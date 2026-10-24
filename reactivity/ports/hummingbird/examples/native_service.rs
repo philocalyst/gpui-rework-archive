@@ -88,7 +88,11 @@ impl Drop for Sink {
 }
 
 fn main() -> Result<(), Box<dyn std::error::Error>> {
-    let database = Database::fixture()?;
+    let database = if std::env::args().any(|arg| arg == "--collections") {
+        Database::collection_fixture()?
+    } else {
+        Database::fixture()?
+    };
     for (id, extension) in [(44, "wav"), (90, "flac")] {
         let fixture = std::path::Path::new(env!("CARGO_MANIFEST_DIR"))
             .join(format!("assets/audio/stereo.{extension}"));

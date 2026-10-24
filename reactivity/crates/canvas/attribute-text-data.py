@@ -51,7 +51,7 @@ def main():
             if len(payload) >= 20000:
                 payloads.append((f"dictionary-{name}", f"{source.name}/literal{index}", payload))
     assets = Path(__file__).resolve().parent / "assets"
-    for source in [assets / "NotoSans.ttf", *sorted(assets.glob("*/*.ttf"))]:
+    for source in [assets / "NotoSans-default.ttf", assets / "NotoSans.ttf", *sorted(assets.glob("*/*.ttf"))]:
         payloads.append(("font", str(source.relative_to(assets)), source.read_bytes()))
     writer = csv.writer(sys.stdout, lineterminator="\n")
     writer.writerow(["kind", "source", "payload_bytes", "elf_file_offset", "instances", "sha256"])

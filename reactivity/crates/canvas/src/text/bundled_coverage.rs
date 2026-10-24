@@ -32,7 +32,7 @@ mod tests {
     }
 
     #[test]
-    fn every_unicode_scalar_matches_original_font_coverage() {
+    fn every_unicode_scalar_matches_bundled_font_coverage() {
         let faces = [
             &super::super::PRIMARY_BYTES[..],
             &super::super::ARABIC_BYTES[..],

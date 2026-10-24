@@ -15,7 +15,7 @@ fearless_simd = { version = "=1.1.0", features = ["force_support_fallback"] }
 fearless_simd_macros = "=0.1.0"
 gpui_reactivity_core = { path = "../core" }
 ttf-parser = "=0.25.1"
-swash = "=0.2.10"
+zeno = { version = "=0.3.3", default-features = false, features = ["eval", "std"] }
 skrifa = "=0.49.0"
 parley = { version = "=0.12.0", default-features = false, features = ["std", "complex-scripts"] }
 fontique = { version = "=0.12.0", default-features = false, features = ["std"] }
@@ -28,6 +28,8 @@ name = "parallel"
 required-features = ["parallel"]
 
 [dev-dependencies]
+# Independent exact mask oracle in tests/render.rs.
+swash = "=0.2.10"
 rustybuzz = "=0.20.1"
 fontdue = "=0.9.5"
 allocation-counter = "=0.8.1"

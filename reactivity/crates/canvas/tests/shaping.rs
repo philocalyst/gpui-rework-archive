@@ -15,7 +15,10 @@ fn borrowed_batch_preserves_lines_clusters_errors_and_shared_face_identity() {
     ] {
         let actual = batch.shape(text, 16.0, width).unwrap();
         let expected = service.shape(text, 16.0, width).unwrap();
-        assert_eq!(actual.glyphs(), expected.glyphs());
+        assert_eq!(
+            actual.glyphs().collect::<Vec<_>>(),
+            expected.glyphs().collect::<Vec<_>>()
+        );
         assert_eq!(actual.width, expected.width);
         assert_eq!(actual.height, expected.height);
         assert_eq!(actual.baseline, expected.baseline);

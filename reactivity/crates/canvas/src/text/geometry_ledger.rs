@@ -58,7 +58,7 @@ fn scoped_geometry_allocation_and_payload_ledger() {
                 "GEOMETRY_PAYLOAD case={name} bytes={} interactive={interactive} glyphs={} glyph_capacity_bytes={} runs={runs} lines={lines} stops={stops} geometry_capacity_bytes={capacity} allocations={} requested={} peak_live={} retained={} retained_allocations={}",
                 value.len(),
                 shape.glyphs.len(),
-                shape.glyphs.capacity() * size_of::<Glyph>(),
+                shape.glyphs.capacity() * size_of::<PackedGlyph>(),
                 cost.count_total,
                 cost.bytes_total,
                 cost.bytes_max,

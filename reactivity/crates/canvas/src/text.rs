@@ -12,15 +12,21 @@ use std::{
         atomic::{AtomicU64, Ordering},
     },
 };
-use swash::{
-    CacheKey, FontRef,
-    scale::{Render, ScaleContext, Source},
-    zeno::Format,
-};
+use zeno::{Format, Mask, Origin, Point, Scratch, Verb};
 mod bundled_coverage;
 mod coverage;
 #[cfg(test)]
 mod geometry_ledger;
+// The only unsafe module owns the finished glyph allocation behind a safe API.
+#[allow(unsafe_code)]
+mod glyph_buffer;
+use glyph_buffer::GlyphBuffer;
+#[cfg(test)]
+mod outline_once_gate;
+#[cfg(test)]
+mod outline_record_tests;
+#[cfg(test)]
+use zeno as path_backend;
 mod layout;
 mod paragraph;
 mod planner;
@@ -35,7 +41,7 @@ const MAX_GLYPHS: usize = 32 * 1024;
 const CACHE_BYTES: usize = 8 * 1024 * 1024;
 // Named immutable arrays guarantee one linked payload per bundled face even
 // when coverage probing and lazy registration land in different codegen units.
-static PRIMARY_BYTES: [u8; 2_049_096] = *include_bytes!("../assets/NotoSans.ttf");
+static PRIMARY_BYTES: [u8; 646_160] = *include_bytes!("../assets/NotoSans-default.ttf");
 static ARABIC_BYTES: [u8; 240_456] = *include_bytes!("../assets/arabic/NotoSansArabic-Regular.ttf");
 static HEBREW_BYTES: [u8; 26_900] = *include_bytes!("../assets/hebrew/NotoSansHebrew-Regular.ttf");
 static NEXT_FONT: AtomicU64 = AtomicU64::new(1);
@@ -47,7 +53,6 @@ static HEBREW_FONT: Mutex<Weak<FontData>> = Mutex::new(Weak::new());
 
 struct FontData {
     bytes: Cow<'static, [u8]>,
-    raster_key: CacheKey,
     id: u64,
     bundled: bool,
 }
@@ -123,7 +128,6 @@ impl FontFace {
         if font.outline_glyphs().format().is_none() {
             return Err(Error::UnsupportedFontFormat);
         }
-        let raster_key = CacheKey::new();
         let id = NEXT_FONT
             .try_update(Ordering::Relaxed, Ordering::Relaxed, |v| v.checked_add(1))
             .map_err(|_| Error::ResourceLimit)?;
@@ -131,12 +135,7 @@ impl FontFace {
         if bundled {
             BUNDLED_PARSES.fetch_add(1, Ordering::Relaxed);
         }
-        Ok(Self(Arc::new(FontData {
-            bytes,
-            raster_key,
-            id,
-            bundled,
-        })))
+        Ok(Self(Arc::new(FontData { bytes, id, bundled })))
     }
     /// Borrows one scoped planner session for a pass. Coverage parses a
     /// custom primary cmap once; dropping the session releases its caches.
@@ -164,10 +163,61 @@ impl std::fmt::Debug for FontFace {
 pub struct Glyph {
     pub id: u16,
     font: FontSlot,
-    simple_tail_bytes: u8,
     pub cluster: u32,
     pub x: f32,
     pub baseline: f32,
+}
+
+// Source starts use 15 bits under MAX_TEXT. Primary glyphs retain all 16 bits;
+// the two fixed fallback faces each fit in one half of the remaining namespace.
+const GLYPH_CODE_BITS: u32 = 17;
+const FALLBACK_CODE: u32 = 1 << 16;
+const FALLBACK_GLYPHS: u32 = 1 << 15;
+const _: () = assert!(MAX_TEXT <= 1 << 15);
+
+#[derive(Clone, Copy, Debug)]
+struct PackedGlyph {
+    meta: u32,
+    x: f32,
+    baseline: f32,
+}
+impl PackedGlyph {
+    fn new(glyph: Glyph) -> Result<Self, Error> {
+        let code = match glyph.font.0 {
+            0 => u32::from(glyph.id),
+            slot @ 1..=2 if u32::from(glyph.id) < FALLBACK_GLYPHS => {
+                FALLBACK_CODE + u32::from(slot - 1) * FALLBACK_GLYPHS + u32::from(glyph.id)
+            }
+            _ => return Err(Error::InvalidFont),
+        };
+        if glyph.cluster >= MAX_TEXT as u32 {
+            return Err(Error::InvalidFont);
+        }
+        Ok(Self {
+            meta: (glyph.cluster << GLYPH_CODE_BITS) | code,
+            x: glyph.x,
+            baseline: glyph.baseline,
+        })
+    }
+    fn glyph(&self) -> Glyph {
+        let code = self.meta & ((1 << GLYPH_CODE_BITS) - 1);
+        let (font, id) = if code < FALLBACK_CODE {
+            (FontSlot(0), code as u16)
+        } else {
+            let fallback = code - FALLBACK_CODE;
+            (
+                FontSlot(1 + (fallback / FALLBACK_GLYPHS) as u8),
+                (fallback % FALLBACK_GLYPHS) as u16,
+            )
+        };
+        Glyph {
+            id,
+            font,
+            cluster: self.meta >> GLYPH_CODE_BITS,
+            x: self.x,
+            baseline: self.baseline,
+        }
+    }
 }
 
 #[derive(Clone, Copy, Debug, PartialEq, Eq)]
@@ -234,16 +284,37 @@ pub struct TextLayout {
     pub height: f32,
     pub baseline: f32,
     font_size: f32,
-    glyphs: Vec<Glyph>,
+    glyphs: GlyphBuffer,
     fonts: Arc<FontSet>,
     mapping: Option<Arc<Details>>,
+}
+/// Advance size and first baseline, without retaining glyphs, font leases or
+/// interaction geometry. Produced by the same validated Unicode planner.
+#[derive(Clone, Copy, Debug, PartialEq)]
+pub struct TextMetrics {
+    pub width: f32,
+    pub height: f32,
+    pub baseline: f32,
 }
 impl TextLayout {
     pub fn font_size(&self) -> f32 {
         self.font_size
     }
-    pub fn glyphs(&self) -> &[Glyph] {
-        &self.glyphs
+    /// Borrow canonical positions without allocating an expanded glyph array.
+    /// Collect the returned values when an owned array is needed.
+    ///
+    /// ```compile_fail
+    /// fn expired(layout: gpui_canvas::TextLayout) {
+    ///     let glyphs = layout.glyphs();
+    ///     drop(layout);
+    ///     let _ = glyphs.count();
+    /// }
+    /// ```
+    pub fn glyphs(
+        &self,
+    ) -> impl DoubleEndedIterator<Item = Glyph> + ExactSizeIterator + Clone + std::iter::FusedIterator + '_
+    {
+        self.glyphs.iter().map(PackedGlyph::glyph)
     }
 }
 
@@ -273,6 +344,17 @@ pub struct TextShaper<'font> {
     planner: Option<Box<planner::Planner<'font>>>,
 }
 impl<'font> TextShaper<'font> {
+    /// Measure wrapping without freezing an owned layout. Paragraph scratch is
+    /// reused within this shaper; the returned numbers borrow no font storage.
+    pub fn measure(
+        &mut self,
+        text: &str,
+        font_size: f32,
+        max_width: Option<f32>,
+    ) -> Result<TextMetrics, Error> {
+        self.planner(text, font_size, max_width)?
+            .measure(text, font_size, max_width)
+    }
     pub fn shape(
         &mut self,
         text: &str,
@@ -298,6 +380,15 @@ impl<'font> TextShaper<'font> {
         max_width: Option<f32>,
         interactive: bool,
     ) -> Result<TextLayout, Error> {
+        self.planner(text, font_size, max_width)?
+            .shape(text, font_size, max_width, interactive)
+    }
+    fn planner(
+        &mut self,
+        text: &str,
+        font_size: f32,
+        max_width: Option<f32>,
+    ) -> Result<&mut planner::Planner<'font>, Error> {
         if !font_size.is_finite() || !(0.0..=512.0).contains(&font_size) || font_size == 0. {
             return Err(Error::InvalidFontSize);
         }
@@ -310,10 +401,7 @@ impl<'font> TextShaper<'font> {
         if self.planner.is_none() {
             self.planner = Some(Box::new(planner::Planner::new(self.font)?));
         }
-        self.planner
-            .as_mut()
-            .unwrap()
-            .shape(text, font_size, max_width, interactive)
+        Ok(self.planner.as_mut().unwrap())
     }
 }
 
@@ -329,7 +417,7 @@ struct RasterCache {
     cache: HashMap<GlyphKey, Arc<Raster>>,
     cache_bytes: usize,
     // No scaler/outline storage until the first requested glyph.
-    scaler: Option<Box<ScaleContext>>,
+    scaler: Option<Box<OutlineRaster>>,
 }
 impl TextSystem {
     /// Noto Sans 2.015, upstream commit and OFL attribution in assets/README.md.
@@ -399,7 +487,7 @@ impl TextSystem {
         self.validate(layout)?;
         let mut min = [f32::INFINITY; 2];
         let mut max = [f32::NEG_INFINITY; 2];
-        for g in &layout.glyphs {
+        for g in layout.glyphs() {
             let Some([left, bottom, right, top]) = outline_bounds(
                 &layout.fonts.face(g.font_slot())?.0.bytes,
                 g.id,
@@ -437,7 +525,12 @@ impl RasterCache {
             size: size.to_bits(),
         };
         if !self.cache.contains_key(&key) {
-            let bounds = outline_bounds(&face.0.bytes, id, size)?;
+            let mut cold = OutlineRaster::default();
+            // Borrow the warm backend through validation. A rejected outline
+            // must not discard scratch retained by earlier successful glyphs.
+            let backend = self.scaler.as_deref_mut().unwrap_or(&mut cold);
+            backend.path.clear();
+            let bounds = decode_outline(&face.0.bytes, id, size, Some(&mut backend.path))?;
             let estimated = if let Some(r) = bounds {
                 ((r[2] - r[0] + 2.0) as usize)
                     .checked_mul((r[3] - r[1] + 2.0) as usize)
@@ -448,47 +541,67 @@ impl RasterCache {
             if estimated > 1024 * 1024 {
                 return Err(Error::ResourceLimit);
             }
-            if self.cache_bytes + estimated > CACHE_BYTES || self.cache.len() >= 4096 {
-                self.clear_cache();
+            let evicted = self.cache_bytes + estimated > CACHE_BYTES || self.cache.len() >= 4096;
+            if evicted {
+                self.cache.clear();
+                self.cache_bytes = 0;
+                backend.path.points.shrink_to_fit();
+                backend.path.verbs.shrink_to_fit();
+                backend.scratch = Scratch::new();
             }
-            let (metrics, pixels) = if bounds.is_some() {
-                // This is the narrow outline-alpha path of the existing GPUI
-                // SwashGlyphRasterizer: stable face key, unhinted default instance,
-                // native placement and owned grayscale coverage, no color fallback.
-                let mut font = FontRef::from_index(&face.0.bytes, 0).ok_or(Error::InvalidFont)?;
-                font.key = face.0.raster_key;
-                let context = self
-                    .scaler
-                    .get_or_insert_with(|| Box::new(ScaleContext::with_max_entries(1)));
-                let mut scaler = context.builder(font).size(size).hint(false).build();
-                let image = Render::new(&[Source::Outline])
-                    .format(Format::Alpha)
-                    .render(&mut scaler, id)
-                    .ok_or(Error::InvalidFont)?;
-                if image.content != swash::scale::image::Content::Mask {
-                    return Err(Error::UnsupportedFontFormat);
+            #[cfg(test)]
+            if outline_once_gate::FAIL_BACKEND.load(Ordering::Relaxed) == face.0.id {
+                if evicted {
+                    self.scaler = None;
                 }
-                let p = image.placement;
-                let bytes = (p.width as usize)
-                    .checked_mul(p.height as usize)
+                return Err(Error::InvalidFont);
+            }
+            let (metrics, pixels) = if let Some([left, bottom, right, top]) = bounds {
+                if backend.path.overflow {
+                    backend.path.replay();
+                    decode_outline(&face.0.bytes, id, size, Some(&mut backend.path))?;
+                }
+                let width = (right - left) as u32;
+                let height = (top - bottom) as u32;
+                let bytes = (width as usize)
+                    .checked_mul(height as usize)
                     .ok_or(Error::ResourceLimit)?;
-                if bytes > 1024 * 1024 || bytes != image.data.len() {
+                if bytes > 1024 * 1024 {
                     return Err(Error::ResourceLimit);
                 }
-                let ymin = p
-                    .top
-                    .checked_sub(p.height as i32)
-                    .ok_or(Error::InvalidGeometry)?;
+                // Zeno's automatic placement uses precisely this control-hull
+                // shift. Keep the checked bounds, including empty moves, while
+                // borrowing the recorded path for the alpha fill.
+                let mut pixels = vec![0; bytes];
+                Mask::with_scratch(
+                    (
+                        backend.path.points.as_slice(),
+                        backend.path.verbs.as_slice(),
+                    ),
+                    &mut backend.scratch,
+                )
+                .format(Format::Alpha)
+                .origin(Origin::BottomLeft)
+                .size(width, height)
+                .offset((-left, -bottom))
+                .render_into(&mut pixels, None);
+                if self.scaler.is_none() {
+                    self.scaler = Some(Box::new(cold));
+                }
                 (
                     RasterMetrics {
-                        xmin: p.left,
-                        ymin,
-                        width: p.width as usize,
-                        height: p.height as usize,
+                        xmin: left as i32,
+                        ymin: bottom as i32,
+                        width: width as usize,
+                        height: height as usize,
                     },
-                    image.data,
+                    pixels,
                 )
             } else {
+                // Empty glyphs retain existing scratch until an eviction.
+                if evicted {
+                    self.scaler = None;
+                }
                 (RasterMetrics::default(), Vec::new())
             };
             // Enforce the actual retained-byte cap independently of the
@@ -514,11 +627,19 @@ impl RasterCache {
     }
 }
 
-// A no-allocation control-hull pen preflights the same default outline used
-// by Swash. The count is checked after traversal, not an early parser abort.
+// The same control-hull pen serves ink bounds without recording, and records
+// a cache miss for rasterization. Limits remain deferred until after draw.
 // Bezier curves lie in their control hull. Guard one device pixel
 // after floor/ceil for raster rounding; reject excessive outlines before render.
 fn outline_bounds(bytes: &[u8], glyph: u16, size: f32) -> Result<Option<[f32; 4]>, Error> {
+    decode_outline(bytes, glyph, size, None)
+}
+fn decode_outline(
+    bytes: &[u8],
+    glyph: u16,
+    size: f32,
+    path: Option<&mut OutlinePath>,
+) -> Result<Option<[f32; 4]>, Error> {
     let font = skrifa::FontRef::from_index(bytes, 0).map_err(|_| Error::InvalidFont)?;
     let outlines = font.outline_glyphs();
     let outline = outlines
@@ -527,7 +648,10 @@ fn outline_bounds(bytes: &[u8], glyph: u16, size: f32) -> Result<Option<[f32; 4]
     if outline.draw_memory_size(Hinting::None) > 1024 * 1024 {
         return Err(Error::ResourceLimit);
     }
-    let mut pen = BoundsPen::default();
+    let mut pen = BoundsPen {
+        path,
+        ..BoundsPen::default()
+    };
     outline
         .draw(
             DrawSettings::unhinted(Size::new(size), LocationRef::default()),
@@ -540,6 +664,12 @@ fn outline_bounds(bytes: &[u8], glyph: u16, size: f32) -> Result<Option<[f32; 4]
     if pen.segments > 65_536 {
         return Err(Error::ResourceLimit);
     }
+    if let Some(path) = pen.path.as_mut() {
+        path.close();
+        if path.overflow && !path.speculative {
+            return Err(Error::ResourceLimit);
+        }
+    }
     Ok(
         (pen.segments != 0 && pen.max[0] > pen.min[0] && pen.max[1] > pen.min[1]).then(|| {
             [
@@ -551,15 +681,96 @@ fn outline_bounds(bytes: &[u8], glyph: u16, size: f32) -> Result<Option<[f32; 4]
         }),
     )
 }
-struct BoundsPen {
+#[derive(Default)]
+struct OutlineRaster {
+    path: OutlinePath,
+    scratch: Scratch,
+}
+
+// Empty contours affect bounds but add no fill edges. Each retained contour
+// has a segment: accepted paths need <=4 points and <=3 verbs per segment.
+// Speculation keeps ordinary glyphs to one decode while bounding rejection
+// costs. Accepted complex paths replay into their exact first-pass counts.
+#[derive(Default)]
+struct OutlinePath {
+    points: Vec<Point>,
+    verbs: Vec<Verb>,
+    pending: Option<Point>,
+    point_count: usize,
+    verb_count: usize,
+    open: bool,
+    overflow: bool,
+    speculative: bool,
+}
+impl OutlinePath {
+    fn clear(&mut self) {
+        self.points.clear();
+        self.verbs.clear();
+        self.pending = None;
+        self.point_count = 0;
+        self.verb_count = 0;
+        self.open = false;
+        self.overflow = false;
+        self.speculative = true;
+    }
+    fn replay(&mut self) {
+        let points = Vec::with_capacity(self.point_count);
+        let verbs = Vec::with_capacity(self.verb_count);
+        self.clear();
+        self.points = points;
+        self.verbs = verbs;
+        self.speculative = false;
+    }
+    fn admit(&mut self) -> bool {
+        if !self.overflow
+            && (self.point_count > 4 * 65_536
+                || self.verb_count > 3 * 65_536
+                || (self.speculative && (self.point_count > 1024 || self.verb_count > 768)))
+        {
+            self.points = Vec::new();
+            self.verbs = Vec::new();
+            self.overflow = true;
+        }
+        !self.overflow
+    }
+    fn segment(&mut self, verb: Verb, points: &[Point]) {
+        let movement = usize::from(self.pending.is_some());
+        self.point_count += movement + points.len();
+        self.verb_count += movement + 1;
+        if self.admit() {
+            if let Some(point) = self.pending {
+                self.points.push(point);
+                self.verbs.push(Verb::MoveTo);
+            }
+            self.points.extend_from_slice(points);
+            self.verbs.push(verb);
+        }
+        self.pending = None;
+        self.open = true;
+    }
+    fn close(&mut self) {
+        if self.open {
+            self.verb_count += 1;
+            if self.admit() {
+                self.verbs.push(Verb::Close);
+            }
+        }
+        self.open = false;
+        self.pending = None;
+    }
+}
+
+struct BoundsPen<'a> {
+    path: Option<&'a mut OutlinePath>,
     min: [f32; 2],
     max: [f32; 2],
     segments: usize,
     invalid: bool,
 }
-impl Default for BoundsPen {
+impl Default for BoundsPen<'_> {
     fn default() -> Self {
         Self {
+            path: None,
             min: [f32::INFINITY; 2],
             max: [f32::NEG_INFINITY; 2],
             segments: 0,
@@ -567,7 +778,7 @@ impl Default for BoundsPen {
         }
     }
 }
-impl BoundsPen {
+impl BoundsPen<'_> {
     fn point(&mut self, x: f32, y: f32) {
         if !x.is_finite() || !y.is_finite() || x.abs() > 1_048_576.0 || y.abs() > 1_048_576.0 {
             self.invalid = true;
@@ -578,30 +789,53 @@ impl BoundsPen {
         self.max[1] = self.max[1].max(y);
     }
 }
-impl OutlinePen for BoundsPen {
+impl OutlinePen for BoundsPen<'_> {
     fn move_to(&mut self, x: f32, y: f32) {
         self.point(x, y);
+        if let Some(path) = self.path.as_mut() {
+            path.close();
+            path.pending = Some(Point::new(x, y));
+        }
     }
     fn line_to(&mut self, x: f32, y: f32) {
         self.segments += 1;
         self.point(x, y);
+        if let Some(path) = self.path.as_mut() {
+            path.segment(Verb::LineTo, &[Point::new(x, y)]);
+        }
     }
     fn quad_to(&mut self, cx: f32, cy: f32, x: f32, y: f32) {
         self.segments += 1;
         self.point(cx, cy);
         self.point(x, y);
+        if let Some(path) = self.path.as_mut() {
+            path.segment(Verb::QuadTo, &[Point::new(cx, cy), Point::new(x, y)]);
+        }
     }
     fn curve_to(&mut self, cx0: f32, cy0: f32, cx1: f32, cy1: f32, x: f32, y: f32) {
         self.segments += 1;
         self.point(cx0, cy0);
         self.point(cx1, cy1);
         self.point(x, y);
+        if let Some(path) = self.path.as_mut() {
+            path.segment(
+                Verb::CurveTo,
+                &[Point::new(cx0, cy0), Point::new(cx1, cy1), Point::new(x, y)],
+            );
+        }
     }
-    fn close(&mut self) {}
+    fn close(&mut self) {
+        if let Some(path) = self.path.as_mut() {
+            path.close();
+        }
+    }
 }
 
 #[cfg(test)]
 pub(crate) static BUNDLED_TEST_LOCK: Mutex<()> = Mutex::new(());
+
+#[cfg(test)]
+mod glyph_codec_tests;
 
 #[cfg(test)]
 mod font_tests {
@@ -614,7 +848,6 @@ mod font_tests {
     fn bundled_concurrency_release_remint_and_poison_recovery() {
         let _registry = BUNDLED_TEST_LOCK.lock().unwrap();
         fn send_sync<T: Send + Sync>() {}
-        send_sync::<CacheKey>();
         send_sync::<FontFace>();
         send_sync::<TextSystem>();
         let before = BUNDLED_PARSES.load(Ordering::Relaxed);
@@ -687,7 +920,7 @@ mod font_tests {
             std::mem::size_of::<TextSystem>(),
             std::mem::size_of::<FontData>(),
             std::mem::size_of::<Mutex<Weak<FontData>>>(),
-            std::mem::size_of::<ScaleContext>()
+            std::mem::size_of::<OutlineRaster>()
         );
     }
 }

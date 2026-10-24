@@ -3,6 +3,8 @@ pub mod app;
 pub mod application;
 #[cfg(feature = "audio")]
 pub mod audio;
+pub mod browser;
+mod collection_query;
 pub mod database;
 mod migrations;
 pub mod query;

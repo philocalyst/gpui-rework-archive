@@ -303,6 +303,9 @@ impl Queue {
         }
         Ok(first)
     }
+    pub(crate) fn input_key(&self, index: usize) -> Option<EntryKey> {
+        self.sheet.entries.get(index).map(|entry| entry.key)
+    }
     pub fn replace(
         &mut self,
         tracks: Vec<TrackRef>,
