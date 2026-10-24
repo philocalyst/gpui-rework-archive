@@ -534,3 +534,141 @@ fn ime_cursor_area_tracks_acknowledged_physical_transform_clip_and_dpi() {
     win.ime_event(&mut session, ImeEvent::Cancel).unwrap();
     assert!(win.ime_cursor_area(&session).unwrap().is_none());
 }
+
+#[test]
+fn long_preedit_capacity_does_not_escape_into_canonical_committed_source() {
+    let (mut ordinary, _, _) = window("source");
+    ordinary.key(Key::Text("!")).unwrap();
+    let ordinary_capacity = ordinary.read(&Form::A).unwrap().capacity();
+    let (mut win, _, mut session) = window("source");
+    let long = "x".repeat(4096);
+    win.ime_event(
+        &mut session,
+        ImeEvent::Preedit {
+            text: &long,
+            cursor: Some((long.len(), long.len())),
+        },
+    )
+    .unwrap();
+    ack(&mut win);
+    win.ime_event(&mut session, ImeEvent::Commit("!")).unwrap();
+    ack(&mut win);
+    let source = win.read(&Form::A).unwrap();
+    assert_eq!(source, "source!");
+    assert_eq!(
+        source.capacity(),
+        ordinary_capacity,
+        "composition peak capacity must not become Source history"
+    );
+}
+
+#[test]
+fn own_commit_rebind_or_removal_finishes_the_valid_edit_and_revokes_stream() {
+    struct Rebind {
+        a: Signal<String>,
+        b: Signal<String>,
+    }
+    impl Rebind {
+        const A: Source<Self, String> = Source::new(FieldId::new(1), "a", |m| &m.a, |m| &mut m.a);
+        const B: Source<Self, String> = Source::new(FieldId::new(2), "b", |m| &m.b, |m| &mut m.b);
+    }
+    impl View for Rebind {
+        fn sources() -> Sources<Self> {
+            Sources::new().direct(Self::A).direct(Self::B)
+        }
+        fn view(&self) -> El<'_> {
+            if self.a.as_str() == "gone" {
+                button("gone")
+            } else {
+                text_input(if self.a.as_str() == "trigger" {
+                    &self.b
+                } else {
+                    &self.a
+                })
+                .w(260)
+                .name("input")
+            }
+        }
+    }
+    for committed in ["trigger", "gone"] {
+        let mut win = Win::recording(
+            Rebind {
+                a: Signal::new("start".into()),
+                b: Signal::new("trigger".into()),
+            },
+            WindowOptions::default(),
+        )
+        .unwrap();
+        let acknowledge = |win: &mut Win<Rebind>| {
+            win.presented(win.with_scene(|_, t| t).unwrap()).unwrap();
+        };
+        acknowledge(&mut win);
+        let target = win.input();
+        win.focus(target).unwrap();
+        win.select(target, selection(0, 5)).unwrap();
+        acknowledge(&mut win);
+        let mut session = ImeSession::default();
+        win.ime_event(&mut session, ImeEvent::Enabled).unwrap();
+        win.ime_event(
+            &mut session,
+            ImeEvent::Preedit {
+                text: "marked",
+                cursor: Some((6, 6)),
+            },
+        )
+        .unwrap();
+        acknowledge(&mut win);
+        let epoch = win.snapshot().unwrap().source_epoch;
+        let edit = win
+            .ime_event(&mut session, ImeEvent::Commit(committed))
+            .unwrap();
+        assert_eq!(edit.source_epoch, epoch + 1);
+        assert!(edit.prepared_epoch.is_some());
+        assert!(
+            !session.is_enabled(),
+            "commit cannot grant authority to replacement field"
+        );
+        assert_eq!(win.read(&Rebind::A).unwrap(), committed);
+        acknowledge(&mut win);
+        if committed == "trigger" {
+            assert_eq!(win.query().name("input").one().unwrap(), target);
+        } else {
+            assert!(win.focused().unwrap().is_none());
+        }
+        win.ime_event(&mut session, ImeEvent::Commit("late"))
+            .unwrap();
+        assert_eq!(win.read(&Rebind::B).unwrap(), "trigger");
+        assert_eq!(win.read(&Rebind::A).unwrap(), committed);
+    }
+}
+
+#[test]
+fn unshapable_commit_keeps_canonical_source_write_and_old_p_without_live_stream() {
+    let (mut win, target, mut session) = window("base");
+    win.ime_event(
+        &mut session,
+        ImeEvent::Preedit {
+            text: "ok",
+            cursor: Some((2, 2)),
+        },
+    )
+    .unwrap();
+    ack(&mut win);
+    let old = displayed(&win, target);
+    let epoch = win.snapshot().unwrap().source_epoch;
+    assert!(matches!(
+        win.ime_event(&mut session, ImeEvent::Commit("日")),
+        Err(Error::Canvas(_))
+    ));
+    assert!(!session.is_enabled());
+    assert_eq!(win.read(&Form::A).unwrap(), "base日");
+    assert_eq!(win.snapshot().unwrap().source_epoch, epoch + 1);
+    assert_eq!(displayed(&win, target), old);
+    win.ime_event(&mut session, ImeEvent::Commit("late"))
+        .unwrap();
+    assert_eq!(win.read(&Form::A).unwrap(), "base日");
+    win.set(&Form::A, "fixed".to_owned()).unwrap();
+    ack(&mut win);
+    assert_eq!(displayed(&win, target).0, "fixed");
+    assert!(displayed(&win, target).1.is_none());
+}

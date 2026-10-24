@@ -257,6 +257,26 @@ impl<M: View + 'static> Runtime<M> {
             .get_or_insert_with(Default::default)
             .active = Some(active);
     }
+    fn refresh_ime(&self, active: &mut Active) -> bool {
+        if !self.logical_valid
+            || self.focused != Some(active.target)
+            || active.epoch.checked_add(1) != Some(self.source_epoch)
+        {
+            return false;
+        }
+        let Ok(index) = self.input_index(active.target) else {
+            return false;
+        };
+        let site = self.nodes[index].text_slot().get(&self.texts).unwrap();
+        if site.field != Some(active.field) {
+            return false;
+        }
+        // Only this stream's canonical write can advance its original source
+        // capability. Rebinding/removal never acquires the next field.
+        active.epoch = self.source_epoch;
+        active.source = site.value.clone();
+        true
+    }
     fn bind_ime(&self, stamp: NonZeroU64) -> Result<Box<Active>, Error> {
         let target = self.focused.ok_or(Error::NotInput)?;
         let index = self.input_index(target)?;
@@ -519,15 +539,25 @@ impl<M: View + 'static, L: LaneSet<M>> RuntimeMut<'_, M, L> {
             .unwrap();
         match event {
             ImeEvent::Commit(text) => {
-                let (range, buffer) = match active.preview.take() {
-                    Some(preview) => (preview.replacement, Some(preview.buffer)),
-                    None => (self.selection_at(self.input_index(active.target)?)?, None),
-                };
+                let index = self.input_index(active.target)?;
+                let range = active
+                    .preview
+                    .as_ref()
+                    .map_or_else(|| self.selection_at(index), |p| Ok(p.replacement))?;
+                // Restore the source selection before any fallible codec work.
+                // Exceptional preedit capacity belongs only to this composition;
+                // canonical Source ownership follows ordinary keyboard policy.
+                self.runtime.set_selection(index, range, None);
+                active.preview = None;
                 self.runtime.invalidate_display(active.target);
-                let commit = self.replace_input_buffer(active.target, Some(range), text, buffer)?;
-                let rebound = self.runtime.bind_ime(active.stamp)?;
-                self.runtime.install_ime(rebound);
-                Ok((commit, stamp))
+                let commit = self.replace_input(active.target, Some(range), text)?;
+                if self.runtime.refresh_ime(&mut active) {
+                    self.runtime.install_ime(active);
+                    Ok((commit, stamp))
+                } else {
+                    self.runtime.reclaim_ime();
+                    Ok((commit, None))
+                }
             }
             ImeEvent::Preedit { text, cursor } => {
                 // Keep the exclusive owner installed even when validation or

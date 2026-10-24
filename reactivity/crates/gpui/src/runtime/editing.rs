@@ -551,15 +551,6 @@ impl<M: View + 'static, L: LaneSet<M>> RuntimeMut<'_, M, L> {
         range: Option<TextSelection>,
         text: &str,
     ) -> Result<Commit, Error> {
-        self.replace_input_buffer(target, range, text, None)
-    }
-    pub(super) fn replace_input_buffer(
-        &mut self,
-        target: Target,
-        range: Option<TextSelection>,
-        text: &str,
-        buffer: Option<String>,
-    ) -> Result<Commit, Error> {
         self.live()?;
         let index = self.input_index(target)?;
         let node = &self.nodes[index];
@@ -567,39 +558,10 @@ impl<M: View + 'static, L: LaneSet<M>> RuntimeMut<'_, M, L> {
         let field = node.text_slot().get(&self.texts).unwrap().field.unwrap();
         let codec = self.fanout[&field].codec();
         let range = range.map_or_else(|| self.selection_at(index), Ok)?;
-        let start = range.anchor.offset.byte().min(range.focus.offset.byte());
-        let end = range.anchor.offset.byte().max(range.focus.offset.byte());
-        let byte = start.checked_add(text.len()).ok_or(Error::ResourceLimit)?;
-        let input = match catch_unwind(AssertUnwindSafe(|| {
-            let source = self.sources.read_text(&self.model, field, codec)?;
-            if !validates(&source, range) {
-                return Err(Error::InvalidSelection);
-            }
-            match buffer {
-                Some(mut buffer) => {
-                    // Reuse only this active composition's assembly allocation.
-                    // Build the final joined text directly, without first copying
-                    // the entire source and moving its suffix a second time.
-                    let length = source
-                        .len()
-                        .checked_sub(end - start)
-                        .and_then(|n| n.checked_add(text.len()))
-                        .ok_or(Error::ResourceLimit)?;
-                    buffer.clear();
-                    buffer
-                        .try_reserve(length)
-                        .map_err(|_| Error::ResourceLimit)?;
-                    buffer.push_str(&source[..start]);
-                    buffer.push_str(text);
-                    buffer.push_str(&source[end..]);
-                    Ok(buffer)
-                }
-                None => {
-                    let mut input = source.into_owned();
-                    input.replace_range(start..end, text);
-                    Ok(input)
-                }
-            }
+        let mut input = match catch_unwind(AssertUnwindSafe(|| {
+            self.sources
+                .read_text(&self.model, field, codec)
+                .map(|text| text.into_owned())
         })) {
             Ok(result) => result?,
             Err(_) => {
@@ -607,6 +569,13 @@ impl<M: View + 'static, L: LaneSet<M>> RuntimeMut<'_, M, L> {
                 return Err(Error::OwnerPanicked);
             }
         };
+        if !validates(&input, range) {
+            return Err(Error::InvalidSelection);
+        }
+        let start = range.anchor.offset.byte().min(range.focus.offset.byte());
+        let end = range.anchor.offset.byte().max(range.focus.offset.byte());
+        let byte = start.checked_add(text.len()).ok_or(Error::ResourceLimit)?;
+        input.replace_range(start..end, text);
         let intent = EditingIntent::Replace {
             identity,
             field,
