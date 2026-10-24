@@ -331,3 +331,69 @@ fn randomized_repairs_cross_partial_tile_and_viewport_edges() {
         }
     }
 }
+#[test]
+fn rebuilt_clip_geometry_does_not_damage_unchanged_draws() {
+    use gpui_canvas::{ClipId, ClipShape};
+    fn describe(canvas: &mut Canvas, radius: f32, other: Color) -> (DamageRegion, ClipId) {
+        let mut scene = canvas.stage();
+        scene.clear(Color::WHITE);
+        let mut parent = None;
+        for depth in 0..64 {
+            parent = Some(
+                scene
+                    .create_clip(
+                        parent,
+                        ClipShape::RoundedRect {
+                            rect: Rect::new(0.0, 0.0, 40.0, 40.0),
+                            radius: if depth == 31 { radius } else { 6.0 },
+                        },
+                        Affine::IDENTITY,
+                    )
+                    .unwrap(),
+            );
+        }
+        let clip = parent.unwrap();
+        scene
+            .fill_rect(
+                Rect::new(0.0, 0.0, 40.0, 40.0),
+                Affine::IDENTITY,
+                clip,
+                Color::BLACK,
+            )
+            .unwrap();
+        scene
+            .fill_rect(
+                Rect::new(60.0, 42.0, 4.0, 4.0),
+                Affine::IDENTITY,
+                Rect::new(0.0, 0.0, WIDTH as f32, HEIGHT as f32),
+                other,
+            )
+            .unwrap();
+        (scene.commit_with_damage(), clip)
+    }
+    let mut canvas = Canvas::recording(WIDTH as u32, HEIGHT as u32, Default::default()).unwrap();
+    let (_, original) = describe(&mut canvas, 6.0, Color::BLACK);
+    let mut output = full(&mut canvas);
+    let (same, rebuilt) = describe(&mut canvas, 6.0, Color::BLACK);
+    assert_ne!(
+        original, rebuilt,
+        "geometry equality must not grant cross-scene clip authority"
+    );
+    assert_eq!(
+        same,
+        DamageRegion::default(),
+        "rebuilding an identical chain must not dirty its draws"
+    );
+    repair(&mut canvas, &mut output, same);
+    let (local, _) = describe(&mut canvas, 6.0, Color::rgb(200, 20, 30));
+    assert_eq!(local.bounds(), Some([60, 42, 64, 46]));
+    repair(&mut canvas, &mut output, local);
+    let before = output.clone();
+    let (changed, _) = describe(&mut canvas, 9.0, Color::rgb(200, 20, 30));
+    assert_eq!(changed.bounds(), Some([0, 0, 40, 40]));
+    repair(&mut canvas, &mut output, changed);
+    assert_ne!(
+        output, before,
+        "the middle-ancestor mutation changes actual coverage"
+    );
+}
