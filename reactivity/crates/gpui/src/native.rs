@@ -31,6 +31,7 @@ use crate::{
 #[cfg(feature = "accessibility")]
 mod accessibility;
 mod destination;
+mod ime;
 mod upgrade;
 #[cfg(all(
     test,
@@ -55,6 +56,12 @@ pub(crate) mod test_library;
     any(feature = "x11", feature = "x11-minimal")
 ))]
 mod destination_tests;
+#[cfg(all(
+    test,
+    target_os = "linux",
+    any(feature = "x11", feature = "x11-minimal")
+))]
+mod ime_tests;
 #[cfg(all(
     test,
     any(feature = "x11", feature = "x11-minimal"),
@@ -140,6 +147,7 @@ pub struct Window<V: View + 'static, L: LaneSet<V> = ()> {
     presentation_feedback: Option<PresentationFeedback>,
     renderer: RendererPolicy,
     inspector: bool,
+    text_font: Option<crate::FontFace>,
 }
 impl<V: View + 'static> Window<V> {
     pub fn document(root: V) -> Self {
@@ -152,6 +160,7 @@ impl<V: View + 'static> Window<V> {
             presentation_feedback: None,
             renderer: RendererPolicy::Auto,
             inspector: false,
+            text_font: None,
         }
     }
 }
@@ -169,6 +178,7 @@ impl<V: View + 'static, L: LaneSet<V>> Window<V, L> {
             presentation_feedback: self.presentation_feedback,
             renderer: self.renderer,
             inspector: self.inspector,
+            text_font: self.text_font,
         }
     }
     /// Bind a typed FIFO completion lane when this window mounts.
@@ -219,6 +229,7 @@ impl<V: View + 'static, L: LaneSet<V>> Window<V, L> {
             presentation_feedback: self.presentation_feedback,
             renderer: self.renderer,
             inspector: self.inspector,
+            text_font: self.text_font,
         }
     }
     /// Show a retained inspector beside this window's actual application.
@@ -228,6 +239,12 @@ impl<V: View + 'static, L: LaneSet<V>> Window<V, L> {
     }
     pub fn title(mut self, title: impl Into<String>) -> Self {
         self.title = title.into();
+        self
+    }
+    /// Set the initial immutable outline font, before source text is mounted.
+    /// Coverage is explicit; no operating-system fallback discovery is implied.
+    pub fn text_font(mut self, font: crate::FontFace) -> Self {
+        self.text_font = Some(font);
         self
     }
     pub fn renderer(mut self, renderer: RendererPolicy) -> Self {
@@ -396,6 +413,8 @@ struct NativeHost<V: View + 'static, L: LaneSet<V> = ()> {
     owner: Option<Win<V, L>>,
     graphics: Option<Graphics>,
     pointer: PointerSession,
+    ime: Option<Box<ime::Bridge>>,
+    native_focused: bool,
     occluded: bool,
     destination: destination::Destination,
     error: Option<NativeError>,
@@ -436,6 +455,8 @@ impl<V: View + 'static, L: LaneSet<V>> NativeHost<V, L> {
             owner: None,
             graphics: None,
             pointer: PointerSession::default(),
+            ime: None,
+            native_focused: false,
             occluded: false,
             destination: destination::Destination::default(),
             error: None,
@@ -474,15 +495,17 @@ impl<V: View + 'static, L: LaneSet<V>> NativeHost<V, L> {
                     .map_err(platform)?,
             );
             let size = window.inner_size();
-            let mut owner = Win::recording_lanes(
+            let mut owner = Win::mount_text_lanes(
                 opening.root,
                 opening.lanes,
                 WindowOptions {
                     size: [size.width.max(1), size.height.max(1)],
                     ..WindowOptions::default()
                 },
+                false,
                 window.scale_factor() as f32,
                 opening.inspector,
+                opening.text_font,
             )?;
             if let Some(wake) = &self.wake {
                 owner.attach_wake(wake);
@@ -506,9 +529,10 @@ impl<V: View + 'static, L: LaneSet<V>> NativeHost<V, L> {
         }
         if let Some(window) = &self.window {
             window.set_visible(true);
+            self.native_focused = window.has_focus();
             window.request_redraw();
         }
-        Ok(())
+        self.sync_ime()
     }
     fn create_surface(&mut self) -> Result<(), NativeError> {
         let Some(window) = &self.window else {
@@ -579,6 +603,10 @@ impl<V: View + 'static, L: LaneSet<V>> NativeHost<V, L> {
     }
     fn retire_window(&mut self) {
         self.hide_and_cancel_upgrade();
+        if let Some(window) = &self.window {
+            window.set_ime_allowed(false);
+        }
+        self.ime = None;
         #[cfg(feature = "accessibility")]
         {
             self.accessibility = None;
@@ -779,6 +807,7 @@ impl<V: View + 'static, L: LaneSet<V>> NativeHost<V, L> {
             }
             self.presented_frames += 1;
         }
+        self.update_ime_cursor();
         if let Some(handler) = &mut self.presentation_feedback {
             handler(PresentedFrame {
                 renderer,
@@ -947,6 +976,46 @@ impl<V: View + 'static, L: LaneSet<V>> NativeHost<V, L> {
         // the platform offers a native fill or needs an ordinary CPU buffer.
         Ok((commit, !notified))
     }
+    fn update_ime_cursor(&self) {
+        if let (Some(bridge), Some(owner), Some(window)) = (&self.ime, &self.owner, &self.window) {
+            bridge.update_cursor(owner, window);
+        }
+    }
+    fn sync_ime(&mut self) -> Result<(), NativeError> {
+        let (Some(owner), Some(window)) = (&mut self.owner, &self.window) else {
+            return Ok(());
+        };
+        let desired = self.native_focused.then(|| owner.ime_target()).flatten();
+        if self.ime.is_none() && desired.is_some() {
+            self.ime = Some(Box::default());
+        }
+        if let Some(bridge) = &mut self.ime {
+            if let Some(commit) = bridge.sync(owner, window, desired)?
+                && commit.prepared_epoch.is_some()
+            {
+                window.request_redraw();
+            }
+            if bridge.unused() {
+                self.ime = None;
+            }
+        }
+        self.update_ime_cursor();
+        Ok(())
+    }
+    fn ime_input(&mut self, event: &winit::event::Ime) -> Result<(), NativeError> {
+        self.sync_ime()?;
+        if !self.native_focused && !matches!(event, winit::event::Ime::Disabled) {
+            return Ok(());
+        }
+        let result = match (&mut self.ime, &mut self.owner) {
+            (Some(bridge), Some(owner)) => bridge.event(owner, event),
+            _ => None,
+        };
+        if let Some(result) = result {
+            self.input_result(result)?;
+        }
+        self.sync_ime()
+    }
     fn input_result(&mut self, result: Result<Commit, Error>) -> Result<(), NativeError> {
         match result {
             Ok(commit) => {
@@ -965,7 +1034,7 @@ impl<V: View + 'static, L: LaneSet<V>> NativeHost<V, L> {
             }
             Err(error) => return Err(error.into()),
         }
-        Ok(())
+        self.sync_ime()
     }
     #[cfg(feature = "accessibility")]
     fn accessibility_work(&mut self) -> Result<(), NativeError> {
@@ -1089,7 +1158,12 @@ impl<V: View + 'static, L: LaneSet<V>> NativeHost<V, L> {
             WindowEvent::CursorLeft { .. } => {
                 self.pointer_input(PointerEvent::Leave)?;
             }
+            WindowEvent::Focused(true) => {
+                self.native_focused = true;
+                self.sync_ime()?;
+            }
             WindowEvent::Focused(false) => {
+                self.native_focused = false;
                 self.pointer = PointerSession::default();
                 if let Some(owner) = &mut self.owner {
                     let result = owner.clear_focus();
@@ -1127,6 +1201,7 @@ impl<V: View + 'static, L: LaneSet<V>> NativeHost<V, L> {
                     PointerEvent::Release
                 })?;
             }
+            WindowEvent::Ime(event) => self.ime_input(event)?,
             WindowEvent::KeyboardInput {
                 event,
                 is_synthetic: false,
@@ -1237,6 +1312,11 @@ impl<V: View + 'static, L: LaneSet<V>> Host for NativeHost<V, L> {
                 Ok(())
             }
             Callback::AboutToWait => {
+                if let Err(error) = self.sync_ime() {
+                    self.error = Some(error);
+                    event_loop.exit();
+                    return;
+                }
                 event_loop.set_control_flow(match self.retry_at.filter(|_| !self.occluded) {
                     Some(deadline) => winit::event_loop::ControlFlow::WaitUntil(deadline),
                     None => winit::event_loop::ControlFlow::Wait,
@@ -1245,6 +1325,7 @@ impl<V: View + 'static, L: LaneSet<V>> Host for NativeHost<V, L> {
             }
             Callback::Resumed => self.resumed(event_loop),
             Callback::Suspended => {
+                self.native_focused = false;
                 self.destination.invalidate();
                 self.pointer = PointerSession::default();
                 // Dropping both bounded channel endpoints cancels this admission
@@ -1253,12 +1334,14 @@ impl<V: View + 'static, L: LaneSet<V>> Host for NativeHost<V, L> {
                 self.upgrade_attempted = false;
                 self.instance = None;
                 self.graphics = None;
-                self.owner
-                    .as_mut()
-                    .map(Win::presentation_lost)
-                    .transpose()
-                    .map(|_| ())
-                    .map_err(NativeError::from)
+                self.sync_ime().and_then(|()| {
+                    self.owner
+                        .as_mut()
+                        .map(Win::presentation_lost)
+                        .transpose()
+                        .map(|_| ())
+                        .map_err(NativeError::from)
+                })
             }
             Callback::Exiting => {
                 self.retire_window();

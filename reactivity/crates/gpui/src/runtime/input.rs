@@ -305,8 +305,16 @@ impl<M: View + 'static, L: LaneSet<M>> Win<M, L> {
         let Some(target) = runtime.focused else {
             return Ok(runtime.commit());
         };
-        match key {
-            Key::Text(text) if text.chars().any(char::is_control) => Ok(runtime.commit()),
+        if matches!(key, Key::Text(text) if text.chars().any(char::is_control))
+            || runtime.ime_has_preedit()
+        {
+            return Ok(runtime.commit());
+        }
+        // Empty Preedit can precede Commit or ordinary keyboard input. Keep its
+        // replacement until that choice arrives; a key resumes Source editing.
+        let cancelled = runtime.cancel_cleared_preedit();
+        let prepared = runtime.latest_token;
+        let result = match key {
             Key::Text(text) => runtime.replace_input(target, None, text),
             Key::Backspace => runtime.backspace_input(target),
             Key::Left { extend } | Key::Right { extend } => {
@@ -338,6 +346,12 @@ impl<M: View + 'static, L: LaneSet<M>> Win<M, L> {
                 }
             }
             Key::Tab | Key::ReverseTab => unreachable!(),
+        };
+        if cancelled && result.is_ok() && runtime.latest_token == prepared {
+            // A no-op key still publishes cancellation (including its caret).
+            runtime.present()
+        } else {
+            result
         }
     }
 }
@@ -439,6 +453,7 @@ impl<M: View + 'static> Runtime<M> {
         }) {
             self.focused = None;
         }
+        self.reconcile_ime();
     }
     fn tab(&mut self, reverse: bool) -> Result<Commit, Error> {
         self.current_presentation()?;
