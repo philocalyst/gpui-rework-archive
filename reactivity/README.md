@@ -55,10 +55,11 @@ The same design packet is mirrored at `/root/designs/reactivity/rework`.
 This standalone workspace is excluded from legacy GPUI. From the repository root:
 
 ```sh
-cargo test --manifest-path reactivity/Cargo.toml --workspace --features gpui_reactivity_core/layout
-cargo clippy --manifest-path reactivity/Cargo.toml --workspace --all-targets --features gpui_reactivity_core/layout -- -D warnings
-cargo test --release --manifest-path reactivity/Cargo.toml -p gpui_reactivity_ownership_lab --features loom --test loom_protocol
-cargo check --manifest-path reactivity/Cargo.toml -p gpui_reactivity_host --features x11,wayland
+cd reactivity
+cargo test --workspace --features gpui_reactivity_core/layout
+cargo clippy --workspace --all-targets --features gpui_reactivity_core/layout -- -D warnings
+cargo test --release -p gpui_reactivity_ownership_lab --features loom --test loom_protocol
+cargo check -p gpui_reactivity_host --features x11,wayland
 ```
 
 Core/state default builds have no third-party dependencies. Layout/native hosting
