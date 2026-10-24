@@ -1,4 +1,6 @@
-//! Serialized Vulkan wall time, not a GPU timestamp measurement.
+//! Serialized native-backend wall time, not a GPU timestamp measurement.
+#[path = "../tests/support/adapter.rs"]
+mod test_adapter;
 use gpui_canvas::{Affine, Canvas, Color, ColorConfig, Point, Rect, TextSystem};
 use gpui_gpu::{Renderer, wgpu};
 use std::time::Instant;
@@ -61,16 +63,7 @@ fn scene(case: &str) -> Canvas {
 
 async fn measure(case: &str, proofs: bool) {
     let canvas = scene(case);
-    let mut descriptor = wgpu::InstanceDescriptor::new_without_display_handle();
-    descriptor.backends = wgpu::Backends::VULKAN;
-    let instance = wgpu::Instance::new(descriptor);
-    let adapter = instance
-        .request_adapter(&wgpu::RequestAdapterOptions {
-            force_fallback_adapter: true,
-            ..Default::default()
-        })
-        .await
-        .expect("Vulkan adapter required");
+    let (_, adapter) = test_adapter::request().await;
     eprintln!("{case}/{proofs}: {:?}", adapter.get_info());
     let mut renderer = Renderer::request(&adapter, wgpu::TextureFormat::Rgba8UnormSrgb)
         .await

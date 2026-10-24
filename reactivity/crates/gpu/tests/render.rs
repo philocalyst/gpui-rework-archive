@@ -1,3 +1,5 @@
+#[path = "support/adapter.rs"]
+mod test_adapter;
 use gpui_canvas::{Affine, Canvas, Color, ColorConfig, Point, Rect, TextSystem};
 use gpui_gpu::{Renderer, Stats, wgpu};
 
@@ -214,17 +216,7 @@ fn packed_images_profiles_alpha_filters_and_cache_match_cpu() {
 }
 
 async fn renderer(format: wgpu::TextureFormat) -> Renderer {
-    let mut descriptor = wgpu::InstanceDescriptor::new_without_display_handle();
-    descriptor.backends = wgpu::Backends::VULKAN;
-    let instance = wgpu::Instance::new(descriptor);
-    let adapter = instance
-        .request_adapter(&wgpu::RequestAdapterOptions {
-            force_fallback_adapter: true,
-            ..Default::default()
-        })
-        .await
-        .expect("Vulkan test adapter is required");
-    eprintln!("adapter: {:?}", adapter.get_info());
+    let (_, adapter) = test_adapter::request().await;
     Renderer::request(&adapter, format).await.unwrap()
 }
 
@@ -3157,16 +3149,7 @@ fn shared_context_drop_and_real_destroy_never_rebind_old_state() {
 #[test]
 fn unsupported_context_format_does_not_request_a_device() {
     pollster::block_on(async {
-        let mut descriptor = wgpu::InstanceDescriptor::new_without_display_handle();
-        descriptor.backends = wgpu::Backends::VULKAN;
-        let instance = wgpu::Instance::new(descriptor);
-        let adapter = instance
-            .request_adapter(&wgpu::RequestAdapterOptions {
-                force_fallback_adapter: true,
-                ..Default::default()
-            })
-            .await
-            .unwrap();
+        let (instance, adapter) = test_adapter::request().await;
         let before = instance.generate_report().unwrap();
         assert!(matches!(
             gpui_gpu::GpuContext::request(&adapter, wgpu::TextureFormat::Rgba32Float).await,
@@ -3223,20 +3206,11 @@ fn layout_equality_names_the_instance_and_preserves_clone_order_hash() {
     });
 }
 
-#[cfg(feature = "offline-shader")]
+#[cfg(all(feature = "offline-shader", feature = "vulkan-tests"))]
 #[test]
 fn artifact_missing_feature_falls_back_and_admitted_pipeline_errors_propagate() {
     pollster::block_on(async {
-        let mut desc = wgpu::InstanceDescriptor::new_without_display_handle();
-        desc.backends = wgpu::Backends::VULKAN;
-        let instance = wgpu::Instance::new(desc);
-        let adapter = instance
-            .request_adapter(&wgpu::RequestAdapterOptions {
-                force_fallback_adapter: true,
-                ..Default::default()
-            })
-            .await
-            .unwrap();
+        let (_, adapter) = test_adapter::request().await;
         let optional = adapter.shader_artifact_features();
         assert!(optional.contains(wgpu::Features::PASSTHROUGH_SHADERS));
         for enabled in [false, true] {
@@ -3284,16 +3258,7 @@ fn artifact_missing_feature_falls_back_and_admitted_pipeline_errors_propagate() 
 #[test]
 fn viewport_partial_tiles_and_maximum_extent_preserve_all_four_edges() {
     pollster::block_on(async {
-        let mut desc = wgpu::InstanceDescriptor::new_without_display_handle();
-        desc.backends = wgpu::Backends::VULKAN;
-        let instance = wgpu::Instance::new(desc);
-        let adapter = instance
-            .request_adapter(&wgpu::RequestAdapterOptions {
-                force_fallback_adapter: true,
-                ..Default::default()
-            })
-            .await
-            .unwrap();
+        let (_, adapter) = test_adapter::request().await;
         let (device, queue) = adapter
             .request_device(&wgpu::DeviceDescriptor {
                 required_features: adapter.features() & wgpu::Features::PASSTHROUGH_SHADERS,

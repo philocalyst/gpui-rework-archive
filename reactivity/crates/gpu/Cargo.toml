@@ -9,16 +9,18 @@ publish = false
 [features]
 default = ["simd"]
 simd = ["gpui_canvas/simd"]
-vulkan-tests = []
+# Hardware oracle on the native backend; software Vulkan remains explicit.
+gpu-tests = []
+vulkan-tests = ["gpu-tests"]
 offline-shader = ["dep:naga", "dep:sha2", "wgpu/shader-artifacts"]
 
 [[test]]
 name = "render"
-required-features = ["vulkan-tests"]
+required-features = ["gpu-tests"]
 
 [[example]]
 name = "tiles"
-required-features = ["vulkan-tests"]
+required-features = ["gpu-tests"]
 
 [dependencies]
 gpui_canvas = { path = "../canvas", default-features = false }
@@ -36,8 +38,8 @@ pollster = "=1.0.1"
 
 [[example]]
 name = "groups"
-required-features = ["vulkan-tests"]
+required-features = ["gpu-tests"]
 
 [[example]]
 name = "images"
-required-features = ["vulkan-tests"]
+required-features = ["gpu-tests"]

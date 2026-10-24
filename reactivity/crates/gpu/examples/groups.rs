@@ -1,4 +1,6 @@
-//! Serialized Vulkan wall time, not GPU timestamps. Separate process per schema.
+//! Serialized native-backend wall time, not GPU timestamps. Separate process per schema.
+#[path = "../tests/support/adapter.rs"]
+mod test_adapter;
 use gpui_canvas::{Affine, Canvas, Color, ColorConfig, Point, Rect, TextSystem};
 use gpui_gpu::{Renderer, wgpu};
 use std::time::Instant;
@@ -71,17 +73,7 @@ fn scene(case: &str) -> Canvas {
 }
 async fn run(case: &str, grouped: bool) {
     let canvas = scene(case);
-    let mut descriptor = wgpu::InstanceDescriptor::new_without_display_handle();
-    descriptor.backends = wgpu::Backends::VULKAN;
-    let instance = wgpu::Instance::new(descriptor);
-    let adapter = instance
-        .request_adapter(&wgpu::RequestAdapterOptions {
-            force_fallback_adapter: true,
-            ..Default::default()
-        })
-        .await
-        .unwrap();
-    eprintln!("{:?}", adapter.get_info());
+    let (_, adapter) = test_adapter::request().await;
     let mut renderer = Renderer::request(&adapter, wgpu::TextureFormat::Rgba8UnormSrgb)
         .await
         .unwrap();

@@ -1,6 +1,8 @@
-//! Serialized llvmpipe/Vulkan wall time; no discrete-GPU timestamp claim.
+//! Serialized native-backend wall time; no GPU timestamp claim.
 #[path = "../../canvas/examples/support/images.rs"]
 mod fixture;
+#[path = "../tests/support/adapter.rs"]
+mod test_adapter;
 use gpui_gpu::{Renderer, wgpu};
 use std::time::Instant;
 fn main() {
@@ -9,17 +11,7 @@ fn main() {
 async fn run() {
     let case = std::env::args().nth(1).unwrap_or_else(|| "one".into());
     let canvas = fixture::scene(&case);
-    let mut descriptor = wgpu::InstanceDescriptor::new_without_display_handle();
-    descriptor.backends = wgpu::Backends::VULKAN;
-    let instance = wgpu::Instance::new(descriptor);
-    let adapter = instance
-        .request_adapter(&wgpu::RequestAdapterOptions {
-            force_fallback_adapter: true,
-            ..Default::default()
-        })
-        .await
-        .expect("Vulkan adapter required");
-    eprintln!("{:?}", adapter.get_info());
+    let (_, adapter) = test_adapter::request().await;
     let mut renderer = Renderer::request(&adapter, wgpu::TextureFormat::Rgba8UnormSrgb)
         .await
         .unwrap();

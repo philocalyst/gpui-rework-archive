@@ -1406,21 +1406,12 @@ mod tests {
     use super::*;
     use gpui_canvas::Rect;
 
-    #[cfg(feature = "vulkan-tests")]
+    #[cfg(feature = "gpu-tests")]
     #[test]
     fn only_lowered_solid_packets_publish_the_sample_certificate() {
         use gpui_canvas::{Affine, Canvas, Color, PaintColor};
         pollster::block_on(async {
-            let mut desc = wgpu::InstanceDescriptor::new_without_display_handle();
-            desc.backends = wgpu::Backends::VULKAN;
-            let instance = wgpu::Instance::new(desc);
-            let adapter = instance
-                .request_adapter(&wgpu::RequestAdapterOptions {
-                    force_fallback_adapter: true,
-                    ..Default::default()
-                })
-                .await
-                .unwrap();
+            let (_, adapter) = crate::test_adapter::request().await;
             let mut renderer = Renderer::request(&adapter, wgpu::TextureFormat::Rgba8UnormSrgb)
                 .await
                 .unwrap();
@@ -1680,20 +1671,11 @@ mod tests {
         }
         assert!(accepted > 20, "exercise nontrivial successful certificates");
     }
-    #[cfg(feature = "vulkan-tests")]
+    #[cfg(feature = "gpu-tests")]
     #[test]
     fn packet_reference_cap_and_atlas_last_row_admission() {
         pollster::block_on(async {
-            let mut desc = wgpu::InstanceDescriptor::new_without_display_handle();
-            desc.backends = wgpu::Backends::VULKAN;
-            let instance = wgpu::Instance::new(desc);
-            let adapter = instance
-                .request_adapter(&wgpu::RequestAdapterOptions {
-                    force_fallback_adapter: true,
-                    ..Default::default()
-                })
-                .await
-                .unwrap();
+            let (_, adapter) = crate::test_adapter::request().await;
             let context = GpuContext::request(&adapter, wgpu::TextureFormat::Rgba8UnormSrgb)
                 .await
                 .unwrap();

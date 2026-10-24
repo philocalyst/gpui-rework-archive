@@ -8,3 +8,7 @@ pub use renderer::{
     PaintError, PaintRenderer, Renderer, RendererState, SlotError, Stats,
 };
 pub use wgpu;
+
+#[cfg(all(test, feature = "gpu-tests"))]
+#[path = "../tests/support/adapter.rs"]
+mod test_adapter;

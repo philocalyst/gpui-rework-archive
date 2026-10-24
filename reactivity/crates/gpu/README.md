@@ -65,9 +65,26 @@ overlapping alpha edges, physical glyph scales 1/1.25/1.5/2, threshold clear
 colors and premultiplied float output. They run on Mesa llvmpipe Vulkan here;
 other backends require their own validation.
 
-Portable `cargo test -p gpui_gpu` validates generated WGSL and CPU packing. Run
-`cargo test -p gpui_gpu --features vulkan-tests --test render` for actual Vulkan
-conformance; this command requires an adapter and never silently skips tests.
+Portable `cargo test -p gpui_gpu` validates generated WGSL and CPU packing.
+The same real pixel-oracle suite has two explicit execution profiles:
+
+```sh
+# Physical GPU: Metal on macOS, DX12 on Windows, Vulkan elsewhere.
+cargo test -p gpui_gpu --features gpu-tests --lib --test render -- --nocapture --test-threads=1
+# Existing software-Vulkan profile, retained for deterministic driver checks.
+cargo test -p gpui_gpu --features vulkan-tests --lib --test render -- --nocapture --test-threads=1
+```
+
+Hardware execution rejects CPU, virtual and unknown adapters; it cannot silently
+become a software result. Both profiles print the exact backend/device/driver.
+They share all scene inputs and numerical assertions. `vulkan-tests` implies
+`gpu-tests` and explicitly requests the fallback Vulkan adapter, including when
+both features are enabled. The offline SPIR-V admission/error-injection test is
+Vulkan-specific and additionally requires `vulkan-tests`; ordinary Metal/DX12
+execution exercises the portable WGSL route. Neither a passing build nor a
+missing adapter counts as backend correctness coverage. The `groups`, `tiles`
+and `images` diagnostic examples use the same adapter selection; their times
+remain host submission/completion wall times, not GPU timestamps or scanout.
 
 ## Storage and output
 
