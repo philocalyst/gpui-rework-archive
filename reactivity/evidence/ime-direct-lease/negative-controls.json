@@ -1,0 +1,45 @@
+{
+  "scratch": {
+    "mutation": "Restore a retained String join buffer and 24-byte Preview header; immutable final constructor remains.",
+    "source_archive_sha256": "008f9081aaabe1fd4343012342dc67cabf1ca2226329b079482f58815aba0431",
+    "semantic_tests": 18,
+    "certificate_exit": 1,
+    "failure": "Expected retained release saving N+24 becomes zero.",
+    "executable": [
+      {
+        "path": "/tmp/gpui-ime-direct-lease-sol-target-20261024/mutant-native/debug/build/gpui/126fcb55b234f831/out/ime-126fcb55b234f831",
+        "sealed": "/tmp/gpui-ime-direct-lease-sol-evidence-20261024/seal-mutants/scratch-ime",
+        "sha256": "6c0bc453bbd36ddf22c2e6c398ee527764d360adea004fc1560b8f7c759b10cc",
+        "bytes": 31215432,
+        "fresh": false
+      }
+    ],
+    "extra_guard": {
+      "exit": 0,
+      "extra_mutant_inputs": 599,
+      "all_extra_inputs_unchanged": true,
+      "scope": "Exact mutant GPUI copy plus original 2073-input source closure guarded by outer gate."
+    }
+  },
+  "tie": {
+    "mutation": "Change adjacent-boundary distance comparison < to <=, choosing upstream on ties.",
+    "source_archive_sha256": "8d93614c93b45d2094bd737dc0edac2cbd551445c94615c81955cac6bc29fefb",
+    "certificate_exit": 101,
+    "failure": "RI seam, marked 0..4, raw focus byte 4: upstream 0 differs from downstream 8.",
+    "executable": [
+      {
+        "path": "/tmp/gpui-ime-direct-lease-sol-target-20261024/mutant-native/debug/build/gpui/5dd03cf289fca239/out/gpui-5dd03cf289fca239",
+        "sealed": "/tmp/gpui-ime-direct-lease-sol-evidence-20261024/seal-mutants/tie-gpui",
+        "sha256": "2f40e0040db6312a61b985d4fe8f000907a40999752b761330c71aaf9b87b11c",
+        "bytes": 174827752,
+        "fresh": false
+      }
+    ],
+    "extra_guard": {
+      "exit": 101,
+      "extra_mutant_inputs": 599,
+      "all_extra_inputs_unchanged": true,
+      "scope": "Exact mutant GPUI copy plus original 2073-input source closure guarded by outer gate."
+    }
+  }
+}

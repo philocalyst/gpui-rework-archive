@@ -91,7 +91,6 @@ struct Active {
 }
 pub(super) struct Preview {
     replacement: gpui_canvas::TextSelection,
-    buffer: String,
     pub display: SharedText,
     pub selection: gpui_canvas::TextSelection,
     pub decoration: gpui_canvas::TextSelection,
@@ -104,22 +103,53 @@ fn nearest(value: &str, byte: usize) -> Result<gpui_canvas::TextPosition, Error>
         .unwrap_or(0);
     position(byte)
 }
-fn decoration(value: &str, start: usize, end: usize) -> Result<gpui_canvas::TextSelection, Error> {
+fn preview_selections(
+    value: &str,
+    marked: Range<usize>,
+    cursor: Option<[u32; 2]>,
+) -> Result<(gpui_canvas::TextSelection, gpui_canvas::TextSelection), Error> {
+    let [a, b] = cursor.map_or([marked.start; 2], |c| c.map(|n| n as usize));
+    let mut anchor = 0;
+    let mut focus = 0;
     let mut left = 0;
     let mut right = value.len();
+    let mut previous = 0;
+    // Admission places both raw cursor endpoints inside the marked range. Each
+    // nearest endpoint needs only its adjacent boundaries; ties go downstream.
+    // The first boundary at/after marked.end also completes its decoration.
     for boundary in icu_segmenter::GraphemeClusterSegmenter::new().segment_str(value) {
-        if boundary <= start {
+        let nearest = |byte: usize| {
+            if byte.abs_diff(previous) < byte.abs_diff(boundary) {
+                previous
+            } else {
+                boundary
+            }
+        };
+        if (previous..=boundary).contains(&a) {
+            anchor = nearest(a);
+        }
+        if (previous..=boundary).contains(&b) {
+            focus = nearest(b);
+        }
+        if boundary <= marked.start {
             left = boundary;
         }
-        if boundary >= end {
+        if boundary >= marked.end {
             right = boundary;
             break;
         }
+        previous = boundary;
     }
-    Ok(gpui_canvas::TextSelection {
-        anchor: position(left)?,
-        focus: position(right)?,
-    })
+    Ok((
+        gpui_canvas::TextSelection {
+            anchor: position(anchor)?,
+            focus: position(focus)?,
+        },
+        gpui_canvas::TextSelection {
+            anchor: position(left)?,
+            focus: position(right)?,
+        },
+    ))
 }
 impl<M: View + 'static> Runtime<M> {
     fn ime_active(&self) -> Option<&Active> {
@@ -445,7 +475,6 @@ impl<M: View + 'static, L: LaneSet<M>> RuntimeMut<'_, M, L> {
         let preview = active.preview.get_or_insert_with(|| {
             Box::new(Preview {
                 replacement,
-                buffer: String::new(),
                 display: active.source.clone(),
                 selection: replacement,
                 decoration: replacement,
@@ -457,28 +486,34 @@ impl<M: View + 'static, L: LaneSet<M>> RuntimeMut<'_, M, L> {
                 },
             })
         });
-        let before = preview.display.clone();
-        if text.is_empty() {
-            preview.display = active.source.clone();
-        } else {
-            preview.buffer.clear();
-            preview
-                .buffer
-                .try_reserve(joined_len)
-                .map_err(|_| Error::ResourceLimit)?;
-            preview.buffer.push_str(&active.source[..start]);
-            preview.buffer.push_str(text);
-            preview.buffer.push_str(&active.source[end..]);
-            if preview.display.as_ref() != preview.buffer {
-                preview.display = SharedText::from(preview.buffer.as_str());
+        let changed = if text.is_empty() {
+            let changed = !std::ptr::eq::<str>(preview.display.as_ref(), active.source.as_ref());
+            if changed {
+                preview.display = active.source.clone();
             }
-        }
+            changed
+        } else {
+            // Source and replacement stay fixed for this composition. Only the
+            // raw UTF-8 middle can differ; an empty mark denotes Source itself.
+            let [left, right] = preview.mark.range.map(|n| n as usize);
+            let previous = if left == right {
+                &active.source[start..end]
+            } else {
+                &preview.display[left..right]
+            };
+            if previous != text {
+                preview.display =
+                    SharedText::try_join([&active.source[..start], text, &active.source[end..]])
+                        .ok_or(Error::ResourceLimit)?;
+                true
+            } else {
+                false
+            }
+        };
         let finish = start + text.len();
         let exact = cursor.map(|(a, b)| [(start + a) as u32, (start + b) as u32]);
-        let focus = nearest(&preview.display, exact.map_or(start, |c| c[1] as usize))?;
-        let anchor = nearest(&preview.display, exact.map_or(start, |c| c[0] as usize))?;
-        preview.selection = gpui_canvas::TextSelection { anchor, focus };
-        preview.decoration = decoration(&preview.display, start, finish)?;
+        (preview.selection, preview.decoration) =
+            preview_selections(&preview.display, start..finish, exact)?;
         preview.mark = MarkSnapshot {
             identity,
             stamp: active.stamp,
@@ -494,7 +529,7 @@ impl<M: View + 'static, L: LaneSet<M>> RuntimeMut<'_, M, L> {
             },
             None,
         );
-        if !std::ptr::eq::<str>(before.as_ref(), preview.display.as_ref()) {
+        if changed {
             self.runtime.invalidate_display(active.target);
         }
         self.runtime.dirty = true;
@@ -558,8 +593,8 @@ impl<M: View + 'static, L: LaneSet<M>> RuntimeMut<'_, M, L> {
                     .as_ref()
                     .map_or_else(|| self.selection_at(index), |p| Ok(p.replacement))?;
                 // Restore the source selection before any fallible codec work.
-                // Exceptional preedit capacity belongs only to this composition;
-                // canonical Source ownership follows ordinary keyboard policy.
+                // Drop the composition display lease before canonical allocation;
+                // Source ownership follows ordinary keyboard policy.
                 self.runtime.set_selection(index, range, None);
                 active.preview = None;
                 self.runtime.invalidate_display(active.target);
@@ -575,7 +610,7 @@ impl<M: View + 'static, L: LaneSet<M>> RuntimeMut<'_, M, L> {
             ImeEvent::Preedit { text, cursor } => {
                 // Keep the exclusive owner installed even when validation or
                 // preparation fails, so the common cancellation path restores
-                // the original source selection and releases active capacity.
+                // the original source selection and releases the active lease.
                 let result = self.update_preedit(&mut active, text, cursor);
                 self.runtime.install_ime(active);
                 result?;
@@ -607,7 +642,184 @@ mod tests {
         win.presented(win.with_scene(|_, t| t).unwrap()).unwrap();
     }
     #[test]
-    fn ime_cold_ownership_reuses_only_active_buffer_and_releases_after_final_ack() {
+    fn one_pass_preview_geometry_matches_exact_full_scan_at_all_raw_byte_positions() {
+        fn original_decoration(
+            value: &str,
+            start: usize,
+            end: usize,
+        ) -> gpui_canvas::TextSelection {
+            let mut left = 0;
+            let mut right = value.len();
+            for boundary in icu_segmenter::GraphemeClusterSegmenter::new().segment_str(value) {
+                if boundary <= start {
+                    left = boundary;
+                }
+                if boundary >= end {
+                    right = boundary;
+                    break;
+                }
+            }
+            gpui_canvas::TextSelection {
+                anchor: position(left).unwrap(),
+                focus: position(right).unwrap(),
+            }
+        }
+        let mut cases = 0;
+        for value in [
+            "",
+            "abc",
+            "a\u{301}z",
+            "👩‍❤️‍💋‍👨x",
+            "🇫🇷🇯🇵",
+            "👍🏽x",
+            "עברית",
+            "a\r\nb",
+        ] {
+            for start in 0..=value.len() {
+                for end in start..=value.len() {
+                    let decoration = original_decoration(value, start, end);
+                    let hidden = preview_selections(value, start..end, None).unwrap();
+                    assert_eq!(
+                        hidden,
+                        (
+                            gpui_canvas::TextSelection {
+                                anchor: nearest(value, start).unwrap(),
+                                focus: nearest(value, start).unwrap()
+                            },
+                            decoration
+                        )
+                    );
+                    for anchor in start..=end {
+                        for focus in start..=end {
+                            let cursor = Some([anchor as u32, focus as u32]);
+                            let actual = preview_selections(value, start..end, cursor).unwrap();
+                            let selected = gpui_canvas::TextSelection {
+                                anchor: nearest(value, anchor).unwrap(),
+                                focus: nearest(value, focus).unwrap(),
+                            };
+                            assert_eq!(
+                                actual,
+                                (selected, decoration),
+                                "{value:?}/{start}/{end}/{anchor}/{focus}"
+                            );
+                            cases += 1;
+                        }
+                    }
+                }
+            }
+        }
+        assert_eq!(cases, 79_333);
+    }
+    #[test]
+    fn initial_equal_preedit_and_clear_reuse_the_exact_source_lease() {
+        let mut win = Win::recording(
+            Input(Signal::new("source".into())),
+            WindowOptions::default(),
+        )
+        .unwrap();
+        ack(&mut win);
+        let target = win.input();
+        win.focus(target).unwrap();
+        win.select(
+            target,
+            gpui_canvas::TextSelection {
+                anchor: position(0).unwrap(),
+                focus: position(6).unwrap(),
+            },
+        )
+        .unwrap();
+        ack(&mut win);
+        let mut session = ImeSession::default();
+        win.ime_event(&mut session, ImeEvent::Enabled).unwrap();
+        let pointer = win.runtime().unwrap().ime_active().unwrap().source.as_ptr();
+        for text in ["source", "", "source"] {
+            win.ime_event(&mut session, ImeEvent::Preedit { text, cursor: None })
+                .unwrap();
+            let preview = win.runtime().unwrap().composition_preview().unwrap().1;
+            assert!(std::ptr::eq(preview.display.as_ptr(), pointer));
+            ack(&mut win);
+        }
+        win.ime_event(
+            &mut session,
+            ImeEvent::Preedit {
+                text: "x",
+                cursor: Some((0, 0)),
+            },
+        )
+        .unwrap();
+        let changed = win
+            .runtime()
+            .unwrap()
+            .composition_preview()
+            .unwrap()
+            .1
+            .display
+            .clone();
+        assert!(!std::ptr::eq(changed.as_ptr(), pointer));
+        win.ime_event(
+            &mut session,
+            ImeEvent::Preedit {
+                text: "source",
+                cursor: Some((6, 6)),
+            },
+        )
+        .unwrap();
+        let equal = win
+            .runtime()
+            .unwrap()
+            .composition_preview()
+            .unwrap()
+            .1
+            .display
+            .clone();
+        assert_eq!(equal.as_ref(), "source");
+        assert!(
+            !std::ptr::eq(equal.as_ptr(), pointer),
+            "equal bytes after different display retain baseline lease authority"
+        );
+        win.ime_event(
+            &mut session,
+            ImeEvent::Preedit {
+                text: "source",
+                cursor: Some((0, 0)),
+            },
+        )
+        .unwrap();
+        assert!(std::ptr::eq(
+            win.runtime()
+                .unwrap()
+                .composition_preview()
+                .unwrap()
+                .1
+                .display
+                .as_ptr(),
+            equal.as_ptr()
+        ));
+        win.ime_event(
+            &mut session,
+            ImeEvent::Preedit {
+                text: "",
+                cursor: None,
+            },
+        )
+        .unwrap();
+        assert!(std::ptr::eq(
+            win.runtime()
+                .unwrap()
+                .composition_preview()
+                .unwrap()
+                .1
+                .display
+                .as_ptr(),
+            pointer
+        ));
+        assert_eq!(changed.as_ref(), "x");
+        win.ime_event(&mut session, ImeEvent::Commit("done"))
+            .unwrap();
+        assert_eq!(win.read(Input::VALUE).unwrap(), "done");
+    }
+    #[test]
+    fn ime_cold_ownership_reuses_immutable_display_and_releases_after_final_ack() {
         let mut win = Win::recording(
             Input(Signal::new("source".into())),
             WindowOptions::default(),
@@ -675,8 +887,6 @@ mod tests {
         );
         ack(&mut win);
         let preview = win.runtime().unwrap().composition_preview().unwrap().1;
-        let buffer = preview.buffer.as_ptr();
-        let capacity = preview.buffer.capacity();
         let display = preview.display.as_ptr();
         assert_eq!(
             SharedText::strong_count(&preview.display),
@@ -689,7 +899,7 @@ mod tests {
             SharedText::strong_count(&win.runtime().unwrap().ime_active().unwrap().source).unwrap()
         );
         eprintln!(
-            "IME_STORAGE session={} active={} preview={} mark={} owner={} editing={} text_resources={} buffer_capacity={} display_bytes={}",
+            "IME_STORAGE session={} active={} preview={} mark={} owner={} editing={} text_resources={} display_bytes={}",
             size_of::<ImeSession>(),
             size_of::<Active>(),
             size_of::<Preview>(),
@@ -697,9 +907,9 @@ mod tests {
             size_of::<Ime>(),
             size_of::<super::super::editing::Editing>(),
             size_of::<super::super::text_geometry::TextResources>(),
-            capacity,
             preview.display.len()
         );
+        let old_display = preview.display.clone();
         win.ime_event(
             &mut session,
             ImeEvent::Preedit {
@@ -709,8 +919,6 @@ mod tests {
         )
         .unwrap();
         let preview = win.runtime().unwrap().composition_preview().unwrap().1;
-        assert_eq!(preview.buffer.as_ptr(), buffer);
-        assert_eq!(preview.buffer.capacity(), capacity);
         assert_eq!(
             preview.display.as_ptr(),
             display,
@@ -726,8 +934,9 @@ mod tests {
         )
         .unwrap();
         let preview = win.runtime().unwrap().composition_preview().unwrap().1;
-        assert_eq!(preview.buffer.as_ptr(), buffer);
-        assert_eq!(preview.buffer.capacity(), capacity);
+        assert_ne!(preview.display.as_ptr(), display);
+        assert_eq!(old_display.as_ref(), "sourcelong marked phrase");
+        assert_eq!(preview.display.as_ref(), "sourcex");
         ack(&mut win);
         win.ime_event(&mut session, ImeEvent::Cancel).unwrap();
         let owner = win
@@ -744,7 +953,7 @@ mod tests {
             .unwrap();
         assert!(
             owner.active.is_none(),
-            "cancel immediately drops String, active and preview owners"
+            "cancel immediately drops active and preview owners"
         );
         assert!(
             owner.presented.is_some(),
@@ -764,12 +973,14 @@ mod tests {
                 .is_none()
         );
         assert_eq!(win.read(Input::VALUE).unwrap(), "source");
+        assert_eq!(old_display.as_ref(), "sourcelong marked phrase");
+        assert_eq!(old_display.strong_count(), Some(1));
         win.close();
         assert!(win.inner.is_none());
         if cfg!(target_pointer_width = "64") {
             assert_eq!(size_of::<ImeSession>(), 8);
             assert_eq!(size_of::<Active>(), 56);
-            assert_eq!(size_of::<Preview>(), 120);
+            assert_eq!(size_of::<Preview>(), 96);
             assert_eq!(size_of::<MarkSnapshot>(), 40);
             assert_eq!(size_of::<Ime>(), 88);
         }

@@ -1,0 +1,519 @@
+{
+  "headers": {
+    "Preview": {
+      "baseline": 120,
+      "final": 96
+    },
+    "Active": 56,
+    "Ime": 88,
+    "MarkSnapshot": 40,
+    "SharedText": 8,
+    "Option_SharedText": 8,
+    "Enabled": {
+      "allocations": 2,
+      "bytes": 144
+    }
+  },
+  "public_api_allocation_certificate": [
+    {
+      "length": 24,
+      "stage": "changed_with_old_p",
+      "baseline": {
+        "allocations": 240,
+        "bytes": 116441,
+        "retained": 1209,
+        "peak": 49517
+      },
+      "candidate": {
+        "allocations": 240,
+        "bytes": 116441,
+        "retained": 1209,
+        "peak": 49517
+      },
+      "baseline_minus_candidate": {
+        "allocations": 0,
+        "bytes": 0,
+        "retained": 0,
+        "peak": 0
+      }
+    },
+    {
+      "length": 24,
+      "stage": "cursor",
+      "baseline": {
+        "allocations": 15,
+        "bytes": 2420,
+        "retained": 384,
+        "peak": 1784
+      },
+      "candidate": {
+        "allocations": 15,
+        "bytes": 2420,
+        "retained": 384,
+        "peak": 1784
+      },
+      "baseline_minus_candidate": {
+        "allocations": 0,
+        "bytes": 0,
+        "retained": 0,
+        "peak": 0
+      }
+    },
+    {
+      "length": 24,
+      "stage": "failed_newer_releases_active",
+      "baseline": {
+        "allocations": 1,
+        "bytes": 104,
+        "retained": -136,
+        "peak": 64
+      },
+      "candidate": {
+        "allocations": 1,
+        "bytes": 104,
+        "retained": -88,
+        "peak": 64
+      },
+      "baseline_minus_candidate": {
+        "allocations": 0,
+        "bytes": 0,
+        "retained": -48,
+        "peak": 0
+      }
+    },
+    {
+      "length": 24,
+      "stage": "first",
+      "baseline": {
+        "allocations": 242,
+        "bytes": 116549,
+        "retained": 1439,
+        "peak": 49665
+      },
+      "candidate": {
+        "allocations": 241,
+        "bytes": 116501,
+        "retained": 1391,
+        "peak": 49617
+      },
+      "baseline_minus_candidate": {
+        "allocations": 1,
+        "bytes": 48,
+        "retained": 48,
+        "peak": 48
+      }
+    },
+    {
+      "length": 4096,
+      "stage": "changed_with_old_p",
+      "baseline": {
+        "allocations": 277,
+        "bytes": 1027017,
+        "retained": 67885,
+        "peak": 779596
+      },
+      "candidate": {
+        "allocations": 277,
+        "bytes": 1027017,
+        "retained": 67885,
+        "peak": 779596
+      },
+      "baseline_minus_candidate": {
+        "allocations": 0,
+        "bytes": 0,
+        "retained": 0,
+        "peak": 0
+      }
+    },
+    {
+      "length": 4096,
+      "stage": "cursor",
+      "baseline": {
+        "allocations": 21,
+        "bytes": 32468,
+        "retained": 384,
+        "peak": 23544
+      },
+      "candidate": {
+        "allocations": 21,
+        "bytes": 32468,
+        "retained": 384,
+        "peak": 23544
+      },
+      "baseline_minus_candidate": {
+        "allocations": 0,
+        "bytes": 0,
+        "retained": 0,
+        "peak": 0
+      }
+    },
+    {
+      "length": 4096,
+      "stage": "failed_newer_releases_active",
+      "baseline": {
+        "allocations": 1,
+        "bytes": 104,
+        "retained": -4208,
+        "peak": 64
+      },
+      "candidate": {
+        "allocations": 1,
+        "bytes": 104,
+        "retained": -88,
+        "peak": 64
+      },
+      "baseline_minus_candidate": {
+        "allocations": 0,
+        "bytes": 0,
+        "retained": -4120,
+        "peak": 0
+      }
+    },
+    {
+      "length": 4096,
+      "stage": "first",
+      "baseline": {
+        "allocations": 279,
+        "bytes": 1031245,
+        "retained": 136131,
+        "peak": 783852
+      },
+      "candidate": {
+        "allocations": 278,
+        "bytes": 1027125,
+        "retained": 132011,
+        "peak": 779732
+      },
+      "baseline_minus_candidate": {
+        "allocations": 1,
+        "bytes": 4120,
+        "retained": 4120,
+        "peak": 4120
+      }
+    },
+    {
+      "length": 32768,
+      "stage": "changed_with_old_p",
+      "baseline": {
+        "allocations": 292,
+        "bytes": 7231641,
+        "retained": 538109,
+        "peak": 5926220
+      },
+      "candidate": {
+        "allocations": 292,
+        "bytes": 7231641,
+        "retained": 538109,
+        "peak": 5926220
+      },
+      "baseline_minus_candidate": {
+        "allocations": 0,
+        "bytes": 0,
+        "retained": 0,
+        "peak": 0
+      }
+    },
+    {
+      "length": 32768,
+      "stage": "cursor",
+      "baseline": {
+        "allocations": 21,
+        "bytes": 32468,
+        "retained": 384,
+        "peak": 23544
+      },
+      "candidate": {
+        "allocations": 21,
+        "bytes": 32468,
+        "retained": 384,
+        "peak": 23544
+      },
+      "baseline_minus_candidate": {
+        "allocations": 0,
+        "bytes": 0,
+        "retained": 0,
+        "peak": 0
+      }
+    },
+    {
+      "length": 32768,
+      "stage": "failed_newer_releases_active",
+      "baseline": {
+        "allocations": 1,
+        "bytes": 104,
+        "retained": -32880,
+        "peak": 64
+      },
+      "candidate": {
+        "allocations": 1,
+        "bytes": 104,
+        "retained": -88,
+        "peak": 64
+      },
+      "baseline_minus_candidate": {
+        "allocations": 0,
+        "bytes": 0,
+        "retained": -32792,
+        "peak": 0
+      }
+    },
+    {
+      "length": 32768,
+      "stage": "first",
+      "baseline": {
+        "allocations": 294,
+        "bytes": 7264937,
+        "retained": 979487,
+        "peak": 5959148
+      },
+      "candidate": {
+        "allocations": 293,
+        "bytes": 7232145,
+        "retained": 946695,
+        "peak": 5926356
+      },
+      "baseline_minus_candidate": {
+        "allocations": 1,
+        "bytes": 32792,
+        "retained": 32792,
+        "peak": 32792
+      }
+    }
+  ],
+  "paired_actual_api_cpu": [
+    {
+      "variant": "bounded",
+      "display_bytes": 24,
+      "samples": [
+        4454,
+        4314,
+        4325,
+        4309,
+        4328,
+        4296,
+        4298,
+        4301,
+        4290,
+        4414,
+        4337,
+        4394,
+        4322,
+        4371,
+        4311,
+        4305,
+        4303,
+        4304,
+        4521,
+        4411,
+        4397,
+        4409,
+        4387,
+        4326,
+        4344,
+        4417,
+        4352
+      ],
+      "median_ns": 4328,
+      "min": 4290,
+      "max": 4521
+    },
+    {
+      "variant": "bounded",
+      "display_bytes": 4096,
+      "samples": [
+        311433,
+        311200,
+        310765,
+        319089,
+        310700,
+        309317,
+        312306,
+        315457,
+        311331,
+        310318,
+        313929,
+        312014,
+        311748,
+        313627,
+        310609,
+        310580,
+        311736,
+        312801,
+        309616,
+        310075,
+        314255,
+        312609,
+        310776,
+        311635,
+        310552,
+        311977,
+        315955
+      ],
+      "median_ns": 311635,
+      "min": 309317,
+      "max": 319089
+    },
+    {
+      "variant": "bounded",
+      "display_bytes": 32768,
+      "samples": [
+        2221222,
+        2219229,
+        2219352,
+        2224274,
+        2219288,
+        2229239,
+        2223949,
+        2215242,
+        2231776,
+        2230038,
+        2230816,
+        2225040,
+        2219678,
+        2224274,
+        2219917,
+        2235092,
+        2231608,
+        2225221,
+        2221300,
+        2223277,
+        2220305,
+        2221641,
+        2258554,
+        2223349,
+        2230078,
+        2232386,
+        2221765
+      ],
+      "median_ns": 2223949,
+      "min": 2215242,
+      "max": 2258554
+    },
+    {
+      "variant": "successor",
+      "display_bytes": 24,
+      "samples": [
+        4901,
+        4852,
+        4840,
+        4851,
+        4840,
+        4817,
+        4817,
+        4951,
+        4821,
+        4964,
+        4929,
+        4915,
+        4884,
+        4873,
+        4924,
+        4849,
+        4880,
+        4917,
+        4869,
+        4863,
+        4988,
+        5027,
+        4888,
+        4830,
+        4796,
+        4858,
+        4806
+      ],
+      "median_ns": 4869,
+      "min": 4796,
+      "max": 5027
+    },
+    {
+      "variant": "successor",
+      "display_bytes": 4096,
+      "samples": [
+        385099,
+        383000,
+        384627,
+        387165,
+        385035,
+        387019,
+        384583,
+        385387,
+        389279,
+        388382,
+        384651,
+        387693,
+        384242,
+        383806,
+        385412,
+        384531,
+        385579,
+        387028,
+        419588,
+        383769,
+        382810,
+        383519,
+        382368,
+        384024,
+        381542,
+        382184,
+        384351
+      ],
+      "median_ns": 384627,
+      "min": 381542,
+      "max": 419588
+    },
+    {
+      "variant": "successor",
+      "display_bytes": 32768,
+      "samples": [
+        2810444,
+        2800815,
+        2810349,
+        2817711,
+        2806234,
+        2859250,
+        2808019,
+        2817505,
+        2798190,
+        2799342,
+        2803919,
+        2809760,
+        2802205,
+        2812426,
+        2827741,
+        2820625,
+        2811363,
+        2800533,
+        2863286,
+        2812745,
+        2817563,
+        2808788,
+        2816279,
+        2810308,
+        2803312,
+        2813883,
+        2806016
+      ],
+      "median_ns": 2810349,
+      "min": 2798190,
+      "max": 2863286
+    }
+  ],
+  "shipping": {
+    "elf_baseline": 9777912,
+    "elf_final": 9773120,
+    "text_baseline": 3038343,
+    "text_final": 3037239,
+    "Win_ime_event_code_baseline": 5894,
+    "Win_ime_event_code_final": 5213,
+    "try_join_code": 289,
+    "try_join_memcpy_calls": 3,
+    "preview_selections_code": 543,
+    "Win_ime_event_frame_baseline": 440,
+    "Win_ime_event_frame_final": 424,
+    "old_nearest_frame": 408,
+    "old_decoration_frame": 200,
+    "preview_selections_frame": 232,
+    "try_join_frame": 72
+  },
+  "scope": "Requested allocation bytes on calling thread; paired scalar recording API CPU; fixed x86-64 frames excluding return address/callees. No UI latency/RSS/worst-case stack claim."
+}
