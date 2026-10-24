@@ -533,6 +533,23 @@ impl DisplayList {
             .map_err(|_| Error::ResourceLimit)?;
         self.inline.try_reserve(1).map_err(|_| Error::ResourceLimit)
     }
+    fn reserve_placements(&mut self, additional: usize) -> Result<(), Error> {
+        let required = self.placements.len() + additional;
+        if required > self.placements.capacity()
+            && let Some(previous) = self.commons.last()
+        {
+            // Reuse an admitted group's actual cardinality for bulk growth.
+            // No invisible glyphs or previous-frame prediction reserve storage.
+            let quantum = (previous.range[1] - previous.range[0]) as usize;
+            let capacity =
+                (required.div_ceil(quantum).next_power_of_two() * quantum).min(MAX_COMMANDS);
+            self.placements
+                .try_reserve_exact(capacity - self.placements.len())
+        } else {
+            self.placements.try_reserve(additional)
+        }
+        .map_err(|_| Error::ResourceLimit)
+    }
     fn append_inline(
         &mut self,
         common: Common,
@@ -1541,9 +1558,7 @@ impl Canvas {
                     first = Some(command);
                 } else {
                     self.commands
-                        .placements
-                        .try_reserve(if count == 2 { 2 } else { 1 })
-                        .map_err(|_| Error::ResourceLimit)?;
+                        .reserve_placements(if count == 2 { 2 } else { 1 })?;
                     if let Some(command) = first.take() {
                         self.commands.placements.push(Placement {
                             geometry: command.geometry,

@@ -28,7 +28,10 @@ fn repeated_labels_keep_batched_capacity_and_allocate_nothing_when_warm() {
         };
         submit(&mut canvas);
         let storage = canvas.prepared_scene().storage();
-        println!("labels={labels} placement_bytes={} batched_bytes={batched_bytes}", storage.placement_bytes);
+        println!(
+            "labels={labels} placement_bytes={} batched_bytes={batched_bytes}",
+            storage.placement_bytes
+        );
         assert!(storage.placement_bytes <= batched_bytes);
         canvas.clear(Color::TRANSPARENT);
         let allocation = allocation_counter::measure(|| submit(&mut canvas));
