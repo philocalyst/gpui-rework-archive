@@ -37,23 +37,30 @@ fn private_inspector_shell_keeps_canonical_width_distinct_from_stored_set() {
         .name("GPUI Inspector")
         .one()
         .unwrap();
-    win.set_property(panel, gpui::property::WIDTH, Contribution::Set(Some(111.)))
-        .unwrap();
+    win.set_property(
+        panel,
+        gpui::property::WIDTH,
+        Contribution::Set(gpui::Length::Points(111.)),
+    )
+    .unwrap();
     assert_eq!(
         win.property(panel, gpui::property::WIDTH).unwrap(),
         Some(320.)
     );
     assert_eq!(
         win.contribution(panel, gpui::property::WIDTH).unwrap(),
-        Contribution::Set(Some(111.))
+        Contribution::Set(gpui::Length::Points(111.))
     );
     win.update(|model| model.destination = Some(panel)).unwrap();
     win.activate(win.button("Read selected width")).unwrap();
     let state = win.root().unwrap().state.unwrap();
-    assert_eq!(state.value, PropertyValue::Dimension(Some(320.)));
+    assert_eq!(
+        state.value,
+        PropertyValue::Dimension(gpui::Length::Points(320.))
+    );
     assert_eq!(
         state.contribution,
-        Contribution::Set(PropertyValue::Dimension(Some(111.)))
+        Contribution::Set(PropertyValue::Dimension(gpui::Length::Points(111.)))
     );
     println!(
         "PROPERTY_SHELL canonical=320 stored_Set=111; deriving Set(canonical) would lose author state"

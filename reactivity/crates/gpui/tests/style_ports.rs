@@ -100,7 +100,10 @@ fn paint_geometry_and_layout_ports_use_existing_typed_properties_without_view_wo
     assert_eq!(win.counters().layout_runs, 0);
     win.reset_counters().unwrap();
     win.set(Panel::NUMBER, 32.0).unwrap();
-    assert_eq!(win.property(target, WIDTH).unwrap(), Some(32.0));
+    assert_eq!(
+        win.property(target, WIDTH).unwrap(),
+        gpui::Length::Points(32.0)
+    );
     assert_eq!(win.property(target, FONT_SIZE).unwrap(), 32.0);
     assert!(win.find_text("32").is_ok());
     assert_eq!(win.counters().source_reads, 1);
@@ -121,7 +124,10 @@ fn text_first_and_style_first_keep_combined_numeric_capabilities() {
         let mut win = Win::with_size(model, 120, 120).unwrap();
         let target = root(&win);
         win.set(Panel::NUMBER, 40.0).unwrap();
-        assert_eq!(win.property(target, WIDTH).unwrap(), Some(40.0));
+        assert_eq!(
+            win.property(target, WIDTH).unwrap(),
+            gpui::Length::Points(40.0)
+        );
         assert!(win.find_text("40").is_ok());
         assert_eq!(win.counters().owner_reruns, 0);
     }
@@ -131,7 +137,7 @@ fn text_first_and_style_first_keep_combined_numeric_capabilities() {
 fn masked_sources_advance_inspector_bases_and_inherit_reveals_without_view() {
     let mut win = Win::with_size(Panel::new(), 120, 80).unwrap();
     let target = root(&win);
-    win.set_property(target, WIDTH, Contribution::Set(None))
+    win.set_property(target, WIDTH, Contribution::Set(gpui::Length::Auto))
         .unwrap();
     win.set_property(
         target,
@@ -145,7 +151,7 @@ fn masked_sources_advance_inspector_bases_and_inherit_reveals_without_view() {
     win.set(Panel::NUMBER, 36.0).unwrap();
     win.set(Panel::COLOR, rgb(0x123456)).unwrap();
     win.set(Panel::RADIUS, 9.0).unwrap();
-    assert_eq!(win.property(target, WIDTH).unwrap(), None);
+    assert_eq!(win.property(target, WIDTH).unwrap(), gpui::Length::Auto);
     assert_eq!(
         win.property(target, BACKGROUND).unwrap().solid().unwrap(),
         Color::WHITE
@@ -157,7 +163,10 @@ fn masked_sources_advance_inspector_bases_and_inherit_reveals_without_view() {
         .unwrap();
     win.set_property(target, CORNER_RADIUS, Contribution::Inherit)
         .unwrap();
-    assert_eq!(win.property(target, WIDTH).unwrap(), Some(36.0));
+    assert_eq!(
+        win.property(target, WIDTH).unwrap(),
+        gpui::Length::Points(36.0)
+    );
     assert_eq!(
         win.property(target, BACKGROUND).unwrap().solid().unwrap(),
         rgb(0x123456)
@@ -246,8 +255,14 @@ fn last_write_wins_size_fanout_and_unregistered_snapshots_do_not_keep_obsolete_e
     let target = win.query().name("panel").one().unwrap();
     win.reset_counters().unwrap();
     win.set(Page::A, 22).unwrap();
-    assert_eq!(win.property(target, WIDTH).unwrap(), Some(30.0));
-    assert_eq!(win.property(target, HEIGHT).unwrap(), Some(22.0));
+    assert_eq!(
+        win.property(target, WIDTH).unwrap(),
+        gpui::Length::Points(30.0)
+    );
+    assert_eq!(
+        win.property(target, HEIGHT).unwrap(),
+        gpui::Length::Points(22.0)
+    );
     assert_eq!(win.counters().destination_compares, 1);
     win.update(|m| *m.color = Color::WHITE).unwrap();
     assert_eq!(
@@ -365,8 +380,14 @@ fn final_literal_and_final_signal_win_for_direct_and_flex_fields() {
     win.reset_counters().unwrap();
     win.set(Page::VALUE, 30).unwrap();
     assert_eq!(win.counters().destination_compares, 1);
-    assert_eq!(win.property(target, WIDTH).unwrap(), Some(44.0));
-    assert_eq!(win.property(target, HEIGHT).unwrap(), Some(30.0));
+    assert_eq!(
+        win.property(target, WIDTH).unwrap(),
+        gpui::Length::Points(44.0)
+    );
+    assert_eq!(
+        win.property(target, HEIGHT).unwrap(),
+        gpui::Length::Points(30.0)
+    );
     assert_eq!(win.property(target, gpui::property::GAP).unwrap(), 3.0);
     win.reset_counters().unwrap();
     win.set(Page::ALIGN, Align::End).unwrap();

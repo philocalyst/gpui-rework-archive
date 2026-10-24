@@ -5,7 +5,7 @@
 //! equal. Literal values may share exact authoring bits; implicit defaults need
 //! neither a slot allocation nor a source registration.
 use super::super::{Destination, Fanout, FieldId, Style};
-use crate::{Affine, Align, Color, Flow, Justify};
+use crate::{Affine, Align, Color, Flow, Justify, Length};
 use gpui_canvas::{PaintColor, PaintSlot};
 use std::collections::BTreeMap;
 
@@ -292,8 +292,8 @@ impl Discovery {
 /// owner read, never mutation or a second retained resolved copy.
 #[derive(Clone, Copy)]
 pub(in crate::runtime) struct LayoutStyle {
-    width: Option<f32>,
-    height: Option<f32>,
+    width: Length,
+    height: Length,
     gap: f32,
     padding: f32,
     font_size: f32,
@@ -337,8 +337,8 @@ impl LayoutStyle {
     }
     pub(in crate::runtime) fn same(self, other: Self) -> bool {
         use crate::property::ExactValue;
-        Option::<f32>::same(&self.width, &other.width)
-            && Option::<f32>::same(&self.height, &other.height)
+        Length::same(&self.width, &other.width)
+            && Length::same(&self.height, &other.height)
             && f32::same(&self.gap, &other.gap)
             && f32::same(&self.padding, &other.padding)
             && f32::same(&self.font_size, &other.font_size)
@@ -753,8 +753,8 @@ mod admission_tests {
         }
         assert_eq!(discovery.bank.sources.len(), N * 2);
         let declared = Style {
-            width: Some(0.),
-            height: Some(0.),
+            width: crate::Length::Points(0.),
+            height: crate::Length::Points(0.),
             fg: Color::BLACK,
             bg: Color::BLACK,
             ..Style::DEFAULT

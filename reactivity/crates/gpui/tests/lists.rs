@@ -383,6 +383,10 @@ fn malformed_source_metrics_and_duplicate_list_ids_fail_admission() {
             let list = uniform_list(LIST, self, row_height).h(height);
             if self.mode == 6 {
                 row((list, uniform_list(LIST, self, 32).h(64)))
+            } else if self.mode == 7 {
+                list.h(Length::Percent(100.0))
+            } else if self.mode == 8 {
+                list.h(Length::Auto)
             } else {
                 list
             }
@@ -395,6 +399,8 @@ fn malformed_source_metrics_and_duplicate_list_ids_fail_admission() {
         (4, ListError::InvalidMetrics),
         (5, ListError::ResourceLimit),
         (6, ListError::DuplicateList(LIST)),
+        (7, ListError::UnsupportedStyle),
+        (8, ListError::MissingViewport),
     ] {
         assert_eq!(
             Win::with_size(Invalid { mode }, 200, 100).err(),

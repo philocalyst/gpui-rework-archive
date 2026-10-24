@@ -30,7 +30,7 @@ use crate::{
     property::{Contribution, Overrides, Property, PropertyError},
     remote::{Delivery, DeliveryError, Inbox, Lane, LaneSet, Stage},
     source::{BindError, FieldId, SourcePath, Sources, TextCodec, TextEditError},
-    style::{Color, Flow, Style},
+    style::{Color, Flow, Length, Style},
 };
 
 const MAX_NODES: usize = 100_000;
@@ -3858,11 +3858,18 @@ fn layout_style(style: &Style) -> cephal::Style {
     use cephal::style::{
         AlignItems, Dimension, Display, FlexDirection, FlexWrap, JustifyContent, LengthPercentage,
     };
+    fn dimension(length: Length) -> Dimension {
+        match length {
+            Length::Auto => Dimension::AUTO,
+            Length::Points(value) => Dimension::length(value),
+            Length::Percent(value) => Dimension::percent(value / 100.0),
+        }
+    }
     cephal::Style {
         display: Display::Flex,
         size: Size {
-            width: style.width.map_or(Dimension::AUTO, Dimension::length),
-            height: style.height.map_or(Dimension::AUTO, Dimension::length),
+            width: dimension(style.width),
+            height: dimension(style.height),
         },
         padding: cephal::Rect::splat(LengthPercentage::length(style.padding)),
         gap: Size {
@@ -4986,7 +4993,7 @@ mod style_port_tests {
             win.set_property(
                 target,
                 crate::property::WIDTH,
-                Contribution::Set(Some(30.0)),
+                Contribution::Set(crate::Length::Points(30.0)),
             )
             .unwrap();
             let before = win.runtime().unwrap().styles.get(index).to_owned();

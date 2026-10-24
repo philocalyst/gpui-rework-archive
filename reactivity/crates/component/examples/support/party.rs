@@ -147,7 +147,9 @@ impl View for Party {
                         Input::new(&self.title, "Gathering name", t)
                             .invalid(invalid)
                             .description("At least three characters")
-                            .parts(|parts| parts.frame(|e: El<'_>| e.w(t.rem(29.0))))
+                            .parts(|parts| {
+                                parts.frame(|e: El<'_>| e.w(gpui::Length::Percent(100.0)))
+                            })
                             .build(),
                         t,
                     )
@@ -194,6 +196,7 @@ impl View for Party {
                 .style(|e: El<'_>| e.fg(t.muted()).font_size(t.rem(6.0 / 7.0)))
                 .build(),
         ))
+        .size(gpui::Length::Percent(100.0))
         .gap(t.space(Space::Group))
         .p(t.space(Space::Region))
         .bg(t.background())

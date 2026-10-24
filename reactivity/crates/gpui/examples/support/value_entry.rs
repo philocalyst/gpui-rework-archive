@@ -27,10 +27,8 @@ impl ValueEntry {
         self.selected = Some((target, id, value));
         self.status.clear();
         *self.draft = match value {
-            PropertyValue::Number(value) | PropertyValue::Dimension(Some(value)) => {
-                value.to_string()
-            }
-            PropertyValue::Dimension(None) => "auto".into(),
+            PropertyValue::Number(value) => value.to_string(),
+            PropertyValue::Dimension(value) => value.to_string(),
             PropertyValue::Transform(value) => format!(
                 "{}, {}, {}, {}, {}, {}",
                 value.a, value.b, value.c, value.d, value.tx, value.ty
@@ -48,11 +46,11 @@ impl ValueEntry {
         let scalar = || source.parse::<f32>().map_err(|_| "Expected a number");
         let value = match previous {
             PropertyValue::Number(_) => PropertyValue::Number(scalar()?),
-            PropertyValue::Dimension(_) => PropertyValue::Dimension(if source == "auto" {
-                None
-            } else {
-                Some(scalar()?)
-            }),
+            PropertyValue::Dimension(_) => PropertyValue::Dimension(
+                source
+                    .parse()
+                    .map_err(|_| "Expected auto, points or a percentage")?,
+            ),
             PropertyValue::Transform(_) => {
                 let [a, b, c, d, tx, ty] = numbers(source)?;
                 PropertyValue::Transform(Affine { a, b, c, d, tx, ty })

@@ -206,7 +206,7 @@ fn nonleaf_replacements_keep_all_ordered_children_and_geometry() {
     .unwrap();
     let base = apply(&win, base, &mut tree, Some(1));
     let leaf = win.query().name("selected").one().unwrap();
-    win.set_property(leaf, WIDTH, Contribution::Set(Some(12.)))
+    win.set_property(leaf, WIDTH, Contribution::Set(crate::Length::Points(12.)))
         .unwrap();
     let base = apply(&win, base, &mut tree, Some(1));
     win.set_property(
@@ -239,7 +239,7 @@ fn pending_metadata_and_failed_newer_prepare_keep_old_p_and_fallback() {
     let mut tree = Tree::new(full(&win), true);
     let base = win.accessibility_state().unwrap();
     let target = win.query().name("selected").one().unwrap();
-    win.set_property(target, WIDTH, Contribution::Set(Some(12.)))
+    win.set_property(target, WIDTH, Contribution::Set(crate::Length::Points(12.)))
         .unwrap();
     assert_eq!(win.accessibility_state().unwrap(), base);
     assert!(win.accessibility_delta(base, base).is_none());
@@ -253,7 +253,7 @@ fn pending_metadata_and_failed_newer_prepare_keep_old_p_and_fallback() {
     acknowledge(&mut win);
     let base = apply(&win, base, &mut tree, None);
     // Preserve a coherent prepared candidate while a newer attempt fails.
-    win.set_property(target, WIDTH, Contribution::Set(Some(14.)))
+    win.set_property(target, WIDTH, Contribution::Set(crate::Length::Points(14.)))
         .unwrap();
     let coherent = win.with_scene(|_, token| token).unwrap();
     assert!(win.update(|m| m.broken = true).is_err());
@@ -490,7 +490,7 @@ fn sparse_transition_measurements() {
                 win.set_property(
                     target,
                     WIDTH,
-                    Contribution::Set(Some(if n % 2 == 0 { 2. } else { 3. })),
+                    Contribution::Set(crate::Length::Points(if n % 2 == 0 { 2. } else { 3. })),
                 )
                 .unwrap();
             });
@@ -1063,7 +1063,7 @@ fn selection_and_placement_keep_native_run_arrays_while_wrap_retires_them() {
                 .unwrap();
             }
             _ => {
-                win.set_property(target, WIDTH, Contribution::Set(Some(60.)))
+                win.set_property(target, WIDTH, Contribution::Set(crate::Length::Points(60.)))
                     .unwrap();
             }
         }

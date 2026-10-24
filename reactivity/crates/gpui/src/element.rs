@@ -729,11 +729,7 @@ impl<'a> El<'a> {
         // Keep the original input type through conversion/admission: e.g. an
         // integer is statically finite, so literal callers need no float error
         // branches for a value that cannot reach them.
-        let scalar = input
-            .into_prop()
-            .literal()
-            .expect("sealed literal")
-            .scalar();
+        let scalar = input.into_prop().literal_scalar().expect("sealed literal");
         let value = scalar.narrow(id).expect("invalid literal style property");
         PropertyId::set_literal::<CODE>(&mut self.style, value)
             .expect("invalid literal style property");
@@ -774,16 +770,16 @@ impl<'a> El<'a> {
             }
         }
     }
-    pub fn w(mut self, width: impl IntoProp<'a, f64>) -> Self {
-        self.property_input::<{ PropertyId::Width as u16 }, false, f64, _>(width);
+    pub fn w(mut self, width: impl IntoProp<'a, crate::Length>) -> Self {
+        self.property_input::<{ PropertyId::Width as u16 }, false, crate::Length, _>(width);
         self
     }
-    pub fn h(mut self, height: impl IntoProp<'a, f64>) -> Self {
-        self.property_input::<{ PropertyId::Height as u16 }, false, f64, _>(height);
+    pub fn h(mut self, height: impl IntoProp<'a, crate::Length>) -> Self {
+        self.property_input::<{ PropertyId::Height as u16 }, false, crate::Length, _>(height);
         self
     }
-    pub fn size(mut self, size: impl IntoProp<'a, f64>) -> Self {
-        self.property_input::<{ PropertyId::Width as u16 }, true, f64, _>(size);
+    pub fn size(mut self, size: impl IntoProp<'a, crate::Length>) -> Self {
+        self.property_input::<{ PropertyId::Width as u16 }, true, crate::Length, _>(size);
         self
     }
     pub fn gap(mut self, gap: impl IntoProp<'a, f64>) -> Self {
@@ -1050,7 +1046,7 @@ impl<'a> El<'a> {
                     }
                     let mut wrapper = Self::new(NodeKind::ListItem, None);
                     wrapper.append_children(row);
-                    wrapper.style.height = Some(row_height as f32);
+                    wrapper.style.height = crate::Length::Points(row_height as f32);
                     rows.push((
                         Some(index),
                         wrapper,
@@ -1758,8 +1754,8 @@ mod tests {
             .flatten();
         assert_eq!(nodes[0].kind.role(), Role::TextInput);
         assert!(nodes[0].text.as_ref().unwrap().signal().is_some());
-        assert_eq!(nodes[0].style.width, Some(320.0));
-        assert_eq!(nodes[0].style.height, Some(24.0));
+        assert_eq!(nodes[0].style.width, crate::Length::Points(320.0));
+        assert_eq!(nodes[0].style.height, crate::Length::Points(24.0));
         assert_eq!(nodes[0].style.fg, Color::rgb(1, 2, 3));
     }
 

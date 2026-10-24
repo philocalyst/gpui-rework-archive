@@ -128,7 +128,7 @@ impl Script {
                 let target = owner.button("Library button");
                 assert_eq!(
                     owner.property_value(target, PropertyId::Width).unwrap(),
-                    PropertyValue::Dimension(Some(120.))
+                    PropertyValue::Dimension(crate::Length::Points(120.))
                 );
                 self.enter("193.25");
             }
@@ -137,7 +137,7 @@ impl Script {
                 let target = owner.button("Library button");
                 assert_eq!(
                     owner.property_value(target, PropertyId::Width).unwrap(),
-                    PropertyValue::Dimension(Some(193.25))
+                    PropertyValue::Dimension(crate::Length::Points(193.25))
                 );
                 assert_eq!(
                     owner.root().unwrap().editor.status,
@@ -160,7 +160,7 @@ impl Script {
                 let target = owner.button("Library button");
                 assert_eq!(
                     owner.property_value(target, PropertyId::Width).unwrap(),
-                    PropertyValue::Dimension(Some(211.75))
+                    PropertyValue::Dimension(crate::Length::Points(211.75))
                 );
                 owner.update(|m| m.show_application = false).unwrap();
             }

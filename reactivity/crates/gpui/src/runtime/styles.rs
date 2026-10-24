@@ -377,7 +377,7 @@ mod tests {
 
     fn numbered(index: usize) -> Style {
         Style {
-            width: Some(index as f32),
+            width: crate::Length::Points(index as f32),
             ..Style::default()
         }
     }

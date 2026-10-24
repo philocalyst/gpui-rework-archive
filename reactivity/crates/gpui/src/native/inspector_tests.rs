@@ -254,7 +254,7 @@ impl Script {
                     .set_property(
                         card,
                         crate::property::WIDTH,
-                        crate::property::Contribution::Set(Some(90.)),
+                        crate::property::Contribution::Set(crate::Length::Points(90.)),
                     )
                     .unwrap();
                 // An actual physical click during pending C cannot re-pick P.

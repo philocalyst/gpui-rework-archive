@@ -30,7 +30,7 @@ fn contained_editor_allocation_ledger() {
     });
     assert_eq!(
         owner.property_value(target, PropertyId::Width).unwrap(),
-        PropertyValue::Dimension(Some(193.25))
+        PropertyValue::Dimension(gpui::Length::Points(193.25))
     );
     println!(
         "contained_editor_cost,Win={},Companion={},ValueEntry={},mount_count={},mount_requested={},mount_retained={},idle_count={},action_count={},action_requested={},action_retained={}",
@@ -94,7 +94,7 @@ fn actual_contained_apply_rejects_and_recovers_without_losing_the_route() {
     assert_eq!(win.counters().paint_passes, 1);
     assert_eq!(
         win.property_value(target, PropertyId::Width).unwrap(),
-        PropertyValue::Dimension(Some(193.25))
+        PropertyValue::Dimension(gpui::Length::Points(193.25))
     );
     for invalid in ["NaN", "-1"] {
         draft(&mut win, invalid);
@@ -102,7 +102,7 @@ fn actual_contained_apply_rejects_and_recovers_without_losing_the_route() {
         assert!(win.root().unwrap().editor.status.starts_with("Rejected:"));
         assert_eq!(
             win.property_value(target, PropertyId::Width).unwrap(),
-            PropertyValue::Dimension(Some(193.25))
+            PropertyValue::Dimension(gpui::Length::Points(193.25))
         );
     }
     draft(&mut win, "bad syntax");
@@ -118,13 +118,13 @@ fn actual_contained_apply_rejects_and_recovers_without_losing_the_route() {
     win.click(apply).unwrap();
     assert_eq!(
         win.property_value(target, PropertyId::Width).unwrap(),
-        PropertyValue::Dimension(Some(211.75))
+        PropertyValue::Dimension(gpui::Length::Points(211.75))
     );
     win.update(|m| *m.application.width = 260.).unwrap();
     win.click(win.button("Inherit")).unwrap();
     assert_eq!(
         win.property_value(target, PropertyId::Width).unwrap(),
-        PropertyValue::Dimension(Some(260.))
+        PropertyValue::Dimension(gpui::Length::Points(260.))
     );
     win.click(target).unwrap();
     assert_eq!(win.root().unwrap().application.presses, 3);
@@ -138,7 +138,7 @@ fn proposed_foreign_and_stale_targets_report_but_original_stale_event_rejects() 
         m.editor.select(
             foreign,
             PropertyId::Width,
-            PropertyValue::Dimension(Some(120.)),
+            PropertyValue::Dimension(gpui::Length::Points(120.)),
         )
     })
     .unwrap();
@@ -157,7 +157,7 @@ fn proposed_foreign_and_stale_targets_report_but_original_stale_event_rejects() 
     assert!(matches!(win.click(apply), Err(Error::Closed)));
     assert_eq!(
         other.property_value(foreign, PropertyId::Width).unwrap(),
-        PropertyValue::Dimension(Some(120.))
+        PropertyValue::Dimension(gpui::Length::Points(120.))
     );
 }
 
@@ -200,7 +200,7 @@ fn one_editor_family_routes_geometry_color_and_six_affine_components() {
         m.editor.select(
             target,
             PropertyId::CornerRadius,
-            PropertyValue::Dimension(Some(1.)),
+            PropertyValue::Dimension(gpui::Length::Points(1.)),
         )
     })
     .unwrap();
@@ -236,7 +236,7 @@ fn logical_acceptance_is_distinct_from_acknowledged_presentation() {
     assert_eq!(
         win.property_contribution(target, PropertyId::Width)
             .unwrap(),
-        Contribution::Set(PropertyValue::Dimension(Some(177.125)))
+        Contribution::Set(PropertyValue::Dimension(gpui::Length::Points(177.125)))
     );
 }
 
@@ -301,7 +301,7 @@ fn request_and_reply_panics_restore_the_owned_route_until_close() {
                         Some((
                             m.target.unwrap(),
                             PropertyId::Width,
-                            Contribution::Set(PropertyValue::Dimension(Some(80.))),
+                            Contribution::Set(PropertyValue::Dimension(gpui::Length::Points(80.))),
                         ))
                     },
                     |_: &mut Self, _| panic!("reply panic"),
@@ -343,7 +343,7 @@ fn post_mutation_projection_rejection_quarantines_instead_of_leaving_live_l() {
                 (
                     target,
                     PropertyId::Width,
-                    Contribution::Set(PropertyValue::Dimension(Some(180.))),
+                    Contribution::Set(PropertyValue::Dimension(gpui::Length::Points(180.))),
                 )
             })
         }

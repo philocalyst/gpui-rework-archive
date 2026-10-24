@@ -135,7 +135,10 @@ fn recipe_and_inspector_contributions_keep_presence_and_latest_lower_source() {
         theme,
     });
     let target = window.button("Styled");
-    assert_eq!(window.property(target, WIDTH).unwrap(), Some(200.0));
+    assert_eq!(
+        window.property(target, WIDTH).unwrap(),
+        gpui::Length::Points(200.0)
+    );
     assert_eq!(window.property(target, CORNER_RADIUS).unwrap(), 8.0);
     let explicit = FOREGROUND.default_value();
     window
@@ -169,10 +172,17 @@ fn recipe_and_inspector_contributions_keep_presence_and_latest_lower_source() {
     );
     assert!(
         window
-            .set_property(target, WIDTH, Contribution::Set(Some(f32::NAN)))
+            .set_property(
+                target,
+                WIDTH,
+                Contribution::Set(gpui::Length::Points(f32::NAN))
+            )
             .is_err()
     );
-    assert_eq!(window.property(target, WIDTH).unwrap(), Some(200.0));
+    assert_eq!(
+        window.property(target, WIDTH).unwrap(),
+        gpui::Length::Points(200.0)
+    );
 }
 
 struct Editable {

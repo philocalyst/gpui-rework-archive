@@ -149,12 +149,15 @@ fn owned_result_precedes_mutable_reply_source_edits() {
     let initial = win.root().unwrap().last.unwrap();
     assert_eq!(initial.target, target);
     assert_eq!(initial.id, PropertyId::Width);
-    assert_eq!(initial.value, PropertyValue::Dimension(Some(120.)));
+    assert_eq!(
+        initial.value,
+        PropertyValue::Dimension(gpui::Length::Points(120.))
+    );
     assert_eq!(initial.contribution, Contribution::Inherit);
     win.set_property(
         target,
         gpui::property::WIDTH,
-        Contribution::Set(Some(193.25)),
+        Contribution::Set(gpui::Length::Points(193.25)),
     )
     .unwrap();
     win.update(|model| model.mutate_reply = true).unwrap();
@@ -395,7 +398,7 @@ fn every_closed_catalog_family_returns_canonical_value_and_equal_presence() {
         assert_eq!(equal.value, inherited.value);
         assert_eq!(equal.contribution, Contribution::Set(inherited.value));
         let changed = match inherited.value {
-            PropertyValue::Dimension(_) => PropertyValue::Dimension(Some(100.)),
+            PropertyValue::Dimension(_) => PropertyValue::Dimension(gpui::Length::Points(100.)),
             PropertyValue::Number(value) => PropertyValue::Number(value + 1.),
             PropertyValue::Color(_) => {
                 PropertyValue::Color(Color::oklch(0.7, 0.1, 40., 0.8).unwrap())

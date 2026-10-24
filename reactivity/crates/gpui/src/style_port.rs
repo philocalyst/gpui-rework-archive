@@ -3,7 +3,7 @@
 use crate::{
     property::{PropertyError, PropertyErrorKind, PropertyId, PropertyValue, ValueKind},
     source::{ErasedSignal, SourceCodec},
-    style::{Affine, Align, Color, Flow, Justify},
+    style::{Affine, Align, Color, Flow, Justify, Length},
 };
 use gpui_reactivity_state::Signal;
 use std::fmt;
@@ -45,7 +45,7 @@ impl Scalar {
                 }
                 let narrowed = number as f32;
                 let numeric = |value| match id.value_kind() {
-                    ValueKind::Dimension => PropertyValue::Dimension(Some(value)),
+                    ValueKind::Dimension => PropertyValue::Dimension(Length::Points(value)),
                     _ => PropertyValue::Number(value),
                 };
                 if number < 0.0 && narrowed == 0.0 {
@@ -199,6 +199,9 @@ pub struct PropInput<'a, T>(Operand<'a, T>);
 #[derive(Clone, Copy)]
 enum Operand<'a, T> {
     Literal(T),
+    // Numeric dimensions retain their wide author value until admission. This
+    // is a real operand, never a NaN/signed-zero encoding in a Length value.
+    Number(f64),
     Signal(&'a dyn StyleSignal),
     Mapped(MapOperand<'a>),
 }
@@ -212,6 +215,7 @@ impl<T: PartialEq> PartialEq for PropInput<'_, T> {
     fn eq(&self, other: &Self) -> bool {
         match (&self.0, &other.0) {
             (Operand::Literal(a), Operand::Literal(b)) => a == b,
+            (Operand::Number(a), Operand::Number(b)) => a == b,
             (Operand::Signal(a), Operand::Signal(b)) => a.same(*b),
             _ => false,
         }
@@ -229,6 +233,7 @@ impl<T: fmt::Debug> fmt::Debug for PropInput<'_, T> {
     fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
         match &self.0 {
             Operand::Literal(value) => f.debug_tuple("Literal").field(value).finish(),
+            Operand::Number(value) => f.debug_tuple("Number").field(value).finish(),
             Operand::Signal(_) => f.write_str("Signal(..)"),
             Operand::Mapped(_) => f.write_str("Mapped(..)"),
         }
@@ -242,6 +247,7 @@ impl<'a, T> PropInput<'a, T> {
     {
         match self.0 {
             Operand::Literal(value) => value.scalar(),
+            Operand::Number(value) => Scalar::Number(value),
             Operand::Signal(signal) => signal.scalar(),
             Operand::Mapped(map) => map.scalar().expect("valid mapped operand"),
         }
@@ -249,6 +255,16 @@ impl<'a, T> PropInput<'a, T> {
     pub(crate) fn literal(self) -> Option<T> {
         match self.0 {
             Operand::Literal(value) => Some(value),
+            Operand::Number(_) | Operand::Signal(_) | Operand::Mapped(_) => None,
+        }
+    }
+    pub(crate) fn literal_scalar(self) -> Option<Scalar>
+    where
+        T: Value,
+    {
+        match self.0 {
+            Operand::Literal(value) => Some(value.scalar()),
+            Operand::Number(value) => Some(Scalar::Number(value)),
             Operand::Signal(_) | Operand::Mapped(_) => None,
         }
     }
@@ -260,7 +276,7 @@ impl<'a, T> PropInput<'a, T> {
     }
     pub(crate) fn signal(self) -> Option<&'a dyn StyleSignal> {
         match self.0 {
-            Operand::Literal(_) | Operand::Mapped(_) => None,
+            Operand::Literal(_) | Operand::Number(_) | Operand::Mapped(_) => None,
             Operand::Signal(signal) => Some(signal),
         }
     }
@@ -292,6 +308,18 @@ macro_rules! numbers {
         impl<'a> IntoProp<'a, f64> for &'a Signal<$ty> {
             fn into_prop(self) -> PropInput<'a, f64> { PropInput(Operand::Signal(self)) }
         }
+        impl sealed::Input<Length> for $ty { const IS_LITERAL: bool = true; }
+        impl<'a> IntoProp<'a, Length> for $ty {
+            fn into_prop(self) -> PropInput<'a, Length> { PropInput(Operand::Number(crate::IntoLength::into_length(self))) }
+        }
+        impl sealed::Input<Length> for &$ty { const IS_LITERAL: bool = true; }
+        impl<'a> IntoProp<'a, Length> for &$ty {
+            fn into_prop(self) -> PropInput<'a, Length> { (*self).into_prop() }
+        }
+        impl sealed::Input<Length> for &Signal<$ty> { const IS_LITERAL: bool = false; }
+        impl<'a> IntoProp<'a, Length> for &'a Signal<$ty> {
+            fn into_prop(self) -> PropInput<'a, Length> { PropInput(Operand::Signal(self)) }
+        }
     )+};
 }
 // Existing text types use the SAME combined descriptor from either port. A
@@ -310,6 +338,29 @@ macro_rules! mapped_numbers {
     )+};
 }
 mapped_numbers!(f32, u8, u16, u32, u64, usize, i8, i16, i32, i64, isize);
+
+macro_rules! mapped_dimensions {
+    ($($ty:ty),+ $(,)?) => {$(
+        impl sealed::Input<Length> for Mapped<'_, $ty> { const IS_LITERAL: bool = false; }
+        impl<'a> IntoProp<'a, Length> for Mapped<'a, $ty> {
+            fn into_prop(self) -> PropInput<'a, Length> { PropInput(Operand::Mapped(self.operand)) }
+        }
+    )+};
+}
+mapped_dimensions!(f32, f64, u8, u16, u32, u64, usize, i8, i16, i32, i64, isize);
+
+impl sealed::Input<Length> for PropInput<'_, f64> {
+    const IS_LITERAL: bool = false;
+}
+impl<'a> IntoProp<'a, Length> for PropInput<'a, f64> {
+    fn into_prop(self) -> PropInput<'a, Length> {
+        PropInput(match self.0 {
+            Operand::Literal(value) | Operand::Number(value) => Operand::Number(value),
+            Operand::Signal(signal) => Operand::Signal(signal),
+            Operand::Mapped(map) => Operand::Mapped(map),
+        })
+    }
+}
 
 // Corner radius preserves its established f32 authoring domain. Unlike the
 // pre-existing length builders, literal radius errors are deferred to mount.
@@ -360,7 +411,8 @@ macro_rules! values {
 }
 values!(Color => Color, for_style; Affine => Transform, for_style;
     Flow => Flow, for_style; Align => Align, for_style;
-    Justify => Justify, for_style; bool => Flag, for_value);
+    Justify => Justify, for_style; bool => Flag, for_value;
+    Length => Dimension, for_style);
 
 #[cfg(test)]
 mod tests {
@@ -401,7 +453,8 @@ mod tests {
         macro_rules! check { ($($ty:ty),+) => {$(
             let signal = Signal::new(12 as $ty);
             let text = (&signal).into_text();
-            let style = (&signal).into_prop().signal().unwrap();
+            let input: PropInput<'_, f64> = (&signal).into_prop();
+            let style = input.signal().unwrap();
             for codec in [text.codec().unwrap(), style.codec()] {
                 let frozen = codec.freeze(style.as_any(), FieldId::new(7), Needs { text: true, style: true }).unwrap();
                 assert_eq!(frozen.text.as_deref(), Some("12"));
@@ -478,7 +531,7 @@ mod admission_tests {
         ] {
             assert_eq!(Scalar::Number(value).admit(id).unwrap_err().reason, reason);
         }
-        let PropertyValue::Dimension(Some(value)) =
+        let PropertyValue::Dimension(crate::Length::Points(value)) =
             Scalar::Number(-0.0).admit(PropertyId::Width).unwrap()
         else {
             panic!("dimension")

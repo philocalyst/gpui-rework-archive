@@ -25,10 +25,10 @@ mod workspace;
 fn style_key(style: Style, transform: bool) -> [u32; 24] {
     let mut key = [0; 24];
     key[..4].copy_from_slice(&[
-        u32::from(style.width.is_some()),
-        style.width.unwrap_or_default().to_bits(),
-        u32::from(style.height.is_some()),
-        style.height.unwrap_or_default().to_bits(),
+        style.width.authoring()[0],
+        style.width.authoring()[1],
+        style.height.authoring()[0],
+        style.height.authoring()[1],
     ]);
     key[4..7].copy_from_slice(&[style.gap, style.padding, style.font_size].map(f32::to_bits));
     key[7] = style.fg.space() as u32;

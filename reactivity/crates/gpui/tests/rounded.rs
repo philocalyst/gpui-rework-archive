@@ -433,7 +433,7 @@ fn typed_inspector_retains_signed_zero_bits_in_each_authoring_domain() {
         win.property(target, TRANSFORM).unwrap().tx.to_bits(),
         (-0.0_f32).to_bits()
     );
-    win.set_property(target, WIDTH, Contribution::Set(Some(-0.0)))
+    win.set_property(target, WIDTH, Contribution::Set(gpui::Length::Points(-0.0)))
         .unwrap();
     assert_eq!(
         win.property(target, WIDTH).unwrap().unwrap().to_bits(),
