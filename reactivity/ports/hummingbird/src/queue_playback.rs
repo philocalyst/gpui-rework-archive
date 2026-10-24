@@ -51,7 +51,7 @@ pub struct PlaybackQueue {
 impl PlaybackQueue {
     pub fn new() -> Result<Self, QueueError> {
         let previous = NEXT_SESSION
-            .fetch_update(Ordering::Relaxed, Ordering::Relaxed, |value| {
+            .try_update(Ordering::Relaxed, Ordering::Relaxed, |value| {
                 value.checked_add(1)
             })
             .map_err(|_| QueueError::SessionExhausted)?;

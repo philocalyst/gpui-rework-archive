@@ -28,6 +28,7 @@ windowfunctions = { version = "=0.1.1", optional = true }
 cpal = { version = "=0.18.2", default-features = false, optional = true }
 
 [dev-dependencies]
+rusqlite = { version = "=0.40.2", default-features = false, features = ["hooks"] }
 allocation-counter = "=0.8.1"
 rubato = "=5.0.1"
 audioadapter-buffers = "=5.2.0"

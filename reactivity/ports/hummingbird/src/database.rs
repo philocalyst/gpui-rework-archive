@@ -1,18 +1,20 @@
 //! Application-owned SQLite source. The UI never borrows this connection.
-use crate::{migrations::MIGRATIONS, query::TrackSearchRow};
-use rusqlite::{Connection, OpenFlags, Result, params};
+use crate::query::TrackSearchRow;
+use rusqlite::{Connection, OpenFlags, Result, TransactionBehavior, params};
 use std::path::Path;
+
+const FRESH_SCHEMA: &str = include_str!("../schema/fresh.sql");
 
 pub struct Database {
     pub(crate) connection: Connection,
 }
 impl Database {
     pub fn fixture() -> Result<Self> {
-        let connection = Connection::open_in_memory()?;
+        let mut connection = Connection::open_in_memory()?;
         connection.pragma_update(None, "foreign_keys", true)?;
-        for (_, sql) in MIGRATIONS {
-            connection.execute_batch(sql)?;
-        }
+        let transaction = connection.transaction()?;
+        transaction.execute_batch(FRESH_SCHEMA)?;
+        transaction.commit()?;
         let mut database = Self { connection };
         database.seed()?;
         Ok(database)
@@ -45,39 +47,41 @@ impl Database {
     /// existing Hummingbird database keeps the separate read-only API; its
     /// schema is never guessed, rewritten or reseeded by this constructor.
     pub fn open_library(path: &Path) -> Result<Self, crate::search::SourceError> {
-        let connection = Connection::open(path)?;
+        let mut connection = Connection::open(path)?;
         connection.pragma_update(None, "foreign_keys", true)?;
-        let marked: bool = connection.query_row(
+        Self::initialize_library(&mut connection)?;
+        Ok(Self { connection })
+    }
+    fn initialize_library(connection: &mut Connection) -> Result<(), crate::search::SourceError> {
+        // Serialize creators before checking admission. Schema, seed and marker
+        // publish together; a failed creation rolls back to an empty database.
+        let transaction = connection.transaction_with_behavior(TransactionBehavior::Immediate)?;
+        let marked: bool = transaction.query_row(
             "SELECT EXISTS(SELECT 1 FROM sqlite_schema WHERE name='_gpui_library')",
             [],
             |row| row.get(0),
         )?;
         if !marked {
-            let occupied: bool = connection.query_row(
+            let occupied: bool = transaction.query_row(
                 "SELECT EXISTS(SELECT 1 FROM sqlite_schema WHERE type='table' AND name NOT LIKE 'sqlite_%')", [], |row| row.get(0),
             )?;
             if occupied {
                 return Err(crate::search::SourceError::UnknownLibrarySchema);
             }
-            // Pinned upstream migrations contain their own BEGIN/COMMIT.
-            // Publish the ownership marker only after every migration succeeds;
-            // a failed new-file setup remains unrecognized on reopen.
-            for (_, sql) in MIGRATIONS {
-                connection.execute_batch(sql)?;
-            }
-            connection.execute_batch("CREATE TABLE _gpui_library(version INTEGER NOT NULL); INSERT INTO _gpui_library VALUES(1)")?;
+            transaction.execute_batch(FRESH_SCHEMA)?;
+            transaction.execute_batch("CREATE TABLE _gpui_library(version INTEGER NOT NULL); INSERT INTO _gpui_library VALUES(1)")?;
         }
-        let version: i64 =
-            connection.query_row("SELECT version FROM _gpui_library", [], |row| row.get(0))?;
-        let markers: i64 =
-            connection.query_row("SELECT COUNT(*) FROM _gpui_library", [], |row| row.get(0))?;
-        if version != 1 || markers != 1 {
+        let (markers, version): (i64, Option<i64>) = transaction.query_row(
+            "SELECT COUNT(*),MIN(version) FROM _gpui_library",
+            [],
+            |row| Ok((row.get(0)?, row.get(1)?)),
+        )?;
+        if markers != 1 || version != Some(1) {
             return Err(crate::search::SourceError::UnknownLibrarySchema);
         }
-        // Acquisition tables belong to the worker's source-admission boundary.
-        // It initializes fixtures and persistent sources once before accepting
-        // commands; source replacement uses the same boundary.
-        Ok(Self { connection })
+        transaction.commit()?;
+        // Acquisition tables remain at the worker's source-admission boundary.
+        Ok(())
     }
     pub(crate) fn initialize_index(&self) -> Result<()> {
         if self.connection.is_readonly("main")? {
@@ -231,3 +235,6 @@ impl Database {
         Ok(row)
     }
 }
+
+#[cfg(test)]
+mod tests;

@@ -9,6 +9,7 @@ pub mod database;
 pub mod files;
 pub mod indexing;
 mod metadata;
+#[cfg(test)]
 mod migrations;
 pub mod query;
 pub mod queue;
