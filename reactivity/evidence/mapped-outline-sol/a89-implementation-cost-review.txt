@@ -1,0 +1,87 @@
+Frozen mapped-properties outlining successor cost review, 2026-10-24
+
+Measured successor: a89fc0241aa32cbf7db9bcd62983bb943f186028.
+Comparators: exact baseline7df96981b8dd7c32ac5ff4d899b501bf30a0f3e2 and original mapped0062bf589829c4f28807ad0fde3e13285379294c. Directory retains the first653167 archive but that iteration was NOT built/measured. The original0062 cost dossier remains unchanged in /tmp/gpui-mapped-cost-sol-evidence.
+
+Method and integrity
+All three pins were freshly built sequentially at the SAME physical source directory /home/miles/gpui-ce3-compute-20261024/src/mapped-cost-sol-shared/source, using the same targets/mapped-cost-sol cache, nightly7189d39d9 (rustc1.101/LLVM23.1.4), Clang21, ordinary .cargo config (v0 symbols/cfg tokio_unstable), offline/locked release, default features plus x11/native/accessibility, debug0/incremental0/jobs2. No LTO, custom inline, codegen-unit, stack or panic flags. Sources came from immutable git archives; all Rust gpui input mtimes were touched BEFORE sourceguard capture/build to force freshness after restoring different pinned contents at one physical path. No content changed during a build. Exact source archives/config and build scripts retained. gpui fresh=false on every counter pin transition, each example fresh=false; six sourceguard pairs and all six ELF SHA256 values match. Completed source directories were moved aside after their builds. All remote jobs/copies reaped and lease released to BenchmarkSol before any later timing capture. No remote timing performed here.
+
+Source inspection
+Shipping differences from0062 are confined to runtime.rs and semantic.rs. Concrete noninline Fanout::map/freeze/finish_description and MappedFanout::publish_colors replace model-specific admission/finish/publication temporaries; merged iteration uses borrowed slice cursors; into_parts uses an iterative output accumulator. No API/layout/helper-crate/unsafe change. The first653 iteration and a89's small MapDraft-admission followup are separately archived. Functional qualification beyond the native gates below belongs to the implementation agent/parent and was pending when this cost pass began.
+
+Ordinary native counter, whole linked artifact and sections
+                                  baseline7df    original0062    successor a89
+ELF bytes                           23829320        23851320         23840400
+GNU size text                       19007539        19027127         19014007
+GNU size data                         441608          441792           441880
+GNU size bss                            7720            7720             7720
+ELF .text                           10890432        10906512         10903968
+ELF .rodata                          5852992         5853248          5843136
+ELF .eh_frame                        1139676         1141580          1141180
+ELF .gcc_except_table                 413948          414744           414384
+ELF .data.rel.ro                      395856          395936           396016
+
+Successor versus original: whole ELF−10920B; executable .text−2544B; .rodata−10112B; GNU text−13120B; data+88B.
+Successor versus baseline: whole ELF+11080B; executable .text+13536B; GNU text+6468B; data+272B. These remaining costs are charged. GNU size text includes readonly/unwind material and is not executable .text; the stronger-looking GNU text improvement comes substantially from readonly data rather than removed instructions.
+
+Actual ordinary function code bytes / maximum fixed CFA offsets
+                                              baseline7df     original0062    successor a89
+RuntimeMut<Counter>::after_source_changed       8002/1104       10213/1728        9862/1216
+Runtime<Counter>::describe_inner               30998/2320       33837/2480       31853/2336
+ElementExtra::into_parts                        1200/240         2137/576         1738/288
+El::flatten_lists<describe_inner closure1>       9406/1968       11423/2096       11455/2096
+
+Remaining successor CFA growth versus7df is +112B after_source_changed,+16B describe_inner,+48B into_parts,+128B flatten_lists. Reduced original frames do not establish equal ordinary stack cost.
+
+New outlined helper code bytes / CFA, identically linked in counter and mapped app:
+Fanout::freeze                 1533/320
+Fanout::map                     836/288 (original0062 concrete map was510/144 with less responsibility)
+Fanout::finish_description     1488/176
+MappedFanout::publish_colors    313/144
+
+CFA evidence includes saved registers and return addresses. It is a per-function fixed frame measurement, not measured process peak stack. Caller frames can be live together with these callee frames, so1216 must not be compared with1728 as a total stack-peak conclusion. No dynamic CFA expression occurs in the cited frames. Prologues/CFI retained in bounded key-function excerpts and complete dumps. No standalone El::properties/property_input/literal_properties or Counter::view survives optimized linking; no frame is assigned to them from source guesses.
+
+Actual calls, disassembly plus relative GOT relocations/data flow:
+- Ordinary activate_property,activate_with_editing,replace_input call after_source_changed as before.
+- Ordinary after_source_changed calls Fanout::freeze and MappedFanout::publish_colors through relocation-resolved GOT slots.
+- describe_with_changed calls describe_inner. describe_inner calls Fanout::map through GOT.
+- describe_inner loads the concrete finish_description address with lea into%rbx at0x110405, then calls through%rbx at0x1104e8 with no intervening assignment to that register; bounded assembly excerpt retained. The general call resolver intentionally leaves register targets unresolved; this call is verified by local data flow rather than guessed from source.
+- El::flatten_lists calls into_parts in all three builds. Original0062 into_parts has a real self-call; a89 has NO self-call. This removes the recursive decomposition but leaves its fixed frame48B above7df.
+
+Mapped33 native application and legitimate representable baseline
+All retain32-color bit row plus one affine on1000 static child rows,400x240,Frame32B/Signal40B,ReferenceCpu,one update payload.7df representation uses literal value projections and ordinary owner-level with_inbox;0062/a89 use maps and with_inbox_for. This is an honest different lowering of the same visual update, not retained-work equivalence.
+
+                                  baseline owner    original0062    successor a89
+ELF bytes                            23865456          23898832         23893760
+GNU size text                        19018525          19041385         19035245
+GNU size data                          441512            441968           442016
+GNU size bss                             7736              7736             7736
+ELF .text                            10899632          10917552         10921296
+ELF .rodata                           5853120           5853376          5843392
+Runtime<Panel>::describe_inner         30998/2320        33837/2480       31853/2336
+RuntimeMut<Panel,Lane>::after_admission  7921/1104        10402/1760        9841/1216
+El::flatten_lists                      9230/1952        11436/2064       11516/2080
+
+Successor mapped versus0062: ELF−5072B and GNU text−6140B, BUT executable .text+3744B while .rodata−9984B. The executable-code growth is charged despite the smaller whole file. Successor versus legitimate7df owner representation: ELF+28304B, executable .text+21664B, GNU text+16720B,data+504B.
+
+Fresh local native execution gates of these exact ELFs passed:
+-7df owner representation: epoch1,one owner description,1000 rebuilt rows.
+-original0062: epoch1,zero owner reruns,zero rebuilt rows.
+-a89: epoch1,zero owner reruns,zero rebuilt rows.
+Both mapped variants link the same two InlineCall thunks: color140B/CFA80 and affine120B/CFA64; counter links none. These operation counts are not a speed claim. Baseline's first launch raced Xvfb startup and failed to open X; its failed log/exit are retained, and the unchanged ELF passed after the display became available. No binary or source change was made to repair that environment-only attempt. The prior0062 review's invalid exact-inbox/literal comparator also remains retained separately.
+
+Layouts/allocations/source charge
+No retained headers or erased operands changed relative to0062: ordinary Destination4,Binding/Draft24,ElementExtra56,Decorations48,Fanout32; erased PropInput Color/Affine/numeric remain48 (7df24/32/16). InlineCall24,MapOperand40,MapBinding/MapDraft48,MappedRecord32,MappedFanout88,PropertyValue28. The mapped33 fanout retains2068B=88+33*(32+28) excluding existing map scaffolding. Prior isolated allocator results and the first large-color publication's1.2MB preparation bill are not reinterpreted as native paired measurements here. No Root paint fast path is present in a89. Sibling's shipping source inventory is32319 including helper50,−3 versus0062/+505 versus7df31814; this cost pass did not rerun the source inventory.
+
+Outcome
+Outlining reduces original0062 fixed root frames and ordinary linked size, and removes actual decomposition recursion. It does not restore baseline ordinary code/frame costs. Shared callee frames and residual cold flattening growth remain explicit. Mapped executable-code size grows even while its whole file shrinks. No total peak-stack, zero ordinary overhead, speed, or adoption-readiness claim is made.
+
+Evidence index
+paired-costs.json and summary-verification.txt: six fresh ELF hashes, sections, functions, compiler artifact freshness and successful sourceguard verification.
+*.analysis.json,*.nm.txt,*.sections.txt: symbol/frame/section accounting.
+*.frames.txt.gz,*.asm.txt.gz: complete raw CFI/disassembly.
+*.key-functions.{cfi,asm}.txt,*.resolved-calls.json,key-callers.txt: smaller actual frame/caller evidence.
+successor-finish-description-register-call.asm.txt: concrete register-call data flow.
+*-build.{jsonl,log,exit},*-source-{before,after}.sha256,source*.tar.gz,source*-vs0062.patch: exact build/source provenance.
+*-run.{log,exit}: native gates and retained startup failure.
+Original0062 review is untouched at /tmp/gpui-mapped-cost-sol-evidence/implementation-cost-review.txt.

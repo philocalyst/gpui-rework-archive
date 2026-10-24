@@ -1,0 +1,7 @@
+base0062-baseline-counter 23829320 {'.text': 10890432, '.rodata': 5852992, '.eh_frame': 1139676, '.gcc_except_table': 413948, '.data.rel.ro': 395856}
+original0062-counter 23851320 {'.text': 10906512, '.rodata': 5853248, '.eh_frame': 1141580, '.gcc_except_table': 414744, '.data.rel.ro': 395936}
+successor-counter 23840400 {'.text': 10903968, '.rodata': 5843136, '.eh_frame': 1141180, '.gcc_except_table': 414384, '.data.rel.ro': 396016}
+base0062-baseline-representation-v2 23865456 {'.text': 10899632, '.rodata': 5853120, '.eh_frame': 1140180, '.gcc_except_table': 415188, '.data.rel.ro': 395768}
+original0062-mapped 23898832 {'.text': 10917552, '.rodata': 5853376, '.eh_frame': 1142988, '.gcc_except_table': 415952, '.data.rel.ro': 396112}
+successor-mapped 23893760 {'.text': 10921296, '.rodata': 5843392, '.eh_frame': 1143196, '.gcc_except_table': 415716, '.data.rel.ro': 396152}
+All6 artifact hashes/sourceguards verified; each example fresh=false; gpui fresh=false on each counter pin transition.

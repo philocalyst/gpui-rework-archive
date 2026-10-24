@@ -1,0 +1,10 @@
+{
+  "source_commit": "a89fc0241aa32cbf7db9bcd62983bb943f186028",
+  "six_shipping_core_lines": 32269,
+  "unchanged_helper_core_lines": 50,
+  "all_shipping_core_lines": 32319,
+  "delta_vs_0062": -3,
+  "delta_vs_reader_main_7df": 505,
+  "helper_source_sha256": "fd7a17dd45f972bb3b7387ebf36edc7bf93efd4828d2c04bc7f1ec335c2525ad",
+  "helper_build_scripts": []
+}

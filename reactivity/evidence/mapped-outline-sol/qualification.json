@@ -1,0 +1,18 @@
+{
+  "source_commit": "a89fc0241aa32cbf7db9bcd62983bb943f186028",
+  "sourceguards_equal": true,
+  "sourceguard_aggregate": "e68089da0cf5461805f6e0e35eefec8cf672137316ac48e1dc9d12845bba258c",
+  "sourceguard_files": 11444,
+  "default_tests": {
+    "passed": 634,
+    "failed": 0,
+    "ignored": 10,
+    "harnesses": 69
+  },
+  "strict_all_targets_exit": 0,
+  "mapped_allocation_tests_exit": 0,
+  "description_allocation_tests_exit": 0,
+  "independent_native_a89_ack_exit": 0,
+  "native_ack": "MAPPED_NATIVE_ACK,source_epoch=1,presentation_epoch=1,owner_reruns=0,row_rebuilds=0,initial_rows=1000,frame_bytes=32,signal_bytes=40,renderer=ReferenceCpu",
+  "scope": "No peak-stack/speed/zero ordinary overhead/adoption claim; native ELF/cost evidence supplied by CostSol."
+}

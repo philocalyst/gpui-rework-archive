@@ -1,0 +1,24 @@
+    Finished `test` profile [unoptimized + debuginfo] target(s) in 40.11s
+     Running unittests src/lib.rs (/tmp/gpui-mapped-outline-target/debug/build/gpui/f6156e8727b03b8d/out/gpui-f6156e8727b03b8d)
+
+running 4 tests
+test runtime::mapped_qualification::late_invalid_transform_cannot_mutate_earlier_paint_sinks_or_masked_bases ... ok
+test runtime::mapped_qualification::mapped_layout_and_cold_owner_bill_and_zero_allocation_warm_patch ... mapped_headers,Destination=4,Binding=24,Draft=24,ElementExtra=56,Decorations=48,Fanout=32,Recipe=24,MappedRecord=32,MappedFanout=88,PropertyValue=28,MapBinding=48,MapDraft=48,MappedOperand=40,PropInputColor=48
+mapped_color_headers,SourceColor=48,Record=72,Bound=88
+mapped_public_operands,Color=48,Affine=48,number=48
+mapped_owner,33,requests=196,requested=119150,retained=34168,peak=37688,fanout_bytes=2068
+mapped_first_patch,requests=0,requested=0,retained=0,peak=0
+mapped_warm_patch,requests=0,requested=0,retained=0,peak=0
+ok
+test runtime::mapped_qualification::mixed_mapped_and_direct_colors_do_not_accumulate_unique_historical_values ... mixed_mapped_colors_4094_updates,requests=0,requested=0,retained=0,peak=0
+ok
+test runtime::mapped_qualification::ten_thousand_direct_color_rows_keep_their_shared_lane_with_one_mapped_color ... large_color_owner,mapped=false,rows=10000,nodes=10001,requests=21876,requested=23838905,retained=5396597,peak=6318800,style_lane_bytes=10425,fanout_bytes=0
+large_direct_tick,mapped=false,requests=0,requested=0,retained=0,peak=0,source_reads=1,destination_compares=0,owner_reruns=0,paint_passes=0
+large_color_owner,mapped=true,rows=10000,nodes=10002,requests=21883,requested=25599926,retained=5396730,peak=6544442,style_lane_bytes=10498,fanout_bytes=148
+large_direct_tick,mapped=true,requests=0,requested=0,retained=0,peak=0,source_reads=1,destination_compares=0,owner_reruns=0,paint_passes=0
+large_mapped_tick,requests=15,requested=1215456,retained=0,peak=1211600,source_reads=1,destination_compares=1,owner_reruns=0,paint_passes=1
+large_mapped_warm_4094_patches,requests=0,requested=0,retained=0,peak=0
+ok
+
+test result: ok. 4 passed; 0 failed; 0 ignored; 0 measured; 163 filtered out; finished in 0.49s
+

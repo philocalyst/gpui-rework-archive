@@ -1,0 +1,14 @@
+{
+  "gpui-f6156e8727b03b8d.elf": {
+    "path": "/tmp/gpui-mapped-outline-evidence/final-frozen-elfs/gpui-f6156e8727b03b8d.elf",
+    "sha256": "9a515f784f3e2a629072322c26fe85b4baa59cc23e37ca914c82389dc8d259f9",
+    "bytes": 269417200,
+    "source_commit": "a89fc0241aa32cbf7db9bcd62983bb943f186028"
+  },
+  "mapped_properties-34c7c10b886bf78e.elf": {
+    "path": "/tmp/gpui-mapped-outline-evidence/final-frozen-elfs/mapped_properties-34c7c10b886bf78e.elf",
+    "sha256": "d6a87bea5b9857a2832ee5194772a28962f994a2f50f5d1674b725fb33305fae",
+    "bytes": 159608520,
+    "source_commit": "a89fc0241aa32cbf7db9bcd62983bb943f186028"
+  }
+}
