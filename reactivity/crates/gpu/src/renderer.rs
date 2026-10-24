@@ -1775,3 +1775,6 @@ mod tests {
         });
     }
 }
+
+#[cfg(all(test, feature = "vulkan-tests"))]
+mod clip_reuse_probe;
