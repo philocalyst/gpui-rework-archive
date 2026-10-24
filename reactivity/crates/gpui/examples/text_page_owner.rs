@@ -481,7 +481,7 @@ fn main() {
     certificates(&font);
     println!(
         "PAGE_SCOPE,{}",
-        serde_json::json!({"mode":mode,"requested_rows":count,"text_specs":specs.len(),"size":16,"width":204,"scope":"owner-column component control; Todo strings use ordinary complete public recording queries but uniform Canvas placement is not native Todo qualification","resource_header":size_of::<Resource>(),"key":size_of::<Key>(),"page":size_of::<Page>(),"shared_site":size_of::<SharedSite>(),"shared_entry":size_of::<SharedEntry>(),"owned_layout":size_of::<OwnedTextLayout>(),"shared_layout":size_of::<TextLayout>()})
+        serde_json::json!({"mode":mode,"requested_rows":count,"text_specs":specs.len(),"size":16,"width":204,"scope":"owner-column component control; Todo strings use ordinary complete public recording queries but uniform Canvas placement is not native Todo qualification","resource_header":size_of::<Resource>(),"key":size_of::<Key>(),"page":size_of::<Page>(),"shared_site":size_of::<SharedSite>(),"shared_entry":size_of::<SharedEntry>(),"owned_layout":size_of::<OwnedTextLayout>(),"shared_layout":size_of::<TextLayout>(),"glyph_run":size_of::<gpui_canvas::GlyphRun>()})
     );
     let baseline = measured("shared_columns_mount", || shared(&specs, &font));
     let snapshot = measured("owned_pages_mount", || build(&specs, &font, None).unwrap());
