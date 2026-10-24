@@ -12,7 +12,10 @@ The integrated shipping source is byte-identical to qualified
 qualified Todo comparison example and registers both examples in Cargo; its
 README documents the new API. [Source equivalence](source-equivalence.json)
 records all 2,033 candidate build-scope files, including both deliberate
-non-shipping differences. Main's own integration lint is recorded separately.
+non-shipping differences. [Main's integration gate](main-integration.json)
+passes strict native all-target Clippy at `c0b7dfb0dd11404e31bcc3dcda6df400a882ac66`,
+including both examples; all 2,035 scoped input hashes match before/after.
+The updated seven-library counter independently confirms 32,365 shipping lines.
 
 ## Ownership and admission
 
