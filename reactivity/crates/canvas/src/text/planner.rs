@@ -320,6 +320,7 @@ impl<'font> Planner<'font> {
         };
         for (index, paragraph) in paragraph::ranges(text).enumerate() {
             let content = &text[paragraph.content.clone()];
+            let reused = !capture && paragraphs.is_some();
             let planned = if !capture && let Some(paragraphs) = &mut paragraphs {
                 if index == 0 {
                     &mut paragraphs.first
@@ -330,7 +331,9 @@ impl<'font> Planner<'font> {
                 self.build(content, size, needed);
                 &mut self.layout
             };
-            planned.break_all_lines(max_width);
+            if !reused {
+                planned.break_all_lines(max_width);
+            }
             let planned = &*planned;
             let simple = !interactive
                 && paragraph.content.end == text.len()
