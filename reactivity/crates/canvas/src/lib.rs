@@ -14,8 +14,8 @@ pub use canvas::{
     SlotEdit, SlotError, SlotErrorKind, rounded_rect_contains, sampled_rect_clip,
 };
 pub use color::gradient::{
-    Extend, Gradient, GradientGeometry, GradientKey, GradientStop, GradientView, Interpolation,
-    MAX_GRADIENT_STOPS,
+    Extend, Gradient, GradientGeometry, GradientKey, GradientStop, GradientView, HueInterpolation,
+    Interpolation, MAX_GRADIENT_STOPS,
 };
 pub use color::{
     Color, ColorConfig, ColorSpace, FloatRangePolicy, OutputMetadata, OutputProfile,

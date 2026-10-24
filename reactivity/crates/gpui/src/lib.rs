@@ -103,6 +103,7 @@ pub mod prelude {
 
 pub use element::IntoBackground;
 pub use gpui_canvas::{
-    Extend, Gradient, GradientGeometry, GradientKey, GradientStop, GradientView, Interpolation,
+    Extend, Gradient, GradientGeometry, GradientKey, GradientStop, GradientView, HueInterpolation,
+    Interpolation,
 };
 pub use property::Brush;

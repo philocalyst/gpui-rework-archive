@@ -2665,18 +2665,28 @@ fn render_gradient<S: Simd>(
     for y in top.max(command.bounds[1])..bottom.min(command.bounds[3]) {
         for x in left.max(command.bounds[0])..right.min(command.bounds[2]) {
             let mask = mask_kernel::coverage(simd, &shape, x, y, stats);
-            let sources = std::array::from_fn(|i| {
-                if mask & (1 << i) == 0 {
-                    return None;
+            let mut sources = [None; 16];
+            for row in 0..4 {
+                let row_mask = ((mask >> (row * 4)) & 15) as u8;
+                if row_mask == 0 {
+                    continue;
                 }
-                let (lx, ly) = command
-                    .map
-                    .local(x as f64 + SAMPLES[i % 4], y as f64 + SAMPLES[i / 4]);
-                Some(gradient.sample_normalized([
-                    ((lx - command.rect.x as f64) / command.rect.width as f64) as f32,
-                    ((ly - command.rect.y as f64) / command.rect.height as f64) as f32,
-                ]))
-            });
+                let points = std::array::from_fn(|lane| {
+                    let (lx, ly) = command
+                        .map
+                        .local(x as f64 + SAMPLES[lane], y as f64 + SAMPLES[row]);
+                    [
+                        ((lx - command.rect.x as f64) / command.rect.width as f64) as f32,
+                        ((ly - command.rect.y as f64) / command.rect.height as f64) as f32,
+                    ]
+                });
+                let colors = gradient.sample_four(simd, points, row_mask);
+                for lane in 0..4 {
+                    if row_mask & (1 << lane) != 0 {
+                        sources[row * 4 + lane] = Some(colors[lane]);
+                    }
+                }
+            }
             samples.blend_sources((y - top) * TILE + x - left, sources);
             stats.boundary_pixels += 1;
         }

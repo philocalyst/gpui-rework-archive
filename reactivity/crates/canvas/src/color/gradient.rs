@@ -1,6 +1,8 @@
 //! Immutable analytic paint. Author stops and compiled intervals share one lease.
-use super::Color;
+use super::{Color, ColorSpace};
 use crate::{Error, Point};
+use fearless_simd::{Simd, f32x4, prelude::*};
+use fearless_simd_macros::simd;
 use std::sync::atomic::{AtomicU64, Ordering};
 use triomphe::ThinArc;
 
@@ -21,12 +23,38 @@ pub enum Extend {
     Repeat,
     Reflect,
 }
-/// This first analytic material interpolates premultiplied extended linear sRGB.
-/// Further spaces need explicit preparation AND CPU/GPU decoding, not a tag
-/// silently accepted by one backend.
+/// Interpolation occurs before final gamut/output conversion. Oklch is GPUI's
+/// authoring default; CSS's general interpolation default is Oklab.
 #[derive(Clone, Copy, Debug, PartialEq, Eq)]
 pub enum Interpolation {
     LinearSrgb,
+    Oklab,
+    Oklch { hue: HueInterpolation },
+}
+impl Default for Interpolation {
+    fn default() -> Self {
+        Self::Oklch {
+            hue: HueInterpolation::Shorter,
+        }
+    }
+}
+#[derive(Clone, Copy, Debug, Default, PartialEq, Eq)]
+#[repr(u32)]
+pub enum HueInterpolation {
+    #[default]
+    Shorter,
+    Longer,
+    Increasing,
+    Decreasing,
+}
+impl Interpolation {
+    fn tag(self) -> u32 {
+        match self {
+            Self::LinearSrgb => 0,
+            Self::Oklab => 1,
+            Self::Oklch { hue } => 2 + hue as u32,
+        }
+    }
 }
 /// Coordinates are relative to the painted rectangle; element transforms apply
 /// equally to coverage and this coordinate system. Conic zero points upward,
@@ -79,7 +107,21 @@ impl Gradient {
         extend: Extend,
         interpolation: Interpolation,
     ) -> Result<Self, Error> {
-        let Interpolation::LinearSrgb = interpolation;
+        // Perceptual gradients require normal positive author alpha. Color's
+        // lossless storage and explicit LinearSrgb interpolation remain broader.
+        // WGSL may flush subnormal arithmetic; fading output may still underflow.
+        if interpolation != Interpolation::LinearSrgb
+            && stops
+                .iter()
+                .any(|s| s.color.alpha() > 0.0 && s.color.alpha() < f32::MIN_POSITIVE)
+        {
+            return Err(Error::InvalidGradient);
+        }
+        let stride = if interpolation == Interpolation::LinearSrgb {
+            STOP_WORDS
+        } else {
+            5
+        };
         if !(2..=MAX_GRADIENT_STOPS).contains(&stops.len()) {
             return Err(Error::InvalidGradient);
         }
@@ -122,7 +164,8 @@ impl Gradient {
                 kind,
                 extend as u32,
                 stops.len() as u32,
-                u32::from(stops.iter().any(|stop| stop.color.alpha() > 0.0)),
+                u32::from(stops.iter().any(|stop| stop.color.alpha() > 0.0))
+                    | interpolation.tag() << 1,
             ],
             author.map(f32::to_bits),
             prepared.map(f32::to_bits),
@@ -132,40 +175,28 @@ impl Gradient {
             .try_update(Ordering::Relaxed, Ordering::Relaxed, |n| n.checked_add(1))
             .map_err(|_| Error::ResourceLimit)?;
         let key = GradientKey([id as u32, (id >> 32) as u32]);
-        let mut cached = [[0; 4]; STOP_WORDS];
-        let words = (0..HEADER_WORDS + stops.len() * STOP_WORDS).map(|word| {
+        let mut cached = [[0; 4]; 5];
+        let words = (0..HEADER_WORDS + stops.len() * stride).map(|word| {
             if word < HEADER_WORDS {
                 return header[word];
             }
             let n = word - HEADER_WORDS;
-            if n.is_multiple_of(STOP_WORDS) {
-                let i = n / STOP_WORDS;
+            if n.is_multiple_of(stride) {
+                let i = n / stride;
                 let stop = stops[i];
                 let next = stops.get(i + 1).copied().unwrap_or(stop);
-                let base = stop.color.premultiplied();
-                let right = next.color.premultiplied();
-                let span = next.offset - stop.offset;
-                cached = [
-                    [
-                        stop.offset.to_bits(),
-                        if span > 0.0 {
-                            (1.0 / span).to_bits()
-                        } else {
-                            0
-                        },
-                        0,
-                        0,
-                    ],
-                    base.map(f32::to_bits),
-                    std::array::from_fn(|c| (right[c] - base[c]).to_bits()),
-                    stop.color.words,
-                ];
+                cached = prepare_interval(stop, next, interpolation);
             }
-            cached[n % STOP_WORDS]
+            cached[n % stride]
         });
         let resource =
             ThinArc::try_from_header_and_iter(key, words).map_err(|_| Error::ResourceLimit)?;
         Ok(Self(resource))
+    }
+    /// A padded gradient using GPUI's Oklch/shorter authoring default.
+    /// Stops remain explicit, ordered positions; this does not apply CSS fixup.
+    pub fn perceptual(geometry: GradientGeometry, stops: &[GradientStop]) -> Result<Self, Error> {
+        Self::new(geometry, stops, Extend::Pad, Interpolation::default())
     }
     #[cfg(test)]
     pub(crate) fn lease_count(&self) -> usize {
@@ -181,6 +212,126 @@ impl Gradient {
         }
     }
 }
+// Preparation uses f64 author conversions, never the rounded public conversion.
+// Color admission bounds straight linear RGB to 1e20. The composed forward LMS
+// row norm is < 2, Lab row norm < 5, and inverse LMS row norm < 3.5. Even allowing
+// arbitrary polar hue, |q| < 1e9, |q^3| < 1e27 and RGB row norm < 8: all interior
+// intermediates remain far below f32::MAX. No RGB coefficients are expanded.
+fn prepare_interval(stop: GradientStop, next: GradientStop, mode: Interpolation) -> [Word; 5] {
+    let span = next.offset - stop.offset;
+    let reciprocal = if span > 0.0 { 1.0 / span } else { 0.0 };
+    let endpoint = stop.color.premultiplied();
+    if mode == Interpolation::LinearSrgb {
+        let right = next.color.premultiplied();
+        return [
+            [stop.offset.to_bits(), reciprocal.to_bits(), 0, 0],
+            endpoint.map(f32::to_bits),
+            std::array::from_fn(|c| (right[c] - endpoint[c]).to_bits()),
+            stop.color.words,
+            [0; 4],
+        ];
+    }
+    let mut left = author_lab(stop.color);
+    let mut right = author_lab(next.color);
+    let mut polar = false;
+    if let Interpolation::Oklch { hue } = mode {
+        left = author_lch(stop.color, left);
+        right = author_lch(next.color, right);
+        if left[1] <= 0.000004 {
+            left[2] = right[2];
+        }
+        if right[1] <= 0.000004 {
+            right[2] = left[2];
+        }
+        if left[1] <= 0.000004 && right[1] <= 0.000004 {
+            left[2] = 0.0;
+            right[2] = 0.0;
+        }
+        let delta = right[2] - left[2];
+        match hue {
+            HueInterpolation::Shorter if delta > 180.0 => left[2] += 360.0,
+            HueInterpolation::Shorter if delta < -180.0 => right[2] += 360.0,
+            HueInterpolation::Longer if delta > 0.0 && delta < 180.0 => left[2] += 360.0,
+            HueInterpolation::Longer if delta > -180.0 && delta <= 0.0 => right[2] += 360.0,
+            HueInterpolation::Increasing if delta < 0.0 => right[2] += 360.0,
+            HueInterpolation::Decreasing if delta > 0.0 => left[2] += 360.0,
+            _ => {}
+        }
+        polar = left[2] != right[2];
+        if polar {
+            left[2] = left[2].to_radians();
+            right[2] = right[2].to_radians();
+        } else {
+            let (sin, cos) = left[2].to_radians().sin_cos();
+            left = [left[0], left[1] * cos, left[1] * sin];
+            right = [right[0], right[1] * cos, right[1] * sin];
+        }
+    }
+    if !polar {
+        left = super::matrix(super::OKLAB_TO_LMS, left);
+        right = super::matrix(super::OKLAB_TO_LMS, right);
+    }
+    let a0 = stop.color.alpha();
+    let a1 = next.color.alpha();
+    let scale = f64::from(a0.max(a1));
+    let normalized = if scale == 0.0 {
+        [0.0; 2]
+    } else {
+        [f64::from(a0) / scale, f64::from(a1) / scale]
+    };
+    [
+        [
+            stop.offset.to_bits(),
+            (if polar { reciprocal } else { -reciprocal }).to_bits(),
+            (normalized[0] as f32).to_bits(),
+            (normalized[1] as f32).to_bits(),
+        ],
+        [
+            (left[0] as f32).to_bits(),
+            (left[1] as f32).to_bits(),
+            (left[2] as f32).to_bits(),
+            a0.to_bits(),
+        ],
+        [
+            ((right[0] - left[0]) as f32).to_bits(),
+            ((right[1] - left[1]) as f32).to_bits(),
+            ((right[2] - left[2]) as f32).to_bits(),
+            a1.to_bits(),
+        ],
+        stop.color.words,
+        endpoint.map(f32::to_bits),
+    ]
+}
+fn author_lab(color: Color) -> [f64; 3] {
+    if color.space() == ColorSpace::Oklch {
+        let [l, c, h, _] = color.channels();
+        let (sin, cos) = f64::from(h).to_radians().sin_cos();
+        [f64::from(l), f64::from(c) * cos, f64::from(c) * sin]
+    } else {
+        super::linear_to_oklab(color.linear_rgb())
+    }
+}
+fn author_lch(color: Color, lab: [f64; 3]) -> [f64; 3] {
+    if color.space() == ColorSpace::Oklch {
+        let c = color.channels();
+        [f64::from(c[0]), f64::from(c[1]), f64::from(c[2])]
+    } else {
+        [
+            lab[0],
+            lab[1].hypot(lab[2]),
+            lab[2].atan2(lab[1]).to_degrees().rem_euclid(360.0),
+        ]
+    }
+}
+const LMS_TO_RGB: [[f32; 3]; 3] = [
+    [4.076741636075958, -3.3077115392580616, 0.23096990318210442],
+    [-1.268437973285032, 2.609757349287688, -0.34131937600265727],
+    [
+        -0.004196076138675566,
+        -0.7034186179359363,
+        1.7076146940746117,
+    ],
+];
 fn prepare_geometry(geometry: GradientGeometry) -> Result<(u32, [f32; 4], [f32; 4]), Error> {
     let result = match geometry {
         GradientGeometry::Linear { start, end } => {
@@ -220,13 +371,15 @@ impl<'a> GradientView<'a> {
     pub fn key(self) -> GradientKey {
         self.key
     }
-    /// Shared validated word schema: three header words, four per stop (position
-    /// and reciprocal span, premultiplied base, delta, exact authored Color).
+    /// Shared CPU/GPU packet: three headers, four words per LinearSrgb stop,
+    /// five per perceptual stop. Word +3 always retains exact authored Color;
+    /// perceptual word +4 preserves exact premultiplied endpoint RGB. Metadata's
+    /// reciprocal sign selects LMS-prime (negative) or moving LCH (positive).
     pub fn words(self) -> &'a [Word] {
         self.words
     }
     pub fn has_visible_stop(self) -> bool {
-        self.words[0][3] != 0
+        self.words[0][3] & 1 != 0
     }
     pub fn extend(self) -> Extend {
         match self.words[0][1] {
@@ -236,7 +389,25 @@ impl<'a> GradientView<'a> {
         }
     }
     pub fn interpolation(self) -> Interpolation {
-        Interpolation::LinearSrgb
+        match self.words[0][3] >> 1 {
+            0 => Interpolation::LinearSrgb,
+            1 => Interpolation::Oklab,
+            tag => Interpolation::Oklch {
+                hue: match tag {
+                    2 => HueInterpolation::Shorter,
+                    3 => HueInterpolation::Longer,
+                    4 => HueInterpolation::Increasing,
+                    _ => HueInterpolation::Decreasing,
+                },
+            },
+        }
+    }
+    fn stride(self) -> usize {
+        if self.words[0][3] >> 1 == 0 {
+            STOP_WORDS
+        } else {
+            5
+        }
     }
     pub fn stop_count(self) -> usize {
         self.words[0][2] as usize
@@ -266,7 +437,7 @@ impl<'a> GradientView<'a> {
         if index >= self.stop_count() {
             return None;
         }
-        let base = HEADER_WORDS + index * STOP_WORDS;
+        let base = HEADER_WORDS + index * self.stride();
         Some(GradientStop {
             offset: f32::from_bits(self.words[base][0]),
             color: Color {
@@ -288,10 +459,13 @@ impl<'a> GradientView<'a> {
     // Draw admission and coverage already certify this domain. Raster sampling
     // keeps no fallible public-input validation in its per-sample kernel.
     pub(crate) fn sample_normalized(self, point: [f32; 2]) -> [f32; 4] {
+        self.sample_four(fearless_simd::Fallback::new(), [point; 4], 1)[0]
+    }
+    fn parameter(self, point: [f32; 2]) -> f32 {
         let p = self.words[2].map(f32::from_bits);
         let x = point[0] - p[0];
         let y = point[1] - p[1];
-        let t = match self.words[0][0] {
+        match self.words[0][0] {
             0 => x * p[2] + y * p[3],
             1 => ((x * p[2]) * (x * p[2]) + (y * p[3]) * (y * p[3])).sqrt(),
             _ => {
@@ -303,8 +477,28 @@ impl<'a> GradientView<'a> {
                 let value = angle - p[2];
                 value - value.floor()
             }
-        };
-        self.evaluate_parameter(t)
+        }
+    }
+    // Covered sample lanes share actual color arithmetic. Interval selection is
+    // bounded binary search per lane; no all-stops scan, allocation or lease.
+    #[simd]
+    pub(crate) fn sample_four<S: Simd>(
+        self,
+        simd: S,
+        points: [[f32; 2]; 4],
+        mask: u8,
+    ) -> [[f32; 4]; 4] {
+        self.evaluate_four(
+            simd,
+            std::array::from_fn(|i| {
+                if mask & (1 << i) != 0 {
+                    self.parameter(points[i])
+                } else {
+                    0.0
+                }
+            }),
+            mask,
+        )
     }
     /// Evaluate a finite parameter. Repeating paints admit at most 2^20 periods
     /// from the first stop, matching the renderer's phase-precision bound.
@@ -315,18 +509,19 @@ impl<'a> GradientView<'a> {
         if self.extend() != Extend::Pad {
             let first = f64::from(f32::from_bits(self.words[HEADER_WORDS][0]));
             let last = f64::from(f32::from_bits(
-                self.words[HEADER_WORDS + (self.stop_count() - 1) * STOP_WORDS][0],
+                self.words[HEADER_WORDS + (self.stop_count() - 1) * self.stride()][0],
             ));
             if ((f64::from(t) - first) / (last - first)).abs() > 1_048_576.0 {
                 return Err(Error::InvalidGradient);
             }
         }
-        Ok(self.evaluate_parameter(t))
+        Ok(self.evaluate_four(fearless_simd::Fallback::new(), [t; 4], 1)[0])
     }
-    fn evaluate_parameter(self, mut t: f32) -> [f32; 4] {
+    fn interval(self, mut t: f32) -> (usize, f32) {
+        let stride = self.stride();
         let n = self.stop_count();
         let first = f32::from_bits(self.words[HEADER_WORDS][0]);
-        let last = f32::from_bits(self.words[HEADER_WORDS + (n - 1) * STOP_WORDS][0]);
+        let last = f32::from_bits(self.words[HEADER_WORDS + (n - 1) * stride][0]);
         let span = last - first;
         match self.words[0][1] {
             1 => {
@@ -347,22 +542,112 @@ impl<'a> GradientView<'a> {
         let mut high = n;
         while low < high {
             let mid = (low + high) / 2;
-            if f32::from_bits(self.words[HEADER_WORDS + mid * STOP_WORDS][0]) <= t {
+            if f32::from_bits(self.words[HEADER_WORDS + mid * stride][0]) <= t {
                 low = mid + 1;
             } else {
                 high = mid;
             }
         }
         let i = low.saturating_sub(1);
-        let base = HEADER_WORDS + i * STOP_WORDS;
+        let base = HEADER_WORDS + i * stride;
         let meta = self.words[base].map(f32::from_bits);
-        let c = self.words[base + 1].map(f32::from_bits);
         if low == 0 || i + 1 == n {
-            return c;
+            return (base, 0.0);
         }
-        let u = ((t - meta[0]) * meta[1]).clamp(0.0, 1.0);
-        let d = self.words[base + 2].map(f32::from_bits);
-        std::array::from_fn(|j| c[j] + u * d[j])
+        (base, ((t - meta[0]) * meta[1].abs()).clamp(0.0, 1.0))
+    }
+    #[inline(always)]
+    fn evaluate_four<S: Simd>(self, simd: S, parameters: [f32; 4], mask: u8) -> [[f32; 4]; 4] {
+        let intervals = std::array::from_fn::<_, 4, _>(|i| {
+            if mask & (1 << i) != 0 {
+                self.interval(parameters[i])
+            } else {
+                (HEADER_WORDS, 0.0)
+            }
+        });
+        let load = |word: usize, channel: usize| {
+            f32x4::from_fn(simd, |i| {
+                f32::from_bits(self.words[intervals[i].0 + word][channel])
+            })
+        };
+        let t = f32x4::from_fn(simd, |i| intervals[i].1);
+        let mut c = [load(1, 0), load(1, 1), load(1, 2)];
+        let d = [load(2, 0), load(2, 1), load(2, 2)];
+        let alpha;
+        if self.interpolation() == Interpolation::LinearSrgb {
+            for j in 0..3 {
+                c[j] += t * d[j];
+            }
+            alpha = load(1, 3) + t * load(2, 3);
+        } else {
+            let a0 = load(0, 2);
+            let a1 = load(0, 3);
+            let denominator = (1.0 - t) * a0 + t * a1;
+            let ratio = t * a1 / denominator.max(f32::MIN_POSITIVE);
+            let v = a0.simd_eq(0.0).select(
+                f32x4::splat(simd, 1.0),
+                a1.simd_eq(0.0).select(f32x4::splat(simd, 0.0), ratio),
+            );
+            // Hue is never premultiplied: it advances with t, L and C with v.
+            let h = c[2] + t * d[2];
+            for j in 0..3 {
+                c[j] += v * d[j];
+            }
+            let polar =
+                std::array::from_fn::<_, 4, _>(|i| self.words[intervals[i].0][1] >> 31 == 0);
+            if polar.iter().any(|p| *p) {
+                let angles: [f32; 4] = h.into();
+                let trig = std::array::from_fn::<_, 4, _>(|i| {
+                    if polar[i] && mask & (1 << i) != 0 {
+                        {
+                            let tau = std::f32::consts::TAU;
+                            let angle = angles[i] - ((angles[i] + tau * 0.5) / tau).floor() * tau;
+                            angle.sin_cos()
+                        }
+                    } else {
+                        (0.0, 1.0)
+                    }
+                });
+                let a = c[1] * f32x4::from_fn(simd, |i| trig[i].1);
+                let b = c[1] * f32x4::from_fn(simd, |i| trig[i].0);
+                let q = [
+                    c[0] + a * 0.3963377773761749 + b * 0.2158037573099136,
+                    c[0] - a * 0.1055613458156586 - b * 0.0638541728258133,
+                    c[0] - a * 0.0894841775298119 - b * 1.2914855480194092,
+                ];
+                for j in 0..3 {
+                    let original: [f32; 4] = c[j].into();
+                    let converted: [f32; 4] = q[j].into();
+                    c[j] =
+                        f32x4::from_fn(simd, |i| if polar[i] { converted[i] } else { original[i] });
+                }
+            }
+            for q in &mut c {
+                *q = *q * *q * *q;
+            }
+            let q = c;
+            for (j, row) in LMS_TO_RGB.iter().enumerate() {
+                c[j] = q[0] * row[0] + q[1] * row[1] + q[2] * row[2];
+            }
+            alpha = (1.0 - t) * load(1, 3) + t * load(2, 3);
+            for value in &mut c {
+                *value *= alpha;
+            }
+        }
+        let channels: [[f32; 4]; 4] = [c[0].into(), c[1].into(), c[2].into(), alpha.into()];
+        std::array::from_fn(|i| {
+            if mask & (1 << i) == 0 {
+                return [0.0; 4];
+            }
+            if intervals[i].1 == 0.0 {
+                return self.words[intervals[i].0 + if self.stride() == 4 { 1 } else { 4 }]
+                    .map(f32::from_bits);
+            }
+            if self.stride() == 5 && intervals[i].1 == 1.0 {
+                return self.words[intervals[i].0 + self.stride() + 4].map(f32::from_bits);
+            }
+            std::array::from_fn(|j| channels[j][i])
+        })
     }
 }
 
@@ -377,6 +662,79 @@ mod tests {
     }
     fn gradient(stops: &[GradientStop], extend: Extend) -> Gradient {
         Gradient::new(line(), stops, extend, Interpolation::LinearSrgb).unwrap()
+    }
+    #[test]
+    fn perceptual_allocation_and_all_available_simd_backends_share_the_kernel() {
+        let stops = [
+            GradientStop::new(0.0, Color::oklch(0.6, 0.2, 350., 0.1).unwrap()),
+            GradientStop::new(0.3, Color::linear_display_p3(2., -0.1, 0.5, 0.9).unwrap()),
+            GradientStop::new(0.3, Color::oklch(0.3, 0.1, 170., 0.5).unwrap()),
+            GradientStop::new(1.0, Color::linear_srgb(0.2, 0.2, 0.2, 1.).unwrap()),
+        ];
+        for mode in [
+            Interpolation::Oklab,
+            Interpolation::default(),
+            Interpolation::Oklch {
+                hue: HueInterpolation::Longer,
+            },
+        ] {
+            let mut gradient = None;
+            let cost = allocation_counter::measure(|| {
+                gradient = Some(Gradient::new(line(), &stops[..2], Extend::Pad, mode).unwrap())
+            });
+            assert_eq!((cost.count_total, cost.bytes_total), (1, 232));
+            let g = Gradient::new(line(), &stops, Extend::Reflect, mode).unwrap();
+            fn check<S: Simd>(simd: S, g: GradientView<'_>) {
+                for mask in 0..16 {
+                    for x in [
+                        0.0,
+                        0.125,
+                        0.3,
+                        f32::from_bits(0.3f32.to_bits() - 1),
+                        0.7,
+                        1.0,
+                    ] {
+                        let points = [[x, 0.0], [0.3, 0.5], [1.0 - x, 0.0], [0.0, 1.0]];
+                        let vector = g.sample_four(simd, points, mask);
+                        for i in 0..4 {
+                            let expected = if mask & (1 << i) == 0 {
+                                [0.0; 4]
+                            } else {
+                                g.sample(points[i]).unwrap()
+                            };
+                            assert_eq!(
+                                vector[i].map(f32::to_bits),
+                                expected.map(f32::to_bits),
+                                "{:?} {mask} {x} {i}",
+                                simd.level()
+                            );
+                        }
+                    }
+                }
+            }
+            check(fearless_simd::Fallback::new(), g.view());
+            let level = fearless_simd::Level::new();
+            #[cfg(any(target_arch = "x86", target_arch = "x86_64"))]
+            {
+                if let Some(s) = level.as_sse2() {
+                    check(s, g.view());
+                }
+                if let Some(s) = level.as_sse4_2() {
+                    check(s, g.view());
+                }
+                if let Some(s) = level.as_avx2() {
+                    check(s, g.view());
+                }
+                if let Some(s) = level.as_avx512() {
+                    check(s, g.view());
+                }
+            }
+            #[cfg(target_arch = "aarch64")]
+            if let Some(s) = level.as_neon() {
+                check(s, g.view());
+            }
+            eprintln!("perceptual SIMD available backend ceiling {level:?}");
+        }
     }
     #[test]
     fn resource_compilation_has_one_allocation_and_no_temporary_stop_vector() {

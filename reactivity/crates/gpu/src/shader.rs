@@ -352,8 +352,10 @@ pub mod ui {
             t -= floor(t);
         }
         let count = header.z;
+        let perceptual = (header.w >> 1) != 0;
+        let stride = select(4_u32, 5_u32, perceptual);
         let first = bitcast_f32(get!(WORDS)[(base + 3) as usize].x);
-        let last = bitcast_f32(get!(WORDS)[(base + 3 + (count - 1) * 4) as usize].x);
+        let last = bitcast_f32(get!(WORDS)[(base + 3 + (count - 1) * stride) as usize].x);
         let span = last - first;
         if header.y == 1 {
             let x = t - first;
@@ -368,7 +370,7 @@ pub mod ui {
         let mut high = count;
         while low < high {
             let mid = (low + high) / 2;
-            if bitcast_f32(get!(WORDS)[(base + 3 + mid * 4) as usize].x) <= t {
+            if bitcast_f32(get!(WORDS)[(base + 3 + mid * stride) as usize].x) <= t {
                 low = mid + 1;
             } else {
                 high = mid;
@@ -378,14 +380,58 @@ pub mod ui {
         if low > 0 {
             index = low - 1;
         }
-        let word = base + 3 + index * 4;
+        let word = base + 3 + index * stride;
         let interval = bitcast_vec4f(get!(WORDS)[word as usize]);
         let color = bitcast_vec4f(get!(WORDS)[(word + 1) as usize]);
-        if low == 0 || index + 1 == count {
-            return color;
+        let mut u = 0.0;
+        if low != 0 && index + 1 != count {
+            u = clamp((t - interval.x) * abs(interval.y), 0.0, 1.0);
         }
-        let u = clamp((t - interval.x) * interval.y, 0.0, 1.0);
-        return color + u * bitcast_vec4f(get!(WORDS)[(word + 2) as usize]);
+        if !perceptual {
+            if u == 0.0 {
+                return color;
+            }
+            return color + u * bitcast_vec4f(get!(WORDS)[(word + 2) as usize]);
+        }
+        if u == 0.0 {
+            return bitcast_vec4f(get!(WORDS)[(word + 4) as usize]);
+        }
+        if u == 1.0 {
+            return bitcast_vec4f(get!(WORDS)[(word + stride + 4) as usize]);
+        }
+        let delta = bitcast_vec4f(get!(WORDS)[(word + 2) as usize]);
+        let denominator = (1.0 - u) * interval.z + u * interval.w;
+        let mut v = u * interval.w / max(denominator, bitcast_f32(0x00800000));
+        if interval.z == 0.0 {
+            v = 1.0;
+        } else if interval.w == 0.0 {
+            v = 0.0;
+        }
+        let mut q = color.xyz() + v * delta.xyz();
+        if (bitcast_u32(interval.y) & 0x80000000) == 0 {
+            // Only L and C are premultiplied; hue advances with u, not v.
+            let hue = color.z + u * delta.z;
+            let tau = bitcast_f32(0x40c90fdb);
+            let angle = hue - floor((hue + tau * 0.5) / tau) * tau;
+            let a = q.y * cos(angle);
+            let b = q.y * sin(angle);
+            q = vec3f(
+                q.x + a * 0.3963377773761749 + b * 0.2158037573099136,
+                q.x - a * 0.1055613458156586 - b * 0.0638541728258133,
+                q.x - a * 0.0894841775298119 - b * 1.2914855480194092,
+            );
+        }
+        q = q * q * q;
+        let alpha = (1.0 - u) * color.w + u * delta.w;
+        return vec4f(
+            (q.x * 4.076741636075958 - q.y * 3.3077115392580616 + q.z * 0.23096990318210442)
+                * alpha,
+            (-q.x * 1.268437973285032 + q.y * 2.609757349287688 - q.z * 0.34131937600265727)
+                * alpha,
+            (-q.x * 0.004196076138675566 - q.y * 0.7034186179359363 + q.z * 1.7076146940746117)
+                * alpha,
+            alpha,
+        );
     }
 
     pub fn sample_draw(draw: Draw, point: Vec2f) -> Vec4f {
