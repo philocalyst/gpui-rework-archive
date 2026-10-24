@@ -711,7 +711,7 @@ fn cleared_preedit_resumes_keys_at_original_replacement_and_revokes_late_commit(
         let candidate = win.with_scene(|_, token| token).unwrap();
         assert_ne!(candidate, cleared);
         assert_eq!(displayed(&win, target), p);
-        win.presented(cleared).unwrap();
+        assert_eq!(win.presented(cleared), Err(Error::StalePresentation));
         assert_eq!(displayed(&win, target), p);
         assert!(win.ime_cursor_area(&session).unwrap().is_none());
         win.ime_event(&mut session, ImeEvent::Commit("late"))
@@ -752,13 +752,13 @@ fn cleared_preedit_noop_key_publishes_cancel_while_control_text_stays_ignored() 
     win.key(Key::Text("\n")).unwrap();
     assert_eq!(win.with_scene(|_, token| token).unwrap(), cleared);
     assert!(win.ime_cursor_area(&session).unwrap().is_some());
-    let cancelled = win.key(Key::Text("")).unwrap();
+    let cancelled = win.key(Key::Enter).unwrap();
     assert_eq!(cancelled.source_epoch, epoch);
     assert!(cancelled.prepared_epoch.is_some());
     let candidate = win.with_scene(|_, token| token).unwrap();
     assert_ne!(candidate, cleared);
     assert_eq!(displayed(&win, target), p);
-    win.presented(cleared).unwrap();
+    assert_eq!(win.presented(cleared), Err(Error::StalePresentation));
     assert_eq!(displayed(&win, target), p);
     assert!(win.ime_cursor_area(&session).unwrap().is_none());
     win.ime_event(&mut session, ImeEvent::Commit("late"))

@@ -244,7 +244,7 @@ impl Script {
                     .with_scene(|_, t| t)
                     .unwrap();
                 self.host
-                    .key_input(&NativeKey::Named(NamedKey::End), None)
+                    .key_input(&NativeKey::Named(NamedKey::Enter), None)
                     .unwrap();
                 let owner = self.host.owner.as_ref().unwrap();
                 assert_eq!(
