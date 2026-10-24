@@ -1,0 +1,957 @@
+{
+  "native": {
+    "all_exit_zero": true,
+    "passed": 414,
+    "failed": 0,
+    "ignored": 33,
+    "children_reaped": true,
+    "suites": [
+      {
+        "target": "checkbox",
+        "passed": 9,
+        "failed": 0,
+        "ignored": 0
+      },
+      {
+        "target": "clipping",
+        "passed": 6,
+        "failed": 0,
+        "ignored": 0
+      },
+      {
+        "target": "focus",
+        "passed": 9,
+        "failed": 0,
+        "ignored": 0
+      },
+      {
+        "target": "gpui",
+        "passed": 250,
+        "failed": 0,
+        "ignored": 33
+      },
+      {
+        "target": "ime",
+        "passed": 15,
+        "failed": 0,
+        "ignored": 0
+      },
+      {
+        "target": "inspector",
+        "passed": 15,
+        "failed": 0,
+        "ignored": 0
+      },
+      {
+        "target": "lists",
+        "passed": 19,
+        "failed": 0,
+        "ignored": 0
+      },
+      {
+        "target": "property_selection",
+        "passed": 10,
+        "failed": 0,
+        "ignored": 0
+      },
+      {
+        "target": "remote",
+        "passed": 16,
+        "failed": 0,
+        "ignored": 0
+      },
+      {
+        "target": "scroll",
+        "passed": 27,
+        "failed": 0,
+        "ignored": 0
+      },
+      {
+        "target": "semantic_metadata",
+        "passed": 12,
+        "failed": 0,
+        "ignored": 0
+      },
+      {
+        "target": "text_selection",
+        "passed": 20,
+        "failed": 0,
+        "ignored": 0
+      },
+      {
+        "target": "text_selection_compound",
+        "passed": 6,
+        "failed": 0,
+        "ignored": 0
+      }
+    ]
+  },
+  "scalar": {
+    "all_exit_zero": true,
+    "passed": 210,
+    "failed": 0,
+    "ignored": 5,
+    "children_reaped": true,
+    "suites": [
+      {
+        "target": "components",
+        "passed": 12,
+        "failed": 0,
+        "ignored": 0
+      },
+      {
+        "target": "frontier",
+        "passed": 4,
+        "failed": 0,
+        "ignored": 0
+      },
+      {
+        "target": "gpui",
+        "passed": 179,
+        "failed": 0,
+        "ignored": 5
+      },
+      {
+        "target": "ime",
+        "passed": 15,
+        "failed": 0,
+        "ignored": 0
+      }
+    ]
+  },
+  "strict": {
+    "source": "a623ee8e3ff7ccfc2d0ea87ee97c8eee2e985a27",
+    "exit": 0,
+    "abort": null,
+    "guards": 2073,
+    "guards_match": true,
+    "helpers_match": true,
+    "passed": 0,
+    "failed": 0,
+    "ignored": 0,
+    "harnesses": 0,
+    "free_start": 10919915520,
+    "free_minimum": 10527621120,
+    "free_end": 10527338496,
+    "floor_bytes": 8589934592,
+    "reserve_bytes": 268435456,
+    "children_reaped": true,
+    "scope": "Functional/identity qualification on Mothership Linux debug0, no timing inference."
+  },
+  "docs": {
+    "source": "a623ee8e3ff7ccfc2d0ea87ee97c8eee2e985a27",
+    "exit": 0,
+    "abort": null,
+    "guards": 2073,
+    "guards_match": true,
+    "helpers_match": true,
+    "passed": 33,
+    "failed": 0,
+    "ignored": 0,
+    "harnesses": 4,
+    "free_start": 10527027200,
+    "free_minimum": 10444087296,
+    "free_end": 10448359424,
+    "floor_bytes": 8589934592,
+    "reserve_bytes": 268435456,
+    "children_reaped": true,
+    "scope": "Functional/identity qualification on Mothership Linux debug0, no timing inference."
+  },
+  "external_consumer": {
+    "source": "a623ee8e3ff7ccfc2d0ea87ee97c8eee2e985a27",
+    "exit": 0,
+    "abort": null,
+    "guards": 2073,
+    "guards_match": true,
+    "helpers_match": true,
+    "passed": 1,
+    "failed": 0,
+    "ignored": 0,
+    "harnesses": 1,
+    "free_start": 9764241408,
+    "free_minimum": 9764241408,
+    "free_end": 9763962880,
+    "floor_bytes": 8589934592,
+    "reserve_bytes": 268435456,
+    "children_reaped": true,
+    "scope": "Functional/identity qualification on Mothership Linux debug0, no timing inference."
+  },
+  "native_fixtures": {
+    "tests": [
+      {
+        "label": "accesskit",
+        "argv": [
+          "/home/miles/gpui-ce3-compute-20261024/ime-cleared-sol-9310-20261024/target/debug/build/gpui/844d7bbdddc48e15/out/gpui-844d7bbdddc48e15",
+          "native::accessibility::tests::ime_accesskit_uses_acknowledged_display_and_selection_without_preview_edit_authority",
+          "--exact",
+          "--nocapture",
+          "--test-threads=1"
+        ],
+        "exit": 0
+      },
+      {
+        "label": "ownership",
+        "argv": [
+          "/home/miles/gpui-ce3-compute-20261024/ime-cleared-sol-9310-20261024/target/debug/build/gpui/844d7bbdddc48e15/out/gpui-844d7bbdddc48e15",
+          "runtime::ime::tests::ime_cold_ownership_reuses_only_active_buffer_and_releases_after_final_ack",
+          "--exact",
+          "--nocapture",
+          "--test-threads=1"
+        ],
+        "exit": 0
+      },
+      {
+        "label": "headers",
+        "argv": [
+          "/home/miles/gpui-ce3-compute-20261024/ime-cleared-sol-9310-20261024/target/debug/build/gpui/844d7bbdddc48e15/out/gpui-844d7bbdddc48e15",
+          "native::ime::ime_native_header_ledger",
+          "--exact",
+          "--nocapture",
+          "--test-threads=1"
+        ],
+        "exit": 0
+      },
+      {
+        "label": "query-headers",
+        "argv": [
+          "/home/miles/gpui-ce3-compute-20261024/ime-cleared-sol-9310-20261024/target/debug/build/gpui/844d7bbdddc48e15/out/gpui-844d7bbdddc48e15",
+          "runtime::query::geometry_layout_tests::basis_borrowed_geometry_context_layout_is_explicit",
+          "--exact",
+          "--nocapture",
+          "--test-threads=1"
+        ],
+        "exit": 0
+      },
+      {
+        "label": "packet-headers",
+        "argv": [
+          "/home/miles/gpui-ce3-compute-20261024/ime-cleared-sol-9310-20261024/target/debug/build/gpui/844d7bbdddc48e15/out/gpui-844d7bbdddc48e15",
+          "native::tests::packet_gpu_header_ledger",
+          "--exact",
+          "--nocapture",
+          "--test-threads=1"
+        ],
+        "exit": 0
+      },
+      {
+        "label": "native",
+        "argv": [
+          "dbus-run-session",
+          "--",
+          "/home/miles/gpui-ce3-compute-20261024/ime-cleared-sol-9310-20261024/target/debug/build/gpui/844d7bbdddc48e15/out/gpui-844d7bbdddc48e15",
+          "native::ime_tests::native_ime_preedit_commit_focus_lifecycle_and_acknowledged_pixels",
+          "--exact",
+          "--ignored",
+          "--nocapture",
+          "--test-threads=1"
+        ],
+        "exit": 0
+      }
+    ],
+    "binary_unchanged": true,
+    "children_reaped": true,
+    "scope": "Real X11 native Window/CPU submission and complete server pixels; normalized Winit IME callbacks, not OS candidate-engine synthesis. AccessKit consumer P projection."
+  },
+  "native_wire": {
+    "tests": [
+      {
+        "label": "atspi",
+        "argv": [
+          "dbus-run-session",
+          "--",
+          "/nix/store/9r02ykx9y35lf4gk6gc30gnag1y8ncp7-python3-3.13.15/bin/python3",
+          "/home/miles/gpui-ce3-compute-20261024/ime-cleared-sol-9310-20261024/helpers/gpui-ime-atspi-launch.py",
+          "/home/miles/gpui-ce3-compute-20261024/ime-cleared-sol-9310-20261024/evidence/native-a623-wire",
+          "/home/miles/gpui-ce3-compute-20261024/ime-cleared-sol-9310-20261024/target/debug/build/gpui/844d7bbdddc48e15/out/gpui-844d7bbdddc48e15",
+          "native::accessibility::linux_tests::ime::native_atspi_ime_cjk_preview_old_candidate_ack_and_commit"
+        ],
+        "exit": 0
+      }
+    ],
+    "binary_unchanged": true,
+    "children_reaped": true,
+    "scope": "Real X11 native Window/CPU submission and complete server pixels; normalized Winit IME callbacks, not OS candidate-engine synthesis. AccessKit consumer P projection."
+  },
+  "source": "a623ee8e3ff7ccfc2d0ea87ee97c8eee2e985a27",
+  "base": "ce79d00fb004859994c8574254bbd091e964a2d4",
+  "adoption": "Unadopted; Root review/composition required",
+  "source_archive": {
+    "source": "a623ee8e3ff7ccfc2d0ea87ee97c8eee2e985a27",
+    "archive": "/tmp/gpui-ime-cleared-a623-inputs/source.tar.zst",
+    "bytes": 8429257,
+    "sha256": "19682e2c53ca48e3d9dc1f874773eeb4f75731f6c608783d71264539cdd8e392",
+    "inputs": 2073,
+    "overlay_paths": [
+      "reactivity/crates/gpui/src/native/ime_tests.rs",
+      "reactivity/crates/gpui/src/runtime/ime.rs",
+      "reactivity/crates/gpui/src/runtime/input.rs",
+      "reactivity/crates/gpui/tests/ime.rs"
+    ],
+    "children_reaped": true,
+    "payload_sha256": "3f4dfdbaf1268a4c41b6bd8aee33affa4c8463d69cb43efbb292d72313a23aec"
+  },
+  "artifact_archive": {
+    "source": "a623ee8e3ff7ccfc2d0ea87ee97c8eee2e985a27",
+    "negative_source": "9e00c79f46fd451f7f9ea8150801ee44c709d745",
+    "archive": "/home/miles/gpui-ce3-compute-20261024/ime-cleared-sol-9310-20261024/seal-a623/positive-negative-artifacts.tar.zst",
+    "bytes": 209168688,
+    "sha256": "518a6e17a76760c71bfe4ab9f1819ec81a312fcb47d8d6c33917a2cb2d2960d1",
+    "members": [
+      {
+        "member": "source-a623.tar.zst",
+        "bytes": 8429257,
+        "sha256": "19682e2c53ca48e3d9dc1f874773eeb4f75731f6c608783d71264539cdd8e392"
+      },
+      {
+        "member": "source-9e.tar.zst",
+        "bytes": 8428849,
+        "sha256": "82e5861ac74c158a3caa22906fc9bad046feb92d8df818c608f85981f6269ed8"
+      },
+      {
+        "member": "input-manifest-a623.json",
+        "bytes": 278559,
+        "sha256": "595ac96cea08ded01d453343fef569a255d09d2ee69500002a0c387c6c691f7e"
+      },
+      {
+        "member": "input-manifest-9e.json",
+        "bytes": 278958,
+        "sha256": "b52f06f26dfcded50924160bf32a260c602e305dc26938cdee0d89847005d02c"
+      },
+      {
+        "member": "executables.json",
+        "bytes": 32594,
+        "sha256": "7d5826ea752272ac9710b86623d9acb2cd718c89cd86a19bd60526ff6245d5e0"
+      },
+      {
+        "member": "native/checkbox/test",
+        "bytes": 30045432,
+        "sha256": "a148142a65706bd336e17a700e671d7a8f4a2e3b0ba3742250a12ffff872b09b"
+      },
+      {
+        "member": "native/clipping/test",
+        "bytes": 32313408,
+        "sha256": "16f889fa0c8f73bea03f046caa7d647f6e3093a731fa8fd435a7a36e55a778ab"
+      },
+      {
+        "member": "native/focus/test",
+        "bytes": 30374192,
+        "sha256": "b5de0a8e3333fba11e83f6a1298d2dadd4a476ecf40c2fb755a54e45d0ac4d7f"
+      },
+      {
+        "member": "native/gpui/test",
+        "bytes": 172639896,
+        "sha256": "a9ae2a458fadaa73c545f093a145fcf924184864643a06fc3074e15501b45729"
+      },
+      {
+        "member": "native/ime/test",
+        "bytes": 29197936,
+        "sha256": "68291705104a42002f8469659cce579f01e502822c1cc81f6fe7779669acb374"
+      },
+      {
+        "member": "native/inspector/test",
+        "bytes": 33957360,
+        "sha256": "1ec0d64960c51f94245f560d64bf6c864bd63a33b70be04ce8f7867383ac5750"
+      },
+      {
+        "member": "native/lists/test",
+        "bytes": 38532952,
+        "sha256": "4fa75d1f7ba51562464cc2f4249088a0e7d2478d7b3100a8f147cd458c155f4c"
+      },
+      {
+        "member": "native/property_selection/test",
+        "bytes": 30535312,
+        "sha256": "10e039013b58fcf0cf7e842e0aead94af28cecb67914c6f854146fcec940f3bf"
+      },
+      {
+        "member": "native/remote/test",
+        "bytes": 30171464,
+        "sha256": "79dccb9a768e82bd125c0bf38388f3f7f94b52f39536f8be3ebd5d60508d4717"
+      },
+      {
+        "member": "native/scroll/test",
+        "bytes": 38383568,
+        "sha256": "64972eedb459d6c2744b4b20aeb8d64fc39257f569be6fa0a3c7bb52812fbb54"
+      },
+      {
+        "member": "native/semantic_metadata/test",
+        "bytes": 34812632,
+        "sha256": "8487004b608fb1cb3eeec550f3b0e585fa68ff6b24e896f5d1ebdd94498ed967"
+      },
+      {
+        "member": "native/text_selection/test",
+        "bytes": 31167032,
+        "sha256": "c877b88a65ff2c01d2e3bc20e9bea34953a6b9da8daa0facda8d2dbac5a52a50"
+      },
+      {
+        "member": "native/text_selection_compound/test",
+        "bytes": 27303720,
+        "sha256": "7981a375e9208f3dc1902ef05cfc6e8f71e3fe255b607145ba0f97249b515cd8"
+      },
+      {
+        "member": "scalar/components/test",
+        "bytes": 31390888,
+        "sha256": "c470876700a3e0b244c404e1055657e6f6a953ee60657657ec4a2c87d8901871"
+      },
+      {
+        "member": "scalar/frontier/test",
+        "bytes": 28935344,
+        "sha256": "9c59eb6249bff1b6ad75d0a12fcab68694a1bde0ad6105e193cce69ac7fd9fb3"
+      },
+      {
+        "member": "scalar/gpui/test",
+        "bytes": 68445648,
+        "sha256": "b6326a086b3f7072df35899859bb05c04ea55279b69b60a038693c111dfdb5a7"
+      },
+      {
+        "member": "scalar/ime/test",
+        "bytes": 28733560,
+        "sha256": "0f77f2804f8d42faf3cfbc06bc489d150a74d34f8ac581328036302de285259e"
+      },
+      {
+        "member": "consumer/cleared-key/test",
+        "bytes": 26658464,
+        "sha256": "540b48d0314c3597204806de5b9a8bc4e93b35f23c9834787e189ccb46a409ab"
+      },
+      {
+        "member": "negative-9e/cleared-key/test",
+        "bytes": 26656800,
+        "sha256": "2d30a2457258c4cdf74db9774f61d01ae20b9115bd71dcf0aa2de0ecf596ac54"
+      },
+      {
+        "member": "consumer-a623/Cargo.toml",
+        "bytes": 1064,
+        "sha256": "575212fedeb8287fd9bf638b5fa772a1429b0609f9e228f460698e66016403f0"
+      },
+      {
+        "member": "consumer-a623/Cargo.lock",
+        "bytes": 17172,
+        "sha256": "d6f46d9a2c38378a4659c319c2f1bc4551214396e2a593ef699362b930424285"
+      },
+      {
+        "member": "consumer-a623/src/lib.rs",
+        "bytes": 1022,
+        "sha256": "b186911ed20cecbaa031b338f3fdf22b8bfab78eed3d9b3b00604c5808e593c0"
+      },
+      {
+        "member": "consumer-9e/Cargo.toml",
+        "bytes": 1064,
+        "sha256": "575212fedeb8287fd9bf638b5fa772a1429b0609f9e228f460698e66016403f0"
+      },
+      {
+        "member": "consumer-9e/Cargo.lock",
+        "bytes": 17172,
+        "sha256": "d6f46d9a2c38378a4659c319c2f1bc4551214396e2a593ef699362b930424285"
+      },
+      {
+        "member": "consumer-9e/src/lib.rs",
+        "bytes": 1022,
+        "sha256": "b186911ed20cecbaa031b338f3fdf22b8bfab78eed3d9b3b00604c5808e593c0"
+      }
+    ],
+    "positive_executables": 18,
+    "negative_executables": 1,
+    "originals_rechecked": true,
+    "stream_reextraction_checked": true,
+    "children_reaped": true,
+    "scope": "Actual18final native/scalar/external-consumer executables plus unchanged9e consumerfailure; exactsource archives and source-identical external fixtures. Targets/evidence remain retained; no shipping-code-size or latency inference."
+  },
+  "failed_attempt_archive": {
+    "source": "9310fd79fc2efb5903602625190e71101197ebad",
+    "archive": "/home/miles/gpui-ce3-compute-20261024/ime-cleared-sol-9310-20261024/seal-9310-failure/source-and-failed-test.tar.zst",
+    "bytes": 17093543,
+    "sha256": "cef951e7b3e31d2b6ff122665e82330667aaced37e3eee73f57139c58eb11cdc",
+    "members": [
+      {
+        "member": "source.tar.zst",
+        "bytes": 8429273,
+        "sha256": "2b551cb2a37f589d14ed8d28c171fd816df95b33f552b6e58b698f487b07873e"
+      },
+      {
+        "member": "input-manifest.json",
+        "bytes": 278559,
+        "sha256": "3d1b78350c16d4f94ff322e2672563e7eec6883e2c2f66bda2a7e52d02a5e8ab"
+      },
+      {
+        "member": "public-all/000-gpui-ime/binary.json",
+        "bytes": 1094,
+        "sha256": "857215fdcbb143bd76fae9220c3878a6fb4174ff2b861fe768dd280c9381323f"
+      },
+      {
+        "member": "public-all/000-gpui-ime/result.json",
+        "bytes": 333,
+        "sha256": "cc64e2c805b5571d02f4d7c27ec2d88add5f20e0458bc6a3fb2ee3286811c511"
+      },
+      {
+        "member": "public-all/000-gpui-ime/stderr.log",
+        "bytes": 475,
+        "sha256": "4b30cc38402c5f0e2396a1ec37ce9c889dd7ef212c8a008f7ea5d236a486a68d"
+      },
+      {
+        "member": "public-all/000-gpui-ime/stdout.log",
+        "bytes": 1583,
+        "sha256": "f2776d649fbc5bc8bff944d42b6751cc63bcf8cce925ad94c875a754e6ea2de7"
+      },
+      {
+        "member": "public-all/result.json",
+        "bytes": 510,
+        "sha256": "7a92922816135f10c7d4c428c632963ae02cb1ad9177b12dde719e95e02c1fd2"
+      },
+      {
+        "member": "public-build/after.json",
+        "bytes": 273822,
+        "sha256": "8d55346ed773878c2538eeff36249f177429e7a8e33319f470a80a5e01860ed1"
+      },
+      {
+        "member": "public-build/before.json",
+        "bytes": 273822,
+        "sha256": "8d55346ed773878c2538eeff36249f177429e7a8e33319f470a80a5e01860ed1"
+      },
+      {
+        "member": "public-build/cargo.txt",
+        "bytes": 353,
+        "sha256": "08b604bc6bf85db2831c253424771ccc6d6d4c5ebd81dac34ca9d11bcffe855a"
+      },
+      {
+        "member": "public-build/command.json",
+        "bytes": 1964,
+        "sha256": "d304f9669faafb77326f92647e9a02e9c7e5c3361f1818fd25217ac22e3ae5c9"
+      },
+      {
+        "member": "public-build/result.json",
+        "bytes": 488,
+        "sha256": "30f5e51f219a3893302032ce4ada2b44b0e95019653f270a73e8a38e25d9a50a"
+      },
+      {
+        "member": "public-build/rustc.txt",
+        "bytes": 214,
+        "sha256": "2900025046ddf3de47f87dd3d69fbfe380cae61af5fe1ecf31bb89c5f10645c5"
+      },
+      {
+        "member": "public-build/stderr.log",
+        "bytes": 10058,
+        "sha256": "89e96609e1f32d31aee7201b3c58d32e8207f43d9bbede5bc4e8b1d73ed24ea7"
+      },
+      {
+        "member": "public-build/stdout.log",
+        "bytes": 300508,
+        "sha256": "a7b653138090847c41e7c8c5cae2d053bb2ef796e8a6af50102c2a74b6bce2b9"
+      },
+      {
+        "member": "ime-test",
+        "bytes": 29192368,
+        "sha256": "8d1a7da5dbf2d01c9dc0c2803c0495c4f6cbc76c610105eded58de6c3c6716c9"
+      }
+    ],
+    "original_elf_rechecked": true,
+    "stream_reextraction_checked": true,
+    "children_reaped": true,
+    "reason": "Actual13pass2failed new assertions; wrong no-op input and expected stale ACK return. Production correction unchanged in test-only successor."
+  },
+  "negative_9e": {
+    "source": "9e00c79f46fd451f7f9ea8150801ee44c709d745",
+    "exit": 101,
+    "abort": null,
+    "guards": 2073,
+    "guards_match": true,
+    "helpers_match": true,
+    "passed": 0,
+    "failed": 1,
+    "ignored": 0,
+    "harnesses": 1,
+    "free_start": 9221513216,
+    "free_minimum": 9221513216,
+    "free_end": 9221222400,
+    "floor_bytes": 8589934592,
+    "reserve_bytes": 268435456,
+    "children_reaped": true,
+    "scope": "Functional/identity qualification on Mothership Linux debug0, no timing inference."
+  },
+  "shader": {
+    "source": "a623ee8e3ff7ccfc2d0ea87ee97c8eee2e985a27",
+    "baseline_shader_source": "ce79d00fb004859994c8574254bbd091e964a2d4",
+    "wgsl_sha256": "ea6e71d3da2bdb23d4971a14f0f55db389dbb45f9b2e9c05c85d4dc6363eb4d1",
+    "wgsl_bytes": 18995,
+    "typed_rust_sha256": "433b9760e356cb45144262aabec37d61c1d5eb1e0529b47e4103da7d69b4859c",
+    "spirv": [
+      {
+        "name": "ui-0-vertex.spv",
+        "bytes": 880,
+        "sha256": "562bb388d843aee9fdc843071123e4f268862be3a3c2205dbdc530d6ba94b0a3",
+        "validator_exit": 0
+      },
+      {
+        "name": "ui-0-fragment.spv",
+        "bytes": 41636,
+        "sha256": "ca1755841d98965e73ca9e77306d74cf67c696351470af3e4361d124f4b16427",
+        "validator_exit": 0
+      },
+      {
+        "name": "ui-1-vertex.spv",
+        "bytes": 880,
+        "sha256": "562bb388d843aee9fdc843071123e4f268862be3a3c2205dbdc530d6ba94b0a3",
+        "validator_exit": 0
+      },
+      {
+        "name": "ui-1-fragment.spv",
+        "bytes": 41796,
+        "sha256": "235b15cc22bb6fb69382a766399bb0346a420e233b21c1bb82cf2ef7e9b7f34e",
+        "validator_exit": 0
+      },
+      {
+        "name": "ui-2-vertex.spv",
+        "bytes": 880,
+        "sha256": "562bb388d843aee9fdc843071123e4f268862be3a3c2205dbdc530d6ba94b0a3",
+        "validator_exit": 0
+      },
+      {
+        "name": "ui-2-fragment.spv",
+        "bytes": 44900,
+        "sha256": "0e0236209107471feb5fddf9cf7d8da0a137f836a710060eb594a08cdb844e0f",
+        "validator_exit": 0
+      },
+      {
+        "name": "ui-3-vertex.spv",
+        "bytes": 880,
+        "sha256": "562bb388d843aee9fdc843071123e4f268862be3a3c2205dbdc530d6ba94b0a3",
+        "validator_exit": 0
+      },
+      {
+        "name": "ui-3-fragment.spv",
+        "bytes": 45060,
+        "sha256": "676ca921107e45cc03734ade2095a82d34d06a72599c68c6c455f8d0a18b6d20",
+        "validator_exit": 0
+      }
+    ],
+    "validator": "/nix/store/z5hs3p3inrq3w8cv71jycz7l4y3ny5xk-spirv-tools-1.4.363.0/bin/spirv-val",
+    "validator_sha256": "eb4e44965a1d96bb56e5b4e42471ae333324844865ddce2eafbc4a74572ecf6e",
+    "executed_native_elf": {
+      "path": "/home/miles/gpui-ce3-compute-20261024/ime-cleared-sol-9310-20261024/target/debug/build/gpui/844d7bbdddc48e15/out/gpui-844d7bbdddc48e15",
+      "sha256": "a9ae2a458fadaa73c545f093a145fcf924184864643a06fc3074e15501b45729",
+      "bytes": 172639896,
+      "inode": 16270151,
+      "mtime_ns": 1792871484372228512,
+      "features": [
+        "accessibility",
+        "default",
+        "native",
+        "native-core",
+        "simd",
+        "x11",
+        "x11-minimal"
+      ],
+      "fresh": false
+    },
+    "embedded": [
+      {
+        "name": "ui.wgsl",
+        "offset": 79677414,
+        "bytes": 18995,
+        "sha256": "ea6e71d3da2bdb23d4971a14f0f55db389dbb45f9b2e9c05c85d4dc6363eb4d1"
+      },
+      {
+        "name": "ui-0-vertex.spv",
+        "offset": 80433072,
+        "bytes": 880,
+        "sha256": "562bb388d843aee9fdc843071123e4f268862be3a3c2205dbdc530d6ba94b0a3"
+      },
+      {
+        "name": "ui-0-fragment.spv",
+        "offset": 80259680,
+        "bytes": 41636,
+        "sha256": "ca1755841d98965e73ca9e77306d74cf67c696351470af3e4361d124f4b16427"
+      },
+      {
+        "name": "ui-1-vertex.spv",
+        "offset": 80433072,
+        "bytes": 880,
+        "sha256": "562bb388d843aee9fdc843071123e4f268862be3a3c2205dbdc530d6ba94b0a3"
+      },
+      {
+        "name": "ui-1-fragment.spv",
+        "offset": 80301316,
+        "bytes": 41796,
+        "sha256": "235b15cc22bb6fb69382a766399bb0346a420e233b21c1bb82cf2ef7e9b7f34e"
+      },
+      {
+        "name": "ui-2-vertex.spv",
+        "offset": 80433072,
+        "bytes": 880,
+        "sha256": "562bb388d843aee9fdc843071123e4f268862be3a3c2205dbdc530d6ba94b0a3"
+      },
+      {
+        "name": "ui-2-fragment.spv",
+        "offset": 80343112,
+        "bytes": 44900,
+        "sha256": "0e0236209107471feb5fddf9cf7d8da0a137f836a710060eb594a08cdb844e0f"
+      },
+      {
+        "name": "ui-3-vertex.spv",
+        "offset": 80433072,
+        "bytes": 880,
+        "sha256": "562bb388d843aee9fdc843071123e4f268862be3a3c2205dbdc530d6ba94b0a3"
+      },
+      {
+        "name": "ui-3-fragment.spv",
+        "offset": 80388012,
+        "bytes": 45060,
+        "sha256": "676ca921107e45cc03734ade2095a82d34d06a72599c68c6c455f8d0a18b6d20"
+      }
+    ],
+    "binary_unchanged": true,
+    "scope": "Actual executed final remote debug0 GPUI native ELF embedding; unchanged shader closure also passed56GPUreadbacks in fa36 local gate. No hardware/timing inference."
+  },
+  "collected_logs": {
+    "stage": "/home/miles/gpui-ce3-compute-20261024/ime-cleared-sol-9310-20261024",
+    "archive": "/tmp/gpui-ime-remote-collected-sol-20261024/a623/logs.tar.gz",
+    "bytes": 4111157,
+    "sha256": "7bd93f933ac3de9ff7e92a68172706c9b88eb98f7d18e10fc8e66ff454a36269",
+    "members": 274,
+    "all_members_verified": true,
+    "children_reaped": true
+  },
+  "prior_logs": {
+    "stage": "/home/miles/gpui-ce3-compute-20261024/ime-composition-sol-9e00-20261024",
+    "archive": "/tmp/gpui-ime-remote-collected-sol-20261024/9e00/logs.tar.gz",
+    "bytes": 3229258,
+    "sha256": "3e5db39967e5d89365bf68238b4cd3b8650184b4b6108515f23bdf18a472ed83",
+    "members": 200,
+    "all_members_verified": true,
+    "children_reaped": true
+  },
+  "whole_debug0_elf": {
+    "baseline_source": "9e00c79f46fd451f7f9ea8150801ee44c709d745",
+    "source": "a623ee8e3ff7ccfc2d0ea87ee97c8eee2e985a27",
+    "baseline_bytes": 172583544,
+    "candidate_bytes": 172639896,
+    "delta_bytes": 56352,
+    "baseline_sha256": "a34dcefd1ce27accfb5b4c1382cfb444538baf50f3483517b2bc0c2962781320",
+    "candidate_sha256": "a9ae2a458fadaa73c545f093a145fcf924184864643a06fc3074e15501b45729",
+    "same_features": true,
+    "same_profile": true,
+    "scope": "Whole Linux debug0 GPUI unit-test ELF includes expanded native fixture. No isolated optimized shipping code/stack/latency claim."
+  },
+  "shipping_lines": {
+    "source": 35755,
+    "baseline": 34852,
+    "delta": 903,
+    "libraries": 7,
+    "tests_comments_vendors_excluded": true,
+    "dependencies_changed": false,
+    "existing_ecow_shipping_lines": 2315
+  },
+  "cost_scope": "Retained header, buffer physicalcapacity, immutable leases, fullcallingthread first-preedit allocations and wholequalificationELFs separately charged in README; no speedup claim",
+  "all_owned_jobs_reaped": true,
+  "remote_final_free_bytes": 9553330176,
+  "mac_successor": {
+    "status": {
+      "state": "complete",
+      "source": "a623ee8e3ff7ccfc2d0ea87ee97c8eee2e985a27",
+      "pid": 75242,
+      "scope": "Pinned-nightly actual Darwin IME public contracts and normalized native adapter tests; not physical IME input or VoiceOver qualification.",
+      "results": [
+        {
+          "name": "ime",
+          "sha256": "d3589ad3047a3081c3f3f7137f39e35bad1804803d3624c7d247a9965525a683",
+          "bytes": 30127296,
+          "cargo": {
+            "reason": "compiler-artifact",
+            "package_id": "path+file:///Users/mileswirht/gpui-reactivity-20261024-root/ime-a623ee8e/source/reactivity/crates/gpui#0.1.0",
+            "manifest_path": "/Users/mileswirht/gpui-reactivity-20261024-root/ime-a623ee8e/source/reactivity/crates/gpui/Cargo.toml",
+            "target": {
+              "kind": [
+                "test"
+              ],
+              "crate_types": [
+                "bin"
+              ],
+              "name": "ime",
+              "src_path": "/Users/mileswirht/gpui-reactivity-20261024-root/ime-a623ee8e/source/reactivity/crates/gpui/tests/ime.rs",
+              "edition": "2024",
+              "doc": false,
+              "doctest": false,
+              "test": true
+            },
+            "profile": {
+              "opt_level": "0",
+              "debuginfo": 0,
+              "debug_assertions": true,
+              "overflow_checks": true,
+              "test": true
+            },
+            "features": [
+              "accessibility",
+              "default",
+              "native",
+              "native-core",
+              "simd"
+            ],
+            "filenames": [
+              "/Users/mileswirht/gpui-reactivity-20261024-root/target-nightly/debug/build/gpui/baacc33fb0be4a42/out/ime-baacc33fb0be4a42"
+            ],
+            "executable": "/Users/mileswirht/gpui-reactivity-20261024-root/target-nightly/debug/build/gpui/baacc33fb0be4a42/out/ime-baacc33fb0be4a42",
+            "fresh": false
+          },
+          "exit": 0
+        },
+        {
+          "name": "property_selection",
+          "sha256": "a890d59b6380da274e70dd02372516ace65189fe404ca5ad7e04dd1aaa89f79f",
+          "bytes": 31349152,
+          "cargo": {
+            "reason": "compiler-artifact",
+            "package_id": "path+file:///Users/mileswirht/gpui-reactivity-20261024-root/ime-a623ee8e/source/reactivity/crates/gpui#0.1.0",
+            "manifest_path": "/Users/mileswirht/gpui-reactivity-20261024-root/ime-a623ee8e/source/reactivity/crates/gpui/Cargo.toml",
+            "target": {
+              "kind": [
+                "test"
+              ],
+              "crate_types": [
+                "bin"
+              ],
+              "name": "property_selection",
+              "src_path": "/Users/mileswirht/gpui-reactivity-20261024-root/ime-a623ee8e/source/reactivity/crates/gpui/tests/property_selection.rs",
+              "edition": "2024",
+              "doc": false,
+              "doctest": false,
+              "test": true
+            },
+            "profile": {
+              "opt_level": "0",
+              "debuginfo": 0,
+              "debug_assertions": true,
+              "overflow_checks": true,
+              "test": true
+            },
+            "features": [
+              "accessibility",
+              "default",
+              "native",
+              "native-core",
+              "simd"
+            ],
+            "filenames": [
+              "/Users/mileswirht/gpui-reactivity-20261024-root/target-nightly/debug/build/gpui/7943a04a675d56c0/out/property_selection-7943a04a675d56c0"
+            ],
+            "executable": "/Users/mileswirht/gpui-reactivity-20261024-root/target-nightly/debug/build/gpui/7943a04a675d56c0/out/property_selection-7943a04a675d56c0",
+            "fresh": false
+          },
+          "exit": 0
+        },
+        {
+          "name": "gpui",
+          "sha256": "d1356cc0d51449792d94f3b39e3b835949c8ee35de30551224de5ba7ebbcf1c2",
+          "bytes": 91822320,
+          "cargo": {
+            "reason": "compiler-artifact",
+            "package_id": "path+file:///Users/mileswirht/gpui-reactivity-20261024-root/ime-a623ee8e/source/reactivity/crates/gpui#0.1.0",
+            "manifest_path": "/Users/mileswirht/gpui-reactivity-20261024-root/ime-a623ee8e/source/reactivity/crates/gpui/Cargo.toml",
+            "target": {
+              "kind": [
+                "lib"
+              ],
+              "crate_types": [
+                "lib"
+              ],
+              "name": "gpui",
+              "src_path": "/Users/mileswirht/gpui-reactivity-20261024-root/ime-a623ee8e/source/reactivity/crates/gpui/src/lib.rs",
+              "edition": "2024",
+              "doc": true,
+              "doctest": true,
+              "test": true
+            },
+            "profile": {
+              "opt_level": "0",
+              "debuginfo": 0,
+              "debug_assertions": true,
+              "overflow_checks": true,
+              "test": true
+            },
+            "features": [
+              "accessibility",
+              "default",
+              "native",
+              "native-core",
+              "simd"
+            ],
+            "filenames": [
+              "/Users/mileswirht/gpui-reactivity-20261024-root/target-nightly/debug/build/gpui/4f7a671047784901/out/gpui-4f7a671047784901"
+            ],
+            "executable": "/Users/mileswirht/gpui-reactivity-20261024-root/target-nightly/debug/build/gpui/4f7a671047784901/out/gpui-4f7a671047784901",
+            "fresh": false
+          },
+          "native::ime": 0,
+          "native::accessibility::tests::": 0,
+          "runtime::ime::tests::": 0,
+          "runtime::query::geometry_layout_tests::basis_borrowed_geometry_context_layout_is_explicit": 0
+        }
+      ],
+      "source_hashes_match": true,
+      "binary_hashes_match": true
+    },
+    "receipt": {
+      "archive": "/Users/mileswirht/gpui-reactivity-20261024-root/collected-ime-a623-root.tar.gz",
+      "bytes": 117229,
+      "sha256": "a30ff304940adbdb473ca316727c9565a3fd28b7d4f9d77838d9ed5ce3a03ca1",
+      "members_sha256": {
+        "ime-a623ee8e/result/build.command.json": "2d9b59455925ae1768752c1a00bd3bab5f50905ac103e15ae77d782626c09849",
+        "ime-a623ee8e/result/build.stderr": "8d1283abffbb0cca85430fda6642bee03785fee72f6f19eef265414c0aa7bf86",
+        "ime-a623ee8e/result/build.stdout": "186da0dce4399f9aebf17cae568b84fcf2e05b078e6eb7c48857d2b7ab068c67",
+        "ime-a623ee8e/result/clean-debug.command.json": "c52632d8f738198e6d2fcabccaede6da10556e8c4d0e0233e43a7200e291fe7c",
+        "ime-a623ee8e/result/clean-debug.stderr": "3139479a1fa3b93708348b621ab025442e3064059034ae275932286b0a6039b3",
+        "ime-a623ee8e/result/clean-debug.stdout": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+        "ime-a623ee8e/result/gpui-native-accessibility-tests-.command.json": "50411250e2333bcc8468a053c4a72dd3d6e5f172c780d0893010144c57bbe32c",
+        "ime-a623ee8e/result/gpui-native-accessibility-tests-.stderr": "909fe03963c8cb55a5ab681be2c9b2694908463a02b20b80ac9ce77199995e3a",
+        "ime-a623ee8e/result/gpui-native-accessibility-tests-.stdout": "f63d16174f7fa7dd6588413f737305fcd903c68e13cc0d28848ae056e644ca2b",
+        "ime-a623ee8e/result/gpui-native-ime.command.json": "c0f9137ecc01851bd61b47b66047373453e926d5804ef36d98a46f48913022ae",
+        "ime-a623ee8e/result/gpui-native-ime.stderr": "ee9abd246802670bd268beb5823258e216026ced0a5f6c818e178ff88fd91f41",
+        "ime-a623ee8e/result/gpui-native-ime.stdout": "d81c9df428246b28323a642aaab7ffe7696198b7fc9288d524f35929bb1ba80d",
+        "ime-a623ee8e/result/gpui-runtime-ime-tests-.command.json": "31c65e3938c8e52338cd7643434d8da31119d34c503c1b8e4d66d94374639269",
+        "ime-a623ee8e/result/gpui-runtime-ime-tests-.stderr": "67fe9f8b3f2c6703220c343ec1eeac46a87a476c59b823b404d3e2876eee4f03",
+        "ime-a623ee8e/result/gpui-runtime-ime-tests-.stdout": "daa9dc405a1c6c71f142391c3886a8485a36715f559f8b72e17744eb2142c1c6",
+        "ime-a623ee8e/result/gpui-runtime-query-geometry_layout_tests-basis_borrowed_geometry_context_layout_is_explicit.command.json": "eaef461c1bc547c9cb448e2bf6d581a3037bae59de6d76d83b796701c68c2dff",
+        "ime-a623ee8e/result/gpui-runtime-query-geometry_layout_tests-basis_borrowed_geometry_context_layout_is_explicit.stderr": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+        "ime-a623ee8e/result/gpui-runtime-query-geometry_layout_tests-basis_borrowed_geometry_context_layout_is_explicit.stdout": "1b12a277e4ef38b80e37f79bc311c618e3cbdf68446dbe92a60dbd66e3b91db1",
+        "ime-a623ee8e/result/gpui.binary.json": "7a7f5d7eed83e40100776cc61132b72e22fef7d6de58c690faa7f54b10526031",
+        "ime-a623ee8e/result/ime.binary.json": "e1556bdb7adf527b544f07d607774c74782d1e9d9bc2c5a586aecab5ed5c4add",
+        "ime-a623ee8e/result/ime.command.json": "f70a1b5f430370eb03106466f0a49728072c568970d410969c4a0e9038128d79",
+        "ime-a623ee8e/result/ime.stderr": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+        "ime-a623ee8e/result/ime.stdout": "d9184920286ec39a079039bd645d2fb3780bb60e6971e8da6fd28d2c525f8247",
+        "ime-a623ee8e/result/property_selection.binary.json": "83756c7141f7d900794909b94b7c877df16a4709f3bc7c43050f5d6215d8ca68",
+        "ime-a623ee8e/result/property_selection.command.json": "dc36f1a939e878526293fdb1fe0603205c0bedcec700378f6c8b6a67cbf23d7e",
+        "ime-a623ee8e/result/property_selection.stderr": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+        "ime-a623ee8e/result/property_selection.stdout": "ed9cd51f8e982aeabda2b652d8ec1a1b77de5f14154c003169d6a7120b85ae17",
+        "ime-a623ee8e/result/status.json": "a14fc8027cb94f9286abae8421e9da7f56e56c21cc640042e28ebebca5f893cc",
+        "ime-a623ee8e/source/source-manifest.json": "108a6082f3265417f83ef3e07abbe96b2c9d56ffd76cdedecebea3880ec7f489",
+        "ime-a623ee8e/source/source-pin.txt": "747ea4e3a4dc023039e451c3c6c178aba533f492d4d2e3721326652b742b4961",
+        "ime-a623ee8e/job.py": "2ddeb33d6a6cf53f074f3a261e4b73e7c5077d40e1ba0b172d2449329f7be7a9"
+      },
+      "external_executables": [
+        {
+          "path": "ime-a623ee8e/result/gpui",
+          "bytes": 91822320,
+          "sha256": "d1356cc0d51449792d94f3b39e3b835949c8ee35de30551224de5ba7ebbcf1c2"
+        },
+        {
+          "path": "ime-a623ee8e/result/ime",
+          "bytes": 30127296,
+          "sha256": "d3589ad3047a3081c3f3f7137f39e35bad1804803d3624c7d247a9965525a683"
+        },
+        {
+          "path": "ime-a623ee8e/result/property_selection",
+          "bytes": 31349152,
+          "sha256": "a890d59b6380da274e70dd02372516ace65189fe404ca5ad7e04dd1aaa89f79f"
+        }
+      ]
+    },
+    "local_logs": "/tmp/gpui-mac-collected-root-20261024/ime-a623/logs.tar.gz",
+    "all31_local_members_rechecked": true
+  },
+  "review_source": {
+    "tested_source": "a623ee8e3ff7ccfc2d0ea87ee97c8eee2e985a27",
+    "review_source_commit": "21116abc62e2c305fbffdfe8492fefa2ba414d4a",
+    "base": "ce79d00fb004859994c8574254bbd091e964a2d4",
+    "tree": "c139801bdb233bbc4b948e793692e04ff49ed88a",
+    "tree_identical": true,
+    "reference": "refs/heads/ime-composition-review-sol-20261024"
+  }
+}

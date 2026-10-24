@@ -1,0 +1,465 @@
+{
+  "epoch": {
+    "guard": {
+      "source": "c14b372bfdd5042c5f777f6c76c95a03bb96ac59",
+      "exit": 101,
+      "guards": 2073,
+      "guards_match": true,
+      "tracked_input_scopes": [
+        ".cargo",
+        "clippy.toml",
+        "Cargo.toml",
+        "Cargo.lock",
+        "reactivity/Cargo.toml",
+        "reactivity/Cargo.lock",
+        "reactivity/rust-toolchain.toml",
+        "reactivity/crates",
+        "reactivity/vendor"
+      ],
+      "passed": 0,
+      "failed": 1,
+      "ignored": 0,
+      "harnesses": 1,
+      "scope": "Functional/source-identity gate; no timing inference."
+    },
+    "binary": {
+      "source": "c14b372bfdd5042c5f777f6c76c95a03bb96ac59",
+      "original": "/tmp/gpui-ime-authority-mutants-sol-target/debug/build/gpui/4414817e0f58e725/out/ime-4414817e0f58e725",
+      "frozen": "/tmp/gpui-ime-mutant-epoch-native-run/test",
+      "sha256": "4682772cb210120fd221b460ba01771f878765bc005e12485db2468dac88a481",
+      "bytes": 339789224,
+      "target": {
+        "kind": [
+          "test"
+        ],
+        "crate_types": [
+          "bin"
+        ],
+        "name": "ime",
+        "src_path": "/tmp/gpui-ime-authority-mutants-sol/reactivity/crates/gpui/tests/ime.rs",
+        "edition": "2024",
+        "doc": false,
+        "doctest": false,
+        "test": true
+      },
+      "features": [
+        "accessibility",
+        "default",
+        "native",
+        "native-core",
+        "simd",
+        "x11",
+        "x11-minimal"
+      ],
+      "fresh": false,
+      "scope": "One actual CargoJSON executable copied because the isolated mutant target will be cleaned between controls."
+    },
+    "execution": {
+      "argv": [
+        "/tmp/gpui-ime-mutant-epoch-native-run/test",
+        "external_equal_edit_rebind_and_focus_turnover_revoke_old_stream",
+        "--exact",
+        "--nocapture",
+        "--test-threads=1"
+      ],
+      "exit": 101,
+      "expected_negative_exit": 101,
+      "expected_negative_observed": true,
+      "binary_unchanged": true
+    },
+    "failure": "\nthread 'external_equal_edit_rebind_and_focus_turnover_revoke_old_stream' (2836633) panicked at crates/gpui/tests/ime.rs:224:9:\nassertion `left == right` failed\n  left: \"samelate\"\n right: \"same\"\nnote: run with `RUST_BACKTRACE=1` environment variable to display a backtrace\n"
+  },
+  "presented": {
+    "guard": {
+      "source": "537c0052f95bc187f49e511bfb912db6a60ec364",
+      "exit": 101,
+      "guards": 2073,
+      "guards_match": true,
+      "tracked_input_scopes": [
+        ".cargo",
+        "clippy.toml",
+        "Cargo.toml",
+        "Cargo.lock",
+        "reactivity/Cargo.toml",
+        "reactivity/Cargo.lock",
+        "reactivity/rust-toolchain.toml",
+        "reactivity/crates",
+        "reactivity/vendor"
+      ],
+      "passed": 0,
+      "failed": 1,
+      "ignored": 0,
+      "harnesses": 1,
+      "scope": "Functional/source-identity gate; no timing inference."
+    },
+    "binary": {
+      "source": "537c0052f95bc187f49e511bfb912db6a60ec364",
+      "original": "/tmp/gpui-ime-authority-mutants-sol-target/debug/build/gpui/4414817e0f58e725/out/ime-4414817e0f58e725",
+      "frozen": "/tmp/gpui-ime-mutant-presented-native-run/test",
+      "sha256": "9ab20a558e2481222fafc0f03c3834504ed194002382823f15d1828db46d0eae",
+      "bytes": 339789344,
+      "target": {
+        "kind": [
+          "test"
+        ],
+        "crate_types": [
+          "bin"
+        ],
+        "name": "ime",
+        "src_path": "/tmp/gpui-ime-authority-mutants-sol/reactivity/crates/gpui/tests/ime.rs",
+        "edition": "2024",
+        "doc": false,
+        "doctest": false,
+        "test": true
+      },
+      "features": [
+        "accessibility",
+        "default",
+        "native",
+        "native-core",
+        "simd",
+        "x11",
+        "x11-minimal"
+      ],
+      "fresh": false,
+      "scope": "One actual CargoJSON executable copied because the isolated mutant target will be cleaned between controls."
+    },
+    "execution": {
+      "argv": [
+        "/tmp/gpui-ime-mutant-presented-native-run/test",
+        "old_candidate_ack_after_failed_new_source_retains_preview_bytes_mark_and_geometry",
+        "--exact",
+        "--nocapture",
+        "--test-threads=1"
+      ],
+      "exit": 101,
+      "expected_negative_exit": 101,
+      "expected_negative_observed": true,
+      "binary_unchanged": true
+    },
+    "failure": "\nthread 'old_candidate_ack_after_failed_new_source_retains_preview_bytes_mark_and_geometry' (2838831) panicked at crates/gpui/tests/ime.rs:253:5:\nassertion `left == right` failed\n  left: (\"base\u00e9\", Some(MarkedText { session: 1, range: 4..10, cursor: Some(10..10) }), TextSelection { anchor: TextPosition { offset: TextOffset(6), affinity: Downstream }, focus: TextPosition { offset: TextOffset(6), affinity: Downstream } }, Rect { x: 47.856, y: 3.9999998, width: 1.0000077, height: 23.168005 })\n right: (\"base\u00e9\", Some(MarkedText { session: 1, range: 4..6, cursor: Some(6..6) }), TextSelection { anchor: TextPosition { offset: TextOffset(6), affinity: Downstream }, focus: TextPosition { offset: TextOffset(6), affinity: Downstream } }, Rect { x: 47.856, y: 3.9999998, width: 1.0000077, height: 23.168005 })\nnote: run with `RUST_BACKTRACE=1` environment variable to display a backtrace\n"
+  },
+  "requested": {
+    "guard": {
+      "source": "f30add9fcaf375cd8c2d20ef07b3e10733cf79cd",
+      "exit": 101,
+      "guards": 2073,
+      "guards_match": true,
+      "tracked_input_scopes": [
+        ".cargo",
+        "clippy.toml",
+        "Cargo.toml",
+        "Cargo.lock",
+        "reactivity/Cargo.toml",
+        "reactivity/Cargo.lock",
+        "reactivity/rust-toolchain.toml",
+        "reactivity/crates",
+        "reactivity/vendor"
+      ],
+      "passed": 0,
+      "failed": 0,
+      "ignored": 0,
+      "harnesses": 0,
+      "scope": "Functional/source-identity gate; no timing inference."
+    },
+    "binary": {
+      "path": "/tmp/gpui-ime-mutant-requested-native-run/test",
+      "sha256": "d4745d5f83b10d3503d3978240a9ffdb413031e7a6c685099d215d5d2ec227e3",
+      "bytes": 732111840,
+      "inode": 216665609,
+      "mtime_ns": 1792866862120421771,
+      "features": [
+        "accessibility",
+        "default",
+        "native",
+        "native-core",
+        "simd",
+        "x11",
+        "x11-minimal"
+      ],
+      "fresh": false
+    },
+    "execution": {
+      "tests": [
+        {
+          "label": "native",
+          "argv": [
+            "dbus-run-session",
+            "--",
+            "/tmp/gpui-ime-mutant-requested-native-run/test",
+            "native::ime_tests::native_ime_preedit_commit_focus_lifecycle_and_acknowledged_pixels",
+            "--exact",
+            "--ignored",
+            "--nocapture",
+            "--test-threads=1"
+          ],
+          "exit": 101
+        }
+      ],
+      "binary_unchanged": true,
+      "children_reaped": true,
+      "scope": "Real X11 native Window/CPU submission and complete server pixels; normalized Winit IME callbacks, not OS candidate-engine synthesis. AccessKit consumer P projection."
+    },
+    "failure": "\nthread 'native::ime_tests::native_ime_preedit_commit_focus_lifecycle_and_acknowledged_pixels' (2853237) panicked at crates/gpui/src/native/ime_tests.rs:113:17:\nassertion `left == right` failed\n  left: \"late\"\n right: \"\"\nnote: run with `RUST_BACKTRACE=1` environment variable to display a backtrace\n"
+  },
+  "external9e": {
+    "execution": {
+      "source": "9e00c79f46fd451f7f9ea8150801ee44c709d745",
+      "exit": 101,
+      "abort": null,
+      "guards": 2073,
+      "guards_match": true,
+      "helpers_match": true,
+      "passed": 0,
+      "failed": 1,
+      "ignored": 0,
+      "harnesses": 1,
+      "free_start": 9221513216,
+      "free_minimum": 9221513216,
+      "free_end": 9221222400,
+      "floor_bytes": 8589934592,
+      "reserve_bytes": 268435456,
+      "children_reaped": true,
+      "scope": "Functional/identity qualification on Mothership Linux debug0, no timing inference."
+    },
+    "binary": {
+      "source": "9e00c79f46fd451f7f9ea8150801ee44c709d745",
+      "cargo": {
+        "reason": "compiler-artifact",
+        "package_id": "path+file:///home/miles/gpui-ce3-compute-20261024/ime-composition-sol-9e00-20261024/evidence/cleared-key-consumer-v2#ime_cleared_key_consumer@0.0.0",
+        "manifest_path": "/home/miles/gpui-ce3-compute-20261024/ime-composition-sol-9e00-20261024/evidence/cleared-key-consumer-v2/Cargo.toml",
+        "target": {
+          "kind": [
+            "lib"
+          ],
+          "crate_types": [
+            "lib"
+          ],
+          "name": "ime_cleared_key_consumer",
+          "src_path": "/home/miles/gpui-ce3-compute-20261024/ime-composition-sol-9e00-20261024/evidence/cleared-key-consumer-v2/src/lib.rs",
+          "edition": "2024",
+          "doc": true,
+          "doctest": true,
+          "test": true
+        },
+        "profile": {
+          "opt_level": "0",
+          "debuginfo": 0,
+          "debug_assertions": true,
+          "overflow_checks": true,
+          "test": true
+        },
+        "features": [],
+        "filenames": [
+          "/home/miles/gpui-ce3-compute-20261024/ime-composition-sol-9e00-20261024/target/debug/build/ime_cleared_key_consumer/b14f2620bf473d49/out/ime_cleared_key_consumer-b14f2620bf473d49"
+        ],
+        "executable": "/home/miles/gpui-ce3-compute-20261024/ime-composition-sol-9e00-20261024/target/debug/build/ime_cleared_key_consumer/b14f2620bf473d49/out/ime_cleared_key_consumer-b14f2620bf473d49",
+        "fresh": false
+      },
+      "sha256": "2d30a2457258c4cdf74db9774f61d01ae20b9115bd71dcf0aa2de0ecf596ac54",
+      "gpui_artifacts": [
+        {
+          "package_id": "path+file:///home/miles/gpui-ce3-compute-20261024/ime-composition-sol-9e00-20261024/source/reactivity/crates/gpui#0.1.0",
+          "features": [],
+          "fresh": false,
+          "filenames": [
+            "/home/miles/gpui-ce3-compute-20261024/ime-composition-sol-9e00-20261024/target/debug/build/gpui/17c2bacd3e3d53c1/out/libgpui-17c2bacd3e3d53c1.rlib",
+            "/home/miles/gpui-ce3-compute-20261024/ime-composition-sol-9e00-20261024/target/debug/build/gpui/17c2bacd3e3d53c1/out/libgpui-17c2bacd3e3d53c1.rmeta"
+          ]
+        }
+      ]
+    },
+    "fixture_source": "use gpui::*;\nstruct Form { value: Signal<String> }\nimpl Form { const VALUE:Source<Self,String>=Source::new(FieldId::new(1),\"value\",|m|&m.value,|m|&mut m.value); }\nimpl View for Form {\n fn sources()->Sources<Self>{Sources::new().direct(Self::VALUE)}\n fn view(&self)->El<'_>{text_input(&self.value).w(200)}\n}\n#[test]\nfn cleared_preedit_must_not_swallow_an_ordinary_key(){\n let mut win=Win::recording(Form{value:Signal::new(\"base\".into())},WindowOptions::default()).unwrap();\n let token=win.with_scene(|_,t|t).unwrap();win.presented(token).unwrap();\n let target=win.input();win.focus(target).unwrap();\n let token=win.with_scene(|_,t|t).unwrap();win.presented(token).unwrap();\n let mut session=ImeSession::default();win.ime_event(&mut session,ImeEvent::Enabled).unwrap();\n win.ime_event(&mut session,ImeEvent::Preedit{text:\"x\",cursor:Some((1,1))}).unwrap();\n win.ime_event(&mut session,ImeEvent::Preedit{text:\"\",cursor:None}).unwrap();\n win.key(Key::Text(\"!\")).unwrap();\n assert_eq!(win.read(Form::VALUE).unwrap(),\"base!\");\n}\n",
+    "failure": "",
+    "successor_execution": {
+      "source": "a623ee8e3ff7ccfc2d0ea87ee97c8eee2e985a27",
+      "exit": 0,
+      "abort": null,
+      "guards": 2073,
+      "guards_match": true,
+      "helpers_match": true,
+      "passed": 1,
+      "failed": 0,
+      "ignored": 0,
+      "harnesses": 1,
+      "free_start": 9764241408,
+      "free_minimum": 9764241408,
+      "free_end": 9763962880,
+      "floor_bytes": 8589934592,
+      "reserve_bytes": 268435456,
+      "children_reaped": true,
+      "scope": "Functional/identity qualification on Mothership Linux debug0, no timing inference."
+    },
+    "successor_binary": {
+      "source": "a623ee8e3ff7ccfc2d0ea87ee97c8eee2e985a27",
+      "path": "/home/miles/gpui-ce3-compute-20261024/ime-cleared-sol-9310-20261024/target/debug/build/ime_cleared_key_consumer/884b3e5e3ce1b4c8/out/ime_cleared_key_consumer-884b3e5e3ce1b4c8",
+      "cargo": {
+        "reason": "compiler-artifact",
+        "package_id": "path+file:///home/miles/gpui-ce3-compute-20261024/ime-cleared-sol-9310-20261024/evidence/cleared-key-consumer-a623#ime_cleared_key_consumer@0.0.0",
+        "manifest_path": "/home/miles/gpui-ce3-compute-20261024/ime-cleared-sol-9310-20261024/evidence/cleared-key-consumer-a623/Cargo.toml",
+        "target": {
+          "kind": [
+            "lib"
+          ],
+          "crate_types": [
+            "lib"
+          ],
+          "name": "ime_cleared_key_consumer",
+          "src_path": "/home/miles/gpui-ce3-compute-20261024/ime-cleared-sol-9310-20261024/evidence/cleared-key-consumer-a623/src/lib.rs",
+          "edition": "2024",
+          "doc": true,
+          "doctest": true,
+          "test": true
+        },
+        "profile": {
+          "opt_level": "0",
+          "debuginfo": 0,
+          "debug_assertions": true,
+          "overflow_checks": true,
+          "test": true
+        },
+        "features": [],
+        "filenames": [
+          "/home/miles/gpui-ce3-compute-20261024/ime-cleared-sol-9310-20261024/target/debug/build/ime_cleared_key_consumer/884b3e5e3ce1b4c8/out/ime_cleared_key_consumer-884b3e5e3ce1b4c8"
+        ],
+        "executable": "/home/miles/gpui-ce3-compute-20261024/ime-cleared-sol-9310-20261024/target/debug/build/ime_cleared_key_consumer/884b3e5e3ce1b4c8/out/ime_cleared_key_consumer-884b3e5e3ce1b4c8",
+        "fresh": false
+      },
+      "sha256": "540b48d0314c3597204806de5b9a8bc4e93b35f23c9834787e189ccb46a409ab",
+      "bytes": 26658464,
+      "fixture_source_sha256": "b186911ed20cecbaa031b338f3fdf22b8bfab78eed3d9b3b00604c5808e593c0",
+      "matches_original_negative_fixture": true,
+      "manifest_bytes_match": true,
+      "locked_offline": true,
+      "gpui_artifacts": [
+        {
+          "package_id": "path+file:///home/miles/gpui-ce3-compute-20261024/ime-cleared-sol-9310-20261024/source/reactivity/crates/gpui#0.1.0",
+          "features": [],
+          "fresh": false,
+          "filenames": [
+            "/home/miles/gpui-ce3-compute-20261024/ime-cleared-sol-9310-20261024/target/debug/build/gpui/07bea72b2c9307ba/out/libgpui-07bea72b2c9307ba.rlib",
+            "/home/miles/gpui-ce3-compute-20261024/ime-cleared-sol-9310-20261024/target/debug/build/gpui/07bea72b2c9307ba/out/libgpui-07bea72b2c9307ba.rmeta"
+          ]
+        }
+      ]
+    }
+  },
+  "assertion_correction9310": {
+    "execution": {
+      "tests": [
+        {
+          "package": "gpui",
+          "target": "ime",
+          "argv": [
+            "/home/miles/gpui-ce3-compute-20261024/ime-cleared-sol-9310-20261024/target/debug/build/gpui/c3f431686767a2ca/out/ime-c3f431686767a2ca",
+            "--nocapture",
+            "--test-threads=1"
+          ],
+          "exit": 101,
+          "passed": 13,
+          "failed": 2,
+          "ignored": 0,
+          "binary_unchanged": true
+        }
+      ],
+      "all_exit_zero": false,
+      "passed": 13,
+      "failed": 2,
+      "ignored": 0,
+      "children_reaped": true
+    },
+    "failures": "\nthread 'cleared_preedit_noop_key_publishes_cancel_while_control_text_stays_ignored' (3328525) panicked at crates/gpui/tests/ime.rs:756:5:\nassertion `left == right` failed\n  left: 1\n right: 0\nnote: run with `RUST_BACKTRACE=1` environment variable to display a backtrace\n\nthread 'cleared_preedit_resumes_keys_at_original_replacement_and_revokes_late_commit' (3328526) panicked at crates/gpui/tests/ime.rs:714:32:\ncalled `Result::unwrap()` on an `Err` value: StalePresentation\n",
+    "archive": {
+      "source": "9310fd79fc2efb5903602625190e71101197ebad",
+      "archive": "/home/miles/gpui-ce3-compute-20261024/ime-cleared-sol-9310-20261024/seal-9310-failure/source-and-failed-test.tar.zst",
+      "bytes": 17093543,
+      "sha256": "cef951e7b3e31d2b6ff122665e82330667aaced37e3eee73f57139c58eb11cdc",
+      "members": [
+        {
+          "member": "source.tar.zst",
+          "bytes": 8429273,
+          "sha256": "2b551cb2a37f589d14ed8d28c171fd816df95b33f552b6e58b698f487b07873e"
+        },
+        {
+          "member": "input-manifest.json",
+          "bytes": 278559,
+          "sha256": "3d1b78350c16d4f94ff322e2672563e7eec6883e2c2f66bda2a7e52d02a5e8ab"
+        },
+        {
+          "member": "public-all/000-gpui-ime/binary.json",
+          "bytes": 1094,
+          "sha256": "857215fdcbb143bd76fae9220c3878a6fb4174ff2b861fe768dd280c9381323f"
+        },
+        {
+          "member": "public-all/000-gpui-ime/result.json",
+          "bytes": 333,
+          "sha256": "cc64e2c805b5571d02f4d7c27ec2d88add5f20e0458bc6a3fb2ee3286811c511"
+        },
+        {
+          "member": "public-all/000-gpui-ime/stderr.log",
+          "bytes": 475,
+          "sha256": "4b30cc38402c5f0e2396a1ec37ce9c889dd7ef212c8a008f7ea5d236a486a68d"
+        },
+        {
+          "member": "public-all/000-gpui-ime/stdout.log",
+          "bytes": 1583,
+          "sha256": "f2776d649fbc5bc8bff944d42b6751cc63bcf8cce925ad94c875a754e6ea2de7"
+        },
+        {
+          "member": "public-all/result.json",
+          "bytes": 510,
+          "sha256": "7a92922816135f10c7d4c428c632963ae02cb1ad9177b12dde719e95e02c1fd2"
+        },
+        {
+          "member": "public-build/after.json",
+          "bytes": 273822,
+          "sha256": "8d55346ed773878c2538eeff36249f177429e7a8e33319f470a80a5e01860ed1"
+        },
+        {
+          "member": "public-build/before.json",
+          "bytes": 273822,
+          "sha256": "8d55346ed773878c2538eeff36249f177429e7a8e33319f470a80a5e01860ed1"
+        },
+        {
+          "member": "public-build/cargo.txt",
+          "bytes": 353,
+          "sha256": "08b604bc6bf85db2831c253424771ccc6d6d4c5ebd81dac34ca9d11bcffe855a"
+        },
+        {
+          "member": "public-build/command.json",
+          "bytes": 1964,
+          "sha256": "d304f9669faafb77326f92647e9a02e9c7e5c3361f1818fd25217ac22e3ae5c9"
+        },
+        {
+          "member": "public-build/result.json",
+          "bytes": 488,
+          "sha256": "30f5e51f219a3893302032ce4ada2b44b0e95019653f270a73e8a38e25d9a50a"
+        },
+        {
+          "member": "public-build/rustc.txt",
+          "bytes": 214,
+          "sha256": "2900025046ddf3de47f87dd3d69fbfe380cae61af5fe1ecf31bb89c5f10645c5"
+        },
+        {
+          "member": "public-build/stderr.log",
+          "bytes": 10058,
+          "sha256": "89e96609e1f32d31aee7201b3c58d32e8207f43d9bbede5bc4e8b1d73ed24ea7"
+        },
+        {
+          "member": "public-build/stdout.log",
+          "bytes": 300508,
+          "sha256": "a7b653138090847c41e7c8c5cae2d053bb2ef796e8a6af50102c2a74b6bce2b9"
+        },
+        {
+          "member": "ime-test",
+          "bytes": 29192368,
+          "sha256": "8d1a7da5dbf2d01c9dc0c2803c0495c4f6cbc76c610105eded58de6c3c6716c9"
+        }
+      ],
+      "original_elf_rechecked": true,
+      "stream_reextraction_checked": true,
+      "children_reaped": true,
+      "reason": "Actual13pass2failed new assertions; wrong no-op input and expected stale ACK return. Production correction unchanged in test-only successor."
+    }
+  }
+}

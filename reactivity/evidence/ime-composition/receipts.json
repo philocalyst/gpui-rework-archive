@@ -1,0 +1,405 @@
+{
+  "final_source_archive": {
+    "source": "a623ee8e3ff7ccfc2d0ea87ee97c8eee2e985a27",
+    "archive": "/tmp/gpui-ime-cleared-a623-inputs/source.tar.zst",
+    "bytes": 8429257,
+    "sha256": "19682e2c53ca48e3d9dc1f874773eeb4f75731f6c608783d71264539cdd8e392",
+    "inputs": 2073,
+    "overlay_paths": [
+      "reactivity/crates/gpui/src/native/ime_tests.rs",
+      "reactivity/crates/gpui/src/runtime/ime.rs",
+      "reactivity/crates/gpui/src/runtime/input.rs",
+      "reactivity/crates/gpui/tests/ime.rs"
+    ],
+    "children_reaped": true,
+    "payload_sha256": "3f4dfdbaf1268a4c41b6bd8aee33affa4c8463d69cb43efbb292d72313a23aec"
+  },
+  "final_logs": {
+    "stage": "/home/miles/gpui-ce3-compute-20261024/ime-cleared-sol-9310-20261024",
+    "archive": "/tmp/gpui-ime-remote-collected-sol-20261024/a623/logs.tar.gz",
+    "bytes": 4111157,
+    "sha256": "7bd93f933ac3de9ff7e92a68172706c9b88eb98f7d18e10fc8e66ff454a36269",
+    "members": 274,
+    "all_members_verified": true,
+    "children_reaped": true
+  },
+  "prior_logs": {
+    "stage": "/home/miles/gpui-ce3-compute-20261024/ime-composition-sol-9e00-20261024",
+    "archive": "/tmp/gpui-ime-remote-collected-sol-20261024/9e00/logs.tar.gz",
+    "bytes": 3229258,
+    "sha256": "3e5db39967e5d89365bf68238b4cd3b8650184b4b6108515f23bdf18a472ed83",
+    "members": 200,
+    "all_members_verified": true,
+    "children_reaped": true
+  },
+  "final_artifacts": {
+    "source": "a623ee8e3ff7ccfc2d0ea87ee97c8eee2e985a27",
+    "negative_source": "9e00c79f46fd451f7f9ea8150801ee44c709d745",
+    "archive": "/home/miles/gpui-ce3-compute-20261024/ime-cleared-sol-9310-20261024/seal-a623/positive-negative-artifacts.tar.zst",
+    "bytes": 209168688,
+    "sha256": "518a6e17a76760c71bfe4ab9f1819ec81a312fcb47d8d6c33917a2cb2d2960d1",
+    "members": [
+      {
+        "member": "source-a623.tar.zst",
+        "bytes": 8429257,
+        "sha256": "19682e2c53ca48e3d9dc1f874773eeb4f75731f6c608783d71264539cdd8e392"
+      },
+      {
+        "member": "source-9e.tar.zst",
+        "bytes": 8428849,
+        "sha256": "82e5861ac74c158a3caa22906fc9bad046feb92d8df818c608f85981f6269ed8"
+      },
+      {
+        "member": "input-manifest-a623.json",
+        "bytes": 278559,
+        "sha256": "595ac96cea08ded01d453343fef569a255d09d2ee69500002a0c387c6c691f7e"
+      },
+      {
+        "member": "input-manifest-9e.json",
+        "bytes": 278958,
+        "sha256": "b52f06f26dfcded50924160bf32a260c602e305dc26938cdee0d89847005d02c"
+      },
+      {
+        "member": "executables.json",
+        "bytes": 32594,
+        "sha256": "7d5826ea752272ac9710b86623d9acb2cd718c89cd86a19bd60526ff6245d5e0"
+      },
+      {
+        "member": "native/checkbox/test",
+        "bytes": 30045432,
+        "sha256": "a148142a65706bd336e17a700e671d7a8f4a2e3b0ba3742250a12ffff872b09b"
+      },
+      {
+        "member": "native/clipping/test",
+        "bytes": 32313408,
+        "sha256": "16f889fa0c8f73bea03f046caa7d647f6e3093a731fa8fd435a7a36e55a778ab"
+      },
+      {
+        "member": "native/focus/test",
+        "bytes": 30374192,
+        "sha256": "b5de0a8e3333fba11e83f6a1298d2dadd4a476ecf40c2fb755a54e45d0ac4d7f"
+      },
+      {
+        "member": "native/gpui/test",
+        "bytes": 172639896,
+        "sha256": "a9ae2a458fadaa73c545f093a145fcf924184864643a06fc3074e15501b45729"
+      },
+      {
+        "member": "native/ime/test",
+        "bytes": 29197936,
+        "sha256": "68291705104a42002f8469659cce579f01e502822c1cc81f6fe7779669acb374"
+      },
+      {
+        "member": "native/inspector/test",
+        "bytes": 33957360,
+        "sha256": "1ec0d64960c51f94245f560d64bf6c864bd63a33b70be04ce8f7867383ac5750"
+      },
+      {
+        "member": "native/lists/test",
+        "bytes": 38532952,
+        "sha256": "4fa75d1f7ba51562464cc2f4249088a0e7d2478d7b3100a8f147cd458c155f4c"
+      },
+      {
+        "member": "native/property_selection/test",
+        "bytes": 30535312,
+        "sha256": "10e039013b58fcf0cf7e842e0aead94af28cecb67914c6f854146fcec940f3bf"
+      },
+      {
+        "member": "native/remote/test",
+        "bytes": 30171464,
+        "sha256": "79dccb9a768e82bd125c0bf38388f3f7f94b52f39536f8be3ebd5d60508d4717"
+      },
+      {
+        "member": "native/scroll/test",
+        "bytes": 38383568,
+        "sha256": "64972eedb459d6c2744b4b20aeb8d64fc39257f569be6fa0a3c7bb52812fbb54"
+      },
+      {
+        "member": "native/semantic_metadata/test",
+        "bytes": 34812632,
+        "sha256": "8487004b608fb1cb3eeec550f3b0e585fa68ff6b24e896f5d1ebdd94498ed967"
+      },
+      {
+        "member": "native/text_selection/test",
+        "bytes": 31167032,
+        "sha256": "c877b88a65ff2c01d2e3bc20e9bea34953a6b9da8daa0facda8d2dbac5a52a50"
+      },
+      {
+        "member": "native/text_selection_compound/test",
+        "bytes": 27303720,
+        "sha256": "7981a375e9208f3dc1902ef05cfc6e8f71e3fe255b607145ba0f97249b515cd8"
+      },
+      {
+        "member": "scalar/components/test",
+        "bytes": 31390888,
+        "sha256": "c470876700a3e0b244c404e1055657e6f6a953ee60657657ec4a2c87d8901871"
+      },
+      {
+        "member": "scalar/frontier/test",
+        "bytes": 28935344,
+        "sha256": "9c59eb6249bff1b6ad75d0a12fcab68694a1bde0ad6105e193cce69ac7fd9fb3"
+      },
+      {
+        "member": "scalar/gpui/test",
+        "bytes": 68445648,
+        "sha256": "b6326a086b3f7072df35899859bb05c04ea55279b69b60a038693c111dfdb5a7"
+      },
+      {
+        "member": "scalar/ime/test",
+        "bytes": 28733560,
+        "sha256": "0f77f2804f8d42faf3cfbc06bc489d150a74d34f8ac581328036302de285259e"
+      },
+      {
+        "member": "consumer/cleared-key/test",
+        "bytes": 26658464,
+        "sha256": "540b48d0314c3597204806de5b9a8bc4e93b35f23c9834787e189ccb46a409ab"
+      },
+      {
+        "member": "negative-9e/cleared-key/test",
+        "bytes": 26656800,
+        "sha256": "2d30a2457258c4cdf74db9774f61d01ae20b9115bd71dcf0aa2de0ecf596ac54"
+      },
+      {
+        "member": "consumer-a623/Cargo.toml",
+        "bytes": 1064,
+        "sha256": "575212fedeb8287fd9bf638b5fa772a1429b0609f9e228f460698e66016403f0"
+      },
+      {
+        "member": "consumer-a623/Cargo.lock",
+        "bytes": 17172,
+        "sha256": "d6f46d9a2c38378a4659c319c2f1bc4551214396e2a593ef699362b930424285"
+      },
+      {
+        "member": "consumer-a623/src/lib.rs",
+        "bytes": 1022,
+        "sha256": "b186911ed20cecbaa031b338f3fdf22b8bfab78eed3d9b3b00604c5808e593c0"
+      },
+      {
+        "member": "consumer-9e/Cargo.toml",
+        "bytes": 1064,
+        "sha256": "575212fedeb8287fd9bf638b5fa772a1429b0609f9e228f460698e66016403f0"
+      },
+      {
+        "member": "consumer-9e/Cargo.lock",
+        "bytes": 17172,
+        "sha256": "d6f46d9a2c38378a4659c319c2f1bc4551214396e2a593ef699362b930424285"
+      },
+      {
+        "member": "consumer-9e/src/lib.rs",
+        "bytes": 1022,
+        "sha256": "b186911ed20cecbaa031b338f3fdf22b8bfab78eed3d9b3b00604c5808e593c0"
+      }
+    ],
+    "positive_executables": 18,
+    "negative_executables": 1,
+    "originals_rechecked": true,
+    "stream_reextraction_checked": true,
+    "children_reaped": true,
+    "scope": "Actual18final native/scalar/external-consumer executables plus unchanged9e consumerfailure; exactsource archives and source-identical external fixtures. Targets/evidence remain retained; no shipping-code-size or latency inference."
+  },
+  "prior9e_artifacts": {
+    "source": "9e00c79f46fd451f7f9ea8150801ee44c709d745",
+    "archive": "/home/miles/gpui-ce3-compute-20261024/ime-composition-sol-9e00-20261024/seal/native-scalar-artifacts.tar.zst",
+    "bytes": 95357151,
+    "sha256": "c4f9f60d9603fdae6fc28d138f4ebc93db0fc40840c681f5db20750523391c1d",
+    "members": [
+      {
+        "member": "source.tar.zst",
+        "bytes": 8428849,
+        "sha256": "82e5861ac74c158a3caa22906fc9bad046feb92d8df818c608f85981f6269ed8"
+      },
+      {
+        "member": "input-manifest.json",
+        "bytes": 278958,
+        "sha256": "b52f06f26dfcded50924160bf32a260c602e305dc26938cdee0d89847005d02c"
+      },
+      {
+        "member": "executables.json",
+        "bytes": 10604,
+        "sha256": "b5a2f797e27d760574e15d3911fad7838ce17fb4ebe980787bde7a7014c16101"
+      },
+      {
+        "member": "native/ime/test",
+        "bytes": 29166768,
+        "sha256": "f71c28ffb12310a516253a56a084a31a7960ac0635f2541bbabeac3f282fcc10"
+      },
+      {
+        "member": "native/property_selection/test",
+        "bytes": 30535312,
+        "sha256": "0ca25f908d7a599a6e84d43508cb3da489cc59e05d8505f6b13837f0fd84f4e0"
+      },
+      {
+        "member": "native/gpui/test",
+        "bytes": 172583544,
+        "sha256": "a34dcefd1ce27accfb5b4c1382cfb444538baf50f3483517b2bc0c2962781320"
+      },
+      {
+        "member": "scalar/gpui/test",
+        "bytes": 68445648,
+        "sha256": "c523f5d27b5562607619532c89dcb7f65e0b9eaa36a4eba25a73e3042f6eeb61"
+      },
+      {
+        "member": "scalar/frontier/test",
+        "bytes": 28935344,
+        "sha256": "44a9d785f7d89b1b3a3b7722d1c3eb9e9e39c13ba1dc7227f095a2aac9abdfc4"
+      },
+      {
+        "member": "scalar/ime/test",
+        "bytes": 28702440,
+        "sha256": "6030a83fa7be78cd7ea9458929ad5ac6ec308babbf93551ed3024944215a06ae"
+      },
+      {
+        "member": "scalar/components/test",
+        "bytes": 31390888,
+        "sha256": "08dad22aad259be275b7cc88e39cdaac7000d4bd5a64270069c1349d911bd0ad"
+      }
+    ],
+    "originals_rechecked": true,
+    "stream_reextraction_checked": true,
+    "children_reaped": true,
+    "scope": "Seven actual final native/scalar Linux debug0 executables and exact source inputs; unmodified target/cache/evidence retained."
+  },
+  "assertion_failure_archive": {
+    "source": "9310fd79fc2efb5903602625190e71101197ebad",
+    "archive": "/home/miles/gpui-ce3-compute-20261024/ime-cleared-sol-9310-20261024/seal-9310-failure/source-and-failed-test.tar.zst",
+    "bytes": 17093543,
+    "sha256": "cef951e7b3e31d2b6ff122665e82330667aaced37e3eee73f57139c58eb11cdc",
+    "members": [
+      {
+        "member": "source.tar.zst",
+        "bytes": 8429273,
+        "sha256": "2b551cb2a37f589d14ed8d28c171fd816df95b33f552b6e58b698f487b07873e"
+      },
+      {
+        "member": "input-manifest.json",
+        "bytes": 278559,
+        "sha256": "3d1b78350c16d4f94ff322e2672563e7eec6883e2c2f66bda2a7e52d02a5e8ab"
+      },
+      {
+        "member": "public-all/000-gpui-ime/binary.json",
+        "bytes": 1094,
+        "sha256": "857215fdcbb143bd76fae9220c3878a6fb4174ff2b861fe768dd280c9381323f"
+      },
+      {
+        "member": "public-all/000-gpui-ime/result.json",
+        "bytes": 333,
+        "sha256": "cc64e2c805b5571d02f4d7c27ec2d88add5f20e0458bc6a3fb2ee3286811c511"
+      },
+      {
+        "member": "public-all/000-gpui-ime/stderr.log",
+        "bytes": 475,
+        "sha256": "4b30cc38402c5f0e2396a1ec37ce9c889dd7ef212c8a008f7ea5d236a486a68d"
+      },
+      {
+        "member": "public-all/000-gpui-ime/stdout.log",
+        "bytes": 1583,
+        "sha256": "f2776d649fbc5bc8bff944d42b6751cc63bcf8cce925ad94c875a754e6ea2de7"
+      },
+      {
+        "member": "public-all/result.json",
+        "bytes": 510,
+        "sha256": "7a92922816135f10c7d4c428c632963ae02cb1ad9177b12dde719e95e02c1fd2"
+      },
+      {
+        "member": "public-build/after.json",
+        "bytes": 273822,
+        "sha256": "8d55346ed773878c2538eeff36249f177429e7a8e33319f470a80a5e01860ed1"
+      },
+      {
+        "member": "public-build/before.json",
+        "bytes": 273822,
+        "sha256": "8d55346ed773878c2538eeff36249f177429e7a8e33319f470a80a5e01860ed1"
+      },
+      {
+        "member": "public-build/cargo.txt",
+        "bytes": 353,
+        "sha256": "08b604bc6bf85db2831c253424771ccc6d6d4c5ebd81dac34ca9d11bcffe855a"
+      },
+      {
+        "member": "public-build/command.json",
+        "bytes": 1964,
+        "sha256": "d304f9669faafb77326f92647e9a02e9c7e5c3361f1818fd25217ac22e3ae5c9"
+      },
+      {
+        "member": "public-build/result.json",
+        "bytes": 488,
+        "sha256": "30f5e51f219a3893302032ce4ada2b44b0e95019653f270a73e8a38e25d9a50a"
+      },
+      {
+        "member": "public-build/rustc.txt",
+        "bytes": 214,
+        "sha256": "2900025046ddf3de47f87dd3d69fbfe380cae61af5fe1ecf31bb89c5f10645c5"
+      },
+      {
+        "member": "public-build/stderr.log",
+        "bytes": 10058,
+        "sha256": "89e96609e1f32d31aee7201b3c58d32e8207f43d9bbede5bc4e8b1d73ed24ea7"
+      },
+      {
+        "member": "public-build/stdout.log",
+        "bytes": 300508,
+        "sha256": "a7b653138090847c41e7c8c5cae2d053bb2ef796e8a6af50102c2a74b6bce2b9"
+      },
+      {
+        "member": "ime-test",
+        "bytes": 29192368,
+        "sha256": "8d1a7da5dbf2d01c9dc0c2803c0495c4f6cbc76c610105eded58de6c3c6716c9"
+      }
+    ],
+    "original_elf_rechecked": true,
+    "stream_reextraction_checked": true,
+    "children_reaped": true,
+    "reason": "Actual13pass2failed new assertions; wrong no-op input and expected stale ACK return. Production correction unchanged in test-only successor."
+  },
+  "predecessorfa36_artifacts": {
+    "archive": "/tmp/gpui-ime-fa36-immutable-artifacts-v2/artifacts.tar.zst",
+    "bytes": 539193143,
+    "sha256": "012d3d37776c05c0d5c9eabf8375dc7c48d5ec0ee8550b60160c3488e9d7d04f",
+    "members": [
+      {
+        "member": "manifest.json",
+        "bytes": 7613,
+        "sha256": "6596675266c8bb69e2421eb7ef17837520e959892f30d73f0f691be319da2c1a"
+      },
+      {
+        "member": "fa36-source.tar",
+        "bytes": 37058560,
+        "sha256": "944dbc704361feb4c914902801dc5d343020a047f8bae4660e6d980a4d9c6a20"
+      },
+      {
+        "member": "positive/ime/test",
+        "bytes": 342941664,
+        "sha256": "2259971cc55041bfb219f2d77924928f47becfd669f3d65abbc5c725a511fe22"
+      },
+      {
+        "member": "positive/property_selection/test",
+        "bytes": 348435096,
+        "sha256": "4178d273202e8724e0198350fcd0d24aeff1ea852439a753e95ebfcaee2ab23f"
+      },
+      {
+        "member": "positive/gpui/test",
+        "bytes": 736718600,
+        "sha256": "688398132f6a884ea7cc8d0006178079082258784d8300e22ffdd92bd500bd59"
+      },
+      {
+        "member": "mutants/epoch/test",
+        "bytes": 339789224,
+        "sha256": "4682772cb210120fd221b460ba01771f878765bc005e12485db2468dac88a481"
+      },
+      {
+        "member": "mutants/presented/test",
+        "bytes": 339789344,
+        "sha256": "9ab20a558e2481222fafc0f03c3834504ed194002382823f15d1828db46d0eae"
+      },
+      {
+        "member": "mutants/requested/test",
+        "bytes": 732111840,
+        "sha256": "d4745d5f83b10d3503d3978240a9ffdb413031e7a6c685099d215d5d2ec227e3"
+      }
+    ],
+    "originals_rechecked": true,
+    "stream_reextraction_checked": true,
+    "children_reaped": true,
+    "scope": "Six actual frozen positive/negative executables preserved before native package rebuild; broader unrelated test target remains retained."
+  }
+}

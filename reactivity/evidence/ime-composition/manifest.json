@@ -1,0 +1,57 @@
+[
+  {
+    "path": "README.md",
+    "bytes": 10995,
+    "sha256": "263544db8a6335fd8574ae0047e3a22aedca366c4d95453c1556c5f59f894dd7"
+  },
+  {
+    "path": "cache-prune.json",
+    "bytes": 676,
+    "sha256": "92b24aa93f78651ff2c3f546bed202405b10dc004efe25a6fcaafa951829f103"
+  },
+  {
+    "path": "commands.json",
+    "bytes": 43443,
+    "sha256": "bf260e23478cf93cd2098efd576106e6ce2be231333cb56f475bc4eb4512cfc4"
+  },
+  {
+    "path": "core-lines.json",
+    "bytes": 53803,
+    "sha256": "e6d3fb2c5e8b2cf155375ad4090711e636792c7145b951cae24358e21e4d6e57"
+  },
+  {
+    "path": "costs.json",
+    "bytes": 4932,
+    "sha256": "7e77499e073da889d240c3445967cc1c7b16eb150901c82c406ed41ad982af07"
+  },
+  {
+    "path": "executables.json",
+    "bytes": 32594,
+    "sha256": "7d5826ea752272ac9710b86623d9acb2cd718c89cd86a19bd60526ff6245d5e0"
+  },
+  {
+    "path": "mac.json",
+    "bytes": 188242,
+    "sha256": "2507acb89f45dd92edffc42a916e41ec25de7bc7b5a9f135624bf9e43ee5b8fe"
+  },
+  {
+    "path": "negative-controls.json",
+    "bytes": 19297,
+    "sha256": "8dcb1ffd24b3a83c0570e05a38446c0ebab0f59861747c4b6a4b7741b5e00ea8"
+  },
+  {
+    "path": "receipts.json",
+    "bytes": 14868,
+    "sha256": "1bc9f813165a979da6ca9f8a2c12025e8736aa21590e2425125feaddc34322d9"
+  },
+  {
+    "path": "result.json",
+    "bytes": 35968,
+    "sha256": "bdb70d91f250da639dd08158a8f732833397d8f4ace969389f1a946ec5ce2f5e"
+  },
+  {
+    "path": "source.json",
+    "bytes": 335,
+    "sha256": "943bda1e6526ee198b4c8fec52fda09322fe017882d8172362153298e20b9b0b"
+  }
+]

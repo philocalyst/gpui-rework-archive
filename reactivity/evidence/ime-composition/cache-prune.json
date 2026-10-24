@@ -1,0 +1,16 @@
+{
+  "target": "/home/miles/gpui-ce3-compute-20261024/ime-composition-sol-9e00-20261024/target",
+  "source": "9e00c79f46fd451f7f9ea8150801ee44c709d745",
+  "removed_cache_files": 1869,
+  "cache_bytes": 1666608167,
+  "preserved_elves": 100,
+  "preserved_elves_match": true,
+  "source_inputs": 2073,
+  "source_and_evidence_unchanged": true,
+  "archive_reextraction_matches": true,
+  "archive": "/home/miles/gpui-ce3-compute-20261024/ime-composition-sol-9e00-20261024/seal/native-scalar-artifacts.tar.zst",
+  "archive_sha256": "c4f9f60d9603fdae6fc28d138f4ebc93db0fc40840c681f5db20750523391c1d",
+  "free_before": 9250545664,
+  "free_after": 10920226816,
+  "children_reaped": true
+}

@@ -1,0 +1,97 @@
+{
+  "source": "a623ee8e3ff7ccfc2d0ea87ee97c8eee2e985a27",
+  "baseline": "ce79d00fb004859994c8574254bbd091e964a2d4",
+  "raw_final_ledgers": {
+    "ownership": {
+      "stdout": "\nrunning 1 test\ntest runtime::ime::tests::ime_cold_ownership_reuses_only_active_buffer_and_releases_after_final_ack ... ok\n\ntest result: ok. 1 passed; 0 failed; 0 ignored; 0 measured; 282 filtered out; finished in 0.01s\n\n",
+      "stderr": "IME_PUBLIC_VALUES event=40 marked_text=48\nIME_TEXT_PROMOTION allocations=1 bytes=41 retained=41 peak=41 text_len=25\nIME_ENABLED allocations=2 bytes=144 retained=144 peak=144\nIME_FIRST_PREEDIT calling_thread_allocations=265 bytes=122770 retained=5782 peak=53250\nIME_LEASES display_strong=2 source_strong=3\nIME_STORAGE session=8 active=56 preview=120 mark=40 owner=88 editing=104 text_resources=128 buffer_capacity=24 display_bytes=24\n"
+    },
+    "headers": {
+      "stdout": "\nrunning 1 test\ntest native::ime::ime_native_header_ledger ... ok\n\ntest result: ok. 1 passed; 0 failed; 0 ignored; 0 measured; 282 filtered out; finished in 0.00s\n\n",
+      "stderr": "IME_NATIVE bridge=48 target=32 native_host=648 opening=80 window_options=24\n"
+    },
+    "query-headers": {
+      "stdout": "\nrunning 1 test\ntest runtime::query::geometry_layout_tests::basis_borrowed_geometry_context_layout_is_explicit ... BASIS_QUERY_LAYOUT context=136 context_align=8 part=16 geometry_view=24 bases=16\nok\n\ntest result: ok. 1 passed; 0 failed; 0 ignored; 0 measured; 282 filtered out; finished in 0.00s\n\n",
+      "stderr": ""
+    },
+    "packet-headers": {
+      "stdout": "\nrunning 1 test\ntest native::tests::packet_gpu_header_ledger ... ok\n\ntest result: ok. 1 passed; 0 failed; 0 ignored; 0 measured; 282 filtered out; finished in 0.00s\n\n",
+      "stderr": "packet_gpu_layout,Renderer=888,Stats=200,GpuSurface=1008,NativeHost=768,Canvas=464,PreparedScene=56\n"
+    }
+  },
+  "whole_debug0_elf": {
+    "baseline_source": "9e00c79f46fd451f7f9ea8150801ee44c709d745",
+    "source": "a623ee8e3ff7ccfc2d0ea87ee97c8eee2e985a27",
+    "baseline_bytes": 172583544,
+    "candidate_bytes": 172639896,
+    "delta_bytes": 56352,
+    "baseline_sha256": "a34dcefd1ce27accfb5b4c1382cfb444538baf50f3483517b2bc0c2962781320",
+    "candidate_sha256": "a9ae2a458fadaa73c545f093a145fcf924184864643a06fc3074e15501b45729",
+    "same_features": true,
+    "same_profile": true,
+    "scope": "Whole Linux debug0 GPUI unit-test ELF includes expanded native fixture. No isolated optimized shipping code/stack/latency claim."
+  },
+  "predecessor_whole_debug2_elf": {
+    "source": "fa36c4ebf510dfda2d393c526de17505a6ab5bf9",
+    "baseline_source": "ce79d00fb004859994c8574254bbd091e964a2d4",
+    "baseline_sha256": "168c9812ce3d510c40adcb40dd92ede12f76d024eb80e799c21b447722332eed",
+    "candidate_sha256": "688398132f6a884ea7cc8d0006178079082258784d8300e22ffdd92bd500bd59",
+    "baseline_bytes": 712232680,
+    "candidate_bytes": 736718600,
+    "whole_elf_delta_bytes": 24485920,
+    "same_gpui_features": true,
+    "baseline_executable_section_bytes": 82237615,
+    "candidate_executable_section_bytes": 86781119,
+    "section_deltas": {
+      "": 0,
+      ".bss": 0,
+      ".comment": 0,
+      ".data": 72,
+      ".data.rel.ro": 12512,
+      ".debug_abbrev": 1190,
+      ".debug_aranges": 221104,
+      ".debug_gdb_scripts": 0,
+      ".debug_info": 5505031,
+      ".debug_line": 1790116,
+      ".debug_loc": 238387,
+      ".debug_ranges": 1314576,
+      ".debug_str": 6581506,
+      ".dynamic": 0,
+      ".dynstr": 0,
+      ".dynsym": 0,
+      ".eh_frame": 367568,
+      ".eh_frame_hdr": 109880,
+      ".fini": 0,
+      ".fini_array": 0,
+      ".gcc_except_table": 116084,
+      ".gnu.hash": 0,
+      ".gnu.version": 0,
+      ".gnu.version_r": 0,
+      ".got": 48,
+      ".got.plt": 0,
+      ".init": 0,
+      ".init_array": 0,
+      ".interp": 0,
+      ".note.ABI-tag": 0,
+      ".plt": 0,
+      ".rela.dyn": 13440,
+      ".rela.plt": 0,
+      ".relro_padding": 1392,
+      ".rodata": 139944,
+      ".shstrtab": 0,
+      ".strtab": 3162945,
+      ".symtab": 368088,
+      ".tbss": 0,
+      ".tdata": 0,
+      ".text": 4543504,
+      ".tm_clone_table": 0
+    },
+    "scope": "Whole debug qualification test ELF, including new tests and 73036 bytes of font outlines. Executable sections include test code. No isolated shipping-machine-code, optimized stack, timing or latency inference."
+  },
+  "dependencies_changed": false,
+  "existing_ecow_shipping_lines": 2315,
+  "font_test_payload_bytes": 73036,
+  "physical_capacity_policy": "Full String geometric spare and old C/P immutable buffers charged; logical32KiB is not physicalbound; no buffer retained in canonicalSource on commit",
+  "allocation_measurement_scope": "Requested allocation bytes on calling thread; parallelworker/RSS/universalpeak/latency not claimed",
+  "transient_key_cost": "One extra optional PresentationToken value; no isolated optimizedstack measurement"
+}

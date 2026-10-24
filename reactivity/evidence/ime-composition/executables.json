@@ -1,0 +1,900 @@
+[
+  {
+    "member": "native/checkbox/test",
+    "path": "/home/miles/gpui-ce3-compute-20261024/ime-cleared-sol-9310-20261024/target/debug/build/gpui/b888b625af001083/out/checkbox-b888b625af001083",
+    "bytes": 30045432,
+    "sha256": "a148142a65706bd336e17a700e671d7a8f4a2e3b0ba3742250a12ffff872b09b",
+    "identity": {
+      "source": "a623ee8e3ff7ccfc2d0ea87ee97c8eee2e985a27",
+      "path": "/home/miles/gpui-ce3-compute-20261024/ime-cleared-sol-9310-20261024/target/debug/build/gpui/b888b625af001083/out/checkbox-b888b625af001083",
+      "sha256": "a148142a65706bd336e17a700e671d7a8f4a2e3b0ba3742250a12ffff872b09b",
+      "bytes": 30045432,
+      "inode": 16270112,
+      "mtime_ns": 1792871462636096259,
+      "package": "gpui",
+      "target": {
+        "kind": [
+          "test"
+        ],
+        "crate_types": [
+          "bin"
+        ],
+        "name": "checkbox",
+        "src_path": "/home/miles/gpui-ce3-compute-20261024/ime-cleared-sol-9310-20261024/source/reactivity/crates/gpui/tests/checkbox.rs",
+        "edition": "2024",
+        "doc": false,
+        "doctest": false,
+        "test": true
+      },
+      "features": [
+        "accessibility",
+        "default",
+        "native",
+        "native-core",
+        "simd",
+        "x11",
+        "x11-minimal"
+      ],
+      "fresh": false,
+      "profile": {
+        "opt_level": "0",
+        "debuginfo": 0,
+        "debug_assertions": true,
+        "overflow_checks": true,
+        "test": true
+      },
+      "scope": "Exclusive lane target, compiler reaped before execution; no redundant executable copy."
+    },
+    "role": "positive"
+  },
+  {
+    "member": "native/clipping/test",
+    "path": "/home/miles/gpui-ce3-compute-20261024/ime-cleared-sol-9310-20261024/target/debug/build/gpui/b567565d4cb5fb88/out/clipping-b567565d4cb5fb88",
+    "bytes": 32313408,
+    "sha256": "16f889fa0c8f73bea03f046caa7d647f6e3093a731fa8fd435a7a36e55a778ab",
+    "identity": {
+      "source": "a623ee8e3ff7ccfc2d0ea87ee97c8eee2e985a27",
+      "path": "/home/miles/gpui-ce3-compute-20261024/ime-cleared-sol-9310-20261024/target/debug/build/gpui/b567565d4cb5fb88/out/clipping-b567565d4cb5fb88",
+      "sha256": "16f889fa0c8f73bea03f046caa7d647f6e3093a731fa8fd435a7a36e55a778ab",
+      "bytes": 32313408,
+      "inode": 16270172,
+      "mtime_ns": 1792871489252258165,
+      "package": "gpui",
+      "target": {
+        "kind": [
+          "test"
+        ],
+        "crate_types": [
+          "bin"
+        ],
+        "name": "clipping",
+        "src_path": "/home/miles/gpui-ce3-compute-20261024/ime-cleared-sol-9310-20261024/source/reactivity/crates/gpui/tests/clipping.rs",
+        "edition": "2024",
+        "doc": false,
+        "doctest": false,
+        "test": true
+      },
+      "features": [
+        "accessibility",
+        "default",
+        "native",
+        "native-core",
+        "simd",
+        "x11",
+        "x11-minimal"
+      ],
+      "fresh": false,
+      "profile": {
+        "opt_level": "0",
+        "debuginfo": 0,
+        "debug_assertions": true,
+        "overflow_checks": true,
+        "test": true
+      },
+      "scope": "Exclusive lane target, compiler reaped before execution; no redundant executable copy."
+    },
+    "role": "positive"
+  },
+  {
+    "member": "native/focus/test",
+    "path": "/home/miles/gpui-ce3-compute-20261024/ime-cleared-sol-9310-20261024/target/debug/build/gpui/c684687220ff27e4/out/focus-c684687220ff27e4",
+    "bytes": 30374192,
+    "sha256": "b5de0a8e3333fba11e83f6a1298d2dadd4a476ecf40c2fb755a54e45d0ac4d7f",
+    "identity": {
+      "source": "a623ee8e3ff7ccfc2d0ea87ee97c8eee2e985a27",
+      "path": "/home/miles/gpui-ce3-compute-20261024/ime-cleared-sol-9310-20261024/target/debug/build/gpui/c684687220ff27e4/out/focus-c684687220ff27e4",
+      "sha256": "b5de0a8e3333fba11e83f6a1298d2dadd4a476ecf40c2fb755a54e45d0ac4d7f",
+      "bytes": 30374192,
+      "inode": 16270123,
+      "mtime_ns": 1792871467569126300,
+      "package": "gpui",
+      "target": {
+        "kind": [
+          "test"
+        ],
+        "crate_types": [
+          "bin"
+        ],
+        "name": "focus",
+        "src_path": "/home/miles/gpui-ce3-compute-20261024/ime-cleared-sol-9310-20261024/source/reactivity/crates/gpui/tests/focus.rs",
+        "edition": "2024",
+        "doc": false,
+        "doctest": false,
+        "test": true
+      },
+      "features": [
+        "accessibility",
+        "default",
+        "native",
+        "native-core",
+        "simd",
+        "x11",
+        "x11-minimal"
+      ],
+      "fresh": false,
+      "profile": {
+        "opt_level": "0",
+        "debuginfo": 0,
+        "debug_assertions": true,
+        "overflow_checks": true,
+        "test": true
+      },
+      "scope": "Exclusive lane target, compiler reaped before execution; no redundant executable copy."
+    },
+    "role": "positive"
+  },
+  {
+    "member": "native/gpui/test",
+    "path": "/home/miles/gpui-ce3-compute-20261024/ime-cleared-sol-9310-20261024/target/debug/build/gpui/844d7bbdddc48e15/out/gpui-844d7bbdddc48e15",
+    "bytes": 172639896,
+    "sha256": "a9ae2a458fadaa73c545f093a145fcf924184864643a06fc3074e15501b45729",
+    "identity": {
+      "source": "a623ee8e3ff7ccfc2d0ea87ee97c8eee2e985a27",
+      "path": "/home/miles/gpui-ce3-compute-20261024/ime-cleared-sol-9310-20261024/target/debug/build/gpui/844d7bbdddc48e15/out/gpui-844d7bbdddc48e15",
+      "sha256": "a9ae2a458fadaa73c545f093a145fcf924184864643a06fc3074e15501b45729",
+      "bytes": 172639896,
+      "inode": 16270151,
+      "mtime_ns": 1792871484372228512,
+      "package": "gpui",
+      "target": {
+        "kind": [
+          "lib"
+        ],
+        "crate_types": [
+          "lib"
+        ],
+        "name": "gpui",
+        "src_path": "/home/miles/gpui-ce3-compute-20261024/ime-cleared-sol-9310-20261024/source/reactivity/crates/gpui/src/lib.rs",
+        "edition": "2024",
+        "doc": true,
+        "doctest": true,
+        "test": true
+      },
+      "features": [
+        "accessibility",
+        "default",
+        "native",
+        "native-core",
+        "simd",
+        "x11",
+        "x11-minimal"
+      ],
+      "fresh": false,
+      "profile": {
+        "opt_level": "0",
+        "debuginfo": 0,
+        "debug_assertions": true,
+        "overflow_checks": true,
+        "test": true
+      },
+      "scope": "Exclusive lane target, compiler reaped before execution; no redundant executable copy."
+    },
+    "role": "positive"
+  },
+  {
+    "member": "native/ime/test",
+    "path": "/home/miles/gpui-ce3-compute-20261024/ime-cleared-sol-9310-20261024/target/debug/build/gpui/c3f431686767a2ca/out/ime-c3f431686767a2ca",
+    "bytes": 29197936,
+    "sha256": "68291705104a42002f8469659cce579f01e502822c1cc81f6fe7779669acb374",
+    "identity": {
+      "source": "a623ee8e3ff7ccfc2d0ea87ee97c8eee2e985a27",
+      "path": "/home/miles/gpui-ce3-compute-20261024/ime-cleared-sol-9310-20261024/target/debug/build/gpui/c3f431686767a2ca/out/ime-c3f431686767a2ca",
+      "sha256": "68291705104a42002f8469659cce579f01e502822c1cc81f6fe7779669acb374",
+      "bytes": 29197936,
+      "inode": 16270021,
+      "mtime_ns": 1792871404209739224,
+      "package": "gpui",
+      "target": {
+        "kind": [
+          "test"
+        ],
+        "crate_types": [
+          "bin"
+        ],
+        "name": "ime",
+        "src_path": "/home/miles/gpui-ce3-compute-20261024/ime-cleared-sol-9310-20261024/source/reactivity/crates/gpui/tests/ime.rs",
+        "edition": "2024",
+        "doc": false,
+        "doctest": false,
+        "test": true
+      },
+      "features": [
+        "accessibility",
+        "default",
+        "native",
+        "native-core",
+        "simd",
+        "x11",
+        "x11-minimal"
+      ],
+      "fresh": true,
+      "profile": {
+        "opt_level": "0",
+        "debuginfo": 0,
+        "debug_assertions": true,
+        "overflow_checks": true,
+        "test": true
+      },
+      "scope": "Exclusive lane target, compiler reaped before execution; no redundant executable copy."
+    },
+    "role": "positive"
+  },
+  {
+    "member": "native/inspector/test",
+    "path": "/home/miles/gpui-ce3-compute-20261024/ime-cleared-sol-9310-20261024/target/debug/build/gpui/5ab6aed0b12696f5/out/inspector-5ab6aed0b12696f5",
+    "bytes": 33957360,
+    "sha256": "1ec0d64960c51f94245f560d64bf6c864bd63a33b70be04ce8f7867383ac5750",
+    "identity": {
+      "source": "a623ee8e3ff7ccfc2d0ea87ee97c8eee2e985a27",
+      "path": "/home/miles/gpui-ce3-compute-20261024/ime-cleared-sol-9310-20261024/target/debug/build/gpui/5ab6aed0b12696f5/out/inspector-5ab6aed0b12696f5",
+      "sha256": "1ec0d64960c51f94245f560d64bf6c864bd63a33b70be04ce8f7867383ac5750",
+      "bytes": 33957360,
+      "inode": 16270103,
+      "mtime_ns": 1792871458168069036,
+      "package": "gpui",
+      "target": {
+        "kind": [
+          "test"
+        ],
+        "crate_types": [
+          "bin"
+        ],
+        "name": "inspector",
+        "src_path": "/home/miles/gpui-ce3-compute-20261024/ime-cleared-sol-9310-20261024/source/reactivity/crates/gpui/tests/inspector.rs",
+        "edition": "2024",
+        "doc": false,
+        "doctest": false,
+        "test": true
+      },
+      "features": [
+        "accessibility",
+        "default",
+        "native",
+        "native-core",
+        "simd",
+        "x11",
+        "x11-minimal"
+      ],
+      "fresh": false,
+      "profile": {
+        "opt_level": "0",
+        "debuginfo": 0,
+        "debug_assertions": true,
+        "overflow_checks": true,
+        "test": true
+      },
+      "scope": "Exclusive lane target, compiler reaped before execution; no redundant executable copy."
+    },
+    "role": "positive"
+  },
+  {
+    "member": "native/lists/test",
+    "path": "/home/miles/gpui-ce3-compute-20261024/ime-cleared-sol-9310-20261024/target/debug/build/gpui/7f27e7609799c25d/out/lists-7f27e7609799c25d",
+    "bytes": 38532952,
+    "sha256": "4fa75d1f7ba51562464cc2f4249088a0e7d2478d7b3100a8f147cd458c155f4c",
+    "identity": {
+      "source": "a623ee8e3ff7ccfc2d0ea87ee97c8eee2e985a27",
+      "path": "/home/miles/gpui-ce3-compute-20261024/ime-cleared-sol-9310-20261024/target/debug/build/gpui/7f27e7609799c25d/out/lists-7f27e7609799c25d",
+      "sha256": "4fa75d1f7ba51562464cc2f4249088a0e7d2478d7b3100a8f147cd458c155f4c",
+      "bytes": 38532952,
+      "inode": 16270158,
+      "mtime_ns": 1792871483896225619,
+      "package": "gpui",
+      "target": {
+        "kind": [
+          "test"
+        ],
+        "crate_types": [
+          "bin"
+        ],
+        "name": "lists",
+        "src_path": "/home/miles/gpui-ce3-compute-20261024/ime-cleared-sol-9310-20261024/source/reactivity/crates/gpui/tests/lists.rs",
+        "edition": "2024",
+        "doc": false,
+        "doctest": false,
+        "test": true
+      },
+      "features": [
+        "accessibility",
+        "default",
+        "native",
+        "native-core",
+        "simd",
+        "x11",
+        "x11-minimal"
+      ],
+      "fresh": false,
+      "profile": {
+        "opt_level": "0",
+        "debuginfo": 0,
+        "debug_assertions": true,
+        "overflow_checks": true,
+        "test": true
+      },
+      "scope": "Exclusive lane target, compiler reaped before execution; no redundant executable copy."
+    },
+    "role": "positive"
+  },
+  {
+    "member": "native/property_selection/test",
+    "path": "/home/miles/gpui-ce3-compute-20261024/ime-cleared-sol-9310-20261024/target/debug/build/gpui/cecdf4f1ec46ad0a/out/property_selection-cecdf4f1ec46ad0a",
+    "bytes": 30535312,
+    "sha256": "10e039013b58fcf0cf7e842e0aead94af28cecb67914c6f854146fcec940f3bf",
+    "identity": {
+      "source": "a623ee8e3ff7ccfc2d0ea87ee97c8eee2e985a27",
+      "path": "/home/miles/gpui-ce3-compute-20261024/ime-cleared-sol-9310-20261024/target/debug/build/gpui/cecdf4f1ec46ad0a/out/property_selection-cecdf4f1ec46ad0a",
+      "sha256": "10e039013b58fcf0cf7e842e0aead94af28cecb67914c6f854146fcec940f3bf",
+      "bytes": 30535312,
+      "inode": 16270096,
+      "mtime_ns": 1792871452831036502,
+      "package": "gpui",
+      "target": {
+        "kind": [
+          "test"
+        ],
+        "crate_types": [
+          "bin"
+        ],
+        "name": "property_selection",
+        "src_path": "/home/miles/gpui-ce3-compute-20261024/ime-cleared-sol-9310-20261024/source/reactivity/crates/gpui/tests/property_selection.rs",
+        "edition": "2024",
+        "doc": false,
+        "doctest": false,
+        "test": true
+      },
+      "features": [
+        "accessibility",
+        "default",
+        "native",
+        "native-core",
+        "simd",
+        "x11",
+        "x11-minimal"
+      ],
+      "fresh": false,
+      "profile": {
+        "opt_level": "0",
+        "debuginfo": 0,
+        "debug_assertions": true,
+        "overflow_checks": true,
+        "test": true
+      },
+      "scope": "Exclusive lane target, compiler reaped before execution; no redundant executable copy."
+    },
+    "role": "positive"
+  },
+  {
+    "member": "native/remote/test",
+    "path": "/home/miles/gpui-ce3-compute-20261024/ime-cleared-sol-9310-20261024/target/debug/build/gpui/7d83c7f6c2f44e0e/out/remote-7d83c7f6c2f44e0e",
+    "bytes": 30171464,
+    "sha256": "79dccb9a768e82bd125c0bf38388f3f7f94b52f39536f8be3ebd5d60508d4717",
+    "identity": {
+      "source": "a623ee8e3ff7ccfc2d0ea87ee97c8eee2e985a27",
+      "path": "/home/miles/gpui-ce3-compute-20261024/ime-cleared-sol-9310-20261024/target/debug/build/gpui/7d83c7f6c2f44e0e/out/remote-7d83c7f6c2f44e0e",
+      "sha256": "79dccb9a768e82bd125c0bf38388f3f7f94b52f39536f8be3ebd5d60508d4717",
+      "bytes": 30171464,
+      "inode": 16270156,
+      "mtime_ns": 1792871488703254829,
+      "package": "gpui",
+      "target": {
+        "kind": [
+          "test"
+        ],
+        "crate_types": [
+          "bin"
+        ],
+        "name": "remote",
+        "src_path": "/home/miles/gpui-ce3-compute-20261024/ime-cleared-sol-9310-20261024/source/reactivity/crates/gpui/tests/remote.rs",
+        "edition": "2024",
+        "doc": false,
+        "doctest": false,
+        "test": true
+      },
+      "features": [
+        "accessibility",
+        "default",
+        "native",
+        "native-core",
+        "simd",
+        "x11",
+        "x11-minimal"
+      ],
+      "fresh": false,
+      "profile": {
+        "opt_level": "0",
+        "debuginfo": 0,
+        "debug_assertions": true,
+        "overflow_checks": true,
+        "test": true
+      },
+      "scope": "Exclusive lane target, compiler reaped before execution; no redundant executable copy."
+    },
+    "role": "positive"
+  },
+  {
+    "member": "native/scroll/test",
+    "path": "/home/miles/gpui-ce3-compute-20261024/ime-cleared-sol-9310-20261024/target/debug/build/gpui/e83311f92a417589/out/scroll-e83311f92a417589",
+    "bytes": 38383568,
+    "sha256": "64972eedb459d6c2744b4b20aeb8d64fc39257f569be6fa0a3c7bb52812fbb54",
+    "identity": {
+      "source": "a623ee8e3ff7ccfc2d0ea87ee97c8eee2e985a27",
+      "path": "/home/miles/gpui-ce3-compute-20261024/ime-cleared-sol-9310-20261024/target/debug/build/gpui/e83311f92a417589/out/scroll-e83311f92a417589",
+      "sha256": "64972eedb459d6c2744b4b20aeb8d64fc39257f569be6fa0a3c7bb52812fbb54",
+      "bytes": 38383568,
+      "inode": 16270088,
+      "mtime_ns": 1792871448048007328,
+      "package": "gpui",
+      "target": {
+        "kind": [
+          "test"
+        ],
+        "crate_types": [
+          "bin"
+        ],
+        "name": "scroll",
+        "src_path": "/home/miles/gpui-ce3-compute-20261024/ime-cleared-sol-9310-20261024/source/reactivity/crates/gpui/tests/scroll.rs",
+        "edition": "2024",
+        "doc": false,
+        "doctest": false,
+        "test": true
+      },
+      "features": [
+        "accessibility",
+        "default",
+        "native",
+        "native-core",
+        "simd",
+        "x11",
+        "x11-minimal"
+      ],
+      "fresh": false,
+      "profile": {
+        "opt_level": "0",
+        "debuginfo": 0,
+        "debug_assertions": true,
+        "overflow_checks": true,
+        "test": true
+      },
+      "scope": "Exclusive lane target, compiler reaped before execution; no redundant executable copy."
+    },
+    "role": "positive"
+  },
+  {
+    "member": "native/semantic_metadata/test",
+    "path": "/home/miles/gpui-ce3-compute-20261024/ime-cleared-sol-9310-20261024/target/debug/build/gpui/3ffd79213f3a3942/out/semantic_metadata-3ffd79213f3a3942",
+    "bytes": 34812632,
+    "sha256": "8487004b608fb1cb3eeec550f3b0e585fa68ff6b24e896f5d1ebdd94498ed967",
+    "identity": {
+      "source": "a623ee8e3ff7ccfc2d0ea87ee97c8eee2e985a27",
+      "path": "/home/miles/gpui-ce3-compute-20261024/ime-cleared-sol-9310-20261024/target/debug/build/gpui/3ffd79213f3a3942/out/semantic_metadata-3ffd79213f3a3942",
+      "sha256": "8487004b608fb1cb3eeec550f3b0e585fa68ff6b24e896f5d1ebdd94498ed967",
+      "bytes": 34812632,
+      "inode": 16270145,
+      "mtime_ns": 1792871477009183745,
+      "package": "gpui",
+      "target": {
+        "kind": [
+          "test"
+        ],
+        "crate_types": [
+          "bin"
+        ],
+        "name": "semantic_metadata",
+        "src_path": "/home/miles/gpui-ce3-compute-20261024/ime-cleared-sol-9310-20261024/source/reactivity/crates/gpui/tests/semantic_metadata.rs",
+        "edition": "2024",
+        "doc": false,
+        "doctest": false,
+        "test": true
+      },
+      "features": [
+        "accessibility",
+        "default",
+        "native",
+        "native-core",
+        "simd",
+        "x11",
+        "x11-minimal"
+      ],
+      "fresh": false,
+      "profile": {
+        "opt_level": "0",
+        "debuginfo": 0,
+        "debug_assertions": true,
+        "overflow_checks": true,
+        "test": true
+      },
+      "scope": "Exclusive lane target, compiler reaped before execution; no redundant executable copy."
+    },
+    "role": "positive"
+  },
+  {
+    "member": "native/text_selection/test",
+    "path": "/home/miles/gpui-ce3-compute-20261024/ime-cleared-sol-9310-20261024/target/debug/build/gpui/f9395b6f549d7889/out/text_selection-f9395b6f549d7889",
+    "bytes": 31167032,
+    "sha256": "c877b88a65ff2c01d2e3bc20e9bea34953a6b9da8daa0facda8d2dbac5a52a50",
+    "identity": {
+      "source": "a623ee8e3ff7ccfc2d0ea87ee97c8eee2e985a27",
+      "path": "/home/miles/gpui-ce3-compute-20261024/ime-cleared-sol-9310-20261024/target/debug/build/gpui/f9395b6f549d7889/out/text_selection-f9395b6f549d7889",
+      "sha256": "c877b88a65ff2c01d2e3bc20e9bea34953a6b9da8daa0facda8d2dbac5a52a50",
+      "bytes": 31167032,
+      "inode": 16270081,
+      "mtime_ns": 1792871440813963177,
+      "package": "gpui",
+      "target": {
+        "kind": [
+          "test"
+        ],
+        "crate_types": [
+          "bin"
+        ],
+        "name": "text_selection",
+        "src_path": "/home/miles/gpui-ce3-compute-20261024/ime-cleared-sol-9310-20261024/source/reactivity/crates/gpui/tests/text_selection.rs",
+        "edition": "2024",
+        "doc": false,
+        "doctest": false,
+        "test": true
+      },
+      "features": [
+        "accessibility",
+        "default",
+        "native",
+        "native-core",
+        "simd",
+        "x11",
+        "x11-minimal"
+      ],
+      "fresh": false,
+      "profile": {
+        "opt_level": "0",
+        "debuginfo": 0,
+        "debug_assertions": true,
+        "overflow_checks": true,
+        "test": true
+      },
+      "scope": "Exclusive lane target, compiler reaped before execution; no redundant executable copy."
+    },
+    "role": "positive"
+  },
+  {
+    "member": "native/text_selection_compound/test",
+    "path": "/home/miles/gpui-ce3-compute-20261024/ime-cleared-sol-9310-20261024/target/debug/build/gpui/e760fc125d3d467e/out/text_selection_compound-e760fc125d3d467e",
+    "bytes": 27303720,
+    "sha256": "7981a375e9208f3dc1902ef05cfc6e8f71e3fe255b607145ba0f97249b515cd8",
+    "identity": {
+      "source": "a623ee8e3ff7ccfc2d0ea87ee97c8eee2e985a27",
+      "path": "/home/miles/gpui-ce3-compute-20261024/ime-cleared-sol-9310-20261024/target/debug/build/gpui/e760fc125d3d467e/out/text_selection_compound-e760fc125d3d467e",
+      "sha256": "7981a375e9208f3dc1902ef05cfc6e8f71e3fe255b607145ba0f97249b515cd8",
+      "bytes": 27303720,
+      "inode": 16270133,
+      "mtime_ns": 1792871471308149059,
+      "package": "gpui",
+      "target": {
+        "kind": [
+          "test"
+        ],
+        "crate_types": [
+          "bin"
+        ],
+        "name": "text_selection_compound",
+        "src_path": "/home/miles/gpui-ce3-compute-20261024/ime-cleared-sol-9310-20261024/source/reactivity/crates/gpui/tests/text_selection_compound.rs",
+        "edition": "2024",
+        "doc": false,
+        "doctest": false,
+        "test": true
+      },
+      "features": [
+        "accessibility",
+        "default",
+        "native",
+        "native-core",
+        "simd",
+        "x11",
+        "x11-minimal"
+      ],
+      "fresh": false,
+      "profile": {
+        "opt_level": "0",
+        "debuginfo": 0,
+        "debug_assertions": true,
+        "overflow_checks": true,
+        "test": true
+      },
+      "scope": "Exclusive lane target, compiler reaped before execution; no redundant executable copy."
+    },
+    "role": "positive"
+  },
+  {
+    "member": "scalar/components/test",
+    "path": "/home/miles/gpui-ce3-compute-20261024/ime-cleared-sol-9310-20261024/target/debug/build/gpui/dba58dbca62eb48c/out/components-dba58dbca62eb48c",
+    "bytes": 31390888,
+    "sha256": "c470876700a3e0b244c404e1055657e6f6a953ee60657657ec4a2c87d8901871",
+    "identity": {
+      "source": "a623ee8e3ff7ccfc2d0ea87ee97c8eee2e985a27",
+      "path": "/home/miles/gpui-ce3-compute-20261024/ime-cleared-sol-9310-20261024/target/debug/build/gpui/dba58dbca62eb48c/out/components-dba58dbca62eb48c",
+      "sha256": "c470876700a3e0b244c404e1055657e6f6a953ee60657657ec4a2c87d8901871",
+      "bytes": 31390888,
+      "inode": 16274508,
+      "mtime_ns": 1792871941509423553,
+      "package": "gpui",
+      "target": {
+        "kind": [
+          "test"
+        ],
+        "crate_types": [
+          "bin"
+        ],
+        "name": "components",
+        "src_path": "/home/miles/gpui-ce3-compute-20261024/ime-cleared-sol-9310-20261024/source/reactivity/crates/gpui/tests/components.rs",
+        "edition": "2024",
+        "doc": false,
+        "doctest": false,
+        "test": true
+      },
+      "features": [],
+      "fresh": false,
+      "profile": {
+        "opt_level": "0",
+        "debuginfo": 0,
+        "debug_assertions": true,
+        "overflow_checks": true,
+        "test": true
+      },
+      "scope": "Exclusive lane target, compiler reaped before execution; no redundant executable copy."
+    },
+    "role": "positive"
+  },
+  {
+    "member": "scalar/frontier/test",
+    "path": "/home/miles/gpui-ce3-compute-20261024/ime-cleared-sol-9310-20261024/target/debug/build/gpui/771706e2d1f939a1/out/frontier-771706e2d1f939a1",
+    "bytes": 28935344,
+    "sha256": "9c59eb6249bff1b6ad75d0a12fcab68694a1bde0ad6105e193cce69ac7fd9fb3",
+    "identity": {
+      "source": "a623ee8e3ff7ccfc2d0ea87ee97c8eee2e985a27",
+      "path": "/home/miles/gpui-ce3-compute-20261024/ime-cleared-sol-9310-20261024/target/debug/build/gpui/771706e2d1f939a1/out/frontier-771706e2d1f939a1",
+      "sha256": "9c59eb6249bff1b6ad75d0a12fcab68694a1bde0ad6105e193cce69ac7fd9fb3",
+      "bytes": 28935344,
+      "inode": 16274499,
+      "mtime_ns": 1792871937485444286,
+      "package": "gpui",
+      "target": {
+        "kind": [
+          "test"
+        ],
+        "crate_types": [
+          "bin"
+        ],
+        "name": "frontier",
+        "src_path": "/home/miles/gpui-ce3-compute-20261024/ime-cleared-sol-9310-20261024/source/reactivity/crates/gpui/tests/frontier.rs",
+        "edition": "2024",
+        "doc": false,
+        "doctest": false,
+        "test": true
+      },
+      "features": [],
+      "fresh": false,
+      "profile": {
+        "opt_level": "0",
+        "debuginfo": 0,
+        "debug_assertions": true,
+        "overflow_checks": true,
+        "test": true
+      },
+      "scope": "Exclusive lane target, compiler reaped before execution; no redundant executable copy."
+    },
+    "role": "positive"
+  },
+  {
+    "member": "scalar/gpui/test",
+    "path": "/home/miles/gpui-ce3-compute-20261024/ime-cleared-sol-9310-20261024/target/debug/build/gpui/2a2531d86535ce32/out/gpui-2a2531d86535ce32",
+    "bytes": 68445648,
+    "sha256": "b6326a086b3f7072df35899859bb05c04ea55279b69b60a038693c111dfdb5a7",
+    "identity": {
+      "source": "a623ee8e3ff7ccfc2d0ea87ee97c8eee2e985a27",
+      "path": "/home/miles/gpui-ce3-compute-20261024/ime-cleared-sol-9310-20261024/target/debug/build/gpui/2a2531d86535ce32/out/gpui-2a2531d86535ce32",
+      "sha256": "b6326a086b3f7072df35899859bb05c04ea55279b69b60a038693c111dfdb5a7",
+      "bytes": 68445648,
+      "inode": 16274519,
+      "mtime_ns": 1792871951303374304,
+      "package": "gpui",
+      "target": {
+        "kind": [
+          "lib"
+        ],
+        "crate_types": [
+          "lib"
+        ],
+        "name": "gpui",
+        "src_path": "/home/miles/gpui-ce3-compute-20261024/ime-cleared-sol-9310-20261024/source/reactivity/crates/gpui/src/lib.rs",
+        "edition": "2024",
+        "doc": true,
+        "doctest": true,
+        "test": true
+      },
+      "features": [],
+      "fresh": false,
+      "profile": {
+        "opt_level": "0",
+        "debuginfo": 0,
+        "debug_assertions": true,
+        "overflow_checks": true,
+        "test": true
+      },
+      "scope": "Exclusive lane target, compiler reaped before execution; no redundant executable copy."
+    },
+    "role": "positive"
+  },
+  {
+    "member": "scalar/ime/test",
+    "path": "/home/miles/gpui-ce3-compute-20261024/ime-cleared-sol-9310-20261024/target/debug/build/gpui/df44f158b24e84ce/out/ime-df44f158b24e84ce",
+    "bytes": 28733560,
+    "sha256": "0f77f2804f8d42faf3cfbc06bc489d150a74d34f8ac581328036302de285259e",
+    "identity": {
+      "source": "a623ee8e3ff7ccfc2d0ea87ee97c8eee2e985a27",
+      "path": "/home/miles/gpui-ce3-compute-20261024/ime-cleared-sol-9310-20261024/target/debug/build/gpui/df44f158b24e84ce/out/ime-df44f158b24e84ce",
+      "sha256": "0f77f2804f8d42faf3cfbc06bc489d150a74d34f8ac581328036302de285259e",
+      "bytes": 28733560,
+      "inode": 16274516,
+      "mtime_ns": 1792871944456408554,
+      "package": "gpui",
+      "target": {
+        "kind": [
+          "test"
+        ],
+        "crate_types": [
+          "bin"
+        ],
+        "name": "ime",
+        "src_path": "/home/miles/gpui-ce3-compute-20261024/ime-cleared-sol-9310-20261024/source/reactivity/crates/gpui/tests/ime.rs",
+        "edition": "2024",
+        "doc": false,
+        "doctest": false,
+        "test": true
+      },
+      "features": [],
+      "fresh": false,
+      "profile": {
+        "opt_level": "0",
+        "debuginfo": 0,
+        "debug_assertions": true,
+        "overflow_checks": true,
+        "test": true
+      },
+      "scope": "Exclusive lane target, compiler reaped before execution; no redundant executable copy."
+    },
+    "role": "positive"
+  },
+  {
+    "member": "consumer/cleared-key/test",
+    "path": "/home/miles/gpui-ce3-compute-20261024/ime-cleared-sol-9310-20261024/target/debug/build/ime_cleared_key_consumer/884b3e5e3ce1b4c8/out/ime_cleared_key_consumer-884b3e5e3ce1b4c8",
+    "bytes": 26658464,
+    "sha256": "540b48d0314c3597204806de5b9a8bc4e93b35f23c9834787e189ccb46a409ab",
+    "identity": {
+      "source": "a623ee8e3ff7ccfc2d0ea87ee97c8eee2e985a27",
+      "path": "/home/miles/gpui-ce3-compute-20261024/ime-cleared-sol-9310-20261024/target/debug/build/ime_cleared_key_consumer/884b3e5e3ce1b4c8/out/ime_cleared_key_consumer-884b3e5e3ce1b4c8",
+      "cargo": {
+        "reason": "compiler-artifact",
+        "package_id": "path+file:///home/miles/gpui-ce3-compute-20261024/ime-cleared-sol-9310-20261024/evidence/cleared-key-consumer-a623#ime_cleared_key_consumer@0.0.0",
+        "manifest_path": "/home/miles/gpui-ce3-compute-20261024/ime-cleared-sol-9310-20261024/evidence/cleared-key-consumer-a623/Cargo.toml",
+        "target": {
+          "kind": [
+            "lib"
+          ],
+          "crate_types": [
+            "lib"
+          ],
+          "name": "ime_cleared_key_consumer",
+          "src_path": "/home/miles/gpui-ce3-compute-20261024/ime-cleared-sol-9310-20261024/evidence/cleared-key-consumer-a623/src/lib.rs",
+          "edition": "2024",
+          "doc": true,
+          "doctest": true,
+          "test": true
+        },
+        "profile": {
+          "opt_level": "0",
+          "debuginfo": 0,
+          "debug_assertions": true,
+          "overflow_checks": true,
+          "test": true
+        },
+        "features": [],
+        "filenames": [
+          "/home/miles/gpui-ce3-compute-20261024/ime-cleared-sol-9310-20261024/target/debug/build/ime_cleared_key_consumer/884b3e5e3ce1b4c8/out/ime_cleared_key_consumer-884b3e5e3ce1b4c8"
+        ],
+        "executable": "/home/miles/gpui-ce3-compute-20261024/ime-cleared-sol-9310-20261024/target/debug/build/ime_cleared_key_consumer/884b3e5e3ce1b4c8/out/ime_cleared_key_consumer-884b3e5e3ce1b4c8",
+        "fresh": false
+      },
+      "sha256": "540b48d0314c3597204806de5b9a8bc4e93b35f23c9834787e189ccb46a409ab",
+      "bytes": 26658464,
+      "fixture_source_sha256": "b186911ed20cecbaa031b338f3fdf22b8bfab78eed3d9b3b00604c5808e593c0",
+      "matches_original_negative_fixture": true,
+      "manifest_bytes_match": true,
+      "locked_offline": true,
+      "gpui_artifacts": [
+        {
+          "package_id": "path+file:///home/miles/gpui-ce3-compute-20261024/ime-cleared-sol-9310-20261024/source/reactivity/crates/gpui#0.1.0",
+          "features": [],
+          "fresh": false,
+          "filenames": [
+            "/home/miles/gpui-ce3-compute-20261024/ime-cleared-sol-9310-20261024/target/debug/build/gpui/07bea72b2c9307ba/out/libgpui-07bea72b2c9307ba.rlib",
+            "/home/miles/gpui-ce3-compute-20261024/ime-cleared-sol-9310-20261024/target/debug/build/gpui/07bea72b2c9307ba/out/libgpui-07bea72b2c9307ba.rmeta"
+          ]
+        }
+      ]
+    },
+    "role": "positive"
+  },
+  {
+    "member": "negative-9e/cleared-key/test",
+    "path": "/home/miles/gpui-ce3-compute-20261024/ime-composition-sol-9e00-20261024/target/debug/build/ime_cleared_key_consumer/b14f2620bf473d49/out/ime_cleared_key_consumer-b14f2620bf473d49",
+    "bytes": 26656800,
+    "sha256": "2d30a2457258c4cdf74db9774f61d01ae20b9115bd71dcf0aa2de0ecf596ac54",
+    "identity": {
+      "source": "9e00c79f46fd451f7f9ea8150801ee44c709d745",
+      "cargo": {
+        "reason": "compiler-artifact",
+        "package_id": "path+file:///home/miles/gpui-ce3-compute-20261024/ime-composition-sol-9e00-20261024/evidence/cleared-key-consumer-v2#ime_cleared_key_consumer@0.0.0",
+        "manifest_path": "/home/miles/gpui-ce3-compute-20261024/ime-composition-sol-9e00-20261024/evidence/cleared-key-consumer-v2/Cargo.toml",
+        "target": {
+          "kind": [
+            "lib"
+          ],
+          "crate_types": [
+            "lib"
+          ],
+          "name": "ime_cleared_key_consumer",
+          "src_path": "/home/miles/gpui-ce3-compute-20261024/ime-composition-sol-9e00-20261024/evidence/cleared-key-consumer-v2/src/lib.rs",
+          "edition": "2024",
+          "doc": true,
+          "doctest": true,
+          "test": true
+        },
+        "profile": {
+          "opt_level": "0",
+          "debuginfo": 0,
+          "debug_assertions": true,
+          "overflow_checks": true,
+          "test": true
+        },
+        "features": [],
+        "filenames": [
+          "/home/miles/gpui-ce3-compute-20261024/ime-composition-sol-9e00-20261024/target/debug/build/ime_cleared_key_consumer/b14f2620bf473d49/out/ime_cleared_key_consumer-b14f2620bf473d49"
+        ],
+        "executable": "/home/miles/gpui-ce3-compute-20261024/ime-composition-sol-9e00-20261024/target/debug/build/ime_cleared_key_consumer/b14f2620bf473d49/out/ime_cleared_key_consumer-b14f2620bf473d49",
+        "fresh": false
+      },
+      "sha256": "2d30a2457258c4cdf74db9774f61d01ae20b9115bd71dcf0aa2de0ecf596ac54",
+      "gpui_artifacts": [
+        {
+          "package_id": "path+file:///home/miles/gpui-ce3-compute-20261024/ime-composition-sol-9e00-20261024/source/reactivity/crates/gpui#0.1.0",
+          "features": [],
+          "fresh": false,
+          "filenames": [
+            "/home/miles/gpui-ce3-compute-20261024/ime-composition-sol-9e00-20261024/target/debug/build/gpui/17c2bacd3e3d53c1/out/libgpui-17c2bacd3e3d53c1.rlib",
+            "/home/miles/gpui-ce3-compute-20261024/ime-composition-sol-9e00-20261024/target/debug/build/gpui/17c2bacd3e3d53c1/out/libgpui-17c2bacd3e3d53c1.rmeta"
+          ]
+        }
+      ]
+    },
+    "role": "negative"
+  }
+]

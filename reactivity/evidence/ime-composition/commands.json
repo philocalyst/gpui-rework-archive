@@ -1,0 +1,802 @@
+{
+  "public-a623-build": {
+    "command": {
+      "source": "a623ee8e3ff7ccfc2d0ea87ee97c8eee2e985a27",
+      "source_manifest_sha256": "595ac96cea08ded01d453343fef569a255d09d2ee69500002a0c387c6c691f7e",
+      "cwd": "/home/miles/gpui-ce3-compute-20261024/ime-cleared-sol-9310-20261024/source",
+      "argv": [
+        "cargo",
+        "-Z",
+        "checksum-freshness",
+        "--config",
+        "build.fingerprint=\"content\"",
+        "test",
+        "--manifest-path",
+        "reactivity/Cargo.toml",
+        "--locked",
+        "--offline",
+        "-p",
+        "gpui",
+        "--test",
+        "ime",
+        "--features",
+        "x11,gpui_canvas/parallel,gpui_gpu/vulkan-tests,gpui_gpu/offline-shader",
+        "--no-run",
+        "--message-format=json"
+      ],
+      "timeout_seconds": 300,
+      "environment": {
+        "RUSTC": "/home/miles/gpui-ce3-compute-20261024/toolchains/nightly-2026-10-23/bin/rustc",
+        "RUSTDOC": "/home/miles/gpui-ce3-compute-20261024/toolchains/nightly-2026-10-23/bin/rustdoc",
+        "RUSTFLAGS": null,
+        "CARGO_ENCODED_RUSTFLAGS": null,
+        "CARGO_HOME": "/home/miles/.cargo",
+        "CARGO_TARGET_DIR": "/home/miles/gpui-ce3-compute-20261024/ime-cleared-sol-9310-20261024/target",
+        "CARGO_BUILD_JOBS": "2",
+        "CARGO_INCREMENTAL": "0",
+        "CARGO_PROFILE_DEV_DEBUG": "0",
+        "CARGO_PROFILE_TEST_DEBUG": "0",
+        "GPUI_SPIRV_VAL": "/nix/store/z5hs3p3inrq3w8cv71jycz7l4y3ny5xk-spirv-tools-1.4.363.0/bin/spirv-val"
+      },
+      "helper_sha256": {
+        "gpui-ime-atspi-launch.py": "c7d1be24efd30f3850e16f0e079684cd1f42604cecbeb3d763d8007ca2656baf",
+        "gpui-ime-wire-only.py": "c3f01c21af42a9daf0c6c638518c297a9bbaea2e0aa60e33dca25f99d23fb0ac",
+        "remote-gate.py": "7c7173a42ce1028955d222383e07e977cdf7b5b3717f5f47ab6375e59aa2877f",
+        "gpui-ime-final-native-run.py": "ab689962ebf56abbe3862e79adc60415f9ff871878fbfcb0786e862c751244a2",
+        "gpui-ime-run-all.py": "e6b230402d9b0ff4600c1553d6dfec7eba1a667352a4fa9d8983282f5c829990"
+      },
+      "scope": "Remote Linux debug0/incremental0 profile, exact upstream2073-input source closure; extracted source has no .git."
+    },
+    "result": {
+      "source": "a623ee8e3ff7ccfc2d0ea87ee97c8eee2e985a27",
+      "exit": 0,
+      "abort": null,
+      "guards": 2073,
+      "guards_match": true,
+      "helpers_match": true,
+      "passed": 0,
+      "failed": 0,
+      "ignored": 0,
+      "harnesses": 0,
+      "free_start": 9825595392,
+      "free_minimum": 9794023424,
+      "free_end": 9784987648,
+      "floor_bytes": 8589934592,
+      "reserve_bytes": 268435456,
+      "children_reaped": true,
+      "scope": "Functional/identity qualification on Mothership Linux debug0, no timing inference."
+    }
+  },
+  "native-a623-build": {
+    "command": {
+      "source": "a623ee8e3ff7ccfc2d0ea87ee97c8eee2e985a27",
+      "source_manifest_sha256": "595ac96cea08ded01d453343fef569a255d09d2ee69500002a0c387c6c691f7e",
+      "cwd": "/home/miles/gpui-ce3-compute-20261024/ime-cleared-sol-9310-20261024/source",
+      "argv": [
+        "cargo",
+        "-Z",
+        "checksum-freshness",
+        "--config",
+        "build.fingerprint=\"content\"",
+        "test",
+        "--manifest-path",
+        "reactivity/Cargo.toml",
+        "--locked",
+        "--offline",
+        "-p",
+        "gpui",
+        "--lib",
+        "--test",
+        "ime",
+        "--test",
+        "property_selection",
+        "--test",
+        "lists",
+        "--test",
+        "inspector",
+        "--test",
+        "text_selection_compound",
+        "--test",
+        "semantic_metadata",
+        "--test",
+        "text_selection",
+        "--test",
+        "clipping",
+        "--test",
+        "scroll",
+        "--test",
+        "checkbox",
+        "--test",
+        "focus",
+        "--test",
+        "remote",
+        "--features",
+        "x11,gpui_canvas/parallel,gpui_gpu/vulkan-tests,gpui_gpu/offline-shader",
+        "--no-run",
+        "--message-format=json"
+      ],
+      "timeout_seconds": 600,
+      "environment": {
+        "RUSTC": "/home/miles/gpui-ce3-compute-20261024/toolchains/nightly-2026-10-23/bin/rustc",
+        "RUSTDOC": "/home/miles/gpui-ce3-compute-20261024/toolchains/nightly-2026-10-23/bin/rustdoc",
+        "RUSTFLAGS": null,
+        "CARGO_ENCODED_RUSTFLAGS": null,
+        "CARGO_HOME": "/home/miles/.cargo",
+        "CARGO_TARGET_DIR": "/home/miles/gpui-ce3-compute-20261024/ime-cleared-sol-9310-20261024/target",
+        "CARGO_BUILD_JOBS": "2",
+        "CARGO_INCREMENTAL": "0",
+        "CARGO_PROFILE_DEV_DEBUG": "0",
+        "CARGO_PROFILE_TEST_DEBUG": "0",
+        "GPUI_SPIRV_VAL": "/nix/store/z5hs3p3inrq3w8cv71jycz7l4y3ny5xk-spirv-tools-1.4.363.0/bin/spirv-val"
+      },
+      "helper_sha256": {
+        "gpui-ime-atspi-launch.py": "c7d1be24efd30f3850e16f0e079684cd1f42604cecbeb3d763d8007ca2656baf",
+        "gpui-ime-wire-only.py": "c3f01c21af42a9daf0c6c638518c297a9bbaea2e0aa60e33dca25f99d23fb0ac",
+        "remote-gate.py": "7c7173a42ce1028955d222383e07e977cdf7b5b3717f5f47ab6375e59aa2877f",
+        "gpui-ime-final-native-run.py": "ab689962ebf56abbe3862e79adc60415f9ff871878fbfcb0786e862c751244a2",
+        "gpui-ime-run-all.py": "e6b230402d9b0ff4600c1553d6dfec7eba1a667352a4fa9d8983282f5c829990"
+      },
+      "scope": "Remote Linux debug0/incremental0 profile, exact upstream2073-input source closure; extracted source has no .git."
+    },
+    "result": {
+      "source": "a623ee8e3ff7ccfc2d0ea87ee97c8eee2e985a27",
+      "exit": 0,
+      "abort": null,
+      "guards": 2073,
+      "guards_match": true,
+      "helpers_match": true,
+      "passed": 0,
+      "failed": 0,
+      "ignored": 0,
+      "harnesses": 0,
+      "free_start": 9784082432,
+      "free_minimum": 9193472000,
+      "free_end": 9252732928,
+      "floor_bytes": 8589934592,
+      "reserve_bytes": 268435456,
+      "children_reaped": true,
+      "scope": "Functional/identity qualification on Mothership Linux debug0, no timing inference."
+    }
+  },
+  "native-a623-execute": {
+    "command": {
+      "source": "a623ee8e3ff7ccfc2d0ea87ee97c8eee2e985a27",
+      "source_manifest_sha256": "595ac96cea08ded01d453343fef569a255d09d2ee69500002a0c387c6c691f7e",
+      "cwd": "/home/miles/gpui-ce3-compute-20261024/ime-cleared-sol-9310-20261024/source",
+      "argv": [
+        "python3",
+        "/home/miles/gpui-ce3-compute-20261024/ime-cleared-sol-9310-20261024/helpers/gpui-ime-run-all.py",
+        "/home/miles/gpui-ce3-compute-20261024/ime-cleared-sol-9310-20261024/evidence/native-a623-build",
+        "/home/miles/gpui-ce3-compute-20261024/ime-cleared-sol-9310-20261024/evidence/native-a623-all"
+      ],
+      "timeout_seconds": 900,
+      "environment": {
+        "RUSTC": "/home/miles/gpui-ce3-compute-20261024/toolchains/nightly-2026-10-23/bin/rustc",
+        "RUSTDOC": "/home/miles/gpui-ce3-compute-20261024/toolchains/nightly-2026-10-23/bin/rustdoc",
+        "RUSTFLAGS": null,
+        "CARGO_ENCODED_RUSTFLAGS": null,
+        "CARGO_HOME": "/home/miles/.cargo",
+        "CARGO_TARGET_DIR": "/home/miles/gpui-ce3-compute-20261024/ime-cleared-sol-9310-20261024/target",
+        "CARGO_BUILD_JOBS": "2",
+        "CARGO_INCREMENTAL": "0",
+        "CARGO_PROFILE_DEV_DEBUG": "0",
+        "CARGO_PROFILE_TEST_DEBUG": "0",
+        "GPUI_SPIRV_VAL": "/nix/store/z5hs3p3inrq3w8cv71jycz7l4y3ny5xk-spirv-tools-1.4.363.0/bin/spirv-val"
+      },
+      "helper_sha256": {
+        "gpui-ime-atspi-launch.py": "c7d1be24efd30f3850e16f0e079684cd1f42604cecbeb3d763d8007ca2656baf",
+        "gpui-ime-wire-only.py": "c3f01c21af42a9daf0c6c638518c297a9bbaea2e0aa60e33dca25f99d23fb0ac",
+        "remote-gate.py": "7c7173a42ce1028955d222383e07e977cdf7b5b3717f5f47ab6375e59aa2877f",
+        "gpui-ime-final-native-run.py": "ab689962ebf56abbe3862e79adc60415f9ff871878fbfcb0786e862c751244a2",
+        "gpui-ime-run-all.py": "e6b230402d9b0ff4600c1553d6dfec7eba1a667352a4fa9d8983282f5c829990"
+      },
+      "scope": "Remote Linux debug0/incremental0 profile, exact upstream2073-input source closure; extracted source has no .git."
+    },
+    "result": {
+      "source": "a623ee8e3ff7ccfc2d0ea87ee97c8eee2e985a27",
+      "exit": 0,
+      "abort": null,
+      "guards": 2073,
+      "guards_match": true,
+      "helpers_match": true,
+      "passed": 0,
+      "failed": 0,
+      "ignored": 0,
+      "harnesses": 0,
+      "free_start": 9252433920,
+      "free_minimum": 9252179968,
+      "free_end": 9251835904,
+      "floor_bytes": 8589934592,
+      "reserve_bytes": 268435456,
+      "children_reaped": true,
+      "scope": "Functional/identity qualification on Mothership Linux debug0, no timing inference."
+    }
+  },
+  "native-a623-fixtures-execute": {
+    "command": {
+      "source": "a623ee8e3ff7ccfc2d0ea87ee97c8eee2e985a27",
+      "source_manifest_sha256": "595ac96cea08ded01d453343fef569a255d09d2ee69500002a0c387c6c691f7e",
+      "cwd": "/home/miles/gpui-ce3-compute-20261024/ime-cleared-sol-9310-20261024/source",
+      "argv": [
+        "python3",
+        "/home/miles/gpui-ce3-compute-20261024/ime-cleared-sol-9310-20261024/helpers/gpui-ime-final-native-run.py",
+        "/home/miles/gpui-ce3-compute-20261024/ime-cleared-sol-9310-20261024/evidence/native-a623-build",
+        "/home/miles/gpui-ce3-compute-20261024/ime-cleared-sol-9310-20261024/evidence/native-a623-fixtures"
+      ],
+      "timeout_seconds": 360,
+      "environment": {
+        "RUSTC": "/home/miles/gpui-ce3-compute-20261024/toolchains/nightly-2026-10-23/bin/rustc",
+        "RUSTDOC": "/home/miles/gpui-ce3-compute-20261024/toolchains/nightly-2026-10-23/bin/rustdoc",
+        "RUSTFLAGS": null,
+        "CARGO_ENCODED_RUSTFLAGS": null,
+        "CARGO_HOME": "/home/miles/.cargo",
+        "CARGO_TARGET_DIR": "/home/miles/gpui-ce3-compute-20261024/ime-cleared-sol-9310-20261024/target",
+        "CARGO_BUILD_JOBS": "2",
+        "CARGO_INCREMENTAL": "0",
+        "CARGO_PROFILE_DEV_DEBUG": "0",
+        "CARGO_PROFILE_TEST_DEBUG": "0",
+        "GPUI_SPIRV_VAL": "/nix/store/z5hs3p3inrq3w8cv71jycz7l4y3ny5xk-spirv-tools-1.4.363.0/bin/spirv-val"
+      },
+      "helper_sha256": {
+        "gpui-ime-atspi-launch.py": "c7d1be24efd30f3850e16f0e079684cd1f42604cecbeb3d763d8007ca2656baf",
+        "gpui-ime-wire-only.py": "c3f01c21af42a9daf0c6c638518c297a9bbaea2e0aa60e33dca25f99d23fb0ac",
+        "remote-gate.py": "7c7173a42ce1028955d222383e07e977cdf7b5b3717f5f47ab6375e59aa2877f",
+        "gpui-ime-final-native-run.py": "ab689962ebf56abbe3862e79adc60415f9ff871878fbfcb0786e862c751244a2",
+        "gpui-ime-run-all.py": "e6b230402d9b0ff4600c1553d6dfec7eba1a667352a4fa9d8983282f5c829990"
+      },
+      "scope": "Remote Linux debug0/incremental0 profile, exact upstream2073-input source closure; extracted source has no .git."
+    },
+    "result": {
+      "source": "a623ee8e3ff7ccfc2d0ea87ee97c8eee2e985a27",
+      "exit": 0,
+      "abort": null,
+      "guards": 2073,
+      "guards_match": true,
+      "helpers_match": true,
+      "passed": 0,
+      "failed": 0,
+      "ignored": 0,
+      "harnesses": 0,
+      "free_start": 9251528704,
+      "free_minimum": 9251528704,
+      "free_end": 9251196928,
+      "floor_bytes": 8589934592,
+      "reserve_bytes": 268435456,
+      "children_reaped": true,
+      "scope": "Functional/identity qualification on Mothership Linux debug0, no timing inference."
+    }
+  },
+  "native-a623-wire-execute": {
+    "command": {
+      "source": "a623ee8e3ff7ccfc2d0ea87ee97c8eee2e985a27",
+      "source_manifest_sha256": "595ac96cea08ded01d453343fef569a255d09d2ee69500002a0c387c6c691f7e",
+      "cwd": "/home/miles/gpui-ce3-compute-20261024/ime-cleared-sol-9310-20261024/source",
+      "argv": [
+        "python3",
+        "/home/miles/gpui-ce3-compute-20261024/ime-cleared-sol-9310-20261024/helpers/gpui-ime-wire-only.py",
+        "/home/miles/gpui-ce3-compute-20261024/ime-cleared-sol-9310-20261024/evidence/native-a623-build",
+        "/home/miles/gpui-ce3-compute-20261024/ime-cleared-sol-9310-20261024/evidence/native-a623-wire"
+      ],
+      "timeout_seconds": 180,
+      "environment": {
+        "RUSTC": "/home/miles/gpui-ce3-compute-20261024/toolchains/nightly-2026-10-23/bin/rustc",
+        "RUSTDOC": "/home/miles/gpui-ce3-compute-20261024/toolchains/nightly-2026-10-23/bin/rustdoc",
+        "RUSTFLAGS": null,
+        "CARGO_ENCODED_RUSTFLAGS": null,
+        "CARGO_HOME": "/home/miles/.cargo",
+        "CARGO_TARGET_DIR": "/home/miles/gpui-ce3-compute-20261024/ime-cleared-sol-9310-20261024/target",
+        "CARGO_BUILD_JOBS": "2",
+        "CARGO_INCREMENTAL": "0",
+        "CARGO_PROFILE_DEV_DEBUG": "0",
+        "CARGO_PROFILE_TEST_DEBUG": "0",
+        "GPUI_SPIRV_VAL": "/nix/store/z5hs3p3inrq3w8cv71jycz7l4y3ny5xk-spirv-tools-1.4.363.0/bin/spirv-val"
+      },
+      "helper_sha256": {
+        "gpui-ime-atspi-launch.py": "c7d1be24efd30f3850e16f0e079684cd1f42604cecbeb3d763d8007ca2656baf",
+        "gpui-ime-wire-only.py": "c3f01c21af42a9daf0c6c638518c297a9bbaea2e0aa60e33dca25f99d23fb0ac",
+        "remote-gate.py": "7c7173a42ce1028955d222383e07e977cdf7b5b3717f5f47ab6375e59aa2877f",
+        "gpui-ime-final-native-run.py": "ab689962ebf56abbe3862e79adc60415f9ff871878fbfcb0786e862c751244a2",
+        "gpui-ime-run-all.py": "e6b230402d9b0ff4600c1553d6dfec7eba1a667352a4fa9d8983282f5c829990"
+      },
+      "scope": "Remote Linux debug0/incremental0 profile, exact upstream2073-input source closure; extracted source has no .git."
+    },
+    "result": {
+      "source": "a623ee8e3ff7ccfc2d0ea87ee97c8eee2e985a27",
+      "exit": 0,
+      "abort": null,
+      "guards": 2073,
+      "guards_match": true,
+      "helpers_match": true,
+      "passed": 0,
+      "failed": 0,
+      "ignored": 0,
+      "harnesses": 0,
+      "free_start": 9250902016,
+      "free_minimum": 9250902016,
+      "free_end": 9250574336,
+      "floor_bytes": 8589934592,
+      "reserve_bytes": 268435456,
+      "children_reaped": true,
+      "scope": "Functional/identity qualification on Mothership Linux debug0, no timing inference."
+    }
+  },
+  "strict-a623": {
+    "command": {
+      "source": "a623ee8e3ff7ccfc2d0ea87ee97c8eee2e985a27",
+      "source_manifest_sha256": "595ac96cea08ded01d453343fef569a255d09d2ee69500002a0c387c6c691f7e",
+      "cwd": "/home/miles/gpui-ce3-compute-20261024/ime-cleared-sol-9310-20261024/source",
+      "argv": [
+        "cargo",
+        "-Z",
+        "checksum-freshness",
+        "--config",
+        "build.fingerprint=\"content\"",
+        "clippy",
+        "--manifest-path",
+        "reactivity/Cargo.toml",
+        "--locked",
+        "--offline",
+        "-p",
+        "gpui",
+        "-p",
+        "gpui_canvas",
+        "-p",
+        "gpui_gpu",
+        "--all-targets",
+        "--all-features",
+        "--",
+        "-D",
+        "warnings"
+      ],
+      "timeout_seconds": 1800,
+      "environment": {
+        "RUSTC": "/home/miles/gpui-ce3-compute-20261024/toolchains/nightly-2026-10-23/bin/rustc",
+        "RUSTDOC": "/home/miles/gpui-ce3-compute-20261024/toolchains/nightly-2026-10-23/bin/rustdoc",
+        "RUSTFLAGS": null,
+        "CARGO_ENCODED_RUSTFLAGS": null,
+        "CARGO_HOME": "/home/miles/.cargo",
+        "CARGO_TARGET_DIR": "/home/miles/gpui-ce3-compute-20261024/ime-cleared-sol-9310-20261024/target",
+        "CARGO_BUILD_JOBS": "2",
+        "CARGO_INCREMENTAL": "0",
+        "CARGO_PROFILE_DEV_DEBUG": "0",
+        "CARGO_PROFILE_TEST_DEBUG": "0",
+        "GPUI_SPIRV_VAL": "/nix/store/z5hs3p3inrq3w8cv71jycz7l4y3ny5xk-spirv-tools-1.4.363.0/bin/spirv-val"
+      },
+      "helper_sha256": {
+        "gpui-ime-atspi-launch.py": "c7d1be24efd30f3850e16f0e079684cd1f42604cecbeb3d763d8007ca2656baf",
+        "gpui-ime-wire-only.py": "c3f01c21af42a9daf0c6c638518c297a9bbaea2e0aa60e33dca25f99d23fb0ac",
+        "remote-gate.py": "7c7173a42ce1028955d222383e07e977cdf7b5b3717f5f47ab6375e59aa2877f",
+        "gpui-ime-final-native-run.py": "ab689962ebf56abbe3862e79adc60415f9ff871878fbfcb0786e862c751244a2",
+        "gpui-ime-run-all.py": "e6b230402d9b0ff4600c1553d6dfec7eba1a667352a4fa9d8983282f5c829990"
+      },
+      "scope": "Remote Linux debug0/incremental0 profile, exact upstream2073-input source closure; extracted source has no .git."
+    },
+    "result": {
+      "source": "a623ee8e3ff7ccfc2d0ea87ee97c8eee2e985a27",
+      "exit": 0,
+      "abort": null,
+      "guards": 2073,
+      "guards_match": true,
+      "helpers_match": true,
+      "passed": 0,
+      "failed": 0,
+      "ignored": 0,
+      "harnesses": 0,
+      "free_start": 10919915520,
+      "free_minimum": 10527621120,
+      "free_end": 10527338496,
+      "floor_bytes": 8589934592,
+      "reserve_bytes": 268435456,
+      "children_reaped": true,
+      "scope": "Functional/identity qualification on Mothership Linux debug0, no timing inference."
+    }
+  },
+  "docs-a623": {
+    "command": {
+      "source": "a623ee8e3ff7ccfc2d0ea87ee97c8eee2e985a27",
+      "source_manifest_sha256": "595ac96cea08ded01d453343fef569a255d09d2ee69500002a0c387c6c691f7e",
+      "cwd": "/home/miles/gpui-ce3-compute-20261024/ime-cleared-sol-9310-20261024/source",
+      "argv": [
+        "cargo",
+        "-Z",
+        "checksum-freshness",
+        "--config",
+        "build.fingerprint=\"content\"",
+        "test",
+        "--manifest-path",
+        "reactivity/Cargo.toml",
+        "--locked",
+        "--offline",
+        "-p",
+        "gpui",
+        "-p",
+        "gpui_canvas",
+        "-p",
+        "gpui_gpu",
+        "--no-default-features",
+        "--features",
+        "gpui/default,gpui/x11,gpui_canvas/simd,gpui_canvas/parallel,gpui_gpu/simd,gpui_gpu/vulkan-tests,gpui_gpu/offline-shader",
+        "--doc"
+      ],
+      "timeout_seconds": 900,
+      "environment": {
+        "RUSTC": "/home/miles/gpui-ce3-compute-20261024/toolchains/nightly-2026-10-23/bin/rustc",
+        "RUSTDOC": "/home/miles/gpui-ce3-compute-20261024/toolchains/nightly-2026-10-23/bin/rustdoc",
+        "RUSTFLAGS": null,
+        "CARGO_ENCODED_RUSTFLAGS": null,
+        "CARGO_HOME": "/home/miles/.cargo",
+        "CARGO_TARGET_DIR": "/home/miles/gpui-ce3-compute-20261024/ime-cleared-sol-9310-20261024/target",
+        "CARGO_BUILD_JOBS": "2",
+        "CARGO_INCREMENTAL": "0",
+        "CARGO_PROFILE_DEV_DEBUG": "0",
+        "CARGO_PROFILE_TEST_DEBUG": "0",
+        "GPUI_SPIRV_VAL": "/nix/store/z5hs3p3inrq3w8cv71jycz7l4y3ny5xk-spirv-tools-1.4.363.0/bin/spirv-val"
+      },
+      "helper_sha256": {
+        "gpui-ime-atspi-launch.py": "c7d1be24efd30f3850e16f0e079684cd1f42604cecbeb3d763d8007ca2656baf",
+        "gpui-ime-wire-only.py": "c3f01c21af42a9daf0c6c638518c297a9bbaea2e0aa60e33dca25f99d23fb0ac",
+        "remote-gate.py": "7c7173a42ce1028955d222383e07e977cdf7b5b3717f5f47ab6375e59aa2877f",
+        "gpui-ime-final-native-run.py": "ab689962ebf56abbe3862e79adc60415f9ff871878fbfcb0786e862c751244a2",
+        "gpui-ime-run-all.py": "e6b230402d9b0ff4600c1553d6dfec7eba1a667352a4fa9d8983282f5c829990"
+      },
+      "scope": "Remote Linux debug0/incremental0 profile, exact upstream2073-input source closure; extracted source has no .git."
+    },
+    "result": {
+      "source": "a623ee8e3ff7ccfc2d0ea87ee97c8eee2e985a27",
+      "exit": 0,
+      "abort": null,
+      "guards": 2073,
+      "guards_match": true,
+      "helpers_match": true,
+      "passed": 33,
+      "failed": 0,
+      "ignored": 0,
+      "harnesses": 4,
+      "free_start": 10527027200,
+      "free_minimum": 10444087296,
+      "free_end": 10448359424,
+      "floor_bytes": 8589934592,
+      "reserve_bytes": 268435456,
+      "children_reaped": true,
+      "scope": "Functional/identity qualification on Mothership Linux debug0, no timing inference."
+    }
+  },
+  "scalar-a623-build": {
+    "command": {
+      "source": "a623ee8e3ff7ccfc2d0ea87ee97c8eee2e985a27",
+      "source_manifest_sha256": "595ac96cea08ded01d453343fef569a255d09d2ee69500002a0c387c6c691f7e",
+      "cwd": "/home/miles/gpui-ce3-compute-20261024/ime-cleared-sol-9310-20261024/source",
+      "argv": [
+        "cargo",
+        "-Z",
+        "checksum-freshness",
+        "--config",
+        "build.fingerprint=\"content\"",
+        "test",
+        "--manifest-path",
+        "reactivity/Cargo.toml",
+        "--locked",
+        "--offline",
+        "-p",
+        "gpui",
+        "--no-default-features",
+        "--lib",
+        "--test",
+        "frontier",
+        "--test",
+        "components",
+        "--test",
+        "ime",
+        "--no-run",
+        "--message-format=json"
+      ],
+      "timeout_seconds": 900,
+      "environment": {
+        "RUSTC": "/home/miles/gpui-ce3-compute-20261024/toolchains/nightly-2026-10-23/bin/rustc",
+        "RUSTDOC": "/home/miles/gpui-ce3-compute-20261024/toolchains/nightly-2026-10-23/bin/rustdoc",
+        "RUSTFLAGS": null,
+        "CARGO_ENCODED_RUSTFLAGS": null,
+        "CARGO_HOME": "/home/miles/.cargo",
+        "CARGO_TARGET_DIR": "/home/miles/gpui-ce3-compute-20261024/ime-cleared-sol-9310-20261024/target",
+        "CARGO_BUILD_JOBS": "2",
+        "CARGO_INCREMENTAL": "0",
+        "CARGO_PROFILE_DEV_DEBUG": "0",
+        "CARGO_PROFILE_TEST_DEBUG": "0",
+        "GPUI_SPIRV_VAL": "/nix/store/z5hs3p3inrq3w8cv71jycz7l4y3ny5xk-spirv-tools-1.4.363.0/bin/spirv-val"
+      },
+      "helper_sha256": {
+        "gpui-ime-atspi-launch.py": "c7d1be24efd30f3850e16f0e079684cd1f42604cecbeb3d763d8007ca2656baf",
+        "gpui-ime-wire-only.py": "c3f01c21af42a9daf0c6c638518c297a9bbaea2e0aa60e33dca25f99d23fb0ac",
+        "remote-gate.py": "7c7173a42ce1028955d222383e07e977cdf7b5b3717f5f47ab6375e59aa2877f",
+        "gpui-ime-final-native-run.py": "ab689962ebf56abbe3862e79adc60415f9ff871878fbfcb0786e862c751244a2",
+        "gpui-ime-run-all.py": "e6b230402d9b0ff4600c1553d6dfec7eba1a667352a4fa9d8983282f5c829990"
+      },
+      "scope": "Remote Linux debug0/incremental0 profile, exact upstream2073-input source closure; extracted source has no .git."
+    },
+    "result": {
+      "source": "a623ee8e3ff7ccfc2d0ea87ee97c8eee2e985a27",
+      "exit": 0,
+      "abort": null,
+      "guards": 2073,
+      "guards_match": true,
+      "helpers_match": true,
+      "passed": 0,
+      "failed": 0,
+      "ignored": 0,
+      "harnesses": 0,
+      "free_start": 10448048128,
+      "free_minimum": 9995329536,
+      "free_end": 10038235136,
+      "floor_bytes": 8589934592,
+      "reserve_bytes": 268435456,
+      "children_reaped": true,
+      "scope": "Functional/identity qualification on Mothership Linux debug0, no timing inference."
+    }
+  },
+  "scalar-a623-execute": {
+    "command": {
+      "source": "a623ee8e3ff7ccfc2d0ea87ee97c8eee2e985a27",
+      "source_manifest_sha256": "595ac96cea08ded01d453343fef569a255d09d2ee69500002a0c387c6c691f7e",
+      "cwd": "/home/miles/gpui-ce3-compute-20261024/ime-cleared-sol-9310-20261024/source",
+      "argv": [
+        "python3",
+        "/home/miles/gpui-ce3-compute-20261024/ime-cleared-sol-9310-20261024/helpers/gpui-ime-run-all.py",
+        "/home/miles/gpui-ce3-compute-20261024/ime-cleared-sol-9310-20261024/evidence/scalar-a623-build",
+        "/home/miles/gpui-ce3-compute-20261024/ime-cleared-sol-9310-20261024/evidence/scalar-a623-all"
+      ],
+      "timeout_seconds": 600,
+      "environment": {
+        "RUSTC": "/home/miles/gpui-ce3-compute-20261024/toolchains/nightly-2026-10-23/bin/rustc",
+        "RUSTDOC": "/home/miles/gpui-ce3-compute-20261024/toolchains/nightly-2026-10-23/bin/rustdoc",
+        "RUSTFLAGS": null,
+        "CARGO_ENCODED_RUSTFLAGS": null,
+        "CARGO_HOME": "/home/miles/.cargo",
+        "CARGO_TARGET_DIR": "/home/miles/gpui-ce3-compute-20261024/ime-cleared-sol-9310-20261024/target",
+        "CARGO_BUILD_JOBS": "2",
+        "CARGO_INCREMENTAL": "0",
+        "CARGO_PROFILE_DEV_DEBUG": "0",
+        "CARGO_PROFILE_TEST_DEBUG": "0",
+        "GPUI_SPIRV_VAL": "/nix/store/z5hs3p3inrq3w8cv71jycz7l4y3ny5xk-spirv-tools-1.4.363.0/bin/spirv-val"
+      },
+      "helper_sha256": {
+        "gpui-ime-atspi-launch.py": "c7d1be24efd30f3850e16f0e079684cd1f42604cecbeb3d763d8007ca2656baf",
+        "gpui-ime-wire-only.py": "c3f01c21af42a9daf0c6c638518c297a9bbaea2e0aa60e33dca25f99d23fb0ac",
+        "remote-gate.py": "7c7173a42ce1028955d222383e07e977cdf7b5b3717f5f47ab6375e59aa2877f",
+        "gpui-ime-final-native-run.py": "ab689962ebf56abbe3862e79adc60415f9ff871878fbfcb0786e862c751244a2",
+        "gpui-ime-run-all.py": "e6b230402d9b0ff4600c1553d6dfec7eba1a667352a4fa9d8983282f5c829990"
+      },
+      "scope": "Remote Linux debug0/incremental0 profile, exact upstream2073-input source closure; extracted source has no .git."
+    },
+    "result": {
+      "source": "a623ee8e3ff7ccfc2d0ea87ee97c8eee2e985a27",
+      "exit": 0,
+      "abort": null,
+      "guards": 2073,
+      "guards_match": true,
+      "helpers_match": true,
+      "passed": 0,
+      "failed": 0,
+      "ignored": 0,
+      "harnesses": 0,
+      "free_start": 10043461632,
+      "free_minimum": 10002206720,
+      "free_end": 10001924096,
+      "floor_bytes": 8589934592,
+      "reserve_bytes": 268435456,
+      "children_reaped": true,
+      "scope": "Functional/identity qualification on Mothership Linux debug0, no timing inference."
+    }
+  },
+  "consumer-a623-build": {
+    "command": {
+      "source": "a623ee8e3ff7ccfc2d0ea87ee97c8eee2e985a27",
+      "source_manifest_sha256": "595ac96cea08ded01d453343fef569a255d09d2ee69500002a0c387c6c691f7e",
+      "cwd": "/home/miles/gpui-ce3-compute-20261024/ime-cleared-sol-9310-20261024/source",
+      "argv": [
+        "python3",
+        "-c",
+        "from pathlib import Path\nimport subprocess,shutil,json,hashlib\nstage=Path('/home/miles/gpui-ce3-compute-20261024/ime-cleared-sol-9310-20261024');old=Path('/home/miles/gpui-ce3-compute-20261024/ime-composition-sol-9e00-20261024/evidence/cleared-key-consumer-v2');probe=stage/'evidence/cleared-key-consumer-a623';(probe/'src').mkdir(parents=True)\nsha=lambda p:hashlib.file_digest(p.open('rb'),'sha256').hexdigest()\nfor src,dst in [(old/'Cargo.toml',probe/'Cargo.toml'),(old/'src/lib.rs',probe/'src/lib.rs'),(old/'Cargo.lock',probe/'Cargo.lock')]:shutil.copyfile(src,dst);assert sha(src)==sha(dst)\nargs=['cargo','-Z','checksum-freshness','--config','build.fingerprint=\"content\"','test','--manifest-path',str(probe/'Cargo.toml'),'--locked','--offline','--lib','--no-run','--message-format=json']\nwith (probe/'build.stdout.log').open('w') as stdout,(probe/'build.stderr.log').open('w') as stderr:r=subprocess.run(args,stdout=stdout,stderr=stderr)\nassert r.returncode==0,(probe/'build.stderr.log').read_text()\nrows=[json.loads(l) for l in (probe/'build.stdout.log').read_text().splitlines()];artifacts=[r for r in rows if r.get('executable') and r['profile']['test']];assert len(artifacts)==1\nrow=artifacts[0];binary=Path(row['executable']);identity={'source':'a623ee8e3ff7ccfc2d0ea87ee97c8eee2e985a27','path':str(binary),'cargo':row,'sha256':sha(binary),'bytes':binary.stat().st_size,'fixture_source_sha256':sha(probe/'src/lib.rs'),'matches_original_negative_fixture':sha(probe/'src/lib.rs')==sha(old/'src/lib.rs'),'manifest_bytes_match':sha(probe/'Cargo.toml')==sha(old/'Cargo.toml'),'locked_offline':True,'gpui_artifacts':[{k:r[k] for k in ['package_id','features','fresh','filenames']} for r in rows if r.get('reason')=='compiler-artifact' and '/crates/gpui#' in r['package_id']]};(probe/'binary.json').write_text(json.dumps(identity,indent=2)+'\\n');print(json.dumps(identity))\n"
+      ],
+      "timeout_seconds": 300,
+      "environment": {
+        "RUSTC": "/home/miles/gpui-ce3-compute-20261024/toolchains/nightly-2026-10-23/bin/rustc",
+        "RUSTDOC": "/home/miles/gpui-ce3-compute-20261024/toolchains/nightly-2026-10-23/bin/rustdoc",
+        "RUSTFLAGS": null,
+        "CARGO_ENCODED_RUSTFLAGS": null,
+        "CARGO_HOME": "/home/miles/.cargo",
+        "CARGO_TARGET_DIR": "/home/miles/gpui-ce3-compute-20261024/ime-cleared-sol-9310-20261024/target",
+        "CARGO_BUILD_JOBS": "2",
+        "CARGO_INCREMENTAL": "0",
+        "CARGO_PROFILE_DEV_DEBUG": "0",
+        "CARGO_PROFILE_TEST_DEBUG": "0",
+        "GPUI_SPIRV_VAL": "/nix/store/z5hs3p3inrq3w8cv71jycz7l4y3ny5xk-spirv-tools-1.4.363.0/bin/spirv-val"
+      },
+      "helper_sha256": {
+        "gpui-ime-atspi-launch.py": "c7d1be24efd30f3850e16f0e079684cd1f42604cecbeb3d763d8007ca2656baf",
+        "gpui-ime-wire-only.py": "c3f01c21af42a9daf0c6c638518c297a9bbaea2e0aa60e33dca25f99d23fb0ac",
+        "remote-gate.py": "7c7173a42ce1028955d222383e07e977cdf7b5b3717f5f47ab6375e59aa2877f",
+        "gpui-ime-final-native-run.py": "ab689962ebf56abbe3862e79adc60415f9ff871878fbfcb0786e862c751244a2",
+        "gpui-ime-run-all.py": "e6b230402d9b0ff4600c1553d6dfec7eba1a667352a4fa9d8983282f5c829990"
+      },
+      "scope": "Remote Linux debug0/incremental0 profile, exact upstream2073-input source closure; extracted source has no .git."
+    },
+    "result": {
+      "source": "a623ee8e3ff7ccfc2d0ea87ee97c8eee2e985a27",
+      "exit": 0,
+      "abort": null,
+      "guards": 2073,
+      "guards_match": true,
+      "helpers_match": true,
+      "passed": 0,
+      "failed": 0,
+      "ignored": 0,
+      "harnesses": 0,
+      "free_start": 10001625088,
+      "free_minimum": 9765220352,
+      "free_end": 9764937728,
+      "floor_bytes": 8589934592,
+      "reserve_bytes": 268435456,
+      "children_reaped": true,
+      "scope": "Functional/identity qualification on Mothership Linux debug0, no timing inference."
+    }
+  },
+  "consumer-a623-execute": {
+    "command": {
+      "source": "a623ee8e3ff7ccfc2d0ea87ee97c8eee2e985a27",
+      "source_manifest_sha256": "595ac96cea08ded01d453343fef569a255d09d2ee69500002a0c387c6c691f7e",
+      "cwd": "/home/miles/gpui-ce3-compute-20261024/ime-cleared-sol-9310-20261024/source",
+      "argv": [
+        "python3",
+        "-c",
+        "from pathlib import Path\nimport hashlib,json,subprocess\nstage=Path('/home/miles/gpui-ce3-compute-20261024/ime-cleared-sol-9310-20261024');probe=stage/'evidence/cleared-key-consumer-a623';row=json.loads((probe/'binary.json').read_text());binary=Path(row['path']);sha=lambda p:hashlib.file_digest(p.open('rb'),'sha256').hexdigest();assert sha(binary)==row['sha256'];r=subprocess.run([str(binary),'--nocapture','--test-threads=1']);assert sha(binary)==row['sha256'];raise SystemExit(r.returncode)\n"
+      ],
+      "timeout_seconds": 120,
+      "environment": {
+        "RUSTC": "/home/miles/gpui-ce3-compute-20261024/toolchains/nightly-2026-10-23/bin/rustc",
+        "RUSTDOC": "/home/miles/gpui-ce3-compute-20261024/toolchains/nightly-2026-10-23/bin/rustdoc",
+        "RUSTFLAGS": null,
+        "CARGO_ENCODED_RUSTFLAGS": null,
+        "CARGO_HOME": "/home/miles/.cargo",
+        "CARGO_TARGET_DIR": "/home/miles/gpui-ce3-compute-20261024/ime-cleared-sol-9310-20261024/target",
+        "CARGO_BUILD_JOBS": "2",
+        "CARGO_INCREMENTAL": "0",
+        "CARGO_PROFILE_DEV_DEBUG": "0",
+        "CARGO_PROFILE_TEST_DEBUG": "0",
+        "GPUI_SPIRV_VAL": "/nix/store/z5hs3p3inrq3w8cv71jycz7l4y3ny5xk-spirv-tools-1.4.363.0/bin/spirv-val"
+      },
+      "helper_sha256": {
+        "gpui-ime-atspi-launch.py": "c7d1be24efd30f3850e16f0e079684cd1f42604cecbeb3d763d8007ca2656baf",
+        "gpui-ime-wire-only.py": "c3f01c21af42a9daf0c6c638518c297a9bbaea2e0aa60e33dca25f99d23fb0ac",
+        "remote-gate.py": "7c7173a42ce1028955d222383e07e977cdf7b5b3717f5f47ab6375e59aa2877f",
+        "gpui-ime-final-native-run.py": "ab689962ebf56abbe3862e79adc60415f9ff871878fbfcb0786e862c751244a2",
+        "gpui-ime-run-all.py": "e6b230402d9b0ff4600c1553d6dfec7eba1a667352a4fa9d8983282f5c829990"
+      },
+      "scope": "Remote Linux debug0/incremental0 profile, exact upstream2073-input source closure; extracted source has no .git."
+    },
+    "result": {
+      "source": "a623ee8e3ff7ccfc2d0ea87ee97c8eee2e985a27",
+      "exit": 0,
+      "abort": null,
+      "guards": 2073,
+      "guards_match": true,
+      "helpers_match": true,
+      "passed": 1,
+      "failed": 0,
+      "ignored": 0,
+      "harnesses": 1,
+      "free_start": 9764241408,
+      "free_minimum": 9764241408,
+      "free_end": 9763962880,
+      "floor_bytes": 8589934592,
+      "reserve_bytes": 268435456,
+      "children_reaped": true,
+      "scope": "Functional/identity qualification on Mothership Linux debug0, no timing inference."
+    }
+  },
+  "shader-a623-execute": {
+    "command": {
+      "source": "a623ee8e3ff7ccfc2d0ea87ee97c8eee2e985a27",
+      "source_manifest_sha256": "595ac96cea08ded01d453343fef569a255d09d2ee69500002a0c387c6c691f7e",
+      "cwd": "/home/miles/gpui-ce3-compute-20261024/ime-cleared-sol-9310-20261024/source",
+      "argv": [
+        "python3",
+        "-c",
+        "from pathlib import Path\nimport hashlib,json,mmap,os,subprocess\nstage=Path('/home/miles/gpui-ce3-compute-20261024/ime-cleared-sol-9310-20261024');out=stage/'evidence/shader-audit';out.mkdir();root=stage/'source'\nrows=[json.loads(l) for l in (stage/'evidence/native-a623-build/stdout.log').read_text().splitlines()];outputs=[r for r in rows if r.get('reason')=='build-script-executed' and '/crates/gpu#' in r['package_id']];assert len(outputs)==1\nfolder=Path(outputs[0]['out_dir']);manifest=json.loads((folder/'ui-artifacts.json').read_text());sha=lambda b:hashlib.sha256(b).hexdigest()\nassert sha((root/'reactivity/crates/gpu/src/shader.rs').read_bytes())==manifest['typed_rust_sha256']=='433b9760e356cb45144262aabec37d61c1d5eb1e0529b47e4103da7d69b4859c'\nwgsl=(folder/'ui.wgsl').read_bytes();assert sha(wgsl)==manifest['wgsl_sha256']=='ea6e71d3da2bdb23d4971a14f0f55db389dbb45f9b2e9c05c85d4dc6363eb4d1'\nneed=[('ui.wgsl',wgsl)];checks=[];validator=os.environ['GPUI_SPIRV_VAL']\nfor row in manifest['artifacts']:\n name=f'ui-{row[\"variant\"]}-{row[\"entry\"]}.spv';data=(folder/name).read_bytes();assert len(data)==row['bytes'] and sha(data)==row['sha256'];r=subprocess.run([validator,'--target-env','vulkan1.0',str(folder/name)],capture_output=True,text=True);assert r.returncode==0,r.stderr;need.append((name,data));checks.append({'name':name,'bytes':len(data),'sha256':sha(data),'validator_exit':0});(out/name).write_bytes(data)\nidentity=json.loads((stage/'evidence/native-a623-fixtures/binary.json').read_text());binary=Path(identity['path'])\nwith binary.open('rb') as f,mmap.mmap(f.fileno(),0,access=mmap.ACCESS_READ) as mapped:\n assert sha(mapped)==identity['sha256'];positions=[{'name':name,'offset':mapped.find(data),'bytes':len(data),'sha256':sha(data)} for name,data in need];assert all(p['offset']>=0 for p in positions)\n(out/'ui.wgsl').write_bytes(wgsl);(out/'ui-artifacts.json').write_text(json.dumps(manifest,indent=2)+'\\n')\nwith Path(validator).open('rb') as f:validator_sha=hashlib.file_digest(f,'sha256').hexdigest()\nresult={'source':'a623ee8e3ff7ccfc2d0ea87ee97c8eee2e985a27','baseline_shader_source':'ce79d00fb004859994c8574254bbd091e964a2d4','wgsl_sha256':sha(wgsl),'wgsl_bytes':len(wgsl),'typed_rust_sha256':manifest['typed_rust_sha256'],'spirv':checks,'validator':validator,'validator_sha256':validator_sha,'executed_native_elf':identity,'embedded':positions,'binary_unchanged':True,'scope':'Actual executed final remote debug0 GPUI native ELF embedding; unchanged shader closure also passed56GPUreadbacks in fa36 local gate. No hardware/timing inference.'};(out/'result.json').write_text(json.dumps(result,indent=2)+'\\n');print(json.dumps({k:v for k,v in result.items() if k not in ['spirv','embedded','executed_native_elf']}))\n"
+      ],
+      "timeout_seconds": 120,
+      "environment": {
+        "RUSTC": "/home/miles/gpui-ce3-compute-20261024/toolchains/nightly-2026-10-23/bin/rustc",
+        "RUSTDOC": "/home/miles/gpui-ce3-compute-20261024/toolchains/nightly-2026-10-23/bin/rustdoc",
+        "RUSTFLAGS": null,
+        "CARGO_ENCODED_RUSTFLAGS": null,
+        "CARGO_HOME": "/home/miles/.cargo",
+        "CARGO_TARGET_DIR": "/home/miles/gpui-ce3-compute-20261024/ime-cleared-sol-9310-20261024/target",
+        "CARGO_BUILD_JOBS": "2",
+        "CARGO_INCREMENTAL": "0",
+        "CARGO_PROFILE_DEV_DEBUG": "0",
+        "CARGO_PROFILE_TEST_DEBUG": "0",
+        "GPUI_SPIRV_VAL": "/nix/store/z5hs3p3inrq3w8cv71jycz7l4y3ny5xk-spirv-tools-1.4.363.0/bin/spirv-val"
+      },
+      "helper_sha256": {
+        "gpui-ime-atspi-launch.py": "c7d1be24efd30f3850e16f0e079684cd1f42604cecbeb3d763d8007ca2656baf",
+        "gpui-ime-wire-only.py": "c3f01c21af42a9daf0c6c638518c297a9bbaea2e0aa60e33dca25f99d23fb0ac",
+        "remote-gate.py": "7c7173a42ce1028955d222383e07e977cdf7b5b3717f5f47ab6375e59aa2877f",
+        "gpui-ime-final-native-run.py": "ab689962ebf56abbe3862e79adc60415f9ff871878fbfcb0786e862c751244a2",
+        "gpui-ime-run-all.py": "e6b230402d9b0ff4600c1553d6dfec7eba1a667352a4fa9d8983282f5c829990"
+      },
+      "scope": "Remote Linux debug0/incremental0 profile, exact upstream2073-input source closure; extracted source has no .git."
+    },
+    "result": {
+      "source": "a623ee8e3ff7ccfc2d0ea87ee97c8eee2e985a27",
+      "exit": 0,
+      "abort": null,
+      "guards": 2073,
+      "guards_match": true,
+      "helpers_match": true,
+      "passed": 0,
+      "failed": 0,
+      "ignored": 0,
+      "harnesses": 0,
+      "free_start": 9763663872,
+      "free_minimum": 9763663872,
+      "free_end": 9763147776,
+      "floor_bytes": 8589934592,
+      "reserve_bytes": 268435456,
+      "children_reaped": true,
+      "scope": "Functional/identity qualification on Mothership Linux debug0, no timing inference."
+    }
+  },
+  "seal-a623-execute": {
+    "command": {
+      "source": "a623ee8e3ff7ccfc2d0ea87ee97c8eee2e985a27",
+      "source_manifest_sha256": "595ac96cea08ded01d453343fef569a255d09d2ee69500002a0c387c6c691f7e",
+      "cwd": "/home/miles/gpui-ce3-compute-20261024/ime-cleared-sol-9310-20261024/source",
+      "argv": [
+        "python3",
+        "-c",
+        "from pathlib import Path\nimport hashlib,json,subprocess,tarfile\nstage=Path('/home/miles/gpui-ce3-compute-20261024/ime-cleared-sol-9310-20261024');old=Path('/home/miles/gpui-ce3-compute-20261024/ime-composition-sol-9e00-20261024');out=stage/'seal-a623';out.mkdir();sha=lambda p:hashlib.file_digest(p.open('rb'),'sha256').hexdigest();selected=[]\nfor profile in ['native','scalar']:\n root=stage/'evidence'/f'{profile}-a623-all';report=json.loads((root/'result.json').read_text());assert report['all_exit_zero']\n for p in sorted(root.glob('*/binary.json')):\n  row=json.loads(p.read_text());binary=Path(row['path']);assert sha(binary)==row['sha256'];selected.append((binary,row,f'{profile}/{row[\"target\"][\"name\"]}/test','positive'))\nassert len(selected)==17\nrow=json.loads((stage/'evidence/cleared-key-consumer-a623/binary.json').read_text());binary=Path(row['path']);assert sha(binary)==row['sha256'];assert json.loads((stage/'evidence/consumer-a623-execute/result.json').read_text())['passed']==1;selected.append((binary,row,'consumer/cleared-key/test','positive'))\nrow=json.loads((old/'evidence/cleared-key-consumer-v2/binary.json').read_text());binary=Path(row['cargo']['executable']);assert sha(binary)==row['sha256'];assert json.loads((old/'evidence/cleared-key-consumer-execute/result.json').read_text())['exit']==101;selected.append((binary,row,'negative-9e/cleared-key/test','negative'))\nassert len(selected)==19\nmanifest=[{'member':name,'path':str(path),'bytes':path.stat().st_size,'sha256':row['sha256'],'identity':row,'role':role} for path,row,name,role in selected];(out/'executables.json').write_text(json.dumps(manifest,indent=2)+'\\n');archive=out/'positive-negative-artifacts.tar.zst'\nwith archive.open('wb') as target:\n child=subprocess.Popen(['zstd','-T2','-3','-c'],stdin=subprocess.PIPE,stdout=target)\n with tarfile.open(fileobj=child.stdin,mode='w|') as writer:\n  for path,name in [(stage/'source.tar.zst','source-a623.tar.zst'),(old/'source.tar.zst','source-9e.tar.zst'),(stage/'input-manifest.json','input-manifest-a623.json'),(old/'input-manifest.json','input-manifest-9e.json'),(out/'executables.json','executables.json')]:writer.add(path,arcname=name)\n  for path,row,name,role in selected:writer.add(path,arcname=name)\n  for prefix,folder in [('consumer-a623',stage/'evidence/cleared-key-consumer-a623'),('consumer-9e',old/'evidence/cleared-key-consumer-v2')]:\n   for name in ['Cargo.toml','Cargo.lock','src/lib.rs']:writer.add(folder/name,arcname=prefix+'/'+name)\n child.stdin.close();assert child.wait()==0\nchecks=[];child=subprocess.Popen(['zstd','-dc',str(archive)],stdout=subprocess.PIPE)\nwith tarfile.open(fileobj=child.stdout,mode='r|') as reader:\n for member in reader:\n  if member.isfile():checks.append({'member':member.name,'bytes':member.size,'sha256':hashlib.file_digest(reader.extractfile(member),'sha256').hexdigest()})\nchild.stdout.close();assert child.wait()==0\nfor row in manifest:assert any(c['member']==row['member'] and c['sha256']==row['sha256'] and c['bytes']==row['bytes'] for c in checks)\nassert all(sha(path)==row['sha256'] for path,row,name,role in selected)\nresult={'source':'a623ee8e3ff7ccfc2d0ea87ee97c8eee2e985a27','negative_source':'9e00c79f46fd451f7f9ea8150801ee44c709d745','archive':str(archive),'bytes':archive.stat().st_size,'sha256':sha(archive),'members':checks,'positive_executables':18,'negative_executables':1,'originals_rechecked':True,'stream_reextraction_checked':True,'children_reaped':True,'scope':'Actual18final native/scalar/external-consumer executables plus unchanged9e consumerfailure; exactsource archives and source-identical external fixtures. Targets/evidence remain retained; no shipping-code-size or latency inference.'};(out/'result.json').write_text(json.dumps(result,indent=2)+'\\n');print(json.dumps({k:v for k,v in result.items() if k!='members'}),flush=True)\n"
+      ],
+      "timeout_seconds": 300,
+      "environment": {
+        "RUSTC": "/home/miles/gpui-ce3-compute-20261024/toolchains/nightly-2026-10-23/bin/rustc",
+        "RUSTDOC": "/home/miles/gpui-ce3-compute-20261024/toolchains/nightly-2026-10-23/bin/rustdoc",
+        "RUSTFLAGS": null,
+        "CARGO_ENCODED_RUSTFLAGS": null,
+        "CARGO_HOME": "/home/miles/.cargo",
+        "CARGO_TARGET_DIR": "/home/miles/gpui-ce3-compute-20261024/ime-cleared-sol-9310-20261024/target",
+        "CARGO_BUILD_JOBS": "2",
+        "CARGO_INCREMENTAL": "0",
+        "CARGO_PROFILE_DEV_DEBUG": "0",
+        "CARGO_PROFILE_TEST_DEBUG": "0",
+        "GPUI_SPIRV_VAL": "/nix/store/z5hs3p3inrq3w8cv71jycz7l4y3ny5xk-spirv-tools-1.4.363.0/bin/spirv-val"
+      },
+      "helper_sha256": {
+        "gpui-ime-atspi-launch.py": "c7d1be24efd30f3850e16f0e079684cd1f42604cecbeb3d763d8007ca2656baf",
+        "gpui-ime-wire-only.py": "c3f01c21af42a9daf0c6c638518c297a9bbaea2e0aa60e33dca25f99d23fb0ac",
+        "remote-gate.py": "7c7173a42ce1028955d222383e07e977cdf7b5b3717f5f47ab6375e59aa2877f",
+        "gpui-ime-final-native-run.py": "ab689962ebf56abbe3862e79adc60415f9ff871878fbfcb0786e862c751244a2",
+        "gpui-ime-run-all.py": "e6b230402d9b0ff4600c1553d6dfec7eba1a667352a4fa9d8983282f5c829990"
+      },
+      "scope": "Remote Linux debug0/incremental0 profile, exact upstream2073-input source closure; extracted source has no .git."
+    },
+    "result": {
+      "source": "a623ee8e3ff7ccfc2d0ea87ee97c8eee2e985a27",
+      "exit": 0,
+      "abort": null,
+      "guards": 2073,
+      "guards_match": true,
+      "helpers_match": true,
+      "passed": 0,
+      "failed": 0,
+      "ignored": 0,
+      "harnesses": 0,
+      "free_start": 9762828288,
+      "free_minimum": 9553616896,
+      "free_end": 9553330176,
+      "floor_bytes": 8589934592,
+      "reserve_bytes": 268435456,
+      "children_reaped": true,
+      "scope": "Functional/identity qualification on Mothership Linux debug0, no timing inference."
+    }
+  }
+}
