@@ -122,6 +122,10 @@ pub struct Stats {
 // selects an inline 96-byte draw; compact placements are two 16-byte words and
 // point at a five-word shared common record in the same storage buffer.
 const INLINE_RECORD: u32 = 1 << 31;
+// Correction metadata: bit 31 selects a paint-bank color; bit 30 certifies
+// quarter-grid solid coverage. Generic correction indices never reach either.
+const LOWERED_SOLID: u32 = 1 << 30;
+const _: () = assert!(MAX_DRAWS + 1 < LOWERED_SOLID as usize);
 // Inline draws use six words. For compact groups n >= 2, 5 + 2n <= 6n.
 const _: () = assert!(MAX_DRAWS * 6 < INLINE_RECORD as usize);
 type Word = [u32; 4];
@@ -139,20 +143,13 @@ fn prepared<'a>(group: PreparedGroup<'a>, p: PreparedPlacement<'a>) -> PreparedD
     }
 }
 // Quarter-pixel endpoints select the canonical CPU's exact sample set.
-// Keep an empty domain outside the viewport with positive extents: the shader
-// computes normalized coordinates before rejecting local membership.
+// Empty rectangles need no special sentinel in the certified bounds sampler.
 fn sampled_solid_rect(
     draw: &PreparedDraw<'_>,
     viewport: [u32; 2],
 ) -> Result<gpui_canvas::Rect, Error> {
-    let rect = draw
-        .sampled_rect_clip(viewport)
-        .map_err(|_| Error::InvalidScene)?;
-    Ok(if rect.is_empty() {
-        gpui_canvas::Rect::new(-1.0, -1.0, 0.25, 0.25)
-    } else {
-        rect
-    })
+    draw.sampled_rect_clip(viewport)
+        .map_err(|_| Error::InvalidScene)
 }
 fn common_words(group: PreparedGroup<'_>, error: [f32; 2], correction: u32) -> [Word; 5] {
     let [a, b, c, d, tx, ty] = group.inverse.map(|v| v as f32);
@@ -716,20 +713,16 @@ impl RendererState {
         let mut ordinal = 0;
         let mut shared_groups = 0;
         let mut compact_draws = 0;
-        let viewport = gpui_canvas::Rect::new(0.0, 0.0, scene.width as f32, scene.height as f32);
         for group in scene.groups() {
             let compact = compact_group(group, self.grouped_records);
             let lower_solid = group.inverse[1] == 0.0
                 && group.inverse[2] == 0.0
                 && group.placements().all(|p| p.source.is_solid());
             // Retain canonical geometry for admission/CSR/proofs. Only the
-            // uploaded coverage changes: quarter edges and eighth samples make
-            // identity arithmetic exact, so no residual/error lane is needed.
-            let mut packet_group = group;
+            // uploaded coverage changes. The tag bypasses transform/clip/error
+            // arithmetic only after canonical sample-set lowering succeeds.
             let correction = if lower_solid {
-                packet_group.inverse = [1.0, 0.0, 0.0, 1.0, 0.0, 0.0];
-                packet_group.clip = viewport;
-                0
+                LOWERED_SOLID
             } else {
                 self.correction(group.inverse, group.clip)
             };
@@ -750,11 +743,7 @@ impl RendererState {
                     error[1] = error[1].max(e[1]);
                 }
                 let common = self.records.len() as u32;
-                let mut words = common_words(
-                    packet_group,
-                    if lower_solid { [0.0; 2] } else { error },
-                    correction,
-                );
+                let mut words = common_words(group, error, correction);
                 if let Some(slot) = group.paint_slot() {
                     words[3] = [slots::color_word(bank_count, slot), 0, 0, 0];
                     words[4][0] |= SLOT_COLOR;
@@ -793,15 +782,12 @@ impl RendererState {
                     let error = validate_draw(draw, ordinal, scene.width, scene.height)?;
                     has_masks |= draw.source.mask().is_some();
                     let address = INLINE_RECORD | self.records.len() as u32;
-                    let mut packet_draw = prepared(packet_group, p);
-                    let packet_error = if lower_solid {
+                    let mut packet_draw = draw;
+                    if lower_solid {
                         packet_draw.local_rect =
                             sampled_solid_rect(&draw, [scene.width, scene.height])?;
-                        [0.0; 2]
-                    } else {
-                        error
-                    };
-                    let mut words = inline_words(packet_draw, packet_error, correction);
+                    }
+                    let mut words = inline_words(packet_draw, error, correction);
                     if let Some(slot) = group.paint_slot() {
                         words[4] = [slots::color_word(bank_count, slot), 0, 0, 0];
                         words[5][3] |= SLOT_COLOR;
@@ -1401,6 +1387,97 @@ fn validate_draw(
 mod tests {
     use super::*;
     use gpui_canvas::Rect;
+
+    #[cfg(feature = "vulkan-tests")]
+    #[test]
+    fn only_lowered_solid_packets_publish_the_sample_certificate() {
+        use gpui_canvas::{Affine, Canvas, Color, PaintColor};
+        pollster::block_on(async {
+            let mut desc = wgpu::InstanceDescriptor::new_without_display_handle();
+            desc.backends = wgpu::Backends::VULKAN;
+            let instance = wgpu::Instance::new(desc);
+            let adapter = instance
+                .request_adapter(&wgpu::RequestAdapterOptions {
+                    force_fallback_adapter: true,
+                    ..Default::default()
+                })
+                .await
+                .unwrap();
+            let mut renderer = Renderer::request(&adapter, wgpu::TextureFormat::Rgba8UnormSrgb)
+                .await
+                .unwrap();
+            let mut canvas = Canvas::recording(19, 17, Default::default()).unwrap();
+            canvas.clear(Color::WHITE);
+            let clip = Rect::new(0.125, 0.375, 17.5, 15.25);
+            let rect = Rect::new(0.125, 0.375, 12.25, 13.5);
+            let slot = canvas.paint_slot(PaintColor::new(Color::BLACK)).unwrap();
+            canvas
+                .fill_rect_slot(
+                    rect,
+                    Affine {
+                        a: -1.25,
+                        tx: 17.125,
+                        b: -0.0,
+                        ..Affine::IDENTITY
+                    },
+                    clip,
+                    slot,
+                )
+                .unwrap();
+            canvas
+                .fill_rect(
+                    rect,
+                    Affine {
+                        c: 0.125,
+                        ..Affine::IDENTITY
+                    },
+                    clip,
+                    Color::BLACK,
+                )
+                .unwrap();
+            canvas
+                .fill_rounded_rect(rect, 2.0, Affine::IDENTITY, clip, Color::BLACK)
+                .unwrap();
+            let target = renderer.device().create_texture(&wgpu::TextureDescriptor {
+                label: None,
+                size: wgpu::Extent3d {
+                    width: 19,
+                    height: 17,
+                    depth_or_array_layers: 1,
+                },
+                mip_level_count: 1,
+                sample_count: 1,
+                dimension: wgpu::TextureDimension::D2,
+                format: renderer.format(),
+                usage: wgpu::TextureUsages::RENDER_ATTACHMENT,
+                view_formats: &[],
+            });
+            renderer
+                .render(
+                    canvas.prepared_scene(),
+                    &target.create_view(&Default::default()),
+                )
+                .unwrap();
+            let prefix = slots::prefix_words(1);
+            let records = &renderer.state.records[prefix..];
+            assert_eq!(records.len(), 18);
+            assert_eq!(records[5][3], LOWERED_SOLID | SLOT_COLOR);
+            assert_eq!(records[11][3] & LOWERED_SOLID, 0);
+            assert_eq!(records[17][3] & LOWERED_SOLID, 0);
+            let draw = canvas.prepared_scene().draws().next().unwrap();
+            let lowered = sampled_solid_rect(&draw, [19, 17]).unwrap();
+            assert_eq!(
+                records[0],
+                float_word([lowered.x, lowered.y, lowered.width, lowered.height])
+            );
+            // The shared common writer puts the same tag in the metadata lane
+            // read by both compact shader loaders; bit 31 remains independent.
+            let group = canvas.prepared_scene().groups().next().unwrap();
+            let common = common_words(group, [0.0; 2], LOWERED_SOLID | SLOT_COLOR);
+            assert_eq!(common[4][0], records[5][3]);
+            assert_eq!(renderer.stats().draw_record_bytes, (prefix + 18) * 16);
+        });
+    }
 
     #[test]
     fn packet_storage_ledger() {

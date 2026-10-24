@@ -1,0 +1,199 @@
+{
+  "pid": 3193169,
+  "pgid": 3193169,
+  "state": "complete",
+  "completed_controls": [
+    {
+      "profile": "original",
+      "control": "positive",
+      "passed": true,
+      "error": null
+    },
+    {
+      "profile": "original",
+      "control": "suppressed-complete",
+      "passed": true,
+      "error": null
+    },
+    {
+      "profile": "original",
+      "control": "stale-marker",
+      "passed": true,
+      "error": null
+    },
+    {
+      "profile": "certified",
+      "control": "positive",
+      "passed": true,
+      "error": null
+    },
+    {
+      "profile": "certified",
+      "control": "suppressed-complete",
+      "passed": true,
+      "error": null
+    },
+    {
+      "profile": "certified",
+      "control": "stale-marker",
+      "passed": true,
+      "error": null
+    },
+    {
+      "profile": "banked4",
+      "control": "positive",
+      "passed": true,
+      "error": null
+    },
+    {
+      "profile": "banked4",
+      "control": "suppressed-complete",
+      "passed": true,
+      "error": null
+    },
+    {
+      "profile": "banked4",
+      "control": "stale-marker",
+      "passed": true,
+      "error": null
+    }
+  ],
+  "completed_trials": [
+    {
+      "profile": "original",
+      "mode": "busy",
+      "repeat": 1,
+      "qualified": true,
+      "error": null
+    },
+    {
+      "profile": "certified",
+      "mode": "busy",
+      "repeat": 1,
+      "qualified": true,
+      "error": null
+    },
+    {
+      "profile": "banked4",
+      "mode": "busy",
+      "repeat": 1,
+      "qualified": true,
+      "error": null
+    },
+    {
+      "profile": "original",
+      "mode": "animation",
+      "repeat": 1,
+      "qualified": false,
+      "error": null
+    },
+    {
+      "profile": "certified",
+      "mode": "animation",
+      "repeat": 1,
+      "qualified": false,
+      "error": null
+    },
+    {
+      "profile": "banked4",
+      "mode": "animation",
+      "repeat": 1,
+      "qualified": false,
+      "error": null
+    },
+    {
+      "profile": "banked4",
+      "mode": "animation",
+      "repeat": 2,
+      "qualified": false,
+      "error": null
+    },
+    {
+      "profile": "certified",
+      "mode": "animation",
+      "repeat": 2,
+      "qualified": false,
+      "error": null
+    },
+    {
+      "profile": "original",
+      "mode": "animation",
+      "repeat": 2,
+      "qualified": false,
+      "error": null
+    },
+    {
+      "profile": "banked4",
+      "mode": "busy",
+      "repeat": 2,
+      "qualified": true,
+      "error": null
+    },
+    {
+      "profile": "certified",
+      "mode": "busy",
+      "repeat": 2,
+      "qualified": true,
+      "error": null
+    },
+    {
+      "profile": "original",
+      "mode": "busy",
+      "repeat": 2,
+      "qualified": true,
+      "error": null
+    },
+    {
+      "profile": "certified",
+      "mode": "busy",
+      "repeat": 3,
+      "qualified": true,
+      "error": null
+    },
+    {
+      "profile": "original",
+      "mode": "busy",
+      "repeat": 3,
+      "qualified": true,
+      "error": null
+    },
+    {
+      "profile": "banked4",
+      "mode": "busy",
+      "repeat": 3,
+      "qualified": true,
+      "error": null
+    },
+    {
+      "profile": "certified",
+      "mode": "animation",
+      "repeat": 3,
+      "qualified": false,
+      "error": null
+    },
+    {
+      "profile": "original",
+      "mode": "animation",
+      "repeat": 3,
+      "qualified": false,
+      "error": null
+    },
+    {
+      "profile": "banked4",
+      "mode": "animation",
+      "repeat": 3,
+      "qualified": false,
+      "error": null
+    }
+  ],
+  "physical_gpu_and_scanout": "unsupported",
+  "current": {
+    "profile": "banked4",
+    "mode": "animation",
+    "repeat": 3
+  },
+  "source_and_binary_unchanged": true,
+  "harness_unchanged": true,
+  "all_trials_qualified": false,
+  "completed_utc": "2026-10-24T09:56:51.811359+00:00"
+}

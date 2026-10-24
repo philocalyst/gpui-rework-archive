@@ -1,0 +1,2 @@
+cargo::rerun-if-changed=src
+cargo::rerun-if-env-changed=GPUI_SPIRV_VAL

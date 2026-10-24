@@ -1,0 +1,37 @@
+{
+  "source": "7ccc65d2673a64499d805f41aaa0e423f15de2ce",
+  "original": "/tmp/gpui-lowered-solid-target/debug/build/gpui/51b85d9fb2c20092/out/gpui-51b85d9fb2c20092",
+  "sha256": "db1651e1f2033f6ee5775dae93b26e93b817954fb8525ff60157d3f1448d2b2d",
+  "bytes": 678086960,
+  "fresh": false,
+  "features": [
+    "accessibility",
+    "default",
+    "native",
+    "native-core",
+    "simd",
+    "x11",
+    "x11-minimal"
+  ],
+  "profile": {
+    "opt_level": "0",
+    "debuginfo": 2,
+    "debug_assertions": true,
+    "overflow_checks": true,
+    "test": true
+  },
+  "target": {
+    "kind": [
+      "lib"
+    ],
+    "crate_types": [
+      "lib"
+    ],
+    "name": "gpui",
+    "src_path": "/root/gpui-lowered-solid-sol/reactivity/crates/gpui/src/lib.rs",
+    "edition": "2024",
+    "doc": true,
+    "doctest": true,
+    "test": true
+  }
+}

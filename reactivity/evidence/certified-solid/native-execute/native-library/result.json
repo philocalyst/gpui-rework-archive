@@ -1,0 +1,8 @@
+{
+  "name": "native-library",
+  "exit": 0,
+  "passed": 220,
+  "failed": 0,
+  "ignored": 30,
+  "binary_sha256_matches": true
+}

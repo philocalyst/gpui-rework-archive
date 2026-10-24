@@ -1,0 +1,34 @@
+{
+  "private_abi": {
+    "word_bytes": 16,
+    "inline_draw_bytes": 96,
+    "compact_draw_bytes": 32,
+    "shared_common_bytes": 80,
+    "correction_bytes": 32,
+    "Globals_bytes": 48,
+    "changes_to_each": 0
+  },
+  "actual_new_packet_test": {
+    "name": "renderer::tests::only_lowered_solid_packets_publish_the_sample_certificate",
+    "profile": "real Vulkan llvmpipe successful banked SDR render",
+    "draws": 3,
+    "inline_draw_words": 18,
+    "bank_prefix_words": 3,
+    "total_words": 21,
+    "draw_record_bytes_asserted": 336,
+    "actual_lowered_metadata_word_hex": "c0000000",
+    "generic_shear_and_rounded_have_tag_bit_clear": true
+  },
+  "existing_actual_storage_ledger": {
+    "Renderer": 888,
+    "GpuContext": 48,
+    "RendererState": 840,
+    "Stats": 200,
+    "Packet": 16,
+    "OptionPacket": 16,
+    "BindGroup": 8,
+    "Canvas": 488,
+    "PreparedScene": 56
+  },
+  "limits": "Public Canvas currently authors multi-placement groups only for glyphs; compact-solid metadata transport is proven by unchanged common writer/loaders and the private common-word check, not a naturally produced compact-solid scene. No new per-draw lane, public type, owner field, material layout or resource binding."
+}

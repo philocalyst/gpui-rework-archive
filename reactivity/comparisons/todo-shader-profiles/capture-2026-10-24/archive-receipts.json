@@ -1,0 +1,22 @@
+{
+  "raw-evidence": {
+    "archive": "/home/miles/gpui-ce3-compute-20261024/artifacts/todo-shader-profiles-v1/raw-evidence.tar.gz",
+    "bytes": 6849857,
+    "sha256": "8eb4916ea2a166a0a106e7061e14fb8cde93e555c442121a64a3d3c51e05bb79",
+    "payload_members": 158,
+    "manifest_sha256": "70744d04b924a82cfd699f918bea3aac062892891e5e22e0f361b3ac1e4dc0be",
+    "exact_member_set_verified": true,
+    "all_member_bytes_and_modes_verified": true,
+    "description": "Every raw setup failure, build receipt/log, native control and registered short trial; source/ELF bytes are in the disjoint source capsule."
+  },
+  "source-and-elfs": {
+    "archive": "/home/miles/gpui-ce3-compute-20261024/artifacts/todo-shader-profiles-v1/source-and-elfs.tar.gz",
+    "bytes": 105094551,
+    "sha256": "8ceb6961e5fa929473b4d749abbdaa102b41c0ee2e028c063b9b56b4a3db9803",
+    "payload_members": 6145,
+    "manifest_sha256": "1feed35f30fd863b9f6d1a98bcf2a3ed55e2c85925f96d8d298206875855379e",
+    "exact_member_set_verified": true,
+    "all_member_bytes_and_modes_verified": true,
+    "description": "Complete three frozen 0062+739c source scopes, actual WGSL and linked ELFs, prior-binary quarantines, source overlays and orchestration/runner sources; no Git internals or build cache."
+  }
+}

@@ -1,0 +1,57 @@
+{
+  "status": "INVALIDFAULT",
+  "artifacts": [
+    {
+      "outdir": "/tmp/gpui-lowered-solid-target/debug/build/gpui_gpu/2d97987bb02daabb/out",
+      "wgsl_sha256": "bfc3c458b4632b081f03ceeb2b33cd5d4cef757dbb6063ae55838c01ffa1f185",
+      "contains_guarded_tag_branch": true,
+      "mtime_ns": 1792830718341788732
+    },
+    {
+      "outdir": "/tmp/gpui-lowered-solid-target/debug/build/gpui_gpu/87185d8a08a29dcf/out",
+      "wgsl_sha256": "bfc3c458b4632b081f03ceeb2b33cd5d4cef757dbb6063ae55838c01ffa1f185",
+      "contains_guarded_tag_branch": true,
+      "mtime_ns": 1792831052369004106
+    },
+    {
+      "outdir": "/tmp/gpui-lowered-solid-target/debug/build/gpui_gpu/b6d65cf8fa78d0e3/out",
+      "wgsl_sha256": "bfc3c458b4632b081f03ceeb2b33cd5d4cef757dbb6063ae55838c01ffa1f185",
+      "contains_guarded_tag_branch": true,
+      "mtime_ns": 1792830527928680879
+    },
+    {
+      "outdir": "/tmp/gpui-lowered-solid-target/debug/build/gpui_gpu/d4b259f172523aaa/out",
+      "wgsl_sha256": "bfc3c458b4632b081f03ceeb2b33cd5d4cef757dbb6063ae55838c01ffa1f185",
+      "contains_guarded_tag_branch": true,
+      "mtime_ns": 1792830889305480594
+    },
+    {
+      "script_executable": "/tmp/gpui-lowered-solid-target/debug/build/gpui_gpu/105cdd4b1c3b5d17/out/build_script_build",
+      "bytes": 16332056,
+      "sha256": "f5db5c47107e9c56aa0f4df45dd6ffd3c24e590a89010ecd49a6b59b81e9c9d1",
+      "dependency_info": "/tmp/gpui-lowered-solid-target/debug/build/gpui_gpu/105cdd4b1c3b5d17/out/build_script_build.d: /root/gpui-lowered-solid-sol/clippy.toml crates/gpu/build.rs crates/gpu/src/shader.rs crates/gpu/src/shader_build.rs Cargo.toml\n\n/tmp/gpui-lowered-solid-target/debug/build/gpui_gpu/105cdd4b1c3b5d17/out/build_script_build: /root/gpui-lowered-solid-sol/clippy.toml crates/gpu/build.rs crates/gpu/src/shader.rs crates/gpu/src/shader_build.rs Cargo.toml\n\n/root/gpui-lowered-solid-sol/clippy.toml:\ncrates/gpu/build.rs:\ncrates/gpu/src/shader.rs:\ncrates/gpu/src/shader_build.rs:\nCargo.toml:\n\n# env-dep:CLIPPY_ARGS=-D__CLIPPY_HACKERY__warnings__CLIPPY_HACKERY__\n# env-dep:CLIPPY_CONF_DIR\n"
+    },
+    {
+      "script_executable": "/tmp/gpui-lowered-solid-target/debug/build/gpui_gpu/323bcf552479fc19/out/build_script_build",
+      "bytes": 21378248,
+      "sha256": "398d32bc2ce29aca9d3a5c372fad30faa4b0ac04dca73c7c9d0bc98cf3afd34c",
+      "dependency_info": "/tmp/gpui-lowered-solid-target/debug/build/gpui_gpu/323bcf552479fc19/out/build_script_build.d: crates/gpu/build.rs crates/gpu/src/shader.rs\n\n/tmp/gpui-lowered-solid-target/debug/build/gpui_gpu/323bcf552479fc19/out/build_script_build: crates/gpu/build.rs crates/gpu/src/shader.rs\n\ncrates/gpu/build.rs:\ncrates/gpu/src/shader.rs:\n"
+    },
+    {
+      "script_executable": "/tmp/gpui-lowered-solid-target/debug/build/gpui_gpu/c1c0f83e5d6b92b2/out/build_script_build",
+      "bytes": 25826720,
+      "sha256": "a2d1680a3813a1237d4493a0cb379dbf7e7958848d4768c77c1d60d405cd04a4",
+      "dependency_info": "/tmp/gpui-lowered-solid-target/debug/build/gpui_gpu/c1c0f83e5d6b92b2/out/build_script_build.d: crates/gpu/build.rs crates/gpu/src/shader.rs crates/gpu/src/shader_build.rs\n\n/tmp/gpui-lowered-solid-target/debug/build/gpui_gpu/c1c0f83e5d6b92b2/out/build_script_build: crates/gpu/build.rs crates/gpu/src/shader.rs crates/gpu/src/shader_build.rs\n\ncrates/gpu/build.rs:\ncrates/gpu/src/shader.rs:\ncrates/gpu/src/shader_build.rs:\n"
+    },
+    {
+      "script_executable": "/tmp/gpui-lowered-solid-target/debug/build/gpui_gpu/cca0607e7b7f0050/out/build_script_build",
+      "bytes": 21462576,
+      "sha256": "f0e4155b401b98285d7b1caeda6b4430b0b0bffbcbb8976bd79a56e6087c66c9",
+      "dependency_info": "/tmp/gpui-lowered-solid-target/debug/build/gpui_gpu/cca0607e7b7f0050/out/build_script_build.d: crates/gpu/build.rs crates/gpu/src/shader.rs\n\n/tmp/gpui-lowered-solid-target/debug/build/gpui_gpu/cca0607e7b7f0050/out/build_script_build: crates/gpu/build.rs crates/gpu/src/shader.rs\n\ncrates/gpu/build.rs:\ncrates/gpu/src/shader.rs:\n"
+    }
+  ],
+  "source_mtimes": {
+    "/root/gpui-lowered-solid-fault/reactivity/crates/gpu/src/shader.rs": 1792830624846591977,
+    "/root/gpui-lowered-solid-sol/reactivity/crates/gpu/src/shader.rs": 1792830090536272394
+  }
+}
