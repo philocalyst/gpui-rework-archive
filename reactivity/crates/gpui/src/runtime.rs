@@ -2570,7 +2570,16 @@ impl<M: View + 'static> Runtime<M> {
             base.sort_unstable_by_key(|entry| entry.identity);
             metadata.base = base;
         }
-        background::reconcile(&mut self.images, &mut self.dirty, &nodes, background_drafts)?;
+        // Enter the material bank only for declared paint or an existing cold
+        // override/resource arm. Plain descriptions never take its stack frame.
+        if !background_drafts.is_empty()
+            || self
+                .images
+                .as_ref()
+                .is_some_and(|resources| resources.backgrounds.is_some())
+        {
+            background::reconcile(&mut self.images, &mut self.dirty, &nodes, background_drafts)?;
+        }
         self.reconcile_geometry(&nodes, geometry_drafts);
         self.viewports = viewports;
         self.list_rows = list_rows;
