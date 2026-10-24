@@ -663,7 +663,7 @@ mod destination_tests {
         for port in [0, 1, 2] {
             assert!(checked((1 << 2) | port).is_none());
         }
-        for invalid in [0, 14, 8191] {
+        for invalid in [0, 15, 8191] {
             assert!(checked((invalid << 2) | 3).is_none());
         }
         assert!(checked((MAX_NODES as u32) << 15).is_none());

@@ -179,15 +179,27 @@ pub mod ui {
             pair_dot(draw.inverse_y.xyz(), correction.y.xyz(), point),
             vec2f(-draw.local.y, 0.0),
         );
+        rounded_local_contains(draw.local, x, y, radius, scale)
+    }
+    pub fn rounded_local_contains(
+        local: Vec4f,
+        x: Vec2f,
+        y: Vec2f,
+        radius: f32,
+        scale: f32,
+    ) -> bool {
         if pair_negative(x)
             || pair_negative(y)
-            || !pair_negative(pair_add(x, vec2f(-draw.local.z, 0.0)))
-            || !pair_negative(pair_add(y, vec2f(-draw.local.w, 0.0)))
+            || !pair_negative(pair_add(x, vec2f(-local.z, 0.0)))
+            || !pair_negative(pair_add(y, vec2f(-local.w, 0.0)))
         {
             return false;
         }
-        let dx = pair_scale(corner_distance(x, draw.local.z, radius), scale);
-        let dy = pair_scale(corner_distance(y, draw.local.w, radius), scale);
+        if radius == 0.0 {
+            return true;
+        }
+        let dx = pair_scale(corner_distance(x, local.z, radius), scale);
+        let dy = pair_scale(corner_distance(y, local.w, radius), scale);
         let r = radius * scale;
         let residual = pair_add(
             pair_add(pair_square(dx), pair_square(dy)),
@@ -292,6 +304,34 @@ pub mod ui {
         vec4f(rgb.x, rgb.y, rgb.z, value.w)
     }
 
+    pub fn clip_chain_contains(address: u32, point: Vec2f) -> bool {
+        let mut cursor = address;
+        for _depth in 0..64 {
+            let base = cursor as usize;
+            let local = bitcast_vec4f(get!(WORDS)[base]);
+            let high_x = bitcast_vec4f(get!(WORDS)[base + 1]);
+            let high_y = bitcast_vec4f(get!(WORDS)[base + 2]);
+            let low_x = get!(WORDS)[base + 3];
+            let low_y = bitcast_vec4f(get!(WORDS)[base + 4]);
+            let x = pair_add(
+                pair_dot(high_x.xyz(), bitcast_vec4f(low_x).xyz(), point),
+                vec2f(-local.x, 0.0),
+            );
+            let y = pair_add(
+                pair_dot(high_y.xyz(), low_y.xyz(), point),
+                vec2f(-local.y, 0.0),
+            );
+            if !rounded_local_contains(local, x, y, high_x.w, high_y.w) {
+                return false;
+            }
+            cursor = low_x.w;
+            if cursor == 0 {
+                return true;
+            }
+        }
+        false
+    }
+
     // Same validated parameter/interval word schema as Canvas GradientView.
     // Material is independent of rounded/rectangular coverage and never takes
     // uniform-solid tile certificates, even when every stop has alpha one.
@@ -362,7 +402,11 @@ pub mod ui {
             }
             return draw.color;
         }
-        if point.x < draw.clip.x
+        if bitcast_u32(draw.clip.x) == 0x7fc00003 {
+            if !clip_chain_contains(bitcast_u32(draw.clip.y), point) {
+                return vec4f(0.0, 0.0, 0.0, 0.0);
+            }
+        } else if point.x < draw.clip.x
             || point.y < draw.clip.y
             || outside_clip_max(point.x, draw.clip.x, draw.clip.z, draw.atlas.w, false)
             || outside_clip_max(point.y, draw.clip.y, draw.clip.w, draw.atlas.w, true)

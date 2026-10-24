@@ -10,6 +10,11 @@ use fearless_simd::Simd;
 use fearless_simd::dispatch;
 use std::{collections::HashMap, sync::Arc};
 
+mod clips;
+pub use clips::{
+    Clip, ClipChain, ClipGeometry, ClipId, ClipShape, MAX_CLIP_DEPTH, MAX_CLIP_NODES,
+    PreparedClipNode,
+};
 mod columns;
 use columns::{Columns, PaintUse, StoredCommon};
 pub use columns::{
@@ -342,6 +347,7 @@ struct DisplayList {
 }
 #[derive(Default)]
 struct ImageResources {
+    clips: Option<Box<clips::ClipArena>>,
     values: Vec<Image>,
     index: HashMap<ImageKey, u32>,
     bytes: usize,
@@ -400,6 +406,7 @@ struct BorrowedCommand<'a> {
     clip: Rect,
     map: Mapping,
     source: BorrowedSource<'a>,
+    clip_chain: Option<ClipChain<'a>>,
     color: [f32; 4],
     bounds: [usize; 4],
 }
@@ -413,6 +420,11 @@ impl BorrowedCommand<'_> {
             && rect_bits(self.clip) == rect_bits(other.clip)
             && self.map.inverse.map(f64::to_bits) == other.map.inverse.map(f64::to_bits)
             && self.color.map(f32::to_bits) == other.color.map(f32::to_bits)
+            && match (self.clip_chain, other.clip_chain) {
+                (None, None) => true,
+                (Some(a), Some(b)) => a.same(b),
+                _ => false,
+            }
             && match (self.source, other.source) {
                 (BorrowedSource::Rect, BorrowedSource::Rect) => true,
                 (BorrowedSource::Rounded(left), BorrowedSource::Rounded(right)) => {
@@ -457,11 +469,15 @@ impl DisplayList {
                     + r.gradients
                         .as_ref()
                         .map_or(0, |_| size_of::<GradientResources>())
+                    + r.clips
+                        .as_ref()
+                        .map_or(0, |_| size_of::<clips::ClipArena>())
             }),
             order_bytes: self.order.capacity() * size_of::<u32>(),
             inline_bytes: self.inline.capacity() * size_of::<InlineDraw>(),
             common_bytes: self.commons.capacity() * size_of::<CommonGroup>() + self.columns.bytes(),
             placement_bytes: self.placements.capacity() * size_of::<Placement>(),
+            clip_node_bytes: self.clip_geometry().map_or(0, ClipGeometry::node_bytes),
             resource_handles_bytes: self.masks.capacity() * size_of::<Arc<Raster>>()
                 + self.images.as_ref().map_or(0, |r| {
                     r.values.capacity() * size_of::<Image>()
@@ -477,7 +493,10 @@ impl DisplayList {
             resource_entries: self.masks.len()
                 + self.images.as_ref().map_or(0, |r| {
                     r.values.len() + r.gradients.as_ref().map_or(0, |g| g.values.len())
-                }),
+                })
+                + self
+                    .clip_geometry()
+                    .map_or(0, |geometry| geometry.nodes().len()),
         }
     }
     fn bytes(&self) -> usize {
@@ -566,7 +585,8 @@ impl DisplayList {
         let (common, geometry, source) = self.parts(address, viewport);
         BorrowedCommand {
             rect: geometry.rect,
-            clip: common.clip,
+            clip: self.clip_bounds(common.clip),
+            clip_chain: self.clip_chain(common.clip),
             map: common.map,
             color: common.color,
             bounds: geometry.bounds.map(usize::from),
@@ -726,6 +746,7 @@ pub struct PreparedDraw<'a> {
     pub bounds: Rect,
     pub color: [f32; 4],
     pub source: PreparedSource<'a>,
+    pub clip_chain: Option<ClipChain<'a>>,
 }
 
 impl PreparedDraw<'_> {
@@ -734,6 +755,9 @@ impl PreparedDraw<'_> {
     /// sampling remain separate. The inverse must be finite and axis-aligned,
     /// within the Canvas inverse-magnitude limit of 1e12.
     pub fn sampled_rect_clip(&self, viewport: [u32; 2]) -> Result<Rect, Error> {
+        if self.clip_chain.is_some() {
+            return Err(Error::InvalidGeometry);
+        }
         validate_sampled_domain(self.local_rect, self.clip, viewport)?;
         let map = Mapping {
             inverse: self.inverse,
@@ -767,6 +791,8 @@ pub struct SceneStorage {
     pub inline_bytes: usize,
     pub common_bytes: usize,
     pub placement_bytes: usize,
+    /// Capacity of immutable parent-linked clip nodes, absent for flat clips.
+    pub clip_node_bytes: usize,
     pub resource_handles_bytes: usize,
     pub resource_index_capacity: usize,
     pub resource_entries: usize,
@@ -777,6 +803,7 @@ impl SceneStorage {
             + self.inline_bytes
             + self.common_bytes
             + self.placement_bytes
+            + self.clip_node_bytes
             + self.resource_handles_bytes
     }
 }
@@ -799,6 +826,10 @@ pub struct PreparedGroup<'a> {
     order: &'a [u32],
 }
 impl<'a> PreparedGroup<'a> {
+    pub fn clip_chain(self) -> Option<ClipChain<'a>> {
+        let (common, _, _) = self.commands.parts(self.order[0], self.clip);
+        self.commands.clip_chain(common.clip)
+    }
     /// Shared working paint relationship in this canonical scene, if present.
     pub fn paint_slot(self) -> Option<PaintSlot> {
         let (stored, _, source) = self.commands.stored(self.order[0]);
@@ -839,7 +870,7 @@ impl<'a> Groups<'a> {
         let (common, _, source) = self.commands.parts(address, extent_rect(self.extent));
         PreparedGroup {
             inverse: common.map.inverse,
-            clip: common.clip,
+            clip: self.commands.clip_bounds(common.clip),
             color: if resource_material(source) {
                 [1.0; 4]
             } else {
@@ -985,6 +1016,12 @@ impl<'a> PreparedScene<'a> {
         self.commands.masks.iter().map(|mask| mask_view(mask))
     }
     /// Unique immutable image leases, borrowed without cloning a resource.
+    pub fn clip_nodes(self) -> impl DoubleEndedIterator<Item = PreparedClipNode> {
+        self.commands
+            .clip_geometry()
+            .into_iter()
+            .flat_map(ClipGeometry::nodes)
+    }
     pub fn images(self) -> impl DoubleEndedIterator<Item = ImageView<'a>> {
         self.commands
             .images
@@ -1019,6 +1056,7 @@ impl<'a> PreparedScene<'a> {
                 ),
                 color: command.source.material_color(command.color),
                 source: command.source.prepared(command.color),
+                clip_chain: command.clip_chain,
             }
         })
     }
@@ -1182,19 +1220,19 @@ impl Canvas {
         self.clear = color.premultiplied();
         self.dirty = true;
     }
-    /// Clip is an axis-aligned rectangle in canvas coordinates, before sampling.
+    /// Clip is a canvas rectangle or a capability created by `create_clip`.
     /// Singular/ill-conditioned transforms and out-of-domain geometry return errors.
     pub fn fill_rect(
         &mut self,
         rect: Rect,
         transform: Affine,
-        clip: Rect,
+        clip: impl Into<Clip>,
         color: Color,
     ) -> Result<(), Error> {
         self.fill_shape(
             rect,
             transform,
-            clip,
+            clip.into(),
             PaintColor::new(color),
             RECT_SOURCE,
             PaintUse::Literal,
@@ -1209,7 +1247,7 @@ impl Canvas {
         rect: Rect,
         radius: f32,
         transform: Affine,
-        clip: Rect,
+        clip: impl Into<Clip>,
         color: Color,
     ) -> Result<(), Error> {
         rounded::validate_radius(radius)?;
@@ -1221,7 +1259,7 @@ impl Canvas {
         self.fill_shape(
             rect,
             transform,
-            clip,
+            clip.into(),
             PaintColor::new(color),
             source,
             PaintUse::Literal,
@@ -1231,13 +1269,13 @@ impl Canvas {
         &mut self,
         rect: Rect,
         transform: Affine,
-        clip: Rect,
+        clip: impl Into<Clip>,
         slot: PaintSlot,
     ) -> Result<(), Error> {
         self.fill_shape(
             rect,
             transform,
-            clip,
+            clip.into(),
             self.slot_color(slot)?,
             RECT_SOURCE,
             PaintUse::Existing(slot),
@@ -1248,7 +1286,7 @@ impl Canvas {
         rect: Rect,
         radius: f32,
         transform: Affine,
-        clip: Rect,
+        clip: impl Into<Clip>,
         slot: PaintSlot,
     ) -> Result<(), Error> {
         rounded::validate_radius(radius)?;
@@ -1260,7 +1298,7 @@ impl Canvas {
         self.fill_shape(
             rect,
             transform,
-            clip,
+            clip.into(),
             self.slot_color(slot)?,
             source,
             PaintUse::Existing(slot),
@@ -1271,12 +1309,12 @@ impl Canvas {
         &mut self,
         rect: Rect,
         transform: Affine,
-        clip: Rect,
+        clip: Clip,
         color: PaintColor,
         source: u32,
         paint: PaintUse<'_>,
     ) -> Result<(), Error> {
-        validate_rect(clip)?;
+        let clip = self.resolve_clip(clip)?;
         let common = Common {
             clip,
             map: Mapping::new(transform)?,
@@ -1312,7 +1350,7 @@ impl Canvas {
         rect: Rect,
         radius: f32,
         transform: Affine,
-        clip: Rect,
+        clip: impl Into<Clip>,
         initial: PaintColor,
         cache: &mut Option<PaintSlot>,
     ) -> Result<(), Error> {
@@ -1330,7 +1368,7 @@ impl Canvas {
         self.fill_shape(
             rect,
             transform,
-            clip,
+            clip.into(),
             value,
             source,
             PaintUse::Shared(cache),
@@ -1343,7 +1381,7 @@ impl Canvas {
         layout: &TextLayout,
         origin: Point,
         transform: Affine,
-        clip: Rect,
+        clip: impl Into<Clip>,
         initial: PaintColor,
         cache: &mut Option<PaintSlot>,
         raster_scale: f32,
@@ -1358,7 +1396,7 @@ impl Canvas {
             layout,
             origin,
             transform,
-            clip,
+            clip.into(),
             value,
             raster_scale,
             PaintUse::Shared(cache),
@@ -1372,9 +1410,9 @@ impl Canvas {
         rect: Rect,
         radius: f32,
         transform: Affine,
-        clip: Rect,
+        clip: impl Into<Clip>,
     ) -> Result<(), Error> {
-        self.fill_gradient_with(gradient, rect, radius, transform, clip, false)
+        self.fill_gradient_with(gradient, rect, radius, transform, clip.into(), false)
     }
     fn fill_gradient_with(
         &mut self,
@@ -1382,11 +1420,11 @@ impl Canvas {
         rect: Rect,
         radius: f32,
         transform: Affine,
-        clip: Rect,
+        clip: Clip,
         previous_lease: bool,
     ) -> Result<(), Error> {
         rounded::validate_radius(radius)?;
-        validate_rect(clip)?;
+        let clip = self.resolve_clip(clip)?;
         let resources = self
             .commands
             .images
@@ -1438,7 +1476,7 @@ impl Canvas {
             true,
             false,
         )?;
-        self.admit(std::slice::from_ref(&command), &[], 0)?;
+        self.admit(&command)?;
         if unpublished.is_some() {
             self.commands.images = unpublished;
         }
@@ -1462,11 +1500,9 @@ impl Canvas {
             r.index.insert(gradient.key(), index);
             r.bytes += gradient.view().byte_len();
         }
-        self.commands.append(
+        self.commands.append_inline(
             common,
-            std::iter::once(command),
-            false,
-            Vec::new(),
+            command,
             viewport_rect(self.width, self.height),
             None,
         );
@@ -1480,7 +1516,7 @@ impl Canvas {
         image: &Image,
         rect: Rect,
         transform: Affine,
-        clip: Rect,
+        clip: impl Into<Clip>,
         sampling: ImageSampling,
     ) -> Result<(), Error> {
         self.draw_image_with(
@@ -1499,7 +1535,17 @@ impl Canvas {
         image: &Image,
         rect: Rect,
         transform: Affine,
-        clip: Rect,
+        clip: impl Into<Clip>,
+        options: crate::ImageOptions,
+    ) -> Result<(), Error> {
+        self.draw_image_working(image, rect, transform, clip.into(), options)
+    }
+    fn draw_image_working(
+        &mut self,
+        image: &Image,
+        rect: Rect,
+        transform: Affine,
+        clip: Clip,
         options: crate::ImageOptions,
     ) -> Result<(), Error> {
         let crate::ImageOptions {
@@ -1507,7 +1553,7 @@ impl Canvas {
             corner_radius,
         } = options;
         rounded::validate_radius(corner_radius)?;
-        validate_rect(clip)?;
+        let clip = self.resolve_clip(clip)?;
         let resources = self.commands.images.as_deref();
         let existing = resources.and_then(|r| r.index.get(&image.key()).copied());
         let index = existing.unwrap_or_else(|| resources.map_or(0, |r| r.values.len() as u32));
@@ -1595,7 +1641,7 @@ impl Canvas {
         layout: &TextLayout,
         origin: Point,
         transform: Affine,
-        clip: Rect,
+        clip: impl Into<Clip>,
         color: Color,
     ) -> Result<(), Error> {
         self.draw_text_scaled(text, layout, origin, transform, clip, color, 1.0)
@@ -1612,7 +1658,7 @@ impl Canvas {
         layout: &TextLayout,
         origin: Point,
         transform: Affine,
-        clip: Rect,
+        clip: impl Into<Clip>,
         color: Color,
         raster_scale: f32,
     ) -> Result<(), Error> {
@@ -1621,7 +1667,7 @@ impl Canvas {
             layout,
             origin,
             transform,
-            clip,
+            clip.into(),
             PaintColor::new(color),
             raster_scale,
             PaintUse::Literal,
@@ -1634,7 +1680,7 @@ impl Canvas {
         layout: &TextLayout,
         origin: Point,
         transform: Affine,
-        clip: Rect,
+        clip: impl Into<Clip>,
         slot: PaintSlot,
         raster_scale: f32,
     ) -> Result<(), Error> {
@@ -1643,7 +1689,7 @@ impl Canvas {
             layout,
             origin,
             transform,
-            clip,
+            clip.into(),
             self.slot_color(slot)?,
             raster_scale,
             PaintUse::Existing(slot),
@@ -1656,7 +1702,7 @@ impl Canvas {
         layout: &TextLayout,
         origin: Point,
         transform: Affine,
-        clip: Rect,
+        clip: Clip,
         color: PaintColor,
         raster_scale: f32,
         paint: PaintUse<'_>,
@@ -1676,7 +1722,7 @@ impl Canvas {
             return Err(Error::InvalidGeometry);
         }
         // Validate even an empty run, and prepare all commands before publishing.
-        validate_rect(clip)?;
+        let clip = self.resolve_clip(clip)?;
         let common = Common {
             clip,
             map: Mapping::new(transform)?,
@@ -1821,7 +1867,7 @@ impl Canvas {
         source: u32,
     ) -> Result<Option<PendingDraw>, Error> {
         validate_rect(rect)?;
-        let clip = common.clip;
+        let clip = self.commands.clip_bounds(common.clip);
         if rect.is_empty() || clip.is_empty() || common.color[3] == 0.0 {
             return Ok(None);
         }
@@ -2431,6 +2477,7 @@ fn render_band_impl<W: PixelWriter, S: Simd>(
             }
             let axis = if !full
                 && matches!(command.source, BorrowedSource::Rect)
+                && command.clip_chain.is_none()
                 && command.map.axis_aligned()
             {
                 match AxisCoverage::new(&command, [left, top, right, bottom], &mut stats) {
@@ -2487,7 +2534,16 @@ fn render_band_impl<W: PixelWriter, S: Simd>(
                         samples.blend_mask(pixel, command.color, mask);
                     } else if let Some(axis) = &glyph_axis {
                         stats.boundary_pixels += 1;
-                        samples.blend(pixel, command.color, axis.coverage(x - left, y - top));
+                        let mut coverage = axis.coverage(x - left, y - top);
+                        if let Some(chain) = command.clip_chain {
+                            let mask = chain.mask(simd, x, y, &mut stats);
+                            for (index, value) in coverage.iter_mut().enumerate() {
+                                if mask & (1 << index) == 0 {
+                                    *value = 0.0;
+                                }
+                            }
+                        }
+                        samples.blend(pixel, command.color, coverage);
                     } else {
                         stats.boundary_pixels += 1;
                         if matches!(
@@ -2574,7 +2630,7 @@ fn render_image_command(
         render_rounded_image(samples, command, bounds, stats, image, sampling, radius);
     } else if image.needs_decode_memo() {
         render_cached_image(samples, command, bounds, stats, image, sampling);
-    } else if command.map.axis_aligned() {
+    } else if command.clip_chain.is_none() && command.map.axis_aligned() {
         image_axis::render(samples, command, bounds, stats, image, sampling, |x, y| {
             image.texel(x, y)
         });
@@ -2691,7 +2747,7 @@ fn render_cached_image(
     sampling: ImageSampling,
 ) {
     crate::image::with_decode_memo(image, |sampler| {
-        if command.map.axis_aligned() {
+        if command.clip_chain.is_none() && command.map.axis_aligned() {
             image_axis::render(samples, command, bounds, stats, image, sampling, |x, y| {
                 sampler.texel(x, y)
             });
@@ -2726,6 +2782,9 @@ fn render_image(
                     || wy < command.clip.y as f64
                     || wx >= command.clip.x as f64 + command.clip.width as f64
                     || wy >= command.clip.y as f64 + command.clip.height as f64
+                    || command
+                        .clip_chain
+                        .is_some_and(|chain| !chain.contains_at(wx, wy))
                 {
                     return None;
                 }
@@ -2757,7 +2816,7 @@ impl CanvasScene<'_> {
         rect: Rect,
         radius: f32,
         transform: Affine,
-        clip: Rect,
+        clip: impl Into<Clip>,
     ) -> Result<(), Error> {
         let previous = self
             .target
@@ -2767,9 +2826,17 @@ impl CanvasScene<'_> {
             .and_then(|r| r.gradients.as_ref())
             .is_some_and(|r| r.index.contains_key(&gradient.key()));
         self.pending
-            .fill_gradient_with(gradient, rect, radius, transform, clip, previous)
+            .fill_gradient_with(gradient, rect, radius, transform, clip.into(), previous)
     }
 
+    pub fn create_clip(
+        &mut self,
+        parent: Option<ClipId>,
+        shape: ClipShape,
+        transform: Affine,
+    ) -> Result<ClipId, Error> {
+        self.pending.create_clip(parent, shape, transform)
+    }
     pub fn width(&self) -> u32 {
         self.pending.width()
     }
@@ -2783,7 +2850,7 @@ impl CanvasScene<'_> {
         &mut self,
         rect: Rect,
         transform: Affine,
-        clip: Rect,
+        clip: impl Into<Clip>,
         color: Color,
     ) -> Result<(), Error> {
         self.pending.fill_rect(rect, transform, clip, color)
@@ -2793,7 +2860,7 @@ impl CanvasScene<'_> {
         rect: Rect,
         radius: f32,
         transform: Affine,
-        clip: Rect,
+        clip: impl Into<Clip>,
         color: Color,
     ) -> Result<(), Error> {
         self.pending
@@ -2803,7 +2870,7 @@ impl CanvasScene<'_> {
         &mut self,
         rect: Rect,
         transform: Affine,
-        clip: Rect,
+        clip: impl Into<Clip>,
         slot: PaintSlot,
     ) -> Result<(), Error> {
         self.pending.fill_rect_slot(rect, transform, clip, slot)
@@ -2813,7 +2880,7 @@ impl CanvasScene<'_> {
         rect: Rect,
         radius: f32,
         transform: Affine,
-        clip: Rect,
+        clip: impl Into<Clip>,
         slot: PaintSlot,
     ) -> Result<(), Error> {
         self.pending
@@ -2826,7 +2893,7 @@ impl CanvasScene<'_> {
         layout: &TextLayout,
         origin: Point,
         transform: Affine,
-        clip: Rect,
+        clip: impl Into<Clip>,
         slot: PaintSlot,
         raster_scale: f32,
     ) -> Result<(), Error> {
@@ -2846,7 +2913,7 @@ impl CanvasScene<'_> {
         rect: Rect,
         radius: f32,
         transform: Affine,
-        clip: Rect,
+        clip: impl Into<Clip>,
         initial: PaintColor,
         cache: &mut Option<PaintSlot>,
     ) -> Result<(), Error> {
@@ -2860,7 +2927,7 @@ impl CanvasScene<'_> {
         layout: &TextLayout,
         origin: Point,
         transform: Affine,
-        clip: Rect,
+        clip: impl Into<Clip>,
         initial: PaintColor,
         cache: &mut Option<PaintSlot>,
         raster_scale: f32,
@@ -2881,7 +2948,7 @@ impl CanvasScene<'_> {
         image: &Image,
         rect: Rect,
         transform: Affine,
-        clip: Rect,
+        clip: impl Into<Clip>,
         sampling: ImageSampling,
     ) -> Result<(), Error> {
         self.pending
@@ -2892,7 +2959,7 @@ impl CanvasScene<'_> {
         image: &Image,
         rect: Rect,
         transform: Affine,
-        clip: Rect,
+        clip: impl Into<Clip>,
         options: crate::ImageOptions,
     ) -> Result<(), Error> {
         self.pending
@@ -2904,7 +2971,7 @@ impl CanvasScene<'_> {
         layout: &TextLayout,
         origin: Point,
         transform: Affine,
-        clip: Rect,
+        clip: impl Into<Clip>,
         color: Color,
     ) -> Result<(), Error> {
         self.pending
@@ -2917,7 +2984,7 @@ impl CanvasScene<'_> {
         layout: &TextLayout,
         origin: Point,
         transform: Affine,
-        clip: Rect,
+        clip: impl Into<Clip>,
         color: Color,
         raster_scale: f32,
     ) -> Result<(), Error> {
@@ -2985,6 +3052,9 @@ fn full_tile(
     right: usize,
     bottom: usize,
 ) -> bool {
+    if command.clip_chain.is_some() {
+        return false;
+    }
     let r = command.rect;
     let c = command.clip;
     if command.map.axis_aligned() {
@@ -3123,6 +3193,9 @@ fn sample(command: &BorrowedCommand<'_>, x: usize, y: usize, stats: &mut RenderS
                 || wy < clip.y as f64
                 || wx >= clip.x as f64 + clip.width as f64
                 || wy >= clip.y as f64 + clip.height as f64
+                || command
+                    .clip_chain
+                    .is_some_and(|chain| !chain.contains_at(wx, wy))
             {
                 continue;
             }
@@ -3255,6 +3328,7 @@ mod scaled_mask_tests {
                             Rect::new(0.125f32.next_down(), 0.375f32.next_up(), 31.0, 31.0),
                         ] {
                             let command = BorrowedCommand {
+                                clip_chain: None,
                                 rect,
                                 clip,
                                 map,

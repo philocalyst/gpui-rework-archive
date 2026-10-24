@@ -32,7 +32,7 @@ use serde_json::{Map as SchemaMap, Value as SchemaValue};
 pub use uuid::Uuid;
 
 mod geometry;
-pub use geometry::{Affine, Point, Rect, Size, Vec2};
+pub use geometry::{Affine, HitTestShape, Point, Rect, Size, Vec2};
 
 /// The type of an accessibility node.
 ///
@@ -883,6 +883,7 @@ enum PropertyValue {
     TextAlign(TextAlign),
     VerticalOffset(VerticalOffset),
     Affine(Box<Affine>),
+    HitTestShape(Box<HitTestShape>),
     Rect(Rect),
     TextSelection(Box<TextSelection>),
     CustomActionVec(Vec<CustomAction>),
@@ -1003,6 +1004,7 @@ enum PropertyId {
 
     // Other
     Transform,
+    HitTestShape,
     Bounds,
     TextSelection,
     CustomActions,
@@ -1041,6 +1043,7 @@ impl Clone for PropertyValue {
             Self::TextAlign(v) => Self::TextAlign(*v),
             Self::VerticalOffset(v) => Self::VerticalOffset(*v),
             Self::Affine(v) => Self::Affine(v.clone()),
+            Self::HitTestShape(v) => Self::HitTestShape(v.clone()),
             Self::Rect(v) => Self::Rect(*v),
             Self::TextSelection(v) => Self::TextSelection(v.clone()),
             Self::CustomActionVec(v) => Self::CustomActionVec(v.clone()),
@@ -1059,6 +1062,7 @@ impl Clone for PropertyValue {
             (Self::CoordVec(dest), Self::CoordVec(source)) => dest.clone_from(source),
             (Self::CustomActionVec(dest), Self::CustomActionVec(source)) => dest.clone_from(source),
             (Self::Affine(dest), Self::Affine(source)) => dest.clone_from(source),
+            (Self::HitTestShape(dest), Self::HitTestShape(source)) => dest.clone_from(source),
             (Self::TextSelection(dest), Self::TextSelection(source)) => dest.clone_from(source),
             (dest, source) => *dest = source.clone(),
         }
@@ -1984,6 +1988,7 @@ flag_methods! {
 
 option_ref_type_getters! {
     (get_affine_property, Affine, Affine),
+    (get_hit_test_shape_property, HitTestShape, HitTestShape),
     (get_string_property, str, String),
     (get_coord_vec_property, [f32], CoordVec),
     (get_text_selection_property, TextSelection, TextSelection)
@@ -2013,6 +2018,7 @@ copy_type_getters! {
 
 owned_type_setters! {
     (set_affine_property, Box<Affine>, Affine),
+    (set_hit_test_shape_property, Box<HitTestShape>, HitTestShape),
     (set_string_property, String, String),
     (set_length_vec_property, Vec<u8>, LengthVec),
     (set_coord_vec_property, Vec<f32>, CoordVec),
@@ -2538,6 +2544,12 @@ property_methods! {
     /// [`bounds`]: Node::bounds
     (Transform, transform, get_affine_property, Option<&Affine>, set_transform, set_affine_property, impl Into<Box<Affine>>, clear_transform),
 
+    /// Optional analytic shape for point queries in this node's coordinate
+    /// space. Native rectangular extents continue to use [`Node::bounds`].
+    /// When [`Node::clips_children`] is set, this shape also clips descendant
+    /// point queries. Without this property, bounds supply the point predicate.
+    (HitTestShape, hit_test_shape, get_hit_test_shape_property, Option<&HitTestShape>, set_hit_test_shape, set_hit_test_shape_property, impl Into<Box<HitTestShape>>, clear_hit_test_shape),
+
     /// The bounding box of this node, in the node's coordinate space.
     /// This property does not affect the coordinate space of either this node
     /// or its descendants; only the [`transform`] property affects that.
@@ -2564,7 +2576,7 @@ property_methods! {
 }
 
 impl Node {
-    option_properties_debug_method! { debug_option_properties, [transform, bounds, text_selection, tree_id,] }
+    option_properties_debug_method! { debug_option_properties, [transform, hit_test_shape, bounds, text_selection, tree_id,] }
 }
 
 #[cfg(test)]
@@ -2883,6 +2895,7 @@ impl Serialize for Properties {
                 TextAlign,
                 VerticalOffset,
                 Affine,
+                HitTestShape,
                 Rect,
                 TextSelection,
                 CustomActionVec,
@@ -3016,6 +3029,7 @@ impl<'de> Visitor<'de> for PropertiesVisitor {
                 TextAlign { TextAlign },
                 VerticalOffset { VerticalOffset },
                 Affine { Transform },
+                HitTestShape { HitTestShape },
                 Rect { Bounds },
                 TextSelection { TextSelection },
                 CustomActionVec { CustomActions },
@@ -3171,6 +3185,7 @@ impl JsonSchema for Properties {
             TextAlign { TextAlign },
             VerticalOffset { VerticalOffset },
             Affine { Transform },
+                HitTestShape { HitTestShape },
             Rect { Bounds },
             TextSelection { TextSelection },
             Vec<CustomAction> { CustomActions },
@@ -3733,5 +3748,33 @@ mod tests {
         assert_eq!(tree.root, NodeId(1));
         assert_eq!(tree.toolkit_name, None);
         assert_eq!(tree.toolkit_version, None);
+    }
+}
+
+#[cfg(test)]
+mod hit_test_shape {
+    extern crate std;
+    use super::*;
+    #[test]
+    fn sparse_shape_clone_clear_and_headers() {
+        let mut node = Node::new(Role::GenericContainer);
+        let shape = HitTestShape::rounded_rect([0., 0., 10., 10.], 5., [1., 0., 0., 1., 0., 0.])
+            .unwrap()
+            .with_child_radius(0.)
+            .unwrap();
+        assert!(!shape.contains(Point::new(0.5, 0.5)));
+        assert!(shape.contains_child_clip(Point::new(0.5, 0.5)));
+        node.set_hit_test_shape(shape.clone());
+        assert_eq!(node.clone().hit_test_shape(), Some(&shape));
+        node.clear_hit_test_shape();
+        assert!(node.hit_test_shape().is_none());
+        std::println!(
+            "ACCESSKIT_CLIP_HEADERS node={} properties={} indices={} property_value={} shape={}",
+            size_of::<Node>(),
+            size_of::<Properties>(),
+            size_of::<PropertyIndices>(),
+            size_of::<PropertyValue>(),
+            size_of::<HitTestShape>()
+        );
     }
 }

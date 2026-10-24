@@ -435,7 +435,8 @@ impl<'a> El<'a> {
         let mut element = Self::new(NodeKind::Image, None);
         element.extra = Some(Box::new(crate::semantic::ElementExtra::Image {
             spec: crate::image::ImageSpec {
-                geometry: Default::default(),
+                corner_radius: 0.0,
+                clip_children: false,
                 resource,
                 sampling: crate::ImageSampling::Linear,
             },
@@ -533,9 +534,7 @@ impl<'a> El<'a> {
                         Default::default(),
                     ))
                 })
-                .set_geometry(crate::property::GeometryStyle {
-                    corner_radius: value,
-                });
+                .set_radius(value);
         } else if let Some(map) = radius.mapped() {
             self.bind_mapped_property(PropertyId::CornerRadius, map);
         } else {
@@ -543,6 +542,36 @@ impl<'a> El<'a> {
                 PropertyId::CornerRadius,
                 radius.signal().expect("signal radius"),
             );
+        }
+        self
+    }
+    /// Intersect this element and its descendants with its local bounds and
+    /// current uniform corner radius. Transforms compose normally; this flag
+    /// does not alter layout. Rounded corners alone still affect only this part.
+    pub fn clip(self) -> Self {
+        self.clipped(true)
+    }
+    /// A typed clipping flag accepting a literal, signal or source map. Radius
+    /// and clipping share the geometry domain and its checked publication path.
+    pub fn clipped(mut self, clipped: impl IntoProp<'a, bool>) -> Self {
+        let clipped = clipped.into_prop();
+        if let Some(value) = clipped.literal() {
+            if let Some(extra) = self.extra.as_deref_mut() {
+                extra.unbind(PropertyId::Clip);
+            }
+            if value || self.extra.is_some() {
+                self.extra
+                    .get_or_insert_with(|| {
+                        Box::new(crate::semantic::ElementExtra::Decorations(
+                            Default::default(),
+                        ))
+                    })
+                    .clip_children(value);
+            }
+        } else if let Some(map) = clipped.mapped() {
+            self.bind_mapped_property(PropertyId::Clip, map);
+        } else {
+            self.bind_property(PropertyId::Clip, clipped.signal().expect("signal clip"));
         }
         self
     }
@@ -885,10 +914,7 @@ impl<'a> El<'a> {
                         binding.property.set_erased(&mut element.style, value)?;
                     }
                     crate::property::PropertyDestination::Geometry => {
-                        let crate::property::PropertyValue::Number(radius) = value else {
-                            unreachable!()
-                        };
-                        shape.corner_radius = radius;
+                        binding.property.set_geometry(&mut shape, value)?;
                     }
                 }
                 style_ports.push(crate::style_port::Draft {
@@ -905,10 +931,7 @@ impl<'a> El<'a> {
                         binding.property.set_erased(&mut element.style, value)?;
                     }
                     crate::property::PropertyDestination::Geometry => {
-                        let crate::property::PropertyValue::Number(radius) = value else {
-                            unreachable!()
-                        };
-                        shape.corner_radius = radius;
+                        binding.property.set_geometry(&mut shape, value)?;
                     }
                 }
                 mapped_ports.push(crate::style_port::MapDraft {
@@ -925,11 +948,11 @@ impl<'a> El<'a> {
                     },
                 ));
             }
-            if shape.corner_radius.to_bits() != 0 {
+            if shape.corner_radius.to_bits() != 0 || shape.clip_children {
                 geometry.push((index as usize, shape));
             }
             if let Some(mut spec) = image {
-                spec.geometry = shape;
+                spec.set_geometry(shape);
                 images.push(crate::image::ImageDraft { node: index, spec });
             }
             if let Some((projector, map)) = projector {

@@ -864,3 +864,108 @@ impl Neg for Vec2 {
         }
     }
 }
+
+/// Analytic point geometry, independent of conservative native extents.
+///
+/// The local rectangle and radius use finite f32 author coordinates. The
+/// inverse maps this node's coordinate space into those local coordinates.
+/// This optional extension does not add a native accessibility protocol field.
+#[derive(Clone, Debug, PartialEq)]
+#[cfg_attr(feature = "schemars", derive(schemars::JsonSchema))]
+#[cfg_attr(feature = "serde", derive(serde::Serialize, serde::Deserialize))]
+pub struct HitTestShape {
+    bounds: [f32; 4],
+    radius: f32,
+    child_radius: f32,
+    inverse: [f64; 6],
+}
+
+impl HitTestShape {
+    /// Construct a uniform rounded rectangle, clamping radius to half its size.
+    /// The finite transform maps the local rectangle into the node's space.
+    pub fn rounded_rect(bounds: [f32; 4], radius: f32, transform: [f32; 6]) -> Option<Self> {
+        let [x, y, width, height] = bounds;
+        if ![x, y, width, height, x + width, y + height, radius]
+            .into_iter()
+            .all(f32::is_finite)
+            || width < 0.0
+            || height < 0.0
+            || radius < 0.0
+            || !transform.into_iter().all(f32::is_finite)
+        {
+            return None;
+        }
+        let [a, b, c, d, tx, ty] = transform.map(f64::from);
+        let det = a * d - b * c;
+        if det == 0.0 {
+            return None;
+        }
+        let inverse = [
+            d / det,
+            -b / det,
+            -c / det,
+            a / det,
+            (c * ty - d * tx) / det,
+            (b * tx - a * ty) / det,
+        ];
+        inverse.into_iter().all(f64::is_finite).then_some(Self {
+            bounds,
+            radius,
+            child_radius: radius,
+            inverse,
+        })
+    }
+
+    /// Half-open outer edges and closed circular boundaries. This is continuous
+    /// geometry; it does not snap points to a raster coverage sample lattice.
+    pub fn contains(&self, point: Point) -> bool {
+        self.contains_with_radius(point, self.radius)
+    }
+
+    /// Override the descendant clip radius when it differs from the node's
+    /// own shape, for example a rectangular scrolling viewport with rounded paint.
+    pub fn with_child_radius(mut self, radius: f32) -> Option<Self> {
+        if !radius.is_finite() || radius < 0.0 {
+            return None;
+        }
+        self.child_radius = radius;
+        Some(self)
+    }
+
+    /// Point membership for descendants when the node clips its children.
+    pub fn contains_child_clip(&self, point: Point) -> bool {
+        self.contains_with_radius(point, self.child_radius)
+    }
+
+    fn contains_with_radius(&self, point: Point, radius: f32) -> bool {
+        // Deserialized private fields must obey the same admission as constructors.
+        let [left, top, width, height] = self.bounds;
+        if ![left, top, width, height, left + width, top + height, radius]
+            .into_iter()
+            .all(f32::is_finite)
+            || width < 0.0
+            || height < 0.0
+            || radius < 0.0
+            || !self.inverse.into_iter().all(f64::is_finite)
+        {
+            return false;
+        }
+        let [a, b, c, d, tx, ty] = self.inverse;
+        let determinant = a * d - b * c;
+        if !determinant.is_finite() || determinant == 0.0 {
+            return false;
+        }
+        let x = a * point.x + c * point.y + tx;
+        let y = b * point.x + d * point.y + ty;
+        let [left, top, width, height] = self.bounds.map(f64::from);
+        if !(x >= left && y >= top && x < left + width && y < top + height) {
+            return false;
+        }
+        let radius = f64::from(radius).min(width * 0.5).min(height * 0.5);
+        let px = x - left;
+        let py = y - top;
+        let dx = (radius - px).max(px - (width - radius)).max(0.0);
+        let dy = (radius - py).max(py - (height - radius)).max(0.0);
+        dx * dx + dy * dy <= radius * radius
+    }
+}

@@ -2,6 +2,99 @@ use gpui_canvas::{Affine, Canvas, Color, ColorConfig, Point, Rect, TextSystem};
 use gpui_gpu::{Renderer, Stats, wgpu};
 
 #[test]
+fn gradient_clip_masks_remain_correlated_when_material_tails_relocate() {
+    use gpui_canvas::{ClipShape, Extend, Gradient, GradientGeometry, GradientStop, Interpolation};
+    fn half(bytes: &[u8]) -> f32 {
+        let bits = u16::from_le_bytes([bytes[0], bytes[1]]);
+        let exponent = i32::from((bits >> 10) & 31);
+        let mantissa = f32::from(bits & 1023);
+        if exponent == 0 {
+            mantissa * 2f32.powi(-24)
+        } else {
+            (1.0 + mantissa / 1024.0) * 2f32.powi(exponent - 15)
+        }
+    }
+    pollster::block_on(async {
+        let mut renderer = renderer(wgpu::TextureFormat::Rgba16Float).await;
+        let color = Color::linear_srgb(2.0, 1.0, 0.5, 0.5).unwrap();
+        let gradient = Gradient::new(
+            GradientGeometry::Linear {
+                start: Point::default(),
+                end: Point { x: 1.0, y: 0.0 },
+            },
+            &[GradientStop::new(0.0, color), GradientStop::new(1.0, color)],
+            Extend::Pad,
+            Interpolation::LinearSrgb,
+        )
+        .unwrap();
+        for (turn, leading_solids) in [0, 40, 1].into_iter().enumerate() {
+            let mut canvas = Canvas::recording(
+                24,
+                24,
+                ColorConfig::linear_hdr(gpui_canvas::OutputProfile::Srgb, 203.0).unwrap(),
+            )
+            .unwrap();
+            canvas.clear(Color::TRANSPARENT);
+            for _ in 0..leading_solids {
+                canvas
+                    .fill_rect(
+                        Rect::new(0.0, 23.0, 24.0, 1.0),
+                        Affine::IDENTITY,
+                        Rect::new(0.0, 0.0, 24.0, 24.0),
+                        Color::BLACK,
+                    )
+                    .unwrap();
+            }
+            let shape = ClipShape::RoundedRect {
+                rect: Rect::new(1.25, 1.75, 20.0, 19.0),
+                radius: 7.0,
+            };
+            let first = canvas.create_clip(None, shape, Affine::IDENTITY).unwrap();
+            let duplicate = canvas
+                .create_clip(Some(first), shape, Affine::IDENTITY)
+                .unwrap();
+            canvas
+                .fill_gradient(
+                    &gradient,
+                    Rect::new(0.0, 0.0, 24.0, 23.0),
+                    0.0,
+                    Affine::IDENTITY,
+                    duplicate,
+                )
+                .unwrap();
+            let geometry = canvas.clip_geometry().unwrap();
+            let chain = geometry.chain(duplicate).unwrap();
+            let gpu = readback(&mut renderer, &canvas);
+            if turn == 1 {
+                assert!(renderer.image_stats().unwrap().uploaded_bytes > 0);
+            } else if turn == 2 {
+                assert_eq!(renderer.image_stats().unwrap().uploaded_bytes, 0);
+            }
+            let cpu = canvas.pixels();
+            for y in 0..23 {
+                for x in 0..24 {
+                    let coverage = chain.sample_mask(x, y).count_ones() as f32 / 16.0;
+                    let expected = [coverage, coverage * 0.5, coverage * 0.25, coverage * 0.5];
+                    for (channel, expected) in expected.into_iter().enumerate() {
+                        let byte = ((y as usize * 24 + x as usize) * 4 + channel) * 2;
+                        assert_eq!(
+                            half(&gpu[byte..byte + 2]),
+                            expected,
+                            "GPU ({x},{y}) channel {channel}"
+                        );
+                        assert_eq!(
+                            half(&cpu[byte..byte + 2]),
+                            expected,
+                            "CPU ({x},{y}) channel {channel}"
+                        );
+                    }
+                }
+            }
+        }
+    });
+}
+
+#[test]
 fn packed_images_profiles_alpha_filters_and_cache_match_cpu() {
     use gpui_canvas::{AlphaMode, Image, ImageProfile, ImageSampling};
     pollster::block_on(async {
@@ -3718,6 +3811,322 @@ fn analytic_gradient_exact_edges_and_premultiplied_expected_values() {
                         mean[c],
                         expected[c]
                     );
+                }
+            }
+        }
+    });
+}
+
+#[test]
+fn nested_transformed_clip_prefixes_match_cpu_across_materials_and_group_layouts() {
+    use gpui_canvas::{AlphaMode, ClipShape, Image, ImageProfile, ImageSampling};
+    pollster::block_on(async {
+        let mut gpu = renderer(wgpu::TextureFormat::Rgba8UnormSrgb).await;
+        let mut fonts = TextSystem::bundled().unwrap();
+        let layout = fonts.shape("office", 12.0, None).unwrap();
+        let image = Image::rgba8(
+            2,
+            2,
+            ImageProfile::Srgb,
+            AlphaMode::Straight,
+            vec![
+                255, 19, 31, 255, 43, 251, 71, 180, 29, 73, 255, 220, 231, 191, 31, 130,
+            ]
+            .into_boxed_slice(),
+        )
+        .unwrap();
+        for map in [
+            Affine::IDENTITY,
+            Affine::translation(0.375, 0.125),
+            Affine {
+                a: -1.0,
+                b: -0.0,
+                c: 0.0,
+                d: 1.0,
+                tx: 31.0,
+                ty: -0.0,
+            },
+            Affine {
+                a: 0.9,
+                b: 0.125,
+                c: -0.25,
+                d: 1.0,
+                tx: 4.0,
+                ty: 0.375,
+            },
+        ] {
+            let mut canvas = Canvas::recording(32, 32, ColorConfig::default()).unwrap();
+            canvas.clear(Color::rgb(19, 29, 47));
+            let outer = canvas
+                .create_clip(
+                    None,
+                    ClipShape::RoundedRect {
+                        rect: Rect::new(0.125, 0.375, 26.5, 27.25),
+                        radius: 7.0,
+                    },
+                    map,
+                )
+                .unwrap();
+            let child = canvas
+                .create_clip(
+                    Some(outer),
+                    ClipShape::RoundedRect {
+                        rect: Rect::new(2.375, 1.125, 23.25, 25.5),
+                        radius: 4.0,
+                    },
+                    Affine::IDENTITY,
+                )
+                .unwrap();
+            canvas
+                .fill_rect(
+                    Rect::new(0.0, 0.0, 32.0, 32.0),
+                    Affine::IDENTITY,
+                    child,
+                    Color::rgba(211, 43, 91, 180),
+                )
+                .unwrap();
+            canvas
+                .draw_text(
+                    &mut fonts,
+                    &layout,
+                    Point { x: 0.5, y: 1.5 },
+                    Affine::IDENTITY,
+                    child,
+                    Color::WHITE,
+                )
+                .unwrap();
+            canvas
+                .draw_image(
+                    &image,
+                    Rect::new(0.125, 15.375, 29.5, 14.25),
+                    Affine::IDENTITY,
+                    child,
+                    ImageSampling::Linear,
+                )
+                .unwrap();
+            let expected = canvas.pixels().to_vec();
+            for grouped in [false, true] {
+                gpu.set_grouped_records(grouped);
+                let actual = readback(&mut gpu, &canvas);
+                for (index, (a, b)) in actual.into_iter().zip(&expected).enumerate() {
+                    assert!(
+                        a.abs_diff(*b) <= 1,
+                        "{map:?} grouped={grouped} byte={index}: GPU{a} CPU{b}"
+                    );
+                }
+                assert_eq!(gpu.stats().uniform_tiles, 0);
+            }
+        }
+    });
+}
+
+#[test]
+fn clip_word_prefixes_survive_banked_patches_image_permutations_and_growth() {
+    use gpui_canvas::{
+        AlphaMode, ClipShape, Image, ImageProfile, ImageSampling, PaintColor, SlotEdit,
+    };
+    pollster::block_on(async {
+        let mut gpu = renderer(wgpu::TextureFormat::Rgba8UnormSrgb).await;
+        let mut oracle = renderer(wgpu::TextureFormat::Rgba8UnormSrgb).await;
+        let images = [
+            Image::rgba8(
+                1,
+                1,
+                ImageProfile::Srgb,
+                AlphaMode::Straight,
+                vec![255, 31, 73, 180].into_boxed_slice(),
+            )
+            .unwrap(),
+            Image::rgba8(
+                1,
+                1,
+                ImageProfile::Srgb,
+                AlphaMode::Straight,
+                vec![17, 231, 89, 220].into_boxed_slice(),
+            )
+            .unwrap(),
+        ];
+        let colors = [
+            [Color::BLACK, Color::rgba(0, 0, 255, 128)],
+            [Color::rgb(80, 120, 160), Color::rgba(255, 0, 0, 128)],
+            [Color::rgb(20, 40, 60), Color::rgba(0, 255, 0, 128)],
+        ];
+        let build = |extra, reversed, colors: [Color; 2]| {
+            let mut canvas = Canvas::recording(32, 32, ColorConfig::default()).unwrap();
+            canvas.clear(Color::WHITE);
+            let rect = Rect::new(0., 0., 32., 32.);
+            let parent = canvas
+                .create_clip(
+                    None,
+                    ClipShape::RoundedRect {
+                        rect: Rect::new(0.125, 0.375, 30.5, 29.5),
+                        radius: 8.,
+                    },
+                    Affine::IDENTITY,
+                )
+                .unwrap();
+            let clip = canvas
+                .create_clip(
+                    Some(parent),
+                    ClipShape::Rect(rect),
+                    Affine {
+                        c: 0.125,
+                        tx: -2.,
+                        ..Affine::IDENTITY
+                    },
+                )
+                .unwrap();
+            for _ in 0..extra {
+                canvas
+                    .create_clip(None, ClipShape::Rect(rect), Affine::IDENTITY)
+                    .unwrap();
+            }
+            let slots = colors.map(|color| canvas.paint_slot(PaintColor::new(color)).unwrap());
+            for (index, slot) in slots.into_iter().enumerate() {
+                canvas
+                    .fill_rect_slot(
+                        Rect::new(index as f32 * 2., 0., 30., 32.),
+                        Affine::IDENTITY,
+                        clip,
+                        slot,
+                    )
+                    .unwrap();
+            }
+            for index in 0..2 {
+                canvas
+                    .draw_image(
+                        &images[if reversed { 1 - index } else { index }],
+                        Rect::new(4. + index as f32 * 10., 5., 9., 11.),
+                        Affine::IDENTITY,
+                        clip,
+                        ImageSampling::Linear,
+                    )
+                    .unwrap();
+            }
+            (canvas, slots)
+        };
+        for (iteration, extra, reversed) in [
+            (0, 0, false),
+            (1, 0, false),
+            (2, 100, true),
+            (3, 0, true),
+            (4, 0, false),
+        ] {
+            let (mut canvas, slots) = build(extra, reversed, colors[0]);
+            let targets = std::array::from_fn::<_, 3, _>(|_| output_texture(&gpu, &canvas));
+            gpu.render(
+                canvas.prepared_scene(),
+                &targets[0].create_view(&Default::default()),
+            )
+            .unwrap();
+            let uploaded = gpu.image_stats().unwrap().uploaded_bytes;
+            if iteration == 1 || iteration == 3 {
+                assert_eq!(
+                    uploaded, 0,
+                    "same image key set and fitting prefix must reuse the resource tail"
+                );
+            }
+            if iteration == 2 {
+                assert_eq!(
+                    uploaded, 8,
+                    "clip prefix growth relocates the two image words"
+                );
+            }
+            for index in 1..3 {
+                let edits = slots
+                    .into_iter()
+                    .zip(colors[index])
+                    .map(|(slot, color)| SlotEdit::new(slot, PaintColor::new(color)))
+                    .collect::<Vec<_>>();
+                canvas.prepare_slots(&edits).unwrap().commit();
+                let view = targets[index].create_view(&Default::default());
+                let patch = gpu.prepare_slots(&edits, &view).unwrap();
+                assert_eq!(patch.upload_bytes(), 32);
+                patch.commit();
+                assert_eq!(gpu.stats().validated_draws, 0);
+                assert_eq!(gpu.stats().instance_upload_bytes, 32);
+            }
+            // Submit A/B/C without an intervening poll: queued bank writes must
+            // not overwrite clip offsets or immutable image-tail addresses.
+            let actual = targets.each_ref().map(|target| read_texture(&gpu, target));
+            for index in 0..3 {
+                let (mut full, _) = build(extra, reversed, colors[index]);
+                assert_eq!(
+                    actual[index],
+                    readback(&mut oracle, &full),
+                    "iteration{iteration} frame{index}"
+                );
+                for (&gpu, &cpu) in actual[index].iter().zip(full.pixels()) {
+                    assert!(gpu.abs_diff(cpu) <= 1);
+                }
+            }
+            assert_eq!(
+                gpu.stats().uniform_tiles,
+                0,
+                "a rounded clip cannot certify an opaque full tile"
+            );
+        }
+    });
+}
+
+#[test]
+fn all_solid_packet_declines_rectangular_certification_for_a_rounded_clip() {
+    use gpui_canvas::ClipShape;
+    pollster::block_on(async {
+        let mut gpu = renderer(wgpu::TextureFormat::Rgba8UnormSrgb).await;
+        for map in [
+            Affine::IDENTITY,
+            Affine {
+                a: -1.,
+                tx: 32.,
+                ..Affine::IDENTITY
+            },
+            Affine {
+                c: 0.25,
+                tx: -3.,
+                ..Affine::IDENTITY
+            },
+        ] {
+            let mut canvas = Canvas::recording(32, 32, ColorConfig::default()).unwrap();
+            canvas.clear(Color::BLACK);
+            let rect = Rect::new(0., 0., 32., 32.);
+            let clip = canvas
+                .create_clip(
+                    None,
+                    ClipShape::RoundedRect {
+                        rect: Rect::new(0.125, 0.375, 30.5, 29.5),
+                        radius: 8.,
+                    },
+                    map,
+                )
+                .unwrap();
+            canvas
+                .fill_rect(rect, Affine::IDENTITY, clip, Color::WHITE)
+                .unwrap();
+            assert!(
+                canvas
+                    .prepared_scene()
+                    .draws()
+                    .all(|draw| draw.source.is_solid())
+            );
+            let expected = canvas.pixels().to_vec();
+            assert_eq!(&expected[..4], &[0, 0, 0, 255]);
+            assert!(
+                expected
+                    .as_chunks::<4>()
+                    .0
+                    .iter()
+                    .any(|pixel| pixel[0] > 0 && pixel[0] < 255)
+            );
+            for grouped in [false, true] {
+                gpu.set_grouped_records(grouped);
+                for proofs in [false, true] {
+                    gpu.set_tile_proofs(proofs);
+                    let actual = readback(&mut gpu, &canvas);
+                    for (&gpu, &cpu) in actual.iter().zip(&expected) {
+                        assert!(gpu.abs_diff(cpu) <= 1);
+                    }
+                    assert_eq!(gpu.stats().uniform_tiles, 0);
                 }
             }
         }

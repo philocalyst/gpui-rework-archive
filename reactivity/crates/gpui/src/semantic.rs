@@ -57,7 +57,8 @@ pub(crate) struct Decorations<'a> {
     base: Option<Box<LeafExtra<'a>>>,
     bindings: Vec<crate::style_port::Binding<'a>>,
     semantic: Option<Box<Annotations<'a>>>,
-    geometry: crate::property::GeometryStyle,
+    corner_radius: f32,
+    clip_children: bool,
     axes: Option<crate::Axis>,
 }
 enum LeafExtra<'a> {
@@ -101,7 +102,8 @@ impl<'a> ElementExtra<'a> {
             let mut decorations = Decorations::default();
             let (base, semantic) = match previous {
                 Self::Image { spec, semantic } => {
-                    decorations.geometry = spec.geometry;
+                    decorations.corner_radius = spec.corner_radius;
+                    decorations.clip_children = spec.clip_children;
                     (Some(LeafExtra::Image(spec)), semantic)
                 }
                 Self::Reader {
@@ -139,7 +141,7 @@ impl<'a> ElementExtra<'a> {
                 && base.as_deref().is_none_or(Self::empty);
         }
         matches!(self, Self::Decorations(d) if d.base.is_none() && d.bindings.is_empty()
-            && d.semantic.is_none() && d.geometry.corner_radius.to_bits() == 0 && d.axes.is_none())
+            && d.semantic.is_none() && d.corner_radius.to_bits() == 0 && !d.clip_children && d.axes.is_none())
     }
     pub fn bind(
         &mut self,
@@ -278,10 +280,16 @@ impl<'a> ElementExtra<'a> {
         };
         *background = Some(gradient);
     }
-    pub fn set_geometry(&mut self, value: crate::property::GeometryStyle) {
+    pub fn set_radius(&mut self, value: f32) {
         match self {
-            Self::Image { spec, .. } => spec.geometry = value,
-            _ => self.decorations().geometry = value,
+            Self::Image { spec, .. } => spec.corner_radius = value,
+            _ => self.decorations().corner_radius = value,
+        }
+    }
+    pub fn clip_children(&mut self, value: bool) {
+        match self {
+            Self::Image { spec, .. } => spec.clip_children = value,
+            _ => self.decorations().clip_children = value,
         }
     }
     pub fn make_scroll(&mut self, axes: crate::Axis) -> Result<(), crate::ScrollError> {
@@ -379,15 +387,19 @@ impl<'a> ElementExtra<'a> {
                     }
                 }
                 Self::Decorations(d) => {
+                    let geometry = crate::property::GeometryStyle {
+                        corner_radius: d.corner_radius,
+                        clip_children: d.clip_children,
+                    };
                     parts.annotations = d.semantic.map(|s| *s).unwrap_or_default();
                     parts.axes = d.axes;
-                    parts.geometry = Some(d.geometry);
+                    parts.geometry = Some(geometry);
                     parts.bindings = d.bindings;
                     match d.base.map(|base| *base) {
                         Some(LeafExtra::List(list)) => parts.list = Some(list),
                         Some(LeafExtra::Reader(projector)) => parts.projection = Some(projector),
                         Some(LeafExtra::Image(mut spec)) => {
-                            spec.geometry = d.geometry;
+                            spec.set_geometry(geometry);
                             parts.image = Some(spec);
                         }
                         None => {}
@@ -403,7 +415,7 @@ impl<'a> ElementExtra<'a> {
                 }
                 Self::Image { spec, semantic } => {
                     parts.image = Some(spec);
-                    parts.geometry = Some(spec.geometry);
+                    parts.geometry = Some(spec.geometry());
                     parts.annotations = semantic.map(|s| *s).unwrap_or_default();
                 }
                 Self::List(list) => parts.list = Some(list),

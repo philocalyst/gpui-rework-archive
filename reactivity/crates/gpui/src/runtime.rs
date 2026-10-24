@@ -3051,7 +3051,18 @@ impl<M: View + 'static> Runtime<M> {
         let mut geometry_records = Vec::new();
         let mut spaces: Vec<CoordinateSpace> = Vec::with_capacity(self.nodes.len());
         let list_mode = !self.viewports.is_empty();
-        let list_capacity = if list_mode { self.nodes.len() } else { 0 };
+        let clip_mode = self
+            .metadata
+            .as_ref()
+            .and_then(|m| m.geometry.as_ref())
+            .is_some_and(|geometry| geometry.has_logical_clips());
+        let list_capacity = if list_mode || clip_mode {
+            self.nodes.len()
+        } else {
+            0
+        };
+        let mut clip_chains: Vec<Option<gpui_canvas::ClipId>> =
+            Vec::with_capacity(if clip_mode { self.nodes.len() } else { 0 });
         let mut clips: Vec<Rect> = Vec::with_capacity(list_capacity);
         let mut hit_clips: Vec<Rect> = Vec::with_capacity(list_capacity);
         let mut clip_membership: Vec<u8> = Vec::with_capacity(list_capacity);
@@ -3107,11 +3118,12 @@ impl<M: View + 'static> Runtime<M> {
                 .parent
                 .index()
                 .map(|parent| self.nodes[parent].identity());
-            let radius = self
+            let geometry_style = self
                 .metadata
                 .as_ref()
                 .and_then(|m| m.geometry.as_ref())
-                .map_or(0.0, |g| g.get(self.nodes[index].identity()).corner_radius);
+                .map_or_else(Default::default, |g| g.get(self.nodes[index].identity()));
+            let radius = geometry_style.corner_radius;
             let node = &mut self.nodes[index];
             let parent = node.parent.index().map_or(
                 CoordinateSpace::new(Affine::scale(scale_factor, scale_factor)),
@@ -3134,17 +3146,18 @@ impl<M: View + 'static> Runtime<M> {
                 (space.is_invertible() && candidate.is_finite() && candidate.is_invertible())
                     .then_some(candidate);
             let rect = Rect::new(0.0, 0.0, layout.size.width, layout.size.height);
-            let (mut clip, mut hit_clip, in_list) = if list_mode {
+            let (mut clip, mut hit_clip, in_list) = if list_mode || clip_mode {
                 (
                     node.parent.index().map_or(viewport, |parent| clips[parent]),
                     node.parent
                         .index()
                         .map_or(viewport, |parent| hit_clips[parent]),
                     node.kind() == NodeKind::ListItem
-                        || node
-                            .parent
-                            .index()
-                            .is_some_and(|parent| clip_membership[parent] & 1 != 0),
+                        || node.parent.index().is_some_and(|parent| {
+                            clip_membership
+                                .get(parent)
+                                .is_some_and(|flags| flags & 1 != 0)
+                        }),
                 )
             } else {
                 (viewport, viewport, false)
@@ -3173,19 +3186,53 @@ impl<M: View + 'static> Runtime<M> {
                         }
                     })?;
             }
-            if list_mode {
-                clips.push(clip);
-                hit_clips.push(hit_clip);
-            }
             let raw_bounds = transform
                 .and_then(|map| CoordinateSpace::new(map).bounds(rect))
                 .unwrap_or_default();
-            let bounds = if in_list || in_scroll || node.kind() == NodeKind::List {
+            let mut chain = if clip_mode {
+                node.parent.index().and_then(|parent| clip_chains[parent])
+            } else {
+                None
+            };
+            let viewport_node = matches!(
+                node.kind(),
+                NodeKind::List | NodeKind::ListItem | NodeKind::Scroll
+            );
+            if geometry_style.clip_children || (chain.is_some() && viewport_node) {
+                let transform =
+                    transform.ok_or(Error::Canvas(gpui_canvas::Error::InvalidGeometry))?;
+                if chain.is_none() && clip != viewport {
+                    chain = Some(scene.create_clip(
+                        None,
+                        gpui_canvas::ClipShape::Rect(clip),
+                        Affine::IDENTITY,
+                    )?);
+                }
+                let shape = if geometry_style.clip_children {
+                    gpui_canvas::ClipShape::RoundedRect { rect, radius }
+                } else {
+                    gpui_canvas::ClipShape::Rect(rect)
+                };
+                chain = Some(scene.create_clip(chain, shape, transform)?);
+            }
+            if geometry_style.clip_children {
+                hit_clip = hit_clip.intersection(raw_bounds);
+            }
+            if clip_mode {
+                clip_chains.push(chain);
+            }
+            if list_mode || clip_mode {
+                clips.push(clip);
+                hit_clips.push(hit_clip);
+            }
+            let bounds = if in_list || in_scroll || node.kind() == NodeKind::List || chain.is_some()
+            {
                 list::clipped_bounds(raw_bounds, hit_clip)
             } else {
                 raw_bounds.intersection(viewport)
             };
-            let paint = !in_scroll || !bounds.is_empty();
+            let paint = (!in_scroll && chain.is_none()) || !bounds.is_empty();
+            let clip = chain.map_or(gpui_canvas::Clip::Rect(clip), gpui_canvas::Clip::Chain);
             let gradient = self
                 .images
                 .as_deref()
@@ -3423,10 +3470,12 @@ impl<M: View + 'static> Runtime<M> {
                         previous: self.presented.get(index).map(|row| accessibility::RowView {
                             row,
                             bases: previous_geometry.bases(),
+                            shape: previous_geometry.style(row.identity),
                         }),
                         next: accessibility::RowView {
                             row: &presented[index],
                             bases: geometry::Bases::new(&geometry_records),
+                            shape: geometry_style,
                         },
                     },
                     (self.metadata.as_deref(), selection_snapshot),

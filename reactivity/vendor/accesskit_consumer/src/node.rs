@@ -346,6 +346,16 @@ impl<'a> NodeRef<'a> {
         point: Point,
         filter: &impl Fn(&NodeRef) -> FilterResult,
     ) -> Option<(NodeRef<'a>, Point)> {
+        // A subtree query still obeys clips above its entry node.
+        let mut ancestor = *self;
+        let mut ancestor_point = point;
+        while let Some(parent) = ancestor.parent() {
+            ancestor_point = ancestor.direct_transform() * ancestor_point;
+            if parent.clips_children() && !parent.point_in_child_clip(ancestor_point) {
+                return None;
+            }
+            ancestor = parent;
+        }
         // A node's `Test` frame is pushed before its children, then children in
         // forward order, so that children are searched last-to-first and the
         // node's own bounds are tested only after all descendants miss.
@@ -359,10 +369,8 @@ impl<'a> NodeRef<'a> {
         while let Some(frame) = stack.pop() {
             match frame {
                 Frame::Test(node, point) => {
-                    if let Some(rect) = &node.raw_bounds() {
-                        if rect.contains(point) {
-                            return Some((node, point));
-                        }
+                    if node.point_in_bounds(point) {
+                        return Some((node, point));
                     }
                 }
                 Frame::Visit(node, point) => {
@@ -373,6 +381,9 @@ impl<'a> NodeRef<'a> {
                     if filter_result == FilterResult::Include {
                         stack.push(Frame::Test(node, point));
                     }
+                    if node.clips_children() && !node.point_in_child_clip(point) {
+                        continue;
+                    }
                     for child in node.children() {
                         let child_point = child.direct_transform().inverse() * point;
                         stack.push(Frame::Visit(child, child_point));
@@ -382,6 +393,20 @@ impl<'a> NodeRef<'a> {
         }
 
         None
+    }
+
+    fn point_in_child_clip(&self, point: Point) -> bool {
+        self.data().hit_test_shape().map_or_else(
+            || self.raw_bounds().is_some_and(|rect| rect.contains(point)),
+            |shape| shape.contains_child_clip(point),
+        )
+    }
+
+    fn point_in_bounds(&self, point: Point) -> bool {
+        self.data().hit_test_shape().map_or_else(
+            || self.raw_bounds().is_some_and(|rect| rect.contains(point)),
+            |shape| shape.contains(point),
+        )
     }
 
     /// Returns the deepest filtered node, either this node or a descendant,
@@ -1389,6 +1414,71 @@ mod tests {
                 .node_by_id(nid(LABEL_1_1_ID))
                 .unwrap()
                 .bounding_box()
+        );
+    }
+
+    #[test]
+    fn child_clip_prunes_descendants_without_excluding_parent() {
+        use crate::FilterResult;
+
+        let mut parent = Node::new(Role::GenericContainer);
+        parent.set_bounds(Rect::new(0., 0., 10., 10.));
+        parent.set_children(vec![NodeId(1)]);
+        parent.set_clips_children();
+        parent.set_hit_test_shape(
+            accesskit::HitTestShape::rounded_rect([0., 0., 10., 10.], 0., [1., 0., 0., 1., 0., 0.])
+                .unwrap()
+                .with_child_radius(5.)
+                .unwrap(),
+        );
+        let mut child = Node::new(Role::Button);
+        child.set_bounds(Rect::new(0., 0., 10., 10.));
+        let tree = crate::tree::Tree::new(
+            TreeUpdate {
+                nodes: vec![(NodeId(0), parent), (NodeId(1), child)],
+                tree: Some(TreeInfo::new(NodeId(0))),
+                tree_id: TreeId::ROOT,
+                focus: NodeId(0),
+            },
+            false,
+        );
+        let root = tree.state().root();
+        let corner = Point::new(0.5, 0.5);
+        let include = |_: &crate::NodeRef| FilterResult::Include;
+        assert_eq!(
+            root.node_at_point(corner, &include).unwrap().id(),
+            nid(NodeId(0))
+        );
+        assert_eq!(
+            root.node_at_point(Point::new(5., 5.), &include)
+                .unwrap()
+                .id(),
+            nid(NodeId(1))
+        );
+        let exclude_parent = |node: &crate::NodeRef| {
+            if node.id() == nid(NodeId(0)) {
+                FilterResult::ExcludeNode
+            } else {
+                FilterResult::Include
+            }
+        };
+        assert!(root.node_at_point(corner, &exclude_parent).is_none());
+        assert_eq!(
+            root.node_at_point(Point::new(5., 5.), &exclude_parent)
+                .unwrap()
+                .id(),
+            nid(NodeId(1))
+        );
+        assert!(
+            root.node_at_point(Point::new(5., 5.), &|_| FilterResult::ExcludeSubtree)
+                .is_none()
+        );
+        assert!(
+            root.children()
+                .next()
+                .unwrap()
+                .node_at_point(corner, &include)
+                .is_none()
         );
     }
 

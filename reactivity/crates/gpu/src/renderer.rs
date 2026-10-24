@@ -7,6 +7,7 @@ use std::{borrow::Cow, collections::HashMap};
 #[cfg(feature = "offline-shader")]
 #[allow(unsafe_code)]
 mod artifact;
+mod clips;
 mod images;
 mod owned;
 mod paint;
@@ -134,6 +135,7 @@ fn float_word(value: [f32; 4]) -> Word {
 }
 fn prepared<'a>(group: PreparedGroup<'a>, p: PreparedPlacement<'a>) -> PreparedDraw<'a> {
     PreparedDraw {
+        clip_chain: group.clip_chain(),
         local_rect: p.local_rect,
         inverse: group.inverse,
         clip: group.clip,
@@ -715,7 +717,8 @@ impl RendererState {
         let mut compact_draws = 0;
         for group in scene.groups() {
             let compact = compact_group(group, self.grouped_records);
-            let lower_solid = group.inverse[1] == 0.0
+            let lower_solid = group.clip_chain().is_none()
+                && group.inverse[1] == 0.0
                 && group.inverse[2] == 0.0
                 && group.placements().all(|p| p.source.is_solid());
             // Retain canonical geometry for admission/CSR/proofs. Only the
@@ -744,6 +747,9 @@ impl RendererState {
                 }
                 let common = self.records.len() as u32;
                 let mut words = common_words(group, error, correction);
+                if let Some(chain) = group.clip_chain() {
+                    words[2] = clips::reference(word_count + bank_words, chain.index())?;
+                }
                 if let Some(slot) = group.paint_slot() {
                     words[3] = [slots::color_word(bank_count, slot), 0, 0, 0];
                     words[4][0] |= SLOT_COLOR;
@@ -788,6 +794,9 @@ impl RendererState {
                             sampled_solid_rect(&draw, [scene.width, scene.height])?;
                     }
                     let mut words = inline_words(packet_draw, error, correction);
+                    if let Some(chain) = group.clip_chain() {
+                        words[3] = clips::reference(word_count + bank_words, chain.index())?;
+                    }
                     if let Some(slot) = group.paint_slot() {
                         words[4] = [slots::color_word(bank_count, slot), 0, 0, 0];
                         words[5][3] |= SLOT_COLOR;
@@ -807,6 +816,8 @@ impl RendererState {
                 }
             }
         }
+        let draw_words_end = self.records.len();
+        clips::append(&mut self.records, scene)?;
         images::prepare(
             &context.device,
             &context.queue,
@@ -862,7 +873,7 @@ impl RendererState {
                 word += if compact { 2 } else { 6 };
             }
         }
-        debug_assert_eq!(word, self.records.len());
+        debug_assert_eq!(word, draw_words_end);
         let mut offset = 0;
         for (tile, range) in self.ranges.iter_mut().enumerate() {
             let count = range[1];
@@ -878,7 +889,7 @@ impl RendererState {
         self.references.resize(references, 0);
         // Reverse group traversal recovers variable-width word addresses without
         // retaining another per-draw address lane or a duplicate expanded scene.
-        let mut word = self.records.len();
+        let mut word = draw_words_end;
         let mut reverse_ordinal = ordinal;
         for group in scene.groups().rev() {
             let compact = compact_group(group, self.grouped_records);
@@ -1207,7 +1218,7 @@ fn full_tile(
     width: u32,
     height: u32,
 ) -> bool {
-    if !draw.source.is_solid()
+    if draw.clip_chain.is_some() || !draw.source.is_solid()
         || draw.color[3] != 1.0
         // Source-over can change -0 to +0 according to the backdrop's sign.
         // A negative subnormal may also flush to -0 before that addition.
@@ -1610,6 +1621,7 @@ mod tests {
     #[test]
     fn precision_admission_rejects_finite_but_overflowing_intermediates() {
         let mut draw = PreparedDraw {
+            clip_chain: None,
             local_rect: Rect::new(0.0, 0.0, 1.0, 1.0),
             inverse: [1.0, 0.0, 0.0, 1.0, 0.0, 0.0],
             clip: Rect::new(0.0, 0.0, 1.0, 1.0),
@@ -1636,6 +1648,7 @@ mod tests {
         let mut accepted = 0;
         for n in 0..64 {
             let draw = PreparedDraw {
+                clip_chain: None,
                 local_rect: Rect::new(-8.0, -8.0, 16.0 + n as f32, 40.0),
                 inverse: [1.0, n as f64 / 256.0, -0.3, 1.0, n as f64 / 8.0, 0.0],
                 clip: Rect::new(0.0, 0.0, 16.0, 16.0),
@@ -1695,6 +1708,7 @@ mod tests {
             state.ranges.resize(1, [0, 0]);
             state.cursors.resize(1, 0);
             let draw = PreparedDraw {
+                clip_chain: None,
                 local_rect: Rect::new(0., 0., 1., 1.),
                 inverse: [1., 0., 0., 1., 0., 0.],
                 clip: Rect::new(0., 0., 1., 1.),

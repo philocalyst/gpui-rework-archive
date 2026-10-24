@@ -127,6 +127,7 @@ mod tests {
         for b in [0.0, -0.0] {
             for c in [0.0, -0.0] {
                 let command = BorrowedCommand {
+                    clip_chain: None,
                     rect: Rect::new(0.125, 0.375, 22.7, 19.3),
                     clip: Rect::new(0.375, 0.125, 21.5, 25.0),
                     map: Mapping::new(Affine {
@@ -215,6 +216,7 @@ mod tests {
                                 Rect::new(0.125f32.next_down(), 0.375f32.next_up(), 31.0, 31.0),
                             ] {
                                 let command = BorrowedCommand {
+                                    clip_chain: None,
                                     rect,
                                     clip,
                                     map,

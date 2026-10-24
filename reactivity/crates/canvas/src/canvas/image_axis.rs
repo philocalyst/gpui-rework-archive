@@ -278,6 +278,7 @@ mod tests {
                             Rect::new(0., 0., 1e-20, 2.),
                         ] {
                             let command = BorrowedCommand {
+                                clip_chain: None,
                                 rect,
                                 clip: Rect::new(
                                     0.125f32.next_down(),
@@ -356,6 +357,7 @@ mod tests {
                 for sampling in [ImageSampling::Linear, ImageSampling::Nearest] {
                     let rect = Rect::new(0.125, 0.375, 31.7, 29.3);
                     let command = BorrowedCommand {
+                        clip_chain: None,
                         rect,
                         clip: Rect::new(0.375, 0.125, 28.5, 30.),
                         map: Mapping::new(Affine {
@@ -422,6 +424,7 @@ mod work_tests {
         )
         .unwrap();
         let command = BorrowedCommand {
+            clip_chain: None,
             rect: Rect::new(0., 0., 32., 32.),
             clip: Rect::new(0., 0., 32., 32.),
             map: Mapping::new(Affine::IDENTITY).unwrap(),
