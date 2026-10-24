@@ -7,7 +7,7 @@
 #![feature(auto_traits, negative_impls, trait_alias)]
 // The native WGPU Send proof exceeds the default trait-solver depth.
 #![cfg_attr(feature = "native-core", recursion_limit = "256")]
-#![forbid(unsafe_code)]
+#![deny(unsafe_code)]
 
 #[cfg(test)]
 extern crate self as gpui;
