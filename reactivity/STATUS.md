@@ -68,6 +68,18 @@ precision limits, source/stack costs and the unadopted alternatives.
 
 ## Current verification
 
+The integrated [raw glyph count](evidence/raw-glyph-count/README.md) uses exact
+source `ff8fa35f19`, adopted as `2fefe2d266`. Preflight sums existing raw
+line-scoped cluster counts without constructing positioned runs or adding a
+count header. Both feature configurations pass 73 unit tests, with two ignored;
+strict repository-policy lint, Apple/MSVC source checks and the unchanged
+1,120-case public oracle pass. Actual executables catch a deliberately wrong
+count. Matched whole executable code falls 1,392 bytes; the count helper's
+maximum observed RSP CFA falls 352→48 bytes and shaping falls 3,056→3,040.
+Core is now **31,318** non-test, non-comment lines, **−3** for this slice.
+All section/padding costs and rejected count-cache frames remain recorded;
+no timing or RSS win is inferred.
+
 The integrated [bundled coverage certificate](evidence/bundled-coverage/README.md)
 uses exact source `023e584a05`, adopted as `f0859ea215`. A 585-byte interval
 certificate replaces repeated bundled-font cmap probes; one Fearless
@@ -78,7 +90,7 @@ with three ignored; strict repository-policy lint and Apple/MSVC source checks
 pass. Exhaustive Unicode and deliberately broken certificate/classifier controls
 are retained. Matched whole executable code falls 1,632 bytes; all allocated
 sections grow four bytes after charging the table and padding. The shaping
-function's maximum observed RSP CFA falls 4,656→3,056 bytes. Core is now
+function's maximum observed RSP CFA falls 4,656→3,056 bytes. Core at that checkpoint is
 **31,321** non-test, non-comment lines, **+89** for this slice; Hummingbird remains
 5,633. No timing, measured heap or RSS result is inferred.
 

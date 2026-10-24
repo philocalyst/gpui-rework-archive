@@ -78,7 +78,10 @@ coverage is a font-policy error, not an artificial script rejection.
 The existing admission caps remain: 32 KiB source bytes, 32K retained output
 glyphs, 16 MiB supplied font input, author font size up to 512 and physical
 raster size up to 4096. Output count is checked only after a paragraph's planner
-build. HarfRust's private per-buffer limit is `max(input_scalars × 256, 65536)`;
+build. Preflight sums existing raw line-scoped cluster lengths without grouping
+positioned runs or adding a count field; the [count ledger](../../evidence/raw-glyph-count/README.md)
+retains exact output/error controls and code/frame costs. HarfRust's private
+per-buffer limit is `max(input_scalars × 256, 65536)`;
 at this source cap one such buffer can reach 8,388,608 entries. This is not a
 whole-layout scratch or heap budget: multiple shaped runs can retain their
 expansion before Canvas checks the final count. Hostile-font transient-memory

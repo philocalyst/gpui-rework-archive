@@ -1,0 +1,5 @@
+    Blocking waiting for file lock on package cache
+   Compiling parley v0.12.0 (/tmp/gpui-coverage-integration-root/reactivity/vendor/parley)
+   Compiling gpui_canvas v0.1.0 (/tmp/gpui-coverage-integration-root/reactivity/crates/canvas)
+    Finished `release` profile [optimized] target(s) in 43.53s
+     Running unittests src/lib.rs (/tmp/gpui-coverage-integration-target/release/build/gpui_canvas/f55280fd9106e47e/out/gpui_canvas-f55280fd9106e47e)

@@ -1,0 +1,301 @@
+{
+  "identity": {
+    "canvas_source": "ff8fa35f19af553764f82a4af943c94b1235f5a4",
+    "fixture": "35fdf80a1a5d45d6769ca0e5fc8f1c64b3595eb0",
+    "original_path": "/tmp/gpui-coverage-text-oracle-root-target/release/browser-text-oracle",
+    "frozen_path": "/tmp/gpui-coverage-integration-evidence/raw-oracle-frozen",
+    "bytes": 10424088,
+    "sha256": "3635c7afd72cdf97ac421b0d9ef372bf9cd07934fd4c376fef2ff3906166e78f"
+  },
+  "sections": {
+    ".interp": {
+      "bytes": 83,
+      "flags": "A"
+    },
+    ".note.ABI-tag": {
+      "bytes": 32,
+      "flags": "A"
+    },
+    ".dynsym": {
+      "bytes": 1680,
+      "flags": "A"
+    },
+    ".gnu.version": {
+      "bytes": 140,
+      "flags": "A"
+    },
+    ".gnu.version_r": {
+      "bytes": 288,
+      "flags": "A"
+    },
+    ".gnu.hash": {
+      "bytes": 28,
+      "flags": "A"
+    },
+    ".dynstr": {
+      "bytes": 1073,
+      "flags": "A"
+    },
+    ".rela.dyn": {
+      "bytes": 72264,
+      "flags": "A"
+    },
+    ".rela.plt": {
+      "bytes": 48,
+      "flags": "AI"
+    },
+    ".rodata": {
+      "bytes": 8466428,
+      "flags": "AMS"
+    },
+    ".gcc_except_table": {
+      "bytes": 48716,
+      "flags": "A"
+    },
+    ".eh_frame_hdr": {
+      "bytes": 17884,
+      "flags": "A"
+    },
+    ".eh_frame": {
+      "bytes": 106796,
+      "flags": "A"
+    },
+    ".text": {
+      "bytes": 1200022,
+      "flags": "AX"
+    },
+    ".init": {
+      "bytes": 27,
+      "flags": "AX"
+    },
+    ".fini": {
+      "bytes": 13,
+      "flags": "AX"
+    },
+    ".plt": {
+      "bytes": 48,
+      "flags": "AX"
+    },
+    ".tdata": {
+      "bytes": 48,
+      "flags": "WAT"
+    },
+    ".tbss": {
+      "bytes": 32,
+      "flags": "WAT"
+    },
+    ".fini_array": {
+      "bytes": 8,
+      "flags": "WA"
+    },
+    ".init_array": {
+      "bytes": 16,
+      "flags": "WAo"
+    },
+    ".data.rel.ro": {
+      "bytes": 45008,
+      "flags": "WA"
+    },
+    ".dynamic": {
+      "bytes": 464,
+      "flags": "WA"
+    },
+    ".got": {
+      "bytes": 8656,
+      "flags": "WA"
+    },
+    ".got.plt": {
+      "bytes": 40,
+      "flags": "WA"
+    },
+    ".relro_padding": {
+      "bytes": 3168,
+      "flags": "WA"
+    },
+    ".tm_clone_table": {
+      "bytes": 0,
+      "flags": "WA"
+    },
+    ".data": {
+      "bytes": 2704,
+      "flags": "WA"
+    },
+    ".bss": {
+      "bytes": 298,
+      "flags": "WA"
+    },
+    ".comment": {
+      "bytes": 166,
+      "flags": "MS"
+    },
+    ".symtab": {
+      "bytes": 102864,
+      "flags": "33"
+    },
+    ".shstrtab": {
+      "bytes": 320,
+      "flags": "0"
+    },
+    ".strtab": {
+      "bytes": 345262,
+      "flags": "0"
+    }
+  },
+  "allocated_sections": 9976012,
+  "selected_functions": [
+    {
+      "address": 8810608,
+      "bytes": 444,
+      "name": "<core::iter::adapters::map::Map<core::iter::adapters::enumerate::Enumerate<core::slice::iter::Iter<parley::layout::data::LineItemData>>, <parley::layout::line::Line<()>>::items_nonpositioned::{closure#0}> as core::iter::traits::iterator::Iterator>::fold::<usize, core::iter::adapters::filter_map::filter_map_fold<parley::layout::line::LineItem<()>, parley::layout::run::Run<()>, usize, <parley::layout::line::Line<()>>::runs::{closure#0}, &mut core::iter::adapters::map::map_fold<parley::layout::run::Run<()>, usize, usize, <gpui_canvas::text::planner::Planner>::shape_inner::{closure#5}, <usize as core::iter::traits::accum::Sum>::sum<core::iter::adapters::map::Map<core::iter::adapters::flatten::FlatMap<core::iter::adapters::map::Map<core::iter::adapters::enumerate::Enumerate<core::slice::iter::Iter<parley::layout::data::LineData>>, <parley::layout::layout::Layout<()>>::lines::{closure#0}>, core::iter::adapters::filter_map::FilterMap<core::iter::adapters::map::Map<core::iter::adapters::enumerate::Enumerate<core::slice::iter::Iter<parley::layout::data::LineItemData>>, <parley::layout::line::Line<()>>::items_nonpositioned::{closure#0}>, <parley::layout::line::Line<()>>::runs::{closure#0}>, <gpui_canvas::text::planner::Planner>::shape_inner::{closure#4}>, <gpui_canvas::text::planner::Planner>::shape_inner::{closure#5}>>::{closure#0}>::{closure#0}>::{closure#0}>",
+      "fde_ranges": [
+        {
+          "start": 8810608,
+          "end": 8811052,
+          "rsp_cfa_offsets": [
+            8,
+            16,
+            24,
+            32,
+            40,
+            48,
+            40,
+            32,
+            24,
+            16,
+            8,
+            48
+          ]
+        }
+      ],
+      "max_observed_rsp_cfa": 48
+    },
+    {
+      "address": 8836208,
+      "bytes": 508,
+      "name": "<gpui_canvas::text::coverage::Events as core::iter::traits::iterator::Iterator>::next",
+      "fde_ranges": [
+        {
+          "start": 8836208,
+          "end": 8836716,
+          "rsp_cfa_offsets": [
+            8,
+            16,
+            24,
+            32,
+            40,
+            48,
+            56,
+            80,
+            56,
+            48,
+            40,
+            32,
+            24,
+            16,
+            8,
+            80
+          ]
+        }
+      ],
+      "max_observed_rsp_cfa": 80
+    },
+    {
+      "address": 8731808,
+      "bytes": 7910,
+      "name": "browser_text_oracle::main",
+      "fde_ranges": [
+        {
+          "start": 8731808,
+          "end": 8739718,
+          "rsp_cfa_offsets": [
+            8,
+            16,
+            24,
+            32,
+            40,
+            48,
+            56,
+            1280,
+            56,
+            48,
+            40,
+            32,
+            24,
+            16,
+            8,
+            1280
+          ]
+        }
+      ],
+      "max_observed_rsp_cfa": 1280
+    },
+    {
+      "address": 8882288,
+      "bytes": 13312,
+      "name": "<gpui_canvas::text::planner::Planner>::shape",
+      "fde_ranges": [
+        {
+          "start": 8882288,
+          "end": 8895600,
+          "rsp_cfa_offsets": [
+            8,
+            16,
+            24,
+            32,
+            40,
+            48,
+            56,
+            3040,
+            56,
+            48,
+            40,
+            32,
+            24,
+            16,
+            8,
+            3040
+          ]
+        }
+      ],
+      "max_observed_rsp_cfa": 3040
+    }
+  ],
+  "files": {
+    "disassembly.txt": {
+      "bytes": 21462385,
+      "sha256": "d97b3fc32893b49368343605659b041d07bf1817886766be269c85f420373d89"
+    },
+    "symbols.txt": {
+      "bytes": 411086,
+      "sha256": "94330a5d7e480f5b9d7c2038565d805c06a2c134cc7a4cb24fd9e9df3306d9dd"
+    },
+    "symbols.stderr": {
+      "bytes": 0,
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    "disassembly.stderr": {
+      "bytes": 0,
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    "sections.txt": {
+      "bytes": 3458,
+      "sha256": "c1ea64a3b0b705bfa9c61bb5b0ba10e143c3ffc6d28e4b58043263687945abbf"
+    },
+    "sections.stderr": {
+      "bytes": 0,
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    "frames.txt": {
+      "bytes": 1466211,
+      "sha256": "8a4327b2debae4d44773e962f779535d8fc4f7f466bea77e0645a3a0334cc9aa"
+    },
+    "frames.stderr": {
+      "bytes": 0,
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    "selected-code.txt": {
+      "bytes": 316626,
+      "sha256": "724501d801857e1edfad69c9f0d2cfcf4e669062b77f5f2829ee38ccc853a2a9"
+    }
+  }
+}

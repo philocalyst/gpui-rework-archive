@@ -1,0 +1,11 @@
+{
+  "selected_source": "ff8fa35f19af553764f82a4af943c94b1235f5a4",
+  "main_base": "5d395892d0",
+  "changed_files": {
+    "reactivity/crates/canvas/src/text/planner.rs": "26853b4ea2f6cf0fe4a74637bea12664a77392239029f547ead211f893f7c74c",
+    "reactivity/vendor/parley/GPUI-PATCHES.md": "fe9168a39fac88e120c3dc331b2167b4a70a143442fbb89f424f2bbad5886f41",
+    "reactivity/vendor/parley/src/layout/run.rs": "030cacad74ec82f230044a46298d0b0b7cd82130f6ddc6e6f691b519e333705d",
+    "reactivity/vendor/parley_engine/src/shape/data.rs": "92623f754b0deb39a190e916905efc755869a04d558d28019360c95fba1f6259"
+  },
+  "scope": "Exact four-file equality; qualified source is023 plus this patch; earlier Mainf085 adopted exact023 code, later commit was documentation/evidence only."
+}

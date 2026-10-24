@@ -1,0 +1,62 @@
+{
+  "certificate": {
+    "address": 8848512,
+    "code_bytes": 2764,
+    "name": "<parley::layout::line::GlyphRunIter<()> as core::iter::traits::iterator::Iterator>::next",
+    "fdes": [
+      {
+        "start": 8848512,
+        "end": 8851276,
+        "rsp_cfa": [
+          8,
+          16,
+          24,
+          32,
+          40,
+          48,
+          56,
+          320,
+          56,
+          48,
+          40,
+          32,
+          24,
+          16,
+          8,
+          320
+        ]
+      }
+    ],
+    "max_observed_rsp_cfa": 320
+  },
+  "count": {
+    "address": 8776128,
+    "code_bytes": 2919,
+    "name": "<parley::layout::line::GlyphRunIter<()> as core::iter::traits::iterator::Iterator>::next",
+    "fdes": [
+      {
+        "start": 8776128,
+        "end": 8779047,
+        "rsp_cfa": [
+          8,
+          16,
+          24,
+          32,
+          40,
+          48,
+          56,
+          352,
+          56,
+          48,
+          40,
+          32,
+          24,
+          16,
+          8,
+          352
+        ]
+      }
+    ],
+    "max_observed_rsp_cfa": 352
+  }
+}
