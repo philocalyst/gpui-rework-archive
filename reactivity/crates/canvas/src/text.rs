@@ -205,7 +205,7 @@ impl PackedGlyph {
         } else {
             let fallback = code - FALLBACK_CODE;
             (
-                FontSlot(1 + (fallback / FALLBACK_GLYPHS) as u8),
+                FontSlot(2 - (fallback / FALLBACK_GLYPHS) as u8),
                 (fallback % FALLBACK_GLYPHS) as u16,
             )
         };
