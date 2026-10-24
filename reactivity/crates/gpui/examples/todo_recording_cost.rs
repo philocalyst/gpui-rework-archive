@@ -110,6 +110,9 @@ fn main() -> Result<(), Box<dyn std::error::Error>> {
     assert_eq!(state["draft"], "");
     assert!(state["deleted"].is_null());
     println!("TODO_RECORDING_VALIDATED,rows={},operations=8", rows + 1);
-    measure("close", || win.close())?;
+    measure("close", || {
+        win.close();
+        Ok(())
+    })?;
     Ok(())
 }
