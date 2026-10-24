@@ -1,0 +1,363 @@
+{
+  "native-build-bounded": {
+    "source": "b1560c2a4c4d327701b19d6974875d51b6806393",
+    "exit": 0,
+    "guards": 2073,
+    "guards_match": true,
+    "tracked_input_scopes": [
+      ".cargo",
+      "clippy.toml",
+      "Cargo.toml",
+      "Cargo.lock",
+      "reactivity/Cargo.toml",
+      "reactivity/Cargo.lock",
+      "reactivity/rust-toolchain.toml",
+      "reactivity/crates",
+      "reactivity/vendor"
+    ],
+    "passed": 0,
+    "failed": 0,
+    "ignored": 0,
+    "harnesses": 0,
+    "scope": "Functional/source-identity gate; no timing inference."
+  },
+  "native-run-bounded": {
+    "source": "b1560c2a4c4d327701b19d6974875d51b6806393",
+    "exit": 0,
+    "guards": 2073,
+    "guards_match": true,
+    "tracked_input_scopes": [
+      ".cargo",
+      "clippy.toml",
+      "Cargo.toml",
+      "Cargo.lock",
+      "reactivity/Cargo.toml",
+      "reactivity/Cargo.lock",
+      "reactivity/rust-toolchain.toml",
+      "reactivity/crates",
+      "reactivity/vendor"
+    ],
+    "passed": 298,
+    "failed": 0,
+    "ignored": 33,
+    "harnesses": 5,
+    "scope": "Functional/source-identity gate; no timing inference."
+  },
+  "clippy-bounded": {
+    "source": "b1560c2a4c4d327701b19d6974875d51b6806393",
+    "exit": 0,
+    "guards": 2073,
+    "guards_match": true,
+    "tracked_input_scopes": [
+      ".cargo",
+      "clippy.toml",
+      "Cargo.toml",
+      "Cargo.lock",
+      "reactivity/Cargo.toml",
+      "reactivity/Cargo.lock",
+      "reactivity/rust-toolchain.toml",
+      "reactivity/crates",
+      "reactivity/vendor"
+    ],
+    "passed": 0,
+    "failed": 0,
+    "ignored": 0,
+    "harnesses": 0,
+    "scope": "Functional/source-identity gate; no timing inference."
+  },
+  "constructor-bounded-release": {
+    "source": "b1560c2a4c4d327701b19d6974875d51b6806393",
+    "exit": 0,
+    "guards": 2073,
+    "guards_match": true,
+    "tracked_input_scopes": [
+      ".cargo",
+      "clippy.toml",
+      "Cargo.toml",
+      "Cargo.lock",
+      "reactivity/Cargo.toml",
+      "reactivity/Cargo.lock",
+      "reactivity/rust-toolchain.toml",
+      "reactivity/crates",
+      "reactivity/vendor"
+    ],
+    "passed": 4,
+    "failed": 0,
+    "ignored": 0,
+    "harnesses": 1,
+    "scope": "Functional/source-identity gate; no timing inference."
+  },
+  "constructor-bounded-miri": {
+    "source": "b1560c2a4c4d327701b19d6974875d51b6806393",
+    "exit": 0,
+    "guards": 2073,
+    "guards_match": true,
+    "tracked_input_scopes": [
+      ".cargo",
+      "clippy.toml",
+      "Cargo.toml",
+      "Cargo.lock",
+      "reactivity/Cargo.toml",
+      "reactivity/Cargo.lock",
+      "reactivity/rust-toolchain.toml",
+      "reactivity/crates",
+      "reactivity/vendor"
+    ],
+    "passed": 1,
+    "failed": 0,
+    "ignored": 0,
+    "harnesses": 1,
+    "scope": "Functional/source-identity gate; no timing inference."
+  },
+  "native-focused-bounded-gate": {
+    "source": "b1560c2a4c4d327701b19d6974875d51b6806393",
+    "exit": 0,
+    "guards": 2073,
+    "guards_match": true,
+    "tracked_input_scopes": [
+      ".cargo",
+      "clippy.toml",
+      "Cargo.toml",
+      "Cargo.lock",
+      "reactivity/Cargo.toml",
+      "reactivity/Cargo.lock",
+      "reactivity/rust-toolchain.toml",
+      "reactivity/crates",
+      "reactivity/vendor"
+    ],
+    "passed": 0,
+    "failed": 0,
+    "ignored": 0,
+    "harnesses": 0,
+    "scope": "Functional/source-identity gate; no timing inference."
+  },
+  "atspi-wire-bounded-gate": {
+    "source": "b1560c2a4c4d327701b19d6974875d51b6806393",
+    "exit": 0,
+    "guards": 2073,
+    "guards_match": true,
+    "tracked_input_scopes": [
+      ".cargo",
+      "clippy.toml",
+      "Cargo.toml",
+      "Cargo.lock",
+      "reactivity/Cargo.toml",
+      "reactivity/Cargo.lock",
+      "reactivity/rust-toolchain.toml",
+      "reactivity/crates",
+      "reactivity/vendor"
+    ],
+    "passed": 0,
+    "failed": 0,
+    "ignored": 0,
+    "harnesses": 0,
+    "scope": "Functional/source-identity gate; no timing inference."
+  },
+  "scratch-mutant-build": {
+    "source": "b1560c2a4c4d327701b19d6974875d51b6806393",
+    "exit": 0,
+    "guards": 2073,
+    "guards_match": true,
+    "tracked_input_scopes": [
+      ".cargo",
+      "clippy.toml",
+      "Cargo.toml",
+      "Cargo.lock",
+      "reactivity/Cargo.toml",
+      "reactivity/Cargo.lock",
+      "reactivity/rust-toolchain.toml",
+      "reactivity/crates",
+      "reactivity/vendor"
+    ],
+    "passed": 0,
+    "failed": 0,
+    "ignored": 0,
+    "harnesses": 0,
+    "scope": "Functional/source-identity gate; no timing inference."
+  },
+  "scratch-mutant-run": {
+    "source": "b1560c2a4c4d327701b19d6974875d51b6806393",
+    "exit": 0,
+    "guards": 2073,
+    "guards_match": true,
+    "tracked_input_scopes": [
+      ".cargo",
+      "clippy.toml",
+      "Cargo.toml",
+      "Cargo.lock",
+      "reactivity/Cargo.toml",
+      "reactivity/Cargo.lock",
+      "reactivity/rust-toolchain.toml",
+      "reactivity/crates",
+      "reactivity/vendor"
+    ],
+    "passed": 18,
+    "failed": 0,
+    "ignored": 0,
+    "harnesses": 1,
+    "scope": "Functional/source-identity gate; no timing inference."
+  },
+  "scratch-mutant-negative-certificate": {
+    "source": "b1560c2a4c4d327701b19d6974875d51b6806393",
+    "exit": 1,
+    "guards": 2073,
+    "guards_match": true,
+    "tracked_input_scopes": [
+      ".cargo",
+      "clippy.toml",
+      "Cargo.toml",
+      "Cargo.lock",
+      "reactivity/Cargo.toml",
+      "reactivity/Cargo.lock",
+      "reactivity/rust-toolchain.toml",
+      "reactivity/crates",
+      "reactivity/vendor"
+    ],
+    "passed": 0,
+    "failed": 0,
+    "ignored": 0,
+    "harnesses": 0,
+    "scope": "Functional/source-identity gate; no timing inference."
+  },
+  "tie-mutant-build": {
+    "source": "b1560c2a4c4d327701b19d6974875d51b6806393",
+    "exit": 0,
+    "guards": 2073,
+    "guards_match": true,
+    "tracked_input_scopes": [
+      ".cargo",
+      "clippy.toml",
+      "Cargo.toml",
+      "Cargo.lock",
+      "reactivity/Cargo.toml",
+      "reactivity/Cargo.lock",
+      "reactivity/rust-toolchain.toml",
+      "reactivity/crates",
+      "reactivity/vendor"
+    ],
+    "passed": 0,
+    "failed": 0,
+    "ignored": 0,
+    "harnesses": 0,
+    "scope": "Functional/source-identity gate; no timing inference."
+  },
+  "tie-mutant-negative-geometry": {
+    "source": "b1560c2a4c4d327701b19d6974875d51b6806393",
+    "exit": 101,
+    "guards": 2073,
+    "guards_match": true,
+    "tracked_input_scopes": [
+      ".cargo",
+      "clippy.toml",
+      "Cargo.toml",
+      "Cargo.lock",
+      "reactivity/Cargo.toml",
+      "reactivity/Cargo.lock",
+      "reactivity/rust-toolchain.toml",
+      "reactivity/crates",
+      "reactivity/vendor"
+    ],
+    "passed": 0,
+    "failed": 1,
+    "ignored": 0,
+    "harnesses": 1,
+    "scope": "Functional/source-identity gate; no timing inference."
+  },
+  "native-focused-fixture": {
+    "tests": [
+      {
+        "label": "accesskit",
+        "argv": [
+          "/tmp/gpui-ime-direct-lease-sol-target-20261024/native/debug/build/gpui/844d7bbdddc48e15/out/gpui-844d7bbdddc48e15",
+          "native::accessibility::tests::ime_accesskit_uses_acknowledged_display_and_selection_without_preview_edit_authority",
+          "--exact",
+          "--nocapture",
+          "--test-threads=1"
+        ],
+        "exit": 0
+      },
+      {
+        "label": "ownership",
+        "argv": [
+          "/tmp/gpui-ime-direct-lease-sol-target-20261024/native/debug/build/gpui/844d7bbdddc48e15/out/gpui-844d7bbdddc48e15",
+          "runtime::ime::tests::ime_cold_ownership_reuses_immutable_display_and_releases_after_final_ack",
+          "--exact",
+          "--nocapture",
+          "--test-threads=1"
+        ],
+        "exit": 0
+      },
+      {
+        "label": "headers",
+        "argv": [
+          "/tmp/gpui-ime-direct-lease-sol-target-20261024/native/debug/build/gpui/844d7bbdddc48e15/out/gpui-844d7bbdddc48e15",
+          "native::ime::ime_native_header_ledger",
+          "--exact",
+          "--nocapture",
+          "--test-threads=1"
+        ],
+        "exit": 0
+      },
+      {
+        "label": "query-headers",
+        "argv": [
+          "/tmp/gpui-ime-direct-lease-sol-target-20261024/native/debug/build/gpui/844d7bbdddc48e15/out/gpui-844d7bbdddc48e15",
+          "runtime::query::geometry_layout_tests::basis_borrowed_geometry_context_layout_is_explicit",
+          "--exact",
+          "--nocapture",
+          "--test-threads=1"
+        ],
+        "exit": 0
+      },
+      {
+        "label": "packet-headers",
+        "argv": [
+          "/tmp/gpui-ime-direct-lease-sol-target-20261024/native/debug/build/gpui/844d7bbdddc48e15/out/gpui-844d7bbdddc48e15",
+          "native::tests::packet_gpu_header_ledger",
+          "--exact",
+          "--nocapture",
+          "--test-threads=1"
+        ],
+        "exit": 0
+      },
+      {
+        "label": "native",
+        "argv": [
+          "dbus-run-session",
+          "--",
+          "/tmp/gpui-ime-direct-lease-sol-target-20261024/native/debug/build/gpui/844d7bbdddc48e15/out/gpui-844d7bbdddc48e15",
+          "native::ime_tests::native_ime_preedit_commit_focus_lifecycle_and_acknowledged_pixels",
+          "--exact",
+          "--ignored",
+          "--nocapture",
+          "--test-threads=1"
+        ],
+        "exit": 0
+      }
+    ],
+    "binary_unchanged": true,
+    "children_reaped": true,
+    "scope": "Real X11 native Window/CPU submission and complete server pixels; normalized Winit IME callbacks, not OS candidate-engine synthesis. AccessKit consumer P projection."
+  },
+  "atspi-wire-fixture": {
+    "tests": [
+      {
+        "label": "atspi",
+        "argv": [
+          "dbus-run-session",
+          "--",
+          "/nix/store/9r02ykx9y35lf4gk6gc30gnag1y8ncp7-python3-3.13.15/bin/python3",
+          "/tmp/gpui-ime-atspi-launch.py",
+          "/tmp/gpui-ime-direct-lease-sol-evidence-20261024/atspi-wire-bounded-fixture",
+          "/tmp/gpui-ime-direct-lease-sol-target-20261024/native/debug/build/gpui/844d7bbdddc48e15/out/gpui-844d7bbdddc48e15",
+          "native::accessibility::linux_tests::ime::native_atspi_ime_cjk_preview_old_candidate_ack_and_commit"
+        ],
+        "exit": 0
+      }
+    ],
+    "binary_unchanged": true,
+    "children_reaped": true,
+    "scope": "Real X11 native Window/CPU submission and complete server pixels; normalized Winit IME callbacks, not OS candidate-engine synthesis. AccessKit consumer P projection."
+  },
+  "actual_executor": "local Linux for compiler/native/functional/cost gates; Mothership Linux only for the paired scalar CPU runs"
+}

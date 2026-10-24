@@ -1,0 +1,158 @@
+[
+  {
+    "sealed_path": "/tmp/gpui-ime-direct-lease-sol-evidence-20261024/seal-baseline/gpui-844d7bbdddc48e15",
+    "capsule_path": "executables/50bb41bc362d4e2118b8356d335339c2b3bd456852110aa4364f4dfb1bd402a4.elf",
+    "bytes": 174760472,
+    "sha256": "50bb41bc362d4e2118b8356d335339c2b3bd456852110aa4364f4dfb1bd402a4"
+  },
+  {
+    "sealed_path": "/tmp/gpui-ime-direct-lease-sol-evidence-20261024/seal-baseline/ime-c3f431686767a2ca",
+    "capsule_path": "executables/428dcfacc69b2cf0a2b8a0f64e5514add1a061d52d4ccadaa3228e4b2aac8e35.elf",
+    "bytes": 31181752,
+    "sha256": "428dcfacc69b2cf0a2b8a0f64e5514add1a061d52d4ccadaa3228e4b2aac8e35"
+  },
+  {
+    "sealed_path": "/tmp/gpui-ime-direct-lease-sol-evidence-20261024/seal-45a85/components-39ac2b0e083e0b91",
+    "capsule_path": "executables/c45dbf26a2aa71ef4c17d5ebe6fcb9db7db145719212396b28ef7b2f173c53a6.elf",
+    "bytes": 33838424,
+    "sha256": "c45dbf26a2aa71ef4c17d5ebe6fcb9db7db145719212396b28ef7b2f173c53a6"
+  },
+  {
+    "sealed_path": "/tmp/gpui-ime-direct-lease-sol-evidence-20261024/seal-45a85/frontier-184ebf536aa0f92c",
+    "capsule_path": "executables/2e593878b2144a526d2ec2eba2e2f1a9f48d58c0f26c877fcb22392de6014fba.elf",
+    "bytes": 32498776,
+    "sha256": "2e593878b2144a526d2ec2eba2e2f1a9f48d58c0f26c877fcb22392de6014fba"
+  },
+  {
+    "sealed_path": "/tmp/gpui-ime-direct-lease-sol-evidence-20261024/seal-45a85/gpui-844d7bbdddc48e15",
+    "capsule_path": "executables/29eb48edff357b59a3388dbf52ea36362b90f8db6c0e7f2f6ea869fd18290550.elf",
+    "bytes": 174777056,
+    "sha256": "29eb48edff357b59a3388dbf52ea36362b90f8db6c0e7f2f6ea869fd18290550"
+  },
+  {
+    "sealed_path": "/tmp/gpui-ime-direct-lease-sol-evidence-20261024/seal-45a85/ime-c3f431686767a2ca",
+    "capsule_path": "executables/0bd0321bf3bcf87fb679963749df6efe8ebb5ddb6a506588ba3fdc54981069a7.elf",
+    "bytes": 31188064,
+    "sha256": "0bd0321bf3bcf87fb679963749df6efe8ebb5ddb6a506588ba3fdc54981069a7"
+  },
+  {
+    "sealed_path": "/tmp/gpui-ime-direct-lease-sol-evidence-20261024/seal-45a85/property_selection-cecdf4f1ec46ad0a",
+    "capsule_path": "executables/c0b20cd5554a9295c2c282b6b599eab6194a690da511959078c271179c26a8af.elf",
+    "bytes": 32453800,
+    "sha256": "c0b20cd5554a9295c2c282b6b599eab6194a690da511959078c271179c26a8af"
+  },
+  {
+    "sealed_path": "/tmp/gpui-ime-direct-lease-sol-evidence-20261024/seal-successor/api-workload",
+    "capsule_path": "executables/c1f02aad1030d84a694395efa75801170de6fc3b54af0b839f36201d86ba3db9.elf",
+    "bytes": 9774672,
+    "sha256": "c1f02aad1030d84a694395efa75801170de6fc3b54af0b839f36201d86ba3db9"
+  },
+  {
+    "sealed_path": "/tmp/gpui-ime-direct-lease-sol-evidence-20261024/seal-successor/components-39ac2b0e083e0b91",
+    "capsule_path": "executables/c45dbf26a2aa71ef4c17d5ebe6fcb9db7db145719212396b28ef7b2f173c53a6.elf",
+    "bytes": 33838424,
+    "sha256": "c45dbf26a2aa71ef4c17d5ebe6fcb9db7db145719212396b28ef7b2f173c53a6"
+  },
+  {
+    "sealed_path": "/tmp/gpui-ime-direct-lease-sol-evidence-20261024/seal-successor/frontier-184ebf536aa0f92c",
+    "capsule_path": "executables/2e593878b2144a526d2ec2eba2e2f1a9f48d58c0f26c877fcb22392de6014fba.elf",
+    "bytes": 32498776,
+    "sha256": "2e593878b2144a526d2ec2eba2e2f1a9f48d58c0f26c877fcb22392de6014fba"
+  },
+  {
+    "sealed_path": "/tmp/gpui-ime-direct-lease-sol-evidence-20261024/seal-successor/gpui-844d7bbdddc48e15",
+    "capsule_path": "executables/41f534a6636759238679801b9500ea4c650396517540050ec864d0d5983bd6aa.elf",
+    "bytes": 174873304,
+    "sha256": "41f534a6636759238679801b9500ea4c650396517540050ec864d0d5983bd6aa"
+  },
+  {
+    "sealed_path": "/tmp/gpui-ime-direct-lease-sol-evidence-20261024/seal-successor/ime-c3f431686767a2ca",
+    "capsule_path": "executables/54e345688b2bc2002a400943e0defc7d8601fb65a9ea07d36648300187ffe7e3.elf",
+    "bytes": 31214144,
+    "sha256": "54e345688b2bc2002a400943e0defc7d8601fb65a9ea07d36648300187ffe7e3"
+  },
+  {
+    "sealed_path": "/tmp/gpui-ime-direct-lease-sol-evidence-20261024/seal-successor/property_selection-cecdf4f1ec46ad0a",
+    "capsule_path": "executables/c0b20cd5554a9295c2c282b6b599eab6194a690da511959078c271179c26a8af.elf",
+    "bytes": 32453800,
+    "sha256": "c0b20cd5554a9295c2c282b6b599eab6194a690da511959078c271179c26a8af"
+  },
+  {
+    "sealed_path": "/tmp/gpui-ime-direct-lease-sol-evidence-20261024/seal-bounded/api-workload",
+    "capsule_path": "executables/7c7a816d3320b70a3ae76890e025307ec2f4ef1e00a93536f800221db85e8176.elf",
+    "bytes": 9773120,
+    "sha256": "7c7a816d3320b70a3ae76890e025307ec2f4ef1e00a93536f800221db85e8176"
+  },
+  {
+    "sealed_path": "/tmp/gpui-ime-direct-lease-sol-evidence-20261024/seal-bounded/components-39ac2b0e083e0b91",
+    "capsule_path": "executables/2009dcc19f0790bb17752c56e17b1c6ab93ea1f7d1e390ef570237467d95bef6.elf",
+    "bytes": 33838664,
+    "sha256": "2009dcc19f0790bb17752c56e17b1c6ab93ea1f7d1e390ef570237467d95bef6"
+  },
+  {
+    "sealed_path": "/tmp/gpui-ime-direct-lease-sol-evidence-20261024/seal-bounded/constructor-tests",
+    "capsule_path": "executables/481491c496810503995ee46e210f827080981464b49e48684b2e35491c1047e1.elf",
+    "bytes": 1123160,
+    "sha256": "481491c496810503995ee46e210f827080981464b49e48684b2e35491c1047e1"
+  },
+  {
+    "sealed_path": "/tmp/gpui-ime-direct-lease-sol-evidence-20261024/seal-bounded/frontier-184ebf536aa0f92c",
+    "capsule_path": "executables/59eeb184300f71ed41bc9300452fae52e979b74ed7ff76be7d5d401db626cb2b.elf",
+    "bytes": 32498984,
+    "sha256": "59eeb184300f71ed41bc9300452fae52e979b74ed7ff76be7d5d401db626cb2b"
+  },
+  {
+    "sealed_path": "/tmp/gpui-ime-direct-lease-sol-evidence-20261024/seal-bounded/gpui-844d7bbdddc48e15",
+    "capsule_path": "executables/810baad60a8f398e336b098a18e76c4ca9306eda85b8d4e706dd4c9dcea527c5.elf",
+    "bytes": 174809504,
+    "sha256": "810baad60a8f398e336b098a18e76c4ca9306eda85b8d4e706dd4c9dcea527c5"
+  },
+  {
+    "sealed_path": "/tmp/gpui-ime-direct-lease-sol-evidence-20261024/seal-bounded/ime-c3f431686767a2ca",
+    "capsule_path": "executables/b903a8d516f571afb9639c98aa00b5ac8dad38d4c5c0861d8d15b9e8b8d59b58.elf",
+    "bytes": 31212256,
+    "sha256": "b903a8d516f571afb9639c98aa00b5ac8dad38d4c5c0861d8d15b9e8b8d59b58"
+  },
+  {
+    "sealed_path": "/tmp/gpui-ime-direct-lease-sol-evidence-20261024/seal-bounded/property_selection-cecdf4f1ec46ad0a",
+    "capsule_path": "executables/d85f8fb3feb9df3a33796523ecb06d98f643f649c7a07d3adccc0569ce7c6a92.elf",
+    "bytes": 32454064,
+    "sha256": "d85f8fb3feb9df3a33796523ecb06d98f643f649c7a07d3adccc0569ce7c6a92"
+  },
+  {
+    "sealed_path": "/tmp/gpui-ime-direct-lease-sol-evidence-20261024/seal-mutants/scratch-ime",
+    "capsule_path": "executables/6c0bc453bbd36ddf22c2e6c398ee527764d360adea004fc1560b8f7c759b10cc.elf",
+    "bytes": 31215432,
+    "sha256": "6c0bc453bbd36ddf22c2e6c398ee527764d360adea004fc1560b8f7c759b10cc"
+  },
+  {
+    "sealed_path": "/tmp/gpui-ime-direct-lease-sol-evidence-20261024/seal-mutants/tie-gpui",
+    "capsule_path": "executables/2f40e0040db6312a61b985d4fe8f000907a40999752b761330c71aaf9b87b11c.elf",
+    "bytes": 174827752,
+    "sha256": "2f40e0040db6312a61b985d4fe8f000907a40999752b761330c71aaf9b87b11c"
+  },
+  {
+    "sealed_path": "/tmp/gpui-ime-direct-lease-sol-evidence-20261024/remote-cpu-payload/api-baseline",
+    "capsule_path": "executables/fc9e1ce29bbbba48e104410c572931676746408f332a85a29afd9451e9c5a7bf.elf",
+    "bytes": 9777912,
+    "sha256": "fc9e1ce29bbbba48e104410c572931676746408f332a85a29afd9451e9c5a7bf"
+  },
+  {
+    "sealed_path": "/tmp/gpui-ime-direct-lease-sol-evidence-20261024/remote-cpu-payload/api-successor",
+    "capsule_path": "executables/c1f02aad1030d84a694395efa75801170de6fc3b54af0b839f36201d86ba3db9.elf",
+    "bytes": 9774672,
+    "sha256": "c1f02aad1030d84a694395efa75801170de6fc3b54af0b839f36201d86ba3db9"
+  },
+  {
+    "sealed_path": "/tmp/gpui-ime-direct-lease-sol-evidence-20261024/remote-cpu-payload/api-three-fragment",
+    "capsule_path": "executables/92fe86a01c88c5430951972b6c21c8e3a57d9b6c574d929a095ea085dbc72ad6.elf",
+    "bytes": 9778384,
+    "sha256": "92fe86a01c88c5430951972b6c21c8e3a57d9b6c574d929a095ea085dbc72ad6"
+  },
+  {
+    "sealed_path": "/tmp/gpui-ime-direct-lease-sol-evidence-20261024/remote-bounded-payload/api-bounded",
+    "capsule_path": "executables/7c7a816d3320b70a3ae76890e025307ec2f4ef1e00a93536f800221db85e8176.elf",
+    "bytes": 9773120,
+    "sha256": "7c7a816d3320b70a3ae76890e025307ec2f4ef1e00a93536f800221db85e8176"
+  }
+]

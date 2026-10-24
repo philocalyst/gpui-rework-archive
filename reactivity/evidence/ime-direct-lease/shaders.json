@@ -1,0 +1,214 @@
+{
+  "typed_source_sha256": "433b9760e356cb45144262aabec37d61c1d5eb1e0529b47e4103da7d69b4859c",
+  "files": [
+    {
+      "path": "ui.wgsl",
+      "bytes": 18995,
+      "sha256": "ea6e71d3da2bdb23d4971a14f0f55db389dbb45f9b2e9c05c85d4dc6363eb4d1",
+      "in_actual_executable": {
+        "seal-successor": {
+          "binary": "/tmp/gpui-ime-direct-lease-sol-evidence-20261024/seal-successor/gpui-844d7bbdddc48e15",
+          "offset": 7024277
+        },
+        "seal-45a85": {
+          "binary": "/tmp/gpui-ime-direct-lease-sol-evidence-20261024/seal-45a85/gpui-844d7bbdddc48e15",
+          "offset": 6933473
+        },
+        "seal-baseline": {
+          "binary": "/tmp/gpui-ime-direct-lease-sol-evidence-20261024/seal-baseline/gpui-844d7bbdddc48e15",
+          "offset": 6860650
+        },
+        "seal-bounded": {
+          "binary": "/tmp/gpui-ime-direct-lease-sol-evidence-20261024/seal-bounded/gpui-844d7bbdddc48e15",
+          "offset": 6883592
+        }
+      }
+    },
+    {
+      "path": "ui-0-vertex.spv",
+      "bytes": 880,
+      "sha256": "562bb388d843aee9fdc843071123e4f268862be3a3c2205dbdc530d6ba94b0a3",
+      "in_actual_executable": {
+        "seal-successor": {
+          "binary": "/tmp/gpui-ime-direct-lease-sol-evidence-20261024/seal-successor/gpui-844d7bbdddc48e15",
+          "offset": 7605440
+        },
+        "seal-45a85": {
+          "binary": "/tmp/gpui-ime-direct-lease-sol-evidence-20261024/seal-45a85/gpui-844d7bbdddc48e15",
+          "offset": 7602880
+        },
+        "seal-baseline": {
+          "binary": "/tmp/gpui-ime-direct-lease-sol-evidence-20261024/seal-baseline/gpui-844d7bbdddc48e15",
+          "offset": 7601152
+        },
+        "seal-bounded": {
+          "binary": "/tmp/gpui-ime-direct-lease-sol-evidence-20261024/seal-bounded/gpui-844d7bbdddc48e15",
+          "offset": 7605184
+        }
+      }
+    },
+    {
+      "path": "ui-0-fragment.spv",
+      "bytes": 41636,
+      "sha256": "ca1755841d98965e73ca9e77306d74cf67c696351470af3e4361d124f4b16427",
+      "in_actual_executable": {
+        "seal-successor": {
+          "binary": "/tmp/gpui-ime-direct-lease-sol-evidence-20261024/seal-successor/gpui-844d7bbdddc48e15",
+          "offset": 7432048
+        },
+        "seal-45a85": {
+          "binary": "/tmp/gpui-ime-direct-lease-sol-evidence-20261024/seal-45a85/gpui-844d7bbdddc48e15",
+          "offset": 7429488
+        },
+        "seal-baseline": {
+          "binary": "/tmp/gpui-ime-direct-lease-sol-evidence-20261024/seal-baseline/gpui-844d7bbdddc48e15",
+          "offset": 7427760
+        },
+        "seal-bounded": {
+          "binary": "/tmp/gpui-ime-direct-lease-sol-evidence-20261024/seal-bounded/gpui-844d7bbdddc48e15",
+          "offset": 7431792
+        }
+      }
+    },
+    {
+      "path": "ui-1-vertex.spv",
+      "bytes": 880,
+      "sha256": "562bb388d843aee9fdc843071123e4f268862be3a3c2205dbdc530d6ba94b0a3",
+      "in_actual_executable": {
+        "seal-successor": {
+          "binary": "/tmp/gpui-ime-direct-lease-sol-evidence-20261024/seal-successor/gpui-844d7bbdddc48e15",
+          "offset": 7605440
+        },
+        "seal-45a85": {
+          "binary": "/tmp/gpui-ime-direct-lease-sol-evidence-20261024/seal-45a85/gpui-844d7bbdddc48e15",
+          "offset": 7602880
+        },
+        "seal-baseline": {
+          "binary": "/tmp/gpui-ime-direct-lease-sol-evidence-20261024/seal-baseline/gpui-844d7bbdddc48e15",
+          "offset": 7601152
+        },
+        "seal-bounded": {
+          "binary": "/tmp/gpui-ime-direct-lease-sol-evidence-20261024/seal-bounded/gpui-844d7bbdddc48e15",
+          "offset": 7605184
+        }
+      }
+    },
+    {
+      "path": "ui-1-fragment.spv",
+      "bytes": 41796,
+      "sha256": "235b15cc22bb6fb69382a766399bb0346a420e233b21c1bb82cf2ef7e9b7f34e",
+      "in_actual_executable": {
+        "seal-successor": {
+          "binary": "/tmp/gpui-ime-direct-lease-sol-evidence-20261024/seal-successor/gpui-844d7bbdddc48e15",
+          "offset": 7473684
+        },
+        "seal-45a85": {
+          "binary": "/tmp/gpui-ime-direct-lease-sol-evidence-20261024/seal-45a85/gpui-844d7bbdddc48e15",
+          "offset": 7471124
+        },
+        "seal-baseline": {
+          "binary": "/tmp/gpui-ime-direct-lease-sol-evidence-20261024/seal-baseline/gpui-844d7bbdddc48e15",
+          "offset": 7469396
+        },
+        "seal-bounded": {
+          "binary": "/tmp/gpui-ime-direct-lease-sol-evidence-20261024/seal-bounded/gpui-844d7bbdddc48e15",
+          "offset": 7473428
+        }
+      }
+    },
+    {
+      "path": "ui-2-vertex.spv",
+      "bytes": 880,
+      "sha256": "562bb388d843aee9fdc843071123e4f268862be3a3c2205dbdc530d6ba94b0a3",
+      "in_actual_executable": {
+        "seal-successor": {
+          "binary": "/tmp/gpui-ime-direct-lease-sol-evidence-20261024/seal-successor/gpui-844d7bbdddc48e15",
+          "offset": 7605440
+        },
+        "seal-45a85": {
+          "binary": "/tmp/gpui-ime-direct-lease-sol-evidence-20261024/seal-45a85/gpui-844d7bbdddc48e15",
+          "offset": 7602880
+        },
+        "seal-baseline": {
+          "binary": "/tmp/gpui-ime-direct-lease-sol-evidence-20261024/seal-baseline/gpui-844d7bbdddc48e15",
+          "offset": 7601152
+        },
+        "seal-bounded": {
+          "binary": "/tmp/gpui-ime-direct-lease-sol-evidence-20261024/seal-bounded/gpui-844d7bbdddc48e15",
+          "offset": 7605184
+        }
+      }
+    },
+    {
+      "path": "ui-2-fragment.spv",
+      "bytes": 44900,
+      "sha256": "0e0236209107471feb5fddf9cf7d8da0a137f836a710060eb594a08cdb844e0f",
+      "in_actual_executable": {
+        "seal-successor": {
+          "binary": "/tmp/gpui-ime-direct-lease-sol-evidence-20261024/seal-successor/gpui-844d7bbdddc48e15",
+          "offset": 7515480
+        },
+        "seal-45a85": {
+          "binary": "/tmp/gpui-ime-direct-lease-sol-evidence-20261024/seal-45a85/gpui-844d7bbdddc48e15",
+          "offset": 7512920
+        },
+        "seal-baseline": {
+          "binary": "/tmp/gpui-ime-direct-lease-sol-evidence-20261024/seal-baseline/gpui-844d7bbdddc48e15",
+          "offset": 7511192
+        },
+        "seal-bounded": {
+          "binary": "/tmp/gpui-ime-direct-lease-sol-evidence-20261024/seal-bounded/gpui-844d7bbdddc48e15",
+          "offset": 7515224
+        }
+      }
+    },
+    {
+      "path": "ui-3-vertex.spv",
+      "bytes": 880,
+      "sha256": "562bb388d843aee9fdc843071123e4f268862be3a3c2205dbdc530d6ba94b0a3",
+      "in_actual_executable": {
+        "seal-successor": {
+          "binary": "/tmp/gpui-ime-direct-lease-sol-evidence-20261024/seal-successor/gpui-844d7bbdddc48e15",
+          "offset": 7605440
+        },
+        "seal-45a85": {
+          "binary": "/tmp/gpui-ime-direct-lease-sol-evidence-20261024/seal-45a85/gpui-844d7bbdddc48e15",
+          "offset": 7602880
+        },
+        "seal-baseline": {
+          "binary": "/tmp/gpui-ime-direct-lease-sol-evidence-20261024/seal-baseline/gpui-844d7bbdddc48e15",
+          "offset": 7601152
+        },
+        "seal-bounded": {
+          "binary": "/tmp/gpui-ime-direct-lease-sol-evidence-20261024/seal-bounded/gpui-844d7bbdddc48e15",
+          "offset": 7605184
+        }
+      }
+    },
+    {
+      "path": "ui-3-fragment.spv",
+      "bytes": 45060,
+      "sha256": "676ca921107e45cc03734ade2095a82d34d06a72599c68c6c455f8d0a18b6d20",
+      "in_actual_executable": {
+        "seal-successor": {
+          "binary": "/tmp/gpui-ime-direct-lease-sol-evidence-20261024/seal-successor/gpui-844d7bbdddc48e15",
+          "offset": 7560380
+        },
+        "seal-45a85": {
+          "binary": "/tmp/gpui-ime-direct-lease-sol-evidence-20261024/seal-45a85/gpui-844d7bbdddc48e15",
+          "offset": 7557820
+        },
+        "seal-baseline": {
+          "binary": "/tmp/gpui-ime-direct-lease-sol-evidence-20261024/seal-baseline/gpui-844d7bbdddc48e15",
+          "offset": 7556092
+        },
+        "seal-bounded": {
+          "binary": "/tmp/gpui-ime-direct-lease-sol-evidence-20261024/seal-bounded/gpui-844d7bbdddc48e15",
+          "offset": 7560124
+        }
+      }
+    }
+  ],
+  "validator": "SPIRV-Tools 2026.4, target vulkan1.0",
+  "scope": "Generated typed-source WGSL and all eight SPIR-V byte sequences present in all three sealed native unit-test executables; no GPU latency inference."
+}

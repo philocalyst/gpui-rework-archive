@@ -1,0 +1,13 @@
+{
+  "path": "/tmp/gpui-ime-direct-lease-sol-evidence-20261024/ime-direct-lease-sol-20261024-capsule.tar.gz",
+  "bytes": 357556662,
+  "sha256": "9289c87acdeb6457008540dc85e3693e13c2a20e3e6cd32d56b287ed24e6c8c5",
+  "payload_files": 585,
+  "payload_bytes": 1353716237,
+  "unique_executables": 21,
+  "executable_aliases": 26,
+  "final_source_archive_members": 2073,
+  "verified_every_archive_member": true,
+  "targets_or_full_repository_included": false,
+  "manifest_sha256": "4283dfb7421c8074aaa47fa4dd88993d2774a3f100df211928dc85b87bb84a44"
+}

@@ -1,0 +1,22 @@
+{
+  "tested_source": "b1560c2a4c4d327701b19d6974875d51b6806393",
+  "qualified_baseline": "21116abc62e2c305fbffdfe8492fefa2ba414d4a",
+  "baseline_evidence": "b21e9c7d474e0f2a4d94cf61b7165b68313e35a8",
+  "ce79": "ce79d00fb004859994c8574254bbd091e964a2d4",
+  "tested_tree": "61267d7e5868641a48f63ac25bff87a8f89c4a7a",
+  "source_input_count": 2073,
+  "source_manifest_sha256": "c002728587f8a7296846d04708a769991de98f51765a582630013035c12ab387",
+  "source_archive": {
+    "path": "/tmp/gpui-ime-direct-lease-sol-evidence-20261024/candidate-source.tar.gz",
+    "bytes": 8777233,
+    "sha256": "3f676e10c78d33c8fb4dbfda94175041b95bd8d84fb4501cdd4022dafd970928"
+  },
+  "build_inputs_match_tested_pin": true,
+  "source_changes": [
+    "reactivity/crates/gpui/src/lib.rs",
+    "reactivity/crates/gpui/src/shared_text.rs",
+    "reactivity/crates/gpui/src/runtime/ime.rs",
+    "reactivity/crates/gpui/tests/ime.rs"
+  ],
+  "main_adopted": false
+}

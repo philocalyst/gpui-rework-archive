@@ -1,0 +1,112 @@
+{
+  "comparisons": {
+    "ce79": {
+      "before": 34852,
+      "after": 35806,
+      "delta": 954,
+      "files": [
+        {
+          "path": "reactivity/crates/gpui/src/lib.rs",
+          "before": 87,
+          "after": 88,
+          "delta": 1
+        },
+        {
+          "path": "reactivity/crates/gpui/src/native.rs",
+          "before": 1124,
+          "after": 1199,
+          "delta": 75
+        },
+        {
+          "path": "reactivity/crates/gpui/src/native/accessibility/text.rs",
+          "before": 529,
+          "after": 530,
+          "delta": 1
+        },
+        {
+          "path": "reactivity/crates/gpui/src/native/ime.rs",
+          "before": 0,
+          "after": 118,
+          "delta": 118
+        },
+        {
+          "path": "reactivity/crates/gpui/src/runtime.rs",
+          "before": 3497,
+          "after": 3602,
+          "delta": 105
+        },
+        {
+          "path": "reactivity/crates/gpui/src/runtime/editing.rs",
+          "before": 554,
+          "after": 572,
+          "delta": 18
+        },
+        {
+          "path": "reactivity/crates/gpui/src/runtime/ime.rs",
+          "before": 0,
+          "after": 581,
+          "delta": 581
+        },
+        {
+          "path": "reactivity/crates/gpui/src/runtime/input.rs",
+          "before": 411,
+          "after": 423,
+          "delta": 12
+        },
+        {
+          "path": "reactivity/crates/gpui/src/runtime/query.rs",
+          "before": 613,
+          "after": 625,
+          "delta": 12
+        },
+        {
+          "path": "reactivity/crates/gpui/src/runtime/query/serialize.rs",
+          "before": 127,
+          "after": 132,
+          "delta": 5
+        },
+        {
+          "path": "reactivity/crates/gpui/src/runtime/text_geometry.rs",
+          "before": 119,
+          "after": 123,
+          "delta": 4
+        },
+        {
+          "path": "reactivity/crates/gpui/src/runtime/turn.rs",
+          "before": 415,
+          "after": 416,
+          "delta": 1
+        },
+        {
+          "path": "reactivity/crates/gpui/src/shared_text.rs",
+          "before": 29,
+          "after": 50,
+          "delta": 21
+        }
+      ]
+    },
+    "qualified_ime": {
+      "before": 35755,
+      "after": 35806,
+      "delta": 51,
+      "files": [
+        {
+          "path": "reactivity/crates/gpui/src/runtime/ime.rs",
+          "before": 551,
+          "after": 581,
+          "delta": 30
+        },
+        {
+          "path": "reactivity/crates/gpui/src/shared_text.rs",
+          "before": 29,
+          "after": 50,
+          "delta": 21
+        }
+      ]
+    }
+  },
+  "scope": "tests, comments, blanks, documentation examples, labs, application examples, benchmarks, tools, evidence, vendors",
+  "helper_sha256": "b63af45651633e3649664ef5a0bf5d8815546ddd6f643a9523a87f91621436ea",
+  "counter_sha256": "2d4bdd99477637f8f0af19d4cc15d884e744401fa20af733c69b6cbdc7461d1b",
+  "inventory_sha256": "d5b2a0b4afddc0eda26f3ce7b199f48200606080a496f96a4696cd9c411ab81c"
+}
