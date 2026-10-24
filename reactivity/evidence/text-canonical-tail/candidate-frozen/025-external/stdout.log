@@ -1,0 +1,7 @@
+
+running 2 tests
+test external_native_words_match_rgba_and_preserve_lazy_image_coherence ... ok
+test invalid_external_targets_leave_buffer_and_scene_untouched ... ok
+
+test result: ok. 2 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 0.19s
+

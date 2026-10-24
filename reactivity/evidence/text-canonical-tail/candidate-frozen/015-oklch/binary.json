@@ -1,0 +1,33 @@
+{
+  "original": "/root/target-text-sol-nightly/debug/build/gpui_canvas/fab80b32372b9590/out/oklch-fab80b32372b9590",
+  "frozen": "/tmp/text-sol-evidence/candidate-frozen/015-oklch/test",
+  "sha256": "8677458b53c059cc18cc3a0981a73e1b0b4b198c77f43e4c5be52825d25258b7",
+  "bytes": 81462232,
+  "fresh": true,
+  "package_id": "path+file:///root/gpui-text-sol/reactivity/crates/canvas#gpui_canvas@0.1.0",
+  "target": {
+    "kind": [
+      "test"
+    ],
+    "crate_types": [
+      "bin"
+    ],
+    "name": "oklch",
+    "src_path": "/root/gpui-text-sol/reactivity/crates/canvas/tests/oklch.rs",
+    "edition": "2024",
+    "doc": false,
+    "doctest": false,
+    "test": true
+  },
+  "features": [
+    "default",
+    "simd"
+  ],
+  "profile": {
+    "opt_level": "0",
+    "debuginfo": 2,
+    "debug_assertions": true,
+    "overflow_checks": true,
+    "test": true
+  }
+}

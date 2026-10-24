@@ -1,0 +1,33 @@
+{
+  "original": "/root/target-text-sol-nightly/debug/build/gpui_canvas/092b50fe80a578eb/out/color_authoring-092b50fe80a578eb",
+  "frozen": "/tmp/text-sol-evidence/candidate-frozen/028-color_authoring/test",
+  "sha256": "bc6b85fecf15031fea9d8da4f5bb7019e5252d91da3f0c9f9ecc1d71e1244a5b",
+  "bytes": 81366632,
+  "fresh": true,
+  "package_id": "path+file:///root/gpui-text-sol/reactivity/crates/canvas#gpui_canvas@0.1.0",
+  "target": {
+    "kind": [
+      "test"
+    ],
+    "crate_types": [
+      "bin"
+    ],
+    "name": "color_authoring",
+    "src_path": "/root/gpui-text-sol/reactivity/crates/canvas/tests/color_authoring.rs",
+    "edition": "2024",
+    "doc": false,
+    "doctest": false,
+    "test": true
+  },
+  "features": [
+    "default",
+    "simd"
+  ],
+  "profile": {
+    "opt_level": "0",
+    "debuginfo": 2,
+    "debug_assertions": true,
+    "overflow_checks": true,
+    "test": true
+  }
+}

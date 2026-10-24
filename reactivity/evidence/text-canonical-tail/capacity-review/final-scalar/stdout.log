@@ -1,0 +1,16 @@
+
+running 1 test
+test repeated_labels_keep_batched_capacity_and_allocate_nothing_when_warm ... ok
+
+test result: ok. 1 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 0.02s
+
+
+running 5 tests
+test warm_many_label_rebuild_has_no_submission_allocations ... ok
+test submission_allocation_and_retained_capacity_ledger ... ok
+test mixed_script_paint_selection_density_transform_and_scroll_keep_canonical_output ... ok
+test late_command_limit_failure_preserves_scene_and_new_resource_identity ... ok
+test duplicate_keys_and_foreign_face_rollback_preserve_pixels_and_candidate ... ok
+
+test result: ok. 5 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 0.87s
+

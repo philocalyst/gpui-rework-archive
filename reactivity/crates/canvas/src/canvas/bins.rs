@@ -158,17 +158,18 @@ mod tests {
             false,
         );
         let geometry = canvas.commands.inline[0].geometry;
-        canvas.commands.append(
-            common,
-            [super::super::PendingDraw {
-                geometry,
-                source: super::super::RECT_SOURCE,
-            }],
-            true,
-            Vec::new(),
-            super::super::viewport_rect(65, 49),
-            None,
-        );
+        let common =
+            canvas
+                .commands
+                .columns
+                .store(common, super::super::viewport_rect(65, 49), None, false);
+        let start = canvas.commands.placements.len();
+        canvas.commands.placements.push(super::super::Placement {
+            geometry,
+            common: canvas.commands.commons.len() as u32,
+            source: super::super::RECT_SOURCE,
+        });
+        canvas.commands.publish_group(start, common);
         let image = Image::linear_srgb(
             1,
             1,

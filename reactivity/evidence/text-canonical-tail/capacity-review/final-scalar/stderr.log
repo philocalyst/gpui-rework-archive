@@ -1,0 +1,4 @@
+   Compiling gpui_canvas v0.1.0 (/tmp/gpui-text-capacity-root/reactivity/crates/canvas)
+    Finished `test` profile [unoptimized + debuginfo] target(s) in 1.28s
+     Running tests/text_capacity.rs (/tmp/gpui-hummingbird-compose-root-target/debug/build/gpui_canvas/f2e7824a7c2491e8/out/text_capacity-f2e7824a7c2491e8)
+     Running tests/text_transaction.rs (/tmp/gpui-hummingbird-compose-root-target/debug/build/gpui_canvas/b39e27273e5a549a/out/text_transaction-b39e27273e5a549a)

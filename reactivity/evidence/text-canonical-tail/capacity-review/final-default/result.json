@@ -1,0 +1,20 @@
+{
+  "source": "71ed91f0ae42eeaa1d845c7e26d17be8b83e1c7b",
+  "exit": 0,
+  "guards": 2035,
+  "guards_match": true,
+  "tracked_input_scopes": [
+    ".cargo",
+    "clippy.toml",
+    "reactivity/Cargo.toml",
+    "reactivity/Cargo.lock",
+    "reactivity/rust-toolchain.toml",
+    "reactivity/crates",
+    "reactivity/vendor"
+  ],
+  "passed": 222,
+  "failed": 0,
+  "ignored": 3,
+  "harnesses": 31,
+  "scope": "Functional/source-identity gate; no timing inference."
+}

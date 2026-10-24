@@ -1,0 +1,2 @@
+{"target": "render", "exit": 0, "passed": 47, "failed": 0, "ignored": 0, "sha256_after_matches": true}
+{"harnesses": 1, "passed": 47, "failed": 0, "ignored": 0, "all_exit_zero": true, "scope": "Frozen functional test artifacts; sequential execution, no performance inference."}

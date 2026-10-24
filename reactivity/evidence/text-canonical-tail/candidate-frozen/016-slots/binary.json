@@ -1,0 +1,33 @@
+{
+  "original": "/root/target-text-sol-nightly/debug/build/gpui_canvas/773beafad158adb5/out/slots-773beafad158adb5",
+  "frozen": "/tmp/text-sol-evidence/candidate-frozen/016-slots/test",
+  "sha256": "f1b0170885ac195dd1ce0af5304324a92e027a00652b831cd463cff3450f53eb",
+  "bytes": 100622072,
+  "fresh": true,
+  "package_id": "path+file:///root/gpui-text-sol/reactivity/crates/canvas#gpui_canvas@0.1.0",
+  "target": {
+    "kind": [
+      "test"
+    ],
+    "crate_types": [
+      "bin"
+    ],
+    "name": "slots",
+    "src_path": "/root/gpui-text-sol/reactivity/crates/canvas/tests/slots.rs",
+    "edition": "2024",
+    "doc": false,
+    "doctest": false,
+    "test": true
+  },
+  "features": [
+    "default",
+    "simd"
+  ],
+  "profile": {
+    "opt_level": "0",
+    "debuginfo": 2,
+    "debug_assertions": true,
+    "overflow_checks": true,
+    "test": true
+  }
+}

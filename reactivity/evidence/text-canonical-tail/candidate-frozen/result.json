@@ -1,0 +1,242 @@
+{
+  "harnesses": 29,
+  "passed": 218,
+  "failed": 0,
+  "ignored": 3,
+  "all_exit_zero": true,
+  "results": [
+    {
+      "target": "gpui_canvas",
+      "exit": 0,
+      "passed": 91,
+      "failed": 0,
+      "ignored": 2,
+      "sha256_after_matches": true
+    },
+    {
+      "target": "grouped",
+      "exit": 0,
+      "passed": 2,
+      "failed": 0,
+      "ignored": 0,
+      "sha256_after_matches": true
+    },
+    {
+      "target": "render",
+      "exit": 0,
+      "passed": 10,
+      "failed": 0,
+      "ignored": 0,
+      "sha256_after_matches": true
+    },
+    {
+      "target": "default_font",
+      "exit": 0,
+      "passed": 4,
+      "failed": 0,
+      "ignored": 0,
+      "sha256_after_matches": true
+    },
+    {
+      "target": "literal_cow",
+      "exit": 0,
+      "passed": 2,
+      "failed": 0,
+      "ignored": 0,
+      "sha256_after_matches": true
+    },
+    {
+      "target": "bins",
+      "exit": 0,
+      "passed": 8,
+      "failed": 0,
+      "ignored": 0,
+      "sha256_after_matches": true
+    },
+    {
+      "target": "shaping",
+      "exit": 0,
+      "passed": 2,
+      "failed": 0,
+      "ignored": 0,
+      "sha256_after_matches": true
+    },
+    {
+      "target": "font_quality",
+      "exit": 0,
+      "passed": 3,
+      "failed": 0,
+      "ignored": 0,
+      "sha256_after_matches": true
+    },
+    {
+      "target": "parallel",
+      "exit": 0,
+      "passed": 0,
+      "failed": 0,
+      "ignored": 0,
+      "sha256_after_matches": true
+    },
+    {
+      "target": "text_transaction",
+      "exit": 0,
+      "passed": 5,
+      "failed": 0,
+      "ignored": 0,
+      "sha256_after_matches": true
+    },
+    {
+      "target": "color_packing",
+      "exit": 0,
+      "passed": 3,
+      "failed": 0,
+      "ignored": 0,
+      "sha256_after_matches": true
+    },
+    {
+      "target": "hdr",
+      "exit": 0,
+      "passed": 6,
+      "failed": 0,
+      "ignored": 0,
+      "sha256_after_matches": true
+    },
+    {
+      "target": "rounded",
+      "exit": 0,
+      "passed": 5,
+      "failed": 0,
+      "ignored": 0,
+      "sha256_after_matches": true
+    },
+    {
+      "target": "selection",
+      "exit": 0,
+      "passed": 11,
+      "failed": 0,
+      "ignored": 0,
+      "sha256_after_matches": true
+    },
+    {
+      "target": "dpi",
+      "exit": 0,
+      "passed": 3,
+      "failed": 0,
+      "ignored": 0,
+      "sha256_after_matches": true
+    },
+    {
+      "target": "oklch",
+      "exit": 0,
+      "passed": 5,
+      "failed": 0,
+      "ignored": 0,
+      "sha256_after_matches": true
+    },
+    {
+      "target": "slots",
+      "exit": 0,
+      "passed": 6,
+      "failed": 0,
+      "ignored": 0,
+      "sha256_after_matches": true
+    },
+    {
+      "target": "color",
+      "exit": 0,
+      "passed": 6,
+      "failed": 0,
+      "ignored": 0,
+      "sha256_after_matches": true
+    },
+    {
+      "target": "sample_storage",
+      "exit": 0,
+      "passed": 2,
+      "failed": 0,
+      "ignored": 0,
+      "sha256_after_matches": true
+    },
+    {
+      "target": "font_sharing",
+      "exit": 0,
+      "passed": 2,
+      "failed": 0,
+      "ignored": 1,
+      "sha256_after_matches": true
+    },
+    {
+      "target": "prepared_scene",
+      "exit": 0,
+      "passed": 3,
+      "failed": 0,
+      "ignored": 0,
+      "sha256_after_matches": true
+    },
+    {
+      "target": "unicode",
+      "exit": 0,
+      "passed": 14,
+      "failed": 0,
+      "ignored": 0,
+      "sha256_after_matches": true
+    },
+    {
+      "target": "damage",
+      "exit": 0,
+      "passed": 7,
+      "failed": 0,
+      "ignored": 0,
+      "sha256_after_matches": true
+    },
+    {
+      "target": "images",
+      "exit": 0,
+      "passed": 4,
+      "failed": 0,
+      "ignored": 0,
+      "sha256_after_matches": true
+    },
+    {
+      "target": "sample_clip",
+      "exit": 0,
+      "passed": 3,
+      "failed": 0,
+      "ignored": 0,
+      "sha256_after_matches": true
+    },
+    {
+      "target": "external",
+      "exit": 0,
+      "passed": 2,
+      "failed": 0,
+      "ignored": 0,
+      "sha256_after_matches": true
+    },
+    {
+      "target": "paint",
+      "exit": 0,
+      "passed": 4,
+      "failed": 0,
+      "ignored": 0,
+      "sha256_after_matches": true
+    },
+    {
+      "target": "solid",
+      "exit": 0,
+      "passed": 3,
+      "failed": 0,
+      "ignored": 0,
+      "sha256_after_matches": true
+    },
+    {
+      "target": "color_authoring",
+      "exit": 0,
+      "passed": 2,
+      "failed": 0,
+      "ignored": 0,
+      "sha256_after_matches": true
+    }
+  ],
+  "scope": "Frozen functional test artifacts; sequential execution, no performance inference."
+}
