@@ -114,11 +114,11 @@ fn preview_selections(
     // ASCII bytes also certify the restart offset is a UTF-8 boundary.
     let bytes = value.as_bytes();
     let mut base = if bytes.get(..marked.start).is_some_and(<[u8]>::is_ascii) {
-        marked.start.saturating_sub(0)
+        marked.start.saturating_sub(1)
     } else {
         0
     };
-    if base > 0 && base < bytes.len() && bytes[base - 1..=base] == *b"\r\n" {
+    if base > 0 && bytes[base - 1..=base] == *b"\r\n" {
         base -= 1;
     }
     // Keep the scan in suffix coordinates; translate its four results once.
@@ -134,7 +134,9 @@ fn preview_selections(
     // Admission places both raw cursor endpoints inside the marked range. Each
     // nearest endpoint needs only its adjacent boundaries; ties go downstream.
     // The first boundary at/after marked.end also completes its decoration.
-    for boundary in icu_segmenter::GraphemeClusterSegmenter::new().segment_str(&value[base..]) {
+    for boundary in icu_segmenter::GraphemeClusterSegmenter::new()
+        .segment_str(&value[base..base + marked.end])
+    {
         let nearest = |byte: usize| {
             if byte.abs_diff(previous) < byte.abs_diff(boundary) {
                 previous
