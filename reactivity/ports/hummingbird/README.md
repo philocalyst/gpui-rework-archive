@@ -4,9 +4,11 @@ This application experiment ports a real Hummingbird data seam into the ordinary
 GPUI native/headless owner: SQLite query → Nucleo search → keyed virtual rows →
 SQLite-validated playback request → exclusively owned queue and playback plan.
 Native now attaches [real decoding and CPAL output](AUDIO.md), including
-pause, seek, stop and queue-authorized source transitions. Scanner/watcher, full
-navigation/table controls, artwork, settings and platform media integration
-remain absent.
+pause, seek, stop and queue-authorized source transitions. Routed Tracks, Albums,
+Artists and Playlists share the same Question and support explicit context
+playback. [Library roots, cancellable indexing and Files navigation](FILES.md)
+use the same worker and playback authority. Watchers, full table/context controls,
+artwork, general settings and platform media integration remain absent.
 
 Run from this standalone workspace:
 
@@ -16,6 +18,7 @@ cargo run --locked --features native -- --native
 cargo run --locked --features native -- --native --renderer gpu
 cargo run --locked --features native -- --native --renderer cpu
 cargo run --locked --features native -- --native --database /path/to/library.db
+cargo run --locked --features native -- --native --library /path/to/port-library.db
 cargo test --locked --all-targets
 cargo clippy --locked --all-targets --features native -- -D warnings
 ```
@@ -36,7 +39,10 @@ The default in-memory database applies all 39 real pinned migrations before
 inserting Hummingbird's original three-track/artist/album/liked fixture, plus six
 explicit edge-case rows. `--database` opens an existing library **read-only**;
 it does not run migrations or seed it. Query compatibility is with the pin below,
-not a promise to migrate arbitrary future databases. Each row offers explicit
+not a promise to migrate arbitrary future databases. `--library` creates or
+reopens a port-owned writable database, persists library roots, and refuses an
+unmarked occupied database. It is mutually exclusive with `--database`.
+Each row offers explicit
 Prepare and, with the audio feature, Play now. Prepare resolves the actual
 track/album/title/path through the existing `for_queue` SQL projection and
 stores an inert lease. Play now prepares and starts that recording with one
