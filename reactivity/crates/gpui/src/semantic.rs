@@ -315,61 +315,55 @@ impl<'a> ElementExtra<'a> {
             Self::List(_) | Self::Mapped { .. } => unreachable!(),
         }
     }
-    pub fn into_parts(self) -> ExtraParts<'a> {
-        match self {
-            Self::Mapped { bindings, base } => {
-                let mut parts = base.map(|base| base.into_parts()).unwrap_or_default();
-                parts.mapped = bindings;
-                parts
-            }
-            Self::Decorations(d) => {
-                let mut parts = ExtraParts {
-                    annotations: d.semantic.map(|s| *s).unwrap_or_default(),
-                    axes: d.axes,
-                    geometry: Some(d.geometry),
-                    bindings: d.bindings,
-                    ..Default::default()
-                };
-                match d.base.map(|base| *base) {
-                    Some(LeafExtra::List(list)) => parts.list = Some(list),
-                    Some(LeafExtra::Reader(projector)) => parts.projection = Some(projector),
-                    Some(LeafExtra::Image(mut spec)) => {
-                        spec.geometry = d.geometry;
-                        parts.image = Some(spec);
+    pub fn into_parts(mut self) -> ExtraParts<'a> {
+        let mut parts = ExtraParts::default();
+        loop {
+            match self {
+                Self::Mapped { bindings, base } => {
+                    parts.mapped = bindings;
+                    if let Some(base) = base {
+                        self = *base;
+                        continue;
                     }
-                    None => {}
                 }
-                parts
+                Self::Decorations(d) => {
+                    parts.annotations = d.semantic.map(|s| *s).unwrap_or_default();
+                    parts.axes = d.axes;
+                    parts.geometry = Some(d.geometry);
+                    parts.bindings = d.bindings;
+                    match d.base.map(|base| *base) {
+                        Some(LeafExtra::List(list)) => parts.list = Some(list),
+                        Some(LeafExtra::Reader(projector)) => parts.projection = Some(projector),
+                        Some(LeafExtra::Image(mut spec)) => {
+                            spec.geometry = d.geometry;
+                            parts.image = Some(spec);
+                        }
+                        None => {}
+                    }
+                }
+                Self::Reader {
+                    projector,
+                    semantic,
+                    map,
+                } => {
+                    parts.projection = Some((projector, map));
+                    parts.annotations = semantic.map(|s| *s).unwrap_or_default();
+                }
+                Self::Image { spec, semantic } => {
+                    parts.image = Some(spec);
+                    parts.geometry = Some(spec.geometry);
+                    parts.annotations = semantic.map(|s| *s).unwrap_or_default();
+                }
+                Self::List(list) => parts.list = Some(list),
+                Self::Semantic(annotations) => parts.annotations = annotations,
+                Self::Combined { list, semantic } => {
+                    parts.list = Some(*list);
+                    parts.annotations = semantic;
+                }
             }
-            Self::Reader {
-                projector,
-                semantic,
-                map,
-            } => ExtraParts {
-                projection: Some((projector, map)),
-                annotations: semantic.map(|s| *s).unwrap_or_default(),
-                ..Default::default()
-            },
-            Self::Image { spec, semantic } => ExtraParts {
-                image: Some(spec),
-                geometry: Some(spec.geometry),
-                annotations: semantic.map(|s| *s).unwrap_or_default(),
-                ..Default::default()
-            },
-            Self::List(list) => ExtraParts {
-                list: Some(list),
-                ..Default::default()
-            },
-            Self::Semantic(annotations) => ExtraParts {
-                annotations,
-                ..Default::default()
-            },
-            Self::Combined { list, semantic } => ExtraParts {
-                list: Some(*list),
-                annotations: semantic,
-                ..Default::default()
-            },
+            break;
         }
+        parts
     }
 }
 

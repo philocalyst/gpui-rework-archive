@@ -723,6 +723,34 @@ struct MappedFanout {
     values: Vec<crate::property::PropertyValue>,
     direct_color: u32,
 }
+impl MappedFanout {
+    // Every comparison and inspector base must see the OLD bank. Publish only
+    // after all sinks compare, including masked peers sharing the direct slot.
+    #[inline(never)]
+    fn publish_colors(
+        &self,
+        styles: &mut styles::Styles,
+        direct: Option<crate::style_port::Scalar>,
+    ) {
+        for (record, value) in self.records.iter().zip(&self.values) {
+            if let Some(slot) = styles::ColorSlot::from_source_code(record.color) {
+                let crate::property::PropertyValue::Color(color) = *value else {
+                    unreachable!("color slot has color property")
+                };
+                styles.update_color(slot, color);
+            }
+        }
+        if let Some(slot) = styles::ColorSlot::from_source_code(self.direct_color) {
+            let Some(crate::style_port::Scalar::Value(crate::property::PropertyValue::Color(
+                color,
+            ))) = direct
+            else {
+                unreachable!("direct color frozen and admitted")
+            };
+            styles.update_color(slot, color);
+        }
+    }
+}
 enum Fanout {
     General {
         codec: TextCodec,
@@ -765,18 +793,14 @@ impl Fanout {
         recipe: crate::style_port::Recipe,
         value: crate::property::PropertyValue,
     ) {
-        if !matches!(self, Self::Mapped(_)) {
-            let old = std::mem::replace(self, Self::new(TextCodec::for_style::<f64>()));
-            let Self::General {
-                codec,
-                destinations,
-            } = old
-            else {
-                unreachable!()
-            };
+        if let Self::General {
+            codec,
+            destinations,
+        } = self
+        {
             *self = Self::Mapped(Box::new(MappedFanout {
-                codec,
-                destinations,
+                codec: *codec,
+                destinations: std::mem::take(destinations),
                 records: Vec::new(),
                 values: Vec::new(),
                 direct_color: 0,
@@ -792,35 +816,130 @@ impl Fanout {
         });
         mapped.values.push(value);
     }
+    // Shared erased admission keeps model-specific owner turns small. All
+    // outputs are frozen and admitted here before any destination can mutate.
+    #[inline(never)]
+    fn freeze<'a>(
+        &mut self,
+        source: &'a dyn std::any::Any,
+        field: FieldId,
+    ) -> Result<crate::source::Frozen<'a>, Error> {
+        let mut needs = crate::source::Needs {
+            text: false,
+            style: false,
+        };
+        for destination in self.destinations() {
+            if destination.port() == Port::Style {
+                needs.style = true;
+            } else {
+                needs.text = true;
+            }
+        }
+        let frozen = if needs.text || needs.style {
+            self.codec().freeze(source, field, needs)?
+        } else {
+            crate::source::Frozen {
+                text: None,
+                style: None,
+            }
+        };
+        if let Fanout::Mapped(mapped) = self {
+            for (record, value) in mapped.records.iter().zip(&mut mapped.values) {
+                *value = record
+                    .recipe
+                    .call(source)
+                    .ok_or(BindError::TypeMismatch(field))?
+                    .admit(record.destination.property().expect("mapped property"))?;
+            }
+        }
+        // A numeric source may feed width, font size AND text. Reject every bad
+        // sink before the first logical destination or inspector base is edited.
+        for destination in self.destinations() {
+            if let Some(id) = destination.property() {
+                frozen.style.expect("style codec requested").admit(id)?;
+            }
+        }
+        Ok(frozen)
+    }
+    #[inline(never)]
+    fn finish_description(
+        &mut self,
+        field: FieldId,
+        drafts: &[crate::element::DraftNode<'_>],
+        colors: &mut styles::ColorDiscovery,
+    ) -> bool {
+        self.destinations_mut()
+            .sort_unstable_by_key(|destination| destination.packed());
+        let Self::Mapped(mapped) = self else {
+            return false;
+        };
+        let mut register = |destination: Destination, code: &mut u32| {
+            if let Some(
+                id @ (crate::property::PropertyId::Foreground
+                | crate::property::PropertyId::Background),
+            ) = destination.property()
+            {
+                let slot = styles::ColorSlot::from_source_code(*code).unwrap_or_else(|| {
+                    let style = drafts[destination.node()].style;
+                    colors.mapped(
+                        field,
+                        if id == crate::property::PropertyId::Foreground {
+                            style.fg
+                        } else {
+                            style.bg
+                        },
+                    )
+                });
+                *code = slot.source_code();
+                colors.mapped_port(destination, slot);
+            }
+        };
+        for record in &mut mapped.records {
+            register(record.destination, &mut record.color);
+        }
+        // Identity Color ports share one slot; mapped outputs each own one.
+        for &destination in &mapped.destinations {
+            register(destination, &mut mapped.direct_color);
+        }
+        // Scratch values are overwritten in this sorted record order
+        // on every patch before the iterator can publish them.
+        mapped
+            .records
+            .sort_unstable_by_key(|record| record.destination.packed());
+        mapped.records.shrink_to_fit();
+        mapped.values.shrink_to_fit();
+        true
+    }
     fn all_destinations(
         &self,
     ) -> impl Iterator<Item = (Destination, Option<crate::property::PropertyValue>, u32)> + '_ {
-        let mapped = match self {
-            Self::Mapped(mapped) => Some(mapped.as_ref()),
-            _ => None,
+        let (mut records, mut values, direct_color) = match self {
+            Self::Mapped(mapped) => (
+                mapped.records.as_slice(),
+                mapped.values.as_slice(),
+                mapped.direct_color,
+            ),
+            _ => (&[][..], &[][..], 0),
         };
-        let direct_color = mapped.map_or(0, |mapped| mapped.direct_color);
-        let mut direct = self.destinations().iter().copied().peekable();
-        let mut mapped = mapped
-            .into_iter()
-            .flat_map(|mapped| mapped.records.iter().zip(&mapped.values))
-            .peekable();
+        let mut direct = self.destinations();
         std::iter::from_fn(move || {
-            if direct.peek().is_some_and(|destination| {
-                mapped
-                    .peek()
-                    .is_none_or(|(record, _)| destination.packed() < record.destination.packed())
-            }) {
-                direct
-                    .next()
-                    .map(|destination| (destination, None, direct_color))
+            if let Some((&destination, rest)) = direct.split_first()
+                && records
+                    .first()
+                    .is_none_or(|record| destination.packed() < record.destination.packed())
+            {
+                direct = rest;
+                Some((destination, None, direct_color))
             } else {
-                mapped
-                    .next()
-                    .map(|(record, value)| (record.destination, Some(*value), record.color))
+                let (record, rest) = records.split_first()?;
+                let (value, remaining) = values.split_first()?;
+                records = rest;
+                values = remaining;
+                Some((record.destination, Some(*value), record.color))
             }
         })
     }
+
     #[cfg(test)]
     fn destination_bytes(&self) -> usize {
         match self {
@@ -1999,72 +2118,13 @@ impl<M: View + 'static> Runtime<M> {
             }
             annotation_fields.push(slots);
         }
-        for (&field, fanout) in &mut fanout {
-            if let Fanout::Mapped(mapped) = fanout {
-                for record in &mut mapped.records {
-                    if let Some(
-                        id @ (crate::property::PropertyId::Foreground
-                        | crate::property::PropertyId::Background),
-                    ) = record.destination.property()
-                    {
-                        let style = drafts[record.destination.node()].style;
-                        let color = if id == crate::property::PropertyId::Foreground {
-                            style.fg
-                        } else {
-                            style.bg
-                        };
-                        let slot = color_discovery.mapped(field, color);
-                        record.color = slot.source_code();
-                        color_discovery.mapped_port(record.destination, slot);
-                    }
-                }
-                // A Signal<Color> may also have identity ports in this same
-                // mapped source group. They share one bounded source slot.
-                for &destination in &mapped.destinations {
-                    if let Some(
-                        id @ (crate::property::PropertyId::Foreground
-                        | crate::property::PropertyId::Background),
-                    ) = destination.property()
-                    {
-                        let slot = match styles::ColorSlot::from_source_code(mapped.direct_color) {
-                            Some(slot) => slot,
-                            None => {
-                                let style = drafts[destination.node()].style;
-                                let color = if id == crate::property::PropertyId::Foreground {
-                                    style.fg
-                                } else {
-                                    style.bg
-                                };
-                                let slot = color_discovery.mapped(field, color);
-                                mapped.direct_color = slot.source_code();
-                                slot
-                            }
-                        };
-                        color_discovery.mapped_port(destination, slot);
-                    }
-                }
-                // Description always rebinds recipes; equal current outputs do
-                // not establish mapper identity or preserve old Canvas slots.
-                self.dirty = true;
-            }
+        for (&field, ports) in &mut fanout {
+            // Equal outputs do not identify recipes or preserve old Canvas slots.
+            self.dirty |= ports.finish_description(field, &drafts, &mut color_discovery);
         }
         // Promotion is lazy and shared by all changed ports of a registered
         // field in this description. Unchanged retained operands keep their Arc.
         let mut promotions: BTreeMap<FieldId, SharedText> = BTreeMap::new();
-        for fanout in fanout.values_mut() {
-            if let Fanout::Mapped(mapped) = fanout {
-                // Scratch values are overwritten in this sorted record order
-                // on every patch before the iterator can publish them.
-                mapped
-                    .records
-                    .sort_unstable_by_key(|record| record.destination.packed());
-                mapped.records.shrink_to_fit();
-                mapped.values.shrink_to_fit();
-            }
-            fanout
-                .destinations_mut()
-                .sort_unstable_by_key(|destination| destination.packed());
-        }
         color_discovery.capture(&fanout);
         for (field, slot) in color_discovery.fields() {
             let entry = fanout.get_mut(&field).expect("registered color fanout");
@@ -2513,43 +2573,8 @@ impl<M: View + 'static> Runtime<M> {
         let Some(fanout) = self.fanout.get_mut(&field) else {
             return Ok(PatchOutcome::Visual);
         };
-        let mut needs = crate::source::Needs {
-            text: false,
-            style: false,
-        };
-        for destination in fanout.destinations() {
-            if destination.port() == Port::Style {
-                needs.style = true;
-            } else {
-                needs.text = true;
-            }
-        }
         self.counters.source_reads += 1;
-        let source = self.sources.signal(&self.model, field)?.as_any();
-        let frozen = if needs.text || needs.style {
-            fanout.codec().freeze(source, field, needs)?
-        } else {
-            crate::source::Frozen {
-                text: None,
-                style: None,
-            }
-        };
-        if let Fanout::Mapped(mapped) = fanout {
-            for (record, value) in mapped.records.iter().zip(&mut mapped.values) {
-                *value = record
-                    .recipe
-                    .call(source)
-                    .ok_or(BindError::TypeMismatch(field))?
-                    .admit(record.destination.property().expect("mapped property"))?;
-            }
-        }
-        // A numeric source may feed width, font size AND text. Reject every bad
-        // sink before the first logical destination or inspector base is edited.
-        for destination in fanout.destinations() {
-            if let Some(id) = destination.property() {
-                frozen.style.expect("style codec requested").admit(id)?;
-            }
-        }
+        let frozen = fanout.freeze(self.sources.signal(&self.model, field)?.as_any(), field)?;
         let mut promoted: Option<SharedText> = None;
         let mut semantic = false;
         let mut visual_changed = false;
@@ -2656,23 +2681,8 @@ impl<M: View + 'static> Runtime<M> {
                 last_changed = Some(index);
             }
         }
-        // Every comparison and inspector base above sees the OLD bank. A
-        // shared identity slot can have an overridden first sink and unmasked
-        // later sinks. Mutating it earlier would hide those later changes.
-        for (_, mapped_value, color) in fanout.all_destinations() {
-            if let Some(slot) = styles::ColorSlot::from_source_code(color) {
-                let value = match mapped_value {
-                    Some(value) => value,
-                    None => match frozen.style.expect("direct color frozen and admitted") {
-                        crate::style_port::Scalar::Value(value) => value,
-                        crate::style_port::Scalar::Number(_) => unreachable!("direct color scalar"),
-                    },
-                };
-                let crate::property::PropertyValue::Color(value) = value else {
-                    unreachable!("color slot has color property")
-                };
-                self.styles.update_color(slot, value);
-            }
+        if let Fanout::Mapped(mapped) = fanout {
+            mapped.publish_colors(&mut self.styles, frozen.style);
         }
         Ok(if semantic && !visual_changed {
             PatchOutcome::Metadata
