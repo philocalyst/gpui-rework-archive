@@ -500,6 +500,30 @@ impl TextLayout {
     }
 }
 
+/// A directional, single-line source span, derived without allocation.
+#[derive(Clone, Copy, Debug)]
+pub struct TextRun {
+    start: u32,
+    end: u32,
+    bounds: Rect,
+    line: usize,
+    direction: TextDirection,
+}
+impl TextRun {
+    pub fn text_range(self) -> std::ops::Range<TextOffset> {
+        TextOffset(self.start)..TextOffset(self.end)
+    }
+    pub fn bounds(self) -> Rect {
+        self.bounds
+    }
+    pub fn line(self) -> usize {
+        self.line
+    }
+    pub fn direction(self) -> TextDirection {
+        self.direction
+    }
+}
+
 #[cfg(test)]
 mod tests {
     use super::*;
@@ -575,29 +599,5 @@ mod tests {
         assert_eq!(requested.len(), 3);
         assert_eq!(map.intervals(requested, 2.5).count(), 2);
         assert_eq!(map.intervals(all, 2.5).count(), 9_999);
-    }
-}
-
-/// A directional, single-line source span, derived without allocation.
-#[derive(Clone, Copy, Debug)]
-pub struct TextRun {
-    start: u32,
-    end: u32,
-    bounds: Rect,
-    line: usize,
-    direction: TextDirection,
-}
-impl TextRun {
-    pub fn text_range(self) -> std::ops::Range<TextOffset> {
-        TextOffset(self.start)..TextOffset(self.end)
-    }
-    pub fn bounds(self) -> Rect {
-        self.bounds
-    }
-    pub fn line(self) -> usize {
-        self.line
-    }
-    pub fn direction(self) -> TextDirection {
-        self.direction
     }
 }

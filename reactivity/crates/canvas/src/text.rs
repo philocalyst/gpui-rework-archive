@@ -17,6 +17,8 @@ use swash::{
     scale::{Render, ScaleContext, Source},
     zeno::Format,
 };
+mod bundled_coverage;
+mod coverage;
 #[cfg(test)]
 mod geometry_ledger;
 mod layout;
@@ -136,8 +138,8 @@ impl FontFace {
             bundled,
         })))
     }
-    /// Borrows one scoped planner session for a pass. Coverage still parses a
-    /// primary Face view per string; dropping the session releases its caches.
+    /// Borrows one scoped planner session for a pass. Coverage parses a
+    /// custom primary cmap once; dropping the session releases its caches.
     pub fn shaper(&self) -> TextShaper<'_> {
         TextShaper {
             font: self,

@@ -300,9 +300,9 @@ mod tests {
                             );
                             for x in 1..16 {
                                 let mut column = Column::new(axes.columns[x]);
-                                for y in 2..16 {
+                                for (y, row) in axes.rows.iter().enumerate().skip(2) {
                                     let actual = column.sources(
-                                        axes.rows[y],
+                                        *row,
                                         sampling == ImageSampling::Linear,
                                         &mut |x, y| image.view().texel(x, y),
                                     );
