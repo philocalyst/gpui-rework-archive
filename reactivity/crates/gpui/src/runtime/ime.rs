@@ -108,16 +108,33 @@ fn preview_selections(
     marked: Range<usize>,
     cursor: Option<[u32; 2]>,
 ) -> Result<(gpui_canvas::TextSelection, gpui_canvas::TextSelection), Error> {
-    let [a, b] = cursor.map_or([marked.start; 2], |c| c.map(|n| n as usize));
+    // An ASCII prefix has no grapheme context before its final grapheme.
+    // Retain that grapheme: a leading Extend can join it, and LF can follow CR.
+    // Keep the complete suffix for joins across the other marked-text seam.
+    // ASCII bytes also certify the restart offset is a UTF-8 boundary.
+    let bytes = value.as_bytes();
+    let mut base = if bytes.get(..marked.start).is_some_and(<[u8]>::is_ascii) {
+        marked.start.saturating_sub(1)
+    } else {
+        0
+    };
+    if base > 0 && bytes[base - 1..=base] == *b"\r\n" {
+        base -= 1;
+    }
+    // Keep the scan in suffix coordinates; translate its four results once.
+    let [a, b] = cursor
+        .map_or([marked.start; 2], |c| c.map(|n| n as usize))
+        .map(|n| n - base);
+    let marked = marked.start - base..marked.end - base;
     let mut anchor = 0;
     let mut focus = 0;
     let mut left = 0;
-    let mut right = value.len();
+    let mut right = value.len() - base;
     let mut previous = 0;
     // Admission places both raw cursor endpoints inside the marked range. Each
     // nearest endpoint needs only its adjacent boundaries; ties go downstream.
     // The first boundary at/after marked.end also completes its decoration.
-    for boundary in icu_segmenter::GraphemeClusterSegmenter::new().segment_str(value) {
+    for boundary in icu_segmenter::GraphemeClusterSegmenter::new().segment_str(&value[base..]) {
         let nearest = |byte: usize| {
             if byte.abs_diff(previous) < byte.abs_diff(boundary) {
                 previous
@@ -142,12 +159,12 @@ fn preview_selections(
     }
     Ok((
         gpui_canvas::TextSelection {
-            anchor: position(anchor)?,
-            focus: position(focus)?,
+            anchor: position(base + anchor)?,
+            focus: position(base + focus)?,
         },
         gpui_canvas::TextSelection {
-            anchor: position(left)?,
-            focus: position(right)?,
+            anchor: position(base + left)?,
+            focus: position(base + right)?,
         },
     ))
 }
@@ -709,6 +726,76 @@ mod tests {
             }
         }
         assert_eq!(cases, 79_333);
+    }
+    #[test]
+    fn ascii_restart_preserves_both_unicode_seams_and_full_scan_geometry() {
+        let segmenter = icu_segmenter::GraphemeClusterSegmenter::new();
+        let mut cases = 0;
+        for byte in 0..=127 {
+            for preedit in ["", "x", "\u{301}", "\u{fe0f}\u{20e3}", "👩‍", "🇦", "क्‍ष"]
+            {
+                for suffix in ["", "\n", "\u{301}", "💻", "🇧🇨", "ष"] {
+                    let prefix = format!("left\r\n{}", char::from(byte));
+                    let value = format!("{prefix}{preedit}{suffix}");
+                    let marked = prefix.len()..prefix.len() + preedit.len();
+                    let boundaries = segmenter.segment_str(&value).collect::<Vec<_>>();
+                    let nearest = |byte: usize| {
+                        position(
+                            *boundaries
+                                .iter()
+                                .min_by_key(|&&n| (n.abs_diff(byte), std::cmp::Reverse(n)))
+                                .unwrap(),
+                        )
+                        .unwrap()
+                    };
+                    let decoration = gpui_canvas::TextSelection {
+                        anchor: position(
+                            *boundaries.iter().rfind(|&&n| n <= marked.start).unwrap(),
+                        )
+                        .unwrap(),
+                        focus: position(*boundaries.iter().find(|&&n| n >= marked.end).unwrap())
+                            .unwrap(),
+                    };
+                    let offsets = (0..=preedit.len())
+                        .filter(|&n| preedit.is_char_boundary(n))
+                        .collect::<Vec<_>>();
+                    for a in &offsets {
+                        for b in &offsets {
+                            let a = marked.start + a;
+                            let b = marked.start + b;
+                            assert_eq!(
+                                preview_selections(
+                                    &value,
+                                    marked.clone(),
+                                    Some([a as u32, b as u32]),
+                                )
+                                .unwrap(),
+                                (
+                                    gpui_canvas::TextSelection {
+                                        anchor: nearest(a),
+                                        focus: nearest(b),
+                                    },
+                                    decoration,
+                                ),
+                                "{value:?}/{marked:?}/{a}/{b}"
+                            );
+                            cases += 1;
+                        }
+                    }
+                    assert_eq!(
+                        preview_selections(&value, marked.clone(), None).unwrap(),
+                        (
+                            gpui_canvas::TextSelection {
+                                anchor: nearest(marked.start),
+                                focus: nearest(marked.start),
+                            },
+                            decoration,
+                        ),
+                    );
+                }
+            }
+        }
+        assert_eq!(cases, 43_008);
     }
     #[test]
     fn initial_equal_preedit_and_clear_reuse_the_exact_source_lease() {
