@@ -590,6 +590,19 @@ mod tests {
                 .ime
                 .is_none()
         );
+        let mut promotion = None;
+        let promoted = allocation_counter::measure(|| {
+            promotion = Some(SharedText::from("twenty four bytes source!"));
+        });
+        eprintln!(
+            "IME_TEXT_PROMOTION allocations={} bytes={} retained={} peak={} text_len={}",
+            promoted.count_total,
+            promoted.bytes_total,
+            promoted.bytes_current,
+            promoted.bytes_max,
+            promotion.as_ref().unwrap().len()
+        );
+        drop(promotion);
         let mut session = ImeSession::default();
         let enabled = allocation_counter::measure(|| {
             win.ime_event(&mut session, ImeEvent::Enabled).unwrap();

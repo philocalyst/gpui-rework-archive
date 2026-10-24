@@ -146,3 +146,20 @@ impl Bridge {
         }
     }
 }
+
+#[cfg(test)]
+#[test]
+fn ime_native_header_ledger() {
+    eprintln!(
+        "IME_NATIVE bridge={} target={} native_host={} opening={} window_options={}",
+        size_of::<Bridge>(),
+        size_of::<ImeTarget>(),
+        size_of::<NativeHost<()>>(),
+        size_of::<Window<()>>(),
+        size_of::<WindowOptions>()
+    );
+    if cfg!(target_pointer_width = "64") {
+        assert_eq!(size_of::<Bridge>(), 48);
+        assert_eq!(size_of::<ImeTarget>(), 32);
+    }
+}
