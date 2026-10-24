@@ -46,12 +46,16 @@ pub(super) fn bernstein(
         let anchor_error = endpoint_error + 0.75 * (1.0 + denominator_error) * cast_error;
         let mut parameter_error = 0.0;
         if a0 != a1 && a0 > 0.0 && a1 > 0.0 {
-            // Absolute derivative in v of the alpha-conditioned endpoint form.
-            let k1 = f64::from(stored[0][c]);
-            let k2 = f64::from(stored[1][c]);
+            // Differentiate the ideal controls; anchor/cast residuals remain
+            // uniformly bounded for every clamped v, including ratio FTZ.
+            let k1 = alpha * controls[1][c];
+            let k2 = alpha * controls[2][c];
             let k = k1.abs().max(k2.abs());
-            let derivative = 2.0 * f64::from(p0[c]).abs().max(f64::from(p1[c]).abs())
-                + (1.0 + denominator_error) * (3.0 * k + 0.75 * (k2 - k1).abs());
+            let p = (f64::from(a0) * controls[0][c])
+                .abs()
+                .max((f64::from(a1) * controls[3][c]).abs());
+            let derivative =
+                2.0 * p + (1.0 + denominator_error) * (3.0 * k + 0.75 * (k2 - k1).abs());
             parameter_error = 12.0 * EPS * derivative + denominator_error * 0.75 * k;
         }
         // At exact v, the nonnegative Bernstein weights total A(t)/max(A).
