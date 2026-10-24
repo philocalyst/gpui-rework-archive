@@ -829,8 +829,14 @@ fn clip_reuse_completed_work_benchmark() {
     }
     pollster::block_on(async {
         let mut gpu = renderer(wgpu::TextureFormat::Rgba16Float).await;
-        let baseline = baseline::ui::WGSL_SOURCE.wgsl_source().unwrap();
-        let candidate = crate::shader::ui::WGSL_SOURCE.wgsl_source().unwrap();
+        const BASELINE: &str = include_str!("../../tests/clip_reuse_baseline.wgsl");
+        assert_eq!(BASELINE, baseline::ui::WGSL_SOURCE.wgsl_source().unwrap());
+        assert_eq!(
+            SHADER_SOURCE,
+            crate::shader::ui::WGSL_SOURCE.wgsl_source().unwrap()
+        );
+        let baseline = BASELINE;
+        let candidate = SHADER_SOURCE;
         let pipelines = [
             make_pipeline(&gpu, &baseline, gpu.format()),
             make_pipeline(&gpu, &candidate, gpu.format()),
