@@ -54,6 +54,8 @@ and excluded from the actual production-fault proof.
 ## Cost
 
 Syn inventory/Tokei counts core 31,616→31,745 non-test, non-comment lines, +129.
+Root's independent [Main recount](main-core-lines.json) pins `e5fc145cd0`: 31,727
+library source lines plus 18 build-script lines, excluding tests and comments.
 LogicalSelection and its Option grow 40→48 bytes; the single cold Editing owner
 grows 88→96. Runtime, Metadata, Node and TextSite sizes are unchanged.
 
