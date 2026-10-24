@@ -28,7 +28,10 @@ Ordinary views can use `.bg(&gradient)`, `.rounded(radius).clip()`, and typed `B
 
 The broad run includes all 70 GPU cases (11 unit, 4 presentation, 55 render) and 240 GPUI library cases, with its 31 other native cases ignored. Counts overlap; the header probes repeat selected tests. The final delta from d3 changes only clip content comparison and its public damage fixture. It adds no shader, packet, native-provider or public API change. The native wire executable predates the action-query fixture correction, which changed only that integration test.
 
-Every gate hashes 2,049 tracked build inputs before/after and requires a clean pinned worktree. The exact nightly is 2026-10-23, rustc `7189d39d9`, LLVM 23. Cargo features, commands, full logs, failed attempts and executable identities are in `qualification-logs.tar.gz` and `delta-qualification.tar.gz`. Source mutation during qualification is prohibited. `qualification-members.json` lists the compact archive's payload hashes. Frozen ELFs remain outside Git at the paths in their binary records.
+Every gate hashes 2,049 tracked scoped inputs before/after and requires a clean pinned worktree. The exact nightly is 2026-10-23, rustc `7189d39d9`, LLVM 23. Cargo features, commands, full logs, failed attempts and executable identities are in `qualification-logs.tar.gz` and `delta-qualification.tar.gz`. Source mutation during qualification is prohibited. `qualification-members.json` lists the compact archive's payload hashes. Frozen ELFs remain outside Git at the paths in their binary records.
+`main-adoption.json` proves that the fast-forward changed only the intentional
+GPUI README within that scoped closure; production source/configuration bytes
+match the qualified pin exactly.
 
 `shader-artifacts/result.json` verifies the actual 18,995-byte WGSL (SHA256 `ea6e71d3da2bdb23d4971a14f0f55db389dbb45f9b2e9c05c85d4dc6363eb4d1`) and all four vertex/fragment SPIR-V recipe pairs inside both frozen GPU and native library-test ELFs. SPIR-V validation passes; the executed storage-layout test independently compares included WGSL with fresh typed Rust generation. GPU execution uses Mesa 26.1.4 llvmpipe; Xvfb and software Vulkan establish neither hardware GPU speed nor scanout latency.
 
