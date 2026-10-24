@@ -190,6 +190,11 @@ fn representative(kind: u32) -> Canvas {
     .unwrap();
     canvas.clear(Color::WHITE);
     let flat = Rect::new(0., 0., 512., 256.);
+    // Preserve the existing tiles/text fixture's opaque background as well as
+    // all 24 runs: this is 313 retained draws and 1,333 sampled CSR references.
+    canvas
+        .fill_rect(flat, Affine::IDENTITY, flat, Color::rgb(80, 100, 140))
+        .unwrap();
     let outer = canvas
         .create_clip(
             None,
@@ -636,6 +641,13 @@ fn clip_reuse_exact_frozen_shader_and_key_mutant() {
                                     actual, expected,
                                     "mode{mode} grouped{grouped} variant{variant} edge{edge:?} banked{banked} {format:?}"
                                 );
+                                if format == native {
+                                    assert_eq!(
+                                        read(&gpu.context, &target),
+                                        expected,
+                                        "normal offline-artifact/native pipeline differs from frozen WGSL"
+                                    );
+                                }
                                 comparisons += 1;
                                 // The unchanged banked route is a required negative eligibility control.
                                 if !banked && variant == 0 && edge == 8.125 && index == 2 {
@@ -670,5 +682,107 @@ fn clip_reuse_exact_frozen_shader_and_key_mutant() {
         eprintln!(
             "clip_reuse_exact comparisons={comparisons} mutant_differing_bytes={mutant_differences}"
         );
+    });
+}
+
+#[test]
+fn clip_reuse_backend_assembly() {
+    let Ok(which) = std::env::var("GPUI_CLIP_REUSE_BACKEND") else {
+        return;
+    };
+    pollster::block_on(async {
+        let mut gpu = renderer(wgpu::TextureFormat::Rgba16Float).await;
+        let source = if which == "baseline" {
+            baseline::ui::WGSL_SOURCE.wgsl_source().unwrap()
+        } else {
+            assert_eq!(which, "candidate");
+            crate::shader::ui::WGSL_SOURCE.wgsl_source().unwrap()
+        };
+        let canvas = boundary_scene(
+            ColorConfig::linear_hdr(gpui_canvas::OutputProfile::Srgb, 203.0).unwrap(),
+            Affine::IDENTITY,
+            8.125,
+            2,
+            false,
+        );
+        let target = texture(gpu.device(), 32, 24, gpu.format());
+        gpu.render(
+            canvas.prepared_scene(),
+            &target.create_view(&Default::default()),
+        )
+        .unwrap();
+        gpu.device()
+            .poll(wgpu::PollType::wait_indefinitely())
+            .unwrap();
+        eprintln!("CLIP_REUSE_ASSEMBLY_BEGIN {which}");
+        let result = custom(&gpu, &source, wgpu::TextureFormat::Rgba32Float, 32, 24);
+        assert_eq!(result.len(), 32 * 24 * 16);
+        eprintln!("CLIP_REUSE_ASSEMBLY_END {which}");
+    });
+}
+#[test]
+fn clip_reuse_signed_zero_is_observed() {
+    pollster::block_on(async {
+        let mut gpu = renderer(wgpu::TextureFormat::Rgba16Float).await;
+        let mut canvas = Canvas::recording(
+            64,
+            16,
+            ColorConfig::linear_hdr(gpui_canvas::OutputProfile::Srgb, 203.0).unwrap(),
+        )
+        .unwrap();
+        canvas.clear(Color::linear_srgb(-0.0, -0.0, -0.0, 1.0).unwrap());
+        let clip = canvas
+            .create_clip(
+                None,
+                ClipShape::RoundedRect {
+                    rect: Rect::new(0.125, 0.375, 10., 14.),
+                    radius: 3.0,
+                },
+                Affine::IDENTITY,
+            )
+            .unwrap();
+        let mut fonts = TextSystem::bundled().unwrap();
+        let layout = fonts.shape("HH", 12., None).unwrap();
+        canvas
+            .draw_text(
+                &mut fonts,
+                &layout,
+                Point::default(),
+                Affine::IDENTITY,
+                clip,
+                Color::linear_srgb(-0.0, -f32::from_bits(1), 2.0, 0.5).unwrap(),
+            )
+            .unwrap();
+        let target = texture(gpu.device(), 64, 16, gpu.format());
+        gpu.render(
+            canvas.prepared_scene(),
+            &target.create_view(&Default::default()),
+        )
+        .unwrap();
+        let baseline = baseline::ui::WGSL_SOURCE.wgsl_source().unwrap();
+        let candidate = crate::shader::ui::WGSL_SOURCE.wgsl_source().unwrap();
+        let mut negative_zeros = 0;
+        for format in [
+            wgpu::TextureFormat::Rgba16Float,
+            wgpu::TextureFormat::Rgba32Float,
+        ] {
+            let before = custom(&gpu, &baseline, format, 64, 16);
+            let after = custom(&gpu, &candidate, format, 64, 16);
+            assert_eq!(before, after);
+            if format == wgpu::TextureFormat::Rgba16Float {
+                assert_eq!(read(&gpu.context, &target), before);
+            } else {
+                negative_zeros = before
+                    .chunks_exact(4)
+                    .filter(|b| u32::from_le_bytes((*b).try_into().unwrap()) == 0x80000000)
+                    .count();
+                evidence("signed-zero-oracle.rgba32", &before);
+            }
+        }
+        assert!(
+            negative_zeros > 0,
+            "corpus must actually retain negative-zero target bits"
+        );
+        eprintln!("clip_reuse_signed_zero negative_zero_channels={negative_zeros}");
     });
 }

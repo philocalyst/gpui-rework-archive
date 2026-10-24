@@ -6,7 +6,7 @@ const WORDS: usize = 5;
 const MARKER: u32 = 0x7fc0_0003;
 const MAX_BYTES: usize = MAX_CLIP_NODES * WORDS * 16;
 // Chain starts precede immutable material tails. Draw records use <=6 words
-// per placement; the paint prefix uses <=2 words/slot plus dirty bits/header.
+// per placement; the paint prefix has <=2*MAX_DRAWS color rows plus flags/header.
 // This proves the shader's sample-local cache sentinel cannot name a chain.
 const _: () = assert!(
     super::MAX_DRAWS * 8 + super::MAX_DRAWS / 32 + 1 + MAX_CLIP_NODES * WORDS < u32::MAX as usize
