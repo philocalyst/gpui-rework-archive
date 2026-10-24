@@ -3,6 +3,15 @@ use super::Style;
 mod colours;
 pub(super) use colours::{Change as ColorChange, Discovery as ColorDiscovery, Slot as ColorSlot};
 
+#[cfg(test)]
+pub(super) fn color_headers() -> [usize; 3] {
+    [
+        size_of::<colours::SourceColor>(),
+        size_of::<colours::Record>(),
+        size_of::<colours::Bound>(),
+    ]
+}
+
 const PALETTE_LIMIT: usize = 32;
 const SMALL_OWNER: usize = 8;
 const _: () = assert!(PALETTE_LIMIT <= u8::MAX as usize);
