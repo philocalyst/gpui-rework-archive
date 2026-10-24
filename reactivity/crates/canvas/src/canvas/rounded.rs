@@ -77,11 +77,11 @@ mod storage {
     #[test]
     fn rounded_sources_keep_retained_strides_without_image_extension_allocations() {
         eprintln!(
-            "rounded_canvas,Canvas={},DisplayList={},Inline={},Placement={},Common={},BorrowedSource={},PreparedSource={},PreparedDraw={},ImageResources={}",
+            "rounded_canvas,Canvas={},DisplayList={},Inline={},DrawRef={},Common={},BorrowedSource={},PreparedSource={},PreparedDraw={},ImageResources={}",
             size_of::<Canvas>(),
             size_of::<DisplayList>(),
             size_of::<InlineDraw>(),
-            size_of::<Placement>(),
+            size_of::<DrawRef>(),
             size_of::<Common>(),
             size_of::<BorrowedSource<'_>>(),
             size_of::<PreparedSource<'_>>(),

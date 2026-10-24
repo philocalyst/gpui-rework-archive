@@ -284,7 +284,7 @@ pub struct TextLayout {
     pub height: f32,
     pub baseline: f32,
     font_size: f32,
-    glyphs: GlyphBuffer,
+    glyphs: Arc<GlyphBuffer>,
     fonts: Arc<FontSet>,
     mapping: Option<Arc<Details>>,
 }
@@ -296,7 +296,18 @@ pub struct TextMetrics {
     pub height: f32,
     pub baseline: f32,
 }
+/// Shared canonical packed positions; scene readers never copy glyph storage.
+pub(crate) struct SharedGlyphs(Arc<GlyphBuffer>);
+impl SharedGlyphs {
+    pub(crate) fn position(&self, index: u16) -> [f32; 2] {
+        let glyph = &self.0[usize::from(index)];
+        [glyph.x, glyph.baseline]
+    }
+}
 impl TextLayout {
+    pub(crate) fn shared_glyphs(&self) -> SharedGlyphs {
+        SharedGlyphs(self.glyphs.clone())
+    }
     pub fn font_size(&self) -> f32 {
         self.font_size
     }

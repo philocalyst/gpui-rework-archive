@@ -1,4 +1,4 @@
-use crate::text::Raster;
+use crate::text::{Raster, SharedGlyphs};
 use crate::{
     Affine, Color, ColorConfig, DamageRegion, Error, Image, ImageKey, ImageSampling, ImageView,
     Point, Rect, TextLayout, TextSystem,
@@ -234,7 +234,7 @@ fn lower_sampled_rect(map: &Mapping, rect: Rect, parent: Rect, [width, height]: 
 
 // One source of retained draw order. Compact typed lanes share text-run state;
 // the renderer and exported scene resolve the same checked private addresses.
-const INLINE_DRAW: u32 = 1 << 31;
+const INLINE_GLYPH: u16 = u16::MAX;
 const RECT_SOURCE: u32 = u32::MAX;
 const ROUNDED_SOURCE: u32 = 1 << 31;
 const IMAGE_SOURCE: u32 = 1 << 30;
@@ -244,7 +244,7 @@ const RESOURCE_INDEX: u32 = GRADIENT_SOURCE - 1;
 fn resource_material(source: u32) -> bool {
     source & ROUNDED_SOURCE == 0 && source & (IMAGE_SOURCE | GRADIENT_SOURCE) != 0
 }
-const _: () = assert!(MAX_COMMANDS < INLINE_DRAW as usize);
+const _: () = assert!(MAX_COMMANDS <= u16::MAX as usize + 1);
 // Each published image/mask resource has at least one admitted placement.
 // Rounded radii keep all 31 positive-f32 bits; the NaN sentinel remains Rect.
 const _: () = assert!(MAX_COMMANDS < NEAREST_SOURCE as usize);
@@ -269,17 +269,40 @@ struct PendingDraw {
 }
 struct InlineDraw {
     common: StoredCommon,
-    geometry: Geometry,
+    rect: Rect,
     source: u32,
 }
 struct CommonGroup {
     common: StoredCommon,
     range: [u32; 2],
+    glyphs: SharedGlyphs,
+    origin: Point,
+    scale: f32,
 }
-struct Placement {
-    geometry: Geometry,
-    common: u32,
-    source: u32,
+// A raster witness, not expanded glyph geometry. The glyph positions live only
+// in the shared packed owner. Cached admitted bounds avoid repeating forward
+// transform/clip work in CSR, compatibility iterators and every tile visit.
+#[derive(Clone, Copy)]
+struct DrawRef {
+    bounds: [u16; 4],
+    command: u16,
+    glyph: u16,
+    mask: u16,
+}
+impl DrawRef {
+    fn inline(self) -> bool {
+        self.glyph == INLINE_GLYPH
+    }
+}
+const _: () = assert!(size_of::<DrawRef>() == 14);
+fn glyph_rect(origin: Point, [x, baseline]: [f32; 2], raster: &Raster, scale: f32) -> Rect {
+    let m = raster.metrics;
+    Rect::new(
+        origin.x + x + m.xmin as f32 / scale,
+        origin.y + baseline - m.ymin as f32 / scale - m.height as f32 / scale,
+        m.width as f32 / scale,
+        m.height as f32 / scale,
+    )
 }
 // Factor the common font identity out of the primary mask index. Glyph+size is
 // a lossless 48-bit key within that face; other faces retain their complete key.
@@ -336,11 +359,10 @@ impl MaskIndex {
 
 #[derive(Default)]
 struct DisplayList {
-    order: Vec<u32>,
+    order: Vec<DrawRef>,
     inline: Vec<InlineDraw>,
     commons: Vec<CommonGroup>,
     columns: Columns,
-    placements: Vec<Placement>,
     masks: Vec<Arc<Raster>>,
     mask_index: MaskIndex,
     images: Option<Box<ImageResources>>,
@@ -456,7 +478,6 @@ impl DisplayList {
         self.inline.clear();
         self.commons.clear();
         self.columns.clear();
-        self.placements.clear();
         self.masks.clear();
         self.mask_index.clear();
         self.images = None;
@@ -473,10 +494,10 @@ impl DisplayList {
                         .as_ref()
                         .map_or(0, |_| size_of::<clips::ClipArena>())
             }),
-            order_bytes: self.order.capacity() * size_of::<u32>(),
+            order_bytes: self.order.capacity() * size_of::<DrawRef>(),
             inline_bytes: self.inline.capacity() * size_of::<InlineDraw>(),
             common_bytes: self.commons.capacity() * size_of::<CommonGroup>() + self.columns.bytes(),
-            placement_bytes: self.placements.capacity() * size_of::<Placement>(),
+            placement_bytes: 0,
             clip_node_bytes: self.clip_geometry().map_or(0, ClipGeometry::node_bytes),
             resource_handles_bytes: self.masks.capacity() * size_of::<Arc<Raster>>()
                 + self.images.as_ref().map_or(0, |r| {
@@ -513,40 +534,42 @@ impl DisplayList {
     /// Device-clipped integer bounds in painter order. CSR construction needs
     /// no material, resource lease, inverse mapping, or command reconstruction.
     fn ordered_bounds(&self) -> impl ExactSizeIterator<Item = [u16; 4]> + DoubleEndedIterator {
-        self.order.iter().map(|&address| {
-            if address & INLINE_DRAW != 0 {
-                self.inline[(address & !INLINE_DRAW) as usize]
-                    .geometry
-                    .bounds
-            } else {
-                self.placements[address as usize].geometry.bounds
-            }
-        })
+        self.order.iter().map(|address| address.bounds)
     }
-    // Addresses are private and constructed only by admitted appends. Every
-    // resource/common/geometry index belongs to this DisplayList; no external
-    // stale address can enter this indexing path.
+    // Private witnesses are published only after the complete text transaction
+    // succeeds. Every index belongs to this scene and its immutable packed owner.
     #[inline]
-    fn stored(&self, address: u32) -> (StoredCommon, &Geometry, u32) {
-        if address & INLINE_DRAW != 0 {
-            let draw = &self.inline[(address & !INLINE_DRAW) as usize];
-            (draw.common, &draw.geometry, draw.source)
+    fn state(&self, address: DrawRef) -> (StoredCommon, u32) {
+        if address.inline() {
+            let draw = &self.inline[usize::from(address.command)];
+            (draw.common, draw.source)
         } else {
-            let p = &self.placements[address as usize];
             (
-                self.commons[p.common as usize].common,
-                &p.geometry,
-                p.source,
+                self.commons[usize::from(address.command)].common,
+                u32::from(address.mask),
             )
         }
     }
     #[inline]
-    fn parts(&self, address: u32, viewport: Rect) -> (Common, &Geometry, u32) {
-        let (common, geometry, source) = self.stored(address);
-        let image = resource_material(source);
+    fn stored(&self, address: DrawRef) -> (StoredCommon, Geometry, u32) {
+        let (common, source) = self.state(address);
+        let rect = if address.inline() {
+            self.inline[usize::from(address.command)].rect
+        } else {
+            let run = &self.commons[usize::from(address.command)];
+            glyph_rect(
+                run.origin,
+                run.glyphs.position(address.glyph),
+                &self.masks[usize::from(address.mask)],
+                run.scale,
+            )
+        };
         (
-            self.columns.resolve(common, viewport, image),
-            geometry,
+            common,
+            Geometry {
+                rect,
+                bounds: address.bounds,
+            },
             source,
         )
     }
@@ -581,8 +604,10 @@ impl DisplayList {
         }
     }
     #[inline]
-    fn get(&self, address: u32, viewport: Rect) -> BorrowedCommand<'_> {
-        let (common, geometry, source) = self.parts(address, viewport);
+    fn get(&self, address: DrawRef, viewport: Rect) -> BorrowedCommand<'_> {
+        let (stored, geometry, source) = self.stored(address);
+        let image = resource_material(source);
+        let common = self.columns.resolve(stored, viewport, image);
         BorrowedCommand {
             rect: geometry.rect,
             clip: self.clip_bounds(common.clip),
@@ -599,21 +624,21 @@ impl DisplayList {
             .map_err(|_| Error::ResourceLimit)?;
         self.inline.try_reserve(1).map_err(|_| Error::ResourceLimit)
     }
-    fn reserve_placements(&mut self, additional: usize) -> Result<(), Error> {
-        let required = self.placements.len() + additional;
-        if required <= self.placements.capacity() {
+    fn reserve_draws(&mut self, additional: usize) -> Result<(), Error> {
+        let required = self.order.len() + additional;
+        if required <= self.order.capacity() {
             return Ok(());
         }
         if let Some(previous) = self.commons.last() {
-            // Reuse an admitted group's actual cardinality for bulk growth.
-            // No invisible glyphs or previous-frame prediction reserve storage.
             let quantum = (previous.range[1] - previous.range[0]) as usize;
-            let capacity =
-                (required.div_ceil(quantum).next_power_of_two() * quantum).min(MAX_COMMANDS);
-            self.placements
-                .try_reserve_exact(capacity - self.placements.len())
+            // Inline draws do not participate in the text growth quantum.
+            let inline = self.inline.len();
+            let capacity = ((required - inline).div_ceil(quantum).next_power_of_two() * quantum
+                + inline)
+                .min(MAX_COMMANDS);
+            self.order.try_reserve_exact(capacity - self.order.len())
         } else {
-            self.placements.try_reserve(additional)
+            self.order.try_reserve(additional)
         }
         .map_err(|_| Error::ResourceLimit)
     }
@@ -633,28 +658,39 @@ impl DisplayList {
                 command.source == RECT_SOURCE,
             );
         }
-        self.order.push(INLINE_DRAW | self.inline.len() as u32);
+        self.order.push(DrawRef {
+            bounds: command.geometry.bounds,
+            command: self.inline.len() as u16,
+            glyph: INLINE_GLYPH,
+            mask: 0,
+        });
         self.inline.push(InlineDraw {
             common,
-            geometry: command.geometry,
+            rect: command.geometry.rect,
             source: command.source,
         });
     }
-    // Placement.common already names the next common row. All fallible work
-    // precedes this publication of the tail's checked addresses in painter order.
-    fn publish_group(&mut self, start: usize, common: StoredCommon) {
-        let first = self.order.len() as u32;
-        for (index, placement) in self.placements.iter().enumerate().skip(start) {
+    fn publish_group(
+        &mut self,
+        start: usize,
+        common: StoredCommon,
+        glyphs: SharedGlyphs,
+        origin: Point,
+        scale: f32,
+    ) {
+        for address in &self.order[start..] {
             self.columns.support(
                 common.paint,
-                DamageRegion::checked_canvas_bounds(placement.geometry.bounds.map(usize::from)),
-                placement.source == RECT_SOURCE,
+                DamageRegion::checked_canvas_bounds(address.bounds.map(usize::from)),
+                false,
             );
-            self.order.push(index as u32);
         }
         self.commons.push(CommonGroup {
             common,
-            range: [first, self.order.len() as u32],
+            range: [start as u32, self.order.len() as u32],
+            glyphs,
+            origin,
+            scale,
         });
     }
 }
@@ -787,9 +823,11 @@ pub struct SceneStorage {
     /// Separately boxed resource-vector/index headers. Excludes allocator
     /// metadata, resource payloads, and opaque hash-table allocation overhead.
     pub resource_header_bytes: usize,
+    /// Direct painter-indexed raster witnesses, including cached device bounds.
     pub order_bytes: usize,
     pub inline_bytes: usize,
     pub common_bytes: usize,
+    /// Legacy expanded geometry lane; zero for retained packed-text scenes.
     pub placement_bytes: usize,
     /// Capacity of immutable parent-linked clip nodes, absent for flat clips.
     pub clip_node_bytes: usize,
@@ -823,16 +861,16 @@ pub struct PreparedGroup<'a> {
     pub clip: Rect,
     pub color: [f32; 4],
     commands: &'a DisplayList,
-    order: &'a [u32],
+    order: &'a [DrawRef],
 }
 impl<'a> PreparedGroup<'a> {
     pub fn clip_chain(self) -> Option<ClipChain<'a>> {
-        let (common, _, _) = self.commands.parts(self.order[0], self.clip);
-        self.commands.clip_chain(common.clip)
+        let (stored, _) = self.commands.state(self.order[0]);
+        self.commands.clip_chain(stored.clip)
     }
     /// Shared working paint relationship in this canonical scene, if present.
     pub fn paint_slot(self) -> Option<PaintSlot> {
-        let (stored, _, source) = self.commands.stored(self.order[0]);
+        let (stored, source) = self.commands.state(self.order[0]);
         if resource_material(source) {
             return None;
         }
@@ -867,7 +905,12 @@ struct Groups<'a> {
 impl<'a> Groups<'a> {
     fn view(&self, start: usize, end: usize) -> PreparedGroup<'a> {
         let address = self.commands.order[start];
-        let (common, _, source) = self.commands.parts(address, extent_rect(self.extent));
+        let (stored, source) = self.commands.state(address);
+        let image = resource_material(source);
+        let common = self
+            .commands
+            .columns
+            .resolve(stored, extent_rect(self.extent), image);
         PreparedGroup {
             inverse: common.map.inverse,
             clip: self.commands.clip_bounds(common.clip),
@@ -889,11 +932,10 @@ impl<'a> Iterator for Groups<'a> {
         }
         let start = self.front;
         let address = self.commands.order[start];
-        self.front = if address & INLINE_DRAW != 0 {
+        self.front = if address.inline() {
             start + 1
         } else {
-            self.commands.commons[self.commands.placements[address as usize].common as usize].range
-                [1] as usize
+            self.commands.commons[usize::from(address.command)].range[1] as usize
         };
         self.remaining -= 1;
         Some(self.view(start, self.front))
@@ -910,10 +952,8 @@ impl DoubleEndedIterator for Groups<'_> {
         let end = self.back;
         self.back -= 1;
         let address = self.commands.order[self.back];
-        if address & INLINE_DRAW == 0 {
-            self.back = self.commands.commons
-                [self.commands.placements[address as usize].common as usize]
-                .range[0] as usize;
+        if !address.inline() {
+            self.back = self.commands.commons[usize::from(address.command)].range[0] as usize;
         }
         self.remaining -= 1;
         Some(self.view(self.back, end))
@@ -950,6 +990,15 @@ fn mask_view(mask: &Raster) -> GlyphMask<'_> {
 /// Borrowed canonical scene; CPU tile bins are disposable and not part of it.
 /// Clear and draws use the same working-color domain. No rasterization occurs
 /// when obtaining this view or traversing it, and no mask Arc is cloned.
+///
+/// Lazy draw expansion still borrows the scene, including its mask pixels.
+///
+/// ```compile_fail,E0505
+/// let canvas = gpui_canvas::Canvas::new(16, 16).unwrap();
+/// let draws = canvas.prepared_scene().draws();
+/// drop(canvas);
+/// let _ = draws.count();
+/// ```
 #[derive(Clone, Copy)]
 pub struct PreparedScene<'a> {
     pub width: u32,
@@ -1728,19 +1777,18 @@ impl Canvas {
             map: Mapping::new(transform)?,
             color: color.0,
         };
-        // Only order/common rows publish draws. Build a group's unpublished
-        // tail directly in its final lanes, using the scene's one mask index.
-        // Keep a single placement on the stack so one-glyph runs remain inline.
-        let placement_start = self.commands.placements.len();
+        // Prepare the final unpublished raster-witness tail. A singleton stays
+        // inline and never retains a scene lease on the packed glyph owner.
+        let order_start = self.commands.order.len();
         let mask_start = self.commands.masks.len();
         let primary_face = self.commands.mask_index.face;
-        let group = self.commands.commons.len() as u32;
+        let group = self.commands.commons.len() as u16;
         let mut first = None;
         let mut count = 0;
         let mut bytes = 0;
         let mut references = 0;
         let admitted = (|| {
-            for glyph in layout.glyphs() {
+            for (glyph_index, glyph) in layout.glyphs().enumerate() {
                 let key = text.layout_key(layout, glyph, physical_font_size)?;
                 let existing = self.commands.mask_index.get(&key).copied();
                 // Deduplicate before leasing: repeated placements and later
@@ -1754,22 +1802,14 @@ impl Canvas {
                 let raster = new
                     .as_deref()
                     .unwrap_or_else(|| &self.commands.masks[index as usize]);
-                let m = raster.metrics;
-                let rect = Rect::new(
-                    origin.x + glyph.x + m.xmin as f32 / raster_scale,
-                    origin.y + glyph.baseline
-                        - m.ymin as f32 / raster_scale
-                        - m.height as f32 / raster_scale,
-                    m.width as f32 / raster_scale,
-                    m.height as f32 / raster_scale,
-                );
+                let rect = glyph_rect(origin, [glyph.x, glyph.baseline], raster, raster_scale);
                 let Some(command) = self.prepare(rect, transform, common, index)? else {
                     continue;
                 };
                 let [x, y, r, b] = command.geometry.bounds.map(usize::from);
                 references += ((r - 1) / TILE - x / TILE + 1) * ((b - 1) / TILE - y / TILE + 1);
                 count += 1;
-                if self.commands.len() + count > MAX_COMMANDS
+                if order_start + count > MAX_COMMANDS
                     || self.references + references > MAX_REFERENCES
                 {
                     return Err(Error::ResourceLimit);
@@ -1787,39 +1827,30 @@ impl Canvas {
                     self.commands.mask_index.insert(key, index);
                     self.commands.masks.push(mask);
                 }
+                let witness = DrawRef {
+                    bounds: command.geometry.bounds,
+                    command: group,
+                    glyph: glyph_index as u16,
+                    mask: index as u16,
+                };
                 if count == 1 {
-                    first = Some(command);
+                    first = Some((command, witness));
                 } else {
                     self.commands
-                        .reserve_placements(if count == 2 { 2 } else { 1 })?;
-                    if let Some(command) = first.take() {
-                        self.commands.placements.push(Placement {
-                            geometry: command.geometry,
-                            common: group,
-                            source: command.source,
-                        });
+                        .reserve_draws(if count == 2 { 2 } else { 1 })?;
+                    if count == 2 {
+                        self.commands.order.push(first.as_ref().unwrap().1);
                     }
-                    self.commands.placements.push(Placement {
-                        geometry: command.geometry,
-                        common: group,
-                        source: command.source,
-                    });
+                    self.commands.order.push(witness);
                 }
             }
-            self.commands
-                .order
-                .try_reserve(count)
-                .map_err(|_| Error::ResourceLimit)?;
             if count > 1 {
                 self.commands
                     .commons
                     .try_reserve(1)
                     .map_err(|_| Error::ResourceLimit)?;
             } else if count == 1 {
-                self.commands
-                    .inline
-                    .try_reserve(1)
-                    .map_err(|_| Error::ResourceLimit)?;
+                self.commands.reserve_inline()?;
             }
             if count != 0 {
                 self.commands.columns.admit(
@@ -1833,9 +1864,9 @@ impl Canvas {
             Ok(())
         })();
         if let Err(error) = admitted {
-            // No columns, painter order, counters, bins or pixels were changed.
+            // No published columns, painter order, counters, bins or pixels changed.
             // Remove only keys introduced by this draw, including other faces.
-            self.commands.placements.truncate(placement_start);
+            self.commands.order.truncate(order_start);
             for mask in self.commands.masks.drain(mask_start..) {
                 self.commands.mask_index.remove(mask.key);
             }
@@ -1845,12 +1876,18 @@ impl Canvas {
         if count != 0 {
             let viewport = viewport_rect(self.width, self.height);
             let shared = paint.commit(&mut self.commands.columns, color);
-            if let Some(command) = first {
+            if count == 1 {
                 self.commands
-                    .append_inline(common, command, viewport, shared);
+                    .append_inline(common, first.unwrap().0, viewport, shared);
             } else {
                 let common = self.commands.columns.store(common, viewport, shared, false);
-                self.commands.publish_group(placement_start, common);
+                self.commands.publish_group(
+                    order_start,
+                    common,
+                    layout.shared_glyphs(),
+                    origin,
+                    raster_scale,
+                );
             }
             self.mask_bytes += bytes;
             self.references += references;
@@ -2443,10 +2480,15 @@ fn render_band_impl<W: PixelWriter, S: Simd>(
                 let cut = ordered
                     .iter()
                     .rposition(|&word| {
-                        let command = frame.commands.get(
-                            frame.commands.order[bins::ordinal(word)],
-                            viewport_rect(frame.width, frame.height),
-                        );
+                        let address = frame.commands.order[bins::ordinal(word)];
+                        // Retained text is always mask material. It cannot cut
+                        // an opaque backdrop, so do not expand its geometry.
+                        if !address.inline() {
+                            return false;
+                        }
+                        let command = frame
+                            .commands
+                            .get(address, viewport_rect(frame.width, frame.height));
                         can_discard_backdrop(command.color)
                             && matches!(command.source, BorrowedSource::Rect)
                             && full_tile(&command, left, top, right, bottom)
