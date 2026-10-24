@@ -198,8 +198,9 @@ fn gradient_numeric_frontiers_are_admitted_or_rejected_explicitly() {
     // A normal reciprocal and enormous finite HDR delta must not be multiplied
     // together into an overflowing precomputed slope.
     let tiny = f32::MIN_POSITIVE;
-    let large = Color::linear_srgb(1e20, -1e20, 0., 1.).unwrap();
-    let opposite = Color::linear_srgb(-1e20, 1e20, 0., 1.).unwrap();
+    let limit = 1e20_f32.next_down(); // the literal itself rounds above Color's f64 ceiling
+    let large = Color::linear_srgb(limit, -limit, 0., 1.).unwrap();
+    let opposite = Color::linear_srgb(-limit, limit, 0., 1.).unwrap();
     let g = make(
         line,
         &[Stop::new(0., large), Stop::new(tiny, opposite)],
