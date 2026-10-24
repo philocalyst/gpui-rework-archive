@@ -45,7 +45,7 @@ fn contains(win: &Win<Panel>, target: Target, point: Point) -> bool {
 }
 
 #[test]
-fn clipped_gradient_candidates_keep_their_resource_and_hit_authority_after_failure() {
+fn clipped_gradient_text_candidates_keep_their_resource_and_hit_authority_after_failure() {
     use gpui::{Extend, Gradient, GradientGeometry, GradientStop, Interpolation};
     struct Painted {
         paint: Gradient,
@@ -62,7 +62,13 @@ fn clipped_gradient_candidates_keep_their_resource_and_hit_authority_after_failu
                 } else {
                     Affine::IDENTITY
                 })
-                .child(div().size(48).bg(&self.paint).name("painted-child"))
+                .child(
+                    div()
+                        .size(48)
+                        .bg(&self.paint)
+                        .name("painted-child")
+                        .child(gpui::text("office café אבג").name("painted-text")),
+                )
         }
     }
     fn paint(color: Color) -> Gradient {
@@ -107,6 +113,13 @@ fn clipped_gradient_candidates_keep_their_resource_and_hit_authority_after_failu
                 [key]
             );
             assert!(scene.clip_nodes().count() > 0);
+            assert!(
+                scene
+                    .draws()
+                    .filter(|draw| draw.source.mask().is_some())
+                    .count()
+                    > 1
+            );
             token
         })
         .unwrap();

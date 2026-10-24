@@ -23,6 +23,12 @@ fn retained_text_metadata_preserves_complex_clip_gradient_order_and_lifetime() {
         let layout = fonts.shape("office café אבג", 12.0, None).unwrap();
         let single = fonts.shape("H", 12.0, None).unwrap();
         let mut canvas = Canvas::recording(96, 48, ColorConfig::default()).unwrap();
+        println!(
+            "COMPOSE_HEADERS canvas={} layout={} scene={}",
+            size_of::<Canvas>(),
+            size_of::<gpui_canvas::TextLayout>(),
+            canvas.prepared_scene().storage().header_bytes
+        );
         canvas.clear(Color::BLACK);
         let parent = canvas
             .create_clip(
@@ -142,5 +148,92 @@ fn retained_text_metadata_preserves_complex_clip_gradient_order_and_lifetime() {
         }
         assert_eq!(canvas.pixels(), expected);
         assert!(canvas.clip_geometry().unwrap().chain(child).is_ok());
+    }
+}
+
+#[test]
+fn rebuilt_nested_clip_text_and_gradient_scenes_have_exact_damage() {
+    let gradient = Gradient::new(
+        GradientGeometry::Linear {
+            start: Point::default(),
+            end: Point { x: 1.0, y: 1.0 },
+        },
+        &[
+            GradientStop::new(0.0, Color::BLACK),
+            GradientStop::new(1.0, Color::WHITE),
+        ],
+        Extend::Pad,
+        Interpolation::LinearSrgb,
+    )
+    .unwrap();
+    let mut fonts = TextSystem::bundled().unwrap();
+    let layout = fonts.shape("office café אבג", 12.0, None).unwrap();
+    for dpr in [1.0, 2.0, 1.25] {
+        let mut canvas = Canvas::recording(96, 48, ColorConfig::default()).unwrap();
+        let mut describe = |canvas: &mut Canvas, radius: f32| {
+            let mut next = canvas.stage();
+            next.clear(Color::BLACK);
+            let parent = next
+                .create_clip(
+                    None,
+                    ClipShape::RoundedRect {
+                        rect: Rect::new(0.125, 0.375, 90.0, 45.0),
+                        radius,
+                    },
+                    Affine::IDENTITY,
+                )
+                .unwrap();
+            let child = next
+                .create_clip(
+                    Some(parent),
+                    ClipShape::Rect(Rect::new(0.0, 0.0, 92.0, 44.0)),
+                    Affine {
+                        a: 1.0,
+                        b: 0.125,
+                        c: -0.125,
+                        d: 1.0,
+                        tx: 2.0,
+                        ty: 0.0,
+                    },
+                )
+                .unwrap();
+            next.fill_gradient(
+                &gradient,
+                Rect::new(0.0, 0.0, 96.0, 48.0),
+                3.0,
+                Affine::IDENTITY,
+                child,
+            )
+            .unwrap();
+            next.draw_text_scaled(
+                &mut fonts,
+                &layout,
+                Point { x: 1.5, y: 1.5 },
+                Affine::IDENTITY,
+                child,
+                Color::WHITE,
+                dpr,
+            )
+            .unwrap();
+            next.commit_with_damage()
+        };
+        assert!(!describe(&mut canvas, 14.0).is_empty());
+        let original = canvas.pixels().to_vec();
+        assert!(describe(&mut canvas, 14.0).is_empty());
+        assert_eq!(canvas.pixels(), original);
+        let damage = describe(&mut canvas, 2.0);
+        let changed = canvas.pixels();
+        assert_ne!(changed, original);
+        let [left, top, right, bottom] = damage.bounds().expect("changed clip contributes support");
+        for (index, (a, b)) in original
+            .chunks_exact(4)
+            .zip(changed.chunks_exact(4))
+            .enumerate()
+        {
+            if a != b {
+                let (x, y) = ((index % 96) as u32, (index / 96) as u32);
+                assert!(x >= left && x < right && y >= top && y < bottom);
+            }
+        }
     }
 }
