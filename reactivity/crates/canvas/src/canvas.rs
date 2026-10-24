@@ -2672,7 +2672,7 @@ fn render_gradient<S: Simd>(
                 let (lx, ly) = command
                     .map
                     .local(x as f64 + SAMPLES[i % 4], y as f64 + SAMPLES[i / 4]);
-                Some(gradient.sample([
+                Some(gradient.sample_normalized([
                     ((lx - command.rect.x as f64) / command.rect.width as f64) as f32,
                     ((ly - command.rect.y as f64) / command.rect.height as f64) as f32,
                 ]))

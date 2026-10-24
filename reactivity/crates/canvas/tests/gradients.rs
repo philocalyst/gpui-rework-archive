@@ -5,21 +5,60 @@ use gpui_canvas::{
 };
 
 #[test]
-fn public_repeat_sampling_does_not_silently_choose_the_first_stop_after_overflow() {
-    let gradient = Gradient::new(
-        Geometry::Linear {
-            start: Point::default(),
-            end: Point { x: 1.0, y: 0.0 },
-        },
-        &[Stop::new(0.0, Color::BLACK), Stop::new(0.3, Color::WHITE)],
-        Extend::Repeat,
-        Interpolation::LinearSrgb,
-    )
-    .unwrap();
-    let span = f64::from(0.3_f32);
-    let expected = (f64::from(f32::MAX).rem_euclid(span) / span) as f32;
-    assert!(expected > 0.0);
-    assert_eq!(gradient.view().sample_parameter(f32::MAX)[0], expected);
+fn public_sampling_rejects_unsupported_domains_instead_of_silent_phase_overflow() {
+    for extend in [Extend::Pad, Extend::Repeat, Extend::Reflect] {
+        let gradient = Gradient::new(
+            Geometry::Linear {
+                start: Point::default(),
+                end: Point { x: 1.0, y: 0.0 },
+            },
+            &[Stop::new(0.0, Color::BLACK), Stop::new(0.3, Color::WHITE)],
+            extend,
+            Interpolation::LinearSrgb,
+        )
+        .unwrap();
+        let view = gradient.view();
+        for parameter in [f32::NAN, f32::INFINITY, f32::NEG_INFINITY] {
+            assert_eq!(
+                view.sample_parameter(parameter),
+                Err(gpui_canvas::Error::InvalidGradient)
+            );
+        }
+        for point in [
+            [f32::NAN, 0.0],
+            [-f32::EPSILON, 0.0],
+            [1.0_f32.next_up(), 0.0],
+            [0.0, f32::INFINITY],
+        ] {
+            assert_eq!(view.sample(point), Err(gpui_canvas::Error::InvalidGradient));
+        }
+        for point in [[0.0, 0.0], [1.0, 1.0], [0.125, 0.875]] {
+            assert!(view.sample(point).unwrap().iter().all(|v| v.is_finite()));
+        }
+        if extend == Extend::Pad {
+            assert_eq!(view.sample_parameter(f32::MAX).unwrap(), [1.0; 4]);
+            assert_eq!(
+                view.sample_parameter(-f32::MAX).unwrap(),
+                [0.0, 0.0, 0.0, 1.0]
+            );
+        } else {
+            assert_eq!(
+                view.sample_parameter(f32::MAX),
+                Err(gpui_canvas::Error::InvalidGradient)
+            );
+            let edge = 0.3_f32 * 1_048_576.0;
+            assert!(view.sample_parameter(edge).is_ok());
+            assert!(view.sample_parameter(-edge).is_ok());
+            assert_eq!(
+                view.sample_parameter(edge.next_up()),
+                Err(gpui_canvas::Error::InvalidGradient)
+            );
+            assert_eq!(
+                view.sample_parameter((-edge).next_down()),
+                Err(gpui_canvas::Error::InvalidGradient)
+            );
+        }
+    }
 }
 
 fn half(bytes: &[u8]) -> f64 {
@@ -226,7 +265,7 @@ fn gradient_numeric_frontiers_are_admitted_or_rejected_explicitly() {
         Extend::Pad,
     )
     .unwrap();
-    let midpoint = g.view().sample_parameter(tiny * 0.5);
+    let midpoint = g.view().sample_parameter(tiny * 0.5).unwrap();
     assert!(midpoint.iter().all(|v| v.is_finite()));
     assert!(midpoint[0].abs() < 1e14 && midpoint[1].abs() < 1e14);
     assert_eq!(midpoint[3], 1.);
@@ -256,7 +295,7 @@ fn gradient_numeric_frontiers_are_admitted_or_rejected_explicitly() {
     )
     .unwrap();
     assert_eq!(
-        g.view().sample_parameter(first + 0.0625),
+        g.view().sample_parameter(first + 0.0625).unwrap(),
         [0.5, 0., 0.5, 1.]
     );
     assert_eq!(
@@ -277,7 +316,7 @@ fn gradient_numeric_frontiers_are_admitted_or_rejected_explicitly() {
             0.,
             0.5,
             1.25,
-            1_048_575.75,
+            1_048_575.5,
         ] {
             let x = f64::from(t) + 0.5;
             let u = if extend == Extend::Repeat {
@@ -287,7 +326,7 @@ fn gradient_numeric_frontiers_are_admitted_or_rejected_explicitly() {
                 if u > 1. { 2. - u } else { u }
             };
             assert_eq!(
-                g.view().sample_parameter(t),
+                g.view().sample_parameter(t).unwrap(),
                 [(1. - u) as f32, 0., u as f32, 1.],
                 "{extend:?} {t}"
             );
@@ -303,10 +342,10 @@ fn gradient_numeric_frontiers_are_admitted_or_rejected_explicitly() {
         Extend::Pad,
     )
     .unwrap();
-    assert_eq!(conic.view().sample([0.5, 0.25]), [1., 0., 0., 1.]);
-    assert_eq!(conic.view().sample([0.5, 0.5]), [1., 0., 0., 1.]);
-    assert!(conic.view().sample([0.4999, 0.25])[2] > 0.999);
-    assert!(conic.view().sample([0.5001, 0.25])[0] > 0.999);
+    assert_eq!(conic.view().sample([0.5, 0.25]).unwrap(), [1., 0., 0., 1.]);
+    assert_eq!(conic.view().sample([0.5, 0.5]).unwrap(), [1., 0., 0., 1.]);
+    assert!(conic.view().sample([0.4999, 0.25]).unwrap()[2] > 0.999);
+    assert!(conic.view().sample([0.5001, 0.25]).unwrap()[0] > 0.999);
     let rotated = make(
         Geometry::Conic {
             center: Point { x: 0.5, y: 0.5 },
@@ -316,7 +355,10 @@ fn gradient_numeric_frontiers_are_admitted_or_rejected_explicitly() {
         Extend::Pad,
     )
     .unwrap();
-    assert_eq!(rotated.view().sample([0.5, 0.25]), [0.75, 0., 0.25, 1.]);
+    assert_eq!(
+        rotated.view().sample([0.5, 0.25]).unwrap(),
+        [0.75, 0., 0.25, 1.]
+    );
     let extremes = [
         Geometry::Linear {
             start: Point { x: 0., y: 0. },
@@ -330,7 +372,13 @@ fn gradient_numeric_frontiers_are_admitted_or_rejected_explicitly() {
     for geometry in extremes {
         let g = make(geometry, &stops, Extend::Pad).unwrap();
         for point in [[0., 0.], [1., 1.], [0.125, 0.875]] {
-            assert!(g.view().sample(point).iter().all(|v| v.is_finite()));
+            assert!(
+                g.view()
+                    .sample(point)
+                    .unwrap()
+                    .iter()
+                    .all(|v| v.is_finite())
+            );
         }
         assert!(
             make(geometry, &stops, Extend::Repeat).is_err(),

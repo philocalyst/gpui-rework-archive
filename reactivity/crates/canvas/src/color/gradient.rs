@@ -274,8 +274,20 @@ impl<'a> GradientView<'a> {
             },
         })
     }
-    /// Premultiplied extended-linear output; no gamut clipping or output encode.
-    pub fn sample(self, point: [f32; 2]) -> [f32; 4] {
+    /// Sample a point in the normalized painted rectangle, including its edges.
+    /// Returns premultiplied extended-linear output without gamut/output encoding.
+    pub fn sample(self, point: [f32; 2]) -> Result<[f32; 4], Error> {
+        if point
+            .iter()
+            .any(|v| !v.is_finite() || !(0.0..=1.0).contains(v))
+        {
+            return Err(Error::InvalidGradient);
+        }
+        Ok(self.sample_normalized(point))
+    }
+    // Draw admission and coverage already certify this domain. Raster sampling
+    // keeps no fallible public-input validation in its per-sample kernel.
+    pub(crate) fn sample_normalized(self, point: [f32; 2]) -> [f32; 4] {
         let p = self.words[2].map(f32::from_bits);
         let x = point[0] - p[0];
         let y = point[1] - p[1];
@@ -292,9 +304,26 @@ impl<'a> GradientView<'a> {
                 value - value.floor()
             }
         };
-        self.sample_parameter(t)
+        self.evaluate_parameter(t)
     }
-    pub fn sample_parameter(self, mut t: f32) -> [f32; 4] {
+    /// Evaluate a finite parameter. Repeating paints admit at most 2^20 periods
+    /// from the first stop, matching the renderer's phase-precision bound.
+    pub fn sample_parameter(self, t: f32) -> Result<[f32; 4], Error> {
+        if !t.is_finite() {
+            return Err(Error::InvalidGradient);
+        }
+        if self.extend() != Extend::Pad {
+            let first = f64::from(f32::from_bits(self.words[HEADER_WORDS][0]));
+            let last = f64::from(f32::from_bits(
+                self.words[HEADER_WORDS + (self.stop_count() - 1) * STOP_WORDS][0],
+            ));
+            if ((f64::from(t) - first) / (last - first)).abs() > 1_048_576.0 {
+                return Err(Error::InvalidGradient);
+            }
+        }
+        Ok(self.evaluate_parameter(t))
+    }
+    fn evaluate_parameter(self, mut t: f32) -> [f32; 4] {
         let n = self.stop_count();
         let first = f32::from_bits(self.words[HEADER_WORDS][0]);
         let last = f32::from_bits(self.words[HEADER_WORDS + (n - 1) * STOP_WORDS][0]);
@@ -408,9 +437,9 @@ mod tests {
             ],
             Extend::Pad,
         );
-        assert_eq!(g.view().sample_parameter(0.5), [1.0; 4]);
+        assert_eq!(g.view().sample_parameter(0.5).unwrap(), [1.0; 4]);
         assert_eq!(
-            g.view().sample_parameter(0.5 - f32::EPSILON),
+            g.view().sample_parameter(0.5 - f32::EPSILON).unwrap(),
             [0.0, 0.0, 0.0, 1.0]
         );
         for extend in [Extend::Repeat, Extend::Reflect] {
@@ -422,10 +451,10 @@ mod tests {
                 extend,
             );
             for t in [-1.0, -0.5, 0.0, 0.5, 1.0] {
-                assert_eq!(g.view().sample_parameter(t), [0.5, 0.5, 0.5, 1.0]);
+                assert_eq!(g.view().sample_parameter(t).unwrap(), [0.5, 0.5, 0.5, 1.0]);
             }
             assert_eq!(
-                g.view().sample_parameter(0.75)[0],
+                g.view().sample_parameter(0.75).unwrap()[0],
                 if extend == Extend::Repeat { 0.0 } else { 1.0 }
             );
         }
@@ -436,8 +465,11 @@ mod tests {
             ],
             Extend::Pad,
         );
-        assert_eq!(g.view().sample_parameter(-1.0), [0.0, 0.0, 0.0, 1.0]);
-        assert_eq!(g.view().sample_parameter(0.0), [1.0; 4]);
+        assert_eq!(
+            g.view().sample_parameter(-1.0).unwrap(),
+            [0.0, 0.0, 0.0, 1.0]
+        );
+        assert_eq!(g.view().sample_parameter(0.0).unwrap(), [1.0; 4]);
     }
     #[test]
     fn transparent_endpoint_is_premultiplied_before_interpolation() {
@@ -448,8 +480,11 @@ mod tests {
             ],
             Extend::Pad,
         );
-        assert_eq!(g.view().sample_parameter(0.5), [0.5, 0.0, 0.0, 0.5]);
-        assert_eq!(g.view().sample_parameter(1.0), [0.0; 4]);
+        assert_eq!(
+            g.view().sample_parameter(0.5).unwrap(),
+            [0.5, 0.0, 0.0, 0.5]
+        );
+        assert_eq!(g.view().sample_parameter(1.0).unwrap(), [0.0; 4]);
     }
     #[test]
     fn geometry_and_numeric_admission_cover_ellipse_conic_and_degeneracy() {
@@ -467,8 +502,8 @@ mod tests {
             Interpolation::LinearSrgb,
         )
         .unwrap();
-        assert_eq!(g.view().sample([0.75, 0.5])[0], 0.5);
-        assert_eq!(g.view().sample([0.5, 0.625])[0], 0.5);
+        assert_eq!(g.view().sample([0.75, 0.5]).unwrap()[0], 0.5);
+        assert_eq!(g.view().sample([0.5, 0.625]).unwrap()[0], 0.5);
         let g = Gradient::new(
             GradientGeometry::Conic {
                 center: Point { x: 0.5, y: 0.5 },
@@ -486,7 +521,7 @@ mod tests {
             ([0.0, 0.5], 0.75),
             ([0.5, 0.5], 0.0),
         ] {
-            assert_eq!(g.view().sample(p)[0], value);
+            assert_eq!(g.view().sample(p).unwrap()[0], value);
         }
         for geometry in [
             GradientGeometry::Linear {
