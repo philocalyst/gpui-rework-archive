@@ -75,7 +75,7 @@ impl Todos {
         self.ticks += 1;
     }
     fn filter(&mut self, filter: Filter) {
-        *self.filter = filter;
+        *self.filter = Filter::All;
         self.action(match filter {
             Filter::All => "all",
             Filter::Active => "active",
