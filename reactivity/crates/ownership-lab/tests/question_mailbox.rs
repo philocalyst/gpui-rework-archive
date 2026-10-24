@@ -17,6 +17,41 @@ use loom::{
 use mailbox::Mailbox;
 
 #[test]
+fn owner_poll_acquires_the_payload_without_a_notification_channel() {
+    loom::model(|| {
+        let slot = Arc::new(Mailbox::new());
+        let consumed = Arc::new(AtomicBool::new(false));
+        slot.begin();
+        let worker = {
+            let slot = slot.clone();
+            thread::spawn(move || assert_eq!(slot.complete(7, || {}), Ok(())))
+        };
+        let owner = {
+            let slot = slot.clone();
+            let consumed = consumed.clone();
+            thread::spawn(move || {
+                // No channel, wake counter or joined thread can independently
+                // carry the producer's writes before this actual cell read.
+                if let Some(terminal) = slot.freeze() {
+                    assert_eq!((terminal, slot.take()), (2, Some(7)));
+                    slot.retire();
+                    consumed.store(true, Ordering::Relaxed);
+                }
+            })
+        };
+        worker.join().unwrap();
+        owner.join().unwrap();
+        if !consumed.load(Ordering::Relaxed) {
+            assert_eq!(slot.freeze(), Some(2));
+            assert_eq!(slot.take(), Some(7));
+            slot.retire();
+        }
+        assert!(slot.idle());
+        slot.close();
+    });
+}
+
+#[test]
 fn a_single_wake_after_terminal_cannot_strand_a_published_response() {
     loom::model(|| {
         let slot = Arc::new(Mailbox::new());
