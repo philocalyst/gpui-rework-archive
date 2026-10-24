@@ -298,20 +298,22 @@ impl MaskIndex {
             self.other.insert(key, index);
         }
     }
-    fn reserve(&mut self, masks: &[Arc<Raster>]) -> Result<(), Error> {
-        let face = self
-            .face
-            .or_else(|| masks.first().map(|m| m.key.index_parts().0));
-        let primary = masks
-            .iter()
-            .filter(|m| Some(m.key.index_parts().0) == face)
-            .count();
-        self.primary
-            .try_reserve(primary)
-            .map_err(|_| Error::ResourceLimit)?;
-        self.other
-            .try_reserve(masks.len() - primary)
-            .map_err(|_| Error::ResourceLimit)
+    fn reserve_key(&mut self, key: crate::GlyphKey) -> Result<(), Error> {
+        let (face, _) = key.index_parts();
+        if self.face.is_none_or(|primary| primary == face) {
+            self.primary.try_reserve(1)
+        } else {
+            self.other.try_reserve(1)
+        }
+        .map_err(|_| Error::ResourceLimit)
+    }
+    fn remove(&mut self, key: crate::GlyphKey) {
+        let (face, local) = key.index_parts();
+        if self.face == Some(face) {
+            self.primary.remove(&local);
+        } else {
+            self.other.remove(&key);
+        }
     }
     fn clear(&mut self) {
         self.face = None;
@@ -525,90 +527,51 @@ impl DisplayList {
             source: self.source(source),
         }
     }
-    // Reserve all lanes before publication. Allocation failure can grow capacity
-    // but cannot change the published draw sequence or resource table.
-    fn reserve(
-        &mut self,
-        draws: usize,
-        resources: &[Arc<Raster>],
-        grouped: bool,
-    ) -> Result<(), Error> {
+    fn reserve_inline(&mut self) -> Result<(), Error> {
         self.order
-            .try_reserve(draws)
+            .try_reserve(1)
             .map_err(|_| Error::ResourceLimit)?;
-        self.masks
-            .try_reserve(resources.len())
-            .map_err(|_| Error::ResourceLimit)?;
-        self.mask_index.reserve(resources)?;
-        if grouped {
-            self.commons
-                .try_reserve(1)
-                .map_err(|_| Error::ResourceLimit)?;
-            self.placements
-                .try_reserve(draws)
-                .map_err(|_| Error::ResourceLimit)?;
-        } else {
-            self.inline
-                .try_reserve(draws)
-                .map_err(|_| Error::ResourceLimit)?;
-        }
-        Ok(())
+        self.inline.try_reserve(1).map_err(|_| Error::ResourceLimit)
     }
-    fn append(
+    fn append_inline(
         &mut self,
         common: Common,
-        pending: impl IntoIterator<Item = PendingDraw>,
-        grouped: bool,
-        masks: Vec<Arc<Raster>>,
+        command: PendingDraw,
         viewport: Rect,
         shared: Option<PaintSlot>,
     ) {
-        for mask in masks {
-            let index = self.masks.len() as u32;
-            self.mask_index.insert(mask.key, index);
-            self.masks.push(mask);
-        }
-        let mut pending = pending.into_iter().peekable();
-        let image = pending.peek().is_some_and(|draw| {
-            draw.source & ROUNDED_SOURCE == 0 && draw.source & IMAGE_SOURCE != 0
-        });
+        let image = command.source & ROUNDED_SOURCE == 0 && command.source & IMAGE_SOURCE != 0;
         let common = self.columns.store(common, viewport, shared, image);
-        let group = self.commons.len() as u32;
-        if grouped {
-            self.commons.push(CommonGroup {
-                common,
-                range: [self.order.len() as u32; 2],
-            });
+        if !image {
+            self.columns.support(
+                common.paint,
+                DamageRegion::checked_canvas_bounds(command.geometry.bounds.map(usize::from)),
+                command.source == RECT_SOURCE,
+            );
         }
-        for command in pending {
-            let source = command.source;
-            let geometry = command.geometry;
-            if !image {
-                self.columns.support(
-                    common.paint,
-                    DamageRegion::checked_canvas_bounds(geometry.bounds.map(usize::from)),
-                    source == RECT_SOURCE,
-                );
-            }
-            if grouped {
-                self.order.push(self.placements.len() as u32);
-                self.placements.push(Placement {
-                    geometry,
-                    common: group,
-                    source,
-                });
-            } else {
-                self.order.push(INLINE_DRAW | self.inline.len() as u32);
-                self.inline.push(InlineDraw {
-                    geometry,
-                    common,
-                    source,
-                });
-            }
+        self.order.push(INLINE_DRAW | self.inline.len() as u32);
+        self.inline.push(InlineDraw {
+            common,
+            geometry: command.geometry,
+            source: command.source,
+        });
+    }
+    // Placement.common already names the next common row. All fallible work
+    // precedes this publication of the tail's checked addresses in painter order.
+    fn publish_group(&mut self, start: usize, common: StoredCommon) {
+        let first = self.order.len() as u32;
+        for (index, placement) in self.placements.iter().enumerate().skip(start) {
+            self.columns.support(
+                common.paint,
+                DamageRegion::checked_canvas_bounds(placement.geometry.bounds.map(usize::from)),
+                placement.source == RECT_SOURCE,
+            );
+            self.order.push(index as u32);
         }
-        if grouped {
-            self.commons[group as usize].range[1] = self.order.len() as u32;
-        }
+        self.commons.push(CommonGroup {
+            common,
+            range: [first, self.order.len() as u32],
+        });
     }
 }
 
@@ -1240,13 +1203,11 @@ impl Canvas {
                 source & ROUNDED_SOURCE == 0 && source & IMAGE_SOURCE != 0,
                 paint.new_shared(),
             )?;
-            self.admit(std::slice::from_ref(&command), &[], 0)?;
+            self.admit(&command)?;
             let shared = paint.commit(&mut self.commands.columns, color);
-            self.commands.append(
+            self.commands.append_inline(
                 common,
-                std::iter::once(command),
-                false,
-                Vec::new(),
+                command,
                 viewport_rect(self.width, self.height),
                 shared,
             );
@@ -1403,7 +1364,7 @@ impl Canvas {
             true,
             false,
         )?;
-        self.admit(std::slice::from_ref(&command), &[], 0)?;
+        self.admit(&command)?;
         if unpublished.is_some() {
             self.commands.images = unpublished;
         }
@@ -1413,11 +1374,9 @@ impl Canvas {
             resources.index.insert(image.key(), index);
             resources.bytes += image.pixel_bytes();
         }
-        self.commands.append(
+        self.commands.append_inline(
             common,
-            std::iter::once(command),
-            false,
-            Vec::new(),
+            command,
             viewport_rect(self.width, self.height),
             None,
         );
@@ -1519,76 +1478,135 @@ impl Canvas {
             map: Mapping::new(transform)?,
             color: color.0,
         };
-        let mut pending = Vec::with_capacity(layout.glyphs().len());
-        let mut resources = Vec::<Arc<Raster>>::new();
-        let mut resource_index = HashMap::new();
-        let mut pending_bytes = 0;
-        let base = self.commands.masks.len();
-        for glyph in layout.glyphs() {
-            let key = text.layout_key(layout, glyph, physical_font_size)?;
-            let existing = self
-                .commands
-                .mask_index
-                .get(&key)
-                .copied()
-                .or_else(|| resource_index.get(&key).copied());
-            // Lookup precedes the font-cache lease. Repeated glyph placements
-            // perform no Arc increment/decrement; only unique scene masks lease.
-            let new = if existing.is_none() {
-                Some(text.layout_raster(layout, glyph, physical_font_size)?)
-            } else {
-                None
-            };
-            let index = existing.unwrap_or((base + resources.len()) as u32);
-            let raster = if let Some(mask) = &new {
-                &**mask
-            } else if (index as usize) < base {
-                &*self.commands.masks[index as usize]
-            } else {
-                &*resources[index as usize - base]
-            };
-            let m = raster.metrics;
-            let rect = Rect::new(
-                origin.x + glyph.x + m.xmin as f32 / raster_scale,
-                origin.y + glyph.baseline
-                    - m.ymin as f32 / raster_scale
-                    - m.height as f32 / raster_scale,
-                m.width as f32 / raster_scale,
-                m.height as f32 / raster_scale,
-            );
-            if let Some(command) = self.prepare(rect, transform, common, index)? {
+        // Only order/common rows publish draws. Build a group's unpublished
+        // tail directly in its final lanes, using the scene's one mask index.
+        // Keep a single placement on the stack so one-glyph runs remain inline.
+        let placement_start = self.commands.placements.len();
+        let mask_start = self.commands.masks.len();
+        let primary_face = self.commands.mask_index.face;
+        let group = self.commands.commons.len() as u32;
+        let mut first = None;
+        let mut count = 0;
+        let mut bytes = 0;
+        let mut references = 0;
+        let admitted = (|| {
+            for glyph in layout.glyphs() {
+                let key = text.layout_key(layout, glyph, physical_font_size)?;
+                let existing = self.commands.mask_index.get(&key).copied();
+                // Deduplicate before leasing: repeated placements and later
+                // labels never increment the raster's Arc strong count.
+                let new = if existing.is_none() {
+                    Some(text.layout_raster(layout, glyph, physical_font_size)?)
+                } else {
+                    None
+                };
+                let index = existing.unwrap_or(self.commands.masks.len() as u32);
+                let raster = new
+                    .as_deref()
+                    .unwrap_or_else(|| &self.commands.masks[index as usize]);
+                let m = raster.metrics;
+                let rect = Rect::new(
+                    origin.x + glyph.x + m.xmin as f32 / raster_scale,
+                    origin.y + glyph.baseline
+                        - m.ymin as f32 / raster_scale
+                        - m.height as f32 / raster_scale,
+                    m.width as f32 / raster_scale,
+                    m.height as f32 / raster_scale,
+                );
+                let Some(command) = self.prepare(rect, transform, common, index)? else {
+                    continue;
+                };
+                let [x, y, r, b] = command.geometry.bounds.map(usize::from);
+                references += ((r - 1) / TILE - x / TILE + 1) * ((b - 1) / TILE - y / TILE + 1);
+                count += 1;
+                if self.commands.len() + count > MAX_COMMANDS
+                    || self.references + references > MAX_REFERENCES
+                {
+                    return Err(Error::ResourceLimit);
+                }
                 if let Some(mask) = new {
-                    pending_bytes += mask.pixels.len();
-                    if self.mask_bytes + pending_bytes > MAX_MASK_BYTES {
+                    bytes += mask.pixels.len();
+                    if self.mask_bytes + bytes > MAX_MASK_BYTES {
                         return Err(Error::ResourceLimit);
                     }
-                    resource_index.insert(key, index);
-                    resources.push(mask);
+                    self.commands
+                        .masks
+                        .try_reserve(1)
+                        .map_err(|_| Error::ResourceLimit)?;
+                    self.commands.mask_index.reserve_key(key)?;
+                    self.commands.mask_index.insert(key, index);
+                    self.commands.masks.push(mask);
                 }
-                pending.push(command);
+                if count == 1 {
+                    first = Some(command);
+                } else {
+                    self.commands
+                        .placements
+                        .try_reserve(if count == 2 { 2 } else { 1 })
+                        .map_err(|_| Error::ResourceLimit)?;
+                    if let Some(command) = first.take() {
+                        self.commands.placements.push(Placement {
+                            geometry: command.geometry,
+                            common: group,
+                            source: command.source,
+                        });
+                    }
+                    self.commands.placements.push(Placement {
+                        geometry: command.geometry,
+                        common: group,
+                        source: command.source,
+                    });
+                }
             }
+            self.commands
+                .order
+                .try_reserve(count)
+                .map_err(|_| Error::ResourceLimit)?;
+            if count > 1 {
+                self.commands
+                    .commons
+                    .try_reserve(1)
+                    .map_err(|_| Error::ResourceLimit)?;
+            } else if count == 1 {
+                self.commands
+                    .inline
+                    .try_reserve(1)
+                    .map_err(|_| Error::ResourceLimit)?;
+            }
+            if count != 0 {
+                self.commands.columns.admit(
+                    common,
+                    viewport_rect(self.width, self.height),
+                    paint.reference(),
+                    false,
+                    paint.new_shared(),
+                )?;
+            }
+            Ok(())
+        })();
+        if let Err(error) = admitted {
+            // No columns, painter order, counters, bins or pixels were changed.
+            // Remove only keys introduced by this draw, including other faces.
+            self.commands.placements.truncate(placement_start);
+            for mask in self.commands.masks.drain(mask_start..) {
+                self.commands.mask_index.remove(mask.key);
+            }
+            self.commands.mask_index.face = primary_face;
+            return Err(error);
         }
-        if !pending.is_empty() {
-            self.commands.columns.admit(
-                common,
-                viewport_rect(self.width, self.height),
-                paint.reference(),
-                false,
-                paint.new_shared(),
-            )?;
-        }
-        self.admit(&pending, &resources, pending_bytes)?;
-        if !pending.is_empty() {
+        if count != 0 {
+            let viewport = viewport_rect(self.width, self.height);
             let shared = paint.commit(&mut self.commands.columns, color);
-            let grouped = pending.len() > 1;
-            self.commands.append(
-                common,
-                pending,
-                grouped,
-                resources,
-                viewport_rect(self.width, self.height),
-                shared,
-            );
+            if let Some(command) = first {
+                self.commands
+                    .append_inline(common, command, viewport, shared);
+            } else {
+                let common = self.commands.columns.store(common, viewport, shared, false);
+                self.commands.publish_group(placement_start, common);
+            }
+            self.mask_bytes += bytes;
+            self.references += references;
+            self.invalidate_bins();
             self.dirty = true;
         }
         Ok(())
@@ -1659,30 +1677,15 @@ impl Canvas {
             source,
         }))
     }
-    fn admit(
-        &mut self,
-        pending: &[PendingDraw],
-        resources: &[Arc<Raster>],
-        bytes: usize,
-    ) -> Result<(), Error> {
-        if self.commands.len() + pending.len() > MAX_COMMANDS {
+    fn admit(&mut self, command: &PendingDraw) -> Result<(), Error> {
+        let [x, y, r, b] = command.geometry.bounds.map(usize::from);
+        let refs = ((r - 1) / TILE - x / TILE + 1) * ((b - 1) / TILE - y / TILE + 1);
+        if self.commands.len() == MAX_COMMANDS || self.references + refs > MAX_REFERENCES {
             return Err(Error::ResourceLimit);
         }
-        let mut refs = 0;
-        for command in pending {
-            let [x, y, r, b] = command.geometry.bounds.map(usize::from);
-            refs += ((r - 1) / TILE - x / TILE + 1) * ((b - 1) / TILE - y / TILE + 1);
-        }
-        if self.references + refs > MAX_REFERENCES || self.mask_bytes + bytes > MAX_MASK_BYTES {
-            return Err(Error::ResourceLimit);
-        }
-        self.commands
-            .reserve(pending.len(), resources, pending.len() > 1)?;
-        self.mask_bytes += bytes;
+        self.commands.reserve_inline()?;
         self.references += refs;
-        if !pending.is_empty() {
-            self.invalidate_bins();
-        }
+        self.invalidate_bins();
         Ok(())
     }
     /// Premultiplied output, top-left origin, tightly packed rows. RGBA8 uses
