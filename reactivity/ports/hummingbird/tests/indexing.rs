@@ -237,10 +237,8 @@ fn files_use_fresh_row_domains_exact_paths_and_explicit_root_removal_semantics()
         .with_ready(result, |page| match page {
             Page::Files(files) => (
                 files.list(),
-                files
-                    .entries
-                    .iter()
-                    .map(|entry| entry.path.clone())
+                (0..files.entries.len())
+                    .map(|index| files.path(index).unwrap())
                     .collect::<Vec<_>>(),
             ),
             _ => panic!("Files page"),
@@ -265,7 +263,7 @@ fn files_use_fresh_row_domains_exact_paths_and_explicit_root_removal_semantics()
     assert_eq!(win.activate(old), Err(Error::StaleTarget));
     assert_eq!(
         win.with_ready(result, |page| match page {
-            Page::Files(files) => files.entries[0].path.clone(),
+            Page::Files(files) => files.path(0).unwrap(),
             _ => panic!("Files page"),
         })
         .unwrap(),
@@ -294,6 +292,87 @@ fn files_use_fresh_row_domains_exact_paths_and_explicit_root_removal_semantics()
             .unwrap(),
         0
     );
+    drop(read);
+    drop(win);
+    worker.finish().unwrap();
+}
+
+#[test]
+fn replacement_resolves_an_accepted_scan_before_its_first_filesystem_unit() {
+    use std::sync::{Arc, Barrier};
+    let folder = Folder::new();
+    let music = folder.0.join("music");
+    fs::create_dir(&music).unwrap();
+    wave(&music.join("one.wav"), "One", "Artist", "Album");
+    let (worker, mut win) = open(&folder.0.join("library.sqlite"));
+    add(&mut win, &worker, &music);
+    let entered = Arc::new(Barrier::new(2));
+    let release = Arc::new(Barrier::new(2));
+    let handle = worker.handle();
+    let hold = {
+        let entered = entered.clone();
+        let release = release.clone();
+        std::thread::spawn(move || {
+            handle
+                .with_current_source(0, || {
+                    entered.wait();
+                    release.wait();
+                })
+                .unwrap()
+        })
+    };
+    entered.wait();
+    win.update(|model| model.request_index(Command::Scan))
+        .unwrap();
+    let replacement = worker
+        .replace_database(Database::fixture().unwrap())
+        .unwrap();
+    release.wait();
+    hold.join().unwrap();
+    replacement
+        .recv_timeout(Duration::from_secs(10))
+        .unwrap()
+        .unwrap();
+    settle(&mut win, &worker).unwrap();
+    assert_eq!(win.with_model(Library::indexing_request).unwrap(), None);
+    assert!(win.contains_text("Library source changed").unwrap());
+    drop(win);
+    worker.finish().unwrap();
+}
+
+#[cfg(unix)]
+#[test]
+fn symlinks_are_not_traversed_and_missing_roots_preserve_committed_recordings() {
+    use std::os::unix::fs::symlink;
+    let folder = Folder::new();
+    let root = folder.0.join("music");
+    fs::create_dir(&root).unwrap();
+    let outside = folder.0.join("outside");
+    fs::create_dir(&outside).unwrap();
+    wave(&root.join("inside.wav"), "Inside", "Artist", "Album");
+    wave(&outside.join("outside.wav"), "Outside", "Artist", "Album");
+    symlink(&outside, root.join("linked-directory")).unwrap();
+    symlink(outside.join("outside.wav"), root.join("linked.wav")).unwrap();
+    let db = folder.0.join("library.sqlite");
+    let (worker, mut win) = open(&db);
+    add(&mut win, &worker, &root);
+    scan(&mut win, &worker);
+    let read = Database::open_read_only(&db).unwrap();
+    assert_eq!(
+        read.connection()
+            .query_row("SELECT COUNT(*) FROM track", [], |row| row.get::<_, i64>(0))
+            .unwrap(),
+        1
+    );
+    fs::rename(&root, folder.0.join("temporarily unavailable")).unwrap();
+    scan(&mut win, &worker);
+    assert_eq!(
+        read.connection()
+            .query_row("SELECT title FROM track", [], |row| row.get::<_, String>(0))
+            .unwrap(),
+        "Inside"
+    );
+    assert!(win.contains_text("failed 1").unwrap());
     drop(read);
     drop(win);
     worker.finish().unwrap();

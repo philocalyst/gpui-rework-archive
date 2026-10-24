@@ -33,7 +33,7 @@ fn main() -> Result<(), Box<dyn std::error::Error>> {
             "--headless" => {}
             _ => {
                 return Err(
-                    "expected --headless, --native, --database <path> or --renderer <auto|cpu|gpu>"
+                    "expected --headless, --native, --library <path>, --database <path> or --renderer <auto|cpu|gpu>"
                         .into(),
                 );
             }
@@ -45,7 +45,7 @@ fn main() -> Result<(), Box<dyn std::error::Error>> {
     if !native {
         if database.is_some() || library.is_some() || renderer.is_some() {
             return Err(
-                "Use --native with --database or --renderer; headless mode runs the pinned fixture"
+                "Use --native with --library, --database or --renderer; headless mode runs the pinned fixture"
                     .into(),
             );
         }

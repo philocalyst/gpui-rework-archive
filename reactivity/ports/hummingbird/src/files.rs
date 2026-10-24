@@ -11,7 +11,7 @@ use crate::{
 use gpui::prelude::*;
 use nucleo_matcher::pattern::{CaseMatching, Normalization, Pattern};
 use rusqlite::OptionalExtension;
-use std::{fs, path::PathBuf};
+use std::{ffi::OsString, fs, path::PathBuf};
 use triomphe::Arc;
 
 #[derive(Debug)]
@@ -23,28 +23,32 @@ pub enum Kind {
 }
 #[derive(Debug)]
 pub struct Entry {
-    pub path: PathBuf,
+    /// Exact child name, or an absolute root path when no directory is held.
+    pub name: OsString,
     pub kind: Kind,
 }
 impl Entry {
     fn label(&self) -> std::borrow::Cow<'_, str> {
-        if matches!(self.kind, Kind::Root(_)) {
-            self.path.to_string_lossy()
-        } else {
-            self.path
-                .file_name()
-                .unwrap_or(self.path.as_os_str())
-                .to_string_lossy()
-        }
+        self.name.to_string_lossy()
     }
 }
 #[derive(Debug)]
 pub struct FileListing {
     pub input: Arc<Input>,
     pub entries: Vec<Entry>,
+    directory: Option<PathBuf>,
     domain: u64,
 }
 impl FileListing {
+    /// Compose a path only for an explicit caller/action. Listing rows retain
+    /// one directory and exact names instead of repeating its prefix per entry.
+    pub fn path(&self, index: usize) -> Option<PathBuf> {
+        let entry = self.entries.get(index)?;
+        Some(match &self.directory {
+            Some(directory) => directory.join(&entry.name),
+            None => PathBuf::from(&entry.name),
+        })
+    }
     pub fn list(&self) -> ListId {
         ListId::new(self.domain)
     }
@@ -84,8 +88,8 @@ impl FileListing {
             if selected == Some(index) {
                 beginning = tracks.len();
             }
-            let indexed = entry
-                .path
+            let path = self.path(index).expect("enumerated file entry");
+            let indexed = path
                 .to_str()
                 .map(|location| {
                     metadata
@@ -105,11 +109,11 @@ impl FileListing {
                 |(id, album, title)| (Some(id), album, title),
             );
             tracks.push(TrackRef::new(Track {
-                path: entry.path.clone(),
+                available_when_prepared: path.is_file(),
+                path,
                 title,
                 track_id,
                 album_id,
-                available_when_prepared: entry.path.is_file(),
             }));
         }
         let track = tracks.get(beginning).ok_or(SourceError::NoSelection)?;
@@ -151,10 +155,11 @@ impl ItemSource for FileRows {
         let label = entry.label();
         let action = match entry.kind {
             Kind::Root(_) | Kind::Directory => {
-                let path = entry.path.clone();
-                let input = self.input.clone();
+                let files = self.0.clone();
                 button(format!("Open {label}")).on_click(move |model: &mut Library| {
-                    model.open_collection(&input, Route::Directory(path.clone()))
+                    if let Some(path) = files.path(index) {
+                        model.open_collection(&files.input, Route::Directory(path));
+                    }
                 })
             }
             Kind::Recording => {
@@ -216,6 +221,7 @@ pub(crate) fn page(
     let result = (|| {
         let roots = indexing::roots(database)?;
         let mut entries = Vec::new();
+        let mut prefix = None;
         let pattern = Pattern::parse(&input.query, CaseMatching::Smart, Normalization::Smart);
         match &input.route {
             Route::Files => {
@@ -225,7 +231,7 @@ pub(crate) fn page(
                     }
                     if searcher.matches(&pattern, &root.path.to_string_lossy(), None) {
                         entries.push(Entry {
-                            path: root.path,
+                            name: root.path.into_os_string(),
                             kind: Kind::Root(root.id),
                         });
                     }
@@ -251,36 +257,37 @@ pub(crate) fn page(
                         path: directory.clone(),
                         error,
                     })?;
-                    let path = child.path();
+                    let name = child.file_name();
                     let kind = child.file_type().map_err(|error| SourceError::Io {
-                        path: path.clone(),
+                        path: directory.join(&name),
                         error,
                     })?;
                     let kind = if kind.is_dir() {
                         Kind::Directory
-                    } else if kind.is_file() && crate::metadata::supported(&path) {
+                    } else if kind.is_file()
+                        && crate::metadata::supported(std::path::Path::new(&name))
+                    {
                         Kind::Recording
                     } else {
                         Kind::Other
                     };
-                    if searcher.matches(&pattern, &child.file_name().to_string_lossy(), None) {
-                        entries.push(Entry { path, kind });
+                    if searcher.matches(&pattern, &name.to_string_lossy(), None) {
+                        entries.push(Entry { name, kind });
                     }
                 }
                 entries.sort_by(|a, b| {
-                    group(&a.kind).cmp(&group(&b.kind)).then_with(|| {
-                        a.path
-                            .file_name()
-                            .cmp(&b.path.file_name())
-                            .then_with(|| a.path.cmp(&b.path))
-                    })
+                    group(&a.kind)
+                        .cmp(&group(&b.kind))
+                        .then_with(|| a.name.cmp(&b.name))
                 });
+                prefix = Some(directory);
             }
             _ => return Err(SourceError::MissingCollection),
         }
         Ok(Some(Page::Files(FileRows(Arc::new(FileListing {
             input,
             entries,
+            directory: prefix,
             domain,
         })))))
     })();
@@ -315,7 +322,7 @@ impl View for Roots {
     fn view(&self) -> El<'_> {
         text_input(&self.path)
             .name("Library root path")
-            .description("Absolute folder to index; no playback is started")
+            .description("Folder whose supported recordings will be indexed")
             .w(650)
             .h(32)
     }
