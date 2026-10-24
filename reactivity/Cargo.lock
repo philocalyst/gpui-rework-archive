@@ -1096,6 +1096,7 @@ dependencies = [
  "gpui_reactivity_host",
  "gpui_reactivity_state",
  "icu_segmenter",
+ "parking_lot",
  "pin-project-lite",
  "pollster",
  "serde",

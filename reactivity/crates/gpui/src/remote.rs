@@ -6,10 +6,10 @@ use crate::{
 };
 #[cfg(feature = "native-core")]
 use gpui_reactivity_host::native::Wake;
-use std::collections::VecDeque;
+use parking_lot::Mutex;
 #[cfg(feature = "native-core")]
 use std::sync::OnceLock;
-use std::sync::{Arc, Mutex, MutexGuard};
+use std::{collections::VecDeque, panic::AssertUnwindSafe, sync::Arc};
 
 // The sole payload buffer includes both the owner's frozen prefix and later
 // sends. No callback or payload destructor runs while this mutex is held.
@@ -21,14 +21,13 @@ struct State<T> {
     observe_close: bool,
 }
 struct Shared<T> {
-    state: Mutex<State<T>>,
+    // No user code runs under this lock; checked producer overflow leaves the
+    // queue intact. Preserve the std mutex's public unwind auto-traits.
+    state: AssertUnwindSafe<Mutex<State<T>>>,
     #[cfg(feature = "native-core")]
     wake: OnceLock<Wake>,
 }
 impl<T> Shared<T> {
-    fn lock(&self) -> MutexGuard<'_, State<T>> {
-        self.state.lock().unwrap_or_else(|error| error.into_inner())
-    }
     fn signal(&self) {
         #[cfg(feature = "native-core")]
         if let Some(wake) = self.wake.get() {
@@ -87,7 +86,7 @@ pub struct Remote<T> {
 }
 impl<T> Clone for Remote<T> {
     fn clone(&self) -> Self {
-        let mut state = self.shared.lock();
+        let mut state = self.shared.state.lock();
         state.producers = state
             .producers
             .checked_add(1)
@@ -99,7 +98,7 @@ impl<T> Clone for Remote<T> {
 }
 impl<T> Drop for Remote<T> {
     fn drop(&mut self) {
-        let mut state = self.shared.lock();
+        let mut state = self.shared.state.lock();
         state.producers -= 1;
         let notify = state.producers == 0 && state.observe_close;
         drop(state);
@@ -118,13 +117,13 @@ impl<T> Remote<T> {
     /// An attached native event proxy/OS may allocate separately when posting wakes.
     pub fn bounded(capacity: usize) -> (Self, Inbox<T>) {
         let shared = Arc::new(Shared {
-            state: Mutex::new(State {
+            state: AssertUnwindSafe(Mutex::new(State {
                 queue: VecDeque::with_capacity(capacity),
                 capacity,
                 producers: 1,
                 open: true,
                 observe_close: false,
-            }),
+            })),
             #[cfg(feature = "native-core")]
             wake: OnceLock::new(),
         });
@@ -140,7 +139,7 @@ impl<T> Remote<T> {
         )
     }
     pub fn try_send(&self, value: T) -> Result<(), SendError<T>> {
-        let mut state = self.shared.lock();
+        let mut state = self.shared.state.lock();
         if !state.open {
             return Err(SendError::Closed(value));
         }
@@ -176,7 +175,7 @@ impl<T> Inbox<T> {
     // Return ownership without dropping values, allowing a static lane chain to
     // revoke every producer before any user destructor can unwind retirement.
     fn revoke(&mut self) -> VecDeque<T> {
-        let mut state = self.shared.lock();
+        let mut state = self.shared.state.lock();
         state.open = false;
         self.frozen = 0;
         self.terminal = Terminal::Delivered;
@@ -186,7 +185,7 @@ impl<T> Inbox<T> {
         drop(self.revoke());
     }
     pub(crate) fn observe_close(&self) -> Result<(), Error> {
-        let mut state = self.shared.lock();
+        let mut state = self.shared.state.lock();
         if state.capacity == 0 || !state.open {
             return Err(Error::ZeroInboxCapacity);
         }
@@ -197,7 +196,7 @@ impl<T> Inbox<T> {
         if self.terminal != Terminal::Open {
             return Stage::Empty;
         }
-        let state = self.shared.lock();
+        let state = self.shared.state.lock();
         if !state.open || state.capacity == 0 {
             return Stage::Empty;
         }
@@ -218,7 +217,7 @@ impl<T> Inbox<T> {
         if self.frozen == 0 {
             return None;
         }
-        let mut state = self.shared.lock();
+        let mut state = self.shared.state.lock();
         self.frozen -= 1;
         state.queue.pop_front()
     }
@@ -530,7 +529,7 @@ impl<M, T: Send + 'static, F: InboxHandler<M, T>, L: LaneSet<M>> LaneSet<M> for 
     fn attach(&mut self, wake: &Wake) {
         // Attach once to this owner's event loop; surface suspend/resume does not
         // change its loop. Signal after attachment covers messages sent unbound.
-        let open = self.inbox.shared.lock().open;
+        let open = self.inbox.shared.state.lock().open;
         if open {
             let _ = self.inbox.shared.wake.set(wake.clone());
             // Installation followed by a wake covers both pre-bind sends and
@@ -569,10 +568,10 @@ mod tests {
     #[test]
     fn a_checked_producer_overflow_unwinds_without_losing_the_queue() {
         let (remote, mut inbox) = Remote::bounded(1);
-        remote.shared.lock().producers = usize::MAX;
+        remote.shared.state.lock().producers = usize::MAX;
         assert!(std::panic::catch_unwind(|| remote.clone()).is_err());
-        assert_eq!(remote.shared.lock().producers, usize::MAX);
-        remote.shared.lock().producers = 1;
+        assert_eq!(remote.shared.state.lock().producers, usize::MAX);
+        remote.shared.state.lock().producers = 1;
         drop(remote.clone());
         remote.try_send(7).unwrap();
         assert!(matches!(inbox.stage(false), Stage::Ready));
