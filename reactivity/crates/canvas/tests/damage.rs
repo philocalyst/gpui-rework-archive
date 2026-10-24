@@ -386,11 +386,12 @@ fn rebuilt_clip_geometry_does_not_damage_unchanged_draws() {
     );
     repair(&mut canvas, &mut output, same);
     let (local, _) = describe(&mut canvas, 6.0, Color::rgb(200, 20, 30));
-    assert_eq!(local.bounds(), Some([60, 42, 64, 46]));
+    // Retain Canvas admission's existing one-pixel conservative guard.
+    assert_eq!(local.bounds(), Some([59, 41, 65, 47]));
     repair(&mut canvas, &mut output, local);
     let before = output.clone();
     let (changed, _) = describe(&mut canvas, 9.0, Color::rgb(200, 20, 30));
-    assert_eq!(changed.bounds(), Some([0, 0, 40, 40]));
+    assert_eq!(changed.bounds(), Some([0, 0, 41, 41]));
     repair(&mut canvas, &mut output, changed);
     assert_ne!(
         output, before,
