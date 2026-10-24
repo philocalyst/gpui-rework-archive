@@ -50,8 +50,28 @@ impl GradientStop {
 /// One thin, immutable allocation containing author bits and compiled interval
 /// coefficients. Canonical scenes lease this once per distinct resource; draw
 /// iteration and raster sampling borrow it without refcount operations.
-#[derive(Clone)]
 pub struct Gradient(ThinArc<GradientKey, Word>);
+static AUDIT_CLONES: AtomicU64 = AtomicU64::new(0);
+static AUDIT_DROPS: AtomicU64 = AtomicU64::new(0);
+impl Clone for Gradient {
+    fn clone(&self) -> Self {
+        AUDIT_CLONES.fetch_add(1, Ordering::Relaxed);
+        Self(self.0.clone())
+    }
+}
+impl Drop for Gradient {
+    fn drop(&mut self) {
+        AUDIT_DROPS.fetch_add(1, Ordering::Relaxed);
+    }
+}
+impl Gradient {
+    pub fn audit_lease_events() -> [u64; 2] {
+        [
+            AUDIT_CLONES.load(Ordering::Relaxed),
+            AUDIT_DROPS.load(Ordering::Relaxed),
+        ]
+    }
+}
 impl std::fmt::Debug for Gradient {
     fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
         f.debug_struct("Gradient")

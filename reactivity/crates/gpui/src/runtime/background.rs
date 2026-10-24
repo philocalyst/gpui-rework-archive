@@ -647,6 +647,29 @@ mod tests {
     }
     #[test]
     fn gradient_description_and_paint_edit_allocation_audit() {
+        let mut phase = 0;
+        let mut measured = |work: &mut dyn FnMut()| {
+            phase += 1;
+            let before = Gradient::audit_lease_events();
+            let cost = allocation_counter::measure(work);
+            let after = Gradient::audit_lease_events();
+            let delta = [after[0] - before[0], after[1] - before[1]];
+            eprintln!(
+                "gradient_lease_audit,phase={phase},clones={},drops={}",
+                delta[0], delta[1]
+            );
+            if phase != 3 {
+                assert_eq!(delta, [0, 0], "unchanged work must not churn leases");
+            }
+            cost
+        };
+        eprintln!(
+            "gradient_return_layout,index={},result_bool={},result_index_bool={}",
+            size_of::<IdentityIndex>(),
+            size_of::<Result<bool, Error>>(),
+            size_of::<Result<(IdentityIndex, bool), Error>>()
+        );
+
         let resource = gradient(Color::WHITE);
         let key = resource.key();
         let mut win = Win::with_size(
@@ -661,7 +684,7 @@ mod tests {
         let target = win.inspect().unwrap().nodes[0].target.unwrap();
         win.update(|_| {}).unwrap();
         let before = win.runtime().unwrap().counters.descriptions;
-        let cost = allocation_counter::measure(|| {
+        let cost = measured(&mut || {
             for _ in 0..16 {
                 win.update(|_| {}).unwrap();
             }
@@ -677,7 +700,7 @@ mod tests {
         win.set_property(target, BACKGROUND, Contribution::Set(Brush::Gradient(key)))
             .unwrap();
         let before = win.runtime().unwrap().counters.descriptions;
-        let cost = allocation_counter::measure(|| {
+        let cost = measured(&mut || {
             for _ in 0..16 {
                 win.set_property(target, BACKGROUND, Contribution::Set(Brush::Gradient(key)))
                     .unwrap();
@@ -692,7 +715,7 @@ mod tests {
             cost.bytes_max
         );
         let before = win.runtime().unwrap().counters.descriptions;
-        let cost = allocation_counter::measure(|| {
+        let cost = measured(&mut || {
             for _ in 0..8 {
                 win.set_property(
                     target,
@@ -716,7 +739,7 @@ mod tests {
         let Runtime { images, nodes, .. } = &mut *runtime;
         let live = IdentityIndex::from_ids(nodes.iter().map(Node::identity));
         let drafts = vec![(0, &resource)];
-        let cost = allocation_counter::measure(|| {
+        let cost = measured(&mut || {
             assert!(!reconcile(images, nodes, &live, drafts).unwrap());
         });
         eprintln!(
@@ -730,7 +753,7 @@ mod tests {
         let Runtime { images, nodes, .. } = &mut *runtime;
         let live = IdentityIndex::from_ids(nodes.iter().map(Node::identity));
         let drafts = vec![(0, &resource)];
-        let cost = allocation_counter::measure(|| {
+        let cost = measured(&mut || {
             assert!(!reconcile(images, nodes, &live, drafts).unwrap());
         });
         eprintln!(
