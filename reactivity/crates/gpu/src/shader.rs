@@ -457,32 +457,31 @@ pub mod ui {
         exposed / (vec3f(1.0, 1.0, 1.0) + exposed)
     }
 
-    // Banked scenes decode a draw and its working paint once before the
-    // sixteen sample operations. This deliberately trades sixteen local colors
-    // for the ordinary sample-major path's repeated record/bank loads; it is
-    // not a claim of lower register pressure or universally faster shading.
+    // Keep four neighboring samples live at once. Every sample still blends
+    // draws in scene order, then contributes in the canonical row-major order.
+    // Compared with the full sixteen-color array, each record is loaded four
+    // times. This is a measured tradeoff, not a register-allocation guarantee.
     pub fn banked_fragment(position: Vec2f, range: Vec2u, clear: Vec4f) -> Vec4f {
-        let mut colors: [Vec4f; 16] = [
-            clear, clear, clear, clear, clear, clear, clear, clear, clear, clear, clear, clear,
-            clear, clear, clear, clear,
-        ];
-        #[wgsl_allow(non_literal_loop_bounds)]
-        for cursor in range.x..range.y {
-            let draw = load_banked_draw(get!(INDICES)[cursor as usize]);
-            for y in 0..4 {
+        let mut anchor = vec4f(0.0, 0.0, 0.0, 0.0);
+        let mut delta = vec4f(0.0, 0.0, 0.0, 0.0);
+        for y in 0..4 {
+            let mut colors: [Vec4f; 4] = [clear, clear, clear, clear];
+            #[wgsl_allow(non_literal_loop_bounds)]
+            for cursor in range.x..range.y {
+                let draw = load_banked_draw(get!(INDICES)[cursor as usize]);
                 for x in 0..4 {
                     let point = position
                         + vec2f((x as f32 + 0.5) * 0.25 - 0.5, (y as f32 + 0.5) * 0.25 - 0.5);
                     let source = sample_draw(draw, point);
-                    let index = (y * 4 + x) as usize;
-                    colors[index] = source + colors[index] * (1.0 - source.w);
+                    colors[x as usize] = source + colors[x as usize] * (1.0 - source.w);
                 }
             }
-        }
-        let anchor = colors[0];
-        let mut delta = vec4f(0.0, 0.0, 0.0, 0.0);
-        for index in 0..16 {
-            delta += (colors[index as usize] - anchor) * 0.0625;
+            if y == 0 {
+                anchor = colors[0];
+            }
+            for x in 0..4 {
+                delta += (colors[x as usize] - anchor) * 0.0625;
+            }
         }
         output(anchor + delta)
     }
