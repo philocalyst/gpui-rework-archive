@@ -1,0 +1,30 @@
+   Compiling parley_engine v0.12.0 (/tmp/gpui-inbox-reader-gate-control/reactivity/vendor/parley_engine)
+   Compiling cephal v0.1.1 (/tmp/gpui-inbox-reader-gate-control/reactivity/vendor/cephal)
+   Compiling parley v0.12.0 (/tmp/gpui-inbox-reader-gate-control/reactivity/vendor/parley)
+   Compiling gpui_reactivity_core v0.1.0 (/tmp/gpui-inbox-reader-gate-control/reactivity/crates/core)
+   Compiling gpui_canvas v0.1.0 (/tmp/gpui-inbox-reader-gate-control/reactivity/crates/canvas)
+   Compiling accesskit v0.25.1 (/tmp/gpui-inbox-reader-gate-control/reactivity/vendor/accesskit)
+   Compiling gpui_reactivity_state v0.1.0 (/tmp/gpui-inbox-reader-gate-control/reactivity/crates/state)
+   Compiling gpui v0.1.0 (/tmp/gpui-inbox-reader-gate-control/reactivity/crates/gpui)
+   Compiling accesskit_consumer v0.39.1 (/tmp/gpui-inbox-reader-gate-control/reactivity/vendor/accesskit_consumer)
+    Finished `test` profile [unoptimized + debuginfo] target(s) in 12.46s
+     Running tests/source_inbox_reader_gate.rs (target/debug/build/gpui/f657b2e07d8e581b/out/source_inbox_reader_gate-f657b2e07d8e581b)
+
+running 1 test
+test exact_source_inbox_refresh_publishes_pending_reader_chrome_without_a_completion ... FAILED
+
+failures:
+
+---- exact_source_inbox_refresh_publishes_pending_reader_chrome_without_a_completion stdout ----
+
+thread 'exact_source_inbox_refresh_publishes_pending_reader_chrome_without_a_completion' (1120775) panicked at crates/gpui/tests/source_inbox_reader_gate.rs:29:5:
+Pending must publish Reader chrome even without a completed question
+note: run with `RUST_BACKTRACE=1` environment variable to display a backtrace
+
+
+failures:
+    exact_source_inbox_refresh_publishes_pending_reader_chrome_without_a_completion
+
+test result: FAILED. 0 passed; 1 failed; 0 ignored; 0 measured; 0 filtered out; finished in 0.01s
+
+error: test failed, to rerun pass `-p gpui --test source_inbox_reader_gate`

@@ -1,0 +1,22 @@
+   Compiling gpui v0.1.0 (/tmp/gpui-mapped-properties-sol/reactivity/crates/gpui)
+    Finished `test` profile [unoptimized + debuginfo] target(s) in 15.46s
+     Running unittests src/lib.rs (target/debug/build/gpui/f6156e8727b03b8d/out/gpui-f6156e8727b03b8d)
+
+running 1 test
+test runtime::mapped_qualification::mixed_mapped_and_direct_colors_do_not_accumulate_unique_historical_values ... mixed_mapped_colors_4094_updates,requests=10,requested=130944,retained=65472,peak=98240
+
+thread 'runtime::mapped_qualification::mixed_mapped_and_direct_colors_do_not_accumulate_unique_historical_values' (1176417) panicked at crates/gpui/src/runtime.rs:4832:9:
+assertion `left == right` failed: a mapped color must not retain a history of unique outputs in an unrelated source bank
+  left: 10
+ right: 0
+note: run with `RUST_BACKTRACE=1` environment variable to display a backtrace
+FAILED
+
+failures:
+
+failures:
+    runtime::mapped_qualification::mixed_mapped_and_direct_colors_do_not_accumulate_unique_historical_values
+
+test result: FAILED. 0 passed; 1 failed; 0 ignored; 0 measured; 165 filtered out; finished in 0.01s
+
+error: test failed, to rerun pass `-p gpui --lib`

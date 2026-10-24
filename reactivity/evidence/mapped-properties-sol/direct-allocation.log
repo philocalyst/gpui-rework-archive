@@ -1,0 +1,13 @@
+    Finished `test` profile [unoptimized + debuginfo] target(s) in 0.11s
+     Running unittests src/lib.rs (target/debug/build/gpui/f6156e8727b03b8d/out/gpui-f6156e8727b03b8d)
+
+running 1 test
+test runtime::style_port_tests::fresh_cold_binding_owner_ledger ... style_owner,ports=0,requests=41,requested=7440,retained=6140,peak=6300,fanouts=0,destination_capacity_bytes=0
+style_owner,ports=1,requests=46,requested=8088,retained=6612,peak=6772,fanouts=1,destination_capacity_bytes=16
+style_owner,ports=2,requests=47,requested=8136,retained=6612,peak=6772,fanouts=1,destination_capacity_bytes=16
+style_owner,ports=8,requests=58,requested=9200,retained=7004,peak=7164,fanouts=3,destination_capacity_bytes=48
+style_plain_owner,requests=33,requested=6784,retained=5556,peak=5724
+ok
+
+test result: ok. 1 passed; 0 failed; 0 ignored; 0 measured; 163 filtered out; finished in 0.00s
+

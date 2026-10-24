@@ -1,0 +1,17 @@
+{
+  "color-growth-negative.elf": {
+    "path": "/tmp/gpui-mapped-properties-sol-evidence/color-growth-negative.elf",
+    "sha256": "9271c0ce8e4247ee17b6152aef68b3b168c208aff96b029afcfe5a1e0a683d5e",
+    "bytes": 274844344
+  },
+  "masked-shared-slot-negative.elf": {
+    "path": "/tmp/gpui-mapped-properties-sol-evidence/masked-shared-slot-negative.elf",
+    "sha256": "7139e82cc3711d94306fcb2edbdd06657741c0be2aa5f071534e26d28aeee2d0",
+    "bytes": 160383008
+  },
+  "reader-fixed.elf": {
+    "path": "/tmp/gpui-mapped-properties-sol-evidence/reader-fixed.elf",
+    "sha256": "45e1337a15e5b4d3a28f4f5edf68373a14445d11419d7fba4c7531000e134472",
+    "bytes": 145781768
+  }
+}
