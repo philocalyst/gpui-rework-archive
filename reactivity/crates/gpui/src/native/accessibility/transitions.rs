@@ -1339,3 +1339,133 @@ fn same_pool_index_with_different_exact_basis_updates_native_sparse_tree() {
     acknowledge(&mut win);
     apply(&win, base, &mut tree, Some(1));
 }
+
+fn shape_only_ack_delta(edit_clip: bool) {
+    struct Shape;
+    impl View for Shape {
+        fn view(&self) -> El<'_> {
+            div()
+                .size(32)
+                .rounded(16.)
+                .clip()
+                .name("parent")
+                .child(div().size(48).name("child").on_click(|_: &mut Self| {}))
+        }
+    }
+    let mut win = Win::recording(
+        Shape,
+        WindowOptions {
+            size: [64, 64],
+            ..Default::default()
+        },
+    )
+    .unwrap();
+    acknowledge(&mut win);
+    win.accessibility_observe(true).unwrap();
+    let base = win.accessibility_state().unwrap();
+    let parent = win.query().name("parent").one().unwrap();
+    let child = win.query().name("child").one().unwrap();
+    let mut cohort = cohort(&win);
+    let mut tree = Tree::new(
+        project(&win.accessibility_sheet().unwrap(), base, "Shape", &cohort),
+        true,
+    );
+    let mut parent_id = None;
+    let mut child_id = None;
+    win.visit(|part| {
+        if part.target() == parent {
+            parent_id = Some(cohort.id(part));
+        }
+        if part.target() == child {
+            child_id = Some(cohort.id(part));
+        }
+    })
+    .unwrap();
+    let parent_id = parent_id.unwrap();
+    let child_id = child_id.unwrap();
+    let before = tree
+        .state()
+        .node_by_tree_local_id(parent_id, TreeId::ROOT)
+        .unwrap()
+        .data()
+        .clone();
+    if edit_clip {
+        win.set_property(parent, crate::property::CLIP, Contribution::Set(false))
+            .unwrap();
+    } else {
+        win.set_property(
+            parent,
+            crate::property::CORNER_RADIUS,
+            Contribution::Set(8.),
+        )
+        .unwrap();
+    }
+    let eligible = win.with_scene(|_, token| token).unwrap();
+    assert_eq!(
+        win.accessibility_state().unwrap(),
+        base,
+        "new C cannot rewrite P"
+    );
+    assert_eq!(
+        full(&win)
+            .nodes
+            .into_iter()
+            .find(|(id, _)| *id == parent_id)
+            .unwrap()
+            .1,
+        before
+    );
+    win.presented(eligible).unwrap();
+    let next = win.accessibility_state().unwrap();
+    let indices = win.accessibility_delta(base, next).unwrap();
+    assert_eq!(
+        indices,
+        &[0],
+        "a clip/radius-only ancestor must enter the exact native frontier"
+    );
+    cohort.refresh(&win).unwrap();
+    let update = project_sparse(
+        &win.accessibility_sheet().unwrap(),
+        indices,
+        &[],
+        &cohort,
+        None,
+    );
+    tree.update_and_process_changes(update, &mut Changes::default());
+    let after = tree
+        .state()
+        .node_by_tree_local_id(parent_id, TreeId::ROOT)
+        .unwrap();
+    assert_eq!(after.raw_bounds(), before.bounds());
+    assert_eq!(after.data().transform(), before.transform());
+    assert_ne!(after.data().hit_test_shape(), before.hit_test_shape());
+    assert_eq!(after.clips_children(), !edit_clip);
+    let filter = |node: &NodeRef<'_>| {
+        if node.locate().0 == child_id {
+            accesskit_consumer::FilterResult::Include
+        } else {
+            accesskit_consumer::FilterResult::ExcludeNode
+        }
+    };
+    let point = accesskit::Point::new(3., 3.);
+    assert!(tree.state().root().node_at_point(point, &filter).is_some());
+    let expected = full(&win)
+        .nodes
+        .into_iter()
+        .find(|(id, _)| *id == parent_id)
+        .unwrap()
+        .1;
+    assert_eq!(
+        after.data(),
+        &expected,
+        "sparse native state matches independent full P projection"
+    );
+}
+#[test]
+fn shape_only_clip_ack_updates_native_frontier_with_unchanged_map_and_bounds() {
+    shape_only_ack_delta(true);
+}
+#[test]
+fn shape_only_radius_ack_updates_native_frontier_with_unchanged_map_and_bounds() {
+    shape_only_ack_delta(false);
+}

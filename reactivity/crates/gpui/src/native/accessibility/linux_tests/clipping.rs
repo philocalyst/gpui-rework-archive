@@ -37,7 +37,10 @@ async fn at_point(
         .call("GetAccessibleAtPoint", &(x, y, kind))
         .await
 }
-async fn exercise(deadline: Instant) -> Result<(), Box<dyn std::error::Error>> {
+async fn exercise(
+    deadline: Instant,
+    acknowledged: mpmc::Receiver<()>,
+) -> Result<(), Box<dyn std::error::Error>> {
     let runtime = SharedRuntime::current()?;
     let session = Builder::session()
         .method_timeout(Duration::from_secs(3))
@@ -92,13 +95,23 @@ async fn exercise(deadline: Instant) -> Result<(), Box<dyn std::error::Error>> {
             .call::<_, _, bool>("DoAction", &(0i32,))
             .await?
     );
-    wait_for(&runtime, deadline, async || {
-        let current_members = descendants(&session, child.clone()).await.ok()?;
-        current_members
-            .contains(&at_point(&session, &window, 1, 1, 1).await.ok()?)
-            .then_some(())
-    })
-    .await;
+    acknowledged
+        .recv()
+        .await
+        .map_err(|_| "native ACK gate closed")?;
+    let semantic_deadline = Instant::now() + Duration::from_secs(3);
+    loop {
+        let current_members = descendants(&session, child.clone()).await?;
+        let hit = at_point(&session, &window, 1, 1, 1).await?;
+        if current_members.contains(&hit) {
+            break;
+        }
+        assert!(
+            Instant::now() < semantic_deadline,
+            "native provider kept the old rounded clip after P acknowledged CLIP=false: hit={hit:?}, current child subtree={current_members:?}"
+        );
+        runtime.sleep(Duration::from_millis(10)).await;
+    }
     // Text geometry cohort IDs retire when clip geometry changes. Resolve the
     // current subtree after ACK instead of treating those old IDs as authority.
     let members = descendants(&session, child.clone()).await?;
@@ -126,6 +139,8 @@ struct Script {
     client: Option<thread::JoinHandle<()>>,
     complete: bool,
     pointer_checked: bool,
+    acknowledge: Option<mpmc::Sender<()>>,
+    acknowledged: Option<mpmc::Receiver<()>>,
 }
 impl Script {
     fn event(&mut self, event_loop: &ActiveEventLoop, event: WindowEvent) {
@@ -185,17 +200,51 @@ impl Host for Script {
             let sender = self.sender.take().unwrap();
             let wake = self.host.wake.clone().unwrap();
             let deadline = self.deadline;
+            let acknowledged = self.acknowledged.take().unwrap();
             self.client = Some(thread::spawn(move || {
-                let result = zbus::block_on(async {
-                    SharedRuntime::current()?
-                        .timeout_at(deadline, exercise(deadline))
-                        .await?
-                });
+                let result = std::panic::catch_unwind(std::panic::AssertUnwindSafe(|| {
+                    zbus::block_on(async {
+                        SharedRuntime::current()?
+                            .timeout_at(deadline, exercise(deadline, acknowledged))
+                            .await?
+                    })
+                }))
+                .unwrap_or_else(|_| Err("native point semantic assertion failed".into()));
                 sender
                     .try_send(result.map_err(|e: Box<dyn std::error::Error>| e.to_string()))
                     .unwrap();
                 wake.signal();
             }));
+        }
+        if ready
+            && self.acknowledge.is_some()
+            && self.host.owner.as_ref().unwrap().root().unwrap().calls == 2
+        {
+            let owner = self.host.owner.as_ref().unwrap();
+            let mut parent_seen = false;
+            owner
+                .visit(|part| {
+                    if part.parent().is_none() {
+                        assert!(
+                            !part.clips_children(),
+                            "the gate reads acknowledged P, never newer L/C"
+                        );
+                        parent_seen = true;
+                    }
+                })
+                .unwrap();
+            assert!(parent_seen);
+            assert!(
+                owner
+                    .hit_target(crate::Point { x: 1., y: 1. })
+                    .unwrap()
+                    .is_some()
+            );
+            eprintln!(
+                "GPUI_NATIVE_CLIP confirmed P parent_clipped=false pointer_corner_hit=true epoch={}",
+                owner.snapshot().unwrap().presentation_epoch
+            );
+            self.acknowledge.take().unwrap().try_send(()).unwrap();
         }
         if let Ok(result) = self.receiver.try_recv() {
             result.expect("actual rounded-clip AT-SPI client failed");
@@ -232,6 +281,7 @@ fn native_atspi_rounded_clip_point_queries_pointer_and_ack() {
         .build()
         .unwrap();
     let (sender, receiver) = mpmc::bounded(1.try_into().unwrap());
+    let (acknowledge, acknowledged) = mpmc::bounded(1.try_into().unwrap());
     let host = Script {
         host: NativeHost::new(
             Window::document(Page::default())
@@ -245,6 +295,8 @@ fn native_atspi_rounded_clip_point_queries_pointer_and_ack() {
         client: None,
         complete: false,
         pointer_checked: false,
+        acknowledge: Some(acknowledge),
+        acknowledged: Some(acknowledged),
     };
     let (mut driver, wake) = Driver::new(&event_loop, host);
     driver.host_mut().host.wake = Some(wake);
