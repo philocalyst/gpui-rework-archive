@@ -2,6 +2,7 @@
 //! Slots route work, while exact source bytes and font-size bits authorize reuse.
 use super::*;
 use gpui_canvas::PreparedText;
+use std::collections::HashMap;
 
 pub(super) struct TextPass<'font, 'text> {
     shaper: TextShaper<'font>,
@@ -12,7 +13,6 @@ pub(super) struct TextPass<'font, 'text> {
     pub peak: usize,
 }
 impl<'font, 'text> TextPass<'font, 'text> {
-    #[cfg(test)]
     pub fn new(shaper: TextShaper<'font>) -> Self {
         Self::with_inputs(shaper, &[])
     }

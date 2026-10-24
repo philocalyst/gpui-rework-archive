@@ -118,7 +118,7 @@ impl<M: View + 'static> Runtime<M> {
                 .font_face()
                 .clone();
             slot.get_mut(&mut self.texts).unwrap().shape_for(
-                &mut font.shaper(),
+                &mut TextPass::new(font.shaper()),
                 self.styles.get(index).font_size,
                 Some(width),
             )?;

@@ -341,14 +341,6 @@ pub(crate) struct Raster {
     pub pixels: Vec<u8>,
 }
 
-/// A scoped parser over immutable font bytes, reusable across measurement and
-/// painting. It owns parsed shaping tables and reusable paragraph scratch,
-/// borrows the backing, and releases both on drop. Returned layouts do not
-/// borrow this parser.
-///
-/// This separates read-only shaping from a service's mutable glyph cache without
-/// a self reference, permanent table cache or shared mutable lock. Each returned
-/// layout owns one immutable FontSet lease shared by layouts from this pass.
 /// A source-borrowed handoff of already-shaped paragraphs. Rebreaking this value
 /// uses the original Unicode shaping output at each requested width. Its font
 /// identity and size are fixed, and it cannot outlive the exact source bytes.
@@ -367,6 +359,14 @@ impl PreparedText<'_> {
         self.font_size
     }
 }
+/// A scoped parser over immutable font bytes, reusable across measurement and
+/// painting. It owns parsed shaping tables and reusable paragraph scratch,
+/// borrows the backing, and releases both on drop. Returned layouts do not
+/// borrow this parser.
+///
+/// This separates read-only shaping from a service's mutable glyph cache without
+/// a self reference, permanent table cache or shared mutable lock. Each returned
+/// layout owns one immutable FontSet lease shared by layouts from this pass.
 pub struct TextShaper<'font> {
     font: &'font FontFace,
     planner: Option<Box<planner::Planner<'font>>>,
