@@ -567,6 +567,19 @@ mod tests {
         }
     }
     #[test]
+    fn a_checked_producer_overflow_unwinds_without_losing_the_queue() {
+        let (remote, mut inbox) = Remote::bounded(1);
+        remote.shared.lock().producers = usize::MAX;
+        assert!(std::panic::catch_unwind(|| remote.clone()).is_err());
+        assert_eq!(remote.shared.lock().producers, usize::MAX);
+        remote.shared.lock().producers = 1;
+        drop(remote.clone());
+        remote.try_send(7).unwrap();
+        assert!(matches!(inbox.stage(false), Stage::Ready));
+        assert_eq!(inbox.pop(), Some(7));
+        assert!(matches!(inbox.stage(false), Stage::Empty));
+    }
+    #[test]
     fn preallocated_frozen_prefix_has_no_per_message_allocations() {
         let (remote, inbox) = Remote::bounded(8);
         let mut lanes = Lane::new(inbox, |sum: &mut u64, value: u64| *sum += value, ());
@@ -596,6 +609,53 @@ mod tests {
 mod ledger {
     use super::*;
     use crate::{El, View, Win, div};
+    #[test]
+    fn cold_and_first_lock_transport_allocation_ledger() {
+        for capacity in [0, 1, 8] {
+            let mut pair = None;
+            let cold = allocation_counter::measure(|| {
+                pair = Some(Remote::<u64>::bounded(capacity));
+            });
+            let (remote, mut inbox) = pair.unwrap();
+            let send = allocation_counter::measure(|| {
+                if capacity == 0 {
+                    assert!(matches!(remote.try_send(7), Err(SendError::Full(7))));
+                } else {
+                    remote.try_send(7).unwrap();
+                }
+            });
+            let stage = allocation_counter::measure(|| {
+                assert!(matches!(inbox.stage(false), Stage::Ready) == (capacity != 0));
+            });
+            let pop = allocation_counter::measure(|| {
+                assert_eq!(inbox.pop(), (capacity != 0).then_some(7));
+            });
+            let (_remote, mut untouched) = Remote::<u64>::bounded(capacity);
+            let first_stage = allocation_counter::measure(|| {
+                assert!(matches!(untouched.stage(false), Stage::Empty));
+            });
+            let (_remote, mut untouched) = Remote::<u64>::bounded(capacity);
+            let first_close = allocation_counter::measure(|| untouched.close());
+            println!(
+                "remote_first_use,capacity={capacity},cold_count={},cold_bytes={},send_count={},send_bytes={},stage_count={},stage_bytes={},pop_count={},pop_bytes={},untouched_stage_count={},untouched_stage_bytes={},untouched_close_count={},untouched_close_bytes={},mutex={},shared={},state={}",
+                cold.count_total,
+                cold.bytes_total,
+                send.count_total,
+                send.bytes_total,
+                stage.count_total,
+                stage.bytes_total,
+                pop.count_total,
+                pop.bytes_total,
+                first_stage.count_total,
+                first_stage.bytes_total,
+                first_close.count_total,
+                first_close.bytes_total,
+                size_of::<Mutex<State<u64>>>(),
+                size_of::<Shared<u64>>(),
+                size_of::<State<u64>>()
+            );
+        }
+    }
     #[test]
     fn requested_lane_storage_is_explicit_and_unused_windows_remain_one_pointer() {
         struct Page;
