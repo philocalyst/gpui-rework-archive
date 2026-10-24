@@ -81,7 +81,6 @@ pub struct TextGeometry {
 pub struct TextGeometryView<'a> {
     pub(super) len: u32,
     pub(super) font_size: f32,
-    pub(super) runs: &'a [Run],
     pub(super) lines: &'a [Line],
     pub(super) carets: Option<&'a [Stop]>,
 }
@@ -90,7 +89,6 @@ impl TextGeometry {
         TextGeometryView {
             len: self.len,
             font_size: self.font_size,
-            runs: &self.runs,
             lines: &self.lines,
             carets: self.carets.as_deref(),
         }

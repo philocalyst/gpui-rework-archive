@@ -69,7 +69,7 @@ impl<'a> TextGeometryView<'a> {
 
     /// Inclusive endpoint groups for a validated selection source range.
     fn stops(self, start: u32, end: u32) -> &'a [Stop] {
-        let stops = self.carets.as_deref().unwrap_or_default();
+        let stops = self.carets.unwrap_or_default();
         let first = if start == 0 {
             0
         } else {
@@ -84,7 +84,7 @@ impl<'a> TextGeometryView<'a> {
     /// At a soft wrap the same extra pair belongs to the next line and filters
     /// out by source-affinity ownership. No upper-bound scan precedes a hit.
     fn line_tail(self, line: usize) -> &'a [Stop] {
-        let stops = self.carets.as_deref().unwrap_or_default();
+        let stops = self.carets.unwrap_or_default();
         let start = self.lines[line].start;
         let first = if start == 0 {
             0
@@ -182,10 +182,7 @@ impl<'a> TextGeometryView<'a> {
     /// Source-ordered grapheme advances, including atomic hard-break markers.
     /// Nothing is retained or allocated. Requires interactive shaping.
     pub fn graphemes(self) -> impl Iterator<Item = TextGrapheme> + 'a {
-        self.intervals(
-            self.carets.as_deref().unwrap_or_default(),
-            self.font_size * 0.25,
-        )
+        self.intervals(self.carets.unwrap_or_default(), self.font_size * 0.25)
     }
     /// Units in an exact source range. Invalid or reversed endpoints return
     /// None before iteration; bounds use the same source-affinity ownership.
@@ -196,7 +193,7 @@ impl<'a> TextGeometryView<'a> {
         if range.start > range.end {
             return None;
         }
-        let stops = self.carets.as_deref()?;
+        let stops = self.carets?;
         for offset in [range.start, range.end] {
             let index = stops.partition_point(|stop| stop.byte < offset.0);
             if stops.get(index).is_none_or(|stop| stop.byte != offset.0) {
@@ -222,7 +219,7 @@ impl<'a> TextGeometryView<'a> {
     /// Advance at an exact grapheme start; interiors and the terminal caret
     /// have no grapheme. The byte lookup reuses the existing sorted stops.
     pub fn grapheme(self, start: TextOffset) -> Option<TextGrapheme> {
-        let stops = self.carets.as_deref()?;
+        let stops = self.carets?;
         let first = stops.partition_point(|stop| stop.byte < start.0);
         self.intervals(&stops[first..], self.font_size * 0.25)
             .next()
@@ -681,13 +678,15 @@ mod tests {
                 )
             };
             let full = map
+                .view()
                 .intervals(all, 2.5)
                 .filter(|i| i.line == line)
                 .map(owned)
                 .collect::<Vec<_>>();
             let mut derived = 0;
             let cut = map
-                .intervals(map.line_tail(line), 2.5)
+                .view()
+                .intervals(map.view().line_tail(line), 2.5)
                 .inspect(|_| derived += 1)
                 .take_while(|interval| interval.start.offset.0 <= map.lines[line].end)
                 .filter(|i| i.line == line)
@@ -697,12 +696,16 @@ mod tests {
             assert!(derived <= 8);
         }
         assert_eq!(
-            map.stops(4, 6).iter().map(|s| s.byte).collect::<Vec<_>>(),
+            map.view()
+                .stops(4, 6)
+                .iter()
+                .map(|s| s.byte)
+                .collect::<Vec<_>>(),
             [4, 6]
         );
-        let requested = map.stops(8_001, 8_003);
+        let requested = map.view().stops(8_001, 8_003);
         assert_eq!(requested.len(), 3);
-        assert_eq!(map.intervals(requested, 2.5).count(), 2);
-        assert_eq!(map.intervals(all, 2.5).count(), 9_999);
+        assert_eq!(map.view().intervals(requested, 2.5).count(), 2);
+        assert_eq!(map.view().intervals(all, 2.5).count(), 9_999);
     }
 }
