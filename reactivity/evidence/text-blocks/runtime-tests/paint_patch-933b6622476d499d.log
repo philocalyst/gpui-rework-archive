@@ -1,0 +1,10 @@
+
+running 5 tests
+test colors_commit_without_description_layout_or_paint_walk_and_match_full_oracle ... ok
+test keep_rows_flag_preserves_virtual_membership_and_semantic_columns ... ok
+test masked_bases_and_alpha_topology_fallback_remain_exact ... ok
+test paint_preserves_prior_full_candidate_and_failed_newer_visual_is_not_relabelled ... ok
+test pending_colors_preserve_targets_and_geometry_until_acknowledgement ... ok
+
+test result: ok. 5 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 0.00s
+

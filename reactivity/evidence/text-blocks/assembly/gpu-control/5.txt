@@ -1,0 +1,175 @@
+
+/tmp/gpui-text-blocks-control-gpu-artifacts/render:     file format elf64-x86-64
+
+
+Disassembly of section .text:
+
+0000000000b096d0 <<gpui_canvas::canvas::DisplayList>::get>:
+  b096d0:	sub    $0x28,%rsp
+  b096d4:	test   %edx,%edx
+  b096d6:	js     b0971f <<gpui_canvas::canvas::DisplayList>::get+0x4f>
+  b096d8:	mov    %edx,%r9d
+  b096db:	mov    0xf8(%rsi),%rax
+  b096e2:	cmp    %r9,%rax
+  b096e5:	jbe    b09932 <<gpui_canvas::canvas::DisplayList>::get+0x262>
+  b096eb:	mov    0xb0(%rsi),%r8
+  b096f2:	mov    0xf0(%rsi),%rdx
+  b096f9:	shl    $0x5,%r9
+  b096fd:	mov    0x18(%rdx,%r9,1),%eax
+  b09702:	cmp    %rax,%r8
+  b09705:	jbe    b09945 <<gpui_canvas::canvas::DisplayList>::get+0x275>
+  b0970b:	add    %r9,%rdx
+  b0970e:	shl    $0x5,%rax
+  b09712:	add    0xa8(%rsi),%rax
+  b09719:	lea    0x1c(%rdx),%r9
+  b0971d:	jmp    b09753 <<gpui_canvas::canvas::DisplayList>::get+0x83>
+  b0971f:	and    $0x7fffffff,%edx
+  b09725:	mov    0x98(%rsi),%rax
+  b0972c:	cmp    %rdx,%rax
+  b0972f:	jbe    b0997b <<gpui_canvas::canvas::DisplayList>::get+0x2ab>
+  b09735:	mov    0x90(%rsi),%r8
+  b0973c:	imul   $0x38,%rdx,%r9
+  b09740:	lea    (%r8,%r9,1),%rax
+  b09744:	lea    (%r8,%r9,1),%rdx
+  b09748:	add    $0x18,%rdx
+  b0974c:	add    %r8,%r9
+  b0974f:	add    $0x30,%r9
+  b09753:	mov    0x14(%rax),%r10d
+  b09757:	mov    0x10(%rax),%r8d
+  b0975b:	movups (%rax),%xmm0
+  b0975e:	mov    (%r9),%eax
+  b09761:	test   %r8,%r8
+  b09764:	je     b09808 <<gpui_canvas::canvas::DisplayList>::get+0x138>
+  b0976a:	dec    %r8
+  b0976d:	mov    0xc8(%rsi),%r9
+  b09774:	cmp    %r9,%r8
+  b09777:	jae    b09958 <<gpui_canvas::canvas::DisplayList>::get+0x288>
+  b0977d:	mov    0xc0(%rsi),%r9
+  b09784:	lea    (%r8,%r8,2),%r8
+  b09788:	shl    $0x4,%r8
+  b0978c:	movups (%r9,%r8,1),%xmm2
+  b09791:	movups 0x10(%r9,%r8,1),%xmm1
+  b09797:	movups 0x20(%r9,%r8,1),%xmm3
+  b0979d:	movups %xmm3,(%rcx)
+  b097a0:	cmp    $0x3fffffff,%eax
+  b097a5:	jle    b0981d <<gpui_canvas::canvas::DisplayList>::get+0x14d>
+  b097a7:	movups (%rcx),%xmm3
+  b097aa:	movaps %xmm3,0x10(%rsp)
+  b097af:	movups (%rdx),%xmm3
+  b097b2:	movaps %xmm3,(%rsp)
+  b097b6:	mov    0x118(%rsi),%r8
+  b097bd:	test   %r8,%r8
+  b097c0:	je     b09925 <<gpui_canvas::canvas::DisplayList>::get+0x255>
+  b097c6:	mov    %eax,%ecx
+  b097c8:	and    $0x1fffffff,%ecx
+  b097ce:	mov    0x10(%r8),%rsi
+  b097d2:	cmp    %rcx,%rsi
+  b097d5:	jbe    b0996b <<gpui_canvas::canvas::DisplayList>::get+0x29b>
+  b097db:	movd   %r10d,%xmm4
+  b097e0:	shl    $0x3,%ecx
+  b097e3:	add    0x8(%r8),%rcx
+  b097e7:	mov    0x10(%rdx),%rdx
+  b097eb:	and    $0x20000000,%eax
+  b097f0:	xor    %esi,%esi
+  b097f2:	cmp    $0x1,%eax
+  b097f5:	adc    $0x3,%esi
+  b097f8:	movaps -0xa9e4af(%rip),%xmm3        # 6b350 <anon.b1ddf9e9b91fbec46b4e77fc18148830.109.llvm.8182223368055666678+0x200>
+  b097ff:	movss  %xmm4,%xmm3
+  b09803:	jmp    b098ba <<gpui_canvas::canvas::DisplayList>::get+0x1ea>
+  b09808:	movaps -0xa9b2ef(%rip),%xmm1        # 6e520 <anon.880d3a0e0beec417a3e8476d77b38a00.166.llvm.1650309141274653057+0x60>
+  b0980f:	movaps -0xa9ebf6(%rip),%xmm2        # 6ac20 <anon.5aa904a9c32aba1a2304aab900613666.398.llvm.11057348507900646641+0x40>
+  b09816:	cmp    $0x3fffffff,%eax
+  b0981b:	jg     b097a7 <<gpui_canvas::canvas::DisplayList>::get+0xd7>
+  b0981d:	cmp    $0x3,%r10d
+  b09821:	jae    b0984e <<gpui_canvas::canvas::DisplayList>::get+0x17e>
+  b09823:	lea    -0xa0fcba(%rip),%r8        # f9b70 <log::logger::NOP+0x10a>
+  b0982a:	lea    -0xa0fcb5(%rip),%r9        # f9b7c <log::logger::NOP+0x116>
+  b09831:	movss  (%r9,%r10,4),%xmm4
+  b09837:	movss  (%r8,%r10,4),%xmm5
+  b0983d:	movss  (%r8,%r10,4),%xmm3
+  b09843:	unpcklps %xmm5,%xmm3
+  b09846:	unpcklps %xmm4,%xmm5
+  b09849:	movlhps %xmm5,%xmm3
+  b0984c:	jmp    b09872 <<gpui_canvas::canvas::DisplayList>::get+0x1a2>
+  b0984e:	mov    0xe0(%rsi),%r8
+  b09855:	add    $0xfffffffd,%r10d
+  b09859:	cmp    %r10,%r8
+  b0985c:	jbe    b09991 <<gpui_canvas::canvas::DisplayList>::get+0x2c1>
+  b09862:	mov    0xd8(%rsi),%r8
+  b09869:	lea    (%r10,%r10,2),%r9
+  b0986d:	movups (%r8,%r9,8),%xmm3
+  b09872:	movups (%rcx),%xmm4
+  b09875:	movaps %xmm4,0x10(%rsp)
+  b0987a:	movups (%rdx),%xmm4
+  b0987d:	movaps %xmm4,(%rsp)
+  b09881:	mov    0x10(%rdx),%rdx
+  b09885:	cmp    $0xffffffff,%eax
+  b09888:	je     b098b8 <<gpui_canvas::canvas::DisplayList>::get+0x1e8>
+  b0988a:	test   %eax,%eax
+  b0988c:	js     b09919 <<gpui_canvas::canvas::DisplayList>::get+0x249>
+  b09892:	mov    0x110(%rsi),%rcx
+  b09899:	cmp    %rax,%rcx
+  b0989c:	jbe    b099a4 <<gpui_canvas::canvas::DisplayList>::get+0x2d4>
+  b098a2:	mov    0x108(%rsi),%rcx
+  b098a9:	mov    (%rcx,%rax,8),%rcx
+  b098ad:	add    $0x10,%rcx
+  b098b1:	mov    $0x2,%esi
+  b098b6:	jmp    b098ba <<gpui_canvas::canvas::DisplayList>::get+0x1ea>
+  b098b8:	xor    %esi,%esi
+  b098ba:	mov    %rdx,%r8
+  b098bd:	shr    $0x20,%r8
+  b098c1:	movzwl %r8w,%r8d
+  b098c5:	mov    %edx,%r9d
+  b098c8:	shr    $0x10,%r9d
+  b098cc:	movzwl %dx,%r10d
+  b098d0:	shr    $0x30,%rdx
+  b098d4:	movaps (%rsp),%xmm4
+  b098d8:	movups %xmm4,0x10(%rdi)
+  b098dc:	movaps 0x10(%rsp),%xmm4
+  b098e1:	movups %xmm4,0x20(%rdi)
+  b098e5:	movups %xmm2,0x30(%rdi)
+  b098e9:	movups %xmm1,0x40(%rdi)
+  b098ed:	movups %xmm0,0x50(%rdi)
+  b098f1:	mov    %esi,(%rdi)
+  b098f3:	mov    %eax,0x4(%rdi)
+  b098f6:	mov    %rcx,0x8(%rdi)
+  b098fa:	movups %xmm3,0x60(%rdi)
+  b098fe:	mov    %r10,0x70(%rdi)
+  b09902:	mov    %r9,0x78(%rdi)
+  b09906:	mov    %r8,0x80(%rdi)
+  b0990d:	mov    %rdx,0x88(%rdi)
+  b09914:	add    $0x28,%rsp
+  b09918:	ret
+  b09919:	and    $0x7fffffff,%eax
+  b0991e:	mov    $0x1,%esi
+  b09923:	jmp    b098ba <<gpui_canvas::canvas::DisplayList>::get+0x1ea>
+  b09925:	lea    0x212854(%rip),%rdi        # d1c180 <anon.fb6f5eafdfe0b435d0b4b2f0bb92df2e.199.llvm.12041963204792030370+0x4a8>
+  b0992c:	call   *0x226cbe(%rip)        # d305f0 <_DYNAMIC+0x390>
+  b09932:	lea    0x212877(%rip),%rdx        # d1c1b0 <anon.fb6f5eafdfe0b435d0b4b2f0bb92df2e.199.llvm.12041963204792030370+0x4d8>
+  b09939:	mov    %r9,%rdi
+  b0993c:	mov    %rax,%rsi
+  b0993f:	call   *0x226d9b(%rip)        # d306e0 <_DYNAMIC+0x480>
+  b09945:	lea    0x21287c(%rip),%rdx        # d1c1c8 <anon.fb6f5eafdfe0b435d0b4b2f0bb92df2e.199.llvm.12041963204792030370+0x4f0>
+  b0994c:	mov    %rax,%rdi
+  b0994f:	mov    %r8,%rsi
+  b09952:	call   *0x226d88(%rip)        # d306e0 <_DYNAMIC+0x480>
+  b09958:	lea    0x212d09(%rip),%rdx        # d1c668 <anon.e51b6cae5f9b63f9aaa253b68e8f686d.35.llvm.7563302802361057054>
+  b0995f:	mov    %r8,%rdi
+  b09962:	mov    %r9,%rsi
+  b09965:	call   *0x226d75(%rip)        # d306e0 <_DYNAMIC+0x480>
+  b0996b:	lea    0x212826(%rip),%rdx        # d1c198 <anon.fb6f5eafdfe0b435d0b4b2f0bb92df2e.199.llvm.12041963204792030370+0x4c0>
+  b09972:	mov    %rcx,%rdi
+  b09975:	call   *0x226d65(%rip)        # d306e0 <_DYNAMIC+0x480>
+  b0997b:	lea    0x21285e(%rip),%rcx        # d1c1e0 <anon.fb6f5eafdfe0b435d0b4b2f0bb92df2e.199.llvm.12041963204792030370+0x508>
+  b09982:	mov    %rdx,%rdi
+  b09985:	mov    %rax,%rsi
+  b09988:	mov    %rcx,%rdx
+  b0998b:	call   *0x226d4f(%rip)        # d306e0 <_DYNAMIC+0x480>
+  b09991:	lea    0x212c70(%rip),%rdx        # d1c608 <anon.e51b6cae5f9b63f9aaa253b68e8f686d.30.llvm.7563302802361057054>
+  b09998:	mov    %r10,%rdi
+  b0999b:	mov    %r8,%rsi
+  b0999e:	call   *0x226d3c(%rip)        # d306e0 <_DYNAMIC+0x480>
+  b099a4:	lea    0x2127bd(%rip),%rdx        # d1c168 <anon.fb6f5eafdfe0b435d0b4b2f0bb92df2e.199.llvm.12041963204792030370+0x490>
+  b099ab:	mov    %rax,%rdi
+  b099ae:	mov    %rcx,%rsi
+  b099b1:	call   *0x226d29(%rip)        # d306e0 <_DYNAMIC+0x480>

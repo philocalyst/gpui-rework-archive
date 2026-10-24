@@ -1,0 +1,188 @@
+[
+  {
+    "binary": "/tmp/gpui-text-blocks-final-artifacts/bins-b328fffb21e4b254",
+    "sha256": "b35167473b5947007e2992e0792547430db13c2ae818a64d85070d68070592ff",
+    "exit": 0,
+    "seconds": 0.021294630016200244
+  },
+  {
+    "binary": "/tmp/gpui-text-blocks-final-artifacts/color-c7952733035feccd",
+    "sha256": "05b37b4327c7bc587d1eaaa906b3e22e42e1d33cd697d4e4a68890522f589e5a",
+    "exit": 0,
+    "seconds": 0.003458147053606808
+  },
+  {
+    "binary": "/tmp/gpui-text-blocks-final-artifacts/color_authoring-0679d8bdb80bc4fd",
+    "sha256": "a315eaea9719c396dd03550030d222b47ef8312a0768f565b699ce6a53e4aba1",
+    "exit": 0,
+    "seconds": 0.002541417023167014
+  },
+  {
+    "binary": "/tmp/gpui-text-blocks-final-artifacts/color_packing-36148775cc4aaec1",
+    "sha256": "40b87d4ca598f7dcde632001dcf76b02c2802817c5cf056571fda528f5125b42",
+    "exit": 0,
+    "seconds": 0.02690418402198702
+  },
+  {
+    "binary": "/tmp/gpui-text-blocks-final-artifacts/damage-0a8811fdb520e876",
+    "sha256": "f9f62a7b4b5b4a16caf6c63a5c5850e7d8f1b5578a0ea432fd9472496f9485bf",
+    "exit": 0,
+    "seconds": 0.06696614902466536
+  },
+  {
+    "binary": "/tmp/gpui-text-blocks-final-artifacts/default_font-b23f3e735fae561c",
+    "sha256": "1dde8aa726b9eaee82579069091a64a80e255605c3eb520dc73444366ed67a42",
+    "exit": 0,
+    "seconds": 1.0299612790113315
+  },
+  {
+    "binary": "/tmp/gpui-text-blocks-final-artifacts/dpi-5a9fe0be1692700e",
+    "sha256": "66a3bfc90d2690141ee34dd583733742e7a2ab563f62c7c8eb3cc07b8028f375",
+    "exit": 0,
+    "seconds": 0.008411205955781043
+  },
+  {
+    "binary": "/tmp/gpui-text-blocks-final-artifacts/external-fb08a040797229a7",
+    "sha256": "cec137243bfda6b3bed473885aa1ee242ab5f290f88ac6609e8fe915e348cc54",
+    "exit": 0,
+    "seconds": 0.01042198995128274
+  },
+  {
+    "binary": "/tmp/gpui-text-blocks-final-artifacts/font_quality-49397e7658647ef8",
+    "sha256": "8d4cf592189b67884e6884c10e3fc4deb9c37f44bdf3a14872e2d76fcd9083c6",
+    "exit": 0,
+    "seconds": 0.04025782900862396
+  },
+  {
+    "binary": "/tmp/gpui-text-blocks-final-artifacts/font_sharing-43edc6f1be0dc325",
+    "sha256": "76a1345b942b6c2350adea194412cd50cba8aae3f58a34bd2a61ee185dc87d45",
+    "exit": 0,
+    "seconds": 0.011999875074252486
+  },
+  {
+    "binary": "/tmp/gpui-text-blocks-final-artifacts/gpui_canvas-c32f854c09b998cb",
+    "sha256": "c839e7b1ce85b1a0bad9d3d1c26a94fefe178b479ea3b8ea51eb915140c28083",
+    "exit": 0,
+    "seconds": 2.670909781008959
+  },
+  {
+    "binary": "/tmp/gpui-text-blocks-final-artifacts/grouped-5ee05e1b2eb64e09",
+    "sha256": "43b2af0c99e4b7113313373fbeece6c6671233a3734c97ec561c83850e0fc6f4",
+    "exit": 0,
+    "seconds": 0.011401392053812742
+  },
+  {
+    "binary": "/tmp/gpui-text-blocks-final-artifacts/hdr-4434e85487e42e0a",
+    "sha256": "9f2bf4f7fd8b73e24d2ea2b4a04eb258692f505275b1f369f9fc5f38af8893f3",
+    "exit": 0,
+    "seconds": 0.007911355001851916
+  },
+  {
+    "binary": "/tmp/gpui-text-blocks-final-artifacts/images-bdf1503b7dc43eb4",
+    "sha256": "08140af2e37bb43e7bce9ef9b3110b98e575ae4189addb37125ff8d8eb05948a",
+    "exit": 0,
+    "seconds": 0.06853988394141197
+  },
+  {
+    "binary": "/tmp/gpui-text-blocks-final-artifacts/literal_cow-15321ca348ccc9ed",
+    "sha256": "c438ac2c54962af15d28ea681c32b349e611906993b232157f714e281c8c8e07",
+    "exit": 0,
+    "seconds": 0.0028472719714045525
+  },
+  {
+    "binary": "/tmp/gpui-text-blocks-final-artifacts/oklch-929646e47e15588a",
+    "sha256": "5802c297826915abd1df2f5e97f84ad5b20a8a36b792e1ce1062b78113b69b0b",
+    "exit": 0,
+    "seconds": 0.00251924607437104
+  },
+  {
+    "binary": "/tmp/gpui-text-blocks-final-artifacts/paint-db78526e9cafa47a",
+    "sha256": "03484bdaea23a86d67c8702c435a5904053503192fef245f17a12153511a12fa",
+    "exit": 0,
+    "seconds": 0.013174391002394259
+  },
+  {
+    "binary": "/tmp/gpui-text-blocks-final-artifacts/parallel-097a0b512c7f6914",
+    "sha256": "cd1674de7b205e381540b95e2ba34ebb2b7f5df3b222c25725a49b2b3c502d23",
+    "exit": 0,
+    "seconds": 0.0023090309696272016
+  },
+  {
+    "binary": "/tmp/gpui-text-blocks-final-artifacts/prepared_scene-54ef7bd5ea385aaf",
+    "sha256": "13e0edd07b63889913c6d1727194a27410ffd609b8a21a1eb8f00c02943ca20e",
+    "exit": 0,
+    "seconds": 0.01056819292716682
+  },
+  {
+    "binary": "/tmp/gpui-text-blocks-final-artifacts/render-b656913987df027e",
+    "sha256": "1622b029c6fd8b15a7f888e7c93b2a7f521324f8ee21f0f133b1d6eb00d72194",
+    "exit": 0,
+    "seconds": 0.1302065560594201
+  },
+  {
+    "binary": "/tmp/gpui-text-blocks-final-artifacts/rounded-b4169bf501b3f226",
+    "sha256": "2e1d159dd73f1f68ee9baceb8114146428d19a2fad09f71fda6ff44d3094edd8",
+    "exit": 0,
+    "seconds": 0.005946781020611525
+  },
+  {
+    "binary": "/tmp/gpui-text-blocks-final-artifacts/sample_clip-f90c78b86a7b6aeb",
+    "sha256": "bcd7146ff1cc2558f0359171a42a24eb1b7e7cd324cf5a41106ff8ce9266179e",
+    "exit": 0,
+    "seconds": 0.005205424968153238
+  },
+  {
+    "binary": "/tmp/gpui-text-blocks-final-artifacts/sample_storage-316db4cbb19322e3",
+    "sha256": "113e03932e7fb3303797233a628bc98346f1d7053d250ea03f1799fa49b599c6",
+    "exit": 0,
+    "seconds": 0.1888121300144121
+  },
+  {
+    "binary": "/tmp/gpui-text-blocks-final-artifacts/selection-e093ded61580a851",
+    "sha256": "7868e2cb8709e2cca80945f385c6fa63935aa7ff391e99765f84c3e89de5db02",
+    "exit": 0,
+    "seconds": 0.016926934011280537
+  },
+  {
+    "binary": "/tmp/gpui-text-blocks-final-artifacts/shaping-2025aa9ce2df5d56",
+    "sha256": "15af4bf4a36fd88d9c2eeb4a5c615608a11f9b34ce60318b3f452301d9eeb3cc",
+    "exit": 0,
+    "seconds": 0.008351904922164977
+  },
+  {
+    "binary": "/tmp/gpui-text-blocks-final-artifacts/slots-e848fc04241b867e",
+    "sha256": "3d922fb85aa7f5e164304a0159d2767e4c02f7857fb4fea2e7e3db46be37c893",
+    "exit": 0,
+    "seconds": 0.016063555027358234
+  },
+  {
+    "binary": "/tmp/gpui-text-blocks-final-artifacts/solid-552cb792877e94e1",
+    "sha256": "0984567ff3006a825d9f9c2c348bfd66dfa34c4217c6921996e8dae99886a9ea",
+    "exit": 0,
+    "seconds": 0.002770600956864655
+  },
+  {
+    "binary": "/tmp/gpui-text-blocks-final-artifacts/text_capacity-706644c39647e508",
+    "sha256": "9ef43b33fbd680d1dd7ab11fc016e0782a0000f8e04175a163dd8255fc1a9bba",
+    "exit": 0,
+    "seconds": 0.007881214027293026
+  },
+  {
+    "binary": "/tmp/gpui-text-blocks-final-artifacts/text_run_probe-eea017db6ac20391",
+    "sha256": "b27d8994614685ee08a5d497b4d7021ca93fe4ba1e65523958ed54626adf6a16",
+    "exit": 0,
+    "seconds": 1.9757066658930853
+  },
+  {
+    "binary": "/tmp/gpui-text-blocks-final-artifacts/text_transaction-93761aede0e33135",
+    "sha256": "5658e8be605d93ddb36bc8d666d8fee8bebbfbcb1795af91c7d58101c838990a",
+    "exit": 0,
+    "seconds": 0.07661882205866277
+  },
+  {
+    "binary": "/tmp/gpui-text-blocks-final-artifacts/unicode-052a64956d439a02",
+    "sha256": "381dec9e26dfce59b43037a46ea33d7255c806f8c88fa19efe9b106ce4d035c1",
+    "exit": 0,
+    "seconds": 0.028756655054166913
+  }
+]

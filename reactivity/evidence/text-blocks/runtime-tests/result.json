@@ -1,0 +1,44 @@
+[
+  {
+    "binary": "/tmp/gpui-text-blocks-runtime-artifacts/paint_patch-933b6622476d499d",
+    "sha256": "fdee7000985726c57899ba741dd6fe0070f7038488934c2a4e67ba24d4e6a97a",
+    "exit": 0,
+    "seconds": 0.018307453952729702
+  },
+  {
+    "binary": "/tmp/gpui-text-blocks-runtime-artifacts/paint_slots-8e87dcbbd9c51368",
+    "sha256": "5b49ab769dfe27d2f62563ebbf6e6f4c236884591387a3cb96085afc7c81abec",
+    "exit": 0,
+    "seconds": 0.016622997005470097
+  },
+  {
+    "binary": "/tmp/gpui-text-blocks-runtime-artifacts/presentation-ffe4dff0e1bd0980",
+    "sha256": "03fbdcc566e16d29c1a4348cbc1109c4be6a637d3caca3562a8c506c5d8f346b",
+    "exit": 0,
+    "seconds": 0.012732640956528485
+  },
+  {
+    "binary": "/tmp/gpui-text-blocks-runtime-artifacts/text_cache-67d421ff86950821",
+    "sha256": "e4663918c38edb7e49f34f8ade5542b618b5b6b8d0127359752b74f327c28793",
+    "exit": 0,
+    "seconds": 0.02004438196308911
+  },
+  {
+    "binary": "/tmp/gpui-text-blocks-runtime-artifacts/text_geometry-936de053b27ebe72",
+    "sha256": "719b001db2f91cdef8599bc507365f7f8e9ee63c2529f84a19147fcf4584ea2e",
+    "exit": 0,
+    "seconds": 0.010827489895746112
+  },
+  {
+    "binary": "/tmp/gpui-text-blocks-runtime-artifacts/text_selection-4b655c0831decae7",
+    "sha256": "88179203480179f5059ec2efaf8d285f321befa5229179fe4e6612abfe10915f",
+    "exit": 0,
+    "seconds": 0.029138213023543358
+  },
+  {
+    "binary": "/tmp/gpui-text-blocks-runtime-artifacts/text_selection_compound-36d17fc037b8227c",
+    "sha256": "d7a33edbc82a635f3748d41a455772432bf948cff38d14d71bb27ddf7d93af67",
+    "exit": 0,
+    "seconds": 0.01484441792126745
+  }
+]

@@ -1,0 +1,10 @@
+
+running 5 tests
+test analytic_sample_oracle_reflections_shear_clips_and_radius_clamping ... ok
+test correlated_layers_cannot_fill_each_others_rounded_corners ... ok
+test invalid_radius_is_transactional_and_negative_zero_is_rectangular ... ok
+test public_image_views_keep_canonical_material_and_exact_authored_radius ... ok
+test source_word_preserves_every_finite_radius_exponent_and_mantissa_samples ... ok
+
+test result: ok. 5 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 0.00s
+

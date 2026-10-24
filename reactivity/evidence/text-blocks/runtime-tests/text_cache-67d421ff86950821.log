@@ -1,0 +1,8 @@
+
+running 3 tests
+test failed_shaping_retains_old_pixels_and_recovers_without_owner_description ... ok
+test font_override_then_inherit_matches_fresh_shaping ... ok
+test shared_text_at_distinct_widths_survives_actions_remounts_and_resize ... ok
+
+test result: ok. 3 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 0.01s
+

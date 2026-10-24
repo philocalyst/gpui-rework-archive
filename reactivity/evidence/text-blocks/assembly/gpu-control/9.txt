@@ -1,0 +1,48 @@
+
+/tmp/gpui-text-blocks-control-gpu-artifacts/render:     file format elf64-x86-64
+
+
+Disassembly of section .text:
+
+0000000000761390 <<core::iter::adapters::enumerate::Enumerate<core::iter::adapters::map::Map<core::slice::iter::Iter<u32>, <gpui_canvas::canvas::PreparedGroup>::placements::{closure#0}>> as core::iter::traits::iterator::Iterator>::next>:
+  761390:	push   %r14
+  761392:	push   %rbx
+  761393:	sub    $0x58,%rsp
+  761397:	mov    %rdi,%rbx
+  76139a:	mov    (%rsi),%rax
+  76139d:	cmp    0x8(%rsi),%rax
+  7613a1:	je     76140d <<core::iter::adapters::enumerate::Enumerate<core::iter::adapters::map::Map<core::slice::iter::Iter<u32>, <gpui_canvas::canvas::PreparedGroup>::placements::{closure#0}>> as core::iter::traits::iterator::Iterator>::next+0x7d>
+  7613a3:	mov    %rsi,%r14
+  7613a6:	lea    0x4(%rax),%rcx
+  7613aa:	mov    %rcx,(%rsi)
+  7613ad:	mov    0x10(%rsi),%rsi
+  7613b1:	mov    (%rax),%edx
+  7613b3:	mov    %rsp,%rdi
+  7613b6:	call   75b610 <<gpui_canvas::canvas::PreparedGroup>::placements::{closure#0}>
+  7613bb:	cmpb   $0xff,(%rsp)
+  7613bf:	je     76140d <<core::iter::adapters::enumerate::Enumerate<core::iter::adapters::map::Map<core::slice::iter::Iter<u32>, <gpui_canvas::canvas::PreparedGroup>::placements::{closure#0}>> as core::iter::traits::iterator::Iterator>::next+0x7d>
+  7613c1:	mov    0x50(%rsp),%rax
+  7613c6:	mov    %rax,0x58(%rbx)
+  7613ca:	movups 0x40(%rsp),%xmm0
+  7613cf:	movups %xmm0,0x48(%rbx)
+  7613d3:	movups (%rsp),%xmm0
+  7613d7:	movups 0x10(%rsp),%xmm1
+  7613dc:	movups 0x20(%rsp),%xmm2
+  7613e1:	movups 0x30(%rsp),%xmm3
+  7613e6:	movups %xmm3,0x38(%rbx)
+  7613ea:	movups %xmm2,0x28(%rbx)
+  7613ee:	movups %xmm1,0x18(%rbx)
+  7613f2:	movups %xmm0,0x8(%rbx)
+  7613f6:	mov    0x18(%r14),%rax
+  7613fa:	lea    0x1(%rax),%rcx
+  7613fe:	mov    %rcx,0x18(%r14)
+  761402:	mov    %rax,(%rbx)
+  761405:	add    $0x58,%rsp
+  761409:	pop    %rbx
+  76140a:	pop    %r14
+  76140c:	ret
+  76140d:	movb   $0xff,0x8(%rbx)
+  761411:	add    $0x58,%rsp
+  761415:	pop    %rbx
+  761416:	pop    %r14
+  761418:	ret

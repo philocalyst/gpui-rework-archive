@@ -1,0 +1,40 @@
+{
+  "canvas": {
+    "binaries": 31,
+    "passed": 222,
+    "failures": 0
+  },
+  "runtime": {
+    "binaries": 7,
+    "passed": 50,
+    "failures": 0
+  },
+  "gpu_control": {
+    "passed": 49,
+    "failures": 0
+  },
+  "gpu_candidate": {
+    "passed": 49,
+    "failures": 0
+  },
+  "scalar_selected": {
+    "passed": 21,
+    "failures": 0
+  },
+  "borrow_compile_fail": {
+    "passed": 4,
+    "failures": 0
+  },
+  "clippy": {
+    "exit": 0,
+    "cargo_manifest_warning": "existing optional gpui_gpu unused dependency in headless GPUI"
+  },
+  "negative_owner": {
+    "exit": 101,
+    "expected": "shared owner strong count1 !=2"
+  },
+  "negative_bounds": {
+    "exit": 101,
+    "expected": "canonical command fingerprint changes despite equal first-mode pixel fingerprint"
+  }
+}

@@ -1,0 +1,8 @@
+
+running 3 tests
+test const_palette_alpha_and_float_equality_keep_their_contracts ... ok
+test legacy_admission_channels_and_conversion_are_bit_exact ... ok
+test legacy_working_colors_produce_identical_cpu_pixels ... ok
+
+test result: ok. 3 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 0.02s
+

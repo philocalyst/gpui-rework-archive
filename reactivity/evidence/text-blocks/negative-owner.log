@@ -1,0 +1,21 @@
+   Compiling gpui_canvas v0.1.0 (/tmp/gpui-text-blocks-sol/reactivity/crates/canvas)
+    Finished `release` profile [optimized] target(s) in 13.76s
+     Running unittests src/lib.rs (/tmp/gpui-text-blocks-sol-target/release/build/gpui_canvas/c32f854c09b998cb/out/gpui_canvas-c32f854c09b998cb)
+
+running 1 test
+
+thread 'text::geometry_ledger::packed_owner_is_shared_only_when_the_scene_needs_a_retained_run' (1657355) panicked at crates/canvas/src/text/geometry_ledger.rs:218:5:
+assertion `left == right` failed
+  left: 1
+ right: 2
+note: run with `RUST_BACKTRACE=1` environment variable to display a backtrace
+test text::geometry_ledger::packed_owner_is_shared_only_when_the_scene_needs_a_retained_run ... FAILED
+
+failures:
+
+failures:
+    text::geometry_ledger::packed_owner_is_shared_only_when_the_scene_needs_a_retained_run
+
+test result: FAILED. 0 passed; 1 failed; 0 ignored; 0 measured; 94 filtered out; finished in 0.00s
+
+error: test failed, to rerun pass `-p gpui_canvas --lib`

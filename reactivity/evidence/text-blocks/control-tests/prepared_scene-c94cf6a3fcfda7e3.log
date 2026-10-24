@@ -1,0 +1,8 @@
+
+running 3 tests
+test canonical_scene_is_ordered_borrowed_and_does_not_rasterize ... ok
+test raster_keys_survive_cache_eviction_and_shared_services_but_not_distinct_faces ... ok
+test recording_canvas_allocates_sole_cpu_image_only_on_request ... ok
+
+test result: ok. 3 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 0.00s
+

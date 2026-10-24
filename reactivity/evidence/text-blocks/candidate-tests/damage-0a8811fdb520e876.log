@@ -1,0 +1,12 @@
+
+running 7 tests
+test a_small_repair_at_a_distant_origin_needs_only_local_bins ... ok
+test hdr_sample_promotion_matches_the_uncompressed_path ... ok
+test hdr_support_uses_unquantized_working_colors ... ok
+test identical_leased_text_is_empty_and_moved_text_repairs_old_and_new_support ... ok
+test insert_remove_reorder_and_transformed_color_edits_repair_every_pixel ... ok
+test randomized_repairs_cross_partial_tile_and_viewport_edges ... ok
+test unpresented_edits_union_without_retaining_the_intermediate_scene ... ok
+
+test result: ok. 7 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 0.06s
+

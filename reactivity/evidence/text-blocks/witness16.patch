@@ -1,0 +1,19 @@
+--- a/reactivity/crates/canvas/src/canvas.rs
++++ b/reactivity/crates/canvas/src/canvas.rs
+@@ -273,6 +273,7 @@
+ // A raster witness, not expanded glyph geometry. The glyph positions live only
+ // in the shared packed owner. Cached admitted bounds avoid repeating forward
+ // transform/clip work in CSR, compatibility iterators and every tile visit.
++#[repr(align(4))]
+ #[derive(Clone, Copy)]
+ struct DrawRef {
+     bounds: [u16; 4],
+@@ -285,7 +286,7 @@
+         self.glyph == INLINE_GLYPH
+     }
+ }
+-const _: () = assert!(size_of::<DrawRef>() == 14);
++const _: () = assert!(size_of::<DrawRef>() == 16);
+ fn glyph_rect(origin: Point, [x, baseline]: [f32; 2], raster: &Raster, scale: f32) -> Rect {
+     let m = raster.metrics;
+     Rect::new(

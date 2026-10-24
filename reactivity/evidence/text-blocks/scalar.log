@@ -1,0 +1,47 @@
+   Compiling gpui_canvas v0.1.0 (/tmp/gpui-text-blocks-sol/reactivity/crates/canvas)
+    Finished `release` profile [optimized] target(s) in 6.03s
+     Running tests/dpi.rs (/tmp/gpui-text-blocks-sol-target/release/build/gpui_canvas/f309fe77915a376c/out/dpi-f309fe77915a376c)
+
+running 3 tests
+test invalid_density_and_physical_font_size_reject_even_empty_layouts_atomically ... ok
+test two_x_density_uses_real_physical_masks_and_matches_physical_font_rendering ... ok
+test density_one_preserves_existing_pixels_and_fractional_density_uses_physical_raster_keys ... ok
+
+test result: ok. 3 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 0.00s
+
+     Running tests/prepared_scene.rs (/tmp/gpui-text-blocks-sol-target/release/build/gpui_canvas/74949eb37ff13e69/out/prepared_scene-74949eb37ff13e69)
+
+running 3 tests
+test canonical_scene_is_ordered_borrowed_and_does_not_rasterize ... ok
+test recording_canvas_allocates_sole_cpu_image_only_on_request ... ok
+test raster_keys_survive_cache_eviction_and_shared_services_but_not_distinct_faces ... ok
+
+test result: ok. 3 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 0.00s
+
+     Running tests/render.rs (/tmp/gpui-text-blocks-sol-target/release/build/gpui_canvas/ff91e722ea5199b3/out/render-ff91e722ea5199b3)
+
+running 10 tests
+test linear_light_alpha_and_premultiplied_output ... ok
+test correlated_edges_are_composited_before_sample_average ... ok
+test staged_scene_keeps_old_pixels_and_reuses_the_output_allocation ... ok
+test no_sample_draw_preserves_the_entire_background_at_quantization_thresholds ... ok
+test wrapped_runs_keep_utf8_and_whole_shaping_clusters ... ok
+test real_shaping_ligatures_unicode_measure_and_paint_are_stable ... ok
+test transformed_text_clip_and_foreign_layout_failure_are_explicit ... ok
+test swash_native_pixels_and_transformed_cells_match_independent_oracles ... ok
+test invalid_inputs_and_caps_do_not_corrupt_scene ... ok
+test transformed_rectangles_match_exhaustive_sample_oracle ... ok
+
+test result: ok. 10 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 0.09s
+
+     Running tests/text_transaction.rs (/tmp/gpui-text-blocks-sol-target/release/build/gpui_canvas/6ce8821428b69140/out/text_transaction-6ce8821428b69140)
+
+running 5 tests
+test warm_many_label_rebuild_has_no_submission_allocations ... ok
+test submission_allocation_and_retained_capacity_ledger ... ok
+test mixed_script_paint_selection_density_transform_and_scroll_keep_canonical_output ... ok
+test late_command_limit_failure_preserves_scene_and_new_resource_identity ... ok
+test duplicate_keys_and_foreign_face_rollback_preserve_pixels_and_candidate ... ok
+
+test result: ok. 5 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 0.05s
+

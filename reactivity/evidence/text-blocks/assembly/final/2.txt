@@ -1,0 +1,513 @@
+
+/tmp/gpui-text-blocks-final-artifacts/text_run_probe-eea017db6ac20391:     file format elf64-x86-64
+
+
+Disassembly of section .text:
+
+00000000005c9600 <<gpui_canvas::canvas::bins::RasterScratch>::prepare>:
+  5c9600:	push   %rbp
+  5c9601:	push   %r15
+  5c9603:	push   %r14
+  5c9605:	push   %r13
+  5c9607:	push   %r12
+  5c9609:	push   %rbx
+  5c960a:	sub    $0xc8,%rsp
+  5c9611:	mov    %rdi,%r14
+  5c9614:	mov    (%rdx),%rbx
+  5c9617:	mov    0x8(%rdx),%r12
+  5c961b:	mov    0x10(%rdx),%r15
+  5c961f:	mov    0x18(%rdx),%r13
+  5c9623:	movzwl 0x30(%rdi),%edi
+  5c9627:	movzwl 0x32(%r14),%eax
+  5c962c:	mov    %edi,%ecx
+  5c962e:	and    $0x7fff,%ecx
+  5c9634:	cmp    %bx,%cx
+  5c9637:	setbe  %r9b
+  5c963b:	movzwl 0x34(%r14),%edx
+  5c9640:	cmp    %r12w,%ax
+  5c9644:	setbe  %r10b
+  5c9648:	movzwl 0x36(%r14),%r8d
+  5c964d:	cmp    %r15w,%dx
+  5c9651:	setae  %r11b
+  5c9655:	and    %r10b,%r11b
+  5c9658:	and    %r9b,%r11b
+  5c965b:	cmp    %r13w,%r8w
+  5c965f:	setae  %bpl
+  5c9663:	and    %r11b,%bpl
+  5c9666:	je     5c9687 <<gpui_canvas::canvas::bins::RasterScratch>::prepare+0x87>
+  5c9668:	test   %di,%di
+  5c966b:	jns    5c9ced <<gpui_canvas::canvas::bins::RasterScratch>::prepare+0x6ed>
+  5c9671:	mov    0x10(%r14),%r9
+  5c9675:	cmp    $0x2,%r9
+  5c9679:	jae    5c9d01 <<gpui_canvas::canvas::bins::RasterScratch>::prepare+0x701>
+  5c967f:	mov    %r8d,%esi
+  5c9682:	jmp    5c9cd9 <<gpui_canvas::canvas::bins::RasterScratch>::prepare+0x6d9>
+  5c9687:	movq   $0x0,0x30(%r14)
+  5c968f:	mov    %r15,%rcx
+  5c9692:	sub    %rbx,%rcx
+  5c9695:	mov    %r13,%rax
+  5c9698:	sub    %r12,%rax
+  5c969b:	mov    %rcx,0x28(%rsp)
+  5c96a0:	imul   %rcx,%rax
+  5c96a4:	movq   $0x0,0x10(%r14)
+  5c96ac:	mov    %rax,%rdx
+  5c96af:	inc    %rdx
+  5c96b2:	mov    %r14,0x18(%rsp)
+  5c96b7:	mov    %rbx,0x10(%rsp)
+  5c96bc:	mov    %r15,0x38(%rsp)
+  5c96c1:	mov    %rax,0x30(%rsp)
+  5c96c6:	mov    %bpl,0xf(%rsp)
+  5c96cb:	jne    5c96d2 <<gpui_canvas::canvas::bins::RasterScratch>::prepare+0xd2>
+  5c96cd:	xor    %r15d,%r15d
+  5c96d0:	jmp    5c9718 <<gpui_canvas::canvas::bins::RasterScratch>::prepare+0x118>
+  5c96d2:	cmp    (%r14),%rdx
+  5c96d5:	ja     5c9dbb <<gpui_canvas::canvas::bins::RasterScratch>::prepare+0x7bb>
+  5c96db:	xor    %r15d,%r15d
+  5c96de:	mov    0x8(%r14),%rbx
+  5c96e2:	lea    (%rbx,%r15,4),%rdi
+  5c96e6:	test   %rax,%rax
+  5c96e9:	je     5c970f <<gpui_canvas::canvas::bins::RasterScratch>::prepare+0x10f>
+  5c96eb:	lea    0x0(,%rax,4),%rdx
+  5c96f3:	mov    %rsi,%r14
+  5c96f6:	xor    %esi,%esi
+  5c96f8:	call   *0x1b0a92(%rip)        # 77a190 <memset@GLIBC_2.2.5>
+  5c96fe:	mov    %r14,%rsi
+  5c9701:	mov    0x18(%rsp),%r14
+  5c9706:	add    0x30(%rsp),%r15
+  5c970b:	lea    (%rbx,%r15,4),%rdi
+  5c970f:	movl   $0x0,(%rdi)
+  5c9715:	inc    %r15
+  5c9718:	mov    %r15,0x10(%r14)
+  5c971c:	mov    0x78(%rsi),%rcx
+  5c9720:	mov    0x80(%rsi),%rdx
+  5c9727:	mov    %rdx,%r9
+  5c972a:	shl    $0x4,%r9
+  5c972e:	sub    %rdx,%r9
+  5c9731:	sub    %rdx,%r9
+  5c9734:	mov    %rcx,0x48(%rsp)
+  5c9739:	add    %rcx,%r9
+  5c973c:	mov    %rdx,0x58(%rsp)
+  5c9741:	test   %rdx,%rdx
+  5c9744:	mov    %r12,0x20(%rsp)
+  5c9749:	mov    %r13,0x50(%rsp)
+  5c974e:	je     5c9a1b <<gpui_canvas::canvas::bins::RasterScratch>::prepare+0x41b>
+  5c9754:	mov    0x18(%rsp),%rax
+  5c9759:	mov    0x8(%rax),%rax
+  5c975d:	mov    0x10(%rsp),%rdx
+  5c9762:	mov    %rdx,%rcx
+  5c9765:	mov    0x38(%rsp),%rsi
+  5c976a:	sub    %rsi,%rcx
+  5c976d:	mov    %rcx,0x40(%rsp)
+  5c9772:	mov    $0x1,%ecx
+  5c9777:	sub    %rdx,%rcx
+  5c977a:	mov    %rcx,0x78(%rsp)
+  5c977f:	lea    0x0(,%rdx,4),%rcx
+  5c9787:	mov    %rax,%rdi
+  5c978a:	sub    %rcx,%rdi
+  5c978d:	add    $0x14,%rdi
+  5c9791:	mov    %rdi,0x70(%rsp)
+  5c9796:	mov    0x28(%rsp),%rdi
+  5c979b:	lea    0x0(,%rdi,4),%rdi
+  5c97a3:	mov    %rdi,0x68(%rsp)
+  5c97a8:	lea    0x0(,%rsi,4),%rdi
+  5c97b0:	mov    0x28(%rsp),%rsi
+  5c97b5:	sub    %rcx,%rdi
+  5c97b8:	mov    %rdi,0x90(%rsp)
+  5c97c0:	lea    -0x1(%rdx),%rcx
+  5c97c4:	mov    %rcx,0x60(%rsp)
+  5c97c9:	pcmpeqd %xmm0,%xmm0
+  5c97cd:	mov    0x48(%rsp),%rcx
+  5c97d2:	mov    %r9,0x80(%rsp)
+  5c97da:	jmp    5c9807 <<gpui_canvas::canvas::bins::RasterScratch>::prepare+0x207>
+  5c97dc:	nopl   0x0(%rax)
+  5c97e0:	mov    0x88(%rsp),%rcx
+  5c97e8:	add    $0xe,%rcx
+  5c97ec:	mov    0x80(%rsp),%r9
+  5c97f4:	cmp    %r9,%rcx
+  5c97f7:	mov    0x20(%rsp),%r12
+  5c97fc:	mov    0x50(%rsp),%r13
+  5c9801:	je     5c9a1b <<gpui_canvas::canvas::bins::RasterScratch>::prepare+0x41b>
+  5c9807:	mov    %rcx,0x88(%rsp)
+  5c980f:	mov    (%rcx),%rdi
+  5c9812:	mov    %edi,%ebp
+  5c9814:	shr    $0x14,%ebp
+  5c9817:	cmp    %r12,%rbp
+  5c981a:	cmovbe %r12,%rbp
+  5c981e:	mov    %rdi,%r8
+  5c9821:	shr    $0x34,%r8
+  5c9825:	mov    %rdi,%rcx
+  5c9828:	movabs $0xf000000000000,%rdx
+  5c9832:	and    %rdx,%rcx
+  5c9835:	cmp    $0x1,%rcx
+  5c9839:	sbb    $0xffffffffffffffff,%r8
+  5c983d:	cmp    %r13,%r8
+  5c9840:	cmovae %r13,%r8
+  5c9844:	cmp    %r8,%rbp
+  5c9847:	jae    5c97e0 <<gpui_canvas::canvas::bins::RasterScratch>::prepare+0x1e0>
+  5c9849:	mov    %edi,%edx
+  5c984b:	shr    $0x4,%edx
+  5c984e:	and    $0xfff,%edx
+  5c9854:	mov    0x10(%rsp),%rcx
+  5c9859:	cmp    %rcx,%rdx
+  5c985c:	cmovbe %rcx,%rdx
+  5c9860:	mov    %rdi,%r9
+  5c9863:	shr    $0x24,%r9
+  5c9867:	and    $0xfff,%r9d
+  5c986e:	movabs $0xf00000000,%rcx
+  5c9878:	and    %rcx,%rdi
+  5c987b:	cmp    $0x1,%rdi
+  5c987f:	sbb    $0xffffffffffffffff,%r9
+  5c9883:	mov    0x38(%rsp),%rcx
+  5c9888:	cmp    %rcx,%r9
+  5c988b:	cmovae %rcx,%r9
+  5c988f:	cmp    %r9,%rdx
+  5c9892:	jae    5c97e0 <<gpui_canvas::canvas::bins::RasterScratch>::prepare+0x1e0>
+  5c9898:	mov    %r9,%rcx
+  5c989b:	mov    %rdx,%r10
+  5c989e:	not    %r10
+  5c98a1:	mov    %r9,%r11
+  5c98a4:	add    %rcx,%r10
+  5c98a7:	mov    0x78(%rsp),%rdi
+  5c98ac:	lea    (%rdx,%rdi,1),%rbx
+  5c98b0:	mov    %rbp,%rcx
+  5c98b3:	sub    0x20(%rsp),%rcx
+  5c98b8:	mov    %rsi,%r14
+  5c98bb:	imul   %rcx,%r14
+  5c98bf:	add    %r14,%rbx
+  5c98c2:	mov    %r14,%r9
+  5c98c5:	not    %r9
+  5c98c8:	add    0x10(%rsp),%r9
+  5c98cd:	sub    %rdx,%r9
+  5c98d0:	mov    %r9,0x98(%rsp)
+  5c98d8:	imul   0x68(%rsp),%rcx
+  5c98de:	lea    (%rcx,%rdx,4),%r9
+  5c98e2:	mov    0x40(%rsp),%rcx
+  5c98e7:	add    0x70(%rsp),%r9
+  5c98ec:	mov    0x60(%rsp),%r13
+  5c98f1:	sub    %r14,%r13
+  5c98f4:	sub    %rdx,%r13
+  5c98f7:	neg    %r11
+  5c98fa:	mov    %r11,0xa8(%rsp)
+  5c9902:	add    %rdi,%r14
+  5c9905:	mov    %rbx,0xa0(%rsp)
+  5c990d:	mov    %rbx,%r11
+  5c9910:	xor    %ebx,%ebx
+  5c9912:	data16 data16 data16 data16 cs nopw 0x0(%rax,%rax,1)
+  5c9920:	cmp    %r11,%r15
+  5c9923:	mov    %r11,%r12
+  5c9926:	cmova  %r15,%r12
+  5c992a:	add    %r13,%r12
+  5c992d:	cmp    %r12,%r10
+  5c9930:	cmovb  %r10,%r12
+  5c9934:	mov    %rsi,%rdi
+  5c9937:	imul   %rbx,%rdi
+  5c993b:	add    0xa0(%rsp),%rdi
+  5c9943:	cmp    %rdi,%r15
+  5c9946:	cmova  %r15,%rdi
+  5c994a:	imul   %rbx,%rcx
+  5c994e:	add    0x98(%rsp),%rcx
+  5c9956:	add    %rdi,%rcx
+  5c9959:	cmp    %rcx,%r10
+  5c995c:	cmovb  %r10,%rcx
+  5c9960:	inc    %rcx
+  5c9963:	mov    %rdx,%rdi
+  5c9966:	cmp    $0x9,%rcx
+  5c996a:	jb     5c99c0 <<gpui_canvas::canvas::bins::RasterScratch>::prepare+0x3c0>
+  5c996c:	mov    %ecx,%esi
+  5c996e:	and    $0x7,%esi
+  5c9971:	mov    $0x8,%edi
+  5c9976:	cmove  %rdi,%rsi
+  5c997a:	sub    %rsi,%rcx
+  5c997d:	mov    %rcx,%rdi
+  5c9980:	add    %rdx,%rdi
+  5c9983:	sub    %rsi,%r12
+  5c9986:	inc    %r12
+  5c9989:	xor    %ecx,%ecx
+  5c998b:	nopl   0x0(%rax,%rax,1)
+  5c9990:	movdqu -0x10(%r9,%rcx,4),%xmm1
+  5c9997:	movdqu (%r9,%rcx,4),%xmm2
+  5c999d:	psubd  %xmm0,%xmm1
+  5c99a1:	psubd  %xmm0,%xmm2
+  5c99a5:	movdqu %xmm1,-0x10(%r9,%rcx,4)
+  5c99ac:	movdqu %xmm2,(%r9,%rcx,4)
+  5c99b2:	add    $0x8,%rcx
+  5c99b6:	cmp    %rcx,%r12
+  5c99b9:	jne    5c9990 <<gpui_canvas::canvas::bins::RasterScratch>::prepare+0x390>
+  5c99bb:	mov    0x28(%rsp),%rsi
+  5c99c0:	inc    %rbp
+  5c99c3:	mov    0xa8(%rsp),%rcx
+  5c99cb:	add    %rdi,%rcx
+  5c99ce:	add    %r14,%rdi
+  5c99d1:	data16 data16 data16 data16 data16 cs nopw 0x0(%rax,%rax,1)
+  5c99e0:	cmp    %r15,%rdi
+  5c99e3:	jae    5c9d4e <<gpui_canvas::canvas::bins::RasterScratch>::prepare+0x74e>
+  5c99e9:	incl   (%rax,%rdi,4)
+  5c99ec:	inc    %rdi
+  5c99ef:	inc    %rcx
+  5c99f2:	jne    5c99e0 <<gpui_canvas::canvas::bins::RasterScratch>::prepare+0x3e0>
+  5c99f4:	inc    %rbx
+  5c99f7:	add    0x90(%rsp),%r9
+  5c99ff:	add    %rsi,%r11
+  5c9a02:	mov    0x40(%rsp),%rcx
+  5c9a07:	add    %rcx,%r13
+  5c9a0a:	add    %rsi,%r14
+  5c9a0d:	cmp    %r8,%rbp
+  5c9a10:	jne    5c9920 <<gpui_canvas::canvas::bins::RasterScratch>::prepare+0x320>
+  5c9a16:	jmp    5c97e0 <<gpui_canvas::canvas::bins::RasterScratch>::prepare+0x1e0>
+  5c9a1b:	cmp    $0x2,%r15
+  5c9a1f:	mov    0x18(%rsp),%r14
+  5c9a24:	jb     5c9a9e <<gpui_canvas::canvas::bins::RasterScratch>::prepare+0x49e>
+  5c9a26:	mov    0x8(%r14),%rdx
+  5c9a2a:	mov    (%rdx),%eax
+  5c9a2c:	lea    -0x1(%r15),%rdi
+  5c9a30:	lea    -0x2(%r15),%r8
+  5c9a34:	mov    %edi,%ecx
+  5c9a36:	and    $0x3,%ecx
+  5c9a39:	mov    $0x1,%esi
+  5c9a3e:	cmp    $0x3,%r8
+  5c9a42:	jb     5c9a81 <<gpui_canvas::canvas::bins::RasterScratch>::prepare+0x481>
+  5c9a44:	and    $0xfffffffffffffffc,%rdi
+  5c9a48:	xor    %esi,%esi
+  5c9a4a:	nopw   0x0(%rax,%rax,1)
+  5c9a50:	add    0x4(%rdx,%rsi,4),%eax
+  5c9a54:	mov    %eax,0x4(%rdx,%rsi,4)
+  5c9a58:	add    0x8(%rdx,%rsi,4),%eax
+  5c9a5c:	mov    %eax,0x8(%rdx,%rsi,4)
+  5c9a60:	add    0xc(%rdx,%rsi,4),%eax
+  5c9a64:	mov    %eax,0xc(%rdx,%rsi,4)
+  5c9a68:	add    0x10(%rdx,%rsi,4),%eax
+  5c9a6c:	mov    %eax,0x10(%rdx,%rsi,4)
+  5c9a70:	add    $0x4,%rsi
+  5c9a74:	cmp    %rsi,%rdi
+  5c9a77:	jne    5c9a50 <<gpui_canvas::canvas::bins::RasterScratch>::prepare+0x450>
+  5c9a79:	test   %rcx,%rcx
+  5c9a7c:	je     5c9a9e <<gpui_canvas::canvas::bins::RasterScratch>::prepare+0x49e>
+  5c9a7e:	inc    %rsi
+  5c9a81:	lea    (%rdx,%rsi,4),%rdx
+  5c9a85:	xor    %esi,%esi
+  5c9a87:	nopw   0x0(%rax,%rax,1)
+  5c9a90:	add    (%rdx,%rsi,4),%eax
+  5c9a93:	mov    %eax,(%rdx,%rsi,4)
+  5c9a96:	inc    %rsi
+  5c9a99:	cmp    %rsi,%rcx
+  5c9a9c:	jne    5c9a90 <<gpui_canvas::canvas::bins::RasterScratch>::prepare+0x490>
+  5c9a9e:	mov    0x30(%rsp),%rdi
+  5c9aa3:	cmp    %r15,%rdi
+  5c9aa6:	jae    5c9e02 <<gpui_canvas::canvas::bins::RasterScratch>::prepare+0x802>
+  5c9aac:	mov    0x8(%r14),%rbp
+  5c9ab0:	mov    0x0(%rbp,%rdi,4),%r12d
+  5c9ab5:	movq   $0x0,0x28(%r14)
+  5c9abd:	test   %r12,%r12
+  5c9ac0:	mov    %r12,0x40(%rsp)
+  5c9ac5:	je     5c9b2e <<gpui_canvas::canvas::bins::RasterScratch>::prepare+0x52e>
+  5c9ac7:	cmp    %r12,0x18(%r14)
+  5c9acb:	jb     5c9d81 <<gpui_canvas::canvas::bins::RasterScratch>::prepare+0x781>
+  5c9ad1:	xor    %r13d,%r13d
+  5c9ad4:	mov    0x20(%r14),%rbx
+  5c9ad8:	lea    (%rbx,%r13,4),%rdi
+  5c9adc:	cmp    $0x1,%r12d
+  5c9ae0:	je     5c9b0a <<gpui_canvas::canvas::bins::RasterScratch>::prepare+0x50a>
+  5c9ae2:	lea    -0x4(,%r12,4),%rdx
+  5c9aea:	xor    %esi,%esi
+  5c9aec:	mov    %r9,%r15
+  5c9aef:	call   *0x1b069b(%rip)        # 77a190 <memset@GLIBC_2.2.5>
+  5c9af5:	mov    %r15,%r9
+  5c9af8:	lea    (%r12,%r13,1),%rax
+  5c9afc:	lea    (%rbx,%rax,4),%rdi
+  5c9b00:	add    $0xfffffffffffffffc,%rdi
+  5c9b04:	add    %r12,%r13
+  5c9b07:	dec    %r13
+  5c9b0a:	movl   $0x0,(%rdi)
+  5c9b10:	inc    %r13
+  5c9b13:	mov    0x8(%r14),%rbp
+  5c9b17:	mov    0x10(%r14),%r15
+  5c9b1b:	mov    0x58(%rsp),%rax
+  5c9b20:	mov    %r13,0x28(%r14)
+  5c9b24:	test   %rax,%rax
+  5c9b27:	jne    5c9b43 <<gpui_canvas::canvas::bins::RasterScratch>::prepare+0x543>
+  5c9b29:	jmp    5c9c86 <<gpui_canvas::canvas::bins::RasterScratch>::prepare+0x686>
+  5c9b2e:	xor    %r13d,%r13d
+  5c9b31:	mov    0x58(%rsp),%rax
+  5c9b36:	mov    %r13,0x28(%r14)
+  5c9b3a:	test   %rax,%rax
+  5c9b3d:	je     5c9c86 <<gpui_canvas::canvas::bins::RasterScratch>::prepare+0x686>
+  5c9b43:	mov    0x18(%rsp),%rax
+  5c9b48:	mov    0x20(%rax),%rcx
+  5c9b4c:	mov    $0x1,%edx
+  5c9b51:	sub    0x10(%rsp),%rdx
+  5c9b56:	mov    0x20(%rsp),%rsi
+  5c9b5b:	neg    %rsi
+  5c9b5e:	jmp    5c9b6e <<gpui_canvas::canvas::bins::RasterScratch>::prepare+0x56e>
+  5c9b60:	mov    %r8,%r9
+  5c9b63:	cmp    %r8,0x48(%rsp)
+  5c9b68:	je     5c9c86 <<gpui_canvas::canvas::bins::RasterScratch>::prepare+0x686>
+  5c9b6e:	mov    -0xe(%r9),%rax
+  5c9b72:	add    $0xfffffffffffffff2,%r9
+  5c9b76:	mov    %r9,%r8
+  5c9b79:	mov    %eax,%r9d
+  5c9b7c:	shr    $0x14,%r9d
+  5c9b80:	mov    0x20(%rsp),%rdi
+  5c9b85:	cmp    %rdi,%r9
+  5c9b88:	cmovbe %rdi,%r9
+  5c9b8c:	mov    %rax,%r10
+  5c9b8f:	shr    $0x34,%r10
+  5c9b93:	mov    %rax,%rdi
+  5c9b96:	movabs $0xf000000000000,%r11
+  5c9ba0:	and    %r11,%rdi
+  5c9ba3:	cmp    $0x1,%rdi
+  5c9ba7:	sbb    $0xffffffffffffffff,%r10
+  5c9bab:	mov    0x50(%rsp),%rdi
+  5c9bb0:	cmp    %rdi,%r10
+  5c9bb3:	cmovae %rdi,%r10
+  5c9bb7:	cmp    %r10,%r9
+  5c9bba:	jae    5c9b60 <<gpui_canvas::canvas::bins::RasterScratch>::prepare+0x560>
+  5c9bbc:	mov    %eax,%edi
+  5c9bbe:	shr    $0x4,%edi
+  5c9bc1:	and    $0xfff,%edi
+  5c9bc7:	mov    0x10(%rsp),%r11
+  5c9bcc:	cmp    %r11,%rdi
+  5c9bcf:	cmovbe %r11,%rdi
+  5c9bd3:	mov    %rax,%rbx
+  5c9bd6:	shr    $0x24,%rbx
+  5c9bda:	and    $0xfff,%ebx
+  5c9be0:	movabs $0xf00000000,%r11
+  5c9bea:	and    %r11,%rax
+  5c9bed:	cmp    $0x1,%rax
+  5c9bf1:	sbb    $0xffffffffffffffff,%rbx
+  5c9bf5:	mov    0x38(%rsp),%rax
+  5c9bfa:	cmp    %rax,%rbx
+  5c9bfd:	cmovae %rax,%rbx
+  5c9c01:	mov    %rdi,%r11
+  5c9c04:	sub    %rbx,%r11
+  5c9c07:	jae    5c9b60 <<gpui_canvas::canvas::bins::RasterScratch>::prepare+0x560>
+  5c9c0d:	mov    %r8,%rbx
+  5c9c10:	sub    0x48(%rsp),%rbx
+  5c9c15:	shr    $1,%rbx
+  5c9c18:	movabs $0x6db6db6db6db6db7,%rax
+  5c9c22:	imul   %rax,%rbx
+  5c9c26:	add    %rdx,%rdi
+  5c9c29:	lea    (%rsi,%r9,1),%r14
+  5c9c2d:	imul   0x28(%rsp),%r14
+  5c9c33:	add    %rdi,%r14
+  5c9c36:	cs nopw 0x0(%rax,%rax,1)
+  5c9c40:	inc    %r9
+  5c9c43:	mov    %r11,%r12
+  5c9c46:	mov    %r14,%rdi
+  5c9c49:	nopl   0x0(%rax)
+  5c9c50:	cmp    %r15,%rdi
+  5c9c53:	jae    5c9d5e <<gpui_canvas::canvas::bins::RasterScratch>::prepare+0x75e>
+  5c9c59:	mov    0x0(%rbp,%rdi,4),%eax
+  5c9c5d:	dec    %eax
+  5c9c5f:	mov    %eax,0x0(%rbp,%rdi,4)
+  5c9c63:	cmp    %rax,%r13
+  5c9c66:	jbe    5c9d6e <<gpui_canvas::canvas::bins::RasterScratch>::prepare+0x76e>
+  5c9c6c:	mov    %ebx,(%rcx,%rax,4)
+  5c9c6f:	inc    %rdi
+  5c9c72:	inc    %r12
+  5c9c75:	jne    5c9c50 <<gpui_canvas::canvas::bins::RasterScratch>::prepare+0x650>
+  5c9c77:	add    0x28(%rsp),%r14
+  5c9c7c:	cmp    %r10,%r9
+  5c9c7f:	jne    5c9c40 <<gpui_canvas::canvas::bins::RasterScratch>::prepare+0x640>
+  5c9c81:	jmp    5c9b60 <<gpui_canvas::canvas::bins::RasterScratch>::prepare+0x560>
+  5c9c86:	test   %r15,%r15
+  5c9c89:	je     5c9e12 <<gpui_canvas::canvas::bins::RasterScratch>::prepare+0x812>
+  5c9c8f:	lea    0x4(%rbp),%rsi
+  5c9c93:	lea    -0x4(,%r15,4),%rdx
+  5c9c9b:	mov    %rbp,%rdi
+  5c9c9e:	call   *0x1b06b4(%rip)        # 77a358 <memmove@GLIBC_2.2.5>
+  5c9ca4:	mov    0x30(%rsp),%rdi
+  5c9ca9:	cmp    %r15,%rdi
+  5c9cac:	mov    0x18(%rsp),%r14
+  5c9cb1:	mov    0x20(%rsp),%rax
+  5c9cb6:	mov    0x50(%rsp),%rsi
+  5c9cbb:	mov    0x40(%rsp),%rcx
+  5c9cc0:	jae    5c9e4d <<gpui_canvas::canvas::bins::RasterScratch>::prepare+0x84d>
+  5c9cc6:	mov    %ecx,0x0(%rbp,%rdi,4)
+  5c9cca:	movzbl 0xf(%rsp),%ebp
+  5c9ccf:	mov    0x10(%rsp),%rcx
+  5c9cd4:	mov    0x38(%rsp),%rdx
+  5c9cd9:	mov    %cx,0x30(%r14)
+  5c9cde:	mov    %ax,0x32(%r14)
+  5c9ce3:	mov    %dx,0x34(%r14)
+  5c9ce8:	mov    %si,0x36(%r14)
+  5c9ced:	mov    %ebp,%eax
+  5c9cef:	add    $0xc8,%rsp
+  5c9cf6:	pop    %rbx
+  5c9cf7:	pop    %r12
+  5c9cf9:	pop    %r13
+  5c9cfb:	pop    %r14
+  5c9cfd:	pop    %r15
+  5c9cff:	pop    %rbp
+  5c9d00:	ret
+  5c9d01:	mov    0x28(%r14),%rsi
+  5c9d05:	mov    0x8(%r14),%r10
+  5c9d09:	mov    0x20(%r14),%r11
+  5c9d0d:	add    $0x4,%r10
+  5c9d11:	inc    %r9
+  5c9d14:	jmp    5c9d31 <<gpui_canvas::canvas::bins::RasterScratch>::prepare+0x731>
+  5c9d16:	cs nopw 0x0(%rax,%rax,1)
+  5c9d20:	add    $0x4,%r10
+  5c9d24:	dec    %r9
+  5c9d27:	cmp    $0x3,%r9
+  5c9d2b:	jb     5c967f <<gpui_canvas::canvas::bins::RasterScratch>::prepare+0x7f>
+  5c9d31:	mov    -0x4(%r10),%edi
+  5c9d35:	cmp    (%r10),%edi
+  5c9d38:	je     5c9d20 <<gpui_canvas::canvas::bins::RasterScratch>::prepare+0x720>
+  5c9d3a:	cmp    %rdi,%rsi
+  5c9d3d:	jbe    5c9df5 <<gpui_canvas::canvas::bins::RasterScratch>::prepare+0x7f5>
+  5c9d43:	movzwl (%r11,%rdi,4),%ebx
+  5c9d48:	mov    %ebx,(%r11,%rdi,4)
+  5c9d4c:	jmp    5c9d20 <<gpui_canvas::canvas::bins::RasterScratch>::prepare+0x720>
+  5c9d4e:	lea    0x19dbdb(%rip),%rdx        # 767930 <anon.0ac2545e11a71ee7d3423e8383958346.9.llvm.5078552564575009897+0x50>
+  5c9d55:	mov    %r15,%rsi
+  5c9d58:	call   *0x1b0302(%rip)        # 77a060 <_DYNAMIC+0x2e0>
+  5c9d5e:	lea    0x19db9b(%rip),%rdx        # 767900 <anon.0ac2545e11a71ee7d3423e8383958346.9.llvm.5078552564575009897+0x20>
+  5c9d65:	mov    %r15,%rsi
+  5c9d68:	call   *0x1b02f2(%rip)        # 77a060 <_DYNAMIC+0x2e0>
+  5c9d6e:	lea    0x19dba3(%rip),%rdx        # 767918 <anon.0ac2545e11a71ee7d3423e8383958346.9.llvm.5078552564575009897+0x38>
+  5c9d75:	mov    %rax,%rdi
+  5c9d78:	mov    %r13,%rsi
+  5c9d7b:	call   *0x1b02df(%rip)        # 77a060 <_DYNAMIC+0x2e0>
+  5c9d81:	lea    0x18(%r14),%rdi
+  5c9d85:	mov    $0x4,%ecx
+  5c9d8a:	mov    $0x4,%r8d
+  5c9d90:	xor    %esi,%esi
+  5c9d92:	mov    %r12,%rdx
+  5c9d95:	mov    %r9,%rbx
+  5c9d98:	call   5b4940 <<alloc::raw_vec::RawVecInner<_>>::reserve::do_reserve_and_handle::<alloc::alloc::Global>>
+  5c9d9d:	mov    %rbx,%r9
+  5c9da0:	mov    0x28(%r14),%r13
+  5c9da4:	mov    0x20(%r14),%rbx
+  5c9da8:	lea    (%rbx,%r13,4),%rdi
+  5c9dac:	cmp    $0x1,%r12d
+  5c9db0:	jne    5c9ae2 <<gpui_canvas::canvas::bins::RasterScratch>::prepare+0x4e2>
+  5c9db6:	jmp    5c9b0a <<gpui_canvas::canvas::bins::RasterScratch>::prepare+0x50a>
+  5c9dbb:	mov    $0x4,%ecx
+  5c9dc0:	mov    $0x4,%r8d
+  5c9dc6:	mov    %r14,%rdi
+  5c9dc9:	mov    %rsi,%rbx
+  5c9dcc:	xor    %esi,%esi
+  5c9dce:	call   5b4940 <<alloc::raw_vec::RawVecInner<_>>::reserve::do_reserve_and_handle::<alloc::alloc::Global>>
+  5c9dd3:	mov    0x30(%rsp),%rax
+  5c9dd8:	mov    %rbx,%rsi
+  5c9ddb:	mov    0x10(%r14),%r15
+  5c9ddf:	mov    0x8(%r14),%rbx
+  5c9de3:	lea    (%rbx,%r15,4),%rdi
+  5c9de7:	test   %rax,%rax
+  5c9dea:	jne    5c96eb <<gpui_canvas::canvas::bins::RasterScratch>::prepare+0xeb>
+  5c9df0:	jmp    5c970f <<gpui_canvas::canvas::bins::RasterScratch>::prepare+0x10f>
+  5c9df5:	lea    0x19dc0c(%rip),%rdx        # 767a08 <anon.0ac2545e11a71ee7d3423e8383958346.20.llvm.5078552564575009897+0x60>
+  5c9dfc:	call   *0x1b025e(%rip)        # 77a060 <_DYNAMIC+0x2e0>
+  5c9e02:	lea    0x19dbb7(%rip),%rdx        # 7679c0 <anon.0ac2545e11a71ee7d3423e8383958346.20.llvm.5078552564575009897+0x18>
+  5c9e09:	mov    %r15,%rsi
+  5c9e0c:	call   *0x1b024e(%rip)        # 77a060 <_DYNAMIC+0x2e0>
+  5c9e12:	movq   $0x1,0xb0(%rsp)
+  5c9e1e:	movq   $0x1,0xb8(%rsp)
+  5c9e2a:	movq   $0x0,0xc0(%rsp)
+  5c9e36:	lea    0x19db9b(%rip),%rdx        # 7679d8 <anon.0ac2545e11a71ee7d3423e8383958346.20.llvm.5078552564575009897+0x30>
+  5c9e3d:	lea    0xb0(%rsp),%rdi
+  5c9e45:	xor    %esi,%esi
+  5c9e47:	call   *0x1b0aab(%rip)        # 77a8f8 <_DYNAMIC+0xb78>
+  5c9e4d:	lea    0x19db9c(%rip),%rdx        # 7679f0 <anon.0ac2545e11a71ee7d3423e8383958346.20.llvm.5078552564575009897+0x48>
+  5c9e54:	mov    %r15,%rsi
+  5c9e57:	call   *0x1b0203(%rip)        # 77a060 <_DYNAMIC+0x2e0>

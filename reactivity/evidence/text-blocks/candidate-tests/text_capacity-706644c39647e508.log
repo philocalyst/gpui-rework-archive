@@ -1,0 +1,10 @@
+
+running 1 test
+test repeated_labels_keep_batched_capacity_and_allocate_nothing_when_warm ... labels=32 placement_bytes=0 batched_bytes=22528
+labels=48 placement_bytes=0 batched_bytes=45056
+labels=64 placement_bytes=0 batched_bytes=45056
+labels=96 placement_bytes=0 batched_bytes=90112
+ok
+
+test result: ok. 1 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 0.00s
+

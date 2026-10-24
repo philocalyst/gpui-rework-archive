@@ -1,0 +1,7 @@
+[
+  {
+    "binary": "/tmp/gpui-text-blocks-final-gpu-artifacts/render",
+    "sha256": "b15d946f3eb0dff1cfbfe9bde7d8443695ce28f26524aeee7a99bdebd8146f79",
+    "source_executable": "/tmp/gpui-text-blocks-sol-target/release/build/gpui_gpu/4cf7c31b862bb0ac/out/render-4cf7c31b862bb0ac"
+  }
+]

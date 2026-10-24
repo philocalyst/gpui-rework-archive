@@ -1,0 +1,11 @@
+
+running 6 tests
+test actual_font_coverage_is_encoded_as_extended_linear_half_pixels ... ok
+test byte_counts_and_checked_configuration_are_format_specific ... ok
+test extended_values_compose_before_finite_storage_saturation ... ok
+test p3_primaries_remain_linear_and_reference_white_is_explicit_metadata ... ok
+test recording_allocates_eight_byte_pixels_lazily_and_staging_reuses_them ... ok
+test rgba16f_is_actual_eight_byte_linear_premultiplied_output ... ok
+
+test result: ok. 6 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 0.00s
+

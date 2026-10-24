@@ -1,0 +1,21 @@
+   Compiling gpui_canvas v0.1.0 (/tmp/gpui-text-blocks-sol/reactivity/crates/canvas)
+    Finished `release` profile [optimized] target(s) in 9.23s
+     Running tests/text_transaction.rs (/tmp/gpui-text-blocks-sol-target/release/build/gpui_canvas/93761aede0e33135/out/text_transaction-93761aede0e33135)
+
+running 1 test
+
+thread 'mixed_script_paint_selection_density_transform_and_scroll_keep_canonical_output' (1660096) panicked at crates/canvas/tests/text_transaction.rs:190:9:
+assertion `left == right` failed: mode=0
+  left: (4415992746233845574, 7527280167539412869, 43)
+ right: (604497862809837837, 7527280167539412869, 43)
+note: run with `RUST_BACKTRACE=1` environment variable to display a backtrace
+test mixed_script_paint_selection_density_transform_and_scroll_keep_canonical_output ... FAILED
+
+failures:
+
+failures:
+    mixed_script_paint_selection_density_transform_and_scroll_keep_canonical_output
+
+test result: FAILED. 0 passed; 1 failed; 0 ignored; 0 measured; 4 filtered out; finished in 0.00s
+
+error: test failed, to rerun pass `-p gpui_canvas --test text_transaction`

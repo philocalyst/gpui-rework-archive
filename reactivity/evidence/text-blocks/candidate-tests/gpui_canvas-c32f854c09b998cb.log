@@ -1,0 +1,211 @@
+
+running 95 tests
+test canvas::bins::tests::admitted_reference_and_command_limits_fit_narrow_membership_and_cuts ... ok
+test canvas::bins::tests::bounds_projection_and_csr_match_independent_command_membership ... ok
+test canvas::bins::tests::embedded_cut_preserves_a_nonzero_first_painter_and_no_opaque_prefix ... ok
+test canvas::bins::tests::opaque_certificates_follow_physical_tiles_and_exact_alpha ... ok
+test canvas::bins::tests::recording_has_no_scratch_allocation_and_first_raster_charges_one_owner ... raster_headers,Canvas=464,Scratch=56,RenderStats=96,Frame=88
+raster_allocations,first_requests=2,first_bytes=76,retained=76,csr_bytes=20,warm_requests=0,warm_bytes=0
+ok
+test canvas::columns::tests::alternating_late_scopes_disclose_bounded_discovery_fallback_growth ... scope_late_alternating,rows=162,capacity=256,allocations=2,requested=18432
+ok
+test canvas::columns::tests::complete_bank_layout_and_plain_recording_floor_are_explicit ... scope_bank_layout,Canvas=464,DisplayList=264,Columns=48,Inline=48,CommonGroup=56,Scope=48,Paint=24,Stored=24,Frame=88,Prepared=56,PreparedGroup=104,Slot=4,OptionSlot=4,Edit=20
+scope_plain_recording,allocations=2,requested=248,peak=248
+ok
+test canvas::columns::tests::empty_and_clipped_calls_do_not_admit_literals_when_the_bank_is_full ... ok
+test canvas::columns::tests::literal_palette_shares_exact_bits_without_aliasing_mutable_sources ... ok
+test canvas::columns::tests::palette_flags_survive_support_union_without_leaking_into_geometry ... ok
+test canvas::columns::tests::positional_writes_detach_once_and_never_rejoin_literal_discovery ... ok
+test canvas::columns::tests::repeated_last_scope_after_discovery_prefix_needs_no_more_rows_or_allocations ... ok
+test canvas::columns::tests::repeated_unique_and_late_miss_palette_storage_is_explicit ... literal_palette,mode=0,rows=1,capacity=4,allocations=1,requested=96,live=96
+literal_palette,mode=1,rows=4096,capacity=4096,allocations=11,requested=196512,live=98304
+literal_palette,mode=2,rows=4096,capacity=4096,allocations=11,requested=196512,live=98304
+ok
+test canvas::columns::tests::support_flags_never_enter_empty_or_maximum_canvas_geometry ... ok
+test canvas::glyph_axis::tests::clipped_command_bounds_and_signed_zero_axes_match_scalar_samples ... ok
+test canvas::glyph_axis::tests::shared_mask_addresses_match_every_original_scalar_sample ... ok
+test canvas::image_axis::tests::every_correlated_sample_matches_generic_inverse_filter_and_decoder_bits ... ok
+test canvas::image_axis::tests::whole_tile_overlaps_match_generic_painter_order_and_partial_tiles ... ok
+test canvas::image_axis::work_tests::setup_is_per_axis_and_adjacent_filter_rows_are_reused_without_allocation ... ok
+test canvas::mask_kernel::tests::every_supported_backend_matches_mapping_bits_and_all_primitive_sites ... ok
+test canvas::paint::tests::paint_plan_adds_no_canvas_fields_and_allocates_nothing ... paint_storage,Canvas=464,DisplayList=264,PaintIndex=4,PaintEdit=20,PaintCommit=40
+paint_commit_allocations=0,bytes=0
+ok
+test canvas::rounded::storage::rounded_sources_keep_retained_strides_without_image_extension_allocations ... rounded_canvas,Canvas=464,DisplayList=264,Inline=48,DrawRef=14,Common=80,BorrowedSource=16,PreparedSource=56,PreparedDraw=168,ImageResources=80
+rounded_command_alloc,plain=2,248;rounded=2,248
+rounded_image_existing_resource,allocations=0,bytes=0,header=80,handles=32
+ok
+test canvas::rounded::tests::closed_circle_and_half_open_box ... ok
+test canvas::samples::tests::binary_masks_preserve_absent_bits_in_both_promotion_modes ... ok
+test canvas::samples::tests::identical_finite_samples_preserve_exact_bits_including_signed_zero ... ok
+test canvas::samples::tests::promotion_preserves_every_sample_and_later_overlap ... ok
+test canvas::scaled_mask_tests::normalized_mask_obeys_half_open_local_edges_before_texel_rounding ... ok
+test canvas::scaled_mask_tests::separable_masks_and_certificates_match_every_scalar_sample ... ok
+test canvas::simd_tests::complete_pixels_all_supported_backends_match_independent_sample_composition ... complete scene executed supported backends through Avx2(Avx2 { _private: () })
+complete scene executed supported backends through Avx2(Avx2 { _private: () })
+complete scene executed supported backends through Avx2(Avx2 { _private: () })
+complete scene executed supported backends through Avx2(Avx2 { _private: () })
+ok
+test color::gamut::tests::author_bits_alpha_validation_and_extended_colors_have_explicit_contracts ... ok
+test color::gamut::tests::finite_input_sweep_keeps_exact_membership_and_a_nearby_outward_witness ... ok
+test color::gamut::tests::first_outward_roots_and_unresolved_contacts_keep_separate_authority ... ok
+test color::gamut::tests::limits_match_independent_high_precision_monotone_interval_oracle ... worst error in f32ULPs=1.0213637705892324e0; normal-L scaled error=6.855178725219511e-8
+worst error in f32ULPs=1.0213637705892324e0; normal-L scaled error=6.855178725219511e-8
+worst error in f32ULPs=1.0213637705892324e0; normal-L scaled error=6.855178725219511e-8
+worst error in f32ULPs=1.0213637705892324e0; normal-L scaled error=6.855178725219511e-8
+ok
+test color::gamut::tests::nonbinary_rational_tangent_blocks_later_roots_instead_of_guessing_a_sign ... ok
+test color::half_tests::authored_color_keeps_sixteen_byte_provenance_header ... ok
+test color::half_tests::every_adjacent_half_midpoint_rounds_ties_even_on_both_sides ... ok
+test color::half_tests::every_finite_half_roundtrips_including_signed_zero ... ok
+test color::half_tests::known_values_finite_saturation_and_little_endian_channels ... ok
+test color::half_tests::p3_matrix_applies_to_premultiplied_linear_channels ... ok
+test color::packing_tests::every_base199_exponent_triple_round_trips ... ok
+test color::packing_tests::raw_rgb_and_oklch_layouts_preserve_every_lane ... ok
+test color::quantizer_tests::every_in_range_float_matches_the_reference_quantizer ... ignored, 107 million inputs; run explicitly with --release
+test color::quantizer_tests::opaque_quantizer_microbenchmark ... ignored, timing experiment; run explicitly with --release --nocapture
+test color::quantizer_tests::quantizer_matches_reference_at_all_thresholds_and_bucket_edges ... ok
+test image::tests::bilinear_reconstruction_is_linear_premultiplied_and_clamps_texel_edges ... ok
+test image::tests::byte_table_preserves_existing_color_bits_for_every_channel_and_alpha ... ok
+test image::tests::encoded_premultiplication_is_undone_before_linear_conversion ... ok
+test image::tests::immutable_ids_and_hdr_working_pixels_keep_their_leases ... Image=8 ImageData=40 ImageView=40 PreparedSource=56 PreparedDraw=168 PreparedPlacement=88 Canvas=464
+ok
+test image::tests::rejects_bad_lengths_alpha_and_nonfinite_hdr_before_publication ... ok
+test image::tests::scenes_lease_each_distinct_image_once_and_failed_candidates_keep_old_leases ... ok
+test image::tests::tile_decode_cache_is_exact_under_collisions_profiles_alpha_and_filters ... ok
+test text::bundled_coverage::tests::certificate_is_a_complete_maximal_partition ... ok
+test text::bundled_coverage::tests::every_unicode_scalar_matches_bundled_font_coverage ... ok
+test text::coverage::tests::all_ascii_values_at_every_short_and_vector_boundary ... ok
+test text::coverage::tests::callback_rejection_stops_before_any_later_event ... ok
+test text::coverage::tests::every_unicode_scalar_crossing_a_vector_boundary ... ok
+test text::coverage::tests::immutable_primary_font_covers_the_skipped_ascii_domain ... ok
+test text::coverage::tests::mixed_scripts_continuations_and_controls_keep_source_order ... ok
+test text::font_tests::bundled_concurrency_release_remint_and_poison_recovery ... 
+thread '<unnamed>' (1677333) panicked at crates/canvas/src/text.rs:917:17:
+simulated unpublished-font initialization panic
+note: run with `RUST_BACKTRACE=1` environment variable to display a backtrace
+font_face_bytes=8,text_system_bytes=72,font_data_header_bytes=40,registry_static_bytes=16,scaler_header_bytes=168
+ok
+test text::geometry_ledger::canonical_caret_group_shapes_are_measured_before_implicit_affinity_encoding ... CARET_GROUPS case=empty width=None bytes=0 stops=1 common=1 split=0 exclusive=0
+CARET_GROUPS case=empty width=Some(1.0) bytes=0 stops=1 common=1 split=0 exclusive=0
+CARET_GROUPS case=empty width=Some(55.0) bytes=0 stops=1 common=1 split=0 exclusive=0
+CARET_GROUPS case=empty width=Some(400.0) bytes=0 stops=1 common=1 split=0 exclusive=0
+CARET_GROUPS case=ascii32k width=None bytes=32768 stops=32769 common=32769 split=0 exclusive=0
+CARET_GROUPS case=ascii32k width=Some(1.0) bytes=32768 stops=65536 common=2 split=32767 exclusive=0
+CARET_GROUPS case=ascii32k width=Some(55.0) bytes=32768 stops=38230 common=27308 split=5461 exclusive=0
+CARET_GROUPS case=ascii32k width=Some(400.0) bytes=32768 stops=33513 common=32025 split=744 exclusive=0
+CARET_GROUPS case=ligatures width=None bytes=17 stops=16 common=16 split=0 exclusive=0
+CARET_GROUPS case=ligatures width=Some(1.0) bytes=17 stops=24 common=8 split=8 exclusive=0
+CARET_GROUPS case=ligatures width=Some(55.0) bytes=17 stops=18 common=14 split=2 exclusive=0
+CARET_GROUPS case=ligatures width=Some(400.0) bytes=17 stops=16 common=16 split=0 exclusive=0
+CARET_GROUPS case=paragraphs width=None bytes=14 stops=8 common=8 split=0 exclusive=0
+CARET_GROUPS case=paragraphs width=Some(1.0) bytes=14 stops=8 common=8 split=0 exclusive=0
+CARET_GROUPS case=paragraphs width=Some(55.0) bytes=14 stops=8 common=8 split=0 exclusive=0
+CARET_GROUPS case=paragraphs width=Some(400.0) bytes=14 stops=8 common=8 split=0 exclusive=0
+CARET_GROUPS case=bidi width=None bytes=33 stops=29 common=19 split=5 exclusive=0
+CARET_GROUPS case=bidi width=Some(1.0) bytes=33 stops=44 common=4 split=20 exclusive=0
+CARET_GROUPS case=bidi width=Some(55.0) bytes=33 stops=30 common=18 split=6 exclusive=0
+CARET_GROUPS case=bidi width=Some(400.0) bytes=33 stops=29 common=19 split=5 exclusive=0
+CARET_GROUPS case=isolates width=None bytes=29 stops=24 common=14 split=5 exclusive=0
+CARET_GROUPS case=isolates width=Some(1.0) bytes=29 stops=31 common=7 split=12 exclusive=0
+CARET_GROUPS case=isolates width=Some(55.0) bytes=29 stops=24 common=14 split=5 exclusive=0
+CARET_GROUPS case=isolates width=Some(400.0) bytes=29 stops=24 common=14 split=5 exclusive=0
+CARET_GROUPS case=zwj width=None bytes=24 stops=14 common=12 split=1 exclusive=0
+CARET_GROUPS case=zwj width=Some(1.0) bytes=24 stops=22 common=4 split=9 exclusive=0
+CARET_GROUPS case=zwj width=Some(55.0) bytes=24 stops=14 common=12 split=1 exclusive=0
+CARET_GROUPS case=zwj width=Some(400.0) bytes=24 stops=14 common=12 split=1 exclusive=0
+CARET_GROUPS case=emoji width=None rejected=MissingGlyph('👩')
+CARET_GROUPS case=emoji width=Some(1.0) rejected=MissingGlyph('👩')
+CARET_GROUPS case=emoji width=Some(55.0) rejected=MissingGlyph('👩')
+CARET_GROUPS case=emoji width=Some(400.0) rejected=MissingGlyph('👩')
+CARET_GROUPS case=one_long_grapheme width=None bytes=2049 stops=2 common=2 split=0 exclusive=0
+CARET_GROUPS case=one_long_grapheme width=Some(1.0) bytes=2049 stops=2 common=2 split=0 exclusive=0
+CARET_GROUPS case=one_long_grapheme width=Some(55.0) bytes=2049 stops=2 common=2 split=0 exclusive=0
+CARET_GROUPS case=one_long_grapheme width=Some(400.0) bytes=2049 stops=2 common=2 split=0 exclusive=0
+ok
+test text::geometry_ledger::each_retained_text_call_charges_one_packed_owner_lease ... PACKED_RUN_LEASES admitted_runs=32 packed_increments=32 packed_decrements=32 unique_mask_leases=2
+ok
+test text::geometry_ledger::packed_owner_is_shared_only_when_the_scene_needs_a_retained_run ... PACKED_SHARED layout=40 owner_payload=16 arc_control=16
+ok
+test text::geometry_ledger::retained_geometry_drops_paint_leases_and_detaches_explicit_mutation ... ok
+test text::geometry_ledger::scoped_geometry_allocation_and_payload_ledger ... GEOMETRY_HEADERS layout=40 details=80 stop=12 run=24 line=24 system=72
+GEOMETRY_PAYLOAD case=empty bytes=0 interactive=false glyphs=0 glyph_capacity_bytes=0 runs=0 lines=0 stops=0 geometry_capacity_bytes=0 allocations=204 requested=108792 peak_live=44612 retained=72 retained_allocations=2
+GEOMETRY_PAYLOAD case=empty bytes=0 interactive=true glyphs=0 glyph_capacity_bytes=0 runs=0 lines=1 stops=1 geometry_capacity_bytes=108 allocations=208 requested=109044 peak_live=44816 retained=276 retained_allocations=5
+GEOMETRY_PAYLOAD case=short bytes=13 interactive=false glyphs=13 glyph_capacity_bytes=156 runs=0 lines=0 stops=0 geometry_capacity_bytes=0 allocations=206 requested=109862 peak_live=45650 retained=228 retained_allocations=3
+GEOMETRY_PAYLOAD case=short bytes=13 interactive=true glyphs=13 glyph_capacity_bytes=156 runs=1 lines=1 stops=14 geometry_capacity_bytes=360 allocations=215 requested=110914 peak_live=46358 retained=684 retained_allocations=7
+GEOMETRY_PAYLOAD case=wrapped bytes=936 interactive=false glyphs=624 glyph_capacity_bytes=7488 runs=150 lines=30 stops=0 geometry_capacity_bytes=6912 allocations=438 requested=440568 peak_live=232420 retained=14568 retained_allocations=6
+GEOMETRY_PAYLOAD case=wrapped bytes=936 interactive=true glyphs=624 glyph_capacity_bytes=7488 runs=150 lines=30 stops=786 geometry_capacity_bytes=16344 allocations=450 requested=489024 peak_live=262276 retained=24000 retained_allocations=7
+GEOMETRY_PAYLOAD case=ascii32k bytes=32768 interactive=false glyphs=32768 glyph_capacity_bytes=393216 runs=745 lines=745 stops=0 geometry_capacity_bytes=49152 allocations=240 requested=4121168 peak_live=3865148 retained=442536 retained_allocations=6
+GEOMETRY_PAYLOAD case=ascii32k bytes=32768 interactive=true glyphs=32768 glyph_capacity_bytes=393216 runs=745 lines=745 stops=33513 geometry_capacity_bytes=451308 allocations=258 requested=6751500 peak_live=5687868 retained=844692 retained_allocations=7
+GEOMETRY_PAYLOAD case=one_long_grapheme bytes=2049 interactive=false glyphs=1024 glyph_capacity_bytes=12288 runs=0 lines=0 stops=0 geometry_capacity_bytes=0 allocations=214 requested=352146 peak_live=271614 retained=12360 retained_allocations=3
+GEOMETRY_PAYLOAD case=one_long_grapheme bytes=2049 interactive=true glyphs=1024 glyph_capacity_bytes=12288 runs=1 lines=1 stops=2 geometry_capacity_bytes=216 allocations=219 requested=352506 peak_live=271926 retained=12672 retained_allocations=7
+ok
+test text::glyph_buffer::tests::checked_header_endpoints_and_failed_admission_preserve_the_vector ... ok
+test text::glyph_buffer::tests::empty_spare_capacity_and_full_buffers_keep_exact_allocation_and_bits ... GLYPH_OWNER_HEADERS owner=16 packed=12
+ok
+test text::glyph_buffer::tests::threads_have_independent_ownership_and_shared_borrows ... 
+thread 'text::glyph_buffer::tests::threads_have_independent_ownership_and_shared_borrows' (1677342) panicked at crates/canvas/src/text/glyph_buffer.rs:182:17:
+owner unwind control
+ok
+test text::glyph_buffer::tests::transfer_allocates_nothing ... ok
+test text::glyph_codec_tests::all_font_code_endpoints_and_float_bits_round_trip ... ok
+test text::glyph_codec_tests::borrowed_iteration_never_materializes_an_expanded_buffer ... ok
+test text::glyph_codec_tests::document_length_does_not_require_a_long_tail_geometry_owner ... ok
+test text::glyph_codec_tests::exact_embedded_fallback_fonts_fit_the_code_namespaces ... ok
+test text::layout::interaction::tests::byte_cuts_keep_boundary_ownership_and_only_visit_the_requested_source ... ok
+test text::outline_once_gate::accepted_complex_outline_exact_masks_and_retained_scratch ... complex cff2=false cost including leased mask=AllocationInfo { count_total: 29, count_current: 7, count_max: 8, bytes_total: 39662, bytes_current: 20194, bytes_max: 20458 }
+complex cff2=true cost including leased mask=AllocationInfo { count_total: 29, count_current: 7, count_max: 8, bytes_total: 39662, bytes_current: 20194, bytes_max: 20458 }
+ok
+test text::outline_once_gate::explicit_zeno_matches_auto_bounds_with_empty_contours ... ok
+test text::outline_once_gate::frozen_canvas_pixels_and_leased_clear ... ok
+test text::outline_once_gate::glyf_memory_geometry_empty_moves_and_transient_recording ... glyf kind=0 outcome=Err(ResourceLimit) cost=AllocationInfo { count_total: 0, count_current: 0, count_max: 0, bytes_total: 0, bytes_current: 0, bytes_max: 0 }
+glyf kind=1 outcome=Ok(0) cost=AllocationInfo { count_total: 3, count_current: 2, count_max: 2, bytes_total: 622841, bytes_current: 196, bytes_max: 622645 }
+glyf kind=2 outcome=Err(InvalidGeometry) cost=AllocationInfo { count_total: 2, count_current: 0, count_max: 2, bytes_total: 40, bytes_current: 0, bytes_max: 40 }
+glyf kind=3 outcome=Err(InvalidFont) cost=AllocationInfo { count_total: 0, count_current: 0, count_max: 0, bytes_total: 0, bytes_current: 0, bytes_max: 0 }
+cff transient requested=65536 outcome=Ok(0) cost=AllocationInfo { count_total: 19, count_current: 2, count_max: 3, bytes_total: 18588, bytes_current: 196, bytes_max: 12800 }
+cff transient requested=65537 outcome=Err(ResourceLimit) cost=AllocationInfo { count_total: 17, count_current: 0, count_max: 3, bytes_total: 18392, bytes_current: 0, bytes_max: 12800 }
+multi retained backend cost=AllocationInfo { count_total: 49, count_current: 5, count_max: 33, bytes_total: 16208, bytes_current: 4992, bytes_max: 13200 }
+multi warm cost=AllocationInfo { count_total: 0, count_current: 0, count_max: 0, bytes_total: 0, bytes_current: 0, bytes_max: 0 }
+multi clear cost=AllocationInfo { count_total: 0, count_current: -32, count_max: 0, bytes_total: 0, bytes_current: -10816, bytes_max: 0 }
+ok
+test text::outline_once_gate::synthetic_cff_cff2_masks_and_deferred_segment_limits ... raw draw=Ok(AdjustedMetrics { has_overlaps: false, lsb: None, advance_width: Some(0.0625) }) segments=65535 invalid=false
+cff2=false requested=65536 result=Ok(0)
+raw draw=Ok(AdjustedMetrics { has_overlaps: false, lsb: None, advance_width: Some(0.0625) }) segments=65537 invalid=false
+cff2=false requested=65537 result=Err(ResourceLimit)
+raw draw=Ok(AdjustedMetrics { has_overlaps: false, lsb: None, advance_width: Some(0.0625) }) segments=65535 invalid=false
+cff2=true requested=65536 result=Ok(0)
+raw draw=Ok(AdjustedMetrics { has_overlaps: false, lsb: None, advance_width: Some(0.0625) }) segments=65537 invalid=false
+cff2=true requested=65537 result=Err(ResourceLimit)
+ok
+test text::outline_once_gate::tiny_frozen_masks_and_cold_scratch ... font=0 FontData=40 backend=168 cold=AllocationInfo { count_total: 18, count_current: 5, count_max: 8, bytes_total: 3524, bytes_current: 1800, bytes_max: 2208 }
+font=0 clear=AllocationInfo { count_total: 0, count_current: -5, count_max: 0, bytes_total: 0, bytes_current: -1800, bytes_max: 0 }
+font=1 FontData=40 backend=168 cold=AllocationInfo { count_total: 14, count_current: 5, count_max: 8, bytes_total: 2612, bytes_current: 1320, bytes_max: 1760 }
+font=1 clear=AllocationInfo { count_total: 0, count_current: -5, count_max: 0, bytes_total: 0, bytes_current: -1320, bytes_max: 0 }
+font=2 FontData=40 backend=168 cold=AllocationInfo { count_total: 14, count_current: 5, count_max: 8, bytes_total: 2612, bytes_current: 1320, bytes_max: 1760 }
+font=2 clear=AllocationInfo { count_total: 0, count_current: -5, count_max: 0, bytes_total: 0, bytes_current: -1320, bytes_max: 0 }
+ok
+test text::outline_record_tests::accepted_cubic_contours_fill_but_do_not_exceed_recording_caps ... ok
+test text::outline_record_tests::empty_moves_keep_original_bounds_without_growing_storage ... ok
+test text::outline_record_tests::rejected_outline_preserves_warm_backend_and_cached_masks ... ok
+test text::paragraph::tests::original_utf8_ranges_empty_and_crlf_are_exact ... ok
+test text::planner::cursor_pair_tests::indexed_affinity_pairs_preserve_every_direct_geometry_bit ... cursor_pairs,accepted=94176,snapped=41760,distinct=11096
+ok
+test text::planner::line_break_tests::batch_incremental_revert_and_mixed_breaking_preserve_actual_layout_bits ... ok
+test text::planner::line_break_tests::max_height_revert_then_batch_repair_and_invalid_width_keep_contract ... 
+thread 'text::planner::line_break_tests::max_height_revert_then_batch_repair_and_invalid_width_keep_contract' (1677363) panicked at vendor/parley/src/layout/line_break.rs:1040:9:
+assertion failed: self.state.layout_max_advance == f32::INFINITY ||
+    self.state.line_max_advance - self.state.layout_max_advance < 1.0
+ok
+test text::planner::line_ownership_tests::mandatory_break_lines_exclude_separators_but_runs_cover_document ... ok
+test text::planner::line_ownership_tests::source_line_geometry_reconstruction_preserves_producer_arithmetic_bits ... ok
+test text::planner::line_ownership_tests::visual_line_transitions_do_not_rehit_collapsed_line_tops ... ok
+test text::planner::line_ownership_tests::wrapped_zero_and_small_line_heights_keep_producer_source_ownership ... ok
+test text::planner::tests::cached_cmaps_match_face_for_every_scalar_and_absent_or_custom_tables ... ok
+test text::planner::tests::indexed_cursor_geometry_matches_original_at_every_byte_and_affinity ... ok
+test text::planner::tests::measurement_keeps_exact_metrics_and_no_owned_geometry ... TEXT_HEADERS metrics=12 planned=128 layout=40 planner=2640
+ok
+test text::planner::tests::raw_run_counts_match_positioned_output_across_wraps_and_scripts ... ok
+test text::planner::tests::rejected_expanding_output_does_not_contaminate_the_next_paragraph ... ok
+
+test result: ok. 93 passed; 0 failed; 2 ignored; 0 measured; 0 filtered out; finished in 2.66s
+

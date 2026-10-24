@@ -1,0 +1,15 @@
+
+running 6 tests
+test absence_of_a_caret_effect_preserves_complete_metadata_and_bank_fast_paths ... ok
+test committed_failed_preparation_keeps_new_focus_and_logical_failure_clears_it ... 
+thread 'committed_failed_preparation_keeps_new_focus_and_logical_failure_clears_it' (1696458) panicked at crates/gpui/tests/text_selection_compound.rs:66:57:
+owner fault
+note: run with `RUST_BACKTRACE=1` environment variable to display a backtrace
+ok
+test compound_visual_complete_metadata_and_bank_actions_publish_one_caret_frame ... ok
+test rejected_compound_actions_restore_focus_without_publication ... ok
+test tab_reveal_that_scrolls_includes_caret_blur_in_its_one_candidate ... ok
+test tab_with_an_idle_reveal_still_publishes_caret_visibility ... ok
+
+test result: ok. 6 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 0.01s
+

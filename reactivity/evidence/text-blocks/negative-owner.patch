@@ -1,0 +1,11 @@
+--- a/reactivity/crates/canvas/src/text.rs
++++ b/reactivity/crates/canvas/src/text.rs
+@@ -306,7 +306,7 @@
+ }
+ impl TextLayout {
+     pub(crate) fn shared_glyphs(&self) -> SharedGlyphs {
+-        SharedGlyphs(self.glyphs.clone())
++        SharedGlyphs(Arc::new(GlyphBuffer::new(self.glyphs.to_vec(), self.glyphs.text_len()).expect("negative copied owner")))
+     }
+     pub fn font_size(&self) -> f32 {
+         self.font_size

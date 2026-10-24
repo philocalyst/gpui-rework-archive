@@ -1,0 +1,11 @@
+--- a/reactivity/crates/canvas/src/canvas.rs
++++ b/reactivity/crates/canvas/src/canvas.rs
+@@ -1596,7 +1596,7 @@
+                     self.commands.masks.push(mask);
+                 }
+                 let witness = DrawRef {
+-                    bounds: command.geometry.bounds,
++                    bounds: command.geometry.bounds.map(|edge| edge.saturating_add(1)),
+                     command: group,
+                     glyph: glyph_index as u16,
+                     mask: index as u16,
