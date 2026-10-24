@@ -322,7 +322,7 @@ fn prepare_interval(
                 _ => {}
             }
         }
-        polar = left[2] != right[2];
+        polar = left[2] != right[2] && (left[1] != 0.0 || right[1] != 0.0);
         if polar {
             left[2] = left[2].to_radians();
             right[2] = right[2].to_radians();

@@ -28,8 +28,9 @@ mod tests {
     use super::*;
     fn truncation_and_rounding_bound(sine: bool) -> f64 {
         // This derivation uses one-ULP WGSL rounding at each operation. The
-        // alternating Horner partial P_i has sign(c_i), |P_i| <= |c_i| on the
-        // interval, because z|c_(i+1)| < |c_i|. Contraction can only improve it;
+        // alternating nonconstant Horner partial P_i has sign(c_i) and
+        // |P_i| <= |c_i| because z|c_(i+1)| < |c_i|. The cos constant term's
+        // separate grouped bound is checked below. Contraction can only improve it;
         // reassociation cannot move an addition across a multiplication.
         let coefficients = if sine {
             [
@@ -58,7 +59,17 @@ mod tests {
         let rounded_z_bound = z * (1. + eps);
         let mut error = (f64::from(coefficients[6] as f32) - coefficients[6]).abs();
         for i in (0..6).rev() {
-            assert!(rounded_z_bound * coefficients[i + 1].abs() < coefficients[i].abs());
+            if !sine && i == 0 {
+                // cos's top partial needs its own bound: group -z/2+z²/24,
+                // -z³/720+z⁴/40320, -z⁵/3628800+z⁶/479001600 for P0<=1.
+                // Dropping positive terms gives P0 > -.272 for z<2.5.
+                assert!(rounded_z_bound < 2.5);
+                assert!(
+                    1.0 - 2.5 / 2.0 - 2.5_f64.powi(3) / 720.0 - 2.5_f64.powi(5) / 3628800.0 > -1.0
+                );
+            } else {
+                assert!(rounded_z_bound * coefficients[i + 1].abs() < coefficients[i].abs());
+            }
             let cast = (f64::from(coefficients[i] as f32) - coefficients[i]).abs();
             let product = eps * rounded_z_bound * (coefficients[i + 1].abs() + error);
             error = cast

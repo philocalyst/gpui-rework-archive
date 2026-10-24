@@ -17,79 +17,85 @@ fn gradient_clip_masks_remain_correlated_when_material_tails_relocate() {
     pollster::block_on(async {
         let mut renderer = renderer(wgpu::TextureFormat::Rgba16Float).await;
         let color = Color::linear_srgb(2.0, 1.0, 0.5, 0.5).unwrap();
-        let gradient = Gradient::new(
-            GradientGeometry::Linear {
-                start: Point::default(),
-                end: Point { x: 1.0, y: 0.0 },
-            },
-            &[GradientStop::new(0.0, color), GradientStop::new(1.0, color)],
-            Extend::Pad,
+        for interpolation in [
             Interpolation::LinearSrgb,
-        )
-        .unwrap();
-        for (turn, leading_solids) in [0, 40, 1].into_iter().enumerate() {
-            let mut canvas = Canvas::recording(
-                24,
-                24,
-                ColorConfig::linear_hdr(gpui_canvas::OutputProfile::Srgb, 203.0).unwrap(),
+            Interpolation::Oklab,
+            Interpolation::default(),
+        ] {
+            let gradient = Gradient::new(
+                GradientGeometry::Linear {
+                    start: Point::default(),
+                    end: Point { x: 1.0, y: 0.0 },
+                },
+                &[GradientStop::new(0.0, color), GradientStop::new(1.0, color)],
+                Extend::Pad,
+                interpolation,
             )
             .unwrap();
-            canvas.clear(Color::TRANSPARENT);
-            for _ in 0..leading_solids {
-                canvas
-                    .fill_rect(
-                        Rect::new(0.0, 23.0, 24.0, 1.0),
-                        Affine::IDENTITY,
-                        Rect::new(0.0, 0.0, 24.0, 24.0),
-                        Color::BLACK,
-                    )
-                    .unwrap();
-            }
-            let shape = ClipShape::RoundedRect {
-                rect: Rect::new(1.25, 1.75, 20.0, 19.0),
-                radius: 7.0,
-            };
-            let first = canvas.create_clip(None, shape, Affine::IDENTITY).unwrap();
-            let duplicate = canvas
-                .create_clip(Some(first), shape, Affine::IDENTITY)
-                .unwrap();
-            canvas
-                .fill_gradient(
-                    &gradient,
-                    Rect::new(0.0, 0.0, 24.0, 23.0),
-                    0.0,
-                    Affine::IDENTITY,
-                    duplicate,
+            for (turn, leading_solids) in [0, 40, 1].into_iter().enumerate() {
+                let mut canvas = Canvas::recording(
+                    24,
+                    24,
+                    ColorConfig::linear_hdr(gpui_canvas::OutputProfile::Srgb, 203.0).unwrap(),
                 )
                 .unwrap();
-            let geometry = canvas.clip_geometry().unwrap();
-            let chain = geometry.chain(duplicate).unwrap();
-            let masks: [[u16; 24]; 23] = std::array::from_fn(|y| {
-                std::array::from_fn(|x| chain.sample_mask(x as u32, y as u32))
-            });
-            let gpu = readback(&mut renderer, &canvas);
-            if turn == 1 {
-                assert!(renderer.image_stats().unwrap().uploaded_bytes > 0);
-            } else if turn == 2 {
-                assert_eq!(renderer.image_stats().unwrap().uploaded_bytes, 0);
-            }
-            let cpu = canvas.pixels();
-            for (y, row) in masks.into_iter().enumerate() {
-                for (x, mask) in row.into_iter().enumerate() {
-                    let coverage = mask.count_ones() as f32 / 16.0;
-                    let expected = [coverage, coverage * 0.5, coverage * 0.25, coverage * 0.5];
-                    for (channel, expected) in expected.into_iter().enumerate() {
-                        let byte = ((y * 24 + x) * 4 + channel) * 2;
-                        assert_eq!(
-                            half(&gpu[byte..byte + 2]),
-                            expected,
-                            "GPU ({x},{y}) channel {channel}"
-                        );
-                        assert_eq!(
-                            half(&cpu[byte..byte + 2]),
-                            expected,
-                            "CPU ({x},{y}) channel {channel}"
-                        );
+                canvas.clear(Color::TRANSPARENT);
+                for _ in 0..leading_solids {
+                    canvas
+                        .fill_rect(
+                            Rect::new(0.0, 23.0, 24.0, 1.0),
+                            Affine::IDENTITY,
+                            Rect::new(0.0, 0.0, 24.0, 24.0),
+                            Color::BLACK,
+                        )
+                        .unwrap();
+                }
+                let shape = ClipShape::RoundedRect {
+                    rect: Rect::new(1.25, 1.75, 20.0, 19.0),
+                    radius: 7.0,
+                };
+                let first = canvas.create_clip(None, shape, Affine::IDENTITY).unwrap();
+                let duplicate = canvas
+                    .create_clip(Some(first), shape, Affine::IDENTITY)
+                    .unwrap();
+                canvas
+                    .fill_gradient(
+                        &gradient,
+                        Rect::new(0.0, 0.0, 24.0, 23.0),
+                        0.0,
+                        Affine::IDENTITY,
+                        duplicate,
+                    )
+                    .unwrap();
+                let geometry = canvas.clip_geometry().unwrap();
+                let chain = geometry.chain(duplicate).unwrap();
+                let masks: [[u16; 24]; 23] = std::array::from_fn(|y| {
+                    std::array::from_fn(|x| chain.sample_mask(x as u32, y as u32))
+                });
+                let gpu = readback(&mut renderer, &canvas);
+                if turn == 1 {
+                    assert!(renderer.image_stats().unwrap().uploaded_bytes > 0);
+                } else if turn == 2 {
+                    assert_eq!(renderer.image_stats().unwrap().uploaded_bytes, 0);
+                }
+                let cpu = canvas.pixels();
+                for (y, row) in masks.into_iter().enumerate() {
+                    for (x, mask) in row.into_iter().enumerate() {
+                        let coverage = mask.count_ones() as f32 / 16.0;
+                        let expected = [coverage, coverage * 0.5, coverage * 0.25, coverage * 0.5];
+                        for (channel, expected) in expected.into_iter().enumerate() {
+                            let byte = ((y * 24 + x) * 4 + channel) * 2;
+                            assert_eq!(
+                                half(&gpu[byte..byte + 2]),
+                                expected,
+                                "GPU ({x},{y}) channel {channel}"
+                            );
+                            assert_eq!(
+                                half(&cpu[byte..byte + 2]),
+                                expected,
+                                "CPU ({x},{y}) channel {channel}"
+                            );
+                        }
                     }
                 }
             }
@@ -4191,7 +4197,16 @@ fn perceptual_gradients_match_independent_authored_f64_oracle() {
                 hue: Hue::Decreasing,
             },
         ];
+        let hdr = f32::from_bits(1e20_f32.to_bits() - 1);
         let pairs = [
+            (
+                Color::linear_srgb(hdr, 0., 0., 1e-22).unwrap(),
+                Color::linear_srgb(0., hdr, 0., 2e-22).unwrap(),
+            ),
+            (
+                Color::linear_srgb(-hdr, hdr, -hdr, 1e-22).unwrap(),
+                Color::linear_srgb(hdr, 0., 0., 1e-22).unwrap(),
+            ),
             (
                 Color::oklch(0.7, 0.2, 350., 0.1).unwrap(),
                 Color::oklch(0.5, 0.15, 10., 0.9).unwrap(),
@@ -4259,7 +4274,11 @@ fn perceptual_gradients_match_independent_authored_f64_oracle() {
                         for c in 0..4 {
                             let index = (x * 4 + c) * 2;
                             let actual = half(&bytes[index..index + 2]);
-                            let tolerance = if c == 3 { 0.001 } else { 0.003 * scale };
+                            let tolerance = if c == 3 {
+                                0.001
+                            } else {
+                                0.000005 + 0.002 * expected[c].abs()
+                            };
                             assert!(
                                 (actual - expected[c]).abs() <= tolerance,
                                 "{name} {mode:?} {left:?} {right:?} x={x} c={c}: {actual} oracle={} tolerance={tolerance}",
