@@ -1083,7 +1083,7 @@ mod tests {
         }
     }
     #[test]
-    fn binding_rejection_retires_the_staged_terminal_before_returning_error() {
+    fn binding_rejection_retires_a_stale_staged_terminal_before_returning_error() {
         let (send, jobs) = std::sync::mpsc::channel();
         let (mut plan, _) = Questions::new()
             .question(
@@ -1095,7 +1095,7 @@ mod tests {
                 },
             )
             .unwrap();
-        let model = Model {
+        let mut model = Model {
             value: crate::Signal::new(1),
             other: crate::Signal::new(2),
         };
@@ -1104,6 +1104,11 @@ mod tests {
             .refresh_self(&model, &sources, Change::Mount)
             .unwrap();
         plan.lanes.start_pending();
+        *model.value = 3;
+        plan.lanes
+            .refresh_self(&model, &sources, Change::Source(Some(FieldId::new(1))))
+            .unwrap();
+        assert_eq!(plan.lanes.control().current.load(Ordering::Acquire), 2);
         jobs.recv().unwrap().1.complete(Ok(1)).unwrap();
         assert!(matches!(plan.lanes.stage(0), Stage::Ready));
         // Simulate a checked projection mismatch without invoking unsafe code or
@@ -1120,6 +1125,8 @@ mod tests {
             "rejected binding must not fabricate a diagnostic pack"
         );
         assert!(plan.lanes.controller.idle());
+        assert!(plan.lanes.pending.is_none());
+        assert_eq!(plan.lanes.control().current.load(Ordering::Acquire), 0);
     }
     #[test]
     fn a_discovered_revision_change_cannot_leave_the_current_ticket_pending_forever() {

@@ -94,18 +94,22 @@ fn a_retained_completion_cannot_revive_a_rejected_or_panicking_start() {
         let (send, jobs) = mpsc::channel();
         let mut starts = 0;
         let (questions, answer) = Questions::new()
-            .question(Model::QUERY, Clone::clone, move |input, completion| {
-                starts += 1;
-                send.send((input, completion)).unwrap();
-                if starts == 2 {
-                    assert!(
-                        !panic_after_enqueue,
-                        "starter panicked after retaining completion"
-                    );
-                    return Err(StartError::Busy);
-                }
-                Ok(())
-            })
+            .question(
+                Model::QUERY,
+                Clone::clone,
+                move |input, completion: Completion<String, Domain>| {
+                    starts += 1;
+                    send.send((input, completion)).unwrap();
+                    if starts == 2 {
+                        assert!(
+                            !panic_after_enqueue,
+                            "starter panicked after retaining completion"
+                        );
+                        return Err(StartError::Busy);
+                    }
+                    Ok(())
+                },
+            )
             .unwrap();
         let mut win = Win::recording_questions(
             Model {
@@ -623,6 +627,10 @@ fn completion_and_terminal_queued_before_ack_start_pending_b_in_that_same_turn()
         .try_recv()
         .expect("returned credit starts B without another event");
     assert_eq!(input, "B");
+    assert!(
+        !second.is_cancelled(),
+        "stale A retirement must preserve B admission"
+    );
     second.complete(Ok("B".into())).unwrap();
     drain(&mut win);
     assert!(win.contains_text("B").unwrap());
