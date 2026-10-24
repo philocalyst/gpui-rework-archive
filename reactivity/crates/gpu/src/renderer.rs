@@ -143,19 +143,13 @@ fn prepared<'a>(group: PreparedGroup<'a>, p: PreparedPlacement<'a>) -> PreparedD
     }
 }
 // Quarter-pixel endpoints select the canonical CPU's exact sample set.
-// Keep an empty domain outside every positive viewport sample.
+// Empty rectangles need no special sentinel in the certified bounds sampler.
 fn sampled_solid_rect(
     draw: &PreparedDraw<'_>,
     viewport: [u32; 2],
 ) -> Result<gpui_canvas::Rect, Error> {
-    let rect = draw
-        .sampled_rect_clip(viewport)
-        .map_err(|_| Error::InvalidScene)?;
-    Ok(if rect.is_empty() {
-        gpui_canvas::Rect::new(-1.0, -1.0, 0.25, 0.25)
-    } else {
-        rect
-    })
+    draw.sampled_rect_clip(viewport)
+        .map_err(|_| Error::InvalidScene)
 }
 fn common_words(group: PreparedGroup<'_>, error: [f32; 2], correction: u32) -> [Word; 5] {
     let [a, b, c, d, tx, ty] = group.inverse.map(|v| v as f32);
@@ -1413,6 +1407,7 @@ mod tests {
                 .await
                 .unwrap();
             let mut canvas = Canvas::recording(19, 17, Default::default()).unwrap();
+            canvas.clear(Color::WHITE);
             let clip = Rect::new(0.125, 0.375, 17.5, 15.25);
             let rect = Rect::new(0.125, 0.375, 12.25, 13.5);
             let slot = canvas.paint_slot(PaintColor::new(Color::BLACK)).unwrap();
