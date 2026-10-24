@@ -93,6 +93,7 @@ fn clipped_gradient_candidates_keep_their_resource_and_hit_authority_after_failu
     .unwrap();
     let first = win.with_scene(|_, token| token).unwrap();
     win.presented(first).unwrap();
+    let child = win.query().name("painted-child").one().unwrap();
     let second = paint(Color::rgb(255, 0, 0));
     let key = second.key();
     win.update(|model| model.paint = second).unwrap();
@@ -127,14 +128,20 @@ fn clipped_gradient_candidates_keep_their_resource_and_hit_authority_after_failu
     win.with_pixels(|bytes, _, _| assert_eq!(bytes, pixels))
         .unwrap();
     win.presented(eligible).unwrap();
-    let child = win.query().name("painted-child").one().unwrap();
+    assert_eq!(
+        win.query().name("painted-child").one(),
+        Err(gpui::Error::PresentationStale)
+    );
+    let mut visited = false;
     win.visit(|part| {
         if part.target() == child {
+            visited = true;
             assert!(!part.contains_point(Point { x: 0.5, y: 0.5 }));
             assert!(part.contains_point(Point { x: 16.0, y: 16.0 }));
         }
     })
     .unwrap();
+    assert!(visited);
 }
 #[test]
 fn declarative_clip_preserves_builder_order_paint_and_acknowledged_hit_geometry() {
