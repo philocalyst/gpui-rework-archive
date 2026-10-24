@@ -38,9 +38,9 @@ pub use element::{
     column, div, label, property_action, property_selection, row, text, text_input,
 };
 pub use gpui_canvas::{
-    AlphaMode, CaretAffinity, ColorConfig, ColorSpace, Image, ImageKey, ImagePixels, ImageProfile,
-    ImageSampling, OutputProfile, PixelFormat, SdrMapping, TextOffset, TextPosition, TextSelection,
-    oklch,
+    AlphaMode, CaretAffinity, ColorConfig, ColorSpace, FontFace, Image, ImageKey, ImagePixels,
+    ImageProfile, ImageSampling, OutputProfile, PixelFormat, SdrMapping, TextOffset, TextPosition,
+    TextSelection, oklch,
 };
 pub use gpui_reactivity_core::{Affine, Point, Rect};
 pub use gpui_reactivity_state::{Handoff, Signal};
@@ -58,9 +58,9 @@ pub use remote::{Delivery, DeliveryError, Inbox, Remote, SendError};
 #[doc(hidden)]
 pub use remote::{Lane, LaneSet, StatusLane};
 pub use runtime::{
-    Action, ActionKind, Actions, Commit, Counters, Error, Key, ListInfo, ListItemInfo, Part,
-    PointerEvent, PointerSession, PresentationToken, Query, SemanticSnapshot, SetError, Snapshot,
-    SnapshotNode, TextGeometry, Win, WindowOptions,
+    Action, ActionKind, Actions, Commit, Counters, Error, ImeEvent, ImeSession, Key, ListInfo,
+    ListItemInfo, MarkedText, Part, PointerEvent, PointerSession, PresentationToken, Query,
+    SemanticSnapshot, SetError, Snapshot, SnapshotNode, TextGeometry, Win, WindowOptions,
 };
 pub use scroll::{
     Axis, ScrollDelta, ScrollDirection, ScrollError, ScrollOffset, ScrollUnit, ScrollViewport,
@@ -94,10 +94,11 @@ pub trait View {
 pub mod prelude {
     pub use crate::{
         Action, ActionKind, Affine, Align, AlphaMode, Axis, Color, Component, El, Element, FieldId,
-        Flex, Flow, Handoff, Image, ImageProfile, ImageSampling, Inbox, ItemKey, ItemSource,
-        Justify, Key, ListId, Point, PointerEvent, PointerSession, Rect, Remote, ScrollDelta,
-        ScrollOffset, Signal, SignalMap, Source, Sources, Target, View, Win, button, checkbox,
-        column, div, image, label, oklch, rgb, row, text, text_input, uniform_list,
+        Flex, Flow, Handoff, Image, ImageProfile, ImageSampling, ImeEvent, ImeSession, Inbox,
+        ItemKey, ItemSource, Justify, Key, ListId, Point, PointerEvent, PointerSession, Rect,
+        Remote, ScrollDelta, ScrollOffset, Signal, SignalMap, Source, Sources, Target, View, Win,
+        button, checkbox, column, div, image, label, oklch, rgb, row, text, text_input,
+        uniform_list,
     };
 }
 

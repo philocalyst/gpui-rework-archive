@@ -226,6 +226,7 @@ impl<M: View + 'static, L: LaneSet<M>> RuntimeMut<'_, M, L> {
         editing: EditingIntent,
         property_changed: Option<NonZeroU64>,
     ) -> Result<Commit, Error> {
+        let ime_changed = self.runtime.reconcile_ime();
         // A bank-only candidate cannot include changed caret visibility.
         // Disable that early publication before patching, then combine both
         // effects in the one ordinary full preparation below.
@@ -283,7 +284,7 @@ impl<M: View + 'static, L: LaneSet<M>> RuntimeMut<'_, M, L> {
             self.runtime.focused = None;
             return Err(error);
         }
-        let editing_changed = self.runtime.reconcile_editing(editing)?;
+        let editing_changed = self.runtime.reconcile_editing(editing)? || ime_changed;
         if result == Ok(PatchOutcome::Complete) && !self.inspector_enabled() && !editing_changed {
             return Ok(self.commit());
         }
