@@ -62,7 +62,8 @@ Apple aarch64 / Windows MSVC compile-only checks. Selected-package formatting
 and the dependent Hummingbird locked/offline metadata check passed.
 Frozen build/test commands, source guards and results are archived separately.
 The counter reports **31,616** non-test, non-comment core lines, **+298** from
-Main 5381: six shipping libraries plus their build script, excluding apps,
+Main 5381: independently recounted on Main `ca746715bb`. The scope is six
+shipping libraries plus their build script, excluding apps,
 vendors, tests, examples and evidence. No future line-count projection is used.
 
 The unchanged original full Debug oracle comparison failed, and remains failed:

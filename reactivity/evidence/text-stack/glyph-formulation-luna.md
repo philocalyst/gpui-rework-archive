@@ -68,4 +68,3 @@ The existing binary report from the common-8 investigation records a code-size i
 - [Rust `Vec::into_boxed_slice`](https://doc.rust-lang.org/beta/std/vec/struct.Vec.html#method.into_boxed_slice)
 - [Rust portable SIMD module](https://doc.rust-lang.org/std/simd/)
 - [Rust slice `as_simd`](https://doc.rust-lang.org/std/primitive.slice.html#method.as_simd)
-
