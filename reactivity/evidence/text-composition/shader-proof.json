@@ -1,0 +1,24 @@
+{
+  "source": "4aba1b86be9adb6b22e16485caeb90c96f93acc1",
+  "shader": "/tmp/gpui-text-composition-sol-target/debug/build/gpui_gpu/34144a9b5eddd942/out/ui.wgsl",
+  "wgsl_sha256": "ea6e71d3da2bdb23d4971a14f0f55db389dbb45f9b2e9c05c85d4dc6363eb4d1",
+  "wgsl_bytes": 18995,
+  "matches_frozen_root_d3e6885_generated_shader": true,
+  "artifacts": [
+    {
+      "ELF": "/tmp/gpui-text-composition-sol-target/debug/build/gpui/ac84e72426e656ad/out/gpui-ac84e72426e656ad",
+      "target": "gpui",
+      "sha256": "19062045620b415ca25d3b534ded97117ffd9ca7962901a4ffe9b44e4fe19805",
+      "complete_generated_WGSL_in_ELF": true,
+      "relocated_frozen_ELF": "/tmp/gpui-text-composition-sol-frozen-full/018-gpui"
+    },
+    {
+      "ELF": "/tmp/gpui-text-composition-sol-target/debug/build/gpui_gpu/b184001f49e71a62/out/render-b184001f49e71a62",
+      "target": "render",
+      "sha256": "ca5fbd5292fb7fb9af4756c459fb3fccf1ab5a0f1d99dd5570a00f2d18d09d7b",
+      "complete_generated_WGSL_in_ELF": true,
+      "relocated_frozen_ELF": "/tmp/gpui-text-composition-sol-frozen-full/103-render"
+    }
+  ],
+  "shipping_source_with_identical_production_bytes": "4c9f4a2b514f784319c0239812eb444c2081b3c2"
+}

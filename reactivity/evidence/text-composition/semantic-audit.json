@@ -1,0 +1,87 @@
+{
+  "source": "4c9f4a2b514f784319c0239812eb444c2081b3c2",
+  "byte_identity_checks": [
+    {
+      "baseline": "948eff489aaa1f5d36a2514dc247884755b8e5c7",
+      "path": "reactivity/crates/canvas/src/canvas/clips.rs",
+      "sha256": "d602ab922111e8aa88e39cb7faa475099512568a16c319af79222adb67d87b49",
+      "identical": true
+    },
+    {
+      "baseline": "948eff489aaa1f5d36a2514dc247884755b8e5c7",
+      "path": "reactivity/crates/canvas/src/color/gradient.rs",
+      "sha256": "d4ea65d330756030e01dfa6cb8b7578477ddd3b7bdf077308a54de76a8a85e11",
+      "identical": true
+    },
+    {
+      "baseline": "948eff489aaa1f5d36a2514dc247884755b8e5c7",
+      "path": "reactivity/crates/gpu/src/renderer/clips.rs",
+      "sha256": "562f1161192310efff0b234bf02f60cc212ad953faac475db6c77ee2078ec470",
+      "identical": true
+    },
+    {
+      "baseline": "948eff489aaa1f5d36a2514dc247884755b8e5c7",
+      "path": "reactivity/crates/gpu/src/renderer/images.rs",
+      "sha256": "80e5528a91da2d1645fe12dcd2d7e684d599c286632fcc0cd85314e2754792ff",
+      "identical": true
+    },
+    {
+      "baseline": "948eff489aaa1f5d36a2514dc247884755b8e5c7",
+      "path": "reactivity/crates/gpu/src/shader.rs",
+      "sha256": "433b9760e356cb45144262aabec37d61c1d5eb1e0529b47e4103da7d69b4859c",
+      "identical": true
+    },
+    {
+      "baseline": "948eff489aaa1f5d36a2514dc247884755b8e5c7",
+      "path": "reactivity/crates/canvas/src/canvas/mask_kernel.rs",
+      "sha256": "283e74b92971c961b76412303bb5e222fd586c7dc97f38b560edc253ea5de193",
+      "identical": true
+    },
+    {
+      "baseline": "948eff489aaa1f5d36a2514dc247884755b8e5c7",
+      "path": "reactivity/crates/canvas/src/canvas/glyph_axis.rs",
+      "sha256": "6d2d0fe08be71b8d6be5915ebf5cf528721a3f9e22f06ef499daa1f0c5a566c7",
+      "identical": true
+    },
+    {
+      "baseline": "948eff489aaa1f5d36a2514dc247884755b8e5c7",
+      "path": "reactivity/crates/canvas/src/canvas/image_axis.rs",
+      "sha256": "5fc3d1c9068338918d0748c33c527309a4eb0e73ee7c5b3533ac336c6b3f084d",
+      "identical": true
+    },
+    {
+      "baseline": "7c9fc3cf775544d4082fe7c6ce3e0bb8a3a0a407",
+      "path": "reactivity/crates/canvas/src/text.rs",
+      "sha256": "64f308a2226169ad94000e293106b20b29a98636f84cbb99142485782dd36c29",
+      "identical": true
+    },
+    {
+      "baseline": "7c9fc3cf775544d4082fe7c6ce3e0bb8a3a0a407",
+      "path": "reactivity/crates/canvas/src/text/glyph_buffer.rs",
+      "sha256": "dee60c551db2964f336f31f5174b65edc2ae2912c6b181f9bbeda9d5ca00cc7f",
+      "identical": true
+    },
+    {
+      "baseline": "7c9fc3cf775544d4082fe7c6ce3e0bb8a3a0a407",
+      "path": "reactivity/crates/canvas/src/text/planner.rs",
+      "sha256": "f97a3fcd5e1301faa92eb8122866a532e1c7505b6f577f6f55b28e5a733a2577",
+      "identical": true
+    },
+    {
+      "baseline": "7c9fc3cf775544d4082fe7c6ce3e0bb8a3a0a407",
+      "path": "reactivity/crates/canvas/src/canvas/metric_scale.rs",
+      "sha256": "9e4ef654bac6f47401b86e71e5deb7fdfbceea59ebbafcd90f198d7cef5faab4",
+      "identical": true
+    }
+  ],
+  "semantic_review": [
+    "Gradient ThinArc and private public-domain sampler unchanged",
+    "Clip arena exclusively boxed, exact Root948 geometry comparison imported unchanged; owner-specific capabilities preserved",
+    "Generic Into<Clip>, CPU/GPU complex-chain fast-path declines preserved",
+    "Root71ed direct return on sufficient draw capacity retained in reserve_draws",
+    "GPU draw_words_end precedes clip/material tails, reverse CSR starts at draw_words_end",
+    "sources()/bounds() skip glyph geometry; rounded gradient path reconstructs only its local rectangle",
+    "Safe owner and MetricScale modules byte-identical to qualified text source"
+  ],
+  "same_shipping_bytes_as_full_run_source": "4aba1b86be9adb6b22e16485caeb90c96f93acc1"
+}

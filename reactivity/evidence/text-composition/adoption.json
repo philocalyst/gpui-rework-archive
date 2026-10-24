@@ -1,0 +1,56 @@
+{
+  "shipping_source": "4c9f4a2b514f784319c0239812eb444c2081b3c2",
+  "recorded_main_head": "e93dcea272d5f124381b0c06c313ab726c7ae708",
+  "main_vs_root948_build_input_differences": [
+    "reactivity/crates/gpui/README.md"
+  ],
+  "shipping_cherry_pick_sequence": [
+    {
+      "commit": "cd298df595168ae260538511762549e17cb942eb",
+      "subject": "Retain packed text runs behind direct raster witnesses"
+    },
+    {
+      "commit": "7846dbf11a73d1f794add0c8e3663194b96bc1a4",
+      "subject": "Traverse retained draw metadata without expanding glyph rectangles"
+    },
+    {
+      "commit": "e9cbda1633e0ffb94c2f86b01761c1e6407716bb",
+      "subject": "Produce retained packed glyphs directly in one shared allocation"
+    },
+    {
+      "commit": "6ada445e3ad553fed0db8a798dee1e05fcb6d611",
+      "subject": "Add matched retained-text cohorts at native, doubled and fractional density"
+    },
+    {
+      "commit": "8fe35496205db454670eb7eb378b63973a71234f",
+      "subject": "Include pixel fingerprints in matched density cohorts"
+    },
+    {
+      "commit": "321cfb2e1f9c50c562773431688ee994b4a6c433",
+      "subject": "Compile exact power-of-two raster scales into the retained command word"
+    },
+    {
+      "commit": "296d559c25833567aa9cf9d7468befe392ad0ab9",
+      "subject": "Qualify retained text metadata with nested clips and gradient material tails"
+    },
+    {
+      "commit": "767ad54cd4be1a1a06e5b980cdf7ba4ebd1078f7",
+      "subject": "Pass raster scale after clip and paint in joint text fixtures"
+    },
+    {
+      "commit": "4aba1b86be9adb6b22e16485caeb90c96f93acc1",
+      "subject": "Exercise clipped retained text through scene damage and runtime acknowledgement"
+    },
+    {
+      "commit": "4c9f4a2b514f784319c0239812eb444c2081b3c2",
+      "subject": "Use fixed-size pixel chunks in the joint damage fixture"
+    }
+  ],
+  "duplicate_root_clip_damage_commits_to_exclude": [
+    "91f422a5adb1615e4c7166066ec8be1fcc6421b8",
+    "1112893deb9e0fbf8d0be1dbd8ba8f56ce812f53",
+    "64a387b0084ff1efa90c390f57740b9a50b4ca65"
+  ],
+  "evidence_commit": "Apply the separate final capsule commit after these shipping commits; its hash is in the handoff message",
+  "main_edit_by_this_lane": false
+}

@@ -1,0 +1,26 @@
+{
+  "shipping_source": "4c9f4a2b514f784319c0239812eb444c2081b3c2",
+  "full_combined_run_source": "4aba1b86be9adb6b22e16485caeb90c96f93acc1",
+  "full_combined_run": {
+    "passed": 1020,
+    "failed": 0,
+    "ignored": 40,
+    "harnesses": 105
+  },
+  "changed_paths": [
+    "reactivity/crates/canvas/tests/text_composition.rs"
+  ],
+  "all_other_tracked_paths_byte_identical": true,
+  "all_shipping_source_and_build_inputs_byte_identical": true,
+  "change_scope": "Test-only replacement of two chunks_exact(4) calls with as_chunks::<4>() iteration; both partition complete four-byte pixels and discard any remainder",
+  "test_file_before_sha256": "ee406c1831e028659ab3215263ebde6310e30ff6aaf63eb9c95d5fa4f09c5816",
+  "test_file_after_sha256": "596abe8265ad4ee5de541f2408f9f49b654884a91f510ad4ccfafdcbc4986b5a",
+  "patch": "diff --git a/reactivity/crates/canvas/tests/text_composition.rs b/reactivity/crates/canvas/tests/text_composition.rs\nindex 95ac3bd879..c780afb2a6 100644\n--- a/reactivity/crates/canvas/tests/text_composition.rs\n+++ b/reactivity/crates/canvas/tests/text_composition.rs\n@@ -226,8 +226,10 @@ fn rebuilt_nested_clip_text_and_gradient_scenes_have_exact_damage() {\n         assert_ne!(changed, original);\n         let [left, top, right, bottom] = damage.bounds().expect(\"changed clip contributes support\");\n         for (index, (a, b)) in original\n-            .chunks_exact(4)\n-            .zip(changed.chunks_exact(4))\n+            .as_chunks::<4>()\n+            .0\n+            .iter()\n+            .zip(changed.as_chunks::<4>().0)\n             .enumerate()\n         {\n             if a != b {",
+  "validation_completed": {
+    "focused_tests": 2,
+    "all_target_native_GPU_clippy": "passed -D warnings",
+    "doctests": 33,
+    "scalar_joint_tests": 117,
+    "guarded_inputs_per_gate": 2055
+  }
+}

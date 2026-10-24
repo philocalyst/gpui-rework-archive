@@ -1,3 +1,5 @@
+> Historical Arc-owner design note for `bbe0c2058c2b3812e0ae8e251db68c329be7734a`. Its qualified capsule is `ac26d70a8b100315eceb25f09ee6ee4f436c8255`. Current safe-owner, exact-scale and clip/gradient composition qualification and costs are in [text-composition](../text-composition/README.md). The validation-pending text below belongs to this original design snapshot.
+
 # Retained packed text with direct raster witnesses
 
 Base: `4ee08a32def2ca70371c1764a0153a57053ae0e4`. This slice keeps the fullscreen GPU tile compositor and its existing packet ABI. GPU preparation still expands and repacks individual glyphs. No CPU/GPU latency claim follows from the storage change.
