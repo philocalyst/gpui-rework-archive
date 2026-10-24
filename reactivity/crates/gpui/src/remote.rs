@@ -6,10 +6,10 @@ use crate::{
 };
 #[cfg(feature = "native-core")]
 use gpui_reactivity_host::native::Wake;
-use std::collections::VecDeque;
+use parking_lot::Mutex;
 #[cfg(feature = "native-core")]
 use std::sync::OnceLock;
-use std::sync::{Arc, Mutex, MutexGuard};
+use std::{collections::VecDeque, panic::AssertUnwindSafe, sync::Arc};
 
 // The sole payload buffer includes both the owner's frozen prefix and later
 // sends. No callback or payload destructor runs while this mutex is held.
@@ -21,14 +21,13 @@ struct State<T> {
     observe_close: bool,
 }
 struct Shared<T> {
-    state: Mutex<State<T>>,
+    // No user code runs under this lock; checked producer overflow leaves the
+    // queue intact. Preserve the std mutex's public unwind auto-traits.
+    state: AssertUnwindSafe<Mutex<State<T>>>,
     #[cfg(feature = "native-core")]
     wake: OnceLock<Wake>,
 }
 impl<T> Shared<T> {
-    fn lock(&self) -> MutexGuard<'_, State<T>> {
-        self.state.lock().unwrap_or_else(|error| error.into_inner())
-    }
     fn signal(&self) {
         #[cfg(feature = "native-core")]
         if let Some(wake) = self.wake.get() {
@@ -87,7 +86,7 @@ pub struct Remote<T> {
 }
 impl<T> Clone for Remote<T> {
     fn clone(&self) -> Self {
-        let mut state = self.shared.lock();
+        let mut state = self.shared.state.lock();
         state.producers = state
             .producers
             .checked_add(1)
@@ -99,7 +98,7 @@ impl<T> Clone for Remote<T> {
 }
 impl<T> Drop for Remote<T> {
     fn drop(&mut self) {
-        let mut state = self.shared.lock();
+        let mut state = self.shared.state.lock();
         state.producers -= 1;
         let notify = state.producers == 0 && state.observe_close;
         drop(state);
@@ -118,13 +117,13 @@ impl<T> Remote<T> {
     /// An attached native event proxy/OS may allocate separately when posting wakes.
     pub fn bounded(capacity: usize) -> (Self, Inbox<T>) {
         let shared = Arc::new(Shared {
-            state: Mutex::new(State {
+            state: AssertUnwindSafe(Mutex::new(State {
                 queue: VecDeque::with_capacity(capacity),
                 capacity,
                 producers: 1,
                 open: true,
                 observe_close: false,
-            }),
+            })),
             #[cfg(feature = "native-core")]
             wake: OnceLock::new(),
         });
@@ -140,7 +139,7 @@ impl<T> Remote<T> {
         )
     }
     pub fn try_send(&self, value: T) -> Result<(), SendError<T>> {
-        let mut state = self.shared.lock();
+        let mut state = self.shared.state.lock();
         if !state.open {
             return Err(SendError::Closed(value));
         }
@@ -176,7 +175,7 @@ impl<T> Inbox<T> {
     // Return ownership without dropping values, allowing a static lane chain to
     // revoke every producer before any user destructor can unwind retirement.
     fn revoke(&mut self) -> VecDeque<T> {
-        let mut state = self.shared.lock();
+        let mut state = self.shared.state.lock();
         state.open = false;
         self.frozen = 0;
         self.terminal = Terminal::Delivered;
@@ -186,7 +185,7 @@ impl<T> Inbox<T> {
         drop(self.revoke());
     }
     pub(crate) fn observe_close(&self) -> Result<(), Error> {
-        let mut state = self.shared.lock();
+        let mut state = self.shared.state.lock();
         if state.capacity == 0 || !state.open {
             return Err(Error::ZeroInboxCapacity);
         }
@@ -197,7 +196,7 @@ impl<T> Inbox<T> {
         if self.terminal != Terminal::Open {
             return Stage::Empty;
         }
-        let state = self.shared.lock();
+        let state = self.shared.state.lock();
         if !state.open || state.capacity == 0 {
             return Stage::Empty;
         }
@@ -218,7 +217,7 @@ impl<T> Inbox<T> {
         if self.frozen == 0 {
             return None;
         }
-        let mut state = self.shared.lock();
+        let mut state = self.shared.state.lock();
         self.frozen -= 1;
         state.queue.pop_front()
     }
@@ -530,7 +529,7 @@ impl<M, T: Send + 'static, F: InboxHandler<M, T>, L: LaneSet<M>> LaneSet<M> for 
     fn attach(&mut self, wake: &Wake) {
         // Attach once to this owner's event loop; surface suspend/resume does not
         // change its loop. Signal after attachment covers messages sent unbound.
-        let open = self.inbox.shared.lock().open;
+        let open = self.inbox.shared.state.lock().open;
         if open {
             let _ = self.inbox.shared.wake.set(wake.clone());
             // Installation followed by a wake covers both pre-bind sends and
@@ -567,6 +566,19 @@ mod tests {
         }
     }
     #[test]
+    fn a_checked_producer_overflow_unwinds_without_losing_the_queue() {
+        let (remote, mut inbox) = Remote::bounded(1);
+        remote.shared.state.lock().producers = usize::MAX;
+        assert!(std::panic::catch_unwind(|| remote.clone()).is_err());
+        assert_eq!(remote.shared.state.lock().producers, usize::MAX);
+        remote.shared.state.lock().producers = 1;
+        drop(remote.clone());
+        remote.try_send(7).unwrap();
+        assert!(matches!(inbox.stage(false), Stage::Ready));
+        assert_eq!(inbox.pop(), Some(7));
+        assert!(matches!(inbox.stage(false), Stage::Empty));
+    }
+    #[test]
     fn preallocated_frozen_prefix_has_no_per_message_allocations() {
         let (remote, inbox) = Remote::bounded(8);
         let mut lanes = Lane::new(inbox, |sum: &mut u64, value: u64| *sum += value, ());
@@ -596,6 +608,53 @@ mod tests {
 mod ledger {
     use super::*;
     use crate::{El, View, Win, div};
+    #[test]
+    fn cold_and_first_lock_transport_allocation_ledger() {
+        for capacity in [0, 1, 8] {
+            let mut pair = None;
+            let cold = allocation_counter::measure(|| {
+                pair = Some(Remote::<u64>::bounded(capacity));
+            });
+            let (remote, mut inbox) = pair.unwrap();
+            let send = allocation_counter::measure(|| {
+                if capacity == 0 {
+                    assert!(matches!(remote.try_send(7), Err(SendError::Full(7))));
+                } else {
+                    remote.try_send(7).unwrap();
+                }
+            });
+            let stage = allocation_counter::measure(|| {
+                assert!(matches!(inbox.stage(false), Stage::Ready) == (capacity != 0));
+            });
+            let pop = allocation_counter::measure(|| {
+                assert_eq!(inbox.pop(), (capacity != 0).then_some(7));
+            });
+            let (_remote, mut untouched) = Remote::<u64>::bounded(capacity);
+            let first_stage = allocation_counter::measure(|| {
+                assert!(matches!(untouched.stage(false), Stage::Empty));
+            });
+            let (_remote, mut untouched) = Remote::<u64>::bounded(capacity);
+            let first_close = allocation_counter::measure(|| untouched.close());
+            println!(
+                "remote_first_use,capacity={capacity},cold_count={},cold_bytes={},send_count={},send_bytes={},stage_count={},stage_bytes={},pop_count={},pop_bytes={},untouched_stage_count={},untouched_stage_bytes={},untouched_close_count={},untouched_close_bytes={},mutex={},shared={},state={}",
+                cold.count_total,
+                cold.bytes_total,
+                send.count_total,
+                send.bytes_total,
+                stage.count_total,
+                stage.bytes_total,
+                pop.count_total,
+                pop.bytes_total,
+                first_stage.count_total,
+                first_stage.bytes_total,
+                first_close.count_total,
+                first_close.bytes_total,
+                size_of::<Mutex<State<u64>>>(),
+                size_of::<Shared<u64>>(),
+                size_of::<State<u64>>()
+            );
+        }
+    }
     #[test]
     fn requested_lane_storage_is_explicit_and_unused_windows_remain_one_pointer() {
         struct Page;

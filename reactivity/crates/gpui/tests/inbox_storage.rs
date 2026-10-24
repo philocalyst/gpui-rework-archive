@@ -261,6 +261,9 @@ fn shared_transport_does_not_require_payload_sync() {
     fn send_sync<T: Send + Sync>() {}
     send_sync::<Remote<mpsc::Receiver<u8>>>();
     send_sync::<gpui::Inbox<mpsc::Receiver<u8>>>();
+    fn unwind_safe<T: std::panic::UnwindSafe + std::panic::RefUnwindSafe>() {}
+    unwind_safe::<Remote<std::cell::Cell<u8>>>();
+    unwind_safe::<gpui::Inbox<std::cell::Cell<u8>>>();
 }
 
 #[test]
