@@ -64,6 +64,7 @@ mod geometry;
 mod metadata;
 pub(crate) mod paint;
 use paint::PatchOutcome;
+mod published;
 mod query;
 mod semantics;
 mod styles;
@@ -83,6 +84,8 @@ struct ClipFrame {
     hit_clip: Rect,
     chain: Option<gpui_canvas::ClipId>,
     membership: u8,
+    // In list mode, the nearest ancestor actually emitted into P.
+    published: Parent,
 }
 
 #[derive(Clone, Copy, Debug, PartialEq)]
@@ -3072,7 +3075,6 @@ impl<M: View + 'static> Runtime<M> {
             .as_ref()
             .and_then(|m| m.geometry.as_ref())
             .is_some_and(|geometry| geometry.has_logical_clips());
-        let list_capacity = if list_mode { self.nodes.len() } else { 0 };
         let mut spaces = frontier::Frontier::new(
             CoordinateSpace::new(Affine::scale(scale_factor, scale_factor)),
             usize::from(self.layout_depth),
@@ -3082,11 +3084,12 @@ impl<M: View + 'static> Runtime<M> {
             hit_clip: viewport,
             chain: None,
             membership: 0,
+            published: Parent::NONE,
         };
         let mut clips = (list_mode || clip_mode)
             .then(|| frontier::Frontier::new(root_clip, usize::from(self.layout_depth)));
         let mut ancestor = Parent::NONE;
-        let mut published: Vec<Parent> = Vec::with_capacity(list_capacity);
+        let mut published = published::Published::new(if list_mode { self.nodes.len() } else { 0 });
         let mut visible_rows = BTreeSet::new();
         let mut metadata_sheet = self.metadata_sheet();
         let viewport_geometry = if list_mode {
@@ -3226,6 +3229,21 @@ impl<M: View + 'static> Runtime<M> {
             if geometry_style.clip_children {
                 hit_clip = hit_clip.intersection(raw_bounds);
             }
+            let bounds = if in_list || in_scroll || node.kind() == NodeKind::List || chain.is_some()
+            {
+                list::clipped_bounds(raw_bounds, hit_clip)
+            } else {
+                raw_bounds.intersection(viewport)
+            };
+            let published_parent = if list_mode {
+                inherited.published
+            } else {
+                node.parent
+            };
+            let omitted = in_list
+                && bounds.is_empty()
+                && (!has_children || hit_clip.is_empty())
+                && (!in_scroll || hit_clip.is_empty());
             if has_children {
                 spaces.push(space);
                 if let Some(clips) = &mut clips {
@@ -3233,6 +3251,11 @@ impl<M: View + 'static> Runtime<M> {
                         clip,
                         hit_clip,
                         chain,
+                        published: if omitted {
+                            published_parent
+                        } else {
+                            Parent::new(Some(presented.len()))
+                        },
                         membership: if list_mode {
                             u8::from(in_list) | (u8::from(in_scroll) << 1)
                         } else {
@@ -3242,12 +3265,6 @@ impl<M: View + 'static> Runtime<M> {
                 }
                 ancestor = Parent::new(Some(index));
             }
-            let bounds = if in_list || in_scroll || node.kind() == NodeKind::List || chain.is_some()
-            {
-                list::clipped_bounds(raw_bounds, hit_clip)
-            } else {
-                raw_bounds.intersection(viewport)
-            };
             let paint = (!in_scroll && chain.is_none()) || !bounds.is_empty();
             let clip = chain.map_or(gpui_canvas::Clip::Rect(clip), gpui_canvas::Clip::Chain);
             let gradient = self
@@ -3413,26 +3430,15 @@ impl<M: View + 'static> Runtime<M> {
                     },
                 )?;
             }
-            let published_parent = if list_mode {
-                node.parent
-                    .index()
-                    .map_or(Parent::NONE, |parent| published[parent])
-            } else {
-                node.parent
-            };
-            if in_list
-                && bounds.is_empty()
-                && (!has_children || hit_clip.is_empty())
-                && (!in_scroll || hit_clip.is_empty())
-            {
-                published.push(published_parent);
+            if omitted {
+                published.record(index, presented.len(), false);
                 continue;
             }
             if node.kind() == NodeKind::ListItem {
                 visible_rows.insert(node.identity());
             }
             if list_mode {
-                published.push(Parent::new(Some(presented.len())));
+                published.record(index, presented.len(), true);
             }
             // Empty bounds can never pass sheet_hit, including wheel routing.
             // Keep the existing byte as the common-path candidate test; loading
@@ -3545,7 +3551,6 @@ impl<M: View + 'static> Runtime<M> {
                         || logical_indices
                             .get(identity)
                             .and_then(|index| published.get(index))
-                            .and_then(|entry| entry.index())
                             .and_then(|index| presented.get(index))
                             .is_some_and(|node| node.identity == identity)
                 })
@@ -3580,12 +3585,12 @@ impl<M: View + 'static> Runtime<M> {
             && let Some(metadata) = &mut self.metadata
         {
             // Reuse the geometry allocation as the immutable P column. Virtual
-            // row clipping can omit a declared viewport; the existing logical
-            // to published scratch proves exact admitted identity without a map.
+            // row clipping can omit a declared viewport; emission rank and the
+            // final identity match certify membership in this candidate.
             sheet.viewports = viewport_geometry.freeze(|identity| {
                 let index = self.by_identity.required(identity);
-                published[index]
-                    .index()
+                published
+                    .get(index)
                     .filter(|&index| presented[index].identity == identity)
             });
             metadata.candidate = Some(sheet);
