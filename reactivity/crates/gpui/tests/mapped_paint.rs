@@ -20,8 +20,12 @@ impl View for Panel {
                 .name("paint")
                 .size(4)
                 .bg(self.value.map_with(self.alpha, |value, alpha| {
-                    if alpha && *value == 0 {
-                        Color::TRANSPARENT
+                    if alpha {
+                        if *value == 0 {
+                            Color::TRANSPARENT
+                        } else {
+                            Color::BLACK
+                        }
                     } else if *value & 1 == 0 {
                         Color::BLACK
                     } else {
@@ -59,8 +63,8 @@ fn window(alpha: bool, two: bool) -> Win<Panel> {
     )
     .unwrap()
 }
-fn first_pixel(win: &Win<Panel>) -> Vec<u8> {
-    win.with_pixels(|pixels, _, _| pixels[..4].to_vec())
+fn first_pixel(win: &mut Win<Panel>) -> [u8; 4] {
+    win.with_pixels(|pixels, _, _| pixels[..4].try_into().unwrap())
         .unwrap()
 }
 
@@ -70,7 +74,7 @@ fn one_mapped_color_keeps_ten_thousand_rows_without_allocating_a_replacement_sce
     ack(&mut win);
     let target = win.query().name("paint").one().unwrap();
     let bounds = win.bounds(target).unwrap();
-    let initial = first_pixel(&win);
+    let initial = first_pixel(&mut win);
     for value in 1..=4 {
         let previous = win.with_scene(|_, token| token).unwrap();
         win.reset_counters().unwrap();
@@ -103,7 +107,7 @@ fn one_mapped_color_keeps_ten_thousand_rows_without_allocating_a_replacement_sce
             Color::WHITE
         };
         assert_eq!(win.property(target, BACKGROUND).unwrap(), color);
-        assert_eq!(first_pixel(&win) == initial, value & 1 == 0);
+        assert_eq!(first_pixel(&mut win) == initial, value & 1 == 0);
         ack(&mut win);
         assert_eq!(win.bounds(target).unwrap(), bounds);
     }
@@ -114,14 +118,14 @@ fn alpha_changes_and_two_changed_slots_preserve_complete_pixels() {
     for (alpha, two) in [(true, false), (false, true)] {
         let mut win = window(alpha, two);
         ack(&mut win);
-        let before = first_pixel(&win);
+        let before = first_pixel(&mut win);
         win.reset_counters().unwrap();
         win.set(Panel::VALUE, 1).unwrap();
         assert!(
             win.counters().paint_passes > 0,
             "topology or multiple slots need full preparation"
         );
-        assert_ne!(first_pixel(&win), before);
+        assert_ne!(first_pixel(&mut win), before);
         ack(&mut win);
         if two {
             let target = win.query().name("peer").one().unwrap();
