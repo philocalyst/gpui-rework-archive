@@ -11,8 +11,7 @@ impl View for Page {
             row(self
                 .labels
                 .iter()
-                .map(|label| button(label.as_str()).p(0).font_size(16.))
-                .collect::<Vec<_>>()),
+                .map(|label| button(label.as_str()).p(0).font_size(16.))),
             div().size(4).bg(Color::BLACK).transform(if self.fail {
                 Affine::scale(0., 1.)
             } else {
