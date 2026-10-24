@@ -664,6 +664,15 @@ impl<'a> El<'a> {
         self
     }
     fn control_input(&mut self, sink: crate::style_port::Sink, input: crate::PropInput<'a, bool>) {
+        if sink == crate::style_port::Sink::DISABLED
+            && input.literal() == Some(false)
+            && !matches!(
+                self.kind,
+                NodeKind::Input | NodeKind::Button | NodeKind::CheckBox(_)
+            )
+        {
+            return;
+        }
         assert!(
             matches!(
                 self.kind,
