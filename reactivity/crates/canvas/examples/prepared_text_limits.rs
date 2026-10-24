@@ -51,4 +51,27 @@ fn main() {
             }
         }
     }
+    for paragraphs in [1024, 16 * 1024] {
+        let source = "a\n".repeat(paragraphs);
+        let mut oracle = face.shaper();
+        let expected = oracle.measure(&source, 12., None).unwrap();
+        let mut shaper = face.shaper();
+        drop(shaper.shape("warm", 12., None).unwrap());
+        let mut held = None;
+        let cost = allocation_counter::measure(|| {
+            let (prepared, measured) = shaper.prepare(&source, 12., None).unwrap();
+            assert_eq!(bits(&Ok(measured)), bits(&Ok(expected)));
+            held = Some(prepared);
+        });
+        let storage = held.as_ref().unwrap().diagnostic_storage();
+        println!(
+            "PREPARED_NONEMPTY paragraphs={paragraphs} bytes={} allocations={} requested={} retained={} peak={} payload={} rows={storage:?}",
+            source.len(),
+            cost.count_total,
+            cost.bytes_total,
+            cost.bytes_current,
+            cost.bytes_max,
+            storage.iter().map(|row| row[2]).sum::<usize>()
+        );
+    }
 }
