@@ -1,0 +1,9 @@
+{
+  "qualified_source": "8c56ff0bbedbcdfde7484a97182b104aadccdbf5",
+  "materialized_files_compared": 12010,
+  "differences": [
+    "reactivity/STATUS.md"
+  ],
+  "all_code_configuration_locks_assets_equal": true,
+  "new_evidence_files": "outside the qualified path set"
+}

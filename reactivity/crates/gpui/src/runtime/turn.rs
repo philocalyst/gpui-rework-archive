@@ -42,9 +42,10 @@ impl<M: View + 'static, L: LaneSet<M>> RuntimeMut<'_, M, L> {
         }
         let rejected = result.is_err();
         let mut questions = 0;
+        let mut questions_changed = false;
         let result = match catch_unwind(AssertUnwindSafe(|| {
             if models != 0 {
-                self.lanes.refresh(
+                questions_changed = self.lanes.refresh(
                     &self.runtime.model,
                     &self.runtime.sources,
                     crate::reader::question::Change::Source(exact),
@@ -86,7 +87,7 @@ impl<M: View + 'static, L: LaneSet<M>> RuntimeMut<'_, M, L> {
         if *applied == 0 {
             return Ok(self.commit());
         }
-        self.after_admission(exact, questions != 0)
+        self.after_admission(exact, questions_changed || questions != 0)
     }
     pub(super) fn describe(&mut self, mount: bool) -> Result<(), Error> {
         self.describe_with(mount, &[])

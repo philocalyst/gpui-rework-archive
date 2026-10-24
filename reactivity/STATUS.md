@@ -68,6 +68,13 @@ precision limits, source/stack costs and the unadopted alternatives.
 
 ## Current verification
 
+The [exact-inbox Reader refresh fix](evidence/inbox-reader-refresh/README.md)
+publishes Pending/Updating chrome when a source edit invalidates a question
+without consuming a completion. The original public regression fails; Root
+passes 240 source/question tests and strict default all-target checks. Both
+regression executables and full source guards are retained. No retained field
+or dependency is added. Core is **31,814** non-test/non-comment lines, **+1**.
+
 The [close-time accessibility cleanup](evidence/accesskit-close/README.md)
 retires stale AT-SPI interfaces and client-cache entries when one window closes
 while another survives. Its original public Adapter control fails; both valid
