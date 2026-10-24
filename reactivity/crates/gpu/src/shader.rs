@@ -464,7 +464,7 @@ pub mod ui {
     pub fn banked_fragment(position: Vec2f, range: Vec2u, clear: Vec4f) -> Vec4f {
         let mut anchor = vec4f(0.0, 0.0, 0.0, 0.0);
         let mut delta = vec4f(0.0, 0.0, 0.0, 0.0);
-        for y in 0..4 {
+        for y in 0..3 {
             let mut colors: [Vec4f; 4] = [clear, clear, clear, clear];
             #[wgsl_allow(non_literal_loop_bounds)]
             for cursor in range.x..range.y {
