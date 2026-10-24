@@ -152,8 +152,30 @@ conservatively can prevent this last case even when their samples are empty.
 
 `set_tile_proofs(false)` selects the general path for comparisons. `Stats`
 distinguishes original references, uploaded sampled references, omitted
-references, uniform tiles, planned lattice samples and planned `sample_draw`
+references, uniform tiles, planned sample points and planned `sample_draw`
 calls. The last two count shader work, not hardware performance counters.
+
+For SDR Clip output, a nonuniform tile can also use one sample history when
+every retained draw is an actually lowered solid whose uploaded rectangle has
+finite integer endpoints inside the viewport. Its half-open edges cannot split
+the sixteen canonical sites within a pixel. Bit 30 of the existing cursor is a
+sticky decline flag; only a successful opaque cutoff resets it. After reverse
+CSR fill, bit 30 of the range end certifies all retained draws. Range offsets and
+cutoff ordinals exclude these flags. No buffer, binding, retained column, or
+allocation was added. Geometry-only certification remains valid across admitted
+same-alpha literal and banked paint edits; full preparation rebuilds it.
+
+The shader folds those draws once at the pixel center and retains the existing
+sixteen-term anchor/delta reduction expression. Float output and Reinhard mapping
+decline: a compiler can fold identical reduction terms and change signed zero on
+float targets. SDR Clip has opaque alpha, no exposure amplification, and a final
+UNORM encoding that cannot distinguish zero signs or subnormal magnitudes.
+P3's fixed matrix does not amplify subnormals into a representable UNORM step.
+Fractional lowered edges, generic geometry, rounded shapes, text and images
+decline. The general sixteen-history path remains the oracle for those cases.
+For each certified pixel with D references, planned sample points fall from 16
+to 1 and `sample_draw` calls from 16D to D. Uniform/empty tiles already need zero.
+These are source-work counts; they do not establish a hardware speedup.
 
 ## Measured regimes
 

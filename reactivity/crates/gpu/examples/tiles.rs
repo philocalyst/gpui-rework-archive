@@ -54,6 +54,29 @@ fn scene(case: &str) -> Canvas {
                     .unwrap();
             }
         }
+        "translucent1" | "translucent16" | "banked16" | "fractional16" => {
+            let count = if case == "translucent1" { 1 } else { 16 };
+            let rect = if case == "fractional16" {
+                Rect::new(0.0, 0.0, 511.25, 256.0)
+            } else {
+                viewport
+            };
+            for n in 0..count {
+                let color = Color::rgba(20 + n * 7, 60, 140, 96);
+                if case == "banked16" {
+                    let slot = canvas
+                        .paint_slot(gpui_canvas::PaintColor::new(color))
+                        .unwrap();
+                    canvas
+                        .fill_rect_slot(rect, Affine::IDENTITY, viewport, slot)
+                        .unwrap();
+                } else {
+                    canvas
+                        .fill_rect(rect, Affine::IDENTITY, viewport, color)
+                        .unwrap();
+                }
+            }
+        }
         _ => panic!("unknown case"),
     }
     canvas

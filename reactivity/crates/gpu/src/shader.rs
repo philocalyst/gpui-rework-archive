@@ -487,11 +487,38 @@ pub mod ui {
         output(anchor + delta)
     }
 
+    pub fn constant_draw(address: u32, banked: bool) -> Draw {
+        if banked {
+            return load_banked_draw(address);
+        }
+        load_draw(address)
+    }
+
+    // Preserve the reduction expression; host admission also excludes float
+    // output, whose zero signs can change when a compiler folds these terms.
+    pub fn constant_fragment(position: Vec2f, range: Vec2u, clear: Vec4f, banked: bool) -> Vec4f {
+        let mut color = clear;
+        #[wgsl_allow(non_literal_loop_bounds)]
+        for cursor in range.x..range.y {
+            let address = get!(INDICES)[cursor as usize];
+            let draw = constant_draw(address, banked);
+            let source = sample_draw(draw, position);
+            color = source + color * (1.0 - source.w);
+        }
+        let anchor = color;
+        let mut delta = vec4f(0.0, 0.0, 0.0, 0.0);
+        for _index in 0..16 {
+            delta += (color - anchor) * 0.0625;
+        }
+        output(anchor + delta)
+    }
+
     #[fragment]
     pub fn fragment(#[builtin(position)] position: Vec4f) -> Vec4f {
         let globals = get!(GLOBALS);
         let tile = position.x as u32 / 16 + position.y as u32 / 16 * globals.viewport.z;
-        let range = get!(TILES)[tile as usize];
+        let encoded_range = get!(TILES)[tile as usize];
+        let range = vec2u(encoded_range.x, encoded_range.y & 0xbfffffff);
         if (range.y & 0x80000000) != 0 {
             if (globals.viewport.w & 8) != 0 {
                 return output(load_banked_draw(range.x).color);
@@ -500,6 +527,14 @@ pub mod ui {
         }
         if range.x == range.y {
             return output(globals.clear);
+        }
+        if (encoded_range.y & 0x40000000) != 0 {
+            return constant_fragment(
+                position.xy(),
+                range,
+                globals.clear,
+                (globals.viewport.w & 8) != 0,
+            );
         }
         if (globals.viewport.w & 8) != 0 {
             return banked_fragment(position.xy(), range, globals.clear);

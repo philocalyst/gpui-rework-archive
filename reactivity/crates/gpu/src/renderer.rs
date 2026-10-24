@@ -23,8 +23,10 @@ const MAX_ATLAS_SIDE: u32 = 2048;
 const ROUNDED_SOURCE: u32 = 1 << 30;
 const _: () = assert!(MAX_ATLAS_SIDE < ROUNDED_SOURCE);
 const UNIFORM_TILE: u32 = 1 << 31;
-const _: () = assert!(MAX_REFERENCES < UNIFORM_TILE as usize);
-const _: () = assert!(MAX_DRAWS < UNIFORM_TILE as usize);
+// A cursor bit means a retained draw declined; a range-end bit certifies all.
+const CONSTANT_SAMPLES: u32 = 1 << 30;
+const _: () = assert!(MAX_REFERENCES < CONSTANT_SAMPLES as usize);
+const _: () = assert!(MAX_DRAWS + 1 < CONSTANT_SAMPLES as usize);
 
 #[derive(Debug)]
 pub enum Error {
@@ -98,7 +100,7 @@ pub struct Stats {
     /// References omitted from the sampled CSR, including uniform tiles.
     pub skipped_tile_references: usize,
     pub uniform_tiles: usize,
-    /// Planned lattice samples, excluding clear and certified uniform pixels.
+    /// Planned sample points, excluding clear and certified uniform pixels.
     pub sample_evaluations: u64,
     /// Planned sample_draw calls, including calls rejected by clip/geometry.
     pub sample_draw_evaluations: u64,
@@ -150,6 +152,21 @@ fn sampled_solid_rect(
 ) -> Result<gpui_canvas::Rect, Error> {
     draw.sampled_rect_clip(viewport)
         .map_err(|_| Error::InvalidScene)
+}
+// Inspect actual uploaded geometry after lowering. Integer half-open edges
+// cannot split a pixel's canonical sites. Paint edits cannot alter this proof.
+fn constant_samples(correction: u32, r: gpui_canvas::Rect, width: u32, height: u32) -> bool {
+    correction & LOWERED_SOLID != 0
+        && [
+            (r.x, width),
+            (r.x + r.width, width),
+            (r.y, height),
+            (r.y + r.height, height),
+        ]
+        .into_iter()
+        .all(|(edge, limit)| {
+            edge.is_finite() && edge >= 0.0 && edge <= limit as f32 && edge.fract() == 0.0
+        })
 }
 fn common_words(group: PreparedGroup<'_>, error: [f32; 2], correction: u32) -> [Word; 5] {
     let [a, b, c, d, tx, ty] = group.inverse.map(|v| v as f32);
@@ -768,6 +785,7 @@ impl RendererState {
                         draw,
                         error,
                         address,
+                        constant_samples(correction, r, scene.width, scene.height),
                         ordinal,
                         columns,
                         scene.width,
@@ -797,6 +815,12 @@ impl RendererState {
                         draw,
                         error,
                         address,
+                        constant_samples(
+                            correction,
+                            packet_draw.local_rect,
+                            scene.width,
+                            scene.height,
+                        ),
                         ordinal,
                         columns,
                         scene.width,
@@ -852,7 +876,7 @@ impl RendererState {
         let mut offset = 0;
         for (tile, range) in self.ranges.iter_mut().enumerate() {
             let count = range[1];
-            if self.cursors[tile] != 0 && count == 1 {
+            if self.cursors[tile] & !CONSTANT_SAMPLES != 0 && count == 1 {
                 range[1] = UNIFORM_TILE;
             } else {
                 offset += count;
@@ -874,7 +898,8 @@ impl RendererState {
                 let address = word as u32 | if compact { 0 } else { INLINE_RECORD };
                 visit(prepared(group, p), columns, |tile| {
                     let range = &mut self.ranges[tile];
-                    if range[1] != UNIFORM_TILE && reverse_ordinal as u32 + 1 >= self.cursors[tile]
+                    if range[1] != UNIFORM_TILE
+                        && reverse_ordinal as u32 + 1 >= self.cursors[tile] & !CONSTANT_SAMPLES
                     {
                         range[0] -= 1;
                         self.references[range[0] as usize] = address;
@@ -889,15 +914,26 @@ impl RendererState {
         let mut uniform_tiles = 0;
         let mut sample_evaluations = 0;
         let mut sample_draw_evaluations = 0;
-        for (tile, range) in self.ranges.iter().enumerate() {
+        for (tile, range) in self.ranges.iter_mut().enumerate() {
             if range[1] == UNIFORM_TILE {
                 uniform_tiles += 1;
             } else if range[0] != range[1] {
                 let [left, top, right, bottom] =
                     tile_bounds(tile, columns, scene.width, scene.height);
-                let samples = u64::from((right - left) * (bottom - top)) * 16;
+                // Repeated identical reduction terms may be folded by a shader
+                // compiler, changing zero signs on float output. Keep float and
+                // exposure-mapped output on the original sixteen histories.
+                let equal = self.tile_proofs
+                    && !hdr
+                    && scene.color_config.mapping == SdrMapping::Clip
+                    && self.cursors[tile] & CONSTANT_SAMPLES == 0;
+                let samples =
+                    u64::from((right - left) * (bottom - top)) * if equal { 1 } else { 16 };
                 sample_evaluations += samples;
                 sample_draw_evaluations += samples * u64::from(range[1] - range[0]);
+                if equal {
+                    range[1] |= CONSTANT_SAMPLES;
+                }
             }
         }
         let (tone, exposure) = match scene.color_config.mapping {
@@ -1095,6 +1131,7 @@ impl RendererState {
         draw: PreparedDraw<'_>,
         error: [f32; 2],
         address: u32,
+        equal_samples: bool,
         ordinal: usize,
         columns: usize,
         width: u32,
@@ -1107,12 +1144,14 @@ impl RendererState {
         if total > MAX_REFERENCES {
             return Err(Error::ResourceLimit);
         }
+        let declined = if equal_samples { 0 } else { CONSTANT_SAMPLES };
         visit(draw, columns, |tile| {
             if self.tile_proofs && full_tile(draw, error, tile, columns, width, height) {
                 self.ranges[tile] = [address, 1];
-                self.cursors[tile] = ordinal as u32 + 1;
+                self.cursors[tile] = (ordinal as u32 + 1) | declined;
             } else {
                 self.ranges[tile][1] += 1;
+                self.cursors[tile] |= declined;
             }
         });
         Ok(total)
@@ -1690,14 +1729,24 @@ mod tests {
             };
             assert_eq!(
                 state
-                    .bin_draw(draw, [0.; 2], 0, MAX_DRAWS - 1, 1, 1, 1, MAX_REFERENCES - 1)
+                    .bin_draw(
+                        draw,
+                        [0.; 2],
+                        0,
+                        true,
+                        MAX_DRAWS - 1,
+                        1,
+                        1,
+                        1,
+                        MAX_REFERENCES - 1
+                    )
                     .unwrap(),
                 MAX_REFERENCES
             );
             let before = (state.ranges.clone(), state.cursors.clone());
             for previous in [MAX_REFERENCES, usize::MAX] {
                 assert!(matches!(
-                    state.bin_draw(draw, [0.; 2], 0, 0, 1, 1, 1, previous),
+                    state.bin_draw(draw, [0.; 2], 0, true, 0, 1, 1, 1, previous),
                     Err(Error::ResourceLimit)
                 ));
                 assert_eq!((&state.ranges, &state.cursors), (&before.0, &before.1));
@@ -1754,3 +1803,7 @@ mod tests {
         });
     }
 }
+
+#[cfg(all(test, feature = "vulkan-tests"))]
+#[path = "renderer/constant_samples_tests.rs"]
+mod constant_samples_tests;
