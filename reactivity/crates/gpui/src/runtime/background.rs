@@ -462,10 +462,14 @@ mod tests {
             nodes,
             ..
         } = &mut *runtime;
-        let live = IdentityIndex::from_ids(nodes.iter().map(Node::identity));
         let identities = [nodes[1].identity(), nodes[2].identity()];
         owner.as_mut().unwrap().logical = images;
-        assert!(reconcile(owner, nodes, &live, vec![(1, &second), (2, &second)]).unwrap());
+        let (live, changed) =
+            image::finish_description(owner, nodes, vec![(1, &second), (2, &second)]).unwrap();
+        assert!(changed);
+        for (index, identity) in identities.into_iter().enumerate() {
+            assert_eq!(live.get(identity), Some(index + 1));
+        }
         let bank = owner.as_ref().unwrap().backgrounds.as_ref().unwrap();
         assert_eq!(bank.resources.len(), 2);
         for identity in identities {
@@ -484,8 +488,8 @@ mod tests {
             .unwrap(),
         );
         assert_eq!(
-            reconcile(owner, nodes, &live, vec![(1, &third), (2, &third)]),
-            Err(Error::ResourceLimit)
+            image::finish_description(owner, nodes, vec![(1, &third), (2, &third)]).err(),
+            Some(Error::ResourceLimit)
         );
         let bank = owner.as_ref().unwrap().backgrounds.as_ref().unwrap();
         assert_eq!(bank.resources.len(), 2);

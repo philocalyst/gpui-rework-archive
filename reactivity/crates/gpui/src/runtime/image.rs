@@ -70,7 +70,7 @@ pub(super) fn prune(current: &mut Option<Box<SceneResources>>) {
 }
 
 /// Finalize resource liveness against the same index published with these nodes.
-/// Admission failure leaves the preceding index and material bank unpublished.
+/// Admission failure leaves the preceding index and material bank unchanged.
 pub(super) fn finish_description(
     current: &mut Option<Box<SceneResources>>,
     nodes: &[Node],
