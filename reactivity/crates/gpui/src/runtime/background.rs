@@ -137,9 +137,7 @@ pub(super) fn reconcile(
                 .is_ok()
     });
     for (_, gradient) in &drafts {
-        bank.resources
-            .entry(gradient.key())
-            .or_insert_with(|| (*gradient).clone());
+        bank.resources.insert(gradient.key(), (*gradient).clone());
     }
     drafts.sort_unstable_by_key(|(index, _)| *index);
     let mut changed = false;
