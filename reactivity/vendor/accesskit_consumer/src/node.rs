@@ -1417,6 +1417,69 @@ mod tests {
     }
 
     #[test]
+    fn child_clip_prunes_descendants_without_excluding_parent() {
+        let mut parent = Node::new(Role::GenericContainer);
+        parent.set_bounds(Rect::new(0., 0., 10., 10.));
+        parent.set_children(vec![NodeId(1)]);
+        parent.set_clips_children();
+        parent.set_hit_test_shape(
+            accesskit::HitTestShape::rounded_rect([0., 0., 10., 10.], 0., [1., 0., 0., 1., 0., 0.])
+                .unwrap()
+                .with_child_radius(5.)
+                .unwrap(),
+        );
+        let mut child = Node::new(Role::Button);
+        child.set_bounds(Rect::new(0., 0., 10., 10.));
+        let tree = crate::tree::Tree::new(
+            TreeUpdate {
+                nodes: vec![(NodeId(0), parent), (NodeId(1), child)],
+                tree: Some(TreeInfo::new(NodeId(0))),
+                tree_id: TreeId::ROOT,
+                focus: NodeId(0),
+            },
+            false,
+        );
+        let root = tree.state().root();
+        let corner = Point::new(0.5, 0.5);
+        let include = |_: &crate::NodeRef| FilterResult::Include;
+        assert_eq!(
+            root.node_at_point(corner, &include).unwrap().id(),
+            nid(NodeId(0))
+        );
+        assert_eq!(
+            root.node_at_point(Point::new(5., 5.), &include)
+                .unwrap()
+                .id(),
+            nid(NodeId(1))
+        );
+        let exclude_parent = |node: &crate::NodeRef| {
+            if node.id() == nid(NodeId(0)) {
+                FilterResult::ExcludeNode
+            } else {
+                FilterResult::Include
+            }
+        };
+        assert!(root.node_at_point(corner, &exclude_parent).is_none());
+        assert_eq!(
+            root.node_at_point(Point::new(5., 5.), &exclude_parent)
+                .unwrap()
+                .id(),
+            nid(NodeId(1))
+        );
+        assert!(
+            root.node_at_point(Point::new(5., 5.), &|_| FilterResult::ExcludeSubtree)
+                .is_none()
+        );
+        assert!(
+            root.children()
+                .next()
+                .unwrap()
+                .node_at_point(corner, &include)
+                .is_none()
+        );
+    }
+
+    #[test]
     fn node_at_point() {
         let tree = test_tree();
         assert!(
