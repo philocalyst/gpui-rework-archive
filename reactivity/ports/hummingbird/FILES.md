@@ -11,8 +11,14 @@ cargo run --locked --features native -- --native --library /path/to/library.sqli
 ```
 
 `Database::open_library(path)` creates or reopens a port-owned database. Creation
-runs the pinned migrations and publishes an ownership marker only after setup
-succeeds. An occupied unmarked database is rejected. `--database` continues to
+executes the canonical final schema derived from the pinned upstream migrations,
+seed expressions and ownership marker in one durable transaction. Failed setup
+rolls back; concurrent creators serialize before checking admission. Any user
+schema object without the ownership table is rejected. Existing schema1 libraries
+reopen unchanged; unsupported versions require an explicit future upgrade policy.
+The worker publishes its acquisition tables in a separate atomic transaction.
+Untouched upstream migrations remain an independent test oracle, not startup work.
+See `FRESH-SCHEMA.json` and `tools/generate-fresh-schema.py --check`. `--database` continues to
 open an existing upstream database read-only; it does not migrate or seed it.
 The two CLI database options are mutually exclusive.
 

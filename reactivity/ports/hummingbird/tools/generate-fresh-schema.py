@@ -26,7 +26,7 @@ def generate():
         connection.executescript(data.decode())
     objects = connection.execute(
         "SELECT type,name,sql FROM sqlite_schema WHERE sql IS NOT NULL "
-        "AND name NOT LIKE 'sqlite_%' ORDER BY "
+        "AND name NOT GLOB 'sqlite_*' ORDER BY "
         "CASE type WHEN 'table' THEN 0 WHEN 'index' THEN 1 "
         "WHEN 'view' THEN 2 WHEN 'trigger' THEN 3 ELSE 4 END,rowid"
     ).fetchall()

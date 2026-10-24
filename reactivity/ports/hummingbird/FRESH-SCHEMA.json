@@ -1,7 +1,7 @@
 {
   "scope": "Offline standard-library SQLite derivation, not a runtime/build dependency. Rust tests compare the result against bundled SQLite replaying these untouched migrations.",
   "sqlite_generator_version": "3.51.2",
-  "generator_sha256": "1aca0dbc7d87bca4206f4daa5f94ad07a212ba938774cdc86cc4fd944e11f833",
+  "generator_sha256": "11fc773e37cd696273687c89b6d9d8618eb7f1abe296dadf231b01bf40186fe0",
   "ordered_migrations": {
     "migrations/20240730163128_create_artist_table.sql": "cdcb441f9344dd17d39ece0433210998aa6b75641b80f2367305394abfb2e000",
     "migrations/20240730163151_create_album_table.sql": "2baed726e828bd1480c38a08eaab26cd469f9b23101bcc70303308e648028e40",
