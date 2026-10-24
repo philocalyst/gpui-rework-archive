@@ -278,14 +278,28 @@ impl FontSet {
 /// the primary face; fallback slots always retain their exact original faces.
 /// Advance bounds and ink differ.
 #[derive(Clone, Debug)]
-pub struct TextLayout {
+pub struct TextLayout<G = Arc<TextGeometry>> {
     pub width: f32,
     pub height: f32,
     pub baseline: f32,
     font_size: f32,
     glyphs: GlyphBuffer,
     fonts: Arc<FontSet>,
-    mapping: Option<Arc<Details>>,
+    mapping: Option<G>,
+}
+/// A layout whose interaction data is owned directly. Immutable resource pages
+/// can own these values without one reference-counted geometry allocation each.
+pub type OwnedTextLayout = TextLayout<TextGeometry>;
+
+#[derive(Clone, Copy)]
+pub(crate) struct LayoutView<'a> {
+    width: f32,
+    height: f32,
+    baseline: f32,
+    font_size: f32,
+    glyphs: &'a GlyphBuffer,
+    fonts: &'a FontSet,
+    mapping: Option<&'a TextGeometry>,
 }
 /// Advance size and first baseline, without retaining glyphs, font leases or
 /// interaction geometry. Produced by the same validated Unicode planner.
@@ -303,9 +317,17 @@ impl SharedGlyphs {
         [glyph.x, glyph.baseline]
     }
 }
-impl TextLayout {
-    pub(crate) fn shared_glyphs(&self) -> SharedGlyphs {
-        SharedGlyphs(self.glyphs.shared())
+impl<G: AsRef<TextGeometry>> TextLayout<G> {
+    pub(crate) fn view(&self) -> LayoutView<'_> {
+        LayoutView {
+            width: self.width,
+            height: self.height,
+            baseline: self.baseline,
+            font_size: self.font_size,
+            glyphs: &self.glyphs,
+            fonts: &self.fonts,
+            mapping: self.mapping.as_ref().map(AsRef::as_ref),
+        }
     }
     pub fn font_size(&self) -> f32 {
         self.font_size
@@ -325,6 +347,20 @@ impl TextLayout {
     ) -> impl DoubleEndedIterator<Item = Glyph> + ExactSizeIterator + Clone + std::iter::FusedIterator + '_
     {
         self.glyphs.iter().map(PackedGlyph::glyph)
+    }
+}
+impl<'a> LayoutView<'a> {
+    pub(crate) fn font_size(self) -> f32 {
+        self.font_size
+    }
+    pub(crate) fn glyphs(
+        self,
+    ) -> impl DoubleEndedIterator<Item = Glyph> + ExactSizeIterator + Clone + std::iter::FusedIterator + 'a
+    {
+        self.glyphs.iter().map(PackedGlyph::glyph)
+    }
+    pub(crate) fn shared_glyphs(self) -> SharedGlyphs {
+        SharedGlyphs(self.glyphs.shared())
     }
 }
 
@@ -382,6 +418,17 @@ impl<'font> TextShaper<'font> {
         max_width: Option<f32>,
     ) -> Result<TextLayout, Error> {
         self.shape_mode(text, font_size, max_width, true)
+    }
+    /// Materialize complete interaction data directly in an owned resource,
+    /// without allocating a separate shared geometry owner.
+    pub fn shape_owned_interactive(
+        &mut self,
+        text: &str,
+        font_size: f32,
+        max_width: Option<f32>,
+    ) -> Result<OwnedTextLayout, Error> {
+        self.planner(text, font_size, max_width)?
+            .shape(text, font_size, max_width, true)
     }
     fn shape_mode(
         &mut self,
@@ -463,7 +510,7 @@ impl TextSystem {
     ) -> Result<TextLayout, Error> {
         self.face.shaper().shape(text, font_size, max_width)
     }
-    pub(crate) fn validate(&self, layout: &TextLayout) -> Result<(), Error> {
+    pub(crate) fn validate(&self, layout: LayoutView<'_>) -> Result<(), Error> {
         if !layout.fonts.primary.same_face(&self.face) {
             Err(Error::ForeignLayout)
         } else {
@@ -472,7 +519,7 @@ impl TextSystem {
     }
     pub(crate) fn layout_key(
         &self,
-        layout: &TextLayout,
+        layout: LayoutView<'_>,
         glyph: Glyph,
         size: f32,
     ) -> Result<GlyphKey, Error> {
@@ -485,7 +532,7 @@ impl TextSystem {
     }
     pub(crate) fn layout_raster(
         &mut self,
-        layout: &TextLayout,
+        layout: LayoutView<'_>,
         glyph: Glyph,
         size: f32,
     ) -> Result<Arc<Raster>, Error> {
@@ -493,7 +540,13 @@ impl TextSystem {
             .raster(layout.fonts.face(glyph.font_slot())?, glyph.id, size)
     }
     /// Conservative local raster bounds, useful for damage and paint geometry.
-    pub fn ink_bounds(&self, layout: &TextLayout) -> Result<Rect, Error> {
+    pub fn ink_bounds<G: AsRef<TextGeometry>>(
+        &self,
+        layout: &TextLayout<G>,
+    ) -> Result<Rect, Error> {
+        self.ink_bounds_view(layout.view())
+    }
+    fn ink_bounds_view(&self, layout: LayoutView<'_>) -> Result<Rect, Error> {
         self.validate(layout)?;
         let mut min = [f32::INFINITY; 2];
         let mut max = [f32::NEG_INFINITY; 2];
@@ -895,7 +948,7 @@ mod font_tests {
         let shared = FontFace::bundled().unwrap();
         assert_eq!(shared.0.id, old_id);
         assert_eq!(
-            TextSystem::from_font(shared.clone()).validate(&layout),
+            TextSystem::from_font(shared.clone()).validate(layout.view()),
             Ok(())
         );
         drop(shared);

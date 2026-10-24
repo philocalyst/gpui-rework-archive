@@ -1,5 +1,5 @@
 //! Borrowed typed views over the one canonical owned glyph layout.
-use super::{FontFace, FontSlot, Glyph, PackedGlyph, TextLayout};
+use super::{FontFace, FontSet, FontSlot, Glyph, GlyphBuffer, LayoutView, PackedGlyph, TextLayout};
 use crate::Rect;
 use std::ops::Range;
 mod interaction;
@@ -75,6 +75,11 @@ pub struct TextGeometry {
     pub(super) lines: Vec<Line>,
     pub(super) carets: Option<Vec<Stop>>,
 }
+impl AsRef<TextGeometry> for TextGeometry {
+    fn as_ref(&self) -> &TextGeometry {
+        self
+    }
+}
 pub(super) type Details = TextGeometry;
 
 #[derive(Clone, Copy, Debug)]
@@ -105,7 +110,8 @@ pub(super) struct Stop {
 }
 #[derive(Clone, Copy)]
 pub struct GlyphRun<'a> {
-    layout: &'a TextLayout,
+    glyphs: &'a GlyphBuffer,
+    fonts: &'a FontSet,
     run: Run,
 }
 impl<'a> GlyphRun<'a> {
@@ -116,7 +122,7 @@ impl<'a> GlyphRun<'a> {
         self,
     ) -> impl DoubleEndedIterator<Item = Glyph> + ExactSizeIterator + Clone + std::iter::FusedIterator + 'a
     {
-        self.layout.glyphs[self.run.glyph_start as usize..self.run.glyph_end as usize]
+        self.glyphs[self.run.glyph_start as usize..self.run.glyph_end as usize]
             .iter()
             .map(PackedGlyph::glyph)
     }
@@ -127,8 +133,7 @@ impl<'a> GlyphRun<'a> {
         self.run.line as usize
     }
     pub fn font_face(self) -> &'a FontFace {
-        self.layout
-            .fonts
+        self.fonts
             .face(usize::from(self.run.font.0))
             .expect("validated run font slot")
     }
@@ -149,16 +154,35 @@ impl TextLine {
     }
 }
 
-impl TextLayout {
+impl<G: AsRef<TextGeometry>> TextLayout<G> {
     pub fn text_len(&self) -> usize {
         self.glyphs.text_len()
     }
     pub fn runs(&self) -> impl Iterator<Item = GlyphRun<'_>> + Clone {
-        let (single, many): (Option<Run>, &[Run]) = match &self.mapping {
+        self.view().runs()
+    }
+    pub fn lines(&self) -> impl Iterator<Item = TextLine> + Clone {
+        self.view().lines()
+    }
+    /// Borrow this layout's immutable map, when a detailed layout was needed.
+    pub fn geometry(&self) -> Option<&TextGeometry> {
+        self.mapping.as_ref().map(AsRef::as_ref)
+    }
+    pub fn caret_bounds(&self, position: TextPosition) -> Option<Rect> {
+        self.geometry()?.caret_bounds(position)
+    }
+    pub fn validates_selection(&self, selection: TextSelection) -> bool {
+        self.geometry()
+            .is_some_and(|map| map.validates_selection(selection))
+    }
+}
+impl<'a> LayoutView<'a> {
+    pub(super) fn runs(self) -> impl Iterator<Item = GlyphRun<'a>> + Clone {
+        let (single, many): (Option<Run>, &[Run]) = match self.mapping {
             None => (
                 Some(Run {
                     start: 0,
-                    end: self.text_len() as u32,
+                    end: self.glyphs.text_len() as u32,
                     glyph_start: 0,
                     glyph_end: self.glyphs.len() as u32,
                     line: 0,
@@ -172,14 +196,18 @@ impl TextLayout {
         single
             .into_iter()
             .chain(many.iter().copied())
-            .map(|run| GlyphRun { layout: self, run })
+            .map(move |run| GlyphRun {
+                glyphs: self.glyphs,
+                fonts: self.fonts,
+                run,
+            })
     }
-    pub fn lines(&self) -> impl Iterator<Item = TextLine> + Clone {
-        let (single, many): (Option<Line>, &[Line]) = match &self.mapping {
+    pub(super) fn lines(self) -> impl Iterator<Item = TextLine> + Clone + 'a {
+        let (single, many): (Option<Line>, &[Line]) = match self.mapping {
             None => (
                 Some(Line {
                     start: 0,
-                    end: self.text_len() as u32,
+                    end: self.glyphs.text_len() as u32,
                     top: 0.,
                     height: self.height,
                     baseline: self.baseline,
@@ -191,22 +219,12 @@ impl TextLayout {
         };
         single.into_iter().chain(many.iter().copied()).map(TextLine)
     }
-    /// Borrow this layout's immutable map, when a detailed layout was needed.
-    pub fn geometry(&self) -> Option<&TextGeometry> {
-        self.mapping.as_deref()
-    }
+}
+impl TextLayout {
     /// Retain exact geometry independently from this layout's glyph/font payload.
     pub fn retain_geometry(&self) -> Option<std::sync::Arc<TextGeometry>> {
         self.mapping.clone()
     }
-    pub fn caret_bounds(&self, position: TextPosition) -> Option<Rect> {
-        self.geometry()?.caret_bounds(position)
-    }
-    pub fn validates_selection(&self, selection: TextSelection) -> bool {
-        self.geometry()
-            .is_some_and(|map| map.validates_selection(selection))
-    }
-
     /// Release opt-in caret geometry while preserving the canonical glyphs,
     /// fonts and placement. Single primary-font LTR metadata is folded back
     /// into the ordinary compact layout.
