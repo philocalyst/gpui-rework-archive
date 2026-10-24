@@ -1,0 +1,123 @@
+{
+  "adopted_source": "ec6babe88c511efb9ba44406f19dc9d53c376d14",
+  "qualified_source": "69aca81557374bb25142ab2f73a01b7e9358a545",
+  "whole_git_trees_identical": true,
+  "functional_results": {
+    "source": "69aca81557374bb25142ab2f73a01b7e9358a545",
+    "binary_sha256": "15c3ad8892cdde73f10943529500f6ffbbaf27e90983c72359a09d2e5c98d76b",
+    "results": [
+      {
+        "rows": 0,
+        "exit": 0,
+        "full_model_checkpoints": 9,
+        "operations": 8,
+        "binary_hash_matches": true
+      },
+      {
+        "rows": 1,
+        "exit": 0,
+        "full_model_checkpoints": 9,
+        "operations": 8,
+        "binary_hash_matches": true
+      },
+      {
+        "rows": 2,
+        "exit": 0,
+        "full_model_checkpoints": 9,
+        "operations": 8,
+        "binary_hash_matches": true
+      },
+      {
+        "rows": 1000,
+        "exit": 0,
+        "full_model_checkpoints": 9,
+        "operations": 8,
+        "binary_hash_matches": true
+      },
+      {
+        "rows": 10000,
+        "exit": 0,
+        "full_model_checkpoints": 9,
+        "operations": 8,
+        "binary_hash_matches": true
+      }
+    ],
+    "scope": "Functional ordinary recording fixture, validation outside per-edit and ACK timers; no paired performance claim."
+  },
+  "strict": {
+    "source": "69aca81557374bb25142ab2f73a01b7e9358a545",
+    "exit": 0,
+    "guards": 2075,
+    "guards_match": true,
+    "tracked_input_scopes": [
+      ".cargo",
+      "clippy.toml",
+      "reactivity/Cargo.toml",
+      "reactivity/Cargo.lock",
+      "reactivity/rust-toolchain.toml",
+      "reactivity/crates",
+      "reactivity/vendor"
+    ],
+    "passed": 0,
+    "failed": 0,
+    "ignored": 0,
+    "harnesses": 0,
+    "scope": "Functional/source-identity gate; no timing inference."
+  },
+  "negative_controls": {
+    "mutant": {
+      "source": "d586f55877789ed311de465eb963371e190d0f92",
+      "oracle": "per-phase",
+      "actual_exit": 101,
+      "expected_behavior_confirmed": true,
+      "binary_sha256": "8b22a47f11045670ca18c6e9977d4876034052f1888c3f9d5f5a4ea89028fda1",
+      "scope": "Bounded wrong-filter mutant preserves callbacks and final model; per-phase canonical source assertion must reject it."
+    },
+    "old-oracle": {
+      "source": "7b479bcb8713830ab234394b0702cf55685cf6f7",
+      "oracle": "final-only",
+      "actual_exit": 0,
+      "expected_behavior_confirmed": true,
+      "binary_sha256": "e2f08978c1c67e92bdad10ad2651e463e1fe8e3b1129e9cf548f3297f1f5fab4",
+      "scope": "Bounded wrong-filter mutant preserves callbacks and final model; per-phase canonical source assertion must reject it."
+    }
+  },
+  "source_guards": {
+    "inputs": 2075,
+    "all_before_after_match": true
+  },
+  "shipping_cost": {
+    "core_lines": 35863,
+    "shipping_line_delta": 0,
+    "library_or_dependency_changes": false
+  },
+  "logs": {
+    "bytes": 1392594,
+    "sha256": "dc40b8faabd8cbe5cda21333c75bcc94e4663b05379bec8a041ce70d5664ded7",
+    "verified_metadata_members": 91
+  },
+  "actual_executables_external": [
+    {
+      "path": "/tmp/gpui-todo-phase-executable-root/todo_recording_cost",
+      "bytes": 10239184,
+      "sha256": "15c3ad8892cdde73f10943529500f6ffbbaf27e90983c72359a09d2e5c98d76b"
+    },
+    {
+      "path": "/tmp/gpui-todo-phase-mutant-executable-root/todo_recording_cost",
+      "bytes": 10239232,
+      "sha256": "8b22a47f11045670ca18c6e9977d4876034052f1888c3f9d5f5a4ea89028fda1"
+    },
+    {
+      "path": "/tmp/gpui-todo-phase-old-oracle-executable-root/todo_recording_cost",
+      "bytes": 10248080,
+      "sha256": "e2f08978c1c67e92bdad10ad2651e463e1fe8e3b1129e9cf548f3297f1f5fab4"
+    }
+  ],
+  "limits": [
+    "Recording functional evidence only, not native rendering or performance.",
+    "Expected model creation follows measured mount and initial ACK; later checks stay outside edit/ACK timers and counters.",
+    "Whole-process CPU/RSS and cache conditions change; previous fixture timing remains separately pinned.",
+    "Native ordered callback, drawable revision, presentation and latency gates remain unchanged and separately required.",
+    "The bounded wrong-filter mutant establishes one concrete detection improvement, not complete bug coverage."
+  ]
+}

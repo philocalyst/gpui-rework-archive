@@ -97,6 +97,14 @@ raw samples separate from native rendering and latency gates. Full-string ICU
 oracles independently check both Unicode seams; bounded mutants must fail a
 semantic assertion rather than merely panic on an unrelated bound.
 
+The [Todo recording oracle](evidence/todo-recording-per-phase/README.md) checks
+the full ordinary source after each acknowledged operation against an explicit
+independent model. Its callback-preserving wrong-filter control passes the
+previous final-only oracle and fails the new Active checkpoint. Oracle work
+is outside edit/ACK timers but changes whole-process work and cache conditions;
+compare performance only within the same fixture revision. Native callback,
+drawable, presentation and latency gates remain independently required.
+
 The [contained property editor](docs/property-state-routes.md) exercises this same
 surface through public mounted selection, canonical state replies, editable
 drafts, Apply, Inherit and Refresh. Its headless cases use ordinary `Win` actions;

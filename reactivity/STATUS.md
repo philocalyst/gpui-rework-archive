@@ -23,9 +23,12 @@ physical candidate engines, VoiceOver and Windows runtime remain unqualified.
 That seven-library source `373c9c6ba2` contains **35,851** non-test code lines,
 including 18 library build-script lines, up 952 from its predecessor.
 
-The ordinary [Todo recording fixture](crates/gpui/examples/todo_recording_cost.rs)
+The ordinary [Todo recording fixture](evidence/todo-recording-per-phase/README.md)
 separates edits from acknowledgement and validates every canonical model field
-after all eight actions at 0, 1,000 and 10,000 seeded rows. Its CPU/allocation
+after each acknowledged phase at 0, 1, 2, 1,000 and 10,000 seeded rows. Its
+45 checks reject an ignored-filter mutant accepted by the previous final-only
+oracle. Validation stays outside edit/ACK counters but changes whole-process
+work; previous measurements retain their original fixture identity. CPU/allocation
 diagnostics isolate retained work; native rendering and latency keep their
 separate unchanged acceptance gates.
 
