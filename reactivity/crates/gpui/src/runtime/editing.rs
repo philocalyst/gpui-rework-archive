@@ -96,7 +96,7 @@ impl<M: View + 'static> Runtime<M> {
         let ready = slot
             .get(&self.texts)
             .and_then(|site| site.shaped.as_ref())
-            .is_some_and(|shape| shape.layout.caret_bounds(position(0).unwrap()).is_some());
+            .is_some();
         if !ready {
             let width = self
                 .layout
@@ -113,7 +113,6 @@ impl<M: View + 'static> Runtime<M> {
                 &mut font.shaper(),
                 self.styles.get(index).font_size,
                 Some(width),
-                true,
             )?;
         }
         Ok(&slot

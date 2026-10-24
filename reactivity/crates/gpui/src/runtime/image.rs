@@ -92,7 +92,7 @@ fn prune(current: &mut Option<Box<Images>>) {
     }
 }
 
-pub(super) fn measure(image: &Image, input: MeasureInput) -> MeasureOutput {
+pub(super) fn measure(image: &Image, input: WidthMeasureInput) -> MeasureOutput {
     let ratio = image.width() as f32 / image.height() as f32;
     let (width, height) = match (input.known_dimensions.width, input.known_dimensions.height) {
         (Some(width), Some(height)) => (width, height),

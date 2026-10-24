@@ -8,6 +8,7 @@ use cephal::style::{
 };
 use gpui_reactivity_core::layout::{
     AvailableSpace, LayoutError, LayoutTree, MeasureInput, MeasureOutput, Size, Style,
+    WidthMeasureInput,
 };
 use gpui_reactivity_core::{NodeId, NodeKind, TreeError};
 
@@ -481,6 +482,141 @@ fn measured_content_service_is_borrowed_per_compute_and_invalidates_explicitly()
     assert!(calls.contains(&a));
     // Flex may ask the clean sibling a different available-space question.
     // Stable content does not imply that every cached query remains reusable.
+}
+
+#[test]
+fn width_measurement_reuses_height_probes_and_matches_full_axis_layout() {
+    fn fixture() -> (LayoutTree, NodeId, Vec<NodeId>) {
+        let mut tree = LayoutTree::new();
+        let root = tree
+            .insert(
+                None,
+                NodeKind::Element,
+                Style {
+                    display: Display::Flex,
+                    flex_direction: cephal::style::FlexDirection::Column,
+                    ..Style::DEFAULT
+                },
+            )
+            .unwrap();
+        let row = tree
+            .insert(
+                Some(root),
+                NodeKind::Element,
+                Style {
+                    display: Display::Flex,
+                    ..Style::DEFAULT
+                },
+            )
+            .unwrap();
+        let mut leaves = Vec::new();
+        for _ in 0..8 {
+            let leaf = tree
+                .insert(Some(row), NodeKind::Element, Style::DEFAULT)
+                .unwrap();
+            tree.set_measure(leaf, Some(measure)).unwrap();
+            leaves.push(leaf);
+        }
+        (tree, root, leaves)
+    }
+    fn content(input: WidthMeasureInput, advance: f32) -> MeasureOutput {
+        let width = input
+            .known_dimensions
+            .width
+            .unwrap_or(match input.available_width {
+                AvailableSpace::MaxContent => advance * 8.0,
+                AvailableSpace::MinContent => advance,
+                AvailableSpace::Definite(width) => width.min(advance * 8.0),
+            });
+        MeasureOutput {
+            size: Size {
+                width,
+                height: input
+                    .known_dimensions
+                    .height
+                    .unwrap_or((advance * 8.0 / width.max(1.0)).ceil() * 20.0),
+            },
+            baselines: cephal::tree::Baselines::from_first(Some(15.0)),
+        }
+    }
+    let (mut full, full_root, full_leaves) = fixture();
+    let (mut narrow, narrow_root, narrow_leaves) = fixture();
+    let mut full_calls = 0;
+    let mut narrow_calls = 0;
+    for (width, height, advance, known_height) in [
+        (400.0, AvailableSpace::MaxContent, 7.0, None),
+        (240.0, AvailableSpace::MinContent, 7.0, None),
+        (500.0, AvailableSpace::Definite(300.0), 9.0, Some(43.0)),
+        (240.0, AvailableSpace::Definite(120.0), 6.0, Some(17.0)),
+    ] {
+        for (tree, leaves) in [(&mut full, &full_leaves), (&mut narrow, &narrow_leaves)] {
+            for &leaf in leaves {
+                tree.set_style(
+                    leaf,
+                    Style {
+                        size: Size {
+                            width: Dimension::AUTO,
+                            height: known_height.map_or(Dimension::AUTO, Dimension::length),
+                        },
+                        ..Style::DEFAULT
+                    },
+                )
+                .unwrap();
+                // An advance/font/content dependency changed independently of style.
+                tree.mark_dirty(leaf).unwrap();
+            }
+        }
+        let available = Size {
+            width: AvailableSpace::Definite(width),
+            height,
+        };
+        full.compute_with(full_root, available, &mut |_, input| {
+            full_calls += 1;
+            content(
+                WidthMeasureInput {
+                    known_dimensions: input.known_dimensions,
+                    available_width: input.available_space.width,
+                },
+                advance,
+            )
+        })
+        .unwrap();
+        narrow
+            .compute_with_width_measure(narrow_root, available, &mut |_, input| {
+                narrow_calls += 1;
+                content(input, advance)
+            })
+            .unwrap();
+        for (a, b) in full
+            .tree()
+            .subtree(full_root)
+            .unwrap()
+            .zip(narrow.tree().subtree(narrow_root).unwrap())
+        {
+            assert_eq!(full.layout(a).unwrap(), narrow.layout(b).unwrap());
+        }
+        if let Some(height) = known_height {
+            assert_eq!(narrow.layout(narrow_leaves[0]).unwrap().size.height, height);
+        }
+    }
+    assert!(
+        narrow_calls < full_calls,
+        "full={full_calls}, narrow={narrow_calls}"
+    );
+    let before = narrow.stats();
+    assert!(
+        !narrow
+            .compute_with_width_measure(
+                narrow_root,
+                Size {
+                    width: AvailableSpace::Definite(240.0),
+                    height: AvailableSpace::Definite(120.0),
+                },
+                &mut |_, _| panic!("clean computation must not measure")
+            )
+            .unwrap()
+    );
+    assert_eq!(narrow.stats(), before);
 }
 
 #[test]

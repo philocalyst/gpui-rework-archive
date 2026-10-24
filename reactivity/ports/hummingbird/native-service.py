@@ -51,6 +51,7 @@ def main():
     parser = argparse.ArgumentParser(description=__doc__)
     parser.add_argument("binary", type=Path)
     parser.add_argument("output", type=Path)
+    parser.add_argument("--collections", action="store_true")
     args = parser.parse_args()
     args.output.mkdir(exist_ok=False)
     deadline = time.monotonic() + 150
@@ -107,7 +108,7 @@ def main():
 
             address = wait(discover, "private accessibility bus")
             bus(session, "set-property", "org.a11y.Bus", "/org/a11y/bus", "org.a11y.Status", "IsEnabled", "b", "true")
-            app = subprocess.Popen([str(args.binary)], env=env, stdin=subprocess.PIPE, stdout=subprocess.PIPE, stderr=log)
+            app = subprocess.Popen([str(args.binary)] + (["--collections"] if args.collections else []), env=env, stdin=subprocess.PIPE, stdout=subprocess.PIPE, stderr=log)
             children.append(app)
             pending = b""
 
@@ -166,32 +167,73 @@ def main():
                 line = command("stats")[0].split(",")
                 return [int(v) for v in line[1:5]] + [line[5] == "true"]
 
-            find("9 recordings for ‘’ — Title")
-            command("import")
-            find("10 recordings for ‘’ — Title")
-            find("Imported recording 5000")
-            search("μαρ")
-            find("1 recordings for ‘μαρ’ — Title")
-            command("collision")
-            invoke("Prepare Καλημέρα")
-            fixture = Path(__file__).parent / "assets/audio/stereo.wav"
-            find(f"Prepared request 1: recording 44 — {fixture}")
-            assert stats() == [0, 0, 0, 0, False], "pure preparation or unmatched public request played"
-            invoke("Play Καλημέρα now")
-            find(f"Prepared request 2: recording 44 — {fixture}")
-            wait(lambda: stats()[0] == 1, "real audio service open")
-            assert stats()[1:3] == [0, 0], "zero-credit sink accepted PCM"
-            command("credit")
-            wait(lambda: stats()[1:3] == [64, 64], "bounded PCM production")
-            find("Queue — 1 entries")
-            invoke("Stop")
-            find("No decoder plan")
-            wait(lambda: not stats()[4], "Stop revokes output gate")
-            command("disconnect")
-            find("Library worker closed")
-            invoke("Prepare Καλημέρα")
-            find("Recording unavailable: Library worker is closed")
-            assert stats()[0] == 1, "closed worker restarted playback"
+            if args.collections:
+                find("9 recordings for ‘’ — Title")
+                command("import")
+                find("10 recordings for ‘’ — Title")
+                invoke("Albums")
+                find("4 albums")
+                invoke("Open Album")
+                find("2 recordings for ‘’ — Track order")
+                invoke("Back")
+                find("4 albums")
+                invoke("Artists")
+                invoke("Open Alpha Artist")
+                find("4 recordings for ‘’ — Title")
+                invoke("Playlists")
+                invoke("Open Evening Καφέ")
+                find("3 recordings for ‘’ — Playlist order")
+                search("μαρ")
+                find("1 recordings for ‘μαρ’ — Playlist order")
+                search("")
+                find("3 recordings for ‘’ — Playlist order")
+                command("collision")
+                invoke("Prepare Καλημέρα")
+                fixture = Path(__file__).parent / "assets/audio/stereo.wav"
+                find(f"Prepared request 1: recording 44 — {fixture}")
+                assert stats() == [0, 0, 0, 0, False], "navigation, queries, pure Prepare or wrong reply played"
+                invoke("Play from Untitled")
+                find("Collection playback started")
+                wait(lambda: stats()[0] == 1, "context playback real service open")
+                assert stats()[1:3] == [0, 0], "zero-credit sink accepted PCM"
+                command("credit")
+                wait(lambda: stats()[1:3] == [64, 64], "context bounded PCM production")
+                find("Queue — 3 entries")
+                invoke("Stop")
+                find("No decoder plan")
+                wait(lambda: not stats()[4], "Stop revokes context output gate")
+                command("disconnect")
+                find("Library worker closed")
+                invoke("Prepare Καλημέρα")
+                find("Recording unavailable: Library worker is closed")
+                assert stats()[0] == 1, "closed worker restarted context playback"
+            else:
+                find("9 recordings for ‘’ — Title")
+                command("import")
+                find("10 recordings for ‘’ — Title")
+                find("Imported recording 5000")
+                search("μαρ")
+                find("1 recordings for ‘μαρ’ — Title")
+                command("collision")
+                invoke("Prepare Καλημέρα")
+                fixture = Path(__file__).parent / "assets/audio/stereo.wav"
+                find(f"Prepared request 1: recording 44 — {fixture}")
+                assert stats() == [0, 0, 0, 0, False], "pure preparation or unmatched public request played"
+                invoke("Play Καλημέρα now")
+                find(f"Prepared request 2: recording 44 — {fixture}")
+                wait(lambda: stats()[0] == 1, "real audio service open")
+                assert stats()[1:3] == [0, 0], "zero-credit sink accepted PCM"
+                command("credit")
+                wait(lambda: stats()[1:3] == [64, 64], "bounded PCM production")
+                find("Queue — 1 entries")
+                invoke("Stop")
+                find("No decoder plan")
+                wait(lambda: not stats()[4], "Stop revokes output gate")
+                command("disconnect")
+                find("Library worker closed")
+                invoke("Prepare Καλημέρα")
+                find("Recording unavailable: Library worker is closed")
+                assert stats()[0] == 1, "closed worker restarted playback"
             xdotool = "/nix/store/qvckv6m6ycsa8f26w0f20mzk5w4v9ciq-xdotool-4.20260303.1/bin/xdotool"
             window = int(subprocess.check_output([xdotool, "search", "--onlyvisible", "--name", "Hummingbird"], env=env, text=True).splitlines()[0])
             close_window(display, window)
@@ -199,7 +241,7 @@ def main():
             assert app.wait(timeout=10) == 0, "WM close did not retire application services"
             log.flush()
             assert "HUMMINGBIRD_NATIVE_CLOSED" in (args.output / "native.log").read_text()
-            (args.output / "result.json").write_text(json.dumps({"passed": True, "events": events, "scope": "Actual Registry/public Window and original Library actions; real SQLite/audio owners; bounded counting output, no hardware or timing claim; prequeued unmatched full-Selection collision."}, indent=2) + "\n")
+            (args.output / "result.json").write_text(json.dumps({"passed": True, "events": events, "collections": args.collections, "scope": "Actual Registry/public Window and original Library actions; real SQLite/audio owners; bounded counting output, no hardware or timing claim; prequeued unmatched full-Selection collision."}, indent=2) + "\n")
         finally:
             for child in reversed(children):
                 if child.poll() is None:

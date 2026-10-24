@@ -11,11 +11,15 @@ use std::{
 };
 
 use gpui_canvas::{
-    Canvas, ColorConfig, DamageRegion, PreparedScene, TextLayout, TextShaper, TextSystem,
+    Canvas, ColorConfig, DamageRegion, PreparedScene, TextLayout, TextMetrics, TextShaper,
+    TextSystem,
 };
 use gpui_reactivity_core::{
     Affine, CoordinateSpace, NodeId, Point, Rect,
-    layout::{AvailableSpace, LayoutError, LayoutTree, MeasureInput, MeasureOutput, Size},
+    layout::{
+        AvailableSpace, LayoutError, LayoutTree, MeasureInput, MeasureOutput, Size,
+        WidthMeasureInput,
+    },
 };
 use serde::Serialize;
 
@@ -308,9 +312,10 @@ impl Snapshot {
     }
 }
 
-/// One current-width layout per text-bearing site, owned by the runtime's dense
-/// lane. A description moves cache entries with surviving identities; removed
-/// sites drop their glyph buffers when the preceding lane is dropped.
+/// One interactive layout per text-bearing site. A first known-width measurement
+/// may fill a vacant slot; other measurement widths never replace it. Final
+/// placement checks its exact width before retaining C/P geometry. Description
+/// moves surviving identities and removed sites drop their glyph buffers.
 struct Shaped {
     width: Option<u32>,
     layout: TextLayout,
@@ -653,31 +658,50 @@ impl Node {
     }
 }
 impl TextSite {
+    fn measure_for(
+        &mut self,
+        service: &mut TextShaper<'_>,
+        font_size: f32,
+        input: WidthMeasureInput,
+    ) -> Result<TextMetrics, Error> {
+        let width = input
+            .known_dimensions
+            .width
+            .or(match input.available_width {
+                AvailableSpace::Definite(width) => Some(width),
+                AvailableSpace::MinContent => Some(f32::MIN_POSITIVE),
+                AvailableSpace::MaxContent => None,
+            });
+        let width = width.map(|value| value.max(f32::MIN_POSITIVE));
+        if self.shaped.is_none() && input.known_dimensions.width.is_some() {
+            self.shape_for(service, font_size, width)?;
+        }
+        if let Some(shape) = &self.shaped
+            && shape.width == width.map(f32::to_bits)
+            && shape.layout.font_size() == font_size
+        {
+            return Ok(TextMetrics {
+                width: shape.layout.width,
+                height: shape.layout.height,
+                baseline: shape.layout.baseline,
+            });
+        }
+        Ok(service.measure(&self.value, font_size, width)?)
+    }
     fn shape_for<'n>(
         &'n mut self,
         service: &mut TextShaper<'_>,
         font_size: f32,
         width: Option<f32>,
-        interactive: bool,
     ) -> Result<&'n TextLayout, Error> {
         let width = width.map(|value| value.max(f32::MIN_POSITIVE));
         let key = width.map(f32::to_bits);
-        if self.shaped.as_ref().is_none_or(|shape| {
-            shape.width != key
-                || (interactive
-                    && shape
-                        .layout
-                        .caret_bounds(gpui_canvas::TextPosition {
-                            offset: gpui_canvas::TextOffset::new(0).unwrap(),
-                            affinity: gpui_canvas::CaretAffinity::Downstream,
-                        })
-                        .is_none())
-        }) {
-            let layout = if interactive {
-                service.shape_interactive(&self.value, font_size, width)?
-            } else {
-                service.shape(&self.value, font_size, width)?
-            };
+        if self
+            .shaped
+            .as_ref()
+            .is_none_or(|shape| shape.width != key || shape.layout.font_size() != font_size)
+        {
+            let layout = service.shape_interactive(&self.value, font_size, width)?;
             self.shaped = Some(Shaped { width: key, layout });
         }
         Ok(&self.shaped.as_ref().unwrap().layout)
@@ -2678,15 +2702,7 @@ impl<M: View + 'static> Runtime<M> {
         let texts = &mut self.texts;
         let images = &self.images;
         let service = &mut shaper;
-        let mut measure = |id: NodeId, input: MeasureInput| {
-            let width = input
-                .known_dimensions
-                .width
-                .or(match input.available_space.width {
-                    AvailableSpace::Definite(width) => Some(width),
-                    AvailableSpace::MinContent => Some(f32::MIN_POSITIVE),
-                    AvailableSpace::MaxContent => None,
-                });
+        let mut measure = |id: NodeId, input: WidthMeasureInput| {
             let index = layout_nodes
                 .binary_search(&id)
                 .expect("measurement names a node in the current layout arena");
@@ -2697,14 +2713,10 @@ impl<M: View + 'static> Runtime<M> {
             let service = service
                 .as_mut()
                 .expect("measured text has an initialized service");
-            match node.text_slot().get_mut(texts).unwrap().shape_for(
+            match node.text_slot().get_mut(texts).unwrap().measure_for(
                 service,
                 styles.get(index).font_size,
-                width,
-                // Intrinsic probes cannot publish geometry. Final finite
-                // placement upgrades the cache before retaining C/P maps.
-                input.known_dimensions.width.is_some()
-                    || matches!(input.available_space.width, AvailableSpace::Definite(_)),
+                input,
             ) {
                 Ok(shape) => MeasureOutput {
                     size: Size {
@@ -2722,7 +2734,7 @@ impl<M: View + 'static> Runtime<M> {
                 }
             }
         };
-        self.layout.compute_with(
+        self.layout.compute_with_width_measure(
             self.layout_nodes[0],
             Size {
                 width: AvailableSpace::Definite(size[0] as f32 / scale_factor),
@@ -2915,7 +2927,6 @@ impl<M: View + 'static> Runtime<M> {
                     shaper.as_mut().expect("text initialized before layout"),
                     style.font_size,
                     Some(layout.content_box_width()),
-                    true,
                 )?;
                 let origin = Point {
                     x: layout.padding.left,
@@ -3894,6 +3905,159 @@ mod tests {
     }
 
     #[test]
+    fn first_known_width_measurement_fills_only_a_vacant_layout_slot() {
+        let system = TextSystem::bundled().unwrap();
+        let mut shaper = system.font_face().shaper();
+        let mut site = TextSite {
+            value: SharedText::from("office אבג\nnext"),
+            field: None,
+            shaped: None,
+        };
+        let input = |available_width| WidthMeasureInput {
+            known_dimensions: Size::NONE,
+            available_width,
+        };
+        for width in [
+            AvailableSpace::MaxContent,
+            AvailableSpace::MinContent,
+            AvailableSpace::Definite(80.),
+        ] {
+            site.measure_for(&mut shaper, 16., input(width)).unwrap();
+            assert!(
+                site.shaped.is_none(),
+                "an available constraint cannot fill the slot"
+            );
+        }
+        site.measure_for(
+            &mut shaper,
+            16.,
+            WidthMeasureInput {
+                known_dimensions: Size {
+                    width: Some(80.),
+                    height: None,
+                },
+                available_width: AvailableSpace::MaxContent,
+            },
+        )
+        .unwrap();
+        let first = site.shaped.as_ref().unwrap().layout.glyphs().as_ptr();
+        let geometry = site
+            .shaped
+            .as_ref()
+            .unwrap()
+            .layout
+            .retain_geometry()
+            .unwrap();
+        for other in [
+            input(AvailableSpace::MaxContent),
+            input(AvailableSpace::MinContent),
+            input(AvailableSpace::Definite(40.)),
+            WidthMeasureInput {
+                known_dimensions: Size {
+                    width: Some(40.),
+                    height: None,
+                },
+                available_width: AvailableSpace::MaxContent,
+            },
+        ] {
+            site.measure_for(&mut shaper, 16., other).unwrap();
+            assert_eq!(
+                site.shaped.as_ref().unwrap().layout.glyphs().as_ptr(),
+                first
+            );
+        }
+        let cost = allocation_counter::measure(|| {
+            site.measure_for(&mut shaper, 16., input(AvailableSpace::Definite(80.)))
+                .unwrap();
+            site.shape_for(&mut shaper, 16., Some(80.)).unwrap();
+        });
+        assert_eq!(cost.count_total, 0);
+        // The first known width is provisional. Final placement must still
+        // check its own width, while the old geometry lease remains usable.
+        site.shape_for(&mut shaper, 16., Some(40.)).unwrap();
+        assert_eq!(site.shaped.as_ref().unwrap().width, Some(40.0f32.to_bits()));
+        assert!(
+            geometry
+                .caret_bounds(gpui_canvas::TextPosition {
+                    offset: gpui_canvas::TextOffset::new(0).unwrap(),
+                    affinity: gpui_canvas::CaretAffinity::Downstream,
+                })
+                .is_some()
+        );
+    }
+
+    #[test]
+    fn measurements_preserve_the_last_successful_canonical_text_geometry() {
+        let system = TextSystem::bundled().unwrap();
+        let mut shaper = system.font_face().shaper();
+        let mut site = TextSite {
+            value: SharedText::from("office אבג\nnext"),
+            field: None,
+            shaped: None,
+        };
+        let geometry = site
+            .shape_for(&mut shaper, 16., Some(80.))
+            .unwrap()
+            .retain_geometry()
+            .unwrap();
+        let glyphs = site.shaped.as_ref().unwrap().layout.glyphs().as_ptr();
+        for (size, width) in [(16., None), (16., Some(1.)), (24., Some(80.))] {
+            site.measure_for(
+                &mut shaper,
+                size,
+                WidthMeasureInput {
+                    known_dimensions: Size::NONE,
+                    available_width: width
+                        .map_or(AvailableSpace::MaxContent, AvailableSpace::Definite),
+                },
+            )
+            .unwrap();
+            let shape = site.shaped.as_ref().unwrap();
+            assert_eq!(shape.width, Some(80.0f32.to_bits()));
+            assert_eq!(shape.layout.glyphs().as_ptr(), glyphs);
+            assert!(std::sync::Arc::ptr_eq(
+                &geometry,
+                &shape.layout.retain_geometry().unwrap()
+            ));
+        }
+        assert!(
+            site.measure_for(
+                &mut shaper,
+                0.,
+                WidthMeasureInput {
+                    known_dimensions: Size::NONE,
+                    available_width: AvailableSpace::Definite(80.),
+                }
+            )
+            .is_err()
+        );
+        assert_eq!(
+            site.shaped.as_ref().unwrap().layout.glyphs().as_ptr(),
+            glyphs
+        );
+        let cost = allocation_counter::measure(|| {
+            site.measure_for(
+                &mut shaper,
+                16.,
+                WidthMeasureInput {
+                    known_dimensions: Size::NONE,
+                    available_width: AvailableSpace::Definite(80.),
+                },
+            )
+            .unwrap();
+        });
+        assert_eq!(
+            cost.count_total, 0,
+            "exact published operands borrow metrics"
+        );
+        println!(
+            "TEXT_SITE_HEADERS site={} shaped={}",
+            size_of::<TextSite>(),
+            size_of::<Shaped>()
+        );
+    }
+
+    #[test]
     fn text_width_cache_preserves_keys_and_replaces_only_after_success() {
         let system = TextSystem::bundled().unwrap();
         let mut shaper = system.font_face().shaper();
@@ -3903,36 +4067,31 @@ mod tests {
             shaped: None,
         };
         let wide = site
-            .shape_for(&mut shaper, 16.0, Some(140.0), false)
+            .shape_for(&mut shaper, 16.0, Some(140.0))
             .unwrap()
             .height;
         let narrow = site
-            .shape_for(&mut shaper, 16.0, Some(40.0), false)
+            .shape_for(&mut shaper, 16.0, Some(40.0))
             .unwrap()
             .height;
         assert!(narrow > wide);
         let pointer = site.shaped.as_ref().unwrap().layout.glyphs().as_ptr();
-        site.shape_for(&mut shaper, 16.0, Some(40.0), false)
-            .unwrap();
+        site.shape_for(&mut shaper, 16.0, Some(40.0)).unwrap();
         assert_eq!(
             pointer,
             site.shaped.as_ref().unwrap().layout.glyphs().as_ptr()
         );
         assert_eq!(site.shaped.as_ref().unwrap().width, Some(40.0f32.to_bits()));
-        site.shape_for(&mut shaper, 16.0, None, false).unwrap();
+        site.shape_for(&mut shaper, 16.0, None).unwrap();
         assert_eq!(site.shaped.as_ref().unwrap().width, None);
-        site.shape_for(&mut shaper, 16.0, Some(-0.0), false)
-            .unwrap();
+        site.shape_for(&mut shaper, 16.0, Some(-0.0)).unwrap();
         assert_eq!(
             site.shaped.as_ref().unwrap().width,
             Some(f32::MIN_POSITIVE.to_bits())
         );
         site.value = SharedText::from("漢");
         site.shaped = None;
-        assert!(
-            site.shape_for(&mut shaper, 16.0, Some(40.0), false)
-                .is_err()
-        );
+        assert!(site.shape_for(&mut shaper, 16.0, Some(40.0)).is_err());
         assert!(site.shaped.is_none());
     }
 }
