@@ -4305,23 +4305,23 @@ fn perceptual_gradients_match_independent_authored_f64_oracle() {
                     for dx in [0.125, 0.375, 0.625, 0.875] {
                         let oracle =
                             perceptual_oracle::interpolate(left, right, (x as f64 + dx) / 8., mode);
-                        for c in 0..4 {
-                            expected[c] += oracle[c] * 0.25;
+                        for (destination, source) in expected.iter_mut().zip(oracle) {
+                            *destination += source * 0.25;
                         }
                     }
                     for (name, bytes) in [("GPU", gpu.as_slice()), ("CPU", cpu)] {
-                        for c in 0..4 {
+                        for (c, &expected_channel) in expected.iter().enumerate() {
                             let index = (x * 4 + c) * 2;
                             let actual = half(&bytes[index..index + 2]);
                             let tolerance = if c == 3 {
                                 0.001
                             } else {
-                                0.000005 + 0.002 * expected[c].abs()
+                                0.000005 + 0.002 * expected_channel.abs()
                             };
                             assert!(
-                                (actual - expected[c]).abs() <= tolerance,
+                                (actual - expected_channel).abs() <= tolerance,
                                 "{name} {mode:?} {left:?} {right:?} x={x} c={c}: {actual} oracle={} tolerance={tolerance}",
-                                expected[c]
+                                expected_channel
                             );
                         }
                     }
