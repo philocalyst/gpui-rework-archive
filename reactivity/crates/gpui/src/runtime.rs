@@ -3100,9 +3100,9 @@ impl<M: View + 'static> Runtime<M> {
                 });
             }
         }
-        // One immutable parser for every measurement and final line layout in
-        // this pass. A single face lease lets the raster cache remain mutable;
-        // neither a string nor a glyph increments its reference count.
+        // One immutable parser and face lease span measurement and final line
+        // layout, while the raster cache remains mutable. Dirty layout passes
+        // additionally pin exact source leases for paragraph handoffs below.
         let font = self
             .text
             .as_ref()
@@ -3118,15 +3118,26 @@ impl<M: View + 'static> Runtime<M> {
             .map(|(identity, preview)| (identity, preview.display.clone(), preview.decoration));
         // Pin the exact Source or active Display input for this layout pass.
         // Leases copy no UTF-8; only measured sites acquire shaped paragraphs.
-        let text_inputs: Vec<_> = self
-            .texts
-            .iter()
-            .map(|site| site.as_ref().map(|site| site.value.clone()))
-            .collect();
-        let mut text_inputs = text_inputs;
-        if let Some((identity, display, _)) = &composition {
-            let index = self.by_identity.required(*identity);
-            text_inputs[self.nodes[index].text_slot().0 as usize] = Some(display.clone());
+        let mut text_inputs: Vec<_> = if self.rebuild_layout
+            || self.topology_changed
+            || self.layout.is_poisoned()
+            || !self.layout_dirty.is_empty()
+        {
+            self.texts
+                .iter()
+                .map(|site| site.as_ref().map(|site| site.value.clone()))
+                .collect()
+        } else {
+            Vec::new()
+        };
+        if let Some((identity, display, _)) = &composition
+            && let Some(input) = text_inputs.get_mut(
+                self.nodes[self.by_identity.required(*identity)]
+                    .text_slot()
+                    .0 as usize,
+            )
+        {
+            *input = Some(display.clone());
         }
         let mut shaper = font
             .as_ref()

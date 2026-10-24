@@ -349,6 +349,7 @@ impl<'font> Planner<'font> {
             } else {
                 (0, false)
             };
+            let duplicate_empty = paragraphs.is_some() && !fresh;
             let planned = if (!capture || !fresh)
                 && let Some(paragraphs) = &mut paragraphs
             {
@@ -361,7 +362,9 @@ impl<'font> Planner<'font> {
                 self.build(content, size, needed);
                 &mut self.layout
             };
-            planned.break_all_lines(max_width);
+            if !duplicate_empty {
+                planned.break_all_lines(max_width);
+            }
             let planned = &*planned;
             let simple = !interactive
                 && paragraph.content.end == text.len()
