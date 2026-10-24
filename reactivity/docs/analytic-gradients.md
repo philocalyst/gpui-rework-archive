@@ -35,7 +35,11 @@ solid Color or a GradientKey; Style.bg holds the compiled solid arm and is
 transparent while a gradient is selected. There is no second override property.
 Existing color literals, direct signals, and mapped colors keep their builder
 path. An inspector contribution is authoritative; its solid cache masks existing
-color ports until Inherit. A gradient key has private lanes and monotonic checked
+color ports until Inherit. Solid contributions use the existing style override
+lane; the cold resource bank stores only gradient overrides. Resolution selects
+a gradient override, then an explicit solid override, then the declared gradient
+or solid base. Inherit clears the contribution and reveals the latest declaration.
+A plain solid setter never creates a gradient resource bank. A gradient key has private lanes and monotonic checked
 64-bit identity, independent of allocator addresses. Setting a key validates
 current-owner resource membership and the current target generation. Inspection
 requires both a live target and its matching resolved key; it exposes geometry,

@@ -407,7 +407,88 @@ mod tests {
         );
         assert_eq!(
             win.property(target, BACKGROUND).unwrap(),
-            Brush::Solid(Color::TRANSPARENT)
+            Brush::Solid(Style::DEFAULT.bg)
+        );
+    }
+    #[test]
+    fn gradient_description_and_paint_edit_allocation_audit() {
+        let resource = gradient(Color::WHITE);
+        let key = resource.key();
+        let mut win = Win::with_size(
+            Page {
+                paint: Some(resource.clone()),
+                bad: false,
+            },
+            24,
+            24,
+        )
+        .unwrap();
+        let target = win.inspect().unwrap().nodes[0].target.unwrap();
+        win.update(|_| {}).unwrap();
+        let before = win.runtime().unwrap().counters.descriptions;
+        let cost = allocation_counter::measure(|| {
+            for _ in 0..16 {
+                win.update(|_| {}).unwrap();
+            }
+        });
+        eprintln!(
+            "gradient_work_audit,path=unchanged-owner-describe,iterations=16,descriptions={},allocs={},requested={},retained_delta={},peak_delta={}",
+            win.runtime().unwrap().counters.descriptions - before,
+            cost.count_total,
+            cost.bytes_total,
+            cost.bytes_current,
+            cost.bytes_max
+        );
+        win.set_property(target, BACKGROUND, Contribution::Set(Brush::Gradient(key)))
+            .unwrap();
+        let before = win.runtime().unwrap().counters.descriptions;
+        let cost = allocation_counter::measure(|| {
+            for _ in 0..16 {
+                win.set_property(target, BACKGROUND, Contribution::Set(Brush::Gradient(key)))
+                    .unwrap();
+            }
+        });
+        eprintln!(
+            "gradient_work_audit,path=equal-gradient-contribution,iterations=16,descriptions={},allocs={},requested={},retained_delta={},peak_delta={}",
+            win.runtime().unwrap().counters.descriptions - before,
+            cost.count_total,
+            cost.bytes_total,
+            cost.bytes_current,
+            cost.bytes_max
+        );
+        let before = win.runtime().unwrap().counters.descriptions;
+        let cost = allocation_counter::measure(|| {
+            for _ in 0..8 {
+                win.set_property(
+                    target,
+                    BACKGROUND,
+                    Contribution::Set(Brush::Solid(Color::WHITE)),
+                )
+                .unwrap();
+                win.set_property(target, BACKGROUND, Contribution::Set(Brush::Gradient(key)))
+                    .unwrap();
+            }
+        });
+        eprintln!(
+            "gradient_work_audit,path=changed-solid-gradient-contribution,iterations=16,descriptions={},allocs={},requested={},retained_delta={},peak_delta={}",
+            win.runtime().unwrap().counters.descriptions - before,
+            cost.count_total,
+            cost.bytes_total,
+            cost.bytes_current,
+            cost.bytes_max
+        );
+        let mut runtime = win.runtime_mut().unwrap();
+        let Runtime {
+            images,
+            dirty,
+            nodes,
+            ..
+        } = &mut *runtime;
+        let drafts = vec![(0, &resource)];
+        let cost = allocation_counter::measure(|| reconcile(images, dirty, nodes, drafts).unwrap());
+        eprintln!(
+            "gradient_work_audit,path=unchanged-reconcile-excluding-input-vec,iterations=1,allocs={},requested={},retained_delta={},peak_delta={}",
+            cost.count_total, cost.bytes_total, cost.bytes_current, cost.bytes_max
         );
     }
     #[test]
