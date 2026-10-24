@@ -157,3 +157,29 @@ fn exact_endpoints_edges_alpha_admission_and_lossless_authors() {
     }
     assert_eq!(Mode::default(), Mode::Oklch { hue: Hue::Shorter });
 }
+
+#[test]
+fn fixed_coordinates_preserve_hdr_axis_channels_but_longer_still_rotates() {
+    let color = Color::linear_srgb(HDR, 0., -0., 1.).unwrap();
+    let gradient = make(color, color, Mode::Oklab);
+    for t in [0.125, 0.5, 0.875] {
+        let actual = gradient.view().sample_parameter(t).unwrap();
+        assert_eq!(actual[1], 0.0);
+        assert_eq!(actual[2], 0.0);
+        assert_eq!(actual[0], HDR);
+        assert_eq!(actual[3], 1.0);
+    }
+    let color = Color::oklch(0.6, 0.2, 30., 0.5).unwrap();
+    let short = make(color, color, Mode::Oklch { hue: Hue::Shorter });
+    let long = make(color, color, Mode::Oklch { hue: Hue::Longer });
+    let a = short.view().sample_parameter(0.5).unwrap();
+    let b = long.view().sample_parameter(0.5).unwrap();
+    assert!((a[0] - b[0]).abs() > 0.1);
+    let gray = Color::oklch(0.6, 0.000003, 10., 1.).unwrap();
+    let longer = make(gray, gray, Mode::Oklch { hue: Hue::Longer });
+    let shorter = make(gray, gray, Mode::Oklch { hue: Hue::Shorter });
+    assert_eq!(
+        longer.view().sample_parameter(0.5).unwrap(),
+        shorter.view().sample_parameter(0.5).unwrap()
+    );
+}

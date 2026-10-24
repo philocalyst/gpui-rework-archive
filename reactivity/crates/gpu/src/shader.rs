@@ -400,6 +400,10 @@ pub mod ui {
             return bitcast_vec4f(get!(WORDS)[(word + stride + 4) as usize]);
         }
         let delta = bitcast_vec4f(get!(WORDS)[(word + 2) as usize]);
+        if (bitcast_u32(interval.z) & 0x80000000) != 0 {
+            return bitcast_vec4f(get!(WORDS)[(word + 4) as usize]) * (1.0 - u)
+                + bitcast_vec4f(get!(WORDS)[(word + stride + 4) as usize]) * u;
+        }
         if (bitcast_u32(interval.y) & 0x80000000) != 0 {
             if color.w == 0.0 {
                 return bitcast_vec4f(get!(WORDS)[(word + stride + 4) as usize]) * u;
@@ -408,11 +412,12 @@ pub mod ui {
                 return bitcast_vec4f(get!(WORDS)[(word + 4) as usize]) * (1.0 - u);
             }
         }
+        let alpha0 = abs(interval.z);
         let mut v = u;
-        if interval.z != interval.w {
-            let denominator = (1.0 - u) * interval.z + u * interval.w;
+        if alpha0 != interval.w {
+            let denominator = (1.0 - u) * alpha0 + u * interval.w;
             v = u * interval.w / max(denominator, bitcast_f32(0x00800000));
-            if interval.z == 0.0 {
+            if alpha0 == 0.0 {
                 v = 1.0;
             } else if interval.w == 0.0 {
                 v = 0.0;

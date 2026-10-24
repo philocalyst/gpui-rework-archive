@@ -291,7 +291,7 @@ fn prepare_interval(stop: GradientStop, next: GradientStop, mode: Interpolation)
         [
             stop.offset.to_bits(),
             (if polar { reciprocal } else { -reciprocal }).to_bits(),
-            (normalized[0] as f32).to_bits(),
+            (normalized[0] as f32).to_bits() | if !polar && left == right { 1 << 31 } else { 0 },
             (normalized[1] as f32).to_bits(),
         ],
         [
@@ -383,6 +383,8 @@ impl<'a> GradientView<'a> {
     /// five per perceptual stop. Word +3 always retains exact authored Color;
     /// perceptual word +4 preserves exact premultiplied endpoint RGB. Metadata's
     /// reciprocal sign selects LMS-prime (negative) or moving LCH (positive).
+    /// Metadata z's sign marks a resolved fixed-coordinate interval; its
+    /// magnitude and metadata w are normalized endpoint alpha.
     pub fn words(self) -> &'a [Word] {
         self.words
     }
@@ -596,7 +598,7 @@ impl<'a> GradientView<'a> {
             }
             alpha = load(1, 3) + t * load(2, 3);
         } else {
-            let a0 = load(0, 2);
+            let a0 = load(0, 2).abs();
             let a1 = load(0, 3);
             let mut v = t;
             if a0.simd_eq(a1).to_bitmask() != 15 {
@@ -664,6 +666,13 @@ impl<'a> GradientView<'a> {
             }
             if self.stride() == 5 && intervals[i].1 == 1.0 {
                 return self.words[intervals[i].0 + self.stride() + 4].map(f32::from_bits);
+            }
+            if self.stride() == 5 && self.words[intervals[i].0][2] >> 31 != 0 {
+                let left = self.words[intervals[i].0 + 4].map(f32::from_bits);
+                let right = self.words[intervals[i].0 + self.stride() + 4].map(f32::from_bits);
+                return std::array::from_fn(|j| {
+                    (1.0 - intervals[i].1) * left[j] + intervals[i].1 * right[j]
+                });
             }
             if self.stride() == 5 && self.words[intervals[i].0][1] >> 31 != 0 {
                 let left_alpha = f32::from_bits(self.words[intervals[i].0 + 1][3]);
