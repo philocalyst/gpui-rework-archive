@@ -57,13 +57,15 @@ impl Database {
         // publish together; a failed creation rolls back to an empty database.
         let transaction = connection.transaction_with_behavior(TransactionBehavior::Immediate)?;
         let marked: bool = transaction.query_row(
-            "SELECT EXISTS(SELECT 1 FROM sqlite_schema WHERE name='_gpui_library')",
+            "SELECT EXISTS(SELECT 1 FROM sqlite_schema WHERE type='table' AND name='_gpui_library')",
             [],
             |row| row.get(0),
         )?;
         if !marked {
             let occupied: bool = transaction.query_row(
-                "SELECT EXISTS(SELECT 1 FROM sqlite_schema WHERE type='table' AND name NOT LIKE 'sqlite_%')", [], |row| row.get(0),
+                "SELECT EXISTS(SELECT 1 FROM sqlite_schema WHERE name NOT GLOB 'sqlite_*')",
+                [],
+                |row| row.get(0),
             )?;
             if occupied {
                 return Err(crate::search::SourceError::UnknownLibrarySchema);
@@ -87,7 +89,8 @@ impl Database {
         if self.connection.is_readonly("main")? {
             return Ok(());
         }
-        self.connection.execute_batch(
+        let transaction = self.connection.unchecked_transaction()?;
+        transaction.execute_batch(
             "CREATE TABLE IF NOT EXISTS _gpui_root(
                 id INTEGER PRIMARY KEY AUTOINCREMENT,
                 path TEXT NOT NULL UNIQUE
@@ -101,7 +104,8 @@ impl Database {
                 location TEXT NOT NULL REFERENCES _gpui_index_file(location) ON DELETE CASCADE,
                 PRIMARY KEY(root_id,location)
             );",
-        )
+        )?;
+        transaction.commit()
     }
     /// Existing Hummingbird libraries are read without migrating or seeding them.
     pub fn open_read_only(path: &Path) -> Result<Self> {
