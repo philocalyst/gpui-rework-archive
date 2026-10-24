@@ -509,7 +509,11 @@ fn party_default_toggle_and_title_edits_refresh_checked_validation_and_parent_po
     ));
     window.activate(treats).unwrap();
     assert_presented(&window, true, false);
-    let input = window.query().name("Gathering name").one().unwrap();
+    let input = window
+        .role(Role::TextInput)
+        .name("Gathering name")
+        .one()
+        .unwrap();
     let len = window.root().unwrap().title.len();
     window
         .replace(input, gpui::TextSelection::from_bytes(0, len).unwrap(), "x")
