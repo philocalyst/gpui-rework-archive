@@ -364,3 +364,49 @@ fn layout_depth_128_is_admitted_and_129_is_rejected_without_losing_candidate() {
     assert_eq!(win.with_scene(|_, token| token).unwrap(), eligible);
     win.presented(eligible).unwrap();
 }
+
+struct DeepSiblings(bool);
+impl View for DeepSiblings {
+    fn view(&self) -> El<'_> {
+        let branch = |name| {
+            let mut child =
+                div()
+                    .size(1)
+                    .name(name)
+                    .bg(if self.0 { Color::BLACK } else { Color::WHITE });
+            for _ in 0..127 {
+                child = div().size(4).child(child);
+            }
+            child
+        };
+        column((
+            branch("first-deep-leaf"),
+            div().size(1).name("middle-sibling"),
+            branch("second-deep-leaf"),
+            div().size(1).name("last-sibling"),
+        ))
+        .size(32)
+    }
+}
+
+#[test]
+fn repeated_maximum_depth_branches_preserve_sibling_identities_on_redescription() {
+    let mut win = Win::recording(DeepSiblings(false), WindowOptions::default()).unwrap();
+    ack(&mut win);
+    let names = [
+        "first-deep-leaf",
+        "middle-sibling",
+        "second-deep-leaf",
+        "last-sibling",
+    ];
+    let original = names.map(|name| win.query().name(name).one().unwrap());
+    for phase in [true, false] {
+        win.update(|page| page.0 = phase).unwrap();
+        ack(&mut win);
+        assert_eq!(
+            names.map(|name| win.query().name(name).one().unwrap()),
+            original
+        );
+    }
+    assert_eq!(win.counters().descriptions, 3);
+}
