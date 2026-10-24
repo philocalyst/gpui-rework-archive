@@ -63,17 +63,17 @@ mod tests {
     }
     impl Context for Events {
         fn notify(&self) {
-            if self.calls.fetch_add(1, Ordering::Relaxed) == 0 {
-                if let Some(published) = &self.published {
-                    published.send(()).unwrap();
-                    self.resume
-                        .as_ref()
-                        .unwrap()
-                        .lock()
-                        .unwrap()
-                        .recv()
-                        .unwrap();
-                }
+            if self.calls.fetch_add(1, Ordering::Relaxed) == 0
+                && let Some(published) = &self.published
+            {
+                published.send(()).unwrap();
+                self.resume
+                    .as_ref()
+                    .unwrap()
+                    .lock()
+                    .unwrap()
+                    .recv()
+                    .unwrap();
             }
             assert!(!self.panic_notify, "notification");
         }
