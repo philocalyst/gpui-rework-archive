@@ -18,6 +18,10 @@ impl<T: Copy> Frontier<T> {
             spill_capacity: depth.saturating_sub(INLINE),
         }
     }
+    pub(super) fn set_root(&mut self, root: T) {
+        debug_assert_eq!(self.len, 0);
+        self.root = root;
+    }
     pub(super) fn top(&self) -> T {
         if self.len == 0 {
             self.root

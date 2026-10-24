@@ -2916,6 +2916,38 @@ impl<M: View + 'static> Runtime<M> {
         Ok(self.commit())
     }
     fn present_inner(&mut self) -> Result<(), Error> {
+        let list_mode = !self.viewports.is_empty();
+        let clip_mode = self
+            .metadata
+            .as_ref()
+            .and_then(|m| m.geometry.as_ref())
+            .is_some_and(|geometry| geometry.has_logical_clips());
+        if list_mode || clip_mode {
+            self.present_clipped(list_mode, clip_mode)
+        } else {
+            self.present_walk(false, false, None)
+        }
+    }
+    // Keep the optional inline clip frontier out of the common walk's frame.
+    #[inline(never)]
+    fn present_clipped(&mut self, list_mode: bool, clip_mode: bool) -> Result<(), Error> {
+        let seed = ClipFrame {
+            clip: Rect::default(),
+            hit_clip: Rect::default(),
+            chain: None,
+            membership: 0,
+            published: Parent::NONE,
+        };
+        let mut clips = frontier::Frontier::new(seed, usize::from(self.layout_depth));
+        self.present_walk(list_mode, clip_mode, Some(&mut clips))
+    }
+    #[inline(never)]
+    fn present_walk(
+        &mut self,
+        list_mode: bool,
+        clip_mode: bool,
+        mut clips: Option<&mut frontier::Frontier<ClipFrame>>,
+    ) -> Result<(), Error> {
         let sequence = self.next_presentation;
         let next_sequence = sequence.checked_add(1).ok_or(Error::EpochExhausted)?;
         let token = PresentationToken {
@@ -3069,12 +3101,6 @@ impl<M: View + 'static> Runtime<M> {
         let viewport = Rect::new(0.0, 0.0, size[0] as f32, size[1] as f32);
         let mut presented: Vec<Presented> = Vec::with_capacity(self.nodes.len());
         let mut geometry_records = Vec::new();
-        let list_mode = !self.viewports.is_empty();
-        let clip_mode = self
-            .metadata
-            .as_ref()
-            .and_then(|m| m.geometry.as_ref())
-            .is_some_and(|geometry| geometry.has_logical_clips());
         let mut spaces = frontier::Frontier::new(
             CoordinateSpace::new(Affine::scale(scale_factor, scale_factor)),
             usize::from(self.layout_depth),
@@ -3086,8 +3112,9 @@ impl<M: View + 'static> Runtime<M> {
             membership: 0,
             published: Parent::NONE,
         };
-        let mut clips = (list_mode || clip_mode)
-            .then(|| frontier::Frontier::new(root_clip, usize::from(self.layout_depth)));
+        if let Some(clips) = &mut clips {
+            clips.set_root(root_clip);
+        }
         let mut ancestor = Parent::NONE;
         let mut published = published::Published::new(if list_mode { self.nodes.len() } else { 0 });
         let mut visible_rows = BTreeSet::new();
@@ -3136,7 +3163,7 @@ impl<M: View + 'static> Runtime<M> {
                 }
                 ancestor = self.nodes[ancestor.index().unwrap()].parent;
             }
-            let inherited = clips.as_ref().map_or(root_clip, frontier::Frontier::top);
+            let inherited = clips.as_deref().map_or(root_clip, frontier::Frontier::top);
             let has_children = self
                 .nodes
                 .get(index + 1)

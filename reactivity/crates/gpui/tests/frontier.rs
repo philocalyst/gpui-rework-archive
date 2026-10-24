@@ -127,8 +127,12 @@ fn evidence<M: View + 'static>(win: &mut Win<M>, path: &Path, label: &str) {
 }
 #[test]
 fn allocation_and_exact_public_sheet_corpus() {
-    let out = std::env::var("GPUI_FRONTIER_EVIDENCE")
-        .unwrap_or_else(|_| format!("/tmp/gpui-frontier-public-{}", std::process::id()));
+    let out = std::env::var("GPUI_FRONTIER_EVIDENCE").unwrap_or_else(|_| {
+        std::env::temp_dir()
+            .join(format!("gpui-frontier-public-{}", std::process::id()))
+            .to_string_lossy()
+            .into_owned()
+    });
     let out = Path::new(&out);
     std::fs::create_dir_all(out).unwrap();
     drop(
@@ -287,8 +291,12 @@ impl View for Mixed {
 }
 #[test]
 fn sibling_unwind_nested_viewports_and_late_failure_preserve_acknowledgement() {
-    let out = std::env::var("GPUI_FRONTIER_EVIDENCE")
-        .unwrap_or_else(|_| format!("/tmp/gpui-frontier-public-{}", std::process::id()));
+    let out = std::env::var("GPUI_FRONTIER_EVIDENCE").unwrap_or_else(|_| {
+        std::env::temp_dir()
+            .join(format!("gpui-frontier-public-{}", std::process::id()))
+            .to_string_lossy()
+            .into_owned()
+    });
     let out = Path::new(&out);
     std::fs::create_dir_all(out).unwrap();
     let mut win = Win::recording(
