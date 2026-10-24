@@ -128,7 +128,17 @@ fn mixed_script_paint_selection_density_transform_and_scroll_keep_canonical_outp
         offset: TextOffset::new(byte).unwrap(),
         affinity: CaretAffinity::Downstream,
     };
-    for mode in 0..7 {
+    // Exact fingerprints from the frozen pre-refactor nightly baseline.
+    let expected = [
+        (604497862809837837, 7527280167539412869, 43),
+        (9246998227355371943, 3768078052957102048, 49),
+        (13692261620077259410, 15790634111628224307, 43),
+        (1749676696716030854, 13487479287976039562, 43),
+        (1937568770473666453, 7419303201436603241, 52),
+        (6922594733120599165, 16406274913052508165, 43),
+        (17293752116150255889, 10912843186917499701, 43),
+    ];
+    for (mode, expected) in expected.into_iter().enumerate() {
         canvas.clear(Color::rgb(19, 29, 47));
         let transform = match mode {
             3 => Affine::translation(2.375, 1.125),
@@ -177,9 +187,158 @@ fn mixed_script_paint_selection_density_transform_and_scroll_keep_canonical_outp
                 .fill_rect(caret, transform, clip, Color::WHITE)
                 .unwrap();
         }
+        assert_eq!(fingerprint(&mut canvas), expected, "mode={mode}");
+    }
+}
+
+#[test]
+fn duplicate_keys_and_foreign_face_rollback_preserve_pixels_and_candidate() {
+    let mut text = TextSystem::bundled().unwrap();
+    let many = text
+        .shape(&format!("{}i", "H".repeat(128)), 1.0, Some(2.0))
+        .unwrap();
+    let one = text.shape("H", 1.0, None).unwrap();
+    let mut foreign = TextSystem::new(include_bytes!("../assets/NotoSans.ttf")).unwrap();
+    let foreign_layout = foreign.shape("H", 1.0, None).unwrap();
+    let mut canvas = Canvas::new(320, 192).unwrap();
+    canvas
+        .draw_text(
+            &mut foreign,
+            &foreign_layout,
+            Point::default(),
+            Affine::IDENTITY,
+            CLIP,
+            Color::WHITE,
+        )
+        .unwrap();
+    // One foreign mask already exists. The rejected draw admits a new primary
+    // service mask, then 127 duplicate placements, before exceeding the limit.
+    for _ in 0..65_407 {
+        canvas
+            .fill_rect(
+                Rect::new(1.0, 1.0, 1.0, 1.0),
+                Affine::IDENTITY,
+                CLIP,
+                Color::WHITE,
+            )
+            .unwrap();
+    }
+    let before = fingerprint(&mut canvas);
+    let rendered = canvas.stats().render_count;
+    let masks = canvas
+        .prepared_scene()
+        .masks()
+        .map(|mask| mask.key)
+        .collect::<Vec<_>>();
+    assert_eq!(
+        canvas.draw_text(
+            &mut text,
+            &many,
+            Point::default(),
+            Affine::IDENTITY,
+            CLIP,
+            Color::WHITE
+        ),
+        Err(Error::ResourceLimit)
+    );
+    assert_eq!(fingerprint(&mut canvas), before);
+    assert_eq!(canvas.stats().render_count, rendered);
+    assert_eq!(
+        canvas
+            .prepared_scene()
+            .masks()
+            .map(|mask| mask.key)
+            .collect::<Vec<_>>(),
+        masks
+    );
+    // The same failure in a replacement candidate cannot publish its partial
+    // glyph group or change the target's previous pixels and resources.
+    {
+        let mut candidate = canvas.stage();
+        for _ in 0..65_408 {
+            candidate
+                .fill_rect(
+                    Rect::new(1.0, 1.0, 1.0, 1.0),
+                    Affine::IDENTITY,
+                    CLIP,
+                    Color::WHITE,
+                )
+                .unwrap();
+        }
+        assert_eq!(
+            candidate.draw_text(
+                &mut text,
+                &many,
+                Point::default(),
+                Affine::IDENTITY,
+                CLIP,
+                Color::WHITE
+            ),
+            Err(Error::ResourceLimit)
+        );
+    }
+    assert_eq!(fingerprint(&mut canvas), before);
+    canvas
+        .draw_text(
+            &mut text,
+            &one,
+            Point::default(),
+            Affine::IDENTITY,
+            CLIP,
+            Color::WHITE,
+        )
+        .unwrap();
+    assert_eq!(canvas.prepared_scene().masks().len(), 2);
+}
+
+#[test]
+fn submission_allocation_and_retained_capacity_ledger() {
+    let mut text = TextSystem::bundled().unwrap();
+    for (name, source, repeats, clip) in [
+        ("single", "H", 1, CLIP),
+        ("label", "office café repeated labels", 1, CLIP),
+        ("many_labels", "office café repeated labels", 48, CLIP),
+        (
+            "clipped",
+            "office café repeated labels",
+            48,
+            Rect::new(900.0, 900.0, 1.0, 1.0),
+        ),
+    ] {
+        let layout = text.shape(source, 12.0, None).unwrap();
+        let mut warm_cache = Canvas::recording(320, 192, ColorConfig::default()).unwrap();
+        warm_cache
+            .draw_text(
+                &mut text,
+                &layout,
+                Point::default(),
+                Affine::IDENTITY,
+                CLIP,
+                Color::WHITE,
+            )
+            .unwrap();
+        let mut canvas = Canvas::recording(320, 192, ColorConfig::default()).unwrap();
+        let submit = |canvas: &mut Canvas, text: &mut TextSystem| {
+            for _ in 0..repeats {
+                canvas
+                    .draw_text(
+                        text,
+                        &layout,
+                        Point::default(),
+                        Affine::IDENTITY,
+                        clip,
+                        Color::WHITE,
+                    )
+                    .unwrap();
+            }
+        };
+        let cold = allocation_counter::measure(|| submit(&mut canvas, &mut text));
+        let storage = canvas.prepared_scene().storage();
+        canvas.clear(Color::TRANSPARENT);
+        let warm = allocation_counter::measure(|| submit(&mut canvas, &mut text));
         println!(
-            "canonical mode={mode} fingerprint={:?}",
-            fingerprint(&mut canvas)
+            "ledger name={name} cold_count={} cold_bytes={} warm_count={} warm_bytes={} storage={storage:?}",
+            cold.count_total, cold.bytes_total, warm.count_total, warm.bytes_total
         );
     }
 }
