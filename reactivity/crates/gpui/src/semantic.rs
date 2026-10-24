@@ -49,6 +49,7 @@ pub(crate) struct ExtraParts<'a> {
     pub axes: Option<crate::Axis>,
     pub geometry: Option<crate::property::GeometryStyle>,
     pub bindings: Vec<crate::style_port::Binding<'a>>,
+    pub mapped: Vec<crate::style_port::MapBinding<'a>>,
 }
 #[derive(Default)]
 pub(crate) struct Decorations<'a> {
@@ -64,6 +65,11 @@ enum LeafExtra<'a> {
     List(crate::list::ListSpec<'a>),
 }
 pub(crate) enum ElementExtra<'a> {
+    // Only mapped nodes pay for this payload; one normalized optional base.
+    Mapped {
+        bindings: Vec<crate::style_port::MapBinding<'a>>,
+        base: Option<Box<ElementExtra<'a>>>,
+    },
     Decorations(Decorations<'a>),
     Image {
         spec: crate::image::ImageSpec<'a>,
@@ -83,6 +89,11 @@ pub(crate) enum ElementExtra<'a> {
 }
 impl<'a> ElementExtra<'a> {
     fn decorations(&mut self) -> &mut Decorations<'a> {
+        if let Self::Mapped { base, .. } = self {
+            return base
+                .get_or_insert_with(|| Box::new(Self::Decorations(Default::default())))
+                .decorations();
+        }
         if !matches!(self, Self::Decorations(_)) {
             let previous = std::mem::replace(self, Self::Semantic(Annotations::default()));
             let mut decorations = Decorations::default();
@@ -103,7 +114,7 @@ impl<'a> ElementExtra<'a> {
                 Self::Semantic(semantic) => {
                     (None, (!semantic.is_empty()).then(|| Box::new(semantic)))
                 }
-                Self::Decorations(_) => unreachable!(),
+                Self::Decorations(_) | Self::Mapped { .. } => unreachable!(),
             };
             decorations.base = base.map(Box::new);
             decorations.semantic = semantic;
@@ -115,6 +126,9 @@ impl<'a> ElementExtra<'a> {
         decorations
     }
     pub fn empty(&self) -> bool {
+        if let Self::Mapped { bindings, base } = self {
+            return bindings.is_empty() && base.as_deref().is_none_or(Self::empty);
+        }
         matches!(self, Self::Decorations(d) if d.base.is_none() && d.bindings.is_empty()
             && d.semantic.is_none() && d.geometry.corner_radius.to_bits() == 0 && d.axes.is_none())
     }
@@ -123,6 +137,33 @@ impl<'a> ElementExtra<'a> {
         property: crate::property::PropertyId,
         signal: &'a dyn crate::style_port::StyleSignal,
     ) {
+        if let Self::Mapped {
+            bindings,
+            base: Some(base),
+        } = self
+            && !bindings.iter().any(|binding| binding.property == property)
+        {
+            base.bind(property, signal);
+            return;
+        }
+        if let Self::Decorations(d) = self
+            && let Some(binding) = d
+                .bindings
+                .iter_mut()
+                .find(|binding| binding.property == property)
+        {
+            binding.signal = signal;
+            return;
+        }
+        self.unbind(property);
+        if let Self::Mapped { bindings, base } = self
+            && bindings.is_empty()
+        {
+            *self = base
+                .take()
+                .map(|base| *base)
+                .unwrap_or_else(|| Self::Decorations(Default::default()));
+        }
         let bindings = &mut self.decorations().bindings;
         if let Some(binding) = bindings
             .iter_mut()
@@ -136,7 +177,53 @@ impl<'a> ElementExtra<'a> {
             bindings.push(crate::style_port::Binding { property, signal });
         }
     }
+    pub fn bind_map(
+        &mut self,
+        property: crate::property::PropertyId,
+        operand: crate::style_port::MapOperand<'a>,
+    ) {
+        if let Self::Mapped { bindings, .. } = self
+            && let Some(binding) = bindings
+                .iter_mut()
+                .find(|binding| binding.property == property)
+        {
+            binding.operand = operand;
+            return;
+        }
+        self.unbind(property);
+        if !matches!(self, Self::Mapped { .. }) {
+            let previous = std::mem::replace(self, Self::Semantic(Annotations::default()));
+            let base = if matches!(&previous, Self::Semantic(s) if s.is_empty()) || previous.empty()
+            {
+                None
+            } else {
+                Some(Box::new(previous))
+            };
+            *self = Self::Mapped {
+                bindings: Vec::new(),
+                base,
+            };
+        }
+        let Self::Mapped { bindings, .. } = self else {
+            unreachable!()
+        };
+        // Exact growth avoids a minimum-four allocation for one cold binding.
+        if bindings.len() == bindings.capacity() {
+            bindings.reserve_exact(bindings.capacity().max(1));
+        }
+        bindings.push(crate::style_port::MapBinding { property, operand });
+    }
     pub fn unbind(&mut self, property: crate::property::PropertyId) {
+        if let Self::Mapped { bindings, base } = self {
+            bindings.retain(|binding| binding.property != property);
+            if bindings.is_empty() {
+                *bindings = Vec::new();
+            }
+            if let Some(base) = base {
+                base.unbind(property);
+            }
+            return;
+        }
         if let Self::Decorations(d) = self {
             d.bindings.retain(|binding| binding.property != property);
             if d.bindings.is_empty() {
@@ -151,6 +238,11 @@ impl<'a> ElementExtra<'a> {
         }
     }
     pub fn make_scroll(&mut self, axes: crate::Axis) -> Result<(), crate::ScrollError> {
+        if let Self::Mapped { base, .. } = self {
+            return base
+                .get_or_insert_with(|| Box::new(Self::Semantic(Annotations::default())))
+                .make_scroll(axes);
+        }
         if !matches!(
             self,
             Self::Semantic(_) | Self::Decorations(Decorations { base: None, .. })
@@ -162,6 +254,7 @@ impl<'a> ElementExtra<'a> {
     }
     pub fn image_mut(&mut self) -> Option<&mut crate::image::ImageSpec<'a>> {
         match self {
+            Self::Mapped { base, .. } => base.as_deref_mut()?.image_mut(),
             Self::Image { spec, .. } => Some(spec),
             Self::Decorations(d) => match d.base.as_deref_mut()? {
                 LeafExtra::Image(spec) => Some(spec),
@@ -177,6 +270,7 @@ impl<'a> ElementExtra<'a> {
         &mut Option<crate::list::RowMap>,
     )> {
         match self {
+            Self::Mapped { base, .. } => base.as_deref_mut()?.projection_mut(),
             Self::Reader { projector, map, .. } => Some((projector, map)),
             Self::Decorations(d) => match d.base.as_deref_mut()? {
                 LeafExtra::Reader((projector, map)) => Some((projector, map)),
@@ -187,6 +281,7 @@ impl<'a> ElementExtra<'a> {
     }
     pub fn list_mut(&mut self) -> Option<&mut crate::list::ListSpec<'a>> {
         match self {
+            Self::Mapped { base, .. } => base.as_deref_mut()?.list_mut(),
             Self::List(list) => Some(list),
             Self::Combined { list, .. } => Some(list),
             Self::Decorations(d) => match d.base.as_deref_mut()? {
@@ -197,6 +292,11 @@ impl<'a> ElementExtra<'a> {
         }
     }
     pub fn annotations_mut(&mut self) -> &mut Annotations<'a> {
+        if let Self::Mapped { base, .. } = self {
+            return base
+                .get_or_insert_with(|| Box::new(Self::Semantic(Annotations::default())))
+                .annotations_mut();
+        }
         if matches!(self, Self::List(_)) {
             let previous = std::mem::replace(self, Self::Semantic(Annotations::default()));
             if let Self::List(list) = previous {
@@ -212,59 +312,58 @@ impl<'a> ElementExtra<'a> {
                 semantic.get_or_insert_with(Default::default)
             }
             Self::Semantic(semantic) | Self::Combined { semantic, .. } => semantic,
-            Self::List(_) => unreachable!(),
+            Self::List(_) | Self::Mapped { .. } => unreachable!(),
         }
     }
-    pub fn into_parts(self) -> ExtraParts<'a> {
-        match self {
-            Self::Decorations(d) => {
-                let mut parts = ExtraParts {
-                    annotations: d.semantic.map(|s| *s).unwrap_or_default(),
-                    axes: d.axes,
-                    geometry: Some(d.geometry),
-                    bindings: d.bindings,
-                    ..Default::default()
-                };
-                match d.base.map(|base| *base) {
-                    Some(LeafExtra::List(list)) => parts.list = Some(list),
-                    Some(LeafExtra::Reader(projector)) => parts.projection = Some(projector),
-                    Some(LeafExtra::Image(mut spec)) => {
-                        spec.geometry = d.geometry;
-                        parts.image = Some(spec);
+    pub fn into_parts(mut self) -> ExtraParts<'a> {
+        let mut parts = ExtraParts::default();
+        loop {
+            match self {
+                Self::Mapped { bindings, base } => {
+                    parts.mapped = bindings;
+                    if let Some(base) = base {
+                        self = *base;
+                        continue;
                     }
-                    None => {}
                 }
-                parts
+                Self::Decorations(d) => {
+                    parts.annotations = d.semantic.map(|s| *s).unwrap_or_default();
+                    parts.axes = d.axes;
+                    parts.geometry = Some(d.geometry);
+                    parts.bindings = d.bindings;
+                    match d.base.map(|base| *base) {
+                        Some(LeafExtra::List(list)) => parts.list = Some(list),
+                        Some(LeafExtra::Reader(projector)) => parts.projection = Some(projector),
+                        Some(LeafExtra::Image(mut spec)) => {
+                            spec.geometry = d.geometry;
+                            parts.image = Some(spec);
+                        }
+                        None => {}
+                    }
+                }
+                Self::Reader {
+                    projector,
+                    semantic,
+                    map,
+                } => {
+                    parts.projection = Some((projector, map));
+                    parts.annotations = semantic.map(|s| *s).unwrap_or_default();
+                }
+                Self::Image { spec, semantic } => {
+                    parts.image = Some(spec);
+                    parts.geometry = Some(spec.geometry);
+                    parts.annotations = semantic.map(|s| *s).unwrap_or_default();
+                }
+                Self::List(list) => parts.list = Some(list),
+                Self::Semantic(annotations) => parts.annotations = annotations,
+                Self::Combined { list, semantic } => {
+                    parts.list = Some(*list);
+                    parts.annotations = semantic;
+                }
             }
-            Self::Reader {
-                projector,
-                semantic,
-                map,
-            } => ExtraParts {
-                projection: Some((projector, map)),
-                annotations: semantic.map(|s| *s).unwrap_or_default(),
-                ..Default::default()
-            },
-            Self::Image { spec, semantic } => ExtraParts {
-                image: Some(spec),
-                geometry: Some(spec.geometry),
-                annotations: semantic.map(|s| *s).unwrap_or_default(),
-                ..Default::default()
-            },
-            Self::List(list) => ExtraParts {
-                list: Some(list),
-                ..Default::default()
-            },
-            Self::Semantic(annotations) => ExtraParts {
-                annotations,
-                ..Default::default()
-            },
-            Self::Combined { list, semantic } => ExtraParts {
-                list: Some(*list),
-                annotations: semantic,
-                ..Default::default()
-            },
+            break;
         }
+        parts
     }
 }
 
@@ -272,6 +371,84 @@ impl<'a> ElementExtra<'a> {
 mod decoration_tests {
     use super::*;
     use crate::{Affine, Axis, Color, El, Signal, div};
+    #[test]
+    fn mapped_33_description_bill_preserves_literal_and_direct_floors() {
+        use crate::SignalMap;
+        let source = Signal::new(0_u32);
+        let color = Signal::new(Color::BLACK);
+        for mode in 0..3 {
+            let mut nodes = Vec::with_capacity(33);
+            let cost = allocation_counter::measure(|| {
+                for index in 0..33 {
+                    nodes.push(match mode {
+                        0 => div().bg(Color::BLACK),
+                        1 => div().bg(&color),
+                        _ => div().bg(source.map_with(index, |value, index| {
+                            if *value == index {
+                                Color::WHITE
+                            } else {
+                                Color::BLACK
+                            }
+                        })),
+                    });
+                }
+            });
+            eprintln!(
+                "description_33,mode={mode},requests={},requested={},retained={},peak={}",
+                cost.count_total, cost.bytes_total, cost.bytes_current, cost.bytes_max
+            );
+            assert_eq!(cost.count_total, if mode == 0 { 0 } else { 66 });
+            assert_eq!(
+                cost.bytes_current,
+                match mode {
+                    0 => 0,
+                    1 => 33 * 80,
+                    _ => 33 * 104,
+                }
+            );
+            drop(nodes);
+        }
+    }
+    #[test]
+    fn mapped_builders_normalize_one_wrapper_and_release_overwritten_recipes() {
+        use crate::SignalMap;
+        let number = Signal::new(12_u32);
+        let color = Signal::new(Color::BLACK);
+        let mut element = None;
+        let mixed = allocation_counter::measure(|| {
+            let mut el = div();
+            for _ in 0..1000 {
+                el = el
+                    .bg(number.map(|_| Color::WHITE))
+                    .w(&number)
+                    .rounded(2.0)
+                    .name("mapped")
+                    .scroll(Axis::Y);
+            }
+            element = Some(el);
+        });
+        assert_eq!(mixed.count_total, 5);
+        eprintln!(
+            "mapped_mixed_description,requests={},requested={},retained={},peak={}",
+            mixed.count_total, mixed.bytes_total, mixed.bytes_current, mixed.bytes_max
+        );
+        drop(element);
+        let mut element = None;
+        let direct = allocation_counter::measure(|| {
+            element = Some(div().bg(number.map(|_| Color::WHITE)).bg(&color));
+        });
+        assert_eq!(
+            direct.bytes_current, 80,
+            "obsolete mapper releases its vector and uses ordinary direct storage"
+        );
+        drop(element);
+        let mut element = None;
+        let literal = allocation_counter::measure(|| {
+            element = Some(div().bg(number.map(|_| Color::WHITE)).bg(Color::BLACK));
+        });
+        assert_eq!(literal.bytes_current, 0);
+        drop(element);
+    }
     #[test]
     fn cold_headers_and_alternating_builders_have_one_nonrecursive_decoration() {
         assert_eq!(size_of::<ElementExtra<'_>>(), 56);

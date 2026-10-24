@@ -13,7 +13,7 @@ describe the intended complete system; this page records what is connected now.
 | Worker delivery | Static typed inbox/question chains, frozen batches, versioned input-family admission, one physical completion credit, borrowed cooperative cancellation, native wakes and exclusive cleanup | Reader lookup scans earlier lanes; cross-turn results remain progressive; dynamic graph and demand parking remain; queue capacity is not a byte bound |
 | Collections | Borrowed keyed uniform lists and ordinary two-axis scroll panes, f64 rebased offsets, viewport-only virtual rows, shared wheel/reveal/accessibility routing | Explicit uniform-height finite virtual viewports; rotated/sheared scroll apertures and variable-height virtual rows remain |
 | Properties and inspector | Typed selectors and closed reflection catalog share validated Set/Inherit transactions; all 13 properties and eight value families feed retained native inspector controls; contained components select mounted targets, edit and refresh canonical state through ordinary typed click methods; edit counts join description changes by exact identity | Arbitrary built-in entry, descendant picking for contained tools, complete theme cascade and user-defined component schemas remain |
-| Layout and text | Cephal perf/cold-layout with direct lazy cache handles, selective nonparent containing blocks and allocation-free hidden markers; literal/direct-Signal dimensions and flex recipes; Parley/Engine/Fontique 0.12 with scoped paragraph reuse; source-qualified grapheme editing, native selection/caret paint, horizontal and vertical visual navigation and line-edge keys; acknowledged wrapped/bidi text geometry | General Reader/Motion recipe algebra, IME/clipboard/autoscroll, native macOS range-origin policy, arbitrary font discovery and hostile-font transient budgets remain |
+| Layout and text | Cephal perf/cold-layout with direct lazy cache handles, selective nonparent containing blocks and allocation-free hidden markers; literal/direct-Signal/mapped properties and flex recipes; Parley/Engine/Fontique 0.12 with scoped paragraph reuse; source-qualified grapheme editing, native selection/caret paint, horizontal and vertical visual navigation and line-edge keys; acknowledged wrapped/bidi text geometry | General Reader/Motion recipe algebra, IME/clipboard/autoscroll, native macOS range-origin policy, arbitrary font discovery and hostile-font transient budgets remain |
 | Canvas | Canonical grouped display list, rounded solid/image shapes, linear-light 4×4 sampling, exact per-pixel sample promotion, separable rectangle/glyph addresses, tile proofs, optional CPU image, exact scene-support damage, certified software-buffer repair, lazy bounds-only CSR membership reused across contained repairs and disjoint parallel bands | Multiple damage islands, persistent GPU repair and complete effect/path/media library remain |
 | Images | Borrowed immutable resources, packed RGBA8/P3 or explicit linear HDR, linear-light filtering, CPU/WGSL rendering and native accessible Image roles | Caller decoding/I/O, direct source fanout, mipmaps and native HDR negotiation remain |
 | GPU | Vendored WGPU/Core/HAL 30, typed wgsl-rs generation/validation and optional guarded static SPIR-V recipes with scoped Vulkan module lifetime; shared device/pipeline context and independent renderer states; grouped packets, tile proofs, lazy R8 atlas, boundary corrections, SDR/HDR targets, replay and transactional color patches | Native shared-device multiwindow remains; coalesced token gaps can rebuild packets; replay/patch draws the full target; native HDR negotiation, legacy DX11, other primitives and hardware/backend conformance remain |
@@ -67,6 +67,17 @@ and [lattice/adaptive controls](evidence/gamut-search-controls/README.md) retain
 precision limits, source/stack costs and the unadopted alternatives.
 
 ## Current verification
+
+The [typed property-map integration](evidence/mapped-properties-integration/README.md)
+lets one source feed multiple validated properties without rebuilding its owner.
+A native 33-property frame updates 1,000 mounted children with zero owner/row
+descriptions; a single effective mapped color reuses complete scene geometry
+and makes zero allocations in the public 10,000-row recording fixture. Final
+source passes 637 default tests, 227 executed native cases and strict checks;
+explicit ignored cases and source/ELF identities remain in the dossier.
+Core is **32,365** non-test/non-comment lines, **+551**, including the new 50-line
+unsafe helper and its Miri/UB control. Ordinary linked code/frame growth and
+transient input sizes remain charged. No timing or RSS win is claimed.
 
 The [five-native Todo capture](comparisons/five-app-todo/capture-2026-10-24/report.md)
 records all 75 primary cells and all fifteen requested metric categories. All

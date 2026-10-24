@@ -26,6 +26,18 @@ impl Slot {
         assert!(index < SOURCE as usize);
         Self(SOURCE | index as u32)
     }
+    pub(in crate::runtime) fn source_code(self) -> u32 {
+        assert!(self.0 & SOURCE != 0);
+        self.0
+    }
+    pub(in crate::runtime) fn from_source_code(code: u32) -> Option<Self> {
+        if code == 0 {
+            None
+        } else {
+            assert!(code & SOURCE != 0);
+            Some(Self(code))
+        }
+    }
     fn source_index(self) -> Option<usize> {
         (self.0 & SOURCE != 0).then_some((self.0 & !SOURCE) as usize)
     }
@@ -176,16 +188,32 @@ impl Discovery {
             slot
         })
     }
+    /// A recipe has its own bounded mutable slot even when its true source field
+    /// also feeds other recipes. These entries never become field-wide fanouts.
+    pub(in crate::runtime) fn mapped(&mut self, field: FieldId, value: Color) -> Slot {
+        let slot = Slot::source(self.bank.sources.len());
+        self.bank.sources.push(SourceColor {
+            field,
+            value,
+            working: PaintColor::new(value),
+            canvas: None,
+            users: 0,
+        });
+        slot
+    }
+    pub(in crate::runtime) fn mapped_port(&mut self, destination: Destination, slot: Slot) {
+        self.ports.push(Binding { destination, slot });
+    }
     /// Fanout already owns every resolved typed destination. Freeze only its
     /// color subset into one exactly sized sparse allocation, then sort once.
     pub(in crate::runtime) fn capture(&mut self, fanout: &BTreeMap<FieldId, Fanout>) {
-        debug_assert!(self.ports.is_empty());
         let count = self
             .fields
             .keys()
             .map(|id| fanout[id].destinations().len())
             .sum();
-        let mut ports = Vec::with_capacity(count);
+        let mut ports = std::mem::take(&mut self.ports);
+        ports.reserve_exact(count);
         for (&field, &slot) in &self.fields {
             ports.extend(
                 fanout[&field]
@@ -241,7 +269,7 @@ impl Discovery {
         self.ports.push(Binding { destination, slot });
     }
     pub(in crate::runtime) fn is_empty(&self) -> bool {
-        self.fields.is_empty()
+        self.bank.sources.is_empty()
     }
     pub(in crate::runtime) fn binding_fields(&self, node: usize) -> [Option<FieldId>; 2] {
         self.bindings(node)

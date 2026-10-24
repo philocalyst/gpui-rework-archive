@@ -110,6 +110,8 @@ pub enum Error {
     ResourceLimit,
     EpochExhausted,
     Binding(BindError),
+    MapStorage { size: usize, alignment: usize },
+    MapInput,
     TextEdit(TextEditError),
     Layout(LayoutError),
     Canvas(gpui_canvas::Error),
@@ -707,12 +709,93 @@ impl TextSite {
         Ok(&self.shaped.as_ref().unwrap().layout)
     }
 }
+struct MappedRecord {
+    destination: Destination,
+    recipe: crate::style_port::Recipe,
+    // Zero or one checked source-slot code; uses the record's former padding.
+    color: u32,
+}
+struct MappedFanout {
+    codec: TextCodec,
+    destinations: Vec<Destination>,
+    records: Vec<MappedRecord>,
+    // Retained scratch admits every output before the first sink write.
+    values: Vec<crate::property::PropertyValue>,
+    direct_color: u32,
+}
+enum ColorPatch {
+    Full,
+    Candidate(Option<styles::ColorChange>),
+}
+impl MappedFanout {
+    // Every comparison and inspector base must see the OLD bank. Publish only
+    // after all sinks compare, including masked peers sharing the direct slot.
+    #[inline(never)]
+    fn publish_colors(
+        &self,
+        styles: &mut styles::Styles,
+        direct: Option<crate::style_port::Scalar>,
+        eligible: bool,
+    ) -> ColorPatch {
+        let mut patch = if eligible
+            && self.records.iter().all(|record| record.color != 0)
+            && self.destinations.iter().all(|destination| {
+                matches!(
+                    destination.property(),
+                    Some(
+                        crate::property::PropertyId::Foreground
+                            | crate::property::PropertyId::Background
+                    )
+                )
+            }) {
+            ColorPatch::Candidate(None)
+        } else {
+            ColorPatch::Full
+        };
+        let mut publish = |slot, color| {
+            if let Some(change) = styles.update_color(slot, color)
+                && let ColorPatch::Candidate(candidate) = &mut patch
+                && change.users != 0
+                && change.previous.working().map(f32::to_bits)
+                    != change.value.working().map(f32::to_bits)
+                && (change.canvas.is_some()
+                    || change.previous.working()[3].to_bits()
+                        != change.value.working()[3].to_bits())
+            {
+                if candidate.is_some() {
+                    patch = ColorPatch::Full;
+                } else {
+                    *candidate = Some(change);
+                }
+            }
+        };
+        for (record, value) in self.records.iter().zip(&self.values) {
+            if let Some(slot) = styles::ColorSlot::from_source_code(record.color) {
+                let crate::property::PropertyValue::Color(color) = *value else {
+                    unreachable!("color slot has color property")
+                };
+                publish(slot, color);
+            }
+        }
+        if let Some(slot) = styles::ColorSlot::from_source_code(self.direct_color) {
+            let Some(crate::style_port::Scalar::Value(crate::property::PropertyValue::Color(
+                color,
+            ))) = direct
+            else {
+                unreachable!("direct color frozen and admitted")
+            };
+            publish(slot, color);
+        }
+        patch
+    }
+}
 enum Fanout {
     General {
         codec: TextCodec,
         destinations: Vec<Destination>,
     },
     Color(styles::ColorSlot),
+    Mapped(Box<MappedFanout>),
 }
 impl Fanout {
     fn new(codec: TextCodec) -> Self {
@@ -725,20 +808,175 @@ impl Fanout {
         match self {
             Self::General { codec, .. } => *codec,
             Self::Color(_) => TextCodec::for_style::<Color>(),
+            Self::Mapped(mapped) => mapped.codec,
         }
     }
     fn destinations(&self) -> &[Destination] {
         match self {
             Self::General { destinations, .. } => destinations,
             Self::Color(_) => &[],
+            Self::Mapped(mapped) => &mapped.destinations,
         }
     }
     fn destinations_mut(&mut self) -> &mut Vec<Destination> {
         match self {
             Self::General { destinations, .. } => destinations,
             Self::Color(_) => unreachable!("color fanout installed after description"),
+            Self::Mapped(mapped) => &mut mapped.destinations,
         }
     }
+    #[inline(never)]
+    fn map(&mut self, draft: crate::style_port::MapDraft<'_>) -> Result<(), Error> {
+        let recipe = draft.operand.recipe()?;
+        let value = draft.operand.scalar()?.admit(draft.property)?;
+        if let Self::General {
+            codec,
+            destinations,
+        } = self
+        {
+            *self = Self::Mapped(Box::new(MappedFanout {
+                codec: *codec,
+                destinations: std::mem::take(destinations),
+                records: Vec::new(),
+                values: Vec::new(),
+                direct_color: 0,
+            }));
+        }
+        let Self::Mapped(mapped) = self else {
+            unreachable!()
+        };
+        mapped.records.push(MappedRecord {
+            destination: Destination::style(draft.node as usize, draft.property),
+            recipe,
+            color: 0,
+        });
+        mapped.values.push(value);
+        Ok(())
+    }
+    // Shared erased admission keeps model-specific owner turns small. All
+    // outputs are frozen and admitted here before any destination can mutate.
+    #[inline(never)]
+    fn freeze<'a>(
+        &mut self,
+        source: &'a dyn std::any::Any,
+        field: FieldId,
+    ) -> Result<crate::source::Frozen<'a>, Error> {
+        let mut needs = crate::source::Needs {
+            text: false,
+            style: false,
+        };
+        for destination in self.destinations() {
+            if destination.port() == Port::Style {
+                needs.style = true;
+            } else {
+                needs.text = true;
+            }
+        }
+        let frozen = if needs.text || needs.style {
+            self.codec().freeze(source, field, needs)?
+        } else {
+            crate::source::Frozen {
+                text: None,
+                style: None,
+            }
+        };
+        if let Fanout::Mapped(mapped) = self {
+            for (record, value) in mapped.records.iter().zip(&mut mapped.values) {
+                *value = record
+                    .recipe
+                    .call(source)
+                    .ok_or(BindError::TypeMismatch(field))?
+                    .admit(record.destination.property().expect("mapped property"))?;
+            }
+        }
+        // A numeric source may feed width, font size AND text. Reject every bad
+        // sink before the first logical destination or inspector base is edited.
+        for destination in self.destinations() {
+            if let Some(id) = destination.property() {
+                frozen.style.expect("style codec requested").admit(id)?;
+            }
+        }
+        Ok(frozen)
+    }
+    #[inline(never)]
+    fn finish_description(
+        &mut self,
+        field: FieldId,
+        drafts: &[crate::element::DraftNode<'_>],
+        colors: &mut styles::ColorDiscovery,
+    ) -> bool {
+        self.destinations_mut()
+            .sort_unstable_by_key(|destination| destination.packed());
+        let Self::Mapped(mapped) = self else {
+            return false;
+        };
+        let mut register = |destination: Destination, code: &mut u32| {
+            if let Some(
+                id @ (crate::property::PropertyId::Foreground
+                | crate::property::PropertyId::Background),
+            ) = destination.property()
+            {
+                let slot = styles::ColorSlot::from_source_code(*code).unwrap_or_else(|| {
+                    let style = drafts[destination.node()].style;
+                    colors.mapped(
+                        field,
+                        if id == crate::property::PropertyId::Foreground {
+                            style.fg
+                        } else {
+                            style.bg
+                        },
+                    )
+                });
+                *code = slot.source_code();
+                colors.mapped_port(destination, slot);
+            }
+        };
+        for record in &mut mapped.records {
+            register(record.destination, &mut record.color);
+        }
+        // Identity Color ports share one slot; mapped outputs each own one.
+        for &destination in &mapped.destinations {
+            register(destination, &mut mapped.direct_color);
+        }
+        // Scratch values are overwritten in this sorted record order
+        // on every patch before the iterator can publish them.
+        mapped
+            .records
+            .sort_unstable_by_key(|record| record.destination.packed());
+        mapped.records.shrink_to_fit();
+        mapped.values.shrink_to_fit();
+        true
+    }
+    fn all_destinations(
+        &self,
+    ) -> impl Iterator<Item = (Destination, Option<crate::property::PropertyValue>, u32)> + '_ {
+        let (mut records, mut values, direct_color) = match self {
+            Self::Mapped(mapped) => (
+                mapped.records.as_slice(),
+                mapped.values.as_slice(),
+                mapped.direct_color,
+            ),
+            _ => (&[][..], &[][..], 0),
+        };
+        let mut direct = self.destinations();
+        std::iter::from_fn(move || {
+            if let Some((&destination, rest)) = direct.split_first()
+                && records
+                    .first()
+                    .is_none_or(|record| destination.packed() < record.destination.packed())
+            {
+                direct = rest;
+                Some((destination, None, direct_color))
+            } else {
+                let (record, rest) = records.split_first()?;
+                let (value, remaining) = values.split_first()?;
+                records = rest;
+                values = remaining;
+                Some((record.destination, Some(*value), record.color))
+            }
+        })
+    }
+
     #[cfg(test)]
     fn destination_bytes(&self) -> usize {
         match self {
@@ -746,6 +984,12 @@ impl Fanout {
                 destinations.capacity() * size_of::<Destination>()
             }
             Self::Color(_) => 0,
+            Self::Mapped(mapped) => {
+                mapped.destinations.capacity() * size_of::<Destination>()
+                    + size_of::<MappedFanout>()
+                    + mapped.records.capacity() * size_of::<MappedRecord>()
+                    + mapped.values.capacity() * size_of::<crate::property::PropertyValue>()
+            }
         }
     }
 }
@@ -1725,6 +1969,7 @@ impl<M: View + 'static> Runtime<M> {
             images: image_drafts,
             geometry: geometry_drafts,
             style_ports,
+            mapped_ports,
         } = inspector::description(
             &self.model,
             self.metadata
@@ -1837,21 +2082,35 @@ impl<M: View + 'static> Runtime<M> {
                 .validate(&geometry.corner_radius)
                 .map_err(|error| Error::GeometryProperty { node, error })?;
         }
+        for draft in mapped_ports {
+            if let Some(field) = self.sources.resolve(&self.model, draft.operand.signal)? {
+                fanout
+                    .entry(field)
+                    .or_insert_with(|| Fanout::new(TextCodec::for_style::<f64>()))
+                    .map(draft)?;
+            }
+        }
         let mut color_discovery = styles::ColorDiscovery::default();
         for draft in style_ports {
             if let Some(field) = self.sources.resolve(&self.model, draft.signal)? {
                 use crate::property::PropertyId;
-                if matches!(
-                    draft.property,
-                    PropertyId::Foreground | PropertyId::Background
-                ) {
+                if !matches!(fanout.get(&field), Some(Fanout::Mapped(_)))
+                    && matches!(
+                        draft.property,
+                        PropertyId::Foreground | PropertyId::Background
+                    )
+                {
                     let foreground = draft.property == PropertyId::Foreground;
                     let style = drafts[draft.node as usize].style;
                     color_discovery.register(field, if foreground { style.fg } else { style.bg });
                 }
-                fanout
+                let entry = fanout
                     .entry(field)
-                    .or_insert_with(|| Fanout::new(draft.signal.codec()))
+                    .or_insert_with(|| Fanout::new(draft.signal.codec()));
+                if let Fanout::Mapped(mapped) = entry {
+                    mapped.codec = draft.signal.codec();
+                }
+                entry
                     .destinations_mut()
                     .push(Destination::style(draft.node as usize, draft.property));
             }
@@ -1873,31 +2132,30 @@ impl<M: View + 'static> Runtime<M> {
                     let codec = text
                         .codec()
                         .ok_or(Error::Binding(BindError::TypeMismatch(field)))?;
-                    fanout
-                        .entry(field)
-                        .or_insert_with(|| Fanout::new(codec))
-                        .destinations_mut()
-                        .push(Destination::new(
-                            annotation.node as usize,
-                            if slot == 0 {
-                                Port::Name
-                            } else {
-                                Port::Description
-                            },
-                        ));
+                    let entry = fanout.entry(field).or_insert_with(|| Fanout::new(codec));
+                    if let Fanout::Mapped(mapped) = entry {
+                        mapped.codec = codec;
+                    }
+                    entry.destinations_mut().push(Destination::new(
+                        annotation.node as usize,
+                        if slot == 0 {
+                            Port::Name
+                        } else {
+                            Port::Description
+                        },
+                    ));
                     slots[slot] = Some(field);
                 }
             }
             annotation_fields.push(slots);
         }
+        for (&field, ports) in &mut fanout {
+            // Equal outputs do not identify recipes or preserve old Canvas slots.
+            self.dirty |= ports.finish_description(field, &drafts, &mut color_discovery);
+        }
         // Promotion is lazy and shared by all changed ports of a registered
         // field in this description. Unchanged retained operands keep their Arc.
         let mut promotions: BTreeMap<FieldId, SharedText> = BTreeMap::new();
-        for fanout in fanout.values_mut() {
-            fanout
-                .destinations_mut()
-                .sort_unstable_by_key(|destination| destination.packed());
-        }
         color_discovery.capture(&fanout);
         for (field, slot) in color_discovery.fields() {
             let entry = fanout.get_mut(&field).expect("registered color fanout");
@@ -2343,42 +2601,26 @@ impl<M: View + 'static> Runtime<M> {
             self.dirty |= self.changed_nodes != 0;
             return Ok(PatchOutcome::Visual);
         }
-        let Some(fanout) = self.fanout.get(&field) else {
+        let eligible = !self.dirty && self.complete_epoch.checked_add(1) == Some(self.source_epoch);
+        let Some(fanout) = self.fanout.get_mut(&field) else {
             return Ok(PatchOutcome::Visual);
         };
-        let mut needs = crate::source::Needs {
-            text: false,
-            style: false,
-        };
-        for destination in fanout.destinations() {
-            if destination.port() == Port::Style {
-                needs.style = true;
-            } else {
-                needs.text = true;
-            }
-        }
         self.counters.source_reads += 1;
-        let frozen = self
-            .sources
-            .freeze(&self.model, field, fanout.codec(), needs)?;
-        // A numeric source may feed width, font size AND text. Reject every bad
-        // sink before the first logical destination or inspector base is edited.
-        for destination in fanout.destinations() {
-            if let Some(id) = destination.property() {
-                frozen.style.expect("style codec requested").admit(id)?;
-            }
-        }
+        let frozen = fanout.freeze(self.sources.signal(&self.model, field)?.as_any(), field)?;
         let mut promoted: Option<SharedText> = None;
         let mut semantic = false;
         let mut visual_changed = false;
         let mut last_changed = None;
-        for &destination in fanout.destinations() {
+        for (destination, mapped_value, color) in fanout.all_destinations() {
             self.counters.destination_compares += 1;
             let index = destination.node();
             let node = &self.nodes[index];
             let identity = node.identity();
             let changed = if let Some(id) = destination.property() {
-                let value = frozen.style.expect("style codec requested").admit(id)?;
+                let value = match mapped_value {
+                    Some(value) => value,
+                    None => frozen.style.expect("style codec requested").admit(id)?,
+                };
                 let changed = match id.info().destination {
                     crate::property::PropertyDestination::Style => {
                         let before = self.styles.get(index);
@@ -2393,7 +2635,9 @@ impl<M: View + 'static> Runtime<M> {
                             {
                                 text.shaped = None;
                             }
-                            self.styles.set(index, after, self.nodes.len());
+                            if color == 0 {
+                                self.styles.set(index, after, self.nodes.len());
+                            }
                         }
                         changed
                     }
@@ -2468,6 +2712,18 @@ impl<M: View + 'static> Runtime<M> {
                 self.changed_nodes += 1;
                 last_changed = Some(index);
             }
+        }
+        if let Fanout::Mapped(mapped) = fanout
+            && let ColorPatch::Candidate(change) =
+                mapped.publish_colors(&mut self.styles, frozen.style, eligible)
+        {
+            // Only color relationships changed; preserve complete geometry
+            // through the existing alpha-checked transaction and ACK path.
+            self.dirty = false;
+            if self.finish_color_slot(change.as_ref())? {
+                return Ok(PatchOutcome::Complete);
+            }
+            self.dirty = visual_changed;
         }
         Ok(if semantic && !visual_changed {
             PatchOutcome::Metadata
@@ -4615,3 +4871,356 @@ mod basis_layout_probe;
 
 #[cfg(test)]
 mod basis_lifecycle_tests;
+
+#[cfg(test)]
+mod mapped_qualification {
+    use super::*;
+    use crate::{Signal, SignalMap};
+    #[derive(Clone, Copy)]
+    struct Frame {
+        count: u32,
+        invalid: bool,
+    }
+    struct Panel(Signal<Frame>);
+    const FRAME: crate::Source<Panel, Frame> =
+        crate::Source::new(FieldId::new(1), "frame", |m| &m.0, |m| &mut m.0);
+    impl View for Panel {
+        fn sources() -> Sources<Self> {
+            Sources::new().direct(FRAME)
+        }
+        fn view(&self) -> crate::El<'_> {
+            crate::column((0..33).map(|index| {
+                let node = crate::div().size(2);
+                if index == 32 {
+                    node.transform(self.0.map(|frame| {
+                        if frame.invalid {
+                            Affine {
+                                tx: f32::NAN,
+                                ..Affine::IDENTITY
+                            }
+                        } else {
+                            Affine::IDENTITY
+                        }
+                    }))
+                } else {
+                    node.bg(self.0.map_with(index, |frame, index| {
+                        if frame.count & (1 << index) == 0 {
+                            Color::BLACK
+                        } else {
+                            Color::WHITE
+                        }
+                    }))
+                }
+            }))
+        }
+    }
+    #[test]
+    fn mixed_mapped_and_direct_colors_do_not_accumulate_unique_historical_values() {
+        struct Colors {
+            mapped: Signal<u32>,
+            direct: Signal<Color>,
+        }
+        const MAPPED: crate::Source<Colors, u32> =
+            crate::Source::new(FieldId::new(1), "mapped", |m| &m.mapped, |m| &mut m.mapped);
+        const DIRECT: crate::Source<Colors, Color> =
+            crate::Source::new(FieldId::new(2), "direct", |m| &m.direct, |m| &mut m.direct);
+        impl View for Colors {
+            fn sources() -> Sources<Self> {
+                Sources::new().direct(MAPPED).direct(DIRECT)
+            }
+            fn view(&self) -> crate::El<'_> {
+                crate::row((
+                    crate::div().bg(self.mapped.map(|value| crate::rgb(*value))),
+                    crate::div().bg(&self.direct),
+                ))
+            }
+        }
+        let mut win = Win::with_size(
+            Colors {
+                mapped: Signal::new(0),
+                direct: Signal::new(Color::BLACK),
+            },
+            100,
+            100,
+        )
+        .unwrap();
+        let mut runtime = win.runtime_mut().unwrap();
+        *runtime.model.mapped = 1;
+        runtime.patch(MAPPED.id()).unwrap();
+        let cost = allocation_counter::measure(|| {
+            for value in 2..4096 {
+                *runtime.model.mapped = value;
+                runtime.patch(MAPPED.id()).unwrap();
+            }
+        });
+        eprintln!(
+            "mixed_mapped_colors_4094_updates,requests={},requested={},retained={},peak={}",
+            cost.count_total, cost.bytes_total, cost.bytes_current, cost.bytes_max
+        );
+        assert_eq!(runtime.styles.get(1).bg, crate::rgb(4095));
+        assert_eq!(runtime.styles.get(2).bg, Color::BLACK);
+        assert_eq!(
+            cost.count_total, 0,
+            "a mapped color must not retain a history of unique outputs in an unrelated source bank"
+        );
+        *runtime.model.direct = Color::WHITE;
+        runtime.patch(DIRECT.id()).unwrap();
+        assert_eq!(runtime.styles.get(1).bg, crate::rgb(4095));
+        assert_eq!(runtime.styles.get(2).bg, Color::WHITE);
+    }
+    #[test]
+    fn ten_thousand_direct_color_rows_keep_their_shared_lane_with_one_mapped_color() {
+        struct Large {
+            direct: Signal<Color>,
+            number: Signal<u32>,
+            mapped: bool,
+        }
+        const DIRECT: crate::Source<Large, Color> =
+            crate::Source::new(FieldId::new(1), "direct", |m| &m.direct, |m| &mut m.direct);
+        const NUMBER: crate::Source<Large, u32> =
+            crate::Source::new(FieldId::new(2), "number", |m| &m.number, |m| &mut m.number);
+        impl View for Large {
+            fn sources() -> Sources<Self> {
+                Sources::new().direct(DIRECT).direct(NUMBER)
+            }
+            fn view(&self) -> crate::El<'_> {
+                crate::column(
+                    self.mapped
+                        .then(|| {
+                            crate::div()
+                                .size(1)
+                                .bg(self.number.map(|value| crate::rgb(*value)))
+                        })
+                        .into_iter()
+                        .chain((0..10_000).map(|_| crate::div().size(1).bg(&self.direct))),
+                )
+            }
+        }
+        for mapped in [false, true] {
+            let mut win = None;
+            let cold = allocation_counter::measure(|| {
+                win = Some(
+                    Win::with_size(
+                        Large {
+                            direct: Signal::new(Color::BLACK),
+                            number: Signal::new(0),
+                            mapped,
+                        },
+                        100,
+                        100,
+                    )
+                    .unwrap(),
+                );
+            });
+            let mut win = win.unwrap();
+            let runtime = win.runtime().unwrap();
+            let colors = match &runtime.styles {
+                styles::Styles::Colors(colors) => colors.bytes(),
+                _ => panic!("ordinary direct Color keeps its shared source lane"),
+            };
+            eprintln!(
+                "large_color_owner,mapped={mapped},rows=10000,nodes={},requests={},requested={},retained={},peak={},style_lane_bytes={},fanout_bytes={}",
+                runtime.nodes.len(),
+                cold.count_total,
+                cold.bytes_total,
+                cold.bytes_current,
+                cold.bytes_max,
+                colors,
+                runtime
+                    .fanout
+                    .values()
+                    .map(Fanout::destination_bytes)
+                    .sum::<usize>()
+            );
+            win.reset_counters().unwrap();
+            let direct = allocation_counter::measure(|| {
+                win.set(DIRECT, Color::WHITE).unwrap();
+            });
+            let counters = win.counters();
+            eprintln!(
+                "large_direct_tick,mapped={mapped},requests={},requested={},retained={},peak={},source_reads={},destination_compares={},owner_reruns={},paint_passes={}",
+                direct.count_total,
+                direct.bytes_total,
+                direct.bytes_current,
+                direct.bytes_max,
+                counters.source_reads,
+                counters.destination_compares,
+                counters.owner_reruns,
+                counters.paint_passes
+            );
+            assert_eq!(counters.source_reads, 1);
+            assert_eq!(counters.destination_compares, 0);
+            assert_eq!(counters.owner_reruns, 0);
+            if mapped {
+                win.reset_counters().unwrap();
+                let changed = allocation_counter::measure(|| {
+                    win.set(NUMBER, 1).unwrap();
+                });
+                let counters = win.counters();
+                eprintln!(
+                    "large_mapped_tick,requests={},requested={},retained={},peak={},source_reads={},destination_compares={},owner_reruns={},paint_passes={}",
+                    changed.count_total,
+                    changed.bytes_total,
+                    changed.bytes_current,
+                    changed.bytes_max,
+                    counters.source_reads,
+                    counters.destination_compares,
+                    counters.owner_reruns,
+                    counters.paint_passes
+                );
+                assert_eq!(counters.source_reads, 1);
+                assert_eq!(counters.destination_compares, 1);
+                assert_eq!(counters.owner_reruns, 0);
+                let mut runtime = win.runtime_mut().unwrap();
+                let cost = allocation_counter::measure(|| {
+                    for value in 2..4096 {
+                        *runtime.model.number = value;
+                        runtime.patch(NUMBER.id()).unwrap();
+                    }
+                });
+                eprintln!(
+                    "large_mapped_warm_4094_patches,requests={},requested={},retained={},peak={}",
+                    cost.count_total, cost.bytes_total, cost.bytes_current, cost.bytes_max
+                );
+                assert_eq!(cost.count_total, 0);
+            }
+        }
+    }
+    #[test]
+    fn late_invalid_transform_cannot_mutate_earlier_paint_sinks_or_masked_bases() {
+        let mut win = Win::with_size(
+            Panel(Signal::new(Frame {
+                count: 0,
+                invalid: false,
+            })),
+            100,
+            100,
+        )
+        .unwrap();
+        let target = win.inspect().unwrap().nodes[1].target.unwrap();
+        win.set_property(
+            target,
+            crate::property::BACKGROUND,
+            crate::property::Contribution::Set(Color::WHITE),
+        )
+        .unwrap();
+        let before = win.runtime().unwrap().styles.get(1);
+        assert!(
+            win.set(
+                FRAME,
+                Frame {
+                    count: u32::MAX,
+                    invalid: true
+                }
+            )
+            .is_err()
+        );
+        let runtime = win.runtime().unwrap();
+        assert!(styles::exact_eq(&runtime.styles.get(1), &before));
+        for index in 2..33 {
+            assert_eq!(runtime.styles.get(index).bg, Color::BLACK);
+        }
+        let mut runtime = win.runtime_mut().unwrap();
+        let identity = runtime.nodes[1].identity();
+        let lower = runtime
+            .overrides
+            .set(
+                identity,
+                before,
+                crate::property::BACKGROUND,
+                crate::property::Contribution::Inherit,
+            )
+            .unwrap();
+        assert_eq!(lower.bg, Color::BLACK);
+    }
+    #[test]
+    fn mapped_layout_and_cold_owner_bill_and_zero_allocation_warm_patch() {
+        let mut win = None;
+        let cold = allocation_counter::measure(|| {
+            win = Some(
+                Win::with_size(
+                    Panel(Signal::new(Frame {
+                        count: 0,
+                        invalid: false,
+                    })),
+                    100,
+                    100,
+                )
+                .unwrap(),
+            );
+        });
+        let mut win = win.unwrap();
+        let runtime = win.runtime().unwrap();
+        let fanout = &runtime.fanout[&FRAME.id()];
+        eprintln!(
+            "mapped_headers,Destination={},Binding={},Draft={},ElementExtra={},Decorations={},Fanout={},Recipe={},MappedRecord={},MappedFanout={},PropertyValue={},MapBinding={},MapDraft={},MappedOperand={},PropInputColor={}",
+            size_of::<Destination>(),
+            size_of::<crate::style_port::Binding<'_>>(),
+            size_of::<crate::style_port::Draft<'_>>(),
+            size_of::<crate::semantic::ElementExtra<'_>>(),
+            size_of::<crate::semantic::Decorations<'_>>(),
+            size_of::<Fanout>(),
+            size_of::<crate::style_port::Recipe>(),
+            size_of::<MappedRecord>(),
+            size_of::<MappedFanout>(),
+            size_of::<crate::property::PropertyValue>(),
+            size_of::<crate::style_port::MapBinding<'_>>(),
+            size_of::<crate::style_port::MapDraft<'_>>(),
+            size_of::<crate::style_port::MapOperand<'_>>(),
+            size_of::<crate::PropInput<'_, Color>>()
+        );
+        eprintln!(
+            "mapped_color_headers,SourceColor={},Record={},Bound={}",
+            styles::color_headers()[0],
+            styles::color_headers()[1],
+            styles::color_headers()[2]
+        );
+        eprintln!(
+            "mapped_public_operands,Color={},Affine={},number={}",
+            size_of::<crate::PropInput<'_, Color>>(),
+            size_of::<crate::PropInput<'_, Affine>>(),
+            size_of::<crate::PropInput<'_, f64>>()
+        );
+        eprintln!(
+            "mapped_owner,33,requests={},requested={},retained={},peak={},fanout_bytes={}",
+            cold.count_total,
+            cold.bytes_total,
+            cold.bytes_current,
+            cold.bytes_max,
+            fanout.destination_bytes()
+        );
+        assert_eq!(size_of::<Destination>(), 4);
+        assert_eq!(size_of::<crate::style_port::Binding<'_>>(), 24);
+        assert_eq!(size_of::<crate::semantic::ElementExtra<'_>>(), 56);
+        assert_eq!(size_of::<Fanout>(), 32);
+        assert_eq!(
+            fanout.destination_bytes(),
+            size_of::<MappedFanout>()
+                + 33 * (size_of::<MappedRecord>() + size_of::<crate::property::PropertyValue>())
+        );
+        let mut runtime = win.runtime_mut().unwrap();
+        *runtime.model.0 = Frame {
+            count: 0xa55a_f00f,
+            invalid: false,
+        };
+        let first = allocation_counter::measure(|| {
+            runtime.patch(FRAME.id()).unwrap();
+        });
+        eprintln!(
+            "mapped_first_patch,requests={},requested={},retained={},peak={}",
+            first.count_total, first.bytes_total, first.bytes_current, first.bytes_max
+        );
+        *runtime.model.0 = Frame {
+            count: 0x5aa5_0ff0,
+            invalid: false,
+        };
+        let cost = allocation_counter::measure(|| {
+            runtime.patch(FRAME.id()).unwrap();
+        });
+        eprintln!(
+            "mapped_warm_patch,requests={},requested={},retained={},peak={}",
+            cost.count_total, cost.bytes_total, cost.bytes_current, cost.bytes_max
+        );
+        assert_eq!(cost.count_total, 0);
+    }
+}

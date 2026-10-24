@@ -17,7 +17,7 @@ import tomllib
 import inventory
 
 
-LIBRARIES = ("canvas", "core", "gpui", "gpu", "host", "state")
+LIBRARIES = ("canvas", "core", "gpui", "gpu", "host", "inline-call", "state")
 
 
 def without_tests(text, ranges):
@@ -54,6 +54,9 @@ def count(ref, original, helper, tokei, src_only=False):
     roots = (["crates/gpui/src/"] if original else
              [f"reactivity/crates/{name}/src/" for name in LIBRARIES])
     available = list(inventory.read_sources(commit))
+    # Historical pins predate some shipping helpers. Charge each library that
+    # exists at the selected pin, including its host-side build script below.
+    roots = [root for root in roots if any(path.startswith(root) for path, _, _ in available)]
     scripts = set() if src_only else build_scripts(commit, roots, {p for p, _, _ in available})
     sources = [(path, data, language) for path, data, language in available
                if path.startswith(tuple(roots)) or path in scripts]
@@ -89,7 +92,7 @@ def count(ref, original, helper, tokei, src_only=False):
     build_lines = sum(entries[path]["code_lines"] for path in scripts)
     total_lines = sum(row["code_lines"] for row in entries.values())
     return {"source_commit": commit, "roots": roots, "build_scripts": sorted(scripts),
-            "scope": "original GPUI crate" if original else "six shipping first-party libraries",
+            "scope": "original GPUI crate" if original else f"{len(roots)} shipping first-party libraries",
             "core_non_test_code_lines": total_lines,
             "library_src_code_lines": total_lines - build_lines,
             "library_build_code_lines": build_lines,

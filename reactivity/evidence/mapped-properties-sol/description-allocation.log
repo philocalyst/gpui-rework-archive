@@ -1,0 +1,20 @@
+    Finished `test` profile [unoptimized + debuginfo] target(s) in 0.10s
+     Running unittests src/lib.rs (target/debug/build/gpui/f6156e8727b03b8d/out/gpui-f6156e8727b03b8d)
+
+running 4 tests
+test semantic::decoration_tests::binding_accumulator_costs_are_cold_and_literal_overwrites_release_it ... style_decorations,ports=0,requests=0,requested=0,retained=0,peak=0
+style_decorations,ports=1,requests=2,requested=80,retained=80,peak=80
+style_decorations,ports=2,requests=3,requested=128,retained=104,peak=128
+style_decorations,ports=8,requests=5,requested=416,retained=248,peak=344
+ok
+test semantic::decoration_tests::cold_headers_and_alternating_builders_have_one_nonrecursive_decoration ... style_decorations,alternating,requests=3,requested=128,retained=128,peak=128
+ok
+test semantic::decoration_tests::mapped_33_description_bill_preserves_literal_and_direct_floors ... description_33,mode=0,requests=0,requested=0,retained=0,peak=0
+description_33,mode=1,requests=66,requested=2640,retained=2640,peak=2640
+description_33,mode=2,requests=66,requested=3432,retained=3432,peak=3432
+ok
+test semantic::decoration_tests::mapped_builders_normalize_one_wrapper_and_release_overwritten_recipes ... mapped_mixed_description,requests=5,requested=232,retained=232,peak=232
+ok
+
+test result: ok. 4 passed; 0 failed; 0 ignored; 0 measured; 161 filtered out; finished in 0.00s
+

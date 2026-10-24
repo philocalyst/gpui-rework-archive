@@ -73,7 +73,7 @@ pub use source::{
 #[doc(hidden)]
 pub use style::FlexRecipe;
 pub use style::{Align, Color, Flex, Flow, IntoLength, Justify, Style, rgb};
-pub use style_port::{IntoProp, PropInput};
+pub use style_port::{IntoProp, MapValue, Mapped, PropInput, SignalMap};
 
 /// A component describes ordinary borrowed operands. No mutable runtime or
 /// ambient frame is available in this method.
@@ -96,7 +96,7 @@ pub mod prelude {
         Action, ActionKind, Affine, Align, AlphaMode, Axis, Color, Component, El, Element, FieldId,
         Flex, Flow, Handoff, Image, ImageProfile, ImageSampling, Inbox, ItemKey, ItemSource,
         Justify, Key, ListId, Point, PointerEvent, PointerSession, Rect, Remote, ScrollDelta,
-        ScrollOffset, Signal, Source, Sources, Target, View, Win, button, checkbox, column, div,
-        image, label, oklch, rgb, row, text, text_input, uniform_list,
+        ScrollOffset, Signal, SignalMap, Source, Sources, Target, View, Win, button, checkbox,
+        column, div, image, label, oklch, rgb, row, text, text_input, uniform_list,
     };
 }

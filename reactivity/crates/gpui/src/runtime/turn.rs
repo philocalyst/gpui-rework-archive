@@ -247,7 +247,7 @@ impl<M: View + 'static, L: LaneSet<M>> RuntimeMut<'_, M, L> {
                 self.runtime.counters.exact_updates += 1;
                 let realize = self.has_lists()
                     && self.fanout.get(&field).is_some_and(|fanout| {
-                        fanout.destinations().iter().any(|destination| {
+                        fanout.all_destinations().any(|(destination, _, _)| {
                             destination.property().is_some_and(|id| {
                                 id.info().impact != crate::property::Impact::Paint
                             })

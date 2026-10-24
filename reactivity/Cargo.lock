@@ -1085,6 +1085,7 @@ dependencies = [
  "cephal",
  "gpui_canvas",
  "gpui_gpu",
+ "gpui_inline_call",
  "gpui_reactivity_core",
  "gpui_reactivity_host",
  "gpui_reactivity_state",
@@ -1133,6 +1134,10 @@ dependencies = [
  "wgpu",
  "wgsl-rs",
 ]
+
+[[package]]
+name = "gpui_inline_call"
+version = "0.1.0"
 
 [[package]]
 name = "gpui_presenter_tests"

@@ -1,0 +1,28 @@
+{
+  "source_commit": "0062bf589829c4f28807ad0fde3e13285379294c",
+  "reader_fix_commit": "8c56ff0bbedbcdfde7484a97182b104aadccdbf5",
+  "main_reader_adoption": "7df96981b8dd7c32ac5ff4d899b501bf30a0f3e2",
+  "guards_match": true,
+  "sourceguard_files": 11401,
+  "sourceguard_aggregate": "9f7c903d6456b43039956d9429f48e5c32b9ce2901456907b19db084b0d4157f",
+  "tests": {
+    "full-default-tests.log": {
+      "passed": 634,
+      "failed": 0,
+      "ignored": 10,
+      "harnesses": 69
+    },
+    "native-tests.log": {
+      "passed": 247,
+      "failed": 0,
+      "ignored": 30,
+      "harnesses": 4
+    }
+  },
+  "clippy_default_all_targets_exit": 0,
+  "clippy_x11_all_targets_exit": 0,
+  "native_build_exit": 0,
+  "native_run_exit": 0,
+  "native_ack": "MAPPED_NATIVE_ACK,source_epoch=1,presentation_epoch=1,owner_reruns=0,row_rebuilds=0,initial_rows=1000,frame_bytes=32,signal_bytes=40,renderer=ReferenceCpu",
+  "scope": "Functional/allocator/source-size qualification; no timing or machine-code inference. Native ACK demo does not inspect native pixels or inspector masking; those cases use recording/public and private tests."
+}

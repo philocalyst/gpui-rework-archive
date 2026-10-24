@@ -61,6 +61,94 @@ impl Scalar {
     }
 }
 
+pub(crate) type Recipe = gpui_inline_call::InlineCall<Option<Scalar>>;
+
+/// A closed property output supported by source maps.
+#[allow(private_bounds)]
+pub trait MapValue: Value {}
+impl<T: Value> MapValue for T {}
+
+/// An owned, small recipe borrowing its source only during description.
+/// Maps must be total, deterministic, read-only computations of their input and
+/// immutable parameters, with no I/O or external mutable reads. This semantic
+/// law matches Source::new; Rust cannot prove purity. Outputs use the existing
+/// closed property validators and impacts. Recipes are rebuilt on description.
+pub struct Mapped<'a, U> {
+    operand: MapOperand<'a>,
+    output: std::marker::PhantomData<U>,
+}
+impl<U> Copy for Mapped<'_, U> {}
+impl<U> Clone for Mapped<'_, U> {
+    fn clone(&self) -> Self {
+        *self
+    }
+}
+#[derive(Clone, Copy)]
+pub(crate) struct MapOperand<'a> {
+    pub signal: &'a dyn ErasedSignal,
+    pub recipe: Result<Recipe, gpui_inline_call::TooLarge>,
+}
+impl MapOperand<'_> {
+    pub fn recipe(self) -> Result<Recipe, crate::Error> {
+        self.recipe.map_err(|error| crate::Error::MapStorage {
+            size: error.size,
+            alignment: error.alignment,
+        })
+    }
+    pub fn scalar(self) -> Result<Scalar, crate::Error> {
+        self.recipe()?
+            .call(self.signal.as_any())
+            .ok_or(crate::Error::MapInput)
+    }
+}
+/// Allocation-free source mapping. Import this trait for `signal.map(...)`.
+/// The mapper and explicit parameter together must fit sixteen bytes and have
+/// alignment at most eight; larger recipes fail mount admission, without a heap
+/// fallback or a builder panic. Small Copy captures are supported too.
+pub trait SignalMap<T> {
+    fn map<U: MapValue, F>(&self, map: F) -> Mapped<'_, U>
+    where
+        F: Fn(&T) -> U + Copy + Send + Sync + 'static;
+    fn map_with<P, U: MapValue, F>(&self, parameter: P, map: F) -> Mapped<'_, U>
+    where
+        P: Copy + Send + Sync + 'static,
+        F: Fn(&T, P) -> U + Copy + Send + Sync + 'static;
+}
+impl<T: 'static> SignalMap<T> for Signal<T> {
+    fn map<U: MapValue, F>(&self, map: F) -> Mapped<'_, U>
+    where
+        F: Fn(&T) -> U + Copy + Send + Sync + 'static,
+    {
+        self.map_with((), move |value, ()| map(value))
+    }
+    fn map_with<P, U: MapValue, F>(&self, parameter: P, map: F) -> Mapped<'_, U>
+    where
+        P: Copy + Send + Sync + 'static,
+        F: Fn(&T, P) -> U + Copy + Send + Sync + 'static,
+    {
+        Mapped {
+            operand: MapOperand {
+                signal: self,
+                recipe: Recipe::new(move |input: &dyn std::any::Any| {
+                    input
+                        .downcast_ref::<Signal<T>>()
+                        .map(|signal| map(&**signal, parameter).scalar())
+                }),
+            },
+            output: std::marker::PhantomData,
+        }
+    }
+}
+pub(crate) struct MapBinding<'a> {
+    pub property: PropertyId,
+    pub operand: MapOperand<'a>,
+}
+pub(crate) struct MapDraft<'a> {
+    pub node: u32,
+    pub property: PropertyId,
+    pub operand: MapOperand<'a>,
+}
+
 pub(crate) struct Binding<'a> {
     pub property: PropertyId,
     pub signal: &'a dyn StyleSignal,
@@ -99,7 +187,8 @@ mod sealed {
 
 /// A library-closed property input. Numeric builders accept every IntoLength
 /// primitive; references to literals are copied, while signal inputs are borrowed
-/// until synchronous description. Callers cannot install conversion callbacks.
+/// until synchronous description. Typed maps may compute these closed property
+/// values; callers cannot replace setters, validators, or impacts.
 pub trait IntoProp<'a, T>: sealed::Input<T> {
     #[doc(hidden)]
     fn into_prop(self) -> PropInput<'a, T>;
@@ -111,6 +200,7 @@ pub struct PropInput<'a, T>(Operand<'a, T>);
 enum Operand<'a, T> {
     Literal(T),
     Signal(&'a dyn StyleSignal),
+    Mapped(MapOperand<'a>),
 }
 impl<T: Copy> Copy for PropInput<'_, T> {}
 impl<T: Copy> Clone for PropInput<'_, T> {
@@ -140,6 +230,7 @@ impl<T: fmt::Debug> fmt::Debug for PropInput<'_, T> {
         match &self.0 {
             Operand::Literal(value) => f.debug_tuple("Literal").field(value).finish(),
             Operand::Signal(_) => f.write_str("Signal(..)"),
+            Operand::Mapped(_) => f.write_str("Mapped(..)"),
         }
     }
 }
@@ -152,22 +243,37 @@ impl<'a, T> PropInput<'a, T> {
         match self.0 {
             Operand::Literal(value) => value.scalar(),
             Operand::Signal(signal) => signal.scalar(),
+            Operand::Mapped(map) => map.scalar().expect("valid mapped operand"),
         }
     }
     pub(crate) fn literal(self) -> Option<T> {
         match self.0 {
             Operand::Literal(value) => Some(value),
-            Operand::Signal(_) => None,
+            Operand::Signal(_) | Operand::Mapped(_) => None,
+        }
+    }
+    pub(crate) fn mapped(self) -> Option<MapOperand<'a>> {
+        match self.0 {
+            Operand::Mapped(map) => Some(map),
+            _ => None,
         }
     }
     pub(crate) fn signal(self) -> Option<&'a dyn StyleSignal> {
         match self.0 {
-            Operand::Literal(_) => None,
+            Operand::Literal(_) | Operand::Mapped(_) => None,
             Operand::Signal(signal) => Some(signal),
         }
     }
 }
 
+impl<U> sealed::Input<U> for Mapped<'_, U> {
+    const IS_LITERAL: bool = false;
+}
+impl<'a, U> IntoProp<'a, U> for Mapped<'a, U> {
+    fn into_prop(self) -> PropInput<'a, U> {
+        PropInput(Operand::Mapped(self.operand))
+    }
+}
 macro_rules! numbers {
     ($($ty:ty => $codec:ident),+ $(,)?) => {$(
         impl Value for $ty {
@@ -194,6 +300,16 @@ numbers!(f32 => for_style, f64 => for_value, u8 => for_style,
     u16 => for_style, u32 => for_value, u64 => for_value,
     usize => for_style, i8 => for_style, i16 => for_style,
     i32 => for_value, i64 => for_style, isize => for_style);
+
+macro_rules! mapped_numbers {
+    ($($ty:ty),+ $(,)?) => {$(
+        impl sealed::Input<f64> for Mapped<'_, $ty> { const IS_LITERAL: bool = false; }
+        impl<'a> IntoProp<'a, f64> for Mapped<'a, $ty> {
+            fn into_prop(self) -> PropInput<'a, f64> { PropInput(Operand::Mapped(self.operand)) }
+        }
+    )+};
+}
+mapped_numbers!(f32, u8, u16, u32, u64, usize, i8, i16, i32, i64, isize);
 
 // Corner radius preserves its established f32 authoring domain. Unlike the
 // pre-existing length builders, literal radius errors are deferred to mount.

@@ -536,6 +536,8 @@ impl<'a> El<'a> {
                 .set_geometry(crate::property::GeometryStyle {
                     corner_radius: value,
                 });
+        } else if let Some(map) = radius.mapped() {
+            self.bind_mapped_property(PropertyId::CornerRadius, map);
         } else {
             self.bind_property(
                 PropertyId::CornerRadius,
@@ -586,6 +588,14 @@ impl<'a> El<'a> {
 
     pub fn on_click<M: 'static, S, H: IntoHandler<M, S>>(self, handler: H) -> Self {
         handler.install(self)
+    }
+
+    fn bind_mapped_property(&mut self, id: PropertyId, operand: crate::style_port::MapOperand<'a>) {
+        self.extra
+            .get_or_insert_with(|| {
+                Box::new(crate::semantic::ElementExtra::Semantic(Default::default()))
+            })
+            .bind_map(id, operand);
     }
 
     fn bind_property(&mut self, id: PropertyId, signal: &'a dyn StyleSignal) {
@@ -667,6 +677,11 @@ impl<'a> El<'a> {
                 self.bind_property(id, signal);
                 if SIZE {
                     self.bind_property(PropertyId::Height, signal);
+                }
+            } else if let Some(map) = input.mapped() {
+                self.bind_mapped_property(id, map);
+                if SIZE {
+                    self.bind_mapped_property(PropertyId::Height, map);
                 }
             } else {
                 self.literal_properties::<CODE, SIZE, T, _>(input);
@@ -823,6 +838,7 @@ impl<'a> El<'a> {
         let mut images = Vec::new();
         let mut geometry = Vec::new();
         let mut style_ports = Vec::new();
+        let mut mapped_ports = Vec::new();
         let mut pending = vec![(None, self, None::<(usize, crate::ItemKey, u32, f32, f32)>)];
         while let Some((parent, mut element, slot)) = pending.pop() {
             if output.len() >= limit {
@@ -849,6 +865,7 @@ impl<'a> El<'a> {
                 axes,
                 geometry: shape,
                 bindings,
+                mapped,
             } = element
                 .extra
                 .take()
@@ -872,6 +889,25 @@ impl<'a> El<'a> {
                     node: index,
                     property: binding.property,
                     signal: binding.signal,
+                });
+            }
+            for binding in mapped {
+                let value = binding.operand.scalar()?.admit(binding.property)?;
+                match binding.property.info().destination {
+                    crate::property::PropertyDestination::Style => {
+                        binding.property.set_erased(&mut element.style, value)?;
+                    }
+                    crate::property::PropertyDestination::Geometry => {
+                        let crate::property::PropertyValue::Number(radius) = value else {
+                            unreachable!()
+                        };
+                        shape.corner_radius = radius;
+                    }
+                }
+                mapped_ports.push(crate::style_port::MapDraft {
+                    node: index,
+                    property: binding.property,
+                    operand: binding.operand,
                 });
             }
             if let Some(axes) = axes {
@@ -969,6 +1005,7 @@ impl<'a> El<'a> {
             images,
             geometry,
             style_ports,
+            mapped_ports,
         })
     }
 }
@@ -998,6 +1035,7 @@ impl Drop for ComponentBoundaries {
 pub(crate) struct Description<'a> {
     pub geometry: Vec<(usize, crate::property::GeometryStyle)>,
     pub style_ports: Vec<crate::style_port::Draft<'a>>,
+    pub mapped_ports: Vec<crate::style_port::MapDraft<'a>>,
     pub nodes: Vec<DraftNode<'a>>,
     pub viewports: Vec<crate::list::ViewportDraft>,
     pub annotations: Vec<crate::semantic::AnnotationDraft<'a>>,

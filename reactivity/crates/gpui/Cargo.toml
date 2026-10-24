@@ -7,6 +7,7 @@ description = "Clean-room GPUI implementation: typed views and coherent retained
 publish = false
 
 [dependencies]
+gpui_inline_call = { path = "../inline-call" }
 triomphe = { version = "=0.1.17", default-features = false, features = ["std"] }
 arcstr = { version = "=1.2.0", default-features = false, features = ["std"] }
 gpui_reactivity_core = { path = "../core", features = ["layout"] }
@@ -102,4 +103,8 @@ required-features = ["native-core"]
 
 [[example]]
 name = "todo_comparison_five"
+required-features = ["native-core"]
+
+[[example]]
+name = "mapped_properties"
 required-features = ["native-core"]

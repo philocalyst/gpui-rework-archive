@@ -48,6 +48,17 @@ Direct typed style sources and borrowed Flex fields use the same public ports;
 see [style inputs and limits](STYLE_PORTS.md). The `reactive_styles` example also
 runs headlessly with no native feature.
 
+`SignalMap` in the prelude lets one source feed several typed properties:
+`.bg(self.state.map(|state| state.color))` and
+`.transform(self.state.map(|state| state.transform))`. Each output uses the
+ordinary property validator, inspector and presentation barrier. Declare that
+source `direct` when these operands describe all its dependencies. Recipes must
+be deterministic, read-only `Copy + Send + Sync` functions; captures and explicit
+`map_with` parameters together fit sixteen bytes at alignment eight. Oversized
+recipes return an admission error. See the
+[native example](examples/mapped_properties.rs) and
+[qualification and costs](../../evidence/mapped-properties-integration/README.md).
+
 Inputs support [grapheme-safe selection and replacement](TEXT_SELECTION.md),
 pointer dragging, visual arrows with Shift extension, and actual selection and
 caret painting through the ordinary window and native input paths.

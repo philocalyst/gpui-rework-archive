@@ -927,7 +927,11 @@ impl<M> Sources<M> {
             component.collect_signals(model, output);
         }
     }
-    fn signal<'a>(&self, model: &'a M, id: FieldId) -> Result<&'a dyn ErasedSignal, BindError> {
+    pub(crate) fn signal<'a>(
+        &self,
+        model: &'a M,
+        id: FieldId,
+    ) -> Result<&'a dyn ErasedSignal, BindError> {
         if id.scope() == 0 {
             Ok(self.get(id)?.signal(model))
         } else {

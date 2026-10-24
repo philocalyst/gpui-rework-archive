@@ -1,0 +1,10 @@
+{
+  "baseline_commit": "7df96981b8dd7c32ac5ff4d899b501bf30a0f3e2",
+  "final_commit": "4b44b21a187c5029a83357eb03034cdad5aec141",
+  "baseline_six_core_lines": 31814,
+  "final_six_core_lines": 32315,
+  "helper_lines": 50,
+  "all_shipping_final": 32365,
+  "all_shipping_delta": 551,
+  "method": "unmodified Syn/Tokei core_lines.py six-library inventory plus exact same-policy new inline-call shipping helper"
+}

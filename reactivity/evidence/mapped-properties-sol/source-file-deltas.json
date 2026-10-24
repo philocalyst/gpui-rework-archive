@@ -1,0 +1,44 @@
+[
+  {
+    "path": "reactivity/crates/gpui/src/element.rs",
+    "baseline": 1075,
+    "candidate": 1112,
+    "delta": 37
+  },
+  {
+    "path": "reactivity/crates/gpui/src/runtime.rs",
+    "baseline": 3068,
+    "candidate": 3256,
+    "delta": 188
+  },
+  {
+    "path": "reactivity/crates/gpui/src/runtime/styles/colours.rs",
+    "baseline": 437,
+    "candidate": 463,
+    "delta": 26
+  },
+  {
+    "path": "reactivity/crates/gpui/src/runtime/turn.rs",
+    "baseline": 410,
+    "candidate": 411,
+    "delta": 1
+  },
+  {
+    "path": "reactivity/crates/gpui/src/semantic.rs",
+    "baseline": 261,
+    "candidate": 364,
+    "delta": 103
+  },
+  {
+    "path": "reactivity/crates/gpui/src/source.rs",
+    "baseline": 962,
+    "candidate": 966,
+    "delta": 4
+  },
+  {
+    "path": "reactivity/crates/gpui/src/style_port.rs",
+    "baseline": 206,
+    "candidate": 306,
+    "delta": 100
+  }
+]

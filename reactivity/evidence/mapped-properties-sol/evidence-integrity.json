@@ -1,0 +1,7 @@
+{
+  "source_commit": "0062bf589829c4f28807ad0fde3e13285379294c",
+  "frozen_file_count": 11401,
+  "all_frozen_hashes_still_match": true,
+  "sourceguard_aggregate": "9f7c903d6456b43039956d9429f48e5c32b9ce2901456907b19db084b0d4157f",
+  "subsequent_changes": "evidence/mapped-properties-sol only"
+}
