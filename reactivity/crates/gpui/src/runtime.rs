@@ -2823,7 +2823,7 @@ impl<M: View + 'static> Runtime<M> {
             let node = &self.nodes[index];
             let identity = node.identity();
             let changed = if let Some(control) = destination.control() {
-                let crate::PropertyValue::Flag(value) =
+                let crate::property::PropertyValue::Flag(value) =
                     mapped_value.unwrap_or_else(|| match frozen.style {
                         Some(crate::style_port::Scalar::Value(value)) => value,
                         _ => unreachable!("admitted bool source"),

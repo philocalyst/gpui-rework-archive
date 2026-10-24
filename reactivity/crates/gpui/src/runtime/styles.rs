@@ -84,7 +84,7 @@ impl Styles {
                 let Self::Colors(values) = self else {
                     unreachable!("selected color has owner color bank");
                 };
-                crate::style_port::Scalar::Value(crate::PropertyValue::Color(
+                crate::style_port::Scalar::Value(crate::property::PropertyValue::Color(
                     values.literal_code(code),
                 ))
             }

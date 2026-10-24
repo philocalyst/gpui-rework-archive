@@ -576,7 +576,7 @@ impl<'a> El<'a> {
                     ))
                 })
                 .set_radius(value);
-        } else if let Some(map) = radius.mapped() {
+        } else if let Some(map) = radius.clone().mapped() {
             self.bind_mapped_property(PropertyId::CornerRadius, map);
         } else {
             self.bind_property(
@@ -609,7 +609,7 @@ impl<'a> El<'a> {
                     })
                     .clip_children(value);
             }
-        } else if let Some(map) = clipped.mapped() {
+        } else if let Some(map) = clipped.clone().mapped() {
             self.bind_mapped_property(PropertyId::Clip, map);
         } else {
             self.bind_property(PropertyId::Clip, clipped.signal().expect("signal clip"));
@@ -700,7 +700,7 @@ impl<'a> El<'a> {
     }
     fn apply_sink(
         sink: crate::style_port::Sink,
-        value: crate::PropertyValue,
+        value: crate::property::PropertyValue,
         element: &mut Self,
         disabled: &mut bool,
         shape: &mut crate::property::GeometryStyle,
@@ -709,14 +709,14 @@ impl<'a> El<'a> {
             match property.info().destination {
                 crate::property::PropertyDestination::Style
                 | crate::property::PropertyDestination::Paint => {
-                    property.set_erased(&mut element.style, value)?
+                    property.set_erased(&mut element.style, value)?;
                 }
                 crate::property::PropertyDestination::Geometry => {
-                    property.set_geometry(shape, value)?
+                    property.set_geometry(shape, value)?;
                 }
             }
         } else {
-            let crate::PropertyValue::Flag(value) = value else {
+            let crate::property::PropertyValue::Flag(value) = value else {
                 return Err(crate::Error::MapInput);
             };
             if sink == crate::style_port::Sink::CHECKED {
@@ -864,13 +864,16 @@ impl<'a> El<'a> {
                 if SIZE {
                     self.bind_property(PropertyId::Height, signal);
                 }
-            } else if let Some(map) = input.clone().mapped() {
-                self.bind_mapped_property(id, map.clone());
-                if SIZE {
-                    self.bind_mapped_property(PropertyId::Height, map);
-                }
-            } else {
+            } else if input.literal_scalar().is_some() {
                 self.literal_properties::<CODE, SIZE, T, _>(input);
+            } else {
+                let map = input.mapped().expect("sealed mapped input");
+                if SIZE {
+                    self.bind_mapped_property(id, map.clone());
+                    self.bind_mapped_property(PropertyId::Height, map);
+                } else {
+                    self.bind_mapped_property(id, map);
+                }
             }
         }
     }
