@@ -308,9 +308,11 @@ fn display_referred_hdr_and_p3_admission_cohorts() {
                             accepted.count_ones(),
                             49 - accepted.count_ones()
                         );
-                        // Exact fixed intervals remain available at every peak.
-                        for i in 0..7 {
-                            if mode != (Mode::Oklch { hue: Hue::Longer }) {
+                        // Lab's authored identities remain exact at every peak.
+                        // LCH can replace a tiny nonzero powerless hue, while
+                        // Longer can intentionally rotate identical colors.
+                        if mode == Mode::Oklab {
+                            for i in 0..7 {
                                 assert_ne!(accepted & (1 << (8 * i)), 0);
                             }
                         }
