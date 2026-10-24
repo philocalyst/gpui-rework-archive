@@ -79,6 +79,10 @@ pub(in crate::runtime) struct Bank {
     literals: Vec<Color>,
 }
 impl Bank {
+    pub(in crate::runtime) fn literal_code(&self, code: u32) -> Color {
+        assert!(code < SOURCE);
+        self.get(Slot(code))
+    }
     pub(in crate::runtime) fn get(&self, slot: Slot) -> Color {
         if let Some(index) = slot.source_index() {
             return self.sources[index].value;
@@ -175,6 +179,9 @@ struct Binding {
     slot: Slot,
 }
 impl Discovery {
+    pub(in crate::runtime) fn literal_code(&mut self, color: Color) -> u32 {
+        self.bank.literal(color).0
+    }
     pub(in crate::runtime) fn register(&mut self, field: FieldId, value: Color) -> Slot {
         *self.fields.entry(field).or_insert_with(|| {
             let slot = Slot::source(self.bank.sources.len());
@@ -390,6 +397,9 @@ pub(in crate::runtime) struct Bound {
     pub(in crate::runtime) transition: Option<super::super::paint::SlotTransition>,
 }
 impl Bound {
+    pub(in crate::runtime) fn literal_code(&self, code: u32) -> Color {
+        self.bank.literal_code(code)
+    }
     #[cfg(test)]
     pub(in crate::runtime) fn bytes(&self) -> usize {
         size_of::<Self>()

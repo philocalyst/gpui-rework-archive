@@ -75,6 +75,22 @@ pub(super) enum Styles {
     Colors(Box<colours::Bound>),
 }
 impl Styles {
+    pub(super) fn resolve_scalar(
+        &self,
+        scalar: crate::style_port::Scalar,
+    ) -> crate::style_port::Scalar {
+        match scalar {
+            crate::style_port::Scalar::ColorSlot(code) => {
+                let Self::Colors(values) = self else {
+                    unreachable!("selected color has owner color bank");
+                };
+                crate::style_port::Scalar::Value(crate::PropertyValue::Color(
+                    values.literal_code(code),
+                ))
+            }
+            value => value,
+        }
+    }
     /// Borrow ordinary lanes directly. Only a source-colored record needs a
     /// temporary resolved value; the callback cannot retain a borrow of it.
     #[inline]

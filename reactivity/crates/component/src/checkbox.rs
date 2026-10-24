@@ -3,7 +3,7 @@ use crate::{
     Space, Theme,
     recipe::{Recipe, style},
 };
-use gpui::{Align, El, Flex, IntoHandler, Source};
+use gpui::{Align, BoolInput, Color, El, Flex, IntoHandler, Source};
 
 /// The named parts are ordinary descriptions, never dynamic selectors.
 ///
@@ -33,29 +33,22 @@ impl<'a> CheckboxParts<'a> {
 }
 pub struct Checkbox<'a> {
     parts: CheckboxParts<'a>,
-    checked: bool,
     theme: &'a Theme,
 }
 impl<'a> Checkbox<'a> {
-    pub fn new(label: &'a str, checked: bool, theme: &'a Theme) -> Self {
+    pub fn new(label: &'a str, checked: impl BoolInput<'a>, theme: &'a Theme) -> Self {
         let indicator = gpui::div()
             .size(theme.rem(8.0 / 7.0))
             .rounded(theme.radius() / 2.0)
             .p(theme.rem(1.0 / 7.0))
-            .bg(if checked {
-                theme.accent()
-            } else {
-                theme.border()
-            })
-            .child(checked.then(|| {
-                // A UI mark is geometry, independent of the application's font.
-                // Both strokes scale with the same rem snapshot as the frame.
+            .bg(checked.select(theme.border(), theme.accent()))
+            .child({
                 let unit = theme.rem(1.0 / 14.0) as f32;
                 let stroke = |width, a, b, x, y| {
                     gpui::div()
                         .w(theme.rem(width / 14.0))
                         .h(theme.rem(2.0 / 14.0))
-                        .bg(theme.on_accent())
+                        .bg(checked.select(Color::TRANSPARENT, theme.on_accent()))
                         .transform(gpui::Affine {
                             a,
                             b,
@@ -69,7 +62,7 @@ impl<'a> Checkbox<'a> {
                     stroke(4.0, 0.707, 0.707, 1.0, 4.0),
                     stroke(8.0, 0.707, -0.707, 3.0, 4.0),
                 ))
-            }));
+            });
         Self {
             parts: CheckboxParts {
                 root: gpui::checkbox("", checked)
@@ -83,23 +76,18 @@ impl<'a> Checkbox<'a> {
                     .fg(theme.foreground())
                     .font_size(theme.font_size()),
             },
-            checked,
             theme,
         }
     }
     /// Report intent once. The controlled value changes only when its owner writes.
     pub fn on_change<M: 'static>(mut self, handler: impl Fn(&mut M, bool) + 'static) -> Self {
-        let next = !self.checked;
-        self.parts.root = self
-            .parts
-            .root
-            .on_click(move |model: &mut M| handler(model, next));
+        self.parts.root = self.parts.root.on_check(handler);
         self
     }
     /// Default behavior for an explicitly registered owner-relative field.
-    /// `checked` is a snapshot: register its source with `Sources::field` (and
-    /// parent snapshot reads with `Sources::component`) so writes re-describe
-    /// the controlled value. A direct-only declaration cannot observe that read.
+    /// Pass `&Signal<bool>` for direct checked/appearance bindings. A by-value
+    /// bool remains a snapshot and requires `Sources::field` (and component
+    /// dependencies for parent snapshot branches).
     pub fn toggle<M: 'static>(mut self, source: Source<M, bool>) -> Self {
         self.parts.root = self
             .parts
@@ -112,12 +100,13 @@ impl<'a> Checkbox<'a> {
         self.parts.root = self.parts.root.on_click(handler);
         self
     }
-    pub fn disabled(mut self, disabled: bool) -> Self {
+    pub fn disabled(mut self, disabled: impl BoolInput<'a>) -> Self {
         self.parts.root = self.parts.root.disabled(disabled);
-        if disabled {
-            self.parts.label = self.parts.label.fg(self.theme.muted());
-            self.parts.indicator = self.parts.indicator.bg(self.theme.raised());
-        }
+        // Disabled paint is a caller policy, expressed through the same input.
+        self.parts.label = self
+            .parts
+            .label
+            .fg(disabled.select(self.theme.foreground(), self.theme.muted()));
         self
     }
     pub fn parts(mut self, customize: impl FnOnce(CheckboxParts<'a>) -> CheckboxParts<'a>) -> Self {

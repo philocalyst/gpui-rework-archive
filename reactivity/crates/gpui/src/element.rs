@@ -75,6 +75,9 @@ pub(crate) enum Admission {
 trait Route {
     fn admit(&self, receiver: &dyn Any, sources: &dyn Any) -> Result<Admission, BindError>;
     fn invoke(&self, receiver: &mut dyn Any) -> Result<(), BindError>;
+    fn invoke_control(&self, receiver: &mut dyn Any, _next: Option<bool>) -> Result<(), BindError> {
+        self.invoke(receiver)
+    }
     fn owner_scope(&self, _receiver: &dyn Any, _sources: &dyn Any) -> Result<u32, BindError> {
         Ok(0)
     }
@@ -221,6 +224,13 @@ impl Handler {
     pub(crate) fn invoke(&self, receiver: &mut dyn Any) -> Result<(), BindError> {
         self.0.invoke(receiver)
     }
+    pub(crate) fn invoke_control(
+        &self,
+        receiver: &mut dyn Any,
+        next: Option<bool>,
+    ) -> Result<(), BindError> {
+        self.0.invoke_control(receiver, next)
+    }
 
     pub(crate) fn proposal(
         &self,
@@ -300,6 +310,13 @@ impl<P: 'static, C: View + 'static> Route for ComponentRoute<P, C> {
             .ok_or(BindError::ReceiverMismatch)?;
         self.handler.invoke(self.component.project_mut(parent)?)
     }
+    fn invoke_control(&self, receiver: &mut dyn Any, next: Option<bool>) -> Result<(), BindError> {
+        let parent = receiver
+            .downcast_mut::<P>()
+            .ok_or(BindError::ReceiverMismatch)?;
+        self.handler
+            .invoke_control(self.component.project_mut(parent)?, next)
+    }
     fn property(&self, phase: PropertyPhase<'_>) -> Result<(), BindError> {
         match phase {
             PropertyPhase::Propose(receiver, target, output) => {
@@ -346,6 +363,30 @@ impl<M: 'static, F: Fn(&mut M)> Route for MethodRoute<M, F> {
             .downcast_mut::<M>()
             .ok_or(BindError::ReceiverMismatch)?;
         (self.callback)(receiver);
+        Ok(())
+    }
+}
+
+struct CheckRoute<M, F> {
+    callback: F,
+    model: PhantomData<fn(M)>,
+}
+impl<M: 'static, F: Fn(&mut M, bool)> Route for CheckRoute<M, F> {
+    fn admit(&self, receiver: &dyn Any, _: &dyn Any) -> Result<Admission, BindError> {
+        if receiver.is::<M>() {
+            Ok(Admission::Model { exact: None })
+        } else {
+            Err(BindError::ReceiverMismatch)
+        }
+    }
+    fn invoke(&self, _: &mut dyn Any) -> Result<(), BindError> {
+        Err(BindError::ReceiverMismatch)
+    }
+    fn invoke_control(&self, receiver: &mut dyn Any, next: Option<bool>) -> Result<(), BindError> {
+        let receiver = receiver
+            .downcast_mut::<M>()
+            .ok_or(BindError::ReceiverMismatch)?;
+        (self.callback)(receiver, next.ok_or(BindError::ReceiverMismatch)?);
         Ok(())
     }
 }
@@ -524,7 +565,7 @@ impl<'a> El<'a> {
         let radius = radius.into_prop();
         if let Some(value) = radius.literal() {
             if let Some(extra) = self.extra.as_deref_mut() {
-                extra.unbind(PropertyId::CornerRadius);
+                extra.unbind(PropertyId::CornerRadius.into());
             }
             // Preserve the original radius builder's deferred, typed admission
             // and raw f32 bits, including invalid NaN payloads until admission.
@@ -557,7 +598,7 @@ impl<'a> El<'a> {
         let clipped = clipped.into_prop();
         if let Some(value) = clipped.literal() {
             if let Some(extra) = self.extra.as_deref_mut() {
-                extra.unbind(PropertyId::Clip);
+                extra.unbind(PropertyId::Clip.into());
             }
             if value || self.extra.is_some() {
                 self.extra
@@ -618,24 +659,73 @@ impl<'a> El<'a> {
 
     /// Disable a semantic control and its named-part descendants. Physical
     /// routes remain installed for normal replacement/drop, but cannot act.
-    pub fn disabled(mut self, disabled: bool) -> Self {
-        if disabled {
-            assert!(
-                matches!(
-                    self.kind,
-                    NodeKind::Input | NodeKind::Button | NodeKind::CheckBox(_)
-                ),
-                "disabled state belongs to a semantic control"
-            );
-        }
-        if disabled || self.extra.is_some() {
+    pub fn disabled(mut self, disabled: impl IntoProp<'a, bool>) -> Self {
+        self.control_input(crate::style_port::Sink::DISABLED, disabled.into_prop());
+        self
+    }
+    fn control_input(&mut self, sink: crate::style_port::Sink, input: crate::PropInput<'a, bool>) {
+        assert!(
+            matches!(
+                self.kind,
+                NodeKind::Input | NodeKind::Button | NodeKind::CheckBox(_)
+            ),
+            "intrinsic state belongs to a semantic control"
+        );
+        if let Some(value) = input.literal() {
+            if let Some(extra) = &mut self.extra {
+                extra.unbind(sink);
+            }
+            if sink == crate::style_port::Sink::CHECKED {
+                self.kind = NodeKind::CheckBox(value);
+            } else if value || self.extra.is_some() {
+                self.extra
+                    .get_or_insert_with(|| {
+                        Box::new(crate::semantic::ElementExtra::Semantic(Default::default()))
+                    })
+                    .set_disabled(value);
+            }
+        } else if let Some(signal) = input.signal() {
             self.extra
                 .get_or_insert_with(|| {
                     Box::new(crate::semantic::ElementExtra::Semantic(Default::default()))
                 })
-                .set_disabled(disabled);
+                .bind(sink, signal);
+        } else if let Some(map) = input.clone().mapped() {
+            self.extra
+                .get_or_insert_with(|| {
+                    Box::new(crate::semantic::ElementExtra::Semantic(Default::default()))
+                })
+                .bind_map(sink, map);
         }
-        self
+    }
+    fn apply_sink(
+        sink: crate::style_port::Sink,
+        value: crate::PropertyValue,
+        element: &mut Self,
+        disabled: &mut bool,
+        shape: &mut crate::property::GeometryStyle,
+    ) -> Result<(), crate::Error> {
+        if let Some(property) = sink.property() {
+            match property.info().destination {
+                crate::property::PropertyDestination::Style
+                | crate::property::PropertyDestination::Paint => {
+                    property.set_erased(&mut element.style, value)?
+                }
+                crate::property::PropertyDestination::Geometry => {
+                    property.set_geometry(shape, value)?
+                }
+            }
+        } else {
+            let crate::PropertyValue::Flag(value) = value else {
+                return Err(crate::Error::MapInput);
+            };
+            if sink == crate::style_port::Sink::CHECKED {
+                element.kind = NodeKind::CheckBox(value);
+            } else {
+                *disabled = value;
+            }
+        }
+        Ok(())
     }
 
     pub fn child<C, S>(mut self, children: C) -> Self
@@ -675,12 +765,26 @@ impl<'a> El<'a> {
         handler.install(self)
     }
 
+    /// Replace the checkbox route with a controlled intent callback. Every
+    /// activation computes intent from current logical checked state, including
+    /// direct source publications, before exposing the mutable model.
+    pub fn on_check<M: 'static>(mut self, callback: impl Fn(&mut M, bool) + 'static) -> Self {
+        assert!(
+            matches!(self.kind, NodeKind::CheckBox(_)),
+            "checked intent belongs to a checkbox"
+        );
+        self.on_click = Some(Handler(Box::new(CheckRoute {
+            callback,
+            model: PhantomData,
+        })));
+        self
+    }
     fn bind_mapped_property(&mut self, id: PropertyId, operand: crate::style_port::MapOperand<'a>) {
         self.extra
             .get_or_insert_with(|| {
                 Box::new(crate::semantic::ElementExtra::Semantic(Default::default()))
             })
-            .bind_map(id, operand);
+            .bind_map(id.into(), operand);
     }
 
     fn bind_property(&mut self, id: PropertyId, signal: &'a dyn StyleSignal) {
@@ -690,7 +794,7 @@ impl<'a> El<'a> {
                     Default::default(),
                 ))
             })
-            .bind(id, signal);
+            .bind(id.into(), signal);
     }
 
     #[inline]
@@ -706,7 +810,7 @@ impl<'a> El<'a> {
         id: PropertyId,
     ) {
         if let Some(value) = extra.as_deref_mut() {
-            value.unbind(id);
+            value.unbind(id.into());
             if value.empty() {
                 *extra = None;
             }
@@ -760,8 +864,8 @@ impl<'a> El<'a> {
                 if SIZE {
                     self.bind_property(PropertyId::Height, signal);
                 }
-            } else if let Some(map) = input.mapped() {
-                self.bind_mapped_property(id, map);
+            } else if let Some(map) = input.clone().mapped() {
+                self.bind_mapped_property(id, map.clone());
                 if SIZE {
                     self.bind_mapped_property(PropertyId::Height, map);
                 }
@@ -964,37 +1068,22 @@ impl<'a> El<'a> {
                 backgrounds.push((index as usize, gradient));
             }
             let mut shape = shape.unwrap_or_default();
+            let mut disabled = control.disabled;
             for binding in bindings {
-                let value = binding.signal.scalar().admit(binding.property)?;
-                match binding.property.info().destination {
-                    crate::property::PropertyDestination::Style
-                    | crate::property::PropertyDestination::Paint => {
-                        binding.property.set_erased(&mut element.style, value)?;
-                    }
-                    crate::property::PropertyDestination::Geometry => {
-                        binding.property.set_geometry(&mut shape, value)?;
-                    }
-                }
+                let value = binding.sink.admit(binding.signal.scalar())?;
+                Self::apply_sink(binding.sink, value, &mut element, &mut disabled, &mut shape)?;
                 style_ports.push(crate::style_port::Draft {
                     node: index,
-                    property: binding.property,
+                    sink: binding.sink,
                     signal: binding.signal,
                 });
             }
             for binding in mapped {
-                let value = binding.operand.scalar()?.admit(binding.property)?;
-                match binding.property.info().destination {
-                    crate::property::PropertyDestination::Style
-                    | crate::property::PropertyDestination::Paint => {
-                        binding.property.set_erased(&mut element.style, value)?;
-                    }
-                    crate::property::PropertyDestination::Geometry => {
-                        binding.property.set_geometry(&mut shape, value)?;
-                    }
-                }
+                let value = binding.sink.admit(binding.operand.scalar()?)?;
+                Self::apply_sink(binding.sink, value, &mut element, &mut disabled, &mut shape)?;
                 mapped_ports.push(crate::style_port::MapDraft {
                     node: index,
-                    property: binding.property,
+                    sink: binding.sink,
                     operand: binding.operand,
                 });
             }
@@ -1020,7 +1109,6 @@ impl<'a> El<'a> {
                 }
                 element.append_children(child);
             }
-            let disabled = control.disabled;
             if let Some(color) = control.focus_indicator {
                 focus_indicators.push((index as usize, color));
             }
@@ -1196,8 +1284,10 @@ pub fn button<'a>(text: impl IntoText<'a>) -> El<'a> {
 /// state remains readable, but the checkbox is neither actionable nor focusable.
 /// Style the label/control with the ordinary element properties; this does not
 /// install a platform widget or draw a check mark.
-pub fn checkbox<'a>(label: impl IntoText<'a>, checked: bool) -> El<'a> {
-    El::new(NodeKind::CheckBox(checked), Some(label.into_text()))
+pub fn checkbox<'a>(label: impl IntoText<'a>, checked: impl IntoProp<'a, bool>) -> El<'a> {
+    let mut element = El::new(NodeKind::CheckBox(false), Some(label.into_text()));
+    element.control_input(crate::style_port::Sink::CHECKED, checked.into_prop());
+    element
 }
 /// A two-way text port accepts a writable String signal, never a snapshot.
 /// Mounting additionally requires a registered owner-relative source projection.

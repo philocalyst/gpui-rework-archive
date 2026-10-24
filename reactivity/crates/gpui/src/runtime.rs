@@ -606,10 +606,22 @@ impl TextSlot {
 /// including the checkbox state. No Rust enum representation is reinterpreted.
 #[derive(Clone, Copy)]
 struct Content(u32);
-const _: () = assert!(MAX_NODES * 2 <= (1 << (Content::BITS - 1 - 4)));
+const _: () = assert!(MAX_NODES * 2 <= (1 << (Content::BITS - 2 - 4)));
 impl Content {
-    const BITS: u32 = 23;
-    const DISABLED: u32 = 1 << (Self::BITS - 1);
+    const BITS: u32 = 24;
+    const DISABLED: u32 = 1 << 22;
+    const OWN_DISABLED: u32 = 1 << 23;
+    const FLAGS: u32 = Self::DISABLED | Self::OWN_DISABLED;
+    fn with_own_disabled(self, disabled: bool) -> Self {
+        Self((self.0 & !Self::OWN_DISABLED) | (u32::from(disabled) * Self::OWN_DISABLED))
+    }
+    fn own_disabled(self) -> bool {
+        self.0 & Self::OWN_DISABLED != 0
+    }
+    fn with_checked(self, checked: bool) -> Self {
+        assert!(matches!(self.kind(), NodeKind::CheckBox(_)));
+        Self((self.0 & !15) | 8 | u32::from(checked))
+    }
     fn with_disabled(self, disabled: bool) -> Self {
         Self((self.0 & !Self::DISABLED) | (u32::from(disabled) * Self::DISABLED))
     }
@@ -661,7 +673,7 @@ impl Content {
         if self.kind() == NodeKind::Image {
             return TextSlot::NONE;
         }
-        let text = (self.0 & !Self::DISABLED) >> 4;
+        let text = (self.0 & !Self::FLAGS) >> 4;
         TextSlot(if text == 0 { u32::MAX } else { text - 1 })
     }
     fn image(image: image::ImageUse) -> Self {
@@ -670,7 +682,7 @@ impl Content {
         Self(((value + 1) << 4) | 6)
     }
     fn image_use(self) -> Option<image::ImageUse> {
-        let value = (self.0 & !Self::DISABLED) >> 4;
+        let value = (self.0 & !Self::FLAGS) >> 4;
         if self.kind() != NodeKind::Image || value == 0 {
             return None;
         }
@@ -894,9 +906,16 @@ impl Fanout {
         }
     }
     #[inline(never)]
-    fn map(&mut self, draft: crate::style_port::MapDraft<'_>) -> Result<(), Error> {
-        let recipe = draft.operand.recipe()?;
-        let value = draft.operand.scalar()?.admit(draft.property)?;
+    fn map(
+        &mut self,
+        draft: crate::style_port::MapDraft<'_>,
+        colors: &mut styles::ColorDiscovery,
+    ) -> Result<(), Error> {
+        let value = draft.sink.admit(draft.operand.scalar()?)?;
+        let recipe = draft
+            .operand
+            .recipe
+            .lower(|color| colors.literal_code(color))?;
         if let Self::General {
             codec,
             destinations,
@@ -914,7 +933,7 @@ impl Fanout {
             unreachable!()
         };
         mapped.records.push(MappedRecord {
-            destination: Destination::style(draft.node as usize, draft.property),
+            destination: Destination::sink(draft.node as usize, draft.sink),
             recipe,
             color: 0,
         });
@@ -928,13 +947,14 @@ impl Fanout {
         &mut self,
         source: &'a dyn std::any::Any,
         field: FieldId,
+        styles: &styles::Styles,
     ) -> Result<crate::source::Frozen<'a>, Error> {
         let mut needs = crate::source::Needs {
             text: false,
             style: false,
         };
         for destination in self.destinations() {
-            if destination.port() == Port::Style {
+            if destination.target_sink().is_some() {
                 needs.style = true;
             } else {
                 needs.text = true;
@@ -951,17 +971,24 @@ impl Fanout {
         if let Fanout::Mapped(mapped) = self {
             for (record, value) in mapped.records.iter().zip(&mut mapped.values) {
                 *value = record
-                    .recipe
-                    .call(source)
-                    .ok_or(BindError::TypeMismatch(field))?
-                    .admit(record.destination.property().expect("mapped property"))?;
+                    .destination
+                    .target_sink()
+                    .expect("mapped sink")
+                    .admit(
+                        styles.resolve_scalar(
+                            record
+                                .recipe
+                                .call(source)
+                                .ok_or(BindError::TypeMismatch(field))?,
+                        ),
+                    )?;
             }
         }
         // A numeric source may feed width, font size AND text. Reject every bad
         // sink before the first logical destination or inspector base is edited.
         for destination in self.destinations() {
-            if let Some(id) = destination.property() {
-                frozen.style.expect("style codec requested").admit(id)?;
+            if let Some(sink) = destination.target_sink() {
+                sink.admit(frozen.style.expect("scalar codec requested"))?;
             }
         }
         Ok(frozen)
@@ -2164,25 +2191,25 @@ impl<M: View + 'static> Runtime<M> {
                 .validate(&geometry.corner_radius)
                 .map_err(|error| Error::GeometryProperty { node, error })?;
         }
+        let mut color_discovery = styles::ColorDiscovery::default();
         for draft in mapped_ports {
             if let Some(field) = self.sources.resolve(&self.model, draft.operand.signal)? {
                 fanout
                     .entry(field)
                     .or_insert_with(|| Fanout::new(TextCodec::for_style::<f64>()))
-                    .map(draft)?;
+                    .map(draft, &mut color_discovery)?;
             }
         }
-        let mut color_discovery = styles::ColorDiscovery::default();
         for draft in style_ports {
             if let Some(field) = self.sources.resolve(&self.model, draft.signal)? {
                 use crate::property::PropertyId;
                 if !matches!(fanout.get(&field), Some(Fanout::Mapped(_)))
                     && matches!(
-                        draft.property,
-                        PropertyId::Foreground | PropertyId::Background
+                        draft.sink.property(),
+                        Some(PropertyId::Foreground | PropertyId::Background)
                     )
                 {
-                    let foreground = draft.property == PropertyId::Foreground;
+                    let foreground = draft.sink.property() == Some(PropertyId::Foreground);
                     let style = drafts[draft.node as usize].style;
                     color_discovery.register(field, if foreground { style.fg } else { style.bg });
                 }
@@ -2194,7 +2221,7 @@ impl<M: View + 'static> Runtime<M> {
                 }
                 entry
                     .destinations_mut()
-                    .push(Destination::style(draft.node as usize, draft.property));
+                    .push(Destination::sink(draft.node as usize, draft.sink));
             }
         }
         let mut annotation_fields = Vec::with_capacity(annotation_drafts.len());
@@ -2533,6 +2560,7 @@ impl<M: View + 'static> Runtime<M> {
             } else {
                 Content::new(draft.kind, text_slot)
             }
+            .with_own_disabled(draft.disabled)
             .with_disabled(disabled);
             if property_changed == Some(node.identity) {
                 node_changed = true;
@@ -2779,17 +2807,45 @@ impl<M: View + 'static> Runtime<M> {
             return Ok(PatchOutcome::Visual);
         };
         self.counters.source_reads += 1;
-        let frozen = fanout.freeze(self.sources.signal(&self.model, field)?.as_any(), field)?;
+        let frozen = fanout.freeze(
+            self.sources.signal(&self.model, field)?.as_any(),
+            field,
+            &self.styles,
+        )?;
         let mut promoted: Option<SharedText> = None;
         let mut semantic = false;
         let mut visual_changed = false;
+        let mut controls_changed = false;
         let mut last_changed = None;
         for (destination, mapped_value, color) in fanout.all_destinations() {
             self.counters.destination_compares += 1;
             let index = destination.node();
             let node = &self.nodes[index];
             let identity = node.identity();
-            let changed = if let Some(id) = destination.property() {
+            let changed = if let Some(control) = destination.control() {
+                let crate::PropertyValue::Flag(value) =
+                    mapped_value.unwrap_or_else(|| match frozen.style {
+                        Some(crate::style_port::Scalar::Value(value)) => value,
+                        _ => unreachable!("admitted bool source"),
+                    })
+                else {
+                    unreachable!("admitted bool sink");
+                };
+                let before = node.content;
+                let after = if control == crate::style_port::Sink::CHECKED {
+                    before.with_checked(value)
+                } else {
+                    before.with_own_disabled(value)
+                };
+                let changed = before.0 != after.0;
+                if changed {
+                    self.nodes[index].content = after;
+                    self.dirty = true;
+                    visual_changed = true;
+                    controls_changed = true;
+                }
+                changed
+            } else if let Some(id) = destination.property() {
                 let value = match mapped_value {
                     Some(value) => value,
                     None => frozen.style.expect("style codec requested").admit(id)?,
@@ -2898,6 +2954,18 @@ impl<M: View + 'static> Runtime<M> {
                 return Ok(PatchOutcome::Complete);
             }
             self.dirty = visual_changed;
+        }
+        if controls_changed {
+            for index in 0..self.nodes.len() {
+                let node = &self.nodes[index];
+                let disabled = node.content.own_disabled()
+                    || node
+                        .parent()
+                        .index()
+                        .is_some_and(|parent| self.nodes[parent].content.disabled());
+                self.nodes[index].content = node.content.with_disabled(disabled);
+            }
+            self.prune_focus();
         }
         Ok(if semantic && !visual_changed {
             PatchOutcome::Metadata

@@ -3,7 +3,7 @@ use crate::{
     Size, Theme,
     recipe::{Recipe, style},
 };
-use gpui::{El, Signal};
+use gpui::{BoolInput, El, Signal};
 
 pub struct InputParts<'a> {
     frame: El<'a>,
@@ -52,19 +52,19 @@ impl<'a> Input<'a> {
             .font_size(self.theme.control_font(size));
         self
     }
-    pub fn invalid(mut self, invalid: bool) -> Self {
-        self.parts.frame = self.parts.frame.bg(if invalid {
-            self.theme.danger()
-        } else {
-            self.theme.border()
-        });
+    pub fn invalid(mut self, invalid: impl BoolInput<'a>) -> Self {
+        self.parts.frame = self
+            .parts
+            .frame
+            .bg(invalid.select(self.theme.border(), self.theme.danger()));
         self
     }
-    pub fn disabled(mut self, disabled: bool) -> Self {
+    pub fn disabled(mut self, disabled: impl BoolInput<'a>) -> Self {
         self.parts.control = self.parts.control.disabled(disabled);
-        if disabled {
-            self.parts.control = self.parts.control.fg(self.theme.muted());
-        }
+        self.parts.control = self
+            .parts
+            .control
+            .fg(disabled.select(self.theme.foreground(), self.theme.muted()));
         self
     }
     pub fn description(mut self, description: &'a str) -> Self {

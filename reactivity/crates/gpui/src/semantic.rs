@@ -229,7 +229,7 @@ impl<'a> ElementExtra<'a> {
     }
     pub fn bind(
         &mut self,
-        property: crate::property::PropertyId,
+        property: crate::style_port::Sink,
         signal: &'a dyn crate::style_port::StyleSignal,
     ) {
         if matches!(self, Self::Control { .. }) {
@@ -241,7 +241,7 @@ impl<'a> ElementExtra<'a> {
             base: Some(base),
             ..
         } = self
-            && !bindings.iter().any(|binding| binding.property == property)
+            && !bindings.iter().any(|binding| binding.sink == property)
         {
             base.bind(property, signal);
             return;
@@ -250,7 +250,7 @@ impl<'a> ElementExtra<'a> {
             && let Some(binding) = d
                 .bindings
                 .iter_mut()
-                .find(|binding| binding.property == property)
+                .find(|binding| binding.sink == property)
         {
             binding.signal = signal;
             return;
@@ -270,21 +270,21 @@ impl<'a> ElementExtra<'a> {
                 .unwrap_or_else(|| Self::Decorations(Default::default()));
         }
         let bindings = &mut self.decorations().bindings;
-        if let Some(binding) = bindings
-            .iter_mut()
-            .find(|binding| binding.property == property)
-        {
+        if let Some(binding) = bindings.iter_mut().find(|binding| binding.sink == property) {
             binding.signal = signal;
         } else {
             if bindings.len() == bindings.capacity() {
                 bindings.reserve_exact(bindings.capacity().max(1));
             }
-            bindings.push(crate::style_port::Binding { property, signal });
+            bindings.push(crate::style_port::Binding {
+                sink: property,
+                signal,
+            });
         }
     }
     pub fn bind_map(
         &mut self,
-        property: crate::property::PropertyId,
+        property: crate::style_port::Sink,
         operand: crate::style_port::MapOperand<'a>,
     ) {
         if matches!(self, Self::Control { .. }) {
@@ -292,9 +292,7 @@ impl<'a> ElementExtra<'a> {
             return;
         }
         if let Self::Mapped { bindings, .. } = self
-            && let Some(binding) = bindings
-                .iter_mut()
-                .find(|binding| binding.property == property)
+            && let Some(binding) = bindings.iter_mut().find(|binding| binding.sink == property)
         {
             binding.operand = operand;
             return;
@@ -321,9 +319,12 @@ impl<'a> ElementExtra<'a> {
         if bindings.len() == bindings.capacity() {
             bindings.reserve_exact(bindings.capacity().max(1));
         }
-        bindings.push(crate::style_port::MapBinding { property, operand });
+        bindings.push(crate::style_port::MapBinding {
+            sink: property,
+            operand,
+        });
     }
-    pub fn unbind(&mut self, property: crate::property::PropertyId) {
+    pub fn unbind(&mut self, property: crate::style_port::Sink) {
         if let Self::Control { base, .. } = self {
             if let Some(base) = base {
                 base.unbind(property);
@@ -339,10 +340,10 @@ impl<'a> ElementExtra<'a> {
             background,
         } = self
         {
-            if property == crate::property::PropertyId::Background {
+            if property.property() == Some(crate::property::PropertyId::Background) {
                 *background = None;
             }
-            bindings.retain(|binding| binding.property != property);
+            bindings.retain(|binding| binding.sink != property);
             if bindings.is_empty() {
                 *bindings = Vec::new();
             }
@@ -352,7 +353,7 @@ impl<'a> ElementExtra<'a> {
             return;
         }
         if let Self::Decorations(d) = self {
-            d.bindings.retain(|binding| binding.property != property);
+            d.bindings.retain(|binding| binding.sink != property);
             if d.bindings.is_empty() {
                 d.bindings = Vec::new();
             }
@@ -374,7 +375,7 @@ impl<'a> ElementExtra<'a> {
             self.control_base().set_background(gradient);
             return;
         }
-        self.unbind(crate::property::PropertyId::Background);
+        self.unbind(crate::property::PropertyId::Background.into());
         if !matches!(self, Self::Mapped { .. }) {
             let previous = std::mem::replace(self, Self::Semantic(Annotations::default()));
             let base = (!previous.empty()

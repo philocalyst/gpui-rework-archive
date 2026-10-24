@@ -23,6 +23,23 @@ impl Destination {
         assert!(node < MAX_NODES && (property as u16) <= 8191);
         Self((node as u32) << 15 | (property as u32) << 2 | Port::Style as u32)
     }
+    pub fn sink(node: usize, sink: crate::style_port::Sink) -> Self {
+        match sink.property() {
+            Some(property) => Self::style(node, property),
+            None => {
+                assert!(node < MAX_NODES);
+                Self((node as u32) << 15 | (sink.control_code() as u32) << 2)
+            }
+        }
+    }
+    pub fn control(self) -> Option<crate::style_port::Sink> {
+        (self.port() == Port::Visual)
+            .then(|| crate::style_port::Sink::control(((self.0 >> 2) & 8191) as u16))
+            .flatten()
+    }
+    pub fn target_sink(self) -> Option<crate::style_port::Sink> {
+        self.property().map(Into::into).or_else(|| self.control())
+    }
     pub fn packed(self) -> u32 {
         self.0
     }

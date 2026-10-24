@@ -12,6 +12,8 @@ use std::fmt;
 pub(crate) enum Scalar {
     Number(f64),
     Value(PropertyValue),
+    // Checked literal-bank code, emitted only after ordinary recipe lowering.
+    ColorSlot(u32),
 }
 
 impl Scalar {
@@ -29,6 +31,7 @@ impl Scalar {
     pub(crate) fn narrow(self, id: PropertyId) -> Result<PropertyValue, PropertyError> {
         let value = match self {
             Self::Value(value) => value,
+            Self::ColorSlot(_) => unreachable!("literal color resolved before admission"),
             Self::Number(number) => {
                 let reason = if !number.is_finite() {
                     Some(PropertyErrorKind::NonFinite)
@@ -73,90 +76,253 @@ impl<T: Value> MapValue for T {}
 /// immutable parameters, with no I/O or external mutable reads. This semantic
 /// law matches Source::new; Rust cannot prove purity. Outputs use the existing
 /// closed property validators and impacts. Recipes are rebuilt on description.
-pub struct Mapped<'a, U> {
-    operand: MapOperand<'a>,
+pub struct Mapped<'a, U, F> {
+    signal: &'a dyn ErasedSignal,
+    map: F,
     output: std::marker::PhantomData<U>,
 }
-impl<U> Copy for Mapped<'_, U> {}
-impl<U> Clone for Mapped<'_, U> {
+impl<U, F: Copy> Copy for Mapped<'_, U, F> {}
+impl<U, F: Copy> Clone for Mapped<'_, U, F> {
     fn clone(&self) -> Self {
         *self
     }
 }
-#[derive(Clone, Copy)]
-pub(crate) struct MapOperand<'a> {
-    pub signal: &'a dyn ErasedSignal,
-    pub recipe: Result<Recipe, gpui_inline_call::TooLarge>,
+impl<'a, U: MapValue, F> Mapped<'a, U, F>
+where
+    F: Fn(&dyn std::any::Any) -> Option<U> + Copy + Send + Sync + 'static,
+{
+    fn operand(self) -> MapOperand<'a> {
+        let map = self.map;
+        MapOperand {
+            signal: self.signal,
+            recipe: PendingRecipe::new(move |input| map(input).map(Value::scalar)),
+        }
+    }
 }
-impl MapOperand<'_> {
-    pub fn recipe(self) -> Result<Recipe, crate::Error> {
-        self.recipe.map_err(|error| crate::Error::MapStorage {
+// The largest variant remains the original inline recipe plus its result tag.
+// Color endpoints exist only during description; retained selectors carry two
+// codes into the existing owner color bank, never a borrowed theme.
+#[derive(Clone)]
+pub(crate) enum PendingRecipe {
+    Inline(Recipe),
+    Rejected(gpui_inline_call::TooLarge),
+    Select(Box<ColorSelection>),
+}
+#[derive(Clone)]
+pub(crate) struct ColorSelection {
+    build: gpui_inline_call::InlineCall<Result<Recipe, gpui_inline_call::TooLarge>>,
+    colors: [Color; 2],
+}
+impl PendingRecipe {
+    fn new<F>(map: F) -> Self
+    where
+        F: Fn(&dyn std::any::Any) -> Option<Scalar> + Copy + Send + Sync + 'static,
+    {
+        match Recipe::new(map) {
+            Ok(recipe) => Self::Inline(recipe),
+            Err(error) => Self::Rejected(error),
+        }
+    }
+    fn error(error: gpui_inline_call::TooLarge) -> crate::Error {
+        crate::Error::MapStorage {
             size: error.size,
             alignment: error.alignment,
-        })
+        }
     }
-    pub fn scalar(self) -> Result<Scalar, crate::Error> {
-        self.recipe()?
-            .call(self.signal.as_any())
-            .ok_or(crate::Error::MapInput)
+    pub(crate) fn scalar(&self, source: &dyn std::any::Any) -> Result<Scalar, crate::Error> {
+        match self {
+            Self::Inline(recipe) => recipe.call(source).ok_or(crate::Error::MapInput),
+            Self::Rejected(error) => Err(Self::error(*error)),
+            Self::Select(selection) => {
+                let recipe = selection.build.call(&[0_u32, 1]).map_err(Self::error)?;
+                let Some(Scalar::ColorSlot(code)) = recipe.call(source) else {
+                    return Err(crate::Error::MapInput);
+                };
+                Ok(Scalar::Value(PropertyValue::Color(
+                    selection.colors[code as usize],
+                )))
+            }
+        }
+    }
+    pub(crate) fn lower(
+        self,
+        mut literal: impl FnMut(Color) -> u32,
+    ) -> Result<Recipe, crate::Error> {
+        match self {
+            Self::Inline(recipe) => Ok(recipe),
+            Self::Rejected(error) => Err(Self::error(error)),
+            Self::Select(selection) => selection
+                .build
+                .call(&selection.colors.map(&mut literal))
+                .map_err(Self::error),
+        }
     }
 }
-/// Allocation-free source mapping. Import this trait for `signal.map(...)`.
-/// The mapper and explicit parameter together must fit sixteen bytes and have
-/// alignment at most eight; larger recipes fail mount admission, without a heap
-/// fallback or a builder panic. Small Copy captures are supported too.
+#[derive(Clone)]
+pub(crate) struct MapOperand<'a> {
+    pub signal: &'a dyn ErasedSignal,
+    pub recipe: PendingRecipe,
+}
+impl MapOperand<'_> {
+    pub fn scalar(&self) -> Result<Scalar, crate::Error> {
+        self.recipe.scalar(self.signal.as_any())
+    }
+}
+/// Allocation-free source mapping. The concrete mapper remains typed until an
+/// element consumes the operand. Its final capture must fit sixteen bytes with
+/// alignment at most eight; admission rejects larger recipes without fallback.
 pub trait SignalMap<T> {
-    fn map<U: MapValue, F>(&self, map: F) -> Mapped<'_, U>
+    fn map<U: MapValue, F>(
+        &self,
+        map: F,
+    ) -> Mapped<'_, U, impl Fn(&dyn std::any::Any) -> Option<U> + Copy + Send + Sync + 'static>
     where
         F: Fn(&T) -> U + Copy + Send + Sync + 'static;
-    fn map_with<P, U: MapValue, F>(&self, parameter: P, map: F) -> Mapped<'_, U>
+    fn map_with<P, U: MapValue, F>(
+        &self,
+        parameter: P,
+        map: F,
+    ) -> Mapped<'_, U, impl Fn(&dyn std::any::Any) -> Option<U> + Copy + Send + Sync + 'static>
     where
         P: Copy + Send + Sync + 'static,
         F: Fn(&T, P) -> U + Copy + Send + Sync + 'static;
 }
 impl<T: 'static> SignalMap<T> for Signal<T> {
-    fn map<U: MapValue, F>(&self, map: F) -> Mapped<'_, U>
+    fn map<U: MapValue, F>(
+        &self,
+        map: F,
+    ) -> Mapped<'_, U, impl Fn(&dyn std::any::Any) -> Option<U> + Copy + Send + Sync + 'static>
     where
         F: Fn(&T) -> U + Copy + Send + Sync + 'static,
     {
-        self.map_with((), move |value, ()| map(value))
-    }
-    fn map_with<P, U: MapValue, F>(&self, parameter: P, map: F) -> Mapped<'_, U>
-    where
-        P: Copy + Send + Sync + 'static,
-        F: Fn(&T, P) -> U + Copy + Send + Sync + 'static,
-    {
         Mapped {
-            operand: MapOperand {
-                signal: self,
-                recipe: Recipe::new(move |input: &dyn std::any::Any| {
-                    input
-                        .downcast_ref::<Signal<T>>()
-                        .map(|signal| map(&**signal, parameter).scalar())
-                }),
+            signal: self,
+            map: move |input: &dyn std::any::Any| {
+                input
+                    .downcast_ref::<Signal<T>>()
+                    .map(|signal| map(&**signal))
             },
             output: std::marker::PhantomData,
         }
     }
+    fn map_with<P, U: MapValue, F>(
+        &self,
+        parameter: P,
+        map: F,
+    ) -> Mapped<'_, U, impl Fn(&dyn std::any::Any) -> Option<U> + Copy + Send + Sync + 'static>
+    where
+        P: Copy + Send + Sync + 'static,
+        F: Fn(&T, P) -> U + Copy + Send + Sync + 'static,
+    {
+        self.map(move |value| map(value, parameter))
+    }
+}
+/// A boolean operand that can also select owned semantic palette tokens.
+/// Literal selection is free. Dynamic endpoints are interned in the ordinary
+/// owner color bank during lowering. The two checked codes consume eight bytes
+/// of the final sixteen-byte mapper capture budget.
+pub trait BoolInput<'a>: IntoProp<'a, bool> + Copy {
+    fn select(self, when_false: Color, when_true: Color) -> PropInput<'a, Color>;
+}
+fn select<'a, F>(signal: &'a dyn ErasedSignal, map: F, colors: [Color; 2]) -> PropInput<'a, Color>
+where
+    F: Fn(&dyn std::any::Any) -> Option<bool> + Copy + Send + Sync + 'static,
+{
+    let build = gpui_inline_call::InlineCall::new(move |input: &dyn std::any::Any| {
+        let codes = *input
+            .downcast_ref::<[u32; 2]>()
+            .expect("internal palette pair");
+        Recipe::new(move |input: &dyn std::any::Any| {
+            map(input).map(|flag| Scalar::ColorSlot(codes[usize::from(flag)]))
+        })
+    });
+    let recipe = match build {
+        Ok(build) => PendingRecipe::Select(Box::new(ColorSelection { build, colors })),
+        Err(error) => PendingRecipe::Rejected(error),
+    };
+    PropInput(Operand::Mapped(MapOperand { signal, recipe }))
+}
+impl<'a> BoolInput<'a> for bool {
+    fn select(self, when_false: Color, when_true: Color) -> PropInput<'a, Color> {
+        (if self { when_true } else { when_false }).into_prop()
+    }
+}
+impl<'a> BoolInput<'a> for &bool {
+    fn select(self, when_false: Color, when_true: Color) -> PropInput<'a, Color> {
+        (*self).select(when_false, when_true)
+    }
+}
+impl<'a> BoolInput<'a> for &'a Signal<bool> {
+    fn select(self, when_false: Color, when_true: Color) -> PropInput<'a, Color> {
+        select(
+            self,
+            |input| input.downcast_ref::<Signal<bool>>().map(|value| **value),
+            [when_false, when_true],
+        )
+    }
+}
+impl<'a, F> BoolInput<'a> for Mapped<'a, bool, F>
+where
+    F: Fn(&dyn std::any::Any) -> Option<bool> + Copy + Send + Sync + 'static,
+{
+    fn select(self, when_false: Color, when_true: Color) -> PropInput<'a, Color> {
+        select(self.signal, self.map, [when_false, when_true])
+    }
+}
+/// Private destination tags share the existing two-byte binding slot. Control
+/// state is intrinsic semantics, not an inspector style-property declaration.
+#[derive(Clone, Copy, Debug, PartialEq, Eq)]
+pub(crate) struct Sink(u16);
+impl Sink {
+    pub const CHECKED: Self = Self(0x8000);
+    pub const DISABLED: Self = Self(0x8001);
+    pub fn property(self) -> Option<PropertyId> {
+        PropertyId::from_code(self.0)
+    }
+    pub fn control_code(self) -> u16 {
+        assert!(self.property().is_none());
+        self.0 - 0x7fff
+    }
+    pub fn control(code: u16) -> Option<Self> {
+        match code {
+            1 => Some(Self::CHECKED),
+            2 => Some(Self::DISABLED),
+            _ => None,
+        }
+    }
+    pub fn admit(self, scalar: Scalar) -> Result<PropertyValue, crate::Error> {
+        if let Some(id) = self.property() {
+            return Ok(scalar.admit(id)?);
+        }
+        match scalar {
+            Scalar::Value(value @ PropertyValue::Flag(_)) => Ok(value),
+            _ => Err(crate::Error::MapInput),
+        }
+    }
+}
+impl From<PropertyId> for Sink {
+    fn from(id: PropertyId) -> Self {
+        Self(id as u16)
+    }
 }
 pub(crate) struct MapBinding<'a> {
-    pub property: PropertyId,
+    pub sink: Sink,
     pub operand: MapOperand<'a>,
 }
 pub(crate) struct MapDraft<'a> {
     pub node: u32,
-    pub property: PropertyId,
+    pub sink: Sink,
     pub operand: MapOperand<'a>,
 }
 
 pub(crate) struct Binding<'a> {
-    pub property: PropertyId,
+    pub sink: Sink,
     pub signal: &'a dyn StyleSignal,
 }
 pub(crate) struct Draft<'a> {
     pub signal: &'a dyn StyleSignal,
     pub node: u32,
-    pub property: PropertyId,
+    pub sink: Sink,
 }
 
 pub(crate) trait Value: Copy + 'static {
@@ -195,8 +361,9 @@ pub trait IntoProp<'a, T>: sealed::Input<T> {
 }
 
 /// An opaque operand for explicitly erasing the literal/signal input form.
+#[derive(Clone)]
 pub struct PropInput<'a, T>(Operand<'a, T>);
-#[derive(Clone, Copy)]
+#[derive(Clone)]
 enum Operand<'a, T> {
     Literal(T),
     // Numeric dimensions retain their wide author value until admission. This
@@ -204,12 +371,6 @@ enum Operand<'a, T> {
     Number(f64),
     Signal(&'a dyn StyleSignal),
     Mapped(MapOperand<'a>),
-}
-impl<T: Copy> Copy for PropInput<'_, T> {}
-impl<T: Copy> Clone for PropInput<'_, T> {
-    fn clone(&self) -> Self {
-        *self
-    }
 }
 impl<T: PartialEq> PartialEq for PropInput<'_, T> {
     fn eq(&self, other: &Self) -> bool {
@@ -252,19 +413,22 @@ impl<'a, T> PropInput<'a, T> {
             Operand::Mapped(map) => map.scalar().expect("valid mapped operand"),
         }
     }
-    pub(crate) fn literal(self) -> Option<T> {
-        match self.0 {
-            Operand::Literal(value) => Some(value),
+    pub(crate) fn literal(&self) -> Option<T>
+    where
+        T: Copy,
+    {
+        match &self.0 {
+            Operand::Literal(value) => Some(*value),
             Operand::Number(_) | Operand::Signal(_) | Operand::Mapped(_) => None,
         }
     }
-    pub(crate) fn literal_scalar(self) -> Option<Scalar>
+    pub(crate) fn literal_scalar(&self) -> Option<Scalar>
     where
         T: Value,
     {
-        match self.0 {
+        match &self.0 {
             Operand::Literal(value) => Some(value.scalar()),
-            Operand::Number(value) => Some(Scalar::Number(value)),
+            Operand::Number(value) => Some(Scalar::Number(*value)),
             Operand::Signal(_) | Operand::Mapped(_) => None,
         }
     }
@@ -274,20 +438,23 @@ impl<'a, T> PropInput<'a, T> {
             _ => None,
         }
     }
-    pub(crate) fn signal(self) -> Option<&'a dyn StyleSignal> {
-        match self.0 {
+    pub(crate) fn signal(&self) -> Option<&'a dyn StyleSignal> {
+        match &self.0 {
             Operand::Literal(_) | Operand::Number(_) | Operand::Mapped(_) => None,
-            Operand::Signal(signal) => Some(signal),
+            Operand::Signal(signal) => Some(*signal),
         }
     }
 }
 
-impl<U> sealed::Input<U> for Mapped<'_, U> {
+impl<U, F> sealed::Input<U> for Mapped<'_, U, F> {
     const IS_LITERAL: bool = false;
 }
-impl<'a, U> IntoProp<'a, U> for Mapped<'a, U> {
+impl<'a, U: MapValue, F> IntoProp<'a, U> for Mapped<'a, U, F>
+where
+    F: Fn(&dyn std::any::Any) -> Option<U> + Copy + Send + Sync + 'static,
+{
     fn into_prop(self) -> PropInput<'a, U> {
-        PropInput(Operand::Mapped(self.operand))
+        PropInput(Operand::Mapped(self.operand()))
     }
 }
 macro_rules! numbers {
@@ -331,9 +498,9 @@ numbers!(f32 => for_style, f64 => for_value, u8 => for_style,
 
 macro_rules! mapped_numbers {
     ($($ty:ty),+ $(,)?) => {$(
-        impl sealed::Input<f64> for Mapped<'_, $ty> { const IS_LITERAL: bool = false; }
-        impl<'a> IntoProp<'a, f64> for Mapped<'a, $ty> {
-            fn into_prop(self) -> PropInput<'a, f64> { PropInput(Operand::Mapped(self.operand)) }
+        impl<F> sealed::Input<f64> for Mapped<'_, $ty, F> { const IS_LITERAL: bool = false; }
+        impl<'a, F> IntoProp<'a, f64> for Mapped<'a, $ty, F> where F: Fn(&dyn std::any::Any) -> Option<$ty> + Copy + Send + Sync + 'static {
+            fn into_prop(self) -> PropInput<'a, f64> { PropInput(Operand::Mapped(self.operand())) }
         }
     )+};
 }
@@ -341,9 +508,9 @@ mapped_numbers!(f32, u8, u16, u32, u64, usize, i8, i16, i32, i64, isize);
 
 macro_rules! mapped_dimensions {
     ($($ty:ty),+ $(,)?) => {$(
-        impl sealed::Input<Length> for Mapped<'_, $ty> { const IS_LITERAL: bool = false; }
-        impl<'a> IntoProp<'a, Length> for Mapped<'a, $ty> {
-            fn into_prop(self) -> PropInput<'a, Length> { PropInput(Operand::Mapped(self.operand)) }
+        impl<F> sealed::Input<Length> for Mapped<'_, $ty, F> { const IS_LITERAL: bool = false; }
+        impl<'a, F> IntoProp<'a, Length> for Mapped<'a, $ty, F> where F: Fn(&dyn std::any::Any) -> Option<$ty> + Copy + Send + Sync + 'static {
+            fn into_prop(self) -> PropInput<'a, Length> { PropInput(Operand::Mapped(self.operand())) }
         }
     )+};
 }

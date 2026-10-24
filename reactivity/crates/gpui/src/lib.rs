@@ -73,7 +73,7 @@ pub use source::{
 #[doc(hidden)]
 pub use style::FlexRecipe;
 pub use style::{Align, Color, Flex, Flow, IntoLength, Justify, Length, Style, rgb};
-pub use style_port::{IntoProp, MapValue, Mapped, PropInput, SignalMap};
+pub use style_port::{BoolInput, IntoProp, MapValue, Mapped, PropInput, SignalMap};
 
 /// A component describes ordinary borrowed operands. No mutable runtime or
 /// ambient frame is available in this method.
