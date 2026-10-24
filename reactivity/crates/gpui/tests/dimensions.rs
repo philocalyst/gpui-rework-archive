@@ -249,7 +249,7 @@ fn dimensions_keep_authored_tags_bits_and_existing_headers_without_literal_alloc
     assert_eq!(size_of::<Style>(), 88);
     assert_eq!(size_of::<El<'static>>(), 176);
     let count = allocation_counter::measure(|| {
-        std::hint::black_box(div().size(Length::Percent(100.0)));
+        let _element = std::hint::black_box(div().size(Length::Percent(100.0)));
     });
     assert_eq!(count.count_total, 0);
     for value in [

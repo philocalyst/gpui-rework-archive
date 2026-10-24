@@ -1,6 +1,6 @@
 #[path = "support/party.rs"]
 mod party;
-use gpui::{El, View, Win};
+use gpui::{El, Length, PropInput, Signal, Style, View, Win};
 use gpui_component::{Button, Checkbox, Input, Theme};
 fn main() {
     let theme = Theme::halloween();
@@ -39,5 +39,15 @@ fn main() {
         size_of::<Checkbox<'_>>(),
         size_of::<Input<'_>>(),
         size_of::<Theme>()
+    );
+    println!(
+        "dimension_headers Length={} OptionLength={} PropInputLength={} PropInputNumber={} Style={} SignalLength={} SignalNumber={}",
+        size_of::<Length>(),
+        size_of::<Option<Length>>(),
+        size_of::<PropInput<'_, Length>>(),
+        size_of::<PropInput<'_, f64>>(),
+        size_of::<Style>(),
+        size_of::<Signal<Length>>(),
+        size_of::<Signal<f64>>()
     );
 }
