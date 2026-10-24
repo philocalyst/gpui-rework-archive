@@ -79,7 +79,7 @@ impl Gradient {
         extend: Extend,
         interpolation: Interpolation,
     ) -> Result<Self, Error> {
-        let _ = interpolation;
+        let Interpolation::LinearSrgb = interpolation;
         if !(2..=MAX_GRADIENT_STOPS).contains(&stops.len()) {
             return Err(Error::InvalidGradient);
         }

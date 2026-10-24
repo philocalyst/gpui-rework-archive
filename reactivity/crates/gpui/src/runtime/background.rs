@@ -74,60 +74,97 @@ impl<M> Runtime<M> {
 }
 pub(super) fn reconcile(
     resources: &mut Option<Box<super::image::SceneResources>>,
-    dirty: &mut bool,
     nodes: &[Node],
-    drafts: Vec<(usize, &Gradient)>,
-) -> Result<(), Error> {
+    live: &IdentityIndex,
+    mut drafts: Vec<(usize, &Gradient)>,
+) -> Result<bool, Error> {
     if drafts.is_empty() && resources.as_ref().is_none_or(|r| r.backgrounds.is_none()) {
-        return Ok(());
+        return Ok(false);
     }
-    let live: BTreeSet<_> = nodes.iter().map(Node::identity).collect();
-    let mut needed: BTreeMap<_, _> = drafts
-        .iter()
-        .map(|(_, g)| (g.key(), g.view().byte_len()))
-        .collect();
-    if let Some(bank) = resources.as_ref().and_then(|r| r.backgrounds.as_deref()) {
-        for (identity, key) in &bank.overrides {
+    // The owned description is the admission key stream. Sorting references
+    // neither clones author data nor acquires resource leases.
+    drafts.sort_unstable_by_key(|(_, gradient)| gradient.key());
+    let mut overrides = BTreeSet::new();
+    let old = resources.as_ref().and_then(|r| r.backgrounds.as_deref());
+    if let Some(bank) = old {
+        for (&identity, &key) in &bank.overrides {
             if live.contains(identity) {
-                needed.insert(*key, bank.resources[key].view().byte_len());
+                overrides.insert(key);
             }
         }
     }
-    let image_bytes = resources.as_ref().map_or(0, |r| {
+    let mut bytes = resources.as_ref().map_or(0, |r| {
         r.logical
             .iter()
             .map(crate::Image::pixel_bytes)
             .sum::<usize>()
     });
-    let bytes = needed
-        .values()
-        .try_fold(image_bytes, |sum, bytes| sum.checked_add(*bytes))
-        .ok_or(Error::ResourceLimit)?;
+    let mut previous = None;
+    for (_, gradient) in &drafts {
+        let key = gradient.key();
+        if previous != Some(key) {
+            bytes = bytes
+                .checked_add(gradient.view().byte_len())
+                .ok_or(Error::ResourceLimit)?;
+            previous = Some(key);
+        }
+    }
+    for key in &overrides {
+        if drafts
+            .binary_search_by_key(key, |(_, gradient)| gradient.key())
+            .is_err()
+        {
+            bytes = bytes
+                .checked_add(old.unwrap().resources[key].view().byte_len())
+                .ok_or(Error::ResourceLimit)?;
+        }
+    }
     if bytes > gpui_canvas::MAX_IMAGE_SCENE_BYTES {
         return Err(Error::ResourceLimit);
     }
-    // Admission precedes removing or mutating any existing owner lease.
+    // All admission completes before changing the preceding bank. Keep the key
+    // ordering through resource retention, then restore description node order.
     let mut bank = resources
         .as_mut()
         .and_then(|r| r.backgrounds.take())
         .unwrap_or_default();
-    let mut declared = BTreeMap::new();
-    for (index, gradient) in drafts {
-        declared.insert(nodes[index].identity(), gradient.key());
+    bank.overrides
+        .retain(|identity, _| live.contains(*identity));
+    bank.resources.retain(|key, _| {
+        overrides.contains(key)
+            || drafts
+                .binary_search_by_key(key, |(_, gradient)| gradient.key())
+                .is_ok()
+    });
+    for (_, gradient) in &drafts {
         bank.resources
             .entry(gradient.key())
-            .or_insert_with(|| gradient.clone());
+            .or_insert_with(|| (*gradient).clone());
     }
-    *dirty |= bank.declared != declared;
-    bank.declared = declared;
-    bank.overrides.retain(|identity, _| live.contains(identity));
-    bank.resources.retain(|key, _| needed.contains_key(key));
+    drafts.sort_unstable_by_key(|(index, _)| *index);
+    let mut changed = false;
+    bank.declared.retain(|identity, _| {
+        let keep = live.get(*identity).is_some_and(|index| {
+            drafts
+                .binary_search_by_key(&index, |(index, _)| *index)
+                .is_ok()
+        });
+        changed |= !keep;
+        keep
+    });
+    for (index, gradient) in drafts {
+        changed |= bank
+            .declared
+            .insert(nodes[index].identity(), gradient.key())
+            != Some(gradient.key());
+    }
     if !bank.unused() {
         resources.get_or_insert_with(Default::default).backgrounds = Some(bank);
     }
     super::image::prune(resources);
-    Ok(())
+    Ok(changed)
 }
+
 impl<M: View + 'static, L: crate::remote::LaneSet<M>> Win<M, L> {
     pub(super) fn paint_property<T>(
         &self,
@@ -267,6 +304,204 @@ mod tests {
             }
             el
         }
+    }
+    struct Pair {
+        paint: Option<Gradient>,
+        replace_first: bool,
+    }
+    impl View for Pair {
+        fn view(&self) -> El<'_> {
+            let painted = |name| {
+                let mut el = div().size(8).name(name);
+                if let Some(paint) = &self.paint {
+                    el = el.bg(paint);
+                }
+                el
+            };
+            crate::column((
+                if self.replace_first {
+                    crate::button("replacement")
+                } else {
+                    painted("first")
+                },
+                painted("second"),
+            ))
+        }
+    }
+    #[test]
+    fn shared_resource_overrides_follow_surviving_owners_with_one_resource() {
+        let paint = gradient(Color::WHITE);
+        let key = paint.key();
+        let mut win = Win::with_size(
+            Pair {
+                paint: Some(paint),
+                replace_first: false,
+            },
+            24,
+            24,
+        )
+        .unwrap();
+        let first = win.query().name("first").one().unwrap();
+        let second = win.query().name("second").one().unwrap();
+        assert_eq!(
+            win.runtime()
+                .unwrap()
+                .backgrounds()
+                .unwrap()
+                .resources
+                .len(),
+            1
+        );
+        assert_eq!(
+            win.with_scene(|scene, _| scene.gradients().count())
+                .unwrap(),
+            1
+        );
+        for target in [first, second] {
+            win.set_property(target, BACKGROUND, Contribution::Set(Brush::Gradient(key)))
+                .unwrap();
+        }
+        win.update(|page| page.paint = None).unwrap();
+        assert!(
+            win.runtime()
+                .unwrap()
+                .backgrounds()
+                .unwrap()
+                .declared
+                .is_empty()
+        );
+        assert_eq!(
+            win.runtime()
+                .unwrap()
+                .backgrounds()
+                .unwrap()
+                .overrides
+                .len(),
+            2
+        );
+        win.update(|page| page.replace_first = true).unwrap();
+        assert_eq!(win.property(first, BACKGROUND), Err(Error::StaleTarget));
+        assert_eq!(win.query().name("second").one().unwrap(), second);
+        assert_eq!(
+            win.property(second, BACKGROUND).unwrap(),
+            Brush::Gradient(key)
+        );
+        assert_eq!(
+            win.runtime()
+                .unwrap()
+                .backgrounds()
+                .unwrap()
+                .overrides
+                .len(),
+            1
+        );
+        assert_eq!(
+            win.runtime()
+                .unwrap()
+                .backgrounds()
+                .unwrap()
+                .resources
+                .len(),
+            1
+        );
+        win.set_property(second, BACKGROUND, Contribution::Inherit)
+            .unwrap();
+        assert!(win.runtime().unwrap().images.is_none());
+        assert_eq!(
+            win.with_scene(|scene, _| scene.gradients().count())
+                .unwrap(),
+            0
+        );
+    }
+    #[test]
+    fn combined_budget_deduplicates_shared_declarations_and_overrides_before_mutation() {
+        let first = gradient(Color::WHITE);
+        let first_key = first.key();
+        let second = gradient(Color::BLACK);
+        let second_key = second.key();
+        assert_eq!(first.view().byte_len(), 304);
+        let mut win = Win::with_size(
+            Pair {
+                paint: Some(first),
+                replace_first: false,
+            },
+            24,
+            24,
+        )
+        .unwrap();
+        for name in ["first", "second"] {
+            let target = win.query().name(name).one().unwrap();
+            win.set_property(
+                target,
+                BACKGROUND,
+                Contribution::Set(Brush::Gradient(first_key)),
+            )
+            .unwrap();
+        }
+        let token = win.with_scene(|_, token| token).unwrap();
+        let pixels = win.runtime_mut().unwrap().canvas.pixels().to_vec();
+        // Exactly64MiB after two distinct304-byte gradients. Each new gradient
+        // declaration and each preceding override occurs twice in the input.
+        let image = |width, height| {
+            crate::Image::linear_srgb(
+                width,
+                height,
+                crate::AlphaMode::Premultiplied,
+                vec![[0.; 4]; width as usize * height as usize].into_boxed_slice(),
+            )
+            .unwrap()
+        };
+        let images = vec![image(2048, 2047), image(2010, 1)];
+        assert_eq!(
+            images.iter().map(crate::Image::pixel_bytes).sum::<usize>() + 608,
+            gpui_canvas::MAX_IMAGE_SCENE_BYTES
+        );
+        let mut runtime = win.runtime_mut().unwrap();
+        let Runtime {
+            images: owner,
+            nodes,
+            ..
+        } = &mut *runtime;
+        let live = IdentityIndex::from_ids(nodes.iter().map(Node::identity));
+        let identities = [nodes[1].identity(), nodes[2].identity()];
+        owner.as_mut().unwrap().logical = images;
+        assert!(reconcile(owner, nodes, &live, vec![(1, &second), (2, &second)]).unwrap());
+        let bank = owner.as_ref().unwrap().backgrounds.as_ref().unwrap();
+        assert_eq!(bank.resources.len(), 2);
+        for identity in identities {
+            assert_eq!(bank.declared[&identity], second_key);
+            assert_eq!(bank.overrides[&identity], first_key);
+        }
+        let third = gradient(Color::rgb(255, 0, 0));
+        owner.as_mut().unwrap().logical.push(
+            crate::Image::rgba8(
+                1,
+                1,
+                crate::ImageProfile::Srgb,
+                crate::AlphaMode::Straight,
+                vec![0; 4].into_boxed_slice(),
+            )
+            .unwrap(),
+        );
+        assert_eq!(
+            reconcile(owner, nodes, &live, vec![(1, &third), (2, &third)]),
+            Err(Error::ResourceLimit)
+        );
+        let bank = owner.as_ref().unwrap().backgrounds.as_ref().unwrap();
+        assert_eq!(bank.resources.len(), 2);
+        assert!(!bank.resources.contains_key(&third.key()));
+        for identity in identities {
+            assert_eq!(bank.declared[&identity], second_key);
+            assert_eq!(bank.overrides[&identity], first_key);
+        }
+        drop(runtime);
+        win.with_scene(|scene, current| {
+            assert_eq!(current, token);
+            assert_eq!(scene.images().count(), 0);
+            assert_eq!(scene.gradients().next().unwrap().key(), first_key);
+        })
+        .unwrap();
+        assert_eq!(win.runtime_mut().unwrap().canvas.pixels(), pixels);
     }
     #[test]
     fn solid_and_gradient_overrides_share_presence_and_prune_only_displaced_resources() {
@@ -478,14 +713,12 @@ mod tests {
             cost.bytes_max
         );
         let mut runtime = win.runtime_mut().unwrap();
-        let Runtime {
-            images,
-            dirty,
-            nodes,
-            ..
-        } = &mut *runtime;
+        let Runtime { images, nodes, .. } = &mut *runtime;
+        let live = IdentityIndex::from_ids(nodes.iter().map(Node::identity));
         let drafts = vec![(0, &resource)];
-        let cost = allocation_counter::measure(|| reconcile(images, dirty, nodes, drafts).unwrap());
+        let cost = allocation_counter::measure(|| {
+            assert!(!reconcile(images, nodes, &live, drafts).unwrap());
+        });
         eprintln!(
             "gradient_work_audit,path=unchanged-reconcile-excluding-input-vec,iterations=1,allocs={},requested={},retained_delta={},peak_delta={}",
             cost.count_total, cost.bytes_total, cost.bytes_current, cost.bytes_max
