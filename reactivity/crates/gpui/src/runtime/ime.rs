@@ -532,3 +532,159 @@ impl<M: View + 'static, L: LaneSet<M>> RuntimeMut<'_, M, L> {
         }
     }
 }
+
+#[cfg(test)]
+mod tests {
+    use super::*;
+    use crate::{El, Signal, Source, Sources, text_input};
+    struct Input(Signal<String>);
+    impl Input {
+        const VALUE: Source<Self, String> =
+            Source::new(FieldId::new(1), "value", |m| &m.0, |m| &mut m.0);
+    }
+    impl View for Input {
+        fn sources() -> Sources<Self> {
+            Sources::new().direct(Self::VALUE)
+        }
+        fn view(&self) -> El<'_> {
+            text_input(&self.0).w(300)
+        }
+    }
+    fn ack(win: &mut Win<Input>) {
+        win.presented(win.with_scene(|_, t| t).unwrap()).unwrap();
+    }
+    #[test]
+    fn ime_cold_ownership_reuses_only_active_buffer_and_releases_after_final_ack() {
+        let mut win = Win::recording(
+            Input(Signal::new("source".into())),
+            WindowOptions::default(),
+        )
+        .unwrap();
+        ack(&mut win);
+        let target = win.input();
+        win.focus(target).unwrap();
+        ack(&mut win);
+        // Materialize the ordinary selection before measuring only IME admission.
+        let selected = win.selection(target).unwrap();
+        win.select(target, selected).unwrap();
+        ack(&mut win);
+        assert!(
+            win.runtime()
+                .unwrap()
+                .metadata
+                .as_ref()
+                .unwrap()
+                .editing
+                .as_ref()
+                .unwrap()
+                .ime
+                .is_none()
+        );
+        let mut session = ImeSession::default();
+        let enabled = allocation_counter::measure(|| {
+            win.ime_event(&mut session, ImeEvent::Enabled).unwrap();
+        });
+        eprintln!(
+            "IME_ENABLED allocations={} bytes={} retained={} peak={}",
+            enabled.count_total, enabled.bytes_total, enabled.bytes_current, enabled.bytes_max
+        );
+        win.ime_event(
+            &mut session,
+            ImeEvent::Preedit {
+                text: "long marked phrase",
+                cursor: Some((18, 18)),
+            },
+        )
+        .unwrap();
+        ack(&mut win);
+        let preview = win.runtime().unwrap().composition_preview().unwrap().1;
+        let buffer = preview.buffer.as_ptr();
+        let capacity = preview.buffer.capacity();
+        let display = preview.display.as_ptr();
+        eprintln!(
+            "IME_STORAGE session={} active={} preview={} mark={} owner={} editing={} text_resources={} buffer_capacity={} display_bytes={}",
+            size_of::<ImeSession>(),
+            size_of::<Active>(),
+            size_of::<Preview>(),
+            size_of::<MarkSnapshot>(),
+            size_of::<Ime>(),
+            size_of::<super::super::editing::Editing>(),
+            size_of::<super::super::text_geometry::TextResources>(),
+            capacity,
+            preview.display.len()
+        );
+        win.ime_event(
+            &mut session,
+            ImeEvent::Preedit {
+                text: "long marked phrase",
+                cursor: Some((0, 0)),
+            },
+        )
+        .unwrap();
+        let preview = win.runtime().unwrap().composition_preview().unwrap().1;
+        assert_eq!(preview.buffer.as_ptr(), buffer);
+        assert_eq!(preview.buffer.capacity(), capacity);
+        assert_eq!(
+            preview.display.as_ptr(),
+            display,
+            "cursor-only update shares immutable display"
+        );
+        ack(&mut win);
+        win.ime_event(
+            &mut session,
+            ImeEvent::Preedit {
+                text: "x",
+                cursor: Some((1, 1)),
+            },
+        )
+        .unwrap();
+        let preview = win.runtime().unwrap().composition_preview().unwrap().1;
+        assert_eq!(preview.buffer.as_ptr(), buffer);
+        assert_eq!(preview.buffer.capacity(), capacity);
+        ack(&mut win);
+        win.ime_event(&mut session, ImeEvent::Cancel).unwrap();
+        let owner = win
+            .runtime()
+            .unwrap()
+            .metadata
+            .as_ref()
+            .unwrap()
+            .editing
+            .as_ref()
+            .unwrap()
+            .ime
+            .as_ref()
+            .unwrap();
+        assert!(
+            owner.active.is_none(),
+            "cancel immediately drops String, active and preview owners"
+        );
+        assert!(
+            owner.presented.is_some(),
+            "old P keeps its exact mark until ACK"
+        );
+        ack(&mut win);
+        assert!(
+            win.runtime()
+                .unwrap()
+                .metadata
+                .as_ref()
+                .unwrap()
+                .editing
+                .as_ref()
+                .unwrap()
+                .ime
+                .is_none()
+        );
+        assert_eq!(win.read(&Input::VALUE).unwrap(), "source");
+        win.close();
+        assert!(win.inner.is_none());
+        if cfg!(target_pointer_width = "64") {
+            assert_eq!(size_of::<ImeSession>(), 8);
+            assert_eq!(size_of::<Active>(), 56);
+            assert_eq!(size_of::<Preview>(), 112);
+            assert_eq!(size_of::<MarkSnapshot>(), 40);
+            assert_eq!(size_of::<Ime>(), 88);
+        }
+    }
+}

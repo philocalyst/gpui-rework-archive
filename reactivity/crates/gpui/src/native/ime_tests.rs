@@ -149,9 +149,17 @@ impl Script {
             3 => {
                 assert_eq!(self.value("first"), "日本語");
                 // An observed stream cannot acquire the next focused source.
+                let target = self
+                    .host
+                    .owner
+                    .as_ref()
+                    .unwrap()
+                    .query()
+                    .name("second")
+                    .one()
+                    .unwrap();
                 self.event(event_loop, Ime::Preedit("に".into(), Some((3, 3))));
                 let owner = self.host.owner.as_mut().unwrap();
-                let target = owner.query().name("second").one().unwrap();
                 let result = owner.focus(target);
                 self.host.input_result(result).unwrap();
                 self.event(event_loop, Ime::Commit("late".into()));

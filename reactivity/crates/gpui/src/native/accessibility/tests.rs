@@ -1244,11 +1244,14 @@ fn ime_accesskit_uses_acknowledged_display_and_selection_without_preview_edit_au
         fn view(&self) -> El<'_> {
             column((
                 text_input(&self.value).w(180),
-                div().size(2).transform(if self.broken {
-                    Affine::scale(0., 1.)
-                } else {
-                    Affine::IDENTITY
-                }),
+                div()
+                    .size(2)
+                    .bg(crate::Color::BLACK)
+                    .transform(if self.broken {
+                        Affine::scale(0., 1.)
+                    } else {
+                        Affine::IDENTITY
+                    }),
             ))
         }
     }
