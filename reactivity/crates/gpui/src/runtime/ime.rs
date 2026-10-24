@@ -459,14 +459,18 @@ impl<M: View + 'static, L: LaneSet<M>> RuntimeMut<'_, M, L> {
         if text.is_empty() {
             preview.display = active.source.clone();
         } else {
-            let parts = [&active.source[..start], text, &active.source[end..]];
-            if preview
-                .display
-                .strip_prefix(parts[0])
-                .and_then(|tail| tail.strip_prefix(parts[1]))
-                != Some(parts[2])
-            {
-                preview.display = SharedText::try_join(parts).ok_or(Error::ResourceLimit)?;
+            // Source and replacement stay fixed for this composition. Only the
+            // raw UTF-8 middle can differ; an empty mark denotes Source itself.
+            let [left, right] = preview.mark.range.map(|n| n as usize);
+            let previous = if left == right {
+                &active.source[start..end]
+            } else {
+                &preview.display[left..right]
+            };
+            if previous != text {
+                preview.display =
+                    SharedText::try_join([&active.source[..start], text, &active.source[end..]])
+                        .ok_or(Error::ResourceLimit)?;
             }
         }
         let finish = start + text.len();
@@ -631,6 +635,81 @@ mod tests {
             assert!(std::ptr::eq(preview.display.as_ptr(), pointer));
             ack(&mut win);
         }
+        win.ime_event(
+            &mut session,
+            ImeEvent::Preedit {
+                text: "x",
+                cursor: Some((0, 0)),
+            },
+        )
+        .unwrap();
+        let changed = win
+            .runtime()
+            .unwrap()
+            .composition_preview()
+            .unwrap()
+            .1
+            .display
+            .clone();
+        assert!(!std::ptr::eq(changed.as_ptr(), pointer));
+        win.ime_event(
+            &mut session,
+            ImeEvent::Preedit {
+                text: "source",
+                cursor: Some((6, 6)),
+            },
+        )
+        .unwrap();
+        let equal = win
+            .runtime()
+            .unwrap()
+            .composition_preview()
+            .unwrap()
+            .1
+            .display
+            .clone();
+        assert_eq!(equal.as_ref(), "source");
+        assert!(
+            !std::ptr::eq(equal.as_ptr(), pointer),
+            "equal bytes after different display retain baseline lease authority"
+        );
+        win.ime_event(
+            &mut session,
+            ImeEvent::Preedit {
+                text: "source",
+                cursor: Some((0, 0)),
+            },
+        )
+        .unwrap();
+        assert!(std::ptr::eq(
+            win.runtime()
+                .unwrap()
+                .composition_preview()
+                .unwrap()
+                .1
+                .display
+                .as_ptr(),
+            equal.as_ptr()
+        ));
+        win.ime_event(
+            &mut session,
+            ImeEvent::Preedit {
+                text: "",
+                cursor: None,
+            },
+        )
+        .unwrap();
+        assert!(std::ptr::eq(
+            win.runtime()
+                .unwrap()
+                .composition_preview()
+                .unwrap()
+                .1
+                .display
+                .as_ptr(),
+            pointer
+        ));
+        assert_eq!(changed.as_ref(), "x");
         win.ime_event(&mut session, ImeEvent::Commit("done"))
             .unwrap();
         assert_eq!(win.read(Input::VALUE).unwrap(), "done");

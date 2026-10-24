@@ -119,6 +119,52 @@ fn equal_initial_preedit_clear_and_commit_keep_original_replacement() {
     assert_eq!(win.snapshot().unwrap().source_epoch, epoch + 1);
 }
 #[test]
+fn tiny_preedit_on_large_source_preserves_raw_seam_cursor_and_original_replacement() {
+    let prefix = format!("{}a", "x".repeat(16_380));
+    let suffix = "z".repeat(16_381);
+    let source = format!("{prefix}OLD{suffix}");
+    assert_eq!(source.len(), 32 * 1024 - 3);
+    let start = prefix.len();
+    let (mut win, target, mut session) = window(&source);
+    win.select(target, selection(start, start + 3)).unwrap();
+    ack(&mut win);
+    win.ime_event(&mut session, ImeEvent::Enabled).unwrap();
+    let epoch = win.snapshot().unwrap().source_epoch;
+    for (text, cursor) in [
+        ("OLD", Some((3, 3))),
+        ("\u{301}", Some((0, 0))),
+        ("\u{301}", Some((2, 2))),
+        ("OLD", Some((0, 0))),
+        ("", None),
+        ("OLD", Some((3, 3))),
+    ] {
+        win.ime_event(&mut session, ImeEvent::Preedit { text, cursor })
+            .unwrap();
+        ack(&mut win);
+        let (value, mark, selected, _) = displayed(&win, target);
+        assert_eq!(
+            value,
+            if text.is_empty() {
+                source.clone()
+            } else {
+                format!("{prefix}{text}{suffix}")
+            }
+        );
+        let mark = mark.unwrap();
+        assert_eq!(mark.range, start..start + text.len());
+        assert_eq!(mark.cursor, cursor.map(|(a, b)| start + a..start + b));
+        if text == "\u{301}" && cursor == Some((0, 0)) {
+            assert_eq!(selected, selection(start - 1, start - 1));
+        }
+        assert_eq!(win.read(Form::A).unwrap(), source);
+        assert_eq!(win.snapshot().unwrap().source_epoch, epoch);
+    }
+    win.ime_event(&mut session, ImeEvent::Commit("!")).unwrap();
+    ack(&mut win);
+    assert_eq!(win.read(Form::A).unwrap(), &format!("{prefix}!{suffix}"));
+    assert_eq!(win.snapshot().unwrap().source_epoch, epoch + 1);
+}
+#[test]
 fn public_preedit_allocation_and_old_candidate_lifetime_workload() {
     fn event(text: &str, cursor: Option<(usize, usize)>) -> ImeEvent<'_> {
         ImeEvent::Preedit { text, cursor }
