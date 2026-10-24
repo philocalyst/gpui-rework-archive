@@ -11,6 +11,8 @@ const _: () = assert!(
 
 /// An optional compilation job for one exact context. Preparing it may enter
 /// driver locks; callers choose an appropriate cold worker or idle boundary.
+/// Driver compilation may also be deferred until the first accelerated draw;
+/// preparing a pipeline does not promise that its first submission is warm.
 /// It owns one device and layout lease, with no scene/window reference.
 pub struct ClipAccelerationJob {
     device: wgpu::Device,

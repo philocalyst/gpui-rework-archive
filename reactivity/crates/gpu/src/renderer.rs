@@ -377,7 +377,8 @@ pub struct Renderer {
     state: RendererState,
 }
 
-/// One device/queue and one compositor pipeline for a fixed format.
+/// One device/queue and a baseline compositor for a fixed format. An optional
+/// clip accelerator can be prepared as cold owned work and installed exclusively.
 /// Borrow this owner for independent per-window `RendererState`s. There is no
 /// pipeline map, per-draw reference counting, or process-wide GPU cache.
 /// A different format requires a separate context. The queue must belong to
