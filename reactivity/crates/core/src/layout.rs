@@ -902,10 +902,11 @@ mod tests {
         assert_eq!(tree.storage().cache_heap_bytes, 0);
         let key = EngineId::new(tree.tree.layout_key(hidden));
         {
-            let mut engine = Engine::<false> {
+            let mut engine = Engine {
                 owner: &mut tree,
                 measure: None,
                 observed: 0,
+                width_only: false,
             };
             engine.set_speculation(1);
             cephal::compute::compute_hidden_layout(&mut engine, key);
@@ -1072,10 +1073,11 @@ mod tests {
             .insert(None, NodeKind::Element, Style::DEFAULT)
             .unwrap();
         let key = EngineId::new(owner.tree.layout_key(node));
-        let mut engine = Engine::<false> {
+        let mut engine = Engine {
             owner: &mut owner,
             observed: 0,
             measure: None,
+            width_only: false,
         };
         engine.set_speculation(1);
         engine.set_absolute_context(key, AbsoluteContext::default());
