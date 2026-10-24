@@ -162,7 +162,7 @@ impl<'font> Planner<'font> {
     ) -> Result<(Paragraphs, TextMetrics), Error> {
         let mut paragraphs = Paragraphs {
             first: parley::Layout::default(),
-            rest: Vec::with_capacity(paragraph::ranges(text).count() - 1),
+            rest: Vec::new(),
             needed: 0,
             blob_ids: self.blob_ids,
             glyphs: 0,
@@ -313,14 +313,45 @@ impl<'font> Planner<'font> {
         let mut height = 0.0f32;
         let mut baseline = 0.0f32;
         let mut mask = 0;
+        // Empty paragraphs have identical shaping under this frozen style.
+        // Source iteration recreates the sparse mapping without a retained map.
         let capture_count = if capture {
-            paragraph::ranges(text).count()
+            let mut empty = false;
+            paragraph::ranges(text)
+                .filter(|paragraph| {
+                    if paragraph.content.is_empty() {
+                        !std::mem::replace(&mut empty, true)
+                    } else {
+                        true
+                    }
+                })
+                .count()
         } else {
             0
         };
-        for (index, paragraph) in paragraph::ranges(text).enumerate() {
+        let mut next_unique = 0;
+        let mut first_empty = None;
+        for paragraph in paragraph::ranges(text) {
             let content = &text[paragraph.content.clone()];
-            let planned = if !capture && let Some(paragraphs) = &mut paragraphs {
+            let (index, fresh) = if paragraphs.is_some() {
+                if content.is_empty()
+                    && let Some(index) = first_empty
+                {
+                    (index, false)
+                } else {
+                    let index = next_unique;
+                    next_unique += 1;
+                    if content.is_empty() {
+                        first_empty = Some(index);
+                    }
+                    (index, true)
+                }
+            } else {
+                (0, false)
+            };
+            let planned = if (!capture || !fresh)
+                && let Some(paragraphs) = &mut paragraphs
+            {
                 if index == 0 {
                     &mut paragraphs.first
                 } else {
@@ -482,13 +513,17 @@ impl<'font> Planner<'font> {
                 append_carets(stops, planned, content, paragraph.content.start, height)?;
             }
             height += planned.height();
-            if capture && let Some(paragraphs) = &mut paragraphs {
+            if capture
+                && fresh
+                && let Some(paragraphs) = &mut paragraphs
+            {
                 let layout = std::mem::take(&mut self.layout);
-                if index + 1 < capture_count {
+                if next_unique < capture_count {
                     self.layout = self.spare.pop().unwrap_or_default();
                 }
                 paragraphs.glyphs += count;
                 if index == 0 {
+                    paragraphs.rest.reserve_exact(capture_count - 1);
                     paragraphs.first = layout;
                 } else {
                     paragraphs.rest.push(layout);
