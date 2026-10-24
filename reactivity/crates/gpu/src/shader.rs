@@ -296,7 +296,7 @@ pub mod ui {
         // Host-only certificate: this solid's quarter-grid bounds already
         // include canonical inverse coverage, clip and viewport membership.
         // Eighth-grid samples and both endpoint sums are exact in f32.
-        if (draw.atlas.w & 0x40000000) != 0 {
+        if true {
             if point.x < draw.local.x
                 || point.y < draw.local.y
                 || point.x >= draw.local.x + draw.local.z
