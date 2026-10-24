@@ -133,7 +133,6 @@ impl<M: View + 'static> Runtime<M> {
     fn ime_valid(&self, active: &Active) -> bool {
         self.logical_valid
             && self.focused == Some(active.target)
-            && self.source_epoch == active.epoch
             && self.input_index(active.target).ok().is_some_and(|index| {
                 let site = self.nodes[index].text_slot().get(&self.texts).unwrap();
                 site.field == Some(active.field)
