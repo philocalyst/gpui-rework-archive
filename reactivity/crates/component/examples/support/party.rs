@@ -61,9 +61,9 @@ impl View for Preparation {
 pub struct Party {
     pub title: Signal<String>,
     pub preparation: Preparation,
-    pub sent: bool,
+    pub finished: bool,
     pub default_calls: usize,
-    pub send_calls: usize,
+    pub finish_calls: usize,
     pub theme: Theme,
 }
 impl Default for Party {
@@ -72,9 +72,9 @@ impl Default for Party {
         Self {
             title: Signal::new("The midnight gathering".into()),
             preparation: Preparation::new(theme.clone()),
-            sent: false,
+            finished: false,
             default_calls: 0,
-            send_calls: 0,
+            finish_calls: 0,
             theme,
         }
     }
@@ -88,20 +88,20 @@ impl Party {
         |m| &m.preparation,
         |m| &mut m.preparation,
     );
-    fn default_send(&mut self) {
+    fn default_finish(&mut self) {
         self.default_calls += 1;
     }
-    fn send(&mut self) {
+    fn finish(&mut self) {
         if self.ready() {
-            self.send_calls += 1;
-            self.sent = true;
+            self.finish_calls += 1;
+            self.finished = true;
         }
     }
     pub fn ready(&self) -> bool {
         self.title.trim().chars().count() >= 3
             && *self.preparation.lanterns
             && *self.preparation.treats
-            && !self.sent
+            && !self.finished
     }
 }
 impl View for Party {
@@ -120,8 +120,8 @@ impl View for Party {
                         .style(|e: El<'_>| e.font_size(t.rem(6.0 / 7.0)).fg(t.muted()))
                         .build(),
                     Badge::new(
-                        if self.sent {
-                            "Invitations sent"
+                        if self.finished {
+                            "Ready to share"
                         } else {
                             "Draft invitation"
                         },
@@ -164,24 +164,24 @@ impl View for Party {
             inline(
                 (
                     Button::new(
-                        if self.sent {
-                            "Sent"
+                        if self.finished {
+                            "Ready"
                         } else {
-                            "Send invitations"
+                            "Finish invitation"
                         },
                         t,
                     )
                     .variant(ButtonVariant::Primary)
-                    .on_click(Self::default_send)
-                    .on_click(Self::send)
+                    .on_click(Self::default_finish)
+                    .on_click(Self::finish)
                     .disabled(!self.ready())
                     .style(|e: El<'_>| e.rounded(t.radius() / 2.0))
                     .build(),
                     Label::new(
-                        if self.sent {
-                            "Your guests have the details"
+                        if self.finished {
+                            "Your invitation is ready to share"
                         } else {
-                            "Finish the checklist to send"
+                            "Finish the checklist to prepare your invitation"
                         },
                         t,
                     )

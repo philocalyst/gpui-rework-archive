@@ -328,6 +328,9 @@ impl<'a> ElementExtra<'a> {
             if let Some(base) = base {
                 base.unbind(property);
             }
+            if base.as_deref().is_some_and(Self::empty) {
+                *base = None;
+            }
             return;
         }
         if let Self::Mapped {

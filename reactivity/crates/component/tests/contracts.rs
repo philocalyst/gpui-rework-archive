@@ -30,12 +30,15 @@ fn party_uses_real_controls_and_application_overrides_exactly_once() {
             .unwrap(),
         lanterns
     );
-    let send = window.button("Send invitations");
-    window.click(send).unwrap();
+    let finish = window.button("Finish invitation");
+    window.click(finish).unwrap();
     assert_eq!(window.root().unwrap().default_calls, 0);
-    assert_eq!(window.root().unwrap().send_calls, 1);
-    assert!(window.root().unwrap().sent);
-    assert!(matches!(window.activate(send), Err(Error::NotInteractive)));
+    assert_eq!(window.root().unwrap().finish_calls, 1);
+    assert!(window.root().unwrap().finished);
+    assert!(matches!(
+        window.activate(finish),
+        Err(Error::NotInteractive)
+    ));
 }
 
 struct Controlled {
