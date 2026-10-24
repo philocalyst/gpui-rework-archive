@@ -1233,7 +1233,7 @@ fn context_play_replaces_full_sql_order_at_selected_occurrence_once_and_obeys_ou
     worker
         .handle()
         .prepare_listing(PlayRequest {
-            input: input.clone(),
+            listing: hummingbird_gpui_port::browser::Listing::Sql(input.clone()),
             start: Some(key),
             sequence,
         })
@@ -1548,7 +1548,7 @@ fn context_play_rejects_prequeued_public_wrong_occurrence_input_sequence_and_pur
                 .unwrap();
         } else {
             let mut wrong = PlayRequest {
-                input,
+                listing: hummingbird_gpui_port::browser::Listing::Sql(input),
                 start: Some(RowKey::PlaylistItem {
                     item: 701,
                     track: 90,
@@ -1563,9 +1563,10 @@ fn context_play_rejects_prequeued_public_wrong_occurrence_input_sequence_and_pur
                     })
                 }
                 "input" => {
-                    let mut input = (*wrong.input).clone();
+                    let mut input = (**wrong.input()).clone();
                     input.search.sort = hummingbird_gpui_port::search::Sort::Longest;
-                    wrong.input = triomphe::Arc::new(input);
+                    wrong.listing =
+                        hummingbird_gpui_port::browser::Listing::Sql(triomphe::Arc::new(input));
                 }
                 "sequence" => wrong.sequence = 2,
                 _ => unreachable!(),

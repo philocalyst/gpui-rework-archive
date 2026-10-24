@@ -2,7 +2,8 @@
 //! existing TrackQuery supplies credited-artist UNION and release ordering.
 use crate::{
     browser::{
-        CollectionRow, Collections, Input, Page, PlayRequest, PreparedListing, Route, TrackRows,
+        CollectionKind, CollectionRow, Collections, Input, LibraryPage, Page, PlayRequest,
+        PreparedListing, Route, TrackRows,
     },
     database::Database,
     query::{TrackColumn, TrackQuery, TrackSearchRow, tracks},
@@ -38,7 +39,7 @@ fn read_page(
     }
     let result = (|| {
         let connection = database.connection();
-        let title = match input.route {
+        let title = match &input.route {
             Route::Album(id) => connection
                 .query_row("SELECT title FROM album WHERE id=?", [id], |row| row.get(0))
                 .optional()?,
@@ -61,7 +62,7 @@ fn read_page(
             input: input.clone(),
             rows: Vec::new(),
         };
-        let collection_query = match input.route {
+        let collection_query = match &input.route {
             Route::Albums | Route::Artist(_) => Some((
                 "SELECT album.id,album.title,COALESCE(NULLIF(album.artist_display_override,''),(SELECT GROUP_CONCAT(artist.name, ', ') FROM album_artist JOIN artist ON artist.id=album_artist.artist_id WHERE album_artist.album_id=album.id),'Unknown artist') FROM album",
                 "album.title_sortable COLLATE NOCASE ASC,album.id ASC",
@@ -82,9 +83,9 @@ fn read_page(
         if let Some((sql, order, kind)) = collection_query {
             let mut sql = sql.to_owned();
             let mut values = Vec::<Value>::new();
-            if let Route::Artist(id) = input.route {
+            if let Route::Artist(id) = &input.route {
                 sql.push_str(" WHERE EXISTS(SELECT 1 FROM album_artist WHERE album_artist.album_id=album.id AND album_artist.artist_id=?)");
-                values.push(id.into());
+                values.push((*id).into());
             }
             if kind == 2 {
                 sql.push_str(" GROUP BY playlist.id");
@@ -103,10 +104,10 @@ fn read_page(
                 if searcher.matches(&pattern, title, Some(detail)) {
                     let id = row.get(0)?;
                     collections.rows.push(CollectionRow {
-                        route: match kind {
-                            0 => Route::Album(id),
-                            1 => Route::Artist(id),
-                            _ => Route::Playlist(id),
+                        kind: match kind {
+                            0 => CollectionKind::Album,
+                            1 => CollectionKind::Artist,
+                            _ => CollectionKind::Playlist,
                         },
                         id,
                         title: title.to_owned(),
@@ -115,11 +116,11 @@ fn read_page(
                 }
             }
         }
-        Ok(Some(Page {
+        Ok(Some(Page::Library(LibraryPage {
             title,
             rows,
             collections,
-        }))
+        })))
     })();
     if cancelled() {
         None
@@ -151,11 +152,11 @@ fn read_tracks(
             rows: Vec::new(),
             playlist_items: Vec::new(),
         };
-        match input.route {
+        match &input.route {
             Route::Tracks | Route::Album(_) | Route::Artist(_) => {
-                let base = match input.route {
-                    Route::Album(id) => tracks().from_album(id),
-                    Route::Artist(id) => tracks().from_artist(id),
+                let base = match &input.route {
+                    Route::Album(id) => tracks().from_album(*id),
+                    Route::Artist(id) => tracks().from_artist(*id),
                     _ => tracks(),
                 };
                 let query = ordered(base, &input);
@@ -227,8 +228,11 @@ pub(crate) fn prepare(
     searcher: &mut Searcher,
     request: &PlayRequest,
 ) -> Result<PreparedListing, SourceError> {
+    if let crate::browser::Listing::Files(files) = &request.listing {
+        return files.prepare(request.start);
+    }
     let _snapshot = database.connection().unchecked_transaction()?;
-    let rows = read_tracks(database, searcher, request.input.clone(), || false)
+    let rows = read_tracks(database, searcher, request.input().clone(), || false)
         .expect("uncancelled listing")?;
     let start = match request.start {
         Some(key) => (0..rows.len())

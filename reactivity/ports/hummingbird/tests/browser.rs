@@ -42,6 +42,8 @@ fn real_collection_sql_and_public_nested_sources_browse_relations_and_history_wi
     let result = win.with_model(|m| m.results).unwrap();
     assert_eq!(
         win.with_ready(result, |page| page
+            .library()
+            .unwrap()
             .collections
             .rows
             .iter()
@@ -53,6 +55,8 @@ fn real_collection_sql_and_public_nested_sources_browse_relations_and_history_wi
     );
     assert_eq!(
         win.with_ready(result, |page| page
+            .library()
+            .unwrap()
             .collections
             .rows
             .iter()
@@ -77,6 +81,8 @@ fn real_collection_sql_and_public_nested_sources_browse_relations_and_history_wi
     assert_eq!(ids(&win), [1, 3, 2, 44]);
     assert_eq!(
         win.with_ready(result, |page| page
+            .library()
+            .unwrap()
             .collections
             .rows
             .iter()
@@ -90,6 +96,8 @@ fn real_collection_sql_and_public_nested_sources_browse_relations_and_history_wi
     settle(&mut win, &worker).unwrap();
     assert_eq!(
         win.with_ready(result, |page| page
+            .library()
+            .unwrap()
             .collections
             .rows
             .iter()
@@ -106,7 +114,12 @@ fn real_collection_sql_and_public_nested_sources_browse_relations_and_history_wi
     settle(&mut win, &worker).unwrap();
     assert_eq!(ids(&win), [44, 90, 11]);
     assert_eq!(
-        win.with_ready(result, |page| page.rows.playlist_items.clone())
+        win.with_ready(result, |page| page
+            .library()
+            .unwrap()
+            .rows
+            .playlist_items
+            .clone())
             .unwrap()
             .unwrap(),
         [702, 701, 703]
@@ -157,7 +170,7 @@ fn navigation_history_is_bounded_and_new_branch_discards_forward_routes() {
             .unwrap()
     );
     assert_eq!(
-        win.with_model(|m| m.browser().navigation().current())
+        win.with_model(|m| m.browser().navigation().current().clone())
             .unwrap(),
         Route::Tracks
     );

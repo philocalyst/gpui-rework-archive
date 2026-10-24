@@ -21,11 +21,13 @@ impl Renderer {
 fn main() -> Result<(), Box<dyn std::error::Error>> {
     let mut native = false;
     let mut database = None;
+    let mut library = None;
     let mut renderer = None;
     let mut arguments = std::env::args().skip(1);
     while let Some(argument) = arguments.next() {
         match argument.as_str() {
             "--native" => native = true,
+            "--library" => library = Some(arguments.next().ok_or("--library requires a path")?),
             "--database" => database = Some(arguments.next().ok_or("--database requires a path")?),
             "--renderer" => renderer = Some(Renderer::parse(arguments.next())?),
             "--headless" => {}
@@ -37,8 +39,11 @@ fn main() -> Result<(), Box<dyn std::error::Error>> {
             }
         }
     }
+    if database.is_some() && library.is_some() {
+        return Err("Choose --library for a port-owned writable index or --database for an existing read-only library".into());
+    }
     if !native {
-        if database.is_some() || renderer.is_some() {
+        if database.is_some() || library.is_some() || renderer.is_some() {
             return Err(
                 "Use --native with --database or --renderer; headless mode runs the pinned fixture"
                     .into(),
@@ -47,14 +52,19 @@ fn main() -> Result<(), Box<dyn std::error::Error>> {
         println!("{:#?}", transcript::run()?);
         return Ok(());
     }
-    run_native(database, renderer.unwrap_or(Renderer::Auto))
+    run_native(database, library, renderer.unwrap_or(Renderer::Auto))
 }
 
 #[cfg(feature = "native")]
-fn run_native(path: Option<String>, renderer: Renderer) -> Result<(), Box<dyn std::error::Error>> {
-    let database = match path {
-        Some(path) => Database::open_read_only(std::path::Path::new(&path))?,
-        None => Database::fixture()?,
+fn run_native(
+    path: Option<String>,
+    library: Option<String>,
+    renderer: Renderer,
+) -> Result<(), Box<dyn std::error::Error>> {
+    let database = match (path, library) {
+        (_, Some(path)) => Database::open_library(std::path::Path::new(&path))?,
+        (Some(path), None) => Database::open_read_only(std::path::Path::new(&path))?,
+        (None, None) => Database::fixture()?,
     };
     let (services, window) = hummingbird_gpui_port::application::system_window(database)?;
     let result = gpui::Application::run_window(
@@ -80,6 +90,10 @@ fn run_native(path: Option<String>, renderer: Renderer) -> Result<(), Box<dyn st
     Ok(())
 }
 #[cfg(not(feature = "native"))]
-fn run_native(_: Option<String>, _: Renderer) -> Result<(), Box<dyn std::error::Error>> {
+fn run_native(
+    _: Option<String>,
+    _: Option<String>,
+    _: Renderer,
+) -> Result<(), Box<dyn std::error::Error>> {
     Err("build with --features native to open the application window".into())
 }

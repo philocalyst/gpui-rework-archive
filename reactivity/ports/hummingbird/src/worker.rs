@@ -2,6 +2,7 @@
 use crate::{
     browser::{Input, Page, PlayRequest, PreparedListing},
     database::Database,
+    indexing,
     query::tracks,
     queue::{Track, TrackRef},
     search::{Searcher, SourceError, Version},
@@ -32,6 +33,11 @@ pub struct Selection {
 }
 #[derive(Debug)]
 pub enum LibraryEvent {
+    Indexed {
+        request: indexing::Request,
+        version: Version,
+        result: Result<indexing::Outcome, SourceError>,
+    },
     ListingPrepared {
         request: PlayRequest,
         result: Result<PreparedListing, SourceError>,
@@ -49,6 +55,7 @@ pub enum LibraryEvent {
     },
 }
 enum Command {
+    Index(indexing::Request, indexing::Command),
     Browse(triomphe::Arc<Input>, Completion<Page, SourceError>),
     PrepareListing(PlayRequest),
     Prepare(Selection),
@@ -131,6 +138,16 @@ impl WorkerHandle {
         drop(version);
         Ok(Some(result))
     }
+    /// Nonblocking explicit acquisition command on the existing library worker.
+    /// Cancel is observed between filesystem/media units; it does not interrupt
+    /// an operating-system call or a transaction already being committed.
+    pub fn index(
+        &self,
+        request: indexing::Request,
+        command: indexing::Command,
+    ) -> Result<(), StartError> {
+        self.enqueue(Command::Index(request, command))
+    }
     pub fn browse(
         &self,
         input: triomphe::Arc<Input>,
@@ -164,6 +181,7 @@ impl Worker {
                 SourceError::SourceNotCommitted,
             ));
         }
+        database.initialize_index().map_err(std::io::Error::other)?;
         let (sender, commands) = mpsc::sync_channel(4);
         let (updates, inbox) = Remote::bounded(8);
         let shared = Arc::new(Producer {
@@ -178,7 +196,21 @@ impl Worker {
                 // publishing terminal source authority before disconnect wake.
                 let source = SourceLife(producer);
                 let mut searcher = Searcher::default();
-                while let Ok(command) = commands.recv() {
+                let mut file_domain = 3_u64;
+                let mut scan: Option<indexing::Scan> = None;
+                loop {
+                    let command = if scan.is_some() {
+                        match commands.try_recv() {
+                            Ok(command) => Some(command),
+                            Err(mpsc::TryRecvError::Empty) => None,
+                            Err(mpsc::TryRecvError::Disconnected) => break,
+                        }
+                    } else {
+                        match commands.recv() {
+                            Ok(command) => Some(command),
+                            Err(_) => break,
+                        }
+                    };
                     // This turn's sender drops before the next blocking recv.
                     // Keeping only Weak between turns preserves final-handle
                     // disconnection; the worker cannot own its waiting sender.
@@ -189,11 +221,130 @@ impl Worker {
                         Ok(version) => *version,
                         Err(_) => break,
                     };
+                    let Some(command) = command else {
+                        let active = scan.as_mut().expect("scan progress turn");
+                        let result = active.step(&database);
+                        if matches!(result, Ok(false)) {
+                            continue;
+                        }
+                        let active = scan.take().expect("completed scan");
+                        let request = active.request;
+                        let result = result.and_then(|_| active.finish(&database));
+                        let (published, result) = match result {
+                            Ok((next, report)) => {
+                                let Ok(mut authority) = shared.version.lock() else {
+                                    break;
+                                };
+                                *authority = next;
+                                (next, Ok(indexing::Outcome::Indexed(report)))
+                            }
+                            Err(error) => (version, Err(error)),
+                        };
+                        if updates
+                            .try_send(LibraryEvent::Indexed {
+                                request,
+                                version: published,
+                                result,
+                            })
+                            .is_err()
+                        {
+                            break;
+                        }
+                        continue;
+                    };
                     match command {
+                        Command::Index(request, command) => {
+                            let result = if request.version != version {
+                                Err(SourceError::OutdatedSource)
+                            } else {
+                                if scan.take().is_some() {
+                                    if let Err(error) = indexing::clear(&database) {
+                                        if updates
+                                            .try_send(LibraryEvent::Indexed {
+                                                request,
+                                                version,
+                                                result: Err(error),
+                                            })
+                                            .is_err()
+                                        {
+                                            break;
+                                        }
+                                        continue;
+                                    }
+                                }
+                                match command {
+                                    indexing::Command::Scan => {
+                                        match indexing::Scan::new(&database, request) {
+                                            Ok(active) => {
+                                                scan = Some(active);
+                                                continue;
+                                            }
+                                            Err(error) => Err(error),
+                                        }
+                                    }
+                                    indexing::Command::Cancel => {
+                                        Ok((version, indexing::Outcome::Canceled))
+                                    }
+                                    indexing::Command::AddRoot(path) => {
+                                        indexing::add_root(&database, &path, version)
+                                            .map(|next| (next, indexing::Outcome::RootsChanged))
+                                    }
+                                    indexing::Command::RemoveRoot {
+                                        id,
+                                        delete_recordings,
+                                    } => indexing::remove_root(
+                                        &database,
+                                        id,
+                                        delete_recordings,
+                                        version,
+                                    )
+                                    .map(|next| (next, indexing::Outcome::RootsChanged)),
+                                }
+                            };
+                            let (published, result) = match result {
+                                Ok((next, outcome)) => {
+                                    let Ok(mut authority) = shared.version.lock() else {
+                                        break;
+                                    };
+                                    *authority = next;
+                                    (next, Ok(outcome))
+                                }
+                                Err(error) => (version, Err(error)),
+                            };
+                            if updates
+                                .try_send(LibraryEvent::Indexed {
+                                    request,
+                                    version: published,
+                                    result,
+                                })
+                                .is_err()
+                            {
+                                break;
+                            }
+                        }
                         Command::Browse(input, completion) => {
                             let _ = completion.run_cancellable(input, |input, cancellation| {
                                 if input.version != version {
                                     return Some(Err(SourceError::OutdatedSource));
+                                }
+                                if matches!(
+                                    input.route,
+                                    crate::browser::Route::Files
+                                        | crate::browser::Route::Directory(_)
+                                ) {
+                                    let Some(next) =
+                                        file_domain.checked_add(4).filter(|n| *n < u64::MAX)
+                                    else {
+                                        return Some(Err(SourceError::IndexExhausted));
+                                    };
+                                    file_domain = next;
+                                    return crate::files::page(
+                                        &database,
+                                        &mut searcher,
+                                        input,
+                                        file_domain,
+                                        || cancellation.is_cancelled(),
+                                    );
                                 }
                                 crate::collection_query::page(
                                     &database,
@@ -204,7 +355,7 @@ impl Worker {
                             });
                         }
                         Command::PrepareListing(request) => {
-                            let result = if request.input.version != version {
+                            let result = if request.input().version != version {
                                 Err(SourceError::OutdatedSource)
                             } else {
                                 crate::collection_query::prepare(&database, &mut searcher, &request)
@@ -228,6 +379,9 @@ impl Worker {
                             }
                         }
                         Command::Prepend(reply) => {
+                            if scan.take().is_some() && indexing::clear(&database).is_err() {
+                                break;
+                            }
                             let result = next_revision(version).and_then(|next| {
                                 let row = database.prepend_fixture_track()?;
                                 // SQL is committed before Version publication. The
@@ -252,15 +406,14 @@ impl Worker {
                             }
                         }
                         Command::Replace(replacement, reply) => {
-                            let result = next_revision(version).and_then(|mut next| {
+                            if scan.take().is_some() && indexing::clear(&database).is_err() {
+                                break;
+                            }
+                            let result = version.advance(true).and_then(|next| {
                                 if !replacement.connection().is_autocommit() {
                                     return Err(SourceError::SourceNotCommitted);
                                 }
-                                next.generation = next
-                                    .generation
-                                    .checked_add(1)
-                                    .filter(|&generation| generation < u64::MAX)
-                                    .ok_or(SourceError::VersionExhausted)?;
+                                replacement.initialize_index()?;
                                 database = replacement;
                                 // SQL is committed before Version publication. The
                                 // single worker cannot start a new read before it.
@@ -340,13 +493,7 @@ impl Worker {
     }
 }
 fn next_revision(version: Version) -> Result<Version, SourceError> {
-    Ok(Version {
-        revision: version
-            .revision
-            .checked_add(1)
-            .ok_or(SourceError::VersionExhausted)?,
-        ..version
-    })
+    version.advance(false)
 }
 
 fn prepare(

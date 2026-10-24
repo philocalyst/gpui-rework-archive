@@ -41,6 +41,63 @@ impl Database {
         database.connection.execute_batch("COMMIT")?;
         Ok(database)
     }
+    /// Create or reopen this port's persistent writable library. An unrelated
+    /// existing Hummingbird database keeps the separate read-only API; its
+    /// schema is never guessed, rewritten or reseeded by this constructor.
+    pub fn open_library(path: &Path) -> Result<Self, crate::search::SourceError> {
+        let connection = Connection::open(path)?;
+        connection.pragma_update(None, "foreign_keys", true)?;
+        let marked: bool = connection.query_row(
+            "SELECT EXISTS(SELECT 1 FROM sqlite_schema WHERE name='_gpui_library')",
+            [],
+            |row| row.get(0),
+        )?;
+        if !marked {
+            let occupied: bool = connection.query_row(
+                "SELECT EXISTS(SELECT 1 FROM sqlite_schema WHERE type='table' AND name NOT LIKE 'sqlite_%')", [], |row| row.get(0),
+            )?;
+            if occupied {
+                return Err(crate::search::SourceError::UnknownLibrarySchema);
+            }
+            // Pinned upstream migrations contain their own BEGIN/COMMIT.
+            // Publish the ownership marker only after every migration succeeds;
+            // a failed new-file setup remains unrecognized on reopen.
+            for (_, sql) in MIGRATIONS {
+                connection.execute_batch(sql)?;
+            }
+            connection.execute_batch("CREATE TABLE _gpui_library(version INTEGER NOT NULL); INSERT INTO _gpui_library VALUES(1)")?;
+        }
+        let version: i64 =
+            connection.query_row("SELECT version FROM _gpui_library", [], |row| row.get(0))?;
+        let markers: i64 =
+            connection.query_row("SELECT COUNT(*) FROM _gpui_library", [], |row| row.get(0))?;
+        if version != 1 || markers != 1 {
+            return Err(crate::search::SourceError::UnknownLibrarySchema);
+        }
+        let database = Self { connection };
+        database.initialize_index()?;
+        Ok(database)
+    }
+    pub(crate) fn initialize_index(&self) -> Result<()> {
+        if self.connection.is_readonly("main")? {
+            return Ok(());
+        }
+        self.connection.execute_batch(
+            "CREATE TABLE IF NOT EXISTS _gpui_root(
+                id INTEGER PRIMARY KEY AUTOINCREMENT,
+                path TEXT NOT NULL UNIQUE
+            );
+            CREATE TABLE IF NOT EXISTS _gpui_index_file(
+                location TEXT PRIMARY KEY,
+                track_id INTEGER NOT NULL UNIQUE REFERENCES track(id) ON DELETE CASCADE
+            );
+            CREATE TABLE IF NOT EXISTS _gpui_index_member(
+                root_id INTEGER NOT NULL REFERENCES _gpui_root(id) ON DELETE CASCADE,
+                location TEXT NOT NULL REFERENCES _gpui_index_file(location) ON DELETE CASCADE,
+                PRIMARY KEY(root_id,location)
+            );",
+        )
+    }
     /// Existing Hummingbird libraries are read without migrating or seeding them.
     pub fn open_read_only(path: &Path) -> Result<Self> {
         Ok(Self {
