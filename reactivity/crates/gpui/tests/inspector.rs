@@ -96,7 +96,11 @@ fn paint_and_transform_edits_skip_owner_and_layout_but_publish_real_output() {
     let original = window.scene_digest().unwrap();
     window.reset_counters().unwrap();
     window
-        .set_property(panel, BACKGROUND, Contribution::Set(rgb(0xef1200)))
+        .set_property(
+            panel,
+            BACKGROUND,
+            Contribution::Set(gpui::Brush::Solid(rgb(0xef1200))),
+        )
         .unwrap();
     assert_ne!(window.scene_digest().unwrap(), original);
     window
@@ -327,11 +331,14 @@ fn actual_inspector_controls_pick_noninteractive_app_shape_and_edit_real_propert
     click_control(&mut win, "background").unwrap();
     click_control(&mut win, "Increase").unwrap();
     assert_eq!(
-        win.property(target, BACKGROUND).unwrap(),
+        win.property(target, BACKGROUND).unwrap().solid().unwrap(),
         Color::srgb(18. / 255. + 0.05, 52. / 255., 86. / 255., 1.).unwrap()
     );
     click_control(&mut win, "Inherit").unwrap();
-    assert_eq!(win.property(target, BACKGROUND).unwrap(), rgb(0x123456));
+    assert_eq!(
+        win.property(target, BACKGROUND).unwrap().solid().unwrap(),
+        rgb(0x123456)
+    );
     assert_eq!(
         win.counters().owner_reruns,
         1,
@@ -397,7 +404,7 @@ fn pending_presentation_consumes_pick_release_and_failed_geometry_keeps_logical_
     assert_eq!(win.click(tint), Err(Error::PresentationStale));
     win.key(Key::Enter).unwrap_err(); // logical tint commits, visual prepare still fails
     assert_eq!(
-        win.property(target, BACKGROUND).unwrap(),
+        win.property(target, BACKGROUND).unwrap().solid().unwrap(),
         Color::srgb(18. / 255. + 0.05, 52. / 255., 86. / 255., 1.).unwrap()
     );
     win.update(|m| m.broken = false).unwrap();
@@ -642,7 +649,7 @@ fn color_editor_preserves_every_author_space_and_rejects_invalid_steps_visibly()
         click_control(&mut win, "background").unwrap();
         for component in 0..4 {
             click_control(&mut win, "Increase").unwrap();
-            let PropertyValue::Color(after) =
+            let PropertyValue::Brush(gpui::Brush::Solid(after)) =
                 win.property_value(target, PropertyId::Background).unwrap()
             else {
                 panic!()
@@ -677,7 +684,7 @@ fn color_editor_preserves_every_author_space_and_rejects_invalid_steps_visibly()
                 );
             }
             click_control(&mut win, "Inherit").unwrap();
-            let PropertyValue::Color(restored) =
+            let PropertyValue::Brush(gpui::Brush::Solid(restored)) =
                 win.property_value(target, PropertyId::Background).unwrap()
             else {
                 panic!()

@@ -637,6 +637,7 @@ impl<'a> El<'a> {
             assert!(matches!(
                 id.info().destination,
                 crate::property::PropertyDestination::Style
+                    | crate::property::PropertyDestination::Paint
             ));
             id
         };
@@ -725,9 +726,8 @@ impl<'a> El<'a> {
         self.property_input::<{ PropertyId::Foreground as u16 }, false, Color, _>(color);
         self
     }
-    pub fn bg(mut self, color: impl IntoProp<'a, Color>) -> Self {
-        self.property_input::<{ PropertyId::Background as u16 }, false, Color, _>(color);
-        self
+    pub fn bg<S>(self, background: impl IntoBackground<'a, S>) -> Self {
+        background.apply_background(self)
     }
     pub fn transform(mut self, transform: impl IntoProp<'a, Affine>) -> Self {
         self.property_input::<{ PropertyId::Transform as u16 }, false, Affine, _>(transform);
@@ -837,6 +837,7 @@ impl<'a> El<'a> {
         let mut annotations = Vec::new();
         let mut images = Vec::new();
         let mut geometry = Vec::new();
+        let mut backgrounds = Vec::new();
         let mut style_ports = Vec::new();
         let mut mapped_ports = Vec::new();
         let mut pending = vec![(None, self, None::<(usize, crate::ItemKey, u32, f32, f32)>)];
@@ -866,16 +867,21 @@ impl<'a> El<'a> {
                 geometry: shape,
                 bindings,
                 mapped,
+                background,
             } = element
                 .extra
                 .take()
                 .map(|extra| extra.into_parts())
                 .unwrap_or_default();
+            if let Some(gradient) = background {
+                backgrounds.push((index as usize, gradient));
+            }
             let mut shape = shape.unwrap_or_default();
             for binding in bindings {
                 let value = binding.signal.scalar().admit(binding.property)?;
                 match binding.property.info().destination {
-                    crate::property::PropertyDestination::Style => {
+                    crate::property::PropertyDestination::Style
+                    | crate::property::PropertyDestination::Paint => {
                         binding.property.set_erased(&mut element.style, value)?;
                     }
                     crate::property::PropertyDestination::Geometry => {
@@ -894,7 +900,8 @@ impl<'a> El<'a> {
             for binding in mapped {
                 let value = binding.operand.scalar()?.admit(binding.property)?;
                 match binding.property.info().destination {
-                    crate::property::PropertyDestination::Style => {
+                    crate::property::PropertyDestination::Style
+                    | crate::property::PropertyDestination::Paint => {
                         binding.property.set_erased(&mut element.style, value)?;
                     }
                     crate::property::PropertyDestination::Geometry => {
@@ -1004,6 +1011,7 @@ impl<'a> El<'a> {
             annotations,
             images,
             geometry,
+            backgrounds,
             style_ports,
             mapped_ports,
         })
@@ -1033,6 +1041,7 @@ impl Drop for ComponentBoundaries {
 }
 
 pub(crate) struct Description<'a> {
+    pub backgrounds: Vec<(usize, &'a gpui_canvas::Gradient)>,
     pub geometry: Vec<(usize, crate::property::GeometryStyle)>,
     pub style_ports: Vec<crate::style_port::Draft<'a>>,
     pub mapped_ports: Vec<crate::style_port::MapDraft<'a>>,
@@ -1104,7 +1113,42 @@ where
     div().layout(Flex::column()).child(children)
 }
 
+/// Closed background authoring: existing literal/signal/mapped colors, or an
+/// immutable gradient borrowed for this description. Resources are retained
+/// once by the owner rather than cloned for every paint command.
+#[allow(private_bounds)]
+pub trait IntoBackground<'a, S>: sealed::Background<S> {
+    #[doc(hidden)]
+    fn apply_background(self, element: El<'a>) -> El<'a>;
+}
+impl<'a, I: IntoProp<'a, Color>> sealed::Background<Color> for I {}
+impl<'a, I: IntoProp<'a, Color>> IntoBackground<'a, Color> for I {
+    fn apply_background(self, mut element: El<'a>) -> El<'a> {
+        if let Some(extra) = element.extra.as_mut() {
+            extra.clear_background();
+        }
+        element.property_input::<{ PropertyId::Background as u16 }, false, Color, _>(self);
+        element
+    }
+}
+impl sealed::Background<gpui_canvas::Gradient> for &gpui_canvas::Gradient {}
+impl<'a> IntoBackground<'a, gpui_canvas::Gradient> for &'a gpui_canvas::Gradient {
+    fn apply_background(self, mut element: El<'a>) -> El<'a> {
+        element
+            .extra
+            .get_or_insert_with(|| {
+                Box::new(crate::semantic::ElementExtra::Decorations(
+                    Default::default(),
+                ))
+            })
+            .set_background(self);
+        element.style.bg = Color::TRANSPARENT;
+        element
+    }
+}
+
 mod sealed {
+    pub trait Background<S> {}
     pub trait Element {}
     pub trait Children<S> {}
     pub trait Handler<M, S> {}
@@ -1585,9 +1629,10 @@ mod tests {
                 )+};
             }
             fields!(
-                WIDTH, HEIGHT, GAP, PADDING, FONT_SIZE, FOREGROUND, BACKGROUND, FLOW, TRANSFORM,
-                ALIGN, JUSTIFY, WRAP
+                WIDTH, HEIGHT, GAP, PADDING, FONT_SIZE, FOREGROUND, FLOW, TRANSFORM, ALIGN,
+                JUSTIFY, WRAP
             );
+            assert!(a.bg.same_authoring(b.bg));
         }
         macro_rules! check {
             ($method:ident, $input:ty, $property:ident, $literal:expr, $expected:expr) => {{
@@ -1630,7 +1675,14 @@ mod tests {
             Color::oklch(0.5, 0.2, 123.0, 0.75).unwrap(),
         ] {
             check!(fg, Color, FOREGROUND, color, color);
-            check!(bg, Color, BACKGROUND, color, color);
+            for element in [
+                div().bg(color),
+                div().bg(&color),
+                div().bg(IntoProp::into_prop(color)),
+            ] {
+                assert!(element.style.bg.same_authoring(color));
+                assert!(element.extra.is_none());
+            }
         }
         let map = Affine {
             a: 1.0,

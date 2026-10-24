@@ -84,7 +84,10 @@ fn paint_geometry_and_layout_ports_use_existing_typed_properties_without_view_wo
     let target = root(&win);
     win.reset_counters().unwrap();
     win.set(Panel::COLOR, Color::WHITE).unwrap();
-    assert_eq!(win.property(target, BACKGROUND).unwrap(), Color::WHITE);
+    assert_eq!(
+        win.property(target, BACKGROUND).unwrap().solid().unwrap(),
+        Color::WHITE
+    );
     assert_eq!(win.counters().source_reads, 1);
     assert_eq!(win.counters().destination_compares, 0);
     assert_eq!(win.counters().layout_runs, 0);
@@ -130,8 +133,12 @@ fn masked_sources_advance_inspector_bases_and_inherit_reveals_without_view() {
     let target = root(&win);
     win.set_property(target, WIDTH, Contribution::Set(None))
         .unwrap();
-    win.set_property(target, BACKGROUND, Contribution::Set(Color::WHITE))
-        .unwrap();
+    win.set_property(
+        target,
+        BACKGROUND,
+        Contribution::Set(gpui::Brush::Solid(Color::WHITE)),
+    )
+    .unwrap();
     win.set_property(target, CORNER_RADIUS, Contribution::Set(4.0))
         .unwrap();
     win.reset_counters().unwrap();
@@ -139,7 +146,10 @@ fn masked_sources_advance_inspector_bases_and_inherit_reveals_without_view() {
     win.set(Panel::COLOR, rgb(0x123456)).unwrap();
     win.set(Panel::RADIUS, 9.0).unwrap();
     assert_eq!(win.property(target, WIDTH).unwrap(), None);
-    assert_eq!(win.property(target, BACKGROUND).unwrap(), Color::WHITE);
+    assert_eq!(
+        win.property(target, BACKGROUND).unwrap().solid().unwrap(),
+        Color::WHITE
+    );
     assert_eq!(win.property(target, CORNER_RADIUS).unwrap(), 4.0);
     win.set_property(target, WIDTH, Contribution::Inherit)
         .unwrap();
@@ -148,7 +158,10 @@ fn masked_sources_advance_inspector_bases_and_inherit_reveals_without_view() {
     win.set_property(target, CORNER_RADIUS, Contribution::Inherit)
         .unwrap();
     assert_eq!(win.property(target, WIDTH).unwrap(), Some(36.0));
-    assert_eq!(win.property(target, BACKGROUND).unwrap(), rgb(0x123456));
+    assert_eq!(
+        win.property(target, BACKGROUND).unwrap().solid().unwrap(),
+        rgb(0x123456)
+    );
     assert_eq!(win.property(target, CORNER_RADIUS).unwrap(), 9.0);
     assert_eq!(win.counters().owner_reruns, 0);
 }
@@ -237,7 +250,10 @@ fn last_write_wins_size_fanout_and_unregistered_snapshots_do_not_keep_obsolete_e
     assert_eq!(win.property(target, HEIGHT).unwrap(), Some(22.0));
     assert_eq!(win.counters().destination_compares, 1);
     win.update(|m| *m.color = Color::WHITE).unwrap();
-    assert_eq!(win.property(target, BACKGROUND).unwrap(), Color::WHITE);
+    assert_eq!(
+        win.property(target, BACKGROUND).unwrap().solid().unwrap(),
+        Color::WHITE
+    );
 }
 
 #[test]
@@ -424,8 +440,14 @@ fn same_local_component_ids_install_distinct_style_sources() {
     let right = panels.nodes[3].target.unwrap();
     win.reset_counters().unwrap();
     win.click(win.button("right")).unwrap();
-    assert_eq!(win.property(left, BACKGROUND).unwrap(), Color::BLACK);
-    assert_eq!(win.property(right, BACKGROUND).unwrap(), Color::WHITE);
+    assert_eq!(
+        win.property(left, BACKGROUND).unwrap().solid().unwrap(),
+        Color::BLACK
+    );
+    assert_eq!(
+        win.property(right, BACKGROUND).unwrap().solid().unwrap(),
+        Color::WHITE
+    );
     assert_eq!(win.counters().owner_reruns, 0);
     assert_eq!(win.counters().source_reads, 1);
 }

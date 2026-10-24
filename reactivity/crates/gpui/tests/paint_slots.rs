@@ -37,17 +37,25 @@ fn equal_source_values_do_not_merge_relationships_or_masked_lower_bases() {
     let mut win = Win::with_size(Colors::new(), 48, 24).unwrap();
     let left = win.query().name("left").one().unwrap();
     let right = win.query().name("right").one().unwrap();
-    win.set_property(left, BACKGROUND, Contribution::Set(Color::BLACK))
-        .unwrap();
+    win.set_property(
+        left,
+        BACKGROUND,
+        Contribution::Set(gpui::Brush::Solid(Color::BLACK)),
+    )
+    .unwrap();
     win.reset_counters().unwrap();
     win.set(Colors::LEFT, Color::WHITE).unwrap();
     assert!(
         win.property(left, BACKGROUND)
             .unwrap()
+            .solid()
+            .unwrap()
             .same_authoring(Color::BLACK)
     );
     assert!(
         win.property(right, BACKGROUND)
+            .unwrap()
+            .solid()
             .unwrap()
             .same_authoring(Color::BLACK)
     );
@@ -59,10 +67,14 @@ fn equal_source_values_do_not_merge_relationships_or_masked_lower_bases() {
     assert!(
         win.property(left, BACKGROUND)
             .unwrap()
+            .solid()
+            .unwrap()
             .same_authoring(Color::WHITE)
     );
     assert!(
         win.property(right, BACKGROUND)
+            .unwrap()
+            .solid()
             .unwrap()
             .same_authoring(Color::BLACK)
     );
@@ -70,10 +82,14 @@ fn equal_source_values_do_not_merge_relationships_or_masked_lower_bases() {
     assert!(
         win.property(left, BACKGROUND)
             .unwrap()
+            .solid()
+            .unwrap()
             .same_authoring(Color::WHITE)
     );
     assert!(
         win.property(right, BACKGROUND)
+            .unwrap()
+            .solid()
             .unwrap()
             .same_authoring(Color::rgb(10, 20, 30))
     );
@@ -141,8 +157,12 @@ fn equal_inspector_set_rebinds_only_masked_member_of_shared_color_source() {
     }
     let mut win = Win::with_size(Peers(Signal::new(Color::BLACK)), 32, 16).unwrap();
     let masked = win.query().name("masked").one().unwrap();
-    win.set_property(masked, BACKGROUND, Contribution::Set(Color::BLACK))
-        .unwrap();
+    win.set_property(
+        masked,
+        BACKGROUND,
+        Contribution::Set(gpui::Brush::Solid(Color::BLACK)),
+    )
+    .unwrap();
     win.reset_counters().unwrap();
     win.set(Peers::COLOR, Color::WHITE).unwrap();
     assert_eq!(win.counters().paint_passes, 0);

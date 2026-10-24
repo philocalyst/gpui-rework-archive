@@ -271,8 +271,12 @@ fn ordinary_resize_and_paint_geometry_overrides_never_redescribe_the_owner() {
     .unwrap();
     let viewport = pane(&win, "pane");
     win.reset_counters().unwrap();
-    win.set_property(viewport, BACKGROUND, Contribution::Set(Color::WHITE))
-        .unwrap();
+    win.set_property(
+        viewport,
+        BACKGROUND,
+        Contribution::Set(gpui::Brush::Solid(Color::WHITE)),
+    )
+    .unwrap();
     win.set_property(
         viewport,
         TRANSFORM,

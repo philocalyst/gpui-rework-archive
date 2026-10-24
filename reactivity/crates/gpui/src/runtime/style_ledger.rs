@@ -328,7 +328,7 @@ fn retained_style_cost() {
                 win.set_property(
                     panel,
                     crate::property::BACKGROUND,
-                    Contribution::Set(Color::WHITE),
+                    Contribution::Set(crate::Brush::Solid(Color::WHITE)),
                 )
                 .unwrap();
                 acknowledge(&mut win);
@@ -337,14 +337,14 @@ fn retained_style_cost() {
                 win.set_property(
                     panel,
                     crate::property::BACKGROUND,
-                    Contribution::Set(Color::BLACK),
+                    Contribution::Set(crate::Brush::Solid(Color::BLACK)),
                 )
                 .unwrap();
                 acknowledge(&mut win);
                 win.set_property(
                     panel,
                     crate::property::BACKGROUND,
-                    Contribution::Set(Color::WHITE),
+                    Contribution::Set(crate::Brush::Solid(Color::WHITE)),
                 )
                 .unwrap();
                 acknowledge(&mut win);
@@ -428,7 +428,7 @@ fn inspector_dense_lane_is_reclaimed_after_inherit_and_redescription() {
     win.set_property(
         panel,
         crate::property::BACKGROUND,
-        Contribution::Set(Color::WHITE),
+        Contribution::Set(crate::Brush::Solid(Color::WHITE)),
     )
     .unwrap();
     assert!(matches!(

@@ -49,7 +49,11 @@ fn typed_edits_and_style_mode_changes_keep_pending_and_displayed_geometry_indepe
     let peer = target(&window, 1);
     let displayed = window.snapshot().unwrap();
     window
-        .set_property(first, BACKGROUND, Contribution::Set(Color::WHITE))
+        .set_property(
+            first,
+            BACKGROUND,
+            Contribution::Set(gpui::Brush::Solid(Color::WHITE)),
+        )
         .unwrap();
     window
         .set_property(
@@ -60,7 +64,10 @@ fn typed_edits_and_style_mode_changes_keep_pending_and_displayed_geometry_indepe
         .unwrap();
     let candidate = token(&window);
     let candidate_digest = window.scene_digest().unwrap();
-    assert_eq!(window.property(peer, BACKGROUND).unwrap(), rgb(0x123456));
+    assert_eq!(
+        window.property(peer, BACKGROUND).unwrap().solid().unwrap(),
+        rgb(0x123456)
+    );
     assert_eq!(window.snapshot().unwrap().nodes, displayed.nodes);
     // Inherit exposes the authored zero-scale transform, so this description
     // fails while the preceding complete candidate and old P remain intact.
@@ -85,12 +92,21 @@ fn typed_edits_and_style_mode_changes_keep_pending_and_displayed_geometry_indepe
         .unwrap();
     window.resize_scaled([80, 64], 1.25).unwrap();
     window.presented(token(&window)).unwrap();
-    assert_eq!(window.property(first, BACKGROUND).unwrap(), Color::WHITE);
-    assert_eq!(window.property(peer, BACKGROUND).unwrap(), rgb(1));
+    assert_eq!(
+        window.property(first, BACKGROUND).unwrap().solid().unwrap(),
+        Color::WHITE
+    );
+    assert_eq!(
+        window.property(peer, BACKGROUND).unwrap().solid().unwrap(),
+        rgb(1)
+    );
     window
         .set_property(first, BACKGROUND, Contribution::Inherit)
         .unwrap();
-    assert_eq!(window.property(first, BACKGROUND).unwrap(), rgb(0));
+    assert_eq!(
+        window.property(first, BACKGROUND).unwrap().solid().unwrap(),
+        rgb(0)
+    );
     window.update(|model| model.count = 2).unwrap();
     assert_eq!(window.property(first, BACKGROUND), Err(Error::StaleTarget));
 }
@@ -129,7 +145,7 @@ fn repeated_authored_styles_keep_profile_and_signed_channel_bits() {
         window.update(|model| model.colors.rotate_left(1)).unwrap();
         for (index, site) in sites.iter().enumerate() {
             let expected = colors[(index + frame + 1) % colors.len()];
-            let actual = window.property(*site, BACKGROUND).unwrap();
+            let actual = window.property(*site, BACKGROUND).unwrap().solid().unwrap();
             assert_eq!(actual.space(), expected.space());
             assert_eq!(
                 actual.channels().map(f32::to_bits),

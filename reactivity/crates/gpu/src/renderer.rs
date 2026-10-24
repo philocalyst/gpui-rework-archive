@@ -839,7 +839,21 @@ impl RendererState {
                 word += 5;
             }
             for p in group.placements() {
-                let atlas = if let Some((image, sampling)) = p.source.image() {
+                let atlas = if let Some((gradient, radius)) = p.source.gradient() {
+                    let r = radius
+                        .min(p.local_rect.width * 0.5)
+                        .min(p.local_rect.height * 0.5);
+                    let scale = if r == 0.0 {
+                        1.0
+                    } else {
+                        f32::from_bits((254 - (r.to_bits() >> 23)) << 23)
+                    };
+                    [
+                        self.images.as_ref().unwrap().gradient(gradient.key()),
+                        r.to_bits(),
+                        scale.to_bits(),
+                    ]
+                } else if let Some((image, sampling)) = p.source.image() {
                     let [offset, mut flags] = self
                         .images
                         .as_ref()

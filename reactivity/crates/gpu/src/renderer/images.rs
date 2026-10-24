@@ -5,6 +5,7 @@ use gpui_canvas::{AlphaMode, ImageKey, ImagePixels, ImageProfile, ImageSampling,
 use std::collections::HashMap;
 
 pub(super) const IMAGE: u32 = 1 << 31;
+pub(super) const GRADIENT: u32 = 1 << 29;
 pub(super) const FILTER_LINEAR: u32 = 1;
 const PREMULTIPLIED: u32 = 2;
 const DISPLAY_P3: u32 = 4;
@@ -27,10 +28,16 @@ struct Entry {
     word: u32,
     flags: u32,
 }
+#[derive(Default)]
+struct Gradients {
+    keys: Vec<gpui_canvas::GradientKey>,
+    entries: HashMap<gpui_canvas::GradientKey, u32>,
+}
 pub(super) struct Images {
     keys: Vec<ImageKey>,
     entries: HashMap<ImageKey, Entry>,
     prefix_words: usize,
+    gradients: Option<Box<Gradients>>,
     stats: ImageStats,
 }
 impl Images {
@@ -39,6 +46,9 @@ impl Images {
     }
     pub(super) fn redrawn(&mut self) {
         self.stats.uploaded_bytes = 0;
+    }
+    pub(super) fn gradient(&self, key: gpui_canvas::GradientKey) -> u32 {
+        GRADIENT | self.gradients.as_ref().unwrap().entries[&key]
     }
     pub(super) fn metadata(&self, key: ImageKey, sampling: ImageSampling) -> [u32; 2] {
         let entry = self.entries[&key];
@@ -62,7 +72,9 @@ pub(super) fn prepare(
     draw_words: usize,
     scene: PreparedScene<'_>,
 ) -> Result<(), Error> {
-    let count = scene.images().count();
+    let image_count = scene.images().count();
+    let gradient_count = scene.gradients().count();
+    let count = image_count + gradient_count;
     if count == 0 {
         if current.take().is_some() {
             // Submitted bind groups retain their own old buffer leases.
@@ -77,11 +89,17 @@ pub(super) fn prepare(
     }
     if let Some(current) = current.as_mut()
         && draw_words <= current.prefix_words
-        && current
-            .keys
-            .iter()
-            .copied()
-            .eq(scene.images().map(|image| image.key()))
+        && current.keys.len() == image_count
+        && scene
+            .images()
+            .all(|image| current.entries.contains_key(&image.key()))
+        && current.gradients.as_ref().map_or(0, |g| g.keys.len()) == gradient_count
+        && scene.gradients().all(|g| {
+            current
+                .gradients
+                .as_ref()
+                .is_some_and(|c| c.entries.contains_key(&g.key()))
+        })
     {
         current.stats.uploaded_bytes = 0;
         return Ok(());
@@ -96,13 +114,14 @@ pub(super) fn prepare(
         keys: Vec::new(),
         entries: HashMap::new(),
         prefix_words,
+        gradients: (gradient_count != 0).then(Default::default),
         stats: ImageStats::default(),
     };
     next.keys
-        .try_reserve_exact(count)
+        .try_reserve_exact(image_count)
         .map_err(|_| Error::ResourceLimit)?;
     next.entries
-        .try_reserve(count)
+        .try_reserve(image_count)
         .map_err(|_| Error::ResourceLimit)?;
     let mut words = prefix_words;
     for image in scene.images() {
@@ -139,6 +158,35 @@ pub(super) fn prepare(
         next.entries.insert(image.key(), Entry { word, flags });
         next.keys.push(image.key());
     }
+    if let Some(gradients) = &mut next.gradients {
+        gradients
+            .keys
+            .try_reserve_exact(gradient_count)
+            .map_err(|_| Error::ResourceLimit)?;
+        gradients
+            .entries
+            .try_reserve(gradient_count)
+            .map_err(|_| Error::ResourceLimit)?;
+        for gradient in scene.gradients() {
+            let offset = u32::try_from(words).map_err(|_| Error::ResourceLimit)?;
+            if offset >= GRADIENT {
+                return Err(Error::ResourceLimit);
+            }
+            gradients.keys.push(gradient.key());
+            gradients.entries.insert(gradient.key(), offset);
+            words = words
+                .checked_add(gradient.words().len())
+                .ok_or(Error::ResourceLimit)?;
+            next.stats.packed_bytes = next
+                .stats
+                .packed_bytes
+                .checked_add(gradient.byte_len())
+                .ok_or(Error::ResourceLimit)?;
+        }
+    }
+    if words >= GRADIENT as usize || next.stats.packed_bytes > gpui_canvas::MAX_IMAGE_SCENE_BYTES {
+        return Err(Error::ResourceLimit);
+    }
     let required = words
         .checked_mul(16)
         .and_then(|bytes| bytes.checked_add(255))
@@ -170,11 +218,24 @@ pub(super) fn prepare(
             }
         }
     }
+    if let Some(gradients) = &next.gradients {
+        for gradient in scene.gradients() {
+            let mut offset = u64::from(gradients.entries[&gradient.key()]) * 16;
+            // Borrow the immutable compiled words, never clone a stop Vec or a
+            // resource handle. Stable identities skip this upload entirely.
+            for chunk in gradient.words().chunks(4096) {
+                let bytes = bytemuck::cast_slice(chunk);
+                queue.write_buffer(&buffer.handle, offset, bytes);
+                offset += bytes.len() as u64;
+            }
+        }
+    }
     next.stats.resources = count;
     next.stats.uploaded_bytes = next.stats.packed_bytes;
     next.stats.prefix_bytes = prefix_words * 16;
     next.stats.gpu_buffer_bytes = buffer.size;
-    next.stats.index_capacity = next.entries.capacity();
+    next.stats.index_capacity =
+        next.entries.capacity() + next.gradients.as_ref().map_or(0, |g| g.entries.capacity());
     *current = Some(Box::new(next));
     Ok(())
 }

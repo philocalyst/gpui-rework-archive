@@ -292,6 +292,62 @@ pub mod ui {
         vec4f(rgb.x, rgb.y, rgb.z, value.w)
     }
 
+    // Same validated parameter/interval word schema as Canvas GradientView.
+    // Material is independent of rounded/rectangular coverage and never takes
+    // uniform-solid tile certificates, even when every stop has alpha one.
+    pub fn gradient_color(base: u32, point: Vec2f) -> Vec4f {
+        let header = get!(WORDS)[base as usize];
+        let geometry = bitcast_vec4f(get!(WORDS)[(base + 2) as usize]);
+        let p = point - geometry.xy();
+        let mut t = p.x * geometry.z + p.y * geometry.w;
+        if header.x == 1 {
+            let q = p * geometry.zw();
+            t = sqrt(q.x * q.x + q.y * q.y);
+        } else if header.x == 2 {
+            t = 0.0;
+            if p.x != 0.0 || p.y != 0.0 {
+                t = atan2(p.x, -p.y) / 6.283185307179586;
+            }
+            t -= geometry.z;
+            t -= floor(t);
+        }
+        let count = header.z;
+        let first = bitcast_f32(get!(WORDS)[(base + 3) as usize].x);
+        let last = bitcast_f32(get!(WORDS)[(base + 3 + (count - 1) * 4) as usize].x);
+        let span = last - first;
+        if header.y == 1 {
+            let x = t - first;
+            t = x - floor(x / span) * span + first;
+        } else if header.y == 2 {
+            let period = span * 2.0;
+            let x = t - first;
+            let u = x - floor(x / period) * period;
+            t = first + select(u, period - u, u > span);
+        }
+        let mut low = 0_u32;
+        let mut high = count;
+        while low < high {
+            let mid = (low + high) / 2;
+            if bitcast_f32(get!(WORDS)[(base + 3 + mid * 4) as usize].x) <= t {
+                low = mid + 1;
+            } else {
+                high = mid;
+            }
+        }
+        let mut index = 0_u32;
+        if low > 0 {
+            index = low - 1;
+        }
+        let word = base + 3 + index * 4;
+        let interval = bitcast_vec4f(get!(WORDS)[word as usize]);
+        let color = bitcast_vec4f(get!(WORDS)[(word + 1) as usize]);
+        if low == 0 || index + 1 == count {
+            return color;
+        }
+        let u = clamp((t - interval.x) * interval.y, 0.0, 1.0);
+        return color + u * bitcast_vec4f(get!(WORDS)[(word + 2) as usize]);
+    }
+
     pub fn sample_draw(draw: Draw, point: Vec2f) -> Vec4f {
         if point.x < draw.clip.x
             || point.y < draw.clip.y
@@ -299,6 +355,22 @@ pub mod ui {
             || outside_clip_max(point.y, draw.clip.y, draw.clip.w, draw.atlas.w, true)
         {
             return vec4f(0.0, 0.0, 0.0, 0.0);
+        }
+        if (draw.atlas.x & 0x20000000) != 0 && (draw.atlas.x & 0x80000000) == 0 {
+            if !rounded_contains(
+                draw,
+                point,
+                bitcast_f32(draw.atlas.y),
+                bitcast_f32(draw.atlas.z),
+            ) {
+                return vec4f(0.0, 0.0, 0.0, 0.0);
+            }
+            let h = vec3f(point.x, point.y, 1.0);
+            let local = vec2f(dot(draw.inverse_x.xyz(), h), dot(draw.inverse_y.xyz(), h));
+            return gradient_color(
+                draw.atlas.x & 0x1fffffff,
+                (local - draw.local.xy()) / draw.local.zw(),
+            );
         }
         if (draw.atlas.x & 0x40000000) != 0 && (draw.atlas.x & 0x80000000) == 0 {
             if rounded_contains(

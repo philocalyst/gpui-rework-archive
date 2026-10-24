@@ -148,14 +148,24 @@ fn paint_preserves_prior_full_candidate_and_failed_newer_visual_is_not_relabelle
 fn masked_bases_and_alpha_topology_fallback_remain_exact() {
     let mut win = Win::with_size(Panel::new(rgb(0x804020)), 100, 100).unwrap();
     let target = win.query().name("surface").one().unwrap();
-    win.set_property(target, BACKGROUND, Contribution::Set(Color::WHITE))
-        .unwrap();
+    win.set_property(
+        target,
+        BACKGROUND,
+        Contribution::Set(gpui::Brush::Solid(Color::WHITE)),
+    )
+    .unwrap();
     win.reset_counters().unwrap();
     win.set(Panel::COLOR, rgb(0x305070)).unwrap();
-    assert_eq!(win.property(target, BACKGROUND).unwrap(), Color::WHITE);
+    assert_eq!(
+        win.property(target, BACKGROUND).unwrap().solid().unwrap(),
+        Color::WHITE
+    );
     win.set_property(target, BACKGROUND, Contribution::Inherit)
         .unwrap();
-    assert_eq!(win.property(target, BACKGROUND).unwrap(), rgb(0x305070));
+    assert_eq!(
+        win.property(target, BACKGROUND).unwrap().solid().unwrap(),
+        rgb(0x305070)
+    );
     win.reset_counters().unwrap();
     win.set(Panel::COLOR, Color::rgba(10, 20, 30, 100)).unwrap();
     assert!(win.counters().paint_passes > 0);

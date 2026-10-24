@@ -11,6 +11,7 @@ parallel = ["dep:rayon"]
 simd = []
 
 [dependencies]
+triomphe = { version = "=0.1.17", default-features = false, features = ["std"] }
 fearless_simd = { version = "=1.1.0", features = ["force_support_fallback"] }
 fearless_simd_macros = "=0.1.0"
 gpui_reactivity_core = { path = "../core" }

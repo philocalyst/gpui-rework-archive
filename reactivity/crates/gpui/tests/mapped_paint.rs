@@ -106,7 +106,10 @@ fn one_mapped_color_keeps_ten_thousand_rows_without_allocating_a_replacement_sce
         } else {
             Color::WHITE
         };
-        assert_eq!(win.property(target, BACKGROUND).unwrap(), color);
+        assert_eq!(
+            win.property(target, BACKGROUND).unwrap().solid().unwrap(),
+            color
+        );
         assert_eq!(first_pixel(&mut win) == initial, value & 1 == 0);
         ack(&mut win);
         assert_eq!(win.bounds(target).unwrap(), bounds);
@@ -129,7 +132,10 @@ fn alpha_changes_and_two_changed_slots_preserve_complete_pixels() {
         ack(&mut win);
         if two {
             let target = win.query().name("peer").one().unwrap();
-            assert_eq!(win.property(target, BACKGROUND).unwrap(), Color::BLACK);
+            assert_eq!(
+                win.property(target, BACKGROUND).unwrap().solid().unwrap(),
+                Color::BLACK
+            );
         }
     }
 }
@@ -153,12 +159,15 @@ fn mounted_inspector_refreshes_the_mapped_color_after_a_complete_paint_turn() {
     let caption = |color| {
         format!(
             "background: {:?}\nInherit",
-            gpui::property::PropertyValue::Color(color)
+            gpui::property::PropertyValue::Brush(gpui::Brush::Solid(color))
         )
     };
     assert!(win.contains_text(&caption(Color::BLACK)).unwrap());
     win.set(Panel::VALUE, 1).unwrap();
-    assert_eq!(win.property(target, BACKGROUND).unwrap(), Color::WHITE);
+    assert_eq!(
+        win.property(target, BACKGROUND).unwrap().solid().unwrap(),
+        Color::WHITE
+    );
     assert!(win.contains_text(&caption(Color::WHITE)).unwrap());
     assert!(!win.contains_text(&caption(Color::BLACK)).unwrap());
 }

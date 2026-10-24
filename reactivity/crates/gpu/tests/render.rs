@@ -3362,3 +3362,153 @@ fn axis_solids_preserve_deep_stacks_reflections_and_complementary_sample_ties() 
         }
     });
 }
+
+#[test]
+fn analytic_gradients_geometry_spreads_hard_edges_hdr_and_cache_match_cpu() {
+    use gpui_canvas::{
+        Extend, Gradient, GradientGeometry as Geometry, GradientStop as Stop, Interpolation,
+        OutputProfile,
+    };
+    fn half(bytes: &[u8]) -> f32 {
+        let bits = u16::from_le_bytes([bytes[0], bytes[1]]);
+        let sign = if bits & 0x8000 == 0 { 1. } else { -1. };
+        let e = ((bits >> 10) & 31) as i32;
+        let m = (bits & 1023) as f32;
+        sign * if e == 0 {
+            m * 2f32.powi(-24)
+        } else {
+            (1. + m / 1024.) * 2f32.powi(e - 15)
+        }
+    }
+    pollster::block_on(async {
+        let mut renderer = renderer(wgpu::TextureFormat::Rgba16Float).await;
+        let geometries = [
+            Geometry::Linear {
+                start: Point { x: 0.1, y: 0.2 },
+                end: Point { x: 0.8, y: 0.6 },
+            },
+            Geometry::Radial {
+                center: Point { x: 0.4, y: 0.6 },
+                radii: [0.3, 0.6],
+            },
+            Geometry::Conic {
+                center: Point { x: 0.4, y: 0.6 },
+                start_turn: -0.125,
+            },
+        ];
+        let maps = [
+            Affine::IDENTITY,
+            Affine {
+                a: -0.9,
+                b: 0.13,
+                c: -0.17,
+                d: 0.75,
+                tx: 29.125,
+                ty: 0.375,
+            },
+        ];
+        let stops = [
+            Stop::new(-0.2, Color::linear_srgb(8., -0.5, 1., 0.).unwrap()),
+            Stop::new(0.4, Color::linear_srgb(4., -0.25, 0.5, 1.).unwrap()),
+            Stop::new(0.4, Color::linear_srgb(0.2, 2., -0.1, 0.5).unwrap()),
+            Stop::new(1.2, Color::linear_display_p3(0.1, 0.3, 3., 0.75).unwrap()),
+        ];
+        for profile in [OutputProfile::Srgb, OutputProfile::DisplayP3] {
+            for geometry in geometries {
+                for extend in [Extend::Pad, Extend::Repeat, Extend::Reflect] {
+                    let gradient =
+                        Gradient::new(geometry, &stops, extend, Interpolation::LinearSrgb).unwrap();
+                    for map in maps {
+                        for radius in [0., 5.] {
+                            let mut canvas = Canvas::recording(
+                                32,
+                                24,
+                                ColorConfig::linear_hdr(profile, 203.).unwrap(),
+                            )
+                            .unwrap();
+                            canvas.clear(Color::linear_srgb(0.2, 0.3, 0.5, 0.7).unwrap());
+                            canvas
+                                .fill_gradient(
+                                    &gradient,
+                                    Rect::new(0.125, 0.375, 25.5, 19.25),
+                                    radius,
+                                    map,
+                                    Rect::new(1.125, 0.375, 29.5, 22.25),
+                                )
+                                .unwrap();
+                            let first = readback(&mut renderer, &canvas);
+                            let stats = renderer.image_stats().unwrap();
+                            assert_eq!(stats.resources, 1);
+                            assert_eq!(stats.packed_bytes, gradient.view().byte_len());
+                            let second = readback(&mut renderer, &canvas);
+                            assert_eq!(first, second);
+                            assert_eq!(renderer.image_stats().unwrap().uploaded_bytes, 0);
+                            let cpu = canvas.pixels();
+                            for (i, (a, b)) in first
+                                .as_chunks::<2>()
+                                .0
+                                .iter()
+                                .zip(cpu.as_chunks::<2>().0)
+                                .enumerate()
+                            {
+                                let (a, b) = (half(a), half(b));
+                                assert!(
+                                    (a - b).abs() <= 0.000004f32.max(b.abs() * 0.002),
+                                    "{profile:?} {geometry:?} {extend:?} {map:?} radius{radius} value{i} GPU{a} CPU{b}"
+                                );
+                            }
+                            assert!(
+                                !canvas
+                                    .prepared_scene()
+                                    .draws()
+                                    .next()
+                                    .unwrap()
+                                    .source
+                                    .is_solid()
+                            );
+                        }
+                    }
+                }
+            }
+        }
+        // A key-set permutation retains packed intervals without upload.
+        let a = Gradient::new(
+            geometries[0],
+            &stops,
+            Extend::Pad,
+            Interpolation::LinearSrgb,
+        )
+        .unwrap();
+        let b = Gradient::new(
+            geometries[1],
+            &stops,
+            Extend::Pad,
+            Interpolation::LinearSrgb,
+        )
+        .unwrap();
+        for (turn, order) in [[&a, &b], [&b, &a]].into_iter().enumerate() {
+            let mut canvas = Canvas::recording(
+                32,
+                24,
+                ColorConfig::linear_hdr(OutputProfile::Srgb, 203.).unwrap(),
+            )
+            .unwrap();
+            canvas.clear(Color::WHITE);
+            for (i, g) in order.into_iter().enumerate() {
+                canvas
+                    .fill_gradient(
+                        g,
+                        Rect::new(i as f32 * 16., 0., 16., 24.),
+                        0.,
+                        Affine::IDENTITY,
+                        Rect::new(0., 0., 32., 24.),
+                    )
+                    .unwrap();
+            }
+            readback(&mut renderer, &canvas);
+            if turn == 1 {
+                assert_eq!(renderer.image_stats().unwrap().uploaded_bytes, 0);
+            }
+        }
+    });
+}

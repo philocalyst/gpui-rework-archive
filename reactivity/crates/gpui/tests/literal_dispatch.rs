@@ -77,7 +77,10 @@ fn erased_size_keeps_two_sinks_latest_inspector_base_and_literal_edge_removal() 
     assert_eq!(win.property(target, WIDTH).unwrap(), Some(24.0));
     assert_eq!(win.property(target, HEIGHT).unwrap(), Some(24.0));
     assert_eq!(win.property(target, FONT_SIZE).unwrap(), 24.0);
-    assert_eq!(win.property(target, BACKGROUND).unwrap(), Color::WHITE);
+    assert_eq!(
+        win.property(target, BACKGROUND).unwrap().solid().unwrap(),
+        Color::WHITE
+    );
     assert!(win.find_text("48").is_ok());
     assert_eq!(
         win.counters().destination_compares,

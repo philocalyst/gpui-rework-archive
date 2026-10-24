@@ -398,17 +398,26 @@ fn typed_inspector_retains_signed_zero_bits_in_each_authoring_domain() {
     win.set_property(
         target,
         BACKGROUND,
-        Contribution::Set(Color::linear_srgb(0.0, 0.0, 0.0, 1.0).unwrap()),
+        Contribution::Set(gpui::Brush::Solid(
+            Color::linear_srgb(0.0, 0.0, 0.0, 1.0).unwrap(),
+        )),
     )
     .unwrap();
     win.set_property(
         target,
         BACKGROUND,
-        Contribution::Set(Color::linear_srgb(-0.0, 0.0, 0.0, 1.0).unwrap()),
+        Contribution::Set(gpui::Brush::Solid(
+            Color::linear_srgb(-0.0, 0.0, 0.0, 1.0).unwrap(),
+        )),
     )
     .unwrap();
     assert_eq!(
-        win.property(target, BACKGROUND).unwrap().channels()[0].to_bits(),
+        win.property(target, BACKGROUND)
+            .unwrap()
+            .solid()
+            .unwrap()
+            .channels()[0]
+            .to_bits(),
         (-0.0_f32).to_bits()
     );
     win.set_property(
