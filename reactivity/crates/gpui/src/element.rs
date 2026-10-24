@@ -75,6 +75,9 @@ pub(crate) enum Admission {
 trait Route {
     fn admit(&self, receiver: &dyn Any, sources: &dyn Any) -> Result<Admission, BindError>;
     fn invoke(&self, receiver: &mut dyn Any) -> Result<(), BindError>;
+    fn invoke_control(&self, receiver: &mut dyn Any, _next: Option<bool>) -> Result<(), BindError> {
+        self.invoke(receiver)
+    }
     fn owner_scope(&self, _receiver: &dyn Any, _sources: &dyn Any) -> Result<u32, BindError> {
         Ok(0)
     }
@@ -221,6 +224,13 @@ impl Handler {
     pub(crate) fn invoke(&self, receiver: &mut dyn Any) -> Result<(), BindError> {
         self.0.invoke(receiver)
     }
+    pub(crate) fn invoke_control(
+        &self,
+        receiver: &mut dyn Any,
+        next: Option<bool>,
+    ) -> Result<(), BindError> {
+        self.0.invoke_control(receiver, next)
+    }
 
     pub(crate) fn proposal(
         &self,
@@ -300,6 +310,13 @@ impl<P: 'static, C: View + 'static> Route for ComponentRoute<P, C> {
             .ok_or(BindError::ReceiverMismatch)?;
         self.handler.invoke(self.component.project_mut(parent)?)
     }
+    fn invoke_control(&self, receiver: &mut dyn Any, next: Option<bool>) -> Result<(), BindError> {
+        let parent = receiver
+            .downcast_mut::<P>()
+            .ok_or(BindError::ReceiverMismatch)?;
+        self.handler
+            .invoke_control(self.component.project_mut(parent)?, next)
+    }
     fn property(&self, phase: PropertyPhase<'_>) -> Result<(), BindError> {
         match phase {
             PropertyPhase::Propose(receiver, target, output) => {
@@ -346,6 +363,30 @@ impl<M: 'static, F: Fn(&mut M)> Route for MethodRoute<M, F> {
             .downcast_mut::<M>()
             .ok_or(BindError::ReceiverMismatch)?;
         (self.callback)(receiver);
+        Ok(())
+    }
+}
+
+struct CheckRoute<M, F> {
+    callback: F,
+    model: PhantomData<fn(M)>,
+}
+impl<M: 'static, F: Fn(&mut M, bool)> Route for CheckRoute<M, F> {
+    fn admit(&self, receiver: &dyn Any, _: &dyn Any) -> Result<Admission, BindError> {
+        if receiver.is::<M>() {
+            Ok(Admission::Model { exact: None })
+        } else {
+            Err(BindError::ReceiverMismatch)
+        }
+    }
+    fn invoke(&self, _: &mut dyn Any) -> Result<(), BindError> {
+        Err(BindError::ReceiverMismatch)
+    }
+    fn invoke_control(&self, receiver: &mut dyn Any, next: Option<bool>) -> Result<(), BindError> {
+        let receiver = receiver
+            .downcast_mut::<M>()
+            .ok_or(BindError::ReceiverMismatch)?;
+        (self.callback)(receiver, next.ok_or(BindError::ReceiverMismatch)?);
         Ok(())
     }
 }
@@ -524,7 +565,7 @@ impl<'a> El<'a> {
         let radius = radius.into_prop();
         if let Some(value) = radius.literal() {
             if let Some(extra) = self.extra.as_deref_mut() {
-                extra.unbind(PropertyId::CornerRadius);
+                extra.unbind(PropertyId::CornerRadius.into());
             }
             // Preserve the original radius builder's deferred, typed admission
             // and raw f32 bits, including invalid NaN payloads until admission.
@@ -557,7 +598,7 @@ impl<'a> El<'a> {
         let clipped = clipped.into_prop();
         if let Some(value) = clipped.literal() {
             if let Some(extra) = self.extra.as_deref_mut() {
-                extra.unbind(PropertyId::Clip);
+                extra.unbind(PropertyId::Clip.into());
             }
             if value || self.extra.is_some() {
                 self.extra
@@ -568,6 +609,16 @@ impl<'a> El<'a> {
                     })
                     .clip_children(value);
             }
+        } else if let Some(id) = clipped.boolean_id() {
+            self.extra
+                .get_or_insert_with(|| {
+                    Box::new(crate::semantic::ElementExtra::Semantic(Default::default()))
+                })
+                .bind_boolean(crate::style_port::boolean::Record::Member {
+                    id,
+                    sink: PropertyId::Clip.into(),
+                    colors: None,
+                });
         } else if let Some(map) = clipped.mapped() {
             self.bind_mapped_property(PropertyId::Clip, map);
         } else {
@@ -595,6 +646,141 @@ impl<'a> El<'a> {
             .annotations_mut()
     }
 
+    /// Opt into a visible focus marker inside the control frame. The caller
+    /// chooses its color; the runtime owns focus and clipped affine painting.
+    pub fn focus_indicator(mut self, color: Color) -> Self {
+        assert!(
+            matches!(
+                self.kind,
+                NodeKind::Input | NodeKind::Button | NodeKind::CheckBox(_)
+            ),
+            "focus appearance belongs to a semantic control"
+        );
+        self.extra
+            .get_or_insert_with(|| {
+                Box::new(crate::semantic::ElementExtra::Semantic(Default::default()))
+            })
+            .focus_indicator(color);
+        self
+    }
+
+    /// Disable a semantic control and its named-part descendants. Physical
+    /// routes remain installed for normal replacement/drop, but cannot act.
+    pub fn disabled(mut self, disabled: impl IntoProp<'a, bool>) -> Self {
+        self.control_input(crate::style_port::Sink::DISABLED, disabled.into_prop());
+        self
+    }
+    /// Validation state of an input. It changes neither editing authority nor focus.
+    pub fn invalid(mut self, invalid: impl IntoProp<'a, bool>) -> Self {
+        assert!(
+            self.kind == NodeKind::Input,
+            "invalid state belongs to a text input"
+        );
+        self.control_input(crate::style_port::Sink::INVALID, invalid.into_prop());
+        self
+    }
+    pub(crate) fn bind_boolean(&mut self, record: crate::style_port::boolean::Record<'a>) {
+        self.extra
+            .get_or_insert_with(|| {
+                Box::new(crate::semantic::ElementExtra::Semantic(Default::default()))
+            })
+            .bind_boolean(record);
+    }
+    fn control_input(&mut self, sink: crate::style_port::Sink, input: crate::PropInput<'a, bool>) {
+        if sink == crate::style_port::Sink::DISABLED
+            && input.literal() == Some(false)
+            && !matches!(
+                self.kind,
+                NodeKind::Input | NodeKind::Button | NodeKind::CheckBox(_)
+            )
+        {
+            return;
+        }
+        assert!(
+            matches!(
+                self.kind,
+                NodeKind::Input | NodeKind::Button | NodeKind::CheckBox(_)
+            ),
+            "intrinsic state belongs to a semantic control"
+        );
+        if let Some(value) = input.literal() {
+            if let Some(extra) = &mut self.extra {
+                extra.unbind(sink);
+            }
+            if sink == crate::style_port::Sink::CHECKED {
+                self.kind = NodeKind::CheckBox(value);
+            } else if value || self.extra.is_some() {
+                self.extra.get_or_insert_with(|| {
+                    Box::new(crate::semantic::ElementExtra::Semantic(Default::default()))
+                });
+                let extra = self.extra.as_mut().unwrap();
+                if sink == crate::style_port::Sink::INVALID {
+                    extra.set_invalid(value);
+                } else {
+                    extra.set_disabled(value);
+                }
+            }
+            if self
+                .extra
+                .as_deref()
+                .is_some_and(crate::semantic::ElementExtra::empty)
+            {
+                self.extra = None;
+            }
+        } else if let Some(id) = input.boolean_id() {
+            self.bind_boolean(crate::style_port::boolean::Record::Member {
+                id,
+                sink,
+                colors: None,
+            });
+        } else if let Some(signal) = input.signal() {
+            self.extra
+                .get_or_insert_with(|| {
+                    Box::new(crate::semantic::ElementExtra::Semantic(Default::default()))
+                })
+                .bind(sink, signal);
+        } else if let Some(map) = input.mapped() {
+            self.extra
+                .get_or_insert_with(|| {
+                    Box::new(crate::semantic::ElementExtra::Semantic(Default::default()))
+                })
+                .bind_map(sink, map.into());
+        }
+    }
+    fn apply_sink(
+        sink: crate::style_port::Sink,
+        value: crate::property::PropertyValue,
+        kind: &mut NodeKind,
+        style: &mut Style,
+        disabled: &mut bool,
+        invalid: &mut bool,
+        shape: &mut crate::property::GeometryStyle,
+    ) -> Result<(), crate::Error> {
+        if let Some(property) = sink.property() {
+            match property.info().destination {
+                crate::property::PropertyDestination::Style
+                | crate::property::PropertyDestination::Paint => {
+                    property.set_erased(style, value)?;
+                }
+                crate::property::PropertyDestination::Geometry => {
+                    property.set_geometry(shape, value)?;
+                }
+            }
+        } else {
+            let crate::property::PropertyValue::Flag(value) = value else {
+                return Err(crate::Error::MapInput);
+            };
+            if sink == crate::style_port::Sink::CHECKED {
+                *kind = NodeKind::CheckBox(value);
+            } else if sink == crate::style_port::Sink::INVALID {
+                *invalid = value;
+            } else {
+                *disabled = value;
+            }
+        }
+        Ok(())
+    }
+
     pub fn child<C, S>(mut self, children: C) -> Self
     where
         C: ChildSeq<'a, S>,
@@ -602,7 +788,7 @@ impl<'a> El<'a> {
         assert!(
             matches!(
                 self.kind,
-                NodeKind::Div | NodeKind::Button | NodeKind::Scroll
+                NodeKind::Div | NodeKind::Button | NodeKind::Scroll | NodeKind::CheckBox(_)
             ),
             "this element does not accept children"
         );
@@ -632,12 +818,29 @@ impl<'a> El<'a> {
         handler.install(self)
     }
 
+    /// Replace the checkbox route with a controlled intent callback. Every
+    /// activation computes intent from current logical checked state, including
+    /// direct source publications, before exposing the mutable model.
+    pub fn on_check<M: 'static>(mut self, callback: impl Fn(&mut M, bool) + 'static) -> Self {
+        assert!(
+            matches!(self.kind, NodeKind::CheckBox(_)),
+            "checked intent belongs to a checkbox"
+        );
+        self.on_click = Some(Handler(Box::new(CheckRoute {
+            callback,
+            model: PhantomData,
+        })));
+        self
+    }
     fn bind_mapped_property(&mut self, id: PropertyId, operand: crate::style_port::MapOperand<'a>) {
+        self.bind_owned_map(id, operand.into());
+    }
+    fn bind_owned_map(&mut self, id: PropertyId, operand: crate::style_port::OwnedMapOperand<'a>) {
         self.extra
             .get_or_insert_with(|| {
                 Box::new(crate::semantic::ElementExtra::Semantic(Default::default()))
             })
-            .bind_map(id, operand);
+            .bind_map(id.into(), operand);
     }
 
     fn bind_property(&mut self, id: PropertyId, signal: &'a dyn StyleSignal) {
@@ -647,7 +850,7 @@ impl<'a> El<'a> {
                     Default::default(),
                 ))
             })
-            .bind(id, signal);
+            .bind(id.into(), signal);
     }
 
     #[inline]
@@ -663,7 +866,7 @@ impl<'a> El<'a> {
         id: PropertyId,
     ) {
         if let Some(value) = extra.as_deref_mut() {
-            value.unbind(id);
+            value.unbind(id.into());
             if value.empty() {
                 *extra = None;
             }
@@ -686,11 +889,7 @@ impl<'a> El<'a> {
         // Keep the original input type through conversion/admission: e.g. an
         // integer is statically finite, so literal callers need no float error
         // branches for a value that cannot reach them.
-        let scalar = input
-            .into_prop()
-            .literal()
-            .expect("sealed literal")
-            .scalar();
+        let scalar = input.into_prop().literal_scalar().expect("sealed literal");
         let value = scalar.narrow(id).expect("invalid literal style property");
         PropertyId::set_literal::<CODE>(&mut self.style, value)
             .expect("invalid literal style property");
@@ -721,26 +920,37 @@ impl<'a> El<'a> {
                 if SIZE {
                     self.bind_property(PropertyId::Height, signal);
                 }
-            } else if let Some(map) = input.mapped() {
-                self.bind_mapped_property(id, map);
-                if SIZE {
-                    self.bind_mapped_property(PropertyId::Height, map);
-                }
-            } else {
+            } else if input.literal_scalar().is_some() {
                 self.literal_properties::<CODE, SIZE, T, _>(input);
+            } else {
+                if let Some(group) = input.boolean_id() {
+                    self.bind_boolean(crate::style_port::boolean::Record::Member {
+                        id: group,
+                        sink: id.into(),
+                        colors: None,
+                    });
+                    return;
+                }
+                let map = input.mapped().expect("sealed mapped input");
+                if SIZE {
+                    self.bind_mapped_property(id, map);
+                    self.bind_mapped_property(PropertyId::Height, map);
+                } else {
+                    self.bind_mapped_property(id, map);
+                }
             }
         }
     }
-    pub fn w(mut self, width: impl IntoProp<'a, f64>) -> Self {
-        self.property_input::<{ PropertyId::Width as u16 }, false, f64, _>(width);
+    pub fn w(mut self, width: impl IntoProp<'a, crate::Length>) -> Self {
+        self.property_input::<{ PropertyId::Width as u16 }, false, crate::Length, _>(width);
         self
     }
-    pub fn h(mut self, height: impl IntoProp<'a, f64>) -> Self {
-        self.property_input::<{ PropertyId::Height as u16 }, false, f64, _>(height);
+    pub fn h(mut self, height: impl IntoProp<'a, crate::Length>) -> Self {
+        self.property_input::<{ PropertyId::Height as u16 }, false, crate::Length, _>(height);
         self
     }
-    pub fn size(mut self, size: impl IntoProp<'a, f64>) -> Self {
-        self.property_input::<{ PropertyId::Width as u16 }, true, f64, _>(size);
+    pub fn size(mut self, size: impl IntoProp<'a, crate::Length>) -> Self {
+        self.property_input::<{ PropertyId::Width as u16 }, true, crate::Length, _>(size);
         self
     }
     pub fn gap(mut self, gap: impl IntoProp<'a, f64>) -> Self {
@@ -764,9 +974,46 @@ impl<'a> El<'a> {
     pub fn text_lg(self) -> Self {
         self.font_size(18)
     }
-    pub fn fg(mut self, color: impl IntoProp<'a, Color>) -> Self {
-        self.property_input::<{ PropertyId::Foreground as u16 }, false, Color, _>(color);
+    pub(crate) fn color_property<I: IntoProp<'a, Color>>(&mut self, input: I, foreground: bool) {
+        if foreground {
+            self.property_input::<{ PropertyId::Foreground as u16 }, false, Color, I>(input);
+        } else {
+            self.property_input::<{ PropertyId::Background as u16 }, false, Color, I>(input);
+        }
+    }
+    pub(crate) fn color_operand(mut self, color: crate::ColorInput<'a>, foreground: bool) -> Self {
+        match color.operand() {
+            crate::style_port::ColorOperand::Property(input) => {
+                self.color_property(input, foreground)
+            }
+            crate::style_port::ColorOperand::Boolean(selection) => {
+                let binding = crate::BoolBinding::new(selection.input);
+                let state = binding.state().into_prop();
+                let id = state.boolean_id().expect("dynamic boolean palette");
+                self = binding.attach(self);
+                self.bind_boolean(crate::style_port::boolean::Record::Member {
+                    id,
+                    sink: if foreground {
+                        PropertyId::Foreground.into()
+                    } else {
+                        PropertyId::Background.into()
+                    },
+                    colors: Some(selection.colors),
+                });
+            }
+            crate::style_port::ColorOperand::Selection(operand) => self.bind_owned_map(
+                if foreground {
+                    PropertyId::Foreground
+                } else {
+                    PropertyId::Background
+                },
+                operand,
+            ),
+        }
         self
+    }
+    pub fn fg(self, color: impl crate::IntoColor<'a>) -> Self {
+        color.apply_color(self, true)
     }
     pub fn bg<S>(self, background: impl IntoBackground<'a, S>) -> Self {
         background.apply_background(self)
@@ -881,11 +1128,13 @@ impl<'a> El<'a> {
         let mut output = Vec::new();
         let mut viewports: Vec<crate::list::ViewportDraft> = Vec::new();
         let mut annotations = Vec::new();
+        let mut focus_indicators = Vec::new();
         let mut images = Vec::new();
         let mut geometry = Vec::new();
         let mut backgrounds = Vec::new();
         let mut style_ports = Vec::new();
         let mut mapped_ports = Vec::new();
+        let mut boolean_description = crate::style_port::boolean::Description::default();
         let mut pending = vec![(None, self, None::<(usize, crate::ItemKey, u32, f32, f32)>)];
         while let Some((parent, mut element, slot)) = pending.pop() {
             if output.len() >= limit {
@@ -907,6 +1156,7 @@ impl<'a> El<'a> {
             let crate::semantic::ExtraParts {
                 list: spec,
                 annotations: annotation,
+                control,
                 projection: projector,
                 image,
                 axes,
@@ -923,37 +1173,42 @@ impl<'a> El<'a> {
                 backgrounds.push((index as usize, gradient));
             }
             let mut shape = shape.unwrap_or_default();
+            let mut disabled = control.disabled;
+            let mut invalid = control.invalid;
             for binding in bindings {
-                let value = binding.signal.scalar().admit(binding.property)?;
-                match binding.property.info().destination {
-                    crate::property::PropertyDestination::Style
-                    | crate::property::PropertyDestination::Paint => {
-                        binding.property.set_erased(&mut element.style, value)?;
-                    }
-                    crate::property::PropertyDestination::Geometry => {
-                        binding.property.set_geometry(&mut shape, value)?;
-                    }
-                }
+                let value = binding.sink.admit(binding.signal.scalar())?;
+                Self::apply_sink(
+                    binding.sink,
+                    value,
+                    &mut element.kind,
+                    &mut element.style,
+                    &mut disabled,
+                    &mut invalid,
+                    &mut shape,
+                )?;
                 style_ports.push(crate::style_port::Draft {
                     node: index,
-                    property: binding.property,
+                    sink: binding.sink,
                     signal: binding.signal,
                 });
             }
+            let (mapped, boolean) = mapped.into_parts();
+            boolean_description.append(boolean, index)?;
             for binding in mapped {
-                let value = binding.operand.scalar()?.admit(binding.property)?;
-                match binding.property.info().destination {
-                    crate::property::PropertyDestination::Style
-                    | crate::property::PropertyDestination::Paint => {
-                        binding.property.set_erased(&mut element.style, value)?;
-                    }
-                    crate::property::PropertyDestination::Geometry => {
-                        binding.property.set_geometry(&mut shape, value)?;
-                    }
-                }
+                let value = binding.sink.admit(binding.operand.scalar()?)?;
+                Self::apply_sink(
+                    binding.sink,
+                    value,
+                    &mut element.kind,
+                    &mut element.style,
+                    &mut disabled,
+                    &mut invalid,
+                    &mut shape,
+                )?;
                 mapped_ports.push(crate::style_port::MapDraft {
                     node: index,
-                    property: binding.property,
+                    sink: binding.sink,
+                    value,
                     operand: binding.operand,
                 });
             }
@@ -979,6 +1234,9 @@ impl<'a> El<'a> {
                 }
                 element.append_children(child);
             }
+            if let Some(color) = control.focus_indicator {
+                focus_indicators.push((index as usize, color));
+            }
             if !annotation.is_empty() {
                 annotations.push(crate::semantic::AnnotationDraft {
                     node: index,
@@ -1001,7 +1259,7 @@ impl<'a> El<'a> {
                     }
                     let mut wrapper = Self::new(NodeKind::ListItem, None);
                     wrapper.append_children(row);
-                    wrapper.style.height = Some(row_height as f32);
+                    wrapper.style.height = crate::Length::Points(row_height as f32);
                     rows.push((
                         Some(index),
                         wrapper,
@@ -1039,16 +1297,59 @@ impl<'a> El<'a> {
             output.push(DraftNode {
                 parent,
                 kind: element.kind,
+                disabled,
+                invalid,
                 text: element.text.take(),
                 style: element.style,
                 on_click: element.on_click.take(),
                 components: std::mem::take(&mut element.components),
             });
         }
+        let boolean_groups = boolean_description.finish()?;
+        for group in &boolean_groups {
+            for member in &group.members {
+                let node = &mut output[member.node as usize];
+                let value = if let Some(colors) = member.colors {
+                    crate::property::PropertyValue::Color(colors[usize::from(group.value)])
+                } else {
+                    crate::property::PropertyValue::Flag(group.value)
+                };
+                let value = member.sink.admit(crate::style_port::Scalar::Value(value))?;
+                let mut shape = geometry
+                    .iter()
+                    .find(|(index, _)| *index == member.node as usize)
+                    .map_or(crate::property::GeometryStyle::default(), |(_, shape)| {
+                        *shape
+                    });
+                Self::apply_sink(
+                    member.sink,
+                    value,
+                    &mut node.kind,
+                    &mut node.style,
+                    &mut node.disabled,
+                    &mut node.invalid,
+                    &mut shape,
+                )?;
+                if member.sink.property().is_some_and(|id| {
+                    id.info().destination == crate::property::PropertyDestination::Geometry
+                }) {
+                    if let Some((_, old)) = geometry
+                        .iter_mut()
+                        .find(|(index, _)| *index == member.node as usize)
+                    {
+                        *old = shape;
+                    } else {
+                        geometry.push((member.node as usize, shape));
+                    }
+                }
+            }
+        }
         Ok(Description {
+            boolean_groups,
             nodes: output,
             viewports,
             annotations,
+            focus_indicators,
             images,
             geometry,
             backgrounds,
@@ -1108,6 +1409,7 @@ impl Drop for ComponentBoundaries {
 }
 
 pub(crate) struct Description<'a> {
+    pub boolean_groups: Vec<crate::style_port::BooleanDraft<'a>>,
     pub backgrounds: Vec<(usize, &'a gpui_canvas::Gradient)>,
     pub geometry: Vec<(usize, crate::property::GeometryStyle)>,
     pub style_ports: Vec<crate::style_port::Draft<'a>>,
@@ -1115,11 +1417,14 @@ pub(crate) struct Description<'a> {
     pub nodes: Vec<DraftNode<'a>>,
     pub viewports: Vec<crate::list::ViewportDraft>,
     pub annotations: Vec<crate::semantic::AnnotationDraft<'a>>,
+    pub focus_indicators: Vec<(usize, Color)>,
     pub images: Vec<crate::image::ImageDraft<'a>>,
 }
 pub(crate) struct DraftNode<'a> {
     pub(crate) parent: Option<u32>,
     pub(crate) kind: NodeKind,
+    pub(crate) disabled: bool,
+    pub(crate) invalid: bool,
     pub(crate) text: Option<Text<'a>>,
     pub(crate) style: Style,
     pub(crate) on_click: Option<Handler>,
@@ -1140,6 +1445,15 @@ pub fn button<'a>(text: impl IntoText<'a>) -> El<'a> {
 }
 
 /// A controlled two-state checkbox with a visual label and semantic checked state.
+/// Accepts bool snapshots or a registered `&Signal<bool>` for direct publication.
+/// A snapshot's dependencies must use `Sources::field`/`component`; declaring a
+/// direct source does not observe an ordinary Rust dereference or branch.
+///
+/// ```compile_fail
+/// use gpui::{Signal, checkbox};
+/// let value = Signal::new(1_u32);
+/// let _ = checkbox("Wrong type", &value);
+/// ```
 /// The model owns `checked`; activation only invokes the installed `on_click`
 /// route. Pointer release, Space, Enter and assistive Click share that route.
 /// Supply a nonempty label or an explicit accessible `name`.
@@ -1147,8 +1461,10 @@ pub fn button<'a>(text: impl IntoText<'a>) -> El<'a> {
 /// state remains readable, but the checkbox is neither actionable nor focusable.
 /// Style the label/control with the ordinary element properties; this does not
 /// install a platform widget or draw a check mark.
-pub fn checkbox<'a>(label: impl IntoText<'a>, checked: bool) -> El<'a> {
-    El::new(NodeKind::CheckBox(checked), Some(label.into_text()))
+pub fn checkbox<'a>(label: impl IntoText<'a>, checked: impl IntoProp<'a, bool>) -> El<'a> {
+    let mut element = El::new(NodeKind::CheckBox(false), Some(label.into_text()));
+    element.control_input(crate::style_port::Sink::CHECKED, checked.into_prop());
+    element
 }
 /// A two-way text port accepts a writable String signal, never a snapshot.
 /// Mounting additionally requires a registered owner-relative source projection.
@@ -1188,14 +1504,13 @@ pub trait IntoBackground<'a, S>: sealed::Background<S> {
     #[doc(hidden)]
     fn apply_background(self, element: El<'a>) -> El<'a>;
 }
-impl<'a, I: IntoProp<'a, Color>> sealed::Background<Color> for I {}
-impl<'a, I: IntoProp<'a, Color>> IntoBackground<'a, Color> for I {
+impl<'a, I: crate::IntoColor<'a>> sealed::Background<Color> for I {}
+impl<'a, I: crate::IntoColor<'a>> IntoBackground<'a, Color> for I {
     fn apply_background(self, mut element: El<'a>) -> El<'a> {
         if let Some(extra) = element.extra.as_mut() {
             extra.clear_background();
         }
-        element.property_input::<{ PropertyId::Background as u16 }, false, Color, _>(self);
-        element
+        self.apply_color(element, false)
     }
 }
 impl sealed::Background<gpui_canvas::Gradient> for &gpui_canvas::Gradient {}
@@ -1705,8 +2020,8 @@ mod tests {
             .flatten();
         assert_eq!(nodes[0].kind.role(), Role::TextInput);
         assert!(nodes[0].text.as_ref().unwrap().signal().is_some());
-        assert_eq!(nodes[0].style.width, Some(320.0));
-        assert_eq!(nodes[0].style.height, Some(24.0));
+        assert_eq!(nodes[0].style.width, crate::Length::Points(320.0));
+        assert_eq!(nodes[0].style.height, crate::Length::Points(24.0));
         assert_eq!(nodes[0].style.fg, Color::rgb(1, 2, 3));
     }
 
@@ -1745,22 +2060,34 @@ mod tests {
         }
         macro_rules! numbers {
             ($($ty:ty),+) => {$(
-                check!(w, f64, WIDTH, 3 as $ty, Some(3.0));
-                check!(h, f64, HEIGHT, 3 as $ty, Some(3.0));
+                check!(w, f64, WIDTH, 3 as $ty, crate::Length::Points(3.0));
+                check!(h, f64, HEIGHT, 3 as $ty, crate::Length::Points(3.0));
                 check!(gap, f64, GAP, 3 as $ty, 3.0);
                 check!(p, f64, PADDING, 3 as $ty, 3.0);
                 check!(font_size, f64, FONT_SIZE, 3 as $ty, 3.0);
             )+};
         }
         numbers!(f32, f64, u8, u16, u32, u64, usize, i8, i16, i32, i64, isize);
-        check!(w, f64, WIDTH, -0.0_f64, Some(-0.0));
+        check!(w, f64, WIDTH, -0.0_f64, crate::Length::Points(-0.0));
         check!(p, f64, PADDING, -0.0_f32, -0.0);
         // Preserve the inherited IntoLength→f64→f32 conversion, including its
         // double-rounding boundaries, rather than silently switching casts.
         let midpoint = (1_u64 << 63) + (1_u64 << 39) + 1;
-        check!(w, f64, WIDTH, midpoint, Some((midpoint as f64) as f32));
+        check!(
+            w,
+            f64,
+            WIDTH,
+            midpoint,
+            crate::Length::Points((midpoint as f64) as f32)
+        );
         let midpoint = (1_i64 << 62) + (1_i64 << 38) + 1;
-        check!(h, f64, HEIGHT, midpoint, Some((midpoint as f64) as f32));
+        check!(
+            h,
+            f64,
+            HEIGHT,
+            midpoint,
+            crate::Length::Points((midpoint as f64) as f32)
+        );
         for color in [
             Color::rgb(1, 2, 3),
             Color::display_p3(-0.0, 0.5, 1.0, 0.5).unwrap(),

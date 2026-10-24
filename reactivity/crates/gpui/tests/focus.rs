@@ -160,7 +160,7 @@ fn click_focus_uses_geometry_while_explicit_focus_and_activation_are_position_fr
     win.set_property(
         button,
         gpui::property::WIDTH,
-        gpui::property::Contribution::Set(Some(0.0)),
+        gpui::property::Contribution::Set(gpui::Length::Points(0.0)),
     )
     .unwrap();
     assert_eq!(win.click(button), Err(Error::NotHittable));

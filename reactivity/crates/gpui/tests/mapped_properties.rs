@@ -330,11 +330,14 @@ fn mapped_outputs_keep_inspector_bases_and_mix_with_direct_text_in_either_instal
         )
         .unwrap();
         let target = win.query().name("mapped").one().unwrap();
-        win.set_property(target, WIDTH, Contribution::Set(Some(50.0)))
+        win.set_property(target, WIDTH, Contribution::Set(gpui::Length::Points(50.0)))
             .unwrap();
         win.set(VALUE, 23).unwrap();
         assert!(win.contains_text("23").unwrap());
-        assert_eq!(win.property(target, WIDTH).unwrap(), Some(50.0));
+        assert_eq!(
+            win.property(target, WIDTH).unwrap(),
+            gpui::Length::Points(50.0)
+        );
         assert_eq!(
             win.property(target, BACKGROUND).unwrap().solid().unwrap(),
             Color::BLACK
@@ -345,7 +348,10 @@ fn mapped_outputs_keep_inspector_bases_and_mix_with_direct_text_in_either_instal
         );
         win.set_property(target, WIDTH, Contribution::Inherit)
             .unwrap();
-        assert_eq!(win.property(target, WIDTH).unwrap(), Some(24.0));
+        assert_eq!(
+            win.property(target, WIDTH).unwrap(),
+            gpui::Length::Points(24.0)
+        );
         assert_eq!(win.counters().owner_reruns, 0);
     }
     struct Colors(Signal<Color>);

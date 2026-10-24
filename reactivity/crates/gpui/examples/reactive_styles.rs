@@ -76,7 +76,10 @@ fn main() -> Result<(), gpui::Error> {
     win.reset_counters()?;
     win.click(win.button("Resize"))?;
     win.click(win.button("Recolor"))?;
-    assert_eq!(win.property(preview, gpui::property::WIDTH)?, Some(300.0));
+    assert_eq!(
+        win.property(preview, gpui::property::WIDTH)?,
+        gpui::Length::Points(300.0)
+    );
     assert_eq!(win.counters().owner_reruns, 0);
     println!("{}", win.semantics()?.to_json()?);
     println!(

@@ -5,6 +5,64 @@
 pub use gpui_canvas::{Color, rgb};
 pub use gpui_reactivity_core::Affine;
 
+/// An authored layout dimension. Percentages use `100.0` for the full parent
+/// content size; values above 100 are allowed. `Auto` is an explicit value,
+/// separate from a property's `Contribution::Inherit`.
+///
+/// Points and percentages must be finite and nonnegative. The property
+/// admission boundary checks them before layout, including reactive updates.
+///
+/// ```
+/// use gpui::{Length, div};
+/// let element = div().w(Length::Percent(100.0)).h(Length::Auto);
+/// ```
+///
+/// ```compile_fail
+/// use gpui::{Length, div};
+/// div().gap(Length::Percent(10.0));
+/// ```
+#[derive(Clone, Copy, Debug, Default, PartialEq)]
+pub enum Length {
+    #[default]
+    Auto,
+    Points(f32),
+    Percent(f32),
+}
+impl Length {
+    pub(crate) const fn authoring(self) -> [u32; 2] {
+        match self {
+            Self::Auto => [0, 0],
+            Self::Points(value) => [1, value.to_bits()],
+            Self::Percent(value) => [2, value.to_bits()],
+        }
+    }
+    pub(crate) const fn is_auto(self) -> bool {
+        matches!(self, Self::Auto)
+    }
+}
+impl std::fmt::Display for Length {
+    fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
+        match self {
+            Self::Auto => f.write_str("auto"),
+            Self::Points(value) => value.fmt(f),
+            Self::Percent(value) => write!(f, "{value}%"),
+        }
+    }
+}
+impl std::str::FromStr for Length {
+    type Err = std::num::ParseFloatError;
+    fn from_str(source: &str) -> Result<Self, Self::Err> {
+        let source = source.trim();
+        if source == "auto" {
+            Ok(Self::Auto)
+        } else if let Some(value) = source.strip_suffix('%') {
+            value.trim().parse().map(Self::Percent)
+        } else {
+            source.parse().map(Self::Points)
+        }
+    }
+}
+
 #[derive(Clone, Copy, Debug, Default, PartialEq, Eq)]
 #[repr(u8)]
 pub enum Flow {
@@ -40,8 +98,8 @@ pub enum Justify {
 
 #[derive(Clone, Copy, Debug, PartialEq)]
 pub struct Style {
-    pub(crate) width: Option<f32>,
-    pub(crate) height: Option<f32>,
+    pub(crate) width: Length,
+    pub(crate) height: Length,
     pub(crate) gap: f32,
     pub(crate) padding: f32,
     pub(crate) font_size: f32,
@@ -56,8 +114,8 @@ pub struct Style {
 
 impl Style {
     pub(crate) const DEFAULT: Self = Self {
-        width: None,
-        height: None,
+        width: Length::Auto,
+        height: Length::Auto,
         gap: 0.0,
         padding: 0.0,
         font_size: 16.0,

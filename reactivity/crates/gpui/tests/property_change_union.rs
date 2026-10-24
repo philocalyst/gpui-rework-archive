@@ -30,9 +30,10 @@ impl Page {
         if self.no_proposal {
             return None;
         }
-        let (id, value) = self
-            .property
-            .unwrap_or((PropertyId::Width, PropertyValue::Dimension(Some(20.0))));
+        let (id, value) = self.property.unwrap_or((
+            PropertyId::Width,
+            PropertyValue::Dimension(gpui::Length::Points(20.0)),
+        ));
         Some((
             self.selected?,
             id,
@@ -104,7 +105,7 @@ fn check(inherit: bool) {
             .set_property_value(
                 target,
                 PropertyId::Width,
-                Contribution::Set(PropertyValue::Dimension(Some(20.0))),
+                Contribution::Set(PropertyValue::Dimension(gpui::Length::Points(20.0))),
             )
             .unwrap();
     }
@@ -119,7 +120,7 @@ fn check(inherit: bool) {
     let commit = owner.activate(owner.button("Apply")).unwrap();
     assert_eq!(
         owner.property_value(target, PropertyId::Width).unwrap(),
-        PropertyValue::Dimension(Some(if inherit { 10.0 } else { 20.0 }))
+        PropertyValue::Dimension(gpui::Length::Points(if inherit { 10.0 } else { 20.0 }))
     );
     assert_eq!(commit.source_epoch, before + 1);
     assert_eq!(owner.counters().source_operations, 1);
@@ -148,7 +149,7 @@ fn overlapping_target_change_counts_once_and_a_peer_change_counts_twice() {
         assert_eq!(commit.changed_nodes, expected);
         assert_eq!(
             owner.property_value(target, PropertyId::Width).unwrap(),
-            PropertyValue::Dimension(Some(20.0))
+            PropertyValue::Dimension(gpui::Length::Points(20.0))
         );
     }
 }
@@ -224,7 +225,7 @@ fn rejected_equal_and_empty_requests_do_not_reuse_a_prior_change_marker() {
     );
     assert_eq!(
         owner.property_value(target, PropertyId::Width).unwrap(),
-        PropertyValue::Dimension(Some(20.0))
+        PropertyValue::Dimension(gpui::Length::Points(20.0))
     );
     owner.update(|page| page.no_proposal = true).unwrap();
     let before = owner.inspect().unwrap().source_epoch;
@@ -308,7 +309,7 @@ fn failed_description_retires_the_old_target_and_discards_its_marker() {
     assert_ne!(fresh, target);
     assert_eq!(
         owner.property_value(fresh, PropertyId::Width).unwrap(),
-        PropertyValue::Dimension(Some(10.0))
+        PropertyValue::Dimension(gpui::Length::Points(10.0))
     );
     assert_eq!(owner.activate(target), Err(Error::StaleTarget));
 }
@@ -336,7 +337,7 @@ fn changed_component_scope_counts_consumed_old_target_and_fresh_replacement() {
             Some((
                 self.selected?,
                 PropertyId::Width,
-                Contribution::Set(PropertyValue::Dimension(Some(20.0))),
+                Contribution::Set(PropertyValue::Dimension(gpui::Length::Points(20.0))),
             ))
         }
         fn replied(&mut self, result: Result<gpui::PropertyState, &Error>) {
@@ -375,7 +376,7 @@ fn changed_component_scope_counts_consumed_old_target_and_fresh_replacement() {
     assert_ne!(old, fresh);
     assert_eq!(
         owner.property_value(fresh, PropertyId::Width).unwrap(),
-        PropertyValue::Dimension(Some(10.0))
+        PropertyValue::Dimension(gpui::Length::Points(10.0))
     );
     assert_eq!(owner.activate(old), Err(Error::StaleTarget));
 }
@@ -409,7 +410,7 @@ fn direct_property_setter_keeps_its_destination_through_list_realization() {
     let mut owner = Win::with_size(Lists(Rows), 128, 128).unwrap();
     let target = owner.button("Target");
     for contribution in [
-        Contribution::Set(PropertyValue::Dimension(Some(20.0))),
+        Contribution::Set(PropertyValue::Dimension(gpui::Length::Points(20.0))),
         Contribution::Inherit,
     ] {
         let commit = owner

@@ -283,7 +283,7 @@ fn failed_new_l_and_old_c_ack_never_reinterpret_native_p_geometry() {
         )
     };
     let p0 = snapshot(&win);
-    win.set_property(target, WIDTH, Contribution::Set(Some(60.)))
+    win.set_property(target, WIDTH, Contribution::Set(crate::Length::Points(60.)))
         .unwrap();
     let c1 = win.with_scene(|_, token| token).unwrap();
     assert_eq!(snapshot(&win), p0);

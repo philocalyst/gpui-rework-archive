@@ -45,13 +45,13 @@ fn inherit_and_refresh_read_canonical_state_after_a_masked_source_change() {
     win.update(|model| *model.application.width = 170.).unwrap();
     assert_eq!(
         win.property(target, gpui::property::WIDTH).unwrap(),
-        Some(193.25)
+        gpui::Length::Points(193.25)
     );
     assert_eq!(&**win.root().unwrap().editor.draft, "193.25");
     win.activate(win.button("Inherit")).unwrap();
     assert_eq!(
         win.property(target, gpui::property::WIDTH).unwrap(),
-        Some(170.)
+        gpui::Length::Points(170.)
     );
     assert_eq!(&**win.root().unwrap().editor.draft, "170");
     assert_eq!(
@@ -149,12 +149,15 @@ fn owned_result_precedes_mutable_reply_source_edits() {
     let initial = win.root().unwrap().last.unwrap();
     assert_eq!(initial.target, target);
     assert_eq!(initial.id, PropertyId::Width);
-    assert_eq!(initial.value, PropertyValue::Dimension(Some(120.)));
+    assert_eq!(
+        initial.value,
+        PropertyValue::Dimension(gpui::Length::Points(120.))
+    );
     assert_eq!(initial.contribution, Contribution::Inherit);
     win.set_property(
         target,
         gpui::property::WIDTH,
-        Contribution::Set(Some(193.25)),
+        Contribution::Set(gpui::Length::Points(193.25)),
     )
     .unwrap();
     win.update(|model| model.mutate_reply = true).unwrap();
@@ -162,7 +165,7 @@ fn owned_result_precedes_mutable_reply_source_edits() {
     assert_eq!(win.root().unwrap().last.unwrap(), initial);
     assert_eq!(
         win.property(target, gpui::property::WIDTH).unwrap(),
-        Some(170.)
+        gpui::Length::Points(170.)
     );
 }
 #[test]
@@ -395,7 +398,7 @@ fn every_closed_catalog_family_returns_canonical_value_and_equal_presence() {
         assert_eq!(equal.value, inherited.value);
         assert_eq!(equal.contribution, Contribution::Set(inherited.value));
         let changed = match inherited.value {
-            PropertyValue::Dimension(_) => PropertyValue::Dimension(Some(100.)),
+            PropertyValue::Dimension(_) => PropertyValue::Dimension(gpui::Length::Points(100.)),
             PropertyValue::Number(value) => PropertyValue::Number(value + 1.),
             PropertyValue::Color(_) => {
                 PropertyValue::Color(Color::oklch(0.7, 0.1, 40., 0.8).unwrap())
@@ -448,4 +451,37 @@ fn public_consumer_headers_remain_explicit() {
     assert_eq!(size_of::<Option<gpui::Window<Companion>>>(), 216);
     assert_eq!(size_of::<Companion>(), 136);
     assert_eq!(size_of::<workbench::value_entry::ValueEntry>(), 104);
+}
+
+#[test]
+fn cold_value_editor_roundtrips_percent_units_and_rejects_invalid_authored_values() {
+    let mut win = Win::with_size(Companion::default(), 800, 400).unwrap();
+    let target = select_application(&mut win);
+    draft(&mut win, "125%");
+    win.activate(win.button("Apply")).unwrap();
+    assert_eq!(
+        win.property(target, gpui::property::WIDTH).unwrap(),
+        Length::Percent(125.0)
+    );
+    assert_eq!(&**win.root().unwrap().editor.draft, "125%");
+    for invalid in ["-1%", "NaN%", "inf%"] {
+        draft(&mut win, invalid);
+        win.activate(win.button("Apply")).unwrap();
+        assert_eq!(
+            win.property(target, gpui::property::WIDTH).unwrap(),
+            Length::Percent(125.0)
+        );
+        assert!(win.root().unwrap().editor.status.starts_with("Rejected:"));
+    }
+    draft(&mut win, "auto");
+    win.activate(win.button("Apply")).unwrap();
+    assert_eq!(
+        win.contribution(target, gpui::property::WIDTH).unwrap(),
+        Contribution::Set(Length::Auto)
+    );
+    win.activate(win.button("Inherit")).unwrap();
+    assert_eq!(
+        win.property(target, gpui::property::WIDTH).unwrap(),
+        Length::Points(120.0)
+    );
 }

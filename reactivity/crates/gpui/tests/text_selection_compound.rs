@@ -208,7 +208,7 @@ fn tab_reveal_that_scrolls_includes_caret_blur_in_its_one_candidate() {
     win.set_property(
         viewport,
         gpui::property::HEIGHT,
-        gpui::property::Contribution::Set(Some(40.)),
+        gpui::property::Contribution::Set(gpui::Length::Points(40.)),
     )
     .unwrap();
     win.reset_counters().unwrap();

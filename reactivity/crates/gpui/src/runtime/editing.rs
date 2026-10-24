@@ -134,6 +134,9 @@ impl<M: View + 'static> Runtime<M> {
 
     pub(super) fn input_index(&self, target: Target) -> Result<usize, Error> {
         let index = self.resolve_index(target)?;
+        if self.nodes[index].content.disabled() {
+            return Err(Error::NotInteractive);
+        }
         if self.nodes[index].kind() != NodeKind::Input {
             return Err(Error::NotInput);
         }
@@ -153,6 +156,7 @@ impl<M: View + 'static> Runtime<M> {
         let node = &self.nodes[index];
         let text = node.text_slot().get(&self.texts)?;
         (node.kind() == NodeKind::Input
+            && !node.content.disabled()
             && node.identity() == state.identity
             && text.field == Some(state.field)
             && std::ptr::eq::<str>(state.value.as_ref(), text.value.as_ref()))
@@ -236,6 +240,7 @@ impl<M: View + 'static> Runtime<M> {
         {
             if let Some(index) = self.by_identity.get(identity)
                 && self.nodes[index].kind() == NodeKind::Input
+                && !self.nodes[index].content.disabled()
                 && let Some(site) = self.nodes[index].text_slot().get(&self.texts)
                 && site.field == Some(field)
             {
@@ -325,14 +330,30 @@ impl<M: View + 'static, L: LaneSet<M>> Win<M, L> {
 
 impl<M: View + 'static, L: LaneSet<M>> RuntimeMut<'_, M, L> {
     pub(super) fn focus_needs_paint(&self, previous: Option<Target>) -> bool {
-        self.active_selection()
-            .is_some_and(|(identity, selection)| {
-                let before =
-                    previous.and_then(|target| self.sites.resolve(target)) == Some(identity);
-                let after =
-                    self.focused.and_then(|target| self.sites.resolve(target)) == Some(identity);
-                before != after && selection.anchor.offset == selection.focus.offset
-            })
+        let styled = previous != self.focused
+            && [previous, self.focused]
+                .into_iter()
+                .flatten()
+                .any(|target| {
+                    self.sites
+                        .resolve(target)
+                        .and_then(|identity| {
+                            self.metadata
+                                .as_deref()
+                                .and_then(|m| m.focus_indicator(identity))
+                        })
+                        .is_some()
+                });
+        styled
+            || self
+                .active_selection()
+                .is_some_and(|(identity, selection)| {
+                    let before =
+                        previous.and_then(|target| self.sites.resolve(target)) == Some(identity);
+                    let after = self.focused.and_then(|target| self.sites.resolve(target))
+                        == Some(identity);
+                    before != after && selection.anchor.offset == selection.focus.offset
+                })
     }
 
     pub(super) fn publish_focus_change(

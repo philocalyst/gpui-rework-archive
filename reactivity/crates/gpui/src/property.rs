@@ -2,7 +2,7 @@
 //! reference; callers cannot supply a setter, validator or impact claim.
 //! Contributions retain presence separately from resolved destination equality.
 
-use crate::style::{Affine, Align, Color, Flow, Justify, Style};
+use crate::style::{Affine, Align, Color, Flow, Justify, Length, Style};
 use std::{collections::BTreeMap, fmt};
 
 /// Inclusive ceilings: Geometry includes hit/bounds/damage/paint; Layout also
@@ -309,10 +309,10 @@ impl ExactValue for f32 {
         a.to_bits() == b.to_bits()
     }
 }
-impl ExactValue for Option<f32> {
+impl ExactValue for Length {
     #[inline]
     fn same(a: &Self, b: &Self) -> bool {
-        a.map(f32::to_bits) == b.map(f32::to_bits)
+        a.authoring() == b.authoring()
     }
 }
 impl ExactValue for Color {
@@ -362,7 +362,7 @@ struct Declaration<T, D> {
 }
 
 /// A closed typed selector. Get/set share the declaration used by reflection.
-/// Width/height use `Option<f32>`: `None` means explicit automatic sizing.
+/// Width/height use `Length`: `Length::Auto` means explicit automatic sizing.
 ///
 /// ```compile_fail,E0423
 /// use gpui::property::Property;
@@ -454,8 +454,11 @@ fn nonnegative(value: &f32) -> Result<(), PropertyErrorKind> {
     }
 }
 #[inline]
-fn dimension(value: &Option<f32>) -> Result<(), PropertyErrorKind> {
-    value.as_ref().map_or(Ok(()), nonnegative)
+fn dimension(value: &Length) -> Result<(), PropertyErrorKind> {
+    match value {
+        Length::Auto => Ok(()),
+        Length::Points(value) | Length::Percent(value) => nonnegative(value),
+    }
 }
 #[inline]
 fn font_size(value: &f32) -> Result<(), PropertyErrorKind> {
@@ -551,8 +554,8 @@ fn finite_transform(value: &Affine) -> Result<(), PropertyErrorKind> {
 // Color's private fields and checked constructors already guarantee finite,
 // valid tagged color values, including extended RGB; do not clip them here.
 properties! {
-    WIDTH, WIDTH_DECL, Option<f32>, Width, "width", Dimension, Layout, width, dimension;
-    HEIGHT, HEIGHT_DECL, Option<f32>, Height, "height", Dimension, Layout, height, dimension;
+    WIDTH, WIDTH_DECL, Length, Width, "width", Dimension, Layout, width, dimension;
+    HEIGHT, HEIGHT_DECL, Length, Height, "height", Dimension, Layout, height, dimension;
     GAP, GAP_DECL, f32, Gap, "gap", Number, Layout, gap, nonnegative;
     PADDING, PADDING_DECL, f32, Padding, "padding", Number, Layout, padding, nonnegative;
     FONT_SIZE, FONT_SIZE_DECL, f32, FontSize, "font_size", Number, Layout, font_size, font_size;
@@ -623,7 +626,7 @@ pub const CLIP: Property<bool, GeometryStyle> = Property(&CLIP_DECL);
 #[derive(Clone, Copy, Debug, PartialEq)]
 #[non_exhaustive]
 pub enum PropertyValue {
-    Dimension(Option<f32>),
+    Dimension(Length),
     Number(f32),
     Color(Color),
     Brush(Brush),
@@ -831,26 +834,29 @@ mod tests {
     #[test]
     fn contribution_presence_survives_destination_equality_and_auto_is_explicit() {
         let mut style = Style::default();
-        let auto = Contribution::Set(None);
+        let auto = Contribution::Set(Length::Auto);
         assert_ne!(auto, Contribution::Inherit);
-        assert_eq!(WIDTH.resolve(auto, Some(40.0)), Ok(None));
+        assert_eq!(WIDTH.resolve(auto, Length::Points(40.0)), Ok(Length::Auto));
         assert_eq!(
-            WIDTH.resolve(Contribution::Inherit, Some(40.0)),
-            Ok(Some(40.0))
+            WIDTH.resolve(Contribution::Inherit, Length::Points(40.0)),
+            Ok(Length::Points(40.0))
         );
         assert!(
             !WIDTH
-                .set(&mut style, WIDTH.resolve(auto, Some(40.0)).unwrap())
+                .set(
+                    &mut style,
+                    WIDTH.resolve(auto, Length::Points(40.0)).unwrap()
+                )
                 .unwrap()
         );
-        assert_eq!(auto, Contribution::Set(None));
+        assert_eq!(auto, Contribution::Set(Length::Auto));
         let same = Contribution::Set(8.0);
         assert_eq!(PADDING.resolve(same, 8.0), Ok(8.0));
         assert_eq!(PADDING.resolve(same, 10.0), Ok(8.0));
         assert_eq!(PADDING.resolve(Contribution::Inherit, 10.0), Ok(10.0));
         assert!(
             WIDTH
-                .resolve(Contribution::Inherit, Some(f32::NAN))
+                .resolve(Contribution::Inherit, Length::Points(f32::NAN))
                 .is_err()
         );
     }
@@ -860,12 +866,15 @@ mod tests {
         let mut style = Style::default();
         for invalid in [f32::NAN, f32::INFINITY, -1.0] {
             let before = style;
-            assert!(WIDTH.set(&mut style, Some(invalid)).is_err());
+            assert!(WIDTH.set(&mut style, Length::Points(invalid)).is_err());
             assert!(GAP.set(&mut style, invalid).is_err());
             assert!(PADDING.set(&mut style, invalid).is_err());
             assert!(
                 PropertyId::Height
-                    .set_erased(&mut style, PropertyValue::Dimension(Some(invalid)))
+                    .set_erased(
+                        &mut style,
+                        PropertyValue::Dimension(crate::Length::Points(invalid))
+                    )
                     .is_err()
             );
             assert_eq!(style, before);
@@ -942,8 +951,14 @@ mod tests {
     fn all_typed_selectors_and_the_erased_seam_edit_the_same_style() {
         let mut style = Style::default();
         let values = [
-            (PropertyId::Width, PropertyValue::Dimension(Some(90.0))),
-            (PropertyId::Height, PropertyValue::Dimension(Some(30.0))),
+            (
+                PropertyId::Width,
+                PropertyValue::Dimension(crate::Length::Points(90.0)),
+            ),
+            (
+                PropertyId::Height,
+                PropertyValue::Dimension(crate::Length::Points(30.0)),
+            ),
             (PropertyId::Gap, PropertyValue::Number(3.0)),
             (PropertyId::Padding, PropertyValue::Number(4.0)),
             (PropertyId::FontSize, PropertyValue::Number(18.0)),
@@ -969,12 +984,12 @@ mod tests {
             assert_eq!(id.get_erased(&style), Ok(value));
             assert!(!id.set_erased(&mut style, value).unwrap());
         }
-        assert_eq!(WIDTH.get(&style), Some(90.0));
+        assert_eq!(WIDTH.get(&style), Length::Points(90.0));
         assert_eq!(PADDING.get(&style), 4.0);
         assert_eq!(FOREGROUND.get(&style), Color::WHITE);
         assert_eq!(FLOW.get(&style), Flow::Row);
         assert_eq!(TRANSFORM.get(&style), Affine::translation(4.0, 8.0));
-        assert_eq!(WIDTH.default_value(), None);
+        assert_eq!(WIDTH.default_value(), Length::Auto);
         assert_eq!(FONT_SIZE.default_value(), 16.0);
     }
 
@@ -985,17 +1000,17 @@ mod tests {
         assert_eq!(overrides.get(1, WIDTH), Contribution::Inherit);
         assert!(overrides.entries.is_empty());
         let equal = overrides
-            .set(1, base, WIDTH, Contribution::Set(None))
+            .set(1, base, WIDTH, Contribution::Set(Length::Auto))
             .unwrap();
         assert_eq!(equal, base);
-        assert_eq!(overrides.get(1, WIDTH), Contribution::Set(None));
+        assert_eq!(overrides.get(1, WIDTH), Contribution::Set(Length::Auto));
         let mut declared = base;
-        WIDTH.set(&mut declared, Some(40.0)).unwrap();
+        WIDTH.set(&mut declared, Length::Points(40.0)).unwrap();
         PADDING.set(&mut declared, 8.0).unwrap();
         let resolved = overrides.resolve(1, declared);
-        assert_eq!(WIDTH.get(&resolved), None);
+        assert_eq!(WIDTH.get(&resolved), Length::Auto);
         assert_eq!(PADDING.get(&resolved), 8.0);
-        assert_eq!(overrides.get(1, WIDTH), Contribution::Set(None));
+        assert_eq!(overrides.get(1, WIDTH), Contribution::Set(Length::Auto));
         let restored = overrides
             .set(1, resolved, WIDTH, Contribution::Inherit)
             .unwrap();
@@ -1009,32 +1024,35 @@ mod tests {
         let mut overrides = Overrides::default();
         let base = Style::default();
         let width = overrides
-            .set(1, base, WIDTH, Contribution::Set(Some(20.0)))
+            .set(1, base, WIDTH, Contribution::Set(Length::Points(20.0)))
             .unwrap();
         let both = overrides
-            .set(1, width, HEIGHT, Contribution::Set(Some(30.0)))
+            .set(1, width, HEIGHT, Contribution::Set(Length::Points(30.0)))
             .unwrap();
         assert_eq!(
             (WIDTH.get(&both), HEIGHT.get(&both)),
-            (Some(20.0), Some(30.0))
+            (Length::Points(20.0), Length::Points(30.0))
         );
         overrides.set(2, base, GAP, Contribution::Set(7.0)).unwrap();
         let mut declared = base;
-        WIDTH.set(&mut declared, Some(100.0)).unwrap();
-        HEIGHT.set(&mut declared, Some(200.0)).unwrap();
+        WIDTH.set(&mut declared, Length::Points(100.0)).unwrap();
+        HEIGHT.set(&mut declared, Length::Points(200.0)).unwrap();
         let both = overrides.resolve(1, declared);
         assert_eq!(
             (WIDTH.get(&both), HEIGHT.get(&both)),
-            (Some(20.0), Some(30.0))
+            (Length::Points(20.0), Length::Points(30.0))
         );
         let height = overrides
             .set(1, both, WIDTH, Contribution::Inherit)
             .unwrap();
         assert_eq!(
             (WIDTH.get(&height), HEIGHT.get(&height)),
-            (Some(100.0), Some(30.0))
+            (Length::Points(100.0), Length::Points(30.0))
         );
-        assert_eq!(overrides.get(1, HEIGHT), Contribution::Set(Some(30.0)));
+        assert_eq!(
+            overrides.get(1, HEIGHT),
+            Contribution::Set(Length::Points(30.0))
+        );
         assert_eq!(overrides.get(2, GAP), Contribution::Set(7.0));
         overrides.retain(|identity| identity == 2);
         assert_eq!(overrides.get(1, HEIGHT), Contribution::Inherit);
@@ -1051,7 +1069,7 @@ mod tests {
         let base = Style::default();
         let current = overrides.set(1, base, GAP, Contribution::Set(3.0)).unwrap();
         overrides
-            .set(2, base, WIDTH, Contribution::Set(Some(8.0)))
+            .set(2, base, WIDTH, Contribution::Set(Length::Points(8.0)))
             .unwrap();
         let old_values = overrides.entries[&1].values.clone();
         let old_base = overrides.entries[&1].base;
