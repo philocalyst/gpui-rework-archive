@@ -4474,6 +4474,14 @@ fn perceptual_gradients_match_independent_authored_f64_oracle() {
                 Color::linear_srgb(-2., -2., -2., f32::MIN_POSITIVE).unwrap(),
                 Color::linear_srgb(4., 0., 0., f32::MIN_POSITIVE).unwrap(),
             ),
+            (
+                Color::oklch(0.6, 0.2, 30., -0.0).unwrap(),
+                Color::oklch(0.5, 0.2, 200., 1.).unwrap(),
+            ),
+            (
+                Color::oklch(0.6, 0.2, 30., 1.).unwrap(),
+                Color::oklch(0.5, 0.2, 200., -0.0).unwrap(),
+            ),
         ];
         for mode in modes {
             let (mut admitted, mut rejected) = (0, 0);

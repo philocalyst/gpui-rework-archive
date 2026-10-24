@@ -108,6 +108,54 @@ fn authored_f64_oracle_covers_alpha_routes_hdr_p3_and_negative_lms() {
     );
 }
 #[test]
+fn signed_zero_author_alpha_does_not_select_fixed_coordinates() {
+    for mode in modes() {
+        for transparent_left in [false, true] {
+            let colors = |zero| {
+                [
+                    Color::oklch(0.6, 0.2, 30., if transparent_left { zero } else { 1. }).unwrap(),
+                    Color::oklch(0.5, 0.2, 200., if transparent_left { 1. } else { zero }).unwrap(),
+                ]
+            };
+            let positive = colors(0.0);
+            let negative = colors(-0.0);
+            let expected = make(positive[0], positive[1], mode);
+            let actual = make(negative[0], negative[1], mode);
+            let index = usize::from(!transparent_left);
+            assert_eq!(
+                actual.view().stop(index).unwrap().color.alpha().to_bits(),
+                0x80000000
+            );
+            assert!(
+                actual
+                    .view()
+                    .stop(index)
+                    .unwrap()
+                    .color
+                    .same_authoring(negative[index])
+            );
+            for t in [0.00001, 0.125, 0.5, 0.875, 0.99999] {
+                let value = actual.view().sample_parameter(t).unwrap();
+                assert_eq!(
+                    value.map(f32::to_bits),
+                    expected
+                        .view()
+                        .sample_parameter(t)
+                        .unwrap()
+                        .map(f32::to_bits)
+                );
+                let reference = oracle::interpolate(negative[0], negative[1], f64::from(t), mode);
+                for channel in 0..4 {
+                    assert!(
+                        (f64::from(value[channel]) - reference[channel]).abs() < 0.00002,
+                        "{mode:?} {transparent_left} {t} {channel}"
+                    );
+                }
+            }
+        }
+    }
+}
+#[test]
 fn exact_endpoints_edges_alpha_admission_and_lossless_authors() {
     for mode in modes() {
         let left = Color::linear_srgb(-0., 0.75, -0.1, 0.25).unwrap();

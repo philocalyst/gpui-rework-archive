@@ -382,7 +382,9 @@ fn prepare_interval(
     let normalized = if scale == 0.0 {
         [0.0; 2]
     } else {
-        [f64::from(a0) / scale, f64::from(a1) / scale]
+        // Author alpha keeps signed zero; private magnitudes reserve the sign
+        // of alpha0 for the fixed-coordinate tag.
+        [f64::from(a0).abs() / scale, f64::from(a1).abs() / scale]
     };
     (
         [
