@@ -123,6 +123,7 @@ pub enum Error {
     MissingElement,
     AmbiguousElement { matches: usize },
     UnregisteredInput { node: usize },
+    UnregisteredControl { node: usize },
     DepthLimit { node: usize },
     ResourceLimit,
     EpochExhausted,
@@ -478,17 +479,24 @@ mod parent_tests {
                 NodeKind::CheckBox(true),
             ] {
                 let original = Content::new(kind, slot);
-                let disabled = original.with_disabled(true);
-                assert!(disabled.disabled());
-                assert_eq!(disabled.kind(), kind);
-                assert_eq!(disabled.text_slot().0, slot.0);
-                assert_eq!(disabled.with_disabled(false).0, original.0);
+                for own in [false, true] {
+                    let disabled = original.with_own_disabled(own).with_disabled(true);
+                    assert!(disabled.disabled());
+                    assert_eq!(disabled.own_disabled(), own);
+                    assert_eq!(disabled.kind(), kind);
+                    assert_eq!(disabled.text_slot().0, slot.0);
+                    assert_eq!(
+                        disabled.with_disabled(false).with_own_disabled(false).0,
+                        original.0
+                    );
+                }
             }
         }
         for resource in [0, MAX_NODES as u32 - 1] {
             for sampling in [crate::ImageSampling::Linear, crate::ImageSampling::Nearest] {
-                let content =
-                    Content::image(image::ImageUse { resource, sampling }).with_disabled(true);
+                let content = Content::image(image::ImageUse { resource, sampling })
+                    .with_own_disabled(true)
+                    .with_disabled(true);
                 let image = content.image_use().unwrap();
                 assert_eq!(image.resource, resource);
                 assert_eq!(image.sampling, sampling);
@@ -2193,7 +2201,13 @@ impl<M: View + 'static> Runtime<M> {
         }
         let mut color_discovery = styles::ColorDiscovery::default();
         for draft in mapped_ports {
-            if let Some(field) = self.sources.resolve(&self.model, draft.operand.signal)? {
+            let field = self.sources.resolve(&self.model, draft.operand.signal)?;
+            if field.is_none() && draft.sink.property().is_none() {
+                return Err(Error::UnregisteredControl {
+                    node: draft.node as usize,
+                });
+            }
+            if let Some(field) = field {
                 fanout
                     .entry(field)
                     .or_insert_with(|| Fanout::new(TextCodec::for_style::<f64>()))
@@ -2201,7 +2215,13 @@ impl<M: View + 'static> Runtime<M> {
             }
         }
         for draft in style_ports {
-            if let Some(field) = self.sources.resolve(&self.model, draft.signal)? {
+            let field = self.sources.resolve(&self.model, draft.signal)?;
+            if field.is_none() && draft.sink.property().is_none() {
+                return Err(Error::UnregisteredControl {
+                    node: draft.node as usize,
+                });
+            }
+            if let Some(field) = field {
                 use crate::property::PropertyId;
                 if !matches!(fanout.get(&field), Some(Fanout::Mapped(_)))
                     && matches!(

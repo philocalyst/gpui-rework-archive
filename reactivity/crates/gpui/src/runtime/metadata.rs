@@ -651,7 +651,9 @@ mod destination_tests {
         }
         if raw & 3 == 3 {
             PropertyId::from_code(property)?;
-        } else if property != 0 {
+        } else if property != 0
+            && !(raw & 3 == 0 && crate::style_port::Sink::control(property).is_some())
+        {
             return None;
         }
         Some(Destination(raw))
@@ -684,9 +686,23 @@ mod destination_tests {
                 .windows(2)
                 .all(|pair| pair[0].node() <= pair[1].node())
         );
-        for port in [0, 1, 2] {
+        for port in [1, 2] {
             assert!(checked((1 << 2) | port).is_none());
         }
+        for node in [0, 1, MAX_NODES - 1] {
+            for sink in [
+                crate::style_port::Sink::CHECKED,
+                crate::style_port::Sink::DISABLED,
+            ] {
+                let destination = Destination::sink(node, sink);
+                let decoded = checked(destination.packed()).unwrap();
+                assert_eq!(decoded.node(), node);
+                assert_eq!(decoded.control(), Some(sink));
+                assert!(decoded.property().is_none());
+                assert_eq!(size_of_val(&sink), 2);
+            }
+        }
+        assert!(checked(3 << 2).is_none());
         for invalid in [0, 15, 8191] {
             assert!(checked((invalid << 2) | 3).is_none());
         }

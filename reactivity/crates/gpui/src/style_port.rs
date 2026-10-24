@@ -155,6 +155,7 @@ pub(crate) struct MapOperand<'a> {
     pub recipe: Result<Recipe, gpui_inline_call::TooLarge>,
 }
 impl MapOperand<'_> {
+    #[cfg(test)]
     pub fn scalar(self) -> Result<Scalar, crate::Error> {
         self.recipe
             .map_err(PendingRecipe::error)?

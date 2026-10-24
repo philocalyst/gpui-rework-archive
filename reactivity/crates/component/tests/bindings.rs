@@ -545,3 +545,39 @@ fn explicitly_erased_properties_remain_copy_while_selected_color_recipes_stay_ty
     // Deliberate erasure of a selection owns its cold descriptor until consumed.
     drop(gpui::div().fg(selection.into_color()));
 }
+
+#[test]
+fn dynamic_intrinsic_operands_require_registration_even_when_false() {
+    struct Unregistered {
+        flag: Signal<bool>,
+        mapped: bool,
+        disabled: bool,
+    }
+    impl View for Unregistered {
+        fn view(&self) -> El<'_> {
+            if self.disabled {
+                gpui::button("Command").disabled(&self.flag)
+            } else if self.mapped {
+                gpui::checkbox("Choice", self.flag.map(|flag| *flag))
+            } else {
+                gpui::checkbox("Choice", &self.flag)
+            }
+        }
+    }
+    for mapped in [false, true] {
+        for disabled in [false, true] {
+            assert!(matches!(
+                Win::with_size(
+                    Unregistered {
+                        flag: Signal::new(false),
+                        mapped,
+                        disabled
+                    },
+                    30,
+                    30
+                ),
+                Err(Error::UnregisteredControl { node: 0 })
+            ));
+        }
+    }
+}
