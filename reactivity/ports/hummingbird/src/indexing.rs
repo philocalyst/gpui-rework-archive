@@ -349,10 +349,13 @@ fn stage(
     let title = metadata
         .title
         .as_ref()
-        .map(|value| value.trim())
+        .map(|value| metadata::clean(value))
         .or_else(|| path.file_stem().and_then(|value| value.to_str()))
         .ok_or_else(|| SourceError::UnsupportedPath(path.into()))?;
-    let artist_sort = metadata.artist_sort.as_ref().map(|value| value.trim());
+    let artist_sort = metadata
+        .artist_sort
+        .as_ref()
+        .map(|value| metadata::clean(value));
     database.connection().execute(
         "INSERT OR REPLACE INTO temp._gpui_scan_track VALUES(?,?,?,?,?,?,?,?,?)",
         params![
@@ -361,13 +364,13 @@ fn stage(
             metadata
                 .title_sort
                 .as_ref()
-                .map_or(title, |value| value.trim()),
+                .map_or(title, |value| metadata::clean(value)),
             artist_sort,
-            metadata.album.as_ref().map(|value| value.trim()),
+            metadata.album.as_ref().map(|value| metadata::clean(value)),
             metadata
                 .album_artist_sort
                 .as_ref()
-                .map(|value| value.trim()),
+                .map(|value| metadata::clean(value)),
             metadata.track_number,
             metadata.disc_number,
             metadata.duration_ms
@@ -384,7 +387,12 @@ fn stage(
         for (position, name) in credits.iter().enumerate() {
             database.connection().execute(
                 "INSERT INTO temp._gpui_scan_credit VALUES(?,?,?,?)",
-                params![location, kind as i64, position as i64, name.trim()],
+                params![
+                    location,
+                    kind as i64,
+                    position as i64,
+                    metadata::clean(name)
+                ],
             )?;
         }
     }

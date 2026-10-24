@@ -133,12 +133,18 @@ pub(crate) fn read(probe: &Probe, path: &Path) -> Result<Metadata, SourceError> 
 // Retain the metadata reader's existing shared strings. No per-tag String or
 // Arc allocation is introduced; whitespace is removed when binding SQLite.
 fn set_option(output: &mut Option<Arc<String>>, value: &Arc<String>) {
-    if !value.trim().is_empty() {
+    if !clean(value).is_empty() {
         *output = Some(value.clone());
     }
 }
 fn append(output: &mut Vec<Arc<String>>, value: &Arc<String>) {
-    if !value.trim().is_empty() && !output.iter().any(|current| current.trim() == value.trim()) {
+    if !clean(value).is_empty() && !output.iter().any(|current| clean(current) == clean(value)) {
         output.push(value.clone());
     }
+}
+
+/// Container padding/terminators are borrowed away at the SQL boundary, while
+/// retaining the reader's original Arc. Interior content stays unchanged.
+pub(crate) fn clean(value: &str) -> &str {
+    value.trim_matches(|character: char| character == '\0' || character.is_whitespace())
 }
