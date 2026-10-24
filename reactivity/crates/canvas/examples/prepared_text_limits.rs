@@ -41,6 +41,12 @@ fn main() {
                     cost.bytes_max,
                     bits(result.as_ref().unwrap())
                 );
+                if let Some(prepared) = held.as_ref() {
+                    println!(
+                        "PREPARED_STORAGE len={len} rows={:?}",
+                        prepared.diagnostic_storage()
+                    );
+                }
                 drop(held);
             }
         }
