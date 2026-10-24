@@ -3,6 +3,28 @@ use gpui_canvas::{
     Affine, Canvas, Color, ColorConfig, Extend, Gradient, GradientGeometry as Geometry,
     GradientStop as Stop, Interpolation, OutputProfile, Point, Rect,
 };
+
+#[test]
+fn public_repeat_sampling_does_not_silently_publish_nonfinite_channels() {
+    let gradient = Gradient::new(
+        Geometry::Linear {
+            start: Point::default(),
+            end: Point { x: 1.0, y: 0.0 },
+        },
+        &[Stop::new(0.0, Color::BLACK), Stop::new(0.5, Color::WHITE)],
+        Extend::Repeat,
+        Interpolation::LinearSrgb,
+    )
+    .unwrap();
+    assert!(
+        gradient
+            .view()
+            .sample_parameter(f32::MAX)
+            .iter()
+            .all(|value| value.is_finite())
+    );
+}
+
 fn half(bytes: &[u8]) -> f64 {
     let bits = u16::from_le_bytes([bytes[0], bytes[1]]);
     let e = ((bits >> 10) & 31) as i32;
