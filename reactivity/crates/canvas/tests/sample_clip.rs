@@ -91,3 +91,37 @@ fn nested_clips_intersect_exact_sample_sets_and_helper_allocates_nothing() {
     assert!(sampled_rect_clip(Affine::scale(0.0, 1.0), first, viewport, [3, 3]).is_err());
     assert!(sampled_rect_clip(Affine::IDENTITY, first, viewport, [0, 3]).is_err());
 }
+
+#[test]
+fn prepared_inverse_lowering_preserves_canonical_ties_without_forward_roundtrip() {
+    let clip = Rect::new(0.0, 0.0, 33.0, 17.0);
+    let mut canvas = Canvas::recording(33, 17, Default::default()).unwrap();
+    canvas
+        .fill_rect(
+            Rect::new(0.0, 0.0, 8.5, 17.0),
+            Affine::scale(1.25, 0.75),
+            clip,
+            Color::BLACK,
+        )
+        .unwrap();
+    let mut draw = canvas.prepared_scene().draws().next().unwrap();
+    let original = draw.sampled_rect_clip([33, 17]).unwrap();
+    assert_eq!(
+        original,
+        sampled_rect_clip(Affine::scale(1.25, 0.75), draw.local_rect, clip, [33, 17]).unwrap()
+    );
+    assert_eq!(original.width, 10.5);
+    draw.inverse[0] = draw.inverse[0].next_down();
+    assert_eq!(draw.sampled_rect_clip([33, 17]).unwrap().width, 10.5);
+    draw.inverse[0] = draw.inverse[0].next_down();
+    assert_eq!(draw.sampled_rect_clip([33, 17]).unwrap().width, 10.75);
+    for inverse in [
+        [0.0; 6],
+        [1.0, 0.125, 0.0, 1.0, 0.0, 0.0],
+        [f64::NAN, 0.0, 0.0, 1.0, 0.0, 0.0],
+        [1e13, 0.0, 0.0, 1.0, 0.0, 0.0],
+    ] {
+        draw.inverse = inverse;
+        assert!(draw.sampled_rect_clip([33, 17]).is_err());
+    }
+}

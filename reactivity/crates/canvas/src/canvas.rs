@@ -135,6 +135,15 @@ pub fn sampled_rect_clip(
     parent: Rect,
     viewport: [u32; 2],
 ) -> Result<Rect, Error> {
+    validate_sampled_domain(rect, parent, viewport)?;
+    if transform.b != 0.0 || transform.c != 0.0 {
+        return Err(Error::InvalidGeometry);
+    }
+    let map = Mapping::new(transform)?;
+    Ok(lower_sampled_rect(&map, rect, parent, viewport))
+}
+
+fn validate_sampled_domain(rect: Rect, parent: Rect, viewport: [u32; 2]) -> Result<(), Error> {
     validate_rect(rect)?;
     validate_rect(parent)?;
     let [width, height] = viewport;
@@ -142,12 +151,12 @@ pub fn sampled_rect_clip(
     if pixels == 0 || pixels > MAX_PIXELS as u64 || width > 16_384 || height > 16_384 {
         return Err(Error::InvalidDimensions);
     }
-    if transform.b != 0.0 || transform.c != 0.0 {
-        return Err(Error::InvalidGeometry);
-    }
-    let map = Mapping::new(transform)?;
+    Ok(())
+}
+
+fn lower_sampled_rect(map: &Mapping, rect: Rect, parent: Rect, [width, height]: [u32; 2]) -> Rect {
     if rect.is_empty() || parent.is_empty() {
-        return Ok(Rect::default());
+        return Rect::default();
     }
     fn lower_bound(count: u32, mut predicate: impl FnMut(u32) -> bool) -> u32 {
         let (mut low, mut high) = (0, count);
@@ -203,19 +212,19 @@ pub fn sampled_rect_clip(
                 }
         });
         if end <= first {
-            return Ok(Rect::default());
+            return Rect::default();
         }
         *interval = [first, end];
     }
     let [[left, right], [top, bottom]] = intervals;
     // Midpoints between lattice samples preserve ordinary integer clip edges.
     // Every integer here is <=65536, so all products/sums are exact in f32.
-    Ok(Rect::new(
+    Rect::new(
         left as f32 * 0.25,
         top as f32 * 0.25,
         (right - left) as f32 * 0.25,
         (bottom - top) as f32 * 0.25,
-    ))
+    )
 }
 
 // One source of retained draw order. Compact typed lanes share text-run state;
@@ -678,6 +687,32 @@ pub struct PreparedDraw<'a> {
     pub bounds: Rect,
     pub color: [f32; 4],
     pub source: PreparedSource<'a>,
+}
+
+impl PreparedDraw<'_> {
+    /// Lower this draw's rectangular local domain onto the fixed 4×4 lattice.
+    /// This checks rectangular membership only; rounded corners and material
+    /// sampling remain separate. The inverse must be finite and axis-aligned,
+    /// within the Canvas inverse-magnitude limit of 1e12.
+    pub fn sampled_rect_clip(&self, viewport: [u32; 2]) -> Result<Rect, Error> {
+        validate_sampled_domain(self.local_rect, self.clip, viewport)?;
+        let map = Mapping {
+            inverse: self.inverse,
+        };
+        if !map.axis_aligned()
+            || map.inverse[0] == 0.0
+            || map.inverse[3] == 0.0
+            || map.inverse.iter().any(|v| !v.is_finite() || v.abs() > 1e12)
+        {
+            return Err(Error::InvalidGeometry);
+        }
+        Ok(lower_sampled_rect(
+            &map,
+            self.local_rect,
+            self.clip,
+            viewport,
+        ))
+    }
 }
 
 /// Exact Vec-capacity ledger. HashMap bucket/control allocation is opaque:

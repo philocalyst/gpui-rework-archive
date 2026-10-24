@@ -68,6 +68,15 @@ precision limits, source/stack costs and the unadopted alternatives.
 
 ## Current verification
 
+The [axis-solid coverage correction](evidence/axis-solid-coverage/README.md)
+uses the canonical CPU inverse predicate to select exact GPU sample intervals
+for plain axis-aligned solids. Root passes 47 ordinary GPU and 273 scalar
+Canvas/GPU cases plus strict checks. Borrowed boundaries remove the first fix's
+renderer-frame growth; the remaining code and host-search costs stay charged.
+Core is **31,813** non-test, non-comment lines, **+68**. General glyph/image/shear
+precision and hardware conformance remain; the failed prefix optimization stays
+stopped and certified-seed work is a separate experiment.
+
 The [visual-line navigation slice](evidence/text-navigation/README.md) shares the
 existing geometry through public/native Up/Down and line-edge keys. Same-source
 selection updates reuse their owned lease. Producer and Root composition checks
@@ -94,8 +103,7 @@ native suites pass 838/211/648 cases and strict checks pass. Core is **31,616**
 non-test, non-comment lines, **+298** from 5381. The public glyph API is a
 borrowed value iterator. Its removed private Debug field caused an original
 oracle failure; the separate exact semantic comparison and all costs are kept.
-Common-eight compression and the new axis-boundary GPU correction remain
-separate candidates. No whole-campaign,
+Common-eight compression remains a separate candidate. No whole-campaign,
 application-parity, speed or RSS claim follows from this text integration.
 
 The bundled primary now embeds a reproducible [full static default instance](crates/canvas/evidence/default-font/README.md).

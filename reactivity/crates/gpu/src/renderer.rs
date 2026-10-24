@@ -138,6 +138,22 @@ fn prepared<'a>(group: PreparedGroup<'a>, p: PreparedPlacement<'a>) -> PreparedD
         source: p.source,
     }
 }
+// Quarter-pixel endpoints select the canonical CPU's exact sample set.
+// Keep an empty domain outside the viewport with positive extents: the shader
+// computes normalized coordinates before rejecting local membership.
+fn sampled_solid_rect(
+    draw: &PreparedDraw<'_>,
+    viewport: [u32; 2],
+) -> Result<gpui_canvas::Rect, Error> {
+    let rect = draw
+        .sampled_rect_clip(viewport)
+        .map_err(|_| Error::InvalidScene)?;
+    Ok(if rect.is_empty() {
+        gpui_canvas::Rect::new(-1.0, -1.0, 0.25, 0.25)
+    } else {
+        rect
+    })
+}
 fn common_words(group: PreparedGroup<'_>, error: [f32; 2], correction: u32) -> [Word; 5] {
     let [a, b, c, d, tx, ty] = group.inverse.map(|v| v as f32);
     let clip = group.clip;
@@ -700,9 +716,23 @@ impl RendererState {
         let mut ordinal = 0;
         let mut shared_groups = 0;
         let mut compact_draws = 0;
+        let viewport = gpui_canvas::Rect::new(0.0, 0.0, scene.width as f32, scene.height as f32);
         for group in scene.groups() {
             let compact = compact_group(group, self.grouped_records);
-            let correction = self.correction(group.inverse, group.clip);
+            let lower_solid = group.inverse[1] == 0.0
+                && group.inverse[2] == 0.0
+                && group.placements().all(|p| p.source.is_solid());
+            // Retain canonical geometry for admission/CSR/proofs. Only the
+            // uploaded coverage changes: quarter edges and eighth samples make
+            // identity arithmetic exact, so no residual/error lane is needed.
+            let mut packet_group = group;
+            let correction = if lower_solid {
+                packet_group.inverse = [1.0, 0.0, 0.0, 1.0, 0.0, 0.0];
+                packet_group.clip = viewport;
+                0
+            } else {
+                self.correction(group.inverse, group.clip)
+            };
             // The optional paint owner captures only requested groups here.
             // Ordinary render's empty observer specializes away. Inline
             // multi-placement diagnostic groups decline color-only patching.
@@ -720,7 +750,11 @@ impl RendererState {
                     error[1] = error[1].max(e[1]);
                 }
                 let common = self.records.len() as u32;
-                let mut words = common_words(group, error, correction);
+                let mut words = common_words(
+                    packet_group,
+                    if lower_solid { [0.0; 2] } else { error },
+                    correction,
+                );
                 if let Some(slot) = group.paint_slot() {
                     words[3] = [slots::color_word(bank_count, slot), 0, 0, 0];
                     words[4][0] |= SLOT_COLOR;
@@ -731,7 +765,11 @@ impl RendererState {
                 for p in group.placements() {
                     let draw = prepared(group, p);
                     has_masks |= draw.source.mask().is_some();
-                    let r = draw.local_rect;
+                    let r = if lower_solid {
+                        sampled_solid_rect(&draw, [scene.width, scene.height])?
+                    } else {
+                        draw.local_rect
+                    };
                     let address = self.records.len() as u32;
                     self.records.extend_from_slice(&[
                         float_word([r.x, r.y, r.width, r.height]),
@@ -755,7 +793,15 @@ impl RendererState {
                     let error = validate_draw(draw, ordinal, scene.width, scene.height)?;
                     has_masks |= draw.source.mask().is_some();
                     let address = INLINE_RECORD | self.records.len() as u32;
-                    let mut words = inline_words(draw, error, correction);
+                    let mut packet_draw = prepared(packet_group, p);
+                    let packet_error = if lower_solid {
+                        packet_draw.local_rect =
+                            sampled_solid_rect(&draw, [scene.width, scene.height])?;
+                        [0.0; 2]
+                    } else {
+                        error
+                    };
+                    let mut words = inline_words(packet_draw, packet_error, correction);
                     if let Some(slot) = group.paint_slot() {
                         words[4] = [slots::color_word(bank_count, slot), 0, 0, 0];
                         words[5][3] |= SLOT_COLOR;

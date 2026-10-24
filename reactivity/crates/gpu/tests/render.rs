@@ -3255,3 +3255,110 @@ fn viewport_partial_tiles_and_maximum_extent_preserve_all_four_edges() {
         }
     });
 }
+
+#[test]
+fn axis_solids_preserve_deep_stacks_reflections_and_complementary_sample_ties() {
+    pollster::block_on(async {
+        for format in [
+            wgpu::TextureFormat::Rgba8UnormSrgb,
+            wgpu::TextureFormat::Rgba16Float,
+        ] {
+            let mut renderer = renderer(format).await;
+            renderer.set_tile_proofs(false);
+            let config = if format == wgpu::TextureFormat::Rgba16Float {
+                ColorConfig::linear_hdr(gpui_canvas::OutputProfile::Srgb, 203.0).unwrap()
+            } else {
+                ColorConfig::default()
+            };
+            for banked in [false, true] {
+                for transform in [
+                    Affine::IDENTITY,
+                    Affine::translation(0.125, 0.375),
+                    Affine {
+                        a: -1.0,
+                        tx: 33.0,
+                        ..Affine::IDENTITY
+                    },
+                    Affine {
+                        d: -1.0,
+                        ty: 17.0,
+                        ..Affine::IDENTITY
+                    },
+                    Affine {
+                        a: 1.25,
+                        d: 0.75,
+                        ..Affine::IDENTITY
+                    },
+                    Affine {
+                        c: 0.125,
+                        ..Affine::IDENTITY
+                    },
+                ] {
+                    for edge in [8.125_f32.next_down(), 8.125, 8.125_f32.next_up(), 8.5] {
+                        let mut canvas = Canvas::recording(33, 17, config).unwrap();
+                        canvas.clear(Color::linear_srgb(0.125, 0.25, 0.5, 1.0).unwrap());
+                        let clip = Rect::new(0.0, 0.0, 33.0, 17.0);
+                        let color = if format == wgpu::TextureFormat::Rgba16Float {
+                            Color::linear_srgb(2.0, -0.125, 0.75, 0.17).unwrap()
+                        } else {
+                            Color::rgba(31, 89, 173, 43)
+                        };
+                        let slot = banked.then(|| {
+                            canvas
+                                .paint_slot(gpui_canvas::PaintColor::new(color))
+                                .unwrap()
+                        });
+                        for _ in 0..32 {
+                            let full = Rect::new(-2.0, -2.0, 37.0, 21.0);
+                            if let Some(slot) = slot {
+                                canvas
+                                    .fill_rect_slot(full, Affine::IDENTITY, clip, slot)
+                                    .unwrap();
+                            } else {
+                                canvas
+                                    .fill_rect(full, Affine::IDENTITY, clip, color)
+                                    .unwrap();
+                            }
+                        }
+                        for (rect, paint) in [
+                            (
+                                Rect::new(0.0, 0.0, edge, 17.0),
+                                Color::rgba(231, 17, 37, 127),
+                            ),
+                            (
+                                Rect::new(edge, 0.0, 33.0 - edge, 17.0),
+                                Color::rgba(19, 227, 83, 191),
+                            ),
+                        ] {
+                            canvas.fill_rect(rect, transform, clip, paint).unwrap();
+                        }
+                        let actual = readback(&mut renderer, &canvas);
+                        let expected = canvas.pixels();
+                        if format == wgpu::TextureFormat::Rgba16Float {
+                            for (a, b) in actual
+                                .as_chunks::<2>()
+                                .0
+                                .iter()
+                                .zip(expected.as_chunks::<2>().0)
+                            {
+                                let a = u16::from_le_bytes(*a);
+                                let b = u16::from_le_bytes(*b);
+                                assert!(
+                                    a.abs_diff(b) <= 1 || (a & 0x7fff == 0 && b & 0x7fff == 0),
+                                    "HDR banked{banked} {transform:?} edge{edge}: {a:04x} {b:04x}"
+                                );
+                            }
+                        } else {
+                            for (&a, &b) in actual.iter().zip(expected) {
+                                assert!(
+                                    a.abs_diff(b) <= 1,
+                                    "SDR banked{banked} {transform:?} edge{edge}: GPU{a} CPU{b}"
+                                );
+                            }
+                        }
+                    }
+                }
+            }
+        }
+    });
+}

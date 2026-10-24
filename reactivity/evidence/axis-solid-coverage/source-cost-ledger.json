@@ -1,0 +1,563 @@
+{
+  "base": "5381eb93e62e97573bbbb3577e8bd0512d4f0dde",
+  "first_fix": "1ad7fee64b7387c4a708bf276d194f21f1bc7c82",
+  "successor": "e872330f303deae4a7fba191af31e5bffa574054",
+  "source_path": "/tmp/gpui-half-open-borrow-sol",
+  "core_baseline": 31318,
+  "core_first_fix": 31386,
+  "core_successor": 31386,
+  "sections_vs_shipping": {
+    "by-value": {
+      ".text": 2624,
+      ".rodata": 0,
+      ".data.rel.ro": 0,
+      ".eh_frame": 168,
+      ".gcc_except_table": 0
+    },
+    "borrowed": {
+      ".text": 2656,
+      ".rodata": 0,
+      ".data.rel.ro": 0,
+      ".eh_frame": 168,
+      ".gcc_except_table": 0
+    }
+  },
+  "borrowed_vs_by_value": {
+    ".text": 32,
+    ".rodata": 0,
+    ".data.rel.ro": 0,
+    ".eh_frame": 0,
+    ".gcc_except_table": 0
+  },
+  "functions": {
+    "shipping": {
+      "<gpui_gpu::renderer::RendererState>::render_observed::<<gpui_gpu::renderer::paint::PaintRenderer>::render_mapped::{closure#2}>": [
+        {
+          "address": 7857680,
+          "symbols": [
+            {
+              "address": 7857680,
+              "bytes": 9347,
+              "kind": "t"
+            }
+          ],
+          "reachable_own_stack_bytes_excluding_return_address": 1640,
+          "unknown": [],
+          "direct_and_indirect_calls": [
+            "*0x6998b7(%rip)        # e1a2d8 <_DYNAMIC+0x368>",
+            "*0x69998d(%rip)        # e1a3c8 <_DYNAMIC+0x458>",
+            "*0x69999a(%rip)        # e1a3c8 <_DYNAMIC+0x458>",
+            "*0x699adf(%rip)        # e1a550 <_DYNAMIC+0x5e0>",
+            "*0x699d83(%rip)        # e1a550 <_DYNAMIC+0x5e0>",
+            "*0x69a354(%rip)        # e1ad68 <_DYNAMIC+0xdf8>",
+            "*0x69a6c1(%rip)        # e1ae20 <_DYNAMIC+0xeb0>",
+            "*0x69a933(%rip)        # e1ae18 <_DYNAMIC+0xea8>",
+            "*0x69ad89(%rip)        # e1ae10 <_DYNAMIC+0xea0>",
+            "*0x69b225(%rip)        # e1ae00 <_DYNAMIC+0xe90>",
+            "*0x69b266(%rip)        # e1ae00 <_DYNAMIC+0xe90>",
+            "*0x69b473(%rip)        # e1ae00 <_DYNAMIC+0xe90>",
+            "*0x69b7af(%rip)        # e1ae08 <_DYNAMIC+0xe98>",
+            "*0x69bab4(%rip)        # e1ae08 <_DYNAMIC+0xe98>",
+            "*0x69bec3(%rip)        # e1a550 <_DYNAMIC+0x5e0>",
+            "*0x69c1c0(%rip)        # e1ae00 <_DYNAMIC+0xe90>",
+            "*0x69c241(%rip)        # e1adf8 <_DYNAMIC+0xe88>",
+            "*0x69c3eb(%rip)        # e1adf0 <_DYNAMIC+0xe80>",
+            "77e4c0 <<core::option::Option<gpui_canvas::canvas::GlyphMask>>::map_or::<[u32; 3], <gpui_gpu::renderer::RendererState>::render_observed<<gpui_gpu::renderer::RendererState>::render::{closure#0}>::{closure#4}>>",
+            "781820 <gpui_gpu::renderer::visit::<<gpui_gpu::renderer::RendererState>::render_observed<<gpui_gpu::renderer::RendererState>::render::{closure#0}>::{closure#5}>>",
+            "781a40 <<gpui_canvas::canvas::Groups as core::iter::traits::iterator::Iterator>::try_fold::<usize, <gpui_gpu::renderer::RendererState>::render_observed<<gpui_gpu::renderer::RendererState>::render::{closure#0}>::{closure#2}, core::result::Result<usize, gpui_gpu::renderer::Error>>>",
+            "781b90 <<gpui_gpu::renderer::paint::PaintRenderer>::render_mapped::{closure#2}>",
+            "781c40 <<gpui_canvas::canvas::PreparedGroup>::placements::{closure#0}>",
+            "781f00 <<gpui_gpu::renderer::Buffer>::write>",
+            "7828c0 <<gpui_gpu::renderer::GpuContext>::submit>",
+            "782a60 <<gpui_gpu::renderer::RendererState>::correction>",
+            "782e20 <<gpui_gpu::renderer::RendererState>::prepare_atlas>",
+            "785c50 <<gpui_gpu::renderer::RendererState>::bin_draw>",
+            "786f70 <gpui_gpu::renderer::compact_group>",
+            "786fc0 <gpui_gpu::renderer::validate_draw>",
+            "787690 <<core::iter::adapters::enumerate::Enumerate<core::iter::adapters::map::Map<core::slice::iter::Iter<u32>, <gpui_canvas::canvas::PreparedGroup>::placements::{closure#0}>> as core::iter::traits::iterator::Iterator>::next>",
+            "789b80 <<hashbrown::raw::RawTable<([u32; 8], u32)>>::clear>",
+            "78a030 <<gpui_gpu::renderer::images::Images>::metadata>",
+            "78a130 <<alloc::vec::Vec<[u32; 2]>>::resize>",
+            "78a250 <<alloc::vec::Vec<u32>>::resize>",
+            "78a3a0 <gpui_gpu::renderer::images::prepare>",
+            "78cff0 <<alloc::raw_vec::RawVecInner<_>>::reserve::do_reserve_and_handle::<alloc::alloc::Global>>",
+            "78d310 <<alloc::raw_vec::RawVecInner>::try_reserve_exact>",
+            "78d610 <gpui_gpu::renderer::slots::color_word>",
+            "78d650 <gpui_gpu::renderer::slots::write_prefix>",
+            "dbb6c0 <_Unwind_Resume@plt>"
+          ]
+        }
+      ],
+      "<gpui_gpu::renderer::RendererState>::render": [
+        {
+          "address": 7878736,
+          "symbols": [
+            {
+              "address": 7878736,
+              "bytes": 9209,
+              "kind": "T"
+            }
+          ],
+          "reachable_own_stack_bytes_excluding_return_address": 1496,
+          "unknown": [],
+          "direct_and_indirect_calls": [
+            "*0x6946f8(%rip)        # e1a2d8 <_DYNAMIC+0x368>",
+            "*0x6947ce(%rip)        # e1a3c8 <_DYNAMIC+0x458>",
+            "*0x6947db(%rip)        # e1a3c8 <_DYNAMIC+0x458>",
+            "*0x694921(%rip)        # e1a550 <_DYNAMIC+0x5e0>",
+            "*0x694bc3(%rip)        # e1a550 <_DYNAMIC+0x5e0>",
+            "*0x695195(%rip)        # e1ad68 <_DYNAMIC+0xdf8>",
+            "*0x6954f4(%rip)        # e1ae20 <_DYNAMIC+0xeb0>",
+            "*0x69576e(%rip)        # e1ae18 <_DYNAMIC+0xea8>",
+            "*0x695c06(%rip)        # e1ae10 <_DYNAMIC+0xea0>",
+            "*0x6960c2(%rip)        # e1ae00 <_DYNAMIC+0xe90>",
+            "*0x696105(%rip)        # e1ae00 <_DYNAMIC+0xe90>",
+            "*0x69632c(%rip)        # e1ae00 <_DYNAMIC+0xe90>",
+            "*0x69666b(%rip)        # e1ae08 <_DYNAMIC+0xe98>",
+            "*0x696969(%rip)        # e1ae08 <_DYNAMIC+0xe98>",
+            "*0x696c92(%rip)        # e1a550 <_DYNAMIC+0x5e0>",
+            "*0x696f89(%rip)        # e1ae00 <_DYNAMIC+0xe90>",
+            "*0x697009(%rip)        # e1adf8 <_DYNAMIC+0xe88>",
+            "*0x6971bd(%rip)        # e1adf0 <_DYNAMIC+0xe80>",
+            "77e4c0 <<core::option::Option<gpui_canvas::canvas::GlyphMask>>::map_or::<[u32; 3], <gpui_gpu::renderer::RendererState>::render_observed<<gpui_gpu::renderer::RendererState>::render::{closure#0}>::{closure#4}>>",
+            "781820 <gpui_gpu::renderer::visit::<<gpui_gpu::renderer::RendererState>::render_observed<<gpui_gpu::renderer::RendererState>::render::{closure#0}>::{closure#5}>>",
+            "781a40 <<gpui_canvas::canvas::Groups as core::iter::traits::iterator::Iterator>::try_fold::<usize, <gpui_gpu::renderer::RendererState>::render_observed<<gpui_gpu::renderer::RendererState>::render::{closure#0}>::{closure#2}, core::result::Result<usize, gpui_gpu::renderer::Error>>>",
+            "781c40 <<gpui_canvas::canvas::PreparedGroup>::placements::{closure#0}>",
+            "781f00 <<gpui_gpu::renderer::Buffer>::write>",
+            "7828c0 <<gpui_gpu::renderer::GpuContext>::submit>",
+            "782a60 <<gpui_gpu::renderer::RendererState>::correction>",
+            "782e20 <<gpui_gpu::renderer::RendererState>::prepare_atlas>",
+            "785c50 <<gpui_gpu::renderer::RendererState>::bin_draw>",
+            "786f70 <gpui_gpu::renderer::compact_group>",
+            "786fc0 <gpui_gpu::renderer::validate_draw>",
+            "787690 <<core::iter::adapters::enumerate::Enumerate<core::iter::adapters::map::Map<core::slice::iter::Iter<u32>, <gpui_canvas::canvas::PreparedGroup>::placements::{closure#0}>> as core::iter::traits::iterator::Iterator>::next>",
+            "789b80 <<hashbrown::raw::RawTable<([u32; 8], u32)>>::clear>",
+            "78a030 <<gpui_gpu::renderer::images::Images>::metadata>",
+            "78a130 <<alloc::vec::Vec<[u32; 2]>>::resize>",
+            "78a250 <<alloc::vec::Vec<u32>>::resize>",
+            "78a3a0 <gpui_gpu::renderer::images::prepare>",
+            "78cff0 <<alloc::raw_vec::RawVecInner<_>>::reserve::do_reserve_and_handle::<alloc::alloc::Global>>",
+            "78d310 <<alloc::raw_vec::RawVecInner>::try_reserve_exact>",
+            "78d610 <gpui_gpu::renderer::slots::color_word>",
+            "78d650 <gpui_gpu::renderer::slots::write_prefix>",
+            "dbb6c0 <_Unwind_Resume@plt>"
+          ]
+        }
+      ],
+      "gpui_canvas::canvas::sampled_rect_clip": [
+        {
+          "address": 11750464,
+          "symbols": [
+            {
+              "address": 11750464,
+              "bytes": 1577,
+              "kind": "T"
+            }
+          ],
+          "reachable_own_stack_bytes_excluding_return_address": 232,
+          "unknown": [],
+          "direct_and_indirect_calls": [
+            "*0x2e616b(%rip)        # e1ae80 <_DYNAMIC+0xf10>",
+            "*0x2e6218(%rip)        # e1ae80 <_DYNAMIC+0xf10>",
+            "b2e650 <<gpui_canvas::canvas::Mapping>::new>"
+          ]
+        }
+      ]
+    },
+    "by-value": {
+      "<gpui_gpu::renderer::RendererState>::render_observed::<<gpui_gpu::renderer::paint::PaintRenderer>::render_mapped::{closure#2}>": [
+        {
+          "address": 7857872,
+          "symbols": [
+            {
+              "address": 7857872,
+              "bytes": 10084,
+              "kind": "t"
+            }
+          ],
+          "reachable_own_stack_bytes_excluding_return_address": 1768,
+          "unknown": [],
+          "direct_and_indirect_calls": [
+            "*0x69a015(%rip)        # e1add8 <_DYNAMIC+0x368>",
+            "*0x69a0eb(%rip)        # e1aec8 <_DYNAMIC+0x458>",
+            "*0x69a0f8(%rip)        # e1aec8 <_DYNAMIC+0x458>",
+            "*0x69a23e(%rip)        # e1b050 <_DYNAMIC+0x5e0>",
+            "*0x69a4e9(%rip)        # e1b050 <_DYNAMIC+0x5e0>",
+            "*0x69aab2(%rip)        # e1b868 <_DYNAMIC+0xdf8>",
+            "*0x69ae27(%rip)        # e1b920 <_DYNAMIC+0xeb0>",
+            "*0x69b0a2(%rip)        # e1b918 <_DYNAMIC+0xea8>",
+            "*0x69b4eb(%rip)        # e1b910 <_DYNAMIC+0xea0>",
+            "*0x69b9c9(%rip)        # e1b900 <_DYNAMIC+0xe90>",
+            "*0x69ba09(%rip)        # e1b900 <_DYNAMIC+0xe90>",
+            "*0x69bc1d(%rip)        # e1b900 <_DYNAMIC+0xe90>",
+            "*0x69bfa5(%rip)        # e1b908 <_DYNAMIC+0xe98>",
+            "*0x69c226(%rip)        # e1b908 <_DYNAMIC+0xe98>",
+            "*0x69c903(%rip)        # e1b050 <_DYNAMIC+0x5e0>",
+            "*0x69cbb6(%rip)        # e1b900 <_DYNAMIC+0xe90>",
+            "*0x69cc3c(%rip)        # e1b8f8 <_DYNAMIC+0xe88>",
+            "*0x69cdf0(%rip)        # e1b8f0 <_DYNAMIC+0xe80>",
+            "77e580 <<core::option::Option<gpui_canvas::canvas::GlyphMask>>::map_or::<[u32; 3], <gpui_gpu::renderer::RendererState>::render_observed<<gpui_gpu::renderer::RendererState>::render::{closure#0}>::{closure#5}>>",
+            "781bc0 <gpui_gpu::renderer::visit::<<gpui_gpu::renderer::RendererState>::render_observed<<gpui_gpu::renderer::RendererState>::render::{closure#0}>::{closure#6}>>",
+            "781de0 <<gpui_canvas::canvas::Groups as core::iter::traits::iterator::Iterator>::try_fold::<usize, <gpui_gpu::renderer::RendererState>::render_observed<<gpui_gpu::renderer::RendererState>::render::{closure#0}>::{closure#2}, core::result::Result<usize, gpui_gpu::renderer::Error>>>",
+            "781f30 <<gpui_gpu::renderer::paint::PaintRenderer>::render_mapped::{closure#2}>",
+            "781fe0 <<gpui_canvas::canvas::PreparedGroup>::placements::{closure#0}>",
+            "7822a0 <<gpui_gpu::renderer::Buffer>::write>",
+            "782c60 <<gpui_gpu::renderer::GpuContext>::submit>",
+            "782e00 <<gpui_gpu::renderer::RendererState>::correction>",
+            "7831c0 <<gpui_gpu::renderer::RendererState>::prepare_atlas>",
+            "786410 <<gpui_gpu::renderer::RendererState>::bin_draw>",
+            "787730 <gpui_gpu::renderer::compact_group>",
+            "787780 <gpui_gpu::renderer::validate_draw>",
+            "787e50 <gpui_gpu::renderer::sampled_solid_rect>",
+            "787ee0 <<core::iter::adapters::enumerate::Enumerate<core::iter::adapters::map::Map<core::slice::iter::Iter<u32>, <gpui_canvas::canvas::PreparedGroup>::placements::{closure#0}>> as core::iter::traits::iterator::Iterator>::next>",
+            "78a3d0 <<hashbrown::raw::RawTable<([u32; 8], u32)>>::clear>",
+            "78a880 <<gpui_gpu::renderer::images::Images>::metadata>",
+            "78a980 <<alloc::vec::Vec<[u32; 2]>>::resize>",
+            "78aaa0 <<alloc::vec::Vec<u32>>::resize>",
+            "78abf0 <gpui_gpu::renderer::images::prepare>",
+            "78d840 <<alloc::raw_vec::RawVecInner<_>>::reserve::do_reserve_and_handle::<alloc::alloc::Global>>",
+            "78db60 <<alloc::raw_vec::RawVecInner>::try_reserve_exact>",
+            "78de60 <gpui_gpu::renderer::slots::color_word>",
+            "78dea0 <gpui_gpu::renderer::slots::write_prefix>",
+            "dbc1c0 <_Unwind_Resume@plt>"
+          ]
+        }
+      ],
+      "<gpui_gpu::renderer::RendererState>::render": [
+        {
+          "address": 7879664,
+          "symbols": [
+            {
+              "address": 7879664,
+              "bytes": 10263,
+              "kind": "T"
+            }
+          ],
+          "reachable_own_stack_bytes_excluding_return_address": 1672,
+          "unknown": [],
+          "direct_and_indirect_calls": [
+            "*0x694a3b(%rip)        # e1add8 <_DYNAMIC+0x368>",
+            "*0x694b11(%rip)        # e1aec8 <_DYNAMIC+0x458>",
+            "*0x694b1e(%rip)        # e1aec8 <_DYNAMIC+0x458>",
+            "*0x694c63(%rip)        # e1b050 <_DYNAMIC+0x5e0>",
+            "*0x694f0d(%rip)        # e1b050 <_DYNAMIC+0x5e0>",
+            "*0x6954d8(%rip)        # e1b868 <_DYNAMIC+0xdf8>",
+            "*0x69583e(%rip)        # e1b920 <_DYNAMIC+0xeb0>",
+            "*0x695ac2(%rip)        # e1b918 <_DYNAMIC+0xea8>",
+            "*0x695f61(%rip)        # e1b910 <_DYNAMIC+0xea0>",
+            "*0x69648b(%rip)        # e1b900 <_DYNAMIC+0xe90>",
+            "*0x6964cc(%rip)        # e1b900 <_DYNAMIC+0xe90>",
+            "*0x6966e4(%rip)        # e1b900 <_DYNAMIC+0xe90>",
+            "*0x696aca(%rip)        # e1b908 <_DYNAMIC+0xe98>",
+            "*0x696d87(%rip)        # e1b908 <_DYNAMIC+0xe98>",
+            "*0x6973f2(%rip)        # e1b050 <_DYNAMIC+0x5e0>",
+            "*0x69769b(%rip)        # e1b900 <_DYNAMIC+0xe90>",
+            "*0x69771f(%rip)        # e1b8f8 <_DYNAMIC+0xe88>",
+            "*0x6978e4(%rip)        # e1b8f0 <_DYNAMIC+0xe80>",
+            "77e580 <<core::option::Option<gpui_canvas::canvas::GlyphMask>>::map_or::<[u32; 3], <gpui_gpu::renderer::RendererState>::render_observed<<gpui_gpu::renderer::RendererState>::render::{closure#0}>::{closure#5}>>",
+            "781bc0 <gpui_gpu::renderer::visit::<<gpui_gpu::renderer::RendererState>::render_observed<<gpui_gpu::renderer::RendererState>::render::{closure#0}>::{closure#6}>>",
+            "781de0 <<gpui_canvas::canvas::Groups as core::iter::traits::iterator::Iterator>::try_fold::<usize, <gpui_gpu::renderer::RendererState>::render_observed<<gpui_gpu::renderer::RendererState>::render::{closure#0}>::{closure#2}, core::result::Result<usize, gpui_gpu::renderer::Error>>>",
+            "781fe0 <<gpui_canvas::canvas::PreparedGroup>::placements::{closure#0}>",
+            "7822a0 <<gpui_gpu::renderer::Buffer>::write>",
+            "782c60 <<gpui_gpu::renderer::GpuContext>::submit>",
+            "782e00 <<gpui_gpu::renderer::RendererState>::correction>",
+            "7831c0 <<gpui_gpu::renderer::RendererState>::prepare_atlas>",
+            "786410 <<gpui_gpu::renderer::RendererState>::bin_draw>",
+            "787730 <gpui_gpu::renderer::compact_group>",
+            "787780 <gpui_gpu::renderer::validate_draw>",
+            "787e50 <gpui_gpu::renderer::sampled_solid_rect>",
+            "787ee0 <<core::iter::adapters::enumerate::Enumerate<core::iter::adapters::map::Map<core::slice::iter::Iter<u32>, <gpui_canvas::canvas::PreparedGroup>::placements::{closure#0}>> as core::iter::traits::iterator::Iterator>::next>",
+            "78a3d0 <<hashbrown::raw::RawTable<([u32; 8], u32)>>::clear>",
+            "78a880 <<gpui_gpu::renderer::images::Images>::metadata>",
+            "78a980 <<alloc::vec::Vec<[u32; 2]>>::resize>",
+            "78aaa0 <<alloc::vec::Vec<u32>>::resize>",
+            "78abf0 <gpui_gpu::renderer::images::prepare>",
+            "78d840 <<alloc::raw_vec::RawVecInner<_>>::reserve::do_reserve_and_handle::<alloc::alloc::Global>>",
+            "78db60 <<alloc::raw_vec::RawVecInner>::try_reserve_exact>",
+            "78de60 <gpui_gpu::renderer::slots::color_word>",
+            "78dea0 <gpui_gpu::renderer::slots::write_prefix>",
+            "dbc1c0 <_Unwind_Resume@plt>"
+          ]
+        }
+      ],
+      "gpui_gpu::renderer::sampled_solid_rect": [
+        {
+          "address": 7896656,
+          "symbols": [
+            {
+              "address": 7896656,
+              "bytes": 137,
+              "kind": "t"
+            }
+          ],
+          "reachable_own_stack_bytes_excluding_return_address": 40,
+          "unknown": [],
+          "direct_and_indirect_calls": [
+            "*0x693b25(%rip)        # e1b988 <_DYNAMIC+0xf18>"
+          ]
+        }
+      ],
+      "<gpui_canvas::canvas::PreparedDraw>::sampled_rect_clip": [
+        {
+          "address": 11731888,
+          "symbols": [
+            {
+              "address": 11731888,
+              "bytes": 683,
+              "kind": "T"
+            }
+          ],
+          "reachable_own_stack_bytes_excluding_return_address": 104,
+          "unknown": [],
+          "direct_and_indirect_calls": [
+            "*0x2eb52d(%rip)        # e1b980 <_DYNAMIC+0xf10>",
+            "*0x2eb5ac(%rip)        # e1b980 <_DYNAMIC+0xf10>",
+            "b35910 <gpui_canvas::canvas::lower_sampled_rect>"
+          ]
+        }
+      ],
+      "gpui_canvas::canvas::sampled_rect_clip": [
+        {
+          "address": 11753280,
+          "symbols": [
+            {
+              "address": 11753280,
+              "bytes": 454,
+              "kind": "T"
+            }
+          ],
+          "reachable_own_stack_bytes_excluding_return_address": 152,
+          "unknown": [],
+          "direct_and_indirect_calls": [
+            "*0x2e619c(%rip)        # e1b980 <_DYNAMIC+0xf10>",
+            "*0x2e621a(%rip)        # e1b980 <_DYNAMIC+0xf10>",
+            "b2eea0 <<gpui_canvas::canvas::Mapping>::new>",
+            "b35910 <gpui_canvas::canvas::lower_sampled_rect>"
+          ]
+        }
+      ],
+      "gpui_canvas::canvas::lower_sampled_rect": [
+        {
+          "address": 11753744,
+          "symbols": [
+            {
+              "address": 11753744,
+              "bytes": 1119,
+              "kind": "t"
+            }
+          ],
+          "reachable_own_stack_bytes_excluding_return_address": 0,
+          "unknown": [],
+          "direct_and_indirect_calls": []
+        }
+      ]
+    },
+    "borrowed": {
+      "<gpui_gpu::renderer::RendererState>::render_observed::<<gpui_gpu::renderer::paint::PaintRenderer>::render_mapped::{closure#2}>": [
+        {
+          "address": 7857872,
+          "symbols": [
+            {
+              "address": 7857872,
+              "bytes": 10102,
+              "kind": "t"
+            }
+          ],
+          "reachable_own_stack_bytes_excluding_return_address": 1432,
+          "unknown": [],
+          "direct_and_indirect_calls": [
+            "*0x69a023(%rip)        # e1adf8 <_DYNAMIC+0x368>",
+            "*0x69a0f9(%rip)        # e1aee8 <_DYNAMIC+0x458>",
+            "*0x69a106(%rip)        # e1aee8 <_DYNAMIC+0x458>",
+            "*0x69a24c(%rip)        # e1b070 <_DYNAMIC+0x5e0>",
+            "*0x69a4f7(%rip)        # e1b070 <_DYNAMIC+0x5e0>",
+            "*0x69aac0(%rip)        # e1b888 <_DYNAMIC+0xdf8>",
+            "*0x69ae35(%rip)        # e1b940 <_DYNAMIC+0xeb0>",
+            "*0x69b0b0(%rip)        # e1b938 <_DYNAMIC+0xea8>",
+            "*0x69b508(%rip)        # e1b930 <_DYNAMIC+0xea0>",
+            "*0x69b9e6(%rip)        # e1b920 <_DYNAMIC+0xe90>",
+            "*0x69ba26(%rip)        # e1b920 <_DYNAMIC+0xe90>",
+            "*0x69bc3a(%rip)        # e1b920 <_DYNAMIC+0xe90>",
+            "*0x69bfc9(%rip)        # e1b928 <_DYNAMIC+0xe98>",
+            "*0x69c24c(%rip)        # e1b928 <_DYNAMIC+0xe98>",
+            "*0x69c923(%rip)        # e1b070 <_DYNAMIC+0x5e0>",
+            "*0x69cbd7(%rip)        # e1b920 <_DYNAMIC+0xe90>",
+            "*0x69cc5d(%rip)        # e1b918 <_DYNAMIC+0xe88>",
+            "*0x69ce10(%rip)        # e1b910 <_DYNAMIC+0xe80>",
+            "77e580 <<core::option::Option<gpui_canvas::canvas::GlyphMask>>::map_or::<[u32; 3], <gpui_gpu::renderer::RendererState>::render_observed<<gpui_gpu::renderer::RendererState>::render::{closure#0}>::{closure#5}>>",
+            "781bd0 <gpui_gpu::renderer::visit::<<gpui_gpu::renderer::RendererState>::render_observed<<gpui_gpu::renderer::RendererState>::render::{closure#0}>::{closure#6}>>",
+            "781df0 <<gpui_canvas::canvas::Groups as core::iter::traits::iterator::Iterator>::try_fold::<usize, <gpui_gpu::renderer::RendererState>::render_observed<<gpui_gpu::renderer::RendererState>::render::{closure#0}>::{closure#2}, core::result::Result<usize, gpui_gpu::renderer::Error>>>",
+            "781f40 <<gpui_gpu::renderer::paint::PaintRenderer>::render_mapped::{closure#2}>",
+            "781ff0 <<gpui_canvas::canvas::PreparedGroup>::placements::{closure#0}>",
+            "7822b0 <<gpui_gpu::renderer::Buffer>::write>",
+            "782c70 <<gpui_gpu::renderer::GpuContext>::submit>",
+            "782e10 <<gpui_gpu::renderer::RendererState>::correction>",
+            "7831d0 <<gpui_gpu::renderer::RendererState>::prepare_atlas>",
+            "786440 <<gpui_gpu::renderer::RendererState>::bin_draw>",
+            "787760 <gpui_gpu::renderer::compact_group>",
+            "7877b0 <gpui_gpu::renderer::validate_draw>",
+            "787e80 <gpui_gpu::renderer::sampled_solid_rect>",
+            "787f10 <<core::iter::adapters::enumerate::Enumerate<core::iter::adapters::map::Map<core::slice::iter::Iter<u32>, <gpui_canvas::canvas::PreparedGroup>::placements::{closure#0}>> as core::iter::traits::iterator::Iterator>::next>",
+            "78a400 <<hashbrown::raw::RawTable<([u32; 8], u32)>>::clear>",
+            "78a8b0 <<gpui_gpu::renderer::images::Images>::metadata>",
+            "78a9b0 <<alloc::vec::Vec<[u32; 2]>>::resize>",
+            "78aad0 <<alloc::vec::Vec<u32>>::resize>",
+            "78ac20 <gpui_gpu::renderer::images::prepare>",
+            "78d870 <<alloc::raw_vec::RawVecInner<_>>::reserve::do_reserve_and_handle::<alloc::alloc::Global>>",
+            "78db90 <<alloc::raw_vec::RawVecInner>::try_reserve_exact>",
+            "78de90 <gpui_gpu::renderer::slots::color_word>",
+            "78ded0 <gpui_gpu::renderer::slots::write_prefix>",
+            "dbc1e0 <_Unwind_Resume@plt>"
+          ]
+        }
+      ],
+      "<gpui_gpu::renderer::RendererState>::render": [
+        {
+          "address": 7879680,
+          "symbols": [
+            {
+              "address": 7879680,
+              "bytes": 10293,
+              "kind": "T"
+            }
+          ],
+          "reachable_own_stack_bytes_excluding_return_address": 1320,
+          "unknown": [],
+          "direct_and_indirect_calls": [
+            "*0x694a2d(%rip)        # e1adf8 <_DYNAMIC+0x368>",
+            "*0x694b03(%rip)        # e1aee8 <_DYNAMIC+0x458>",
+            "*0x694b10(%rip)        # e1aee8 <_DYNAMIC+0x458>",
+            "*0x694c55(%rip)        # e1b070 <_DYNAMIC+0x5e0>",
+            "*0x694eff(%rip)        # e1b070 <_DYNAMIC+0x5e0>",
+            "*0x6954ca(%rip)        # e1b888 <_DYNAMIC+0xdf8>",
+            "*0x695830(%rip)        # e1b940 <_DYNAMIC+0xeb0>",
+            "*0x695ab4(%rip)        # e1b938 <_DYNAMIC+0xea8>",
+            "*0x695f62(%rip)        # e1b930 <_DYNAMIC+0xea0>",
+            "*0x69648c(%rip)        # e1b920 <_DYNAMIC+0xe90>",
+            "*0x6964cd(%rip)        # e1b920 <_DYNAMIC+0xe90>",
+            "*0x6966e5(%rip)        # e1b920 <_DYNAMIC+0xe90>",
+            "*0x696ad3(%rip)        # e1b928 <_DYNAMIC+0xe98>",
+            "*0x696d90(%rip)        # e1b928 <_DYNAMIC+0xe98>",
+            "*0x697402(%rip)        # e1b070 <_DYNAMIC+0x5e0>",
+            "*0x6976ac(%rip)        # e1b920 <_DYNAMIC+0xe90>",
+            "*0x697730(%rip)        # e1b918 <_DYNAMIC+0xe88>",
+            "*0x6978f4(%rip)        # e1b910 <_DYNAMIC+0xe80>",
+            "77e580 <<core::option::Option<gpui_canvas::canvas::GlyphMask>>::map_or::<[u32; 3], <gpui_gpu::renderer::RendererState>::render_observed<<gpui_gpu::renderer::RendererState>::render::{closure#0}>::{closure#5}>>",
+            "781bd0 <gpui_gpu::renderer::visit::<<gpui_gpu::renderer::RendererState>::render_observed<<gpui_gpu::renderer::RendererState>::render::{closure#0}>::{closure#6}>>",
+            "781df0 <<gpui_canvas::canvas::Groups as core::iter::traits::iterator::Iterator>::try_fold::<usize, <gpui_gpu::renderer::RendererState>::render_observed<<gpui_gpu::renderer::RendererState>::render::{closure#0}>::{closure#2}, core::result::Result<usize, gpui_gpu::renderer::Error>>>",
+            "781ff0 <<gpui_canvas::canvas::PreparedGroup>::placements::{closure#0}>",
+            "7822b0 <<gpui_gpu::renderer::Buffer>::write>",
+            "782c70 <<gpui_gpu::renderer::GpuContext>::submit>",
+            "782e10 <<gpui_gpu::renderer::RendererState>::correction>",
+            "7831d0 <<gpui_gpu::renderer::RendererState>::prepare_atlas>",
+            "786440 <<gpui_gpu::renderer::RendererState>::bin_draw>",
+            "787760 <gpui_gpu::renderer::compact_group>",
+            "7877b0 <gpui_gpu::renderer::validate_draw>",
+            "787e80 <gpui_gpu::renderer::sampled_solid_rect>",
+            "787f10 <<core::iter::adapters::enumerate::Enumerate<core::iter::adapters::map::Map<core::slice::iter::Iter<u32>, <gpui_canvas::canvas::PreparedGroup>::placements::{closure#0}>> as core::iter::traits::iterator::Iterator>::next>",
+            "78a400 <<hashbrown::raw::RawTable<([u32; 8], u32)>>::clear>",
+            "78a8b0 <<gpui_gpu::renderer::images::Images>::metadata>",
+            "78a9b0 <<alloc::vec::Vec<[u32; 2]>>::resize>",
+            "78aad0 <<alloc::vec::Vec<u32>>::resize>",
+            "78ac20 <gpui_gpu::renderer::images::prepare>",
+            "78d870 <<alloc::raw_vec::RawVecInner<_>>::reserve::do_reserve_and_handle::<alloc::alloc::Global>>",
+            "78db90 <<alloc::raw_vec::RawVecInner>::try_reserve_exact>",
+            "78de90 <gpui_gpu::renderer::slots::color_word>",
+            "78ded0 <gpui_gpu::renderer::slots::write_prefix>",
+            "dbc1e0 <_Unwind_Resume@plt>"
+          ]
+        }
+      ],
+      "gpui_gpu::renderer::sampled_solid_rect": [
+        {
+          "address": 7896704,
+          "symbols": [
+            {
+              "address": 7896704,
+              "bytes": 137,
+              "kind": "t"
+            }
+          ],
+          "reachable_own_stack_bytes_excluding_return_address": 40,
+          "unknown": [],
+          "direct_and_indirect_calls": [
+            "*0x693b15(%rip)        # e1b9a8 <_DYNAMIC+0xf18>"
+          ]
+        }
+      ],
+      "<gpui_canvas::canvas::PreparedDraw>::sampled_rect_clip": [
+        {
+          "address": 11731936,
+          "symbols": [
+            {
+              "address": 11731936,
+              "bytes": 668,
+              "kind": "T"
+            }
+          ],
+          "reachable_own_stack_bytes_excluding_return_address": 104,
+          "unknown": [],
+          "direct_and_indirect_calls": [
+            "*0x2eb51e(%rip)        # e1b9a0 <_DYNAMIC+0xf10>",
+            "*0x2eb59c(%rip)        # e1b9a0 <_DYNAMIC+0xf10>",
+            "b35930 <gpui_canvas::canvas::lower_sampled_rect>"
+          ]
+        }
+      ],
+      "gpui_canvas::canvas::sampled_rect_clip": [
+        {
+          "address": 11753312,
+          "symbols": [
+            {
+              "address": 11753312,
+              "bytes": 458,
+              "kind": "T"
+            }
+          ],
+          "reachable_own_stack_bytes_excluding_return_address": 152,
+          "unknown": [],
+          "direct_and_indirect_calls": [
+            "*0x2e619d(%rip)        # e1b9a0 <_DYNAMIC+0xf10>",
+            "*0x2e621a(%rip)        # e1b9a0 <_DYNAMIC+0xf10>",
+            "b2eed0 <<gpui_canvas::canvas::Mapping>::new>",
+            "b35930 <gpui_canvas::canvas::lower_sampled_rect>"
+          ]
+        }
+      ],
+      "gpui_canvas::canvas::lower_sampled_rect": [
+        {
+          "address": 11753776,
+          "symbols": [
+            {
+              "address": 11753776,
+              "bytes": 1119,
+              "kind": "t"
+            }
+          ],
+          "reachable_own_stack_bytes_excluding_return_address": 0,
+          "unknown": [],
+          "direct_and_indirect_calls": []
+        }
+      ]
+    }
+  },
+  "patches": {
+    "production.patch": {
+      "bytes": 8322,
+      "sha256": "a1ab190324348a931b2f12d3e830b7a6e425c58493ee21c81e7a42bebd0fbbd5"
+    },
+    "full.patch": {
+      "bytes": 15342,
+      "sha256": "e23a40532f4afa8f76405ca89493ab85e016d3d5ca86d5e7cfd57e3ec4014490"
+    },
+    "borrow-only.patch": {
+      "bytes": 3375,
+      "sha256": "7ce019ce8e531a7350d64e0cc35912bb5dcaee9f592e88522d4dd8aca6ec9ac9"
+    }
+  },
+  "retained_layout": "No retained fields/resources/packet widths changed. No matched capacity improvement claimed.",
+  "host_work": "Same additional group placement eligibility scan and four binary searches, logically <=68predicate visits per eligible draw; no new search shortcut.",
+  "frames_scope": "Reachable own stack only, including negative-RSP red-zone accesses, excluding return address and callee frames; unknown stack/CFG operations remain explicit. No call-chain sum.",
+  "shader": "All3lanes identical15139B generatedWGSL ab3accf5a441b5eb03a9c7a690fdd40c13471ba6475b406183a7e86369b9605b.",
+  "timing_claim": false
+}
