@@ -343,16 +343,14 @@ mod tests {
                 hue: crate::HueInterpolation::Decreasing,
             },
         ] {
-            let color = Color::linear_display_p3(0.5, -0.0625, 0.125, 0.75).unwrap();
+            let color = Color::oklch(0.6, 0.2, 350., 0.1).unwrap();
+            let p3 = Color::linear_display_p3(2., -0.1, 0.5, 0.9).unwrap();
             let paint = Gradient::new(
                 GradientGeometry::Linear {
                     start: Point::default(),
                     end: Point { x: 1., y: 0. },
                 },
-                &[
-                    GradientStop::new(0., color),
-                    GradientStop::new(1., Color::WHITE),
-                ],
+                &[GradientStop::new(0., color), GradientStop::new(1., p3)],
                 Extend::Pad,
                 interpolation,
             )
@@ -372,6 +370,7 @@ mod tests {
                 assert_eq!(view.key(), key);
                 assert_eq!(view.interpolation(), interpolation);
                 assert!(view.stop(0).unwrap().color.same_authoring(color));
+                assert!(view.stop(1).unwrap().color.same_authoring(p3));
                 assert!(scene.draws().all(|draw| !draw.source.is_solid()));
             })
             .unwrap();
