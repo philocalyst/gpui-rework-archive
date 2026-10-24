@@ -107,7 +107,7 @@ impl Party {
 impl View for Party {
     fn sources() -> Sources<Self> {
         Sources::new()
-            .direct(Self::TITLE)
+            .field(Self::TITLE)
             .component(Self::PREPARATION)
     }
     fn view(&self) -> El<'_> {
