@@ -156,7 +156,7 @@ fn tiny_preedit_on_large_source_preserves_raw_seam_cursor_and_original_replaceme
         if text == "\u{301}" && cursor == Some((0, 0)) {
             assert_eq!(selected, selection(start - 1, start - 1));
         }
-        assert_eq!(win.read(Form::A).unwrap(), source);
+        assert_eq!(win.read(Form::A).unwrap(), source.as_str());
         assert_eq!(win.snapshot().unwrap().source_epoch, epoch);
     }
     win.ime_event(&mut session, ImeEvent::Commit("!")).unwrap();
