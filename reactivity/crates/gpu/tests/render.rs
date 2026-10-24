@@ -3636,11 +3636,31 @@ fn analytic_gradients_geometry_spreads_hard_edges_hdr_and_cache_match_cpu() {
                 hue: gpui_canvas::HueInterpolation::Decreasing,
             },
         ] {
+            // Preserve the existing linear HDR packet/corpus verbatim. This
+            // first perceptual precision tier admits a narrower color domain;
+            // its separate authored oracle reports the rejected HDR pairs.
+            let perceptual_stops = stops.map(|stop| {
+                let [r, g, b, a] = stop.color.channels();
+                Stop::new(
+                    stop.offset,
+                    match stop.color.space() {
+                        gpui_canvas::ColorSpace::LinearDisplayP3 => {
+                            Color::linear_display_p3(r * 0.25, g * 0.25, b * 0.25, a).unwrap()
+                        }
+                        _ => Color::linear_srgb(r * 0.25, g * 0.25, b * 0.25, a).unwrap(),
+                    },
+                )
+            });
+            let stops = if interpolation == Interpolation::LinearSrgb {
+                &stops
+            } else {
+                &perceptual_stops
+            };
             for profile in [OutputProfile::Srgb, OutputProfile::DisplayP3] {
                 for geometry in geometries {
                     for extend in [Extend::Pad, Extend::Repeat, Extend::Reflect] {
                         let gradient =
-                            Gradient::new(geometry, &stops, extend, interpolation).unwrap();
+                            Gradient::new(geometry, stops, extend, interpolation).unwrap();
                         for map in maps {
                             for radius in [0., 5.] {
                                 let mut canvas = Canvas::recording(
@@ -4200,6 +4220,14 @@ fn perceptual_gradients_match_independent_authored_f64_oracle() {
         let hdr = f32::from_bits(1e20_f32.to_bits() - 1);
         let pairs = [
             (
+                Color::linear_srgb(4., 0., 0., 1.).unwrap(),
+                Color::linear_srgb(4., 4., 4., 1.).unwrap(),
+            ),
+            (
+                Color::linear_display_p3(4., 0., 0., 1.).unwrap(),
+                Color::linear_display_p3(4., 4., 4., 1.).unwrap(),
+            ),
+            (
                 Color::linear_srgb(hdr, 0., 0., 1e-22).unwrap(),
                 Color::linear_srgb(0., hdr, 0., 2e-22).unwrap(),
             ),
@@ -4391,10 +4419,10 @@ fn transformed_gradient_edges_use_corrected_material_coordinates() {
         let mut renderer = renderer(wgpu::TextureFormat::Rgba16Float).await;
         let scale = 0.001_f32;
         let reciprocal = 1.0 / f64::from(scale);
-        let translation = 1000.0 / f64::from(scale);
-        let precise = ((0.125 * reciprocal + translation - 1_000_000.0) / 8000.0) as f32;
-        let high_only =
-            ((0.125 * reciprocal as f32 + translation as f32 - 1_000_000.0) / 8000.0) as f32;
+        let translation = 11.0 / f64::from(scale);
+        let origin = translation as f32;
+        let precise = ((0.125 * reciprocal + translation - f64::from(origin)) / 8000.0) as f32;
+        let high_only = (0.125 * reciprocal as f32 + translation as f32 - origin) / 8000.0;
         let edge = (precise + high_only) * 0.5;
         assert!(
             high_only < edge && edge < precise,
@@ -4402,10 +4430,10 @@ fn transformed_gradient_edges_use_corrected_material_coordinates() {
         );
         let map = Affine {
             a: scale,
-            tx: -1000.0,
+            tx: -11.0,
             ..Affine::IDENTITY
         };
-        let rect = Rect::new(1_000_000.0, 0.0, 8000.0, 8.0);
+        let rect = Rect::new(origin, 0.0, 8000.0, 8.0);
         let clip = Rect::new(0.0, 0.0, 8.0, 8.0);
         let red = Color::linear_srgb(1., 0., 0., 1.).unwrap();
         let blue = Color::linear_srgb(0., 0., 1., 1.).unwrap();
