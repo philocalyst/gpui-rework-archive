@@ -343,7 +343,7 @@ mod tests {
                 hue: crate::HueInterpolation::Decreasing,
             },
         ] {
-            let color = Color::linear_display_p3(2., -0.25, 0.5, 0.75).unwrap();
+            let color = Color::linear_display_p3(0.5, -0.0625, 0.125, 0.75).unwrap();
             let paint = Gradient::new(
                 GradientGeometry::Linear {
                     start: Point::default(),

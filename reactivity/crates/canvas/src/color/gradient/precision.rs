@@ -125,13 +125,15 @@ pub(super) fn conversion_bound(
         3.0 * q * q * e + 3.0 * q * e * e + e * e * e + gamma(2.0) * (q + e).powi(3)
     });
     let q = bounds.iter().copied().fold(0.0_f64, f64::max);
-    // Covers every FTZ site even after multiplication reassociation: alpha*v
-    // error loses its denominator when premultiplied, and remaining paths have
-    // degree at most three in the bounded coordinates. The factor exceeds the
-    // polynomial fanout (z^6 < 226), operation count and inverse-matrix
-    // amplification. The unweighted term covers moving alpha before products
-    // and an output alpha flushed to zero. Neither term divides by min alpha.
-    let ftz = (alpha * 16777216.0 + 1024.0) * TINY * (1.0 + q.powi(3));
+    // The per-lane graph has <256 scalar arithmetic nodes / <1024 FTZ input
+    // and output sites. A polynomial perturbation has fanout <512, polar
+    // sensitivity <16*max(1,Q), cube sensitivity <4*max(1,Q²), and inverse
+    // matrix row norm <8: their product is <=2^28*(1+Q³). Ratio FTZ loses
+    // its denominator after premultiplication; rounding and other paths keep
+    // the total below 2^32. After alpha moves before products, <1024 sites
+    // amplify by <16*max(1,Q³), below the unweighted 2^16 allowance. Neither
+    // term divides by minimum alpha. The qualification proof enumerates the DAG.
+    let ftz = (alpha * 4294967296.0 + 65536.0) * TINY * (1.0 + q.powi(3));
     LMS_TO_RGB.map(|row| {
         let mut error = 0.0;
         let mut norm = 0.0;

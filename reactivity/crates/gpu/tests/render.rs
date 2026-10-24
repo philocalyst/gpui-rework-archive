@@ -4262,7 +4262,7 @@ fn perceptual_gradients_match_independent_authored_f64_oracle() {
         ];
         for mode in modes {
             let (mut admitted, mut rejected) = (0, 0);
-            for (left, right) in pairs {
+            for (pair_index, (left, right)) in pairs.into_iter().enumerate() {
                 let gradient = match Gradient::new(
                     GradientGeometry::Linear {
                         start: Point { x: 0., y: 0. },
@@ -4277,6 +4277,10 @@ fn perceptual_gradients_match_independent_authored_f64_oracle() {
                         gradient
                     }
                     Err(gpui_canvas::Error::GradientPrecision) => {
+                        assert!(
+                            pair_index >= 2 || mode == (Mode::Oklch { hue: Hue::Longer }),
+                            "ordinary HDR/P3 red-to-neutral must be admitted in {mode:?}"
+                        );
                         rejected += 1;
                         eprintln!("gpu_profile_rejected,{mode:?},{left:?},{right:?}");
                         continue;
@@ -4510,6 +4514,7 @@ fn transparent_left_fixed_fade_preserves_exact_axis_channels() {
             Interpolation::Oklab,
         )
         .unwrap();
+        assert_eq!(gradient.view().words()[3][2], 0x80000000);
         let mut canvas = Canvas::recording(
             8,
             1,

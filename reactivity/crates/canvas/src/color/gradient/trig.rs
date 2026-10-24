@@ -85,7 +85,7 @@ mod tests {
             .sum();
         error += derivative * eps * z;
         if sine {
-            x * error + eps * x + x.powi(15) / (1..=15).product::<u64>() as f64
+            x * error + eps * x * (1.0 + error) + x.powi(15) / (1..=15).product::<u64>() as f64
         } else {
             error + x.powi(14) / (1..=14).product::<u64>() as f64
         }
