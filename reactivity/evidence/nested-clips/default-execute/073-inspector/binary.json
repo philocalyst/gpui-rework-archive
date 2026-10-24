@@ -1,0 +1,33 @@
+{
+  "original": "/root/target-clips-sol-nightly/debug/build/gpui/ab8e5bf5199dbac2/out/inspector-ab8e5bf5199dbac2",
+  "frozen": "/tmp/clips-sol-evidence/final-b164/default-execute/073-inspector/test",
+  "sha256": "4df0bbe6b8273f6799192cd5f52eef3867cc60093811bb758d7d6af932ec48bc",
+  "bytes": 162535384,
+  "fresh": false,
+  "package_id": "path+file:///root/gpui-clips-sol/reactivity/crates/gpui#0.1.0",
+  "target": {
+    "kind": [
+      "test"
+    ],
+    "crate_types": [
+      "bin"
+    ],
+    "name": "inspector",
+    "src_path": "/root/gpui-clips-sol/reactivity/crates/gpui/tests/inspector.rs",
+    "edition": "2024",
+    "doc": false,
+    "doctest": false,
+    "test": true
+  },
+  "features": [
+    "default",
+    "simd"
+  ],
+  "profile": {
+    "opt_level": "0",
+    "debuginfo": 2,
+    "debug_assertions": true,
+    "overflow_checks": true,
+    "test": true
+  }
+}

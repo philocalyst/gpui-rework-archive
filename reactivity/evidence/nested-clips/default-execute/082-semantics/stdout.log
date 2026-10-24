@@ -1,0 +1,11 @@
+
+running 6 tests
+test ahead_of_frame_source_cannot_rewrite_advertised_value_or_actions ... ok
+test full_geometry_and_visible_bounds_come_from_the_same_retained_shape ... ok
+test one_borrowed_sheet_exposes_topology_focus_values_and_advertised_actions ... ok
+test semantic_actions_drive_the_real_todo_model_and_match_ordinary_input ... ok
+test semantic_actions_reject_foreign_closed_and_unpresented_authority ... ok
+test semantic_activation_reads_allocate_nothing_and_do_no_render_work ... ok
+
+test result: ok. 6 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 0.16s
+

@@ -1,0 +1,41 @@
+{
+  "source": "7695533f31797b8fa2d102b10ae8e7cc724bec4f",
+  "cwd": "/root/gpui-clips-sol",
+  "argv": [
+    "cargo",
+    "test",
+    "--locked",
+    "--manifest-path",
+    "reactivity/Cargo.toml",
+    "-p",
+    "gpui",
+    "--features",
+    "x11",
+    "--lib",
+    "--no-run",
+    "--message-format=json"
+  ],
+  "timeout_seconds": 600,
+  "tracked_input_scopes": [
+    ".cargo",
+    "clippy.toml",
+    "reactivity/Cargo.toml",
+    "reactivity/Cargo.lock",
+    "reactivity/rust-toolchain.toml",
+    "reactivity/crates",
+    "reactivity/vendor"
+  ],
+  "environment": {
+    "RUSTC": "/tmp/gpui-nightly-2026-10-23/bin/rustc",
+    "RUSTDOC": "/tmp/gpui-nightly-2026-10-23/bin/rustdoc",
+    "RUSTC_BOOTSTRAP": null,
+    "RUSTFLAGS": null,
+    "CARGO_ENCODED_RUSTFLAGS": null,
+    "CARGO_TARGET_DIR": "/root/target-clips-sol-nightly",
+    "CARGO_BUILD_JOBS": "2",
+    "MIRI": null,
+    "MIRI_SYSROOT": null,
+    "MIRIFLAGS": null,
+    "RUST_SRC_PATH": null
+  }
+}

@@ -1,0 +1,52 @@
+{
+  "elf_sha256": "50ca1e03de61f436ae000ab5d291be3d07d5b9dad2b9bfcdfea107b11cc36bb9",
+  "bytes": 229125088,
+  "source": "b164198e02ca4172a8cd56308ad204d30f1da333",
+  "embedded": [
+    {
+      "name": "ui-0-fragment.spv",
+      "sha256": "98187006ba4322c948eae06e157266e4fc481016be21c0980e01664a9ff1c169",
+      "byte_offset": 2529448
+    },
+    {
+      "name": "ui-0-vertex.spv",
+      "sha256": "562bb388d843aee9fdc843071123e4f268862be3a3c2205dbdc530d6ba94b0a3",
+      "byte_offset": 2676792
+    },
+    {
+      "name": "ui-1-fragment.spv",
+      "sha256": "f84b1e784c2ec40a2091248ab3022805b33418650dfbb95a118b9a3d1ebffc80",
+      "byte_offset": 2564844
+    },
+    {
+      "name": "ui-1-vertex.spv",
+      "sha256": "562bb388d843aee9fdc843071123e4f268862be3a3c2205dbdc530d6ba94b0a3",
+      "byte_offset": 2676792
+    },
+    {
+      "name": "ui-2-fragment.spv",
+      "sha256": "4794b48b2a023205ae2cd488e56109866bbe1bd2e1873a8cf474e995a5f83a0f",
+      "byte_offset": 2600400
+    },
+    {
+      "name": "ui-2-vertex.spv",
+      "sha256": "562bb388d843aee9fdc843071123e4f268862be3a3c2205dbdc530d6ba94b0a3",
+      "byte_offset": 2676792
+    },
+    {
+      "name": "ui-3-fragment.spv",
+      "sha256": "d51c31941767b3ee3d78ca81ab98aece698a1575dcb76d5ff523296fc313b213",
+      "byte_offset": 2638516
+    },
+    {
+      "name": "ui-3-vertex.spv",
+      "sha256": "562bb388d843aee9fdc843071123e4f268862be3a3c2205dbdc530d6ba94b0a3",
+      "byte_offset": 2676792
+    },
+    {
+      "name": "ui.wgsl",
+      "sha256": "defb31515dfae7bedbecb6beeec4275f3cbe8d0dba84a95f2f26c391c5a1f20f",
+      "byte_offset": 2472280
+    }
+  ]
+}

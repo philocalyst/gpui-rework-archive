@@ -1,0 +1,16 @@
+
+running 11 tests
+test a_coarse_replacement_of_either_source_supersedes_an_equal_revision_pack ... ok
+test a_dependent_freeze_panic_quarantines_the_same_owner_after_counted_upstream_admission ... ok
+test accepted_upstream_survives_visual_failure_and_dependency_remains_coherent ... ok
+test both_sources_invalidate_but_unrelated_exact_edits_do_not_and_diagnostics_are_complete ... ok
+test close_revokes_a_held_completion_and_returns_its_same_owned_payload ... ok
+test dependency_fault_and_pending_previous_values_never_freeze_fresh_work ... ok
+test foreign_reader_is_rejected_before_mount ... ok
+test nested_pairs_preserve_every_member_and_duplicate_sources_are_observed_consistently ... ok
+test same_batch_upstream_and_old_dependent_terminal_dispatch_latest_once ... ok
+test synchronous_completion_waits_for_the_next_frozen_batch ... ok
+test two_reader_inputs_settle_before_their_dependent_freezes_once ... ok
+
+test result: ok. 11 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 0.13s
+

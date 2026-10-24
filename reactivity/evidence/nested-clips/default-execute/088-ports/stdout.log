@@ -1,0 +1,8 @@
+
+running 3 tests
+test complete_application_views_compose_without_rewriting_their_state_or_routes ... ok
+test component_graphics_port_reuses_layout_for_geometry_and_color_updates ... ok
+test tutorial_port_uses_the_ordinary_input_and_serialization_interface ... ok
+
+test result: ok. 3 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 0.84s
+

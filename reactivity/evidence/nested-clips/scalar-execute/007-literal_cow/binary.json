@@ -1,0 +1,30 @@
+{
+  "original": "/root/target-clips-sol-nightly/debug/build/gpui_canvas/bc78691d0bdcb0d0/out/literal_cow-bc78691d0bdcb0d0",
+  "frozen": "/tmp/clips-sol-evidence/final-b164/scalar-execute/007-literal_cow/test",
+  "sha256": "5f40c4c25e3a598e74a3ebbdcf5e96575da58512ebb90180d12cafda5a1a21c7",
+  "bytes": 79093712,
+  "fresh": false,
+  "package_id": "path+file:///root/gpui-clips-sol/reactivity/crates/canvas#gpui_canvas@0.1.0",
+  "target": {
+    "kind": [
+      "test"
+    ],
+    "crate_types": [
+      "bin"
+    ],
+    "name": "literal_cow",
+    "src_path": "/root/gpui-clips-sol/reactivity/crates/canvas/tests/literal_cow.rs",
+    "edition": "2024",
+    "doc": false,
+    "doctest": false,
+    "test": true
+  },
+  "features": [],
+  "profile": {
+    "opt_level": "0",
+    "debuginfo": 2,
+    "debug_assertions": true,
+    "overflow_checks": true,
+    "test": true
+  }
+}

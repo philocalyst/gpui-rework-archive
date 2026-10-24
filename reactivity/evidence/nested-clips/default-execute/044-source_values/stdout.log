@@ -1,0 +1,9 @@
+
+running 4 tests
+test coarse_in_place_heap_edit_refreshes_inner_text_and_question ... ok
+test coarse_replacement_refreshes_same_address_zero_revision_inner_source ... ok
+test generic_leaf_declaration_and_erased_leaf_values_remain_supported ... ok
+test nested_signal_state_construction_default_and_serde_remain_general ... ok
+
+test result: ok. 4 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 0.02s
+

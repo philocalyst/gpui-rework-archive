@@ -1,0 +1,13 @@
+{
+  "source": "b164198e02ca4172a8cd56308ad204d30f1da333",
+  "original": "/tmp/clips-sol-evidence/final-b164/default-execute/048-gpui/test",
+  "sha256": "b89ce0b8a1b27d5e48e330fa66fdfa71bbbc77c5aeea8fed25ac913853ccf9ac",
+  "bytes": 270417448,
+  "args": [
+    "clipping_headers_and_cold_builder_costs_are_explicit",
+    "--nocapture",
+    "--test-threads=1"
+  ],
+  "exit": 0,
+  "hash_matches": true
+}

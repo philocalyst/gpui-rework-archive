@@ -1,0 +1,15 @@
+
+running 10 tests
+test an_action_with_a_bad_component_writer_is_checked_before_mutation_or_epoch_admission ... ok
+test changing_component_owners_at_equal_ordinals_revokes_old_targets ... ok
+test default_registration_refreshes_parent_snapshots_even_when_the_child_field_is_direct ... ok
+test identical_component_types_dispatch_methods_actions_and_editable_ports_to_their_own_state ... ok
+test moving_and_restoring_models_preserves_state_and_remints_target_authority ... ok
+test nested_component_roots_qualify_reused_ids_and_compose_typed_route_authority ... ok
+test panicking_component_projectors_follow_the_owner_quarantine_boundary ... ok
+test read_only_boundaries_also_check_the_registered_projector_not_only_the_id ... ok
+test registration_checks_exclusive_projection_before_describing_the_owner ... ok
+test visual_parentage_does_not_infer_model_ownership_or_exclusive_access ... ok
+
+test result: ok. 10 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 0.12s
+

@@ -1,0 +1,12 @@
+
+running 7 tests
+test a_cancelled_catalogue_scan_releases_credit_at_a_bounded_checkpoint_for_the_latest_query ... ok
+test bounded_library_snapshot_and_page_allocation_ledger ... ok
+test library_domain_restore_remints_readers_and_targets_and_rejects_old_work ... ok
+test paired_real_library_cancellation_cost ... ignored, manual release cancellation-latency evidence; run alone on a quiet CPU
+test quarter_million_search_has_bounded_results_virtual_rows_and_exact_play_actions ... ok
+test query_and_order_are_one_frozen_library_cohort ... ok
+test worker_matches_an_independent_full_scan_and_bounds_utf8_input_and_result_pages ... ok
+
+test result: ok. 6 passed; 0 failed; 1 ignored; 0 measured; 0 filtered out; finished in 4.70s
+

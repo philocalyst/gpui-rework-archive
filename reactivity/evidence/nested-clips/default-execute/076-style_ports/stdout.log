@@ -1,0 +1,18 @@
+
+running 13 tests
+test borrowed_flex_fields_and_flow_publish_through_the_closed_typed_schema ... ok
+test dynamic_list_height_is_admitted_before_realization_but_paint_does_not_describe ... ok
+test final_literal_and_final_signal_win_for_direct_and_flex_fields ... ok
+test invalid_numeric_publication_commits_source_but_preserves_old_p_and_recovers ... ok
+test large_integer_lengths_preserve_the_inherited_f019_narrowing_oracle ... ok
+test last_write_wins_size_fanout_and_unregistered_snapshots_do_not_keep_obsolete_edges ... ok
+test literal_and_borrowed_recipes_preserve_unspecified_fields ... ok
+test masked_sources_advance_inspector_bases_and_inherit_reveals_without_view ... ok
+test paint_geometry_and_layout_ports_use_existing_typed_properties_without_view_work ... ok
+test pending_and_failed_geometry_keep_acknowledged_style_geometry ... ok
+test radius_literals_keep_deferred_geometry_errors_and_font_uses_its_schema_error ... ok
+test same_local_component_ids_install_distinct_style_sources ... ok
+test text_first_and_style_first_keep_combined_numeric_capabilities ... ok
+
+test result: ok. 13 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 0.04s
+

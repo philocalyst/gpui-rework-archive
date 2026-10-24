@@ -1,0 +1,33 @@
+reactivity/vendor/accesskit_macos/src/adapter.rs-287-        let context = self.get_or_init_context(activation_handler);
+reactivity/vendor/accesskit_macos/src/adapter.rs-288-        let tree = context.tree.borrow();
+reactivity/vendor/accesskit_macos/src/adapter.rs-289-        let state = tree.state();
+reactivity/vendor/accesskit_macos/src/adapter.rs-290-        let root = state.root();
+reactivity/vendor/accesskit_macos/src/adapter.rs-291-        let point = from_ns_point(&view, &root, point);
+reactivity/vendor/accesskit_macos/src/adapter.rs:292:        let node = root.node_at_point(point, &filter).unwrap_or(root);
+reactivity/vendor/accesskit_macos/src/adapter.rs-293-        Id::autorelease_return(context.get_or_create_platform_node(node.id())) as *mut _
+reactivity/vendor/accesskit_macos/src/adapter.rs-294-    }
+reactivity/vendor/accesskit_macos/src/adapter.rs-295-}
+--
+reactivity/vendor/accesskit_atspi_common/src/node.rs-1154-                Point::new(x.into(), y.into()),
+reactivity/vendor/accesskit_atspi_common/src/node.rs-1155-                Some(node),
+reactivity/vendor/accesskit_atspi_common/src/node.rs-1156-                coord_type,
+reactivity/vendor/accesskit_atspi_common/src/node.rs-1157-            );
+reactivity/vendor/accesskit_atspi_common/src/node.rs-1158-            let point = node.transform().inverse() * point;
+reactivity/vendor/accesskit_atspi_common/src/node.rs:1159:            Ok(node.node_at_point(point, &filter).map(|node| node.id()))
+reactivity/vendor/accesskit_atspi_common/src/node.rs-1160-        })
+reactivity/vendor/accesskit_atspi_common/src/node.rs-1161-    }
+reactivity/vendor/accesskit_atspi_common/src/node.rs-1162-
+reactivity/vendor/accesskit_atspi_common/src/node.rs-1163-    pub fn extents(&self, coord_type: CoordType) -> Result<AtspiRect> {
+reactivity/vendor/accesskit_atspi_common/src/node.rs-1164-        self.resolve_with_context(|node, _, context| {
+--
+/root/.cargo/registry/src/index.crates.io-1949cf8c6b5b557f/accesskit_windows-0.35.1/src/node.rs-1149-    fn ElementProviderFromPoint(&self, x: f64, y: f64) -> Result<IRawElementProviderFragment> {
+/root/.cargo/registry/src/index.crates.io-1949cf8c6b5b557f/accesskit_windows-0.35.1/src/node.rs-1150-        self.resolve_with_context(|node, context| {
+/root/.cargo/registry/src/index.crates.io-1949cf8c6b5b557f/accesskit_windows-0.35.1/src/node.rs-1151-            let client_top_left = context.client_top_left();
+/root/.cargo/registry/src/index.crates.io-1949cf8c6b5b557f/accesskit_windows-0.35.1/src/node.rs-1152-            let point = Point::new(x - client_top_left.x, y - client_top_left.y);
+/root/.cargo/registry/src/index.crates.io-1949cf8c6b5b557f/accesskit_windows-0.35.1/src/node.rs-1153-            let point = node.transform().inverse() * point;
+/root/.cargo/registry/src/index.crates.io-1949cf8c6b5b557f/accesskit_windows-0.35.1/src/node.rs:1154:            node.node_at_point(point, &filter).map_or_else(
+/root/.cargo/registry/src/index.crates.io-1949cf8c6b5b557f/accesskit_windows-0.35.1/src/node.rs-1155-                || Err(Error::empty()),
+/root/.cargo/registry/src/index.crates.io-1949cf8c6b5b557f/accesskit_windows-0.35.1/src/node.rs-1156-                |node| {
+/root/.cargo/registry/src/index.crates.io-1949cf8c6b5b557f/accesskit_windows-0.35.1/src/node.rs-1157-                    Ok(context
+/root/.cargo/registry/src/index.crates.io-1949cf8c6b5b557f/accesskit_windows-0.35.1/src/node.rs-1158-                        .get_or_create_platform_node(node.id())
+/root/.cargo/registry/src/index.crates.io-1949cf8c6b5b557f/accesskit_windows-0.35.1/src/node.rs-1159-                        .into_interface())

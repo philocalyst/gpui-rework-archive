@@ -1,0 +1,8 @@
+
+running 3 tests
+test coarse_models_still_allow_shared_mutable_resources ... ok
+test immutable_arc_copy_on_write_keeps_peer_data_and_ready_capture_coherent ... ok
+test immutable_arcstr_leases_allow_exact_replacement_without_changing_a_peer ... ok
+
+test result: ok. 3 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 0.01s
+

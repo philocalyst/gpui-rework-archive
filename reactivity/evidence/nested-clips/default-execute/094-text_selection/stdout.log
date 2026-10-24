@@ -1,0 +1,25 @@
+
+running 20 tests
+test acknowledged_selection_does_not_follow_pending_failed_or_repair_edits ... ok
+test byte_selection_construction_preserves_direction_and_checks_representation ... ok
+test equal_output_replacement_still_collapses_caret_before_publication ... ok
+test geometry_navigation_waits_for_ack_but_logical_range_edits_do_not ... ok
+test grapheme_backspace_and_joined_carets_repair_even_a_failed_visual_source ... ok
+test invalid_grapheme_crlf_and_foreign_ranges_are_atomic ... ok
+test line_navigation_handles_crlf_empty_lines_and_stale_geometry_without_mutation ... ok
+test logical_selection_survives_pending_and_failed_p_without_rewriting_old_sheet ... ok
+test ordinary_replace_typing_keyboard_and_accessibility_share_selection_aware_source_edits ... ok
+test ordinary_wrapped_navigation_keeps_each_affinity_on_its_canonical_source_line ... ok
+test pointer_drag_uses_current_map_outside_input_and_revokes_on_source_change ... ok
+test rtl_line_edges_are_physical_and_vertical_ranges_move_from_either_focus ... ok
+test selection_and_focus_publish_pixels_without_changing_source_text ... ok
+test semantic_range_actions_share_ordinary_editing_and_preserve_reverse_endpoints ... ok
+test stored_selection_is_source_qualified_but_explicit_ranges_address_current_source ... ok
+test transformed_input_navigates_in_local_coordinates_and_pointer_restarts_preferred_x ... ok
+test transformed_padded_input_hits_and_shared_caret_ink_follow_the_real_paint_bank ... ok
+test unchanged_explicit_selection_horizontal_motion_and_source_rebind_reset_preferred_x ... ok
+test vertical_keys_restore_preferred_x_extend_and_move_from_the_focus ... ok
+test visual_arrows_extend_whole_graphemes_and_collapse_bidi_endpoints ... ok
+
+test result: ok. 20 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 0.24s
+

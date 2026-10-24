@@ -1,0 +1,30 @@
+{
+  "original": "/root/target-clips-sol-nightly/debug/build/gpui_canvas/21ecbacb653df2f2/out/unicode-21ecbacb653df2f2",
+  "frozen": "/tmp/clips-sol-evidence/final-b164/scalar-execute/016-unicode/test",
+  "sha256": "4d89fb8b702e3c6d0b06f3c9a27c3f78d43aed444d40c3b05e5f901563976e39",
+  "bytes": 104935888,
+  "fresh": false,
+  "package_id": "path+file:///root/gpui-clips-sol/reactivity/crates/canvas#gpui_canvas@0.1.0",
+  "target": {
+    "kind": [
+      "test"
+    ],
+    "crate_types": [
+      "bin"
+    ],
+    "name": "unicode",
+    "src_path": "/root/gpui-clips-sol/reactivity/crates/canvas/tests/unicode.rs",
+    "edition": "2024",
+    "doc": false,
+    "doctest": false,
+    "test": true
+  },
+  "features": [],
+  "profile": {
+    "opt_level": "0",
+    "debuginfo": 2,
+    "debug_assertions": true,
+    "overflow_checks": true,
+    "test": true
+  }
+}

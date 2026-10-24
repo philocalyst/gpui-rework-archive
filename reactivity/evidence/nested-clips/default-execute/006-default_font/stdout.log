@@ -1,0 +1,9 @@
+
+running 4 tests
+test actual_cpu_sdr_and_hdr_pixels_are_exact ... ok
+test all_glyph_swash_masks_have_exact_placement_and_coverage ... ok
+test exact_cmap_and_all_glyph_metrics_and_outline_commands ... ok
+test independent_rustybuzz_shaping_is_exact ... ok
+
+test result: ok. 4 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 31.07s
+
