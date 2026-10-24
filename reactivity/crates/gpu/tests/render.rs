@@ -1287,7 +1287,7 @@ fn mixed_image_payload_offsets_and_reordered_exact_keys_remain_coherent() {
     pollster::block_on(async {
         let mut renderer = renderer(wgpu::TextureFormat::Rgba8UnormSrgb).await;
         let payload: usize = images.iter().map(Image::pixel_bytes).sum();
-        for order in [[0, 1, 2], [2, 0, 1], [1, 2, 0]] {
+        for (turn, order) in [[0, 1, 2], [2, 0, 1], [1, 2, 0]].into_iter().enumerate() {
             let mut canvas = Canvas::recording(33, 17, ColorConfig::default()).unwrap();
             canvas.clear(Color::WHITE);
             let clip = Rect::new(0., 0., 33., 17.);
@@ -1314,7 +1314,10 @@ fn mixed_image_payload_offsets_and_reordered_exact_keys_remain_coherent() {
             let gpu = readback(&mut renderer, &canvas);
             assert_eq!(renderer.image_stats().unwrap().resources, 3);
             assert_eq!(renderer.image_stats().unwrap().packed_bytes, payload);
-            assert_eq!(renderer.image_stats().unwrap().uploaded_bytes, payload);
+            assert_eq!(
+                renderer.image_stats().unwrap().uploaded_bytes,
+                if turn == 0 { payload } else { 0 }
+            );
             for (i, (&a, &b)) in gpu.iter().zip(canvas.pixels()).enumerate() {
                 assert!(a.abs_diff(b) <= 1, "order{order:?} byte{i}: GPU{a} CPU{b}");
             }
