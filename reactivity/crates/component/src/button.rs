@@ -32,7 +32,7 @@ impl<'a> Button<'a> {
     pub fn variant(mut self, variant: ButtonVariant) -> Self {
         self.variant = variant;
         let (bg, fg) = Self::colors(self.theme, variant);
-        self.element = self.element.bg(bg).fg(fg).rounded(theme.radius());
+        self.element = self.element.bg(bg).fg(fg).rounded(self.theme.radius());
         self
     }
     fn colors(theme: &Theme, variant: ButtonVariant) -> (gpui::Color, gpui::Color) {
@@ -41,16 +41,14 @@ impl<'a> Button<'a> {
             ButtonVariant::Primary => (theme.accent(), theme.on_accent()),
             ButtonVariant::Ghost => (theme.surface(), theme.foreground()),
             ButtonVariant::Danger => (theme.danger(), theme.on_accent()),
-        };
-        self.element = self.element.bg(bg).fg(fg).rounded(theme.radius());
-        self
+        }
     }
     pub fn with_size(mut self, size: Size) -> Self {
         self.element = self
             .element
-            .h(theme.control_height(size))
-            .p(theme.rem(4.0 / 7.0))
-            .font_size(theme.control_font(size));
+            .h(self.theme.control_height(size))
+            .p(self.theme.rem(4.0 / 7.0))
+            .font_size(self.theme.control_font(size));
         self
     }
     pub fn disabled(mut self, disabled: impl BoolInput<'a>) -> Self {
