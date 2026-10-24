@@ -4371,20 +4371,20 @@ fn lab_bernstein_hdr_cohorts_match_independent_oracle() {
                                         (x as f64 + dx) / 8.,
                                         Mode::Oklab,
                                     );
-                                    for c in 0..4 {
-                                        expected[c] += source[c] * 0.25;
+                                    for (destination, source) in expected.iter_mut().zip(source) {
+                                        *destination += source * 0.25;
                                     }
                                 }
-                                for c in 0..4 {
+                                for (c, &expected_channel) in expected.iter().enumerate() {
                                     let offset = ((y * 8 + x) * 4 + c) * 2;
                                     let actual = half(&bytes[offset..offset + 2]);
                                     let tolerance = if c == 3 {
                                         0.001
                                     } else {
-                                        0.000005 + 0.002 * expected[c].abs()
+                                        0.000005 + 0.002 * expected_channel.abs()
                                     };
                                     assert!(
-                                        (actual - expected[c]).abs() <= tolerance,
+                                        (actual - expected_channel).abs() <= tolerance,
                                         "reference={reference} peak={peak} p3={p3} alpha={a0}/{a1} row={y} x={x} c={c} actual={actual} expected={expected:?} tolerance={tolerance}"
                                     );
                                 }
