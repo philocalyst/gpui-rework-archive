@@ -45,7 +45,7 @@ fn private_inspector_shell_keeps_canonical_width_distinct_from_stored_set() {
     .unwrap();
     assert_eq!(
         win.property(panel, gpui::property::WIDTH).unwrap(),
-        Some(320.)
+        Length::Points(320.)
     );
     assert_eq!(
         win.contribution(panel, gpui::property::WIDTH).unwrap(),
