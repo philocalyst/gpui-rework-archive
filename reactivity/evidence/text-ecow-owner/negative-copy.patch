@@ -1,0 +1,13 @@
+diff --git a/src/glyph_buffer.rs b/src/glyph_buffer.rs
+index 763ffc3..51e4fe4 100644
+--- a/src/glyph_buffer.rs
++++ b/src/glyph_buffer.rs
+@@ -38,7 +38,7 @@ impl GlyphBuffer {
+         usize::from(self.text_len)
+     }
+     pub(super) fn shared(&self) -> EcoVec<PackedGlyph> {
+-        self.values.clone()
++        EcoVec::from(self.values.as_slice())
+     }
+     #[cfg(test)]
+     pub(super) fn capacity(&self) -> usize {

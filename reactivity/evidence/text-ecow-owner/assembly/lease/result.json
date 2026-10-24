@@ -1,0 +1,38 @@
+[
+  {
+    "variant": "blocks",
+    "name": "<gpui_canvas::canvas::DisplayList>::publish_group",
+    "bytes": 644,
+    "asm": "blocks-0.txt"
+  },
+  {
+    "variant": "blocks",
+    "name": "<alloc::rcs::arc::Arc<gpui_canvas::text::glyph_buffer::GlyphBuffer>>::drop_slow",
+    "bytes": 70,
+    "asm": "blocks-1.txt"
+  },
+  {
+    "variant": "ecow",
+    "name": "ecow::vec::ref_count_overflow::<gpui_canvas::text::PackedGlyph>",
+    "bytes": 31,
+    "asm": "ecow-2.txt"
+  },
+  {
+    "variant": "ecow",
+    "name": "ecow::vec::ref_count_overflow::<gpui_canvas::text::PackedGlyph>",
+    "bytes": 31,
+    "asm": "ecow-3.txt"
+  },
+  {
+    "variant": "ecow",
+    "name": "<gpui_canvas::canvas::DisplayList>::publish_group",
+    "bytes": 653,
+    "asm": "ecow-4.txt"
+  },
+  {
+    "variant": "ecow",
+    "name": "<gpui_canvas::text::TextLayout>::shared_glyphs",
+    "bytes": 30,
+    "asm": "ecow-5.txt"
+  }
+]

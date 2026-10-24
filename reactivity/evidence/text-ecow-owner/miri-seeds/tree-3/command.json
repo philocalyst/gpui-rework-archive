@@ -1,0 +1,32 @@
+{
+  "source": "b16735276d8cea66a74e10d474f50c911d121c5b",
+  "cwd": "/tmp/gpui-ecow-miri-sol",
+  "argv": [
+    "cargo",
+    "miri",
+    "test",
+    "--offline",
+    "--locked",
+    "--",
+    "--test-threads=1",
+    "--skip",
+    "empty_spare_capacity_and_full_buffers_keep_exact_allocation_and_bits"
+  ],
+  "timeout_seconds": 120,
+  "tracked_input_scopes": [
+    "all materialized tracked files"
+  ],
+  "environment": {
+    "RUSTC": "/tmp/gpui-nightly-2026-10-23/bin/rustc",
+    "RUSTDOC": "/tmp/gpui-nightly-2026-10-23/bin/rustdoc",
+    "RUSTC_BOOTSTRAP": null,
+    "RUSTFLAGS": null,
+    "CARGO_ENCODED_RUSTFLAGS": null,
+    "CARGO_TARGET_DIR": "/tmp/gpui-ecow-miri-sol-target",
+    "CARGO_BUILD_JOBS": "2",
+    "MIRI": null,
+    "MIRI_SYSROOT": "/tmp/gpui-miri-root-sysroot",
+    "MIRIFLAGS": "-Zmiri-strict-provenance -Zmiri-seed=3 -Zmiri-tree-borrows",
+    "RUST_SRC_PATH": null
+  }
+}

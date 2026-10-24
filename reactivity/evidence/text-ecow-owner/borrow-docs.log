@@ -1,0 +1,11 @@
+    Finished `release` profile [optimized] target(s) in 0.60s
+   Doc-tests gpui_canvas
+
+running 4 tests
+test crates/canvas/src/canvas/paint.rs - canvas::paint::PaintCommit (line 66) - compile fail ... ok
+test crates/canvas/src/text.rs - text::TextLayout::glyphs (line 316) - compile fail ... ok
+test crates/canvas/src/canvas.rs - canvas::PreparedScene (line 907) - compile fail ... ok
+test crates/canvas/src/canvas.rs - canvas::CanvasScene (line 2553) - compile fail ... ok
+
+test result: ok. 4 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 0.05s
+

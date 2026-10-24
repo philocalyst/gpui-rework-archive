@@ -1,0 +1,27 @@
+
+/tmp/gpui-ecow-final-artifacts/text_run_probe:     file format elf64-x86-64
+
+
+Disassembly of section .text:
+
+0000000000544650 <core::ptr::drop_glue::<ecow::vec::EcoVec<gpui_canvas::text::PackedGlyph>>>:
+  544650:	sub    $0x18,%rsp
+  544654:	mov    %rdi,%rax
+  544657:	sub    $0x10,%rax
+  54465b:	je     54469d <core::ptr::drop_glue::<ecow::vec::EcoVec<gpui_canvas::text::PackedGlyph>>+0x4d>
+  54465d:	lock decq (%rax)
+  544661:	jne    54469d <core::ptr::drop_glue::<ecow::vec::EcoVec<gpui_canvas::text::PackedGlyph>>+0x4d>
+  544663:	mov    -0x8(%rdi),%rcx
+  544667:	movabs $0xaaaaaaaaaaaaaa9,%rdx
+  544671:	cmp    %rdx,%rcx
+  544674:	jae    5446a2 <core::ptr::drop_glue::<ecow::vec::EcoVec<gpui_canvas::text::PackedGlyph>>+0x52>
+  544676:	lea    (%rcx,%rcx,2),%rcx
+  54467a:	lea    0x10(,%rcx,4),%rcx
+  544682:	mov    %rax,0x10(%rsp)
+  544687:	movq   $0x8,(%rsp)
+  54468f:	mov    %rcx,0x8(%rsp)
+  544694:	mov    %rsp,%rdi
+  544697:	call   *0x2368d3(%rip)        # 77af70 <_DYNAMIC+0x318>
+  54469d:	add    $0x18,%rsp
+  5446a1:	ret
+  5446a2:	call   *0x236948(%rip)        # 77aff0 <_DYNAMIC+0x398>

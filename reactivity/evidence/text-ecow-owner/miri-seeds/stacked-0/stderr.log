@@ -1,0 +1,51 @@
+warning: struct `PackedGlyph` is never constructed
+ --> src/lib.rs:5:8
+  |
+5 | struct PackedGlyph { meta: u32, x: f32, baseline: f32 }
+  |        ^^^^^^^^^^^
+  |
+  = note: `#[warn(dead_code)]` (part of `#[warn(unused)]`) on by default
+
+warning: struct `GlyphBuffer` is never constructed
+ --> src/glyph_buffer.rs:6:19
+  |
+6 | pub(super) struct GlyphBuffer {
+  |                   ^^^^^^^^^^^
+
+warning: function `checked_counts` is never used
+  --> src/glyph_buffer.rs:13:4
+   |
+13 | fn checked_counts(length: usize, capacity: usize, text_len: usize) -> Option<(u16, u32, u16)> {
+   |    ^^^^^^^^^^^^^^
+
+warning: associated items `new`, `text_len`, and `shared` are never used
+  --> src/glyph_buffer.rs:25:19
+   |
+24 | impl GlyphBuffer {
+   | ---------------- associated items in this implementation
+25 |     pub(super) fn new(
+   |                   ^^^
+...
+37 |     pub(super) fn text_len(&self) -> usize {
+   |                   ^^^^^^^^
+...
+40 |     pub(super) fn shared(&self) -> EcoVec<PackedGlyph> {
+   |                   ^^^^^^
+
+warning: `gpui-ecow-owner-miri-sol` (lib) generated 4 warnings
+    Finished `test` profile [unoptimized + debuginfo] target(s) in 0.42s
+     Running unittests src/lib.rs (/tmp/gpui-ecow-miri-sol-target/miri/x86_64-unknown-linux-gnu/debug/build/gpui-ecow-owner-miri-sol/dbe5ad15714d1aa2/out/gpui_ecow_owner_miri_sol-dbe5ad15714d1aa2)
+warning: method `is_unique` is never used
+  --> src/glyph_buffer.rs:48:19
+   |
+24 | impl GlyphBuffer {
+   | ---------------- method in this implementation
+...
+48 |     pub(super) fn is_unique(&mut self) -> bool {
+   |                   ^^^^^^^^^
+   |
+   = note: `#[warn(dead_code)]` (part of `#[warn(unused)]`) on by default
+
+warning: 1 warning emitted
+
+   Doc-tests gpui_ecow_owner_miri_sol

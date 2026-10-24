@@ -1,0 +1,17 @@
+
+/tmp/gpui-ecow-final-artifacts/text_run_probe:     file format elf64-x86-64
+
+
+Disassembly of section .text:
+
+00000000005a4520 <<gpui_canvas::text::TextLayout>::shared_glyphs>:
+  5a4520:	mov    (%rdi),%rax
+  5a4523:	mov    0x8(%rdi),%rdx
+  5a4527:	cmp    $0x10,%rax
+  5a452b:	je     5a4534 <<gpui_canvas::text::TextLayout>::shared_glyphs+0x14>
+  5a452d:	lock incq -0x10(%rax)
+  5a4532:	jle    5a4535 <<gpui_canvas::text::TextLayout>::shared_glyphs+0x15>
+  5a4534:	ret
+  5a4535:	push   %rax
+  5a4536:	mov    %rax,%rdi
+  5a4539:	call   5b0f00 <ecow::vec::ref_count_overflow::<gpui_canvas::text::PackedGlyph>>

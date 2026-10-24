@@ -1,0 +1,236 @@
+[
+  {
+    "variant": "canvas",
+    "binary": "/tmp/gpui-ecow-final-artifacts/bins",
+    "sha256": "36a081de67b797a861e33a3d2bcfec72934efb33c99ed678bbd5c8debd8550e7",
+    "exit": 0
+  },
+  {
+    "variant": "canvas",
+    "binary": "/tmp/gpui-ecow-final-artifacts/color",
+    "sha256": "6177e358f377c3b446f6258b2dd822cfe5a3b4eef5c91326354172da4b40d040",
+    "exit": 0
+  },
+  {
+    "variant": "canvas",
+    "binary": "/tmp/gpui-ecow-final-artifacts/color_authoring",
+    "sha256": "05cdaaa75e7ee5090d2dced36e5641f29b2943e3d43b830febd5007dd3e5e5c1",
+    "exit": 0
+  },
+  {
+    "variant": "canvas",
+    "binary": "/tmp/gpui-ecow-final-artifacts/color_packing",
+    "sha256": "3c8e72af128cf70ed9dd3f7abf54ccbf5249b37f3ae8b0e1fab1f66896c82968",
+    "exit": 0
+  },
+  {
+    "variant": "canvas",
+    "binary": "/tmp/gpui-ecow-final-artifacts/damage",
+    "sha256": "f8b2e88b5e4e96b9822fbdf3950c6c8068d831df1a3b62fd3e0010b112813017",
+    "exit": 0
+  },
+  {
+    "variant": "canvas",
+    "binary": "/tmp/gpui-ecow-final-artifacts/default_font",
+    "sha256": "578da4b682a23c719616018494642e5c70ef1f364d6326cb87dc386d28d67336",
+    "exit": 0
+  },
+  {
+    "variant": "canvas",
+    "binary": "/tmp/gpui-ecow-final-artifacts/dpi",
+    "sha256": "903daadbc5493703fcb84b29498e053be264aabec4b9c9f4757e4bfc03f961b3",
+    "exit": 0
+  },
+  {
+    "variant": "canvas",
+    "binary": "/tmp/gpui-ecow-final-artifacts/external",
+    "sha256": "186da171bb760d28e8ca8f7ddb32cc91bdd5c1031b35144d793a1793420dc699",
+    "exit": 0
+  },
+  {
+    "variant": "canvas",
+    "binary": "/tmp/gpui-ecow-final-artifacts/font_quality",
+    "sha256": "07eeaac50f972c3ae13a085bd83caa5789fd55c5f5c3bd8d67d16fc0637c17bb",
+    "exit": 0
+  },
+  {
+    "variant": "canvas",
+    "binary": "/tmp/gpui-ecow-final-artifacts/font_sharing",
+    "sha256": "131ebe79add2dcad2ca98ef8f1ed1ec40490a892cd2515d40c9a2c0f2f881159",
+    "exit": 0
+  },
+  {
+    "variant": "canvas",
+    "binary": "/tmp/gpui-ecow-final-artifacts/gpui_canvas",
+    "sha256": "0f87911b84f71c1a496d85cbca1d4d66a45cd552aa713257c447e7e64ea9206f",
+    "exit": 0
+  },
+  {
+    "variant": "canvas",
+    "binary": "/tmp/gpui-ecow-final-artifacts/grouped",
+    "sha256": "0b75eeb9ca4b58672c8ce6ce2e85e8774e72f635d547ecc559763393c748203b",
+    "exit": 0
+  },
+  {
+    "variant": "canvas",
+    "binary": "/tmp/gpui-ecow-final-artifacts/hdr",
+    "sha256": "0352dda2f6054972bf38d0f9a0e26560bdba8c5e914a408d52cb3d473a57065f",
+    "exit": 0
+  },
+  {
+    "variant": "canvas",
+    "binary": "/tmp/gpui-ecow-final-artifacts/images",
+    "sha256": "2c88ee509dbd320c96e430511501ff8b0d9504d4faa23bec4e2358e07ace8472",
+    "exit": 0
+  },
+  {
+    "variant": "canvas",
+    "binary": "/tmp/gpui-ecow-final-artifacts/literal_cow",
+    "sha256": "ba437f3880f40aac3269a87f01cff6f4df1238c1ac2f82a318dbc3aa10494648",
+    "exit": 0
+  },
+  {
+    "variant": "canvas",
+    "binary": "/tmp/gpui-ecow-final-artifacts/oklch",
+    "sha256": "fa48ad79bcbe7e1296ffaf193d70b4391fe1d8b95445d012633c7bb53cc3dbf1",
+    "exit": 0
+  },
+  {
+    "variant": "canvas",
+    "binary": "/tmp/gpui-ecow-final-artifacts/paint",
+    "sha256": "b6390907ac9b38aa0032ed59ac4f599798d0b613d83afb72abc9bedf4f8f0ad0",
+    "exit": 0
+  },
+  {
+    "variant": "canvas",
+    "binary": "/tmp/gpui-ecow-final-artifacts/parallel",
+    "sha256": "93ad07efcf308301ac3730b999a94fc8c6c574ec709b293c1c68b418a90761e1",
+    "exit": 0
+  },
+  {
+    "variant": "canvas",
+    "binary": "/tmp/gpui-ecow-final-artifacts/prepared_scene",
+    "sha256": "9903549bbeab4f1db9d811b27cf7ad4f94f48cb2dadefdefb58bdfabc0d35d4b",
+    "exit": 0
+  },
+  {
+    "variant": "canvas",
+    "binary": "/tmp/gpui-ecow-final-artifacts/render",
+    "sha256": "dc53c67d85a736f9da9a80eb77bee611254b1ac6130c9b74c108ed93304eb78c",
+    "exit": 0
+  },
+  {
+    "variant": "canvas",
+    "binary": "/tmp/gpui-ecow-final-artifacts/rounded",
+    "sha256": "23fcb7d69b87cb71603266c0e8d0ffe83520eb4e396a4bdbf1eb1f26a3514693",
+    "exit": 0
+  },
+  {
+    "variant": "canvas",
+    "binary": "/tmp/gpui-ecow-final-artifacts/sample_clip",
+    "sha256": "c22907cfbad0e672cef340ca9d4fa0e33e21e503227af64a84e88ef2d5f4497f",
+    "exit": 0
+  },
+  {
+    "variant": "canvas",
+    "binary": "/tmp/gpui-ecow-final-artifacts/sample_storage",
+    "sha256": "f04823a57e8f2685517ecb6b89c35f7d6be4ff09e2c621f0d09e7e39d4ad1d81",
+    "exit": 0
+  },
+  {
+    "variant": "canvas",
+    "binary": "/tmp/gpui-ecow-final-artifacts/selection",
+    "sha256": "ead099cf5f7f0741713fbcbf515c6866af6ac4e4615fe7de09950068b3e6aec0",
+    "exit": 0
+  },
+  {
+    "variant": "canvas",
+    "binary": "/tmp/gpui-ecow-final-artifacts/shaping",
+    "sha256": "2a10d8a475b4b9338cbed2c739aeeb7ba197d5e372561a3b46fc05c412c95ab0",
+    "exit": 0
+  },
+  {
+    "variant": "canvas",
+    "binary": "/tmp/gpui-ecow-final-artifacts/slots",
+    "sha256": "709a7b54effbb8bb0477108b56064073a9df2f7a63cf5fc5befb0199973fce2f",
+    "exit": 0
+  },
+  {
+    "variant": "canvas",
+    "binary": "/tmp/gpui-ecow-final-artifacts/solid",
+    "sha256": "cf1ff48faa76edd3e39d9c6cb4ef2265941c3f5c088b9f6b83e5d699859ff170",
+    "exit": 0
+  },
+  {
+    "variant": "canvas",
+    "binary": "/tmp/gpui-ecow-final-artifacts/text_capacity",
+    "sha256": "d9497ca5cfa6888badfb8e72989d2becfecdf52ea49afd754d902f2adf1b9d2b",
+    "exit": 0
+  },
+  {
+    "variant": "canvas",
+    "binary": "/tmp/gpui-ecow-final-artifacts/text_run_probe",
+    "sha256": "d3c51be0a93d2ac3740437a54eaab142b0ea907751e0561d93292790e68918ab",
+    "exit": 0
+  },
+  {
+    "variant": "canvas",
+    "binary": "/tmp/gpui-ecow-final-artifacts/text_transaction",
+    "sha256": "56bd9635352cd296d97550bb9092c32fd49587dc5f0811b01eec663120e18b97",
+    "exit": 0
+  },
+  {
+    "variant": "canvas",
+    "binary": "/tmp/gpui-ecow-final-artifacts/unicode",
+    "sha256": "3d06aa2c4f5823d5e1697af0910f3ce576dab0d4e285288bd6dd31b2763e039e",
+    "exit": 0
+  },
+  {
+    "variant": "gpu",
+    "binary": "/tmp/gpui-ecow-gpu-artifacts/render",
+    "sha256": "1b78dfec6633fbdde40f8511cc541eaf6ffd88f634e90e34f0ca5298434ffc29",
+    "exit": 0
+  },
+  {
+    "variant": "runtime",
+    "binary": "/tmp/gpui-ecow-runtime-artifacts/paint_patch",
+    "sha256": "c84b774611e539d560b0fdf149d0de748c920bb3018538cf21b5e278bfb7884f",
+    "exit": 0
+  },
+  {
+    "variant": "runtime",
+    "binary": "/tmp/gpui-ecow-runtime-artifacts/paint_slots",
+    "sha256": "99e469ceecbc0e7860038b321840ffa5e68946b79d8a5db6713aa6107a05ada8",
+    "exit": 0
+  },
+  {
+    "variant": "runtime",
+    "binary": "/tmp/gpui-ecow-runtime-artifacts/presentation",
+    "sha256": "898972b16a7ec193fe99ad456f882364b5217691e776d4a845c58ab7600a45cc",
+    "exit": 0
+  },
+  {
+    "variant": "runtime",
+    "binary": "/tmp/gpui-ecow-runtime-artifacts/text_cache",
+    "sha256": "59382ae6bc7f19dbf2b0c9195ed28608191025a072c2b7763bed16847e8772cc",
+    "exit": 0
+  },
+  {
+    "variant": "runtime",
+    "binary": "/tmp/gpui-ecow-runtime-artifacts/text_geometry",
+    "sha256": "85785b9057ae22da11757f7c97f5cf4f5319941ddfdc0082427ad5ccc0f44249",
+    "exit": 0
+  },
+  {
+    "variant": "runtime",
+    "binary": "/tmp/gpui-ecow-runtime-artifacts/text_selection",
+    "sha256": "95b236467f22a70fa2847a40c28db7f1adea14215b9e8552ae3f406ff99a8d31",
+    "exit": 0
+  },
+  {
+    "variant": "runtime",
+    "binary": "/tmp/gpui-ecow-runtime-artifacts/text_selection_compound",
+    "sha256": "f1c3f5f4eb8471d72482aa2dd9b3a9cfc20df7c719595c28f81a66a2d5ca901c",
+    "exit": 0
+  }
+]

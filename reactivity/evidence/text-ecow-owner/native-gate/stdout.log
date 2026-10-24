@@ -1,0 +1,782 @@
+
+running 8 tests
+test cached_origin_and_stride_do_not_change_regional_output_or_reference_stats ... ok
+test color_patches_reuse_unpruned_bins_and_match_fresh_full_scenes ... ok
+test containing_tile_envelopes_survive_empty_regions_and_diagnostic_interleaving ... ok
+test exceptional_paint_retires_cached_cuts_only_after_commit_and_reuses_geometry ... ok
+test failed_and_dropped_work_preserves_valid_bins_and_prior_pixels ... ok
+test fresh_negative_zero_opaque_cut_matches_scalar_hdr ... ok
+test shared_colors_revoke_cached_cuts_without_touching_geometry_or_allocating ... ok
+test structural_commits_reject_stale_bins_even_with_identical_counts_and_bounds ... ok
+
+test result: ok. 8 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 0.01s
+
+
+
+running 6 tests
+test all_profile_pairs_roundtrip_without_gamut_clipping ... ok
+test final_mapping_occurs_after_extended_linear_composition ... ok
+test invalid_color_values_and_configuration_are_rejected ... ok
+test p3_bytes_are_explicitly_profiled_and_hdr_is_linear_eight_byte_output ... ok
+test primary_conversion_uses_d65_matrices_and_preserves_extended_channels ... ok
+test tone_mapping_is_selected_not_implicit ... ok
+
+test result: ok. 6 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 0.00s
+
+
+
+running 2 tests
+test exact_authoring_comparison_matches_observable_channel_bits_and_profile ... ok
+test numeric_equality_remains_distinct_from_exact_authoring ... ok
+
+test result: ok. 2 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 0.00s
+
+
+
+running 3 tests
+test const_palette_alpha_and_float_equality_keep_their_contracts ... ok
+test legacy_admission_channels_and_conversion_are_bit_exact ... ok
+test legacy_working_colors_produce_identical_cpu_pixels ... ok
+
+test result: ok. 3 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 0.03s
+
+
+
+running 7 tests
+test a_small_repair_at_a_distant_origin_needs_only_local_bins ... ok
+test hdr_sample_promotion_matches_the_uncompressed_path ... ok
+test hdr_support_uses_unquantized_working_colors ... ok
+test identical_leased_text_is_empty_and_moved_text_repairs_old_and_new_support ... ok
+test insert_remove_reorder_and_transformed_color_edits_repair_every_pixel ... ok
+test randomized_repairs_cross_partial_tile_and_viewport_edges ... ok
+test unpresented_edits_union_without_retaining_the_intermediate_scene ... ok
+
+test result: ok. 7 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 0.07s
+
+
+
+running 4 tests
+test actual_cpu_sdr_and_hdr_pixels_are_exact ... ok
+test all_glyph_swash_masks_have_exact_placement_and_coverage ... ok
+test exact_cmap_and_all_glyph_metrics_and_outline_commands ... ok
+test independent_rustybuzz_shaping_is_exact ... ok
+
+test result: ok. 4 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 1.01s
+
+
+
+running 3 tests
+test density_one_preserves_existing_pixels_and_fractional_density_uses_physical_raster_keys ... ok
+test invalid_density_and_physical_font_size_reject_even_empty_layouts_atomically ... ok
+test two_x_density_uses_real_physical_masks_and_matches_physical_font_rendering ... ok
+
+test result: ok. 3 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 0.00s
+
+
+
+running 2 tests
+test external_native_words_match_rgba_and_preserve_lazy_image_coherence ... ok
+test invalid_external_targets_leave_buffer_and_scene_untouched ... ok
+
+test result: ok. 2 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 0.00s
+
+
+
+running 3 tests
+test empty_glyphs_do_not_create_masks_and_clearing_cache_preserves_scene_leases ... ok
+test immutable_font_admission_has_no_eager_outline_heap ... ok
+test requested_outline_masks_have_real_coverage_and_preserve_placement ... mask_count=84,mask_bytes=18333,changed_bytes=4779,max_error=17,coverage_rmse=1.5101
+ok
+
+test result: ok. 3 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 0.04s
+
+
+
+running 3 tests
+test live_services_measurement ... ignored, RSS/timing measurement; GPUI_FONT_SERVICES=1,2,8 in separate processes
+test shared_face_accepts_cross_service_layouts_but_caches_are_independent ... ok
+test supplied_font_bytes_are_owned_once_by_the_shared_face ... ok
+
+test result: ok. 2 passed; 0 failed; 1 ignored; 0 measured; 0 filtered out; finished in 0.01s
+
+
+
+running 97 tests
+test canvas::bins::tests::admitted_reference_and_command_limits_fit_narrow_membership_and_cuts ... ok
+test canvas::bins::tests::bounds_projection_and_csr_match_independent_command_membership ... ok
+test canvas::bins::tests::embedded_cut_preserves_a_nonzero_first_painter_and_no_opaque_prefix ... ok
+test canvas::bins::tests::opaque_certificates_follow_physical_tiles_and_exact_alpha ... ok
+test canvas::bins::tests::recording_has_no_scratch_allocation_and_first_raster_charges_one_owner ... raster_headers,Canvas=464,Scratch=56,RenderStats=96,Frame=88
+raster_allocations,first_requests=2,first_bytes=76,retained=76,csr_bytes=20,warm_requests=0,warm_bytes=0
+ok
+test canvas::columns::tests::alternating_late_scopes_disclose_bounded_discovery_fallback_growth ... scope_late_alternating,rows=162,capacity=256,allocations=2,requested=18432
+ok
+test canvas::columns::tests::complete_bank_layout_and_plain_recording_floor_are_explicit ... scope_bank_layout,Canvas=464,DisplayList=264,Columns=48,Inline=48,CommonGroup=64,Scope=48,Paint=24,Stored=24,Frame=88,Prepared=56,PreparedGroup=104,Slot=4,OptionSlot=4,Edit=20
+scope_plain_recording,allocations=2,requested=248,peak=248
+ok
+test canvas::columns::tests::empty_and_clipped_calls_do_not_admit_literals_when_the_bank_is_full ... ok
+test canvas::columns::tests::literal_palette_shares_exact_bits_without_aliasing_mutable_sources ... ok
+test canvas::columns::tests::palette_flags_survive_support_union_without_leaking_into_geometry ... ok
+test canvas::columns::tests::positional_writes_detach_once_and_never_rejoin_literal_discovery ... ok
+test canvas::columns::tests::repeated_last_scope_after_discovery_prefix_needs_no_more_rows_or_allocations ... ok
+test canvas::columns::tests::repeated_unique_and_late_miss_palette_storage_is_explicit ... literal_palette,mode=0,rows=1,capacity=4,allocations=1,requested=96,live=96
+literal_palette,mode=1,rows=4096,capacity=4096,allocations=11,requested=196512,live=98304
+literal_palette,mode=2,rows=4096,capacity=4096,allocations=11,requested=196512,live=98304
+ok
+test canvas::columns::tests::support_flags_never_enter_empty_or_maximum_canvas_geometry ... ok
+test canvas::glyph_axis::tests::clipped_command_bounds_and_signed_zero_axes_match_scalar_samples ... ok
+test canvas::glyph_axis::tests::shared_mask_addresses_match_every_original_scalar_sample ... ok
+test canvas::image_axis::tests::every_correlated_sample_matches_generic_inverse_filter_and_decoder_bits ... ok
+test canvas::image_axis::tests::whole_tile_overlaps_match_generic_painter_order_and_partial_tiles ... ok
+test canvas::image_axis::work_tests::setup_is_per_axis_and_adjacent_filter_rows_are_reused_without_allocation ... ok
+test canvas::mask_kernel::tests::every_supported_backend_matches_mapping_bits_and_all_primitive_sites ... ok
+test canvas::paint::tests::paint_plan_adds_no_canvas_fields_and_allocates_nothing ... paint_storage,Canvas=464,DisplayList=264,PaintIndex=4,PaintEdit=20,PaintCommit=40
+paint_commit_allocations=0,bytes=0
+ok
+test canvas::rounded::storage::rounded_sources_keep_retained_strides_without_image_extension_allocations ... rounded_canvas,Canvas=464,DisplayList=264,Inline=48,DrawRef=14,Common=80,BorrowedSource=16,PreparedSource=56,PreparedDraw=168,ImageResources=80
+rounded_command_alloc,plain=2,248;rounded=2,248
+rounded_image_existing_resource,allocations=0,bytes=0,header=80,handles=32
+ok
+test canvas::rounded::tests::closed_circle_and_half_open_box ... ok
+test canvas::samples::tests::binary_masks_preserve_absent_bits_in_both_promotion_modes ... ok
+test canvas::samples::tests::identical_finite_samples_preserve_exact_bits_including_signed_zero ... ok
+test canvas::samples::tests::promotion_preserves_every_sample_and_later_overlap ... ok
+test canvas::scaled_mask_tests::normalized_mask_obeys_half_open_local_edges_before_texel_rounding ... ok
+test canvas::scaled_mask_tests::separable_masks_and_certificates_match_every_scalar_sample ... ok
+test canvas::simd_tests::complete_pixels_all_supported_backends_match_independent_sample_composition ... complete scene executed supported backends through Avx2(Avx2 { _private: () })
+complete scene executed supported backends through Avx2(Avx2 { _private: () })
+complete scene executed supported backends through Avx2(Avx2 { _private: () })
+complete scene executed supported backends through Avx2(Avx2 { _private: () })
+ok
+test color::gamut::tests::author_bits_alpha_validation_and_extended_colors_have_explicit_contracts ... ok
+test color::gamut::tests::finite_input_sweep_keeps_exact_membership_and_a_nearby_outward_witness ... ok
+test color::gamut::tests::first_outward_roots_and_unresolved_contacts_keep_separate_authority ... ok
+test color::gamut::tests::limits_match_independent_high_precision_monotone_interval_oracle ... worst error in f32ULPs=1.0213637705892324e0; normal-L scaled error=6.855178725219511e-8
+worst error in f32ULPs=1.0213637705892324e0; normal-L scaled error=6.855178725219511e-8
+worst error in f32ULPs=1.0213637705892324e0; normal-L scaled error=6.855178725219511e-8
+worst error in f32ULPs=1.0213637705892324e0; normal-L scaled error=6.855178725219511e-8
+ok
+test color::gamut::tests::nonbinary_rational_tangent_blocks_later_roots_instead_of_guessing_a_sign ... ok
+test color::half_tests::authored_color_keeps_sixteen_byte_provenance_header ... ok
+test color::half_tests::every_adjacent_half_midpoint_rounds_ties_even_on_both_sides ... ok
+test color::half_tests::every_finite_half_roundtrips_including_signed_zero ... ok
+test color::half_tests::known_values_finite_saturation_and_little_endian_channels ... ok
+test color::half_tests::p3_matrix_applies_to_premultiplied_linear_channels ... ok
+test color::packing_tests::every_base199_exponent_triple_round_trips ... ok
+test color::packing_tests::raw_rgb_and_oklch_layouts_preserve_every_lane ... ok
+test color::quantizer_tests::every_in_range_float_matches_the_reference_quantizer ... ignored, 107 million inputs; run explicitly with --release
+test color::quantizer_tests::opaque_quantizer_microbenchmark ... ignored, timing experiment; run explicitly with --release --nocapture
+test color::quantizer_tests::quantizer_matches_reference_at_all_thresholds_and_bucket_edges ... ok
+test image::tests::bilinear_reconstruction_is_linear_premultiplied_and_clamps_texel_edges ... ok
+test image::tests::byte_table_preserves_existing_color_bits_for_every_channel_and_alpha ... ok
+test image::tests::encoded_premultiplication_is_undone_before_linear_conversion ... ok
+test image::tests::immutable_ids_and_hdr_working_pixels_keep_their_leases ... Image=8 ImageData=40 ImageView=40 PreparedSource=56 PreparedDraw=168 PreparedPlacement=88 Canvas=464
+ok
+test image::tests::rejects_bad_lengths_alpha_and_nonfinite_hdr_before_publication ... ok
+test image::tests::scenes_lease_each_distinct_image_once_and_failed_candidates_keep_old_leases ... ok
+test image::tests::tile_decode_cache_is_exact_under_collisions_profiles_alpha_and_filters ... ok
+test text::bundled_coverage::tests::certificate_is_a_complete_maximal_partition ... ok
+test text::bundled_coverage::tests::every_unicode_scalar_matches_bundled_font_coverage ... ok
+test text::coverage::tests::all_ascii_values_at_every_short_and_vector_boundary ... ok
+test text::coverage::tests::callback_rejection_stops_before_any_later_event ... ok
+test text::coverage::tests::every_unicode_scalar_crossing_a_vector_boundary ... ok
+test text::coverage::tests::immutable_primary_font_covers_the_skipped_ascii_domain ... ok
+test text::coverage::tests::mixed_scripts_continuations_and_controls_keep_source_order ... ok
+test text::font_tests::bundled_concurrency_release_remint_and_poison_recovery ... 
+thread '<unnamed>' (1790394) panicked at crates/canvas/src/text.rs:916:17:
+simulated unpublished-font initialization panic
+note: run with `RUST_BACKTRACE=1` environment variable to display a backtrace
+font_face_bytes=8,text_system_bytes=72,font_data_header_bytes=40,registry_static_bytes=16,scaler_header_bytes=168
+ok
+test text::geometry_ledger::canonical_caret_group_shapes_are_measured_before_implicit_affinity_encoding ... CARET_GROUPS case=empty width=None bytes=0 stops=1 common=1 split=0 exclusive=0
+CARET_GROUPS case=empty width=Some(1.0) bytes=0 stops=1 common=1 split=0 exclusive=0
+CARET_GROUPS case=empty width=Some(55.0) bytes=0 stops=1 common=1 split=0 exclusive=0
+CARET_GROUPS case=empty width=Some(400.0) bytes=0 stops=1 common=1 split=0 exclusive=0
+CARET_GROUPS case=ascii32k width=None bytes=32768 stops=32769 common=32769 split=0 exclusive=0
+CARET_GROUPS case=ascii32k width=Some(1.0) bytes=32768 stops=65536 common=2 split=32767 exclusive=0
+CARET_GROUPS case=ascii32k width=Some(55.0) bytes=32768 stops=38230 common=27308 split=5461 exclusive=0
+CARET_GROUPS case=ascii32k width=Some(400.0) bytes=32768 stops=33513 common=32025 split=744 exclusive=0
+CARET_GROUPS case=ligatures width=None bytes=17 stops=16 common=16 split=0 exclusive=0
+CARET_GROUPS case=ligatures width=Some(1.0) bytes=17 stops=24 common=8 split=8 exclusive=0
+CARET_GROUPS case=ligatures width=Some(55.0) bytes=17 stops=18 common=14 split=2 exclusive=0
+CARET_GROUPS case=ligatures width=Some(400.0) bytes=17 stops=16 common=16 split=0 exclusive=0
+CARET_GROUPS case=paragraphs width=None bytes=14 stops=8 common=8 split=0 exclusive=0
+CARET_GROUPS case=paragraphs width=Some(1.0) bytes=14 stops=8 common=8 split=0 exclusive=0
+CARET_GROUPS case=paragraphs width=Some(55.0) bytes=14 stops=8 common=8 split=0 exclusive=0
+CARET_GROUPS case=paragraphs width=Some(400.0) bytes=14 stops=8 common=8 split=0 exclusive=0
+CARET_GROUPS case=bidi width=None bytes=33 stops=29 common=19 split=5 exclusive=0
+CARET_GROUPS case=bidi width=Some(1.0) bytes=33 stops=44 common=4 split=20 exclusive=0
+CARET_GROUPS case=bidi width=Some(55.0) bytes=33 stops=30 common=18 split=6 exclusive=0
+CARET_GROUPS case=bidi width=Some(400.0) bytes=33 stops=29 common=19 split=5 exclusive=0
+CARET_GROUPS case=isolates width=None bytes=29 stops=24 common=14 split=5 exclusive=0
+CARET_GROUPS case=isolates width=Some(1.0) bytes=29 stops=31 common=7 split=12 exclusive=0
+CARET_GROUPS case=isolates width=Some(55.0) bytes=29 stops=24 common=14 split=5 exclusive=0
+CARET_GROUPS case=isolates width=Some(400.0) bytes=29 stops=24 common=14 split=5 exclusive=0
+CARET_GROUPS case=zwj width=None bytes=24 stops=14 common=12 split=1 exclusive=0
+CARET_GROUPS case=zwj width=Some(1.0) bytes=24 stops=22 common=4 split=9 exclusive=0
+CARET_GROUPS case=zwj width=Some(55.0) bytes=24 stops=14 common=12 split=1 exclusive=0
+CARET_GROUPS case=zwj width=Some(400.0) bytes=24 stops=14 common=12 split=1 exclusive=0
+CARET_GROUPS case=emoji width=None rejected=MissingGlyph('👩')
+CARET_GROUPS case=emoji width=Some(1.0) rejected=MissingGlyph('👩')
+CARET_GROUPS case=emoji width=Some(55.0) rejected=MissingGlyph('👩')
+CARET_GROUPS case=emoji width=Some(400.0) rejected=MissingGlyph('👩')
+CARET_GROUPS case=one_long_grapheme width=None bytes=2049 stops=2 common=2 split=0 exclusive=0
+CARET_GROUPS case=one_long_grapheme width=Some(1.0) bytes=2049 stops=2 common=2 split=0 exclusive=0
+CARET_GROUPS case=one_long_grapheme width=Some(55.0) bytes=2049 stops=2 common=2 split=0 exclusive=0
+CARET_GROUPS case=one_long_grapheme width=Some(400.0) bytes=2049 stops=2 common=2 split=0 exclusive=0
+ok
+test text::geometry_ledger::each_retained_text_call_charges_one_packed_owner_lease ... PACKED_RUN_LEASES admitted_runs=32 owner_shared_during_scene=true owner_unique_after_clear=true unique_mask_leases=2
+ok
+test text::geometry_ledger::packed_owner_is_shared_only_when_the_scene_needs_a_retained_run ... PACKED_SHARED layout=56 owner_payload=24 shared_header=16
+ok
+test text::geometry_ledger::retained_geometry_drops_paint_leases_and_detaches_explicit_mutation ... ok
+test text::geometry_ledger::scoped_geometry_allocation_and_payload_ledger ... GEOMETRY_HEADERS layout=56 details=80 stop=12 run=24 line=24 system=72
+GEOMETRY_PAYLOAD case=empty bytes=0 interactive=false glyphs=0 glyph_capacity_bytes=0 runs=0 lines=0 stops=0 geometry_capacity_bytes=0 allocations=203 requested=108760 peak_live=44588 retained=40 retained_allocations=1
+GEOMETRY_PAYLOAD case=empty bytes=0 interactive=true glyphs=0 glyph_capacity_bytes=0 runs=0 lines=1 stops=1 geometry_capacity_bytes=108 allocations=207 requested=109012 peak_live=44784 retained=244 retained_allocations=4
+GEOMETRY_PAYLOAD case=short bytes=13 interactive=false glyphs=13 glyph_capacity_bytes=156 runs=0 lines=0 stops=0 geometry_capacity_bytes=0 allocations=205 requested=109846 peak_live=45634 retained=212 retained_allocations=2
+GEOMETRY_PAYLOAD case=short bytes=13 interactive=true glyphs=13 glyph_capacity_bytes=156 runs=1 lines=1 stops=14 geometry_capacity_bytes=360 allocations=214 requested=110898 peak_live=46374 retained=668 retained_allocations=6
+GEOMETRY_PAYLOAD case=wrapped bytes=936 interactive=false glyphs=624 glyph_capacity_bytes=7488 runs=150 lines=30 stops=0 geometry_capacity_bytes=6912 allocations=437 requested=440552 peak_live=232436 retained=14552 retained_allocations=5
+GEOMETRY_PAYLOAD case=wrapped bytes=936 interactive=true glyphs=624 glyph_capacity_bytes=7488 runs=150 lines=30 stops=786 geometry_capacity_bytes=16344 allocations=449 requested=489008 peak_live=262292 retained=23984 retained_allocations=6
+GEOMETRY_PAYLOAD case=ascii32k bytes=32768 interactive=false glyphs=32768 glyph_capacity_bytes=393216 runs=745 lines=745 stops=0 geometry_capacity_bytes=49152 allocations=239 requested=4121152 peak_live=3865164 retained=442520 retained_allocations=5
+GEOMETRY_PAYLOAD case=ascii32k bytes=32768 interactive=true glyphs=32768 glyph_capacity_bytes=393216 runs=745 lines=745 stops=33513 geometry_capacity_bytes=451308 allocations=257 requested=6751484 peak_live=5687884 retained=844676 retained_allocations=6
+GEOMETRY_PAYLOAD case=one_long_grapheme bytes=2049 interactive=false glyphs=1024 glyph_capacity_bytes=12288 runs=0 lines=0 stops=0 geometry_capacity_bytes=0 allocations=213 requested=352130 peak_live=271598 retained=12344 retained_allocations=2
+GEOMETRY_PAYLOAD case=one_long_grapheme bytes=2049 interactive=true glyphs=1024 glyph_capacity_bytes=12288 runs=1 lines=1 stops=2 geometry_capacity_bytes=216 allocations=218 requested=352490 peak_live=271910 retained=12656 retained_allocations=6
+ok
+test text::glyph_buffer::tests::checked_header_endpoints_and_failed_admission_preserve_the_vector ... ok
+test text::glyph_buffer::tests::cloned_owners_keep_exact_bits_across_threads_and_original_drop ... 
+thread 'text::glyph_buffer::tests::cloned_owners_keep_exact_bits_across_threads_and_original_drop' (1790405) panicked at crates/canvas/src/text/glyph_buffer.rs:163:17:
+owner unwind control
+ok
+test text::glyph_buffer::tests::empty_owners_and_scene_leases_preserve_text_length_and_owner_lifetime ... 
+thread 'text::glyph_buffer::tests::empty_owners_and_scene_leases_preserve_text_length_and_owner_lifetime' (1790408) panicked at crates/canvas/src/text/glyph_buffer.rs:182:13:
+shared owner unwind control
+ok
+test text::glyph_buffer::tests::empty_spare_capacity_and_full_buffers_keep_exact_allocation_and_bits ... GLYPH_OWNER_HEADERS owner=24 packed=12
+ok
+test text::glyph_buffer::tests::one_allocation_survives_until_last_clone_and_is_released ... ok
+test text::glyph_buffer::tests::transfer_allocates_nothing ... ok
+test text::glyph_codec_tests::all_font_code_endpoints_and_float_bits_round_trip ... ok
+test text::glyph_codec_tests::borrowed_iteration_never_materializes_an_expanded_buffer ... ok
+test text::glyph_codec_tests::document_length_does_not_require_a_long_tail_geometry_owner ... ok
+test text::glyph_codec_tests::exact_embedded_fallback_fonts_fit_the_code_namespaces ... ok
+test text::layout::interaction::tests::byte_cuts_keep_boundary_ownership_and_only_visit_the_requested_source ... ok
+test text::outline_once_gate::accepted_complex_outline_exact_masks_and_retained_scratch ... complex cff2=false cost including leased mask=AllocationInfo { count_total: 29, count_current: 7, count_max: 8, bytes_total: 39662, bytes_current: 20194, bytes_max: 20458 }
+complex cff2=true cost including leased mask=AllocationInfo { count_total: 29, count_current: 7, count_max: 8, bytes_total: 39662, bytes_current: 20194, bytes_max: 20458 }
+ok
+test text::outline_once_gate::explicit_zeno_matches_auto_bounds_with_empty_contours ... ok
+test text::outline_once_gate::frozen_canvas_pixels_and_leased_clear ... ok
+test text::outline_once_gate::glyf_memory_geometry_empty_moves_and_transient_recording ... glyf kind=0 outcome=Err(ResourceLimit) cost=AllocationInfo { count_total: 0, count_current: 0, count_max: 0, bytes_total: 0, bytes_current: 0, bytes_max: 0 }
+glyf kind=1 outcome=Ok(0) cost=AllocationInfo { count_total: 3, count_current: 2, count_max: 2, bytes_total: 622841, bytes_current: 196, bytes_max: 622645 }
+glyf kind=2 outcome=Err(InvalidGeometry) cost=AllocationInfo { count_total: 2, count_current: 0, count_max: 2, bytes_total: 40, bytes_current: 0, bytes_max: 40 }
+glyf kind=3 outcome=Err(InvalidFont) cost=AllocationInfo { count_total: 0, count_current: 0, count_max: 0, bytes_total: 0, bytes_current: 0, bytes_max: 0 }
+cff transient requested=65536 outcome=Ok(0) cost=AllocationInfo { count_total: 19, count_current: 2, count_max: 3, bytes_total: 18588, bytes_current: 196, bytes_max: 12800 }
+cff transient requested=65537 outcome=Err(ResourceLimit) cost=AllocationInfo { count_total: 17, count_current: 0, count_max: 3, bytes_total: 18392, bytes_current: 0, bytes_max: 12800 }
+multi retained backend cost=AllocationInfo { count_total: 49, count_current: 5, count_max: 33, bytes_total: 16208, bytes_current: 4992, bytes_max: 13200 }
+multi warm cost=AllocationInfo { count_total: 0, count_current: 0, count_max: 0, bytes_total: 0, bytes_current: 0, bytes_max: 0 }
+multi clear cost=AllocationInfo { count_total: 0, count_current: -32, count_max: 0, bytes_total: 0, bytes_current: -10816, bytes_max: 0 }
+ok
+test text::outline_once_gate::synthetic_cff_cff2_masks_and_deferred_segment_limits ... raw draw=Ok(AdjustedMetrics { has_overlaps: false, lsb: None, advance_width: Some(0.0625) }) segments=65535 invalid=false
+cff2=false requested=65536 result=Ok(0)
+raw draw=Ok(AdjustedMetrics { has_overlaps: false, lsb: None, advance_width: Some(0.0625) }) segments=65537 invalid=false
+cff2=false requested=65537 result=Err(ResourceLimit)
+raw draw=Ok(AdjustedMetrics { has_overlaps: false, lsb: None, advance_width: Some(0.0625) }) segments=65535 invalid=false
+cff2=true requested=65536 result=Ok(0)
+raw draw=Ok(AdjustedMetrics { has_overlaps: false, lsb: None, advance_width: Some(0.0625) }) segments=65537 invalid=false
+cff2=true requested=65537 result=Err(ResourceLimit)
+ok
+test text::outline_once_gate::tiny_frozen_masks_and_cold_scratch ... font=0 FontData=40 backend=168 cold=AllocationInfo { count_total: 18, count_current: 5, count_max: 8, bytes_total: 3524, bytes_current: 1800, bytes_max: 2208 }
+font=0 clear=AllocationInfo { count_total: 0, count_current: -5, count_max: 0, bytes_total: 0, bytes_current: -1800, bytes_max: 0 }
+font=1 FontData=40 backend=168 cold=AllocationInfo { count_total: 14, count_current: 5, count_max: 8, bytes_total: 2612, bytes_current: 1320, bytes_max: 1760 }
+font=1 clear=AllocationInfo { count_total: 0, count_current: -5, count_max: 0, bytes_total: 0, bytes_current: -1320, bytes_max: 0 }
+font=2 FontData=40 backend=168 cold=AllocationInfo { count_total: 14, count_current: 5, count_max: 8, bytes_total: 2612, bytes_current: 1320, bytes_max: 1760 }
+font=2 clear=AllocationInfo { count_total: 0, count_current: -5, count_max: 0, bytes_total: 0, bytes_current: -1320, bytes_max: 0 }
+ok
+test text::outline_record_tests::accepted_cubic_contours_fill_but_do_not_exceed_recording_caps ... ok
+test text::outline_record_tests::empty_moves_keep_original_bounds_without_growing_storage ... ok
+test text::outline_record_tests::rejected_outline_preserves_warm_backend_and_cached_masks ... ok
+test text::paragraph::tests::original_utf8_ranges_empty_and_crlf_are_exact ... ok
+test text::planner::cursor_pair_tests::indexed_affinity_pairs_preserve_every_direct_geometry_bit ... cursor_pairs,accepted=94176,snapped=41760,distinct=11096
+ok
+test text::planner::line_break_tests::batch_incremental_revert_and_mixed_breaking_preserve_actual_layout_bits ... ok
+test text::planner::line_break_tests::max_height_revert_then_batch_repair_and_invalid_width_keep_contract ... 
+thread 'text::planner::line_break_tests::max_height_revert_then_batch_repair_and_invalid_width_keep_contract' (1790437) panicked at vendor/parley/src/layout/line_break.rs:1040:9:
+assertion failed: self.state.layout_max_advance == f32::INFINITY ||
+    self.state.line_max_advance - self.state.layout_max_advance < 1.0
+ok
+test text::planner::line_ownership_tests::mandatory_break_lines_exclude_separators_but_runs_cover_document ... ok
+test text::planner::line_ownership_tests::source_line_geometry_reconstruction_preserves_producer_arithmetic_bits ... ok
+test text::planner::line_ownership_tests::visual_line_transitions_do_not_rehit_collapsed_line_tops ... ok
+test text::planner::line_ownership_tests::wrapped_zero_and_small_line_heights_keep_producer_source_ownership ... ok
+test text::planner::tests::cached_cmaps_match_face_for_every_scalar_and_absent_or_custom_tables ... ok
+test text::planner::tests::indexed_cursor_geometry_matches_original_at_every_byte_and_affinity ... ok
+test text::planner::tests::measurement_keeps_exact_metrics_and_no_owned_geometry ... TEXT_HEADERS metrics=12 planned=120 layout=56 planner=2640
+ok
+test text::planner::tests::raw_run_counts_match_positioned_output_across_wraps_and_scripts ... ok
+test text::planner::tests::rejected_expanding_output_does_not_contaminate_the_next_paragraph ... ok
+
+test result: ok. 95 passed; 0 failed; 2 ignored; 0 measured; 0 filtered out; finished in 2.79s
+
+
+
+running 2 tests
+test groups_are_the_same_canonical_painter_sequence_in_both_directions ... ok
+test masks_are_leased_once_per_stable_key_across_runs_cache_eviction_and_services ... ok
+
+test result: ok. 2 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 0.01s
+
+
+
+running 6 tests
+test actual_font_coverage_is_encoded_as_extended_linear_half_pixels ... ok
+test byte_counts_and_checked_configuration_are_format_specific ... ok
+test extended_values_compose_before_finite_storage_saturation ... ok
+test p3_primaries_remain_linear_and_reference_white_is_explicit_metadata ... ok
+test recording_allocates_eight_byte_pixels_lazily_and_staging_reuses_them ... ok
+test rgba16f_is_actual_eight_byte_linear_premultiplied_output ... ok
+
+test result: ok. 6 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 0.00s
+
+
+
+running 4 tests
+test constant_images_match_independent_solid_geometry_for_every_sample ... ok
+test distinct_payload_budget_is_checked_before_publishing_a_new_resource_or_draw ... ok
+test image_identity_filter_and_removal_damage_repair_preserved_pixels ... ok
+test nearest_packed_texels_match_independent_color_rectangles ... ok
+
+test result: ok. 4 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 0.07s
+
+
+
+running 2 tests
+test dropped_and_rejected_transactions_preserve_all_aliases_and_future_source_updates ... ok
+test equal_and_changed_positional_writes_detach_locally_without_mutating_literal_peers ... ok
+
+test result: ok. 2 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 0.00s
+
+
+
+running 5 tests
+test css_xyz_path_agrees_with_independent_published_direct_srgb_reference ... ok
+test hue_alpha_extended_values_and_oklch_neutral_defaults ... ok
+test invalid_ranges_and_out_of_working_range_are_rejected ... ok
+test metadata_names_linear_p3_d65_reference_white_and_numeric_conversion ... ok
+test primaries_have_independent_reference_oklch_values_and_roundtrip ... ok
+
+test result: ok. 5 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 0.00s
+
+
+
+running 4 tests
+test group_boundaries_empty_calls_and_image_material_are_checked ... ok
+test patches_match_full_replacement_for_profiles_hdr_masks_and_ordered_overlap ... ok
+test returned_damage_repairs_a_preserved_image_and_leaves_outside_pixels_unchanged ... ok
+test validation_and_dropping_a_prepared_commit_are_transactional ... ok
+
+test result: ok. 4 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 0.01s
+
+
+
+running 0 tests
+
+test result: ok. 0 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 0.00s
+
+
+
+running 3 tests
+test canonical_scene_is_ordered_borrowed_and_does_not_rasterize ... ok
+test raster_keys_survive_cache_eviction_and_shared_services_but_not_distinct_faces ... ok
+test recording_canvas_allocates_sole_cpu_image_only_on_request ... ok
+
+test result: ok. 3 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 0.01s
+
+
+
+running 10 tests
+test correlated_edges_are_composited_before_sample_average ... ok
+test invalid_inputs_and_caps_do_not_corrupt_scene ... ok
+test linear_light_alpha_and_premultiplied_output ... ok
+test no_sample_draw_preserves_the_entire_background_at_quantization_thresholds ... ok
+test real_shaping_ligatures_unicode_measure_and_paint_are_stable ... ok
+test staged_scene_keeps_old_pixels_and_reuses_the_output_allocation ... ok
+test swash_native_pixels_and_transformed_cells_match_independent_oracles ... ok
+test transformed_rectangles_match_exhaustive_sample_oracle ... ok
+test transformed_text_clip_and_foreign_layout_failure_are_explicit ... ok
+test wrapped_runs_keep_utf8_and_whole_shaping_clusters ... ok
+
+test result: ok. 10 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 0.12s
+
+
+
+running 5 tests
+test analytic_sample_oracle_reflections_shear_clips_and_radius_clamping ... ok
+test correlated_layers_cannot_fill_each_others_rounded_corners ... ok
+test invalid_radius_is_transactional_and_negative_zero_is_rectangular ... ok
+test public_image_views_keep_canonical_material_and_exact_authored_radius ... ok
+test source_word_preserves_every_finite_radius_exponent_and_mantissa_samples ... ok
+
+test result: ok. 5 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 0.00s
+
+
+
+running 3 tests
+test nested_clips_intersect_exact_sample_sets_and_helper_allocates_nothing ... ok
+test prepared_inverse_lowering_preserves_canonical_ties_without_forward_roundtrip ... ok
+test sampled_clips_match_independent_ordinary_canvas_for_signs_ties_and_extreme_inverse ... ok
+
+test result: ok. 3 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 0.00s
+
+
+
+running 2 tests
+test adjacent_hdr_zeros_keep_distinct_output_signs ... ok
+test promoted_pixels_match_uncompressed_samples_across_tiles_and_color_formats ... ok
+
+test result: ok. 2 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 0.21s
+
+
+
+running 11 tests
+test derived_selection_intervals_match_parley_real_bidi_ligature_and_wrap_geometry ... ok
+test directional_run_boxes_do_not_span_disconnected_isolate_fragments ... ok
+test discarding_interaction_keeps_glyph_storage_source_runs_and_lines ... ok
+test distant_hits_and_line_transitions_choose_physical_extrema ... ok
+test hit_selection_and_motion_share_exact_grapheme_crlf_and_bidi_positions ... ok
+test independent_visible_order_hits_half_intervals_with_source_affinity ... ok
+test ordinary_interaction_queries_allocate_nothing_and_preserve_layout_size ... ok
+test physical_arrows_walk_independent_known_visual_edges ... ok
+test selected_crlf_is_atomic_and_its_marker_extends_past_the_source_trailing_edge ... ok
+test source_affinity_at_bidi_wrap_owns_the_correct_adjacent_line ... ok
+test vertical_navigation_uses_affinity_line_ownership_and_one_allocation_free_map ... ok
+
+test result: ok. 11 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 0.01s
+
+
+
+running 2 tests
+test batch_parses_once_and_releases_tables_without_an_idle_cache ... ok
+test borrowed_batch_preserves_lines_clusters_errors_and_shared_face_identity ... ok
+
+test result: ok. 2 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 0.00s
+
+
+
+running 6 tests
+test deferred_shared_paints_allocate_no_bank_for_empty_geometry_or_clipped_glyphs ... ok
+test equal_legacy_edit_of_nondefault_shared_paint_is_infallible_without_allocation ... ok
+test equal_positional_set_detaches_from_future_shared_color_edits ... ok
+test legacy_positional_edit_detaches_only_that_common_from_shared_slot ... ok
+test shared_slot_matches_full_literal_oracle_after_each_transaction ... ok
+test transaction_rejection_and_drop_leave_complete_bank_untouched ... ok
+
+test result: ok. 6 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 0.01s
+
+
+
+running 3 tests
+test public_scene_metadata_edits_cannot_certify_invalid_content ... ok
+test solid_certificate_uses_exact_output_quantizer_without_rendering_or_allocating ... ok
+test unsupported_and_nonempty_scenes_use_normal_renderer ... ok
+
+test result: ok. 3 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 0.00s
+
+
+
+running 1 test
+test repeated_labels_keep_batched_capacity_and_allocate_nothing_when_warm ... labels=32 placement_bytes=0 batched_bytes=22528
+labels=48 placement_bytes=0 batched_bytes=45056
+labels=64 placement_bytes=0 batched_bytes=45056
+labels=96 placement_bytes=0 batched_bytes=90112
+ok
+
+test result: ok. 1 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 0.00s
+
+
+
+running 1 test
+test retained_text_cost_and_work_probe ... TEXT_RUN case=blank draws=0 layout_header=56 shape_allocs=0 shape_requested=0 shape_live=0 scene_allocs=0 scene_requested=0 scene_live=0 scene_peak=0 header=264 lanes=0 order=0 inline=0 common=0 placements=0 handles=0 index=0 bin_bytes=964 tile_refs=0 sample_tests=0 prepare_ns=25 render_ns=15074 expansion_ns=15 expansion_hash=0
+TEXT_RUN case=solids32 draws=32 layout_header=56 shape_allocs=0 shape_requested=0 shape_live=0 scene_allocs=8 scene_requested=3720 scene_live=1984 scene_peak=2752 header=264 lanes=1984 order=448 inline=1536 common=0 placements=0 handles=0 index=0 bin_bytes=1164 tile_refs=50 sample_tests=3500 prepare_ns=3483 render_ns=60325 expansion_ns=1926 expansion_hash=279039115264
+TEXT_RUN case=empty32 draws=0 layout_header=56 shape_allocs=2 shape_requested=64 shape_live=0 scene_allocs=0 scene_requested=0 scene_live=0 scene_peak=0 header=264 lanes=0 order=0 inline=0 common=0 placements=0 handles=0 index=0 bin_bytes=964 tile_refs=0 sample_tests=0 prepare_ns=1803 render_ns=17645 expansion_ns=17 expansion_hash=0
+TEXT_RUN case=single32 draws=32 layout_header=56 shape_allocs=3 shape_requested=128 shape_live=64 scene_allocs=10 scene_requested=3836 scene_live=2100 scene_peak=2868 header=264 lanes=2016 order=448 inline=1536 common=0 placements=0 handles=32 index=3 bin_bytes=1168 tile_refs=51 sample_tests=3448 prepare_ns=6757 render_ns=187297 expansion_ns=2466 expansion_hash=351895486988
+TEXT_RUN case=pair32 draws=64 layout_header=56 shape_allocs=3 shape_requested=128 shape_live=64 scene_allocs=11 scene_requested=5692 scene_live=3060 scene_peak=4084 header=264 lanes=2976 order=896 inline=0 common=2048 placements=0 handles=32 index=3 bin_bytes=1372 tile_refs=102 sample_tests=6004 prepare_ns=10240 render_ns=265436 expansion_ns=4723 expansion_hash=704124526008
+TEXT_RUN case=empty_independent32 draws=0 layout_header=56 shape_allocs=64 shape_requested=2048 shape_live=0 scene_allocs=0 scene_requested=0 scene_live=0 scene_peak=0 header=264 lanes=0 order=0 inline=0 common=0 placements=0 handles=0 index=0 bin_bytes=964 tile_refs=0 sample_tests=0 prepare_ns=1813 render_ns=17762 expansion_ns=17 expansion_hash=0
+TEXT_RUN case=single_independent32 draws=32 layout_header=56 shape_allocs=96 shape_requested=4096 shape_live=2048 scene_allocs=10 scene_requested=3836 scene_live=2100 scene_peak=2868 header=264 lanes=2016 order=448 inline=1536 common=0 placements=0 handles=32 index=3 bin_bytes=1168 tile_refs=51 sample_tests=3448 prepare_ns=6924 render_ns=188460 expansion_ns=2483 expansion_hash=351895486988
+TEXT_RUN case=pair_independent32 draws=64 layout_header=56 shape_allocs=96 shape_requested=4096 shape_live=2048 scene_allocs=11 scene_requested=5692 scene_live=3060 scene_peak=4084 header=264 lanes=2976 order=896 inline=0 common=2048 placements=0 handles=32 index=3 bin_bytes=1372 tile_refs=102 sample_tests=6004 prepare_ns=10315 render_ns=264088 expansion_ns=4693 expansion_hash=704124526008
+TEXT_RUN case=triple_independent32 draws=96 layout_header=56 shape_allocs=96 shape_requested=4096 shape_live=2048 scene_allocs=12 scene_requested=6616 scene_live=3508 scene_peak=4532 header=264 lanes=3424 order=1344 inline=0 common=2048 placements=0 handles=32 index=3 bin_bytes=1804 tile_refs=210 sample_tests=11532 prepare_ns=12902 render_ns=478955 expansion_ns=6576 expansion_hash=1057098385328
+TEXT_RUN case=triple32 draws=96 layout_header=56 shape_allocs=3 shape_requested=128 shape_live=64 scene_allocs=12 scene_requested=6616 scene_live=3508 scene_peak=4532 header=264 lanes=3424 order=1344 inline=0 common=2048 placements=0 handles=32 index=3 bin_bytes=1804 tile_refs=210 sample_tests=11532 prepare_ns=12867 render_ns=478326 expansion_ns=6638 expansion_hash=1057098385328
+TEXT_RUN case=labels32 draws=704 layout_header=56 shape_allocs=11 shape_requested=3154 shape_live=2666 scene_allocs=19 scene_requested=24524 scene_live=12320 scene_peak=16224 header=264 lanes=12032 order=9856 inline=0 common=2048 placements=0 handles=128 index=14 bin_bytes=7636 tile_refs=1668 sample_tests=88760 prepare_ns=62187 render_ns=3286189 expansion_ns=32554 expansion_hash=7768296024252
+TEXT_RUN case=labels_borrowed32 draws=704 layout_header=56 shape_allocs=4 shape_requested=412 shape_live=316 scene_allocs=19 scene_requested=24524 scene_live=12320 scene_peak=16224 header=264 lanes=12032 order=9856 inline=0 common=2048 placements=0 handles=128 index=14 bin_bytes=7636 tile_refs=1668 sample_tests=88760 prepare_ns=61875 render_ns=3287781 expansion_ns=32375 expansion_hash=7768296024252
+TEXT_RUN case=unique32 draws=758 layout_header=56 shape_allocs=135 shape_requested=19316 shape_live=13502 scene_allocs=22 scene_requested=32032 scene_live=13616 scene_peak=17968 header=264 lanes=13056 order=10752 inline=0 common=2048 placements=0 handles=256 index=28 bin_bytes=8140 tile_refs=1794 sample_tests=95544 prepare_ns=66675 render_ns=3592708 expansion_ns=34841 expansion_hash=8364757897052
+TEXT_RUN case=bidi32 draws=470 layout_header=56 shape_allocs=446 shape_requested=118092 shape_live=53832 scene_allocs=24 scene_requested=22504 scene_live=10000 scene_peak=12336 header=264 lanes=9024 order=6720 inline=0 common=2048 placements=0 handles=256 index=42 bin_bytes=5356 tile_refs=1098 sample_tests=58976 prepare_ns=47182 render_ns=2221638 expansion_ns=22118 expansion_hash=5186518845826
+TEXT_RUN case=clipped32 draws=0 layout_header=56 shape_allocs=128 shape_requested=13832 shape_live=10760 scene_allocs=0 scene_requested=0 scene_live=0 scene_peak=0 header=264 lanes=0 order=0 inline=0 common=0 placements=0 handles=0 index=0 bin_bytes=964 tile_refs=0 sample_tests=0 prepare_ns=77591 render_ns=16757 expansion_ns=15 expansion_hash=0
+TEXT_RUN case=mixed32 draws=736 layout_header=56 shape_allocs=4 shape_requested=412 shape_live=316 scene_allocs=24 scene_requested=30540 scene_live=14304 scene_peak=18656 header=264 lanes=14016 order=10304 inline=1536 common=2048 placements=0 handles=128 index=14 bin_bytes=7836 tile_refs=1718 sample_tests=92260 prepare_ns=65866 render_ns=3362279 expansion_ns=34683 expansion_hash=8047335139516
+ok
+
+test result: ok. 1 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 1.88s
+
+
+
+running 5 tests
+test duplicate_keys_and_foreign_face_rollback_preserve_pixels_and_candidate ... ok
+test late_command_limit_failure_preserves_scene_and_new_resource_identity ... ok
+test mixed_script_paint_selection_density_transform_and_scroll_keep_canonical_output ... ok
+test submission_allocation_and_retained_capacity_ledger ... ledger name=single cold_count=4 cold_bytes=364 warm_count=0 warm_bytes=0 storage=SceneStorage { header_bytes: 264, resource_header_bytes: 0, order_bytes: 56, inline_bytes: 192, common_bytes: 0, placement_bytes: 0, resource_handles_bytes: 32, resource_index_capacity: 3, resource_entries: 1 }
+ledger name=label cold_count=11 cold_bytes=1844 warm_count=0 warm_bytes=0 storage=SceneStorage { header_bytes: 264, resource_header_bytes: 0, order_bytes: 448, inline_bytes: 0, common_bytes: 256, placement_bytes: 0, resource_handles_bytes: 128, resource_index_capacity: 14, resource_entries: 14 }
+ledger name=many_labels cold_count=21 cold_bytes=48332 warm_count=0 warm_bytes=0 storage=SceneStorage { header_bytes: 264, resource_header_bytes: 0, order_bytes: 19712, inline_bytes: 0, common_bytes: 4096, placement_bytes: 0, resource_handles_bytes: 128, resource_index_capacity: 14, resource_entries: 14 }
+ledger name=clipped cold_count=0 cold_bytes=0 warm_count=0 warm_bytes=0 storage=SceneStorage { header_bytes: 264, resource_header_bytes: 0, order_bytes: 0, inline_bytes: 0, common_bytes: 0, placement_bytes: 0, resource_handles_bytes: 0, resource_index_capacity: 0, resource_entries: 0 }
+ok
+test warm_many_label_rebuild_has_no_submission_allocations ... many_label_warm allocations=0 bytes=0
+ok
+
+test result: ok. 5 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 0.09s
+
+
+
+running 14 tests
+test bidi_visual_positions_match_explicit_mixed_direction_examples ... ok
+test every_bidi_grapheme_boundary_has_both_requested_destinations ... ok
+test explicit_variable_face_uses_its_default_instance_for_shape_and_raster ... ok
+test fallback_choice_is_independent_of_prior_passes_and_ignorables_keep_source_bytes ... ok
+test fallback_layout_leases_survive_later_sets_and_cache_eviction ... ok
+test grapheme_interiors_are_not_legal_byte_positions ... ok
+test line_separator_keeps_paragraph_bidi_base_but_paragraph_separator_resets_it ... ok
+test long_graphemes_take_cold_metadata_without_rejecting_source_or_losing_tail ... ok
+test missing_coverage_is_an_error_and_inherited_arabic_marks_use_fallback ... ok
+test mixed_paragraph_reordering_preserves_every_grapheme_destination_and_run_range ... ok
+test mixed_scripts_rtl_numbers_and_isolates_have_actual_coverage ... ok
+test original_crlf_bytes_empty_paragraphs_and_caret_affinity_are_exact ... ok
+test single_script_glyphs_match_independent_harfbuzz_implementation ... ok
+test wrapped_ligatures_never_cross_font_or_bidi_run_boundaries ... ok
+
+test result: ok. 14 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 0.03s
+
+
+
+running 49 tests
+test all_authored_color_layouts_reach_real_sdr_and_hdr_targets ... adapter: AdapterInfo { name: "llvmpipe (LLVM 21.1.8, 256 bits)", vendor: 65541, device: 0, device_type: Cpu, device_pci_bus_id: "", driver: "llvmpipe", driver_info: "Mesa 26.1.4 (LLVM 21.1.8)", backend: Vulkan, subgroup_min_size: 8, subgroup_max_size: 8, transient_saves_memory: Some(false), limit_bucket: None }
+adapter: AdapterInfo { name: "llvmpipe (LLVM 21.1.8, 256 bits)", vendor: 65541, device: 0, device_type: Cpu, device_pci_bus_id: "", driver: "llvmpipe", driver_info: "Mesa 26.1.4 (LLVM 21.1.8)", backend: Vulkan, subgroup_min_size: 8, subgroup_max_size: 8, transient_saves_memory: Some(false), limit_bucket: None }
+ok
+test analytic_rounded_rectangles_match_cpu_and_never_use_rect_certificates ... adapter: AdapterInfo { name: "llvmpipe (LLVM 21.1.8, 256 bits)", vendor: 65541, device: 0, device_type: Cpu, device_pci_bus_id: "", driver: "llvmpipe", driver_info: "Mesa 26.1.4 (LLVM 21.1.8)", backend: Vulkan, subgroup_min_size: 8, subgroup_max_size: 8, transient_saves_memory: Some(false), limit_bucket: None }
+adapter: AdapterInfo { name: "llvmpipe (LLVM 21.1.8, 256 bits)", vendor: 65541, device: 0, device_type: Cpu, device_pci_bus_id: "", driver: "llvmpipe", driver_info: "Mesa 26.1.4 (LLVM 21.1.8)", backend: Vulkan, subgroup_min_size: 8, subgroup_max_size: 8, transient_saves_memory: Some(false), limit_bucket: None }
+ok
+test axis_solids_preserve_deep_stacks_reflections_and_complementary_sample_ties ... adapter: AdapterInfo { name: "llvmpipe (LLVM 21.1.8, 256 bits)", vendor: 65541, device: 0, device_type: Cpu, device_pci_bus_id: "", driver: "llvmpipe", driver_info: "Mesa 26.1.4 (LLVM 21.1.8)", backend: Vulkan, subgroup_min_size: 8, subgroup_max_size: 8, transient_saves_memory: Some(false), limit_bucket: None }
+adapter: AdapterInfo { name: "llvmpipe (LLVM 21.1.8, 256 bits)", vendor: 65541, device: 0, device_type: Cpu, device_pci_bus_id: "", driver: "llvmpipe", driver_info: "Mesa 26.1.4 (LLVM 21.1.8)", backend: Vulkan, subgroup_min_size: 8, subgroup_max_size: 8, transient_saves_memory: Some(false), limit_bucket: None }
+ok
+test bank_patch_rejects_exceptional_opaque_proof_colors_then_full_render_recovers ... adapter: AdapterInfo { name: "llvmpipe (LLVM 21.1.8, 256 bits)", vendor: 65541, device: 0, device_type: Cpu, device_pci_bus_id: "", driver: "llvmpipe", driver_info: "Mesa 26.1.4 (LLVM 21.1.8)", backend: Vulkan, subgroup_min_size: 8, subgroup_max_size: 8, transient_saves_memory: Some(false), limit_bucket: None }
+adapter: AdapterInfo { name: "llvmpipe (LLVM 21.1.8, 256 bits)", vendor: 65541, device: 0, device_type: Cpu, device_pci_bus_id: "", driver: "llvmpipe", driver_info: "Mesa 26.1.4 (LLVM 21.1.8)", backend: Vulkan, subgroup_min_size: 8, subgroup_max_size: 8, transient_saves_memory: Some(false), limit_bucket: None }
+adapter: AdapterInfo { name: "llvmpipe (LLVM 21.1.8, 256 bits)", vendor: 65541, device: 0, device_type: Cpu, device_pci_bus_id: "", driver: "llvmpipe", driver_info: "Mesa 26.1.4 (LLVM 21.1.8)", backend: Vulkan, subgroup_min_size: 8, subgroup_max_size: 8, transient_saves_memory: Some(false), limit_bucket: None }
+ok
+test clip_extent_sum_preserves_half_open_sample_membership ... adapter: AdapterInfo { name: "llvmpipe (LLVM 21.1.8, 256 bits)", vendor: 65541, device: 0, device_type: Cpu, device_pci_bus_id: "", driver: "llvmpipe", driver_info: "Mesa 26.1.4 (LLVM 21.1.8)", backend: Vulkan, subgroup_min_size: 8, subgroup_max_size: 8, transient_saves_memory: Some(false), limit_bucket: None }
+ok
+test explicit_packet_redraw_submits_complete_pixels_to_fresh_targets_after_scene_drop ... adapter: AdapterInfo { name: "llvmpipe (LLVM 21.1.8, 256 bits)", vendor: 65541, device: 0, device_type: Cpu, device_pci_bus_id: "", driver: "llvmpipe", driver_info: "Mesa 26.1.4 (LLVM 21.1.8)", backend: Vulkan, subgroup_min_size: 8, subgroup_max_size: 8, transient_saves_memory: Some(false), limit_bucket: None }
+packet_prepare=Stats { submissions: 1, packet_reused: false, validated_draws: 11, binning_tile_visits: 98, bind_group_creations: 1, draws: 11, tile_references: 49, original_tile_references: 49, skipped_tile_references: 0, uniform_tiles: 0, sample_evaluations: 90112, sample_draw_evaluations: 200704, instance_upload_bytes: 1028, draw_record_bytes: 560, shared_groups: 1, compact_draws: 9, inline_draws: 2, mask_upload_bytes: 725, gpu_buffer_bytes: 1872, atlas_bytes: 65536, atlas_keys: 8, atlas_key_capacity: 14, cpu_index_capacity_bytes: 1172, correction_records: 1, correction_key_capacity: 0 }
+packet_redraw=Stats { submissions: 2, packet_reused: true, validated_draws: 0, binning_tile_visits: 0, bind_group_creations: 0, draws: 11, tile_references: 49, original_tile_references: 49, skipped_tile_references: 0, uniform_tiles: 0, sample_evaluations: 90112, sample_draw_evaluations: 200704, instance_upload_bytes: 0, draw_record_bytes: 560, shared_groups: 1, compact_draws: 9, inline_draws: 2, mask_upload_bytes: 0, gpu_buffer_bytes: 1872, atlas_bytes: 65536, atlas_keys: 8, atlas_key_capacity: 14, cpu_index_capacity_bytes: 1172, correction_records: 1, correction_key_capacity: 0 }
+ok
+test failed_preparation_after_image_upload_discards_the_previous_packet ... adapter: AdapterInfo { name: "llvmpipe (LLVM 21.1.8, 256 bits)", vendor: 65541, device: 0, device_type: Cpu, device_pci_bus_id: "", driver: "llvmpipe", driver_info: "Mesa 26.1.4 (LLVM 21.1.8)", backend: Vulkan, subgroup_min_size: 8, subgroup_max_size: 8, transient_saves_memory: Some(false), limit_bucket: None }
+ok
+test float_target_rejects_sdr_scene_metadata_before_submission ... adapter: AdapterInfo { name: "llvmpipe (LLVM 21.1.8, 256 bits)", vendor: 65541, device: 0, device_type: Cpu, device_pci_bus_id: "", driver: "llvmpipe", driver_info: "Mesa 26.1.4 (LLVM 21.1.8)", backend: Vulkan, subgroup_min_size: 8, subgroup_max_size: 8, transient_saves_memory: Some(false), limit_bucket: None }
+ok
+test grouped_and_inline_packets_match_every_pixel_in_mixed_scenes ... adapter: AdapterInfo { name: "llvmpipe (LLVM 21.1.8, 256 bits)", vendor: 65541, device: 0, device_type: Cpu, device_pci_bus_id: "", driver: "llvmpipe", driver_info: "Mesa 26.1.4 (LLVM 21.1.8)", backend: Vulkan, subgroup_min_size: 8, subgroup_max_size: 8, transient_saves_memory: Some(false), limit_bucket: None }
+adapter: AdapterInfo { name: "llvmpipe (LLVM 21.1.8, 256 bits)", vendor: 65541, device: 0, device_type: Cpu, device_pci_bus_id: "", driver: "llvmpipe", driver_info: "Mesa 26.1.4 (LLVM 21.1.8)", backend: Vulkan, subgroup_min_size: 8, subgroup_max_size: 8, transient_saves_memory: Some(false), limit_bucket: None }
+ok
+test grouped_error_envelopes_match_inline_across_fractional_glyph_samples ... adapter: AdapterInfo { name: "llvmpipe (LLVM 21.1.8, 256 bits)", vendor: 65541, device: 0, device_type: Cpu, device_pci_bus_id: "", driver: "llvmpipe", driver_info: "Mesa 26.1.4 (LLVM 21.1.8)", backend: Vulkan, subgroup_min_size: 8, subgroup_max_size: 8, transient_saves_memory: Some(false), limit_bucket: None }
+ok
+test hdr_and_wide_gamut_packets_redraw_exactly_without_reencoding_or_uploads ... adapter: AdapterInfo { name: "llvmpipe (LLVM 21.1.8, 256 bits)", vendor: 65541, device: 0, device_type: Cpu, device_pci_bus_id: "", driver: "llvmpipe", driver_info: "Mesa 26.1.4 (LLVM 21.1.8)", backend: Vulkan, subgroup_min_size: 8, subgroup_max_size: 8, transient_saves_memory: Some(false), limit_bucket: None }
+ok
+test images_reach_linear_hdr_and_display_p3_output_without_a_linear_gpu_mirror ... adapter: AdapterInfo { name: "llvmpipe (LLVM 21.1.8, 256 bits)", vendor: 65541, device: 0, device_type: Cpu, device_pci_bus_id: "", driver: "llvmpipe", driver_info: "Mesa 26.1.4 (LLVM 21.1.8)", backend: Vulkan, subgroup_min_size: 8, subgroup_max_size: 8, transient_saves_memory: Some(false), limit_bucket: None }
+HDR image maximum observed absolute error: 0.001953125
+ok
+test inverse_lattice_clips_preserve_actual_vulkan_pixels ... adapter: AdapterInfo { name: "llvmpipe (LLVM 21.1.8, 256 bits)", vendor: 65541, device: 0, device_type: Cpu, device_pci_bus_id: "", driver: "llvmpipe", driver_info: "Mesa 26.1.4 (LLVM 21.1.8)", backend: Vulkan, subgroup_min_size: 8, subgroup_max_size: 8, transient_saves_memory: Some(false), limit_bucket: None }
+ok
+test layout_equality_names_the_instance_and_preserves_clone_order_hash ... adapter: AdapterInfo { name: "llvmpipe (LLVM 21.1.8, 256 bits)", vendor: 65541, device: 0, device_type: Cpu, device_pci_bus_id: "", driver: "llvmpipe", driver_info: "Mesa 26.1.4 (LLVM 21.1.8)", backend: Vulkan, subgroup_min_size: 8, subgroup_max_size: 8, transient_saves_memory: Some(false), limit_bucket: None }
+adapter: AdapterInfo { name: "llvmpipe (LLVM 21.1.8, 256 bits)", vendor: 65541, device: 0, device_type: Cpu, device_pci_bus_id: "", driver: "llvmpipe", driver_info: "Mesa 26.1.4 (LLVM 21.1.8)", backend: Vulkan, subgroup_min_size: 8, subgroup_max_size: 8, transient_saves_memory: Some(false), limit_bucket: None }
+first=BindGroupLayout { inner: Core(CoreBindGroupLayout { context: ContextWgpuCore { type: "Native" }, id: BindGroupLayoutId(1,1) }) }; second=BindGroupLayout { inner: Core(CoreBindGroupLayout { context: ContextWgpuCore { type: "Native" }, id: BindGroupLayoutId(1,1) }) }
+ok
+test linear_float_target_retains_hdr_and_premultiplied_alpha ... adapter: AdapterInfo { name: "llvmpipe (LLVM 21.1.8, 256 bits)", vendor: 65541, device: 0, device_type: Cpu, device_pci_bus_id: "", driver: "llvmpipe", driver_info: "Mesa 26.1.4 (LLVM 21.1.8)", backend: Vulkan, subgroup_min_size: 8, subgroup_max_size: 8, transient_saves_memory: Some(false), limit_bucket: None }
+ok
+test literal_cow_and_equal_source_rows_preserve_queued_positional_and_slot_submissions ... adapter: AdapterInfo { name: "llvmpipe (LLVM 21.1.8, 256 bits)", vendor: 65541, device: 0, device_type: Cpu, device_pci_bus_id: "", driver: "llvmpipe", driver_info: "Mesa 26.1.4 (LLVM 21.1.8)", backend: Vulkan, subgroup_min_size: 8, subgroup_max_size: 8, transient_saves_memory: Some(false), limit_bucket: None }
+adapter: AdapterInfo { name: "llvmpipe (LLVM 21.1.8, 256 bits)", vendor: 65541, device: 0, device_type: Cpu, device_pci_bus_id: "", driver: "llvmpipe", driver_info: "Mesa 26.1.4 (LLVM 21.1.8)", backend: Vulkan, subgroup_min_size: 8, subgroup_max_size: 8, transient_saves_memory: Some(false), limit_bucket: None }
+adapter: AdapterInfo { name: "llvmpipe (LLVM 21.1.8, 256 bits)", vendor: 65541, device: 0, device_type: Cpu, device_pci_bus_id: "", driver: "llvmpipe", driver_info: "Mesa 26.1.4 (LLVM 21.1.8)", backend: Vulkan, subgroup_min_size: 8, subgroup_max_size: 8, transient_saves_memory: Some(false), limit_bucket: None }
+adapter: AdapterInfo { name: "llvmpipe (LLVM 21.1.8, 256 bits)", vendor: 65541, device: 0, device_type: Cpu, device_pci_bus_id: "", driver: "llvmpipe", driver_info: "Mesa 26.1.4 (LLVM 21.1.8)", backend: Vulkan, subgroup_min_size: 8, subgroup_max_size: 8, transient_saves_memory: Some(false), limit_bucket: None }
+ok
+test lowered_solids_keep_clipped_sample_ties_and_exceptional_paints ... adapter: AdapterInfo { name: "llvmpipe (LLVM 21.1.8, 256 bits)", vendor: 65541, device: 0, device_type: Cpu, device_pci_bus_id: "", driver: "llvmpipe", driver_info: "Mesa 26.1.4 (LLVM 21.1.8)", backend: Vulkan, subgroup_min_size: 8, subgroup_max_size: 8, transient_saves_memory: Some(false), limit_bucket: None }
+adapter: AdapterInfo { name: "llvmpipe (LLVM 21.1.8, 256 bits)", vendor: 65541, device: 0, device_type: Cpu, device_pci_bus_id: "", driver: "llvmpipe", driver_info: "Mesa 26.1.4 (LLVM 21.1.8)", backend: Vulkan, subgroup_min_size: 8, subgroup_max_size: 8, transient_saves_memory: Some(false), limit_bucket: None }
+ok
+test maximum_admitted_tone_mapping_is_finite_and_bright ... adapter: AdapterInfo { name: "llvmpipe (LLVM 21.1.8, 256 bits)", vendor: 65541, device: 0, device_type: Cpu, device_pci_bus_id: "", driver: "llvmpipe", driver_info: "Mesa 26.1.4 (LLVM 21.1.8)", backend: Vulkan, subgroup_min_size: 8, subgroup_max_size: 8, transient_saves_memory: Some(false), limit_bucket: None }
+ok
+test mixed_image_payload_offsets_and_reordered_exact_keys_remain_coherent ... adapter: AdapterInfo { name: "llvmpipe (LLVM 21.1.8, 256 bits)", vendor: 65541, device: 0, device_type: Cpu, device_pci_bus_id: "", driver: "llvmpipe", driver_info: "Mesa 26.1.4 (LLVM 21.1.8)", backend: Vulkan, subgroup_min_size: 8, subgroup_max_size: 8, transient_saves_memory: Some(false), limit_bucket: None }
+ok
+test narrowed_inverse_preserves_the_adversarial_half_open_edge ... adapter: AdapterInfo { name: "llvmpipe (LLVM 21.1.8, 256 bits)", vendor: 65541, device: 0, device_type: Cpu, device_pci_bus_id: "", driver: "llvmpipe", driver_info: "Mesa 26.1.4 (LLVM 21.1.8)", backend: Vulkan, subgroup_min_size: 8, subgroup_max_size: 8, transient_saves_memory: Some(false), limit_bucket: None }
+ok
+test opaque_proof_changes_do_not_discard_background_records ... adapter: AdapterInfo { name: "llvmpipe (LLVM 21.1.8, 256 bits)", vendor: 65541, device: 0, device_type: Cpu, device_pci_bus_id: "", driver: "llvmpipe", driver_info: "Mesa 26.1.4 (LLVM 21.1.8)", backend: Vulkan, subgroup_min_size: 8, subgroup_max_size: 8, transient_saves_memory: Some(false), limit_bucket: None }
+ok
+test opaque_tile_proofs_skip_overlap_and_preserve_later_edges ... adapter: AdapterInfo { name: "llvmpipe (LLVM 21.1.8, 256 bits)", vendor: 65541, device: 0, device_type: Cpu, device_pci_bus_id: "", driver: "llvmpipe", driver_info: "Mesa 26.1.4 (LLVM 21.1.8)", backend: Vulkan, subgroup_min_size: 8, subgroup_max_size: 8, transient_saves_memory: Some(false), limit_bucket: None }
+ok
+test packed_images_profiles_alpha_filters_and_cache_match_cpu ... adapter: AdapterInfo { name: "llvmpipe (LLVM 21.1.8, 256 bits)", vendor: 65541, device: 0, device_type: Cpu, device_pci_bus_id: "", driver: "llvmpipe", driver_info: "Mesa 26.1.4 (LLVM 21.1.8)", backend: Vulkan, subgroup_min_size: 8, subgroup_max_size: 8, transient_saves_memory: Some(false), limit_bucket: None }
+ok
+test paint_modes_foreign_ordinals_and_attempted_full_failures_revoke_mapping ... adapter: AdapterInfo { name: "llvmpipe (LLVM 21.1.8, 256 bits)", vendor: 65541, device: 0, device_type: Cpu, device_pci_bus_id: "", driver: "llvmpipe", driver_info: "Mesa 26.1.4 (LLVM 21.1.8)", backend: Vulkan, subgroup_min_size: 8, subgroup_max_size: 8, transient_saves_memory: Some(false), limit_bucket: None }
+ok
+test paint_packets_queue_a_patch_b_patch_c_before_readback_and_match_full_rebuilds ... adapter: AdapterInfo { name: "llvmpipe (LLVM 21.1.8, 256 bits)", vendor: 65541, device: 0, device_type: Cpu, device_pci_bus_id: "", driver: "llvmpipe", driver_info: "Mesa 26.1.4 (LLVM 21.1.8)", backend: Vulkan, subgroup_min_size: 8, subgroup_max_size: 8, transient_saves_memory: Some(false), limit_bucket: None }
+adapter: AdapterInfo { name: "llvmpipe (LLVM 21.1.8, 256 bits)", vendor: 65541, device: 0, device_type: Cpu, device_pci_bus_id: "", driver: "llvmpipe", driver_info: "Mesa 26.1.4 (LLVM 21.1.8)", backend: Vulkan, subgroup_min_size: 8, subgroup_max_size: 8, transient_saves_memory: Some(false), limit_bucket: None }
+ok
+test paint_validation_is_atomic_and_hdr_proof_changes_require_full_rebuild ... adapter: AdapterInfo { name: "llvmpipe (LLVM 21.1.8, 256 bits)", vendor: 65541, device: 0, device_type: Cpu, device_pci_bus_id: "", driver: "llvmpipe", driver_info: "Mesa 26.1.4 (LLVM 21.1.8)", backend: Vulkan, subgroup_min_size: 8, subgroup_max_size: 8, transient_saves_memory: Some(false), limit_bucket: None }
+ok
+test physical_glyph_masks_map_back_to_logical_rectangles ... adapter: AdapterInfo { name: "llvmpipe (LLVM 21.1.8, 256 bits)", vendor: 65541, device: 0, device_type: Cpu, device_pci_bus_id: "", driver: "llvmpipe", driver_info: "Mesa 26.1.4 (LLVM 21.1.8)", backend: Vulkan, subgroup_min_size: 8, subgroup_max_size: 8, transient_saves_memory: Some(false), limit_bucket: None }
+ok
+test queued_redraw_keeps_its_packet_before_later_uploads_and_buffer_replacement ... adapter: AdapterInfo { name: "llvmpipe (LLVM 21.1.8, 256 bits)", vendor: 65541, device: 0, device_type: Cpu, device_pci_bus_id: "", driver: "llvmpipe", driver_info: "Mesa 26.1.4 (LLVM 21.1.8)", backend: Vulkan, subgroup_min_size: 8, subgroup_max_size: 8, transient_saves_memory: Some(false), limit_bucket: None }
+ok
+test real_text_uses_shared_glyph_keys_and_uploads_only_missing_masks ... adapter: AdapterInfo { name: "llvmpipe (LLVM 21.1.8, 256 bits)", vendor: 65541, device: 0, device_type: Cpu, device_pci_bus_id: "", driver: "llvmpipe", driver_info: "Mesa 26.1.4 (LLVM 21.1.8)", backend: Vulkan, subgroup_min_size: 8, subgroup_max_size: 8, transient_saves_memory: Some(false), limit_bucket: None }
+ok
+test real_vulkan_pixels_match_cpu_sampling_and_preserve_correlated_edges ... adapter: AdapterInfo { name: "llvmpipe (LLVM 21.1.8, 256 bits)", vendor: 65541, device: 0, device_type: Cpu, device_pci_bus_id: "", driver: "llvmpipe", driver_info: "Mesa 26.1.4 (LLVM 21.1.8)", backend: Vulkan, subgroup_min_size: 8, subgroup_max_size: 8, transient_saves_memory: Some(false), limit_bucket: None }
+ok
+test redraw_rejects_wrong_targets_without_discarding_the_valid_packet ... adapter: AdapterInfo { name: "llvmpipe (LLVM 21.1.8, 256 bits)", vendor: 65541, device: 0, device_type: Cpu, device_pci_bus_id: "", driver: "llvmpipe", driver_info: "Mesa 26.1.4 (LLVM 21.1.8)", backend: Vulkan, subgroup_min_size: 8, subgroup_max_size: 8, transient_saves_memory: Some(false), limit_bucket: None }
+ok
+test retained_text_packet_cost_probe ... adapter: AdapterInfo { name: "llvmpipe (LLVM 21.1.8, 256 bits)", vendor: 65541, device: 0, device_type: Cpu, device_pci_bus_id: "", driver: "llvmpipe", driver_info: "Mesa 26.1.4 (LLVM 21.1.8)", backend: Vulkan, subgroup_min_size: 8, subgroup_max_size: 8, transient_saves_memory: Some(false), limit_bucket: None }
+TEXT_PACKET case=solids32 draws=32 validated=32 records=3072 upload=5272 bin_visits=100 tile_refs=50 original_refs=50 sample_draws=204800 compact=0 shared=0 mask_upload=0 hash=619848373183677861
+TEXT_PACKET case=pair32 draws=64 validated=64 records=4608 upload=7016 bin_visits=204 tile_refs=102 original_refs=102 sample_draws=417792 compact=64 shared=32 mask_upload=0 hash=10213777272607940645
+TEXT_PACKET case=labels32 draws=704 validated=704 records=25088 upload=33760 bin_visits=3336 tile_refs=1668 original_refs=1668 sample_draws=6832128 compact=704 shared=32 mask_upload=0 hash=14178373883980296517
+TEXT_PACKET case=bidi8 draws=104 validated=104 records=3968 upload=6956 bin_visits=494 tile_refs=247 original_refs=247 sample_draws=1011712 compact=104 shared=8 mask_upload=0 hash=12645586400959000165
+ok
+test rounded_circle_pythagorean_sites_neighbor_radii_and_origin_cancellation ... adapter: AdapterInfo { name: "llvmpipe (LLVM 21.1.8, 256 bits)", vendor: 65541, device: 0, device_type: Cpu, device_pci_bus_id: "", driver: "llvmpipe", driver_info: "Mesa 26.1.4 (LLVM 21.1.8)", backend: Vulkan, subgroup_min_size: 8, subgroup_max_size: 8, transient_saves_memory: Some(false), limit_bucket: None }
+adapter: AdapterInfo { name: "llvmpipe (LLVM 21.1.8, 256 bits)", vendor: 65541, device: 0, device_type: Cpu, device_pci_bus_id: "", driver: "llvmpipe", driver_info: "Mesa 26.1.4 (LLVM 21.1.8)", backend: Vulkan, subgroup_min_size: 8, subgroup_max_size: 8, transient_saves_memory: Some(false), limit_bucket: None }
+ok
+test rounded_image_material_decodes_exact_hdr_coverage ... adapter: AdapterInfo { name: "llvmpipe (LLVM 21.1.8, 256 bits)", vendor: 65541, device: 0, device_type: Cpu, device_pci_bus_id: "", driver: "llvmpipe", driver_info: "Mesa 26.1.4 (LLVM 21.1.8)", backend: Vulkan, subgroup_min_size: 8, subgroup_max_size: 8, transient_saves_memory: Some(false), limit_bucket: None }
+ok
+test rounded_images_share_pixels_and_fixed_packet_strides_preserve_queued_order ... adapter: AdapterInfo { name: "llvmpipe (LLVM 21.1.8, 256 bits)", vendor: 65541, device: 0, device_type: Cpu, device_pci_bus_id: "", driver: "llvmpipe", driver_info: "Mesa 26.1.4 (LLVM 21.1.8)", backend: Vulkan, subgroup_min_size: 8, subgroup_max_size: 8, transient_saves_memory: Some(false), limit_bucket: None }
+ok
+test scene_buffer_growth_and_shrinking_prefixes_preserve_pixels_and_replay ... adapter: AdapterInfo { name: "llvmpipe (LLVM 21.1.8, 256 bits)", vendor: 65541, device: 0, device_type: Cpu, device_pci_bus_id: "", driver: "llvmpipe", driver_info: "Mesa 26.1.4 (LLVM 21.1.8)", backend: Vulkan, subgroup_min_size: 8, subgroup_max_size: 8, transient_saves_memory: Some(false), limit_bucket: None }
+ok
+test separate_identical_color_calls_keep_independent_positional_groups ... adapter: AdapterInfo { name: "llvmpipe (LLVM 21.1.8, 256 bits)", vendor: 65541, device: 0, device_type: Cpu, device_pci_bus_id: "", driver: "llvmpipe", driver_info: "Mesa 26.1.4 (LLVM 21.1.8)", backend: Vulkan, subgroup_min_size: 8, subgroup_max_size: 8, transient_saves_memory: Some(false), limit_bucket: None }
+adapter: AdapterInfo { name: "llvmpipe (LLVM 21.1.8, 256 bits)", vendor: 65541, device: 0, device_type: Cpu, device_pci_bus_id: "", driver: "llvmpipe", driver_info: "Mesa 26.1.4 (LLVM 21.1.8)", backend: Vulkan, subgroup_min_size: 8, subgroup_max_size: 8, transient_saves_memory: Some(false), limit_bucket: None }
+ok
+test shared_bank_queues_a_patch_b_patch_c_without_poll_and_matches_full_literal_packets ... adapter: AdapterInfo { name: "llvmpipe (LLVM 21.1.8, 256 bits)", vendor: 65541, device: 0, device_type: Cpu, device_pci_bus_id: "", driver: "llvmpipe", driver_info: "Mesa 26.1.4 (LLVM 21.1.8)", backend: Vulkan, subgroup_min_size: 8, subgroup_max_size: 8, transient_saves_memory: Some(false), limit_bucket: None }
+adapter: AdapterInfo { name: "llvmpipe (LLVM 21.1.8, 256 bits)", vendor: 65541, device: 0, device_type: Cpu, device_pci_bus_id: "", driver: "llvmpipe", driver_info: "Mesa 26.1.4 (LLVM 21.1.8)", backend: Vulkan, subgroup_min_size: 8, subgroup_max_size: 8, transient_saves_memory: Some(false), limit_bucket: None }
+adapter: AdapterInfo { name: "llvmpipe (LLVM 21.1.8, 256 bits)", vendor: 65541, device: 0, device_type: Cpu, device_pci_bus_id: "", driver: "llvmpipe", driver_info: "Mesa 26.1.4 (LLVM 21.1.8)", backend: Vulkan, subgroup_min_size: 8, subgroup_max_size: 8, transient_saves_memory: Some(false), limit_bucket: None }
+adapter: AdapterInfo { name: "llvmpipe (LLVM 21.1.8, 256 bits)", vendor: 65541, device: 0, device_type: Cpu, device_pci_bus_id: "", driver: "llvmpipe", driver_info: "Mesa 26.1.4 (LLVM 21.1.8)", backend: Vulkan, subgroup_min_size: 8, subgroup_max_size: 8, transient_saves_memory: Some(false), limit_bucket: None }
+ok
+test shared_context_drop_and_real_destroy_never_rebind_old_state ... adapter: AdapterInfo { name: "llvmpipe (LLVM 21.1.8, 256 bits)", vendor: 65541, device: 0, device_type: Cpu, device_pci_bus_id: "", driver: "llvmpipe", driver_info: "Mesa 26.1.4 (LLVM 21.1.8)", backend: Vulkan, subgroup_min_size: 8, subgroup_max_size: 8, transient_saves_memory: Some(false), limit_bucket: None }
+adapter: AdapterInfo { name: "llvmpipe (LLVM 21.1.8, 256 bits)", vendor: 65541, device: 0, device_type: Cpu, device_pci_bus_id: "", driver: "llvmpipe", driver_info: "Mesa 26.1.4 (LLVM 21.1.8)", backend: Vulkan, subgroup_min_size: 8, subgroup_max_size: 8, transient_saves_memory: Some(false), limit_bucket: None }
+adapter: AdapterInfo { name: "llvmpipe (LLVM 21.1.8, 256 bits)", vendor: 65541, device: 0, device_type: Cpu, device_pci_bus_id: "", driver: "llvmpipe", driver_info: "Mesa 26.1.4 (LLVM 21.1.8)", backend: Vulkan, subgroup_min_size: 8, subgroup_max_size: 8, transient_saves_memory: Some(false), limit_bucket: None }
+actual destroy callback: Destroyed, 
+ok
+test shared_context_keeps_packets_atlases_images_and_slots_independent ... adapter: AdapterInfo { name: "llvmpipe (LLVM 21.1.8, 256 bits)", vendor: 65541, device: 0, device_type: Cpu, device_pci_bus_id: "", driver: "llvmpipe", driver_info: "Mesa 26.1.4 (LLVM 21.1.8)", backend: Vulkan, subgroup_min_size: 8, subgroup_max_size: 8, transient_saves_memory: Some(false), limit_bucket: None }
+adapter: AdapterInfo { name: "llvmpipe (LLVM 21.1.8, 256 bits)", vendor: 65541, device: 0, device_type: Cpu, device_pci_bus_id: "", driver: "llvmpipe", driver_info: "Mesa 26.1.4 (LLVM 21.1.8)", backend: Vulkan, subgroup_min_size: 8, subgroup_max_size: 8, transient_saves_memory: Some(false), limit_bucket: None }
+ok
+test text_free_reset_releases_keys_without_invalidating_in_flight_text ... adapter: AdapterInfo { name: "llvmpipe (LLVM 21.1.8, 256 bits)", vendor: 65541, device: 0, device_type: Cpu, device_pci_bus_id: "", driver: "llvmpipe", driver_info: "Mesa 26.1.4 (LLVM 21.1.8)", backend: Vulkan, subgroup_min_size: 8, subgroup_max_size: 8, transient_saves_memory: Some(false), limit_bucket: None }
+ok
+test tile_certificates_fall_back_for_clip_alpha_shear_and_ambiguous_edges ... adapter: AdapterInfo { name: "llvmpipe (LLVM 21.1.8, 256 bits)", vendor: 65541, device: 0, device_type: Cpu, device_pci_bus_id: "", driver: "llvmpipe", driver_info: "Mesa 26.1.4 (LLVM 21.1.8)", backend: Vulkan, subgroup_min_size: 8, subgroup_max_size: 8, transient_saves_memory: Some(false), limit_bucket: None }
+ok
+test unicode_paragraphs_fallback_and_fractional_density_match_cpu ... adapter: AdapterInfo { name: "llvmpipe (LLVM 21.1.8, 256 bits)", vendor: 65541, device: 0, device_type: Cpu, device_pci_bus_id: "", driver: "llvmpipe", driver_info: "Mesa 26.1.4 (LLVM 21.1.8)", backend: Vulkan, subgroup_min_size: 8, subgroup_max_size: 8, transient_saves_memory: Some(false), limit_bucket: None }
+ok
+test uniform_float_tiles_preserve_reference_output_bits ... adapter: AdapterInfo { name: "llvmpipe (LLVM 21.1.8, 256 bits)", vendor: 65541, device: 0, device_type: Cpu, device_pci_bus_id: "", driver: "llvmpipe", driver_info: "Mesa 26.1.4 (LLVM 21.1.8)", backend: Vulkan, subgroup_min_size: 8, subgroup_max_size: 8, transient_saves_memory: Some(false), limit_bucket: None }
+ok
+test unkeyed_calls_revalidate_mutable_headers_and_distinct_scenes_and_modes ... adapter: AdapterInfo { name: "llvmpipe (LLVM 21.1.8, 256 bits)", vendor: 65541, device: 0, device_type: Cpu, device_pci_bus_id: "", driver: "llvmpipe", driver_info: "Mesa 26.1.4 (LLVM 21.1.8)", backend: Vulkan, subgroup_min_size: 8, subgroup_max_size: 8, transient_saves_memory: Some(false), limit_bucket: None }
+ok
+test unsupported_context_format_does_not_request_a_device ... unsupported_format_devices,before=RegistryReport { num_allocated: 0, num_kept_from_user: 0, num_released_from_user: 0, element_size: 8 },after=RegistryReport { num_allocated: 0, num_kept_from_user: 0, num_released_from_user: 0, element_size: 8 }
+ok
+test viewport_partial_tiles_and_maximum_extent_preserve_all_four_edges ... ok
+test zero_coverage_draw_preserves_threshold_clear_and_hdr_bits ... adapter: AdapterInfo { name: "llvmpipe (LLVM 21.1.8, 256 bits)", vendor: 65541, device: 0, device_type: Cpu, device_pci_bus_id: "", driver: "llvmpipe", driver_info: "Mesa 26.1.4 (LLVM 21.1.8)", backend: Vulkan, subgroup_min_size: 8, subgroup_max_size: 8, transient_saves_memory: Some(false), limit_bucket: None }
+adapter: AdapterInfo { name: "llvmpipe (LLVM 21.1.8, 256 bits)", vendor: 65541, device: 0, device_type: Cpu, device_pci_bus_id: "", driver: "llvmpipe", driver_info: "Mesa 26.1.4 (LLVM 21.1.8)", backend: Vulkan, subgroup_min_size: 8, subgroup_max_size: 8, transient_saves_memory: Some(false), limit_bucket: None }
+ok
+test zero_coverage_hdr_preserves_numeric_zero_across_cpu_and_gpu ... adapter: AdapterInfo { name: "llvmpipe (LLVM 21.1.8, 256 bits)", vendor: 65541, device: 0, device_type: Cpu, device_pci_bus_id: "", driver: "llvmpipe", driver_info: "Mesa 26.1.4 (LLVM 21.1.8)", backend: Vulkan, subgroup_min_size: 8, subgroup_max_size: 8, transient_saves_memory: Some(false), limit_bucket: None }
+ok
+
+test result: ok. 49 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 11.27s
+
+
+
+running 5 tests
+test colors_commit_without_description_layout_or_paint_walk_and_match_full_oracle ... ok
+test keep_rows_flag_preserves_virtual_membership_and_semantic_columns ... ok
+test masked_bases_and_alpha_topology_fallback_remain_exact ... ok
+test paint_preserves_prior_full_candidate_and_failed_newer_visual_is_not_relabelled ... ok
+test pending_colors_preserve_targets_and_geometry_until_acknowledgement ... ok
+
+test result: ok. 5 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 0.01s
+
+
+
+running 3 tests
+test equal_inspector_set_rebinds_only_masked_member_of_shared_color_source ... ok
+test equal_source_values_do_not_merge_relationships_or_masked_lower_bases ... ok
+test shared_fg_bg_source_updates_once_without_writing_each_style ... ok
+
+test result: ok. 3 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 0.00s
+
+
+
+running 9 tests
+test headless_keeps_automatic_presentation_and_resize_behavior ... ok
+test initial_recording_has_no_input_authority_until_actual_acknowledgement ... ok
+test pending_coherent_sheet_survives_newer_preparation_failure_and_can_be_acknowledged ... ok
+test reacknowledgement_after_surface_loss_cannot_cover_a_failed_new_source ... ok
+test resize_keeps_targets_and_source_epoch_but_requires_new_geometry_ack ... ok
+test software_surface_rendering_returns_the_exact_unacknowledged_scene_token ... ok
+test surface_loss_revokes_coordinates_until_current_scene_is_presented_again ... ok
+test tokens_reject_foreign_namespaces_and_replaced_candidates ... ok
+test unseen_visual_candidates_block_coordinate_routing_even_after_noop_edits ... ok
+
+test result: ok. 9 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 0.00s
+
+
+
+running 3 tests
+test failed_shaping_retains_old_pixels_and_recovers_without_owner_description ... ok
+test font_override_then_inherit_matches_fresh_shaping ... ok
+test shared_text_at_distinct_widths_survives_actions_remounts_and_resize ... ok
+
+test result: ok. 3 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 0.01s
+
+
+
+running 4 tests
+test old_p_and_eligible_c_keep_exact_geometry_after_new_l_reshapes_then_fails ... ok
+test physical_geometry_keeps_padding_fractional_dpi_reflection_shear_and_exact_target_hits ... ok
+test wrapped_directional_runs_cover_source_and_containing_hit_is_not_nearest_caret ... ok
+test zero_advance_unit_retains_visible_semantic_extent_without_a_damage_rectangle ... ok
+
+test result: ok. 4 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 0.00s
+
+
+
+running 20 tests
+test acknowledged_selection_does_not_follow_pending_failed_or_repair_edits ... ok
+test byte_selection_construction_preserves_direction_and_checks_representation ... ok
+test equal_output_replacement_still_collapses_caret_before_publication ... ok
+test geometry_navigation_waits_for_ack_but_logical_range_edits_do_not ... ok
+test grapheme_backspace_and_joined_carets_repair_even_a_failed_visual_source ... ok
+test invalid_grapheme_crlf_and_foreign_ranges_are_atomic ... ok
+test line_navigation_handles_crlf_empty_lines_and_stale_geometry_without_mutation ... ok
+test logical_selection_survives_pending_and_failed_p_without_rewriting_old_sheet ... ok
+test ordinary_replace_typing_keyboard_and_accessibility_share_selection_aware_source_edits ... ok
+test ordinary_wrapped_navigation_keeps_each_affinity_on_its_canonical_source_line ... ok
+test pointer_drag_uses_current_map_outside_input_and_revokes_on_source_change ... ok
+test rtl_line_edges_are_physical_and_vertical_ranges_move_from_either_focus ... ok
+test selection_and_focus_publish_pixels_without_changing_source_text ... ok
+test semantic_range_actions_share_ordinary_editing_and_preserve_reverse_endpoints ... ok
+test stored_selection_is_source_qualified_but_explicit_ranges_address_current_source ... ok
+test transformed_input_navigates_in_local_coordinates_and_pointer_restarts_preferred_x ... ok
+test transformed_padded_input_hits_and_shared_caret_ink_follow_the_real_paint_bank ... ok
+test unchanged_explicit_selection_horizontal_motion_and_source_rebind_reset_preferred_x ... ok
+test vertical_keys_restore_preferred_x_extend_and_move_from_the_focus ... ok
+test visual_arrows_extend_whole_graphemes_and_collapse_bidi_endpoints ... ok
+
+test result: ok. 20 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 0.02s
+
+
+
+running 6 tests
+test absence_of_a_caret_effect_preserves_complete_metadata_and_bank_fast_paths ... ok
+test committed_failed_preparation_keeps_new_focus_and_logical_failure_clears_it ... 
+thread 'committed_failed_preparation_keeps_new_focus_and_logical_failure_clears_it' (1793186) panicked at crates/gpui/tests/text_selection_compound.rs:66:57:
+owner fault
+note: run with `RUST_BACKTRACE=1` environment variable to display a backtrace
+ok
+test compound_visual_complete_metadata_and_bank_actions_publish_one_caret_frame ... ok
+test rejected_compound_actions_restore_focus_without_publication ... ok
+test tab_reveal_that_scrolls_includes_caret_blur_in_its_one_candidate ... ok
+test tab_with_an_idle_reveal_still_publishes_caret_visibility ... ok
+
+test result: ok. 6 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 0.01s
+
+

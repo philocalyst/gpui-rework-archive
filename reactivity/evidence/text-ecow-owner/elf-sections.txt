@@ -1,0 +1,105 @@
+/tmp/gpui-text-blocks-control-artifacts/text_run_probe  :
+section                size      addr
+.interp                  83       736
+.note.ABI-tag            32       820
+.dynsym                3096       856
+.gnu.version            258      3952
+.gnu.version_r          464      4212
+.gnu.hash                28      4680
+.dynstr                1931      4708
+.rela.dyn            154560      6640
+.rela.plt                48    161200
+.gcc_except_table     57328    161248
+.rodata             5073008    218592
+.eh_frame_hdr         28428   5291600
+.eh_frame            175044   5320032
+.text               2230839   5499184
+.init                    27   7730024
+.fini                    13   7730052
+.plt                     48   7730080
+.tdata                   72   7734224
+.tbss                  3192   7734296
+.fini_array               8   7734296
+.init_array              16   7734304
+.data.rel.ro         103208   7734320
+.dynamic                480   7837528
+.got                  11984   7838008
+.got.plt                 40   7849992
+.relro_padding         2000   7850032
+.tm_clone_table           0   7854128
+.data                  5792   7854128
+.bss                    307   7859920
+.comment                166         0
+Total               7852500
+
+
+/tmp/gpui-text-blocks-14-final-artifacts/text_run_probe-eea017db6ac20391  :
+section                size      addr
+.interp                  83       736
+.note.ABI-tag            32       820
+.dynsym                3096       856
+.gnu.version            258      3952
+.gnu.version_r          464      4212
+.gnu.hash                28      4680
+.dynstr                1931      4708
+.rela.dyn            154488      6640
+.rela.plt                48    161128
+.gcc_except_table     57488    161176
+.rodata             5072768    218688
+.eh_frame_hdr         28380   5291456
+.eh_frame            174968   5319840
+.text               2233367   5498912
+.init                    27   7732280
+.fini                    13   7732308
+.plt                     48   7732336
+.tdata                   72   7736480
+.tbss                  3192   7736552
+.fini_array               8   7736552
+.init_array              16   7736560
+.data.rel.ro         103200   7736576
+.dynamic                480   7839776
+.got                  11968   7840256
+.got.plt                 40   7852224
+.relro_padding         3864   7852264
+.tm_clone_table           0   7856360
+.data                  5792   7856360
+.bss                    307   7862152
+.comment                166         0
+Total               7856592
+
+
+/tmp/gpui-ecow-final-artifacts/text_run_probe  :
+section                size      addr
+.interp                  83       736
+.note.ABI-tag            32       820
+.dynsym                3096       856
+.gnu.version            258      3952
+.gnu.version_r          464      4212
+.gnu.hash                28      4680
+.dynstr                1931      4708
+.rela.dyn            154608      6640
+.rela.plt                48    161248
+.gcc_except_table     58052    161296
+.rodata             5073064    219360
+.eh_frame_hdr         28524   5292424
+.eh_frame            175708   5320952
+.text               2234535   5500768
+.init                    27   7735304
+.fini                    13   7735332
+.plt                     48   7735360
+.tdata                   72   7739504
+.tbss                  3192   7739576
+.fini_array               8   7739576
+.init_array              16   7739584
+.data.rel.ro         103304   7739600
+.dynamic                480   7842904
+.got                  11968   7843384
+.got.plt                 40   7855352
+.relro_padding          736   7855392
+.tm_clone_table           0   7859488
+.data                  5792   7859488
+.bss                    307   7865280
+.comment                166         0
+Total               7856600
+
+

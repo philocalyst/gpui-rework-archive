@@ -1,0 +1,1796 @@
+
+/tmp/gpui-ecow-gpu-artifacts/render:     file format elf64-x86-64
+
+
+Disassembly of section .text:
+
+000000000075eb70 <<gpui_gpu::renderer::RendererState>::render>:
+  75eb70:	push   %rbp
+  75eb71:	push   %r15
+  75eb73:	push   %r14
+  75eb75:	push   %r13
+  75eb77:	push   %r12
+  75eb79:	push   %rbx
+  75eb7a:	sub    $0x4b8,%rsp
+  75eb81:	mov    0x228(%rsi),%rax
+  75eb88:	mov    0x18(%rdx),%r9
+  75eb8c:	cmp    %r9,%rax
+  75eb8f:	je     75ebad <<gpui_gpu::renderer::RendererState>::render+0x3d>
+  75eb91:	mov    0x10(%rax),%r10
+  75eb95:	cmp    0x10(%r9),%r10
+  75eb99:	jne    75ec7b <<gpui_gpu::renderer::RendererState>::render+0x10b>
+  75eb9f:	mov    0x18(%rax),%rax
+  75eba3:	cmp    0x18(%r9),%rax
+  75eba7:	jne    75ec7b <<gpui_gpu::renderer::RendererState>::render+0x10b>
+  75ebad:	lea    0x330(%rsi),%rbx
+  75ebb4:	mov    0x330(%rsi),%rax
+  75ebbb:	test   %rax,%rax
+  75ebbe:	je     75ebed <<gpui_gpu::renderer::RendererState>::render+0x7d>
+  75ebc0:	lock decq (%rax)
+  75ebc4:	jne    75ebed <<gpui_gpu::renderer::RendererState>::render+0x7d>
+  75ebc6:	mov    %rdi,%r14
+  75ebc9:	mov    %rbx,%rdi
+  75ebcc:	mov    %rsi,%r12
+  75ebcf:	mov    %r8,%r13
+  75ebd2:	mov    %rdx,%r15
+  75ebd5:	mov    %rcx,%rbp
+  75ebd8:	call   *0x5d4aaa(%rip)        # d33688 <_DYNAMIC+0x618>
+  75ebde:	mov    %rbp,%rcx
+  75ebe1:	mov    %r15,%rdx
+  75ebe4:	mov    %r13,%r8
+  75ebe7:	mov    %r12,%rsi
+  75ebea:	mov    %r14,%rdi
+  75ebed:	movq   $0x0,0x330(%rsi)
+  75ebf8:	mov    (%rcx),%r15d
+  75ebfb:	mov    0x8(%rcx),%r9d
+  75ebff:	movzbl 0xd(%rcx),%eax
+  75ec03:	test   %r9d,%r9d
+  75ec06:	sets   %r10b
+  75ec0a:	and    $0x7fffffff,%r9d
+  75ec11:	lea    -0x800000(%r9),%r11d
+  75ec18:	cmp    $0x7f000000,%r11d
+  75ec1f:	setb   %r11b
+  75ec23:	and    %r10b,%r11b
+  75ec26:	lea    -0x1(%r9),%ebp
+  75ec2a:	cmp    $0x7fffff,%ebp
+  75ec30:	setb   %bpl
+  75ec34:	and    %r10b,%bpl
+  75ec37:	test   %r9d,%r9d
+  75ec3a:	sete   %r10b
+  75ec3e:	cmp    $0x7f800000,%r9d
+  75ec45:	sete   %r14b
+  75ec49:	or     %r10b,%r14b
+  75ec4c:	cmp    $0x7f800001,%r9d
+  75ec53:	setge  %r9b
+  75ec57:	or     %r14b,%r9b
+  75ec5a:	or     %bpl,%r9b
+  75ec5d:	test   %r15d,%r15d
+  75ec60:	setne  %r10b
+  75ec64:	and    %al,%r10b
+  75ec67:	or     %r11b,%r10b
+  75ec6a:	or     %r9b,%r10b
+  75ec6d:	test   $0x1,%r10b
+  75ec71:	je     75ec96 <<gpui_gpu::renderer::RendererState>::render+0x126>
+  75ec73:	movl   $0x3,(%rdi)
+  75ec79:	jmp    75ec81 <<gpui_gpu::renderer::RendererState>::render+0x111>
+  75ec7b:	movl   $0x4,(%rdi)
+  75ec81:	mov    %rdi,%rax
+  75ec84:	add    $0x4b8,%rsp
+  75ec8b:	pop    %rbx
+  75ec8c:	pop    %r12
+  75ec8e:	pop    %r13
+  75ec90:	pop    %r14
+  75ec92:	pop    %r15
+  75ec94:	pop    %rbp
+  75ec95:	ret
+  75ec96:	movd   0x4(%rcx),%xmm2
+  75ec9b:	movzbl 0xc(%rcx),%r13d
+  75eca0:	test   $0x1,%r15b
+  75eca4:	je     75ed1b <<gpui_gpu::renderer::RendererState>::render+0x1ab>
+  75eca6:	movd   %xmm2,%r9d
+  75ecab:	test   %r9d,%r9d
+  75ecae:	sets   %r10b
+  75ecb2:	and    $0x7fffffff,%r9d
+  75ecb9:	lea    -0x800000(%r9),%r11d
+  75ecc0:	cmp    $0x7f000000,%r11d
+  75ecc7:	setb   %r11b
+  75eccb:	and    %r10b,%r11b
+  75ecce:	lea    -0x1(%r9),%ebp
+  75ecd2:	cmp    $0x7fffff,%ebp
+  75ecd8:	setb   %bpl
+  75ecdc:	and    %r10b,%bpl
+  75ecdf:	test   %r9d,%r9d
+  75ece2:	sete   %r10b
+  75ece6:	cmp    $0x7f800000,%r9d
+  75eced:	sete   %r14b
+  75ecf1:	or     %r10b,%r14b
+  75ecf4:	cmp    $0x7f800001,%r9d
+  75ecfb:	setge  %r9b
+  75ecff:	or     %r14b,%r9b
+  75ed02:	or     %bpl,%r9b
+  75ed05:	or     %r11b,%r9b
+  75ed08:	jne    75ec73 <<gpui_gpu::renderer::RendererState>::render+0x103>
+  75ed0e:	ucomiss -0x6f6265(%rip),%xmm2        # 68ab0 <anon.a42d0d794d3fa8cc7a1fe8b72326ceca.129.llvm.5616604929139648703+0x60>
+  75ed15:	ja     75ec73 <<gpui_gpu::renderer::RendererState>::render+0x103>
+  75ed1b:	mov    0x28(%rcx),%r14d
+  75ed1f:	cmp    0x20(%r8),%r14d
+  75ed23:	jne    75ec73 <<gpui_gpu::renderer::RendererState>::render+0x103>
+  75ed29:	mov    0x2c(%rcx),%ebp
+  75ed2c:	cmp    0x24(%r8),%ebp
+  75ed30:	jne    75ec73 <<gpui_gpu::renderer::RendererState>::render+0x103>
+  75ed36:	mov    0x38(%r8),%r12d
+  75ed3a:	cmp    0x20(%rdx),%r12d
+  75ed3e:	jne    75ec73 <<gpui_gpu::renderer::RendererState>::render+0x103>
+  75ed44:	cmp    $0x4c,%r12d
+  75ed48:	jne    75ed6d <<gpui_gpu::renderer::RendererState>::render+0x1fd>
+  75ed4a:	movq   0x3c(%r8),%xmm0
+  75ed50:	movq   0x24(%rdx),%xmm1
+  75ed55:	pcmpeqd %xmm0,%xmm1
+  75ed59:	pshufd $0x50,%xmm1,%xmm0
+  75ed5e:	movmskpd %xmm0,%r9d
+  75ed63:	cmp    $0x3,%r9d
+  75ed67:	jne    75ec73 <<gpui_gpu::renderer::RendererState>::render+0x103>
+  75ed6d:	cmp    $0x4000,%ebp
+  75ed73:	ja     75eda9 <<gpui_gpu::renderer::RendererState>::render+0x239>
+  75ed75:	cmp    $0x4000,%r14d
+  75ed7c:	ja     75eda9 <<gpui_gpu::renderer::RendererState>::render+0x239>
+  75ed7e:	mov    %ebp,%r10d
+  75ed81:	mov    %r10,%r9
+  75ed84:	imul   %r14,%r9
+  75ed88:	add    $0xfffffffffeffffff,%r9
+  75ed8f:	cmp    $0xffffffffff000000,%r9
+  75ed96:	jb     75eda9 <<gpui_gpu::renderer::RendererState>::render+0x239>
+  75ed98:	mov    0x10(%rcx),%r11
+  75ed9c:	cmpq   $0x10000,0x80(%r11)
+  75eda7:	jbe    75edb4 <<gpui_gpu::renderer::RendererState>::render+0x244>
+  75eda9:	movl   $0x6,(%rdi)
+  75edaf:	jmp    75ec81 <<gpui_gpu::renderer::RendererState>::render+0x111>
+  75edb4:	movd   0x18(%rcx),%xmm0
+  75edb9:	movd   %xmm0,%r9d
+  75edbe:	add    %r9d,%r9d
+  75edc1:	cmp    $0xfeffffff,%r9d
+  75edc8:	ja     75ec73 <<gpui_gpu::renderer::RendererState>::render+0x103>
+  75edce:	pand   -0x6f20c6(%rip),%xmm0        # 6cd10 <anon.2f431091ada728ad0601af58d9b3fb3e.774.llvm.13222203440441229516+0x500>
+  75edd6:	ucomiss -0x6f5ba5(%rip),%xmm0        # 69238 <anon.fb6f5eafdfe0b435d0b4b2f0bb92df2e.78.llvm.12041963204792030370+0x58>
+  75eddd:	ja     75ec73 <<gpui_gpu::renderer::RendererState>::render+0x103>
+  75ede3:	movd   0x1c(%rcx),%xmm0
+  75ede8:	movd   %xmm0,%r9d
+  75eded:	add    %r9d,%r9d
+  75edf0:	cmp    $0xfeffffff,%r9d
+  75edf7:	ja     75ec73 <<gpui_gpu::renderer::RendererState>::render+0x103>
+  75edfd:	pand   -0x6f20f5(%rip),%xmm0        # 6cd10 <anon.2f431091ada728ad0601af58d9b3fb3e.774.llvm.13222203440441229516+0x500>
+  75ee05:	ucomiss -0x6f5bd4(%rip),%xmm0        # 69238 <anon.fb6f5eafdfe0b435d0b4b2f0bb92df2e.78.llvm.12041963204792030370+0x58>
+  75ee0c:	ja     75ec73 <<gpui_gpu::renderer::RendererState>::render+0x103>
+  75ee12:	movd   0x20(%rcx),%xmm0
+  75ee17:	movd   %xmm0,%r9d
+  75ee1c:	add    %r9d,%r9d
+  75ee1f:	cmp    $0xfeffffff,%r9d
+  75ee26:	ja     75ec73 <<gpui_gpu::renderer::RendererState>::render+0x103>
+  75ee2c:	pand   -0x6f2124(%rip),%xmm0        # 6cd10 <anon.2f431091ada728ad0601af58d9b3fb3e.774.llvm.13222203440441229516+0x500>
+  75ee34:	ucomiss -0x6f5c03(%rip),%xmm0        # 69238 <anon.fb6f5eafdfe0b435d0b4b2f0bb92df2e.78.llvm.12041963204792030370+0x58>
+  75ee3b:	ja     75ec73 <<gpui_gpu::renderer::RendererState>::render+0x103>
+  75ee41:	movd   0x24(%rcx),%xmm0
+  75ee46:	movd   %xmm0,%r9d
+  75ee4b:	add    %r9d,%r9d
+  75ee4e:	cmp    $0xfeffffff,%r9d
+  75ee55:	ja     75ec73 <<gpui_gpu::renderer::RendererState>::render+0x103>
+  75ee5b:	movdqa -0x6f2153(%rip),%xmm1        # 6cd10 <anon.2f431091ada728ad0601af58d9b3fb3e.774.llvm.13222203440441229516+0x500>
+  75ee63:	pand   %xmm0,%xmm1
+  75ee67:	ucomiss -0x6f5c36(%rip),%xmm1        # 69238 <anon.fb6f5eafdfe0b435d0b4b2f0bb92df2e.78.llvm.12041963204792030370+0x58>
+  75ee6e:	ja     75ec73 <<gpui_gpu::renderer::RendererState>::render+0x103>
+  75ee74:	xorps  %xmm1,%xmm1
+  75ee77:	ucomiss %xmm1,%xmm0
+  75ee7a:	jb     75ec73 <<gpui_gpu::renderer::RendererState>::render+0x103>
+  75ee80:	movss  -0x6f6770(%rip),%xmm1        # 68718 <anon.a42d0d794d3fa8cc7a1fe8b72326ceca.208.llvm.5616604929139648703+0x18>
+  75ee88:	ucomiss %xmm0,%xmm1
+  75ee8b:	jb     75ec73 <<gpui_gpu::renderer::RendererState>::render+0x103>
+  75ee91:	mov    0x30(%rcx),%r9d
+  75ee95:	cmp    $0x28,%r12d
+  75ee99:	jne    75eea5 <<gpui_gpu::renderer::RendererState>::render+0x335>
+  75ee9b:	test   $0x1,%al
+  75ee9d:	je     75ec73 <<gpui_gpu::renderer::RendererState>::render+0x103>
+  75eea3:	jmp    75eec0 <<gpui_gpu::renderer::RendererState>::render+0x350>
+  75eea5:	test   $0x1,%al
+  75eea7:	jne    75ec73 <<gpui_gpu::renderer::RendererState>::render+0x103>
+  75eead:	ucomiss -0x6f679c(%rip),%xmm0        # 68718 <anon.a42d0d794d3fa8cc7a1fe8b72326ceca.208.llvm.5616604929139648703+0x18>
+  75eeb4:	jne    75ec73 <<gpui_gpu::renderer::RendererState>::render+0x103>
+  75eeba:	jp     75ec73 <<gpui_gpu::renderer::RendererState>::render+0x103>
+  75eec0:	mov    %r9d,0x28(%rsp)
+  75eec5:	mov    %r11,0xa8(%rsp)
+  75eecd:	movss  %xmm1,0x114(%rsp)
+  75eed6:	movd   %xmm2,0x33c(%rsp)
+  75eedf:	mov    %r10,0x108(%rsp)
+  75eee7:	mov    %rdx,0x198(%rsp)
+  75eeef:	mov    %r8,0x3e8(%rsp)
+  75eef7:	mov    %rdi,0x48(%rsp)
+  75eefc:	lea    0xf(%r14),%rax
+  75ef00:	shr    $0x4,%rax
+  75ef04:	lea    0xf(%rbp),%edx
+  75ef07:	shr    $0x4,%edx
+  75ef0a:	lea    0x18(%rsi),%rdi
+  75ef0e:	movq   $0x0,0x28(%rsi)
+  75ef16:	mov    %rax,0x58(%rsp)
+  75ef1b:	imul   %eax,%edx
+  75ef1e:	mov    %rdi,0xb8(%rsp)
+  75ef26:	mov    %rsi,0x8(%rsp)
+  75ef2b:	mov    %rdx,0x30(%rsp)
+  75ef30:	mov    %rdx,%rsi
+  75ef33:	xor    %edx,%edx
+  75ef35:	mov    %rcx,0xb0(%rsp)
+  75ef3d:	call   765760 <<alloc::vec::Vec<[u32; 2]>>::resize>
+  75ef42:	mov    0x8(%rsp),%rax
+  75ef47:	movq   $0x0,0x10(%rax)
+  75ef4f:	mov    0xb0(%rsp),%rdi
+  75ef57:	call   *0x5d4f93(%rip)        # d33ef0 <_DYNAMIC+0xe80>
+  75ef5d:	mov    %rdx,%rcx
+  75ef60:	sub    %rax,%rcx
+  75ef63:	cmp    $0x300000,%rcx
+  75ef6a:	jbe    75ef7c <<gpui_gpu::renderer::RendererState>::render+0x40c>
+  75ef6c:	mov    0x48(%rsp),%rdi
+  75ef71:	movl   $0x6,(%rdi)
+  75ef77:	jmp    75ec81 <<gpui_gpu::renderer::RendererState>::render+0x111>
+  75ef7c:	mov    %rcx,%rsi
+  75ef7f:	shr    $0x3,%rcx
+  75ef83:	movabs $0xaaaaaaaaaaaaaaab,%rdi
+  75ef8d:	imul   %rcx,%rdi
+  75ef91:	mov    %rdi,0x40(%rsp)
+  75ef96:	mov    %rax,0x368(%rsp)
+  75ef9e:	mov    %rdx,0x360(%rsp)
+  75efa6:	cmp    %rax,%rdx
+  75efa9:	je     75efda <<gpui_gpu::renderer::RendererState>::render+0x46a>
+  75efab:	mov    $0xaaaaaaab,%eax
+  75efb0:	imul   %rax,%rsi
+  75efb4:	shr    $0x2a,%rsi
+  75efb8:	mov    0x40(%rsp),%rcx
+  75efbd:	mov    %ecx,%eax
+  75efbf:	and    $0x3f,%eax
+  75efc2:	add    %rcx,%rsi
+  75efc5:	cmp    $0x1,%rax
+  75efc9:	sbb    $0xffffffffffffffff,%rsi
+  75efcd:	inc    %rsi
+  75efd0:	mov    %rsi,0xc8(%rsp)
+  75efd8:	jmp    75efe6 <<gpui_gpu::renderer::RendererState>::render+0x476>
+  75efda:	movq   $0x0,0xc8(%rsp)
+  75efe6:	mov    0xa8(%rsp),%rdx
+  75efee:	mov    0x80(%rdx),%rax
+  75eff5:	mov    0x98(%rdx),%rcx
+  75effc:	add    0xb0(%rdx),%rcx
+  75f003:	mov    %rdx,0x1c0(%rsp)
+  75f00b:	mov    0x28(%rsp),%edx
+  75f00f:	mov    %edx,0x1e0(%rsp)
+  75f016:	movq   $0x0,0x1c8(%rsp)
+  75f022:	mov    %rax,0x1d0(%rsp)
+  75f02a:	mov    %rcx,0x1d8(%rsp)
+  75f032:	mov    0x8(%rsp),%rax
+  75f037:	movzbl 0x341(%rax),%edx
+  75f03e:	lea    0x118(%rsp),%rdi
+  75f046:	lea    0x1c0(%rsp),%rsi
+  75f04e:	call   75cc30 <<gpui_canvas::canvas::Groups as core::iter::traits::iterator::Iterator>::try_fold::<usize, <gpui_gpu::renderer::RendererState>::render_observed<<gpui_gpu::renderer::RendererState>::render::{closure#0}>::{closure#2}, core::result::Result<usize, gpui_gpu::renderer::Error>>>
+  75f053:	mov    0x118(%rsp),%eax
+  75f05a:	cmp    $0xffffffff,%eax
+  75f05d:	je     75f08d <<gpui_gpu::renderer::RendererState>::render+0x51d>
+  75f05f:	mov    0x11c(%rsp),%ecx
+  75f066:	mov    0x120(%rsp),%rdx
+  75f06e:	movups 0x128(%rsp),%xmm0
+  75f076:	mov    0x48(%rsp),%rdi
+  75f07b:	movups %xmm0,0x10(%rdi)
+  75f07f:	mov    %eax,(%rdi)
+  75f081:	mov    %ecx,0x4(%rdi)
+  75f084:	mov    %rdx,0x8(%rdi)
+  75f088:	jmp    75ec81 <<gpui_gpu::renderer::RendererState>::render+0x111>
+  75f08d:	mov    0x120(%rsp),%rdx
+  75f095:	add    0xc8(%rsp),%rdx
+  75f09d:	mov    0x8(%rsp),%rdi
+  75f0a2:	mov    0x10(%rdi),%rsi
+  75f0a6:	mov    $0x4,%ecx
+  75f0ab:	mov    $0x10,%r8d
+  75f0b1:	call   768940 <<alloc::raw_vec::RawVecInner>::try_reserve_exact>
+  75f0b6:	cmp    $0xffffffffffffffff,%rax
+  75f0ba:	jne    75ef6c <<gpui_gpu::renderer::RendererState>::render+0x3fc>
+  75f0c0:	mov    0x8(%rsp),%rdi
+  75f0c5:	mov    0xb0(%rsp),%rsi
+  75f0cd:	mov    0x40(%rsp),%rdx
+  75f0d2:	call   768c80 <gpui_gpu::renderer::slots::write_prefix>
+  75f0d7:	mov    0x8(%rsp),%rax
+  75f0dc:	lea    0x48(%rax),%rdi
+  75f0e0:	movq   $0x0,0x58(%rax)
+  75f0e8:	mov    %rdi,0x3f0(%rsp)
+  75f0f0:	mov    0x30(%rsp),%rsi
+  75f0f5:	xor    %edx,%edx
+  75f0f7:	call   765880 <<alloc::vec::Vec<u32>>::resize>
+  75f0fc:	mov    0x8(%rsp),%rax
+  75f101:	movq   $0x0,0x70(%rax)
+  75f109:	cmpq   $0x0,0x60(%rax)
+  75f10e:	jne    75f11f <<gpui_gpu::renderer::RendererState>::render+0x5af>
+  75f110:	mov    0x8(%rsp),%rax
+  75f115:	lea    0x60(%rax),%rdi
+  75f119:	call   *0x5d4dd9(%rip)        # d33ef8 <_DYNAMIC+0xe88>
+  75f11f:	mov    0x8(%rsp),%rax
+  75f124:	mov    0x68(%rax),%rcx
+  75f128:	xorps  %xmm0,%xmm0
+  75f12b:	movups %xmm0,0x10(%rcx)
+  75f12f:	movups %xmm0,(%rcx)
+  75f132:	movq   $0x1,0x70(%rax)
+  75f13a:	lea    0x2f8(%rax),%rdi
+  75f141:	call   7651b0 <<hashbrown::raw::RawTable<([u32; 8], u32)>>::clear>
+  75f146:	mov    0xa8(%rsp),%rdx
+  75f14e:	mov    0x80(%rdx),%rax
+  75f155:	mov    0x98(%rdx),%rcx
+  75f15c:	add    0xb0(%rdx),%rcx
+  75f163:	mov    %rdx,0x2c0(%rsp)
+  75f16b:	movq   $0x0,0x2c8(%rsp)
+  75f177:	mov    %rax,0x2d0(%rsp)
+  75f17f:	mov    %rcx,0x2d8(%rsp)
+  75f187:	mov    0x28(%rsp),%eax
+  75f18b:	mov    %eax,0x2e0(%rsp)
+  75f192:	shlq   $0x20,0x108(%rsp)
+  75f19b:	lea    0x3f8(%rsp),%rdi
+  75f1a3:	lea    0x2c0(%rsp),%rsi
+  75f1ab:	call   *0x5d4d4f(%rip)        # d33f00 <_DYNAMIC+0xe90>
+  75f1b1:	mov    0x3f8(%rsp),%rax
+  75f1b9:	mov    %rax,0x10(%rsp)
+  75f1be:	test   %rax,%rax
+  75f1c1:	je     760105 <<gpui_gpu::renderer::RendererState>::render+0x1595>
+  75f1c7:	mov    0x108(%rsp),%rax
+  75f1cf:	add    %r14,%rax
+  75f1d2:	mov    %rax,0x358(%rsp)
+  75f1da:	movq   $0x0,0x50(%rsp)
+  75f1e3:	movq   $0x0,0xa0(%rsp)
+  75f1ef:	movq   $0x0,0x320(%rsp)
+  75f1fb:	movq   $0x0,0x328(%rsp)
+  75f207:	movq   $0x0,0xc0(%rsp)
+  75f213:	mov    0x400(%rsp),%rdx
+  75f21b:	mov    0x408(%rsp),%r8
+  75f223:	mov    0x410(%rsp),%rdi
+  75f22b:	movups 0x418(%rsp),%xmm2
+  75f233:	movaps %xmm2,0x30(%rsp)
+  75f238:	lea    0x428(%rsp),%rcx
+  75f240:	mov    0x20(%rcx),%rax
+  75f244:	mov    %rax,0x3a0(%rsp)
+  75f24c:	movups (%rcx),%xmm0
+  75f24f:	movups 0x10(%rcx),%xmm1
+  75f253:	movaps %xmm1,0x390(%rsp)
+  75f25b:	movaps %xmm0,0x380(%rsp)
+  75f263:	movups 0x28(%rcx),%xmm0
+  75f267:	movaps %xmm0,0x340(%rsp)
+  75f26f:	mov    0x8(%rsp),%rax
+  75f274:	movzbl 0x341(%rax),%esi
+  75f27b:	mov    0x10(%rsp),%rax
+  75f280:	mov    %rax,0x1c0(%rsp)
+  75f288:	mov    %rdx,0x20(%rsp)
+  75f28d:	mov    %rdx,0x1c8(%rsp)
+  75f295:	mov    %r8,0x90(%rsp)
+  75f29d:	mov    %r8,0x1d0(%rsp)
+  75f2a5:	mov    %rdi,0x18(%rsp)
+  75f2aa:	mov    %rdi,0x1d8(%rsp)
+  75f2b2:	movups %xmm2,0x1e0(%rsp)
+  75f2ba:	mov    0x20(%rcx),%rax
+  75f2be:	lea    0x1f0(%rsp),%rdx
+  75f2c6:	mov    %rax,0x20(%rdx)
+  75f2ca:	movups (%rcx),%xmm0
+  75f2cd:	movups 0x10(%rcx),%xmm1
+  75f2d1:	movups %xmm1,0x10(%rdx)
+  75f2d5:	movups %xmm0,(%rdx)
+  75f2d8:	movupd 0x28(%rcx),%xmm0
+  75f2dd:	lea    0x218(%rsp),%rax
+  75f2e5:	movupd %xmm0,(%rax)
+  75f2e9:	lea    0x1c0(%rsp),%rdi
+  75f2f1:	call   7625a0 <gpui_gpu::renderer::compact_group>
+  75f2f6:	mov    %al,0xd0(%rsp)
+  75f2fd:	xorpd  %xmm0,%xmm0
+  75f301:	movapd 0x30(%rsp),%xmm1
+  75f307:	ucomisd %xmm0,%xmm1
+  75f30b:	jne    75f3a9 <<gpui_gpu::renderer::RendererState>::render+0x839>
+  75f311:	jp     75f3a9 <<gpui_gpu::renderer::RendererState>::render+0x839>
+  75f317:	movapd 0x30(%rsp),%xmm0
+  75f31d:	unpckhpd %xmm0,%xmm0
+  75f321:	xorpd  %xmm1,%xmm1
+  75f325:	ucomisd %xmm1,%xmm0
+  75f329:	jne    75f3a9 <<gpui_gpu::renderer::RendererState>::render+0x839>
+  75f32b:	jp     75f3a9 <<gpui_gpu::renderer::RendererState>::render+0x839>
+  75f32d:	mov    $0x1,%al
+  75f32f:	mov    %eax,0xf8(%rsp)
+  75f336:	movl   $0x40000000,0x7c(%rsp)
+  75f33e:	cmpq   $0x0,0x90(%rsp)
+  75f347:	je     75f40d <<gpui_gpu::renderer::RendererState>::render+0x89d>
+  75f34d:	mov    0x90(%rsp),%rcx
+  75f355:	lea    (%rcx,%rcx,1),%rax
+  75f359:	shl    $0x4,%rcx
+  75f35d:	sub    %rax,%rcx
+  75f360:	mov    %rcx,0x60(%rsp)
+  75f365:	mov    0x20(%rsp),%rax
+  75f36a:	mov    %rax,0x80(%rsp)
+  75f372:	lea    0x1c0(%rsp),%rdi
+  75f37a:	mov    0x10(%rsp),%rsi
+  75f37f:	mov    0x80(%rsp),%rdx
+  75f387:	call   75ce30 <<gpui_canvas::canvas::PreparedGroup>::placements::{closure#0}>
+  75f38c:	cmpb   $0x0,0x1c0(%rsp)
+  75f394:	jne    75f3a9 <<gpui_gpu::renderer::RendererState>::render+0x839>
+  75f396:	addq   $0xe,0x80(%rsp)
+  75f39f:	addq   $0xfffffffffffffff2,0x60(%rsp)
+  75f3a5:	jne    75f372 <<gpui_gpu::renderer::RendererState>::render+0x802>
+  75f3a7:	jmp    75f40d <<gpui_gpu::renderer::RendererState>::render+0x89d>
+  75f3a9:	mov    0x18(%rsp),%rax
+  75f3ae:	mov    %rax,0x1c0(%rsp)
+  75f3b6:	movaps 0x30(%rsp),%xmm0
+  75f3bb:	movups %xmm0,0x1c8(%rsp)
+  75f3c3:	lea    0x428(%rsp),%rdx
+  75f3cb:	mov    0x10(%rdx),%rax
+  75f3cf:	lea    0x218(%rsp),%rcx
+  75f3d7:	mov    %rax,-0x30(%rcx)
+  75f3db:	movupd (%rdx),%xmm0
+  75f3df:	movupd %xmm0,-0x40(%rcx)
+  75f3e4:	mov    0x8(%rsp),%rdi
+  75f3e9:	lea    0x1c0(%rsp),%rsi
+  75f3f1:	lea    0x440(%rsp),%rdx
+  75f3f9:	call   75dd80 <<gpui_gpu::renderer::RendererState>::correction>
+  75f3fe:	mov    %eax,0x7c(%rsp)
+  75f402:	movl   $0x0,0xf8(%rsp)
+  75f40d:	mov    0x90(%rsp),%rcx
+  75f415:	lea    (%rcx,%rcx,1),%rax
+  75f419:	shl    $0x4,%rcx
+  75f41d:	sub    %rax,%rcx
+  75f420:	mov    %rcx,0x100(%rsp)
+  75f428:	cmpb   $0x0,0xd0(%rsp)
+  75f430:	je     75f5e9 <<gpui_gpu::renderer::RendererState>::render+0xa79>
+  75f436:	mov    0x20(%rsp),%rcx
+  75f43b:	mov    0x100(%rsp),%rax
+  75f443:	add    %rcx,%rax
+  75f446:	mov    %rcx,0x1a0(%rsp)
+  75f44e:	mov    %rax,0x1a8(%rsp)
+  75f456:	mov    0x10(%rsp),%rax
+  75f45b:	mov    %rax,0x1b0(%rsp)
+  75f463:	movq   $0x0,0x1b8(%rsp)
+  75f46f:	lea    0x118(%rsp),%rdi
+  75f477:	lea    0x1a0(%rsp),%rsi
+  75f47f:	call   762cc0 <<core::iter::adapters::enumerate::Enumerate<core::iter::adapters::map::Map<core::slice::iter::Iter<gpui_canvas::canvas::DrawRef>, <gpui_canvas::canvas::PreparedGroup>::placements::{closure#0}>> as core::iter::traits::iterator::Iterator>::next>
+  75f484:	cmpb   $0xff,0x120(%rsp)
+  75f48c:	je     75fbaf <<gpui_gpu::renderer::RendererState>::render+0x103f>
+  75f492:	xorpd  %xmm0,%xmm0
+  75f496:	movapd %xmm0,0x60(%rsp)
+  75f49c:	mov    0x118(%rsp),%rdx
+  75f4a4:	add    0xa0(%rsp),%rdx
+  75f4ac:	lea    0x119(%rsp),%rsi
+  75f4b4:	movups 0x3f(%rsi),%xmm0
+  75f4b8:	lea    0x218(%rsp),%rcx
+  75f4c0:	movups %xmm0,-0x20(%rcx)
+  75f4c4:	movups 0x4f(%rsi),%xmm0
+  75f4c8:	movups %xmm0,0x30(%rcx)
+  75f4cc:	mov    0x37(%rsi),%rax
+  75f4d0:	mov    %rax,0x1f0(%rsp)
+  75f4d8:	movups 0x7(%rsi),%xmm0
+  75f4dc:	movups 0x17(%rsi),%xmm1
+  75f4e0:	movups 0x27(%rsi),%xmm2
+  75f4e4:	movaps %xmm2,0x1e0(%rsp)
+  75f4ec:	movaps %xmm1,0x1d0(%rsp)
+  75f4f4:	movaps %xmm0,0x1c0(%rsp)
+  75f4fc:	lea    0x428(%rsp),%rsi
+  75f504:	mov    0x10(%rsi),%rax
+  75f508:	lea    0x1f0(%rsp),%rdi
+  75f510:	mov    %rax,0x40(%rdi)
+  75f514:	movups (%rsi),%xmm0
+  75f517:	movups %xmm0,0x30(%rdi)
+  75f51b:	lea    0x440(%rsp),%rax
+  75f523:	movups (%rax),%xmm0
+  75f526:	movups %xmm0,0x20(%rcx)
+  75f52a:	movups 0x28(%rsi),%xmm0
+  75f52e:	movups %xmm0,0x40(%rcx)
+  75f532:	mov    0x18(%rsp),%rax
+  75f537:	mov    %rax,0x208(%rsp)
+  75f53f:	movaps 0x30(%rsp),%xmm0
+  75f544:	movaps %xmm0,0x210(%rsp)
+  75f54c:	lea    0x2f8(%rsp),%rdi
+  75f554:	lea    0x1c0(%rsp),%rsi
+  75f55c:	mov    %r14d,%ecx
+  75f55f:	mov    %ebp,%r8d
+  75f562:	call   7625f0 <gpui_gpu::renderer::validate_draw>
+  75f567:	mov    0x2f8(%rsp),%ecx
+  75f56e:	mov    0x2fc(%rsp),%rax
+  75f576:	cmp    $0xffffffff,%ecx
+  75f579:	jne    7601c0 <<gpui_gpu::renderer::RendererState>::render+0x1650>
+  75f57f:	mov    %rax,%rcx
+  75f582:	shr    $0x20,%rcx
+  75f586:	movd   %eax,%xmm0
+  75f58a:	movd   %ecx,%xmm2
+  75f58e:	punpckldq %xmm0,%xmm2
+  75f592:	movaps 0x60(%rsp),%xmm1
+  75f597:	movaps %xmm1,%xmm0
+  75f59a:	maxps  %xmm2,%xmm0
+  75f59d:	cmpunordps %xmm2,%xmm2
+  75f5a1:	andps  %xmm2,%xmm1
+  75f5a4:	andnps %xmm0,%xmm2
+  75f5a7:	orps   %xmm1,%xmm2
+  75f5aa:	movaps %xmm2,0x80(%rsp)
+  75f5b2:	lea    0x118(%rsp),%rdi
+  75f5ba:	lea    0x1a0(%rsp),%rsi
+  75f5c2:	call   762cc0 <<core::iter::adapters::enumerate::Enumerate<core::iter::adapters::map::Map<core::slice::iter::Iter<gpui_canvas::canvas::DrawRef>, <gpui_canvas::canvas::PreparedGroup>::placements::{closure#0}>> as core::iter::traits::iterator::Iterator>::next>
+  75f5c7:	cmpb   $0xff,0x120(%rsp)
+  75f5cf:	movapd 0x80(%rsp),%xmm0
+  75f5d8:	movapd %xmm0,0x60(%rsp)
+  75f5de:	jne    75f49c <<gpui_gpu::renderer::RendererState>::render+0x92c>
+  75f5e4:	jmp    75fbbc <<gpui_gpu::renderer::RendererState>::render+0x104c>
+  75f5e9:	cmpq   $0x0,0x90(%rsp)
+  75f5f2:	je     7600af <<gpui_gpu::renderer::RendererState>::render+0x153f>
+  75f5f8:	movaps 0x30(%rsp),%xmm1
+  75f5fd:	xorps  %xmm0,%xmm0
+  75f600:	cvtsd2ss %xmm1,%xmm0
+  75f604:	movss  %xmm0,0x334(%rsp)
+  75f60d:	mov    0x7c(%rsp),%eax
+  75f611:	or     $0x80000000,%eax
+  75f616:	mov    %eax,0x330(%rsp)
+  75f61d:	movsd  0x18(%rsp),%xmm0
+  75f623:	shufps $0xe4,%xmm1,%xmm0
+  75f627:	cvtpd2ps %xmm0,%xmm0
+  75f62b:	movapd %xmm0,0x470(%rsp)
+  75f634:	movq   $0x0,0x180(%rsp)
+  75f640:	mov    0x20(%rsp),%rax
+  75f645:	mov    0x180(%rsp),%rcx
+  75f64d:	lea    (%rax,%rcx,1),%rdx
+  75f651:	lea    0x118(%rsp),%rdi
+  75f659:	mov    0x10(%rsp),%rsi
+  75f65e:	call   75ce30 <<gpui_canvas::canvas::PreparedGroup>::placements::{closure#0}>
+  75f663:	movzbl 0x118(%rsp),%edi
+  75f66b:	lea    0x119(%rsp),%rsi
+  75f673:	mov    (%rsi),%eax
+  75f675:	mov    0x3(%rsi),%ecx
+  75f678:	lea    0x1f0(%rsp),%rdx
+  75f680:	mov    %ecx,-0x2c(%rdx)
+  75f683:	mov    %eax,-0x2f(%rdx)
+  75f686:	mov    0x120(%rsp),%r8
+  75f68e:	mov    0x2f(%rsi),%rax
+  75f692:	mov    %rax,(%rdx)
+  75f695:	movups 0xf(%rsi),%xmm0
+  75f699:	movups 0x1f(%rsi),%xmm1
+  75f69d:	movups %xmm1,-0x10(%rdx)
+  75f6a1:	movups %xmm0,-0x20(%rdx)
+  75f6a5:	movups 0x37(%rsi),%xmm0
+  75f6a9:	lea    0x218(%rsp),%rcx
+  75f6b1:	movups %xmm0,-0x20(%rcx)
+  75f6b5:	lea    0x160(%rsp),%rax
+  75f6bd:	movups (%rax),%xmm0
+  75f6c0:	movups %xmm0,0x30(%rcx)
+  75f6c4:	mov    0x390(%rsp),%rax
+  75f6cc:	mov    %rax,0x40(%rdx)
+  75f6d0:	movaps 0x380(%rsp),%xmm0
+  75f6d8:	movups %xmm0,0x30(%rdx)
+  75f6dc:	lea    0x398(%rsp),%rax
+  75f6e4:	movups (%rax),%xmm0
+  75f6e7:	movups %xmm0,0x20(%rcx)
+  75f6eb:	movaps 0x340(%rsp),%xmm0
+  75f6f3:	movups %xmm0,0x40(%rcx)
+  75f6f7:	mov    0x18(%rsp),%rax
+  75f6fc:	mov    %rax,0x208(%rsp)
+  75f704:	movaps 0x30(%rsp),%xmm0
+  75f709:	movups %xmm0,0x210(%rsp)
+  75f711:	mov    %dil,0xe0(%rsp)
+  75f719:	mov    %dil,0x1c0(%rsp)
+  75f721:	mov    %r8,0x80(%rsp)
+  75f729:	mov    %r8,0x1c8(%rsp)
+  75f731:	lea    0x118(%rsp),%rdi
+  75f739:	lea    0x1c0(%rsp),%rsi
+  75f741:	mov    0xa0(%rsp),%rdx
+  75f749:	mov    %r14d,%ecx
+  75f74c:	mov    %ebp,%r8d
+  75f74f:	call   7625f0 <gpui_gpu::renderer::validate_draw>
+  75f754:	mov    0x118(%rsp),%eax
+  75f75b:	mov    0x11c(%rsp),%rcx
+  75f763:	mov    %rcx,0x98(%rsp)
+  75f76b:	cmp    $0xffffffff,%eax
+  75f76e:	jne    76023a <<gpui_gpu::renderer::RendererState>::render+0x16ca>
+  75f774:	cmpb   $0x2,0xe0(%rsp)
+  75f77c:	sete   0x2f(%rsp)
+  75f781:	cmpq   $0x0,0x80(%rsp)
+  75f78a:	setne  0x2e(%rsp)
+  75f78f:	mov    0x8(%rsp),%rax
+  75f794:	mov    0x10(%rax),%ecx
+  75f797:	mov    $0x80000000,%eax
+  75f79c:	or     %eax,%ecx
+  75f79e:	mov    %ecx,0x338(%rsp)
+  75f7a5:	movss  0x1c4(%rsp),%xmm0
+  75f7ae:	movaps %xmm0,0x370(%rsp)
+  75f7b6:	movups 0x220(%rsp),%xmm0
+  75f7be:	movaps %xmm0,0x490(%rsp)
+  75f7c6:	movsd  0x228(%rsp),%xmm0
+  75f7cf:	movsd  %xmm0,0x3e0(%rsp)
+  75f7d8:	movsd  0x230(%rsp),%xmm0
+  75f7e1:	movaps %xmm0,0x480(%rsp)
+  75f7e9:	movups 0x238(%rsp),%xmm0
+  75f7f1:	movaps %xmm0,0x4a0(%rsp)
+  75f7f9:	mov    0x258(%rsp),%eax
+  75f800:	mov    %eax,0x80(%rsp)
+  75f807:	mov    0x25c(%rsp),%eax
+  75f80e:	mov    %eax,0x60(%rsp)
+  75f812:	movsd  0x260(%rsp),%xmm0
+  75f81b:	movaps %xmm0,0xd0(%rsp)
+  75f823:	cmpb   $0x0,0xf8(%rsp)
+  75f82b:	je     75f863 <<gpui_gpu::renderer::RendererState>::render+0xcf3>
+  75f82d:	lea    0x118(%rsp),%rdi
+  75f835:	lea    0x1c0(%rsp),%rsi
+  75f83d:	mov    0x358(%rsp),%rdx
+  75f845:	call   *0x5d46bd(%rip)        # d33f08 <_DYNAMIC+0xe98>
+  75f84b:	cmpl   $0x1,0x118(%rsp)
+  75f853:	je     7611aa <<gpui_gpu::renderer::RendererState>::render+0x263a>
+  75f859:	movups 0x11c(%rsp),%xmm0
+  75f861:	jmp    75f86b <<gpui_gpu::renderer::RendererState>::render+0xcfb>
+  75f863:	movups 0x1f8(%rsp),%xmm0
+  75f86b:	movaps %xmm0,0x2b0(%rsp)
+  75f873:	cmpb   $0x3,0xe0(%rsp)
+  75f87b:	jne    75f91b <<gpui_gpu::renderer::RendererState>::render+0xdab>
+  75f881:	xorps  %xmm0,%xmm0
+  75f884:	movaps 0x370(%rsp),%xmm1
+  75f88c:	ucomiss %xmm0,%xmm1
+  75f88f:	jne    75f897 <<gpui_gpu::renderer::RendererState>::render+0xd27>
+  75f891:	jnp    75f91b <<gpui_gpu::renderer::RendererState>::render+0xdab>
+  75f897:	movaps 0x2b0(%rsp),%xmm4
+  75f89f:	movaps %xmm4,%xmm0
+  75f8a2:	unpckhpd %xmm4,%xmm0
+  75f8a6:	movss  -0x6f6c7e(%rip),%xmm3        # 68c30 <anon.dbed2c0193d8c5e63bacb48ebfab8608.310.llvm.1695364603321093560+0x10>
+  75f8ae:	mulss  %xmm3,%xmm0
+  75f8b2:	movaps 0x370(%rsp),%xmm5
+  75f8ba:	movaps %xmm5,%xmm1
+  75f8bd:	minss  %xmm0,%xmm1
+  75f8c1:	cmpunordss %xmm0,%xmm0
+  75f8c6:	movaps %xmm0,%xmm2
+  75f8c9:	andnps %xmm1,%xmm2
+  75f8cc:	andps  %xmm5,%xmm0
+  75f8cf:	orps   %xmm2,%xmm0
+  75f8d2:	movaps %xmm4,%xmm1
+  75f8d5:	shufps $0xff,%xmm4,%xmm1
+  75f8d9:	mulss  %xmm3,%xmm1
+  75f8dd:	movaps %xmm1,%xmm2
+  75f8e0:	cmpunordss %xmm1,%xmm2
+  75f8e5:	movaps %xmm2,%xmm3
+  75f8e8:	andps  %xmm0,%xmm3
+  75f8eb:	minss  %xmm1,%xmm0
+  75f8ef:	andnps %xmm0,%xmm2
+  75f8f2:	orps   %xmm3,%xmm2
+  75f8f5:	movd   %xmm2,%eax
+  75f8f9:	mov    %eax,0x80(%rsp)
+  75f900:	and    $0xff800000,%eax
+  75f905:	mov    $0x7f000000,%ecx
+  75f90a:	sub    %eax,%ecx
+  75f90c:	mov    %ecx,0x60(%rsp)
+  75f910:	xorps  %xmm0,%xmm0
+  75f913:	movaps %xmm0,0xd0(%rsp)
+  75f91b:	mov    0x10(%rsp),%rax
+  75f920:	mov    %rax,0x118(%rsp)
+  75f928:	mov    0x20(%rsp),%rax
+  75f92d:	mov    %rax,0x120(%rsp)
+  75f935:	mov    0x90(%rsp),%rax
+  75f93d:	mov    %rax,0x128(%rsp)
+  75f945:	mov    0x18(%rsp),%rax
+  75f94a:	mov    %rax,0x130(%rsp)
+  75f952:	movaps 0x30(%rsp),%xmm0
+  75f957:	movups %xmm0,0x138(%rsp)
+  75f95f:	mov    0x3a0(%rsp),%rax
+  75f967:	lea    0x119(%rsp),%rcx
+  75f96f:	mov    %rax,0x4f(%rcx)
+  75f973:	movaps 0x380(%rsp),%xmm0
+  75f97b:	movaps 0x390(%rsp),%xmm1
+  75f983:	movups %xmm1,0x3f(%rcx)
+  75f987:	movups %xmm0,0x2f(%rcx)
+  75f98b:	movaps 0x340(%rsp),%xmm0
+  75f993:	lea    0x160(%rsp),%rax
+  75f99b:	movups %xmm0,0x10(%rax)
+  75f99f:	lea    0x118(%rsp),%rdi
+  75f9a7:	call   *0x5d4563(%rip)        # d33f10 <_DYNAMIC+0xea0>
+  75f9ad:	mov    0x7c(%rsp),%ecx
+  75f9b1:	mov    %ecx,0xe0(%rsp)
+  75f9b8:	test   %eax,%eax
+  75f9ba:	je     75f9f0 <<gpui_gpu::renderer::RendererState>::render+0xe80>
+  75f9bc:	mov    0x40(%rsp),%rdi
+  75f9c1:	mov    %eax,%esi
+  75f9c3:	call   768c40 <gpui_gpu::renderer::slots::color_word>
+  75f9c8:	mov    %eax,0x80(%rsp)
+  75f9cf:	xorps  %xmm0,%xmm0
+  75f9d2:	movaps %xmm0,0xd0(%rsp)
+  75f9da:	movl   $0x0,0x60(%rsp)
+  75f9e2:	mov    0x330(%rsp),%eax
+  75f9e9:	mov    %eax,0xe0(%rsp)
+  75f9f0:	mov    0x98(%rsp),%rax
+  75f9f8:	shr    $0x20,%rax
+  75f9fc:	mov    %rax,0x370(%rsp)
+  75fa04:	mov    0x8(%rsp),%rax
+  75fa09:	mov    (%rax),%rcx
+  75fa0c:	mov    0x10(%rax),%rsi
+  75fa10:	sub    %rsi,%rcx
+  75fa13:	cmp    $0x5,%rcx
+  75fa17:	jbe    75fb87 <<gpui_gpu::renderer::RendererState>::render+0x1017>
+  75fa1d:	movsd  0x3e0(%rsp),%xmm0
+  75fa26:	cvtsd2ss %xmm0,%xmm0
+  75fa2a:	movapd 0x490(%rsp),%xmm1
+  75fa33:	unpcklpd 0x480(%rsp),%xmm1
+  75fa3c:	cvtpd2ps %xmm1,%xmm1
+  75fa40:	mov    0x8(%rsp),%rax
+  75fa45:	mov    0x8(%rax),%rdx
+  75fa49:	shl    $0x4,%rsi
+  75fa4d:	movaps 0x2b0(%rsp),%xmm2
+  75fa55:	movups %xmm2,(%rdx,%rsi,1)
+  75fa59:	movdqa 0x470(%rsp),%xmm2
+  75fa62:	movq   %xmm2,0x10(%rdx,%rsi,1)
+  75fa68:	movss  %xmm0,0x18(%rdx,%rsi,1)
+  75fa6e:	mov    0x98(%rsp),%rcx
+  75fa76:	mov    %ecx,0x1c(%rdx,%rsi,1)
+  75fa7a:	movss  0x334(%rsp),%xmm0
+  75fa83:	movss  %xmm0,0x20(%rdx,%rsi,1)
+  75fa89:	movlpd %xmm1,0x24(%rdx,%rsi,1)
+  75fa8f:	mov    0x370(%rsp),%rdi
+  75fa97:	mov    %edi,0x2c(%rdx,%rsi,1)
+  75fa9b:	movaps 0x4a0(%rsp),%xmm0
+  75faa3:	movups %xmm0,0x30(%rdx,%rsi,1)
+  75faa8:	mov    0x80(%rsp),%edi
+  75faaf:	mov    %edi,0x40(%rdx,%rsi,1)
+  75fab3:	mov    0x60(%rsp),%edi
+  75fab7:	mov    %edi,0x44(%rdx,%rsi,1)
+  75fabb:	movaps 0xd0(%rsp),%xmm0
+  75fac3:	movlps %xmm0,0x48(%rdx,%rsi,1)
+  75fac8:	movq   $0x0,0x50(%rdx,%rsi,1)
+  75fad1:	movl   $0x0,0x58(%rdx,%rsi,1)
+  75fad9:	mov    0xe0(%rsp),%edi
+  75fae0:	mov    %edi,0x5c(%rdx,%rsi,1)
+  75fae4:	addq   $0x6,0x10(%rax)
+  75fae9:	lea    0x118(%rsp),%rdi
+  75faf1:	mov    %rax,%rsi
+  75faf4:	lea    0x1c0(%rsp),%rdx
+  75fafc:	mov    0x338(%rsp),%r8d
+  75fb04:	mov    0xa0(%rsp),%r9
+  75fb0c:	push   0xc0(%rsp)
+  75fb13:	push   %rbp
+  75fb14:	push   %r14
+  75fb16:	push   0x70(%rsp)
+  75fb1a:	call   761280 <<gpui_gpu::renderer::RendererState>::bin_draw>
+  75fb1f:	add    $0x20,%rsp
+  75fb23:	mov    0x118(%rsp),%eax
+  75fb2a:	cmp    $0xffffffff,%eax
+  75fb2d:	jne    75f05f <<gpui_gpu::renderer::RendererState>::render+0x4ef>
+  75fb33:	movzbl 0x2f(%rsp),%ecx
+  75fb38:	and    0x2e(%rsp),%cl
+  75fb3c:	mov    0x50(%rsp),%rax
+  75fb41:	or     %cl,%al
+  75fb43:	mov    %rax,0x50(%rsp)
+  75fb48:	mov    0x120(%rsp),%rax
+  75fb50:	mov    %rax,0xc0(%rsp)
+  75fb58:	incq   0xa0(%rsp)
+  75fb60:	mov    0x180(%rsp),%rcx
+  75fb68:	add    $0xe,%rcx
+  75fb6c:	mov    %rcx,0x180(%rsp)
+  75fb74:	cmp    %rcx,0x100(%rsp)
+  75fb7c:	jne    75f640 <<gpui_gpu::renderer::RendererState>::render+0xad0>
+  75fb82:	jmp    7600af <<gpui_gpu::renderer::RendererState>::render+0x153f>
+  75fb87:	mov    $0x6,%edx
+  75fb8c:	mov    $0x4,%ecx
+  75fb91:	mov    $0x10,%r8d
+  75fb97:	mov    0x8(%rsp),%rdi
+  75fb9c:	call   768620 <<alloc::raw_vec::RawVecInner<_>>::reserve::do_reserve_and_handle::<alloc::alloc::Global>>
+  75fba1:	mov    0x8(%rsp),%rax
+  75fba6:	mov    0x10(%rax),%rsi
+  75fbaa:	jmp    75fa1d <<gpui_gpu::renderer::RendererState>::render+0xead>
+  75fbaf:	xorpd  %xmm0,%xmm0
+  75fbb3:	movapd %xmm0,0x80(%rsp)
+  75fbbc:	mov    0x8(%rsp),%rax
+  75fbc1:	mov    0x10(%rax),%eax
+  75fbc4:	mov    %eax,0x2b0(%rsp)
+  75fbcb:	movsd  0x430(%rsp),%xmm0
+  75fbd4:	movsd  %xmm0,0x180(%rsp)
+  75fbdd:	movsd  0x438(%rsp),%xmm0
+  75fbe6:	movsd  %xmm0,0x98(%rsp)
+  75fbef:	movups 0x440(%rsp),%xmm0
+  75fbf7:	movaps %xmm0,0xd0(%rsp)
+  75fbff:	movups 0x450(%rsp),%xmm0
+  75fc07:	movaps %xmm0,0x60(%rsp)
+  75fc0c:	movaps 0x30(%rsp),%xmm0
+  75fc11:	movaps %xmm0,%xmm1
+  75fc14:	movhps 0x428(%rsp),%xmm1
+  75fc1c:	movaps %xmm1,0xe0(%rsp)
+  75fc24:	mov    0x10(%rsp),%rax
+  75fc29:	mov    %rax,0x1c0(%rsp)
+  75fc31:	mov    0x20(%rsp),%rax
+  75fc36:	mov    %rax,0x1c8(%rsp)
+  75fc3e:	mov    0x90(%rsp),%rax
+  75fc46:	mov    %rax,0x1d0(%rsp)
+  75fc4e:	mov    0x18(%rsp),%rax
+  75fc53:	mov    %rax,0x1d8(%rsp)
+  75fc5b:	movups %xmm0,0x1e0(%rsp)
+  75fc63:	lea    0x428(%rsp),%rcx
+  75fc6b:	mov    0x20(%rcx),%rax
+  75fc6f:	lea    0x1f0(%rsp),%rdx
+  75fc77:	mov    %rax,0x20(%rdx)
+  75fc7b:	movups (%rcx),%xmm0
+  75fc7e:	movups 0x10(%rcx),%xmm1
+  75fc82:	movups %xmm1,0x10(%rdx)
+  75fc86:	movups %xmm0,(%rdx)
+  75fc89:	movdqu 0x28(%rcx),%xmm0
+  75fc8e:	lea    0x218(%rsp),%rax
+  75fc96:	movdqu %xmm0,(%rax)
+  75fc9a:	lea    0x1c0(%rsp),%rdi
+  75fca2:	call   *0x5d4268(%rip)        # d33f10 <_DYNAMIC+0xea0>
+  75fca8:	test   %eax,%eax
+  75fcaa:	je     75fcca <<gpui_gpu::renderer::RendererState>::render+0x115a>
+  75fcac:	mov    0x40(%rsp),%rdi
+  75fcb1:	mov    %eax,%esi
+  75fcb3:	call   768c40 <gpui_gpu::renderer::slots::color_word>
+  75fcb8:	orl    $0x80000000,0x7c(%rsp)
+  75fcc0:	movd   %eax,%xmm0
+  75fcc4:	movdqa %xmm0,0x60(%rsp)
+  75fcca:	mov    0x8(%rsp),%rax
+  75fccf:	mov    (%rax),%rcx
+  75fcd2:	mov    0x10(%rax),%rsi
+  75fcd6:	sub    %rsi,%rcx
+  75fcd9:	cmp    $0x4,%rcx
+  75fcdd:	jbe    7600dd <<gpui_gpu::renderer::RendererState>::render+0x156d>
+  75fce3:	movaps 0x80(%rsp),%xmm5
+  75fceb:	movaps %xmm5,%xmm0
+  75fcee:	shufps $0x55,%xmm5,%xmm0
+  75fcf2:	movsd  0x18(%rsp),%xmm1
+  75fcf8:	shufpd $0x2,0x30(%rsp),%xmm1
+  75fcff:	cvtpd2ps %xmm1,%xmm1
+  75fd03:	cvtpd2ps 0xe0(%rsp),%xmm2
+  75fd0c:	movsd  0x180(%rsp),%xmm3
+  75fd15:	cvtsd2ss %xmm3,%xmm3
+  75fd19:	movsd  0x98(%rsp),%xmm4
+  75fd22:	cvtsd2ss %xmm4,%xmm4
+  75fd26:	mov    0x8(%rsp),%rax
+  75fd2b:	mov    0x8(%rax),%rcx
+  75fd2f:	shl    $0x4,%rsi
+  75fd33:	movlpd %xmm1,(%rcx,%rsi,1)
+  75fd38:	movss  %xmm3,0x8(%rcx,%rsi,1)
+  75fd3e:	movss  %xmm0,0xc(%rcx,%rsi,1)
+  75fd44:	movlpd %xmm2,0x10(%rcx,%rsi,1)
+  75fd4a:	movss  %xmm4,0x18(%rcx,%rsi,1)
+  75fd50:	movss  %xmm5,0x1c(%rcx,%rsi,1)
+  75fd56:	movaps 0xd0(%rsp),%xmm1
+  75fd5e:	movups %xmm1,0x20(%rcx,%rsi,1)
+  75fd63:	movapd 0x60(%rsp),%xmm1
+  75fd69:	movupd %xmm1,0x30(%rcx,%rsi,1)
+  75fd6f:	mov    0x7c(%rsp),%edx
+  75fd73:	mov    %edx,0x40(%rcx,%rsi,1)
+  75fd77:	movq   $0x0,0x44(%rcx,%rsi,1)
+  75fd80:	movl   $0x0,0x4c(%rcx,%rsi,1)
+  75fd88:	addq   $0x5,0x10(%rax)
+  75fd8d:	incq   0x320(%rsp)
+  75fd95:	mov    0x90(%rsp),%rax
+  75fd9d:	add    %rax,0x328(%rsp)
+  75fda5:	test   %rax,%rax
+  75fda8:	je     7600af <<gpui_gpu::renderer::RendererState>::render+0x153f>
+  75fdae:	movd   %xmm0,%ecx
+  75fdb2:	movdqa 0x80(%rsp),%xmm0
+  75fdbb:	movd   %xmm0,%eax
+  75fdbf:	shl    $0x20,%rax
+  75fdc3:	or     %rax,%rcx
+  75fdc6:	mov    %rcx,0x90(%rsp)
+  75fdce:	lea    0x118(%rsp),%rdi
+  75fdd6:	mov    0x10(%rsp),%rsi
+  75fddb:	mov    0x20(%rsp),%rdx
+  75fde0:	call   75ce30 <<gpui_canvas::canvas::PreparedGroup>::placements::{closure#0}>
+  75fde5:	movzbl 0x118(%rsp),%eax
+  75fded:	lea    0x119(%rsp),%r8
+  75fdf5:	mov    (%r8),%ecx
+  75fdf8:	mov    0x3(%r8),%edx
+  75fdfc:	lea    0x1f0(%rsp),%rdi
+  75fe04:	mov    %edx,-0x2c(%rdi)
+  75fe07:	mov    %ecx,-0x2f(%rdi)
+  75fe0a:	mov    0x120(%rsp),%rcx
+  75fe12:	movups 0xf(%r8),%xmm0
+  75fe17:	movups 0x1f(%r8),%xmm1
+  75fe1c:	movups %xmm1,-0x10(%rdi)
+  75fe20:	mov    0x2f(%r8),%rdx
+  75fe24:	mov    %rdx,(%rdi)
+  75fe27:	movups %xmm0,-0x20(%rdi)
+  75fe2b:	movss  0x150(%rsp),%xmm3
+  75fe34:	movq   0x154(%rsp),%xmm2
+  75fe3d:	movss  0x15c(%rsp),%xmm1
+  75fe46:	lea    0x160(%rsp),%rdx
+  75fe4e:	movups (%rdx),%xmm0
+  75fe51:	lea    0x218(%rsp),%rsi
+  75fe59:	movups %xmm0,0x30(%rsi)
+  75fe5d:	mov    0x390(%rsp),%rdx
+  75fe65:	mov    %rdx,0x40(%rdi)
+  75fe69:	movaps 0x380(%rsp),%xmm0
+  75fe71:	movups %xmm0,0x30(%rdi)
+  75fe75:	lea    0x398(%rsp),%rdx
+  75fe7d:	movups (%rdx),%xmm0
+  75fe80:	movups %xmm0,0x20(%rsi)
+  75fe84:	movaps 0x340(%rsp),%xmm0
+  75fe8c:	movups %xmm0,0x40(%rsi)
+  75fe90:	movss  %xmm3,0xd0(%rsp)
+  75fe99:	movss  %xmm3,0x1f8(%rsp)
+  75fea2:	movdqa %xmm2,0x60(%rsp)
+  75fea8:	movq   %xmm2,0x1fc(%rsp)
+  75feb1:	movss  %xmm1,0x80(%rsp)
+  75feba:	movss  %xmm1,0x204(%rsp)
+  75fec3:	mov    0x18(%rsp),%rdx
+  75fec8:	mov    %rdx,0x208(%rsp)
+  75fed0:	movaps 0x30(%rsp),%xmm0
+  75fed5:	movups %xmm0,0x210(%rsp)
+  75fedd:	mov    %al,0x1c0(%rsp)
+  75fee4:	mov    %rcx,0x1c8(%rsp)
+  75feec:	cmp    $0x2,%al
+  75feee:	sete   0x98(%rsp)
+  75fef6:	test   %rcx,%rcx
+  75fef9:	setne  0xe0(%rsp)
+  75ff01:	cmpb   $0x0,0xf8(%rsp)
+  75ff09:	je     75ff70 <<gpui_gpu::renderer::RendererState>::render+0x1400>
+  75ff0b:	lea    0x118(%rsp),%rdi
+  75ff13:	lea    0x1c0(%rsp),%rsi
+  75ff1b:	mov    0x358(%rsp),%rdx
+  75ff23:	call   *0x5d3fdf(%rip)        # d33f08 <_DYNAMIC+0xe98>
+  75ff29:	cmpb   $0x0,0x118(%rsp)
+  75ff31:	jne    760739 <<gpui_gpu::renderer::RendererState>::render+0x1bc9>
+  75ff37:	movss  0x128(%rsp),%xmm0
+  75ff40:	movss  %xmm0,0x80(%rsp)
+  75ff49:	movups 0x11c(%rsp),%xmm0
+  75ff51:	movsd  0x120(%rsp),%xmm1
+  75ff5a:	movaps %xmm1,0x60(%rsp)
+  75ff5f:	movaps %xmm0,0x460(%rsp)
+  75ff67:	movss  %xmm0,0xd0(%rsp)
+  75ff70:	mov    0x8(%rsp),%rax
+  75ff75:	mov    (%rax),%rcx
+  75ff78:	mov    0x10(%rax),%rax
+  75ff7c:	sub    %rax,%rcx
+  75ff7f:	mov    %rax,0x180(%rsp)
+  75ff87:	cmp    $0x1,%rcx
+  75ff8b:	jbe    76007f <<gpui_gpu::renderer::RendererState>::render+0x150f>
+  75ff91:	mov    0x8(%rsp),%rsi
+  75ff96:	mov    0x8(%rsi),%rcx
+  75ff9a:	shl    $0x4,%rax
+  75ff9e:	movss  0xd0(%rsp),%xmm0
+  75ffa7:	movss  %xmm0,(%rcx,%rax,1)
+  75ffac:	movaps 0x60(%rsp),%xmm0
+  75ffb1:	movlps %xmm0,0x4(%rcx,%rax,1)
+  75ffb6:	movss  0x80(%rsp),%xmm0
+  75ffbf:	movss  %xmm0,0xc(%rcx,%rax,1)
+  75ffc5:	movq   $0x0,0x10(%rcx,%rax,1)
+  75ffce:	movl   $0x0,0x18(%rcx,%rax,1)
+  75ffd6:	mov    0x2b0(%rsp),%edx
+  75ffdd:	mov    %edx,0x1c(%rcx,%rax,1)
+  75ffe1:	addq   $0x2,0x10(%rsi)
+  75ffe6:	lea    0x118(%rsp),%rdi
+  75ffee:	lea    0x1c0(%rsp),%rdx
+  75fff6:	mov    0x90(%rsp),%rcx
+  75fffe:	mov    0x180(%rsp),%r8
+  760006:	mov    0xa0(%rsp),%r9
+  76000e:	push   0xc0(%rsp)
+  760015:	push   %rbp
+  760016:	push   %r14
+  760018:	push   0x70(%rsp)
+  76001c:	call   761280 <<gpui_gpu::renderer::RendererState>::bin_draw>
+  760021:	add    $0x20,%rsp
+  760025:	mov    0x118(%rsp),%eax
+  76002c:	cmp    $0xffffffff,%eax
+  76002f:	jne    75f05f <<gpui_gpu::renderer::RendererState>::render+0x4ef>
+  760035:	addq   $0xe,0x20(%rsp)
+  76003b:	movzbl 0x98(%rsp),%ecx
+  760043:	and    0xe0(%rsp),%cl
+  76004a:	mov    0x50(%rsp),%rax
+  76004f:	or     %cl,%al
+  760051:	mov    %rax,0x50(%rsp)
+  760056:	mov    0x120(%rsp),%rax
+  76005e:	mov    %rax,0xc0(%rsp)
+  760066:	incq   0xa0(%rsp)
+  76006e:	addq   $0xfffffffffffffff2,0x100(%rsp)
+  760077:	jne    75fdce <<gpui_gpu::renderer::RendererState>::render+0x125e>
+  76007d:	jmp    7600af <<gpui_gpu::renderer::RendererState>::render+0x153f>
+  76007f:	mov    $0x2,%edx
+  760084:	mov    $0x4,%ecx
+  760089:	mov    $0x10,%r8d
+  76008f:	mov    0x8(%rsp),%rdi
+  760094:	mov    0x180(%rsp),%rsi
+  76009c:	call   768620 <<alloc::raw_vec::RawVecInner<_>>::reserve::do_reserve_and_handle::<alloc::alloc::Global>>
+  7600a1:	mov    0x8(%rsp),%rax
+  7600a6:	mov    0x10(%rax),%rax
+  7600aa:	jmp    75ff91 <<gpui_gpu::renderer::RendererState>::render+0x1421>
+  7600af:	lea    0x3f8(%rsp),%rdi
+  7600b7:	lea    0x2c0(%rsp),%rsi
+  7600bf:	call   *0x5d3e3b(%rip)        # d33f00 <_DYNAMIC+0xe90>
+  7600c5:	mov    0x3f8(%rsp),%rax
+  7600cd:	mov    %rax,0x10(%rsp)
+  7600d2:	test   %rax,%rax
+  7600d5:	jne    75f213 <<gpui_gpu::renderer::RendererState>::render+0x6a3>
+  7600db:	jmp    76013e <<gpui_gpu::renderer::RendererState>::render+0x15ce>
+  7600dd:	mov    $0x5,%edx
+  7600e2:	mov    $0x4,%ecx
+  7600e7:	mov    $0x10,%r8d
+  7600ed:	mov    0x8(%rsp),%rdi
+  7600f2:	call   768620 <<alloc::raw_vec::RawVecInner<_>>::reserve::do_reserve_and_handle::<alloc::alloc::Global>>
+  7600f7:	mov    0x8(%rsp),%rax
+  7600fc:	mov    0x10(%rax),%rsi
+  760100:	jmp    75fce3 <<gpui_gpu::renderer::RendererState>::render+0x1173>
+  760105:	movq   $0x0,0xc0(%rsp)
+  760111:	movq   $0x0,0x328(%rsp)
+  76011d:	movq   $0x0,0x320(%rsp)
+  760129:	movq   $0x0,0xa0(%rsp)
+  760135:	movq   $0x0,0x50(%rsp)
+  76013e:	mov    0x198(%rsp),%rsi
+  760146:	lea    0x8(%rsi),%rdx
+  76014a:	mov    0x8(%rsp),%rax
+  76014f:	lea    0x258(%rax),%rcx
+  760156:	lea    0x328(%rax),%r8
+  76015d:	mov    0x10(%rax),%r9
+  760161:	sub    $0x8,%rsp
+  760165:	lea    0x1c8(%rsp),%rdi
+  76016d:	mov    %rdx,0x108(%rsp)
+  760175:	mov    %rcx,0x2b8(%rsp)
+  76017d:	mov    %r8,0xa0(%rsp)
+  760185:	push   0xb8(%rsp)
+  76018c:	call   7659d0 <gpui_gpu::renderer::images::prepare>
+  760191:	add    $0x10,%rsp
+  760195:	cmpl   $0xffffffff,0x1c0(%rsp)
+  76019d:	je     7601e6 <<gpui_gpu::renderer::RendererState>::render+0x1676>
+  76019f:	movups 0x1c0(%rsp),%xmm0
+  7601a7:	movups 0x1d0(%rsp),%xmm1
+  7601af:	mov    0x48(%rsp),%rdi
+  7601b4:	movups %xmm1,0x10(%rdi)
+  7601b8:	movups %xmm0,(%rdi)
+  7601bb:	jmp    75ec81 <<gpui_gpu::renderer::RendererState>::render+0x111>
+  7601c0:	mov    0x314(%rsp),%edx
+  7601c7:	mov    0x48(%rsp),%rdi
+  7601cc:	mov    %edx,0x1c(%rdi)
+  7601cf:	movups 0x304(%rsp),%xmm0
+  7601d7:	movups %xmm0,0xc(%rdi)
+  7601db:	mov    %ecx,(%rdi)
+  7601dd:	mov    %rax,0x4(%rdi)
+  7601e1:	jmp    75ec81 <<gpui_gpu::renderer::RendererState>::render+0x111>
+  7601e6:	movzbl 0x50(%rsp),%r8d
+  7601ec:	and    $0x1,%r8d
+  7601f0:	lea    0x1c0(%rsp),%rdi
+  7601f8:	mov    0x8(%rsp),%rsi
+  7601fd:	mov    0x198(%rsp),%rdx
+  760205:	mov    0xa8(%rsp),%rcx
+  76020d:	call   75e140 <<gpui_gpu::renderer::RendererState>::prepare_atlas>
+  760212:	mov    0x1c0(%rsp),%eax
+  760219:	cmp    $0xffffffff,%eax
+  76021c:	je     760268 <<gpui_gpu::renderer::RendererState>::render+0x16f8>
+  76021e:	mov    0x1c4(%rsp),%ecx
+  760225:	mov    0x1c8(%rsp),%rdx
+  76022d:	movups 0x1d0(%rsp),%xmm0
+  760235:	jmp    75f076 <<gpui_gpu::renderer::RendererState>::render+0x506>
+  76023a:	mov    0x134(%rsp),%ecx
+  760241:	mov    0x48(%rsp),%rdi
+  760246:	mov    %ecx,0x1c(%rdi)
+  760249:	movups 0x124(%rsp),%xmm0
+  760251:	movups %xmm0,0xc(%rdi)
+  760255:	mov    %eax,(%rdi)
+  760257:	mov    0x98(%rsp),%rax
+  76025f:	mov    %rax,0x4(%rdi)
+  760263:	jmp    75ec81 <<gpui_gpu::renderer::RendererState>::render+0x111>
+  760268:	mov    0x1c8(%rsp),%rax
+  760270:	mov    %rax,0xf8(%rsp)
+  760278:	mov    0xa8(%rsp),%rdx
+  760280:	mov    0x80(%rdx),%rax
+  760287:	mov    0x98(%rdx),%rcx
+  76028e:	add    0xb0(%rdx),%rcx
+  760295:	mov    %rdx,0x380(%rsp)
+  76029d:	movq   $0x0,0x388(%rsp)
+  7602a9:	mov    %rax,0x390(%rsp)
+  7602b1:	mov    %rcx,0x398(%rsp)
+  7602b9:	mov    0x28(%rsp),%eax
+  7602bd:	mov    %eax,0x3a0(%rsp)
+  7602c4:	lea    0x118(%rsp),%rdi
+  7602cc:	lea    0x380(%rsp),%rsi
+  7602d4:	call   *0x5d3c26(%rip)        # d33f00 <_DYNAMIC+0xe90>
+  7602da:	mov    0x118(%rsp),%rax
+  7602e2:	mov    %rax,0x80(%rsp)
+  7602ea:	test   %rax,%rax
+  7602ed:	je     7606bf <<gpui_gpu::renderer::RendererState>::render+0x1b4f>
+  7602f3:	mov    0x8(%rsp),%rax
+  7602f8:	add    $0x120,%rax
+  7602fe:	mov    %rax,0xe0(%rsp)
+  760306:	jmp    760344 <<gpui_gpu::renderer::RendererState>::render+0x17d4>
+  760308:	lea    0x118(%rsp),%rdi
+  760310:	lea    0x380(%rsp),%rsi
+  760318:	call   *0x5d3be2(%rip)        # d33f00 <_DYNAMIC+0xe90>
+  76031e:	mov    0x118(%rsp),%rax
+  760326:	mov    0x30(%rsp),%rcx
+  76032b:	mov    %rcx,0xc8(%rsp)
+  760333:	mov    %rax,0x80(%rsp)
+  76033b:	test   %rax,%rax
+  76033e:	je     7606bf <<gpui_gpu::renderer::RendererState>::render+0x1b4f>
+  760344:	mov    0x120(%rsp),%rdx
+  76034c:	mov    0x128(%rsp),%rdi
+  760354:	mov    %rdi,0x50(%rsp)
+  760359:	lea    0x130(%rsp),%rcx
+  760361:	movups 0x40(%rcx),%xmm0
+  760365:	lea    0x218(%rsp),%rax
+  76036d:	movups %xmm0,(%rax)
+  760370:	movups (%rcx),%xmm0
+  760373:	movups 0x10(%rcx),%xmm1
+  760377:	movups 0x20(%rcx),%xmm2
+  76037b:	movups 0x30(%rcx),%xmm3
+  76037f:	movups %xmm3,-0x10(%rax)
+  760383:	movups %xmm2,-0x20(%rax)
+  760387:	movups %xmm1,-0x30(%rax)
+  76038b:	movups %xmm0,-0x40(%rax)
+  76038f:	mov    0x8(%rsp),%rax
+  760394:	movzbl 0x341(%rax),%esi
+  76039b:	mov    0x80(%rsp),%rax
+  7603a3:	mov    %rax,0x1c0(%rsp)
+  7603ab:	mov    %rdx,0x10(%rsp)
+  7603b0:	mov    %rdx,0x1c8(%rsp)
+  7603b8:	mov    %rdi,0x1d0(%rsp)
+  7603c0:	lea    0x1c0(%rsp),%rdi
+  7603c8:	call   7625a0 <gpui_gpu::renderer::compact_group>
+  7603cd:	mov    0xc8(%rsp),%rcx
+  7603d5:	lea    0x5(%rcx),%rdx
+  7603d9:	test   %al,%al
+  7603db:	cmove  %rcx,%rdx
+  7603df:	mov    %rdx,0x30(%rsp)
+  7603e4:	mov    0x50(%rsp),%rdx
+  7603e9:	test   %rdx,%rdx
+  7603ec:	je     760308 <<gpui_gpu::renderer::RendererState>::render+0x1798>
+  7603f2:	mov    %rdx,%rcx
+  7603f5:	add    %rcx,%rcx
+  7603f8:	shl    $0x4,%rdx
+  7603fc:	sub    %rcx,%rdx
+  7603ff:	mov    %rdx,0x50(%rsp)
+  760404:	xor    $0x1,%al
+  760406:	movzbl %al,%ecx
+  760409:	shl    $0x2,%ecx
+  76040c:	lea    0x1(%rcx),%rax
+  760410:	mov    %rax,0x60(%rsp)
+  760415:	mov    0x30(%rsp),%rax
+  76041a:	lea    (%rax,%rcx,1),%r9
+  76041e:	inc    %r9
+  760421:	or     $0x2,%rcx
+  760425:	shl    $0x4,%r9
+  760429:	mov    %rcx,0xc8(%rsp)
+  760431:	shl    $0x4,%ecx
+  760434:	mov    %rcx,0xd0(%rsp)
+  76043c:	mov    0x10(%rsp),%rdx
+  760441:	mov    %r9,0x18(%rsp)
+  760446:	lea    0x1c0(%rsp),%rdi
+  76044e:	mov    0x80(%rsp),%rsi
+  760456:	mov    %rdx,0x10(%rsp)
+  76045b:	call   75ce30 <<gpui_canvas::canvas::PreparedGroup>::placements::{closure#0}>
+  760460:	movzbl 0x1c0(%rsp),%ecx
+  760468:	movzbl 0x1c1(%rsp),%eax
+  760470:	movss  0x1c4(%rsp),%xmm4
+  760479:	lea    0x1c8(%rsp),%rsi
+  760481:	mov    0x10(%rsi),%rdx
+  760485:	mov    %rdx,0x2d0(%rsp)
+  76048d:	movups (%rsi),%xmm0
+  760490:	movaps %xmm0,0x2c0(%rsp)
+  760498:	cmp    $0x1,%ecx
+  76049b:	je     760530 <<gpui_gpu::renderer::RendererState>::render+0x19c0>
+  7604a1:	movaps %xmm4,0x180(%rsp)
+  7604a9:	mov    0x1e0(%rsp),%rsi
+  7604b1:	mov    0x1e8(%rsp),%edx
+  7604b8:	mov    %edx,0x40(%rsp)
+  7604bc:	mov    0x1ec(%rsp),%edx
+  7604c3:	mov    %edx,0x20(%rsp)
+  7604c7:	cmp    $0x3,%ecx
+  7604ca:	jne    7605b2 <<gpui_gpu::renderer::RendererState>::render+0x1a42>
+  7604d0:	mov    0x98(%rsp),%rcx
+  7604d8:	mov    (%rcx),%rdi
+  7604db:	test   %rdi,%rdi
+  7604de:	je     7611fa <<gpui_gpu::renderer::RendererState>::render+0x268a>
+  7604e4:	movzbl %al,%edx
+  7604e7:	call   765660 <<gpui_gpu::renderer::images::Images>::metadata>
+  7604ec:	mov    %eax,%ecx
+  7604ee:	shr    $0x20,%rax
+  7604f2:	mov    %eax,%edx
+  7604f4:	or     $0x10,%edx
+  7604f7:	xorps  %xmm0,%xmm0
+  7604fa:	movaps 0x180(%rsp),%xmm1
+  760502:	ucomiss %xmm0,%xmm1
+  760505:	cmovne %edx,%eax
+  760508:	cmovp  %edx,%eax
+  76050b:	mov    0x20(%rsp),%edx
+  76050f:	shl    $0x10,%edx
+  760512:	or     0x40(%rsp),%edx
+  760516:	mov    %ecx,0x1a0(%rsp)
+  76051d:	mov    %eax,0x1a4(%rsp)
+  760524:	mov    %edx,0x1a8(%rsp)
+  76052b:	jmp    76064f <<gpui_gpu::renderer::RendererState>::render+0x1adf>
+  760530:	movss  0x200(%rsp),%xmm0
+  760539:	movss  -0x6f7911(%rip),%xmm3        # 68c30 <anon.dbed2c0193d8c5e63bacb48ebfab8608.310.llvm.1695364603321093560+0x10>
+  760541:	mulss  %xmm3,%xmm0
+  760545:	movaps %xmm4,%xmm1
+  760548:	minss  %xmm0,%xmm1
+  76054c:	cmpunordss %xmm0,%xmm0
+  760551:	movaps %xmm0,%xmm2
+  760554:	andnps %xmm1,%xmm2
+  760557:	andps  %xmm4,%xmm0
+  76055a:	orps   %xmm2,%xmm0
+  76055d:	movss  0x204(%rsp),%xmm1
+  760566:	mulss  %xmm3,%xmm1
+  76056a:	movaps %xmm1,%xmm2
+  76056d:	cmpunordss %xmm1,%xmm2
+  760572:	movaps %xmm2,%xmm3
+  760575:	andps  %xmm0,%xmm3
+  760578:	minss  %xmm1,%xmm0
+  76057c:	andnps %xmm0,%xmm2
+  76057f:	orps   %xmm3,%xmm2
+  760582:	movd   %xmm2,%eax
+  760586:	and    $0xff800000,%eax
+  76058b:	mov    $0x7f000000,%ecx
+  760590:	sub    %eax,%ecx
+  760592:	movl   $0x40000000,0x1a0(%rsp)
+  76059d:	movss  %xmm2,0x1a4(%rsp)
+  7605a6:	mov    %ecx,0x1a8(%rsp)
+  7605ad:	jmp    76064f <<gpui_gpu::renderer::RendererState>::render+0x1adf>
+  7605b2:	cmp    $0x2,%cl
+  7605b5:	jne    760607 <<gpui_gpu::renderer::RendererState>::render+0x1a97>
+  7605b7:	mov    0x1f0(%rsp),%rax
+  7605bf:	mov    0x2d0(%rsp),%rcx
+  7605c7:	mov    %rcx,0x1d0(%rsp)
+  7605cf:	movaps 0x2c0(%rsp),%xmm0
+  7605d7:	movaps %xmm0,0x1c0(%rsp)
+  7605df:	mov    %rsi,0x1d8(%rsp)
+  7605e7:	mov    0x40(%rsp),%ecx
+  7605eb:	mov    %ecx,0x1e0(%rsp)
+  7605f2:	mov    0x20(%rsp),%ecx
+  7605f6:	mov    %ecx,0x1e4(%rsp)
+  7605fd:	mov    %rax,0x1e8(%rsp)
+  760605:	jmp    760613 <<gpui_gpu::renderer::RendererState>::render+0x1aa3>
+  760607:	movq   $0x0,0x1c0(%rsp)
+  760613:	movl   $0x0,0x300(%rsp)
+  76061e:	movq   $0x0,0x2f8(%rsp)
+  76062a:	lea    0x1a0(%rsp),%rdi
+  760632:	lea    0x1c0(%rsp),%rsi
+  76063a:	lea    0x2f8(%rsp),%rdx
+  760642:	mov    0xe0(%rsp),%rcx
+  76064a:	call   7593a0 <<core::option::Option<gpui_canvas::canvas::GlyphMask>>::map_or::<[u32; 3], <gpui_gpu::renderer::RendererState>::render_observed<<gpui_gpu::renderer::RendererState>::render::{closure#0}>::{closure#5}>>
+  76064f:	mov    0x30(%rsp),%r8
+  760654:	mov    0x60(%rsp),%rax
+  760659:	lea    (%rax,%r8,1),%rdi
+  76065d:	mov    0x8(%rsp),%rax
+  760662:	mov    0x10(%rax),%rsi
+  760666:	cmp    %rsi,%rdi
+  760669:	mov    0x10(%rsp),%rdx
+  76066e:	mov    0x18(%rsp),%r9
+  760673:	jae    761207 <<gpui_gpu::renderer::RendererState>::render+0x2697>
+  760679:	add    $0xe,%rdx
+  76067d:	mov    0x8(%rax),%rax
+  760681:	mov    0x1a8(%rsp),%ecx
+  760688:	mov    %ecx,0x8(%rax,%r9,1)
+  76068d:	mov    0x1a0(%rsp),%rcx
+  760695:	mov    %rcx,(%rax,%r9,1)
+  760699:	add    0xc8(%rsp),%r8
+  7606a1:	mov    %r8,0x30(%rsp)
+  7606a6:	add    0xd0(%rsp),%r9
+  7606ae:	addq   $0xfffffffffffffff2,0x50(%rsp)
+  7606b4:	jne    760441 <<gpui_gpu::renderer::RendererState>::render+0x18d1>
+  7606ba:	jmp    760308 <<gpui_gpu::renderer::RendererState>::render+0x1798>
+  7606bf:	mov    0x8(%rsp),%rax
+  7606c4:	mov    0x28(%rax),%rax
+  7606c8:	movq   $0x0,0x60(%rsp)
+  7606d1:	test   %rax,%rax
+  7606d4:	je     760761 <<gpui_gpu::renderer::RendererState>::render+0x1bf1>
+  7606da:	mov    0x8(%rsp),%rcx
+  7606df:	mov    0x20(%rcx),%rcx
+  7606e3:	shl    $0x3,%rax
+  7606e7:	xor    %edi,%edi
+  7606e9:	jmp    760707 <<gpui_gpu::renderer::RendererState>::render+0x1b97>
+  7606eb:	mov    0x60(%rsp),%rdx
+  7606f0:	add    %esi,%edx
+  7606f2:	mov    %edx,(%rcx,%rdi,8)
+  7606f5:	mov    %rdx,0x60(%rsp)
+  7606fa:	mov    %edx,0x4(%rcx,%rdi,8)
+  7606fe:	inc    %rdi
+  760701:	add    $0xfffffffffffffff8,%rax
+  760705:	je     760755 <<gpui_gpu::renderer::RendererState>::render+0x1be5>
+  760707:	mov    0x8(%rsp),%rdx
+  76070c:	mov    0x58(%rdx),%rsi
+  760710:	cmp    %rsi,%rdi
+  760713:	jae    761214 <<gpui_gpu::renderer::RendererState>::render+0x26a4>
+  760719:	mov    0x4(%rcx,%rdi,8),%esi
+  76071d:	cmp    $0x1,%esi
+  760720:	jne    7606eb <<gpui_gpu::renderer::RendererState>::render+0x1b7b>
+  760722:	mov    0x8(%rsp),%rdx
+  760727:	mov    0x50(%rdx),%r8
+  76072b:	mov    $0x80000000,%edx
+  760730:	cmpl   $0x0,(%r8,%rdi,4)
+  760735:	jne    7606fa <<gpui_gpu::renderer::RendererState>::render+0x1b8a>
+  760737:	jmp    7606eb <<gpui_gpu::renderer::RendererState>::render+0x1b7b>
+  760739:	mov    0x48(%rsp),%rdi
+  76073e:	movl   $0x3,(%rdi)
+  760744:	movaps 0x460(%rsp),%xmm0
+  76074c:	movups %xmm0,0x4(%rdi)
+  760750:	jmp    75ec81 <<gpui_gpu::renderer::RendererState>::render+0x111>
+  760755:	mov    0x60(%rsp),%rax
+  76075a:	mov    %eax,%eax
+  76075c:	mov    %rax,0x60(%rsp)
+  760761:	mov    0x8(%rsp),%rax
+  760766:	lea    0x30(%rax),%rdi
+  76076a:	movq   $0x0,0x40(%rax)
+  760772:	mov    %rdi,0x80(%rsp)
+  76077a:	mov    0x60(%rsp),%rsi
+  76077f:	xor    %edx,%edx
+  760781:	call   765880 <<alloc::vec::Vec<u32>>::resize>
+  760786:	mov    0x8(%rsp),%rax
+  76078b:	mov    0x10(%rax),%rax
+  76078f:	mov    %rax,0x20(%rsp)
+  760794:	mov    0xa0(%rsp),%rax
+  76079c:	mov    %rax,0x340(%rsp)
+  7607a4:	mov    0xa8(%rsp),%rdx
+  7607ac:	mov    0x80(%rdx),%rax
+  7607b3:	mov    0x98(%rdx),%rcx
+  7607ba:	add    0xb0(%rdx),%rcx
+  7607c1:	mov    %rdx,0x2f8(%rsp)
+  7607c9:	movq   $0x0,0x300(%rsp)
+  7607d5:	mov    %rax,0x308(%rsp)
+  7607dd:	mov    %rcx,0x310(%rsp)
+  7607e5:	mov    0x28(%rsp),%eax
+  7607e9:	mov    %eax,0x318(%rsp)
+  7607f0:	jmp    760809 <<gpui_gpu::renderer::RendererState>::render+0x1c99>
+  7607f2:	mov    0x20(%rsp),%rcx
+  7607f7:	lea    -0x5(%rcx),%rax
+  7607fb:	cmpb   $0x0,0x28(%rsp)
+  760800:	cmovne %rax,%rcx
+  760804:	mov    %rcx,0x20(%rsp)
+  760809:	lea    0x118(%rsp),%rdi
+  760811:	lea    0x2f8(%rsp),%rsi
+  760819:	call   *0x5d36f9(%rip)        # d33f18 <_DYNAMIC+0xea8>
+  76081f:	mov    0x118(%rsp),%rax
+  760827:	mov    %rax,0x40(%rsp)
+  76082c:	test   %rax,%rax
+  76082f:	je     760a95 <<gpui_gpu::renderer::RendererState>::render+0x1f25>
+  760835:	mov    0x120(%rsp),%rcx
+  76083d:	mov    0x128(%rsp),%rdx
+  760845:	mov    %rdx,0x10(%rsp)
+  76084a:	mov    0x8(%rsp),%rax
+  76084f:	movzbl 0x341(%rax),%esi
+  760856:	mov    0x40(%rsp),%rax
+  76085b:	mov    %rax,0x1c0(%rsp)
+  760863:	mov    %rcx,0xa8(%rsp)
+  76086b:	mov    %rcx,0x1c8(%rsp)
+  760873:	mov    %rdx,0x1d0(%rsp)
+  76087b:	lea    0x130(%rsp),%rax
+  760883:	movups (%rax),%xmm0
+  760886:	movups 0x10(%rax),%xmm1
+  76088a:	movdqu 0x20(%rax),%xmm2
+  76088f:	lea    0x218(%rsp),%rax
+  760897:	movdqu %xmm2,-0x20(%rax)
+  76089c:	movups %xmm1,-0x30(%rax)
+  7608a0:	movups %xmm0,-0x40(%rax)
+  7608a4:	lea    0x160(%rsp),%rcx
+  7608ac:	movups (%rcx),%xmm0
+  7608af:	lea    0x208(%rsp),%rdx
+  7608b7:	movups %xmm0,(%rdx)
+  7608ba:	movupd 0x10(%rcx),%xmm0
+  7608bf:	movupd %xmm0,(%rax)
+  7608c3:	lea    0x1c0(%rsp),%rdi
+  7608cb:	call   7625a0 <gpui_gpu::renderer::compact_group>
+  7608d0:	mov    %al,0x28(%rsp)
+  7608d4:	mov    0x10(%rsp),%rcx
+  7608d9:	test   %rcx,%rcx
+  7608dc:	je     7607f2 <<gpui_gpu::renderer::RendererState>::render+0x1c82>
+  7608e2:	mov    %rcx,%rax
+  7608e5:	add    %rax,%rax
+  7608e8:	shl    $0x4,%rcx
+  7608ec:	sub    %rax,%rcx
+  7608ef:	movzbl 0x28(%rsp),%eax
+  7608f4:	lea    0x0(,%rax,4),%edx
+  7608fb:	or     $0xfffffffffffffffa,%rdx
+  7608ff:	xor    %esi,%esi
+  760901:	test   %al,%al
+  760903:	sete   %sil
+  760907:	shl    $0x1f,%esi
+  76090a:	mov    %esi,0x50(%rsp)
+  76090e:	mov    %rdx,0x18(%rsp)
+  760913:	mov    0x20(%rsp),%rax
+  760918:	add    %edx,%eax
+  76091a:	mov    %eax,0x30(%rsp)
+  76091e:	addq   $0xfffffffffffffff2,0xa8(%rsp)
+  760927:	mov    0xa8(%rsp),%rax
+  76092f:	mov    %rcx,0x10(%rsp)
+  760934:	lea    (%rax,%rcx,1),%rdx
+  760938:	lea    0x380(%rsp),%rdi
+  760940:	mov    0x40(%rsp),%rsi
+  760945:	call   75ce30 <<gpui_canvas::canvas::PreparedGroup>::placements::{closure#0}>
+  76094a:	decq   0x340(%rsp)
+  760952:	mov    0x18(%rsp),%rax
+  760957:	add    %rax,0x20(%rsp)
+  76095c:	mov    0x50(%rsp),%eax
+  760960:	or     0x30(%rsp),%eax
+  760964:	mov    %eax,0x1a0(%rsp)
+  76096b:	lea    0x130(%rsp),%rax
+  760973:	movups (%rax),%xmm0
+  760976:	movups 0x10(%rax),%xmm1
+  76097a:	movups 0x20(%rax),%xmm2
+  76097e:	lea    0x208(%rsp),%rax
+  760986:	movups %xmm2,0x20(%rax)
+  76098a:	movups %xmm1,0x10(%rax)
+  76098e:	movups %xmm0,(%rax)
+  760991:	lea    0x160(%rsp),%rcx
+  760999:	movups (%rcx),%xmm0
+  76099c:	lea    0x218(%rsp),%rax
+  7609a4:	movups %xmm0,0x20(%rax)
+  7609a8:	movups 0x10(%rcx),%xmm0
+  7609ac:	movups %xmm0,0x40(%rax)
+  7609b0:	lea    0x3b8(%rsp),%rcx
+  7609b8:	movups (%rcx),%xmm0
+  7609bb:	movups %xmm0,-0x20(%rax)
+  7609bf:	movups 0x10(%rcx),%xmm0
+  7609c3:	movups %xmm0,0x30(%rax)
+  7609c7:	mov    0x3b0(%rsp),%rax
+  7609cf:	mov    %rax,0x1f0(%rsp)
+  7609d7:	movupd 0x380(%rsp),%xmm0
+  7609e0:	movups 0x390(%rsp),%xmm1
+  7609e8:	movdqu 0x3a0(%rsp),%xmm2
+  7609f1:	movdqa %xmm2,0x1e0(%rsp)
+  7609fa:	movaps %xmm1,0x1d0(%rsp)
+  760a02:	movapd %xmm0,0x1c0(%rsp)
+  760a0b:	mov    0xb8(%rsp),%rax
+  760a13:	mov    %rax,0x2c0(%rsp)
+  760a1b:	mov    0x80(%rsp),%rax
+  760a23:	mov    %rax,0x2c8(%rsp)
+  760a2b:	mov    0x3f0(%rsp),%rax
+  760a33:	mov    %rax,0x2d0(%rsp)
+  760a3b:	lea    0x340(%rsp),%rax
+  760a43:	mov    %rax,0x2d8(%rsp)
+  760a4b:	lea    0x1a0(%rsp),%rax
+  760a53:	mov    %rax,0x2e0(%rsp)
+  760a5b:	lea    0x1c0(%rsp),%rdi
+  760a63:	mov    0x58(%rsp),%rsi
+  760a68:	lea    0x2c0(%rsp),%rdx
+  760a70:	call   75ca10 <gpui_gpu::renderer::visit::<<gpui_gpu::renderer::RendererState>::render_observed<<gpui_gpu::renderer::RendererState>::render::{closure#0}>::{closure#6}>>
+  760a75:	mov    0x30(%rsp),%eax
+  760a79:	add    0x18(%rsp),%eax
+  760a7d:	mov    %eax,0x30(%rsp)
+  760a81:	mov    0x10(%rsp),%rcx
+  760a86:	add    $0xfffffffffffffff2,%rcx
+  760a8a:	jne    760927 <<gpui_gpu::renderer::RendererState>::render+0x1db7>
+  760a90:	jmp    7607f2 <<gpui_gpu::renderer::RendererState>::render+0x1c82>
+  760a95:	mov    0x8(%rsp),%rax
+  760a9a:	mov    0x28(%rax),%rdi
+  760a9e:	movq   $0x0,0xb8(%rsp)
+  760aaa:	test   %rdi,%rdi
+  760aad:	je     760b7b <<gpui_gpu::renderer::RendererState>::render+0x200b>
+  760ab3:	mov    0x8(%rsp),%rax
+  760ab8:	mov    0x20(%rax),%r8
+  760abc:	shl    $0x3,%rdi
+  760ac0:	cmpl   $0x0,0x58(%rsp)
+  760ac5:	je     7611b4 <<gpui_gpu::renderer::RendererState>::render+0x2644>
+  760acb:	movq   $0x0,0x18(%rsp)
+  760ad4:	movq   $0x0,0x10(%rsp)
+  760add:	movq   $0x0,0x30(%rsp)
+  760ae6:	xor    %r9d,%r9d
+  760ae9:	xor    %ecx,%ecx
+  760aeb:	jmp    760b10 <<gpui_gpu::renderer::RendererState>::render+0x1fa0>
+  760aed:	incq   0x30(%rsp)
+  760af2:	inc    %r9
+  760af5:	cmp    0x58(%rsp),%r9
+  760afa:	mov    $0x0,%eax
+  760aff:	cmove  %rax,%r9
+  760b03:	inc    %rcx
+  760b06:	add    $0xfffffffffffffff8,%rdi
+  760b0a:	je     760b96 <<gpui_gpu::renderer::RendererState>::render+0x2026>
+  760b10:	mov    0x4(%r8,%rcx,8),%r10d
+  760b15:	mov    %r10d,%eax
+  760b18:	neg    %eax
+  760b1a:	jo     760aed <<gpui_gpu::renderer::RendererState>::render+0x1f7d>
+  760b1c:	sub    (%r8,%rcx,8),%r10d
+  760b20:	je     760af2 <<gpui_gpu::renderer::RendererState>::render+0x1f82>
+  760b22:	mov    %rcx,%rax
+  760b25:	shr    $0x20,%rax
+  760b29:	je     760b3a <<gpui_gpu::renderer::RendererState>::render+0x1fca>
+  760b2b:	mov    %rcx,%rax
+  760b2e:	xor    %edx,%edx
+  760b30:	divq   0x58(%rsp)
+  760b35:	mov    %r9,%rdx
+  760b38:	jmp    760b42 <<gpui_gpu::renderer::RendererState>::render+0x1fd2>
+  760b3a:	mov    %ecx,%eax
+  760b3c:	xor    %edx,%edx
+  760b3e:	divl   0x58(%rsp)
+  760b42:	shl    $0x4,%edx
+  760b45:	shl    $0x4,%eax
+  760b48:	lea    0x10(%rdx),%r11d
+  760b4c:	cmp    %r14d,%r11d
+  760b4f:	cmovae %r14d,%r11d
+  760b53:	lea    0x10(%rax),%esi
+  760b56:	cmp    %ebp,%esi
+  760b58:	cmovae %ebp,%esi
+  760b5b:	sub    %edx,%r11d
+  760b5e:	sub    %eax,%esi
+  760b60:	imul   %r11d,%esi
+  760b64:	shl    $0x4,%rsi
+  760b68:	add    %rsi,0x10(%rsp)
+  760b6d:	imul   %rsi,%r10
+  760b71:	add    %r10,0x18(%rsp)
+  760b76:	jmp    760af2 <<gpui_gpu::renderer::RendererState>::render+0x1f82>
+  760b7b:	movq   $0x0,0x30(%rsp)
+  760b84:	movq   $0x0,0x10(%rsp)
+  760b8d:	movq   $0x0,0x18(%rsp)
+  760b96:	test   $0x1,%r15b
+  760b9a:	je     760bef <<gpui_gpu::renderer::RendererState>::render+0x207f>
+  760b9c:	movd   0x33c(%rsp),%xmm0
+  760ba5:	movd   %xmm0,%eax
+  760ba9:	test   %eax,%eax
+  760bab:	setns  %cl
+  760bae:	mov    %eax,%edx
+  760bb0:	and    $0x7fffffff,%edx
+  760bb6:	add    $0xff800000,%edx
+  760bbc:	cmp    $0x7f000000,%edx
+  760bc2:	setb   %dl
+  760bc5:	and    %cl,%dl
+  760bc7:	dec    %eax
+  760bc9:	cmp    $0x7fffff,%eax
+  760bce:	setb   %al
+  760bd1:	or     %dl,%al
+  760bd3:	mov    $0x2,%eax
+  760bd8:	mov    %rax,0xb8(%rsp)
+  760be0:	movd   %xmm0,0x114(%rsp)
+  760be9:	je     7611aa <<gpui_gpu::renderer::RendererState>::render+0x263a>
+  760bef:	mov    0x198(%rsp),%r15
+  760bf7:	lea    0x18(%r15),%rax
+  760bfb:	mov    %rax,0x20(%rsp)
+  760c00:	mov    0xb0(%rsp),%rcx
+  760c08:	add    $0x18,%rcx
+  760c0c:	and    $0x1,%r13d
+  760c10:	mov    0xb8(%rsp),%rdx
+  760c18:	lea    (%rdx,%r13,1),%eax
+  760c1c:	cmp    $0x28,%r12d
+  760c20:	lea    0x4(%rdx,%r13,1),%edx
+  760c25:	cmovne %eax,%edx
+  760c28:	lea    0x8(%rdx),%esi
+  760c2b:	mov    0x360(%rsp),%rax
+  760c33:	cmp    0x368(%rsp),%rax
+  760c3b:	cmove  %edx,%esi
+  760c3e:	movups (%rcx),%xmm0
+  760c41:	movups %xmm0,0x2d0(%rsp)
+  760c49:	mov    %r14d,0x2c0(%rsp)
+  760c51:	mov    %ebp,0x2c4(%rsp)
+  760c58:	mov    0x58(%rsp),%rax
+  760c5d:	mov    %eax,0x2c8(%rsp)
+  760c64:	mov    %esi,0x2cc(%rsp)
+  760c6b:	movss  0x114(%rsp),%xmm0
+  760c74:	movss  %xmm0,0x2e0(%rsp)
+  760c7d:	movq   $0x0,0x2e4(%rsp)
+  760c89:	movl   $0x0,0x2ec(%rsp)
+  760c94:	mov    0x8(%rsp),%rbp
+  760c99:	lea    0x230(%rbp),%rsi
+  760ca0:	xor    %r13d,%r13d
+  760ca3:	lea    0x2c0(%rsp),%rcx
+  760cab:	mov    $0x30,%r8d
+  760cb1:	mov    0x100(%rsp),%r12
+  760cb9:	mov    %r12,%rdi
+  760cbc:	mov    %rsi,0x58(%rsp)
+  760cc1:	xor    %edx,%edx
+  760cc3:	call   *0x5d3257(%rip)        # d33f20 <_DYNAMIC+0xeb0>
+  760cc9:	mov    0x8(%rbp),%rcx
+  760ccd:	mov    0x10(%rbp),%r8
+  760cd1:	shl    $0x4,%r8
+  760cd5:	mov    0x2b0(%rsp),%rdi
+  760cdd:	mov    %r15,%rsi
+  760ce0:	mov    %r12,%rdx
+  760ce3:	call   75d220 <<gpui_gpu::renderer::Buffer>::write>
+  760ce8:	lea    0x280(%rbp),%rdi
+  760cef:	mov    0x20(%rbp),%rcx
+  760cf3:	mov    0x28(%rbp),%r8
+  760cf7:	shl    $0x3,%r8
+  760cfb:	mov    %rdi,0xb8(%rsp)
+  760d03:	mov    %r15,%rsi
+  760d06:	mov    %r12,%rdx
+  760d09:	call   75d220 <<gpui_gpu::renderer::Buffer>::write>
+  760d0e:	lea    0x2a8(%rbp),%rdi
+  760d15:	mov    0x38(%rbp),%rcx
+  760d19:	mov    0x40(%rbp),%r8
+  760d1d:	shl    $0x2,%r8
+  760d21:	mov    %rdi,0xb0(%rsp)
+  760d29:	mov    %r15,%rsi
+  760d2c:	mov    %r12,%rdx
+  760d2f:	call   75d220 <<gpui_gpu::renderer::Buffer>::write>
+  760d34:	lea    0x2d0(%rbp),%rdi
+  760d3b:	mov    0x68(%rbp),%rcx
+  760d3f:	mov    0x70(%rbp),%r8
+  760d43:	shl    $0x5,%r8
+  760d47:	mov    %rdi,0x40(%rsp)
+  760d4c:	mov    %r15,%rsi
+  760d4f:	mov    %r12,%rdx
+  760d52:	call   75d220 <<gpui_gpu::renderer::Buffer>::write>
+  760d57:	cmpq   $0x0,0x328(%rbp)
+  760d5f:	jne    760d76 <<gpui_gpu::renderer::RendererState>::render+0x2206>
+  760d61:	mov    0x8(%rsp),%rax
+  760d66:	mov    0x10(%rax),%r13
+  760d6a:	cmp    $0x1,%r13
+  760d6e:	adc    $0x0,%r13
+  760d72:	shl    $0x4,%r13
+  760d76:	mov    0x8(%rsp),%rsi
+  760d7b:	mov    0x28(%rsi),%rcx
+  760d7f:	mov    0x40(%rsi),%rax
+  760d83:	cmp    $0x1,%rcx
+  760d87:	adc    $0x0,%rcx
+  760d8b:	shl    $0x3,%rcx
+  760d8f:	cmp    $0x1,%rax
+  760d93:	adc    $0x0,%rax
+  760d97:	shl    $0x2,%rax
+  760d9b:	mov    0x70(%rsi),%rdx
+  760d9f:	cmp    $0x1,%rdx
+  760da3:	adc    $0x0,%rdx
+  760da7:	add    $0xc8,%rsi
+  760dae:	shl    $0x5,%rdx
+  760db2:	movq   $0x0,0x1c0(%rsp)
+  760dbe:	mov    0x58(%rsp),%rdi
+  760dc3:	mov    %rdi,0x1c8(%rsp)
+  760dcb:	movq   $0x0,0x1e8(%rsp)
+  760dd7:	xorps  %xmm0,%xmm0
+  760dda:	movups %xmm0,0x1d0(%rsp)
+  760de2:	movl   $0x0,0x1e0(%rsp)
+  760ded:	mov    0x2b0(%rsp),%rdi
+  760df5:	mov    %rdi,0x1f0(%rsp)
+  760dfd:	movq   $0x0,0x1f8(%rsp)
+  760e09:	mov    %r13,0x200(%rsp)
+  760e11:	movl   $0x1,0x208(%rsp)
+  760e1c:	movq   $0x0,0x210(%rsp)
+  760e28:	mov    0xb8(%rsp),%rdi
+  760e30:	mov    %rdi,0x218(%rsp)
+  760e38:	movq   $0x0,0x220(%rsp)
+  760e44:	mov    %rcx,0x228(%rsp)
+  760e4c:	movl   $0x2,0x230(%rsp)
+  760e57:	movq   $0x0,0x238(%rsp)
+  760e63:	mov    0xb0(%rsp),%rcx
+  760e6b:	mov    %rcx,0x240(%rsp)
+  760e73:	movq   $0x0,0x248(%rsp)
+  760e7f:	mov    %rax,0x250(%rsp)
+  760e87:	movl   $0x3,0x258(%rsp)
+  760e92:	movq   $0x4,0x260(%rsp)
+  760e9e:	mov    %rsi,0x268(%rsp)
+  760ea6:	movl   $0x4,0x280(%rsp)
+  760eb1:	movq   $0x0,0x288(%rsp)
+  760ebd:	mov    0x40(%rsp),%rax
+  760ec2:	mov    %rax,0x290(%rsp)
+  760eca:	movq   $0x0,0x298(%rsp)
+  760ed6:	mov    %rdx,0x2a0(%rsp)
+  760ede:	movl   $0x5,0x2a8(%rsp)
+  760ee9:	lea    -0x6c03e0(%rip),%rax        # a0b10 <anon.e28c37b6eb72e88f7fbdd526e97e9b1b.0.llvm.1500201584695907981+0x4e80>
+  760ef0:	mov    %rax,0x310(%rsp)
+  760ef8:	movq   $0xa,0x318(%rsp)
+  760f04:	mov    0x20(%rsp),%rax
+  760f09:	mov    %rax,0x2f8(%rsp)
+  760f11:	lea    0x1c0(%rsp),%rax
+  760f19:	mov    %rax,0x300(%rsp)
+  760f21:	movq   $0x6,0x308(%rsp)
+  760f2d:	lea    0x2f8(%rsp),%rsi
+  760f35:	mov    0x198(%rsp),%r15
+  760f3d:	mov    %r15,%rdi
+  760f40:	call   *0x5d2fe2(%rip)        # d33f28 <_DYNAMIC+0xeb8>
+  760f46:	mov    %rax,%r12
+  760f49:	mov    %rax,0x1a0(%rsp)
+  760f51:	lea    0x1a0(%rsp),%rdx
+  760f59:	mov    %r15,%rdi
+  760f5c:	mov    0x3e8(%rsp),%rsi
+  760f64:	call   75dbe0 <<gpui_gpu::renderer::GpuContext>::submit>
+  760f69:	mov    %rax,0x58(%rsp)
+  760f6e:	lea    -0x80000000(%r14),%ecx
+  760f75:	mov    0x360(%rsp),%rax
+  760f7d:	cmp    0x368(%rsp),%rax
+  760f85:	cmove  %r14d,%ecx
+  760f89:	add    %rcx,0x108(%rsp)
+  760f91:	mov    (%rbx),%rax
+  760f94:	test   %rax,%rax
+  760f97:	je     760fa8 <<gpui_gpu::renderer::RendererState>::render+0x2438>
+  760f99:	lock decq (%rax)
+  760f9d:	jne    760fa8 <<gpui_gpu::renderer::RendererState>::render+0x2438>
+  760f9f:	mov    %rbx,%rdi
+  760fa2:	call   *0x5d26e0(%rip)        # d33688 <_DYNAMIC+0x618>
+  760fa8:	mov    0x8(%rsp),%rax
+  760fad:	mov    %r12,0x330(%rax)
+  760fb4:	mov    0x108(%rsp),%rcx
+  760fbc:	mov    %rcx,0x338(%rax)
+  760fc3:	mov    0x10(%rax),%r8
+  760fc7:	mov    0x28(%rax),%rsi
+  760fcb:	mov    0x70(%rax),%rcx
+  760fcf:	mov    %rcx,0xb8(%rsp)
+  760fd7:	shl    $0x4,%r8
+  760fdb:	mov    0x60(%rsp),%rdx
+  760fe0:	lea    (%r8,%rdx,4),%rdi
+  760fe4:	lea    (%rdi,%rsi,8),%rsi
+  760fe8:	mov    %rcx,%rdi
+  760feb:	shl    $0x5,%rdi
+  760fef:	lea    (%rdi,%rsi,1),%rcx
+  760ff3:	add    $0x30,%rcx
+  760ff7:	mov    %rcx,0xb0(%rsp)
+  760fff:	mov    0x278(%rax),%rdi
+  761006:	add    0x250(%rax),%rdi
+  76100d:	add    0x2a0(%rax),%rdi
+  761014:	add    0x2c8(%rax),%rdi
+  76101b:	add    0x2f0(%rax),%rdi
+  761022:	mov    0x308(%rax),%rsi
+  761029:	add    0x310(%rax),%rsi
+  761030:	mov    0x150(%rax),%r9d
+  761037:	imul   %r9,%r9
+  76103b:	mov    0xc0(%rsp),%r11
+  761043:	mov    %r11,%rcx
+  761046:	sub    %rdx,%rcx
+  761049:	mov    0xa0(%rsp),%r10
+  761051:	mov    %r10,%r15
+  761054:	mov    0x328(%rsp),%rbp
+  76105c:	sub    %rbp,%r15
+  76105f:	mov    0x160(%rax),%rbx
+  761066:	inc    %rbx
+  761069:	mov    $0xffffffffffffffff,%r14
+  761070:	cmovne %rbx,%r14
+  761074:	mov    (%rax),%rbx
+  761077:	shl    $0x4,%rbx
+  76107b:	mov    0x48(%rax),%r12
+  76107f:	add    0x30(%rax),%r12
+  761083:	mov    0x18(%rax),%r13
+  761087:	lea    (%rbx,%r13,8),%rbx
+  76108b:	lea    (%rbx,%r12,4),%rbx
+  76108f:	mov    0x60(%rax),%r12
+  761093:	shl    $0x5,%r12
+  761097:	add    %rbx,%r12
+  76109a:	mov    0x138(%rax),%rbx
+  7610a1:	mov    0x130(%rax),%r13
+  7610a8:	mov    %r14,0x160(%rax)
+  7610af:	mov    %r10,0x168(%rax)
+  7610b6:	lea    (%r11,%r11,1),%r14
+  7610ba:	mov    %r14,0x170(%rax)
+  7610c1:	movq   $0x1,0x178(%rax)
+  7610cc:	mov    %r10,0x180(%rax)
+  7610d3:	mov    %rdx,0x188(%rax)
+  7610da:	mov    %r11,0x190(%rax)
+  7610e1:	mov    %rcx,0x198(%rax)
+  7610e8:	mov    0x30(%rsp),%rcx
+  7610ed:	mov    %rcx,0x1a0(%rax)
+  7610f4:	mov    0x10(%rsp),%rcx
+  7610f9:	mov    %rcx,0x1a8(%rax)
+  761100:	mov    0x18(%rsp),%rcx
+  761105:	mov    %rcx,0x1b0(%rax)
+  76110c:	mov    0xb0(%rsp),%rcx
+  761114:	mov    %rcx,0x1b8(%rax)
+  76111b:	mov    %r8,0x1c0(%rax)
+  761122:	mov    0x320(%rsp),%rdx
+  76112a:	mov    %rdx,0x1c8(%rax)
+  761131:	mov    %rbp,0x1d0(%rax)
+  761138:	mov    %r15,0x1d8(%rax)
+  76113f:	mov    0xf8(%rsp),%rcx
+  761147:	mov    %rcx,0x1e0(%rax)
+  76114e:	mov    %rdi,0x1e8(%rax)
+  761155:	mov    %r9,0x1f0(%rax)
+  76115c:	add    %rbx,%r13
+  76115f:	mov    %rbx,0x1f8(%rax)
+  761166:	mov    %r13,0x200(%rax)
+  76116d:	mov    %r12,0x208(%rax)
+  761174:	mov    0xb8(%rsp),%rcx
+  76117c:	mov    %rcx,0x210(%rax)
+  761183:	mov    %rsi,0x218(%rax)
+  76118a:	movb   $0x0,0x220(%rax)
+  761191:	mov    0x48(%rsp),%rdi
+  761196:	mov    0x58(%rsp),%rax
+  76119b:	mov    %rax,0x8(%rdi)
+  76119f:	movl   $0xffffffff,(%rdi)
+  7611a5:	jmp    75ec81 <<gpui_gpu::renderer::RendererState>::render+0x111>
+  7611aa:	mov    0x48(%rsp),%rdi
+  7611af:	jmp    75ec73 <<gpui_gpu::renderer::RendererState>::render+0x103>
+  7611b4:	movq   $0x0,0x10(%rsp)
+  7611bd:	xor    %eax,%eax
+  7611bf:	movq   $0x0,0x30(%rsp)
+  7611c8:	jmp    7611dc <<gpui_gpu::renderer::RendererState>::render+0x266c>
+  7611ca:	incq   0x30(%rsp)
+  7611cf:	add    $0x8,%rax
+  7611d3:	cmp    %rax,%rdi
+  7611d6:	je     760b8d <<gpui_gpu::renderer::RendererState>::render+0x201d>
+  7611dc:	mov    0x4(%r8,%rax,1),%ecx
+  7611e1:	mov    %ecx,%edx
+  7611e3:	neg    %edx
+  7611e5:	jo     7611ca <<gpui_gpu::renderer::RendererState>::render+0x265a>
+  7611e7:	cmp    (%r8,%rax,1),%ecx
+  7611eb:	je     7611cf <<gpui_gpu::renderer::RendererState>::render+0x265f>
+  7611ed:	lea    0x590e4c(%rip),%rdi        # cf2040 <anon.33ba179a38fcc7330df8a238323da8f3.31.llvm.4683221688322278040+0x10>
+  7611f4:	call   *0x5d2c6e(%rip)        # d33e68 <_DYNAMIC+0xdf8>
+  7611fa:	lea    0x590c77(%rip),%rdi        # cf1e78 <anon.e28c37b6eb72e88f7fbdd526e97e9b1b.2.llvm.1500201584695907981+0x5ab8>
+  761201:	call   *0x5d2201(%rip)        # d33408 <_DYNAMIC+0x398>
+  761207:	lea    0x590c82(%rip),%rdx        # cf1e90 <anon.e28c37b6eb72e88f7fbdd526e97e9b1b.2.llvm.1500201584695907981+0x5ad0>
+  76120e:	call   *0x5d22e4(%rip)        # d334f8 <_DYNAMIC+0x488>
+  761214:	lea    0x590c45(%rip),%rdx        # cf1e60 <anon.e28c37b6eb72e88f7fbdd526e97e9b1b.2.llvm.1500201584695907981+0x5aa0>
+  76121b:	call   *0x5d22d7(%rip)        # d334f8 <_DYNAMIC+0x488>
+  761221:	mov    %rax,%r14
+  761224:	mov    0x8(%rsp),%rax
+  761229:	mov    %r12,0x330(%rax)
+  761230:	mov    0x108(%rsp),%rcx
+  761238:	mov    %rcx,0x338(%rax)
+  76123f:	mov    %r14,%rdi
+  761242:	call   ce2130 <_Unwind_Resume@plt>
+  761247:	mov    %rax,%r14
+  76124a:	lock decq (%r12)
+  76124f:	jne    761271 <<gpui_gpu::renderer::RendererState>::render+0x2701>
+  761251:	lea    0x1a0(%rsp),%rdi
+  761259:	call   *0x5d2429(%rip)        # d33688 <_DYNAMIC+0x618>
+  76125f:	jmp    761271 <<gpui_gpu::renderer::RendererState>::render+0x2701>
+  761261:	call   *0x5d2111(%rip)        # d33378 <_DYNAMIC+0x308>
+  761267:	mov    %rax,%r14
+  76126a:	movq   $0x0,(%rbx)
+  761271:	mov    %r14,%rdi
+  761274:	call   ce2130 <_Unwind_Resume@plt>

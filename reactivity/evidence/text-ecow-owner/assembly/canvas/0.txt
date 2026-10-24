@@ -1,0 +1,1427 @@
+
+/tmp/gpui-ecow-final-artifacts/text_run_probe:     file format elf64-x86-64
+
+
+Disassembly of section .text:
+
+000000000058b440 <gpui_canvas::canvas::render_band_impl::<gpui_canvas::canvas::BgrxEncoder, fearless_simd::generated::sse2::Sse2>>:
+  58b440:	push   %rbp
+  58b441:	push   %r15
+  58b443:	push   %r14
+  58b445:	push   %r13
+  58b447:	push   %r12
+  58b449:	push   %rbx
+  58b44a:	mov    %rsp,%r11
+  58b44d:	sub    $0x11000,%r11
+  58b454:	sub    $0x1000,%rsp
+  58b45b:	movq   $0x0,(%rsp)
+  58b463:	cmp    %r11,%rsp
+  58b466:	jne    58b454 <gpui_canvas::canvas::render_band_impl::<gpui_canvas::canvas::BgrxEncoder, fearless_simd::generated::sse2::Sse2>+0x14>
+  58b468:	sub    $0xbc8,%rsp
+  58b46f:	mov    %r9,0x140(%rsp)
+  58b477:	mov    %r8,0xe0(%rsp)
+  58b47f:	mov    %rcx,0x138(%rsp)
+  58b487:	mov    %rdx,%r15
+  58b48a:	mov    %rsi,%rbx
+  58b48d:	mov    %rdi,0x230(%rsp)
+  58b495:	mov    0x30(%rsi),%rax
+  58b499:	mov    %rax,0xc0(%rsp)
+  58b4a1:	mov    0x38(%rsi),%r12
+  58b4a5:	mov    0x40(%rsi),%rax
+  58b4a9:	mov    %rax,0xb8(%rsp)
+  58b4b1:	xorps  %xmm0,%xmm0
+  58b4b4:	movups %xmm0,0x21a(%rsp)
+  58b4bc:	movaps %xmm0,0x210(%rsp)
+  58b4c4:	movaps %xmm0,0x200(%rsp)
+  58b4cc:	movaps %xmm0,0x1f0(%rsp)
+  58b4d4:	movaps %xmm0,0x1e0(%rsp)
+  58b4dc:	movaps %xmm0,0x1d0(%rsp)
+  58b4e4:	lea    0x10ba8(%rsp),%rdi
+  58b4ec:	mov    0x1efb5d(%rip),%r14        # 77b050 <memset@GLIBC_2.2.5>
+  58b4f3:	mov    $0x1000,%edx
+  58b4f8:	xor    %esi,%esi
+  58b4fa:	call   *%r14
+  58b4fd:	lea    0xba8(%rsp),%rdi
+  58b505:	mov    $0x10000,%edx
+  58b50a:	xor    %esi,%esi
+  58b50c:	call   *%r14
+  58b50f:	xorps  %xmm0,%xmm0
+  58b512:	movups %xmm0,0x11ba8(%rsp)
+  58b51a:	movups %xmm0,0x11bb8(%rsp)
+  58b522:	movups %xmm0,0x1bc(%rsp)
+  58b52a:	movaps %xmm0,0x1b0(%rsp)
+  58b532:	movups 0x18(%rbx),%xmm0
+  58b536:	movaps %xmm0,%xmm1
+  58b539:	shufps $0xff,%xmm0,%xmm1
+  58b53d:	movaps %xmm0,0x390(%rsp)
+  58b545:	movaps %xmm1,0x70(%rsp)
+  58b54a:	ucomiss -0x555be1(%rip),%xmm1        # 35970 <anon.5be91be43c2876666deeb2bf5df5d357.300.llvm.1276089336069091895+0x48>
+  58b551:	movaps %xmm0,%xmm2
+  58b554:	shufps $0x55,%xmm0,%xmm2
+  58b558:	movaps %xmm0,0xa0(%rsp)
+  58b560:	movaps %xmm0,%xmm3
+  58b563:	unpckhpd %xmm0,%xmm3
+  58b567:	mov    %r15,0xd8(%rsp)
+  58b56f:	movaps %xmm2,0x110(%rsp)
+  58b577:	movaps %xmm3,0x160(%rsp)
+  58b57f:	jne    58b5c5 <gpui_canvas::canvas::render_band_impl::<gpui_canvas::canvas::BgrxEncoder, fearless_simd::generated::sse2::Sse2>+0x185>
+  58b581:	jp     58b5c5 <gpui_canvas::canvas::render_band_impl::<gpui_canvas::canvas::BgrxEncoder, fearless_simd::generated::sse2::Sse2>+0x185>
+  58b583:	mov    0x10(%r15),%rcx
+  58b587:	test   %rcx,%rcx
+  58b58a:	je     58b5c5 <gpui_canvas::canvas::render_band_impl::<gpui_canvas::canvas::BgrxEncoder, fearless_simd::generated::sse2::Sse2>+0x185>
+  58b58c:	xorps  %xmm0,%xmm0
+  58b58f:	movaps 0xa0(%rsp),%xmm1
+  58b597:	ucomiss %xmm1,%xmm0
+  58b59a:	jae    58b600 <gpui_canvas::canvas::render_band_impl::<gpui_canvas::canvas::BgrxEncoder, fearless_simd::generated::sse2::Sse2>+0x1c0>
+  58b59c:	mov    $0xff,%al
+  58b59e:	ucomiss -0x555c35(%rip),%xmm1        # 35970 <anon.5be91be43c2876666deeb2bf5df5d357.300.llvm.1276089336069091895+0x48>
+  58b5a5:	jae    58b602 <gpui_canvas::canvas::render_band_impl::<gpui_canvas::canvas::BgrxEncoder, fearless_simd::generated::sse2::Sse2>+0x1c2>
+  58b5a7:	movdqa 0xa0(%rsp),%xmm1
+  58b5b0:	movd   %xmm1,%edx
+  58b5b4:	cmp    %edx,0x800(%rcx)
+  58b5ba:	jbe    58b627 <gpui_canvas::canvas::render_band_impl::<gpui_canvas::canvas::BgrxEncoder, fearless_simd::generated::sse2::Sse2>+0x1e7>
+  58b5bc:	xor    %eax,%eax
+  58b5be:	ucomiss %xmm2,%xmm0
+  58b5c1:	jb     58b607 <gpui_canvas::canvas::render_band_impl::<gpui_canvas::canvas::BgrxEncoder, fearless_simd::generated::sse2::Sse2>+0x1c7>
+  58b5c3:	jmp    58b643 <gpui_canvas::canvas::render_band_impl::<gpui_canvas::canvas::BgrxEncoder, fearless_simd::generated::sse2::Sse2>+0x203>
+  58b5c5:	lea    0x390(%rsp),%rsi
+  58b5cd:	mov    %r15,%rdi
+  58b5d0:	call   *0x1f0132(%rip)        # 77b708 <_DYNAMIC+0xab0>
+  58b5d6:	mov    %eax,%edx
+  58b5d8:	shr    $0x8,%edx
+  58b5db:	mov    %eax,%esi
+  58b5dd:	shr    $0x10,%esi
+  58b5e0:	cmpq   $0x0,0x11c00(%rsp)
+  58b5e9:	jne    58b6a7 <gpui_canvas::canvas::render_band_impl::<gpui_canvas::canvas::BgrxEncoder, fearless_simd::generated::sse2::Sse2>+0x267>
+  58b5ef:	lea    0x1db72a(%rip),%rdx        # 766d20 <anon.be4d51fbbe824da7f5ab1afc5d73eb57.0.llvm.5255786034794295177+0x5038>
+  58b5f6:	xor    %edi,%edi
+  58b5f8:	xor    %esi,%esi
+  58b5fa:	call   *0x1ef930(%rip)        # 77af30 <_DYNAMIC+0x2d8>
+  58b600:	xor    %eax,%eax
+  58b602:	ucomiss %xmm2,%xmm0
+  58b605:	jae    58b643 <gpui_canvas::canvas::render_band_impl::<gpui_canvas::canvas::BgrxEncoder, fearless_simd::generated::sse2::Sse2>+0x203>
+  58b607:	mov    $0xff,%dl
+  58b609:	ucomiss -0x555ca0(%rip),%xmm2        # 35970 <anon.5be91be43c2876666deeb2bf5df5d357.300.llvm.1276089336069091895+0x48>
+  58b610:	jae    58b645 <gpui_canvas::canvas::render_band_impl::<gpui_canvas::canvas::BgrxEncoder, fearless_simd::generated::sse2::Sse2>+0x205>
+  58b612:	movd   %xmm2,%esi
+  58b616:	cmp    %esi,0x800(%rcx)
+  58b61c:	jbe    58b678 <gpui_canvas::canvas::render_band_impl::<gpui_canvas::canvas::BgrxEncoder, fearless_simd::generated::sse2::Sse2>+0x238>
+  58b61e:	xor    %edx,%edx
+  58b620:	ucomiss %xmm3,%xmm0
+  58b623:	jb     58b64a <gpui_canvas::canvas::render_band_impl::<gpui_canvas::canvas::BgrxEncoder, fearless_simd::generated::sse2::Sse2>+0x20a>
+  58b625:	jmp    58b696 <gpui_canvas::canvas::render_band_impl::<gpui_canvas::canvas::BgrxEncoder, fearless_simd::generated::sse2::Sse2>+0x256>
+  58b627:	mov    %edx,%eax
+  58b629:	shr    $0x10,%eax
+  58b62c:	and    $0x7ff,%eax
+  58b631:	movzbl (%rcx,%rax,1),%eax
+  58b635:	cmp    0x800(%rcx,%rax,4),%edx
+  58b63c:	sbb    $0xff,%al
+  58b63e:	ucomiss %xmm2,%xmm0
+  58b641:	jb     58b607 <gpui_canvas::canvas::render_band_impl::<gpui_canvas::canvas::BgrxEncoder, fearless_simd::generated::sse2::Sse2>+0x1c7>
+  58b643:	xor    %edx,%edx
+  58b645:	ucomiss %xmm3,%xmm0
+  58b648:	jae    58b696 <gpui_canvas::canvas::render_band_impl::<gpui_canvas::canvas::BgrxEncoder, fearless_simd::generated::sse2::Sse2>+0x256>
+  58b64a:	mov    $0xff,%sil
+  58b64d:	ucomiss -0x555ce4(%rip),%xmm3        # 35970 <anon.5be91be43c2876666deeb2bf5df5d357.300.llvm.1276089336069091895+0x48>
+  58b654:	jae    58b698 <gpui_canvas::canvas::render_band_impl::<gpui_canvas::canvas::BgrxEncoder, fearless_simd::generated::sse2::Sse2>+0x258>
+  58b656:	movd   %xmm3,%edi
+  58b65a:	cmp    %edi,0x800(%rcx)
+  58b660:	jbe    58cee8 <gpui_canvas::canvas::render_band_impl::<gpui_canvas::canvas::BgrxEncoder, fearless_simd::generated::sse2::Sse2>+0x1aa8>
+  58b666:	xor    %esi,%esi
+  58b668:	cmpq   $0x0,0x11c00(%rsp)
+  58b671:	jne    58b6a7 <gpui_canvas::canvas::render_band_impl::<gpui_canvas::canvas::BgrxEncoder, fearless_simd::generated::sse2::Sse2>+0x267>
+  58b673:	jmp    58b5ef <gpui_canvas::canvas::render_band_impl::<gpui_canvas::canvas::BgrxEncoder, fearless_simd::generated::sse2::Sse2>+0x1af>
+  58b678:	mov    %esi,%edx
+  58b67a:	shr    $0x10,%edx
+  58b67d:	and    $0x7ff,%edx
+  58b683:	movzbl (%rcx,%rdx,1),%edx
+  58b687:	cmp    0x800(%rcx,%rdx,4),%esi
+  58b68e:	sbb    $0xff,%dl
+  58b691:	ucomiss %xmm3,%xmm0
+  58b694:	jb     58b64a <gpui_canvas::canvas::render_band_impl::<gpui_canvas::canvas::BgrxEncoder, fearless_simd::generated::sse2::Sse2>+0x20a>
+  58b696:	xor    %esi,%esi
+  58b698:	cmpq   $0x0,0x11c00(%rsp)
+  58b6a1:	je     58b5ef <gpui_canvas::canvas::render_band_impl::<gpui_canvas::canvas::BgrxEncoder, fearless_simd::generated::sse2::Sse2>+0x1af>
+  58b6a7:	mov    0xb8(%rsp),%rcx
+  58b6af:	cmp    0xc0(%rsp),%rcx
+  58b6b7:	movdqa 0xa0(%rsp),%xmm0
+  58b6c0:	movdqa 0x110(%rsp),%xmm1
+  58b6c9:	movdqa 0x160(%rsp),%xmm2
+  58b6d2:	jne    58b735 <gpui_canvas::canvas::render_band_impl::<gpui_canvas::canvas::BgrxEncoder, fearless_simd::generated::sse2::Sse2>+0x2f5>
+  58b6d4:	movaps 0x220(%rsp),%xmm0
+  58b6dc:	mov    0x230(%rsp),%rax
+  58b6e4:	movups %xmm0,0x50(%rax)
+  58b6e8:	movaps 0x210(%rsp),%xmm0
+  58b6f0:	movups %xmm0,0x40(%rax)
+  58b6f4:	movaps 0x1d0(%rsp),%xmm0
+  58b6fc:	movaps 0x1e0(%rsp),%xmm1
+  58b704:	movaps 0x1f0(%rsp),%xmm2
+  58b70c:	movaps 0x200(%rsp),%xmm3
+  58b714:	movups %xmm3,0x30(%rax)
+  58b718:	movups %xmm2,0x20(%rax)
+  58b71c:	movups %xmm1,0x10(%rax)
+  58b720:	movups %xmm0,(%rax)
+  58b723:	add    $0x11bc8,%rsp
+  58b72a:	pop    %rbx
+  58b72b:	pop    %r12
+  58b72d:	pop    %r13
+  58b72f:	pop    %r14
+  58b731:	pop    %r15
+  58b733:	pop    %rbp
+  58b734:	ret
+  58b735:	movzbl %dl,%r8d
+  58b739:	shl    $0x8,%r8d
+  58b73d:	movzbl %al,%r11d
+  58b741:	shl    $0x10,%r11d
+  58b745:	movd   %xmm0,%eax
+  58b749:	movd   %xmm1,%ecx
+  58b74d:	mov    %rcx,0x88(%rsp)
+  58b755:	movd   %xmm2,%ecx
+  58b759:	movdqa 0x70(%rsp),%xmm1
+  58b75f:	movd   %xmm1,%edx
+  58b763:	mov    %rdx,0x80(%rsp)
+  58b76b:	movzwl 0x28(%rbx),%edx
+  58b76f:	shl    $0x4,%r12
+  58b773:	mov    0x8(%rbx),%r10
+  58b777:	mov    %r12,0x10(%rsp)
+  58b77c:	lea    0x10(%r12),%r9
+  58b781:	mov    0x10(%rbx),%rdi
+  58b785:	cmp    %rdi,%r9
+  58b788:	cmovae %rdi,%r9
+  58b78c:	mov    %r9,0x20(%rsp)
+  58b791:	test   %r10,%r10
+  58b794:	mov    %r10,0x48(%rsp)
+  58b799:	js     58b7a5 <gpui_canvas::canvas::render_band_impl::<gpui_canvas::canvas::BgrxEncoder, fearless_simd::generated::sse2::Sse2>+0x365>
+  58b79b:	xorps  %xmm1,%xmm1
+  58b79e:	cvtsi2ss %r10,%xmm1
+  58b7a3:	jmp    58b7be <gpui_canvas::canvas::render_band_impl::<gpui_canvas::canvas::BgrxEncoder, fearless_simd::generated::sse2::Sse2>+0x37e>
+  58b7a5:	mov    %r10,%r9
+  58b7a8:	shr    $1,%r9
+  58b7ab:	and    $0x1,%r10d
+  58b7af:	or     %r9,%r10
+  58b7b2:	xorps  %xmm1,%xmm1
+  58b7b5:	cvtsi2ss %r10,%xmm1
+  58b7ba:	addss  %xmm1,%xmm1
+  58b7be:	movss  %xmm1,0x6c(%rsp)
+  58b7c4:	movzbl %sil,%esi
+  58b7c8:	or     %r8d,%r11d
+  58b7cb:	shlq   $0x20,0x80(%rsp)
+  58b7d4:	shlq   $0x20,0x88(%rsp)
+  58b7dd:	test   %rdi,%rdi
+  58b7e0:	js     58b7ec <gpui_canvas::canvas::render_band_impl::<gpui_canvas::canvas::BgrxEncoder, fearless_simd::generated::sse2::Sse2>+0x3ac>
+  58b7e2:	xorps  %xmm1,%xmm1
+  58b7e5:	cvtsi2ss %rdi,%xmm1
+  58b7ea:	jmp    58b804 <gpui_canvas::canvas::render_band_impl::<gpui_canvas::canvas::BgrxEncoder, fearless_simd::generated::sse2::Sse2>+0x3c4>
+  58b7ec:	mov    %rdi,%r8
+  58b7ef:	shr    $1,%r8
+  58b7f2:	and    $0x1,%edi
+  58b7f5:	or     %r8,%rdi
+  58b7f8:	xorps  %xmm1,%xmm1
+  58b7fb:	cvtsi2ss %rdi,%xmm1
+  58b800:	addss  %xmm1,%xmm1
+  58b804:	movss  %xmm1,0x68(%rsp)
+  58b80a:	mov    0xc0(%rsp),%rdi
+  58b812:	sub    %rdi,0xb8(%rsp)
+  58b81a:	mov    %r11d,%r8d
+  58b81d:	or     %esi,%r8d
+  58b820:	add    %rcx,0x80(%rsp)
+  58b828:	add    %rax,0x88(%rsp)
+  58b830:	mov    %rdi,%rax
+  58b833:	sub    %rdx,%rax
+  58b836:	mov    %rax,0x260(%rsp)
+  58b83e:	mov    0x140(%rsp),%rax
+  58b846:	mov    (%rax),%eax
+  58b848:	mov    %eax,0x10c(%rsp)
+  58b84f:	mov    (%rbx),%r9
+  58b852:	movzbl 0x50(%rbx),%eax
+  58b856:	mov    %al,0xf(%rsp)
+  58b85a:	lea    0x318(%rsp),%r13
+  58b862:	mov    0xd8(%rsp),%rax
+  58b86a:	mov    0x10(%rax),%rax
+  58b86e:	mov    %rax,0x90(%rsp)
+  58b876:	mov    0x10(%rsp),%rcx
+  58b87b:	mov    %rcx,%rax
+  58b87e:	neg    %rax
+  58b881:	mov    %rax,0x258(%rsp)
+  58b889:	mov    %rdi,%rax
+  58b88c:	shl    $0x4,%rax
+  58b890:	neg    %rax
+  58b893:	mov    %rax,0x250(%rsp)
+  58b89b:	mov    %rdi,%rax
+  58b89e:	shl    $0x5,%rax
+  58b8a2:	neg    %rax
+  58b8a5:	add    %rsp,%rax
+  58b8a8:	add    $0x350,%rax
+  58b8ae:	mov    %rax,0x248(%rsp)
+  58b8b6:	mov    %rdi,%rax
+  58b8b9:	shl    $0x6,%rax
+  58b8bd:	add    0x138(%rsp),%rax
+  58b8c5:	mov    %rax,0x240(%rsp)
+  58b8cd:	lea    (%rdi,%rcx,1),%rax
+  58b8d1:	mov    %rax,0x238(%rsp)
+  58b8d9:	mov    0x48(%rsp),%rbx
+  58b8de:	lea    0x0(,%rbx,4),%rax
+  58b8e6:	mov    %rax,0x150(%rsp)
+  58b8ee:	xor    %r15d,%r15d
+  58b8f1:	mov    %r8d,0x64(%rsp)
+  58b8f6:	mov    %r8d,0x34(%rsp)
+  58b8fb:	mov    %r9,0xf0(%rsp)
+  58b903:	jmp    58b943 <gpui_canvas::canvas::render_band_impl::<gpui_canvas::canvas::BgrxEncoder, fearless_simd::generated::sse2::Sse2>+0x503>
+  58b905:	data16 cs nopw 0x0(%rax,%rax,1)
+  58b910:	movaps 0xa0(%rsp),%xmm0
+  58b918:	mov    0xd0(%rsp),%r15
+  58b920:	cmp    0xb8(%rsp),%r15
+  58b928:	mov    0x48(%rsp),%rbx
+  58b92d:	mov    0xf0(%rsp),%r9
+  58b935:	lea    0x318(%rsp),%r13
+  58b93d:	jae    58b6d4 <gpui_canvas::canvas::render_band_impl::<gpui_canvas::canvas::BgrxEncoder, fearless_simd::generated::sse2::Sse2>+0x294>
+  58b943:	mov    0x238(%rsp),%rax
+  58b94b:	add    %r15,%rax
+  58b94e:	neg    %rax
+  58b951:	mov    %rax,0xc8(%rsp)
+  58b959:	mov    0xc0(%rsp),%rax
+  58b961:	lea    (%rax,%r15,1),%rcx
+  58b965:	mov    0x258(%rsp),%rax
+  58b96d:	sub    %rcx,%rax
+  58b970:	mov    %rax,0x148(%rsp)
+  58b978:	mov    %r15,%rax
+  58b97b:	shl    $0x4,%rax
+  58b97f:	mov    0x250(%rsp),%rdx
+  58b987:	sub    %rax,%rdx
+  58b98a:	mov    %rdx,0x110(%rsp)
+  58b992:	mov    %r15,%rax
+  58b995:	shl    $0x5,%rax
+  58b999:	mov    0x248(%rsp),%rdx
+  58b9a1:	sub    %rax,%rdx
+  58b9a4:	mov    %rdx,0x160(%rsp)
+  58b9ac:	shl    $0x4,%rcx
+  58b9b0:	mov    %r15,%rax
+  58b9b3:	shl    $0x6,%rax
+  58b9b7:	add    0x240(%rsp),%rax
+  58b9bf:	mov    %rax,0x50(%rsp)
+  58b9c4:	lea    0x10(%rcx),%rax
+  58b9c8:	mov    %rax,0xe8(%rsp)
+  58b9d0:	mov    %rcx,0x58(%rsp)
+  58b9d5:	mov    %rcx,%r14
+  58b9d8:	neg    %r14
+  58b9db:	mov    0x260(%rsp),%rax
+  58b9e3:	lea    (%r15,%rax,1),%rdi
+  58b9e7:	mov    0x11c00(%rsp),%rsi
+  58b9ef:	cmp    %rsi,%rdi
+  58b9f2:	jae    58cff2 <gpui_canvas::canvas::render_band_impl::<gpui_canvas::canvas::BgrxEncoder, fearless_simd::generated::sse2::Sse2>+0x1bb2>
+  58b9f8:	lea    0x1(%rdi),%rax
+  58b9fc:	cmp    %rsi,%rax
+  58b9ff:	jae    58cfff <gpui_canvas::canvas::render_band_impl::<gpui_canvas::canvas::BgrxEncoder, fearless_simd::generated::sse2::Sse2>+0x1bbf>
+  58ba05:	mov    0x140(%rsp),%rax
+  58ba0d:	mov    (%rax,%rdi,4),%ecx
+  58ba10:	mov    %ecx,0x30(%rsp)
+  58ba14:	mov    %ecx,%ebp
+  58ba16:	mov    0x10c(%rsp),%ecx
+  58ba1d:	sub    %ecx,%ebp
+  58ba1f:	mov    0x4(%rax,%rdi,4),%eax
+  58ba23:	mov    %eax,0x2c(%rsp)
+  58ba27:	mov    %eax,%esi
+  58ba29:	sub    %ecx,%esi
+  58ba2b:	cmp    %ebp,%esi
+  58ba2d:	jb     58cf26 <gpui_canvas::canvas::render_band_impl::<gpui_canvas::canvas::BgrxEncoder, fearless_simd::generated::sse2::Sse2>+0x1ae6>
+  58ba33:	cmp    %rsi,0x11c10(%rsp)
+  58ba3b:	jb     58cf26 <gpui_canvas::canvas::render_band_impl::<gpui_canvas::canvas::BgrxEncoder, fearless_simd::generated::sse2::Sse2>+0x1ae6>
+  58ba41:	mov    %rsi,%rdi
+  58ba44:	sub    %rbp,%rdi
+  58ba47:	mov    %rbx,%rcx
+  58ba4a:	lea    0x0(,%rbp,4),%rbx
+  58ba52:	mov    0x11c08(%rsp),%rax
+  58ba5a:	lea    (%rax,%rbp,4),%r12
+  58ba5e:	add    %rdi,0x1e0(%rsp)
+  58ba66:	mov    0xc0(%rsp),%rax
+  58ba6e:	mov    %r15,0xd0(%rsp)
+  58ba76:	add    %r15,%rax
+  58ba79:	mov    %rax,0x268(%rsp)
+  58ba81:	shl    $0x4,%rax
+  58ba85:	mov    %rax,0x70(%rsp)
+  58ba8a:	add    $0x10,%rax
+  58ba8e:	cmp    %rcx,%rax
+  58ba91:	cmovae %rcx,%rax
+  58ba95:	mov    %rax,0x38(%rsp)
+  58ba9a:	cmpb   $0x0,0xf(%rsp)
+  58ba9f:	je     58bad0 <gpui_canvas::canvas::render_band_impl::<gpui_canvas::canvas::BgrxEncoder, fearless_simd::generated::sse2::Sse2>+0x690>
+  58baa1:	mov    0x2c(%rsp),%eax
+  58baa5:	cmp    0x30(%rsp),%eax
+  58baa9:	je     58bae0 <gpui_canvas::canvas::render_band_impl::<gpui_canvas::canvas::BgrxEncoder, fearless_simd::generated::sse2::Sse2>+0x6a0>
+  58baab:	mov    (%r12),%eax
+  58baaf:	shr    $0x10,%eax
+  58bab2:	je     58bae0 <gpui_canvas::canvas::render_band_impl::<gpui_canvas::canvas::BgrxEncoder, fearless_simd::generated::sse2::Sse2>+0x6a0>
+  58bab4:	dec    %eax
+  58bab6:	mov    %rax,%rbp
+  58bab9:	add    %rbp,0x1f0(%rsp)
+  58bac1:	cmp    %rdi,%rbp
+  58bac4:	jbe    58bb3e <gpui_canvas::canvas::render_band_impl::<gpui_canvas::canvas::BgrxEncoder, fearless_simd::generated::sse2::Sse2>+0x6fe>
+  58bac6:	jmp    58cf3e <gpui_canvas::canvas::render_band_impl::<gpui_canvas::canvas::BgrxEncoder, fearless_simd::generated::sse2::Sse2>+0x1afe>
+  58bacb:	nopl   0x0(%rax,%rax,1)
+  58bad0:	xor    %ebp,%ebp
+  58bad2:	jmp    58bb3e <gpui_canvas::canvas::render_band_impl::<gpui_canvas::canvas::BgrxEncoder, fearless_simd::generated::sse2::Sse2>+0x6fe>
+  58bad4:	data16 data16 cs nopw 0x0(%rax,%rax,1)
+  58bae0:	mov    %r14,0x98(%rsp)
+  58bae8:	lea    0x0(,%rsi,4),%r14
+  58baf0:	cmp    %r14,%rbx
+  58baf3:	jne    58c71d <gpui_canvas::canvas::render_band_impl::<gpui_canvas::canvas::BgrxEncoder, fearless_simd::generated::sse2::Sse2>+0x12dd>
+  58baf9:	xor    %ebp,%ebp
+  58bafb:	mov    0x2c(%rsp),%eax
+  58baff:	cmp    0x30(%rsp),%eax
+  58bb03:	je     58c8c0 <gpui_canvas::canvas::render_band_impl::<gpui_canvas::canvas::BgrxEncoder, fearless_simd::generated::sse2::Sse2>+0x1480>
+  58bb09:	cmp    $0xfffe,%rbp
+  58bb10:	mov    0x98(%rsp),%r14
+  58bb18:	ja     58bb2d <gpui_canvas::canvas::render_band_impl::<gpui_canvas::canvas::BgrxEncoder, fearless_simd::generated::sse2::Sse2>+0x6ed>
+  58bb1a:	mov    %ebp,%eax
+  58bb1c:	shl    $0x10,%eax
+  58bb1f:	add    $0x10000,%eax
+  58bb24:	shr    $0x10,%eax
+  58bb27:	mov    %ax,0x2(%r12)
+  58bb2d:	add    %rbp,0x1f0(%rsp)
+  58bb35:	cmp    %rdi,%rbp
+  58bb38:	ja     58cf3e <gpui_canvas::canvas::render_band_impl::<gpui_canvas::canvas::BgrxEncoder, fearless_simd::generated::sse2::Sse2>+0x1afe>
+  58bb3e:	mov    0xd0(%rsp),%rdx
+  58bb46:	inc    %rdx
+  58bb49:	lea    0x0(,%rsi,4),%rax
+  58bb51:	lea    (%rbx,%rbp,4),%rcx
+  58bb55:	cmp    %rax,%rcx
+  58bb58:	jne    58bc20 <gpui_canvas::canvas::render_band_impl::<gpui_canvas::canvas::BgrxEncoder, fearless_simd::generated::sse2::Sse2>+0x7e0>
+  58bb5e:	mov    0x64(%rsp),%eax
+  58bb62:	mov    %eax,0x390(%rsp)
+  58bb69:	movdqa %xmm0,%xmm1
+  58bb6d:	movups 0x1bc(%rsp),%xmm0
+  58bb75:	lea    0x394(%rsp),%rax
+  58bb7d:	movups %xmm0,0xc(%rax)
+  58bb81:	movaps 0x1b0(%rsp),%xmm0
+  58bb89:	movups %xmm0,(%rax)
+  58bb8c:	mov    0x2c(%rsp),%eax
+  58bb90:	cmp    0x30(%rsp),%eax
+  58bb94:	mov    %rdx,%r15
+  58bb97:	je     58ca64 <gpui_canvas::canvas::render_band_impl::<gpui_canvas::canvas::BgrxEncoder, fearless_simd::generated::sse2::Sse2>+0x1624>
+  58bb9d:	movaps %xmm1,0x7a0(%rsp)
+  58bba5:	cmpq   $0x0,0x90(%rsp)
+  58bbae:	je     58c8de <gpui_canvas::canvas::render_band_impl::<gpui_canvas::canvas::BgrxEncoder, fearless_simd::generated::sse2::Sse2>+0x149e>
+  58bbb4:	movaps %xmm1,%xmm0
+  58bbb7:	shufps $0xff,%xmm1,%xmm0
+  58bbbb:	ucomiss -0x556252(%rip),%xmm0        # 35970 <anon.5be91be43c2876666deeb2bf5df5d357.300.llvm.1276089336069091895+0x48>
+  58bbc2:	jne    58c8de <gpui_canvas::canvas::render_band_impl::<gpui_canvas::canvas::BgrxEncoder, fearless_simd::generated::sse2::Sse2>+0x149e>
+  58bbc8:	jp     58c8de <gpui_canvas::canvas::render_band_impl::<gpui_canvas::canvas::BgrxEncoder, fearless_simd::generated::sse2::Sse2>+0x149e>
+  58bbce:	movaps %xmm1,%xmm2
+  58bbd1:	xorps  %xmm0,%xmm0
+  58bbd4:	ucomiss %xmm1,%xmm0
+  58bbd7:	movaps %xmm1,%xmm0
+  58bbda:	jae    58c909 <gpui_canvas::canvas::render_band_impl::<gpui_canvas::canvas::BgrxEncoder, fearless_simd::generated::sse2::Sse2>+0x14c9>
+  58bbe0:	mov    $0xff,%al
+  58bbe2:	ucomiss -0x556279(%rip),%xmm0        # 35970 <anon.5be91be43c2876666deeb2bf5df5d357.300.llvm.1276089336069091895+0x48>
+  58bbe9:	jae    58c90b <gpui_canvas::canvas::render_band_impl::<gpui_canvas::canvas::BgrxEncoder, fearless_simd::generated::sse2::Sse2>+0x14cb>
+  58bbef:	movd   %xmm0,%ecx
+  58bbf3:	mov    0x90(%rsp),%rdx
+  58bbfb:	cmp    %ecx,0x800(%rdx)
+  58bc01:	jbe    58c9b3 <gpui_canvas::canvas::render_band_impl::<gpui_canvas::canvas::BgrxEncoder, fearless_simd::generated::sse2::Sse2>+0x1573>
+  58bc07:	xor    %eax,%eax
+  58bc09:	shufps $0x55,%xmm0,%xmm0
+  58bc0d:	xorps  %xmm1,%xmm1
+  58bc10:	ucomiss %xmm0,%xmm1
+  58bc13:	jb     58c91b <gpui_canvas::canvas::render_band_impl::<gpui_canvas::canvas::BgrxEncoder, fearless_simd::generated::sse2::Sse2>+0x14db>
+  58bc19:	jmp    58c9da <gpui_canvas::canvas::render_band_impl::<gpui_canvas::canvas::BgrxEncoder, fearless_simd::generated::sse2::Sse2>+0x159a>
+  58bc1e:	xchg   %ax,%ax
+  58bc20:	mov    %r14,0x98(%rsp)
+  58bc28:	shl    $0x2,%rbp
+  58bc2c:	mov    0x11c08(%rsp),%rax
+  58bc34:	lea    (%rax,%rsi,4),%rax
+  58bc38:	mov    %rax,0x158(%rsp)
+  58bc40:	add    %rbp,%r12
+  58bc43:	mov    $0x1,%ebx
+  58bc48:	movdqa %xmm0,0x120(%rsp)
+  58bc51:	mov    %rdx,%r15
+  58bc54:	mov    %rdx,0xd0(%rsp)
+  58bc5c:	jmp    58bc88 <gpui_canvas::canvas::render_band_impl::<gpui_canvas::canvas::BgrxEncoder, fearless_simd::generated::sse2::Sse2>+0x848>
+  58bc5e:	xchg   %ax,%ax
+  58bc60:	xor    %ebx,%ebx
+  58bc62:	mov    0xf8(%rsp),%r12
+  58bc6a:	cmp    0x158(%rsp),%r12
+  58bc72:	mov    0xf0(%rsp),%r9
+  58bc7a:	mov    0xd0(%rsp),%r15
+  58bc82:	je     58caf0 <gpui_canvas::canvas::render_band_impl::<gpui_canvas::canvas::BgrxEncoder, fearless_simd::generated::sse2::Sse2>+0x16b0>
+  58bc88:	movzwl (%r12),%edi
+  58bc8d:	mov    0x80(%r9),%rsi
+  58bc94:	cmp    %rdi,%rsi
+  58bc97:	jbe    58cfd8 <gpui_canvas::canvas::render_band_impl::<gpui_canvas::canvas::BgrxEncoder, fearless_simd::generated::sse2::Sse2>+0x1b98>
+  58bc9d:	add    $0x4,%r12
+  58bca1:	mov    0x78(%r9),%rax
+  58bca5:	lea    (%rdi,%rdi,1),%rcx
+  58bca9:	shl    $0x4,%edi
+  58bcac:	sub    %rcx,%rdi
+  58bcaf:	mov    (%rax,%rdi,1),%rcx
+  58bcb3:	mov    0x6(%rax,%rdi,1),%rax
+  58bcb8:	mov    %rax,0x7a6(%rsp)
+  58bcc0:	mov    %rcx,0x7a0(%rsp)
+  58bcc8:	movq   $0x0,0x390(%rsp)
+  58bcd4:	movss  0x6c(%rsp),%xmm0
+  58bcda:	movss  %xmm0,0x398(%rsp)
+  58bce3:	movss  0x68(%rsp),%xmm0
+  58bce9:	movss  %xmm0,0x39c(%rsp)
+  58bcf2:	lea    0x2b8(%rsp),%r14
+  58bcfa:	mov    %r14,%rdi
+  58bcfd:	mov    %r9,%rsi
+  58bd00:	lea    0x7a0(%rsp),%rdx
+  58bd08:	lea    0x390(%rsp),%rcx
+  58bd10:	call   592cc0 <<gpui_canvas::canvas::DisplayList>::get>
+  58bd15:	mov    0x2b8(%rsp),%ebp
+  58bd1c:	test   %ebp,%ebp
+  58bd1e:	sete   %al
+  58bd21:	test   %al,0xf(%rsp)
+  58bd25:	mov    %r12,0xf8(%rsp)
+  58bd2d:	je     58bd90 <gpui_canvas::canvas::render_band_impl::<gpui_canvas::canvas::BgrxEncoder, fearless_simd::generated::sse2::Sse2>+0x950>
+  58bd2f:	mov    %r14,%rdi
+  58bd32:	mov    0x70(%rsp),%rsi
+  58bd37:	mov    0x10(%rsp),%rdx
+  58bd3c:	mov    0x38(%rsp),%rcx
+  58bd41:	mov    0x20(%rsp),%r8
+  58bd46:	call   *0x1ef97c(%rip)        # 77b6c8 <_DYNAMIC+0xa70>
+  58bd4c:	test   %al,%al
+  58bd4e:	lea    0xba8(%rsp),%r14
+  58bd56:	je     58bea0 <gpui_canvas::canvas::render_band_impl::<gpui_canvas::canvas::BgrxEncoder, fearless_simd::generated::sse2::Sse2>+0xa60>
+  58bd5c:	incq   0x1e8(%rsp)
+  58bd64:	test   $0x1,%bl
+  58bd67:	jne    58c6d3 <gpui_canvas::canvas::render_band_impl::<gpui_canvas::canvas::BgrxEncoder, fearless_simd::generated::sse2::Sse2>+0x1293>
+  58bd6d:	movw   $0x0,0x34e(%rsp)
+  58bd77:	movq   $0x0,0x7a0(%rsp)
+  58bd83:	mov    $0x1,%cl
+  58bd85:	xor    %eax,%eax
+  58bd87:	jmp    58c09e <gpui_canvas::canvas::render_band_impl::<gpui_canvas::canvas::BgrxEncoder, fearless_simd::generated::sse2::Sse2>+0xc5e>
+  58bd8c:	nopl   0x0(%rax)
+  58bd90:	test   %ebp,%ebp
+  58bd92:	lea    0xba8(%rsp),%r14
+  58bd9a:	je     58bea0 <gpui_canvas::canvas::render_band_impl::<gpui_canvas::canvas::BgrxEncoder, fearless_simd::generated::sse2::Sse2>+0xa60>
+  58bda0:	movw   $0x0,0x34e(%rsp)
+  58bdaa:	cmp    $0x2,%ebp
+  58bdad:	jne    58bf72 <gpui_canvas::canvas::render_band_impl::<gpui_canvas::canvas::BgrxEncoder, fearless_simd::generated::sse2::Sse2>+0xb32>
+  58bdb3:	movsd  0x2f0(%rsp),%xmm0
+  58bdbc:	xor    %eax,%eax
+  58bdbe:	xorps  %xmm1,%xmm1
+  58bdc1:	ucomisd %xmm1,%xmm0
+  58bdc5:	jne    58bf74 <gpui_canvas::canvas::render_band_impl::<gpui_canvas::canvas::BgrxEncoder, fearless_simd::generated::sse2::Sse2>+0xb34>
+  58bdcb:	jp     58bf74 <gpui_canvas::canvas::render_band_impl::<gpui_canvas::canvas::BgrxEncoder, fearless_simd::generated::sse2::Sse2>+0xb34>
+  58bdd1:	movsd  0x2f8(%rsp),%xmm0
+  58bdda:	ucomisd %xmm1,%xmm0
+  58bdde:	jne    58bf74 <gpui_canvas::canvas::render_band_impl::<gpui_canvas::canvas::BgrxEncoder, fearless_simd::generated::sse2::Sse2>+0xb34>
+  58bde4:	jp     58bf74 <gpui_canvas::canvas::render_band_impl::<gpui_canvas::canvas::BgrxEncoder, fearless_simd::generated::sse2::Sse2>+0xb34>
+  58bdea:	mov    0x70(%rsp),%rax
+  58bdef:	mov    %rax,0x170(%rsp)
+  58bdf7:	mov    0x10(%rsp),%rax
+  58bdfc:	mov    %rax,0x178(%rsp)
+  58be04:	mov    0x38(%rsp),%rax
+  58be09:	mov    %rax,0x180(%rsp)
+  58be11:	mov    0x20(%rsp),%rax
+  58be16:	mov    %rax,0x188(%rsp)
+  58be1e:	lea    0x390(%rsp),%r12
+  58be26:	mov    %r12,%rdi
+  58be29:	lea    0x2b8(%rsp),%rsi
+  58be31:	lea    0x170(%rsp),%rdx
+  58be39:	lea    0x1d0(%rsp),%rcx
+  58be41:	call   *0x1ef8c9(%rip)        # 77b710 <_DYNAMIC+0xab8>
+  58be47:	cmpq   $0x0,0x390(%rsp)
+  58be50:	je     58c710 <gpui_canvas::canvas::render_band_impl::<gpui_canvas::canvas::BgrxEncoder, fearless_simd::generated::sse2::Sse2>+0x12d0>
+  58be56:	mov    $0x408,%edx
+  58be5b:	lea    0x7a0(%rsp),%rdi
+  58be63:	mov    %r12,%rsi
+  58be66:	call   *0x1ef12c(%rip)        # 77af98 <memcpy@GLIBC_2.14>
+  58be6c:	xor    %eax,%eax
+  58be6e:	mov    0xf8(%rsp),%r12
+  58be76:	test   $0x1,%bl
+  58be79:	lea    0x2b8(%rsp),%rsi
+  58be81:	lea    0x390(%rsp),%r8
+  58be89:	jne    58bf99 <gpui_canvas::canvas::render_band_impl::<gpui_canvas::canvas::BgrxEncoder, fearless_simd::generated::sse2::Sse2>+0xb59>
+  58be8f:	jmp    58c08a <gpui_canvas::canvas::render_band_impl::<gpui_canvas::canvas::BgrxEncoder, fearless_simd::generated::sse2::Sse2>+0xc4a>
+  58be94:	data16 data16 cs nopw 0x0(%rax,%rax,1)
+  58bea0:	movsd  0x2f0(%rsp),%xmm0
+  58bea9:	xorps  %xmm1,%xmm1
+  58beac:	ucomisd %xmm1,%xmm0
+  58beb0:	jne    58bf40 <gpui_canvas::canvas::render_band_impl::<gpui_canvas::canvas::BgrxEncoder, fearless_simd::generated::sse2::Sse2>+0xb00>
+  58beb6:	jp     58bf40 <gpui_canvas::canvas::render_band_impl::<gpui_canvas::canvas::BgrxEncoder, fearless_simd::generated::sse2::Sse2>+0xb00>
+  58bebc:	movsd  0x2f8(%rsp),%xmm0
+  58bec5:	ucomisd %xmm1,%xmm0
+  58bec9:	jne    58bf40 <gpui_canvas::canvas::render_band_impl::<gpui_canvas::canvas::BgrxEncoder, fearless_simd::generated::sse2::Sse2>+0xb00>
+  58becb:	jp     58bf40 <gpui_canvas::canvas::render_band_impl::<gpui_canvas::canvas::BgrxEncoder, fearless_simd::generated::sse2::Sse2>+0xb00>
+  58becd:	mov    0x70(%rsp),%rax
+  58bed2:	mov    %rax,0x390(%rsp)
+  58beda:	mov    0x10(%rsp),%rax
+  58bedf:	mov    %rax,0x398(%rsp)
+  58bee7:	mov    0x38(%rsp),%rax
+  58beec:	mov    %rax,0x3a0(%rsp)
+  58bef4:	mov    0x20(%rsp),%rax
+  58bef9:	mov    %rax,0x3a8(%rsp)
+  58bf01:	lea    0x34e(%rsp),%rdi
+  58bf09:	lea    0x2b8(%rsp),%rsi
+  58bf11:	lea    0x390(%rsp),%rdx
+  58bf19:	lea    0x1d0(%rsp),%rcx
+  58bf21:	call   *0x1ef7a9(%rip)        # 77b6d0 <_DYNAMIC+0xa78>
+  58bf27:	cmpw   $0x1,0x34e(%rsp)
+  58bf30:	jne    58c5f0 <gpui_canvas::canvas::render_band_impl::<gpui_canvas::canvas::BgrxEncoder, fearless_simd::generated::sse2::Sse2>+0x11b0>
+  58bf36:	mov    $0x1,%al
+  58bf38:	jmp    58bf74 <gpui_canvas::canvas::render_band_impl::<gpui_canvas::canvas::BgrxEncoder, fearless_simd::generated::sse2::Sse2>+0xb34>
+  58bf3a:	nopw   0x0(%rax,%rax,1)
+  58bf40:	movw   $0x0,0x34e(%rsp)
+  58bf4a:	movq   $0x0,0x7a0(%rsp)
+  58bf56:	xor    %eax,%eax
+  58bf58:	test   $0x1,%bl
+  58bf5b:	lea    0x2b8(%rsp),%rsi
+  58bf63:	lea    0x390(%rsp),%r8
+  58bf6b:	jne    58bf99 <gpui_canvas::canvas::render_band_impl::<gpui_canvas::canvas::BgrxEncoder, fearless_simd::generated::sse2::Sse2>+0xb59>
+  58bf6d:	jmp    58c08a <gpui_canvas::canvas::render_band_impl::<gpui_canvas::canvas::BgrxEncoder, fearless_simd::generated::sse2::Sse2>+0xc4a>
+  58bf72:	xor    %eax,%eax
+  58bf74:	movq   $0x0,0x7a0(%rsp)
+  58bf80:	test   $0x1,%bl
+  58bf83:	lea    0x2b8(%rsp),%rsi
+  58bf8b:	lea    0x390(%rsp),%r8
+  58bf93:	je     58c08a <gpui_canvas::canvas::render_band_impl::<gpui_canvas::canvas::BgrxEncoder, fearless_simd::generated::sse2::Sse2>+0xc4a>
+  58bf99:	cmpb   $0x0,0xf(%rsp)
+  58bf9e:	je     58c013 <gpui_canvas::canvas::render_band_impl::<gpui_canvas::canvas::BgrxEncoder, fearless_simd::generated::sse2::Sse2>+0xbd3>
+  58bfa0:	xor    %ecx,%ecx
+  58bfa2:	movdqa 0x120(%rsp),%xmm0
+  58bfab:	nopl   0x0(%rax,%rax,1)
+  58bfb0:	movdqu %xmm0,0x10ba8(%rsp,%rcx,1)
+  58bfb9:	movdqu %xmm0,0x10bb8(%rsp,%rcx,1)
+  58bfc2:	movdqu %xmm0,0x10bc8(%rsp,%rcx,1)
+  58bfcb:	movdqu %xmm0,0x10bd8(%rsp,%rcx,1)
+  58bfd4:	movdqu %xmm0,0x10be8(%rsp,%rcx,1)
+  58bfdd:	movdqu %xmm0,0x10bf8(%rsp,%rcx,1)
+  58bfe6:	movdqu %xmm0,0x10c08(%rsp,%rcx,1)
+  58bfef:	movdqu %xmm0,0x10c18(%rsp,%rcx,1)
+  58bff8:	sub    $0xffffffffffffff80,%rcx
+  58bffc:	cmp    $0x1000,%rcx
+  58c003:	jne    58bfb0 <gpui_canvas::canvas::render_band_impl::<gpui_canvas::canvas::BgrxEncoder, fearless_simd::generated::sse2::Sse2>+0xb70>
+  58c005:	lea    0x11ba8(%rsp),%rcx
+  58c00d:	pxor   %xmm0,%xmm0
+  58c011:	jmp    58c081 <gpui_canvas::canvas::render_band_impl::<gpui_canvas::canvas::BgrxEncoder, fearless_simd::generated::sse2::Sse2>+0xc41>
+  58c013:	xor    %ecx,%ecx
+  58c015:	movdqa 0x120(%rsp),%xmm0
+  58c01e:	xchg   %ax,%ax
+  58c020:	movdqu %xmm0,0xba8(%rsp,%rcx,1)
+  58c029:	movdqu %xmm0,0xbb8(%rsp,%rcx,1)
+  58c032:	movdqu %xmm0,0xbc8(%rsp,%rcx,1)
+  58c03b:	movdqu %xmm0,0xbd8(%rsp,%rcx,1)
+  58c044:	movdqu %xmm0,0xbe8(%rsp,%rcx,1)
+  58c04d:	movdqu %xmm0,0xbf8(%rsp,%rcx,1)
+  58c056:	movdqu %xmm0,0xc08(%rsp,%rcx,1)
+  58c05f:	movdqu %xmm0,0xc18(%rsp,%rcx,1)
+  58c068:	sub    $0xffffffffffffff80,%rcx
+  58c06c:	cmp    $0x10000,%rcx
+  58c073:	jne    58c020 <gpui_canvas::canvas::render_band_impl::<gpui_canvas::canvas::BgrxEncoder, fearless_simd::generated::sse2::Sse2>+0xbe0>
+  58c075:	lea    0x11ba8(%rsp),%rcx
+  58c07d:	pcmpeqd %xmm0,%xmm0
+  58c081:	movdqu %xmm0,0x10(%rcx)
+  58c086:	movdqu %xmm0,(%rcx)
+  58c08a:	cmp    $0x3,%ebp
+  58c08d:	je     58c60b <gpui_canvas::canvas::render_band_impl::<gpui_canvas::canvas::BgrxEncoder, fearless_simd::generated::sse2::Sse2>+0x11cb>
+  58c093:	cmp    $0x4,%ebp
+  58c096:	je     58c538 <gpui_canvas::canvas::render_band_impl::<gpui_canvas::canvas::BgrxEncoder, fearless_simd::generated::sse2::Sse2>+0x10f8>
+  58c09c:	xor    %ecx,%ecx
+  58c09e:	mov    0x330(%rsp),%rdi
+  58c0a6:	mov    0x340(%rsp),%rsi
+  58c0ae:	mov    0x10(%rsp),%rdx
+  58c0b3:	cmp    %rdi,%rdx
+  58c0b6:	cmova  %rdx,%rdi
+  58c0ba:	mov    0x20(%rsp),%rdx
+  58c0bf:	cmp    %rsi,%rdx
+  58c0c2:	cmovb  %rdx,%rsi
+  58c0c6:	mov    %rsi,0x40(%rsp)
+  58c0cb:	cmp    %rsi,%rdi
+  58c0ce:	jae    58bc60 <gpui_canvas::canvas::render_band_impl::<gpui_canvas::canvas::BgrxEncoder, fearless_simd::generated::sse2::Sse2>+0x820>
+  58c0d4:	mov    0x328(%rsp),%rsi
+  58c0dc:	mov    0x338(%rsp),%rbx
+  58c0e4:	mov    0x70(%rsp),%rdx
+  58c0e9:	cmp    %rsi,%rdx
+  58c0ec:	cmova  %rdx,%rsi
+  58c0f0:	mov    0x38(%rsp),%rdx
+  58c0f5:	cmp    %rbx,%rdx
+  58c0f8:	cmovb  %rdx,%rbx
+  58c0fc:	mov    %rsi,0x18(%rsp)
+  58c101:	cmp    %rbx,%rsi
+  58c104:	jae    58bc60 <gpui_canvas::canvas::render_band_impl::<gpui_canvas::canvas::BgrxEncoder, fearless_simd::generated::sse2::Sse2>+0x820>
+  58c10a:	test   %cl,%cl
+  58c10c:	je     58c162 <gpui_canvas::canvas::render_band_impl::<gpui_canvas::canvas::BgrxEncoder, fearless_simd::generated::sse2::Sse2>+0xd22>
+  58c10e:	mov    0xc8(%rsp),%rax
+  58c116:	lea    (%rax,%rdi,1),%r15
+  58c11a:	shl    $0x4,%r15
+  58c11e:	xchg   %ax,%ax
+  58c120:	mov    %rdi,%rbp
+  58c123:	mov    0x18(%rsp),%r12
+  58c128:	nopl   0x0(%rax,%rax,1)
+  58c130:	lea    (%r15,%r12,1),%rsi
+  58c134:	inc    %r12
+  58c137:	mov    %r14,%rdi
+  58c13a:	mov    %r13,%rdx
+  58c13d:	mov    $0xffff,%ecx
+  58c142:	call   591b40 <<gpui_canvas::canvas::samples::Samples>::blend_mask>
+  58c147:	cmp    %rbx,%r12
+  58c14a:	jb     58c130 <gpui_canvas::canvas::render_band_impl::<gpui_canvas::canvas::BgrxEncoder, fearless_simd::generated::sse2::Sse2>+0xcf0>
+  58c14c:	mov    %rbp,%rdi
+  58c14f:	inc    %rdi
+  58c152:	add    $0x10,%r15
+  58c156:	cmp    0x40(%rsp),%rdi
+  58c15b:	jne    58c120 <gpui_canvas::canvas::render_band_impl::<gpui_canvas::canvas::BgrxEncoder, fearless_simd::generated::sse2::Sse2>+0xce0>
+  58c15d:	jmp    58bc60 <gpui_canvas::canvas::render_band_impl::<gpui_canvas::canvas::BgrxEncoder, fearless_simd::generated::sse2::Sse2>+0x820>
+  58c162:	test   %al,%al
+  58c164:	je     58c21c <gpui_canvas::canvas::render_band_impl::<gpui_canvas::canvas::BgrxEncoder, fearless_simd::generated::sse2::Sse2>+0xddc>
+  58c16a:	mov    0x148(%rsp),%rax
+  58c172:	lea    (%rax,%rdi,1),%r15
+  58c176:	shl    $0x4,%r15
+  58c17a:	nopw   0x0(%rax,%rax,1)
+  58c180:	mov    %rdi,%rbp
+  58c183:	sub    0x10(%rsp),%rbp
+  58c188:	cmp    $0xf,%rbp
+  58c18c:	ja     58cf54 <gpui_canvas::canvas::render_band_impl::<gpui_canvas::canvas::BgrxEncoder, fearless_simd::generated::sse2::Sse2>+0x1b14>
+  58c192:	inc    %rdi
+  58c195:	mov    %rdi,0x100(%rsp)
+  58c19d:	mov    0x18(%rsp),%r12
+  58c1a2:	data16 data16 data16 data16 cs nopw 0x0(%rax,%rax,1)
+  58c1b0:	incq   0x1f8(%rsp)
+  58c1b8:	mov    0x110(%rsp),%rax
+  58c1c0:	lea    (%rax,%r12,1),%rdi
+  58c1c4:	cmp    $0xf,%rdi
+  58c1c8:	ja     58cf84 <gpui_canvas::canvas::render_band_impl::<gpui_canvas::canvas::BgrxEncoder, fearless_simd::generated::sse2::Sse2>+0x1b44>
+  58c1ce:	lea    (%r15,%r12,1),%rsi
+  58c1d2:	mov    0x160(%rsp),%rax
+  58c1da:	movzwl (%rax,%r12,2),%eax
+  58c1df:	inc    %r12
+  58c1e2:	imul   $0x1111,%eax,%ecx
+  58c1e8:	and    0x370(%rsp,%rbp,2),%cx
+  58c1f0:	mov    %r14,%rdi
+  58c1f3:	mov    %r13,%rdx
+  58c1f6:	call   591b40 <<gpui_canvas::canvas::samples::Samples>::blend_mask>
+  58c1fb:	cmp    %rbx,%r12
+  58c1fe:	jb     58c1b0 <gpui_canvas::canvas::render_band_impl::<gpui_canvas::canvas::BgrxEncoder, fearless_simd::generated::sse2::Sse2>+0xd70>
+  58c200:	add    $0x10,%r15
+  58c204:	mov    0x100(%rsp),%rdi
+  58c20c:	cmp    0x40(%rsp),%rdi
+  58c211:	jne    58c180 <gpui_canvas::canvas::render_band_impl::<gpui_canvas::canvas::BgrxEncoder, fearless_simd::generated::sse2::Sse2>+0xd40>
+  58c217:	jmp    58bc60 <gpui_canvas::canvas::render_band_impl::<gpui_canvas::canvas::BgrxEncoder, fearless_simd::generated::sse2::Sse2>+0x820>
+  58c21c:	mov    0x7a0(%rsp),%r12
+  58c224:	test   %r12,%r12
+  58c227:	jne    58c2e6 <gpui_canvas::canvas::render_band_impl::<gpui_canvas::canvas::BgrxEncoder, fearless_simd::generated::sse2::Sse2>+0xea6>
+  58c22d:	cmp    $0x2,%ebp
+  58c230:	jae    58c639 <gpui_canvas::canvas::render_band_impl::<gpui_canvas::canvas::BgrxEncoder, fearless_simd::generated::sse2::Sse2>+0x11f9>
+  58c236:	mov    0xc8(%rsp),%rax
+  58c23e:	add    %rdi,%rax
+  58c241:	shl    $0x4,%rax
+  58c245:	data16 cs nopw 0x0(%rax,%rax,1)
+  58c250:	mov    0x18(%rsp),%rsi
+  58c255:	mov    %r14,%r13
+  58c258:	mov    %rdi,%r15
+  58c25b:	nopl   0x0(%rax,%rax,1)
+  58c260:	lea    0x1(%rsi),%r12
+  58c264:	lea    (%rax,%rsi,1),%rbp
+  58c268:	incq   0x1f8(%rsp)
+  58c270:	lea    0x2b8(%rsp),%rdi
+  58c278:	mov    %r15,%rdx
+  58c27b:	lea    0x1d0(%rsp),%rcx
+  58c283:	mov    %rax,%r14
+  58c286:	call   5e5be0 <gpui_canvas::canvas::mask_kernel::coverage::<fearless_simd::generated::sse2::Sse2>>
+  58c28b:	mov    %r13,%rdi
+  58c28e:	mov    %rbp,%rsi
+  58c291:	lea    0x318(%rsp),%rdx
+  58c299:	mov    %eax,%ecx
+  58c29b:	call   591b40 <<gpui_canvas::canvas::samples::Samples>::blend_mask>
+  58c2a0:	mov    %r14,%rax
+  58c2a3:	mov    %r12,%rsi
+  58c2a6:	cmp    %rbx,%r12
+  58c2a9:	jb     58c260 <gpui_canvas::canvas::render_band_impl::<gpui_canvas::canvas::BgrxEncoder, fearless_simd::generated::sse2::Sse2>+0xe20>
+  58c2ab:	inc    %r15
+  58c2ae:	add    $0x10,%rax
+  58c2b2:	cmp    0x40(%rsp),%r15
+  58c2b7:	mov    %r13,%r14
+  58c2ba:	lea    0x318(%rsp),%r13
+  58c2c2:	mov    %r15,%rdi
+  58c2c5:	jne    58c250 <gpui_canvas::canvas::render_band_impl::<gpui_canvas::canvas::BgrxEncoder, fearless_simd::generated::sse2::Sse2>+0xe10>
+  58c2c7:	jmp    58bc60 <gpui_canvas::canvas::render_band_impl::<gpui_canvas::canvas::BgrxEncoder, fearless_simd::generated::sse2::Sse2>+0x820>
+  58c2cc:	nopl   0x0(%rax)
+  58c2d0:	mov    0x100(%rsp),%rdi
+  58c2d8:	cmp    0x40(%rsp),%rdi
+  58c2dd:	mov    %r14,%r13
+  58c2e0:	je     58bc60 <gpui_canvas::canvas::render_band_impl::<gpui_canvas::canvas::BgrxEncoder, fearless_simd::generated::sse2::Sse2>+0x820>
+  58c2e6:	mov    %rdi,%rbp
+  58c2e9:	sub    0x10(%rsp),%rbp
+  58c2ee:	cmp    $0xf,%rbp
+  58c2f2:	ja     58cf96 <gpui_canvas::canvas::render_band_impl::<gpui_canvas::canvas::BgrxEncoder, fearless_simd::generated::sse2::Sse2>+0x1b56>
+  58c2f8:	mov    %r13,%r14
+  58c2fb:	inc    %rdi
+  58c2fe:	mov    %rdi,0x100(%rsp)
+  58c306:	mov    %rbp,%r15
+  58c309:	sub    0x268(%rsp),%r15
+  58c311:	shl    $0x4,%r15
+  58c315:	shl    $0x5,%rbp
+  58c319:	lea    0x9a8(%rsp),%rax
+  58c321:	add    %rax,%rbp
+  58c324:	mov    0x18(%rsp),%rsi
+  58c329:	jmp    58c39d <gpui_canvas::canvas::render_band_impl::<gpui_canvas::canvas::BgrxEncoder, fearless_simd::generated::sse2::Sse2>+0xf5d>
+  58c32b:	nopl   0x0(%rax,%rax,1)
+  58c330:	movups 0x390(%rsp),%xmm0
+  58c338:	movups 0x3a0(%rsp),%xmm1
+  58c340:	movdqu 0x3b0(%rsp),%xmm2
+  58c349:	movups 0x3c0(%rsp),%xmm3
+  58c351:	movaps %xmm3,0x1a0(%rsp)
+  58c359:	movdqa %xmm2,0x190(%rsp)
+  58c362:	movaps %xmm1,0x180(%rsp)
+  58c36a:	movaps %xmm0,0x170(%rsp)
+  58c372:	lea    0x1(%rsi),%r13
+  58c376:	add    %r15,%rsi
+  58c379:	lea    0xba8(%rsp),%rdi
+  58c381:	mov    %r14,%rdx
+  58c384:	lea    0x170(%rsp),%rcx
+  58c38c:	call   591e50 <<gpui_canvas::canvas::samples::Samples>::blend>
+  58c391:	mov    %r13,%rsi
+  58c394:	cmp    %rbx,%r13
+  58c397:	jae    58c2d0 <gpui_canvas::canvas::render_band_impl::<gpui_canvas::canvas::BgrxEncoder, fearless_simd::generated::sse2::Sse2>+0xe90>
+  58c39d:	incq   0x1f8(%rsp)
+  58c3a5:	mov    %rsi,%rdi
+  58c3a8:	sub    0x70(%rsp),%rdi
+  58c3ad:	cmp    $0xf,%rdi
+  58c3b1:	ja     58cfc6 <gpui_canvas::canvas::render_band_impl::<gpui_canvas::canvas::BgrxEncoder, fearless_simd::generated::sse2::Sse2>+0x1b86>
+  58c3b7:	shl    $0x5,%rdi
+  58c3bb:	lea    0x7a8(%rsp),%rax
+  58c3c3:	movups (%rax,%rdi,1),%xmm0
+  58c3c7:	movups 0x10(%rax,%rdi,1),%xmm1
+  58c3cc:	movaps %xmm1,0x280(%rsp)
+  58c3d4:	movaps %xmm0,0x270(%rsp)
+  58c3dc:	movups 0x0(%rbp),%xmm0
+  58c3e0:	movups 0x10(%rbp),%xmm1
+  58c3e4:	movaps %xmm1,0x2a0(%rsp)
+  58c3ec:	movaps %xmm0,0x290(%rsp)
+  58c3f4:	mov    0x270(%rsp),%rax
+  58c3fc:	cmp    %rax,0x278(%rsp)
+  58c404:	jne    58c4c0 <gpui_canvas::canvas::render_band_impl::<gpui_canvas::canvas::BgrxEncoder, fearless_simd::generated::sse2::Sse2>+0x1080>
+  58c40a:	cmp    %rax,0x280(%rsp)
+  58c412:	jne    58c4c0 <gpui_canvas::canvas::render_band_impl::<gpui_canvas::canvas::BgrxEncoder, fearless_simd::generated::sse2::Sse2>+0x1080>
+  58c418:	cmp    %rax,0x288(%rsp)
+  58c420:	jne    58c4c0 <gpui_canvas::canvas::render_band_impl::<gpui_canvas::canvas::BgrxEncoder, fearless_simd::generated::sse2::Sse2>+0x1080>
+  58c426:	mov    0x290(%rsp),%rdi
+  58c42e:	cmp    %rdi,0x298(%rsp)
+  58c436:	jne    58c4c0 <gpui_canvas::canvas::render_band_impl::<gpui_canvas::canvas::BgrxEncoder, fearless_simd::generated::sse2::Sse2>+0x1080>
+  58c43c:	cmp    %rdi,0x2a0(%rsp)
+  58c444:	jne    58c4c0 <gpui_canvas::canvas::render_band_impl::<gpui_canvas::canvas::BgrxEncoder, fearless_simd::generated::sse2::Sse2>+0x1080>
+  58c446:	cmp    %rdi,0x2a8(%rsp)
+  58c44e:	jne    58c4c0 <gpui_canvas::canvas::render_band_impl::<gpui_canvas::canvas::BgrxEncoder, fearless_simd::generated::sse2::Sse2>+0x1080>
+  58c450:	xorps  %xmm0,%xmm0
+  58c453:	cmp    $0xffffffffffffffff,%rax
+  58c457:	movss  -0x5564f7(%rip),%xmm1        # 35f68 <anon.5be91be43c2876666deeb2bf5df5d357.235.llvm.1276089336069091895+0x190>
+  58c45f:	je     58c48c <gpui_canvas::canvas::render_band_impl::<gpui_canvas::canvas::BgrxEncoder, fearless_simd::generated::sse2::Sse2>+0x104c>
+  58c461:	cmp    $0xffffffffffffffff,%rdi
+  58c465:	je     58c48c <gpui_canvas::canvas::render_band_impl::<gpui_canvas::canvas::BgrxEncoder, fearless_simd::generated::sse2::Sse2>+0x104c>
+  58c467:	add    %rax,%rdi
+  58c46a:	mov    0x10(%r12),%rax
+  58c46f:	cmp    %rax,%rdi
+  58c472:	jae    58cf16 <gpui_canvas::canvas::render_band_impl::<gpui_canvas::canvas::BgrxEncoder, fearless_simd::generated::sse2::Sse2>+0x1ad6>
+  58c478:	mov    0x8(%r12),%rax
+  58c47d:	movzbl (%rax,%rdi,1),%eax
+  58c481:	xorps  %xmm0,%xmm0
+  58c484:	cvtsi2ss %eax,%xmm0
+  58c488:	divss  %xmm1,%xmm0
+  58c48c:	shufps $0x0,%xmm0,%xmm0
+  58c490:	movaps %xmm0,0x170(%rsp)
+  58c498:	movaps %xmm0,0x180(%rsp)
+  58c4a0:	movaps %xmm0,0x190(%rsp)
+  58c4a8:	movaps %xmm0,0x1a0(%rsp)
+  58c4b0:	jmp    58c372 <gpui_canvas::canvas::render_band_impl::<gpui_canvas::canvas::BgrxEncoder, fearless_simd::generated::sse2::Sse2>+0xf32>
+  58c4b5:	data16 cs nopw 0x0(%rax,%rax,1)
+  58c4c0:	xor    %ecx,%ecx
+  58c4c2:	movss  -0x556562(%rip),%xmm1        # 35f68 <anon.5be91be43c2876666deeb2bf5df5d357.235.llvm.1276089336069091895+0x190>
+  58c4ca:	jmp    58c4e6 <gpui_canvas::canvas::render_band_impl::<gpui_canvas::canvas::BgrxEncoder, fearless_simd::generated::sse2::Sse2>+0x10a6>
+  58c4cc:	nopl   0x0(%rax)
+  58c4d0:	movss  %xmm0,0x390(%rsp,%rcx,4)
+  58c4d9:	inc    %rcx
+  58c4dc:	cmp    $0x10,%rcx
+  58c4e0:	je     58c330 <gpui_canvas::canvas::render_band_impl::<gpui_canvas::canvas::BgrxEncoder, fearless_simd::generated::sse2::Sse2>+0xef0>
+  58c4e6:	mov    %ecx,%eax
+  58c4e8:	and    $0x3,%eax
+  58c4eb:	mov    0x270(%rsp,%rax,8),%rax
+  58c4f3:	xorps  %xmm0,%xmm0
+  58c4f6:	cmp    $0xffffffffffffffff,%rax
+  58c4fa:	je     58c4d0 <gpui_canvas::canvas::render_band_impl::<gpui_canvas::canvas::BgrxEncoder, fearless_simd::generated::sse2::Sse2>+0x1090>
+  58c4fc:	mov    %rcx,%rdx
+  58c4ff:	and    $0xfffffffffffffffc,%rdx
+  58c503:	mov    0x290(%rsp,%rdx,2),%rdi
+  58c50b:	cmp    $0xffffffffffffffff,%rdi
+  58c50f:	je     58c4d0 <gpui_canvas::canvas::render_band_impl::<gpui_canvas::canvas::BgrxEncoder, fearless_simd::generated::sse2::Sse2>+0x1090>
+  58c511:	add    %rax,%rdi
+  58c514:	mov    0x10(%r12),%rax
+  58c519:	cmp    %rax,%rdi
+  58c51c:	jae    58cf16 <gpui_canvas::canvas::render_band_impl::<gpui_canvas::canvas::BgrxEncoder, fearless_simd::generated::sse2::Sse2>+0x1ad6>
+  58c522:	mov    0x8(%r12),%rax
+  58c527:	movzbl (%rax,%rdi,1),%eax
+  58c52b:	xorps  %xmm0,%xmm0
+  58c52e:	cvtsi2ss %eax,%xmm0
+  58c532:	divss  %xmm1,%xmm0
+  58c536:	jmp    58c4d0 <gpui_canvas::canvas::render_band_impl::<gpui_canvas::canvas::BgrxEncoder, fearless_simd::generated::sse2::Sse2>+0x1090>
+  58c538:	mov    0x2c0(%rsp),%rax
+  58c540:	mov    (%rax),%rcx
+  58c543:	mov    0x28(%rcx),%rax
+  58c547:	movsd  0x30(%rcx),%xmm0
+  58c54c:	mov    $0x1,%dl
+  58c54e:	cmpb   $0x0,0x10(%rcx)
+  58c552:	mov    $0x1,%r10b
+  58c555:	mov    $0x1,%r9b
+  58c558:	jne    58c569 <gpui_canvas::canvas::render_band_impl::<gpui_canvas::canvas::BgrxEncoder, fearless_simd::generated::sse2::Sse2>+0x1129>
+  58c55a:	movzbl 0x11(%rcx),%edi
+  58c55e:	movzbl 0x12(%rcx),%r11d
+  58c563:	xor    %r10d,%r10d
+  58c566:	mov    %edx,%r9d
+  58c569:	movups 0x18(%rcx),%xmm1
+  58c56d:	mov    %r10b,0x390(%rsp)
+  58c575:	mov    %dil,0x391(%rsp)
+  58c57d:	mov    %r11b,0x392(%rsp)
+  58c585:	movups %xmm1,0x398(%rsp)
+  58c58d:	mov    %rax,0x3a8(%rsp)
+  58c595:	movlps %xmm0,0x3b0(%rsp)
+  58c59d:	mov    0x70(%rsp),%rax
+  58c5a2:	mov    %rax,0x170(%rsp)
+  58c5aa:	mov    0x10(%rsp),%rax
+  58c5af:	mov    %rax,0x178(%rsp)
+  58c5b7:	mov    0x38(%rsp),%rax
+  58c5bc:	mov    %rax,0x180(%rsp)
+  58c5c4:	mov    0x20(%rsp),%rax
+  58c5c9:	mov    %rax,0x188(%rsp)
+  58c5d1:	movzbl %r9b,%r9d
+  58c5d5:	mov    %r14,%rdi
+  58c5d8:	lea    0x170(%rsp),%rdx
+  58c5e0:	lea    0x1d0(%rsp),%rcx
+  58c5e8:	call   *0x1ef0ea(%rip)        # 77b6d8 <_DYNAMIC+0xa80>
+  58c5ee:	xor    %ebx,%ebx
+  58c5f0:	cmp    0x158(%rsp),%r12
+  58c5f8:	mov    0xf0(%rsp),%r9
+  58c600:	jne    58bc88 <gpui_canvas::canvas::render_band_impl::<gpui_canvas::canvas::BgrxEncoder, fearless_simd::generated::sse2::Sse2>+0x848>
+  58c606:	jmp    58c958 <gpui_canvas::canvas::render_band_impl::<gpui_canvas::canvas::BgrxEncoder, fearless_simd::generated::sse2::Sse2>+0x1518>
+  58c60b:	mov    0x2c0(%rsp),%rax
+  58c613:	mov    (%rax),%rcx
+  58c616:	mov    0x28(%rcx),%rax
+  58c61a:	movsd  0x30(%rcx),%xmm0
+  58c61f:	mov    $0x1,%r10b
+  58c622:	xor    %edx,%edx
+  58c624:	cmpb   $0x0,0x10(%rcx)
+  58c628:	mov    $0x0,%r9d
+  58c62e:	je     58c55a <gpui_canvas::canvas::render_band_impl::<gpui_canvas::canvas::BgrxEncoder, fearless_simd::generated::sse2::Sse2>+0x111a>
+  58c634:	jmp    58c569 <gpui_canvas::canvas::render_band_impl::<gpui_canvas::canvas::BgrxEncoder, fearless_simd::generated::sse2::Sse2>+0x1129>
+  58c639:	mov    0xc8(%rsp),%rax
+  58c641:	add    %rdi,%rax
+  58c644:	shl    $0x4,%rax
+  58c648:	nopl   0x0(%rax,%rax,1)
+  58c650:	mov    0x18(%rsp),%rdx
+  58c655:	lea    0x390(%rsp),%r14
+  58c65d:	mov    %rdi,%r15
+  58c660:	lea    0x1(%rdx),%r12
+  58c664:	lea    (%rax,%rdx,1),%rbp
+  58c668:	incq   0x1f8(%rsp)
+  58c670:	mov    %r14,%rdi
+  58c673:	lea    0x2b8(%rsp),%rsi
+  58c67b:	mov    %r15,%rcx
+  58c67e:	lea    0x1d0(%rsp),%r8
+  58c686:	mov    %rax,%r13
+  58c689:	call   *0x1ef051(%rip)        # 77b6e0 <_DYNAMIC+0xa88>
+  58c68f:	lea    0xba8(%rsp),%rdi
+  58c697:	mov    %rbp,%rsi
+  58c69a:	lea    0x318(%rsp),%rdx
+  58c6a2:	mov    %r14,%rcx
+  58c6a5:	call   591e50 <<gpui_canvas::canvas::samples::Samples>::blend>
+  58c6aa:	mov    %r13,%rax
+  58c6ad:	mov    %r12,%rdx
+  58c6b0:	cmp    %rbx,%r12
+  58c6b3:	jb     58c660 <gpui_canvas::canvas::render_band_impl::<gpui_canvas::canvas::BgrxEncoder, fearless_simd::generated::sse2::Sse2>+0x1220>
+  58c6b5:	inc    %r15
+  58c6b8:	add    $0x10,%rax
+  58c6bc:	cmp    0x40(%rsp),%r15
+  58c6c1:	lea    0x318(%rsp),%r13
+  58c6c9:	mov    %r15,%rdi
+  58c6cc:	jne    58c650 <gpui_canvas::canvas::render_band_impl::<gpui_canvas::canvas::BgrxEncoder, fearless_simd::generated::sse2::Sse2>+0x1210>
+  58c6ce:	jmp    58bc60 <gpui_canvas::canvas::render_band_impl::<gpui_canvas::canvas::BgrxEncoder, fearless_simd::generated::sse2::Sse2>+0x820>
+  58c6d3:	movups 0x318(%rsp),%xmm0
+  58c6db:	movss  -0x556d73(%rip),%xmm1        # 35970 <anon.5be91be43c2876666deeb2bf5df5d357.300.llvm.1276089336069091895+0x48>
+  58c6e3:	subss  0x324(%rsp),%xmm1
+  58c6ec:	shufps $0x0,%xmm1,%xmm1
+  58c6f0:	movaps 0x120(%rsp),%xmm2
+  58c6f8:	mulps  %xmm1,%xmm2
+  58c6fb:	addps  %xmm0,%xmm2
+  58c6fe:	movaps %xmm2,0x120(%rsp)
+  58c706:	mov    $0x1,%ebx
+  58c70b:	jmp    58c5f0 <gpui_canvas::canvas::render_band_impl::<gpui_canvas::canvas::BgrxEncoder, fearless_simd::generated::sse2::Sse2>+0x11b0>
+  58c710:	mov    0xf8(%rsp),%r12
+  58c718:	jmp    58c5f0 <gpui_canvas::canvas::render_band_impl::<gpui_canvas::canvas::BgrxEncoder, fearless_simd::generated::sse2::Sse2>+0x11b0>
+  58c71d:	mov    %rdi,0x18(%rsp)
+  58c722:	not    %rbp
+  58c725:	mov    %rsi,0x40(%rsp)
+  58c72a:	add    %rsi,%rbp
+  58c72d:	jmp    58c74c <gpui_canvas::canvas::render_band_impl::<gpui_canvas::canvas::BgrxEncoder, fearless_simd::generated::sse2::Sse2>+0x130c>
+  58c72f:	nop
+  58c730:	movdqa 0xa0(%rsp),%xmm0
+  58c739:	mov    %r15,%r9
+  58c73c:	dec    %rbp
+  58c73f:	add    $0xfffffffffffffffc,%r14
+  58c743:	cmp    %r14,%rbx
+  58c746:	je     58c8a6 <gpui_canvas::canvas::render_band_impl::<gpui_canvas::canvas::BgrxEncoder, fearless_simd::generated::sse2::Sse2>+0x1466>
+  58c74c:	mov    0x11c08(%rsp),%rax
+  58c754:	movzwl -0x4(%rax,%r14,1),%edi
+  58c75a:	mov    0x80(%r9),%rsi
+  58c761:	cmp    %rdi,%rsi
+  58c764:	jbe    58cfe5 <gpui_canvas::canvas::render_band_impl::<gpui_canvas::canvas::BgrxEncoder, fearless_simd::generated::sse2::Sse2>+0x1ba5>
+  58c76a:	mov    0x78(%r9),%rax
+  58c76e:	lea    (%rdi,%rdi,1),%rcx
+  58c772:	shl    $0x4,%edi
+  58c775:	sub    %rcx,%rdi
+  58c778:	mov    (%rax,%rdi,1),%rcx
+  58c77c:	mov    0x6(%rax,%rdi,1),%rax
+  58c781:	mov    %rax,0x2be(%rsp)
+  58c789:	mov    %rcx,0x2b8(%rsp)
+  58c791:	cmpw   $0xffff,0x2c2(%rsp)
+  58c79a:	jne    58c73c <gpui_canvas::canvas::render_band_impl::<gpui_canvas::canvas::BgrxEncoder, fearless_simd::generated::sse2::Sse2>+0x12fc>
+  58c79c:	movq   $0x0,0x7a0(%rsp)
+  58c7a8:	movss  0x6c(%rsp),%xmm0
+  58c7ae:	movss  %xmm0,0x7a8(%rsp)
+  58c7b7:	movss  0x68(%rsp),%xmm0
+  58c7bd:	movss  %xmm0,0x7ac(%rsp)
+  58c7c6:	lea    0x390(%rsp),%rdi
+  58c7ce:	mov    %r9,%r15
+  58c7d1:	mov    %r9,%rsi
+  58c7d4:	lea    0x2b8(%rsp),%rdx
+  58c7dc:	lea    0x7a0(%rsp),%rcx
+  58c7e4:	call   592cc0 <<gpui_canvas::canvas::DisplayList>::get>
+  58c7e9:	movss  0x3fc(%rsp),%xmm0
+  58c7f2:	ucomiss -0x556e89(%rip),%xmm0        # 35970 <anon.5be91be43c2876666deeb2bf5df5d357.300.llvm.1276089336069091895+0x48>
+  58c7f9:	jne    58c730 <gpui_canvas::canvas::render_band_impl::<gpui_canvas::canvas::BgrxEncoder, fearless_simd::generated::sse2::Sse2>+0x12f0>
+  58c7ff:	jp     58c730 <gpui_canvas::canvas::render_band_impl::<gpui_canvas::canvas::BgrxEncoder, fearless_simd::generated::sse2::Sse2>+0x12f0>
+  58c805:	mov    0x3f0(%rsp),%edx
+  58c80c:	mov    0x3f4(%rsp),%ecx
+  58c813:	mov    0x3f8(%rsp),%eax
+  58c81a:	test   %edx,%edx
+  58c81c:	jns    58c832 <gpui_canvas::canvas::render_band_impl::<gpui_canvas::canvas::BgrxEncoder, fearless_simd::generated::sse2::Sse2>+0x13f2>
+  58c81e:	and    $0x7f800000,%edx
+  58c824:	dec    %edx
+  58c826:	cmp    $0x7f7fffff,%edx
+  58c82c:	jae    58c730 <gpui_canvas::canvas::render_band_impl::<gpui_canvas::canvas::BgrxEncoder, fearless_simd::generated::sse2::Sse2>+0x12f0>
+  58c832:	test   %ecx,%ecx
+  58c834:	jns    58c84a <gpui_canvas::canvas::render_band_impl::<gpui_canvas::canvas::BgrxEncoder, fearless_simd::generated::sse2::Sse2>+0x140a>
+  58c836:	and    $0x7f800000,%ecx
+  58c83c:	dec    %ecx
+  58c83e:	cmp    $0x7f7ffffe,%ecx
+  58c844:	ja     58c730 <gpui_canvas::canvas::render_band_impl::<gpui_canvas::canvas::BgrxEncoder, fearless_simd::generated::sse2::Sse2>+0x12f0>
+  58c84a:	test   %eax,%eax
+  58c84c:	jns    58c860 <gpui_canvas::canvas::render_band_impl::<gpui_canvas::canvas::BgrxEncoder, fearless_simd::generated::sse2::Sse2>+0x1420>
+  58c84e:	and    $0x7f800000,%eax
+  58c853:	dec    %eax
+  58c855:	cmp    $0x7f7ffffe,%eax
+  58c85a:	ja     58c730 <gpui_canvas::canvas::render_band_impl::<gpui_canvas::canvas::BgrxEncoder, fearless_simd::generated::sse2::Sse2>+0x12f0>
+  58c860:	cmpl   $0x0,0x390(%rsp)
+  58c868:	jne    58c730 <gpui_canvas::canvas::render_band_impl::<gpui_canvas::canvas::BgrxEncoder, fearless_simd::generated::sse2::Sse2>+0x12f0>
+  58c86e:	lea    0x390(%rsp),%rdi
+  58c876:	mov    0x70(%rsp),%rsi
+  58c87b:	mov    0x10(%rsp),%rdx
+  58c880:	mov    0x38(%rsp),%rcx
+  58c885:	mov    0x20(%rsp),%r8
+  58c88a:	call   *0x1eee38(%rip)        # 77b6c8 <_DYNAMIC+0xa70>
+  58c890:	test   %al,%al
+  58c892:	movdqa 0xa0(%rsp),%xmm0
+  58c89b:	mov    %r15,%r9
+  58c89e:	je     58c73c <gpui_canvas::canvas::render_band_impl::<gpui_canvas::canvas::BgrxEncoder, fearless_simd::generated::sse2::Sse2>+0x12fc>
+  58c8a4:	jmp    58c8a8 <gpui_canvas::canvas::render_band_impl::<gpui_canvas::canvas::BgrxEncoder, fearless_simd::generated::sse2::Sse2>+0x1468>
+  58c8a6:	xor    %ebp,%ebp
+  58c8a8:	mov    0x40(%rsp),%rsi
+  58c8ad:	mov    0x18(%rsp),%rdi
+  58c8b2:	mov    0x2c(%rsp),%eax
+  58c8b6:	cmp    0x30(%rsp),%eax
+  58c8ba:	jne    58bb09 <gpui_canvas::canvas::render_band_impl::<gpui_canvas::canvas::BgrxEncoder, fearless_simd::generated::sse2::Sse2>+0x6c9>
+  58c8c0:	mov    0x98(%rsp),%r14
+  58c8c8:	add    %rbp,0x1f0(%rsp)
+  58c8d0:	cmp    %rdi,%rbp
+  58c8d3:	jbe    58bb3e <gpui_canvas::canvas::render_band_impl::<gpui_canvas::canvas::BgrxEncoder, fearless_simd::generated::sse2::Sse2>+0x6fe>
+  58c8d9:	jmp    58cf3e <gpui_canvas::canvas::render_band_impl::<gpui_canvas::canvas::BgrxEncoder, fearless_simd::generated::sse2::Sse2>+0x1afe>
+  58c8de:	mov    0xd8(%rsp),%rdi
+  58c8e6:	lea    0x7a0(%rsp),%rsi
+  58c8ee:	mov    %r9,%rbx
+  58c8f1:	call   *0x1eee11(%rip)        # 77b708 <_DYNAMIC+0xab0>
+  58c8f7:	mov    %rbx,%r9
+  58c8fa:	mov    %eax,%ecx
+  58c8fc:	shr    $0x8,%ecx
+  58c8ff:	mov    %eax,%edx
+  58c901:	shr    $0x10,%edx
+  58c904:	jmp    58ca4a <gpui_canvas::canvas::render_band_impl::<gpui_canvas::canvas::BgrxEncoder, fearless_simd::generated::sse2::Sse2>+0x160a>
+  58c909:	xor    %eax,%eax
+  58c90b:	shufps $0x55,%xmm0,%xmm0
+  58c90f:	xorps  %xmm1,%xmm1
+  58c912:	ucomiss %xmm0,%xmm1
+  58c915:	jae    58c9da <gpui_canvas::canvas::render_band_impl::<gpui_canvas::canvas::BgrxEncoder, fearless_simd::generated::sse2::Sse2>+0x159a>
+  58c91b:	mov    $0xff,%cl
+  58c91d:	ucomiss -0x556fb4(%rip),%xmm0        # 35970 <anon.5be91be43c2876666deeb2bf5df5d357.300.llvm.1276089336069091895+0x48>
+  58c924:	jae    58c9dc <gpui_canvas::canvas::render_band_impl::<gpui_canvas::canvas::BgrxEncoder, fearless_simd::generated::sse2::Sse2>+0x159c>
+  58c92a:	movd   %xmm0,%edx
+  58c92e:	mov    0x90(%rsp),%rsi
+  58c936:	cmp    %edx,0x800(%rsi)
+  58c93c:	jbe    58ca24 <gpui_canvas::canvas::render_band_impl::<gpui_canvas::canvas::BgrxEncoder, fearless_simd::generated::sse2::Sse2>+0x15e4>
+  58c942:	xor    %ecx,%ecx
+  58c944:	movhlps %xmm2,%xmm2
+  58c947:	xorps  %xmm0,%xmm0
+  58c94a:	ucomiss %xmm2,%xmm0
+  58c94d:	jb     58c9e7 <gpui_canvas::canvas::render_band_impl::<gpui_canvas::canvas::BgrxEncoder, fearless_simd::generated::sse2::Sse2>+0x15a7>
+  58c953:	jmp    58ca48 <gpui_canvas::canvas::render_band_impl::<gpui_canvas::canvas::BgrxEncoder, fearless_simd::generated::sse2::Sse2>+0x1608>
+  58c958:	mov    0x64(%rsp),%eax
+  58c95c:	mov    %eax,0x390(%rsp)
+  58c963:	movups 0x1bc(%rsp),%xmm0
+  58c96b:	lea    0x394(%rsp),%rax
+  58c973:	movups %xmm0,0xc(%rax)
+  58c977:	movaps 0x1b0(%rsp),%xmm0
+  58c97f:	movups %xmm0,(%rax)
+  58c982:	mov    0x2c(%rsp),%eax
+  58c986:	cmp    0x30(%rsp),%eax
+  58c98a:	setne  %al
+  58c98d:	test   %bl,%al
+  58c98f:	mov    0x98(%rsp),%r14
+  58c997:	movaps 0x120(%rsp),%xmm1
+  58c99f:	jne    58bb9d <gpui_canvas::canvas::render_band_impl::<gpui_canvas::canvas::BgrxEncoder, fearless_simd::generated::sse2::Sse2>+0x75d>
+  58c9a5:	cmp    $0x1,%ebx
+  58c9a8:	je     58ca64 <gpui_canvas::canvas::render_band_impl::<gpui_canvas::canvas::BgrxEncoder, fearless_simd::generated::sse2::Sse2>+0x1624>
+  58c9ae:	jmp    58cb22 <gpui_canvas::canvas::render_band_impl::<gpui_canvas::canvas::BgrxEncoder, fearless_simd::generated::sse2::Sse2>+0x16e2>
+  58c9b3:	mov    %ecx,%eax
+  58c9b5:	shr    $0x10,%eax
+  58c9b8:	and    $0x7ff,%eax
+  58c9bd:	movzbl (%rdx,%rax,1),%eax
+  58c9c1:	cmp    0x800(%rdx,%rax,4),%ecx
+  58c9c8:	sbb    $0xff,%al
+  58c9ca:	shufps $0x55,%xmm0,%xmm0
+  58c9ce:	xorps  %xmm1,%xmm1
+  58c9d1:	ucomiss %xmm0,%xmm1
+  58c9d4:	jb     58c91b <gpui_canvas::canvas::render_band_impl::<gpui_canvas::canvas::BgrxEncoder, fearless_simd::generated::sse2::Sse2>+0x14db>
+  58c9da:	xor    %ecx,%ecx
+  58c9dc:	movhlps %xmm2,%xmm2
+  58c9df:	xorps  %xmm0,%xmm0
+  58c9e2:	ucomiss %xmm2,%xmm0
+  58c9e5:	jae    58ca48 <gpui_canvas::canvas::render_band_impl::<gpui_canvas::canvas::BgrxEncoder, fearless_simd::generated::sse2::Sse2>+0x1608>
+  58c9e7:	movaps %xmm2,%xmm0
+  58c9ea:	mov    $0xff,%dl
+  58c9ec:	ucomiss -0x557083(%rip),%xmm2        # 35970 <anon.5be91be43c2876666deeb2bf5df5d357.300.llvm.1276089336069091895+0x48>
+  58c9f3:	jae    58ca4a <gpui_canvas::canvas::render_band_impl::<gpui_canvas::canvas::BgrxEncoder, fearless_simd::generated::sse2::Sse2>+0x160a>
+  58c9f5:	movd   %xmm0,%esi
+  58c9f9:	mov    0x90(%rsp),%rdi
+  58ca01:	cmp    %esi,0x800(%rdi)
+  58ca07:	ja     58ca48 <gpui_canvas::canvas::render_band_impl::<gpui_canvas::canvas::BgrxEncoder, fearless_simd::generated::sse2::Sse2>+0x1608>
+  58ca09:	mov    %esi,%edx
+  58ca0b:	shr    $0x10,%edx
+  58ca0e:	and    $0x7ff,%edx
+  58ca14:	movzbl (%rdi,%rdx,1),%edx
+  58ca18:	cmp    0x800(%rdi,%rdx,4),%esi
+  58ca1f:	sbb    $0xff,%dl
+  58ca22:	jmp    58ca4a <gpui_canvas::canvas::render_band_impl::<gpui_canvas::canvas::BgrxEncoder, fearless_simd::generated::sse2::Sse2>+0x160a>
+  58ca24:	mov    %edx,%ecx
+  58ca26:	shr    $0x10,%ecx
+  58ca29:	and    $0x7ff,%ecx
+  58ca2f:	movzbl (%rsi,%rcx,1),%ecx
+  58ca33:	cmp    0x800(%rsi,%rcx,4),%edx
+  58ca3a:	sbb    $0xff,%cl
+  58ca3d:	movhlps %xmm2,%xmm2
+  58ca40:	xorps  %xmm0,%xmm0
+  58ca43:	ucomiss %xmm2,%xmm0
+  58ca46:	jb     58c9e7 <gpui_canvas::canvas::render_band_impl::<gpui_canvas::canvas::BgrxEncoder, fearless_simd::generated::sse2::Sse2>+0x15a7>
+  58ca48:	xor    %edx,%edx
+  58ca4a:	movzbl %dl,%edx
+  58ca4d:	movzbl %cl,%ecx
+  58ca50:	shl    $0x8,%ecx
+  58ca53:	movzbl %al,%eax
+  58ca56:	shl    $0x10,%eax
+  58ca59:	or     %ecx,%eax
+  58ca5b:	or     %edx,%eax
+  58ca5d:	mov    %eax,0x390(%rsp)
+  58ca64:	mov    0x138(%rsp),%rdi
+  58ca6c:	mov    0xe0(%rsp),%rsi
+  58ca74:	mov    0x48(%rsp),%rbx
+  58ca79:	mov    %rbx,%rdx
+  58ca7c:	mov    0x70(%rsp),%rcx
+  58ca81:	mov    0x38(%rsp),%r8
+  58ca86:	mov    %r9,%r12
+  58ca89:	lea    0x390(%rsp),%r9
+  58ca91:	call   *0x1eec51(%rip)        # 77b6e8 <_DYNAMIC+0xa90>
+  58ca97:	mov    %r12,%r9
+  58ca9a:	decq   0xc8(%rsp)
+  58caa2:	decq   0x148(%rsp)
+  58caaa:	addq   $0xfffffffffffffff0,0x110(%rsp)
+  58cab3:	addq   $0xffffffffffffffe0,0x160(%rsp)
+  58cabc:	addq   $0x10,0x58(%rsp)
+  58cac2:	addq   $0x40,0x50(%rsp)
+  58cac8:	addq   $0x10,0xe8(%rsp)
+  58cad1:	add    $0xfffffffffffffff0,%r14
+  58cad5:	cmp    0xb8(%rsp),%r15
+  58cadd:	movaps 0xa0(%rsp),%xmm0
+  58cae5:	jb     58b9db <gpui_canvas::canvas::render_band_impl::<gpui_canvas::canvas::BgrxEncoder, fearless_simd::generated::sse2::Sse2>+0x59b>
+  58caeb:	jmp    58b6d4 <gpui_canvas::canvas::render_band_impl::<gpui_canvas::canvas::BgrxEncoder, fearless_simd::generated::sse2::Sse2>+0x294>
+  58caf0:	mov    0x64(%rsp),%eax
+  58caf4:	mov    %eax,0x390(%rsp)
+  58cafb:	movups 0x1bc(%rsp),%xmm0
+  58cb03:	lea    0x394(%rsp),%rax
+  58cb0b:	movups %xmm0,0xc(%rax)
+  58cb0f:	movaps 0x1b0(%rsp),%xmm0
+  58cb17:	movups %xmm0,(%rax)
+  58cb1a:	mov    0x98(%rsp),%r14
+  58cb22:	mov    0x20(%rsp),%rax
+  58cb27:	cmp    %rax,0x10(%rsp)
+  58cb2c:	jae    58b910 <gpui_canvas::canvas::render_band_impl::<gpui_canvas::canvas::BgrxEncoder, fearless_simd::generated::sse2::Sse2>+0x4d0>
+  58cb32:	mov    0x38(%rsp),%rax
+  58cb37:	cmp    %rax,0x70(%rsp)
+  58cb3c:	movaps 0xa0(%rsp),%xmm0
+  58cb44:	jae    58b918 <gpui_canvas::canvas::render_band_impl::<gpui_canvas::canvas::BgrxEncoder, fearless_simd::generated::sse2::Sse2>+0x4d8>
+  58cb4a:	mov    0x90(%rsp),%r15
+  58cb52:	test   %r15,%r15
+  58cb55:	je     58cdae <gpui_canvas::canvas::render_band_impl::<gpui_canvas::canvas::BgrxEncoder, fearless_simd::generated::sse2::Sse2>+0x196e>
+  58cb5b:	mov    0x48(%rsp),%rax
+  58cb60:	mov    0xe8(%rsp),%r13
+  58cb68:	cmp    %r13,%rax
+  58cb6b:	cmovb  %rax,%r13
+  58cb6f:	add    %r14,%r13
+  58cb72:	xor    %ebx,%ebx
+  58cb74:	mov    0x10(%rsp),%rax
+  58cb79:	jmp    58cbb8 <gpui_canvas::canvas::render_band_impl::<gpui_canvas::canvas::BgrxEncoder, fearless_simd::generated::sse2::Sse2>+0x1778>
+  58cb7b:	nopl   0x0(%rax,%rax,1)
+  58cb80:	add    $0x10,%rbx
+  58cb84:	mov    0x58(%rsp),%rax
+  58cb89:	add    0x48(%rsp),%rax
+  58cb8e:	mov    %rax,0x58(%rsp)
+  58cb93:	mov    0x50(%rsp),%rax
+  58cb98:	add    0x150(%rsp),%rax
+  58cba0:	mov    %rax,0x50(%rsp)
+  58cba5:	mov    0x110(%rsp),%rax
+  58cbad:	cmp    0x20(%rsp),%rax
+  58cbb2:	je     58b918 <gpui_canvas::canvas::render_band_impl::<gpui_canvas::canvas::BgrxEncoder, fearless_simd::generated::sse2::Sse2>+0x4d8>
+  58cbb8:	inc    %rax
+  58cbbb:	mov    %rax,0x110(%rsp)
+  58cbc3:	xor    %r12d,%r12d
+  58cbc6:	jmp    58cc12 <gpui_canvas::canvas::render_band_impl::<gpui_canvas::canvas::BgrxEncoder, fearless_simd::generated::sse2::Sse2>+0x17d2>
+  58cbc8:	xor    %ecx,%ecx
+  58cbca:	movzbl %cl,%ecx
+  58cbcd:	movzbl %dl,%edx
+  58cbd0:	shl    $0x8,%edx
+  58cbd3:	movzbl %al,%eax
+  58cbd6:	shl    $0x10,%eax
+  58cbd9:	or     %edx,%eax
+  58cbdb:	or     %ecx,%eax
+  58cbdd:	mov    %eax,0x34(%rsp)
+  58cbe1:	mov    %r14,0x88(%rsp)
+  58cbe9:	mov    %rbp,0x80(%rsp)
+  58cbf1:	mov    0x50(%rsp),%rax
+  58cbf6:	mov    0x34(%rsp),%ecx
+  58cbfa:	mov    %ecx,(%rax,%r12,4)
+  58cbfe:	inc    %r12
+  58cc01:	cmp    %r12,%r13
+  58cc04:	movaps 0xa0(%rsp),%xmm0
+  58cc0c:	je     58cb80 <gpui_canvas::canvas::render_band_impl::<gpui_canvas::canvas::BgrxEncoder, fearless_simd::generated::sse2::Sse2>+0x1740>
+  58cc12:	mov    0x58(%rsp),%rax
+  58cc17:	lea    (%rax,%r12,1),%rdi
+  58cc1b:	cmp    0xe0(%rsp),%rdi
+  58cc23:	jae    58cecf <gpui_canvas::canvas::render_band_impl::<gpui_canvas::canvas::BgrxEncoder, fearless_simd::generated::sse2::Sse2>+0x1a8f>
+  58cc29:	lea    (%rbx,%r12,1),%rdx
+  58cc2d:	lea    0x7a0(%rsp),%rdi
+  58cc35:	lea    0xba8(%rsp),%rsi
+  58cc3d:	call   592530 <<gpui_canvas::canvas::samples::Samples>::color>
+  58cc42:	mov    0x7a0(%rsp),%edx
+  58cc49:	mov    0x7a4(%rsp),%ecx
+  58cc50:	mov    0x7a8(%rsp),%rbp
+  58cc58:	mov    %rcx,%r14
+  58cc5b:	shl    $0x20,%r14
+  58cc5f:	or     %rdx,%r14
+  58cc62:	mov    %rbp,%rax
+  58cc65:	xor    0x80(%rsp),%rax
+  58cc6d:	mov    %r14,%rsi
+  58cc70:	xor    0x88(%rsp),%rsi
+  58cc78:	or     %rax,%rsi
+  58cc7b:	je     58cbf1 <gpui_canvas::canvas::render_band_impl::<gpui_canvas::canvas::BgrxEncoder, fearless_simd::generated::sse2::Sse2>+0x17b1>
+  58cc81:	mov    %rbp,%rax
+  58cc84:	shr    $0x20,%rax
+  58cc88:	movd   %eax,%xmm0
+  58cc8c:	ucomiss -0x557323(%rip),%xmm0        # 35970 <anon.5be91be43c2876666deeb2bf5df5d357.300.llvm.1276089336069091895+0x48>
+  58cc93:	jne    58ccc4 <gpui_canvas::canvas::render_band_impl::<gpui_canvas::canvas::BgrxEncoder, fearless_simd::generated::sse2::Sse2>+0x1884>
+  58cc95:	jp     58ccc4 <gpui_canvas::canvas::render_band_impl::<gpui_canvas::canvas::BgrxEncoder, fearless_simd::generated::sse2::Sse2>+0x1884>
+  58cc97:	movd   %edx,%xmm0
+  58cc9b:	xorps  %xmm1,%xmm1
+  58cc9e:	ucomiss %xmm0,%xmm1
+  58cca1:	jae    58cce9 <gpui_canvas::canvas::render_band_impl::<gpui_canvas::canvas::BgrxEncoder, fearless_simd::generated::sse2::Sse2>+0x18a9>
+  58cca3:	mov    $0xff,%al
+  58cca5:	ucomiss -0x55733c(%rip),%xmm0        # 35970 <anon.5be91be43c2876666deeb2bf5df5d357.300.llvm.1276089336069091895+0x48>
+  58ccac:	jae    58cceb <gpui_canvas::canvas::render_band_impl::<gpui_canvas::canvas::BgrxEncoder, fearless_simd::generated::sse2::Sse2>+0x18ab>
+  58ccae:	cmp    %edx,0x800(%r15)
+  58ccb5:	jbe    58cd18 <gpui_canvas::canvas::render_band_impl::<gpui_canvas::canvas::BgrxEncoder, fearless_simd::generated::sse2::Sse2>+0x18d8>
+  58ccb7:	xor    %eax,%eax
+  58ccb9:	movd   %ecx,%xmm0
+  58ccbd:	ucomiss %xmm0,%xmm1
+  58ccc0:	jb     58ccf4 <gpui_canvas::canvas::render_band_impl::<gpui_canvas::canvas::BgrxEncoder, fearless_simd::generated::sse2::Sse2>+0x18b4>
+  58ccc2:	jmp    58cd3a <gpui_canvas::canvas::render_band_impl::<gpui_canvas::canvas::BgrxEncoder, fearless_simd::generated::sse2::Sse2>+0x18fa>
+  58ccc4:	mov    0xd8(%rsp),%rdi
+  58cccc:	lea    0x7a0(%rsp),%rsi
+  58ccd4:	call   *0x1eea2e(%rip)        # 77b708 <_DYNAMIC+0xab0>
+  58ccda:	mov    %eax,%edx
+  58ccdc:	shr    $0x8,%edx
+  58ccdf:	mov    %eax,%ecx
+  58cce1:	shr    $0x10,%ecx
+  58cce4:	jmp    58cbca <gpui_canvas::canvas::render_band_impl::<gpui_canvas::canvas::BgrxEncoder, fearless_simd::generated::sse2::Sse2>+0x178a>
+  58cce9:	xor    %eax,%eax
+  58cceb:	movd   %ecx,%xmm0
+  58ccef:	ucomiss %xmm0,%xmm1
+  58ccf2:	jae    58cd3a <gpui_canvas::canvas::render_band_impl::<gpui_canvas::canvas::BgrxEncoder, fearless_simd::generated::sse2::Sse2>+0x18fa>
+  58ccf4:	mov    $0xff,%dl
+  58ccf6:	ucomiss -0x55738d(%rip),%xmm0        # 35970 <anon.5be91be43c2876666deeb2bf5df5d357.300.llvm.1276089336069091895+0x48>
+  58ccfd:	jae    58cd3c <gpui_canvas::canvas::render_band_impl::<gpui_canvas::canvas::BgrxEncoder, fearless_simd::generated::sse2::Sse2>+0x18fc>
+  58ccff:	cmp    %ecx,0x800(%r15)
+  58cd06:	jbe    58cd85 <gpui_canvas::canvas::render_band_impl::<gpui_canvas::canvas::BgrxEncoder, fearless_simd::generated::sse2::Sse2>+0x1945>
+  58cd08:	xor    %edx,%edx
+  58cd0a:	movd   %ebp,%xmm0
+  58cd0e:	ucomiss %xmm0,%xmm1
+  58cd11:	jb     58cd49 <gpui_canvas::canvas::render_band_impl::<gpui_canvas::canvas::BgrxEncoder, fearless_simd::generated::sse2::Sse2>+0x1909>
+  58cd13:	jmp    58cbc8 <gpui_canvas::canvas::render_band_impl::<gpui_canvas::canvas::BgrxEncoder, fearless_simd::generated::sse2::Sse2>+0x1788>
+  58cd18:	mov    %edx,%eax
+  58cd1a:	shr    $0x10,%eax
+  58cd1d:	and    $0x7ff,%eax
+  58cd22:	movzbl (%r15,%rax,1),%eax
+  58cd27:	cmp    0x800(%r15,%rax,4),%edx
+  58cd2f:	sbb    $0xff,%al
+  58cd31:	movd   %ecx,%xmm0
+  58cd35:	ucomiss %xmm0,%xmm1
+  58cd38:	jb     58ccf4 <gpui_canvas::canvas::render_band_impl::<gpui_canvas::canvas::BgrxEncoder, fearless_simd::generated::sse2::Sse2>+0x18b4>
+  58cd3a:	xor    %edx,%edx
+  58cd3c:	movd   %ebp,%xmm0
+  58cd40:	ucomiss %xmm0,%xmm1
+  58cd43:	jae    58cbc8 <gpui_canvas::canvas::render_band_impl::<gpui_canvas::canvas::BgrxEncoder, fearless_simd::generated::sse2::Sse2>+0x1788>
+  58cd49:	mov    $0xff,%cl
+  58cd4b:	ucomiss -0x5573e2(%rip),%xmm0        # 35970 <anon.5be91be43c2876666deeb2bf5df5d357.300.llvm.1276089336069091895+0x48>
+  58cd52:	jae    58cbca <gpui_canvas::canvas::render_band_impl::<gpui_canvas::canvas::BgrxEncoder, fearless_simd::generated::sse2::Sse2>+0x178a>
+  58cd58:	cmp    %ebp,0x800(%r15)
+  58cd5f:	ja     58cbc8 <gpui_canvas::canvas::render_band_impl::<gpui_canvas::canvas::BgrxEncoder, fearless_simd::generated::sse2::Sse2>+0x1788>
+  58cd65:	mov    %ebp,%ecx
+  58cd67:	shr    $0x10,%ecx
+  58cd6a:	and    $0x7ff,%ecx
+  58cd70:	movzbl (%r15,%rcx,1),%ecx
+  58cd75:	cmp    0x800(%r15,%rcx,4),%ebp
+  58cd7d:	sbb    $0xff,%cl
+  58cd80:	jmp    58cbca <gpui_canvas::canvas::render_band_impl::<gpui_canvas::canvas::BgrxEncoder, fearless_simd::generated::sse2::Sse2>+0x178a>
+  58cd85:	mov    %ecx,%edx
+  58cd87:	shr    $0x10,%edx
+  58cd8a:	and    $0x7ff,%edx
+  58cd90:	movzbl (%r15,%rdx,1),%edx
+  58cd95:	cmp    0x800(%r15,%rdx,4),%ecx
+  58cd9d:	sbb    $0xff,%dl
+  58cda0:	movd   %ebp,%xmm0
+  58cda4:	ucomiss %xmm0,%xmm1
+  58cda7:	jb     58cd49 <gpui_canvas::canvas::render_band_impl::<gpui_canvas::canvas::BgrxEncoder, fearless_simd::generated::sse2::Sse2>+0x1909>
+  58cda9:	jmp    58cbc8 <gpui_canvas::canvas::render_band_impl::<gpui_canvas::canvas::BgrxEncoder, fearless_simd::generated::sse2::Sse2>+0x1788>
+  58cdae:	mov    0x48(%rsp),%rax
+  58cdb3:	mov    0xe8(%rsp),%r13
+  58cdbb:	cmp    %r13,%rax
+  58cdbe:	cmovb  %rax,%r13
+  58cdc2:	add    %r14,%r13
+  58cdc5:	xor    %ebx,%ebx
+  58cdc7:	mov    0x10(%rsp),%r14
+  58cdcc:	jmp    58ce00 <gpui_canvas::canvas::render_band_impl::<gpui_canvas::canvas::BgrxEncoder, fearless_simd::generated::sse2::Sse2>+0x19c0>
+  58cdce:	xchg   %ax,%ax
+  58cdd0:	add    $0x10,%rbx
+  58cdd4:	mov    0x58(%rsp),%rax
+  58cdd9:	add    0x48(%rsp),%rax
+  58cdde:	mov    %rax,0x58(%rsp)
+  58cde3:	mov    0x50(%rsp),%rax
+  58cde8:	add    0x150(%rsp),%rax
+  58cdf0:	mov    %rax,0x50(%rsp)
+  58cdf5:	cmp    0x20(%rsp),%r14
+  58cdfa:	je     58b918 <gpui_canvas::canvas::render_band_impl::<gpui_canvas::canvas::BgrxEncoder, fearless_simd::generated::sse2::Sse2>+0x4d8>
+  58ce00:	inc    %r14
+  58ce03:	xor    %r15d,%r15d
+  58ce06:	jmp    58ce2d <gpui_canvas::canvas::render_band_impl::<gpui_canvas::canvas::BgrxEncoder, fearless_simd::generated::sse2::Sse2>+0x19ed>
+  58ce08:	nopl   0x0(%rax,%rax,1)
+  58ce10:	mov    0x50(%rsp),%rax
+  58ce15:	mov    0x34(%rsp),%ecx
+  58ce19:	mov    %ecx,(%rax,%r15,4)
+  58ce1d:	inc    %r15
+  58ce20:	cmp    %r15,%r13
+  58ce23:	movaps 0xa0(%rsp),%xmm0
+  58ce2b:	je     58cdd0 <gpui_canvas::canvas::render_band_impl::<gpui_canvas::canvas::BgrxEncoder, fearless_simd::generated::sse2::Sse2>+0x1990>
+  58ce2d:	mov    0x58(%rsp),%rax
+  58ce32:	lea    (%rax,%r15,1),%rdi
+  58ce36:	cmp    0xe0(%rsp),%rdi
+  58ce3e:	jae    58cecf <gpui_canvas::canvas::render_band_impl::<gpui_canvas::canvas::BgrxEncoder, fearless_simd::generated::sse2::Sse2>+0x1a8f>
+  58ce44:	lea    (%rbx,%r15,1),%rdx
+  58ce48:	lea    0x7a0(%rsp),%rdi
+  58ce50:	lea    0xba8(%rsp),%rsi
+  58ce58:	call   592530 <<gpui_canvas::canvas::samples::Samples>::color>
+  58ce5d:	mov    0x7a0(%rsp),%r12
+  58ce65:	mov    0x7a8(%rsp),%rbp
+  58ce6d:	mov    %rbp,%rax
+  58ce70:	xor    0x80(%rsp),%rax
+  58ce78:	mov    %r12,%rcx
+  58ce7b:	xor    0x88(%rsp),%rcx
+  58ce83:	or     %rax,%rcx
+  58ce86:	je     58ce10 <gpui_canvas::canvas::render_band_impl::<gpui_canvas::canvas::BgrxEncoder, fearless_simd::generated::sse2::Sse2>+0x19d0>
+  58ce88:	mov    0xd8(%rsp),%rdi
+  58ce90:	lea    0x7a0(%rsp),%rsi
+  58ce98:	call   *0x1ee86a(%rip)        # 77b708 <_DYNAMIC+0xab0>
+  58ce9e:	mov    %eax,%ecx
+  58cea0:	movzbl %al,%edx
+  58cea3:	shr    $0x10,%eax
+  58cea6:	movzbl %al,%eax
+  58cea9:	and    $0xff00,%ecx
+  58ceaf:	shl    $0x10,%edx
+  58ceb2:	or     %ecx,%edx
+  58ceb4:	or     %eax,%edx
+  58ceb6:	mov    %edx,0x34(%rsp)
+  58ceba:	mov    %r12,0x88(%rsp)
+  58cec2:	mov    %rbp,0x80(%rsp)
+  58ceca:	jmp    58ce10 <gpui_canvas::canvas::render_band_impl::<gpui_canvas::canvas::BgrxEncoder, fearless_simd::generated::sse2::Sse2>+0x19d0>
+  58cecf:	lea    0x1(%rdi),%rsi
+  58ced3:	lea    0x1d9ed6(%rip),%rcx        # 766db0 <anon.be4d51fbbe824da7f5ab1afc5d73eb57.0.llvm.5255786034794295177+0x50c8>
+  58ceda:	mov    0xe0(%rsp),%rdx
+  58cee2:	call   *0x1ee128(%rip)        # 77b010 <_DYNAMIC+0x3b8>
+  58cee8:	mov    %edi,%esi
+  58ceea:	shr    $0x10,%esi
+  58ceed:	and    $0x7ff,%esi
+  58cef3:	movzbl (%rcx,%rsi,1),%esi
+  58cef7:	cmp    0x800(%rcx,%rsi,4),%edi
+  58cefe:	sbb    $0xff,%sil
+  58cf02:	cmpq   $0x0,0x11c00(%rsp)
+  58cf0b:	jne    58b6a7 <gpui_canvas::canvas::render_band_impl::<gpui_canvas::canvas::BgrxEncoder, fearless_simd::generated::sse2::Sse2>+0x267>
+  58cf11:	jmp    58b5ef <gpui_canvas::canvas::render_band_impl::<gpui_canvas::canvas::BgrxEncoder, fearless_simd::generated::sse2::Sse2>+0x1af>
+  58cf16:	lea    0x1d9f23(%rip),%rdx        # 766e40 <anon.be4d51fbbe824da7f5ab1afc5d73eb57.0.llvm.5255786034794295177+0x5158>
+  58cf1d:	mov    %rax,%rsi
+  58cf20:	call   *0x1ee00a(%rip)        # 77af30 <_DYNAMIC+0x2d8>
+  58cf26:	lea    0x1d9eb3(%rip),%rcx        # 766de0 <anon.be4d51fbbe824da7f5ab1afc5d73eb57.0.llvm.5255786034794295177+0x50f8>
+  58cf2d:	mov    %rbp,%rdi
+  58cf30:	mov    0x11c10(%rsp),%rdx
+  58cf38:	call   *0x1ee0d2(%rip)        # 77b010 <_DYNAMIC+0x3b8>
+  58cf3e:	lea    0x1d9e83(%rip),%rcx        # 766dc8 <anon.be4d51fbbe824da7f5ab1afc5d73eb57.0.llvm.5255786034794295177+0x50e0>
+  58cf45:	mov    %rdi,%rdx
+  58cf48:	mov    %rbp,%rdi
+  58cf4b:	mov    %rdx,%rsi
+  58cf4e:	call   *0x1ee0bc(%rip)        # 77b010 <_DYNAMIC+0x3b8>
+  58cf54:	incq   0x1f8(%rsp)
+  58cf5c:	mov    0x18(%rsp),%rax
+  58cf61:	sub    0x70(%rsp),%rax
+  58cf66:	mov    %rax,%rdi
+  58cf69:	cmp    $0x10,%rax
+  58cf6d:	jae    58cf84 <gpui_canvas::canvas::render_band_impl::<gpui_canvas::canvas::BgrxEncoder, fearless_simd::generated::sse2::Sse2>+0x1b44>
+  58cf6f:	lea    0x1d9e22(%rip),%rdx        # 766d98 <anon.be4d51fbbe824da7f5ab1afc5d73eb57.0.llvm.5255786034794295177+0x50b0>
+  58cf76:	mov    $0x10,%esi
+  58cf7b:	mov    %rbp,%rdi
+  58cf7e:	call   *0x1edfac(%rip)        # 77af30 <_DYNAMIC+0x2d8>
+  58cf84:	lea    0x1d9df5(%rip),%rdx        # 766d80 <anon.be4d51fbbe824da7f5ab1afc5d73eb57.0.llvm.5255786034794295177+0x5098>
+  58cf8b:	mov    $0x10,%esi
+  58cf90:	call   *0x1edf9a(%rip)        # 77af30 <_DYNAMIC+0x2d8>
+  58cf96:	incq   0x1f8(%rsp)
+  58cf9e:	mov    0x18(%rsp),%rax
+  58cfa3:	sub    0x70(%rsp),%rax
+  58cfa8:	mov    %rax,%rdi
+  58cfab:	cmp    $0x10,%rax
+  58cfaf:	jae    58cfc6 <gpui_canvas::canvas::render_band_impl::<gpui_canvas::canvas::BgrxEncoder, fearless_simd::generated::sse2::Sse2>+0x1b86>
+  58cfb1:	lea    0x1d9ee8(%rip),%rdx        # 766ea0 <anon.be4d51fbbe824da7f5ab1afc5d73eb57.0.llvm.5255786034794295177+0x51b8>
+  58cfb8:	mov    $0x10,%esi
+  58cfbd:	mov    %rbp,%rdi
+  58cfc0:	call   *0x1edf6a(%rip)        # 77af30 <_DYNAMIC+0x2d8>
+  58cfc6:	lea    0x1d9ebb(%rip),%rdx        # 766e88 <anon.be4d51fbbe824da7f5ab1afc5d73eb57.0.llvm.5255786034794295177+0x51a0>
+  58cfcd:	mov    $0x10,%esi
+  58cfd2:	call   *0x1edf58(%rip)        # 77af30 <_DYNAMIC+0x2d8>
+  58cfd8:	lea    0x1d9d89(%rip),%rdx        # 766d68 <anon.be4d51fbbe824da7f5ab1afc5d73eb57.0.llvm.5255786034794295177+0x5080>
+  58cfdf:	call   *0x1edf4b(%rip)        # 77af30 <_DYNAMIC+0x2d8>
+  58cfe5:	lea    0x1d9e3c(%rip),%rdx        # 766e28 <anon.be4d51fbbe824da7f5ab1afc5d73eb57.0.llvm.5255786034794295177+0x5140>
+  58cfec:	call   *0x1edf3e(%rip)        # 77af30 <_DYNAMIC+0x2d8>
+  58cff2:	lea    0x1d9d3f(%rip),%rdx        # 766d38 <anon.be4d51fbbe824da7f5ab1afc5d73eb57.0.llvm.5255786034794295177+0x5050>
+  58cff9:	call   *0x1edf31(%rip)        # 77af30 <_DYNAMIC+0x2d8>
+  58cfff:	lea    0x1d9d4a(%rip),%rdx        # 766d50 <anon.be4d51fbbe824da7f5ab1afc5d73eb57.0.llvm.5255786034794295177+0x5068>
+  58d006:	mov    %rax,%rdi
+  58d009:	call   *0x1edf21(%rip)        # 77af30 <_DYNAMIC+0x2d8>

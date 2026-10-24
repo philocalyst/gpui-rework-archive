@@ -1,0 +1,14 @@
+WARNING: Ignoring `RUSTC` environment variable; set `MIRI` if you want to control the binary used as the driver.
+
+running 3 tests
+test glyph_buffer::tests::checked_header_endpoints_and_failed_admission_preserve_the_vector ... ok
+test glyph_buffer::tests::cloned_owners_keep_exact_bits_across_threads_and_original_drop ... ok
+test glyph_buffer::tests::empty_owners_and_scene_leases_preserve_text_length_and_owner_lifetime ... ok
+
+test result: ok. 3 passed; 0 failed; 0 ignored; 0 measured; 1 filtered out; finished in 0.58s
+
+
+running 0 tests
+
+test result: ok. 0 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 0.00s
+

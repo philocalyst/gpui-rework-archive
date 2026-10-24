@@ -1,0 +1,160 @@
+
+/tmp/gpui-ecow-final-artifacts/text_run_probe:     file format elf64-x86-64
+
+
+Disassembly of section .text:
+
+0000000000592a30 <<gpui_canvas::canvas::DisplayList>::publish_group>:
+  592a30:	push   %rbp
+  592a31:	push   %r15
+  592a33:	push   %r14
+  592a35:	push   %r13
+  592a37:	push   %r12
+  592a39:	push   %rbx
+  592a3a:	sub    $0x88,%rsp
+  592a41:	mov    %rdx,0x20(%rsp)
+  592a46:	mov    %rcx,0x78(%rsp)
+  592a4b:	mov    %r8,0x80(%rsp)
+  592a53:	mov    0x80(%rdi),%rdx
+  592a5a:	mov    %rsi,0x10(%rsp)
+  592a5f:	mov    %rdx,0x8(%rsp)
+  592a64:	cmp    %rdx,%rsi
+  592a67:	ja     592c5d <<gpui_canvas::canvas::DisplayList>::publish_group+0x22d>
+  592a6d:	mov    %rdi,0x18(%rsp)
+  592a72:	mov    %rcx,0x28(%rsp)
+  592a77:	mov    %r8,0x30(%rsp)
+  592a7c:	je     592a8f <<gpui_canvas::canvas::DisplayList>::publish_group+0x5f>
+  592a7e:	mov    0x20(%rsp),%rax
+  592a83:	mov    0x14(%rax),%edi
+  592a86:	sub    $0x3,%edi
+  592a89:	jae    592b50 <<gpui_canvas::canvas::DisplayList>::publish_group+0x120>
+  592a8f:	mov    0x20(%rsp),%rcx
+  592a94:	mov    0x10(%rcx),%rax
+  592a98:	mov    %rax,0x58(%rsp)
+  592a9d:	movups (%rcx),%xmm3
+  592aa0:	movups %xmm3,0x48(%rsp)
+  592aa5:	mov    0x10(%rsp),%rax
+  592aaa:	mov    %eax,0x60(%rsp)
+  592aae:	mov    0x8(%rsp),%rax
+  592ab3:	mov    %eax,0x64(%rsp)
+  592ab7:	mov    0x28(%rsp),%rax
+  592abc:	mov    %rax,0x38(%rsp)
+  592ac1:	mov    0x30(%rsp),%rax
+  592ac6:	mov    %rax,0x40(%rsp)
+  592acb:	movss  %xmm0,0x68(%rsp)
+  592ad1:	movss  %xmm1,0x6c(%rsp)
+  592ad7:	movss  %xmm2,0x70(%rsp)
+  592add:	mov    0x18(%rsp),%rbx
+  592ae2:	mov    0xb0(%rbx),%r14
+  592ae9:	cmp    0xa0(%rbx),%r14
+  592af0:	jne    592aff <<gpui_canvas::canvas::DisplayList>::publish_group+0xcf>
+  592af2:	lea    0xa0(%rbx),%rdi
+  592af9:	call   *0x1e8c41(%rip)        # 77b740 <_DYNAMIC+0xae8>
+  592aff:	mov    0xa8(%rbx),%rax
+  592b06:	mov    %r14,%rcx
+  592b09:	shl    $0x6,%rcx
+  592b0d:	movups 0x38(%rsp),%xmm0
+  592b12:	movups 0x48(%rsp),%xmm1
+  592b17:	movups 0x58(%rsp),%xmm2
+  592b1c:	movups 0x68(%rsp),%xmm3
+  592b21:	movups %xmm3,0x30(%rax,%rcx,1)
+  592b26:	movups %xmm2,0x20(%rax,%rcx,1)
+  592b2b:	movups %xmm1,0x10(%rax,%rcx,1)
+  592b30:	movups %xmm0,(%rax,%rcx,1)
+  592b34:	inc    %r14
+  592b37:	mov    %r14,0xb0(%rbx)
+  592b3e:	add    $0x88,%rsp
+  592b45:	pop    %rbx
+  592b46:	pop    %r12
+  592b48:	pop    %r13
+  592b4a:	pop    %r14
+  592b4c:	pop    %r15
+  592b4e:	pop    %rbp
+  592b4f:	ret
+  592b50:	mov    0x18(%rsp),%rax
+  592b55:	mov    0xe0(%rax),%r9
+  592b5c:	cmp    %rdi,%r9
+  592b5f:	jbe    592c79 <<gpui_canvas::canvas::DisplayList>::publish_group+0x249>
+  592b65:	lea    (%rdi,%rdi,2),%rdi
+  592b69:	shl    $0x3,%rdi
+  592b6d:	add    0xd8(%rax),%rdi
+  592b74:	mov    0x78(%rax),%r9
+  592b78:	mov    0x10(%rdi),%r10
+  592b7c:	mov    0x10(%rsp),%r11
+  592b81:	lea    (%r11,%r11,1),%rax
+  592b85:	shl    $0x4,%r11
+  592b89:	sub    %rax,%r11
+  592b8c:	mov    0x8(%rsp),%r14
+  592b91:	lea    (%r14,%r14,1),%rax
+  592b95:	shl    $0x4,%r14
+  592b99:	sub    %rax,%r14
+  592b9c:	movabs $0x8000800080008000,%r12
+  592ba6:	movabs $0x7fff7fff7fff7fff,%rbx
+  592bb0:	jmp    592bda <<gpui_canvas::canvas::DisplayList>::publish_group+0x1aa>
+  592bb2:	data16 data16 data16 data16 cs nopw 0x0(%rax,%rax,1)
+  592bc0:	mov    %rbp,%r13
+  592bc3:	and    %r12,%r10
+  592bc6:	or     %r13,%r10
+  592bc9:	mov    %r10,0x10(%rdi)
+  592bcd:	add    $0xe,%r11
+  592bd1:	cmp    %r11,%r14
+  592bd4:	je     592a8f <<gpui_canvas::canvas::DisplayList>::publish_group+0x5f>
+  592bda:	mov    (%r9,%r11,1),%r13
+  592bde:	mov    %r10,%rbp
+  592be1:	and    %rbx,%rbp
+  592be4:	mov    %rbp,%rax
+  592be7:	shr    $0x20,%rax
+  592beb:	cmp    %ax,%bp
+  592bee:	je     592bc3 <<gpui_canvas::canvas::DisplayList>::publish_group+0x193>
+  592bf0:	mov    %ebp,%esi
+  592bf2:	shr    $0x10,%esi
+  592bf5:	mov    %rbp,%r8
+  592bf8:	shr    $0x30,%r8
+  592bfc:	cmp    %r8w,%si
+  592c00:	je     592bc3 <<gpui_canvas::canvas::DisplayList>::publish_group+0x193>
+  592c02:	mov    %r13,%rcx
+  592c05:	shr    $0x20,%rcx
+  592c09:	cmp    %cx,%r13w
+  592c0d:	je     592bc0 <<gpui_canvas::canvas::DisplayList>::publish_group+0x190>
+  592c0f:	mov    %r13d,%edx
+  592c12:	shr    $0x10,%edx
+  592c15:	mov    %r13,%r15
+  592c18:	shr    $0x30,%r15
+  592c1c:	cmp    %r15w,%dx
+  592c20:	je     592bc0 <<gpui_canvas::canvas::DisplayList>::publish_group+0x190>
+  592c22:	cmp    %r13w,%bp
+  592c26:	cmovb  %ebp,%r13d
+  592c2a:	cmp    %dx,%si
+  592c2d:	cmovb  %esi,%edx
+  592c30:	cmp    %cx,%ax
+  592c33:	cmova  %eax,%ecx
+  592c36:	cmp    %r15w,%r8w
+  592c3a:	cmova  %r8d,%r15d
+  592c3e:	movd   %r13d,%xmm3
+  592c43:	pinsrw $0x1,%edx,%xmm3
+  592c48:	pinsrw $0x2,%ecx,%xmm3
+  592c4d:	pinsrw $0x3,%r15d,%xmm3
+  592c53:	movq   %xmm3,%r13
+  592c58:	jmp    592bc3 <<gpui_canvas::canvas::DisplayList>::publish_group+0x193>
+  592c5d:	lea    0x1d429c(%rip),%rcx        # 766f00 <anon.be4d51fbbe824da7f5ab1afc5d73eb57.0.llvm.5255786034794295177+0x5218>
+  592c64:	mov    0x10(%rsp),%rdi
+  592c69:	mov    0x8(%rsp),%rdx
+  592c6e:	mov    %rdx,%rsi
+  592c71:	call   *0x1e8399(%rip)        # 77b010 <_DYNAMIC+0x3b8>
+  592c77:	jmp    592c89 <<gpui_canvas::canvas::DisplayList>::publish_group+0x259>
+  592c79:	lea    0x1d4660(%rip),%rdx        # 7672e0 <anon.5aeaa60913b4df1acb6ef522a5bff98d.36.llvm.16382158044649164693>
+  592c80:	mov    %r9,%rsi
+  592c83:	call   *0x1e82a7(%rip)        # 77af30 <_DYNAMIC+0x2d8>
+  592c89:	ud2
+  592c8b:	jmp    592ca2 <<gpui_canvas::canvas::DisplayList>::publish_group+0x272>
+  592c8d:	mov    %rax,%rbx
+  592c90:	lea    0x38(%rsp),%rdi
+  592c95:	call   5b2240 <<ecow::vec::EcoVec<gpui_canvas::text::PackedGlyph> as core::ops::drop::Drop>::drop>
+  592c9a:	jmp    592caf <<gpui_canvas::canvas::DisplayList>::publish_group+0x27f>
+  592c9c:	call   *0x1e8226(%rip)        # 77aec8 <_DYNAMIC+0x270>
+  592ca2:	mov    %rax,%rbx
+  592ca5:	lea    0x78(%rsp),%rdi
+  592caa:	call   5b2240 <<ecow::vec::EcoVec<gpui_canvas::text::PackedGlyph> as core::ops::drop::Drop>::drop>
+  592caf:	mov    %rbx,%rdi
+  592cb2:	call   760860 <_Unwind_Resume@plt>
+  592cb7:	call   *0x1e820b(%rip)        # 77aec8 <_DYNAMIC+0x270>

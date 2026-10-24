@@ -1,0 +1,10 @@
+HEADERS packed=12 eco_vec=16 eco_owner=24
+OWNER case=empty len=0 capacity=0 vec_requests=0 eco_requests=0 vec_requested=0 eco_requested=0 vec_live=0 eco_live=0 vec_peak=0 eco_peak=0 vec_ns=11 eco_ns=3
+OWNER case=single len=1 capacity=4 vec_requests=1 eco_requests=1 vec_requested=48 eco_requested=64 vec_live=48 eco_live=64 vec_peak=48 eco_peak=64 vec_ns=28 eco_ns=25
+OWNER case=pair len=2 capacity=4 vec_requests=1 eco_requests=1 vec_requested=48 eco_requested=64 vec_live=48 eco_live=64 vec_peak=48 eco_peak=64 vec_ns=26 eco_ns=28
+OWNER case=triple len=3 capacity=4 vec_requests=1 eco_requests=1 vec_requested=48 eco_requested=64 vec_live=48 eco_live=64 vec_peak=48 eco_peak=64 vec_ns=28 eco_ns=31
+OWNER case=label len=25 capacity=25 vec_requests=1 eco_requests=1 vec_requested=300 eco_requested=316 vec_live=300 eco_live=316 vec_peak=300 eco_peak=316 vec_ns=50 eco_ns=110
+OWNER case=filtered len=20 capacity=32 vec_requests=1 eco_requests=1 vec_requested=384 eco_requested=400 vec_live=384 eco_live=400 vec_peak=384 eco_peak=400 vec_ns=44 eco_ns=94
+OWNER case=all_filtered len=0 capacity=8 vec_requests=1 eco_requests=1 vec_requested=96 eco_requested=112 vec_live=96 eco_live=112 vec_peak=96 eco_peak=112 vec_ns=25 eco_ns=21
+OWNER case=paragraphs len=99 capacity=101 vec_requests=2 eco_requests=2 vec_requested=1260 eco_requested=1292 vec_live=1212 eco_live=1228 vec_peak=1260 eco_peak=1292 vec_ns=170 eco_ns=399
+OWNER case=max len=32768 capacity=32768 vec_requests=1 eco_requests=1 vec_requested=393216 eco_requested=393232 vec_live=393216 eco_live=393232 vec_peak=393216 eco_peak=393232 vec_ns=36641 eco_ns=103470

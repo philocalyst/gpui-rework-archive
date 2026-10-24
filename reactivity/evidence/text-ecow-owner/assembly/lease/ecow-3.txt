@@ -1,0 +1,13 @@
+
+/tmp/gpui-ecow-final-artifacts/text_run_probe:     file format elf64-x86-64
+
+
+Disassembly of section .text:
+
+0000000000544630 <ecow::vec::ref_count_overflow::<gpui_canvas::text::PackedGlyph>>:
+  544630:	push   %rax
+  544631:	call   544650 <core::ptr::drop_glue::<ecow::vec::EcoVec<gpui_canvas::text::PackedGlyph>>>
+  544636:	lea    -0x502126(%rip),%rdi        # 42517 <anon.da3643df4e990520e14ee8cef95dca3e.0.llvm.4447024851479299802>
+  54463d:	lea    0x21d504(%rip),%rdx        # 761b48 <anon.da3643df4e990520e14ee8cef95dca3e.2.llvm.4447024851479299802>
+  544644:	mov    $0x31,%esi
+  544649:	call   *0x2369b1(%rip)        # 77b000 <_DYNAMIC+0x3a8>

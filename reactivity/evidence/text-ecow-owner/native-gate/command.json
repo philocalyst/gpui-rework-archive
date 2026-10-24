@@ -1,0 +1,31 @@
+{
+  "source": "65c1152f25ec1f139ef874ca89ccd2eb59cc45da",
+  "cwd": "/tmp/gpui-text-ecow-owner-sol",
+  "argv": [
+    "/nix/store/9r02ykx9y35lf4gk6gc30gnag1y8ncp7-python3-3.13.15/bin/python3",
+    "/tmp/gpui-ecow-frozen-matrix-sol.py"
+  ],
+  "timeout_seconds": 120,
+  "tracked_input_scopes": [
+    ".cargo",
+    "clippy.toml",
+    "reactivity/Cargo.toml",
+    "reactivity/Cargo.lock",
+    "reactivity/rust-toolchain.toml",
+    "reactivity/crates",
+    "reactivity/vendor"
+  ],
+  "environment": {
+    "RUSTC": "/tmp/gpui-nightly-2026-10-23/bin/rustc",
+    "RUSTDOC": "/tmp/gpui-nightly-2026-10-23/bin/rustdoc",
+    "RUSTC_BOOTSTRAP": null,
+    "RUSTFLAGS": null,
+    "CARGO_ENCODED_RUSTFLAGS": null,
+    "CARGO_TARGET_DIR": null,
+    "CARGO_BUILD_JOBS": null,
+    "MIRI": null,
+    "MIRI_SYSROOT": null,
+    "MIRIFLAGS": null,
+    "RUST_SRC_PATH": null
+  }
+}

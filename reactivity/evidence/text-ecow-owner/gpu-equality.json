@@ -1,0 +1,9 @@
+{
+  "all_packet_fields_exact": true,
+  "cases": [
+    "case=solids32 draws=32 validated=32 records=3072 upload=5272 bin_visits=100 tile_refs=50 original_refs=50 sample_draws=204800 compact=0 shared=0 mask_upload=0 hash=619848373183677861",
+    "case=pair32 draws=64 validated=64 records=4608 upload=7016 bin_visits=204 tile_refs=102 original_refs=102 sample_draws=417792 compact=64 shared=32 mask_upload=0 hash=10213777272607940645",
+    "case=labels32 draws=704 validated=704 records=25088 upload=33760 bin_visits=3336 tile_refs=1668 original_refs=1668 sample_draws=6832128 compact=704 shared=32 mask_upload=0 hash=14178373883980296517",
+    "case=bidi8 draws=104 validated=104 records=3968 upload=6956 bin_visits=494 tile_refs=247 original_refs=247 sample_draws=1011712 compact=104 shared=8 mask_upload=0 hash=12645586400959000165"
+  ]
+}

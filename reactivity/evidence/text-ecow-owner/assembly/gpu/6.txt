@@ -1,0 +1,174 @@
+
+/tmp/gpui-ecow-gpu-artifacts/render:     file format elf64-x86-64
+
+
+Disassembly of section .text:
+
+000000000075e140 <<gpui_gpu::renderer::RendererState>::prepare_atlas>:
+  75e140:	push   %rbp
+  75e141:	push   %r15
+  75e143:	push   %r14
+  75e145:	push   %r13
+  75e147:	push   %r12
+  75e149:	push   %rbx
+  75e14a:	sub    $0x228,%rsp
+  75e151:	mov    %rsi,%r14
+  75e154:	test   %r8d,%r8d
+  75e157:	je     75e1ff <<gpui_gpu::renderer::RendererState>::prepare_atlas+0xbf>
+  75e15d:	mov    %rdi,(%rsp)
+  75e161:	mov    0xf8(%rcx),%r15
+  75e168:	test   %r15,%r15
+  75e16b:	je     75e263 <<gpui_gpu::renderer::RendererState>::prepare_atlas+0x123>
+  75e171:	mov    %rcx,0x8(%rsp)
+  75e176:	mov    0xf0(%rcx),%r13
+  75e17d:	shl    $0x3,%r15
+  75e181:	mov    %r14,0x20(%rsp)
+  75e186:	lea    0x78(%r14),%rdi
+  75e18a:	mov    %rdx,0x10(%rsp)
+  75e18f:	lea    0x8(%rdx),%rax
+  75e193:	mov    %rax,0x18(%rsp)
+  75e198:	xor    %r12d,%r12d
+  75e19b:	lea    0x28(%rsp),%rbx
+  75e1a0:	xor    %ebp,%ebp
+  75e1a2:	data16 data16 data16 data16 cs nopw 0x0(%rax,%rax,1)
+  75e1b0:	mov    0x0(%r13,%rbp,1),%rax
+  75e1b5:	movups 0x28(%rax),%xmm0
+  75e1b9:	lea    0x38(%rsp),%rcx
+  75e1be:	movups %xmm0,(%rcx)
+  75e1c1:	movups 0x18(%rax),%xmm0
+  75e1c5:	movups %xmm0,0x28(%rsp)
+  75e1ca:	movups 0x38(%rax),%xmm0
+  75e1ce:	movups %xmm0,0x48(%rsp)
+  75e1d3:	mov    %rdi,%r14
+  75e1d6:	mov    0x18(%rsp),%rsi
+  75e1db:	mov    %rbx,%rdx
+  75e1de:	call   75d980 <<gpui_gpu::renderer::Atlas>::insert>
+  75e1e3:	test   $0x1,%al
+  75e1e5:	je     75e26b <<gpui_gpu::renderer::RendererState>::prepare_atlas+0x12b>
+  75e1eb:	add    %rdx,%r12
+  75e1ee:	add    $0x8,%rbp
+  75e1f2:	cmp    %rbp,%r15
+  75e1f5:	mov    %r14,%rdi
+  75e1f8:	jne    75e1b0 <<gpui_gpu::renderer::RendererState>::prepare_atlas+0x70>
+  75e1fa:	jmp    75e39d <<gpui_gpu::renderer::RendererState>::prepare_atlas+0x25d>
+  75e1ff:	cmpl   $0x1,0x150(%r14)
+  75e207:	jne    75e219 <<gpui_gpu::renderer::RendererState>::prepare_atlas+0xd9>
+  75e209:	mov    0x138(%r14),%rax
+  75e210:	add    0x130(%r14),%rax
+  75e217:	je     75e250 <<gpui_gpu::renderer::RendererState>::prepare_atlas+0x110>
+  75e219:	mov    %rdi,%rbx
+  75e21c:	add    $0x78,%r14
+  75e220:	lea    0x58(%rsp),%rdi
+  75e225:	mov    %rdx,%rsi
+  75e228:	mov    $0x1,%edx
+  75e22d:	call   75d6b0 <<gpui_gpu::renderer::Atlas>::new>
+  75e232:	mov    %r14,%rdi
+  75e235:	call   75bf90 <core::ptr::drop_glue::<gpui_gpu::renderer::Atlas>>
+  75e23a:	lea    0x58(%rsp),%rsi
+  75e23f:	mov    $0xe8,%edx
+  75e244:	mov    %r14,%rdi
+  75e247:	call   *0x5d508b(%rip)        # d332d8 <memcpy@GLIBC_2.14>
+  75e24d:	mov    %rbx,%rdi
+  75e250:	movq   $0x0,0x8(%rdi)
+  75e258:	movl   $0xffffffff,(%rdi)
+  75e25e:	jmp    75e3ab <<gpui_gpu::renderer::RendererState>::prepare_atlas+0x26b>
+  75e263:	xor    %r12d,%r12d
+  75e266:	jmp    75e39d <<gpui_gpu::renderer::RendererState>::prepare_atlas+0x25d>
+  75e26b:	mov    0x20(%rsp),%rax
+  75e270:	mov    0x150(%rax),%eax
+  75e276:	cmp    $0x81,%eax
+  75e27b:	mov    $0x80,%ebp
+  75e280:	cmovae %eax,%ebp
+  75e283:	add    %ebp,%ebp
+  75e285:	cmp    $0x800,%ebp
+  75e28b:	mov    $0x800,%eax
+  75e290:	cmovae %eax,%ebp
+  75e293:	lea    0x140(%rsp),%rdi
+  75e29b:	mov    0x10(%rsp),%rsi
+  75e2a0:	mov    %ebp,%edx
+  75e2a2:	call   75d6b0 <<gpui_gpu::renderer::Atlas>::new>
+  75e2a7:	mov    0x8(%rsp),%rcx
+  75e2ac:	mov    0xf8(%rcx),%rax
+  75e2b3:	test   %rax,%rax
+  75e2b6:	je     75e36a <<gpui_gpu::renderer::RendererState>::prepare_atlas+0x22a>
+  75e2bc:	mov    0xf0(%rcx),%rbx
+  75e2c3:	lea    (%rbx,%rax,8),%r15
+  75e2c7:	lea    0x140(%rsp),%r13
+  75e2cf:	nop
+  75e2d0:	mov    (%rbx),%rax
+  75e2d3:	movups 0x28(%rax),%xmm0
+  75e2d7:	lea    0x68(%rsp),%rcx
+  75e2dc:	movups %xmm0,(%rcx)
+  75e2df:	movups 0x18(%rax),%xmm0
+  75e2e3:	movups %xmm0,0x58(%rsp)
+  75e2e8:	movups 0x38(%rax),%xmm0
+  75e2ec:	movups %xmm0,0x78(%rsp)
+  75e2f1:	mov    %r13,%rdi
+  75e2f4:	mov    0x18(%rsp),%rsi
+  75e2f9:	lea    0x58(%rsp),%rdx
+  75e2fe:	call   75d980 <<gpui_gpu::renderer::Atlas>::insert>
+  75e303:	cmp    $0x1,%rax
+  75e307:	jne    75e317 <<gpui_gpu::renderer::RendererState>::prepare_atlas+0x1d7>
+  75e309:	add    $0x8,%rbx
+  75e30d:	add    %rdx,%r12
+  75e310:	cmp    %r15,%rbx
+  75e313:	jne    75e2d0 <<gpui_gpu::renderer::RendererState>::prepare_atlas+0x190>
+  75e315:	jmp    75e36a <<gpui_gpu::renderer::RendererState>::prepare_atlas+0x22a>
+  75e317:	cmp    $0x800,%ebp
+  75e31d:	je     75e3bd <<gpui_gpu::renderer::RendererState>::prepare_atlas+0x27d>
+  75e323:	mov    %r13,%rdi
+  75e326:	call   75bf90 <core::ptr::drop_glue::<gpui_gpu::renderer::Atlas>>
+  75e32b:	add    %ebp,%ebp
+  75e32d:	cmp    $0x800,%ebp
+  75e333:	mov    $0x800,%eax
+  75e338:	cmovae %eax,%ebp
+  75e33b:	mov    %r13,%rdi
+  75e33e:	mov    0x10(%rsp),%rsi
+  75e343:	mov    %ebp,%edx
+  75e345:	call   75d6b0 <<gpui_gpu::renderer::Atlas>::new>
+  75e34a:	mov    0x8(%rsp),%rax
+  75e34f:	mov    0xf0(%rax),%rbx
+  75e356:	mov    0xf8(%rax),%rax
+  75e35d:	lea    (%rbx,%rax,8),%r15
+  75e361:	test   %rax,%rax
+  75e364:	jne    75e2d0 <<gpui_gpu::renderer::RendererState>::prepare_atlas+0x190>
+  75e36a:	lea    0x58(%rsp),%rdi
+  75e36f:	lea    0x140(%rsp),%rsi
+  75e377:	mov    $0xe8,%edx
+  75e37c:	call   *0x5d4f56(%rip)        # d332d8 <memcpy@GLIBC_2.14>
+  75e382:	mov    %r14,%rdi
+  75e385:	call   75bf90 <core::ptr::drop_glue::<gpui_gpu::renderer::Atlas>>
+  75e38a:	lea    0x58(%rsp),%rsi
+  75e38f:	mov    $0xe8,%edx
+  75e394:	mov    %r14,%rdi
+  75e397:	call   *0x5d4f3b(%rip)        # d332d8 <memcpy@GLIBC_2.14>
+  75e39d:	mov    (%rsp),%rax
+  75e3a1:	mov    %r12,0x8(%rax)
+  75e3a5:	movl   $0xffffffff,(%rax)
+  75e3ab:	add    $0x228,%rsp
+  75e3b2:	pop    %rbx
+  75e3b3:	pop    %r12
+  75e3b5:	pop    %r13
+  75e3b7:	pop    %r14
+  75e3b9:	pop    %r15
+  75e3bb:	pop    %rbp
+  75e3bc:	ret
+  75e3bd:	mov    (%rsp),%rax
+  75e3c1:	movl   $0x7,(%rax)
+  75e3c7:	lea    0x140(%rsp),%rdi
+  75e3cf:	call   75bf90 <core::ptr::drop_glue::<gpui_gpu::renderer::Atlas>>
+  75e3d4:	jmp    75e3ab <<gpui_gpu::renderer::RendererState>::prepare_atlas+0x26b>
+  75e3d6:	jmp    75e3d8 <<gpui_gpu::renderer::RendererState>::prepare_atlas+0x298>
+  75e3d8:	mov    %rax,%rbx
+  75e3db:	lea    0x58(%rsp),%rsi
+  75e3e0:	mov    $0xe8,%edx
+  75e3e5:	mov    %r14,%rdi
+  75e3e8:	call   *0x5d4eea(%rip)        # d332d8 <memcpy@GLIBC_2.14>
+  75e3ee:	mov    %rbx,%rdi
+  75e3f1:	call   ce2130 <_Unwind_Resume@plt>
+  75e3f6:	mov    %rax,%rbx
+  75e3f9:	lea    0x140(%rsp),%rdi
+  75e401:	call   75bf90 <core::ptr::drop_glue::<gpui_gpu::renderer::Atlas>>
+  75e406:	mov    %rbx,%rdi
+  75e409:	call   ce2130 <_Unwind_Resume@plt>
+  75e40e:	call   *0x5d4f64(%rip)        # d33378 <_DYNAMIC+0x308>

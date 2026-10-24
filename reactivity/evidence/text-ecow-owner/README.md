@@ -1,0 +1,35 @@
+# One-allocation packed glyph owner
+
+Shipping source is `65c1152f25ec1f139ef874ca89ccd2eb59cc45da`, based on retained-text source `bbe0c2058c2b3812e0ae8e251db68c329be7734a`. Main control is `4ee08a32def2ca70371c1764a0153a57053ae0e4`. This is a measured allocation/storage tradeoff; it makes no CPU, GPU or latency improvement claim.
+
+The planner emits packed glyphs directly into pinned `ecow 0.3.1` with default features disabled. Paragraph raw-count reservation, zero-ID/default-ignorable filtering, glyph limits and checked admission stay in their original order. Freezing moves the existing EcoVec handle; it allocates and copies nothing. Layout clones and admitted multi-glyph scene commands share the immutable allocation. The wrapper exposes only immutable slices; its builder is scoped to planning. A single visible glyph keeps the inline scene route and takes no packed owner lease. Raster mask leases and packet ABI are unchanged. First-party raw Vec ownership, manual Drop and unsafe Send/Sync disappear.
+
+The dependency owns one allocation containing a 16B refcount/capacity header and 12B packed records on this target. It has no weak owner header. `EcoVec::new()` is allocation-free; raw-count reservation can still allocate for a paragraph whose glyphs are subsequently all filtered, matching the previous reservation policy. Actual capacities and allocation counts match Vec for the empty/tiny/filtered/multiple-paragraph/maximum standalone producer traces in [producer-probe.log](producer-probe.log).
+
+This is not a thin handle: compiled EcoVec is16B, GlyphBuffer24B, TextLayout56B (bbe40B, Main48B), retained command64B (bbe56B), Canvas464B and witness14B. For a nonempty independently shaped layout, the larger layout header cancels the saved16B outer-Arc allocation payload/header bytes; each retained run adds8B compared with bbe. Truly empty independent layouts save16B each compared with bbe. Nonempty tiny-layout storage losses compared with Main remain.
+
+[Actual full planner/frame probes](probe-threeway.json) charge retained layout headers, live shaping allocations, scene allocations, and the full Canvas header. Their cold allocation request counts exclude the preallocated outer layout array, source strings, raster-cache warmup and the parser/service construction, which are outside the measurement region in all variants. Layout array storage is charged as owner count × compiled TextLayout size. These are scoped live/requested bytes, not allocator usable size or process RSS.
+
+| Cohort | Requests Main / bbe / owner | Retained bytes Main / bbe / owner |
+|---|---:|---:|
+| Blank |0 /0 /0 |488 /464 /464 |
+|32 solids |8 /8 /8 |2408 /2448 /2448 |
+|32 independent empty |64 /96 /64 |2024 /2768 /2256 |
+|32 independent single glyph |106 /138 /106 |5596 /6404 /6404 |
+|32 independent pairs |112 /139 /107 |7004 /7108 /7364 |
+|32 independent triples |114 /140 /108 |8284 /7556 /7812 |
+|32 draws borrowing one long layout |29 /24 /23 |27620 /12900 /13156 |
+|32 independent unique long labels |164 /189 /157 |47318 /29118 /29374 |
+|32 all-clipped unique labels |128 /160 /128 |12272 /13016 /13016 |
+
+Warm frame admission remains zero allocation in every cohort. All128 draw-count, expansion-bit-hash, tile-reference and sampling-count comparisons match both controls. Timings in raw logs are diagnostic only: other build lanes were active. The unchanged GPU still expands32B per compact glyph and80B per run. All four [packet/readback probes](gpu-equality.json) match Main and bbe exactly, including704 glyphs:25088B records,33760B upload,3336 bin visits and6832128 planned sample draws.
+
+The safe producer adds work. `EcoVec::push` calls its uniqueness-checking reserve on each admitted glyph; actual producer assembly calls the741B reserve helper both at paragraph reservation and at each push. Its Acquire uniqueness load/check is retained. Layout publication uses a30B shared-glyph helper with an empty-sentinel check and one locked increment; scene clear drops one such lease per admitted run. Repeated labels do not deduplicate owners. The existing unique-mask lease count remains independent. [Optimized owner assembly](assembly/owner/result.json) shows planner shape8066→8207B compared with bbe, and new grow173B/reserve741B/drop91B helpers. [Lease assembly](assembly/lease/result.json) records the publication atomics. Whole matched probe `.text` grows2233367→2234535B (+1168B); this includes the probe's linked program, not only one helper. The native band and CSR functions remain7119B and2141B. GPU render remains9993B; its outlined placement expansion is812B and still performs direct lazy divisions.
+
+Pinned EcoVec's public API has no spare-capacity or set_len entry point. Its public unsafe extend_from_trusted requires exact iterator cardinality, whereas Parley's raw count includes filtered glyphs. Safe Extend still pushes per item. make_mut would require initializing a raw-count tail before overwriting/truncating it. No speculative batching, custom allocator, new unsafe promotion, or additional geometry cache is introduced.
+
+Source cost is explicit: Main's `core_lines.py`, the supplied Syn helper and qualified Tokei count32394 first-party shipping lines: bbe32408→32394 (−14), Main32372→32394 (+22). The complete new dependency adds2315 non-test/non-comment shipping Rust lines (vec.rs785), conservatively including its unused string/bytes APIs and conditional branches. No mandatory transitive dependency is added. Total scoped source therefore increases; deleting the first-party unsafe owner does not hide the dependency's unsafe implementation. See the compressed per-file first-party ledgers and [dependency ledger](dependency-lines.json).
+
+Qualification is pinned in [qualification.json](qualification.json). The final frozen native gate passes323 tests across39 harnesses (Canvas223 plus its probe1, GPU49, runtime50), with3 existing ignores and2038 tracked build/input hashes unchanged. Runtime coverage includes presentation ACK/rollback, cache, paint patch/slots, geometry, and selection. Four public borrow/transaction compile-fail doctests pass. Release all-target Clippy passes with Rust `-D warnings`; Cargo emits the existing optional gpui_gpu unused-dependency manifest warning. An exact-byte isolated owner module passes all4 strict-provenance Miri tests, including32768-element and spare-capacity cases. Three focused bounds/lifetime/thread/panic/empty tests additionally pass eight seeds under each of stacked and tree borrows (48 passes,64 matched input guards). The actual [deep-copy negative patch](negative-copy.patch) fails the shared pointer/lifetime test, as intended. This demonstrates the sharing contract is checked rather than inferred from unchanged pixels.
+
+All builds used jobs2 and `/tmp/gpui-text-ecow-owner-sol-target`; all measured ELFs are frozen separately. Source `/tmp/gpui-native-env.sh` then `/tmp/gpui-nightly-env.sh`: rustc1.101.0-nightly, commit7189d39d9, exact nightly2026-10-23. Miri has the same compiler commit. GPU uses llvmpipe/Mesa26.1.4. No Main edits, remote runs or pushes were performed. Root's metadata-view work remains a separate source.

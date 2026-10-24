@@ -1,0 +1,6 @@
+{
+  "Cargo.lock": "9801a5a3bc4c42730e620be04801842b6d13e68f1184a7567fa3eff779aa36fb",
+  "Cargo.toml": "b872f7440312270b34ffbfb41a2ab1992441352bb87d72e314a6d17bf1b8fbaf",
+  "src/glyph_buffer.rs": "dee60c551db2964f336f31f5174b65edc2ae2912c6b181f9bbeda9d5ca00cc7f",
+  "src/lib.rs": "b63eb970d3bf2eb66333d8e5a1c473620cfbb3477444b787210d37a22c6c0b27"
+}

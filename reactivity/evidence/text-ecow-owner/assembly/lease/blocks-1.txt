@@ -1,0 +1,28 @@
+
+/tmp/gpui-text-blocks-14-final-artifacts/text_run_probe-eea017db6ac20391:     file format elf64-x86-64
+
+
+Disassembly of section .text:
+
+00000000005b8260 <<alloc::rcs::arc::Arc<gpui_canvas::text::glyph_buffer::GlyphBuffer>>::drop_slow>:
+  5b8260:	push   %rbx
+  5b8261:	mov    (%rdi),%rbx
+  5b8264:	mov    0x18(%rbx),%eax
+  5b8267:	test   %rax,%rax
+  5b826a:	je     5b8283 <<alloc::rcs::arc::Arc<gpui_canvas::text::glyph_buffer::GlyphBuffer>>::drop_slow+0x23>
+  5b826c:	mov    0x10(%rbx),%rdi
+  5b8270:	shl    $0x2,%rax
+  5b8274:	lea    (%rax,%rax,2),%rsi
+  5b8278:	mov    $0x4,%edx
+  5b827d:	call   *0x1c1fed(%rip)        # 77a270 <_DYNAMIC+0x250>
+  5b8283:	cmp    $0xffffffffffffffff,%rbx
+  5b8287:	je     5b82a4 <<alloc::rcs::arc::Arc<gpui_canvas::text::glyph_buffer::GlyphBuffer>>::drop_slow+0x44>
+  5b8289:	lock decq 0x8(%rbx)
+  5b828e:	jne    5b82a4 <<alloc::rcs::arc::Arc<gpui_canvas::text::glyph_buffer::GlyphBuffer>>::drop_slow+0x44>
+  5b8290:	mov    $0x20,%esi
+  5b8295:	mov    $0x8,%edx
+  5b829a:	mov    %rbx,%rdi
+  5b829d:	pop    %rbx
+  5b829e:	jmp    *0x1c1fcc(%rip)        # 77a270 <_DYNAMIC+0x250>
+  5b82a4:	pop    %rbx
+  5b82a5:	ret

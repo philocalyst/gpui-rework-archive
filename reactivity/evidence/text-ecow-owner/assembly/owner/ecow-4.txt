@@ -1,0 +1,51 @@
+
+/tmp/gpui-ecow-final-artifacts/text_run_probe:     file format elf64-x86-64
+
+
+Disassembly of section .text:
+
+00000000005b1410 <<ecow::vec::EcoVec<gpui_canvas::text::PackedGlyph>>::grow>:
+  5b1410:	push   %r15
+  5b1412:	push   %r14
+  5b1414:	push   %rbx
+  5b1415:	test   %rsi,%rsi
+  5b1418:	js     5b14b7 <<ecow::vec::EcoVec<gpui_canvas::text::PackedGlyph>>::grow+0xa7>
+  5b141e:	mov    %rsi,%rbx
+  5b1421:	movabs $0xaaaaaaaaaaaaaa8,%rax
+  5b142b:	cmp    %rax,%rsi
+  5b142e:	ja     5b14b7 <<ecow::vec::EcoVec<gpui_canvas::text::PackedGlyph>>::grow+0xa7>
+  5b1434:	mov    %rdi,%r14
+  5b1437:	lea    (%rbx,%rbx,2),%rcx
+  5b143b:	lea    0x10(,%rcx,4),%r15
+  5b1443:	mov    (%rdi),%rdi
+  5b1446:	cmp    $0x10,%rdi
+  5b144a:	je     5b1490 <<ecow::vec::EcoVec<gpui_canvas::text::PackedGlyph>>::grow+0x80>
+  5b144c:	mov    -0x8(%rdi),%rcx
+  5b1450:	cmp    %rax,%rcx
+  5b1453:	ja     5b14b7 <<ecow::vec::EcoVec<gpui_canvas::text::PackedGlyph>>::grow+0xa7>
+  5b1455:	add    $0xfffffffffffffff0,%rdi
+  5b1459:	lea    (%rcx,%rcx,2),%rax
+  5b145d:	lea    0x10(,%rax,4),%rsi
+  5b1465:	mov    $0x8,%edx
+  5b146a:	mov    %r15,%rcx
+  5b146d:	call   *0x1c9a3d(%rip)        # 77aeb0 <_DYNAMIC+0x258>
+  5b1473:	test   %rax,%rax
+  5b1476:	je     5b14a9 <<ecow::vec::EcoVec<gpui_canvas::text::PackedGlyph>>::grow+0x99>
+  5b1478:	lea    0x10(%rax),%rcx
+  5b147c:	mov    %rcx,(%r14)
+  5b147f:	movq   $0x1,(%rax)
+  5b1486:	mov    %rbx,0x8(%rax)
+  5b148a:	pop    %rbx
+  5b148b:	pop    %r14
+  5b148d:	pop    %r15
+  5b148f:	ret
+  5b1490:	call   *0x1c9af2(%rip)        # 77af88 <_DYNAMIC+0x330>
+  5b1496:	mov    $0x8,%esi
+  5b149b:	mov    %r15,%rdi
+  5b149e:	call   *0x1c99fc(%rip)        # 77aea0 <_DYNAMIC+0x248>
+  5b14a4:	test   %rax,%rax
+  5b14a7:	jne    5b1478 <<ecow::vec::EcoVec<gpui_canvas::text::PackedGlyph>>::grow+0x68>
+  5b14a9:	mov    $0x8,%edi
+  5b14ae:	mov    %r15,%rsi
+  5b14b1:	call   *0x1c9d11(%rip)        # 77b1c8 <_DYNAMIC+0x570>
+  5b14b7:	call   *0x1c9b33(%rip)        # 77aff0 <_DYNAMIC+0x398>
