@@ -731,7 +731,14 @@ impl TextSite {
                 baseline: shape.layout.baseline,
             });
         }
-        Ok(service.measure(display.unwrap_or(&self.value), font_size, width)?)
+        Ok(service.measure(
+            display.unwrap_or(&self.value),
+            font_size,
+            width,
+            self.shaped
+                .as_ref()
+                .is_none_or(|shape| shape.layout.font_size() != font_size),
+        )?)
     }
     fn shape_for<'n>(
         &'n mut self,

@@ -42,7 +42,17 @@ fn prepared_rebreak_matches_independent_builder_metrics_and_complete_geometry() 
     ] {
         for size in [1., 12., 16., 31.25, 512.] {
             let before = reused.paragraph_shapes();
-            let mut prepared = reused.prepare(source, size).unwrap();
+            let (mut prepared, initial) = reused
+                .prepare(source, size, Some(f32::MIN_POSITIVE))
+                .unwrap();
+            assert_eq!(
+                bits(initial),
+                bits(
+                    oracle
+                        .measure(source, size, Some(f32::MIN_POSITIVE))
+                        .unwrap()
+                )
+            );
             assert_eq!(prepared.text(), source);
             let after = reused.paragraph_shapes();
             assert!(after > before);
@@ -86,7 +96,7 @@ fn handoff_is_source_borrowed_and_font_qualified_across_shapers() {
     let other = FontFace::new(include_bytes!("../assets/NotoSans-default.ttf").to_vec()).unwrap();
     let source = String::from("office אבג العربية");
     let mut owner = face.shaper();
-    let mut prepared = owner.prepare(&source, 16.).unwrap();
+    let (mut prepared, _) = owner.prepare(&source, 16., None).unwrap();
     drop(owner);
     let mut foreign = other.shaper();
     assert_eq!(
@@ -109,11 +119,11 @@ fn handoff_is_source_borrowed_and_font_qualified_across_shapers() {
     );
     assert!(same_face.measure_prepared(&mut prepared, Some(40.)).is_ok());
     assert!(matches!(
-        same_face.prepare("\t", 16.),
+        same_face.prepare("\t", 16., None),
         Err(Error::UnsupportedControl('\t'))
     ));
     assert!(matches!(
-        same_face.prepare("a", 0.),
+        same_face.prepare("a", 0., None),
         Err(Error::InvalidFontSize)
     ));
 }

@@ -377,17 +377,21 @@ impl<'font> TextShaper<'font> {
         &mut self,
         text: &'text str,
         font_size: f32,
-    ) -> Result<PreparedText<'text>, Error> {
+        max_width: Option<f32>,
+    ) -> Result<(PreparedText<'text>, TextMetrics), Error> {
         let face = self.font.0.id;
-        let paragraphs = self
-            .planner(text, font_size, None)?
-            .prepare(text, font_size)?;
-        Ok(PreparedText {
-            text,
-            font_size,
-            face,
-            paragraphs: Some(paragraphs),
-        })
+        let (paragraphs, metrics) = self
+            .planner(text, font_size, max_width)?
+            .prepare(text, font_size, max_width)?;
+        Ok((
+            PreparedText {
+                text,
+                font_size,
+                face,
+                paragraphs: Some(paragraphs),
+            },
+            metrics,
+        ))
     }
     /// Exact current width, height and baseline from rebreaking shaped data.
     pub fn measure_prepared(

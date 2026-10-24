@@ -155,28 +155,27 @@ impl<'font> Planner<'font> {
             })
         }))
     }
-    pub fn prepare(&mut self, text: &str, size: f32) -> Result<Paragraphs, Error> {
-        let needed = self.coverage(text)?;
-        let mut paragraphs = paragraph::ranges(text);
-        let first = paragraphs
-            .next()
-            .expect("even empty text has one paragraph");
-        self.build(&text[first.content], size, needed);
-        let first = std::mem::replace(&mut self.layout, self.spare.pop().unwrap_or_default());
-        let mut rest = Vec::new();
-        for paragraph in paragraphs {
-            self.build(&text[paragraph.content], size, needed);
-            rest.push(std::mem::replace(
-                &mut self.layout,
-                self.spare.pop().unwrap_or_default(),
-            ));
-        }
-        Ok(Paragraphs {
-            first,
-            rest,
-            needed,
+    pub fn prepare(
+        &mut self,
+        text: &str,
+        size: f32,
+        max_width: Option<f32>,
+    ) -> Result<(Paragraphs, TextMetrics), Error> {
+        let mut paragraphs = Paragraphs {
+            first: parley::Layout::default(),
+            rest: Vec::new(),
+            needed: 0,
             blob_ids: self.blob_ids,
-        })
+        };
+        // Capture only after each paragraph passes the same glyph/geometry
+        // admission as ordinary measurement. Failure releases prior paragraphs.
+        match self.plan_inner::<false>(text, size, max_width, false, Some(&mut paragraphs), true) {
+            Ok(planned) => Ok((paragraphs, planned.metrics)),
+            Err(error) => {
+                self.layout = parley::Layout::default();
+                Err(error)
+            }
+        }
     }
     pub fn recycle(&mut self, paragraphs: Paragraphs) {
         // Keep only the high-water number of buffers used concurrently in this
@@ -222,7 +221,8 @@ impl<'font> Planner<'font> {
         // exact primary face. Resolve fallback leases there, while glyph slots
         // continue to use the original paragraph's font blob identities.
         self.coverage(text)?;
-        let planned = self.plan_inner::<true>(text, size, max_width, true, Some(paragraphs))?;
+        let planned =
+            self.plan_inner::<true>(text, size, max_width, true, Some(paragraphs), false)?;
         self.materialize(text, size, planned)
     }
     pub fn measure_prepared(
@@ -233,7 +233,7 @@ impl<'font> Planner<'font> {
         paragraphs: &mut Paragraphs,
     ) -> Result<TextMetrics, Error> {
         Ok(self
-            .plan_inner::<false>(text, size, max_width, false, Some(paragraphs))?
+            .plan_inner::<false>(text, size, max_width, false, Some(paragraphs), false)?
             .metrics)
     }
     pub fn shape(
@@ -278,7 +278,8 @@ impl<'font> Planner<'font> {
         max_width: Option<f32>,
         interactive: bool,
     ) -> Result<Planned, Error> {
-        let result = self.plan_inner::<MATERIALIZE>(text, size, max_width, interactive, None);
+        let result =
+            self.plan_inner::<MATERIALIZE>(text, size, max_width, interactive, None, false);
         if result.is_err() {
             // An invalid or expanding font can create a rejected large layout.
             // Do not keep its buffers for later calls in this planning pass.
@@ -293,11 +294,16 @@ impl<'font> Planner<'font> {
         max_width: Option<f32>,
         interactive: bool,
         mut paragraphs: Option<&mut Paragraphs>,
+        capture: bool,
     ) -> Result<Planned, Error> {
         let needed = match &paragraphs {
-            Some(paragraphs) => paragraphs.needed,
-            None => self.coverage(text)?,
+            Some(paragraphs) if !capture => paragraphs.needed,
+            _ => self.coverage(text)?,
         };
+        if capture && let Some(paragraphs) = &mut paragraphs {
+            paragraphs.needed = needed;
+            paragraphs.blob_ids = self.blob_ids;
+        }
         let blob_ids = paragraphs.as_ref().map_or(self.blob_ids, |p| p.blob_ids);
         let mut glyphs = EcoVec::new();
         let mut details: Option<Details> = None;
@@ -309,7 +315,7 @@ impl<'font> Planner<'font> {
         let mut mask = 0;
         for (index, paragraph) in paragraph::ranges(text).enumerate() {
             let content = &text[paragraph.content.clone()];
-            let planned = if let Some(paragraphs) = &mut paragraphs {
+            let planned = if !capture && let Some(paragraphs) = &mut paragraphs {
                 if index == 0 {
                     &mut paragraphs.first
                 } else {
@@ -471,6 +477,15 @@ impl<'font> Planner<'font> {
                 append_carets(stops, planned, content, paragraph.content.start, height)?;
             }
             height += planned.height();
+            if capture && let Some(paragraphs) = &mut paragraphs {
+                let layout =
+                    std::mem::replace(&mut self.layout, self.spare.pop().unwrap_or_default());
+                if index == 0 {
+                    paragraphs.first = layout;
+                } else {
+                    paragraphs.rest.push(layout);
+                }
+            }
         }
         // The immutable map cannot append stops after publication. Charge the
         // trim separately from stop-field compression and query changes.
