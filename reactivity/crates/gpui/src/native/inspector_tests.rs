@@ -147,7 +147,11 @@ impl Script {
                     Some(80.0)
                 );
                 assert_eq!(
-                    owner.property(card, crate::property::BACKGROUND).unwrap(),
+                    owner
+                        .property(card, crate::property::BACKGROUND)
+                        .unwrap()
+                        .solid()
+                        .unwrap(),
                     crate::Color::srgb(18. / 255. + 0.05, 52. / 255., 86. / 255., 1.).unwrap()
                 );
                 assert_eq!(owner.counters().owner_reruns, 0);

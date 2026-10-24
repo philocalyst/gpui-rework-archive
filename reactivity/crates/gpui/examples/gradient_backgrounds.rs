@@ -1,4 +1,4 @@
-//! Analytic background materials. Run with --proof for a two-frame native ACK
+//! Analytic background materials. Run with --cpu --proof for a two-frame native ACK
 //! proof; ordinary use keeps the window open and exposes typed inspection.
 use gpui::{
     Extend, Gradient, GradientGeometry as Geometry, GradientStop as Stop, Interpolation, Point,

@@ -708,7 +708,7 @@ fn cold_unqualified_publication_recovers_after_same_byte_empty_frontier_repair()
     win.set_property(
         root,
         crate::property::BACKGROUND,
-        crate::property::Contribution::Set(crate::Color::WHITE),
+        crate::property::Contribution::Set(crate::Brush::Solid(crate::Color::WHITE)),
     )
     .unwrap();
     ack(&mut win);
