@@ -1,0 +1,34 @@
+{
+  "external-machos.json": {
+    "bytes": 20723,
+    "sha256": "aa835b7547386493078ffd376658f80f39208fba309854c6065ee65e15f43e50"
+  },
+  "local-staging-receipts.tar.gz": {
+    "bytes": 434110,
+    "sha256": "ca76624097226a88bad6d3ad549e0406d07b05a15aa88c737b81e421b724c12f"
+  },
+  "metadata-receipt.json": {
+    "bytes": 227,
+    "sha256": "8983306ddede1b7458f9192443bf578f16335ddc935b8dd8bef143682f3ded5f"
+  },
+  "metadata.tar.gz": {
+    "bytes": 415256,
+    "sha256": "452550686fd225a5383d4bd7302450689bc0cbb535841206e3dec33396569fdc"
+  },
+  "packaging-timeout.json": {
+    "bytes": 339,
+    "sha256": "59d5208f905411a3663b23e961195a09ca2068421a7fc2da4a9bce8dd4c49dc5"
+  },
+  "platform.json": {
+    "bytes": 227,
+    "sha256": "4a7e8d564f19a1de256040621cd0f942b8240211eb9d7d1ca4dedacc3753a3fe"
+  },
+  "report.txt": {
+    "bytes": 2186,
+    "sha256": "bda673aec01a39b5f64b077ae17acd372477332b83add05c2924f79429b7d19a"
+  },
+  "status.json": {
+    "bytes": 145412,
+    "sha256": "19d4f6fd95bc108c26125c83fd19b86878a5dfe6a7fd661b9def334fe00a50c0"
+  }
+}

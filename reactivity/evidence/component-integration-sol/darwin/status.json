@@ -1,0 +1,4297 @@
+{
+  "state": "complete",
+  "source": "7a2f9325440bc4325f423863a443df0ca2f39743",
+  "pid": 11163,
+  "gates": [
+    {
+      "name": "clean-first-party-dev",
+      "exit": 0,
+      "seconds": 0.627404125
+    },
+    {
+      "name": "full-native-build",
+      "exit": 0,
+      "seconds": 54.262044375
+    },
+    {
+      "name": "native-run-0",
+      "exit": 0,
+      "seconds": 0.614582833
+    },
+    {
+      "name": "native-run-1",
+      "exit": 0,
+      "seconds": 2.7480190419999957
+    },
+    {
+      "name": "native-run-2",
+      "exit": 0,
+      "seconds": 0.6620352500000024
+    },
+    {
+      "name": "native-run-3",
+      "exit": 0,
+      "seconds": 0.6290707499999968
+    },
+    {
+      "name": "native-run-4",
+      "exit": 0,
+      "seconds": 0.6718998330000048
+    },
+    {
+      "name": "native-run-5",
+      "exit": 0,
+      "seconds": 0.5712200420000002
+    },
+    {
+      "name": "native-run-6",
+      "exit": 0,
+      "seconds": 0.5620762089999971
+    },
+    {
+      "name": "native-run-7",
+      "exit": 0,
+      "seconds": 1.1588555410000012
+    },
+    {
+      "name": "native-run-8",
+      "exit": 0,
+      "seconds": 0.5937785419999955
+    },
+    {
+      "name": "native-run-9",
+      "exit": 0,
+      "seconds": 0.6272899580000058
+    },
+    {
+      "name": "native-run-10",
+      "exit": 0,
+      "seconds": 0.6480170829999992
+    },
+    {
+      "name": "native-run-11",
+      "exit": 0,
+      "seconds": 0.5973906659999955
+    },
+    {
+      "name": "native-run-12",
+      "exit": 0,
+      "seconds": 0.5639263329999977
+    },
+    {
+      "name": "native-run-13",
+      "exit": 0,
+      "seconds": 0.6045937920000028
+    },
+    {
+      "name": "native-run-14",
+      "exit": 0,
+      "seconds": 0.6492955410000008
+    },
+    {
+      "name": "native-run-15",
+      "exit": 0,
+      "seconds": 0.6017552909999893
+    },
+    {
+      "name": "native-run-16",
+      "exit": 0,
+      "seconds": 0.6077706250000006
+    },
+    {
+      "name": "native-run-17",
+      "exit": 0,
+      "seconds": 0.6245260419999994
+    },
+    {
+      "name": "native-run-18",
+      "exit": 0,
+      "seconds": 0.6353766670000027
+    },
+    {
+      "name": "native-run-19",
+      "exit": 0,
+      "seconds": 9.500906208000004
+    },
+    {
+      "name": "native-run-20",
+      "exit": 0,
+      "seconds": 0.6048735419999929
+    },
+    {
+      "name": "native-run-21",
+      "exit": 0,
+      "seconds": 0.6225418329999997
+    },
+    {
+      "name": "native-run-22",
+      "exit": 0,
+      "seconds": 0.6602157500000061
+    },
+    {
+      "name": "native-run-23",
+      "exit": 0,
+      "seconds": 0.6440919170000114
+    },
+    {
+      "name": "native-run-24",
+      "exit": 0,
+      "seconds": 0.6199209580000087
+    },
+    {
+      "name": "native-run-25",
+      "exit": 0,
+      "seconds": 0.6032376659999983
+    },
+    {
+      "name": "native-run-26",
+      "exit": 0,
+      "seconds": 0.6105694580000005
+    },
+    {
+      "name": "native-run-27",
+      "exit": 0,
+      "seconds": 0.6489526670000032
+    },
+    {
+      "name": "native-run-28",
+      "exit": 0,
+      "seconds": 0.6048242500000072
+    },
+    {
+      "name": "native-run-29",
+      "exit": 0,
+      "seconds": 1.800637542000004
+    },
+    {
+      "name": "native-run-30",
+      "exit": 0,
+      "seconds": 1.2451843749999938
+    },
+    {
+      "name": "native-run-31",
+      "exit": 0,
+      "seconds": 0.6585732080000071
+    },
+    {
+      "name": "native-run-32",
+      "exit": 0,
+      "seconds": 2.846597542000012
+    },
+    {
+      "name": "native-run-33",
+      "exit": 0,
+      "seconds": 0.6430035000000061
+    },
+    {
+      "name": "native-run-34",
+      "exit": 101,
+      "seconds": 13.738627582999996
+    },
+    {
+      "name": "native-run-35",
+      "exit": 0,
+      "seconds": 0.614011416000011
+    },
+    {
+      "name": "native-run-36",
+      "exit": 0,
+      "seconds": 0.5753884580000062
+    },
+    {
+      "name": "native-run-37",
+      "exit": 0,
+      "seconds": 0.6297978329999978
+    },
+    {
+      "name": "native-run-38",
+      "exit": 0,
+      "seconds": 0.656332582999994
+    },
+    {
+      "name": "native-run-39",
+      "exit": 0,
+      "seconds": 1.1197732499999944
+    },
+    {
+      "name": "native-run-40",
+      "exit": 0,
+      "seconds": 0.6271683749999966
+    },
+    {
+      "name": "native-run-41",
+      "exit": 0,
+      "seconds": 1.1025020419999976
+    },
+    {
+      "name": "native-run-42",
+      "exit": 0,
+      "seconds": 0.617645791000001
+    },
+    {
+      "name": "native-run-43",
+      "exit": 0,
+      "seconds": 0.5583005000000014
+    },
+    {
+      "name": "native-run-44",
+      "exit": 0,
+      "seconds": 0.6450461250000075
+    },
+    {
+      "name": "native-run-45",
+      "exit": 0,
+      "seconds": 1.221280207999996
+    },
+    {
+      "name": "native-run-46",
+      "exit": 0,
+      "seconds": 0.6517811249999994
+    },
+    {
+      "name": "native-run-47",
+      "exit": 0,
+      "seconds": 0.6457775420000047
+    },
+    {
+      "name": "native-run-48",
+      "exit": 0,
+      "seconds": 0.6154848329999965
+    },
+    {
+      "name": "native-run-49",
+      "exit": 0,
+      "seconds": 1.2141738330000038
+    },
+    {
+      "name": "native-run-50",
+      "exit": 0,
+      "seconds": 0.6184635000000043
+    },
+    {
+      "name": "native-run-51",
+      "exit": 0,
+      "seconds": 0.6508855000000011
+    },
+    {
+      "name": "native-run-52",
+      "exit": 0,
+      "seconds": 0.5979734169999915
+    },
+    {
+      "name": "native-run-53",
+      "exit": 0,
+      "seconds": 0.5902190420000011
+    },
+    {
+      "name": "native-run-54",
+      "exit": 0,
+      "seconds": 0.6505915000000044
+    },
+    {
+      "name": "native-run-55",
+      "exit": 0,
+      "seconds": 1.1384460000000018
+    },
+    {
+      "name": "native-run-56",
+      "exit": 0,
+      "seconds": 0.5812153329999887
+    },
+    {
+      "name": "native-run-57",
+      "exit": 0,
+      "seconds": 0.6508430420000195
+    },
+    {
+      "name": "native-run-58",
+      "exit": 0,
+      "seconds": 0.6120562079999843
+    },
+    {
+      "name": "native-run-59",
+      "exit": 0,
+      "seconds": 0.6210128329999804
+    },
+    {
+      "name": "native-run-60",
+      "exit": 0,
+      "seconds": 0.6418671670000151
+    },
+    {
+      "name": "native-run-61",
+      "exit": 0,
+      "seconds": 0.5681967090000057
+    },
+    {
+      "name": "native-run-62",
+      "exit": 0,
+      "seconds": 0.6248434169999939
+    },
+    {
+      "name": "native-run-63",
+      "exit": 0,
+      "seconds": 0.6387844169999823
+    },
+    {
+      "name": "native-run-64",
+      "exit": 0,
+      "seconds": 0.6185844999999972
+    },
+    {
+      "name": "native-run-65",
+      "exit": 0,
+      "seconds": 0.6123529580000024
+    },
+    {
+      "name": "native-run-66",
+      "exit": 0,
+      "seconds": 0.6437911249999786
+    },
+    {
+      "name": "native-run-67",
+      "exit": 0,
+      "seconds": 0.6634082090000106
+    },
+    {
+      "name": "native-run-68",
+      "exit": 0,
+      "seconds": 0.5983661669999947
+    },
+    {
+      "name": "native-run-69",
+      "exit": 0,
+      "seconds": 0.6628412090000211
+    },
+    {
+      "name": "native-run-70",
+      "exit": 0,
+      "seconds": 1.1706667079999988
+    },
+    {
+      "name": "native-run-71",
+      "exit": 0,
+      "seconds": 0.6537657499999909
+    },
+    {
+      "name": "native-run-72",
+      "exit": 101,
+      "seconds": 0.6313610420000089
+    },
+    {
+      "name": "native-run-73",
+      "exit": 0,
+      "seconds": 0.5955356660000177
+    },
+    {
+      "name": "native-app-build",
+      "exit": 0,
+      "seconds": 5.0680939579999915
+    },
+    {
+      "name": "strict-native-clippy",
+      "exit": 0,
+      "seconds": 9.368750083000009
+    },
+    {
+      "name": "native-docs",
+      "exit": 0,
+      "seconds": 2.7662462499999947
+    }
+  ],
+  "binaries": [
+    {
+      "name": "routes",
+      "file": "full-native-build-0-routes",
+      "sha256": "c1bf14e11af6cd2dac7b225fb1b3d116c5ad7b432d89fd5234b89ffdfaa8143f",
+      "bytes": 29327200,
+      "cargo": {
+        "reason": "compiler-artifact",
+        "package_id": "path+file:///Users/mileswirht/gpui-reactivity-20261024-root/component-7a2f9325-sol/source/reactivity/crates/gpui#0.1.0",
+        "manifest_path": "/Users/mileswirht/gpui-reactivity-20261024-root/component-7a2f9325-sol/source/reactivity/crates/gpui/Cargo.toml",
+        "target": {
+          "kind": [
+            "test"
+          ],
+          "crate_types": [
+            "bin"
+          ],
+          "name": "routes",
+          "src_path": "/Users/mileswirht/gpui-reactivity-20261024-root/component-7a2f9325-sol/source/reactivity/crates/gpui/tests/routes.rs",
+          "edition": "2024",
+          "doc": false,
+          "doctest": false,
+          "test": true
+        },
+        "profile": {
+          "opt_level": "0",
+          "debuginfo": 0,
+          "debug_assertions": true,
+          "overflow_checks": true,
+          "test": true
+        },
+        "features": [
+          "accessibility",
+          "default",
+          "native",
+          "native-core",
+          "simd"
+        ],
+        "filenames": [
+          "/Users/mileswirht/gpui-reactivity-20261024-root/target-nightly/debug/build/gpui/4b10fcfb1e4087ea/out/routes-4b10fcfb1e4087ea"
+        ],
+        "executable": "/Users/mileswirht/gpui-reactivity-20261024-root/target-nightly/debug/build/gpui/4b10fcfb1e4087ea/out/routes-4b10fcfb1e4087ea",
+        "fresh": false
+      }
+    },
+    {
+      "name": "search_library",
+      "file": "full-native-build-1-search_library",
+      "sha256": "13ec0b5f65b13febfffdc394f15f99d3d0c0fc2edf9d6983b623d1e0a13e9120",
+      "bytes": 30049648,
+      "cargo": {
+        "reason": "compiler-artifact",
+        "package_id": "path+file:///Users/mileswirht/gpui-reactivity-20261024-root/component-7a2f9325-sol/source/reactivity/crates/gpui#0.1.0",
+        "manifest_path": "/Users/mileswirht/gpui-reactivity-20261024-root/component-7a2f9325-sol/source/reactivity/crates/gpui/Cargo.toml",
+        "target": {
+          "kind": [
+            "test"
+          ],
+          "crate_types": [
+            "bin"
+          ],
+          "name": "search_library",
+          "src_path": "/Users/mileswirht/gpui-reactivity-20261024-root/component-7a2f9325-sol/source/reactivity/crates/gpui/tests/search_library.rs",
+          "edition": "2024",
+          "doc": false,
+          "doctest": false,
+          "test": true
+        },
+        "profile": {
+          "opt_level": "0",
+          "debuginfo": 0,
+          "debug_assertions": true,
+          "overflow_checks": true,
+          "test": true
+        },
+        "features": [
+          "accessibility",
+          "default",
+          "native",
+          "native-core",
+          "simd"
+        ],
+        "filenames": [
+          "/Users/mileswirht/gpui-reactivity-20261024-root/target-nightly/debug/build/gpui/0f31a26377f4a482/out/search_library-0f31a26377f4a482"
+        ],
+        "executable": "/Users/mileswirht/gpui-reactivity-20261024-root/target-nightly/debug/build/gpui/0f31a26377f4a482/out/search_library-0f31a26377f4a482",
+        "fresh": false
+      }
+    },
+    {
+      "name": "runtime",
+      "file": "full-native-build-2-runtime",
+      "sha256": "40bd68c2f5d935e9a99bee2bda512ff6a6520b0996cfd2fb12447654f066a9f7",
+      "bytes": 36214976,
+      "cargo": {
+        "reason": "compiler-artifact",
+        "package_id": "path+file:///Users/mileswirht/gpui-reactivity-20261024-root/component-7a2f9325-sol/source/reactivity/crates/gpui#0.1.0",
+        "manifest_path": "/Users/mileswirht/gpui-reactivity-20261024-root/component-7a2f9325-sol/source/reactivity/crates/gpui/Cargo.toml",
+        "target": {
+          "kind": [
+            "test"
+          ],
+          "crate_types": [
+            "bin"
+          ],
+          "name": "runtime",
+          "src_path": "/Users/mileswirht/gpui-reactivity-20261024-root/component-7a2f9325-sol/source/reactivity/crates/gpui/tests/runtime.rs",
+          "edition": "2024",
+          "doc": false,
+          "doctest": false,
+          "test": true
+        },
+        "profile": {
+          "opt_level": "0",
+          "debuginfo": 0,
+          "debug_assertions": true,
+          "overflow_checks": true,
+          "test": true
+        },
+        "features": [
+          "accessibility",
+          "default",
+          "native",
+          "native-core",
+          "simd"
+        ],
+        "filenames": [
+          "/Users/mileswirht/gpui-reactivity-20261024-root/target-nightly/debug/build/gpui/6cde4c1f4ac1a7f9/out/runtime-6cde4c1f4ac1a7f9"
+        ],
+        "executable": "/Users/mileswirht/gpui-reactivity-20261024-root/target-nightly/debug/build/gpui/6cde4c1f4ac1a7f9/out/runtime-6cde4c1f4ac1a7f9",
+        "fresh": false
+      }
+    },
+    {
+      "name": "scroll",
+      "file": "full-native-build-3-scroll",
+      "sha256": "ea212f6107ef8adf0de5bc58a96a961a5453ef40a070bd061b0695e2fd274951",
+      "bytes": 37520752,
+      "cargo": {
+        "reason": "compiler-artifact",
+        "package_id": "path+file:///Users/mileswirht/gpui-reactivity-20261024-root/component-7a2f9325-sol/source/reactivity/crates/gpui#0.1.0",
+        "manifest_path": "/Users/mileswirht/gpui-reactivity-20261024-root/component-7a2f9325-sol/source/reactivity/crates/gpui/Cargo.toml",
+        "target": {
+          "kind": [
+            "test"
+          ],
+          "crate_types": [
+            "bin"
+          ],
+          "name": "scroll",
+          "src_path": "/Users/mileswirht/gpui-reactivity-20261024-root/component-7a2f9325-sol/source/reactivity/crates/gpui/tests/scroll.rs",
+          "edition": "2024",
+          "doc": false,
+          "doctest": false,
+          "test": true
+        },
+        "profile": {
+          "opt_level": "0",
+          "debuginfo": 0,
+          "debug_assertions": true,
+          "overflow_checks": true,
+          "test": true
+        },
+        "features": [
+          "accessibility",
+          "default",
+          "native",
+          "native-core",
+          "simd"
+        ],
+        "filenames": [
+          "/Users/mileswirht/gpui-reactivity-20261024-root/target-nightly/debug/build/gpui/2ee5d8cbf3f3c190/out/scroll-2ee5d8cbf3f3c190"
+        ],
+        "executable": "/Users/mileswirht/gpui-reactivity-20261024-root/target-nightly/debug/build/gpui/2ee5d8cbf3f3c190/out/scroll-2ee5d8cbf3f3c190",
+        "fresh": false
+      }
+    },
+    {
+      "name": "semantic_serialization",
+      "file": "full-native-build-4-semantic_serialization",
+      "sha256": "d3aabb16d32f4fd555310786114c13d12c12d5bd3c3d071c8cf941d631e7800f",
+      "bytes": 30273504,
+      "cargo": {
+        "reason": "compiler-artifact",
+        "package_id": "path+file:///Users/mileswirht/gpui-reactivity-20261024-root/component-7a2f9325-sol/source/reactivity/crates/gpui#0.1.0",
+        "manifest_path": "/Users/mileswirht/gpui-reactivity-20261024-root/component-7a2f9325-sol/source/reactivity/crates/gpui/Cargo.toml",
+        "target": {
+          "kind": [
+            "test"
+          ],
+          "crate_types": [
+            "bin"
+          ],
+          "name": "semantic_serialization",
+          "src_path": "/Users/mileswirht/gpui-reactivity-20261024-root/component-7a2f9325-sol/source/reactivity/crates/gpui/tests/semantic_serialization.rs",
+          "edition": "2024",
+          "doc": false,
+          "doctest": false,
+          "test": true
+        },
+        "profile": {
+          "opt_level": "0",
+          "debuginfo": 0,
+          "debug_assertions": true,
+          "overflow_checks": true,
+          "test": true
+        },
+        "features": [
+          "accessibility",
+          "default",
+          "native",
+          "native-core",
+          "simd"
+        ],
+        "filenames": [
+          "/Users/mileswirht/gpui-reactivity-20261024-root/target-nightly/debug/build/gpui/ac41e2f8265026da/out/semantic_serialization-ac41e2f8265026da"
+        ],
+        "executable": "/Users/mileswirht/gpui-reactivity-20261024-root/target-nightly/debug/build/gpui/ac41e2f8265026da/out/semantic_serialization-ac41e2f8265026da",
+        "fresh": false
+      }
+    },
+    {
+      "name": "semantics",
+      "file": "full-native-build-5-semantics",
+      "sha256": "1f66703fb7cf44a745baec2180da8007821377f2e316384e8d873c51f2fe7819",
+      "bytes": 29561024,
+      "cargo": {
+        "reason": "compiler-artifact",
+        "package_id": "path+file:///Users/mileswirht/gpui-reactivity-20261024-root/component-7a2f9325-sol/source/reactivity/crates/gpui#0.1.0",
+        "manifest_path": "/Users/mileswirht/gpui-reactivity-20261024-root/component-7a2f9325-sol/source/reactivity/crates/gpui/Cargo.toml",
+        "target": {
+          "kind": [
+            "test"
+          ],
+          "crate_types": [
+            "bin"
+          ],
+          "name": "semantics",
+          "src_path": "/Users/mileswirht/gpui-reactivity-20261024-root/component-7a2f9325-sol/source/reactivity/crates/gpui/tests/semantics.rs",
+          "edition": "2024",
+          "doc": false,
+          "doctest": false,
+          "test": true
+        },
+        "profile": {
+          "opt_level": "0",
+          "debuginfo": 0,
+          "debug_assertions": true,
+          "overflow_checks": true,
+          "test": true
+        },
+        "features": [
+          "accessibility",
+          "default",
+          "native",
+          "native-core",
+          "simd"
+        ],
+        "filenames": [
+          "/Users/mileswirht/gpui-reactivity-20261024-root/target-nightly/debug/build/gpui/4fe5813f18d0679a/out/semantics-4fe5813f18d0679a"
+        ],
+        "executable": "/Users/mileswirht/gpui-reactivity-20261024-root/target-nightly/debug/build/gpui/4fe5813f18d0679a/out/semantics-4fe5813f18d0679a",
+        "fresh": false
+      }
+    },
+    {
+      "name": "semantic_metadata",
+      "file": "full-native-build-6-semantic_metadata",
+      "sha256": "89e896d40f23df3c133774ac9f09c6c5a93a18697b3855c8dfe09a85a6daf60c",
+      "bytes": 34102880,
+      "cargo": {
+        "reason": "compiler-artifact",
+        "package_id": "path+file:///Users/mileswirht/gpui-reactivity-20261024-root/component-7a2f9325-sol/source/reactivity/crates/gpui#0.1.0",
+        "manifest_path": "/Users/mileswirht/gpui-reactivity-20261024-root/component-7a2f9325-sol/source/reactivity/crates/gpui/Cargo.toml",
+        "target": {
+          "kind": [
+            "test"
+          ],
+          "crate_types": [
+            "bin"
+          ],
+          "name": "semantic_metadata",
+          "src_path": "/Users/mileswirht/gpui-reactivity-20261024-root/component-7a2f9325-sol/source/reactivity/crates/gpui/tests/semantic_metadata.rs",
+          "edition": "2024",
+          "doc": false,
+          "doctest": false,
+          "test": true
+        },
+        "profile": {
+          "opt_level": "0",
+          "debuginfo": 0,
+          "debug_assertions": true,
+          "overflow_checks": true,
+          "test": true
+        },
+        "features": [
+          "accessibility",
+          "default",
+          "native",
+          "native-core",
+          "simd"
+        ],
+        "filenames": [
+          "/Users/mileswirht/gpui-reactivity-20261024-root/target-nightly/debug/build/gpui/2f76810f676e101d/out/semantic_metadata-2f76810f676e101d"
+        ],
+        "executable": "/Users/mileswirht/gpui-reactivity-20261024-root/target-nightly/debug/build/gpui/2f76810f676e101d/out/semantic_metadata-2f76810f676e101d",
+        "fresh": false
+      }
+    },
+    {
+      "name": "sibling_reconciliation_cost",
+      "file": "full-native-build-7-sibling_reconciliation_cost",
+      "sha256": "8cf449002e93f670b4ff1303daef79e056e614afc9c6c3fff7922378587e9d71",
+      "bytes": 27719776,
+      "cargo": {
+        "reason": "compiler-artifact",
+        "package_id": "path+file:///Users/mileswirht/gpui-reactivity-20261024-root/component-7a2f9325-sol/source/reactivity/crates/gpui#0.1.0",
+        "manifest_path": "/Users/mileswirht/gpui-reactivity-20261024-root/component-7a2f9325-sol/source/reactivity/crates/gpui/Cargo.toml",
+        "target": {
+          "kind": [
+            "test"
+          ],
+          "crate_types": [
+            "bin"
+          ],
+          "name": "sibling_reconciliation_cost",
+          "src_path": "/Users/mileswirht/gpui-reactivity-20261024-root/component-7a2f9325-sol/source/reactivity/crates/gpui/tests/sibling_reconciliation_cost.rs",
+          "edition": "2024",
+          "doc": false,
+          "doctest": false,
+          "test": true
+        },
+        "profile": {
+          "opt_level": "0",
+          "debuginfo": 0,
+          "debug_assertions": true,
+          "overflow_checks": true,
+          "test": true
+        },
+        "features": [
+          "accessibility",
+          "default",
+          "native",
+          "native-core",
+          "simd"
+        ],
+        "filenames": [
+          "/Users/mileswirht/gpui-reactivity-20261024-root/target-nightly/debug/build/gpui/0f9b7e1c60a69a21/out/sibling_reconciliation_cost-0f9b7e1c60a69a21"
+        ],
+        "executable": "/Users/mileswirht/gpui-reactivity-20261024-root/target-nightly/debug/build/gpui/0f9b7e1c60a69a21/out/sibling_reconciliation_cost-0f9b7e1c60a69a21",
+        "fresh": false
+      }
+    },
+    {
+      "name": "source_inbox_reader_gate",
+      "file": "full-native-build-8-source_inbox_reader_gate",
+      "sha256": "c99ea4d1ac2ef32b8117061852795429775a4bbaee9f533bd3412c476f1e979b",
+      "bytes": 28221888,
+      "cargo": {
+        "reason": "compiler-artifact",
+        "package_id": "path+file:///Users/mileswirht/gpui-reactivity-20261024-root/component-7a2f9325-sol/source/reactivity/crates/gpui#0.1.0",
+        "manifest_path": "/Users/mileswirht/gpui-reactivity-20261024-root/component-7a2f9325-sol/source/reactivity/crates/gpui/Cargo.toml",
+        "target": {
+          "kind": [
+            "test"
+          ],
+          "crate_types": [
+            "bin"
+          ],
+          "name": "source_inbox_reader_gate",
+          "src_path": "/Users/mileswirht/gpui-reactivity-20261024-root/component-7a2f9325-sol/source/reactivity/crates/gpui/tests/source_inbox_reader_gate.rs",
+          "edition": "2024",
+          "doc": false,
+          "doctest": false,
+          "test": true
+        },
+        "profile": {
+          "opt_level": "0",
+          "debuginfo": 0,
+          "debug_assertions": true,
+          "overflow_checks": true,
+          "test": true
+        },
+        "features": [
+          "accessibility",
+          "default",
+          "native",
+          "native-core",
+          "simd"
+        ],
+        "filenames": [
+          "/Users/mileswirht/gpui-reactivity-20261024-root/target-nightly/debug/build/gpui/34286809aa399ab6/out/source_inbox_reader_gate-34286809aa399ab6"
+        ],
+        "executable": "/Users/mileswirht/gpui-reactivity-20261024-root/target-nightly/debug/build/gpui/34286809aa399ab6/out/source_inbox_reader_gate-34286809aa399ab6",
+        "fresh": false
+      }
+    },
+    {
+      "name": "source_inbox",
+      "file": "full-native-build-9-source_inbox",
+      "sha256": "c5681ffa87f9adcdff6071c4ac772465fae3aceda3a36a6e2c249b656c5052d2",
+      "bytes": 32299152,
+      "cargo": {
+        "reason": "compiler-artifact",
+        "package_id": "path+file:///Users/mileswirht/gpui-reactivity-20261024-root/component-7a2f9325-sol/source/reactivity/crates/gpui#0.1.0",
+        "manifest_path": "/Users/mileswirht/gpui-reactivity-20261024-root/component-7a2f9325-sol/source/reactivity/crates/gpui/Cargo.toml",
+        "target": {
+          "kind": [
+            "test"
+          ],
+          "crate_types": [
+            "bin"
+          ],
+          "name": "source_inbox",
+          "src_path": "/Users/mileswirht/gpui-reactivity-20261024-root/component-7a2f9325-sol/source/reactivity/crates/gpui/tests/source_inbox.rs",
+          "edition": "2024",
+          "doc": false,
+          "doctest": false,
+          "test": true
+        },
+        "profile": {
+          "opt_level": "0",
+          "debuginfo": 0,
+          "debug_assertions": true,
+          "overflow_checks": true,
+          "test": true
+        },
+        "features": [
+          "accessibility",
+          "default",
+          "native",
+          "native-core",
+          "simd"
+        ],
+        "filenames": [
+          "/Users/mileswirht/gpui-reactivity-20261024-root/target-nightly/debug/build/gpui/48675c4090770d90/out/source_inbox-48675c4090770d90"
+        ],
+        "executable": "/Users/mileswirht/gpui-reactivity-20261024-root/target-nightly/debug/build/gpui/48675c4090770d90/out/source_inbox-48675c4090770d90",
+        "fresh": false
+      }
+    },
+    {
+      "name": "source_value_isolation",
+      "file": "full-native-build-10-source_value_isolation",
+      "sha256": "8291b0ac1db1e369cc9159dce52e14950077ccd9ab390bedb60a685d92af550f",
+      "bytes": 29778496,
+      "cargo": {
+        "reason": "compiler-artifact",
+        "package_id": "path+file:///Users/mileswirht/gpui-reactivity-20261024-root/component-7a2f9325-sol/source/reactivity/crates/gpui#0.1.0",
+        "manifest_path": "/Users/mileswirht/gpui-reactivity-20261024-root/component-7a2f9325-sol/source/reactivity/crates/gpui/Cargo.toml",
+        "target": {
+          "kind": [
+            "test"
+          ],
+          "crate_types": [
+            "bin"
+          ],
+          "name": "source_value_isolation",
+          "src_path": "/Users/mileswirht/gpui-reactivity-20261024-root/component-7a2f9325-sol/source/reactivity/crates/gpui/tests/source_value_isolation.rs",
+          "edition": "2024",
+          "doc": false,
+          "doctest": false,
+          "test": true
+        },
+        "profile": {
+          "opt_level": "0",
+          "debuginfo": 0,
+          "debug_assertions": true,
+          "overflow_checks": true,
+          "test": true
+        },
+        "features": [
+          "accessibility",
+          "default",
+          "native",
+          "native-core",
+          "simd"
+        ],
+        "filenames": [
+          "/Users/mileswirht/gpui-reactivity-20261024-root/target-nightly/debug/build/gpui/8ccb0dc141e86097/out/source_value_isolation-8ccb0dc141e86097"
+        ],
+        "executable": "/Users/mileswirht/gpui-reactivity-20261024-root/target-nightly/debug/build/gpui/8ccb0dc141e86097/out/source_value_isolation-8ccb0dc141e86097",
+        "fresh": false
+      }
+    },
+    {
+      "name": "source_values",
+      "file": "full-native-build-11-source_values",
+      "sha256": "e90e0690a258a57ac16a4bb363ae288260c305f87680fbf12ac72277eb1f1772",
+      "bytes": 29005280,
+      "cargo": {
+        "reason": "compiler-artifact",
+        "package_id": "path+file:///Users/mileswirht/gpui-reactivity-20261024-root/component-7a2f9325-sol/source/reactivity/crates/gpui#0.1.0",
+        "manifest_path": "/Users/mileswirht/gpui-reactivity-20261024-root/component-7a2f9325-sol/source/reactivity/crates/gpui/Cargo.toml",
+        "target": {
+          "kind": [
+            "test"
+          ],
+          "crate_types": [
+            "bin"
+          ],
+          "name": "source_values",
+          "src_path": "/Users/mileswirht/gpui-reactivity-20261024-root/component-7a2f9325-sol/source/reactivity/crates/gpui/tests/source_values.rs",
+          "edition": "2024",
+          "doc": false,
+          "doctest": false,
+          "test": true
+        },
+        "profile": {
+          "opt_level": "0",
+          "debuginfo": 0,
+          "debug_assertions": true,
+          "overflow_checks": true,
+          "test": true
+        },
+        "features": [
+          "accessibility",
+          "default",
+          "native",
+          "native-core",
+          "simd"
+        ],
+        "filenames": [
+          "/Users/mileswirht/gpui-reactivity-20261024-root/target-nightly/debug/build/gpui/acf6a7374cb98cb9/out/source_values-acf6a7374cb98cb9"
+        ],
+        "executable": "/Users/mileswirht/gpui-reactivity-20261024-root/target-nightly/debug/build/gpui/acf6a7374cb98cb9/out/source_values-acf6a7374cb98cb9",
+        "fresh": false
+      }
+    },
+    {
+      "name": "text_cache",
+      "file": "full-native-build-12-text_cache",
+      "sha256": "ab6208390e3b1c8e872a9c78e7ba62f6dc392c4ddc17a1ea79603bc960347975",
+      "bytes": 29116144,
+      "cargo": {
+        "reason": "compiler-artifact",
+        "package_id": "path+file:///Users/mileswirht/gpui-reactivity-20261024-root/component-7a2f9325-sol/source/reactivity/crates/gpui#0.1.0",
+        "manifest_path": "/Users/mileswirht/gpui-reactivity-20261024-root/component-7a2f9325-sol/source/reactivity/crates/gpui/Cargo.toml",
+        "target": {
+          "kind": [
+            "test"
+          ],
+          "crate_types": [
+            "bin"
+          ],
+          "name": "text_cache",
+          "src_path": "/Users/mileswirht/gpui-reactivity-20261024-root/component-7a2f9325-sol/source/reactivity/crates/gpui/tests/text_cache.rs",
+          "edition": "2024",
+          "doc": false,
+          "doctest": false,
+          "test": true
+        },
+        "profile": {
+          "opt_level": "0",
+          "debuginfo": 0,
+          "debug_assertions": true,
+          "overflow_checks": true,
+          "test": true
+        },
+        "features": [
+          "accessibility",
+          "default",
+          "native",
+          "native-core",
+          "simd"
+        ],
+        "filenames": [
+          "/Users/mileswirht/gpui-reactivity-20261024-root/target-nightly/debug/build/gpui/1c449bc4f03e4514/out/text_cache-1c449bc4f03e4514"
+        ],
+        "executable": "/Users/mileswirht/gpui-reactivity-20261024-root/target-nightly/debug/build/gpui/1c449bc4f03e4514/out/text_cache-1c449bc4f03e4514",
+        "fresh": false
+      }
+    },
+    {
+      "name": "text_geometry",
+      "file": "full-native-build-13-text_geometry",
+      "sha256": "47fa65471914c1675687371e21a2fadc9145d5498349945d41ae6230d3466486",
+      "bytes": 28681488,
+      "cargo": {
+        "reason": "compiler-artifact",
+        "package_id": "path+file:///Users/mileswirht/gpui-reactivity-20261024-root/component-7a2f9325-sol/source/reactivity/crates/gpui#0.1.0",
+        "manifest_path": "/Users/mileswirht/gpui-reactivity-20261024-root/component-7a2f9325-sol/source/reactivity/crates/gpui/Cargo.toml",
+        "target": {
+          "kind": [
+            "test"
+          ],
+          "crate_types": [
+            "bin"
+          ],
+          "name": "text_geometry",
+          "src_path": "/Users/mileswirht/gpui-reactivity-20261024-root/component-7a2f9325-sol/source/reactivity/crates/gpui/tests/text_geometry.rs",
+          "edition": "2024",
+          "doc": false,
+          "doctest": false,
+          "test": true
+        },
+        "profile": {
+          "opt_level": "0",
+          "debuginfo": 0,
+          "debug_assertions": true,
+          "overflow_checks": true,
+          "test": true
+        },
+        "features": [
+          "accessibility",
+          "default",
+          "native",
+          "native-core",
+          "simd"
+        ],
+        "filenames": [
+          "/Users/mileswirht/gpui-reactivity-20261024-root/target-nightly/debug/build/gpui/de4e6e1bffaeacba/out/text_geometry-de4e6e1bffaeacba"
+        ],
+        "executable": "/Users/mileswirht/gpui-reactivity-20261024-root/target-nightly/debug/build/gpui/de4e6e1bffaeacba/out/text_geometry-de4e6e1bffaeacba",
+        "fresh": false
+      }
+    },
+    {
+      "name": "text_selection",
+      "file": "full-native-build-14-text_selection",
+      "sha256": "f771c38217a2f30eca012c3ce38f90d3d60b2d5df99c9d7ac7468433023bb431",
+      "bytes": 30642960,
+      "cargo": {
+        "reason": "compiler-artifact",
+        "package_id": "path+file:///Users/mileswirht/gpui-reactivity-20261024-root/component-7a2f9325-sol/source/reactivity/crates/gpui#0.1.0",
+        "manifest_path": "/Users/mileswirht/gpui-reactivity-20261024-root/component-7a2f9325-sol/source/reactivity/crates/gpui/Cargo.toml",
+        "target": {
+          "kind": [
+            "test"
+          ],
+          "crate_types": [
+            "bin"
+          ],
+          "name": "text_selection",
+          "src_path": "/Users/mileswirht/gpui-reactivity-20261024-root/component-7a2f9325-sol/source/reactivity/crates/gpui/tests/text_selection.rs",
+          "edition": "2024",
+          "doc": false,
+          "doctest": false,
+          "test": true
+        },
+        "profile": {
+          "opt_level": "0",
+          "debuginfo": 0,
+          "debug_assertions": true,
+          "overflow_checks": true,
+          "test": true
+        },
+        "features": [
+          "accessibility",
+          "default",
+          "native",
+          "native-core",
+          "simd"
+        ],
+        "filenames": [
+          "/Users/mileswirht/gpui-reactivity-20261024-root/target-nightly/debug/build/gpui/eae1d00e9d915b8e/out/text_selection-eae1d00e9d915b8e"
+        ],
+        "executable": "/Users/mileswirht/gpui-reactivity-20261024-root/target-nightly/debug/build/gpui/eae1d00e9d915b8e/out/text_selection-eae1d00e9d915b8e",
+        "fresh": false
+      }
+    },
+    {
+      "name": "style_ports",
+      "file": "full-native-build-15-style_ports",
+      "sha256": "413472bde65fbd6d8fccbef33045fc27edb16bf85b1b25bca3783434bb70ceb0",
+      "bytes": 37399952,
+      "cargo": {
+        "reason": "compiler-artifact",
+        "package_id": "path+file:///Users/mileswirht/gpui-reactivity-20261024-root/component-7a2f9325-sol/source/reactivity/crates/gpui#0.1.0",
+        "manifest_path": "/Users/mileswirht/gpui-reactivity-20261024-root/component-7a2f9325-sol/source/reactivity/crates/gpui/Cargo.toml",
+        "target": {
+          "kind": [
+            "test"
+          ],
+          "crate_types": [
+            "bin"
+          ],
+          "name": "style_ports",
+          "src_path": "/Users/mileswirht/gpui-reactivity-20261024-root/component-7a2f9325-sol/source/reactivity/crates/gpui/tests/style_ports.rs",
+          "edition": "2024",
+          "doc": false,
+          "doctest": false,
+          "test": true
+        },
+        "profile": {
+          "opt_level": "0",
+          "debuginfo": 0,
+          "debug_assertions": true,
+          "overflow_checks": true,
+          "test": true
+        },
+        "features": [
+          "accessibility",
+          "default",
+          "native",
+          "native-core",
+          "simd"
+        ],
+        "filenames": [
+          "/Users/mileswirht/gpui-reactivity-20261024-root/target-nightly/debug/build/gpui/a92a3bbcf2c4e31e/out/style_ports-a92a3bbcf2c4e31e"
+        ],
+        "executable": "/Users/mileswirht/gpui-reactivity-20261024-root/target-nightly/debug/build/gpui/a92a3bbcf2c4e31e/out/style_ports-a92a3bbcf2c4e31e",
+        "fresh": false
+      }
+    },
+    {
+      "name": "acceptance",
+      "file": "full-native-build-16-acceptance",
+      "sha256": "e37765721b6d9262e443301be0cf2002150922cce46163d68b678ad32f4da83d",
+      "bytes": 31524992,
+      "cargo": {
+        "reason": "compiler-artifact",
+        "package_id": "path+file:///Users/mileswirht/gpui-reactivity-20261024-root/component-7a2f9325-sol/source/reactivity/crates/gpui#0.1.0",
+        "manifest_path": "/Users/mileswirht/gpui-reactivity-20261024-root/component-7a2f9325-sol/source/reactivity/crates/gpui/Cargo.toml",
+        "target": {
+          "kind": [
+            "test"
+          ],
+          "crate_types": [
+            "bin"
+          ],
+          "name": "acceptance",
+          "src_path": "/Users/mileswirht/gpui-reactivity-20261024-root/component-7a2f9325-sol/source/reactivity/crates/gpui/tests/acceptance.rs",
+          "edition": "2024",
+          "doc": false,
+          "doctest": false,
+          "test": true
+        },
+        "profile": {
+          "opt_level": "0",
+          "debuginfo": 0,
+          "debug_assertions": true,
+          "overflow_checks": true,
+          "test": true
+        },
+        "features": [
+          "accessibility",
+          "default",
+          "native",
+          "native-core",
+          "simd"
+        ],
+        "filenames": [
+          "/Users/mileswirht/gpui-reactivity-20261024-root/target-nightly/debug/build/gpui/a0ff537f8c5b1875/out/acceptance-a0ff537f8c5b1875"
+        ],
+        "executable": "/Users/mileswirht/gpui-reactivity-20261024-root/target-nightly/debug/build/gpui/a0ff537f8c5b1875/out/acceptance-a0ff537f8c5b1875",
+        "fresh": false
+      }
+    },
+    {
+      "name": "text_selection_compound",
+      "file": "full-native-build-17-text_selection_compound",
+      "sha256": "9af9ed601690cfc4af2c3c810abed97b498e989a30b4d7bd9a983600c83f4ff7",
+      "bytes": 28332528,
+      "cargo": {
+        "reason": "compiler-artifact",
+        "package_id": "path+file:///Users/mileswirht/gpui-reactivity-20261024-root/component-7a2f9325-sol/source/reactivity/crates/gpui#0.1.0",
+        "manifest_path": "/Users/mileswirht/gpui-reactivity-20261024-root/component-7a2f9325-sol/source/reactivity/crates/gpui/Cargo.toml",
+        "target": {
+          "kind": [
+            "test"
+          ],
+          "crate_types": [
+            "bin"
+          ],
+          "name": "text_selection_compound",
+          "src_path": "/Users/mileswirht/gpui-reactivity-20261024-root/component-7a2f9325-sol/source/reactivity/crates/gpui/tests/text_selection_compound.rs",
+          "edition": "2024",
+          "doc": false,
+          "doctest": false,
+          "test": true
+        },
+        "profile": {
+          "opt_level": "0",
+          "debuginfo": 0,
+          "debug_assertions": true,
+          "overflow_checks": true,
+          "test": true
+        },
+        "features": [
+          "accessibility",
+          "default",
+          "native",
+          "native-core",
+          "simd"
+        ],
+        "filenames": [
+          "/Users/mileswirht/gpui-reactivity-20261024-root/target-nightly/debug/build/gpui/bf660ffe29479d74/out/text_selection_compound-bf660ffe29479d74"
+        ],
+        "executable": "/Users/mileswirht/gpui-reactivity-20261024-root/target-nightly/debug/build/gpui/bf660ffe29479d74/out/text_selection_compound-bf660ffe29479d74",
+        "fresh": false
+      }
+    },
+    {
+      "name": "application",
+      "file": "full-native-build-18-application",
+      "sha256": "634df8718e676c44925ab3fb8064407c3caef74d006534b7b7bb2c520dd6aaf8",
+      "bytes": 29939504,
+      "cargo": {
+        "reason": "compiler-artifact",
+        "package_id": "path+file:///Users/mileswirht/gpui-reactivity-20261024-root/component-7a2f9325-sol/source/reactivity/crates/gpui#0.1.0",
+        "manifest_path": "/Users/mileswirht/gpui-reactivity-20261024-root/component-7a2f9325-sol/source/reactivity/crates/gpui/Cargo.toml",
+        "target": {
+          "kind": [
+            "test"
+          ],
+          "crate_types": [
+            "bin"
+          ],
+          "name": "application",
+          "src_path": "/Users/mileswirht/gpui-reactivity-20261024-root/component-7a2f9325-sol/source/reactivity/crates/gpui/tests/application.rs",
+          "edition": "2024",
+          "doc": false,
+          "doctest": false,
+          "test": true
+        },
+        "profile": {
+          "opt_level": "0",
+          "debuginfo": 0,
+          "debug_assertions": true,
+          "overflow_checks": true,
+          "test": true
+        },
+        "features": [
+          "accessibility",
+          "default",
+          "native",
+          "native-core",
+          "simd"
+        ],
+        "filenames": [
+          "/Users/mileswirht/gpui-reactivity-20261024-root/target-nightly/debug/build/gpui/51917ef42542d157/out/application-51917ef42542d157"
+        ],
+        "executable": "/Users/mileswirht/gpui-reactivity-20261024-root/target-nightly/debug/build/gpui/51917ef42542d157/out/application-51917ef42542d157",
+        "fresh": false
+      }
+    },
+    {
+      "name": "todo_comparison",
+      "file": "full-native-build-19-todo_comparison",
+      "sha256": "a1c7d63216660b72769d58a9d481ccdb693ff57227c446f00f61202bcce8ee79",
+      "bytes": 29678544,
+      "cargo": {
+        "reason": "compiler-artifact",
+        "package_id": "path+file:///Users/mileswirht/gpui-reactivity-20261024-root/component-7a2f9325-sol/source/reactivity/crates/gpui#0.1.0",
+        "manifest_path": "/Users/mileswirht/gpui-reactivity-20261024-root/component-7a2f9325-sol/source/reactivity/crates/gpui/Cargo.toml",
+        "target": {
+          "kind": [
+            "test"
+          ],
+          "crate_types": [
+            "bin"
+          ],
+          "name": "todo_comparison",
+          "src_path": "/Users/mileswirht/gpui-reactivity-20261024-root/component-7a2f9325-sol/source/reactivity/crates/gpui/tests/todo_comparison.rs",
+          "edition": "2024",
+          "doc": false,
+          "doctest": false,
+          "test": true
+        },
+        "profile": {
+          "opt_level": "0",
+          "debuginfo": 0,
+          "debug_assertions": true,
+          "overflow_checks": true,
+          "test": true
+        },
+        "features": [
+          "accessibility",
+          "default",
+          "native",
+          "native-core",
+          "simd"
+        ],
+        "filenames": [
+          "/Users/mileswirht/gpui-reactivity-20261024-root/target-nightly/debug/build/gpui/638f28fe480a5181/out/todo_comparison-638f28fe480a5181"
+        ],
+        "executable": "/Users/mileswirht/gpui-reactivity-20261024-root/target-nightly/debug/build/gpui/638f28fe480a5181/out/todo_comparison-638f28fe480a5181",
+        "fresh": false
+      }
+    },
+    {
+      "name": "unicode_text",
+      "file": "full-native-build-20-unicode_text",
+      "sha256": "5a08fb2d33e6cfff10f7469227a0a9906fd0ad48b44ee4a40b7158be1a18ef43",
+      "bytes": 28327440,
+      "cargo": {
+        "reason": "compiler-artifact",
+        "package_id": "path+file:///Users/mileswirht/gpui-reactivity-20261024-root/component-7a2f9325-sol/source/reactivity/crates/gpui#0.1.0",
+        "manifest_path": "/Users/mileswirht/gpui-reactivity-20261024-root/component-7a2f9325-sol/source/reactivity/crates/gpui/Cargo.toml",
+        "target": {
+          "kind": [
+            "test"
+          ],
+          "crate_types": [
+            "bin"
+          ],
+          "name": "unicode_text",
+          "src_path": "/Users/mileswirht/gpui-reactivity-20261024-root/component-7a2f9325-sol/source/reactivity/crates/gpui/tests/unicode_text.rs",
+          "edition": "2024",
+          "doc": false,
+          "doctest": false,
+          "test": true
+        },
+        "profile": {
+          "opt_level": "0",
+          "debuginfo": 0,
+          "debug_assertions": true,
+          "overflow_checks": true,
+          "test": true
+        },
+        "features": [
+          "accessibility",
+          "default",
+          "native",
+          "native-core",
+          "simd"
+        ],
+        "filenames": [
+          "/Users/mileswirht/gpui-reactivity-20261024-root/target-nightly/debug/build/gpui/a5a06411dcb227f2/out/unicode_text-a5a06411dcb227f2"
+        ],
+        "executable": "/Users/mileswirht/gpui-reactivity-20261024-root/target-nightly/debug/build/gpui/a5a06411dcb227f2/out/unicode_text-a5a06411dcb227f2",
+        "fresh": false
+      }
+    },
+    {
+      "name": "child_capacity",
+      "file": "full-native-build-21-child_capacity",
+      "sha256": "382a7efca95bf99fe5109e8fca4b9ba33025dd212b5979604ea355866c097484",
+      "bytes": 27738256,
+      "cargo": {
+        "reason": "compiler-artifact",
+        "package_id": "path+file:///Users/mileswirht/gpui-reactivity-20261024-root/component-7a2f9325-sol/source/reactivity/crates/gpui#0.1.0",
+        "manifest_path": "/Users/mileswirht/gpui-reactivity-20261024-root/component-7a2f9325-sol/source/reactivity/crates/gpui/Cargo.toml",
+        "target": {
+          "kind": [
+            "test"
+          ],
+          "crate_types": [
+            "bin"
+          ],
+          "name": "child_capacity",
+          "src_path": "/Users/mileswirht/gpui-reactivity-20261024-root/component-7a2f9325-sol/source/reactivity/crates/gpui/tests/child_capacity.rs",
+          "edition": "2024",
+          "doc": false,
+          "doctest": false,
+          "test": true
+        },
+        "profile": {
+          "opt_level": "0",
+          "debuginfo": 0,
+          "debug_assertions": true,
+          "overflow_checks": true,
+          "test": true
+        },
+        "features": [
+          "accessibility",
+          "default",
+          "native",
+          "native-core",
+          "simd"
+        ],
+        "filenames": [
+          "/Users/mileswirht/gpui-reactivity-20261024-root/target-nightly/debug/build/gpui/0913f1ec627c232c/out/child_capacity-0913f1ec627c232c"
+        ],
+        "executable": "/Users/mileswirht/gpui-reactivity-20261024-root/target-nightly/debug/build/gpui/0913f1ec627c232c/out/child_capacity-0913f1ec627c232c",
+        "fresh": false
+      }
+    },
+    {
+      "name": "checkbox",
+      "file": "full-native-build-22-checkbox",
+      "sha256": "e8616e914fd5074b2a95ace58def45f9f578166b4a26753a1a56595115be800f",
+      "bytes": 31761024,
+      "cargo": {
+        "reason": "compiler-artifact",
+        "package_id": "path+file:///Users/mileswirht/gpui-reactivity-20261024-root/component-7a2f9325-sol/source/reactivity/crates/gpui#0.1.0",
+        "manifest_path": "/Users/mileswirht/gpui-reactivity-20261024-root/component-7a2f9325-sol/source/reactivity/crates/gpui/Cargo.toml",
+        "target": {
+          "kind": [
+            "test"
+          ],
+          "crate_types": [
+            "bin"
+          ],
+          "name": "checkbox",
+          "src_path": "/Users/mileswirht/gpui-reactivity-20261024-root/component-7a2f9325-sol/source/reactivity/crates/gpui/tests/checkbox.rs",
+          "edition": "2024",
+          "doc": false,
+          "doctest": false,
+          "test": true
+        },
+        "profile": {
+          "opt_level": "0",
+          "debuginfo": 0,
+          "debug_assertions": true,
+          "overflow_checks": true,
+          "test": true
+        },
+        "features": [
+          "accessibility",
+          "default",
+          "native",
+          "native-core",
+          "simd"
+        ],
+        "filenames": [
+          "/Users/mileswirht/gpui-reactivity-20261024-root/target-nightly/debug/build/gpui/68796b34056e5ee7/out/checkbox-68796b34056e5ee7"
+        ],
+        "executable": "/Users/mileswirht/gpui-reactivity-20261024-root/target-nightly/debug/build/gpui/68796b34056e5ee7/out/checkbox-68796b34056e5ee7",
+        "fresh": false
+      }
+    },
+    {
+      "name": "unit_action_cost",
+      "file": "full-native-build-23-unit_action_cost",
+      "sha256": "deb6c6589cc09bba0371804b04a51932e24e1e2d9c7e6a13db948aef3552db08",
+      "bytes": 27945840,
+      "cargo": {
+        "reason": "compiler-artifact",
+        "package_id": "path+file:///Users/mileswirht/gpui-reactivity-20261024-root/component-7a2f9325-sol/source/reactivity/crates/gpui#0.1.0",
+        "manifest_path": "/Users/mileswirht/gpui-reactivity-20261024-root/component-7a2f9325-sol/source/reactivity/crates/gpui/Cargo.toml",
+        "target": {
+          "kind": [
+            "test"
+          ],
+          "crate_types": [
+            "bin"
+          ],
+          "name": "unit_action_cost",
+          "src_path": "/Users/mileswirht/gpui-reactivity-20261024-root/component-7a2f9325-sol/source/reactivity/crates/gpui/tests/unit_action_cost.rs",
+          "edition": "2024",
+          "doc": false,
+          "doctest": false,
+          "test": true
+        },
+        "profile": {
+          "opt_level": "0",
+          "debuginfo": 0,
+          "debug_assertions": true,
+          "overflow_checks": true,
+          "test": true
+        },
+        "features": [
+          "accessibility",
+          "default",
+          "native",
+          "native-core",
+          "simd"
+        ],
+        "filenames": [
+          "/Users/mileswirht/gpui-reactivity-20261024-root/target-nightly/debug/build/gpui/1990c419a47cfd9a/out/unit_action_cost-1990c419a47cfd9a"
+        ],
+        "executable": "/Users/mileswirht/gpui-reactivity-20261024-root/target-nightly/debug/build/gpui/1990c419a47cfd9a/out/unit_action_cost-1990c419a47cfd9a",
+        "fresh": false
+      }
+    },
+    {
+      "name": "unit_action_cost_two",
+      "file": "full-native-build-24-unit_action_cost_two",
+      "sha256": "981ec3aa277aa30ca248e8d40baf49bf4aaff370f0a9a97681a270a927f6c453",
+      "bytes": 28669344,
+      "cargo": {
+        "reason": "compiler-artifact",
+        "package_id": "path+file:///Users/mileswirht/gpui-reactivity-20261024-root/component-7a2f9325-sol/source/reactivity/crates/gpui#0.1.0",
+        "manifest_path": "/Users/mileswirht/gpui-reactivity-20261024-root/component-7a2f9325-sol/source/reactivity/crates/gpui/Cargo.toml",
+        "target": {
+          "kind": [
+            "test"
+          ],
+          "crate_types": [
+            "bin"
+          ],
+          "name": "unit_action_cost_two",
+          "src_path": "/Users/mileswirht/gpui-reactivity-20261024-root/component-7a2f9325-sol/source/reactivity/crates/gpui/tests/unit_action_cost_two.rs",
+          "edition": "2024",
+          "doc": false,
+          "doctest": false,
+          "test": true
+        },
+        "profile": {
+          "opt_level": "0",
+          "debuginfo": 0,
+          "debug_assertions": true,
+          "overflow_checks": true,
+          "test": true
+        },
+        "features": [
+          "accessibility",
+          "default",
+          "native",
+          "native-core",
+          "simd"
+        ],
+        "filenames": [
+          "/Users/mileswirht/gpui-reactivity-20261024-root/target-nightly/debug/build/gpui/3cd8d52977c2b62c/out/unit_action_cost_two-3cd8d52977c2b62c"
+        ],
+        "executable": "/Users/mileswirht/gpui-reactivity-20261024-root/target-nightly/debug/build/gpui/3cd8d52977c2b62c/out/unit_action_cost_two-3cd8d52977c2b62c",
+        "fresh": false
+      }
+    },
+    {
+      "name": "clipping",
+      "file": "full-native-build-25-clipping",
+      "sha256": "53db188b7196476f16b78cea08f4fc354adc48993914c9a0450ddf5ba93c175f",
+      "bytes": 31745200,
+      "cargo": {
+        "reason": "compiler-artifact",
+        "package_id": "path+file:///Users/mileswirht/gpui-reactivity-20261024-root/component-7a2f9325-sol/source/reactivity/crates/gpui#0.1.0",
+        "manifest_path": "/Users/mileswirht/gpui-reactivity-20261024-root/component-7a2f9325-sol/source/reactivity/crates/gpui/Cargo.toml",
+        "target": {
+          "kind": [
+            "test"
+          ],
+          "crate_types": [
+            "bin"
+          ],
+          "name": "clipping",
+          "src_path": "/Users/mileswirht/gpui-reactivity-20261024-root/component-7a2f9325-sol/source/reactivity/crates/gpui/tests/clipping.rs",
+          "edition": "2024",
+          "doc": false,
+          "doctest": false,
+          "test": true
+        },
+        "profile": {
+          "opt_level": "0",
+          "debuginfo": 0,
+          "debug_assertions": true,
+          "overflow_checks": true,
+          "test": true
+        },
+        "features": [
+          "accessibility",
+          "default",
+          "native",
+          "native-core",
+          "simd"
+        ],
+        "filenames": [
+          "/Users/mileswirht/gpui-reactivity-20261024-root/target-nightly/debug/build/gpui/9fadb4c095138904/out/clipping-9fadb4c095138904"
+        ],
+        "executable": "/Users/mileswirht/gpui-reactivity-20261024-root/target-nightly/debug/build/gpui/9fadb4c095138904/out/clipping-9fadb4c095138904",
+        "fresh": false
+      }
+    },
+    {
+      "name": "color_packing",
+      "file": "full-native-build-26-color_packing",
+      "sha256": "ecc32100acbe36a4abb9b9d73a571c41ab29e94028ae4019ab6ab4404bfe6473",
+      "bytes": 28378304,
+      "cargo": {
+        "reason": "compiler-artifact",
+        "package_id": "path+file:///Users/mileswirht/gpui-reactivity-20261024-root/component-7a2f9325-sol/source/reactivity/crates/gpui#0.1.0",
+        "manifest_path": "/Users/mileswirht/gpui-reactivity-20261024-root/component-7a2f9325-sol/source/reactivity/crates/gpui/Cargo.toml",
+        "target": {
+          "kind": [
+            "test"
+          ],
+          "crate_types": [
+            "bin"
+          ],
+          "name": "color_packing",
+          "src_path": "/Users/mileswirht/gpui-reactivity-20261024-root/component-7a2f9325-sol/source/reactivity/crates/gpui/tests/color_packing.rs",
+          "edition": "2024",
+          "doc": false,
+          "doctest": false,
+          "test": true
+        },
+        "profile": {
+          "opt_level": "0",
+          "debuginfo": 0,
+          "debug_assertions": true,
+          "overflow_checks": true,
+          "test": true
+        },
+        "features": [
+          "accessibility",
+          "default",
+          "native",
+          "native-core",
+          "simd"
+        ],
+        "filenames": [
+          "/Users/mileswirht/gpui-reactivity-20261024-root/target-nightly/debug/build/gpui/14278fdb75b80add/out/color_packing-14278fdb75b80add"
+        ],
+        "executable": "/Users/mileswirht/gpui-reactivity-20261024-root/target-nightly/debug/build/gpui/14278fdb75b80add/out/color_packing-14278fdb75b80add",
+        "fresh": false
+      }
+    },
+    {
+      "name": "dimensions",
+      "file": "full-native-build-27-dimensions",
+      "sha256": "5bcdc9f540b6ae36fc84ceb442eea55b218642590ffd392820f2a3c7e2c445de",
+      "bytes": 29452896,
+      "cargo": {
+        "reason": "compiler-artifact",
+        "package_id": "path+file:///Users/mileswirht/gpui-reactivity-20261024-root/component-7a2f9325-sol/source/reactivity/crates/gpui#0.1.0",
+        "manifest_path": "/Users/mileswirht/gpui-reactivity-20261024-root/component-7a2f9325-sol/source/reactivity/crates/gpui/Cargo.toml",
+        "target": {
+          "kind": [
+            "test"
+          ],
+          "crate_types": [
+            "bin"
+          ],
+          "name": "dimensions",
+          "src_path": "/Users/mileswirht/gpui-reactivity-20261024-root/component-7a2f9325-sol/source/reactivity/crates/gpui/tests/dimensions.rs",
+          "edition": "2024",
+          "doc": false,
+          "doctest": false,
+          "test": true
+        },
+        "profile": {
+          "opt_level": "0",
+          "debuginfo": 0,
+          "debug_assertions": true,
+          "overflow_checks": true,
+          "test": true
+        },
+        "features": [
+          "accessibility",
+          "default",
+          "native",
+          "native-core",
+          "simd"
+        ],
+        "filenames": [
+          "/Users/mileswirht/gpui-reactivity-20261024-root/target-nightly/debug/build/gpui/6808a293bc5eb963/out/dimensions-6808a293bc5eb963"
+        ],
+        "executable": "/Users/mileswirht/gpui-reactivity-20261024-root/target-nightly/debug/build/gpui/6808a293bc5eb963/out/dimensions-6808a293bc5eb963",
+        "fresh": false
+      }
+    },
+    {
+      "name": "dpi",
+      "file": "full-native-build-28-dpi",
+      "sha256": "ab97d390c906388c8123f7788b4d954e0dfec5678df761776f92b3a942b3831a",
+      "bytes": 29356544,
+      "cargo": {
+        "reason": "compiler-artifact",
+        "package_id": "path+file:///Users/mileswirht/gpui-reactivity-20261024-root/component-7a2f9325-sol/source/reactivity/crates/gpui#0.1.0",
+        "manifest_path": "/Users/mileswirht/gpui-reactivity-20261024-root/component-7a2f9325-sol/source/reactivity/crates/gpui/Cargo.toml",
+        "target": {
+          "kind": [
+            "test"
+          ],
+          "crate_types": [
+            "bin"
+          ],
+          "name": "dpi",
+          "src_path": "/Users/mileswirht/gpui-reactivity-20261024-root/component-7a2f9325-sol/source/reactivity/crates/gpui/tests/dpi.rs",
+          "edition": "2024",
+          "doc": false,
+          "doctest": false,
+          "test": true
+        },
+        "profile": {
+          "opt_level": "0",
+          "debuginfo": 0,
+          "debug_assertions": true,
+          "overflow_checks": true,
+          "test": true
+        },
+        "features": [
+          "accessibility",
+          "default",
+          "native",
+          "native-core",
+          "simd"
+        ],
+        "filenames": [
+          "/Users/mileswirht/gpui-reactivity-20261024-root/target-nightly/debug/build/gpui/0e3d7bac905bddcf/out/dpi-0e3d7bac905bddcf"
+        ],
+        "executable": "/Users/mileswirht/gpui-reactivity-20261024-root/target-nightly/debug/build/gpui/0e3d7bac905bddcf/out/dpi-0e3d7bac905bddcf",
+        "fresh": false
+      }
+    },
+    {
+      "name": "components",
+      "file": "full-native-build-29-components",
+      "sha256": "db1d9b2ea56f4339d5ebf025e8146f50694ef898bf2865e39ff7755acf9ab6c9",
+      "bytes": 32739536,
+      "cargo": {
+        "reason": "compiler-artifact",
+        "package_id": "path+file:///Users/mileswirht/gpui-reactivity-20261024-root/component-7a2f9325-sol/source/reactivity/crates/gpui#0.1.0",
+        "manifest_path": "/Users/mileswirht/gpui-reactivity-20261024-root/component-7a2f9325-sol/source/reactivity/crates/gpui/Cargo.toml",
+        "target": {
+          "kind": [
+            "test"
+          ],
+          "crate_types": [
+            "bin"
+          ],
+          "name": "components",
+          "src_path": "/Users/mileswirht/gpui-reactivity-20261024-root/component-7a2f9325-sol/source/reactivity/crates/gpui/tests/components.rs",
+          "edition": "2024",
+          "doc": false,
+          "doctest": false,
+          "test": true
+        },
+        "profile": {
+          "opt_level": "0",
+          "debuginfo": 0,
+          "debug_assertions": true,
+          "overflow_checks": true,
+          "test": true
+        },
+        "features": [
+          "accessibility",
+          "default",
+          "native",
+          "native-core",
+          "simd"
+        ],
+        "filenames": [
+          "/Users/mileswirht/gpui-reactivity-20261024-root/target-nightly/debug/build/gpui/8fbd36e7fc8481e9/out/components-8fbd36e7fc8481e9"
+        ],
+        "executable": "/Users/mileswirht/gpui-reactivity-20261024-root/target-nightly/debug/build/gpui/8fbd36e7fc8481e9/out/components-8fbd36e7fc8481e9",
+        "fresh": false
+      }
+    },
+    {
+      "name": "field_identity",
+      "file": "full-native-build-30-field_identity",
+      "sha256": "e60a22f1f4a46b2edf999ba45d8c2eb72bf65c79068967f086aa63090f15e2d9",
+      "bytes": 27735952,
+      "cargo": {
+        "reason": "compiler-artifact",
+        "package_id": "path+file:///Users/mileswirht/gpui-reactivity-20261024-root/component-7a2f9325-sol/source/reactivity/crates/gpui#0.1.0",
+        "manifest_path": "/Users/mileswirht/gpui-reactivity-20261024-root/component-7a2f9325-sol/source/reactivity/crates/gpui/Cargo.toml",
+        "target": {
+          "kind": [
+            "test"
+          ],
+          "crate_types": [
+            "bin"
+          ],
+          "name": "field_identity",
+          "src_path": "/Users/mileswirht/gpui-reactivity-20261024-root/component-7a2f9325-sol/source/reactivity/crates/gpui/tests/field_identity.rs",
+          "edition": "2024",
+          "doc": false,
+          "doctest": false,
+          "test": true
+        },
+        "profile": {
+          "opt_level": "0",
+          "debuginfo": 0,
+          "debug_assertions": true,
+          "overflow_checks": true,
+          "test": true
+        },
+        "features": [
+          "accessibility",
+          "default",
+          "native",
+          "native-core",
+          "simd"
+        ],
+        "filenames": [
+          "/Users/mileswirht/gpui-reactivity-20261024-root/target-nightly/debug/build/gpui/1854b65874ee74ea/out/field_identity-1854b65874ee74ea"
+        ],
+        "executable": "/Users/mileswirht/gpui-reactivity-20261024-root/target-nightly/debug/build/gpui/1854b65874ee74ea/out/field_identity-1854b65874ee74ea",
+        "fresh": false
+      }
+    },
+    {
+      "name": "flex",
+      "file": "full-native-build-31-flex",
+      "sha256": "d4e72cfc0f30c9062b77bbacacb3cb0b031ac1791a109cab1b47a763c7cacf8d",
+      "bytes": 32562112,
+      "cargo": {
+        "reason": "compiler-artifact",
+        "package_id": "path+file:///Users/mileswirht/gpui-reactivity-20261024-root/component-7a2f9325-sol/source/reactivity/crates/gpui#0.1.0",
+        "manifest_path": "/Users/mileswirht/gpui-reactivity-20261024-root/component-7a2f9325-sol/source/reactivity/crates/gpui/Cargo.toml",
+        "target": {
+          "kind": [
+            "test"
+          ],
+          "crate_types": [
+            "bin"
+          ],
+          "name": "flex",
+          "src_path": "/Users/mileswirht/gpui-reactivity-20261024-root/component-7a2f9325-sol/source/reactivity/crates/gpui/tests/flex.rs",
+          "edition": "2024",
+          "doc": false,
+          "doctest": false,
+          "test": true
+        },
+        "profile": {
+          "opt_level": "0",
+          "debuginfo": 0,
+          "debug_assertions": true,
+          "overflow_checks": true,
+          "test": true
+        },
+        "features": [
+          "accessibility",
+          "default",
+          "native",
+          "native-core",
+          "simd"
+        ],
+        "filenames": [
+          "/Users/mileswirht/gpui-reactivity-20261024-root/target-nightly/debug/build/gpui/35d0ef873752c90e/out/flex-35d0ef873752c90e"
+        ],
+        "executable": "/Users/mileswirht/gpui-reactivity-20261024-root/target-nightly/debug/build/gpui/35d0ef873752c90e/out/flex-35d0ef873752c90e",
+        "fresh": false
+      }
+    },
+    {
+      "name": "frontier",
+      "file": "full-native-build-32-frontier",
+      "sha256": "fe6f2b4f3a4287b20a5dabe3da7ec110e66603cc62784ef5756ce97c9597386e",
+      "bytes": 30133040,
+      "cargo": {
+        "reason": "compiler-artifact",
+        "package_id": "path+file:///Users/mileswirht/gpui-reactivity-20261024-root/component-7a2f9325-sol/source/reactivity/crates/gpui#0.1.0",
+        "manifest_path": "/Users/mileswirht/gpui-reactivity-20261024-root/component-7a2f9325-sol/source/reactivity/crates/gpui/Cargo.toml",
+        "target": {
+          "kind": [
+            "test"
+          ],
+          "crate_types": [
+            "bin"
+          ],
+          "name": "frontier",
+          "src_path": "/Users/mileswirht/gpui-reactivity-20261024-root/component-7a2f9325-sol/source/reactivity/crates/gpui/tests/frontier.rs",
+          "edition": "2024",
+          "doc": false,
+          "doctest": false,
+          "test": true
+        },
+        "profile": {
+          "opt_level": "0",
+          "debuginfo": 0,
+          "debug_assertions": true,
+          "overflow_checks": true,
+          "test": true
+        },
+        "features": [
+          "accessibility",
+          "default",
+          "native",
+          "native-core",
+          "simd"
+        ],
+        "filenames": [
+          "/Users/mileswirht/gpui-reactivity-20261024-root/target-nightly/debug/build/gpui/d857d937fe77c38f/out/frontier-d857d937fe77c38f"
+        ],
+        "executable": "/Users/mileswirht/gpui-reactivity-20261024-root/target-nightly/debug/build/gpui/d857d937fe77c38f/out/frontier-d857d937fe77c38f",
+        "fresh": false
+      }
+    },
+    {
+      "name": "focus",
+      "file": "full-native-build-33-focus",
+      "sha256": "738384a71a17b2423c631bd80c37bfb751f550fae430db26a00a25a30b484505",
+      "bytes": 31247168,
+      "cargo": {
+        "reason": "compiler-artifact",
+        "package_id": "path+file:///Users/mileswirht/gpui-reactivity-20261024-root/component-7a2f9325-sol/source/reactivity/crates/gpui#0.1.0",
+        "manifest_path": "/Users/mileswirht/gpui-reactivity-20261024-root/component-7a2f9325-sol/source/reactivity/crates/gpui/Cargo.toml",
+        "target": {
+          "kind": [
+            "test"
+          ],
+          "crate_types": [
+            "bin"
+          ],
+          "name": "focus",
+          "src_path": "/Users/mileswirht/gpui-reactivity-20261024-root/component-7a2f9325-sol/source/reactivity/crates/gpui/tests/focus.rs",
+          "edition": "2024",
+          "doc": false,
+          "doctest": false,
+          "test": true
+        },
+        "profile": {
+          "opt_level": "0",
+          "debuginfo": 0,
+          "debug_assertions": true,
+          "overflow_checks": true,
+          "test": true
+        },
+        "features": [
+          "accessibility",
+          "default",
+          "native",
+          "native-core",
+          "simd"
+        ],
+        "filenames": [
+          "/Users/mileswirht/gpui-reactivity-20261024-root/target-nightly/debug/build/gpui/556529a38d621be5/out/focus-556529a38d621be5"
+        ],
+        "executable": "/Users/mileswirht/gpui-reactivity-20261024-root/target-nightly/debug/build/gpui/556529a38d621be5/out/focus-556529a38d621be5",
+        "fresh": false
+      }
+    },
+    {
+      "name": "gpui",
+      "file": "full-native-build-34-gpui",
+      "sha256": "df70d779c2b9a5c88f40f62dc8fed81606e5af62202d410f4b49e76cdfeb0294",
+      "bytes": 90891232,
+      "cargo": {
+        "reason": "compiler-artifact",
+        "package_id": "path+file:///Users/mileswirht/gpui-reactivity-20261024-root/component-7a2f9325-sol/source/reactivity/crates/gpui#0.1.0",
+        "manifest_path": "/Users/mileswirht/gpui-reactivity-20261024-root/component-7a2f9325-sol/source/reactivity/crates/gpui/Cargo.toml",
+        "target": {
+          "kind": [
+            "lib"
+          ],
+          "crate_types": [
+            "lib"
+          ],
+          "name": "gpui",
+          "src_path": "/Users/mileswirht/gpui-reactivity-20261024-root/component-7a2f9325-sol/source/reactivity/crates/gpui/src/lib.rs",
+          "edition": "2024",
+          "doc": true,
+          "doctest": true,
+          "test": true
+        },
+        "profile": {
+          "opt_level": "0",
+          "debuginfo": 0,
+          "debug_assertions": true,
+          "overflow_checks": true,
+          "test": true
+        },
+        "features": [
+          "accessibility",
+          "default",
+          "native",
+          "native-core",
+          "simd"
+        ],
+        "filenames": [
+          "/Users/mileswirht/gpui-reactivity-20261024-root/target-nightly/debug/build/gpui/4f7a671047784901/out/gpui-4f7a671047784901"
+        ],
+        "executable": "/Users/mileswirht/gpui-reactivity-20261024-root/target-nightly/debug/build/gpui/4f7a671047784901/out/gpui-4f7a671047784901",
+        "fresh": false
+      }
+    },
+    {
+      "name": "identity_recovery",
+      "file": "full-native-build-35-identity_recovery",
+      "sha256": "8007e52aeb821635ebc7fd5f0161e851840ba9c18f04705ce26f54d63c595486",
+      "bytes": 27930576,
+      "cargo": {
+        "reason": "compiler-artifact",
+        "package_id": "path+file:///Users/mileswirht/gpui-reactivity-20261024-root/component-7a2f9325-sol/source/reactivity/crates/gpui#0.1.0",
+        "manifest_path": "/Users/mileswirht/gpui-reactivity-20261024-root/component-7a2f9325-sol/source/reactivity/crates/gpui/Cargo.toml",
+        "target": {
+          "kind": [
+            "test"
+          ],
+          "crate_types": [
+            "bin"
+          ],
+          "name": "identity_recovery",
+          "src_path": "/Users/mileswirht/gpui-reactivity-20261024-root/component-7a2f9325-sol/source/reactivity/crates/gpui/tests/identity_recovery.rs",
+          "edition": "2024",
+          "doc": false,
+          "doctest": false,
+          "test": true
+        },
+        "profile": {
+          "opt_level": "0",
+          "debuginfo": 0,
+          "debug_assertions": true,
+          "overflow_checks": true,
+          "test": true
+        },
+        "features": [
+          "accessibility",
+          "default",
+          "native",
+          "native-core",
+          "simd"
+        ],
+        "filenames": [
+          "/Users/mileswirht/gpui-reactivity-20261024-root/target-nightly/debug/build/gpui/42402cffb9afb205/out/identity_recovery-42402cffb9afb205"
+        ],
+        "executable": "/Users/mileswirht/gpui-reactivity-20261024-root/target-nightly/debug/build/gpui/42402cffb9afb205/out/identity_recovery-42402cffb9afb205",
+        "fresh": false
+      }
+    },
+    {
+      "name": "images",
+      "file": "full-native-build-36-images",
+      "sha256": "7927c4142fc3e70ca7a4e695ef09a92625790f3156d9826d7f9971d8539838c4",
+      "bytes": 29803344,
+      "cargo": {
+        "reason": "compiler-artifact",
+        "package_id": "path+file:///Users/mileswirht/gpui-reactivity-20261024-root/component-7a2f9325-sol/source/reactivity/crates/gpui#0.1.0",
+        "manifest_path": "/Users/mileswirht/gpui-reactivity-20261024-root/component-7a2f9325-sol/source/reactivity/crates/gpui/Cargo.toml",
+        "target": {
+          "kind": [
+            "test"
+          ],
+          "crate_types": [
+            "bin"
+          ],
+          "name": "images",
+          "src_path": "/Users/mileswirht/gpui-reactivity-20261024-root/component-7a2f9325-sol/source/reactivity/crates/gpui/tests/images.rs",
+          "edition": "2024",
+          "doc": false,
+          "doctest": false,
+          "test": true
+        },
+        "profile": {
+          "opt_level": "0",
+          "debuginfo": 0,
+          "debug_assertions": true,
+          "overflow_checks": true,
+          "test": true
+        },
+        "features": [
+          "accessibility",
+          "default",
+          "native",
+          "native-core",
+          "simd"
+        ],
+        "filenames": [
+          "/Users/mileswirht/gpui-reactivity-20261024-root/target-nightly/debug/build/gpui/922cae5653f32b3e/out/images-922cae5653f32b3e"
+        ],
+        "executable": "/Users/mileswirht/gpui-reactivity-20261024-root/target-nightly/debug/build/gpui/922cae5653f32b3e/out/images-922cae5653f32b3e",
+        "fresh": false
+      }
+    },
+    {
+      "name": "immutable_text",
+      "file": "full-native-build-37-immutable_text",
+      "sha256": "849e7762015fc71cf14ff2e3231809b2592f71b82331c74b1b9ae072ac6ead36",
+      "bytes": 27676608,
+      "cargo": {
+        "reason": "compiler-artifact",
+        "package_id": "path+file:///Users/mileswirht/gpui-reactivity-20261024-root/component-7a2f9325-sol/source/reactivity/crates/gpui#0.1.0",
+        "manifest_path": "/Users/mileswirht/gpui-reactivity-20261024-root/component-7a2f9325-sol/source/reactivity/crates/gpui/Cargo.toml",
+        "target": {
+          "kind": [
+            "test"
+          ],
+          "crate_types": [
+            "bin"
+          ],
+          "name": "immutable_text",
+          "src_path": "/Users/mileswirht/gpui-reactivity-20261024-root/component-7a2f9325-sol/source/reactivity/crates/gpui/tests/immutable_text.rs",
+          "edition": "2024",
+          "doc": false,
+          "doctest": false,
+          "test": true
+        },
+        "profile": {
+          "opt_level": "0",
+          "debuginfo": 0,
+          "debug_assertions": true,
+          "overflow_checks": true,
+          "test": true
+        },
+        "features": [
+          "accessibility",
+          "default",
+          "native",
+          "native-core",
+          "simd"
+        ],
+        "filenames": [
+          "/Users/mileswirht/gpui-reactivity-20261024-root/target-nightly/debug/build/gpui/89c94ae9eccf030d/out/immutable_text-89c94ae9eccf030d"
+        ],
+        "executable": "/Users/mileswirht/gpui-reactivity-20261024-root/target-nightly/debug/build/gpui/89c94ae9eccf030d/out/immutable_text-89c94ae9eccf030d",
+        "fresh": false
+      }
+    },
+    {
+      "name": "inbox_storage",
+      "file": "full-native-build-38-inbox_storage",
+      "sha256": "5d599ec281f5a258a9eedb6e4074d36394b73713a8ab84fb8d5c283d56ee3ebc",
+      "bytes": 29200208,
+      "cargo": {
+        "reason": "compiler-artifact",
+        "package_id": "path+file:///Users/mileswirht/gpui-reactivity-20261024-root/component-7a2f9325-sol/source/reactivity/crates/gpui#0.1.0",
+        "manifest_path": "/Users/mileswirht/gpui-reactivity-20261024-root/component-7a2f9325-sol/source/reactivity/crates/gpui/Cargo.toml",
+        "target": {
+          "kind": [
+            "test"
+          ],
+          "crate_types": [
+            "bin"
+          ],
+          "name": "inbox_storage",
+          "src_path": "/Users/mileswirht/gpui-reactivity-20261024-root/component-7a2f9325-sol/source/reactivity/crates/gpui/tests/inbox_storage.rs",
+          "edition": "2024",
+          "doc": false,
+          "doctest": false,
+          "test": true
+        },
+        "profile": {
+          "opt_level": "0",
+          "debuginfo": 0,
+          "debug_assertions": true,
+          "overflow_checks": true,
+          "test": true
+        },
+        "features": [
+          "accessibility",
+          "default",
+          "native",
+          "native-core",
+          "simd"
+        ],
+        "filenames": [
+          "/Users/mileswirht/gpui-reactivity-20261024-root/target-nightly/debug/build/gpui/3a70baff84045b29/out/inbox_storage-3a70baff84045b29"
+        ],
+        "executable": "/Users/mileswirht/gpui-reactivity-20261024-root/target-nightly/debug/build/gpui/3a70baff84045b29/out/inbox_storage-3a70baff84045b29",
+        "fresh": false
+      }
+    },
+    {
+      "name": "handler_storage",
+      "file": "full-native-build-39-handler_storage",
+      "sha256": "efa46ca083de680b05308b9765317999381266e56535d96d2bcd305b89f8ed5d",
+      "bytes": 33422208,
+      "cargo": {
+        "reason": "compiler-artifact",
+        "package_id": "path+file:///Users/mileswirht/gpui-reactivity-20261024-root/component-7a2f9325-sol/source/reactivity/crates/gpui#0.1.0",
+        "manifest_path": "/Users/mileswirht/gpui-reactivity-20261024-root/component-7a2f9325-sol/source/reactivity/crates/gpui/Cargo.toml",
+        "target": {
+          "kind": [
+            "test"
+          ],
+          "crate_types": [
+            "bin"
+          ],
+          "name": "handler_storage",
+          "src_path": "/Users/mileswirht/gpui-reactivity-20261024-root/component-7a2f9325-sol/source/reactivity/crates/gpui/tests/handler_storage.rs",
+          "edition": "2024",
+          "doc": false,
+          "doctest": false,
+          "test": true
+        },
+        "profile": {
+          "opt_level": "0",
+          "debuginfo": 0,
+          "debug_assertions": true,
+          "overflow_checks": true,
+          "test": true
+        },
+        "features": [
+          "accessibility",
+          "default",
+          "native",
+          "native-core",
+          "simd"
+        ],
+        "filenames": [
+          "/Users/mileswirht/gpui-reactivity-20261024-root/target-nightly/debug/build/gpui/05d22dd6d61fec0c/out/handler_storage-05d22dd6d61fec0c"
+        ],
+        "executable": "/Users/mileswirht/gpui-reactivity-20261024-root/target-nightly/debug/build/gpui/05d22dd6d61fec0c/out/handler_storage-05d22dd6d61fec0c",
+        "fresh": false
+      }
+    },
+    {
+      "name": "intrinsic_text",
+      "file": "full-native-build-40-intrinsic_text",
+      "sha256": "d320a0bdc78c45ffccc54d0f3530cff6f76ac739725f203539fec4da1b2e032b",
+      "bytes": 28218064,
+      "cargo": {
+        "reason": "compiler-artifact",
+        "package_id": "path+file:///Users/mileswirht/gpui-reactivity-20261024-root/component-7a2f9325-sol/source/reactivity/crates/gpui#0.1.0",
+        "manifest_path": "/Users/mileswirht/gpui-reactivity-20261024-root/component-7a2f9325-sol/source/reactivity/crates/gpui/Cargo.toml",
+        "target": {
+          "kind": [
+            "test"
+          ],
+          "crate_types": [
+            "bin"
+          ],
+          "name": "intrinsic_text",
+          "src_path": "/Users/mileswirht/gpui-reactivity-20261024-root/component-7a2f9325-sol/source/reactivity/crates/gpui/tests/intrinsic_text.rs",
+          "edition": "2024",
+          "doc": false,
+          "doctest": false,
+          "test": true
+        },
+        "profile": {
+          "opt_level": "0",
+          "debuginfo": 0,
+          "debug_assertions": true,
+          "overflow_checks": true,
+          "test": true
+        },
+        "features": [
+          "accessibility",
+          "default",
+          "native",
+          "native-core",
+          "simd"
+        ],
+        "filenames": [
+          "/Users/mileswirht/gpui-reactivity-20261024-root/target-nightly/debug/build/gpui/ce9c10a1b4c2125c/out/intrinsic_text-ce9c10a1b4c2125c"
+        ],
+        "executable": "/Users/mileswirht/gpui-reactivity-20261024-root/target-nightly/debug/build/gpui/ce9c10a1b4c2125c/out/intrinsic_text-ce9c10a1b4c2125c",
+        "fresh": false
+      }
+    },
+    {
+      "name": "inspector",
+      "file": "full-native-build-41-inspector",
+      "sha256": "2b864332f876f5872fe907ec2eef819ccdd99a40d6bc4a4bb1f84e06d1498848",
+      "bytes": 33312512,
+      "cargo": {
+        "reason": "compiler-artifact",
+        "package_id": "path+file:///Users/mileswirht/gpui-reactivity-20261024-root/component-7a2f9325-sol/source/reactivity/crates/gpui#0.1.0",
+        "manifest_path": "/Users/mileswirht/gpui-reactivity-20261024-root/component-7a2f9325-sol/source/reactivity/crates/gpui/Cargo.toml",
+        "target": {
+          "kind": [
+            "test"
+          ],
+          "crate_types": [
+            "bin"
+          ],
+          "name": "inspector",
+          "src_path": "/Users/mileswirht/gpui-reactivity-20261024-root/component-7a2f9325-sol/source/reactivity/crates/gpui/tests/inspector.rs",
+          "edition": "2024",
+          "doc": false,
+          "doctest": false,
+          "test": true
+        },
+        "profile": {
+          "opt_level": "0",
+          "debuginfo": 0,
+          "debug_assertions": true,
+          "overflow_checks": true,
+          "test": true
+        },
+        "features": [
+          "accessibility",
+          "default",
+          "native",
+          "native-core",
+          "simd"
+        ],
+        "filenames": [
+          "/Users/mileswirht/gpui-reactivity-20261024-root/target-nightly/debug/build/gpui/18c22ab18d60a1ec/out/inspector-18c22ab18d60a1ec"
+        ],
+        "executable": "/Users/mileswirht/gpui-reactivity-20261024-root/target-nightly/debug/build/gpui/18c22ab18d60a1ec/out/inspector-18c22ab18d60a1ec",
+        "fresh": false
+      }
+    },
+    {
+      "name": "library",
+      "file": "full-native-build-42-library",
+      "sha256": "dfb689b4823c193c5c61e3f3856eb234c4915187dd89ece601e9e8d63d876dae",
+      "bytes": 28901248,
+      "cargo": {
+        "reason": "compiler-artifact",
+        "package_id": "path+file:///Users/mileswirht/gpui-reactivity-20261024-root/component-7a2f9325-sol/source/reactivity/crates/gpui#0.1.0",
+        "manifest_path": "/Users/mileswirht/gpui-reactivity-20261024-root/component-7a2f9325-sol/source/reactivity/crates/gpui/Cargo.toml",
+        "target": {
+          "kind": [
+            "test"
+          ],
+          "crate_types": [
+            "bin"
+          ],
+          "name": "library",
+          "src_path": "/Users/mileswirht/gpui-reactivity-20261024-root/component-7a2f9325-sol/source/reactivity/crates/gpui/tests/library.rs",
+          "edition": "2024",
+          "doc": false,
+          "doctest": false,
+          "test": true
+        },
+        "profile": {
+          "opt_level": "0",
+          "debuginfo": 0,
+          "debug_assertions": true,
+          "overflow_checks": true,
+          "test": true
+        },
+        "features": [
+          "accessibility",
+          "default",
+          "native",
+          "native-core",
+          "simd"
+        ],
+        "filenames": [
+          "/Users/mileswirht/gpui-reactivity-20261024-root/target-nightly/debug/build/gpui/56ef897265982a7c/out/library-56ef897265982a7c"
+        ],
+        "executable": "/Users/mileswirht/gpui-reactivity-20261024-root/target-nightly/debug/build/gpui/56ef897265982a7c/out/library-56ef897265982a7c",
+        "fresh": false
+      }
+    },
+    {
+      "name": "contracts",
+      "file": "full-native-build-43-contracts",
+      "sha256": "d0007e2d36d849da4e1d00ab818414ec52ec71601c7aa2db1c836b8859cac15d",
+      "bytes": 34152944,
+      "cargo": {
+        "reason": "compiler-artifact",
+        "package_id": "path+file:///Users/mileswirht/gpui-reactivity-20261024-root/component-7a2f9325-sol/source/reactivity/crates/component#gpui-component@0.1.0",
+        "manifest_path": "/Users/mileswirht/gpui-reactivity-20261024-root/component-7a2f9325-sol/source/reactivity/crates/component/Cargo.toml",
+        "target": {
+          "kind": [
+            "test"
+          ],
+          "crate_types": [
+            "bin"
+          ],
+          "name": "contracts",
+          "src_path": "/Users/mileswirht/gpui-reactivity-20261024-root/component-7a2f9325-sol/source/reactivity/crates/component/tests/contracts.rs",
+          "edition": "2024",
+          "doc": false,
+          "doctest": false,
+          "test": true
+        },
+        "profile": {
+          "opt_level": "0",
+          "debuginfo": 0,
+          "debug_assertions": true,
+          "overflow_checks": true,
+          "test": true
+        },
+        "features": [
+          "default",
+          "native"
+        ],
+        "filenames": [
+          "/Users/mileswirht/gpui-reactivity-20261024-root/target-nightly/debug/build/gpui-component/91b743b998f07e27/out/contracts-91b743b998f07e27"
+        ],
+        "executable": "/Users/mileswirht/gpui-reactivity-20261024-root/target-nightly/debug/build/gpui-component/91b743b998f07e27/out/contracts-91b743b998f07e27",
+        "fresh": false
+      }
+    },
+    {
+      "name": "literal_dispatch",
+      "file": "full-native-build-44-literal_dispatch",
+      "sha256": "a7ac6b4d5b57120cd7d1f1b022de44ddded0e63ed09693acdc02e0d71f41e4af",
+      "bytes": 28536624,
+      "cargo": {
+        "reason": "compiler-artifact",
+        "package_id": "path+file:///Users/mileswirht/gpui-reactivity-20261024-root/component-7a2f9325-sol/source/reactivity/crates/gpui#0.1.0",
+        "manifest_path": "/Users/mileswirht/gpui-reactivity-20261024-root/component-7a2f9325-sol/source/reactivity/crates/gpui/Cargo.toml",
+        "target": {
+          "kind": [
+            "test"
+          ],
+          "crate_types": [
+            "bin"
+          ],
+          "name": "literal_dispatch",
+          "src_path": "/Users/mileswirht/gpui-reactivity-20261024-root/component-7a2f9325-sol/source/reactivity/crates/gpui/tests/literal_dispatch.rs",
+          "edition": "2024",
+          "doc": false,
+          "doctest": false,
+          "test": true
+        },
+        "profile": {
+          "opt_level": "0",
+          "debuginfo": 0,
+          "debug_assertions": true,
+          "overflow_checks": true,
+          "test": true
+        },
+        "features": [
+          "accessibility",
+          "default",
+          "native",
+          "native-core",
+          "simd"
+        ],
+        "filenames": [
+          "/Users/mileswirht/gpui-reactivity-20261024-root/target-nightly/debug/build/gpui/2bbd16811d637453/out/literal_dispatch-2bbd16811d637453"
+        ],
+        "executable": "/Users/mileswirht/gpui-reactivity-20261024-root/target-nightly/debug/build/gpui/2bbd16811d637453/out/literal_dispatch-2bbd16811d637453",
+        "fresh": false
+      }
+    },
+    {
+      "name": "mapped_paint",
+      "file": "full-native-build-45-mapped_paint",
+      "sha256": "db391c71c74ffa6194ab6cec67ae8b080782c094713b86f16de261941b8383d9",
+      "bytes": 28383104,
+      "cargo": {
+        "reason": "compiler-artifact",
+        "package_id": "path+file:///Users/mileswirht/gpui-reactivity-20261024-root/component-7a2f9325-sol/source/reactivity/crates/gpui#0.1.0",
+        "manifest_path": "/Users/mileswirht/gpui-reactivity-20261024-root/component-7a2f9325-sol/source/reactivity/crates/gpui/Cargo.toml",
+        "target": {
+          "kind": [
+            "test"
+          ],
+          "crate_types": [
+            "bin"
+          ],
+          "name": "mapped_paint",
+          "src_path": "/Users/mileswirht/gpui-reactivity-20261024-root/component-7a2f9325-sol/source/reactivity/crates/gpui/tests/mapped_paint.rs",
+          "edition": "2024",
+          "doc": false,
+          "doctest": false,
+          "test": true
+        },
+        "profile": {
+          "opt_level": "0",
+          "debuginfo": 0,
+          "debug_assertions": true,
+          "overflow_checks": true,
+          "test": true
+        },
+        "features": [
+          "accessibility",
+          "default",
+          "native",
+          "native-core",
+          "simd"
+        ],
+        "filenames": [
+          "/Users/mileswirht/gpui-reactivity-20261024-root/target-nightly/debug/build/gpui/780e5ba936d6c7d7/out/mapped_paint-780e5ba936d6c7d7"
+        ],
+        "executable": "/Users/mileswirht/gpui-reactivity-20261024-root/target-nightly/debug/build/gpui/780e5ba936d6c7d7/out/mapped_paint-780e5ba936d6c7d7",
+        "fresh": false
+      }
+    },
+    {
+      "name": "bindings",
+      "file": "full-native-build-46-bindings",
+      "sha256": "faf927519408cd6aed076cc8eeba5f753068c4a98e08b6ebabededb7882d48f7",
+      "bytes": 31323280,
+      "cargo": {
+        "reason": "compiler-artifact",
+        "package_id": "path+file:///Users/mileswirht/gpui-reactivity-20261024-root/component-7a2f9325-sol/source/reactivity/crates/component#gpui-component@0.1.0",
+        "manifest_path": "/Users/mileswirht/gpui-reactivity-20261024-root/component-7a2f9325-sol/source/reactivity/crates/component/Cargo.toml",
+        "target": {
+          "kind": [
+            "test"
+          ],
+          "crate_types": [
+            "bin"
+          ],
+          "name": "bindings",
+          "src_path": "/Users/mileswirht/gpui-reactivity-20261024-root/component-7a2f9325-sol/source/reactivity/crates/component/tests/bindings.rs",
+          "edition": "2024",
+          "doc": false,
+          "doctest": false,
+          "test": true
+        },
+        "profile": {
+          "opt_level": "0",
+          "debuginfo": 0,
+          "debug_assertions": true,
+          "overflow_checks": true,
+          "test": true
+        },
+        "features": [
+          "default",
+          "native"
+        ],
+        "filenames": [
+          "/Users/mileswirht/gpui-reactivity-20261024-root/target-nightly/debug/build/gpui-component/99ada5636aa38673/out/bindings-99ada5636aa38673"
+        ],
+        "executable": "/Users/mileswirht/gpui-reactivity-20261024-root/target-nightly/debug/build/gpui-component/99ada5636aa38673/out/bindings-99ada5636aa38673",
+        "fresh": false
+      }
+    },
+    {
+      "name": "gpui_component",
+      "file": "full-native-build-47-gpui_component",
+      "sha256": "68bf7faf68a7d5362a863702d379d9bed68c49b821a809228b35af652d114754",
+      "bytes": 967808,
+      "cargo": {
+        "reason": "compiler-artifact",
+        "package_id": "path+file:///Users/mileswirht/gpui-reactivity-20261024-root/component-7a2f9325-sol/source/reactivity/crates/component#gpui-component@0.1.0",
+        "manifest_path": "/Users/mileswirht/gpui-reactivity-20261024-root/component-7a2f9325-sol/source/reactivity/crates/component/Cargo.toml",
+        "target": {
+          "kind": [
+            "lib"
+          ],
+          "crate_types": [
+            "lib"
+          ],
+          "name": "gpui_component",
+          "src_path": "/Users/mileswirht/gpui-reactivity-20261024-root/component-7a2f9325-sol/source/reactivity/crates/component/src/lib.rs",
+          "edition": "2024",
+          "doc": true,
+          "doctest": true,
+          "test": true
+        },
+        "profile": {
+          "opt_level": "0",
+          "debuginfo": 0,
+          "debug_assertions": true,
+          "overflow_checks": true,
+          "test": true
+        },
+        "features": [
+          "default",
+          "native"
+        ],
+        "filenames": [
+          "/Users/mileswirht/gpui-reactivity-20261024-root/target-nightly/debug/build/gpui-component/b338d54e69429a58/out/gpui_component-b338d54e69429a58"
+        ],
+        "executable": "/Users/mileswirht/gpui-reactivity-20261024-root/target-nightly/debug/build/gpui-component/b338d54e69429a58/out/gpui_component-b338d54e69429a58",
+        "fresh": false
+      }
+    },
+    {
+      "name": "paint_slot_rebind",
+      "file": "full-native-build-48-paint_slot_rebind",
+      "sha256": "10a89c14fea3d57e31967927888bb6c4dd0777defe55488c25d2dd944e32bf8b",
+      "bytes": 28318928,
+      "cargo": {
+        "reason": "compiler-artifact",
+        "package_id": "path+file:///Users/mileswirht/gpui-reactivity-20261024-root/component-7a2f9325-sol/source/reactivity/crates/gpui#0.1.0",
+        "manifest_path": "/Users/mileswirht/gpui-reactivity-20261024-root/component-7a2f9325-sol/source/reactivity/crates/gpui/Cargo.toml",
+        "target": {
+          "kind": [
+            "test"
+          ],
+          "crate_types": [
+            "bin"
+          ],
+          "name": "paint_slot_rebind",
+          "src_path": "/Users/mileswirht/gpui-reactivity-20261024-root/component-7a2f9325-sol/source/reactivity/crates/gpui/tests/paint_slot_rebind.rs",
+          "edition": "2024",
+          "doc": false,
+          "doctest": false,
+          "test": true
+        },
+        "profile": {
+          "opt_level": "0",
+          "debuginfo": 0,
+          "debug_assertions": true,
+          "overflow_checks": true,
+          "test": true
+        },
+        "features": [
+          "accessibility",
+          "default",
+          "native",
+          "native-core",
+          "simd"
+        ],
+        "filenames": [
+          "/Users/mileswirht/gpui-reactivity-20261024-root/target-nightly/debug/build/gpui/c01dfa36945a2551/out/paint_slot_rebind-c01dfa36945a2551"
+        ],
+        "executable": "/Users/mileswirht/gpui-reactivity-20261024-root/target-nightly/debug/build/gpui/c01dfa36945a2551/out/paint_slot_rebind-c01dfa36945a2551",
+        "fresh": false
+      }
+    },
+    {
+      "name": "mapped_properties",
+      "file": "full-native-build-49-mapped_properties",
+      "sha256": "3cc63edf45ba13d771845c59e50c18e0fc770d00a4a67d27aea16bebe913c126",
+      "bytes": 32342464,
+      "cargo": {
+        "reason": "compiler-artifact",
+        "package_id": "path+file:///Users/mileswirht/gpui-reactivity-20261024-root/component-7a2f9325-sol/source/reactivity/crates/gpui#0.1.0",
+        "manifest_path": "/Users/mileswirht/gpui-reactivity-20261024-root/component-7a2f9325-sol/source/reactivity/crates/gpui/Cargo.toml",
+        "target": {
+          "kind": [
+            "test"
+          ],
+          "crate_types": [
+            "bin"
+          ],
+          "name": "mapped_properties",
+          "src_path": "/Users/mileswirht/gpui-reactivity-20261024-root/component-7a2f9325-sol/source/reactivity/crates/gpui/tests/mapped_properties.rs",
+          "edition": "2024",
+          "doc": false,
+          "doctest": false,
+          "test": true
+        },
+        "profile": {
+          "opt_level": "0",
+          "debuginfo": 0,
+          "debug_assertions": true,
+          "overflow_checks": true,
+          "test": true
+        },
+        "features": [
+          "accessibility",
+          "default",
+          "native",
+          "native-core",
+          "simd"
+        ],
+        "filenames": [
+          "/Users/mileswirht/gpui-reactivity-20261024-root/target-nightly/debug/build/gpui/bc1eddac92b546ae/out/mapped_properties-bc1eddac92b546ae"
+        ],
+        "executable": "/Users/mileswirht/gpui-reactivity-20261024-root/target-nightly/debug/build/gpui/bc1eddac92b546ae/out/mapped_properties-bc1eddac92b546ae",
+        "fresh": false
+      }
+    },
+    {
+      "name": "paint_patch",
+      "file": "full-native-build-50-paint_patch",
+      "sha256": "9ce94818de01df212b6aaddf81035c3c641493797a3a1028a5802d0c74e0d352",
+      "bytes": 29235344,
+      "cargo": {
+        "reason": "compiler-artifact",
+        "package_id": "path+file:///Users/mileswirht/gpui-reactivity-20261024-root/component-7a2f9325-sol/source/reactivity/crates/gpui#0.1.0",
+        "manifest_path": "/Users/mileswirht/gpui-reactivity-20261024-root/component-7a2f9325-sol/source/reactivity/crates/gpui/Cargo.toml",
+        "target": {
+          "kind": [
+            "test"
+          ],
+          "crate_types": [
+            "bin"
+          ],
+          "name": "paint_patch",
+          "src_path": "/Users/mileswirht/gpui-reactivity-20261024-root/component-7a2f9325-sol/source/reactivity/crates/gpui/tests/paint_patch.rs",
+          "edition": "2024",
+          "doc": false,
+          "doctest": false,
+          "test": true
+        },
+        "profile": {
+          "opt_level": "0",
+          "debuginfo": 0,
+          "debug_assertions": true,
+          "overflow_checks": true,
+          "test": true
+        },
+        "features": [
+          "accessibility",
+          "default",
+          "native",
+          "native-core",
+          "simd"
+        ],
+        "filenames": [
+          "/Users/mileswirht/gpui-reactivity-20261024-root/target-nightly/debug/build/gpui/5f6bfe818b736b58/out/paint_patch-5f6bfe818b736b58"
+        ],
+        "executable": "/Users/mileswirht/gpui-reactivity-20261024-root/target-nightly/debug/build/gpui/5f6bfe818b736b58/out/paint_patch-5f6bfe818b736b58",
+        "fresh": false
+      }
+    },
+    {
+      "name": "lists",
+      "file": "full-native-build-51-lists",
+      "sha256": "d0fd023a8a00a1eb3162d9d6b50d2a3c48a773896a47b4b9b615fd6f0d18b5e2",
+      "bytes": 37703152,
+      "cargo": {
+        "reason": "compiler-artifact",
+        "package_id": "path+file:///Users/mileswirht/gpui-reactivity-20261024-root/component-7a2f9325-sol/source/reactivity/crates/gpui#0.1.0",
+        "manifest_path": "/Users/mileswirht/gpui-reactivity-20261024-root/component-7a2f9325-sol/source/reactivity/crates/gpui/Cargo.toml",
+        "target": {
+          "kind": [
+            "test"
+          ],
+          "crate_types": [
+            "bin"
+          ],
+          "name": "lists",
+          "src_path": "/Users/mileswirht/gpui-reactivity-20261024-root/component-7a2f9325-sol/source/reactivity/crates/gpui/tests/lists.rs",
+          "edition": "2024",
+          "doc": false,
+          "doctest": false,
+          "test": true
+        },
+        "profile": {
+          "opt_level": "0",
+          "debuginfo": 0,
+          "debug_assertions": true,
+          "overflow_checks": true,
+          "test": true
+        },
+        "features": [
+          "accessibility",
+          "default",
+          "native",
+          "native-core",
+          "simd"
+        ],
+        "filenames": [
+          "/Users/mileswirht/gpui-reactivity-20261024-root/target-nightly/debug/build/gpui/2d935bfb53e15b87/out/lists-2d935bfb53e15b87"
+        ],
+        "executable": "/Users/mileswirht/gpui-reactivity-20261024-root/target-nightly/debug/build/gpui/2d935bfb53e15b87/out/lists-2d935bfb53e15b87",
+        "fresh": false
+      }
+    },
+    {
+      "name": "pointer_focus",
+      "file": "full-native-build-52-pointer_focus",
+      "sha256": "08698fd5e24e71a5d1e9987d642253629bfaed3a338837a51876c145871ff17d",
+      "bytes": 28256496,
+      "cargo": {
+        "reason": "compiler-artifact",
+        "package_id": "path+file:///Users/mileswirht/gpui-reactivity-20261024-root/component-7a2f9325-sol/source/reactivity/crates/gpui#0.1.0",
+        "manifest_path": "/Users/mileswirht/gpui-reactivity-20261024-root/component-7a2f9325-sol/source/reactivity/crates/gpui/Cargo.toml",
+        "target": {
+          "kind": [
+            "test"
+          ],
+          "crate_types": [
+            "bin"
+          ],
+          "name": "pointer_focus",
+          "src_path": "/Users/mileswirht/gpui-reactivity-20261024-root/component-7a2f9325-sol/source/reactivity/crates/gpui/tests/pointer_focus.rs",
+          "edition": "2024",
+          "doc": false,
+          "doctest": false,
+          "test": true
+        },
+        "profile": {
+          "opt_level": "0",
+          "debuginfo": 0,
+          "debug_assertions": true,
+          "overflow_checks": true,
+          "test": true
+        },
+        "features": [
+          "accessibility",
+          "default",
+          "native",
+          "native-core",
+          "simd"
+        ],
+        "filenames": [
+          "/Users/mileswirht/gpui-reactivity-20261024-root/target-nightly/debug/build/gpui/e6ac914c5a0d5bef/out/pointer_focus-e6ac914c5a0d5bef"
+        ],
+        "executable": "/Users/mileswirht/gpui-reactivity-20261024-root/target-nightly/debug/build/gpui/e6ac914c5a0d5bef/out/pointer_focus-e6ac914c5a0d5bef",
+        "fresh": false
+      }
+    },
+    {
+      "name": "paint_slots",
+      "file": "full-native-build-53-paint_slots",
+      "sha256": "cabd7a62aed4957ccb17649f15bb3589905e4161196b88722c48b0cb68b62c15",
+      "bytes": 29797552,
+      "cargo": {
+        "reason": "compiler-artifact",
+        "package_id": "path+file:///Users/mileswirht/gpui-reactivity-20261024-root/component-7a2f9325-sol/source/reactivity/crates/gpui#0.1.0",
+        "manifest_path": "/Users/mileswirht/gpui-reactivity-20261024-root/component-7a2f9325-sol/source/reactivity/crates/gpui/Cargo.toml",
+        "target": {
+          "kind": [
+            "test"
+          ],
+          "crate_types": [
+            "bin"
+          ],
+          "name": "paint_slots",
+          "src_path": "/Users/mileswirht/gpui-reactivity-20261024-root/component-7a2f9325-sol/source/reactivity/crates/gpui/tests/paint_slots.rs",
+          "edition": "2024",
+          "doc": false,
+          "doctest": false,
+          "test": true
+        },
+        "profile": {
+          "opt_level": "0",
+          "debuginfo": 0,
+          "debug_assertions": true,
+          "overflow_checks": true,
+          "test": true
+        },
+        "features": [
+          "accessibility",
+          "default",
+          "native",
+          "native-core",
+          "simd"
+        ],
+        "filenames": [
+          "/Users/mileswirht/gpui-reactivity-20261024-root/target-nightly/debug/build/gpui/e27e6d2cc42342ba/out/paint_slots-e27e6d2cc42342ba"
+        ],
+        "executable": "/Users/mileswirht/gpui-reactivity-20261024-root/target-nightly/debug/build/gpui/e27e6d2cc42342ba/out/paint_slots-e27e6d2cc42342ba",
+        "fresh": false
+      }
+    },
+    {
+      "name": "pointer",
+      "file": "full-native-build-54-pointer",
+      "sha256": "9b37bd4f51cc0693b1d4eff6e56aab07453fb9d80fc10d086872b5c7c64415de",
+      "bytes": 29702128,
+      "cargo": {
+        "reason": "compiler-artifact",
+        "package_id": "path+file:///Users/mileswirht/gpui-reactivity-20261024-root/component-7a2f9325-sol/source/reactivity/crates/gpui#0.1.0",
+        "manifest_path": "/Users/mileswirht/gpui-reactivity-20261024-root/component-7a2f9325-sol/source/reactivity/crates/gpui/Cargo.toml",
+        "target": {
+          "kind": [
+            "test"
+          ],
+          "crate_types": [
+            "bin"
+          ],
+          "name": "pointer",
+          "src_path": "/Users/mileswirht/gpui-reactivity-20261024-root/component-7a2f9325-sol/source/reactivity/crates/gpui/tests/pointer.rs",
+          "edition": "2024",
+          "doc": false,
+          "doctest": false,
+          "test": true
+        },
+        "profile": {
+          "opt_level": "0",
+          "debuginfo": 0,
+          "debug_assertions": true,
+          "overflow_checks": true,
+          "test": true
+        },
+        "features": [
+          "accessibility",
+          "default",
+          "native",
+          "native-core",
+          "simd"
+        ],
+        "filenames": [
+          "/Users/mileswirht/gpui-reactivity-20261024-root/target-nightly/debug/build/gpui/f0f1e97e6e042b0a/out/pointer-f0f1e97e6e042b0a"
+        ],
+        "executable": "/Users/mileswirht/gpui-reactivity-20261024-root/target-nightly/debug/build/gpui/f0f1e97e6e042b0a/out/pointer-f0f1e97e6e042b0a",
+        "fresh": false
+      }
+    },
+    {
+      "name": "ports",
+      "file": "full-native-build-55-ports",
+      "sha256": "329c4796d63ef7ddf1dd6d61b8a1d6bdfb709a6413cfbd89567d797cba753c9a",
+      "bytes": 30540432,
+      "cargo": {
+        "reason": "compiler-artifact",
+        "package_id": "path+file:///Users/mileswirht/gpui-reactivity-20261024-root/component-7a2f9325-sol/source/reactivity/crates/gpui#0.1.0",
+        "manifest_path": "/Users/mileswirht/gpui-reactivity-20261024-root/component-7a2f9325-sol/source/reactivity/crates/gpui/Cargo.toml",
+        "target": {
+          "kind": [
+            "test"
+          ],
+          "crate_types": [
+            "bin"
+          ],
+          "name": "ports",
+          "src_path": "/Users/mileswirht/gpui-reactivity-20261024-root/component-7a2f9325-sol/source/reactivity/crates/gpui/tests/ports.rs",
+          "edition": "2024",
+          "doc": false,
+          "doctest": false,
+          "test": true
+        },
+        "profile": {
+          "opt_level": "0",
+          "debuginfo": 0,
+          "debug_assertions": true,
+          "overflow_checks": true,
+          "test": true
+        },
+        "features": [
+          "accessibility",
+          "default",
+          "native",
+          "native-core",
+          "simd"
+        ],
+        "filenames": [
+          "/Users/mileswirht/gpui-reactivity-20261024-root/target-nightly/debug/build/gpui/d4e6ce043fee0b2d/out/ports-d4e6ce043fee0b2d"
+        ],
+        "executable": "/Users/mileswirht/gpui-reactivity-20261024-root/target-nightly/debug/build/gpui/d4e6ce043fee0b2d/out/ports-d4e6ce043fee0b2d",
+        "fresh": false
+      }
+    },
+    {
+      "name": "presentation",
+      "file": "full-native-build-56-presentation",
+      "sha256": "cc5bfdad95086f1924cdc4d9e772c2c4ee57139a9b96d882a1e2f32feb5aeba9",
+      "bytes": 28616800,
+      "cargo": {
+        "reason": "compiler-artifact",
+        "package_id": "path+file:///Users/mileswirht/gpui-reactivity-20261024-root/component-7a2f9325-sol/source/reactivity/crates/gpui#0.1.0",
+        "manifest_path": "/Users/mileswirht/gpui-reactivity-20261024-root/component-7a2f9325-sol/source/reactivity/crates/gpui/Cargo.toml",
+        "target": {
+          "kind": [
+            "test"
+          ],
+          "crate_types": [
+            "bin"
+          ],
+          "name": "presentation",
+          "src_path": "/Users/mileswirht/gpui-reactivity-20261024-root/component-7a2f9325-sol/source/reactivity/crates/gpui/tests/presentation.rs",
+          "edition": "2024",
+          "doc": false,
+          "doctest": false,
+          "test": true
+        },
+        "profile": {
+          "opt_level": "0",
+          "debuginfo": 0,
+          "debug_assertions": true,
+          "overflow_checks": true,
+          "test": true
+        },
+        "features": [
+          "accessibility",
+          "default",
+          "native",
+          "native-core",
+          "simd"
+        ],
+        "filenames": [
+          "/Users/mileswirht/gpui-reactivity-20261024-root/target-nightly/debug/build/gpui/006ec417735cd541/out/presentation-006ec417735cd541"
+        ],
+        "executable": "/Users/mileswirht/gpui-reactivity-20261024-root/target-nightly/debug/build/gpui/006ec417735cd541/out/presentation-006ec417735cd541",
+        "fresh": false
+      }
+    },
+    {
+      "name": "property_outline_allocations",
+      "file": "full-native-build-57-property_outline_allocations",
+      "sha256": "9be715fb7a7993d3be53fde5919570044d72d3e766019b8096ea34a6d3c4af98",
+      "bytes": 27925424,
+      "cargo": {
+        "reason": "compiler-artifact",
+        "package_id": "path+file:///Users/mileswirht/gpui-reactivity-20261024-root/component-7a2f9325-sol/source/reactivity/crates/gpui#0.1.0",
+        "manifest_path": "/Users/mileswirht/gpui-reactivity-20261024-root/component-7a2f9325-sol/source/reactivity/crates/gpui/Cargo.toml",
+        "target": {
+          "kind": [
+            "test"
+          ],
+          "crate_types": [
+            "bin"
+          ],
+          "name": "property_outline_allocations",
+          "src_path": "/Users/mileswirht/gpui-reactivity-20261024-root/component-7a2f9325-sol/source/reactivity/crates/gpui/tests/property_outline_allocations.rs",
+          "edition": "2024",
+          "doc": false,
+          "doctest": false,
+          "test": true
+        },
+        "profile": {
+          "opt_level": "0",
+          "debuginfo": 0,
+          "debug_assertions": true,
+          "overflow_checks": true,
+          "test": true
+        },
+        "features": [
+          "accessibility",
+          "default",
+          "native",
+          "native-core",
+          "simd"
+        ],
+        "filenames": [
+          "/Users/mileswirht/gpui-reactivity-20261024-root/target-nightly/debug/build/gpui/8aabcbd332736240/out/property_outline_allocations-8aabcbd332736240"
+        ],
+        "executable": "/Users/mileswirht/gpui-reactivity-20261024-root/target-nightly/debug/build/gpui/8aabcbd332736240/out/property_outline_allocations-8aabcbd332736240",
+        "fresh": false
+      }
+    },
+    {
+      "name": "property_actions",
+      "file": "full-native-build-58-property_actions",
+      "sha256": "2de6762753ebd17fa24ca74b9da31b82fd3c9c29ae855e027eaa559d2ee1cff9",
+      "bytes": 30150192,
+      "cargo": {
+        "reason": "compiler-artifact",
+        "package_id": "path+file:///Users/mileswirht/gpui-reactivity-20261024-root/component-7a2f9325-sol/source/reactivity/crates/gpui#0.1.0",
+        "manifest_path": "/Users/mileswirht/gpui-reactivity-20261024-root/component-7a2f9325-sol/source/reactivity/crates/gpui/Cargo.toml",
+        "target": {
+          "kind": [
+            "test"
+          ],
+          "crate_types": [
+            "bin"
+          ],
+          "name": "property_actions",
+          "src_path": "/Users/mileswirht/gpui-reactivity-20261024-root/component-7a2f9325-sol/source/reactivity/crates/gpui/tests/property_actions.rs",
+          "edition": "2024",
+          "doc": false,
+          "doctest": false,
+          "test": true
+        },
+        "profile": {
+          "opt_level": "0",
+          "debuginfo": 0,
+          "debug_assertions": true,
+          "overflow_checks": true,
+          "test": true
+        },
+        "features": [
+          "accessibility",
+          "default",
+          "native",
+          "native-core",
+          "simd"
+        ],
+        "filenames": [
+          "/Users/mileswirht/gpui-reactivity-20261024-root/target-nightly/debug/build/gpui/1635f9977ab87842/out/property_actions-1635f9977ab87842"
+        ],
+        "executable": "/Users/mileswirht/gpui-reactivity-20261024-root/target-nightly/debug/build/gpui/1635f9977ab87842/out/property_actions-1635f9977ab87842",
+        "fresh": false
+      }
+    },
+    {
+      "name": "projected_sources",
+      "file": "full-native-build-59-projected_sources",
+      "sha256": "2970772a85103b9599733be2b490d91532b8277ebe38bd1b00c13b9d983feb00",
+      "bytes": 30996576,
+      "cargo": {
+        "reason": "compiler-artifact",
+        "package_id": "path+file:///Users/mileswirht/gpui-reactivity-20261024-root/component-7a2f9325-sol/source/reactivity/crates/gpui#0.1.0",
+        "manifest_path": "/Users/mileswirht/gpui-reactivity-20261024-root/component-7a2f9325-sol/source/reactivity/crates/gpui/Cargo.toml",
+        "target": {
+          "kind": [
+            "test"
+          ],
+          "crate_types": [
+            "bin"
+          ],
+          "name": "projected_sources",
+          "src_path": "/Users/mileswirht/gpui-reactivity-20261024-root/component-7a2f9325-sol/source/reactivity/crates/gpui/tests/projected_sources.rs",
+          "edition": "2024",
+          "doc": false,
+          "doctest": false,
+          "test": true
+        },
+        "profile": {
+          "opt_level": "0",
+          "debuginfo": 0,
+          "debug_assertions": true,
+          "overflow_checks": true,
+          "test": true
+        },
+        "features": [
+          "accessibility",
+          "default",
+          "native",
+          "native-core",
+          "simd"
+        ],
+        "filenames": [
+          "/Users/mileswirht/gpui-reactivity-20261024-root/target-nightly/debug/build/gpui/7ca04e624cb76821/out/projected_sources-7ca04e624cb76821"
+        ],
+        "executable": "/Users/mileswirht/gpui-reactivity-20261024-root/target-nightly/debug/build/gpui/7ca04e624cb76821/out/projected_sources-7ca04e624cb76821",
+        "fresh": false
+      }
+    },
+    {
+      "name": "property_state_shell",
+      "file": "full-native-build-60-property_state_shell",
+      "sha256": "2a5d4a72b61029fc32944944fabb0435b389c7e89d1e000ca39a95f3e854dd74",
+      "bytes": 27888224,
+      "cargo": {
+        "reason": "compiler-artifact",
+        "package_id": "path+file:///Users/mileswirht/gpui-reactivity-20261024-root/component-7a2f9325-sol/source/reactivity/crates/gpui#0.1.0",
+        "manifest_path": "/Users/mileswirht/gpui-reactivity-20261024-root/component-7a2f9325-sol/source/reactivity/crates/gpui/Cargo.toml",
+        "target": {
+          "kind": [
+            "test"
+          ],
+          "crate_types": [
+            "bin"
+          ],
+          "name": "property_state_shell",
+          "src_path": "/Users/mileswirht/gpui-reactivity-20261024-root/component-7a2f9325-sol/source/reactivity/crates/gpui/tests/property_state_shell.rs",
+          "edition": "2024",
+          "doc": false,
+          "doctest": false,
+          "test": true
+        },
+        "profile": {
+          "opt_level": "0",
+          "debuginfo": 0,
+          "debug_assertions": true,
+          "overflow_checks": true,
+          "test": true
+        },
+        "features": [
+          "accessibility",
+          "default",
+          "native",
+          "native-core",
+          "simd"
+        ],
+        "filenames": [
+          "/Users/mileswirht/gpui-reactivity-20261024-root/target-nightly/debug/build/gpui/5d839c7c3f2b1420/out/property_state_shell-5d839c7c3f2b1420"
+        ],
+        "executable": "/Users/mileswirht/gpui-reactivity-20261024-root/target-nightly/debug/build/gpui/5d839c7c3f2b1420/out/property_state_shell-5d839c7c3f2b1420",
+        "fresh": false
+      }
+    },
+    {
+      "name": "property_selection",
+      "file": "full-native-build-61-property_selection",
+      "sha256": "afb49e757ffa232367b4b499e9b614dcbcb6923082e3424b9460cf7685d7b25e",
+      "bytes": 31442160,
+      "cargo": {
+        "reason": "compiler-artifact",
+        "package_id": "path+file:///Users/mileswirht/gpui-reactivity-20261024-root/component-7a2f9325-sol/source/reactivity/crates/gpui#0.1.0",
+        "manifest_path": "/Users/mileswirht/gpui-reactivity-20261024-root/component-7a2f9325-sol/source/reactivity/crates/gpui/Cargo.toml",
+        "target": {
+          "kind": [
+            "test"
+          ],
+          "crate_types": [
+            "bin"
+          ],
+          "name": "property_selection",
+          "src_path": "/Users/mileswirht/gpui-reactivity-20261024-root/component-7a2f9325-sol/source/reactivity/crates/gpui/tests/property_selection.rs",
+          "edition": "2024",
+          "doc": false,
+          "doctest": false,
+          "test": true
+        },
+        "profile": {
+          "opt_level": "0",
+          "debuginfo": 0,
+          "debug_assertions": true,
+          "overflow_checks": true,
+          "test": true
+        },
+        "features": [
+          "accessibility",
+          "default",
+          "native",
+          "native-core",
+          "simd"
+        ],
+        "filenames": [
+          "/Users/mileswirht/gpui-reactivity-20261024-root/target-nightly/debug/build/gpui/7943a04a675d56c0/out/property_selection-7943a04a675d56c0"
+        ],
+        "executable": "/Users/mileswirht/gpui-reactivity-20261024-root/target-nightly/debug/build/gpui/7943a04a675d56c0/out/property_selection-7943a04a675d56c0",
+        "fresh": false
+      }
+    },
+    {
+      "name": "queries",
+      "file": "full-native-build-62-queries",
+      "sha256": "6e535b6cacee3a40d9363980e0bf03f94adffcf741892b058f4111703c3a2da6",
+      "bytes": 28483888,
+      "cargo": {
+        "reason": "compiler-artifact",
+        "package_id": "path+file:///Users/mileswirht/gpui-reactivity-20261024-root/component-7a2f9325-sol/source/reactivity/crates/gpui#0.1.0",
+        "manifest_path": "/Users/mileswirht/gpui-reactivity-20261024-root/component-7a2f9325-sol/source/reactivity/crates/gpui/Cargo.toml",
+        "target": {
+          "kind": [
+            "test"
+          ],
+          "crate_types": [
+            "bin"
+          ],
+          "name": "queries",
+          "src_path": "/Users/mileswirht/gpui-reactivity-20261024-root/component-7a2f9325-sol/source/reactivity/crates/gpui/tests/queries.rs",
+          "edition": "2024",
+          "doc": false,
+          "doctest": false,
+          "test": true
+        },
+        "profile": {
+          "opt_level": "0",
+          "debuginfo": 0,
+          "debug_assertions": true,
+          "overflow_checks": true,
+          "test": true
+        },
+        "features": [
+          "accessibility",
+          "default",
+          "native",
+          "native-core",
+          "simd"
+        ],
+        "filenames": [
+          "/Users/mileswirht/gpui-reactivity-20261024-root/target-nightly/debug/build/gpui/f64b0ee8bb0d5af4/out/queries-f64b0ee8bb0d5af4"
+        ],
+        "executable": "/Users/mileswirht/gpui-reactivity-20261024-root/target-nightly/debug/build/gpui/f64b0ee8bb0d5af4/out/queries-f64b0ee8bb0d5af4",
+        "fresh": false
+      }
+    },
+    {
+      "name": "property_change_union",
+      "file": "full-native-build-63-property_change_union",
+      "sha256": "0083910fd30f467395cbb29b730e481a2797696f6e5d3d1a775de8157cc61e3c",
+      "bytes": 29512224,
+      "cargo": {
+        "reason": "compiler-artifact",
+        "package_id": "path+file:///Users/mileswirht/gpui-reactivity-20261024-root/component-7a2f9325-sol/source/reactivity/crates/gpui#0.1.0",
+        "manifest_path": "/Users/mileswirht/gpui-reactivity-20261024-root/component-7a2f9325-sol/source/reactivity/crates/gpui/Cargo.toml",
+        "target": {
+          "kind": [
+            "test"
+          ],
+          "crate_types": [
+            "bin"
+          ],
+          "name": "property_change_union",
+          "src_path": "/Users/mileswirht/gpui-reactivity-20261024-root/component-7a2f9325-sol/source/reactivity/crates/gpui/tests/property_change_union.rs",
+          "edition": "2024",
+          "doc": false,
+          "doctest": false,
+          "test": true
+        },
+        "profile": {
+          "opt_level": "0",
+          "debuginfo": 0,
+          "debug_assertions": true,
+          "overflow_checks": true,
+          "test": true
+        },
+        "features": [
+          "accessibility",
+          "default",
+          "native",
+          "native-core",
+          "simd"
+        ],
+        "filenames": [
+          "/Users/mileswirht/gpui-reactivity-20261024-root/target-nightly/debug/build/gpui/472d758c3ab71ac2/out/property_change_union-472d758c3ab71ac2"
+        ],
+        "executable": "/Users/mileswirht/gpui-reactivity-20261024-root/target-nightly/debug/build/gpui/472d758c3ab71ac2/out/property_change_union-472d758c3ab71ac2",
+        "fresh": false
+      }
+    },
+    {
+      "name": "question_cost",
+      "file": "full-native-build-64-question_cost",
+      "sha256": "4edd93649e15ea6ec315dfd1643073ebea2b3283f4297b5def3df01d31727cf4",
+      "bytes": 28737680,
+      "cargo": {
+        "reason": "compiler-artifact",
+        "package_id": "path+file:///Users/mileswirht/gpui-reactivity-20261024-root/component-7a2f9325-sol/source/reactivity/crates/gpui#0.1.0",
+        "manifest_path": "/Users/mileswirht/gpui-reactivity-20261024-root/component-7a2f9325-sol/source/reactivity/crates/gpui/Cargo.toml",
+        "target": {
+          "kind": [
+            "test"
+          ],
+          "crate_types": [
+            "bin"
+          ],
+          "name": "question_cost",
+          "src_path": "/Users/mileswirht/gpui-reactivity-20261024-root/component-7a2f9325-sol/source/reactivity/crates/gpui/tests/question_cost.rs",
+          "edition": "2024",
+          "doc": false,
+          "doctest": false,
+          "test": true
+        },
+        "profile": {
+          "opt_level": "0",
+          "debuginfo": 0,
+          "debug_assertions": true,
+          "overflow_checks": true,
+          "test": true
+        },
+        "features": [
+          "accessibility",
+          "default",
+          "native",
+          "native-core",
+          "simd"
+        ],
+        "filenames": [
+          "/Users/mileswirht/gpui-reactivity-20261024-root/target-nightly/debug/build/gpui/300ae0eafa76fd23/out/question_cost-300ae0eafa76fd23"
+        ],
+        "executable": "/Users/mileswirht/gpui-reactivity-20261024-root/target-nightly/debug/build/gpui/300ae0eafa76fd23/out/question_cost-300ae0eafa76fd23",
+        "fresh": false
+      }
+    },
+    {
+      "name": "question_input_cost",
+      "file": "full-native-build-65-question_input_cost",
+      "sha256": "f88e950cd0124342a8740668af1f6674ae7a75493a9788dbe79092150acd986e",
+      "bytes": 28052928,
+      "cargo": {
+        "reason": "compiler-artifact",
+        "package_id": "path+file:///Users/mileswirht/gpui-reactivity-20261024-root/component-7a2f9325-sol/source/reactivity/crates/gpui#0.1.0",
+        "manifest_path": "/Users/mileswirht/gpui-reactivity-20261024-root/component-7a2f9325-sol/source/reactivity/crates/gpui/Cargo.toml",
+        "target": {
+          "kind": [
+            "test"
+          ],
+          "crate_types": [
+            "bin"
+          ],
+          "name": "question_input_cost",
+          "src_path": "/Users/mileswirht/gpui-reactivity-20261024-root/component-7a2f9325-sol/source/reactivity/crates/gpui/tests/question_input_cost.rs",
+          "edition": "2024",
+          "doc": false,
+          "doctest": false,
+          "test": true
+        },
+        "profile": {
+          "opt_level": "0",
+          "debuginfo": 0,
+          "debug_assertions": true,
+          "overflow_checks": true,
+          "test": true
+        },
+        "features": [
+          "accessibility",
+          "default",
+          "native",
+          "native-core",
+          "simd"
+        ],
+        "filenames": [
+          "/Users/mileswirht/gpui-reactivity-20261024-root/target-nightly/debug/build/gpui/72b0cf7da9ed5a23/out/question_input_cost-72b0cf7da9ed5a23"
+        ],
+        "executable": "/Users/mileswirht/gpui-reactivity-20261024-root/target-nightly/debug/build/gpui/72b0cf7da9ed5a23/out/question_input_cost-72b0cf7da9ed5a23",
+        "fresh": false
+      }
+    },
+    {
+      "name": "question_inputs",
+      "file": "full-native-build-66-question_inputs",
+      "sha256": "d41053ae85f6ff433038b3c8375799271300d4c08321d2d86ec5d5cdcb641b98",
+      "bytes": 29350704,
+      "cargo": {
+        "reason": "compiler-artifact",
+        "package_id": "path+file:///Users/mileswirht/gpui-reactivity-20261024-root/component-7a2f9325-sol/source/reactivity/crates/gpui#0.1.0",
+        "manifest_path": "/Users/mileswirht/gpui-reactivity-20261024-root/component-7a2f9325-sol/source/reactivity/crates/gpui/Cargo.toml",
+        "target": {
+          "kind": [
+            "test"
+          ],
+          "crate_types": [
+            "bin"
+          ],
+          "name": "question_inputs",
+          "src_path": "/Users/mileswirht/gpui-reactivity-20261024-root/component-7a2f9325-sol/source/reactivity/crates/gpui/tests/question_inputs.rs",
+          "edition": "2024",
+          "doc": false,
+          "doctest": false,
+          "test": true
+        },
+        "profile": {
+          "opt_level": "0",
+          "debuginfo": 0,
+          "debug_assertions": true,
+          "overflow_checks": true,
+          "test": true
+        },
+        "features": [
+          "accessibility",
+          "default",
+          "native",
+          "native-core",
+          "simd"
+        ],
+        "filenames": [
+          "/Users/mileswirht/gpui-reactivity-20261024-root/target-nightly/debug/build/gpui/6c82f4649e4db28e/out/question_inputs-6c82f4649e4db28e"
+        ],
+        "executable": "/Users/mileswirht/gpui-reactivity-20261024-root/target-nightly/debug/build/gpui/6c82f4649e4db28e/out/question_inputs-6c82f4649e4db28e",
+        "fresh": false
+      }
+    },
+    {
+      "name": "question_futures",
+      "file": "full-native-build-67-question_futures",
+      "sha256": "8aaa355853aa9b16ed1b301fca6668f516e47fab562a9b0d7db2570cd810d60d",
+      "bytes": 31452880,
+      "cargo": {
+        "reason": "compiler-artifact",
+        "package_id": "path+file:///Users/mileswirht/gpui-reactivity-20261024-root/component-7a2f9325-sol/source/reactivity/crates/gpui#0.1.0",
+        "manifest_path": "/Users/mileswirht/gpui-reactivity-20261024-root/component-7a2f9325-sol/source/reactivity/crates/gpui/Cargo.toml",
+        "target": {
+          "kind": [
+            "test"
+          ],
+          "crate_types": [
+            "bin"
+          ],
+          "name": "question_futures",
+          "src_path": "/Users/mileswirht/gpui-reactivity-20261024-root/component-7a2f9325-sol/source/reactivity/crates/gpui/tests/question_futures.rs",
+          "edition": "2024",
+          "doc": false,
+          "doctest": false,
+          "test": true
+        },
+        "profile": {
+          "opt_level": "0",
+          "debuginfo": 0,
+          "debug_assertions": true,
+          "overflow_checks": true,
+          "test": true
+        },
+        "features": [
+          "accessibility",
+          "default",
+          "native",
+          "native-core",
+          "simd"
+        ],
+        "filenames": [
+          "/Users/mileswirht/gpui-reactivity-20261024-root/target-nightly/debug/build/gpui/b01c6a72f73c6f46/out/question_futures-b01c6a72f73c6f46"
+        ],
+        "executable": "/Users/mileswirht/gpui-reactivity-20261024-root/target-nightly/debug/build/gpui/b01c6a72f73c6f46/out/question_futures-b01c6a72f73c6f46",
+        "fresh": false
+      }
+    },
+    {
+      "name": "question_mailbox",
+      "file": "full-native-build-68-question_mailbox",
+      "sha256": "de0495fb5219fa705ac01ef1d8c473b5593fd77a922af4ff8485cd36bb179766",
+      "bytes": 28261472,
+      "cargo": {
+        "reason": "compiler-artifact",
+        "package_id": "path+file:///Users/mileswirht/gpui-reactivity-20261024-root/component-7a2f9325-sol/source/reactivity/crates/gpui#0.1.0",
+        "manifest_path": "/Users/mileswirht/gpui-reactivity-20261024-root/component-7a2f9325-sol/source/reactivity/crates/gpui/Cargo.toml",
+        "target": {
+          "kind": [
+            "test"
+          ],
+          "crate_types": [
+            "bin"
+          ],
+          "name": "question_mailbox",
+          "src_path": "/Users/mileswirht/gpui-reactivity-20261024-root/component-7a2f9325-sol/source/reactivity/crates/gpui/tests/question_mailbox.rs",
+          "edition": "2024",
+          "doc": false,
+          "doctest": false,
+          "test": true
+        },
+        "profile": {
+          "opt_level": "0",
+          "debuginfo": 0,
+          "debug_assertions": true,
+          "overflow_checks": true,
+          "test": true
+        },
+        "features": [
+          "accessibility",
+          "default",
+          "native",
+          "native-core",
+          "simd"
+        ],
+        "filenames": [
+          "/Users/mileswirht/gpui-reactivity-20261024-root/target-nightly/debug/build/gpui/b9a0a25ad796372c/out/question_mailbox-b9a0a25ad796372c"
+        ],
+        "executable": "/Users/mileswirht/gpui-reactivity-20261024-root/target-nightly/debug/build/gpui/b9a0a25ad796372c/out/question_mailbox-b9a0a25ad796372c",
+        "fresh": false
+      }
+    },
+    {
+      "name": "question_storage",
+      "file": "full-native-build-69-question_storage",
+      "sha256": "172bef58cdf1f50884d35a587ccea12311c9522781c7cabab732d4cf1fc5ad11",
+      "bytes": 30499024,
+      "cargo": {
+        "reason": "compiler-artifact",
+        "package_id": "path+file:///Users/mileswirht/gpui-reactivity-20261024-root/component-7a2f9325-sol/source/reactivity/crates/gpui#0.1.0",
+        "manifest_path": "/Users/mileswirht/gpui-reactivity-20261024-root/component-7a2f9325-sol/source/reactivity/crates/gpui/Cargo.toml",
+        "target": {
+          "kind": [
+            "test"
+          ],
+          "crate_types": [
+            "bin"
+          ],
+          "name": "question_storage",
+          "src_path": "/Users/mileswirht/gpui-reactivity-20261024-root/component-7a2f9325-sol/source/reactivity/crates/gpui/tests/question_storage.rs",
+          "edition": "2024",
+          "doc": false,
+          "doctest": false,
+          "test": true
+        },
+        "profile": {
+          "opt_level": "0",
+          "debuginfo": 0,
+          "debug_assertions": true,
+          "overflow_checks": true,
+          "test": true
+        },
+        "features": [
+          "accessibility",
+          "default",
+          "native",
+          "native-core",
+          "simd"
+        ],
+        "filenames": [
+          "/Users/mileswirht/gpui-reactivity-20261024-root/target-nightly/debug/build/gpui/84e52fb236fd45e0/out/question_storage-84e52fb236fd45e0"
+        ],
+        "executable": "/Users/mileswirht/gpui-reactivity-20261024-root/target-nightly/debug/build/gpui/84e52fb236fd45e0/out/question_storage-84e52fb236fd45e0",
+        "fresh": false
+      }
+    },
+    {
+      "name": "questions",
+      "file": "full-native-build-70-questions",
+      "sha256": "d14bc30b94ae3ef17e86e153775f248999e6a1839fda766681cec79811ff884f",
+      "bytes": 30108112,
+      "cargo": {
+        "reason": "compiler-artifact",
+        "package_id": "path+file:///Users/mileswirht/gpui-reactivity-20261024-root/component-7a2f9325-sol/source/reactivity/crates/gpui#0.1.0",
+        "manifest_path": "/Users/mileswirht/gpui-reactivity-20261024-root/component-7a2f9325-sol/source/reactivity/crates/gpui/Cargo.toml",
+        "target": {
+          "kind": [
+            "test"
+          ],
+          "crate_types": [
+            "bin"
+          ],
+          "name": "questions",
+          "src_path": "/Users/mileswirht/gpui-reactivity-20261024-root/component-7a2f9325-sol/source/reactivity/crates/gpui/tests/questions.rs",
+          "edition": "2024",
+          "doc": false,
+          "doctest": false,
+          "test": true
+        },
+        "profile": {
+          "opt_level": "0",
+          "debuginfo": 0,
+          "debug_assertions": true,
+          "overflow_checks": true,
+          "test": true
+        },
+        "features": [
+          "accessibility",
+          "default",
+          "native",
+          "native-core",
+          "simd"
+        ],
+        "filenames": [
+          "/Users/mileswirht/gpui-reactivity-20261024-root/target-nightly/debug/build/gpui/b188ff4960f606cc/out/questions-b188ff4960f606cc"
+        ],
+        "executable": "/Users/mileswirht/gpui-reactivity-20261024-root/target-nightly/debug/build/gpui/b188ff4960f606cc/out/questions-b188ff4960f606cc",
+        "fresh": false
+      }
+    },
+    {
+      "name": "retained_styles",
+      "file": "full-native-build-71-retained_styles",
+      "sha256": "e8651ef8a914b09db919f8a76b46c47677a2f766869a8987227055959ea77f9f",
+      "bytes": 29072848,
+      "cargo": {
+        "reason": "compiler-artifact",
+        "package_id": "path+file:///Users/mileswirht/gpui-reactivity-20261024-root/component-7a2f9325-sol/source/reactivity/crates/gpui#0.1.0",
+        "manifest_path": "/Users/mileswirht/gpui-reactivity-20261024-root/component-7a2f9325-sol/source/reactivity/crates/gpui/Cargo.toml",
+        "target": {
+          "kind": [
+            "test"
+          ],
+          "crate_types": [
+            "bin"
+          ],
+          "name": "retained_styles",
+          "src_path": "/Users/mileswirht/gpui-reactivity-20261024-root/component-7a2f9325-sol/source/reactivity/crates/gpui/tests/retained_styles.rs",
+          "edition": "2024",
+          "doc": false,
+          "doctest": false,
+          "test": true
+        },
+        "profile": {
+          "opt_level": "0",
+          "debuginfo": 0,
+          "debug_assertions": true,
+          "overflow_checks": true,
+          "test": true
+        },
+        "features": [
+          "accessibility",
+          "default",
+          "native",
+          "native-core",
+          "simd"
+        ],
+        "filenames": [
+          "/Users/mileswirht/gpui-reactivity-20261024-root/target-nightly/debug/build/gpui/cfd6b2bf80ad6f75/out/retained_styles-cfd6b2bf80ad6f75"
+        ],
+        "executable": "/Users/mileswirht/gpui-reactivity-20261024-root/target-nightly/debug/build/gpui/cfd6b2bf80ad6f75/out/retained_styles-cfd6b2bf80ad6f75",
+        "fresh": false
+      }
+    },
+    {
+      "name": "remote",
+      "file": "full-native-build-72-remote",
+      "sha256": "7551a9417abaa436d97b999ba1af73fed65094d060f2ba0162a2223d0d62e263",
+      "bytes": 31036672,
+      "cargo": {
+        "reason": "compiler-artifact",
+        "package_id": "path+file:///Users/mileswirht/gpui-reactivity-20261024-root/component-7a2f9325-sol/source/reactivity/crates/gpui#0.1.0",
+        "manifest_path": "/Users/mileswirht/gpui-reactivity-20261024-root/component-7a2f9325-sol/source/reactivity/crates/gpui/Cargo.toml",
+        "target": {
+          "kind": [
+            "test"
+          ],
+          "crate_types": [
+            "bin"
+          ],
+          "name": "remote",
+          "src_path": "/Users/mileswirht/gpui-reactivity-20261024-root/component-7a2f9325-sol/source/reactivity/crates/gpui/tests/remote.rs",
+          "edition": "2024",
+          "doc": false,
+          "doctest": false,
+          "test": true
+        },
+        "profile": {
+          "opt_level": "0",
+          "debuginfo": 0,
+          "debug_assertions": true,
+          "overflow_checks": true,
+          "test": true
+        },
+        "features": [
+          "accessibility",
+          "default",
+          "native",
+          "native-core",
+          "simd"
+        ],
+        "filenames": [
+          "/Users/mileswirht/gpui-reactivity-20261024-root/target-nightly/debug/build/gpui/25de9920956650ab/out/remote-25de9920956650ab"
+        ],
+        "executable": "/Users/mileswirht/gpui-reactivity-20261024-root/target-nightly/debug/build/gpui/25de9920956650ab/out/remote-25de9920956650ab",
+        "fresh": false
+      }
+    },
+    {
+      "name": "rounded",
+      "file": "full-native-build-73-rounded",
+      "sha256": "cd24798d682e82fd56ca2f4e31ffc9057c341f2aaafdea8f461bfe05f23979d4",
+      "bytes": 31335600,
+      "cargo": {
+        "reason": "compiler-artifact",
+        "package_id": "path+file:///Users/mileswirht/gpui-reactivity-20261024-root/component-7a2f9325-sol/source/reactivity/crates/gpui#0.1.0",
+        "manifest_path": "/Users/mileswirht/gpui-reactivity-20261024-root/component-7a2f9325-sol/source/reactivity/crates/gpui/Cargo.toml",
+        "target": {
+          "kind": [
+            "test"
+          ],
+          "crate_types": [
+            "bin"
+          ],
+          "name": "rounded",
+          "src_path": "/Users/mileswirht/gpui-reactivity-20261024-root/component-7a2f9325-sol/source/reactivity/crates/gpui/tests/rounded.rs",
+          "edition": "2024",
+          "doc": false,
+          "doctest": false,
+          "test": true
+        },
+        "profile": {
+          "opt_level": "0",
+          "debuginfo": 0,
+          "debug_assertions": true,
+          "overflow_checks": true,
+          "test": true
+        },
+        "features": [
+          "accessibility",
+          "default",
+          "native",
+          "native-core",
+          "simd"
+        ],
+        "filenames": [
+          "/Users/mileswirht/gpui-reactivity-20261024-root/target-nightly/debug/build/gpui/b35fbb7126f8481c/out/rounded-b35fbb7126f8481c"
+        ],
+        "executable": "/Users/mileswirht/gpui-reactivity-20261024-root/target-nightly/debug/build/gpui/b35fbb7126f8481c/out/rounded-b35fbb7126f8481c",
+        "fresh": false
+      }
+    }
+  ],
+  "results": [
+    {
+      "binary": "full-native-build-0-routes",
+      "name": "routes",
+      "exit": 0,
+      "passed": 4,
+      "failed": 0,
+      "ignored": 0
+    },
+    {
+      "binary": "full-native-build-1-search_library",
+      "name": "search_library",
+      "exit": 0,
+      "passed": 6,
+      "failed": 0,
+      "ignored": 1
+    },
+    {
+      "binary": "full-native-build-2-runtime",
+      "name": "runtime",
+      "exit": 0,
+      "passed": 15,
+      "failed": 0,
+      "ignored": 0
+    },
+    {
+      "binary": "full-native-build-3-scroll",
+      "name": "scroll",
+      "exit": 0,
+      "passed": 27,
+      "failed": 0,
+      "ignored": 0
+    },
+    {
+      "binary": "full-native-build-4-semantic_serialization",
+      "name": "semantic_serialization",
+      "exit": 0,
+      "passed": 7,
+      "failed": 0,
+      "ignored": 0
+    },
+    {
+      "binary": "full-native-build-5-semantics",
+      "name": "semantics",
+      "exit": 0,
+      "passed": 6,
+      "failed": 0,
+      "ignored": 0
+    },
+    {
+      "binary": "full-native-build-6-semantic_metadata",
+      "name": "semantic_metadata",
+      "exit": 0,
+      "passed": 12,
+      "failed": 0,
+      "ignored": 0
+    },
+    {
+      "binary": "full-native-build-7-sibling_reconciliation_cost",
+      "name": "sibling_reconciliation_cost",
+      "exit": 0,
+      "passed": 1,
+      "failed": 0,
+      "ignored": 1
+    },
+    {
+      "binary": "full-native-build-8-source_inbox_reader_gate",
+      "name": "source_inbox_reader_gate",
+      "exit": 0,
+      "passed": 1,
+      "failed": 0,
+      "ignored": 0
+    },
+    {
+      "binary": "full-native-build-9-source_inbox",
+      "name": "source_inbox",
+      "exit": 0,
+      "passed": 14,
+      "failed": 0,
+      "ignored": 0
+    },
+    {
+      "binary": "full-native-build-10-source_value_isolation",
+      "name": "source_value_isolation",
+      "exit": 0,
+      "passed": 3,
+      "failed": 0,
+      "ignored": 0
+    },
+    {
+      "binary": "full-native-build-11-source_values",
+      "name": "source_values",
+      "exit": 0,
+      "passed": 4,
+      "failed": 0,
+      "ignored": 0
+    },
+    {
+      "binary": "full-native-build-12-text_cache",
+      "name": "text_cache",
+      "exit": 0,
+      "passed": 3,
+      "failed": 0,
+      "ignored": 0
+    },
+    {
+      "binary": "full-native-build-13-text_geometry",
+      "name": "text_geometry",
+      "exit": 0,
+      "passed": 4,
+      "failed": 0,
+      "ignored": 0
+    },
+    {
+      "binary": "full-native-build-14-text_selection",
+      "name": "text_selection",
+      "exit": 0,
+      "passed": 20,
+      "failed": 0,
+      "ignored": 0
+    },
+    {
+      "binary": "full-native-build-15-style_ports",
+      "name": "style_ports",
+      "exit": 0,
+      "passed": 13,
+      "failed": 0,
+      "ignored": 0
+    },
+    {
+      "binary": "full-native-build-16-acceptance",
+      "name": "acceptance",
+      "exit": 0,
+      "passed": 6,
+      "failed": 0,
+      "ignored": 0
+    },
+    {
+      "binary": "full-native-build-17-text_selection_compound",
+      "name": "text_selection_compound",
+      "exit": 0,
+      "passed": 6,
+      "failed": 0,
+      "ignored": 0
+    },
+    {
+      "binary": "full-native-build-18-application",
+      "name": "application",
+      "exit": 0,
+      "passed": 3,
+      "failed": 0,
+      "ignored": 0
+    },
+    {
+      "binary": "full-native-build-19-todo_comparison",
+      "name": "todo_comparison",
+      "exit": 0,
+      "passed": 4,
+      "failed": 0,
+      "ignored": 1
+    },
+    {
+      "binary": "full-native-build-20-unicode_text",
+      "name": "unicode_text",
+      "exit": 0,
+      "passed": 2,
+      "failed": 0,
+      "ignored": 0
+    },
+    {
+      "binary": "full-native-build-21-child_capacity",
+      "name": "child_capacity",
+      "exit": 0,
+      "passed": 3,
+      "failed": 0,
+      "ignored": 0
+    },
+    {
+      "binary": "full-native-build-22-checkbox",
+      "name": "checkbox",
+      "exit": 0,
+      "passed": 9,
+      "failed": 0,
+      "ignored": 0
+    },
+    {
+      "binary": "full-native-build-23-unit_action_cost",
+      "name": "unit_action_cost",
+      "exit": 0,
+      "passed": 1,
+      "failed": 0,
+      "ignored": 0
+    },
+    {
+      "binary": "full-native-build-24-unit_action_cost_two",
+      "name": "unit_action_cost_two",
+      "exit": 0,
+      "passed": 2,
+      "failed": 0,
+      "ignored": 0
+    },
+    {
+      "binary": "full-native-build-25-clipping",
+      "name": "clipping",
+      "exit": 0,
+      "passed": 6,
+      "failed": 0,
+      "ignored": 0
+    },
+    {
+      "binary": "full-native-build-26-color_packing",
+      "name": "color_packing",
+      "exit": 0,
+      "passed": 1,
+      "failed": 0,
+      "ignored": 0
+    },
+    {
+      "binary": "full-native-build-27-dimensions",
+      "name": "dimensions",
+      "exit": 0,
+      "passed": 7,
+      "failed": 0,
+      "ignored": 0
+    },
+    {
+      "binary": "full-native-build-28-dpi",
+      "name": "dpi",
+      "exit": 0,
+      "passed": 6,
+      "failed": 0,
+      "ignored": 0
+    },
+    {
+      "binary": "full-native-build-29-components",
+      "name": "components",
+      "exit": 0,
+      "passed": 12,
+      "failed": 0,
+      "ignored": 0
+    },
+    {
+      "binary": "full-native-build-30-field_identity",
+      "name": "field_identity",
+      "exit": 0,
+      "passed": 1,
+      "failed": 0,
+      "ignored": 0
+    },
+    {
+      "binary": "full-native-build-31-flex",
+      "name": "flex",
+      "exit": 0,
+      "passed": 10,
+      "failed": 0,
+      "ignored": 0
+    },
+    {
+      "binary": "full-native-build-32-frontier",
+      "name": "frontier",
+      "exit": 0,
+      "passed": 4,
+      "failed": 0,
+      "ignored": 0
+    },
+    {
+      "binary": "full-native-build-33-focus",
+      "name": "focus",
+      "exit": 0,
+      "passed": 9,
+      "failed": 0,
+      "ignored": 0
+    },
+    {
+      "binary": "full-native-build-34-gpui",
+      "name": "gpui",
+      "exit": 101,
+      "passed": 251,
+      "failed": 1,
+      "ignored": 7
+    },
+    {
+      "binary": "full-native-build-35-identity_recovery",
+      "name": "identity_recovery",
+      "exit": 0,
+      "passed": 1,
+      "failed": 0,
+      "ignored": 0
+    },
+    {
+      "binary": "full-native-build-36-images",
+      "name": "images",
+      "exit": 0,
+      "passed": 3,
+      "failed": 0,
+      "ignored": 0
+    },
+    {
+      "binary": "full-native-build-37-immutable_text",
+      "name": "immutable_text",
+      "exit": 0,
+      "passed": 2,
+      "failed": 0,
+      "ignored": 0
+    },
+    {
+      "binary": "full-native-build-38-inbox_storage",
+      "name": "inbox_storage",
+      "exit": 0,
+      "passed": 9,
+      "failed": 0,
+      "ignored": 0
+    },
+    {
+      "binary": "full-native-build-39-handler_storage",
+      "name": "handler_storage",
+      "exit": 0,
+      "passed": 5,
+      "failed": 0,
+      "ignored": 0
+    },
+    {
+      "binary": "full-native-build-40-intrinsic_text",
+      "name": "intrinsic_text",
+      "exit": 0,
+      "passed": 3,
+      "failed": 0,
+      "ignored": 0
+    },
+    {
+      "binary": "full-native-build-41-inspector",
+      "name": "inspector",
+      "exit": 0,
+      "passed": 15,
+      "failed": 0,
+      "ignored": 0
+    },
+    {
+      "binary": "full-native-build-42-library",
+      "name": "library",
+      "exit": 0,
+      "passed": 4,
+      "failed": 0,
+      "ignored": 0
+    },
+    {
+      "binary": "full-native-build-43-contracts",
+      "name": "contracts",
+      "exit": 0,
+      "passed": 12,
+      "failed": 0,
+      "ignored": 0
+    },
+    {
+      "binary": "full-native-build-44-literal_dispatch",
+      "name": "literal_dispatch",
+      "exit": 0,
+      "passed": 2,
+      "failed": 0,
+      "ignored": 0
+    },
+    {
+      "binary": "full-native-build-45-mapped_paint",
+      "name": "mapped_paint",
+      "exit": 0,
+      "passed": 3,
+      "failed": 0,
+      "ignored": 0
+    },
+    {
+      "binary": "full-native-build-46-bindings",
+      "name": "bindings",
+      "exit": 0,
+      "passed": 16,
+      "failed": 0,
+      "ignored": 0
+    },
+    {
+      "binary": "full-native-build-47-gpui_component",
+      "name": "gpui_component",
+      "exit": 0,
+      "passed": 0,
+      "failed": 0,
+      "ignored": 0
+    },
+    {
+      "binary": "full-native-build-48-paint_slot_rebind",
+      "name": "paint_slot_rebind",
+      "exit": 0,
+      "passed": 1,
+      "failed": 0,
+      "ignored": 0
+    },
+    {
+      "binary": "full-native-build-49-mapped_properties",
+      "name": "mapped_properties",
+      "exit": 0,
+      "passed": 7,
+      "failed": 0,
+      "ignored": 0
+    },
+    {
+      "binary": "full-native-build-50-paint_patch",
+      "name": "paint_patch",
+      "exit": 0,
+      "passed": 5,
+      "failed": 0,
+      "ignored": 0
+    },
+    {
+      "binary": "full-native-build-51-lists",
+      "name": "lists",
+      "exit": 0,
+      "passed": 19,
+      "failed": 0,
+      "ignored": 0
+    },
+    {
+      "binary": "full-native-build-52-pointer_focus",
+      "name": "pointer_focus",
+      "exit": 0,
+      "passed": 12,
+      "failed": 0,
+      "ignored": 0
+    },
+    {
+      "binary": "full-native-build-53-paint_slots",
+      "name": "paint_slots",
+      "exit": 0,
+      "passed": 3,
+      "failed": 0,
+      "ignored": 0
+    },
+    {
+      "binary": "full-native-build-54-pointer",
+      "name": "pointer",
+      "exit": 0,
+      "passed": 9,
+      "failed": 0,
+      "ignored": 0
+    },
+    {
+      "binary": "full-native-build-55-ports",
+      "name": "ports",
+      "exit": 0,
+      "passed": 3,
+      "failed": 0,
+      "ignored": 0
+    },
+    {
+      "binary": "full-native-build-56-presentation",
+      "name": "presentation",
+      "exit": 0,
+      "passed": 9,
+      "failed": 0,
+      "ignored": 0
+    },
+    {
+      "binary": "full-native-build-57-property_outline_allocations",
+      "name": "property_outline_allocations",
+      "exit": 0,
+      "passed": 1,
+      "failed": 0,
+      "ignored": 0
+    },
+    {
+      "binary": "full-native-build-58-property_actions",
+      "name": "property_actions",
+      "exit": 0,
+      "passed": 9,
+      "failed": 0,
+      "ignored": 0
+    },
+    {
+      "binary": "full-native-build-59-projected_sources",
+      "name": "projected_sources",
+      "exit": 0,
+      "passed": 12,
+      "failed": 0,
+      "ignored": 0
+    },
+    {
+      "binary": "full-native-build-60-property_state_shell",
+      "name": "property_state_shell",
+      "exit": 0,
+      "passed": 1,
+      "failed": 0,
+      "ignored": 0
+    },
+    {
+      "binary": "full-native-build-61-property_selection",
+      "name": "property_selection",
+      "exit": 0,
+      "passed": 11,
+      "failed": 0,
+      "ignored": 0
+    },
+    {
+      "binary": "full-native-build-62-queries",
+      "name": "queries",
+      "exit": 0,
+      "passed": 3,
+      "failed": 0,
+      "ignored": 0
+    },
+    {
+      "binary": "full-native-build-63-property_change_union",
+      "name": "property_change_union",
+      "exit": 0,
+      "passed": 11,
+      "failed": 0,
+      "ignored": 0
+    },
+    {
+      "binary": "full-native-build-64-question_cost",
+      "name": "question_cost",
+      "exit": 0,
+      "passed": 0,
+      "failed": 0,
+      "ignored": 1
+    },
+    {
+      "binary": "full-native-build-65-question_input_cost",
+      "name": "question_input_cost",
+      "exit": 0,
+      "passed": 0,
+      "failed": 0,
+      "ignored": 1
+    },
+    {
+      "binary": "full-native-build-66-question_inputs",
+      "name": "question_inputs",
+      "exit": 0,
+      "passed": 11,
+      "failed": 0,
+      "ignored": 0
+    },
+    {
+      "binary": "full-native-build-67-question_futures",
+      "name": "question_futures",
+      "exit": 0,
+      "passed": 17,
+      "failed": 0,
+      "ignored": 0
+    },
+    {
+      "binary": "full-native-build-68-question_mailbox",
+      "name": "question_mailbox",
+      "exit": 0,
+      "passed": 3,
+      "failed": 0,
+      "ignored": 0
+    },
+    {
+      "binary": "full-native-build-69-question_storage",
+      "name": "question_storage",
+      "exit": 0,
+      "passed": 1,
+      "failed": 0,
+      "ignored": 0
+    },
+    {
+      "binary": "full-native-build-70-questions",
+      "name": "questions",
+      "exit": 0,
+      "passed": 21,
+      "failed": 0,
+      "ignored": 0
+    },
+    {
+      "binary": "full-native-build-71-retained_styles",
+      "name": "retained_styles",
+      "exit": 0,
+      "passed": 2,
+      "failed": 0,
+      "ignored": 0
+    },
+    {
+      "binary": "full-native-build-72-remote",
+      "name": "remote",
+      "exit": 101,
+      "passed": 15,
+      "failed": 1,
+      "ignored": 0
+    },
+    {
+      "binary": "full-native-build-73-rounded",
+      "name": "rounded",
+      "exit": 0,
+      "passed": 9,
+      "failed": 0,
+      "ignored": 0
+    }
+  ],
+  "scope": "Exact component/Length/binding composition on Reader/GPU741; full actual Darwin native GPUI and component tests, strict all-target native checks, docs and Halloween build. No IME/Remote successor, UI permission request, fabricated input or physical capture.",
+  "application": [
+    {
+      "name": "halloween",
+      "file": "native-app-build-0-halloween",
+      "sha256": "b8c0db38fd6e6d8957af0ce98f754b7400887127e55b227464946f389aa34b4a",
+      "bytes": 56107056,
+      "cargo": {
+        "reason": "compiler-artifact",
+        "package_id": "path+file:///Users/mileswirht/gpui-reactivity-20261024-root/component-7a2f9325-sol/source/reactivity/crates/component#gpui-component@0.1.0",
+        "manifest_path": "/Users/mileswirht/gpui-reactivity-20261024-root/component-7a2f9325-sol/source/reactivity/crates/component/Cargo.toml",
+        "target": {
+          "kind": [
+            "example"
+          ],
+          "crate_types": [
+            "bin"
+          ],
+          "name": "halloween",
+          "src_path": "/Users/mileswirht/gpui-reactivity-20261024-root/component-7a2f9325-sol/source/reactivity/crates/component/examples/halloween.rs",
+          "edition": "2024",
+          "doc": false,
+          "doctest": false,
+          "test": false
+        },
+        "profile": {
+          "opt_level": "0",
+          "debuginfo": 0,
+          "debug_assertions": true,
+          "overflow_checks": true,
+          "test": false
+        },
+        "features": [
+          "default",
+          "native"
+        ],
+        "filenames": [
+          "/Users/mileswirht/gpui-reactivity-20261024-root/target-nightly/debug/examples/halloween"
+        ],
+        "executable": "/Users/mileswirht/gpui-reactivity-20261024-root/target-nightly/debug/examples/halloween",
+        "fresh": false
+      }
+    }
+  ],
+  "source_hashes_match": true,
+  "binary_hashes_match": true,
+  "final_free": 32241004544,
+  "passed": 753,
+  "failed": 2,
+  "ignored": 12,
+  "native_all_exit_zero": false,
+  "all_gates_exit_zero": false
+}

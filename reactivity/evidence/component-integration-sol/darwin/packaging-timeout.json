@@ -1,0 +1,6 @@
+{
+  "reason": "Synchronous packaging request exceeded the Rex30s limit; qualification and all original frozen files remain intact",
+  "path": "/Users/mileswirht/gpui-reactivity-20261024-root/component-7a2f9325-sol/frozen-machos.tar.gz",
+  "bytes": 228182788,
+  "sha256": "2102d30f31cf432319bcb7dd65a183e35d9256e2c8bb6879501d40958be4921e"
+}

@@ -1,0 +1,37 @@
+Darwin native qualification of frozen component integration baseline
+
+Source 7a2f9325440bc4325f423863a443df0ca2f39743, direct parent
+7410240e39d6130a4447ba3445f50c17cfb59298. All 2,082 guarded build
+inputs matched before and after execution. This is a baseline, not the final
+boolean/accessibility successor. It deliberately retains the older Remote
+std::Mutex implementation; current Main independently fixes both failures.
+
+Executed 74 actual native test Mach-Os: 753 passed, 2 failed, 12 ignored.
+The two failures were exactly:
+- remote::tests::preallocated_frozen_prefix_has_no_per_message_allocations
+- preallocated_transport_and_idle_turns_do_not_allocate
+
+The native gpui/component strict all-target Clippy gate, both crates' native
+doctests and Halloween native application build succeeded. The application
+was not run on Darwin. No physical capture, fabricated input, display latency
+or hardware performance claim is made. Linux native execution/captures remain
+in the separate baseline evidence.
+
+All 75 actual Mach-Os (74 tests plus application) were frozen by rename out of
+the shared target before execution, made read-only, and hashed before and
+after. external-machos.json preserves exact external paths, sizes and hashes.
+The source and frozen binary hashes matched at completion. PID 11163 was
+reaped, the exclusive host lock was released, and 32,241,004,544 bytes remained
+free. The IME lane and Root were notified that the serial Mac slot was free.
+
+metadata.tar.gz includes original full command records, stdout/stderr,
+freshness JSON, source guards, binary identities, full status and job script.
+SHA-256 452550686fd225a5383d4bd7302450689bc0cbb535841206e3dec33396569fdc
+415,256 bytes. It excludes the actual external Mach-Os.
+
+Two auxiliary diagnostics are preserved without altering the qualified job:
+an attempted newline-metadata correction aborted at its live-job assertion
+(the original metadata was already valid), and a synchronous full Mach-O
+archive request exceeded Rex's 30-second timeout. The partial archive is
+explicitly marked unusable; original 75 frozen Mach-Os remain preserved.
+The successful metadata-only download verified the archive SHA-256.

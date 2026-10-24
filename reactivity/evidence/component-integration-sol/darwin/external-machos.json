@@ -1,0 +1,452 @@
+[
+  {
+    "path": "/Users/mileswirht/gpui-reactivity-20261024-root/component-7a2f9325-sol/qualification/full-native-build-0-routes",
+    "bytes": 29327200,
+    "sha256": "c1bf14e11af6cd2dac7b225fb1b3d116c5ad7b432d89fd5234b89ffdfaa8143f",
+    "name": "routes"
+  },
+  {
+    "path": "/Users/mileswirht/gpui-reactivity-20261024-root/component-7a2f9325-sol/qualification/full-native-build-1-search_library",
+    "bytes": 30049648,
+    "sha256": "13ec0b5f65b13febfffdc394f15f99d3d0c0fc2edf9d6983b623d1e0a13e9120",
+    "name": "search_library"
+  },
+  {
+    "path": "/Users/mileswirht/gpui-reactivity-20261024-root/component-7a2f9325-sol/qualification/full-native-build-2-runtime",
+    "bytes": 36214976,
+    "sha256": "40bd68c2f5d935e9a99bee2bda512ff6a6520b0996cfd2fb12447654f066a9f7",
+    "name": "runtime"
+  },
+  {
+    "path": "/Users/mileswirht/gpui-reactivity-20261024-root/component-7a2f9325-sol/qualification/full-native-build-3-scroll",
+    "bytes": 37520752,
+    "sha256": "ea212f6107ef8adf0de5bc58a96a961a5453ef40a070bd061b0695e2fd274951",
+    "name": "scroll"
+  },
+  {
+    "path": "/Users/mileswirht/gpui-reactivity-20261024-root/component-7a2f9325-sol/qualification/full-native-build-4-semantic_serialization",
+    "bytes": 30273504,
+    "sha256": "d3aabb16d32f4fd555310786114c13d12c12d5bd3c3d071c8cf941d631e7800f",
+    "name": "semantic_serialization"
+  },
+  {
+    "path": "/Users/mileswirht/gpui-reactivity-20261024-root/component-7a2f9325-sol/qualification/full-native-build-5-semantics",
+    "bytes": 29561024,
+    "sha256": "1f66703fb7cf44a745baec2180da8007821377f2e316384e8d873c51f2fe7819",
+    "name": "semantics"
+  },
+  {
+    "path": "/Users/mileswirht/gpui-reactivity-20261024-root/component-7a2f9325-sol/qualification/full-native-build-6-semantic_metadata",
+    "bytes": 34102880,
+    "sha256": "89e896d40f23df3c133774ac9f09c6c5a93a18697b3855c8dfe09a85a6daf60c",
+    "name": "semantic_metadata"
+  },
+  {
+    "path": "/Users/mileswirht/gpui-reactivity-20261024-root/component-7a2f9325-sol/qualification/full-native-build-7-sibling_reconciliation_cost",
+    "bytes": 27719776,
+    "sha256": "8cf449002e93f670b4ff1303daef79e056e614afc9c6c3fff7922378587e9d71",
+    "name": "sibling_reconciliation_cost"
+  },
+  {
+    "path": "/Users/mileswirht/gpui-reactivity-20261024-root/component-7a2f9325-sol/qualification/full-native-build-8-source_inbox_reader_gate",
+    "bytes": 28221888,
+    "sha256": "c99ea4d1ac2ef32b8117061852795429775a4bbaee9f533bd3412c476f1e979b",
+    "name": "source_inbox_reader_gate"
+  },
+  {
+    "path": "/Users/mileswirht/gpui-reactivity-20261024-root/component-7a2f9325-sol/qualification/full-native-build-9-source_inbox",
+    "bytes": 32299152,
+    "sha256": "c5681ffa87f9adcdff6071c4ac772465fae3aceda3a36a6e2c249b656c5052d2",
+    "name": "source_inbox"
+  },
+  {
+    "path": "/Users/mileswirht/gpui-reactivity-20261024-root/component-7a2f9325-sol/qualification/full-native-build-10-source_value_isolation",
+    "bytes": 29778496,
+    "sha256": "8291b0ac1db1e369cc9159dce52e14950077ccd9ab390bedb60a685d92af550f",
+    "name": "source_value_isolation"
+  },
+  {
+    "path": "/Users/mileswirht/gpui-reactivity-20261024-root/component-7a2f9325-sol/qualification/full-native-build-11-source_values",
+    "bytes": 29005280,
+    "sha256": "e90e0690a258a57ac16a4bb363ae288260c305f87680fbf12ac72277eb1f1772",
+    "name": "source_values"
+  },
+  {
+    "path": "/Users/mileswirht/gpui-reactivity-20261024-root/component-7a2f9325-sol/qualification/full-native-build-12-text_cache",
+    "bytes": 29116144,
+    "sha256": "ab6208390e3b1c8e872a9c78e7ba62f6dc392c4ddc17a1ea79603bc960347975",
+    "name": "text_cache"
+  },
+  {
+    "path": "/Users/mileswirht/gpui-reactivity-20261024-root/component-7a2f9325-sol/qualification/full-native-build-13-text_geometry",
+    "bytes": 28681488,
+    "sha256": "47fa65471914c1675687371e21a2fadc9145d5498349945d41ae6230d3466486",
+    "name": "text_geometry"
+  },
+  {
+    "path": "/Users/mileswirht/gpui-reactivity-20261024-root/component-7a2f9325-sol/qualification/full-native-build-14-text_selection",
+    "bytes": 30642960,
+    "sha256": "f771c38217a2f30eca012c3ce38f90d3d60b2d5df99c9d7ac7468433023bb431",
+    "name": "text_selection"
+  },
+  {
+    "path": "/Users/mileswirht/gpui-reactivity-20261024-root/component-7a2f9325-sol/qualification/full-native-build-15-style_ports",
+    "bytes": 37399952,
+    "sha256": "413472bde65fbd6d8fccbef33045fc27edb16bf85b1b25bca3783434bb70ceb0",
+    "name": "style_ports"
+  },
+  {
+    "path": "/Users/mileswirht/gpui-reactivity-20261024-root/component-7a2f9325-sol/qualification/full-native-build-16-acceptance",
+    "bytes": 31524992,
+    "sha256": "e37765721b6d9262e443301be0cf2002150922cce46163d68b678ad32f4da83d",
+    "name": "acceptance"
+  },
+  {
+    "path": "/Users/mileswirht/gpui-reactivity-20261024-root/component-7a2f9325-sol/qualification/full-native-build-17-text_selection_compound",
+    "bytes": 28332528,
+    "sha256": "9af9ed601690cfc4af2c3c810abed97b498e989a30b4d7bd9a983600c83f4ff7",
+    "name": "text_selection_compound"
+  },
+  {
+    "path": "/Users/mileswirht/gpui-reactivity-20261024-root/component-7a2f9325-sol/qualification/full-native-build-18-application",
+    "bytes": 29939504,
+    "sha256": "634df8718e676c44925ab3fb8064407c3caef74d006534b7b7bb2c520dd6aaf8",
+    "name": "application"
+  },
+  {
+    "path": "/Users/mileswirht/gpui-reactivity-20261024-root/component-7a2f9325-sol/qualification/full-native-build-19-todo_comparison",
+    "bytes": 29678544,
+    "sha256": "a1c7d63216660b72769d58a9d481ccdb693ff57227c446f00f61202bcce8ee79",
+    "name": "todo_comparison"
+  },
+  {
+    "path": "/Users/mileswirht/gpui-reactivity-20261024-root/component-7a2f9325-sol/qualification/full-native-build-20-unicode_text",
+    "bytes": 28327440,
+    "sha256": "5a08fb2d33e6cfff10f7469227a0a9906fd0ad48b44ee4a40b7158be1a18ef43",
+    "name": "unicode_text"
+  },
+  {
+    "path": "/Users/mileswirht/gpui-reactivity-20261024-root/component-7a2f9325-sol/qualification/full-native-build-21-child_capacity",
+    "bytes": 27738256,
+    "sha256": "382a7efca95bf99fe5109e8fca4b9ba33025dd212b5979604ea355866c097484",
+    "name": "child_capacity"
+  },
+  {
+    "path": "/Users/mileswirht/gpui-reactivity-20261024-root/component-7a2f9325-sol/qualification/full-native-build-22-checkbox",
+    "bytes": 31761024,
+    "sha256": "e8616e914fd5074b2a95ace58def45f9f578166b4a26753a1a56595115be800f",
+    "name": "checkbox"
+  },
+  {
+    "path": "/Users/mileswirht/gpui-reactivity-20261024-root/component-7a2f9325-sol/qualification/full-native-build-23-unit_action_cost",
+    "bytes": 27945840,
+    "sha256": "deb6c6589cc09bba0371804b04a51932e24e1e2d9c7e6a13db948aef3552db08",
+    "name": "unit_action_cost"
+  },
+  {
+    "path": "/Users/mileswirht/gpui-reactivity-20261024-root/component-7a2f9325-sol/qualification/full-native-build-24-unit_action_cost_two",
+    "bytes": 28669344,
+    "sha256": "981ec3aa277aa30ca248e8d40baf49bf4aaff370f0a9a97681a270a927f6c453",
+    "name": "unit_action_cost_two"
+  },
+  {
+    "path": "/Users/mileswirht/gpui-reactivity-20261024-root/component-7a2f9325-sol/qualification/full-native-build-25-clipping",
+    "bytes": 31745200,
+    "sha256": "53db188b7196476f16b78cea08f4fc354adc48993914c9a0450ddf5ba93c175f",
+    "name": "clipping"
+  },
+  {
+    "path": "/Users/mileswirht/gpui-reactivity-20261024-root/component-7a2f9325-sol/qualification/full-native-build-26-color_packing",
+    "bytes": 28378304,
+    "sha256": "ecc32100acbe36a4abb9b9d73a571c41ab29e94028ae4019ab6ab4404bfe6473",
+    "name": "color_packing"
+  },
+  {
+    "path": "/Users/mileswirht/gpui-reactivity-20261024-root/component-7a2f9325-sol/qualification/full-native-build-27-dimensions",
+    "bytes": 29452896,
+    "sha256": "5bcdc9f540b6ae36fc84ceb442eea55b218642590ffd392820f2a3c7e2c445de",
+    "name": "dimensions"
+  },
+  {
+    "path": "/Users/mileswirht/gpui-reactivity-20261024-root/component-7a2f9325-sol/qualification/full-native-build-28-dpi",
+    "bytes": 29356544,
+    "sha256": "ab97d390c906388c8123f7788b4d954e0dfec5678df761776f92b3a942b3831a",
+    "name": "dpi"
+  },
+  {
+    "path": "/Users/mileswirht/gpui-reactivity-20261024-root/component-7a2f9325-sol/qualification/full-native-build-29-components",
+    "bytes": 32739536,
+    "sha256": "db1d9b2ea56f4339d5ebf025e8146f50694ef898bf2865e39ff7755acf9ab6c9",
+    "name": "components"
+  },
+  {
+    "path": "/Users/mileswirht/gpui-reactivity-20261024-root/component-7a2f9325-sol/qualification/full-native-build-30-field_identity",
+    "bytes": 27735952,
+    "sha256": "e60a22f1f4a46b2edf999ba45d8c2eb72bf65c79068967f086aa63090f15e2d9",
+    "name": "field_identity"
+  },
+  {
+    "path": "/Users/mileswirht/gpui-reactivity-20261024-root/component-7a2f9325-sol/qualification/full-native-build-31-flex",
+    "bytes": 32562112,
+    "sha256": "d4e72cfc0f30c9062b77bbacacb3cb0b031ac1791a109cab1b47a763c7cacf8d",
+    "name": "flex"
+  },
+  {
+    "path": "/Users/mileswirht/gpui-reactivity-20261024-root/component-7a2f9325-sol/qualification/full-native-build-32-frontier",
+    "bytes": 30133040,
+    "sha256": "fe6f2b4f3a4287b20a5dabe3da7ec110e66603cc62784ef5756ce97c9597386e",
+    "name": "frontier"
+  },
+  {
+    "path": "/Users/mileswirht/gpui-reactivity-20261024-root/component-7a2f9325-sol/qualification/full-native-build-33-focus",
+    "bytes": 31247168,
+    "sha256": "738384a71a17b2423c631bd80c37bfb751f550fae430db26a00a25a30b484505",
+    "name": "focus"
+  },
+  {
+    "path": "/Users/mileswirht/gpui-reactivity-20261024-root/component-7a2f9325-sol/qualification/full-native-build-34-gpui",
+    "bytes": 90891232,
+    "sha256": "df70d779c2b9a5c88f40f62dc8fed81606e5af62202d410f4b49e76cdfeb0294",
+    "name": "gpui"
+  },
+  {
+    "path": "/Users/mileswirht/gpui-reactivity-20261024-root/component-7a2f9325-sol/qualification/full-native-build-35-identity_recovery",
+    "bytes": 27930576,
+    "sha256": "8007e52aeb821635ebc7fd5f0161e851840ba9c18f04705ce26f54d63c595486",
+    "name": "identity_recovery"
+  },
+  {
+    "path": "/Users/mileswirht/gpui-reactivity-20261024-root/component-7a2f9325-sol/qualification/full-native-build-36-images",
+    "bytes": 29803344,
+    "sha256": "7927c4142fc3e70ca7a4e695ef09a92625790f3156d9826d7f9971d8539838c4",
+    "name": "images"
+  },
+  {
+    "path": "/Users/mileswirht/gpui-reactivity-20261024-root/component-7a2f9325-sol/qualification/full-native-build-37-immutable_text",
+    "bytes": 27676608,
+    "sha256": "849e7762015fc71cf14ff2e3231809b2592f71b82331c74b1b9ae072ac6ead36",
+    "name": "immutable_text"
+  },
+  {
+    "path": "/Users/mileswirht/gpui-reactivity-20261024-root/component-7a2f9325-sol/qualification/full-native-build-38-inbox_storage",
+    "bytes": 29200208,
+    "sha256": "5d599ec281f5a258a9eedb6e4074d36394b73713a8ab84fb8d5c283d56ee3ebc",
+    "name": "inbox_storage"
+  },
+  {
+    "path": "/Users/mileswirht/gpui-reactivity-20261024-root/component-7a2f9325-sol/qualification/full-native-build-39-handler_storage",
+    "bytes": 33422208,
+    "sha256": "efa46ca083de680b05308b9765317999381266e56535d96d2bcd305b89f8ed5d",
+    "name": "handler_storage"
+  },
+  {
+    "path": "/Users/mileswirht/gpui-reactivity-20261024-root/component-7a2f9325-sol/qualification/full-native-build-40-intrinsic_text",
+    "bytes": 28218064,
+    "sha256": "d320a0bdc78c45ffccc54d0f3530cff6f76ac739725f203539fec4da1b2e032b",
+    "name": "intrinsic_text"
+  },
+  {
+    "path": "/Users/mileswirht/gpui-reactivity-20261024-root/component-7a2f9325-sol/qualification/full-native-build-41-inspector",
+    "bytes": 33312512,
+    "sha256": "2b864332f876f5872fe907ec2eef819ccdd99a40d6bc4a4bb1f84e06d1498848",
+    "name": "inspector"
+  },
+  {
+    "path": "/Users/mileswirht/gpui-reactivity-20261024-root/component-7a2f9325-sol/qualification/full-native-build-42-library",
+    "bytes": 28901248,
+    "sha256": "dfb689b4823c193c5c61e3f3856eb234c4915187dd89ece601e9e8d63d876dae",
+    "name": "library"
+  },
+  {
+    "path": "/Users/mileswirht/gpui-reactivity-20261024-root/component-7a2f9325-sol/qualification/full-native-build-43-contracts",
+    "bytes": 34152944,
+    "sha256": "d0007e2d36d849da4e1d00ab818414ec52ec71601c7aa2db1c836b8859cac15d",
+    "name": "contracts"
+  },
+  {
+    "path": "/Users/mileswirht/gpui-reactivity-20261024-root/component-7a2f9325-sol/qualification/full-native-build-44-literal_dispatch",
+    "bytes": 28536624,
+    "sha256": "a7ac6b4d5b57120cd7d1f1b022de44ddded0e63ed09693acdc02e0d71f41e4af",
+    "name": "literal_dispatch"
+  },
+  {
+    "path": "/Users/mileswirht/gpui-reactivity-20261024-root/component-7a2f9325-sol/qualification/full-native-build-45-mapped_paint",
+    "bytes": 28383104,
+    "sha256": "db391c71c74ffa6194ab6cec67ae8b080782c094713b86f16de261941b8383d9",
+    "name": "mapped_paint"
+  },
+  {
+    "path": "/Users/mileswirht/gpui-reactivity-20261024-root/component-7a2f9325-sol/qualification/full-native-build-46-bindings",
+    "bytes": 31323280,
+    "sha256": "faf927519408cd6aed076cc8eeba5f753068c4a98e08b6ebabededb7882d48f7",
+    "name": "bindings"
+  },
+  {
+    "path": "/Users/mileswirht/gpui-reactivity-20261024-root/component-7a2f9325-sol/qualification/full-native-build-47-gpui_component",
+    "bytes": 967808,
+    "sha256": "68bf7faf68a7d5362a863702d379d9bed68c49b821a809228b35af652d114754",
+    "name": "gpui_component"
+  },
+  {
+    "path": "/Users/mileswirht/gpui-reactivity-20261024-root/component-7a2f9325-sol/qualification/full-native-build-48-paint_slot_rebind",
+    "bytes": 28318928,
+    "sha256": "10a89c14fea3d57e31967927888bb6c4dd0777defe55488c25d2dd944e32bf8b",
+    "name": "paint_slot_rebind"
+  },
+  {
+    "path": "/Users/mileswirht/gpui-reactivity-20261024-root/component-7a2f9325-sol/qualification/full-native-build-49-mapped_properties",
+    "bytes": 32342464,
+    "sha256": "3cc63edf45ba13d771845c59e50c18e0fc770d00a4a67d27aea16bebe913c126",
+    "name": "mapped_properties"
+  },
+  {
+    "path": "/Users/mileswirht/gpui-reactivity-20261024-root/component-7a2f9325-sol/qualification/full-native-build-50-paint_patch",
+    "bytes": 29235344,
+    "sha256": "9ce94818de01df212b6aaddf81035c3c641493797a3a1028a5802d0c74e0d352",
+    "name": "paint_patch"
+  },
+  {
+    "path": "/Users/mileswirht/gpui-reactivity-20261024-root/component-7a2f9325-sol/qualification/full-native-build-51-lists",
+    "bytes": 37703152,
+    "sha256": "d0fd023a8a00a1eb3162d9d6b50d2a3c48a773896a47b4b9b615fd6f0d18b5e2",
+    "name": "lists"
+  },
+  {
+    "path": "/Users/mileswirht/gpui-reactivity-20261024-root/component-7a2f9325-sol/qualification/full-native-build-52-pointer_focus",
+    "bytes": 28256496,
+    "sha256": "08698fd5e24e71a5d1e9987d642253629bfaed3a338837a51876c145871ff17d",
+    "name": "pointer_focus"
+  },
+  {
+    "path": "/Users/mileswirht/gpui-reactivity-20261024-root/component-7a2f9325-sol/qualification/full-native-build-53-paint_slots",
+    "bytes": 29797552,
+    "sha256": "cabd7a62aed4957ccb17649f15bb3589905e4161196b88722c48b0cb68b62c15",
+    "name": "paint_slots"
+  },
+  {
+    "path": "/Users/mileswirht/gpui-reactivity-20261024-root/component-7a2f9325-sol/qualification/full-native-build-54-pointer",
+    "bytes": 29702128,
+    "sha256": "9b37bd4f51cc0693b1d4eff6e56aab07453fb9d80fc10d086872b5c7c64415de",
+    "name": "pointer"
+  },
+  {
+    "path": "/Users/mileswirht/gpui-reactivity-20261024-root/component-7a2f9325-sol/qualification/full-native-build-55-ports",
+    "bytes": 30540432,
+    "sha256": "329c4796d63ef7ddf1dd6d61b8a1d6bdfb709a6413cfbd89567d797cba753c9a",
+    "name": "ports"
+  },
+  {
+    "path": "/Users/mileswirht/gpui-reactivity-20261024-root/component-7a2f9325-sol/qualification/full-native-build-56-presentation",
+    "bytes": 28616800,
+    "sha256": "cc5bfdad95086f1924cdc4d9e772c2c4ee57139a9b96d882a1e2f32feb5aeba9",
+    "name": "presentation"
+  },
+  {
+    "path": "/Users/mileswirht/gpui-reactivity-20261024-root/component-7a2f9325-sol/qualification/full-native-build-57-property_outline_allocations",
+    "bytes": 27925424,
+    "sha256": "9be715fb7a7993d3be53fde5919570044d72d3e766019b8096ea34a6d3c4af98",
+    "name": "property_outline_allocations"
+  },
+  {
+    "path": "/Users/mileswirht/gpui-reactivity-20261024-root/component-7a2f9325-sol/qualification/full-native-build-58-property_actions",
+    "bytes": 30150192,
+    "sha256": "2de6762753ebd17fa24ca74b9da31b82fd3c9c29ae855e027eaa559d2ee1cff9",
+    "name": "property_actions"
+  },
+  {
+    "path": "/Users/mileswirht/gpui-reactivity-20261024-root/component-7a2f9325-sol/qualification/full-native-build-59-projected_sources",
+    "bytes": 30996576,
+    "sha256": "2970772a85103b9599733be2b490d91532b8277ebe38bd1b00c13b9d983feb00",
+    "name": "projected_sources"
+  },
+  {
+    "path": "/Users/mileswirht/gpui-reactivity-20261024-root/component-7a2f9325-sol/qualification/full-native-build-60-property_state_shell",
+    "bytes": 27888224,
+    "sha256": "2a5d4a72b61029fc32944944fabb0435b389c7e89d1e000ca39a95f3e854dd74",
+    "name": "property_state_shell"
+  },
+  {
+    "path": "/Users/mileswirht/gpui-reactivity-20261024-root/component-7a2f9325-sol/qualification/full-native-build-61-property_selection",
+    "bytes": 31442160,
+    "sha256": "afb49e757ffa232367b4b499e9b614dcbcb6923082e3424b9460cf7685d7b25e",
+    "name": "property_selection"
+  },
+  {
+    "path": "/Users/mileswirht/gpui-reactivity-20261024-root/component-7a2f9325-sol/qualification/full-native-build-62-queries",
+    "bytes": 28483888,
+    "sha256": "6e535b6cacee3a40d9363980e0bf03f94adffcf741892b058f4111703c3a2da6",
+    "name": "queries"
+  },
+  {
+    "path": "/Users/mileswirht/gpui-reactivity-20261024-root/component-7a2f9325-sol/qualification/full-native-build-63-property_change_union",
+    "bytes": 29512224,
+    "sha256": "0083910fd30f467395cbb29b730e481a2797696f6e5d3d1a775de8157cc61e3c",
+    "name": "property_change_union"
+  },
+  {
+    "path": "/Users/mileswirht/gpui-reactivity-20261024-root/component-7a2f9325-sol/qualification/full-native-build-64-question_cost",
+    "bytes": 28737680,
+    "sha256": "4edd93649e15ea6ec315dfd1643073ebea2b3283f4297b5def3df01d31727cf4",
+    "name": "question_cost"
+  },
+  {
+    "path": "/Users/mileswirht/gpui-reactivity-20261024-root/component-7a2f9325-sol/qualification/full-native-build-65-question_input_cost",
+    "bytes": 28052928,
+    "sha256": "f88e950cd0124342a8740668af1f6674ae7a75493a9788dbe79092150acd986e",
+    "name": "question_input_cost"
+  },
+  {
+    "path": "/Users/mileswirht/gpui-reactivity-20261024-root/component-7a2f9325-sol/qualification/full-native-build-66-question_inputs",
+    "bytes": 29350704,
+    "sha256": "d41053ae85f6ff433038b3c8375799271300d4c08321d2d86ec5d5cdcb641b98",
+    "name": "question_inputs"
+  },
+  {
+    "path": "/Users/mileswirht/gpui-reactivity-20261024-root/component-7a2f9325-sol/qualification/full-native-build-67-question_futures",
+    "bytes": 31452880,
+    "sha256": "8aaa355853aa9b16ed1b301fca6668f516e47fab562a9b0d7db2570cd810d60d",
+    "name": "question_futures"
+  },
+  {
+    "path": "/Users/mileswirht/gpui-reactivity-20261024-root/component-7a2f9325-sol/qualification/full-native-build-68-question_mailbox",
+    "bytes": 28261472,
+    "sha256": "de0495fb5219fa705ac01ef1d8c473b5593fd77a922af4ff8485cd36bb179766",
+    "name": "question_mailbox"
+  },
+  {
+    "path": "/Users/mileswirht/gpui-reactivity-20261024-root/component-7a2f9325-sol/qualification/full-native-build-69-question_storage",
+    "bytes": 30499024,
+    "sha256": "172bef58cdf1f50884d35a587ccea12311c9522781c7cabab732d4cf1fc5ad11",
+    "name": "question_storage"
+  },
+  {
+    "path": "/Users/mileswirht/gpui-reactivity-20261024-root/component-7a2f9325-sol/qualification/full-native-build-70-questions",
+    "bytes": 30108112,
+    "sha256": "d14bc30b94ae3ef17e86e153775f248999e6a1839fda766681cec79811ff884f",
+    "name": "questions"
+  },
+  {
+    "path": "/Users/mileswirht/gpui-reactivity-20261024-root/component-7a2f9325-sol/qualification/full-native-build-71-retained_styles",
+    "bytes": 29072848,
+    "sha256": "e8651ef8a914b09db919f8a76b46c47677a2f766869a8987227055959ea77f9f",
+    "name": "retained_styles"
+  },
+  {
+    "path": "/Users/mileswirht/gpui-reactivity-20261024-root/component-7a2f9325-sol/qualification/full-native-build-72-remote",
+    "bytes": 31036672,
+    "sha256": "7551a9417abaa436d97b999ba1af73fed65094d060f2ba0162a2223d0d62e263",
+    "name": "remote"
+  },
+  {
+    "path": "/Users/mileswirht/gpui-reactivity-20261024-root/component-7a2f9325-sol/qualification/full-native-build-73-rounded",
+    "bytes": 31335600,
+    "sha256": "cd24798d682e82fd56ca2f4e31ffc9057c341f2aaafdea8f461bfe05f23979d4",
+    "name": "rounded"
+  },
+  {
+    "path": "/Users/mileswirht/gpui-reactivity-20261024-root/component-7a2f9325-sol/qualification/native-app-build-0-halloween",
+    "bytes": 56107056,
+    "sha256": "b8c0db38fd6e6d8957af0ce98f754b7400887127e55b227464946f389aa34b4a",
+    "name": "halloween"
+  }
+]
