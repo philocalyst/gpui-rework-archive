@@ -112,6 +112,17 @@ fn measure<const DIRECT: bool>() -> (Vec<u8>, Vec<u8>) {
     (initial, final_pixels)
 }
 fn main() {
+    println!(
+        "public_headers,PropertyValue={},PropertyValueAlignment={},El={},Style={},Button={},Checkbox={},Input={},PropInputColor={}",
+        size_of::<gpui::property::PropertyValue>(),
+        align_of::<gpui::property::PropertyValue>(),
+        size_of::<El<'_>>(),
+        size_of::<gpui::Style>(),
+        size_of::<Button<'_>>(),
+        size_of::<Checkbox<'_>>(),
+        size_of::<Input<'_>>(),
+        size_of::<gpui::PropInput<'_, gpui::Color>>()
+    );
     let snapshot = measure::<false>();
     let direct = measure::<true>();
     assert_eq!(
