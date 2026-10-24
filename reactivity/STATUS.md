@@ -4,6 +4,15 @@ The clean-room workspace runs real applications through one exclusively owned
 runtime. Start at [the GPUI crate](crates/gpui/README.md). The design documents
 describe the intended complete system; this page records what is connected now.
 
+The [Remote first-lock repair](evidence/remote-first-lock/README.md) removes
+Darwin's lazy 64-byte mutex allocation from first send, stage and close while
+preserving the existing bounded FIFO and frozen-prefix contracts. All 719
+nonignored native Mac GPUI cases pass; both original allocation failures
+reproduce in preserved std-mutex controls. Main passes 244 affected cases,
+strict checks and Hummingbird's locked default-target check. Native adds no
+dependency packages; default adds five, with 7,470 dependency source lines
+charged separately. There is no CPU improvement claim.
+
 The [Reader one-shot handoff](evidence/reader-one-shot/README.md) adopts private
 consuming response roles and lane-bound tickets. A default u64 question now
 uses one allocation/48 requested bytes instead of two/112 at its typed-mailbox
@@ -38,8 +47,8 @@ Hummingbird's standalone lock remains `c6bef498a41a96ab23938f9025aa0ef0a63431b5`
 Generated WGSL and all eight SPIR-V recipes are verified in the executed native
 binary. These compose with the [text and preorder preparation](evidence/frontier-text-integration/README.md)
 and [gradients, transformed clips and exact clip damage](evidence/clipping-gradients-integration/README.md).
-The current seven-library inventory is **34,902 non-test, non-comment shipping lines**,
-including 18 build-script lines, 50 above the packed-tree source. EcoVec adds
+The current seven-library inventory is **34,899 non-test, non-comment shipping lines**,
+including 18 build-script lines, 47 above the packed-tree source. EcoVec adds
 2,315 separately charged dependency lines;
 tiny-layout costs and changed AccessKit vendor code remain explicit.
 The [mapped Todo](comparisons/mapped-todo/README.md) and
@@ -55,8 +64,8 @@ The [portable GPU oracle](evidence/portable-gpu-oracle/README.md) now passes
 rejects software adapters. This adds no shipping core lines or dependencies.
 Windows/DX12 runtime and hardware performance remain unqualified. A subsequent
 native Mac suite exposed three first-lock allocation failures across Reader and
-Remote. The adopted Reader handoff fixes its first-poll case; the two Remote
-contracts remain intact and their separate transport repair is under review.
+Remote. The adopted Reader handoff fixes its first-poll case; the adopted
+Remote repair fixes both remaining failures without changing their assertions.
 
 | Boundary | Integrated behavior | Remaining limit |
 | --- | --- | --- |

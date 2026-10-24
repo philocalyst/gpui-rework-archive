@@ -35,8 +35,10 @@ opens windows of different model types without an index, shared owner, shadow
 dispatcher or registry. The returned windows own their lifetimes; closing a
 window drops its model and resources. Queries borrow `&Win`; edits, input and
 presentation acknowledgement require `&mut Win`. Rust rejects mutation during a
-source/scene read. There is no production `Rc`, `RefCell` or `Cell` in this window
-engine. Immutable text uses one-word ArcStr leases between source and presented epochs;
+source/scene read. Models and synchronous window ownership use exclusive borrows.
+The private interthread response slot has a separately proved interior-mutability
+boundary; its consuming roles and ownership tests are recorded below.
+Immutable text uses one-word ArcStr leases between source and presented epochs;
 fonts/masks/backend resources have their separate immutable resource leases.
 The [ownership evidence](crates/gpui/evidence/thin-text.md) charges larger distinct
 nonempty string headers, dependency unsafe internals and measured CPU losses.
@@ -322,6 +324,13 @@ while Loom checks publication with tracked borrows. Its Arc `try_unwrap`
 adapter does not model std `Arc::into_inner`'s destructor-thread guarantee.
 The [adopted Reader dossier](evidence/reader-one-shot/README.md) records the
 eleven models, six native cases, two failing admission mutants and exact limits.
+The [Remote first-use dossier](evidence/remote-first-lock/README.md) preserves
+both actual Darwin std-mutex allocation failures and their passing replacement,
+all 70 native GPUI test executables, and Main's 244 affected cases. Capacity-zero,
+ZST, frozen-prefix, unwind-trait and checked producer-overflow cases retain the
+ordinary transport API and its exact allocation assertions. Dependency source,
+native release size and operation frames are charged separately; these are
+functional/storage gates, not contention or latency measurements.
 The allocation-counter example has isolated System-forwarding
 instrumentation and is not an accepted production allocator. Unavailable unsafe
 validation is a failed adoption gate, not an implied waiver.
