@@ -111,6 +111,24 @@ fn relative_dimensions_resolve_against_parent_content_and_resize_after_ack() {
         );
     })
     .unwrap();
+    // Same logical containing block, different device density. Percentages
+    // resolve before the ordinary acknowledged local-to-physical transform.
+    win.resize_scaled([900, 450], 1.5).unwrap();
+    ack(&mut win);
+    assert_eq!(bounds(&win, "root").width, 600.0);
+    assert_eq!(bounds(&win, "panel").width, 290.0);
+    assert_eq!(bounds(&win, "panel").x, 15.0);
+    win.visit(|part| {
+        if part.name() == Some("panel") {
+            assert_eq!(part.transform().unwrap().a, 1.5);
+        }
+    })
+    .unwrap();
+    win.with_pixels(|pixels, width, height| {
+        assert_eq!((width, height), (900, 450));
+        assert_eq!(&pixels[pixels.len() - 4..], &[0, 0, 0, 255]);
+    })
+    .unwrap();
 }
 
 #[test]
@@ -205,6 +223,8 @@ fn typed_and_cold_edits_reject_invalid_dimensions_before_mutating_contributions(
     win.set_property(target, WIDTH, Contribution::Set(Length::Percent(125.0)))
         .unwrap();
     assert_eq!(win.property(target, WIDTH).unwrap(), Length::Percent(125.0));
+    assert_eq!(bounds(&win, "panel").width, 475.0);
+    assert!(win.bounds(target).unwrap().width < 475.0);
 }
 
 #[test]
