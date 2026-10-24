@@ -1068,7 +1068,10 @@ impl ComponentBoundaries {
             check.validate(receiver, sources)?;
             // Model ancestry is independent of visual parentage. The final,
             // innermost boundary supplies the scope inherited by visual children.
-            scope = check.owner_scope(receiver, sources)?;
+            let candidate = check.owner_scope(receiver, sources)?;
+            if scope == 0 {
+                scope = candidate;
+            }
         }
         if let Some(boundary) = self.0.as_deref_mut() {
             // Reuse the checked route's storage until this draft is consumed.
