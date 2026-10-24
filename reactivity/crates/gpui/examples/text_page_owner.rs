@@ -220,6 +220,7 @@ fn build(
     font: &FontFace,
     old: Option<&Page>,
 ) -> Result<Snapshot, gpui_canvas::Error> {
+    let old = old.filter(|page| page.font.same_face(font));
     let mut sorted: Vec<_> = (0..specs.len()).collect();
     sorted.sort_unstable_by(|&a, &b| compare(specs[a].key(), specs[b].key()));
     let mut builder = Builder {
