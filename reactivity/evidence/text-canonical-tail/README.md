@@ -53,6 +53,10 @@ hashes matching before and after. The earlier producer's GPU/runtime tests and
 independent baseline fingerprints remain separately attributed to `a70abc5`;
 they are not relabeled as final-source results. Main's shipping source equivalence
 is recorded in [main-source-equivalence.json](main-source-equivalence.json).
+The composed Main at `19037365297ae1fb29e1f69fc74d07c87dbbcba7` also passes
+strict native all-target Clippy, including the ordinary, mapped and inspector
+examples, with all 2,039 scoped input hashes unchanged; see
+[main-native-lint/result.json](main-native-lint/result.json).
 
 The actual seven-library Syn/Tokei inventory is **32,377 non-test, non-comment
 shipping code lines**, including build code and the 50-line inline-call helper:
