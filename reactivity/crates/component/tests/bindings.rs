@@ -527,3 +527,21 @@ fn composed_capture_rejects_at_mount_and_overwrite_discards_owned_palette() {
         .is_ok()
     );
 }
+
+#[test]
+fn explicitly_erased_properties_remain_copy_while_selected_color_recipes_stay_typed() {
+    use gpui::{BoolInput, IntoColor, IntoProp, PropInput};
+    fn copy<T: Copy>(value: T) -> (T, T) {
+        (value, value)
+    }
+    let flag = Signal::new(false);
+    let width: PropInput<'_, Length> = Length::Percent(100.0).into_prop();
+    let boolean: PropInput<'_, bool> = (&flag).into_prop();
+    let color: PropInput<'_, Color> = Color::BLACK.into_prop();
+    let _ = (copy(width), copy(boolean), copy(color));
+    let selection = (&flag).select(Color::BLACK, Color::WHITE);
+    let (fg, bg) = copy(selection);
+    drop(gpui::div().fg(fg).bg(bg));
+    // Deliberate erasure of a selection owns its cold descriptor until consumed.
+    drop(gpui::div().fg(selection.into_color()));
+}

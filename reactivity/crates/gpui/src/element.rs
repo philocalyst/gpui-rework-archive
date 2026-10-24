@@ -576,7 +576,7 @@ impl<'a> El<'a> {
                     ))
                 })
                 .set_radius(value);
-        } else if let Some(map) = radius.clone().mapped() {
+        } else if let Some(map) = radius.mapped() {
             self.bind_mapped_property(PropertyId::CornerRadius, map);
         } else {
             self.bind_property(
@@ -609,7 +609,7 @@ impl<'a> El<'a> {
                     })
                     .clip_children(value);
             }
-        } else if let Some(map) = clipped.clone().mapped() {
+        } else if let Some(map) = clipped.mapped() {
             self.bind_mapped_property(PropertyId::Clip, map);
         } else {
             self.bind_property(PropertyId::Clip, clipped.signal().expect("signal clip"));
@@ -704,7 +704,7 @@ impl<'a> El<'a> {
                 .get_or_insert_with(|| {
                     Box::new(crate::semantic::ElementExtra::Semantic(Default::default()))
                 })
-                .bind_map(sink, map);
+                .bind_map(sink, map.into());
         }
     }
     fn apply_sink(
@@ -789,6 +789,9 @@ impl<'a> El<'a> {
         self
     }
     fn bind_mapped_property(&mut self, id: PropertyId, operand: crate::style_port::MapOperand<'a>) {
+        self.bind_owned_map(id, operand.into());
+    }
+    fn bind_owned_map(&mut self, id: PropertyId, operand: crate::style_port::OwnedMapOperand<'a>) {
         self.extra
             .get_or_insert_with(|| {
                 Box::new(crate::semantic::ElementExtra::Semantic(Default::default()))
@@ -878,7 +881,7 @@ impl<'a> El<'a> {
             } else {
                 let map = input.mapped().expect("sealed mapped input");
                 if SIZE {
-                    self.bind_mapped_property(id, map.clone());
+                    self.bind_mapped_property(id, map);
                     self.bind_mapped_property(PropertyId::Height, map);
                 } else {
                     self.bind_mapped_property(id, map);
@@ -919,9 +922,31 @@ impl<'a> El<'a> {
     pub fn text_lg(self) -> Self {
         self.font_size(18)
     }
-    pub fn fg(mut self, color: impl IntoProp<'a, Color>) -> Self {
-        self.property_input::<{ PropertyId::Foreground as u16 }, false, Color, _>(color);
+    pub(crate) fn color_property<I: IntoProp<'a, Color>>(&mut self, input: I, foreground: bool) {
+        if foreground {
+            self.property_input::<{ PropertyId::Foreground as u16 }, false, Color, I>(input);
+        } else {
+            self.property_input::<{ PropertyId::Background as u16 }, false, Color, I>(input);
+        }
+    }
+    pub(crate) fn color_operand(mut self, color: crate::ColorInput<'a>, foreground: bool) -> Self {
+        match color.operand() {
+            crate::style_port::ColorOperand::Property(input) => {
+                self.color_property(input, foreground)
+            }
+            crate::style_port::ColorOperand::Selection(operand) => self.bind_owned_map(
+                if foreground {
+                    PropertyId::Foreground
+                } else {
+                    PropertyId::Background
+                },
+                operand,
+            ),
+        }
         self
+    }
+    pub fn fg(self, color: impl crate::IntoColor<'a>) -> Self {
+        color.apply_color(self, true)
     }
     pub fn bg<S>(self, background: impl IntoBackground<'a, S>) -> Self {
         background.apply_background(self)
@@ -1349,14 +1374,13 @@ pub trait IntoBackground<'a, S>: sealed::Background<S> {
     #[doc(hidden)]
     fn apply_background(self, element: El<'a>) -> El<'a>;
 }
-impl<'a, I: IntoProp<'a, Color>> sealed::Background<Color> for I {}
-impl<'a, I: IntoProp<'a, Color>> IntoBackground<'a, Color> for I {
+impl<'a, I: crate::IntoColor<'a>> sealed::Background<Color> for I {}
+impl<'a, I: crate::IntoColor<'a>> IntoBackground<'a, Color> for I {
     fn apply_background(self, mut element: El<'a>) -> El<'a> {
         if let Some(extra) = element.extra.as_mut() {
             extra.clear_background();
         }
-        element.property_input::<{ PropertyId::Background as u16 }, false, Color, _>(self);
-        element
+        self.apply_color(element, false)
     }
 }
 impl sealed::Background<gpui_canvas::Gradient> for &gpui_canvas::Gradient {}

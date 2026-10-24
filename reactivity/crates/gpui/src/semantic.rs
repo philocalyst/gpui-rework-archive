@@ -285,7 +285,7 @@ impl<'a> ElementExtra<'a> {
     pub fn bind_map(
         &mut self,
         property: crate::style_port::Sink,
-        operand: crate::style_port::MapOperand<'a>,
+        operand: crate::style_port::OwnedMapOperand<'a>,
     ) {
         if matches!(self, Self::Control { .. }) {
             self.control_base().bind_map(property, operand);
