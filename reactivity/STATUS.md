@@ -36,6 +36,14 @@ precision tiers, thinner glyph ownership, 16-byte node storage, real IME and
 optional GPU clip acceleration remain separate spikes. Their costs and
 unsupported domains are not shipping claims.
 
+The [portable GPU oracle](evidence/portable-gpu-oracle/README.md) now passes
+65 unchanged renderer/unit checks on actual Apple M3 Pro Metal hardware, plus
+69 software Vulkan checks and 71 with offline shaders. The hardware profile
+rejects software adapters. This adds no shipping core lines or dependencies.
+Windows/DX12 runtime and hardware performance remain unqualified. A subsequent
+native Mac suite exposed two first-lock allocation regressions; its zero-allocation
+contracts remain intact and a structural transport repair is pending.
+
 | Boundary | Integrated behavior | Remaining limit |
 | --- | --- | --- |
 | Ownership and sources | Borrowed View, inline Signal, typed owner-relative sources/actions, contained component projections and declared Source/earlier-Reader input families | One serial root owner; complete dependency/cohort graph remains |

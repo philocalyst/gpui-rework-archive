@@ -62,8 +62,9 @@ lanes of the existing correction record; draw and correction strides do not grow
 
 The Vulkan regressions exercise neighboring representable widths, reflection,
 overlapping alpha edges, physical glyph scales 1/1.25/1.5/2, threshold clear
-colors and premultiplied float output. They run on Mesa llvmpipe Vulkan here;
-other backends require their own validation.
+colors and premultiplied float output. The same scenes pass on Mesa llvmpipe Vulkan and Apple M3 Pro Metal;
+[exact runs and limits](../../evidence/portable-gpu-oracle/README.md) keep the
+profiles separate. DX12 still requires runtime validation.
 
 Portable `cargo test -p gpui_gpu` validates generated WGSL and CPU packing.
 The same real pixel-oracle suite has two explicit execution profiles:
