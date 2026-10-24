@@ -389,6 +389,17 @@ pub mod ui {
     }
 
     pub fn sample_draw(draw: Draw, point: Vec2f) -> Vec4f {
+        let mut chain_contains = true;
+        if (draw.atlas.w & 0x40000000) == 0 && bitcast_u32(draw.clip.x) == 0x7fc00003 {
+            chain_contains = clip_chain_contains(bitcast_u32(draw.clip.y), point);
+        }
+        sample_draw_checked(draw, point, chain_contains)
+    }
+
+    // The chain result is supplied by the original wrapper or by the exact
+    // sample-local cache. All other coverage and material checks stay here,
+    // giving the ordinary draw loop one material callsite on every route.
+    pub fn sample_draw_checked(draw: Draw, point: Vec2f, chain_contains: bool) -> Vec4f {
         // Host-only certificate: this solid's quarter-grid bounds already
         // include canonical inverse coverage, clip and viewport membership.
         // Eighth-grid samples and both endpoint sums are exact in f32.
@@ -403,7 +414,7 @@ pub mod ui {
             return draw.color;
         }
         if bitcast_u32(draw.clip.x) == 0x7fc00003 {
-            if !clip_chain_contains(bitcast_u32(draw.clip.y), point) {
+            if !chain_contains {
                 return vec4f(0.0, 0.0, 0.0, 0.0);
             }
         } else if point.x < draw.clip.x
@@ -643,19 +654,14 @@ pub mod ui {
                 for cursor in range.x..range.y {
                     let index = get!(INDICES)[cursor as usize];
                     let draw = load_draw(index);
-                    let mut source = vec4f(0.0, 0.0, 0.0, 0.0);
                     if (draw.atlas.w & 0x40000000) == 0 && bitcast_u32(draw.clip.x) == 0x7fc00003 {
                         let address = bitcast_u32(draw.clip.y);
                         if cached_clip_address != address {
                             cached_clip_address = address;
                             cached_clip_contains = clip_chain_contains(address, point);
                         }
-                        if cached_clip_contains {
-                            source = sample_material(draw, point);
-                        }
-                    } else {
-                        source = sample_draw(draw, point);
                     }
+                    let source = sample_draw_checked(draw, point, cached_clip_contains);
                     // Even clipped zero sources perform source-over: skipping it
                     // can change signed-zero bits in float targets.
                     color = source + color * (1.0 - source.w);
