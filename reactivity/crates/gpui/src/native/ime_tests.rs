@@ -99,8 +99,26 @@ impl Script {
                 assert_eq!(self.value("first"), "日本");
                 let owner = self.host.owner.as_mut().unwrap();
                 let target = owner.query().name("first").one().unwrap();
+                let second = owner.query().name("second").one().unwrap();
                 let result = owner.focus(target);
                 self.host.input_result(result).unwrap();
+                // The initial request has not been observed Enabled. Moving
+                // focus must still quarantine a delayed old Enabled + Commit,
+                // including after an arbitrary event-loop turn boundary.
+                let result = self.host.owner.as_mut().unwrap().focus(second);
+                self.host.input_result(result).unwrap();
+                self.host.dispatch(event_loop, Callback::AboutToWait);
+                self.event(event_loop, Ime::Enabled);
+                self.event(event_loop, Ime::Commit("late".into()));
+                assert_eq!(
+                    self.host.owner.as_ref().unwrap().read(&Form::B).unwrap(),
+                    ""
+                );
+                self.event(event_loop, Ime::Disabled);
+                self.event(event_loop, Ime::Enabled);
+                let result = self.host.owner.as_mut().unwrap().focus(target);
+                self.host.input_result(result).unwrap();
+                self.event(event_loop, Ime::Disabled);
                 self.queue();
             }
             1 => {

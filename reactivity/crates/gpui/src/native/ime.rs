@@ -1,4 +1,8 @@
 //! Native lifecycle transport; source authority stays in the ordinary IME API.
+//! Turnover waits for a real Winit Disabled acknowledgement. Some macOS/Windows
+//! never-enabled requests do not produce one; native IME then remains disabled
+//! for this window rather than assigning delayed events to another field.
+//! Ordinary keyboard input and the explicit scoped IME API remain available.
 use super::*;
 use crate::{ImeEvent, ImeSession, runtime::ime::ImeTarget};
 use winit::{
@@ -50,15 +54,12 @@ impl Bridge {
         if had_request || was_enabled {
             window.set_ime_allowed(false);
         }
-        if was_enabled {
-            // Winit promises Disabled closes an observed IME stream. Retain the
-            // gate even if focus returns to the same field before it arrives.
+        if had_request || was_enabled {
+            // A turn boundary does not identify the originating OS request.
+            // Both observed and still-pending streams must receive the real
+            // Disabled acknowledgement before another source is admitted.
             self.phase = Phase::Disabling;
         } else {
-            // macOS/Windows need not emit Disabled for a mere allowed request
-            // that never became Enabled. Their setters and callbacks are FIFO
-            // on the native UI thread; restart the request without awaiting an
-            // event those platforms are not required to produce.
             self.phase = Phase::Requested;
             if desired.is_some() {
                 window.set_ime_allowed(true);

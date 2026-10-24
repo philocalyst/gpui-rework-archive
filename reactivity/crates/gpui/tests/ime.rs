@@ -504,8 +504,8 @@ fn ime_cursor_area_tracks_acknowledged_physical_transform_clip_and_dpi() {
         if part.target() == target {
             let geometry = part.text_geometry().unwrap();
             let map = geometry.transform().unwrap().coefficients();
-            assert_eq!(map[0], 2.4);
-            assert_eq!(map[3], 2.2);
+            assert_eq!(map[0], f64::from(2.4_f32));
+            assert_eq!(map[3], f64::from(2.2_f32));
             let caret = geometry
                 .layout()
                 .caret_bounds(part.selection().unwrap().focus)
