@@ -50,6 +50,7 @@ pub(super) struct Planner<'font> {
     blob_ids: [Option<u64>; 3],
     sets: [Option<Arc<FontSet>>; 4],
     primary_cmap: Cmap<'font>,
+    pub(super) paragraph_shapes: u64,
 }
 struct Planned {
     metrics: TextMetrics,
@@ -77,6 +78,7 @@ impl<'font> Planner<'font> {
             faces,
             blob_ids: [None; 3],
             sets: [Some(base), None, None, None],
+            paragraph_shapes: 0,
             primary_cmap: if primary.0.bundled {
                 Cmap(None)
             } else {
@@ -220,6 +222,7 @@ impl<'font> Planner<'font> {
             builder.push_default(StyleProperty::FontSize(size));
             builder.push_default(StyleProperty::OverflowWrap(OverflowWrap::Anywhere));
             builder.build_into(&mut self.layout, content);
+            self.paragraph_shapes += 1;
             self.layout.break_all_lines(max_width);
             let planned = &self.layout;
             let simple = !interactive

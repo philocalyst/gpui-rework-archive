@@ -354,6 +354,10 @@ pub struct TextShaper<'font> {
     planner: Option<Box<planner::Planner<'font>>>,
 }
 impl<'font> TextShaper<'font> {
+    pub fn paragraph_shapes(&self) -> u64 {
+        self.planner.as_ref().map_or(0, |p| p.paragraph_shapes)
+    }
+
     /// Measure wrapping without freezing an owned layout. Paragraph scratch is
     /// reused within this shaper; the returned numbers borrow no font storage.
     pub fn measure(
