@@ -833,9 +833,7 @@ impl RendererState {
             for (index, source) in group.sources().enumerate() {
                 let atlas = if let Some((gradient, radius)) = source.gradient() {
                     let rect = group.placements().nth(index).unwrap().local_rect;
-                    let r = radius
-                        .min(rect.width * 0.5)
-                        .min(rect.height * 0.5);
+                    let r = radius.min(rect.width * 0.5).min(rect.height * 0.5);
                     let scale = if r == 0.0 {
                         1.0
                     } else {

@@ -873,8 +873,12 @@ pub struct PreparedGroup<'a> {
 }
 impl<'a> PreparedGroup<'a> {
     pub fn clip_chain(self) -> Option<ClipChain<'a>> {
-        let (stored, _) = self.commands.state(self.order[0]);
-        self.commands.clip_chain(stored.clip)
+        let (stored, source) = self.commands.state(self.order[0]);
+        let common = self
+            .commands
+            .columns
+            .resolve(stored, self.clip, resource_material(source));
+        self.commands.clip_chain(common.clip)
     }
     /// Device bounds in painter order, without expanding packed text positions.
     pub fn bounds(self) -> impl ExactSizeIterator<Item = Rect> + DoubleEndedIterator {

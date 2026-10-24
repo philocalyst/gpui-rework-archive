@@ -3822,11 +3822,28 @@ fn analytic_gradient_exact_edges_and_premultiplied_expected_values() {
 
 #[test]
 fn nested_transformed_clip_prefixes_match_cpu_across_materials_and_group_layouts() {
-    use gpui_canvas::{AlphaMode, ClipShape, Image, ImageProfile, ImageSampling};
+    use gpui_canvas::{
+        AlphaMode, ClipShape, Extend, Gradient, GradientGeometry, GradientStop, Image,
+        ImageProfile, ImageSampling, Interpolation,
+    };
     pollster::block_on(async {
         let mut gpu = renderer(wgpu::TextureFormat::Rgba8UnormSrgb).await;
         let mut fonts = TextSystem::bundled().unwrap();
         let layout = fonts.shape("office", 12.0, None).unwrap();
+        let gradient = Gradient::new(
+            GradientGeometry::Linear {
+                start: Point { x: 0.0, y: 0.0 },
+                end: Point { x: 1.0, y: 1.0 },
+            },
+            &[
+                GradientStop::new(0.0, Color::rgba(29, 71, 191, 180)),
+                GradientStop::new(0.5, Color::rgba(231, 51, 29, 170)),
+                GradientStop::new(1.0, Color::WHITE),
+            ],
+            Extend::Reflect,
+            Interpolation::LinearSrgb,
+        )
+        .unwrap();
         let image = Image::rgba8(
             2,
             2,
@@ -3858,66 +3875,90 @@ fn nested_transformed_clip_prefixes_match_cpu_across_materials_and_group_layouts
                 ty: 0.375,
             },
         ] {
-            let mut canvas = Canvas::recording(32, 32, ColorConfig::default()).unwrap();
-            canvas.clear(Color::rgb(19, 29, 47));
-            let outer = canvas
-                .create_clip(
-                    None,
-                    ClipShape::RoundedRect {
-                        rect: Rect::new(0.125, 0.375, 26.5, 27.25),
-                        radius: 7.0,
-                    },
-                    map,
-                )
-                .unwrap();
-            let child = canvas
-                .create_clip(
-                    Some(outer),
-                    ClipShape::RoundedRect {
-                        rect: Rect::new(2.375, 1.125, 23.25, 25.5),
-                        radius: 4.0,
-                    },
-                    Affine::IDENTITY,
-                )
-                .unwrap();
-            canvas
-                .fill_rect(
-                    Rect::new(0.0, 0.0, 32.0, 32.0),
-                    Affine::IDENTITY,
-                    child,
-                    Color::rgba(211, 43, 91, 180),
-                )
-                .unwrap();
-            canvas
-                .draw_text(
-                    &mut fonts,
-                    &layout,
-                    Point { x: 0.5, y: 1.5 },
-                    Affine::IDENTITY,
-                    child,
-                    Color::WHITE,
-                )
-                .unwrap();
-            canvas
-                .draw_image(
-                    &image,
-                    Rect::new(0.125, 15.375, 29.5, 14.25),
-                    Affine::IDENTITY,
-                    child,
-                    ImageSampling::Linear,
-                )
-                .unwrap();
-            let expected = canvas.pixels().to_vec();
-            for grouped in [false, true] {
-                gpu.set_grouped_records(grouped);
-                let actual = readback(&mut gpu, &canvas);
-                for (index, (a, b)) in actual.into_iter().zip(&expected).enumerate() {
-                    assert!(
-                        a.abs_diff(*b) <= 1,
-                        "{map:?} grouped={grouped} byte={index}: GPU{a} CPU{b}"
-                    );
+            for dpr in [1.0, 2.0, 1.25] {
+                let mut canvas = Canvas::recording(32, 32, ColorConfig::default()).unwrap();
+                canvas.clear(Color::rgb(19, 29, 47));
+                let outer = canvas
+                    .create_clip(
+                        None,
+                        ClipShape::RoundedRect {
+                            rect: Rect::new(0.125, 0.375, 26.5, 27.25),
+                            radius: 7.0,
+                        },
+                        map,
+                    )
+                    .unwrap();
+                let child = canvas
+                    .create_clip(
+                        Some(outer),
+                        ClipShape::RoundedRect {
+                            rect: Rect::new(2.375, 1.125, 23.25, 25.5),
+                            radius: 4.0,
+                        },
+                        Affine::IDENTITY,
+                    )
+                    .unwrap();
+                canvas
+                    .fill_rect(
+                        Rect::new(0.0, 0.0, 32.0, 32.0),
+                        Affine::IDENTITY,
+                        child,
+                        Color::rgba(211, 43, 91, 180),
+                    )
+                    .unwrap();
+                canvas
+                    .fill_gradient(
+                        &gradient,
+                        Rect::new(0.25, 0.75, 30.5, 29.25),
+                        3.0,
+                        Affine::IDENTITY,
+                        child,
+                    )
+                    .unwrap();
+                canvas
+                    .draw_text_scaled(
+                        &mut fonts,
+                        &layout,
+                        Point { x: 0.5, y: 1.5 },
+                        dpr,
+                        Affine::IDENTITY,
+                        child,
+                        Color::WHITE,
+                    )
+                    .unwrap();
+                canvas
+                    .draw_image(
+                        &image,
+                        Rect::new(0.125, 15.375, 29.5, 14.25),
+                        Affine::IDENTITY,
+                        child,
+                        ImageSampling::Linear,
+                    )
+                    .unwrap();
+                canvas
+                    .fill_gradient(
+                        &gradient,
+                        Rect::new(19.5, 17.25, 10.0, 11.5),
+                        0.0,
+                        Affine::IDENTITY,
+                        child,
+                    )
+                    .unwrap();
+                let expected = canvas.pixels().to_vec();
+                for grouped in [false, true] {
+                    gpu.set_grouped_records(grouped);
+                    for proofs in [false, true] {
+                        gpu.set_tile_proofs(proofs);
+                        let actual = readback(&mut gpu, &canvas);
+                        for (index, (a, b)) in actual.into_iter().zip(&expected).enumerate() {
+                            assert!(
+                                a.abs_diff(*b) <= 1,
+                                "{map:?} dpr={dpr} grouped={grouped} proofs={proofs} byte={index}: GPU{a} CPU{b}"
+                            );
+                        }
+                        assert_eq!(gpu.stats().uniform_tiles, 0);
+                    }
                 }
-                assert_eq!(gpu.stats().uniform_tiles, 0);
             }
         }
     });
