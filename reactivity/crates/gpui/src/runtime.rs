@@ -576,6 +576,14 @@ impl TextSlot {
 struct Content(u32);
 const _: () = assert!(MAX_NODES * 2 <= (u32::MAX >> 4) as usize);
 impl Content {
+    const BITS: u32 = 23;
+    const DISABLED: u32 = 1 << (Self::BITS - 1);
+    fn with_disabled(self, disabled: bool) -> Self {
+        Self((self.0 & !Self::DISABLED) | (u32::from(disabled) * Self::DISABLED))
+    }
+    fn disabled(self) -> bool {
+        self.0 & Self::DISABLED != 0
+    }
     #[inline]
     fn new(kind: NodeKind, text: TextSlot) -> Self {
         let kind = match kind {
@@ -621,7 +629,7 @@ impl Content {
         if self.kind() == NodeKind::Image {
             return TextSlot::NONE;
         }
-        let text = self.0 >> 4;
+        let text = (self.0 & !Self::DISABLED) >> 4;
         TextSlot(if text == 0 { u32::MAX } else { text - 1 })
     }
     fn image(image: image::ImageUse) -> Self {
@@ -630,7 +638,7 @@ impl Content {
         Self(((value + 1) << 4) | 6)
     }
     fn image_use(self) -> Option<image::ImageUse> {
-        let value = self.0 >> 4;
+        let value = (self.0 & !Self::DISABLED) >> 4;
         if self.kind() != NodeKind::Image || value == 0 {
             return None;
         }
@@ -668,10 +676,11 @@ impl Node {
         self.links.handler()
     }
     fn has_handler(&self) -> bool {
-        self.handler_slot().is_some()
+        !self.content.disabled() && self.handler_slot().is_some()
     }
     fn focusable(&self) -> bool {
-        matches!(self.kind(), NodeKind::Input | NodeKind::Button) || self.has_handler()
+        !self.content.disabled()
+            && (matches!(self.kind(), NodeKind::Input | NodeKind::Button) || self.has_handler())
     }
     #[inline]
     fn identity(&self) -> u64 {
@@ -1056,6 +1065,7 @@ struct Presented {
     basis: geometry::MapBasis,
     bounds: Rect,
     hittable: bool,
+    disabled: bool,
     actions: Actions,
 }
 impl Presented {
@@ -2391,7 +2401,7 @@ impl<M: View + 'static> Runtime<M> {
                 self.dirty = true;
                 node_changed = true;
             }
-            if node.kind() != draft.kind {
+            if node.kind() != draft.kind || node.content.disabled() != draft.disabled {
                 // State belongs to the next presentation, not the mount identity.
                 self.dirty = true;
                 node_changed = true;
@@ -2487,7 +2497,8 @@ impl<M: View + 'static> Runtime<M> {
                 Content::image(image)
             } else {
                 Content::new(draft.kind, text_slot)
-            };
+            }
+            .with_disabled(draft.disabled);
             if property_changed == Some(node.identity) {
                 node_changed = true;
                 property_changed = None;
@@ -2584,8 +2595,23 @@ impl<M: View + 'static> Runtime<M> {
                     .filter(|a| a.text.name.is_some() || a.text.description.is_some())
                     .count(),
             );
+            let focus_changed = metadata.focus_indicators.len()
+                != annotation_drafts
+                    .iter()
+                    .filter(|a| a.text.focus_indicator.is_some())
+                    .count()
+                || annotation_drafts.iter().any(|a| {
+                    a.text.focus_indicator.is_some_and(|color| {
+                        metadata.focus_indicator(nodes[a.node as usize].identity()) != Some(color)
+                    })
+                });
+            self.dirty |= focus_changed;
+            metadata.focus_indicators.clear();
             for (annotation, fields) in annotation_drafts.into_iter().zip(annotation_fields) {
                 let identity = nodes[annotation.node as usize].identity();
+                if let Some(color) = annotation.text.focus_indicator {
+                    metadata.focus_indicators.push((identity, color));
+                }
                 let previous = metadata.base(identity);
                 let mut values = [None, None];
                 for (slot, text) in [annotation.text.name, annotation.text.description]
@@ -2633,6 +2659,9 @@ impl<M: View + 'static> Runtime<M> {
                     });
                 }
             }
+            metadata
+                .focus_indicators
+                .sort_unstable_by_key(|entry| entry.0);
             base.sort_unstable_by_key(|entry| entry.identity);
             metadata.base = base;
         }
@@ -3492,6 +3521,24 @@ impl<M: View + 'static> Runtime<M> {
             } else {
                 None
             };
+            if paint
+                && self.focused.and_then(|target| self.sites.resolve(target))
+                    == Some(node.identity())
+                && let Some(color) = self
+                    .metadata
+                    .as_deref()
+                    .and_then(|m| m.focus_indicator(node.identity()))
+            {
+                let inset = radius.max(2.0).min(rect.width * 0.25);
+                let width = (rect.width - inset * 2.0).max(0.0);
+                let height = 2.0_f32.min(rect.height);
+                scene.fill_rect(
+                    Rect::new(rect.x + inset, rect.y + rect.height - height, width, height),
+                    transform.ok_or(Error::Canvas(gpui_canvas::Error::InvalidGeometry))?,
+                    clip,
+                    color,
+                )?;
+            }
             if paint && let Some(image) = node.content.image_use() {
                 let resource = self.images.as_ref().unwrap().get(image);
                 scene.draw_image_with(
@@ -3558,8 +3605,13 @@ impl<M: View + 'static> Runtime<M> {
                 basis,
                 bounds,
                 hittable,
-                actions: Actions::for_node(node.kind(), node.has_handler())
-                    .scroll_into_view(inherited.membership != 0 || parent_is_viewport),
+                disabled: node.content.disabled(),
+                actions: if node.content.disabled() {
+                    Actions::default()
+                } else {
+                    Actions::for_node(node.kind(), node.has_handler())
+                        .scroll_into_view(inherited.membership != 0 || parent_is_viewport)
+                },
             });
             #[cfg(feature = "accessibility")]
             if let Some(observation) = &mut observation {
@@ -3729,6 +3781,7 @@ impl<M: View + 'static> Runtime<M> {
         while let Some(index) = cursor {
             let node = &sheet.nodes[index];
             if let Some(logical) = self.by_identity.get(node.identity)
+                && !self.nodes[logical].content.disabled()
                 && (self.nodes[logical].has_handler() || node.kind == NodeKind::Input)
             {
                 return Some(node.identity);

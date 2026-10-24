@@ -595,6 +595,28 @@ impl<'a> El<'a> {
             .annotations_mut()
     }
 
+    /// Disable activation, editing and focus without changing the control's
+    /// mount identity or accessible role. Logical interaction is rejected
+    /// immediately; queries describe the acknowledged presentation.
+    /// Opt into a visible focus marker inside the control frame. The caller
+    /// chooses its color; the runtime owns focus and clipped affine painting.
+    pub fn focus_indicator(mut self, color: Color) -> Self {
+        self.annotations_mut().focus_indicator = Some(color);
+        self
+    }
+
+    pub fn disabled(mut self, disabled: bool) -> Self {
+        if disabled || self.extra.is_some() {
+            self.extra
+                .get_or_insert_with(|| {
+                    Box::new(crate::semantic::ElementExtra::Semantic(Default::default()))
+                })
+                .annotations_mut()
+                .disabled = disabled;
+        }
+        self
+    }
+
     pub fn child<C, S>(mut self, children: C) -> Self
     where
         C: ChildSeq<'a, S>,
@@ -602,7 +624,7 @@ impl<'a> El<'a> {
         assert!(
             matches!(
                 self.kind,
-                NodeKind::Div | NodeKind::Button | NodeKind::Scroll
+                NodeKind::Div | NodeKind::Button | NodeKind::Scroll | NodeKind::CheckBox(_)
             ),
             "this element does not accept children"
         );
@@ -906,7 +928,7 @@ impl<'a> El<'a> {
             }
             let crate::semantic::ExtraParts {
                 list: spec,
-                annotations: annotation,
+                annotations: mut annotation,
                 projection: projector,
                 image,
                 axes,
@@ -979,6 +1001,8 @@ impl<'a> El<'a> {
                 }
                 element.append_children(child);
             }
+            let disabled = annotation.disabled;
+            annotation.disabled = false;
             if !annotation.is_empty() {
                 annotations.push(crate::semantic::AnnotationDraft {
                     node: index,
@@ -1039,6 +1063,7 @@ impl<'a> El<'a> {
             output.push(DraftNode {
                 parent,
                 kind: element.kind,
+                disabled,
                 text: element.text.take(),
                 style: element.style,
                 on_click: element.on_click.take(),
@@ -1120,6 +1145,7 @@ pub(crate) struct Description<'a> {
 pub(crate) struct DraftNode<'a> {
     pub(crate) parent: Option<u32>,
     pub(crate) kind: NodeKind,
+    pub(crate) disabled: bool,
     pub(crate) text: Option<Text<'a>>,
     pub(crate) style: Style,
     pub(crate) on_click: Option<Handler>,

@@ -202,6 +202,7 @@ impl Collect<'_> {
             || !previous_view.shape.same(rows.next.shape)
             || previous.kind != next.kind
             || previous.actions != next.actions
+            || previous.disabled != next.disabled
             || previous.text.as_deref() != next.text.as_deref()
             || metadata
                 .and_then(|m| m.editing.as_ref())

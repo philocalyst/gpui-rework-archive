@@ -22,10 +22,15 @@ pub const DESCRIPTION: SemanticText = SemanticText::Description;
 pub(crate) struct Annotations<'a> {
     pub name: Option<Text<'a>>,
     pub description: Option<Text<'a>>,
+    pub disabled: bool,
+    pub focus_indicator: Option<crate::Color>,
 }
 impl Annotations<'_> {
     pub(crate) fn is_empty(&self) -> bool {
-        self.name.is_none() && self.description.is_none()
+        self.name.is_none()
+            && self.description.is_none()
+            && !self.disabled
+            && self.focus_indicator.is_none()
     }
 }
 pub(crate) struct AnnotationDraft<'a> {

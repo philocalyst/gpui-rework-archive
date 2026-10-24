@@ -191,6 +191,7 @@ impl Sheet {
 }
 #[derive(Default)]
 pub(super) struct Metadata {
+    pub focus_indicators: Vec<(u64, Color)>,
     pub inspector: Option<Box<super::inspector::Inspector>>,
     pub editing: Option<Box<super::editing::Editing>>,
     pub base: Vec<Declared>,
@@ -200,6 +201,12 @@ pub(super) struct Metadata {
     pub geometry: Option<Box<super::geometry::Geometry>>,
 }
 impl Metadata {
+    pub fn focus_indicator(&self, identity: u64) -> Option<Color> {
+        self.focus_indicators
+            .binary_search_by_key(&identity, |entry| entry.0)
+            .ok()
+            .map(|i| self.focus_indicators[i].1)
+    }
     pub fn base(&self, identity: u64) -> Option<&Declared> {
         self.base
             .binary_search_by_key(&identity, |entry| entry.identity)

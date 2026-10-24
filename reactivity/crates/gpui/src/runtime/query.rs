@@ -173,6 +173,10 @@ impl<'a> Part<'a> {
     pub fn focused(self) -> bool {
         self.context.focused == Some(self.target())
     }
+    /// Disabled state from the acknowledged presentation.
+    pub fn disabled(self) -> bool {
+        self.node().disabled
+    }
     pub fn actions(self) -> Actions {
         self.node().actions
     }
