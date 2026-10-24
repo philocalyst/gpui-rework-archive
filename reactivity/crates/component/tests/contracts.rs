@@ -57,7 +57,7 @@ impl Controlled {
 }
 impl View for Controlled {
     fn sources() -> Sources<Self> {
-        Sources::new().direct(Self::CHECKED)
+        Sources::new().field(Self::CHECKED)
     }
     fn view(&self) -> El<'_> {
         Checkbox::new("Controlled", *self.checked, &self.theme)
@@ -464,4 +464,74 @@ fn native_inspector_composition_keeps_the_same_application_input_authority() {
     let finish = window.button("Finish invitation");
     window.click(finish).unwrap();
     assert!(window.root().unwrap().finished);
+}
+
+#[test]
+fn party_default_toggle_and_title_edits_refresh_checked_validation_and_parent_policy() {
+    let mut window = Win::with_size(party::Party::default(), 760, 680).unwrap();
+    let lanterns = window
+        .role(Role::CheckBox)
+        .name("Light the lanterns")
+        .one()
+        .unwrap();
+    let treats = window
+        .role(Role::CheckBox)
+        .name("Set out the treats")
+        .one()
+        .unwrap();
+    window.activate(lanterns).unwrap();
+    let finish = window.button("Finish invitation");
+    let assert_presented = |window: &Win<party::Party>, checked, disabled| {
+        let mut choice = None;
+        let mut command = None;
+        window
+            .visit(|part| {
+                if part.target() == treats {
+                    choice = part.checked();
+                }
+                if part.target() == finish {
+                    command = Some(part.disabled());
+                }
+            })
+            .unwrap();
+        assert_eq!(choice, Some(checked));
+        assert_eq!(command, Some(disabled));
+    };
+    assert_presented(&window, true, false);
+    // This is the reusable default Source update route, without the custom
+    // lantern callback's coarse model edit to hide missing dependencies.
+    window.activate(treats).unwrap();
+    assert!(!*window.root().unwrap().preparation.treats);
+    assert_presented(&window, false, true);
+    assert!(matches!(
+        window.activate(finish),
+        Err(Error::NotInteractive)
+    ));
+    window.activate(treats).unwrap();
+    assert_presented(&window, true, false);
+    let input = window.query().name("Gathering name").one().unwrap();
+    let len = window.root().unwrap().title.len();
+    window
+        .replace(input, gpui::TextSelection::from_bytes(0, len).unwrap(), "x")
+        .unwrap();
+    assert!(
+        window
+            .contains_text("Use at least three characters")
+            .unwrap()
+    );
+    assert_presented(&window, true, true);
+    window
+        .replace(
+            input,
+            gpui::TextSelection::from_bytes(0, 1).unwrap(),
+            "Midnight",
+        )
+        .unwrap();
+    assert!(
+        !window
+            .contains_text("Use at least three characters")
+            .unwrap()
+    );
+    assert_presented(&window, true, false);
+    assert!(window.counters().owner_reruns > 0);
 }

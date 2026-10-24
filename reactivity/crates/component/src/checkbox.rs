@@ -97,6 +97,9 @@ impl<'a> Checkbox<'a> {
         self
     }
     /// Default behavior for an explicitly registered owner-relative field.
+    /// `checked` is a snapshot: register its source with `Sources::field` (and
+    /// parent snapshot reads with `Sources::component`) so writes re-describe
+    /// the controlled value. A direct-only declaration cannot observe that read.
     pub fn toggle<M: 'static>(mut self, source: Source<M, bool>) -> Self {
         self.parts.root = self
             .parts
