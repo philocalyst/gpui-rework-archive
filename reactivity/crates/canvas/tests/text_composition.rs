@@ -226,8 +226,10 @@ fn rebuilt_nested_clip_text_and_gradient_scenes_have_exact_damage() {
         assert_ne!(changed, original);
         let [left, top, right, bottom] = damage.bounds().expect("changed clip contributes support");
         for (index, (a, b)) in original
-            .chunks_exact(4)
-            .zip(changed.chunks_exact(4))
+            .as_chunks::<4>()
+            .0
+            .iter()
+            .zip(changed.as_chunks::<4>().0)
             .enumerate()
         {
             if a != b {
