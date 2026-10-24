@@ -150,26 +150,6 @@ mod tests {
                 )
                 .unwrap();
         }
-        // Exercise both private address forms without loading a shared font
-        // in this unit binary (the font lifecycle oracle owns that registry).
-        let common = canvas.commands.columns.resolve(
-            canvas.commands.inline[0].common,
-            super::super::viewport_rect(65, 49),
-            false,
-        );
-        let geometry = canvas.commands.inline[0].geometry;
-        let common =
-            canvas
-                .commands
-                .columns
-                .store(common, super::super::viewport_rect(65, 49), None, false);
-        let start = canvas.commands.placements.len();
-        canvas.commands.placements.push(super::super::Placement {
-            geometry,
-            common: canvas.commands.commons.len() as u32,
-            source: super::super::RECT_SOURCE,
-        });
-        canvas.commands.publish_group(start, common);
         let image = Image::linear_srgb(
             1,
             1,
@@ -188,7 +168,6 @@ mod tests {
             .unwrap();
         let commands = &canvas.commands;
         assert!(!commands.inline.is_empty());
-        assert!(!commands.placements.is_empty());
         let expected: Vec<_> = commands
             .iter(super::super::viewport_rect(65, 49))
             .map(|c| c.bounds)
@@ -444,7 +423,7 @@ mod tests {
         {
             assert_eq!((first.count_total, first.bytes_total), (2, 76));
             assert_eq!(canvas.bin_bytes(), 20);
-            assert_eq!(size_of::<Canvas>(), 488);
+            assert_eq!(size_of::<Canvas>(), 464);
             assert_eq!(size_of::<RasterScratch>(), 56);
             assert_eq!(size_of::<super::super::RenderStats>(), 96);
             assert_eq!(size_of::<super::super::Frame<'_>>(), 88);

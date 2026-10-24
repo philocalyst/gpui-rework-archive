@@ -3464,3 +3464,76 @@ fn lowered_solids_keep_clipped_sample_ties_and_exceptional_paints() {
         }
     });
 }
+
+#[test]
+fn retained_text_packet_cost_probe() {
+    pollster::block_on(async {
+        let mut renderer = renderer(wgpu::TextureFormat::Rgba8UnormSrgb).await;
+        let mut text = TextSystem::bundled().unwrap();
+        let clip = Rect::new(0., 0., 320., 192.);
+        for (name, source, labels, solids) in [
+            ("solids32", "", 0, 32),
+            ("pair32", "Hi", 32, 0),
+            ("labels32", "office café repeated labels", 32, 0),
+            ("bidi8", "office e\u{301} אבג مرحبا", 8, 0),
+        ] {
+            let layout = text.shape(source, 12., None).unwrap();
+            let mut canvas = Canvas::recording(320, 192, ColorConfig::default()).unwrap();
+            canvas.clear(Color::BLACK);
+            for row in 0..solids {
+                canvas
+                    .fill_rect(
+                        Rect::new((row % 16) as f32 * 19., (row / 16) as f32 * 19., 9., 9.),
+                        Affine::IDENTITY,
+                        clip,
+                        Color::WHITE,
+                    )
+                    .unwrap();
+            }
+            for row in 0..labels {
+                canvas
+                    .draw_text_scaled(
+                        &mut text,
+                        &layout,
+                        Point {
+                            x: 2.25,
+                            y: (row % 12) as f32 * 14.,
+                        },
+                        Affine::IDENTITY,
+                        clip,
+                        Color::WHITE,
+                        1.25,
+                    )
+                    .unwrap();
+            }
+            let first = readback(&mut renderer, &canvas);
+            let second = readback(&mut renderer, &canvas);
+            assert_eq!(first, second);
+            for (index, (&gpu, &cpu)) in second.iter().zip(canvas.pixels()).enumerate() {
+                assert!(
+                    (i16::from(gpu) - i16::from(cpu)).abs() <= 1,
+                    "{name} byte{index}:GPU{gpu} CPU{cpu}"
+                );
+            }
+            let stats = renderer.stats();
+            assert_eq!(stats.mask_upload_bytes, 0);
+            let hash = second.iter().fold(0xcbf29ce484222325u64, |h, &b| {
+                (h ^ u64::from(b)).wrapping_mul(0x100000001b3)
+            });
+            println!(
+                "TEXT_PACKET case={name} draws={} validated={} records={} upload={} bin_visits={} tile_refs={} original_refs={} sample_draws={} compact={} shared={} mask_upload={} hash={hash}",
+                stats.draws,
+                stats.validated_draws,
+                stats.draw_record_bytes,
+                stats.instance_upload_bytes,
+                stats.binning_tile_visits,
+                stats.tile_references,
+                stats.original_tile_references,
+                stats.sample_draw_evaluations,
+                stats.compact_draws,
+                stats.shared_groups,
+                stats.mask_upload_bytes
+            );
+        }
+    });
+}

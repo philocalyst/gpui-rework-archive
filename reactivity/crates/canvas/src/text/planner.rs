@@ -158,8 +158,9 @@ impl<'font> Planner<'font> {
             height: planned.metrics.height,
             baseline: planned.metrics.baseline,
             font_size: size,
-            glyphs: GlyphBuffer::new(planned.glyphs, text.len())
-                .map_err(|_| Error::ResourceLimit)?,
+            glyphs: Arc::new(
+                GlyphBuffer::new(planned.glyphs, text.len()).map_err(|_| Error::ResourceLimit)?,
+            ),
             fonts: self.font_set(planned.mask),
             mapping: planned.details.map(Arc::new),
         })

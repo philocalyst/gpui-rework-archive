@@ -90,11 +90,10 @@ impl PaintCommit<'_, '_> {
         for edit in self.edits {
             let commands = &mut self.canvas.commands;
             let address = commands.order[edit.index.0 as usize];
-            let common = if address & INLINE_DRAW != 0 {
-                &mut commands.inline[(address & !INLINE_DRAW) as usize].common
+            let common = if address.inline() {
+                &mut commands.inline[usize::from(address.command)].common
             } else {
-                let group = commands.placements[address as usize].common;
-                &mut commands.commons[group as usize].common
+                &mut commands.commons[usize::from(address.command)].common
             };
             revoke |= can_discard_backdrop(commands.columns.paint(common.paint).0)
                 != can_discard_backdrop(edit.color);
@@ -115,20 +114,21 @@ impl DisplayList {
         &self,
         start: u32,
         viewport: Rect,
-    ) -> Result<(u32, Common, DamageRegion), PaintErrorKind> {
+    ) -> Result<(DrawRef, Common, DamageRegion), PaintErrorKind> {
         let &address = self
             .order
             .get(start as usize)
             .ok_or(PaintErrorKind::MissingGroup)?;
-        let (common, geometry, source) = self.parts(address, viewport);
+        let (stored, source) = self.state(address);
+        let image = source & ROUNDED_SOURCE == 0 && source & IMAGE_SOURCE != 0;
+        let common = self.columns.resolve(stored, viewport, image);
         if source != RECT_SOURCE && source & ROUNDED_SOURCE == 0 && source & IMAGE_SOURCE != 0 {
             return Err(PaintErrorKind::NotColor);
         }
-        let damage = if address & INLINE_DRAW != 0 {
-            DamageRegion::checked_canvas_bounds(geometry.bounds.map(usize::from))
+        let damage = if address.inline() {
+            DamageRegion::checked_canvas_bounds(address.bounds.map(usize::from))
         } else {
-            let p = &self.placements[address as usize];
-            if self.commons[p.common as usize].range[0] != start {
+            if self.commons[usize::from(address.command)].range[0] != start {
                 return Err(PaintErrorKind::MissingGroup);
             }
             // All placements share this clip. Using it avoids a glyph-count
@@ -187,12 +187,12 @@ impl Canvas {
             if edit.color[3] == 0.0 || edit.color[3].to_bits() != common.color[3].to_bits() {
                 return Err(fail(PaintErrorKind::AlphaChanged));
             }
-            let reference = if address & INLINE_DRAW != 0 {
-                self.commands.inline[(address & !INLINE_DRAW) as usize]
+            let reference = if address.inline() {
+                self.commands.inline[usize::from(address.command)]
                     .common
                     .paint
             } else {
-                self.commands.commons[self.commands.placements[address as usize].common as usize]
+                self.commands.commons[usize::from(address.command)]
                     .common
                     .paint
             };
@@ -205,7 +205,7 @@ impl Canvas {
                 continue;
             }
             changed += 1;
-            let support = if address & INLINE_DRAW != 0 {
+            let support = if address.inline() {
                 support
             } else {
                 let c = common.clip;

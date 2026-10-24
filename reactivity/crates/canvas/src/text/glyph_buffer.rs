@@ -73,13 +73,6 @@ impl Drop for GlyphBuffer {
     }
 }
 
-impl Clone for GlyphBuffer {
-    fn clone(&self) -> Self {
-        Self::new(self.to_vec(), self.text_len())
-            .unwrap_or_else(|_| panic!("cloned glyph capacity exceeds the header domain"))
-    }
-}
-
 impl fmt::Debug for GlyphBuffer {
     fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
         fmt::Debug::fmt(&**self, f)
@@ -165,9 +158,9 @@ mod tests {
     }
 
     #[test]
-    fn clone_and_threads_have_independent_ownership_and_shared_borrows() {
+    fn threads_have_independent_ownership_and_shared_borrows() {
         let retained = GlyphBuffer::new(vec![glyph(1), glyph(2)], 8).unwrap();
-        let cloned = retained.clone();
+        let cloned = GlyphBuffer::new(vec![glyph(1), glyph(2)], 8).unwrap();
         assert_ne!(cloned.as_ptr(), retained.as_ptr());
         assert_eq!(cloned.text_len(), retained.text_len());
         assert!(
@@ -194,20 +187,13 @@ mod tests {
 
     #[cfg(not(miri))]
     #[test]
-    fn transfer_allocates_nothing_and_clone_keeps_only_packed_values() {
+    fn transfer_allocates_nothing() {
         let mut vector = Vec::with_capacity(257);
         vector.extend((0..128).map(glyph));
         let mut owner = None;
         let cost =
             allocation_counter::measure(|| owner = Some(GlyphBuffer::new(vector, 1024).unwrap()));
         assert_eq!((cost.count_total, cost.bytes_total), (0, 0));
-        let owner = owner.unwrap();
-        let mut cloned = None;
-        let cost = allocation_counter::measure(|| cloned = Some(owner.clone()));
-        assert_eq!(
-            (cost.count_total, cost.bytes_total),
-            (1, (128 * size_of::<PackedGlyph>()) as u64)
-        );
-        assert_eq!(cloned.as_ref().unwrap().text_len(), 1024);
+        assert_eq!(owner.unwrap().text_len(), 1024);
     }
 }
