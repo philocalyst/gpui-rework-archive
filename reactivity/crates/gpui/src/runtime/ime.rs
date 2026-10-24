@@ -108,7 +108,6 @@ fn preview_selections(
     marked: Range<usize>,
     cursor: Option<[u32; 2]>,
 ) -> Result<(gpui_canvas::TextSelection, gpui_canvas::TextSelection), Error> {
-    let [a, b] = cursor.map_or([marked.start; 2], |c| c.map(|n| n as usize));
     // An ASCII prefix has no grapheme context before its final grapheme.
     // Retain that grapheme: a leading Extend can join it, and LF can follow CR.
     // Keep the complete suffix for joins across the other marked-text seam.
@@ -122,16 +121,20 @@ fn preview_selections(
     if base > 0 && bytes[base - 1..=base] == *b"\r\n" {
         base -= 1;
     }
-    let mut anchor = base;
-    let mut focus = base;
-    let mut left = base;
-    let mut right = value.len();
-    let mut previous = base;
+    // Keep the scan in suffix coordinates; translate its four results once.
+    let [a, b] = cursor
+        .map_or([marked.start; 2], |c| c.map(|n| n as usize))
+        .map(|n| n - base);
+    let marked = marked.start - base..marked.end - base;
+    let mut anchor = 0;
+    let mut focus = 0;
+    let mut left = 0;
+    let mut right = value.len() - base;
+    let mut previous = 0;
     // Admission places both raw cursor endpoints inside the marked range. Each
     // nearest endpoint needs only its adjacent boundaries; ties go downstream.
     // The first boundary at/after marked.end also completes its decoration.
     for boundary in icu_segmenter::GraphemeClusterSegmenter::new().segment_str(&value[base..]) {
-        let boundary = base + boundary;
         let nearest = |byte: usize| {
             if byte.abs_diff(previous) < byte.abs_diff(boundary) {
                 previous
@@ -156,12 +159,12 @@ fn preview_selections(
     }
     Ok((
         gpui_canvas::TextSelection {
-            anchor: position(anchor)?,
-            focus: position(focus)?,
+            anchor: position(base + anchor)?,
+            focus: position(base + focus)?,
         },
         gpui_canvas::TextSelection {
-            anchor: position(left)?,
-            focus: position(right)?,
+            anchor: position(base + left)?,
+            focus: position(base + right)?,
         },
     ))
 }
