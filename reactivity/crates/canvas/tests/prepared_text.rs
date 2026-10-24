@@ -145,6 +145,8 @@ fn rejected_first_paragraph_never_reserves_remaining_layout_headers() {
 fn empty_paragraph_capture_retention_is_independent_of_separator_count() {
     let face = FontFace::bundled().unwrap();
     let mut retained = None;
+    let mut allocations = None;
+    let mut requested = None;
     for length in [1, 1024, 32 * 1024] {
         let source = "\n".repeat(length);
         let mut shaper = face.shaper();
@@ -157,6 +159,11 @@ fn empty_paragraph_capture_retention_is_independent_of_separator_count() {
             *retained.get_or_insert(cost.bytes_current),
             cost.bytes_current
         );
+        assert_eq!(
+            *allocations.get_or_insert(cost.count_total),
+            cost.count_total
+        );
+        assert_eq!(*requested.get_or_insert(cost.bytes_total), cost.bytes_total);
         let (mut prepared, measured) = prepared.unwrap();
         let mut oracle = face.shaper();
         assert_eq!(
