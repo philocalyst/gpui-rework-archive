@@ -41,26 +41,34 @@ pub(super) fn bernstein(
         let cast_error = (f64::from(stored[0][c]) - alpha * controls[1][c])
             .abs()
             .max((f64::from(stored[1][c]) - alpha * controls[2][c]).abs());
-        // At exact v, the nonnegative Bernstein weights total A(t)/max(A).
-        // The longest written color path has nine one-ULP factors including
-        // the shared complement and both final sums. No other channel norm.
-        let mut error = endpoint_error + 0.75 * cast_error + gamma(9.0) * norm;
+        let anchor_error = endpoint_error + 0.75 * cast_error;
+        let mut parameter_error = 0.0;
         if a0 != a1 && a0 > 0.0 && a1 > 0.0 {
             // Absolute derivative in v of the alpha-conditioned endpoint form.
-            let k1 = alpha * controls[1][c];
-            let k2 = alpha * controls[2][c];
+            let k1 = f64::from(stored[0][c]);
+            let k2 = f64::from(stored[1][c]);
             let k = k1.abs().max(k2.abs());
+            let denominator_error = gamma(4.0);
             let derivative = 2.0 * f64::from(p0[c]).abs().max(f64::from(p1[c]).abs())
-                + 3.0 * k
-                + 0.75 * (k2 - k1).abs();
-            error += 12.0 * EPS * derivative + gamma(4.0) * 0.75 * k;
+                + (1.0 + denominator_error) * (3.0 * k + 0.75 * (k2 - k1).abs());
+            parameter_error = 12.0 * EPS * derivative + denominator_error * 0.75 * k;
         }
+        // At exact v, the nonnegative Bernstein weights total A(t)/max(A).
+        // The longest color path has nine one-ULP factors including shared
+        // complement uses and both final sums; unequal alpha adds 3*D's
+        // nontrivial product. Perturbed weights and stored controls also enter
+        // the rounding norm. No other channel's magnitude enters this bound.
+        let graph = if a0 == a1 { 9.0 } else { 10.0 };
+        let mut error =
+            anchor_error + parameter_error + gamma(graph) * (norm + anchor_error + parameter_error);
         // Controls use a short f64 matrix/product DAG. The broad host
         // conversion assumption remains the same as the direct-LMS profile.
         error += 128.0 * f64::EPSILON * (1.0 + preparation_norm);
-        // Conservative experimental FTZ allowance; qualification must audit the
-        // actual DAG and weighted ratio path before this tier can be adopted.
-        error += 1048576.0 * TINY * (1.0 + norm);
+        // <256 scalar arithmetic input/output sites, each with sensitivity
+        // <32*max(1, norm+anchor_error), plus weighted ratio loss <512*T*norm.
+        // Ordinary subnormal rounding and FTZ double this <2^15 allowance;
+        // 2^20 reserves the remaining DAG fanout. See the experiment ledger.
+        error += 1048576.0 * TINY * (1.0 + norm + anchor_error);
         (error * (1.0 + 256.0 * f64::EPSILON)).next_up()
     });
     (stored, errors)

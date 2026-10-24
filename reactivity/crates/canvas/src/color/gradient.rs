@@ -830,6 +830,7 @@ mod tests {
             GradientStop::new(0.0, Color::oklch(0.6, 0.2, 350., 0.1).unwrap()),
             GradientStop::new(0.3, Color::linear_display_p3(2., -0.1, 0.5, 0.9).unwrap()),
             GradientStop::new(0.3, Color::oklch(0.3, 0.1, 170., 0.5).unwrap()),
+            GradientStop::new(0.6, Color::oklch(0.5, 0.1, 170., 0.5).unwrap()),
             GradientStop::new(1.0, Color::linear_srgb(0.2, 0.2, 0.2, 1.).unwrap()),
         ];
         for mode in [
@@ -851,6 +852,7 @@ mod tests {
                         0.0,
                         0.125,
                         0.3,
+                        0.5,
                         f32::from_bits(0.3f32.to_bits() - 1),
                         0.7,
                         1.0,

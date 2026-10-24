@@ -4188,6 +4188,133 @@ fn all_solid_packet_declines_rectangular_certification_for_a_rounded_clip() {
 mod perceptual_oracle;
 
 #[test]
+fn lab_bernstein_hdr_cohorts_match_independent_oracle() {
+    use gpui_canvas::{
+        Extend, Gradient, GradientGeometry, GradientStop as Stop, Interpolation as Mode,
+        OutputProfile,
+    };
+    fn half(bytes: &[u8]) -> f64 {
+        let bits = u16::from_le_bytes([bytes[0], bytes[1]]);
+        let sign = if bits & 0x8000 == 0 { 1. } else { -1. };
+        let exponent = i32::from((bits >> 10) & 31);
+        let mantissa = f64::from(bits & 1023);
+        sign * if exponent == 0 {
+            mantissa * 2f64.powi(-24)
+        } else {
+            (1. + mantissa / 1024.) * 2f64.powi(exponent - 15)
+        }
+    }
+    pollster::block_on(async {
+        let mut renderer = renderer(wgpu::TextureFormat::Rgba16Float).await;
+        let palette = [
+            [1., 0., 0.],
+            [0., 1., 0.],
+            [0., 0., 1.],
+            [1., 1., 0.],
+            [0., 1., 1.],
+            [1., 0., 1.],
+            [1., 1., 1.],
+        ];
+        let mut verified = 0;
+        for reference in [80., 100., 203.] {
+            for peak in [1000., 4000., 10000.] {
+                for p3 in [false, true] {
+                    for (a0, a1) in [(1., 1.), (0.25, 0.75)] {
+                        let color = |rgb: [f32; 3], alpha| {
+                            let [r, g, b] = rgb.map(|v| v * (peak / reference));
+                            if p3 {
+                                Color::linear_display_p3(r, g, b, alpha).unwrap()
+                            } else {
+                                Color::linear_srgb(r, g, b, alpha).unwrap()
+                            }
+                        };
+                        let mut rows = Vec::new();
+                        let mut accepted = 0_u64;
+                        for (i, rgb0) in palette.iter().enumerate() {
+                            for (j, rgb1) in palette.iter().enumerate() {
+                                let (left, right) = (color(*rgb0, a0), color(*rgb1, a1));
+                                match Gradient::new(
+                                    GradientGeometry::Linear {
+                                        start: Point::default(),
+                                        end: Point { x: 1., y: 0. },
+                                    },
+                                    &[Stop::new(0., left), Stop::new(1., right)],
+                                    Extend::Pad,
+                                    Mode::Oklab,
+                                ) {
+                                    Ok(g) => {
+                                        accepted |= 1 << (7 * i + j);
+                                        rows.push((left, right, g));
+                                    }
+                                    Err(gpui_canvas::Error::GradientPrecision) => {}
+                                    Err(error) => panic!("unexpected admission error {error:?}"),
+                                }
+                            }
+                        }
+                        let height = rows.len() as u32;
+                        assert!(height >= 7);
+                        let mut canvas = Canvas::recording(
+                            8,
+                            height,
+                            ColorConfig::linear_hdr(OutputProfile::Srgb, 203.).unwrap(),
+                        )
+                        .unwrap();
+                        canvas.clear(Color::TRANSPARENT);
+                        let clip = Rect::new(0., 0., 8., height as f32);
+                        for (y, (_, _, gradient)) in rows.iter().enumerate() {
+                            canvas
+                                .fill_gradient(
+                                    gradient,
+                                    Rect::new(0., y as f32, 8., 1.),
+                                    0.,
+                                    Affine::IDENTITY,
+                                    clip,
+                                )
+                                .unwrap();
+                        }
+                        let bytes = readback(&mut renderer, &canvas);
+                        for (y, (left, right, _)) in rows.iter().enumerate() {
+                            for x in 0..8 {
+                                let mut expected = [0.; 4];
+                                for dx in [0.125, 0.375, 0.625, 0.875] {
+                                    let source = perceptual_oracle::interpolate(
+                                        *left,
+                                        *right,
+                                        (x as f64 + dx) / 8.,
+                                        Mode::Oklab,
+                                    );
+                                    for c in 0..4 {
+                                        expected[c] += source[c] * 0.25;
+                                    }
+                                }
+                                for c in 0..4 {
+                                    let offset = ((y * 8 + x) * 4 + c) * 2;
+                                    let actual = half(&bytes[offset..offset + 2]);
+                                    let tolerance = if c == 3 {
+                                        0.001
+                                    } else {
+                                        0.000005 + 0.002 * expected[c].abs()
+                                    };
+                                    assert!(
+                                        (actual - expected[c]).abs() <= tolerance,
+                                        "reference={reference} peak={peak} p3={p3} alpha={a0}/{a1} row={y} x={x} c={c} actual={actual} expected={expected:?} tolerance={tolerance}"
+                                    );
+                                }
+                            }
+                        }
+                        verified += rows.len();
+                        eprintln!(
+                            "gpu_lab_hdr_profile,reference_nits={reference},peak_nits={peak},p3={p3},alpha={a0}/{a1},admitted={height},accepted_pair_mask={accepted:013x}"
+                        );
+                    }
+                }
+            }
+        }
+        eprintln!("gpu_lab_hdr_profile,verified_pairs={verified}");
+    });
+}
+
+#[test]
 fn perceptual_gradients_match_independent_authored_f64_oracle() {
     use gpui_canvas::{
         Extend, Gradient, GradientGeometry, GradientStop as Stop, HueInterpolation as Hue,
