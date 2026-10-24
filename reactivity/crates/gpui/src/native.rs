@@ -1900,7 +1900,7 @@ mod tests {
                             .set_property(
                                 target,
                                 crate::property::BACKGROUND,
-                                Contribution::Set(crate::Color::BLACK),
+                                Contribution::Set(crate::Color::BLACK.into()),
                             )
                             .unwrap();
                         owner

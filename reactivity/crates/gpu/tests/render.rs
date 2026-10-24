@@ -64,6 +64,9 @@ fn gradient_clip_masks_remain_correlated_when_material_tails_relocate() {
                 .unwrap();
             let geometry = canvas.clip_geometry().unwrap();
             let chain = geometry.chain(duplicate).unwrap();
+            let masks: [[u16; 24]; 23] = std::array::from_fn(|y| {
+                std::array::from_fn(|x| chain.sample_mask(x as u32, y as u32))
+            });
             let gpu = readback(&mut renderer, &canvas);
             if turn == 1 {
                 assert!(renderer.image_stats().unwrap().uploaded_bytes > 0);
@@ -73,7 +76,7 @@ fn gradient_clip_masks_remain_correlated_when_material_tails_relocate() {
             let cpu = canvas.pixels();
             for y in 0..23 {
                 for x in 0..24 {
-                    let coverage = chain.sample_mask(x, y).count_ones() as f32 / 16.0;
+                    let coverage = masks[y][x].count_ones() as f32 / 16.0;
                     let expected = [coverage, coverage * 0.5, coverage * 0.25, coverage * 0.5];
                     for (channel, expected) in expected.into_iter().enumerate() {
                         let byte = ((y as usize * 24 + x as usize) * 4 + channel) * 2;
