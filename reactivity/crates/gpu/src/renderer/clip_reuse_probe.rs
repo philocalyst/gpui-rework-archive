@@ -1132,7 +1132,17 @@ fn optional_pipeline_identity_fallback_and_packet_selection() {
                         Color::BLACK,
                     )
                     .unwrap();
-                gpu.set_tile_proofs(kind == 3);
+                if kind == 2 {
+                    scene
+                        .fill_rect(
+                            Rect::new(1., 1., 4., 4.),
+                            Affine::IDENTITY,
+                            Rect::new(0., 0., 32., 24.),
+                            Color::rgba(100, 20, 30, 127),
+                        )
+                        .unwrap();
+                }
+                gpu.set_tile_proofs(true);
             }
             gpu.render(
                 scene.prepared_scene(),
