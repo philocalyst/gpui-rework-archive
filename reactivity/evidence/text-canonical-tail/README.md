@@ -57,6 +57,11 @@ The composed Main at `19037365297ae1fb29e1f69fc74d07c87dbbcba7` also passes
 strict native all-target Clippy, including the ordinary, mapped and inspector
 examples, with all 2,039 scoped input hashes unchanged; see
 [main-native-lint/result.json](main-native-lint/result.json).
+The later certified-solid composition at `4ee08a32def2ca70371c1764a0153a57053ae0e4`
+passes 226 native library tests plus the actual native GPU/paint/inspector bridge;
+[its evidence](../certified-solid/main-integration/result.json) retains the
+frozen executable and generated-shader identity. Text shipping bytes remain the
+reviewed reserve formulation above.
 
 The actual seven-library Syn/Tokei inventory is **32,377 non-test, non-comment
 shipping code lines**, including build code and the 50-line inline-call helper:

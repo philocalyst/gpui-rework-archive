@@ -1,0 +1,11 @@
+{
+  "source": "4ee08a32def2ca70371c1764a0153a57053ae0e4",
+  "generated": "/tmp/gpui-hummingbird-compose-root-target/debug/build/gpui_gpu/2d97987bb02daabb/out/ui.wgsl",
+  "wgsl_sha256": "bfc3c458b4632b081f03ceeb2b33cd5d4cef757dbb6063ae55838c01ffa1f185",
+  "wgsl_bytes": 15438,
+  "linked_native_ELF": "/tmp/gpui-hummingbird-compose-root-target/debug/build/gpui/a1498bbf48237c25/out/gpui-a1498bbf48237c25",
+  "ELF_sha256": "2a77bd6c946addcd05b109dfce208383deb7ecbc41cc5b1ea20f3c0beb9096ad",
+  "complete_generated_WGSL_in_linked_ELF": true,
+  "expected_shader_source": "7ccc65d2673a64499d805f41aaa0e423f15de2ce",
+  "scope": "Actual fresh generated shader and linked binary identity; no runtime inference."
+}

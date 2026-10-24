@@ -63,7 +63,9 @@ cargo check -p gpui_reactivity_host --features x11,wayland
 ```
 
 Core/state default builds have no third-party dependencies. Layout/native hosting
-are optional. The first-party libraries forbid unsafe; the allocation-counter
-example is isolated instrumentation. Current experiments are independent oracles,
+are optional. The GPUI façade forbids unsafe. Canvas isolates its audited packed
+glyph allocation owner, and the mapped-call helper isolates its checked inline
+payload operations; their evidence records the safety and layout contracts.
+Current experiments are independent oracles,
 not all permanent production subsystems. [Core README](crates/core/README.md)
 records the mutable-tree oracle's detailed behavior and memory bill.

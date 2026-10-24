@@ -1,0 +1,20 @@
+{
+  "scope": "Postexecution inventory of exact Cargo-reported GPU test artifacts; no before/after execution hash claim. Native ELF separately frozen and checked before/after.",
+  "artifacts": [
+    {
+      "path": "/tmp/gpui-hummingbird-compose-root-target/debug/build/gpui_gpu/438f3efd8226ced6/out/gpui_gpu-438f3efd8226ced6",
+      "bytes": 221484960,
+      "sha256": "0bb102153c53cb85a0a6d592f57d2ccfa89250ecebfbb03ff06215c45fac5310"
+    },
+    {
+      "path": "/tmp/gpui-hummingbird-compose-root-target/debug/build/gpui_gpu/af87d59cd0130b57/out/presentation-af87d59cd0130b57",
+      "bytes": 108536816,
+      "sha256": "f13ad00e46d5a2b5229774928a472230e572dde46da2aebcd2deb44678dcdcf3"
+    },
+    {
+      "path": "/tmp/gpui-hummingbird-compose-root-target/debug/build/gpui_gpu/3337e5995ae3a116/out/render-3337e5995ae3a116",
+      "bytes": 228560568,
+      "sha256": "84b31478f6861721f74519c1bcf0d2b18d4abb32ab7db7b3f14edc2e3c9706d5"
+    }
+  ]
+}

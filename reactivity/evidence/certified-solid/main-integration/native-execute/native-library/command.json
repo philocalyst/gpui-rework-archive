@@ -1,0 +1,8 @@
+{
+  "argv": [
+    "/tmp/gpui-certified-main-native/native-execute/gpui-native-tests",
+    "--test-threads=1"
+  ],
+  "timeout_seconds": 180,
+  "scope": "Functional actual ELF execution; no timing inference."
+}

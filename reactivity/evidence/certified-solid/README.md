@@ -46,9 +46,17 @@ its observed overloaded throughput 188/187/188 loses most of the certified path'
 benefit. It is deliberately unadopted. Reducing apparent live shader state is
 not enough to justify repeated draw loads.
 
-The producer's six-library source inventory is 31,814→31,809 (-5). Main's updated
-seven-library inventory and composed native/GPU qualification are recorded
-separately after integration. Original producer logs/guards and selected IR are
+The producer's six-library source inventory is 31,814→31,809 (-5). Main's actual
+seven-library inventory is **32,372**, five lines below its preceding text/map
+composition. At source `4ee08a32def2ca70371c1764a0153a57053ae0e4`,
+[composed qualification](main-integration/result.json) passes 227 native tests
+(30 other cases explicitly ignored), 65 all-feature GPU tests across four
+harnesses, and strict all-target native/GPU/offline-shader Clippy. All gates
+retain 2,039 matching scoped input hashes. The frozen native ELF contains the
+complete freshly generated WGSL with the exact candidate hash. Native tests
+exercise direct/mapped SDR/HDR full-render pixel oracles, coalescing and alpha
+fallback under private X11/llvmpipe. No other platform's runtime is claimed.
+Original producer logs/guards and selected IR are
 stored here compactly; [external executable identities](external-executables.json)
 retain the actual standalone artifacts without committing binary blobs.
 

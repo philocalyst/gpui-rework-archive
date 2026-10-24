@@ -4,6 +4,20 @@ The clean-room workspace runs real applications through one exclusively owned
 runtime. Start at [the GPUI crate](crates/gpui/README.md). The design documents
 describe the intended complete system; this page records what is connected now.
 
+The latest composed source `4ee08a32def2ca70371c1764a0153a57053ae0e4` integrates
+[mapped properties](evidence/mapped-properties-integration/README.md),
+[allocation-free warm text submission](evidence/text-canonical-tail/README.md)
+with reviewed placement capacities, and
+[sample-certified solid GPU packets](evidence/certified-solid/README.md).
+It passes 227 native tests (30 other native cases explicitly ignored), 65
+all-feature GPU tests and strict native/GPU all-target Clippy. Actual generated
+WGSL is verified inside the native executable. The seven-library inventory is
+32,372 non-test, non-comment shipping code lines. The
+[mapped Todo](comparisons/mapped-todo/README.md) and
+[matched shader](comparisons/todo-shader-profiles/README.md) experiments preserve
+their historical source identities and all failed work gates. Gradient materials
+and nested transformed clip chains remain separate qualification work.
+
 | Boundary | Integrated behavior | Remaining limit |
 | --- | --- | --- |
 | Ownership and sources | Borrowed View, inline Signal, typed owner-relative sources/actions, contained component projections and declared Source/earlier-Reader input families | One serial root owner; complete dependency/cohort graph remains |

@@ -1,0 +1,9 @@
+   Compiling wgpu-hal v30.0.1 (/root/gpui-ce3/reactivity/vendor/wgpu-hal)
+   Compiling gpui_gpu v0.1.0 (/root/gpui-ce3/reactivity/crates/gpu)
+   Compiling wgpu-core-deps-windows-linux-android v30.0.1
+   Compiling wgpu-core v30.0.1 (/root/gpui-ce3/reactivity/vendor/wgpu-core)
+   Compiling gpui_canvas v0.1.0 (/root/gpui-ce3/reactivity/crates/canvas)
+   Compiling wgpu v30.0.1 (/root/gpui-ce3/reactivity/vendor/wgpu)
+   Compiling gpui_inline_call v0.1.0 (/root/gpui-ce3/reactivity/crates/inline-call)
+   Compiling gpui v0.1.0 (/root/gpui-ce3/reactivity/crates/gpui)
+    Finished `test` profile [unoptimized + debuginfo] target(s) in 2m 05s
