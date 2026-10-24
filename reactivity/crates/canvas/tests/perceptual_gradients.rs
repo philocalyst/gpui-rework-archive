@@ -187,3 +187,20 @@ fn fixed_coordinates_preserve_hdr_axis_channels_but_longer_still_rotates() {
         shorter.view().sample_parameter(0.5).unwrap()
     );
 }
+
+#[test]
+fn transparent_extreme_hdr_does_not_destroy_visible_polar_coordinates() {
+    let left = Color::linear_srgb(HDR, 0., 0., 0.).unwrap();
+    let right = Color::linear_srgb(0., 0., 1., 1.).unwrap();
+    for mode in modes() {
+        let gradient = make(left, right, mode);
+        let expected = oracle::interpolate(left, right, 0.5, mode);
+        let actual = gradient.view().sample_parameter(0.5).unwrap();
+        for c in 0..4 {
+            assert!(
+                (f64::from(actual[c]) - expected[c]).abs() <= 0.00002 + expected[c].abs() * 0.00002,
+                "{mode:?} channel={c} actual={actual:?} expected={expected:?}"
+            );
+        }
+    }
+}
