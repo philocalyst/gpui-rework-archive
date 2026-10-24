@@ -74,12 +74,12 @@ fn gradient_clip_masks_remain_correlated_when_material_tails_relocate() {
                 assert_eq!(renderer.image_stats().unwrap().uploaded_bytes, 0);
             }
             let cpu = canvas.pixels();
-            for y in 0..23 {
-                for x in 0..24 {
-                    let coverage = masks[y][x].count_ones() as f32 / 16.0;
+            for (y, row) in masks.into_iter().enumerate() {
+                for (x, mask) in row.into_iter().enumerate() {
+                    let coverage = mask.count_ones() as f32 / 16.0;
                     let expected = [coverage, coverage * 0.5, coverage * 0.25, coverage * 0.5];
                     for (channel, expected) in expected.into_iter().enumerate() {
-                        let byte = ((y as usize * 24 + x as usize) * 4 + channel) * 2;
+                        let byte = ((y * 24 + x) * 4 + channel) * 2;
                         assert_eq!(
                             half(&gpu[byte..byte + 2]),
                             expected,
