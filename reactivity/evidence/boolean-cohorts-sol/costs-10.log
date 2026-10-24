@@ -1,0 +1,8 @@
+   Compiling gpui v0.1.0 (/root/gpui-boolean-cohort-sol-20261024/reactivity/crates/gpui)
+   Compiling gpui-component v0.1.0 (/root/gpui-boolean-cohort-sol-20261024/reactivity/crates/component)
+    Finished `dev` profile [unoptimized] target(s) in 3.05s
+     Running `targets/boolean-cohort-sol-20261024/debug/examples/binding_costs`
+public_headers,PropertyValue=28,PropertyValueAlignment=4,El=176,Style=88,Button=192,Checkbox=536,Input=360,PropInputColor=48
+direct=false,description_allocations=13,description_requested=2000,description_retained=2000,mount_allocations=420,mount_requested=164778,mount_retained=28716,update_allocations=5750,update_requested=1821800,update_retained=0,owner_reruns=100,descriptions=100,source_reads=0,destination_compares=1200
+direct=true,description_allocations=37,description_requested=4408,description_retained=3624,mount_allocations=470,mount_requested=170762,mount_retained=29348,update_allocations=1950,update_requested=338800,update_retained=0,owner_reruns=0,descriptions=0,source_reads=100,destination_compares=400
+initial_and_final_pixels_equal=true,bytes_each=281600

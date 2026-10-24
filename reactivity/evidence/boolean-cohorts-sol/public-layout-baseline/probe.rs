@@ -1,0 +1,1 @@
+fn main() { println!("BASELINE_LAYOUT ColorInput={} PropInputBool={} PropInputColor={} El={} Style={}", size_of::<gpui::ColorInput<'_>>(), size_of::<gpui::PropInput<'_,bool>>(), size_of::<gpui::PropInput<'_,gpui::Color>>(), size_of::<gpui::El<'_>>(), size_of::<gpui::Style>()); }

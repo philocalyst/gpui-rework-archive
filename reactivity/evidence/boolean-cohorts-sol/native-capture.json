@@ -1,0 +1,29 @@
+{
+  "binary": "/root/targets/boolean-cohort-sol-native-20261024/debug/examples/halloween",
+  "binary_sha256": "5c841e1753f571ab30e7ad60cd61985927d63165d4b5c0ebc22ffa253276d1c8",
+  "window": "2097154",
+  "display": ":0",
+  "renderer": "ReferenceCpu",
+  "screenshots": [
+    "draft",
+    "focus",
+    "disabled",
+    "ready",
+    "resized"
+  ],
+  "events": [
+    "pointer lanterns",
+    "Space lanterns",
+    "Enter lanterns",
+    "Tab treats",
+    "Space treats off",
+    "Space treats on",
+    "Tab finish",
+    "Enter finish"
+  ],
+  "final_acknowledged_epoch": 9,
+  "resize_acknowledged_epoch": 9,
+  "resized_geometry": "WINDOW=2097154\nX=0\nY=0\nWIDTH=960\nHEIGHT=700\nSCREEN=0\n",
+  "process_live_after_events": true,
+  "limitation": "Xvfb software display; no hardware GPU or physical display claim"
+}

@@ -1,0 +1,2972 @@
+{
+  "/root/gpui-boolean-cohort-sol-artifacts-20261024/component-5-e459186d2d": [
+    {
+      "name": "gpui_component",
+      "source": "e459186d2d3ba75883950350c6510b463b4f8dfc",
+      "original": "/root/targets/boolean-cohort-sol-20261024/debug/build/gpui-component/57972b8b7decc843/out/gpui_component-57972b8b7decc843",
+      "frozen": "/root/gpui-boolean-cohort-sol-artifacts-20261024/component-5-e459186d2d/gpui_component-gpui_component-57972b8b7decc843",
+      "bytes": 1076224,
+      "sha256": "e45aa13bb5ae27b3be1d458034632eaa6e9631a0da632bc4abdcc013540bd078",
+      "fresh": false,
+      "package": "path+file:///root/gpui-boolean-cohort-sol-20261024/reactivity/crates/component#gpui-component@0.1.0"
+    },
+    {
+      "name": "costs",
+      "source": "e459186d2d3ba75883950350c6510b463b4f8dfc",
+      "original": "/root/targets/boolean-cohort-sol-20261024/debug/examples/costs",
+      "frozen": "/root/gpui-boolean-cohort-sol-artifacts-20261024/component-5-e459186d2d/costs-costs",
+      "bytes": 26320800,
+      "sha256": "2d5b5beef9924796867739be85415d111b64703ab7f0737f75c5fa5ae43c1c46",
+      "fresh": false,
+      "package": "path+file:///root/gpui-boolean-cohort-sol-20261024/reactivity/crates/component#gpui-component@0.1.0"
+    },
+    {
+      "name": "halloween",
+      "source": "e459186d2d3ba75883950350c6510b463b4f8dfc",
+      "original": "/root/targets/boolean-cohort-sol-20261024/debug/examples/halloween",
+      "frozen": "/root/gpui-boolean-cohort-sol-artifacts-20261024/component-5-e459186d2d/halloween-halloween",
+      "bytes": 27335664,
+      "sha256": "8a1a47028ea3364c3e09d377f00df0377c95f11a8403fde5b80c364c522cc971",
+      "fresh": false,
+      "package": "path+file:///root/gpui-boolean-cohort-sol-20261024/reactivity/crates/component#gpui-component@0.1.0"
+    },
+    {
+      "name": "boolean_cohorts",
+      "source": "e459186d2d3ba75883950350c6510b463b4f8dfc",
+      "original": "/root/targets/boolean-cohort-sol-20261024/debug/build/gpui-component/0aa28119ed30bf5a/out/boolean_cohorts-0aa28119ed30bf5a",
+      "frozen": "/root/gpui-boolean-cohort-sol-artifacts-20261024/component-5-e459186d2d/boolean_cohorts-boolean_cohorts-0aa28119ed30bf5a",
+      "bytes": 28806856,
+      "sha256": "9e05cdebfd0bbdca3a547b9c5808033280be338fe2b4f70c4158c5e0d0ca4d3a",
+      "fresh": false,
+      "package": "path+file:///root/gpui-boolean-cohort-sol-20261024/reactivity/crates/component#gpui-component@0.1.0"
+    },
+    {
+      "name": "binding_costs",
+      "source": "e459186d2d3ba75883950350c6510b463b4f8dfc",
+      "original": "/root/targets/boolean-cohort-sol-20261024/debug/examples/binding_costs",
+      "frozen": "/root/gpui-boolean-cohort-sol-artifacts-20261024/component-5-e459186d2d/binding_costs-binding_costs",
+      "bytes": 27873544,
+      "sha256": "e187451f2348826e4960e1a08e4c94a9b551aa48b8ec6ff6ef68065efd5286f5",
+      "fresh": false,
+      "package": "path+file:///root/gpui-boolean-cohort-sol-20261024/reactivity/crates/component#gpui-component@0.1.0"
+    },
+    {
+      "name": "contracts",
+      "source": "e459186d2d3ba75883950350c6510b463b4f8dfc",
+      "original": "/root/targets/boolean-cohort-sol-20261024/debug/build/gpui-component/580e773b81c472df/out/contracts-580e773b81c472df",
+      "frozen": "/root/gpui-boolean-cohort-sol-artifacts-20261024/component-5-e459186d2d/contracts-contracts-580e773b81c472df",
+      "bytes": 33868528,
+      "sha256": "64c6d025ecda78091f21592047e57e3259cee25bb6e57c64d3410d406da5210d",
+      "fresh": false,
+      "package": "path+file:///root/gpui-boolean-cohort-sol-20261024/reactivity/crates/component#gpui-component@0.1.0"
+    },
+    {
+      "name": "bindings",
+      "source": "e459186d2d3ba75883950350c6510b463b4f8dfc",
+      "original": "/root/targets/boolean-cohort-sol-20261024/debug/build/gpui-component/d3bc361651d1abfd/out/bindings-d3bc361651d1abfd",
+      "frozen": "/root/gpui-boolean-cohort-sol-artifacts-20261024/component-5-e459186d2d/bindings-bindings-d3bc361651d1abfd",
+      "bytes": 30630448,
+      "sha256": "e433a11e652c60ecddbe49ed1f02f25b7cfabf1f0272d1b1b41a59396cc7962c",
+      "fresh": false,
+      "package": "path+file:///root/gpui-boolean-cohort-sol-20261024/reactivity/crates/component#gpui-component@0.1.0"
+    }
+  ],
+  "/root/gpui-boolean-cohort-sol-artifacts-20261024/component-6-9eb708ab3f": [
+    {
+      "name": "gpui_component",
+      "source": "9eb708ab3f9e8a4b2cd4f260c422cc02ad678e09",
+      "original": "/root/targets/boolean-cohort-sol-20261024/debug/build/gpui-component/57972b8b7decc843/out/gpui_component-57972b8b7decc843",
+      "frozen": "/root/gpui-boolean-cohort-sol-artifacts-20261024/component-6-9eb708ab3f/gpui_component-gpui_component-57972b8b7decc843",
+      "bytes": 1076224,
+      "sha256": "e45aa13bb5ae27b3be1d458034632eaa6e9631a0da632bc4abdcc013540bd078",
+      "fresh": false,
+      "package": "path+file:///root/gpui-boolean-cohort-sol-20261024/reactivity/crates/component#gpui-component@0.1.0"
+    },
+    {
+      "name": "costs",
+      "source": "9eb708ab3f9e8a4b2cd4f260c422cc02ad678e09",
+      "original": "/root/targets/boolean-cohort-sol-20261024/debug/examples/costs",
+      "frozen": "/root/gpui-boolean-cohort-sol-artifacts-20261024/component-6-9eb708ab3f/costs-costs",
+      "bytes": 26308656,
+      "sha256": "861d195febbfd86fbb9218c9cdf8055f732981dbb3aee1b7c5bb6cab2da8df3c",
+      "fresh": false,
+      "package": "path+file:///root/gpui-boolean-cohort-sol-20261024/reactivity/crates/component#gpui-component@0.1.0"
+    },
+    {
+      "name": "boolean_cohorts",
+      "source": "9eb708ab3f9e8a4b2cd4f260c422cc02ad678e09",
+      "original": "/root/targets/boolean-cohort-sol-20261024/debug/build/gpui-component/0aa28119ed30bf5a/out/boolean_cohorts-0aa28119ed30bf5a",
+      "frozen": "/root/gpui-boolean-cohort-sol-artifacts-20261024/component-6-9eb708ab3f/boolean_cohorts-boolean_cohorts-0aa28119ed30bf5a",
+      "bytes": 28773840,
+      "sha256": "ff0be735da75aac37d29d87211ae9b5a6a91c3ef4e3357af992ab6eb8abd1325",
+      "fresh": false,
+      "package": "path+file:///root/gpui-boolean-cohort-sol-20261024/reactivity/crates/component#gpui-component@0.1.0"
+    },
+    {
+      "name": "bindings",
+      "source": "9eb708ab3f9e8a4b2cd4f260c422cc02ad678e09",
+      "original": "/root/targets/boolean-cohort-sol-20261024/debug/build/gpui-component/d3bc361651d1abfd/out/bindings-d3bc361651d1abfd",
+      "frozen": "/root/gpui-boolean-cohort-sol-artifacts-20261024/component-6-9eb708ab3f/bindings-bindings-d3bc361651d1abfd",
+      "bytes": 30577432,
+      "sha256": "79aea6e331f67041d05cc4a5d7a0227c79793be9ebfd018b6e1a9bac5765ea08",
+      "fresh": false,
+      "package": "path+file:///root/gpui-boolean-cohort-sol-20261024/reactivity/crates/component#gpui-component@0.1.0"
+    },
+    {
+      "name": "binding_costs",
+      "source": "9eb708ab3f9e8a4b2cd4f260c422cc02ad678e09",
+      "original": "/root/targets/boolean-cohort-sol-20261024/debug/examples/binding_costs",
+      "frozen": "/root/gpui-boolean-cohort-sol-artifacts-20261024/component-6-9eb708ab3f/binding_costs-binding_costs",
+      "bytes": 27851352,
+      "sha256": "e0a697a649ad191b053277afb6ea6463749cff28974d817d444b3fef03d0b494",
+      "fresh": false,
+      "package": "path+file:///root/gpui-boolean-cohort-sol-20261024/reactivity/crates/component#gpui-component@0.1.0"
+    },
+    {
+      "name": "halloween",
+      "source": "9eb708ab3f9e8a4b2cd4f260c422cc02ad678e09",
+      "original": "/root/targets/boolean-cohort-sol-20261024/debug/examples/halloween",
+      "frozen": "/root/gpui-boolean-cohort-sol-artifacts-20261024/component-6-9eb708ab3f/halloween-halloween",
+      "bytes": 27323480,
+      "sha256": "a0a000b5a9dcdb724644002adfbc3f126e4faaf65a2d3fb4032be488db8e0964",
+      "fresh": false,
+      "package": "path+file:///root/gpui-boolean-cohort-sol-20261024/reactivity/crates/component#gpui-component@0.1.0"
+    },
+    {
+      "name": "contracts",
+      "source": "9eb708ab3f9e8a4b2cd4f260c422cc02ad678e09",
+      "original": "/root/targets/boolean-cohort-sol-20261024/debug/build/gpui-component/580e773b81c472df/out/contracts-580e773b81c472df",
+      "frozen": "/root/gpui-boolean-cohort-sol-artifacts-20261024/component-6-9eb708ab3f/contracts-contracts-580e773b81c472df",
+      "bytes": 33791024,
+      "sha256": "9195ef1291c8d6a9a4ea0a0ed9eaef1bd7242c2b0156d7020e0354de57c140c5",
+      "fresh": false,
+      "package": "path+file:///root/gpui-boolean-cohort-sol-20261024/reactivity/crates/component#gpui-component@0.1.0"
+    }
+  ],
+  "/root/gpui-boolean-cohort-sol-artifacts-20261024/full-10-31a6496bf7": [
+    {
+      "name": "library",
+      "source": "31a6496bf7044433498ac2535b42a032791720f4",
+      "original": "/root/targets/boolean-cohort-sol-20261024/debug/build/gpui/b6d35a445151d675/out/library-b6d35a445151d675",
+      "frozen": "/root/gpui-boolean-cohort-sol-artifacts-20261024/full-10-31a6496bf7/library-library-b6d35a445151d675",
+      "bytes": 28072376,
+      "sha256": "e44a5a4bf1084c0faeaf9bde56600dd88eb546a79e692e4ebf54901eb0a0e0fe",
+      "fresh": false,
+      "package": "path+file:///root/gpui-boolean-cohort-sol-20261024/reactivity/crates/gpui#0.1.0"
+    },
+    {
+      "name": "dimensions",
+      "source": "31a6496bf7044433498ac2535b42a032791720f4",
+      "original": "/root/targets/boolean-cohort-sol-20261024/debug/build/gpui/6d9b3d4fdeb6aeaa/out/dimensions-6d9b3d4fdeb6aeaa",
+      "frozen": "/root/gpui-boolean-cohort-sol-artifacts-20261024/full-10-31a6496bf7/dimensions-dimensions-6d9b3d4fdeb6aeaa",
+      "bytes": 29525784,
+      "sha256": "d83cb9fcd0d9eae4f7f9f07d228075d9fc624b1fedeefc55590d6e91662ed5f5",
+      "fresh": false,
+      "package": "path+file:///root/gpui-boolean-cohort-sol-20261024/reactivity/crates/gpui#0.1.0"
+    },
+    {
+      "name": "property_actions",
+      "source": "31a6496bf7044433498ac2535b42a032791720f4",
+      "original": "/root/targets/boolean-cohort-sol-20261024/debug/build/gpui/d9284f04be1c46cb/out/property_actions-d9284f04be1c46cb",
+      "frozen": "/root/gpui-boolean-cohort-sol-artifacts-20261024/full-10-31a6496bf7/property_actions-property_actions-d9284f04be1c46cb",
+      "bytes": 29381400,
+      "sha256": "3a7c736ba75b9db1852d928622314972c39c5b60587771fcbad7c8324d5773e7",
+      "fresh": false,
+      "package": "path+file:///root/gpui-boolean-cohort-sol-20261024/reactivity/crates/gpui#0.1.0"
+    },
+    {
+      "name": "text_lease_measure",
+      "source": "31a6496bf7044433498ac2535b42a032791720f4",
+      "original": "/root/targets/boolean-cohort-sol-20261024/debug/examples/text_lease_measure",
+      "frozen": "/root/gpui-boolean-cohort-sol-artifacts-20261024/full-10-31a6496bf7/text_lease_measure-text_lease_measure",
+      "bytes": 636664,
+      "sha256": "84e5318735cb58c16a5aa56465de1a0375f9dc3527a87da685b1101045eaeec4",
+      "fresh": false,
+      "package": "path+file:///root/gpui-boolean-cohort-sol-20261024/reactivity/crates/gpui#0.1.0"
+    },
+    {
+      "name": "sibling_reconciliation_cost",
+      "source": "31a6496bf7044433498ac2535b42a032791720f4",
+      "original": "/root/targets/boolean-cohort-sol-20261024/debug/build/gpui/1867e8d9ffc2ca04/out/sibling_reconciliation_cost-1867e8d9ffc2ca04",
+      "frozen": "/root/gpui-boolean-cohort-sol-artifacts-20261024/full-10-31a6496bf7/sibling_reconciliation_cost-sibling_reconciliation_cost-1867e8d9ffc2ca04",
+      "bytes": 26829288,
+      "sha256": "959f06d1cb9ac0f52296e27f4720f792dba3c8eb8c67f71e3ccd7148c5327ebe",
+      "fresh": false,
+      "package": "path+file:///root/gpui-boolean-cohort-sol-20261024/reactivity/crates/gpui#0.1.0"
+    },
+    {
+      "name": "unit_action_cost_two",
+      "source": "31a6496bf7044433498ac2535b42a032791720f4",
+      "original": "/root/targets/boolean-cohort-sol-20261024/debug/build/gpui/b1b2c8efbd6612f3/out/unit_action_cost_two-b1b2c8efbd6612f3",
+      "frozen": "/root/gpui-boolean-cohort-sol-artifacts-20261024/full-10-31a6496bf7/unit_action_cost_two-unit_action_cost_two-b1b2c8efbd6612f3",
+      "bytes": 27835056,
+      "sha256": "136d38cfdb74e7fc5a82c982fd84ecc714385729fd4b00049ad22a775890b0f3",
+      "fresh": false,
+      "package": "path+file:///root/gpui-boolean-cohort-sol-20261024/reactivity/crates/gpui#0.1.0"
+    },
+    {
+      "name": "queries",
+      "source": "31a6496bf7044433498ac2535b42a032791720f4",
+      "original": "/root/targets/boolean-cohort-sol-20261024/debug/build/gpui/1b5476dfc58f943c/out/queries-1b5476dfc58f943c",
+      "frozen": "/root/gpui-boolean-cohort-sol-artifacts-20261024/full-10-31a6496bf7/queries-queries-1b5476dfc58f943c",
+      "bytes": 27622328,
+      "sha256": "e8f7bb1378b0e995d8fdb2ed0487e7b95d54db0b86bb36e589e0f9fdaf3c94f1",
+      "fresh": false,
+      "package": "path+file:///root/gpui-boolean-cohort-sol-20261024/reactivity/crates/gpui#0.1.0"
+    },
+    {
+      "name": "gradient_backgrounds",
+      "source": "31a6496bf7044433498ac2535b42a032791720f4",
+      "original": "/root/targets/boolean-cohort-sol-20261024/debug/examples/gradient_backgrounds",
+      "frozen": "/root/gpui-boolean-cohort-sol-artifacts-20261024/full-10-31a6496bf7/gradient_backgrounds-gradient_backgrounds",
+      "bytes": 27732352,
+      "sha256": "5c65126c7f56f6d066622648334b1ef57811779e7af15d50004b123794ce5288",
+      "fresh": false,
+      "package": "path+file:///root/gpui-boolean-cohort-sol-20261024/reactivity/crates/gpui#0.1.0"
+    },
+    {
+      "name": "frontier",
+      "source": "31a6496bf7044433498ac2535b42a032791720f4",
+      "original": "/root/targets/boolean-cohort-sol-20261024/debug/build/gpui/2904597d18534e63/out/frontier-2904597d18534e63",
+      "frozen": "/root/gpui-boolean-cohort-sol-artifacts-20261024/full-10-31a6496bf7/frontier-frontier-2904597d18534e63",
+      "bytes": 30231936,
+      "sha256": "2dbfe3f4e02128b25213a6c8cfb882dabc1e496aba93fba7b31989aca578c158",
+      "fresh": false,
+      "package": "path+file:///root/gpui-boolean-cohort-sol-20261024/reactivity/crates/gpui#0.1.0"
+    },
+    {
+      "name": "paint_patch",
+      "source": "31a6496bf7044433498ac2535b42a032791720f4",
+      "original": "/root/targets/boolean-cohort-sol-20261024/debug/build/gpui/b3eaf94002a67c67/out/paint_patch-b3eaf94002a67c67",
+      "frozen": "/root/gpui-boolean-cohort-sol-artifacts-20261024/full-10-31a6496bf7/paint_patch-paint_patch-b3eaf94002a67c67",
+      "bytes": 29313576,
+      "sha256": "d31f629261a790ce3492f34911230a1d0550abc926e0970fac60c04e44cfb9f4",
+      "fresh": false,
+      "package": "path+file:///root/gpui-boolean-cohort-sol-20261024/reactivity/crates/gpui#0.1.0"
+    },
+    {
+      "name": "question_mailbox",
+      "source": "31a6496bf7044433498ac2535b42a032791720f4",
+      "original": "/root/targets/boolean-cohort-sol-20261024/debug/build/gpui/6a15bdbe56567270/out/question_mailbox-6a15bdbe56567270",
+      "frozen": "/root/gpui-boolean-cohort-sol-artifacts-20261024/full-10-31a6496bf7/question_mailbox-question_mailbox-6a15bdbe56567270",
+      "bytes": 27253240,
+      "sha256": "50171c79543389368d649e8bfbc40a2e9d4014e3d2910b8644ecda67e52e4192",
+      "fresh": false,
+      "package": "path+file:///root/gpui-boolean-cohort-sol-20261024/reactivity/crates/gpui#0.1.0"
+    },
+    {
+      "name": "bindings",
+      "source": "31a6496bf7044433498ac2535b42a032791720f4",
+      "original": "/root/targets/boolean-cohort-sol-20261024/debug/build/gpui-component/2acc55e836c6c0cc/out/bindings-2acc55e836c6c0cc",
+      "frozen": "/root/gpui-boolean-cohort-sol-artifacts-20261024/full-10-31a6496bf7/bindings-bindings-2acc55e836c6c0cc",
+      "bytes": 30639344,
+      "sha256": "1511b09b878cf0f90bdc845a5c824e858c2e2684aea1e34479c1f5b51b408c15",
+      "fresh": false,
+      "package": "path+file:///root/gpui-boolean-cohort-sol-20261024/reactivity/crates/component#gpui-component@0.1.0"
+    },
+    {
+      "name": "style_ports",
+      "source": "31a6496bf7044433498ac2535b42a032791720f4",
+      "original": "/root/targets/boolean-cohort-sol-20261024/debug/build/gpui/b395d1a20e1251a9/out/style_ports-b395d1a20e1251a9",
+      "frozen": "/root/gpui-boolean-cohort-sol-artifacts-20261024/full-10-31a6496bf7/style_ports-style_ports-b395d1a20e1251a9",
+      "bytes": 37845248,
+      "sha256": "d8b12d150ab73b38400619744227c845717fdb6b5da62e12f79198b3d3ca4f71",
+      "fresh": false,
+      "package": "path+file:///root/gpui-boolean-cohort-sol-20261024/reactivity/crates/gpui#0.1.0"
+    },
+    {
+      "name": "inbox_storage",
+      "source": "31a6496bf7044433498ac2535b42a032791720f4",
+      "original": "/root/targets/boolean-cohort-sol-20261024/debug/build/gpui/3b934c5ca1f70f86/out/inbox_storage-3b934c5ca1f70f86",
+      "frozen": "/root/gpui-boolean-cohort-sol-artifacts-20261024/full-10-31a6496bf7/inbox_storage-inbox_storage-3b934c5ca1f70f86",
+      "bytes": 28238304,
+      "sha256": "358b7401be1b2cc9b86e872f1a1879f5d19b0ab496d5d0dd99fa567231917d58",
+      "fresh": false,
+      "package": "path+file:///root/gpui-boolean-cohort-sol-20261024/reactivity/crates/gpui#0.1.0"
+    },
+    {
+      "name": "clipping",
+      "source": "31a6496bf7044433498ac2535b42a032791720f4",
+      "original": "/root/targets/boolean-cohort-sol-20261024/debug/build/gpui/b77bc012000d2afe/out/clipping-b77bc012000d2afe",
+      "frozen": "/root/gpui-boolean-cohort-sol-artifacts-20261024/full-10-31a6496bf7/clipping-clipping-b77bc012000d2afe",
+      "bytes": 31781328,
+      "sha256": "cd90ad435b284c98d9a66ec61373fd1627d52a9b640bf29862f679ae4feece14",
+      "fresh": false,
+      "package": "path+file:///root/gpui-boolean-cohort-sol-20261024/reactivity/crates/gpui#0.1.0"
+    },
+    {
+      "name": "ports",
+      "source": "31a6496bf7044433498ac2535b42a032791720f4",
+      "original": "/root/targets/boolean-cohort-sol-20261024/debug/build/gpui/fe0c54f729300911/out/ports-fe0c54f729300911",
+      "frozen": "/root/gpui-boolean-cohort-sol-artifacts-20261024/full-10-31a6496bf7/ports-ports-fe0c54f729300911",
+      "bytes": 30685304,
+      "sha256": "9d52aa2a6d6f3fcab196e47050eba7a7fc1507ad524310518a7d4b8ab19622bd",
+      "fresh": false,
+      "package": "path+file:///root/gpui-boolean-cohort-sol-20261024/reactivity/crates/gpui#0.1.0"
+    },
+    {
+      "name": "todo_comparison",
+      "source": "31a6496bf7044433498ac2535b42a032791720f4",
+      "original": "/root/targets/boolean-cohort-sol-20261024/debug/build/gpui/697f5d232ed0b549/out/todo_comparison-697f5d232ed0b549",
+      "frozen": "/root/gpui-boolean-cohort-sol-artifacts-20261024/full-10-31a6496bf7/todo_comparison-todo_comparison-697f5d232ed0b549",
+      "bytes": 29591936,
+      "sha256": "40d6fba7bc84564a43ff4bd04c8dfb2bc60907746d9a9ccc57b1d184f843d1f6",
+      "fresh": false,
+      "package": "path+file:///root/gpui-boolean-cohort-sol-20261024/reactivity/crates/gpui#0.1.0"
+    },
+    {
+      "name": "retained_list",
+      "source": "31a6496bf7044433498ac2535b42a032791720f4",
+      "original": "/root/targets/boolean-cohort-sol-20261024/debug/examples/retained_list",
+      "frozen": "/root/gpui-boolean-cohort-sol-artifacts-20261024/full-10-31a6496bf7/retained_list-retained_list",
+      "bytes": 27645496,
+      "sha256": "c71e6e3b97b0e43db8c4b8ed6b3d7e9a437d484ea9ad01377399f28494fe8e59",
+      "fresh": false,
+      "package": "path+file:///root/gpui-boolean-cohort-sol-20261024/reactivity/crates/gpui#0.1.0"
+    },
+    {
+      "name": "gpui_component",
+      "source": "31a6496bf7044433498ac2535b42a032791720f4",
+      "original": "/root/targets/boolean-cohort-sol-20261024/debug/build/gpui-component/4b4743de5210f9d4/out/gpui_component-4b4743de5210f9d4",
+      "frozen": "/root/gpui-boolean-cohort-sol-artifacts-20261024/full-10-31a6496bf7/gpui_component-gpui_component-4b4743de5210f9d4",
+      "bytes": 1076224,
+      "sha256": "7c4b4781d6b501339a03fb4de1b111f84982c9c92fca2647eee633144f6334bc",
+      "fresh": false,
+      "package": "path+file:///root/gpui-boolean-cohort-sol-20261024/reactivity/crates/component#gpui-component@0.1.0"
+    },
+    {
+      "name": "semantic_metadata",
+      "source": "31a6496bf7044433498ac2535b42a032791720f4",
+      "original": "/root/targets/boolean-cohort-sol-20261024/debug/build/gpui/b2f16d39422959e5/out/semantic_metadata-b2f16d39422959e5",
+      "frozen": "/root/gpui-boolean-cohort-sol-artifacts-20261024/full-10-31a6496bf7/semantic_metadata-semantic_metadata-b2f16d39422959e5",
+      "bytes": 34281264,
+      "sha256": "5bef402654f437517fc68188b11989c8611289bdc72e392829723a006d1e0337",
+      "fresh": false,
+      "package": "path+file:///root/gpui-boolean-cohort-sol-20261024/reactivity/crates/gpui#0.1.0"
+    },
+    {
+      "name": "field_identity",
+      "source": "31a6496bf7044433498ac2535b42a032791720f4",
+      "original": "/root/targets/boolean-cohort-sol-20261024/debug/build/gpui/5654a5203d5402c4/out/field_identity-5654a5203d5402c4",
+      "frozen": "/root/gpui-boolean-cohort-sol-artifacts-20261024/full-10-31a6496bf7/field_identity-field_identity-5654a5203d5402c4",
+      "bytes": 26849040,
+      "sha256": "b45e8382095883e4e936de4a418bcf4b815786467058fdad08d35b495313301f",
+      "fresh": false,
+      "package": "path+file:///root/gpui-boolean-cohort-sol-20261024/reactivity/crates/gpui#0.1.0"
+    },
+    {
+      "name": "literal_dispatch",
+      "source": "31a6496bf7044433498ac2535b42a032791720f4",
+      "original": "/root/targets/boolean-cohort-sol-20261024/debug/build/gpui/059baed3a7a2ea3f/out/literal_dispatch-059baed3a7a2ea3f",
+      "frozen": "/root/gpui-boolean-cohort-sol-artifacts-20261024/full-10-31a6496bf7/literal_dispatch-literal_dispatch-059baed3a7a2ea3f",
+      "bytes": 28567816,
+      "sha256": "28e9767a886ec55f8955a9963cc00472b60a356fa596a85902f49198c0555fe4",
+      "fresh": false,
+      "package": "path+file:///root/gpui-boolean-cohort-sol-20261024/reactivity/crates/gpui#0.1.0"
+    },
+    {
+      "name": "rounded",
+      "source": "31a6496bf7044433498ac2535b42a032791720f4",
+      "original": "/root/targets/boolean-cohort-sol-20261024/debug/build/gpui/704af4c9a17a7c32/out/rounded-704af4c9a17a7c32",
+      "frozen": "/root/gpui-boolean-cohort-sol-artifacts-20261024/full-10-31a6496bf7/rounded-rounded-704af4c9a17a7c32",
+      "bytes": 31477904,
+      "sha256": "9be6cb2c649ecb86d70ff859597c316fc4de23754a3b58abb6b37f6749fdac0b",
+      "fresh": false,
+      "package": "path+file:///root/gpui-boolean-cohort-sol-20261024/reactivity/crates/gpui#0.1.0"
+    },
+    {
+      "name": "property_outline_allocations",
+      "source": "31a6496bf7044433498ac2535b42a032791720f4",
+      "original": "/root/targets/boolean-cohort-sol-20261024/debug/build/gpui/5a19370338ca7f3e/out/property_outline_allocations-5a19370338ca7f3e",
+      "frozen": "/root/gpui-boolean-cohort-sol-artifacts-20261024/full-10-31a6496bf7/property_outline_allocations-property_outline_allocations-5a19370338ca7f3e",
+      "bytes": 27059240,
+      "sha256": "1bfeee71d13bce9d1519edcb5ea0f7a5a4d90935761bf1d663f4b13d14d9830a",
+      "fresh": false,
+      "package": "path+file:///root/gpui-boolean-cohort-sol-20261024/reactivity/crates/gpui#0.1.0"
+    },
+    {
+      "name": "identity_recovery",
+      "source": "31a6496bf7044433498ac2535b42a032791720f4",
+      "original": "/root/targets/boolean-cohort-sol-20261024/debug/build/gpui/b51784c3fd391e16/out/identity_recovery-b51784c3fd391e16",
+      "frozen": "/root/gpui-boolean-cohort-sol-artifacts-20261024/full-10-31a6496bf7/identity_recovery-identity_recovery-b51784c3fd391e16",
+      "bytes": 27069280,
+      "sha256": "c1bf2dc9d2a057be6084ea4472ffec72f43f2f27a56e3d8965f6cd5d5d31b2e1",
+      "fresh": false,
+      "package": "path+file:///root/gpui-boolean-cohort-sol-20261024/reactivity/crates/gpui#0.1.0"
+    },
+    {
+      "name": "paint_slots",
+      "source": "31a6496bf7044433498ac2535b42a032791720f4",
+      "original": "/root/targets/boolean-cohort-sol-20261024/debug/build/gpui/a570db7535072cf1/out/paint_slots-a570db7535072cf1",
+      "frozen": "/root/gpui-boolean-cohort-sol-artifacts-20261024/full-10-31a6496bf7/paint_slots-paint_slots-a570db7535072cf1",
+      "bytes": 29905216,
+      "sha256": "23eb853a04ff5e991facc0644670f0432577d17258430514ad1b855b247de938",
+      "fresh": false,
+      "package": "path+file:///root/gpui-boolean-cohort-sol-20261024/reactivity/crates/gpui#0.1.0"
+    },
+    {
+      "name": "question_futures",
+      "source": "31a6496bf7044433498ac2535b42a032791720f4",
+      "original": "/root/targets/boolean-cohort-sol-20261024/debug/build/gpui/6c5310428c152e9a/out/question_futures-6c5310428c152e9a",
+      "frozen": "/root/gpui-boolean-cohort-sol-artifacts-20261024/full-10-31a6496bf7/question_futures-question_futures-6c5310428c152e9a",
+      "bytes": 30636584,
+      "sha256": "19fa328eb6c01c08d4e6b981915b695c8daad97972171a8bd3378a3ab9172ff6",
+      "fresh": false,
+      "package": "path+file:///root/gpui-boolean-cohort-sol-20261024/reactivity/crates/gpui#0.1.0"
+    },
+    {
+      "name": "source_inbox_reader_gate",
+      "source": "31a6496bf7044433498ac2535b42a032791720f4",
+      "original": "/root/targets/boolean-cohort-sol-20261024/debug/build/gpui/d104278269e560da/out/source_inbox_reader_gate-d104278269e560da",
+      "frozen": "/root/gpui-boolean-cohort-sol-artifacts-20261024/full-10-31a6496bf7/source_inbox_reader_gate-source_inbox_reader_gate-d104278269e560da",
+      "bytes": 27206312,
+      "sha256": "dfa5783add1f3cc20b7eaafaf72ee0edc0bde96db0517b86d886210fcc0ac7d0",
+      "fresh": false,
+      "package": "path+file:///root/gpui-boolean-cohort-sol-20261024/reactivity/crates/gpui#0.1.0"
+    },
+    {
+      "name": "application",
+      "source": "31a6496bf7044433498ac2535b42a032791720f4",
+      "original": "/root/targets/boolean-cohort-sol-20261024/debug/build/gpui/e2286cad79c35b8b/out/application-e2286cad79c35b8b",
+      "frozen": "/root/gpui-boolean-cohort-sol-artifacts-20261024/full-10-31a6496bf7/application-application-e2286cad79c35b8b",
+      "bytes": 30040024,
+      "sha256": "0a8f22638205ec57ea2c355edde853db0f7e85f2b0e971d1e1e97f0a79e2c146",
+      "fresh": false,
+      "package": "path+file:///root/gpui-boolean-cohort-sol-20261024/reactivity/crates/gpui#0.1.0"
+    },
+    {
+      "name": "text_geometry",
+      "source": "31a6496bf7044433498ac2535b42a032791720f4",
+      "original": "/root/targets/boolean-cohort-sol-20261024/debug/build/gpui/99a4d622471d6d31/out/text_geometry-99a4d622471d6d31",
+      "frozen": "/root/gpui-boolean-cohort-sol-artifacts-20261024/full-10-31a6496bf7/text_geometry-text_geometry-99a4d622471d6d31",
+      "bytes": 27834944,
+      "sha256": "4c47120fed2ce97535dd0d3944c5d525337fafe02b4cd645e19fff51139f310f",
+      "fresh": false,
+      "package": "path+file:///root/gpui-boolean-cohort-sol-20261024/reactivity/crates/gpui#0.1.0"
+    },
+    {
+      "name": "contained_owner_spike",
+      "source": "31a6496bf7044433498ac2535b42a032791720f4",
+      "original": "/root/targets/boolean-cohort-sol-20261024/debug/examples/contained_owner_spike",
+      "frozen": "/root/gpui-boolean-cohort-sol-artifacts-20261024/full-10-31a6496bf7/contained_owner_spike-contained_owner_spike",
+      "bytes": 26890424,
+      "sha256": "368734500a30c5fcd73583faeae45dd90fcb73ef4c0afeb60ce722751717bdeb",
+      "fresh": false,
+      "package": "path+file:///root/gpui-boolean-cohort-sol-20261024/reactivity/crates/gpui#0.1.0"
+    },
+    {
+      "name": "paint_slot_storage",
+      "source": "31a6496bf7044433498ac2535b42a032791720f4",
+      "original": "/root/targets/boolean-cohort-sol-20261024/debug/examples/paint_slot_storage",
+      "frozen": "/root/gpui-boolean-cohort-sol-artifacts-20261024/full-10-31a6496bf7/paint_slot_storage-paint_slot_storage",
+      "bytes": 26295504,
+      "sha256": "383606a14c8462509aa862765a4065aeecc914f6ba8ce95e894e117b496787b5",
+      "fresh": false,
+      "package": "path+file:///root/gpui-boolean-cohort-sol-20261024/reactivity/crates/gpui#0.1.0"
+    },
+    {
+      "name": "costs",
+      "source": "31a6496bf7044433498ac2535b42a032791720f4",
+      "original": "/root/targets/boolean-cohort-sol-20261024/debug/examples/costs",
+      "frozen": "/root/gpui-boolean-cohort-sol-artifacts-20261024/full-10-31a6496bf7/costs-costs",
+      "bytes": 26308656,
+      "sha256": "45cddc6fb854d621a7d64378596435580cd92398f4f96f2a7d349470046c4b13",
+      "fresh": false,
+      "package": "path+file:///root/gpui-boolean-cohort-sol-20261024/reactivity/crates/component#gpui-component@0.1.0"
+    },
+    {
+      "name": "gpui",
+      "source": "31a6496bf7044433498ac2535b42a032791720f4",
+      "original": "/root/targets/boolean-cohort-sol-20261024/debug/build/gpui/25196bf12836f725/out/gpui-25196bf12836f725",
+      "frozen": "/root/gpui-boolean-cohort-sol-artifacts-20261024/full-10-31a6496bf7/gpui-gpui-25196bf12836f725",
+      "bytes": 70266032,
+      "sha256": "e57b0a7e7efe4c8d3fd83605fa31b6b551712bc8e22dd2bac66d5712962664f2",
+      "fresh": false,
+      "package": "path+file:///root/gpui-boolean-cohort-sol-20261024/reactivity/crates/gpui#0.1.0"
+    },
+    {
+      "name": "intrinsic_text",
+      "source": "31a6496bf7044433498ac2535b42a032791720f4",
+      "original": "/root/targets/boolean-cohort-sol-20261024/debug/build/gpui/95aaac3b95806b75/out/intrinsic_text-95aaac3b95806b75",
+      "frozen": "/root/gpui-boolean-cohort-sol-artifacts-20261024/full-10-31a6496bf7/intrinsic_text-intrinsic_text-95aaac3b95806b75",
+      "bytes": 27350096,
+      "sha256": "a8a9233e384d3406416ee217ae55fdc3f939960a21f4ff434b7b0e05bb929041",
+      "fresh": false,
+      "package": "path+file:///root/gpui-boolean-cohort-sol-20261024/reactivity/crates/gpui#0.1.0"
+    },
+    {
+      "name": "projected_sources",
+      "source": "31a6496bf7044433498ac2535b42a032791720f4",
+      "original": "/root/targets/boolean-cohort-sol-20261024/debug/build/gpui/51a1f1a61e3d3c0d/out/projected_sources-51a1f1a61e3d3c0d",
+      "frozen": "/root/gpui-boolean-cohort-sol-artifacts-20261024/full-10-31a6496bf7/projected_sources-projected_sources-51a1f1a61e3d3c0d",
+      "bytes": 30073120,
+      "sha256": "50e13ade64c3bd92aedaf531fb36c9067ac5fedd6f0818f2825bf4d60d95f2f7",
+      "fresh": false,
+      "package": "path+file:///root/gpui-boolean-cohort-sol-20261024/reactivity/crates/gpui#0.1.0"
+    },
+    {
+      "name": "questions",
+      "source": "31a6496bf7044433498ac2535b42a032791720f4",
+      "original": "/root/targets/boolean-cohort-sol-20261024/debug/build/gpui/52da471991a50b2a/out/questions-52da471991a50b2a",
+      "frozen": "/root/gpui-boolean-cohort-sol-artifacts-20261024/full-10-31a6496bf7/questions-questions-52da471991a50b2a",
+      "bytes": 29199448,
+      "sha256": "4349d727cd079aede9b5074ea14c8f32ed18da0545e7f569f2cc872721eba104",
+      "fresh": false,
+      "package": "path+file:///root/gpui-boolean-cohort-sol-20261024/reactivity/crates/gpui#0.1.0"
+    },
+    {
+      "name": "semantics",
+      "source": "31a6496bf7044433498ac2535b42a032791720f4",
+      "original": "/root/targets/boolean-cohort-sol-20261024/debug/build/gpui/7693f05a5ab9a240/out/semantics-7693f05a5ab9a240",
+      "frozen": "/root/gpui-boolean-cohort-sol-artifacts-20261024/full-10-31a6496bf7/semantics-semantics-7693f05a5ab9a240",
+      "bytes": 29616872,
+      "sha256": "b810128dae8bdbbd909af1aa82c19787d371cb69bb9d3dceb4f69f62cf2c9a7b",
+      "fresh": false,
+      "package": "path+file:///root/gpui-boolean-cohort-sol-20261024/reactivity/crates/gpui#0.1.0"
+    },
+    {
+      "name": "unit_action_cost",
+      "source": "31a6496bf7044433498ac2535b42a032791720f4",
+      "original": "/root/targets/boolean-cohort-sol-20261024/debug/build/gpui/2173a19b4bf89b8b/out/unit_action_cost-2173a19b4bf89b8b",
+      "frozen": "/root/gpui-boolean-cohort-sol-artifacts-20261024/full-10-31a6496bf7/unit_action_cost-unit_action_cost-2173a19b4bf89b8b",
+      "bytes": 27071184,
+      "sha256": "42a81c6661515f7e7cd17b51f19135b3d9d0f309014aeabb6959970d9a41feea",
+      "fresh": false,
+      "package": "path+file:///root/gpui-boolean-cohort-sol-20261024/reactivity/crates/gpui#0.1.0"
+    },
+    {
+      "name": "text_lane_measure",
+      "source": "31a6496bf7044433498ac2535b42a032791720f4",
+      "original": "/root/targets/boolean-cohort-sol-20261024/debug/examples/text_lane_measure",
+      "frozen": "/root/gpui-boolean-cohort-sol-artifacts-20261024/full-10-31a6496bf7/text_lane_measure-text_lane_measure",
+      "bytes": 27862024,
+      "sha256": "dea63dc113215475a89ddeb16f135bf79f1eec1068dce0d7e13af0df6a11a2f7",
+      "fresh": false,
+      "package": "path+file:///root/gpui-boolean-cohort-sol-20261024/reactivity/crates/gpui#0.1.0"
+    },
+    {
+      "name": "binding_costs",
+      "source": "31a6496bf7044433498ac2535b42a032791720f4",
+      "original": "/root/targets/boolean-cohort-sol-20261024/debug/examples/binding_costs",
+      "frozen": "/root/gpui-boolean-cohort-sol-artifacts-20261024/full-10-31a6496bf7/binding_costs-binding_costs",
+      "bytes": 27851352,
+      "sha256": "5636feb4b2c5f8c422a0372fff0a1ffd374ed85107dc6ea6c0a0ee76a49aca0b",
+      "fresh": false,
+      "package": "path+file:///root/gpui-boolean-cohort-sol-20261024/reactivity/crates/component#gpui-component@0.1.0"
+    },
+    {
+      "name": "property_state_shell",
+      "source": "31a6496bf7044433498ac2535b42a032791720f4",
+      "original": "/root/targets/boolean-cohort-sol-20261024/debug/build/gpui/6a5892b921b89427/out/property_state_shell-6a5892b921b89427",
+      "frozen": "/root/gpui-boolean-cohort-sol-artifacts-20261024/full-10-31a6496bf7/property_state_shell-property_state_shell-6a5892b921b89427",
+      "bytes": 27030280,
+      "sha256": "8985dc3096b4035afd3ff5da8262175872025a12f1257ca0fc57ec14f17579ec",
+      "fresh": false,
+      "package": "path+file:///root/gpui-boolean-cohort-sol-20261024/reactivity/crates/gpui#0.1.0"
+    },
+    {
+      "name": "components",
+      "source": "31a6496bf7044433498ac2535b42a032791720f4",
+      "original": "/root/targets/boolean-cohort-sol-20261024/debug/build/gpui/7978379f244f4005/out/components-7978379f244f4005",
+      "frozen": "/root/gpui-boolean-cohort-sol-artifacts-20261024/full-10-31a6496bf7/components-components-7978379f244f4005",
+      "bytes": 32115504,
+      "sha256": "8a56cc61821999c8fc612526d4a0e97efc05115c993384bfa406cfae8417dc51",
+      "fresh": false,
+      "package": "path+file:///root/gpui-boolean-cohort-sol-20261024/reactivity/crates/gpui#0.1.0"
+    },
+    {
+      "name": "mapped_properties",
+      "source": "31a6496bf7044433498ac2535b42a032791720f4",
+      "original": "/root/targets/boolean-cohort-sol-20261024/debug/build/gpui/7a5e988d99e5a31e/out/mapped_properties-7a5e988d99e5a31e",
+      "frozen": "/root/gpui-boolean-cohort-sol-artifacts-20261024/full-10-31a6496bf7/mapped_properties-mapped_properties-7a5e988d99e5a31e",
+      "bytes": 32404448,
+      "sha256": "88625a86114df178a6eee4b804d8bc88f41ad2fb8014e708871e824fa492c746",
+      "fresh": false,
+      "package": "path+file:///root/gpui-boolean-cohort-sol-20261024/reactivity/crates/gpui#0.1.0"
+    },
+    {
+      "name": "source_values",
+      "source": "31a6496bf7044433498ac2535b42a032791720f4",
+      "original": "/root/targets/boolean-cohort-sol-20261024/debug/build/gpui/bd88fc3a744034d2/out/source_values-bd88fc3a744034d2",
+      "frozen": "/root/gpui-boolean-cohort-sol-artifacts-20261024/full-10-31a6496bf7/source_values-source_values-bd88fc3a744034d2",
+      "bytes": 27971200,
+      "sha256": "1705770e49220af0b98fe839121b0035c06431f953ec4ce8e4858f19d11171e4",
+      "fresh": false,
+      "package": "path+file:///root/gpui-boolean-cohort-sol-20261024/reactivity/crates/gpui#0.1.0"
+    },
+    {
+      "name": "focus",
+      "source": "31a6496bf7044433498ac2535b42a032791720f4",
+      "original": "/root/targets/boolean-cohort-sol-20261024/debug/build/gpui/a3c62805c442e195/out/focus-a3c62805c442e195",
+      "frozen": "/root/gpui-boolean-cohort-sol-artifacts-20261024/full-10-31a6496bf7/focus-focus-a3c62805c442e195",
+      "bytes": 30575864,
+      "sha256": "0d59e44d8c362e5012384b354409cd184b38fba761d8ec549740064b0eabd579",
+      "fresh": false,
+      "package": "path+file:///root/gpui-boolean-cohort-sol-20261024/reactivity/crates/gpui#0.1.0"
+    },
+    {
+      "name": "first_frame",
+      "source": "31a6496bf7044433498ac2535b42a032791720f4",
+      "original": "/root/targets/boolean-cohort-sol-20261024/debug/examples/first_frame",
+      "frozen": "/root/gpui-boolean-cohort-sol-artifacts-20261024/full-10-31a6496bf7/first_frame-first_frame",
+      "bytes": 28273088,
+      "sha256": "4b12a840463c7b05d3e980190822c0ef3dae9bf503f76d643ea3b3b435d38f71",
+      "fresh": false,
+      "package": "path+file:///root/gpui-boolean-cohort-sol-20261024/reactivity/crates/gpui#0.1.0"
+    },
+    {
+      "name": "question_inputs",
+      "source": "31a6496bf7044433498ac2535b42a032791720f4",
+      "original": "/root/targets/boolean-cohort-sol-20261024/debug/build/gpui/f8337bf2443d77bb/out/question_inputs-f8337bf2443d77bb",
+      "frozen": "/root/gpui-boolean-cohort-sol-artifacts-20261024/full-10-31a6496bf7/question_inputs-question_inputs-f8337bf2443d77bb",
+      "bytes": 28310968,
+      "sha256": "7ada3fff0a69f02aef50467d2a35e4f80cde497929599be105e020cca573ac8e",
+      "fresh": false,
+      "package": "path+file:///root/gpui-boolean-cohort-sol-20261024/reactivity/crates/gpui#0.1.0"
+    },
+    {
+      "name": "runtime",
+      "source": "31a6496bf7044433498ac2535b42a032791720f4",
+      "original": "/root/targets/boolean-cohort-sol-20261024/debug/build/gpui/7c19208a61f5302b/out/runtime-7c19208a61f5302b",
+      "frozen": "/root/gpui-boolean-cohort-sol-artifacts-20261024/full-10-31a6496bf7/runtime-runtime-7c19208a61f5302b",
+      "bytes": 36673928,
+      "sha256": "9fc8a07ff2fe59d6ff57ed8717daf94e135c28a64e8772f34177fa19710d07da",
+      "fresh": false,
+      "package": "path+file:///root/gpui-boolean-cohort-sol-20261024/reactivity/crates/gpui#0.1.0"
+    },
+    {
+      "name": "pointer_focus",
+      "source": "31a6496bf7044433498ac2535b42a032791720f4",
+      "original": "/root/targets/boolean-cohort-sol-20261024/debug/build/gpui/ae258c841850710a/out/pointer_focus-ae258c841850710a",
+      "frozen": "/root/gpui-boolean-cohort-sol-artifacts-20261024/full-10-31a6496bf7/pointer_focus-pointer_focus-ae258c841850710a",
+      "bytes": 27416296,
+      "sha256": "dbb124c167711e6d500481bbece4388379d564dc21871136d1b20a1939ec94f8",
+      "fresh": false,
+      "package": "path+file:///root/gpui-boolean-cohort-sol-20261024/reactivity/crates/gpui#0.1.0"
+    },
+    {
+      "name": "text_selection_compound",
+      "source": "31a6496bf7044433498ac2535b42a032791720f4",
+      "original": "/root/targets/boolean-cohort-sol-20261024/debug/build/gpui/8fbb703d244b8586/out/text_selection_compound-8fbb703d244b8586",
+      "frozen": "/root/gpui-boolean-cohort-sol-artifacts-20261024/full-10-31a6496bf7/text_selection_compound-text_selection_compound-8fbb703d244b8586",
+      "bytes": 27495560,
+      "sha256": "d615be011008a389b3c045c884700853c27db548e620aa84b9e98e9bcad3dcd0",
+      "fresh": false,
+      "package": "path+file:///root/gpui-boolean-cohort-sol-20261024/reactivity/crates/gpui#0.1.0"
+    },
+    {
+      "name": "contracts",
+      "source": "31a6496bf7044433498ac2535b42a032791720f4",
+      "original": "/root/targets/boolean-cohort-sol-20261024/debug/build/gpui-component/0749f5d3f8a42466/out/contracts-0749f5d3f8a42466",
+      "frozen": "/root/gpui-boolean-cohort-sol-artifacts-20261024/full-10-31a6496bf7/contracts-contracts-0749f5d3f8a42466",
+      "bytes": 34510936,
+      "sha256": "07880fdf19bcf905fc595413bd3197d2db5017f703481ea59914deb1cfcb15c2",
+      "fresh": false,
+      "package": "path+file:///root/gpui-boolean-cohort-sol-20261024/reactivity/crates/component#gpui-component@0.1.0"
+    },
+    {
+      "name": "child_capacity",
+      "source": "31a6496bf7044433498ac2535b42a032791720f4",
+      "original": "/root/targets/boolean-cohort-sol-20261024/debug/build/gpui/eb3e83b5cb443269/out/child_capacity-eb3e83b5cb443269",
+      "frozen": "/root/gpui-boolean-cohort-sol-artifacts-20261024/full-10-31a6496bf7/child_capacity-child_capacity-eb3e83b5cb443269",
+      "bytes": 26835480,
+      "sha256": "464a08ae18fbb37387ab10503a485d1f9529e3a640a245ebd86177a521eef148",
+      "fresh": false,
+      "package": "path+file:///root/gpui-boolean-cohort-sol-20261024/reactivity/crates/gpui#0.1.0"
+    },
+    {
+      "name": "immutable_text",
+      "source": "31a6496bf7044433498ac2535b42a032791720f4",
+      "original": "/root/targets/boolean-cohort-sol-20261024/debug/build/gpui/065f5cd9e2b41359/out/immutable_text-065f5cd9e2b41359",
+      "frozen": "/root/gpui-boolean-cohort-sol-artifacts-20261024/full-10-31a6496bf7/immutable_text-immutable_text-065f5cd9e2b41359",
+      "bytes": 26792744,
+      "sha256": "070f30ddbed655d9c2c9525699eeddb86fdf598d09c08a8b16d5f7c107090fbb",
+      "fresh": false,
+      "package": "path+file:///root/gpui-boolean-cohort-sol-20261024/reactivity/crates/gpui#0.1.0"
+    },
+    {
+      "name": "remote_delivery_measure",
+      "source": "31a6496bf7044433498ac2535b42a032791720f4",
+      "original": "/root/targets/boolean-cohort-sol-20261024/debug/examples/remote_delivery_measure",
+      "frozen": "/root/gpui-boolean-cohort-sol-artifacts-20261024/full-10-31a6496bf7/remote_delivery_measure-remote_delivery_measure",
+      "bytes": 27789688,
+      "sha256": "860d310860c30a6b0dd52c0e400cf9e1c2dec04eb7707d2b9b70f7c0a9af2b3d",
+      "fresh": false,
+      "package": "path+file:///root/gpui-boolean-cohort-sol-20261024/reactivity/crates/gpui#0.1.0"
+    },
+    {
+      "name": "retained_styles",
+      "source": "31a6496bf7044433498ac2535b42a032791720f4",
+      "original": "/root/targets/boolean-cohort-sol-20261024/debug/build/gpui/bb72653730e32e55/out/retained_styles-bb72653730e32e55",
+      "frozen": "/root/gpui-boolean-cohort-sol-artifacts-20261024/full-10-31a6496bf7/retained_styles-retained_styles-bb72653730e32e55",
+      "bytes": 29138152,
+      "sha256": "b8caeb7a1d094c6f0a29ff4aa2aea386ccb07a2345633f8d74a740897248eabf",
+      "fresh": false,
+      "package": "path+file:///root/gpui-boolean-cohort-sol-20261024/reactivity/crates/gpui#0.1.0"
+    },
+    {
+      "name": "search_library",
+      "source": "31a6496bf7044433498ac2535b42a032791720f4",
+      "original": "/root/targets/boolean-cohort-sol-20261024/debug/build/gpui/b9c6f8d28f864b8f/out/search_library-b9c6f8d28f864b8f",
+      "frozen": "/root/gpui-boolean-cohort-sol-artifacts-20261024/full-10-31a6496bf7/search_library-search_library-b9c6f8d28f864b8f",
+      "bytes": 29006176,
+      "sha256": "2acf7c912ecdc9f06736ca6511f0c1d70b2024ef940655a9c1a900e0c42ca226",
+      "fresh": false,
+      "package": "path+file:///root/gpui-boolean-cohort-sol-20261024/reactivity/crates/gpui#0.1.0"
+    },
+    {
+      "name": "property_change_union",
+      "source": "31a6496bf7044433498ac2535b42a032791720f4",
+      "original": "/root/targets/boolean-cohort-sol-20261024/debug/build/gpui/61b6aa8b68481cff/out/property_change_union-61b6aa8b68481cff",
+      "frozen": "/root/gpui-boolean-cohort-sol-artifacts-20261024/full-10-31a6496bf7/property_change_union-property_change_union-61b6aa8b68481cff",
+      "bytes": 28737984,
+      "sha256": "95d20b74dcb414a169a3d56bed56b9569fb4b2484f4165283546cd5cc379ac47",
+      "fresh": false,
+      "package": "path+file:///root/gpui-boolean-cohort-sol-20261024/reactivity/crates/gpui#0.1.0"
+    },
+    {
+      "name": "color_cost",
+      "source": "31a6496bf7044433498ac2535b42a032791720f4",
+      "original": "/root/targets/boolean-cohort-sol-20261024/debug/examples/color_cost",
+      "frozen": "/root/gpui-boolean-cohort-sol-artifacts-20261024/full-10-31a6496bf7/color_cost-color_cost",
+      "bytes": 26060024,
+      "sha256": "4731dc024d73b0a85aa1c79625b3c15b7e7307e21e71948f166e357ded718416",
+      "fresh": false,
+      "package": "path+file:///root/gpui-boolean-cohort-sol-20261024/reactivity/crates/gpui#0.1.0"
+    },
+    {
+      "name": "unicode_text_measure",
+      "source": "31a6496bf7044433498ac2535b42a032791720f4",
+      "original": "/root/targets/boolean-cohort-sol-20261024/debug/examples/unicode_text_measure",
+      "frozen": "/root/gpui-boolean-cohort-sol-artifacts-20261024/full-10-31a6496bf7/unicode_text_measure-unicode_text_measure",
+      "bytes": 27752424,
+      "sha256": "3cd7334103daf9d41a6bee6895de9237ed3c430a0b19962f8b1ca3533968d22e",
+      "fresh": false,
+      "package": "path+file:///root/gpui-boolean-cohort-sol-20261024/reactivity/crates/gpui#0.1.0"
+    },
+    {
+      "name": "dpi",
+      "source": "31a6496bf7044433498ac2535b42a032791720f4",
+      "original": "/root/targets/boolean-cohort-sol-20261024/debug/build/gpui/919a728593516008/out/dpi-919a728593516008",
+      "frozen": "/root/gpui-boolean-cohort-sol-artifacts-20261024/full-10-31a6496bf7/dpi-dpi-919a728593516008",
+      "bytes": 29427208,
+      "sha256": "1d5bd034e41965a8c63086880244dd0f6527b2a26e86f0913768b2f754b8a8d8",
+      "fresh": false,
+      "package": "path+file:///root/gpui-boolean-cohort-sol-20261024/reactivity/crates/gpui#0.1.0"
+    },
+    {
+      "name": "source_inbox",
+      "source": "31a6496bf7044433498ac2535b42a032791720f4",
+      "original": "/root/targets/boolean-cohort-sol-20261024/debug/build/gpui/2ac4fea1e90f4aad/out/source_inbox-2ac4fea1e90f4aad",
+      "frozen": "/root/gpui-boolean-cohort-sol-artifacts-20261024/full-10-31a6496bf7/source_inbox-source_inbox-2ac4fea1e90f4aad",
+      "bytes": 31462456,
+      "sha256": "11f2e201a12bb0bca6b6e69f96cf05bcdfc32037776fc5ef6536736e4768f554",
+      "fresh": false,
+      "package": "path+file:///root/gpui-boolean-cohort-sol-20261024/reactivity/crates/gpui#0.1.0"
+    },
+    {
+      "name": "question_cost",
+      "source": "31a6496bf7044433498ac2535b42a032791720f4",
+      "original": "/root/targets/boolean-cohort-sol-20261024/debug/build/gpui/05fc6b2d6e017ffb/out/question_cost-05fc6b2d6e017ffb",
+      "frozen": "/root/gpui-boolean-cohort-sol-artifacts-20261024/full-10-31a6496bf7/question_cost-question_cost-05fc6b2d6e017ffb",
+      "bytes": 27776544,
+      "sha256": "7c9d82fbad514aee99c2bcbc3ace203d0e7f9897963d630732e5a42547f74fd3",
+      "fresh": false,
+      "package": "path+file:///root/gpui-boolean-cohort-sol-20261024/reactivity/crates/gpui#0.1.0"
+    },
+    {
+      "name": "paint_slot_rebind",
+      "source": "31a6496bf7044433498ac2535b42a032791720f4",
+      "original": "/root/targets/boolean-cohort-sol-20261024/debug/build/gpui/9d6092c0039c27a9/out/paint_slot_rebind-9d6092c0039c27a9",
+      "frozen": "/root/gpui-boolean-cohort-sol-artifacts-20261024/full-10-31a6496bf7/paint_slot_rebind-paint_slot_rebind-9d6092c0039c27a9",
+      "bytes": 28341424,
+      "sha256": "263dfd9f5b016f01a93eb5c3eddf2473109ff7f5333a5d5a8d863b27dc6cb1f5",
+      "fresh": false,
+      "package": "path+file:///root/gpui-boolean-cohort-sol-20261024/reactivity/crates/gpui#0.1.0"
+    },
+    {
+      "name": "lists",
+      "source": "31a6496bf7044433498ac2535b42a032791720f4",
+      "original": "/root/targets/boolean-cohort-sol-20261024/debug/build/gpui/74960e6b926d85e7/out/lists-74960e6b926d85e7",
+      "frozen": "/root/gpui-boolean-cohort-sol-artifacts-20261024/full-10-31a6496bf7/lists-lists-74960e6b926d85e7",
+      "bytes": 38178936,
+      "sha256": "da1aad5c05a369bf39a2007e27444c64116c4d69e52c580b68f8bdc90ab0349a",
+      "fresh": false,
+      "package": "path+file:///root/gpui-boolean-cohort-sol-20261024/reactivity/crates/gpui#0.1.0"
+    },
+    {
+      "name": "text_cache",
+      "source": "31a6496bf7044433498ac2535b42a032791720f4",
+      "original": "/root/targets/boolean-cohort-sol-20261024/debug/build/gpui/b66661530c147aaa/out/text_cache-b66661530c147aaa",
+      "frozen": "/root/gpui-boolean-cohort-sol-artifacts-20261024/full-10-31a6496bf7/text_cache-text_cache-b66661530c147aaa",
+      "bytes": 29177768,
+      "sha256": "65361735fe2a47193f0a7806af3bf219dab09ee82eeb66f9f0d9442c34d929c8",
+      "fresh": false,
+      "package": "path+file:///root/gpui-boolean-cohort-sol-20261024/reactivity/crates/gpui#0.1.0"
+    },
+    {
+      "name": "acceptance",
+      "source": "31a6496bf7044433498ac2535b42a032791720f4",
+      "original": "/root/targets/boolean-cohort-sol-20261024/debug/build/gpui/99fb8c8c77ec32e7/out/acceptance-99fb8c8c77ec32e7",
+      "frozen": "/root/gpui-boolean-cohort-sol-artifacts-20261024/full-10-31a6496bf7/acceptance-acceptance-99fb8c8c77ec32e7",
+      "bytes": 31701448,
+      "sha256": "0be052f6161f95258e915e7df28252c46bd91b2ed3f37684f2ce7cacd9255962",
+      "fresh": false,
+      "package": "path+file:///root/gpui-boolean-cohort-sol-20261024/reactivity/crates/gpui#0.1.0"
+    },
+    {
+      "name": "scroll",
+      "source": "31a6496bf7044433498ac2535b42a032791720f4",
+      "original": "/root/targets/boolean-cohort-sol-20261024/debug/build/gpui/b1fa991592855717/out/scroll-b1fa991592855717",
+      "frozen": "/root/gpui-boolean-cohort-sol-artifacts-20261024/full-10-31a6496bf7/scroll-scroll-b1fa991592855717",
+      "bytes": 38025832,
+      "sha256": "3f0a3eb1afc6519a43d268e21e5754836dd6ac79f9fffb61742580a665703b6d",
+      "fresh": false,
+      "package": "path+file:///root/gpui-boolean-cohort-sol-20261024/reactivity/crates/gpui#0.1.0"
+    },
+    {
+      "name": "handler_storage",
+      "source": "31a6496bf7044433498ac2535b42a032791720f4",
+      "original": "/root/targets/boolean-cohort-sol-20261024/debug/build/gpui/6bddc94d811b0ef5/out/handler_storage-6bddc94d811b0ef5",
+      "frozen": "/root/gpui-boolean-cohort-sol-artifacts-20261024/full-10-31a6496bf7/handler_storage-handler_storage-6bddc94d811b0ef5",
+      "bytes": 32836456,
+      "sha256": "7a2bf5c4a882cb096bc4f402131f1a312f1cd1e5759870bbf917b9a87b4f4fce",
+      "fresh": false,
+      "package": "path+file:///root/gpui-boolean-cohort-sol-20261024/reactivity/crates/gpui#0.1.0"
+    },
+    {
+      "name": "color_packing",
+      "source": "31a6496bf7044433498ac2535b42a032791720f4",
+      "original": "/root/targets/boolean-cohort-sol-20261024/debug/build/gpui/544fda724e854068/out/color_packing-544fda724e854068",
+      "frozen": "/root/gpui-boolean-cohort-sol-artifacts-20261024/full-10-31a6496bf7/color_packing-color_packing-544fda724e854068",
+      "bytes": 28399952,
+      "sha256": "aadef135ed9f53203bdb7e37d21347b5c4dc2ba499062d4881a21b84e2d5ab79",
+      "fresh": false,
+      "package": "path+file:///root/gpui-boolean-cohort-sol-20261024/reactivity/crates/gpui#0.1.0"
+    },
+    {
+      "name": "sheet_access_measure",
+      "source": "31a6496bf7044433498ac2535b42a032791720f4",
+      "original": "/root/targets/boolean-cohort-sol-20261024/debug/examples/sheet_access_measure",
+      "frozen": "/root/gpui-boolean-cohort-sol-artifacts-20261024/full-10-31a6496bf7/sheet_access_measure-sheet_access_measure",
+      "bytes": 26147880,
+      "sha256": "dce259be70a275177198c3d163ebb85b18a70a700488190f202a228c8b0a3f4b",
+      "fresh": false,
+      "package": "path+file:///root/gpui-boolean-cohort-sol-20261024/reactivity/crates/gpui#0.1.0"
+    },
+    {
+      "name": "immutable_text_measure",
+      "source": "31a6496bf7044433498ac2535b42a032791720f4",
+      "original": "/root/targets/boolean-cohort-sol-20261024/debug/examples/immutable_text_measure",
+      "frozen": "/root/gpui-boolean-cohort-sol-artifacts-20261024/full-10-31a6496bf7/immutable_text_measure-immutable_text_measure",
+      "bytes": 27844888,
+      "sha256": "4d14ea3c7c3da93bb4e33f2de6364d7a5f512f64ded3ef13203121d07020e343",
+      "fresh": false,
+      "package": "path+file:///root/gpui-boolean-cohort-sol-20261024/reactivity/crates/gpui#0.1.0"
+    },
+    {
+      "name": "question_storage",
+      "source": "31a6496bf7044433498ac2535b42a032791720f4",
+      "original": "/root/targets/boolean-cohort-sol-20261024/debug/build/gpui/1be6a788f523a613/out/question_storage-1be6a788f523a613",
+      "frozen": "/root/gpui-boolean-cohort-sol-artifacts-20261024/full-10-31a6496bf7/question_storage-question_storage-1be6a788f523a613",
+      "bytes": 29507704,
+      "sha256": "4ae7e80797ee174ffaa3dbdd6a910d204728386bb439dd5650f8dfa4555088d2",
+      "fresh": false,
+      "package": "path+file:///root/gpui-boolean-cohort-sol-20261024/reactivity/crates/gpui#0.1.0"
+    },
+    {
+      "name": "presentation",
+      "source": "31a6496bf7044433498ac2535b42a032791720f4",
+      "original": "/root/targets/boolean-cohort-sol-20261024/debug/build/gpui/940cb3c994f711f0/out/presentation-940cb3c994f711f0",
+      "frozen": "/root/gpui-boolean-cohort-sol-artifacts-20261024/full-10-31a6496bf7/presentation-presentation-940cb3c994f711f0",
+      "bytes": 28654872,
+      "sha256": "5c730f65bdb31e40e357e33c4634f5142c45351db53700d6786e140736f9bd37",
+      "fresh": false,
+      "package": "path+file:///root/gpui-boolean-cohort-sol-20261024/reactivity/crates/gpui#0.1.0"
+    },
+    {
+      "name": "routes",
+      "source": "31a6496bf7044433498ac2535b42a032791720f4",
+      "original": "/root/targets/boolean-cohort-sol-20261024/debug/build/gpui/e4c671ecfc2ee7ff/out/routes-e4c671ecfc2ee7ff",
+      "frozen": "/root/gpui-boolean-cohort-sol-artifacts-20261024/full-10-31a6496bf7/routes-routes-e4c671ecfc2ee7ff",
+      "bytes": 28531496,
+      "sha256": "292a13481dd9092124e15625d1343c976e6984ba00e999898504025525fa7a55",
+      "fresh": false,
+      "package": "path+file:///root/gpui-boolean-cohort-sol-20261024/reactivity/crates/gpui#0.1.0"
+    },
+    {
+      "name": "semantic_serialization",
+      "source": "31a6496bf7044433498ac2535b42a032791720f4",
+      "original": "/root/targets/boolean-cohort-sol-20261024/debug/build/gpui/78be91ec14353f4a/out/semantic_serialization-78be91ec14353f4a",
+      "frozen": "/root/gpui-boolean-cohort-sol-artifacts-20261024/full-10-31a6496bf7/semantic_serialization-semantic_serialization-78be91ec14353f4a",
+      "bytes": 29475368,
+      "sha256": "19346c84b9aa064fd7ba92738c162f332bc16adde044f377c59e40454408c42b",
+      "fresh": false,
+      "package": "path+file:///root/gpui-boolean-cohort-sol-20261024/reactivity/crates/gpui#0.1.0"
+    },
+    {
+      "name": "mapped_paint",
+      "source": "31a6496bf7044433498ac2535b42a032791720f4",
+      "original": "/root/targets/boolean-cohort-sol-20261024/debug/build/gpui/2523f566816b55d3/out/mapped_paint-2523f566816b55d3",
+      "frozen": "/root/gpui-boolean-cohort-sol-artifacts-20261024/full-10-31a6496bf7/mapped_paint-mapped_paint-2523f566816b55d3",
+      "bytes": 28405800,
+      "sha256": "d3c83cd88e69c411087f4a4e12721e552b13e18c2ebdd6a3b078a7e163e0f89e",
+      "fresh": false,
+      "package": "path+file:///root/gpui-boolean-cohort-sol-20261024/reactivity/crates/gpui#0.1.0"
+    },
+    {
+      "name": "inspector",
+      "source": "31a6496bf7044433498ac2535b42a032791720f4",
+      "original": "/root/targets/boolean-cohort-sol-20261024/debug/build/gpui/b563a17ffea3df9e/out/inspector-b563a17ffea3df9e",
+      "frozen": "/root/gpui-boolean-cohort-sol-artifacts-20261024/full-10-31a6496bf7/inspector-inspector-b563a17ffea3df9e",
+      "bytes": 33596968,
+      "sha256": "fba1fec77780ceb8e5d7547329fcaab72c09a761fe3f3a28490f1b9215449da4",
+      "fresh": false,
+      "package": "path+file:///root/gpui-boolean-cohort-sol-20261024/reactivity/crates/gpui#0.1.0"
+    },
+    {
+      "name": "counter",
+      "source": "31a6496bf7044433498ac2535b42a032791720f4",
+      "original": "/root/targets/boolean-cohort-sol-20261024/debug/examples/counter",
+      "frozen": "/root/gpui-boolean-cohort-sol-artifacts-20261024/full-10-31a6496bf7/counter-counter",
+      "bytes": 28049968,
+      "sha256": "26b1b20df2dc69b8bba671de539cee8d6f48d01abf7888774da11bd6dfaf6cb2",
+      "fresh": false,
+      "package": "path+file:///root/gpui-boolean-cohort-sol-20261024/reactivity/crates/gpui#0.1.0"
+    },
+    {
+      "name": "property_selection",
+      "source": "31a6496bf7044433498ac2535b42a032791720f4",
+      "original": "/root/targets/boolean-cohort-sol-20261024/debug/build/gpui/e36c9e5e94c0ffc9/out/property_selection-e36c9e5e94c0ffc9",
+      "frozen": "/root/gpui-boolean-cohort-sol-artifacts-20261024/full-10-31a6496bf7/property_selection-property_selection-e36c9e5e94c0ffc9",
+      "bytes": 30752376,
+      "sha256": "23ab4342f47d0dc09a2debd7a8ae412d4191473157ddfc1905c21e53095ae528",
+      "fresh": false,
+      "package": "path+file:///root/gpui-boolean-cohort-sol-20261024/reactivity/crates/gpui#0.1.0"
+    },
+    {
+      "name": "flex",
+      "source": "31a6496bf7044433498ac2535b42a032791720f4",
+      "original": "/root/targets/boolean-cohort-sol-20261024/debug/build/gpui/2077c33af15d8c94/out/flex-2077c33af15d8c94",
+      "frozen": "/root/gpui-boolean-cohort-sol-artifacts-20261024/full-10-31a6496bf7/flex-flex-2077c33af15d8c94",
+      "bytes": 32772968,
+      "sha256": "17c18bf5da65ff667704b95deb46dd75778ca4e0218d66612f0323f65581f656",
+      "fresh": false,
+      "package": "path+file:///root/gpui-boolean-cohort-sol-20261024/reactivity/crates/gpui#0.1.0"
+    },
+    {
+      "name": "source_value_isolation",
+      "source": "31a6496bf7044433498ac2535b42a032791720f4",
+      "original": "/root/targets/boolean-cohort-sol-20261024/debug/build/gpui/5e44c744ba815b2c/out/source_value_isolation-5e44c744ba815b2c",
+      "frozen": "/root/gpui-boolean-cohort-sol-artifacts-20261024/full-10-31a6496bf7/source_value_isolation-source_value_isolation-5e44c744ba815b2c",
+      "bytes": 28848136,
+      "sha256": "cd42d8595c93e5c3be42d47065d449fe2ab8cdca8648073ceee1477e09f39aeb",
+      "fresh": false,
+      "package": "path+file:///root/gpui-boolean-cohort-sol-20261024/reactivity/crates/gpui#0.1.0"
+    },
+    {
+      "name": "halloween",
+      "source": "31a6496bf7044433498ac2535b42a032791720f4",
+      "original": "/root/targets/boolean-cohort-sol-20261024/debug/examples/halloween",
+      "frozen": "/root/gpui-boolean-cohort-sol-artifacts-20261024/full-10-31a6496bf7/halloween-halloween",
+      "bytes": 28043376,
+      "sha256": "d764dd0e4e1a3a167545d71bfa5422da93d7e5ed62f3c4c7df17b24b39feb122",
+      "fresh": false,
+      "package": "path+file:///root/gpui-boolean-cohort-sol-20261024/reactivity/crates/component#gpui-component@0.1.0"
+    },
+    {
+      "name": "question_input_cost",
+      "source": "31a6496bf7044433498ac2535b42a032791720f4",
+      "original": "/root/targets/boolean-cohort-sol-20261024/debug/build/gpui/ce4f046939110c4e/out/question_input_cost-ce4f046939110c4e",
+      "frozen": "/root/gpui-boolean-cohort-sol-artifacts-20261024/full-10-31a6496bf7/question_input_cost-question_input_cost-ce4f046939110c4e",
+      "bytes": 26972096,
+      "sha256": "ff181dfa61b2942bc8f36c4b31761e1bb4f48867c6917912044baf1da34f23b0",
+      "fresh": false,
+      "package": "path+file:///root/gpui-boolean-cohort-sol-20261024/reactivity/crates/gpui#0.1.0"
+    },
+    {
+      "name": "reactive_styles",
+      "source": "31a6496bf7044433498ac2535b42a032791720f4",
+      "original": "/root/targets/boolean-cohort-sol-20261024/debug/examples/reactive_styles",
+      "frozen": "/root/gpui-boolean-cohort-sol-artifacts-20261024/full-10-31a6496bf7/reactive_styles-reactive_styles",
+      "bytes": 28318376,
+      "sha256": "7cb0f51322c8fc116526017aae51c8a0f4cd7a1eeff99b46f421710c90639340",
+      "fresh": false,
+      "package": "path+file:///root/gpui-boolean-cohort-sol-20261024/reactivity/crates/gpui#0.1.0"
+    },
+    {
+      "name": "pointer",
+      "source": "31a6496bf7044433498ac2535b42a032791720f4",
+      "original": "/root/targets/boolean-cohort-sol-20261024/debug/build/gpui/08861d23689fbef2/out/pointer-08861d23689fbef2",
+      "frozen": "/root/gpui-boolean-cohort-sol-artifacts-20261024/full-10-31a6496bf7/pointer-pointer-08861d23689fbef2",
+      "bytes": 28915392,
+      "sha256": "36dfa2e668010cfb7c31228238a55192c941557ba62a48146e4f0e4a09e19ec7",
+      "fresh": false,
+      "package": "path+file:///root/gpui-boolean-cohort-sol-20261024/reactivity/crates/gpui#0.1.0"
+    },
+    {
+      "name": "boolean_cohorts",
+      "source": "31a6496bf7044433498ac2535b42a032791720f4",
+      "original": "/root/targets/boolean-cohort-sol-20261024/debug/build/gpui-component/4e5e0c08ea3b49de/out/boolean_cohorts-4e5e0c08ea3b49de",
+      "frozen": "/root/gpui-boolean-cohort-sol-artifacts-20261024/full-10-31a6496bf7/boolean_cohorts-boolean_cohorts-4e5e0c08ea3b49de",
+      "bytes": 30427072,
+      "sha256": "53f39f05c0d1f2262f2c5785df2c6cb8c5ac192568124bd020710fdaa850ba44",
+      "fresh": false,
+      "package": "path+file:///root/gpui-boolean-cohort-sol-20261024/reactivity/crates/component#gpui-component@0.1.0"
+    },
+    {
+      "name": "unicode_text",
+      "source": "31a6496bf7044433498ac2535b42a032791720f4",
+      "original": "/root/targets/boolean-cohort-sol-20261024/debug/build/gpui/2d05ac57e8b6a8d3/out/unicode_text-2d05ac57e8b6a8d3",
+      "frozen": "/root/gpui-boolean-cohort-sol-artifacts-20261024/full-10-31a6496bf7/unicode_text-unicode_text-2d05ac57e8b6a8d3",
+      "bytes": 28322288,
+      "sha256": "727f5180db14aeb9d75d8321f02c16f46eac7deff27552860db0d0a7aef492f1",
+      "fresh": false,
+      "package": "path+file:///root/gpui-boolean-cohort-sol-20261024/reactivity/crates/gpui#0.1.0"
+    },
+    {
+      "name": "images",
+      "source": "31a6496bf7044433498ac2535b42a032791720f4",
+      "original": "/root/targets/boolean-cohort-sol-20261024/debug/build/gpui/c61ff544120dafb3/out/images-c61ff544120dafb3",
+      "frozen": "/root/gpui-boolean-cohort-sol-artifacts-20261024/full-10-31a6496bf7/images-images-c61ff544120dafb3",
+      "bytes": 29874848,
+      "sha256": "2e9882bd519b53cd16bb544ce356265badabe00f3017666b293134b7d1e51051",
+      "fresh": false,
+      "package": "path+file:///root/gpui-boolean-cohort-sol-20261024/reactivity/crates/gpui#0.1.0"
+    },
+    {
+      "name": "text_selection",
+      "source": "31a6496bf7044433498ac2535b42a032791720f4",
+      "original": "/root/targets/boolean-cohort-sol-20261024/debug/build/gpui/7e06f9254f6e7abc/out/text_selection-7e06f9254f6e7abc",
+      "frozen": "/root/gpui-boolean-cohort-sol-artifacts-20261024/full-10-31a6496bf7/text_selection-text_selection-7e06f9254f6e7abc",
+      "bytes": 30821496,
+      "sha256": "dec40f11e9c5a5b4496a448f15d282c5fe2f8754a2fc42a35744ede7ff63f0f9",
+      "fresh": false,
+      "package": "path+file:///root/gpui-boolean-cohort-sol-20261024/reactivity/crates/gpui#0.1.0"
+    },
+    {
+      "name": "checkbox",
+      "source": "31a6496bf7044433498ac2535b42a032791720f4",
+      "original": "/root/targets/boolean-cohort-sol-20261024/debug/build/gpui/1081084de8b72c0d/out/checkbox-1081084de8b72c0d",
+      "frozen": "/root/gpui-boolean-cohort-sol-artifacts-20261024/full-10-31a6496bf7/checkbox-checkbox-1081084de8b72c0d",
+      "bytes": 31060400,
+      "sha256": "60177fe3a691555be1bd5e6e8d4b2787e3bf7fd56ccd17f0bb0cd14a315b5137",
+      "fresh": false,
+      "package": "path+file:///root/gpui-boolean-cohort-sol-20261024/reactivity/crates/gpui#0.1.0"
+    },
+    {
+      "name": "remote",
+      "source": "31a6496bf7044433498ac2535b42a032791720f4",
+      "original": "/root/targets/boolean-cohort-sol-20261024/debug/build/gpui/cfca37a91c901861/out/remote-cfca37a91c901861",
+      "frozen": "/root/gpui-boolean-cohort-sol-artifacts-20261024/full-10-31a6496bf7/remote-remote-cfca37a91c901861",
+      "bytes": 30173944,
+      "sha256": "c43a2a7953968d66acf54dd0865e4e749648f3e974457764291f487c04165199",
+      "fresh": false,
+      "package": "path+file:///root/gpui-boolean-cohort-sol-20261024/reactivity/crates/gpui#0.1.0"
+    }
+  ],
+  "/root/gpui-boolean-cohort-sol-artifacts-20261024/full-11-3fc07815a0": [
+    {
+      "name": "text_lease_measure",
+      "source": "3fc07815a0ce389db54e492dd1d889c6fca10699",
+      "original": "/root/targets/boolean-cohort-sol-20261024/debug/examples/text_lease_measure",
+      "frozen": "/root/gpui-boolean-cohort-sol-artifacts-20261024/full-11-3fc07815a0/text_lease_measure-text_lease_measure",
+      "bytes": 636664,
+      "sha256": "84e5318735cb58c16a5aa56465de1a0375f9dc3527a87da685b1101045eaeec4",
+      "fresh": true,
+      "package": "path+file:///root/gpui-boolean-cohort-sol-20261024/reactivity/crates/gpui#0.1.0"
+    },
+    {
+      "name": "queries",
+      "source": "3fc07815a0ce389db54e492dd1d889c6fca10699",
+      "original": "/root/targets/boolean-cohort-sol-20261024/debug/build/gpui/1b5476dfc58f943c/out/queries-1b5476dfc58f943c",
+      "frozen": "/root/gpui-boolean-cohort-sol-artifacts-20261024/full-11-3fc07815a0/queries-queries-1b5476dfc58f943c",
+      "bytes": 27622328,
+      "sha256": "e8f7bb1378b0e995d8fdb2ed0487e7b95d54db0b86bb36e589e0f9fdaf3c94f1",
+      "fresh": true,
+      "package": "path+file:///root/gpui-boolean-cohort-sol-20261024/reactivity/crates/gpui#0.1.0"
+    },
+    {
+      "name": "frontier",
+      "source": "3fc07815a0ce389db54e492dd1d889c6fca10699",
+      "original": "/root/targets/boolean-cohort-sol-20261024/debug/build/gpui/2904597d18534e63/out/frontier-2904597d18534e63",
+      "frozen": "/root/gpui-boolean-cohort-sol-artifacts-20261024/full-11-3fc07815a0/frontier-frontier-2904597d18534e63",
+      "bytes": 30231936,
+      "sha256": "2dbfe3f4e02128b25213a6c8cfb882dabc1e496aba93fba7b31989aca578c158",
+      "fresh": true,
+      "package": "path+file:///root/gpui-boolean-cohort-sol-20261024/reactivity/crates/gpui#0.1.0"
+    },
+    {
+      "name": "paint_patch",
+      "source": "3fc07815a0ce389db54e492dd1d889c6fca10699",
+      "original": "/root/targets/boolean-cohort-sol-20261024/debug/build/gpui/b3eaf94002a67c67/out/paint_patch-b3eaf94002a67c67",
+      "frozen": "/root/gpui-boolean-cohort-sol-artifacts-20261024/full-11-3fc07815a0/paint_patch-paint_patch-b3eaf94002a67c67",
+      "bytes": 29313576,
+      "sha256": "d31f629261a790ce3492f34911230a1d0550abc926e0970fac60c04e44cfb9f4",
+      "fresh": true,
+      "package": "path+file:///root/gpui-boolean-cohort-sol-20261024/reactivity/crates/gpui#0.1.0"
+    },
+    {
+      "name": "style_ports",
+      "source": "3fc07815a0ce389db54e492dd1d889c6fca10699",
+      "original": "/root/targets/boolean-cohort-sol-20261024/debug/build/gpui/b395d1a20e1251a9/out/style_ports-b395d1a20e1251a9",
+      "frozen": "/root/gpui-boolean-cohort-sol-artifacts-20261024/full-11-3fc07815a0/style_ports-style_ports-b395d1a20e1251a9",
+      "bytes": 37845248,
+      "sha256": "d8b12d150ab73b38400619744227c845717fdb6b5da62e12f79198b3d3ca4f71",
+      "fresh": true,
+      "package": "path+file:///root/gpui-boolean-cohort-sol-20261024/reactivity/crates/gpui#0.1.0"
+    },
+    {
+      "name": "gradient_backgrounds",
+      "source": "3fc07815a0ce389db54e492dd1d889c6fca10699",
+      "original": "/root/targets/boolean-cohort-sol-20261024/debug/examples/gradient_backgrounds",
+      "frozen": "/root/gpui-boolean-cohort-sol-artifacts-20261024/full-11-3fc07815a0/gradient_backgrounds-gradient_backgrounds",
+      "bytes": 27732352,
+      "sha256": "5c65126c7f56f6d066622648334b1ef57811779e7af15d50004b123794ce5288",
+      "fresh": true,
+      "package": "path+file:///root/gpui-boolean-cohort-sol-20261024/reactivity/crates/gpui#0.1.0"
+    },
+    {
+      "name": "bindings",
+      "source": "3fc07815a0ce389db54e492dd1d889c6fca10699",
+      "original": "/root/targets/boolean-cohort-sol-20261024/debug/build/gpui-component/2acc55e836c6c0cc/out/bindings-2acc55e836c6c0cc",
+      "frozen": "/root/gpui-boolean-cohort-sol-artifacts-20261024/full-11-3fc07815a0/bindings-bindings-2acc55e836c6c0cc",
+      "bytes": 30639344,
+      "sha256": "1511b09b878cf0f90bdc845a5c824e858c2e2684aea1e34479c1f5b51b408c15",
+      "fresh": true,
+      "package": "path+file:///root/gpui-boolean-cohort-sol-20261024/reactivity/crates/component#gpui-component@0.1.0"
+    },
+    {
+      "name": "costs",
+      "source": "3fc07815a0ce389db54e492dd1d889c6fca10699",
+      "original": "/root/targets/boolean-cohort-sol-20261024/debug/examples/costs",
+      "frozen": "/root/gpui-boolean-cohort-sol-artifacts-20261024/full-11-3fc07815a0/costs-costs",
+      "bytes": 26368088,
+      "sha256": "773d1b56a44baadabaa1a40e2a03693894cd091ce7c9fc9862511454d5cd0927",
+      "fresh": true,
+      "package": "path+file:///root/gpui-boolean-cohort-sol-20261024/reactivity/crates/component#gpui-component@0.1.0"
+    },
+    {
+      "name": "ports",
+      "source": "3fc07815a0ce389db54e492dd1d889c6fca10699",
+      "original": "/root/targets/boolean-cohort-sol-20261024/debug/build/gpui/fe0c54f729300911/out/ports-fe0c54f729300911",
+      "frozen": "/root/gpui-boolean-cohort-sol-artifacts-20261024/full-11-3fc07815a0/ports-ports-fe0c54f729300911",
+      "bytes": 30685304,
+      "sha256": "9d52aa2a6d6f3fcab196e47050eba7a7fc1507ad524310518a7d4b8ab19622bd",
+      "fresh": true,
+      "package": "path+file:///root/gpui-boolean-cohort-sol-20261024/reactivity/crates/gpui#0.1.0"
+    },
+    {
+      "name": "inbox_storage",
+      "source": "3fc07815a0ce389db54e492dd1d889c6fca10699",
+      "original": "/root/targets/boolean-cohort-sol-20261024/debug/build/gpui/3b934c5ca1f70f86/out/inbox_storage-3b934c5ca1f70f86",
+      "frozen": "/root/gpui-boolean-cohort-sol-artifacts-20261024/full-11-3fc07815a0/inbox_storage-inbox_storage-3b934c5ca1f70f86",
+      "bytes": 28238304,
+      "sha256": "358b7401be1b2cc9b86e872f1a1879f5d19b0ab496d5d0dd99fa567231917d58",
+      "fresh": true,
+      "package": "path+file:///root/gpui-boolean-cohort-sol-20261024/reactivity/crates/gpui#0.1.0"
+    },
+    {
+      "name": "clipping",
+      "source": "3fc07815a0ce389db54e492dd1d889c6fca10699",
+      "original": "/root/targets/boolean-cohort-sol-20261024/debug/build/gpui/b77bc012000d2afe/out/clipping-b77bc012000d2afe",
+      "frozen": "/root/gpui-boolean-cohort-sol-artifacts-20261024/full-11-3fc07815a0/clipping-clipping-b77bc012000d2afe",
+      "bytes": 31781328,
+      "sha256": "cd90ad435b284c98d9a66ec61373fd1627d52a9b640bf29862f679ae4feece14",
+      "fresh": true,
+      "package": "path+file:///root/gpui-boolean-cohort-sol-20261024/reactivity/crates/gpui#0.1.0"
+    },
+    {
+      "name": "question_mailbox",
+      "source": "3fc07815a0ce389db54e492dd1d889c6fca10699",
+      "original": "/root/targets/boolean-cohort-sol-20261024/debug/build/gpui/6a15bdbe56567270/out/question_mailbox-6a15bdbe56567270",
+      "frozen": "/root/gpui-boolean-cohort-sol-artifacts-20261024/full-11-3fc07815a0/question_mailbox-question_mailbox-6a15bdbe56567270",
+      "bytes": 27253240,
+      "sha256": "50171c79543389368d649e8bfbc40a2e9d4014e3d2910b8644ecda67e52e4192",
+      "fresh": true,
+      "package": "path+file:///root/gpui-boolean-cohort-sol-20261024/reactivity/crates/gpui#0.1.0"
+    },
+    {
+      "name": "semantic_metadata",
+      "source": "3fc07815a0ce389db54e492dd1d889c6fca10699",
+      "original": "/root/targets/boolean-cohort-sol-20261024/debug/build/gpui/b2f16d39422959e5/out/semantic_metadata-b2f16d39422959e5",
+      "frozen": "/root/gpui-boolean-cohort-sol-artifacts-20261024/full-11-3fc07815a0/semantic_metadata-semantic_metadata-b2f16d39422959e5",
+      "bytes": 34281264,
+      "sha256": "5bef402654f437517fc68188b11989c8611289bdc72e392829723a006d1e0337",
+      "fresh": true,
+      "package": "path+file:///root/gpui-boolean-cohort-sol-20261024/reactivity/crates/gpui#0.1.0"
+    },
+    {
+      "name": "todo_comparison",
+      "source": "3fc07815a0ce389db54e492dd1d889c6fca10699",
+      "original": "/root/targets/boolean-cohort-sol-20261024/debug/build/gpui/697f5d232ed0b549/out/todo_comparison-697f5d232ed0b549",
+      "frozen": "/root/gpui-boolean-cohort-sol-artifacts-20261024/full-11-3fc07815a0/todo_comparison-todo_comparison-697f5d232ed0b549",
+      "bytes": 29591936,
+      "sha256": "40d6fba7bc84564a43ff4bd04c8dfb2bc60907746d9a9ccc57b1d184f843d1f6",
+      "fresh": true,
+      "package": "path+file:///root/gpui-boolean-cohort-sol-20261024/reactivity/crates/gpui#0.1.0"
+    },
+    {
+      "name": "retained_list",
+      "source": "3fc07815a0ce389db54e492dd1d889c6fca10699",
+      "original": "/root/targets/boolean-cohort-sol-20261024/debug/examples/retained_list",
+      "frozen": "/root/gpui-boolean-cohort-sol-artifacts-20261024/full-11-3fc07815a0/retained_list-retained_list",
+      "bytes": 27645496,
+      "sha256": "c71e6e3b97b0e43db8c4b8ed6b3d7e9a437d484ea9ad01377399f28494fe8e59",
+      "fresh": true,
+      "package": "path+file:///root/gpui-boolean-cohort-sol-20261024/reactivity/crates/gpui#0.1.0"
+    },
+    {
+      "name": "rounded",
+      "source": "3fc07815a0ce389db54e492dd1d889c6fca10699",
+      "original": "/root/targets/boolean-cohort-sol-20261024/debug/build/gpui/704af4c9a17a7c32/out/rounded-704af4c9a17a7c32",
+      "frozen": "/root/gpui-boolean-cohort-sol-artifacts-20261024/full-11-3fc07815a0/rounded-rounded-704af4c9a17a7c32",
+      "bytes": 31477904,
+      "sha256": "9be6cb2c649ecb86d70ff859597c316fc4de23754a3b58abb6b37f6749fdac0b",
+      "fresh": true,
+      "package": "path+file:///root/gpui-boolean-cohort-sol-20261024/reactivity/crates/gpui#0.1.0"
+    },
+    {
+      "name": "field_identity",
+      "source": "3fc07815a0ce389db54e492dd1d889c6fca10699",
+      "original": "/root/targets/boolean-cohort-sol-20261024/debug/build/gpui/5654a5203d5402c4/out/field_identity-5654a5203d5402c4",
+      "frozen": "/root/gpui-boolean-cohort-sol-artifacts-20261024/full-11-3fc07815a0/field_identity-field_identity-5654a5203d5402c4",
+      "bytes": 26849040,
+      "sha256": "b45e8382095883e4e936de4a418bcf4b815786467058fdad08d35b495313301f",
+      "fresh": true,
+      "package": "path+file:///root/gpui-boolean-cohort-sol-20261024/reactivity/crates/gpui#0.1.0"
+    },
+    {
+      "name": "literal_dispatch",
+      "source": "3fc07815a0ce389db54e492dd1d889c6fca10699",
+      "original": "/root/targets/boolean-cohort-sol-20261024/debug/build/gpui/059baed3a7a2ea3f/out/literal_dispatch-059baed3a7a2ea3f",
+      "frozen": "/root/gpui-boolean-cohort-sol-artifacts-20261024/full-11-3fc07815a0/literal_dispatch-literal_dispatch-059baed3a7a2ea3f",
+      "bytes": 28567816,
+      "sha256": "28e9767a886ec55f8955a9963cc00472b60a356fa596a85902f49198c0555fe4",
+      "fresh": true,
+      "package": "path+file:///root/gpui-boolean-cohort-sol-20261024/reactivity/crates/gpui#0.1.0"
+    },
+    {
+      "name": "property_outline_allocations",
+      "source": "3fc07815a0ce389db54e492dd1d889c6fca10699",
+      "original": "/root/targets/boolean-cohort-sol-20261024/debug/build/gpui/5a19370338ca7f3e/out/property_outline_allocations-5a19370338ca7f3e",
+      "frozen": "/root/gpui-boolean-cohort-sol-artifacts-20261024/full-11-3fc07815a0/property_outline_allocations-property_outline_allocations-5a19370338ca7f3e",
+      "bytes": 27059240,
+      "sha256": "1bfeee71d13bce9d1519edcb5ea0f7a5a4d90935761bf1d663f4b13d14d9830a",
+      "fresh": true,
+      "package": "path+file:///root/gpui-boolean-cohort-sol-20261024/reactivity/crates/gpui#0.1.0"
+    },
+    {
+      "name": "identity_recovery",
+      "source": "3fc07815a0ce389db54e492dd1d889c6fca10699",
+      "original": "/root/targets/boolean-cohort-sol-20261024/debug/build/gpui/b51784c3fd391e16/out/identity_recovery-b51784c3fd391e16",
+      "frozen": "/root/gpui-boolean-cohort-sol-artifacts-20261024/full-11-3fc07815a0/identity_recovery-identity_recovery-b51784c3fd391e16",
+      "bytes": 27069280,
+      "sha256": "c1bf2dc9d2a057be6084ea4472ffec72f43f2f27a56e3d8965f6cd5d5d31b2e1",
+      "fresh": true,
+      "package": "path+file:///root/gpui-boolean-cohort-sol-20261024/reactivity/crates/gpui#0.1.0"
+    },
+    {
+      "name": "application",
+      "source": "3fc07815a0ce389db54e492dd1d889c6fca10699",
+      "original": "/root/targets/boolean-cohort-sol-20261024/debug/build/gpui/e2286cad79c35b8b/out/application-e2286cad79c35b8b",
+      "frozen": "/root/gpui-boolean-cohort-sol-artifacts-20261024/full-11-3fc07815a0/application-application-e2286cad79c35b8b",
+      "bytes": 30040024,
+      "sha256": "0a8f22638205ec57ea2c355edde853db0f7e85f2b0e971d1e1e97f0a79e2c146",
+      "fresh": true,
+      "package": "path+file:///root/gpui-boolean-cohort-sol-20261024/reactivity/crates/gpui#0.1.0"
+    },
+    {
+      "name": "paint_slots",
+      "source": "3fc07815a0ce389db54e492dd1d889c6fca10699",
+      "original": "/root/targets/boolean-cohort-sol-20261024/debug/build/gpui/a570db7535072cf1/out/paint_slots-a570db7535072cf1",
+      "frozen": "/root/gpui-boolean-cohort-sol-artifacts-20261024/full-11-3fc07815a0/paint_slots-paint_slots-a570db7535072cf1",
+      "bytes": 29905216,
+      "sha256": "23eb853a04ff5e991facc0644670f0432577d17258430514ad1b855b247de938",
+      "fresh": true,
+      "package": "path+file:///root/gpui-boolean-cohort-sol-20261024/reactivity/crates/gpui#0.1.0"
+    },
+    {
+      "name": "question_futures",
+      "source": "3fc07815a0ce389db54e492dd1d889c6fca10699",
+      "original": "/root/targets/boolean-cohort-sol-20261024/debug/build/gpui/6c5310428c152e9a/out/question_futures-6c5310428c152e9a",
+      "frozen": "/root/gpui-boolean-cohort-sol-artifacts-20261024/full-11-3fc07815a0/question_futures-question_futures-6c5310428c152e9a",
+      "bytes": 30636584,
+      "sha256": "19fa328eb6c01c08d4e6b981915b695c8daad97972171a8bd3378a3ab9172ff6",
+      "fresh": true,
+      "package": "path+file:///root/gpui-boolean-cohort-sol-20261024/reactivity/crates/gpui#0.1.0"
+    },
+    {
+      "name": "source_inbox_reader_gate",
+      "source": "3fc07815a0ce389db54e492dd1d889c6fca10699",
+      "original": "/root/targets/boolean-cohort-sol-20261024/debug/build/gpui/d104278269e560da/out/source_inbox_reader_gate-d104278269e560da",
+      "frozen": "/root/gpui-boolean-cohort-sol-artifacts-20261024/full-11-3fc07815a0/source_inbox_reader_gate-source_inbox_reader_gate-d104278269e560da",
+      "bytes": 27206312,
+      "sha256": "dfa5783add1f3cc20b7eaafaf72ee0edc0bde96db0517b86d886210fcc0ac7d0",
+      "fresh": true,
+      "package": "path+file:///root/gpui-boolean-cohort-sol-20261024/reactivity/crates/gpui#0.1.0"
+    },
+    {
+      "name": "text_geometry",
+      "source": "3fc07815a0ce389db54e492dd1d889c6fca10699",
+      "original": "/root/targets/boolean-cohort-sol-20261024/debug/build/gpui/99a4d622471d6d31/out/text_geometry-99a4d622471d6d31",
+      "frozen": "/root/gpui-boolean-cohort-sol-artifacts-20261024/full-11-3fc07815a0/text_geometry-text_geometry-99a4d622471d6d31",
+      "bytes": 27834944,
+      "sha256": "4c47120fed2ce97535dd0d3944c5d525337fafe02b4cd645e19fff51139f310f",
+      "fresh": true,
+      "package": "path+file:///root/gpui-boolean-cohort-sol-20261024/reactivity/crates/gpui#0.1.0"
+    },
+    {
+      "name": "paint_slot_storage",
+      "source": "3fc07815a0ce389db54e492dd1d889c6fca10699",
+      "original": "/root/targets/boolean-cohort-sol-20261024/debug/examples/paint_slot_storage",
+      "frozen": "/root/gpui-boolean-cohort-sol-artifacts-20261024/full-11-3fc07815a0/paint_slot_storage-paint_slot_storage",
+      "bytes": 26295504,
+      "sha256": "383606a14c8462509aa862765a4065aeecc914f6ba8ce95e894e117b496787b5",
+      "fresh": true,
+      "package": "path+file:///root/gpui-boolean-cohort-sol-20261024/reactivity/crates/gpui#0.1.0"
+    },
+    {
+      "name": "questions",
+      "source": "3fc07815a0ce389db54e492dd1d889c6fca10699",
+      "original": "/root/targets/boolean-cohort-sol-20261024/debug/build/gpui/52da471991a50b2a/out/questions-52da471991a50b2a",
+      "frozen": "/root/gpui-boolean-cohort-sol-artifacts-20261024/full-11-3fc07815a0/questions-questions-52da471991a50b2a",
+      "bytes": 29199448,
+      "sha256": "4349d727cd079aede9b5074ea14c8f32ed18da0545e7f569f2cc872721eba104",
+      "fresh": true,
+      "package": "path+file:///root/gpui-boolean-cohort-sol-20261024/reactivity/crates/gpui#0.1.0"
+    },
+    {
+      "name": "projected_sources",
+      "source": "3fc07815a0ce389db54e492dd1d889c6fca10699",
+      "original": "/root/targets/boolean-cohort-sol-20261024/debug/build/gpui/51a1f1a61e3d3c0d/out/projected_sources-51a1f1a61e3d3c0d",
+      "frozen": "/root/gpui-boolean-cohort-sol-artifacts-20261024/full-11-3fc07815a0/projected_sources-projected_sources-51a1f1a61e3d3c0d",
+      "bytes": 30073120,
+      "sha256": "50e13ade64c3bd92aedaf531fb36c9067ac5fedd6f0818f2825bf4d60d95f2f7",
+      "fresh": true,
+      "package": "path+file:///root/gpui-boolean-cohort-sol-20261024/reactivity/crates/gpui#0.1.0"
+    },
+    {
+      "name": "unit_action_cost",
+      "source": "3fc07815a0ce389db54e492dd1d889c6fca10699",
+      "original": "/root/targets/boolean-cohort-sol-20261024/debug/build/gpui/2173a19b4bf89b8b/out/unit_action_cost-2173a19b4bf89b8b",
+      "frozen": "/root/gpui-boolean-cohort-sol-artifacts-20261024/full-11-3fc07815a0/unit_action_cost-unit_action_cost-2173a19b4bf89b8b",
+      "bytes": 27071184,
+      "sha256": "42a81c6661515f7e7cd17b51f19135b3d9d0f309014aeabb6959970d9a41feea",
+      "fresh": true,
+      "package": "path+file:///root/gpui-boolean-cohort-sol-20261024/reactivity/crates/gpui#0.1.0"
+    },
+    {
+      "name": "intrinsic_text",
+      "source": "3fc07815a0ce389db54e492dd1d889c6fca10699",
+      "original": "/root/targets/boolean-cohort-sol-20261024/debug/build/gpui/95aaac3b95806b75/out/intrinsic_text-95aaac3b95806b75",
+      "frozen": "/root/gpui-boolean-cohort-sol-artifacts-20261024/full-11-3fc07815a0/intrinsic_text-intrinsic_text-95aaac3b95806b75",
+      "bytes": 27350096,
+      "sha256": "a8a9233e384d3406416ee217ae55fdc3f939960a21f4ff434b7b0e05bb929041",
+      "fresh": true,
+      "package": "path+file:///root/gpui-boolean-cohort-sol-20261024/reactivity/crates/gpui#0.1.0"
+    },
+    {
+      "name": "components",
+      "source": "3fc07815a0ce389db54e492dd1d889c6fca10699",
+      "original": "/root/targets/boolean-cohort-sol-20261024/debug/build/gpui/7978379f244f4005/out/components-7978379f244f4005",
+      "frozen": "/root/gpui-boolean-cohort-sol-artifacts-20261024/full-11-3fc07815a0/components-components-7978379f244f4005",
+      "bytes": 32115504,
+      "sha256": "8a56cc61821999c8fc612526d4a0e97efc05115c993384bfa406cfae8417dc51",
+      "fresh": true,
+      "package": "path+file:///root/gpui-boolean-cohort-sol-20261024/reactivity/crates/gpui#0.1.0"
+    },
+    {
+      "name": "semantics",
+      "source": "3fc07815a0ce389db54e492dd1d889c6fca10699",
+      "original": "/root/targets/boolean-cohort-sol-20261024/debug/build/gpui/7693f05a5ab9a240/out/semantics-7693f05a5ab9a240",
+      "frozen": "/root/gpui-boolean-cohort-sol-artifacts-20261024/full-11-3fc07815a0/semantics-semantics-7693f05a5ab9a240",
+      "bytes": 29616872,
+      "sha256": "b810128dae8bdbbd909af1aa82c19787d371cb69bb9d3dceb4f69f62cf2c9a7b",
+      "fresh": true,
+      "package": "path+file:///root/gpui-boolean-cohort-sol-20261024/reactivity/crates/gpui#0.1.0"
+    },
+    {
+      "name": "text_lane_measure",
+      "source": "3fc07815a0ce389db54e492dd1d889c6fca10699",
+      "original": "/root/targets/boolean-cohort-sol-20261024/debug/examples/text_lane_measure",
+      "frozen": "/root/gpui-boolean-cohort-sol-artifacts-20261024/full-11-3fc07815a0/text_lane_measure-text_lane_measure",
+      "bytes": 27862024,
+      "sha256": "dea63dc113215475a89ddeb16f135bf79f1eec1068dce0d7e13af0df6a11a2f7",
+      "fresh": true,
+      "package": "path+file:///root/gpui-boolean-cohort-sol-20261024/reactivity/crates/gpui#0.1.0"
+    },
+    {
+      "name": "contained_owner_spike",
+      "source": "3fc07815a0ce389db54e492dd1d889c6fca10699",
+      "original": "/root/targets/boolean-cohort-sol-20261024/debug/examples/contained_owner_spike",
+      "frozen": "/root/gpui-boolean-cohort-sol-artifacts-20261024/full-11-3fc07815a0/contained_owner_spike-contained_owner_spike",
+      "bytes": 26890424,
+      "sha256": "368734500a30c5fcd73583faeae45dd90fcb73ef4c0afeb60ce722751717bdeb",
+      "fresh": true,
+      "package": "path+file:///root/gpui-boolean-cohort-sol-20261024/reactivity/crates/gpui#0.1.0"
+    },
+    {
+      "name": "binding_costs",
+      "source": "3fc07815a0ce389db54e492dd1d889c6fca10699",
+      "original": "/root/targets/boolean-cohort-sol-20261024/debug/examples/binding_costs",
+      "frozen": "/root/gpui-boolean-cohort-sol-artifacts-20261024/full-11-3fc07815a0/binding_costs-binding_costs",
+      "bytes": 28572152,
+      "sha256": "6e83077c435b3e5660d5029ef774d15a0d2f31bccc722a8827544717d2625d13",
+      "fresh": true,
+      "package": "path+file:///root/gpui-boolean-cohort-sol-20261024/reactivity/crates/component#gpui-component@0.1.0"
+    },
+    {
+      "name": "mapped_properties",
+      "source": "3fc07815a0ce389db54e492dd1d889c6fca10699",
+      "original": "/root/targets/boolean-cohort-sol-20261024/debug/build/gpui/7a5e988d99e5a31e/out/mapped_properties-7a5e988d99e5a31e",
+      "frozen": "/root/gpui-boolean-cohort-sol-artifacts-20261024/full-11-3fc07815a0/mapped_properties-mapped_properties-7a5e988d99e5a31e",
+      "bytes": 32404448,
+      "sha256": "88625a86114df178a6eee4b804d8bc88f41ad2fb8014e708871e824fa492c746",
+      "fresh": true,
+      "package": "path+file:///root/gpui-boolean-cohort-sol-20261024/reactivity/crates/gpui#0.1.0"
+    },
+    {
+      "name": "focus",
+      "source": "3fc07815a0ce389db54e492dd1d889c6fca10699",
+      "original": "/root/targets/boolean-cohort-sol-20261024/debug/build/gpui/a3c62805c442e195/out/focus-a3c62805c442e195",
+      "frozen": "/root/gpui-boolean-cohort-sol-artifacts-20261024/full-11-3fc07815a0/focus-focus-a3c62805c442e195",
+      "bytes": 30575864,
+      "sha256": "0d59e44d8c362e5012384b354409cd184b38fba761d8ec549740064b0eabd579",
+      "fresh": true,
+      "package": "path+file:///root/gpui-boolean-cohort-sol-20261024/reactivity/crates/gpui#0.1.0"
+    },
+    {
+      "name": "property_state_shell",
+      "source": "3fc07815a0ce389db54e492dd1d889c6fca10699",
+      "original": "/root/targets/boolean-cohort-sol-20261024/debug/build/gpui/6a5892b921b89427/out/property_state_shell-6a5892b921b89427",
+      "frozen": "/root/gpui-boolean-cohort-sol-artifacts-20261024/full-11-3fc07815a0/property_state_shell-property_state_shell-6a5892b921b89427",
+      "bytes": 27030280,
+      "sha256": "8985dc3096b4035afd3ff5da8262175872025a12f1257ca0fc57ec14f17579ec",
+      "fresh": true,
+      "package": "path+file:///root/gpui-boolean-cohort-sol-20261024/reactivity/crates/gpui#0.1.0"
+    },
+    {
+      "name": "source_values",
+      "source": "3fc07815a0ce389db54e492dd1d889c6fca10699",
+      "original": "/root/targets/boolean-cohort-sol-20261024/debug/build/gpui/bd88fc3a744034d2/out/source_values-bd88fc3a744034d2",
+      "frozen": "/root/gpui-boolean-cohort-sol-artifacts-20261024/full-11-3fc07815a0/source_values-source_values-bd88fc3a744034d2",
+      "bytes": 27971200,
+      "sha256": "1705770e49220af0b98fe839121b0035c06431f953ec4ce8e4858f19d11171e4",
+      "fresh": true,
+      "package": "path+file:///root/gpui-boolean-cohort-sol-20261024/reactivity/crates/gpui#0.1.0"
+    },
+    {
+      "name": "first_frame",
+      "source": "3fc07815a0ce389db54e492dd1d889c6fca10699",
+      "original": "/root/targets/boolean-cohort-sol-20261024/debug/examples/first_frame",
+      "frozen": "/root/gpui-boolean-cohort-sol-artifacts-20261024/full-11-3fc07815a0/first_frame-first_frame",
+      "bytes": 28273088,
+      "sha256": "4b12a840463c7b05d3e980190822c0ef3dae9bf503f76d643ea3b3b435d38f71",
+      "fresh": true,
+      "package": "path+file:///root/gpui-boolean-cohort-sol-20261024/reactivity/crates/gpui#0.1.0"
+    },
+    {
+      "name": "contracts",
+      "source": "3fc07815a0ce389db54e492dd1d889c6fca10699",
+      "original": "/root/targets/boolean-cohort-sol-20261024/debug/build/gpui-component/0749f5d3f8a42466/out/contracts-0749f5d3f8a42466",
+      "frozen": "/root/gpui-boolean-cohort-sol-artifacts-20261024/full-11-3fc07815a0/contracts-contracts-0749f5d3f8a42466",
+      "bytes": 34510936,
+      "sha256": "07880fdf19bcf905fc595413bd3197d2db5017f703481ea59914deb1cfcb15c2",
+      "fresh": true,
+      "package": "path+file:///root/gpui-boolean-cohort-sol-20261024/reactivity/crates/component#gpui-component@0.1.0"
+    },
+    {
+      "name": "pointer_focus",
+      "source": "3fc07815a0ce389db54e492dd1d889c6fca10699",
+      "original": "/root/targets/boolean-cohort-sol-20261024/debug/build/gpui/ae258c841850710a/out/pointer_focus-ae258c841850710a",
+      "frozen": "/root/gpui-boolean-cohort-sol-artifacts-20261024/full-11-3fc07815a0/pointer_focus-pointer_focus-ae258c841850710a",
+      "bytes": 27416296,
+      "sha256": "dbb124c167711e6d500481bbece4388379d564dc21871136d1b20a1939ec94f8",
+      "fresh": true,
+      "package": "path+file:///root/gpui-boolean-cohort-sol-20261024/reactivity/crates/gpui#0.1.0"
+    },
+    {
+      "name": "question_inputs",
+      "source": "3fc07815a0ce389db54e492dd1d889c6fca10699",
+      "original": "/root/targets/boolean-cohort-sol-20261024/debug/build/gpui/f8337bf2443d77bb/out/question_inputs-f8337bf2443d77bb",
+      "frozen": "/root/gpui-boolean-cohort-sol-artifacts-20261024/full-11-3fc07815a0/question_inputs-question_inputs-f8337bf2443d77bb",
+      "bytes": 28310968,
+      "sha256": "7ada3fff0a69f02aef50467d2a35e4f80cde497929599be105e020cca573ac8e",
+      "fresh": true,
+      "package": "path+file:///root/gpui-boolean-cohort-sol-20261024/reactivity/crates/gpui#0.1.0"
+    },
+    {
+      "name": "child_capacity",
+      "source": "3fc07815a0ce389db54e492dd1d889c6fca10699",
+      "original": "/root/targets/boolean-cohort-sol-20261024/debug/build/gpui/eb3e83b5cb443269/out/child_capacity-eb3e83b5cb443269",
+      "frozen": "/root/gpui-boolean-cohort-sol-artifacts-20261024/full-11-3fc07815a0/child_capacity-child_capacity-eb3e83b5cb443269",
+      "bytes": 26835480,
+      "sha256": "464a08ae18fbb37387ab10503a485d1f9529e3a640a245ebd86177a521eef148",
+      "fresh": true,
+      "package": "path+file:///root/gpui-boolean-cohort-sol-20261024/reactivity/crates/gpui#0.1.0"
+    },
+    {
+      "name": "immutable_text",
+      "source": "3fc07815a0ce389db54e492dd1d889c6fca10699",
+      "original": "/root/targets/boolean-cohort-sol-20261024/debug/build/gpui/065f5cd9e2b41359/out/immutable_text-065f5cd9e2b41359",
+      "frozen": "/root/gpui-boolean-cohort-sol-artifacts-20261024/full-11-3fc07815a0/immutable_text-immutable_text-065f5cd9e2b41359",
+      "bytes": 26792744,
+      "sha256": "070f30ddbed655d9c2c9525699eeddb86fdf598d09c08a8b16d5f7c107090fbb",
+      "fresh": true,
+      "package": "path+file:///root/gpui-boolean-cohort-sol-20261024/reactivity/crates/gpui#0.1.0"
+    },
+    {
+      "name": "search_library",
+      "source": "3fc07815a0ce389db54e492dd1d889c6fca10699",
+      "original": "/root/targets/boolean-cohort-sol-20261024/debug/build/gpui/b9c6f8d28f864b8f/out/search_library-b9c6f8d28f864b8f",
+      "frozen": "/root/gpui-boolean-cohort-sol-artifacts-20261024/full-11-3fc07815a0/search_library-search_library-b9c6f8d28f864b8f",
+      "bytes": 29006176,
+      "sha256": "2acf7c912ecdc9f06736ca6511f0c1d70b2024ef940655a9c1a900e0c42ca226",
+      "fresh": true,
+      "package": "path+file:///root/gpui-boolean-cohort-sol-20261024/reactivity/crates/gpui#0.1.0"
+    },
+    {
+      "name": "text_selection_compound",
+      "source": "3fc07815a0ce389db54e492dd1d889c6fca10699",
+      "original": "/root/targets/boolean-cohort-sol-20261024/debug/build/gpui/8fbb703d244b8586/out/text_selection_compound-8fbb703d244b8586",
+      "frozen": "/root/gpui-boolean-cohort-sol-artifacts-20261024/full-11-3fc07815a0/text_selection_compound-text_selection_compound-8fbb703d244b8586",
+      "bytes": 27495560,
+      "sha256": "d615be011008a389b3c045c884700853c27db548e620aa84b9e98e9bcad3dcd0",
+      "fresh": true,
+      "package": "path+file:///root/gpui-boolean-cohort-sol-20261024/reactivity/crates/gpui#0.1.0"
+    },
+    {
+      "name": "remote_delivery_measure",
+      "source": "3fc07815a0ce389db54e492dd1d889c6fca10699",
+      "original": "/root/targets/boolean-cohort-sol-20261024/debug/examples/remote_delivery_measure",
+      "frozen": "/root/gpui-boolean-cohort-sol-artifacts-20261024/full-11-3fc07815a0/remote_delivery_measure-remote_delivery_measure",
+      "bytes": 27789688,
+      "sha256": "860d310860c30a6b0dd52c0e400cf9e1c2dec04eb7707d2b9b70f7c0a9af2b3d",
+      "fresh": true,
+      "package": "path+file:///root/gpui-boolean-cohort-sol-20261024/reactivity/crates/gpui#0.1.0"
+    },
+    {
+      "name": "retained_styles",
+      "source": "3fc07815a0ce389db54e492dd1d889c6fca10699",
+      "original": "/root/targets/boolean-cohort-sol-20261024/debug/build/gpui/bb72653730e32e55/out/retained_styles-bb72653730e32e55",
+      "frozen": "/root/gpui-boolean-cohort-sol-artifacts-20261024/full-11-3fc07815a0/retained_styles-retained_styles-bb72653730e32e55",
+      "bytes": 29138152,
+      "sha256": "b8caeb7a1d094c6f0a29ff4aa2aea386ccb07a2345633f8d74a740897248eabf",
+      "fresh": true,
+      "package": "path+file:///root/gpui-boolean-cohort-sol-20261024/reactivity/crates/gpui#0.1.0"
+    },
+    {
+      "name": "property_change_union",
+      "source": "3fc07815a0ce389db54e492dd1d889c6fca10699",
+      "original": "/root/targets/boolean-cohort-sol-20261024/debug/build/gpui/61b6aa8b68481cff/out/property_change_union-61b6aa8b68481cff",
+      "frozen": "/root/gpui-boolean-cohort-sol-artifacts-20261024/full-11-3fc07815a0/property_change_union-property_change_union-61b6aa8b68481cff",
+      "bytes": 28737984,
+      "sha256": "95d20b74dcb414a169a3d56bed56b9569fb4b2484f4165283546cd5cc379ac47",
+      "fresh": true,
+      "package": "path+file:///root/gpui-boolean-cohort-sol-20261024/reactivity/crates/gpui#0.1.0"
+    },
+    {
+      "name": "color_cost",
+      "source": "3fc07815a0ce389db54e492dd1d889c6fca10699",
+      "original": "/root/targets/boolean-cohort-sol-20261024/debug/examples/color_cost",
+      "frozen": "/root/gpui-boolean-cohort-sol-artifacts-20261024/full-11-3fc07815a0/color_cost-color_cost",
+      "bytes": 26060024,
+      "sha256": "4731dc024d73b0a85aa1c79625b3c15b7e7307e21e71948f166e357ded718416",
+      "fresh": true,
+      "package": "path+file:///root/gpui-boolean-cohort-sol-20261024/reactivity/crates/gpui#0.1.0"
+    },
+    {
+      "name": "lists",
+      "source": "3fc07815a0ce389db54e492dd1d889c6fca10699",
+      "original": "/root/targets/boolean-cohort-sol-20261024/debug/build/gpui/74960e6b926d85e7/out/lists-74960e6b926d85e7",
+      "frozen": "/root/gpui-boolean-cohort-sol-artifacts-20261024/full-11-3fc07815a0/lists-lists-74960e6b926d85e7",
+      "bytes": 38178936,
+      "sha256": "da1aad5c05a369bf39a2007e27444c64116c4d69e52c580b68f8bdc90ab0349a",
+      "fresh": true,
+      "package": "path+file:///root/gpui-boolean-cohort-sol-20261024/reactivity/crates/gpui#0.1.0"
+    },
+    {
+      "name": "dpi",
+      "source": "3fc07815a0ce389db54e492dd1d889c6fca10699",
+      "original": "/root/targets/boolean-cohort-sol-20261024/debug/build/gpui/919a728593516008/out/dpi-919a728593516008",
+      "frozen": "/root/gpui-boolean-cohort-sol-artifacts-20261024/full-11-3fc07815a0/dpi-dpi-919a728593516008",
+      "bytes": 29427208,
+      "sha256": "1d5bd034e41965a8c63086880244dd0f6527b2a26e86f0913768b2f754b8a8d8",
+      "fresh": true,
+      "package": "path+file:///root/gpui-boolean-cohort-sol-20261024/reactivity/crates/gpui#0.1.0"
+    },
+    {
+      "name": "source_inbox",
+      "source": "3fc07815a0ce389db54e492dd1d889c6fca10699",
+      "original": "/root/targets/boolean-cohort-sol-20261024/debug/build/gpui/2ac4fea1e90f4aad/out/source_inbox-2ac4fea1e90f4aad",
+      "frozen": "/root/gpui-boolean-cohort-sol-artifacts-20261024/full-11-3fc07815a0/source_inbox-source_inbox-2ac4fea1e90f4aad",
+      "bytes": 31462456,
+      "sha256": "11f2e201a12bb0bca6b6e69f96cf05bcdfc32037776fc5ef6536736e4768f554",
+      "fresh": true,
+      "package": "path+file:///root/gpui-boolean-cohort-sol-20261024/reactivity/crates/gpui#0.1.0"
+    },
+    {
+      "name": "unicode_text_measure",
+      "source": "3fc07815a0ce389db54e492dd1d889c6fca10699",
+      "original": "/root/targets/boolean-cohort-sol-20261024/debug/examples/unicode_text_measure",
+      "frozen": "/root/gpui-boolean-cohort-sol-artifacts-20261024/full-11-3fc07815a0/unicode_text_measure-unicode_text_measure",
+      "bytes": 27752424,
+      "sha256": "3cd7334103daf9d41a6bee6895de9237ed3c430a0b19962f8b1ca3533968d22e",
+      "fresh": true,
+      "package": "path+file:///root/gpui-boolean-cohort-sol-20261024/reactivity/crates/gpui#0.1.0"
+    },
+    {
+      "name": "scroll",
+      "source": "3fc07815a0ce389db54e492dd1d889c6fca10699",
+      "original": "/root/targets/boolean-cohort-sol-20261024/debug/build/gpui/b1fa991592855717/out/scroll-b1fa991592855717",
+      "frozen": "/root/gpui-boolean-cohort-sol-artifacts-20261024/full-11-3fc07815a0/scroll-scroll-b1fa991592855717",
+      "bytes": 38025832,
+      "sha256": "3f0a3eb1afc6519a43d268e21e5754836dd6ac79f9fffb61742580a665703b6d",
+      "fresh": true,
+      "package": "path+file:///root/gpui-boolean-cohort-sol-20261024/reactivity/crates/gpui#0.1.0"
+    },
+    {
+      "name": "question_cost",
+      "source": "3fc07815a0ce389db54e492dd1d889c6fca10699",
+      "original": "/root/targets/boolean-cohort-sol-20261024/debug/build/gpui/05fc6b2d6e017ffb/out/question_cost-05fc6b2d6e017ffb",
+      "frozen": "/root/gpui-boolean-cohort-sol-artifacts-20261024/full-11-3fc07815a0/question_cost-question_cost-05fc6b2d6e017ffb",
+      "bytes": 27776544,
+      "sha256": "7c9d82fbad514aee99c2bcbc3ace203d0e7f9897963d630732e5a42547f74fd3",
+      "fresh": true,
+      "package": "path+file:///root/gpui-boolean-cohort-sol-20261024/reactivity/crates/gpui#0.1.0"
+    },
+    {
+      "name": "paint_slot_rebind",
+      "source": "3fc07815a0ce389db54e492dd1d889c6fca10699",
+      "original": "/root/targets/boolean-cohort-sol-20261024/debug/build/gpui/9d6092c0039c27a9/out/paint_slot_rebind-9d6092c0039c27a9",
+      "frozen": "/root/gpui-boolean-cohort-sol-artifacts-20261024/full-11-3fc07815a0/paint_slot_rebind-paint_slot_rebind-9d6092c0039c27a9",
+      "bytes": 28341424,
+      "sha256": "263dfd9f5b016f01a93eb5c3eddf2473109ff7f5333a5d5a8d863b27dc6cb1f5",
+      "fresh": true,
+      "package": "path+file:///root/gpui-boolean-cohort-sol-20261024/reactivity/crates/gpui#0.1.0"
+    },
+    {
+      "name": "acceptance",
+      "source": "3fc07815a0ce389db54e492dd1d889c6fca10699",
+      "original": "/root/targets/boolean-cohort-sol-20261024/debug/build/gpui/99fb8c8c77ec32e7/out/acceptance-99fb8c8c77ec32e7",
+      "frozen": "/root/gpui-boolean-cohort-sol-artifacts-20261024/full-11-3fc07815a0/acceptance-acceptance-99fb8c8c77ec32e7",
+      "bytes": 31701448,
+      "sha256": "0be052f6161f95258e915e7df28252c46bd91b2ed3f37684f2ce7cacd9255962",
+      "fresh": true,
+      "package": "path+file:///root/gpui-boolean-cohort-sol-20261024/reactivity/crates/gpui#0.1.0"
+    },
+    {
+      "name": "handler_storage",
+      "source": "3fc07815a0ce389db54e492dd1d889c6fca10699",
+      "original": "/root/targets/boolean-cohort-sol-20261024/debug/build/gpui/6bddc94d811b0ef5/out/handler_storage-6bddc94d811b0ef5",
+      "frozen": "/root/gpui-boolean-cohort-sol-artifacts-20261024/full-11-3fc07815a0/handler_storage-handler_storage-6bddc94d811b0ef5",
+      "bytes": 32836456,
+      "sha256": "7a2bf5c4a882cb096bc4f402131f1a312f1cd1e5759870bbf917b9a87b4f4fce",
+      "fresh": true,
+      "package": "path+file:///root/gpui-boolean-cohort-sol-20261024/reactivity/crates/gpui#0.1.0"
+    },
+    {
+      "name": "text_cache",
+      "source": "3fc07815a0ce389db54e492dd1d889c6fca10699",
+      "original": "/root/targets/boolean-cohort-sol-20261024/debug/build/gpui/b66661530c147aaa/out/text_cache-b66661530c147aaa",
+      "frozen": "/root/gpui-boolean-cohort-sol-artifacts-20261024/full-11-3fc07815a0/text_cache-text_cache-b66661530c147aaa",
+      "bytes": 29177768,
+      "sha256": "65361735fe2a47193f0a7806af3bf219dab09ee82eeb66f9f0d9442c34d929c8",
+      "fresh": true,
+      "package": "path+file:///root/gpui-boolean-cohort-sol-20261024/reactivity/crates/gpui#0.1.0"
+    },
+    {
+      "name": "immutable_text_measure",
+      "source": "3fc07815a0ce389db54e492dd1d889c6fca10699",
+      "original": "/root/targets/boolean-cohort-sol-20261024/debug/examples/immutable_text_measure",
+      "frozen": "/root/gpui-boolean-cohort-sol-artifacts-20261024/full-11-3fc07815a0/immutable_text_measure-immutable_text_measure",
+      "bytes": 27844888,
+      "sha256": "4d14ea3c7c3da93bb4e33f2de6364d7a5f512f64ded3ef13203121d07020e343",
+      "fresh": true,
+      "package": "path+file:///root/gpui-boolean-cohort-sol-20261024/reactivity/crates/gpui#0.1.0"
+    },
+    {
+      "name": "question_storage",
+      "source": "3fc07815a0ce389db54e492dd1d889c6fca10699",
+      "original": "/root/targets/boolean-cohort-sol-20261024/debug/build/gpui/1be6a788f523a613/out/question_storage-1be6a788f523a613",
+      "frozen": "/root/gpui-boolean-cohort-sol-artifacts-20261024/full-11-3fc07815a0/question_storage-question_storage-1be6a788f523a613",
+      "bytes": 29507704,
+      "sha256": "4ae7e80797ee174ffaa3dbdd6a910d204728386bb439dd5650f8dfa4555088d2",
+      "fresh": true,
+      "package": "path+file:///root/gpui-boolean-cohort-sol-20261024/reactivity/crates/gpui#0.1.0"
+    },
+    {
+      "name": "color_packing",
+      "source": "3fc07815a0ce389db54e492dd1d889c6fca10699",
+      "original": "/root/targets/boolean-cohort-sol-20261024/debug/build/gpui/544fda724e854068/out/color_packing-544fda724e854068",
+      "frozen": "/root/gpui-boolean-cohort-sol-artifacts-20261024/full-11-3fc07815a0/color_packing-color_packing-544fda724e854068",
+      "bytes": 28399952,
+      "sha256": "aadef135ed9f53203bdb7e37d21347b5c4dc2ba499062d4881a21b84e2d5ab79",
+      "fresh": true,
+      "package": "path+file:///root/gpui-boolean-cohort-sol-20261024/reactivity/crates/gpui#0.1.0"
+    },
+    {
+      "name": "inspector",
+      "source": "3fc07815a0ce389db54e492dd1d889c6fca10699",
+      "original": "/root/targets/boolean-cohort-sol-20261024/debug/build/gpui/b563a17ffea3df9e/out/inspector-b563a17ffea3df9e",
+      "frozen": "/root/gpui-boolean-cohort-sol-artifacts-20261024/full-11-3fc07815a0/inspector-inspector-b563a17ffea3df9e",
+      "bytes": 33596968,
+      "sha256": "fba1fec77780ceb8e5d7547329fcaab72c09a761fe3f3a28490f1b9215449da4",
+      "fresh": true,
+      "package": "path+file:///root/gpui-boolean-cohort-sol-20261024/reactivity/crates/gpui#0.1.0"
+    },
+    {
+      "name": "presentation",
+      "source": "3fc07815a0ce389db54e492dd1d889c6fca10699",
+      "original": "/root/targets/boolean-cohort-sol-20261024/debug/build/gpui/940cb3c994f711f0/out/presentation-940cb3c994f711f0",
+      "frozen": "/root/gpui-boolean-cohort-sol-artifacts-20261024/full-11-3fc07815a0/presentation-presentation-940cb3c994f711f0",
+      "bytes": 28654872,
+      "sha256": "5c730f65bdb31e40e357e33c4634f5142c45351db53700d6786e140736f9bd37",
+      "fresh": true,
+      "package": "path+file:///root/gpui-boolean-cohort-sol-20261024/reactivity/crates/gpui#0.1.0"
+    },
+    {
+      "name": "runtime",
+      "source": "3fc07815a0ce389db54e492dd1d889c6fca10699",
+      "original": "/root/targets/boolean-cohort-sol-20261024/debug/build/gpui/7c19208a61f5302b/out/runtime-7c19208a61f5302b",
+      "frozen": "/root/gpui-boolean-cohort-sol-artifacts-20261024/full-11-3fc07815a0/runtime-runtime-7c19208a61f5302b",
+      "bytes": 36673928,
+      "sha256": "9fc8a07ff2fe59d6ff57ed8717daf94e135c28a64e8772f34177fa19710d07da",
+      "fresh": true,
+      "package": "path+file:///root/gpui-boolean-cohort-sol-20261024/reactivity/crates/gpui#0.1.0"
+    },
+    {
+      "name": "semantic_serialization",
+      "source": "3fc07815a0ce389db54e492dd1d889c6fca10699",
+      "original": "/root/targets/boolean-cohort-sol-20261024/debug/build/gpui/78be91ec14353f4a/out/semantic_serialization-78be91ec14353f4a",
+      "frozen": "/root/gpui-boolean-cohort-sol-artifacts-20261024/full-11-3fc07815a0/semantic_serialization-semantic_serialization-78be91ec14353f4a",
+      "bytes": 29475368,
+      "sha256": "19346c84b9aa064fd7ba92738c162f332bc16adde044f377c59e40454408c42b",
+      "fresh": true,
+      "package": "path+file:///root/gpui-boolean-cohort-sol-20261024/reactivity/crates/gpui#0.1.0"
+    },
+    {
+      "name": "unicode_text",
+      "source": "3fc07815a0ce389db54e492dd1d889c6fca10699",
+      "original": "/root/targets/boolean-cohort-sol-20261024/debug/build/gpui/2d05ac57e8b6a8d3/out/unicode_text-2d05ac57e8b6a8d3",
+      "frozen": "/root/gpui-boolean-cohort-sol-artifacts-20261024/full-11-3fc07815a0/unicode_text-unicode_text-2d05ac57e8b6a8d3",
+      "bytes": 28322288,
+      "sha256": "727f5180db14aeb9d75d8321f02c16f46eac7deff27552860db0d0a7aef492f1",
+      "fresh": true,
+      "package": "path+file:///root/gpui-boolean-cohort-sol-20261024/reactivity/crates/gpui#0.1.0"
+    },
+    {
+      "name": "sheet_access_measure",
+      "source": "3fc07815a0ce389db54e492dd1d889c6fca10699",
+      "original": "/root/targets/boolean-cohort-sol-20261024/debug/examples/sheet_access_measure",
+      "frozen": "/root/gpui-boolean-cohort-sol-artifacts-20261024/full-11-3fc07815a0/sheet_access_measure-sheet_access_measure",
+      "bytes": 26147880,
+      "sha256": "dce259be70a275177198c3d163ebb85b18a70a700488190f202a228c8b0a3f4b",
+      "fresh": true,
+      "package": "path+file:///root/gpui-boolean-cohort-sol-20261024/reactivity/crates/gpui#0.1.0"
+    },
+    {
+      "name": "routes",
+      "source": "3fc07815a0ce389db54e492dd1d889c6fca10699",
+      "original": "/root/targets/boolean-cohort-sol-20261024/debug/build/gpui/e4c671ecfc2ee7ff/out/routes-e4c671ecfc2ee7ff",
+      "frozen": "/root/gpui-boolean-cohort-sol-artifacts-20261024/full-11-3fc07815a0/routes-routes-e4c671ecfc2ee7ff",
+      "bytes": 28531496,
+      "sha256": "292a13481dd9092124e15625d1343c976e6984ba00e999898504025525fa7a55",
+      "fresh": true,
+      "package": "path+file:///root/gpui-boolean-cohort-sol-20261024/reactivity/crates/gpui#0.1.0"
+    },
+    {
+      "name": "property_selection",
+      "source": "3fc07815a0ce389db54e492dd1d889c6fca10699",
+      "original": "/root/targets/boolean-cohort-sol-20261024/debug/build/gpui/e36c9e5e94c0ffc9/out/property_selection-e36c9e5e94c0ffc9",
+      "frozen": "/root/gpui-boolean-cohort-sol-artifacts-20261024/full-11-3fc07815a0/property_selection-property_selection-e36c9e5e94c0ffc9",
+      "bytes": 30752376,
+      "sha256": "23ab4342f47d0dc09a2debd7a8ae412d4191473157ddfc1905c21e53095ae528",
+      "fresh": true,
+      "package": "path+file:///root/gpui-boolean-cohort-sol-20261024/reactivity/crates/gpui#0.1.0"
+    },
+    {
+      "name": "flex",
+      "source": "3fc07815a0ce389db54e492dd1d889c6fca10699",
+      "original": "/root/targets/boolean-cohort-sol-20261024/debug/build/gpui/2077c33af15d8c94/out/flex-2077c33af15d8c94",
+      "frozen": "/root/gpui-boolean-cohort-sol-artifacts-20261024/full-11-3fc07815a0/flex-flex-2077c33af15d8c94",
+      "bytes": 32772968,
+      "sha256": "17c18bf5da65ff667704b95deb46dd75778ca4e0218d66612f0323f65581f656",
+      "fresh": true,
+      "package": "path+file:///root/gpui-boolean-cohort-sol-20261024/reactivity/crates/gpui#0.1.0"
+    },
+    {
+      "name": "mapped_paint",
+      "source": "3fc07815a0ce389db54e492dd1d889c6fca10699",
+      "original": "/root/targets/boolean-cohort-sol-20261024/debug/build/gpui/2523f566816b55d3/out/mapped_paint-2523f566816b55d3",
+      "frozen": "/root/gpui-boolean-cohort-sol-artifacts-20261024/full-11-3fc07815a0/mapped_paint-mapped_paint-2523f566816b55d3",
+      "bytes": 28405800,
+      "sha256": "d3c83cd88e69c411087f4a4e12721e552b13e18c2ebdd6a3b078a7e163e0f89e",
+      "fresh": true,
+      "package": "path+file:///root/gpui-boolean-cohort-sol-20261024/reactivity/crates/gpui#0.1.0"
+    },
+    {
+      "name": "gpui",
+      "source": "3fc07815a0ce389db54e492dd1d889c6fca10699",
+      "original": "/root/targets/boolean-cohort-sol-20261024/debug/build/gpui/25196bf12836f725/out/gpui-25196bf12836f725",
+      "frozen": "/root/gpui-boolean-cohort-sol-artifacts-20261024/full-11-3fc07815a0/gpui-gpui-25196bf12836f725",
+      "bytes": 70266032,
+      "sha256": "e57b0a7e7efe4c8d3fd83605fa31b6b551712bc8e22dd2bac66d5712962664f2",
+      "fresh": true,
+      "package": "path+file:///root/gpui-boolean-cohort-sol-20261024/reactivity/crates/gpui#0.1.0"
+    },
+    {
+      "name": "source_value_isolation",
+      "source": "3fc07815a0ce389db54e492dd1d889c6fca10699",
+      "original": "/root/targets/boolean-cohort-sol-20261024/debug/build/gpui/5e44c744ba815b2c/out/source_value_isolation-5e44c744ba815b2c",
+      "frozen": "/root/gpui-boolean-cohort-sol-artifacts-20261024/full-11-3fc07815a0/source_value_isolation-source_value_isolation-5e44c744ba815b2c",
+      "bytes": 28848136,
+      "sha256": "cd42d8595c93e5c3be42d47065d449fe2ab8cdca8648073ceee1477e09f39aeb",
+      "fresh": true,
+      "package": "path+file:///root/gpui-boolean-cohort-sol-20261024/reactivity/crates/gpui#0.1.0"
+    },
+    {
+      "name": "counter",
+      "source": "3fc07815a0ce389db54e492dd1d889c6fca10699",
+      "original": "/root/targets/boolean-cohort-sol-20261024/debug/examples/counter",
+      "frozen": "/root/gpui-boolean-cohort-sol-artifacts-20261024/full-11-3fc07815a0/counter-counter",
+      "bytes": 28049968,
+      "sha256": "26b1b20df2dc69b8bba671de539cee8d6f48d01abf7888774da11bd6dfaf6cb2",
+      "fresh": true,
+      "package": "path+file:///root/gpui-boolean-cohort-sol-20261024/reactivity/crates/gpui#0.1.0"
+    },
+    {
+      "name": "halloween",
+      "source": "3fc07815a0ce389db54e492dd1d889c6fca10699",
+      "original": "/root/targets/boolean-cohort-sol-20261024/debug/examples/halloween",
+      "frozen": "/root/gpui-boolean-cohort-sol-artifacts-20261024/full-11-3fc07815a0/halloween-halloween",
+      "bytes": 28043376,
+      "sha256": "d764dd0e4e1a3a167545d71bfa5422da93d7e5ed62f3c4c7df17b24b39feb122",
+      "fresh": true,
+      "package": "path+file:///root/gpui-boolean-cohort-sol-20261024/reactivity/crates/component#gpui-component@0.1.0"
+    },
+    {
+      "name": "question_input_cost",
+      "source": "3fc07815a0ce389db54e492dd1d889c6fca10699",
+      "original": "/root/targets/boolean-cohort-sol-20261024/debug/build/gpui/ce4f046939110c4e/out/question_input_cost-ce4f046939110c4e",
+      "frozen": "/root/gpui-boolean-cohort-sol-artifacts-20261024/full-11-3fc07815a0/question_input_cost-question_input_cost-ce4f046939110c4e",
+      "bytes": 26972096,
+      "sha256": "ff181dfa61b2942bc8f36c4b31761e1bb4f48867c6917912044baf1da34f23b0",
+      "fresh": true,
+      "package": "path+file:///root/gpui-boolean-cohort-sol-20261024/reactivity/crates/gpui#0.1.0"
+    },
+    {
+      "name": "pointer",
+      "source": "3fc07815a0ce389db54e492dd1d889c6fca10699",
+      "original": "/root/targets/boolean-cohort-sol-20261024/debug/build/gpui/08861d23689fbef2/out/pointer-08861d23689fbef2",
+      "frozen": "/root/gpui-boolean-cohort-sol-artifacts-20261024/full-11-3fc07815a0/pointer-pointer-08861d23689fbef2",
+      "bytes": 28915392,
+      "sha256": "36dfa2e668010cfb7c31228238a55192c941557ba62a48146e4f0e4a09e19ec7",
+      "fresh": true,
+      "package": "path+file:///root/gpui-boolean-cohort-sol-20261024/reactivity/crates/gpui#0.1.0"
+    },
+    {
+      "name": "images",
+      "source": "3fc07815a0ce389db54e492dd1d889c6fca10699",
+      "original": "/root/targets/boolean-cohort-sol-20261024/debug/build/gpui/c61ff544120dafb3/out/images-c61ff544120dafb3",
+      "frozen": "/root/gpui-boolean-cohort-sol-artifacts-20261024/full-11-3fc07815a0/images-images-c61ff544120dafb3",
+      "bytes": 29874848,
+      "sha256": "2e9882bd519b53cd16bb544ce356265badabe00f3017666b293134b7d1e51051",
+      "fresh": true,
+      "package": "path+file:///root/gpui-boolean-cohort-sol-20261024/reactivity/crates/gpui#0.1.0"
+    },
+    {
+      "name": "text_selection",
+      "source": "3fc07815a0ce389db54e492dd1d889c6fca10699",
+      "original": "/root/targets/boolean-cohort-sol-20261024/debug/build/gpui/7e06f9254f6e7abc/out/text_selection-7e06f9254f6e7abc",
+      "frozen": "/root/gpui-boolean-cohort-sol-artifacts-20261024/full-11-3fc07815a0/text_selection-text_selection-7e06f9254f6e7abc",
+      "bytes": 30821496,
+      "sha256": "dec40f11e9c5a5b4496a448f15d282c5fe2f8754a2fc42a35744ede7ff63f0f9",
+      "fresh": true,
+      "package": "path+file:///root/gpui-boolean-cohort-sol-20261024/reactivity/crates/gpui#0.1.0"
+    },
+    {
+      "name": "checkbox",
+      "source": "3fc07815a0ce389db54e492dd1d889c6fca10699",
+      "original": "/root/targets/boolean-cohort-sol-20261024/debug/build/gpui/1081084de8b72c0d/out/checkbox-1081084de8b72c0d",
+      "frozen": "/root/gpui-boolean-cohort-sol-artifacts-20261024/full-11-3fc07815a0/checkbox-checkbox-1081084de8b72c0d",
+      "bytes": 31060400,
+      "sha256": "60177fe3a691555be1bd5e6e8d4b2787e3bf7fd56ccd17f0bb0cd14a315b5137",
+      "fresh": true,
+      "package": "path+file:///root/gpui-boolean-cohort-sol-20261024/reactivity/crates/gpui#0.1.0"
+    },
+    {
+      "name": "reactive_styles",
+      "source": "3fc07815a0ce389db54e492dd1d889c6fca10699",
+      "original": "/root/targets/boolean-cohort-sol-20261024/debug/examples/reactive_styles",
+      "frozen": "/root/gpui-boolean-cohort-sol-artifacts-20261024/full-11-3fc07815a0/reactive_styles-reactive_styles",
+      "bytes": 28318376,
+      "sha256": "7cb0f51322c8fc116526017aae51c8a0f4cd7a1eeff99b46f421710c90639340",
+      "fresh": true,
+      "package": "path+file:///root/gpui-boolean-cohort-sol-20261024/reactivity/crates/gpui#0.1.0"
+    },
+    {
+      "name": "dimensions",
+      "source": "3fc07815a0ce389db54e492dd1d889c6fca10699",
+      "original": "/root/targets/boolean-cohort-sol-20261024/debug/build/gpui/6d9b3d4fdeb6aeaa/out/dimensions-6d9b3d4fdeb6aeaa",
+      "frozen": "/root/gpui-boolean-cohort-sol-artifacts-20261024/full-11-3fc07815a0/dimensions-dimensions-6d9b3d4fdeb6aeaa",
+      "bytes": 29525784,
+      "sha256": "d83cb9fcd0d9eae4f7f9f07d228075d9fc624b1fedeefc55590d6e91662ed5f5",
+      "fresh": true,
+      "package": "path+file:///root/gpui-boolean-cohort-sol-20261024/reactivity/crates/gpui#0.1.0"
+    },
+    {
+      "name": "library",
+      "source": "3fc07815a0ce389db54e492dd1d889c6fca10699",
+      "original": "/root/targets/boolean-cohort-sol-20261024/debug/build/gpui/b6d35a445151d675/out/library-b6d35a445151d675",
+      "frozen": "/root/gpui-boolean-cohort-sol-artifacts-20261024/full-11-3fc07815a0/library-library-b6d35a445151d675",
+      "bytes": 28072376,
+      "sha256": "e44a5a4bf1084c0faeaf9bde56600dd88eb546a79e692e4ebf54901eb0a0e0fe",
+      "fresh": true,
+      "package": "path+file:///root/gpui-boolean-cohort-sol-20261024/reactivity/crates/gpui#0.1.0"
+    },
+    {
+      "name": "property_actions",
+      "source": "3fc07815a0ce389db54e492dd1d889c6fca10699",
+      "original": "/root/targets/boolean-cohort-sol-20261024/debug/build/gpui/d9284f04be1c46cb/out/property_actions-d9284f04be1c46cb",
+      "frozen": "/root/gpui-boolean-cohort-sol-artifacts-20261024/full-11-3fc07815a0/property_actions-property_actions-d9284f04be1c46cb",
+      "bytes": 29381400,
+      "sha256": "3a7c736ba75b9db1852d928622314972c39c5b60587771fcbad7c8324d5773e7",
+      "fresh": true,
+      "package": "path+file:///root/gpui-boolean-cohort-sol-20261024/reactivity/crates/gpui#0.1.0"
+    },
+    {
+      "name": "remote",
+      "source": "3fc07815a0ce389db54e492dd1d889c6fca10699",
+      "original": "/root/targets/boolean-cohort-sol-20261024/debug/build/gpui/cfca37a91c901861/out/remote-cfca37a91c901861",
+      "frozen": "/root/gpui-boolean-cohort-sol-artifacts-20261024/full-11-3fc07815a0/remote-remote-cfca37a91c901861",
+      "bytes": 30173944,
+      "sha256": "c43a2a7953968d66acf54dd0865e4e749648f3e974457764291f487c04165199",
+      "fresh": true,
+      "package": "path+file:///root/gpui-boolean-cohort-sol-20261024/reactivity/crates/gpui#0.1.0"
+    },
+    {
+      "name": "sibling_reconciliation_cost",
+      "source": "3fc07815a0ce389db54e492dd1d889c6fca10699",
+      "original": "/root/targets/boolean-cohort-sol-20261024/debug/build/gpui/1867e8d9ffc2ca04/out/sibling_reconciliation_cost-1867e8d9ffc2ca04",
+      "frozen": "/root/gpui-boolean-cohort-sol-artifacts-20261024/full-11-3fc07815a0/sibling_reconciliation_cost-sibling_reconciliation_cost-1867e8d9ffc2ca04",
+      "bytes": 26829288,
+      "sha256": "959f06d1cb9ac0f52296e27f4720f792dba3c8eb8c67f71e3ccd7148c5327ebe",
+      "fresh": true,
+      "package": "path+file:///root/gpui-boolean-cohort-sol-20261024/reactivity/crates/gpui#0.1.0"
+    },
+    {
+      "name": "unit_action_cost_two",
+      "source": "3fc07815a0ce389db54e492dd1d889c6fca10699",
+      "original": "/root/targets/boolean-cohort-sol-20261024/debug/build/gpui/b1b2c8efbd6612f3/out/unit_action_cost_two-b1b2c8efbd6612f3",
+      "frozen": "/root/gpui-boolean-cohort-sol-artifacts-20261024/full-11-3fc07815a0/unit_action_cost_two-unit_action_cost_two-b1b2c8efbd6612f3",
+      "bytes": 27835056,
+      "sha256": "136d38cfdb74e7fc5a82c982fd84ecc714385729fd4b00049ad22a775890b0f3",
+      "fresh": true,
+      "package": "path+file:///root/gpui-boolean-cohort-sol-20261024/reactivity/crates/gpui#0.1.0"
+    },
+    {
+      "name": "gpui_component",
+      "source": "3fc07815a0ce389db54e492dd1d889c6fca10699",
+      "original": "/root/targets/boolean-cohort-sol-20261024/debug/build/gpui-component/4b4743de5210f9d4/out/gpui_component-4b4743de5210f9d4",
+      "frozen": "/root/gpui-boolean-cohort-sol-artifacts-20261024/full-11-3fc07815a0/gpui_component-gpui_component-4b4743de5210f9d4",
+      "bytes": 1076224,
+      "sha256": "7c4b4781d6b501339a03fb4de1b111f84982c9c92fca2647eee633144f6334bc",
+      "fresh": true,
+      "package": "path+file:///root/gpui-boolean-cohort-sol-20261024/reactivity/crates/component#gpui-component@0.1.0"
+    },
+    {
+      "name": "boolean_cohorts",
+      "source": "3fc07815a0ce389db54e492dd1d889c6fca10699",
+      "original": "/root/targets/boolean-cohort-sol-20261024/debug/build/gpui-component/4e5e0c08ea3b49de/out/boolean_cohorts-4e5e0c08ea3b49de",
+      "frozen": "/root/gpui-boolean-cohort-sol-artifacts-20261024/full-11-3fc07815a0/boolean_cohorts-boolean_cohorts-4e5e0c08ea3b49de",
+      "bytes": 30426904,
+      "sha256": "8e1e3e9efd1d0c5c284d7c11844569da8a5c99a2180812bea95d03c9a1288a95",
+      "fresh": false,
+      "package": "path+file:///root/gpui-boolean-cohort-sol-20261024/reactivity/crates/component#gpui-component@0.1.0"
+    }
+  ],
+  "/root/gpui-boolean-cohort-sol-artifacts-20261024/full-9-a95a159568": [
+    {
+      "name": "gpui_component",
+      "source": "a95a159568820e4428f7a1f7257f4f4f53ee965f",
+      "original": "/root/targets/boolean-cohort-sol-20261024/debug/build/gpui-component/4b4743de5210f9d4/out/gpui_component-4b4743de5210f9d4",
+      "frozen": "/root/gpui-boolean-cohort-sol-artifacts-20261024/full-9-a95a159568/gpui_component-gpui_component-4b4743de5210f9d4",
+      "bytes": 1076224,
+      "sha256": "7c4b4781d6b501339a03fb4de1b111f84982c9c92fca2647eee633144f6334bc",
+      "fresh": false,
+      "package": "path+file:///root/gpui-boolean-cohort-sol-20261024/reactivity/crates/component#gpui-component@0.1.0"
+    },
+    {
+      "name": "literal_dispatch",
+      "source": "a95a159568820e4428f7a1f7257f4f4f53ee965f",
+      "original": "/root/targets/boolean-cohort-sol-20261024/debug/build/gpui/059baed3a7a2ea3f/out/literal_dispatch-059baed3a7a2ea3f",
+      "frozen": "/root/gpui-boolean-cohort-sol-artifacts-20261024/full-9-a95a159568/literal_dispatch-literal_dispatch-059baed3a7a2ea3f",
+      "bytes": 28567816,
+      "sha256": "25cbc91cf46d8c7c0401e045e84ee4a3a2d67af638d04a56aebd723b197f2e54",
+      "fresh": false,
+      "package": "path+file:///root/gpui-boolean-cohort-sol-20261024/reactivity/crates/gpui#0.1.0"
+    },
+    {
+      "name": "field_identity",
+      "source": "a95a159568820e4428f7a1f7257f4f4f53ee965f",
+      "original": "/root/targets/boolean-cohort-sol-20261024/debug/build/gpui/5654a5203d5402c4/out/field_identity-5654a5203d5402c4",
+      "frozen": "/root/gpui-boolean-cohort-sol-artifacts-20261024/full-9-a95a159568/field_identity-field_identity-5654a5203d5402c4",
+      "bytes": 26849040,
+      "sha256": "740feae09946df88cdbed1c7af1dd09175de2744077241a3170fa7a37e9dd605",
+      "fresh": false,
+      "package": "path+file:///root/gpui-boolean-cohort-sol-20261024/reactivity/crates/gpui#0.1.0"
+    },
+    {
+      "name": "property_outline_allocations",
+      "source": "a95a159568820e4428f7a1f7257f4f4f53ee965f",
+      "original": "/root/targets/boolean-cohort-sol-20261024/debug/build/gpui/5a19370338ca7f3e/out/property_outline_allocations-5a19370338ca7f3e",
+      "frozen": "/root/gpui-boolean-cohort-sol-artifacts-20261024/full-9-a95a159568/property_outline_allocations-property_outline_allocations-5a19370338ca7f3e",
+      "bytes": 27059240,
+      "sha256": "88962adb8a86cff8dee0eb66be892f024ef7be244bcd63110d52e586d5fd8965",
+      "fresh": false,
+      "package": "path+file:///root/gpui-boolean-cohort-sol-20261024/reactivity/crates/gpui#0.1.0"
+    },
+    {
+      "name": "source_inbox_reader_gate",
+      "source": "a95a159568820e4428f7a1f7257f4f4f53ee965f",
+      "original": "/root/targets/boolean-cohort-sol-20261024/debug/build/gpui/d104278269e560da/out/source_inbox_reader_gate-d104278269e560da",
+      "frozen": "/root/gpui-boolean-cohort-sol-artifacts-20261024/full-9-a95a159568/source_inbox_reader_gate-source_inbox_reader_gate-d104278269e560da",
+      "bytes": 27206312,
+      "sha256": "79c490340453b6a34a07684cf51be31f0b5710e6f428f9263c67272a8bd6d307",
+      "fresh": false,
+      "package": "path+file:///root/gpui-boolean-cohort-sol-20261024/reactivity/crates/gpui#0.1.0"
+    },
+    {
+      "name": "rounded",
+      "source": "a95a159568820e4428f7a1f7257f4f4f53ee965f",
+      "original": "/root/targets/boolean-cohort-sol-20261024/debug/build/gpui/704af4c9a17a7c32/out/rounded-704af4c9a17a7c32",
+      "frozen": "/root/gpui-boolean-cohort-sol-artifacts-20261024/full-9-a95a159568/rounded-rounded-704af4c9a17a7c32",
+      "bytes": 31477904,
+      "sha256": "0285aebc8db559f4ed6cbd175936111eb284335b4c3e77c1213ce57957722f1a",
+      "fresh": false,
+      "package": "path+file:///root/gpui-boolean-cohort-sol-20261024/reactivity/crates/gpui#0.1.0"
+    },
+    {
+      "name": "paint_slots",
+      "source": "a95a159568820e4428f7a1f7257f4f4f53ee965f",
+      "original": "/root/targets/boolean-cohort-sol-20261024/debug/build/gpui/a570db7535072cf1/out/paint_slots-a570db7535072cf1",
+      "frozen": "/root/gpui-boolean-cohort-sol-artifacts-20261024/full-9-a95a159568/paint_slots-paint_slots-a570db7535072cf1",
+      "bytes": 29905216,
+      "sha256": "cbf1b3cd3091bd16f4ffd771fb57b2577c57ddd33b24dde58a79f0ea150afe6f",
+      "fresh": false,
+      "package": "path+file:///root/gpui-boolean-cohort-sol-20261024/reactivity/crates/gpui#0.1.0"
+    },
+    {
+      "name": "question_futures",
+      "source": "a95a159568820e4428f7a1f7257f4f4f53ee965f",
+      "original": "/root/targets/boolean-cohort-sol-20261024/debug/build/gpui/6c5310428c152e9a/out/question_futures-6c5310428c152e9a",
+      "frozen": "/root/gpui-boolean-cohort-sol-artifacts-20261024/full-9-a95a159568/question_futures-question_futures-6c5310428c152e9a",
+      "bytes": 30636584,
+      "sha256": "2b302a0748550740d186eebf0fe6e31c72896c187bc39f0aaf7322372e6072bb",
+      "fresh": false,
+      "package": "path+file:///root/gpui-boolean-cohort-sol-20261024/reactivity/crates/gpui#0.1.0"
+    },
+    {
+      "name": "identity_recovery",
+      "source": "a95a159568820e4428f7a1f7257f4f4f53ee965f",
+      "original": "/root/targets/boolean-cohort-sol-20261024/debug/build/gpui/b51784c3fd391e16/out/identity_recovery-b51784c3fd391e16",
+      "frozen": "/root/gpui-boolean-cohort-sol-artifacts-20261024/full-9-a95a159568/identity_recovery-identity_recovery-b51784c3fd391e16",
+      "bytes": 27069280,
+      "sha256": "b1cfa84763e44ee6fd0ca60f2c6eb160db6e1d07aa45f5951a8314866a8455f1",
+      "fresh": false,
+      "package": "path+file:///root/gpui-boolean-cohort-sol-20261024/reactivity/crates/gpui#0.1.0"
+    },
+    {
+      "name": "text_geometry",
+      "source": "a95a159568820e4428f7a1f7257f4f4f53ee965f",
+      "original": "/root/targets/boolean-cohort-sol-20261024/debug/build/gpui/99a4d622471d6d31/out/text_geometry-99a4d622471d6d31",
+      "frozen": "/root/gpui-boolean-cohort-sol-artifacts-20261024/full-9-a95a159568/text_geometry-text_geometry-99a4d622471d6d31",
+      "bytes": 27834944,
+      "sha256": "069badfd8c19bbf717f07c1fdbd55d40a2ce19dcf2cc69cfedfad6653706a073",
+      "fresh": false,
+      "package": "path+file:///root/gpui-boolean-cohort-sol-20261024/reactivity/crates/gpui#0.1.0"
+    },
+    {
+      "name": "application",
+      "source": "a95a159568820e4428f7a1f7257f4f4f53ee965f",
+      "original": "/root/targets/boolean-cohort-sol-20261024/debug/build/gpui/e2286cad79c35b8b/out/application-e2286cad79c35b8b",
+      "frozen": "/root/gpui-boolean-cohort-sol-artifacts-20261024/full-9-a95a159568/application-application-e2286cad79c35b8b",
+      "bytes": 30040024,
+      "sha256": "3eb304516bbc79b4e216032544ab65a633bfaaf1b32e2a6d8ffedc34ca5a7cc1",
+      "fresh": false,
+      "package": "path+file:///root/gpui-boolean-cohort-sol-20261024/reactivity/crates/gpui#0.1.0"
+    },
+    {
+      "name": "contained_owner_spike",
+      "source": "a95a159568820e4428f7a1f7257f4f4f53ee965f",
+      "original": "/root/targets/boolean-cohort-sol-20261024/debug/examples/contained_owner_spike",
+      "frozen": "/root/gpui-boolean-cohort-sol-artifacts-20261024/full-9-a95a159568/contained_owner_spike-contained_owner_spike",
+      "bytes": 26890424,
+      "sha256": "8e74e871f09a9904033615dc3dd4557ab2c958d8be3b0b3c15c06fd13236b85c",
+      "fresh": false,
+      "package": "path+file:///root/gpui-boolean-cohort-sol-20261024/reactivity/crates/gpui#0.1.0"
+    },
+    {
+      "name": "paint_slot_storage",
+      "source": "a95a159568820e4428f7a1f7257f4f4f53ee965f",
+      "original": "/root/targets/boolean-cohort-sol-20261024/debug/examples/paint_slot_storage",
+      "frozen": "/root/gpui-boolean-cohort-sol-artifacts-20261024/full-9-a95a159568/paint_slot_storage-paint_slot_storage",
+      "bytes": 26295504,
+      "sha256": "e65c7a5b34294c9aa71294111fb305ad2046d151faa395645f65322acdbec223",
+      "fresh": false,
+      "package": "path+file:///root/gpui-boolean-cohort-sol-20261024/reactivity/crates/gpui#0.1.0"
+    },
+    {
+      "name": "text_lane_measure",
+      "source": "a95a159568820e4428f7a1f7257f4f4f53ee965f",
+      "original": "/root/targets/boolean-cohort-sol-20261024/debug/examples/text_lane_measure",
+      "frozen": "/root/gpui-boolean-cohort-sol-artifacts-20261024/full-9-a95a159568/text_lane_measure-text_lane_measure",
+      "bytes": 27862024,
+      "sha256": "6aa518a0608bb25d9b3f192c03917259803af223e8fb4c993951e86c8a8b12b9",
+      "fresh": false,
+      "package": "path+file:///root/gpui-boolean-cohort-sol-20261024/reactivity/crates/gpui#0.1.0"
+    },
+    {
+      "name": "questions",
+      "source": "a95a159568820e4428f7a1f7257f4f4f53ee965f",
+      "original": "/root/targets/boolean-cohort-sol-20261024/debug/build/gpui/52da471991a50b2a/out/questions-52da471991a50b2a",
+      "frozen": "/root/gpui-boolean-cohort-sol-artifacts-20261024/full-9-a95a159568/questions-questions-52da471991a50b2a",
+      "bytes": 29199448,
+      "sha256": "68c52e3eb03414023327c300a39aa8d694e140ec1076d8d50de2b767602491d7",
+      "fresh": false,
+      "package": "path+file:///root/gpui-boolean-cohort-sol-20261024/reactivity/crates/gpui#0.1.0"
+    },
+    {
+      "name": "intrinsic_text",
+      "source": "a95a159568820e4428f7a1f7257f4f4f53ee965f",
+      "original": "/root/targets/boolean-cohort-sol-20261024/debug/build/gpui/95aaac3b95806b75/out/intrinsic_text-95aaac3b95806b75",
+      "frozen": "/root/gpui-boolean-cohort-sol-artifacts-20261024/full-9-a95a159568/intrinsic_text-intrinsic_text-95aaac3b95806b75",
+      "bytes": 27350096,
+      "sha256": "8bc9b854be57a061ea5cd5ca6964df2def4b3fdbecbf47e98c0156960661c242",
+      "fresh": false,
+      "package": "path+file:///root/gpui-boolean-cohort-sol-20261024/reactivity/crates/gpui#0.1.0"
+    },
+    {
+      "name": "projected_sources",
+      "source": "a95a159568820e4428f7a1f7257f4f4f53ee965f",
+      "original": "/root/targets/boolean-cohort-sol-20261024/debug/build/gpui/51a1f1a61e3d3c0d/out/projected_sources-51a1f1a61e3d3c0d",
+      "frozen": "/root/gpui-boolean-cohort-sol-artifacts-20261024/full-9-a95a159568/projected_sources-projected_sources-51a1f1a61e3d3c0d",
+      "bytes": 30073120,
+      "sha256": "9a217b41341f70155dc38c6d71399ce9f113565b24a22240ac09589e431e1267",
+      "fresh": false,
+      "package": "path+file:///root/gpui-boolean-cohort-sol-20261024/reactivity/crates/gpui#0.1.0"
+    },
+    {
+      "name": "semantics",
+      "source": "a95a159568820e4428f7a1f7257f4f4f53ee965f",
+      "original": "/root/targets/boolean-cohort-sol-20261024/debug/build/gpui/7693f05a5ab9a240/out/semantics-7693f05a5ab9a240",
+      "frozen": "/root/gpui-boolean-cohort-sol-artifacts-20261024/full-9-a95a159568/semantics-semantics-7693f05a5ab9a240",
+      "bytes": 29616872,
+      "sha256": "2c2222541c8571f05ba513cb4fad88a486bc99c31f566674ee0d4035f48a2068",
+      "fresh": false,
+      "package": "path+file:///root/gpui-boolean-cohort-sol-20261024/reactivity/crates/gpui#0.1.0"
+    },
+    {
+      "name": "unit_action_cost",
+      "source": "a95a159568820e4428f7a1f7257f4f4f53ee965f",
+      "original": "/root/targets/boolean-cohort-sol-20261024/debug/build/gpui/2173a19b4bf89b8b/out/unit_action_cost-2173a19b4bf89b8b",
+      "frozen": "/root/gpui-boolean-cohort-sol-artifacts-20261024/full-9-a95a159568/unit_action_cost-unit_action_cost-2173a19b4bf89b8b",
+      "bytes": 27071184,
+      "sha256": "efd856776684b0c036b2cfc6f1a4ebed7aef8f4dccc9f0177634ea675e2137a3",
+      "fresh": false,
+      "package": "path+file:///root/gpui-boolean-cohort-sol-20261024/reactivity/crates/gpui#0.1.0"
+    },
+    {
+      "name": "binding_costs",
+      "source": "a95a159568820e4428f7a1f7257f4f4f53ee965f",
+      "original": "/root/targets/boolean-cohort-sol-20261024/debug/examples/binding_costs",
+      "frozen": "/root/gpui-boolean-cohort-sol-artifacts-20261024/full-9-a95a159568/binding_costs-binding_costs",
+      "bytes": 28572152,
+      "sha256": "b726853a4436775225e516a68c114144ed96ae4d9ebc72871c309e78efb53c8f",
+      "fresh": false,
+      "package": "path+file:///root/gpui-boolean-cohort-sol-20261024/reactivity/crates/component#gpui-component@0.1.0"
+    },
+    {
+      "name": "property_state_shell",
+      "source": "a95a159568820e4428f7a1f7257f4f4f53ee965f",
+      "original": "/root/targets/boolean-cohort-sol-20261024/debug/build/gpui/6a5892b921b89427/out/property_state_shell-6a5892b921b89427",
+      "frozen": "/root/gpui-boolean-cohort-sol-artifacts-20261024/full-9-a95a159568/property_state_shell-property_state_shell-6a5892b921b89427",
+      "bytes": 27030280,
+      "sha256": "b7eee0551d670e56960fb743d45648982c949c554c9c17a4500700f75a70fe91",
+      "fresh": false,
+      "package": "path+file:///root/gpui-boolean-cohort-sol-20261024/reactivity/crates/gpui#0.1.0"
+    },
+    {
+      "name": "components",
+      "source": "a95a159568820e4428f7a1f7257f4f4f53ee965f",
+      "original": "/root/targets/boolean-cohort-sol-20261024/debug/build/gpui/7978379f244f4005/out/components-7978379f244f4005",
+      "frozen": "/root/gpui-boolean-cohort-sol-artifacts-20261024/full-9-a95a159568/components-components-7978379f244f4005",
+      "bytes": 32115504,
+      "sha256": "1bd35e871a9852ca0b7a264673e8dd70051f8f5c5ca3fa541864aac0bbf69166",
+      "fresh": false,
+      "package": "path+file:///root/gpui-boolean-cohort-sol-20261024/reactivity/crates/gpui#0.1.0"
+    },
+    {
+      "name": "first_frame",
+      "source": "a95a159568820e4428f7a1f7257f4f4f53ee965f",
+      "original": "/root/targets/boolean-cohort-sol-20261024/debug/examples/first_frame",
+      "frozen": "/root/gpui-boolean-cohort-sol-artifacts-20261024/full-9-a95a159568/first_frame-first_frame",
+      "bytes": 28273088,
+      "sha256": "17c6f713b80b1cba8d2f22f05485dd78a1fb1a3d01b61a1a9bd9fb8cc11cb174",
+      "fresh": false,
+      "package": "path+file:///root/gpui-boolean-cohort-sol-20261024/reactivity/crates/gpui#0.1.0"
+    },
+    {
+      "name": "source_values",
+      "source": "a95a159568820e4428f7a1f7257f4f4f53ee965f",
+      "original": "/root/targets/boolean-cohort-sol-20261024/debug/build/gpui/bd88fc3a744034d2/out/source_values-bd88fc3a744034d2",
+      "frozen": "/root/gpui-boolean-cohort-sol-artifacts-20261024/full-9-a95a159568/source_values-source_values-bd88fc3a744034d2",
+      "bytes": 27971200,
+      "sha256": "69d447a05de3676794ef85942bb514ba07c1a2e976ad7e4a4d615fc48f5f03a9",
+      "fresh": false,
+      "package": "path+file:///root/gpui-boolean-cohort-sol-20261024/reactivity/crates/gpui#0.1.0"
+    },
+    {
+      "name": "mapped_properties",
+      "source": "a95a159568820e4428f7a1f7257f4f4f53ee965f",
+      "original": "/root/targets/boolean-cohort-sol-20261024/debug/build/gpui/7a5e988d99e5a31e/out/mapped_properties-7a5e988d99e5a31e",
+      "frozen": "/root/gpui-boolean-cohort-sol-artifacts-20261024/full-9-a95a159568/mapped_properties-mapped_properties-7a5e988d99e5a31e",
+      "bytes": 32404448,
+      "sha256": "e03b4ed8d77b84664d81b5f0e6e74f5fa42de4c3a64b8a8760c25dc8078f1108",
+      "fresh": false,
+      "package": "path+file:///root/gpui-boolean-cohort-sol-20261024/reactivity/crates/gpui#0.1.0"
+    },
+    {
+      "name": "focus",
+      "source": "a95a159568820e4428f7a1f7257f4f4f53ee965f",
+      "original": "/root/targets/boolean-cohort-sol-20261024/debug/build/gpui/a3c62805c442e195/out/focus-a3c62805c442e195",
+      "frozen": "/root/gpui-boolean-cohort-sol-artifacts-20261024/full-9-a95a159568/focus-focus-a3c62805c442e195",
+      "bytes": 30575864,
+      "sha256": "fd805bf1ca7e04746031f2f1cd2458a09c1f4b275319999f870f7cda26ba2e24",
+      "fresh": false,
+      "package": "path+file:///root/gpui-boolean-cohort-sol-20261024/reactivity/crates/gpui#0.1.0"
+    },
+    {
+      "name": "remote_delivery_measure",
+      "source": "a95a159568820e4428f7a1f7257f4f4f53ee965f",
+      "original": "/root/targets/boolean-cohort-sol-20261024/debug/examples/remote_delivery_measure",
+      "frozen": "/root/gpui-boolean-cohort-sol-artifacts-20261024/full-9-a95a159568/remote_delivery_measure-remote_delivery_measure",
+      "bytes": 27789688,
+      "sha256": "a6e67e7112d11d4d9135a2dab8e05defb8115bb77823ffed80a0d72d7677b3b3",
+      "fresh": false,
+      "package": "path+file:///root/gpui-boolean-cohort-sol-20261024/reactivity/crates/gpui#0.1.0"
+    },
+    {
+      "name": "question_inputs",
+      "source": "a95a159568820e4428f7a1f7257f4f4f53ee965f",
+      "original": "/root/targets/boolean-cohort-sol-20261024/debug/build/gpui/f8337bf2443d77bb/out/question_inputs-f8337bf2443d77bb",
+      "frozen": "/root/gpui-boolean-cohort-sol-artifacts-20261024/full-9-a95a159568/question_inputs-question_inputs-f8337bf2443d77bb",
+      "bytes": 28310968,
+      "sha256": "461bf76ce719783cbc76e041434a81eacf767a121686d6f9d647fe52fa417240",
+      "fresh": false,
+      "package": "path+file:///root/gpui-boolean-cohort-sol-20261024/reactivity/crates/gpui#0.1.0"
+    },
+    {
+      "name": "pointer_focus",
+      "source": "a95a159568820e4428f7a1f7257f4f4f53ee965f",
+      "original": "/root/targets/boolean-cohort-sol-20261024/debug/build/gpui/ae258c841850710a/out/pointer_focus-ae258c841850710a",
+      "frozen": "/root/gpui-boolean-cohort-sol-artifacts-20261024/full-9-a95a159568/pointer_focus-pointer_focus-ae258c841850710a",
+      "bytes": 27416296,
+      "sha256": "f017430d9f5d80adbde6fc64a7b0ba1651b55f196bd3b94f53d764d3d53b9a74",
+      "fresh": false,
+      "package": "path+file:///root/gpui-boolean-cohort-sol-20261024/reactivity/crates/gpui#0.1.0"
+    },
+    {
+      "name": "immutable_text",
+      "source": "a95a159568820e4428f7a1f7257f4f4f53ee965f",
+      "original": "/root/targets/boolean-cohort-sol-20261024/debug/build/gpui/065f5cd9e2b41359/out/immutable_text-065f5cd9e2b41359",
+      "frozen": "/root/gpui-boolean-cohort-sol-artifacts-20261024/full-9-a95a159568/immutable_text-immutable_text-065f5cd9e2b41359",
+      "bytes": 26792744,
+      "sha256": "23c2924e733924ed0aa78336ac1e820e4f874523a39221a615412bf56aaecf8d",
+      "fresh": false,
+      "package": "path+file:///root/gpui-boolean-cohort-sol-20261024/reactivity/crates/gpui#0.1.0"
+    },
+    {
+      "name": "contracts",
+      "source": "a95a159568820e4428f7a1f7257f4f4f53ee965f",
+      "original": "/root/targets/boolean-cohort-sol-20261024/debug/build/gpui-component/0749f5d3f8a42466/out/contracts-0749f5d3f8a42466",
+      "frozen": "/root/gpui-boolean-cohort-sol-artifacts-20261024/full-9-a95a159568/contracts-contracts-0749f5d3f8a42466",
+      "bytes": 34510936,
+      "sha256": "9c0901864fdcf7cb9f2505357c1bd86dd0d55eb7e0f63c30cbfa13bb6681b92d",
+      "fresh": false,
+      "package": "path+file:///root/gpui-boolean-cohort-sol-20261024/reactivity/crates/component#gpui-component@0.1.0"
+    },
+    {
+      "name": "child_capacity",
+      "source": "a95a159568820e4428f7a1f7257f4f4f53ee965f",
+      "original": "/root/targets/boolean-cohort-sol-20261024/debug/build/gpui/eb3e83b5cb443269/out/child_capacity-eb3e83b5cb443269",
+      "frozen": "/root/gpui-boolean-cohort-sol-artifacts-20261024/full-9-a95a159568/child_capacity-child_capacity-eb3e83b5cb443269",
+      "bytes": 26835480,
+      "sha256": "5704fe93651f263ec6e28f72d8dd3f8f45b978354a74781e7ea903ea385defb3",
+      "fresh": false,
+      "package": "path+file:///root/gpui-boolean-cohort-sol-20261024/reactivity/crates/gpui#0.1.0"
+    },
+    {
+      "name": "gpui",
+      "source": "a95a159568820e4428f7a1f7257f4f4f53ee965f",
+      "original": "/root/targets/boolean-cohort-sol-20261024/debug/build/gpui/25196bf12836f725/out/gpui-25196bf12836f725",
+      "frozen": "/root/gpui-boolean-cohort-sol-artifacts-20261024/full-9-a95a159568/gpui-gpui-25196bf12836f725",
+      "bytes": 70265952,
+      "sha256": "f1ad6d3dd69dde522d3896c93fc904d0e87e9b204daa61bd6aafd9d0ffc6de20",
+      "fresh": false,
+      "package": "path+file:///root/gpui-boolean-cohort-sol-20261024/reactivity/crates/gpui#0.1.0"
+    },
+    {
+      "name": "search_library",
+      "source": "a95a159568820e4428f7a1f7257f4f4f53ee965f",
+      "original": "/root/targets/boolean-cohort-sol-20261024/debug/build/gpui/b9c6f8d28f864b8f/out/search_library-b9c6f8d28f864b8f",
+      "frozen": "/root/gpui-boolean-cohort-sol-artifacts-20261024/full-9-a95a159568/search_library-search_library-b9c6f8d28f864b8f",
+      "bytes": 29006176,
+      "sha256": "e01829307065f6727bb215d81a532cf5c254644cc076b7207668e600c85fcb29",
+      "fresh": false,
+      "package": "path+file:///root/gpui-boolean-cohort-sol-20261024/reactivity/crates/gpui#0.1.0"
+    },
+    {
+      "name": "text_selection_compound",
+      "source": "a95a159568820e4428f7a1f7257f4f4f53ee965f",
+      "original": "/root/targets/boolean-cohort-sol-20261024/debug/build/gpui/8fbb703d244b8586/out/text_selection_compound-8fbb703d244b8586",
+      "frozen": "/root/gpui-boolean-cohort-sol-artifacts-20261024/full-9-a95a159568/text_selection_compound-text_selection_compound-8fbb703d244b8586",
+      "bytes": 27495560,
+      "sha256": "2b93f68b2dcee09a099dcdfe30f7cb5f3f77ef462cc6b98110af81f84ff1696a",
+      "fresh": false,
+      "package": "path+file:///root/gpui-boolean-cohort-sol-20261024/reactivity/crates/gpui#0.1.0"
+    },
+    {
+      "name": "retained_styles",
+      "source": "a95a159568820e4428f7a1f7257f4f4f53ee965f",
+      "original": "/root/targets/boolean-cohort-sol-20261024/debug/build/gpui/bb72653730e32e55/out/retained_styles-bb72653730e32e55",
+      "frozen": "/root/gpui-boolean-cohort-sol-artifacts-20261024/full-9-a95a159568/retained_styles-retained_styles-bb72653730e32e55",
+      "bytes": 29138152,
+      "sha256": "99448d3c70d37afcb3818139b8bf51a1b5fc3fa2446a6517ae71e4f85b013904",
+      "fresh": false,
+      "package": "path+file:///root/gpui-boolean-cohort-sol-20261024/reactivity/crates/gpui#0.1.0"
+    },
+    {
+      "name": "property_change_union",
+      "source": "a95a159568820e4428f7a1f7257f4f4f53ee965f",
+      "original": "/root/targets/boolean-cohort-sol-20261024/debug/build/gpui/61b6aa8b68481cff/out/property_change_union-61b6aa8b68481cff",
+      "frozen": "/root/gpui-boolean-cohort-sol-artifacts-20261024/full-9-a95a159568/property_change_union-property_change_union-61b6aa8b68481cff",
+      "bytes": 28737984,
+      "sha256": "40b2ed73c765eb8f51a671b656ed80a3263d6d8f652dbc0caf2dc898f0c3c6a4",
+      "fresh": false,
+      "package": "path+file:///root/gpui-boolean-cohort-sol-20261024/reactivity/crates/gpui#0.1.0"
+    },
+    {
+      "name": "runtime",
+      "source": "a95a159568820e4428f7a1f7257f4f4f53ee965f",
+      "original": "/root/targets/boolean-cohort-sol-20261024/debug/build/gpui/7c19208a61f5302b/out/runtime-7c19208a61f5302b",
+      "frozen": "/root/gpui-boolean-cohort-sol-artifacts-20261024/full-9-a95a159568/runtime-runtime-7c19208a61f5302b",
+      "bytes": 36673928,
+      "sha256": "6ef471b33dda79375c2eb8db387b806abb4c707d38b11a77d2b6901587d90a47",
+      "fresh": false,
+      "package": "path+file:///root/gpui-boolean-cohort-sol-20261024/reactivity/crates/gpui#0.1.0"
+    },
+    {
+      "name": "color_cost",
+      "source": "a95a159568820e4428f7a1f7257f4f4f53ee965f",
+      "original": "/root/targets/boolean-cohort-sol-20261024/debug/examples/color_cost",
+      "frozen": "/root/gpui-boolean-cohort-sol-artifacts-20261024/full-9-a95a159568/color_cost-color_cost",
+      "bytes": 26060024,
+      "sha256": "ebc7b175c7fef70ca69cf9b261791c8a18f7747b22942f9abac9abf97591b666",
+      "fresh": false,
+      "package": "path+file:///root/gpui-boolean-cohort-sol-20261024/reactivity/crates/gpui#0.1.0"
+    },
+    {
+      "name": "dpi",
+      "source": "a95a159568820e4428f7a1f7257f4f4f53ee965f",
+      "original": "/root/targets/boolean-cohort-sol-20261024/debug/build/gpui/919a728593516008/out/dpi-919a728593516008",
+      "frozen": "/root/gpui-boolean-cohort-sol-artifacts-20261024/full-9-a95a159568/dpi-dpi-919a728593516008",
+      "bytes": 29427208,
+      "sha256": "e8e83cb526b4ad97a04004f95c4b069f5799dc3829196c764313ba00bb07bc30",
+      "fresh": false,
+      "package": "path+file:///root/gpui-boolean-cohort-sol-20261024/reactivity/crates/gpui#0.1.0"
+    },
+    {
+      "name": "source_inbox",
+      "source": "a95a159568820e4428f7a1f7257f4f4f53ee965f",
+      "original": "/root/targets/boolean-cohort-sol-20261024/debug/build/gpui/2ac4fea1e90f4aad/out/source_inbox-2ac4fea1e90f4aad",
+      "frozen": "/root/gpui-boolean-cohort-sol-artifacts-20261024/full-9-a95a159568/source_inbox-source_inbox-2ac4fea1e90f4aad",
+      "bytes": 31462456,
+      "sha256": "e75f73b371555804234e026a02985298494c7b5d9a100dc171bd653cd3b0d335",
+      "fresh": false,
+      "package": "path+file:///root/gpui-boolean-cohort-sol-20261024/reactivity/crates/gpui#0.1.0"
+    },
+    {
+      "name": "unicode_text_measure",
+      "source": "a95a159568820e4428f7a1f7257f4f4f53ee965f",
+      "original": "/root/targets/boolean-cohort-sol-20261024/debug/examples/unicode_text_measure",
+      "frozen": "/root/gpui-boolean-cohort-sol-artifacts-20261024/full-9-a95a159568/unicode_text_measure-unicode_text_measure",
+      "bytes": 27752424,
+      "sha256": "8e95f5fd71695041a40f38d00fb4feb54e2de662b5a0ce957e787eb610c20c91",
+      "fresh": false,
+      "package": "path+file:///root/gpui-boolean-cohort-sol-20261024/reactivity/crates/gpui#0.1.0"
+    },
+    {
+      "name": "lists",
+      "source": "a95a159568820e4428f7a1f7257f4f4f53ee965f",
+      "original": "/root/targets/boolean-cohort-sol-20261024/debug/build/gpui/74960e6b926d85e7/out/lists-74960e6b926d85e7",
+      "frozen": "/root/gpui-boolean-cohort-sol-artifacts-20261024/full-9-a95a159568/lists-lists-74960e6b926d85e7",
+      "bytes": 38178936,
+      "sha256": "3891ecaec06efb4411cd5dda902632e8df335354a6264949450b2d3427d93692",
+      "fresh": false,
+      "package": "path+file:///root/gpui-boolean-cohort-sol-20261024/reactivity/crates/gpui#0.1.0"
+    },
+    {
+      "name": "paint_slot_rebind",
+      "source": "a95a159568820e4428f7a1f7257f4f4f53ee965f",
+      "original": "/root/targets/boolean-cohort-sol-20261024/debug/build/gpui/9d6092c0039c27a9/out/paint_slot_rebind-9d6092c0039c27a9",
+      "frozen": "/root/gpui-boolean-cohort-sol-artifacts-20261024/full-9-a95a159568/paint_slot_rebind-paint_slot_rebind-9d6092c0039c27a9",
+      "bytes": 28341424,
+      "sha256": "c67fadf51e9420e4bb8c313e49d8e843c22930df85a354def4d5d956166fed14",
+      "fresh": false,
+      "package": "path+file:///root/gpui-boolean-cohort-sol-20261024/reactivity/crates/gpui#0.1.0"
+    },
+    {
+      "name": "question_cost",
+      "source": "a95a159568820e4428f7a1f7257f4f4f53ee965f",
+      "original": "/root/targets/boolean-cohort-sol-20261024/debug/build/gpui/05fc6b2d6e017ffb/out/question_cost-05fc6b2d6e017ffb",
+      "frozen": "/root/gpui-boolean-cohort-sol-artifacts-20261024/full-9-a95a159568/question_cost-question_cost-05fc6b2d6e017ffb",
+      "bytes": 27776544,
+      "sha256": "9f003454ec824d7ee3653ee7293c607f2c4b9e9a48482730c830bc524ab67cdb",
+      "fresh": false,
+      "package": "path+file:///root/gpui-boolean-cohort-sol-20261024/reactivity/crates/gpui#0.1.0"
+    },
+    {
+      "name": "text_cache",
+      "source": "a95a159568820e4428f7a1f7257f4f4f53ee965f",
+      "original": "/root/targets/boolean-cohort-sol-20261024/debug/build/gpui/b66661530c147aaa/out/text_cache-b66661530c147aaa",
+      "frozen": "/root/gpui-boolean-cohort-sol-artifacts-20261024/full-9-a95a159568/text_cache-text_cache-b66661530c147aaa",
+      "bytes": 29177768,
+      "sha256": "07904f8f2a6f27128936246e9497eec7ab449e62f53e28163016c197df1923d2",
+      "fresh": false,
+      "package": "path+file:///root/gpui-boolean-cohort-sol-20261024/reactivity/crates/gpui#0.1.0"
+    },
+    {
+      "name": "acceptance",
+      "source": "a95a159568820e4428f7a1f7257f4f4f53ee965f",
+      "original": "/root/targets/boolean-cohort-sol-20261024/debug/build/gpui/99fb8c8c77ec32e7/out/acceptance-99fb8c8c77ec32e7",
+      "frozen": "/root/gpui-boolean-cohort-sol-artifacts-20261024/full-9-a95a159568/acceptance-acceptance-99fb8c8c77ec32e7",
+      "bytes": 31701448,
+      "sha256": "47681cdc21a206c6fe6dcaaa911a9468709d6f003d5758497c4006988e492d2a",
+      "fresh": false,
+      "package": "path+file:///root/gpui-boolean-cohort-sol-20261024/reactivity/crates/gpui#0.1.0"
+    },
+    {
+      "name": "immutable_text_measure",
+      "source": "a95a159568820e4428f7a1f7257f4f4f53ee965f",
+      "original": "/root/targets/boolean-cohort-sol-20261024/debug/examples/immutable_text_measure",
+      "frozen": "/root/gpui-boolean-cohort-sol-artifacts-20261024/full-9-a95a159568/immutable_text_measure-immutable_text_measure",
+      "bytes": 27844888,
+      "sha256": "abe5752feba90e853d4145e64b72ca8cec92450f586dee0d31a75417ed70d3f7",
+      "fresh": false,
+      "package": "path+file:///root/gpui-boolean-cohort-sol-20261024/reactivity/crates/gpui#0.1.0"
+    },
+    {
+      "name": "handler_storage",
+      "source": "a95a159568820e4428f7a1f7257f4f4f53ee965f",
+      "original": "/root/targets/boolean-cohort-sol-20261024/debug/build/gpui/6bddc94d811b0ef5/out/handler_storage-6bddc94d811b0ef5",
+      "frozen": "/root/gpui-boolean-cohort-sol-artifacts-20261024/full-9-a95a159568/handler_storage-handler_storage-6bddc94d811b0ef5",
+      "bytes": 32836456,
+      "sha256": "7d92e5dbacaaf4abde203391b40a4e8fc4c4da317d01c41f010bd73694955a97",
+      "fresh": false,
+      "package": "path+file:///root/gpui-boolean-cohort-sol-20261024/reactivity/crates/gpui#0.1.0"
+    },
+    {
+      "name": "scroll",
+      "source": "a95a159568820e4428f7a1f7257f4f4f53ee965f",
+      "original": "/root/targets/boolean-cohort-sol-20261024/debug/build/gpui/b1fa991592855717/out/scroll-b1fa991592855717",
+      "frozen": "/root/gpui-boolean-cohort-sol-artifacts-20261024/full-9-a95a159568/scroll-scroll-b1fa991592855717",
+      "bytes": 38025832,
+      "sha256": "d7c5b4bb6e2f5b43f9d6868fa3ef2e202ea8dcf2880fe7acfda64e5a93ca200a",
+      "fresh": false,
+      "package": "path+file:///root/gpui-boolean-cohort-sol-20261024/reactivity/crates/gpui#0.1.0"
+    },
+    {
+      "name": "color_packing",
+      "source": "a95a159568820e4428f7a1f7257f4f4f53ee965f",
+      "original": "/root/targets/boolean-cohort-sol-20261024/debug/build/gpui/544fda724e854068/out/color_packing-544fda724e854068",
+      "frozen": "/root/gpui-boolean-cohort-sol-artifacts-20261024/full-9-a95a159568/color_packing-color_packing-544fda724e854068",
+      "bytes": 28399952,
+      "sha256": "6d7e9b3df5bcf59db110d4d1b7393fe82fe571ba555496f3e667a1a58b61e001",
+      "fresh": false,
+      "package": "path+file:///root/gpui-boolean-cohort-sol-20261024/reactivity/crates/gpui#0.1.0"
+    },
+    {
+      "name": "question_storage",
+      "source": "a95a159568820e4428f7a1f7257f4f4f53ee965f",
+      "original": "/root/targets/boolean-cohort-sol-20261024/debug/build/gpui/1be6a788f523a613/out/question_storage-1be6a788f523a613",
+      "frozen": "/root/gpui-boolean-cohort-sol-artifacts-20261024/full-9-a95a159568/question_storage-question_storage-1be6a788f523a613",
+      "bytes": 29507704,
+      "sha256": "3ff87a7d00aaa928477ddfbce61c2ddee0f03101f16585a8216edb9b54ced64c",
+      "fresh": false,
+      "package": "path+file:///root/gpui-boolean-cohort-sol-20261024/reactivity/crates/gpui#0.1.0"
+    },
+    {
+      "name": "presentation",
+      "source": "a95a159568820e4428f7a1f7257f4f4f53ee965f",
+      "original": "/root/targets/boolean-cohort-sol-20261024/debug/build/gpui/940cb3c994f711f0/out/presentation-940cb3c994f711f0",
+      "frozen": "/root/gpui-boolean-cohort-sol-artifacts-20261024/full-9-a95a159568/presentation-presentation-940cb3c994f711f0",
+      "bytes": 28654872,
+      "sha256": "793c6e8254ad5d0a4391756f4f4887b28e97872dc68c34dbf0916654902e9548",
+      "fresh": false,
+      "package": "path+file:///root/gpui-boolean-cohort-sol-20261024/reactivity/crates/gpui#0.1.0"
+    },
+    {
+      "name": "unicode_text",
+      "source": "a95a159568820e4428f7a1f7257f4f4f53ee965f",
+      "original": "/root/targets/boolean-cohort-sol-20261024/debug/build/gpui/2d05ac57e8b6a8d3/out/unicode_text-2d05ac57e8b6a8d3",
+      "frozen": "/root/gpui-boolean-cohort-sol-artifacts-20261024/full-9-a95a159568/unicode_text-unicode_text-2d05ac57e8b6a8d3",
+      "bytes": 28322288,
+      "sha256": "29039d552a94182c7149d44cc020a34f6164a81ba40eac49c085f2860559eb0c",
+      "fresh": false,
+      "package": "path+file:///root/gpui-boolean-cohort-sol-20261024/reactivity/crates/gpui#0.1.0"
+    },
+    {
+      "name": "inspector",
+      "source": "a95a159568820e4428f7a1f7257f4f4f53ee965f",
+      "original": "/root/targets/boolean-cohort-sol-20261024/debug/build/gpui/b563a17ffea3df9e/out/inspector-b563a17ffea3df9e",
+      "frozen": "/root/gpui-boolean-cohort-sol-artifacts-20261024/full-9-a95a159568/inspector-inspector-b563a17ffea3df9e",
+      "bytes": 33596968,
+      "sha256": "bc9f1eaecafc92fa5f5457c196a804b402b3175f785de9861b594d0821f268e3",
+      "fresh": false,
+      "package": "path+file:///root/gpui-boolean-cohort-sol-20261024/reactivity/crates/gpui#0.1.0"
+    },
+    {
+      "name": "mapped_paint",
+      "source": "a95a159568820e4428f7a1f7257f4f4f53ee965f",
+      "original": "/root/targets/boolean-cohort-sol-20261024/debug/build/gpui/2523f566816b55d3/out/mapped_paint-2523f566816b55d3",
+      "frozen": "/root/gpui-boolean-cohort-sol-artifacts-20261024/full-9-a95a159568/mapped_paint-mapped_paint-2523f566816b55d3",
+      "bytes": 28405800,
+      "sha256": "d79184debd7ba9043372ddf9a88d372b76e8f3c447a2e7a46076027c2392a5bf",
+      "fresh": false,
+      "package": "path+file:///root/gpui-boolean-cohort-sol-20261024/reactivity/crates/gpui#0.1.0"
+    },
+    {
+      "name": "semantic_serialization",
+      "source": "a95a159568820e4428f7a1f7257f4f4f53ee965f",
+      "original": "/root/targets/boolean-cohort-sol-20261024/debug/build/gpui/78be91ec14353f4a/out/semantic_serialization-78be91ec14353f4a",
+      "frozen": "/root/gpui-boolean-cohort-sol-artifacts-20261024/full-9-a95a159568/semantic_serialization-semantic_serialization-78be91ec14353f4a",
+      "bytes": 29475368,
+      "sha256": "fa40096cabd8e86dfae7fd35d296c09795c8db8d59f5364644f9ca4f5f050923",
+      "fresh": false,
+      "package": "path+file:///root/gpui-boolean-cohort-sol-20261024/reactivity/crates/gpui#0.1.0"
+    },
+    {
+      "name": "routes",
+      "source": "a95a159568820e4428f7a1f7257f4f4f53ee965f",
+      "original": "/root/targets/boolean-cohort-sol-20261024/debug/build/gpui/e4c671ecfc2ee7ff/out/routes-e4c671ecfc2ee7ff",
+      "frozen": "/root/gpui-boolean-cohort-sol-artifacts-20261024/full-9-a95a159568/routes-routes-e4c671ecfc2ee7ff",
+      "bytes": 28531496,
+      "sha256": "8036d9554ece73df76a08dc09249fae7bba0bda6d1e33c272dbcb29480542671",
+      "fresh": false,
+      "package": "path+file:///root/gpui-boolean-cohort-sol-20261024/reactivity/crates/gpui#0.1.0"
+    },
+    {
+      "name": "source_value_isolation",
+      "source": "a95a159568820e4428f7a1f7257f4f4f53ee965f",
+      "original": "/root/targets/boolean-cohort-sol-20261024/debug/build/gpui/5e44c744ba815b2c/out/source_value_isolation-5e44c744ba815b2c",
+      "frozen": "/root/gpui-boolean-cohort-sol-artifacts-20261024/full-9-a95a159568/source_value_isolation-source_value_isolation-5e44c744ba815b2c",
+      "bytes": 28848136,
+      "sha256": "0bb602ac636043ea93426f8d9650ade07cfcf44bd6358ec8fcbaa88cf10e655d",
+      "fresh": false,
+      "package": "path+file:///root/gpui-boolean-cohort-sol-20261024/reactivity/crates/gpui#0.1.0"
+    },
+    {
+      "name": "property_selection",
+      "source": "a95a159568820e4428f7a1f7257f4f4f53ee965f",
+      "original": "/root/targets/boolean-cohort-sol-20261024/debug/build/gpui/e36c9e5e94c0ffc9/out/property_selection-e36c9e5e94c0ffc9",
+      "frozen": "/root/gpui-boolean-cohort-sol-artifacts-20261024/full-9-a95a159568/property_selection-property_selection-e36c9e5e94c0ffc9",
+      "bytes": 30752376,
+      "sha256": "bc306683ccb93c0cfb7135d754ed6ae90c96fb435f9d673f3e9fbe65108ff915",
+      "fresh": false,
+      "package": "path+file:///root/gpui-boolean-cohort-sol-20261024/reactivity/crates/gpui#0.1.0"
+    },
+    {
+      "name": "flex",
+      "source": "a95a159568820e4428f7a1f7257f4f4f53ee965f",
+      "original": "/root/targets/boolean-cohort-sol-20261024/debug/build/gpui/2077c33af15d8c94/out/flex-2077c33af15d8c94",
+      "frozen": "/root/gpui-boolean-cohort-sol-artifacts-20261024/full-9-a95a159568/flex-flex-2077c33af15d8c94",
+      "bytes": 32772968,
+      "sha256": "869fd2c412643fdd5fcd7cfe3e713a842893df6c2f549c14532c6809c80427c5",
+      "fresh": false,
+      "package": "path+file:///root/gpui-boolean-cohort-sol-20261024/reactivity/crates/gpui#0.1.0"
+    },
+    {
+      "name": "counter",
+      "source": "a95a159568820e4428f7a1f7257f4f4f53ee965f",
+      "original": "/root/targets/boolean-cohort-sol-20261024/debug/examples/counter",
+      "frozen": "/root/gpui-boolean-cohort-sol-artifacts-20261024/full-9-a95a159568/counter-counter",
+      "bytes": 28049968,
+      "sha256": "4efdf86edbd156cd02474a1cfb1f7a04dcb6052631c688e7a939ef0fa7b4deb1",
+      "fresh": false,
+      "package": "path+file:///root/gpui-boolean-cohort-sol-20261024/reactivity/crates/gpui#0.1.0"
+    },
+    {
+      "name": "halloween",
+      "source": "a95a159568820e4428f7a1f7257f4f4f53ee965f",
+      "original": "/root/targets/boolean-cohort-sol-20261024/debug/examples/halloween",
+      "frozen": "/root/gpui-boolean-cohort-sol-artifacts-20261024/full-9-a95a159568/halloween-halloween",
+      "bytes": 28043376,
+      "sha256": "337623fe723c4016d4dec53f81ce5bae7ff3f7d2ee83dc5c2b1a8ee477383ac4",
+      "fresh": false,
+      "package": "path+file:///root/gpui-boolean-cohort-sol-20261024/reactivity/crates/component#gpui-component@0.1.0"
+    },
+    {
+      "name": "question_input_cost",
+      "source": "a95a159568820e4428f7a1f7257f4f4f53ee965f",
+      "original": "/root/targets/boolean-cohort-sol-20261024/debug/build/gpui/ce4f046939110c4e/out/question_input_cost-ce4f046939110c4e",
+      "frozen": "/root/gpui-boolean-cohort-sol-artifacts-20261024/full-9-a95a159568/question_input_cost-question_input_cost-ce4f046939110c4e",
+      "bytes": 26972096,
+      "sha256": "c27e18be3d5dbdfbdc097ffc249e4327d17d2247e4f1da196543751b2fcef3ab",
+      "fresh": false,
+      "package": "path+file:///root/gpui-boolean-cohort-sol-20261024/reactivity/crates/gpui#0.1.0"
+    },
+    {
+      "name": "boolean_cohorts",
+      "source": "a95a159568820e4428f7a1f7257f4f4f53ee965f",
+      "original": "/root/targets/boolean-cohort-sol-20261024/debug/build/gpui-component/4e5e0c08ea3b49de/out/boolean_cohorts-4e5e0c08ea3b49de",
+      "frozen": "/root/gpui-boolean-cohort-sol-artifacts-20261024/full-9-a95a159568/boolean_cohorts-boolean_cohorts-4e5e0c08ea3b49de",
+      "bytes": 30427072,
+      "sha256": "55c5ae45517e80fa223a9d6dd6df414b5511766e216daad6fcaa31af28d1538e",
+      "fresh": false,
+      "package": "path+file:///root/gpui-boolean-cohort-sol-20261024/reactivity/crates/component#gpui-component@0.1.0"
+    },
+    {
+      "name": "pointer",
+      "source": "a95a159568820e4428f7a1f7257f4f4f53ee965f",
+      "original": "/root/targets/boolean-cohort-sol-20261024/debug/build/gpui/08861d23689fbef2/out/pointer-08861d23689fbef2",
+      "frozen": "/root/gpui-boolean-cohort-sol-artifacts-20261024/full-9-a95a159568/pointer-pointer-08861d23689fbef2",
+      "bytes": 28915392,
+      "sha256": "dc836e275afbc1e6a2949b1f0df2cc764046bc3d6a080e20f8b8f2ceca13cb5b",
+      "fresh": false,
+      "package": "path+file:///root/gpui-boolean-cohort-sol-20261024/reactivity/crates/gpui#0.1.0"
+    },
+    {
+      "name": "images",
+      "source": "a95a159568820e4428f7a1f7257f4f4f53ee965f",
+      "original": "/root/targets/boolean-cohort-sol-20261024/debug/build/gpui/c61ff544120dafb3/out/images-c61ff544120dafb3",
+      "frozen": "/root/gpui-boolean-cohort-sol-artifacts-20261024/full-9-a95a159568/images-images-c61ff544120dafb3",
+      "bytes": 29874848,
+      "sha256": "b6f30db6c23b32a631a5073359bcb3bb26c34fb9c0590d22aaaa4b3ce2ad3aae",
+      "fresh": false,
+      "package": "path+file:///root/gpui-boolean-cohort-sol-20261024/reactivity/crates/gpui#0.1.0"
+    },
+    {
+      "name": "text_selection",
+      "source": "a95a159568820e4428f7a1f7257f4f4f53ee965f",
+      "original": "/root/targets/boolean-cohort-sol-20261024/debug/build/gpui/7e06f9254f6e7abc/out/text_selection-7e06f9254f6e7abc",
+      "frozen": "/root/gpui-boolean-cohort-sol-artifacts-20261024/full-9-a95a159568/text_selection-text_selection-7e06f9254f6e7abc",
+      "bytes": 30821496,
+      "sha256": "9dd2da42ab0b4a001ec86306642c57fede3836ab458f3e0c6bc5d885925130af",
+      "fresh": false,
+      "package": "path+file:///root/gpui-boolean-cohort-sol-20261024/reactivity/crates/gpui#0.1.0"
+    },
+    {
+      "name": "checkbox",
+      "source": "a95a159568820e4428f7a1f7257f4f4f53ee965f",
+      "original": "/root/targets/boolean-cohort-sol-20261024/debug/build/gpui/1081084de8b72c0d/out/checkbox-1081084de8b72c0d",
+      "frozen": "/root/gpui-boolean-cohort-sol-artifacts-20261024/full-9-a95a159568/checkbox-checkbox-1081084de8b72c0d",
+      "bytes": 31060400,
+      "sha256": "4d52ad60ac001692bd2ef7e95548c438c570b59ce587880219f3284354173b2c",
+      "fresh": false,
+      "package": "path+file:///root/gpui-boolean-cohort-sol-20261024/reactivity/crates/gpui#0.1.0"
+    },
+    {
+      "name": "reactive_styles",
+      "source": "a95a159568820e4428f7a1f7257f4f4f53ee965f",
+      "original": "/root/targets/boolean-cohort-sol-20261024/debug/examples/reactive_styles",
+      "frozen": "/root/gpui-boolean-cohort-sol-artifacts-20261024/full-9-a95a159568/reactive_styles-reactive_styles",
+      "bytes": 28318376,
+      "sha256": "557b8ff31e48e75d34e74b4fa200ba52efdcaad17afde2cfe9e2f3211b48aed6",
+      "fresh": false,
+      "package": "path+file:///root/gpui-boolean-cohort-sol-20261024/reactivity/crates/gpui#0.1.0"
+    },
+    {
+      "name": "sheet_access_measure",
+      "source": "a95a159568820e4428f7a1f7257f4f4f53ee965f",
+      "original": "/root/targets/boolean-cohort-sol-20261024/debug/examples/sheet_access_measure",
+      "frozen": "/root/gpui-boolean-cohort-sol-artifacts-20261024/full-9-a95a159568/sheet_access_measure-sheet_access_measure",
+      "bytes": 26147880,
+      "sha256": "25ce9f914170c1d9359a922f4dfce2893434ade624a8d2b3af135bc248ed9eed",
+      "fresh": false,
+      "package": "path+file:///root/gpui-boolean-cohort-sol-20261024/reactivity/crates/gpui#0.1.0"
+    },
+    {
+      "name": "library",
+      "source": "a95a159568820e4428f7a1f7257f4f4f53ee965f",
+      "original": "/root/targets/boolean-cohort-sol-20261024/debug/build/gpui/b6d35a445151d675/out/library-b6d35a445151d675",
+      "frozen": "/root/gpui-boolean-cohort-sol-artifacts-20261024/full-9-a95a159568/library-library-b6d35a445151d675",
+      "bytes": 28072376,
+      "sha256": "09d115018978a8236ec4a392b42d98f1d4f0660af793b089d3553b29a77cc867",
+      "fresh": false,
+      "package": "path+file:///root/gpui-boolean-cohort-sol-20261024/reactivity/crates/gpui#0.1.0"
+    },
+    {
+      "name": "dimensions",
+      "source": "a95a159568820e4428f7a1f7257f4f4f53ee965f",
+      "original": "/root/targets/boolean-cohort-sol-20261024/debug/build/gpui/6d9b3d4fdeb6aeaa/out/dimensions-6d9b3d4fdeb6aeaa",
+      "frozen": "/root/gpui-boolean-cohort-sol-artifacts-20261024/full-9-a95a159568/dimensions-dimensions-6d9b3d4fdeb6aeaa",
+      "bytes": 29525784,
+      "sha256": "d19349f7f016eee5210f2263c39a61d42e629856848928e8eb3636c267131b1f",
+      "fresh": false,
+      "package": "path+file:///root/gpui-boolean-cohort-sol-20261024/reactivity/crates/gpui#0.1.0"
+    },
+    {
+      "name": "property_actions",
+      "source": "a95a159568820e4428f7a1f7257f4f4f53ee965f",
+      "original": "/root/targets/boolean-cohort-sol-20261024/debug/build/gpui/d9284f04be1c46cb/out/property_actions-d9284f04be1c46cb",
+      "frozen": "/root/gpui-boolean-cohort-sol-artifacts-20261024/full-9-a95a159568/property_actions-property_actions-d9284f04be1c46cb",
+      "bytes": 29381400,
+      "sha256": "c1a6e4f9a2c3414eb04147a31320dfd463b13c776d94f7741efc0ca9f6a6510e",
+      "fresh": false,
+      "package": "path+file:///root/gpui-boolean-cohort-sol-20261024/reactivity/crates/gpui#0.1.0"
+    },
+    {
+      "name": "text_lease_measure",
+      "source": "a95a159568820e4428f7a1f7257f4f4f53ee965f",
+      "original": "/root/targets/boolean-cohort-sol-20261024/debug/examples/text_lease_measure",
+      "frozen": "/root/gpui-boolean-cohort-sol-artifacts-20261024/full-9-a95a159568/text_lease_measure-text_lease_measure",
+      "bytes": 636664,
+      "sha256": "84e5318735cb58c16a5aa56465de1a0375f9dc3527a87da685b1101045eaeec4",
+      "fresh": false,
+      "package": "path+file:///root/gpui-boolean-cohort-sol-20261024/reactivity/crates/gpui#0.1.0"
+    },
+    {
+      "name": "sibling_reconciliation_cost",
+      "source": "a95a159568820e4428f7a1f7257f4f4f53ee965f",
+      "original": "/root/targets/boolean-cohort-sol-20261024/debug/build/gpui/1867e8d9ffc2ca04/out/sibling_reconciliation_cost-1867e8d9ffc2ca04",
+      "frozen": "/root/gpui-boolean-cohort-sol-artifacts-20261024/full-9-a95a159568/sibling_reconciliation_cost-sibling_reconciliation_cost-1867e8d9ffc2ca04",
+      "bytes": 26829288,
+      "sha256": "c11f224ed84cc968b0089365a0e531cbbad7ee9c762bf6f24e0831bf4f645ab6",
+      "fresh": false,
+      "package": "path+file:///root/gpui-boolean-cohort-sol-20261024/reactivity/crates/gpui#0.1.0"
+    },
+    {
+      "name": "unit_action_cost_two",
+      "source": "a95a159568820e4428f7a1f7257f4f4f53ee965f",
+      "original": "/root/targets/boolean-cohort-sol-20261024/debug/build/gpui/b1b2c8efbd6612f3/out/unit_action_cost_two-b1b2c8efbd6612f3",
+      "frozen": "/root/gpui-boolean-cohort-sol-artifacts-20261024/full-9-a95a159568/unit_action_cost_two-unit_action_cost_two-b1b2c8efbd6612f3",
+      "bytes": 27835056,
+      "sha256": "bcd3e5a10febb75bf236aeb5acc396ec1919e7a2b0faec3b97a36be17e1ca48d",
+      "fresh": false,
+      "package": "path+file:///root/gpui-boolean-cohort-sol-20261024/reactivity/crates/gpui#0.1.0"
+    },
+    {
+      "name": "remote",
+      "source": "a95a159568820e4428f7a1f7257f4f4f53ee965f",
+      "original": "/root/targets/boolean-cohort-sol-20261024/debug/build/gpui/cfca37a91c901861/out/remote-cfca37a91c901861",
+      "frozen": "/root/gpui-boolean-cohort-sol-artifacts-20261024/full-9-a95a159568/remote-remote-cfca37a91c901861",
+      "bytes": 30173944,
+      "sha256": "b2de61795f336291c369d757430956b8e06706e3dbe96c1d843af96cf90c9986",
+      "fresh": false,
+      "package": "path+file:///root/gpui-boolean-cohort-sol-20261024/reactivity/crates/gpui#0.1.0"
+    },
+    {
+      "name": "queries",
+      "source": "a95a159568820e4428f7a1f7257f4f4f53ee965f",
+      "original": "/root/targets/boolean-cohort-sol-20261024/debug/build/gpui/1b5476dfc58f943c/out/queries-1b5476dfc58f943c",
+      "frozen": "/root/gpui-boolean-cohort-sol-artifacts-20261024/full-9-a95a159568/queries-queries-1b5476dfc58f943c",
+      "bytes": 27622328,
+      "sha256": "75883b96903819eaff3230c06c7111b67a56619a2b0149615007f58b7e72fd28",
+      "fresh": false,
+      "package": "path+file:///root/gpui-boolean-cohort-sol-20261024/reactivity/crates/gpui#0.1.0"
+    },
+    {
+      "name": "frontier",
+      "source": "a95a159568820e4428f7a1f7257f4f4f53ee965f",
+      "original": "/root/targets/boolean-cohort-sol-20261024/debug/build/gpui/2904597d18534e63/out/frontier-2904597d18534e63",
+      "frozen": "/root/gpui-boolean-cohort-sol-artifacts-20261024/full-9-a95a159568/frontier-frontier-2904597d18534e63",
+      "bytes": 30231936,
+      "sha256": "b52514cf2c1176a02b652f2f9bfea2d864659c0fbed5f39aa67afad5df32f32e",
+      "fresh": false,
+      "package": "path+file:///root/gpui-boolean-cohort-sol-20261024/reactivity/crates/gpui#0.1.0"
+    },
+    {
+      "name": "paint_patch",
+      "source": "a95a159568820e4428f7a1f7257f4f4f53ee965f",
+      "original": "/root/targets/boolean-cohort-sol-20261024/debug/build/gpui/b3eaf94002a67c67/out/paint_patch-b3eaf94002a67c67",
+      "frozen": "/root/gpui-boolean-cohort-sol-artifacts-20261024/full-9-a95a159568/paint_patch-paint_patch-b3eaf94002a67c67",
+      "bytes": 29313576,
+      "sha256": "506f1ef409502584e7930466313e1d02507870117f440603e96893561b93edb8",
+      "fresh": false,
+      "package": "path+file:///root/gpui-boolean-cohort-sol-20261024/reactivity/crates/gpui#0.1.0"
+    },
+    {
+      "name": "gradient_backgrounds",
+      "source": "a95a159568820e4428f7a1f7257f4f4f53ee965f",
+      "original": "/root/targets/boolean-cohort-sol-20261024/debug/examples/gradient_backgrounds",
+      "frozen": "/root/gpui-boolean-cohort-sol-artifacts-20261024/full-9-a95a159568/gradient_backgrounds-gradient_backgrounds",
+      "bytes": 27732352,
+      "sha256": "287ad700011b74d59cd4a7daa205f81e467a62478687aa08594985f0c87f459f",
+      "fresh": false,
+      "package": "path+file:///root/gpui-boolean-cohort-sol-20261024/reactivity/crates/gpui#0.1.0"
+    },
+    {
+      "name": "question_mailbox",
+      "source": "a95a159568820e4428f7a1f7257f4f4f53ee965f",
+      "original": "/root/targets/boolean-cohort-sol-20261024/debug/build/gpui/6a15bdbe56567270/out/question_mailbox-6a15bdbe56567270",
+      "frozen": "/root/gpui-boolean-cohort-sol-artifacts-20261024/full-9-a95a159568/question_mailbox-question_mailbox-6a15bdbe56567270",
+      "bytes": 27253240,
+      "sha256": "9885ada4eaf56ae0308255b9c626c170bd625c062587dc5e27ab8eedb3846840",
+      "fresh": false,
+      "package": "path+file:///root/gpui-boolean-cohort-sol-20261024/reactivity/crates/gpui#0.1.0"
+    },
+    {
+      "name": "todo_comparison",
+      "source": "a95a159568820e4428f7a1f7257f4f4f53ee965f",
+      "original": "/root/targets/boolean-cohort-sol-20261024/debug/build/gpui/697f5d232ed0b549/out/todo_comparison-697f5d232ed0b549",
+      "frozen": "/root/gpui-boolean-cohort-sol-artifacts-20261024/full-9-a95a159568/todo_comparison-todo_comparison-697f5d232ed0b549",
+      "bytes": 29591936,
+      "sha256": "2cc3058d86219865bf6a6548ac7e0006b1b23911a157d76eeadbcb6e60fd5821",
+      "fresh": false,
+      "package": "path+file:///root/gpui-boolean-cohort-sol-20261024/reactivity/crates/gpui#0.1.0"
+    },
+    {
+      "name": "ports",
+      "source": "a95a159568820e4428f7a1f7257f4f4f53ee965f",
+      "original": "/root/targets/boolean-cohort-sol-20261024/debug/build/gpui/fe0c54f729300911/out/ports-fe0c54f729300911",
+      "frozen": "/root/gpui-boolean-cohort-sol-artifacts-20261024/full-9-a95a159568/ports-ports-fe0c54f729300911",
+      "bytes": 30685304,
+      "sha256": "c9f4b9593501b6ac570a58d855a0eb0d375e57b6338e756dfc58f671deb347fb",
+      "fresh": false,
+      "package": "path+file:///root/gpui-boolean-cohort-sol-20261024/reactivity/crates/gpui#0.1.0"
+    },
+    {
+      "name": "inbox_storage",
+      "source": "a95a159568820e4428f7a1f7257f4f4f53ee965f",
+      "original": "/root/targets/boolean-cohort-sol-20261024/debug/build/gpui/3b934c5ca1f70f86/out/inbox_storage-3b934c5ca1f70f86",
+      "frozen": "/root/gpui-boolean-cohort-sol-artifacts-20261024/full-9-a95a159568/inbox_storage-inbox_storage-3b934c5ca1f70f86",
+      "bytes": 28238304,
+      "sha256": "fca843e479413df260b8b0e41491334fdcad24e32a81274a41278eddb60066d3",
+      "fresh": false,
+      "package": "path+file:///root/gpui-boolean-cohort-sol-20261024/reactivity/crates/gpui#0.1.0"
+    },
+    {
+      "name": "style_ports",
+      "source": "a95a159568820e4428f7a1f7257f4f4f53ee965f",
+      "original": "/root/targets/boolean-cohort-sol-20261024/debug/build/gpui/b395d1a20e1251a9/out/style_ports-b395d1a20e1251a9",
+      "frozen": "/root/gpui-boolean-cohort-sol-artifacts-20261024/full-9-a95a159568/style_ports-style_ports-b395d1a20e1251a9",
+      "bytes": 37845248,
+      "sha256": "d53ace27974b8aa3a3a1fcaef81f97f7c67fd13d61998f410330159c885b0909",
+      "fresh": false,
+      "package": "path+file:///root/gpui-boolean-cohort-sol-20261024/reactivity/crates/gpui#0.1.0"
+    },
+    {
+      "name": "retained_list",
+      "source": "a95a159568820e4428f7a1f7257f4f4f53ee965f",
+      "original": "/root/targets/boolean-cohort-sol-20261024/debug/examples/retained_list",
+      "frozen": "/root/gpui-boolean-cohort-sol-artifacts-20261024/full-9-a95a159568/retained_list-retained_list",
+      "bytes": 27645496,
+      "sha256": "26170caa2c0649df9780f7ed2deed2f5c1208e7d20cc2e11c7cfa9d860087464",
+      "fresh": false,
+      "package": "path+file:///root/gpui-boolean-cohort-sol-20261024/reactivity/crates/gpui#0.1.0"
+    },
+    {
+      "name": "clipping",
+      "source": "a95a159568820e4428f7a1f7257f4f4f53ee965f",
+      "original": "/root/targets/boolean-cohort-sol-20261024/debug/build/gpui/b77bc012000d2afe/out/clipping-b77bc012000d2afe",
+      "frozen": "/root/gpui-boolean-cohort-sol-artifacts-20261024/full-9-a95a159568/clipping-clipping-b77bc012000d2afe",
+      "bytes": 31781328,
+      "sha256": "933a6186f851314b501988225505e709e41c1974f406b640374caac5896df0d3",
+      "fresh": false,
+      "package": "path+file:///root/gpui-boolean-cohort-sol-20261024/reactivity/crates/gpui#0.1.0"
+    },
+    {
+      "name": "costs",
+      "source": "a95a159568820e4428f7a1f7257f4f4f53ee965f",
+      "original": "/root/targets/boolean-cohort-sol-20261024/debug/examples/costs",
+      "frozen": "/root/gpui-boolean-cohort-sol-artifacts-20261024/full-9-a95a159568/costs-costs",
+      "bytes": 26368088,
+      "sha256": "ee2bfcc76ae0562e59736682dd9e451b7d81e1a6d295dae6ae3a5f053082d809",
+      "fresh": false,
+      "package": "path+file:///root/gpui-boolean-cohort-sol-20261024/reactivity/crates/component#gpui-component@0.1.0"
+    },
+    {
+      "name": "semantic_metadata",
+      "source": "a95a159568820e4428f7a1f7257f4f4f53ee965f",
+      "original": "/root/targets/boolean-cohort-sol-20261024/debug/build/gpui/b2f16d39422959e5/out/semantic_metadata-b2f16d39422959e5",
+      "frozen": "/root/gpui-boolean-cohort-sol-artifacts-20261024/full-9-a95a159568/semantic_metadata-semantic_metadata-b2f16d39422959e5",
+      "bytes": 34281264,
+      "sha256": "2c4f717b984debbe64f6e62308277390c78162fdf866370f76eaccfefa161c76",
+      "fresh": false,
+      "package": "path+file:///root/gpui-boolean-cohort-sol-20261024/reactivity/crates/gpui#0.1.0"
+    },
+    {
+      "name": "bindings",
+      "source": "a95a159568820e4428f7a1f7257f4f4f53ee965f",
+      "original": "/root/targets/boolean-cohort-sol-20261024/debug/build/gpui-component/2acc55e836c6c0cc/out/bindings-2acc55e836c6c0cc",
+      "frozen": "/root/gpui-boolean-cohort-sol-artifacts-20261024/full-9-a95a159568/bindings-bindings-2acc55e836c6c0cc",
+      "bytes": 30639344,
+      "sha256": "7edddb06af84a3c4a17f067378865f465c5b4869089dbfcdc5a3451f938d55ac",
+      "fresh": false,
+      "package": "path+file:///root/gpui-boolean-cohort-sol-20261024/reactivity/crates/component#gpui-component@0.1.0"
+    }
+  ],
+  "/root/gpui-boolean-cohort-sol-artifacts-20261024/mutant-e5f3a4c31c": [
+    {
+      "name": "boolean_cohorts",
+      "source": "e5f3a4c31cee934f2b05b849859e1b511ab8e87c",
+      "original": "/root/targets/boolean-cohort-mutant-sol-20261024/debug/build/gpui-component/0aa28119ed30bf5a/out/boolean_cohorts-0aa28119ed30bf5a",
+      "frozen": "/root/gpui-boolean-cohort-sol-artifacts-20261024/mutant-e5f3a4c31c/boolean_cohorts-boolean_cohorts-0aa28119ed30bf5a",
+      "bytes": 30365440,
+      "sha256": "63f8023ff498903e4ffca0153cb0f06b3f4e70506941a6a7547ed889107afe8b",
+      "fresh": false,
+      "package": "path+file:///root/gpui-boolean-cohort-mutant-sol-20261024/reactivity/crates/component#gpui-component@0.1.0"
+    }
+  ],
+  "/root/gpui-boolean-cohort-sol-artifacts-20261024/native-10-31a6496bf7": [
+    {
+      "name": "gpui",
+      "source": "31a6496bf7044433498ac2535b42a032791720f4",
+      "original": "/root/targets/boolean-cohort-sol-native-20261024/debug/build/gpui/faec1e8322c34e4b/out/gpui-faec1e8322c34e4b",
+      "frozen": "/root/gpui-boolean-cohort-sol-artifacts-20261024/native-10-31a6496bf7/gpui-gpui-faec1e8322c34e4b",
+      "bytes": 172937128,
+      "sha256": "8c9772485cc50a43c75d0cc09000f0f85924e4da5529ba2583a7b9f6c0de6702",
+      "fresh": false,
+      "package": "path+file:///root/gpui-boolean-cohort-sol-20261024/reactivity/crates/gpui#0.1.0"
+    }
+  ],
+  "/root/gpui-boolean-cohort-sol-artifacts-20261024/native-5-e459186d2d": [
+    {
+      "name": "gpui",
+      "source": "e459186d2d3ba75883950350c6510b463b4f8dfc",
+      "original": "/root/targets/boolean-cohort-sol-native-20261024/debug/build/gpui/faec1e8322c34e4b/out/gpui-faec1e8322c34e4b",
+      "frozen": "/root/gpui-boolean-cohort-sol-artifacts-20261024/native-5-e459186d2d/gpui-gpui-faec1e8322c34e4b",
+      "bytes": 173904024,
+      "sha256": "30a04b4e344f25e3d4770dd2f763b8d88ed21d282f4464831644899d0f0fc3df",
+      "fresh": false,
+      "package": "path+file:///root/gpui-boolean-cohort-sol-20261024/reactivity/crates/gpui#0.1.0"
+    }
+  ],
+  "/root/gpui-boolean-cohort-sol-artifacts-20261024/native-9-a95a159568": [
+    {
+      "name": "gpui",
+      "source": "a95a159568820e4428f7a1f7257f4f4f53ee965f",
+      "original": "/root/targets/boolean-cohort-sol-native-20261024/debug/build/gpui/faec1e8322c34e4b/out/gpui-faec1e8322c34e4b",
+      "frozen": "/root/gpui-boolean-cohort-sol-artifacts-20261024/native-9-a95a159568/gpui-gpui-faec1e8322c34e4b",
+      "bytes": 172937000,
+      "sha256": "b5ce4b1a8f2a8e34835f47832caeb4007264ec57d6d6001989dac42aa9963bb6",
+      "fresh": false,
+      "package": "path+file:///root/gpui-boolean-cohort-sol-20261024/reactivity/crates/gpui#0.1.0"
+    }
+  ],
+  "/root/gpui-boolean-cohort-sol-artifacts-20261024/native-app-11-3fc07815a0": [
+    {
+      "name": "halloween",
+      "source": "3fc07815a0ce389db54e492dd1d889c6fca10699",
+      "original": "/root/targets/boolean-cohort-sol-native-20261024/debug/examples/halloween",
+      "frozen": "/root/gpui-boolean-cohort-sol-artifacts-20261024/native-app-11-3fc07815a0/halloween-halloween",
+      "bytes": 71245208,
+      "sha256": "5c841e1753f571ab30e7ad60cd61985927d63165d4b5c0ebc22ffa253276d1c8",
+      "fresh": false,
+      "package": "path+file:///root/gpui-boolean-cohort-sol-20261024/reactivity/crates/component#gpui-component@0.1.0"
+    }
+  ]
+}

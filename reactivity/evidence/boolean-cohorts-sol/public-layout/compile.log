@@ -1,0 +1,327 @@
+print-type-size type: `gpui::El<'_>`: 176 bytes, alignment: 8 bytes
+print-type-size     field `.children`: 24 bytes
+print-type-size     field `.text`: 24 bytes
+print-type-size     field `.style`: 88 bytes
+print-type-size     field `.on_click`: 16 bytes
+print-type-size     field `.components`: 8 bytes
+print-type-size     field `.extra`: 8 bytes
+print-type-size     field `.kind`: 1 bytes
+print-type-size     end padding: 7 bytes
+print-type-size type: `gpui::Style`: 88 bytes, alignment: 4 bytes
+print-type-size     field `.width`: 8 bytes
+print-type-size     field `.height`: 8 bytes
+print-type-size     field `.gap`: 4 bytes
+print-type-size     field `.padding`: 4 bytes
+print-type-size     field `.font_size`: 4 bytes
+print-type-size     field `.fg`: 16 bytes
+print-type-size     field `.bg`: 16 bytes
+print-type-size     field `.transform`: 24 bytes
+print-type-size     field `.flow`: 1 bytes
+print-type-size     field `.wrap`: 1 bytes
+print-type-size     field `.align`: 1 bytes
+print-type-size     field `.justify`: 1 bytes
+print-type-size type: `gpui::BoolColors<'_>`: 80 bytes, alignment: 8 bytes
+print-type-size     field `.input`: 48 bytes
+print-type-size     field `.colors`: 32 bytes
+print-type-size type: `gpui::ColorInput<'_>`: 80 bytes, alignment: 8 bytes
+print-type-size     field `.0`: 80 bytes
+print-type-size type: `gpui::style_port::ColorOperand<'_>`: 80 bytes, alignment: 8 bytes
+print-type-size     variant `Boolean`: 80 bytes
+print-type-size         field `.0`: 80 bytes
+print-type-size     variant `Property`: 56 bytes
+print-type-size         padding: 8 bytes
+print-type-size         field `.0`: 48 bytes, alignment: 8 bytes
+print-type-size     variant `Selection`: 48 bytes
+print-type-size         padding: 8 bytes
+print-type-size         field `.0`: 40 bytes, alignment: 8 bytes
+print-type-size type: `gpui::BoolBinding<'_>`: 56 bytes, alignment: 8 bytes
+print-type-size     field `.input`: 48 bytes
+print-type-size     field `.id`: 8 bytes
+print-type-size type: `gpui::PropInput<'_, bool>`: 48 bytes, alignment: 8 bytes
+print-type-size     field `.0`: 48 bytes
+print-type-size type: `gpui::PropInput<'_, gpui::Color>`: 48 bytes, alignment: 8 bytes
+print-type-size     field `.0`: 48 bytes
+print-type-size type: `gpui::style_port::Operand<'_, bool>`: 48 bytes, alignment: 8 bytes
+print-type-size     discriminant: 1 bytes
+print-type-size     variant `Mapped`: 47 bytes
+print-type-size         padding: 7 bytes
+print-type-size         field `.0`: 40 bytes, alignment: 8 bytes
+print-type-size     variant `Signal`: 23 bytes
+print-type-size         padding: 7 bytes
+print-type-size         field `.0`: 16 bytes, alignment: 8 bytes
+print-type-size     variant `Number`: 15 bytes
+print-type-size         padding: 7 bytes
+print-type-size         field `.0`: 8 bytes, alignment: 8 bytes
+print-type-size     variant `Boolean`: 15 bytes
+print-type-size         padding: 7 bytes
+print-type-size         field `.id`: 8 bytes, alignment: 8 bytes
+print-type-size     variant `Literal`: 1 bytes
+print-type-size         field `.0`: 1 bytes
+print-type-size type: `gpui::style_port::Operand<'_, gpui::Color>`: 48 bytes, alignment: 8 bytes
+print-type-size     discriminant: 4 bytes
+print-type-size     variant `Mapped`: 44 bytes
+print-type-size         padding: 4 bytes
+print-type-size         field `.0`: 40 bytes, alignment: 8 bytes
+print-type-size     variant `Signal`: 20 bytes
+print-type-size         padding: 4 bytes
+print-type-size         field `.0`: 16 bytes, alignment: 8 bytes
+print-type-size     variant `Literal`: 16 bytes
+print-type-size         field `.0`: 16 bytes
+print-type-size     variant `Number`: 12 bytes
+print-type-size         padding: 4 bytes
+print-type-size         field `.0`: 8 bytes, alignment: 8 bytes
+print-type-size     variant `Boolean`: 12 bytes
+print-type-size         padding: 4 bytes
+print-type-size         field `.id`: 8 bytes, alignment: 8 bytes
+print-type-size type: `gpui::style_port::MapOperand<'_>`: 40 bytes, alignment: 8 bytes
+print-type-size     field `.signal`: 16 bytes
+print-type-size     field `.recipe`: 24 bytes
+print-type-size type: `gpui::style_port::OwnedMapOperand<'_>`: 40 bytes, alignment: 8 bytes
+print-type-size     field `.signal`: 16 bytes
+print-type-size     field `.recipe`: 24 bytes
+print-type-size type: `gpui::Affine`: 24 bytes, alignment: 4 bytes
+print-type-size     field `.a`: 4 bytes
+print-type-size     field `.b`: 4 bytes
+print-type-size     field `.c`: 4 bytes
+print-type-size     field `.d`: 4 bytes
+print-type-size     field `.tx`: 4 bytes
+print-type-size     field `.ty`: 4 bytes
+print-type-size type: `gpui::source::Text<'_>`: 24 bytes, alignment: 8 bytes
+print-type-size     variant `Borrowed`: 24 bytes
+print-type-size         padding: 8 bytes
+print-type-size         field `.0`: 16 bytes, alignment: 8 bytes
+print-type-size     variant `Owned`: 24 bytes
+print-type-size         field `.0`: 24 bytes
+print-type-size     variant `Signal`: 24 bytes
+print-type-size         padding: 8 bytes
+print-type-size         field `.0`: 16 bytes, alignment: 8 bytes
+print-type-size type: `gpui::style_port::PendingRecipe`: 24 bytes, alignment: 8 bytes
+print-type-size     variant `Inline`: 24 bytes
+print-type-size         field `.0`: 24 bytes
+print-type-size     variant `Deferred`: 24 bytes
+print-type-size         padding: 8 bytes
+print-type-size         field `.0`: 16 bytes, alignment: 8 bytes
+print-type-size type: `gpui_inline_call::InlineCall<std::option::Option<gpui::style_port::Scalar>>`: 24 bytes, alignment: 8 bytes
+print-type-size     field `.invoke`: 8 bytes
+print-type-size     field `.payload`: 16 bytes
+print-type-size type: `std::option::Option<gpui::source::Text<'_>>`: 24 bytes, alignment: 8 bytes
+print-type-size     variant `Some`: 24 bytes
+print-type-size         field `.0`: 24 bytes
+print-type-size     variant `None`: 0 bytes
+print-type-size type: `std::result::Result<gpui_inline_call::InlineCall<std::option::Option<gpui::style_port::Scalar>>, gpui_inline_call::TooLarge>`: 24 bytes, alignment: 8 bytes
+print-type-size     variant `Ok`: 24 bytes
+print-type-size         field `.0`: 24 bytes
+print-type-size     variant `Err`: 24 bytes
+print-type-size         padding: 8 bytes
+print-type-size         field `.0`: 16 bytes, alignment: 8 bytes
+print-type-size type: `std::string::String`: 24 bytes, alignment: 8 bytes
+print-type-size     field `.vec`: 24 bytes
+print-type-size type: `std::vec::Vec<gpui::El<'_>>`: 24 bytes, alignment: 8 bytes
+print-type-size     field `.buf`: 16 bytes
+print-type-size     field `.len`: 8 bytes
+print-type-size type: `std::vec::Vec<u8>`: 24 bytes, alignment: 8 bytes
+print-type-size     field `.buf`: 16 bytes
+print-type-size     field `.len`: 8 bytes
+print-type-size type: `alloc::raw_vec::RawVec<gpui::El<'_>>`: 16 bytes, alignment: 8 bytes
+print-type-size     field `.inner`: 16 bytes
+print-type-size     field `._marker`: 0 bytes
+print-type-size type: `alloc::raw_vec::RawVec<u8>`: 16 bytes, alignment: 8 bytes
+print-type-size     field `.inner`: 16 bytes
+print-type-size     field `._marker`: 0 bytes
+print-type-size type: `alloc::raw_vec::RawVecInner`: 16 bytes, alignment: 8 bytes
+print-type-size     field `.cap`: 8 bytes
+print-type-size     field `.ptr`: 8 bytes
+print-type-size     field `.alloc`: 0 bytes
+print-type-size type: `core::fmt::rt::Argument<'_>`: 16 bytes, alignment: 8 bytes
+print-type-size     field `.ty`: 16 bytes
+print-type-size type: `core::fmt::rt::ArgumentType<'_>`: 16 bytes, alignment: 8 bytes
+print-type-size     variant `Placeholder`: 16 bytes
+print-type-size         field `.value`: 8 bytes
+print-type-size         field `.formatter`: 8 bytes
+print-type-size         field `._lifetime`: 0 bytes
+print-type-size     variant `Count`: 10 bytes
+print-type-size         padding: 8 bytes
+print-type-size         field `.0`: 2 bytes, alignment: 2 bytes
+print-type-size type: `gpui::BoolState<'_>`: 16 bytes, alignment: 8 bytes
+print-type-size     field `.id`: 8 bytes
+print-type-size     field `.literal`: 1 bytes
+print-type-size     field `.borrow`: 0 bytes
+print-type-size     end padding: 7 bytes
+print-type-size type: `gpui::Color`: 16 bytes, alignment: 4 bytes
+print-type-size     field `.words`: 16 bytes
+print-type-size type: `gpui::element::Handler`: 16 bytes, alignment: 8 bytes
+print-type-size     field `.0`: 16 bytes
+print-type-size type: `gpui::source::SignalText<'_>`: 16 bytes, alignment: 8 bytes
+print-type-size     field `.0`: 16 bytes
+print-type-size type: `gpui::style_port::DeferredRecipe`: 16 bytes, alignment: 8 bytes
+print-type-size     discriminant: 4 bytes
+print-type-size     variant `RejectedLarge`: 12 bytes
+print-type-size         padding: 4 bytes
+print-type-size         field `.0`: 8 bytes, alignment: 8 bytes
+print-type-size     variant `Select`: 12 bytes
+print-type-size         padding: 4 bytes
+print-type-size         field `.0`: 8 bytes, alignment: 8 bytes
+print-type-size     variant `Rejected`: 8 bytes
+print-type-size         field `.size`: 4 bytes
+print-type-size         field `.alignment`: 4 bytes
+print-type-size type: `gpui_inline_call::Payload`: 16 bytes, alignment: 8 bytes
+print-type-size     field `.0`: 16 bytes
+print-type-size type: `gpui_inline_call::TooLarge`: 16 bytes, alignment: 8 bytes
+print-type-size     field `.size`: 8 bytes
+print-type-size     field `.alignment`: 8 bytes
+print-type-size type: `std::boxed::Box<dyn gpui::element::Route>`: 16 bytes, alignment: 8 bytes
+print-type-size     field `.0`: 16 bytes
+print-type-size     field `.1`: 0 bytes
+print-type-size type: `std::boxed::BoxRaw<dyn gpui::element::Route>`: 16 bytes, alignment: 8 bytes
+print-type-size     field `.pointer`: 16 bytes
+print-type-size     field `._marker`: 0 bytes
+print-type-size type: `std::fmt::Arguments<'_>`: 16 bytes, alignment: 8 bytes
+print-type-size     field `.template`: 8 bytes
+print-type-size     field `.args`: 8 bytes
+print-type-size type: `std::option::Option<gpui::element::Handler>`: 16 bytes, alignment: 8 bytes
+print-type-size     variant `Some`: 16 bytes
+print-type-size         field `.0`: 16 bytes
+print-type-size     variant `None`: 0 bytes
+print-type-size type: `std::ptr::NonNull<dyn gpui::element::Route>`: 16 bytes, alignment: 8 bytes
+print-type-size     field `.pointer`: 16 bytes
+print-type-size type: `core::num::niche_types::UsizeNoHighBit`: 8 bytes, alignment: 8 bytes
+print-type-size     field `.0`: 8 bytes
+print-type-size type: `gpui::Length`: 8 bytes, alignment: 4 bytes
+print-type-size     discriminant: 4 bytes
+print-type-size     variant `Points`: 4 bytes
+print-type-size         field `.0`: 4 bytes
+print-type-size     variant `Percent`: 4 bytes
+print-type-size         field `.0`: 4 bytes
+print-type-size     variant `Auto`: 0 bytes
+print-type-size type: `gpui::element::ComponentBoundaries`: 8 bytes, alignment: 8 bytes
+print-type-size     field `.0`: 8 bytes
+print-type-size type: `std::boxed::Box<gpui::element::ComponentBoundary>`: 8 bytes, alignment: 8 bytes
+print-type-size     field `.0`: 8 bytes
+print-type-size     field `.1`: 0 bytes
+print-type-size type: `std::boxed::Box<gpui::semantic::ElementExtra<'_>>`: 8 bytes, alignment: 8 bytes
+print-type-size     field `.0`: 8 bytes
+print-type-size     field `.1`: 0 bytes
+print-type-size type: `std::boxed::Box<gpui::style_port::ColorSelection>`: 8 bytes, alignment: 8 bytes
+print-type-size     field `.0`: 8 bytes
+print-type-size     field `.1`: 0 bytes
+print-type-size type: `std::boxed::Box<gpui_inline_call::TooLarge>`: 8 bytes, alignment: 8 bytes
+print-type-size     field `.0`: 8 bytes
+print-type-size     field `.1`: 0 bytes
+print-type-size type: `std::boxed::BoxRaw<gpui::element::ComponentBoundary>`: 8 bytes, alignment: 8 bytes
+print-type-size     field `.pointer`: 8 bytes
+print-type-size     field `._marker`: 0 bytes
+print-type-size type: `std::boxed::BoxRaw<gpui::semantic::ElementExtra<'_>>`: 8 bytes, alignment: 8 bytes
+print-type-size     field `.pointer`: 8 bytes
+print-type-size     field `._marker`: 0 bytes
+print-type-size type: `std::boxed::BoxRaw<gpui::style_port::ColorSelection>`: 8 bytes, alignment: 8 bytes
+print-type-size     field `.pointer`: 8 bytes
+print-type-size     field `._marker`: 0 bytes
+print-type-size type: `std::boxed::BoxRaw<gpui_inline_call::TooLarge>`: 8 bytes, alignment: 8 bytes
+print-type-size     field `.pointer`: 8 bytes
+print-type-size     field `._marker`: 0 bytes
+print-type-size type: `std::mem::ManuallyDrop<u64>`: 8 bytes, alignment: 8 bytes
+print-type-size     field `.value`: 8 bytes
+print-type-size type: `std::mem::MaybeUninit<u64>`: 8 bytes, alignment: 8 bytes
+print-type-size     variant `MaybeUninit`: 8 bytes
+print-type-size         field `.uninit`: 0 bytes
+print-type-size         field `.value`: 8 bytes
+print-type-size type: `std::option::Option<std::boxed::Box<gpui::element::ComponentBoundary>>`: 8 bytes, alignment: 8 bytes
+print-type-size     variant `Some`: 8 bytes
+print-type-size         field `.0`: 8 bytes
+print-type-size     variant `None`: 0 bytes
+print-type-size type: `std::option::Option<std::boxed::Box<gpui::semantic::ElementExtra<'_>>>`: 8 bytes, alignment: 8 bytes
+print-type-size     variant `Some`: 8 bytes
+print-type-size         field `.0`: 8 bytes
+print-type-size     variant `None`: 0 bytes
+print-type-size type: `std::ptr::DynMetadata<dyn gpui::element::Route>`: 8 bytes, alignment: 8 bytes
+print-type-size     field `._vtable_ptr`: 8 bytes
+print-type-size     field `._phantom`: 0 bytes
+print-type-size type: `std::ptr::DynMetadata<dyn gpui::source::ErasedSignal>`: 8 bytes, alignment: 8 bytes
+print-type-size     field `._vtable_ptr`: 8 bytes
+print-type-size     field `._phantom`: 0 bytes
+print-type-size type: `std::ptr::DynMetadata<dyn gpui::source::TextSignal>`: 8 bytes, alignment: 8 bytes
+print-type-size     field `._vtable_ptr`: 8 bytes
+print-type-size     field `._phantom`: 0 bytes
+print-type-size type: `std::ptr::DynMetadata<dyn gpui::style_port::StyleSignal>`: 8 bytes, alignment: 8 bytes
+print-type-size     field `._vtable_ptr`: 8 bytes
+print-type-size     field `._phantom`: 0 bytes
+print-type-size type: `std::ptr::DynMetadata<dyn std::ops::Fn() -> i32 + std::marker::Sync + std::panic::RefUnwindSafe>`: 8 bytes, alignment: 8 bytes
+print-type-size     field `._vtable_ptr`: 8 bytes
+print-type-size     field `._phantom`: 0 bytes
+print-type-size type: `std::ptr::NonNull<()>`: 8 bytes, alignment: 8 bytes
+print-type-size     field `.pointer`: 8 bytes
+print-type-size type: `std::ptr::NonNull<core::fmt::rt::Argument<'_>>`: 8 bytes, alignment: 8 bytes
+print-type-size     field `.pointer`: 8 bytes
+print-type-size type: `std::ptr::NonNull<gpui::element::ComponentBoundary>`: 8 bytes, alignment: 8 bytes
+print-type-size     field `.pointer`: 8 bytes
+print-type-size type: `std::ptr::NonNull<gpui::semantic::ElementExtra<'_>>`: 8 bytes, alignment: 8 bytes
+print-type-size     field `.pointer`: 8 bytes
+print-type-size type: `std::ptr::NonNull<gpui::style_port::ColorSelection>`: 8 bytes, alignment: 8 bytes
+print-type-size     field `.pointer`: 8 bytes
+print-type-size type: `std::ptr::NonNull<gpui_inline_call::TooLarge>`: 8 bytes, alignment: 8 bytes
+print-type-size     field `.pointer`: 8 bytes
+print-type-size type: `std::ptr::NonNull<std::ptr::metadata::VTable>`: 8 bytes, alignment: 8 bytes
+print-type-size     field `.pointer`: 8 bytes
+print-type-size type: `std::ptr::NonNull<u8>`: 8 bytes, alignment: 8 bytes
+print-type-size     field `.pointer`: 8 bytes
+print-type-size type: `{closure@std::rt::lang_start<()>::{closure#0}}`: 8 bytes, alignment: 8 bytes
+print-type-size     end padding: 8 bytes
+print-type-size type: `unwind::types::_Unwind_Reason_Code`: 4 bytes, alignment: 4 bytes
+print-type-size     discriminant: 4 bytes
+print-type-size     variant `_URC_NO_REASON`: 0 bytes
+print-type-size     variant `_URC_FOREIGN_EXCEPTION_CAUGHT`: 0 bytes
+print-type-size     variant `_URC_FATAL_PHASE2_ERROR`: 0 bytes
+print-type-size     variant `_URC_FATAL_PHASE1_ERROR`: 0 bytes
+print-type-size     variant `_URC_NORMAL_STOP`: 0 bytes
+print-type-size     variant `_URC_END_OF_STACK`: 0 bytes
+print-type-size     variant `_URC_HANDLER_FOUND`: 0 bytes
+print-type-size     variant `_URC_INSTALL_CONTEXT`: 0 bytes
+print-type-size     variant `_URC_CONTINUE_UNWIND`: 0 bytes
+print-type-size     variant `_URC_FAILURE`: 0 bytes
+print-type-size type: `gpui::Align`: 1 bytes, alignment: 1 bytes
+print-type-size     discriminant: 1 bytes
+print-type-size     variant `Start`: 0 bytes
+print-type-size     variant `End`: 0 bytes
+print-type-size     variant `Center`: 0 bytes
+print-type-size     variant `Stretch`: 0 bytes
+print-type-size     variant `Baseline`: 0 bytes
+print-type-size type: `gpui::Flow`: 1 bytes, alignment: 1 bytes
+print-type-size     discriminant: 1 bytes
+print-type-size     variant `Row`: 0 bytes
+print-type-size     variant `Column`: 0 bytes
+print-type-size type: `gpui::Justify`: 1 bytes, alignment: 1 bytes
+print-type-size     discriminant: 1 bytes
+print-type-size     variant `Start`: 0 bytes
+print-type-size     variant `End`: 0 bytes
+print-type-size     variant `Center`: 0 bytes
+print-type-size     variant `SpaceBetween`: 0 bytes
+print-type-size     variant `SpaceAround`: 0 bytes
+print-type-size     variant `SpaceEvenly`: 0 bytes
+print-type-size type: `gpui::element::NodeKind`: 1 bytes, alignment: 1 bytes
+print-type-size     variant `CheckBox`: 1 bytes
+print-type-size         field `.0`: 1 bytes
+print-type-size     variant `Div`: 0 bytes
+print-type-size     variant `Text`: 0 bytes
+print-type-size     variant `Input`: 0 bytes
+print-type-size     variant `Button`: 0 bytes
+print-type-size     variant `List`: 0 bytes
+print-type-size     variant `ListItem`: 0 bytes
+print-type-size     variant `Image`: 0 bytes
+print-type-size     variant `Scroll`: 0 bytes
+print-type-size type: `std::process::ExitCode`: 1 bytes, alignment: 1 bytes
+print-type-size     field `.0`: 1 bytes
+print-type-size type: `std::sys::process::unix::common::ExitCode`: 1 bytes, alignment: 1 bytes
+print-type-size     field `.0`: 1 bytes
+print-type-size type: `std::alloc::Global`: 0 bytes, alignment: 1 bytes
+print-type-size type: `std::marker::PhantomData<&()>`: 0 bytes, alignment: 1 bytes
+print-type-size type: `std::marker::PhantomData<dyn gpui::element::Route>`: 0 bytes, alignment: 1 bytes
+print-type-size type: `std::marker::PhantomData<dyn gpui::source::ErasedSignal>`: 0 bytes, alignment: 1 bytes
+print-type-size type: `std::marker::PhantomData<dyn gpui::source::TextSignal>`: 0 bytes, alignment: 1 bytes
+print-type-size type: `std::marker::PhantomData<dyn gpui::style_port::StyleSignal>`: 0 bytes, alignment: 1 bytes
+print-type-size type: `std::marker::PhantomData<dyn std::ops::Fn() -> i32 + std::marker::Sync + std::panic::RefUnwindSafe>`: 0 bytes, alignment: 1 bytes
+print-type-size type: `std::marker::PhantomData<gpui::El<'_>>`: 0 bytes, alignment: 1 bytes
+print-type-size type: `std::marker::PhantomData<gpui::element::ComponentBoundary>`: 0 bytes, alignment: 1 bytes
+print-type-size type: `std::marker::PhantomData<gpui::semantic::ElementExtra<'_>>`: 0 bytes, alignment: 1 bytes
+print-type-size type: `std::marker::PhantomData<gpui::style_port::ColorSelection>`: 0 bytes, alignment: 1 bytes
+print-type-size type: `std::marker::PhantomData<gpui_inline_call::TooLarge>`: 0 bytes, alignment: 1 bytes
+print-type-size type: `std::marker::PhantomData<u8>`: 0 bytes, alignment: 1 bytes

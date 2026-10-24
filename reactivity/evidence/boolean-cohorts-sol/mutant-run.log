@@ -1,0 +1,17 @@
+
+running 1 test
+test erased_inputs_share_each_predicate_once_across_semantics_and_named_parts ... FAILED
+
+failures:
+
+failures:
+    erased_inputs_share_each_predicate_once_across_semantics_and_named_parts
+
+test result: FAILED. 0 passed; 1 failed; 0 ignored; 0 measured; 6 filtered out; finished in 0.00s
+
+
+thread 'erased_inputs_share_each_predicate_once_across_semantics_and_named_parts' (3281494) panicked at crates/component/tests/boolean_cohorts.rs:88:5:
+assertion `left == right` failed
+  left: 9
+ right: 6
+note: run with `RUST_BACKTRACE=1` environment variable to display a backtrace
