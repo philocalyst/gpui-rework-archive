@@ -162,7 +162,7 @@ impl<'font> Planner<'font> {
     ) -> Result<(Paragraphs, TextMetrics), Error> {
         let mut paragraphs = Paragraphs {
             first: parley::Layout::default(),
-            rest: Vec::with_capacity(paragraph::ranges(text).count() - 1),
+            rest: Vec::new(),
             needed: 0,
             blob_ids: self.blob_ids,
             glyphs: 0,
@@ -489,6 +489,7 @@ impl<'font> Planner<'font> {
                 }
                 paragraphs.glyphs += count;
                 if index == 0 {
+                    paragraphs.rest.reserve_exact(capture_count - 1);
                     paragraphs.first = layout;
                 } else {
                     paragraphs.rest.push(layout);

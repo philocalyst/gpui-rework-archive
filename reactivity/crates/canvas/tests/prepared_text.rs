@@ -119,3 +119,22 @@ fn handoff_is_source_borrowed_and_font_qualified_across_shapers() {
         Err(Error::InvalidFontSize)
     ));
 }
+
+#[test]
+fn rejected_first_paragraph_never_reserves_remaining_layout_headers() {
+    let face = FontFace::bundled().unwrap();
+    let mut shaper = face.shaper();
+    for length in [1, 1024, 32 * 1024] {
+        let source = format!("\t{}", "\n".repeat(length - 1));
+        drop(shaper.shape("warm", 12., None).unwrap());
+        let mut result = None;
+        let cost =
+            allocation_counter::measure(|| result = Some(shaper.prepare(&source, 12., None)));
+        assert!(matches!(result, Some(Err(Error::UnsupportedControl('\t')))));
+        assert_eq!(
+            cost.count_total, 0,
+            "reject before allocating paragraph headers: {length}"
+        );
+        assert_eq!(cost.bytes_total, 0);
+    }
+}
