@@ -95,10 +95,10 @@ impl<'font, 'text> TextPass<'font, 'text> {
             self.shaper.measure_prepared(prepared, width)?
         } else if capture && self.can_capture(input) {
             let (prepared, metrics) = self.shaper.prepare(input, size, width)?;
-            if self.pending_glyphs() + prepared.shaped_glyph_count() <= HANDOFF_GLYPHS {
-                if let Some(old) = self.prepared.insert(index, prepared) {
-                    self.shaper.recycle_prepared(old);
-                }
+            if self.pending_glyphs() + prepared.shaped_glyph_count() <= HANDOFF_GLYPHS
+                && let Some(old) = self.prepared.insert(index, prepared)
+            {
+                self.shaper.recycle_prepared(old);
             }
             // An oversized completed paragraph drops here instead of entering
             // the pending bank or spare pool. It only loses future reuse.
