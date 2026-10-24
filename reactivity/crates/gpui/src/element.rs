@@ -796,8 +796,12 @@ impl<'a> El<'a> {
             }
             let mut boundary = element.components.0.as_deref_mut();
             while let Some(item) = boundary {
-                let check = item.check.take().expect("boundary check is installed");
-                item.check = Some(map(check));
+                let BoundaryState::Check(check) =
+                    std::mem::replace(&mut item.state, BoundaryState::Scope(0))
+                else {
+                    unreachable!("only descriptions map component routes")
+                };
+                item.state = BoundaryState::Check(map(check));
                 boundary = item.next.0.as_deref_mut();
             }
             if let Some(spec) = element.extra.as_mut().and_then(|extra| extra.list_mut()) {
@@ -832,7 +836,7 @@ impl<'a> El<'a> {
     ) -> Self {
         let next = std::mem::take(&mut self.components);
         self.components.0 = Some(Box::new(ComponentBoundary {
-            check: Some(Handler::component_check(component)),
+            state: BoundaryState::Check(Handler::component_check(component)),
             next,
         }));
         self
@@ -1046,13 +1050,40 @@ impl<'a> El<'a> {
 // unlowered element containing many nested boundaries on the same visual root.
 #[derive(Default)]
 pub(crate) struct ComponentBoundaries(Option<Box<ComponentBoundary>>);
-pub(crate) struct ComponentBoundary {
-    pub(crate) check: Option<Handler>,
+struct ComponentBoundary {
+    state: BoundaryState,
     next: ComponentBoundaries,
 }
+enum BoundaryState {
+    Check(Handler),
+    Scope(u32),
+}
 impl ComponentBoundaries {
-    pub(crate) fn iter(&self) -> impl Iterator<Item = &ComponentBoundary> {
-        std::iter::successors(self.0.as_deref(), |item| item.next.0.as_deref())
+    pub(crate) fn admit(&mut self, receiver: &dyn Any, sources: &dyn Any) -> Result<(), BindError> {
+        let mut scope = 0;
+        for boundary in std::iter::successors(self.0.as_deref(), |item| item.next.0.as_deref()) {
+            let BoundaryState::Check(check) = &boundary.state else {
+                unreachable!("a component boundary is admitted once")
+            };
+            check.validate(receiver, sources)?;
+            // Model ancestry is independent of visual parentage. The final,
+            // innermost boundary supplies the scope inherited by visual children.
+            scope = check.owner_scope(receiver, sources)?;
+        }
+        if let Some(boundary) = self.0.as_deref_mut() {
+            // Reuse the checked route's storage until this draft is consumed.
+            // No dense scope column or additional ordinary-node field is needed.
+            boundary.state = BoundaryState::Scope(scope);
+            boundary.next = Self::default();
+        }
+        Ok(())
+    }
+
+    pub(crate) fn scope(&self) -> Option<u32> {
+        match &self.0.as_deref()?.state {
+            BoundaryState::Scope(scope) => Some(*scope),
+            BoundaryState::Check(_) => unreachable!("component admission precedes retention"),
+        }
     }
 }
 impl Drop for ComponentBoundaries {
@@ -1768,12 +1799,18 @@ mod tests {
     #[test]
     fn size_ledger_counts_inline_route_and_style_costs() {
         eprintln!(
-            "El={} Style={} DraftNode={} Handler={} ComponentRoute={}",
+            "El={} Style={} DraftNode={} Handler={} ComponentRoute={} ComponentBoundary={}",
             size_of::<El<'_>>(),
             size_of::<Style>(),
             size_of::<DraftNode<'_>>(),
             size_of::<Handler>(),
-            size_of::<ComponentRoute<(), ()>>()
+            size_of::<ComponentRoute<(), ()>>(),
+            size_of::<ComponentBoundary>()
+        );
+        assert_eq!(size_of::<BoundaryState>(), size_of::<Handler>());
+        assert_eq!(
+            size_of::<ComponentBoundary>(),
+            size_of::<Handler>() + size_of::<ComponentBoundaries>()
         );
         let el = text("borrowed");
         assert_eq!(el.children.capacity(), 0);

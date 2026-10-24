@@ -1984,7 +1984,7 @@ impl<M: View + 'static> Runtime<M> {
         }
         let mut seen = BTreeSet::new();
         let crate::element::Description {
-            nodes: drafts,
+            nodes: mut drafts,
             viewports: viewport_drafts,
             annotations: annotation_drafts,
             images: image_drafts,
@@ -2053,10 +2053,10 @@ impl<M: View + 'static> Runtime<M> {
         let mut depth = 0usize;
         let mut layout_depth = 0u8;
         let mut fields = Vec::with_capacity(drafts.len());
-        let mut component_scopes = Vec::with_capacity(drafts.len());
         let mut new_counts = vec![0u32; drafts.len() + 1];
         let mut fanout: BTreeMap<FieldId, Fanout> = BTreeMap::new();
-        for (index, node) in drafts.iter().enumerate() {
+        for index in 0..drafts.len() {
+            let node = &drafts[index];
             new_counts[node.parent.map_or(0, |parent| parent as usize + 1)] += 1;
             // Flattening admits preorder. Descending visits the next child;
             // a completed branch is unwound through its existing parent links.
@@ -2076,19 +2076,8 @@ impl<M: View + 'static> Runtime<M> {
                 return Err(Error::DepthLimit { node: index });
             }
             layout_depth = layout_depth.max(depth as u8);
-            let mut component_scope = node
-                .parent
-                .map_or(0, |parent| component_scopes[parent as usize]);
-            for boundary in node.components.iter() {
-                let check = boundary
-                    .check
-                    .as_ref()
-                    .expect("boundary check is installed");
-                check.validate(&self.model, &self.sources)?;
-                // Owning model ancestry is independent of visual parentage.
-                component_scope = check.owner_scope(&self.model, &self.sources)?;
-            }
-            component_scopes.push(component_scope);
+            drafts[index].components.admit(&self.model, &self.sources)?;
+            let node = &drafts[index];
             if let Some(handler) = &node.on_click {
                 handler.admit(&self.model, &self.sources)?;
             }
@@ -2251,6 +2240,10 @@ impl<M: View + 'static> Runtime<M> {
         let mut background_cursor = background_drafts.iter().peekable();
         for (index, draft) in drafts.into_iter().enumerate() {
             let parent = draft.parent.map(|parent| parent as usize);
+            let component_scope = draft
+                .components
+                .scope()
+                .unwrap_or_else(|| parent.map_or(0, |parent| nodes[parent].component_scope));
             let ordinal_slot = parent.map_or(0, |parent| parent + 1);
             let ordinal = if index == 0 || parent == Some(index - 1) {
                 0
@@ -2297,7 +2290,7 @@ impl<M: View + 'static> Runtime<M> {
             };
             let previous = previous_index
                 .and_then(|old_index| old[old_index].take())
-                .filter(|node| node.component_scope == component_scopes[index]);
+                .filter(|node| node.component_scope == component_scope);
             let previous_style = if previous.is_some() {
                 old_styles.get(previous_index.unwrap())
             } else {
@@ -2348,7 +2341,7 @@ impl<M: View + 'static> Runtime<M> {
                     parent: Parent::new(parent),
                     ordinal,
                     content: Content::new(draft.kind, TextSlot::NONE),
-                    component_scope: component_scopes[index],
+                    component_scope,
                     handler: None,
                 }
             };

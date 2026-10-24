@@ -87,7 +87,11 @@ impl View for Pair {
         };
         let right = Self::RIGHT.view(self);
         if self.nested_visual {
-            left.child(right)
+            if self.swap {
+                right.child(left)
+            } else {
+                left.child(right)
+            }
         } else if self.swap {
             row((right, left)).gap(8)
         } else {
@@ -270,6 +274,28 @@ fn nested_component_roots_qualify_reused_ids_and_compose_typed_route_authority()
         "nested"
     );
     win.click(win.button("Left method")).unwrap();
+    assert_eq!(win.with_model(|m| m.pair.left.plain).unwrap(), 1);
+}
+
+#[test]
+fn changing_the_inner_owner_of_a_shared_visual_root_revokes_both_subtrees() {
+    let mut pair = Pair::new();
+    pair.nested_visual = true;
+    let mut win = Win::new(Outer { pair }).unwrap();
+    let left = win.button("Left exact");
+    let right = win.button("Right exact");
+    // Pair and its first Counter share one visual root. The outer Pair remains
+    // the same owner while the innermost Counter at that root changes.
+    win.update(|m| m.pair.swap = true).unwrap();
+    assert_eq!(win.activate(left), Err(Error::StaleTarget));
+    assert_eq!(win.activate(right), Err(Error::StaleTarget));
+    win.click(win.button("Right exact")).unwrap();
+    win.click(win.button("Left method")).unwrap();
+    assert_eq!(
+        win.with_model(|m| (*m.pair.left.count, *m.pair.right.count))
+            .unwrap(),
+        (1, 1)
+    );
     assert_eq!(win.with_model(|m| m.pair.left.plain).unwrap(), 1);
 }
 
