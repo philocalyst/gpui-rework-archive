@@ -160,7 +160,7 @@ impl Adapter {
         adapter
     }
 
-    #[cfg(test)]
+    #[cfg(all(test, not(feature = "tokio")))]
     pub(crate) fn with_state_for_test(
         id: usize,
         messages: Sender<Message>,
