@@ -611,19 +611,35 @@ mod tests {
             "IME_ENABLED allocations={} bytes={} retained={} peak={}",
             enabled.count_total, enabled.bytes_total, enabled.bytes_current, enabled.bytes_max
         );
-        win.ime_event(
-            &mut session,
-            ImeEvent::Preedit {
-                text: "long marked phrase",
-                cursor: Some((18, 18)),
-            },
-        )
-        .unwrap();
+        let first = allocation_counter::measure(|| {
+            win.ime_event(
+                &mut session,
+                ImeEvent::Preedit {
+                    text: "long marked phrase",
+                    cursor: Some((18, 18)),
+                },
+            )
+            .unwrap();
+        });
+        eprintln!(
+            "IME_FIRST_PREEDIT calling_thread_allocations={} bytes={} retained={} peak={}",
+            first.count_total, first.bytes_total, first.bytes_current, first.bytes_max
+        );
         ack(&mut win);
         let preview = win.runtime().unwrap().composition_preview().unwrap().1;
         let buffer = preview.buffer.as_ptr();
         let capacity = preview.buffer.capacity();
         let display = preview.display.as_ptr();
+        assert_eq!(
+            SharedText::strong_count(&preview.display),
+            Some(2),
+            "only active L and acknowledged P own display bytes"
+        );
+        eprintln!(
+            "IME_LEASES display_strong={} source_strong={}",
+            SharedText::strong_count(&preview.display).unwrap(),
+            SharedText::strong_count(&win.runtime().unwrap().ime_active().unwrap().source).unwrap()
+        );
         eprintln!(
             "IME_STORAGE session={} active={} preview={} mark={} owner={} editing={} text_resources={} buffer_capacity={} display_bytes={}",
             size_of::<ImeSession>(),
