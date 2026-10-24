@@ -219,7 +219,7 @@ fn retained_text_metric_scale_cost_and_work_probe() {
             render_times.sort();
             expand_times.sort();
             println!(
-                "METRIC_RUN case={name} scale={raster_scale} draws={count} layout_header={} shape_allocs={} shape_requested={} shape_live={} scene_allocs={} scene_requested={} scene_live={} scene_peak={} header={} lanes={} order={} inline={} common={} placements={} handles={} index={} bin_bytes={} tile_refs={} sample_tests={} prepare_ns={} render_ns={} expansion_ns={} expansion_hash={}",
+                "METRIC_RUN case={name} scale={raster_scale} draws={count} layout_header={} shape_allocs={} shape_requested={} shape_live={} scene_allocs={} scene_requested={} scene_live={} scene_peak={} header={} lanes={} order={} inline={} common={} placements={} handles={} index={} bin_bytes={} tile_refs={} sample_tests={} prepare_ns={} render_ns={} expansion_ns={} expansion_hash={} pixel_hash={}",
                 size_of::<TextLayout>(),
                 shape.count_total,
                 shape.bytes_total,
@@ -242,7 +242,12 @@ fn retained_text_metric_scale_cost_and_work_probe() {
                 prepare_times[3],
                 render_times[3],
                 expand_times[3],
-                expansion(&canvas)
+                expansion(&canvas),
+                pixels
+                    .iter()
+                    .fold(0xcbf2_9ce4_8422_2325_u64, |hash, pixel| {
+                        (hash ^ u64::from(*pixel)).wrapping_mul(0x100_0000_01b3)
+                    })
             );
         }
     }
