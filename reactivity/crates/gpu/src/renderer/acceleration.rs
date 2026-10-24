@@ -185,15 +185,15 @@ pub(super) async fn create_pipeline(
     });
     // Also reject an invalid pipeline after loss: creation errors on a dead
     // device may be ignored, but a dead pipeline cannot return this layout.
-    let actual = pipeline.get_bind_group_layout(0);
+    // WGPU mints a fresh public handle for each lookup, even for an explicit
+    // layout, so its handle identity must not be compared with the input.
+    // The checked lookup itself reports an invalid pipeline in this scope.
+    drop(pipeline.get_bind_group_layout(0));
     let error = errors.pop().await;
     let memory = memory.pop().await;
     let internal = internal.pop().await;
     if let Some(error) = error.or(memory).or(internal) {
         return Err(Error::Shader(error.to_string()));
-    }
-    if actual != layout {
-        return Err(Error::Shader("invalid compositor layout".into()));
     }
     Ok((pipeline, layout))
 }
