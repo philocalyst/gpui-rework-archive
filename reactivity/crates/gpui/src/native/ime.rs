@@ -54,7 +54,7 @@ impl Bridge {
         if had_request || was_enabled {
             window.set_ime_allowed(false);
         }
-        if had_request || was_enabled {
+        if was_enabled {
             // A turn boundary does not identify the originating OS request.
             // Both observed and still-pending streams must receive the real
             // Disabled acknowledgement before another source is admitted.
