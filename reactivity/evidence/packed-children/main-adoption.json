@@ -1,0 +1,10 @@
+{
+  "previous_main": "f2874c35fc914e9002425112be5ebf8aa9717b16",
+  "adopted_commit": "79bc7eedb6f7a7997f16f919abb07ae53ebe81f8",
+  "qualified_library_source": "ce79d00fb004859994c8574254bbd091e964a2d4",
+  "guarded_build_and_port_files": 2781,
+  "byte_exact_files": 2781,
+  "all_hashes_match": true,
+  "qualified_inputs_modified_after_execution": false,
+  "scope": "Byte-exact Main adoption; the parent dossier preserves commands, failures and functional/allocation/code-generation limits."
+}
