@@ -797,6 +797,7 @@ mod tests {
         if cfg!(target_pointer_width = "64") {
             assert_eq!(size_of::<ImeSession>(), 8);
             assert_eq!(size_of::<Active>(), 56);
+            assert_eq!(size_of::<Preview>(), 96);
             assert_eq!(size_of::<MarkSnapshot>(), 40);
             assert_eq!(size_of::<Ime>(), 88);
         }

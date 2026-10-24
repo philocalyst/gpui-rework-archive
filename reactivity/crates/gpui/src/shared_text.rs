@@ -16,22 +16,21 @@ impl SharedText {
         if length == 0 {
             return Some(Self(arcstr::ArcStr::new()));
         }
+        let initialize = |destination: &mut [std::mem::MaybeUninit<u8>]| {
+            let (prefix, tail) = destination.split_at_mut(parts[0].len());
+            let (middle, suffix) = tail.split_at_mut(parts[1].len());
+            prefix.write_copy_of_slice(parts[0].as_bytes());
+            middle.write_copy_of_slice(parts[1].as_bytes());
+            suffix.write_copy_of_slice(parts[2].as_bytes());
+        };
         // SAFETY: concatenating valid UTF-8 fragments yields valid UTF-8.
         // `length` is their checked sum, so the two splits leave three exact
         // destination lengths. Each safe copy initializes its entire slice.
         // No user code runs here; these bounded, equal-length operations cannot
         // panic (ArcStr's initializer has no unwind cleanup for its allocation).
         #[expect(unsafe_code, reason = "checked UTF-8 fragments initialize every byte")]
-        unsafe {
-            arcstr::ArcStr::try_init_with_unchecked(length, |destination| {
-                let (prefix, tail) = destination.split_at_mut(parts[0].len());
-                let (middle, suffix) = tail.split_at_mut(parts[1].len());
-                prefix.write_copy_of_slice(parts[0].as_bytes());
-                middle.write_copy_of_slice(parts[1].as_bytes());
-                suffix.write_copy_of_slice(parts[2].as_bytes());
-            })
-            .map(Self)
-        }
+        let lease = unsafe { arcstr::ArcStr::try_init_with_unchecked(length, initialize) };
+        lease.map(Self)
     }
 }
 impl Deref for SharedText {
