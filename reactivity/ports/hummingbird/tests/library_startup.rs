@@ -41,3 +41,61 @@ fn public_fresh_library_syscall_control() {
     );
     drop(database);
 }
+
+#[test]
+#[ignore = "explicit fresh disk path and external syscall observer required"]
+fn public_source_admission_syscall_control() {
+    let path = std::path::PathBuf::from(std::env::var_os("GPUI_SCHEMA_PROBE_PATH").unwrap());
+    assert!(!path.exists());
+    let database = Database::open_library(&path).unwrap();
+    let (worker, inbox) = hummingbird_gpui_port::worker::Worker::new(database).unwrap();
+    drop(inbox);
+    worker.finish().unwrap();
+    let connection = rusqlite::Connection::open(&path).unwrap();
+    let synchronous: i64 = connection
+        .pragma_query_value(None, "synchronous", |row| row.get(0))
+        .unwrap();
+    let journal: String = connection
+        .pragma_query_value(None, "journal_mode", |row| row.get(0))
+        .unwrap();
+    assert_eq!(synchronous, 2);
+    assert_eq!(journal, "delete");
+    println!("CONTROL source admission synchronous={synchronous} journal={journal}");
+}
+
+fn rejects_unknown(sql: &str) {
+    static NEXT: std::sync::atomic::AtomicU64 = std::sync::atomic::AtomicU64::new(0);
+    let path = std::env::temp_dir().join(format!(
+        "hummingbird-admission-{}-{}.sqlite",
+        std::process::id(),
+        NEXT.fetch_add(1, std::sync::atomic::Ordering::Relaxed)
+    ));
+    assert!(!path.exists());
+    let connection = rusqlite::Connection::open(&path).unwrap();
+    connection.execute_batch(sql).unwrap();
+    drop(connection);
+    let before = std::fs::read(&path).unwrap();
+    let rejected = matches!(
+        Database::open_library(&path),
+        Err(hummingbird_gpui_port::search::SourceError::UnknownLibrarySchema)
+    );
+    let after = std::fs::read(&path).unwrap();
+    std::fs::remove_file(&path).unwrap();
+    assert!(rejected, "unowned schema was admitted");
+    assert_eq!(after, before, "unowned schema was changed");
+}
+
+#[test]
+fn rejects_view_only_unknown_database() {
+    rejects_unknown("CREATE VIEW unrelated AS SELECT 1 AS value");
+}
+
+#[test]
+fn rejects_fake_marker_view() {
+    rejects_unknown("CREATE VIEW _gpui_library AS SELECT 1 AS version");
+}
+
+#[test]
+fn rejects_sqlite_wildcard_lookalike_table() {
+    rejects_unknown("CREATE TABLE sqlitexyz(value INTEGER)");
+}
