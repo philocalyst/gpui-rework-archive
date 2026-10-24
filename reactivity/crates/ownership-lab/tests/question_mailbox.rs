@@ -1,355 +1,328 @@
 #![cfg(feature = "loom")]
-//! The exact GPUI mailbox, with tracked cells and Loom atomics.
+//! The exact production role mailbox with Loom-tracked cell borrows.
+//! Models use only the safe Owner/Producer interface. Native Miri separately
+//! checks real std Arc::into_inner; the Loom adapter below models cell safety,
+//! not the destructor-thread guarantee of that unavailable Loom operation.
+#[allow(dead_code)]
 mod sync {
-    pub use loom::{cell::UnsafeCell as Cell, sync::atomic};
-}
-#[path = "../../gpui/src/reader/linear_mailbox.rs"]
-mod mailbox;
-use gpui_reactivity_ownership_lab::Ready;
-use loom::{
-    sync::{
-        Arc,
-        atomic::{AtomicBool, AtomicUsize, Ordering},
-        mpsc,
-    },
-    thread,
-};
-use mailbox::Mailbox;
+    use std::ops::Deref;
 
-#[test]
-fn owner_poll_acquires_the_payload_without_a_notification_channel() {
-    loom::model(|| {
-        let slot = Arc::new(Mailbox::new());
-        let consumed = Arc::new(AtomicBool::new(false));
-        slot.begin();
-        let worker = {
-            let slot = slot.clone();
-            thread::spawn(move || assert_eq!(slot.complete(7, || {}), Ok(())))
-        };
-        let owner = {
-            let slot = slot.clone();
-            let consumed = consumed.clone();
-            thread::spawn(move || {
-                // No channel, wake counter or joined thread can independently
-                // carry the producer's writes before this actual cell read.
-                if let Some(terminal) = slot.freeze() {
-                    assert_eq!((terminal, slot.take()), (2, Some(7)));
-                    slot.retire();
-                    consumed.store(true, Ordering::Relaxed);
-                }
-            })
-        };
-        worker.join().unwrap();
-        owner.join().unwrap();
-        if !consumed.load(Ordering::Relaxed) {
-            assert_eq!(slot.freeze(), Some(2));
-            assert_eq!(slot.take(), Some(7));
-            slot.retire();
+    pub(super) use loom::sync::atomic;
+
+    pub(super) struct Arc<T>(loom::sync::Arc<T>);
+    impl<T> Arc<T> {
+        pub(super) fn new(value: T) -> Self {
+            Self(loom::sync::Arc::new(value))
         }
-        assert!(slot.idle());
-        slot.close();
-    });
-}
 
-#[test]
-fn a_single_wake_after_terminal_cannot_strand_a_published_response() {
-    loom::model(|| {
-        let slot = Arc::new(Mailbox::new());
-        slot.begin();
-        let gate = Arc::new(Ready::default());
-        let events = Arc::new(AtomicUsize::new(0));
-        let consumed = Arc::new(AtomicBool::new(false));
-        let worker = {
-            let (slot, gate, events) = (slot.clone(), gate.clone(), events.clone());
-            thread::spawn(move || {
-                slot.complete(7, || {
-                    if gate.publish() {
-                        events.fetch_add(1, Ordering::Release);
-                    }
-                })
-                .unwrap();
-            })
-        };
-        let owner = {
-            let (slot, gate, events, consumed) =
-                (slot.clone(), gate.clone(), events.clone(), consumed.clone());
-            thread::spawn(move || {
-                if events.load(Ordering::Acquire) > 0 {
-                    events.fetch_sub(1, Ordering::Relaxed);
-                    gate.acknowledge_before_drain();
-                    if let Some(terminal) = slot.freeze() {
-                        let value = slot.take();
-                        assert_eq!((terminal, value), (2, Some(7)));
-                        slot.retire();
-                        consumed.store(true, Ordering::Release);
-                    }
-                }
-            })
-        };
-        worker.join().unwrap();
-        owner.join().unwrap();
-        assert!(consumed.load(Ordering::Acquire) || events.load(Ordering::Acquire) > 0);
-        if !consumed.load(Ordering::Acquire) {
-            assert_eq!(slot.freeze(), Some(2));
-            assert_eq!(slot.take(), Some(7));
-            slot.retire();
+        pub(super) fn into_inner(this: Self) -> Option<T> {
+            loom::sync::Arc::try_unwrap(this.0).ok()
         }
-        assert!(slot.idle());
-        slot.close();
-    });
-}
+    }
+    impl<T> Clone for Arc<T> {
+        fn clone(&self) -> Self {
+            Self(self.0.clone())
+        }
+    }
+    impl<T> Deref for Arc<T> {
+        type Target = T;
+        fn deref(&self) -> &T {
+            &self.0
+        }
+    }
 
-struct Payload {
-    drops: Arc<AtomicUsize>,
-}
-impl Drop for Payload {
-    fn drop(&mut self) {
-        self.drops.fetch_add(1, Ordering::SeqCst);
+    pub(super) struct Cell<T>(loom::cell::UnsafeCell<T>);
+    impl<T> Cell<T> {
+        pub(super) fn new(value: T) -> Self {
+            Self(loom::cell::UnsafeCell::new(value))
+        }
+
+        pub(super) fn with_mut<R>(&self, visit: impl FnOnce(*mut T) -> R) -> R {
+            self.0.with_mut(visit)
+        }
+
+        pub(super) fn into_inner(self) -> T {
+            self.0.into_inner()
+        }
     }
 }
-#[test]
-fn close_racing_publication_releases_exactly_one_owned_payload() {
-    loom::model(|| {
-        let slot = Arc::new(Mailbox::new());
-        slot.begin();
-        let drops = Arc::new(AtomicUsize::new(0));
-        let worker = {
-            let (slot, drops) = (slot.clone(), drops.clone());
-            thread::spawn(move || {
-                drop(slot.complete(Payload { drops }, || {}));
-            })
-        };
-        let owner = {
-            let slot = slot.clone();
-            thread::spawn(move || slot.close())
-        };
-        worker.join().unwrap();
-        owner.join().unwrap();
-        drop(slot);
-        assert_eq!(drops.load(Ordering::SeqCst), 1);
-    });
-}
 
-#[test]
-fn a_late_old_notification_cannot_overwrite_a_reused_physical_lease() {
-    loom::model(|| {
-        let slot = Arc::new(Mailbox::new());
-        slot.begin();
-        let (sent, ready) = mpsc::channel();
-        let (resume, wait) = mpsc::channel();
-        let worker = {
-            let slot = slot.clone();
-            thread::spawn(move || {
-                slot.complete(11, || {
-                    sent.send(()).unwrap();
-                    wait.recv().unwrap();
-                })
-                .unwrap();
-            })
-        };
-        ready.recv().unwrap();
-        assert_eq!(slot.freeze(), Some(2));
-        assert_eq!(slot.take(), Some(11));
-        slot.retire();
-        slot.begin();
-        slot.complete(22, || {}).unwrap();
-        resume.send(()).unwrap();
-        worker.join().unwrap();
-        assert_eq!(slot.freeze(), Some(2));
-        assert_eq!(slot.take(), Some(22));
-        slot.retire();
-        slot.close();
-    });
-}
+#[path = "../../gpui/src/reader/linear_mailbox.rs"]
+mod linear_mailbox;
+use linear_mailbox::{ABANDONED, Context, Owner, PANICKED, Producer, Shared};
+use sync::Arc;
+const READY: u8 = 2;
+#[cfg(test)]
+mod tests {
+    use super::*;
+    use loom::{
+        sync::{
+            Arc as LoomArc,
+            atomic::{AtomicBool, AtomicU64, AtomicUsize, Ordering},
+        },
+        thread,
+    };
+    use std::{cell::Cell as LocalCell, panic::AssertUnwindSafe};
 
-#[test]
-fn abandonment_releases_credit_without_a_payload_and_stays_bounded() {
-    loom::model(|| {
-        let slot = Arc::new(Mailbox::<u64>::new());
-        slot.begin();
-        let worker = {
-            let slot = slot.clone();
-            thread::spawn(move || slot.finish(3, || {}))
-        };
-        worker.join().unwrap();
-        assert_eq!(slot.freeze(), Some(3));
-        assert_eq!(slot.take(), None);
-        slot.retire();
-        assert!(slot.idle());
-        slot.begin();
-        slot.complete(9, || {}).unwrap();
-        assert_eq!(slot.freeze(), Some(2));
-        assert_eq!(slot.take(), Some(9));
-        slot.close();
-    });
-}
+    struct NotifyGate {
+        entered: AtomicBool,
+        release: AtomicBool,
+    }
 
-#[test]
-fn notification_and_payload_drop_run_outside_the_slot_borrow() {
-    loom::model(|| {
-        struct Probe {
-            slot: Arc<Mailbox<Probe>>,
-            drops: Arc<AtomicUsize>,
-        }
-        impl Drop for Probe {
-            fn drop(&mut self) {
-                assert!(self.slot.unlocked());
-                self.drops.fetch_add(1, Ordering::SeqCst);
+    struct TestContext {
+        current: AtomicU64,
+        notifications: AtomicUsize,
+        panic_notify: bool,
+        gate: Option<LoomArc<NotifyGate>>,
+    }
+
+    impl TestContext {
+        fn new() -> Self {
+            Self {
+                current: AtomicU64::new(0),
+                notifications: AtomicUsize::new(0),
+                panic_notify: false,
+                gate: None,
             }
         }
-        let slot = Arc::new(Mailbox::new());
-        slot.begin();
-        let drops = Arc::new(AtomicUsize::new(0));
-        let probe = Probe {
-            slot: slot.clone(),
-            drops: drops.clone(),
-        };
-        assert!(slot.complete(probe, || assert!(slot.unlocked())).is_ok());
-        slot.freeze().unwrap();
-        let value = slot.take();
-        slot.retire();
-        drop(value);
-        slot.close();
-        assert_eq!(drops.load(Ordering::SeqCst), 1);
-    });
-}
+    }
 
-#[test]
-fn close_never_waits_for_a_descheduled_producer_borrowing_the_response() {
-    loom::model(|| {
-        let slot = Arc::new(Mailbox::new());
-        slot.begin();
-        let (locked, ready) = mpsc::channel();
-        let (resume, wait) = mpsc::channel();
-        let worker = {
-            let slot = slot.clone();
-            thread::spawn(move || {
-                slot.hold_for_test(|| {
-                    locked.send(()).unwrap();
-                    wait.recv().unwrap();
-                });
-                assert_eq!(slot.complete(42, || {}), Err(42));
-            })
-        };
-        ready.recv().unwrap();
-        // If close waited for the slot, Loom would detect this wait cycle:
-        // close waits for the worker, worker waits for resume after close.
-        slot.close();
-        assert_eq!(slot.freeze(), None);
-        resume.send(()).unwrap();
-        drop(slot);
-        worker.join().unwrap();
-    });
-}
+    impl Context for TestContext {
+        fn notify(&self) {
+            self.notifications.fetch_add(1, Ordering::Relaxed);
+            if self.panic_notify {
+                panic!("notification panic after publication");
+            }
+            if let Some(gate) = &self.gate {
+                if !gate.entered.swap(true, Ordering::AcqRel) {
+                    while !gate.release.load(Ordering::Acquire) {
+                        thread::yield_now();
+                    }
+                }
+            }
+        }
 
-#[test]
-fn unique_closed_owner_can_extract_a_response_before_running_its_destructor() {
-    loom::model(|| {
-        let slot = Arc::new(Mailbox::new());
-        let drops = Arc::new(AtomicUsize::new(0));
-        slot.begin();
-        assert!(
-            slot.complete(
-                Payload {
-                    drops: drops.clone()
-                },
-                || {}
-            )
-            .is_ok()
+        fn close(&self) {
+            self.current.store(0, Ordering::Release);
+        }
+    }
+
+    #[test]
+    fn producer_publishes_before_owner_poll_without_any_wake_or_join() {
+        loom::model(|| {
+            let mut owner = Owner::<usize, TestContext>::new(TestContext::new());
+            let producer = owner.begin();
+            let worker = thread::spawn(move || producer.complete(41).unwrap());
+
+            let result = loop {
+                if owner.freeze() == Some(READY) {
+                    break owner.take().unwrap();
+                }
+                thread::yield_now();
+            };
+            assert_eq!(result, 41);
+            owner.retire();
+            worker.join().unwrap();
+        });
+    }
+
+    #[test]
+    fn exclusive_owner_api_rejects_invalid_phase_calls() {
+        loom::model(|| {
+            let mut owner = Owner::<usize, TestContext>::new(TestContext::new());
+            let _producer = owner.begin();
+            let second_begin = std::panic::catch_unwind(AssertUnwindSafe(|| owner.begin()));
+            assert!(second_begin.is_err());
+            let premature_retire = std::panic::catch_unwind(AssertUnwindSafe(|| owner.retire()));
+            assert!(premature_retire.is_err());
+        });
+    }
+
+    #[test]
+    fn one_producer_transfers_a_send_but_not_sync_payload() {
+        loom::model(|| {
+            let mut owner = Owner::<LocalCell<usize>, TestContext>::new(TestContext::new());
+            let producer = owner.begin();
+            let worker = thread::spawn(move || producer.complete(LocalCell::new(17)).unwrap());
+            let value = loop {
+                if owner.freeze() == Some(READY) {
+                    break owner.take().unwrap();
+                }
+                thread::yield_now();
+            };
+            assert_eq!(value.get(), 17);
+            owner.retire();
+            worker.join().unwrap();
+        });
+    }
+
+    #[test]
+    fn notify_panic_cannot_undo_ready_or_reopen_the_slot() {
+        loom::model(|| {
+            let mut context = TestContext::new();
+            context.panic_notify = true;
+            let mut owner = Owner::<usize, TestContext>::new(context);
+            let producer = owner.begin();
+            let result = std::panic::catch_unwind(AssertUnwindSafe(|| producer.complete(7)));
+            assert!(result.is_err());
+            assert_eq!(owner.freeze(), Some(READY));
+            assert_eq!(owner.take(), Some(7));
+            owner.retire();
+        });
+    }
+
+    #[test]
+    fn closing_admission_precedes_panicking_context_cleanup() {
+        struct PanicClose;
+        impl Context for PanicClose {
+            fn notify(&self) {}
+            fn close(&self) {
+                panic!("context cleanup");
+            }
+        }
+
+        loom::model(|| {
+            let mut owner = Owner::new(PanicClose);
+            let producer = owner.begin();
+            assert!(std::panic::catch_unwind(AssertUnwindSafe(|| owner.close())).is_err());
+            let value = String::from("exact rejected allocation");
+            let pointer = value.as_ptr();
+            let returned = producer.complete(value).unwrap_err();
+            assert_eq!(returned.as_ptr(), pointer);
+            assert!(owner.close().is_none());
+        });
+    }
+
+    #[test]
+    fn old_notifier_can_outlive_take_retire_and_reuse() {
+        loom::model(|| {
+            let gate = LoomArc::new(NotifyGate {
+                entered: AtomicBool::new(false),
+                release: AtomicBool::new(false),
+            });
+            let mut context = TestContext::new();
+            context.gate = Some(gate.clone());
+            let mut owner = Owner::<usize, TestContext>::new(context);
+            let old = owner.begin();
+            let old_worker = thread::spawn(move || old.complete(1).unwrap());
+            while !gate.entered.load(Ordering::Acquire) {
+                thread::yield_now();
+            }
+
+            assert_eq!(owner.freeze(), Some(READY));
+            assert_eq!(owner.take(), Some(1));
+            owner.retire();
+            owner.begin().complete(2).unwrap();
+            assert_eq!(owner.freeze(), Some(READY));
+            assert_eq!(owner.take(), Some(2));
+            owner.retire();
+            gate.release.store(true, Ordering::Release);
+            old_worker.join().unwrap();
+        });
+    }
+
+    #[test]
+    fn panic_and_abandonment_publish_empty_terminal_states() {
+        loom::model(|| {
+            let mut owner = Owner::<usize, TestContext>::new(TestContext::new());
+            owner.begin().panicked();
+            assert_eq!(owner.freeze(), Some(PANICKED));
+            assert_eq!(owner.take(), None);
+            owner.retire();
+
+            drop(owner.begin());
+            assert_eq!(owner.freeze(), Some(ABANDONED));
+            assert_eq!(owner.take(), None);
+            owner.retire();
+        });
+    }
+
+    #[test]
+    fn close_rejects_late_completion_and_preserves_original_payload() {
+        loom::model(|| {
+            let mut owner = Owner::<Box<usize>, TestContext>::new(TestContext::new());
+            let producer = owner.begin();
+            assert!(owner.close().is_none());
+            let value = Box::new(19);
+            let pointer = value.as_ref() as *const usize;
+            let returned = producer.complete(value).unwrap_err();
+            assert_eq!(returned.as_ref() as *const usize, pointer);
+        });
+    }
+
+    #[test]
+    fn close_racing_write_reclaims_payload_exactly_once() {
+        loom::model(|| {
+            struct DropCount(LoomArc<AtomicUsize>);
+            impl Drop for DropCount {
+                fn drop(&mut self) {
+                    self.0.fetch_add(1, Ordering::SeqCst);
+                }
+            }
+
+            let drops = LoomArc::new(AtomicUsize::new(0));
+            let mut owner = Owner::<DropCount, TestContext>::new(TestContext::new());
+            let producer = owner.begin();
+            let worker_drops = drops.clone();
+            let worker = thread::spawn(move || {
+                let value = DropCount(worker_drops);
+                producer.complete(value)
+            });
+            let retired = owner.close();
+            drop(worker.join().unwrap().err());
+            drop(retired);
+            assert_eq!(drops.load(Ordering::SeqCst), 1);
+        });
+    }
+
+    #[test]
+    fn owner_and_producer_are_one_optional_arc_each() {
+        assert_eq!(
+            std::mem::size_of::<Owner<usize, TestContext>>(),
+            std::mem::size_of::<Option<Arc<Shared<usize, TestContext>>>>()
         );
-        slot.close();
-        let value = Arc::try_unwrap(slot).ok().unwrap().into_payload();
-        assert_eq!(drops.load(Ordering::SeqCst), 0);
-        drop(value);
-        assert_eq!(drops.load(Ordering::SeqCst), 1);
-    });
-}
-
-#[test]
-fn a_worker_lease_defers_reclamation_after_close_but_cannot_admit_it() {
-    loom::model(|| {
-        let slot = Arc::new(Mailbox::new());
-        slot.begin();
-        let drops = Arc::new(AtomicUsize::new(0));
-        let worker_lease = slot.clone();
-        assert!(
-            worker_lease
-                .complete(
-                    Payload {
-                        drops: drops.clone()
-                    },
-                    || {}
-                )
-                .is_ok()
+        assert_eq!(
+            std::mem::size_of::<Producer<usize, TestContext>>(),
+            std::mem::size_of::<Option<Arc<Shared<usize, TestContext>>>>()
         );
-        slot.close();
-        assert!(slot.freeze().is_none());
-        drop(slot);
-        assert_eq!(drops.load(Ordering::SeqCst), 0);
-        drop(worker_lease);
-        assert_eq!(drops.load(Ordering::SeqCst), 1);
-    });
+    }
 }
 
-#[test]
-fn staged_readiness_keeps_the_payload_sealed_across_owner_refresh() {
-    loom::model(|| {
-        let slot = Arc::new(Mailbox::new());
-        slot.begin();
-        let (published, ready) = mpsc::channel();
-        let (resume, wait) = mpsc::channel();
-        let worker = {
-            let slot = slot.clone();
-            thread::spawn(move || {
-                slot.complete(11, || {
-                    published.send(()).unwrap();
-                    wait.recv().unwrap();
-                })
-                .unwrap();
-            })
-        };
-        ready.recv().unwrap();
-        assert_eq!(slot.freeze(), Some(2));
-        // A coarse callback can supersede the logical ticket and pending input.
-        // Its attempt to launch newer work must still see occupied credit.
-        assert!(!slot.idle());
-        thread::yield_now();
-        assert_eq!(slot.freeze(), Some(2));
-        assert!(!slot.idle());
-        assert_eq!(slot.take(), Some(11));
-        slot.retire();
-        slot.begin();
-        slot.complete(22, || {}).unwrap();
-        resume.send(()).unwrap();
-        worker.join().unwrap();
-        assert_eq!(slot.freeze(), Some(2));
-        assert_eq!(slot.take(), Some(22));
-        slot.retire();
-        slot.close();
-    });
-}
+#[cfg(test)]
+mod owner_handoff_tests {
+    use super::*;
+    use loom::thread;
 
-#[test]
-fn callback_close_discards_a_staged_response_without_taking_it() {
-    loom::model(|| {
-        let slot = Arc::new(Mailbox::new());
-        slot.begin();
-        let drops = Arc::new(AtomicUsize::new(0));
-        let worker = {
-            let slot = slot.clone();
-            let drops = drops.clone();
-            thread::spawn(move || {
-                assert!(slot.complete(Payload { drops }, || {}).is_ok());
-            })
-        };
-        worker.join().unwrap();
-        assert_eq!(slot.freeze(), Some(2));
-        assert_eq!(drops.load(Ordering::SeqCst), 0);
-        // Runtime quarantine/close drops its controller lease before any apply.
-        // The terminal-sealed response stays owned, and final Arc drop cleans it.
-        slot.close();
-        assert_eq!(slot.freeze(), None);
-        drop(slot);
-        assert_eq!(drops.load(Ordering::SeqCst), 1);
-    });
+    struct HandoffContext;
+    impl Context for HandoffContext {
+        fn notify(&self) {}
+        fn close(&self) {}
+    }
+
+    // In the typed API, the next Producer cannot exist until the owner has
+    // taken and retired the prior generation. If it crosses threads, the safe
+    // executor handoff publishes that prior owner access. This models that
+    // role order, unlike the raw pre-issued-writer mutant test.
+    #[test]
+    fn owner_created_next_producer_is_handed_off_after_take() {
+        loom::model(|| {
+            let mut owner = Owner::<usize, HandoffContext>::new(HandoffContext);
+            owner.begin().complete(10).unwrap();
+            assert_eq!(owner.freeze(), Some(READY));
+            assert_eq!(owner.take(), Some(10));
+            owner.retire();
+
+            let next = owner.begin();
+            let worker = thread::spawn(move || next.complete(20).unwrap());
+            let value = loop {
+                if owner.freeze() == Some(READY) {
+                    break owner.take().unwrap();
+                }
+                thread::yield_now();
+            };
+            assert_eq!(value, 20);
+            owner.retire();
+            worker.join().unwrap();
+        });
+    }
 }
