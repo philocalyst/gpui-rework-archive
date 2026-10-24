@@ -21,6 +21,7 @@ impl SharedText {
         // destination lengths. Each safe copy initializes its entire slice.
         // No user code runs here; these bounded, equal-length operations cannot
         // panic (ArcStr's initializer has no unwind cleanup for its allocation).
+        #[expect(unsafe_code, reason = "checked UTF-8 fragments initialize every byte")]
         unsafe {
             arcstr::ArcStr::try_init_with_unchecked(length, |destination| {
                 let (prefix, tail) = destination.split_at_mut(parts[0].len());

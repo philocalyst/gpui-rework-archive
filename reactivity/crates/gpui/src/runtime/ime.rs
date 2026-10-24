@@ -603,6 +603,39 @@ mod tests {
         win.presented(win.with_scene(|_, t| t).unwrap()).unwrap();
     }
     #[test]
+    fn initial_equal_preedit_and_clear_reuse_the_exact_source_lease() {
+        let mut win = Win::recording(
+            Input(Signal::new("source".into())),
+            WindowOptions::default(),
+        )
+        .unwrap();
+        ack(&mut win);
+        let target = win.input();
+        win.focus(target).unwrap();
+        win.select(
+            target,
+            gpui_canvas::TextSelection {
+                anchor: position(0).unwrap(),
+                focus: position(6).unwrap(),
+            },
+        )
+        .unwrap();
+        ack(&mut win);
+        let mut session = ImeSession::default();
+        win.ime_event(&mut session, ImeEvent::Enabled).unwrap();
+        let pointer = win.runtime().unwrap().ime_active().unwrap().source.as_ptr();
+        for text in ["source", "", "source"] {
+            win.ime_event(&mut session, ImeEvent::Preedit { text, cursor: None })
+                .unwrap();
+            let preview = win.runtime().unwrap().composition_preview().unwrap().1;
+            assert!(std::ptr::eq(preview.display.as_ptr(), pointer));
+            ack(&mut win);
+        }
+        win.ime_event(&mut session, ImeEvent::Commit("done"))
+            .unwrap();
+        assert_eq!(win.read(Input::VALUE).unwrap(), "done");
+    }
+    #[test]
     fn ime_cold_ownership_reuses_immutable_display_and_releases_after_final_ack() {
         let mut win = Win::recording(
             Input(Signal::new("source".into())),
