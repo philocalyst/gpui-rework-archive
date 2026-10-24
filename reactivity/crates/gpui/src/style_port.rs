@@ -831,7 +831,8 @@ mod binding_storage_tests {
         assert_eq!(size_of::<MapOperand<'_>>(), 40);
         assert_eq!(size_of::<OwnedMapOperand<'_>>(), 40);
         assert_eq!(size_of::<MapBinding<'_>>(), 48);
-        assert_eq!(size_of::<MapDraft<'_>>(), 72);
+        assert_eq!(size_of::<MapDraft<'_>>(), 80);
+        assert_eq!(size_of::<PropertyValue>(), 32);
         assert_eq!(size_of::<ColorSelection>(), 56);
         for (size, alignment) in [(20, 4), (usize::MAX, 1), (1, usize::MAX)] {
             let expected = crate::Error::MapStorage { size, alignment };

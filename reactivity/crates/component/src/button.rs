@@ -53,9 +53,11 @@ impl<'a> Button<'a> {
     }
     pub fn disabled(mut self, disabled: impl BoolInput<'a>) -> Self {
         self.element = self.element.disabled(disabled);
+        let (background, foreground) = Self::colors(self.theme, self.variant);
         self.element = self
             .element
-            .fg(disabled.select(Self::colors(self.theme, self.variant).1, self.theme.muted()));
+            .fg(disabled.select(foreground, self.theme.muted()))
+            .bg(disabled.select(background, self.theme.surface()));
         self
     }
     pub fn name(mut self, name: impl IntoText<'a>) -> Self {

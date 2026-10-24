@@ -75,7 +75,7 @@ impl<const DIRECT: bool> View for Form<DIRECT> {
         .w(300)
     }
 }
-fn measure<const DIRECT: bool>() {
+fn measure<const DIRECT: bool>() -> (Vec<u8>, Vec<u8>) {
     drop(Win::with_size(Form::<DIRECT>::default(), 320, 220).unwrap());
     let model = Form::<DIRECT>::default();
     let mut description = None;
@@ -85,6 +85,7 @@ fn measure<const DIRECT: bool>() {
     let retained =
         allocation_counter::measure(|| window = Some(Win::with_size(model, 320, 220).unwrap()));
     let mut window = window.unwrap();
+    let initial = window.with_pixels(|pixels, _, _| pixels.to_vec()).unwrap();
     window.reset_counters().unwrap();
     let updates = allocation_counter::measure(|| {
         for index in 0..100 {
@@ -109,6 +110,14 @@ fn measure<const DIRECT: bool>() {
     );
 }
 fn main() {
-    measure::<false>();
-    measure::<true>();
+    let snapshot = measure::<false>();
+    let direct = measure::<true>();
+    assert_eq!(
+        snapshot, direct,
+        "both forms execute the same initial/final raster workload"
+    );
+    println!(
+        "initial_and_final_pixels_equal=true,bytes_each={}",
+        snapshot.0.len()
+    );
 }
