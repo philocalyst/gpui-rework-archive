@@ -146,7 +146,7 @@ fn recipe_and_inspector_contributions_keep_presence_and_latest_lower_source() {
     );
     let latest = window.root().unwrap().theme.danger();
     window
-        .set(&Styled::TINT, latest)
+        .set(Styled::TINT, latest)
         .unwrap_or_else(|_| panic!("valid source"));
     assert_eq!(window.property(target, FOREGROUND).unwrap(), explicit);
     window
