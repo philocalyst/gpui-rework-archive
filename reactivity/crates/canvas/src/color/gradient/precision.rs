@@ -7,6 +7,64 @@ const TINY: f64 = f32::MIN_POSITIVE as f64;
 fn gamma(n: f64) -> f64 {
     n * EPS / (1.0 - n * EPS)
 }
+// Experimental rectangular-Lab arm. The two interior Bernstein controls are
+// N(q0²*q1), N(q0*q1²), scaled by max author alpha. Endpoints stay in their
+// independent exact prepared words; their inverse-Lab residual is charged here.
+pub(super) fn bernstein(
+    left: [f64; 3],
+    right: [f64; 3],
+    a0: f32,
+    a1: f32,
+    p0: [f32; 4],
+    p1: [f32; 4],
+) -> ([[f32; 3]; 2], [f64; 3]) {
+    let alpha = f64::from(a0.max(a1));
+    let powers: [[f64; 3]; 4] = [
+        std::array::from_fn(|i| left[i] * left[i] * left[i]),
+        std::array::from_fn(|i| left[i] * left[i] * right[i]),
+        std::array::from_fn(|i| left[i] * right[i] * right[i]),
+        std::array::from_fn(|i| right[i] * right[i] * right[i]),
+    ];
+    let controls = powers.map(|q| super::super::matrix(LMS_TO_RGB, q));
+    let stored = [
+        controls[1].map(|v| (alpha * v) as f32),
+        controls[2].map(|v| (alpha * v) as f32),
+    ];
+    let errors = std::array::from_fn(|c| {
+        let norm = alpha * controls.iter().map(|v| v[c].abs()).fold(0.0_f64, f64::max);
+        let preparation_norm: f64 = (0..3)
+            .map(|i| alpha * LMS_TO_RGB[c][i].abs() * left[i].abs().max(right[i].abs()).powi(3))
+            .sum();
+        let endpoint_error = (f64::from(p0[c]) - f64::from(a0) * controls[0][c])
+            .abs()
+            .max((f64::from(p1[c]) - f64::from(a1) * controls[3][c]).abs());
+        let cast_error = (f64::from(stored[0][c]) - alpha * controls[1][c])
+            .abs()
+            .max((f64::from(stored[1][c]) - alpha * controls[2][c]).abs());
+        // At exact v, the nonnegative Bernstein weights total A(t)/max(A).
+        // The longest written color path has nine one-ULP factors including
+        // the shared complement and both final sums. No other channel norm.
+        let mut error = endpoint_error + 0.75 * cast_error + gamma(9.0) * norm;
+        if a0 != a1 && a0 > 0.0 && a1 > 0.0 {
+            // Absolute derivative in v of the alpha-conditioned endpoint form.
+            let k1 = alpha * controls[1][c];
+            let k2 = alpha * controls[2][c];
+            let k = k1.abs().max(k2.abs());
+            let derivative = 2.0 * f64::from(p0[c]).abs().max(f64::from(p1[c]).abs())
+                + 3.0 * k
+                + 0.75 * (k2 - k1).abs();
+            error += 12.0 * EPS * derivative + gamma(4.0) * 0.75 * k;
+        }
+        // Controls use a short f64 matrix/product DAG. The broad host
+        // conversion assumption remains the same as the direct-LMS profile.
+        error += 128.0 * f64::EPSILON * (1.0 + preparation_norm);
+        // Conservative experimental FTZ allowance; qualification must audit the
+        // actual DAG and weighted ratio path before this tier can be adopted.
+        error += 1048576.0 * TINY * (1.0 + norm);
+        (error * (1.0 + 256.0 * f64::EPSILON)).next_up()
+    });
+    (stored, errors)
+}
 fn affine(left: f64, right: f64, weight_error: f64) -> (f64, f64) {
     let base = f64::from(left as f32);
     let delta = f64::from((right - left) as f32);

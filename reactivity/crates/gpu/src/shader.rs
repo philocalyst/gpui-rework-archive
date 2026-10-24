@@ -439,6 +439,26 @@ pub mod ui {
             }
         }
         v = clamp(v, 0.0, 1.0);
+        if (header.w >> 1) == 1 {
+            let mut denominator = 1.0;
+            if alpha0 != interval.w {
+                denominator = (1.0 - u) * alpha0 + u * interval.w;
+            }
+            let complement = 1.0 - v;
+            let weight0 = (1.0 - u) * complement * complement;
+            let weight3 = u * v * v;
+            let cross = 3.0 * denominator * complement * v;
+            let left = bitcast_vec4f(get!(WORDS)[(word + 4) as usize]);
+            let right = bitcast_vec4f(get!(WORDS)[(word + stride + 4) as usize]);
+            let rgb = weight0 * left.xyz()
+                + weight3 * right.xyz()
+                + cross * (complement * color.xyz() + v * delta.xyz());
+            let mut alpha = color.w;
+            if color.w != delta.w {
+                alpha = (1.0 - u) * color.w + u * delta.w;
+            }
+            return vec4f(rgb.x, rgb.y, rgb.z, alpha);
+        }
         let mut q = color.xyz() + v * delta.xyz();
         if (packed_interval.y & 0x80000000) == 0 {
             // Only L and C are premultiplied; hue advances with u, not v.

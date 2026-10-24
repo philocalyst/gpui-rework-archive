@@ -279,7 +279,15 @@ fn display_referred_hdr_and_p3_admission_cohorts() {
                                 match try_make(left, right, mode) {
                                     Ok(gradient) => {
                                         accepted |= 1 << (7 * i + j);
-                                        for t in [0.125, 0.5, 0.875] {
+                                        for t in [
+                                            f32::from_bits(1),
+                                            0.00001,
+                                            0.125,
+                                            0.5,
+                                            0.875,
+                                            0.99999,
+                                            f32::from_bits(1.0_f32.to_bits() - 1),
+                                        ] {
                                             let actual =
                                                 gradient.view().sample_parameter(t).unwrap();
                                             let expected = oracle::interpolate(
@@ -321,4 +329,45 @@ fn display_referred_hdr_and_p3_admission_cohorts() {
             }
         }
     }
+}
+
+#[test]
+fn lab_bernstein_controls_keep_near_zero_hdr_channels_small() {
+    let mut tested = 0;
+    for scale in [1., 1000. / 80., 4000. / 80., 10000. / 80.] {
+        for p3 in [false, true] {
+            for (a0, a1) in [(1., 1.), (0.25, 0.75), (1e-22, 2e-22)] {
+                let color = |rgb: [f32; 3], alpha| {
+                    let [r, g, b] = rgb.map(|v| v * scale);
+                    if p3 {
+                        Color::linear_display_p3(r, g, b, alpha).unwrap()
+                    } else {
+                        Color::linear_srgb(r, g, b, alpha).unwrap()
+                    }
+                };
+                for rgb in [[0., 1., 0.], [0., 0., 1.], [1., 1., 1.]] {
+                    let left = color([1., 0., 0.], a0);
+                    let right = color(rgb, a1);
+                    let Ok(gradient) = try_make(left, right, Mode::Oklab) else {
+                        continue;
+                    };
+                    tested += 1;
+                    for step in 0..=4096 {
+                        let t = step as f32 / 4096.;
+                        let expected = oracle::interpolate(left, right, f64::from(t), Mode::Oklab);
+                        let actual = gradient.view().sample_parameter(t).unwrap();
+                        for c in 0..3 {
+                            let error = (f64::from(actual[c]) - expected[c]).abs();
+                            assert!(
+                                error <= Mode::MAX_CONVERSION_ERROR + 2e-7 * expected[c].abs(),
+                                "scale={scale} p3={p3} alpha={a0}/{a1} target={rgb:?} t={t} c={c} actual={actual:?} expected={expected:?} error={error}"
+                            );
+                        }
+                    }
+                }
+            }
+        }
+    }
+    eprintln!("lab_bernstein_dense_near_zero,pairs={tested}");
+    assert!(tested >= 30);
 }

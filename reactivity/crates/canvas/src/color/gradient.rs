@@ -345,11 +345,38 @@ fn prepare_interval(
         right = super::matrix(super::OKLAB_TO_LMS, right);
     }
     let exact_fixed = !polar && left == right && exact_rgb;
+    // Rectangular Lab is a cubic in normalized-alpha progress. Its two
+    // interior RGB controls replace LMS base/delta without another packet word.
+    let cubic = if mode == Interpolation::Oklab {
+        Some(precision::bernstein(
+            left,
+            right,
+            a0,
+            a1,
+            endpoint,
+            right_color.endpoint,
+        ))
+    } else {
+        None
+    };
+    let errors = cubic.as_ref().map_or_else(
+        || precision::conversion_bound(left, right, a0, a1, polar),
+        |(_, errors)| *errors,
+    );
     let admitted = span <= 0.0
         || exact_fixed
-        || precision::conversion_bound(left, right, a0, a1, polar)
+        || errors
             .iter()
             .all(|error| error.is_finite() && *error <= Interpolation::MAX_CONVERSION_ERROR);
+    let controls = cubic.map_or_else(
+        || {
+            [
+                left.map(|v| v as f32),
+                std::array::from_fn(|i| (right[i] - left[i]) as f32),
+            ]
+        },
+        |(controls, _)| controls,
+    );
     let scale = f64::from(a0.max(a1));
     let normalized = if scale == 0.0 {
         [0.0; 2]
@@ -365,15 +392,15 @@ fn prepare_interval(
                 (normalized[1] as f32).to_bits(),
             ],
             [
-                (left[0] as f32).to_bits(),
-                (left[1] as f32).to_bits(),
-                (left[2] as f32).to_bits(),
+                controls[0][0].to_bits(),
+                controls[0][1].to_bits(),
+                controls[0][2].to_bits(),
                 a0.to_bits(),
             ],
             [
-                ((right[0] - left[0]) as f32).to_bits(),
-                ((right[1] - left[1]) as f32).to_bits(),
-                ((right[2] - left[2]) as f32).to_bits(),
+                controls[1][0].to_bits(),
+                controls[1][1].to_bits(),
+                controls[1][2].to_bits(),
                 a1.to_bits(),
             ],
             stop.color.words,
@@ -687,55 +714,78 @@ impl<'a> GradientView<'a> {
         } else {
             let a0 = load(0, 2).abs();
             let a1 = load(0, 3);
+            let same_alpha = a0.simd_eq(a1);
+            let denominator = same_alpha.select(f32x4::splat(simd, 1.0), (1.0 - t) * a0 + t * a1);
             let mut v = t;
-            if a0.simd_eq(a1).to_bitmask() != 15 {
-                let denominator = (1.0 - t) * a0 + t * a1;
+            if same_alpha.to_bitmask() != 15 {
                 let ratio = t * a1 / denominator.max(f32::MIN_POSITIVE);
-                v = a0
-                    .simd_eq(0.0)
+                v = same_alpha
                     .select(
-                        f32x4::splat(simd, 1.0),
-                        a1.simd_eq(0.0).select(f32x4::splat(simd, 0.0), ratio),
+                        t,
+                        a0.simd_eq(0.0).select(
+                            f32x4::splat(simd, 1.0),
+                            a1.simd_eq(0.0).select(f32x4::splat(simd, 0.0), ratio),
+                        ),
                     )
                     .max(0.0)
                     .min(1.0);
-            }
-            // Hue is never premultiplied: it advances with t, L and C with v.
-            let h = c[2] + t * d[2];
-            for j in 0..3 {
-                c[j] += v * d[j];
-            }
-            let polar = std::array::from_fn::<_, 4, _>(|i| {
-                mask & (1 << i) != 0 && self.words[intervals[i].0][1] >> 31 == 0
-            });
-            if polar.iter().any(|p| *p) {
-                let tau = std::f32::consts::TAU;
-                let angle = h - ((h + tau * 0.5) / tau).floor() * tau;
-                let [sin, cos] = trig::sin_cos(angle);
-                let a = c[1] * cos;
-                let b = c[1] * sin;
-                let q = super::OKLAB_TO_LMS.map(|row| c[0] + a * row[1] as f32 + b * row[2] as f32);
-                for j in 0..3 {
-                    let original: [f32; 4] = c[j].into();
-                    let converted: [f32; 4] = q[j].into();
-                    c[j] =
-                        f32x4::from_fn(simd, |i| if polar[i] { converted[i] } else { original[i] });
-                }
-            }
-            for q in &mut c {
-                *q = *q * *q * *q;
-            }
-            let q = c;
-            for (j, row) in LMS_TO_RGB.iter().enumerate() {
-                c[j] = q[0] * row[0] as f32 + q[1] * row[1] as f32 + q[2] * row[2] as f32;
             }
             let left_alpha = load(1, 3);
             let right_alpha = load(2, 3);
             alpha = left_alpha
                 .simd_eq(right_alpha)
                 .select(left_alpha, (1.0 - t) * left_alpha + t * right_alpha);
-            for value in &mut c {
-                *value *= alpha;
+            if self.interpolation() == Interpolation::Oklab {
+                let u = 1.0 - v;
+                let w0 = (1.0 - t) * u * u;
+                let w3 = t * v * v;
+                let cross = 3.0 * denominator * u * v;
+                for j in 0..3 {
+                    let left = load(4, j);
+                    let right = f32x4::from_fn(simd, |i| {
+                        let base = intervals[i].0;
+                        let next = (base + self.stride()).min(self.words.len() - self.stride());
+                        f32::from_bits(self.words[next + 4][j])
+                    });
+                    c[j] = w0 * left + w3 * right + cross * (u * c[j] + v * d[j]);
+                }
+            } else {
+                // Hue is never premultiplied: it advances with t, L and C with v.
+                let h = c[2] + t * d[2];
+                for j in 0..3 {
+                    c[j] += v * d[j];
+                }
+                let polar = std::array::from_fn::<_, 4, _>(|i| {
+                    mask & (1 << i) != 0 && self.words[intervals[i].0][1] >> 31 == 0
+                });
+                if polar.iter().any(|p| *p) {
+                    let tau = std::f32::consts::TAU;
+                    let angle = h - ((h + tau * 0.5) / tau).floor() * tau;
+                    let [sin, cos] = trig::sin_cos(angle);
+                    let a = c[1] * cos;
+                    let b = c[1] * sin;
+                    let q =
+                        super::OKLAB_TO_LMS.map(|row| c[0] + a * row[1] as f32 + b * row[2] as f32);
+                    for j in 0..3 {
+                        let original: [f32; 4] = c[j].into();
+                        let converted: [f32; 4] = q[j].into();
+                        c[j] =
+                            f32x4::from_fn(
+                                simd,
+                                |i| if polar[i] { converted[i] } else { original[i] },
+                            );
+                    }
+                }
+                for q in &mut c {
+                    *q = *q * *q * *q;
+                }
+                let q = c;
+                for (j, row) in LMS_TO_RGB.iter().enumerate() {
+                    c[j] = q[0] * row[0] as f32 + q[1] * row[1] as f32 + q[2] * row[2] as f32;
+                }
+                for value in &mut c {
+                    *value *= alpha;
+                }
             }
         }
         let channels: [[f32; 4]; 4] = [c[0].into(), c[1].into(), c[2].into(), alpha.into()];
