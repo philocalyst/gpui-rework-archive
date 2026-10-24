@@ -53,7 +53,7 @@ pub(super) struct Planner<'font> {
 }
 struct Planned {
     metrics: TextMetrics,
-    glyphs: Vec<PackedGlyph>,
+    glyphs: EcoVec<PackedGlyph>,
     details: Option<Details>,
     mask: usize,
 }
@@ -158,9 +158,8 @@ impl<'font> Planner<'font> {
             height: planned.metrics.height,
             baseline: planned.metrics.baseline,
             font_size: size,
-            glyphs: Arc::new(
-                GlyphBuffer::new(planned.glyphs, text.len()).map_err(|_| Error::ResourceLimit)?,
-            ),
+            glyphs: GlyphBuffer::new(planned.glyphs, text.len())
+                .map_err(|_| Error::ResourceLimit)?,
             fonts: self.font_set(planned.mask),
             mapping: planned.details.map(Arc::new),
         })
@@ -204,7 +203,7 @@ impl<'font> Planner<'font> {
                 family_count += 1;
             }
         }
-        let mut glyphs = Vec::new();
+        let mut glyphs = EcoVec::new();
         let mut details: Option<Details> = None;
         let mut detailed = false;
         let mut glyph_count = 0usize;

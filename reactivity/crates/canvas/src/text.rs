@@ -1,4 +1,5 @@
 use crate::{Error, Rect};
+use ecow::EcoVec;
 use skrifa::{
     MetadataProvider as _,
     instance::{LocationRef, Size},
@@ -17,8 +18,6 @@ mod bundled_coverage;
 mod coverage;
 #[cfg(test)]
 mod geometry_ledger;
-// The only unsafe module owns the finished glyph allocation behind a safe API.
-#[allow(unsafe_code)]
 mod glyph_buffer;
 use glyph_buffer::GlyphBuffer;
 #[cfg(test)]
@@ -284,7 +283,7 @@ pub struct TextLayout {
     pub height: f32,
     pub baseline: f32,
     font_size: f32,
-    glyphs: Arc<GlyphBuffer>,
+    glyphs: GlyphBuffer,
     fonts: Arc<FontSet>,
     mapping: Option<Arc<Details>>,
 }
@@ -297,7 +296,7 @@ pub struct TextMetrics {
     pub baseline: f32,
 }
 /// Shared canonical packed positions; scene readers never copy glyph storage.
-pub(crate) struct SharedGlyphs(Arc<GlyphBuffer>);
+pub(crate) struct SharedGlyphs(EcoVec<PackedGlyph>);
 impl SharedGlyphs {
     pub(crate) fn position(&self, index: u16) -> [f32; 2] {
         let glyph = &self.0[usize::from(index)];
@@ -306,7 +305,7 @@ impl SharedGlyphs {
 }
 impl TextLayout {
     pub(crate) fn shared_glyphs(&self) -> SharedGlyphs {
-        SharedGlyphs(self.glyphs.clone())
+        SharedGlyphs(self.glyphs.shared())
     }
     pub fn font_size(&self) -> f32 {
         self.font_size
