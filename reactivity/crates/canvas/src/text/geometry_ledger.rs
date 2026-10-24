@@ -5,6 +5,7 @@ use super::*;
 fn direct_geometry_materialization_omits_the_shared_allocation() {
     let _registry = BUNDLED_TEST_LOCK.lock().unwrap();
     let font = FontFace::bundled().unwrap();
+    let _fallback = FontFace::fallback(2).unwrap();
     for _ in 0..4 {
         let mut shared = None;
         let shared_cost = allocation_counter::measure(|| {
