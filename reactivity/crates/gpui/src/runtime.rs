@@ -787,12 +787,10 @@ impl Fanout {
             Self::Mapped(mapped) => &mut mapped.destinations,
         }
     }
-    fn map(
-        &mut self,
-        destination: Destination,
-        recipe: crate::style_port::Recipe,
-        value: crate::property::PropertyValue,
-    ) {
+    #[inline(never)]
+    fn map(&mut self, draft: crate::style_port::MapDraft<'_>) -> Result<(), Error> {
+        let recipe = draft.operand.recipe()?;
+        let value = draft.operand.scalar()?.admit(draft.property)?;
         if let Self::General {
             codec,
             destinations,
@@ -810,11 +808,12 @@ impl Fanout {
             unreachable!()
         };
         mapped.records.push(MappedRecord {
-            destination,
+            destination: Destination::style(draft.node as usize, draft.property),
             recipe,
             color: 0,
         });
         mapped.values.push(value);
+        Ok(())
     }
     // Shared erased admission keeps model-specific owner turns small. All
     // outputs are frozen and admitted here before any destination can mutate.
@@ -2047,16 +2046,10 @@ impl<M: View + 'static> Runtime<M> {
         }
         for draft in mapped_ports {
             if let Some(field) = self.sources.resolve(&self.model, draft.operand.signal)? {
-                let recipe = draft.operand.recipe()?;
-                let value = draft.operand.scalar()?.admit(draft.property)?;
                 fanout
                     .entry(field)
                     .or_insert_with(|| Fanout::new(TextCodec::for_style::<f64>()))
-                    .map(
-                        Destination::style(draft.node as usize, draft.property),
-                        recipe,
-                        value,
-                    );
+                    .map(draft)?;
             }
         }
         let mut color_discovery = styles::ColorDiscovery::default();
