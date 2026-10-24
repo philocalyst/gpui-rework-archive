@@ -271,7 +271,43 @@ impl<M: View + 'static> Runtime<M> {
         }))
     }
 }
+/// Native request generation; source bytes remain an exclusive runtime proof.
+#[cfg(feature = "native-core")]
+#[derive(Clone, Copy, Debug, PartialEq, Eq)]
+pub(crate) struct ImeTarget {
+    target: Target,
+    field: FieldId,
+    epoch: u64,
+}
 impl<M: View + 'static, L: LaneSet<M>> Win<M, L> {
+    #[cfg(feature = "native-core")]
+    pub(crate) fn ime_target(&self) -> Option<ImeTarget> {
+        let runtime = self.runtime().ok()?;
+        if !runtime.logical_valid {
+            return None;
+        }
+        let target = runtime.focused?;
+        let index = runtime.input_index(target).ok()?;
+        Some(ImeTarget {
+            target,
+            field: runtime.nodes[index]
+                .text_slot()
+                .get(&runtime.texts)?
+                .field?,
+            epoch: runtime.source_epoch,
+        })
+    }
+    #[cfg(feature = "native-core")]
+    pub(crate) fn ime_session_live(&self, session: &ImeSession) -> bool {
+        self.runtime()
+            .ok()
+            .and_then(|r| {
+                r.ime_active()
+                    .map(|a| Some(a.stamp) == session.stamp && r.ime_valid(a))
+            })
+            .unwrap_or(false)
+    }
+
     /// Apply the same scoped IME protocol as the native adapter. Preedit prepares
     /// a display candidate without changing Signal or source_epoch. Commit writes
     /// once through the ordinary text codec. A stale/cancelled stream is consumed.

@@ -863,7 +863,7 @@ mod tests {
         if cfg!(target_pointer_width = "64") {
             assert_eq!(std::mem::size_of::<LogicalSelection>(), 48);
             assert_eq!(std::mem::size_of::<Option<LogicalSelection>>(), 48);
-            assert_eq!(std::mem::size_of::<Editing>(), 96);
+            assert_eq!(std::mem::size_of::<Editing>(), 104);
             assert_eq!(std::mem::size_of::<SelectionSnapshot>(), 24);
             assert_eq!(std::mem::size_of::<Option<SelectionSnapshot>>(), 24);
             assert_eq!(std::mem::size_of::<Option<Box<Editing>>>(), 8);

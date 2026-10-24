@@ -44,7 +44,7 @@ const _: () = assert!(MAX_LAYOUT_DEPTH <= u8::MAX as usize);
 mod accessibility;
 mod delivery;
 mod editing;
-mod ime;
+pub(crate) mod ime;
 pub use ime::{ImeEvent, ImeSession, MarkedText};
 mod frontier;
 mod text_geometry;
@@ -1371,7 +1371,7 @@ impl<M: View + 'static, L: LaneSet<M>> Win<M, L> {
             None,
         )
     }
-    fn mount_text_lanes(
+    pub(crate) fn mount_text_lanes(
         model: M,
         lanes: L,
         options: WindowOptions,
@@ -1466,16 +1466,6 @@ impl<M: View + 'static, L: LaneSet<M>> Win<M, L> {
         }
         drop(runtime);
         Ok(window)
-    }
-    #[cfg(feature = "native-core")]
-    pub(crate) fn recording_lanes(
-        model: M,
-        lanes: L,
-        options: WindowOptions,
-        scale_factor: f32,
-        inspector: bool,
-    ) -> Result<Self, Error> {
-        Self::mount_lanes(model, lanes, options, false, scale_factor, inspector)
     }
     /// Select the window's outline font through its existing cold text owner.
     /// Only a completed acknowledged candidate replaces displayed text geometry.

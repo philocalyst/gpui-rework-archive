@@ -287,3 +287,109 @@ fn commit_without_preedit_and_ordinary_keyboard_both_use_canonical_input() {
     ack(&mut win);
     assert_eq!(displayed(&win, target).0, "aéz");
 }
+
+#[test]
+fn initial_font_and_same_selection_cancel_preserve_source_and_revoke_late_commit() {
+    let (mut win, target, mut session) = cjk_window("日本");
+    let epoch = win.snapshot().unwrap().source_epoch;
+    win.ime_event(
+        &mut session,
+        ImeEvent::Preedit {
+            text: "語",
+            cursor: Some((3, 3)),
+        },
+    )
+    .unwrap();
+    ack(&mut win);
+    assert_eq!(displayed(&win, target).0, "日本語");
+    // Preedit collapsed the source caret at its original replacement start.
+    win.select(target, selection(6, 6)).unwrap();
+    ack(&mut win);
+    assert_eq!(displayed(&win, target).0, "日本");
+    assert!(displayed(&win, target).1.is_none());
+    assert!(win.ime_cursor_area(&session).unwrap().is_none());
+    assert_eq!(win.snapshot().unwrap().source_epoch, epoch);
+    win.ime_event(&mut session, ImeEvent::Commit("late"))
+        .unwrap();
+    assert_eq!(win.read(&Form::A).unwrap(), "日本");
+}
+
+#[test]
+fn unsupported_preview_and_foreign_session_fail_closed_without_source_edits() {
+    let (mut win, target, mut session) = window("safe");
+    let (mut foreign, _, mut own) = window("elsewhere");
+    foreign
+        .ime_event(&mut session, ImeEvent::Commit("wrong window"))
+        .unwrap();
+    assert_eq!(foreign.read(&Form::A).unwrap(), "elsewhere");
+    foreign.ime_event(&mut own, ImeEvent::Commit("!")).unwrap();
+    assert_eq!(foreign.read(&Form::A).unwrap(), "elsewhere!");
+    // Re-enable the original transport explicitly after its foreign use.
+    win.ime_event(&mut session, ImeEvent::Enabled).unwrap();
+    win.ime_event(
+        &mut session,
+        ImeEvent::Preedit {
+            text: "ok",
+            cursor: Some((2, 2)),
+        },
+    )
+    .unwrap();
+    ack(&mut win);
+    let old = displayed(&win, target);
+    assert!(matches!(
+        win.ime_event(
+            &mut session,
+            ImeEvent::Preedit {
+                text: "日",
+                cursor: Some((3, 3))
+            }
+        ),
+        Err(Error::Canvas(_))
+    ));
+    assert_eq!(displayed(&win, target), old);
+    assert!(win.ime_cursor_area(&session).unwrap().is_none());
+    win.ime_event(&mut session, ImeEvent::Commit("late"))
+        .unwrap();
+    assert_eq!(win.read(&Form::A).unwrap(), "safe");
+}
+
+#[test]
+fn pointer_preview_suffix_resolves_back_to_source_before_cancel() {
+    let (mut win, target, mut session) = window("abc XYZ tail");
+    win.select(target, selection(4, 7)).unwrap();
+    ack(&mut win);
+    win.ime_event(&mut session, ImeEvent::Enabled).unwrap();
+    win.ime_event(
+        &mut session,
+        ImeEvent::Preedit {
+            text: "much longer",
+            cursor: Some((11, 11)),
+        },
+    )
+    .unwrap();
+    ack(&mut win);
+    let mut point = None;
+    win.visit(|part| {
+        if part.target() == target {
+            let geometry = part.text_geometry().unwrap();
+            let bounds = geometry.caret_bounds(selection(20, 20).focus).unwrap();
+            point = Some(Point {
+                x: bounds.x,
+                y: bounds.y + bounds.height * 0.5,
+            });
+        }
+    })
+    .unwrap();
+    let mut pointer = PointerSession::default();
+    win.pointer_event(&mut pointer, PointerEvent::Move(point.unwrap()))
+        .unwrap();
+    win.pointer_event(&mut pointer, PointerEvent::Press)
+        .unwrap();
+    ack(&mut win);
+    assert_eq!(displayed(&win, target).0, "abc XYZ tail");
+    assert_eq!(displayed(&win, target).2, selection(12, 12));
+    assert!(displayed(&win, target).1.is_none());
+    win.ime_event(&mut session, ImeEvent::Commit("late"))
+        .unwrap();
+    assert_eq!(win.read(&Form::A).unwrap(), "abc XYZ tail");
+}
