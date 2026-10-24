@@ -1,6 +1,10 @@
 //! Ordinary five-app Todo workload through the public recording interface.
 //! Recording timings exclude the OS, framebuffer rasterization and scanout.
 #[path = "support/todo_five.rs"]
+#[expect(
+    dead_code,
+    reason = "This fixture profiles Todo edits; the native fixture exercises animation ticks."
+)]
 mod todos;
 
 use gpui::{Error, Role, Target, Win, WindowOptions};
