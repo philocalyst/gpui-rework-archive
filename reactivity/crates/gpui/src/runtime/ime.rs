@@ -620,6 +620,11 @@ mod tests {
                 .ime
                 .is_none()
         );
+        eprintln!(
+            "IME_PUBLIC_VALUES event={} marked_text={}",
+            size_of::<ImeEvent<'_>>(),
+            size_of::<MarkedText>()
+        );
         let mut promotion = None;
         let promoted = allocation_counter::measure(|| {
             promotion = Some(SharedText::from("twenty four bytes source!"));
@@ -745,7 +750,7 @@ mod tests {
                 .ime
                 .is_none()
         );
-        assert_eq!(win.read(&Input::VALUE).unwrap(), "source");
+        assert_eq!(win.read(Input::VALUE).unwrap(), "source");
         win.close();
         assert!(win.inner.is_none());
         if cfg!(target_pointer_width = "64") {

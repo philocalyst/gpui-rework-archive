@@ -110,10 +110,7 @@ impl Script {
                 self.host.dispatch(event_loop, Callback::AboutToWait);
                 self.event(event_loop, Ime::Enabled);
                 self.event(event_loop, Ime::Commit("late".into()));
-                assert_eq!(
-                    self.host.owner.as_ref().unwrap().read(&Form::B).unwrap(),
-                    ""
-                );
+                assert_eq!(self.host.owner.as_ref().unwrap().read(Form::B).unwrap(), "");
                 self.event(event_loop, Ime::Disabled);
                 self.event(event_loop, Ime::Enabled);
                 let result = self.host.owner.as_mut().unwrap().focus(target);
@@ -126,7 +123,7 @@ impl Script {
                 self.event(event_loop, Ime::Preedit("に".into(), Some((3, 3))));
                 assert_eq!(self.value("first"), "日本");
                 assert_eq!(
-                    self.host.owner.as_ref().unwrap().read(&Form::A).unwrap(),
+                    self.host.owner.as_ref().unwrap().read(Form::A).unwrap(),
                     "日本"
                 );
                 assert_eq!(
@@ -149,7 +146,7 @@ impl Script {
                 self.event(event_loop, Ime::Preedit(String::new(), None));
                 self.event(event_loop, Ime::Commit("語".into()));
                 assert_eq!(
-                    self.host.owner.as_ref().unwrap().read(&Form::A).unwrap(),
+                    self.host.owner.as_ref().unwrap().read(Form::A).unwrap(),
                     "日本語"
                 );
                 assert_eq!(
@@ -183,10 +180,7 @@ impl Script {
                 self.event(event_loop, Ime::Commit("late".into()));
                 self.event(event_loop, Ime::Enabled); // Also rejected until Disabled.
                 self.event(event_loop, Ime::Commit("late".into()));
-                assert_eq!(
-                    self.host.owner.as_ref().unwrap().read(&Form::B).unwrap(),
-                    ""
-                );
+                assert_eq!(self.host.owner.as_ref().unwrap().read(Form::B).unwrap(), "");
                 self.event(event_loop, Ime::Disabled);
                 self.event(event_loop, Ime::Enabled);
                 self.event(event_loop, Ime::Commit("!".into()));

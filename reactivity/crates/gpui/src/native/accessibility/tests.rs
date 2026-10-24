@@ -1335,7 +1335,7 @@ fn ime_accesskit_uses_acknowledged_display_and_selection_without_preview_edit_au
             .value(),
         Some("baseאבג")
     );
-    assert_eq!(win.read(&Input::VALUE).unwrap(), "base");
+    assert_eq!(win.read(Input::VALUE).unwrap(), "base");
     assert!(
         win.ime_cursor_area(&session).unwrap().is_none(),
         "revoked L cannot expose native caret from old C"

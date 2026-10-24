@@ -202,11 +202,11 @@ impl Script {
         if !owner.snapshot().unwrap().presentation_valid {
             return;
         }
-        if let Some(frames) = self.waiting {
-            if self.host.presented_frames >= frames {
-                self.waiting = None;
-                self.gate.try_send(()).unwrap();
-            }
+        if let Some(frames) = self.waiting
+            && self.host.presented_frames >= frames
+        {
+            self.waiting = None;
+            self.gate.try_send(()).unwrap();
         }
         if self.client.is_none() {
             let sender = self.sender.take().unwrap();
@@ -251,12 +251,7 @@ impl Script {
                         epoch
                     );
                     assert_eq!(
-                        self.host
-                            .owner
-                            .as_ref()
-                            .unwrap()
-                            .read(&Form::VALUE)
-                            .unwrap(),
+                        self.host.owner.as_ref().unwrap().read(Form::VALUE).unwrap(),
                         "base"
                     );
                     self.gate.try_send(()).unwrap();
@@ -279,7 +274,7 @@ impl Script {
                 }
                 4 => {
                     let owner = self.host.owner.as_mut().unwrap();
-                    assert_eq!(owner.read(&Form::VALUE).unwrap(), "base");
+                    assert_eq!(owner.read(Form::VALUE).unwrap(), "base");
                     let result = owner.update(|m| m.broken = false);
                     self.host.input_result(result).unwrap();
                     self.ime(event_loop, Ime::Disabled);
@@ -294,12 +289,7 @@ impl Script {
                         .source_epoch;
                     self.ime(event_loop, Ime::Commit("語".into()));
                     assert_eq!(
-                        self.host
-                            .owner
-                            .as_ref()
-                            .unwrap()
-                            .read(&Form::VALUE)
-                            .unwrap(),
+                        self.host.owner.as_ref().unwrap().read(Form::VALUE).unwrap(),
                         "base語"
                     );
                     assert_eq!(
