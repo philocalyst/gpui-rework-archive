@@ -47,11 +47,29 @@ impl<'a> Checkbox<'a> {
             } else {
                 theme.border()
             })
-            .child(
-                gpui::text(if checked { "✓" } else { "" })
-                    .fg(theme.on_accent())
-                    .font_size(theme.rem(6.0 / 7.0)),
-            );
+            .child(checked.then(|| {
+                // A UI mark is geometry, independent of the application's font.
+                // Both strokes scale with the same rem snapshot as the frame.
+                let unit = theme.rem(1.0 / 14.0) as f32;
+                let stroke = |width, a, b, x, y| {
+                    gpui::div()
+                        .w(theme.rem(width / 14.0))
+                        .h(theme.rem(2.0 / 14.0))
+                        .bg(theme.on_accent())
+                        .transform(gpui::Affine {
+                            a,
+                            b,
+                            c: -b,
+                            d: a,
+                            tx: x * unit,
+                            ty: y * unit,
+                        })
+                };
+                gpui::div().size(theme.rem(6.0 / 7.0)).child((
+                    stroke(4.0, 0.707, 0.707, 1.0, 4.0),
+                    stroke(8.0, 0.707, -0.707, 3.0, 4.0),
+                ))
+            }));
         Self {
             parts: CheckboxParts {
                 root: gpui::checkbox("", checked)
