@@ -91,8 +91,11 @@ fn main() {
         assert_eq!(win.snapshot().unwrap().source_epoch, epoch);
         let mut expected = source.clone();
         expected.replace_range(start..start + 1, "\u{301}");
+        let mut found = false;
         win.visit(|part| {
             if part.target() == target {
+                assert!(!found);
+                found = true;
                 assert_eq!(part.value(), Some(expected.as_str()));
                 let marked = part.marked_text().unwrap();
                 assert_eq!(marked.range, start..start + 2);
@@ -101,6 +104,7 @@ fn main() {
             }
         })
         .unwrap();
+        assert!(found);
         println!(
             "IME_CURSOR_COST,{}",
             serde_json::json!({

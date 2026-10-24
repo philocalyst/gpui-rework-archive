@@ -109,27 +109,15 @@ fn preview_selections(
     cursor: Option<[u32; 2]>,
 ) -> Result<(gpui_canvas::TextSelection, gpui_canvas::TextSelection), Error> {
     let [a, b] = cursor.map_or([marked.start; 2], |c| c.map(|n| n as usize));
-    // An ASCII prefix has no grapheme context before its final grapheme.
-    // Retain that grapheme: a leading Extend can join it, and LF can follow CR.
-    // Keep the complete suffix for joins across the other marked-text seam.
-    let mut base = if value.get(..marked.start).is_some_and(str::is_ascii) {
-        marked.start.saturating_sub(1)
-    } else {
-        0
-    };
-    if base > 0 && value.as_bytes()[base - 1..=base] == *b"\r\n" {
-        base -= 1;
-    }
-    let mut anchor = base;
-    let mut focus = base;
-    let mut left = base;
+    let mut anchor = 0;
+    let mut focus = 0;
+    let mut left = 0;
     let mut right = value.len();
-    let mut previous = base;
+    let mut previous = 0;
     // Admission places both raw cursor endpoints inside the marked range. Each
     // nearest endpoint needs only its adjacent boundaries; ties go downstream.
     // The first boundary at/after marked.end also completes its decoration.
-    for boundary in icu_segmenter::GraphemeClusterSegmenter::new().segment_str(&value[base..]) {
-        let boundary = base + boundary;
+    for boundary in icu_segmenter::GraphemeClusterSegmenter::new().segment_str(value) {
         let nearest = |byte: usize| {
             if byte.abs_diff(previous) < byte.abs_diff(boundary) {
                 previous
