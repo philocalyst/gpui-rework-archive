@@ -1,0 +1,5 @@
+{
+  "production_source": "023e584a0504c05e7db33c887de980671f096257",
+  "original_module_sha256": "088efb852f1db1b53043b3419d1c20cd4152154126756bfa42383c97044b0f3e",
+  "change": "Only certificate include path is local; original font declarations point to the exact guarded production assets."
+}

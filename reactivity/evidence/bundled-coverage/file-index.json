@@ -1,0 +1,3222 @@
+[
+  {
+    "source": "/tmp/gpui-coverage-integration-evidence/baseline-binary.json",
+    "archive": "raw/integration/baseline-binary.json",
+    "original_bytes": 400,
+    "original_sha256": "d1588249b55df675918afa969d602aadad1a6046688b865f636a4918a94278c8",
+    "archive_sha256": "d1588249b55df675918afa969d602aadad1a6046688b865f636a4918a94278c8"
+  },
+  {
+    "source": "/tmp/gpui-coverage-integration-evidence/baseline-build/after.json",
+    "archive": "raw/integration/baseline-build/after.json",
+    "original_bytes": 434,
+    "original_sha256": "498e3af56ea31c1b0d1626552d66792efd42821abd059719e0da7580d98b2b76",
+    "archive_sha256": "498e3af56ea31c1b0d1626552d66792efd42821abd059719e0da7580d98b2b76"
+  },
+  {
+    "source": "/tmp/gpui-coverage-integration-evidence/baseline-build/before.json",
+    "archive": "raw/integration/baseline-build/before.json",
+    "original_bytes": 434,
+    "original_sha256": "498e3af56ea31c1b0d1626552d66792efd42821abd059719e0da7580d98b2b76",
+    "archive_sha256": "498e3af56ea31c1b0d1626552d66792efd42821abd059719e0da7580d98b2b76"
+  },
+  {
+    "source": "/tmp/gpui-coverage-integration-evidence/baseline-build/command.json",
+    "archive": "raw/integration/baseline-build/command.json",
+    "original_bytes": 673,
+    "original_sha256": "8616caebcff340d63537c5ca8ba0fed89fd06199f00c6ca63c57b7069dd42722",
+    "archive_sha256": "8616caebcff340d63537c5ca8ba0fed89fd06199f00c6ca63c57b7069dd42722"
+  },
+  {
+    "source": "/tmp/gpui-coverage-integration-evidence/baseline-build/exit",
+    "archive": "raw/integration/baseline-build/exit",
+    "original_bytes": 2,
+    "original_sha256": "9a271f2a916b0b6ee6cecb2426f0b3206ef074578be55d9bc94f6f3fe3ab86aa",
+    "archive_sha256": "9a271f2a916b0b6ee6cecb2426f0b3206ef074578be55d9bc94f6f3fe3ab86aa"
+  },
+  {
+    "source": "/tmp/gpui-coverage-integration-evidence/baseline-build/result.json",
+    "archive": "raw/integration/baseline-build/result.json",
+    "original_bytes": 243,
+    "original_sha256": "84faed84aa1e473590378ed8b27b1cb9a7956a11d300e375fa32bccc5d9ea789",
+    "archive_sha256": "84faed84aa1e473590378ed8b27b1cb9a7956a11d300e375fa32bccc5d9ea789"
+  },
+  {
+    "source": "/tmp/gpui-coverage-integration-evidence/baseline-build/rustc.txt",
+    "archive": "raw/integration/baseline-build/rustc.txt",
+    "original_bytes": 214,
+    "original_sha256": "2900025046ddf3de47f87dd3d69fbfe380cae61af5fe1ecf31bb89c5f10645c5",
+    "archive_sha256": "2900025046ddf3de47f87dd3d69fbfe380cae61af5fe1ecf31bb89c5f10645c5"
+  },
+  {
+    "source": "/tmp/gpui-coverage-integration-evidence/baseline-build/stderr.log",
+    "archive": "raw/integration/baseline-build/stderr.log",
+    "original_bytes": 2350,
+    "original_sha256": "181096f0f5c35a87c9faa86c64292d2f8d94ffb2be2078ac182fe78340eca95a",
+    "archive_sha256": "181096f0f5c35a87c9faa86c64292d2f8d94ffb2be2078ac182fe78340eca95a"
+  },
+  {
+    "source": "/tmp/gpui-coverage-integration-evidence/baseline-build/stdout.log",
+    "archive": "raw/integration/baseline-build/stdout.log.gz",
+    "original_bytes": 60725,
+    "original_sha256": "86fd63a3300fbcedfdedb0acfca57c9766f916658c950b3e887678f3ed477cd2",
+    "archive_sha256": "117e308f6c59c9f7fa05caad5148002f6f86b737a1c40d65d93465c19f6c23af"
+  },
+  {
+    "source": "/tmp/gpui-coverage-integration-evidence/baseline-build-dependencies/after.json",
+    "archive": "raw/integration/baseline-build-dependencies/after.json.gz",
+    "original_bytes": 301932,
+    "original_sha256": "8e107dcdf405e6972b373a4a6cc0e9a2a7c4cf08c3147b2ae85139e36323d5a6",
+    "archive_sha256": "a59d2e8d792e3b64cc4029a8533c3761e80575f08ca22161c54b18360d9deb49"
+  },
+  {
+    "source": "/tmp/gpui-coverage-integration-evidence/baseline-build-dependencies/argv.json",
+    "archive": "raw/integration/baseline-build-dependencies/argv.json",
+    "original_bytes": 427,
+    "original_sha256": "34907636024b9fa8f7b7f61a06987a856417397c6bd539d085817028401b61a9",
+    "archive_sha256": "34907636024b9fa8f7b7f61a06987a856417397c6bd539d085817028401b61a9"
+  },
+  {
+    "source": "/tmp/gpui-coverage-integration-evidence/baseline-build-dependencies/before.json",
+    "archive": "raw/integration/baseline-build-dependencies/before.json.gz",
+    "original_bytes": 301932,
+    "original_sha256": "8e107dcdf405e6972b373a4a6cc0e9a2a7c4cf08c3147b2ae85139e36323d5a6",
+    "archive_sha256": "a59d2e8d792e3b64cc4029a8533c3761e80575f08ca22161c54b18360d9deb49"
+  },
+  {
+    "source": "/tmp/gpui-coverage-integration-evidence/baseline-build-dependencies/result.json",
+    "archive": "raw/integration/baseline-build-dependencies/result.json",
+    "original_bytes": 57,
+    "original_sha256": "fb1360d649aa242812caf1a853dcd3ab2ca7ada171f3e6ea628a1994a06fd477",
+    "archive_sha256": "fb1360d649aa242812caf1a853dcd3ab2ca7ada171f3e6ea628a1994a06fd477"
+  },
+  {
+    "source": "/tmp/gpui-coverage-integration-evidence/baseline-comparison.json",
+    "archive": "raw/integration/baseline-comparison.json",
+    "original_bytes": 523,
+    "original_sha256": "38f23e88938ab3ab064701e2e0fc7857fc3a0596b6c377acbd5e716f90231c2e",
+    "archive_sha256": "38f23e88938ab3ab064701e2e0fc7857fc3a0596b6c377acbd5e716f90231c2e"
+  },
+  {
+    "source": "/tmp/gpui-coverage-integration-evidence/baseline-machine/disassembly.stderr",
+    "archive": "raw/integration/baseline-machine/disassembly.stderr",
+    "original_bytes": 0,
+    "original_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+    "archive_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+  },
+  {
+    "source": "/tmp/gpui-coverage-integration-evidence/baseline-machine/frames.stderr",
+    "archive": "raw/integration/baseline-machine/frames.stderr",
+    "original_bytes": 0,
+    "original_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+    "archive_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+  },
+  {
+    "source": "/tmp/gpui-coverage-integration-evidence/baseline-machine/frames.txt",
+    "archive": "raw/integration/baseline-machine/frames.txt.gz",
+    "original_bytes": 1469028,
+    "original_sha256": "1a6f44241c47483949f075a38e6b97dd89420aab1a01b5ed629718ae54100df7",
+    "archive_sha256": "e4b1ad807e2240bf98a2d63225701a113e2cbd9acbdaf40463b31f682c51d0e7"
+  },
+  {
+    "source": "/tmp/gpui-coverage-integration-evidence/baseline-machine/identity.json",
+    "archive": "raw/integration/baseline-machine/identity.json",
+    "original_bytes": 6329,
+    "original_sha256": "683b7bc4ed7cb383576d6ae0d972712c4fe9a6ef4b1b87025c7802fe5881108c",
+    "archive_sha256": "683b7bc4ed7cb383576d6ae0d972712c4fe9a6ef4b1b87025c7802fe5881108c"
+  },
+  {
+    "source": "/tmp/gpui-coverage-integration-evidence/baseline-machine/sections.stderr",
+    "archive": "raw/integration/baseline-machine/sections.stderr",
+    "original_bytes": 0,
+    "original_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+    "archive_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+  },
+  {
+    "source": "/tmp/gpui-coverage-integration-evidence/baseline-machine/sections.txt",
+    "archive": "raw/integration/baseline-machine/sections.txt",
+    "original_bytes": 3458,
+    "original_sha256": "1123fad2e54025159ef56c74570dadd869e37c1d55d445301ea015b0e9da84b0",
+    "archive_sha256": "1123fad2e54025159ef56c74570dadd869e37c1d55d445301ea015b0e9da84b0"
+  },
+  {
+    "source": "/tmp/gpui-coverage-integration-evidence/baseline-machine/selected-code.txt",
+    "archive": "raw/integration/baseline-machine/selected-code.txt.gz",
+    "original_bytes": 343870,
+    "original_sha256": "27d3dcf184d7bbad7e482a0d3bc4f03b3d7939197b18801dc384e7fbd38d1b1e",
+    "archive_sha256": "6d706e63e3781ed82184ef4dc487d87cc7a25d981cb2b31f9026db6fc44a7774"
+  },
+  {
+    "source": "/tmp/gpui-coverage-integration-evidence/baseline-machine/symbols.stderr",
+    "archive": "raw/integration/baseline-machine/symbols.stderr",
+    "original_bytes": 0,
+    "original_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+    "archive_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+  },
+  {
+    "source": "/tmp/gpui-coverage-integration-evidence/baseline-machine/symbols.txt",
+    "archive": "raw/integration/baseline-machine/symbols.txt.gz",
+    "original_bytes": 410096,
+    "original_sha256": "f486bcf3ead6a0d1338a6e981419393127b3e3400bf3b654198d21dcb28c2b81",
+    "archive_sha256": "02149419fd7560da443c3c448856548b7a8528e4cdcac215ce76d75f09e51719"
+  },
+  {
+    "source": "/tmp/gpui-coverage-integration-evidence/baseline-run/after.json",
+    "archive": "raw/integration/baseline-run/after.json",
+    "original_bytes": 434,
+    "original_sha256": "498e3af56ea31c1b0d1626552d66792efd42821abd059719e0da7580d98b2b76",
+    "archive_sha256": "498e3af56ea31c1b0d1626552d66792efd42821abd059719e0da7580d98b2b76"
+  },
+  {
+    "source": "/tmp/gpui-coverage-integration-evidence/baseline-run/before.json",
+    "archive": "raw/integration/baseline-run/before.json",
+    "original_bytes": 434,
+    "original_sha256": "498e3af56ea31c1b0d1626552d66792efd42821abd059719e0da7580d98b2b76",
+    "archive_sha256": "498e3af56ea31c1b0d1626552d66792efd42821abd059719e0da7580d98b2b76"
+  },
+  {
+    "source": "/tmp/gpui-coverage-integration-evidence/baseline-run/command.json",
+    "archive": "raw/integration/baseline-run/command.json",
+    "original_bytes": 599,
+    "original_sha256": "d3ed994adf7f8091c0b9a5054b7143c84d48f2d885fd0b539c52291c5d1ad561",
+    "archive_sha256": "d3ed994adf7f8091c0b9a5054b7143c84d48f2d885fd0b539c52291c5d1ad561"
+  },
+  {
+    "source": "/tmp/gpui-coverage-integration-evidence/baseline-run/exit",
+    "archive": "raw/integration/baseline-run/exit",
+    "original_bytes": 2,
+    "original_sha256": "9a271f2a916b0b6ee6cecb2426f0b3206ef074578be55d9bc94f6f3fe3ab86aa",
+    "archive_sha256": "9a271f2a916b0b6ee6cecb2426f0b3206ef074578be55d9bc94f6f3fe3ab86aa"
+  },
+  {
+    "source": "/tmp/gpui-coverage-integration-evidence/baseline-run/result.json",
+    "archive": "raw/integration/baseline-run/result.json",
+    "original_bytes": 243,
+    "original_sha256": "84faed84aa1e473590378ed8b27b1cb9a7956a11d300e375fa32bccc5d9ea789",
+    "archive_sha256": "84faed84aa1e473590378ed8b27b1cb9a7956a11d300e375fa32bccc5d9ea789"
+  },
+  {
+    "source": "/tmp/gpui-coverage-integration-evidence/baseline-run/rustc.txt",
+    "archive": "raw/integration/baseline-run/rustc.txt",
+    "original_bytes": 214,
+    "original_sha256": "2900025046ddf3de47f87dd3d69fbfe380cae61af5fe1ecf31bb89c5f10645c5",
+    "archive_sha256": "2900025046ddf3de47f87dd3d69fbfe380cae61af5fe1ecf31bb89c5f10645c5"
+  },
+  {
+    "source": "/tmp/gpui-coverage-integration-evidence/baseline-run/stderr.log",
+    "archive": "raw/integration/baseline-run/stderr.log",
+    "original_bytes": 11,
+    "original_sha256": "ee2cb132c66aefa3d504949275839c68d675c9a12d0d107240025e6c1273e3e4",
+    "archive_sha256": "ee2cb132c66aefa3d504949275839c68d675c9a12d0d107240025e6c1273e3e4"
+  },
+  {
+    "source": "/tmp/gpui-coverage-integration-evidence/baseline-run-dependencies/after.json",
+    "archive": "raw/integration/baseline-run-dependencies/after.json.gz",
+    "original_bytes": 301932,
+    "original_sha256": "8e107dcdf405e6972b373a4a6cc0e9a2a7c4cf08c3147b2ae85139e36323d5a6",
+    "archive_sha256": "a59d2e8d792e3b64cc4029a8533c3761e80575f08ca22161c54b18360d9deb49"
+  },
+  {
+    "source": "/tmp/gpui-coverage-integration-evidence/baseline-run-dependencies/argv.json",
+    "archive": "raw/integration/baseline-run-dependencies/argv.json",
+    "original_bytes": 400,
+    "original_sha256": "a9c69b6373996ee2b1aadf4f919ea32c9f10e25d88d36014bbcf2d8b42e9d64c",
+    "archive_sha256": "a9c69b6373996ee2b1aadf4f919ea32c9f10e25d88d36014bbcf2d8b42e9d64c"
+  },
+  {
+    "source": "/tmp/gpui-coverage-integration-evidence/baseline-run-dependencies/before.json",
+    "archive": "raw/integration/baseline-run-dependencies/before.json.gz",
+    "original_bytes": 301932,
+    "original_sha256": "8e107dcdf405e6972b373a4a6cc0e9a2a7c4cf08c3147b2ae85139e36323d5a6",
+    "archive_sha256": "a59d2e8d792e3b64cc4029a8533c3761e80575f08ca22161c54b18360d9deb49"
+  },
+  {
+    "source": "/tmp/gpui-coverage-integration-evidence/baseline-run-dependencies/result.json",
+    "archive": "raw/integration/baseline-run-dependencies/result.json",
+    "original_bytes": 57,
+    "original_sha256": "fb1360d649aa242812caf1a853dcd3ab2ca7ada171f3e6ea628a1994a06fd477",
+    "archive_sha256": "fb1360d649aa242812caf1a853dcd3ab2ca7ada171f3e6ea628a1994a06fd477"
+  },
+  {
+    "source": "/tmp/gpui-coverage-integration-evidence/candidate-binary.json",
+    "archive": "raw/integration/candidate-binary.json",
+    "original_bytes": 401,
+    "original_sha256": "c7ea6aa0f640115149bb86b239d7a40fa793d0bdc0a5db5eed4e794e9815649c",
+    "archive_sha256": "c7ea6aa0f640115149bb86b239d7a40fa793d0bdc0a5db5eed4e794e9815649c"
+  },
+  {
+    "source": "/tmp/gpui-coverage-integration-evidence/candidate-build/after.json",
+    "archive": "raw/integration/candidate-build/after.json",
+    "original_bytes": 434,
+    "original_sha256": "498e3af56ea31c1b0d1626552d66792efd42821abd059719e0da7580d98b2b76",
+    "archive_sha256": "498e3af56ea31c1b0d1626552d66792efd42821abd059719e0da7580d98b2b76"
+  },
+  {
+    "source": "/tmp/gpui-coverage-integration-evidence/candidate-build/before.json",
+    "archive": "raw/integration/candidate-build/before.json",
+    "original_bytes": 434,
+    "original_sha256": "498e3af56ea31c1b0d1626552d66792efd42821abd059719e0da7580d98b2b76",
+    "archive_sha256": "498e3af56ea31c1b0d1626552d66792efd42821abd059719e0da7580d98b2b76"
+  },
+  {
+    "source": "/tmp/gpui-coverage-integration-evidence/candidate-build/command.json",
+    "archive": "raw/integration/candidate-build/command.json",
+    "original_bytes": 673,
+    "original_sha256": "8616caebcff340d63537c5ca8ba0fed89fd06199f00c6ca63c57b7069dd42722",
+    "archive_sha256": "8616caebcff340d63537c5ca8ba0fed89fd06199f00c6ca63c57b7069dd42722"
+  },
+  {
+    "source": "/tmp/gpui-coverage-integration-evidence/candidate-build/exit",
+    "archive": "raw/integration/candidate-build/exit",
+    "original_bytes": 2,
+    "original_sha256": "9a271f2a916b0b6ee6cecb2426f0b3206ef074578be55d9bc94f6f3fe3ab86aa",
+    "archive_sha256": "9a271f2a916b0b6ee6cecb2426f0b3206ef074578be55d9bc94f6f3fe3ab86aa"
+  },
+  {
+    "source": "/tmp/gpui-coverage-integration-evidence/candidate-build/result.json",
+    "archive": "raw/integration/candidate-build/result.json",
+    "original_bytes": 243,
+    "original_sha256": "84faed84aa1e473590378ed8b27b1cb9a7956a11d300e375fa32bccc5d9ea789",
+    "archive_sha256": "84faed84aa1e473590378ed8b27b1cb9a7956a11d300e375fa32bccc5d9ea789"
+  },
+  {
+    "source": "/tmp/gpui-coverage-integration-evidence/candidate-build/rustc.txt",
+    "archive": "raw/integration/candidate-build/rustc.txt",
+    "original_bytes": 214,
+    "original_sha256": "2900025046ddf3de47f87dd3d69fbfe380cae61af5fe1ecf31bb89c5f10645c5",
+    "archive_sha256": "2900025046ddf3de47f87dd3d69fbfe380cae61af5fe1ecf31bb89c5f10645c5"
+  },
+  {
+    "source": "/tmp/gpui-coverage-integration-evidence/candidate-build/stderr.log",
+    "archive": "raw/integration/candidate-build/stderr.log",
+    "original_bytes": 236,
+    "original_sha256": "dcaa3eb3b95f8e224170e078b246b75739af180d015c3feff88e92859f03d583",
+    "archive_sha256": "dcaa3eb3b95f8e224170e078b246b75739af180d015c3feff88e92859f03d583"
+  },
+  {
+    "source": "/tmp/gpui-coverage-integration-evidence/candidate-build/stdout.log",
+    "archive": "raw/integration/candidate-build/stdout.log.gz",
+    "original_bytes": 60659,
+    "original_sha256": "b8d61a0d304f1ee41fd78b468abe3da51338ed1224da617e3cad127f8dc1056f",
+    "archive_sha256": "9b6bc0fccfdcafc426221b8d375e315633f48e63679d7c553e74e5fa75509977"
+  },
+  {
+    "source": "/tmp/gpui-coverage-integration-evidence/candidate-build-dependencies/after.json",
+    "archive": "raw/integration/candidate-build-dependencies/after.json.gz",
+    "original_bytes": 302055,
+    "original_sha256": "fdcaab68cfdcac59a77a6aa256329278067f4e9c9f7d5a18e3d6832588cf0374",
+    "archive_sha256": "fcc96a668c43d0fd54ff3b1a9f4487b6515064a5e01b4c4f6803c9c13aa3f104"
+  },
+  {
+    "source": "/tmp/gpui-coverage-integration-evidence/candidate-build-dependencies/argv.json",
+    "archive": "raw/integration/candidate-build-dependencies/argv.json",
+    "original_bytes": 428,
+    "original_sha256": "b101bb97aa14041b4b642da3ae71b654de96bd6adf3273509c17f5fde3a289f4",
+    "archive_sha256": "b101bb97aa14041b4b642da3ae71b654de96bd6adf3273509c17f5fde3a289f4"
+  },
+  {
+    "source": "/tmp/gpui-coverage-integration-evidence/candidate-build-dependencies/before.json",
+    "archive": "raw/integration/candidate-build-dependencies/before.json.gz",
+    "original_bytes": 302055,
+    "original_sha256": "fdcaab68cfdcac59a77a6aa256329278067f4e9c9f7d5a18e3d6832588cf0374",
+    "archive_sha256": "fcc96a668c43d0fd54ff3b1a9f4487b6515064a5e01b4c4f6803c9c13aa3f104"
+  },
+  {
+    "source": "/tmp/gpui-coverage-integration-evidence/candidate-build-dependencies/result.json",
+    "archive": "raw/integration/candidate-build-dependencies/result.json",
+    "original_bytes": 57,
+    "original_sha256": "84d9426e5bdf6d02de39790f7ce7bc2fbfed1311779e77db23aafd90eeb24b97",
+    "archive_sha256": "84d9426e5bdf6d02de39790f7ce7bc2fbfed1311779e77db23aafd90eeb24b97"
+  },
+  {
+    "source": "/tmp/gpui-coverage-integration-evidence/candidate-comparison.json",
+    "archive": "raw/integration/candidate-comparison.json",
+    "original_bytes": 523,
+    "original_sha256": "c9d4d3df726cb64f57aa95570aabd2b8460d80a09d4af0b5dc47568f8ac5d9f9",
+    "archive_sha256": "c9d4d3df726cb64f57aa95570aabd2b8460d80a09d4af0b5dc47568f8ac5d9f9"
+  },
+  {
+    "source": "/tmp/gpui-coverage-integration-evidence/candidate-machine/disassembly.stderr",
+    "archive": "raw/integration/candidate-machine/disassembly.stderr",
+    "original_bytes": 0,
+    "original_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+    "archive_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+  },
+  {
+    "source": "/tmp/gpui-coverage-integration-evidence/candidate-machine/frames.stderr",
+    "archive": "raw/integration/candidate-machine/frames.stderr",
+    "original_bytes": 0,
+    "original_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+    "archive_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+  },
+  {
+    "source": "/tmp/gpui-coverage-integration-evidence/candidate-machine/frames.txt",
+    "archive": "raw/integration/candidate-machine/frames.txt.gz",
+    "original_bytes": 1464249,
+    "original_sha256": "d8b03d7c732e7a3f0e364567692f78adb4d1e31bd9e6ad62638533c023ae5612",
+    "archive_sha256": "d84abac83474b8d20779df4844e44d442a8367d188517edb01fa0dfd3115101c"
+  },
+  {
+    "source": "/tmp/gpui-coverage-integration-evidence/candidate-machine/identity.json",
+    "archive": "raw/integration/candidate-machine/identity.json",
+    "original_bytes": 7546,
+    "original_sha256": "86245e3f57767f0866b8a9fef2b6062226fa10ff48f809d2e0c91b142925a661",
+    "archive_sha256": "86245e3f57767f0866b8a9fef2b6062226fa10ff48f809d2e0c91b142925a661"
+  },
+  {
+    "source": "/tmp/gpui-coverage-integration-evidence/candidate-machine/sections.stderr",
+    "archive": "raw/integration/candidate-machine/sections.stderr",
+    "original_bytes": 0,
+    "original_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+    "archive_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+  },
+  {
+    "source": "/tmp/gpui-coverage-integration-evidence/candidate-machine/sections.txt",
+    "archive": "raw/integration/candidate-machine/sections.txt",
+    "original_bytes": 3458,
+    "original_sha256": "e1d472cdde26aa3bce4a51a4711758a1cef618f1c6f6c1bfa0ffa953f0bb7df7",
+    "archive_sha256": "e1d472cdde26aa3bce4a51a4711758a1cef618f1c6f6c1bfa0ffa953f0bb7df7"
+  },
+  {
+    "source": "/tmp/gpui-coverage-integration-evidence/candidate-machine/selected-code.txt",
+    "archive": "raw/integration/candidate-machine/selected-code.txt.gz",
+    "original_bytes": 370259,
+    "original_sha256": "c081becea396b18dd41f96890ecc4ae2ff410c080817e7cee91279ad4f9149b9",
+    "archive_sha256": "83b9238a10b1d58f2e4b42ef778e7e1a9358b252f4fa1ee2784dfc95416deb8c"
+  },
+  {
+    "source": "/tmp/gpui-coverage-integration-evidence/candidate-machine/symbols.stderr",
+    "archive": "raw/integration/candidate-machine/symbols.stderr",
+    "original_bytes": 0,
+    "original_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+    "archive_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+  },
+  {
+    "source": "/tmp/gpui-coverage-integration-evidence/candidate-machine/symbols.txt",
+    "archive": "raw/integration/candidate-machine/symbols.txt.gz",
+    "original_bytes": 408532,
+    "original_sha256": "254cb2705f8d39f32f58d8d920a5ad12eaeb00df1be164f9e6cfbcff0319cdd4",
+    "archive_sha256": "4705614ec2178bdf9b83a94bc88b209713949f43311a9ab74d59d364535a0ca2"
+  },
+  {
+    "source": "/tmp/gpui-coverage-integration-evidence/candidate-run/after.json",
+    "archive": "raw/integration/candidate-run/after.json",
+    "original_bytes": 434,
+    "original_sha256": "498e3af56ea31c1b0d1626552d66792efd42821abd059719e0da7580d98b2b76",
+    "archive_sha256": "498e3af56ea31c1b0d1626552d66792efd42821abd059719e0da7580d98b2b76"
+  },
+  {
+    "source": "/tmp/gpui-coverage-integration-evidence/candidate-run/before.json",
+    "archive": "raw/integration/candidate-run/before.json",
+    "original_bytes": 434,
+    "original_sha256": "498e3af56ea31c1b0d1626552d66792efd42821abd059719e0da7580d98b2b76",
+    "archive_sha256": "498e3af56ea31c1b0d1626552d66792efd42821abd059719e0da7580d98b2b76"
+  },
+  {
+    "source": "/tmp/gpui-coverage-integration-evidence/candidate-run/command.json",
+    "archive": "raw/integration/candidate-run/command.json",
+    "original_bytes": 600,
+    "original_sha256": "a51cc062bf5e3de5360437088a4d77f3da513c0a4671937df1bca0c53d24af68",
+    "archive_sha256": "a51cc062bf5e3de5360437088a4d77f3da513c0a4671937df1bca0c53d24af68"
+  },
+  {
+    "source": "/tmp/gpui-coverage-integration-evidence/candidate-run/exit",
+    "archive": "raw/integration/candidate-run/exit",
+    "original_bytes": 2,
+    "original_sha256": "9a271f2a916b0b6ee6cecb2426f0b3206ef074578be55d9bc94f6f3fe3ab86aa",
+    "archive_sha256": "9a271f2a916b0b6ee6cecb2426f0b3206ef074578be55d9bc94f6f3fe3ab86aa"
+  },
+  {
+    "source": "/tmp/gpui-coverage-integration-evidence/candidate-run/result.json",
+    "archive": "raw/integration/candidate-run/result.json",
+    "original_bytes": 243,
+    "original_sha256": "84faed84aa1e473590378ed8b27b1cb9a7956a11d300e375fa32bccc5d9ea789",
+    "archive_sha256": "84faed84aa1e473590378ed8b27b1cb9a7956a11d300e375fa32bccc5d9ea789"
+  },
+  {
+    "source": "/tmp/gpui-coverage-integration-evidence/candidate-run/rustc.txt",
+    "archive": "raw/integration/candidate-run/rustc.txt",
+    "original_bytes": 214,
+    "original_sha256": "2900025046ddf3de47f87dd3d69fbfe380cae61af5fe1ecf31bb89c5f10645c5",
+    "archive_sha256": "2900025046ddf3de47f87dd3d69fbfe380cae61af5fe1ecf31bb89c5f10645c5"
+  },
+  {
+    "source": "/tmp/gpui-coverage-integration-evidence/candidate-run/stderr.log",
+    "archive": "raw/integration/candidate-run/stderr.log",
+    "original_bytes": 11,
+    "original_sha256": "ee2cb132c66aefa3d504949275839c68d675c9a12d0d107240025e6c1273e3e4",
+    "archive_sha256": "ee2cb132c66aefa3d504949275839c68d675c9a12d0d107240025e6c1273e3e4"
+  },
+  {
+    "source": "/tmp/gpui-coverage-integration-evidence/candidate-run-dependencies/after.json",
+    "archive": "raw/integration/candidate-run-dependencies/after.json.gz",
+    "original_bytes": 302055,
+    "original_sha256": "fdcaab68cfdcac59a77a6aa256329278067f4e9c9f7d5a18e3d6832588cf0374",
+    "archive_sha256": "fcc96a668c43d0fd54ff3b1a9f4487b6515064a5e01b4c4f6803c9c13aa3f104"
+  },
+  {
+    "source": "/tmp/gpui-coverage-integration-evidence/candidate-run-dependencies/argv.json",
+    "archive": "raw/integration/candidate-run-dependencies/argv.json",
+    "original_bytes": 402,
+    "original_sha256": "d559b94a70acf9b3ca85a6f7479d09ac8e95a97d287852712f3965cce4807b24",
+    "archive_sha256": "d559b94a70acf9b3ca85a6f7479d09ac8e95a97d287852712f3965cce4807b24"
+  },
+  {
+    "source": "/tmp/gpui-coverage-integration-evidence/candidate-run-dependencies/before.json",
+    "archive": "raw/integration/candidate-run-dependencies/before.json.gz",
+    "original_bytes": 302055,
+    "original_sha256": "fdcaab68cfdcac59a77a6aa256329278067f4e9c9f7d5a18e3d6832588cf0374",
+    "archive_sha256": "fcc96a668c43d0fd54ff3b1a9f4487b6515064a5e01b4c4f6803c9c13aa3f104"
+  },
+  {
+    "source": "/tmp/gpui-coverage-integration-evidence/candidate-run-dependencies/result.json",
+    "archive": "raw/integration/candidate-run-dependencies/result.json",
+    "original_bytes": 57,
+    "original_sha256": "84d9426e5bdf6d02de39790f7ce7bc2fbfed1311779e77db23aafd90eeb24b97",
+    "archive_sha256": "84d9426e5bdf6d02de39790f7ce7bc2fbfed1311779e77db23aafd90eeb24b97"
+  },
+  {
+    "source": "/tmp/gpui-coverage-integration-evidence/certificate-binary.json",
+    "archive": "raw/integration/certificate-binary.json",
+    "original_bytes": 403,
+    "original_sha256": "cd75b61c59b35c83f7e2fd9a7430abccc2abf680a0fdfd713196c13618ff21c3",
+    "archive_sha256": "cd75b61c59b35c83f7e2fd9a7430abccc2abf680a0fdfd713196c13618ff21c3"
+  },
+  {
+    "source": "/tmp/gpui-coverage-integration-evidence/certificate-build/after.json",
+    "archive": "raw/integration/certificate-build/after.json",
+    "original_bytes": 434,
+    "original_sha256": "498e3af56ea31c1b0d1626552d66792efd42821abd059719e0da7580d98b2b76",
+    "archive_sha256": "498e3af56ea31c1b0d1626552d66792efd42821abd059719e0da7580d98b2b76"
+  },
+  {
+    "source": "/tmp/gpui-coverage-integration-evidence/certificate-build/before.json",
+    "archive": "raw/integration/certificate-build/before.json",
+    "original_bytes": 434,
+    "original_sha256": "498e3af56ea31c1b0d1626552d66792efd42821abd059719e0da7580d98b2b76",
+    "archive_sha256": "498e3af56ea31c1b0d1626552d66792efd42821abd059719e0da7580d98b2b76"
+  },
+  {
+    "source": "/tmp/gpui-coverage-integration-evidence/certificate-build/command.json",
+    "archive": "raw/integration/certificate-build/command.json",
+    "original_bytes": 673,
+    "original_sha256": "c4efd2576480fdaa8e7416671b6ae6e7addaf0e1c22863779f38f67f784e79f1",
+    "archive_sha256": "c4efd2576480fdaa8e7416671b6ae6e7addaf0e1c22863779f38f67f784e79f1"
+  },
+  {
+    "source": "/tmp/gpui-coverage-integration-evidence/certificate-build/exit",
+    "archive": "raw/integration/certificate-build/exit",
+    "original_bytes": 2,
+    "original_sha256": "9a271f2a916b0b6ee6cecb2426f0b3206ef074578be55d9bc94f6f3fe3ab86aa",
+    "archive_sha256": "9a271f2a916b0b6ee6cecb2426f0b3206ef074578be55d9bc94f6f3fe3ab86aa"
+  },
+  {
+    "source": "/tmp/gpui-coverage-integration-evidence/certificate-build/result.json",
+    "archive": "raw/integration/certificate-build/result.json",
+    "original_bytes": 243,
+    "original_sha256": "84faed84aa1e473590378ed8b27b1cb9a7956a11d300e375fa32bccc5d9ea789",
+    "archive_sha256": "84faed84aa1e473590378ed8b27b1cb9a7956a11d300e375fa32bccc5d9ea789"
+  },
+  {
+    "source": "/tmp/gpui-coverage-integration-evidence/certificate-build/rustc.txt",
+    "archive": "raw/integration/certificate-build/rustc.txt",
+    "original_bytes": 214,
+    "original_sha256": "2900025046ddf3de47f87dd3d69fbfe380cae61af5fe1ecf31bb89c5f10645c5",
+    "archive_sha256": "2900025046ddf3de47f87dd3d69fbfe380cae61af5fe1ecf31bb89c5f10645c5"
+  },
+  {
+    "source": "/tmp/gpui-coverage-integration-evidence/certificate-build/stderr.log",
+    "archive": "raw/integration/certificate-build/stderr.log",
+    "original_bytes": 444,
+    "original_sha256": "60854487c1ecb4fa0f399667366d9aecda14ecf508aeaa7aa7d622ae55c9cb31",
+    "archive_sha256": "60854487c1ecb4fa0f399667366d9aecda14ecf508aeaa7aa7d622ae55c9cb31"
+  },
+  {
+    "source": "/tmp/gpui-coverage-integration-evidence/certificate-build/stdout.log",
+    "archive": "raw/integration/certificate-build/stdout.log.gz",
+    "original_bytes": 60659,
+    "original_sha256": "b478c3d0802957b7e8d33bcaeba817b12d8a79386921ebaf530d7782b296f830",
+    "archive_sha256": "95b3cbf7fc24afdfbf8d68f6dfcb50d96fd4835605f1a30903367b937a38f92d"
+  },
+  {
+    "source": "/tmp/gpui-coverage-integration-evidence/certificate-build-dependencies/after.json",
+    "archive": "raw/integration/certificate-build-dependencies/after.json.gz",
+    "original_bytes": 302531,
+    "original_sha256": "f3ea5edf467e249e49bddab1f644ae8d1cd3ed190e34e9b8f6afecbc768c4088",
+    "archive_sha256": "e18e1c7b823595eb580462cd1f362a1efbcce8ae0aefd387c855376e5548bd70"
+  },
+  {
+    "source": "/tmp/gpui-coverage-integration-evidence/certificate-build-dependencies/argv.json",
+    "archive": "raw/integration/certificate-build-dependencies/argv.json",
+    "original_bytes": 430,
+    "original_sha256": "6c94b7d604c588f9deefa1e1eeb81f5f482f451eb7def461ed0deed203f1a2f8",
+    "archive_sha256": "6c94b7d604c588f9deefa1e1eeb81f5f482f451eb7def461ed0deed203f1a2f8"
+  },
+  {
+    "source": "/tmp/gpui-coverage-integration-evidence/certificate-build-dependencies/before.json",
+    "archive": "raw/integration/certificate-build-dependencies/before.json.gz",
+    "original_bytes": 302531,
+    "original_sha256": "f3ea5edf467e249e49bddab1f644ae8d1cd3ed190e34e9b8f6afecbc768c4088",
+    "archive_sha256": "e18e1c7b823595eb580462cd1f362a1efbcce8ae0aefd387c855376e5548bd70"
+  },
+  {
+    "source": "/tmp/gpui-coverage-integration-evidence/certificate-build-dependencies/result.json",
+    "archive": "raw/integration/certificate-build-dependencies/result.json",
+    "original_bytes": 57,
+    "original_sha256": "e55014e5f03ec9d54a860bfa0f3deb99deb8257909c4b8c08508be04647d2d2d",
+    "archive_sha256": "e55014e5f03ec9d54a860bfa0f3deb99deb8257909c4b8c08508be04647d2d2d"
+  },
+  {
+    "source": "/tmp/gpui-coverage-integration-evidence/certificate-check-apple/after.json",
+    "archive": "raw/integration/certificate-check-apple/after.json.gz",
+    "original_bytes": 293547,
+    "original_sha256": "9d812fcb1b3a3c2147f0e9512de53c2cada4816a3df8f1350864936f38e33627",
+    "archive_sha256": "3a029b6642a79664889b94a25e5460c69b636d962205c185cb6aa0cbef26e671"
+  },
+  {
+    "source": "/tmp/gpui-coverage-integration-evidence/certificate-check-apple/before.json",
+    "archive": "raw/integration/certificate-check-apple/before.json.gz",
+    "original_bytes": 293547,
+    "original_sha256": "9d812fcb1b3a3c2147f0e9512de53c2cada4816a3df8f1350864936f38e33627",
+    "archive_sha256": "3a029b6642a79664889b94a25e5460c69b636d962205c185cb6aa0cbef26e671"
+  },
+  {
+    "source": "/tmp/gpui-coverage-integration-evidence/certificate-check-apple/command.json",
+    "archive": "raw/integration/certificate-check-apple/command.json",
+    "original_bytes": 789,
+    "original_sha256": "12c7665d22981b567d522ca65f0d49e0270020a8c6db8edc5ace8333b342415e",
+    "archive_sha256": "12c7665d22981b567d522ca65f0d49e0270020a8c6db8edc5ace8333b342415e"
+  },
+  {
+    "source": "/tmp/gpui-coverage-integration-evidence/certificate-check-apple/exit",
+    "archive": "raw/integration/certificate-check-apple/exit",
+    "original_bytes": 2,
+    "original_sha256": "9a271f2a916b0b6ee6cecb2426f0b3206ef074578be55d9bc94f6f3fe3ab86aa",
+    "archive_sha256": "9a271f2a916b0b6ee6cecb2426f0b3206ef074578be55d9bc94f6f3fe3ab86aa"
+  },
+  {
+    "source": "/tmp/gpui-coverage-integration-evidence/certificate-check-apple/result.json",
+    "archive": "raw/integration/certificate-check-apple/result.json",
+    "original_bytes": 246,
+    "original_sha256": "2c3a3ed46a08498e664930b8c7405fc52a82baead90aacea7ef5aeae63bd09c2",
+    "archive_sha256": "2c3a3ed46a08498e664930b8c7405fc52a82baead90aacea7ef5aeae63bd09c2"
+  },
+  {
+    "source": "/tmp/gpui-coverage-integration-evidence/certificate-check-apple/rustc.txt",
+    "archive": "raw/integration/certificate-check-apple/rustc.txt",
+    "original_bytes": 214,
+    "original_sha256": "2900025046ddf3de47f87dd3d69fbfe380cae61af5fe1ecf31bb89c5f10645c5",
+    "archive_sha256": "2900025046ddf3de47f87dd3d69fbfe380cae61af5fe1ecf31bb89c5f10645c5"
+  },
+  {
+    "source": "/tmp/gpui-coverage-integration-evidence/certificate-check-apple/stderr.log",
+    "archive": "raw/integration/certificate-check-apple/stderr.log",
+    "original_bytes": 2282,
+    "original_sha256": "b8e2ef44bd443dd11a06c5a3a14517225562692a834d8ecd548d076a11eccbf6",
+    "archive_sha256": "b8e2ef44bd443dd11a06c5a3a14517225562692a834d8ecd548d076a11eccbf6"
+  },
+  {
+    "source": "/tmp/gpui-coverage-integration-evidence/certificate-check-apple/stdout.log",
+    "archive": "raw/integration/certificate-check-apple/stdout.log.gz",
+    "original_bytes": 54158,
+    "original_sha256": "c8aa1ca937bdb099c3cffdee03e4e74d37f92ebb1bc99714f8a2c64b9c9300f5",
+    "archive_sha256": "f6a47c0eb0f0aa9bc643c4f9054ed98cb8325b434afbbd81fbc5767412cc1433"
+  },
+  {
+    "source": "/tmp/gpui-coverage-integration-evidence/certificate-check-msvc/after.json",
+    "archive": "raw/integration/certificate-check-msvc/after.json.gz",
+    "original_bytes": 293547,
+    "original_sha256": "9d812fcb1b3a3c2147f0e9512de53c2cada4816a3df8f1350864936f38e33627",
+    "archive_sha256": "3a029b6642a79664889b94a25e5460c69b636d962205c185cb6aa0cbef26e671"
+  },
+  {
+    "source": "/tmp/gpui-coverage-integration-evidence/certificate-check-msvc/before.json",
+    "archive": "raw/integration/certificate-check-msvc/before.json.gz",
+    "original_bytes": 293547,
+    "original_sha256": "9d812fcb1b3a3c2147f0e9512de53c2cada4816a3df8f1350864936f38e33627",
+    "archive_sha256": "3a029b6642a79664889b94a25e5460c69b636d962205c185cb6aa0cbef26e671"
+  },
+  {
+    "source": "/tmp/gpui-coverage-integration-evidence/certificate-check-msvc/command.json",
+    "archive": "raw/integration/certificate-check-msvc/command.json",
+    "original_bytes": 791,
+    "original_sha256": "dc51091c2b780fc98208a6061901ab9e6019d8f498c8762c94a8ebb6eacd285e",
+    "archive_sha256": "dc51091c2b780fc98208a6061901ab9e6019d8f498c8762c94a8ebb6eacd285e"
+  },
+  {
+    "source": "/tmp/gpui-coverage-integration-evidence/certificate-check-msvc/exit",
+    "archive": "raw/integration/certificate-check-msvc/exit",
+    "original_bytes": 2,
+    "original_sha256": "9a271f2a916b0b6ee6cecb2426f0b3206ef074578be55d9bc94f6f3fe3ab86aa",
+    "archive_sha256": "9a271f2a916b0b6ee6cecb2426f0b3206ef074578be55d9bc94f6f3fe3ab86aa"
+  },
+  {
+    "source": "/tmp/gpui-coverage-integration-evidence/certificate-check-msvc/result.json",
+    "archive": "raw/integration/certificate-check-msvc/result.json",
+    "original_bytes": 246,
+    "original_sha256": "2c3a3ed46a08498e664930b8c7405fc52a82baead90aacea7ef5aeae63bd09c2",
+    "archive_sha256": "2c3a3ed46a08498e664930b8c7405fc52a82baead90aacea7ef5aeae63bd09c2"
+  },
+  {
+    "source": "/tmp/gpui-coverage-integration-evidence/certificate-check-msvc/rustc.txt",
+    "archive": "raw/integration/certificate-check-msvc/rustc.txt",
+    "original_bytes": 214,
+    "original_sha256": "2900025046ddf3de47f87dd3d69fbfe380cae61af5fe1ecf31bb89c5f10645c5",
+    "archive_sha256": "2900025046ddf3de47f87dd3d69fbfe380cae61af5fe1ecf31bb89c5f10645c5"
+  },
+  {
+    "source": "/tmp/gpui-coverage-integration-evidence/certificate-check-msvc/stderr.log",
+    "archive": "raw/integration/certificate-check-msvc/stderr.log",
+    "original_bytes": 1888,
+    "original_sha256": "e296593da51274ca4990e770e324e4f73f04600d7e5df33ab39015c2fdd2226d",
+    "archive_sha256": "e296593da51274ca4990e770e324e4f73f04600d7e5df33ab39015c2fdd2226d"
+  },
+  {
+    "source": "/tmp/gpui-coverage-integration-evidence/certificate-check-msvc/stdout.log",
+    "archive": "raw/integration/certificate-check-msvc/stdout.log.gz",
+    "original_bytes": 52506,
+    "original_sha256": "eb747d989eca258101712e672403c8fa52fedd9891964b91c3be3ed5b538f31f",
+    "archive_sha256": "9bf59be91a1fe9e2e77eb61fb1a31d9d012fc71a8135086747dd16def871213b"
+  },
+  {
+    "source": "/tmp/gpui-coverage-integration-evidence/certificate-comparison.json",
+    "archive": "raw/integration/certificate-comparison.json",
+    "original_bytes": 523,
+    "original_sha256": "dc717b5243e9f9923485be391aad275dd365fe55893789c63bee16f135daf4e4",
+    "archive_sha256": "dc717b5243e9f9923485be391aad275dd365fe55893789c63bee16f135daf4e4"
+  },
+  {
+    "source": "/tmp/gpui-coverage-integration-evidence/certificate-core-lines.json",
+    "archive": "raw/integration/certificate-core-lines.json.gz",
+    "original_bytes": 46006,
+    "original_sha256": "55987de3e75227c01fb16a8ebf9e9a086a608bbcd72230b5c7d04718fded6096",
+    "archive_sha256": "c420d33dde1b0a1571127707a97f49f0c1c3cba134b297d34f445f0c264d657e"
+  },
+  {
+    "source": "/tmp/gpui-coverage-integration-evidence/certificate-default-tests/after.json",
+    "archive": "raw/integration/certificate-default-tests/after.json.gz",
+    "original_bytes": 293547,
+    "original_sha256": "9d812fcb1b3a3c2147f0e9512de53c2cada4816a3df8f1350864936f38e33627",
+    "archive_sha256": "3a029b6642a79664889b94a25e5460c69b636d962205c185cb6aa0cbef26e671"
+  },
+  {
+    "source": "/tmp/gpui-coverage-integration-evidence/certificate-default-tests/before.json",
+    "archive": "raw/integration/certificate-default-tests/before.json.gz",
+    "original_bytes": 293547,
+    "original_sha256": "9d812fcb1b3a3c2147f0e9512de53c2cada4816a3df8f1350864936f38e33627",
+    "archive_sha256": "3a029b6642a79664889b94a25e5460c69b636d962205c185cb6aa0cbef26e671"
+  },
+  {
+    "source": "/tmp/gpui-coverage-integration-evidence/certificate-default-tests/command.json",
+    "archive": "raw/integration/certificate-default-tests/command.json",
+    "original_bytes": 803,
+    "original_sha256": "41cf51939a8938cd39dc0622ab0371202baf7b44f2f066bd8a5ea7f1117e34a0",
+    "archive_sha256": "41cf51939a8938cd39dc0622ab0371202baf7b44f2f066bd8a5ea7f1117e34a0"
+  },
+  {
+    "source": "/tmp/gpui-coverage-integration-evidence/certificate-default-tests/exit",
+    "archive": "raw/integration/certificate-default-tests/exit",
+    "original_bytes": 2,
+    "original_sha256": "9a271f2a916b0b6ee6cecb2426f0b3206ef074578be55d9bc94f6f3fe3ab86aa",
+    "archive_sha256": "9a271f2a916b0b6ee6cecb2426f0b3206ef074578be55d9bc94f6f3fe3ab86aa"
+  },
+  {
+    "source": "/tmp/gpui-coverage-integration-evidence/certificate-default-tests/result.json",
+    "archive": "raw/integration/certificate-default-tests/result.json",
+    "original_bytes": 249,
+    "original_sha256": "3180e405123ca899133396a2243f96424c10fc0c80cd4b2b7e756a40973b619b",
+    "archive_sha256": "3180e405123ca899133396a2243f96424c10fc0c80cd4b2b7e756a40973b619b"
+  },
+  {
+    "source": "/tmp/gpui-coverage-integration-evidence/certificate-default-tests/rustc.txt",
+    "archive": "raw/integration/certificate-default-tests/rustc.txt",
+    "original_bytes": 214,
+    "original_sha256": "2900025046ddf3de47f87dd3d69fbfe380cae61af5fe1ecf31bb89c5f10645c5",
+    "archive_sha256": "2900025046ddf3de47f87dd3d69fbfe380cae61af5fe1ecf31bb89c5f10645c5"
+  },
+  {
+    "source": "/tmp/gpui-coverage-integration-evidence/certificate-default-tests/stderr.log",
+    "archive": "raw/integration/certificate-default-tests/stderr.log",
+    "original_bytes": 6400,
+    "original_sha256": "c37fc561161ebe8243138038988539e46339deab3160341790801af4a59e8a3f",
+    "archive_sha256": "c37fc561161ebe8243138038988539e46339deab3160341790801af4a59e8a3f"
+  },
+  {
+    "source": "/tmp/gpui-coverage-integration-evidence/certificate-default-tests/stdout.log",
+    "archive": "raw/integration/certificate-default-tests/stdout.log.gz",
+    "original_bytes": 127628,
+    "original_sha256": "d7028c30ee5f166626c34b58a1f85736e1e5fa06a5a4d13efb4b3cf8ce97e94a",
+    "archive_sha256": "38fe191a9066ddf9143ea01b6b891409c2d8bc6b8c1ae05998298bc1eaa02cdf"
+  },
+  {
+    "source": "/tmp/gpui-coverage-integration-evidence/certificate-fallback-tests/after.json",
+    "archive": "raw/integration/certificate-fallback-tests/after.json.gz",
+    "original_bytes": 293547,
+    "original_sha256": "9d812fcb1b3a3c2147f0e9512de53c2cada4816a3df8f1350864936f38e33627",
+    "archive_sha256": "3a029b6642a79664889b94a25e5460c69b636d962205c185cb6aa0cbef26e671"
+  },
+  {
+    "source": "/tmp/gpui-coverage-integration-evidence/certificate-fallback-tests/before.json",
+    "archive": "raw/integration/certificate-fallback-tests/before.json.gz",
+    "original_bytes": 293547,
+    "original_sha256": "9d812fcb1b3a3c2147f0e9512de53c2cada4816a3df8f1350864936f38e33627",
+    "archive_sha256": "3a029b6642a79664889b94a25e5460c69b636d962205c185cb6aa0cbef26e671"
+  },
+  {
+    "source": "/tmp/gpui-coverage-integration-evidence/certificate-fallback-tests/command.json",
+    "archive": "raw/integration/certificate-fallback-tests/command.json",
+    "original_bytes": 832,
+    "original_sha256": "7358c9f3657ecb6504d80c3ffcb223aef06ca47076465b11e4ad6c9dd99c0ee1",
+    "archive_sha256": "7358c9f3657ecb6504d80c3ffcb223aef06ca47076465b11e4ad6c9dd99c0ee1"
+  },
+  {
+    "source": "/tmp/gpui-coverage-integration-evidence/certificate-fallback-tests/exit",
+    "archive": "raw/integration/certificate-fallback-tests/exit",
+    "original_bytes": 2,
+    "original_sha256": "9a271f2a916b0b6ee6cecb2426f0b3206ef074578be55d9bc94f6f3fe3ab86aa",
+    "archive_sha256": "9a271f2a916b0b6ee6cecb2426f0b3206ef074578be55d9bc94f6f3fe3ab86aa"
+  },
+  {
+    "source": "/tmp/gpui-coverage-integration-evidence/certificate-fallback-tests/result.json",
+    "archive": "raw/integration/certificate-fallback-tests/result.json",
+    "original_bytes": 249,
+    "original_sha256": "3180e405123ca899133396a2243f96424c10fc0c80cd4b2b7e756a40973b619b",
+    "archive_sha256": "3180e405123ca899133396a2243f96424c10fc0c80cd4b2b7e756a40973b619b"
+  },
+  {
+    "source": "/tmp/gpui-coverage-integration-evidence/certificate-fallback-tests/rustc.txt",
+    "archive": "raw/integration/certificate-fallback-tests/rustc.txt",
+    "original_bytes": 214,
+    "original_sha256": "2900025046ddf3de47f87dd3d69fbfe380cae61af5fe1ecf31bb89c5f10645c5",
+    "archive_sha256": "2900025046ddf3de47f87dd3d69fbfe380cae61af5fe1ecf31bb89c5f10645c5"
+  },
+  {
+    "source": "/tmp/gpui-coverage-integration-evidence/certificate-fallback-tests/stderr.log",
+    "archive": "raw/integration/certificate-fallback-tests/stderr.log",
+    "original_bytes": 6191,
+    "original_sha256": "ef794cff39ecf13c7f553f761227d4ac03b7e42a8822ae2b217c6cd732545ff0",
+    "archive_sha256": "ef794cff39ecf13c7f553f761227d4ac03b7e42a8822ae2b217c6cd732545ff0"
+  },
+  {
+    "source": "/tmp/gpui-coverage-integration-evidence/certificate-fallback-tests/stdout.log",
+    "archive": "raw/integration/certificate-fallback-tests/stdout.log.gz",
+    "original_bytes": 126972,
+    "original_sha256": "eba578c5eae493424c3f6f85875859aa4511f6f370e71a80cdcf2bc0c0a736ba",
+    "archive_sha256": "87154e31144fc6e2360c760da2a4f6aa585d3420b7c379dc69f6818129b78f1f"
+  },
+  {
+    "source": "/tmp/gpui-coverage-integration-evidence/certificate-machine/disassembly.stderr",
+    "archive": "raw/integration/certificate-machine/disassembly.stderr",
+    "original_bytes": 0,
+    "original_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+    "archive_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+  },
+  {
+    "source": "/tmp/gpui-coverage-integration-evidence/certificate-machine/frames.stderr",
+    "archive": "raw/integration/certificate-machine/frames.stderr",
+    "original_bytes": 0,
+    "original_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+    "archive_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+  },
+  {
+    "source": "/tmp/gpui-coverage-integration-evidence/certificate-machine/frames.txt",
+    "archive": "raw/integration/certificate-machine/frames.txt.gz",
+    "original_bytes": 1465905,
+    "original_sha256": "4101e4bab5c976cec52fb953d329d5204375db87a81d986e7a17dcb8a361784d",
+    "archive_sha256": "46c57bf95c989da6f5b0b16eae3fac8fb299532659d4622e3b3bd201d9aa8d51"
+  },
+  {
+    "source": "/tmp/gpui-coverage-integration-evidence/certificate-machine/identity.json",
+    "archive": "raw/integration/certificate-machine/identity.json",
+    "original_bytes": 6911,
+    "original_sha256": "49fa70e1b5c626429c2c6149ed4785dde9b3cafc6ff55d2b2f3687923aa56ad3",
+    "archive_sha256": "49fa70e1b5c626429c2c6149ed4785dde9b3cafc6ff55d2b2f3687923aa56ad3"
+  },
+  {
+    "source": "/tmp/gpui-coverage-integration-evidence/certificate-machine/sections.stderr",
+    "archive": "raw/integration/certificate-machine/sections.stderr",
+    "original_bytes": 0,
+    "original_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+    "archive_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+  },
+  {
+    "source": "/tmp/gpui-coverage-integration-evidence/certificate-machine/sections.txt",
+    "archive": "raw/integration/certificate-machine/sections.txt",
+    "original_bytes": 3458,
+    "original_sha256": "d814dd35b03e7d0521d9b9b499552ede70524d3a9a7faf576565830af91aea57",
+    "archive_sha256": "d814dd35b03e7d0521d9b9b499552ede70524d3a9a7faf576565830af91aea57"
+  },
+  {
+    "source": "/tmp/gpui-coverage-integration-evidence/certificate-machine/selected-code.txt",
+    "archive": "raw/integration/certificate-machine/selected-code.txt.gz",
+    "original_bytes": 336226,
+    "original_sha256": "160aebdac2f167d576636278fe64ae86c66392b6428b09478e7c73ea7fe208e2",
+    "archive_sha256": "b261025a00e9e2713d00a5179d3ed7b3a306b40a91c910e807b164b7db76aea0"
+  },
+  {
+    "source": "/tmp/gpui-coverage-integration-evidence/certificate-machine/symbols.stderr",
+    "archive": "raw/integration/certificate-machine/symbols.stderr",
+    "original_bytes": 0,
+    "original_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+    "archive_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+  },
+  {
+    "source": "/tmp/gpui-coverage-integration-evidence/certificate-machine/symbols.txt",
+    "archive": "raw/integration/certificate-machine/symbols.txt.gz",
+    "original_bytes": 410191,
+    "original_sha256": "a2f6873c2f0cd79797f64036dcb91b14a337d535f552da822a356bb3102ffe17",
+    "archive_sha256": "4a08382259237b2664c6e79cc7cb3764be6dbb27aa9b533ba2f2554cd36bba6b"
+  },
+  {
+    "source": "/tmp/gpui-coverage-integration-evidence/certificate-run/after.json",
+    "archive": "raw/integration/certificate-run/after.json",
+    "original_bytes": 434,
+    "original_sha256": "498e3af56ea31c1b0d1626552d66792efd42821abd059719e0da7580d98b2b76",
+    "archive_sha256": "498e3af56ea31c1b0d1626552d66792efd42821abd059719e0da7580d98b2b76"
+  },
+  {
+    "source": "/tmp/gpui-coverage-integration-evidence/certificate-run/before.json",
+    "archive": "raw/integration/certificate-run/before.json",
+    "original_bytes": 434,
+    "original_sha256": "498e3af56ea31c1b0d1626552d66792efd42821abd059719e0da7580d98b2b76",
+    "archive_sha256": "498e3af56ea31c1b0d1626552d66792efd42821abd059719e0da7580d98b2b76"
+  },
+  {
+    "source": "/tmp/gpui-coverage-integration-evidence/certificate-run/command.json",
+    "archive": "raw/integration/certificate-run/command.json",
+    "original_bytes": 641,
+    "original_sha256": "5c57a032b97e392405ee53db91ef178f08ca53dd57df78d00d9ce41f30573cb3",
+    "archive_sha256": "5c57a032b97e392405ee53db91ef178f08ca53dd57df78d00d9ce41f30573cb3"
+  },
+  {
+    "source": "/tmp/gpui-coverage-integration-evidence/certificate-run/exit",
+    "archive": "raw/integration/certificate-run/exit",
+    "original_bytes": 2,
+    "original_sha256": "9a271f2a916b0b6ee6cecb2426f0b3206ef074578be55d9bc94f6f3fe3ab86aa",
+    "archive_sha256": "9a271f2a916b0b6ee6cecb2426f0b3206ef074578be55d9bc94f6f3fe3ab86aa"
+  },
+  {
+    "source": "/tmp/gpui-coverage-integration-evidence/certificate-run/result.json",
+    "archive": "raw/integration/certificate-run/result.json",
+    "original_bytes": 243,
+    "original_sha256": "84faed84aa1e473590378ed8b27b1cb9a7956a11d300e375fa32bccc5d9ea789",
+    "archive_sha256": "84faed84aa1e473590378ed8b27b1cb9a7956a11d300e375fa32bccc5d9ea789"
+  },
+  {
+    "source": "/tmp/gpui-coverage-integration-evidence/certificate-run/rustc.txt",
+    "archive": "raw/integration/certificate-run/rustc.txt",
+    "original_bytes": 214,
+    "original_sha256": "2900025046ddf3de47f87dd3d69fbfe380cae61af5fe1ecf31bb89c5f10645c5",
+    "archive_sha256": "2900025046ddf3de47f87dd3d69fbfe380cae61af5fe1ecf31bb89c5f10645c5"
+  },
+  {
+    "source": "/tmp/gpui-coverage-integration-evidence/certificate-run/stderr.log",
+    "archive": "raw/integration/certificate-run/stderr.log",
+    "original_bytes": 11,
+    "original_sha256": "ee2cb132c66aefa3d504949275839c68d675c9a12d0d107240025e6c1273e3e4",
+    "archive_sha256": "ee2cb132c66aefa3d504949275839c68d675c9a12d0d107240025e6c1273e3e4"
+  },
+  {
+    "source": "/tmp/gpui-coverage-integration-evidence/certificate-run/stdout.log",
+    "archive": "raw/integration/certificate-run/stdout.log.gz",
+    "original_bytes": 285940280,
+    "original_sha256": "5f17488c73478c4d7271d39f783a8e15cb72c60a8e32ee18a72bf444923f7c39",
+    "archive_sha256": "1271604be6322f1bb47c094c28e585e6ed2b5023140bd4e87c818c9f00f41b84"
+  },
+  {
+    "source": "/tmp/gpui-coverage-integration-evidence/certificate-run-dependencies/after.json",
+    "archive": "raw/integration/certificate-run-dependencies/after.json.gz",
+    "original_bytes": 302531,
+    "original_sha256": "f3ea5edf467e249e49bddab1f644ae8d1cd3ed190e34e9b8f6afecbc768c4088",
+    "archive_sha256": "e18e1c7b823595eb580462cd1f362a1efbcce8ae0aefd387c855376e5548bd70"
+  },
+  {
+    "source": "/tmp/gpui-coverage-integration-evidence/certificate-run-dependencies/argv.json",
+    "archive": "raw/integration/certificate-run-dependencies/argv.json",
+    "original_bytes": 406,
+    "original_sha256": "6ca856ec95658e814df51c43ecb599b0dce6156c2657bd89098ef8e52933c53e",
+    "archive_sha256": "6ca856ec95658e814df51c43ecb599b0dce6156c2657bd89098ef8e52933c53e"
+  },
+  {
+    "source": "/tmp/gpui-coverage-integration-evidence/certificate-run-dependencies/before.json",
+    "archive": "raw/integration/certificate-run-dependencies/before.json.gz",
+    "original_bytes": 302531,
+    "original_sha256": "f3ea5edf467e249e49bddab1f644ae8d1cd3ed190e34e9b8f6afecbc768c4088",
+    "archive_sha256": "e18e1c7b823595eb580462cd1f362a1efbcce8ae0aefd387c855376e5548bd70"
+  },
+  {
+    "source": "/tmp/gpui-coverage-integration-evidence/certificate-run-dependencies/result.json",
+    "archive": "raw/integration/certificate-run-dependencies/result.json",
+    "original_bytes": 57,
+    "original_sha256": "e55014e5f03ec9d54a860bfa0f3deb99deb8257909c4b8c08508be04647d2d2d",
+    "archive_sha256": "e55014e5f03ec9d54a860bfa0f3deb99deb8257909c4b8c08508be04647d2d2d"
+  },
+  {
+    "source": "/tmp/gpui-coverage-integration-evidence/certificate-strict-default/after.json",
+    "archive": "raw/integration/certificate-strict-default/after.json.gz",
+    "original_bytes": 293547,
+    "original_sha256": "9d812fcb1b3a3c2147f0e9512de53c2cada4816a3df8f1350864936f38e33627",
+    "archive_sha256": "3a029b6642a79664889b94a25e5460c69b636d962205c185cb6aa0cbef26e671"
+  },
+  {
+    "source": "/tmp/gpui-coverage-integration-evidence/certificate-strict-default/before.json",
+    "archive": "raw/integration/certificate-strict-default/before.json.gz",
+    "original_bytes": 293547,
+    "original_sha256": "9d812fcb1b3a3c2147f0e9512de53c2cada4816a3df8f1350864936f38e33627",
+    "archive_sha256": "3a029b6642a79664889b94a25e5460c69b636d962205c185cb6aa0cbef26e671"
+  },
+  {
+    "source": "/tmp/gpui-coverage-integration-evidence/certificate-strict-default/command.json",
+    "archive": "raw/integration/certificate-strict-default/command.json",
+    "original_bytes": 790,
+    "original_sha256": "368c1613370010251af6f16e2a3b96228ad8ebaea2625bb6cb77399eb788ef7e",
+    "archive_sha256": "368c1613370010251af6f16e2a3b96228ad8ebaea2625bb6cb77399eb788ef7e"
+  },
+  {
+    "source": "/tmp/gpui-coverage-integration-evidence/certificate-strict-default/exit",
+    "archive": "raw/integration/certificate-strict-default/exit",
+    "original_bytes": 2,
+    "original_sha256": "9a271f2a916b0b6ee6cecb2426f0b3206ef074578be55d9bc94f6f3fe3ab86aa",
+    "archive_sha256": "9a271f2a916b0b6ee6cecb2426f0b3206ef074578be55d9bc94f6f3fe3ab86aa"
+  },
+  {
+    "source": "/tmp/gpui-coverage-integration-evidence/certificate-strict-default/result.json",
+    "archive": "raw/integration/certificate-strict-default/result.json",
+    "original_bytes": 246,
+    "original_sha256": "2c3a3ed46a08498e664930b8c7405fc52a82baead90aacea7ef5aeae63bd09c2",
+    "archive_sha256": "2c3a3ed46a08498e664930b8c7405fc52a82baead90aacea7ef5aeae63bd09c2"
+  },
+  {
+    "source": "/tmp/gpui-coverage-integration-evidence/certificate-strict-default/rustc.txt",
+    "archive": "raw/integration/certificate-strict-default/rustc.txt",
+    "original_bytes": 214,
+    "original_sha256": "2900025046ddf3de47f87dd3d69fbfe380cae61af5fe1ecf31bb89c5f10645c5",
+    "archive_sha256": "2900025046ddf3de47f87dd3d69fbfe380cae61af5fe1ecf31bb89c5f10645c5"
+  },
+  {
+    "source": "/tmp/gpui-coverage-integration-evidence/certificate-strict-default/stderr.log",
+    "archive": "raw/integration/certificate-strict-default/stderr.log",
+    "original_bytes": 168,
+    "original_sha256": "69add064766e199494df894ee542639ba73b514a72fdd8648673a4b6ddccb207",
+    "archive_sha256": "69add064766e199494df894ee542639ba73b514a72fdd8648673a4b6ddccb207"
+  },
+  {
+    "source": "/tmp/gpui-coverage-integration-evidence/certificate-strict-default/stdout.log",
+    "archive": "raw/integration/certificate-strict-default/stdout.log.gz",
+    "original_bytes": 94442,
+    "original_sha256": "52af150b66107f7ae1c41af633f200bf95f6163e0d368ab8a6313c37bdb12eb1",
+    "archive_sha256": "f94543dfd17c1bc1d014a00816b18e394375f63599f277b69d5c8fdc5e033e3b"
+  },
+  {
+    "source": "/tmp/gpui-coverage-integration-evidence/certificate-strict-fallback/after.json",
+    "archive": "raw/integration/certificate-strict-fallback/after.json.gz",
+    "original_bytes": 293547,
+    "original_sha256": "9d812fcb1b3a3c2147f0e9512de53c2cada4816a3df8f1350864936f38e33627",
+    "archive_sha256": "3a029b6642a79664889b94a25e5460c69b636d962205c185cb6aa0cbef26e671"
+  },
+  {
+    "source": "/tmp/gpui-coverage-integration-evidence/certificate-strict-fallback/before.json",
+    "archive": "raw/integration/certificate-strict-fallback/before.json.gz",
+    "original_bytes": 293547,
+    "original_sha256": "9d812fcb1b3a3c2147f0e9512de53c2cada4816a3df8f1350864936f38e33627",
+    "archive_sha256": "3a029b6642a79664889b94a25e5460c69b636d962205c185cb6aa0cbef26e671"
+  },
+  {
+    "source": "/tmp/gpui-coverage-integration-evidence/certificate-strict-fallback/command.json",
+    "archive": "raw/integration/certificate-strict-fallback/command.json",
+    "original_bytes": 819,
+    "original_sha256": "7a14472bd94741fc1ad733d45c06bf5e600dc26672634332aff990d16b021ca2",
+    "archive_sha256": "7a14472bd94741fc1ad733d45c06bf5e600dc26672634332aff990d16b021ca2"
+  },
+  {
+    "source": "/tmp/gpui-coverage-integration-evidence/certificate-strict-fallback/exit",
+    "archive": "raw/integration/certificate-strict-fallback/exit",
+    "original_bytes": 2,
+    "original_sha256": "9a271f2a916b0b6ee6cecb2426f0b3206ef074578be55d9bc94f6f3fe3ab86aa",
+    "archive_sha256": "9a271f2a916b0b6ee6cecb2426f0b3206ef074578be55d9bc94f6f3fe3ab86aa"
+  },
+  {
+    "source": "/tmp/gpui-coverage-integration-evidence/certificate-strict-fallback/result.json",
+    "archive": "raw/integration/certificate-strict-fallback/result.json",
+    "original_bytes": 246,
+    "original_sha256": "2c3a3ed46a08498e664930b8c7405fc52a82baead90aacea7ef5aeae63bd09c2",
+    "archive_sha256": "2c3a3ed46a08498e664930b8c7405fc52a82baead90aacea7ef5aeae63bd09c2"
+  },
+  {
+    "source": "/tmp/gpui-coverage-integration-evidence/certificate-strict-fallback/rustc.txt",
+    "archive": "raw/integration/certificate-strict-fallback/rustc.txt",
+    "original_bytes": 214,
+    "original_sha256": "2900025046ddf3de47f87dd3d69fbfe380cae61af5fe1ecf31bb89c5f10645c5",
+    "archive_sha256": "2900025046ddf3de47f87dd3d69fbfe380cae61af5fe1ecf31bb89c5f10645c5"
+  },
+  {
+    "source": "/tmp/gpui-coverage-integration-evidence/certificate-strict-fallback/stderr.log",
+    "archive": "raw/integration/certificate-strict-fallback/stderr.log",
+    "original_bytes": 167,
+    "original_sha256": "127e2cdff740fcee7e6107a5398af46059b06ae54671831c7d9275440aa2a6dd",
+    "archive_sha256": "127e2cdff740fcee7e6107a5398af46059b06ae54671831c7d9275440aa2a6dd"
+  },
+  {
+    "source": "/tmp/gpui-coverage-integration-evidence/certificate-strict-fallback/stdout.log",
+    "archive": "raw/integration/certificate-strict-fallback/stdout.log.gz",
+    "original_bytes": 93786,
+    "original_sha256": "536131b6f920a3a72de314b148bfdb6fd83237db818db39da414807238452835",
+    "archive_sha256": "f6cf545b3a8da68cc3f6ba9a7c39423c15fb4a9d0ab1a581dc55ab5bd3029d44"
+  },
+  {
+    "source": "/tmp/gpui-coverage-integration-evidence/default-tests/after.json",
+    "archive": "raw/integration/default-tests/after.json.gz",
+    "original_bytes": 293172,
+    "original_sha256": "d6328ee77867901c7c77ed52843df7a36e430a9035001e1efadb5ba8a4b3372a",
+    "archive_sha256": "d59c42b731aea7c9245e10874d47eaf67c4a7a0b8f8fb85f3e6ee891bee6230a"
+  },
+  {
+    "source": "/tmp/gpui-coverage-integration-evidence/default-tests/before.json",
+    "archive": "raw/integration/default-tests/before.json.gz",
+    "original_bytes": 293172,
+    "original_sha256": "d6328ee77867901c7c77ed52843df7a36e430a9035001e1efadb5ba8a4b3372a",
+    "archive_sha256": "d59c42b731aea7c9245e10874d47eaf67c4a7a0b8f8fb85f3e6ee891bee6230a"
+  },
+  {
+    "source": "/tmp/gpui-coverage-integration-evidence/default-tests/command.json",
+    "archive": "raw/integration/default-tests/command.json",
+    "original_bytes": 803,
+    "original_sha256": "e8bf4ca0e8a6843c3929998418166244ca8631261cc4f5fe5676563984ddbdba",
+    "archive_sha256": "e8bf4ca0e8a6843c3929998418166244ca8631261cc4f5fe5676563984ddbdba"
+  },
+  {
+    "source": "/tmp/gpui-coverage-integration-evidence/default-tests/exit",
+    "archive": "raw/integration/default-tests/exit",
+    "original_bytes": 2,
+    "original_sha256": "9a271f2a916b0b6ee6cecb2426f0b3206ef074578be55d9bc94f6f3fe3ab86aa",
+    "archive_sha256": "9a271f2a916b0b6ee6cecb2426f0b3206ef074578be55d9bc94f6f3fe3ab86aa"
+  },
+  {
+    "source": "/tmp/gpui-coverage-integration-evidence/default-tests/result.json",
+    "archive": "raw/integration/default-tests/result.json",
+    "original_bytes": 249,
+    "original_sha256": "4d84d757b9dc1d2cfebc2e580f23ce78c2867500c320c65cfa2273ad8363d321",
+    "archive_sha256": "4d84d757b9dc1d2cfebc2e580f23ce78c2867500c320c65cfa2273ad8363d321"
+  },
+  {
+    "source": "/tmp/gpui-coverage-integration-evidence/default-tests/rustc.txt",
+    "archive": "raw/integration/default-tests/rustc.txt",
+    "original_bytes": 214,
+    "original_sha256": "2900025046ddf3de47f87dd3d69fbfe380cae61af5fe1ecf31bb89c5f10645c5",
+    "archive_sha256": "2900025046ddf3de47f87dd3d69fbfe380cae61af5fe1ecf31bb89c5f10645c5"
+  },
+  {
+    "source": "/tmp/gpui-coverage-integration-evidence/default-tests/stderr.log",
+    "archive": "raw/integration/default-tests/stderr.log",
+    "original_bytes": 8592,
+    "original_sha256": "bd6a5060f2b5b2a93fdf0fcc086dc2d1b974c683dd26318f5ee2b117cde9d69f",
+    "archive_sha256": "bd6a5060f2b5b2a93fdf0fcc086dc2d1b974c683dd26318f5ee2b117cde9d69f"
+  },
+  {
+    "source": "/tmp/gpui-coverage-integration-evidence/default-tests/stdout.log",
+    "archive": "raw/integration/default-tests/stdout.log.gz",
+    "original_bytes": 126540,
+    "original_sha256": "2a300afad14ab7cdb84ef1a83f4f942dcd35b0f668f9e79e5b1c3d3e3cbcfca1",
+    "archive_sha256": "b0c2b460e96b835813d05fe1d21a30fca87db332386050e7531084fbbcd45dba"
+  },
+  {
+    "source": "/tmp/gpui-coverage-integration-evidence/fallback-tests/after.json",
+    "archive": "raw/integration/fallback-tests/after.json.gz",
+    "original_bytes": 293172,
+    "original_sha256": "d6328ee77867901c7c77ed52843df7a36e430a9035001e1efadb5ba8a4b3372a",
+    "archive_sha256": "d59c42b731aea7c9245e10874d47eaf67c4a7a0b8f8fb85f3e6ee891bee6230a"
+  },
+  {
+    "source": "/tmp/gpui-coverage-integration-evidence/fallback-tests/before.json",
+    "archive": "raw/integration/fallback-tests/before.json.gz",
+    "original_bytes": 293172,
+    "original_sha256": "d6328ee77867901c7c77ed52843df7a36e430a9035001e1efadb5ba8a4b3372a",
+    "archive_sha256": "d59c42b731aea7c9245e10874d47eaf67c4a7a0b8f8fb85f3e6ee891bee6230a"
+  },
+  {
+    "source": "/tmp/gpui-coverage-integration-evidence/fallback-tests/command.json",
+    "archive": "raw/integration/fallback-tests/command.json",
+    "original_bytes": 832,
+    "original_sha256": "873d0ee624ba704c544209e93bbdd4d099806ce48b7158c26e58a17f59405ba9",
+    "archive_sha256": "873d0ee624ba704c544209e93bbdd4d099806ce48b7158c26e58a17f59405ba9"
+  },
+  {
+    "source": "/tmp/gpui-coverage-integration-evidence/fallback-tests/exit",
+    "archive": "raw/integration/fallback-tests/exit",
+    "original_bytes": 2,
+    "original_sha256": "9a271f2a916b0b6ee6cecb2426f0b3206ef074578be55d9bc94f6f3fe3ab86aa",
+    "archive_sha256": "9a271f2a916b0b6ee6cecb2426f0b3206ef074578be55d9bc94f6f3fe3ab86aa"
+  },
+  {
+    "source": "/tmp/gpui-coverage-integration-evidence/fallback-tests/result.json",
+    "archive": "raw/integration/fallback-tests/result.json",
+    "original_bytes": 249,
+    "original_sha256": "4d84d757b9dc1d2cfebc2e580f23ce78c2867500c320c65cfa2273ad8363d321",
+    "archive_sha256": "4d84d757b9dc1d2cfebc2e580f23ce78c2867500c320c65cfa2273ad8363d321"
+  },
+  {
+    "source": "/tmp/gpui-coverage-integration-evidence/fallback-tests/rustc.txt",
+    "archive": "raw/integration/fallback-tests/rustc.txt",
+    "original_bytes": 214,
+    "original_sha256": "2900025046ddf3de47f87dd3d69fbfe380cae61af5fe1ecf31bb89c5f10645c5",
+    "archive_sha256": "2900025046ddf3de47f87dd3d69fbfe380cae61af5fe1ecf31bb89c5f10645c5"
+  },
+  {
+    "source": "/tmp/gpui-coverage-integration-evidence/fallback-tests/stderr.log",
+    "archive": "raw/integration/fallback-tests/stderr.log",
+    "original_bytes": 6022,
+    "original_sha256": "82e30e2a3c26f7c9a1bd8381c8e99c77ec14c21781de5ff05705cef04f672043",
+    "archive_sha256": "82e30e2a3c26f7c9a1bd8381c8e99c77ec14c21781de5ff05705cef04f672043"
+  },
+  {
+    "source": "/tmp/gpui-coverage-integration-evidence/fallback-tests/stdout.log",
+    "archive": "raw/integration/fallback-tests/stdout.log.gz",
+    "original_bytes": 125819,
+    "original_sha256": "df0e9079ceee4b16438ea9a08221d41b550a6b57bd4b8a76b1b2d7eb9c882d28",
+    "archive_sha256": "59a6e05dea8f8c567ff03c2796a07549f906a01179a15f98bbecd669897182e8"
+  },
+  {
+    "source": "/tmp/gpui-coverage-integration-evidence/iterator-binary.json",
+    "archive": "raw/integration/iterator-binary.json",
+    "original_bytes": 400,
+    "original_sha256": "d897dead8cfec0f0913cc85f7553b22c4e14ca63ec0aef891b8b0d8e6a914a30",
+    "archive_sha256": "d897dead8cfec0f0913cc85f7553b22c4e14ca63ec0aef891b8b0d8e6a914a30"
+  },
+  {
+    "source": "/tmp/gpui-coverage-integration-evidence/iterator-build/after.json",
+    "archive": "raw/integration/iterator-build/after.json",
+    "original_bytes": 434,
+    "original_sha256": "498e3af56ea31c1b0d1626552d66792efd42821abd059719e0da7580d98b2b76",
+    "archive_sha256": "498e3af56ea31c1b0d1626552d66792efd42821abd059719e0da7580d98b2b76"
+  },
+  {
+    "source": "/tmp/gpui-coverage-integration-evidence/iterator-build/before.json",
+    "archive": "raw/integration/iterator-build/before.json",
+    "original_bytes": 434,
+    "original_sha256": "498e3af56ea31c1b0d1626552d66792efd42821abd059719e0da7580d98b2b76",
+    "archive_sha256": "498e3af56ea31c1b0d1626552d66792efd42821abd059719e0da7580d98b2b76"
+  },
+  {
+    "source": "/tmp/gpui-coverage-integration-evidence/iterator-build/command.json",
+    "archive": "raw/integration/iterator-build/command.json",
+    "original_bytes": 673,
+    "original_sha256": "c4efd2576480fdaa8e7416671b6ae6e7addaf0e1c22863779f38f67f784e79f1",
+    "archive_sha256": "c4efd2576480fdaa8e7416671b6ae6e7addaf0e1c22863779f38f67f784e79f1"
+  },
+  {
+    "source": "/tmp/gpui-coverage-integration-evidence/iterator-build/exit",
+    "archive": "raw/integration/iterator-build/exit",
+    "original_bytes": 2,
+    "original_sha256": "9a271f2a916b0b6ee6cecb2426f0b3206ef074578be55d9bc94f6f3fe3ab86aa",
+    "archive_sha256": "9a271f2a916b0b6ee6cecb2426f0b3206ef074578be55d9bc94f6f3fe3ab86aa"
+  },
+  {
+    "source": "/tmp/gpui-coverage-integration-evidence/iterator-build/result.json",
+    "archive": "raw/integration/iterator-build/result.json",
+    "original_bytes": 243,
+    "original_sha256": "84faed84aa1e473590378ed8b27b1cb9a7956a11d300e375fa32bccc5d9ea789",
+    "archive_sha256": "84faed84aa1e473590378ed8b27b1cb9a7956a11d300e375fa32bccc5d9ea789"
+  },
+  {
+    "source": "/tmp/gpui-coverage-integration-evidence/iterator-build/rustc.txt",
+    "archive": "raw/integration/iterator-build/rustc.txt",
+    "original_bytes": 214,
+    "original_sha256": "2900025046ddf3de47f87dd3d69fbfe380cae61af5fe1ecf31bb89c5f10645c5",
+    "archive_sha256": "2900025046ddf3de47f87dd3d69fbfe380cae61af5fe1ecf31bb89c5f10645c5"
+  },
+  {
+    "source": "/tmp/gpui-coverage-integration-evidence/iterator-build/stderr.log",
+    "archive": "raw/integration/iterator-build/stderr.log",
+    "original_bytes": 288,
+    "original_sha256": "adbc09b6a3ff71eccf4a929117719129d2523ad936b3af7b86c27d63b2821442",
+    "archive_sha256": "adbc09b6a3ff71eccf4a929117719129d2523ad936b3af7b86c27d63b2821442"
+  },
+  {
+    "source": "/tmp/gpui-coverage-integration-evidence/iterator-build/stdout.log",
+    "archive": "raw/integration/iterator-build/stdout.log.gz",
+    "original_bytes": 60659,
+    "original_sha256": "28108fe037860e22cb7a9cf591e2c6403dc92d25aecf5fd10ac1932fbfc6efde",
+    "archive_sha256": "396aa4c24b9a4c5d62523c73b58a7f397b88194f6ae7b11224de4b1902dfc392"
+  },
+  {
+    "source": "/tmp/gpui-coverage-integration-evidence/iterator-build-dependencies/after.json",
+    "archive": "raw/integration/iterator-build-dependencies/after.json.gz",
+    "original_bytes": 302144,
+    "original_sha256": "a123ccc1c97cc7f742acdc76ce84fe6c3f427ce79c3fc747e9881fd8bafdb0a8",
+    "archive_sha256": "36dfcd7ec0f3e234aa9ceef230709c46b8b31b8ea1fdc5f1eca0abf0462b6414"
+  },
+  {
+    "source": "/tmp/gpui-coverage-integration-evidence/iterator-build-dependencies/argv.json",
+    "archive": "raw/integration/iterator-build-dependencies/argv.json",
+    "original_bytes": 427,
+    "original_sha256": "e76089ab88474bd67a663326fc5647a50a5f39733d09f6c4d0d508f41a1cc8aa",
+    "archive_sha256": "e76089ab88474bd67a663326fc5647a50a5f39733d09f6c4d0d508f41a1cc8aa"
+  },
+  {
+    "source": "/tmp/gpui-coverage-integration-evidence/iterator-build-dependencies/before.json",
+    "archive": "raw/integration/iterator-build-dependencies/before.json.gz",
+    "original_bytes": 302144,
+    "original_sha256": "a123ccc1c97cc7f742acdc76ce84fe6c3f427ce79c3fc747e9881fd8bafdb0a8",
+    "archive_sha256": "36dfcd7ec0f3e234aa9ceef230709c46b8b31b8ea1fdc5f1eca0abf0462b6414"
+  },
+  {
+    "source": "/tmp/gpui-coverage-integration-evidence/iterator-build-dependencies/result.json",
+    "archive": "raw/integration/iterator-build-dependencies/result.json",
+    "original_bytes": 57,
+    "original_sha256": "4e011c50c0493f1a481de660fe968e353847b98bd979598e6f16e0c096669d0d",
+    "archive_sha256": "4e011c50c0493f1a481de660fe968e353847b98bd979598e6f16e0c096669d0d"
+  },
+  {
+    "source": "/tmp/gpui-coverage-integration-evidence/iterator-comparison.json",
+    "archive": "raw/integration/iterator-comparison.json",
+    "original_bytes": 523,
+    "original_sha256": "ba4aed6fd0040acbbd76da9a604b58ed47cf42dae2bad46fdc2027d46a3b02e0",
+    "archive_sha256": "ba4aed6fd0040acbbd76da9a604b58ed47cf42dae2bad46fdc2027d46a3b02e0"
+  },
+  {
+    "source": "/tmp/gpui-coverage-integration-evidence/iterator-machine/disassembly.stderr",
+    "archive": "raw/integration/iterator-machine/disassembly.stderr",
+    "original_bytes": 0,
+    "original_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+    "archive_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+  },
+  {
+    "source": "/tmp/gpui-coverage-integration-evidence/iterator-machine/frames.stderr",
+    "archive": "raw/integration/iterator-machine/frames.stderr",
+    "original_bytes": 0,
+    "original_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+    "archive_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+  },
+  {
+    "source": "/tmp/gpui-coverage-integration-evidence/iterator-machine/frames.txt",
+    "archive": "raw/integration/iterator-machine/frames.txt.gz",
+    "original_bytes": 1463219,
+    "original_sha256": "a9022a89f76df2092f8b6622eca6a66b553c2fcc0fd89fee39ce73a109c43b83",
+    "archive_sha256": "bf9c5cd71778962b61d57bccfd008ce2a97b2807473147cd8e7732f35990115a"
+  },
+  {
+    "source": "/tmp/gpui-coverage-integration-evidence/iterator-machine/identity.json",
+    "archive": "raw/integration/iterator-machine/identity.json",
+    "original_bytes": 6926,
+    "original_sha256": "7263ca2d08536b62b753e0a14d9d1c2f1fc5991350b7e4fbcd2c97129166022a",
+    "archive_sha256": "7263ca2d08536b62b753e0a14d9d1c2f1fc5991350b7e4fbcd2c97129166022a"
+  },
+  {
+    "source": "/tmp/gpui-coverage-integration-evidence/iterator-machine/sections.stderr",
+    "archive": "raw/integration/iterator-machine/sections.stderr",
+    "original_bytes": 0,
+    "original_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+    "archive_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+  },
+  {
+    "source": "/tmp/gpui-coverage-integration-evidence/iterator-machine/sections.txt",
+    "archive": "raw/integration/iterator-machine/sections.txt",
+    "original_bytes": 3458,
+    "original_sha256": "86105a783f5ed241b2050bdd530fcf1d9119a40ce3badf32cdbb8f8fe0255845",
+    "archive_sha256": "86105a783f5ed241b2050bdd530fcf1d9119a40ce3badf32cdbb8f8fe0255845"
+  },
+  {
+    "source": "/tmp/gpui-coverage-integration-evidence/iterator-machine/selected-code.txt",
+    "archive": "raw/integration/iterator-machine/selected-code.txt.gz",
+    "original_bytes": 354425,
+    "original_sha256": "08fb689053f6234cc95e6dabc88028639cb1210322812598e65193c83709d1c7",
+    "archive_sha256": "c26cde27f864b8ab5aa426eaaf632550d0c60fa2261e9bf3bd76b938b5665973"
+  },
+  {
+    "source": "/tmp/gpui-coverage-integration-evidence/iterator-machine/symbols.stderr",
+    "archive": "raw/integration/iterator-machine/symbols.stderr",
+    "original_bytes": 0,
+    "original_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+    "archive_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+  },
+  {
+    "source": "/tmp/gpui-coverage-integration-evidence/iterator-machine/symbols.txt",
+    "archive": "raw/integration/iterator-machine/symbols.txt.gz",
+    "original_bytes": 408135,
+    "original_sha256": "9cc0c045e238b673714de61a8867dc4f66b5a71c8d67acbf9d26e6391a37529b",
+    "archive_sha256": "303fda9964f228cd4c4425b2fafa4f08720b539675d8bce89f5724ac60c37faf"
+  },
+  {
+    "source": "/tmp/gpui-coverage-integration-evidence/iterator-run/after.json",
+    "archive": "raw/integration/iterator-run/after.json",
+    "original_bytes": 434,
+    "original_sha256": "498e3af56ea31c1b0d1626552d66792efd42821abd059719e0da7580d98b2b76",
+    "archive_sha256": "498e3af56ea31c1b0d1626552d66792efd42821abd059719e0da7580d98b2b76"
+  },
+  {
+    "source": "/tmp/gpui-coverage-integration-evidence/iterator-run/before.json",
+    "archive": "raw/integration/iterator-run/before.json",
+    "original_bytes": 434,
+    "original_sha256": "498e3af56ea31c1b0d1626552d66792efd42821abd059719e0da7580d98b2b76",
+    "archive_sha256": "498e3af56ea31c1b0d1626552d66792efd42821abd059719e0da7580d98b2b76"
+  },
+  {
+    "source": "/tmp/gpui-coverage-integration-evidence/iterator-run/command.json",
+    "archive": "raw/integration/iterator-run/command.json",
+    "original_bytes": 638,
+    "original_sha256": "66e2024834c880b88e9812878106d6247779cd2d909db5a1b92b09bae6607648",
+    "archive_sha256": "66e2024834c880b88e9812878106d6247779cd2d909db5a1b92b09bae6607648"
+  },
+  {
+    "source": "/tmp/gpui-coverage-integration-evidence/iterator-run/exit",
+    "archive": "raw/integration/iterator-run/exit",
+    "original_bytes": 2,
+    "original_sha256": "9a271f2a916b0b6ee6cecb2426f0b3206ef074578be55d9bc94f6f3fe3ab86aa",
+    "archive_sha256": "9a271f2a916b0b6ee6cecb2426f0b3206ef074578be55d9bc94f6f3fe3ab86aa"
+  },
+  {
+    "source": "/tmp/gpui-coverage-integration-evidence/iterator-run/result.json",
+    "archive": "raw/integration/iterator-run/result.json",
+    "original_bytes": 243,
+    "original_sha256": "84faed84aa1e473590378ed8b27b1cb9a7956a11d300e375fa32bccc5d9ea789",
+    "archive_sha256": "84faed84aa1e473590378ed8b27b1cb9a7956a11d300e375fa32bccc5d9ea789"
+  },
+  {
+    "source": "/tmp/gpui-coverage-integration-evidence/iterator-run/rustc.txt",
+    "archive": "raw/integration/iterator-run/rustc.txt",
+    "original_bytes": 214,
+    "original_sha256": "2900025046ddf3de47f87dd3d69fbfe380cae61af5fe1ecf31bb89c5f10645c5",
+    "archive_sha256": "2900025046ddf3de47f87dd3d69fbfe380cae61af5fe1ecf31bb89c5f10645c5"
+  },
+  {
+    "source": "/tmp/gpui-coverage-integration-evidence/iterator-run/stderr.log",
+    "archive": "raw/integration/iterator-run/stderr.log",
+    "original_bytes": 11,
+    "original_sha256": "ee2cb132c66aefa3d504949275839c68d675c9a12d0d107240025e6c1273e3e4",
+    "archive_sha256": "ee2cb132c66aefa3d504949275839c68d675c9a12d0d107240025e6c1273e3e4"
+  },
+  {
+    "source": "/tmp/gpui-coverage-integration-evidence/iterator-run-dependencies/after.json",
+    "archive": "raw/integration/iterator-run-dependencies/after.json.gz",
+    "original_bytes": 302144,
+    "original_sha256": "a123ccc1c97cc7f742acdc76ce84fe6c3f427ce79c3fc747e9881fd8bafdb0a8",
+    "archive_sha256": "36dfcd7ec0f3e234aa9ceef230709c46b8b31b8ea1fdc5f1eca0abf0462b6414"
+  },
+  {
+    "source": "/tmp/gpui-coverage-integration-evidence/iterator-run-dependencies/argv.json",
+    "archive": "raw/integration/iterator-run-dependencies/argv.json",
+    "original_bytes": 400,
+    "original_sha256": "2dcb288c432a553580e737bc334a5d5b9337c83774129d87f176068705fedcfa",
+    "archive_sha256": "2dcb288c432a553580e737bc334a5d5b9337c83774129d87f176068705fedcfa"
+  },
+  {
+    "source": "/tmp/gpui-coverage-integration-evidence/iterator-run-dependencies/before.json",
+    "archive": "raw/integration/iterator-run-dependencies/before.json.gz",
+    "original_bytes": 302144,
+    "original_sha256": "a123ccc1c97cc7f742acdc76ce84fe6c3f427ce79c3fc747e9881fd8bafdb0a8",
+    "archive_sha256": "36dfcd7ec0f3e234aa9ceef230709c46b8b31b8ea1fdc5f1eca0abf0462b6414"
+  },
+  {
+    "source": "/tmp/gpui-coverage-integration-evidence/iterator-run-dependencies/result.json",
+    "archive": "raw/integration/iterator-run-dependencies/result.json",
+    "original_bytes": 57,
+    "original_sha256": "4e011c50c0493f1a481de660fe968e353847b98bd979598e6f16e0c096669d0d",
+    "archive_sha256": "4e011c50c0493f1a481de660fe968e353847b98bd979598e6f16e0c096669d0d"
+  },
+  {
+    "source": "/tmp/gpui-coverage-integration-evidence/iterator-strict-policy/after.json",
+    "archive": "raw/integration/iterator-strict-policy/after.json.gz",
+    "original_bytes": 293172,
+    "original_sha256": "7e899065c7791b36bedb9382c5f55f39f7446f886f1a679acfb1bf7cceb6d41d",
+    "archive_sha256": "ace7bbfe3b593d00f07ff167e3f893f06f8d6b14801ccdda705b635e2310a915"
+  },
+  {
+    "source": "/tmp/gpui-coverage-integration-evidence/iterator-strict-policy/before.json",
+    "archive": "raw/integration/iterator-strict-policy/before.json.gz",
+    "original_bytes": 293172,
+    "original_sha256": "7e899065c7791b36bedb9382c5f55f39f7446f886f1a679acfb1bf7cceb6d41d",
+    "archive_sha256": "ace7bbfe3b593d00f07ff167e3f893f06f8d6b14801ccdda705b635e2310a915"
+  },
+  {
+    "source": "/tmp/gpui-coverage-integration-evidence/iterator-strict-policy/command.json",
+    "archive": "raw/integration/iterator-strict-policy/command.json",
+    "original_bytes": 790,
+    "original_sha256": "9f9d17c327b00be1266ad418eed269c751eb062dd2a04a6cfc86c954e6590767",
+    "archive_sha256": "9f9d17c327b00be1266ad418eed269c751eb062dd2a04a6cfc86c954e6590767"
+  },
+  {
+    "source": "/tmp/gpui-coverage-integration-evidence/iterator-strict-policy/exit",
+    "archive": "raw/integration/iterator-strict-policy/exit",
+    "original_bytes": 2,
+    "original_sha256": "9a271f2a916b0b6ee6cecb2426f0b3206ef074578be55d9bc94f6f3fe3ab86aa",
+    "archive_sha256": "9a271f2a916b0b6ee6cecb2426f0b3206ef074578be55d9bc94f6f3fe3ab86aa"
+  },
+  {
+    "source": "/tmp/gpui-coverage-integration-evidence/iterator-strict-policy/result.json",
+    "archive": "raw/integration/iterator-strict-policy/result.json",
+    "original_bytes": 246,
+    "original_sha256": "a048adae9253c47b1f68c6c0fd3ea90e9c27db908ffcba0bee5b20e47109196b",
+    "archive_sha256": "a048adae9253c47b1f68c6c0fd3ea90e9c27db908ffcba0bee5b20e47109196b"
+  },
+  {
+    "source": "/tmp/gpui-coverage-integration-evidence/iterator-strict-policy/rustc.txt",
+    "archive": "raw/integration/iterator-strict-policy/rustc.txt",
+    "original_bytes": 214,
+    "original_sha256": "2900025046ddf3de47f87dd3d69fbfe380cae61af5fe1ecf31bb89c5f10645c5",
+    "archive_sha256": "2900025046ddf3de47f87dd3d69fbfe380cae61af5fe1ecf31bb89c5f10645c5"
+  },
+  {
+    "source": "/tmp/gpui-coverage-integration-evidence/iterator-strict-policy/stderr.log",
+    "archive": "raw/integration/iterator-strict-policy/stderr.log",
+    "original_bytes": 168,
+    "original_sha256": "e43aac943784d5eab128e18c8b11dd5cfff1b25975f3b06ae255bca389f1899d",
+    "archive_sha256": "e43aac943784d5eab128e18c8b11dd5cfff1b25975f3b06ae255bca389f1899d"
+  },
+  {
+    "source": "/tmp/gpui-coverage-integration-evidence/iterator-strict-policy/stdout.log",
+    "archive": "raw/integration/iterator-strict-policy/stdout.log.gz",
+    "original_bytes": 93676,
+    "original_sha256": "7dfe67523a18954656188eb3dc9b66718a3709343258850a1fcfe8c0035faadd",
+    "archive_sha256": "083adc0588eef3e6322ea678f74135d8339452716813b936b98b2ed22e336529"
+  },
+  {
+    "source": "/tmp/gpui-coverage-integration-evidence/iterator-unit-tests/after.json",
+    "archive": "raw/integration/iterator-unit-tests/after.json.gz",
+    "original_bytes": 293172,
+    "original_sha256": "7e899065c7791b36bedb9382c5f55f39f7446f886f1a679acfb1bf7cceb6d41d",
+    "archive_sha256": "ace7bbfe3b593d00f07ff167e3f893f06f8d6b14801ccdda705b635e2310a915"
+  },
+  {
+    "source": "/tmp/gpui-coverage-integration-evidence/iterator-unit-tests/before.json",
+    "archive": "raw/integration/iterator-unit-tests/before.json.gz",
+    "original_bytes": 293172,
+    "original_sha256": "7e899065c7791b36bedb9382c5f55f39f7446f886f1a679acfb1bf7cceb6d41d",
+    "archive_sha256": "ace7bbfe3b593d00f07ff167e3f893f06f8d6b14801ccdda705b635e2310a915"
+  },
+  {
+    "source": "/tmp/gpui-coverage-integration-evidence/iterator-unit-tests/command.json",
+    "archive": "raw/integration/iterator-unit-tests/command.json",
+    "original_bytes": 795,
+    "original_sha256": "83f693c2411393057e6f49f48e502fcdadc152ca5ccdf50d9e34d7cb16579eeb",
+    "archive_sha256": "83f693c2411393057e6f49f48e502fcdadc152ca5ccdf50d9e34d7cb16579eeb"
+  },
+  {
+    "source": "/tmp/gpui-coverage-integration-evidence/iterator-unit-tests/exit",
+    "archive": "raw/integration/iterator-unit-tests/exit",
+    "original_bytes": 2,
+    "original_sha256": "9a271f2a916b0b6ee6cecb2426f0b3206ef074578be55d9bc94f6f3fe3ab86aa",
+    "archive_sha256": "9a271f2a916b0b6ee6cecb2426f0b3206ef074578be55d9bc94f6f3fe3ab86aa"
+  },
+  {
+    "source": "/tmp/gpui-coverage-integration-evidence/iterator-unit-tests/result.json",
+    "archive": "raw/integration/iterator-unit-tests/result.json",
+    "original_bytes": 247,
+    "original_sha256": "73f049b7ae6f3189e9cc1454e4dbf873abf287e00cd2d4801573f310db0d765e",
+    "archive_sha256": "73f049b7ae6f3189e9cc1454e4dbf873abf287e00cd2d4801573f310db0d765e"
+  },
+  {
+    "source": "/tmp/gpui-coverage-integration-evidence/iterator-unit-tests/rustc.txt",
+    "archive": "raw/integration/iterator-unit-tests/rustc.txt",
+    "original_bytes": 214,
+    "original_sha256": "2900025046ddf3de47f87dd3d69fbfe380cae61af5fe1ecf31bb89c5f10645c5",
+    "archive_sha256": "2900025046ddf3de47f87dd3d69fbfe380cae61af5fe1ecf31bb89c5f10645c5"
+  },
+  {
+    "source": "/tmp/gpui-coverage-integration-evidence/iterator-unit-tests/stderr.log",
+    "archive": "raw/integration/iterator-unit-tests/stderr.log",
+    "original_bytes": 360,
+    "original_sha256": "26ba120ec5325a56d0230628966251e65fa86b57d92a1d2bd6d46b3372655b98",
+    "archive_sha256": "26ba120ec5325a56d0230628966251e65fa86b57d92a1d2bd6d46b3372655b98"
+  },
+  {
+    "source": "/tmp/gpui-coverage-integration-evidence/iterator-unit-tests/stdout.log",
+    "archive": "raw/integration/iterator-unit-tests/stdout.log.gz",
+    "original_bytes": 80019,
+    "original_sha256": "5dfacb405994f4f92ff498c1a3a588079704f93a7ff9b18ab6b117344374fc1a",
+    "archive_sha256": "0f10a52aec02eaf2f36e3da4bbfadcc7256d73dac142a562da02ce0c21b468f5"
+  },
+  {
+    "source": "/tmp/gpui-coverage-integration-evidence/machine-analysis-baseline-candidate-successor.json",
+    "archive": "raw/integration/machine-analysis-baseline-candidate-successor.json.gz",
+    "original_bytes": 27289,
+    "original_sha256": "0f4ee1eb342a43f82ebdb945b7a0c9a184a561a396d9e88aab71f8d28ff348cd",
+    "archive_sha256": "b92b5545a42df7caedbafff5c30f0e4963f3f8369702a17fa2f6c28d977a0b02"
+  },
+  {
+    "source": "/tmp/gpui-coverage-integration-evidence/machine-analysis-baseline-candidate.json",
+    "archive": "raw/integration/machine-analysis-baseline-candidate.json",
+    "original_bytes": 17494,
+    "original_sha256": "2602af2d4fe31056c9b12d3bfe705cdcf4e7fab5a3aadf5689fef69a01d68b25",
+    "archive_sha256": "2602af2d4fe31056c9b12d3bfe705cdcf4e7fab5a3aadf5689fef69a01d68b25"
+  },
+  {
+    "source": "/tmp/gpui-coverage-integration-evidence/machine-analysis-baseline-iterator-certificate.json",
+    "archive": "raw/integration/machine-analysis-baseline-iterator-certificate.json.gz",
+    "original_bytes": 25813,
+    "original_sha256": "eaf738e1e254b1bed8228a060db395188aeb9c798c2d887236b9711cb27c055d",
+    "archive_sha256": "d0579bb0fa0f0d10e23ddd4bb8d3898c9f351320d76fc39b45586f28c2e688c8"
+  },
+  {
+    "source": "/tmp/gpui-coverage-integration-evidence/machine-analysis-baseline-successor-iterator.json",
+    "archive": "raw/integration/machine-analysis-baseline-successor-iterator.json.gz",
+    "original_bytes": 26559,
+    "original_sha256": "73d4481df21c12f57734c9de7674d48470b736a284d16576cd942397aa5ec2f8",
+    "archive_sha256": "02c77273a1a3dd564b7a7f67b0d3c981eb5b5384ae2f879b489c5eef897d3331"
+  },
+  {
+    "source": "/tmp/gpui-coverage-integration-evidence/machine-comparison.json",
+    "archive": "raw/integration/machine-comparison.json",
+    "original_bytes": 13336,
+    "original_sha256": "0086753f04c94f1e66e6e559e28cda2c73e02c20cfd3e8876b8f3cc62dfe2b36",
+    "archive_sha256": "0086753f04c94f1e66e6e559e28cda2c73e02c20cfd3e8876b8f3cc62dfe2b36"
+  },
+  {
+    "source": "/tmp/gpui-coverage-integration-evidence/main-source-equivalence.json",
+    "archive": "raw/integration/main-source-equivalence.json",
+    "original_bytes": 1301,
+    "original_sha256": "8756bc590188fdfa3eba164538cddf97cca018820a9ecc693a7704a4dcf8dc52",
+    "archive_sha256": "8756bc590188fdfa3eba164538cddf97cca018820a9ecc693a7704a4dcf8dc52"
+  },
+  {
+    "source": "/tmp/gpui-coverage-integration-evidence/selected-source.patch",
+    "archive": "raw/integration/selected-source.patch",
+    "original_bytes": 18524,
+    "original_sha256": "043ea5acd3b0bf17a8b3389b6ed87d24184881d238527dc0b7c099f38a9dafe8",
+    "archive_sha256": "043ea5acd3b0bf17a8b3389b6ed87d24184881d238527dc0b7c099f38a9dafe8"
+  },
+  {
+    "source": "/tmp/gpui-coverage-integration-evidence/strict-policy/after.json",
+    "archive": "raw/integration/strict-policy/after.json.gz",
+    "original_bytes": 293172,
+    "original_sha256": "d6328ee77867901c7c77ed52843df7a36e430a9035001e1efadb5ba8a4b3372a",
+    "archive_sha256": "d59c42b731aea7c9245e10874d47eaf67c4a7a0b8f8fb85f3e6ee891bee6230a"
+  },
+  {
+    "source": "/tmp/gpui-coverage-integration-evidence/strict-policy/before.json",
+    "archive": "raw/integration/strict-policy/before.json.gz",
+    "original_bytes": 293172,
+    "original_sha256": "d6328ee77867901c7c77ed52843df7a36e430a9035001e1efadb5ba8a4b3372a",
+    "archive_sha256": "d59c42b731aea7c9245e10874d47eaf67c4a7a0b8f8fb85f3e6ee891bee6230a"
+  },
+  {
+    "source": "/tmp/gpui-coverage-integration-evidence/strict-policy/command.json",
+    "archive": "raw/integration/strict-policy/command.json",
+    "original_bytes": 790,
+    "original_sha256": "3834305bb915320c424e16e4521b21f70fe2317120d3bfd64113e6c4dc398087",
+    "archive_sha256": "3834305bb915320c424e16e4521b21f70fe2317120d3bfd64113e6c4dc398087"
+  },
+  {
+    "source": "/tmp/gpui-coverage-integration-evidence/strict-policy/exit",
+    "archive": "raw/integration/strict-policy/exit",
+    "original_bytes": 4,
+    "original_sha256": "39b8dc3fc8b44765c8e6f1adee04c5b465e555ab791cc42d0d9e810d5b64297c",
+    "archive_sha256": "39b8dc3fc8b44765c8e6f1adee04c5b465e555ab791cc42d0d9e810d5b64297c"
+  },
+  {
+    "source": "/tmp/gpui-coverage-integration-evidence/strict-policy/result.json",
+    "archive": "raw/integration/strict-policy/result.json",
+    "original_bytes": 248,
+    "original_sha256": "3b71b16342da3c3ded049a9a8749f6d5c54805ae92ee57fd2cfa245e31642abb",
+    "archive_sha256": "3b71b16342da3c3ded049a9a8749f6d5c54805ae92ee57fd2cfa245e31642abb"
+  },
+  {
+    "source": "/tmp/gpui-coverage-integration-evidence/strict-policy/rustc.txt",
+    "archive": "raw/integration/strict-policy/rustc.txt",
+    "original_bytes": 214,
+    "original_sha256": "2900025046ddf3de47f87dd3d69fbfe380cae61af5fe1ecf31bb89c5f10645c5",
+    "archive_sha256": "2900025046ddf3de47f87dd3d69fbfe380cae61af5fe1ecf31bb89c5f10645c5"
+  },
+  {
+    "source": "/tmp/gpui-coverage-integration-evidence/strict-policy/stderr.log",
+    "archive": "raw/integration/strict-policy/stderr.log",
+    "original_bytes": 2740,
+    "original_sha256": "d1854c598774bb23474fec95ad5ea8d9b4d728b32bdf37551ac32414ade1b32b",
+    "archive_sha256": "d1854c598774bb23474fec95ad5ea8d9b4d728b32bdf37551ac32414ade1b32b"
+  },
+  {
+    "source": "/tmp/gpui-coverage-integration-evidence/strict-policy/stdout.log",
+    "archive": "raw/integration/strict-policy/stdout.log.gz",
+    "original_bytes": 102761,
+    "original_sha256": "2c647a0f55ec43dd79538daa445c3fa34c771469a7b7a9a8a3728d8cc46286d4",
+    "archive_sha256": "4efd3a9b54842e104e9846bd91811b362033ee8bd863d0a1aadb448fc56a33f1"
+  },
+  {
+    "source": "/tmp/gpui-coverage-integration-evidence/strict-policy-successor/after.json",
+    "archive": "raw/integration/strict-policy-successor/after.json.gz",
+    "original_bytes": 293172,
+    "original_sha256": "0e2e0d7e730e4a99e37f20541af2bf33d43b9986e4cca91e61c6514f39538cd5",
+    "archive_sha256": "2ebe17ee5d7604f86094de90470c18273ee1e1d68d269425bbff326f9bde0724"
+  },
+  {
+    "source": "/tmp/gpui-coverage-integration-evidence/strict-policy-successor/before.json",
+    "archive": "raw/integration/strict-policy-successor/before.json.gz",
+    "original_bytes": 293172,
+    "original_sha256": "0e2e0d7e730e4a99e37f20541af2bf33d43b9986e4cca91e61c6514f39538cd5",
+    "archive_sha256": "2ebe17ee5d7604f86094de90470c18273ee1e1d68d269425bbff326f9bde0724"
+  },
+  {
+    "source": "/tmp/gpui-coverage-integration-evidence/strict-policy-successor/command.json",
+    "archive": "raw/integration/strict-policy-successor/command.json",
+    "original_bytes": 790,
+    "original_sha256": "b10d9b8666864a0347ffe1a152ab4689adc61a749e63252d0d417546cacf3a9a",
+    "archive_sha256": "b10d9b8666864a0347ffe1a152ab4689adc61a749e63252d0d417546cacf3a9a"
+  },
+  {
+    "source": "/tmp/gpui-coverage-integration-evidence/strict-policy-successor/exit",
+    "archive": "raw/integration/strict-policy-successor/exit",
+    "original_bytes": 2,
+    "original_sha256": "9a271f2a916b0b6ee6cecb2426f0b3206ef074578be55d9bc94f6f3fe3ab86aa",
+    "archive_sha256": "9a271f2a916b0b6ee6cecb2426f0b3206ef074578be55d9bc94f6f3fe3ab86aa"
+  },
+  {
+    "source": "/tmp/gpui-coverage-integration-evidence/strict-policy-successor/result.json",
+    "archive": "raw/integration/strict-policy-successor/result.json",
+    "original_bytes": 246,
+    "original_sha256": "2dffce20bae0d1d6d57d7e6df18079eb5f3a154b5f19d4fbd6355498363fafa6",
+    "archive_sha256": "2dffce20bae0d1d6d57d7e6df18079eb5f3a154b5f19d4fbd6355498363fafa6"
+  },
+  {
+    "source": "/tmp/gpui-coverage-integration-evidence/strict-policy-successor/rustc.txt",
+    "archive": "raw/integration/strict-policy-successor/rustc.txt",
+    "original_bytes": 214,
+    "original_sha256": "2900025046ddf3de47f87dd3d69fbfe380cae61af5fe1ecf31bb89c5f10645c5",
+    "archive_sha256": "2900025046ddf3de47f87dd3d69fbfe380cae61af5fe1ecf31bb89c5f10645c5"
+  },
+  {
+    "source": "/tmp/gpui-coverage-integration-evidence/strict-policy-successor/stderr.log",
+    "archive": "raw/integration/strict-policy-successor/stderr.log",
+    "original_bytes": 168,
+    "original_sha256": "5307ce99998830c2b439578728487981f77dd0e52c8a84c2170eb2030a8b6e31",
+    "archive_sha256": "5307ce99998830c2b439578728487981f77dd0e52c8a84c2170eb2030a8b6e31"
+  },
+  {
+    "source": "/tmp/gpui-coverage-integration-evidence/strict-policy-successor/stdout.log",
+    "archive": "raw/integration/strict-policy-successor/stdout.log.gz",
+    "original_bytes": 93676,
+    "original_sha256": "f48a2bc0fce82b03241a426f53f97327cbfdb9bc73770a017ea5e71e9100010c",
+    "archive_sha256": "ea19aebc45d6a605db5641cb5409f8e4b229437a205a8cb1c9cf354291abe2e4"
+  },
+  {
+    "source": "/tmp/gpui-coverage-integration-evidence/successor-binary.json",
+    "archive": "raw/integration/successor-binary.json",
+    "original_bytes": 401,
+    "original_sha256": "92476636fddec151821304df90169fb4fa1fcb6b009902d1611f41910f026362",
+    "archive_sha256": "92476636fddec151821304df90169fb4fa1fcb6b009902d1611f41910f026362"
+  },
+  {
+    "source": "/tmp/gpui-coverage-integration-evidence/successor-build/after.json",
+    "archive": "raw/integration/successor-build/after.json",
+    "original_bytes": 434,
+    "original_sha256": "498e3af56ea31c1b0d1626552d66792efd42821abd059719e0da7580d98b2b76",
+    "archive_sha256": "498e3af56ea31c1b0d1626552d66792efd42821abd059719e0da7580d98b2b76"
+  },
+  {
+    "source": "/tmp/gpui-coverage-integration-evidence/successor-build/before.json",
+    "archive": "raw/integration/successor-build/before.json",
+    "original_bytes": 434,
+    "original_sha256": "498e3af56ea31c1b0d1626552d66792efd42821abd059719e0da7580d98b2b76",
+    "archive_sha256": "498e3af56ea31c1b0d1626552d66792efd42821abd059719e0da7580d98b2b76"
+  },
+  {
+    "source": "/tmp/gpui-coverage-integration-evidence/successor-build/command.json",
+    "archive": "raw/integration/successor-build/command.json",
+    "original_bytes": 673,
+    "original_sha256": "c4efd2576480fdaa8e7416671b6ae6e7addaf0e1c22863779f38f67f784e79f1",
+    "archive_sha256": "c4efd2576480fdaa8e7416671b6ae6e7addaf0e1c22863779f38f67f784e79f1"
+  },
+  {
+    "source": "/tmp/gpui-coverage-integration-evidence/successor-build/exit",
+    "archive": "raw/integration/successor-build/exit",
+    "original_bytes": 2,
+    "original_sha256": "9a271f2a916b0b6ee6cecb2426f0b3206ef074578be55d9bc94f6f3fe3ab86aa",
+    "archive_sha256": "9a271f2a916b0b6ee6cecb2426f0b3206ef074578be55d9bc94f6f3fe3ab86aa"
+  },
+  {
+    "source": "/tmp/gpui-coverage-integration-evidence/successor-build/result.json",
+    "archive": "raw/integration/successor-build/result.json",
+    "original_bytes": 243,
+    "original_sha256": "84faed84aa1e473590378ed8b27b1cb9a7956a11d300e375fa32bccc5d9ea789",
+    "archive_sha256": "84faed84aa1e473590378ed8b27b1cb9a7956a11d300e375fa32bccc5d9ea789"
+  },
+  {
+    "source": "/tmp/gpui-coverage-integration-evidence/successor-build/rustc.txt",
+    "archive": "raw/integration/successor-build/rustc.txt",
+    "original_bytes": 214,
+    "original_sha256": "2900025046ddf3de47f87dd3d69fbfe380cae61af5fe1ecf31bb89c5f10645c5",
+    "archive_sha256": "2900025046ddf3de47f87dd3d69fbfe380cae61af5fe1ecf31bb89c5f10645c5"
+  },
+  {
+    "source": "/tmp/gpui-coverage-integration-evidence/successor-build/stderr.log",
+    "archive": "raw/integration/successor-build/stderr.log",
+    "original_bytes": 392,
+    "original_sha256": "e144aab733b5a00990cecbd7183e515a25e030ac0e6568b006a3c69eb8d6a7bc",
+    "archive_sha256": "e144aab733b5a00990cecbd7183e515a25e030ac0e6568b006a3c69eb8d6a7bc"
+  },
+  {
+    "source": "/tmp/gpui-coverage-integration-evidence/successor-build/stdout.log",
+    "archive": "raw/integration/successor-build/stdout.log.gz",
+    "original_bytes": 60659,
+    "original_sha256": "62be345b6554300cdc2087ba3b07ca0a1591b120d8ad8160ec998735540ad8da",
+    "archive_sha256": "796c72c07805df86a2f8ee8c89357f02819f0c88456d5c033d07d50740ed58df"
+  },
+  {
+    "source": "/tmp/gpui-coverage-integration-evidence/successor-build-dependencies/after.json",
+    "archive": "raw/integration/successor-build-dependencies/after.json.gz",
+    "original_bytes": 302144,
+    "original_sha256": "8f3349434e986b3d29d0a81ed4c308f5688fdac9a345dffa5036703c6377ebed",
+    "archive_sha256": "ec5ae3c0c6462b7c2cbd99a0bcee9f64c11bfd5e79d632932ba01ebad2b2482c"
+  },
+  {
+    "source": "/tmp/gpui-coverage-integration-evidence/successor-build-dependencies/argv.json",
+    "archive": "raw/integration/successor-build-dependencies/argv.json",
+    "original_bytes": 428,
+    "original_sha256": "6cbe2dca3bcacac9d52ffe25aef361cdd2c001f5c99c8d49c2208575b58b27ba",
+    "archive_sha256": "6cbe2dca3bcacac9d52ffe25aef361cdd2c001f5c99c8d49c2208575b58b27ba"
+  },
+  {
+    "source": "/tmp/gpui-coverage-integration-evidence/successor-build-dependencies/before.json",
+    "archive": "raw/integration/successor-build-dependencies/before.json.gz",
+    "original_bytes": 302144,
+    "original_sha256": "8f3349434e986b3d29d0a81ed4c308f5688fdac9a345dffa5036703c6377ebed",
+    "archive_sha256": "ec5ae3c0c6462b7c2cbd99a0bcee9f64c11bfd5e79d632932ba01ebad2b2482c"
+  },
+  {
+    "source": "/tmp/gpui-coverage-integration-evidence/successor-build-dependencies/result.json",
+    "archive": "raw/integration/successor-build-dependencies/result.json",
+    "original_bytes": 57,
+    "original_sha256": "4e011c50c0493f1a481de660fe968e353847b98bd979598e6f16e0c096669d0d",
+    "archive_sha256": "4e011c50c0493f1a481de660fe968e353847b98bd979598e6f16e0c096669d0d"
+  },
+  {
+    "source": "/tmp/gpui-coverage-integration-evidence/successor-comparison.json",
+    "archive": "raw/integration/successor-comparison.json",
+    "original_bytes": 523,
+    "original_sha256": "a4dbd8dec8f90a698d085b4d17b83b4b0d4026b7ab18c2b0a2a8848c385ddb94",
+    "archive_sha256": "a4dbd8dec8f90a698d085b4d17b83b4b0d4026b7ab18c2b0a2a8848c385ddb94"
+  },
+  {
+    "source": "/tmp/gpui-coverage-integration-evidence/successor-machine/disassembly.stderr",
+    "archive": "raw/integration/successor-machine/disassembly.stderr",
+    "original_bytes": 0,
+    "original_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+    "archive_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+  },
+  {
+    "source": "/tmp/gpui-coverage-integration-evidence/successor-machine/frames.stderr",
+    "archive": "raw/integration/successor-machine/frames.stderr",
+    "original_bytes": 0,
+    "original_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+    "archive_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+  },
+  {
+    "source": "/tmp/gpui-coverage-integration-evidence/successor-machine/frames.txt",
+    "archive": "raw/integration/successor-machine/frames.txt.gz",
+    "original_bytes": 1464249,
+    "original_sha256": "dbd2eebaf267934fa9e95a3280a376172f0340fb93edcc9d3effdfb90b5b5462",
+    "archive_sha256": "a8c4abb2346d1abab07c4b4449501dbf6eee98c548c3758a3cc55ef29895ce40"
+  },
+  {
+    "source": "/tmp/gpui-coverage-integration-evidence/successor-machine/identity.json",
+    "archive": "raw/integration/successor-machine/identity.json",
+    "original_bytes": 7546,
+    "original_sha256": "e141ab8bc76c39c8726ea72c2f4479a22ddc72db1b1b4afc532b22ad29ca8d87",
+    "archive_sha256": "e141ab8bc76c39c8726ea72c2f4479a22ddc72db1b1b4afc532b22ad29ca8d87"
+  },
+  {
+    "source": "/tmp/gpui-coverage-integration-evidence/successor-machine/sections.stderr",
+    "archive": "raw/integration/successor-machine/sections.stderr",
+    "original_bytes": 0,
+    "original_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+    "archive_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+  },
+  {
+    "source": "/tmp/gpui-coverage-integration-evidence/successor-machine/sections.txt",
+    "archive": "raw/integration/successor-machine/sections.txt",
+    "original_bytes": 3458,
+    "original_sha256": "e1d472cdde26aa3bce4a51a4711758a1cef618f1c6f6c1bfa0ffa953f0bb7df7",
+    "archive_sha256": "e1d472cdde26aa3bce4a51a4711758a1cef618f1c6f6c1bfa0ffa953f0bb7df7"
+  },
+  {
+    "source": "/tmp/gpui-coverage-integration-evidence/successor-machine/selected-code.txt",
+    "archive": "raw/integration/successor-machine/selected-code.txt.gz",
+    "original_bytes": 370259,
+    "original_sha256": "c081becea396b18dd41f96890ecc4ae2ff410c080817e7cee91279ad4f9149b9",
+    "archive_sha256": "83b9238a10b1d58f2e4b42ef778e7e1a9358b252f4fa1ee2784dfc95416deb8c"
+  },
+  {
+    "source": "/tmp/gpui-coverage-integration-evidence/successor-machine/symbols.stderr",
+    "archive": "raw/integration/successor-machine/symbols.stderr",
+    "original_bytes": 0,
+    "original_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+    "archive_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+  },
+  {
+    "source": "/tmp/gpui-coverage-integration-evidence/successor-machine/symbols.txt",
+    "archive": "raw/integration/successor-machine/symbols.txt.gz",
+    "original_bytes": 408532,
+    "original_sha256": "254cb2705f8d39f32f58d8d920a5ad12eaeb00df1be164f9e6cfbcff0319cdd4",
+    "archive_sha256": "4705614ec2178bdf9b83a94bc88b209713949f43311a9ab74d59d364535a0ca2"
+  },
+  {
+    "source": "/tmp/gpui-coverage-integration-evidence/successor-run/after.json",
+    "archive": "raw/integration/successor-run/after.json",
+    "original_bytes": 434,
+    "original_sha256": "498e3af56ea31c1b0d1626552d66792efd42821abd059719e0da7580d98b2b76",
+    "archive_sha256": "498e3af56ea31c1b0d1626552d66792efd42821abd059719e0da7580d98b2b76"
+  },
+  {
+    "source": "/tmp/gpui-coverage-integration-evidence/successor-run/before.json",
+    "archive": "raw/integration/successor-run/before.json",
+    "original_bytes": 434,
+    "original_sha256": "498e3af56ea31c1b0d1626552d66792efd42821abd059719e0da7580d98b2b76",
+    "archive_sha256": "498e3af56ea31c1b0d1626552d66792efd42821abd059719e0da7580d98b2b76"
+  },
+  {
+    "source": "/tmp/gpui-coverage-integration-evidence/successor-run/command.json",
+    "archive": "raw/integration/successor-run/command.json",
+    "original_bytes": 639,
+    "original_sha256": "927b1ed7baba00e3b695a9971e0667c461c9da545fce3f9eb8c0e9c7959f0eb8",
+    "archive_sha256": "927b1ed7baba00e3b695a9971e0667c461c9da545fce3f9eb8c0e9c7959f0eb8"
+  },
+  {
+    "source": "/tmp/gpui-coverage-integration-evidence/successor-run/exit",
+    "archive": "raw/integration/successor-run/exit",
+    "original_bytes": 2,
+    "original_sha256": "9a271f2a916b0b6ee6cecb2426f0b3206ef074578be55d9bc94f6f3fe3ab86aa",
+    "archive_sha256": "9a271f2a916b0b6ee6cecb2426f0b3206ef074578be55d9bc94f6f3fe3ab86aa"
+  },
+  {
+    "source": "/tmp/gpui-coverage-integration-evidence/successor-run/result.json",
+    "archive": "raw/integration/successor-run/result.json",
+    "original_bytes": 243,
+    "original_sha256": "84faed84aa1e473590378ed8b27b1cb9a7956a11d300e375fa32bccc5d9ea789",
+    "archive_sha256": "84faed84aa1e473590378ed8b27b1cb9a7956a11d300e375fa32bccc5d9ea789"
+  },
+  {
+    "source": "/tmp/gpui-coverage-integration-evidence/successor-run/rustc.txt",
+    "archive": "raw/integration/successor-run/rustc.txt",
+    "original_bytes": 214,
+    "original_sha256": "2900025046ddf3de47f87dd3d69fbfe380cae61af5fe1ecf31bb89c5f10645c5",
+    "archive_sha256": "2900025046ddf3de47f87dd3d69fbfe380cae61af5fe1ecf31bb89c5f10645c5"
+  },
+  {
+    "source": "/tmp/gpui-coverage-integration-evidence/successor-run/stderr.log",
+    "archive": "raw/integration/successor-run/stderr.log",
+    "original_bytes": 11,
+    "original_sha256": "ee2cb132c66aefa3d504949275839c68d675c9a12d0d107240025e6c1273e3e4",
+    "archive_sha256": "ee2cb132c66aefa3d504949275839c68d675c9a12d0d107240025e6c1273e3e4"
+  },
+  {
+    "source": "/tmp/gpui-coverage-integration-evidence/successor-run-dependencies/after.json",
+    "archive": "raw/integration/successor-run-dependencies/after.json.gz",
+    "original_bytes": 302144,
+    "original_sha256": "8f3349434e986b3d29d0a81ed4c308f5688fdac9a345dffa5036703c6377ebed",
+    "archive_sha256": "ec5ae3c0c6462b7c2cbd99a0bcee9f64c11bfd5e79d632932ba01ebad2b2482c"
+  },
+  {
+    "source": "/tmp/gpui-coverage-integration-evidence/successor-run-dependencies/argv.json",
+    "archive": "raw/integration/successor-run-dependencies/argv.json",
+    "original_bytes": 402,
+    "original_sha256": "eeb4c7a5683a456bc3d68789502454a79b2d25477ea03feaabb07c88bab2c631",
+    "archive_sha256": "eeb4c7a5683a456bc3d68789502454a79b2d25477ea03feaabb07c88bab2c631"
+  },
+  {
+    "source": "/tmp/gpui-coverage-integration-evidence/successor-run-dependencies/before.json",
+    "archive": "raw/integration/successor-run-dependencies/before.json.gz",
+    "original_bytes": 302144,
+    "original_sha256": "8f3349434e986b3d29d0a81ed4c308f5688fdac9a345dffa5036703c6377ebed",
+    "archive_sha256": "ec5ae3c0c6462b7c2cbd99a0bcee9f64c11bfd5e79d632932ba01ebad2b2482c"
+  },
+  {
+    "source": "/tmp/gpui-coverage-integration-evidence/successor-run-dependencies/result.json",
+    "archive": "raw/integration/successor-run-dependencies/result.json",
+    "original_bytes": 57,
+    "original_sha256": "4e011c50c0493f1a481de660fe968e353847b98bd979598e6f16e0c096669d0d",
+    "archive_sha256": "4e011c50c0493f1a481de660fe968e353847b98bd979598e6f16e0c096669d0d"
+  },
+  {
+    "source": "/tmp/gpui-coverage-integration-evidence/successor-unit-tests/after.json",
+    "archive": "raw/integration/successor-unit-tests/after.json.gz",
+    "original_bytes": 293172,
+    "original_sha256": "0e2e0d7e730e4a99e37f20541af2bf33d43b9986e4cca91e61c6514f39538cd5",
+    "archive_sha256": "2ebe17ee5d7604f86094de90470c18273ee1e1d68d269425bbff326f9bde0724"
+  },
+  {
+    "source": "/tmp/gpui-coverage-integration-evidence/successor-unit-tests/before.json",
+    "archive": "raw/integration/successor-unit-tests/before.json.gz",
+    "original_bytes": 293172,
+    "original_sha256": "0e2e0d7e730e4a99e37f20541af2bf33d43b9986e4cca91e61c6514f39538cd5",
+    "archive_sha256": "2ebe17ee5d7604f86094de90470c18273ee1e1d68d269425bbff326f9bde0724"
+  },
+  {
+    "source": "/tmp/gpui-coverage-integration-evidence/successor-unit-tests/command.json",
+    "archive": "raw/integration/successor-unit-tests/command.json",
+    "original_bytes": 795,
+    "original_sha256": "cb266a4ace02c08d49d3a1a45ac2ffd495245eba82ace2d1446a50e90d97c733",
+    "archive_sha256": "cb266a4ace02c08d49d3a1a45ac2ffd495245eba82ace2d1446a50e90d97c733"
+  },
+  {
+    "source": "/tmp/gpui-coverage-integration-evidence/successor-unit-tests/exit",
+    "archive": "raw/integration/successor-unit-tests/exit",
+    "original_bytes": 2,
+    "original_sha256": "9a271f2a916b0b6ee6cecb2426f0b3206ef074578be55d9bc94f6f3fe3ab86aa",
+    "archive_sha256": "9a271f2a916b0b6ee6cecb2426f0b3206ef074578be55d9bc94f6f3fe3ab86aa"
+  },
+  {
+    "source": "/tmp/gpui-coverage-integration-evidence/successor-unit-tests/result.json",
+    "archive": "raw/integration/successor-unit-tests/result.json",
+    "original_bytes": 247,
+    "original_sha256": "dede15608e58d403bd7d7b6875814bbc2ec2b8c1efa910db2ba6f3af27e2bb4d",
+    "archive_sha256": "dede15608e58d403bd7d7b6875814bbc2ec2b8c1efa910db2ba6f3af27e2bb4d"
+  },
+  {
+    "source": "/tmp/gpui-coverage-integration-evidence/successor-unit-tests/rustc.txt",
+    "archive": "raw/integration/successor-unit-tests/rustc.txt",
+    "original_bytes": 214,
+    "original_sha256": "2900025046ddf3de47f87dd3d69fbfe380cae61af5fe1ecf31bb89c5f10645c5",
+    "archive_sha256": "2900025046ddf3de47f87dd3d69fbfe380cae61af5fe1ecf31bb89c5f10645c5"
+  },
+  {
+    "source": "/tmp/gpui-coverage-integration-evidence/successor-unit-tests/stderr.log",
+    "archive": "raw/integration/successor-unit-tests/stderr.log",
+    "original_bytes": 516,
+    "original_sha256": "6117f583276dc999a96462ea25c08996bf2b36ddb677554092c687b7d9eae606",
+    "archive_sha256": "6117f583276dc999a96462ea25c08996bf2b36ddb677554092c687b7d9eae606"
+  },
+  {
+    "source": "/tmp/gpui-coverage-integration-evidence/successor-unit-tests/stdout.log",
+    "archive": "raw/integration/successor-unit-tests/stdout.log.gz",
+    "original_bytes": 80019,
+    "original_sha256": "6057ca1e41e5fa60432864477270e6fe98a221ca09ee59bd280cff7eb09a7b21",
+    "archive_sha256": "b9dba9bbb995019133dc4d55ad479a0ca420cae5d64a73cb3227921b97dc7e89"
+  },
+  {
+    "source": "/tmp/gpui-bundled-coverage-evidence/certificate-harness.rs",
+    "archive": "raw/certificate/certificate-harness.rs",
+    "original_bytes": 619,
+    "original_sha256": "308dec02a6d874c125074d704f73f2ee0173e337e8692afcd145aa7822ff2165",
+    "archive_sha256": "308dec02a6d874c125074d704f73f2ee0173e337e8692afcd145aa7822ff2165"
+  },
+  {
+    "source": "/tmp/gpui-bundled-coverage-evidence/composition.json",
+    "archive": "raw/certificate/composition.json",
+    "original_bytes": 747,
+    "original_sha256": "5bd198bfff3ff17eb3ea37d193da16f77e1ded36f74c23b6d3bd4bc59b427757",
+    "archive_sha256": "5bd198bfff3ff17eb3ea37d193da16f77e1ded36f74c23b6d3bd4bc59b427757"
+  },
+  {
+    "source": "/tmp/gpui-bundled-coverage-evidence/direct-certificate-run/after.json",
+    "archive": "raw/certificate/direct-certificate-run/after.json.gz",
+    "original_bytes": 293547,
+    "original_sha256": "9d812fcb1b3a3c2147f0e9512de53c2cada4816a3df8f1350864936f38e33627",
+    "archive_sha256": "3a029b6642a79664889b94a25e5460c69b636d962205c185cb6aa0cbef26e671"
+  },
+  {
+    "source": "/tmp/gpui-bundled-coverage-evidence/direct-certificate-run/before.json",
+    "archive": "raw/certificate/direct-certificate-run/before.json.gz",
+    "original_bytes": 293547,
+    "original_sha256": "9d812fcb1b3a3c2147f0e9512de53c2cada4816a3df8f1350864936f38e33627",
+    "archive_sha256": "3a029b6642a79664889b94a25e5460c69b636d962205c185cb6aa0cbef26e671"
+  },
+  {
+    "source": "/tmp/gpui-bundled-coverage-evidence/direct-certificate-run/command.json",
+    "archive": "raw/certificate/direct-certificate-run/command.json",
+    "original_bytes": 632,
+    "original_sha256": "bc3a550b256e256e19aca0fdbfb22e9cd94ff98fdecccffbf1791bc27363557f",
+    "archive_sha256": "bc3a550b256e256e19aca0fdbfb22e9cd94ff98fdecccffbf1791bc27363557f"
+  },
+  {
+    "source": "/tmp/gpui-bundled-coverage-evidence/direct-certificate-run/exit",
+    "archive": "raw/certificate/direct-certificate-run/exit",
+    "original_bytes": 2,
+    "original_sha256": "9a271f2a916b0b6ee6cecb2426f0b3206ef074578be55d9bc94f6f3fe3ab86aa",
+    "archive_sha256": "9a271f2a916b0b6ee6cecb2426f0b3206ef074578be55d9bc94f6f3fe3ab86aa"
+  },
+  {
+    "source": "/tmp/gpui-bundled-coverage-evidence/direct-certificate-run/result.json",
+    "archive": "raw/certificate/direct-certificate-run/result.json",
+    "original_bytes": 246,
+    "original_sha256": "48b6da2c8708142c4001160bda4fe7e3fc487312426f40a918630721eeab90f1",
+    "archive_sha256": "48b6da2c8708142c4001160bda4fe7e3fc487312426f40a918630721eeab90f1"
+  },
+  {
+    "source": "/tmp/gpui-bundled-coverage-evidence/direct-certificate-run/rustc.txt",
+    "archive": "raw/certificate/direct-certificate-run/rustc.txt",
+    "original_bytes": 214,
+    "original_sha256": "2900025046ddf3de47f87dd3d69fbfe380cae61af5fe1ecf31bb89c5f10645c5",
+    "archive_sha256": "2900025046ddf3de47f87dd3d69fbfe380cae61af5fe1ecf31bb89c5f10645c5"
+  },
+  {
+    "source": "/tmp/gpui-bundled-coverage-evidence/direct-certificate-run/stderr.log",
+    "archive": "raw/certificate/direct-certificate-run/stderr.log",
+    "original_bytes": 0,
+    "original_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+    "archive_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+  },
+  {
+    "source": "/tmp/gpui-bundled-coverage-evidence/direct-certificate-run/stdout.log",
+    "archive": "raw/certificate/direct-certificate-run/stdout.log",
+    "original_bytes": 295,
+    "original_sha256": "50be1fb0fc563701f25ef8a642028cf9da34f05c493d1b8d1ae691ea2dde6f44",
+    "archive_sha256": "50be1fb0fc563701f25ef8a642028cf9da34f05c493d1b8d1ae691ea2dde6f44"
+  },
+  {
+    "source": "/tmp/gpui-bundled-coverage-evidence/fault-control/baseline/build/after.json",
+    "archive": "raw/certificate/fault-control/baseline/build/after.json",
+    "original_bytes": 351,
+    "original_sha256": "617c78192cc59ee66e03563853771757a648c7356c6a283deada27d5c4a70935",
+    "archive_sha256": "617c78192cc59ee66e03563853771757a648c7356c6a283deada27d5c4a70935"
+  },
+  {
+    "source": "/tmp/gpui-bundled-coverage-evidence/fault-control/baseline/build/before.json",
+    "archive": "raw/certificate/fault-control/baseline/build/before.json",
+    "original_bytes": 351,
+    "original_sha256": "617c78192cc59ee66e03563853771757a648c7356c6a283deada27d5c4a70935",
+    "archive_sha256": "617c78192cc59ee66e03563853771757a648c7356c6a283deada27d5c4a70935"
+  },
+  {
+    "source": "/tmp/gpui-bundled-coverage-evidence/fault-control/baseline/build/command.json",
+    "archive": "raw/certificate/fault-control/baseline/build/command.json",
+    "original_bytes": 1238,
+    "original_sha256": "75f7fd51d516442e448a612f73c122b67a2d0ff512d6a4ab57e382671d80f151",
+    "archive_sha256": "75f7fd51d516442e448a612f73c122b67a2d0ff512d6a4ab57e382671d80f151"
+  },
+  {
+    "source": "/tmp/gpui-bundled-coverage-evidence/fault-control/baseline/build/exit",
+    "archive": "raw/certificate/fault-control/baseline/build/exit",
+    "original_bytes": 2,
+    "original_sha256": "9a271f2a916b0b6ee6cecb2426f0b3206ef074578be55d9bc94f6f3fe3ab86aa",
+    "archive_sha256": "9a271f2a916b0b6ee6cecb2426f0b3206ef074578be55d9bc94f6f3fe3ab86aa"
+  },
+  {
+    "source": "/tmp/gpui-bundled-coverage-evidence/fault-control/baseline/build/result.json",
+    "archive": "raw/certificate/fault-control/baseline/build/result.json",
+    "original_bytes": 243,
+    "original_sha256": "2cce1ac408a0fc09d79e11b04238d7b1e79dc5d5db4969bf62b03fbc2ec1c828",
+    "archive_sha256": "2cce1ac408a0fc09d79e11b04238d7b1e79dc5d5db4969bf62b03fbc2ec1c828"
+  },
+  {
+    "source": "/tmp/gpui-bundled-coverage-evidence/fault-control/baseline/build/rustc.txt",
+    "archive": "raw/certificate/fault-control/baseline/build/rustc.txt",
+    "original_bytes": 214,
+    "original_sha256": "2900025046ddf3de47f87dd3d69fbfe380cae61af5fe1ecf31bb89c5f10645c5",
+    "archive_sha256": "2900025046ddf3de47f87dd3d69fbfe380cae61af5fe1ecf31bb89c5f10645c5"
+  },
+  {
+    "source": "/tmp/gpui-bundled-coverage-evidence/fault-control/baseline/build/stderr.log",
+    "archive": "raw/certificate/fault-control/baseline/build/stderr.log",
+    "original_bytes": 0,
+    "original_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+    "archive_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+  },
+  {
+    "source": "/tmp/gpui-bundled-coverage-evidence/fault-control/baseline/build/stdout.log",
+    "archive": "raw/certificate/fault-control/baseline/build/stdout.log",
+    "original_bytes": 0,
+    "original_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+    "archive_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+  },
+  {
+    "source": "/tmp/gpui-bundled-coverage-evidence/fault-control/baseline/build-dependencies/after.json",
+    "archive": "raw/certificate/fault-control/baseline/build-dependencies/after.json.gz",
+    "original_bytes": 302531,
+    "original_sha256": "f3ea5edf467e249e49bddab1f644ae8d1cd3ed190e34e9b8f6afecbc768c4088",
+    "archive_sha256": "e18e1c7b823595eb580462cd1f362a1efbcce8ae0aefd387c855376e5548bd70"
+  },
+  {
+    "source": "/tmp/gpui-bundled-coverage-evidence/fault-control/baseline/build-dependencies/argv.json",
+    "archive": "raw/certificate/fault-control/baseline/build-dependencies/argv.json",
+    "original_bytes": 1025,
+    "original_sha256": "4ca1c8395bb4ca3184446df776abbe8d3aa052e3167aba60e0ae0f9f9540e5bf",
+    "archive_sha256": "4ca1c8395bb4ca3184446df776abbe8d3aa052e3167aba60e0ae0f9f9540e5bf"
+  },
+  {
+    "source": "/tmp/gpui-bundled-coverage-evidence/fault-control/baseline/build-dependencies/before.json",
+    "archive": "raw/certificate/fault-control/baseline/build-dependencies/before.json.gz",
+    "original_bytes": 302531,
+    "original_sha256": "f3ea5edf467e249e49bddab1f644ae8d1cd3ed190e34e9b8f6afecbc768c4088",
+    "archive_sha256": "e18e1c7b823595eb580462cd1f362a1efbcce8ae0aefd387c855376e5548bd70"
+  },
+  {
+    "source": "/tmp/gpui-bundled-coverage-evidence/fault-control/baseline/build-dependencies/result.json",
+    "archive": "raw/certificate/fault-control/baseline/build-dependencies/result.json",
+    "original_bytes": 57,
+    "original_sha256": "e55014e5f03ec9d54a860bfa0f3deb99deb8257909c4b8c08508be04647d2d2d",
+    "archive_sha256": "e55014e5f03ec9d54a860bfa0f3deb99deb8257909c4b8c08508be04647d2d2d"
+  },
+  {
+    "source": "/tmp/gpui-bundled-coverage-evidence/fault-control/baseline/run/after.json",
+    "archive": "raw/certificate/fault-control/baseline/run/after.json",
+    "original_bytes": 351,
+    "original_sha256": "617c78192cc59ee66e03563853771757a648c7356c6a283deada27d5c4a70935",
+    "archive_sha256": "617c78192cc59ee66e03563853771757a648c7356c6a283deada27d5c4a70935"
+  },
+  {
+    "source": "/tmp/gpui-bundled-coverage-evidence/fault-control/baseline/run/before.json",
+    "archive": "raw/certificate/fault-control/baseline/run/before.json",
+    "original_bytes": 351,
+    "original_sha256": "617c78192cc59ee66e03563853771757a648c7356c6a283deada27d5c4a70935",
+    "archive_sha256": "617c78192cc59ee66e03563853771757a648c7356c6a283deada27d5c4a70935"
+  },
+  {
+    "source": "/tmp/gpui-bundled-coverage-evidence/fault-control/baseline/run/command.json",
+    "archive": "raw/certificate/fault-control/baseline/run/command.json",
+    "original_bytes": 661,
+    "original_sha256": "03f5d4df7e26c705c51e32094ea2eeaab5c436f9b65b49ca0640d728d22c55ad",
+    "archive_sha256": "03f5d4df7e26c705c51e32094ea2eeaab5c436f9b65b49ca0640d728d22c55ad"
+  },
+  {
+    "source": "/tmp/gpui-bundled-coverage-evidence/fault-control/baseline/run/exit",
+    "archive": "raw/certificate/fault-control/baseline/run/exit",
+    "original_bytes": 2,
+    "original_sha256": "9a271f2a916b0b6ee6cecb2426f0b3206ef074578be55d9bc94f6f3fe3ab86aa",
+    "archive_sha256": "9a271f2a916b0b6ee6cecb2426f0b3206ef074578be55d9bc94f6f3fe3ab86aa"
+  },
+  {
+    "source": "/tmp/gpui-bundled-coverage-evidence/fault-control/baseline/run/result.json",
+    "archive": "raw/certificate/fault-control/baseline/run/result.json",
+    "original_bytes": 243,
+    "original_sha256": "5e8f3e7fc85ace141714efbe9dc262c91745d0329f8178622da51e6ba2f9d382",
+    "archive_sha256": "5e8f3e7fc85ace141714efbe9dc262c91745d0329f8178622da51e6ba2f9d382"
+  },
+  {
+    "source": "/tmp/gpui-bundled-coverage-evidence/fault-control/baseline/run/rustc.txt",
+    "archive": "raw/certificate/fault-control/baseline/run/rustc.txt",
+    "original_bytes": 214,
+    "original_sha256": "2900025046ddf3de47f87dd3d69fbfe380cae61af5fe1ecf31bb89c5f10645c5",
+    "archive_sha256": "2900025046ddf3de47f87dd3d69fbfe380cae61af5fe1ecf31bb89c5f10645c5"
+  },
+  {
+    "source": "/tmp/gpui-bundled-coverage-evidence/fault-control/baseline/run/stderr.log",
+    "archive": "raw/certificate/fault-control/baseline/run/stderr.log",
+    "original_bytes": 0,
+    "original_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+    "archive_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+  },
+  {
+    "source": "/tmp/gpui-bundled-coverage-evidence/fault-control/baseline/run/stdout.log",
+    "archive": "raw/certificate/fault-control/baseline/run/stdout.log",
+    "original_bytes": 295,
+    "original_sha256": "d428381bd018055c9526f5a4ca13db064061e28e22feec80bca45d14d9ae18e6",
+    "archive_sha256": "d428381bd018055c9526f5a4ca13db064061e28e22feec80bca45d14d9ae18e6"
+  },
+  {
+    "source": "/tmp/gpui-bundled-coverage-evidence/fault-control/baseline/run-dependencies/after.json",
+    "archive": "raw/certificate/fault-control/baseline/run-dependencies/after.json.gz",
+    "original_bytes": 302531,
+    "original_sha256": "f3ea5edf467e249e49bddab1f644ae8d1cd3ed190e34e9b8f6afecbc768c4088",
+    "archive_sha256": "e18e1c7b823595eb580462cd1f362a1efbcce8ae0aefd387c855376e5548bd70"
+  },
+  {
+    "source": "/tmp/gpui-bundled-coverage-evidence/fault-control/baseline/run-dependencies/argv.json",
+    "archive": "raw/certificate/fault-control/baseline/run-dependencies/argv.json",
+    "original_bytes": 468,
+    "original_sha256": "2b9381850b2c0652e9db28c09e4faa3eb869e5f085a2e5693fb4a3d93146d597",
+    "archive_sha256": "2b9381850b2c0652e9db28c09e4faa3eb869e5f085a2e5693fb4a3d93146d597"
+  },
+  {
+    "source": "/tmp/gpui-bundled-coverage-evidence/fault-control/baseline/run-dependencies/before.json",
+    "archive": "raw/certificate/fault-control/baseline/run-dependencies/before.json.gz",
+    "original_bytes": 302531,
+    "original_sha256": "f3ea5edf467e249e49bddab1f644ae8d1cd3ed190e34e9b8f6afecbc768c4088",
+    "archive_sha256": "e18e1c7b823595eb580462cd1f362a1efbcce8ae0aefd387c855376e5548bd70"
+  },
+  {
+    "source": "/tmp/gpui-bundled-coverage-evidence/fault-control/baseline/run-dependencies/result.json",
+    "archive": "raw/certificate/fault-control/baseline/run-dependencies/result.json",
+    "original_bytes": 57,
+    "original_sha256": "e55014e5f03ec9d54a860bfa0f3deb99deb8257909c4b8c08508be04647d2d2d",
+    "archive_sha256": "e55014e5f03ec9d54a860bfa0f3deb99deb8257909c4b8c08508be04647d2d2d"
+  },
+  {
+    "source": "/tmp/gpui-bundled-coverage-evidence/fault-control/result.json",
+    "archive": "raw/certificate/fault-control/result.json",
+    "original_bytes": 2545,
+    "original_sha256": "5f788a9103df605ba7a3ef351a5add7b8af062d55f55d470e6b80f1b69d62373",
+    "archive_sha256": "5f788a9103df605ba7a3ef351a5add7b8af062d55f55d470e6b80f1b69d62373"
+  },
+  {
+    "source": "/tmp/gpui-bundled-coverage-evidence/fault-control/wrong-primary-bit/build/after.json",
+    "archive": "raw/certificate/fault-control/wrong-primary-bit/build/after.json",
+    "original_bytes": 351,
+    "original_sha256": "53f8bda238bb86a1ee8ce8f291179ee6a4bf0d3f7cca9d6302720d74edb06f10",
+    "archive_sha256": "53f8bda238bb86a1ee8ce8f291179ee6a4bf0d3f7cca9d6302720d74edb06f10"
+  },
+  {
+    "source": "/tmp/gpui-bundled-coverage-evidence/fault-control/wrong-primary-bit/build/before.json",
+    "archive": "raw/certificate/fault-control/wrong-primary-bit/build/before.json",
+    "original_bytes": 351,
+    "original_sha256": "53f8bda238bb86a1ee8ce8f291179ee6a4bf0d3f7cca9d6302720d74edb06f10",
+    "archive_sha256": "53f8bda238bb86a1ee8ce8f291179ee6a4bf0d3f7cca9d6302720d74edb06f10"
+  },
+  {
+    "source": "/tmp/gpui-bundled-coverage-evidence/fault-control/wrong-primary-bit/build/command.json",
+    "archive": "raw/certificate/fault-control/wrong-primary-bit/build/command.json",
+    "original_bytes": 1247,
+    "original_sha256": "a2af8c569d8c97d9c42d2a865abadd585cbbd838cb8a2bd4a5d46709302092a8",
+    "archive_sha256": "a2af8c569d8c97d9c42d2a865abadd585cbbd838cb8a2bd4a5d46709302092a8"
+  },
+  {
+    "source": "/tmp/gpui-bundled-coverage-evidence/fault-control/wrong-primary-bit/build/exit",
+    "archive": "raw/certificate/fault-control/wrong-primary-bit/build/exit",
+    "original_bytes": 2,
+    "original_sha256": "9a271f2a916b0b6ee6cecb2426f0b3206ef074578be55d9bc94f6f3fe3ab86aa",
+    "archive_sha256": "9a271f2a916b0b6ee6cecb2426f0b3206ef074578be55d9bc94f6f3fe3ab86aa"
+  },
+  {
+    "source": "/tmp/gpui-bundled-coverage-evidence/fault-control/wrong-primary-bit/build/result.json",
+    "archive": "raw/certificate/fault-control/wrong-primary-bit/build/result.json",
+    "original_bytes": 243,
+    "original_sha256": "0640ef5f3a46fa20e20a7b8c1aacd6f84cf9ddf4f138adb907f35678febcf890",
+    "archive_sha256": "0640ef5f3a46fa20e20a7b8c1aacd6f84cf9ddf4f138adb907f35678febcf890"
+  },
+  {
+    "source": "/tmp/gpui-bundled-coverage-evidence/fault-control/wrong-primary-bit/build/rustc.txt",
+    "archive": "raw/certificate/fault-control/wrong-primary-bit/build/rustc.txt",
+    "original_bytes": 214,
+    "original_sha256": "2900025046ddf3de47f87dd3d69fbfe380cae61af5fe1ecf31bb89c5f10645c5",
+    "archive_sha256": "2900025046ddf3de47f87dd3d69fbfe380cae61af5fe1ecf31bb89c5f10645c5"
+  },
+  {
+    "source": "/tmp/gpui-bundled-coverage-evidence/fault-control/wrong-primary-bit/build/stderr.log",
+    "archive": "raw/certificate/fault-control/wrong-primary-bit/build/stderr.log",
+    "original_bytes": 0,
+    "original_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+    "archive_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+  },
+  {
+    "source": "/tmp/gpui-bundled-coverage-evidence/fault-control/wrong-primary-bit/build/stdout.log",
+    "archive": "raw/certificate/fault-control/wrong-primary-bit/build/stdout.log",
+    "original_bytes": 0,
+    "original_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+    "archive_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+  },
+  {
+    "source": "/tmp/gpui-bundled-coverage-evidence/fault-control/wrong-primary-bit/build-dependencies/after.json",
+    "archive": "raw/certificate/fault-control/wrong-primary-bit/build-dependencies/after.json.gz",
+    "original_bytes": 302531,
+    "original_sha256": "f3ea5edf467e249e49bddab1f644ae8d1cd3ed190e34e9b8f6afecbc768c4088",
+    "archive_sha256": "e18e1c7b823595eb580462cd1f362a1efbcce8ae0aefd387c855376e5548bd70"
+  },
+  {
+    "source": "/tmp/gpui-bundled-coverage-evidence/fault-control/wrong-primary-bit/build-dependencies/argv.json",
+    "archive": "raw/certificate/fault-control/wrong-primary-bit/build-dependencies/argv.json",
+    "original_bytes": 1043,
+    "original_sha256": "e9322bfefc6101f8db605d33ec0a759ac52fae376025b109c8414fa9290aeec6",
+    "archive_sha256": "e9322bfefc6101f8db605d33ec0a759ac52fae376025b109c8414fa9290aeec6"
+  },
+  {
+    "source": "/tmp/gpui-bundled-coverage-evidence/fault-control/wrong-primary-bit/build-dependencies/before.json",
+    "archive": "raw/certificate/fault-control/wrong-primary-bit/build-dependencies/before.json.gz",
+    "original_bytes": 302531,
+    "original_sha256": "f3ea5edf467e249e49bddab1f644ae8d1cd3ed190e34e9b8f6afecbc768c4088",
+    "archive_sha256": "e18e1c7b823595eb580462cd1f362a1efbcce8ae0aefd387c855376e5548bd70"
+  },
+  {
+    "source": "/tmp/gpui-bundled-coverage-evidence/fault-control/wrong-primary-bit/build-dependencies/result.json",
+    "archive": "raw/certificate/fault-control/wrong-primary-bit/build-dependencies/result.json",
+    "original_bytes": 57,
+    "original_sha256": "e55014e5f03ec9d54a860bfa0f3deb99deb8257909c4b8c08508be04647d2d2d",
+    "archive_sha256": "e55014e5f03ec9d54a860bfa0f3deb99deb8257909c4b8c08508be04647d2d2d"
+  },
+  {
+    "source": "/tmp/gpui-bundled-coverage-evidence/fault-control/wrong-primary-bit/run/after.json",
+    "archive": "raw/certificate/fault-control/wrong-primary-bit/run/after.json",
+    "original_bytes": 351,
+    "original_sha256": "53f8bda238bb86a1ee8ce8f291179ee6a4bf0d3f7cca9d6302720d74edb06f10",
+    "archive_sha256": "53f8bda238bb86a1ee8ce8f291179ee6a4bf0d3f7cca9d6302720d74edb06f10"
+  },
+  {
+    "source": "/tmp/gpui-bundled-coverage-evidence/fault-control/wrong-primary-bit/run/before.json",
+    "archive": "raw/certificate/fault-control/wrong-primary-bit/run/before.json",
+    "original_bytes": 351,
+    "original_sha256": "53f8bda238bb86a1ee8ce8f291179ee6a4bf0d3f7cca9d6302720d74edb06f10",
+    "archive_sha256": "53f8bda238bb86a1ee8ce8f291179ee6a4bf0d3f7cca9d6302720d74edb06f10"
+  },
+  {
+    "source": "/tmp/gpui-bundled-coverage-evidence/fault-control/wrong-primary-bit/run/command.json",
+    "archive": "raw/certificate/fault-control/wrong-primary-bit/run/command.json",
+    "original_bytes": 775,
+    "original_sha256": "21ef37dc1ad686e18a6dad03ae0de1226bcfbe93134fe466798596817529ad4b",
+    "archive_sha256": "21ef37dc1ad686e18a6dad03ae0de1226bcfbe93134fe466798596817529ad4b"
+  },
+  {
+    "source": "/tmp/gpui-bundled-coverage-evidence/fault-control/wrong-primary-bit/run/exit",
+    "archive": "raw/certificate/fault-control/wrong-primary-bit/run/exit",
+    "original_bytes": 4,
+    "original_sha256": "39b8dc3fc8b44765c8e6f1adee04c5b465e555ab791cc42d0d9e810d5b64297c",
+    "archive_sha256": "39b8dc3fc8b44765c8e6f1adee04c5b465e555ab791cc42d0d9e810d5b64297c"
+  },
+  {
+    "source": "/tmp/gpui-bundled-coverage-evidence/fault-control/wrong-primary-bit/run/result.json",
+    "archive": "raw/certificate/fault-control/wrong-primary-bit/run/result.json",
+    "original_bytes": 245,
+    "original_sha256": "ea940f7e5d511da04d8cd6ec0cd286d4440f0742c8c122ef7ba77c4970a9d88d",
+    "archive_sha256": "ea940f7e5d511da04d8cd6ec0cd286d4440f0742c8c122ef7ba77c4970a9d88d"
+  },
+  {
+    "source": "/tmp/gpui-bundled-coverage-evidence/fault-control/wrong-primary-bit/run/rustc.txt",
+    "archive": "raw/certificate/fault-control/wrong-primary-bit/run/rustc.txt",
+    "original_bytes": 214,
+    "original_sha256": "2900025046ddf3de47f87dd3d69fbfe380cae61af5fe1ecf31bb89c5f10645c5",
+    "archive_sha256": "2900025046ddf3de47f87dd3d69fbfe380cae61af5fe1ecf31bb89c5f10645c5"
+  },
+  {
+    "source": "/tmp/gpui-bundled-coverage-evidence/fault-control/wrong-primary-bit/run/stderr.log",
+    "archive": "raw/certificate/fault-control/wrong-primary-bit/run/stderr.log",
+    "original_bytes": 317,
+    "original_sha256": "f93376c1a22744ad8a838ac86281f86eba1dc3c967b2cbb869050946c558a67f",
+    "archive_sha256": "f93376c1a22744ad8a838ac86281f86eba1dc3c967b2cbb869050946c558a67f"
+  },
+  {
+    "source": "/tmp/gpui-bundled-coverage-evidence/fault-control/wrong-primary-bit/run/stdout.log",
+    "archive": "raw/certificate/fault-control/wrong-primary-bit/run/stdout.log",
+    "original_bytes": 324,
+    "original_sha256": "ddf7f09e39b684b655119369aaf60177afc7ce7ada804eda2af711fa2f740a1d",
+    "archive_sha256": "ddf7f09e39b684b655119369aaf60177afc7ce7ada804eda2af711fa2f740a1d"
+  },
+  {
+    "source": "/tmp/gpui-bundled-coverage-evidence/fault-control/wrong-primary-bit/run-dependencies/after.json",
+    "archive": "raw/certificate/fault-control/wrong-primary-bit/run-dependencies/after.json.gz",
+    "original_bytes": 302531,
+    "original_sha256": "f3ea5edf467e249e49bddab1f644ae8d1cd3ed190e34e9b8f6afecbc768c4088",
+    "archive_sha256": "e18e1c7b823595eb580462cd1f362a1efbcce8ae0aefd387c855376e5548bd70"
+  },
+  {
+    "source": "/tmp/gpui-bundled-coverage-evidence/fault-control/wrong-primary-bit/run-dependencies/argv.json",
+    "archive": "raw/certificate/fault-control/wrong-primary-bit/run-dependencies/argv.json",
+    "original_bytes": 587,
+    "original_sha256": "c271fbc47a4a9b29503310c0602e51eac29acbe88facaeacac243e1373ba8ab5",
+    "archive_sha256": "c271fbc47a4a9b29503310c0602e51eac29acbe88facaeacac243e1373ba8ab5"
+  },
+  {
+    "source": "/tmp/gpui-bundled-coverage-evidence/fault-control/wrong-primary-bit/run-dependencies/before.json",
+    "archive": "raw/certificate/fault-control/wrong-primary-bit/run-dependencies/before.json.gz",
+    "original_bytes": 302531,
+    "original_sha256": "f3ea5edf467e249e49bddab1f644ae8d1cd3ed190e34e9b8f6afecbc768c4088",
+    "archive_sha256": "e18e1c7b823595eb580462cd1f362a1efbcce8ae0aefd387c855376e5548bd70"
+  },
+  {
+    "source": "/tmp/gpui-bundled-coverage-evidence/fault-control/wrong-primary-bit/run-dependencies/result.json",
+    "archive": "raw/certificate/fault-control/wrong-primary-bit/run-dependencies/result.json",
+    "original_bytes": 59,
+    "original_sha256": "bef2e039bce6323380390da7bf1804cba98636bdd34de42c820ba7c7a520b3ca",
+    "archive_sha256": "bef2e039bce6323380390da7bf1804cba98636bdd34de42c820ba7c7a520b3ca"
+  },
+  {
+    "source": "/tmp/gpui-bundled-coverage-evidence/initial-generator.rs",
+    "archive": "raw/certificate/initial-generator.rs",
+    "original_bytes": 1409,
+    "original_sha256": "6632418fa7e9664291eb287ac19377b3b6d445de82329f2588723a14c315e5f2",
+    "archive_sha256": "6632418fa7e9664291eb287ac19377b3b6d445de82329f2588723a14c315e5f2"
+  },
+  {
+    "source": "/tmp/gpui-bundled-coverage-evidence/planner.patch",
+    "archive": "raw/certificate/planner.patch",
+    "original_bytes": 2657,
+    "original_sha256": "cb21bae68c09fd78885893704f56d0be62332f63f00e15dc557f9cd04c48b76b",
+    "archive_sha256": "cb21bae68c09fd78885893704f56d0be62332f63f00e15dc557f9cd04c48b76b"
+  },
+  {
+    "source": "/tmp/gpui-coverage-events-evidence/assembly/after.json",
+    "archive": "raw/simd-spike/assembly/after.json",
+    "original_bytes": 355,
+    "original_sha256": "c1059947cf92e86d0fa3a76680b306e17b5b4fa81341624c234f167bb64e797d",
+    "archive_sha256": "c1059947cf92e86d0fa3a76680b306e17b5b4fa81341624c234f167bb64e797d"
+  },
+  {
+    "source": "/tmp/gpui-coverage-events-evidence/assembly/before.json",
+    "archive": "raw/simd-spike/assembly/before.json",
+    "original_bytes": 355,
+    "original_sha256": "c1059947cf92e86d0fa3a76680b306e17b5b4fa81341624c234f167bb64e797d",
+    "archive_sha256": "c1059947cf92e86d0fa3a76680b306e17b5b4fa81341624c234f167bb64e797d"
+  },
+  {
+    "source": "/tmp/gpui-coverage-events-evidence/assembly/command.json",
+    "archive": "raw/simd-spike/assembly/command.json",
+    "original_bytes": 658,
+    "original_sha256": "5afd26fb7f740f01251f1c371765c68c71497ad2c9cfaf73944d71bcd46c7709",
+    "archive_sha256": "5afd26fb7f740f01251f1c371765c68c71497ad2c9cfaf73944d71bcd46c7709"
+  },
+  {
+    "source": "/tmp/gpui-coverage-events-evidence/assembly/exit",
+    "archive": "raw/simd-spike/assembly/exit",
+    "original_bytes": 2,
+    "original_sha256": "9a271f2a916b0b6ee6cecb2426f0b3206ef074578be55d9bc94f6f3fe3ab86aa",
+    "archive_sha256": "9a271f2a916b0b6ee6cecb2426f0b3206ef074578be55d9bc94f6f3fe3ab86aa"
+  },
+  {
+    "source": "/tmp/gpui-coverage-events-evidence/assembly/result.json",
+    "archive": "raw/simd-spike/assembly/result.json",
+    "original_bytes": 243,
+    "original_sha256": "8f7d3aff8e230c381f9aeaf3ab769047d8f8305ab2a664b85b4ee285b261255e",
+    "archive_sha256": "8f7d3aff8e230c381f9aeaf3ab769047d8f8305ab2a664b85b4ee285b261255e"
+  },
+  {
+    "source": "/tmp/gpui-coverage-events-evidence/assembly/rustc.txt",
+    "archive": "raw/simd-spike/assembly/rustc.txt",
+    "original_bytes": 196,
+    "original_sha256": "b2bdf493bcf6d1dc55181a0efc2774b6d9cf7bf5c8dcc5bed592c994b2ad38c4",
+    "archive_sha256": "b2bdf493bcf6d1dc55181a0efc2774b6d9cf7bf5c8dcc5bed592c994b2ad38c4"
+  },
+  {
+    "source": "/tmp/gpui-coverage-events-evidence/assembly/stderr.log",
+    "archive": "raw/simd-spike/assembly/stderr.log",
+    "original_bytes": 142,
+    "original_sha256": "e0f82458232ec59ab642281356c01f25077622fcae59a6ffce45a224a95c4d44",
+    "archive_sha256": "e0f82458232ec59ab642281356c01f25077622fcae59a6ffce45a224a95c4d44"
+  },
+  {
+    "source": "/tmp/gpui-coverage-events-evidence/assembly/stdout.log",
+    "archive": "raw/simd-spike/assembly/stdout.log",
+    "original_bytes": 8411,
+    "original_sha256": "c86b4376ad187364b6bd5084511ce1d0c53276ec9fd34c507b557ffed5ed69eb",
+    "archive_sha256": "c86b4376ad187364b6bd5084511ce1d0c53276ec9fd34c507b557ffed5ed69eb"
+  },
+  {
+    "source": "/tmp/gpui-coverage-events-evidence/broken-continuation/after.json",
+    "archive": "raw/simd-spike/broken-continuation/after.json",
+    "original_bytes": 355,
+    "original_sha256": "c2f66f6e74c0ea8dfe3023db10669ced1ea8918d7b9c0d7e689bc7a8940dd19a",
+    "archive_sha256": "c2f66f6e74c0ea8dfe3023db10669ced1ea8918d7b9c0d7e689bc7a8940dd19a"
+  },
+  {
+    "source": "/tmp/gpui-coverage-events-evidence/broken-continuation/before.json",
+    "archive": "raw/simd-spike/broken-continuation/before.json",
+    "original_bytes": 355,
+    "original_sha256": "c2f66f6e74c0ea8dfe3023db10669ced1ea8918d7b9c0d7e689bc7a8940dd19a",
+    "archive_sha256": "c2f66f6e74c0ea8dfe3023db10669ced1ea8918d7b9c0d7e689bc7a8940dd19a"
+  },
+  {
+    "source": "/tmp/gpui-coverage-events-evidence/broken-continuation/command.json",
+    "archive": "raw/simd-spike/broken-continuation/command.json",
+    "original_bytes": 697,
+    "original_sha256": "aa7509822f35f219dffcb4a4ca1eeeb51cdeeeed433b44a0a1f1d22148d1ea64",
+    "archive_sha256": "aa7509822f35f219dffcb4a4ca1eeeb51cdeeeed433b44a0a1f1d22148d1ea64"
+  },
+  {
+    "source": "/tmp/gpui-coverage-events-evidence/broken-continuation/exit",
+    "archive": "raw/simd-spike/broken-continuation/exit",
+    "original_bytes": 4,
+    "original_sha256": "39b8dc3fc8b44765c8e6f1adee04c5b465e555ab791cc42d0d9e810d5b64297c",
+    "archive_sha256": "39b8dc3fc8b44765c8e6f1adee04c5b465e555ab791cc42d0d9e810d5b64297c"
+  },
+  {
+    "source": "/tmp/gpui-coverage-events-evidence/broken-continuation/result.json",
+    "archive": "raw/simd-spike/broken-continuation/result.json",
+    "original_bytes": 245,
+    "original_sha256": "ab04fdde12d297c68360f3f3146a9afb2853cec8d2421039bcd1881d853af2eb",
+    "archive_sha256": "ab04fdde12d297c68360f3f3146a9afb2853cec8d2421039bcd1881d853af2eb"
+  },
+  {
+    "source": "/tmp/gpui-coverage-events-evidence/broken-continuation/rustc.txt",
+    "archive": "raw/simd-spike/broken-continuation/rustc.txt",
+    "original_bytes": 196,
+    "original_sha256": "b2bdf493bcf6d1dc55181a0efc2774b6d9cf7bf5c8dcc5bed592c994b2ad38c4",
+    "archive_sha256": "b2bdf493bcf6d1dc55181a0efc2774b6d9cf7bf5c8dcc5bed592c994b2ad38c4"
+  },
+  {
+    "source": "/tmp/gpui-coverage-events-evidence/broken-continuation/stderr.log",
+    "archive": "raw/simd-spike/broken-continuation/stderr.log",
+    "original_bytes": 520,
+    "original_sha256": "957b0fca1fde57bb72909457d4581ff61c13dd4c86d7782b600632e72ff3d167",
+    "archive_sha256": "957b0fca1fde57bb72909457d4581ff61c13dd4c86d7782b600632e72ff3d167"
+  },
+  {
+    "source": "/tmp/gpui-coverage-events-evidence/broken-continuation/stdout.log",
+    "archive": "raw/simd-spike/broken-continuation/stdout.log",
+    "original_bytes": 8381,
+    "original_sha256": "9f67cbd8b83f322216500f03b604951c39da97447aa9438a094ca29c00db922c",
+    "archive_sha256": "9f67cbd8b83f322216500f03b604951c39da97447aa9438a094ca29c00db922c"
+  },
+  {
+    "source": "/tmp/gpui-coverage-events-evidence/default/after.json",
+    "archive": "raw/simd-spike/default/after.json",
+    "original_bytes": 355,
+    "original_sha256": "c1059947cf92e86d0fa3a76680b306e17b5b4fa81341624c234f167bb64e797d",
+    "archive_sha256": "c1059947cf92e86d0fa3a76680b306e17b5b4fa81341624c234f167bb64e797d"
+  },
+  {
+    "source": "/tmp/gpui-coverage-events-evidence/default/before.json",
+    "archive": "raw/simd-spike/default/before.json",
+    "original_bytes": 355,
+    "original_sha256": "c1059947cf92e86d0fa3a76680b306e17b5b4fa81341624c234f167bb64e797d",
+    "archive_sha256": "c1059947cf92e86d0fa3a76680b306e17b5b4fa81341624c234f167bb64e797d"
+  },
+  {
+    "source": "/tmp/gpui-coverage-events-evidence/default/command.json",
+    "archive": "raw/simd-spike/default/command.json",
+    "original_bytes": 601,
+    "original_sha256": "45c9233400bd4a94f3be61b5c1f77ccd55ee15bd21f00b3a476a5eeced00e339",
+    "archive_sha256": "45c9233400bd4a94f3be61b5c1f77ccd55ee15bd21f00b3a476a5eeced00e339"
+  },
+  {
+    "source": "/tmp/gpui-coverage-events-evidence/default/exit",
+    "archive": "raw/simd-spike/default/exit",
+    "original_bytes": 2,
+    "original_sha256": "9a271f2a916b0b6ee6cecb2426f0b3206ef074578be55d9bc94f6f3fe3ab86aa",
+    "archive_sha256": "9a271f2a916b0b6ee6cecb2426f0b3206ef074578be55d9bc94f6f3fe3ab86aa"
+  },
+  {
+    "source": "/tmp/gpui-coverage-events-evidence/default/result.json",
+    "archive": "raw/simd-spike/default/result.json",
+    "original_bytes": 243,
+    "original_sha256": "57e7d1bb49d19dd0b22901c08f13c50aa2e69939c6406c34d5f28ea2a839f129",
+    "archive_sha256": "57e7d1bb49d19dd0b22901c08f13c50aa2e69939c6406c34d5f28ea2a839f129"
+  },
+  {
+    "source": "/tmp/gpui-coverage-events-evidence/default/rustc.txt",
+    "archive": "raw/simd-spike/default/rustc.txt",
+    "original_bytes": 196,
+    "original_sha256": "b2bdf493bcf6d1dc55181a0efc2774b6d9cf7bf5c8dcc5bed592c994b2ad38c4",
+    "archive_sha256": "b2bdf493bcf6d1dc55181a0efc2774b6d9cf7bf5c8dcc5bed592c994b2ad38c4"
+  },
+  {
+    "source": "/tmp/gpui-coverage-events-evidence/default/stderr.log",
+    "archive": "raw/simd-spike/default/stderr.log",
+    "original_bytes": 469,
+    "original_sha256": "821a2c067768a6ce3a8b48ca0f2af7c4ea2b810f18080781e4791856a0da0c5c",
+    "archive_sha256": "821a2c067768a6ce3a8b48ca0f2af7c4ea2b810f18080781e4791856a0da0c5c"
+  },
+  {
+    "source": "/tmp/gpui-coverage-events-evidence/default/stdout.log",
+    "archive": "raw/simd-spike/default/stdout.log",
+    "original_bytes": 8107,
+    "original_sha256": "1d1493ca7cc23805f564fbfee256f2983d07883230ce16361bb494a0413b2c3a",
+    "archive_sha256": "1d1493ca7cc23805f564fbfee256f2983d07883230ce16361bb494a0413b2c3a"
+  },
+  {
+    "source": "/tmp/gpui-coverage-events-evidence/fallback/after.json",
+    "archive": "raw/simd-spike/fallback/after.json",
+    "original_bytes": 355,
+    "original_sha256": "c1059947cf92e86d0fa3a76680b306e17b5b4fa81341624c234f167bb64e797d",
+    "archive_sha256": "c1059947cf92e86d0fa3a76680b306e17b5b4fa81341624c234f167bb64e797d"
+  },
+  {
+    "source": "/tmp/gpui-coverage-events-evidence/fallback/before.json",
+    "archive": "raw/simd-spike/fallback/before.json",
+    "original_bytes": 355,
+    "original_sha256": "c1059947cf92e86d0fa3a76680b306e17b5b4fa81341624c234f167bb64e797d",
+    "archive_sha256": "c1059947cf92e86d0fa3a76680b306e17b5b4fa81341624c234f167bb64e797d"
+  },
+  {
+    "source": "/tmp/gpui-coverage-events-evidence/fallback/command.json",
+    "archive": "raw/simd-spike/fallback/command.json",
+    "original_bytes": 630,
+    "original_sha256": "b7e76bca916dcfd7db8a72b5d91a4051408b0456775f99a26823475e13d90fab",
+    "archive_sha256": "b7e76bca916dcfd7db8a72b5d91a4051408b0456775f99a26823475e13d90fab"
+  },
+  {
+    "source": "/tmp/gpui-coverage-events-evidence/fallback/exit",
+    "archive": "raw/simd-spike/fallback/exit",
+    "original_bytes": 2,
+    "original_sha256": "9a271f2a916b0b6ee6cecb2426f0b3206ef074578be55d9bc94f6f3fe3ab86aa",
+    "archive_sha256": "9a271f2a916b0b6ee6cecb2426f0b3206ef074578be55d9bc94f6f3fe3ab86aa"
+  },
+  {
+    "source": "/tmp/gpui-coverage-events-evidence/fallback/result.json",
+    "archive": "raw/simd-spike/fallback/result.json",
+    "original_bytes": 243,
+    "original_sha256": "57e7d1bb49d19dd0b22901c08f13c50aa2e69939c6406c34d5f28ea2a839f129",
+    "archive_sha256": "57e7d1bb49d19dd0b22901c08f13c50aa2e69939c6406c34d5f28ea2a839f129"
+  },
+  {
+    "source": "/tmp/gpui-coverage-events-evidence/fallback/rustc.txt",
+    "archive": "raw/simd-spike/fallback/rustc.txt",
+    "original_bytes": 196,
+    "original_sha256": "b2bdf493bcf6d1dc55181a0efc2774b6d9cf7bf5c8dcc5bed592c994b2ad38c4",
+    "archive_sha256": "b2bdf493bcf6d1dc55181a0efc2774b6d9cf7bf5c8dcc5bed592c994b2ad38c4"
+  },
+  {
+    "source": "/tmp/gpui-coverage-events-evidence/fallback/stderr.log",
+    "archive": "raw/simd-spike/fallback/stderr.log",
+    "original_bytes": 273,
+    "original_sha256": "d34b82f3059ef685b53d8c970c72d92e2a972c5216e12aa2b54c3139cb15583f",
+    "archive_sha256": "d34b82f3059ef685b53d8c970c72d92e2a972c5216e12aa2b54c3139cb15583f"
+  },
+  {
+    "source": "/tmp/gpui-coverage-events-evidence/fallback/stdout.log",
+    "archive": "raw/simd-spike/fallback/stdout.log",
+    "original_bytes": 8083,
+    "original_sha256": "1a7b6808003f249763e445e65ffe2806af0d4f1693c419ea0714e73272840769",
+    "archive_sha256": "1a7b6808003f249763e445e65ffe2806af0d4f1693c419ea0714e73272840769"
+  },
+  {
+    "source": "/tmp/gpui-coverage-events-evidence/guarded-assembly/after.json",
+    "archive": "raw/simd-spike/guarded-assembly/after.json",
+    "original_bytes": 355,
+    "original_sha256": "3d55c7400620adea2df01e303a0b50b7cfa7214bf714b21875a86edda8a1b2c4",
+    "archive_sha256": "3d55c7400620adea2df01e303a0b50b7cfa7214bf714b21875a86edda8a1b2c4"
+  },
+  {
+    "source": "/tmp/gpui-coverage-events-evidence/guarded-assembly/before.json",
+    "archive": "raw/simd-spike/guarded-assembly/before.json",
+    "original_bytes": 355,
+    "original_sha256": "3d55c7400620adea2df01e303a0b50b7cfa7214bf714b21875a86edda8a1b2c4",
+    "archive_sha256": "3d55c7400620adea2df01e303a0b50b7cfa7214bf714b21875a86edda8a1b2c4"
+  },
+  {
+    "source": "/tmp/gpui-coverage-events-evidence/guarded-assembly/command.json",
+    "archive": "raw/simd-spike/guarded-assembly/command.json",
+    "original_bytes": 658,
+    "original_sha256": "5e6ef3667fe15c17c2c5c9f8c9e469bac4f3f51f0a29d5db49ac176fc6a2c995",
+    "archive_sha256": "5e6ef3667fe15c17c2c5c9f8c9e469bac4f3f51f0a29d5db49ac176fc6a2c995"
+  },
+  {
+    "source": "/tmp/gpui-coverage-events-evidence/guarded-assembly/exit",
+    "archive": "raw/simd-spike/guarded-assembly/exit",
+    "original_bytes": 2,
+    "original_sha256": "9a271f2a916b0b6ee6cecb2426f0b3206ef074578be55d9bc94f6f3fe3ab86aa",
+    "archive_sha256": "9a271f2a916b0b6ee6cecb2426f0b3206ef074578be55d9bc94f6f3fe3ab86aa"
+  },
+  {
+    "source": "/tmp/gpui-coverage-events-evidence/guarded-assembly/result.json",
+    "archive": "raw/simd-spike/guarded-assembly/result.json",
+    "original_bytes": 243,
+    "original_sha256": "b27936f3fcf9911a3d409e8abfee536a771101efae81f843fe464721cd02036c",
+    "archive_sha256": "b27936f3fcf9911a3d409e8abfee536a771101efae81f843fe464721cd02036c"
+  },
+  {
+    "source": "/tmp/gpui-coverage-events-evidence/guarded-assembly/rustc.txt",
+    "archive": "raw/simd-spike/guarded-assembly/rustc.txt",
+    "original_bytes": 196,
+    "original_sha256": "b2bdf493bcf6d1dc55181a0efc2774b6d9cf7bf5c8dcc5bed592c994b2ad38c4",
+    "archive_sha256": "b2bdf493bcf6d1dc55181a0efc2774b6d9cf7bf5c8dcc5bed592c994b2ad38c4"
+  },
+  {
+    "source": "/tmp/gpui-coverage-events-evidence/guarded-assembly/stderr.log",
+    "archive": "raw/simd-spike/guarded-assembly/stderr.log",
+    "original_bytes": 142,
+    "original_sha256": "24cb129459583db3986a8d0cc68fedce741f8b51a6b747aaa02f677a74f40b3b",
+    "archive_sha256": "24cb129459583db3986a8d0cc68fedce741f8b51a6b747aaa02f677a74f40b3b"
+  },
+  {
+    "source": "/tmp/gpui-coverage-events-evidence/guarded-assembly/stdout.log",
+    "archive": "raw/simd-spike/guarded-assembly/stdout.log",
+    "original_bytes": 8411,
+    "original_sha256": "8faddf434a59360a6b9f47eb33fed076d0f1f9f1c8cbdff527067aae21e0c589",
+    "archive_sha256": "8faddf434a59360a6b9f47eb33fed076d0f1f9f1c8cbdff527067aae21e0c589"
+  },
+  {
+    "source": "/tmp/gpui-coverage-events-evidence/guarded-default/after.json",
+    "archive": "raw/simd-spike/guarded-default/after.json",
+    "original_bytes": 355,
+    "original_sha256": "3d55c7400620adea2df01e303a0b50b7cfa7214bf714b21875a86edda8a1b2c4",
+    "archive_sha256": "3d55c7400620adea2df01e303a0b50b7cfa7214bf714b21875a86edda8a1b2c4"
+  },
+  {
+    "source": "/tmp/gpui-coverage-events-evidence/guarded-default/before.json",
+    "archive": "raw/simd-spike/guarded-default/before.json",
+    "original_bytes": 355,
+    "original_sha256": "3d55c7400620adea2df01e303a0b50b7cfa7214bf714b21875a86edda8a1b2c4",
+    "archive_sha256": "3d55c7400620adea2df01e303a0b50b7cfa7214bf714b21875a86edda8a1b2c4"
+  },
+  {
+    "source": "/tmp/gpui-coverage-events-evidence/guarded-default/command.json",
+    "archive": "raw/simd-spike/guarded-default/command.json",
+    "original_bytes": 601,
+    "original_sha256": "c92611b192918d779fdc3ecfad39fa812025654d2a34882876230294bbe7e479",
+    "archive_sha256": "c92611b192918d779fdc3ecfad39fa812025654d2a34882876230294bbe7e479"
+  },
+  {
+    "source": "/tmp/gpui-coverage-events-evidence/guarded-default/exit",
+    "archive": "raw/simd-spike/guarded-default/exit",
+    "original_bytes": 2,
+    "original_sha256": "9a271f2a916b0b6ee6cecb2426f0b3206ef074578be55d9bc94f6f3fe3ab86aa",
+    "archive_sha256": "9a271f2a916b0b6ee6cecb2426f0b3206ef074578be55d9bc94f6f3fe3ab86aa"
+  },
+  {
+    "source": "/tmp/gpui-coverage-events-evidence/guarded-default/result.json",
+    "archive": "raw/simd-spike/guarded-default/result.json",
+    "original_bytes": 243,
+    "original_sha256": "b1865be1647b21c329501f87bf7516a65b76af341edd41305c41e9ef8675881a",
+    "archive_sha256": "b1865be1647b21c329501f87bf7516a65b76af341edd41305c41e9ef8675881a"
+  },
+  {
+    "source": "/tmp/gpui-coverage-events-evidence/guarded-default/rustc.txt",
+    "archive": "raw/simd-spike/guarded-default/rustc.txt",
+    "original_bytes": 196,
+    "original_sha256": "b2bdf493bcf6d1dc55181a0efc2774b6d9cf7bf5c8dcc5bed592c994b2ad38c4",
+    "archive_sha256": "b2bdf493bcf6d1dc55181a0efc2774b6d9cf7bf5c8dcc5bed592c994b2ad38c4"
+  },
+  {
+    "source": "/tmp/gpui-coverage-events-evidence/guarded-default/stderr.log",
+    "archive": "raw/simd-spike/guarded-default/stderr.log",
+    "original_bytes": 273,
+    "original_sha256": "0e600f6ba194c7f9f449a9a5e56f33e92b42ada9b471ea57ddc84b43530d7822",
+    "archive_sha256": "0e600f6ba194c7f9f449a9a5e56f33e92b42ada9b471ea57ddc84b43530d7822"
+  },
+  {
+    "source": "/tmp/gpui-coverage-events-evidence/guarded-default/stdout.log",
+    "archive": "raw/simd-spike/guarded-default/stdout.log",
+    "original_bytes": 8099,
+    "original_sha256": "052365f872bcffe7cba6db62625f9d16fca68c9c0a83ef6b56434ce0f2c99dc4",
+    "archive_sha256": "052365f872bcffe7cba6db62625f9d16fca68c9c0a83ef6b56434ce0f2c99dc4"
+  },
+  {
+    "source": "/tmp/gpui-coverage-events-evidence/guarded-fallback/after.json",
+    "archive": "raw/simd-spike/guarded-fallback/after.json",
+    "original_bytes": 355,
+    "original_sha256": "3d55c7400620adea2df01e303a0b50b7cfa7214bf714b21875a86edda8a1b2c4",
+    "archive_sha256": "3d55c7400620adea2df01e303a0b50b7cfa7214bf714b21875a86edda8a1b2c4"
+  },
+  {
+    "source": "/tmp/gpui-coverage-events-evidence/guarded-fallback/before.json",
+    "archive": "raw/simd-spike/guarded-fallback/before.json",
+    "original_bytes": 355,
+    "original_sha256": "3d55c7400620adea2df01e303a0b50b7cfa7214bf714b21875a86edda8a1b2c4",
+    "archive_sha256": "3d55c7400620adea2df01e303a0b50b7cfa7214bf714b21875a86edda8a1b2c4"
+  },
+  {
+    "source": "/tmp/gpui-coverage-events-evidence/guarded-fallback/command.json",
+    "archive": "raw/simd-spike/guarded-fallback/command.json",
+    "original_bytes": 630,
+    "original_sha256": "b04afb1c73ac9dc96180f8716e79bd50c5087dfa14b7339b6e1de778b1dd0291",
+    "archive_sha256": "b04afb1c73ac9dc96180f8716e79bd50c5087dfa14b7339b6e1de778b1dd0291"
+  },
+  {
+    "source": "/tmp/gpui-coverage-events-evidence/guarded-fallback/exit",
+    "archive": "raw/simd-spike/guarded-fallback/exit",
+    "original_bytes": 2,
+    "original_sha256": "9a271f2a916b0b6ee6cecb2426f0b3206ef074578be55d9bc94f6f3fe3ab86aa",
+    "archive_sha256": "9a271f2a916b0b6ee6cecb2426f0b3206ef074578be55d9bc94f6f3fe3ab86aa"
+  },
+  {
+    "source": "/tmp/gpui-coverage-events-evidence/guarded-fallback/result.json",
+    "archive": "raw/simd-spike/guarded-fallback/result.json",
+    "original_bytes": 243,
+    "original_sha256": "b1865be1647b21c329501f87bf7516a65b76af341edd41305c41e9ef8675881a",
+    "archive_sha256": "b1865be1647b21c329501f87bf7516a65b76af341edd41305c41e9ef8675881a"
+  },
+  {
+    "source": "/tmp/gpui-coverage-events-evidence/guarded-fallback/rustc.txt",
+    "archive": "raw/simd-spike/guarded-fallback/rustc.txt",
+    "original_bytes": 196,
+    "original_sha256": "b2bdf493bcf6d1dc55181a0efc2774b6d9cf7bf5c8dcc5bed592c994b2ad38c4",
+    "archive_sha256": "b2bdf493bcf6d1dc55181a0efc2774b6d9cf7bf5c8dcc5bed592c994b2ad38c4"
+  },
+  {
+    "source": "/tmp/gpui-coverage-events-evidence/guarded-fallback/stderr.log",
+    "archive": "raw/simd-spike/guarded-fallback/stderr.log",
+    "original_bytes": 273,
+    "original_sha256": "8f0c58963c90dc91f31cd5955c45a5f5e17218d8bfadfbc573c4112e2f1065ca",
+    "archive_sha256": "8f0c58963c90dc91f31cd5955c45a5f5e17218d8bfadfbc573c4112e2f1065ca"
+  },
+  {
+    "source": "/tmp/gpui-coverage-events-evidence/guarded-fallback/stdout.log",
+    "archive": "raw/simd-spike/guarded-fallback/stdout.log",
+    "original_bytes": 8083,
+    "original_sha256": "4969b54e22b0fc839fc6b72b03879a12cb6adfc614bca706338689d53ef3da9b",
+    "archive_sha256": "4969b54e22b0fc839fc6b72b03879a12cb6adfc614bca706338689d53ef3da9b"
+  },
+  {
+    "source": "/tmp/gpui-coverage-events-evidence/guarded-strict/after.json",
+    "archive": "raw/simd-spike/guarded-strict/after.json",
+    "original_bytes": 355,
+    "original_sha256": "3d55c7400620adea2df01e303a0b50b7cfa7214bf714b21875a86edda8a1b2c4",
+    "archive_sha256": "3d55c7400620adea2df01e303a0b50b7cfa7214bf714b21875a86edda8a1b2c4"
+  },
+  {
+    "source": "/tmp/gpui-coverage-events-evidence/guarded-strict/before.json",
+    "archive": "raw/simd-spike/guarded-strict/before.json",
+    "original_bytes": 355,
+    "original_sha256": "3d55c7400620adea2df01e303a0b50b7cfa7214bf714b21875a86edda8a1b2c4",
+    "archive_sha256": "3d55c7400620adea2df01e303a0b50b7cfa7214bf714b21875a86edda8a1b2c4"
+  },
+  {
+    "source": "/tmp/gpui-coverage-events-evidence/guarded-strict/command.json",
+    "archive": "raw/simd-spike/guarded-strict/command.json",
+    "original_bytes": 630,
+    "original_sha256": "0c680b0893d5989c80a280fe4ac3b3be81d19f3842a5b92932e6b3a5bf76a9fa",
+    "archive_sha256": "0c680b0893d5989c80a280fe4ac3b3be81d19f3842a5b92932e6b3a5bf76a9fa"
+  },
+  {
+    "source": "/tmp/gpui-coverage-events-evidence/guarded-strict/exit",
+    "archive": "raw/simd-spike/guarded-strict/exit",
+    "original_bytes": 2,
+    "original_sha256": "9a271f2a916b0b6ee6cecb2426f0b3206ef074578be55d9bc94f6f3fe3ab86aa",
+    "archive_sha256": "9a271f2a916b0b6ee6cecb2426f0b3206ef074578be55d9bc94f6f3fe3ab86aa"
+  },
+  {
+    "source": "/tmp/gpui-coverage-events-evidence/guarded-strict/result.json",
+    "archive": "raw/simd-spike/guarded-strict/result.json",
+    "original_bytes": 243,
+    "original_sha256": "b27936f3fcf9911a3d409e8abfee536a771101efae81f843fe464721cd02036c",
+    "archive_sha256": "b27936f3fcf9911a3d409e8abfee536a771101efae81f843fe464721cd02036c"
+  },
+  {
+    "source": "/tmp/gpui-coverage-events-evidence/guarded-strict/rustc.txt",
+    "archive": "raw/simd-spike/guarded-strict/rustc.txt",
+    "original_bytes": 196,
+    "original_sha256": "b2bdf493bcf6d1dc55181a0efc2774b6d9cf7bf5c8dcc5bed592c994b2ad38c4",
+    "archive_sha256": "b2bdf493bcf6d1dc55181a0efc2774b6d9cf7bf5c8dcc5bed592c994b2ad38c4"
+  },
+  {
+    "source": "/tmp/gpui-coverage-events-evidence/guarded-strict/stderr.log",
+    "archive": "raw/simd-spike/guarded-strict/stderr.log",
+    "original_bytes": 152,
+    "original_sha256": "531d2d7fb57754e912d69d463ae553f181379985941b6fc2403ef337059abd1a",
+    "archive_sha256": "531d2d7fb57754e912d69d463ae553f181379985941b6fc2403ef337059abd1a"
+  },
+  {
+    "source": "/tmp/gpui-coverage-events-evidence/guarded-strict/stdout.log",
+    "archive": "raw/simd-spike/guarded-strict/stdout.log",
+    "original_bytes": 9443,
+    "original_sha256": "2f8a90bc84cf06b3da4d5cff5a2b8530642b379f0c959cd5b3f1fd04f249c3d7",
+    "archive_sha256": "2f8a90bc84cf06b3da4d5cff5a2b8530642b379f0c959cd5b3f1fd04f249c3d7"
+  },
+  {
+    "source": "/tmp/gpui-coverage-events-evidence/machine/disassembly.stderr",
+    "archive": "raw/simd-spike/machine/disassembly.stderr",
+    "original_bytes": 0,
+    "original_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+    "archive_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+  },
+  {
+    "source": "/tmp/gpui-coverage-events-evidence/machine/frames.stderr",
+    "archive": "raw/simd-spike/machine/frames.stderr",
+    "original_bytes": 0,
+    "original_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+    "archive_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+  },
+  {
+    "source": "/tmp/gpui-coverage-events-evidence/machine/frames.txt",
+    "archive": "raw/simd-spike/machine/frames.txt.gz",
+    "original_bytes": 247514,
+    "original_sha256": "c0c8f1412814d94986f5b5c0a736b3ff82fc69cf43d904122503215fe4e42ecb",
+    "archive_sha256": "44d127aca49a40aed91d8d90143806a78ee27721330ea923725b6603b2e9de90"
+  },
+  {
+    "source": "/tmp/gpui-coverage-events-evidence/machine/generated.s",
+    "archive": "raw/simd-spike/machine/generated.s",
+    "original_bytes": 19666,
+    "original_sha256": "5e34fe400edacb98b173765e850d256e61ed957efedcca452ab186072ffe6722",
+    "archive_sha256": "5e34fe400edacb98b173765e850d256e61ed957efedcca452ab186072ffe6722"
+  },
+  {
+    "source": "/tmp/gpui-coverage-events-evidence/machine/identity.json",
+    "archive": "raw/simd-spike/machine/identity.json",
+    "original_bytes": 2435,
+    "original_sha256": "2011d264f098282b30676932521e22d7c353f5eaa26cb87416f5f38181acd465",
+    "archive_sha256": "2011d264f098282b30676932521e22d7c353f5eaa26cb87416f5f38181acd465"
+  },
+  {
+    "source": "/tmp/gpui-coverage-events-evidence/machine/sections.stderr",
+    "archive": "raw/simd-spike/machine/sections.stderr",
+    "original_bytes": 0,
+    "original_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+    "archive_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+  },
+  {
+    "source": "/tmp/gpui-coverage-events-evidence/machine/sections.txt",
+    "archive": "raw/simd-spike/machine/sections.txt",
+    "original_bytes": 3456,
+    "original_sha256": "9a67ea2a584ae1d3602eddcd1b019cc8a0b7f00e45fe315cf617d2ea7f824c75",
+    "archive_sha256": "9a67ea2a584ae1d3602eddcd1b019cc8a0b7f00e45fe315cf617d2ea7f824c75"
+  },
+  {
+    "source": "/tmp/gpui-coverage-events-evidence/machine/symbols.stderr",
+    "archive": "raw/simd-spike/machine/symbols.stderr",
+    "original_bytes": 0,
+    "original_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+    "archive_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+  },
+  {
+    "source": "/tmp/gpui-coverage-events-evidence/machine/symbols.txt",
+    "archive": "raw/simd-spike/machine/symbols.txt.gz",
+    "original_bytes": 98114,
+    "original_sha256": "fb35c2dd56f5286af29ee01855e94efc1351c00ed86fe5bec831133098fee5cc",
+    "archive_sha256": "f77dfa0c01aaa0bb60a640ac25749d1b1f2a9297ba9efdc75a87b0e4502beb2c"
+  },
+  {
+    "source": "/tmp/gpui-coverage-events-evidence/machine-14aa6/disassembly.stderr",
+    "archive": "raw/simd-spike/machine-14aa6/disassembly.stderr",
+    "original_bytes": 0,
+    "original_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+    "archive_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+  },
+  {
+    "source": "/tmp/gpui-coverage-events-evidence/machine-14aa6/frames.stderr",
+    "archive": "raw/simd-spike/machine-14aa6/frames.stderr",
+    "original_bytes": 0,
+    "original_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+    "archive_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+  },
+  {
+    "source": "/tmp/gpui-coverage-events-evidence/machine-14aa6/frames.txt",
+    "archive": "raw/simd-spike/machine-14aa6/frames.txt.gz",
+    "original_bytes": 247520,
+    "original_sha256": "2fcb51077d390e23b53c8f1295cec44d64ae5ad67249e9aad9d6cfdaab08f7c0",
+    "archive_sha256": "14a5cf591aae0aa694b5037d7083294482dd8a8062a97430d76bb087713f8f53"
+  },
+  {
+    "source": "/tmp/gpui-coverage-events-evidence/machine-14aa6/generated.s",
+    "archive": "raw/simd-spike/machine-14aa6/generated.s",
+    "original_bytes": 19729,
+    "original_sha256": "1e3b6b5d397da3b646a874f7d4014f7ec1fec00a0e104923d9b3306440dd3a64",
+    "archive_sha256": "1e3b6b5d397da3b646a874f7d4014f7ec1fec00a0e104923d9b3306440dd3a64"
+  },
+  {
+    "source": "/tmp/gpui-coverage-events-evidence/machine-14aa6/identity.json",
+    "archive": "raw/simd-spike/machine-14aa6/identity.json",
+    "original_bytes": 2435,
+    "original_sha256": "bc64eee0e2fc35303c390cd9cd21c43654cd8068abef3fb5fab682174cb9d69a",
+    "archive_sha256": "bc64eee0e2fc35303c390cd9cd21c43654cd8068abef3fb5fab682174cb9d69a"
+  },
+  {
+    "source": "/tmp/gpui-coverage-events-evidence/machine-14aa6/sections.stderr",
+    "archive": "raw/simd-spike/machine-14aa6/sections.stderr",
+    "original_bytes": 0,
+    "original_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+    "archive_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+  },
+  {
+    "source": "/tmp/gpui-coverage-events-evidence/machine-14aa6/sections.txt",
+    "archive": "raw/simd-spike/machine-14aa6/sections.txt",
+    "original_bytes": 3456,
+    "original_sha256": "9a67ea2a584ae1d3602eddcd1b019cc8a0b7f00e45fe315cf617d2ea7f824c75",
+    "archive_sha256": "9a67ea2a584ae1d3602eddcd1b019cc8a0b7f00e45fe315cf617d2ea7f824c75"
+  },
+  {
+    "source": "/tmp/gpui-coverage-events-evidence/machine-14aa6/symbols.stderr",
+    "archive": "raw/simd-spike/machine-14aa6/symbols.stderr",
+    "original_bytes": 0,
+    "original_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+    "archive_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+  },
+  {
+    "source": "/tmp/gpui-coverage-events-evidence/machine-14aa6/symbols.txt",
+    "archive": "raw/simd-spike/machine-14aa6/symbols.txt.gz",
+    "original_bytes": 98114,
+    "original_sha256": "ab04ac0ab47ef33db5a36feca287d9c7ef906289b5e402a076b23f1c3510d5f0",
+    "archive_sha256": "f9f23cc55fb3737247ca0776af0e18c0ff74fff5f2c40f939bbe9ba52788559f"
+  },
+  {
+    "source": "/tmp/gpui-coverage-events-evidence/strict/after.json",
+    "archive": "raw/simd-spike/strict/after.json",
+    "original_bytes": 355,
+    "original_sha256": "c1059947cf92e86d0fa3a76680b306e17b5b4fa81341624c234f167bb64e797d",
+    "archive_sha256": "c1059947cf92e86d0fa3a76680b306e17b5b4fa81341624c234f167bb64e797d"
+  },
+  {
+    "source": "/tmp/gpui-coverage-events-evidence/strict/before.json",
+    "archive": "raw/simd-spike/strict/before.json",
+    "original_bytes": 355,
+    "original_sha256": "c1059947cf92e86d0fa3a76680b306e17b5b4fa81341624c234f167bb64e797d",
+    "archive_sha256": "c1059947cf92e86d0fa3a76680b306e17b5b4fa81341624c234f167bb64e797d"
+  },
+  {
+    "source": "/tmp/gpui-coverage-events-evidence/strict/command.json",
+    "archive": "raw/simd-spike/strict/command.json",
+    "original_bytes": 630,
+    "original_sha256": "97a21446b33ac36630761987cd309aabbacfcfde0d99ff28eec537434329c131",
+    "archive_sha256": "97a21446b33ac36630761987cd309aabbacfcfde0d99ff28eec537434329c131"
+  },
+  {
+    "source": "/tmp/gpui-coverage-events-evidence/strict/exit",
+    "archive": "raw/simd-spike/strict/exit",
+    "original_bytes": 2,
+    "original_sha256": "9a271f2a916b0b6ee6cecb2426f0b3206ef074578be55d9bc94f6f3fe3ab86aa",
+    "archive_sha256": "9a271f2a916b0b6ee6cecb2426f0b3206ef074578be55d9bc94f6f3fe3ab86aa"
+  },
+  {
+    "source": "/tmp/gpui-coverage-events-evidence/strict/result.json",
+    "archive": "raw/simd-spike/strict/result.json",
+    "original_bytes": 243,
+    "original_sha256": "8f7d3aff8e230c381f9aeaf3ab769047d8f8305ab2a664b85b4ee285b261255e",
+    "archive_sha256": "8f7d3aff8e230c381f9aeaf3ab769047d8f8305ab2a664b85b4ee285b261255e"
+  },
+  {
+    "source": "/tmp/gpui-coverage-events-evidence/strict/rustc.txt",
+    "archive": "raw/simd-spike/strict/rustc.txt",
+    "original_bytes": 196,
+    "original_sha256": "b2bdf493bcf6d1dc55181a0efc2774b6d9cf7bf5c8dcc5bed592c994b2ad38c4",
+    "archive_sha256": "b2bdf493bcf6d1dc55181a0efc2774b6d9cf7bf5c8dcc5bed592c994b2ad38c4"
+  },
+  {
+    "source": "/tmp/gpui-coverage-events-evidence/strict/stderr.log",
+    "archive": "raw/simd-spike/strict/stderr.log",
+    "original_bytes": 347,
+    "original_sha256": "499b5be6b0597e71e3aac8620fe39a7ebe5aca72d3849a8e973dc4b4a8e0b537",
+    "archive_sha256": "499b5be6b0597e71e3aac8620fe39a7ebe5aca72d3849a8e973dc4b4a8e0b537"
+  },
+  {
+    "source": "/tmp/gpui-coverage-events-evidence/strict/stdout.log",
+    "archive": "raw/simd-spike/strict/stdout.log",
+    "original_bytes": 9451,
+    "original_sha256": "c65630086d8c78a7492e7a6f180fcd9af2b54178ff7b693d9797548f7393bcb3",
+    "archive_sha256": "c65630086d8c78a7492e7a6f180fcd9af2b54178ff7b693d9797548f7393bcb3"
+  },
+  {
+    "source": "/tmp/gpui-run-frozen-gate-root.py",
+    "archive": "raw/helpers/gpui-run-frozen-gate-root.py",
+    "original_bytes": 2996,
+    "original_sha256": "c74c2c1dbff742dc541c47dda34af84b469c91a6f246500433ff36c59cfd0258",
+    "archive_sha256": "c74c2c1dbff742dc541c47dda34af84b469c91a6f246500433ff36c59cfd0258"
+  },
+  {
+    "source": "/tmp/gpui-freeze-dependencies-root.py",
+    "archive": "raw/helpers/gpui-freeze-dependencies-root.py",
+    "original_bytes": 1797,
+    "original_sha256": "0c8656d45da3b44089ddd01ce5e00398dec36d140eec21c359453a266c0ac49b",
+    "archive_sha256": "0c8656d45da3b44089ddd01ce5e00398dec36d140eec21c359453a266c0ac49b"
+  },
+  {
+    "source": "/tmp/gpui-analyze-coverage-machine-root.py",
+    "archive": "raw/helpers/gpui-analyze-coverage-machine-root.py",
+    "original_bytes": 4965,
+    "original_sha256": "c2c66ebb2fb141bff8ec2631b303d66084cef8bdfac807b4fb35e141f7bef681",
+    "archive_sha256": "c2c66ebb2fb141bff8ec2631b303d66084cef8bdfac807b4fb35e141f7bef681"
+  },
+  {
+    "source": "/tmp/gpui-run-coverage-oracle-root.py",
+    "archive": "raw/helpers/gpui-run-coverage-oracle-root.py",
+    "original_bytes": 2602,
+    "original_sha256": "d04cd5d2563fa3571c440c61812e804ec09a84063be922f65917c7153a6e0ea0",
+    "archive_sha256": "d04cd5d2563fa3571c440c61812e804ec09a84063be922f65917c7153a6e0ea0"
+  },
+  {
+    "source": "/tmp/gpui-bundled-coverage-fault-root.py",
+    "archive": "raw/helpers/gpui-bundled-coverage-fault-root.py",
+    "original_bytes": 3764,
+    "original_sha256": "5f57e18e4af2afbb07ba502bad49b2e30978935af17c13d0bd0ae01c3faa357c",
+    "archive_sha256": "5f57e18e4af2afbb07ba502bad49b2e30978935af17c13d0bd0ae01c3faa357c"
+  },
+  {
+    "source": "/tmp/gpui-archive-bundled-coverage-root.py",
+    "archive": "raw/helpers/gpui-archive-bundled-coverage-root.py",
+    "original_bytes": 9095,
+    "original_sha256": "986183305065f506c99c9a8b3cd87d89d1a2915104ca6ff4222f29335b144343",
+    "archive_sha256": "986183305065f506c99c9a8b3cd87d89d1a2915104ca6ff4222f29335b144343"
+  },
+  {
+    "source": "/tmp/gpui-luna-text-pipeline-research-20261023.json",
+    "archive": "raw/research/gpui-luna-text-pipeline-research-20261023.json.gz",
+    "original_bytes": 29063,
+    "original_sha256": "5bc5fbe120b0e06268cdf04ca51148fa8b0352261bb8d307c46e300fb35c856f",
+    "archive_sha256": "4d7bb1a8a4445720e2dfd491dd0610130ab40eae7f4df46daa4e92ad1bfd5651"
+  },
+  {
+    "source": "/tmp/gpui-bundled-coverage-audit-20261023.json",
+    "archive": "raw/research/gpui-bundled-coverage-audit-20261023.json",
+    "original_bytes": 14412,
+    "original_sha256": "f3ee58468abb888e4f8079f1e7cc3e94b6714ffbfe22d24be13b435915c5620a",
+    "archive_sha256": "f3ee58468abb888e4f8079f1e7cc3e94b6714ffbfe22d24be13b435915c5620a"
+  },
+  {
+    "source": "/tmp/gpui-cold-glyph-raster-audit-20261023.json",
+    "archive": "raw/research/gpui-cold-glyph-raster-audit-20261023.json",
+    "original_bytes": 12430,
+    "original_sha256": "8dc424f0afeb8226578ddf08b1a823ecff8221f116f57341db778c7e4b803649",
+    "archive_sha256": "8dc424f0afeb8226578ddf08b1a823ecff8221f116f57341db778c7e4b803649"
+  },
+  {
+    "source": "/tmp/gpui-coverage-events-root/Cargo.lock",
+    "archive": "raw/fixtures/gpui-coverage-events-root/Cargo.lock",
+    "original_bytes": 1593,
+    "original_sha256": "6804e05ac1d12e10f0adf0514e9cdabf75068b6250fe5e09c421ce40e6890612",
+    "archive_sha256": "6804e05ac1d12e10f0adf0514e9cdabf75068b6250fe5e09c421ce40e6890612"
+  },
+  {
+    "source": "/tmp/gpui-coverage-events-root/Cargo.toml",
+    "archive": "raw/fixtures/gpui-coverage-events-root/Cargo.toml",
+    "original_bytes": 262,
+    "original_sha256": "2afc8f7081e16de70e71ebd0190c6017a405c2c2a92b9f7c86c1ce166b3e648d",
+    "archive_sha256": "2afc8f7081e16de70e71ebd0190c6017a405c2c2a92b9f7c86c1ce166b3e648d"
+  },
+  {
+    "source": "/tmp/gpui-coverage-events-root/src/bin/coverage-events.rs",
+    "archive": "raw/fixtures/gpui-coverage-events-root/src/bin/coverage-events.rs",
+    "original_bytes": 580,
+    "original_sha256": "595e093bbdc73af5bebed7c951670ec085691bda5ad7dd2115a9b40ef158d3d0",
+    "archive_sha256": "595e093bbdc73af5bebed7c951670ec085691bda5ad7dd2115a9b40ef158d3d0"
+  },
+  {
+    "source": "/tmp/gpui-coverage-events-root/src/lib.rs",
+    "archive": "raw/fixtures/gpui-coverage-events-root/src/lib.rs",
+    "original_bytes": 5570,
+    "original_sha256": "1ba9ce52121d926c73231cbb6408c2839f0080da4608e41ac0fa19fe63d0bbf3",
+    "archive_sha256": "1ba9ce52121d926c73231cbb6408c2839f0080da4608e41ac0fa19fe63d0bbf3"
+  },
+  {
+    "source": "/tmp/gpui-coverage-events-broken-root/Cargo.lock",
+    "archive": "raw/fixtures/gpui-coverage-events-broken-root/Cargo.lock",
+    "original_bytes": 1593,
+    "original_sha256": "6804e05ac1d12e10f0adf0514e9cdabf75068b6250fe5e09c421ce40e6890612",
+    "archive_sha256": "6804e05ac1d12e10f0adf0514e9cdabf75068b6250fe5e09c421ce40e6890612"
+  },
+  {
+    "source": "/tmp/gpui-coverage-events-broken-root/Cargo.toml",
+    "archive": "raw/fixtures/gpui-coverage-events-broken-root/Cargo.toml",
+    "original_bytes": 262,
+    "original_sha256": "2afc8f7081e16de70e71ebd0190c6017a405c2c2a92b9f7c86c1ce166b3e648d",
+    "archive_sha256": "2afc8f7081e16de70e71ebd0190c6017a405c2c2a92b9f7c86c1ce166b3e648d"
+  },
+  {
+    "source": "/tmp/gpui-coverage-events-broken-root/src/bin/coverage-events.rs",
+    "archive": "raw/fixtures/gpui-coverage-events-broken-root/src/bin/coverage-events.rs",
+    "original_bytes": 580,
+    "original_sha256": "595e093bbdc73af5bebed7c951670ec085691bda5ad7dd2115a9b40ef158d3d0",
+    "archive_sha256": "595e093bbdc73af5bebed7c951670ec085691bda5ad7dd2115a9b40ef158d3d0"
+  },
+  {
+    "source": "/tmp/gpui-coverage-events-broken-root/src/lib.rs",
+    "archive": "raw/fixtures/gpui-coverage-events-broken-root/src/lib.rs",
+    "original_bytes": 5570,
+    "original_sha256": "fdf602981301e0ab1fdb0a33ee1df4e810ec05da542459f90669c0ba8aa65c9f",
+    "archive_sha256": "fdf602981301e0ab1fdb0a33ee1df4e810ec05da542459f90669c0ba8aa65c9f"
+  },
+  {
+    "source": "/tmp/gpui-coverage-text-oracle-root/Cargo.lock",
+    "archive": "raw/fixtures/gpui-coverage-text-oracle-root/Cargo.lock",
+    "original_bytes": 15176,
+    "original_sha256": "88d80117db49da5e4388d7e3ac32ba6f9268cef5d9dc77175e42555fe5e0353b",
+    "archive_sha256": "88d80117db49da5e4388d7e3ac32ba6f9268cef5d9dc77175e42555fe5e0353b"
+  },
+  {
+    "source": "/tmp/gpui-coverage-text-oracle-root/Cargo.toml",
+    "archive": "raw/fixtures/gpui-coverage-text-oracle-root/Cargo.toml",
+    "original_bytes": 411,
+    "original_sha256": "c79ef0bf0f26264d8f1e8a96c8d2099a567003af13f361b4eb9cbe45a97c1994",
+    "archive_sha256": "c79ef0bf0f26264d8f1e8a96c8d2099a567003af13f361b4eb9cbe45a97c1994"
+  },
+  {
+    "source": "/tmp/gpui-coverage-text-oracle-root/assets/NotoSans.ttf",
+    "archive": "raw/fixtures/gpui-coverage-text-oracle-root/assets/NotoSans.ttf.gz",
+    "original_bytes": 2049096,
+    "original_sha256": "bfb7bb691513f12e734dc346c03a03f784912432d7e3fa8e56efcf906fe86b3d",
+    "archive_sha256": "d52098a38f62f2a5f1305ae2fb5035a93822575290758983b6d33dd389b3941d"
+  },
+  {
+    "source": "/tmp/gpui-coverage-text-oracle-root/origin.json",
+    "archive": "raw/fixtures/gpui-coverage-text-oracle-root/origin.json",
+    "original_bytes": 612,
+    "original_sha256": "67616fe0a93ecf944b762af630cf733f90f76dfdad3213c0c674e4cfd89c3c26",
+    "archive_sha256": "67616fe0a93ecf944b762af630cf733f90f76dfdad3213c0c674e4cfd89c3c26"
+  },
+  {
+    "source": "/tmp/gpui-coverage-text-oracle-root/src/main.rs",
+    "archive": "raw/fixtures/gpui-coverage-text-oracle-root/src/main.rs",
+    "original_bytes": 3939,
+    "original_sha256": "901e16172a9e15886f580aecab96289dd1ef99da0c5e55b661d9e3e132dbc3fa",
+    "archive_sha256": "901e16172a9e15886f580aecab96289dd1ef99da0c5e55b661d9e3e132dbc3fa"
+  },
+  {
+    "source": "/tmp/gpui-coverage-certificate-fault-root/certificate.rs",
+    "archive": "raw/fixtures/gpui-coverage-certificate-fault-root/certificate.rs",
+    "original_bytes": 2003,
+    "original_sha256": "5bcc800d7d273c02cee08c7748707d21d63f4c1234899799a59f64cfc83de8da",
+    "archive_sha256": "5bcc800d7d273c02cee08c7748707d21d63f4c1234899799a59f64cfc83de8da"
+  },
+  {
+    "source": "/tmp/gpui-coverage-certificate-fault-root/font-coverage.bin",
+    "archive": "raw/fixtures/gpui-coverage-certificate-fault-root/font-coverage.bin",
+    "original_bytes": 585,
+    "original_sha256": "e0a38e607d50a7fead2676b2829554fc675e005714be6ce0842072f3031e8e8b",
+    "archive_sha256": "e0a38e607d50a7fead2676b2829554fc675e005714be6ce0842072f3031e8e8b"
+  },
+  {
+    "source": "/tmp/gpui-coverage-certificate-fault-root/harness.rs",
+    "archive": "raw/fixtures/gpui-coverage-certificate-fault-root/harness.rs",
+    "original_bytes": 586,
+    "original_sha256": "311c8e4552e055c0ac6bc824505f6005dbf01b1e54a331cd7ef9174c4c9a3620",
+    "archive_sha256": "311c8e4552e055c0ac6bc824505f6005dbf01b1e54a331cd7ef9174c4c9a3620"
+  },
+  {
+    "source": "/tmp/gpui-coverage-certificate-fault-root/origin.json",
+    "archive": "raw/fixtures/gpui-coverage-certificate-fault-root/origin.json",
+    "original_bytes": 294,
+    "original_sha256": "0ae4d4119213f8ec067f094211765657471510559cad2c78577e15c83ccd62dd",
+    "archive_sha256": "0ae4d4119213f8ec067f094211765657471510559cad2c78577e15c83ccd62dd"
+  }
+]

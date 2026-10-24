@@ -1,0 +1,10 @@
+   Compiling proc-macro2 v1.0.107
+   Compiling unicode-ident v1.0.27
+   Compiling quote v1.0.47
+   Compiling syn v3.0.9
+   Compiling fearless_simd_macros v0.1.0
+   Compiling fearless_simd v1.1.0
+   Compiling gpui_coverage_events_spike v0.0.0 (/tmp/gpui-coverage-events-broken-root)
+    Finished `release` profile [optimized] target(s) in 10.79s
+     Running unittests src/lib.rs (/tmp/gpui-coverage-events-broken-target/release/deps/gpui_coverage_events_spike-5f347ca07e9d941d)
+error: test failed, to rerun pass `--lib`

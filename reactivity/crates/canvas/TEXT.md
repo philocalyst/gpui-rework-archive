@@ -37,6 +37,17 @@ this is not a claim of coverage for every Unicode scalar. Fonts and OFL
 provenance are in [assets](assets/README.md), [Arabic](assets/arabic/README.md)
 and [Hebrew](assets/hebrew/README.md).
 
+Bundled coverage now uses a checked-in 585-byte certificate: 195 maximal
+intervals encode the exact three font-presence bits. An exhaustive Unicode test
+compares it with the production parser against the immutable assets. Printable
+ASCII and CR/LF are certified; a shared Fearless SIMD/Fallback classifier emits
+only controls and non-ASCII leading bytes for ordered validation. Custom fonts
+retain ordinary cmap validation through the same iterator boundary. The
+[integration ledger](../../evidence/bundled-coverage/README.md) records exact
+oracles, fault controls, code/section/frame costs and the rejected callback
+formulation. Regenerate the table with the `coverage_table` example when
+changing a bundled font. This does not change fallback selection or errors.
+
 Painting resolves the private slot against that layout's immutable leases.
 Raster keys include exact face identity, glyph and physical size, so equal IDs
 from different faces cannot alias. Cache eviction and later font-set selection
@@ -73,7 +84,7 @@ whole-layout scratch or heap budget: multiple shaped runs can retain their
 expansion before Canvas checks the final count. Hostile-font transient-memory
 admission remains an explicit gap requiring a configurable dependency budget
 or earlier bounded/fallible planning. No 32K-scratch safety claim is made.
-The [pinned minimal upstream patch](../../vendor/parley/GPUI_PATCHES.md) repairs
+The [pinned minimal upstream patch](../../vendor/parley/GPUI-PATCHES.md) repairs
 overflow/truncation for long graphemes, bounds run-relative cluster access and
 keeps logical RTL ligature groups atomic during wrapping. Source range checks
 remain enabled after lowering.

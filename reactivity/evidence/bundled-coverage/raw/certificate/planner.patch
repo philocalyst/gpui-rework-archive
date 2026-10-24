@@ -1,0 +1,64 @@
+diff --git a/reactivity/crates/canvas/src/text/planner.rs b/reactivity/crates/canvas/src/text/planner.rs
+index 8a2bc5dd46..f8e24b2250 100644
+--- a/reactivity/crates/canvas/src/text/planner.rs
++++ b/reactivity/crates/canvas/src/text/planner.rs
+@@ -50,7 +50,6 @@ pub(super) struct Planner<'font> {
+     blob_ids: [Option<u64>; 3],
+     sets: [Option<Arc<FontSet>>; 4],
+     primary_cmap: Cmap<'font>,
+-    fallback_cmaps: Option<[Cmap<'static>; 2]>,
+ }
+ impl<'font> Planner<'font> {
+     pub fn new(primary: &'font FontFace) -> Result<Self, Error> {
+@@ -72,8 +71,11 @@ impl<'font> Planner<'font> {
+             faces,
+             blob_ids: [None; 3],
+             sets: [Some(base), None, None, None],
+-            primary_cmap: Cmap::parse(&primary.0.bytes)?,
+-            fallback_cmaps: None,
++            primary_cmap: if primary.0.bundled {
++                Cmap(None)
++            } else {
++                Cmap::parse(&primary.0.bytes)?
++            },
+         };
+         result.register(0)?;
+         Ok(result)
+@@ -98,26 +100,18 @@ impl<'font> Planner<'font> {
+             if c.is_control() {
+                 return Err(Error::UnsupportedControl(c));
+             }
+-            if self.primary_cmap.glyph_index(c).is_some_and(|g| g.0 != 0) {
+-                continue;
+-            }
+-            if !self.faces.primary.0.bundled {
+-                return Err(Error::MissingGlyph(c));
+-            }
+-            // These static views remain lazy: primary-only passes never parse
+-            // or touch the fallback faces. No font lease is needed to inspect.
+-            if self.fallback_cmaps.is_none() {
+-                self.fallback_cmaps = Some([
+-                    Cmap::parse(FontFace::fallback_bytes(1)?)?,
+-                    Cmap::parse(FontFace::fallback_bytes(2)?)?,
+-                ]);
+-            }
+-            let mut covered = 0_u8;
+-            for (index, fallback) in self.fallback_cmaps.as_ref().unwrap().iter().enumerate() {
+-                if fallback.glyph_index(c).is_some_and(|glyph| glyph.0 != 0) {
+-                    covered |= 1 << index;
++            let covered = if self.faces.primary.0.bundled {
++                let mask = bundled_coverage::mask(c);
++                if mask & 1 != 0 {
++                    continue;
+                 }
+-            }
++                mask >> 1
++            } else {
++                if self.primary_cmap.glyph_index(c).is_some_and(|g| g.0 != 0) {
++                    continue;
++                }
++                return Err(Error::MissingGlyph(c));
++            };
+             if covered == 0 {
+                 return Err(Error::MissingGlyph(c));
+             }

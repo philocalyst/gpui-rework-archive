@@ -68,6 +68,20 @@ precision limits, source/stack costs and the unadopted alternatives.
 
 ## Current verification
 
+The integrated [bundled coverage certificate](evidence/bundled-coverage/README.md)
+uses exact source `023e584a05`, adopted as `f0859ea215`. A 585-byte interval
+certificate replaces repeated bundled-font cmap probes; one Fearless
+SIMD/Fallback classifier visits only exceptional scalars in certified text.
+The existing 1,120-case public shaping/layout/selection/error oracle is byte
+identical. Ordinary and no-default-feature Canvas suites each pass 188 tests,
+with three ignored; strict repository-policy lint and Apple/MSVC source checks
+pass. Exhaustive Unicode and deliberately broken certificate/classifier controls
+are retained. Matched whole executable code falls 1,632 bytes; all allocated
+sections grow four bytes after charging the table and padding. The shaping
+function's maximum observed RSP CFA falls 4,656→3,056 bytes. Core is now
+**31,321** non-test, non-comment lines, **+89** for this slice; Hummingbird remains
+5,633. No timing, measured heap or RSS result is inferred.
+
 The integrated [source-delivery admission](evidence/delivery-isolation/README.md)
 uses `2b52030aed` over `37d0321fe2`. Registered worker replies share ordinary
 source invalidation; one bounded buffer owns both queued and frozen messages.
@@ -76,7 +90,7 @@ demonstrated stale sibling-Question failure. The kernel requires the pinned
 genuine nightly and does not use bootstrap. Root's composed-source gates pass
 580 default tests, 707 X11/GPU tests, 28 docs and strict default/native-GPU lint
 under repository policy. Separate producer evidence includes native Registry
-clients and Apple/MSVC cross-compilation. Core is now **31,232** non-test,
+clients and Apple/MSVC cross-compilation. Core at that checkpoint is **31,232** non-test,
 non-comment source lines, **+245** from the preceding Main; Hummingbird remains
 5,633. Matched transport and exact-edit allocation savings, ordinary-frame
 growth and typed-delivery code/frame growth are all charged in that dossier.

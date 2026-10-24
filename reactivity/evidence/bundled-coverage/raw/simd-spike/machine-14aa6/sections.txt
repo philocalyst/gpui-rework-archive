@@ -1,0 +1,43 @@
+There are 34 section headers, starting at offset 0x6d298:
+
+Section Headers:
+  [Nr] Name              Type            Address          Off    Size   ES Flg Lk Inf Al
+  [ 0]                   NULL            0000000000000000 000000 000000 00      0   0  0
+  [ 1] .interp           PROGBITS        00000000000002e0 0002e0 000053 00   A  0   0  1
+  [ 2] .note.ABI-tag     NOTE            0000000000000334 000334 000020 00   A  0   0  4
+  [ 3] .dynsym           DYNSYM          0000000000000358 000358 000678 18   A  7   1  8
+  [ 4] .gnu.version      VERSYM          00000000000009d0 0009d0 00008a 02   A  3   0  2
+  [ 5] .gnu.version_r    VERNEED         0000000000000a5c 000a5c 000120 00   A  7   3  4
+  [ 6] .gnu.hash         GNU_HASH        0000000000000b80 000b80 00001c 00   A  3   0  8
+  [ 7] .dynstr           STRTAB          0000000000000b9c 000b9c 00042a 00   A  0   0  1
+  [ 8] .rela.dyn         RELA            0000000000000fc8 000fc8 003af8 18   A  3   0  8
+  [ 9] .rela.plt         RELA            0000000000004ac0 004ac0 000030 18  AI  3  25  8
+  [10] .gcc_except_table PROGBITS        0000000000004af0 004af0 002b38 00   A  0   0  4
+  [11] .rodata           PROGBITS        0000000000007630 007630 005660 00 AMS  0   0 16
+  [12] .eh_frame_hdr     PROGBITS        000000000000cc90 00cc90 00107c 00   A  0   0  4
+  [13] .eh_frame         PROGBITS        000000000000dd10 00dd10 005250 00   A  0   0  8
+  [14] .text             PROGBITS        0000000000013f60 012f60 03dc93 00  AX  0   0 16
+  [15] .init             PROGBITS        0000000000051bf4 050bf4 00001b 00  AX  0   0  4
+  [16] .fini             PROGBITS        0000000000051c10 050c10 00000d 00  AX  0   0  4
+  [17] .plt              PROGBITS        0000000000051c20 050c20 000030 00  AX  0   0 16
+  [18] .tdata            PROGBITS        0000000000052c50 050c50 000020 00 WAT  0   0  8
+  [19] .tbss             NOBITS          0000000000052c70 050c70 000030 00 WAT  0   0  8
+  [20] .fini_array       FINI_ARRAY      0000000000052c70 050c70 000008 08  WA  0   0  8
+  [21] .init_array       INIT_ARRAY      0000000000052c78 050c78 000010 00 WAo  0   0  8
+  [22] .data.rel.ro      PROGBITS        0000000000052c88 050c88 001bf8 00  WA  0   0  8
+  [23] .dynamic          DYNAMIC         0000000000054880 052880 0001d0 10  WA  7   0  8
+  [24] .got              PROGBITS        0000000000054a50 052a50 0008a0 00  WA  0   0  8
+  [25] .got.plt          PROGBITS        00000000000552f0 0532f0 000028 00  WA  0   0  8
+  [26] .relro_padding    NOBITS          0000000000055318 053318 000ce8 00  WA  0   0  1
+  [27] .tm_clone_table   PROGBITS        0000000000056318 053318 000000 00  WA  0   0  8
+  [28] .data             PROGBITS        0000000000056318 053318 0009c0 00  WA  0   0  8
+  [29] .bss              NOBITS          0000000000056cd8 053cd8 0000ca 00  WA  0   0  8
+  [30] .comment          PROGBITS        0000000000000000 053cd8 00009d 01  MS  0   0  1
+  [31] .symtab           SYMTAB          0000000000000000 053d78 006168 18     33 718  8
+  [32] .shstrtab         STRTAB          0000000000000000 059ee0 000140 00      0   0  1
+  [33] .strtab           STRTAB          0000000000000000 05a020 013275 00      0   0  1
+Key to Flags:
+  W (write), A (alloc), X (execute), M (merge), S (strings), I (info),
+  L (link order), O (extra OS processing required), G (group), T (TLS),
+  C (compressed), x (unknown), o (OS specific), E (exclude),
+  D (mbind), l (large), p (processor specific)

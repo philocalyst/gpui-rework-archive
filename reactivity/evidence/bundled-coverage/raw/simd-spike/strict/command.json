@@ -1,0 +1,29 @@
+{
+  "source": "af2332afec8baaa2c39c8b846df4a43e99c10f63",
+  "cwd": "/tmp/gpui-coverage-events-root",
+  "argv": [
+    "cargo",
+    "clippy",
+    "--offline",
+    "--locked",
+    "--all-targets",
+    "--message-format=json",
+    "--",
+    "-D",
+    "warnings"
+  ],
+  "timeout_seconds": 180,
+  "environment": {
+    "RUSTC": null,
+    "RUSTDOC": null,
+    "RUSTC_BOOTSTRAP": null,
+    "RUSTFLAGS": null,
+    "CARGO_ENCODED_RUSTFLAGS": null,
+    "CARGO_TARGET_DIR": "/tmp/gpui-coverage-events-root-target",
+    "CARGO_BUILD_JOBS": "1",
+    "MIRI": null,
+    "MIRI_SYSROOT": null,
+    "MIRIFLAGS": null,
+    "RUST_SRC_PATH": null
+  }
+}
