@@ -50,6 +50,14 @@ pub(super) struct Planner<'font> {
     blob_ids: [Option<u64>; 3],
     sets: [Option<Arc<FontSet>>; 4],
     primary_cmap: Cmap<'font>,
+    pub(super) paragraph_shapes: u64,
+    spare: Vec<parley::Layout<()>>,
+}
+pub(super) struct Paragraphs {
+    first: parley::Layout<()>,
+    rest: Vec<parley::Layout<()>>,
+    needed: u8,
+    blob_ids: [Option<u64>; 3],
 }
 struct Planned {
     metrics: TextMetrics,
@@ -77,6 +85,8 @@ impl<'font> Planner<'font> {
             faces,
             blob_ids: [None; 3],
             sets: [Some(base), None, None, None],
+            paragraph_shapes: 0,
+            spare: Vec::new(),
             primary_cmap: if primary.0.bundled {
                 Cmap(None)
             } else {
@@ -145,6 +155,87 @@ impl<'font> Planner<'font> {
             })
         }))
     }
+    pub fn prepare(&mut self, text: &str, size: f32) -> Result<Paragraphs, Error> {
+        let needed = self.coverage(text)?;
+        let mut paragraphs = paragraph::ranges(text);
+        let first = paragraphs
+            .next()
+            .expect("even empty text has one paragraph");
+        self.build(&text[first.content], size, needed);
+        let first = std::mem::replace(&mut self.layout, self.spare.pop().unwrap_or_default());
+        let mut rest = Vec::new();
+        for paragraph in paragraphs {
+            self.build(&text[paragraph.content], size, needed);
+            rest.push(std::mem::replace(
+                &mut self.layout,
+                self.spare.pop().unwrap_or_default(),
+            ));
+        }
+        Ok(Paragraphs {
+            first,
+            rest,
+            needed,
+            blob_ids: self.blob_ids,
+        })
+    }
+    pub fn recycle(&mut self, paragraphs: Paragraphs) {
+        // Keep only the high-water number of buffers used concurrently in this
+        // pass. Clearing releases font leases without discarding their capacity.
+        let Paragraphs {
+            mut first, rest, ..
+        } = paragraphs;
+        first.clear();
+        std::mem::swap(&mut self.layout, &mut first);
+        first.clear();
+        self.spare.push(first);
+        for mut layout in rest {
+            layout.clear();
+            self.spare.push(layout);
+        }
+    }
+    fn build(&mut self, content: &str, size: f32, needed: u8) {
+        let mut names = FAMILIES.map(|name| FontFamilyName::Named(name.into()));
+        let mut family_count = 1;
+        for (index, family) in FAMILIES.iter().enumerate().skip(1) {
+            if needed & (1 << (index - 1)) != 0 {
+                names[family_count] = FontFamilyName::Named((*family).into());
+                family_count += 1;
+            }
+        }
+        let mut builder = self
+            .context
+            .ranged_builder(&mut self.fonts, content, 1., false);
+        builder.push_default(&names[..family_count]);
+        builder.push_default(StyleProperty::FontSize(size));
+        builder.push_default(StyleProperty::OverflowWrap(OverflowWrap::Anywhere));
+        builder.build_into(&mut self.layout, content);
+        self.paragraph_shapes += 1;
+    }
+    pub fn shape_prepared(
+        &mut self,
+        text: &str,
+        size: f32,
+        max_width: Option<f32>,
+        paragraphs: &mut Paragraphs,
+    ) -> Result<TextLayout, Error> {
+        // Prepared paragraphs can be handed to another shaper of the same
+        // exact primary face. Resolve fallback leases there, while glyph slots
+        // continue to use the original paragraph's font blob identities.
+        self.coverage(text)?;
+        let planned = self.plan_inner::<true>(text, size, max_width, true, Some(paragraphs))?;
+        self.materialize(text, size, planned)
+    }
+    pub fn measure_prepared(
+        &mut self,
+        text: &str,
+        size: f32,
+        max_width: Option<f32>,
+        paragraphs: &mut Paragraphs,
+    ) -> Result<TextMetrics, Error> {
+        Ok(self
+            .plan_inner::<false>(text, size, max_width, false, Some(paragraphs))?
+            .metrics)
+    }
     pub fn shape(
         &mut self,
         text: &str,
@@ -153,6 +244,14 @@ impl<'font> Planner<'font> {
         interactive: bool,
     ) -> Result<TextLayout, Error> {
         let planned = self.plan::<true>(text, size, max_width, interactive)?;
+        self.materialize(text, size, planned)
+    }
+    fn materialize(
+        &mut self,
+        text: &str,
+        size: f32,
+        planned: Planned,
+    ) -> Result<TextLayout, Error> {
         Ok(TextLayout {
             width: planned.metrics.width,
             height: planned.metrics.height,
@@ -179,7 +278,7 @@ impl<'font> Planner<'font> {
         max_width: Option<f32>,
         interactive: bool,
     ) -> Result<Planned, Error> {
-        let result = self.plan_inner::<MATERIALIZE>(text, size, max_width, interactive);
+        let result = self.plan_inner::<MATERIALIZE>(text, size, max_width, interactive, None);
         if result.is_err() {
             // An invalid or expanding font can create a rejected large layout.
             // Do not keep its buffers for later calls in this planning pass.
@@ -193,16 +292,13 @@ impl<'font> Planner<'font> {
         size: f32,
         max_width: Option<f32>,
         interactive: bool,
+        mut paragraphs: Option<&mut Paragraphs>,
     ) -> Result<Planned, Error> {
-        let needed = self.coverage(text)?;
-        let mut names = FAMILIES.map(|name| FontFamilyName::Named(name.into()));
-        let mut family_count = 1;
-        for (index, family) in FAMILIES.iter().enumerate().skip(1) {
-            if needed & (1 << (index - 1)) != 0 {
-                names[family_count] = FontFamilyName::Named((*family).into());
-                family_count += 1;
-            }
-        }
+        let needed = match &paragraphs {
+            Some(paragraphs) => paragraphs.needed,
+            None => self.coverage(text)?,
+        };
+        let blob_ids = paragraphs.as_ref().map_or(self.blob_ids, |p| p.blob_ids);
         let mut glyphs = EcoVec::new();
         let mut details: Option<Details> = None;
         let mut detailed = false;
@@ -211,17 +307,20 @@ impl<'font> Planner<'font> {
         let mut height = 0.0f32;
         let mut baseline = 0.0f32;
         let mut mask = 0;
-        for paragraph in paragraph::ranges(text) {
+        for (index, paragraph) in paragraph::ranges(text).enumerate() {
             let content = &text[paragraph.content.clone()];
-            let mut builder = self
-                .context
-                .ranged_builder(&mut self.fonts, content, 1., false);
-            builder.push_default(&names[..family_count]);
-            builder.push_default(StyleProperty::FontSize(size));
-            builder.push_default(StyleProperty::OverflowWrap(OverflowWrap::Anywhere));
-            builder.build_into(&mut self.layout, content);
-            self.layout.break_all_lines(max_width);
-            let planned = &self.layout;
+            let planned = if let Some(paragraphs) = &mut paragraphs {
+                if index == 0 {
+                    &mut paragraphs.first
+                } else {
+                    &mut paragraphs.rest[index - 1]
+                }
+            } else {
+                self.build(content, size, needed);
+                &mut self.layout
+            };
+            planned.break_all_lines(max_width);
+            let planned = &*planned;
             let simple = !interactive
                 && paragraph.content.end == text.len()
                 && paragraph.content.start == 0
@@ -229,7 +328,7 @@ impl<'font> Planner<'font> {
                 && planned
                     .lines()
                     .flat_map(|line| line.runs())
-                    .all(|run| !run.is_rtl() && Some(run.font().data.id()) == self.blob_ids[0])
+                    .all(|run| !run.is_rtl() && Some(run.font().data.id()) == blob_ids[0])
                 && planned.lines().flat_map(|line| line.runs()).count() <= 1;
             if !simple && !detailed {
                 detailed = true;
@@ -290,8 +389,7 @@ impl<'font> Planner<'font> {
                     {
                         return Err(Error::UnsupportedFontFormat);
                     }
-                    let slot = self
-                        .blob_ids
+                    let slot = blob_ids
                         .iter()
                         .position(|&id| id == Some(run.run().font().data.id()))
                         .ok_or(Error::ForeignLayout)?;

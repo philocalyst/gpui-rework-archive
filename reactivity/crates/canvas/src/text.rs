@@ -349,11 +349,105 @@ pub(crate) struct Raster {
 /// This separates read-only shaping from a service's mutable glyph cache without
 /// a self reference, permanent table cache or shared mutable lock. Each returned
 /// layout owns one immutable FontSet lease shared by layouts from this pass.
+/// A source-borrowed handoff of already-shaped paragraphs. Rebreaking this value
+/// uses the original Unicode shaping output at each requested width. Its font
+/// identity and size are fixed, and it cannot outlive the exact source bytes.
+/// Paragraph buffers are transient; drop this value after canonical placement.
+pub struct PreparedText<'text> {
+    text: &'text str,
+    font_size: f32,
+    face: u64,
+    paragraphs: Option<planner::Paragraphs>,
+}
+impl PreparedText<'_> {
+    pub fn text(&self) -> &str {
+        self.text
+    }
+    pub fn font_size(&self) -> f32 {
+        self.font_size
+    }
+}
 pub struct TextShaper<'font> {
     font: &'font FontFace,
     planner: Option<Box<planner::Planner<'font>>>,
 }
 impl<'font> TextShaper<'font> {
+    /// Shape each paragraph once, preserving its original source borrow.
+    pub fn prepare<'text>(
+        &mut self,
+        text: &'text str,
+        font_size: f32,
+    ) -> Result<PreparedText<'text>, Error> {
+        let face = self.font.0.id;
+        let paragraphs = self
+            .planner(text, font_size, None)?
+            .prepare(text, font_size)?;
+        Ok(PreparedText {
+            text,
+            font_size,
+            face,
+            paragraphs: Some(paragraphs),
+        })
+    }
+    /// Exact current width, height and baseline from rebreaking shaped data.
+    pub fn measure_prepared(
+        &mut self,
+        prepared: &mut PreparedText<'_>,
+        max_width: Option<f32>,
+    ) -> Result<TextMetrics, Error> {
+        if prepared.face != self.font.0.id {
+            return Err(Error::ForeignLayout);
+        }
+        let result = self
+            .planner(prepared.text, prepared.font_size, max_width)?
+            .measure_prepared(
+                prepared.text,
+                prepared.font_size,
+                max_width,
+                prepared.paragraphs.as_mut().ok_or(Error::ForeignLayout)?,
+            );
+        if result.is_err() {
+            prepared.paragraphs = None;
+        }
+        result
+    }
+    /// Freeze canonical interactive geometry without shaping the source again.
+    pub fn shape_prepared(
+        &mut self,
+        prepared: &mut PreparedText<'_>,
+        max_width: Option<f32>,
+    ) -> Result<TextLayout, Error> {
+        if prepared.face != self.font.0.id {
+            return Err(Error::ForeignLayout);
+        }
+        let result = self
+            .planner(prepared.text, prepared.font_size, max_width)?
+            .shape_prepared(
+                prepared.text,
+                prepared.font_size,
+                max_width,
+                prepared.paragraphs.as_mut().ok_or(Error::ForeignLayout)?,
+            );
+        if result.is_err() {
+            prepared.paragraphs = None;
+        }
+        result
+    }
+    /// Release a completed handoff, retaining its cleared scratch for this pass.
+    pub fn recycle_prepared(&mut self, mut prepared: PreparedText<'_>) {
+        if prepared.face == self.font.0.id
+            && let Some(paragraphs) = prepared.paragraphs.take()
+            && let Some(planner) = self.planner.as_mut()
+        {
+            planner.recycle(paragraphs);
+        }
+    }
+    /// Number of paragraph builder invocations in this scoped shaper.
+    pub fn paragraph_shapes(&self) -> u64 {
+        self.planner
+            .as_ref()
+            .map_or(0, |planner| planner.paragraph_shapes)
+    }
     /// Measure wrapping without freezing an owned layout. Paragraph scratch is
     /// reused within this shaper; the returned numbers borrow no font storage.
     pub fn measure(

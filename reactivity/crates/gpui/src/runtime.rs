@@ -48,8 +48,10 @@ pub(crate) mod ime;
 pub use ime::{ImeEvent, ImeSession, MarkedText};
 mod frontier;
 mod text_geometry;
+mod text_pass;
 use editing::EditingIntent;
 pub use text_geometry::TextGeometry;
+use text_pass::TextPass;
 mod identity_index;
 mod image;
 mod siblings;
@@ -200,6 +202,8 @@ pub struct Counters {
     pub text_bytes_copied: u64,
     pub layout_runs: u64,
     pub measure_calls: u64,
+    pub paragraph_shapes: u64,
+    pub prepared_text_peak: u64,
     pub presentations: u64,
     pub paint_passes: u64,
     pub exact_updates: u64,
@@ -692,7 +696,7 @@ impl TextSite {
     #[cfg(test)]
     fn measure_for(
         &mut self,
-        service: &mut TextShaper<'_>,
+        service: &mut TextPass<'_, '_>,
         font_size: f32,
         input: WidthMeasureInput,
     ) -> Result<TextMetrics, Error> {
@@ -700,7 +704,7 @@ impl TextSite {
     }
     fn measure_text(
         &mut self,
-        service: &mut TextShaper<'_>,
+        service: &mut TextPass<'_, '_>,
         font_size: f32,
         input: WidthMeasureInput,
         display: Option<&str>,
@@ -731,7 +735,7 @@ impl TextSite {
     }
     fn shape_for<'n>(
         &'n mut self,
-        service: &mut TextShaper<'_>,
+        service: &mut TextPass<'_, '_>,
         font_size: f32,
         width: Option<f32>,
     ) -> Result<&'n TextLayout, Error> {
@@ -739,7 +743,7 @@ impl TextSite {
     }
     fn shape_text<'n>(
         &'n mut self,
-        service: &mut TextShaper<'_>,
+        service: &mut TextPass<'_, '_>,
         font_size: f32,
         width: Option<f32>,
         display: Option<&str>,
@@ -3100,13 +3104,28 @@ impl<M: View + 'static> Runtime<M> {
             .and_then(|text| text.system.as_ref())
             .map(|text| text.font_face().clone());
         let mut text_geometry = Vec::new();
-        let mut shaper = font.as_ref().map(|font| font.shaper());
+
         let active_selection = self.active_selection();
         let selection_snapshot = self.selection_snapshot();
         let composition_snapshot = self.composition_snapshot();
         let composition = self
             .composition_preview()
             .map(|(identity, preview)| (identity, preview.display.clone(), preview.decoration));
+        // Pin the exact Source or active Display input for this layout pass.
+        // Leases copy no UTF-8; only measured sites acquire shaped paragraphs.
+        let text_inputs: Vec<_> = self
+            .texts
+            .iter()
+            .map(|site| site.as_ref().map(|site| site.value.clone()))
+            .collect();
+        let mut text_inputs = text_inputs;
+        if let Some((identity, display, _)) = &composition {
+            let index = self.by_identity.required(*identity);
+            text_inputs[self.nodes[index].text_slot().0 as usize] = Some(display.clone());
+        }
+        let mut shaper = font
+            .as_ref()
+            .map(|font| TextPass::with_inputs(font.shaper(), &text_inputs));
         if self.rebuild_layout || self.topology_changed || self.layout.is_poisoned() {
             self.layout = LayoutTree::new();
             self.layout_nodes.clear();
@@ -3175,22 +3194,18 @@ impl<M: View + 'static> Runtime<M> {
         let texts = &mut self.texts;
         let images = &self.images;
         let service = &mut shaper;
-        let mut trace_remaining = if std::env::var_os("GPUI_SHAPE_ORDER").is_some() { 120 } else { 0 };
         let mut measure = |id: NodeId, input: WidthMeasureInput| {
             let index = layout_nodes
                 .binary_search(&id)
                 .expect("measurement names a node in the current layout arena");
             let node = &nodes[index];
-            if trace_remaining != 0 {
-                trace_remaining -= 1;
-                eprintln!("MEASURE_ORDER index={index} known={:?} available={:?}", input.known_dimensions, input.available_width);
-            }
             if let Some(image) = node.content.image_use() {
                 return image::measure(images.as_ref().unwrap().get(image), input);
             }
             let service = service
                 .as_mut()
                 .expect("measured text has an initialized service");
+            service.select(node.text_slot());
             match node.text_slot().get_mut(texts).unwrap().measure_text(
                 service,
                 styles.get(index).font_size,
@@ -3224,6 +3239,10 @@ impl<M: View + 'static> Runtime<M> {
             },
             &mut measure,
         )?;
+        self.counters.prepared_text_peak = self
+            .counters
+            .prepared_text_peak
+            .max(shaper.as_ref().map_or(0, |s| s.peak as u64));
         let after = self.layout.stats();
         self.counters.layout_runs += after.computes - before.computes;
         self.counters.measure_calls += after.measure_calls - before.measure_calls;
@@ -3480,8 +3499,10 @@ impl<M: View + 'static> Runtime<M> {
                 let selection = active_selection
                     .filter(|(identity, _)| *identity == node.identity())
                     .map(|(_, selection)| selection);
+                let shaper = shaper.as_mut().expect("text initialized before layout");
+                shaper.select(node.text_slot());
                 let shape = text.shape_text(
-                    shaper.as_mut().expect("text initialized before layout"),
+                    shaper,
                     style.font_size,
                     Some(layout.content_box_width()),
                     composition
@@ -3489,6 +3510,7 @@ impl<M: View + 'static> Runtime<M> {
                         .filter(|(identity, _, _)| *identity == node.identity())
                         .map(|(_, value, _)| value.as_ref()),
                 )?;
+                shaper.release(node.text_slot());
                 let origin = Point {
                     x: layout.padding.left,
                     y: layout.padding.top,
@@ -3829,6 +3851,11 @@ impl<M: View + 'static> Runtime<M> {
         {
             text.system = None;
         }
+        self.counters.paragraph_shapes += shaper.as_ref().map_or(0, TextPass::paragraph_shapes);
+        self.counters.prepared_text_peak = self
+            .counters
+            .prepared_text_peak
+            .max(shaper.as_ref().map_or(0, |s| s.peak as u64));
         self.dirty = false;
         self.rebuild_layout = false;
         self.topology_changed = false;
@@ -4509,7 +4536,7 @@ mod tests {
     #[test]
     fn first_known_width_measurement_fills_only_a_vacant_layout_slot() {
         let system = TextSystem::bundled().unwrap();
-        let mut shaper = system.font_face().shaper();
+        let mut shaper = TextPass::new(system.font_face().shaper());
         let mut site = TextSite {
             value: SharedText::from("office אבג\nnext"),
             field: None,
@@ -4602,7 +4629,7 @@ mod tests {
     #[test]
     fn measurements_preserve_the_last_successful_canonical_text_geometry() {
         let system = TextSystem::bundled().unwrap();
-        let mut shaper = system.font_face().shaper();
+        let mut shaper = TextPass::new(system.font_face().shaper());
         let mut site = TextSite {
             value: SharedText::from("office אבג\nnext"),
             field: None,
@@ -4684,7 +4711,7 @@ mod tests {
     #[test]
     fn text_width_cache_preserves_keys_and_replaces_only_after_success() {
         let system = TextSystem::bundled().unwrap();
-        let mut shaper = system.font_face().shaper();
+        let mut shaper = TextPass::new(system.font_face().shaper());
         let mut site = TextSite {
             value: SharedText::from("alpha beta gamma"),
             field: None,
