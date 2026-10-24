@@ -107,10 +107,8 @@ struct Finish<T, E> {
 }
 impl<T, E> Finish<T, E> {
     fn panic(&mut self) {
-        if let Some(mut completion) = self.completion.take() {
-            let controller = completion.controller.take().expect("completion is linear");
-            completion.stamp.take();
-            controller.terminal(PANICKED);
+        if let Some(completion) = self.completion.take() {
+            completion.panicked();
         }
     }
 }
@@ -179,11 +177,10 @@ mod tests {
         }
         let mut owner = gpui_reactivity_state::OwnerRegistry::new().mount().unwrap();
         let stamp = owner.producer(1).unwrap().begin().unwrap();
-        let controller = Arc::new(Controller::new());
-        controller.mailbox.begin();
+        let mut controller = Owner::new(QuestionContext::new());
         let completion = Completion {
-            controller: Some(controller.clone()),
-            stamp: Some(stamp),
+            stamp,
+            producer: controller.begin(),
         };
         let mut task = std::pin::pin!(RunFuture {
             future: Some(Small),
@@ -208,6 +205,6 @@ mod tests {
             size_of::<[u8; 4096]>(),
             allocation.count_total
         );
-        assert_eq!(controller.mailbox.take().unwrap().value.unwrap(), [7; 4096]);
+        assert_eq!(controller.take().unwrap().value.unwrap(), [7; 4096]);
     }
 }

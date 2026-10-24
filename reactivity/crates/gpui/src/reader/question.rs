@@ -235,7 +235,7 @@ impl<M: 'static, L: LaneSet<M>> Questions<M, L> {
             start: Some(start),
             key,
             gate,
-            controller: Some(Arc::new(Controller::new())),
+            controller: Owner::new(QuestionContext::new()),
             state: State::Empty,
             version: None,
             marker: PhantomData,
@@ -315,7 +315,7 @@ pub struct QuestionLane<M: 'static, A: QuestionInputs<M>, I, T, E, F, S, L> {
     start: Option<S>,
     key: ReaderKey,
     gate: RequestGate,
-    controller: Option<Arc<Controller<T, E>>>,
+    controller: Owner<Message<T, E>, QuestionContext>,
     state: State<T, E>,
     version: Option<A::Versions>,
     marker: PhantomData<fn(M)>,
@@ -337,20 +337,18 @@ pub struct RetiredQuestion<T, E, L> {
 }
 impl<M: 'static, A: QuestionInputs<M>, I, T, E, F, S, L> QuestionLane<M, A, I, T, E, F, S, L> {
     #[inline]
-    fn control(&self) -> &Arc<Controller<T, E>> {
-        self.controller.as_ref().expect("live question controller")
+    fn control(&self) -> &QuestionContext {
+        self.controller.context()
     }
 }
+
 impl<M: 'static, A: QuestionInputs<M>, I, T, E, F, S, L> Drop
     for QuestionLane<M, A, I, T, E, F, S, L>
 {
     fn drop(&mut self) {
-        // Natural Win/failed-mount destruction must cancel the cooperative
-        // hint as well as relinquishing its response-owner lease.
-        if let Some(controller) = self.controller.take() {
-            controller.current.store(0, Ordering::Release);
-            controller.mailbox.close();
-        }
+        // Release the owner lease before starter/task destructors can cancel
+        // synchronously. Explicit close collects responses for deferred drop.
+        drop(self.controller.close());
     }
 }
 impl<
@@ -454,17 +452,16 @@ where
         self.state = State::Fault(StoredFault::Framework(error), previous);
     }
     fn start_pending(&mut self) -> bool {
-        if !self.control().mailbox.idle() {
+        if !self.controller.idle() {
             return false;
         }
         let Some(work) = self.pending.take() else {
             return false;
         };
         self.running_ticket = Some(work.stamp.ticket());
-        self.control().mailbox.begin();
         let completion = Completion {
-            controller: Some(self.control().clone()),
-            stamp: Some(work.stamp),
+            stamp: work.stamp,
+            producer: self.controller.begin(),
         };
         self.stats.dispatched = self.stats.dispatched.saturating_add(1);
         match catch_unwind(AssertUnwindSafe(|| {
@@ -679,7 +676,7 @@ where
         if self.staged_terminal.is_some() {
             return Stage::Empty;
         }
-        if let Some(terminal) = self.control().mailbox.freeze() {
+        if let Some(terminal) = self.controller.freeze() {
             self.staged_terminal = Some(terminal);
             Stage::Ready
         } else {
@@ -737,7 +734,7 @@ where
             *remaining -= 1;
             // The staged terminal seals this response across ordinary callbacks.
             // Take only now, before retiring the physical credit.
-            if let Some(message) = self.control().mailbox.take() {
+            if let Some(message) = self.controller.take() {
                 let own = self.apply_response(message, model, sources, applied).err();
                 if binding_error.is_none() {
                     binding_error = own;
@@ -748,7 +745,7 @@ where
                 .take()
                 .expect("terminal belongs to one launched cap");
             self.start.as_mut().expect("live question").retire();
-            self.control().mailbox.retire();
+            self.controller.retire();
             if ticket == self.ticket && matches!(self.state, State::Pending(_)) {
                 let failure = match terminal {
                     ABANDONED => Some(QuestionFault::Abandoned),
@@ -773,14 +770,7 @@ where
         self.gate.revoke();
         // Relinquish the owner lease before running input/result destructors.
         // A still-running physical cap owns any deferred response reclamation.
-        let response = self.controller.take().and_then(|controller| {
-            controller.current.store(0, Ordering::Release);
-            controller.mailbox.close();
-            // Atomically release this Arc or take unique ownership. Unlike
-            // try_unwrap followed by dropping Err(Arc), this has no last-cap
-            // race that could run a response destructor in this phase.
-            Arc::into_inner(controller).and_then(|controller| controller.mailbox.into_payload())
-        });
+        let response = self.controller.close();
         if let Some(start) = &mut self.start {
             start.cancel();
             start.retire();
@@ -805,7 +795,7 @@ where
     #[cfg(feature = "native-core")]
     fn attach(&mut self, wake: &gpui_reactivity_host::native::Wake) {
         let _ = self.control().wake.set(wake.clone());
-        self.control().signal();
+        linear_mailbox::Context::notify(self.control());
         self.tail.attach(wake);
     }
 }
@@ -985,7 +975,8 @@ mod tests {
                     },
                 )
                 .unwrap();
-            *controller.lock().unwrap() = Some(Arc::downgrade(plan.lanes.control()));
+            *controller.lock().unwrap() =
+                Some(Arc::downgrade(plan.lanes.controller.shared_for_test()));
             let model = Model {
                 value: crate::Signal::new(1),
                 other: crate::Signal::new(2),
@@ -1077,7 +1068,7 @@ mod tests {
             plan.lanes.version.is_none(),
             "rejected binding must not fabricate a diagnostic pack"
         );
-        assert!(plan.lanes.control().mailbox.idle());
+        assert!(plan.lanes.controller.idle());
     }
     #[test]
     fn a_discovered_revision_change_cannot_leave_the_current_ticket_pending_forever() {
@@ -1112,7 +1103,7 @@ mod tests {
             plan.lanes.read(reader.key).unwrap().info.status,
             QuestionStatus::Fault
         );
-        assert!(plan.lanes.control().mailbox.idle());
+        assert!(plan.lanes.controller.idle());
         plan.lanes
             .refresh_self(&model, &sources, Change::Retry(reader.key))
             .unwrap();

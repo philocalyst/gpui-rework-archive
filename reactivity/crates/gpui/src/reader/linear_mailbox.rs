@@ -1,8 +1,7 @@
-//! One inline response, transferred by the existing terminal publication.
-//! The unique Completion writes; the exclusive window owner takes. Closing
-//! only revokes admission. The last Arc reclaims the payload without locking.
+//! One inline response. Exclusive owner methods govern reuse; a consuming
+//! producer ends its cell borrow before publishing and notifying the owner.
 use super::sync::{
-    Cell,
+    Arc, Cell,
     atomic::{AtomicBool, AtomicU8, Ordering},
 };
 
@@ -10,107 +9,167 @@ const IDLE: u8 = 0;
 const PENDING: u8 = 1;
 const READY: u8 = 2;
 const TAKEN: u8 = 4;
-const WRITING: u8 = 6;
+pub(super) const ABANDONED: u8 = 3;
+pub(super) const PANICKED: u8 = 5;
 
-pub(super) struct Mailbox<P> {
+pub(super) trait Context {
+    fn notify(&self);
+    fn close(&self);
+}
+
+pub(super) struct Shared<P, C: Context> {
     state: AtomicU8,
     closed: AtomicBool,
     slot: Cell<Option<P>>,
+    context: C,
 }
-// SAFETY: The linear Completion is the only writer in a pending generation.
-// READY Release follows the end of its cell borrow; the owner's successful
-// Acquire claim precedes its sole take. Retire/begin require that same exclusive
-// owner and cannot overlap its take. After publishing, an old Completion can
-// notify or release its Arc, but never accesses this slot again. Close touches
-// only an atomic; final payload destruction has unique ownership of the Arc.
-// P crosses threads by ownership, so Send is required; no shared P is exposed.
-unsafe impl<P: Send> Sync for Mailbox<P> {}
+// SAFETY: Only the exclusive Owner can begin, take and retire a generation.
+// Its sole Producer acquires PENDING before writing, then ends its cell borrow
+// before publishing READY with Release. Owner acquires READY before taking;
+// the next PENDING Release/Acquire publishes the end of that take to reuse.
+// No producer accesses the cell after publication. Close only sets an atomic;
+// the last Arc uniquely owns reclamation. Context is independently Sync and
+// payloads cross threads by ownership, so they require Send rather than Sync.
+unsafe impl<P: Send, C: Context + Sync> Sync for Shared<P, C> {}
 
-impl<P> Mailbox<P> {
-    pub(super) fn new() -> Self {
+pub(super) struct Owner<P, C: Context> {
+    shared: Option<Arc<Shared<P, C>>>,
+}
+pub(super) struct Producer<P, C: Context> {
+    shared: Option<Arc<Shared<P, C>>>,
+}
+
+impl<P, C: Context> Owner<P, C> {
+    pub(super) fn new(context: C) -> Self {
         Self {
-            state: AtomicU8::new(IDLE),
-            closed: AtomicBool::new(false),
-            slot: Cell::new(None),
+            shared: Some(Arc::new(Shared {
+                state: AtomicU8::new(IDLE),
+                closed: AtomicBool::new(false),
+                slot: Cell::new(None),
+                context,
+            })),
         }
     }
-    pub(super) fn begin(&self) {
-        assert!(
-            !self.closed.load(Ordering::Acquire),
-            "closed response owner"
-        );
-        assert_eq!(self.state.load(Ordering::Acquire), IDLE, "retired response");
-        self.state.store(PENDING, Ordering::Release);
+    pub(super) fn context(&self) -> &C {
+        &self.shared.as_ref().expect("live response owner").context
     }
     pub(super) fn idle(&self) -> bool {
-        self.state.load(Ordering::Acquire) == IDLE
+        self.shared
+            .as_ref()
+            .is_some_and(|shared| shared.state.load(Ordering::Relaxed) == IDLE)
     }
-    pub(super) fn complete(&self, value: P, notify: impl FnOnce()) -> Result<(), P> {
-        if self.closed.load(Ordering::Acquire) {
+    pub(super) fn begin(&mut self) -> Producer<P, C> {
+        let shared = self.shared.as_ref().expect("live response owner");
+        assert_eq!(
+            shared.state.load(Ordering::Relaxed),
+            IDLE,
+            "retired response"
+        );
+        shared.state.store(PENDING, Ordering::Release);
+        Producer {
+            shared: Some(shared.clone()),
+        }
+    }
+    pub(super) fn freeze(&mut self) -> Option<u8> {
+        let state = self.shared.as_ref()?.state.load(Ordering::Acquire);
+        matches!(state, READY | ABANDONED | PANICKED).then_some(state)
+    }
+    pub(super) fn take(&mut self) -> Option<P> {
+        let shared = self.shared.as_ref()?;
+        if shared.state.load(Ordering::Acquire) != READY {
+            return None;
+        }
+        let value = shared.slot.with_mut(|slot| {
+            // SAFETY: This exclusive owner acquired the producer's ended cell
+            // borrow. It cannot begin another generation during its own take.
+            unsafe { (&mut *slot).take() }
+        });
+        assert!(value.is_some(), "published response");
+        shared.state.store(TAKEN, Ordering::Relaxed);
+        value
+    }
+    pub(super) fn retire(&mut self) {
+        let shared = self.shared.as_ref().expect("live response owner");
+        assert!(
+            matches!(
+                shared.state.load(Ordering::Acquire),
+                TAKEN | ABANDONED | PANICKED
+            ),
+            "consumed response before reuse"
+        );
+        shared.state.store(IDLE, Ordering::Relaxed);
+    }
+    pub(super) fn close(&mut self) -> Option<P> {
+        let shared = self.shared.take()?;
+        shared.context.close();
+        shared.closed.store(true, Ordering::Release);
+        // Atomically release this lease or reclaim the allocation uniquely.
+        // A producer can never race a unique slot extraction.
+        Arc::into_inner(shared).and_then(|shared| shared.slot.into_inner())
+    }
+    #[cfg(test)]
+    pub(super) fn shared_for_test(&self) -> &Arc<Shared<P, C>> {
+        self.shared.as_ref().expect("live response owner")
+    }
+}
+impl<P, C: Context> Drop for Owner<P, C> {
+    fn drop(&mut self) {
+        drop(self.close());
+    }
+}
+
+impl<P, C: Context> Producer<P, C> {
+    pub(super) fn context(&self) -> &C {
+        &self
+            .shared
+            .as_ref()
+            .expect("linear response producer")
+            .context
+    }
+    pub(super) fn complete(mut self, value: P) -> Result<(), P> {
+        let shared = self.shared.take().expect("linear response producer");
+        if shared.closed.load(Ordering::Acquire) {
             return Err(value);
         }
-        self.state
-            .compare_exchange(PENDING, WRITING, Ordering::Acquire, Ordering::Acquire)
-            .expect("one response per physical lease");
-        if self.closed.load(Ordering::Acquire) {
-            return Err(value);
-        }
-        self.slot.with_mut(|slot| {
-            // SAFETY: This generation's sole writer claimed WRITING. The owner
-            // cannot take before READY, and final reclamation needs our Arc.
+        assert_eq!(
+            shared.state.load(Ordering::Acquire),
+            PENDING,
+            "active response"
+        );
+        shared.slot.with_mut(|slot| {
+            // SAFETY: This generation's unique consuming Producer acquired
+            // PENDING. Its owner cannot take before the following publication.
             let slot = unsafe { &mut *slot };
             assert!(slot.is_none(), "empty response before publication");
             *slot = Some(value);
         });
-        self.finish(READY, notify);
+        shared.state.store(READY, Ordering::Release);
+        shared.context.notify();
         Ok(())
     }
-    pub(super) fn finish(&self, terminal: u8, notify: impl FnOnce()) {
-        assert!(matches!(terminal, READY | 3 | 5), "response terminal");
-        self.state.store(terminal, Ordering::Release);
-        // Old notification may outlive take, retire and the next generation;
-        // no slot access follows publication, including if notify panics.
-        notify();
+    pub(super) fn panicked(mut self) {
+        self.finish(PANICKED);
     }
-    pub(super) fn freeze(&self) -> Option<u8> {
-        if self.closed.load(Ordering::Acquire) {
-            return None;
+    fn finish(&mut self, terminal: u8) {
+        if let Some(shared) = self.shared.take() {
+            assert_eq!(
+                shared.state.load(Ordering::Acquire),
+                PENDING,
+                "active response"
+            );
+            shared.state.store(terminal, Ordering::Release);
+            shared.context.notify();
         }
-        let state = self.state.load(Ordering::Acquire);
-        matches!(state, READY | 3 | 5).then_some(state)
     }
-    pub(super) fn take(&self) -> Option<P> {
-        // Terminal-without-payload and repeated takes never enter the cell.
-        if self
-            .state
-            .compare_exchange(READY, TAKEN, Ordering::Acquire, Ordering::Acquire)
-            .is_err()
-        {
-            return None;
-        }
-        self.slot.with_mut(|slot| {
-            // SAFETY: Acquire observes the ended producer borrow. TAKEN allows
-            // one take; the exclusive owner retires only after this ends.
-            unsafe { (&mut *slot).take() }
-        })
+}
+impl<P, C: Context> Drop for Producer<P, C> {
+    fn drop(&mut self) {
+        self.finish(ABANDONED);
     }
-    pub(super) fn retire(&self) {
-        self.state.store(IDLE, Ordering::Release);
-    }
-    pub(super) fn close(&self) {
-        self.closed.store(true, Ordering::Release);
-    }
-    pub(super) fn into_payload(self) -> Option<P> {
-        self.slot.into_inner()
-    }
-    #[cfg(test)]
-    pub(super) fn unlocked(&self) -> bool {
-        // The tracked-cell harness rejects a callback inside the slot borrow.
+}
+#[cfg(test)]
+impl<P, C: Context> Shared<P, C> {
+    pub(super) fn unlocked_for_test(&self) -> bool {
         self.slot.with_mut(|_| true)
-    }
-    #[cfg(test)]
-    #[allow(dead_code, reason = "Only Loom pauses an active cell borrower.")]
-    pub(super) fn hold_for_test(&self, paused: impl FnOnce()) {
-        self.slot.with_mut(|_| paused());
     }
 }

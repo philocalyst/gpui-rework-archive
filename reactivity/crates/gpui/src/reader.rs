@@ -8,10 +8,7 @@ use std::{
     marker::PhantomData,
     num::NonZeroU64,
     panic::{AssertUnwindSafe, catch_unwind},
-    sync::{
-        Arc,
-        atomic::{AtomicU64, Ordering},
-    },
+    sync::atomic::{AtomicU64, Ordering},
 };
 
 mod future;
@@ -23,7 +20,7 @@ pub use future::{QuestionExecutor, QuestionTask};
 pub use inputs::QuestionInputs;
 pub(crate) mod question;
 mod sync {
-    pub(super) use std::sync::atomic;
+    pub(super) use std::sync::{Arc, atomic};
 
     // Loom supplies this same interface with tracked cell-borrow lifetimes.
     pub(super) struct Cell<T>(std::cell::UnsafeCell<T>);
@@ -39,8 +36,12 @@ mod sync {
         }
     }
 }
-use linear_mailbox::Mailbox;
+#[cfg(test)]
+use linear_mailbox::Shared;
+use linear_mailbox::{ABANDONED, Owner, PANICKED, Producer};
 pub use question::{QuestionSet, Questions};
+#[cfg(test)]
+use std::sync::Arc;
 
 #[derive(Clone, Copy, Debug, PartialEq, Eq)]
 pub struct ReaderKey {
@@ -261,31 +262,31 @@ pub(crate) struct Message<T, E> {
 // not reuse its immutable local launched ticket until acquiring a terminal
 // state. The unique cap is the sole Running -> terminal writer; after publish
 // it cannot touch this lease again. Queued messages carry independent stamps.
-const ABANDONED: u8 = 3;
-const PANICKED: u8 = 5;
-pub(crate) struct Controller<T, E> {
-    mailbox: Mailbox<Message<T, E>>,
+#[cfg(test)]
+type Controller<T, E> = Shared<Message<T, E>, QuestionContext>;
+struct QuestionContext {
     current: AtomicU64,
     #[cfg(feature = "native-core")]
     wake: std::sync::OnceLock<gpui_reactivity_host::native::Wake>,
 }
-impl<T, E> Controller<T, E> {
+impl QuestionContext {
     fn new() -> Self {
         Self {
-            mailbox: Mailbox::new(),
             current: AtomicU64::new(0),
             #[cfg(feature = "native-core")]
             wake: std::sync::OnceLock::new(),
         }
     }
-    fn signal(&self) {
+}
+impl linear_mailbox::Context for QuestionContext {
+    fn notify(&self) {
         #[cfg(feature = "native-core")]
         if let Some(wake) = self.wake.get() {
             wake.signal();
         }
     }
-    fn terminal(&self, state: u8) {
-        self.mailbox.finish(state, || self.signal());
+    fn close(&self) {
+        self.current.store(0, Ordering::Release);
     }
 }
 
@@ -300,8 +301,8 @@ impl<T, E> Controller<T, E> {
 /// }
 /// ```
 pub struct Completion<T, E> {
-    controller: Option<Arc<Controller<T, E>>>,
-    stamp: Option<RequestStamp>,
+    stamp: RequestStamp,
+    producer: Producer<Message<T, E>, QuestionContext>,
 }
 
 /// Borrowed cancellation hint for one physical completion. This grants no UI
@@ -338,20 +339,19 @@ impl<T, E> Completion<T, E> {
     /// A hint for cooperative worker cancellation; only owner admission decides
     /// whether the owned result is still applicable.
     pub fn is_cancelled(&self) -> bool {
-        self.controller.as_ref().is_none_or(|controller| {
-            controller.current.load(Ordering::Acquire) != self.stamp.as_ref().unwrap().ticket()
-        })
+        self.producer.context().current.load(Ordering::Acquire) != self.stamp.ticket()
     }
-    pub fn complete(mut self, value: Result<T, E>) -> Result<(), CompleteError<T, E>> {
-        let controller = self.controller.take().expect("completion is linear");
-        let message = Message {
-            stamp: self.stamp.take().unwrap(),
-            value,
-        };
-        controller
-            .mailbox
-            .complete(message, || controller.signal())
+    pub fn complete(self, value: Result<T, E>) -> Result<(), CompleteError<T, E>> {
+        self.producer
+            .complete(Message {
+                stamp: self.stamp,
+                value,
+            })
             .map_err(|message| CompleteError::Closed(message.value))
+    }
+    fn panicked(self) {
+        drop(self.stamp);
+        self.producer.panicked();
     }
 
     /// Execute on an existing worker. The owner must only enqueue this work;
@@ -388,7 +388,7 @@ impl<T, E> Completion<T, E> {
     /// }
     /// ```
     pub fn run_cancellable<I>(
-        mut self,
+        self,
         input: I,
         compute: impl FnOnce(I, Cancellation<'_>) -> Option<Result<T, E>>,
     ) -> Result<(), CompleteError<T, E>> {
@@ -399,27 +399,17 @@ impl<T, E> Completion<T, E> {
             compute(
                 input,
                 Cancellation {
-                    current: &self.controller.as_ref().unwrap().current,
-                    ticket: self.stamp.as_ref().unwrap().ticket(),
+                    current: &self.producer.context().current,
+                    ticket: self.stamp.ticket(),
                 },
             )
         })) {
             Ok(Some(value)) => self.complete(value),
             Ok(None) => Ok(()),
             Err(_) => {
-                let controller = self.controller.take().unwrap();
-                self.stamp.take();
-                controller.terminal(PANICKED);
+                self.panicked();
                 Ok(())
             }
-        }
-    }
-}
-impl<T, E> Drop for Completion<T, E> {
-    fn drop(&mut self) {
-        if let Some(controller) = self.controller.take() {
-            self.stamp.take();
-            controller.terminal(ABANDONED);
         }
     }
 }
@@ -434,27 +424,29 @@ mod tests {
     fn cancellation_borrows_the_existing_lease_without_allocating_or_cloning_it() {
         let mut scope = gpui_reactivity_state::OwnerRegistry::new().mount().unwrap();
         let stamp = scope.producer(1).unwrap().begin().unwrap();
-        let controller = Arc::new(Controller::new());
-        controller.mailbox.begin();
-        controller.current.store(stamp.ticket(), Ordering::Release);
+        let mut controller = Owner::new(QuestionContext::new());
+        controller
+            .context()
+            .current
+            .store(stamp.ticket(), Ordering::Release);
         let cap = Completion::<u64, Infallible> {
-            controller: Some(controller.clone()),
-            stamp: Some(stamp),
+            stamp,
+            producer: controller.begin(),
         };
         let memory = allocation_counter::measure(|| {
             cap.run_cancellable((), |_, cancellation| {
-                assert_eq!(Arc::strong_count(&controller), 2);
+                assert_eq!(Arc::strong_count(controller.shared_for_test()), 2);
                 assert!(!cancellation.is_cancelled());
-                controller.current.store(0, Ordering::Release);
+                controller.context().current.store(0, Ordering::Release);
                 assert!(cancellation.is_cancelled());
                 None
             })
             .unwrap();
         });
         assert_eq!(memory.count_total, 0);
-        assert_eq!(Arc::strong_count(&controller), 1);
-        assert_eq!(controller.mailbox.freeze(), Some(ABANDONED));
-        assert!(controller.mailbox.take().is_none());
+        assert_eq!(Arc::strong_count(controller.shared_for_test()), 1);
+        assert_eq!(controller.freeze(), Some(ABANDONED));
+        assert!(controller.take().is_none());
         println!(
             "borrowed_cancellation_bytes={},allocations={},controller_leases_during_compute=2",
             size_of::<Cancellation<'_>>(),
@@ -466,15 +458,16 @@ mod tests {
     fn closed_completion_returns_the_same_owned_result() {
         let mut scope = gpui_reactivity_state::OwnerRegistry::new().mount().unwrap();
         let stamp = scope.producer(1).unwrap().begin().unwrap();
-        let controller = Arc::new(Controller::new());
-        controller.mailbox.begin();
-        controller.current.store(stamp.ticket(), Ordering::Release);
+        let mut controller = Owner::new(QuestionContext::new());
+        controller
+            .context()
+            .current
+            .store(stamp.ticket(), Ordering::Release);
         let cap = Completion::<String, Infallible> {
-            controller: Some(controller.clone()),
-            stamp: Some(stamp),
+            stamp,
+            producer: controller.begin(),
         };
-        controller.current.store(0, Ordering::Release);
-        controller.mailbox.close();
+        drop(controller.close());
         assert!(cap.is_cancelled());
         let value = String::from("retain exact allocation");
         let pointer = value.as_ptr();
@@ -485,39 +478,34 @@ mod tests {
     #[test]
     fn close_and_notify_do_not_hold_the_lock_during_user_drop_or_panic() {
         struct Probe {
-            mailbox: Arc<Mailbox<Probe>>,
+            mailbox: Arc<Shared<Probe, QuestionContext>>,
             drops: Arc<AtomicUsize>,
             panic: bool,
         }
         impl Drop for Probe {
             fn drop(&mut self) {
-                assert!(self.mailbox.unlocked());
+                assert!(self.mailbox.unlocked_for_test());
                 self.drops.fetch_add(1, Ordering::SeqCst);
-                assert!(!self.panic, "payload drop panic outside mailbox mutex");
+                assert!(!self.panic, "payload drop panic outside response borrow");
             }
         }
         for panic in [false, true] {
-            let mailbox = Arc::new(Mailbox::new());
-            mailbox.begin();
+            let mut mailbox = Owner::new(QuestionContext::new());
+            let producer = mailbox.begin();
             let drops = Arc::new(AtomicUsize::new(0));
             let probe = Probe {
-                mailbox: mailbox.clone(),
+                mailbox: mailbox.shared_for_test().clone(),
                 drops: drops.clone(),
                 panic,
             };
-            assert!(
-                mailbox
-                    .complete(probe, || assert!(mailbox.unlocked()))
-                    .is_ok()
-            );
+            assert!(producer.complete(probe).is_ok());
             mailbox.freeze().unwrap();
             let value = mailbox.take();
             mailbox.retire();
-            mailbox.close();
             let result = catch_unwind(AssertUnwindSafe(|| drop(value)));
             assert_eq!(result.is_err(), panic);
-            assert!(mailbox.unlocked());
-            mailbox.close();
+            assert!(mailbox.shared_for_test().unlocked_for_test());
+            drop(mailbox.close());
             assert_eq!(drops.load(Ordering::SeqCst), 1);
         }
     }
