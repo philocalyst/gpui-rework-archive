@@ -118,7 +118,7 @@ fn preview_selections(
     } else {
         0
     };
-    if base > 0 && bytes[base - 1..=base] == *b"\r\n" {
+    if base > 0 && base < bytes.len() && bytes[base - 1..=base] == *b"\r\n" {
         base -= 1;
     }
     // Keep the scan in suffix coordinates; translate its four results once.
