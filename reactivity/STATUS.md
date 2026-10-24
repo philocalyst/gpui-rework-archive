@@ -4,6 +4,22 @@ The clean-room workspace runs real applications through one exclusively owned
 runtime. Start at [the GPUI crate](crates/gpui/README.md). The design documents
 describe the intended complete system; this page records what is connected now.
 
+The [scoped IME composition](evidence/ime-integration/README.md) connects
+ordinary composition events to source-qualified editing, immutable display text,
+acknowledged geometry and native accessibility. Root's exact composed review
+passes 673 Linux cases and 744 native Mac cases, 28 docs on each, strict checks
+and Hummingbird's locked default-target check. Native cancellation without a
+Disabled acknowledgement can still quarantine composition until window close;
+physical candidate engines, VoiceOver and Windows runtime remain unqualified.
+Current seven-library source `373c9c6ba2` contains **35,851** non-test code lines,
+including 18 library build-script lines, up 952 from its predecessor.
+
+The ordinary [Todo recording fixture](crates/gpui/examples/todo_recording_cost.rs)
+separates edits from acknowledgement and validates every canonical model field
+after all eight actions at 0, 1,000 and 10,000 seeded rows. Its CPU/allocation
+diagnostics isolate retained work; native rendering and latency keep their
+separate unchanged acceptance gates.
+
 The [Remote first-lock repair](evidence/remote-first-lock/README.md) removes
 Darwin's lazy 64-byte mutex allocation from first send, stage and close while
 preserving the existing bounded FIFO and frozen-prefix contracts. All 719
@@ -54,7 +70,7 @@ tiny-layout costs and changed AccessKit vendor code remain explicit.
 The [mapped Todo](comparisons/mapped-todo/README.md) and
 [matched shader](comparisons/todo-shader-profiles/README.md) experiments retain
 their historical source identities and failed work gates. Perceptual-gradient
-precision tiers, thinner glyph ownership, 16-byte node storage, real IME and
+precision tiers, thinner glyph ownership, 16-byte node storage and
 optional GPU clip acceleration remain separate spikes. Their costs and
 unsupported domains are not shipping claims.
 
@@ -71,12 +87,12 @@ Remote repair fixes both remaining failures without changing their assertions.
 | --- | --- | --- |
 | Ownership and sources | Borrowed View, inline Signal, typed owner-relative sources/actions, contained component projections and declared Source/earlier-Reader input families | One serial root owner; complete dependency/cohort graph remains |
 | Public testing | Application::demo, borrowed semantic queries/visits and streaming serialization, conjunctive name/description filters, actions, shared native pointer/focus/keyboard input, typed worker delivery, source JSON and explicit scene/pixel diagnostics | Virtual time, replay, touch/capture/drag and hover callbacks remain |
-| Accessibility | Native AccessKit in ordinary desktop profiles, exact acknowledged transitions, controlled checkbox role/state/actions, source-qualified selection and atomic range edits, analytic rounded descendant clips, retired provider authority on text rebind; actual Linux AT-SPI client execution | Topology/missed/capped transitions use full projection; IME, relationships, virtual-item realization and UIA/VoiceOver runtime coverage remain |
+| Accessibility | Native AccessKit in ordinary desktop profiles, exact acknowledged transitions, controlled checkbox role/state/actions, source-qualified selection and atomic range edits, analytic rounded descendant clips, retired provider authority on text rebind and marked-display/Source authority; actual Linux AT-SPI client execution | Topology/missed/capped transitions use full projection; native IME turnover, relationships, virtual-item realization and UIA/VoiceOver runtime coverage remain |
 | Identity | Window-qualified, never-reused 16-byte target stamps; logical membership checks; keyed realized-row identity; no target allocation table or visited-key history | Cross-window list transfer and unrealized-row accessibility realization remain |
 | Worker delivery | Static typed inbox/question chains, frozen batches, versioned input-family admission, consuming inline response credit, checked lane-bound tickets, borrowed cooperative cancellation, native wakes and exclusive cleanup | Reader lookup scans earlier lanes; cross-turn results remain progressive; dynamic graph and demand parking remain; queue capacity is not a byte bound |
 | Collections | Borrowed keyed uniform lists and ordinary two-axis scroll panes, f64 rebased offsets, viewport-only virtual rows, shared wheel/reveal/accessibility routing | Explicit uniform-height finite virtual viewports; rotated/sheared scroll apertures and variable-height virtual rows remain |
 | Properties and inspector | Typed selectors and closed reflection catalog share validated Set/Inherit transactions; all 14 properties and nine value families feed retained native inspector controls; contained components select mounted targets, edit and refresh canonical state through ordinary typed click methods; edit counts join description changes by exact identity | Arbitrary built-in entry, descendant picking for contained tools, complete theme cascade and user-defined component schemas remain |
-| Layout and text | Cephal perf/cold-layout with direct lazy cache handles, selective nonparent containing blocks and allocation-free hidden markers; literal/direct-Signal/mapped properties and flex recipes; Parley/Engine/Fontique 0.12 with scoped paragraph reuse, shared packed glyphs and direct raster witnesses; source-qualified grapheme editing, native selection/caret paint, horizontal and vertical visual navigation and line-edge keys; acknowledged wrapped/bidi text geometry | Rich styled spans/color fonts, general Reader/Motion recipe algebra, IME/clipboard/autoscroll, native macOS range-origin policy, arbitrary font discovery and hostile-font transient budgets remain |
+| Layout and text | Cephal perf/cold-layout with direct lazy cache handles, selective nonparent containing blocks and allocation-free hidden markers; literal/direct-Signal/mapped properties and flex recipes; Parley/Engine/Fontique 0.12 with scoped paragraph reuse, shared packed glyphs and direct raster witnesses; source-qualified grapheme editing and immutable composition previews, native selection/caret paint, horizontal and vertical visual navigation and line-edge keys; acknowledged wrapped/bidi text geometry | Rich styled spans/color fonts, general Reader/Motion recipe algebra, native IME turnover/clipboard/autoscroll, native macOS range-origin policy, arbitrary font discovery and hostile-font transient budgets remain |
 | Canvas | Canonical grouped display list, rounded solid/image shapes, analytic linear/radial/conic gradient materials, nested transformed rectangle/rounded clip chains, linear-light 4×4 sampling, exact per-pixel sample promotion, separable rectangle/glyph addresses, tile proofs, optional CPU image, exact scene-support damage, certified software-buffer repair, lazy bounds-only CSR membership reused across contained repairs and disjoint parallel bands | Multiple damage islands, persistent GPU repair and complete effect/path/media library remain |
 | Images | Borrowed immutable resources, packed RGBA8/P3 or explicit linear HDR, linear-light filtering, CPU/WGSL rendering and native accessible Image roles | Caller decoding/I/O, direct source fanout, mipmaps and native HDR negotiation remain |
 | GPU | Vendored WGPU/Core/HAL 30, typed wgsl-rs generation/validation and optional guarded static SPIR-V recipes with scoped Vulkan module lifetime; shared device/pipeline context and independent renderer states; grouped packets, tile proofs, lazy R8 atlas, boundary corrections, SDR/HDR targets, replay and transactional color patches | Native shared-device multiwindow remains; coalesced token gaps can rebuild packets; replay/patch draws the full target; native HDR negotiation, legacy DX11, other primitives and hardware/backend conformance remain |

@@ -75,6 +75,10 @@ whole chain, so repeated identical edges do not darken independently.
 Inputs support [grapheme-safe selection and replacement](TEXT_SELECTION.md),
 pointer dragging, visual arrows with Shift extension, and actual selection and
 caret painting through the ordinary window and native input paths.
+`ImeSession` and `Win::ime_event` add source-scoped composition previews and
+commits through that same surface. The [composed evidence](../../evidence/ime-integration/README.md)
+records exact display/accessibility authority and the remaining native
+cancellation-quarantine limit.
 
 Linux can instead enable `wayland`; macOS/Windows use `desktop`.
 These normal desktop profiles include the real native AccessKit adapter.

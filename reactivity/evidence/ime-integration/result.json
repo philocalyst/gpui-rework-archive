@@ -1,0 +1,3501 @@
+{
+  "adopted_source": "373c9c6ba2665bcc452a92af835a4089b7b7e135",
+  "qualified_review_source": "63059517488141c35811f0bc197b4cd36c9ae6e1",
+  "whole_tree_identical_at_adoption": true,
+  "linux_gates": {
+    "build": {
+      "source": "63059517488141c35811f0bc197b4cd36c9ae6e1",
+      "exit": 0,
+      "guards": 2073,
+      "guards_match": true,
+      "tracked_input_scopes": [
+        ".cargo",
+        "clippy.toml",
+        "reactivity/Cargo.toml",
+        "reactivity/Cargo.lock",
+        "reactivity/rust-toolchain.toml",
+        "reactivity/crates",
+        "reactivity/vendor"
+      ],
+      "passed": 0,
+      "failed": 0,
+      "ignored": 0,
+      "harnesses": 0,
+      "scope": "Functional/source-identity gate; no timing inference."
+    },
+    "execute": {
+      "source": "63059517488141c35811f0bc197b4cd36c9ae6e1",
+      "exit": 0,
+      "guards": 2073,
+      "guards_match": true,
+      "tracked_input_scopes": [
+        ".cargo",
+        "clippy.toml",
+        "reactivity/Cargo.toml",
+        "reactivity/Cargo.lock",
+        "reactivity/rust-toolchain.toml",
+        "reactivity/crates",
+        "reactivity/vendor"
+      ],
+      "passed": 0,
+      "failed": 0,
+      "ignored": 0,
+      "harnesses": 0,
+      "scope": "Functional/source-identity gate; no timing inference."
+    },
+    "strict": {
+      "source": "63059517488141c35811f0bc197b4cd36c9ae6e1",
+      "exit": 0,
+      "guards": 2073,
+      "guards_match": true,
+      "tracked_input_scopes": [
+        ".cargo",
+        "clippy.toml",
+        "reactivity/Cargo.toml",
+        "reactivity/Cargo.lock",
+        "reactivity/rust-toolchain.toml",
+        "reactivity/crates",
+        "reactivity/vendor"
+      ],
+      "passed": 0,
+      "failed": 0,
+      "ignored": 0,
+      "harnesses": 0,
+      "scope": "Functional/source-identity gate; no timing inference."
+    },
+    "hummingbird": {
+      "source": "63059517488141c35811f0bc197b4cd36c9ae6e1",
+      "exit": 0,
+      "guards": 2794,
+      "guards_match": true,
+      "tracked_input_scopes": [
+        ".cargo",
+        "clippy.toml",
+        "reactivity/Cargo.toml",
+        "reactivity/Cargo.lock",
+        "reactivity/rust-toolchain.toml",
+        "reactivity/crates",
+        "reactivity/vendor",
+        "reactivity/ports/hummingbird"
+      ],
+      "passed": 0,
+      "failed": 0,
+      "ignored": 0,
+      "harnesses": 0,
+      "scope": "Functional/source-identity gate; no timing inference."
+    },
+    "docs": {
+      "source": "63059517488141c35811f0bc197b4cd36c9ae6e1",
+      "exit": 0,
+      "guards": 2073,
+      "guards_match": true,
+      "tracked_input_scopes": [
+        ".cargo",
+        "clippy.toml",
+        "reactivity/Cargo.toml",
+        "reactivity/Cargo.lock",
+        "reactivity/rust-toolchain.toml",
+        "reactivity/crates",
+        "reactivity/vendor"
+      ],
+      "passed": 28,
+      "failed": 0,
+      "ignored": 0,
+      "harnesses": 2,
+      "scope": "Functional/source-identity gate; no timing inference."
+    }
+  },
+  "linux_execution": {
+    "harnesses": 71,
+    "passed": 673,
+    "failed": 0,
+    "ignored": 10,
+    "all_exit_zero": true,
+    "results": [
+      {
+        "target": "semantics",
+        "exit": 0,
+        "passed": 6,
+        "failed": 0,
+        "ignored": 0,
+        "sha256_after_matches": true
+      },
+      {
+        "target": "question_inputs",
+        "exit": 0,
+        "passed": 11,
+        "failed": 0,
+        "ignored": 0,
+        "sha256_after_matches": true
+      },
+      {
+        "target": "child_capacity",
+        "exit": 0,
+        "passed": 3,
+        "failed": 0,
+        "ignored": 0,
+        "sha256_after_matches": true
+      },
+      {
+        "target": "immutable_text",
+        "exit": 0,
+        "passed": 2,
+        "failed": 0,
+        "ignored": 0,
+        "sha256_after_matches": true
+      },
+      {
+        "target": "pointer_focus",
+        "exit": 0,
+        "passed": 12,
+        "failed": 0,
+        "ignored": 0,
+        "sha256_after_matches": true
+      },
+      {
+        "target": "text_selection_compound",
+        "exit": 0,
+        "passed": 6,
+        "failed": 0,
+        "ignored": 0,
+        "sha256_after_matches": true
+      },
+      {
+        "target": "retained_styles",
+        "exit": 0,
+        "passed": 2,
+        "failed": 0,
+        "ignored": 0,
+        "sha256_after_matches": true
+      },
+      {
+        "target": "property_change_union",
+        "exit": 0,
+        "passed": 11,
+        "failed": 0,
+        "ignored": 0,
+        "sha256_after_matches": true
+      },
+      {
+        "target": "field_identity",
+        "exit": 0,
+        "passed": 1,
+        "failed": 0,
+        "ignored": 0,
+        "sha256_after_matches": true
+      },
+      {
+        "target": "lists",
+        "exit": 0,
+        "passed": 19,
+        "failed": 0,
+        "ignored": 0,
+        "sha256_after_matches": true
+      },
+      {
+        "target": "search_library",
+        "exit": 0,
+        "passed": 6,
+        "failed": 0,
+        "ignored": 1,
+        "sha256_after_matches": true
+      },
+      {
+        "target": "question_cost",
+        "exit": 0,
+        "passed": 0,
+        "failed": 0,
+        "ignored": 1,
+        "sha256_after_matches": true
+      },
+      {
+        "target": "paint_slot_rebind",
+        "exit": 0,
+        "passed": 1,
+        "failed": 0,
+        "ignored": 0,
+        "sha256_after_matches": true
+      },
+      {
+        "target": "identity_recovery",
+        "exit": 0,
+        "passed": 1,
+        "failed": 0,
+        "ignored": 0,
+        "sha256_after_matches": true
+      },
+      {
+        "target": "acceptance",
+        "exit": 0,
+        "passed": 6,
+        "failed": 0,
+        "ignored": 0,
+        "sha256_after_matches": true
+      },
+      {
+        "target": "text_cache",
+        "exit": 0,
+        "passed": 3,
+        "failed": 0,
+        "ignored": 0,
+        "sha256_after_matches": true
+      },
+      {
+        "target": "source_inbox",
+        "exit": 0,
+        "passed": 14,
+        "failed": 0,
+        "ignored": 0,
+        "sha256_after_matches": true
+      },
+      {
+        "target": "question_storage",
+        "exit": 0,
+        "passed": 1,
+        "failed": 0,
+        "ignored": 0,
+        "sha256_after_matches": true
+      },
+      {
+        "target": "gpui",
+        "exit": 0,
+        "passed": 190,
+        "failed": 0,
+        "ignored": 5,
+        "sha256_after_matches": true
+      },
+      {
+        "target": "color_packing",
+        "exit": 0,
+        "passed": 1,
+        "failed": 0,
+        "ignored": 0,
+        "sha256_after_matches": true
+      },
+      {
+        "target": "inspector",
+        "exit": 0,
+        "passed": 15,
+        "failed": 0,
+        "ignored": 0,
+        "sha256_after_matches": true
+      },
+      {
+        "target": "unicode_text",
+        "exit": 0,
+        "passed": 2,
+        "failed": 0,
+        "ignored": 0,
+        "sha256_after_matches": true
+      },
+      {
+        "target": "presentation",
+        "exit": 0,
+        "passed": 9,
+        "failed": 0,
+        "ignored": 0,
+        "sha256_after_matches": true
+      },
+      {
+        "target": "mapped_paint",
+        "exit": 0,
+        "passed": 3,
+        "failed": 0,
+        "ignored": 0,
+        "sha256_after_matches": true
+      },
+      {
+        "target": "property_selection",
+        "exit": 0,
+        "passed": 9,
+        "failed": 0,
+        "ignored": 0,
+        "sha256_after_matches": true
+      },
+      {
+        "target": "routes",
+        "exit": 0,
+        "passed": 4,
+        "failed": 0,
+        "ignored": 0,
+        "sha256_after_matches": true
+      },
+      {
+        "target": "focus",
+        "exit": 0,
+        "passed": 9,
+        "failed": 0,
+        "ignored": 0,
+        "sha256_after_matches": true
+      },
+      {
+        "target": "source_value_isolation",
+        "exit": 0,
+        "passed": 3,
+        "failed": 0,
+        "ignored": 0,
+        "sha256_after_matches": true
+      },
+      {
+        "target": "question_input_cost",
+        "exit": 0,
+        "passed": 0,
+        "failed": 0,
+        "ignored": 1,
+        "sha256_after_matches": true
+      },
+      {
+        "target": "semantic_serialization",
+        "exit": 0,
+        "passed": 7,
+        "failed": 0,
+        "ignored": 0,
+        "sha256_after_matches": true
+      },
+      {
+        "target": "pointer",
+        "exit": 0,
+        "passed": 9,
+        "failed": 0,
+        "ignored": 0,
+        "sha256_after_matches": true
+      },
+      {
+        "target": "checkbox",
+        "exit": 0,
+        "passed": 9,
+        "failed": 0,
+        "ignored": 0,
+        "sha256_after_matches": true
+      },
+      {
+        "target": "ime",
+        "exit": 0,
+        "passed": 18,
+        "failed": 0,
+        "ignored": 0,
+        "sha256_after_matches": true
+      },
+      {
+        "target": "text_selection",
+        "exit": 0,
+        "passed": 20,
+        "failed": 0,
+        "ignored": 0,
+        "sha256_after_matches": true
+      },
+      {
+        "target": "library",
+        "exit": 0,
+        "passed": 4,
+        "failed": 0,
+        "ignored": 0,
+        "sha256_after_matches": true
+      },
+      {
+        "target": "dpi",
+        "exit": 0,
+        "passed": 6,
+        "failed": 0,
+        "ignored": 0,
+        "sha256_after_matches": true
+      },
+      {
+        "target": "property_actions",
+        "exit": 0,
+        "passed": 9,
+        "failed": 0,
+        "ignored": 0,
+        "sha256_after_matches": true
+      },
+      {
+        "target": "unit_action_cost_two",
+        "exit": 0,
+        "passed": 2,
+        "failed": 0,
+        "ignored": 0,
+        "sha256_after_matches": true
+      },
+      {
+        "target": "remote",
+        "exit": 0,
+        "passed": 15,
+        "failed": 0,
+        "ignored": 0,
+        "sha256_after_matches": true
+      },
+      {
+        "target": "queries",
+        "exit": 0,
+        "passed": 3,
+        "failed": 0,
+        "ignored": 0,
+        "sha256_after_matches": true
+      },
+      {
+        "target": "paint_patch",
+        "exit": 0,
+        "passed": 5,
+        "failed": 0,
+        "ignored": 0,
+        "sha256_after_matches": true
+      },
+      {
+        "target": "handler_storage",
+        "exit": 0,
+        "passed": 5,
+        "failed": 0,
+        "ignored": 0,
+        "sha256_after_matches": true
+      },
+      {
+        "target": "scroll",
+        "exit": 0,
+        "passed": 27,
+        "failed": 0,
+        "ignored": 0,
+        "sha256_after_matches": true
+      },
+      {
+        "target": "sibling_reconciliation_cost",
+        "exit": 0,
+        "passed": 1,
+        "failed": 0,
+        "ignored": 1,
+        "sha256_after_matches": true
+      },
+      {
+        "target": "style_ports",
+        "exit": 0,
+        "passed": 13,
+        "failed": 0,
+        "ignored": 0,
+        "sha256_after_matches": true
+      },
+      {
+        "target": "ports",
+        "exit": 0,
+        "passed": 3,
+        "failed": 0,
+        "ignored": 0,
+        "sha256_after_matches": true
+      },
+      {
+        "target": "question_mailbox",
+        "exit": 0,
+        "passed": 3,
+        "failed": 0,
+        "ignored": 0,
+        "sha256_after_matches": true
+      },
+      {
+        "target": "inbox_storage",
+        "exit": 0,
+        "passed": 9,
+        "failed": 0,
+        "ignored": 0,
+        "sha256_after_matches": true
+      },
+      {
+        "target": "todo_comparison",
+        "exit": 0,
+        "passed": 4,
+        "failed": 0,
+        "ignored": 1,
+        "sha256_after_matches": true
+      },
+      {
+        "target": "clipping",
+        "exit": 0,
+        "passed": 6,
+        "failed": 0,
+        "ignored": 0,
+        "sha256_after_matches": true
+      },
+      {
+        "target": "source_values",
+        "exit": 0,
+        "passed": 4,
+        "failed": 0,
+        "ignored": 0,
+        "sha256_after_matches": true
+      },
+      {
+        "target": "rounded",
+        "exit": 0,
+        "passed": 9,
+        "failed": 0,
+        "ignored": 0,
+        "sha256_after_matches": true
+      },
+      {
+        "target": "literal_dispatch",
+        "exit": 0,
+        "passed": 2,
+        "failed": 0,
+        "ignored": 0,
+        "sha256_after_matches": true
+      },
+      {
+        "target": "flex",
+        "exit": 0,
+        "passed": 10,
+        "failed": 0,
+        "ignored": 0,
+        "sha256_after_matches": true
+      },
+      {
+        "target": "property_outline_allocations",
+        "exit": 0,
+        "passed": 1,
+        "failed": 0,
+        "ignored": 0,
+        "sha256_after_matches": true
+      },
+      {
+        "target": "images",
+        "exit": 0,
+        "passed": 3,
+        "failed": 0,
+        "ignored": 0,
+        "sha256_after_matches": true
+      },
+      {
+        "target": "application",
+        "exit": 0,
+        "passed": 3,
+        "failed": 0,
+        "ignored": 0,
+        "sha256_after_matches": true
+      },
+      {
+        "target": "question_futures",
+        "exit": 0,
+        "passed": 17,
+        "failed": 0,
+        "ignored": 0,
+        "sha256_after_matches": true
+      },
+      {
+        "target": "paint_slots",
+        "exit": 0,
+        "passed": 3,
+        "failed": 0,
+        "ignored": 0,
+        "sha256_after_matches": true
+      },
+      {
+        "target": "text_geometry",
+        "exit": 0,
+        "passed": 4,
+        "failed": 0,
+        "ignored": 0,
+        "sha256_after_matches": true
+      },
+      {
+        "target": "source_inbox_reader_gate",
+        "exit": 0,
+        "passed": 1,
+        "failed": 0,
+        "ignored": 0,
+        "sha256_after_matches": true
+      },
+      {
+        "target": "semantic_metadata",
+        "exit": 0,
+        "passed": 12,
+        "failed": 0,
+        "ignored": 0,
+        "sha256_after_matches": true
+      },
+      {
+        "target": "questions",
+        "exit": 0,
+        "passed": 21,
+        "failed": 0,
+        "ignored": 0,
+        "sha256_after_matches": true
+      },
+      {
+        "target": "intrinsic_text",
+        "exit": 0,
+        "passed": 3,
+        "failed": 0,
+        "ignored": 0,
+        "sha256_after_matches": true
+      },
+      {
+        "target": "projected_sources",
+        "exit": 0,
+        "passed": 12,
+        "failed": 0,
+        "ignored": 0,
+        "sha256_after_matches": true
+      },
+      {
+        "target": "unit_action_cost",
+        "exit": 0,
+        "passed": 1,
+        "failed": 0,
+        "ignored": 0,
+        "sha256_after_matches": true
+      },
+      {
+        "target": "components",
+        "exit": 0,
+        "passed": 12,
+        "failed": 0,
+        "ignored": 0,
+        "sha256_after_matches": true
+      },
+      {
+        "target": "property_state_shell",
+        "exit": 0,
+        "passed": 1,
+        "failed": 0,
+        "ignored": 0,
+        "sha256_after_matches": true
+      },
+      {
+        "target": "frontier",
+        "exit": 0,
+        "passed": 4,
+        "failed": 0,
+        "ignored": 0,
+        "sha256_after_matches": true
+      },
+      {
+        "target": "runtime",
+        "exit": 0,
+        "passed": 15,
+        "failed": 0,
+        "ignored": 0,
+        "sha256_after_matches": true
+      },
+      {
+        "target": "mapped_properties",
+        "exit": 0,
+        "passed": 7,
+        "failed": 0,
+        "ignored": 0,
+        "sha256_after_matches": true
+      }
+    ],
+    "scope": "Frozen functional test artifacts; sequential execution, no performance inference."
+  },
+  "linux_frozen_executables": [
+    {
+      "original": "/tmp/gpui-ime-composed-root-target-20261024/debug/build/gpui/fcfd95ac4717cdb8/out/semantics-fcfd95ac4717cdb8",
+      "frozen": "/tmp/gpui-ime-composed-executables-root/000-semantics/test",
+      "sha256": "8b361d1c3e891a2377cd8b0eeab37195de17d9eab405a0d81d2eee550c9924c8",
+      "bytes": 29420200,
+      "fresh": false,
+      "package_id": "path+file:///tmp/gpui-ime-composed-review-root-20261024/reactivity/crates/gpui#0.1.0",
+      "target": {
+        "kind": [
+          "test"
+        ],
+        "crate_types": [
+          "bin"
+        ],
+        "name": "semantics",
+        "src_path": "/tmp/gpui-ime-composed-review-root-20261024/reactivity/crates/gpui/tests/semantics.rs",
+        "edition": "2024",
+        "doc": false,
+        "doctest": false,
+        "test": true
+      },
+      "features": [
+        "default",
+        "simd"
+      ],
+      "profile": {
+        "opt_level": "0",
+        "debuginfo": 0,
+        "debug_assertions": true,
+        "overflow_checks": true,
+        "test": true
+      }
+    },
+    {
+      "original": "/tmp/gpui-ime-composed-root-target-20261024/debug/build/gpui/ac7a59a8698519bd/out/question_inputs-ac7a59a8698519bd",
+      "frozen": "/tmp/gpui-ime-composed-executables-root/001-question_inputs/test",
+      "sha256": "5c632a368732892ce03e6b3d725ce9a3e52d30c870d6bc7c95f2fcb9e5e9d6ac",
+      "bytes": 28167008,
+      "fresh": false,
+      "package_id": "path+file:///tmp/gpui-ime-composed-review-root-20261024/reactivity/crates/gpui#0.1.0",
+      "target": {
+        "kind": [
+          "test"
+        ],
+        "crate_types": [
+          "bin"
+        ],
+        "name": "question_inputs",
+        "src_path": "/tmp/gpui-ime-composed-review-root-20261024/reactivity/crates/gpui/tests/question_inputs.rs",
+        "edition": "2024",
+        "doc": false,
+        "doctest": false,
+        "test": true
+      },
+      "features": [
+        "default",
+        "simd"
+      ],
+      "profile": {
+        "opt_level": "0",
+        "debuginfo": 0,
+        "debug_assertions": true,
+        "overflow_checks": true,
+        "test": true
+      }
+    },
+    {
+      "original": "/tmp/gpui-ime-composed-root-target-20261024/debug/build/gpui/e6a6a63353deed83/out/child_capacity-e6a6a63353deed83",
+      "frozen": "/tmp/gpui-ime-composed-executables-root/002-child_capacity/test",
+      "sha256": "7cf70e1febd9b84f455a5911f30efa209451cf0966d5171270fde4d1cfb82414",
+      "bytes": 26696560,
+      "fresh": false,
+      "package_id": "path+file:///tmp/gpui-ime-composed-review-root-20261024/reactivity/crates/gpui#0.1.0",
+      "target": {
+        "kind": [
+          "test"
+        ],
+        "crate_types": [
+          "bin"
+        ],
+        "name": "child_capacity",
+        "src_path": "/tmp/gpui-ime-composed-review-root-20261024/reactivity/crates/gpui/tests/child_capacity.rs",
+        "edition": "2024",
+        "doc": false,
+        "doctest": false,
+        "test": true
+      },
+      "features": [
+        "default",
+        "simd"
+      ],
+      "profile": {
+        "opt_level": "0",
+        "debuginfo": 0,
+        "debug_assertions": true,
+        "overflow_checks": true,
+        "test": true
+      }
+    },
+    {
+      "original": "/tmp/gpui-ime-composed-root-target-20261024/debug/build/gpui/a3554f425c0c5b6d/out/immutable_text-a3554f425c0c5b6d",
+      "frozen": "/tmp/gpui-ime-composed-executables-root/003-immutable_text/test",
+      "sha256": "8db148ac108356da80bae9fb3f3677c672201860de6bf182ba5a63f766daf1e9",
+      "bytes": 26636384,
+      "fresh": false,
+      "package_id": "path+file:///tmp/gpui-ime-composed-review-root-20261024/reactivity/crates/gpui#0.1.0",
+      "target": {
+        "kind": [
+          "test"
+        ],
+        "crate_types": [
+          "bin"
+        ],
+        "name": "immutable_text",
+        "src_path": "/tmp/gpui-ime-composed-review-root-20261024/reactivity/crates/gpui/tests/immutable_text.rs",
+        "edition": "2024",
+        "doc": false,
+        "doctest": false,
+        "test": true
+      },
+      "features": [
+        "default",
+        "simd"
+      ],
+      "profile": {
+        "opt_level": "0",
+        "debuginfo": 0,
+        "debug_assertions": true,
+        "overflow_checks": true,
+        "test": true
+      }
+    },
+    {
+      "original": "/tmp/gpui-ime-composed-root-target-20261024/debug/build/gpui/70db759396f671f3/out/pointer_focus-70db759396f671f3",
+      "frozen": "/tmp/gpui-ime-composed-executables-root/004-pointer_focus/test",
+      "sha256": "4fa00414ced2ab313ee5b2b94f48f7a87c987b06d96d84371aa5bfa3cd056efd",
+      "bytes": 27223288,
+      "fresh": false,
+      "package_id": "path+file:///tmp/gpui-ime-composed-review-root-20261024/reactivity/crates/gpui#0.1.0",
+      "target": {
+        "kind": [
+          "test"
+        ],
+        "crate_types": [
+          "bin"
+        ],
+        "name": "pointer_focus",
+        "src_path": "/tmp/gpui-ime-composed-review-root-20261024/reactivity/crates/gpui/tests/pointer_focus.rs",
+        "edition": "2024",
+        "doc": false,
+        "doctest": false,
+        "test": true
+      },
+      "features": [
+        "default",
+        "simd"
+      ],
+      "profile": {
+        "opt_level": "0",
+        "debuginfo": 0,
+        "debug_assertions": true,
+        "overflow_checks": true,
+        "test": true
+      }
+    },
+    {
+      "original": "/tmp/gpui-ime-composed-root-target-20261024/debug/build/gpui/613e4eee01c2b2c7/out/text_selection_compound-613e4eee01c2b2c7",
+      "frozen": "/tmp/gpui-ime-composed-executables-root/005-text_selection_compound/test",
+      "sha256": "76ff71dcb8c8ebcfda2125e27d5faa7a2a4c8828115366f2bac7f6956e9522f0",
+      "bytes": 27320792,
+      "fresh": false,
+      "package_id": "path+file:///tmp/gpui-ime-composed-review-root-20261024/reactivity/crates/gpui#0.1.0",
+      "target": {
+        "kind": [
+          "test"
+        ],
+        "crate_types": [
+          "bin"
+        ],
+        "name": "text_selection_compound",
+        "src_path": "/tmp/gpui-ime-composed-review-root-20261024/reactivity/crates/gpui/tests/text_selection_compound.rs",
+        "edition": "2024",
+        "doc": false,
+        "doctest": false,
+        "test": true
+      },
+      "features": [
+        "default",
+        "simd"
+      ],
+      "profile": {
+        "opt_level": "0",
+        "debuginfo": 0,
+        "debug_assertions": true,
+        "overflow_checks": true,
+        "test": true
+      }
+    },
+    {
+      "original": "/tmp/gpui-ime-composed-root-target-20261024/debug/build/gpui/f5a005eac7775f8a/out/retained_styles-f5a005eac7775f8a",
+      "frozen": "/tmp/gpui-ime-composed-executables-root/006-retained_styles/test",
+      "sha256": "2554669e8119addd4cf72efbbebaf643786bf9ed67356bae4462166ff9582a58",
+      "bytes": 28961040,
+      "fresh": false,
+      "package_id": "path+file:///tmp/gpui-ime-composed-review-root-20261024/reactivity/crates/gpui#0.1.0",
+      "target": {
+        "kind": [
+          "test"
+        ],
+        "crate_types": [
+          "bin"
+        ],
+        "name": "retained_styles",
+        "src_path": "/tmp/gpui-ime-composed-review-root-20261024/reactivity/crates/gpui/tests/retained_styles.rs",
+        "edition": "2024",
+        "doc": false,
+        "doctest": false,
+        "test": true
+      },
+      "features": [
+        "default",
+        "simd"
+      ],
+      "profile": {
+        "opt_level": "0",
+        "debuginfo": 0,
+        "debug_assertions": true,
+        "overflow_checks": true,
+        "test": true
+      }
+    },
+    {
+      "original": "/tmp/gpui-ime-composed-root-target-20261024/debug/build/gpui/4b2d89a398abc8f2/out/property_change_union-4b2d89a398abc8f2",
+      "frozen": "/tmp/gpui-ime-composed-executables-root/007-property_change_union/test",
+      "sha256": "d9d34da4e356d85ee2d484636bafb46f93b4ea9927963697ed6e40c8c4d0a471",
+      "bytes": 28533592,
+      "fresh": false,
+      "package_id": "path+file:///tmp/gpui-ime-composed-review-root-20261024/reactivity/crates/gpui#0.1.0",
+      "target": {
+        "kind": [
+          "test"
+        ],
+        "crate_types": [
+          "bin"
+        ],
+        "name": "property_change_union",
+        "src_path": "/tmp/gpui-ime-composed-review-root-20261024/reactivity/crates/gpui/tests/property_change_union.rs",
+        "edition": "2024",
+        "doc": false,
+        "doctest": false,
+        "test": true
+      },
+      "features": [
+        "default",
+        "simd"
+      ],
+      "profile": {
+        "opt_level": "0",
+        "debuginfo": 0,
+        "debug_assertions": true,
+        "overflow_checks": true,
+        "test": true
+      }
+    },
+    {
+      "original": "/tmp/gpui-ime-composed-root-target-20261024/debug/build/gpui/fe2e97a1b27db335/out/field_identity-fe2e97a1b27db335",
+      "frozen": "/tmp/gpui-ime-composed-executables-root/008-field_identity/test",
+      "sha256": "a1a19c7f1099449b4b4f290bb2b14d0ef5077ce6dc4cd2fc01d6bcfab3d1514d",
+      "bytes": 26691768,
+      "fresh": false,
+      "package_id": "path+file:///tmp/gpui-ime-composed-review-root-20261024/reactivity/crates/gpui#0.1.0",
+      "target": {
+        "kind": [
+          "test"
+        ],
+        "crate_types": [
+          "bin"
+        ],
+        "name": "field_identity",
+        "src_path": "/tmp/gpui-ime-composed-review-root-20261024/reactivity/crates/gpui/tests/field_identity.rs",
+        "edition": "2024",
+        "doc": false,
+        "doctest": false,
+        "test": true
+      },
+      "features": [
+        "default",
+        "simd"
+      ],
+      "profile": {
+        "opt_level": "0",
+        "debuginfo": 0,
+        "debug_assertions": true,
+        "overflow_checks": true,
+        "test": true
+      }
+    },
+    {
+      "original": "/tmp/gpui-ime-composed-root-target-20261024/debug/build/gpui/453cce4cc0c32507/out/lists-453cce4cc0c32507",
+      "frozen": "/tmp/gpui-ime-composed-executables-root/009-lists/test",
+      "sha256": "bcf081c71f975881b58c378fc9a03b4fcddd1646e1aea8db028d7f4049cba432",
+      "bytes": 37790424,
+      "fresh": false,
+      "package_id": "path+file:///tmp/gpui-ime-composed-review-root-20261024/reactivity/crates/gpui#0.1.0",
+      "target": {
+        "kind": [
+          "test"
+        ],
+        "crate_types": [
+          "bin"
+        ],
+        "name": "lists",
+        "src_path": "/tmp/gpui-ime-composed-review-root-20261024/reactivity/crates/gpui/tests/lists.rs",
+        "edition": "2024",
+        "doc": false,
+        "doctest": false,
+        "test": true
+      },
+      "features": [
+        "default",
+        "simd"
+      ],
+      "profile": {
+        "opt_level": "0",
+        "debuginfo": 0,
+        "debug_assertions": true,
+        "overflow_checks": true,
+        "test": true
+      }
+    },
+    {
+      "original": "/tmp/gpui-ime-composed-root-target-20261024/debug/build/gpui/5a831c232a336991/out/search_library-5a831c232a336991",
+      "frozen": "/tmp/gpui-ime-composed-executables-root/010-search_library/test",
+      "sha256": "eb4df4d06e95d47a41f68f80893a825303f60d81c2087ba7a4bc6348f398e5ff",
+      "bytes": 28858248,
+      "fresh": false,
+      "package_id": "path+file:///tmp/gpui-ime-composed-review-root-20261024/reactivity/crates/gpui#0.1.0",
+      "target": {
+        "kind": [
+          "test"
+        ],
+        "crate_types": [
+          "bin"
+        ],
+        "name": "search_library",
+        "src_path": "/tmp/gpui-ime-composed-review-root-20261024/reactivity/crates/gpui/tests/search_library.rs",
+        "edition": "2024",
+        "doc": false,
+        "doctest": false,
+        "test": true
+      },
+      "features": [
+        "default",
+        "simd"
+      ],
+      "profile": {
+        "opt_level": "0",
+        "debuginfo": 0,
+        "debug_assertions": true,
+        "overflow_checks": true,
+        "test": true
+      }
+    },
+    {
+      "original": "/tmp/gpui-ime-composed-root-target-20261024/debug/build/gpui/a9dde526211fbfee/out/question_cost-a9dde526211fbfee",
+      "frozen": "/tmp/gpui-ime-composed-executables-root/011-question_cost/test",
+      "sha256": "d771d4a6e263cec326e1454b757041a9834a44cfd735eaa532bcab17f99b4280",
+      "bytes": 27598336,
+      "fresh": false,
+      "package_id": "path+file:///tmp/gpui-ime-composed-review-root-20261024/reactivity/crates/gpui#0.1.0",
+      "target": {
+        "kind": [
+          "test"
+        ],
+        "crate_types": [
+          "bin"
+        ],
+        "name": "question_cost",
+        "src_path": "/tmp/gpui-ime-composed-review-root-20261024/reactivity/crates/gpui/tests/question_cost.rs",
+        "edition": "2024",
+        "doc": false,
+        "doctest": false,
+        "test": true
+      },
+      "features": [
+        "default",
+        "simd"
+      ],
+      "profile": {
+        "opt_level": "0",
+        "debuginfo": 0,
+        "debug_assertions": true,
+        "overflow_checks": true,
+        "test": true
+      }
+    },
+    {
+      "original": "/tmp/gpui-ime-composed-root-target-20261024/debug/build/gpui/06e452352320cad9/out/paint_slot_rebind-06e452352320cad9",
+      "frozen": "/tmp/gpui-ime-composed-executables-root/012-paint_slot_rebind/test",
+      "sha256": "6d1fb8dcdd03be673ac8e8c7d090e5d6e122747756d635a31a413f5faa7d6147",
+      "bytes": 28167136,
+      "fresh": false,
+      "package_id": "path+file:///tmp/gpui-ime-composed-review-root-20261024/reactivity/crates/gpui#0.1.0",
+      "target": {
+        "kind": [
+          "test"
+        ],
+        "crate_types": [
+          "bin"
+        ],
+        "name": "paint_slot_rebind",
+        "src_path": "/tmp/gpui-ime-composed-review-root-20261024/reactivity/crates/gpui/tests/paint_slot_rebind.rs",
+        "edition": "2024",
+        "doc": false,
+        "doctest": false,
+        "test": true
+      },
+      "features": [
+        "default",
+        "simd"
+      ],
+      "profile": {
+        "opt_level": "0",
+        "debuginfo": 0,
+        "debug_assertions": true,
+        "overflow_checks": true,
+        "test": true
+      }
+    },
+    {
+      "original": "/tmp/gpui-ime-composed-root-target-20261024/debug/build/gpui/60ef604fa26b6c1b/out/identity_recovery-60ef604fa26b6c1b",
+      "frozen": "/tmp/gpui-ime-composed-executables-root/013-identity_recovery/test",
+      "sha256": "722a1508e026899836d61be8b2455780c91ce71aa098d686bfbd53cb44e3a46f",
+      "bytes": 26910616,
+      "fresh": false,
+      "package_id": "path+file:///tmp/gpui-ime-composed-review-root-20261024/reactivity/crates/gpui#0.1.0",
+      "target": {
+        "kind": [
+          "test"
+        ],
+        "crate_types": [
+          "bin"
+        ],
+        "name": "identity_recovery",
+        "src_path": "/tmp/gpui-ime-composed-review-root-20261024/reactivity/crates/gpui/tests/identity_recovery.rs",
+        "edition": "2024",
+        "doc": false,
+        "doctest": false,
+        "test": true
+      },
+      "features": [
+        "default",
+        "simd"
+      ],
+      "profile": {
+        "opt_level": "0",
+        "debuginfo": 0,
+        "debug_assertions": true,
+        "overflow_checks": true,
+        "test": true
+      }
+    },
+    {
+      "original": "/tmp/gpui-ime-composed-root-target-20261024/debug/build/gpui/831671b36506f83f/out/acceptance-831671b36506f83f",
+      "frozen": "/tmp/gpui-ime-composed-executables-root/014-acceptance/test",
+      "sha256": "4bd5777fa478affbfbbd42abee4ea28b3559e436390f52823152970f934c2b2e",
+      "bytes": 31466312,
+      "fresh": false,
+      "package_id": "path+file:///tmp/gpui-ime-composed-review-root-20261024/reactivity/crates/gpui#0.1.0",
+      "target": {
+        "kind": [
+          "test"
+        ],
+        "crate_types": [
+          "bin"
+        ],
+        "name": "acceptance",
+        "src_path": "/tmp/gpui-ime-composed-review-root-20261024/reactivity/crates/gpui/tests/acceptance.rs",
+        "edition": "2024",
+        "doc": false,
+        "doctest": false,
+        "test": true
+      },
+      "features": [
+        "default",
+        "simd"
+      ],
+      "profile": {
+        "opt_level": "0",
+        "debuginfo": 0,
+        "debug_assertions": true,
+        "overflow_checks": true,
+        "test": true
+      }
+    },
+    {
+      "original": "/tmp/gpui-ime-composed-root-target-20261024/debug/build/gpui/3035aad925017448/out/text_cache-3035aad925017448",
+      "frozen": "/tmp/gpui-ime-composed-executables-root/015-text_cache/test",
+      "sha256": "ffda81d571b72db0ee3e4b410b5ba1eb47c1f01dc6e3f0ac261355ae5655e96e",
+      "bytes": 29003864,
+      "fresh": false,
+      "package_id": "path+file:///tmp/gpui-ime-composed-review-root-20261024/reactivity/crates/gpui#0.1.0",
+      "target": {
+        "kind": [
+          "test"
+        ],
+        "crate_types": [
+          "bin"
+        ],
+        "name": "text_cache",
+        "src_path": "/tmp/gpui-ime-composed-review-root-20261024/reactivity/crates/gpui/tests/text_cache.rs",
+        "edition": "2024",
+        "doc": false,
+        "doctest": false,
+        "test": true
+      },
+      "features": [
+        "default",
+        "simd"
+      ],
+      "profile": {
+        "opt_level": "0",
+        "debuginfo": 0,
+        "debug_assertions": true,
+        "overflow_checks": true,
+        "test": true
+      }
+    },
+    {
+      "original": "/tmp/gpui-ime-composed-root-target-20261024/debug/build/gpui/729a7f5457eb70e1/out/source_inbox-729a7f5457eb70e1",
+      "frozen": "/tmp/gpui-ime-composed-executables-root/016-source_inbox/test",
+      "sha256": "de7c318c8d674f6c433dc3fd9ff1f371b0507c279c4aa9c188610cd23fda6c86",
+      "bytes": 31206192,
+      "fresh": false,
+      "package_id": "path+file:///tmp/gpui-ime-composed-review-root-20261024/reactivity/crates/gpui#0.1.0",
+      "target": {
+        "kind": [
+          "test"
+        ],
+        "crate_types": [
+          "bin"
+        ],
+        "name": "source_inbox",
+        "src_path": "/tmp/gpui-ime-composed-review-root-20261024/reactivity/crates/gpui/tests/source_inbox.rs",
+        "edition": "2024",
+        "doc": false,
+        "doctest": false,
+        "test": true
+      },
+      "features": [
+        "default",
+        "simd"
+      ],
+      "profile": {
+        "opt_level": "0",
+        "debuginfo": 0,
+        "debug_assertions": true,
+        "overflow_checks": true,
+        "test": true
+      }
+    },
+    {
+      "original": "/tmp/gpui-ime-composed-root-target-20261024/debug/build/gpui/494a8db55f5c5040/out/question_storage-494a8db55f5c5040",
+      "frozen": "/tmp/gpui-ime-composed-executables-root/017-question_storage/test",
+      "sha256": "7ab5143cf2b6bd854a32d35c1dde762d60958eaba7caddf329355d7783509098",
+      "bytes": 29309472,
+      "fresh": false,
+      "package_id": "path+file:///tmp/gpui-ime-composed-review-root-20261024/reactivity/crates/gpui#0.1.0",
+      "target": {
+        "kind": [
+          "test"
+        ],
+        "crate_types": [
+          "bin"
+        ],
+        "name": "question_storage",
+        "src_path": "/tmp/gpui-ime-composed-review-root-20261024/reactivity/crates/gpui/tests/question_storage.rs",
+        "edition": "2024",
+        "doc": false,
+        "doctest": false,
+        "test": true
+      },
+      "features": [
+        "default",
+        "simd"
+      ],
+      "profile": {
+        "opt_level": "0",
+        "debuginfo": 0,
+        "debug_assertions": true,
+        "overflow_checks": true,
+        "test": true
+      }
+    },
+    {
+      "original": "/tmp/gpui-ime-composed-root-target-20261024/debug/build/gpui/af179fd8723c989f/out/gpui-af179fd8723c989f",
+      "frozen": "/tmp/gpui-ime-composed-executables-root/018-gpui/test",
+      "sha256": "b4ce4ae6a7d204e2ba2c4bc763a176286bbac9f43de87326ad3e456fb5209534",
+      "bytes": 69824504,
+      "fresh": false,
+      "package_id": "path+file:///tmp/gpui-ime-composed-review-root-20261024/reactivity/crates/gpui#0.1.0",
+      "target": {
+        "kind": [
+          "lib"
+        ],
+        "crate_types": [
+          "lib"
+        ],
+        "name": "gpui",
+        "src_path": "/tmp/gpui-ime-composed-review-root-20261024/reactivity/crates/gpui/src/lib.rs",
+        "edition": "2024",
+        "doc": true,
+        "doctest": true,
+        "test": true
+      },
+      "features": [
+        "default",
+        "simd"
+      ],
+      "profile": {
+        "opt_level": "0",
+        "debuginfo": 0,
+        "debug_assertions": true,
+        "overflow_checks": true,
+        "test": true
+      }
+    },
+    {
+      "original": "/tmp/gpui-ime-composed-root-target-20261024/debug/build/gpui/102ddc81b5dfed44/out/color_packing-102ddc81b5dfed44",
+      "frozen": "/tmp/gpui-ime-composed-executables-root/019-color_packing/test",
+      "sha256": "b8fd7ae1ece2a4936b54a5d2c6799b92fdac623f8116775a6e6f41bf85b60e31",
+      "bytes": 28241952,
+      "fresh": false,
+      "package_id": "path+file:///tmp/gpui-ime-composed-review-root-20261024/reactivity/crates/gpui#0.1.0",
+      "target": {
+        "kind": [
+          "test"
+        ],
+        "crate_types": [
+          "bin"
+        ],
+        "name": "color_packing",
+        "src_path": "/tmp/gpui-ime-composed-review-root-20261024/reactivity/crates/gpui/tests/color_packing.rs",
+        "edition": "2024",
+        "doc": false,
+        "doctest": false,
+        "test": true
+      },
+      "features": [
+        "default",
+        "simd"
+      ],
+      "profile": {
+        "opt_level": "0",
+        "debuginfo": 0,
+        "debug_assertions": true,
+        "overflow_checks": true,
+        "test": true
+      }
+    },
+    {
+      "original": "/tmp/gpui-ime-composed-root-target-20261024/debug/build/gpui/22e68a1d51d84800/out/inspector-22e68a1d51d84800",
+      "frozen": "/tmp/gpui-ime-composed-executables-root/020-inspector/test",
+      "sha256": "9fbd57f9a21f292fecd62f939076ad4a926e62b51e3cb99364210d73063134ef",
+      "bytes": 33318344,
+      "fresh": false,
+      "package_id": "path+file:///tmp/gpui-ime-composed-review-root-20261024/reactivity/crates/gpui#0.1.0",
+      "target": {
+        "kind": [
+          "test"
+        ],
+        "crate_types": [
+          "bin"
+        ],
+        "name": "inspector",
+        "src_path": "/tmp/gpui-ime-composed-review-root-20261024/reactivity/crates/gpui/tests/inspector.rs",
+        "edition": "2024",
+        "doc": false,
+        "doctest": false,
+        "test": true
+      },
+      "features": [
+        "default",
+        "simd"
+      ],
+      "profile": {
+        "opt_level": "0",
+        "debuginfo": 0,
+        "debug_assertions": true,
+        "overflow_checks": true,
+        "test": true
+      }
+    },
+    {
+      "original": "/tmp/gpui-ime-composed-root-target-20261024/debug/build/gpui/acdb0b923113fcf3/out/unicode_text-acdb0b923113fcf3",
+      "frozen": "/tmp/gpui-ime-composed-executables-root/021-unicode_text/test",
+      "sha256": "df4c8383ecad42f7a22d1efaabc44f2ae4ade2f111696c2b5092ae90138c8031",
+      "bytes": 28164936,
+      "fresh": false,
+      "package_id": "path+file:///tmp/gpui-ime-composed-review-root-20261024/reactivity/crates/gpui#0.1.0",
+      "target": {
+        "kind": [
+          "test"
+        ],
+        "crate_types": [
+          "bin"
+        ],
+        "name": "unicode_text",
+        "src_path": "/tmp/gpui-ime-composed-review-root-20261024/reactivity/crates/gpui/tests/unicode_text.rs",
+        "edition": "2024",
+        "doc": false,
+        "doctest": false,
+        "test": true
+      },
+      "features": [
+        "default",
+        "simd"
+      ],
+      "profile": {
+        "opt_level": "0",
+        "debuginfo": 0,
+        "debug_assertions": true,
+        "overflow_checks": true,
+        "test": true
+      }
+    },
+    {
+      "original": "/tmp/gpui-ime-composed-root-target-20261024/debug/build/gpui/6f24bb4ba4426896/out/presentation-6f24bb4ba4426896",
+      "frozen": "/tmp/gpui-ime-composed-executables-root/022-presentation/test",
+      "sha256": "2b07372b2d527fbf727de02d5797dd8694dc0498991ea32e7818b27752366d62",
+      "bytes": 28497000,
+      "fresh": false,
+      "package_id": "path+file:///tmp/gpui-ime-composed-review-root-20261024/reactivity/crates/gpui#0.1.0",
+      "target": {
+        "kind": [
+          "test"
+        ],
+        "crate_types": [
+          "bin"
+        ],
+        "name": "presentation",
+        "src_path": "/tmp/gpui-ime-composed-review-root-20261024/reactivity/crates/gpui/tests/presentation.rs",
+        "edition": "2024",
+        "doc": false,
+        "doctest": false,
+        "test": true
+      },
+      "features": [
+        "default",
+        "simd"
+      ],
+      "profile": {
+        "opt_level": "0",
+        "debuginfo": 0,
+        "debug_assertions": true,
+        "overflow_checks": true,
+        "test": true
+      }
+    },
+    {
+      "original": "/tmp/gpui-ime-composed-root-target-20261024/debug/build/gpui/0f2a5c96853da426/out/mapped_paint-0f2a5c96853da426",
+      "frozen": "/tmp/gpui-ime-composed-executables-root/023-mapped_paint/test",
+      "sha256": "56d56d3be62b60b7cef3657c7f0020d15be6c7a8772b12bc2509dbe250072f18",
+      "bytes": 28227344,
+      "fresh": false,
+      "package_id": "path+file:///tmp/gpui-ime-composed-review-root-20261024/reactivity/crates/gpui#0.1.0",
+      "target": {
+        "kind": [
+          "test"
+        ],
+        "crate_types": [
+          "bin"
+        ],
+        "name": "mapped_paint",
+        "src_path": "/tmp/gpui-ime-composed-review-root-20261024/reactivity/crates/gpui/tests/mapped_paint.rs",
+        "edition": "2024",
+        "doc": false,
+        "doctest": false,
+        "test": true
+      },
+      "features": [
+        "default",
+        "simd"
+      ],
+      "profile": {
+        "opt_level": "0",
+        "debuginfo": 0,
+        "debug_assertions": true,
+        "overflow_checks": true,
+        "test": true
+      }
+    },
+    {
+      "original": "/tmp/gpui-ime-composed-root-target-20261024/debug/build/gpui/2a65d48bd5c62b07/out/property_selection-2a65d48bd5c62b07",
+      "frozen": "/tmp/gpui-ime-composed-executables-root/024-property_selection/test",
+      "sha256": "f42d300187209d58399273abac64e02fb829dac8196465f8fc8554a4b2d1931a",
+      "bytes": 30462680,
+      "fresh": false,
+      "package_id": "path+file:///tmp/gpui-ime-composed-review-root-20261024/reactivity/crates/gpui#0.1.0",
+      "target": {
+        "kind": [
+          "test"
+        ],
+        "crate_types": [
+          "bin"
+        ],
+        "name": "property_selection",
+        "src_path": "/tmp/gpui-ime-composed-review-root-20261024/reactivity/crates/gpui/tests/property_selection.rs",
+        "edition": "2024",
+        "doc": false,
+        "doctest": false,
+        "test": true
+      },
+      "features": [
+        "default",
+        "simd"
+      ],
+      "profile": {
+        "opt_level": "0",
+        "debuginfo": 0,
+        "debug_assertions": true,
+        "overflow_checks": true,
+        "test": true
+      }
+    },
+    {
+      "original": "/tmp/gpui-ime-composed-root-target-20261024/debug/build/gpui/f4af92f84e583e4f/out/routes-f4af92f84e583e4f",
+      "frozen": "/tmp/gpui-ime-composed-executables-root/025-routes/test",
+      "sha256": "d75b57d5b2d08cff722212813e61063b94ac45cd43eb1d5590f0df469225c3ef",
+      "bytes": 28332528,
+      "fresh": false,
+      "package_id": "path+file:///tmp/gpui-ime-composed-review-root-20261024/reactivity/crates/gpui#0.1.0",
+      "target": {
+        "kind": [
+          "test"
+        ],
+        "crate_types": [
+          "bin"
+        ],
+        "name": "routes",
+        "src_path": "/tmp/gpui-ime-composed-review-root-20261024/reactivity/crates/gpui/tests/routes.rs",
+        "edition": "2024",
+        "doc": false,
+        "doctest": false,
+        "test": true
+      },
+      "features": [
+        "default",
+        "simd"
+      ],
+      "profile": {
+        "opt_level": "0",
+        "debuginfo": 0,
+        "debug_assertions": true,
+        "overflow_checks": true,
+        "test": true
+      }
+    },
+    {
+      "original": "/tmp/gpui-ime-composed-root-target-20261024/debug/build/gpui/0791cff5af63143a/out/focus-0791cff5af63143a",
+      "frozen": "/tmp/gpui-ime-composed-executables-root/026-focus/test",
+      "sha256": "7274c044d0bacc408a615ee18cfbf159298831d159acb6367a300eb5d08d768e",
+      "bytes": 30314784,
+      "fresh": false,
+      "package_id": "path+file:///tmp/gpui-ime-composed-review-root-20261024/reactivity/crates/gpui#0.1.0",
+      "target": {
+        "kind": [
+          "test"
+        ],
+        "crate_types": [
+          "bin"
+        ],
+        "name": "focus",
+        "src_path": "/tmp/gpui-ime-composed-review-root-20261024/reactivity/crates/gpui/tests/focus.rs",
+        "edition": "2024",
+        "doc": false,
+        "doctest": false,
+        "test": true
+      },
+      "features": [
+        "default",
+        "simd"
+      ],
+      "profile": {
+        "opt_level": "0",
+        "debuginfo": 0,
+        "debug_assertions": true,
+        "overflow_checks": true,
+        "test": true
+      }
+    },
+    {
+      "original": "/tmp/gpui-ime-composed-root-target-20261024/debug/build/gpui/aa147e891e07e6ae/out/source_value_isolation-aa147e891e07e6ae",
+      "frozen": "/tmp/gpui-ime-composed-executables-root/027-source_value_isolation/test",
+      "sha256": "51a356a65381b721a6ab72ff6e5e0254f664b32e39ced1e7634607422431e58e",
+      "bytes": 28653864,
+      "fresh": false,
+      "package_id": "path+file:///tmp/gpui-ime-composed-review-root-20261024/reactivity/crates/gpui#0.1.0",
+      "target": {
+        "kind": [
+          "test"
+        ],
+        "crate_types": [
+          "bin"
+        ],
+        "name": "source_value_isolation",
+        "src_path": "/tmp/gpui-ime-composed-review-root-20261024/reactivity/crates/gpui/tests/source_value_isolation.rs",
+        "edition": "2024",
+        "doc": false,
+        "doctest": false,
+        "test": true
+      },
+      "features": [
+        "default",
+        "simd"
+      ],
+      "profile": {
+        "opt_level": "0",
+        "debuginfo": 0,
+        "debug_assertions": true,
+        "overflow_checks": true,
+        "test": true
+      }
+    },
+    {
+      "original": "/tmp/gpui-ime-composed-root-target-20261024/debug/build/gpui/170cb5caff453e03/out/question_input_cost-170cb5caff453e03",
+      "frozen": "/tmp/gpui-ime-composed-executables-root/028-question_input_cost/test",
+      "sha256": "fad35be486826a59bb482deab6922a1bcf33ad6680beee917fce77dba55a293f",
+      "bytes": 26813008,
+      "fresh": false,
+      "package_id": "path+file:///tmp/gpui-ime-composed-review-root-20261024/reactivity/crates/gpui#0.1.0",
+      "target": {
+        "kind": [
+          "test"
+        ],
+        "crate_types": [
+          "bin"
+        ],
+        "name": "question_input_cost",
+        "src_path": "/tmp/gpui-ime-composed-review-root-20261024/reactivity/crates/gpui/tests/question_input_cost.rs",
+        "edition": "2024",
+        "doc": false,
+        "doctest": false,
+        "test": true
+      },
+      "features": [
+        "default",
+        "simd"
+      ],
+      "profile": {
+        "opt_level": "0",
+        "debuginfo": 0,
+        "debug_assertions": true,
+        "overflow_checks": true,
+        "test": true
+      }
+    },
+    {
+      "original": "/tmp/gpui-ime-composed-root-target-20261024/debug/build/gpui/671d0604ffcfe965/out/semantic_serialization-671d0604ffcfe965",
+      "frozen": "/tmp/gpui-ime-composed-executables-root/029-semantic_serialization/test",
+      "sha256": "669e3e31e93f94aaf61cc1382c649f800b23f633ceea8c3c9f1c9bc26fb323a2",
+      "bytes": 29293584,
+      "fresh": false,
+      "package_id": "path+file:///tmp/gpui-ime-composed-review-root-20261024/reactivity/crates/gpui#0.1.0",
+      "target": {
+        "kind": [
+          "test"
+        ],
+        "crate_types": [
+          "bin"
+        ],
+        "name": "semantic_serialization",
+        "src_path": "/tmp/gpui-ime-composed-review-root-20261024/reactivity/crates/gpui/tests/semantic_serialization.rs",
+        "edition": "2024",
+        "doc": false,
+        "doctest": false,
+        "test": true
+      },
+      "features": [
+        "default",
+        "simd"
+      ],
+      "profile": {
+        "opt_level": "0",
+        "debuginfo": 0,
+        "debug_assertions": true,
+        "overflow_checks": true,
+        "test": true
+      }
+    },
+    {
+      "original": "/tmp/gpui-ime-composed-root-target-20261024/debug/build/gpui/694c82e5c2129f56/out/pointer-694c82e5c2129f56",
+      "frozen": "/tmp/gpui-ime-composed-executables-root/030-pointer/test",
+      "sha256": "72cf1026922874566f35d43ca2152ab08137acf7820b8c3e819fa7eb69e02005",
+      "bytes": 28714048,
+      "fresh": false,
+      "package_id": "path+file:///tmp/gpui-ime-composed-review-root-20261024/reactivity/crates/gpui#0.1.0",
+      "target": {
+        "kind": [
+          "test"
+        ],
+        "crate_types": [
+          "bin"
+        ],
+        "name": "pointer",
+        "src_path": "/tmp/gpui-ime-composed-review-root-20261024/reactivity/crates/gpui/tests/pointer.rs",
+        "edition": "2024",
+        "doc": false,
+        "doctest": false,
+        "test": true
+      },
+      "features": [
+        "default",
+        "simd"
+      ],
+      "profile": {
+        "opt_level": "0",
+        "debuginfo": 0,
+        "debug_assertions": true,
+        "overflow_checks": true,
+        "test": true
+      }
+    },
+    {
+      "original": "/tmp/gpui-ime-composed-root-target-20261024/debug/build/gpui/e73f55b17eabca96/out/checkbox-e73f55b17eabca96",
+      "frozen": "/tmp/gpui-ime-composed-executables-root/031-checkbox/test",
+      "sha256": "da9c7169a9a9535a6f852a2e644eee9ff26144d3ae6e89ca98e5a5a3bab29585",
+      "bytes": 30010648,
+      "fresh": false,
+      "package_id": "path+file:///tmp/gpui-ime-composed-review-root-20261024/reactivity/crates/gpui#0.1.0",
+      "target": {
+        "kind": [
+          "test"
+        ],
+        "crate_types": [
+          "bin"
+        ],
+        "name": "checkbox",
+        "src_path": "/tmp/gpui-ime-composed-review-root-20261024/reactivity/crates/gpui/tests/checkbox.rs",
+        "edition": "2024",
+        "doc": false,
+        "doctest": false,
+        "test": true
+      },
+      "features": [
+        "default",
+        "simd"
+      ],
+      "profile": {
+        "opt_level": "0",
+        "debuginfo": 0,
+        "debug_assertions": true,
+        "overflow_checks": true,
+        "test": true
+      }
+    },
+    {
+      "original": "/tmp/gpui-ime-composed-root-target-20261024/debug/build/gpui/77c66174853d2311/out/ime-77c66174853d2311",
+      "frozen": "/tmp/gpui-ime-composed-executables-root/032-ime/test",
+      "sha256": "c1ac95861649028ba477b947c338a98b865f6ad3c823ef9b5a12af6652e89f4d",
+      "bytes": 29272640,
+      "fresh": false,
+      "package_id": "path+file:///tmp/gpui-ime-composed-review-root-20261024/reactivity/crates/gpui#0.1.0",
+      "target": {
+        "kind": [
+          "test"
+        ],
+        "crate_types": [
+          "bin"
+        ],
+        "name": "ime",
+        "src_path": "/tmp/gpui-ime-composed-review-root-20261024/reactivity/crates/gpui/tests/ime.rs",
+        "edition": "2024",
+        "doc": false,
+        "doctest": false,
+        "test": true
+      },
+      "features": [
+        "default",
+        "simd"
+      ],
+      "profile": {
+        "opt_level": "0",
+        "debuginfo": 0,
+        "debug_assertions": true,
+        "overflow_checks": true,
+        "test": true
+      }
+    },
+    {
+      "original": "/tmp/gpui-ime-composed-root-target-20261024/debug/build/gpui/ed1b02cf84b42565/out/text_selection-ed1b02cf84b42565",
+      "frozen": "/tmp/gpui-ime-composed-executables-root/033-text_selection/test",
+      "sha256": "a8549aa5eed4c209e39bbadf987bf3f6bb033921eabfd089298f04eb07d0b5bc",
+      "bytes": 30608312,
+      "fresh": false,
+      "package_id": "path+file:///tmp/gpui-ime-composed-review-root-20261024/reactivity/crates/gpui#0.1.0",
+      "target": {
+        "kind": [
+          "test"
+        ],
+        "crate_types": [
+          "bin"
+        ],
+        "name": "text_selection",
+        "src_path": "/tmp/gpui-ime-composed-review-root-20261024/reactivity/crates/gpui/tests/text_selection.rs",
+        "edition": "2024",
+        "doc": false,
+        "doctest": false,
+        "test": true
+      },
+      "features": [
+        "default",
+        "simd"
+      ],
+      "profile": {
+        "opt_level": "0",
+        "debuginfo": 0,
+        "debug_assertions": true,
+        "overflow_checks": true,
+        "test": true
+      }
+    },
+    {
+      "original": "/tmp/gpui-ime-composed-root-target-20261024/debug/build/gpui/68b3e0c8c1684451/out/library-68b3e0c8c1684451",
+      "frozen": "/tmp/gpui-ime-composed-executables-root/034-library/test",
+      "sha256": "a209d6ec100879c7a6cd81d0095942df0d3d0f7dd21a10b0a4f8c1dd0a5bda28",
+      "bytes": 27894304,
+      "fresh": false,
+      "package_id": "path+file:///tmp/gpui-ime-composed-review-root-20261024/reactivity/crates/gpui#0.1.0",
+      "target": {
+        "kind": [
+          "test"
+        ],
+        "crate_types": [
+          "bin"
+        ],
+        "name": "library",
+        "src_path": "/tmp/gpui-ime-composed-review-root-20261024/reactivity/crates/gpui/tests/library.rs",
+        "edition": "2024",
+        "doc": false,
+        "doctest": false,
+        "test": true
+      },
+      "features": [
+        "default",
+        "simd"
+      ],
+      "profile": {
+        "opt_level": "0",
+        "debuginfo": 0,
+        "debug_assertions": true,
+        "overflow_checks": true,
+        "test": true
+      }
+    },
+    {
+      "original": "/tmp/gpui-ime-composed-root-target-20261024/debug/build/gpui/c53f163a537174de/out/dpi-c53f163a537174de",
+      "frozen": "/tmp/gpui-ime-composed-executables-root/035-dpi/test",
+      "sha256": "e040a6c75393010a6e88c7cd67f5fece76d1c9e7f4f98299b23cc7e8d0f6b52e",
+      "bytes": 29258592,
+      "fresh": false,
+      "package_id": "path+file:///tmp/gpui-ime-composed-review-root-20261024/reactivity/crates/gpui#0.1.0",
+      "target": {
+        "kind": [
+          "test"
+        ],
+        "crate_types": [
+          "bin"
+        ],
+        "name": "dpi",
+        "src_path": "/tmp/gpui-ime-composed-review-root-20261024/reactivity/crates/gpui/tests/dpi.rs",
+        "edition": "2024",
+        "doc": false,
+        "doctest": false,
+        "test": true
+      },
+      "features": [
+        "default",
+        "simd"
+      ],
+      "profile": {
+        "opt_level": "0",
+        "debuginfo": 0,
+        "debug_assertions": true,
+        "overflow_checks": true,
+        "test": true
+      }
+    },
+    {
+      "original": "/tmp/gpui-ime-composed-root-target-20261024/debug/build/gpui/52edcb343ac577d2/out/property_actions-52edcb343ac577d2",
+      "frozen": "/tmp/gpui-ime-composed-executables-root/036-property_actions/test",
+      "sha256": "5d92a898f0c7f716e033bb0ebabe3465dfc57c10544b5ef2b91dce5413a73c57",
+      "bytes": 29138456,
+      "fresh": false,
+      "package_id": "path+file:///tmp/gpui-ime-composed-review-root-20261024/reactivity/crates/gpui#0.1.0",
+      "target": {
+        "kind": [
+          "test"
+        ],
+        "crate_types": [
+          "bin"
+        ],
+        "name": "property_actions",
+        "src_path": "/tmp/gpui-ime-composed-review-root-20261024/reactivity/crates/gpui/tests/property_actions.rs",
+        "edition": "2024",
+        "doc": false,
+        "doctest": false,
+        "test": true
+      },
+      "features": [
+        "default",
+        "simd"
+      ],
+      "profile": {
+        "opt_level": "0",
+        "debuginfo": 0,
+        "debug_assertions": true,
+        "overflow_checks": true,
+        "test": true
+      }
+    },
+    {
+      "original": "/tmp/gpui-ime-composed-root-target-20261024/debug/build/gpui/94c42e3bb03face7/out/unit_action_cost_two-94c42e3bb03face7",
+      "frozen": "/tmp/gpui-ime-composed-executables-root/037-unit_action_cost_two/test",
+      "sha256": "11def83ee025f7a72dc6cba96dcf29f228922e395403514d3e7bd3b9c81e1973",
+      "bytes": 27653712,
+      "fresh": false,
+      "package_id": "path+file:///tmp/gpui-ime-composed-review-root-20261024/reactivity/crates/gpui#0.1.0",
+      "target": {
+        "kind": [
+          "test"
+        ],
+        "crate_types": [
+          "bin"
+        ],
+        "name": "unit_action_cost_two",
+        "src_path": "/tmp/gpui-ime-composed-review-root-20261024/reactivity/crates/gpui/tests/unit_action_cost_two.rs",
+        "edition": "2024",
+        "doc": false,
+        "doctest": false,
+        "test": true
+      },
+      "features": [
+        "default",
+        "simd"
+      ],
+      "profile": {
+        "opt_level": "0",
+        "debuginfo": 0,
+        "debug_assertions": true,
+        "overflow_checks": true,
+        "test": true
+      }
+    },
+    {
+      "original": "/tmp/gpui-ime-composed-root-target-20261024/debug/build/gpui/1eabd29ae951b78c/out/remote-1eabd29ae951b78c",
+      "frozen": "/tmp/gpui-ime-composed-executables-root/038-remote/test",
+      "sha256": "da52f4a217d64e7895d309021fb1a5140ee8b7434fba3fda49ab8e2a9201c376",
+      "bytes": 29950192,
+      "fresh": false,
+      "package_id": "path+file:///tmp/gpui-ime-composed-review-root-20261024/reactivity/crates/gpui#0.1.0",
+      "target": {
+        "kind": [
+          "test"
+        ],
+        "crate_types": [
+          "bin"
+        ],
+        "name": "remote",
+        "src_path": "/tmp/gpui-ime-composed-review-root-20261024/reactivity/crates/gpui/tests/remote.rs",
+        "edition": "2024",
+        "doc": false,
+        "doctest": false,
+        "test": true
+      },
+      "features": [
+        "default",
+        "simd"
+      ],
+      "profile": {
+        "opt_level": "0",
+        "debuginfo": 0,
+        "debug_assertions": true,
+        "overflow_checks": true,
+        "test": true
+      }
+    },
+    {
+      "original": "/tmp/gpui-ime-composed-root-target-20261024/debug/build/gpui/1564c8afd80b95b8/out/queries-1564c8afd80b95b8",
+      "frozen": "/tmp/gpui-ime-composed-executables-root/039-queries/test",
+      "sha256": "bdb8ac3cf79d6ccdf44cf1fe0db59987c5e4137a167384a4ddaeef3878329a8e",
+      "bytes": 27451216,
+      "fresh": false,
+      "package_id": "path+file:///tmp/gpui-ime-composed-review-root-20261024/reactivity/crates/gpui#0.1.0",
+      "target": {
+        "kind": [
+          "test"
+        ],
+        "crate_types": [
+          "bin"
+        ],
+        "name": "queries",
+        "src_path": "/tmp/gpui-ime-composed-review-root-20261024/reactivity/crates/gpui/tests/queries.rs",
+        "edition": "2024",
+        "doc": false,
+        "doctest": false,
+        "test": true
+      },
+      "features": [
+        "default",
+        "simd"
+      ],
+      "profile": {
+        "opt_level": "0",
+        "debuginfo": 0,
+        "debug_assertions": true,
+        "overflow_checks": true,
+        "test": true
+      }
+    },
+    {
+      "original": "/tmp/gpui-ime-composed-root-target-20261024/debug/build/gpui/e18681c48b1e8561/out/paint_patch-e18681c48b1e8561",
+      "frozen": "/tmp/gpui-ime-composed-executables-root/040-paint_patch/test",
+      "sha256": "26013e77c6640a95c4e7cb9613a338cc501233a3e6157194f14c9412be1575f9",
+      "bytes": 29124272,
+      "fresh": false,
+      "package_id": "path+file:///tmp/gpui-ime-composed-review-root-20261024/reactivity/crates/gpui#0.1.0",
+      "target": {
+        "kind": [
+          "test"
+        ],
+        "crate_types": [
+          "bin"
+        ],
+        "name": "paint_patch",
+        "src_path": "/tmp/gpui-ime-composed-review-root-20261024/reactivity/crates/gpui/tests/paint_patch.rs",
+        "edition": "2024",
+        "doc": false,
+        "doctest": false,
+        "test": true
+      },
+      "features": [
+        "default",
+        "simd"
+      ],
+      "profile": {
+        "opt_level": "0",
+        "debuginfo": 0,
+        "debug_assertions": true,
+        "overflow_checks": true,
+        "test": true
+      }
+    },
+    {
+      "original": "/tmp/gpui-ime-composed-root-target-20261024/debug/build/gpui/26370e7ca9495b46/out/handler_storage-26370e7ca9495b46",
+      "frozen": "/tmp/gpui-ime-composed-executables-root/041-handler_storage/test",
+      "sha256": "48e95d34c5d6b87b94165295b0f1564e323e90107d1e993852cc8ba5596655a2",
+      "bytes": 32523544,
+      "fresh": false,
+      "package_id": "path+file:///tmp/gpui-ime-composed-review-root-20261024/reactivity/crates/gpui#0.1.0",
+      "target": {
+        "kind": [
+          "test"
+        ],
+        "crate_types": [
+          "bin"
+        ],
+        "name": "handler_storage",
+        "src_path": "/tmp/gpui-ime-composed-review-root-20261024/reactivity/crates/gpui/tests/handler_storage.rs",
+        "edition": "2024",
+        "doc": false,
+        "doctest": false,
+        "test": true
+      },
+      "features": [
+        "default",
+        "simd"
+      ],
+      "profile": {
+        "opt_level": "0",
+        "debuginfo": 0,
+        "debug_assertions": true,
+        "overflow_checks": true,
+        "test": true
+      }
+    },
+    {
+      "original": "/tmp/gpui-ime-composed-root-target-20261024/debug/build/gpui/58d6625e9ba684de/out/scroll-58d6625e9ba684de",
+      "frozen": "/tmp/gpui-ime-composed-executables-root/042-scroll/test",
+      "sha256": "79a39688f9c1222381d9734c3a4fe53b1d1a8168b6fe7d06a16806fa251bc8aa",
+      "bytes": 37640640,
+      "fresh": false,
+      "package_id": "path+file:///tmp/gpui-ime-composed-review-root-20261024/reactivity/crates/gpui#0.1.0",
+      "target": {
+        "kind": [
+          "test"
+        ],
+        "crate_types": [
+          "bin"
+        ],
+        "name": "scroll",
+        "src_path": "/tmp/gpui-ime-composed-review-root-20261024/reactivity/crates/gpui/tests/scroll.rs",
+        "edition": "2024",
+        "doc": false,
+        "doctest": false,
+        "test": true
+      },
+      "features": [
+        "default",
+        "simd"
+      ],
+      "profile": {
+        "opt_level": "0",
+        "debuginfo": 0,
+        "debug_assertions": true,
+        "overflow_checks": true,
+        "test": true
+      }
+    },
+    {
+      "original": "/tmp/gpui-ime-composed-root-target-20261024/debug/build/gpui/1efbae4959e739d5/out/sibling_reconciliation_cost-1efbae4959e739d5",
+      "frozen": "/tmp/gpui-ime-composed-executables-root/043-sibling_reconciliation_cost/test",
+      "sha256": "bf2e50a85e3e8c3479ea7441f6b0939cb4f18b591d303067e53878ac5bd8ba1c",
+      "bytes": 26670264,
+      "fresh": false,
+      "package_id": "path+file:///tmp/gpui-ime-composed-review-root-20261024/reactivity/crates/gpui#0.1.0",
+      "target": {
+        "kind": [
+          "test"
+        ],
+        "crate_types": [
+          "bin"
+        ],
+        "name": "sibling_reconciliation_cost",
+        "src_path": "/tmp/gpui-ime-composed-review-root-20261024/reactivity/crates/gpui/tests/sibling_reconciliation_cost.rs",
+        "edition": "2024",
+        "doc": false,
+        "doctest": false,
+        "test": true
+      },
+      "features": [
+        "default",
+        "simd"
+      ],
+      "profile": {
+        "opt_level": "0",
+        "debuginfo": 0,
+        "debug_assertions": true,
+        "overflow_checks": true,
+        "test": true
+      }
+    },
+    {
+      "original": "/tmp/gpui-ime-composed-root-target-20261024/debug/build/gpui/192b910939765f75/out/style_ports-192b910939765f75",
+      "frozen": "/tmp/gpui-ime-composed-executables-root/044-style_ports/test",
+      "sha256": "8213dce02db3ff09341d97967b5cd61a2e4c873ffce965a16c30fd6be51e4f56",
+      "bytes": 37459816,
+      "fresh": false,
+      "package_id": "path+file:///tmp/gpui-ime-composed-review-root-20261024/reactivity/crates/gpui#0.1.0",
+      "target": {
+        "kind": [
+          "test"
+        ],
+        "crate_types": [
+          "bin"
+        ],
+        "name": "style_ports",
+        "src_path": "/tmp/gpui-ime-composed-review-root-20261024/reactivity/crates/gpui/tests/style_ports.rs",
+        "edition": "2024",
+        "doc": false,
+        "doctest": false,
+        "test": true
+      },
+      "features": [
+        "default",
+        "simd"
+      ],
+      "profile": {
+        "opt_level": "0",
+        "debuginfo": 0,
+        "debug_assertions": true,
+        "overflow_checks": true,
+        "test": true
+      }
+    },
+    {
+      "original": "/tmp/gpui-ime-composed-root-target-20261024/debug/build/gpui/de01650fb7b68588/out/ports-de01650fb7b68588",
+      "frozen": "/tmp/gpui-ime-composed-executables-root/045-ports/test",
+      "sha256": "32a257373456e7e6623673edec44a3d25037f6c0049b24cc9a6ad5a4b5836c91",
+      "bytes": 30478088,
+      "fresh": false,
+      "package_id": "path+file:///tmp/gpui-ime-composed-review-root-20261024/reactivity/crates/gpui#0.1.0",
+      "target": {
+        "kind": [
+          "test"
+        ],
+        "crate_types": [
+          "bin"
+        ],
+        "name": "ports",
+        "src_path": "/tmp/gpui-ime-composed-review-root-20261024/reactivity/crates/gpui/tests/ports.rs",
+        "edition": "2024",
+        "doc": false,
+        "doctest": false,
+        "test": true
+      },
+      "features": [
+        "default",
+        "simd"
+      ],
+      "profile": {
+        "opt_level": "0",
+        "debuginfo": 0,
+        "debug_assertions": true,
+        "overflow_checks": true,
+        "test": true
+      }
+    },
+    {
+      "original": "/tmp/gpui-ime-composed-root-target-20261024/debug/build/gpui/a94ca03c074e02a1/out/question_mailbox-a94ca03c074e02a1",
+      "frozen": "/tmp/gpui-ime-composed-executables-root/046-question_mailbox/test",
+      "sha256": "a60834169b082d9d670065e8c4ebb027aee9d0ae61bdb2bf6984309c8875c940",
+      "bytes": 27097840,
+      "fresh": false,
+      "package_id": "path+file:///tmp/gpui-ime-composed-review-root-20261024/reactivity/crates/gpui#0.1.0",
+      "target": {
+        "kind": [
+          "test"
+        ],
+        "crate_types": [
+          "bin"
+        ],
+        "name": "question_mailbox",
+        "src_path": "/tmp/gpui-ime-composed-review-root-20261024/reactivity/crates/gpui/tests/question_mailbox.rs",
+        "edition": "2024",
+        "doc": false,
+        "doctest": false,
+        "test": true
+      },
+      "features": [
+        "default",
+        "simd"
+      ],
+      "profile": {
+        "opt_level": "0",
+        "debuginfo": 0,
+        "debug_assertions": true,
+        "overflow_checks": true,
+        "test": true
+      }
+    },
+    {
+      "original": "/tmp/gpui-ime-composed-root-target-20261024/debug/build/gpui/480dcd62ab590121/out/inbox_storage-480dcd62ab590121",
+      "frozen": "/tmp/gpui-ime-composed-executables-root/047-inbox_storage/test",
+      "sha256": "ae7878d806d36289b8b48675cf1ac8efcde961a61f21c42174222fc5add4a248",
+      "bytes": 28064240,
+      "fresh": false,
+      "package_id": "path+file:///tmp/gpui-ime-composed-review-root-20261024/reactivity/crates/gpui#0.1.0",
+      "target": {
+        "kind": [
+          "test"
+        ],
+        "crate_types": [
+          "bin"
+        ],
+        "name": "inbox_storage",
+        "src_path": "/tmp/gpui-ime-composed-review-root-20261024/reactivity/crates/gpui/tests/inbox_storage.rs",
+        "edition": "2024",
+        "doc": false,
+        "doctest": false,
+        "test": true
+      },
+      "features": [
+        "default",
+        "simd"
+      ],
+      "profile": {
+        "opt_level": "0",
+        "debuginfo": 0,
+        "debug_assertions": true,
+        "overflow_checks": true,
+        "test": true
+      }
+    },
+    {
+      "original": "/tmp/gpui-ime-composed-root-target-20261024/debug/build/gpui/0e8b0473a620860c/out/todo_comparison-0e8b0473a620860c",
+      "frozen": "/tmp/gpui-ime-composed-executables-root/048-todo_comparison/test",
+      "sha256": "f0152924f68d1f479f955bc47387b29f1d9c658fc70bb6b76483d2a74e03b5c3",
+      "bytes": 29419344,
+      "fresh": false,
+      "package_id": "path+file:///tmp/gpui-ime-composed-review-root-20261024/reactivity/crates/gpui#0.1.0",
+      "target": {
+        "kind": [
+          "test"
+        ],
+        "crate_types": [
+          "bin"
+        ],
+        "name": "todo_comparison",
+        "src_path": "/tmp/gpui-ime-composed-review-root-20261024/reactivity/crates/gpui/tests/todo_comparison.rs",
+        "edition": "2024",
+        "doc": false,
+        "doctest": false,
+        "test": true
+      },
+      "features": [
+        "default",
+        "simd"
+      ],
+      "profile": {
+        "opt_level": "0",
+        "debuginfo": 0,
+        "debug_assertions": true,
+        "overflow_checks": true,
+        "test": true
+      }
+    },
+    {
+      "original": "/tmp/gpui-ime-composed-root-target-20261024/debug/build/gpui/7998e0234bf42ff1/out/clipping-7998e0234bf42ff1",
+      "frozen": "/tmp/gpui-ime-composed-executables-root/049-clipping/test",
+      "sha256": "1e5829c397c5580eafd7c40008dc29fd2b65e4d9d99f9e4e9840bb2bf9e6d4ec",
+      "bytes": 31542440,
+      "fresh": false,
+      "package_id": "path+file:///tmp/gpui-ime-composed-review-root-20261024/reactivity/crates/gpui#0.1.0",
+      "target": {
+        "kind": [
+          "test"
+        ],
+        "crate_types": [
+          "bin"
+        ],
+        "name": "clipping",
+        "src_path": "/tmp/gpui-ime-composed-review-root-20261024/reactivity/crates/gpui/tests/clipping.rs",
+        "edition": "2024",
+        "doc": false,
+        "doctest": false,
+        "test": true
+      },
+      "features": [
+        "default",
+        "simd"
+      ],
+      "profile": {
+        "opt_level": "0",
+        "debuginfo": 0,
+        "debug_assertions": true,
+        "overflow_checks": true,
+        "test": true
+      }
+    },
+    {
+      "original": "/tmp/gpui-ime-composed-root-target-20261024/debug/build/gpui/830b1abfd3f13941/out/source_values-830b1abfd3f13941",
+      "frozen": "/tmp/gpui-ime-composed-executables-root/050-source_values/test",
+      "sha256": "8275b88afbb79fc0a57ad40f71b040f663dd89ecdcc39e4dd4d3527882b5c291",
+      "bytes": 27798056,
+      "fresh": false,
+      "package_id": "path+file:///tmp/gpui-ime-composed-review-root-20261024/reactivity/crates/gpui#0.1.0",
+      "target": {
+        "kind": [
+          "test"
+        ],
+        "crate_types": [
+          "bin"
+        ],
+        "name": "source_values",
+        "src_path": "/tmp/gpui-ime-composed-review-root-20261024/reactivity/crates/gpui/tests/source_values.rs",
+        "edition": "2024",
+        "doc": false,
+        "doctest": false,
+        "test": true
+      },
+      "features": [
+        "default",
+        "simd"
+      ],
+      "profile": {
+        "opt_level": "0",
+        "debuginfo": 0,
+        "debug_assertions": true,
+        "overflow_checks": true,
+        "test": true
+      }
+    },
+    {
+      "original": "/tmp/gpui-ime-composed-root-target-20261024/debug/build/gpui/04e8b6f5c5517797/out/rounded-04e8b6f5c5517797",
+      "frozen": "/tmp/gpui-ime-composed-executables-root/051-rounded/test",
+      "sha256": "40c3f659da7f9a7102898f946500b8a494e2330fd3bd320546a9cd3d82c84bf5",
+      "bytes": 31271288,
+      "fresh": false,
+      "package_id": "path+file:///tmp/gpui-ime-composed-review-root-20261024/reactivity/crates/gpui#0.1.0",
+      "target": {
+        "kind": [
+          "test"
+        ],
+        "crate_types": [
+          "bin"
+        ],
+        "name": "rounded",
+        "src_path": "/tmp/gpui-ime-composed-review-root-20261024/reactivity/crates/gpui/tests/rounded.rs",
+        "edition": "2024",
+        "doc": false,
+        "doctest": false,
+        "test": true
+      },
+      "features": [
+        "default",
+        "simd"
+      ],
+      "profile": {
+        "opt_level": "0",
+        "debuginfo": 0,
+        "debug_assertions": true,
+        "overflow_checks": true,
+        "test": true
+      }
+    },
+    {
+      "original": "/tmp/gpui-ime-composed-root-target-20261024/debug/build/gpui/09b39d708ae28dc5/out/literal_dispatch-09b39d708ae28dc5",
+      "frozen": "/tmp/gpui-ime-composed-executables-root/052-literal_dispatch/test",
+      "sha256": "32a0a73c0e2cdefa4a5080b37c6d0124c6eb18314ee7b324b8b9508920af5d60",
+      "bytes": 28391744,
+      "fresh": false,
+      "package_id": "path+file:///tmp/gpui-ime-composed-review-root-20261024/reactivity/crates/gpui#0.1.0",
+      "target": {
+        "kind": [
+          "test"
+        ],
+        "crate_types": [
+          "bin"
+        ],
+        "name": "literal_dispatch",
+        "src_path": "/tmp/gpui-ime-composed-review-root-20261024/reactivity/crates/gpui/tests/literal_dispatch.rs",
+        "edition": "2024",
+        "doc": false,
+        "doctest": false,
+        "test": true
+      },
+      "features": [
+        "default",
+        "simd"
+      ],
+      "profile": {
+        "opt_level": "0",
+        "debuginfo": 0,
+        "debug_assertions": true,
+        "overflow_checks": true,
+        "test": true
+      }
+    },
+    {
+      "original": "/tmp/gpui-ime-composed-root-target-20261024/debug/build/gpui/f2d6012dc5951377/out/flex-f2d6012dc5951377",
+      "frozen": "/tmp/gpui-ime-composed-executables-root/053-flex/test",
+      "sha256": "b40562962e4921b0376ae9f58bffe212e25d3c278a942a77702267a77302e585",
+      "bytes": 32534960,
+      "fresh": false,
+      "package_id": "path+file:///tmp/gpui-ime-composed-review-root-20261024/reactivity/crates/gpui#0.1.0",
+      "target": {
+        "kind": [
+          "test"
+        ],
+        "crate_types": [
+          "bin"
+        ],
+        "name": "flex",
+        "src_path": "/tmp/gpui-ime-composed-review-root-20261024/reactivity/crates/gpui/tests/flex.rs",
+        "edition": "2024",
+        "doc": false,
+        "doctest": false,
+        "test": true
+      },
+      "features": [
+        "default",
+        "simd"
+      ],
+      "profile": {
+        "opt_level": "0",
+        "debuginfo": 0,
+        "debug_assertions": true,
+        "overflow_checks": true,
+        "test": true
+      }
+    },
+    {
+      "original": "/tmp/gpui-ime-composed-root-target-20261024/debug/build/gpui/00e4d0a412b7f030/out/property_outline_allocations-00e4d0a412b7f030",
+      "frozen": "/tmp/gpui-ime-composed-executables-root/054-property_outline_allocations/test",
+      "sha256": "70eea364895ab6d98b9dacf14ddebd3158cb35ded78421f9ab5e137ff86dd8f0",
+      "bytes": 26900048,
+      "fresh": false,
+      "package_id": "path+file:///tmp/gpui-ime-composed-review-root-20261024/reactivity/crates/gpui#0.1.0",
+      "target": {
+        "kind": [
+          "test"
+        ],
+        "crate_types": [
+          "bin"
+        ],
+        "name": "property_outline_allocations",
+        "src_path": "/tmp/gpui-ime-composed-review-root-20261024/reactivity/crates/gpui/tests/property_outline_allocations.rs",
+        "edition": "2024",
+        "doc": false,
+        "doctest": false,
+        "test": true
+      },
+      "features": [
+        "default",
+        "simd"
+      ],
+      "profile": {
+        "opt_level": "0",
+        "debuginfo": 0,
+        "debug_assertions": true,
+        "overflow_checks": true,
+        "test": true
+      }
+    },
+    {
+      "original": "/tmp/gpui-ime-composed-root-target-20261024/debug/build/gpui/f9ae40fd17757ec1/out/images-f9ae40fd17757ec1",
+      "frozen": "/tmp/gpui-ime-composed-executables-root/055-images/test",
+      "sha256": "9853f6b8590a21aa01615ce142e6b29db84aa2e6aa5e1ccf6019ee10e4c43a94",
+      "bytes": 29684456,
+      "fresh": false,
+      "package_id": "path+file:///tmp/gpui-ime-composed-review-root-20261024/reactivity/crates/gpui#0.1.0",
+      "target": {
+        "kind": [
+          "test"
+        ],
+        "crate_types": [
+          "bin"
+        ],
+        "name": "images",
+        "src_path": "/tmp/gpui-ime-composed-review-root-20261024/reactivity/crates/gpui/tests/images.rs",
+        "edition": "2024",
+        "doc": false,
+        "doctest": false,
+        "test": true
+      },
+      "features": [
+        "default",
+        "simd"
+      ],
+      "profile": {
+        "opt_level": "0",
+        "debuginfo": 0,
+        "debug_assertions": true,
+        "overflow_checks": true,
+        "test": true
+      }
+    },
+    {
+      "original": "/tmp/gpui-ime-composed-root-target-20261024/debug/build/gpui/d6fd2ec5f7d2e6fe/out/application-d6fd2ec5f7d2e6fe",
+      "frozen": "/tmp/gpui-ime-composed-executables-root/056-application/test",
+      "sha256": "8275a82389cac7c546aa91f12d32abfa8b9b8dfd10a246742e79188d2f311158",
+      "bytes": 29834448,
+      "fresh": false,
+      "package_id": "path+file:///tmp/gpui-ime-composed-review-root-20261024/reactivity/crates/gpui#0.1.0",
+      "target": {
+        "kind": [
+          "test"
+        ],
+        "crate_types": [
+          "bin"
+        ],
+        "name": "application",
+        "src_path": "/tmp/gpui-ime-composed-review-root-20261024/reactivity/crates/gpui/tests/application.rs",
+        "edition": "2024",
+        "doc": false,
+        "doctest": false,
+        "test": true
+      },
+      "features": [
+        "default",
+        "simd"
+      ],
+      "profile": {
+        "opt_level": "0",
+        "debuginfo": 0,
+        "debug_assertions": true,
+        "overflow_checks": true,
+        "test": true
+      }
+    },
+    {
+      "original": "/tmp/gpui-ime-composed-root-target-20261024/debug/build/gpui/ca2ea51ec5b71555/out/question_futures-ca2ea51ec5b71555",
+      "frozen": "/tmp/gpui-ime-composed-executables-root/057-question_futures/test",
+      "sha256": "c0ce64bab224e7801370890e5b9b26423f38e2ac0e599eb5520852d8adca7323",
+      "bytes": 30501480,
+      "fresh": false,
+      "package_id": "path+file:///tmp/gpui-ime-composed-review-root-20261024/reactivity/crates/gpui#0.1.0",
+      "target": {
+        "kind": [
+          "test"
+        ],
+        "crate_types": [
+          "bin"
+        ],
+        "name": "question_futures",
+        "src_path": "/tmp/gpui-ime-composed-review-root-20261024/reactivity/crates/gpui/tests/question_futures.rs",
+        "edition": "2024",
+        "doc": false,
+        "doctest": false,
+        "test": true
+      },
+      "features": [
+        "default",
+        "simd"
+      ],
+      "profile": {
+        "opt_level": "0",
+        "debuginfo": 0,
+        "debug_assertions": true,
+        "overflow_checks": true,
+        "test": true
+      }
+    },
+    {
+      "original": "/tmp/gpui-ime-composed-root-target-20261024/debug/build/gpui/8abb498a8fcca78b/out/paint_slots-8abb498a8fcca78b",
+      "frozen": "/tmp/gpui-ime-composed-executables-root/058-paint_slots/test",
+      "sha256": "8dfe4de5fc4af984b070fd6bebba8fd6600ccb9d5300c63ac0f8bad8affe5cc3",
+      "bytes": 29696736,
+      "fresh": false,
+      "package_id": "path+file:///tmp/gpui-ime-composed-review-root-20261024/reactivity/crates/gpui#0.1.0",
+      "target": {
+        "kind": [
+          "test"
+        ],
+        "crate_types": [
+          "bin"
+        ],
+        "name": "paint_slots",
+        "src_path": "/tmp/gpui-ime-composed-review-root-20261024/reactivity/crates/gpui/tests/paint_slots.rs",
+        "edition": "2024",
+        "doc": false,
+        "doctest": false,
+        "test": true
+      },
+      "features": [
+        "default",
+        "simd"
+      ],
+      "profile": {
+        "opt_level": "0",
+        "debuginfo": 0,
+        "debug_assertions": true,
+        "overflow_checks": true,
+        "test": true
+      }
+    },
+    {
+      "original": "/tmp/gpui-ime-composed-root-target-20261024/debug/build/gpui/b8c57e995fb38d0f/out/text_geometry-b8c57e995fb38d0f",
+      "frozen": "/tmp/gpui-ime-composed-executables-root/059-text_geometry/test",
+      "sha256": "7730656e0ebd19fd00e6c74ec0ba267945f0994d8a2054cb2560dab0411ee430",
+      "bytes": 27659080,
+      "fresh": false,
+      "package_id": "path+file:///tmp/gpui-ime-composed-review-root-20261024/reactivity/crates/gpui#0.1.0",
+      "target": {
+        "kind": [
+          "test"
+        ],
+        "crate_types": [
+          "bin"
+        ],
+        "name": "text_geometry",
+        "src_path": "/tmp/gpui-ime-composed-review-root-20261024/reactivity/crates/gpui/tests/text_geometry.rs",
+        "edition": "2024",
+        "doc": false,
+        "doctest": false,
+        "test": true
+      },
+      "features": [
+        "default",
+        "simd"
+      ],
+      "profile": {
+        "opt_level": "0",
+        "debuginfo": 0,
+        "debug_assertions": true,
+        "overflow_checks": true,
+        "test": true
+      }
+    },
+    {
+      "original": "/tmp/gpui-ime-composed-root-target-20261024/debug/build/gpui/b27134642b576578/out/source_inbox_reader_gate-b27134642b576578",
+      "frozen": "/tmp/gpui-ime-composed-executables-root/060-source_inbox_reader_gate/test",
+      "sha256": "c4c1cdbe6a6b2c5cb457af92baa1e1ec07ea3391b3c496f988938f9b837e9b4b",
+      "bytes": 27049512,
+      "fresh": false,
+      "package_id": "path+file:///tmp/gpui-ime-composed-review-root-20261024/reactivity/crates/gpui#0.1.0",
+      "target": {
+        "kind": [
+          "test"
+        ],
+        "crate_types": [
+          "bin"
+        ],
+        "name": "source_inbox_reader_gate",
+        "src_path": "/tmp/gpui-ime-composed-review-root-20261024/reactivity/crates/gpui/tests/source_inbox_reader_gate.rs",
+        "edition": "2024",
+        "doc": false,
+        "doctest": false,
+        "test": true
+      },
+      "features": [
+        "default",
+        "simd"
+      ],
+      "profile": {
+        "opt_level": "0",
+        "debuginfo": 0,
+        "debug_assertions": true,
+        "overflow_checks": true,
+        "test": true
+      }
+    },
+    {
+      "original": "/tmp/gpui-ime-composed-root-target-20261024/debug/build/gpui/0d1689717e60644b/out/semantic_metadata-0d1689717e60644b",
+      "frozen": "/tmp/gpui-ime-composed-executables-root/061-semantic_metadata/test",
+      "sha256": "7cf12cc363e8971b9c89f5921a5554b1d9159c3472f28bea0361e9d8c4702fc6",
+      "bytes": 33989536,
+      "fresh": false,
+      "package_id": "path+file:///tmp/gpui-ime-composed-review-root-20261024/reactivity/crates/gpui#0.1.0",
+      "target": {
+        "kind": [
+          "test"
+        ],
+        "crate_types": [
+          "bin"
+        ],
+        "name": "semantic_metadata",
+        "src_path": "/tmp/gpui-ime-composed-review-root-20261024/reactivity/crates/gpui/tests/semantic_metadata.rs",
+        "edition": "2024",
+        "doc": false,
+        "doctest": false,
+        "test": true
+      },
+      "features": [
+        "default",
+        "simd"
+      ],
+      "profile": {
+        "opt_level": "0",
+        "debuginfo": 0,
+        "debug_assertions": true,
+        "overflow_checks": true,
+        "test": true
+      }
+    },
+    {
+      "original": "/tmp/gpui-ime-composed-root-target-20261024/debug/build/gpui/cebd45f1235223ac/out/questions-cebd45f1235223ac",
+      "frozen": "/tmp/gpui-ime-composed-executables-root/062-questions/test",
+      "sha256": "a4722e5477265056fc4f961df100a5f6a0287dcb28eb97a9a7e9c91f59ff6c14",
+      "bytes": 29030208,
+      "fresh": false,
+      "package_id": "path+file:///tmp/gpui-ime-composed-review-root-20261024/reactivity/crates/gpui#0.1.0",
+      "target": {
+        "kind": [
+          "test"
+        ],
+        "crate_types": [
+          "bin"
+        ],
+        "name": "questions",
+        "src_path": "/tmp/gpui-ime-composed-review-root-20261024/reactivity/crates/gpui/tests/questions.rs",
+        "edition": "2024",
+        "doc": false,
+        "doctest": false,
+        "test": true
+      },
+      "features": [
+        "default",
+        "simd"
+      ],
+      "profile": {
+        "opt_level": "0",
+        "debuginfo": 0,
+        "debug_assertions": true,
+        "overflow_checks": true,
+        "test": true
+      }
+    },
+    {
+      "original": "/tmp/gpui-ime-composed-root-target-20261024/debug/build/gpui/d0adec3259e7f742/out/intrinsic_text-d0adec3259e7f742",
+      "frozen": "/tmp/gpui-ime-composed-executables-root/063-intrinsic_text/test",
+      "sha256": "f473c0619bb1fcab43fc5cf5edf7ac3076585377db7600c7cb94b23453f6320a",
+      "bytes": 27198808,
+      "fresh": false,
+      "package_id": "path+file:///tmp/gpui-ime-composed-review-root-20261024/reactivity/crates/gpui#0.1.0",
+      "target": {
+        "kind": [
+          "test"
+        ],
+        "crate_types": [
+          "bin"
+        ],
+        "name": "intrinsic_text",
+        "src_path": "/tmp/gpui-ime-composed-review-root-20261024/reactivity/crates/gpui/tests/intrinsic_text.rs",
+        "edition": "2024",
+        "doc": false,
+        "doctest": false,
+        "test": true
+      },
+      "features": [
+        "default",
+        "simd"
+      ],
+      "profile": {
+        "opt_level": "0",
+        "debuginfo": 0,
+        "debug_assertions": true,
+        "overflow_checks": true,
+        "test": true
+      }
+    },
+    {
+      "original": "/tmp/gpui-ime-composed-root-target-20261024/debug/build/gpui/9cea5ddfd60a0024/out/projected_sources-9cea5ddfd60a0024",
+      "frozen": "/tmp/gpui-ime-composed-executables-root/064-projected_sources/test",
+      "sha256": "2856e9ceeb5c9b3ef8f8c1a38dd5c7e2f687e694e1c8ca54a4c13c006cfeb530",
+      "bytes": 29865360,
+      "fresh": false,
+      "package_id": "path+file:///tmp/gpui-ime-composed-review-root-20261024/reactivity/crates/gpui#0.1.0",
+      "target": {
+        "kind": [
+          "test"
+        ],
+        "crate_types": [
+          "bin"
+        ],
+        "name": "projected_sources",
+        "src_path": "/tmp/gpui-ime-composed-review-root-20261024/reactivity/crates/gpui/tests/projected_sources.rs",
+        "edition": "2024",
+        "doc": false,
+        "doctest": false,
+        "test": true
+      },
+      "features": [
+        "default",
+        "simd"
+      ],
+      "profile": {
+        "opt_level": "0",
+        "debuginfo": 0,
+        "debug_assertions": true,
+        "overflow_checks": true,
+        "test": true
+      }
+    },
+    {
+      "original": "/tmp/gpui-ime-composed-root-target-20261024/debug/build/gpui/188ea42047087a27/out/unit_action_cost-188ea42047087a27",
+      "frozen": "/tmp/gpui-ime-composed-executables-root/065-unit_action_cost/test",
+      "sha256": "365cc40fc29a9562e450683ac74c3b44049e1bba031af31e60ac7166030c0530",
+      "bytes": 26913232,
+      "fresh": false,
+      "package_id": "path+file:///tmp/gpui-ime-composed-review-root-20261024/reactivity/crates/gpui#0.1.0",
+      "target": {
+        "kind": [
+          "test"
+        ],
+        "crate_types": [
+          "bin"
+        ],
+        "name": "unit_action_cost",
+        "src_path": "/tmp/gpui-ime-composed-review-root-20261024/reactivity/crates/gpui/tests/unit_action_cost.rs",
+        "edition": "2024",
+        "doc": false,
+        "doctest": false,
+        "test": true
+      },
+      "features": [
+        "default",
+        "simd"
+      ],
+      "profile": {
+        "opt_level": "0",
+        "debuginfo": 0,
+        "debug_assertions": true,
+        "overflow_checks": true,
+        "test": true
+      }
+    },
+    {
+      "original": "/tmp/gpui-ime-composed-root-target-20261024/debug/build/gpui/ac6cd2619e36a6da/out/components-ac6cd2619e36a6da",
+      "frozen": "/tmp/gpui-ime-composed-executables-root/066-components/test",
+      "sha256": "fbc530bf642f0e10d2e0fe046d39f520fb5fae5232eaaf0893d6f7bfe2d0bc2a",
+      "bytes": 31833472,
+      "fresh": false,
+      "package_id": "path+file:///tmp/gpui-ime-composed-review-root-20261024/reactivity/crates/gpui#0.1.0",
+      "target": {
+        "kind": [
+          "test"
+        ],
+        "crate_types": [
+          "bin"
+        ],
+        "name": "components",
+        "src_path": "/tmp/gpui-ime-composed-review-root-20261024/reactivity/crates/gpui/tests/components.rs",
+        "edition": "2024",
+        "doc": false,
+        "doctest": false,
+        "test": true
+      },
+      "features": [
+        "default",
+        "simd"
+      ],
+      "profile": {
+        "opt_level": "0",
+        "debuginfo": 0,
+        "debug_assertions": true,
+        "overflow_checks": true,
+        "test": true
+      }
+    },
+    {
+      "original": "/tmp/gpui-ime-composed-root-target-20261024/debug/build/gpui/fbf9d8354ca921f4/out/property_state_shell-fbf9d8354ca921f4",
+      "frozen": "/tmp/gpui-ime-composed-executables-root/067-property_state_shell/test",
+      "sha256": "dd65056a78dcb2529eeb3fa5d96fad1af52ec8bb884ba23679e07db2128f3bb5",
+      "bytes": 26874384,
+      "fresh": false,
+      "package_id": "path+file:///tmp/gpui-ime-composed-review-root-20261024/reactivity/crates/gpui#0.1.0",
+      "target": {
+        "kind": [
+          "test"
+        ],
+        "crate_types": [
+          "bin"
+        ],
+        "name": "property_state_shell",
+        "src_path": "/tmp/gpui-ime-composed-review-root-20261024/reactivity/crates/gpui/tests/property_state_shell.rs",
+        "edition": "2024",
+        "doc": false,
+        "doctest": false,
+        "test": true
+      },
+      "features": [
+        "default",
+        "simd"
+      ],
+      "profile": {
+        "opt_level": "0",
+        "debuginfo": 0,
+        "debug_assertions": true,
+        "overflow_checks": true,
+        "test": true
+      }
+    },
+    {
+      "original": "/tmp/gpui-ime-composed-root-target-20261024/debug/build/gpui/ce3c4d5d42eb1667/out/frontier-ce3c4d5d42eb1667",
+      "frozen": "/tmp/gpui-ime-composed-executables-root/068-frontier/test",
+      "sha256": "0a880656e0a59984a511684bf784440aa67f9246e75ae4c760ccfffffeb4c156",
+      "bytes": 30031424,
+      "fresh": false,
+      "package_id": "path+file:///tmp/gpui-ime-composed-review-root-20261024/reactivity/crates/gpui#0.1.0",
+      "target": {
+        "kind": [
+          "test"
+        ],
+        "crate_types": [
+          "bin"
+        ],
+        "name": "frontier",
+        "src_path": "/tmp/gpui-ime-composed-review-root-20261024/reactivity/crates/gpui/tests/frontier.rs",
+        "edition": "2024",
+        "doc": false,
+        "doctest": false,
+        "test": true
+      },
+      "features": [
+        "default",
+        "simd"
+      ],
+      "profile": {
+        "opt_level": "0",
+        "debuginfo": 0,
+        "debug_assertions": true,
+        "overflow_checks": true,
+        "test": true
+      }
+    },
+    {
+      "original": "/tmp/gpui-ime-composed-root-target-20261024/debug/build/gpui/9ea64b9ba1261e64/out/runtime-9ea64b9ba1261e64",
+      "frozen": "/tmp/gpui-ime-composed-executables-root/069-runtime/test",
+      "sha256": "b61fef0558207bd01e500d1565f3c8660d18cf80585b6727a348f2bdf1f40889",
+      "bytes": 36287472,
+      "fresh": false,
+      "package_id": "path+file:///tmp/gpui-ime-composed-review-root-20261024/reactivity/crates/gpui#0.1.0",
+      "target": {
+        "kind": [
+          "test"
+        ],
+        "crate_types": [
+          "bin"
+        ],
+        "name": "runtime",
+        "src_path": "/tmp/gpui-ime-composed-review-root-20261024/reactivity/crates/gpui/tests/runtime.rs",
+        "edition": "2024",
+        "doc": false,
+        "doctest": false,
+        "test": true
+      },
+      "features": [
+        "default",
+        "simd"
+      ],
+      "profile": {
+        "opt_level": "0",
+        "debuginfo": 0,
+        "debug_assertions": true,
+        "overflow_checks": true,
+        "test": true
+      }
+    },
+    {
+      "original": "/tmp/gpui-ime-composed-root-target-20261024/debug/build/gpui/9534a3c0ad25ab93/out/mapped_properties-9534a3c0ad25ab93",
+      "frozen": "/tmp/gpui-ime-composed-executables-root/070-mapped_properties/test",
+      "sha256": "6842c6c17f41f1fc6c5e089f9ad76c84d21dc445dd9cb93322206587568d7855",
+      "bytes": 32140792,
+      "fresh": false,
+      "package_id": "path+file:///tmp/gpui-ime-composed-review-root-20261024/reactivity/crates/gpui#0.1.0",
+      "target": {
+        "kind": [
+          "test"
+        ],
+        "crate_types": [
+          "bin"
+        ],
+        "name": "mapped_properties",
+        "src_path": "/tmp/gpui-ime-composed-review-root-20261024/reactivity/crates/gpui/tests/mapped_properties.rs",
+        "edition": "2024",
+        "doc": false,
+        "doctest": false,
+        "test": true
+      },
+      "features": [
+        "default",
+        "simd"
+      ],
+      "profile": {
+        "opt_level": "0",
+        "debuginfo": 0,
+        "debug_assertions": true,
+        "overflow_checks": true,
+        "test": true
+      }
+    }
+  ],
+  "darwin": {
+    "source": "63059517488141c35811f0bc197b4cd36c9ae6e1",
+    "source_inputs": 2075,
+    "gates": 75,
+    "all_guards_match": true,
+    "actual_frozen_executables": 71,
+    "passed": 744,
+    "failed": 0,
+    "ignored": 12,
+    "focus": {
+      "ime": {
+        "binary": "test-34-ime",
+        "name": "ime",
+        "exit": 0,
+        "passed": 18,
+        "failed": 0,
+        "ignored": 0
+      },
+      "gpui": {
+        "binary": "test-35-gpui",
+        "name": "gpui",
+        "exit": 0,
+        "passed": 259,
+        "failed": 0,
+        "ignored": 7
+      },
+      "property_selection": {
+        "binary": "test-57-property_selection",
+        "name": "property_selection",
+        "exit": 0,
+        "passed": 10,
+        "failed": 0,
+        "ignored": 0
+      }
+    },
+    "all_gates_exit_zero": false,
+    "offline_blocked_gate": "Resolved by exact locked cache artifacts; both original core_maths and subsequent foldhash offline failures remain archived.",
+    "fresh_shipping_library_artifacts": {
+      "gpui": 1,
+      "gpui_canvas": 1,
+      "gpui_gpu": 1
+    },
+    "source_hashes_match": true,
+    "binary_hashes_match": true,
+    "metadata_archive": {
+      "path": "/Users/mileswirht/gpui-reactivity-20261024-root/ime-composed-6305951-sol/metadata-dedup.tar.gz",
+      "bytes": 239113,
+      "sha256": "72bd5bc23f34a94a71a4eb8f15c8ec1c450234bc199124ea8b38221d6692a257",
+      "files": 466,
+      "objects": 258,
+      "source": "63059517488141c35811f0bc197b4cd36c9ae6e1"
+    },
+    "verified_metadata_files": 466,
+    "verified_unique_metadata_objects": 258,
+    "actual_machos_location": "/Users/mileswirht/gpui-reactivity-20261024-root/ime-composed-6305951-sol/qualification-corrected",
+    "actual_machos_downloaded": false,
+    "release": {
+      "exclusive_lock_available": true,
+      "free_bytes": 29716226048,
+      "original_pid": "",
+      "corrected_pid": ""
+    },
+    "known_baseline_allocation_tests_now_pass_in_this_exact_composition": true,
+    "docs": "\nrunning 2 tests\ntest crates/gpui/src/reader/question.rs - reader::question::Questions<M,L>::question_future (line 121) ... ok\ntest crates/gpui/src/remote.rs - remote::Remote (line 67) ... ok\n\ntest result: ok. 2 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 0.02s\n\n\nrunning 26 tests\ntest crates/gpui/src/component.rs - component::Component<P,C>::view (line 63) - compile fail ... ok\ntest crates/gpui/src/property.rs - property::Property (line 367) - compile fail ... ok\ntest crates/gpui/src/reader.rs - reader::Completion<T,E>::run_cancellable (line 381) - compile fail ... ok\ntest crates/gpui/src/reader.rs - reader::Completion<T,E>::run_cancellable (line 389) - compile fail ... ok\ntest crates/gpui/src/identity.rs - identity::Target (line 14) - compile fail ... ok\ntest crates/gpui/src/reader.rs - reader::Reader<T>::project (line 81) - compile fail ... ok\ntest crates/gpui/src/reader/question.rs - reader::question::Questions<M,L>::question_future (line 139) - compile fail ... ok\ntest crates/gpui/src/reader/question.rs - reader::question::Questions<M,L>::question (line 70) - compile fail ... ok\ntest crates/gpui/src/reader/question.rs - reader::question::Questions<M,L>::question_future (line 132) - compile fail ... ok\ntest crates/gpui/src/reader/question.rs - reader::question::Questions<M,L>::question_future (line 146) - compile fail ... ok\ntest crates/gpui/src/runtime.rs - runtime::PresentationToken (line 212) - compile fail ... ok\ntest crates/gpui/src/runtime.rs - runtime::Win (line 1214) - compile fail ... ok\ntest crates/gpui/src/runtime.rs - runtime::PresentationToken (line 218) - compile fail ... ok\ntest crates/gpui/src/runtime.rs - runtime::Win (line 1222) - compile fail ... ok\ntest crates/gpui/src/runtime/delivery.rs - runtime::delivery::Win<M,L>::visit_question_inputs (line 28) - compile fail ... ok\ntest crates/gpui/src/runtime/delivery.rs - runtime::delivery::Win<M,L>::with_ready (line 58) - compile fail ... ok\ntest crates/gpui/src/runtime/delivery.rs - runtime::delivery::Win<M,L>::with_ready (line 52) - compile fail ... ok\ntest crates/gpui/src/runtime/query.rs - runtime::query::Part (line 128) - compile fail ... ok\ntest crates/gpui/src/runtime/query/serialize.rs - runtime::query::serialize::SemanticSnapshot (line 17) - compile fail ... ok\ntest crates/gpui/src/element.rs - element::text_input (line 1161) - compile fail ... ok\ntest crates/gpui/src/element.rs - element::text_input (line 1156) - compile fail ... ok\ntest crates/gpui/src/remote.rs - remote::Inbox (line 159) - compile fail ... ok\ntest crates/gpui/src/reader.rs - reader::Completion (line 306) - compile fail ... ok\ntest crates/gpui/src/reader.rs - reader::Reader (line 56) - compile fail ... ok\ntest crates/gpui/src/property.rs - property::CORNER_RADIUS (line 597) - compile fail ... ok\ntest crates/gpui/src/property.rs - property::Property (line 372) - compile fail ... ok\n\ntest result: ok. 26 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 0.65s\n\nall doctests ran in 1.89s; merged doctests compilation took 0.88s\n",
+    "scope": "Actual Darwin native contracts and normalized adapter tests. No physical candidate engine, VoiceOver, ScreenRecording/AX permission or UI-latency qualification. Native request-turnover quarantine remains until Disabled/close; no reusable lifecycle claim.",
+    "final_required_gates_pass": true,
+    "strict_native_clippy": {
+      "exit": 0,
+      "scope": "GPUI/Canvas/GPU --features native --all-targets -D warnings; exact original command, locked/offline/checksum-freshness/content fingerprint",
+      "source_guards": 2075,
+      "raw_directory": "/tmp/gpui-ime-composed-mac-6305951-sol/metadata/qualification-clippy-prefetched",
+      "cache_added_files": 12,
+      "cache_added_bytes": 1259764
+    },
+    "documentation": {
+      "passed": 28,
+      "failed": 0,
+      "ignored": 0
+    },
+    "final_frozen_binary_hashes_match": true,
+    "owned_jobs_reaped": true,
+    "metadata_clippy_delta": {
+      "path": "/Users/mileswirht/gpui-reactivity-20261024-root/ime-composed-6305951-sol/metadata-clippy-delta.tar.gz",
+      "bytes": 43290,
+      "sha256": "87f8a59d6ce59edc55e64d4624aa600336d293a1382711ded9b4ff42cd6aa5f5",
+      "files": 19,
+      "new_objects": 9,
+      "source": "63059517488141c35811f0bc197b4cd36c9ae6e1"
+    },
+    "final_seal": "/tmp/gpui-ime-composed-mac-6305951-sol/metadata/final-seal.json"
+  },
+  "original_optimization_capsule": {
+    "path": "/tmp/gpui-ime-direct-lease-sol-evidence-20261024/ime-direct-lease-sol-20261024-capsule.tar.gz",
+    "bytes": 357556662,
+    "sha256": "9289c87acdeb6457008540dc85e3693e13c2a20e3e6cd32d56b287ed24e6c8c5",
+    "payload_files": 585,
+    "payload_bytes": 1353716237,
+    "unique_executables": 21,
+    "executable_aliases": 26,
+    "final_source_archive_members": 2073,
+    "verified_every_archive_member": true,
+    "targets_or_full_repository_included": false,
+    "manifest_sha256": "4283dfb7421c8074aaa47fa4dd88993d2774a3f100df211928dc85b87bb84a44"
+  },
+  "direct_constructor_identical_to_miri_qualified_source": true,
+  "core_lines": {
+    "before": 34899,
+    "after": 35851,
+    "delta": 952,
+    "library_build_scripts": 18,
+    "exclusions": "tests, comments, blanks, documentation examples, labs, application examples, benchmarks, tools, evidence, vendors"
+  },
+  "dependencies_or_vendors_changed": false,
+  "log_archive": {
+    "file": "logs.tar.gz",
+    "bytes": 1499554,
+    "sha256": "fc0a9686b27407c596a5f1c79fd212289959904b73ff8f47445c37a827f8c96a",
+    "members_sha256": {
+      "core-lines.json": "e25d63d93e6493101b8f2493eec90906ff69acbb87b591efc247ec2f3e0d9580",
+      "helpers/execute-artifacts.py": "271b3e8449c402ff5dd3c925dc145bbca4591964b84956221ecb6f37034b46c2",
+      "helpers/frozen-gate.py": "ff38b55ebf8eb466a7204ce601861efb940f8cc45bc5d783cb6fb320b4dc470b",
+      "helpers/seal.py": "48c5b118496a9bc36a04df430be4e03e947761b1f6842b93bb5df3ec33f92b74",
+      "linux-build/after.json": "e52d9ac78960146012b6c0b667c65bceab90dcb2f82a5470c97bcb94c31c59f6",
+      "linux-build/before.json": "e52d9ac78960146012b6c0b667c65bceab90dcb2f82a5470c97bcb94c31c59f6",
+      "linux-build/command.json": "1abe9be8e638d95494783312de04a47d38a4d8aad50ca74f521f127b0ca39980",
+      "linux-build/exit": "9a271f2a916b0b6ee6cecb2426f0b3206ef074578be55d9bc94f6f3fe3ab86aa",
+      "linux-build/result.json": "646129a1a9db077232dda7813433c65620f10ecbebf3de20fb1ef47ef29ff107",
+      "linux-build/rustc.txt": "2900025046ddf3de47f87dd3d69fbfe380cae61af5fe1ecf31bb89c5f10645c5",
+      "linux-build/stderr.log": "c46aa45894153e31c18424cd8c7b5c60dbe0f6f2d444a713999b36c0d5914484",
+      "linux-build/stdout.log": "5da4a72362457912001051ab6eee805fa6d82770d6a5460835dc1e80cc540cfb",
+      "linux-docs/after.json": "e52d9ac78960146012b6c0b667c65bceab90dcb2f82a5470c97bcb94c31c59f6",
+      "linux-docs/before.json": "e52d9ac78960146012b6c0b667c65bceab90dcb2f82a5470c97bcb94c31c59f6",
+      "linux-docs/command.json": "3d7c1765c31e5aed5a9158e5be3d6a1234a35eb70a01b156148293005ffedb59",
+      "linux-docs/exit": "9a271f2a916b0b6ee6cecb2426f0b3206ef074578be55d9bc94f6f3fe3ab86aa",
+      "linux-docs/result.json": "ab5334b9cf56bdd82e1d04cf698892d8842d0b1bcd50477009eeac9e97f2ce34",
+      "linux-docs/rustc.txt": "2900025046ddf3de47f87dd3d69fbfe380cae61af5fe1ecf31bb89c5f10645c5",
+      "linux-docs/stderr.log": "c97ddcd61acb4cde68a6c475077871046899778f7ce7125ea621e2bf908e455f",
+      "linux-docs/stdout.log": "7fef8323603478cba724264f1b484d697c89709e426ebe1d38f4086dec6d03bc",
+      "linux-executables/000-semantics/binary.json": "3e8ac7c266ca011690257c036da382ee32918e68d3583c29655563a5db90c9e3",
+      "linux-executables/000-semantics/result.json": "8fd301385a80faba0e8405bd4840535126297a2ee9f1518a35030fd3ecd7841f",
+      "linux-executables/000-semantics/stderr.log": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "linux-executables/000-semantics/stdout.log": "b21c7aa738dd94db0764fbfc464cff06ceb7556af898be8ee86d24bd882228f7",
+      "linux-executables/001-question_inputs/binary.json": "4b18382412cba562f6b343aed69ca14a513aea41fc80d062c154753ab8db73d4",
+      "linux-executables/001-question_inputs/result.json": "fac73d182262292f23845396b494dc101cff66ea5b16c0019465208ce28806bb",
+      "linux-executables/001-question_inputs/stderr.log": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "linux-executables/001-question_inputs/stdout.log": "f6039feaa01ba01b69d795b548abe52b7d937e08e79a273710b6308985df49ea",
+      "linux-executables/002-child_capacity/binary.json": "1972160335a6941d5d1e509435cfabeb2345e77ccb96ce75b4a6bff4d83de9b0",
+      "linux-executables/002-child_capacity/result.json": "1061092e825eb1ba7fc633c0a99ffb86bfc1ffdf7cbb9d176b62a42ac0986175",
+      "linux-executables/002-child_capacity/stderr.log": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "linux-executables/002-child_capacity/stdout.log": "d81fd801ecbc03a043bce4c00b26fb11de05daee5e76e781d5c38e0eed613ec4",
+      "linux-executables/003-immutable_text/binary.json": "fefe831950fb13276b2cdb0bcb37cc3aaa652895853e028052729782be5c65e8",
+      "linux-executables/003-immutable_text/result.json": "3c7c9935a34cb189cb6b2ece0aea115379f2d6deb937e64e69f45c019930bfbd",
+      "linux-executables/003-immutable_text/stderr.log": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "linux-executables/003-immutable_text/stdout.log": "12b72f79f66c8824f75328f142ec9b49eec5fd29925de3d127ea8777faec3bd3",
+      "linux-executables/004-pointer_focus/binary.json": "d58171394fee4f4e7f8f443fe76ca81281bd2619f1ae153403d1c1ae1547235c",
+      "linux-executables/004-pointer_focus/result.json": "1b5e0f9b2787ca8ffc73d2dab8df5a49b48a9b431cce924bef8ddfaace525728",
+      "linux-executables/004-pointer_focus/stderr.log": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "linux-executables/004-pointer_focus/stdout.log": "48fe4c22661cc92cdba8ecbb80eacdcc9c7153ddd976840e7bfecfa5279b537d",
+      "linux-executables/005-text_selection_compound/binary.json": "acf03e06bb9ef476ca47b7eb571b082f9d8c4f426955dcf6fb45b54dc960f081",
+      "linux-executables/005-text_selection_compound/result.json": "a10df55a136a477d54d8e10e6f09b8cfe4277ce148d8e5b9d44269c994d9fe08",
+      "linux-executables/005-text_selection_compound/stderr.log": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "linux-executables/005-text_selection_compound/stdout.log": "0adcc507c379a19143932fbda45eb27abaf977f14dd679207d20323ed30add2d",
+      "linux-executables/006-retained_styles/binary.json": "7ff9e40618848cfec1f0e9c2a5abe099b01a8aa29505028aadea16ee99ddecb4",
+      "linux-executables/006-retained_styles/result.json": "9056f196c3df8dbcf16a83d6b50bbafc3a211ecb1deeff9fc8ea305aa7f31ce0",
+      "linux-executables/006-retained_styles/stderr.log": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "linux-executables/006-retained_styles/stdout.log": "2630923e4f4dad98884c4ded9e435198c33c87fc31840d3a1a973a70a11e5c58",
+      "linux-executables/007-property_change_union/binary.json": "03b3b9647cf9be7d17aca4af8c84aa53790eef91d6077199f78b88f4309d616e",
+      "linux-executables/007-property_change_union/result.json": "d0cbc0f9153cb843d8ffd37c98a832bff915972e3cff72e60a0c4e6c092580ab",
+      "linux-executables/007-property_change_union/stderr.log": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "linux-executables/007-property_change_union/stdout.log": "cfc47bfc038401169b68c8d0fa6d8128dd510fca4117ad0678f79ec09d73dde8",
+      "linux-executables/008-field_identity/binary.json": "6859b3518f58b00aaa3b45c23afb38b5d2a11342e5d1efcdcfb881f3afadb768",
+      "linux-executables/008-field_identity/result.json": "9d7ba4cbfd974587de33d8882059932e02316595236adcca84bbcc4fbb523959",
+      "linux-executables/008-field_identity/stderr.log": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "linux-executables/008-field_identity/stdout.log": "ecc05861dbda72682a8dd0cad4c30f37752c1ca010fba19265d32a88db22d3d9",
+      "linux-executables/009-lists/binary.json": "2efee86838281004648cc5e7bb3b4c89157b8254fef2daa7a5be12da3edfae2a",
+      "linux-executables/009-lists/result.json": "0258d11c1b9660013887b678949b23e99a2ac1eafafca58a0be49060f6ac032e",
+      "linux-executables/009-lists/stderr.log": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "linux-executables/009-lists/stdout.log": "9b88dc4514a171ad5f859b4375b94e6b8c47b7347abe1a2a492b4e36498444eb",
+      "linux-executables/010-search_library/binary.json": "fb3e0468a220a36bd8bcb89a1e718f0aa137302036b48643014a570593a9dfde",
+      "linux-executables/010-search_library/result.json": "832adcf3a155e2954d47f9065d78b8d66503702f521ae457d6147e82aab23047",
+      "linux-executables/010-search_library/stderr.log": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "linux-executables/010-search_library/stdout.log": "e7264c7330f17fea5c0f03d21a8200cd3f9d96cda76482dcc102f0a561f01c7c",
+      "linux-executables/011-question_cost/binary.json": "8197b24ddc44ccd493f63b27c46ad1252161dcb10895d269b84b3ab53f7778b8",
+      "linux-executables/011-question_cost/result.json": "1c054b9ca6ce3b5739e83b339f7a0150b313e888c3dee0dcf9a8dedc230c05c5",
+      "linux-executables/011-question_cost/stderr.log": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "linux-executables/011-question_cost/stdout.log": "7af332062080688e120eb0d31ea275f40bed1d19c283b259875d755c25f3b326",
+      "linux-executables/012-paint_slot_rebind/binary.json": "9774608a57f8a0d266f9130785cd20f4668d6236c40521008bd672ebfaa712ed",
+      "linux-executables/012-paint_slot_rebind/result.json": "99ac7945d6a1edecabcc6920274dde3af72b7b6215c414d06f7b7d897fdc8701",
+      "linux-executables/012-paint_slot_rebind/stderr.log": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "linux-executables/012-paint_slot_rebind/stdout.log": "c0fcd5cdd2823f157c1d50fb7c4197083fdb59103a952aba8860302967755194",
+      "linux-executables/013-identity_recovery/binary.json": "2f5b944ac0378c0e498f4c6e3f08dbe34b5f9dc7a023d8541a442c9833ea083b",
+      "linux-executables/013-identity_recovery/result.json": "a1af281b68b71191d378874b4b631128e28f75a60a09edcb04812c3199ef6f3a",
+      "linux-executables/013-identity_recovery/stderr.log": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "linux-executables/013-identity_recovery/stdout.log": "2202ad17afa698e5bf305ce08ae857f86dbdc1ff95936c5145572f5af5b81d7f",
+      "linux-executables/014-acceptance/binary.json": "4f7dcee71aba59e891b106973155fea68e2ef024bec178d6b40ba5d4f3410358",
+      "linux-executables/014-acceptance/result.json": "fd324445acf57e3d287c36e13f89488e0c7efb1975f0da4013e04a4c5c63265f",
+      "linux-executables/014-acceptance/stderr.log": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "linux-executables/014-acceptance/stdout.log": "77342faa64384a2cf08c66a91e6c2b9819bd4825cb850e79fd552ff3e21e53ee",
+      "linux-executables/015-text_cache/binary.json": "3b66d4242e14e1d1d4cd884c6984af0fbc2bd9868e999dad0d8f6b1c28e2354b",
+      "linux-executables/015-text_cache/result.json": "eede912b079941c3e13cf385f406026d4abd7ba737a148464a68366a0ef612a7",
+      "linux-executables/015-text_cache/stderr.log": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "linux-executables/015-text_cache/stdout.log": "ededab7292731a419bae4efe2810ab9702caec5306bde95e59385077b9330f36",
+      "linux-executables/016-source_inbox/binary.json": "2cebfcdb2017453081ad9775ef4219d29af5027476782c58aa0829d7c3b7a5b3",
+      "linux-executables/016-source_inbox/result.json": "2ac564154fec6fdaae12224158b437c9705d554eff0f27e66453bf55bdc39184",
+      "linux-executables/016-source_inbox/stderr.log": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "linux-executables/016-source_inbox/stdout.log": "1c8da8a0d3d12955e3eb7a63ae64ed136005905e051f0a385092c142446c867c",
+      "linux-executables/017-question_storage/binary.json": "ea9c8b288aa9b482a853621998a6cb5e9df110f1f056a2f374e1bda1bb80f5f4",
+      "linux-executables/017-question_storage/result.json": "59279e16733508ee54f214ad2392ef0da14d06a0e60b28eb64ad9d2d9bca58c8",
+      "linux-executables/017-question_storage/stderr.log": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "linux-executables/017-question_storage/stdout.log": "ff77b76b70bb4de4b2e3bc87410b36635826fd8d307bdb40231f01483ef0bb1d",
+      "linux-executables/018-gpui/binary.json": "9e1df0a0a34ce83b54bd0eaed00d15c4764675ffd174c9b4d0a7089afa9908bb",
+      "linux-executables/018-gpui/result.json": "cb7c6fd2d839952d7c46f659925158cc9303fec6dad955efebbc68389d16bc31",
+      "linux-executables/018-gpui/stderr.log": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "linux-executables/018-gpui/stdout.log": "71e858b3062274df24c0c79c62ff35eb594e6af07d836cb0826744cfa3cfbac4",
+      "linux-executables/019-color_packing/binary.json": "59346c928231e6105b55bcefb96b1fc86c7ce688a7fd70f607da27793cc39330",
+      "linux-executables/019-color_packing/result.json": "1f580ed8da216009f50fe3d339582d73903efd7836b33e482ebba43f6d13aed8",
+      "linux-executables/019-color_packing/stderr.log": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "linux-executables/019-color_packing/stdout.log": "de30a734c1f04912c53083d18aef60a1b609133587e994b9ca87fec4356f1a66",
+      "linux-executables/020-inspector/binary.json": "000050992205a394a7e586dc4a292effae4e26447779c0b55eaff24d9f6beef9",
+      "linux-executables/020-inspector/result.json": "0180ce0acef47f9cbd8f7cbf03af3b04c3a7c3613dd80dc7facbf75163b1c7ee",
+      "linux-executables/020-inspector/stderr.log": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "linux-executables/020-inspector/stdout.log": "af9be0a9db228ad8e01c58bfebb95eede53ac98b2661c01325faa8a49ff05b0e",
+      "linux-executables/021-unicode_text/binary.json": "4cfa8b97662ea213d7071cf63ccceb2bfb2dbb97cfb7669fcd1af41258a46c39",
+      "linux-executables/021-unicode_text/result.json": "0fc1fb2387807b5a3c86ae8579057f1090291779919e45839c6fa576f1372a98",
+      "linux-executables/021-unicode_text/stderr.log": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "linux-executables/021-unicode_text/stdout.log": "1df0e603d3afad02398151610e386098bbf50db2ec1206804e59aecfb073e833",
+      "linux-executables/022-presentation/binary.json": "c500c16e66ebb5a941fe38f4c20960eafdef96e6f43d3e3232d6dcc32120945e",
+      "linux-executables/022-presentation/result.json": "8f75aad25fe00a097362c4d093c59244b58b434969a5237bca9271a94fb4777c",
+      "linux-executables/022-presentation/stderr.log": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "linux-executables/022-presentation/stdout.log": "5507a1df3cdd045eb1f3dfa15b09f8c85aa42fc21ab372f67d065a9db4802a07",
+      "linux-executables/023-mapped_paint/binary.json": "3096f2b51f63584dc058d47acdba6032043fb67f5854de79610c7a5a0cf629b7",
+      "linux-executables/023-mapped_paint/result.json": "329540ebede9ccb94bb007d301d445664f0b870cb6e036d19e1663e01972fa68",
+      "linux-executables/023-mapped_paint/stderr.log": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "linux-executables/023-mapped_paint/stdout.log": "2a3a0012492b402fc5e749dc04e9efd04b921e10304d8863c9bae21637b83c8d",
+      "linux-executables/024-property_selection/binary.json": "f9eee1a6d57e4659d5badcb9fd0bf7d2be03fc4df99ebf2159ece9c86fa2029b",
+      "linux-executables/024-property_selection/result.json": "134833727395fee76206e0fecd1d8bd3223b7893c01323bcbf10897b2f8d9fd9",
+      "linux-executables/024-property_selection/stderr.log": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "linux-executables/024-property_selection/stdout.log": "925c318462aaa05d57016816a739e719530fa03a31e83a18110dc9d2394d1a36",
+      "linux-executables/025-routes/binary.json": "cf65e844e8b89739e9ff5c30dacb5fa9ab339581a11f7445d7347f9bdd01fad0",
+      "linux-executables/025-routes/result.json": "904ddac402cfe55369b858517854c70c68eb635b49cad9ef68f306a52ecaecda",
+      "linux-executables/025-routes/stderr.log": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "linux-executables/025-routes/stdout.log": "60d0ae27e3ed802470945b620dd660fabf09e158fdf2ecdd6d8d5cbf071b592b",
+      "linux-executables/026-focus/binary.json": "c36c490c9645479d8c37ef961db87ad441b8d826855f6932a7ccc592277a4075",
+      "linux-executables/026-focus/result.json": "6dbce2644125d18442306a421bab8204c34d99a6f8702f991a4cfe8bf3a52f83",
+      "linux-executables/026-focus/stderr.log": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "linux-executables/026-focus/stdout.log": "ce49fd94a64777f27df12c1c9ab69b1ab4491b82b1885b0e9c99631c0abc891b",
+      "linux-executables/027-source_value_isolation/binary.json": "bc3b3d81f1e8aeb441ef6a11a7394df8781529c6e6791f7a5401b19df1a6d81f",
+      "linux-executables/027-source_value_isolation/result.json": "20fed3241106775480fb32de75acbde20ede13e393a16197db697f9628d65db5",
+      "linux-executables/027-source_value_isolation/stderr.log": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "linux-executables/027-source_value_isolation/stdout.log": "83ffcf4c6ea6614bee1c9b113d0a59d822212db54bb48617b4f9a40420025508",
+      "linux-executables/028-question_input_cost/binary.json": "b10e0ae68e0e8658a03ee4e01d488b6e9ea0036edaf815f83c9d6e0ff50ca084",
+      "linux-executables/028-question_input_cost/result.json": "ae747e942ae2680b2aca0f491867d7e434742468e1a6be406fc469fadd32bf20",
+      "linux-executables/028-question_input_cost/stderr.log": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "linux-executables/028-question_input_cost/stdout.log": "089957197cbd3602946afad743b9167aac7c2bb80618c53e6260a4fb9dd61498",
+      "linux-executables/029-semantic_serialization/binary.json": "edfe54270d17e94251355249b0927cd47da255f58fda08bbcdb9b6f428503dd8",
+      "linux-executables/029-semantic_serialization/result.json": "4136a4459cd41786bff106a4e5c7f2cba665a479c2c361e47c8b6cf9d47fb2db",
+      "linux-executables/029-semantic_serialization/stderr.log": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "linux-executables/029-semantic_serialization/stdout.log": "b2e24ddefcab6cd933e4a3fab49a994e79d6cec352193c4386595b4f76bc13db",
+      "linux-executables/030-pointer/binary.json": "2df1116ebda23bbeeb6394a6cda13251e2f2e84cf8cb44a819f8fc0249a74fe3",
+      "linux-executables/030-pointer/result.json": "2585d12aeacf55481c4e168ea462ded1f424b49ff9681b7d517fd6b904daea74",
+      "linux-executables/030-pointer/stderr.log": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "linux-executables/030-pointer/stdout.log": "99fb8ed834bad9a55d20fb1d617f0aae2ca3f2a584a0a2b80bf79f3223d7a028",
+      "linux-executables/031-checkbox/binary.json": "199bb371bde7447e1928246ed4f16065a1e90abe8daeca21ef4e1e5e35567818",
+      "linux-executables/031-checkbox/result.json": "cd867626f0ee5a93aa46a72086158c113cca7e85fe7c38d5413ca926a9347670",
+      "linux-executables/031-checkbox/stderr.log": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "linux-executables/031-checkbox/stdout.log": "9c7c446a426dc39675e1774b27ae2597541a75ace22515cd9951987da98da744",
+      "linux-executables/032-ime/binary.json": "5b0f20c33fa27d85ceb7e7131caf9bc51a5b21288cce01e2eb6dc8ec8cb95b98",
+      "linux-executables/032-ime/result.json": "9d4fb91c19d0edb6cd2d92519849dea638d93e15f5a4e7646545651126775337",
+      "linux-executables/032-ime/stderr.log": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "linux-executables/032-ime/stdout.log": "c3407376bd8a594e332ac096b9030ff5233b420d822cb497afc317d3fa7fea65",
+      "linux-executables/033-text_selection/binary.json": "fe20aa6dddd9140b64ce851f0d268b79cd2c32650581c334c44e50bcd1913e2a",
+      "linux-executables/033-text_selection/result.json": "8e5040ba6f089822166915d04c1b521b4d34f0904fa9da72ee705e8c05424322",
+      "linux-executables/033-text_selection/stderr.log": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "linux-executables/033-text_selection/stdout.log": "688141ab9cdcfc8b77e12f3ce9b45dfb9d96ad07eded2406cf32445ba6d3d946",
+      "linux-executables/034-library/binary.json": "38993dc0c9a4c511d18e2470454605aba0474694e102118f2d796c80b267a3e1",
+      "linux-executables/034-library/result.json": "afc9557d4c15626fa65395258160fccc86892ee8341ad923e35da68f15552871",
+      "linux-executables/034-library/stderr.log": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "linux-executables/034-library/stdout.log": "f5ccf31b6e9c9e9b122855e476296a7dbc8fcfce5332d28a7efe87df9a636f19",
+      "linux-executables/035-dpi/binary.json": "7b5f09a2a5e4c06d50592701219280f6ed88fed36e954354e2ec0bdcfb455e15",
+      "linux-executables/035-dpi/result.json": "c1ff55035dd6cfcfd7383cd2718d02ca09ad1335de28b6f8fb59aa3c637864b6",
+      "linux-executables/035-dpi/stderr.log": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "linux-executables/035-dpi/stdout.log": "2a7f8a2f03f6f12026617d8f7bcd78cb52cfdc40a763b7001258a71e27ff90db",
+      "linux-executables/036-property_actions/binary.json": "e9d95608700cb4d84abc16c5012c0c26a6b975b557a36db0e343bfe232634e0f",
+      "linux-executables/036-property_actions/result.json": "41578f31d20c5031b614410faeeae66413634ec986911d7cfab9a72ca017556a",
+      "linux-executables/036-property_actions/stderr.log": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "linux-executables/036-property_actions/stdout.log": "67a2aab361dff6c9369cb31f44d32e3a6c298faa2caee0823a35a4179fb78fe3",
+      "linux-executables/037-unit_action_cost_two/binary.json": "790c585b9df1141e57e2767385d0c496a7479ed69e83b8aa75d2cea9cb2c9cad",
+      "linux-executables/037-unit_action_cost_two/result.json": "6641bd5a6b70e9b2c02585b4826291db696cd7dcefff8de4439475f00a078c53",
+      "linux-executables/037-unit_action_cost_two/stderr.log": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "linux-executables/037-unit_action_cost_two/stdout.log": "78bb2e0a6ee4feaddfbad8e607d6743f6f1c1c522a9a52a771deb25527885a65",
+      "linux-executables/038-remote/binary.json": "86d70dca4d78448dcd5c35e0c2b68f20806ec157d345221bc8c19ee4d5039406",
+      "linux-executables/038-remote/result.json": "9c054ecd7aaa1e6437397e7d358a256aa6f20ab266fe0e8baaad2132d2c412d9",
+      "linux-executables/038-remote/stderr.log": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "linux-executables/038-remote/stdout.log": "ba5a911c5b42384822063dbbea6796b3cf6872e6c5b62d943e5b5e06e496ff7f",
+      "linux-executables/039-queries/binary.json": "980f2e5b7ca4e54073fec66d23ef4ce4c8e3b758f37964ce054121bf58242b0b",
+      "linux-executables/039-queries/result.json": "c2b190637d4a39c7aa5787ceabd64d302073168a2b3255e3071ee2904c1edf3c",
+      "linux-executables/039-queries/stderr.log": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "linux-executables/039-queries/stdout.log": "a246072794903093431531a2d30fa08ea01ac5e910c3158b3170790a40e9f6d3",
+      "linux-executables/040-paint_patch/binary.json": "d141fccf617aa2b746fbf27530a0a46070586d7b1b04901c855a19e9b4fcba11",
+      "linux-executables/040-paint_patch/result.json": "0f45a8da9e395644cbcad252510310211a80d18c36bb5a5d584b215992c95ff8",
+      "linux-executables/040-paint_patch/stderr.log": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "linux-executables/040-paint_patch/stdout.log": "ef065eaf8cd719b2b5fbff347cbf747de9c8adb274df72689ec015e01ccab621",
+      "linux-executables/041-handler_storage/binary.json": "85f06d65a78da8e4ff54638f7c025bbe8cd0e3484bfc19d0e61978205a88d68e",
+      "linux-executables/041-handler_storage/result.json": "ab054b1a35d832e3cb018e2425e93bdb53b59c4dba86f2db9402b0ed2cc79b8a",
+      "linux-executables/041-handler_storage/stderr.log": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "linux-executables/041-handler_storage/stdout.log": "4a80eef59a288280db12f51e5f0020b2aa1186615084925134609db2f92ea142",
+      "linux-executables/042-scroll/binary.json": "2e47b3233ff39b9ee2c2225f6662f4e123dc755644251a88368b2a1d7966a431",
+      "linux-executables/042-scroll/result.json": "4ebccf905343fab3d837ebe857eacb3b77b3f855f8374ff2cfccab90d218c4ba",
+      "linux-executables/042-scroll/stderr.log": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "linux-executables/042-scroll/stdout.log": "9bf1c7908e929da2accfc81a39891e240c04781e5b6c0b70ebfef93d742e4c98",
+      "linux-executables/043-sibling_reconciliation_cost/binary.json": "0858ca88cb3ca55f0ad9950387b59a4bafad3a324954235ee7aec3509abdacfd",
+      "linux-executables/043-sibling_reconciliation_cost/result.json": "639ffa1ad3bf41ee132432937cb549b5ac14f43bc30771663347576ba3e3d608",
+      "linux-executables/043-sibling_reconciliation_cost/stderr.log": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "linux-executables/043-sibling_reconciliation_cost/stdout.log": "850c4809c1709342c29a029df8277c48e67d6ee086bbe50f795fe4dddbf5e25f",
+      "linux-executables/044-style_ports/binary.json": "3286e2ed6a0b0aed48961c63df55d2f0d1a89d2463db04ce6d3420fac1506ae9",
+      "linux-executables/044-style_ports/result.json": "48beb24713925fe0a9777495e43cbff51fb6c167a5ace9b0ed4b548fe4a235e5",
+      "linux-executables/044-style_ports/stderr.log": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "linux-executables/044-style_ports/stdout.log": "86f0a66e896abbebb0b9cf7e7201ac7c47d7f59711c8acc2da69b858fde96d75",
+      "linux-executables/045-ports/binary.json": "20f2d60658a25e4cf7c32caba24e590b697a1f603e6f6bb3a267d87c3419fb69",
+      "linux-executables/045-ports/result.json": "e4590fc0ce0e46e686a8c550da00aa154496f66016ecee13269895131607a4d7",
+      "linux-executables/045-ports/stderr.log": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "linux-executables/045-ports/stdout.log": "a5b0660711604e0abaeee1ac4bff9f8fede1f07d3b374e70dea195a8d258db39",
+      "linux-executables/046-question_mailbox/binary.json": "d495d8735ad2cd75edcbbe38d72054ee350c8ba47f5a01ecd9ed3becd641caa0",
+      "linux-executables/046-question_mailbox/result.json": "43a6890a33e4abb8dc8e1d33100aa4ccd1e59742531f79af4f5a4965b1f1fd6b",
+      "linux-executables/046-question_mailbox/stderr.log": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "linux-executables/046-question_mailbox/stdout.log": "96cd4fa5ba5885fa6d204188e126d803806cd881d4e3f7971ea6e8adb2a833ad",
+      "linux-executables/047-inbox_storage/binary.json": "577c8c99cd541c41a4b60f4c235bc9ea4d71623cfc4ebee794b6ed2f412f49d1",
+      "linux-executables/047-inbox_storage/result.json": "c67631328e6dd5cb1e536a7d355f25849235b51ac2acf598d142378c5e2f185d",
+      "linux-executables/047-inbox_storage/stderr.log": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "linux-executables/047-inbox_storage/stdout.log": "46383b48aa28851bbdbbc204fa3173cd372051b9cef83f3fe6c45e406de1a69e",
+      "linux-executables/048-todo_comparison/binary.json": "8a1c3c505d577e0b90a427e3abc2e122a7cdb0fb80a9bd00d2152a08f87271f5",
+      "linux-executables/048-todo_comparison/result.json": "ca3922424eafca8542a80262a123b1d9da60de1d5d4aa93077ee856872208c86",
+      "linux-executables/048-todo_comparison/stderr.log": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "linux-executables/048-todo_comparison/stdout.log": "3abc57efab4d303f5fd124ae006abce3d950b7428914fa1792523ad17557d95a",
+      "linux-executables/049-clipping/binary.json": "d48d56d38808a06af0c4088b60cb1114a568734d4b093ed9482fe06ff31684f6",
+      "linux-executables/049-clipping/result.json": "0f4d20389690ec6803e1ea2b997355aeac53b8596d10056cb9a8dec6627e9d56",
+      "linux-executables/049-clipping/stderr.log": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "linux-executables/049-clipping/stdout.log": "753323441553f1094cb233e5298e1f1d1146bd5650ca31ea121522a78587b4f5",
+      "linux-executables/050-source_values/binary.json": "08ee7e0ac1c0b5ca75f1f51873f5d6e337f6c44e298a228190017a36023da07a",
+      "linux-executables/050-source_values/result.json": "00e1f8c55240707eef986b0bfec9284bb452d9c23bb727179e2093638558dbc4",
+      "linux-executables/050-source_values/stderr.log": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "linux-executables/050-source_values/stdout.log": "9a2fde803be754214146d15f4a23d52e3e889c089b31089816cb05dc1a1c131e",
+      "linux-executables/051-rounded/binary.json": "aa7ce2be0ecd60f65455e18a86d6a2ac517dcdde2d72dd7cc8282760b2f241e2",
+      "linux-executables/051-rounded/result.json": "6b9904ef4707009dd1010a44ed99438271782a04f9ffe86f504629781fbdf6d4",
+      "linux-executables/051-rounded/stderr.log": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "linux-executables/051-rounded/stdout.log": "9ddb3cae1c35e95b121ada6559662efc316cf06beee31b134bf35388f820e7bf",
+      "linux-executables/052-literal_dispatch/binary.json": "b876a5c6c25a8af91e16e7c65bf6c52095fdefb650606248bb2ddc02027c7dae",
+      "linux-executables/052-literal_dispatch/result.json": "0d73bb957fd20e1dcd9670e37ed95ccb0211bd45ff4e018e9294d19af4ceeb20",
+      "linux-executables/052-literal_dispatch/stderr.log": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "linux-executables/052-literal_dispatch/stdout.log": "1d260705440f14cc6a766a9ee8072a12afee970b04c1b3f8d1739da6f0e23ff4",
+      "linux-executables/053-flex/binary.json": "fe4b7efe3c4c78340f7070c1948dac62056c4b712bbabeae3a4977eb5df8dfa6",
+      "linux-executables/053-flex/result.json": "4bd639fc46ea54439adda8e58bf75711b5b70a01c376a96a1f55aa2918a3f14f",
+      "linux-executables/053-flex/stderr.log": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "linux-executables/053-flex/stdout.log": "84e77c2a92664bfc48a2d29891e10303c6f961d34ebd6d7ab7e0d02b9690c97b",
+      "linux-executables/054-property_outline_allocations/binary.json": "feed98c77509dd61df660fb5beeced1e727900c5a95dfaff6261df17b494f848",
+      "linux-executables/054-property_outline_allocations/result.json": "b781f9bde2845742bb02f03d57b9e6717c5746db9d2e566c6749f55d70c6634d",
+      "linux-executables/054-property_outline_allocations/stderr.log": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "linux-executables/054-property_outline_allocations/stdout.log": "d5cd4664fa4c58a5d348b10cba8ba7982fd4caebd9478a00f208deaa8310bed4",
+      "linux-executables/055-images/binary.json": "6935fca7b3705a31cced28c7e4ea717fd056ffc80160352262b14280a5756872",
+      "linux-executables/055-images/result.json": "a012a66581197b57aee252201a4479b0c1cc0092268ff7ad9956c245e3d012a0",
+      "linux-executables/055-images/stderr.log": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "linux-executables/055-images/stdout.log": "af55aa807825b99af307109e56e58902288d2eb59b90868b247d35038d56f202",
+      "linux-executables/056-application/binary.json": "eae4a703934b0b5b4c39804f1bd584c6ad7620f5971c39abd253c353b9d3cbfc",
+      "linux-executables/056-application/result.json": "b713b57798d25698958f3a9b6a228b63d23057a8392276ab144a04afdda6e7de",
+      "linux-executables/056-application/stderr.log": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "linux-executables/056-application/stdout.log": "172f440344741c6c79e23dae121e466ff6a91cb184b573dd9e2d2e0adb3672a0",
+      "linux-executables/057-question_futures/binary.json": "b5465b0ea36b5556b833db1231eff771f8ed25ec5f56d79e31a3ffd85997a7e2",
+      "linux-executables/057-question_futures/result.json": "9ac79719bc169d68a287cd8d18b22c337673a761177a9f0ad323732ec11133f5",
+      "linux-executables/057-question_futures/stderr.log": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "linux-executables/057-question_futures/stdout.log": "f836806ba69090059d8484c1655c77b8a7dad8d99b66704b5833a7c9028a0782",
+      "linux-executables/058-paint_slots/binary.json": "f0dc544c1a8a3623c501c8ea821d1689c528ccaf555d553be42e04a985b762a8",
+      "linux-executables/058-paint_slots/result.json": "d4c572c28572a02536299a1415bb4fa934ce05858fcbea662517272dfff332b0",
+      "linux-executables/058-paint_slots/stderr.log": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "linux-executables/058-paint_slots/stdout.log": "e6d3b21877c2bb5378dd8c10b05f679670cbe6f506b6b63c79decdf5b297743d",
+      "linux-executables/059-text_geometry/binary.json": "48609c4a1716447480a8b6c36a8e5553fe5e7c9064a5ad173243523d63c1c205",
+      "linux-executables/059-text_geometry/result.json": "3248bac9059d8fc6fc7a146b3534d3d8d35844a07666cfc7608d35d4d8705ce6",
+      "linux-executables/059-text_geometry/stderr.log": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "linux-executables/059-text_geometry/stdout.log": "225eac8eb305b9eede50a64453c524423d2bfc544a8deae4a5274fe13f60b707",
+      "linux-executables/060-source_inbox_reader_gate/binary.json": "034e483d9a7a8175a191b2cd46326af32c58f64fe622aff97dd30c3cca15b4b7",
+      "linux-executables/060-source_inbox_reader_gate/result.json": "6745abade43668d5afcdef7a57f5e7c23caff11e8d488ed80d8da3a69c20224e",
+      "linux-executables/060-source_inbox_reader_gate/stderr.log": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "linux-executables/060-source_inbox_reader_gate/stdout.log": "fdd231e2524484b796735b78d7260df20ca93114449971bb48bb302c4f967701",
+      "linux-executables/061-semantic_metadata/binary.json": "f91abec9da1f2600967ce7ef61b508153fc65c6e496c886818a9524a22df33d2",
+      "linux-executables/061-semantic_metadata/result.json": "50b8ab8d532e4ce421b8191b4297cb0cd57281f26db970d450d98f02aa1d79c9",
+      "linux-executables/061-semantic_metadata/stderr.log": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "linux-executables/061-semantic_metadata/stdout.log": "5ba3ab41ab109d368decf7b022ec094cb1dde9e3a1d86d9cc1483f5392e1dec5",
+      "linux-executables/062-questions/binary.json": "c450206c876570cf0cf9d7514ace11ff44392605a9bb344d2bda07339567d63a",
+      "linux-executables/062-questions/result.json": "8dc479ac6753418d6a668af01cca7351413e1ad7f329b0d75da628cfd09d56e9",
+      "linux-executables/062-questions/stderr.log": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "linux-executables/062-questions/stdout.log": "e5c4e14448fdbde9c3d33e188d1f9c3ed841b5f9bb0c4bf1691ca042679c31b5",
+      "linux-executables/063-intrinsic_text/binary.json": "7407ccbbbe324ee1c11bdcbcd0681ee55a47926da097f8d39e739aae0bd6c4f3",
+      "linux-executables/063-intrinsic_text/result.json": "d5de61d56594a5c46b80544b87ec3699b8e2e942b65644ff9a6a49312443a326",
+      "linux-executables/063-intrinsic_text/stderr.log": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "linux-executables/063-intrinsic_text/stdout.log": "ad04caec42b6addf1934791489d23533fe6930d0098dbdf17d915556bf19c391",
+      "linux-executables/064-projected_sources/binary.json": "2c85c816bc445c1c1abf6f40061175a8487ecae63b29ad49149832882a913e27",
+      "linux-executables/064-projected_sources/result.json": "a7ebd5c74c86432ab350fb0a34054e007a371c33d5c933c65b975114c08fed45",
+      "linux-executables/064-projected_sources/stderr.log": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "linux-executables/064-projected_sources/stdout.log": "77f7de9a7337e16125a4bd482e1710a69e291aaf1dd63b65a869de76186d113d",
+      "linux-executables/065-unit_action_cost/binary.json": "a2e6ba5b3573ece2107ba4c6bba27dda73e3287b84803255fb466828526888e8",
+      "linux-executables/065-unit_action_cost/result.json": "ed0b689f8fedbbb2c2e3f3a0f94ce0561af32333dc3c050c773d0e0f614a68e3",
+      "linux-executables/065-unit_action_cost/stderr.log": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "linux-executables/065-unit_action_cost/stdout.log": "2abf150d19368703236ae4a183c9cfa9c01ae405447b961857beaed176a0937d",
+      "linux-executables/066-components/binary.json": "7a3b2acbd87e12314055f9890fc1e2b83723877482a00f0d17d28e4ddac224ed",
+      "linux-executables/066-components/result.json": "97e63ce9039b29f4bb4fbabbe0fbc51302781740f5267a774dffdbb5d7284037",
+      "linux-executables/066-components/stderr.log": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "linux-executables/066-components/stdout.log": "1f00c00e32db8a3714ff246a8fd7033f5f97610ff0eab75c2ddd0c7fc2d16fca",
+      "linux-executables/067-property_state_shell/binary.json": "c8441082dbd017b171ac399c3a98b728f51581399d3049ce35d5dd902e44c219",
+      "linux-executables/067-property_state_shell/result.json": "2314e66d1a959c5c2a6a0db388618affaf14434f5cc419fce262728e01f96e82",
+      "linux-executables/067-property_state_shell/stderr.log": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "linux-executables/067-property_state_shell/stdout.log": "1eb6c7ea8fb80bf94ef64a89ef4b4081a38bc2ae58b416bc822990e6cd5f2b94",
+      "linux-executables/068-frontier/binary.json": "16fce9729bf7f1974d0f63bb0ea2e912f5914d4a15e8db5bcd553dd650e7897e",
+      "linux-executables/068-frontier/result.json": "c643d749befd54ed72dc281b0897cdd7ff488e5c43b8cfcd28f131ce1d55db78",
+      "linux-executables/068-frontier/stderr.log": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "linux-executables/068-frontier/stdout.log": "5d18f85938bf355dd8ebd5afdc46f44acf3f096737c11e75701e15ddb21ee72b",
+      "linux-executables/069-runtime/binary.json": "9efc008be49b305ca9ab2410273cae3bc8c5ea895aa972672ebff5c83426164e",
+      "linux-executables/069-runtime/result.json": "37951453fe457a46df8a45b906c65a5fdeaf91c8c19a214200f31c8ad52b4d23",
+      "linux-executables/069-runtime/stderr.log": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "linux-executables/069-runtime/stdout.log": "72076ca4bed48cb209b6e543934e89b1d010fa32a826ad430f38ee55a09e2a33",
+      "linux-executables/070-mapped_properties/binary.json": "2eb7e287ae503c0e3d9c9af50f6fd19e2b3006eb6006e009d212064a3f6f6731",
+      "linux-executables/070-mapped_properties/result.json": "c361f20b695098c350ddbffa8a682d95778868958776d57577a6b3140c3f4e43",
+      "linux-executables/070-mapped_properties/stderr.log": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "linux-executables/070-mapped_properties/stdout.log": "9b16d9fbd00c738c9ec72af851ce3df129761b2441fdc2920a423151274a0457",
+      "linux-executables/result.json": "7c1cdecbbb4d01d477ee32d26cdbf241de374c69fd02610db198fa9d071b0cb2",
+      "linux-execute/after.json": "e52d9ac78960146012b6c0b667c65bceab90dcb2f82a5470c97bcb94c31c59f6",
+      "linux-execute/before.json": "e52d9ac78960146012b6c0b667c65bceab90dcb2f82a5470c97bcb94c31c59f6",
+      "linux-execute/command.json": "81a7b0f9caff3c913cd208442c38f819d5312ea7441f3ce22d0a27a2d19076db",
+      "linux-execute/exit": "9a271f2a916b0b6ee6cecb2426f0b3206ef074578be55d9bc94f6f3fe3ab86aa",
+      "linux-execute/result.json": "646129a1a9db077232dda7813433c65620f10ecbebf3de20fb1ef47ef29ff107",
+      "linux-execute/rustc.txt": "2900025046ddf3de47f87dd3d69fbfe380cae61af5fe1ecf31bb89c5f10645c5",
+      "linux-execute/stderr.log": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "linux-execute/stdout.log": "ee79a9a72cbf499c80867e66cee388c7bd8443a26b5731c274cdbdcd0286a60c",
+      "linux-hummingbird/after.json": "6a18a570483e832dfc67cf0393b1decb4a5ca82cfc0fbb2f5311aa51a48838ca",
+      "linux-hummingbird/before.json": "6a18a570483e832dfc67cf0393b1decb4a5ca82cfc0fbb2f5311aa51a48838ca",
+      "linux-hummingbird/command.json": "9c3fe1e6c9ce93e1a31fe808dd067768eb8fee46770ce57d62e7351102a69284",
+      "linux-hummingbird/exit": "9a271f2a916b0b6ee6cecb2426f0b3206ef074578be55d9bc94f6f3fe3ab86aa",
+      "linux-hummingbird/result.json": "282b3a52e53288e2662c4c24af0e0f9685e5425daeec54e3322182f281f7c883",
+      "linux-hummingbird/rustc.txt": "2900025046ddf3de47f87dd3d69fbfe380cae61af5fe1ecf31bb89c5f10645c5",
+      "linux-hummingbird/stderr.log": "411680ccaf3d60edfe4dfd3a9861683d3e32870cb06ac71b81d1560a3b35c69e",
+      "linux-hummingbird/stdout.log": "4c2d43253700cad4c10b977b305950f451628448369b0fdc954fb268abf3c73a",
+      "linux-strict/after.json": "e52d9ac78960146012b6c0b667c65bceab90dcb2f82a5470c97bcb94c31c59f6",
+      "linux-strict/before.json": "e52d9ac78960146012b6c0b667c65bceab90dcb2f82a5470c97bcb94c31c59f6",
+      "linux-strict/command.json": "57cc4d964b2115316547cf9dc11788fecce21013ce3b22250267ba2935e41557",
+      "linux-strict/exit": "9a271f2a916b0b6ee6cecb2426f0b3206ef074578be55d9bc94f6f3fe3ab86aa",
+      "linux-strict/result.json": "646129a1a9db077232dda7813433c65620f10ecbebf3de20fb1ef47ef29ff107",
+      "linux-strict/rustc.txt": "2900025046ddf3de47f87dd3d69fbfe380cae61af5fe1ecf31bb89c5f10645c5",
+      "linux-strict/stderr.log": "af31e9be80a5a72de4f09ace66905922555383626fefbbed0086708409494fee",
+      "linux-strict/stdout.log": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "mac/README.md": "26c34b620af1b80103d12d552d6f03fcb3dc5b6a7d72bdcd71647c835b9b0cf9",
+      "mac/metadata-clippy-delta-receipt.json": "e29e75d2fb8684fb3f1e30881fe6bc27dfa46cb3ddb4b15754be1ce752480272",
+      "mac/metadata-clippy-delta.tar.gz": "87f8a59d6ce59edc55e64d4624aa600336d293a1382711ded9b4ff42cd6aa5f5",
+      "mac/metadata-dedup.tar.gz": "72bd5bc23f34a94a71a4eb8f15c8ec1c450234bc199124ea8b38221d6692a257",
+      "mac/metadata-receipt.json": "5ee352b908dcc6c10b5e358ff82db3381b1a1f7755834bad1989acc1d51bd36b",
+      "mac/retention-handoff.json": "fa50aa64618faf8c061dfcc520766b818a52364af2b91d9bc6004055d78c9df2",
+      "mac/root-independent.json": "b81826a17f2c98c5713ab6c7dc60efcfb2c3c53bc738e358071c244d85ea5baf",
+      "mac/source-archive-receipt.json": "013d362d1e82ee0cab7ba4fc7074f4a63b768ab6bb7ab1d23306fea69e6309ba",
+      "mac/source-manifest.json": "fc3c602ade9c74f77f2eaba672dc07970230e689ee2a4780b5762c5277366978",
+      "mac/verified-final-result.json": "10b9c74e46201ea7dae81a8d1987e2de1ee43b908dd44f7cdd0fecb5d2b434b5",
+      "mac/verify-clippy-delta.py": "8b7857cc71e972906b683e67b6dd776275b1dc07c7426244c1b2e68d9518c575",
+      "mac/verify-metadata.py": "9bed8e673a60278cfc3142ca432d53901c9a85b74a83f1c047cd1fbfce8e5c0f",
+      "original-slice/README.md": "c6065e200cf0a182e7029bc251afc48e8d62ad1f374e33f537989a11698e5a1c"
+    }
+  },
+  "limits": [
+    "Native requested turnover can quarantine until Disabled/window close, including ordinary Latin-source epoch changes.",
+    "Physical AppKit candidate engines, VoiceOver and Windows runtime behavior remain unqualified.",
+    "Actual normalized native contracts do not establish input-to-photon latency or hardware GPU performance.",
+    "The original slice report preserves its older Reader/Remote Darwin failures; all three pass in the exact adopted composition.",
+    "Hummingbird default all-target checking is not completion of the player port.",
+    "71 actual Linux ELFs remain at recorded external local paths; 71 actual Darwin Mach-Os remain at recorded Mac paths."
+  ]
+}

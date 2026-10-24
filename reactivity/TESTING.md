@@ -121,6 +121,23 @@ The input-focus oracle executes 1,000 move/press/release cycles with zero
 allocations and no source, layout or paint work. An activating callback can edit
 sources and prepare output; that oracle does not claim all clicks allocate nothing.
 
+`ImeSession` and `Win::ime_event` use the same scoped protocol as the native
+adapter. Enable binds the focused Source; Preedit changes only display text,
+and Commit performs one ordinary canonical write. `Part::marked_text` reports
+the acknowledged raw mark/cursor intent, while selection and text geometry use
+legal grapheme endpoints. Tests can retain an older presentation, fail a newer
+candidate and acknowledge an older eligible candidate through the ordinary
+scene interface. They check source JSON, exact display bytes, marked ranges,
+geometry and accessibility authority without a shadow editing model. Native
+turnover and its current cancellation-quarantine limit are recorded in the
+[composed IME evidence](evidence/ime-integration/README.md).
+
+The `todo_recording_cost` example runs the unchanged five-framework Todo model
+through ordinary typing, queries, clicks and explicit scene acknowledgement.
+It reports allocations and counters per edit and verifies all final model fields
+at empty, 1,000-row and 10,000-row sizes. Recording excludes native rasterization
+and scanout; its diagnostics do not replace native latency/work gates.
+
 `win.semantics()?.write_json(writer)?` streams a borrowed semantic presentation
 through the same `Part` getters as `visit` and accessibility. `Part` also implements
 Serde `Serialize`, so applications can use their own serializers. The snapshot
