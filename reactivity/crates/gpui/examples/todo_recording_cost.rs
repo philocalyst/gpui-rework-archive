@@ -103,12 +103,30 @@ fn main() -> Result<(), Box<dyn std::error::Error>> {
         checkpoint(&mut win, phase)?;
     }
     let state = serde_json::from_str::<serde_json::Value>(&win.source_json()?)?;
-    assert_eq!(state["todos"].as_array().unwrap().len(), rows + 1);
-    assert_eq!(state["todos"][0]["id"], 0);
-    assert_eq!(state["todos"][0]["done"], true);
-    assert_eq!(state["todos"][rows]["title"], "bench-000");
-    assert_eq!(state["draft"], "");
-    assert!(state["deleted"].is_null());
+    let mut expected_rows = (0..rows)
+        .map(|index| {
+            serde_json::json!({
+                "id": index,
+                "title": format!("Task {:04}", index + 1),
+                "done": index == 0 || index % 3 == 1,
+            })
+        })
+        .collect::<Vec<_>>();
+    expected_rows.push(serde_json::json!({
+        "id": rows,
+        "title": "bench-000",
+        "done": rows == 0,
+    }));
+    assert_eq!(
+        state,
+        serde_json::json!({
+            "todos": expected_rows,
+            "filter": "All",
+            "draft": "",
+            "next_id": rows + 1,
+            "deleted": null,
+        })
+    );
     println!("TODO_RECORDING_VALIDATED,rows={},operations=8", rows + 1);
     measure("close", || {
         win.close();
