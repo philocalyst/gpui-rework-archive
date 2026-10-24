@@ -1264,6 +1264,15 @@ fn optional_cold_compile_overlap() {
                     .as_nanos()
             );
         }
+        eprintln!(
+            "optional_cold_rss_after_first_use,{}",
+            std::fs::read_to_string("/proc/self/status")
+                .unwrap()
+                .lines()
+                .filter(|l| l.starts_with("VmRSS:") || l.starts_with("VmHWM:"))
+                .collect::<Vec<_>>()
+                .join(";")
+        );
     });
 }
 
@@ -1443,5 +1452,87 @@ fn optional_late_preparation_cannot_enter_replacement_context() {
             Err(Error::IncompatibleContext)
         ));
         assert!(replacement.clip_pipeline.is_none());
+    });
+}
+
+#[test]
+fn optional_display_p3_exact_target_bits() {
+    pollster::block_on(async {
+        let frozen = baseline::ui::WGSL_SOURCE.wgsl_source().unwrap();
+        let mut count = 0;
+        for hdr in [false, true] {
+            let cfg = if hdr {
+                ColorConfig::linear_hdr(gpui_canvas::OutputProfile::DisplayP3, 203.).unwrap()
+            } else {
+                ColorConfig {
+                    profile: gpui_canvas::OutputProfile::DisplayP3,
+                    mapping: gpui_canvas::SdrMapping::ReinhardPerChannel { exposure: 1.75 },
+                    ..Default::default()
+                }
+            };
+            let format = if hdr {
+                wgpu::TextureFormat::Rgba16Float
+            } else {
+                wgpu::TextureFormat::Rgba8UnormSrgb
+            };
+            let mut gpu = renderer(format).await;
+            let prepared = gpu
+                .context
+                .clip_acceleration_job()
+                .unwrap()
+                .prepare()
+                .await
+                .unwrap();
+            gpu.install_clip_acceleration(prepared).unwrap();
+            let formats = [
+                wgpu::TextureFormat::Rgba8UnormSrgb,
+                wgpu::TextureFormat::Rgba16Float,
+                wgpu::TextureFormat::Rgba32Float,
+            ];
+            let pipelines = formats.map(|f| {
+                (
+                    make_pipeline(&gpu, &frozen, f),
+                    make_pipeline(&gpu, CACHED_SHADER, f),
+                )
+            });
+            let target = texture(gpu.device(), 32, 24, format);
+            for grouped in [false, true] {
+                gpu.set_grouped_records(grouped);
+                for map in [
+                    Affine::IDENTITY,
+                    Affine {
+                        a: 0.9,
+                        b: 0.125,
+                        c: -0.25,
+                        d: 1.,
+                        tx: 4.,
+                        ty: 0.375,
+                    },
+                ] {
+                    for banked in [false, true] {
+                        let scene = boundary_scene(cfg, map, 8.125, 64, banked);
+                        gpu.render(
+                            scene.prepared_scene(),
+                            &target.create_view(&Default::default()),
+                        )
+                        .unwrap();
+                        for (i, &f) in formats.iter().enumerate() {
+                            let a = draw_pipeline(&gpu, &pipelines[i].0, f, 32, 24);
+                            let b = draw_pipeline(&gpu, &pipelines[i].1, f, 32, 24);
+                            assert_eq!(
+                                a, b,
+                                "DisplayP3 HDR={hdr} grouped={grouped} banked={banked} format={f:?}"
+                            );
+                            if f == format {
+                                assert_eq!(read(&gpu.context, &target), a);
+                            }
+                            count += 1;
+                        }
+                    }
+                }
+            }
+        }
+        eprintln!("optional_display_p3_exact comparisons={count}");
+        assert_eq!(count, 48);
     });
 }
