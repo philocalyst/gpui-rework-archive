@@ -53,7 +53,13 @@ pub(super) fn plan(
     row_height: f64,
     request: Option<ScrollPosition>,
 ) -> Result<ListPlan, ListError> {
-    let viewport = f64::from(style.height.ok_or(ListError::MissingViewport)?);
+    let viewport = f64::from(match style.height {
+        Length::Points(value) => value,
+        Length::Auto => return Err(ListError::MissingViewport),
+        // Materialization precedes containing-block layout. A point viewport
+        // is required until the list planner can consume resolved geometry.
+        Length::Percent(_) => return Err(ListError::UnsupportedStyle),
+    });
     if !row_height.is_finite()
         || !(1.0 / 64.0..f64::from(MAX_COORDINATE)).contains(&row_height)
         || !viewport.is_finite()
@@ -142,7 +148,7 @@ pub(super) fn row_style(
         // Rebased row offsets address this viewport's containing block.
         style.position = cephal::style::Position::Relative;
     }
-    if matches!(kind, NodeKind::List | NodeKind::Scroll) && declared.width.is_none() {
+    if matches!(kind, NodeKind::List | NodeKind::Scroll) && declared.width.is_auto() {
         use cephal::style::Dimension;
         if parent.is_none() {
             style.size.width = Dimension::percent(1.0);
@@ -157,7 +163,7 @@ pub(super) fn row_style(
             x: Overflow::Scroll,
             y: Overflow::Scroll,
         };
-        if declared.height.is_none() {
+        if declared.height.is_auto() {
             if parent.is_none() {
                 style.size.height = Dimension::percent(1.0);
             } else if parent == Some(Flow::Column) {

@@ -1108,6 +1108,14 @@ dependencies = [
 ]
 
 [[package]]
+name = "gpui-component"
+version = "0.1.0"
+dependencies = [
+ "allocation-counter",
+ "gpui",
+]
+
+[[package]]
 name = "gpui_canvas"
 version = "0.1.0"
 dependencies = [

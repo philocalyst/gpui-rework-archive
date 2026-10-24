@@ -754,7 +754,7 @@ fn input_root_survives_wrap_and_font_changes_but_old_run_positions_retire() {
     let mut previous = snapshot(&win, &cohort);
     for change in 0..2 {
         if change == 0 {
-            win.set_property(target, WIDTH, Contribution::Set(Some(75.)))
+            win.set_property(target, WIDTH, Contribution::Set(crate::Length::Points(75.)))
                 .unwrap();
         } else {
             win.set_property(target, FONT_SIZE, Contribution::Set(24.))

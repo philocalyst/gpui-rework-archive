@@ -64,25 +64,34 @@ fn typed_inspection_preserves_presence_and_reveals_updated_component_defaults() 
     let mut window = Win::with_size(Panel { width: 20 }, 100, 40).unwrap();
     assert!(window.snapshot().unwrap().nodes[0].target.is_none());
     let panel = window.inspect().unwrap().nodes[0].target.unwrap();
-    assert_eq!(window.property(panel, WIDTH).unwrap(), Some(20.0));
+    assert_eq!(
+        window.property(panel, WIDTH).unwrap(),
+        gpui::Length::Points(20.0)
+    );
     assert_eq!(
         window.contribution(panel, WIDTH).unwrap(),
         Contribution::Inherit
     );
     window
-        .set_property(panel, WIDTH, Contribution::Set(None))
+        .set_property(panel, WIDTH, Contribution::Set(gpui::Length::Auto))
         .unwrap();
     assert_eq!(
         window.contribution(panel, WIDTH).unwrap(),
-        Contribution::Set(None)
+        Contribution::Set(gpui::Length::Auto)
     );
     window.update(|model| model.width = 64).unwrap();
-    assert_eq!(window.property(panel, WIDTH).unwrap(), None);
+    assert_eq!(window.property(panel, WIDTH).unwrap(), gpui::Length::Auto);
     window
         .set_property(panel, WIDTH, Contribution::Inherit)
         .unwrap();
-    assert_eq!(window.property(panel, WIDTH).unwrap(), Some(64.0));
-    assert_eq!(window.property(panel, HEIGHT).unwrap(), Some(20.0));
+    assert_eq!(
+        window.property(panel, WIDTH).unwrap(),
+        gpui::Length::Points(64.0)
+    );
+    assert_eq!(
+        window.property(panel, HEIGHT).unwrap(),
+        gpui::Length::Points(20.0)
+    );
     assert_eq!(
         window.contribution(panel, WIDTH).unwrap(),
         Contribution::Inherit
@@ -123,18 +132,25 @@ fn invalid_and_foreign_inspector_edits_fail_before_source_admission() {
     let mut window = Win::with_size(Panel { width: 20 }, 100, 40).unwrap();
     let panel = window.inspect().unwrap().nodes[0].target.unwrap();
     assert!(matches!(
-        window.set_property(panel, WIDTH, Contribution::Set(Some(f32::NAN))),
+        window.set_property(
+            panel,
+            WIDTH,
+            Contribution::Set(gpui::Length::Points(f32::NAN))
+        ),
         Err(Error::Property(_))
     ));
     assert_eq!(window.snapshot().unwrap().source_epoch, 0);
-    assert_eq!(window.property(panel, WIDTH).unwrap(), Some(20.0));
+    assert_eq!(
+        window.property(panel, WIDTH).unwrap(),
+        gpui::Length::Points(20.0)
+    );
     assert_eq!(
         window.contribution(panel, WIDTH).unwrap(),
         Contribution::Inherit
     );
     let mut other = Win::with_size(Panel { width: 20 }, 100, 40).unwrap();
     assert_eq!(
-        other.set_property(panel, WIDTH, Contribution::Set(Some(10.0))),
+        other.set_property(panel, WIDTH, Contribution::Set(gpui::Length::Points(10.0))),
         Err(Error::StaleTarget)
     );
     assert_eq!(other.snapshot().unwrap().source_epoch, 0);
@@ -314,20 +330,26 @@ fn actual_inspector_controls_pick_noninteractive_app_shape_and_edit_real_propert
     assert_eq!(win.root().unwrap().clicks, 0);
     win.reset_counters().unwrap();
     click_control(&mut win, "Increase").unwrap();
-    assert_eq!(win.property(target, WIDTH).unwrap(), Some(81.0));
+    assert_eq!(
+        win.property(target, WIDTH).unwrap(),
+        gpui::Length::Points(81.0)
+    );
     assert_eq!(
         win.contribution(target, WIDTH).unwrap(),
-        Contribution::Set(Some(81.0))
+        Contribution::Set(gpui::Length::Points(81.0))
     );
     click_control(&mut win, "Auto").unwrap();
     assert_eq!(
         win.contribution(target, WIDTH).unwrap(),
-        Contribution::Set(None)
+        Contribution::Set(gpui::Length::Auto)
     );
     win.update(|m| m.width = 140).unwrap();
     assert_eq!(card(&win), target);
     click_control(&mut win, "Inherit").unwrap();
-    assert_eq!(win.property(target, WIDTH).unwrap(), Some(140.0));
+    assert_eq!(
+        win.property(target, WIDTH).unwrap(),
+        gpui::Length::Points(140.0)
+    );
     click_control(&mut win, "background").unwrap();
     click_control(&mut win, "Increase").unwrap();
     assert_eq!(
@@ -451,14 +473,23 @@ fn inspector_controls_preserve_exact_bound_sources_and_reveal_latest_masked_base
     win.reset_counters().unwrap();
     click_control(&mut win, "Increase").unwrap();
     win.click(win.button("Update source")).unwrap();
-    assert_eq!(win.property(target, WIDTH).unwrap(), Some(81.0));
+    assert_eq!(
+        win.property(target, WIDTH).unwrap(),
+        gpui::Length::Points(81.0)
+    );
     click_control(&mut win, "Inherit").unwrap();
-    assert_eq!(win.property(target, WIDTH).unwrap(), Some(140.0));
+    assert_eq!(
+        win.property(target, WIDTH).unwrap(),
+        gpui::Length::Points(140.0)
+    );
     assert_eq!(win.counters().owner_reruns, 0);
     assert_eq!(win.counters().descriptions, 0);
     win.resize_scaled([1200, 840], 1.5).unwrap();
     assert_eq!(win.inspector_selected().unwrap(), Some(target));
-    assert_eq!(win.property(target, WIDTH).unwrap(), Some(140.0));
+    assert_eq!(
+        win.property(target, WIDTH).unwrap(),
+        gpui::Length::Points(140.0)
+    );
     assert!(win.bounds(control(&win, "Increase")).unwrap().x > 700.0);
 }
 

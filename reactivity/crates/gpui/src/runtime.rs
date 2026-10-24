@@ -30,7 +30,7 @@ use crate::{
     property::{Contribution, Overrides, Property, PropertyError},
     remote::{Delivery, DeliveryError, Inbox, Lane, LaneSet, Stage},
     source::{BindError, FieldId, SourcePath, Sources, TextCodec, TextEditError},
-    style::{Color, Flow, Style},
+    style::{Color, Flow, Length, Style},
 };
 
 const MAX_NODES: usize = 100_000;
@@ -123,6 +123,7 @@ pub enum Error {
     MissingElement,
     AmbiguousElement { matches: usize },
     UnregisteredInput { node: usize },
+    UnregisteredControl { node: usize },
     DepthLimit { node: usize },
     ResourceLimit,
     EpochExhausted,
@@ -465,6 +466,45 @@ mod parent_tests {
     }
 
     #[test]
+    fn disabled_content_flag_preserves_all_carriers_and_resource_decoding() {
+        assert_eq!(size_of::<Node>(), 24);
+        assert_eq!(size_of::<Presented>(), 64);
+        assert_eq!(size_of::<crate::El<'_>>(), 176);
+        assert_eq!(size_of::<crate::element::DraftNode<'_>>(), 152);
+        for slot in [TextSlot::NONE, TextSlot(0), TextSlot(MAX_NODES as u32 - 1)] {
+            for kind in [
+                NodeKind::Input,
+                NodeKind::Button,
+                NodeKind::CheckBox(false),
+                NodeKind::CheckBox(true),
+            ] {
+                let original = Content::new(kind, slot);
+                for own in [false, true] {
+                    let disabled = original.with_own_disabled(own).with_disabled(true);
+                    assert!(disabled.disabled());
+                    assert_eq!(disabled.own_disabled(), own);
+                    assert_eq!(disabled.kind(), kind);
+                    assert_eq!(disabled.text_slot().0, slot.0);
+                    assert_eq!(
+                        disabled.with_disabled(false).with_own_disabled(false).0,
+                        original.0
+                    );
+                }
+            }
+        }
+        for resource in [0, MAX_NODES as u32 - 1] {
+            for sampling in [crate::ImageSampling::Linear, crate::ImageSampling::Nearest] {
+                let content = Content::image(image::ImageUse { resource, sampling })
+                    .with_own_disabled(true)
+                    .with_disabled(true);
+                let image = content.image_use().unwrap();
+                assert_eq!(image.resource, resource);
+                assert_eq!(image.sampling, sampling);
+            }
+        }
+    }
+
+    #[test]
     fn checkbox_state_preserves_carrier_layouts() {
         macro_rules! carrier {
             ($ty:ty) => {
@@ -574,8 +614,28 @@ impl TextSlot {
 /// including the checkbox state. No Rust enum representation is reinterpreted.
 #[derive(Clone, Copy)]
 struct Content(u32);
-const _: () = assert!(MAX_NODES * 2 <= (u32::MAX >> 4) as usize);
+const _: () = assert!(MAX_NODES * 2 <= (1 << (Content::BITS - 2 - 4)));
 impl Content {
+    const BITS: u32 = 24;
+    const DISABLED: u32 = 1 << 22;
+    const OWN_DISABLED: u32 = 1 << 23;
+    const FLAGS: u32 = Self::DISABLED | Self::OWN_DISABLED;
+    fn with_own_disabled(self, disabled: bool) -> Self {
+        Self((self.0 & !Self::OWN_DISABLED) | (u32::from(disabled) * Self::OWN_DISABLED))
+    }
+    fn own_disabled(self) -> bool {
+        self.0 & Self::OWN_DISABLED != 0
+    }
+    fn with_checked(self, checked: bool) -> Self {
+        assert!(matches!(self.kind(), NodeKind::CheckBox(_)));
+        Self((self.0 & !15) | 8 | u32::from(checked))
+    }
+    fn with_disabled(self, disabled: bool) -> Self {
+        Self((self.0 & !Self::DISABLED) | (u32::from(disabled) * Self::DISABLED))
+    }
+    fn disabled(self) -> bool {
+        self.0 & Self::DISABLED != 0
+    }
     #[inline]
     fn new(kind: NodeKind, text: TextSlot) -> Self {
         let kind = match kind {
@@ -621,7 +681,7 @@ impl Content {
         if self.kind() == NodeKind::Image {
             return TextSlot::NONE;
         }
-        let text = self.0 >> 4;
+        let text = (self.0 & !Self::FLAGS) >> 4;
         TextSlot(if text == 0 { u32::MAX } else { text - 1 })
     }
     fn image(image: image::ImageUse) -> Self {
@@ -630,7 +690,7 @@ impl Content {
         Self(((value + 1) << 4) | 6)
     }
     fn image_use(self) -> Option<image::ImageUse> {
-        let value = self.0 >> 4;
+        let value = (self.0 & !Self::FLAGS) >> 4;
         if self.kind() != NodeKind::Image || value == 0 {
             return None;
         }
@@ -668,10 +728,11 @@ impl Node {
         self.links.handler()
     }
     fn has_handler(&self) -> bool {
-        self.handler_slot().is_some()
+        !self.content.disabled() && self.handler_slot().is_some()
     }
     fn focusable(&self) -> bool {
-        matches!(self.kind(), NodeKind::Input | NodeKind::Button) || self.has_handler()
+        !self.content.disabled()
+            && (matches!(self.kind(), NodeKind::Input | NodeKind::Button) || self.has_handler())
     }
     #[inline]
     fn identity(&self) -> u64 {
@@ -853,9 +914,16 @@ impl Fanout {
         }
     }
     #[inline(never)]
-    fn map(&mut self, draft: crate::style_port::MapDraft<'_>) -> Result<(), Error> {
-        let recipe = draft.operand.recipe()?;
-        let value = draft.operand.scalar()?.admit(draft.property)?;
+    fn map(
+        &mut self,
+        draft: crate::style_port::MapDraft<'_>,
+        colors: &mut styles::ColorDiscovery,
+    ) -> Result<(), Error> {
+        let value = draft.value;
+        let recipe = draft
+            .operand
+            .recipe
+            .lower(|color| colors.literal_code(color))?;
         if let Self::General {
             codec,
             destinations,
@@ -873,7 +941,7 @@ impl Fanout {
             unreachable!()
         };
         mapped.records.push(MappedRecord {
-            destination: Destination::style(draft.node as usize, draft.property),
+            destination: Destination::sink(draft.node as usize, draft.sink),
             recipe,
             color: 0,
         });
@@ -887,13 +955,14 @@ impl Fanout {
         &mut self,
         source: &'a dyn std::any::Any,
         field: FieldId,
+        styles: &styles::Styles,
     ) -> Result<crate::source::Frozen<'a>, Error> {
         let mut needs = crate::source::Needs {
             text: false,
             style: false,
         };
         for destination in self.destinations() {
-            if destination.port() == Port::Style {
+            if destination.target_sink().is_some() {
                 needs.style = true;
             } else {
                 needs.text = true;
@@ -910,17 +979,24 @@ impl Fanout {
         if let Fanout::Mapped(mapped) = self {
             for (record, value) in mapped.records.iter().zip(&mut mapped.values) {
                 *value = record
-                    .recipe
-                    .call(source)
-                    .ok_or(BindError::TypeMismatch(field))?
-                    .admit(record.destination.property().expect("mapped property"))?;
+                    .destination
+                    .target_sink()
+                    .expect("mapped sink")
+                    .admit(
+                        styles.resolve_scalar(
+                            record
+                                .recipe
+                                .call(source)
+                                .ok_or(BindError::TypeMismatch(field))?,
+                        ),
+                    )?;
             }
         }
         // A numeric source may feed width, font size AND text. Reject every bad
         // sink before the first logical destination or inspector base is edited.
         for destination in self.destinations() {
-            if let Some(id) = destination.property() {
-                frozen.style.expect("style codec requested").admit(id)?;
+            if let Some(sink) = destination.target_sink() {
+                sink.admit(frozen.style.expect("scalar codec requested"))?;
             }
         }
         Ok(frozen)
@@ -1056,6 +1132,7 @@ struct Presented {
     basis: geometry::MapBasis,
     bounds: Rect,
     hittable: bool,
+    disabled: bool,
     actions: Actions,
 }
 impl Presented {
@@ -1999,6 +2076,7 @@ impl<M: View + 'static> Runtime<M> {
             nodes: mut drafts,
             viewports: viewport_drafts,
             annotations: annotation_drafts,
+            focus_indicators: focus_drafts,
             images: image_drafts,
             geometry: geometry_drafts,
             backgrounds: background_drafts,
@@ -2121,25 +2199,37 @@ impl<M: View + 'static> Runtime<M> {
                 .validate(&geometry.corner_radius)
                 .map_err(|error| Error::GeometryProperty { node, error })?;
         }
+        let mut color_discovery = styles::ColorDiscovery::default();
         for draft in mapped_ports {
-            if let Some(field) = self.sources.resolve(&self.model, draft.operand.signal)? {
+            let field = self.sources.resolve(&self.model, draft.operand.signal)?;
+            if field.is_none() && draft.sink.property().is_none() {
+                return Err(Error::UnregisteredControl {
+                    node: draft.node as usize,
+                });
+            }
+            if let Some(field) = field {
                 fanout
                     .entry(field)
                     .or_insert_with(|| Fanout::new(TextCodec::for_style::<f64>()))
-                    .map(draft)?;
+                    .map(draft, &mut color_discovery)?;
             }
         }
-        let mut color_discovery = styles::ColorDiscovery::default();
         for draft in style_ports {
-            if let Some(field) = self.sources.resolve(&self.model, draft.signal)? {
+            let field = self.sources.resolve(&self.model, draft.signal)?;
+            if field.is_none() && draft.sink.property().is_none() {
+                return Err(Error::UnregisteredControl {
+                    node: draft.node as usize,
+                });
+            }
+            if let Some(field) = field {
                 use crate::property::PropertyId;
                 if !matches!(fanout.get(&field), Some(Fanout::Mapped(_)))
                     && matches!(
-                        draft.property,
-                        PropertyId::Foreground | PropertyId::Background
+                        draft.sink.property(),
+                        Some(PropertyId::Foreground | PropertyId::Background)
                     )
                 {
-                    let foreground = draft.property == PropertyId::Foreground;
+                    let foreground = draft.sink.property() == Some(PropertyId::Foreground);
                     let style = drafts[draft.node as usize].style;
                     color_discovery.register(field, if foreground { style.fg } else { style.bg });
                 }
@@ -2151,7 +2241,7 @@ impl<M: View + 'static> Runtime<M> {
                 }
                 entry
                     .destinations_mut()
-                    .push(Destination::style(draft.node as usize, draft.property));
+                    .push(Destination::sink(draft.node as usize, draft.sink));
             }
         }
         let mut annotation_fields = Vec::with_capacity(annotation_drafts.len());
@@ -2261,6 +2351,8 @@ impl<M: View + 'static> Runtime<M> {
         let mut background_cursor = background_drafts.iter().peekable();
         for (index, draft) in drafts.into_iter().enumerate() {
             let parent = draft.parent.map(|parent| parent as usize);
+            let disabled =
+                draft.disabled || parent.is_some_and(|parent| nodes[parent].content.disabled());
             // Only a boundary can change ownership. Reminting that root also
             // prevents descendant reuse: every match includes parent identity.
             let component_scope = draft.components.scope().unwrap_or(0);
@@ -2391,7 +2483,7 @@ impl<M: View + 'static> Runtime<M> {
                 self.dirty = true;
                 node_changed = true;
             }
-            if node.kind() != draft.kind {
+            if node.kind() != draft.kind || node.content.disabled() != disabled {
                 // State belongs to the next presentation, not the mount identity.
                 self.dirty = true;
                 node_changed = true;
@@ -2450,7 +2542,7 @@ impl<M: View + 'static> Runtime<M> {
             {
                 site.shaped = None;
             }
-            if node.has_handler() != draft.on_click.is_some() {
+            if node.has_handler() != (!disabled && draft.on_click.is_some()) {
                 // Eligibility is part of the published hit sheet even when
                 // this transparent site's pixels and layout remain equal.
                 self.dirty = true;
@@ -2487,7 +2579,9 @@ impl<M: View + 'static> Runtime<M> {
                 Content::image(image)
             } else {
                 Content::new(draft.kind, text_slot)
-            };
+            }
+            .with_own_disabled(draft.disabled)
+            .with_disabled(disabled);
             if property_changed == Some(node.identity) {
                 node_changed = true;
                 property_changed = None;
@@ -2574,7 +2668,11 @@ impl<M: View + 'static> Runtime<M> {
                 }),
             );
         }
-        if !annotation_drafts.is_empty() || !viewports.is_empty() || self.metadata.is_some() {
+        if !annotation_drafts.is_empty()
+            || !focus_drafts.is_empty()
+            || !viewports.is_empty()
+            || self.metadata.is_some()
+        {
             let metadata = self
                 .metadata
                 .get_or_insert_with(|| Box::new(Metadata::default()));
@@ -2583,6 +2681,17 @@ impl<M: View + 'static> Runtime<M> {
                     .iter()
                     .filter(|a| a.text.name.is_some() || a.text.description.is_some())
                     .count(),
+            );
+            let focus_changed = metadata.focus_indicators.len() != focus_drafts.len()
+                || focus_drafts.iter().any(|&(node, color)| {
+                    metadata.focus_indicator(nodes[node].identity()) != Some(color)
+                });
+            self.dirty |= focus_changed;
+            metadata.focus_indicators.clear();
+            metadata.focus_indicators.extend(
+                focus_drafts
+                    .into_iter()
+                    .map(|(node, color)| (nodes[node].identity(), color)),
             );
             for (annotation, fields) in annotation_drafts.into_iter().zip(annotation_fields) {
                 let identity = nodes[annotation.node as usize].identity();
@@ -2633,6 +2742,9 @@ impl<M: View + 'static> Runtime<M> {
                     });
                 }
             }
+            metadata
+                .focus_indicators
+                .sort_unstable_by_key(|entry| entry.0);
             base.sort_unstable_by_key(|entry| entry.identity);
             metadata.base = base;
         }
@@ -2715,17 +2827,45 @@ impl<M: View + 'static> Runtime<M> {
             return Ok(PatchOutcome::Visual);
         };
         self.counters.source_reads += 1;
-        let frozen = fanout.freeze(self.sources.signal(&self.model, field)?.as_any(), field)?;
+        let frozen = fanout.freeze(
+            self.sources.signal(&self.model, field)?.as_any(),
+            field,
+            &self.styles,
+        )?;
         let mut promoted: Option<SharedText> = None;
         let mut semantic = false;
         let mut visual_changed = false;
+        let mut disabled_changed = false;
         let mut last_changed = None;
         for (destination, mapped_value, color) in fanout.all_destinations() {
             self.counters.destination_compares += 1;
             let index = destination.node();
             let node = &self.nodes[index];
             let identity = node.identity();
-            let changed = if let Some(id) = destination.property() {
+            let changed = if let Some(control) = destination.control() {
+                let crate::property::PropertyValue::Flag(value) =
+                    mapped_value.unwrap_or_else(|| match frozen.style {
+                        Some(crate::style_port::Scalar::Value(value)) => value,
+                        _ => unreachable!("admitted bool source"),
+                    })
+                else {
+                    unreachable!("admitted bool sink");
+                };
+                let before = node.content;
+                let after = if control == crate::style_port::Sink::CHECKED {
+                    before.with_checked(value)
+                } else {
+                    before.with_own_disabled(value)
+                };
+                let changed = before.0 != after.0;
+                if changed {
+                    self.nodes[index].content = after;
+                    self.dirty = true;
+                    visual_changed = true;
+                    disabled_changed |= control == crate::style_port::Sink::DISABLED;
+                }
+                changed
+            } else if let Some(id) = destination.property() {
                 let value = match mapped_value {
                     Some(value) => value,
                     None => frozen.style.expect("style codec requested").admit(id)?,
@@ -2834,6 +2974,18 @@ impl<M: View + 'static> Runtime<M> {
                 return Ok(PatchOutcome::Complete);
             }
             self.dirty = visual_changed;
+        }
+        if disabled_changed {
+            for index in 0..self.nodes.len() {
+                let node = &self.nodes[index];
+                let disabled = node.content.own_disabled()
+                    || node
+                        .parent()
+                        .index()
+                        .is_some_and(|parent| self.nodes[parent].content.disabled());
+                self.nodes[index].content = node.content.with_disabled(disabled);
+            }
+            self.prune_focus();
         }
         Ok(if semantic && !visual_changed {
             PatchOutcome::Metadata
@@ -3492,6 +3644,24 @@ impl<M: View + 'static> Runtime<M> {
             } else {
                 None
             };
+            if paint
+                && self.focused.and_then(|target| self.sites.resolve(target))
+                    == Some(node.identity())
+                && let Some(color) = self
+                    .metadata
+                    .as_deref()
+                    .and_then(|m| m.focus_indicator(node.identity()))
+            {
+                let inset = radius.max(2.0).min(rect.width * 0.25);
+                let width = (rect.width - inset * 2.0).max(0.0);
+                let height = 2.0_f32.min(rect.height);
+                scene.fill_rect(
+                    Rect::new(rect.x + inset, rect.y + rect.height - height, width, height),
+                    transform.ok_or(Error::Canvas(gpui_canvas::Error::InvalidGeometry))?,
+                    clip,
+                    color,
+                )?;
+            }
             if paint && let Some(image) = node.content.image_use() {
                 let resource = self.images.as_ref().unwrap().get(image);
                 scene.draw_image_with(
@@ -3558,8 +3728,13 @@ impl<M: View + 'static> Runtime<M> {
                 basis,
                 bounds,
                 hittable,
-                actions: Actions::for_node(node.kind(), node.has_handler())
-                    .scroll_into_view(inherited.membership != 0 || parent_is_viewport),
+                disabled: node.content.disabled(),
+                actions: if node.content.disabled() {
+                    Actions::default()
+                } else {
+                    Actions::for_node(node.kind(), node.has_handler())
+                        .scroll_into_view(inherited.membership != 0 || parent_is_viewport)
+                },
             });
             #[cfg(feature = "accessibility")]
             if let Some(observation) = &mut observation {
@@ -3729,6 +3904,7 @@ impl<M: View + 'static> Runtime<M> {
         while let Some(index) = cursor {
             let node = &sheet.nodes[index];
             if let Some(logical) = self.by_identity.get(node.identity)
+                && !self.nodes[logical].content.disabled()
                 && (self.nodes[logical].has_handler() || node.kind == NodeKind::Input)
             {
                 return Some(node.identity);
@@ -3770,11 +3946,18 @@ fn layout_style(style: &Style) -> cephal::Style {
     use cephal::style::{
         AlignItems, Dimension, Display, FlexDirection, FlexWrap, JustifyContent, LengthPercentage,
     };
+    fn dimension(length: Length) -> Dimension {
+        match length {
+            Length::Auto => Dimension::AUTO,
+            Length::Points(value) => Dimension::length(value),
+            Length::Percent(value) => Dimension::percent(value / 100.0),
+        }
+    }
     cephal::Style {
         display: Display::Flex,
         size: Size {
-            width: style.width.map_or(Dimension::AUTO, Dimension::length),
-            height: style.height.map_or(Dimension::AUTO, Dimension::length),
+            width: dimension(style.width),
+            height: dimension(style.height),
         },
         padding: cephal::Rect::splat(LengthPercentage::length(style.padding)),
         gap: Size {
@@ -4898,7 +5081,7 @@ mod style_port_tests {
             win.set_property(
                 target,
                 crate::property::WIDTH,
-                Contribution::Set(Some(30.0)),
+                Contribution::Set(crate::Length::Points(30.0)),
             )
             .unwrap();
             let before = win.runtime().unwrap().styles.get(index).to_owned();
@@ -4926,7 +5109,7 @@ mod style_port_tests {
                     Contribution::Inherit,
                 )
                 .unwrap();
-            assert_eq!(lower.width, Some(24.0));
+            assert_eq!(lower.width, Length::Points(24.0));
         }
     }
     #[test]

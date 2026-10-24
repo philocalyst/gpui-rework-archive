@@ -128,7 +128,7 @@ impl Script {
                 let target = owner.button("Library button");
                 assert_eq!(
                     owner.property_value(target, PropertyId::Width).unwrap(),
-                    PropertyValue::Dimension(Some(120.))
+                    PropertyValue::Dimension(crate::Length::Points(120.))
                 );
                 self.enter("193.25");
             }
@@ -137,7 +137,7 @@ impl Script {
                 let target = owner.button("Library button");
                 assert_eq!(
                     owner.property_value(target, PropertyId::Width).unwrap(),
-                    PropertyValue::Dimension(Some(193.25))
+                    PropertyValue::Dimension(crate::Length::Points(193.25))
                 );
                 assert_eq!(
                     owner.root().unwrap().editor.status,
@@ -152,7 +152,11 @@ impl Script {
             7 => self.apply(event_loop),
             8 => {
                 assert_eq!(&**owner.root().unwrap().editor.draft, "bad syntax");
-                assert!(owner.contains_text("Expected a number").unwrap());
+                assert!(
+                    owner
+                        .contains_text("Expected auto, points or a percentage")
+                        .unwrap()
+                );
                 self.enter("211.75");
             }
             9 => self.apply(event_loop),
@@ -160,7 +164,7 @@ impl Script {
                 let target = owner.button("Library button");
                 assert_eq!(
                     owner.property_value(target, PropertyId::Width).unwrap(),
-                    PropertyValue::Dimension(Some(211.75))
+                    PropertyValue::Dimension(crate::Length::Points(211.75))
                 );
                 owner.update(|m| m.show_application = false).unwrap();
             }
