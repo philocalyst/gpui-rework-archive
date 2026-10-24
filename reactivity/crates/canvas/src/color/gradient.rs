@@ -286,7 +286,8 @@ fn prepare_interval(
     let mut left = left_color.coordinates;
     let mut right = right_color.coordinates;
     let mut polar = false;
-    if let Interpolation::Oklch { hue } = mode {
+    if let Interpolation::Oklch { hue: _ } = mode {
+        let hue = HueInterpolation::Shorter;
         if left[1] <= 0.000004 {
             left[2] = right[2];
         }
