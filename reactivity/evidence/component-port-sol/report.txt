@@ -1,0 +1,131 @@
+Reusable component foundation port, Halloween edition
+
+Qualified source commit: f275e88c32dbe50cc1633e57919c210ba8db0e25
+Base: 7d7353c27d5fe60170516bfae0ed3711feefcc5b
+Worktree: /root/gpui-component-port-sol-20261024
+Branch: codex/component-port-sol-20261024
+Build-input aggregate: 25afb0bca04f0637d0669ff9b9ffb8c8da3ecc6d6c054e5e74e93a4b4eb7ffdd (2077 files)
+Evidence-only seal follows the qualified source; its commit was not compiled.
+Reference: https://github.com/gpui-ce/gpui-component at c08206932417f863062d2ab70cc2854c6ca04238.
+NOTICE and Apache license preserve attribution. This is a new architecture port,
+not source-compatible coverage of the entire reference library. The complete
+81-reference-module inventory names unsupported functionality individually.
+
+Reusable public API
+
+The crate depends downward on ordinary gpui interfaces. Its modules provide
+Button, controlled Checkbox, editable Input, Label, textual Badge, Field,
+Theme, shared sizes/layout helpers, and concrete FnOnce Recipe composition.
+No production Rc/Cell/RefCell, property TypeId registry or macros were added.
+The unchanged closed14 typed property catalog remains the deliberate runtime
+inspector boundary; arbitrary component/schema/theme reflection is not claimed.
+
+Example ordinary public syntax:
+  Button::new("Finish invitation", &theme)
+      .on_click(default_finish).on_click(app_finish)
+      .style(|element| element.w(180))
+      .build()
+  Checkbox::new("Hang the lanterns", checked, &theme)
+      .toggle(Self::LANTERNS).on_change(Self::app_lanterns)
+      .parts(|parts| parts.indicator(|element| element.rounded(4)))
+      .build()
+  Input::new(&name_signal, "Guest name", &theme)
+      .parts(|parts| parts.frame(|element| element.w(320)))
+      .build()
+These are illustrative method combinations; the compiled exact application and
+ordinary external tests are in crates/component/examples and tests/contracts.rs.
+The last on_click/on_change owns one activation route. Recipes refine actual
+Els immediately, retain no callbacks, and accept typed named compound parts.
+Theme snapshots belong to the app. Halloween uses semantic Oklch palette tokens.
+
+Core semantic contracts
+
+A checkbox remains one real controlled semantic CheckBox, now with named-part
+children. Disabled is packed Content bit22 (Content::BITS23); it inherits across
+named descendants and revokes logical activation, focus, text editing and old
+presentation authority immediately. Physical handler-slot membership remains
+separate so callback retirement/re-enable are correct. Part.disabled reflects
+acknowledged state. Serialized semantics and native AccessKit expose disabled.
+The final no-op reconcile compares semantic route eligibility and produces no
+spurious changed-node count for disabled descriptions retaining a callback.
+
+The opt-in focus_indicator draws an inset underline with existing transformed,
+clipped rectangle geometry. Focus transitions damage old/new indicators and
+obey preparation/ACK. Rounded outlines are future shared graphics work.
+ControlAppearance uses the existing56B ElementExtra envelope: a stock rounded
+Button with focus is one56B allocation. Optional annotations share that record;
+there is no extra per-ControlAppearance box or new per-node header.
+
+Validation
+
+The broad composed gpui+component lib/integration gate passed651 tests across72
+binaries (10 ignored) at e8a26e07f83a2d230446e1f189454a47d79751a4; subsequent
+small app/inspector/no-op changes were checked by final core179 unit tests
+(5 ignored),10 optimized external component contracts,4 compile-fail doctests,
+native x11 build, and component all-target clippy -D warnings. gpui26 doctests
+also passed. Gate records preserve before/after source hashes for every attempt.
+Final native and release Cargo JSON show fresh artifacts against final hashes.
+Source no-op guards matched through the final artifact check.
+
+External contracts prove default behavior replaced exactly once, controlled
+checkbox keyboard/pointer/disabled semantics, typed named-part refinements,
+Set(default)/Inherit/latest lower source precedence, invalid typed/cold edits,
+contained-owner identity retirement, focused disabled-input revocation, failed
+newer prepare with older eligible ACK, disabled child-route rejection, and the
+actual inspector composition. Compile-fails cover wrong input state, forged
+selector, wrong width type and nonexistent part. Existing allocation ledgers
+are unchanged. The original checkbox-child rejection test was intentionally
+replaced by the new compound semantic contract.
+
+Preserved rejected gates include FnOnce closure inference, a real MissingGlyph
+for a Unicode check (replaced by geometric strokes), a header-growing annotation
+design which failed8 existing allocation ledgers (redesigned), the superseded
+child-rejection test, and lint failures. Native early-event smoke captures had
+no initial acknowledged frame; they correctly lacked interaction authority and
+are retained as rejected evidence rather than presented as successful input.
+
+Actual native evidence
+
+native-draft.png, native-focus.png and native-ready.png are unaltered captures
+of the actual 840x542 X11 application, ReferenceCpu renderer on private Xvfb.
+The capture waits for ordinary on_presented feedback after initial mount and
+every input: S0/P0 through S7/P7. Pointer activation, Space, Enter, Tab, Tab,
+Enter reach the final Ready to share state. This demonstrates real control
+composition, app-owned behavior, inspector mounting and visible focus.
+The same Party model produces headless.png and the semantic JSON.
+No hardware GPU, physical display or native AT-SPI client roundtrip is claimed.
+The native AccessKit adapter compiles; ordinary semantic/action gates are tested.
+
+Shipping costs and limits
+
+core_lines.py counts35120 lines in the7 shipping core libraries (+268 versus
+34852), separately595 in the reusable component library. Tests/examples/tools,
+evidence/vendors/comments are excluded; library build scripts are charged.
+No new production thirdparty dependency beyond the existing gpui closure.
+Resolved normal/build closure:73 packages headless,226 native including local
+crates; the lock diff is only the new gpui-component package. Dependency lists,
+whole ELF hashes/section sizes and named-symbol attribution are included.
+Named-symbol bytes omit inlining and shared helpers and are not a complete
+marginal-code estimate. Whole native dev and optimized headless artifacts use
+different profiles and are not performance comparisons.
+
+Measured headers: Style88, El176, DraftNode152, Node24, Presented64 unchanged;
+ElementExtra56 and Annotations48 unchanged. Metadata264->288 (+24 one owner
+Vec header), focus record24B. Button184, Checkbox544, Input360 are transient
+builder sizes; Theme192. Stock Button:1 allocation/56B. Party description:
+32 allocations/5713 requested/5633 retained bytes. A window with warmed fonts:
+1000 allocations/319981 requested/89931 retained, excluding lazy CPU/native
+framebuffers and prewarmed font state. These are workload allocation counts,
+not total native RSS. Counters and exact workload source accompany the logs.
+Fresh bounded4-job builds took50.642s release headless examples and145.606s
+native dev(debug0) on a contended host; no compile-performance comparison.
+
+Remaining scope is explicit: no overlays/select/menu/dock/table/tree, switch,
+radio or slider facades; no fake controls. Badge is a textual status subset,
+not the reference count/dot/icon overlay. Input lacks the reference full rich
+editor/validation/clear/masking API. Theme is a borrowed app snapshot, without
+an extra theme cascade. The natural-size fixture has no fill-parent support:
+resize can expose the window clear and the headless fixture has a narrow edge.
+A separate typed relative Length slice is planned to address that shared core
+layout limitation rather than patching only this app. This seal does not
+include that slice and must be reviewed/integrated independently.

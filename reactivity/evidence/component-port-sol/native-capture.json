@@ -1,0 +1,23 @@
+{
+  "binary": "/root/targets/component-port-sol-native-20261024/debug/examples/halloween",
+  "binary_sha256": "fcf86b3d4f46de52bcf3460c3957f63318279fd9304bcf4b5bcc4aa1a9b3eef2",
+  "window": "2097154",
+  "display": ":0",
+  "renderer": "ReferenceCpu",
+  "screenshots": [
+    "draft",
+    "focus",
+    "ready"
+  ],
+  "events": [
+    "pointer lanterns",
+    "Space",
+    "Enter",
+    "Tab",
+    "Tab",
+    "Enter"
+  ],
+  "final_acknowledged_epoch": 7,
+  "process_live_after_events": true,
+  "limitation": "Xvfb software display; no hardware GPU or physical display claim"
+}

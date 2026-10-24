@@ -1,0 +1,57 @@
+[
+  {
+    "profile": "native",
+    "artifacts": [
+      {
+        "package_id": "path+file:///root/gpui-component-port-sol-20261024/reactivity/crates/gpui#0.1.0",
+        "target": "gpui",
+        "kind": [
+          "lib"
+        ],
+        "fresh": true,
+        "executable": null
+      },
+      {
+        "package_id": "path+file:///root/gpui-component-port-sol-20261024/reactivity/crates/component#gpui-component@0.1.0",
+        "target": "halloween",
+        "kind": [
+          "example"
+        ],
+        "fresh": true,
+        "executable": "/root/targets/component-port-sol-native-20261024/debug/examples/halloween"
+      }
+    ]
+  },
+  {
+    "profile": "release",
+    "artifacts": [
+      {
+        "package_id": "path+file:///root/gpui-component-port-sol-20261024/reactivity/crates/gpui#0.1.0",
+        "target": "gpui",
+        "kind": [
+          "lib"
+        ],
+        "fresh": true,
+        "executable": null
+      },
+      {
+        "package_id": "path+file:///root/gpui-component-port-sol-20261024/reactivity/crates/component#gpui-component@0.1.0",
+        "target": "halloween",
+        "kind": [
+          "example"
+        ],
+        "fresh": true,
+        "executable": "/root/targets/component-port-sol-release-20261024/release/examples/halloween"
+      },
+      {
+        "package_id": "path+file:///root/gpui-component-port-sol-20261024/reactivity/crates/component#gpui-component@0.1.0",
+        "target": "costs",
+        "kind": [
+          "example"
+        ],
+        "fresh": true,
+        "executable": "/root/targets/component-port-sol-release-20261024/release/examples/costs"
+      }
+    ]
+  }
+]

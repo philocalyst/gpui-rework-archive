@@ -1,0 +1,14 @@
+
+running 1 test
+Node=24 Presented=64 El=176 Draft=152 Text=24 ListRow=32 Fanout=32 Dest=4 destination_capacity=4 destination_capacity_bytes=16 Metadata=288 Declared=24 TextSlot=16 Sheet=96 Row=24 ListInfo=16
+Extra=56 Annotations=48 ListSpec=48 AnnotationDraft=56
+element,absent,allocations=0,bytes=0
+element,semantic,allocations=1,bytes=56
+element,list,allocations=1,bytes=56
+element,combined,allocations=2,bytes=104
+element,component_named=false,allocations=3,bytes=88
+element,component_named=true,allocations=4,bytes=144
+test runtime::semantic_storage_ledger::sparse_metadata_storage_and_cold_allocation_ledger ... ok
+
+test result: ok. 1 passed; 0 failed; 0 ignored; 0 measured; 183 filtered out; finished in 0.00s
+

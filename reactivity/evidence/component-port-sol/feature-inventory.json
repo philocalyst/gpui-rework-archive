@@ -1,0 +1,422 @@
+{
+  "reference_repository": "https://github.com/gpui-ce/gpui-component",
+  "reference_revision": "c08206932417f863062d2ab70cc2854c6ca04238",
+  "scope": "Initial reusable foundation/control subset; not a drop-in source-compatible or all-components port.",
+  "reference_module_count": 81,
+  "modules": [
+    {
+      "reference_module": "component_traits",
+      "status": "unported",
+      "detail": "Not implemented in this port."
+    },
+    {
+      "reference_module": "element_ext",
+      "status": "adapted",
+      "detail": "Core ordinary borrowed El composition; subset helpers only, no compatibility extension traits."
+    },
+    {
+      "reference_module": "global_state",
+      "status": "unported",
+      "detail": "Not implemented in this port."
+    },
+    {
+      "reference_module": "icon",
+      "status": "unported",
+      "detail": "Not implemented in this port."
+    },
+    {
+      "reference_module": "index_path",
+      "status": "unported",
+      "detail": "Not implemented in this port."
+    },
+    {
+      "reference_module": "inspector",
+      "status": "runtime_reused",
+      "detail": "Existing Win/Window inspector used by actual application; closed14 typed style catalog remains explicit."
+    },
+    {
+      "reference_module": "root",
+      "status": "runtime_reused",
+      "detail": "Exclusive Win root and contained Component<P,C> owner projections; no Entity/Root plugin architecture."
+    },
+    {
+      "reference_module": "sizing",
+      "status": "partial",
+      "detail": "Shared XSmall/Small/Medium/Large tokens used by Button/Input; not all reference sizing traits."
+    },
+    {
+      "reference_module": "styled",
+      "status": "adapted",
+      "detail": "Ordinary El typed property builders + concrete FnOnce recipes; no duplicate per-control property catalog."
+    },
+    {
+      "reference_module": "time",
+      "status": "unported",
+      "detail": "Not implemented in this port."
+    },
+    {
+      "reference_module": "title_bar",
+      "status": "unported",
+      "detail": "Not implemented in this port."
+    },
+    {
+      "reference_module": "touch_selection",
+      "status": "unported",
+      "detail": "Not implemented in this port."
+    },
+    {
+      "reference_module": "virtual_list",
+      "status": "runtime_only",
+      "detail": "Existing runtime uniform_list remains available; no reference virtualization facade port."
+    },
+    {
+      "reference_module": "window_border",
+      "status": "unported",
+      "detail": "Not implemented in this port."
+    },
+    {
+      "reference_module": "window_ext",
+      "status": "unported",
+      "detail": "Not implemented in this port."
+    },
+    {
+      "reference_module": "accordion",
+      "status": "unported",
+      "detail": "Not implemented in this port."
+    },
+    {
+      "reference_module": "alert",
+      "status": "unported",
+      "detail": "Not implemented in this port."
+    },
+    {
+      "reference_module": "attachment",
+      "status": "unported",
+      "detail": "Not implemented in this port."
+    },
+    {
+      "reference_module": "avatar",
+      "status": "unported",
+      "detail": "Not implemented in this port."
+    },
+    {
+      "reference_module": "badge",
+      "status": "different_subset",
+      "detail": "Textual status badge; reference count/dot/icon overlay Badge contracts are not implemented."
+    },
+    {
+      "reference_module": "breadcrumb",
+      "status": "unported",
+      "detail": "Not implemented in this port."
+    },
+    {
+      "reference_module": "bubble",
+      "status": "unported",
+      "detail": "Not implemented in this port."
+    },
+    {
+      "reference_module": "button",
+      "status": "partial",
+      "detail": "Reusable command Button; sizes, semantic variants, disabled/focus, one replaceable activation route. ButtonGroup, dropdown, toggle/loading/tooltip compatibility APIs unported."
+    },
+    {
+      "reference_module": "carousel",
+      "status": "unported",
+      "detail": "Not implemented in this port."
+    },
+    {
+      "reference_module": "chart",
+      "status": "unported",
+      "detail": "Not implemented in this port."
+    },
+    {
+      "reference_module": "checkbox",
+      "status": "partial",
+      "detail": "Controlled binary Checkbox, explicit root/indicator/label parts, default Source<bool> toggle replaceable by owner intent callback. No mixed/indeterminate or legacy API compatibility."
+    },
+    {
+      "reference_module": "clipboard",
+      "status": "unported",
+      "detail": "Not implemented in this port."
+    },
+    {
+      "reference_module": "collapsible",
+      "status": "unported",
+      "detail": "Not implemented in this port."
+    },
+    {
+      "reference_module": "color_picker",
+      "status": "unported",
+      "detail": "Not implemented in this port."
+    },
+    {
+      "reference_module": "combobox",
+      "status": "unported",
+      "detail": "Not implemented in this port."
+    },
+    {
+      "reference_module": "command",
+      "status": "unported",
+      "detail": "Not implemented in this port."
+    },
+    {
+      "reference_module": "description_list",
+      "status": "unported",
+      "detail": "Not implemented in this port."
+    },
+    {
+      "reference_module": "dialog",
+      "status": "unported",
+      "detail": "Not implemented in this port."
+    },
+    {
+      "reference_module": "dock",
+      "status": "unported",
+      "detail": "Not implemented in this port."
+    },
+    {
+      "reference_module": "empty",
+      "status": "unported",
+      "detail": "Not implemented in this port."
+    },
+    {
+      "reference_module": "form",
+      "status": "partial",
+      "detail": "Explicit Field label/control/help/error composition. No form engine or implicit descendant discovery."
+    },
+    {
+      "reference_module": "group_box",
+      "status": "unported",
+      "detail": "Not implemented in this port."
+    },
+    {
+      "reference_module": "highlighter",
+      "status": "unported",
+      "detail": "Not implemented in this port."
+    },
+    {
+      "reference_module": "history",
+      "status": "unported",
+      "detail": "Not implemented in this port."
+    },
+    {
+      "reference_module": "hover_card",
+      "status": "unported",
+      "detail": "Not implemented in this port."
+    },
+    {
+      "reference_module": "input",
+      "status": "partial",
+      "detail": "Single-line writable Signal<String>, accessible name/description, disabled editing, frame/control parts, validation presentation. No password, mask, textarea/editor/number/OTP/autocomplete/context menu facades; IME is a separate lane."
+    },
+    {
+      "reference_module": "kbd",
+      "status": "unported",
+      "detail": "Not implemented in this port."
+    },
+    {
+      "reference_module": "label",
+      "status": "partial",
+      "detail": "Primary/secondary borrowed text and explicit instance recipe. No mask or highlight matching."
+    },
+    {
+      "reference_module": "link",
+      "status": "unported",
+      "detail": "Not implemented in this port."
+    },
+    {
+      "reference_module": "list",
+      "status": "unported",
+      "detail": "Not implemented in this port."
+    },
+    {
+      "reference_module": "marker",
+      "status": "unported",
+      "detail": "Not implemented in this port."
+    },
+    {
+      "reference_module": "menu",
+      "status": "unported",
+      "detail": "Not implemented in this port."
+    },
+    {
+      "reference_module": "message",
+      "status": "unported",
+      "detail": "Not implemented in this port."
+    },
+    {
+      "reference_module": "message_scroller",
+      "status": "unported",
+      "detail": "Not implemented in this port."
+    },
+    {
+      "reference_module": "native_menu",
+      "status": "unported",
+      "detail": "Not implemented in this port."
+    },
+    {
+      "reference_module": "notification",
+      "status": "unported",
+      "detail": "Not implemented in this port."
+    },
+    {
+      "reference_module": "pagination",
+      "status": "unported",
+      "detail": "Not implemented in this port."
+    },
+    {
+      "reference_module": "plot",
+      "status": "unported",
+      "detail": "Not implemented in this port."
+    },
+    {
+      "reference_module": "popover",
+      "status": "unported",
+      "detail": "Not implemented in this port."
+    },
+    {
+      "reference_module": "progress",
+      "status": "unported",
+      "detail": "Not implemented in this port."
+    },
+    {
+      "reference_module": "questionnaire",
+      "status": "unported",
+      "detail": "Not implemented in this port."
+    },
+    {
+      "reference_module": "radio",
+      "status": "unported",
+      "detail": "Not implemented in this port."
+    },
+    {
+      "reference_module": "rating",
+      "status": "unported",
+      "detail": "Not implemented in this port."
+    },
+    {
+      "reference_module": "resizable",
+      "status": "unported",
+      "detail": "Not implemented in this port."
+    },
+    {
+      "reference_module": "scroll",
+      "status": "runtime_only",
+      "detail": "Existing runtime scroll interfaces remain available; no styled Scrollbar family port."
+    },
+    {
+      "reference_module": "searchable_list",
+      "status": "unported",
+      "detail": "Not implemented in this port."
+    },
+    {
+      "reference_module": "select",
+      "status": "unported",
+      "detail": "Not implemented in this port."
+    },
+    {
+      "reference_module": "separator",
+      "status": "unported",
+      "detail": "Not implemented in this port."
+    },
+    {
+      "reference_module": "setting",
+      "status": "unported",
+      "detail": "Not implemented in this port."
+    },
+    {
+      "reference_module": "sheet",
+      "status": "unported",
+      "detail": "Not implemented in this port."
+    },
+    {
+      "reference_module": "shimmer",
+      "status": "unported",
+      "detail": "Not implemented in this port."
+    },
+    {
+      "reference_module": "sidebar",
+      "status": "unported",
+      "detail": "Not implemented in this port."
+    },
+    {
+      "reference_module": "skeleton",
+      "status": "unported",
+      "detail": "Not implemented in this port."
+    },
+    {
+      "reference_module": "slider",
+      "status": "unported",
+      "detail": "Not implemented in this port."
+    },
+    {
+      "reference_module": "spinner",
+      "status": "unported",
+      "detail": "Not implemented in this port."
+    },
+    {
+      "reference_module": "status_bar",
+      "status": "unported",
+      "detail": "Not implemented in this port."
+    },
+    {
+      "reference_module": "stepper",
+      "status": "unported",
+      "detail": "Not implemented in this port."
+    },
+    {
+      "reference_module": "switch",
+      "status": "unported",
+      "detail": "Not implemented in this port."
+    },
+    {
+      "reference_module": "tab",
+      "status": "unported",
+      "detail": "Not implemented in this port."
+    },
+    {
+      "reference_module": "table",
+      "status": "unported",
+      "detail": "Not implemented in this port."
+    },
+    {
+      "reference_module": "tag",
+      "status": "unported",
+      "detail": "Not implemented in this port."
+    },
+    {
+      "reference_module": "text",
+      "status": "unported",
+      "detail": "Not implemented in this port."
+    },
+    {
+      "reference_module": "theme",
+      "status": "partial",
+      "detail": "Application-owned semantic Oklch light/Halloween palettes, radius/font/spacing/size scales; static borrowed recipes. No global Theme compatibility surface, typography family catalog, shadows, motion or generic inspector theme schema."
+    },
+    {
+      "reference_module": "toolbar",
+      "status": "unported",
+      "detail": "Not implemented in this port."
+    },
+    {
+      "reference_module": "tooltip",
+      "status": "unported",
+      "detail": "Not implemented in this port."
+    },
+    {
+      "reference_module": "tree",
+      "status": "unported",
+      "detail": "Not implemented in this port."
+    }
+  ],
+  "new_modules": [
+    "recipe",
+    "layout"
+  ],
+  "boundaries": {
+    "style_reflection": "Existing closed14 typed properties only. El.disabled/focus_indicator and semantic Part.disabled are explicit separate APIs.",
+    "ordinary_use": "Macro-free concrete borrowed builders and FnOnce recipes. Erased PropertyValue remains at the existing deliberate inspector boundary.",
+    "ownership": "App-owned Signals and exclusive Win; builders borrow Theme. No new production Rc, Cell, RefCell, dynamic schema registry, per-control reflection table or TypeId map."
+  }
+}
