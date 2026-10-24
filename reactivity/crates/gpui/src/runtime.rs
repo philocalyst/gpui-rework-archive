@@ -57,6 +57,7 @@ mod scroll;
 mod turn;
 use list::{ListRow, ListState, ScrollRequest};
 use scroll::{ViewportKey, ViewportState};
+mod background;
 mod geometry;
 mod metadata;
 pub(crate) mod paint;
@@ -94,6 +95,7 @@ pub enum Error {
     OwnerPanicked,
     PresentationPanicked,
     StaleTarget,
+    StaleResource,
     PresentationStale,
     InvalidScale,
     ZeroInboxCapacity,
@@ -1116,7 +1118,7 @@ struct Runtime<M> {
     nodes: Vec<Node>,
     styles: styles::Styles,
     texts: Vec<Option<TextSite>>,
-    images: Option<Box<image::Images>>,
+    images: Option<Box<image::SceneResources>>,
     by_identity: IdentityIndex,
     fanout: BTreeMap<FieldId, Fanout>,
     next_identity: u64,
@@ -1710,6 +1712,7 @@ impl<M: View + 'static, L: LaneSet<M>> Win<M, L> {
             (self, target),
             |(win, target), property| win.style_property(target, property),
             |(win, target), property| win.geometry_property(target, property),
+            |(win, target), property| win.paint_property(target, property),
         )
     }
     pub fn contribution<T, D: crate::property::PropertyDomain>(
@@ -1722,6 +1725,7 @@ impl<M: View + 'static, L: LaneSet<M>> Win<M, L> {
             (self, target),
             |(win, target), property| win.style_contribution(target, property),
             |(win, target), property| win.geometry_contribution(target, property),
+            |(win, target), property| win.paint_contribution(target, property),
         )
     }
     pub fn set_property<T: PartialEq, D: crate::property::PropertyDomain>(
@@ -1968,6 +1972,7 @@ impl<M: View + 'static> Runtime<M> {
             annotations: annotation_drafts,
             images: image_drafts,
             geometry: geometry_drafts,
+            backgrounds: background_drafts,
             style_ports,
             mapped_ports,
         } = inspector::description(
@@ -2213,6 +2218,7 @@ impl<M: View + 'static> Runtime<M> {
             Vec::with_capacity(drafts.iter().filter(|draft| draft.text.is_some()).count());
         let mut ordinals = vec![0u32; drafts.len() + 1];
         let mut changed = 0;
+        let mut background_cursor = background_drafts.iter().peekable();
         for (index, draft) in drafts.into_iter().enumerate() {
             let parent = draft.parent.map(|parent| parent as usize);
             let ordinal_slot = parent.map_or(0, |parent| parent + 1);
@@ -2266,6 +2272,29 @@ impl<M: View + 'static> Runtime<M> {
                 self.dirty = true;
             }
             let mut node_changed = previous.is_none();
+            let next_background = if background_cursor
+                .peek()
+                .is_some_and(|entry| entry.0 == index)
+            {
+                Some(background_cursor.next().unwrap().1.key())
+            } else {
+                None
+            };
+            let previous_background = self
+                .images
+                .as_deref()
+                .and_then(|r| r.backgrounds.as_deref())
+                .and_then(|b| {
+                    previous
+                        .as_ref()
+                        .and_then(|node| b.declared.get(&node.identity()))
+                })
+                .copied();
+            if next_background != previous_background {
+                node_changed = true;
+                self.dirty = true;
+            }
+
             let mut node = if let Some(node) = previous {
                 node
             } else {
@@ -2375,7 +2404,7 @@ impl<M: View + 'static> Runtime<M> {
                 Contribution::Set(_)
             )) | (u8::from(matches!(
                 self.overrides
-                    .get(node.identity(), crate::property::BACKGROUND),
+                    .contribution(node.identity(), crate::property::PropertyId::Background),
                 Contribution::Set(_)
             )) << 1);
             styles.declaration(index, draft.style, style, mask);
@@ -2541,6 +2570,18 @@ impl<M: View + 'static> Runtime<M> {
             base.sort_unstable_by_key(|entry| entry.identity);
             metadata.base = base;
         }
+        let by_identity = IdentityIndex::from_ids(nodes.iter().map(Node::identity));
+        // Enter the material bank only for declared paint or an existing cold
+        // override/resource arm. Plain descriptions never take its stack frame.
+        if !background_drafts.is_empty()
+            || self
+                .images
+                .as_ref()
+                .is_some_and(|resources| resources.backgrounds.is_some())
+        {
+            self.dirty |=
+                background::reconcile(&mut self.images, &nodes, &by_identity, background_drafts)?;
+        }
         self.reconcile_geometry(&nodes, geometry_drafts);
         self.viewports = viewports;
         self.list_rows = list_rows;
@@ -2552,7 +2593,7 @@ impl<M: View + 'static> Runtime<M> {
         self.dirty |= matches!(self.styles, styles::Styles::Colors(_));
         self.texts = texts;
         self.fanout = fanout;
-        self.by_identity = IdentityIndex::from_ids(self.nodes.iter().map(Node::identity));
+        self.by_identity = by_identity;
         self.overrides
             .retain(|identity| self.by_identity.contains(identity));
         if let Some(metadata) = &mut self.metadata {
@@ -2622,7 +2663,8 @@ impl<M: View + 'static> Runtime<M> {
                     None => frozen.style.expect("style codec requested").admit(id)?,
                 };
                 let changed = match id.info().destination {
-                    crate::property::PropertyDestination::Style => {
+                    crate::property::PropertyDestination::Style
+                    | crate::property::PropertyDestination::Paint => {
                         let before = self.styles.get(index);
                         let after = self.overrides.update_base(identity, before, id, value)?;
                         let changed = !styles::exact_eq(&before, &after);
@@ -2788,7 +2830,6 @@ impl<M: View + 'static> Runtime<M> {
         if self.latest_token != Some(token) {
             return Err(Error::StalePresentation);
         }
-        image::acknowledge(&mut self.images, token.sequence);
         let prepared = self.prepared.take();
         let newly_presented = prepared.is_some() || !self.presentation_valid;
         if let Some(prepared) = prepared {
@@ -3017,11 +3058,6 @@ impl<M: View + 'static> Runtime<M> {
         let mut published: Vec<Parent> = Vec::with_capacity(list_capacity);
         let mut visible_rows = BTreeSet::new();
         let mut metadata_sheet = self.metadata_sheet();
-        let image_leases = self
-            .images
-            .as_ref()
-            .map(|images| images.candidate())
-            .transpose()?;
         let viewport_geometry = if list_mode {
             scroll::geometry(self, &mut spaces, &mut published)?
         } else {
@@ -3150,7 +3186,31 @@ impl<M: View + 'static> Runtime<M> {
                 raw_bounds.intersection(viewport)
             };
             let paint = !in_scroll || !bounds.is_empty();
-            if paint && style.bg.alpha() > 0.0 {
+            let gradient = self
+                .images
+                .as_deref()
+                .and_then(|r| r.backgrounds.as_deref())
+                .and_then(|b| {
+                    b.gradient(
+                        node.identity(),
+                        matches!(
+                            self.overrides.contribution(
+                                node.identity(),
+                                crate::property::PropertyId::Background,
+                            ),
+                            Contribution::Set(_)
+                        ),
+                    )
+                });
+            if paint && let Some(gradient) = gradient {
+                scene.fill_gradient(
+                    gradient,
+                    rect,
+                    radius,
+                    transform.ok_or(Error::Canvas(gpui_canvas::Error::InvalidGeometry))?,
+                    clip,
+                )?;
+            } else if paint && style.bg.alpha() > 0.0 {
                 let transform =
                     transform.ok_or(Error::Canvas(gpui_canvas::Error::InvalidGeometry))?;
                 if let Some((value, cache)) = self.styles.shared_paint(index, false) {
@@ -3316,6 +3376,7 @@ impl<M: View + 'static> Runtime<M> {
             let hittable = !bounds.is_empty()
                 && (node.text_slot().0 != u32::MAX
                     || style.bg.alpha() > 0.0
+                    || gradient.is_some_and(|g| g.view().has_visible_stop())
                     || node.handler.is_some()
                     || matches!(node.kind(), NodeKind::Input | NodeKind::Image));
             let link = PresentedLink::new(
@@ -3473,9 +3534,6 @@ impl<M: View + 'static> Runtime<M> {
                 .get_or_insert_with(Default::default)
                 .prepare(column);
         }
-        if let Some(leases) = image_leases {
-            self.images.as_mut().unwrap().prepare(sequence, leases);
-        }
         self.styles.clear_slot_transition();
         if let Some(editing) = self.metadata.as_mut().and_then(|m| m.editing.as_mut()) {
             editing.candidate = selection_snapshot;
@@ -3614,6 +3672,9 @@ impl<M> Runtime<M> {
             crate::property::PropertyDestination::Style => {
                 self.styles.with(index, |style| id.value(style))?
             }
+            crate::property::PropertyDestination::Paint => {
+                crate::property::PropertyValue::Brush(self.background(index))
+            }
             crate::property::PropertyDestination::Geometry => id.value(
                 &self
                     .metadata
@@ -3632,6 +3693,7 @@ impl<M> Runtime<M> {
             crate::property::PropertyDestination::Style => {
                 self.overrides.contribution(identity, id)
             }
+            crate::property::PropertyDestination::Paint => self.background_contribution(identity),
             crate::property::PropertyDestination::Geometry => self
                 .metadata
                 .as_ref()
@@ -3695,6 +3757,7 @@ impl<M: View + 'static, L: LaneSet<M>> RuntimeMut<'_, M, L> {
         let changed = match id.info().destination {
             PropertyDestination::Style => self.set_style_value(index, id, contribution)?,
             PropertyDestination::Geometry => self.set_geometry_value(index, id, contribution)?,
+            PropertyDestination::Paint => self.set_background_value(index, contribution)?,
         };
         Ok(changed.then_some(self.nodes[index].identity))
     }
@@ -5101,7 +5164,7 @@ mod mapped_qualification {
         win.set_property(
             target,
             crate::property::BACKGROUND,
-            crate::property::Contribution::Set(Color::WHITE),
+            crate::property::Contribution::Set(crate::Brush::Solid(Color::WHITE)),
         )
         .unwrap();
         let before = win.runtime().unwrap().styles.get(1);
@@ -5124,10 +5187,10 @@ mod mapped_qualification {
         let identity = runtime.nodes[1].identity();
         let lower = runtime
             .overrides
-            .set(
+            .set_value(
                 identity,
                 before,
-                crate::property::BACKGROUND,
+                crate::property::PropertyId::Background,
                 crate::property::Contribution::Inherit,
             )
             .unwrap();
@@ -5222,5 +5285,63 @@ mod mapped_qualification {
             cost.count_total, cost.bytes_total, cost.bytes_current, cost.bytes_max
         );
         assert_eq!(cost.count_total, 0);
+    }
+}
+#[cfg(test)]
+mod ordinary_background_allocation_audit {
+    use super::*;
+    #[test]
+    fn ordinary_background_allocation_first_warm_equal_clear() {
+        use crate::property::{PropertyId, PropertyValue};
+        struct Plain;
+        impl View for Plain {
+            fn view(&self) -> crate::El<'_> {
+                crate::div().size(16).bg(Color::BLACK).name("plain")
+            }
+        }
+        let mut win = Win::with_size(Plain, 16, 16).unwrap();
+        let target = win.query().name("plain").one().unwrap();
+        assert!(win.runtime().unwrap().images.is_none());
+        for (phase, contribution) in [
+            (
+                "first",
+                Contribution::Set(PropertyValue::Color(Color::WHITE)),
+            ),
+            (
+                "warm",
+                Contribution::Set(PropertyValue::Color(Color::BLACK)),
+            ),
+            (
+                "equal",
+                Contribution::Set(PropertyValue::Color(Color::BLACK)),
+            ),
+            ("inherit", Contribution::Inherit),
+        ] {
+            let cost = allocation_counter::measure(|| {
+                win.set_property_value(target, PropertyId::Background, contribution)
+                    .unwrap();
+            });
+            let runtime = win.runtime().unwrap();
+            assert!(
+                runtime.images.is_none(),
+                "a solid contribution has no resource authority"
+            );
+            let style_capacity = match &runtime.styles {
+                styles::Styles::Dense(values) => values.capacity() * size_of::<Style>(),
+                _ => 0,
+            };
+            eprintln!(
+                "ordinary_background_audit,phase={phase},allocs={},requested={},retained_delta={},peak_delta={},images_present={},style_dense_bytes={style_capacity},contribution={:?}",
+                cost.count_total,
+                cost.bytes_total,
+                cost.bytes_current,
+                cost.bytes_max,
+                runtime.images.is_some(),
+                runtime.property_contribution_at(
+                    runtime.resolve(target).unwrap(),
+                    PropertyId::Background
+                )
+            );
+        }
     }
 }

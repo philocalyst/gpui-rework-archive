@@ -35,7 +35,7 @@ impl ValueEntry {
                 "{}, {}, {}, {}, {}, {}",
                 value.a, value.b, value.c, value.d, value.tx, value.ty
             ),
-            PropertyValue::Color(color) => {
+            PropertyValue::Color(color) | PropertyValue::Brush(gpui::Brush::Solid(color)) => {
                 let [a, b, c, d] = color.channels();
                 format!("{a}, {b}, {c}, {d}")
             }
@@ -57,7 +57,7 @@ impl ValueEntry {
                 let [a, b, c, d, tx, ty] = numbers(source)?;
                 PropertyValue::Transform(Affine { a, b, c, d, tx, ty })
             }
-            PropertyValue::Color(color) => {
+            PropertyValue::Color(color) | PropertyValue::Brush(gpui::Brush::Solid(color)) => {
                 let [r, g, b, alpha] = numbers(source)?;
                 let color = match color.space() {
                     ColorSpace::Srgb => Color::srgb(r, g, b, alpha),
@@ -67,7 +67,11 @@ impl ValueEntry {
                     ColorSpace::Oklch => Color::oklch(r, g, b, alpha),
                 }
                 .map_err(|_| "Invalid authored color")?;
-                PropertyValue::Color(color)
+                if matches!(previous, PropertyValue::Brush(_)) {
+                    PropertyValue::Brush(gpui::Brush::Solid(color))
+                } else {
+                    PropertyValue::Color(color)
+                }
             }
             _ => return Err("This editor accepts numeric, color and transform values"),
         };

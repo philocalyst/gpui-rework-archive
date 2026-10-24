@@ -47,14 +47,18 @@ fn source_and_typed_inspector_keep_tag_bits_and_rejected_edits_atomic() {
     for color in colors {
         win.set(Swatch::COLOR, color).unwrap();
         assert_eq!(bits(*win.root().unwrap().color), bits(color));
-        let value = win.property(site, BACKGROUND).unwrap();
+        let value = win.property(site, BACKGROUND).unwrap().solid().unwrap();
         assert_eq!(value.space(), color.space());
         assert_eq!(bits(value), bits(color));
-        win.set_property(site, BACKGROUND, Contribution::Set(Color::WHITE))
-            .unwrap();
+        win.set_property(
+            site,
+            BACKGROUND,
+            Contribution::Set(gpui::Brush::Solid(Color::WHITE)),
+        )
+        .unwrap();
         win.set_property(site, BACKGROUND, Contribution::Inherit)
             .unwrap();
-        let restored = win.property(site, BACKGROUND).unwrap();
+        let restored = win.property(site, BACKGROUND).unwrap().solid().unwrap();
         assert_eq!(bits(restored), bits(color));
         assert_eq!(restored.space(), color.space());
     }
@@ -74,7 +78,11 @@ fn source_and_typed_inspector_keep_tag_bits_and_rejected_edits_atomic() {
         assert_eq!(win.scene_digest().unwrap(), digest);
     }
     assert_eq!(
-        win.property(site, BACKGROUND).unwrap().space(),
+        win.property(site, BACKGROUND)
+            .unwrap()
+            .solid()
+            .unwrap()
+            .space(),
         ColorSpace::Oklch
     );
 }

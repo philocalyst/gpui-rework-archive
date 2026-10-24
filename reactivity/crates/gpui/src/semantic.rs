@@ -50,6 +50,7 @@ pub(crate) struct ExtraParts<'a> {
     pub geometry: Option<crate::property::GeometryStyle>,
     pub bindings: Vec<crate::style_port::Binding<'a>>,
     pub mapped: Vec<crate::style_port::MapBinding<'a>>,
+    pub background: Option<&'a gpui_canvas::Gradient>,
 }
 #[derive(Default)]
 pub(crate) struct Decorations<'a> {
@@ -68,6 +69,7 @@ pub(crate) enum ElementExtra<'a> {
     // Only mapped nodes pay for this payload; one normalized optional base.
     Mapped {
         bindings: Vec<crate::style_port::MapBinding<'a>>,
+        background: Option<&'a gpui_canvas::Gradient>,
         base: Option<Box<ElementExtra<'a>>>,
     },
     Decorations(Decorations<'a>),
@@ -126,8 +128,15 @@ impl<'a> ElementExtra<'a> {
         decorations
     }
     pub fn empty(&self) -> bool {
-        if let Self::Mapped { bindings, base } = self {
-            return bindings.is_empty() && base.as_deref().is_none_or(Self::empty);
+        if let Self::Mapped {
+            bindings,
+            base,
+            background,
+        } = self
+        {
+            return bindings.is_empty()
+                && background.is_none()
+                && base.as_deref().is_none_or(Self::empty);
         }
         matches!(self, Self::Decorations(d) if d.base.is_none() && d.bindings.is_empty()
             && d.semantic.is_none() && d.geometry.corner_radius.to_bits() == 0 && d.axes.is_none())
@@ -140,6 +149,7 @@ impl<'a> ElementExtra<'a> {
         if let Self::Mapped {
             bindings,
             base: Some(base),
+            ..
         } = self
             && !bindings.iter().any(|binding| binding.property == property)
         {
@@ -156,8 +166,13 @@ impl<'a> ElementExtra<'a> {
             return;
         }
         self.unbind(property);
-        if let Self::Mapped { bindings, base } = self
+        if let Self::Mapped {
+            bindings,
+            base,
+            background,
+        } = self
             && bindings.is_empty()
+            && background.is_none()
         {
             *self = base
                 .take()
@@ -201,6 +216,7 @@ impl<'a> ElementExtra<'a> {
             };
             *self = Self::Mapped {
                 bindings: Vec::new(),
+                background: None,
                 base,
             };
         }
@@ -214,7 +230,15 @@ impl<'a> ElementExtra<'a> {
         bindings.push(crate::style_port::MapBinding { property, operand });
     }
     pub fn unbind(&mut self, property: crate::property::PropertyId) {
-        if let Self::Mapped { bindings, base } = self {
+        if let Self::Mapped {
+            bindings,
+            base,
+            background,
+        } = self
+        {
+            if property == crate::property::PropertyId::Background {
+                *background = None;
+            }
             bindings.retain(|binding| binding.property != property);
             if bindings.is_empty() {
                 *bindings = Vec::new();
@@ -230,6 +254,29 @@ impl<'a> ElementExtra<'a> {
                 d.bindings = Vec::new();
             }
         }
+    }
+    pub fn clear_background(&mut self) {
+        if let Self::Mapped { background, .. } = self {
+            *background = None;
+        }
+    }
+    pub fn set_background(&mut self, gradient: &'a gpui_canvas::Gradient) {
+        self.unbind(crate::property::PropertyId::Background);
+        if !matches!(self, Self::Mapped { .. }) {
+            let previous = std::mem::replace(self, Self::Semantic(Annotations::default()));
+            let base = (!previous.empty()
+                && !matches!(&previous,Self::Semantic(s) if s.is_empty()))
+            .then(|| Box::new(previous));
+            *self = Self::Mapped {
+                bindings: Vec::new(),
+                background: None,
+                base,
+            };
+        }
+        let Self::Mapped { background, .. } = self else {
+            unreachable!()
+        };
+        *background = Some(gradient);
     }
     pub fn set_geometry(&mut self, value: crate::property::GeometryStyle) {
         match self {
@@ -319,8 +366,13 @@ impl<'a> ElementExtra<'a> {
         let mut parts = ExtraParts::default();
         loop {
             match self {
-                Self::Mapped { bindings, base } => {
+                Self::Mapped {
+                    bindings,
+                    base,
+                    background,
+                } => {
                     parts.mapped = bindings;
+                    parts.background = background;
                     if let Some(base) = base {
                         self = *base;
                         continue;

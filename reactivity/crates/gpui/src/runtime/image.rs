@@ -8,28 +8,16 @@ pub(super) struct ImageUse {
     pub sampling: ImageSampling,
 }
 #[derive(Default)]
-pub(super) struct Images {
+pub(super) struct SceneResources {
     pub logical: Vec<Image>,
-    presented: Vec<Image>,
-    pending: Option<(NonZeroU64, Vec<Image>)>,
+    pub backgrounds: Option<Box<super::background::Backgrounds>>,
 }
-impl Images {
+impl SceneResources {
     fn unused(&self) -> bool {
-        self.logical.is_empty() && self.presented.is_empty() && self.pending.is_none()
+        self.logical.is_empty() && self.backgrounds.as_ref().is_none_or(|b| b.unused())
     }
     pub(super) fn get(&self, image: ImageUse) -> &Image {
         &self.logical[image.resource as usize]
-    }
-    pub(super) fn candidate(&self) -> Result<Vec<Image>, Error> {
-        let mut leases = Vec::new();
-        leases
-            .try_reserve_exact(self.logical.len())
-            .map_err(|_| Error::ResourceLimit)?;
-        leases.extend(self.logical.iter().cloned());
-        Ok(leases)
-    }
-    pub(super) fn prepare(&mut self, sequence: NonZeroU64, leases: Vec<Image>) {
-        self.pending = Some((sequence, leases));
     }
 }
 pub(super) fn describe(
@@ -66,7 +54,7 @@ pub(super) fn describe(
     }
     Ok((resources, nodes))
 }
-pub(super) fn reconcile(current: &mut Option<Box<Images>>, resources: Vec<Image>) {
+pub(super) fn reconcile(current: &mut Option<Box<SceneResources>>, resources: Vec<Image>) {
     if !resources.is_empty() && current.is_none() {
         *current = Some(Box::default());
     }
@@ -75,19 +63,8 @@ pub(super) fn reconcile(current: &mut Option<Box<Images>>, resources: Vec<Image>
     }
     prune(current);
 }
-pub(super) fn acknowledge(current: &mut Option<Box<Images>>, sequence: NonZeroU64) {
-    if let Some(current) = current
-        && current
-            .pending
-            .as_ref()
-            .is_some_and(|(pending, _)| *pending == sequence)
-    {
-        current.presented = current.pending.take().unwrap().1;
-    }
-    prune(current);
-}
-fn prune(current: &mut Option<Box<Images>>) {
-    if current.as_deref().is_some_and(Images::unused) {
+pub(super) fn prune(current: &mut Option<Box<SceneResources>>) {
+    if current.as_deref().is_some_and(SceneResources::unused) {
         *current = None;
     }
 }
@@ -147,7 +124,7 @@ mod tests {
         println!(
             "Image={} ImageState={} Runtime={} Node={} Presented={} El={} Draft={} Style={} Canvas={}",
             size_of::<Image>(),
-            size_of::<Images>(),
+            size_of::<SceneResources>(),
             size_of::<Runtime<Page>>(),
             size_of::<Node>(),
             size_of::<Presented>(),
@@ -159,12 +136,15 @@ mod tests {
         assert!(runtime.text.is_none());
         assert!(runtime.texts.is_empty());
         assert_eq!(runtime.images.as_ref().unwrap().logical.len(), 1);
-        assert_eq!(runtime.images.as_ref().unwrap().presented.len(), 1);
+        assert_eq!(
+            win.with_scene(|scene, _| scene.images().count()).unwrap(),
+            1
+        );
     }
     #[test]
     fn exact_image_cohort_leases_survive_failed_newer_candidate_loss_and_removal() {
         let first = cover(17);
-        let first_key = first.key();
+        let _first_key = first.key();
         let mut win = Win::recording(
             Page {
                 cover: Some(first),
@@ -182,6 +162,7 @@ mod tests {
         let second_key = second.key();
         win.update(|page| page.cover = Some(second)).unwrap();
         let second_token = win.with_scene(|_, token| token).unwrap();
+        let second_pixels = win.runtime_mut().unwrap().canvas.pixels().to_vec();
         let third = cover(219);
         let third_key = third.key();
         assert!(
@@ -191,37 +172,45 @@ mod tests {
             })
             .is_err()
         );
-        {
-            let runtime = win.runtime().unwrap();
-            let images = runtime.images.as_ref().unwrap();
-            assert_eq!(images.logical[0].key(), third_key);
-            assert_eq!(images.presented[0].key(), first_key);
-            assert_eq!(images.pending.as_ref().unwrap().1[0].key(), second_key);
-            assert_eq!(images.pending.as_ref().unwrap().0, second_token.sequence);
-        }
+        assert_eq!(
+            win.runtime().unwrap().images.as_ref().unwrap().logical[0].key(),
+            third_key
+        );
+        assert_eq!(
+            win.with_scene(|scene, _| scene.images().next().unwrap().key())
+                .unwrap(),
+            second_key
+        );
+        assert_eq!(win.presented(token), Err(Error::StalePresentation));
+        assert_eq!(win.runtime_mut().unwrap().canvas.pixels(), second_pixels);
         win.presented(second_token).unwrap();
         win.presentation_lost().unwrap();
         assert_eq!(
-            win.runtime().unwrap().images.as_ref().unwrap().presented[0].key(),
+            win.with_scene(|scene, _| scene.images().next().unwrap().key())
+                .unwrap(),
             second_key
         );
         win.update(|page| page.bad = false).unwrap();
         let third_token = win.with_scene(|_, token| token).unwrap();
+        assert_ne!(win.runtime_mut().unwrap().canvas.pixels(), second_pixels);
         assert_eq!(
-            win.runtime().unwrap().images.as_ref().unwrap().presented[0].key(),
-            second_key
+            win.with_scene(|scene, _| scene.images().next().unwrap().key())
+                .unwrap(),
+            third_key
         );
         win.presented(third_token).unwrap();
         assert_eq!(
-            win.runtime().unwrap().images.as_ref().unwrap().presented[0].key(),
+            win.with_scene(|scene, _| scene.images().next().unwrap().key())
+                .unwrap(),
             third_key
         );
         win.update(|page| page.cover = None).unwrap();
         let removed = win.with_scene(|_, token| token).unwrap();
         assert_eq!(
-            win.runtime().unwrap().images.as_ref().unwrap().presented[0].key(),
-            third_key
+            win.with_scene(|scene, _| scene.images().count()).unwrap(),
+            0
         );
+        assert_eq!(win.presented(third_token), Err(Error::StalePresentation));
         win.presented(removed).unwrap();
         assert!(win.runtime().unwrap().images.is_none());
         assert_eq!(

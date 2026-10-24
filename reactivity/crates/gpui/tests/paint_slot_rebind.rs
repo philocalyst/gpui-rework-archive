@@ -74,6 +74,8 @@ fn equal_coarse_description_rebinds_the_complete_canvas_before_exact_color_edits
         assert!(
             win.property(target, BACKGROUND)
                 .unwrap()
+                .solid()
+                .unwrap()
                 .same_authoring(Color::WHITE)
         );
         assert_eq!(

@@ -809,7 +809,7 @@ fn pending_complete_coverage_noop_preserves_exact_consumer_transition() {
                 win.set_property(
                     target,
                     crate::property::BACKGROUND,
-                    Contribution::Set(crate::Color::WHITE),
+                    Contribution::Set(crate::Brush::Solid(crate::Color::WHITE)),
                 )
                 .unwrap();
             }

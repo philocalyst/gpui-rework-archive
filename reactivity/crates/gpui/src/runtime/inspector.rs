@@ -194,11 +194,15 @@ fn panel(height: f32, property: PropertyId) -> El<'static> {
 fn components(kind: ValueKind) -> u8 {
     match kind {
         ValueKind::Transform => 6,
-        ValueKind::Color => 4,
+        ValueKind::Color | ValueKind::Brush => 4,
         _ => 1,
     }
 }
 fn component_name(value: PropertyValue, component: u8) -> &'static str {
+    let value = match value {
+        PropertyValue::Brush(crate::Brush::Solid(c)) => PropertyValue::Color(c),
+        value => value,
+    };
     match value {
         PropertyValue::Transform(_) => ["a", "b", "c", "d", "tx", "ty"][component as usize],
         PropertyValue::Color(color) if color.space() == crate::ColorSpace::Oklch => {
@@ -208,10 +212,25 @@ fn component_name(value: PropertyValue, component: u8) -> &'static str {
         _ => "value",
     }
 }
-struct EditorValue(PropertyValue, u8);
+struct EditorValue(
+    PropertyValue,
+    u8,
+    Option<(&'static str, usize, crate::Extend)>,
+);
 impl fmt::Display for EditorValue {
     fn fmt(&self, output: &mut fmt::Formatter<'_>) -> fmt::Result {
-        match self.0 {
+        let value = match self.0 {
+            PropertyValue::Brush(crate::Brush::Solid(c)) => PropertyValue::Color(c),
+            value => value,
+        };
+        match value {
+            PropertyValue::Brush(crate::Brush::Gradient(_)) => {
+                let (kind, stops, extend) = self.2.expect("admitted gradient summary");
+                write!(
+                    output,
+                    "{kind}, {stops} stops, {extend:?}, LinearSrgb (read only)"
+                )
+            }
             PropertyValue::Color(color) => write!(
                 output,
                 "{:?} {}={:?}",
@@ -242,7 +261,21 @@ fn cycle<T: Copy + Eq>(current: T, values: &[T], direction: f32) -> T {
 fn adjust(value: PropertyValue, component: u8, direction: f32) -> Result<PropertyValue, Error> {
     use crate::{Align, ColorSpace, Flow, Justify};
     use PropertyValue::*;
+    if let PropertyValue::Brush(brush) = value {
+        return match brush {
+            crate::Brush::Solid(color) => {
+                match adjust(PropertyValue::Color(color), component, direction)? {
+                    PropertyValue::Color(color) => {
+                        Ok(PropertyValue::Brush(crate::Brush::Solid(color)))
+                    }
+                    _ => unreachable!(),
+                }
+            }
+            crate::Brush::Gradient(_) => Ok(value), // immutable resource summary; only Inherit edits it
+        };
+    }
     Ok(match value {
+        Brush(_) => unreachable!(),
         Dimension(value) => Dimension(Some(value.unwrap_or(0.) + direction)),
         Number(value) => Number(value + direction),
         Flag(_) => Flag(direction > 0.),
@@ -432,6 +465,22 @@ impl<M: View + 'static> Runtime<M> {
                 )?;
             }
             let value = self.property_value_at(index, property)?;
+            let gradient_summary = if let PropertyValue::Brush(crate::Brush::Gradient(key)) = value
+            {
+                self.backgrounds()
+                    .and_then(|b| b.resources.get(&key))
+                    .map(|gradient| {
+                        let view = gradient.view();
+                        let kind = match view.geometry() {
+                            crate::GradientGeometry::Linear { .. } => "Linear",
+                            crate::GradientGeometry::Radial { .. } => "Radial",
+                            crate::GradientGeometry::Conic { .. } => "Conic",
+                        };
+                        (kind, view.stop_count(), view.extend())
+                    })
+            } else {
+                None
+            };
             if let Some(reason) = rejected {
                 self.refresh_caption(
                     panel,
@@ -445,7 +494,7 @@ impl<M: View + 'static> Runtime<M> {
                     format_args!(
                         "Logical {}:\n{}",
                         property.info().name,
-                        EditorValue(value, component)
+                        EditorValue(value, component, gradient_summary)
                     ),
                 )?;
             }
@@ -655,6 +704,11 @@ impl<M: View + 'static, L: LaneSet<M>> RuntimeMut<'_, M, L> {
             }
             Edit(id, op) => {
                 let value = self.property_value_at(index, id)?;
+                if matches!(value, PropertyValue::Brush(crate::Brush::Gradient(_)))
+                    && !matches!(op, EditorOp::Inherit)
+                {
+                    return Ok(self.commit());
+                }
                 let contribution = match op {
                     EditorOp::Inherit => Contribution::Inherit,
                     EditorOp::Auto => Contribution::Set(PropertyValue::Dimension(None)),

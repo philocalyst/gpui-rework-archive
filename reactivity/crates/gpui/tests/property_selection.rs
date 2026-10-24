@@ -400,6 +400,9 @@ fn every_closed_catalog_family_returns_canonical_value_and_equal_presence() {
             PropertyValue::Color(_) => {
                 PropertyValue::Color(Color::oklch(0.7, 0.1, 40., 0.8).unwrap())
             }
+            PropertyValue::Brush(_) => PropertyValue::Brush(gpui::Brush::Solid(
+                Color::oklch(0.7, 0.1, 40., 0.8).unwrap(),
+            )),
             PropertyValue::Flow(_) => PropertyValue::Flow(Flow::Column),
             PropertyValue::Transform(_) => PropertyValue::Transform(Affine {
                 b: 0.125,

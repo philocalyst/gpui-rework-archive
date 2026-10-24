@@ -40,6 +40,7 @@ pub enum ValueKind {
     Dimension,
     Number,
     Color,
+    Brush,
     Flow,
     Transform,
     Align,
@@ -61,12 +62,59 @@ pub struct PropertyInfo {
 pub enum PropertyDestination {
     Style,
     Geometry,
+    Paint,
 }
 
 /// Cold local geometry, independent from layout and inherited text styling.
 #[derive(Clone, Copy, Debug, Default, PartialEq)]
 pub struct GeometryStyle {
     pub(crate) corner_radius: f32,
+}
+
+/// A resolved background value. Gradient keys identify immutable resources in
+/// the current owner; they cannot be constructed from an integer or replayed
+/// into another owner without that owner's resource admission.
+#[derive(Clone, Copy, Debug, PartialEq)]
+pub enum Brush {
+    Solid(Color),
+    Gradient(gpui_canvas::GradientKey),
+}
+impl Brush {
+    pub fn solid(self) -> Option<Color> {
+        if let Self::Solid(color) = self {
+            Some(color)
+        } else {
+            None
+        }
+    }
+}
+impl Default for Brush {
+    fn default() -> Self {
+        Self::Solid(Style::default().bg)
+    }
+}
+impl From<Color> for Brush {
+    fn from(color: Color) -> Self {
+        Self::Solid(color)
+    }
+}
+impl From<&gpui_canvas::Gradient> for Brush {
+    fn from(gradient: &gpui_canvas::Gradient) -> Self {
+        Self::Gradient(gradient.key())
+    }
+}
+impl ExactValue for Brush {
+    fn same(a: &Self, b: &Self) -> bool {
+        match (a, b) {
+            (Self::Solid(a), Self::Solid(b)) => a.same_authoring(*b),
+            (Self::Gradient(a), Self::Gradient(b)) => a == b,
+            _ => false,
+        }
+    }
+}
+#[derive(Clone, Copy, Debug, Default, PartialEq)]
+pub struct PaintStyle {
+    pub(crate) background: Brush,
 }
 
 mod sealed {
@@ -90,6 +138,7 @@ pub trait PropertyDomain: sealed::Domain + Copy + Default + 'static {
         context: C,
         style: impl FnOnce(C, Property<T, Style>) -> R,
         geometry: impl FnOnce(C, Property<T, GeometryStyle>) -> R,
+        paint: impl FnOnce(C, Property<T, PaintStyle>) -> R,
     ) -> R;
 }
 impl PropertyDomain for Style {
@@ -98,6 +147,7 @@ impl PropertyDomain for Style {
         context: C,
         style: impl FnOnce(C, Property<T, Style>) -> R,
         _geometry: impl FnOnce(C, Property<T, GeometryStyle>) -> R,
+        _paint: impl FnOnce(C, Property<T, PaintStyle>) -> R,
     ) -> R {
         style(context, property)
     }
@@ -108,8 +158,49 @@ impl PropertyDomain for GeometryStyle {
         context: C,
         _style: impl FnOnce(C, Property<T, Style>) -> R,
         geometry: impl FnOnce(C, Property<T, GeometryStyle>) -> R,
+        _paint: impl FnOnce(C, Property<T, PaintStyle>) -> R,
     ) -> R {
         geometry(context, property)
+    }
+}
+impl PropertyDomain for PaintStyle {
+    fn dispatch<T, C, R>(
+        property: Property<T, Self>,
+        context: C,
+        _style: impl FnOnce(C, Property<T, Style>) -> R,
+        _geometry: impl FnOnce(C, Property<T, GeometryStyle>) -> R,
+        paint: impl FnOnce(C, Property<T, PaintStyle>) -> R,
+    ) -> R {
+        paint(context, property)
+    }
+}
+impl sealed::Domain for PaintStyle {
+    fn get_erased(id: PropertyId, value: &Self) -> Result<PropertyValue, PropertyError> {
+        if id == PropertyId::Background {
+            Ok(PropertyValue::Brush(value.background))
+        } else {
+            Err(wrong_destination(id, PropertyDestination::Paint))
+        }
+    }
+    fn set_erased(
+        id: PropertyId,
+        value: &mut Self,
+        edit: PropertyValue,
+    ) -> Result<bool, PropertyError> {
+        if id != PropertyId::Background {
+            return Err(wrong_destination(id, PropertyDestination::Paint));
+        }
+        match edit {
+            PropertyValue::Brush(brush) => BACKGROUND.set(value, brush),
+            PropertyValue::Color(color) => BACKGROUND.set(value, Brush::Solid(color)),
+            _ => Err(PropertyError {
+                property: id,
+                reason: PropertyErrorKind::WrongKind {
+                    expected: ValueKind::Brush,
+                    actual: edit.kind(),
+                },
+            }),
+        }
     }
 }
 impl sealed::Domain for Style {
@@ -380,13 +471,14 @@ macro_rules! properties {
         };
         pub const $name: Property<$ty> = Property(&$decl);)+
         /// References to the same declaration metadata as the typed selectors.
-        pub static PROPERTIES: &[&PropertyInfo] = &[$($name.info()),+, CORNER_RADIUS.info()];
+        pub static PROPERTIES: &[&PropertyInfo] = &[$($name.info()),+, BACKGROUND.info(), CORNER_RADIUS.info()];
         const _: () = { $(assert!(PropertyId::$id as u16 <= 8191);)+ assert!(PropertyId::CornerRadius as u16 <= 8191); };
         impl PropertyId {
             pub(crate) const fn from_code(code: u16) -> Option<Self> {
                 match code {
                     $(value if value == Self::$id as u16 => Some(Self::$id),)+
                     value if value == Self::CornerRadius as u16 => Some(Self::CornerRadius),
+                    value if value == Self::Background as u16 => Some(Self::Background),
                     _ => None,
                 }
             }
@@ -394,22 +486,25 @@ macro_rules! properties {
                 match (self, value) {
                     $((Self::$id, PropertyValue::$kind(value)) => $name.validate(&value),)+
                     (Self::CornerRadius, PropertyValue::Number(value)) => CORNER_RADIUS.validate(&value),
+                    (Self::Background, PropertyValue::Brush(value)) => BACKGROUND.validate(&value),
+                    (Self::Background, PropertyValue::Color(_)) => Ok(()),
                     _ => Err(PropertyError { property: self, reason: PropertyErrorKind::WrongKind { expected: self.info().kind, actual: value.kind() } }),
                 }
             }
             pub const fn info(self) -> &'static PropertyInfo {
-                match self { $(Self::$id => $name.info()),+, Self::CornerRadius => CORNER_RADIUS.info() }
+                match self { $(Self::$id => $name.info()),+, Self::CornerRadius => CORNER_RADIUS.info(), Self::Background => BACKGROUND.info() }
             }
             pub(crate) const fn value_kind(self) -> ValueKind {
-                match self { $(Self::$id => ValueKind::$kind),+, Self::CornerRadius => ValueKind::Number }
+                match self { $(Self::$id => ValueKind::$kind),+, Self::CornerRadius => ValueKind::Number, Self::Background => ValueKind::Brush }
             }
             pub(crate) fn get_erased(self, style: &Style) -> Result<PropertyValue,PropertyError> {
-                match self { $(Self::$id => Ok(PropertyValue::$kind($name.get(style)))),+, Self::CornerRadius=>Err(wrong_destination(self,PropertyDestination::Style)) }
+                match self { $(Self::$id => Ok(PropertyValue::$kind($name.get(style)))),+, Self::Background => Ok(PropertyValue::Color(style.bg)), Self::CornerRadius=>Err(wrong_destination(self,PropertyDestination::Style)) }
             }
             pub(crate) fn set_erased(self, style: &mut Style, value: PropertyValue) -> Result<bool, PropertyError> {
-                if self.info().destination != PropertyDestination::Style { return Err(wrong_destination(self,PropertyDestination::Style)); }
+                if self != Self::Background && self.info().destination != PropertyDestination::Style { return Err(wrong_destination(self,PropertyDestination::Style)); }
                 match (self, value) {
                     $((Self::$id, PropertyValue::$kind(value)) => $name.set(style, value),)+
+                    (Self::Background,PropertyValue::Color(color)) | (Self::Background,PropertyValue::Brush(Brush::Solid(color))) => { let changed = !style.bg.same_authoring(color); style.bg=color; Ok(changed) },
                     _ => Err(PropertyError { property: self, reason: PropertyErrorKind::WrongKind { expected: self.info().kind, actual: value.kind() } }),
                 }
             }
@@ -420,6 +515,7 @@ macro_rules! properties {
             pub(crate) fn set_literal<const CODE: u16>(style: &mut Style, value: PropertyValue) -> Result<(), PropertyError> {
                 let id = const { Self::from_code(CODE).expect("closed property code") };
                 match (id, value) {
+                    (Self::Background,PropertyValue::Color(color)) | (Self::Background,PropertyValue::Brush(Brush::Solid(color))) => { style.bg=color; Ok(()) },
                     $((Self::$id, PropertyValue::$kind(value)) => {
                         let verdict: Result<(),PropertyErrorKind> = ($validate)(&value);
                         verdict.map_err(|reason| PropertyError { property: id, reason })?;
@@ -449,13 +545,27 @@ properties! {
     PADDING, PADDING_DECL, f32, Padding, "padding", Number, Layout, padding, nonnegative;
     FONT_SIZE, FONT_SIZE_DECL, f32, FontSize, "font_size", Number, Layout, font_size, font_size;
     FOREGROUND, FOREGROUND_DECL, Color, Foreground, "foreground", Color, Paint, fg, |_| Ok(());
-    BACKGROUND, BACKGROUND_DECL, Color, Background, "background", Color, Paint, bg, |_| Ok(());
     FLOW, FLOW_DECL, Flow, Flow, "flow", Flow, Layout, flow, |_| Ok(());
     TRANSFORM, TRANSFORM_DECL, Affine, Transform, "transform", Transform, Geometry, transform, finite_transform;
     ALIGN, ALIGN_DECL, Align, Align, "align", Align, Layout, align, |_| Ok(());
     JUSTIFY, JUSTIFY_DECL, Justify, Justify, "justify", Justify, Layout, justify, |_| Ok(());
     WRAP, WRAP_DECL, bool, Wrap, "wrap", Flag, Layout, wrap, |_| Ok(());
 }
+
+static BACKGROUND_DECL: Declaration<Brush, PaintStyle> = Declaration {
+    info: PropertyInfo {
+        destination: PropertyDestination::Paint,
+        id: PropertyId::Background,
+        name: "background",
+        kind: ValueKind::Brush,
+        impact: Impact::Paint,
+    },
+    get: |paint| paint.background,
+    put: |paint, value| paint.background = value,
+    validate: |_| Ok(()),
+    same: <Brush as ExactValue>::same,
+};
+pub const BACKGROUND: Property<Brush, PaintStyle> = Property(&BACKGROUND_DECL);
 
 static RADIUS_DECL: Declaration<f32, GeometryStyle> = Declaration {
     info: PropertyInfo {
@@ -487,6 +597,7 @@ pub enum PropertyValue {
     Dimension(Option<f32>),
     Number(f32),
     Color(Color),
+    Brush(Brush),
     Flow(Flow),
     Transform(Affine),
     Align(Align),
@@ -499,6 +610,7 @@ impl PropertyValue {
             Self::Dimension(_) => ValueKind::Dimension,
             Self::Number(_) => ValueKind::Number,
             Self::Color(_) => ValueKind::Color,
+            Self::Brush(_) => ValueKind::Brush,
             Self::Flow(_) => ValueKind::Flow,
             Self::Transform(_) => ValueKind::Transform,
             Self::Align(_) => ValueKind::Align,

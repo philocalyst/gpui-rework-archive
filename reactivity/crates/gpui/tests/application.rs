@@ -112,6 +112,8 @@ fn reactive_hdr_colors_use_the_ordinary_application_and_property_interface() {
         assert_eq!(
             window
                 .property(surface, gpui::property::BACKGROUND)
+                .unwrap()
+                .solid()
                 .unwrap(),
             color(red)
         );

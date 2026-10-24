@@ -100,3 +100,9 @@ pub mod prelude {
         column, div, image, label, oklch, rgb, row, text, text_input, uniform_list,
     };
 }
+
+pub use element::IntoBackground;
+pub use gpui_canvas::{
+    Extend, Gradient, GradientGeometry, GradientKey, GradientStop, GradientView, Interpolation,
+};
+pub use property::Brush;

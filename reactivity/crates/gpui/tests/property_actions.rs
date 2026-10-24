@@ -186,7 +186,9 @@ fn one_editor_family_routes_geometry_color_and_six_affine_components() {
         (
             PropertyId::Background,
             "0.125, 0.25, 0.75, 0.625",
-            PropertyValue::Color(Color::srgb(0.125, 0.25, 0.75, 0.625).unwrap()),
+            PropertyValue::Brush(gpui::Brush::Solid(
+                Color::srgb(0.125, 0.25, 0.75, 0.625).unwrap(),
+            )),
         ),
     ] {
         select(&mut win, target, id);

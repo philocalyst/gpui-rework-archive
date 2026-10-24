@@ -234,7 +234,11 @@ const RECT_SOURCE: u32 = u32::MAX;
 const ROUNDED_SOURCE: u32 = 1 << 31;
 const IMAGE_SOURCE: u32 = 1 << 30;
 const NEAREST_SOURCE: u32 = 1 << 29;
-const RESOURCE_INDEX: u32 = NEAREST_SOURCE - 1;
+const GRADIENT_SOURCE: u32 = 1 << 28;
+const RESOURCE_INDEX: u32 = GRADIENT_SOURCE - 1;
+fn resource_material(source: u32) -> bool {
+    source & ROUNDED_SOURCE == 0 && source & (IMAGE_SOURCE | GRADIENT_SOURCE) != 0
+}
 const _: () = assert!(MAX_COMMANDS < INLINE_DRAW as usize);
 // Each published image/mask resource has at least one admitted placement.
 // Rounded radii keep all 31 positive-f32 bits; the NaN sentinel remains Rect.
@@ -341,6 +345,13 @@ struct ImageResources {
     values: Vec<Image>,
     index: HashMap<ImageKey, u32>,
     bytes: usize,
+    gradients: Option<Box<GradientResources>>,
+}
+#[derive(Default)]
+struct GradientResources {
+    values: Vec<(crate::GradientKey, Option<crate::Gradient>)>,
+    index: HashMap<crate::GradientKey, u32>,
+    bytes: usize,
 }
 #[derive(Clone, Copy)]
 enum BorrowedSource<'a> {
@@ -349,11 +360,15 @@ enum BorrowedSource<'a> {
     Glyph(&'a Raster),
     ImageNearest(&'a Image),
     ImageLinear(&'a Image),
+    Gradient {
+        key: crate::GradientKey,
+        lease: Option<&'a crate::Gradient>,
+    },
 }
 impl<'a> BorrowedSource<'a> {
     fn material_color(self, paint: [f32; 4]) -> [f32; 4] {
         match self {
-            Self::ImageNearest(_) | Self::ImageLinear(_) => [1.0; 4],
+            Self::ImageNearest(_) | Self::ImageLinear(_) | Self::Gradient { .. } => [1.0; 4],
             _ => paint,
         }
     }
@@ -362,6 +377,10 @@ impl<'a> BorrowedSource<'a> {
             Self::Rect => PreparedSource::Solid,
             Self::Rounded(radius) => PreparedSource::RoundedRect(radius),
             Self::Glyph(mask) => PreparedSource::Mask(mask_view(mask)),
+            Self::Gradient { lease, .. } => PreparedSource::Gradient {
+                gradient: lease.expect("canonical gradient lease").view(),
+                radius: paint[0],
+            },
             Self::ImageNearest(image) => PreparedSource::Image {
                 radius: paint[0],
                 image: image.view(),
@@ -399,6 +418,10 @@ impl BorrowedCommand<'_> {
                 (BorrowedSource::Rounded(left), BorrowedSource::Rounded(right)) => {
                     left.to_bits() == right.to_bits()
                 }
+                (
+                    BorrowedSource::Gradient { key: left, .. },
+                    BorrowedSource::Gradient { key: right, .. },
+                ) => left == right,
                 (BorrowedSource::Glyph(left), BorrowedSource::Glyph(right)) => {
                     // Both immutable leases are alive during comparison, so
                     // allocation identity cannot undergo reuse here.
@@ -429,22 +452,32 @@ impl DisplayList {
     fn storage(&self) -> SceneStorage {
         SceneStorage {
             header_bytes: size_of::<Self>(),
-            resource_header_bytes: self
-                .images
-                .as_ref()
-                .map_or(0, |_| size_of::<ImageResources>()),
+            resource_header_bytes: self.images.as_ref().map_or(0, |r| {
+                size_of::<ImageResources>()
+                    + r.gradients
+                        .as_ref()
+                        .map_or(0, |_| size_of::<GradientResources>())
+            }),
             order_bytes: self.order.capacity() * size_of::<u32>(),
             inline_bytes: self.inline.capacity() * size_of::<InlineDraw>(),
             common_bytes: self.commons.capacity() * size_of::<CommonGroup>() + self.columns.bytes(),
             placement_bytes: self.placements.capacity() * size_of::<Placement>(),
             resource_handles_bytes: self.masks.capacity() * size_of::<Arc<Raster>>()
-                + self
-                    .images
-                    .as_ref()
-                    .map_or(0, |r| r.values.capacity() * size_of::<Image>()),
+                + self.images.as_ref().map_or(0, |r| {
+                    r.values.capacity() * size_of::<Image>()
+                        + r.gradients.as_ref().map_or(0, |g| {
+                            g.values.capacity()
+                                * size_of::<(crate::GradientKey, Option<crate::Gradient>)>()
+                        })
+                }),
             resource_index_capacity: self.mask_index.capacity()
-                + self.images.as_ref().map_or(0, |r| r.index.capacity()),
-            resource_entries: self.masks.len() + self.images.as_ref().map_or(0, |r| r.values.len()),
+                + self.images.as_ref().map_or(0, |r| {
+                    r.index.capacity() + r.gradients.as_ref().map_or(0, |g| g.index.capacity())
+                }),
+            resource_entries: self.masks.len()
+                + self.images.as_ref().map_or(0, |r| {
+                    r.values.len() + r.gradients.as_ref().map_or(0, |g| g.values.len())
+                }),
         }
     }
     fn bytes(&self) -> usize {
@@ -491,7 +524,7 @@ impl DisplayList {
     #[inline]
     fn parts(&self, address: u32, viewport: Rect) -> (Common, &Geometry, u32) {
         let (common, geometry, source) = self.stored(address);
-        let image = source & ROUNDED_SOURCE == 0 && source & IMAGE_SOURCE != 0;
+        let image = resource_material(source);
         (
             self.columns.resolve(common, viewport, image),
             geometry,
@@ -504,6 +537,19 @@ impl DisplayList {
             BorrowedSource::Rect
         } else if source & ROUNDED_SOURCE != 0 {
             BorrowedSource::Rounded(f32::from_bits(source & !ROUNDED_SOURCE))
+        } else if source & GRADIENT_SOURCE != 0 {
+            let (key, lease) = &self
+                .images
+                .as_ref()
+                .unwrap()
+                .gradients
+                .as_ref()
+                .unwrap()
+                .values[(source & RESOURCE_INDEX) as usize];
+            BorrowedSource::Gradient {
+                key: *key,
+                lease: lease.as_ref(),
+            }
         } else if source & IMAGE_SOURCE != 0 {
             let image = &self.images.as_ref().unwrap().values[(source & RESOURCE_INDEX) as usize];
             if source & NEAREST_SOURCE != 0 {
@@ -558,7 +604,7 @@ impl DisplayList {
         viewport: Rect,
         shared: Option<PaintSlot>,
     ) {
-        let image = command.source & ROUNDED_SOURCE == 0 && command.source & IMAGE_SOURCE != 0;
+        let image = resource_material(command.source);
         let common = self.columns.store(common, viewport, shared, image);
         if !image {
             self.columns.support(
@@ -609,6 +655,10 @@ pub enum PreparedSource<'a> {
     /// Uniform circular corners in local units, clamped to half each extent.
     /// This is sampled analytic geometry, not a bitmap or integrated area.
     RoundedRect(f32),
+    Gradient {
+        gradient: crate::GradientView<'a>,
+        radius: f32,
+    },
     Mask(GlyphMask<'a>),
     Image {
         image: ImageView<'a>,
@@ -619,7 +669,7 @@ pub enum PreparedSource<'a> {
 impl<'a> PreparedSource<'a> {
     pub fn dimensions(self) -> Option<[usize; 2]> {
         match self {
-            Self::Solid | Self::RoundedRect(_) => None,
+            Self::Solid | Self::RoundedRect(_) | Self::Gradient { .. } => None,
             Self::Mask(mask) => Some([mask.width, mask.height]),
             Self::Image { image, .. } => Some([image.width() as usize, image.height() as usize]),
         }
@@ -644,8 +694,16 @@ impl<'a> PreparedSource<'a> {
     pub fn corner_radius(self) -> Option<f32> {
         match self {
             Self::RoundedRect(radius) => Some(radius),
+            Self::Gradient { radius, .. } if radius != 0.0 => Some(radius),
             Self::Image { radius, .. } if radius != 0.0 => Some(radius),
             _ => None,
+        }
+    }
+    pub fn gradient(self) -> Option<(crate::GradientView<'a>, f32)> {
+        if let Self::Gradient { gradient, radius } = self {
+            Some((gradient, radius))
+        } else {
+            None
         }
     }
     pub fn is_solid(self) -> bool {
@@ -744,7 +802,7 @@ impl<'a> PreparedGroup<'a> {
     /// Shared working paint relationship in this canonical scene, if present.
     pub fn paint_slot(self) -> Option<PaintSlot> {
         let (stored, _, source) = self.commands.stored(self.order[0]);
-        if source & ROUNDED_SOURCE == 0 && source & IMAGE_SOURCE != 0 {
+        if resource_material(source) {
             return None;
         }
         self.commands.columns.shared_slot(stored.paint)
@@ -782,7 +840,7 @@ impl<'a> Groups<'a> {
         PreparedGroup {
             inverse: common.map.inverse,
             clip: common.clip,
-            color: if source & ROUNDED_SOURCE == 0 && source & IMAGE_SOURCE != 0 {
+            color: if resource_material(source) {
                 [1.0; 4]
             } else {
                 common.color
@@ -932,6 +990,18 @@ impl<'a> PreparedScene<'a> {
             .images
             .iter()
             .flat_map(|r| r.values.iter().map(Image::view))
+    }
+
+    pub fn gradients(self) -> impl DoubleEndedIterator<Item = crate::GradientView<'a>> {
+        self.commands
+            .images
+            .iter()
+            .flat_map(|r| r.gradients.iter())
+            .flat_map(|r| {
+                r.values
+                    .iter()
+                    .map(|(_, lease)| lease.as_ref().expect("canonical lease").view())
+            })
     }
 
     pub fn draws(self) -> impl ExactSizeIterator<Item = PreparedDraw<'a>> + DoubleEndedIterator {
@@ -1218,7 +1288,7 @@ impl Canvas {
                 common,
                 viewport_rect(self.width, self.height),
                 paint.reference(),
-                source & ROUNDED_SOURCE == 0 && source & IMAGE_SOURCE != 0,
+                resource_material(source),
                 paint.new_shared(),
             )?;
             self.admit(&command)?;
@@ -1294,6 +1364,115 @@ impl Canvas {
             PaintUse::Shared(cache),
         )
     }
+    /// Analytic gradient paint, sampled at the same correlated 4×4 sites as
+    /// coverage. Only a distinct immutable resource obtains a canonical lease.
+    pub fn fill_gradient(
+        &mut self,
+        gradient: &crate::Gradient,
+        rect: Rect,
+        radius: f32,
+        transform: Affine,
+        clip: Rect,
+    ) -> Result<(), Error> {
+        self.fill_gradient_with(gradient, rect, radius, transform, clip, false)
+    }
+    fn fill_gradient_with(
+        &mut self,
+        gradient: &crate::Gradient,
+        rect: Rect,
+        radius: f32,
+        transform: Affine,
+        clip: Rect,
+        previous_lease: bool,
+    ) -> Result<(), Error> {
+        rounded::validate_radius(radius)?;
+        validate_rect(clip)?;
+        let resources = self
+            .commands
+            .images
+            .as_deref()
+            .and_then(|r| r.gradients.as_deref());
+        let existing = resources.and_then(|r| r.index.get(&gradient.key()).copied());
+        let index = existing.unwrap_or_else(|| resources.map_or(0, |r| r.values.len() as u32));
+        let common = Common {
+            clip,
+            map: Mapping::new(transform)?,
+            color: [radius, 0.0, 0.0, 1.0],
+        };
+        let Some(command) = self.prepare(rect, transform, common, GRADIENT_SOURCE | index)? else {
+            return Ok(());
+        };
+        let mut unpublished = None;
+        if existing.is_none() {
+            let total = resources
+                .map_or(0, |r| r.bytes)
+                .checked_add(gradient.view().byte_len())
+                .ok_or(Error::ResourceLimit)?;
+            if total
+                .checked_add(self.commands.images.as_ref().map_or(0, |r| r.bytes))
+                .is_none_or(|b| b > crate::MAX_IMAGE_SCENE_BYTES)
+            {
+                return Err(Error::ResourceLimit);
+            }
+            let r = if let Some(r) = &mut self.commands.images {
+                r.as_mut()
+            } else {
+                unpublished
+                    .insert(Box::<ImageResources>::default())
+                    .as_mut()
+            };
+            let gradients = r.gradients.get_or_insert_with(Default::default);
+            gradients
+                .values
+                .try_reserve(1)
+                .map_err(|_| Error::ResourceLimit)?;
+            gradients
+                .index
+                .try_reserve(1)
+                .map_err(|_| Error::ResourceLimit)?;
+        }
+        self.commands.columns.admit(
+            common,
+            viewport_rect(self.width, self.height),
+            None,
+            true,
+            false,
+        )?;
+        self.admit(std::slice::from_ref(&command), &[], 0)?;
+        if unpublished.is_some() {
+            self.commands.images = unpublished;
+        }
+        if existing.is_none() {
+            let r = self
+                .commands
+                .images
+                .as_mut()
+                .unwrap()
+                .gradients
+                .as_mut()
+                .unwrap();
+            r.values.push((
+                gradient.key(),
+                if previous_lease {
+                    None
+                } else {
+                    Some(gradient.clone())
+                },
+            ));
+            r.index.insert(gradient.key(), index);
+            r.bytes += gradient.view().byte_len();
+        }
+        self.commands.append(
+            common,
+            std::iter::once(command),
+            false,
+            Vec::new(),
+            viewport_rect(self.width, self.height),
+            None,
+        );
+        self.dirty = true;
+        Ok(())
+    }
     /// Reconstruct immutable pixels across `rect`, using linear-premultiplied
     /// texel colors. Geometry/clip use the same sample sites as other draws.
     pub fn draw_image(
@@ -1356,7 +1535,14 @@ impl Canvas {
                 .map_or(0, |r| r.bytes)
                 .checked_add(image.pixel_bytes())
                 .ok_or(Error::ResourceLimit)?;
-            if bytes > crate::MAX_IMAGE_SCENE_BYTES {
+            if bytes
+                .checked_add(
+                    resources
+                        .and_then(|r| r.gradients.as_deref())
+                        .map_or(0, |g| g.bytes),
+                )
+                .is_none_or(|b| b > crate::MAX_IMAGE_SCENE_BYTES)
+            {
                 return Err(Error::ResourceLimit);
             }
             let resources = if let Some(resources) = &mut self.commands.images {
@@ -2269,6 +2455,17 @@ fn render_band_impl<W: PixelWriter, S: Simd>(
                 // glyph makes its sample colors differ.
                 samples.reset(value, frame.tile_proofs);
             }
+            if let BorrowedSource::Gradient { lease, .. } = command.source {
+                render_gradient(
+                    simd,
+                    &mut samples,
+                    &command,
+                    [left, top, right, bottom],
+                    &mut stats,
+                    lease.expect("canonical lease").view(),
+                );
+                continue;
+            }
             let image = match command.source {
                 BorrowedSource::ImageNearest(image) => Some((image.view(), ImageSampling::Nearest)),
                 BorrowedSource::ImageLinear(image) => Some((image.view(), ImageSampling::Linear)),
@@ -2391,6 +2588,42 @@ fn render_image_command(
                 sampling,
             )
         });
+    }
+}
+
+#[inline(never)]
+fn render_gradient<S: Simd>(
+    simd: S,
+    samples: &mut Samples,
+    command: &BorrowedCommand<'_>,
+    [left, top, right, bottom]: [usize; 4],
+    stats: &mut RenderStats,
+    gradient: crate::GradientView<'_>,
+) {
+    let mut shape = *command;
+    shape.source = if command.color[0] == 0.0 {
+        BorrowedSource::Rect
+    } else {
+        BorrowedSource::Rounded(command.color[0])
+    };
+    for y in top.max(command.bounds[1])..bottom.min(command.bounds[3]) {
+        for x in left.max(command.bounds[0])..right.min(command.bounds[2]) {
+            let mask = mask_kernel::coverage(simd, &shape, x, y, stats);
+            let sources = std::array::from_fn(|i| {
+                if mask & (1 << i) == 0 {
+                    return None;
+                }
+                let (lx, ly) = command
+                    .map
+                    .local(x as f64 + SAMPLES[i % 4], y as f64 + SAMPLES[i / 4]);
+                Some(gradient.sample([
+                    ((lx - command.rect.x as f64) / command.rect.width as f64) as f32,
+                    ((ly - command.rect.y as f64) / command.rect.height as f64) as f32,
+                ]))
+            });
+            samples.blend_sources((y - top) * TILE + x - left, sources);
+            stats.boundary_pixels += 1;
+        }
     }
 }
 
@@ -2518,6 +2751,25 @@ pub struct CanvasScene<'a> {
     pending: Canvas,
 }
 impl CanvasScene<'_> {
+    pub fn fill_gradient(
+        &mut self,
+        gradient: &crate::Gradient,
+        rect: Rect,
+        radius: f32,
+        transform: Affine,
+        clip: Rect,
+    ) -> Result<(), Error> {
+        let previous = self
+            .target
+            .commands
+            .images
+            .as_ref()
+            .and_then(|r| r.gradients.as_ref())
+            .is_some_and(|r| r.index.contains_key(&gradient.key()));
+        self.pending
+            .fill_gradient_with(gradient, rect, radius, transform, clip, previous)
+    }
+
     pub fn width(&self) -> u32 {
         self.pending.width()
     }
@@ -2672,7 +2924,32 @@ impl CanvasScene<'_> {
         self.pending
             .draw_text_scaled(text, layout, origin, transform, clip, color, raster_scale)
     }
-    pub fn commit(self) {
+    pub fn commit(mut self) {
+        // The target is exclusively borrowed throughout staging. Existing
+        // leases move only at commit, after damage comparison; aborts preserve
+        // the predecessor and warm scene replacement touches no Arc count.
+        if let Some(next) = self
+            .pending
+            .commands
+            .images
+            .as_mut()
+            .and_then(|r| r.gradients.as_mut())
+        {
+            for (key, lease) in &mut next.values {
+                if lease.is_none() {
+                    let old = self
+                        .target
+                        .commands
+                        .images
+                        .as_mut()
+                        .and_then(|r| r.gradients.as_mut())
+                        .expect("staged predecessor");
+                    let index = old.index[key] as usize;
+                    *lease = old.values[index].1.take();
+                    assert!(lease.is_some(), "one moved lease per exact resource");
+                }
+            }
+        }
         self.target.invalidate_bins();
         self.target.clear = self.pending.clear;
         self.target.commands = self.pending.commands;
@@ -2869,6 +3146,9 @@ fn sample(command: &BorrowedCommand<'_>, x: usize, y: usize, stats: &mut RenderS
                         0.0
                     }
                 }
+                BorrowedSource::Gradient { .. } => {
+                    unreachable!("gradient material has its own sampler")
+                }
                 BorrowedSource::Glyph(mask) => mask_sample(
                     mask,
                     lx - r.x as f64,
@@ -3046,5 +3326,122 @@ mod scaled_mask_tests {
                 );
             }
         }
+    }
+}
+
+#[cfg(test)]
+mod gradient_ownership_tests {
+    use super::*;
+    fn gradient(color: Color) -> crate::Gradient {
+        crate::Gradient::new(
+            crate::GradientGeometry::Linear {
+                start: Point::default(),
+                end: Point { x: 1.0, y: 0.0 },
+            },
+            &[
+                crate::GradientStop::new(0.0, Color::BLACK),
+                crate::GradientStop::new(1.0, color),
+            ],
+            crate::Extend::Pad,
+            crate::Interpolation::LinearSrgb,
+        )
+        .unwrap()
+    }
+    #[test]
+    fn staging_moves_unique_leases_without_warm_refcount_operations_and_aborts_preserve_c() {
+        let g = gradient(Color::WHITE);
+        let mut canvas = Canvas::new(24, 16).unwrap();
+        let clip = Rect::new(0., 0., 24., 16.);
+        let rect = Rect::new(2., 2., 12., 8.);
+        canvas
+            .fill_gradient(&g, rect, 2., Affine::IDENTITY, clip)
+            .unwrap();
+        assert_eq!(g.lease_count(), 2);
+        let before = canvas.pixels().to_vec();
+        {
+            let mut next = canvas.stage();
+            for _ in 0..32 {
+                next.fill_gradient(&g, rect, 2., Affine::IDENTITY, clip)
+                    .unwrap();
+            }
+            assert_eq!(
+                g.lease_count(),
+                2,
+                "pending predecessor keys must not clone a lease"
+            );
+            assert_eq!(
+                next.pending
+                    .prepared_scene()
+                    .commands
+                    .images
+                    .as_ref()
+                    .unwrap()
+                    .gradients
+                    .as_ref()
+                    .unwrap()
+                    .values
+                    .len(),
+                1
+            );
+            assert!(
+                next.fill_gradient(&g, rect, f32::NAN, Affine::IDENTITY, clip)
+                    .is_err()
+            );
+        }
+        assert_eq!(g.lease_count(), 2);
+        assert_eq!(canvas.pixels(), before);
+        let mut next = canvas.stage();
+        next.fill_gradient(&g, rect, 2., Affine::IDENTITY, clip)
+            .unwrap();
+        assert_eq!(g.lease_count(), 2);
+        assert!(next.commit_with_damage().is_empty());
+        assert_eq!(g.lease_count(), 2);
+        let replacement = gradient(Color::rgb(255, 0, 0));
+        let mut next = canvas.stage();
+        next.fill_gradient(&replacement, rect, 2., Affine::IDENTITY, clip)
+            .unwrap();
+        let damage = next.commit_with_damage();
+        assert!(!damage.is_empty());
+        assert_eq!(g.lease_count(), 1);
+        assert_eq!(replacement.lease_count(), 2);
+        assert_ne!(canvas.pixels(), before);
+        assert_eq!(canvas.prepared_scene().gradients().count(), 1);
+        assert!(
+            !canvas
+                .prepared_scene()
+                .draws()
+                .next()
+                .unwrap()
+                .source
+                .is_solid()
+        );
+    }
+    #[test]
+    fn gradient_coverage_uses_the_exact_existing_simd_lattice_and_uniform_proofs_are_ineligible() {
+        let g = gradient(Color::linear_srgb(2.0, -0.25, 0.5, 0.75).unwrap());
+        let mut a = Canvas::new(32, 24).unwrap();
+        let mut b = Canvas::new(32, 24).unwrap();
+        b.set_tile_proofs(false);
+        for canvas in [&mut a, &mut b] {
+            canvas.clear(Color::rgba(31, 47, 73, 133));
+            canvas
+                .fill_gradient(
+                    &g,
+                    Rect::new(0.125, 0.375, 25.25, 17.5),
+                    3.25,
+                    Affine {
+                        a: 0.9,
+                        b: 0.13,
+                        c: -0.17,
+                        d: 0.75,
+                        tx: 4.125,
+                        ty: 0.125,
+                    },
+                    Rect::new(1.125, 0.375, 29.5, 22.25),
+                )
+                .unwrap();
+        }
+        assert_eq!(a.pixels(), b.pixels());
+        assert_eq!(a.stats().full_rect_tiles, 0);
     }
 }

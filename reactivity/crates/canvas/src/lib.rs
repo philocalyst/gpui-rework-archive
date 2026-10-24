@@ -12,6 +12,10 @@ pub use canvas::{
     PreparedScene, PreparedSource, RenderStats, SceneStorage, SlotCommit, SlotEdit, SlotError,
     SlotErrorKind, rounded_rect_contains, sampled_rect_clip,
 };
+pub use color::gradient::{
+    Extend, Gradient, GradientGeometry, GradientKey, GradientStop, GradientView, Interpolation,
+    MAX_GRADIENT_STOPS,
+};
 pub use color::{
     Color, ColorConfig, ColorSpace, FloatRangePolicy, OutputMetadata, OutputProfile,
     OutputTransfer, PixelFormat, SdrMapping, oklch, rgb,
@@ -47,6 +51,7 @@ pub enum Error {
     UnsupportedPixelFormat,
     UnsupportedOutputProfile,
     NonOpaqueOutput,
+    InvalidGradient,
     InvalidImageLength,
     InvalidImageAlpha,
 }

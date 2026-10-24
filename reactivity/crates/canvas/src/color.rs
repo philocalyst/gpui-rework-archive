@@ -1,4 +1,5 @@
 mod gamut;
+pub mod gradient;
 
 use crate::Error;
 

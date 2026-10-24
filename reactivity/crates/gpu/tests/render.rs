@@ -1287,7 +1287,7 @@ fn mixed_image_payload_offsets_and_reordered_exact_keys_remain_coherent() {
     pollster::block_on(async {
         let mut renderer = renderer(wgpu::TextureFormat::Rgba8UnormSrgb).await;
         let payload: usize = images.iter().map(Image::pixel_bytes).sum();
-        for order in [[0, 1, 2], [2, 0, 1], [1, 2, 0]] {
+        for (turn, order) in [[0, 1, 2], [2, 0, 1], [1, 2, 0]].into_iter().enumerate() {
             let mut canvas = Canvas::recording(33, 17, ColorConfig::default()).unwrap();
             canvas.clear(Color::WHITE);
             let clip = Rect::new(0., 0., 33., 17.);
@@ -1314,7 +1314,10 @@ fn mixed_image_payload_offsets_and_reordered_exact_keys_remain_coherent() {
             let gpu = readback(&mut renderer, &canvas);
             assert_eq!(renderer.image_stats().unwrap().resources, 3);
             assert_eq!(renderer.image_stats().unwrap().packed_bytes, payload);
-            assert_eq!(renderer.image_stats().unwrap().uploaded_bytes, payload);
+            assert_eq!(
+                renderer.image_stats().unwrap().uploaded_bytes,
+                if turn == 0 { payload } else { 0 }
+            );
             for (i, (&a, &b)) in gpu.iter().zip(canvas.pixels()).enumerate() {
                 assert!(a.abs_diff(b) <= 1, "order{order:?} byte{i}: GPU{a} CPU{b}");
             }
@@ -3459,6 +3462,262 @@ fn lowered_solids_keep_clipped_sample_ties_and_exceptional_paints() {
                             "SDR banked{banked} edge{edge}"
                         );
                     }
+                }
+            }
+        }
+    });
+}
+
+#[test]
+fn analytic_gradients_geometry_spreads_hard_edges_hdr_and_cache_match_cpu() {
+    use gpui_canvas::{
+        Extend, Gradient, GradientGeometry as Geometry, GradientStop as Stop, Interpolation,
+        OutputProfile,
+    };
+    fn half(bytes: &[u8]) -> f32 {
+        let bits = u16::from_le_bytes([bytes[0], bytes[1]]);
+        let sign = if bits & 0x8000 == 0 { 1. } else { -1. };
+        let e = ((bits >> 10) & 31) as i32;
+        let m = (bits & 1023) as f32;
+        sign * if e == 0 {
+            m * 2f32.powi(-24)
+        } else {
+            (1. + m / 1024.) * 2f32.powi(e - 15)
+        }
+    }
+    pollster::block_on(async {
+        let mut renderer = renderer(wgpu::TextureFormat::Rgba16Float).await;
+        let geometries = [
+            Geometry::Linear {
+                start: Point { x: 0.1, y: 0.2 },
+                end: Point { x: 0.8, y: 0.6 },
+            },
+            Geometry::Radial {
+                center: Point { x: 0.4, y: 0.6 },
+                radii: [0.3, 0.6],
+            },
+            Geometry::Conic {
+                center: Point { x: 0.4, y: 0.6 },
+                start_turn: -0.125,
+            },
+        ];
+        let maps = [
+            Affine::IDENTITY,
+            Affine {
+                a: -0.9,
+                b: 0.13,
+                c: -0.17,
+                d: 0.75,
+                tx: 29.125,
+                ty: 0.375,
+            },
+        ];
+        let stops = [
+            Stop::new(-0.2, Color::linear_srgb(8., -0.5, 1., 0.).unwrap()),
+            Stop::new(0.4, Color::linear_srgb(4., -0.25, 0.5, 1.).unwrap()),
+            Stop::new(0.4, Color::linear_srgb(0.2, 2., -0.1, 0.5).unwrap()),
+            Stop::new(1.2, Color::linear_display_p3(0.1, 0.3, 3., 0.75).unwrap()),
+        ];
+        for profile in [OutputProfile::Srgb, OutputProfile::DisplayP3] {
+            for geometry in geometries {
+                for extend in [Extend::Pad, Extend::Repeat, Extend::Reflect] {
+                    let gradient =
+                        Gradient::new(geometry, &stops, extend, Interpolation::LinearSrgb).unwrap();
+                    for map in maps {
+                        for radius in [0., 5.] {
+                            let mut canvas = Canvas::recording(
+                                32,
+                                24,
+                                ColorConfig::linear_hdr(profile, 203.).unwrap(),
+                            )
+                            .unwrap();
+                            canvas.clear(Color::linear_srgb(0.2, 0.3, 0.5, 0.7).unwrap());
+                            canvas
+                                .fill_gradient(
+                                    &gradient,
+                                    Rect::new(0.125, 0.375, 25.5, 19.25),
+                                    radius,
+                                    map,
+                                    Rect::new(1.125, 0.375, 29.5, 22.25),
+                                )
+                                .unwrap();
+                            let first = readback(&mut renderer, &canvas);
+                            let stats = renderer.image_stats().unwrap();
+                            assert_eq!(stats.resources, 1);
+                            assert_eq!(stats.packed_bytes, gradient.view().byte_len());
+                            let second = readback(&mut renderer, &canvas);
+                            assert_eq!(first, second);
+                            assert_eq!(renderer.image_stats().unwrap().uploaded_bytes, 0);
+                            let cpu = canvas.pixels();
+                            for (i, (a, b)) in first
+                                .as_chunks::<2>()
+                                .0
+                                .iter()
+                                .zip(cpu.as_chunks::<2>().0)
+                                .enumerate()
+                            {
+                                let (a, b) = (half(a), half(b));
+                                assert!(
+                                    (a - b).abs() <= 0.000004f32.max(b.abs() * 0.002),
+                                    "{profile:?} {geometry:?} {extend:?} {map:?} radius{radius} value{i} GPU{a} CPU{b}"
+                                );
+                            }
+                            assert!(
+                                !canvas
+                                    .prepared_scene()
+                                    .draws()
+                                    .next()
+                                    .unwrap()
+                                    .source
+                                    .is_solid()
+                            );
+                        }
+                    }
+                }
+            }
+        }
+        // A key-set permutation retains packed intervals without upload.
+        let a = Gradient::new(
+            geometries[0],
+            &stops,
+            Extend::Pad,
+            Interpolation::LinearSrgb,
+        )
+        .unwrap();
+        let b = Gradient::new(
+            geometries[1],
+            &stops,
+            Extend::Pad,
+            Interpolation::LinearSrgb,
+        )
+        .unwrap();
+        for (turn, order) in [[&a, &b], [&b, &a]].into_iter().enumerate() {
+            let mut canvas = Canvas::recording(
+                32,
+                24,
+                ColorConfig::linear_hdr(OutputProfile::Srgb, 203.).unwrap(),
+            )
+            .unwrap();
+            canvas.clear(Color::WHITE);
+            for (i, g) in order.into_iter().enumerate() {
+                canvas
+                    .fill_gradient(
+                        g,
+                        Rect::new(i as f32 * 16., 0., 16., 24.),
+                        0.,
+                        Affine::IDENTITY,
+                        Rect::new(0., 0., 32., 24.),
+                    )
+                    .unwrap();
+            }
+            readback(&mut renderer, &canvas);
+            if turn == 1 {
+                assert_eq!(renderer.image_stats().unwrap().uploaded_bytes, 0);
+            }
+        }
+    });
+}
+
+#[test]
+fn analytic_gradient_exact_edges_and_premultiplied_expected_values() {
+    use gpui_canvas::{
+        Extend, Gradient, GradientGeometry, GradientStop as Stop, Interpolation, OutputProfile,
+    };
+    fn half(bytes: &[u8]) -> f32 {
+        let bits = u16::from_le_bytes([bytes[0], bytes[1]]);
+        let e = ((bits >> 10) & 31) as i32;
+        let sign = if bits & 0x8000 == 0 { 1. } else { -1. };
+        let m = (bits & 1023) as f32;
+        sign * if e == 0 {
+            m * 2f32.powi(-24)
+        } else {
+            (1. + m / 1024.) * 2f32.powi(e - 15)
+        }
+    }
+    pollster::block_on(async {
+        let mut renderer = renderer(wgpu::TextureFormat::Rgba16Float).await;
+        let red = Color::linear_srgb(1., 0., 0., 1.).unwrap();
+        let blue = Color::linear_srgb(0., 0., 1., 1.).unwrap();
+        let fixtures = [
+            (
+                vec![
+                    Stop::new(0., red),
+                    Stop::new(0.375, red),
+                    Stop::new(0.375, blue),
+                    Stop::new(1., blue),
+                ],
+                1,
+                [0.25, 0., 0.75, 1.],
+            ),
+            (
+                vec![
+                    Stop::new(0., Color::linear_srgb(9., -1., 0., 0.).unwrap()),
+                    Stop::new(1., blue),
+                ],
+                1,
+                [0., 0., 0.5, 0.5],
+            ),
+            (
+                vec![Stop::new(0., red), Stop::new(1., blue)],
+                16,
+                [0.5, 0., 0.5, 1.],
+            ),
+            (
+                vec![
+                    Stop::new(0., Color::linear_srgb(-1., 4., 0.5, 0.0001).unwrap()),
+                    Stop::new(1., Color::linear_srgb(0., 0., 1., 0.7).unwrap()),
+                ],
+                1,
+                [-0.00005, 0.0002, 0.350025, 0.35005],
+            ),
+            (
+                vec![
+                    Stop::new(0., Color::linear_srgb(9., -1., 0., 0.).unwrap()),
+                    Stop::new(1., Color::linear_srgb(0., 8., 4., 0.).unwrap()),
+                ],
+                1,
+                [0.; 4],
+            ),
+        ];
+        for (stops, size, expected) in fixtures {
+            let gradient = Gradient::new(
+                GradientGeometry::Linear {
+                    start: Point { x: 0., y: 0. },
+                    end: Point { x: 1., y: 0. },
+                },
+                &stops,
+                Extend::Pad,
+                Interpolation::LinearSrgb,
+            )
+            .unwrap();
+            let mut canvas = Canvas::recording(
+                size,
+                size,
+                ColorConfig::linear_hdr(OutputProfile::Srgb, 203.).unwrap(),
+            )
+            .unwrap();
+            canvas.clear(Color::TRANSPARENT);
+            let rect = Rect::new(0., 0., size as f32, size as f32);
+            canvas
+                .fill_gradient(&gradient, rect, 0., Affine::IDENTITY, rect)
+                .unwrap();
+            let gpu = readback(&mut renderer, &canvas);
+            let cpu = canvas.pixels();
+            // The opaque 16x16 fixture exercises full-tile eligibility: its
+            // material still varies, so compare the mean rather than one pixel.
+            for (name, bytes) in [("GPU", gpu.as_slice()), ("CPU", cpu)] {
+                let mut mean = [0.; 4];
+                for (i, word) in bytes.as_chunks::<2>().0.iter().enumerate() {
+                    mean[i % 4] += half(word) / (size * size) as f32;
+                }
+                for c in 0..4 {
+                    assert!(
+                        (mean[c] - expected[c]).abs()
+                            <= 0.000001f32.max(expected[c].abs() * 0.0015),
+                        "{name} size{size} channel{c}:{} != {}",
+                        mean[c],
+                        expected[c]
+                    );
                 }
             }
         }

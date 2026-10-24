@@ -103,7 +103,12 @@ fn colors<L: LaneSet<Panel>>(win: &Win<Panel, L>) -> Vec<Color> {
         .iter()
         .skip(3)
         .take(32)
-        .map(|node| win.property(node.target.unwrap(), BACKGROUND).unwrap())
+        .map(|node| {
+            win.property(node.target.unwrap(), BACKGROUND)
+                .unwrap()
+                .solid()
+                .unwrap()
+        })
         .collect()
 }
 
@@ -330,7 +335,10 @@ fn mapped_outputs_keep_inspector_bases_and_mix_with_direct_text_in_either_instal
         win.set(VALUE, 23).unwrap();
         assert!(win.contains_text("23").unwrap());
         assert_eq!(win.property(target, WIDTH).unwrap(), Some(50.0));
-        assert_eq!(win.property(target, BACKGROUND).unwrap(), Color::BLACK);
+        assert_eq!(
+            win.property(target, BACKGROUND).unwrap().solid().unwrap(),
+            Color::BLACK
+        );
         assert_eq!(
             win.property(target, TRANSFORM).unwrap(),
             Affine::translation(3.0, 0.0)
@@ -358,11 +366,15 @@ fn mapped_outputs_keep_inspector_bases_and_mix_with_direct_text_in_either_instal
     win.set(COLOR, Color::WHITE).unwrap();
     assert_eq!(
         win.property(win.query().name("direct").one().unwrap(), BACKGROUND)
+            .unwrap()
+            .solid()
             .unwrap(),
         Color::WHITE
     );
     assert_eq!(
         win.property(win.query().name("map").one().unwrap(), BACKGROUND)
+            .unwrap()
+            .solid()
             .unwrap(),
         Color::BLACK
     );
@@ -483,8 +495,12 @@ fn masked_first_direct_sink_cannot_hide_a_shared_peer_change_in_a_mapped_group()
     let mut win = Win::with_size(Colors(Signal::new(Color::BLACK)), 100, 100).unwrap();
     let masked = win.query().name("masked").one().unwrap();
     let peer = win.query().name("peer").one().unwrap();
-    win.set_property(masked, BACKGROUND, Contribution::Set(Color::WHITE))
-        .unwrap();
+    win.set_property(
+        masked,
+        BACKGROUND,
+        Contribution::Set(gpui::Brush::Solid(Color::WHITE)),
+    )
+    .unwrap();
     let before = win.scene_digest().unwrap();
     win.reset_counters().unwrap();
     let commit = win.set(COLOR, Color::WHITE).unwrap();
@@ -493,10 +509,17 @@ fn masked_first_direct_sink_cannot_hide_a_shared_peer_change_in_a_mapped_group()
         "the unmasked shared peer changes even when the first sink is masked"
     );
     assert_ne!(win.scene_digest().unwrap(), before);
-    assert_eq!(win.property(peer, BACKGROUND).unwrap(), Color::WHITE);
+    assert_eq!(
+        win.property(peer, BACKGROUND).unwrap().solid().unwrap(),
+        Color::WHITE
+    );
     assert_eq!(win.counters().owner_reruns, 0);
-    win.set_property(peer, BACKGROUND, Contribution::Set(Color::WHITE))
-        .unwrap();
+    win.set_property(
+        peer,
+        BACKGROUND,
+        Contribution::Set(gpui::Brush::Solid(Color::WHITE)),
+    )
+    .unwrap();
     let before = win.scene_digest().unwrap();
     win.reset_counters().unwrap();
     let commit = win.set(COLOR, Color::BLACK).unwrap();
@@ -509,5 +532,8 @@ fn masked_first_direct_sink_cannot_hide_a_shared_peer_change_in_a_mapped_group()
     assert_eq!(win.scene_digest().unwrap(), before);
     win.set_property(masked, BACKGROUND, Contribution::Inherit)
         .unwrap();
-    assert_eq!(win.property(masked, BACKGROUND).unwrap(), Color::BLACK);
+    assert_eq!(
+        win.property(masked, BACKGROUND).unwrap().solid().unwrap(),
+        Color::BLACK
+    );
 }
