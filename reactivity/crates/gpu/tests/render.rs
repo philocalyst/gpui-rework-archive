@@ -4188,6 +4188,94 @@ fn all_solid_packet_declines_rectangular_certification_for_a_rounded_clip() {
 mod perceptual_oracle;
 
 #[test]
+fn lab_selector_mixed_intervals_and_duplicate_stops_match_independent_oracle() {
+    use gpui_canvas::{
+        Extend, Gradient, GradientGeometry, GradientStop as Stop, Interpolation as Mode,
+        OutputProfile,
+    };
+    let half = |bytes: &[u8]| {
+        let bits = u16::from_le_bytes([bytes[0], bytes[1]]);
+        let sign = if bits & 0x8000 == 0 { 1. } else { -1. };
+        let exponent = i32::from((bits >> 10) & 31);
+        let mantissa = f64::from(bits & 1023);
+        sign * if exponent == 0 {
+            mantissa * 2f64.powi(-24)
+        } else {
+            (1. + mantissa / 1024.) * 2f64.powi(exponent - 15)
+        }
+    };
+    pollster::block_on(async {
+        let colors = [
+            Color::linear_srgb(10., 0., 0., 0.25).unwrap(),
+            Color::linear_srgb(10., 0., 10., 0.75).unwrap(),
+            Color::linear_srgb(10., 10., 10., 0.75).unwrap(),
+        ];
+        let gradient = Gradient::new(
+            GradientGeometry::Linear {
+                start: Point::default(),
+                end: Point { x: 1., y: 0. },
+            },
+            &[
+                Stop::new(0., colors[0]),
+                Stop::new(0.5, colors[1]),
+                Stop::new(0.5, colors[1]),
+                Stop::new(1., colors[2]),
+            ],
+            Extend::Pad,
+            Mode::Oklab,
+        )
+        .unwrap();
+        assert_ne!(gradient.view().words()[3][1] >> 31, 0);
+        assert_eq!(gradient.view().words()[3 + 2 * 5][1] >> 31, 0);
+        let mut canvas = Canvas::recording(
+            16,
+            1,
+            ColorConfig::linear_hdr(OutputProfile::Srgb, 203.).unwrap(),
+        )
+        .unwrap();
+        canvas.clear(Color::TRANSPARENT);
+        let rect = Rect::new(0., 0., 16., 1.);
+        canvas
+            .fill_gradient(&gradient, rect, 0., Affine::IDENTITY, rect)
+            .unwrap();
+        let mut renderer = renderer(wgpu::TextureFormat::Rgba16Float).await;
+        let gpu = readback(&mut renderer, &canvas);
+        for x in 0..16 {
+            let mut expected = [0.; 4];
+            for dx in [0.125, 0.375, 0.625, 0.875] {
+                let t = (x as f64 + dx) / 16.;
+                let pair = usize::from(t >= 0.5);
+                let local = if pair == 0 { 2. * t } else { 2. * t - 1. };
+                let source = perceptual_oracle::interpolate(
+                    colors[pair],
+                    colors[pair + 1],
+                    local,
+                    Mode::Oklab,
+                );
+                for (destination, source) in expected.iter_mut().zip(source) {
+                    *destination += source * 0.25;
+                }
+            }
+            for (name, bytes) in [("GPU", gpu.as_slice()), ("CPU", canvas.pixels())] {
+                for (c, &expected) in expected.iter().enumerate() {
+                    let byte = (x * 4 + c) * 2;
+                    let actual = half(&bytes[byte..byte + 2]);
+                    let tolerance = if c == 3 {
+                        0.001
+                    } else {
+                        0.000005 + 0.002 * expected.abs()
+                    };
+                    assert!(
+                        (actual - expected).abs() <= tolerance,
+                        "{name} x={x} c={c}: actual={actual} expected={expected} tolerance={tolerance}"
+                    );
+                }
+            }
+        }
+    });
+}
+
+#[test]
 fn lab_bernstein_hdr_cohorts_match_independent_oracle() {
     use gpui_canvas::{
         Extend, Gradient, GradientGeometry, GradientStop as Stop, Interpolation as Mode,
