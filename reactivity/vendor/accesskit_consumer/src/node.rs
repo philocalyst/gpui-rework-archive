@@ -375,13 +375,14 @@ impl<'a> NodeRef<'a> {
                 }
                 Frame::Visit(node, point) => {
                     let filter_result = filter(&node);
-                    if filter_result == FilterResult::ExcludeSubtree
-                        || (node.clips_children() && !node.point_in_child_clip(point))
-                    {
+                    if filter_result == FilterResult::ExcludeSubtree {
                         continue;
                     }
                     if filter_result == FilterResult::Include {
                         stack.push(Frame::Test(node, point));
+                    }
+                    if node.clips_children() && !node.point_in_child_clip(point) {
+                        continue;
                     }
                     for child in node.children() {
                         let child_point = child.direct_transform().inverse() * point;
