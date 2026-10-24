@@ -1,0 +1,239 @@
+
+/tmp/gpui-metric-control-artifacts/text_run_probe:     file format elf64-x86-64
+
+
+Disassembly of section .text:
+
+0000000000592cc0 <<gpui_canvas::canvas::DisplayList>::get>:
+  592cc0:	push   %r15
+  592cc2:	push   %r14
+  592cc4:	push   %rbx
+  592cc5:	sub    $0x10,%rsp
+  592cc9:	movzwl 0xa(%rdx),%r8d
+  592cce:	movzwl 0x8(%rdx),%eax
+  592cd2:	cmp    $0xffff,%r8
+  592cd9:	je     592db4 <<gpui_canvas::canvas::DisplayList>::get+0xf4>
+  592cdf:	mov    0xb0(%rsi),%r9
+  592ce6:	cmp    %rax,%r9
+  592ce9:	jbe    593037 <<gpui_canvas::canvas::DisplayList>::get+0x377>
+  592cef:	mov    0xa8(%rsi),%rbx
+  592cf6:	shl    $0x6,%eax
+  592cf9:	mov    0x8(%rbx,%rax,1),%r9
+  592cfe:	cmp    %r8,%r9
+  592d01:	jbe    59304a <<gpui_canvas::canvas::DisplayList>::get+0x38a>
+  592d07:	movzwl 0xc(%rdx),%r11d
+  592d0c:	mov    %r11d,%r9d
+  592d0f:	mov    0xf8(%rsi),%r10
+  592d16:	cmp    %r9,%r10
+  592d19:	jbe    59305d <<gpui_canvas::canvas::DisplayList>::get+0x39d>
+  592d1f:	lea    (%rbx,%rax,1),%r10
+  592d23:	movss  0x30(%rbx,%rax,1),%xmm0
+  592d29:	movss  0x34(%rbx,%rax,1),%xmm2
+  592d2f:	mov    0xf0(%rsi),%r14
+  592d36:	mov    (%r10),%r15
+  592d39:	lea    (%r8,%r8,2),%r8
+  592d3d:	mov    (%r14,%r9,8),%r9
+  592d41:	addss  0x4(%r15,%r8,4),%xmm0
+  592d48:	addss  0x8(%r15,%r8,4),%xmm2
+  592d4f:	movsd  0x48(%r9),%xmm1
+  592d55:	cvtdq2ps %xmm1,%xmm4
+  592d58:	movss  0x38(%r10),%xmm3
+  592d5e:	shufps $0x0,%xmm3,%xmm3
+  592d62:	divps  %xmm3,%xmm4
+  592d65:	movaps %xmm4,%xmm5
+  592d68:	shufps $0x55,%xmm4,%xmm5
+  592d6c:	mov    0x38(%r9),%r8
+  592d70:	mov    0x40(%r9),%r9
+  592d74:	test   %r9,%r9
+  592d77:	js     592e89 <<gpui_canvas::canvas::DisplayList>::get+0x1c9>
+  592d7d:	xorps  %xmm1,%xmm1
+  592d80:	cvtsi2ss %r9,%xmm1
+  592d85:	addss  %xmm4,%xmm0
+  592d89:	subss  %xmm5,%xmm2
+  592d8d:	test   %r8,%r8
+  592d90:	jns    592eb3 <<gpui_canvas::canvas::DisplayList>::get+0x1f3>
+  592d96:	mov    %r8,%r9
+  592d99:	shr    $1,%r9
+  592d9c:	and    $0x1,%r8d
+  592da0:	or     %r9,%r8
+  592da3:	xorps  %xmm4,%xmm4
+  592da6:	cvtsi2ss %r8,%xmm4
+  592dab:	addss  %xmm4,%xmm4
+  592daf:	jmp    592ebb <<gpui_canvas::canvas::DisplayList>::get+0x1fb>
+  592db4:	mov    0x98(%rsi),%r8
+  592dbb:	cmp    %rax,%r8
+  592dbe:	jbe    593093 <<gpui_canvas::canvas::DisplayList>::get+0x3d3>
+  592dc4:	mov    0x90(%rsi),%r9
+  592dcb:	lea    (%rax,%rax,2),%r10
+  592dcf:	shl    $0x4,%r10d
+  592dd3:	mov    0x28(%r9,%r10,1),%r11d
+  592dd8:	movups 0x10(%r9,%r10,1),%xmm1
+  592dde:	mov    0x20(%r9,%r10,1),%r8d
+  592de3:	mov    0x24(%r9,%r10,1),%eax
+  592de8:	movups (%r9,%r10,1),%xmm0
+  592ded:	mov    (%rdx),%rdx
+  592df0:	test   %r8d,%r8d
+  592df3:	jne    592eec <<gpui_canvas::canvas::DisplayList>::get+0x22c>
+  592df9:	movaps -0x55b510(%rip),%xmm2        # 378f0 <anon.fd259e55f6337549f4fd45a0db239f1c.9.llvm.4692994314956891543+0x4f0>
+  592e00:	movaps -0x55c5c7(%rip),%xmm3        # 36840 <anon.fd259e55f6337549f4fd45a0db239f1c.5.llvm.4692994314956891543+0x280>
+  592e07:	cmp    $0x3fffffff,%r11d
+  592e0e:	jg     592f32 <<gpui_canvas::canvas::DisplayList>::get+0x272>
+  592e14:	cmp    $0x3,%eax
+  592e17:	jae    592f87 <<gpui_canvas::canvas::DisplayList>::get+0x2c7>
+  592e1d:	mov    %eax,%eax
+  592e1f:	lea    -0x54c6ca(%rip),%r8        # 4675c <anon.5be91be43c2876666deeb2bf5df5d357.155.llvm.1276089336069091895+0x303c>
+  592e26:	lea    -0x54c6c5(%rip),%r9        # 46768 <anon.5be91be43c2876666deeb2bf5df5d357.155.llvm.1276089336069091895+0x3048>
+  592e2d:	movss  (%r9,%rax,4),%xmm5
+  592e33:	movss  (%r8,%rax,4),%xmm4
+  592e39:	movaps %xmm4,%xmm6
+  592e3c:	unpcklps %xmm5,%xmm6
+  592e3f:	shufps $0x40,%xmm6,%xmm4
+  592e43:	movups (%rcx),%xmm5
+  592e46:	movaps %xmm5,(%rsp)
+  592e4a:	cmp    $0xffffffff,%r11d
+  592e4e:	je     592fbb <<gpui_canvas::canvas::DisplayList>::get+0x2fb>
+  592e54:	test   %r11d,%r11d
+  592e57:	js     592fbf <<gpui_canvas::canvas::DisplayList>::get+0x2ff>
+  592e5d:	mov    %r11d,%eax
+  592e60:	mov    0xf8(%rsi),%rcx
+  592e67:	cmp    %rax,%rcx
+  592e6a:	jbe    5930b9 <<gpui_canvas::canvas::DisplayList>::get+0x3f9>
+  592e70:	mov    0xf0(%rsi),%rcx
+  592e77:	mov    (%rcx,%rax,8),%rcx
+  592e7b:	add    $0x10,%rcx
+  592e7f:	mov    $0x2,%eax
+  592e84:	jmp    592f85 <<gpui_canvas::canvas::DisplayList>::get+0x2c5>
+  592e89:	mov    %r9,%r10
+  592e8c:	shr    $1,%r10
+  592e8f:	and    $0x1,%r9d
+  592e93:	or     %r10,%r9
+  592e96:	xorps  %xmm1,%xmm1
+  592e99:	cvtsi2ss %r9,%xmm1
+  592e9e:	addss  %xmm1,%xmm1
+  592ea2:	addss  %xmm4,%xmm0
+  592ea6:	subss  %xmm5,%xmm2
+  592eaa:	test   %r8,%r8
+  592ead:	js     592d96 <<gpui_canvas::canvas::DisplayList>::get+0xd6>
+  592eb3:	xorps  %xmm4,%xmm4
+  592eb6:	cvtsi2ss %r8,%xmm4
+  592ebb:	unpcklps %xmm1,%xmm4
+  592ebe:	movups 0x10(%rbx,%rax,1),%xmm1
+  592ec3:	mov    0x20(%rbx,%rax,1),%r8d
+  592ec8:	mov    0x24(%rbx,%rax,1),%eax
+  592ecc:	divps  %xmm3,%xmm4
+  592ecf:	movaps %xmm4,%xmm3
+  592ed2:	shufps $0x55,%xmm4,%xmm3
+  592ed6:	subss  %xmm3,%xmm2
+  592eda:	unpcklps %xmm2,%xmm0
+  592edd:	movlhps %xmm4,%xmm0
+  592ee0:	mov    (%rdx),%rdx
+  592ee3:	test   %r8d,%r8d
+  592ee6:	je     592df9 <<gpui_canvas::canvas::DisplayList>::get+0x139>
+  592eec:	mov    %r8d,%r9d
+  592eef:	dec    %r9
+  592ef2:	mov    0xc8(%rsi),%r8
+  592ef9:	cmp    %r8,%r9
+  592efc:	jae    593070 <<gpui_canvas::canvas::DisplayList>::get+0x3b0>
+  592f02:	mov    0xc0(%rsi),%r8
+  592f09:	lea    (%r9,%r9,2),%r9
+  592f0d:	shl    $0x4,%r9
+  592f11:	movups (%r8,%r9,1),%xmm3
+  592f16:	movups 0x10(%r8,%r9,1),%xmm2
+  592f1c:	movups 0x20(%r8,%r9,1),%xmm4
+  592f22:	movups %xmm4,(%rcx)
+  592f25:	cmp    $0x3fffffff,%r11d
+  592f2c:	jle    592e14 <<gpui_canvas::canvas::DisplayList>::get+0x154>
+  592f32:	movups (%rcx),%xmm4
+  592f35:	movaps %xmm4,(%rsp)
+  592f39:	mov    0x100(%rsi),%r8
+  592f40:	test   %r8,%r8
+  592f43:	je     59302a <<gpui_canvas::canvas::DisplayList>::get+0x36a>
+  592f49:	mov    %r11d,%ecx
+  592f4c:	and    $0x1fffffff,%ecx
+  592f52:	mov    0x10(%r8),%rsi
+  592f56:	cmp    %rcx,%rsi
+  592f59:	jbe    593083 <<gpui_canvas::canvas::DisplayList>::get+0x3c3>
+  592f5f:	shl    $0x3,%ecx
+  592f62:	add    0x8(%r8),%rcx
+  592f66:	movd   %eax,%xmm5
+  592f6a:	and    $0x20000000,%r11d
+  592f71:	xor    %eax,%eax
+  592f73:	cmp    $0x1,%r11d
+  592f77:	adc    $0x3,%eax
+  592f7a:	movaps -0x55c4b1(%rip),%xmm4        # 36ad0 <anon.fd259e55f6337549f4fd45a0db239f1c.5.llvm.4692994314956891543+0x510>
+  592f81:	movss  %xmm5,%xmm4
+  592f85:	jmp    592fcb <<gpui_canvas::canvas::DisplayList>::get+0x30b>
+  592f87:	mov    0xe0(%rsi),%r8
+  592f8e:	add    $0xfffffffd,%eax
+  592f91:	cmp    %rax,%r8
+  592f94:	jbe    5930a6 <<gpui_canvas::canvas::DisplayList>::get+0x3e6>
+  592f9a:	mov    0xd8(%rsi),%r8
+  592fa1:	lea    (%rax,%rax,2),%rax
+  592fa5:	movups (%r8,%rax,8),%xmm4
+  592faa:	movups (%rcx),%xmm5
+  592fad:	movaps %xmm5,(%rsp)
+  592fb1:	cmp    $0xffffffff,%r11d
+  592fb5:	jne    592e54 <<gpui_canvas::canvas::DisplayList>::get+0x194>
+  592fbb:	xor    %eax,%eax
+  592fbd:	jmp    592fcb <<gpui_canvas::canvas::DisplayList>::get+0x30b>
+  592fbf:	and    $0x7fffffff,%r11d
+  592fc6:	mov    $0x1,%eax
+  592fcb:	mov    %rdx,%rsi
+  592fce:	shr    $0x20,%rsi
+  592fd2:	movzwl %si,%esi
+  592fd5:	mov    %edx,%r8d
+  592fd8:	shr    $0x10,%r8d
+  592fdc:	movzwl %dx,%r9d
+  592fe0:	shr    $0x30,%rdx
+  592fe4:	movups %xmm0,0x10(%rdi)
+  592fe8:	movaps (%rsp),%xmm0
+  592fec:	movups %xmm0,0x20(%rdi)
+  592ff0:	movups %xmm3,0x30(%rdi)
+  592ff4:	movups %xmm2,0x40(%rdi)
+  592ff8:	movups %xmm1,0x50(%rdi)
+  592ffc:	mov    %eax,(%rdi)
+  592ffe:	mov    %r11d,0x4(%rdi)
+  593002:	mov    %rcx,0x8(%rdi)
+  593006:	movups %xmm4,0x60(%rdi)
+  59300a:	mov    %r9,0x70(%rdi)
+  59300e:	mov    %r8,0x78(%rdi)
+  593012:	mov    %rsi,0x80(%rdi)
+  593019:	mov    %rdx,0x88(%rdi)
+  593020:	add    $0x10,%rsp
+  593024:	pop    %rbx
+  593025:	pop    %r14
+  593027:	pop    %r15
+  593029:	ret
+  59302a:	lea    0x1d3f47(%rip),%rdi        # 766f78 <anon.be4d51fbbe824da7f5ab1afc5d73eb57.0.llvm.5255786034794295177+0x5290>
+  593031:	call   *0x1e7ef1(%rip)        # 77af28 <_DYNAMIC+0x2d0>
+  593037:	lea    0x1d3f0a(%rip),%rdx        # 766f48 <anon.be4d51fbbe824da7f5ab1afc5d73eb57.0.llvm.5255786034794295177+0x5260>
+  59303e:	mov    %rax,%rdi
+  593041:	mov    %r9,%rsi
+  593044:	call   *0x1e7ee6(%rip)        # 77af30 <_DYNAMIC+0x2d8>
+  59304a:	lea    0x1d3f57(%rip),%rdx        # 766fa8 <anon.be4d51fbbe824da7f5ab1afc5d73eb57.0.llvm.5255786034794295177+0x52c0>
+  593051:	mov    %r8,%rdi
+  593054:	mov    %r9,%rsi
+  593057:	call   *0x1e7ed3(%rip)        # 77af30 <_DYNAMIC+0x2d8>
+  59305d:	lea    0x1d3f5c(%rip),%rdx        # 766fc0 <anon.be4d51fbbe824da7f5ab1afc5d73eb57.0.llvm.5255786034794295177+0x52d8>
+  593064:	mov    %r9,%rdi
+  593067:	mov    %r10,%rsi
+  59306a:	call   *0x1e7ec0(%rip)        # 77af30 <_DYNAMIC+0x2d8>
+  593070:	lea    0x1d4251(%rip),%rdx        # 7672c8 <anon.5aeaa60913b4df1acb6ef522a5bff98d.35.llvm.16382158044649164693>
+  593077:	mov    %r9,%rdi
+  59307a:	mov    %r8,%rsi
+  59307d:	call   *0x1e7ead(%rip)        # 77af30 <_DYNAMIC+0x2d8>
+  593083:	lea    0x1d3f06(%rip),%rdx        # 766f90 <anon.be4d51fbbe824da7f5ab1afc5d73eb57.0.llvm.5255786034794295177+0x52a8>
+  59308a:	mov    %rcx,%rdi
+  59308d:	call   *0x1e7e9d(%rip)        # 77af30 <_DYNAMIC+0x2d8>
+  593093:	lea    0x1d3e96(%rip),%rdx        # 766f30 <anon.be4d51fbbe824da7f5ab1afc5d73eb57.0.llvm.5255786034794295177+0x5248>
+  59309a:	mov    %rax,%rdi
+  59309d:	mov    %r8,%rsi
+  5930a0:	call   *0x1e7e8a(%rip)        # 77af30 <_DYNAMIC+0x2d8>
+  5930a6:	lea    0x1d41d3(%rip),%rdx        # 767280 <anon.5aeaa60913b4df1acb6ef522a5bff98d.30.llvm.16382158044649164693>
+  5930ad:	mov    %rax,%rdi
+  5930b0:	mov    %r8,%rsi
+  5930b3:	call   *0x1e7e77(%rip)        # 77af30 <_DYNAMIC+0x2d8>
+  5930b9:	lea    0x1d3ea0(%rip),%rdx        # 766f60 <anon.be4d51fbbe824da7f5ab1afc5d73eb57.0.llvm.5255786034794295177+0x5278>
+  5930c0:	mov    %rax,%rdi
+  5930c3:	mov    %rcx,%rsi
+  5930c6:	call   *0x1e7e64(%rip)        # 77af30 <_DYNAMIC+0x2d8>

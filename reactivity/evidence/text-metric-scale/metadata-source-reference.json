@@ -1,0 +1,23 @@
+{
+  "source": "821f486ba1aa84abe96b4150b592abfcf73c28c0",
+  "root_owned_paths": [
+    "/tmp/gpui-text-views-root-full",
+    "/tmp/gpui-text-views-root-release-build",
+    "/tmp/gpui-text-views-root-release-execute-guard",
+    "/tmp/gpui-text-views-root-release-artifacts/result.json",
+    "/tmp/gpui-text-views-root-strict",
+    "/tmp/gpui-text-views-root-assembly/result.json",
+    "/tmp/gpui-text-views-root-release-artifacts/000-render/packet-probe.json"
+  ],
+  "root_frozen_gpu_sha256": "89e55aae3d6e0d4878cff0c6e99609bad6a4ff98800f8f76530ca0ad3f06870e",
+  "root_reported_full": {
+    "passed": 302,
+    "ignored": 4,
+    "harnesses": 36
+  },
+  "root_reported_default_gpu": 49,
+  "root_reported_strict_release_alltarget": "pass",
+  "shipping_lines_delta": 9,
+  "retained_field_and_allocation_delta": 0,
+  "capsule_packaged_separately_by_root": true
+}

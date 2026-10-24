@@ -1,0 +1,894 @@
+
+/tmp/gpui-metric-control-gpu-artifacts/render:     file format elf64-x86-64
+
+
+Disassembly of section .text:
+
+0000000000b08f40 <<gpui_canvas::canvas::Canvas>::draw_text_working::{closure#0}>:
+  b08f40:	push   %rbp
+  b08f41:	push   %r15
+  b08f43:	push   %r14
+  b08f45:	push   %r13
+  b08f47:	push   %r12
+  b08f49:	push   %rbx
+  b08f4a:	sub    $0x1d8,%rsp
+  b08f51:	mov    (%rdi),%r12
+  b08f54:	mov    0x8(%r12),%rax
+  b08f59:	test   %rax,%rax
+  b08f5c:	je     b09b92 <<gpui_canvas::canvas::Canvas>::draw_text_working::{closure#0}+0xc52>
+  b08f62:	mov    (%r12),%r14
+  b08f66:	lea    (%rax,%rax,2),%rax
+  b08f6a:	lea    (%r14,%rax,4),%rax
+  b08f6e:	mov    %rax,0x180(%rsp)
+  b08f76:	mov    0x8(%rdi),%rax
+  b08f7a:	mov    %rax,0x178(%rsp)
+  b08f82:	mov    0x10(%rdi),%rax
+  b08f86:	mov    %rax,0x138(%rsp)
+  b08f8e:	mov    0x18(%rdi),%r15
+  b08f92:	lea    0x40(%r15),%rax
+  b08f96:	mov    %rax,0xf8(%rsp)
+  b08f9e:	lea    0x60(%r15),%rax
+  b08fa2:	mov    %rax,0x110(%rsp)
+  b08faa:	lea    0x10(%r15),%rax
+  b08fae:	mov    %rax,0x100(%rsp)
+  b08fb6:	lea    0x30(%r15),%rax
+  b08fba:	mov    %rax,0x108(%rsp)
+  b08fc2:	mov    0x20(%rdi),%rax
+  b08fc6:	mov    %rax,0x128(%rsp)
+  b08fce:	mov    0x28(%rdi),%rax
+  b08fd2:	mov    %rax,0x198(%rsp)
+  b08fda:	mov    0x30(%rdi),%rax
+  b08fde:	mov    %rax,0x190(%rsp)
+  b08fe6:	mov    0x38(%rdi),%rax
+  b08fea:	mov    %rax,0x188(%rsp)
+  b08ff2:	mov    0x40(%rdi),%rax
+  b08ff6:	mov    %rax,0x170(%rsp)
+  b08ffe:	mov    0x48(%rdi),%r13
+  b09002:	mov    0x50(%rdi),%rax
+  b09006:	mov    %rax,0x168(%rsp)
+  b0900e:	mov    0x58(%rdi),%rax
+  b09012:	mov    %rax,0x158(%rsp)
+  b0901a:	lea    0xe8(%r15),%rax
+  b09021:	mov    %rax,0x150(%rsp)
+  b09029:	mov    0x60(%rdi),%rax
+  b0902d:	mov    %rax,0x160(%rsp)
+  b09035:	lea    0x70(%r15),%rax
+  b09039:	mov    %rax,0xd8(%rsp)
+  b09041:	mov    %rdi,0x140(%rsp)
+  b09049:	mov    0x68(%rdi),%rax
+  b0904d:	mov    %rax,0x118(%rsp)
+  b09055:	add    $0x20,%rax
+  b09059:	mov    %rax,0x148(%rsp)
+  b09061:	xor    %ebx,%ebx
+  b09063:	mov    %r13,0x20(%rsp)
+  b09068:	mov    %r12,0x50(%rsp)
+  b0906d:	mov    %r15,0x10(%rsp)
+  b09072:	jmp    b090e8 <<gpui_canvas::canvas::Canvas>::draw_text_working::{closure#0}+0x1a8>
+  b09074:	data16 data16 cs nopw 0x0(%rax,%rax,1)
+  b09080:	mov    0x118(%rsp),%rax
+  b09088:	movl   $0x1,(%rax)
+  b0908e:	movaps 0xb0(%rsp),%xmm0
+  b09096:	movlps %xmm0,0x4(%rax)
+  b0909a:	movdqa 0x1b0(%rsp),%xmm0
+  b090a3:	movdqu %xmm0,0xc(%rax)
+  b090a8:	mov    0xf4(%rsp),%ecx
+  b090af:	mov    %ecx,0x1c(%rax)
+  b090b2:	mov    0x120(%rsp),%rcx
+  b090ba:	mov    %rcx,0x20(%rax)
+  b090be:	mov    %bp,0x28(%rax)
+  b090c2:	mov    0x1c(%rsp),%ebx
+  b090c6:	mov    %bx,0x2a(%rax)
+  b090ca:	mov    %r13w,0x2c(%rax)
+  b090cf:	mov    0x20(%rsp),%r13
+  b090d4:	add    $0xc,%r14
+  b090d8:	inc    %ebx
+  b090da:	cmp    0x180(%rsp),%r14
+  b090e2:	je     b09c5a <<gpui_canvas::canvas::Canvas>::draw_text_working::{closure#0}+0xd1a>
+  b090e8:	mov    %ebx,0x1c(%rsp)
+  b090ec:	mov    (%r14),%ebx
+  b090ef:	mov    %ebx,%ecx
+  b090f1:	and    $0x1ffff,%ecx
+  b090f7:	lea    0xff0000(,%rcx,2),%eax
+  b090fe:	and    $0xff0000,%eax
+  b09103:	xor    %ebp,%ebp
+  b09105:	cmp    $0x10000,%ecx
+  b0910b:	setb   %cl
+  b0910e:	mov    $0x0,%edx
+  b09113:	cmovb  %edx,%eax
+  b09116:	movq   0x4(%r14),%xmm1
+  b0911c:	mov    0x138(%rsp),%rdx
+  b09124:	movss  (%rdx),%xmm0
+  b09128:	movss  %xmm0,0x28(%rsp)
+  b0912e:	mov    0x18(%r12),%rdx
+  b09133:	test   %eax,%eax
+  b09135:	je     b09160 <<gpui_canvas::canvas::Canvas>::draw_text_working::{closure#0}+0x220>
+  b09137:	mov    $0xc,%r15d
+  b0913d:	xor    %r12d,%r12d
+  b09140:	cmp    $0x2ffff,%eax
+  b09145:	ja     b09eb6 <<gpui_canvas::canvas::Canvas>::draw_text_working::{closure#0}+0xf76>
+  b0914b:	mov    %eax,%esi
+  b0914d:	shr    $0x10,%esi
+  b09150:	mov    0x10(%rdx,%rsi,8),%rdx
+  b09155:	test   %rdx,%rdx
+  b09158:	jne    b09164 <<gpui_canvas::canvas::Canvas>::draw_text_working::{closure#0}+0x224>
+  b0915a:	jmp    b09eb6 <<gpui_canvas::canvas::Canvas>::draw_text_working::{closure#0}+0xf76>
+  b0915f:	nop
+  b09160:	mov    0x10(%rdx),%rdx
+  b09164:	mov    %r14,0x58(%rsp)
+  b09169:	mov    %cl,%bpl
+  b0916c:	shl    $0xf,%ebp
+  b0916f:	or     $0x7fff,%ebp
+  b09175:	and    %ebx,%ebp
+  b09177:	mov    0x2c(%rsp),%ecx
+  b0917b:	and    $0xff000000,%ecx
+  b09181:	or     %ebp,%ecx
+  b09183:	or     %eax,%ecx
+  b09185:	mov    %ecx,0x2c(%rsp)
+  b09189:	mov    0x28(%rdx),%rax
+  b0918d:	mov    %rax,0x130(%rsp)
+  b09195:	mov    %rax,0xe0(%rsp)
+  b0919d:	movd   0x28(%rsp),%xmm0
+  b091a3:	movd   %xmm0,0xe8(%rsp)
+  b091ac:	mov    %bp,0xec(%rsp)
+  b091b4:	mov    0xe0(%rsp),%rax
+  b091bc:	mov    %rax,0xc0(%rsp)
+  b091c4:	mov    0xe8(%rsp),%eax
+  b091cb:	mov    %eax,0xc8(%rsp)
+  b091d2:	movzwl 0xec(%rsp),%eax
+  b091da:	mov    %ax,0xcc(%rsp)
+  b091e2:	movzwl 0xee(%rsp),%eax
+  b091ea:	mov    %ax,0xce(%rsp)
+  b091f2:	mov    0xc0(%rsp),%r15
+  b091fa:	movzwl 0xcc(%rsp),%r12d
+  b09203:	mov    0xc8(%rsp),%r14d
+  b0920b:	mov    %r14,%r13
+  b0920e:	shl    $0x10,%r13
+  b09212:	or     %r12,%r13
+  b09215:	mov    %r13,0x60(%rsp)
+  b0921a:	mov    0x10(%rsp),%rax
+  b0921f:	cmpl   $0x1,(%rax)
+  b09222:	movdqa %xmm1,0xb0(%rsp)
+  b0922b:	jne    b09300 <<gpui_canvas::canvas::Canvas>::draw_text_working::{closure#0}+0x3c0>
+  b09231:	cmp    %r15,0x8(%rax)
+  b09235:	jne    b09300 <<gpui_canvas::canvas::Canvas>::draw_text_working::{closure#0}+0x3c0>
+  b0923b:	cmpq   $0x0,0x28(%rax)
+  b09240:	je     b093d0 <<gpui_canvas::canvas::Canvas>::draw_text_working::{closure#0}+0x490>
+  b09246:	mov    0x108(%rsp),%rdi
+  b0924e:	lea    0x60(%rsp),%rsi
+  b09253:	call   b16190 <<std::hash::random::RandomState as core::hash::BuildHasher>::hash_one::<&gpui_canvas::image::ImageKey>>
+  b09258:	mov    %rax,%rsi
+  b0925b:	shr    $0x39,%rsi
+  b0925f:	mov    0x10(%rsp),%rdx
+  b09264:	mov    0x10(%rdx),%rcx
+  b09268:	mov    0x18(%rdx),%rdx
+  b0926c:	movd   %esi,%xmm0
+  b09270:	punpcklbw %xmm0,%xmm0
+  b09274:	pshuflw $0x0,%xmm0,%xmm0
+  b09279:	pshufd $0x44,%xmm0,%xmm0
+  b0927e:	xor    %esi,%esi
+  b09280:	and    %rdx,%rax
+  b09283:	movdqu (%rcx,%rax,1),%xmm1
+  b09288:	movdqa %xmm1,%xmm2
+  b0928c:	pcmpeqb %xmm0,%xmm2
+  b09290:	pmovmskb %xmm2,%edi
+  b09294:	test   %edi,%edi
+  b09296:	je     b092d0 <<gpui_canvas::canvas::Canvas>::draw_text_working::{closure#0}+0x390>
+  b09298:	tzcnt  %edi,%r9d
+  b0929d:	add    %rax,%r9
+  b092a0:	and    %rdx,%r9
+  b092a3:	shl    $0x4,%r9
+  b092a7:	mov    %rcx,%r8
+  b092aa:	sub    %r9,%r8
+  b092ad:	cmp    -0x10(%r8),%r13
+  b092b1:	je     b09450 <<gpui_canvas::canvas::Canvas>::draw_text_working::{closure#0}+0x510>
+  b092b7:	lea    -0x1(%rdi),%r8d
+  b092bb:	and    %di,%r8w
+  b092bf:	mov    %r8d,%edi
+  b092c2:	jne    b09298 <<gpui_canvas::canvas::Canvas>::draw_text_working::{closure#0}+0x358>
+  b092c4:	data16 data16 cs nopw 0x0(%rax,%rax,1)
+  b092d0:	pcmpeqd %xmm2,%xmm2
+  b092d4:	pcmpeqb %xmm2,%xmm1
+  b092d8:	pmovmskb %xmm1,%edi
+  b092dc:	test   %edi,%edi
+  b092de:	movdqa 0xb0(%rsp),%xmm1
+  b092e7:	jne    b093d0 <<gpui_canvas::canvas::Canvas>::draw_text_working::{closure#0}+0x490>
+  b092ed:	add    %rsi,%rax
+  b092f0:	add    $0x10,%rax
+  b092f4:	add    $0x10,%rsi
+  b092f8:	jmp    b09280 <<gpui_canvas::canvas::Canvas>::draw_text_working::{closure#0}+0x340>
+  b092fa:	nopw   0x0(%rax,%rax,1)
+  b09300:	cmpq   $0x0,0x58(%rax)
+  b09305:	je     b093d0 <<gpui_canvas::canvas::Canvas>::draw_text_working::{closure#0}+0x490>
+  b0930b:	mov    0x110(%rsp),%rdi
+  b09313:	lea    0xc0(%rsp),%rsi
+  b0931b:	call   b15ff0 <<std::hash::random::RandomState as core::hash::BuildHasher>::hash_one::<&gpui_canvas::text::GlyphKey>>
+  b09320:	mov    %rax,%rsi
+  b09323:	shr    $0x39,%rsi
+  b09327:	mov    0x10(%rsp),%rdx
+  b0932c:	mov    0x40(%rdx),%rcx
+  b09330:	mov    0x48(%rdx),%rdx
+  b09334:	movd   %esi,%xmm0
+  b09338:	punpcklbw %xmm0,%xmm0
+  b0933c:	pshuflw $0x0,%xmm0,%xmm0
+  b09341:	pshufd $0x44,%xmm0,%xmm0
+  b09346:	xor    %esi,%esi
+  b09348:	and    %rdx,%rax
+  b0934b:	movdqu (%rcx,%rax,1),%xmm1
+  b09350:	movdqa %xmm1,%xmm2
+  b09354:	pcmpeqb %xmm0,%xmm2
+  b09358:	pmovmskb %xmm2,%edi
+  b0935c:	test   %edi,%edi
+  b0935e:	je     b093a0 <<gpui_canvas::canvas::Canvas>::draw_text_working::{closure#0}+0x460>
+  b09360:	tzcnt  %edi,%r8d
+  b09365:	add    %rax,%r8
+  b09368:	and    %rdx,%r8
+  b0936b:	neg    %r8
+  b0936e:	lea    (%r8,%r8,2),%r8
+  b09372:	cmp    -0x18(%rcx,%r8,8),%r15
+  b09377:	jne    b0938e <<gpui_canvas::canvas::Canvas>::draw_text_working::{closure#0}+0x44e>
+  b09379:	lea    (%rcx,%r8,8),%r8
+  b0937d:	cmp    -0xc(%r8),%r12w
+  b09382:	jne    b0938e <<gpui_canvas::canvas::Canvas>::draw_text_working::{closure#0}+0x44e>
+  b09384:	cmp    -0x10(%r8),%r14d
+  b09388:	je     b09450 <<gpui_canvas::canvas::Canvas>::draw_text_working::{closure#0}+0x510>
+  b0938e:	lea    -0x1(%rdi),%r8d
+  b09392:	and    %di,%r8w
+  b09396:	mov    %r8d,%edi
+  b09399:	jne    b09360 <<gpui_canvas::canvas::Canvas>::draw_text_working::{closure#0}+0x420>
+  b0939b:	nopl   0x0(%rax,%rax,1)
+  b093a0:	pcmpeqd %xmm2,%xmm2
+  b093a4:	pcmpeqb %xmm2,%xmm1
+  b093a8:	pmovmskb %xmm1,%edi
+  b093ac:	test   %edi,%edi
+  b093ae:	movdqa 0xb0(%rsp),%xmm1
+  b093b7:	jne    b093d0 <<gpui_canvas::canvas::Canvas>::draw_text_working::{closure#0}+0x490>
+  b093b9:	add    %rsi,%rax
+  b093bc:	add    $0x10,%rax
+  b093c0:	add    $0x10,%rsi
+  b093c4:	jmp    b09348 <<gpui_canvas::canvas::Canvas>::draw_text_working::{closure#0}+0x408>
+  b093c6:	cs nopw 0x0(%rax,%rax,1)
+  b093d0:	shr    $0x11,%ebx
+  b093d3:	mov    0x138(%rsp),%rax
+  b093db:	movd   (%rax),%xmm0
+  b093df:	mov    %ebx,0x60(%rsp)
+  b093e3:	movq   %xmm1,0x64(%rsp)
+  b093e9:	mov    0x2c(%rsp),%eax
+  b093ed:	mov    %eax,0x6c(%rsp)
+  b093f1:	lea    0x30(%rsp),%rdi
+  b093f6:	mov    0x178(%rsp),%rsi
+  b093fe:	mov    0x50(%rsp),%r12
+  b09403:	mov    %r12,%rdx
+  b09406:	lea    0x60(%rsp),%rcx
+  b0940b:	call   b20710 <<gpui_canvas::text::TextSystem>::layout_raster>
+  b09410:	cmpb   $0x0,0x30(%rsp)
+  b09415:	jne    b09da2 <<gpui_canvas::canvas::Canvas>::draw_text_working::{closure#0}+0xe62>
+  b0941b:	mov    0x38(%rsp),%rax
+  b09420:	mov    %rax,0x8(%rsp)
+  b09425:	mov    0x10(%rsp),%r15
+  b0942a:	mov    0xf8(%r15),%edi
+  b09431:	mov    0x128(%rsp),%rsi
+  b09439:	movaps 0xb0(%rsp),%xmm6
+  b09441:	jmp    b09492 <<gpui_canvas::canvas::Canvas>::draw_text_working::{closure#0}+0x552>
+  b09443:	data16 data16 data16 cs nopw 0x0(%rax,%rax,1)
+  b09450:	mov    -0x8(%r8),%edi
+  b09454:	movq   $0x0,0x8(%rsp)
+  b0945d:	mov    0x10(%rsp),%r15
+  b09462:	mov    0xf8(%r15),%rsi
+  b09469:	cmp    %rdi,%rsi
+  b0946c:	movaps 0xb0(%rsp),%xmm6
+  b09474:	jbe    b09edd <<gpui_canvas::canvas::Canvas>::draw_text_working::{closure#0}+0xf9d>
+  b0947a:	mov    0xf0(%r15),%rax
+  b09481:	mov    (%rax,%rdi,8),%rax
+  b09485:	mov    0x50(%rsp),%r12
+  b0948a:	mov    0x128(%rsp),%rsi
+  b09492:	mov    0x198(%rsp),%rcx
+  b0949a:	movss  (%rcx),%xmm1
+  b0949e:	mov    0x40(%rax),%rcx
+  b094a2:	movaps %xmm6,%xmm0
+  b094a5:	shufps $0x55,%xmm6,%xmm0
+  b094a9:	addss  0x4(%rsi),%xmm0
+  b094ae:	test   %rcx,%rcx
+  b094b1:	js     b094e0 <<gpui_canvas::canvas::Canvas>::draw_text_working::{closure#0}+0x5a0>
+  b094b3:	cvtsi2ss %rcx,%xmm3
+  b094b8:	mov    0x38(%rax),%rcx
+  b094bc:	test   %rcx,%rcx
+  b094bf:	jns    b094fe <<gpui_canvas::canvas::Canvas>::draw_text_working::{closure#0}+0x5be>
+  b094c1:	mov    %rcx,%rdx
+  b094c4:	shr    $1,%rdx
+  b094c7:	and    $0x1,%ecx
+  b094ca:	or     %rdx,%rcx
+  b094cd:	xorps  %xmm2,%xmm2
+  b094d0:	cvtsi2ss %rcx,%xmm2
+  b094d5:	addss  %xmm2,%xmm2
+  b094d9:	jmp    b09506 <<gpui_canvas::canvas::Canvas>::draw_text_working::{closure#0}+0x5c6>
+  b094db:	nopl   0x0(%rax,%rax,1)
+  b094e0:	mov    %rcx,%rdx
+  b094e3:	shr    $1,%rdx
+  b094e6:	and    $0x1,%ecx
+  b094e9:	or     %rdx,%rcx
+  b094ec:	cvtsi2ss %rcx,%xmm3
+  b094f1:	addss  %xmm3,%xmm3
+  b094f5:	mov    0x38(%rax),%rcx
+  b094f9:	test   %rcx,%rcx
+  b094fc:	js     b094c1 <<gpui_canvas::canvas::Canvas>::draw_text_working::{closure#0}+0x581>
+  b094fe:	xorps  %xmm2,%xmm2
+  b09501:	cvtsi2ss %rcx,%xmm2
+  b09506:	cvtsi2ssl 0x48(%rax),%xmm4
+  b0950b:	cvtsi2ssl 0x4c(%rax),%xmm5
+  b09510:	unpcklps %xmm3,%xmm4
+  b09513:	divss  %xmm1,%xmm5
+  b09517:	divss  %xmm1,%xmm2
+  b0951b:	subss  %xmm5,%xmm0
+  b0951f:	addss  (%rsi),%xmm6
+  b09523:	shufps $0x0,%xmm1,%xmm1
+  b09527:	divps  %xmm1,%xmm4
+  b0952a:	movaps %xmm6,%xmm1
+  b0952d:	unpcklps %xmm0,%xmm1
+  b09530:	addps  %xmm4,%xmm6
+  b09533:	subps  %xmm4,%xmm1
+  b09536:	shufps $0x1,%xmm6,%xmm1
+  b0953a:	shufps $0xe2,%xmm6,%xmm1
+  b0953e:	movlps %xmm1,0x1a0(%rsp)
+  b09546:	movss  %xmm2,0x1a8(%rsp)
+  b0954f:	shufps $0x55,%xmm4,%xmm4
+  b09553:	movss  %xmm4,0x1ac(%rsp)
+  b0955c:	mov    0x190(%rsp),%rcx
+  b09564:	mov    0x10(%rcx),%rax
+  b09568:	mov    %rax,0x1d0(%rsp)
+  b09570:	movups (%rcx),%xmm0
+  b09573:	movaps %xmm0,0x1c0(%rsp)
+  b0957b:	mov    0x188(%rsp),%rax
+  b09583:	movups 0x40(%rax),%xmm0
+  b09587:	movaps %xmm0,0xa0(%rsp)
+  b0958f:	movdqu (%rax),%xmm0
+  b09593:	movdqu 0x10(%rax),%xmm1
+  b09598:	movdqu 0x20(%rax),%xmm2
+  b0959d:	movups 0x30(%rax),%xmm3
+  b095a1:	movaps %xmm3,0x90(%rsp)
+  b095a9:	movdqa %xmm2,0x80(%rsp)
+  b095b2:	movdqa %xmm1,0x70(%rsp)
+  b095b8:	movdqa %xmm0,0x60(%rsp)
+  b095be:	mov    0x190(%r15),%rsi
+  b095c5:	mov    0x198(%r15),%rdx
+  b095cc:	mov    $0x1,%bl
+  b095ce:	mov    %rdi,%r13
+  b095d1:	mov    %edi,(%rsp)
+  b095d4:	lea    0x30(%rsp),%rdi
+  b095d9:	lea    0x1a0(%rsp),%rcx
+  b095e1:	lea    0x1c0(%rsp),%r8
+  b095e9:	lea    0x60(%rsp),%r9
+  b095ee:	call   b0eed0 <<gpui_canvas::canvas::Canvas>::prepare>
+  b095f3:	mov    0x30(%rsp),%eax
+  b095f7:	movq   0x34(%rsp),%xmm0
+  b095fd:	movdqa %xmm0,0xb0(%rsp)
+  b09606:	cmp    $0x2,%eax
+  b09609:	je     b09c1a <<gpui_canvas::canvas::Canvas>::draw_text_working::{closure#0}+0xcda>
+  b0960f:	test   $0x1,%al
+  b09611:	je     b09780 <<gpui_canvas::canvas::Canvas>::draw_text_working::{closure#0}+0x840>
+  b09617:	mov    0x44(%rsp),%rsi
+  b0961c:	movdqu 0x3c(%rsp),%xmm0
+  b09622:	movdqa %xmm0,0x1b0(%rsp)
+  b0962b:	mov    0x4c(%rsp),%edi
+  b0962f:	mov    %rsi,%rcx
+  b09632:	shr    $0x20,%rcx
+  b09636:	mov    %rsi,%rax
+  b09639:	shr    $0x30,%rax
+  b0963d:	movzwl %cx,%ecx
+  b09640:	dec    %rcx
+  b09643:	shr    $0x4,%rcx
+  b09647:	mov    %esi,%edx
+  b09649:	shr    $0x4,%edx
+  b0964c:	and    $0xfff,%edx
+  b09652:	sub    %rdx,%rcx
+  b09655:	inc    %rcx
+  b09658:	dec    %rax
+  b0965b:	shr    $0x4,%rax
+  b0965f:	mov    %esi,%edx
+  b09661:	shr    $0x14,%edx
+  b09664:	sub    %rdx,%rax
+  b09667:	inc    %rax
+  b0966a:	imul   %rcx,%rax
+  b0966e:	mov    0x170(%rsp),%rdx
+  b09676:	add    %rax,(%rdx)
+  b09679:	mov    0x20(%rsp),%rax
+  b0967e:	mov    (%rax),%rcx
+  b09681:	inc    %rcx
+  b09684:	mov    %rcx,(%rax)
+  b09687:	mov    0x168(%rsp),%rax
+  b0968f:	mov    (%rax),%rax
+  b09692:	add    %rcx,%rax
+  b09695:	mov    $0x7,%r15d
+  b0969b:	cmp    $0x10000,%rax
+  b096a1:	mov    0x58(%rsp),%r14
+  b096a6:	ja     b09db1 <<gpui_canvas::canvas::Canvas>::draw_text_working::{closure#0}+0xe71>
+  b096ac:	mov    %rsi,0x120(%rsp)
+  b096b4:	mov    (%rdx),%rax
+  b096b7:	mov    0x10(%rsp),%rdx
+  b096bc:	add    0x1b8(%rdx),%rax
+  b096c3:	cmp    $0x400000,%rax
+  b096c9:	ja     b09c32 <<gpui_canvas::canvas::Canvas>::draw_text_working::{closure#0}+0xcf2>
+  b096cf:	mov    %edi,0xf4(%rsp)
+  b096d6:	mov    0x8(%rsp),%rax
+  b096db:	test   %rax,%rax
+  b096de:	je     b097b6 <<gpui_canvas::canvas::Canvas>::draw_text_working::{closure#0}+0x876>
+  b096e4:	mov    %rax,0x30(%rsp)
+  b096e9:	mov    0x158(%rsp),%rdx
+  b096f1:	mov    (%rdx),%rcx
+  b096f4:	add    0x20(%rax),%rcx
+  b096f8:	mov    %rcx,(%rdx)
+  b096fb:	mov    0x10(%rsp),%r15
+  b09700:	add    0x1b0(%r15),%rcx
+  b09707:	cmp    $0x2000000,%rcx
+  b0970e:	mov    0x50(%rsp),%r12
+  b09713:	mov    0x130(%rsp),%rbx
+  b0971b:	ja     b09b6d <<gpui_canvas::canvas::Canvas>::draw_text_working::{closure#0}+0xc2d>
+  b09721:	mov    %r13,%r14
+  b09724:	mov    0xf8(%r15),%rsi
+  b0972b:	cmp    %rsi,0xe8(%r15)
+  b09732:	je     b097dc <<gpui_canvas::canvas::Canvas>::draw_text_working::{closure#0}+0x89c>
+  b09738:	cmpl   $0x1,(%r15)
+  b0973c:	jne    b09843 <<gpui_canvas::canvas::Canvas>::draw_text_working::{closure#0}+0x903>
+  b09742:	cmp    %rbx,0x8(%r15)
+  b09746:	je     b09843 <<gpui_canvas::canvas::Canvas>::draw_text_working::{closure#0}+0x903>
+  b0974c:	cmpq   $0x0,0x50(%r15)
+  b09751:	jne    b0984e <<gpui_canvas::canvas::Canvas>::draw_text_working::{closure#0}+0x90e>
+  b09757:	mov    $0x1,%esi
+  b0975c:	mov    0xf8(%rsp),%rdi
+  b09764:	mov    0x110(%rsp),%rdx
+  b0976c:	xor    %ecx,%ecx
+  b0976e:	call   *0x22d57c(%rip)        # d36cf0 <_DYNAMIC+0x3a98>
+  b09774:	jmp    b09b63 <<gpui_canvas::canvas::Canvas>::draw_text_working::{closure#0}+0xc23>
+  b09779:	nopl   0x0(%rax)
+  b09780:	mov    0x8(%rsp),%rax
+  b09785:	test   %rax,%rax
+  b09788:	mov    0x58(%rsp),%r14
+  b0978d:	mov    0x1c(%rsp),%ebx
+  b09791:	mov    0x20(%rsp),%r13
+  b09796:	je     b090d4 <<gpui_canvas::canvas::Canvas>::draw_text_working::{closure#0}+0x194>
+  b0979c:	lock decq (%rax)
+  b097a0:	jne    b090d4 <<gpui_canvas::canvas::Canvas>::draw_text_working::{closure#0}+0x194>
+  b097a6:	lea    0x8(%rsp),%rdi
+  b097ab:	call   *0x229f4f(%rip)        # d33700 <_DYNAMIC+0x4a8>
+  b097b1:	jmp    b090d4 <<gpui_canvas::canvas::Canvas>::draw_text_working::{closure#0}+0x194>
+  b097b6:	mov    $0x1,%bl
+  b097b8:	mov    0x50(%rsp),%r12
+  b097bd:	mov    0x10(%rsp),%r15
+  b097c2:	mov    0x160(%rsp),%rax
+  b097ca:	movzwl (%rax),%ebp
+  b097cd:	cmp    $0x1,%rcx
+  b097d1:	jne    b09905 <<gpui_canvas::canvas::Canvas>::draw_text_working::{closure#0}+0x9c5>
+  b097d7:	jmp    b09080 <<gpui_canvas::canvas::Canvas>::draw_text_working::{closure#0}+0x140>
+  b097dc:	mov    %r15,%rbx
+  b097df:	lea    (%rsi,%rsi,1),%r15
+  b097e3:	cmp    $0x5,%r15
+  b097e7:	mov    $0x4,%eax
+  b097ec:	cmovb  %rax,%r15
+  b097f0:	mov    0xf0(%rbx),%rdx
+  b097f7:	mov    $0x8,%r8d
+  b097fd:	mov    $0x8,%r9d
+  b09803:	lea    0x60(%rsp),%rdi
+  b09808:	mov    %r15,%rcx
+  b0980b:	call   b215e0 <<alloc::raw_vec::RawVecInner>::finish_grow>
+  b09810:	cmpl   $0x1,0x60(%rsp)
+  b09815:	je     b09b6d <<gpui_canvas::canvas::Canvas>::draw_text_working::{closure#0}+0xc2d>
+  b0981b:	mov    0x68(%rsp),%rax
+  b09820:	mov    %rax,0xf0(%rbx)
+  b09827:	mov    %r15,0xe8(%rbx)
+  b0982e:	mov    %rbx,%r15
+  b09831:	mov    0x130(%rsp),%rbx
+  b09839:	cmpl   $0x1,(%r15)
+  b0983d:	je     b09742 <<gpui_canvas::canvas::Canvas>::draw_text_working::{closure#0}+0x802>
+  b09843:	cmpq   $0x0,0x20(%r15)
+  b09848:	je     b09b46 <<gpui_canvas::canvas::Canvas>::draw_text_working::{closure#0}+0xc06>
+  b0984e:	cmpb   $0x0,(%r15)
+  b09852:	je     b09874 <<gpui_canvas::canvas::Canvas>::draw_text_working::{closure#0}+0x934>
+  b09854:	cmp    %rbx,0x8(%r15)
+  b09858:	je     b0987f <<gpui_canvas::canvas::Canvas>::draw_text_working::{closure#0}+0x93f>
+  b0985a:	mov    0xf8(%rsp),%rdi
+  b09862:	lea    0xe0(%rsp),%rsi
+  b0986a:	mov    %r14d,%edx
+  b0986d:	call   b6b120 <<hashbrown::map::HashMap<gpui_canvas::text::GlyphKey, u32, std::hash::random::RandomState>>::insert>
+  b09872:	jmp    b098a4 <<gpui_canvas::canvas::Canvas>::draw_text_working::{closure#0}+0x964>
+  b09874:	movq   $0x1,(%r15)
+  b0987b:	mov    %rbx,0x8(%r15)
+  b0987f:	movd   0x28(%rsp),%xmm0
+  b09885:	movd   %xmm0,%eax
+  b09889:	mov    %eax,%eax
+  b0988b:	shl    $0x10,%rax
+  b0988f:	mov    %ebp,%esi
+  b09891:	or     %rax,%rsi
+  b09894:	mov    0x100(%rsp),%rdi
+  b0989c:	mov    %r14d,%edx
+  b0989f:	call   b6b460 <<hashbrown::map::HashMap<u64, u32, std::hash::random::RandomState>>::insert>
+  b098a4:	mov    0x30(%rsp),%rbx
+  b098a9:	mov    %rbx,0x60(%rsp)
+  b098ae:	mov    0xf8(%r15),%r14
+  b098b5:	cmp    0xe8(%r15),%r14
+  b098bc:	jne    b098cc <<gpui_canvas::canvas::Canvas>::draw_text_working::{closure#0}+0x98c>
+  b098be:	mov    0x150(%rsp),%rdi
+  b098c6:	call   *0x22d42c(%rip)        # d36cf8 <_DYNAMIC+0x3aa0>
+  b098cc:	mov    0xf0(%r15),%rax
+  b098d3:	mov    %rbx,(%rax,%r14,8)
+  b098d7:	inc    %r14
+  b098da:	mov    %r14,0xf8(%r15)
+  b098e1:	mov    0x20(%rsp),%rax
+  b098e6:	mov    (%rax),%rcx
+  b098e9:	xor    %ebx,%ebx
+  b098eb:	mov    0x58(%rsp),%r14
+  b098f0:	mov    0x160(%rsp),%rax
+  b098f8:	movzwl (%rax),%ebp
+  b098fb:	cmp    $0x1,%rcx
+  b098ff:	je     b09080 <<gpui_canvas::canvas::Canvas>::draw_text_working::{closure#0}+0x140>
+  b09905:	xor    %edx,%edx
+  b09907:	cmp    $0x2,%rcx
+  b0990b:	sete   %dl
+  b0990e:	mov    0x70(%r15),%rsi
+  b09912:	mov    0x80(%r15),%rdi
+  b09919:	lea    (%rdi,%rdx,1),%rax
+  b0991d:	inc    %rax
+  b09920:	cmp    %rsi,%rax
+  b09923:	jbe    b09a53 <<gpui_canvas::canvas::Canvas>::draw_text_working::{closure#0}+0xb13>
+  b09929:	mov    0xb0(%r15),%rcx
+  b09930:	test   %rcx,%rcx
+  b09933:	je     b0996a <<gpui_canvas::canvas::Canvas>::draw_text_working::{closure#0}+0xa2a>
+  b09935:	mov    0xa8(%r15),%rdx
+  b0993c:	shl    $0x6,%rcx
+  b09940:	mov    -0x14(%rdx,%rcx,1),%r8d
+  b09945:	sub    -0x18(%rdx,%rcx,1),%r8d
+  b0994a:	je     b09eee <<gpui_canvas::canvas::Canvas>::draw_text_working::{closure#0}+0xfae>
+  b09950:	mov    0x98(%r15),%r9
+  b09957:	sub    %r9,%rax
+  b0995a:	mov    %rax,%rcx
+  b0995d:	shr    $0x20,%rcx
+  b09961:	je     b099b1 <<gpui_canvas::canvas::Canvas>::draw_text_working::{closure#0}+0xa71>
+  b09963:	xor    %edx,%edx
+  b09965:	div    %r8
+  b09968:	jmp    b099b6 <<gpui_canvas::canvas::Canvas>::draw_text_working::{closure#0}+0xa76>
+  b0996a:	inc    %rdx
+  b0996d:	mov    %rsi,%rcx
+  b09970:	sub    %rdi,%rcx
+  b09973:	cmp    %rcx,%rdx
+  b09976:	jbe    b09a4b <<gpui_canvas::canvas::Canvas>::draw_text_working::{closure#0}+0xb0b>
+  b0997c:	lea    (%rsi,%rsi,1),%rcx
+  b09980:	cmp    %rax,%rcx
+  b09983:	cmova  %rcx,%rax
+  b09987:	cmp    $0x5,%rax
+  b0998b:	mov    $0x4,%ecx
+  b09990:	cmovb  %rcx,%rax
+  b09994:	mov    0x78(%r15),%rdx
+  b09998:	mov    $0x2,%r8d
+  b0999e:	mov    $0xe,%r9d
+  b099a4:	lea    0x60(%rsp),%rdi
+  b099a9:	mov    %rax,%r14
+  b099ac:	mov    %rax,%rcx
+  b099af:	jmp    b09a2e <<gpui_canvas::canvas::Canvas>::draw_text_working::{closure#0}+0xaee>
+  b099b1:	xor    %edx,%edx
+  b099b3:	div    %r8d
+  b099b6:	cmp    $0x1,%rdx
+  b099ba:	sbb    $0xffffffffffffffff,%rax
+  b099be:	sub    $0x1,%rax
+  b099c2:	mov    $0x0,%ecx
+  b099c7:	cmovb  %rcx,%rax
+  b099cb:	mov    $0x0,%ecx
+  b099d0:	test   %rax,%rax
+  b099d3:	js     b099e9 <<gpui_canvas::canvas::Canvas>::draw_text_working::{closure#0}+0xaa9>
+  b099d5:	mov    $0x7f,%ecx
+  b099da:	bsr    %rax,%rcx
+  b099de:	xor    $0x3f,%ecx
+  b099e1:	neg    %cl
+  b099e3:	shl    %cl,%r8
+  b099e6:	mov    %r8,%rcx
+  b099e9:	add    %r9,%rcx
+  b099ec:	cmp    $0x10000,%rcx
+  b099f3:	mov    $0x10000,%eax
+  b099f8:	cmovae %rax,%rcx
+  b099fc:	mov    %rcx,%rax
+  b099ff:	sub    %rdi,%rax
+  b09a02:	mov    %rsi,%rdx
+  b09a05:	sub    %rdi,%rdx
+  b09a08:	cmp    %rdx,%rax
+  b09a0b:	jbe    b09a4b <<gpui_canvas::canvas::Canvas>::draw_text_working::{closure#0}+0xb0b>
+  b09a0d:	cmp    %rdi,%rcx
+  b09a10:	jb     b09dc4 <<gpui_canvas::canvas::Canvas>::draw_text_working::{closure#0}+0xe84>
+  b09a16:	mov    0x78(%r15),%rdx
+  b09a1a:	mov    $0x2,%r8d
+  b09a20:	mov    $0xe,%r9d
+  b09a26:	lea    0x60(%rsp),%rdi
+  b09a2b:	mov    %rcx,%r14
+  b09a2e:	call   b215e0 <<alloc::raw_vec::RawVecInner>::finish_grow>
+  b09a33:	cmpl   $0x1,0x60(%rsp)
+  b09a38:	je     b09dc4 <<gpui_canvas::canvas::Canvas>::draw_text_working::{closure#0}+0xe84>
+  b09a3e:	mov    0x68(%rsp),%rax
+  b09a43:	mov    %rax,0x78(%r15)
+  b09a47:	mov    %r14,0x70(%r15)
+  b09a4b:	mov    0x20(%rsp),%rax
+  b09a50:	mov    (%rax),%rcx
+  b09a53:	cmp    $0x2,%rcx
+  b09a57:	jne    b09adf <<gpui_canvas::canvas::Canvas>::draw_text_working::{closure#0}+0xb9f>
+  b09a5d:	mov    0x118(%rsp),%rax
+  b09a65:	cmpl   $0x1,(%rax)
+  b09a68:	jne    b09ece <<gpui_canvas::canvas::Canvas>::draw_text_working::{closure#0}+0xf8e>
+  b09a6e:	mov    0x148(%rsp),%rcx
+  b09a76:	mov    (%rcx),%rax
+  b09a79:	mov    0x6(%rcx),%rcx
+  b09a7d:	mov    %rcx,0x66(%rsp)
+  b09a82:	mov    %rax,0x60(%rsp)
+  b09a87:	mov    0x80(%r15),%r14
+  b09a8e:	cmp    0x70(%r15),%r14
+  b09a92:	jne    b09aa2 <<gpui_canvas::canvas::Canvas>::draw_text_working::{closure#0}+0xb62>
+  b09a94:	mov    0xd8(%rsp),%rdi
+  b09a9c:	call   *0x22d25e(%rip)        # d36d00 <_DYNAMIC+0x3aa8>
+  b09aa2:	mov    0x78(%r15),%rax
+  b09aa6:	mov    %r14,%rdx
+  b09aa9:	shl    $0x4,%rdx
+  b09aad:	sub    %r14,%rdx
+  b09ab0:	sub    %r14,%rdx
+  b09ab3:	mov    0x60(%rsp),%rcx
+  b09ab8:	mov    0x66(%rsp),%rsi
+  b09abd:	mov    %rsi,0x6(%rax,%rdx,1)
+  b09ac2:	mov    %rcx,(%rax,%rdx,1)
+  b09ac6:	inc    %r14
+  b09ac9:	mov    %r14,0x80(%r15)
+  b09ad0:	mov    0xd8(%rsp),%rax
+  b09ad8:	cmp    (%rax),%r14
+  b09adb:	je     b09af3 <<gpui_canvas::canvas::Canvas>::draw_text_working::{closure#0}+0xbb3>
+  b09add:	jmp    b09b01 <<gpui_canvas::canvas::Canvas>::draw_text_working::{closure#0}+0xbc1>
+  b09adf:	mov    0x80(%r15),%r14
+  b09ae6:	mov    0xd8(%rsp),%rax
+  b09aee:	cmp    (%rax),%r14
+  b09af1:	jne    b09b01 <<gpui_canvas::canvas::Canvas>::draw_text_working::{closure#0}+0xbc1>
+  b09af3:	mov    0xd8(%rsp),%rdi
+  b09afb:	call   *0x22d1ff(%rip)        # d36d00 <_DYNAMIC+0x3aa8>
+  b09b01:	mov    0x78(%r15),%rax
+  b09b05:	mov    %r14,%rdx
+  b09b08:	shl    $0x4,%rdx
+  b09b0c:	sub    %r14,%rdx
+  b09b0f:	sub    %r14,%rdx
+  b09b12:	mov    0x120(%rsp),%rcx
+  b09b1a:	mov    %rcx,(%rax,%rdx,1)
+  b09b1e:	mov    %bp,0x8(%rax,%rdx,1)
+  b09b23:	mov    0x1c(%rsp),%ebx
+  b09b27:	mov    %bx,0xa(%rax,%rdx,1)
+  b09b2c:	mov    %r13w,0xc(%rax,%rdx,1)
+  b09b32:	inc    %r14
+  b09b35:	mov    %r14,0x80(%r15)
+  b09b3c:	mov    0x58(%rsp),%r14
+  b09b41:	jmp    b090cf <<gpui_canvas::canvas::Canvas>::draw_text_working::{closure#0}+0x18f>
+  b09b46:	mov    $0x1,%esi
+  b09b4b:	mov    0x100(%rsp),%rdi
+  b09b53:	mov    0x108(%rsp),%rdx
+  b09b5b:	xor    %ecx,%ecx
+  b09b5d:	call   *0x22d1a5(%rip)        # d36d08 <_DYNAMIC+0x3ab0>
+  b09b63:	cmp    $0xffffffffffffffff,%rax
+  b09b67:	je     b0984e <<gpui_canvas::canvas::Canvas>::draw_text_working::{closure#0}+0x90e>
+  b09b6d:	mov    0x30(%rsp),%rax
+  b09b72:	lock decq (%rax)
+  b09b76:	jne    b09e84 <<gpui_canvas::canvas::Canvas>::draw_text_working::{closure#0}+0xf44>
+  b09b7c:	lea    0x30(%rsp),%rdi
+  b09b81:	call   *0x229b79(%rip)        # d33700 <_DYNAMIC+0x4a8>
+  b09b87:	mov    $0x7,%r15d
+  b09b8d:	jmp    b09eb6 <<gpui_canvas::canvas::Canvas>::draw_text_working::{closure#0}+0xf76>
+  b09b92:	mov    0x48(%rdi),%r13
+  b09b96:	mov    %rdi,%rax
+  b09b99:	cmpq   $0x1,0x0(%r13)
+  b09b9e:	jbe    b09c6d <<gpui_canvas::canvas::Canvas>::draw_text_working::{closure#0}+0xd2d>
+  b09ba4:	mov    0x18(%rax),%rdi
+  b09ba8:	mov    0xb0(%rdi),%rsi
+  b09baf:	cmp    %rsi,0xa0(%rdi)
+  b09bb6:	jne    b09c9c <<gpui_canvas::canvas::Canvas>::draw_text_working::{closure#0}+0xd5c>
+  b09bbc:	mov    %rax,%r15
+  b09bbf:	lea    (%rsi,%rsi,1),%rax
+  b09bc3:	cmp    $0x5,%rax
+  b09bc7:	mov    $0x4,%r14d
+  b09bcd:	cmovae %rax,%r14
+  b09bd1:	mov    %rdi,%rbx
+  b09bd4:	mov    0xa8(%rdi),%rdx
+  b09bdb:	lea    0x60(%rsp),%rdi
+  b09be0:	mov    $0x8,%r8d
+  b09be6:	mov    $0x40,%r9d
+  b09bec:	mov    %r14,%rcx
+  b09bef:	call   b215e0 <<alloc::raw_vec::RawVecInner>::finish_grow>
+  b09bf4:	cmpl   $0x1,0x60(%rsp)
+  b09bf9:	je     b09e84 <<gpui_canvas::canvas::Canvas>::draw_text_working::{closure#0}+0xf44>
+  b09bff:	mov    0x68(%rsp),%rax
+  b09c04:	mov    %rbx,%rdi
+  b09c07:	mov    %rax,0xa8(%rbx)
+  b09c0e:	mov    %r14,0xa0(%rbx)
+  b09c15:	jmp    b09ea2 <<gpui_canvas::canvas::Canvas>::draw_text_working::{closure#0}+0xf62>
+  b09c1a:	movdqa 0xb0(%rsp),%xmm0
+  b09c23:	movd   %xmm0,%r15d
+  b09c28:	pshufd $0x55,%xmm0,%xmm0
+  b09c2d:	movd   %xmm0,%r12d
+  b09c32:	mov    0x8(%rsp),%rax
+  b09c37:	test   %rax,%rax
+  b09c3a:	je     b09eb6 <<gpui_canvas::canvas::Canvas>::draw_text_working::{closure#0}+0xf76>
+  b09c40:	lock decq (%rax)
+  b09c44:	jne    b09eb6 <<gpui_canvas::canvas::Canvas>::draw_text_working::{closure#0}+0xf76>
+  b09c4a:	lea    0x8(%rsp),%rdi
+  b09c4f:	call   *0x229aab(%rip)        # d33700 <_DYNAMIC+0x4a8>
+  b09c55:	jmp    b09eb6 <<gpui_canvas::canvas::Canvas>::draw_text_working::{closure#0}+0xf76>
+  b09c5a:	mov    0x140(%rsp),%rax
+  b09c62:	cmpq   $0x1,0x0(%r13)
+  b09c67:	ja     b09ba4 <<gpui_canvas::canvas::Canvas>::draw_text_working::{closure#0}+0xc64>
+  b09c6d:	jne    b09eb0 <<gpui_canvas::canvas::Canvas>::draw_text_working::{closure#0}+0xf70>
+  b09c73:	mov    0x18(%rax),%rdi
+  b09c77:	mov    0x80(%rdi),%rsi
+  b09c7e:	cmp    %rsi,0x70(%rdi)
+  b09c82:	je     b09de2 <<gpui_canvas::canvas::Canvas>::draw_text_working::{closure#0}+0xea2>
+  b09c88:	mov    0x98(%rdi),%rsi
+  b09c8f:	cmp    %rsi,0x88(%rdi)
+  b09c96:	je     b09e45 <<gpui_canvas::canvas::Canvas>::draw_text_working::{closure#0}+0xf05>
+  b09c9c:	cmpq   $0x0,0x0(%r13)
+  b09ca1:	je     b09eb0 <<gpui_canvas::canvas::Canvas>::draw_text_working::{closure#0}+0xf70>
+  b09ca7:	mov    %rax,%rsi
+  b09caa:	mov    0x38(%rax),%rax
+  b09cae:	movups 0x40(%rax),%xmm0
+  b09cb2:	movaps %xmm0,0xa0(%rsp)
+  b09cba:	movups (%rax),%xmm0
+  b09cbd:	movups 0x10(%rax),%xmm1
+  b09cc1:	movdqu 0x20(%rax),%xmm2
+  b09cc6:	movups 0x30(%rax),%xmm3
+  b09cca:	movaps %xmm3,0x90(%rsp)
+  b09cd2:	movdqa %xmm2,0x80(%rsp)
+  b09cdb:	movaps %xmm1,0x70(%rsp)
+  b09ce0:	movaps %xmm0,0x60(%rsp)
+  b09ce5:	mov    0x190(%rdi),%rcx
+  b09cec:	mov    0x198(%rdi),%rax
+  b09cf3:	test   %rcx,%rcx
+  b09cf6:	js     b09d1f <<gpui_canvas::canvas::Canvas>::draw_text_working::{closure#0}+0xddf>
+  b09cf8:	xorps  %xmm0,%xmm0
+  b09cfb:	cvtsi2ss %rcx,%xmm0
+  b09d00:	test   %rax,%rax
+  b09d03:	jns    b09d3c <<gpui_canvas::canvas::Canvas>::draw_text_working::{closure#0}+0xdfc>
+  b09d05:	mov    %rax,%rcx
+  b09d08:	shr    $1,%rcx
+  b09d0b:	and    $0x1,%eax
+  b09d0e:	or     %rcx,%rax
+  b09d11:	xorps  %xmm1,%xmm1
+  b09d14:	cvtsi2ss %rax,%xmm1
+  b09d19:	addss  %xmm1,%xmm1
+  b09d1d:	jmp    b09d44 <<gpui_canvas::canvas::Canvas>::draw_text_working::{closure#0}+0xe04>
+  b09d1f:	mov    %rcx,%rdx
+  b09d22:	shr    $1,%rdx
+  b09d25:	and    $0x1,%ecx
+  b09d28:	or     %rdx,%rcx
+  b09d2b:	xorps  %xmm0,%xmm0
+  b09d2e:	cvtsi2ss %rcx,%xmm0
+  b09d33:	addss  %xmm0,%xmm0
+  b09d37:	test   %rax,%rax
+  b09d3a:	js     b09d05 <<gpui_canvas::canvas::Canvas>::draw_text_working::{closure#0}+0xdc5>
+  b09d3c:	xorps  %xmm1,%xmm1
+  b09d3f:	cvtsi2ss %rax,%xmm1
+  b09d44:	add    $0xb8,%rdi
+  b09d4b:	movq   $0x0,0x30(%rsp)
+  b09d54:	movss  %xmm0,0x38(%rsp)
+  b09d5a:	movss  %xmm1,0x3c(%rsp)
+  b09d60:	mov    0x70(%rsi),%rax
+  b09d64:	mov    (%rax),%ecx
+  b09d66:	test   %ecx,%ecx
+  b09d68:	je     b09d72 <<gpui_canvas::canvas::Canvas>::draw_text_working::{closure#0}+0xe32>
+  b09d6a:	cmp    $0x1,%ecx
+  b09d6d:	jne    b09d76 <<gpui_canvas::canvas::Canvas>::draw_text_working::{closure#0}+0xe36>
+  b09d6f:	mov    0x4(%rax),%ecx
+  b09d72:	xor    %eax,%eax
+  b09d74:	jmp    b09d81 <<gpui_canvas::canvas::Canvas>::draw_text_working::{closure#0}+0xe41>
+  b09d76:	mov    0x8(%rax),%rax
+  b09d7a:	mov    (%rax),%ecx
+  b09d7c:	test   %ecx,%ecx
+  b09d7e:	sete   %al
+  b09d81:	movzbl %al,%r9d
+  b09d85:	lea    0x60(%rsp),%rsi
+  b09d8a:	lea    0x30(%rsp),%rdx
+  b09d8f:	xor    %r8d,%r8d
+  b09d92:	call   b14cd0 <<gpui_canvas::canvas::columns::Columns>::admit>
+  b09d97:	mov    %eax,%r15d
+  b09d9a:	mov    %edx,%r12d
+  b09d9d:	jmp    b09eb6 <<gpui_canvas::canvas::Canvas>::draw_text_working::{closure#0}+0xf76>
+  b09da2:	mov    0x34(%rsp),%r15d
+  b09da7:	mov    0x38(%rsp),%r12d
+  b09dac:	jmp    b09eb6 <<gpui_canvas::canvas::Canvas>::draw_text_working::{closure#0}+0xf76>
+  b09db1:	mov    0x8(%rsp),%rax
+  b09db6:	test   %rax,%rax
+  b09db9:	jne    b09c40 <<gpui_canvas::canvas::Canvas>::draw_text_working::{closure#0}+0xd00>
+  b09dbf:	jmp    b09eb6 <<gpui_canvas::canvas::Canvas>::draw_text_working::{closure#0}+0xf76>
+  b09dc4:	mov    0x8(%rsp),%rax
+  b09dc9:	test   %rax,%rax
+  b09dcc:	setne  %cl
+  b09dcf:	mov    $0x7,%r15d
+  b09dd5:	test   %bl,%cl
+  b09dd7:	jne    b09c40 <<gpui_canvas::canvas::Canvas>::draw_text_working::{closure#0}+0xd00>
+  b09ddd:	jmp    b09eb6 <<gpui_canvas::canvas::Canvas>::draw_text_working::{closure#0}+0xf76>
+  b09de2:	mov    %rax,%r15
+  b09de5:	lea    (%rsi,%rsi,1),%rax
+  b09de9:	cmp    $0x5,%rax
+  b09ded:	mov    $0x4,%r14d
+  b09df3:	cmovae %rax,%r14
+  b09df7:	mov    %rdi,%rbx
+  b09dfa:	mov    0x78(%rdi),%rdx
+  b09dfe:	lea    0x60(%rsp),%rdi
+  b09e03:	mov    $0x2,%r8d
+  b09e09:	mov    $0xe,%r9d
+  b09e0f:	mov    %r14,%rcx
+  b09e12:	call   b215e0 <<alloc::raw_vec::RawVecInner>::finish_grow>
+  b09e17:	cmpl   $0x1,0x60(%rsp)
+  b09e1c:	je     b09e84 <<gpui_canvas::canvas::Canvas>::draw_text_working::{closure#0}+0xf44>
+  b09e1e:	mov    0x68(%rsp),%rax
+  b09e23:	mov    %rbx,%rdi
+  b09e26:	mov    %rax,0x78(%rbx)
+  b09e2a:	mov    %r14,0x70(%rbx)
+  b09e2e:	mov    %r15,%rax
+  b09e31:	mov    0x98(%rdi),%rsi
+  b09e38:	cmp    %rsi,0x88(%rdi)
+  b09e3f:	jne    b09c9c <<gpui_canvas::canvas::Canvas>::draw_text_working::{closure#0}+0xd5c>
+  b09e45:	mov    %rax,%r15
+  b09e48:	lea    (%rsi,%rsi,1),%rax
+  b09e4c:	cmp    $0x5,%rax
+  b09e50:	mov    $0x4,%r14d
+  b09e56:	cmovae %rax,%r14
+  b09e5a:	mov    %rdi,%rbx
+  b09e5d:	mov    0x90(%rdi),%rdx
+  b09e64:	lea    0x60(%rsp),%rdi
+  b09e69:	mov    $0x8,%r8d
+  b09e6f:	mov    $0x30,%r9d
+  b09e75:	mov    %r14,%rcx
+  b09e78:	call   b215e0 <<alloc::raw_vec::RawVecInner>::finish_grow>
+  b09e7d:	cmpl   $0x1,0x60(%rsp)
+  b09e82:	jne    b09e8c <<gpui_canvas::canvas::Canvas>::draw_text_working::{closure#0}+0xf4c>
+  b09e84:	mov    $0x7,%r15d
+  b09e8a:	jmp    b09eb6 <<gpui_canvas::canvas::Canvas>::draw_text_working::{closure#0}+0xf76>
+  b09e8c:	mov    0x68(%rsp),%rax
+  b09e91:	mov    %rbx,%rdi
+  b09e94:	mov    %rax,0x90(%rbx)
+  b09e9b:	mov    %r14,0x88(%rbx)
+  b09ea2:	mov    %r15,%rax
+  b09ea5:	cmpq   $0x0,0x0(%r13)
+  b09eaa:	jne    b09ca7 <<gpui_canvas::canvas::Canvas>::draw_text_working::{closure#0}+0xd67>
+  b09eb0:	mov    $0xffffffff,%r15d
+  b09eb6:	mov    %r15d,%eax
+  b09eb9:	mov    %r12d,%edx
+  b09ebc:	add    $0x1d8,%rsp
+  b09ec3:	pop    %rbx
+  b09ec4:	pop    %r12
+  b09ec6:	pop    %r13
+  b09ec8:	pop    %r14
+  b09eca:	pop    %r15
+  b09ecc:	pop    %rbp
+  b09ecd:	ret
+  b09ece:	lea    0x215213(%rip),%rdi        # d1f0e8 <anon.fb6f5eafdfe0b435d0b4b2f0bb92df2e.199.llvm.12041963204792030370+0x400>
+  b09ed5:	call   *0x229715(%rip)        # d335f0 <_DYNAMIC+0x398>
+  b09edb:	jmp    b09efb <<gpui_canvas::canvas::Canvas>::draw_text_working::{closure#0}+0xfbb>
+  b09edd:	mov    $0x1,%bl
+  b09edf:	lea    0x2151ea(%rip),%rdx        # d1f0d0 <anon.fb6f5eafdfe0b435d0b4b2f0bb92df2e.199.llvm.12041963204792030370+0x3e8>
+  b09ee6:	call   *0x2297f4(%rip)        # d336e0 <_DYNAMIC+0x488>
+  b09eec:	jmp    b09efb <<gpui_canvas::canvas::Canvas>::draw_text_working::{closure#0}+0xfbb>
+  b09eee:	lea    0x21529b(%rip),%rdi        # d1f190 <anon.fb6f5eafdfe0b435d0b4b2f0bb92df2e.199.llvm.12041963204792030370+0x4a8>
+  b09ef5:	call   *0x22a0e5(%rip)        # d33fe0 <_DYNAMIC+0xd88>
+  b09efb:	ud2
+  b09efd:	mov    %rax,%r14
+  b09f00:	lock decq (%rbx)
+  b09f04:	jne    b09f59 <<gpui_canvas::canvas::Canvas>::draw_text_working::{closure#0}+0x1019>
+  b09f06:	lea    0x60(%rsp),%rdi
+  b09f0b:	call   *0x2297ef(%rip)        # d33700 <_DYNAMIC+0x4a8>
+  b09f11:	jmp    b09f59 <<gpui_canvas::canvas::Canvas>::draw_text_working::{closure#0}+0x1019>
+  b09f13:	call   *0x229647(%rip)        # d33560 <_DYNAMIC+0x308>
+  b09f19:	mov    %rax,%r14
+  b09f1c:	mov    0x30(%rsp),%rax
+  b09f21:	lock decq (%rax)
+  b09f25:	jne    b09f59 <<gpui_canvas::canvas::Canvas>::draw_text_working::{closure#0}+0x1019>
+  b09f27:	lea    0x30(%rsp),%rdi
+  b09f2c:	call   *0x2297ce(%rip)        # d33700 <_DYNAMIC+0x4a8>
+  b09f32:	jmp    b09f59 <<gpui_canvas::canvas::Canvas>::draw_text_working::{closure#0}+0x1019>
+  b09f34:	jmp    b09f36 <<gpui_canvas::canvas::Canvas>::draw_text_working::{closure#0}+0xff6>
+  b09f36:	mov    %rax,%r14
+  b09f39:	mov    0x8(%rsp),%rax
+  b09f3e:	test   %rax,%rax
+  b09f41:	setne  %cl
+  b09f44:	test   %bl,%cl
+  b09f46:	je     b09f59 <<gpui_canvas::canvas::Canvas>::draw_text_working::{closure#0}+0x1019>
+  b09f48:	lock decq (%rax)
+  b09f4c:	jne    b09f59 <<gpui_canvas::canvas::Canvas>::draw_text_working::{closure#0}+0x1019>
+  b09f4e:	lea    0x8(%rsp),%rdi
+  b09f53:	call   *0x2297a7(%rip)        # d33700 <_DYNAMIC+0x4a8>
+  b09f59:	mov    %r14,%rdi
+  b09f5c:	call   ce2300 <_Unwind_Resume@plt>
+  b09f61:	call   *0x2295f9(%rip)        # d33560 <_DYNAMIC+0x308>

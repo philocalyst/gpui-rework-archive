@@ -1,0 +1,26 @@
+[
+  {
+    "variant": "control",
+    "bytes": 384,
+    "name": "<gpui_canvas::canvas::PreparedGroup>::sources::{closure#0}",
+    "asm": "control-0.txt"
+  },
+  {
+    "variant": "control",
+    "bytes": 117,
+    "name": "<core::iter::adapters::enumerate::Enumerate<core::iter::adapters::map::Map<core::slice::iter::Iter<gpui_canvas::canvas::DrawRef>, <gpui_canvas::canvas::PreparedGroup>::sources::{closure#0}>> as core::iter::traits::iterator::Iterator>::next",
+    "asm": "control-1.txt"
+  },
+  {
+    "variant": "candidate",
+    "bytes": 384,
+    "name": "<gpui_canvas::canvas::PreparedGroup>::sources::{closure#0}",
+    "asm": "candidate-2.txt"
+  },
+  {
+    "variant": "candidate",
+    "bytes": 117,
+    "name": "<core::iter::adapters::enumerate::Enumerate<core::iter::adapters::map::Map<core::slice::iter::Iter<gpui_canvas::canvas::DrawRef>, <gpui_canvas::canvas::PreparedGroup>::sources::{closure#0}>> as core::iter::traits::iterator::Iterator>::next",
+    "asm": "candidate-3.txt"
+  }
+]

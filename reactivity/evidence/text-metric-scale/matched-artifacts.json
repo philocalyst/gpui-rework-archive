@@ -1,0 +1,146 @@
+[
+  {
+    "path": "/tmp/gpui-metric-control-artifacts/bins",
+    "sha256": "937ed0f0e29ea2d9115290b7205c48ec8e27d86c028bb04088ea9eab67502a9e"
+  },
+  {
+    "path": "/tmp/gpui-metric-control-artifacts/color",
+    "sha256": "bfae3c6dbc7e9081c4ca0d697459a9378ab454f6ac19ff725fa2451dee3c1c6b"
+  },
+  {
+    "path": "/tmp/gpui-metric-control-artifacts/color_authoring",
+    "sha256": "05cdaaa75e7ee5090d2dced36e5641f29b2943e3d43b830febd5007dd3e5e5c1"
+  },
+  {
+    "path": "/tmp/gpui-metric-control-artifacts/color_packing",
+    "sha256": "7c916d692480e5241aab1a60d2579952f497d584c7694021c52f72777b624987"
+  },
+  {
+    "path": "/tmp/gpui-metric-control-artifacts/damage",
+    "sha256": "f04609b257353cd6d79388b225d76781e94cd668b1762e53f9c94f90a8179038"
+  },
+  {
+    "path": "/tmp/gpui-metric-control-artifacts/default_font",
+    "sha256": "6be2b7a30e5abd578d49506eed8f07c20c0e6e7810ea941c601f2a059e1be49d"
+  },
+  {
+    "path": "/tmp/gpui-metric-control-artifacts/dpi",
+    "sha256": "616823ddd1b1d4eef9bb44721eaaeb0ef4f3cc2b14408e8f0db586d20b576c09"
+  },
+  {
+    "path": "/tmp/gpui-metric-control-artifacts/external",
+    "sha256": "69969ee2ac02dccd30949659855392c1c0f7290eb6c0aee3e5bc679dc589f1b8"
+  },
+  {
+    "path": "/tmp/gpui-metric-control-artifacts/font_quality",
+    "sha256": "98cf3eccf8335f16a3f12446c057cb5708f9bb873700d348f991d59dd13a77d9"
+  },
+  {
+    "path": "/tmp/gpui-metric-control-artifacts/font_sharing",
+    "sha256": "dfeec20c2676e9c5568e2455651c43c937a8e1193bf6c778fc09c82fea086e62"
+  },
+  {
+    "path": "/tmp/gpui-metric-control-artifacts/gpui_canvas",
+    "sha256": "43c3b41eff4e274ce5daf1df32152c8219f3b79e366ef2903f6035c54c12c419"
+  },
+  {
+    "path": "/tmp/gpui-metric-control-artifacts/grouped",
+    "sha256": "e2b25710b0e1e406728f02eddfb0ed5cd49e7d3e8a99f93b8ec029bda1723210"
+  },
+  {
+    "path": "/tmp/gpui-metric-control-artifacts/hdr",
+    "sha256": "39c6268707f34f3b26ae5191b8e3b6d7b444a3ed3a628861aa0bd63a9069923f"
+  },
+  {
+    "path": "/tmp/gpui-metric-control-artifacts/images",
+    "sha256": "99817774124404474698486841d9b4714863af867292f6f2b4daae0674766eb9"
+  },
+  {
+    "path": "/tmp/gpui-metric-control-artifacts/literal_cow",
+    "sha256": "c20eb26a2e42d0e6a5e18b35e76b02ae1414e68edb4b9926da8d3b0e7b6f2301"
+  },
+  {
+    "path": "/tmp/gpui-metric-control-artifacts/oklch",
+    "sha256": "fa48ad79bcbe7e1296ffaf193d70b4391fe1d8b95445d012633c7bb53cc3dbf1"
+  },
+  {
+    "path": "/tmp/gpui-metric-control-artifacts/paint",
+    "sha256": "dbc974e65fb31e9d35071807264e39bef26d47508fc6ccdd8f07d17a606a2d0d"
+  },
+  {
+    "path": "/tmp/gpui-metric-control-artifacts/parallel",
+    "sha256": "93ad07efcf308301ac3730b999a94fc8c6c574ec709b293c1c68b418a90761e1"
+  },
+  {
+    "path": "/tmp/gpui-metric-control-artifacts/prepared_scene",
+    "sha256": "4836c1ff221d4147dff8e31b8e3d9cdea87fbccef10736ccfe6ab427a8792a94"
+  },
+  {
+    "path": "/tmp/gpui-metric-control-artifacts/render",
+    "sha256": "5259477a390d7bcca4e1878b8a60be6b5f6a5cebe0b0643cd28498f8c26278fd"
+  },
+  {
+    "path": "/tmp/gpui-metric-control-artifacts/rounded",
+    "sha256": "c5a2b9ee0398e72bbd3778497f178578f6e84e89217ebf4600e582a82fe173eb"
+  },
+  {
+    "path": "/tmp/gpui-metric-control-artifacts/sample_clip",
+    "sha256": "355f63773a4cb1a781abb4cf12d3918d6ba52d78be63f4da8e9530dfa83d602f"
+  },
+  {
+    "path": "/tmp/gpui-metric-control-artifacts/sample_storage",
+    "sha256": "aac1bc6464dc87d314d9992c586a26ce6ddf1574e5397aa4b9118eb65eab2405"
+  },
+  {
+    "path": "/tmp/gpui-metric-control-artifacts/selection",
+    "sha256": "ead099cf5f7f0741713fbcbf515c6866af6ac4e4615fe7de09950068b3e6aec0"
+  },
+  {
+    "path": "/tmp/gpui-metric-control-artifacts/shaping",
+    "sha256": "2a10d8a475b4b9338cbed2c739aeeb7ba197d5e372561a3b46fc05c412c95ab0"
+  },
+  {
+    "path": "/tmp/gpui-metric-control-artifacts/slots",
+    "sha256": "41a61b42626b67c373b729bf930cf229f158c778a1acf831b4fcdeab0485044b"
+  },
+  {
+    "path": "/tmp/gpui-metric-control-artifacts/solid",
+    "sha256": "aca1749c509f6cae9f4d04aa9592321397e7bcf5b2fcce8c1c29c78e7285515e"
+  },
+  {
+    "path": "/tmp/gpui-metric-control-artifacts/text_capacity",
+    "sha256": "52472678021ce97f42977340ebc654917f975362b1c821ee593a9e2304915695"
+  },
+  {
+    "path": "/tmp/gpui-metric-control-artifacts/text_run_probe",
+    "sha256": "895866e97a06f5ab131373b326ecd05fc356f49c76da94099ee9f26101c358c0"
+  },
+  {
+    "path": "/tmp/gpui-metric-control-artifacts/text_transaction",
+    "sha256": "7bc7c121a358c97ef5a19deadda4087e14be4e5918554e6b81c1ea8d1f185bf0"
+  },
+  {
+    "path": "/tmp/gpui-metric-control-artifacts/unicode",
+    "sha256": "1a130d1627af95015b21543053e426d859e49cb072c4dd1e2f301c1920fe17c5"
+  },
+  {
+    "path": "/tmp/gpui-metric-control-gpu-artifacts/render",
+    "sha256": "6180a2804785a58a39dd1440c264fb4dd5604814c37f47edfc931bdb812abbdc"
+  },
+  {
+    "path": "/tmp/gpui-metric-control-dpr-artifacts/text_metric_scale_probe",
+    "sha256": "30c8cc9665b4f0931afcda27dfc618f8093e86d0ddc53c619550b2c22f4199ba"
+  },
+  {
+    "path": "/tmp/gpui-metric-default-probe-artifacts/text_metric_scale_probe",
+    "sha256": "73aae089f2145e1e414f56425a425ce24bd1a6897061d778ff8871bf70265834"
+  },
+  {
+    "path": "/tmp/gpui-metric-default-probe-artifacts/text_run_probe",
+    "sha256": "73cb95887a7a0d5e0825bc8cf90aa2f69fb52cff199a64ef47decacd42e41ab1"
+  },
+  {
+    "path": "/tmp/gpui-metric-default-gpu-artifacts/render",
+    "sha256": "aff12984be3b89f673ea2116a6d5513bb75ce28d4ef49404467261cdf3a0b664"
+  }
+]

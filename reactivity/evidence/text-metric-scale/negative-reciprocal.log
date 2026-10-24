@@ -1,0 +1,17 @@
+
+running 1 test
+test metric_scale::tests::every_power_and_fallback_keep_signed_zero_extremes_and_random_float_bits ... 
+thread 'metric_scale::tests::every_power_and_fallback_keep_signed_zero_extremes_and_random_float_bits' (1841515) panicked at /tmp/gpui-metric-scale-negative-module-sol.rs:98:17:
+assertion `left == right` failed
+  left: [1088841319, 1088841319, 1088841319, 1088841319]
+ right: [1088841318, 1088841318, 1088841318, 1088841318]
+note: run with `RUST_BACKTRACE=1` environment variable to display a backtrace
+FAILED
+
+failures:
+
+failures:
+    metric_scale::tests::every_power_and_fallback_keep_signed_zero_extremes_and_random_float_bits
+
+test result: FAILED. 0 passed; 1 failed; 0 ignored; 0 measured; 1 filtered out; finished in 0.01s
+

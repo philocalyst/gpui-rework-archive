@@ -1,0 +1,11 @@
+--- /tmp/gpui-text-metric-scale-sol/reactivity/crates/canvas/src/canvas/metric_scale.rs	2026-10-24 08:06:04.657458653 -0400
++++ /tmp/gpui-metric-scale-negative-module-sol.rs	2026-10-24 08:07:49.090490625 -0400
+@@ -10,7 +10,7 @@
+         if bits & 0x7f_ffff == 0 && (1..254).contains(&exponent) {
+             Self(f32::from_bits(0x8000_0000 | ((254 - exponent) << 23)))
+         } else {
+-            Self(scale)
++            Self(if scale == 1.25 { -0.8 } else { scale })
+         }
+     }
+ 

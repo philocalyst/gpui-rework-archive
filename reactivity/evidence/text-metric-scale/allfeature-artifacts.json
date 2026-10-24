@@ -1,0 +1,177 @@
+[
+  {
+    "binary": "/tmp/gpui-metric-allfeature-artifacts/canvas/bins",
+    "sha256": "8f484f76c09b2bfd0d610ea0c0546ab92d10349e91c15d149fe801c51619373a",
+    "exit": 0
+  },
+  {
+    "binary": "/tmp/gpui-metric-allfeature-artifacts/canvas/color",
+    "sha256": "5d1bf7800357ec0619574e13c315d744ea7ea6d7c0080f64b15bb631fd9de280",
+    "exit": 0
+  },
+  {
+    "binary": "/tmp/gpui-metric-allfeature-artifacts/canvas/color_authoring",
+    "sha256": "73c1e6fb8e6730766dce063c512af71948cc6e1814c6346de957e3d9ba6b6060",
+    "exit": 0
+  },
+  {
+    "binary": "/tmp/gpui-metric-allfeature-artifacts/canvas/color_packing",
+    "sha256": "2112c8bcfc0ccfb02d4adecd655513d85ef6d43f5ad3a841ec99132b68f3e61c",
+    "exit": 0
+  },
+  {
+    "binary": "/tmp/gpui-metric-allfeature-artifacts/canvas/damage",
+    "sha256": "6e41105ef911f2728737765421b5f20d173de438dbd6e43935f8ed39231ead4b",
+    "exit": 0
+  },
+  {
+    "binary": "/tmp/gpui-metric-allfeature-artifacts/canvas/default_font",
+    "sha256": "caf7ac9362319db40e789e10599f08c556a34f19b0eef8ccf65c95445ef80852",
+    "exit": 0
+  },
+  {
+    "binary": "/tmp/gpui-metric-allfeature-artifacts/canvas/dpi",
+    "sha256": "9e928cf8341d1eab87722821a1cdeee8488d5fc7e8ff97a864433c464cec2b7c",
+    "exit": 0
+  },
+  {
+    "binary": "/tmp/gpui-metric-allfeature-artifacts/canvas/external",
+    "sha256": "ecf2a25c422b203b77108ef95aa3fb5ae0f15678442cdf110fd88647602840ca",
+    "exit": 0
+  },
+  {
+    "binary": "/tmp/gpui-metric-allfeature-artifacts/canvas/font_quality",
+    "sha256": "8b90fb9559349a35dd021ea2848bd7d7ee15ba39ba0fde5a99f345cb4173e829",
+    "exit": 0
+  },
+  {
+    "binary": "/tmp/gpui-metric-allfeature-artifacts/canvas/font_sharing",
+    "sha256": "6dc13ffcfef706206ffdf92ad0c71cc27e271dd2f201e43a2f24002e67f3d5c1",
+    "exit": 0
+  },
+  {
+    "binary": "/tmp/gpui-metric-allfeature-artifacts/canvas/gpui_canvas",
+    "sha256": "9bd97a44ab7c0d2a6128389d14f8ef07da8f9d509a3ea207e0a6b2a18cee806e",
+    "exit": 0
+  },
+  {
+    "binary": "/tmp/gpui-metric-allfeature-artifacts/canvas/grouped",
+    "sha256": "b4b66aa31777ecdc49fc96a5bdf4a41e745dc9942561361156a16dc7291aa8a5",
+    "exit": 0
+  },
+  {
+    "binary": "/tmp/gpui-metric-allfeature-artifacts/canvas/hdr",
+    "sha256": "0b8ddf6a08dfc152960b9f41b575dd11415d140b44e541a993b55acd0054f7b0",
+    "exit": 0
+  },
+  {
+    "binary": "/tmp/gpui-metric-allfeature-artifacts/canvas/images",
+    "sha256": "1ae2ce44e5a6e1acdb35134c5b84b54e1b9a6f59421e5ce054f20c481d2b9447",
+    "exit": 0
+  },
+  {
+    "binary": "/tmp/gpui-metric-allfeature-artifacts/canvas/literal_cow",
+    "sha256": "8971a929818af0f52e5f622944e1d02e0c52ee931f29070e8898e1536bf0411b",
+    "exit": 0
+  },
+  {
+    "binary": "/tmp/gpui-metric-allfeature-artifacts/canvas/oklch",
+    "sha256": "0fc12248b6771ed6833f0c05742f642ddf2a873d063050fc7335f42aed13707d",
+    "exit": 0
+  },
+  {
+    "binary": "/tmp/gpui-metric-allfeature-artifacts/canvas/paint",
+    "sha256": "862777f4ea473b0dd902258f14805e38c57c012edaf302ffd0e026653da0e375",
+    "exit": 0
+  },
+  {
+    "binary": "/tmp/gpui-metric-allfeature-artifacts/canvas/parallel",
+    "sha256": "f1b874fefe40f338082cf9733d1c8bbeb73129a4828cdcfdabb0c56e3004ade9",
+    "exit": 0
+  },
+  {
+    "binary": "/tmp/gpui-metric-allfeature-artifacts/canvas/prepared_scene",
+    "sha256": "3d6042105645b9fd5b9f99d4051084df5a3891133a67faa00befa3cad8831068",
+    "exit": 0
+  },
+  {
+    "binary": "/tmp/gpui-metric-allfeature-artifacts/canvas/render",
+    "sha256": "c7868387b38ee51c5f6c04201c16dd0d519d48694d9c376c50f61826e8ca41fc",
+    "exit": 0
+  },
+  {
+    "binary": "/tmp/gpui-metric-allfeature-artifacts/canvas/rounded",
+    "sha256": "85b6c1bc83c937199ca55c3734ed8ada92570f6144d8a89a9db751cfdb897a6a",
+    "exit": 0
+  },
+  {
+    "binary": "/tmp/gpui-metric-allfeature-artifacts/canvas/sample_clip",
+    "sha256": "c98c33dc2aaa1ccf510648a74f1791e648c3f9008dfc64062b225a575c3ef67e",
+    "exit": 0
+  },
+  {
+    "binary": "/tmp/gpui-metric-allfeature-artifacts/canvas/sample_storage",
+    "sha256": "8204570e38d37b7022fea2645b3eb5e77ba11e64d84bf9ac3fc0dfd12f1bb645",
+    "exit": 0
+  },
+  {
+    "binary": "/tmp/gpui-metric-allfeature-artifacts/canvas/selection",
+    "sha256": "bf0bfb3545ef1ac6773f0b8994ab2b0a3ea18e8a09316e5bdc6cf4f95dad6009",
+    "exit": 0
+  },
+  {
+    "binary": "/tmp/gpui-metric-allfeature-artifacts/canvas/shaping",
+    "sha256": "d76033da55ad6032bdc13b31223478494a055df083ff17af23ec2662de947db8",
+    "exit": 0
+  },
+  {
+    "binary": "/tmp/gpui-metric-allfeature-artifacts/canvas/slots",
+    "sha256": "9875c0b58aecabbb78a3736dbf07fe5e8f5b6f4d1b68a41c138724a8f676bab3",
+    "exit": 0
+  },
+  {
+    "binary": "/tmp/gpui-metric-allfeature-artifacts/canvas/solid",
+    "sha256": "9bbc57896a137d89ea4e05addd06b87b2068ecf285b5ce50be8f558279ea916c",
+    "exit": 0
+  },
+  {
+    "binary": "/tmp/gpui-metric-allfeature-artifacts/canvas/text_capacity",
+    "sha256": "558b8c8f8d67756a749b0034ca2978cdc3daa526b2ae4e68ccd69429054037b5",
+    "exit": 0
+  },
+  {
+    "binary": "/tmp/gpui-metric-allfeature-artifacts/canvas/text_metric_scale_probe",
+    "sha256": "64bd967ec0a62d1b20a7463274d8a1c93382fc4036efe93f5b48bbb466d8086b",
+    "exit": 0
+  },
+  {
+    "binary": "/tmp/gpui-metric-allfeature-artifacts/canvas/text_run_probe",
+    "sha256": "192bba924d8c6294e7d1457cfd263c7df6d7dcbd7930b9ce7966152984a017bf",
+    "exit": 0
+  },
+  {
+    "binary": "/tmp/gpui-metric-allfeature-artifacts/canvas/text_transaction",
+    "sha256": "8f6e2fcd88a4e06c93134978b5b4a12f9de643356e0aa70799f6460d328ec5d5",
+    "exit": 0
+  },
+  {
+    "binary": "/tmp/gpui-metric-allfeature-artifacts/canvas/unicode",
+    "sha256": "cdd7a1c1e83839c2ea5384ef9f495e0cdb62f80721f174fed09bc0232a3e8a6c",
+    "exit": 0
+  },
+  {
+    "binary": "/tmp/gpui-metric-allfeature-artifacts/gpu/gpui_gpu",
+    "sha256": "392d89eda86b19c5e3fc9953211d073233bbf7fc97ab9fdb48727f7494c04216",
+    "exit": 0
+  },
+  {
+    "binary": "/tmp/gpui-metric-allfeature-artifacts/gpu/presentation",
+    "sha256": "d17504c938bc1a805876e8cbbf063d26bb038ab7182d45b8a61039d649c4832a",
+    "exit": 0
+  },
+  {
+    "binary": "/tmp/gpui-metric-allfeature-artifacts/gpu/render",
+    "sha256": "03664868bbd6556e52c73b26e6076d4ca28ad4176d0eb0e3742487f5519026bf",
+    "exit": 0
+  }
+]

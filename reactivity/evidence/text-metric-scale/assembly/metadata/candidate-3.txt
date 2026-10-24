@@ -1,0 +1,43 @@
+
+/tmp/gpui-metric-default-gpu-artifacts/render:     file format elf64-x86-64
+
+
+Disassembly of section .text:
+
+0000000000762f50 <<core::iter::adapters::enumerate::Enumerate<core::iter::adapters::map::Map<core::slice::iter::Iter<gpui_canvas::canvas::DrawRef>, <gpui_canvas::canvas::PreparedGroup>::sources::{closure#0}>> as core::iter::traits::iterator::Iterator>::next>:
+  762f50:	push   %r14
+  762f52:	push   %rbx
+  762f53:	sub    $0x38,%rsp
+  762f57:	mov    %rdi,%rbx
+  762f5a:	mov    (%rsi),%rdx
+  762f5d:	cmp    0x8(%rsi),%rdx
+  762f61:	je     762fb9 <<core::iter::adapters::enumerate::Enumerate<core::iter::adapters::map::Map<core::slice::iter::Iter<gpui_canvas::canvas::DrawRef>, <gpui_canvas::canvas::PreparedGroup>::sources::{closure#0}>> as core::iter::traits::iterator::Iterator>::next+0x69>
+  762f63:	mov    %rsi,%r14
+  762f66:	lea    0xe(%rdx),%rax
+  762f6a:	mov    %rax,(%rsi)
+  762f6d:	mov    0x10(%rsi),%rsi
+  762f71:	mov    %rsp,%rdi
+  762f74:	call   75d210 <<gpui_canvas::canvas::PreparedGroup>::sources::{closure#0}>
+  762f79:	cmpb   $0xff,(%rsp)
+  762f7d:	je     762fb9 <<core::iter::adapters::enumerate::Enumerate<core::iter::adapters::map::Map<core::slice::iter::Iter<gpui_canvas::canvas::DrawRef>, <gpui_canvas::canvas::PreparedGroup>::sources::{closure#0}>> as core::iter::traits::iterator::Iterator>::next+0x69>
+  762f7f:	mov    0x30(%rsp),%rax
+  762f84:	mov    %rax,0x38(%rbx)
+  762f88:	movups (%rsp),%xmm0
+  762f8c:	movups 0x10(%rsp),%xmm1
+  762f91:	movups 0x20(%rsp),%xmm2
+  762f96:	movups %xmm2,0x28(%rbx)
+  762f9a:	movups %xmm1,0x18(%rbx)
+  762f9e:	movups %xmm0,0x8(%rbx)
+  762fa2:	mov    0x18(%r14),%rax
+  762fa6:	lea    0x1(%rax),%rcx
+  762faa:	mov    %rcx,0x18(%r14)
+  762fae:	mov    %rax,(%rbx)
+  762fb1:	add    $0x38,%rsp
+  762fb5:	pop    %rbx
+  762fb6:	pop    %r14
+  762fb8:	ret
+  762fb9:	movb   $0xff,0x8(%rbx)
+  762fbd:	add    $0x38,%rsp
+  762fc1:	pop    %rbx
+  762fc2:	pop    %r14
+  762fc4:	ret

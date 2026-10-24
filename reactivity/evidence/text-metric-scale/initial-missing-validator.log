@@ -1,0 +1,43 @@
+   Compiling crossbeam-utils v0.8.23
+   Compiling crossbeam-epoch v0.9.21
+   Compiling crossbeam-deque v0.8.8
+   Compiling rayon-core v1.13.0
+   Compiling either v1.19.0
+   Compiling skrifa v0.44.0
+   Compiling rayon v1.12.0
+   Compiling gpui_canvas v0.1.0 (/tmp/gpui-text-metric-scale-sol/reactivity/crates/canvas)
+   Compiling rustybuzz v0.20.1
+   Compiling swash v0.2.10
+   Compiling typenum v1.20.1
+   Compiling hybrid-array v0.4.15
+   Compiling foldhash v0.1.5
+   Compiling hashbrown v0.15.5
+   Compiling naga v30.0.1
+   Compiling wgpu-hal v30.0.1 (/tmp/gpui-text-metric-scale-sol/reactivity/vendor/wgpu-hal)
+   Compiling fixedbitset v0.5.7
+   Compiling petgraph v0.8.3
+   Compiling spirv v0.4.0+sdk-1.4.341.0
+   Compiling block-buffer v0.12.1
+   Compiling crypto-common v0.2.2
+   Compiling digest v0.11.3
+   Compiling wgpu-core v30.0.1 (/tmp/gpui-text-metric-scale-sol/reactivity/vendor/wgpu-core)
+   Compiling cpufeatures v0.3.1
+   Compiling wgsl-rs v0.1.0-beta.6
+   Compiling sha2 v0.11.1
+   Compiling wgpu-core-deps-windows-linux-android v30.0.1
+   Compiling wgpu v30.0.1 (/tmp/gpui-text-metric-scale-sol/reactivity/vendor/wgpu)
+   Compiling gpui_gpu v0.1.0 (/tmp/gpui-text-metric-scale-sol/reactivity/crates/gpu)
+error: failed to run custom build command for `gpui_gpu v0.1.0 (/tmp/gpui-text-metric-scale-sol/reactivity/crates/gpu)`
+
+Caused by:
+  process didn't exit successfully: `/tmp/gpui-text-blocks-sol-target/release/build/gpui_gpu/d2825c4654afe8be/out/build_script_build` (exit status: 101)
+  --- stdout
+  cargo::rerun-if-changed=src
+  cargo::rerun-if-env-changed=GPUI_SPIRV_VAL
+
+  --- stderr
+
+  thread 'main' (1847644) panicked at crates/gpu/src/shader_build.rs:311:10:
+  offline-shader requires spirv-val (GPUI_SPIRV_VAL): Os { code: 2, kind: NotFound, message: "No such file or directory" }
+  note: run with `RUST_BACKTRACE=1` environment variable to display a backtrace
+warning: build failed, waiting for other jobs to finish...

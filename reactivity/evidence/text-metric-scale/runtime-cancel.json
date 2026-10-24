@@ -1,0 +1,8 @@
+{
+  "reason": "Root requested immediate sealing and target release; optional extra runtime dependency build stopped before qualification",
+  "shell_pid": 1865331,
+  "cargo_pid": 1865332,
+  "command": "cargo test -p gpui --release --locked --manifest-path reactivity/Cargo.toml --test presentation --test text_geometry --test text_cache --test paint_patch --test text_selection --test text_selection_compound --test paint_slots --no-run --message-format=json ",
+  "signal": "SIGTERM process group",
+  "runtime_claim_for_metric_composition": false
+}

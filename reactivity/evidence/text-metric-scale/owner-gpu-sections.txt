@@ -1,0 +1,35 @@
+/tmp/gpui-ecow-gpu-artifacts/render  :
+section                 size       addr
+.interp                   83        736
+.note.ABI-tag             32        820
+.dynsym                 3936        856
+.gnu.version             328       4792
+.gnu.version_r           464       5120
+.gnu.hash                 28       5584
+.dynstr                 2130       5612
+.rela.dyn             419688       7744
+.rela.plt                 48     427432
+.rodata              5603632     427520
+.gcc_except_table     270500    6031152
+.eh_frame_hdr          97420    6301652
+.eh_frame             676884    6399072
+.text                6428759    7080064
+.init                     27   13508824
+.fini                     13   13508852
+.plt                      48   13508880
+.tdata                    72   13513024
+.tbss                    144   13513096
+.fini_array                8   13513096
+.init_array               16   13513104
+.data.rel.ro          327376   13513120
+.dynamic                 480   13840496
+.got                   23824   13840976
+.got.plt                  40   13864800
+.relro_padding           120   13864840
+.tm_clone_table            0   13868936
+.data                   6032   13868936
+.bss                     372   13874968
+.comment                 166          0
+Total               13862670
+
+

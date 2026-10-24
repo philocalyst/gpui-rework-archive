@@ -1,0 +1,193 @@
+
+/tmp/gpui-metric-control-gpu-artifacts/render:     file format elf64-x86-64
+
+
+Disassembly of section .text:
+
+000000000075ce30 <<gpui_canvas::canvas::PreparedGroup>::placements::{closure#0}>:
+  75ce30:	push   %rbp
+  75ce31:	push   %r15
+  75ce33:	push   %r14
+  75ce35:	push   %r12
+  75ce37:	push   %rbx
+  75ce38:	sub    $0x30,%rsp
+  75ce3c:	mov    %rdi,%rbx
+  75ce3f:	movzwl 0xa(%rdx),%ecx
+  75ce43:	movzwl 0x8(%rdx),%edi
+  75ce47:	cmp    $0xffff,%rcx
+  75ce4e:	je     75cf2a <<gpui_canvas::canvas::PreparedGroup>::placements::{closure#0}+0xfa>
+  75ce54:	mov    0xb0(%rsi),%rax
+  75ce5b:	cmp    %rdi,%rax
+  75ce5e:	jbe    75d109 <<gpui_canvas::canvas::PreparedGroup>::placements::{closure#0}+0x2d9>
+  75ce64:	mov    0xa8(%rsi),%r10
+  75ce6b:	shl    $0x6,%edi
+  75ce6e:	mov    0x8(%r10,%rdi,1),%rax
+  75ce73:	cmp    %rcx,%rax
+  75ce76:	jbe    75d119 <<gpui_canvas::canvas::PreparedGroup>::placements::{closure#0}+0x2e9>
+  75ce7c:	movzwl 0xc(%rdx),%r9d
+  75ce81:	mov    %r9d,%r8d
+  75ce84:	mov    0xf8(%rsi),%rax
+  75ce8b:	cmp    %r8,%rax
+  75ce8e:	jbe    75d12c <<gpui_canvas::canvas::PreparedGroup>::placements::{closure#0}+0x2fc>
+  75ce94:	lea    (%r10,%rdi,1),%r11
+  75ce98:	movss  0x30(%r10,%rdi,1),%xmm5
+  75ce9f:	movss  0x34(%r10,%rdi,1),%xmm1
+  75cea6:	mov    0xf0(%rsi),%r14
+  75cead:	mov    (%r11),%r15
+  75ceb0:	lea    (%rcx,%rcx,2),%rcx
+  75ceb4:	mov    (%r14,%r8,8),%r8
+  75ceb8:	addss  0x4(%r15,%rcx,4),%xmm5
+  75cebf:	addss  0x8(%r15,%rcx,4),%xmm1
+  75cec6:	movsd  0x48(%r8),%xmm0
+  75cecc:	cvtdq2ps %xmm0,%xmm3
+  75cecf:	movss  0x38(%r11),%xmm2
+  75ced5:	shufps $0x0,%xmm2,%xmm2
+  75ced9:	divps  %xmm2,%xmm3
+  75cedc:	movaps %xmm3,%xmm4
+  75cedf:	shufps $0x55,%xmm3,%xmm4
+  75cee3:	mov    0x38(%r8),%rcx
+  75cee7:	mov    0x40(%r8),%r8
+  75ceeb:	test   %r8,%r8
+  75ceee:	js     75cf87 <<gpui_canvas::canvas::PreparedGroup>::placements::{closure#0}+0x157>
+  75cef4:	xorps  %xmm0,%xmm0
+  75cef7:	cvtsi2ss %r8,%xmm0
+  75cefc:	addss  %xmm3,%xmm5
+  75cf00:	subss  %xmm4,%xmm1
+  75cf04:	test   %rcx,%rcx
+  75cf07:	jns    75cfb1 <<gpui_canvas::canvas::PreparedGroup>::placements::{closure#0}+0x181>
+  75cf0d:	mov    %rcx,%r8
+  75cf10:	shr    $1,%r8
+  75cf13:	and    $0x1,%ecx
+  75cf16:	or     %r8,%rcx
+  75cf19:	xorps  %xmm3,%xmm3
+  75cf1c:	cvtsi2ss %rcx,%xmm3
+  75cf21:	addss  %xmm3,%xmm3
+  75cf25:	jmp    75cfb9 <<gpui_canvas::canvas::PreparedGroup>::placements::{closure#0}+0x189>
+  75cf2a:	mov    0x98(%rsi),%rax
+  75cf31:	cmp    %rdi,%rax
+  75cf34:	jbe    75d13f <<gpui_canvas::canvas::PreparedGroup>::placements::{closure#0}+0x30f>
+  75cf3a:	mov    0x90(%rsi),%rax
+  75cf41:	lea    (%rdi,%rdi,2),%rcx
+  75cf45:	shl    $0x4,%ecx
+  75cf48:	mov    0x28(%rax,%rcx,1),%r9d
+  75cf4d:	mov    $0xffffffff,%edi
+  75cf52:	movss  0x24(%rax,%rcx,1),%xmm0
+  75cf58:	movups (%rax,%rcx,1),%xmm5
+  75cf5c:	mov    (%rdx),%r14
+  75cf5f:	cmp    %rdi,%r9
+  75cf62:	je     75d080 <<gpui_canvas::canvas::PreparedGroup>::placements::{closure#0}+0x250>
+  75cf68:	test   %r9d,%r9d
+  75cf6b:	js     75d08b <<gpui_canvas::canvas::PreparedGroup>::placements::{closure#0}+0x25b>
+  75cf71:	cmp    $0x3fffffff,%r9d
+  75cf78:	ja     75d0a5 <<gpui_canvas::canvas::PreparedGroup>::placements::{closure#0}+0x275>
+  75cf7e:	mov    0xf8(%rsi),%rax
+  75cf85:	jmp    75cfda <<gpui_canvas::canvas::PreparedGroup>::placements::{closure#0}+0x1aa>
+  75cf87:	mov    %r8,%r11
+  75cf8a:	shr    $1,%r11
+  75cf8d:	and    $0x1,%r8d
+  75cf91:	or     %r11,%r8
+  75cf94:	xorps  %xmm0,%xmm0
+  75cf97:	cvtsi2ss %r8,%xmm0
+  75cf9c:	addss  %xmm0,%xmm0
+  75cfa0:	addss  %xmm3,%xmm5
+  75cfa4:	subss  %xmm4,%xmm1
+  75cfa8:	test   %rcx,%rcx
+  75cfab:	js     75cf0d <<gpui_canvas::canvas::PreparedGroup>::placements::{closure#0}+0xdd>
+  75cfb1:	xorps  %xmm3,%xmm3
+  75cfb4:	cvtsi2ss %rcx,%xmm3
+  75cfb9:	unpcklps %xmm0,%xmm3
+  75cfbc:	movss  0x24(%r10,%rdi,1),%xmm0
+  75cfc3:	divps  %xmm2,%xmm3
+  75cfc6:	movaps %xmm3,%xmm2
+  75cfc9:	shufps $0x55,%xmm3,%xmm2
+  75cfcd:	subss  %xmm2,%xmm1
+  75cfd1:	unpcklps %xmm1,%xmm5
+  75cfd4:	mov    (%rdx),%r14
+  75cfd7:	movlhps %xmm3,%xmm5
+  75cfda:	movaps %xmm5,(%rsp)
+  75cfde:	mov    %r9d,%edi
+  75cfe1:	cmp    %rdi,%rax
+  75cfe4:	jbe    75d0f9 <<gpui_canvas::canvas::PreparedGroup>::placements::{closure#0}+0x2c9>
+  75cfea:	mov    0xf0(%rsi),%rax
+  75cff1:	mov    (%rax,%rdi,8),%rax
+  75cff5:	add    $0x10,%rax
+  75cff9:	mov    %rax,0x18(%rsp)
+  75cffe:	mov    $0x2,%eax
+  75d003:	mov    %r14,%r15
+  75d006:	shr    $0x30,%r15
+  75d00a:	mov    %r14d,%ebp
+  75d00d:	shr    $0x10,%ebp
+  75d010:	sub    %ebp,%r15d
+  75d013:	mov    %r14,%r12
+  75d016:	shr    $0x20,%r12
+  75d01a:	sub    %r14d,%r12d
+  75d01d:	mov    %eax,0x10(%rsp)
+  75d021:	movss  %xmm0,0x20(%rsp)
+  75d027:	movq   $0x0,0x24(%rsp)
+  75d030:	movl   $0x3f800000,0x2c(%rsp)
+  75d038:	lea    0x10(%rsp),%rsi
+  75d03d:	lea    0x20(%rsp),%rdx
+  75d042:	mov    %rbx,%rdi
+  75d045:	call   *0x5d70ed(%rip)        # d34138 <_DYNAMIC+0xee0>
+  75d04b:	movaps (%rsp),%xmm0
+  75d04f:	movups %xmm0,0x38(%rbx)
+  75d053:	movzwl %r14w,%eax
+  75d057:	movd   %eax,%xmm0
+  75d05b:	pinsrw $0x2,%ebp,%xmm0
+  75d060:	pinsrw $0x4,%r12d,%xmm0
+  75d066:	pinsrw $0x6,%r15d,%xmm0
+  75d06c:	cvtdq2ps %xmm0,%xmm0
+  75d06f:	movups %xmm0,0x48(%rbx)
+  75d073:	add    $0x30,%rsp
+  75d077:	pop    %rbx
+  75d078:	pop    %r12
+  75d07a:	pop    %r14
+  75d07c:	pop    %r15
+  75d07e:	pop    %rbp
+  75d07f:	ret
+  75d080:	movaps %xmm5,(%rsp)
+  75d084:	xor    %eax,%eax
+  75d086:	jmp    75d003 <<gpui_canvas::canvas::PreparedGroup>::placements::{closure#0}+0x1d3>
+  75d08b:	movaps %xmm5,(%rsp)
+  75d08f:	and    $0x7fffffff,%r9d
+  75d096:	mov    %r9d,0x14(%rsp)
+  75d09b:	mov    $0x1,%eax
+  75d0a0:	jmp    75d003 <<gpui_canvas::canvas::PreparedGroup>::placements::{closure#0}+0x1d3>
+  75d0a5:	mov    0x100(%rsi),%rax
+  75d0ac:	test   %rax,%rax
+  75d0af:	je     75d0ec <<gpui_canvas::canvas::PreparedGroup>::placements::{closure#0}+0x2bc>
+  75d0b1:	movaps %xmm5,(%rsp)
+  75d0b5:	mov    %r9d,%edi
+  75d0b8:	and    $0x1fffffff,%edi
+  75d0be:	mov    0x10(%rax),%rsi
+  75d0c2:	cmp    %rdi,%rsi
+  75d0c5:	jbe    75d14f <<gpui_canvas::canvas::PreparedGroup>::placements::{closure#0}+0x31f>
+  75d0cb:	shl    $0x3,%edi
+  75d0ce:	add    0x8(%rax),%rdi
+  75d0d2:	and    $0x20000000,%r9d
+  75d0d9:	mov    %rdi,0x18(%rsp)
+  75d0de:	xor    %eax,%eax
+  75d0e0:	cmp    $0x1,%r9d
+  75d0e4:	adc    $0x3,%eax
+  75d0e7:	jmp    75d003 <<gpui_canvas::canvas::PreparedGroup>::placements::{closure#0}+0x1d3>
+  75d0ec:	lea    0x5950c5(%rip),%rdi        # cf21b8 <anon.e28c37b6eb72e88f7fbdd526e97e9b1b.2.llvm.1500201584695907981+0x5c28>
+  75d0f3:	call   *0x5d64f7(%rip)        # d335f0 <_DYNAMIC+0x398>
+  75d0f9:	lea    0x5950a0(%rip),%rdx        # cf21a0 <anon.e28c37b6eb72e88f7fbdd526e97e9b1b.2.llvm.1500201584695907981+0x5c10>
+  75d100:	mov    %rax,%rsi
+  75d103:	call   *0x5d65d7(%rip)        # d336e0 <_DYNAMIC+0x488>
+  75d109:	lea    0x595078(%rip),%rdx        # cf2188 <anon.e28c37b6eb72e88f7fbdd526e97e9b1b.2.llvm.1500201584695907981+0x5bf8>
+  75d110:	mov    %rax,%rsi
+  75d113:	call   *0x5d65c7(%rip)        # d336e0 <_DYNAMIC+0x488>
+  75d119:	lea    0x5950c8(%rip),%rdx        # cf21e8 <anon.e28c37b6eb72e88f7fbdd526e97e9b1b.2.llvm.1500201584695907981+0x5c58>
+  75d120:	mov    %rcx,%rdi
+  75d123:	mov    %rax,%rsi
+  75d126:	call   *0x5d65b4(%rip)        # d336e0 <_DYNAMIC+0x488>
+  75d12c:	lea    0x5950cd(%rip),%rdx        # cf2200 <anon.e28c37b6eb72e88f7fbdd526e97e9b1b.2.llvm.1500201584695907981+0x5c70>
+  75d133:	mov    %r8,%rdi
+  75d136:	mov    %rax,%rsi
+  75d139:	call   *0x5d65a1(%rip)        # d336e0 <_DYNAMIC+0x488>
+  75d13f:	lea    0x59502a(%rip),%rdx        # cf2170 <anon.e28c37b6eb72e88f7fbdd526e97e9b1b.2.llvm.1500201584695907981+0x5be0>
+  75d146:	mov    %rax,%rsi
+  75d149:	call   *0x5d6591(%rip)        # d336e0 <_DYNAMIC+0x488>
+  75d14f:	lea    0x59507a(%rip),%rdx        # cf21d0 <anon.e28c37b6eb72e88f7fbdd526e97e9b1b.2.llvm.1500201584695907981+0x5c40>
+  75d156:	call   *0x5d6584(%rip)        # d336e0 <_DYNAMIC+0x488>

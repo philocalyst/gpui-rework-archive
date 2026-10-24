@@ -1,0 +1,56 @@
+{
+  "shipping_pin": "65c1152f25ec1f139ef874ca89ccd2eb59cc45da",
+  "base": "bbe0c2058c2b3812e0ae8e251db68c329be7734a",
+  "main_control": "4ee08a32def2ca70371c1764a0153a57053ae0e4",
+  "native": {
+    "source": "65c1152f25ec1f139ef874ca89ccd2eb59cc45da",
+    "exit": 0,
+    "guards": 2038,
+    "guards_match": true,
+    "tracked_input_scopes": [
+      ".cargo",
+      "clippy.toml",
+      "reactivity/Cargo.toml",
+      "reactivity/Cargo.lock",
+      "reactivity/rust-toolchain.toml",
+      "reactivity/crates",
+      "reactivity/vendor"
+    ],
+    "passed": 323,
+    "failed": 0,
+    "ignored": 3,
+    "harnesses": 39,
+    "scope": "Functional/source-identity gate; no timing inference."
+  },
+  "miri_focused": {
+    "invocations": 16,
+    "passed": 48,
+    "seeds": [
+      0,
+      1,
+      2,
+      3,
+      4,
+      5,
+      6,
+      7
+    ],
+    "models": [
+      "stacked",
+      "tree"
+    ],
+    "strict_provenance": true,
+    "guards_matched": 64
+  },
+  "miri_full": {
+    "passed": 4,
+    "strict_provenance": true,
+    "seed": 0,
+    "model": "stacked"
+  },
+  "borrow_compile_fail_tests": 4,
+  "negative_copy_exit": 101,
+  "first_party_shipping_lines": 32394,
+  "ecow_shipping_lines": 2315,
+  "cpu_gpu_latency_claim": false
+}

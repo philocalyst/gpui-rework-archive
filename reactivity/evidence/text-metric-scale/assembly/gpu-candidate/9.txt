@@ -1,0 +1,47 @@
+
+/tmp/gpui-metric-default-gpu-artifacts/render:     file format elf64-x86-64
+
+
+Disassembly of section .text:
+
+0000000000762ec0 <<core::iter::adapters::enumerate::Enumerate<core::iter::adapters::map::Map<core::slice::iter::Iter<gpui_canvas::canvas::DrawRef>, <gpui_canvas::canvas::PreparedGroup>::placements::{closure#0}>> as core::iter::traits::iterator::Iterator>::next>:
+  762ec0:	push   %r14
+  762ec2:	push   %rbx
+  762ec3:	sub    $0x58,%rsp
+  762ec7:	mov    %rdi,%rbx
+  762eca:	mov    (%rsi),%rdx
+  762ecd:	cmp    0x8(%rsi),%rdx
+  762ed1:	je     762f3b <<core::iter::adapters::enumerate::Enumerate<core::iter::adapters::map::Map<core::slice::iter::Iter<gpui_canvas::canvas::DrawRef>, <gpui_canvas::canvas::PreparedGroup>::placements::{closure#0}>> as core::iter::traits::iterator::Iterator>::next+0x7b>
+  762ed3:	mov    %rsi,%r14
+  762ed6:	lea    0xe(%rdx),%rax
+  762eda:	mov    %rax,(%rsi)
+  762edd:	mov    0x10(%rsi),%rsi
+  762ee1:	mov    %rsp,%rdi
+  762ee4:	call   75cf80 <<gpui_canvas::canvas::PreparedGroup>::placements::{closure#0}>
+  762ee9:	cmpb   $0xff,(%rsp)
+  762eed:	je     762f3b <<core::iter::adapters::enumerate::Enumerate<core::iter::adapters::map::Map<core::slice::iter::Iter<gpui_canvas::canvas::DrawRef>, <gpui_canvas::canvas::PreparedGroup>::placements::{closure#0}>> as core::iter::traits::iterator::Iterator>::next+0x7b>
+  762eef:	mov    0x50(%rsp),%rax
+  762ef4:	mov    %rax,0x58(%rbx)
+  762ef8:	movups 0x40(%rsp),%xmm0
+  762efd:	movups %xmm0,0x48(%rbx)
+  762f01:	movups (%rsp),%xmm0
+  762f05:	movups 0x10(%rsp),%xmm1
+  762f0a:	movups 0x20(%rsp),%xmm2
+  762f0f:	movups 0x30(%rsp),%xmm3
+  762f14:	movups %xmm3,0x38(%rbx)
+  762f18:	movups %xmm2,0x28(%rbx)
+  762f1c:	movups %xmm1,0x18(%rbx)
+  762f20:	movups %xmm0,0x8(%rbx)
+  762f24:	mov    0x18(%r14),%rax
+  762f28:	lea    0x1(%rax),%rcx
+  762f2c:	mov    %rcx,0x18(%r14)
+  762f30:	mov    %rax,(%rbx)
+  762f33:	add    $0x58,%rsp
+  762f37:	pop    %rbx
+  762f38:	pop    %r14
+  762f3a:	ret
+  762f3b:	movb   $0xff,0x8(%rbx)
+  762f3f:	add    $0x58,%rsp
+  762f43:	pop    %rbx
+  762f44:	pop    %r14
+  762f46:	ret

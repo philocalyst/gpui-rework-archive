@@ -1,0 +1,151 @@
+
+/tmp/gpui-metric-default-probe-artifacts/text_run_probe:     file format elf64-x86-64
+
+
+Disassembly of section .text:
+
+0000000000541790 <<gpui_canvas::canvas::PreparedGroup>::placements::{closure#0}>:
+  541790:	push   %rbp
+  541791:	push   %r15
+  541793:	push   %r14
+  541795:	push   %r12
+  541797:	push   %rbx
+  541798:	sub    $0x40,%rsp
+  54179c:	mov    %rdx,%r15
+  54179f:	mov    %rsi,%r14
+  5417a2:	mov    %rdi,%rbx
+  5417a5:	movzwl 0xa(%rdx),%eax
+  5417a9:	movzwl 0x8(%rdx),%edi
+  5417ad:	cmp    $0xffff,%rax
+  5417b3:	je     5418f4 <<gpui_canvas::canvas::PreparedGroup>::placements::{closure#0}+0x164>
+  5417b9:	mov    0xb0(%r14),%rsi
+  5417c0:	cmp    %rdi,%rsi
+  5417c3:	jbe    5419d0 <<gpui_canvas::canvas::PreparedGroup>::placements::{closure#0}+0x240>
+  5417c9:	mov    0xa8(%r14),%rdx
+  5417d0:	shl    $0x6,%edi
+  5417d3:	mov    0x8(%rdx,%rdi,1),%rsi
+  5417d8:	cmp    %rax,%rsi
+  5417db:	jbe    5419dd <<gpui_canvas::canvas::PreparedGroup>::placements::{closure#0}+0x24d>
+  5417e1:	movzwl 0xc(%r15),%r12d
+  5417e6:	mov    %r12d,%ecx
+  5417e9:	mov    0xf8(%r14),%rsi
+  5417f0:	cmp    %rcx,%rsi
+  5417f3:	jbe    5419ed <<gpui_canvas::canvas::PreparedGroup>::placements::{closure#0}+0x25d>
+  5417f9:	lea    (%rdx,%rdi,1),%r8
+  5417fd:	movss  0x24(%rdx,%rdi,1),%xmm0
+  541803:	movss  %xmm0,0xc(%rsp)
+  541809:	movss  0x30(%rdx,%rdi,1),%xmm0
+  54180f:	movss  0x34(%rdx,%rdi,1),%xmm1
+  541815:	mov    0xf0(%r14),%rdx
+  54181c:	mov    (%r8),%rsi
+  54181f:	lea    (%rax,%rax,2),%rax
+  541823:	mov    0x4(%rsi,%rax,4),%rsi
+  541828:	mov    (%rdx,%rcx,8),%rdx
+  54182c:	add    $0x10,%rdx
+  541830:	movss  0x38(%r8),%xmm2
+  541836:	lea    0x30(%rsp),%rdi
+  54183b:	call   *0x2397ff(%rip)        # 77b040 <_DYNAMIC+0x2c8>
+  541841:	mov    (%r15),%r15
+  541844:	mov    %r12d,%edi
+  541847:	mov    0xf8(%r14),%rsi
+  54184e:	cmp    %rdi,%rsi
+  541851:	jbe    54195a <<gpui_canvas::canvas::PreparedGroup>::placements::{closure#0}+0x1ca>
+  541857:	mov    0xf0(%r14),%rax
+  54185e:	mov    (%rax,%rdi,8),%rax
+  541862:	add    $0x10,%rax
+  541866:	mov    %rax,0x18(%rsp)
+  54186b:	mov    $0x2,%eax
+  541870:	movss  0xc(%rsp),%xmm1
+  541876:	mov    %r15,%r14
+  541879:	shr    $0x30,%r14
+  54187d:	mov    %r15d,%ebp
+  541880:	shr    $0x10,%ebp
+  541883:	sub    %ebp,%r14d
+  541886:	mov    %r15,%r12
+  541889:	shr    $0x20,%r12
+  54188d:	sub    %r15d,%r12d
+  541890:	mov    %eax,0x10(%rsp)
+  541894:	movss  %xmm1,0x20(%rsp)
+  54189a:	movq   $0x0,0x24(%rsp)
+  5418a3:	movl   $0x3f800000,0x2c(%rsp)
+  5418ab:	lea    0x10(%rsp),%rsi
+  5418b0:	lea    0x20(%rsp),%rdx
+  5418b5:	mov    %rbx,%rdi
+  5418b8:	call   *0x23978a(%rip)        # 77b048 <_DYNAMIC+0x2d0>
+  5418be:	movaps 0x30(%rsp),%xmm0
+  5418c3:	movups %xmm0,0x38(%rbx)
+  5418c7:	movzwl %r15w,%eax
+  5418cb:	movd   %eax,%xmm0
+  5418cf:	pinsrw $0x2,%ebp,%xmm0
+  5418d4:	pinsrw $0x4,%r12d,%xmm0
+  5418da:	pinsrw $0x6,%r14d,%xmm0
+  5418e0:	cvtdq2ps %xmm0,%xmm0
+  5418e3:	movups %xmm0,0x48(%rbx)
+  5418e7:	add    $0x40,%rsp
+  5418eb:	pop    %rbx
+  5418ec:	pop    %r12
+  5418ee:	pop    %r14
+  5418f0:	pop    %r15
+  5418f2:	pop    %rbp
+  5418f3:	ret
+  5418f4:	mov    0x98(%r14),%rsi
+  5418fb:	cmp    %rdi,%rsi
+  5418fe:	jbe    5419fd <<gpui_canvas::canvas::PreparedGroup>::placements::{closure#0}+0x26d>
+  541904:	mov    0x90(%r14),%rax
+  54190b:	lea    (%rdi,%rdi,2),%rcx
+  54190f:	shl    $0x4,%ecx
+  541912:	mov    0x28(%rax,%rcx,1),%r12d
+  541917:	mov    $0xffffffff,%edx
+  54191c:	movss  0x24(%rax,%rcx,1),%xmm1
+  541922:	mov    (%r15),%r15
+  541925:	movups (%rax,%rcx,1),%xmm0
+  541929:	movaps %xmm0,0x30(%rsp)
+  54192e:	cmp    %rdx,%r12
+  541931:	je     541967 <<gpui_canvas::canvas::PreparedGroup>::placements::{closure#0}+0x1d7>
+  541933:	test   %r12d,%r12d
+  541936:	js     54196e <<gpui_canvas::canvas::PreparedGroup>::placements::{closure#0}+0x1de>
+  541938:	cmp    $0x40000000,%r12d
+  54193f:	jae    541984 <<gpui_canvas::canvas::PreparedGroup>::placements::{closure#0}+0x1f4>
+  541941:	movss  %xmm1,0xc(%rsp)
+  541947:	mov    %r12d,%edi
+  54194a:	mov    0xf8(%r14),%rsi
+  541951:	cmp    %rdi,%rsi
+  541954:	ja     541857 <<gpui_canvas::canvas::PreparedGroup>::placements::{closure#0}+0xc7>
+  54195a:	lea    0x22028f(%rip),%rdx        # 761bf0 <anon.fd259e55f6337549f4fd45a0db239f1c.10.llvm.2026921456694442198+0x138>
+  541961:	call   *0x2396e9(%rip)        # 77b050 <_DYNAMIC+0x2d8>
+  541967:	xor    %eax,%eax
+  541969:	jmp    541876 <<gpui_canvas::canvas::PreparedGroup>::placements::{closure#0}+0xe6>
+  54196e:	and    $0x7fffffff,%r12d
+  541975:	mov    %r12d,0x14(%rsp)
+  54197a:	mov    $0x1,%eax
+  54197f:	jmp    541876 <<gpui_canvas::canvas::PreparedGroup>::placements::{closure#0}+0xe6>
+  541984:	mov    0x100(%r14),%rax
+  54198b:	test   %rax,%rax
+  54198e:	je     5419c3 <<gpui_canvas::canvas::PreparedGroup>::placements::{closure#0}+0x233>
+  541990:	mov    %r12d,%edi
+  541993:	and    $0x1fffffff,%edi
+  541999:	mov    0x10(%rax),%rsi
+  54199d:	cmp    %rdi,%rsi
+  5419a0:	jbe    541a0a <<gpui_canvas::canvas::PreparedGroup>::placements::{closure#0}+0x27a>
+  5419a2:	shl    $0x3,%edi
+  5419a5:	add    0x8(%rax),%rdi
+  5419a9:	and    $0x20000000,%r12d
+  5419b0:	mov    %rdi,0x18(%rsp)
+  5419b5:	xor    %eax,%eax
+  5419b7:	cmp    $0x1,%r12d
+  5419bb:	adc    $0x3,%eax
+  5419be:	jmp    541876 <<gpui_canvas::canvas::PreparedGroup>::placements::{closure#0}+0xe6>
+  5419c3:	lea    0x22023e(%rip),%rdi        # 761c08 <anon.fd259e55f6337549f4fd45a0db239f1c.10.llvm.2026921456694442198+0x150>
+  5419ca:	call   *0x239688(%rip)        # 77b058 <_DYNAMIC+0x2e0>
+  5419d0:	lea    0x220201(%rip),%rdx        # 761bd8 <anon.fd259e55f6337549f4fd45a0db239f1c.10.llvm.2026921456694442198+0x120>
+  5419d7:	call   *0x239673(%rip)        # 77b050 <_DYNAMIC+0x2d8>
+  5419dd:	lea    0x220254(%rip),%rdx        # 761c38 <anon.fd259e55f6337549f4fd45a0db239f1c.10.llvm.2026921456694442198+0x180>
+  5419e4:	mov    %rax,%rdi
+  5419e7:	call   *0x239663(%rip)        # 77b050 <_DYNAMIC+0x2d8>
+  5419ed:	lea    0x22025c(%rip),%rdx        # 761c50 <anon.fd259e55f6337549f4fd45a0db239f1c.10.llvm.2026921456694442198+0x198>
+  5419f4:	mov    %rcx,%rdi
+  5419f7:	call   *0x239653(%rip)        # 77b050 <_DYNAMIC+0x2d8>
+  5419fd:	lea    0x2201bc(%rip),%rdx        # 761bc0 <anon.fd259e55f6337549f4fd45a0db239f1c.10.llvm.2026921456694442198+0x108>
+  541a04:	call   *0x239646(%rip)        # 77b050 <_DYNAMIC+0x2d8>
+  541a0a:	lea    0x22020f(%rip),%rdx        # 761c20 <anon.fd259e55f6337549f4fd45a0db239f1c.10.llvm.2026921456694442198+0x168>
+  541a11:	call   *0x239639(%rip)        # 77b050 <_DYNAMIC+0x2d8>

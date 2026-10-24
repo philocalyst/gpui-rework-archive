@@ -1,0 +1,4 @@
+   Compiling gpui_gpu v0.1.0 (/tmp/gpui-text-metric-scale-sol/reactivity/crates/gpu)
+   Compiling wgpu v30.0.1 (/tmp/gpui-text-metric-scale-sol/reactivity/vendor/wgpu)
+   Compiling gpui_canvas v0.1.0 (/tmp/gpui-text-metric-scale-sol/reactivity/crates/canvas)
+    Finished `release` profile [optimized] target(s) in 54.23s
