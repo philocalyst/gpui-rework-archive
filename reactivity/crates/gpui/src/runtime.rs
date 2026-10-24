@@ -2050,20 +2050,32 @@ impl<M: View + 'static> Runtime<M> {
             .checked_add(drafts.len() as u64)
             .ok_or(Error::EpochExhausted)?;
         let (image_resources, image_nodes) = image::describe(image_drafts)?;
-        let mut depths = Vec::with_capacity(drafts.len());
+        let mut depth = 0usize;
         let mut layout_depth = 0u8;
         let mut fields = Vec::with_capacity(drafts.len());
         let mut component_scopes = Vec::with_capacity(drafts.len());
-        let mut new_counts = vec![0usize; drafts.len() + 1];
+        let mut new_counts = vec![0u32; drafts.len() + 1];
         let mut fanout: BTreeMap<FieldId, Fanout> = BTreeMap::new();
         for (index, node) in drafts.iter().enumerate() {
             new_counts[node.parent.map_or(0, |parent| parent as usize + 1)] += 1;
-            let depth = node.parent.map_or(0, |parent| depths[parent as usize] + 1);
+            // Flattening admits preorder. Descending visits the next child;
+            // a completed branch is unwound through its existing parent links.
+            // Each edge is unwound once, without a node-indexed depth column.
+            if index != 0 {
+                if node.parent == Some((index - 1) as u32) {
+                    depth += 1;
+                } else {
+                    let mut preceding = index - 1;
+                    while drafts[preceding].parent != node.parent {
+                        preceding = drafts[preceding].parent.unwrap() as usize;
+                        depth -= 1;
+                    }
+                }
+            }
             if depth > MAX_LAYOUT_DEPTH {
                 return Err(Error::DepthLimit { node: index });
             }
             layout_depth = layout_depth.max(depth as u8);
-            depths.push(depth);
             let mut component_scope = node
                 .parent
                 .map_or(0, |parent| component_scopes[parent as usize]);
@@ -2235,14 +2247,22 @@ impl<M: View + 'static> Runtime<M> {
         // its text lease and glyph Vec header without cloning either.
         let mut texts =
             Vec::with_capacity(drafts.iter().filter(|draft| draft.text.is_some()).count());
-        let mut ordinals = vec![0u32; drafts.len() + 1];
         let mut changed = 0;
         let mut background_cursor = background_drafts.iter().peekable();
         for (index, draft) in drafts.into_iter().enumerate() {
             let parent = draft.parent.map(|parent| parent as usize);
             let ordinal_slot = parent.map_or(0, |parent| parent + 1);
-            let ordinal = ordinals[ordinal_slot];
-            ordinals[ordinal_slot] += 1;
+            let ordinal = if index == 0 || parent == Some(index - 1) {
+                0
+            } else {
+                // The preceding subtree ends at the previous sibling. Its
+                // retained ordinal gives this sibling's ordinal directly.
+                let mut sibling = index - 1;
+                while nodes[sibling].parent.index() != parent {
+                    sibling = nodes[sibling].parent.index().unwrap();
+                }
+                nodes[sibling].ordinal + 1
+            };
             let parent_identity = parent.map(|parent| nodes[parent].identity());
             let old_siblings = match parent_identity {
                 Some(identity) => self.by_identity.get(identity).map_or(&[][..], |parent| {
@@ -2252,7 +2272,8 @@ impl<M: View + 'static> Runtime<M> {
             };
             // A shape change invalidates the entire unkeyed run. Equal kinds
             // at shifted ordinals must not silently retarget an old capability.
-            let run_survives = reuse_identities && old_siblings.len() == new_counts[ordinal_slot];
+            let run_survives =
+                reuse_identities && old_siblings.len() == new_counts[ordinal_slot] as usize;
             let previous_index = if let Some((_, row)) = row_indices.get(&index) {
                 reuse_identities
                     .then(|| keyed_rows.get(&(parent_identity, row.key, draft.kind.site_kind())))
