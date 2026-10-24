@@ -1,0 +1,10 @@
+GPUI Component clean-room runtime adaptation
+Reference: https://github.com/gpui-ce/gpui-component
+Revision: c08206932417f863062d2ab70cc2854c6ca04238
+Copyright 2024 - 2026 Longbridge <https://longbridge.com>
+Licensed under the Apache License, Version 2.0; see LICENSE-APACHE.
+
+This implementation adapts the reference's component contracts, semantic theme
+and application-owned parts architecture to ordinary borrowed GPUI views and
+exclusively owned Signals. It does not incorporate the reference's Entity,
+Rc/RefCell, procedural macro, asset, or global theme implementations.

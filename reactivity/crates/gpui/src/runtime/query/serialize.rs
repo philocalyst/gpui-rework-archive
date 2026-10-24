@@ -99,7 +99,7 @@ impl Serialize for Part<'_> {
     fn serialize<S: Serializer>(&self, serializer: S) -> Result<S::Ok, S::Error> {
         let mut node = serializer.serialize_struct(
             "Part",
-            19 + usize::from(self.checked().is_some()) + usize::from(self.marked_text().is_some()),
+            21 + usize::from(self.checked().is_some()) + usize::from(self.marked_text().is_some()),
         )?;
         node.serialize_field("target", &self.target())?;
         node.serialize_field("parent", &self.parent())?;
@@ -116,6 +116,8 @@ impl Serialize for Part<'_> {
             node.serialize_field("marked_text", &marked)?;
         }
         node.serialize_field("focused", &self.focused())?;
+        node.serialize_field("disabled", &self.disabled())?;
+        node.serialize_field("invalid", &self.invalid())?;
         node.serialize_field("actions", &self.actions())?;
         node.serialize_field("bounds", &rect(self.bounds()))?;
         node.serialize_field("local_bounds", &rect(self.local_bounds()))?;

@@ -110,7 +110,7 @@ impl Script {
                 let panel = owner.query().name("preview").one().unwrap();
                 assert_eq!(
                     owner.property(panel, crate::property::WIDTH).unwrap(),
-                    Some(100.0)
+                    crate::Length::Points(100.0)
                 );
                 self.click(event_loop, "Recolor");
             }

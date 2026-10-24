@@ -55,12 +55,18 @@ fn ack(win: &mut Win<Panel>) {
 fn erased_size_keeps_two_sinks_latest_inspector_base_and_literal_edge_removal() {
     let mut win = Win::with_size(Panel::new(), 120, 80).unwrap();
     let target = win.query().name("panel").one().unwrap();
-    win.set_property(target, WIDTH, Contribution::Set(Some(40.0)))
+    win.set_property(target, WIDTH, Contribution::Set(gpui::Length::Points(40.0)))
         .unwrap();
     win.reset_counters().unwrap();
     win.set(Panel::NUMBER, 32).unwrap();
-    assert_eq!(win.property(target, WIDTH).unwrap(), Some(40.0));
-    assert_eq!(win.property(target, HEIGHT).unwrap(), Some(32.0));
+    assert_eq!(
+        win.property(target, WIDTH).unwrap(),
+        gpui::Length::Points(40.0)
+    );
+    assert_eq!(
+        win.property(target, HEIGHT).unwrap(),
+        gpui::Length::Points(32.0)
+    );
     assert_eq!(win.property(target, FONT_SIZE).unwrap(), 32.0);
     assert!(win.find_text("32").is_ok());
     assert_eq!(win.counters().source_reads, 1);
@@ -68,14 +74,23 @@ fn erased_size_keeps_two_sinks_latest_inspector_base_and_literal_edge_removal() 
     assert_eq!(win.counters().owner_reruns, 0);
     win.set_property(target, WIDTH, Contribution::Inherit)
         .unwrap();
-    assert_eq!(win.property(target, WIDTH).unwrap(), Some(32.0));
+    assert_eq!(
+        win.property(target, WIDTH).unwrap(),
+        gpui::Length::Points(32.0)
+    );
 
     win.update(|m| m.literal = true).unwrap();
     win.reset_counters().unwrap();
     win.set(Panel::NUMBER, 48).unwrap();
     win.set(Panel::COLOR, Color::BLACK).unwrap();
-    assert_eq!(win.property(target, WIDTH).unwrap(), Some(24.0));
-    assert_eq!(win.property(target, HEIGHT).unwrap(), Some(24.0));
+    assert_eq!(
+        win.property(target, WIDTH).unwrap(),
+        gpui::Length::Points(24.0)
+    );
+    assert_eq!(
+        win.property(target, HEIGHT).unwrap(),
+        gpui::Length::Points(24.0)
+    );
     assert_eq!(win.property(target, FONT_SIZE).unwrap(), 24.0);
     assert_eq!(
         win.property(target, BACKGROUND).unwrap().solid().unwrap(),

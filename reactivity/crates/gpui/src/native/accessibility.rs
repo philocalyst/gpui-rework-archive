@@ -545,6 +545,12 @@ fn projected_node(part: Part<'_>) -> Node {
         Role::ScrollView => accesskit::Role::ScrollView,
     };
     let mut node = Node::new(role);
+    if part.invalid() {
+        node.set_invalid(accesskit::Invalid::True);
+    }
+    if part.disabled() {
+        node.set_disabled();
+    }
     if role == accesskit::Role::Label {
         // Native Label names come from value; an overridden name needs the
         // separate Group + Label child below to preserve actual text content.
@@ -763,6 +769,8 @@ mod tests;
 
 #[cfg(test)]
 mod geometry_tests;
+#[cfg(test)]
+mod invalid_tests;
 #[cfg(test)]
 mod selection_tests;
 #[cfg(test)]

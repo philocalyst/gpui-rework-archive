@@ -18,6 +18,7 @@ mod checkbox;
 mod clipping;
 mod failure;
 mod ime;
+mod invalid;
 mod lifecycle;
 
 const TITLE: &str = "GPUI native AT-SPI Todo proof";

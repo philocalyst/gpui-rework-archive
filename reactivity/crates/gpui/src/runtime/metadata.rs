@@ -23,6 +23,23 @@ impl Destination {
         assert!(node < MAX_NODES && (property as u16) <= 8191);
         Self((node as u32) << 15 | (property as u32) << 2 | Port::Style as u32)
     }
+    pub fn sink(node: usize, sink: crate::style_port::Sink) -> Self {
+        match sink.property() {
+            Some(property) => Self::style(node, property),
+            None => {
+                assert!(node < MAX_NODES);
+                Self((node as u32) << 15 | (sink.control_code() as u32) << 2)
+            }
+        }
+    }
+    pub fn control(self) -> Option<crate::style_port::Sink> {
+        (self.port() == Port::Visual)
+            .then(|| crate::style_port::Sink::control(((self.0 >> 2) & 8191) as u16))
+            .flatten()
+    }
+    pub fn target_sink(self) -> Option<crate::style_port::Sink> {
+        self.property().map(Into::into).or_else(|| self.control())
+    }
     pub fn packed(self) -> u32 {
         self.0
     }
@@ -191,6 +208,7 @@ impl Sheet {
 }
 #[derive(Default)]
 pub(super) struct Metadata {
+    pub focus_indicators: Vec<(u64, Color)>,
     pub inspector: Option<Box<super::inspector::Inspector>>,
     pub editing: Option<Box<super::editing::Editing>>,
     pub base: Vec<Declared>,
@@ -200,6 +218,12 @@ pub(super) struct Metadata {
     pub geometry: Option<Box<super::geometry::Geometry>>,
 }
 impl Metadata {
+    pub fn focus_indicator(&self, identity: u64) -> Option<Color> {
+        self.focus_indicators
+            .binary_search_by_key(&identity, |entry| entry.0)
+            .ok()
+            .map(|i| self.focus_indicators[i].1)
+    }
     pub fn base(&self, identity: u64) -> Option<&Declared> {
         self.base
             .binary_search_by_key(&identity, |entry| entry.identity)
@@ -627,7 +651,9 @@ mod destination_tests {
         }
         if raw & 3 == 3 {
             PropertyId::from_code(property)?;
-        } else if property != 0 {
+        } else if property != 0
+            && !(raw & 3 == 0 && crate::style_port::Sink::control(property).is_some())
+        {
             return None;
         }
         Some(Destination(raw))
@@ -660,9 +686,24 @@ mod destination_tests {
                 .windows(2)
                 .all(|pair| pair[0].node() <= pair[1].node())
         );
-        for port in [0, 1, 2] {
+        for port in [1, 2] {
             assert!(checked((1 << 2) | port).is_none());
         }
+        for node in [0, 1, MAX_NODES - 1] {
+            for sink in [
+                crate::style_port::Sink::CHECKED,
+                crate::style_port::Sink::DISABLED,
+                crate::style_port::Sink::INVALID,
+            ] {
+                let destination = Destination::sink(node, sink);
+                let decoded = checked(destination.packed()).unwrap();
+                assert_eq!(decoded.node(), node);
+                assert_eq!(decoded.control(), Some(sink));
+                assert!(decoded.property().is_none());
+                assert_eq!(size_of_val(&sink), 2);
+            }
+        }
+        assert!(checked(4 << 2).is_none());
         for invalid in [0, 15, 8191] {
             assert!(checked((invalid << 2) | 3).is_none());
         }
