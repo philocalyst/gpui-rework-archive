@@ -91,6 +91,11 @@ fn main() {
                         }
                     }
                 }
+                eprintln!(
+                    "CANVAS_STORAGE case={case} prepared={prepared} shapes={} storage={:?}",
+                    shaper.paragraph_shapes(),
+                    shaper.diagnostic_storage()
+                );
             });
             let elapsed = started.elapsed().as_nanos();
             let hash = black_box(digest(&layouts, hash));
