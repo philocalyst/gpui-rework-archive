@@ -5,24 +5,21 @@ use gpui_canvas::{
 };
 
 #[test]
-fn public_repeat_sampling_does_not_silently_publish_nonfinite_channels() {
+fn public_repeat_sampling_does_not_silently_choose_the_first_stop_after_overflow() {
     let gradient = Gradient::new(
         Geometry::Linear {
             start: Point::default(),
             end: Point { x: 1.0, y: 0.0 },
         },
-        &[Stop::new(0.0, Color::BLACK), Stop::new(0.5, Color::WHITE)],
+        &[Stop::new(0.0, Color::BLACK), Stop::new(0.3, Color::WHITE)],
         Extend::Repeat,
         Interpolation::LinearSrgb,
     )
     .unwrap();
-    assert!(
-        gradient
-            .view()
-            .sample_parameter(f32::MAX)
-            .iter()
-            .all(|value| value.is_finite())
-    );
+    let span = f64::from(0.3_f32);
+    let expected = (f64::from(f32::MAX).rem_euclid(span) / span) as f32;
+    assert!(expected > 0.0);
+    assert_eq!(gradient.view().sample_parameter(f32::MAX)[0], expected);
 }
 
 fn half(bytes: &[u8]) -> f64 {
