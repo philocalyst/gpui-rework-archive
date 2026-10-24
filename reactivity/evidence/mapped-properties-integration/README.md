@@ -16,6 +16,8 @@ non-shipping differences. [Main's integration gate](main-integration.json)
 passes strict native all-target Clippy at `c0b7dfb0dd11404e31bcc3dcda6df400a882ac66`,
 including both examples; all 2,035 scoped input hashes match before/after.
 The updated seven-library counter independently confirms 32,365 shipping lines.
+The same updated tool also reproduces 31,814 lines over six libraries at the
+historical `7df96981b8dd7c32ac5ff4d899b501bf30a0f3e2` pin.
 
 ## Ownership and admission
 
