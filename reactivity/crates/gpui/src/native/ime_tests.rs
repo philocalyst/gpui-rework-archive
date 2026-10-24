@@ -197,6 +197,80 @@ impl Script {
             }
             5 => {
                 assert_eq!(self.value("second"), "!A");
+                self.event(event_loop, Ime::Disabled);
+                self.event(event_loop, Ime::Enabled);
+                self.event(event_loop, Ime::Preedit("marked".into(), Some((6, 6))));
+                self.queue();
+            }
+            6 => {
+                assert_eq!(self.value("second"), "!Amarked");
+                self.event(event_loop, Ime::Preedit(String::new(), None));
+                self.host
+                    .key_input(&NativeKey::Character("B".into()), Some("B"))
+                    .unwrap();
+                assert_eq!(
+                    self.host.owner.as_ref().unwrap().read(Form::B).unwrap(),
+                    "!AB"
+                );
+                assert_eq!(
+                    self.host
+                        .owner
+                        .as_ref()
+                        .unwrap()
+                        .snapshot()
+                        .unwrap()
+                        .source_epoch,
+                    snapshot.source_epoch + 1
+                );
+                assert_eq!(self.value("second"), "!Amarked");
+                self.event(event_loop, Ime::Commit("late".into()));
+                assert_eq!(
+                    self.host.owner.as_ref().unwrap().read(Form::B).unwrap(),
+                    "!AB"
+                );
+                self.queue();
+            }
+            7 => {
+                assert_eq!(self.value("second"), "!AB");
+                self.event(event_loop, Ime::Disabled);
+                self.event(event_loop, Ime::Enabled);
+                self.event(event_loop, Ime::Preedit("x".into(), Some((1, 1))));
+                self.event(event_loop, Ime::Preedit(String::new(), None));
+                let cleared = self
+                    .host
+                    .owner
+                    .as_ref()
+                    .unwrap()
+                    .with_scene(|_, t| t)
+                    .unwrap();
+                self.host
+                    .key_input(&NativeKey::Named(NamedKey::End), None)
+                    .unwrap();
+                let owner = self.host.owner.as_ref().unwrap();
+                assert_eq!(
+                    owner.snapshot().unwrap().source_epoch,
+                    snapshot.source_epoch
+                );
+                assert_ne!(owner.with_scene(|_, t| t).unwrap(), cleared);
+                self.event(event_loop, Ime::Commit("late".into()));
+                assert_eq!(
+                    self.host.owner.as_ref().unwrap().read(Form::B).unwrap(),
+                    "!AB"
+                );
+                self.queue();
+            }
+            8 => {
+                assert_eq!(self.value("second"), "!AB");
+                self.host
+                    .owner
+                    .as_ref()
+                    .unwrap()
+                    .visit(|part| {
+                        if part.name() == Some("second") {
+                            assert!(part.marked_text().is_none());
+                        }
+                    })
+                    .unwrap();
                 assert!(self.host.instance.is_none());
                 self.complete = true;
                 event_loop.exit();
@@ -244,5 +318,5 @@ fn native_ime_preedit_commit_focus_lifecycle_and_acknowledged_pixels() {
     driver.host_mut().host.wake = Some(wake);
     event_loop.run_app(&mut driver).unwrap();
     assert!(driver.host().complete);
-    assert_eq!(driver.host().stage, 6);
+    assert_eq!(driver.host().stage, 9);
 }

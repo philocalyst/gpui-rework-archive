@@ -27,7 +27,9 @@ impl ImeSession {
 /// Winit-compatible composition events. Cursor endpoints are UTF-8 byte offsets
 /// within preedit, including valid character boundaries inside a grapheme.
 /// None hides the caret. Empty Preedit clears the preview while retaining the
-/// original replacement range for the following Commit; Cancel ends the stream.
+/// original replacement range for the following Commit. An ordinary editing key
+/// instead cancels that cleared composition and resumes from the original
+/// selection. Cancel ends the stream.
 #[derive(Clone, Copy, Debug, PartialEq, Eq)]
 pub enum ImeEvent<'a> {
     Enabled,
@@ -187,8 +189,19 @@ impl<M: View + 'static> Runtime<M> {
         };
         nearest(&active.source, mapped)
     }
-    pub(super) fn ime_composing(&self) -> bool {
-        self.composition_preview().is_some()
+    pub(super) fn ime_has_preedit(&self) -> bool {
+        self.composition_preview()
+            .is_some_and(|(_, preview)| preview.mark.range[0] != preview.mark.range[1])
+    }
+    pub(super) fn cancel_cleared_preedit(&mut self) -> bool {
+        if self
+            .composition_preview()
+            .is_some_and(|(_, preview)| preview.mark.range[0] == preview.mark.range[1])
+        {
+            self.cancel_ime()
+        } else {
+            false
+        }
     }
     fn invalidate_display(&mut self, target: Target) {
         if let Ok(index) = self.input_index(target) {

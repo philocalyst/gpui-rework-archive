@@ -672,3 +672,102 @@ fn unshapable_commit_keeps_canonical_source_write_and_old_p_without_live_stream(
     assert_eq!(displayed(&win, target).0, "fixed");
     assert!(displayed(&win, target).1.is_none());
 }
+
+#[test]
+fn cleared_preedit_resumes_keys_at_original_replacement_and_revokes_late_commit() {
+    for (key, expected, caret) in [
+        (Key::Text("!"), "left ! tail", 6),
+        (Key::Backspace, "left  tail", 5),
+        (Key::Space, "left   tail", 6),
+    ] {
+        let (mut win, target, mut session) = window("left RIGHT tail");
+        win.select(target, selection(5, 10)).unwrap();
+        ack(&mut win);
+        win.ime_event(&mut session, ImeEvent::Enabled).unwrap();
+        win.ime_event(
+            &mut session,
+            ImeEvent::Preedit {
+                text: "marked",
+                cursor: Some((6, 6)),
+            },
+        )
+        .unwrap();
+        ack(&mut win);
+        let p = displayed(&win, target);
+        win.ime_event(
+            &mut session,
+            ImeEvent::Preedit {
+                text: "",
+                cursor: None,
+            },
+        )
+        .unwrap();
+        let cleared = win.with_scene(|_, token| token).unwrap();
+        let epoch = win.snapshot().unwrap().source_epoch;
+        let edit = win.key(key).unwrap();
+        assert_eq!(edit.source_epoch, epoch + 1);
+        assert!(edit.prepared_epoch.is_some());
+        assert_eq!(win.read(Form::A).unwrap(), expected);
+        let candidate = win.with_scene(|_, token| token).unwrap();
+        assert_ne!(candidate, cleared);
+        assert_eq!(displayed(&win, target), p);
+        win.presented(cleared).unwrap();
+        assert_eq!(displayed(&win, target), p);
+        assert!(win.ime_cursor_area(&session).unwrap().is_none());
+        win.ime_event(&mut session, ImeEvent::Commit("late"))
+            .unwrap();
+        assert_eq!(win.read(Form::A).unwrap(), expected);
+        assert_eq!(win.snapshot().unwrap().source_epoch, epoch + 1);
+        win.presented(candidate).unwrap();
+        let current = displayed(&win, target);
+        assert_eq!(current.0, expected);
+        assert!(current.1.is_none());
+        assert_eq!(current.2, selection(caret, caret));
+    }
+}
+
+#[test]
+fn cleared_preedit_noop_key_publishes_cancel_while_control_text_stays_ignored() {
+    let (mut win, target, mut session) = window("base");
+    win.ime_event(
+        &mut session,
+        ImeEvent::Preedit {
+            text: "x",
+            cursor: Some((1, 1)),
+        },
+    )
+    .unwrap();
+    ack(&mut win);
+    let p = displayed(&win, target);
+    win.ime_event(
+        &mut session,
+        ImeEvent::Preedit {
+            text: "",
+            cursor: None,
+        },
+    )
+    .unwrap();
+    let cleared = win.with_scene(|_, token| token).unwrap();
+    let epoch = win.snapshot().unwrap().source_epoch;
+    win.key(Key::Text("\n")).unwrap();
+    assert_eq!(win.with_scene(|_, token| token).unwrap(), cleared);
+    assert!(win.ime_cursor_area(&session).unwrap().is_some());
+    let cancelled = win.key(Key::Text("")).unwrap();
+    assert_eq!(cancelled.source_epoch, epoch);
+    assert!(cancelled.prepared_epoch.is_some());
+    let candidate = win.with_scene(|_, token| token).unwrap();
+    assert_ne!(candidate, cleared);
+    assert_eq!(displayed(&win, target), p);
+    win.presented(cleared).unwrap();
+    assert_eq!(displayed(&win, target), p);
+    assert!(win.ime_cursor_area(&session).unwrap().is_none());
+    win.ime_event(&mut session, ImeEvent::Commit("late"))
+        .unwrap();
+    assert_eq!(win.read(Form::A).unwrap(), "base");
+    assert_eq!(win.snapshot().unwrap().source_epoch, epoch);
+    win.presented(candidate).unwrap();
+    let current = displayed(&win, target);
+    assert_eq!(current.0, "base");
+    assert!(current.1.is_none());
+    assert_eq!(current.2, selection(4, 4));
+}
