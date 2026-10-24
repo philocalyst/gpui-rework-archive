@@ -574,7 +574,7 @@ fn own_commit_rebind_or_removal_finishes_the_valid_edit_and_revokes_stream() {
     }
     impl View for Rebind {
         fn sources() -> Sources<Self> {
-            Sources::new().direct(Self::A).direct(Self::B)
+            Sources::new().field(Self::A).direct(Self::B)
         }
         fn view(&self) -> El<'_> {
             if self.a.as_str() == "gone" {
