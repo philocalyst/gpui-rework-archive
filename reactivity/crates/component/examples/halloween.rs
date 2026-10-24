@@ -7,13 +7,13 @@ fn main() -> Result<(), gpui::NativeError> {
         gpui::Window::document(party::Party::default())
             .renderer(gpui::RendererPolicy::ReferenceCpu)
             .title("After dark — Halloween invitations")
-            .size(940, 680)
+            .size(840, 542)
             .inspector(),
     )
 }
 #[cfg(not(feature = "native"))]
 fn main() -> Result<(), gpui::Error> {
-    let mut window = gpui::Win::with_size(party::Party::default(), 720, 680)?;
+    let mut window = gpui::Win::with_size(party::Party::default(), 520, 542)?;
     if let Some(path) = std::env::args().nth(1) {
         let mut bytes = Vec::new();
         window.with_pixels(|pixels, width, height| {

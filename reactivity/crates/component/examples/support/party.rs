@@ -147,7 +147,7 @@ impl View for Party {
                         Input::new(&self.title, "Gathering name", t)
                             .invalid(invalid)
                             .description("At least three characters")
-                            .parts(|parts| parts.control(|e: El<'_>| e.w(t.rem(29.0))))
+                            .parts(|parts| parts.frame(|e: El<'_>| e.w(t.rem(29.0))))
                             .build(),
                         t,
                     )

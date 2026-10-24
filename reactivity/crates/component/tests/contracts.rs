@@ -255,11 +255,11 @@ fn disabled_input_revokes_focus_and_old_presentation_cannot_edit() {
             }
         })
         .unwrap();
-    assert_eq!(window.read(&Editable::VALUE).unwrap(), "draft");
+    assert_eq!(window.read(Editable::VALUE).unwrap(), "draft");
     window.update(|m| m.disabled = false).unwrap();
     acknowledge(&mut window);
     window.type_text(target, "!").unwrap();
-    assert_eq!(window.read(&Editable::VALUE).unwrap(), "draft!");
+    assert_eq!(window.read(Editable::VALUE).unwrap(), "draft!");
 }
 
 struct Owner {
@@ -426,4 +426,31 @@ fn focus_and_geometry_share_the_existing_control_extra_allocation() {
     });
     assert_eq!(cost.count_total, 1);
     assert_eq!(cost.bytes_total, 56);
+}
+
+#[test]
+fn native_inspector_composition_keeps_the_same_application_input_authority() {
+    let mut window = Win::with_inspector(
+        party::Party::default(),
+        WindowOptions {
+            size: [940, 680],
+            ..Default::default()
+        },
+    )
+    .unwrap();
+    let lanterns = window
+        .role(Role::CheckBox)
+        .name("Light the lanterns")
+        .one()
+        .unwrap();
+    window.click(lanterns).unwrap();
+    assert!(*window.root().unwrap().preparation.lanterns);
+    assert_eq!(window.root().unwrap().preparation.requested, 1);
+    window.key(Key::Space).unwrap();
+    assert!(!*window.root().unwrap().preparation.lanterns);
+    window.key(Key::Enter).unwrap();
+    assert!(*window.root().unwrap().preparation.lanterns);
+    let finish = window.button("Finish invitation");
+    window.click(finish).unwrap();
+    assert!(window.root().unwrap().finished);
 }
