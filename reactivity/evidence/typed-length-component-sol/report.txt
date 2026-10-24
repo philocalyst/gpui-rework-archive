@@ -1,0 +1,165 @@
+Typed relative dimensions following the reusable component port
+
+This isolated slice extends the sealed component port at
+0103a0e70ce7d5359a746693775d83b94064f862. No integration to Main is implied.
+Worktree: /root/gpui-length-port-sol-20261024
+Branch: codex/typed-length-port-sol-20261024
+Qualified source commit: 9b9500b9b6685e9a3eb261b988fdfba63e333f88
+Build-input aggregate: f204da313c244a0ede2b3d7536256d196c082919905926dbd82153f0a29effcd (2078 files).
+An evidence-only seal follows this source; it is not a compiled source commit.
+
+Public API and ownership
+
+Length::{Auto, Points(f32), Percent(f32)} replaces Option<f32> only for the
+width/height domain. Percent(100.0) means100% of the parent's content dimension;
+values above100 are valid. Points and percentages must be finite/nonnegative.
+The existing declaration validators reject invalid authoring before Cephal;
+Cephal receives admitted percentages divided by100. Auto is an explicit value,
+separate from Contribution::Inherit, with unchanged typed contribution presence.
+
+Examples:
+  div().w(320).h(Length::Percent(100.0))
+  div().size(Length::Percent(100.0))
+  div().w(&registered_length_signal)
+  div().w(flag.map(|value| if *value { Length::Percent(50.0) } else { Length::Auto }))
+  win.set_property(target, WIDTH, Contribution::Set(Length::Auto))?
+
+WIDTH/HEIGHT are now Property<Length>; the catalog still has14 entries.
+The deliberate cold boundary is PropertyValue::Dimension(Length). Points/percent
+units cannot enter gap/font-size through IntoProp. Ordinary numeric width/height
+builders preserve the prior IntoLength -> f64 -> f32 conversion, including wide
+integer midpoints, overflow and negative-subnormal rejection. An internal explicit
+numeric operand retains f64 until admission; there is no NaN/signed-zero sentinel
+encoding. Direct Length signals and typed maps reuse the same source codecs and
+owner-relative fanouts, without per-control tables or an arbitrary schema registry.
+
+Exact author equality keeps the variant tag and original f32 bits, including
+signed zero. Ordinary PartialEq remains numerical. Layout style interning and its
+retained color/layout projections use the same exact unit/bit comparison. The
+shared lowerer handles roots, ordinary containers and Scroll. Uniform-list row
+materialization still precedes containing-block layout and requires an explicit
+point height: Auto gives MissingViewport, Percent gives UnsupportedStyle. Relative
+list heights remain an explicit follow-up, not a fabricated containing size.
+
+Inspector and migration
+
+Typed setters now take Length::Points(x) in place of Some(x), and Length::Auto
+in place of None. The cold Dimension boundary changes identically. The inspector
+increments percentages in percentage points, preserves their unit, and retains
+Set(Auto) separately from Inherit. The contained value editor uses one shared
+Length Display/FromStr pair for bare point numbers, percentages with %, and auto.
+Invalid parsed values still reach the canonical property validator, which rejects
+without mutating a contribution. Semantic JSON continues to serialize the same
+acknowledged geometry; it does not invent authored style/unit fields or replay
+capabilities. Historical evidence fixtures remain historical snapshots, not a
+source-compatibility claim for this authorized public API change.
+
+Actual application
+
+The same Halloween Party model now gives its root size Percent(100) and its typed
+Input frame width Percent(100). These ordinary shared properties fix natural-size
+white edges and resize behavior. No background oversizing or special root runtime
+path was added. Native captures show pointer/Space/Enter/Tab activation through
+S9/P9, including default treats off/on and parent disabled state, and a further
+acknowledged resize at the same source epoch to960x700.
+The form and input grow with the application region; the root fills the viewport.
+All captures are actual ReferenceCpu/Xvfb frames. No hardware GPU, physical
+scanout or native AT-SPI client roundtrip claim is made.
+
+Qualification
+
+The whole default gpui+component lib/integration gate passed660 tests across73
+binaries (10 ignored), including the original exact allocation ledgers. Seven
+new ordinary external dimension contracts cover parent-content basis, nesting,
+resize/ACK, direct and mapped sources, source fanout and Set(default)/Inherit/
+latest-lower-source precedence, invalid typed/cold edits, failed newer publish
+with older eligible ACK, exact tags/bits, headers/zero literal allocation, and
+the actual inspector. Optimized dimensions and contained editor contracts pass;
+the7 dimensions also pass exact changed-density checks (900x450 at1.5 retains a
+600x300 logical root and290x140 child) and canonical125%=475 with window clipping.
+The contained editor's tenth test exercises percent/auto/invalid parsing through
+ordinary typing and property actions. After the app dependency correction,11 optimized reusable component contracts
+pass, with4 compile-fails rechecked. GPUI documentation and4 component compile-fails pass, including wrong-unit
+Length into gap. All-target gpui+component clippy -D warnings passes.
+
+Native x11/AccessKit library tests compile, and the actual ignored native property
+entry test is run under its own Xvfb/dbus session. Its expectation was updated for
+the clearer dimension parser message; the complete rerun receipt is included.
+The standalone Hummingbird application passes its own locked offline check with
+its independent lockfile and composed core. Before/after guards include that
+application closure for its gate. No manifests, locks, vendors or dependencies
+were changed by this slice. Source guards and exact Cargo artifact/freshness and
+executable identities accompany all gates.
+
+Preserved rejected attempts include missed old Option<f32> assertion/interner
+sites, initial test assertions accidentally using outward-rounded Win::bounds
+instead of exact Part.local_bounds, an unqualified duplicate inspector name,
+one unused test value lint, the old native parser-message expectation, and the
+app owner-dependency declaration bug described below.
+The geometry assertions were corrected to the exact canonical getter; no
+numerical tolerance or runtime geometry behavior was relaxed. An optional old
+operand-header probe outside Cargo failed to link split metadata; no old-size
+comparison depends on it.
+
+Shipping and artifact costs
+
+core_lines.py counts35222 core-library lines (+102 over the component seal's
+35120), separately595 unchanged reusable component-library lines. Tests/examples,
+comments, tools, evidence and vendors are excluded; library build scripts remain
+charged. No dependency changes: the existing component port's normal/build
+closure remains73 headless and226 native packages including local crates.
+
+Measured current headers: Length8, Option<Length>8, Style88, El176 unchanged;
+PropInput<Length>48 and PropInput<f64>48. Signal<Length>12 versus Signal<f64>16
+reflects the value's alignment; it is not a claim of a new retained header saving.
+Stock rounded/focus Button remains1 allocation/56B. Party description remains
+32 allocations/5713 requested/5633 retained. The warmed-font window workload
+measures957 allocations/316629 requested/89995 retained. Correct owner
+dependencies add2 allocations/64 retained bytes versus the pre-correction model. Its definite relative constraints reduce measure_calls
+47->39, with layout_runs still1. This is the changed fixture, not a claimed
+general optimization. Lazy native/CPU framebuffers and prewarmed font state are
+excluded from that allocation workload; no total native RSS is asserted.
+
+Whole optimized headless ELF9,955,488B (.text3,147,847B), +4,064 ELF/+2,608 text
+versus the natural-size port. Native dev(debug0) ELF71,207,120B (.text25,757,287B),
++5,272 ELF/+3,504 text. Release rodata is64B smaller; native rodata is unchanged.
+Component-named text symbols are8,983B/26 release and20,930B/94 native, excluding inlined/shared helpers. Whole
+ELFs charge the dependency closure; deltas also include the model's sizing change
+and are not isolated generic-code estimates. Fresh bounded4-job release examples
+built in1m21s on a contended host; no compile-time regression percentage is claimed.
+The codegen, symbols, guards and artifact SHA receipts give reviewable raw costs.
+
+The reusable control inventory and all other remaining gaps from the component
+seal still apply. Relative list heights and proper rounded focus outlines remain
+separate shared-core/graphics work. The catalog remains a closed typed style
+catalog, not arbitrary component/theme reflection or a new theme cascade.
+
+Correction to the initial component seal
+
+The source audit found that the initial Party/Preparation example declared
+ordinary bool/validation/ready snapshot reads as direct/direct_component. That
+contract explicitly promises those reads are absent. The custom lantern callback
+happened to re-describe coarsely, masking stale default-treats and title-validation
+presentation. This composed seal supersedes those app declarations: Preparation
+uses field for both checked snapshots; Party uses field(TITLE) and
+component(PREPARATION). Checkbox::toggle documents the snapshot seam. Core direct
+publication remains unchanged; there is no blanket re-description workaround.
+The initial foundation/header tests still apply, but its app/cost qualification
+must be read with this correction.
+
+One ordinary external contract now exercises the reusable default Source toggle,
+controlled checked output, parent disabled policy, input replacement, validation
+help and recovery. Two bounded mutants independently reinstate the invalid
+child/parent direct declarations and the invalid title direct declaration. Both
+recompiled actual test executables and fail the intended public semantic
+assertion (checked state, then validation help). The correct source is restored
+byte-for-byte before final gates. The receipts include source guards and distinct
+executable hashes; no test-only route bypass was used. Dependency storage is
+charged: two existing owner_fields vectors retain32B each (+64B), no new header.
+
+The final native disabled image exercises default-treats off and the disabled
+parent command; default-treats on restores readiness before finishing at S9/P9.
+Earlier pre-owner-correction captures are retained in gate records and do not
+substitute for this final flow. Full default660 was measured before this app
+correction; the final app's11 optimized contracts,4 compile-fails, clippy and
+actual native flow were then rerun. Shipping core code is unchanged by that fix.

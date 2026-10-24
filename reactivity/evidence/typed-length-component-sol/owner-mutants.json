@@ -1,0 +1,20 @@
+[
+  {
+    "mutant": "child_direct",
+    "exit_code": 101,
+    "source_commit": "9bee5e2628f84584679bc74cc8792a97fc7ea660",
+    "executable": "/root/targets/typed-length-port-sol-release-20261024/release/build/gpui-component/6ffbd0bee3b8c971/out/contracts-6ffbd0bee3b8c971",
+    "executable_sha256": "f1bec7caf456599bdac7c684ab55d6fbd90d7d67e19fbc0ff81db16191071a0a",
+    "test_recompiled": true,
+    "expected_failure": true
+  },
+  {
+    "mutant": "title_direct",
+    "exit_code": 101,
+    "source_commit": "44549293a75554d5e3b3ba36225081f51e1ef6b9",
+    "executable": "/root/targets/typed-length-port-sol-release-20261024/release/build/gpui-component/6ffbd0bee3b8c971/out/contracts-6ffbd0bee3b8c971",
+    "executable_sha256": "9794a20ac6134d808c4216f9e9fa8625efbd24c1a5bf0dc54af790efe384270e",
+    "test_recompiled": true,
+    "expected_failure": true
+  }
+]

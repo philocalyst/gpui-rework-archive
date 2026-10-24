@@ -1,0 +1,6 @@
+button allocations=1 bytes=56
+party_description allocations=32 bytes=5713 retained=5633
+party_window allocations=957 bytes=316629 retained=89995
+runtime_counters=Counters { owner_reruns: 0, descriptions: 1, source_operations: 0, source_reads: 0, destination_compares: 32, text_promotions: 20, text_bytes_copied: 459, layout_runs: 1, measure_calls: 39, presentations: 1, paint_passes: 1, exact_updates: 0, coarse_updates: 0 }
+headers El=176 Button=184 Checkbox=544 Input=360 Theme=192
+dimension_headers Length=8 OptionLength=8 PropInputLength=48 PropInputNumber=48 Style=88 SignalLength=12 SignalNumber=16
