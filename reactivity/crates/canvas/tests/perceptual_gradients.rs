@@ -1,5 +1,6 @@
 #[path = "support/perceptual_oracle.rs"]
 mod oracle;
+const HDR: f32 = f32::from_bits(1e20_f32.to_bits() - 1);
 use gpui_canvas::{
     Color, Extend, Gradient, GradientGeometry, GradientStop as Stop, HueInterpolation as Hue,
     Interpolation as Mode, Point,
@@ -32,9 +33,9 @@ fn modes() -> [Mode; 5] {
 #[test]
 fn authored_f64_oracle_covers_alpha_routes_hdr_p3_and_negative_lms() {
     let colors = [
-        Color::linear_srgb(1e20, 0., 0., 1.).unwrap(),
-        Color::linear_srgb(0., 1e20, 0., 0.0001).unwrap(),
-        Color::linear_srgb(-1e20, 1e20, -1e20, 0.7).unwrap(),
+        Color::linear_srgb(HDR, 0., 0., 1.).unwrap(),
+        Color::linear_srgb(0., HDR, 0., 0.0001).unwrap(),
+        Color::linear_srgb(-HDR, HDR, -HDR, 0.7).unwrap(),
         Color::linear_srgb(9., -1., 3., 0.).unwrap(),
         Color::linear_srgb(0.2, 0.2, 0.2, 1.).unwrap(),
         Color::linear_srgb(-0.2, -0.2, -0.2, f32::MIN_POSITIVE).unwrap(),
@@ -90,7 +91,7 @@ fn authored_f64_oracle_covers_alpha_routes_hdr_p3_and_negative_lms() {
 #[test]
 fn exact_endpoints_edges_alpha_admission_and_lossless_authors() {
     for mode in modes() {
-        let left = Color::linear_srgb(-0., 1e20, -0.1, 0.25).unwrap();
+        let left = Color::linear_srgb(-0., HDR, -0.1, 0.25).unwrap();
         let right = Color::linear_display_p3(1., 4., -0.1, 0.75).unwrap();
         let g = make(left, right, mode);
         let premul = |c: Color| {
@@ -144,7 +145,7 @@ fn exact_endpoints_edges_alpha_admission_and_lossless_authors() {
                 .color
                 .same_authoring(tiny)
         );
-        let hidden = Color::linear_srgb(1e20, -1e20, 0., 0.).unwrap();
+        let hidden = Color::linear_srgb(HDR, -HDR, 0., 0.).unwrap();
         assert!(!make(hidden, hidden, mode).view().has_visible_stop());
         assert_eq!(
             make(hidden, hidden, mode)

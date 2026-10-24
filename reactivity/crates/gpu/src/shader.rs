@@ -400,12 +400,23 @@ pub mod ui {
             return bitcast_vec4f(get!(WORDS)[(word + stride + 4) as usize]);
         }
         let delta = bitcast_vec4f(get!(WORDS)[(word + 2) as usize]);
-        let denominator = (1.0 - u) * interval.z + u * interval.w;
-        let mut v = u * interval.w / max(denominator, bitcast_f32(0x00800000));
-        if interval.z == 0.0 {
-            v = 1.0;
-        } else if interval.w == 0.0 {
-            v = 0.0;
+        if (bitcast_u32(interval.y) & 0x80000000) != 0 {
+            if color.w == 0.0 {
+                return bitcast_vec4f(get!(WORDS)[(word + stride + 4) as usize]) * u;
+            }
+            if delta.w == 0.0 {
+                return bitcast_vec4f(get!(WORDS)[(word + 4) as usize]) * (1.0 - u);
+            }
+        }
+        let mut v = u;
+        if interval.z != interval.w {
+            let denominator = (1.0 - u) * interval.z + u * interval.w;
+            v = u * interval.w / max(denominator, bitcast_f32(0x00800000));
+            if interval.z == 0.0 {
+                v = 1.0;
+            } else if interval.w == 0.0 {
+                v = 0.0;
+            }
         }
         let mut q = color.xyz() + v * delta.xyz();
         if (bitcast_u32(interval.y) & 0x80000000) == 0 {

@@ -25,6 +25,11 @@ pub enum Extend {
 }
 /// Interpolation occurs before final gamut/output conversion. Oklch is GPUI's
 /// authoring default; CSS's general interpolation default is Oklab.
+/// Perceptual modes reject positive subnormal stop alpha. Rendered fades may
+/// underflow; WGSL permits flushing subnormal arithmetic. Interior results use
+/// f32 arithmetic and are not promised bit-identical across backends. Exact stop
+/// and padded endpoint samples use stored premultiplied RGB. No gamut clipping
+/// or missing-component syntax is applied here.
 #[derive(Clone, Copy, Debug, PartialEq, Eq)]
 pub enum Interpolation {
     LinearSrgb,
@@ -243,19 +248,22 @@ fn prepare_interval(stop: GradientStop, next: GradientStop, mode: Interpolation)
         if right[1] <= 0.000004 {
             right[2] = left[2];
         }
-        if left[1] <= 0.000004 && right[1] <= 0.000004 {
+        let both_powerless = left[1] <= 0.000004 && right[1] <= 0.000004;
+        if both_powerless {
             left[2] = 0.0;
             right[2] = 0.0;
         }
         let delta = right[2] - left[2];
-        match hue {
-            HueInterpolation::Shorter if delta > 180.0 => left[2] += 360.0,
-            HueInterpolation::Shorter if delta < -180.0 => right[2] += 360.0,
-            HueInterpolation::Longer if delta > 0.0 && delta < 180.0 => left[2] += 360.0,
-            HueInterpolation::Longer if delta > -180.0 && delta <= 0.0 => right[2] += 360.0,
-            HueInterpolation::Increasing if delta < 0.0 => right[2] += 360.0,
-            HueInterpolation::Decreasing if delta > 0.0 => left[2] += 360.0,
-            _ => {}
+        if !both_powerless {
+            match hue {
+                HueInterpolation::Shorter if delta > 180.0 => left[2] += 360.0,
+                HueInterpolation::Shorter if delta < -180.0 => right[2] += 360.0,
+                HueInterpolation::Longer if delta > 0.0 && delta < 180.0 => left[2] += 360.0,
+                HueInterpolation::Longer if delta > -180.0 && delta <= 0.0 => right[2] += 360.0,
+                HueInterpolation::Increasing if delta < 0.0 => right[2] += 360.0,
+                HueInterpolation::Decreasing if delta > 0.0 => left[2] += 360.0,
+                _ => {}
+            }
         }
         polar = left[2] != right[2];
         if polar {
@@ -461,24 +469,6 @@ impl<'a> GradientView<'a> {
     pub(crate) fn sample_normalized(self, point: [f32; 2]) -> [f32; 4] {
         self.sample_four(fearless_simd::Fallback::new(), [point; 4], 1)[0]
     }
-    fn parameter(self, point: [f32; 2]) -> f32 {
-        let p = self.words[2].map(f32::from_bits);
-        let x = point[0] - p[0];
-        let y = point[1] - p[1];
-        match self.words[0][0] {
-            0 => x * p[2] + y * p[3],
-            1 => ((x * p[2]) * (x * p[2]) + (y * p[3]) * (y * p[3])).sqrt(),
-            _ => {
-                let angle = if x == 0.0 && y == 0.0 {
-                    0.0
-                } else {
-                    x.atan2(-y) / std::f32::consts::TAU
-                };
-                let value = angle - p[2];
-                value - value.floor()
-            }
-        }
-    }
     // Covered sample lanes share actual color arithmetic. Interval selection is
     // bounded binary search per lane; no all-stops scan, allocation or lease.
     #[simd]
@@ -488,18 +478,44 @@ impl<'a> GradientView<'a> {
         points: [[f32; 2]; 4],
         mask: u8,
     ) -> [[f32; 4]; 4] {
-        self.evaluate_four(
-            simd,
-            std::array::from_fn(|i| {
-                if mask & (1 << i) != 0 {
-                    self.parameter(points[i])
-                } else {
-                    0.0
+        let p = self.words[2].map(f32::from_bits);
+        let x = f32x4::from_fn(simd, |i| {
+            if mask & (1 << i) != 0 {
+                points[i][0] - p[0]
+            } else {
+                0.0
+            }
+        });
+        let y = f32x4::from_fn(simd, |i| {
+            if mask & (1 << i) != 0 {
+                points[i][1] - p[1]
+            } else {
+                0.0
+            }
+        });
+        let parameters = match self.words[0][0] {
+            0 => x * p[2] + y * p[3],
+            1 => {
+                let x = x * p[2];
+                let y = y * p[3];
+                (x * x + y * y).sqrt()
+            }
+            _ => f32x4::from_fn(simd, |i| {
+                if mask & (1 << i) == 0 {
+                    return 0.0;
                 }
+                let angle = if x[i] == 0.0 && y[i] == 0.0 {
+                    0.0
+                } else {
+                    x[i].atan2(-y[i]) / std::f32::consts::TAU
+                };
+                let value = angle - p[2];
+                value - value.floor()
             }),
-            mask,
-        )
+        };
+        self.evaluate_four(simd, parameters.into(), mask)
     }
+
     /// Evaluate a finite parameter. Repeating paints admit at most 2^20 periods
     /// from the first stop, matching the renderer's phase-precision bound.
     pub fn sample_parameter(self, t: f32) -> Result<[f32; 4], Error> {
@@ -582,12 +598,15 @@ impl<'a> GradientView<'a> {
         } else {
             let a0 = load(0, 2);
             let a1 = load(0, 3);
-            let denominator = (1.0 - t) * a0 + t * a1;
-            let ratio = t * a1 / denominator.max(f32::MIN_POSITIVE);
-            let v = a0.simd_eq(0.0).select(
-                f32x4::splat(simd, 1.0),
-                a1.simd_eq(0.0).select(f32x4::splat(simd, 0.0), ratio),
-            );
+            let mut v = t;
+            if a0.simd_eq(a1).to_bitmask() != 15 {
+                let denominator = (1.0 - t) * a0 + t * a1;
+                let ratio = t * a1 / denominator.max(f32::MIN_POSITIVE);
+                v = a0.simd_eq(0.0).select(
+                    f32x4::splat(simd, 1.0),
+                    a1.simd_eq(0.0).select(f32x4::splat(simd, 0.0), ratio),
+                );
+            }
             // Hue is never premultiplied: it advances with t, L and C with v.
             let h = c[2] + t * d[2];
             for j in 0..3 {
@@ -645,6 +664,18 @@ impl<'a> GradientView<'a> {
             }
             if self.stride() == 5 && intervals[i].1 == 1.0 {
                 return self.words[intervals[i].0 + self.stride() + 4].map(f32::from_bits);
+            }
+            if self.stride() == 5 && self.words[intervals[i].0][1] >> 31 != 0 {
+                let left_alpha = f32::from_bits(self.words[intervals[i].0 + 1][3]);
+                let right_alpha = f32::from_bits(self.words[intervals[i].0 + 2][3]);
+                if left_alpha == 0.0 || right_alpha == 0.0 {
+                    let (endpoint, weight) = if left_alpha == 0.0 {
+                        (intervals[i].0 + self.stride() + 4, intervals[i].1)
+                    } else {
+                        (intervals[i].0 + 4, 1.0 - intervals[i].1)
+                    };
+                    return self.words[endpoint].map(|v| f32::from_bits(v) * weight);
+                }
             }
             std::array::from_fn(|j| channels[j][i])
         })

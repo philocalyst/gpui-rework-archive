@@ -139,37 +139,41 @@ pub fn interpolate(left: Color, right: Color, t: f64, mode: Mode) -> [f64; 4] {
         }
         let diff = b[2] - a[2];
         // Written independently as a signed route length, not endpoint fixup.
-        let d = match hue {
-            Hue::Shorter => {
-                if diff > 180.0 {
-                    diff - 360.0
-                } else if diff < -180.0 {
-                    diff + 360.0
-                } else {
-                    diff
+        let d = if missing_a && missing_b {
+            0.0
+        } else {
+            match hue {
+                Hue::Shorter => {
+                    if diff > 180.0 {
+                        diff - 360.0
+                    } else if diff < -180.0 {
+                        diff + 360.0
+                    } else {
+                        diff
+                    }
                 }
-            }
-            Hue::Longer => {
-                if diff > 0.0 && diff < 180.0 {
-                    diff - 360.0
-                } else if diff > -180.0 && diff <= 0.0 {
-                    diff + 360.0
-                } else {
-                    diff
+                Hue::Longer => {
+                    if diff > 0.0 && diff < 180.0 {
+                        diff - 360.0
+                    } else if diff > -180.0 && diff <= 0.0 {
+                        diff + 360.0
+                    } else {
+                        diff
+                    }
                 }
-            }
-            Hue::Increasing => {
-                if diff < 0.0 {
-                    diff + 360.0
-                } else {
-                    diff
+                Hue::Increasing => {
+                    if diff < 0.0 {
+                        diff + 360.0
+                    } else {
+                        diff
+                    }
                 }
-            }
-            Hue::Decreasing => {
-                if diff > 0.0 {
-                    diff - 360.0
-                } else {
-                    diff
+                Hue::Decreasing => {
+                    if diff > 0.0 {
+                        diff - 360.0
+                    } else {
+                        diff
+                    }
                 }
             }
         };
