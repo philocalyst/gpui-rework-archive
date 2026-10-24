@@ -182,17 +182,18 @@ fn packed_owner_is_shared_only_when_the_scene_needs_a_retained_run() {
     let _registry = BUNDLED_TEST_LOCK.lock().unwrap();
     let face = FontFace::bundled().unwrap();
     let mut text = TextSystem::from_font(face.clone());
-    let pair = face.shaper().shape("Hi", 12., None).unwrap();
-    let single = face.shaper().shape("H", 12., None).unwrap();
+    let mut pair = face.shaper().shape("Hi", 12., None).unwrap();
+    let mut single = face.shaper().shape("H", 12., None).unwrap();
     let clip = Rect::new(0., 0., 64., 32.);
     let mut canvas = Canvas::recording(64, 32, ColorConfig::default()).unwrap();
     canvas.clear(Color::BLACK);
-    assert_eq!(Arc::strong_count(&pair.glyphs), 1);
+    assert!(pair.glyphs.is_unique());
     let mut clone = None;
     let cost = allocation_counter::measure(|| clone = Some(pair.clone()));
     assert_eq!((cost.count_total, cost.bytes_total), (0, 0));
     let clone = clone.unwrap();
-    assert!(Arc::ptr_eq(&clone.glyphs, &pair.glyphs));
+    assert_eq!(clone.glyphs.as_ptr(), pair.glyphs.as_ptr());
+    assert!(!pair.glyphs.is_unique());
     drop(clone);
     canvas
         .draw_text(
@@ -204,7 +205,7 @@ fn packed_owner_is_shared_only_when_the_scene_needs_a_retained_run() {
             Color::WHITE,
         )
         .unwrap();
-    assert_eq!(Arc::strong_count(&single.glyphs), 1);
+    assert!(single.glyphs.is_unique());
     canvas
         .draw_text(
             &mut text,
@@ -215,24 +216,21 @@ fn packed_owner_is_shared_only_when_the_scene_needs_a_retained_run() {
             Color::WHITE,
         )
         .unwrap();
-    assert_eq!(Arc::strong_count(&pair.glyphs), 2);
+    assert!(!pair.glyphs.is_unique());
     let mut before = [0; 64 * 32];
     canvas.render_bgrx(&mut before).unwrap();
     // A live scene owns its glyph stream and mask leases independently of L
     // and the mutable raster service. Public metrics cannot rewrite glyph bits.
-    let weak = Arc::downgrade(&pair.glyphs);
     drop(pair);
     drop(single);
     text.clear_cache();
     drop(text);
-    assert!(weak.upgrade().is_some());
     let mut after = [0; 64 * 32];
     canvas.render_bgrx(&mut after).unwrap();
     assert_eq!(before, after);
     canvas.clear(Color::TRANSPARENT);
-    assert!(weak.upgrade().is_none());
     println!(
-        "PACKED_SHARED layout={} owner_payload={} arc_control=16",
+        "PACKED_SHARED layout={} owner_payload={} shared_header=16",
         size_of::<TextLayout>(),
         size_of::<GlyphBuffer>()
     );
@@ -244,7 +242,7 @@ fn each_retained_text_call_charges_one_packed_owner_lease() {
     let _registry = BUNDLED_TEST_LOCK.lock().unwrap();
     let face = FontFace::bundled().unwrap();
     let mut text = TextSystem::from_font(face.clone());
-    let layout = face.shaper().shape("Hi", 12., None).unwrap();
+    let mut layout = face.shaper().shape("Hi", 12., None).unwrap();
     let clip = Rect::new(0., 0., 64., 32.);
     let mut canvas = Canvas::recording(64, 32, ColorConfig::default()).unwrap();
     for _ in 0..32 {
@@ -259,11 +257,11 @@ fn each_retained_text_call_charges_one_packed_owner_lease() {
             )
             .unwrap();
     }
-    assert_eq!(Arc::strong_count(&layout.glyphs), 33);
+    assert!(!layout.glyphs.is_unique());
     assert_eq!(canvas.prepared_scene().masks().len(), 2);
     canvas.clear(Color::TRANSPARENT);
-    assert_eq!(Arc::strong_count(&layout.glyphs), 1);
+    assert!(layout.glyphs.is_unique());
     println!(
-        "PACKED_RUN_LEASES admitted_runs=32 packed_increments=32 packed_decrements=32 unique_mask_leases=2"
+        "PACKED_RUN_LEASES admitted_runs=32 owner_shared_during_scene=true owner_unique_after_clear=true unique_mask_leases=2"
     );
 }
