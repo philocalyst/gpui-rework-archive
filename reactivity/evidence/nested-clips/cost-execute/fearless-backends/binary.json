@@ -1,0 +1,13 @@
+{
+  "source": "b164198e02ca4172a8cd56308ad204d30f1da333",
+  "original": "/tmp/clips-sol-evidence/final-b164/default-execute/023-gpui_canvas/test",
+  "sha256": "f30960a1f13428fe76a27c705869e00e280eb62a8a8ed7cd454bd476ac037737",
+  "bytes": 140660432,
+  "args": [
+    "every_supported_backend_matches_mapping_bits_and_all_primitive_sites",
+    "--nocapture",
+    "--test-threads=1"
+  ],
+  "exit": 0,
+  "hash_matches": true
+}

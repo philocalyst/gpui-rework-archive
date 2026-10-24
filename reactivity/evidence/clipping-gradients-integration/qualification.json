@@ -1,0 +1,2031 @@
+{
+  "initial-compile": {
+    "source": "035f8d08fd75df847c3920242854f7719d1fcd8b",
+    "exit": 101,
+    "guards": 2049,
+    "guards_match": true,
+    "tracked_input_scopes": [
+      ".cargo",
+      "clippy.toml",
+      "reactivity/Cargo.toml",
+      "reactivity/Cargo.lock",
+      "reactivity/rust-toolchain.toml",
+      "reactivity/crates",
+      "reactivity/vendor"
+    ],
+    "passed": 0,
+    "failed": 0,
+    "ignored": 0,
+    "harnesses": 0,
+    "scope": "Functional/source-identity gate; no timing inference."
+  },
+  "initial-strict": {
+    "source": "42012c0a0331ee6b9559b0fa1092ef6ecc5df50f",
+    "exit": 0,
+    "guards": 2049,
+    "guards_match": true,
+    "tracked_input_scopes": [
+      ".cargo",
+      "clippy.toml",
+      "reactivity/Cargo.toml",
+      "reactivity/Cargo.lock",
+      "reactivity/rust-toolchain.toml",
+      "reactivity/crates",
+      "reactivity/vendor"
+    ],
+    "passed": 0,
+    "failed": 0,
+    "ignored": 0,
+    "harnesses": 0,
+    "scope": "Functional/source-identity gate; no timing inference."
+  },
+  "insufficient-finite-domain-control": {
+    "source": "7401650dd3ebf0479e61f94f4d9e941c0e9f6029",
+    "exit": 0,
+    "guards": 2049,
+    "guards_match": true,
+    "tracked_input_scopes": [
+      ".cargo",
+      "clippy.toml",
+      "reactivity/Cargo.toml",
+      "reactivity/Cargo.lock",
+      "reactivity/rust-toolchain.toml",
+      "reactivity/crates",
+      "reactivity/vendor"
+    ],
+    "passed": 1,
+    "failed": 0,
+    "ignored": 0,
+    "harnesses": 1,
+    "scope": "Functional/source-identity gate; no timing inference."
+  },
+  "semantic-domain-red": {
+    "source": "5c281c78f108ca4bcf97193ffc7ecf0e9c4d46ed",
+    "exit": 101,
+    "guards": 2049,
+    "guards_match": true,
+    "tracked_input_scopes": [
+      ".cargo",
+      "clippy.toml",
+      "reactivity/Cargo.toml",
+      "reactivity/Cargo.lock",
+      "reactivity/rust-toolchain.toml",
+      "reactivity/crates",
+      "reactivity/vendor"
+    ],
+    "passed": 0,
+    "failed": 1,
+    "ignored": 0,
+    "harnesses": 1,
+    "scope": "Functional/source-identity gate; no timing inference."
+  },
+  "initial-execute-guard": {
+    "source": "5be9000ae52f9a26e7dd5c2fdd41cf47834688b7",
+    "exit": 1,
+    "guards": 2049,
+    "guards_match": true,
+    "tracked_input_scopes": [
+      ".cargo",
+      "clippy.toml",
+      "reactivity/Cargo.toml",
+      "reactivity/Cargo.lock",
+      "reactivity/rust-toolchain.toml",
+      "reactivity/crates",
+      "reactivity/vendor"
+    ],
+    "passed": 0,
+    "failed": 0,
+    "ignored": 0,
+    "harnesses": 0,
+    "scope": "Functional/source-identity gate; no timing inference."
+  },
+  "initial-test-artifacts": {
+    "harnesses": 102,
+    "passed": 996,
+    "failed": 1,
+    "ignored": 39,
+    "all_exit_zero": false,
+    "results": [
+      {
+        "target": "font_sharing",
+        "exit": 0,
+        "passed": 2,
+        "failed": 0,
+        "ignored": 1,
+        "sha256_after_matches": true
+      },
+      {
+        "target": "slots",
+        "exit": 0,
+        "passed": 6,
+        "failed": 0,
+        "ignored": 0,
+        "sha256_after_matches": true
+      },
+      {
+        "target": "intrinsic_text",
+        "exit": 0,
+        "passed": 3,
+        "failed": 0,
+        "ignored": 0,
+        "sha256_after_matches": true
+      },
+      {
+        "target": "gpui_canvas",
+        "exit": 0,
+        "passed": 99,
+        "failed": 0,
+        "ignored": 2,
+        "sha256_after_matches": true
+      },
+      {
+        "target": "grouped",
+        "exit": 0,
+        "passed": 2,
+        "failed": 0,
+        "ignored": 0,
+        "sha256_after_matches": true
+      },
+      {
+        "target": "text_capacity",
+        "exit": 0,
+        "passed": 1,
+        "failed": 0,
+        "ignored": 0,
+        "sha256_after_matches": true
+      },
+      {
+        "target": "bins",
+        "exit": 0,
+        "passed": 8,
+        "failed": 0,
+        "ignored": 0,
+        "sha256_after_matches": true
+      },
+      {
+        "target": "gradients",
+        "exit": 0,
+        "passed": 3,
+        "failed": 0,
+        "ignored": 0,
+        "sha256_after_matches": true
+      },
+      {
+        "target": "solid",
+        "exit": 0,
+        "passed": 3,
+        "failed": 0,
+        "ignored": 0,
+        "sha256_after_matches": true
+      },
+      {
+        "target": "hdr",
+        "exit": 0,
+        "passed": 6,
+        "failed": 0,
+        "ignored": 0,
+        "sha256_after_matches": true
+      },
+      {
+        "target": "text_transaction",
+        "exit": 0,
+        "passed": 5,
+        "failed": 0,
+        "ignored": 0,
+        "sha256_after_matches": true
+      },
+      {
+        "target": "clipping",
+        "exit": 0,
+        "passed": 6,
+        "failed": 0,
+        "ignored": 0,
+        "sha256_after_matches": true
+      },
+      {
+        "target": "color_packing",
+        "exit": 0,
+        "passed": 3,
+        "failed": 0,
+        "ignored": 0,
+        "sha256_after_matches": true
+      },
+      {
+        "target": "images",
+        "exit": 0,
+        "passed": 4,
+        "failed": 0,
+        "ignored": 0,
+        "sha256_after_matches": true
+      },
+      {
+        "target": "unicode",
+        "exit": 0,
+        "passed": 14,
+        "failed": 0,
+        "ignored": 0,
+        "sha256_after_matches": true
+      },
+      {
+        "target": "literal_cow",
+        "exit": 0,
+        "passed": 2,
+        "failed": 0,
+        "ignored": 0,
+        "sha256_after_matches": true
+      },
+      {
+        "target": "oklch",
+        "exit": 0,
+        "passed": 5,
+        "failed": 0,
+        "ignored": 0,
+        "sha256_after_matches": true
+      },
+      {
+        "target": "parallel",
+        "exit": 0,
+        "passed": 0,
+        "failed": 0,
+        "ignored": 0,
+        "sha256_after_matches": true
+      },
+      {
+        "target": "paint",
+        "exit": 0,
+        "passed": 4,
+        "failed": 0,
+        "ignored": 0,
+        "sha256_after_matches": true
+      },
+      {
+        "target": "prepared_scene",
+        "exit": 0,
+        "passed": 3,
+        "failed": 0,
+        "ignored": 0,
+        "sha256_after_matches": true
+      },
+      {
+        "target": "damage",
+        "exit": 0,
+        "passed": 7,
+        "failed": 0,
+        "ignored": 0,
+        "sha256_after_matches": true
+      },
+      {
+        "target": "rounded",
+        "exit": 0,
+        "passed": 5,
+        "failed": 0,
+        "ignored": 0,
+        "sha256_after_matches": true
+      },
+      {
+        "target": "render",
+        "exit": 0,
+        "passed": 10,
+        "failed": 0,
+        "ignored": 0,
+        "sha256_after_matches": true
+      },
+      {
+        "target": "sample_clip",
+        "exit": 0,
+        "passed": 3,
+        "failed": 0,
+        "ignored": 0,
+        "sha256_after_matches": true
+      },
+      {
+        "target": "default_font",
+        "exit": 0,
+        "passed": 4,
+        "failed": 0,
+        "ignored": 0,
+        "sha256_after_matches": true
+      },
+      {
+        "target": "color",
+        "exit": 0,
+        "passed": 6,
+        "failed": 0,
+        "ignored": 0,
+        "sha256_after_matches": true
+      },
+      {
+        "target": "dpi",
+        "exit": 0,
+        "passed": 3,
+        "failed": 0,
+        "ignored": 0,
+        "sha256_after_matches": true
+      },
+      {
+        "target": "sample_storage",
+        "exit": 0,
+        "passed": 2,
+        "failed": 0,
+        "ignored": 0,
+        "sha256_after_matches": true
+      },
+      {
+        "target": "color_authoring",
+        "exit": 0,
+        "passed": 2,
+        "failed": 0,
+        "ignored": 0,
+        "sha256_after_matches": true
+      },
+      {
+        "target": "external",
+        "exit": 0,
+        "passed": 2,
+        "failed": 0,
+        "ignored": 0,
+        "sha256_after_matches": true
+      },
+      {
+        "target": "selection",
+        "exit": 0,
+        "passed": 11,
+        "failed": 0,
+        "ignored": 0,
+        "sha256_after_matches": true
+      },
+      {
+        "target": "font_quality",
+        "exit": 0,
+        "passed": 3,
+        "failed": 0,
+        "ignored": 0,
+        "sha256_after_matches": true
+      },
+      {
+        "target": "shaping",
+        "exit": 0,
+        "passed": 2,
+        "failed": 0,
+        "ignored": 0,
+        "sha256_after_matches": true
+      },
+      {
+        "target": "unit_action_cost",
+        "exit": 0,
+        "passed": 1,
+        "failed": 0,
+        "ignored": 0,
+        "sha256_after_matches": true
+      },
+      {
+        "target": "inbox_storage",
+        "exit": 0,
+        "passed": 9,
+        "failed": 0,
+        "ignored": 0,
+        "sha256_after_matches": true
+      },
+      {
+        "target": "todo_comparison",
+        "exit": 0,
+        "passed": 4,
+        "failed": 0,
+        "ignored": 1,
+        "sha256_after_matches": true
+      },
+      {
+        "target": "field_identity",
+        "exit": 0,
+        "passed": 1,
+        "failed": 0,
+        "ignored": 0,
+        "sha256_after_matches": true
+      },
+      {
+        "target": "focus",
+        "exit": 0,
+        "passed": 9,
+        "failed": 0,
+        "ignored": 0,
+        "sha256_after_matches": true
+      },
+      {
+        "target": "source_values",
+        "exit": 0,
+        "passed": 4,
+        "failed": 0,
+        "ignored": 0,
+        "sha256_after_matches": true
+      },
+      {
+        "target": "images",
+        "exit": 0,
+        "passed": 3,
+        "failed": 0,
+        "ignored": 0,
+        "sha256_after_matches": true
+      },
+      {
+        "target": "text_cache",
+        "exit": 0,
+        "passed": 3,
+        "failed": 0,
+        "ignored": 0,
+        "sha256_after_matches": true
+      },
+      {
+        "target": "components",
+        "exit": 0,
+        "passed": 10,
+        "failed": 0,
+        "ignored": 0,
+        "sha256_after_matches": true
+      },
+      {
+        "target": "source_inbox_reader_gate",
+        "exit": 0,
+        "passed": 1,
+        "failed": 0,
+        "ignored": 0,
+        "sha256_after_matches": true
+      },
+      {
+        "target": "sibling_reconciliation_cost",
+        "exit": 0,
+        "passed": 1,
+        "failed": 0,
+        "ignored": 1,
+        "sha256_after_matches": true
+      },
+      {
+        "target": "clipping",
+        "exit": 101,
+        "passed": 5,
+        "failed": 1,
+        "ignored": 0,
+        "sha256_after_matches": true
+      },
+      {
+        "target": "application",
+        "exit": 0,
+        "passed": 3,
+        "failed": 0,
+        "ignored": 0,
+        "sha256_after_matches": true
+      },
+      {
+        "target": "text_selection",
+        "exit": 0,
+        "passed": 20,
+        "failed": 0,
+        "ignored": 0,
+        "sha256_after_matches": true
+      },
+      {
+        "target": "semantic_serialization",
+        "exit": 0,
+        "passed": 7,
+        "failed": 0,
+        "ignored": 0,
+        "sha256_after_matches": true
+      },
+      {
+        "target": "search_library",
+        "exit": 0,
+        "passed": 6,
+        "failed": 0,
+        "ignored": 1,
+        "sha256_after_matches": true
+      },
+      {
+        "target": "runtime",
+        "exit": 0,
+        "passed": 15,
+        "failed": 0,
+        "ignored": 0,
+        "sha256_after_matches": true
+      },
+      {
+        "target": "rounded",
+        "exit": 0,
+        "passed": 9,
+        "failed": 0,
+        "ignored": 0,
+        "sha256_after_matches": true
+      },
+      {
+        "target": "remote",
+        "exit": 0,
+        "passed": 16,
+        "failed": 0,
+        "ignored": 0,
+        "sha256_after_matches": true
+      },
+      {
+        "target": "question_storage",
+        "exit": 0,
+        "passed": 1,
+        "failed": 0,
+        "ignored": 0,
+        "sha256_after_matches": true
+      },
+      {
+        "target": "question_inputs",
+        "exit": 0,
+        "passed": 11,
+        "failed": 0,
+        "ignored": 0,
+        "sha256_after_matches": true
+      },
+      {
+        "target": "question_futures",
+        "exit": 0,
+        "passed": 17,
+        "failed": 0,
+        "ignored": 0,
+        "sha256_after_matches": true
+      },
+      {
+        "target": "queries",
+        "exit": 0,
+        "passed": 3,
+        "failed": 0,
+        "ignored": 0,
+        "sha256_after_matches": true
+      },
+      {
+        "target": "property_selection",
+        "exit": 0,
+        "passed": 10,
+        "failed": 0,
+        "ignored": 0,
+        "sha256_after_matches": true
+      },
+      {
+        "target": "property_change_union",
+        "exit": 0,
+        "passed": 11,
+        "failed": 0,
+        "ignored": 0,
+        "sha256_after_matches": true
+      },
+      {
+        "target": "projected_sources",
+        "exit": 0,
+        "passed": 12,
+        "failed": 0,
+        "ignored": 0,
+        "sha256_after_matches": true
+      },
+      {
+        "target": "ports",
+        "exit": 0,
+        "passed": 3,
+        "failed": 0,
+        "ignored": 0,
+        "sha256_after_matches": true
+      },
+      {
+        "target": "pointer",
+        "exit": 0,
+        "passed": 9,
+        "failed": 0,
+        "ignored": 0,
+        "sha256_after_matches": true
+      },
+      {
+        "target": "paint_slot_rebind",
+        "exit": 0,
+        "passed": 1,
+        "failed": 0,
+        "ignored": 0,
+        "sha256_after_matches": true
+      },
+      {
+        "target": "literal_dispatch",
+        "exit": 0,
+        "passed": 2,
+        "failed": 0,
+        "ignored": 0,
+        "sha256_after_matches": true
+      },
+      {
+        "target": "mapped_properties",
+        "exit": 0,
+        "passed": 7,
+        "failed": 0,
+        "ignored": 0,
+        "sha256_after_matches": true
+      },
+      {
+        "target": "library",
+        "exit": 0,
+        "passed": 4,
+        "failed": 0,
+        "ignored": 0,
+        "sha256_after_matches": true
+      },
+      {
+        "target": "unit_action_cost_two",
+        "exit": 0,
+        "passed": 2,
+        "failed": 0,
+        "ignored": 0,
+        "sha256_after_matches": true
+      },
+      {
+        "target": "unicode_text",
+        "exit": 0,
+        "passed": 2,
+        "failed": 0,
+        "ignored": 0,
+        "sha256_after_matches": true
+      },
+      {
+        "target": "inspector",
+        "exit": 0,
+        "passed": 15,
+        "failed": 0,
+        "ignored": 0,
+        "sha256_after_matches": true
+      },
+      {
+        "target": "immutable_text",
+        "exit": 0,
+        "passed": 2,
+        "failed": 0,
+        "ignored": 0,
+        "sha256_after_matches": true
+      },
+      {
+        "target": "text_selection_compound",
+        "exit": 0,
+        "passed": 6,
+        "failed": 0,
+        "ignored": 0,
+        "sha256_after_matches": true
+      },
+      {
+        "target": "identity_recovery",
+        "exit": 0,
+        "passed": 1,
+        "failed": 0,
+        "ignored": 0,
+        "sha256_after_matches": true
+      },
+      {
+        "target": "text_geometry",
+        "exit": 0,
+        "passed": 4,
+        "failed": 0,
+        "ignored": 0,
+        "sha256_after_matches": true
+      },
+      {
+        "target": "flex",
+        "exit": 0,
+        "passed": 10,
+        "failed": 0,
+        "ignored": 0,
+        "sha256_after_matches": true
+      },
+      {
+        "target": "dpi",
+        "exit": 0,
+        "passed": 6,
+        "failed": 0,
+        "ignored": 0,
+        "sha256_after_matches": true
+      },
+      {
+        "target": "style_ports",
+        "exit": 0,
+        "passed": 13,
+        "failed": 0,
+        "ignored": 0,
+        "sha256_after_matches": true
+      },
+      {
+        "target": "color_packing",
+        "exit": 0,
+        "passed": 1,
+        "failed": 0,
+        "ignored": 0,
+        "sha256_after_matches": true
+      },
+      {
+        "target": "source_value_isolation",
+        "exit": 0,
+        "passed": 3,
+        "failed": 0,
+        "ignored": 0,
+        "sha256_after_matches": true
+      },
+      {
+        "target": "source_inbox",
+        "exit": 0,
+        "passed": 14,
+        "failed": 0,
+        "ignored": 0,
+        "sha256_after_matches": true
+      },
+      {
+        "target": "checkbox",
+        "exit": 0,
+        "passed": 9,
+        "failed": 0,
+        "ignored": 0,
+        "sha256_after_matches": true
+      },
+      {
+        "target": "semantics",
+        "exit": 0,
+        "passed": 6,
+        "failed": 0,
+        "ignored": 0,
+        "sha256_after_matches": true
+      },
+      {
+        "target": "acceptance",
+        "exit": 0,
+        "passed": 6,
+        "failed": 0,
+        "ignored": 0,
+        "sha256_after_matches": true
+      },
+      {
+        "target": "semantic_metadata",
+        "exit": 0,
+        "passed": 12,
+        "failed": 0,
+        "ignored": 0,
+        "sha256_after_matches": true
+      },
+      {
+        "target": "scroll",
+        "exit": 0,
+        "passed": 27,
+        "failed": 0,
+        "ignored": 0,
+        "sha256_after_matches": true
+      },
+      {
+        "target": "routes",
+        "exit": 0,
+        "passed": 4,
+        "failed": 0,
+        "ignored": 0,
+        "sha256_after_matches": true
+      },
+      {
+        "target": "retained_styles",
+        "exit": 0,
+        "passed": 2,
+        "failed": 0,
+        "ignored": 0,
+        "sha256_after_matches": true
+      },
+      {
+        "target": "questions",
+        "exit": 0,
+        "passed": 19,
+        "failed": 0,
+        "ignored": 0,
+        "sha256_after_matches": true
+      },
+      {
+        "target": "question_mailbox",
+        "exit": 0,
+        "passed": 3,
+        "failed": 0,
+        "ignored": 0,
+        "sha256_after_matches": true
+      },
+      {
+        "target": "question_input_cost",
+        "exit": 0,
+        "passed": 0,
+        "failed": 0,
+        "ignored": 1,
+        "sha256_after_matches": true
+      },
+      {
+        "target": "question_cost",
+        "exit": 0,
+        "passed": 0,
+        "failed": 0,
+        "ignored": 1,
+        "sha256_after_matches": true
+      },
+      {
+        "target": "property_state_shell",
+        "exit": 0,
+        "passed": 1,
+        "failed": 0,
+        "ignored": 0,
+        "sha256_after_matches": true
+      },
+      {
+        "target": "property_outline_allocations",
+        "exit": 0,
+        "passed": 1,
+        "failed": 0,
+        "ignored": 0,
+        "sha256_after_matches": true
+      },
+      {
+        "target": "property_actions",
+        "exit": 0,
+        "passed": 9,
+        "failed": 0,
+        "ignored": 0,
+        "sha256_after_matches": true
+      },
+      {
+        "target": "pointer_focus",
+        "exit": 0,
+        "passed": 12,
+        "failed": 0,
+        "ignored": 0,
+        "sha256_after_matches": true
+      },
+      {
+        "target": "presentation",
+        "exit": 0,
+        "passed": 9,
+        "failed": 0,
+        "ignored": 0,
+        "sha256_after_matches": true
+      },
+      {
+        "target": "paint_slots",
+        "exit": 0,
+        "passed": 3,
+        "failed": 0,
+        "ignored": 0,
+        "sha256_after_matches": true
+      },
+      {
+        "target": "paint_patch",
+        "exit": 0,
+        "passed": 5,
+        "failed": 0,
+        "ignored": 0,
+        "sha256_after_matches": true
+      },
+      {
+        "target": "mapped_paint",
+        "exit": 0,
+        "passed": 3,
+        "failed": 0,
+        "ignored": 0,
+        "sha256_after_matches": true
+      },
+      {
+        "target": "lists",
+        "exit": 0,
+        "passed": 19,
+        "failed": 0,
+        "ignored": 0,
+        "sha256_after_matches": true
+      },
+      {
+        "target": "presentation",
+        "exit": 0,
+        "passed": 4,
+        "failed": 0,
+        "ignored": 0,
+        "sha256_after_matches": true
+      },
+      {
+        "target": "render",
+        "exit": 0,
+        "passed": 55,
+        "failed": 0,
+        "ignored": 0,
+        "sha256_after_matches": true
+      },
+      {
+        "target": "gpui_gpu",
+        "exit": 0,
+        "passed": 11,
+        "failed": 0,
+        "ignored": 0,
+        "sha256_after_matches": true
+      },
+      {
+        "target": "gpui",
+        "exit": 0,
+        "passed": 240,
+        "failed": 0,
+        "ignored": 31,
+        "sha256_after_matches": true
+      }
+    ],
+    "scope": "Frozen functional test artifacts; sequential execution, no performance inference."
+  },
+  "final-build": {
+    "source": "d3e6885c6bab6a07fafcd3f4faae7cbb3023e0c7",
+    "exit": 0,
+    "guards": 2049,
+    "guards_match": true,
+    "tracked_input_scopes": [
+      ".cargo",
+      "clippy.toml",
+      "reactivity/Cargo.toml",
+      "reactivity/Cargo.lock",
+      "reactivity/rust-toolchain.toml",
+      "reactivity/crates",
+      "reactivity/vendor"
+    ],
+    "passed": 0,
+    "failed": 0,
+    "ignored": 0,
+    "harnesses": 0,
+    "scope": "Functional/source-identity gate; no timing inference."
+  },
+  "final-execute-guard": {
+    "source": "d3e6885c6bab6a07fafcd3f4faae7cbb3023e0c7",
+    "exit": 0,
+    "guards": 2049,
+    "guards_match": true,
+    "tracked_input_scopes": [
+      ".cargo",
+      "clippy.toml",
+      "reactivity/Cargo.toml",
+      "reactivity/Cargo.lock",
+      "reactivity/rust-toolchain.toml",
+      "reactivity/crates",
+      "reactivity/vendor"
+    ],
+    "passed": 0,
+    "failed": 0,
+    "ignored": 0,
+    "harnesses": 0,
+    "scope": "Functional/source-identity gate; no timing inference."
+  },
+  "final-test-artifacts": {
+    "harnesses": 102,
+    "passed": 997,
+    "failed": 0,
+    "ignored": 39,
+    "all_exit_zero": true,
+    "results": [
+      {
+        "target": "damage",
+        "exit": 0,
+        "passed": 7,
+        "failed": 0,
+        "ignored": 0,
+        "sha256_after_matches": true
+      },
+      {
+        "target": "rounded",
+        "exit": 0,
+        "passed": 5,
+        "failed": 0,
+        "ignored": 0,
+        "sha256_after_matches": true
+      },
+      {
+        "target": "color_authoring",
+        "exit": 0,
+        "passed": 2,
+        "failed": 0,
+        "ignored": 0,
+        "sha256_after_matches": true
+      },
+      {
+        "target": "external",
+        "exit": 0,
+        "passed": 2,
+        "failed": 0,
+        "ignored": 0,
+        "sha256_after_matches": true
+      },
+      {
+        "target": "color",
+        "exit": 0,
+        "passed": 6,
+        "failed": 0,
+        "ignored": 0,
+        "sha256_after_matches": true
+      },
+      {
+        "target": "selection",
+        "exit": 0,
+        "passed": 11,
+        "failed": 0,
+        "ignored": 0,
+        "sha256_after_matches": true
+      },
+      {
+        "target": "dpi",
+        "exit": 0,
+        "passed": 3,
+        "failed": 0,
+        "ignored": 0,
+        "sha256_after_matches": true
+      },
+      {
+        "target": "sample_storage",
+        "exit": 0,
+        "passed": 2,
+        "failed": 0,
+        "ignored": 0,
+        "sha256_after_matches": true
+      },
+      {
+        "target": "default_font",
+        "exit": 0,
+        "passed": 4,
+        "failed": 0,
+        "ignored": 0,
+        "sha256_after_matches": true
+      },
+      {
+        "target": "font_quality",
+        "exit": 0,
+        "passed": 3,
+        "failed": 0,
+        "ignored": 0,
+        "sha256_after_matches": true
+      },
+      {
+        "target": "font_sharing",
+        "exit": 0,
+        "passed": 2,
+        "failed": 0,
+        "ignored": 1,
+        "sha256_after_matches": true
+      },
+      {
+        "target": "slots",
+        "exit": 0,
+        "passed": 6,
+        "failed": 0,
+        "ignored": 0,
+        "sha256_after_matches": true
+      },
+      {
+        "target": "gpui_canvas",
+        "exit": 0,
+        "passed": 99,
+        "failed": 0,
+        "ignored": 2,
+        "sha256_after_matches": true
+      },
+      {
+        "target": "gradients",
+        "exit": 0,
+        "passed": 3,
+        "failed": 0,
+        "ignored": 0,
+        "sha256_after_matches": true
+      },
+      {
+        "target": "solid",
+        "exit": 0,
+        "passed": 3,
+        "failed": 0,
+        "ignored": 0,
+        "sha256_after_matches": true
+      },
+      {
+        "target": "grouped",
+        "exit": 0,
+        "passed": 2,
+        "failed": 0,
+        "ignored": 0,
+        "sha256_after_matches": true
+      },
+      {
+        "target": "shaping",
+        "exit": 0,
+        "passed": 2,
+        "failed": 0,
+        "ignored": 0,
+        "sha256_after_matches": true
+      },
+      {
+        "target": "text_capacity",
+        "exit": 0,
+        "passed": 1,
+        "failed": 0,
+        "ignored": 0,
+        "sha256_after_matches": true
+      },
+      {
+        "target": "bins",
+        "exit": 0,
+        "passed": 8,
+        "failed": 0,
+        "ignored": 0,
+        "sha256_after_matches": true
+      },
+      {
+        "target": "hdr",
+        "exit": 0,
+        "passed": 6,
+        "failed": 0,
+        "ignored": 0,
+        "sha256_after_matches": true
+      },
+      {
+        "target": "clipping",
+        "exit": 0,
+        "passed": 6,
+        "failed": 0,
+        "ignored": 0,
+        "sha256_after_matches": true
+      },
+      {
+        "target": "sample_clip",
+        "exit": 0,
+        "passed": 3,
+        "failed": 0,
+        "ignored": 0,
+        "sha256_after_matches": true
+      },
+      {
+        "target": "text_transaction",
+        "exit": 0,
+        "passed": 5,
+        "failed": 0,
+        "ignored": 0,
+        "sha256_after_matches": true
+      },
+      {
+        "target": "images",
+        "exit": 0,
+        "passed": 4,
+        "failed": 0,
+        "ignored": 0,
+        "sha256_after_matches": true
+      },
+      {
+        "target": "color_packing",
+        "exit": 0,
+        "passed": 3,
+        "failed": 0,
+        "ignored": 0,
+        "sha256_after_matches": true
+      },
+      {
+        "target": "unicode",
+        "exit": 0,
+        "passed": 14,
+        "failed": 0,
+        "ignored": 0,
+        "sha256_after_matches": true
+      },
+      {
+        "target": "literal_cow",
+        "exit": 0,
+        "passed": 2,
+        "failed": 0,
+        "ignored": 0,
+        "sha256_after_matches": true
+      },
+      {
+        "target": "oklch",
+        "exit": 0,
+        "passed": 5,
+        "failed": 0,
+        "ignored": 0,
+        "sha256_after_matches": true
+      },
+      {
+        "target": "paint",
+        "exit": 0,
+        "passed": 4,
+        "failed": 0,
+        "ignored": 0,
+        "sha256_after_matches": true
+      },
+      {
+        "target": "parallel",
+        "exit": 0,
+        "passed": 0,
+        "failed": 0,
+        "ignored": 0,
+        "sha256_after_matches": true
+      },
+      {
+        "target": "prepared_scene",
+        "exit": 0,
+        "passed": 3,
+        "failed": 0,
+        "ignored": 0,
+        "sha256_after_matches": true
+      },
+      {
+        "target": "render",
+        "exit": 0,
+        "passed": 10,
+        "failed": 0,
+        "ignored": 0,
+        "sha256_after_matches": true
+      },
+      {
+        "target": "semantic_metadata",
+        "exit": 0,
+        "passed": 12,
+        "failed": 0,
+        "ignored": 0,
+        "sha256_after_matches": true
+      },
+      {
+        "target": "semantics",
+        "exit": 0,
+        "passed": 6,
+        "failed": 0,
+        "ignored": 0,
+        "sha256_after_matches": true
+      },
+      {
+        "target": "scroll",
+        "exit": 0,
+        "passed": 27,
+        "failed": 0,
+        "ignored": 0,
+        "sha256_after_matches": true
+      },
+      {
+        "target": "routes",
+        "exit": 0,
+        "passed": 4,
+        "failed": 0,
+        "ignored": 0,
+        "sha256_after_matches": true
+      },
+      {
+        "target": "retained_styles",
+        "exit": 0,
+        "passed": 2,
+        "failed": 0,
+        "ignored": 0,
+        "sha256_after_matches": true
+      },
+      {
+        "target": "questions",
+        "exit": 0,
+        "passed": 19,
+        "failed": 0,
+        "ignored": 0,
+        "sha256_after_matches": true
+      },
+      {
+        "target": "question_mailbox",
+        "exit": 0,
+        "passed": 3,
+        "failed": 0,
+        "ignored": 0,
+        "sha256_after_matches": true
+      },
+      {
+        "target": "question_input_cost",
+        "exit": 0,
+        "passed": 0,
+        "failed": 0,
+        "ignored": 1,
+        "sha256_after_matches": true
+      },
+      {
+        "target": "property_state_shell",
+        "exit": 0,
+        "passed": 1,
+        "failed": 0,
+        "ignored": 0,
+        "sha256_after_matches": true
+      },
+      {
+        "target": "property_outline_allocations",
+        "exit": 0,
+        "passed": 1,
+        "failed": 0,
+        "ignored": 0,
+        "sha256_after_matches": true
+      },
+      {
+        "target": "property_actions",
+        "exit": 0,
+        "passed": 9,
+        "failed": 0,
+        "ignored": 0,
+        "sha256_after_matches": true
+      },
+      {
+        "target": "presentation",
+        "exit": 0,
+        "passed": 9,
+        "failed": 0,
+        "ignored": 0,
+        "sha256_after_matches": true
+      },
+      {
+        "target": "question_cost",
+        "exit": 0,
+        "passed": 0,
+        "failed": 0,
+        "ignored": 1,
+        "sha256_after_matches": true
+      },
+      {
+        "target": "pointer_focus",
+        "exit": 0,
+        "passed": 12,
+        "failed": 0,
+        "ignored": 0,
+        "sha256_after_matches": true
+      },
+      {
+        "target": "paint_slots",
+        "exit": 0,
+        "passed": 3,
+        "failed": 0,
+        "ignored": 0,
+        "sha256_after_matches": true
+      },
+      {
+        "target": "paint_patch",
+        "exit": 0,
+        "passed": 5,
+        "failed": 0,
+        "ignored": 0,
+        "sha256_after_matches": true
+      },
+      {
+        "target": "lists",
+        "exit": 0,
+        "passed": 19,
+        "failed": 0,
+        "ignored": 0,
+        "sha256_after_matches": true
+      },
+      {
+        "target": "mapped_paint",
+        "exit": 0,
+        "passed": 3,
+        "failed": 0,
+        "ignored": 0,
+        "sha256_after_matches": true
+      },
+      {
+        "target": "intrinsic_text",
+        "exit": 0,
+        "passed": 3,
+        "failed": 0,
+        "ignored": 0,
+        "sha256_after_matches": true
+      },
+      {
+        "target": "unit_action_cost",
+        "exit": 0,
+        "passed": 1,
+        "failed": 0,
+        "ignored": 0,
+        "sha256_after_matches": true
+      },
+      {
+        "target": "inbox_storage",
+        "exit": 0,
+        "passed": 9,
+        "failed": 0,
+        "ignored": 0,
+        "sha256_after_matches": true
+      },
+      {
+        "target": "todo_comparison",
+        "exit": 0,
+        "passed": 4,
+        "failed": 0,
+        "ignored": 1,
+        "sha256_after_matches": true
+      },
+      {
+        "target": "images",
+        "exit": 0,
+        "passed": 3,
+        "failed": 0,
+        "ignored": 0,
+        "sha256_after_matches": true
+      },
+      {
+        "target": "focus",
+        "exit": 0,
+        "passed": 9,
+        "failed": 0,
+        "ignored": 0,
+        "sha256_after_matches": true
+      },
+      {
+        "target": "field_identity",
+        "exit": 0,
+        "passed": 1,
+        "failed": 0,
+        "ignored": 0,
+        "sha256_after_matches": true
+      },
+      {
+        "target": "text_cache",
+        "exit": 0,
+        "passed": 3,
+        "failed": 0,
+        "ignored": 0,
+        "sha256_after_matches": true
+      },
+      {
+        "target": "source_values",
+        "exit": 0,
+        "passed": 4,
+        "failed": 0,
+        "ignored": 0,
+        "sha256_after_matches": true
+      },
+      {
+        "target": "text_selection",
+        "exit": 0,
+        "passed": 20,
+        "failed": 0,
+        "ignored": 0,
+        "sha256_after_matches": true
+      },
+      {
+        "target": "components",
+        "exit": 0,
+        "passed": 10,
+        "failed": 0,
+        "ignored": 0,
+        "sha256_after_matches": true
+      },
+      {
+        "target": "source_inbox_reader_gate",
+        "exit": 0,
+        "passed": 1,
+        "failed": 0,
+        "ignored": 0,
+        "sha256_after_matches": true
+      },
+      {
+        "target": "sibling_reconciliation_cost",
+        "exit": 0,
+        "passed": 1,
+        "failed": 0,
+        "ignored": 1,
+        "sha256_after_matches": true
+      },
+      {
+        "target": "application",
+        "exit": 0,
+        "passed": 3,
+        "failed": 0,
+        "ignored": 0,
+        "sha256_after_matches": true
+      },
+      {
+        "target": "semantic_serialization",
+        "exit": 0,
+        "passed": 7,
+        "failed": 0,
+        "ignored": 0,
+        "sha256_after_matches": true
+      },
+      {
+        "target": "search_library",
+        "exit": 0,
+        "passed": 6,
+        "failed": 0,
+        "ignored": 1,
+        "sha256_after_matches": true
+      },
+      {
+        "target": "gpui",
+        "exit": 0,
+        "passed": 240,
+        "failed": 0,
+        "ignored": 31,
+        "sha256_after_matches": true
+      },
+      {
+        "target": "runtime",
+        "exit": 0,
+        "passed": 15,
+        "failed": 0,
+        "ignored": 0,
+        "sha256_after_matches": true
+      },
+      {
+        "target": "rounded",
+        "exit": 0,
+        "passed": 9,
+        "failed": 0,
+        "ignored": 0,
+        "sha256_after_matches": true
+      },
+      {
+        "target": "remote",
+        "exit": 0,
+        "passed": 16,
+        "failed": 0,
+        "ignored": 0,
+        "sha256_after_matches": true
+      },
+      {
+        "target": "question_storage",
+        "exit": 0,
+        "passed": 1,
+        "failed": 0,
+        "ignored": 0,
+        "sha256_after_matches": true
+      },
+      {
+        "target": "question_futures",
+        "exit": 0,
+        "passed": 17,
+        "failed": 0,
+        "ignored": 0,
+        "sha256_after_matches": true
+      },
+      {
+        "target": "question_inputs",
+        "exit": 0,
+        "passed": 11,
+        "failed": 0,
+        "ignored": 0,
+        "sha256_after_matches": true
+      },
+      {
+        "target": "queries",
+        "exit": 0,
+        "passed": 3,
+        "failed": 0,
+        "ignored": 0,
+        "sha256_after_matches": true
+      },
+      {
+        "target": "property_selection",
+        "exit": 0,
+        "passed": 10,
+        "failed": 0,
+        "ignored": 0,
+        "sha256_after_matches": true
+      },
+      {
+        "target": "property_change_union",
+        "exit": 0,
+        "passed": 11,
+        "failed": 0,
+        "ignored": 0,
+        "sha256_after_matches": true
+      },
+      {
+        "target": "projected_sources",
+        "exit": 0,
+        "passed": 12,
+        "failed": 0,
+        "ignored": 0,
+        "sha256_after_matches": true
+      },
+      {
+        "target": "paint_slot_rebind",
+        "exit": 0,
+        "passed": 1,
+        "failed": 0,
+        "ignored": 0,
+        "sha256_after_matches": true
+      },
+      {
+        "target": "pointer",
+        "exit": 0,
+        "passed": 9,
+        "failed": 0,
+        "ignored": 0,
+        "sha256_after_matches": true
+      },
+      {
+        "target": "mapped_properties",
+        "exit": 0,
+        "passed": 7,
+        "failed": 0,
+        "ignored": 0,
+        "sha256_after_matches": true
+      },
+      {
+        "target": "literal_dispatch",
+        "exit": 0,
+        "passed": 2,
+        "failed": 0,
+        "ignored": 0,
+        "sha256_after_matches": true
+      },
+      {
+        "target": "ports",
+        "exit": 0,
+        "passed": 3,
+        "failed": 0,
+        "ignored": 0,
+        "sha256_after_matches": true
+      },
+      {
+        "target": "library",
+        "exit": 0,
+        "passed": 4,
+        "failed": 0,
+        "ignored": 0,
+        "sha256_after_matches": true
+      },
+      {
+        "target": "unit_action_cost_two",
+        "exit": 0,
+        "passed": 2,
+        "failed": 0,
+        "ignored": 0,
+        "sha256_after_matches": true
+      },
+      {
+        "target": "inspector",
+        "exit": 0,
+        "passed": 15,
+        "failed": 0,
+        "ignored": 0,
+        "sha256_after_matches": true
+      },
+      {
+        "target": "unicode_text",
+        "exit": 0,
+        "passed": 2,
+        "failed": 0,
+        "ignored": 0,
+        "sha256_after_matches": true
+      },
+      {
+        "target": "immutable_text",
+        "exit": 0,
+        "passed": 2,
+        "failed": 0,
+        "ignored": 0,
+        "sha256_after_matches": true
+      },
+      {
+        "target": "text_selection_compound",
+        "exit": 0,
+        "passed": 6,
+        "failed": 0,
+        "ignored": 0,
+        "sha256_after_matches": true
+      },
+      {
+        "target": "identity_recovery",
+        "exit": 0,
+        "passed": 1,
+        "failed": 0,
+        "ignored": 0,
+        "sha256_after_matches": true
+      },
+      {
+        "target": "text_geometry",
+        "exit": 0,
+        "passed": 4,
+        "failed": 0,
+        "ignored": 0,
+        "sha256_after_matches": true
+      },
+      {
+        "target": "flex",
+        "exit": 0,
+        "passed": 10,
+        "failed": 0,
+        "ignored": 0,
+        "sha256_after_matches": true
+      },
+      {
+        "target": "style_ports",
+        "exit": 0,
+        "passed": 13,
+        "failed": 0,
+        "ignored": 0,
+        "sha256_after_matches": true
+      },
+      {
+        "target": "dpi",
+        "exit": 0,
+        "passed": 6,
+        "failed": 0,
+        "ignored": 0,
+        "sha256_after_matches": true
+      },
+      {
+        "target": "source_value_isolation",
+        "exit": 0,
+        "passed": 3,
+        "failed": 0,
+        "ignored": 0,
+        "sha256_after_matches": true
+      },
+      {
+        "target": "color_packing",
+        "exit": 0,
+        "passed": 1,
+        "failed": 0,
+        "ignored": 0,
+        "sha256_after_matches": true
+      },
+      {
+        "target": "source_inbox",
+        "exit": 0,
+        "passed": 14,
+        "failed": 0,
+        "ignored": 0,
+        "sha256_after_matches": true
+      },
+      {
+        "target": "checkbox",
+        "exit": 0,
+        "passed": 9,
+        "failed": 0,
+        "ignored": 0,
+        "sha256_after_matches": true
+      },
+      {
+        "target": "acceptance",
+        "exit": 0,
+        "passed": 6,
+        "failed": 0,
+        "ignored": 0,
+        "sha256_after_matches": true
+      },
+      {
+        "target": "presentation",
+        "exit": 0,
+        "passed": 4,
+        "failed": 0,
+        "ignored": 0,
+        "sha256_after_matches": true
+      },
+      {
+        "target": "render",
+        "exit": 0,
+        "passed": 55,
+        "failed": 0,
+        "ignored": 0,
+        "sha256_after_matches": true
+      },
+      {
+        "target": "gpui_gpu",
+        "exit": 0,
+        "passed": 11,
+        "failed": 0,
+        "ignored": 0,
+        "sha256_after_matches": true
+      },
+      {
+        "target": "clipping",
+        "exit": 0,
+        "passed": 6,
+        "failed": 0,
+        "ignored": 0,
+        "sha256_after_matches": true
+      }
+    ],
+    "scope": "Frozen functional test artifacts; sequential execution, no performance inference."
+  },
+  "final-strict": {
+    "source": "d3e6885c6bab6a07fafcd3f4faae7cbb3023e0c7",
+    "exit": 0,
+    "guards": 2049,
+    "guards_match": true,
+    "tracked_input_scopes": [
+      ".cargo",
+      "clippy.toml",
+      "reactivity/Cargo.toml",
+      "reactivity/Cargo.lock",
+      "reactivity/rust-toolchain.toml",
+      "reactivity/crates",
+      "reactivity/vendor"
+    ],
+    "passed": 0,
+    "failed": 0,
+    "ignored": 0,
+    "harnesses": 0,
+    "scope": "Functional/source-identity gate; no timing inference."
+  },
+  "final-docs": {
+    "source": "d3e6885c6bab6a07fafcd3f4faae7cbb3023e0c7",
+    "exit": 0,
+    "guards": 2049,
+    "guards_match": true,
+    "tracked_input_scopes": [
+      ".cargo",
+      "clippy.toml",
+      "reactivity/Cargo.toml",
+      "reactivity/Cargo.lock",
+      "reactivity/rust-toolchain.toml",
+      "reactivity/crates",
+      "reactivity/vendor"
+    ],
+    "passed": 32,
+    "failed": 0,
+    "ignored": 0,
+    "harnesses": 4,
+    "scope": "Functional/source-identity gate; no timing inference."
+  },
+  "final-scalar-domain": {
+    "source": "d3e6885c6bab6a07fafcd3f4faae7cbb3023e0c7",
+    "exit": 0,
+    "guards": 2049,
+    "guards_match": true,
+    "tracked_input_scopes": [
+      ".cargo",
+      "clippy.toml",
+      "reactivity/Cargo.toml",
+      "reactivity/Cargo.lock",
+      "reactivity/rust-toolchain.toml",
+      "reactivity/crates",
+      "reactivity/vendor"
+    ],
+    "passed": 7,
+    "failed": 0,
+    "ignored": 0,
+    "harnesses": 1,
+    "scope": "Functional/source-identity gate; no timing inference."
+  },
+  "final-scalar-aa": {
+    "source": "d3e6885c6bab6a07fafcd3f4faae7cbb3023e0c7",
+    "exit": 0,
+    "guards": 2049,
+    "guards_match": true,
+    "tracked_input_scopes": [
+      ".cargo",
+      "clippy.toml",
+      "reactivity/Cargo.toml",
+      "reactivity/Cargo.lock",
+      "reactivity/rust-toolchain.toml",
+      "reactivity/crates",
+      "reactivity/vendor"
+    ],
+    "passed": 9,
+    "failed": 0,
+    "ignored": 0,
+    "harnesses": 2,
+    "scope": "Functional/source-identity gate; no timing inference."
+  },
+  "native-wire-guard": {
+    "source": "5be9000ae52f9a26e7dd5c2fdd41cf47834688b7",
+    "exit": 0,
+    "guards": 2049,
+    "guards_match": true,
+    "tracked_input_scopes": [
+      ".cargo",
+      "clippy.toml",
+      "reactivity/Cargo.toml",
+      "reactivity/Cargo.lock",
+      "reactivity/rust-toolchain.toml",
+      "reactivity/crates",
+      "reactivity/vendor"
+    ],
+    "passed": 0,
+    "failed": 0,
+    "ignored": 0,
+    "harnesses": 0,
+    "scope": "Functional/source-identity gate; no timing inference."
+  },
+  "native-wire": {
+    "source": "5be9000ae52f9a26e7dd5c2fdd41cf47834688b7",
+    "binary_sha256": "55dc0f8e6191b65f9be92067fbff806a777c8ac01c267db85ce932d78678787b",
+    "all_exit_zero": true,
+    "passed": 2,
+    "failed": 0,
+    "ignored": 0,
+    "results": [
+      {
+        "name": "native-gpu-paint",
+        "exit": 0,
+        "passed": 1,
+        "failed": 0,
+        "ignored": 0,
+        "binary_sha256_matches": true
+      },
+      {
+        "name": "native-atspi-clips",
+        "exit": 0,
+        "passed": 1,
+        "failed": 0,
+        "ignored": 0,
+        "binary_sha256_matches": true
+      }
+    ],
+    "scope": "Actual private-X11 renderer/paint/inspector bridge and AT-SPI rounded-clip pointer/ACK wire test at1.25 scale and negative screen origin; no hardware, latency or RSS claim."
+  },
+  "layout-probe": {
+    "source": "d3e6885c6bab6a07fafcd3f4faae7cbb3023e0c7",
+    "scope": "Actual composed layout and Rust allocation requests, repeated frozen functional ELF probes; no RSS or timing inference. ELFs were hashed before/after full execution and reverified by shader audit.",
+    "results": [
+      {
+        "target": "gpui_canvas",
+        "selector": "canonical_clip_storage_and_transient_views_are_charged",
+        "elf_sha256": "39ab470fb64806849736588efe0bca53e1c1625c242ff4325c51a0e45ab367bc",
+        "exit": 0,
+        "stdout": "\nrunning 1 test\ntest canvas::clips::tests::canonical_clip_storage_and_transient_views_are_charged ... CLIP_HEADERS canvas=488 candidate=496 display_list=288 resource_box=96 arena=32 node=104 common=24 scope=48 draw_view=184 group_view=104 cpu_command=168 clip_argument=24 handle=16 geometry_view=8 chain_view=16 exported_node=96 optional_handle=16\nCLIP_COLD count=3 bytes=544 storage=SceneStorage { header_bytes: 288, resource_header_bytes: 128, order_bytes: 0, inline_bytes: 0, common_bytes: 0, placement_bytes: 0, clip_node_bytes: 416, resource_handles_bytes: 0, resource_index_capacity: 0, resource_entries: 1 }\nCLIP_SHARED_APPEND count=0 bytes=0\nok\n\ntest result: ok. 1 passed; 0 failed; 0 ignored; 0 measured; 100 filtered out; finished in 0.02s\n\n",
+        "stderr": ""
+      },
+      {
+        "target": "gpui",
+        "selector": "clipping_headers_and_cold_builder_costs_are_explicit",
+        "elf_sha256": "55dc0f8e6191b65f9be92067fbff806a777c8ac01c267db85ce932d78678787b",
+        "exit": 0,
+        "stdout": "\nrunning 1 test\ntest runtime::geometry::clip_layout_tests::clipping_headers_and_cold_builder_costs_are_explicit ... CLIP_LAYOUT geometry_style=8 decorations=48 extra=56 parts=216 image_spec=16 image_draft=24 el=176 node=40 presented=64 style=88 record=16\nCLIP_BUILDER clipped=false count=0 bytes=0\nCLIP_BUILDER clipped=true count=1 bytes=56\nok\n\ntest result: ok. 1 passed; 0 failed; 0 ignored; 0 measured; 270 filtered out; finished in 0.00s\n\n",
+        "stderr": ""
+      },
+      {
+        "target": "gpui",
+        "selector": "runtime::background::tests::",
+        "elf_sha256": "55dc0f8e6191b65f9be92067fbff806a777c8ac01c267db85ce932d78678787b",
+        "exit": 0,
+        "stdout": "\nrunning 7 tests\ntest runtime::background::tests::combined_budget_deduplicates_shared_declarations_and_overrides_before_mutation ... ok\ntest runtime::background::tests::gradient_background_typed_reflection_owner_validation_and_replacement_are_coherent ... ok\ntest runtime::background::tests::gradient_description_and_paint_edit_allocation_audit ... ok\ntest runtime::background::tests::gradient_scene_predecessor_survives_failed_newer_source_stale_ack_loss_and_remove ... ok\ntest runtime::background::tests::mounted_gradient_inspector_is_typed_read_only_and_exposes_author_stops ... ok\ntest runtime::background::tests::shared_resource_overrides_follow_surviving_owners_with_one_resource ... ok\ntest runtime::background::tests::solid_and_gradient_overrides_share_presence_and_prune_only_displaced_resources ... ok\n\ntest result: ok. 7 passed; 0 failed; 0 ignored; 0 measured; 264 filtered out; finished in 0.52s\n\n",
+        "stderr": "gradient_work_audit,path=unchanged-owner-describe,iterations=16,descriptions=16,allocs=256,requested=20544,retained_delta=0,peak_delta=960\ngradient_work_audit,path=equal-gradient-contribution,iterations=16,descriptions=0,allocs=0,requested=0,retained_delta=0,peak_delta=0\ngradient_work_audit,path=changed-solid-gradient-contribution,iterations=16,descriptions=0,allocs=112,requested=8480,retained_delta=0,peak_delta=376\ngradient_work_audit,path=unchanged-reconcile-excluding-input-vec,iterations=1,allocs=1,requested=104,retained_delta=-16,peak_delta=104\ngradient_work_audit,path=unchanged-reconcile-no-overrides-excluding-input-vec,iterations=1,allocs=0,requested=0,retained_delta=-16,peak_delta=0\ngradient_gpui_headers,Color=16,Style=88,Node=40,Destination=4,PropertyValue=28,PropInputColor=48,ElementExtra=56,SceneResources=32,Backgrounds=72,Runtime=1840,Metadata=264\n"
+      }
+    ]
+  },
+  "clip-equality/zero-test-filter": {
+    "source": "ee419e1a84f6a05055d8485107904489e23345f9",
+    "exit": 0,
+    "guards": 2049,
+    "guards_match": true,
+    "tracked_input_scopes": [
+      ".cargo",
+      "clippy.toml",
+      "reactivity/Cargo.toml",
+      "reactivity/Cargo.lock",
+      "reactivity/rust-toolchain.toml",
+      "reactivity/crates",
+      "reactivity/vendor"
+    ],
+    "passed": 0,
+    "failed": 0,
+    "ignored": 0,
+    "harnesses": 1,
+    "scope": "Functional/source-identity gate; no timing inference."
+  },
+  "clip-equality/semantic-red": {
+    "source": "ee419e1a84f6a05055d8485107904489e23345f9",
+    "exit": 101,
+    "guards": 2049,
+    "guards_match": true,
+    "tracked_input_scopes": [
+      ".cargo",
+      "clippy.toml",
+      "reactivity/Cargo.toml",
+      "reactivity/Cargo.lock",
+      "reactivity/rust-toolchain.toml",
+      "reactivity/crates",
+      "reactivity/vendor"
+    ],
+    "passed": 0,
+    "failed": 1,
+    "ignored": 0,
+    "harnesses": 1,
+    "scope": "Functional/source-identity gate; no timing inference."
+  },
+  "clip-equality/initial-green-support-oracle": {
+    "source": "d7cbb42073f46fd10f64ddb654cd366f3590589d",
+    "exit": 101,
+    "guards": 2049,
+    "guards_match": true,
+    "tracked_input_scopes": [
+      ".cargo",
+      "clippy.toml",
+      "reactivity/Cargo.toml",
+      "reactivity/Cargo.lock",
+      "reactivity/rust-toolchain.toml",
+      "reactivity/crates",
+      "reactivity/vendor"
+    ],
+    "passed": 13,
+    "failed": 1,
+    "ignored": 0,
+    "harnesses": 2,
+    "scope": "Functional/source-identity gate; no timing inference."
+  },
+  "clip-equality/green": {
+    "source": "948eff489aaa1f5d36a2514dc247884755b8e5c7",
+    "exit": 0,
+    "guards": 2049,
+    "guards_match": true,
+    "tracked_input_scopes": [
+      ".cargo",
+      "clippy.toml",
+      "reactivity/Cargo.toml",
+      "reactivity/Cargo.lock",
+      "reactivity/rust-toolchain.toml",
+      "reactivity/crates",
+      "reactivity/vendor"
+    ],
+    "passed": 14,
+    "failed": 0,
+    "ignored": 0,
+    "harnesses": 2,
+    "scope": "Functional/source-identity gate; no timing inference."
+  }
+}

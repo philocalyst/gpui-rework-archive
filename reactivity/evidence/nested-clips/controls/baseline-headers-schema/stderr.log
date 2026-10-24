@@ -1,0 +1,28 @@
+    Updating crates.io index
+ Downloading crates ...
+  Downloaded schemars v1.2.3
+  Downloaded schemars_derive v1.2.3
+   Compiling serde_core v1.0.229
+   Compiling serde v1.0.229
+   Compiling serde_json v1.0.154
+   Compiling ref-cast v1.0.27
+   Compiling serde_derive_internals v0.30.0
+   Compiling uuid v1.28.0
+   Compiling ref-cast-impl v1.0.27
+   Compiling schemars_derive v1.2.3
+   Compiling syn v2.0.119
+   Compiling dyn-clone v1.0.20
+   Compiling schemars v1.2.3
+   Compiling zbus_utils v6.0.0
+   Compiling enumn v0.1.14
+   Compiling accesskit v0.25.1 (/tmp/gpui-clips-control/reactivity/vendor/accesskit)
+   Compiling zbus_macros v6.0.0
+   Compiling zcheapstr v1.1.0
+   Compiling accesskit_consumer v0.39.1 (/tmp/gpui-clips-control/reactivity/vendor/accesskit_consumer)
+   Compiling zbus v6.0.0
+   Compiling gpui_reactivity_state v0.1.0 (/tmp/gpui-clips-control/reactivity/crates/state)
+   Compiling gpui v0.1.0 (/tmp/gpui-clips-control/reactivity/crates/gpui)
+    Finished `test` profile [unoptimized + debuginfo] target(s) in 47.18s
+     Running unittests src/lib.rs (/root/target-text-control-nightly/debug/build/accesskit/1d2a81b26a62433c/out/accesskit-1d2a81b26a62433c)
+     Running unittests src/lib.rs (/root/target-text-control-nightly/debug/build/gpui/537afceda3b6a240/out/gpui-537afceda3b6a240)
+     Running unittests src/lib.rs (/root/target-text-control-nightly/debug/build/gpui_canvas/c250b680ecef31bd/out/gpui_canvas-c250b680ecef31bd)

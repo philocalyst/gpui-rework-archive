@@ -1,0 +1,13 @@
+
+running 2 tests
+test native::accessibility::transitions::shape_only_clip_ack_updates_native_frontier_with_unchanged_map_and_bounds ... FAILED
+test native::accessibility::transitions::shape_only_radius_ack_updates_native_frontier_with_unchanged_map_and_bounds ... FAILED
+
+failures:
+
+failures:
+    native::accessibility::transitions::shape_only_clip_ack_updates_native_frontier_with_unchanged_map_and_bounds
+    native::accessibility::transitions::shape_only_radius_ack_updates_native_frontier_with_unchanged_map_and_bounds
+
+test result: FAILED. 0 passed; 2 failed; 0 ignored; 0 measured; 261 filtered out; finished in 0.00s
+

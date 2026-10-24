@@ -1,0 +1,8 @@
+
+running 3 tests
+test a_frozen_question_response_drops_once_when_an_earlier_model_callback_panics ... ok
+test a_staged_response_stays_owned_until_callbacks_supersede_it_and_apply_retires_it ... ok
+test close_releases_ready_state_and_a_late_physical_cap_returns_its_owned_resource ... ok
+
+test result: ok. 3 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 0.01s
+

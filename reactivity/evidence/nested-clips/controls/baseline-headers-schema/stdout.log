@@ -1,0 +1,21 @@
+
+running 1 test
+CLIP_CONTROL accesskit_node=128 properties=112 indices=87 property_value=40
+test clip_header_control::clip_baseline_headers ... ok
+
+test result: ok. 1 passed; 0 failed; 0 ignored; 0 measured; 361 filtered out; finished in 0.00s
+
+
+running 1 test
+CLIP_CONTROL geometry_style=4 decorations=48 extra=56 parts=208 image_spec=16 image_draft=24 el=176 node=40 presented=64 style=88 record=16
+test runtime::geometry::clip_header_control::clip_baseline_headers ... ok
+
+test result: ok. 1 passed; 0 failed; 0 ignored; 0 measured; 167 filtered out; finished in 0.00s
+
+
+running 1 test
+CLIP_CONTROL canvas=488 candidate=496 display_list=288 resource_box=80 common=24 scope=48 draw_view=168 group_view=104 cpu_command=144
+test canvas::clip_header_control::clip_baseline_headers ... ok
+
+test result: ok. 1 passed; 0 failed; 0 ignored; 0 measured; 93 filtered out; finished in 0.00s
+

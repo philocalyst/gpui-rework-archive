@@ -1,0 +1,10 @@
+   Compiling petgraph v0.8.3
+   Compiling wgpu-hal v30.0.1 (/root/gpui-clips-sol/reactivity/vendor/wgpu-hal)
+   Compiling naga v30.0.1
+   Compiling sha2 v0.11.1
+   Compiling wgsl-rs v0.1.0-beta.6
+   Compiling wgpu-core-deps-windows-linux-android v30.0.1
+   Compiling wgpu-core v30.0.1 (/root/gpui-clips-sol/reactivity/vendor/wgpu-core)
+   Compiling gpui_gpu v0.1.0 (/root/gpui-clips-sol/reactivity/crates/gpu)
+   Compiling wgpu v30.0.1 (/root/gpui-clips-sol/reactivity/vendor/wgpu)
+    Finished `test` profile [unoptimized + debuginfo] target(s) in 38.50s

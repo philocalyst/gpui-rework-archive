@@ -1,0 +1,30 @@
+{
+  "original": "/root/target-clips-sol-nightly/debug/build/gpui_canvas/0b9c134dfdd6131a/out/damage-0b9c134dfdd6131a",
+  "frozen": "/tmp/clips-sol-evidence/final-b164/scalar-execute/015-damage/test",
+  "sha256": "21a87a59b08af2f8f1ea75ec67f646604b26a8102c26e28eefdba5d1aa8fac81",
+  "bytes": 96174776,
+  "fresh": false,
+  "package_id": "path+file:///root/gpui-clips-sol/reactivity/crates/canvas#gpui_canvas@0.1.0",
+  "target": {
+    "kind": [
+      "test"
+    ],
+    "crate_types": [
+      "bin"
+    ],
+    "name": "damage",
+    "src_path": "/root/gpui-clips-sol/reactivity/crates/canvas/tests/damage.rs",
+    "edition": "2024",
+    "doc": false,
+    "doctest": false,
+    "test": true
+  },
+  "features": [],
+  "profile": {
+    "opt_level": "0",
+    "debuginfo": 2,
+    "debug_assertions": true,
+    "overflow_checks": true,
+    "test": true
+  }
+}

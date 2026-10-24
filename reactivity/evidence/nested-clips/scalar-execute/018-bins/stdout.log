@@ -1,0 +1,13 @@
+
+running 8 tests
+test cached_origin_and_stride_do_not_change_regional_output_or_reference_stats ... ok
+test color_patches_reuse_unpruned_bins_and_match_fresh_full_scenes ... ok
+test containing_tile_envelopes_survive_empty_regions_and_diagnostic_interleaving ... ok
+test exceptional_paint_retires_cached_cuts_only_after_commit_and_reuses_geometry ... ok
+test failed_and_dropped_work_preserves_valid_bins_and_prior_pixels ... ok
+test fresh_negative_zero_opaque_cut_matches_scalar_hdr ... ok
+test shared_colors_revoke_cached_cuts_without_touching_geometry_or_allocating ... ok
+test structural_commits_reject_stale_bins_even_with_identical_counts_and_bounds ... ok
+
+test result: ok. 8 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 2.58s
+

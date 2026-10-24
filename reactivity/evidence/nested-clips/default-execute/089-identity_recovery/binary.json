@@ -1,0 +1,33 @@
+{
+  "original": "/root/target-clips-sol-nightly/debug/build/gpui/e6bccf4a5489d5bd/out/identity_recovery-e6bccf4a5489d5bd",
+  "frozen": "/tmp/clips-sol-evidence/final-b164/default-execute/089-identity_recovery/test",
+  "sha256": "22933be3e4e9a3953a3ae57afa493d7b0d385b086b5e94a65475057d51d77379",
+  "bytes": 145749000,
+  "fresh": false,
+  "package_id": "path+file:///root/gpui-clips-sol/reactivity/crates/gpui#0.1.0",
+  "target": {
+    "kind": [
+      "test"
+    ],
+    "crate_types": [
+      "bin"
+    ],
+    "name": "identity_recovery",
+    "src_path": "/root/gpui-clips-sol/reactivity/crates/gpui/tests/identity_recovery.rs",
+    "edition": "2024",
+    "doc": false,
+    "doctest": false,
+    "test": true
+  },
+  "features": [
+    "default",
+    "simd"
+  ],
+  "profile": {
+    "opt_level": "0",
+    "debuginfo": 2,
+    "debug_assertions": true,
+    "overflow_checks": true,
+    "test": true
+  }
+}

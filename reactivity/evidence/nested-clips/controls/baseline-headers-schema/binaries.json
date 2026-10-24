@@ -1,0 +1,23 @@
+[
+  {
+    "source": "3205619ca99ac720e239941079bab06aa8c39279",
+    "original": "/root/target-text-control-nightly/debug/build/accesskit/1d2a81b26a62433c/out/accesskit-1d2a81b26a62433c",
+    "frozen": "/tmp/clips-sol-evidence/baseline-headers-schema/test-0",
+    "bytes": 18636816,
+    "sha256": "d2029a4a28dd9b80dbe1bea4727730e0bb2821a70d62beec85467eeff0f0b2cc"
+  },
+  {
+    "source": "3205619ca99ac720e239941079bab06aa8c39279",
+    "original": "/root/target-text-control-nightly/debug/build/gpui/537afceda3b6a240/out/gpui-537afceda3b6a240",
+    "frozen": "/tmp/clips-sol-evidence/baseline-headers-schema/test-1",
+    "bytes": 269483160,
+    "sha256": "1b369de0cf10de0cd2fccc93bd69c3bb9375181d910ac4feae939376168b77d1"
+  },
+  {
+    "source": "3205619ca99ac720e239941079bab06aa8c39279",
+    "original": "/root/target-text-control-nightly/debug/build/gpui_canvas/c250b680ecef31bd/out/gpui_canvas-c250b680ecef31bd",
+    "frozen": "/tmp/clips-sol-evidence/baseline-headers-schema/test-2",
+    "bytes": 140319024,
+    "sha256": "0e70f5b89f0ce9a34b13752dec8f759ad8a45119de02c61ba670cb8fadad64ae"
+  }
+]

@@ -1,0 +1,33 @@
+{
+  "original": "/root/target-clips-sol-nightly/debug/build/gpui/bb54e8e2762dc7d3/out/color_packing-bb54e8e2762dc7d3",
+  "frozen": "/tmp/clips-sol-evidence/final-b164/default-execute/049-color_packing/test",
+  "sha256": "ad056c124f4e2637697b9970f54317ab69db12fad994ad3324c65a3e063b3f70",
+  "bytes": 147100472,
+  "fresh": false,
+  "package_id": "path+file:///root/gpui-clips-sol/reactivity/crates/gpui#0.1.0",
+  "target": {
+    "kind": [
+      "test"
+    ],
+    "crate_types": [
+      "bin"
+    ],
+    "name": "color_packing",
+    "src_path": "/root/gpui-clips-sol/reactivity/crates/gpui/tests/color_packing.rs",
+    "edition": "2024",
+    "doc": false,
+    "doctest": false,
+    "test": true
+  },
+  "features": [
+    "default",
+    "simd"
+  ],
+  "profile": {
+    "opt_level": "0",
+    "debuginfo": 2,
+    "debug_assertions": true,
+    "overflow_checks": true,
+    "test": true
+  }
+}

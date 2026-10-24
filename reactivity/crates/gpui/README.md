@@ -40,6 +40,7 @@ cargo run -p gpui --features x11 --example counter
 cargo run -p gpui --features x11 --example reactive_styles -- --cpu
 cargo run -p gpui --features x11 --example workbench -- --gpu
 cargo run -p gpui --features x11 --example graphics
+cargo run -p gpui --features x11 --example gradient_backgrounds -- --gpu
 cargo run -p gpui --features x11 --example library -- --cpu
 cargo run -p gpui --features x11 --example property_editor -- --cpu
 ```
@@ -58,6 +59,18 @@ be deterministic, read-only `Copy + Send + Sync` functions; captures and explici
 recipes return an admission error. See the
 [native example](examples/mapped_properties.rs) and
 [qualification and costs](../../evidence/mapped-properties-integration/README.md).
+
+Immutable `Gradient` values are prepared once and borrowed with `.bg(&gradient)`.
+Linear, radial and conic paints support hard stops, Pad/Repeat/Reflect and explicit
+`Interpolation::LinearSrgb`. `.rounded(radius).clip()` applies a nested transformed
+clip to descendants as well as the element. Typed `BACKGROUND`, `CORNER_RADIUS`
+and `CLIP` selectors share the inspector and presentation barrier; gradient
+inspection currently exposes a read-only summary. See the
+[native gradient example](examples/gradient_backgrounds.rs) and
+[composed qualification and costs](../../evidence/clipping-gradients-integration/README.md).
+Perceptual interpolation, stop editing, gradient text and durable resource replay
+remain separate work. Clip AA intersects the canonical sample sites across the
+whole chain, so repeated identical edges do not darken independently.
 
 Inputs support [grapheme-safe selection and replacement](TEXT_SELECTION.md),
 pointer dragging, visual arrows with Shift extension, and actual selection and
@@ -199,7 +212,7 @@ input-version and cohort graph remains outstanding.
 Current boundaries are explicit: one root owner; full scene preparation on a
 visual/hit change; layout topology rebuilds after structural changes; Cephal
 depth bounded to 128; viewport clipping; the canvas's documented text/script
-limits; IME, clipboard, vertical selection and autoscroll remain; no
+limits; IME, clipboard and autoscroll remain; no
 complete async graph, embedded native/web content,
 or compatibility facade yet. GPU completion is distinct from presentation
 acknowledgement; Wgpu retains submitted resource leases. Multiwindow device

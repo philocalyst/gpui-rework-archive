@@ -1,0 +1,33 @@
+{
+  "original": "/root/target-clips-sol-nightly/debug/build/gpui/1c746143e6b909f6/out/question_inputs-1c746143e6b909f6",
+  "frozen": "/tmp/clips-sol-evidence/final-b164/default-execute/034-question_inputs/test",
+  "sha256": "978fb68b1b2075ca398f114c19fa0d4a9a9b0145e2632ce5d008a24853965b4a",
+  "bytes": 151850872,
+  "fresh": false,
+  "package_id": "path+file:///root/gpui-clips-sol/reactivity/crates/gpui#0.1.0",
+  "target": {
+    "kind": [
+      "test"
+    ],
+    "crate_types": [
+      "bin"
+    ],
+    "name": "question_inputs",
+    "src_path": "/root/gpui-clips-sol/reactivity/crates/gpui/tests/question_inputs.rs",
+    "edition": "2024",
+    "doc": false,
+    "doctest": false,
+    "test": true
+  },
+  "features": [
+    "default",
+    "simd"
+  ],
+  "profile": {
+    "opt_level": "0",
+    "debuginfo": 2,
+    "debug_assertions": true,
+    "overflow_checks": true,
+    "test": true
+  }
+}

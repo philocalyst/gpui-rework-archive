@@ -4,31 +4,33 @@ The clean-room workspace runs real applications through one exclusively owned
 runtime. Start at [the GPUI crate](crates/gpui/README.md). The design documents
 describe the intended complete system; this page records what is connected now.
 
-The latest composed source `4ee08a32def2ca70371c1764a0153a57053ae0e4` integrates
-[mapped properties](evidence/mapped-properties-integration/README.md),
-[allocation-free warm text submission](evidence/text-canonical-tail/README.md)
-with reviewed placement capacities, and
-[sample-certified solid GPU packets](evidence/certified-solid/README.md).
-It passes 227 native tests (30 other native cases explicitly ignored), 65
-all-feature GPU tests and strict native/GPU all-target Clippy. Actual generated
-WGSL is verified inside the native executable. The seven-library inventory is
-32,372 non-test, non-comment shipping code lines. The
-[mapped Todo](comparisons/mapped-todo/README.md) and
-[matched shader](comparisons/todo-shader-profiles/README.md) experiments preserve
-their historical source identities and all failed work gates. Gradient materials
-and nested transformed clip chains remain separate qualification work.
+The latest composed source `948eff489aaa1f5d36a2514dc247884755b8e5c7` adds
+[gradient materials and nested transformed clipping](evidence/clipping-gradients-integration/README.md)
+to mapped properties, canonical text submission and certified-solid GPU packets.
+The composed ancestor passes 997 tests across 102 frozen executables, 32 doctests,
+16 scalar evaluator/coverage checks and strict native/GPU all-target Clippy;
+actual native paint/inspector and AT-SPI wire fixtures pass. The final exact
+clip-damage delta passes 14 focused tests in both SIMD/default and scalar builds,
+and strict native/GPU Clippy. Counts overlap and each source pin remains explicit.
+Generated WGSL and all SPIR-V recipes are verified in the executed binaries.
+The seven-library inventory is **34,466 non-test, non-comment shipping lines**,
+including build scripts; changed AccessKit vendor code is charged separately.
+The [mapped Todo](comparisons/mapped-todo/README.md) and
+[matched shader](comparisons/todo-shader-profiles/README.md) experiments retain
+their historical source identities and failed work gates. Perceptual gradients,
+compact shared text and the O(depth) preparation frontier remain separate spikes.
 
 | Boundary | Integrated behavior | Remaining limit |
 | --- | --- | --- |
 | Ownership and sources | Borrowed View, inline Signal, typed owner-relative sources/actions, contained component projections and declared Source/earlier-Reader input families | One serial root owner; complete dependency/cohort graph remains |
 | Public testing | Application::demo, borrowed semantic queries/visits and streaming serialization, conjunctive name/description filters, actions, shared native pointer/focus/keyboard input, typed worker delivery, source JSON and explicit scene/pixel diagnostics | Virtual time, replay, touch/capture/drag and hover callbacks remain |
-| Accessibility | Native AccessKit in ordinary desktop profiles, exact acknowledged transitions, controlled checkbox role/state/actions, source-qualified selection and atomic range edits, retired provider authority on text rebind; actual Linux AT-SPI client execution | Topology/missed/capped transitions use full projection; IME, relationships, virtual-item realization and UIA/VoiceOver runtime coverage remain |
+| Accessibility | Native AccessKit in ordinary desktop profiles, exact acknowledged transitions, controlled checkbox role/state/actions, source-qualified selection and atomic range edits, analytic rounded descendant clips, retired provider authority on text rebind; actual Linux AT-SPI client execution | Topology/missed/capped transitions use full projection; IME, relationships, virtual-item realization and UIA/VoiceOver runtime coverage remain |
 | Identity | Window-qualified, never-reused 16-byte target stamps; logical membership checks; keyed realized-row identity; no target allocation table or visited-key history | Cross-window list transfer and unrealized-row accessibility realization remain |
 | Worker delivery | Static typed inbox/question chains, frozen batches, versioned input-family admission, one physical completion credit, borrowed cooperative cancellation, native wakes and exclusive cleanup | Reader lookup scans earlier lanes; cross-turn results remain progressive; dynamic graph and demand parking remain; queue capacity is not a byte bound |
 | Collections | Borrowed keyed uniform lists and ordinary two-axis scroll panes, f64 rebased offsets, viewport-only virtual rows, shared wheel/reveal/accessibility routing | Explicit uniform-height finite virtual viewports; rotated/sheared scroll apertures and variable-height virtual rows remain |
-| Properties and inspector | Typed selectors and closed reflection catalog share validated Set/Inherit transactions; all 13 properties and eight value families feed retained native inspector controls; contained components select mounted targets, edit and refresh canonical state through ordinary typed click methods; edit counts join description changes by exact identity | Arbitrary built-in entry, descendant picking for contained tools, complete theme cascade and user-defined component schemas remain |
+| Properties and inspector | Typed selectors and closed reflection catalog share validated Set/Inherit transactions; all 14 properties and nine value families feed retained native inspector controls; contained components select mounted targets, edit and refresh canonical state through ordinary typed click methods; edit counts join description changes by exact identity | Arbitrary built-in entry, descendant picking for contained tools, complete theme cascade and user-defined component schemas remain |
 | Layout and text | Cephal perf/cold-layout with direct lazy cache handles, selective nonparent containing blocks and allocation-free hidden markers; literal/direct-Signal/mapped properties and flex recipes; Parley/Engine/Fontique 0.12 with scoped paragraph reuse; source-qualified grapheme editing, native selection/caret paint, horizontal and vertical visual navigation and line-edge keys; acknowledged wrapped/bidi text geometry | General Reader/Motion recipe algebra, IME/clipboard/autoscroll, native macOS range-origin policy, arbitrary font discovery and hostile-font transient budgets remain |
-| Canvas | Canonical grouped display list, rounded solid/image shapes, linear-light 4×4 sampling, exact per-pixel sample promotion, separable rectangle/glyph addresses, tile proofs, optional CPU image, exact scene-support damage, certified software-buffer repair, lazy bounds-only CSR membership reused across contained repairs and disjoint parallel bands | Multiple damage islands, persistent GPU repair and complete effect/path/media library remain |
+| Canvas | Canonical grouped display list, rounded solid/image shapes, analytic linear/radial/conic gradient materials, nested transformed rectangle/rounded clip chains, linear-light 4×4 sampling, exact per-pixel sample promotion, separable rectangle/glyph addresses, tile proofs, optional CPU image, exact scene-support damage, certified software-buffer repair, lazy bounds-only CSR membership reused across contained repairs and disjoint parallel bands | Multiple damage islands, persistent GPU repair and complete effect/path/media library remain |
 | Images | Borrowed immutable resources, packed RGBA8/P3 or explicit linear HDR, linear-light filtering, CPU/WGSL rendering and native accessible Image roles | Caller decoding/I/O, direct source fanout, mipmaps and native HDR negotiation remain |
 | GPU | Vendored WGPU/Core/HAL 30, typed wgsl-rs generation/validation and optional guarded static SPIR-V recipes with scoped Vulkan module lifetime; shared device/pipeline context and independent renderer states; grouped packets, tile proofs, lazy R8 atlas, boundary corrections, SDR/HDR targets, replay and transactional color patches | Native shared-device multiwindow remains; coalesced token gaps can rebuild packets; replay/patch draws the full target; native HDR negotiation, legacy DX11, other primitives and hardware/backend conformance remain |
 | Native | Vendor-owned backend hints and target proof; Winit software-first windows, no Auto GPU initialization for certified fills, background GPU preparation for general scenes, checked handoff/recovery, early X11 target admission, surface-lease-safe close/drop, DPI and suspend/recreate | Metal/Wayland retain late attachment; unknown destination state and Wire use full uploads; Windows Auto stays software; shared-device multiwindow and guest/webview composition remain |
@@ -80,7 +82,10 @@ palette/mix/contrast API. [Numerical and allocation evidence](evidence/designer-
 and [lattice/adaptive controls](evidence/gamut-search-controls/README.md) retain
 precision limits, source/stack costs and the unadopted alternatives.
 
-## Current verification
+## Earlier pinned verification
+
+The latest composition is qualified above. These earlier dossiers retain their
+own source pins, workload gates and overlapping counts.
 
 The [typed property-map integration](evidence/mapped-properties-integration/README.md)
 lets one source feed multiple validated properties without rebuilding its owner.
@@ -717,8 +722,9 @@ performance or scanout latency.
 
 Ordinary scroll panes retain offscreen controls for reveal/accessibility;
 virtual rows leaving the admitted cohort retire their targets and focus.
-Rounded solid/image paint and own-shape hit testing share the radius property;
-descendant clipping stays rectangular. CPU-valid radii outside the admitted GPU
+That historical source shared rounded solid/image paint and own-shape hit testing
+through the radius property, with rectangular descendant clipping. The latest
+composition above adds nested analytic descendant clips. CPU-valid radii outside the admitted GPU
 precision class use the existing CPU fallback. Scroll adds no hot node/runtime
 field but charges 104 retained bytes to the first virtual-list cohort; rounded
 geometry adds eight bytes only to existing Metadata owners. Detailed cold costs

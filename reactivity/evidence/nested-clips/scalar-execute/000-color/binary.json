@@ -1,0 +1,30 @@
+{
+  "original": "/root/target-clips-sol-nightly/debug/build/gpui_canvas/0f379e0de2484cde/out/color-0f379e0de2484cde",
+  "frozen": "/tmp/clips-sol-evidence/final-b164/scalar-execute/000-color/test",
+  "sha256": "3e2998f66e213cd513f4ea2f004244a0d5ba91611a669dd4fa5d9dadae78b5f6",
+  "bytes": 78913832,
+  "fresh": false,
+  "package_id": "path+file:///root/gpui-clips-sol/reactivity/crates/canvas#gpui_canvas@0.1.0",
+  "target": {
+    "kind": [
+      "test"
+    ],
+    "crate_types": [
+      "bin"
+    ],
+    "name": "color",
+    "src_path": "/root/gpui-clips-sol/reactivity/crates/canvas/tests/color.rs",
+    "edition": "2024",
+    "doc": false,
+    "doctest": false,
+    "test": true
+  },
+  "features": [],
+  "profile": {
+    "opt_level": "0",
+    "debuginfo": 2,
+    "debug_assertions": true,
+    "overflow_checks": true,
+    "test": true
+  }
+}

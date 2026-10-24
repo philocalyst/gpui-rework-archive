@@ -1,0 +1,38 @@
+{
+  "original": "/root/target-clips-sol-nightly/debug/build/gpui_gpu/3337e5995ae3a116/out/render-3337e5995ae3a116",
+  "frozen": "/tmp/clips-sol-evidence/final-b164/gpu-execute/002-render/test",
+  "sha256": "50ca1e03de61f436ae000ab5d291be3d07d5b9dad2b9bfcdfea107b11cc36bb9",
+  "bytes": 229125088,
+  "fresh": false,
+  "package_id": "path+file:///root/gpui-clips-sol/reactivity/crates/gpu#gpui_gpu@0.1.0",
+  "target": {
+    "kind": [
+      "test"
+    ],
+    "crate_types": [
+      "bin"
+    ],
+    "name": "render",
+    "src_path": "/root/gpui-clips-sol/reactivity/crates/gpu/tests/render.rs",
+    "edition": "2024",
+    "required-features": [
+      "vulkan-tests"
+    ],
+    "doc": false,
+    "doctest": false,
+    "test": true
+  },
+  "features": [
+    "default",
+    "offline-shader",
+    "simd",
+    "vulkan-tests"
+  ],
+  "profile": {
+    "opt_level": "0",
+    "debuginfo": 2,
+    "debug_assertions": true,
+    "overflow_checks": true,
+    "test": true
+  }
+}

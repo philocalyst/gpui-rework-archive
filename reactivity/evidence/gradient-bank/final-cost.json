@@ -1,0 +1,507 @@
+{
+  "base4b44": {
+    "file_bytes": 23849600,
+    "sections": {
+      ".text": 10903280,
+      ".rodata": 5853504,
+      ".eh_frame": 1141268,
+      ".data.rel.ro": 396232
+    },
+    "functions": [
+      {
+        "address": 1285920,
+        "size": 11455,
+        "name": "<gpui::element::El>::flatten_lists::<<gpui::runtime::Runtime<counter::Counter>>::describe_inner::{closure#1}>",
+        "max_static_cfa": 2096,
+        "end": 1297375,
+        "dynamic_cfa": false
+      },
+      {
+        "address": 1020352,
+        "size": 9017,
+        "name": "<gpui::runtime::RuntimeMut<counter::Counter, ()>>::after_source_changed",
+        "max_static_cfa": 1200,
+        "end": 1029369,
+        "dynamic_cfa": false
+      },
+      {
+        "address": 1824400,
+        "size": 1738,
+        "name": "<gpui::semantic::ElementExtra>::into_parts",
+        "max_static_cfa": 288,
+        "end": 1826138,
+        "dynamic_cfa": false
+      },
+      {
+        "address": 1724880,
+        "size": 26,
+        "name": "<gpui::source::SourceCodec>::freeze",
+        "max_static_cfa": 8,
+        "end": 1724906,
+        "dynamic_cfa": false
+      },
+      {
+        "address": 1708976,
+        "size": 833,
+        "name": "<gpui::runtime::MappedFanout>::publish_colors",
+        "max_static_cfa": 208,
+        "end": 1709809,
+        "dynamic_cfa": false
+      },
+      {
+        "address": 1709904,
+        "size": 1488,
+        "name": "<gpui::runtime::Fanout>::finish_description",
+        "max_static_cfa": 176,
+        "end": 1711392,
+        "dynamic_cfa": false
+      },
+      {
+        "address": 1711392,
+        "size": 836,
+        "name": "<gpui::runtime::Fanout>::map",
+        "max_static_cfa": 288,
+        "end": 1712228,
+        "dynamic_cfa": false
+      },
+      {
+        "address": 1712240,
+        "size": 1533,
+        "name": "<gpui::runtime::Fanout>::freeze",
+        "max_static_cfa": 320,
+        "end": 1713773,
+        "dynamic_cfa": false
+      },
+      {
+        "address": 1307264,
+        "size": 295,
+        "name": "<gpui::source::Sources<counter::Counter>>::freeze",
+        "max_static_cfa": 112,
+        "end": 1307559,
+        "dynamic_cfa": false
+      },
+      {
+        "address": 1108608,
+        "size": 31853,
+        "name": "<gpui::runtime::Runtime<counter::Counter>>::describe_inner",
+        "max_static_cfa": 2336,
+        "end": 1140461,
+        "dynamic_cfa": false
+      }
+    ]
+  },
+  "gradient472": {
+    "file_bytes": 23966904,
+    "sections": {
+      ".text": 10974704,
+      ".rodata": 5859608,
+      ".eh_frame": 1145396,
+      ".data.rel.ro": 397368
+    },
+    "functions": [
+      {
+        "address": 1357552,
+        "size": 11024,
+        "name": "<gpui::element::El>::flatten_lists::<<gpui::runtime::Runtime<counter::Counter>>::describe_inner::{closure#1}>",
+        "max_static_cfa": 2160,
+        "end": 1368576,
+        "dynamic_cfa": false
+      },
+      {
+        "address": 1037664,
+        "size": 9017,
+        "name": "<gpui::runtime::RuntimeMut<counter::Counter, ()>>::after_source_changed",
+        "max_static_cfa": 1200,
+        "end": 1046681,
+        "dynamic_cfa": false
+      },
+      {
+        "address": 1678144,
+        "size": 1785,
+        "name": "<gpui::semantic::ElementExtra>::into_parts",
+        "max_static_cfa": 304,
+        "end": 1679929,
+        "dynamic_cfa": false
+      },
+      {
+        "address": 1648560,
+        "size": 26,
+        "name": "<gpui::source::SourceCodec>::freeze",
+        "max_static_cfa": 8,
+        "end": 1648586,
+        "dynamic_cfa": false
+      },
+      {
+        "address": 1736176,
+        "size": 833,
+        "name": "<gpui::runtime::MappedFanout>::publish_colors",
+        "max_static_cfa": 208,
+        "end": 1737009,
+        "dynamic_cfa": false
+      },
+      {
+        "address": 1737104,
+        "size": 1488,
+        "name": "<gpui::runtime::Fanout>::finish_description",
+        "max_static_cfa": 176,
+        "end": 1738592,
+        "dynamic_cfa": false
+      },
+      {
+        "address": 1738592,
+        "size": 836,
+        "name": "<gpui::runtime::Fanout>::map",
+        "max_static_cfa": 288,
+        "end": 1739428,
+        "dynamic_cfa": false
+      },
+      {
+        "address": 1739440,
+        "size": 1533,
+        "name": "<gpui::runtime::Fanout>::freeze",
+        "max_static_cfa": 320,
+        "end": 1740973,
+        "dynamic_cfa": false
+      },
+      {
+        "address": 1379584,
+        "size": 295,
+        "name": "<gpui::source::Sources<counter::Counter>>::freeze",
+        "max_static_cfa": 112,
+        "end": 1379879,
+        "dynamic_cfa": false
+      },
+      {
+        "address": 1126352,
+        "size": 32689,
+        "name": "<gpui::runtime::Runtime<counter::Counter>>::describe_inner",
+        "max_static_cfa": 2416,
+        "end": 1159041,
+        "dynamic_cfa": false
+      },
+      {
+        "address": 1726256,
+        "size": 6100,
+        "name": "gpui::runtime::background::reconcile",
+        "max_static_cfa": 384,
+        "end": 1732356,
+        "dynamic_cfa": false
+      }
+    ]
+  },
+  "finalCounter": {
+    "file_bytes": 23975872,
+    "sections": {
+      ".text": 10978016,
+      ".rodata": 5859608,
+      ".eh_frame": 1147260,
+      ".data.rel.ro": 397712
+    },
+    "functions": [
+      {
+        "address": 1499936,
+        "size": 11024,
+        "name": "<gpui::element::El>::flatten_lists::<<gpui::runtime::Runtime<counter::Counter>>::describe_inner::{closure#1}>",
+        "max_static_cfa": 2160,
+        "end": 1510960,
+        "dynamic_cfa": false
+      },
+      {
+        "address": 1033472,
+        "size": 9017,
+        "name": "<gpui::runtime::RuntimeMut<counter::Counter, ()>>::after_source_changed",
+        "max_static_cfa": 1200,
+        "end": 1042489,
+        "dynamic_cfa": false
+      },
+      {
+        "address": 1743568,
+        "size": 1785,
+        "name": "<gpui::semantic::ElementExtra>::into_parts",
+        "max_static_cfa": 304,
+        "end": 1745353,
+        "dynamic_cfa": false
+      },
+      {
+        "address": 1682064,
+        "size": 26,
+        "name": "<gpui::source::SourceCodec>::freeze",
+        "max_static_cfa": 8,
+        "end": 1682090,
+        "dynamic_cfa": false
+      },
+      {
+        "address": 1683376,
+        "size": 833,
+        "name": "<gpui::runtime::MappedFanout>::publish_colors",
+        "max_static_cfa": 208,
+        "end": 1684209,
+        "dynamic_cfa": false
+      },
+      {
+        "address": 1684304,
+        "size": 1488,
+        "name": "<gpui::runtime::Fanout>::finish_description",
+        "max_static_cfa": 176,
+        "end": 1685792,
+        "dynamic_cfa": false
+      },
+      {
+        "address": 1685792,
+        "size": 836,
+        "name": "<gpui::runtime::Fanout>::map",
+        "max_static_cfa": 288,
+        "end": 1686628,
+        "dynamic_cfa": false
+      },
+      {
+        "address": 1686640,
+        "size": 1533,
+        "name": "<gpui::runtime::Fanout>::freeze",
+        "max_static_cfa": 320,
+        "end": 1688173,
+        "dynamic_cfa": false
+      },
+      {
+        "address": 1522032,
+        "size": 295,
+        "name": "<gpui::source::Sources<counter::Counter>>::freeze",
+        "max_static_cfa": 112,
+        "end": 1522327,
+        "dynamic_cfa": false
+      },
+      {
+        "address": 1122512,
+        "size": 34720,
+        "name": "<gpui::runtime::Runtime<counter::Counter>>::describe_inner",
+        "max_static_cfa": 2448,
+        "end": 1157232,
+        "dynamic_cfa": false
+      },
+      {
+        "address": 1729984,
+        "size": 5151,
+        "name": "gpui::runtime::background::reconcile",
+        "max_static_cfa": 320,
+        "end": 1735135,
+        "dynamic_cfa": false
+      }
+    ],
+    "versusBase": {
+      "file_bytes": 126272,
+      "sections": {
+        ".text": 74736,
+        ".rodata": 6104,
+        ".eh_frame": 5992,
+        ".data.rel.ro": 1480
+      }
+    },
+    "versus472": {
+      "file_bytes": 8968,
+      "sections": {
+        ".text": 3312,
+        ".rodata": 0,
+        ".eh_frame": 1864,
+        ".data.rel.ro": 344
+      }
+    }
+  },
+  "priorDemo": {
+    "file_bytes": 24058424,
+    "sections": {
+      ".text": 11015776,
+      ".rodata": 5859848,
+      ".eh_frame": 1153300,
+      ".data.rel.ro": 397480
+    },
+    "functions": [
+      {
+        "address": 1285904,
+        "size": 11698,
+        "name": "<gpui::element::El>::flatten_lists::<<gpui::runtime::Runtime<gradient_backgrounds::Gallery>>::describe_inner::{closure#1}>",
+        "max_static_cfa": 2112,
+        "end": 1297602,
+        "dynamic_cfa": false
+      },
+      {
+        "address": 1715632,
+        "size": 1785,
+        "name": "<gpui::semantic::ElementExtra>::into_parts",
+        "max_static_cfa": 304,
+        "end": 1717417,
+        "dynamic_cfa": false
+      },
+      {
+        "address": 1686672,
+        "size": 26,
+        "name": "<gpui::source::SourceCodec>::freeze",
+        "max_static_cfa": 8,
+        "end": 1686698,
+        "dynamic_cfa": false
+      },
+      {
+        "address": 1774464,
+        "size": 833,
+        "name": "<gpui::runtime::MappedFanout>::publish_colors",
+        "max_static_cfa": 208,
+        "end": 1775297,
+        "dynamic_cfa": false
+      },
+      {
+        "address": 1775392,
+        "size": 1488,
+        "name": "<gpui::runtime::Fanout>::finish_description",
+        "max_static_cfa": 176,
+        "end": 1776880,
+        "dynamic_cfa": false
+      },
+      {
+        "address": 1776880,
+        "size": 836,
+        "name": "<gpui::runtime::Fanout>::map",
+        "max_static_cfa": 288,
+        "end": 1777716,
+        "dynamic_cfa": false
+      },
+      {
+        "address": 1777728,
+        "size": 1533,
+        "name": "<gpui::runtime::Fanout>::freeze",
+        "max_static_cfa": 320,
+        "end": 1779261,
+        "dynamic_cfa": false
+      },
+      {
+        "address": 1309552,
+        "size": 295,
+        "name": "<gpui::source::Sources<gradient_backgrounds::Gallery>>::freeze",
+        "max_static_cfa": 112,
+        "end": 1309847,
+        "dynamic_cfa": false
+      },
+      {
+        "address": 1132240,
+        "size": 32689,
+        "name": "<gpui::runtime::Runtime<gradient_backgrounds::Gallery>>::describe_inner",
+        "max_static_cfa": 2416,
+        "end": 1164929,
+        "dynamic_cfa": false
+      },
+      {
+        "address": 1764544,
+        "size": 6100,
+        "name": "gpui::runtime::background::reconcile",
+        "max_static_cfa": 384,
+        "end": 1770644,
+        "dynamic_cfa": false
+      }
+    ]
+  },
+  "finalDemo": {
+    "file_bytes": 24034024,
+    "sections": {
+      ".text": 11004096,
+      ".rodata": 5859976,
+      ".eh_frame": 1150692,
+      ".data.rel.ro": 397760
+    },
+    "functions": [
+      {
+        "address": 1642656,
+        "size": 11698,
+        "name": "<gpui::element::El>::flatten_lists::<<gpui::runtime::Runtime<gradient_backgrounds::Gallery>>::describe_inner::{closure#1}>",
+        "max_static_cfa": 2112,
+        "end": 1654354,
+        "dynamic_cfa": false
+      },
+      {
+        "address": 1766064,
+        "size": 1785,
+        "name": "<gpui::semantic::ElementExtra>::into_parts",
+        "max_static_cfa": 304,
+        "end": 1767849,
+        "dynamic_cfa": false
+      },
+      {
+        "address": 1705184,
+        "size": 26,
+        "name": "<gpui::source::SourceCodec>::freeze",
+        "max_static_cfa": 8,
+        "end": 1705210,
+        "dynamic_cfa": false
+      },
+      {
+        "address": 1706496,
+        "size": 833,
+        "name": "<gpui::runtime::MappedFanout>::publish_colors",
+        "max_static_cfa": 208,
+        "end": 1707329,
+        "dynamic_cfa": false
+      },
+      {
+        "address": 1707424,
+        "size": 1488,
+        "name": "<gpui::runtime::Fanout>::finish_description",
+        "max_static_cfa": 176,
+        "end": 1708912,
+        "dynamic_cfa": false
+      },
+      {
+        "address": 1708912,
+        "size": 836,
+        "name": "<gpui::runtime::Fanout>::map",
+        "max_static_cfa": 288,
+        "end": 1709748,
+        "dynamic_cfa": false
+      },
+      {
+        "address": 1709760,
+        "size": 1533,
+        "name": "<gpui::runtime::Fanout>::freeze",
+        "max_static_cfa": 320,
+        "end": 1711293,
+        "dynamic_cfa": false
+      },
+      {
+        "address": 1372832,
+        "size": 295,
+        "name": "<gpui::source::Sources<gradient_backgrounds::Gallery>>::freeze",
+        "max_static_cfa": 112,
+        "end": 1373127,
+        "dynamic_cfa": false
+      },
+      {
+        "address": 1128528,
+        "size": 34720,
+        "name": "<gpui::runtime::Runtime<gradient_backgrounds::Gallery>>::describe_inner",
+        "max_static_cfa": 2448,
+        "end": 1163248,
+        "dynamic_cfa": false
+      },
+      {
+        "address": 1752480,
+        "size": 5151,
+        "name": "gpui::runtime::background::reconcile",
+        "max_static_cfa": 320,
+        "end": 1757631,
+        "dynamic_cfa": false
+      }
+    ],
+    "versus472": {
+      "file_bytes": -24400,
+      "sections": {
+        ".text": -11680,
+        ".rodata": 128,
+        ".eh_frame": -2608,
+        ".data.rel.ro": 280
+      }
+    }
+  },
+  "source": {
+    "sixlibs": 33594,
+    "helper": 50,
+    "total": 33644,
+    "baseline": 32365,
+    "delta": 1279
+  }
+}

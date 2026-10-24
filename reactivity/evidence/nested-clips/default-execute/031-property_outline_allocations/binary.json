@@ -1,0 +1,33 @@
+{
+  "original": "/root/target-clips-sol-nightly/debug/build/gpui/5b994fce4f199dc3/out/property_outline_allocations-5b994fce4f199dc3",
+  "frozen": "/tmp/clips-sol-evidence/final-b164/default-execute/031-property_outline_allocations/test",
+  "sha256": "2fa00c9b0b4d9e0e4f710b897ab87cf5969b54032ba5fa88ea07fcfb83e4c5f2",
+  "bytes": 146038248,
+  "fresh": false,
+  "package_id": "path+file:///root/gpui-clips-sol/reactivity/crates/gpui#0.1.0",
+  "target": {
+    "kind": [
+      "test"
+    ],
+    "crate_types": [
+      "bin"
+    ],
+    "name": "property_outline_allocations",
+    "src_path": "/root/gpui-clips-sol/reactivity/crates/gpui/tests/property_outline_allocations.rs",
+    "edition": "2024",
+    "doc": false,
+    "doctest": false,
+    "test": true
+  },
+  "features": [
+    "default",
+    "simd"
+  ],
+  "profile": {
+    "opt_level": "0",
+    "debuginfo": 2,
+    "debug_assertions": true,
+    "overflow_checks": true,
+    "test": true
+  }
+}

@@ -1,0 +1,17 @@
+
+running 12 tests
+test action_checks_exclusive_leaf_projection_after_successful_mounted_read_admission ... ok
+test borrowed_pair_keeps_every_reflected_input_instead_of_using_single_source_default ... ok
+test borrowed_question_declarations_reduce_actual_lane_storage_without_growing_versions ... ok
+test borrowed_question_path_uses_the_same_scoped_admission_and_credit_protocol ... ok
+test fabricated_question_path_is_rejected_at_mount_before_any_job_or_edit_filtering ... ok
+test failed_nested_edit_retains_exact_candidate_ack_and_logical_read_then_repairs ... ok
+test leaf_projector_mismatches_do_not_change_either_signal ... ok
+test mismatched_registered_component_read_and_exclusive_projectors_reject_before_transfer ... ok
+test path_storage_borrows_only_declarations_and_adds_no_owner_header ... ok
+test question_inputs_qualify_mounted_scopes_before_filtering_edits ... ok
+test repeated_child_schemas_read_set_and_action_have_distinct_exact_grains ... ok
+test wrong_component_question_cannot_mount_a_different_scope_with_the_same_id ... ok
+
+test result: ok. 12 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 0.04s
+

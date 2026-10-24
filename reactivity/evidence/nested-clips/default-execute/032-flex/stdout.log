@@ -1,0 +1,15 @@
+
+running 10 tests
+test aligned_and_distributed_children_share_layout_hits_and_pixels ... ok
+test baseline_alignment_uses_shaped_text_baselines_and_stretch_respects_auto_size ... ok
+test both_axes_and_every_distribution_use_the_same_recipe ... ok
+test explicit_default_contributions_survive_changed_component_recipes ... ok
+test oversized_row_item_and_column_wrapping_preserve_gap_and_order ... ok
+test partial_recipes_preserve_previous_declared_fields ... ok
+test pending_layout_keeps_acknowledged_geometry_and_blocks_coordinate_actions ... ok
+test shared_style_discovery_keeps_distinct_alignment_destinations ... ok
+test wrapping_overrides_and_unset_reveal_changed_declarations ... ok
+test wrapping_reflows_at_resize_and_density_changes_without_replacing_targets ... ok
+
+test result: ok. 10 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 0.08s
+

@@ -1,0 +1,4 @@
+GPUI_NATIVE_LIFECYCLE late service initial=true
+GPUI_NATIVE_CLIP initial point checks source-qualified subtree=2
+GPUI_NATIVE_CLIP confirmed P parent_clipped=false pointer_corner_hit=true epoch=2
+GPUI_NATIVE_CLIP native_point_negative=true screen_origin=-40,-30 physical=120,120 overflow_after_ack=true

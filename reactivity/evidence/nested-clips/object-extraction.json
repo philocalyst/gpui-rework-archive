@@ -1,0 +1,12 @@
+{
+  "archive": "/root/target-clips-sol-nightly/release/build/gpui_canvas/71b7cad10e0663f3/out/libgpui_canvas-71b7cad10e0663f3.rlib",
+  "sha256": "13017a37b2331153edd63faacef548aac2c73ad4b9b8b0c53587a6645c64f8b0",
+  "objects": [
+    {
+      "name": "/0",
+      "offset": 23386,
+      "bytes": 2118984,
+      "sha256": "8dda7c41ebc5b1a18404e6c6fccc14dea9be429640c50eab59911b7689348888"
+    }
+  ]
+}

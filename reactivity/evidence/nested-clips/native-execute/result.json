@@ -1,0 +1,18 @@
+{
+  "harnesses": 1,
+  "passed": 232,
+  "failed": 0,
+  "ignored": 31,
+  "all_exit_zero": true,
+  "results": [
+    {
+      "target": "gpui",
+      "exit": 0,
+      "passed": 232,
+      "failed": 0,
+      "ignored": 31,
+      "sha256_after_matches": true
+    }
+  ],
+  "scope": "Frozen functional test artifacts; sequential execution, no performance inference."
+}

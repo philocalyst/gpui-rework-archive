@@ -1,0 +1,33 @@
+{
+  "original": "/root/target-clips-sol-nightly/debug/build/gpui/f50013f5e989e4be/out/library-f50013f5e989e4be",
+  "frozen": "/tmp/clips-sol-evidence/final-b164/default-execute/063-library/test",
+  "sha256": "e26267a57ceeb027dba5e76ee371cf2448a3c764140949d11b79ed4d88e5c867",
+  "bytes": 148949056,
+  "fresh": false,
+  "package_id": "path+file:///root/gpui-clips-sol/reactivity/crates/gpui#0.1.0",
+  "target": {
+    "kind": [
+      "test"
+    ],
+    "crate_types": [
+      "bin"
+    ],
+    "name": "library",
+    "src_path": "/root/gpui-clips-sol/reactivity/crates/gpui/tests/library.rs",
+    "edition": "2024",
+    "doc": false,
+    "doctest": false,
+    "test": true
+  },
+  "features": [
+    "default",
+    "simd"
+  ],
+  "profile": {
+    "opt_level": "0",
+    "debuginfo": 2,
+    "debug_assertions": true,
+    "overflow_checks": true,
+    "test": true
+  }
+}

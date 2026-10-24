@@ -1,0 +1,17 @@
+
+running 12 tests
+test absent_point_encoding_preserves_finite_bits_and_public_debug_shape ... ok
+test ack_before_release_uses_the_ordinary_current_sheet ... ok
+test built_in_inspector_accepts_own_focus_c_without_publishing_its_epoch_captions ... ok
+test cancellation_and_failed_new_press_consume_the_own_focus_proof ... ok
+test equal_viewport_and_fresh_hit_inside_own_focus_paint_keep_the_gesture ... ok
+test focus_proof_never_crosses_window_namespaces ... ok
+test inspector_focus_proof_does_not_cover_later_source_or_viewport_changes ... ok
+test inspector_panel_action_uses_the_same_focus_release_proof ... ok
+test inspector_picking_uses_actual_shape_and_cannot_select_panel_controls ... ok
+test intervening_model_noop_semantic_geometry_replacement_and_failure_revoke_focus_proof ... ok
+test own_focus_candidate_does_not_lose_rapid_release_or_publish_unacknowledged_state ... ok
+test viewport_aba_and_surface_loss_revoke_the_exact_focus_candidate ... ok
+
+test result: ok. 12 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 0.58s
+

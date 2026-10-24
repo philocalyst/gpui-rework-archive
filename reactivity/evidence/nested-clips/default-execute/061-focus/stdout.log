@@ -1,0 +1,14 @@
+
+running 9 tests
+test click_focus_uses_geometry_while_explicit_focus_and_activation_are_position_free ... ok
+test focus_changes_are_idle_and_invalid_targets_do_not_replace_focus ... ok
+test focus_navigation_has_no_allocations_or_render_work ... ok
+test focus_revokes_on_removal_ineligibility_fault_and_close ... ok
+test keyboard_checked_route_rejection_keeps_owner_and_focus_without_advancing_source ... ok
+test logical_description_failure_revokes_focus_and_recovery_does_not_revive_the_old_target ... ok
+test reusable_components_share_keyboard_barriers_and_keep_independent_state ... ok
+test tab_waits_for_acknowledged_sheet_and_position_free_editing_repairs_failed_text ... ok
+test todos_keyboard_navigation_edits_unicode_and_activates_real_actions ... ok
+
+test result: ok. 9 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 0.06s
+

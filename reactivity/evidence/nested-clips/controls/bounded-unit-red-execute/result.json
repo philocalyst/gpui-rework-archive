@@ -1,0 +1,18 @@
+{
+  "source": "69bea2a68509a1d1fb8eaeae281085f60caf754b",
+  "sha256": "a46e1df314827bad0cfb5df87a9aad5092d2da6296ef18b8f66c8d3127b44554",
+  "argv": [
+    "/tmp/clips-sol-evidence/bounded-unit-red-execute/gpui-native-tests",
+    "shape_only_",
+    "--nocapture",
+    "--test-threads=1"
+  ],
+  "exit": 101,
+  "counts": [
+    [
+      "0",
+      "2"
+    ]
+  ],
+  "binary_unchanged": true
+}
