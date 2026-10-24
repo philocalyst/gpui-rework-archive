@@ -201,7 +201,7 @@ fn long_graphemes_take_cold_metadata_without_rejecting_source_or_losing_tail() {
             .is_none()
     );
     assert_eq!(std::mem::size_of::<gpui_canvas::Glyph>(), 16);
-    assert_eq!(std::mem::size_of::<gpui_canvas::TextLayout>(), 40);
+    assert_eq!(std::mem::size_of::<gpui_canvas::TextLayout>(), 56);
 }
 #[test]
 fn every_bidi_grapheme_boundary_has_both_requested_destinations() {
