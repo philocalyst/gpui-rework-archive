@@ -114,7 +114,7 @@ fn cjk_preedit_replaces_original_selection_then_commits_different_text_once() {
     )
     .unwrap();
     assert_eq!(win.snapshot().unwrap().source_epoch, epoch);
-    assert_eq!(win.read(&Form::A).unwrap(), "left RIGHT tail");
+    assert_eq!(win.read(Form::A).unwrap(), "left RIGHT tail");
     assert_eq!(displayed(&win, target).0, "left RIGHT tail");
     ack(&mut win);
     assert_eq!(displayed(&win, target).0, "left に tail");
@@ -141,7 +141,7 @@ fn cjk_preedit_replaces_original_selection_then_commits_different_text_once() {
     assert!(win.ime_cursor_area(&session).unwrap().is_none());
     win.ime_event(&mut session, ImeEvent::Commit("日本語"))
         .unwrap();
-    assert_eq!(win.read(&Form::A).unwrap(), "left 日本語 tail");
+    assert_eq!(win.read(Form::A).unwrap(), "left 日本語 tail");
     assert_eq!(win.snapshot().unwrap().source_epoch, epoch + 1);
     ack(&mut win);
     assert!(displayed(&win, target).1.is_none());
@@ -173,7 +173,7 @@ fn interior_combining_and_zwj_byte_intent_uses_legal_geometry_and_invalid_utf8_r
         assert_eq!(displayed(&win, target).0, "");
         win.ime_event(&mut session, ImeEvent::Commit("late"))
             .unwrap();
-        assert_eq!(win.read(&Form::A).unwrap(), "");
+        assert_eq!(win.read(Form::A).unwrap(), "");
     }
     let (mut win, _, mut session) = window("source");
     assert!(matches!(
@@ -188,7 +188,7 @@ fn interior_combining_and_zwj_byte_intent_uses_legal_geometry_and_invalid_utf8_r
     ));
     win.ime_event(&mut session, ImeEvent::Commit("late"))
         .unwrap();
-    assert_eq!(win.read(&Form::A).unwrap(), "source");
+    assert_eq!(win.read(Form::A).unwrap(), "source");
 }
 #[test]
 fn external_equal_edit_rebind_and_focus_turnover_revoke_old_stream() {
@@ -205,7 +205,7 @@ fn external_equal_edit_rebind_and_focus_turnover_revoke_old_stream() {
         ack(&mut win);
         match mode {
             0 => {
-                win.set(&Form::A, "same".to_owned()).unwrap();
+                win.set(Form::A, "same".to_owned()).unwrap();
             }
             1 => {
                 win.update(|m| {
@@ -221,9 +221,9 @@ fn external_equal_edit_rebind_and_focus_turnover_revoke_old_stream() {
         }
         win.ime_event(&mut session, ImeEvent::Commit("late"))
             .unwrap();
-        assert_eq!(win.read(&Form::A).unwrap(), "same");
+        assert_eq!(win.read(Form::A).unwrap(), "same");
         assert_eq!(
-            win.read(&Form::B).unwrap(),
+            win.read(Form::B).unwrap(),
             if mode == 1 { "same" } else { "other" }
         );
     }
@@ -259,7 +259,7 @@ fn old_candidate_ack_after_failed_new_source_retains_preview_bytes_mark_and_geom
     assert_eq!(current.1.unwrap().range, 4..10);
     win.ime_event(&mut session, ImeEvent::Commit("late"))
         .unwrap();
-    assert_eq!(win.read(&Form::A).unwrap(), "base");
+    assert_eq!(win.read(Form::A).unwrap(), "base");
     let json = win.semantics().unwrap().to_json().unwrap();
     assert!(json.contains("base日本"));
     assert!(json.contains("marked_text"));
@@ -269,7 +269,7 @@ fn commit_without_preedit_and_ordinary_keyboard_both_use_canonical_input() {
     let (mut win, target, mut session) = window("a");
     win.ime_event(&mut session, ImeEvent::Commit("é")).unwrap();
     ack(&mut win);
-    assert_eq!(win.read(&Form::A).unwrap(), "aé");
+    assert_eq!(win.read(Form::A).unwrap(), "aé");
     win.ime_event(
         &mut session,
         ImeEvent::Preedit {
@@ -280,7 +280,7 @@ fn commit_without_preedit_and_ordinary_keyboard_both_use_canonical_input() {
     .unwrap();
     ack(&mut win);
     win.key(Key::Text("must not duplicate")).unwrap();
-    assert_eq!(win.read(&Form::A).unwrap(), "aé");
+    assert_eq!(win.read(Form::A).unwrap(), "aé");
     win.ime_event(&mut session, ImeEvent::Disabled).unwrap();
     ack(&mut win);
     win.key(Key::Text("z")).unwrap();
@@ -311,7 +311,7 @@ fn initial_font_and_same_selection_cancel_preserve_source_and_revoke_late_commit
     assert_eq!(win.snapshot().unwrap().source_epoch, epoch);
     win.ime_event(&mut session, ImeEvent::Commit("late"))
         .unwrap();
-    assert_eq!(win.read(&Form::A).unwrap(), "日本");
+    assert_eq!(win.read(Form::A).unwrap(), "日本");
 }
 
 #[test]
@@ -321,9 +321,9 @@ fn unsupported_preview_and_foreign_session_fail_closed_without_source_edits() {
     foreign
         .ime_event(&mut session, ImeEvent::Commit("wrong window"))
         .unwrap();
-    assert_eq!(foreign.read(&Form::A).unwrap(), "elsewhere");
+    assert_eq!(foreign.read(Form::A).unwrap(), "elsewhere");
     foreign.ime_event(&mut own, ImeEvent::Commit("!")).unwrap();
-    assert_eq!(foreign.read(&Form::A).unwrap(), "elsewhere!");
+    assert_eq!(foreign.read(Form::A).unwrap(), "elsewhere!");
     // Re-enable the original transport explicitly after its foreign use.
     win.ime_event(&mut session, ImeEvent::Enabled).unwrap();
     win.ime_event(
@@ -350,7 +350,7 @@ fn unsupported_preview_and_foreign_session_fail_closed_without_source_edits() {
     assert!(win.ime_cursor_area(&session).unwrap().is_none());
     win.ime_event(&mut session, ImeEvent::Commit("late"))
         .unwrap();
-    assert_eq!(win.read(&Form::A).unwrap(), "safe");
+    assert_eq!(win.read(Form::A).unwrap(), "safe");
 }
 
 #[test]
@@ -391,7 +391,7 @@ fn pointer_preview_suffix_resolves_back_to_source_before_cancel() {
     assert!(displayed(&win, target).1.is_none());
     win.ime_event(&mut session, ImeEvent::Commit("late"))
         .unwrap();
-    assert_eq!(win.read(&Form::A).unwrap(), "abc XYZ tail");
+    assert_eq!(win.read(Form::A).unwrap(), "abc XYZ tail");
 }
 
 #[test]
@@ -435,7 +435,7 @@ fn failed_preedit_restores_original_source_selection_and_releases_stream() {
         assert!(win.ime_cursor_area(&session).unwrap().is_none());
         win.ime_event(&mut session, ImeEvent::Commit("late"))
             .unwrap();
-        assert_eq!(win.read(&Form::A).unwrap(), "left RIGHT tail");
+        assert_eq!(win.read(Form::A).unwrap(), "left RIGHT tail");
     }
 }
 
@@ -539,7 +539,7 @@ fn ime_cursor_area_tracks_acknowledged_physical_transform_clip_and_dpi() {
 fn long_preedit_capacity_does_not_escape_into_canonical_committed_source() {
     let (mut ordinary, _, _) = window("source");
     ordinary.key(Key::Text("!")).unwrap();
-    let ordinary_capacity = ordinary.read(&Form::A).unwrap().capacity();
+    let ordinary_capacity = ordinary.read(Form::A).unwrap().capacity();
     let (mut win, _, mut session) = window("source");
     let long = "x".repeat(4096);
     win.ime_event(
@@ -553,7 +553,7 @@ fn long_preedit_capacity_does_not_escape_into_canonical_committed_source() {
     ack(&mut win);
     win.ime_event(&mut session, ImeEvent::Commit("!")).unwrap();
     ack(&mut win);
-    let source = win.read(&Form::A).unwrap();
+    let source = win.read(Form::A).unwrap();
     assert_eq!(source, "source!");
     assert_eq!(
         source.capacity(),
@@ -628,7 +628,7 @@ fn own_commit_rebind_or_removal_finishes_the_valid_edit_and_revokes_stream() {
             !session.is_enabled(),
             "commit cannot grant authority to replacement field"
         );
-        assert_eq!(win.read(&Rebind::A).unwrap(), committed);
+        assert_eq!(win.read(Rebind::A).unwrap(), committed);
         acknowledge(&mut win);
         if committed == "trigger" {
             assert_eq!(win.query().name("input").one().unwrap(), target);
@@ -637,8 +637,8 @@ fn own_commit_rebind_or_removal_finishes_the_valid_edit_and_revokes_stream() {
         }
         win.ime_event(&mut session, ImeEvent::Commit("late"))
             .unwrap();
-        assert_eq!(win.read(&Rebind::B).unwrap(), "trigger");
-        assert_eq!(win.read(&Rebind::A).unwrap(), committed);
+        assert_eq!(win.read(Rebind::B).unwrap(), "trigger");
+        assert_eq!(win.read(Rebind::A).unwrap(), committed);
     }
 }
 
@@ -661,13 +661,13 @@ fn unshapable_commit_keeps_canonical_source_write_and_old_p_without_live_stream(
         Err(Error::Canvas(_))
     ));
     assert!(!session.is_enabled());
-    assert_eq!(win.read(&Form::A).unwrap(), "base日");
+    assert_eq!(win.read(Form::A).unwrap(), "base日");
     assert_eq!(win.snapshot().unwrap().source_epoch, epoch + 1);
     assert_eq!(displayed(&win, target), old);
     win.ime_event(&mut session, ImeEvent::Commit("late"))
         .unwrap();
-    assert_eq!(win.read(&Form::A).unwrap(), "base日");
-    win.set(&Form::A, "fixed".to_owned()).unwrap();
+    assert_eq!(win.read(Form::A).unwrap(), "base日");
+    win.set(Form::A, "fixed".to_owned()).unwrap();
     ack(&mut win);
     assert_eq!(displayed(&win, target).0, "fixed");
     assert!(displayed(&win, target).1.is_none());
