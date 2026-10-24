@@ -1690,3 +1690,191 @@ fn context_prepare_missing_selected_path_does_not_replace_queue_or_open_output()
     );
     close(win, audio, worker);
 }
+
+#[path = "support/mod.rs"]
+mod index_support;
+fn acquisition<L: LaneSet<Library>>(win: &mut Win<Library, L>, worker: &Worker) {
+    let deadline = Instant::now() + Duration::from_secs(15);
+    while win.with_model(Library::indexing_request).unwrap().is_some() {
+        assert!(Instant::now() < deadline, "indexing completion missing");
+        worker
+            .checkpoint()
+            .unwrap()
+            .recv_timeout(Duration::from_secs(10))
+            .unwrap();
+        win.deliver_ready(32).unwrap();
+        std::thread::yield_now();
+    }
+    settle(win, worker).unwrap();
+}
+fn acquire_fixture<L: LaneSet<Library>>(win: &mut Win<Library, L>, worker: &Worker, root: &Path) {
+    win.update(|model| {
+        model.request_index(hummingbird_gpui_port::indexing::Command::AddRoot(
+            root.into(),
+        ))
+    })
+    .unwrap();
+    acquisition(win, worker);
+    win.update(|model| model.request_index(hummingbird_gpui_port::indexing::Command::Scan))
+        .unwrap();
+    acquisition(win, worker);
+}
+fn indexed_files(folder: &index_support::Folder) -> PathBuf {
+    let music = folder.0.join("music");
+    std::fs::create_dir(&music).unwrap();
+    index_support::wave(&music.join("01.wav"), "Before", "Artist", "Album");
+    index_support::flac(&music.join("02.flac"), "Second", "Artist", "Album");
+    index_support::mp3(&music.join("03.mp3"), "Third", "Artist", "Album");
+    music
+}
+#[test]
+fn metadata_commit_rejects_buffered_named_sql_and_files_play_before_its_notification() {
+    use hummingbird_gpui_port::{
+        browser::{Page, Route},
+        indexing::Command,
+    };
+    for mode in ["named", "sql", "files"] {
+        let folder = index_support::Folder::new();
+        let music = indexed_files(&folder);
+        let path = folder.0.join("library.sqlite");
+        let (worker, audio, capture, _inject, mut win) =
+            owner_with(Database::open_library(&path).unwrap());
+        acquire_fixture(&mut win, &worker, &music);
+        let read = Database::open_read_only(&path).unwrap();
+        let id: i64 = read
+            .connection()
+            .query_row("SELECT id FROM track WHERE title='Before'", [], |row| {
+                row.get(0)
+            })
+            .unwrap();
+        if mode == "files" {
+            win.update(|model| model.navigate(Route::Directory(music.clone())))
+                .unwrap();
+            settle(&mut win, &worker).unwrap();
+        }
+        let results = win.with_model(|model| model.results).unwrap();
+        if mode == "named" {
+            win.update(|model| model.play_now(id, 0)).unwrap();
+        } else if mode == "sql" {
+            let input = win
+                .with_ready(results, |page| page.input().clone())
+                .unwrap()
+                .unwrap();
+            win.update(move |model| model.play_listing(input, None))
+                .unwrap();
+        } else {
+            win.activate(win.button("Play all files")).unwrap();
+        }
+        // Prepared is finished and buffered first. Consume neither it nor the
+        // later Indexed event until real SQL commits and authority publishes.
+        worker
+            .checkpoint()
+            .unwrap()
+            .recv_timeout(Duration::from_secs(10))
+            .unwrap();
+        index_support::wave(&music.join("01.wav"), "Changed", "Artist", "Album");
+        win.update(|model| model.request_index(Command::Scan))
+            .unwrap();
+        let handle = worker.handle();
+        let deadline = Instant::now() + Duration::from_secs(15);
+        while handle.with_current_source(1, || ()).unwrap().is_none() {
+            assert!(
+                Instant::now() < deadline,
+                "metadata version was not published"
+            );
+            worker
+                .checkpoint()
+                .unwrap()
+                .recv_timeout(Duration::from_secs(10))
+                .unwrap();
+            std::thread::yield_now();
+        }
+        assert_eq!(win.with_model(|model| model.version.generation).unwrap(), 0);
+        win.deliver_ready(1).unwrap();
+        assert_eq!(
+            win.with_model(|model| model.queue.playback().queue().len())
+                .unwrap(),
+            0,
+            "{mode}"
+        );
+        assert!(
+            win.with_model(|model| model.queue.playback().plan().is_none())
+                .unwrap()
+        );
+        assert!(capture.lock().unwrap().streams.is_empty(), "{mode}");
+        acquisition(&mut win, &worker);
+        assert_eq!(win.with_model(|model| model.version.generation).unwrap(), 1);
+        // A new explicit Files action uses the new database title/IDs and the
+        // existing real audio service. Navigation/scanning never opened it.
+        win.update(|model| model.navigate(Route::Directory(music.clone())))
+            .unwrap();
+        settle(&mut win, &worker).unwrap();
+        let entries = win
+            .with_ready(results, |page| match page {
+                Page::Files(files) => files.recording_count(),
+                _ => panic!("Files page"),
+            })
+            .unwrap();
+        assert_eq!(entries, Some(3));
+        win.activate(win.button("Play all files")).unwrap();
+        settle(&mut win, &worker).unwrap();
+        until(&mut win, &capture, false, |_, state| {
+            state.opened.len() == 1
+        });
+        assert!(capture.lock().unwrap().queue.is_empty());
+        let plan = win
+            .with_model(|model| model.queue.playback().plan().unwrap().clone())
+            .unwrap();
+        assert_eq!(plan.current.track.track_id, Some(id));
+        assert_eq!(plan.current.track.title, "Changed");
+        capture.lock().unwrap().capacity = 64;
+        until(&mut win, &capture, false, |_, state| {
+            state.queue.len() == 128
+        });
+        assert_eq!(
+            capture
+                .lock()
+                .unwrap()
+                .queue
+                .iter()
+                .copied()
+                .collect::<Vec<_>>(),
+            expected()[..128]
+        );
+        audio.handle().stop().unwrap();
+        drop(read);
+        close(win, audio, worker);
+    }
+}
+#[test]
+fn cloned_stop_revokes_a_buffered_files_intent_without_editing_the_queue() {
+    use hummingbird_gpui_port::browser::Route;
+    let folder = index_support::Folder::new();
+    let music = indexed_files(&folder);
+    let (worker, audio, capture, _inject, mut win) =
+        owner_with(Database::open_library(&folder.0.join("library.sqlite")).unwrap());
+    acquire_fixture(&mut win, &worker, &music);
+    win.update(|model| model.navigate(Route::Directory(music.clone())))
+        .unwrap();
+    settle(&mut win, &worker).unwrap();
+    win.activate(win.button("Play all files")).unwrap();
+    worker
+        .checkpoint()
+        .unwrap()
+        .recv_timeout(Duration::from_secs(10))
+        .unwrap();
+    let clone = audio.handle();
+    clone.stop().unwrap();
+    settle(&mut win, &worker).unwrap();
+    assert_eq!(
+        win.with_model(|model| model.queue.playback().queue().len())
+            .unwrap(),
+        0
+    );
+    assert_eq!(
+        win.with_model(Library::preparation_status).unwrap(),
+        PreparationStatus::Canceled
+    );
+    assert!(capture.lock().unwrap().streams.is_empty());
+    close(win, audio, worker);
+}

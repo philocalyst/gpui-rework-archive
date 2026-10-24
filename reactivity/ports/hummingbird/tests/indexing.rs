@@ -229,7 +229,7 @@ fn files_use_fresh_row_domains_exact_paths_and_explicit_root_removal_semantics()
     let (worker, mut win) = open(&db);
     add(&mut win, &worker, &root);
     scan(&mut win, &worker);
-    win.activate(win.button(format!("Open {}", root.display())))
+    win.activate(win.button(&format!("Open {}", root.display())))
         .unwrap();
     settle(&mut win, &worker).unwrap();
     let result = win.with_model(|m| m.results).unwrap();
