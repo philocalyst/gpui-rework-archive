@@ -5,7 +5,7 @@ use gpui_canvas::{
     Color, Extend, Gradient, GradientGeometry, GradientStop as Stop, HueInterpolation as Hue,
     Interpolation as Mode, Point,
 };
-fn make(left: Color, right: Color, mode: Mode) -> Gradient {
+fn try_make(left: Color, right: Color, mode: Mode) -> Result<Gradient, gpui_canvas::Error> {
     Gradient::new(
         GradientGeometry::Linear {
             start: Point { x: 0., y: 0. },
@@ -15,7 +15,9 @@ fn make(left: Color, right: Color, mode: Mode) -> Gradient {
         Extend::Pad,
         mode,
     )
-    .unwrap()
+}
+fn make(left: Color, right: Color, mode: Mode) -> Gradient {
+    try_make(left, right, mode).unwrap()
 }
 fn modes() -> [Mode; 5] {
     [
@@ -34,6 +36,8 @@ fn modes() -> [Mode; 5] {
 fn authored_f64_oracle_covers_alpha_routes_hdr_p3_and_negative_lms() {
     let colors = [
         Color::linear_srgb(HDR, 0., 0., 1.).unwrap(),
+        Color::linear_srgb(HDR, 0., 0., 1e-22).unwrap(),
+        Color::linear_srgb(-HDR, HDR, -HDR, 2e-22).unwrap(),
         Color::linear_srgb(0., HDR, 0., 0.0001).unwrap(),
         Color::linear_srgb(-HDR, HDR, -HDR, 0.7).unwrap(),
         Color::linear_srgb(9., -1., 3., 0.).unwrap(),
@@ -45,27 +49,28 @@ fn authored_f64_oracle_covers_alpha_routes_hdr_p3_and_negative_lms() {
         Color::oklch(0.5, 0., 350., 1.).unwrap(),
         Color::oklch(0.5, 0.000004, 10., 0.5).unwrap(),
     ];
-    let mut max_scaled_error = 0.0_f64;
+    let mut max_tolerance_fraction = 0.0_f64;
+    let mut max_small_channel_error = 0.0_f64;
     for mode in modes() {
+        let (mut admitted, mut rejected) = (0, 0);
         for left in colors {
             for right in colors {
-                let g = make(left, right, mode);
+                let g = match try_make(left, right, mode) {
+                    Ok(g) => {
+                        admitted += 1;
+                        g
+                    }
+                    Err(gpui_canvas::Error::GradientPrecision) => {
+                        rejected += 1;
+                        continue;
+                    }
+                    Err(error) => panic!("unexpected admission error {error:?}"),
+                };
                 assert_eq!(g.view().interpolation(), mode);
                 assert!(g.view().stop(0).unwrap().color.same_authoring(left));
                 for t in [f32::from_bits(1), 0.00001, 0.125, 0.5, 0.875, 0.99999] {
                     let expected = oracle::interpolate(left, right, f64::from(t), mode);
                     let actual = g.view().sample_parameter(t).unwrap();
-                    let scale = expected[..3]
-                        .iter()
-                        .map(|v| v.abs())
-                        .fold(1.0_f64, f64::max)
-                        .max(
-                            left.to_linear_srgb()[..3]
-                                .iter()
-                                .chain(&right.to_linear_srgb()[..3])
-                                .map(|v| f64::from(v.abs()))
-                                .fold(0.0_f64, f64::max),
-                        );
                     for c in 0..4 {
                         assert!(
                             actual[c].is_finite(),
@@ -77,8 +82,10 @@ fn authored_f64_oracle_covers_alpha_routes_hdr_p3_and_negative_lms() {
                             0.00002 + 0.00002 * expected[c].abs()
                         };
                         let error = (f64::from(actual[c]) - expected[c]).abs();
-                        max_scaled_error =
-                            max_scaled_error.max(if c == 3 { error } else { error / scale });
+                        max_tolerance_fraction = max_tolerance_fraction.max(error / tolerance);
+                        if c != 3 && expected[c].abs() <= 0.001 {
+                            max_small_channel_error = max_small_channel_error.max(error);
+                        }
                         assert!(
                             error <= tolerance,
                             "{mode:?} {left:?} {right:?} t={t} channel={c} actual={} oracle={} error={error} tolerance={tolerance}",
@@ -89,14 +96,18 @@ fn authored_f64_oracle_covers_alpha_routes_hdr_p3_and_negative_lms() {
                 }
             }
         }
+        eprintln!("perceptual_profile,{mode:?},admitted={admitted},rejected={rejected}");
+        assert!(admitted >= 30, "ordinary colors must not all be rejected");
     }
-    eprintln!("perceptual_f64_oracle,max_scaled_error={max_scaled_error}");
+    eprintln!(
+        "perceptual_f64_oracle,max_tolerance_fraction={max_tolerance_fraction},max_small_channel_abs_error={max_small_channel_error}"
+    );
 }
 #[test]
 fn exact_endpoints_edges_alpha_admission_and_lossless_authors() {
     for mode in modes() {
-        let left = Color::linear_srgb(-0., HDR, -0.1, 0.25).unwrap();
-        let right = Color::linear_display_p3(1., 4., -0.1, 0.75).unwrap();
+        let left = Color::linear_srgb(-0., 0.75, -0.1, 0.25).unwrap();
+        let right = Color::linear_display_p3(0.1, 0.4, -0.1, 0.75).unwrap();
         let g = make(left, right, mode);
         let premul = |c: Color| {
             let mut v = c.to_linear_srgb();
@@ -202,5 +213,34 @@ fn transparent_extreme_hdr_does_not_destroy_visible_polar_coordinates() {
                 "{mode:?} channel={c} actual={actual:?} expected={expected:?}"
             );
         }
+    }
+}
+
+#[test]
+fn ill_conditioned_opaque_hdr_is_rejected_and_tiny_normal_alpha_hdr_is_admitted() {
+    let red = Color::linear_srgb(HDR, 0., 0., 1.).unwrap();
+    let green = Color::linear_srgb(0., HDR, 0., 0.0001).unwrap();
+    for mode in modes() {
+        assert_eq!(
+            try_make(red, green, mode).err(),
+            Some(gpui_canvas::Error::GradientPrecision)
+        );
+        let a = red.with_alpha(1e-22).unwrap();
+        let b = green.with_alpha(2e-22).unwrap();
+        let gradient = make(a, b, mode);
+        for t in [0.00001, 0.125, 0.5, 0.875, 0.99999] {
+            let actual = gradient.view().sample_parameter(t).unwrap();
+            let expected = oracle::interpolate(a, b, f64::from(t), mode);
+            for c in 0..4 {
+                assert!(
+                    (f64::from(actual[c]) - expected[c]).abs()
+                        <= 0.00002 + expected[c].abs() * 0.00002
+                );
+            }
+        }
+        let gray = Color::linear_srgb(HDR, HDR, HDR, 0.5).unwrap();
+        let g = make(gray, gray, mode);
+        assert!(g.view().stop(0).unwrap().color.same_authoring(gray));
+        assert_eq!(g.view().sample_parameter(0.5).unwrap()[0], HDR * 0.5);
     }
 }

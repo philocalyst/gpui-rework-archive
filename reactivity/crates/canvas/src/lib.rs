@@ -54,6 +54,8 @@ pub enum Error {
     UnsupportedOutputProfile,
     NonOpaqueOutput,
     InvalidGradient,
+    /// A perceptual interval cannot meet its per-channel numeric profile.
+    GradientPrecision,
     InvalidImageLength,
     InvalidImageAlpha,
 }

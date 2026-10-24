@@ -145,6 +145,8 @@ pub fn interpolate(left: Color, right: Color, t: f64, mode: Mode) -> [f64; 4] {
         };
         a = polar(left, a);
         b = polar(right, b);
+        let source_hue_a = a[2];
+        let source_hue_b = b[2];
         let missing_a = a[1] <= 0.000004;
         let missing_b = b[1] <= 0.000004;
         match (missing_a, missing_b) {
@@ -196,7 +198,12 @@ pub fn interpolate(left: Color, right: Color, t: f64, mode: Mode) -> [f64; 4] {
                 }
             }
         };
-        if d == 0.0 && (alpha0 == 0.0 || alpha1 == 0.0 || (a[0] == b[0] && a[1] == b[1])) {
+        let visible_hues_unchanged = (alpha0 == 0.0 || a[1] == 0.0 || a[2] == source_hue_a)
+            && (alpha1 == 0.0 || b[1] == 0.0 || b[2] == source_hue_b);
+        if d == 0.0
+            && visible_hues_unchanged
+            && (alpha0 == 0.0 || alpha1 == 0.0 || (a[0] == b[0] && a[1] == b[1]))
+        {
             return identity_or_fade(left, right, t, alpha);
         }
         let l = ((1.0 - t) * alpha0 * a[0] + t * alpha1 * b[0]) / alpha;

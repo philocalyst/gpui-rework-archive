@@ -10,6 +10,8 @@ pub const MAX_GRADIENT_STOPS: usize = 4096;
 const HEADER_WORDS: usize = 3;
 const STOP_WORDS: usize = 4;
 type Word = [u32; 4];
+mod precision;
+mod trig;
 
 /// Exact resource identity, not a content hash or an owner capability. Its two
 /// lanes keep cold reflected values four-aligned without encoding a pointer.
@@ -53,6 +55,11 @@ pub enum HueInterpolation {
     Decreasing,
 }
 impl Interpolation {
+    /// Per-channel absolute conversion budget in premultiplied linear sRGB,
+    /// before coverage, compositing and output encoding. Exact endpoint/fixed
+    /// paths retain ordinary per-channel f32 rounding. Geometry has its own
+    /// admitted sampling domain; this is not a whole-frame error budget.
+    pub const MAX_CONVERSION_ERROR: f64 = 1.0 / 16384.0;
     fn tag(self) -> u32 {
         match self {
             Self::LinearSrgb => 0,
@@ -106,6 +113,9 @@ pub struct GradientView<'a> {
     words: &'a [Word],
 }
 impl Gradient {
+    /// Compile explicit ordered stops. Perceptual intervals which cannot meet
+    /// the numeric profile return `Error::GradientPrecision`; author Color's
+    /// full extended range does not imply every interval is admitted.
     pub fn new(
         geometry: GradientGeometry,
         stops: &[GradientStop],
@@ -181,6 +191,12 @@ impl Gradient {
             .map_err(|_| Error::ResourceLimit)?;
         let key = GradientKey([id as u32, (id >> 32) as u32]);
         let mut cached = [[0; 4]; 5];
+        let mut precision_admitted = true;
+        let mut left = if interpolation == Interpolation::LinearSrgb {
+            PreparedColor::default()
+        } else {
+            prepare_color(stops[0].color, interpolation)
+        };
         let words = (0..HEADER_WORDS + stops.len() * stride).map(|word| {
             if word < HEADER_WORDS {
                 return header[word];
@@ -190,12 +206,25 @@ impl Gradient {
                 let i = n / stride;
                 let stop = stops[i];
                 let next = stops.get(i + 1).copied().unwrap_or(stop);
-                cached = prepare_interval(stop, next, interpolation);
+                let right = if i + 1 == stops.len() || interpolation == Interpolation::LinearSrgb {
+                    left
+                } else {
+                    prepare_color(next.color, interpolation)
+                };
+                let (packet, admitted) = prepare_interval(stop, next, interpolation, left, right);
+                cached = packet;
+                precision_admitted &= admitted;
+                left = right;
             }
             cached[n % stride]
         });
         let resource =
             ThinArc::try_from_header_and_iter(key, words).map_err(|_| Error::ResourceLimit)?;
+        // The one bounded allocation is dropped on a precision rejection.
+        // Converted author colors stream once; no temporary stop Vec is needed.
+        if !precision_admitted {
+            return Err(Error::GradientPrecision);
+        }
         Ok(Self(resource))
     }
     /// A padded gradient using GPUI's Oklch/shorter authoring default.
@@ -222,26 +251,42 @@ impl Gradient {
 // row norm is < 2, Lab row norm < 5, and inverse LMS row norm < 3.5. Even allowing
 // arbitrary polar hue, |q| < 1e9, |q^3| < 1e27 and RGB row norm < 8: all interior
 // intermediates remain far below f32::MAX. No RGB coefficients are expanded.
-fn prepare_interval(stop: GradientStop, next: GradientStop, mode: Interpolation) -> [Word; 5] {
+#[derive(Clone, Copy, Default)]
+struct PreparedColor {
+    coordinates: [f64; 3],
+    endpoint: [f32; 4],
+}
+fn prepare_interval(
+    stop: GradientStop,
+    next: GradientStop,
+    mode: Interpolation,
+    left_color: PreparedColor,
+    right_color: PreparedColor,
+) -> ([Word; 5], bool) {
     let span = next.offset - stop.offset;
     let reciprocal = if span > 0.0 { 1.0 / span } else { 0.0 };
-    let endpoint = stop.color.premultiplied();
     if mode == Interpolation::LinearSrgb {
+        let endpoint = stop.color.premultiplied();
         let right = next.color.premultiplied();
-        return [
-            [stop.offset.to_bits(), reciprocal.to_bits(), 0, 0],
-            endpoint.map(f32::to_bits),
-            std::array::from_fn(|c| (right[c] - endpoint[c]).to_bits()),
-            stop.color.words,
-            [0; 4],
-        ];
+        return (
+            [
+                [stop.offset.to_bits(), reciprocal.to_bits(), 0, 0],
+                endpoint.map(f32::to_bits),
+                std::array::from_fn(|c| (right[c] - endpoint[c]).to_bits()),
+                stop.color.words,
+                [0; 4],
+            ],
+            true,
+        );
     }
-    let mut left = author_lab(stop.color);
-    let mut right = author_lab(next.color);
+    let endpoint = left_color.endpoint;
+    let a0 = stop.color.alpha();
+    let a1 = next.color.alpha();
+    let mut exact_rgb = true;
+    let mut left = left_color.coordinates;
+    let mut right = right_color.coordinates;
     let mut polar = false;
     if let Interpolation::Oklch { hue } = mode {
-        left = author_lch(stop.color, left);
-        right = author_lch(next.color, right);
         if left[1] <= 0.000004 {
             left[2] = right[2];
         }
@@ -252,6 +297,18 @@ fn prepare_interval(stop: GradientStop, next: GradientStop, mode: Interpolation)
         if both_powerless {
             left[2] = 0.0;
             right[2] = 0.0;
+        }
+        exact_rgb = (a0 == 0.0 || left[1] == 0.0 || left[2] == left_color.coordinates[2])
+            && (a1 == 0.0 || right[1] == 0.0 || right[2] == right_color.coordinates[2]);
+        // Invisible L/C must not survive as a huge cancelling base/delta. Hue
+        // still belongs to the authored route and always advances with t.
+        if a0 == 0.0 {
+            left[0] = right[0];
+            left[1] = right[1];
+        }
+        if a1 == 0.0 {
+            right[0] = left[0];
+            right[1] = left[1];
         }
         let delta = right[2] - left[2];
         if !both_powerless {
@@ -274,64 +331,93 @@ fn prepare_interval(stop: GradientStop, next: GradientStop, mode: Interpolation)
             left = [left[0], left[1] * cos, left[1] * sin];
             right = [right[0], right[1] * cos, right[1] * sin];
         }
+    } else {
+        if a0 == 0.0 {
+            left = right;
+        }
+        if a1 == 0.0 {
+            right = left;
+        }
     }
     if !polar {
         left = super::matrix(super::OKLAB_TO_LMS, left);
         right = super::matrix(super::OKLAB_TO_LMS, right);
     }
-    let a0 = stop.color.alpha();
-    let a1 = next.color.alpha();
+    let exact_fixed = !polar && left == right && exact_rgb;
+    let admitted = span <= 0.0
+        || exact_fixed
+        || precision::conversion_bound(left, right, a0, a1, polar)
+            .iter()
+            .all(|error| error.is_finite() && *error <= Interpolation::MAX_CONVERSION_ERROR);
     let scale = f64::from(a0.max(a1));
     let normalized = if scale == 0.0 {
         [0.0; 2]
     } else {
         [f64::from(a0) / scale, f64::from(a1) / scale]
     };
-    [
+    (
         [
-            stop.offset.to_bits(),
-            (if polar { reciprocal } else { -reciprocal }).to_bits(),
-            (normalized[0] as f32).to_bits() | if !polar && left == right { 1 << 31 } else { 0 },
-            (normalized[1] as f32).to_bits(),
+            [
+                stop.offset.to_bits(),
+                (if polar { reciprocal } else { -reciprocal }).to_bits(),
+                (normalized[0] as f32).to_bits() | if exact_fixed { 1 << 31 } else { 0 },
+                (normalized[1] as f32).to_bits(),
+            ],
+            [
+                (left[0] as f32).to_bits(),
+                (left[1] as f32).to_bits(),
+                (left[2] as f32).to_bits(),
+                a0.to_bits(),
+            ],
+            [
+                ((right[0] - left[0]) as f32).to_bits(),
+                ((right[1] - left[1]) as f32).to_bits(),
+                ((right[2] - left[2]) as f32).to_bits(),
+                a1.to_bits(),
+            ],
+            stop.color.words,
+            endpoint.map(f32::to_bits),
         ],
-        [
-            (left[0] as f32).to_bits(),
-            (left[1] as f32).to_bits(),
-            (left[2] as f32).to_bits(),
-            a0.to_bits(),
-        ],
-        [
-            ((right[0] - left[0]) as f32).to_bits(),
-            ((right[1] - left[1]) as f32).to_bits(),
-            ((right[2] - left[2]) as f32).to_bits(),
-            a1.to_bits(),
-        ],
-        stop.color.words,
-        endpoint.map(f32::to_bits),
-    ]
+        admitted,
+    )
 }
-fn author_lab(color: Color) -> [f64; 3] {
-    if color.space() == ColorSpace::Oklch {
+// Stream one converted author color across adjacent intervals: no stop Vec,
+// repeated forward conversion or additional retained resource representation.
+fn prepare_color(color: Color, mode: Interpolation) -> PreparedColor {
+    let rgb = color.linear_rgb();
+    let alpha = color.alpha();
+    let endpoint = [
+        (rgb[0] as f32) * alpha,
+        (rgb[1] as f32) * alpha,
+        (rgb[2] as f32) * alpha,
+        alpha,
+    ];
+    let coordinates = if color.space() == ColorSpace::Oklch {
         let [l, c, h, _] = color.channels();
-        let (sin, cos) = f64::from(h).to_radians().sin_cos();
-        [f64::from(l), f64::from(c) * cos, f64::from(c) * sin]
+        if matches!(mode, Interpolation::Oklch { .. }) {
+            [f64::from(l), f64::from(c), f64::from(h)]
+        } else {
+            let (sin, cos) = f64::from(h).to_radians().sin_cos();
+            [f64::from(l), f64::from(c) * cos, f64::from(c) * sin]
+        }
     } else {
-        super::linear_to_oklab(color.linear_rgb())
+        let lab = super::linear_to_oklab(rgb);
+        if matches!(mode, Interpolation::Oklch { .. }) {
+            [
+                lab[0],
+                lab[1].hypot(lab[2]),
+                lab[2].atan2(lab[1]).to_degrees().rem_euclid(360.0),
+            ]
+        } else {
+            lab
+        }
+    };
+    PreparedColor {
+        coordinates,
+        endpoint,
     }
 }
-fn author_lch(color: Color, lab: [f64; 3]) -> [f64; 3] {
-    if color.space() == ColorSpace::Oklch {
-        let c = color.channels();
-        [f64::from(c[0]), f64::from(c[1]), f64::from(c[2])]
-    } else {
-        [
-            lab[0],
-            lab[1].hypot(lab[2]),
-            lab[2].atan2(lab[1]).to_degrees().rem_euclid(360.0),
-        ]
-    }
-}
-const LMS_TO_RGB: [[f32; 3]; 3] = [
+const LMS_TO_RGB: [[f64; 3]; 3] = [
     [4.076741636075958, -3.3077115392580616, 0.23096990318210442],
     [-1.268437973285032, 2.609757349287688, -0.34131937600265727],
     [
@@ -604,38 +690,30 @@ impl<'a> GradientView<'a> {
             if a0.simd_eq(a1).to_bitmask() != 15 {
                 let denominator = (1.0 - t) * a0 + t * a1;
                 let ratio = t * a1 / denominator.max(f32::MIN_POSITIVE);
-                v = a0.simd_eq(0.0).select(
-                    f32x4::splat(simd, 1.0),
-                    a1.simd_eq(0.0).select(f32x4::splat(simd, 0.0), ratio),
-                );
+                v = a0
+                    .simd_eq(0.0)
+                    .select(
+                        f32x4::splat(simd, 1.0),
+                        a1.simd_eq(0.0).select(f32x4::splat(simd, 0.0), ratio),
+                    )
+                    .max(0.0)
+                    .min(1.0);
             }
             // Hue is never premultiplied: it advances with t, L and C with v.
             let h = c[2] + t * d[2];
             for j in 0..3 {
                 c[j] += v * d[j];
             }
-            let polar =
-                std::array::from_fn::<_, 4, _>(|i| self.words[intervals[i].0][1] >> 31 == 0);
+            let polar = std::array::from_fn::<_, 4, _>(|i| {
+                mask & (1 << i) != 0 && self.words[intervals[i].0][1] >> 31 == 0
+            });
             if polar.iter().any(|p| *p) {
-                let angles: [f32; 4] = h.into();
-                let trig = std::array::from_fn::<_, 4, _>(|i| {
-                    if polar[i] && mask & (1 << i) != 0 {
-                        {
-                            let tau = std::f32::consts::TAU;
-                            let angle = angles[i] - ((angles[i] + tau * 0.5) / tau).floor() * tau;
-                            angle.sin_cos()
-                        }
-                    } else {
-                        (0.0, 1.0)
-                    }
-                });
-                let a = c[1] * f32x4::from_fn(simd, |i| trig[i].1);
-                let b = c[1] * f32x4::from_fn(simd, |i| trig[i].0);
-                let q = [
-                    c[0] + a * 0.3963377773761749 + b * 0.2158037573099136,
-                    c[0] - a * 0.1055613458156586 - b * 0.0638541728258133,
-                    c[0] - a * 0.0894841775298119 - b * 1.2914855480194092,
-                ];
+                let tau = std::f32::consts::TAU;
+                let angle = h - ((h + tau * 0.5) / tau).floor() * tau;
+                let [sin, cos] = trig::sin_cos(angle);
+                let a = c[1] * cos;
+                let b = c[1] * sin;
+                let q = super::OKLAB_TO_LMS.map(|row| c[0] + a * row[1] as f32 + b * row[2] as f32);
                 for j in 0..3 {
                     let original: [f32; 4] = c[j].into();
                     let converted: [f32; 4] = q[j].into();
@@ -648,9 +726,13 @@ impl<'a> GradientView<'a> {
             }
             let q = c;
             for (j, row) in LMS_TO_RGB.iter().enumerate() {
-                c[j] = q[0] * row[0] + q[1] * row[1] + q[2] * row[2];
+                c[j] = q[0] * row[0] as f32 + q[1] * row[1] as f32 + q[2] * row[2] as f32;
             }
-            alpha = (1.0 - t) * load(1, 3) + t * load(2, 3);
+            let left_alpha = load(1, 3);
+            let right_alpha = load(2, 3);
+            alpha = left_alpha
+                .simd_eq(right_alpha)
+                .select(left_alpha, (1.0 - t) * left_alpha + t * right_alpha);
             for value in &mut c {
                 *value *= alpha;
             }
@@ -673,18 +755,6 @@ impl<'a> GradientView<'a> {
                 return std::array::from_fn(|j| {
                     (1.0 - intervals[i].1) * left[j] + intervals[i].1 * right[j]
                 });
-            }
-            if self.stride() == 5 && self.words[intervals[i].0][1] >> 31 != 0 {
-                let left_alpha = f32::from_bits(self.words[intervals[i].0 + 1][3]);
-                let right_alpha = f32::from_bits(self.words[intervals[i].0 + 2][3]);
-                if left_alpha == 0.0 || right_alpha == 0.0 {
-                    let (endpoint, weight) = if left_alpha == 0.0 {
-                        (intervals[i].0 + self.stride() + 4, intervals[i].1)
-                    } else {
-                        (intervals[i].0 + 4, 1.0 - intervals[i].1)
-                    };
-                    return self.words[endpoint].map(|v| f32::from_bits(v) * weight);
-                }
             }
             std::array::from_fn(|j| channels[j][i])
         })

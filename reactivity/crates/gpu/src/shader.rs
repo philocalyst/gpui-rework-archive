@@ -332,6 +332,27 @@ pub mod ui {
         false
     }
 
+    // Same bounded polynomial as Canvas: no implementation-dependent sin/cos.
+    pub fn gradient_sin_cos(angle: f32) -> Vec2f {
+        let folded = abs(angle) > bitcast_f32(0x3fc90fdb);
+        let x = select(abs(angle), bitcast_f32(0x40490fdb) - abs(angle), folded);
+        let z = x * x;
+        let s = x
+            * (1.0
+                + z * (bitcast_f32(0xbe2aaaab)
+                    + z * (bitcast_f32(0x3c088889)
+                        + z * (bitcast_f32(0xb9500d01)
+                            + z * (bitcast_f32(0x3638ef1d)
+                                + z * (bitcast_f32(0xb2d7322b) + z * bitcast_f32(0x2f309231)))))));
+        let c = 1.0
+            + z * (-0.5
+                + z * (bitcast_f32(0x3d2aaaab)
+                    + z * (bitcast_f32(0xbab60b61)
+                        + z * (bitcast_f32(0x37d00d01)
+                            + z * (bitcast_f32(0xb493f27e) + z * bitcast_f32(0x310f76c7))))));
+        return vec2f(select(s, -s, angle < 0.0), select(c, -c, folded));
+    }
+
     // Same validated parameter/interval word schema as Canvas GradientView.
     // Material is independent of rounded/rectangular coverage and never takes
     // uniform-solid tile certificates, even when every stop has alpha one.
@@ -404,14 +425,6 @@ pub mod ui {
             return bitcast_vec4f(get!(WORDS)[(word + 4) as usize]) * (1.0 - u)
                 + bitcast_vec4f(get!(WORDS)[(word + stride + 4) as usize]) * u;
         }
-        if (bitcast_u32(interval.y) & 0x80000000) != 0 {
-            if color.w == 0.0 {
-                return bitcast_vec4f(get!(WORDS)[(word + stride + 4) as usize]) * u;
-            }
-            if delta.w == 0.0 {
-                return bitcast_vec4f(get!(WORDS)[(word + 4) as usize]) * (1.0 - u);
-            }
-        }
         let alpha0 = abs(interval.z);
         let mut v = u;
         if alpha0 != interval.w {
@@ -423,14 +436,16 @@ pub mod ui {
                 v = 0.0;
             }
         }
+        v = clamp(v, 0.0, 1.0);
         let mut q = color.xyz() + v * delta.xyz();
         if (bitcast_u32(interval.y) & 0x80000000) == 0 {
             // Only L and C are premultiplied; hue advances with u, not v.
             let hue = color.z + u * delta.z;
             let tau = bitcast_f32(0x40c90fdb);
             let angle = hue - floor((hue + tau * 0.5) / tau) * tau;
-            let a = q.y * cos(angle);
-            let b = q.y * sin(angle);
+            let trig = gradient_sin_cos(angle);
+            let a = q.y * trig.y;
+            let b = q.y * trig.x;
             q = vec3f(
                 q.x + a * 0.3963377773761749 + b * 0.2158037573099136,
                 q.x - a * 0.1055613458156586 - b * 0.0638541728258133,
@@ -438,7 +453,10 @@ pub mod ui {
             );
         }
         q = q * q * q;
-        let alpha = (1.0 - u) * color.w + u * delta.w;
+        let mut alpha = color.w;
+        if color.w != delta.w {
+            alpha = (1.0 - u) * color.w + u * delta.w;
+        }
         return vec4f(
             (q.x * 4.076741636075958 - q.y * 3.3077115392580616 + q.z * 0.23096990318210442)
                 * alpha,
@@ -484,12 +502,22 @@ pub mod ui {
             ) {
                 return vec4f(0.0, 0.0, 0.0, 0.0);
             }
-            let h = vec3f(point.x, point.y, 1.0);
-            let local = vec2f(dot(draw.inverse_x.xyz(), h), dot(draw.inverse_y.xyz(), h));
-            return gradient_color(
-                draw.atlas.x & 0x1fffffff,
-                (local - draw.local.xy()) / draw.local.zw(),
+            let correction = get!(CORRECTIONS)[draw.atlas.w as usize];
+            let x = pair_divide(
+                pair_add(
+                    pair_dot(draw.inverse_x.xyz(), correction.x.xyz(), point),
+                    vec2f(-draw.local.x, 0.0),
+                ),
+                draw.local.z,
             );
+            let y = pair_divide(
+                pair_add(
+                    pair_dot(draw.inverse_y.xyz(), correction.y.xyz(), point),
+                    vec2f(-draw.local.y, 0.0),
+                ),
+                draw.local.w,
+            );
+            return gradient_color(draw.atlas.x & 0x1fffffff, vec2f(x.x + x.y, y.x + y.y));
         }
         if (draw.atlas.x & 0x40000000) != 0 && (draw.atlas.x & 0x80000000) == 0 {
             if rounded_contains(
