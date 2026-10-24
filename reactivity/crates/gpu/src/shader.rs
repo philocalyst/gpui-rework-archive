@@ -339,17 +339,18 @@ pub mod ui {
         let z = x * x;
         let s = x
             * (1.0
-                + z * (bitcast_f32(0xbe2aaaab)
+                + z * (bitcast_f32(0xbe2aaaab_u32)
                     + z * (bitcast_f32(0x3c088889)
-                        + z * (bitcast_f32(0xb9500d01)
+                        + z * (bitcast_f32(0xb9500d01_u32)
                             + z * (bitcast_f32(0x3638ef1d)
-                                + z * (bitcast_f32(0xb2d7322b) + z * bitcast_f32(0x2f309231)))))));
+                                + z * (bitcast_f32(0xb2d7322b_u32)
+                                    + z * bitcast_f32(0x2f309231)))))));
         let c = 1.0
             + z * (-0.5
                 + z * (bitcast_f32(0x3d2aaaab)
-                    + z * (bitcast_f32(0xbab60b61)
+                    + z * (bitcast_f32(0xbab60b61_u32)
                         + z * (bitcast_f32(0x37d00d01)
-                            + z * (bitcast_f32(0xb493f27e) + z * bitcast_f32(0x310f76c7))))));
+                            + z * (bitcast_f32(0xb493f27e_u32) + z * bitcast_f32(0x310f76c7))))));
         return vec2f(select(s, -s, angle < 0.0), select(c, -c, folded));
     }
 

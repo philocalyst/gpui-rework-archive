@@ -83,11 +83,11 @@ pub(super) fn conversion_bound(
         let pi_error = (f64::from(std::f32::consts::PI) - std::f64::consts::PI).abs();
         // Hue is in [0, 4pi], so the reduction integer is 0, 1 or 2. A wrong
         // floor at a seam changes only which equivalent period is subtracted.
-        let trig_error = eh
-            + 2.0 * tau_error
-            + EPS * std::f64::consts::PI
+        let reduction_error =
+            eh + 2.0 * tau_error + EPS * (std::f64::consts::PI + eh + 2.0 * tau_error);
+        let trig_error = reduction_error
             + pi_error
-            + EPS * std::f64::consts::FRAC_PI_2
+            + EPS * (std::f64::consts::FRAC_PI_2 + reduction_error + pi_error)
             + 8e-7;
         let [sin, cos] = hue_ranges(left[2], right[2]);
         for (i, row) in OKLAB_TO_LMS.iter().enumerate() {

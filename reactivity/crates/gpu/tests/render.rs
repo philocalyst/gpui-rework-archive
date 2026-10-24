@@ -4266,10 +4266,6 @@ fn perceptual_gradients_match_independent_authored_f64_oracle() {
                             expected[c] += oracle[c] * 0.25;
                         }
                     }
-                    let scale = expected[..3]
-                        .iter()
-                        .map(|v| v.abs())
-                        .fold(1.0_f64, f64::max);
                     for (name, bytes) in [("GPU", gpu.as_slice()), ("CPU", cpu)] {
                         for c in 0..4 {
                             let index = (x * 4 + c) * 2;
@@ -4363,6 +4359,84 @@ fn perceptual_pad_and_coincident_edges_use_exact_prepared_endpoint_pixels() {
                         .map(|b| u16::from_le_bytes(*b))
                         .collect();
                     assert_eq!(actual, expected, "{name} {mode:?} start={start}");
+                }
+            }
+        }
+    });
+}
+
+#[test]
+fn transformed_gradient_edges_use_corrected_material_coordinates() {
+    use gpui_canvas::{
+        Extend, Gradient, GradientGeometry, GradientStop as Stop, HueInterpolation as Hue,
+        Interpolation as Mode, OutputProfile,
+    };
+    pollster::block_on(async {
+        let mut renderer = renderer(wgpu::TextureFormat::Rgba16Float).await;
+        let scale = 0.001_f32;
+        let reciprocal = 1.0 / f64::from(scale);
+        let translation = 1000.0 / f64::from(scale);
+        let precise = ((0.125 * reciprocal + translation - 1_000_000.0) / 8000.0) as f32;
+        let high_only =
+            ((0.125 * reciprocal as f32 + translation as f32 - 1_000_000.0) / 8000.0) as f32;
+        let edge = (precise + high_only) * 0.5;
+        assert!(
+            high_only < edge && edge < precise,
+            "fixture must distinguish missing corrections"
+        );
+        let map = Affine {
+            a: scale,
+            tx: -1000.0,
+            ..Affine::IDENTITY
+        };
+        let rect = Rect::new(1_000_000.0, 0.0, 8000.0, 8.0);
+        let clip = Rect::new(0.0, 0.0, 8.0, 8.0);
+        let red = Color::linear_srgb(1., 0., 0., 1.).unwrap();
+        let blue = Color::linear_srgb(0., 0., 1., 1.).unwrap();
+        for mode in [
+            Mode::LinearSrgb,
+            Mode::Oklab,
+            Mode::default(),
+            Mode::Oklch { hue: Hue::Longer },
+            Mode::Oklch {
+                hue: Hue::Increasing,
+            },
+            Mode::Oklch {
+                hue: Hue::Decreasing,
+            },
+        ] {
+            for edge in [edge.next_down(), edge, edge.next_up()] {
+                let gradient = Gradient::new(
+                    GradientGeometry::Linear {
+                        start: Point { x: 0., y: 0. },
+                        end: Point { x: 1., y: 0. },
+                    },
+                    &[Stop::new(edge, red), Stop::new(edge, blue)],
+                    Extend::Pad,
+                    mode,
+                )
+                .unwrap();
+                let mut canvas = Canvas::recording(
+                    8,
+                    8,
+                    ColorConfig::linear_hdr(OutputProfile::Srgb, 203.).unwrap(),
+                )
+                .unwrap();
+                canvas.clear(Color::TRANSPARENT);
+                canvas
+                    .fill_gradient(&gradient, rect, 0., map, clip)
+                    .unwrap();
+                let expected = canvas.pixels().to_vec();
+                // Independent author-domain side choice, including the full low
+                // translation that the old gradient-only high dot discarded.
+                assert_eq!(&expected[..8], &[0, 0, 0, 0, 0, 0x3c, 0, 0x3c]);
+                for grouped in [false, true] {
+                    renderer.set_grouped_records(grouped);
+                    assert_eq!(
+                        readback(&mut renderer, &canvas),
+                        expected,
+                        "{mode:?}, grouped={grouped}, edge={edge}"
+                    );
                 }
             }
         }
