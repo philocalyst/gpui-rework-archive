@@ -183,3 +183,157 @@ fn analytic_material_and_rounded_coverage_match_independent_sixteen_sample_oracl
         }
     }
 }
+
+#[test]
+fn gradient_numeric_frontiers_are_admitted_or_rejected_explicitly() {
+    let line = Geometry::Linear {
+        start: Point { x: 0., y: 0. },
+        end: Point { x: 1., y: 0. },
+    };
+    let red = Color::linear_srgb(1., 0., 0., 1.).unwrap();
+    let blue = Color::linear_srgb(0., 0., 1., 1.).unwrap();
+    let make = |geometry, stops: &[Stop], extend| {
+        Gradient::new(geometry, stops, extend, Interpolation::LinearSrgb)
+    };
+    // A normal reciprocal and enormous finite HDR delta must not be multiplied
+    // together into an overflowing precomputed slope.
+    let tiny = f32::MIN_POSITIVE;
+    let large = Color::linear_srgb(1e20, -1e20, 0., 1.).unwrap();
+    let opposite = Color::linear_srgb(-1e20, 1e20, 0., 1.).unwrap();
+    let g = make(
+        line,
+        &[Stop::new(0., large), Stop::new(tiny, opposite)],
+        Extend::Pad,
+    )
+    .unwrap();
+    let midpoint = g.view().sample_parameter(tiny * 0.5);
+    assert!(midpoint.iter().all(|v| v.is_finite()));
+    assert!(midpoint[0].abs() < 1e14 && midpoint[1].abs() < 1e14);
+    assert_eq!(midpoint[3], 1.);
+    assert!(
+        make(
+            line,
+            &[Stop::new(0., red), Stop::new(tiny.next_down(), blue)],
+            Extend::Pad
+        )
+        .is_err()
+    );
+    assert!(
+        make(
+            line,
+            &[Stop::new(0., red), Stop::new(f32::from_bits(1), blue)],
+            Extend::Pad
+        )
+        .is_err()
+    );
+    // Adjacent authored offsets at a large magnitude retain f32 half-ULP ties.
+    let first = 1_000_000f32 - 0.25;
+    let last = first + 0.125;
+    let g = make(
+        line,
+        &[Stop::new(first, red), Stop::new(last, blue)],
+        Extend::Pad,
+    )
+    .unwrap();
+    assert_eq!(
+        g.view().sample_parameter(first + 0.0625),
+        [0.5, 0., 0.5, 1.]
+    );
+    assert_eq!(
+        (first as f64 + 0.03125) as f32,
+        first,
+        "ties round to the even authored offset"
+    );
+    // Negative phases are evaluated independently in f64, at exactly
+    // representable quarter offsets through the largest admitted phase scale.
+    for extend in [Extend::Repeat, Extend::Reflect] {
+        let g = make(line, &[Stop::new(-0.5, red), Stop::new(0.5, blue)], extend).unwrap();
+        for t in [
+            -1_048_575.75f32,
+            -8.25,
+            -1.25,
+            -0.75,
+            -0.5,
+            0.,
+            0.5,
+            1.25,
+            1_048_575.75,
+        ] {
+            let x = f64::from(t) + 0.5;
+            let u = if extend == Extend::Repeat {
+                x.rem_euclid(1.)
+            } else {
+                let u = x.rem_euclid(2.);
+                if u > 1. { 2. - u } else { u }
+            };
+            assert_eq!(
+                g.view().sample_parameter(t),
+                [(1. - u) as f32, 0., u as f32, 1.],
+                "{extend:?} {t}"
+            );
+        }
+    }
+    let stops = [Stop::new(0., red), Stop::new(1., blue)];
+    let conic = make(
+        Geometry::Conic {
+            center: Point { x: 0.5, y: 0.5 },
+            start_turn: 0.,
+        },
+        &stops,
+        Extend::Pad,
+    )
+    .unwrap();
+    assert_eq!(conic.view().sample([0.5, 0.25]), [1., 0., 0., 1.]);
+    assert_eq!(conic.view().sample([0.5, 0.5]), [1., 0., 0., 1.]);
+    assert!(conic.view().sample([0.4999, 0.25])[2] > 0.999);
+    assert!(conic.view().sample([0.5001, 0.25])[0] > 0.999);
+    let rotated = make(
+        Geometry::Conic {
+            center: Point { x: 0.5, y: 0.5 },
+            start_turn: -0.25,
+        },
+        &stops,
+        Extend::Pad,
+    )
+    .unwrap();
+    assert_eq!(rotated.view().sample([0.5, 0.25]), [0.75, 0., 0.25, 1.]);
+    let extremes = [
+        Geometry::Linear {
+            start: Point { x: 0., y: 0. },
+            end: Point { x: 1e-12, y: 0. },
+        },
+        Geometry::Radial {
+            center: Point { x: 1e6, y: 1e6 },
+            radii: [1e-12, 1e-12],
+        },
+    ];
+    for geometry in extremes {
+        let g = make(geometry, &stops, Extend::Pad).unwrap();
+        for point in [[0., 0.], [1., 1.], [0.125, 0.875]] {
+            assert!(g.view().sample(point).iter().all(|v| v.is_finite()));
+        }
+        assert!(
+            make(geometry, &stops, Extend::Repeat).is_err(),
+            "unstable repeated phase range rejected"
+        );
+    }
+    assert!(
+        make(
+            Geometry::Radial {
+                center: Point::default(),
+                radii: [1e-13, 1.]
+            },
+            &stops,
+            Extend::Pad
+        )
+        .is_err()
+    );
+    assert!(
+        make(
+            line,
+            &[Stop::new(0., red), Stop::new(0., blue)],
+            Extend::Repeat
+        )
+        .is_err()
+    );
+}
