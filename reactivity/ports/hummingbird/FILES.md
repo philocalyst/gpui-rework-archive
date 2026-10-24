@@ -90,6 +90,10 @@ that same log after already-parsed INFO revisions. External metadata stays first
 No second RIFF parser or header walk is added to the application. PCM packet,
 reader admission/options and other parser code remain unchanged. Tests cover
 multiple INFO revisions, unknown chunks and malformed/truncated admission.
+The correction also retains parsed INFO metadata for playback readers until
+the format reader retires, where the buggy reader discarded it. That intended
+metadata lifetime cost is not a zero-resource claim; the constructor/untagged
+directory counters do not bound arbitrary tagged-media retention.
 
 ## Qualification and resource scope
 
