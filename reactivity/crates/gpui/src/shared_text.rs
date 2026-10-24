@@ -6,6 +6,33 @@ use std::ops::Deref;
 #[repr(transparent)]
 #[derive(Clone, Debug, PartialEq, Eq)]
 pub(crate) struct SharedText(arcstr::ArcStr);
+fn joined_len(lengths: [usize; 3]) -> Option<usize> {
+    lengths[0].checked_add(lengths[1])?.checked_add(lengths[2])
+}
+impl SharedText {
+    /// Copy three UTF-8 fragments directly into their final immutable lease.
+    pub(crate) fn try_join(parts: [&str; 3]) -> Option<Self> {
+        let length = joined_len(parts.map(str::len))?;
+        if length == 0 {
+            return Some(Self(arcstr::ArcStr::new()));
+        }
+        // SAFETY: concatenating valid UTF-8 fragments yields valid UTF-8.
+        // `length` is their checked sum, so the two splits leave three exact
+        // destination lengths. Each safe copy initializes its entire slice.
+        // No user code runs here; these bounded, equal-length operations cannot
+        // panic (ArcStr's initializer has no unwind cleanup for its allocation).
+        unsafe {
+            arcstr::ArcStr::try_init_with_unchecked(length, |destination| {
+                let (prefix, tail) = destination.split_at_mut(parts[0].len());
+                let (middle, suffix) = tail.split_at_mut(parts[1].len());
+                prefix.write_copy_of_slice(parts[0].as_bytes());
+                middle.write_copy_of_slice(parts[1].as_bytes());
+                suffix.write_copy_of_slice(parts[2].as_bytes());
+            })
+            .map(Self)
+        }
+    }
+}
 impl Deref for SharedText {
     type Target = str;
     #[inline]
@@ -46,6 +73,41 @@ mod tests {
     use super::*;
     use std::mem::size_of;
     fn assert_send_sync<T: Send + Sync>() {}
+    #[test]
+    fn direct_join_initializes_exact_unicode_fragments_and_checks_length_overflow() {
+        for value in ["", "a\0é漢🙂z", "a\u{301}z", "👩‍❤️‍💋‍👨x", "🇫🇷עברית"]
+        {
+            for left in (0..=value.len()).filter(|&n| value.is_char_boundary(n)) {
+                for right in (left..=value.len()).filter(|&n| value.is_char_boundary(n)) {
+                    let parts = [&value[..left], &value[left..right], &value[right..]];
+                    assert_eq!(SharedText::try_join(parts).unwrap().as_ref(), value);
+                }
+            }
+        }
+        assert_eq!(joined_len([usize::MAX, 1, 0]), None);
+        assert_eq!(joined_len([usize::MAX - 1, 1, 1]), None);
+        assert_eq!(joined_len([usize::MAX - 2, 1, 1]), Some(usize::MAX));
+    }
+    #[test]
+    fn direct_join_allocates_only_final_lease_and_empty_is_static() {
+        for length in [0, 1, 24, 4096, 32 * 1024] {
+            let payload = "x".repeat(length);
+            let mut lease = None;
+            let cost = allocation_counter::measure(|| {
+                lease = SharedText::try_join(["", payload.as_str(), ""]);
+            });
+            let expected = if length == 0 {
+                0
+            } else {
+                length + 2 * size_of::<usize>()
+            };
+            assert_eq!(cost.count_total, u64::from(length != 0));
+            assert_eq!(cost.bytes_total, expected as u64);
+            assert_eq!(cost.bytes_current, expected as i64);
+            assert_eq!(cost.bytes_max, expected as u64);
+            assert_eq!(lease.as_ref().unwrap().as_ref(), payload);
+        }
+    }
     #[test]
     fn one_word_utf8_lease_preserves_owned_unicode_and_thread_transfer() {
         assert_send_sync::<SharedText>();

@@ -91,7 +91,6 @@ struct Active {
 }
 pub(super) struct Preview {
     replacement: gpui_canvas::TextSelection,
-    buffer: String,
     pub display: SharedText,
     pub selection: gpui_canvas::TextSelection,
     pub decoration: gpui_canvas::TextSelection,
@@ -445,7 +444,6 @@ impl<M: View + 'static, L: LaneSet<M>> RuntimeMut<'_, M, L> {
         let preview = active.preview.get_or_insert_with(|| {
             Box::new(Preview {
                 replacement,
-                buffer: String::new(),
                 display: active.source.clone(),
                 selection: replacement,
                 decoration: replacement,
@@ -461,16 +459,14 @@ impl<M: View + 'static, L: LaneSet<M>> RuntimeMut<'_, M, L> {
         if text.is_empty() {
             preview.display = active.source.clone();
         } else {
-            preview.buffer.clear();
-            preview
-                .buffer
-                .try_reserve(joined_len)
-                .map_err(|_| Error::ResourceLimit)?;
-            preview.buffer.push_str(&active.source[..start]);
-            preview.buffer.push_str(text);
-            preview.buffer.push_str(&active.source[end..]);
-            if preview.display.as_ref() != preview.buffer {
-                preview.display = SharedText::from(preview.buffer.as_str());
+            let parts = [&active.source[..start], text, &active.source[end..]];
+            if preview
+                .display
+                .strip_prefix(parts[0])
+                .and_then(|tail| tail.strip_prefix(parts[1]))
+                != Some(parts[2])
+            {
+                preview.display = SharedText::try_join(parts).ok_or(Error::ResourceLimit)?;
             }
         }
         let finish = start + text.len();
@@ -558,8 +554,8 @@ impl<M: View + 'static, L: LaneSet<M>> RuntimeMut<'_, M, L> {
                     .as_ref()
                     .map_or_else(|| self.selection_at(index), |p| Ok(p.replacement))?;
                 // Restore the source selection before any fallible codec work.
-                // Exceptional preedit capacity belongs only to this composition;
-                // canonical Source ownership follows ordinary keyboard policy.
+                // Drop the composition display lease before canonical allocation;
+                // Source ownership follows ordinary keyboard policy.
                 self.runtime.set_selection(index, range, None);
                 active.preview = None;
                 self.runtime.invalidate_display(active.target);
@@ -575,7 +571,7 @@ impl<M: View + 'static, L: LaneSet<M>> RuntimeMut<'_, M, L> {
             ImeEvent::Preedit { text, cursor } => {
                 // Keep the exclusive owner installed even when validation or
                 // preparation fails, so the common cancellation path restores
-                // the original source selection and releases active capacity.
+                // the original source selection and releases the active lease.
                 let result = self.update_preedit(&mut active, text, cursor);
                 self.runtime.install_ime(active);
                 result?;
@@ -607,7 +603,7 @@ mod tests {
         win.presented(win.with_scene(|_, t| t).unwrap()).unwrap();
     }
     #[test]
-    fn ime_cold_ownership_reuses_only_active_buffer_and_releases_after_final_ack() {
+    fn ime_cold_ownership_reuses_immutable_display_and_releases_after_final_ack() {
         let mut win = Win::recording(
             Input(Signal::new("source".into())),
             WindowOptions::default(),
@@ -675,8 +671,6 @@ mod tests {
         );
         ack(&mut win);
         let preview = win.runtime().unwrap().composition_preview().unwrap().1;
-        let buffer = preview.buffer.as_ptr();
-        let capacity = preview.buffer.capacity();
         let display = preview.display.as_ptr();
         assert_eq!(
             SharedText::strong_count(&preview.display),
@@ -689,7 +683,7 @@ mod tests {
             SharedText::strong_count(&win.runtime().unwrap().ime_active().unwrap().source).unwrap()
         );
         eprintln!(
-            "IME_STORAGE session={} active={} preview={} mark={} owner={} editing={} text_resources={} buffer_capacity={} display_bytes={}",
+            "IME_STORAGE session={} active={} preview={} mark={} owner={} editing={} text_resources={} display_bytes={}",
             size_of::<ImeSession>(),
             size_of::<Active>(),
             size_of::<Preview>(),
@@ -697,9 +691,9 @@ mod tests {
             size_of::<Ime>(),
             size_of::<super::super::editing::Editing>(),
             size_of::<super::super::text_geometry::TextResources>(),
-            capacity,
             preview.display.len()
         );
+        let old_display = preview.display.clone();
         win.ime_event(
             &mut session,
             ImeEvent::Preedit {
@@ -709,8 +703,6 @@ mod tests {
         )
         .unwrap();
         let preview = win.runtime().unwrap().composition_preview().unwrap().1;
-        assert_eq!(preview.buffer.as_ptr(), buffer);
-        assert_eq!(preview.buffer.capacity(), capacity);
         assert_eq!(
             preview.display.as_ptr(),
             display,
@@ -726,8 +718,9 @@ mod tests {
         )
         .unwrap();
         let preview = win.runtime().unwrap().composition_preview().unwrap().1;
-        assert_eq!(preview.buffer.as_ptr(), buffer);
-        assert_eq!(preview.buffer.capacity(), capacity);
+        assert_ne!(preview.display.as_ptr(), display);
+        assert_eq!(old_display.as_ref(), "sourcelong marked phrase");
+        assert_eq!(preview.display.as_ref(), "sourcex");
         ack(&mut win);
         win.ime_event(&mut session, ImeEvent::Cancel).unwrap();
         let owner = win
@@ -744,7 +737,7 @@ mod tests {
             .unwrap();
         assert!(
             owner.active.is_none(),
-            "cancel immediately drops String, active and preview owners"
+            "cancel immediately drops active and preview owners"
         );
         assert!(
             owner.presented.is_some(),
@@ -764,12 +757,13 @@ mod tests {
                 .is_none()
         );
         assert_eq!(win.read(Input::VALUE).unwrap(), "source");
+        assert_eq!(old_display.as_ref(), "sourcelong marked phrase");
+        assert_eq!(old_display.strong_count(), Some(1));
         win.close();
         assert!(win.inner.is_none());
         if cfg!(target_pointer_width = "64") {
             assert_eq!(size_of::<ImeSession>(), 8);
             assert_eq!(size_of::<Active>(), 56);
-            assert_eq!(size_of::<Preview>(), 120);
             assert_eq!(size_of::<MarkSnapshot>(), 40);
             assert_eq!(size_of::<Ime>(), 88);
         }

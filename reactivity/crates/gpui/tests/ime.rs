@@ -98,6 +98,99 @@ fn displayed(win: &Win<Form>, target: Target) -> (String, Option<MarkedText>, Te
     result.unwrap()
 }
 #[test]
+fn equal_initial_preedit_clear_and_commit_keep_original_replacement() {
+    let (mut win, target, mut session) = window("left RIGHT tail");
+    win.select(target, selection(5, 10)).unwrap();
+    ack(&mut win);
+    win.ime_event(&mut session, ImeEvent::Enabled).unwrap();
+    let epoch = win.snapshot().unwrap().source_epoch;
+    for text in ["RIGHT", "", "RIGHT", ""] {
+        win.ime_event(&mut session, ImeEvent::Preedit { text, cursor: None })
+            .unwrap();
+        ack(&mut win);
+        assert_eq!(displayed(&win, target).0, "left RIGHT tail");
+        assert_eq!(win.read(Form::A).unwrap(), "left RIGHT tail");
+        assert_eq!(win.snapshot().unwrap().source_epoch, epoch);
+    }
+    win.ime_event(&mut session, ImeEvent::Commit("done"))
+        .unwrap();
+    ack(&mut win);
+    assert_eq!(win.read(Form::A).unwrap(), "left done tail");
+    assert_eq!(win.snapshot().unwrap().source_epoch, epoch + 1);
+}
+#[test]
+fn public_preedit_allocation_and_old_candidate_lifetime_workload() {
+    fn event(text: &str, cursor: Option<(usize, usize)>) -> ImeEvent<'_> {
+        ImeEvent::Preedit { text, cursor }
+    }
+    fn report(length: usize, stage: &str, cost: allocation_counter::AllocationInfo) {
+        eprintln!(
+            "IME_PUBLIC_COST length={length} stage={stage} allocations={} bytes={} retained={} peak={}",
+            cost.count_total, cost.bytes_total, cost.bytes_current, cost.bytes_max
+        );
+    }
+    for length in [24, 4096, 32 * 1024] {
+        let first = "x".repeat(length - 10);
+        let changed = "y".repeat(length - 10);
+        let expected_first = format!("left {first} tail");
+        let expected_changed = format!("left {changed} tail");
+        let (mut win, target, mut session) = window("left RIGHT tail");
+        win.select(target, selection(5, 10)).unwrap();
+        ack(&mut win);
+        win.ime_event(&mut session, ImeEvent::Enabled).unwrap();
+        let epoch = win.snapshot().unwrap().source_epoch;
+        let cost = allocation_counter::measure(|| {
+            win.ime_event(&mut session, event(&first, Some((0, 0))))
+                .unwrap();
+        });
+        report(length, "first", cost);
+        assert_eq!(displayed(&win, target).0, "left RIGHT tail");
+        ack(&mut win);
+        assert_eq!(displayed(&win, target).0, expected_first);
+        let cost = allocation_counter::measure(|| {
+            win.ime_event(
+                &mut session,
+                event(&first, Some((first.len(), first.len()))),
+            )
+            .unwrap();
+        });
+        report(length, "cursor", cost);
+        ack(&mut win);
+        let old_presented = displayed(&win, target);
+        let cost = allocation_counter::measure(|| {
+            win.ime_event(&mut session, event(&changed, Some((0, 0))))
+                .unwrap();
+        });
+        report(length, "changed_with_old_p", cost);
+        let candidate = win.with_scene(|_, token| token).unwrap();
+        assert_eq!(displayed(&win, target), old_presented);
+        let cost = allocation_counter::measure(|| {
+            assert_eq!(
+                win.ime_event(&mut session, event("é", Some((1, 1)))),
+                Err(Error::InvalidSelection)
+            );
+        });
+        report(length, "failed_newer_releases_active", cost);
+        assert!(!session.is_enabled());
+        assert_eq!(win.snapshot().unwrap().source_epoch, epoch);
+        assert_eq!(win.read(Form::A).unwrap(), "left RIGHT tail");
+        assert_eq!(displayed(&win, target), old_presented);
+        win.presented(candidate).unwrap();
+        assert_eq!(displayed(&win, target).0, expected_changed);
+        assert_eq!(displayed(&win, target).1.unwrap().range, 5..length - 5);
+        win.ime_event(&mut session, ImeEvent::Commit("late"))
+            .unwrap();
+        assert_eq!(win.read(Form::A).unwrap(), "left RIGHT tail");
+        win.ime_event(&mut session, ImeEvent::Enabled).unwrap();
+        win.ime_event(&mut session, event("", None)).unwrap();
+        ack(&mut win);
+        assert_eq!(displayed(&win, target).0, "left RIGHT tail");
+        win.ime_event(&mut session, ImeEvent::Cancel).unwrap();
+        ack(&mut win);
+        assert!(displayed(&win, target).1.is_none());
+    }
+}
+#[test]
 fn cjk_preedit_replaces_original_selection_then_commits_different_text_once() {
     let (mut win, target, mut session) = cjk_window("left RIGHT tail");
     win.select(target, selection(5, 10)).unwrap();
