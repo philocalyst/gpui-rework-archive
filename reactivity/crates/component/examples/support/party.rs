@@ -35,7 +35,7 @@ impl Preparation {
 }
 impl View for Preparation {
     fn sources() -> Sources<Self> {
-        Sources::new().field(Self::LANTERNS).field(Self::TREATS)
+        Sources::new().direct(Self::LANTERNS).direct(Self::TREATS)
     }
     fn view(&self) -> El<'_> {
         let t = &self.theme;
@@ -108,7 +108,7 @@ impl View for Party {
     fn sources() -> Sources<Self> {
         Sources::new()
             .field(Self::TITLE)
-            .component(Self::PREPARATION)
+            .direct_component(Self::PREPARATION)
     }
     fn view(&self) -> El<'_> {
         let t = &self.theme;
