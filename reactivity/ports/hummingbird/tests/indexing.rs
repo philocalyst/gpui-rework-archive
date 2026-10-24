@@ -17,7 +17,7 @@ use std::{
     time::{Duration, Instant},
 };
 use support::{Folder, flac, mp3, wave};
-fn open(path: &Path) -> (Worker, Win<Library, impl LaneSet<Library>>) {
+fn open(path: &Path) -> (Worker, Win<Library, impl LaneSet<Library> + use<>>) {
     let (worker, inbox) = Worker::new(Database::open_library(path).unwrap()).unwrap();
     let (model, questions) = connect(worker.handle()).unwrap();
     let mut win = Win::with_questions(
