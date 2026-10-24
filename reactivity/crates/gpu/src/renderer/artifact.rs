@@ -3,6 +3,7 @@ use super::*;
 mod bundle {
     include!(concat!(env!("OUT_DIR"), "/ui-artifacts.rs"));
 }
+pub(super) use bundle::BINDINGS;
 static ENTRIES: [wgpu::PassthroughShaderEntryPoint<'static>; 2] = [
     wgpu::PassthroughShaderEntryPoint {
         name: Cow::Borrowed("vertex"),
@@ -13,27 +14,9 @@ static ENTRIES: [wgpu::PassthroughShaderEntryPoint<'static>; 2] = [
         workgroup_size: (0, 0, 0),
     },
 ];
-pub(super) fn create(
-    device: &wgpu::Device,
-) -> Option<(
-    wgpu::ShaderModule,
-    wgpu::ShaderModule,
-    wgpu::BindGroupLayout,
-    wgpu::PipelineLayout,
-)> {
+pub(super) fn create(device: &wgpu::Device) -> Option<(wgpu::ShaderModule, wgpu::ShaderModule)> {
     let profile = device.shader_artifact_profile()?;
     let words = select(profile.revision(), profile.variant())?;
-    // Every context creates a fresh BGL, preserving the retained layout's
-    // context-identity certificate even when hardware interns its layout data.
-    let layout = device.create_bind_group_layout(&wgpu::BindGroupLayoutDescriptor {
-        label: Some("GPUI offline compositor"),
-        entries: &bundle::BINDINGS,
-    });
-    let pipeline_layout = device.create_pipeline_layout(&wgpu::PipelineLayoutDescriptor {
-        label: Some("GPUI offline compositor"),
-        bind_group_layouts: &[Some(&layout)],
-        immediate_size: 0,
-    });
     // SAFETY: shader_build mechanically generated these immutable aligned
     // words and their exact interface together from our typed WGSL. It checks
     // Naga input/output validation, descriptor/ABI reflection, baseline SPIR-V
@@ -49,7 +32,7 @@ pub(super) fn create(
     };
     let vertex = module(&bundle::VERTEX, &ENTRIES[..1])?;
     let fragment = module(words, &ENTRIES[1..])?;
-    Some((vertex, fragment, layout, pipeline_layout))
+    Some((vertex, fragment))
 }
 
 fn select(revision: u32, variant: usize) -> Option<&'static [u32]> {

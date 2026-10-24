@@ -384,6 +384,7 @@ impl Upgrade {
                         renderer,
                         errors,
                         packet_token: None,
+                        acceleration: Default::default(),
                     }),
                 })
             }
@@ -395,6 +396,83 @@ impl Drop for Upgrade {
         // A blocked driver call is not interruptible. Its result can only drop;
         // cancellation never waits or admits a late target into another owner.
         self.initialization.cancelled.store(true, Ordering::Release);
+    }
+}
+
+// An eligibility-triggered continuation of cold GPU preparation. The baseline
+// initializer exits normally; no worker waits permanently for a future scene.
+// The context owns the installed pipeline. This owner only cancels/receives one
+// transient job, and never lends a window, surface or mutable renderer to it.
+#[derive(Default)]
+pub(super) enum ClipUpgrade {
+    #[default]
+    Idle,
+    Preparing(Box<ClipPreparation>),
+    Finished,
+}
+pub(super) struct ClipPreparation {
+    messages: Receiver<Result<gpui_gpu::PreparedClipAcceleration, gpui_gpu::Error>>,
+    cancelled: Arc<AtomicBool>,
+}
+impl Drop for ClipPreparation {
+    fn drop(&mut self) {
+        self.cancelled.store(true, Ordering::Release);
+    }
+}
+impl ClipUpgrade {
+    pub(super) fn progress(&mut self, renderer: &mut Renderer, wake: &Option<Wake>) {
+        if let Self::Preparing(preparation) = self {
+            match preparation.messages.try_recv() {
+                Err(TryRecvError::Empty) => return,
+                result => {
+                    *self = Self::Finished;
+                    if let Ok(Ok(prepared)) = result {
+                        // Exact context/layout identity is checked under this
+                        // exclusive renderer borrow. A rejected/failed optional
+                        // result leaves the fully correct base pipeline active.
+                        let _ = renderer.install_clip_acceleration(prepared);
+                    }
+                    return;
+                }
+            }
+        }
+        if !matches!(self, Self::Idle) {
+            return;
+        }
+        let Some(job) = renderer.clip_acceleration_job() else {
+            return;
+        };
+        *self = Self::Finished;
+        let cancelled = Arc::new(AtomicBool::new(false));
+        let cancellation = Arc::clone(&cancelled);
+        let (send, messages) = mpsc::sync_channel(1);
+        let wake = wake.clone();
+        let worker = thread::Builder::new()
+            .name("gpui-clip-prepare".into())
+            .spawn(move || {
+                if cancellation.load(Ordering::Acquire) {
+                    return;
+                }
+                // Driver compilation itself cannot be cancelled and can take
+                // driver locks also used by rendering. Threading promises no
+                // latency isolation; this is an optional owned cold boundary.
+                let result = catch_unwind(AssertUnwindSafe(|| pollster::block_on(job.prepare())))
+                    .unwrap_or_else(|_| {
+                        Err(gpui_gpu::Error::Shader("clip preparation panicked".into()))
+                    });
+                if !cancellation.load(Ordering::Acquire) && send.send(result).is_ok() {
+                    if let Some(wake) = wake {
+                        wake.signal();
+                    }
+                }
+            });
+        if let Ok(worker) = worker {
+            drop(worker);
+            *self = Self::Preparing(Box::new(ClipPreparation {
+                messages,
+                cancelled,
+            }));
+        }
     }
 }
 fn deliver(send: &SyncSender<Message>, message: Message, wake: &Option<Wake>) -> bool {

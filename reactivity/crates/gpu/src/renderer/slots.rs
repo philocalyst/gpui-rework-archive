@@ -152,7 +152,9 @@ impl GpuSlotCommit<'_, '_, '_> {
                 bytemuck::bytes_of(&next),
             );
         }
-        let submitted = self.context.submit(self.target, &packet.bindings);
+        let submitted =
+            self.context
+                .submit(self.target, &packet.bindings, packet.clip_accelerated());
         self.owner.packet = Some(packet);
         let stats = &mut self.owner.stats;
         stats.submissions = stats.submissions.saturating_add(1);

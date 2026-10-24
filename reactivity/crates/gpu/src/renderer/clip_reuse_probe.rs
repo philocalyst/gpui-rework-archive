@@ -577,6 +577,16 @@ fn clip_reuse_exact_frozen_shader_and_key_mutant() {
                 wgpu::TextureFormat::Rgba8UnormSrgb
             };
             let mut gpu = renderer(native).await;
+            // Exercise the real optional install/packet selector, in addition
+            // to independently compiled frozen/custom shader comparisons.
+            let prepared = gpu
+                .context
+                .clip_acceleration_job()
+                .unwrap()
+                .prepare()
+                .await
+                .unwrap();
+            assert!(gpu.install_clip_acceleration(prepared).unwrap());
             let formats = [
                 wgpu::TextureFormat::Rgba8UnormSrgb,
                 wgpu::TextureFormat::Rgba16Float,
@@ -987,5 +997,189 @@ fn clip_reuse_chain_tag_excludes_lowered_in_actual_packets() {
             }
         }
         eprintln!("clip_reuse_chain_certificate checked_uploaded_references={checked}");
+    });
+}
+
+#[test]
+fn optional_pipeline_identity_fallback_and_packet_selection() {
+    pollster::block_on(async {
+        let mut gpu = renderer(wgpu::TextureFormat::Rgba16Float).await;
+        assert!(gpu.context.clip_pipeline.is_none());
+        assert!(gpu.clip_acceleration_job().is_none());
+        assert_eq!(size_of::<Packet>(), 16);
+        eprintln!(
+            "optional_clip_layout context={} state={} renderer={} job={} prepared={}",
+            size_of::<GpuContext>(),
+            size_of::<RendererState>(),
+            size_of::<Renderer>(),
+            size_of::<ClipAccelerationJob>(),
+            size_of::<PreparedClipAcceleration>()
+        );
+        let target = texture(gpu.device(), 512, 256, gpu.format());
+        let view = target.create_view(&Default::default());
+        let clipped = representative(1);
+        gpu.render(clipped.prepared_scene(), &view).unwrap();
+        assert!(gpu.state.benefits_from_clip_acceleration());
+        let before = read(&gpu.context, &target); // Base immediately renders clips.
+        let job = gpu.clip_acceleration_job().unwrap();
+        let foreign = GpuContext::new(gpu.device().clone(), gpu.queue().clone(), gpu.format())
+            .await
+            .unwrap();
+        let mut foreign = foreign;
+        let rejected = gpu
+            .context
+            .clip_acceleration_job()
+            .unwrap()
+            .prepare()
+            .await
+            .unwrap();
+        assert!(matches!(
+            foreign.install_clip_acceleration(rejected),
+            Err(Error::IncompatibleContext)
+        ));
+        let prepared = job.prepare().await.unwrap();
+        assert!(gpu.install_clip_acceleration(prepared).unwrap());
+        assert!(gpu.context.clip_acceleration_job().is_none());
+        gpu.redraw(&view).unwrap().unwrap();
+        assert_eq!(read(&gpu.context, &target), before);
+        let mut shared = RendererState::new(&gpu.context);
+        shared
+            .render(&gpu.context, clipped.prepared_scene(), &view)
+            .unwrap();
+        assert_eq!(read(&gpu.context, &target), before);
+        assert!(matches!(
+            shared.redraw(&foreign, &view),
+            Err(Error::IncompatibleContext)
+        ));
+        // A genuine selector mutant would accelerate all packets. The admitted
+        // flat, banked and singleton-chain fixtures must select the base owner.
+        let flat = representative(0);
+        gpu.render(flat.prepared_scene(), &view).unwrap();
+        assert!(!gpu.state.benefits_from_clip_acceleration());
+        assert_eq!(gpu.state.packet.as_ref().unwrap().dimensions(), [512, 256]);
+        assert!(std::ptr::eq(
+            gpu.context.selected_pipeline(false),
+            &gpu.context.pipeline
+        ));
+        assert!(std::ptr::eq(
+            gpu.context.selected_pipeline(true),
+            gpu.context.clip_pipeline.as_ref().unwrap()
+        ));
+        let cfg = ColorConfig::linear_hdr(gpui_canvas::OutputProfile::Srgb, 203.0).unwrap();
+        let banked = boundary_scene(cfg, Affine::IDENTITY, 8.125, 2, true);
+        let small = texture(gpu.device(), 32, 24, gpu.format());
+        gpu.render(
+            banked.prepared_scene(),
+            &small.create_view(&Default::default()),
+        )
+        .unwrap();
+        assert!(gpu.state.packet.as_ref().unwrap().banked());
+        assert!(!gpu.state.benefits_from_clip_acceleration());
+        // Poison only the optional pipeline, then mutate the actual packet
+        // selector. Target-bit differences prove the selector is exercised.
+        gpu.render(flat.prepared_scene(), &view).unwrap();
+        let expected = read(&gpu.context, &target);
+        let poison = "@vertex fn vertex(@builtin(vertex_index) i:u32)->@builtin(position) vec4f { var p=array<vec2f,3>(vec2f(-1.,-1.),vec2f(3.,-1.),vec2f(-1.,3.)); return vec4f(p[i],0.,1.); } @fragment fn fragment(@builtin(position) p:vec4f)->@location(0) vec4f { return vec4f(0.,1.,0.,1.); }";
+        gpu.context.clip_pipeline = Some(make_pipeline(&gpu, poison, gpu.format()));
+        gpu.redraw(&view).unwrap().unwrap();
+        assert_eq!(read(&gpu.context, &target), expected);
+        gpu.state.packet.as_mut().unwrap().size[0] |= CLIP_PACKET;
+        gpu.redraw(&view).unwrap().unwrap();
+        assert_ne!(
+            read(&gpu.context, &target),
+            expected,
+            "actual selector mutant must change pixels"
+        );
+        // These exact CSR addresses include a flat draw between repeated keys.
+        let mut words = vec![[0; 4]; 24];
+        words[3] = [0x7fc0_0003, 100, 0, 0];
+        words[15] = [0x7fc0_0003, 105, 0, 0];
+        words[21] = [0x7fc0_0003, 100, 0, 0];
+        let inline = INLINE_RECORD;
+        assert!(acceleration::repeats_chain(
+            &words,
+            &[inline, inline | 6, inline | 18],
+            [0, 3]
+        ));
+        assert!(!acceleration::repeats_chain(
+            &words,
+            &[inline, inline | 12, inline | 18],
+            [0, 3]
+        ));
+        assert!(!acceleration::repeats_chain(&words, &[inline], [0, 1]));
+    });
+}
+
+#[test]
+fn optional_compile_on_destroyed_device_declines() {
+    pollster::block_on(async {
+        let gpu = renderer(wgpu::TextureFormat::Rgba16Float).await;
+        let job = gpu.context.clip_acceleration_job().unwrap();
+        gpu.device().destroy();
+        assert!(job.prepare().await.is_err());
+    });
+}
+
+// Opt-in diagnostic: the real owned job compiles while the same device renders
+// completed baseline work. This measures driver contention, not thread promises.
+#[test]
+fn optional_cold_compile_overlap() {
+    if std::env::var("GPUI_OPTIONAL_CLIP_COLD").as_deref() != Ok("1") {
+        return;
+    }
+    pollster::block_on(async {
+        let mut gpu = renderer(wgpu::TextureFormat::Rgba16Float).await;
+        let canvas = representative(2);
+        let target = texture(gpu.device(), 512, 256, gpu.format());
+        let view = target.create_view(&Default::default());
+        gpu.render(canvas.prepared_scene(), &view).unwrap();
+        let baseline = &gpu.context.pipeline;
+        for _ in 0..6 {
+            completed_frame(&gpu, baseline, &view);
+        }
+        for phase in 0..3 {
+            if phase != 1 {
+                for round in 0..16 {
+                    eprintln!(
+                        "optional_cold_frame,{phase},{round},{}",
+                        completed_frame(&gpu, baseline, &view).as_nanos()
+                    );
+                }
+            } else {
+                let job = gpu.clip_acceleration_job().unwrap();
+                let (send, receive) = std::sync::mpsc::sync_channel(1);
+                let started = std::time::Instant::now();
+                let worker = std::thread::spawn(move || {
+                    let t = std::time::Instant::now();
+                    let prepared = pollster::block_on(job.prepare()).unwrap();
+                    send.send((prepared, t.elapsed())).unwrap();
+                });
+                let mut round = 0;
+                let (prepared, cold) = loop {
+                    eprintln!(
+                        "optional_cold_frame,{phase},{round},{}",
+                        completed_frame(&gpu, baseline, &view).as_nanos()
+                    );
+                    round += 1;
+                    if let Ok(result) = receive.try_recv() {
+                        break result;
+                    }
+                    assert!(started.elapsed().as_secs() < 60);
+                };
+                worker.join().unwrap();
+                // Keep the baseline selected for the after/control phase.
+                drop(prepared);
+                eprintln!("optional_cold_compile_ns,{}", cold.as_nanos());
+                eprintln!(
+                    "optional_cold_rss,{}",
+                    std::fs::read_to_string("/proc/self/status")
+                        .unwrap()
+                        .lines()
+                        .filter(|l| l.starts_with("VmRSS:") || l.starts_with("VmHWM:"))
+                        .collect::<Vec<_>>()
+                        .join(";")
+                );
+            }
+        }
     });
 }

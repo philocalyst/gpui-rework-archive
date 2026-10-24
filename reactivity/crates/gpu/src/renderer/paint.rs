@@ -366,7 +366,7 @@ impl GpuPaintCommit<'_, '_, '_> {
                 bytemuck::bytes_of(&next),
             );
         }
-        let submitted = context.submit(self.target, &packet.bindings);
+        let submitted = context.submit(self.target, &packet.bindings, packet.clip_accelerated());
         inner.packet = Some(packet);
         inner.stats.submissions = inner.stats.submissions.saturating_add(1);
         inner.stats.packet_reused = true;

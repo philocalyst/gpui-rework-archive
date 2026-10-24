@@ -298,6 +298,7 @@ struct GpuSurface {
     renderer: Renderer,
     errors: Arc<DeviceErrors>,
     packet_token: Option<crate::PresentationToken>,
+    acceleration: upgrade::ClipUpgrade,
 }
 impl GpuSurface {
     fn render_paint(
@@ -553,6 +554,7 @@ impl<V: View + 'static, L: LaneSet<V>> NativeHost<V, L> {
             renderer,
             errors,
             packet_token: None,
+            acceleration: Default::default(),
         })));
         self.resize([size.width, size.height])
     }
@@ -688,6 +690,9 @@ impl<V: View + 'static, L: LaneSet<V>> NativeHost<V, L> {
             let Some(Graphics::Gpu(graphics)) = &mut self.graphics else {
                 return Ok(());
             };
+            graphics
+                .acceleration
+                .progress(&mut graphics.renderer, &self.wake);
             match graphics.handle.get_current_texture() {
                 wgpu::CurrentSurfaceTexture::Success(frame) => {
                     let owner = self.owner.as_mut().expect("surface has an owner");
@@ -725,6 +730,9 @@ impl<V: View + 'static, L: LaneSet<V>> NativeHost<V, L> {
                     };
                     self.window.as_ref().unwrap().pre_present_notify();
                     graphics.renderer.queue().present(frame);
+                    graphics
+                        .acceleration
+                        .progress(&mut graphics.renderer, &self.wake);
                     let commit = owner.presented(token)?;
                     self.did_present(RendererKind::Gpu, commit);
                     self.recoveries = 0;
@@ -868,6 +876,9 @@ impl<V: View + 'static, L: LaneSet<V>> NativeHost<V, L> {
                 self.recoveries = 0;
                 self.timeouts = 0;
                 self.did_present(RendererKind::Gpu, commit);
+                if let Some(Graphics::Gpu(gpu)) = &mut self.graphics {
+                    gpu.acceleration.progress(&mut gpu.renderer, &self.wake);
+                }
                 Ok(true)
             }
             Err(error) => {

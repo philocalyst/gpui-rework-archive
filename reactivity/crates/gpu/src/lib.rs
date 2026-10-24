@@ -4,7 +4,8 @@
 mod renderer;
 pub mod shader;
 pub use renderer::{
-    Error, GpuContext, GpuPaintCommit, GpuPaintEdit, GpuSlotCommit, ImageStats, PaintBinding,
-    PaintError, PaintRenderer, Renderer, RendererState, SlotError, Stats,
+    ClipAccelerationJob, Error, GpuContext, GpuPaintCommit, GpuPaintEdit, GpuSlotCommit,
+    ImageStats, PaintBinding, PaintError, PaintRenderer, PreparedClipAcceleration, Renderer,
+    RendererState, SlotError, Stats,
 };
 pub use wgpu;

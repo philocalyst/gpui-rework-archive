@@ -4,10 +4,12 @@ use gpui_canvas::{
     PreparedPlacement, PreparedScene, SdrMapping,
 };
 use std::{borrow::Cow, collections::HashMap};
+mod acceleration;
 #[cfg(feature = "offline-shader")]
 #[allow(unsafe_code)]
 mod artifact;
 mod clips;
+pub use acceleration::{ClipAccelerationJob, PreparedClipAcceleration};
 mod images;
 mod owned;
 mod paint;
@@ -347,6 +349,9 @@ impl Atlas {
 // A binding to this renderer's current buffers and atlas, not a second scene.
 // Invalidate before any preparation can replace or overwrite those resources.
 const BANK_PACKET: u32 = 1 << 31;
+const CLIP_PACKET: u32 = 1 << 30;
+// Admitted viewport axes are at most 16,384, below both host-only flags.
+const _: () = assert!(16_384 < CLIP_PACKET);
 const SLOT_COLOR: u32 = 1 << 31;
 const _: () = assert!(MAX_DRAWS + 1 < SLOT_COLOR as usize);
 struct Packet {
@@ -356,7 +361,10 @@ struct Packet {
 
 impl Packet {
     fn dimensions(&self) -> [u32; 2] {
-        [self.size[0] & !BANK_PACKET, self.size[1]]
+        [self.size[0] & !(BANK_PACKET | CLIP_PACKET), self.size[1]]
+    }
+    fn clip_accelerated(&self) -> bool {
+        self.size[0] & CLIP_PACKET != 0
     }
     fn banked(&self) -> bool {
         self.size[0] & BANK_PACKET != 0
@@ -379,6 +387,7 @@ pub struct GpuContext {
     queue: wgpu::Queue,
     format: wgpu::TextureFormat,
     pipeline: wgpu::RenderPipeline,
+    clip_pipeline: Option<wgpu::RenderPipeline>,
     layout: wgpu::BindGroupLayout,
 }
 /// Independent buffers, glyph atlas, images, scratch and retained packet.
@@ -431,87 +440,14 @@ impl GpuContext {
         format: wgpu::TextureFormat,
     ) -> Result<Self, Error> {
         validate_format(format)?;
-        #[cfg(feature = "offline-shader")]
-        let internal = device.push_error_scope(wgpu::ErrorFilter::Internal);
-        #[cfg(feature = "offline-shader")]
-        let memory = device.push_error_scope(wgpu::ErrorFilter::OutOfMemory);
-        let errors = device.push_error_scope(wgpu::ErrorFilter::Validation);
-        #[cfg(feature = "offline-shader")]
-        let artifact = artifact::create(&device);
-        #[cfg(not(feature = "offline-shader"))]
-        let artifact = None::<(
-            wgpu::ShaderModule,
-            wgpu::ShaderModule,
-            wgpu::BindGroupLayout,
-            wgpu::PipelineLayout,
-        )>;
-        let (module, explicit) = match artifact {
-            Some((module, fragment, layout, pipeline_layout)) => {
-                (module, Some((fragment, layout, pipeline_layout)))
-            }
-            None => (
-                device.create_shader_module(wgpu::ShaderModuleDescriptor {
-                    label: Some("GPUI tile compositor"),
-                    source: wgpu::ShaderSource::Wgsl(Cow::Borrowed(SHADER_SOURCE)),
-                }),
-                None,
-            ),
-        };
-        let pipeline = device.create_render_pipeline(&wgpu::RenderPipelineDescriptor {
-            label: Some("GPUI tile compositor"),
-            layout: explicit
-                .as_ref()
-                .map(|(_, _, pipeline_layout)| pipeline_layout),
-            vertex: wgpu::VertexState {
-                module: &module,
-                entry_point: Some("vertex"),
-                compilation_options: Default::default(),
-                buffers: &[],
-            },
-            primitive: Default::default(),
-            depth_stencil: None,
-            multisample: Default::default(),
-            fragment: Some(wgpu::FragmentState {
-                module: explicit
-                    .as_ref()
-                    .map(|(fragment, _, _)| fragment)
-                    .unwrap_or(&module),
-                entry_point: Some("fragment"),
-                compilation_options: Default::default(),
-                targets: &[Some(wgpu::ColorTargetState {
-                    format,
-                    blend: None,
-                    write_mask: wgpu::ColorWrites::ALL,
-                })],
-            }),
-            multiview_mask: None,
-            cache: None,
-        });
-        // A destroyed device can yield an invalid pipeline. Keep inferred
-        // layout validation in the same scope instead of panicking afterward.
-        // Each context must mint a fresh layout handle, including if this ever
-        // uses explicit layouts. Sharing a BGL across contexts/formats would
-        // invalidate the state/context identity certificate.
-        // Keep this checked pipeline lookup on the explicit route too: after
-        // device loss creation errors can be ignored by WGPU's scopes, while
-        // this rejects the invalid pipeline instead of returning a dead owner.
-        drop(explicit);
-        let layout = pipeline.get_bind_group_layout(0);
-        let error = errors.pop().await;
-        #[cfg(feature = "offline-shader")]
-        let error = {
-            let memory = memory.pop().await;
-            let internal = internal.pop().await;
-            error.or(memory).or(internal)
-        };
-        if let Some(error) = error {
-            return Err(Error::Shader(error.to_string()));
-        }
+        let (pipeline, layout) =
+            acceleration::create_pipeline(&device, format, None, false).await?;
         Ok(Self {
             device,
             queue,
             format,
             pipeline,
+            clip_pipeline: None,
             layout,
         })
     }
@@ -524,10 +460,18 @@ impl GpuContext {
     pub fn format(&self) -> wgpu::TextureFormat {
         self.format
     }
+    fn selected_pipeline(&self, accelerated: bool) -> &wgpu::RenderPipeline {
+        if accelerated {
+            self.clip_pipeline.as_ref().unwrap_or(&self.pipeline)
+        } else {
+            &self.pipeline
+        }
+    }
     fn submit(
         &self,
         target: &wgpu::TextureView,
         bindings: &wgpu::BindGroup,
+        accelerated: bool,
     ) -> wgpu::SubmissionIndex {
         let mut encoder = self
             .device
@@ -551,7 +495,7 @@ impl GpuContext {
                 occlusion_query_set: None,
                 multiview_mask: None,
             });
-            pass.set_pipeline(&self.pipeline);
+            pass.set_pipeline(self.selected_pipeline(accelerated));
             pass.set_bind_group(0, bindings, &[]);
             pass.draw(0..3, 0..1);
         }
@@ -813,6 +757,7 @@ impl RendererState {
         }
         let draw_words_end = self.records.len();
         clips::append(&mut self.records, scene)?;
+        let has_clips = bank_count == 0 && self.records.len() != draw_words_end;
         images::prepare(
             &context.device,
             &context.queue,
@@ -906,6 +851,7 @@ impl RendererState {
             }
         }
         debug_assert_eq!((word, reverse_ordinal), (bank_words, 0));
+        let mut clip_accelerated = false;
         let mut uniform_tiles = 0;
         let mut sample_evaluations = 0;
         let mut sample_draw_evaluations = 0;
@@ -916,6 +862,10 @@ impl RendererState {
                 let [left, top, right, bottom] =
                     tile_bounds(tile, columns, scene.width, scene.height);
                 let samples = u64::from((right - left) * (bottom - top)) * 16;
+                if has_clips && !clip_accelerated {
+                    clip_accelerated =
+                        acceleration::repeats_chain(&self.records, &self.references, *range);
+                }
                 sample_evaluations += samples;
                 sample_draw_evaluations += samples * u64::from(range[1] - range[0]);
             }
@@ -1002,11 +952,13 @@ impl RendererState {
                     },
                 ],
             });
-        let submitted = context.submit(target, &bindings);
+        let submitted = context.submit(target, &bindings, clip_accelerated);
         self.packet = Some(Packet {
             bindings,
             size: [
-                scene.width | if bank_count != 0 { BANK_PACKET } else { 0 },
+                scene.width
+                    | if bank_count != 0 { BANK_PACKET } else { 0 }
+                    | if clip_accelerated { CLIP_PACKET } else { 0 },
                 scene.height,
             ],
         });
@@ -1076,7 +1028,7 @@ impl RendererState {
         {
             return Err(Error::InvalidScene);
         }
-        let submitted = context.submit(target, &packet.bindings);
+        let submitted = context.submit(target, &packet.bindings, packet.clip_accelerated());
         self.stats.submissions = self.stats.submissions.saturating_add(1);
         self.stats.packet_reused = true;
         self.stats.validated_draws = 0;
