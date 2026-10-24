@@ -213,3 +213,88 @@ fn an_unrecognized_database_is_rejected_without_migration_or_seeding() {
         1
     );
 }
+
+#[test]
+fn files_use_fresh_row_domains_exact_paths_and_explicit_root_removal_semantics() {
+    use gpui::{Error, ItemKey};
+    let folder = Folder::new();
+    let root = folder.0.join("music");
+    fs::create_dir(&root).unwrap();
+    let child = root.join("disc");
+    fs::create_dir(&child).unwrap();
+    wave(&root.join("same.wav"), "Root", "Artist", "Album");
+    wave(&child.join("same.wav"), "Child", "Artist", "Album");
+    fs::write(root.join("notes.txt"), b"not a recording").unwrap();
+    let db = folder.0.join("library.sqlite");
+    let (worker, mut win) = open(&db);
+    add(&mut win, &worker, &root);
+    scan(&mut win, &worker);
+    win.activate(win.button(format!("Open {}", root.display())))
+        .unwrap();
+    settle(&mut win, &worker).unwrap();
+    let result = win.with_model(|m| m.results).unwrap();
+    let (list, entries) = win
+        .with_ready(result, |page| match page {
+            Page::Files(files) => (
+                files.list(),
+                files
+                    .entries
+                    .iter()
+                    .map(|entry| entry.path.clone())
+                    .collect::<Vec<_>>(),
+            ),
+            _ => panic!("Files page"),
+        })
+        .unwrap()
+        .unwrap();
+    assert_eq!(
+        entries,
+        [child.clone(), root.join("same.wav"), root.join("notes.txt")]
+    );
+    let item = win
+        .list_item(win.list(list).unwrap(), ItemKey::new(0))
+        .unwrap();
+    let old = win
+        .role(Role::Button)
+        .name("Open disc")
+        .within(item)
+        .one()
+        .unwrap();
+    win.activate(old).unwrap();
+    settle(&mut win, &worker).unwrap();
+    assert_eq!(win.activate(old), Err(Error::StaleTarget));
+    assert_eq!(
+        win.with_ready(result, |page| match page {
+            Page::Files(files) => files.entries[0].path.clone(),
+            _ => panic!("Files page"),
+        })
+        .unwrap(),
+        Some(child.join("same.wav"))
+    );
+    win.update(|m| m.navigate(Route::Files)).unwrap();
+    settle(&mut win, &worker).unwrap();
+    win.activate(win.button("Forget root")).unwrap();
+    acquired(&mut win, &worker);
+    scan(&mut win, &worker);
+    let read = Database::open_read_only(&db).unwrap();
+    assert_eq!(
+        read.connection()
+            .query_row("SELECT COUNT(*) FROM track", [], |row| row.get::<_, i64>(0))
+            .unwrap(),
+        2
+    );
+    add(&mut win, &worker, &root);
+    scan(&mut win, &worker);
+    win.activate(win.button("Remove root + recordings"))
+        .unwrap();
+    acquired(&mut win, &worker);
+    assert_eq!(
+        read.connection()
+            .query_row("SELECT COUNT(*) FROM track", [], |row| row.get::<_, i64>(0))
+            .unwrap(),
+        0
+    );
+    drop(read);
+    drop(win);
+    worker.finish().unwrap();
+}

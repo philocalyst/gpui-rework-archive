@@ -88,12 +88,22 @@ impl Drop for Sink {
 }
 
 fn main() -> Result<(), Box<dyn std::error::Error>> {
-    let database = if std::env::args().any(|arg| arg == "--collections") {
+    let arguments = std::env::args().collect::<Vec<_>>();
+    let library_path = arguments
+        .windows(2)
+        .find(|pair| pair[0] == "--library")
+        .map(|pair| &pair[1]);
+    let database = if let Some(path) = library_path {
+        Database::open_library(std::path::Path::new(path))?
+    } else if arguments.iter().any(|arg| arg == "--collections") {
         Database::collection_fixture()?
     } else {
         Database::fixture()?
     };
-    for (id, extension) in [(44, "wav"), (90, "flac")] {
+    for (id, extension) in [(44, "wav"), (90, "flac")]
+        .into_iter()
+        .filter(|_| library_path.is_none())
+    {
         let fixture = std::path::Path::new(env!("CARGO_MANIFEST_DIR"))
             .join(format!("assets/audio/stereo.{extension}"));
         database.connection().execute(
