@@ -150,12 +150,18 @@ impl Bridge {
 #[cfg(test)]
 #[test]
 fn ime_native_header_ledger() {
+    struct Empty;
+    impl View for Empty {
+        fn view(&self) -> crate::El<'_> {
+            crate::div()
+        }
+    }
     eprintln!(
         "IME_NATIVE bridge={} target={} native_host={} opening={} window_options={}",
         size_of::<Bridge>(),
         size_of::<ImeTarget>(),
-        size_of::<NativeHost<()>>(),
-        size_of::<Window<()>>(),
+        size_of::<NativeHost<Empty>>(),
+        size_of::<Window<Empty>>(),
         size_of::<WindowOptions>()
     );
     if cfg!(target_pointer_width = "64") {
