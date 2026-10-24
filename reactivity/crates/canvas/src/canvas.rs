@@ -779,6 +779,25 @@ pub struct PreparedGroup<'a> {
     order: &'a [DrawRef],
 }
 impl<'a> PreparedGroup<'a> {
+    /// Device bounds in painter order, without expanding packed text positions.
+    pub fn bounds(self) -> impl ExactSizeIterator<Item = Rect> + DoubleEndedIterator {
+        self.order
+            .iter()
+            .map(|address| device_bounds(address.bounds))
+    }
+
+    /// Material views in painter order, without reconstructing local geometry.
+    pub fn sources(
+        self,
+    ) -> impl ExactSizeIterator<Item = PreparedSource<'a>> + DoubleEndedIterator {
+        self.order.iter().map(move |&address| {
+            let (stored, source) = self.commands.state(address);
+            self.commands
+                .source(source)
+                .prepared([stored.image_radius(), 0.0, 0.0, 1.0])
+        })
+    }
+
     /// Shared working paint relationship in this canonical scene, if present.
     pub fn paint_slot(self) -> Option<PaintSlot> {
         let (stored, source) = self.commands.state(self.order[0]);

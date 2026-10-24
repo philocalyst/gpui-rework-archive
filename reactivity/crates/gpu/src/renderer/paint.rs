@@ -160,13 +160,13 @@ impl PaintRenderer {
                     && site.index.order() as usize == ordinal
                 {
                     site.word = (group.paint_slot().is_none()
-                        && (compact || group.placements().len() == 1))
+                        && (compact || group.bounds().len() == 1))
                         .then(|| NonZeroU32::new((word + if compact { 3 } else { 4 }) as u32))
                         .flatten();
                     site.rectangle = group
-                        .placements()
+                        .sources()
                         .next()
-                        .is_some_and(|p| p.source.is_solid());
+                        .is_some_and(|source| source.is_solid());
                     next += 1;
                 }
             },

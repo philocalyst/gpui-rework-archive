@@ -81,6 +81,37 @@ fn groups_are_the_same_canonical_painter_sequence_in_both_directions() {
         })
         .collect::<Vec<_>>();
     assert_eq!(flat, grouped);
+    let bounds = scene
+        .groups()
+        .flat_map(|group| group.bounds())
+        .collect::<Vec<_>>();
+    assert_eq!(
+        bounds,
+        flat.iter().map(|draw| draw.bounds).collect::<Vec<_>>()
+    );
+    let sources = scene
+        .groups()
+        .flat_map(|group| group.sources())
+        .map(|source| {
+            source
+                .mask()
+                .map(|mask| (mask.key, mask.width, mask.height, mask.coverage.to_vec()))
+        })
+        .collect::<Vec<_>>();
+    assert_eq!(
+        sources,
+        flat.iter()
+            .map(|draw| draw.mask.clone())
+            .collect::<Vec<_>>()
+    );
+    assert_eq!(
+        scene
+            .groups()
+            .rev()
+            .flat_map(|group| group.bounds().rev())
+            .collect::<Vec<_>>(),
+        bounds.into_iter().rev().collect::<Vec<_>>()
+    );
     let expected = scene
         .groups()
         .map(|g| g.placements().map(|p| p.local_rect).collect::<Vec<_>>())

@@ -199,12 +199,7 @@ fn packet_color(draw: PreparedDraw<'_>) -> [f32; 4] {
     }
 }
 fn compact_group(group: PreparedGroup<'_>, enabled: bool) -> bool {
-    enabled
-        && group.placements().len() > 1
-        && !group
-            .placements()
-            .next()
-            .is_some_and(|p| rounded_image(p.source))
+    enabled && group.bounds().len() > 1 && !group.sources().next().is_some_and(rounded_image)
 }
 
 struct Buffer {
@@ -694,7 +689,7 @@ impl RendererState {
         }
         let bank_words = slots::prefix_words(bank_count);
         let word_count = scene.groups().try_fold(0usize, |sum, group| {
-            let n = group.placements().len();
+            let n = group.bounds().len();
             let compact = compact_group(group, self.grouped_records);
             let words = if compact { 5 + 2 * n } else { 6 * n };
             sum.checked_add(words).ok_or(Error::ResourceLimit)
@@ -717,7 +712,7 @@ impl RendererState {
             let compact = compact_group(group, self.grouped_records);
             let lower_solid = group.inverse[1] == 0.0
                 && group.inverse[2] == 0.0
-                && group.placements().all(|p| p.source.is_solid());
+                && group.sources().all(|source| source.is_solid());
             // Retain canonical geometry for admission/CSR/proofs. Only the
             // uploaded coverage changes. The tag bypasses transform/clip/error
             // arithmetic only after canonical sample-set lowering succeeds.
@@ -750,7 +745,7 @@ impl RendererState {
                 }
                 self.records.extend_from_slice(&words);
                 shared_groups += 1;
-                compact_draws += group.placements().len();
+                compact_draws += group.bounds().len();
                 for p in group.placements() {
                     let draw = prepared(group, p);
                     has_masks |= draw.source.mask().is_some();
@@ -824,22 +819,23 @@ impl RendererState {
             if compact {
                 word += 5;
             }
-            for p in group.placements() {
-                let atlas = if let Some((image, sampling)) = p.source.image() {
+            for (index, source) in group.sources().enumerate() {
+                let atlas = if let Some((image, sampling)) = source.image() {
                     let [offset, mut flags] = self
                         .images
                         .as_ref()
                         .unwrap()
                         .metadata(image.key(), sampling);
-                    if rounded_image(p.source) {
+                    if rounded_image(source) {
                         flags |= images::ROUNDED;
                     }
                     [offset, flags, image.width() | (image.height() << 16)]
-                } else if p.source.corner_radius().is_some() {
-                    let [radius, scale, _, _] = shape_word(p.source, p.local_rect);
+                } else if source.corner_radius().is_some() {
+                    let rect = group.placements().nth(index).unwrap().local_rect;
+                    let [radius, scale, _, _] = shape_word(source, rect);
                     [ROUNDED_SOURCE, radius, scale]
                 } else {
-                    p.source.mask().map_or([0; 3], |mask| {
+                    source.mask().map_or([0; 3], |mask| {
                         let t = self.atlas.entries[&mask.key];
                         [t.x, t.y, t.width | (t.height << 16)]
                     })
@@ -868,11 +864,11 @@ impl RendererState {
         let mut reverse_ordinal = ordinal;
         for group in scene.groups().rev() {
             let compact = compact_group(group, self.grouped_records);
-            for p in group.placements().rev() {
+            for bounds in group.bounds().rev() {
                 word -= if compact { 2 } else { 6 };
                 reverse_ordinal -= 1;
                 let address = word as u32 | if compact { 0 } else { INLINE_RECORD };
-                visit(prepared(group, p), columns, |tile| {
+                visit(bounds, columns, |tile| {
                     let range = &mut self.ranges[tile];
                     if range[1] != UNIFORM_TILE && reverse_ordinal as u32 + 1 >= self.cursors[tile]
                     {
@@ -1102,12 +1098,12 @@ impl RendererState {
         previous: usize,
     ) -> Result<usize, Error> {
         let total = previous
-            .checked_add(tile_count(draw))
+            .checked_add(tile_count(draw.bounds))
             .ok_or(Error::ResourceLimit)?;
         if total > MAX_REFERENCES {
             return Err(Error::ResourceLimit);
         }
-        visit(draw, columns, |tile| {
+        visit(draw.bounds, columns, |tile| {
             if self.tile_proofs && full_tile(draw, error, tile, columns, width, height) {
                 self.ranges[tile] = [address, 1];
                 self.cursors[tile] = ordinal as u32 + 1;
@@ -1163,8 +1159,7 @@ impl RendererState {
     }
 }
 
-fn tile_count(draw: PreparedDraw<'_>) -> usize {
-    let r = draw.bounds;
+fn tile_count(r: gpui_canvas::Rect) -> usize {
     ((r.x as usize + r.width as usize - 1) / 16 - r.x as usize / 16 + 1)
         * ((r.y as usize + r.height as usize - 1) / 16 - r.y as usize / 16 + 1)
 }
@@ -1254,8 +1249,7 @@ fn full_tile(
     }
     true
 }
-fn visit(draw: PreparedDraw<'_>, columns: usize, mut visit: impl FnMut(usize)) {
-    let r = draw.bounds;
+fn visit(r: gpui_canvas::Rect, columns: usize, mut visit: impl FnMut(usize)) {
     for y in r.y as usize / 16..=(r.y as usize + r.height as usize - 1) / 16 {
         for x in r.x as usize / 16..=(r.x as usize + r.width as usize - 1) / 16 {
             visit(y * columns + x);
