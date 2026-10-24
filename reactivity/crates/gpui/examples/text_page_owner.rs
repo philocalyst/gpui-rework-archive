@@ -365,7 +365,12 @@ fn lifecycle(mut specs: Vec<Spec>, font: FontFace, p: Snapshot) {
         c1.page.as_ref().unwrap()
     ));
     drop(stable);
-    specs[0].value = "\u{1}".into();
+    specs[0].value = "zz a partially built new resource".into();
+    specs.push(Spec {
+        value: "\u{7f}".into(),
+        size: 16.,
+        width: Some(204.),
+    });
     assert!(measured("failed_newer", || build(&specs, &font, c1.page.as_deref())).is_err());
     assert_eq!(p.row(0).value(), old_value);
     assert_eq!(c1.row(0).value(), "a replacement office אבג");
@@ -412,12 +417,68 @@ fn lifecycle(mut specs: Vec<Spec>, font: FontFace, p: Snapshot) {
     worker.join().unwrap();
     assert!(weak.upgrade().is_none());
 }
+fn certificates(font: &FontFace) {
+    let specs: Vec<_> = [(16., 20.), (16., 80.), (31., 80.), (16., 20.)]
+        .into_iter()
+        .map(|(size, width)| Spec {
+            value: "office repeated across resource keys".into(),
+            size,
+            width: Some(width),
+        })
+        .collect();
+    let p = build(&specs, font, None).unwrap();
+    assert_eq!(p.rows[0], p.rows[3]);
+    assert_ne!(p.rows[0], p.rows[1]);
+    assert_ne!(p.rows[1], p.rows[2]);
+    for (index, spec) in specs.iter().enumerate() {
+        let oracle = font
+            .shaper()
+            .shape_interactive(&spec.value, spec.size, spec.width)
+            .unwrap();
+        assert_eq!(
+            format!("{:?}", oracle.geometry().unwrap()),
+            format!("{:?}", p.row(index).shape().geometry().unwrap())
+        );
+    }
+    let other = FontFace::new(include_bytes!("../../canvas/assets/NotoSans.ttf")).unwrap();
+    assert!(!other.same_face(font));
+    let c = build(&specs, &other, p.page.as_deref()).unwrap();
+    let mut service = TextSystem::from_font(other);
+    let mut canvas = Canvas::new(100, 80).unwrap();
+    canvas
+        .draw_text(
+            &mut service,
+            c.row(0).shape(),
+            Point::default(),
+            Affine::IDENTITY,
+            Rect::new(0., 0., 100., 80.),
+            Color::BLACK,
+        )
+        .unwrap();
+    // Mixed resources exercise both byte-budget capacity and large-singleton
+    // admission, independently of the measured corpus's distribution.
+    let mut mixed = specs;
+    mixed.push(Spec {
+        value: "a".repeat(32768),
+        size: 16.,
+        width: Some(204.),
+    });
+    for n in 0..37 {
+        mixed.push(Spec {
+            value: format!("{}-{n}", "x".repeat(n * 31)),
+            size: 16.,
+            width: Some(204.),
+        });
+    }
+    build(&mixed, font, None).unwrap().retained();
+}
 fn main() {
     let args: Vec<_> = std::env::args().collect();
     let mode = args.get(1).map_or("unique", String::as_str);
     let count = args.get(2).map_or(10000, |n| n.parse().unwrap());
     let specs = corpus(mode, count);
     let font = FontFace::bundled().unwrap();
+    certificates(&font);
     println!(
         "PAGE_SCOPE,{}",
         serde_json::json!({"mode":mode,"requested_rows":count,"text_specs":specs.len(),"size":16,"width":204,"scope":"owner-column component control; Todo strings use ordinary complete public recording queries but uniform Canvas placement is not native Todo qualification","resource_header":size_of::<Resource>(),"key":size_of::<Key>(),"page":size_of::<Page>(),"shared_site":size_of::<SharedSite>(),"shared_entry":size_of::<SharedEntry>(),"owned_layout":size_of::<OwnedTextLayout>(),"shared_layout":size_of::<TextLayout>()})
