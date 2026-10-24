@@ -1418,6 +1418,8 @@ mod tests {
 
     #[test]
     fn child_clip_prunes_descendants_without_excluding_parent() {
+        use crate::FilterResult;
+
         let mut parent = Node::new(Role::GenericContainer);
         parent.set_bounds(Rect::new(0., 0., 10., 10.));
         parent.set_children(vec![NodeId(1)]);
