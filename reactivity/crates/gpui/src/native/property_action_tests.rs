@@ -152,7 +152,11 @@ impl Script {
             7 => self.apply(event_loop),
             8 => {
                 assert_eq!(&**owner.root().unwrap().editor.draft, "bad syntax");
-                assert!(owner.contains_text("Expected a number").unwrap());
+                assert!(
+                    owner
+                        .contains_text("Expected auto, points or a percentage")
+                        .unwrap()
+                );
                 self.enter("211.75");
             }
             9 => self.apply(event_loop),
