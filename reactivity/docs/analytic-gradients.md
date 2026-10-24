@@ -51,7 +51,14 @@ Resource ownership belongs to the existing cold SceneResources pointer, shared
 with images. It deduplicates immutable resources, reuses unchanged leases across
 descriptions, retains resources selected by live overrides, and prunes dead node
 identities and unreferenced keys. Combined image and gradient payloads obey the
-existing 64 MiB resource budget. The old image presented/pending Vec leases have
+existing 64 MiB resource budget. Admission sorts the already-owned description
+drafts by key, sums distinct resources together with live gradient override keys,
+and finishes before mutating the preceding bank. Resource retention uses that key
+ordering; a second in-place sort restores node order for reconciling declarations
+in place. The new logical identity index is reused for liveness. The sparse
+override-key set still allocates when needed, and sorting/work remains proportional
+to the description. Ordinary owner-description allocations are not eliminated.
+The old image presented/pending Vec leases have
 been removed: production image queries used only logical resources, while Canvas
 already owns the latest complete scene and the backend owns submitted buffers.
 An eligible complete scene survives a failed newer source preparation; stale

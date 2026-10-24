@@ -723,6 +723,24 @@ mod tests {
             "gradient_work_audit,path=unchanged-reconcile-excluding-input-vec,iterations=1,allocs={},requested={},retained_delta={},peak_delta={}",
             cost.count_total, cost.bytes_total, cost.bytes_current, cost.bytes_max
         );
+        drop(runtime);
+        win.set_property(target, BACKGROUND, Contribution::Inherit)
+            .unwrap();
+        let mut runtime = win.runtime_mut().unwrap();
+        let Runtime { images, nodes, .. } = &mut *runtime;
+        let live = IdentityIndex::from_ids(nodes.iter().map(Node::identity));
+        let drafts = vec![(0, &resource)];
+        let cost = allocation_counter::measure(|| {
+            assert!(!reconcile(images, nodes, &live, drafts).unwrap());
+        });
+        eprintln!(
+            "gradient_work_audit,path=unchanged-reconcile-no-overrides-excluding-input-vec,iterations=1,allocs={},requested={},retained_delta={},peak_delta={}",
+            cost.count_total, cost.bytes_total, cost.bytes_current, cost.bytes_max
+        );
+        assert_eq!(
+            cost.count_total, 0,
+            "unchanged declarations reuse their existing resource and identity authorities"
+        );
     }
     #[test]
     fn gradient_background_typed_reflection_owner_validation_and_replacement_are_coherent() {
