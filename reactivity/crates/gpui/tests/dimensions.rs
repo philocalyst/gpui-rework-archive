@@ -41,8 +41,23 @@ fn ack<M: View + 'static>(win: &mut Win<M>) {
     let token = win.with_scene(|_, token| token).unwrap();
     win.presented(token).unwrap();
 }
+// Canonical geometry is exact. Win::bounds is deliberately outward-rounded
+// for conservative clipping and is not the dimension's authored-size oracle.
 fn bounds<M: View + 'static>(win: &Win<M>, name: &str) -> Rect {
-    win.bounds(win.query().name(name).one().unwrap()).unwrap()
+    let mut result = None;
+    win.visit(|part| {
+        if part.name() == Some(name) {
+            let local = part.local_bounds();
+            let map = part.transform().unwrap();
+            result = Some(Rect {
+                x: map.tx,
+                y: map.ty,
+                ..local
+            });
+        }
+    })
+    .unwrap();
+    result.unwrap()
 }
 
 #[test]
@@ -121,6 +136,10 @@ fn dimension_source_fanout_retains_units_and_latest_lower_value_under_explicit_a
     win.set(Panel::SIZE, Length::Points(40.0)).unwrap();
     assert_eq!(bounds(&win, "panel").width, 40.0);
     assert_eq!(bounds(&win, "panel").height, 40.0);
+    for value in [Length::Percent(-0.0), Length::Percent(0.0)] {
+        win.set(Panel::SIZE, value).unwrap();
+        assert!(WIDTH.same_authoring(&win.property(target, WIDTH).unwrap(), &value));
+    }
 }
 
 #[test]
@@ -145,13 +164,7 @@ fn invalid_relative_publication_keeps_prepared_and_acknowledged_cohorts_distinct
     assert_eq!(win.scene_digest().unwrap(), digest);
     assert_eq!(win.snapshot().unwrap().nodes, initial.nodes);
     win.presented(pending).unwrap();
-    assert!(
-        win.snapshot()
-            .unwrap()
-            .nodes
-            .iter()
-            .any(|n| n.bounds[2] == 285.0)
-    );
+    assert_eq!(bounds(&win, "panel").width, 285.0);
     assert!(
         win.query().name("panel").one().is_err(),
         "invalid logical publication cannot mint an interaction target"
@@ -273,7 +286,11 @@ fn ordinary_inspector_increment_preserves_percentage_units_and_auto_presence() {
     let target = win.query().name("panel").one().unwrap();
     win.inspector_select(target).unwrap();
     for name in ["Increase", "Auto", "Inherit"] {
-        let inspector = win.query().name("GPUI Inspector").one().unwrap();
+        let inspector = win
+            .role(gpui::Role::ScrollView)
+            .name("GPUI Inspector")
+            .one()
+            .unwrap();
         let control = win.query().name(name).within(inspector).one().unwrap();
         win.scroll_into_view(control).unwrap();
         ack(&mut win);

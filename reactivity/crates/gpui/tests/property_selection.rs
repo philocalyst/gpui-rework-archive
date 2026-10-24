@@ -451,3 +451,36 @@ fn public_consumer_headers_remain_explicit() {
     assert_eq!(size_of::<Companion>(), 136);
     assert_eq!(size_of::<workbench::value_entry::ValueEntry>(), 104);
 }
+
+#[test]
+fn cold_value_editor_roundtrips_percent_units_and_rejects_invalid_authored_values() {
+    let mut win = Win::with_size(Companion::default(), 800, 400).unwrap();
+    let target = select_application(&mut win);
+    draft(&mut win, "125%");
+    win.activate(win.button("Apply")).unwrap();
+    assert_eq!(
+        win.property(target, gpui::property::WIDTH).unwrap(),
+        Length::Percent(125.0)
+    );
+    assert_eq!(&**win.root().unwrap().editor.draft, "125%");
+    for invalid in ["-1%", "NaN%", "inf%"] {
+        draft(&mut win, invalid);
+        win.activate(win.button("Apply")).unwrap();
+        assert_eq!(
+            win.property(target, gpui::property::WIDTH).unwrap(),
+            Length::Percent(125.0)
+        );
+        assert!(win.root().unwrap().editor.status.starts_with("Rejected:"));
+    }
+    draft(&mut win, "auto");
+    win.activate(win.button("Apply")).unwrap();
+    assert_eq!(
+        win.contribution(target, gpui::property::WIDTH).unwrap(),
+        Contribution::Set(Length::Auto)
+    );
+    win.activate(win.button("Inherit")).unwrap();
+    assert_eq!(
+        win.property(target, gpui::property::WIDTH).unwrap(),
+        Length::Points(120.0)
+    );
+}
