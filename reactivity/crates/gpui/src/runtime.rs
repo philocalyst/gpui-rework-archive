@@ -3409,10 +3409,12 @@ impl<M: View + 'static> Runtime<M> {
                         previous: self.presented.get(index).map(|row| accessibility::RowView {
                             row,
                             bases: previous_geometry.bases(),
+                            shape: previous_geometry.style(row.identity),
                         }),
                         next: accessibility::RowView {
                             row: &presented[index],
                             bases: geometry::Bases::new(&geometry_records),
+                            shape: geometry_style,
                         },
                     },
                     (self.metadata.as_deref(), selection_snapshot),

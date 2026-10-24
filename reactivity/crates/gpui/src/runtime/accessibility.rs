@@ -115,6 +115,7 @@ impl Observer {
 pub(super) struct RowView<'a> {
     pub row: &'a Presented,
     pub bases: geometry::Bases<'a>,
+    pub shape: crate::property::GeometryStyle,
 }
 impl RowView<'_> {
     fn transform(self) -> Option<Affine> {
@@ -198,6 +199,7 @@ impl Collect<'_> {
             _ => false,
         };
         if !same_geometry
+            || !previous_view.shape.same(rows.next.shape)
             || previous.kind != next.kind
             || previous.actions != next.actions
             || previous.text.as_deref() != next.text.as_deref()

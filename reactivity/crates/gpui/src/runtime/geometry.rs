@@ -181,12 +181,21 @@ impl<'a> GeometryView<'a> {
     pub fn bases(self) -> Bases<'a> {
         Bases::new(&self.records[..self.radius_start])
     }
-    pub fn clips(self, identity: u64) -> bool {
+    pub fn style(self, identity: u64) -> GeometryStyle {
         let radii = &self.records[self.radius_start..];
         radii
             .binary_search_by_key(&identity, |record| record.radius().identity)
             .ok()
-            .is_some_and(|index| radii[index].radius().clip_children)
+            .map_or_else(GeometryStyle::default, |index| {
+                let radius = radii[index].radius();
+                GeometryStyle {
+                    corner_radius: radius.value,
+                    clip_children: radius.clip_children,
+                }
+            })
+    }
+    pub fn clips(self, identity: u64) -> bool {
+        self.style(identity).clip_children
     }
     pub fn has_clips(self) -> bool {
         self.records[self.radius_start..]
@@ -194,11 +203,7 @@ impl<'a> GeometryView<'a> {
             .any(|record| record.radius().clip_children)
     }
     pub fn radius(self, identity: u64) -> f32 {
-        let radii = &self.records[self.radius_start..];
-        radii
-            .binary_search_by_key(&identity, |record| record.radius().identity)
-            .ok()
-            .map_or(0.0, |index| radii[index].radius().value)
+        self.style(identity).corner_radius
     }
 }
 
