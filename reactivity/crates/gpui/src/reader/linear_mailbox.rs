@@ -4,6 +4,7 @@ use super::sync::{
     Arc, Cell,
     atomic::{AtomicBool, AtomicU8, Ordering},
 };
+use std::panic::AssertUnwindSafe;
 
 const IDLE: u8 = 0;
 const PENDING: u8 = 1;
@@ -20,7 +21,10 @@ pub(super) trait Context {
 pub(super) struct Shared<P, C: Context> {
     state: AtomicU8,
     closed: AtomicBool,
-    slot: Cell<Option<P>>,
+    // No payload borrow crosses a user callback or destructor. Publication and
+    // close finish their state transition before notifying or cleaning context.
+    // Keep the mutex predecessor's unwind traits without constraining P.
+    slot: AssertUnwindSafe<Cell<Option<P>>>,
     context: C,
 }
 // SAFETY: Only the exclusive Owner can begin, take and retire a generation.
@@ -45,7 +49,7 @@ impl<P, C: Context> Owner<P, C> {
             shared: Some(Arc::new(Shared {
                 state: AtomicU8::new(IDLE),
                 closed: AtomicBool::new(false),
-                slot: Cell::new(None),
+                slot: AssertUnwindSafe(Cell::new(None)),
                 context,
             })),
         }
@@ -105,7 +109,7 @@ impl<P, C: Context> Owner<P, C> {
         shared.context.close();
         // Atomically release this lease or reclaim the allocation uniquely.
         // A producer can never race a unique slot extraction.
-        Arc::into_inner(shared).and_then(|shared| shared.slot.into_inner())
+        Arc::into_inner(shared).and_then(|shared| shared.slot.0.into_inner())
     }
     #[cfg(test)]
     pub(super) fn shared_for_test(&self) -> &Arc<Shared<P, C>> {

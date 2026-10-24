@@ -136,6 +136,9 @@ mod tests {
 
     #[test]
     fn abandoned_panicked_and_zero_sized_generations_keep_one_credit() {
+        fn certificate<T: Send + Sync + std::panic::UnwindSafe + std::panic::RefUnwindSafe>() {}
+        certificate::<Owner<Cell<u8>, Events>>();
+        certificate::<Producer<Cell<u8>, Events>>();
         let mut owner = Owner::<(), _>::new(Events::default());
         drop(owner.begin());
         assert_eq!(owner.freeze(), Some(ABANDONED));

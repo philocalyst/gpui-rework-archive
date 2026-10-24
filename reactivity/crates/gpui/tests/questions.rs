@@ -1,6 +1,12 @@
 use gpui::{Completion, Error, QuestionStatus, Questions, StartError, WindowOptions, prelude::*};
 use std::{fmt, sync::mpsc};
 
+#[test]
+fn completion_preserves_send_sync_and_unwind_traits_for_send_only_payloads() {
+    fn certificate<T: Send + Sync + std::panic::UnwindSafe + std::panic::RefUnwindSafe>() {}
+    certificate::<Completion<std::cell::Cell<u8>, std::convert::Infallible>>();
+}
+
 #[derive(Debug, PartialEq, Eq)]
 struct Domain(&'static str);
 impl fmt::Display for Domain {
