@@ -108,6 +108,8 @@ fn measure<const DIRECT: bool>() -> (Vec<u8>, Vec<u8>) {
         window.counters().source_reads,
         window.counters().destination_compares
     );
+    let final_pixels = window.with_pixels(|pixels, _, _| pixels.to_vec()).unwrap();
+    (initial, final_pixels)
 }
 fn main() {
     let snapshot = measure::<false>();
