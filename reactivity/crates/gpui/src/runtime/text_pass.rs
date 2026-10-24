@@ -4,14 +4,17 @@ use super::*;
 use gpui_canvas::PreparedText;
 use std::collections::HashMap;
 
+const HANDOFFS: usize = 8;
+const HANDOFF_TEXT: usize = 256;
+const HANDOFF_INPUT: usize = 2048;
+const HANDOFF_GLYPHS: usize = 2048;
+
 pub(super) struct TextPass<'font, 'text> {
     shaper: TextShaper<'font>,
     inputs: &'text [Option<SharedText>],
     prepared: HashMap<usize, PreparedText<'text>>,
     selected: TextSlot,
     minimums: Vec<Option<Minimum>>,
-    live: usize,
-    pub peak: usize,
 }
 // Frozen input leases and the fixed pass font qualify these numerical facts.
 // No strings, font leases, glyphs, or paragraph buffers enter this column.
@@ -30,8 +33,6 @@ impl<'font, 'text> TextPass<'font, 'text> {
             prepared: HashMap::new(),
             selected: TextSlot(u32::MAX),
             minimums: Vec::new(),
-            live: 0,
-            peak: 0,
         }
     }
     pub fn select(&mut self, slot: TextSlot) {
@@ -39,17 +40,36 @@ impl<'font, 'text> TextPass<'font, 'text> {
     }
     pub fn release(&mut self, slot: TextSlot) {
         if let Some(prepared) = self.prepared.remove(&(slot.0 as usize)) {
-            self.live -= 1;
             self.shaper.recycle_prepared(prepared);
         }
-    }
-    pub fn paragraph_shapes(&self) -> u64 {
-        self.shaper.paragraph_shapes()
     }
     fn input(&self, text: &str) -> Option<&'text str> {
         let input = self.inputs.get(self.selected.0 as usize)?.as_ref()?;
         // A slot routes work; only exact Display/Source bytes authorize reuse.
         (input.as_ref() == text).then_some(input.as_ref())
+    }
+    fn can_capture(&self, text: &str) -> bool {
+        // These are conservative input/glyph budgets, not exact heap-byte
+        // accounting. The complete ordinary path handles every rejected input.
+        self.prepared.len() < HANDOFFS
+            && text.len() <= HANDOFF_TEXT
+            && !text
+                .chars()
+                .any(|c| matches!(c, '\r' | '\n' | '\u{85}' | '\u{2029}'))
+            && self
+                .prepared
+                .values()
+                .map(|p| p.text().len())
+                .sum::<usize>()
+                + text.len()
+                <= HANDOFF_INPUT
+            && self.pending_glyphs() < HANDOFF_GLYPHS
+    }
+    fn pending_glyphs(&self) -> usize {
+        self.prepared
+            .values()
+            .map(PreparedText::shaped_glyph_count)
+            .sum()
     }
     pub fn measure(
         &mut self,
@@ -73,14 +93,15 @@ impl<'font, 'text> TextPass<'font, 'text> {
             && prepared.font_size().to_bits() == size.to_bits()
         {
             self.shaper.measure_prepared(prepared, width)?
-        } else if capture {
+        } else if capture && self.can_capture(input) {
             let (prepared, metrics) = self.shaper.prepare(input, size, width)?;
-            if let Some(old) = self.prepared.insert(index, prepared) {
-                self.shaper.recycle_prepared(old);
-            } else {
-                self.live += 1;
-                self.peak = self.peak.max(self.live);
+            if self.pending_glyphs() + prepared.shaped_glyph_count() <= HANDOFF_GLYPHS {
+                if let Some(old) = self.prepared.insert(index, prepared) {
+                    self.shaper.recycle_prepared(old);
+                }
             }
+            // An oversized completed paragraph drops here instead of entering
+            // the pending bank or spare pool. It only loses future reuse.
             metrics
         } else {
             self.shaper.measure(text, size, width)?
@@ -107,7 +128,6 @@ impl<'font, 'text> TextPass<'font, 'text> {
         if self.input(text).is_some()
             && let Some(mut prepared) = self.prepared.remove(&index)
         {
-            self.live -= 1;
             let result = if prepared.font_size().to_bits() == size.to_bits() {
                 self.shaper.shape_prepared(&mut prepared, width)
             } else {

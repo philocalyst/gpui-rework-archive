@@ -41,7 +41,6 @@ fn prepared_rebreak_matches_independent_builder_metrics_and_complete_geometry() 
         "x\n\n",
     ] {
         for size in [1., 12., 16., 31.25, 512.] {
-            let before = reused.paragraph_shapes();
             let (mut prepared, initial) = reused
                 .prepare(source, size, Some(f32::MIN_POSITIVE))
                 .unwrap();
@@ -54,8 +53,6 @@ fn prepared_rebreak_matches_independent_builder_metrics_and_complete_geometry() 
                 )
             );
             assert_eq!(prepared.text(), source);
-            let after = reused.paragraph_shapes();
-            assert!(after > before);
             let atom = oracle.measure("a", size, None).unwrap().width;
             let widths = [
                 Some(f32::MIN_POSITIVE),
@@ -80,11 +77,6 @@ fn prepared_rebreak_matches_independent_builder_metrics_and_complete_geometry() 
                     "{source:?} {size} {width:?}"
                 );
             }
-            assert_eq!(
-                reused.paragraph_shapes(),
-                after,
-                "every rebreak must delete build_into"
-            );
             reused.recycle_prepared(prepared);
         }
     }

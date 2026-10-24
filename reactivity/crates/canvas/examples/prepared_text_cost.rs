@@ -34,7 +34,12 @@ fn digest(layouts: &[TextLayout], mut hash: u64) -> u64 {
 }
 fn main() {
     let face = FontFace::bundled().unwrap();
+    let requested_case = std::env::args().nth(1);
+    let requested_mode = std::env::args().nth(2);
     for case in ["unique", "repeated", "unicode"] {
+        if requested_case.as_deref().is_some_and(|value| value != case) {
+            continue;
+        }
         let inputs: Vec<String> = (0..10_000)
             .map(|i| match case {
                 "unique" => format!("Task {:04}", i + 1),
@@ -44,13 +49,18 @@ fn main() {
             .collect();
         let mut expected = None;
         for prepared in [false, true] {
+            if requested_mode
+                .as_deref()
+                .is_some_and(|value| value != if prepared { "prepared" } else { "baseline" })
+            {
+                continue;
+            }
             let mut layouts = Vec::new();
             let mut hash = 14695981039346656037;
-            let mut shapes = 0;
             let started = Instant::now();
             let cost = allocation_counter::measure(|| {
                 let mut shaper = face.shaper();
-                let mut pending = Vec::with_capacity(3);
+                let mut pending = Vec::with_capacity(if prepared { 3 } else { 0 });
                 for batch in inputs.chunks(3) {
                     if prepared {
                         for text in batch {
@@ -81,7 +91,6 @@ fn main() {
                         }
                     }
                 }
-                shapes = shaper.paragraph_shapes();
             });
             let elapsed = started.elapsed().as_nanos();
             let hash = black_box(digest(&layouts, hash));
@@ -91,7 +100,7 @@ fn main() {
                 expected = Some(hash);
             }
             println!(
-                "PREPARED_TEXT_COST case={case} prepared={prepared} rows={} ns={elapsed} allocations={} requested={} retained={} peak={} shapes={shapes} digest={hash}",
+                "PREPARED_TEXT_COST case={case} prepared={prepared} rows={} ns={elapsed} allocations={} requested={} retained={} peak={} digest={hash}",
                 inputs.len(),
                 cost.count_total,
                 cost.bytes_total,

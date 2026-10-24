@@ -202,8 +202,6 @@ pub struct Counters {
     pub text_bytes_copied: u64,
     pub layout_runs: u64,
     pub measure_calls: u64,
-    pub paragraph_shapes: u64,
-    pub prepared_text_peak: u64,
     pub presentations: u64,
     pub paint_passes: u64,
     pub exact_updates: u64,
@@ -3246,10 +3244,6 @@ impl<M: View + 'static> Runtime<M> {
             },
             &mut measure,
         )?;
-        self.counters.prepared_text_peak = self
-            .counters
-            .prepared_text_peak
-            .max(shaper.as_ref().map_or(0, |s| s.peak as u64));
         let after = self.layout.stats();
         self.counters.layout_runs += after.computes - before.computes;
         self.counters.measure_calls += after.measure_calls - before.measure_calls;
@@ -3858,11 +3852,6 @@ impl<M: View + 'static> Runtime<M> {
         {
             text.system = None;
         }
-        self.counters.paragraph_shapes += shaper.as_ref().map_or(0, TextPass::paragraph_shapes);
-        self.counters.prepared_text_peak = self
-            .counters
-            .prepared_text_peak
-            .max(shaper.as_ref().map_or(0, |s| s.peak as u64));
         self.dirty = false;
         self.rebuild_layout = false;
         self.topology_changed = false;

@@ -358,6 +358,13 @@ impl PreparedText<'_> {
     pub fn font_size(&self) -> f32 {
         self.font_size
     }
+    /// Raw shaped glyph count, including ignored glyphs. A conservative resource
+    /// admission operand; this is not a measurement of retained heap capacity.
+    pub fn shaped_glyph_count(&self) -> usize {
+        self.paragraphs
+            .as_ref()
+            .map_or(0, |paragraphs| paragraphs.glyphs)
+    }
 }
 /// A scoped parser over immutable font bytes, reusable across measurement and
 /// painting. It owns parsed shaping tables and reusable paragraph scratch,
@@ -372,7 +379,16 @@ pub struct TextShaper<'font> {
     planner: Option<Box<planner::Planner<'font>>>,
 }
 impl<'font> TextShaper<'font> {
-    /// Shape each paragraph once, preserving its original source borrow.
+    /// Measure and shape each paragraph once, preserving its source borrow.
+    ///
+    /// ```compile_fail
+    /// let font = gpui_canvas::FontFace::bundled().unwrap();
+    /// let mut shaper = font.shaper();
+    /// let source = String::from("borrowed paragraph");
+    /// let (mut prepared, _) = shaper.prepare(&source, 16., None).unwrap();
+    /// drop(source);
+    /// let _ = shaper.shape_prepared(&mut prepared, Some(80.));
+    /// ```
     pub fn prepare<'text>(
         &mut self,
         text: &'text str,
@@ -445,12 +461,6 @@ impl<'font> TextShaper<'font> {
         {
             planner.recycle(paragraphs);
         }
-    }
-    /// Number of paragraph builder invocations in this scoped shaper.
-    pub fn paragraph_shapes(&self) -> u64 {
-        self.planner
-            .as_ref()
-            .map_or(0, |planner| planner.paragraph_shapes)
     }
     /// Measure wrapping without freezing an owned layout. Paragraph scratch is
     /// reused within this shaper; the returned numbers borrow no font storage.

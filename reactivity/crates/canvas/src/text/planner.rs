@@ -50,7 +50,6 @@ pub(super) struct Planner<'font> {
     blob_ids: [Option<u64>; 3],
     sets: [Option<Arc<FontSet>>; 4],
     primary_cmap: Cmap<'font>,
-    pub(super) paragraph_shapes: u64,
     spare: Vec<parley::Layout<()>>,
 }
 pub(super) struct Paragraphs {
@@ -58,6 +57,7 @@ pub(super) struct Paragraphs {
     rest: Vec<parley::Layout<()>>,
     needed: u8,
     blob_ids: [Option<u64>; 3],
+    pub(super) glyphs: usize,
 }
 struct Planned {
     metrics: TextMetrics,
@@ -85,7 +85,6 @@ impl<'font> Planner<'font> {
             faces,
             blob_ids: [None; 3],
             sets: [Some(base), None, None, None],
-            paragraph_shapes: 0,
             spare: Vec::new(),
             primary_cmap: if primary.0.bundled {
                 Cmap(None)
@@ -163,9 +162,10 @@ impl<'font> Planner<'font> {
     ) -> Result<(Paragraphs, TextMetrics), Error> {
         let mut paragraphs = Paragraphs {
             first: parley::Layout::default(),
-            rest: Vec::new(),
+            rest: Vec::with_capacity(paragraph::ranges(text).count() - 1),
             needed: 0,
             blob_ids: self.blob_ids,
+            glyphs: 0,
         };
         // Capture only after each paragraph passes the same glyph/geometry
         // admission as ordinary measurement. Failure releases prior paragraphs.
@@ -208,7 +208,6 @@ impl<'font> Planner<'font> {
         builder.push_default(StyleProperty::FontSize(size));
         builder.push_default(StyleProperty::OverflowWrap(OverflowWrap::Anywhere));
         builder.build_into(&mut self.layout, content);
-        self.paragraph_shapes += 1;
     }
     pub fn shape_prepared(
         &mut self,
@@ -480,6 +479,7 @@ impl<'font> Planner<'font> {
             if capture && let Some(paragraphs) = &mut paragraphs {
                 let layout =
                     std::mem::replace(&mut self.layout, self.spare.pop().unwrap_or_default());
+                paragraphs.glyphs += count;
                 if index == 0 {
                     paragraphs.first = layout;
                 } else {
