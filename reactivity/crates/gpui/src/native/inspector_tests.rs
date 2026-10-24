@@ -119,7 +119,7 @@ impl Script {
                 let card = owner.inspector_selected().unwrap().unwrap();
                 assert_eq!(
                     owner.property(card, crate::property::WIDTH).unwrap(),
-                    Some(81.0)
+                    crate::Length::Points(81.0)
                 );
                 if !self.control(event_loop, "background") {
                     return;
@@ -144,7 +144,7 @@ impl Script {
                 let card = owner.inspector_selected().unwrap().unwrap();
                 assert_eq!(
                     owner.property(card, crate::property::WIDTH).unwrap(),
-                    Some(80.0)
+                    crate::Length::Points(80.0)
                 );
                 assert_eq!(
                     owner
@@ -254,7 +254,7 @@ impl Script {
                     .set_property(
                         card,
                         crate::property::WIDTH,
-                        crate::property::Contribution::Set(Some(90.)),
+                        crate::property::Contribution::Set(crate::Length::Points(90.)),
                     )
                     .unwrap();
                 // An actual physical click during pending C cannot re-pick P.

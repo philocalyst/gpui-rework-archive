@@ -44,11 +44,11 @@ impl ValueEditor {
         let scalar = || source.parse::<f32>().map_err(|_| "Expected a number");
         let value = match self.value {
             PropertyValue::Number(_) => PropertyValue::Number(scalar()?),
-            PropertyValue::Dimension(_) => PropertyValue::Dimension(if source == "auto" {
-                None
-            } else {
-                Some(scalar()?)
-            }),
+            PropertyValue::Dimension(_) => PropertyValue::Dimension(
+                source
+                    .parse()
+                    .map_err(|_| "Expected auto, points or a percentage")?,
+            ),
             PropertyValue::Transform(_) => {
                 let [a, b, c, d, tx, ty] = numbers(source)?;
                 PropertyValue::Transform(Affine { a, b, c, d, tx, ty })
@@ -171,12 +171,12 @@ fn main() -> Result<(), Box<dyn std::error::Error>> {
     win.update(|m| *m.application.width = 250.)?;
     assert_eq!(
         win.property_value(target, PropertyId::Width)?,
-        PropertyValue::Dimension(Some(193.25))
+        PropertyValue::Dimension(gpui::Length::Points(193.25))
     );
     win.set_property_value(target, PropertyId::Width, Contribution::Inherit)?;
     assert_eq!(
         win.property_value(target, PropertyId::Width)?,
-        PropertyValue::Dimension(Some(250.))
+        PropertyValue::Dimension(gpui::Length::Points(250.))
     );
     win.click(target)?;
     assert_eq!(win.root()?.application.presses, 1);

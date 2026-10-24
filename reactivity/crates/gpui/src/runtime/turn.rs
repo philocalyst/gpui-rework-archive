@@ -338,6 +338,9 @@ impl<M: View + 'static, L: LaneSet<M>> RuntimeMut<'_, M, L> {
     ) -> Result<Commit, Error> {
         self.live()?;
         let index = self.resolve_index(target)?;
+        if self.runtime.nodes[index].content.disabled() {
+            return Err(Error::NotInteractive);
+        }
         if self.runtime.nodes[index].kind() == NodeKind::Input {
             self.runtime.changed_nodes = 0;
             return Ok(self.commit());
@@ -364,7 +367,13 @@ impl<M: View + 'static, L: LaneSet<M>> RuntimeMut<'_, M, L> {
             .source_epoch
             .checked_add(1)
             .ok_or(Error::EpochExhausted)?;
-        match catch_unwind(AssertUnwindSafe(|| handler.invoke(&mut self.runtime.model))) {
+        let next = match self.runtime.nodes[index].kind() {
+            NodeKind::CheckBox(checked) => Some(!checked),
+            _ => None,
+        };
+        match catch_unwind(AssertUnwindSafe(|| {
+            handler.invoke_control(&mut self.runtime.model, next)
+        })) {
             Ok(result) => result?,
             Err(_) => {
                 self.poison();

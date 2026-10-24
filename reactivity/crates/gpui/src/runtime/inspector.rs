@@ -276,7 +276,11 @@ fn adjust(value: PropertyValue, component: u8, direction: f32) -> Result<Propert
     }
     Ok(match value {
         Brush(_) => unreachable!(),
-        Dimension(value) => Dimension(Some(value.unwrap_or(0.) + direction)),
+        Dimension(value) => Dimension(match value {
+            Length::Auto => Length::Points(direction),
+            Length::Points(value) => Length::Points(value + direction),
+            Length::Percent(value) => Length::Percent(value + direction),
+        }),
         Number(value) => Number(value + direction),
         Flag(_) => Flag(direction > 0.),
         Flow(value) => Flow(cycle(value, &[Flow::Row, Flow::Column], direction)),
@@ -406,8 +410,8 @@ impl<M: View + 'static> Runtime<M> {
         for (index, width) in [(0, width), (1, (width - 320.0).max(0.0)), (panel, 320.0)] {
             let before = self.styles.get(index);
             let mut after = before;
-            WIDTH.set(&mut after, Some(width))?;
-            crate::property::HEIGHT.set(&mut after, Some(height))?;
+            WIDTH.set(&mut after, Length::Points(width))?;
+            crate::property::HEIGHT.set(&mut after, Length::Points(height))?;
             if !styles::exact_eq(&before, &after) {
                 self.styles.set(index, after, self.nodes.len());
                 self.layout_dirty.insert(self.nodes[index].identity());
@@ -718,7 +722,7 @@ impl<M: View + 'static, L: LaneSet<M>> RuntimeMut<'_, M, L> {
                 }
                 let contribution = match op {
                     EditorOp::Inherit => Contribution::Inherit,
-                    EditorOp::Auto => Contribution::Set(PropertyValue::Dimension(None)),
+                    EditorOp::Auto => Contribution::Set(PropertyValue::Dimension(Length::Auto)),
                     EditorOp::Decrease | EditorOp::Increase => {
                         let value = match adjust(
                             value,
@@ -1000,8 +1004,11 @@ mod tests {
         for field in Caption::ALL {
             let node = &nodes[field.offset()];
             if matches!(field, Caption::Bounds | Caption::Transform) {
-                assert_eq!(WIDTH.get(&node.style), Some(296.0));
-                assert_eq!(crate::property::HEIGHT.get(&node.style), Some(36.0));
+                assert_eq!(WIDTH.get(&node.style), Length::Points(296.0));
+                assert_eq!(
+                    crate::property::HEIGHT.get(&node.style),
+                    Length::Points(36.0)
+                );
             }
             assert_eq!(node.kind, field.kind(), "{field:?}");
             assert_eq!(

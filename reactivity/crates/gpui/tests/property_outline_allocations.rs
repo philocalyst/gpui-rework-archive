@@ -18,7 +18,7 @@ impl Model {
         Some((
             self.target?,
             PropertyId::Width,
-            Contribution::Set(PropertyValue::Dimension(Some(80.))),
+            Contribution::Set(PropertyValue::Dimension(gpui::Length::Points(80.))),
         ))
     }
     fn replied(&mut self, result: Result<PropertyState, &Error>) {
@@ -67,7 +67,7 @@ fn ordinary_and_property_requests_have_matched_allocation_controls() {
         assert_eq!(owner.counters().source_operations, 3);
         assert_eq!(
             owner.property_value(target, PropertyId::Width).unwrap(),
-            PropertyValue::Dimension(Some(80.))
+            PropertyValue::Dimension(gpui::Length::Points(80.))
         );
         let idle = allocation_counter::measure(|| {
             for _ in 0..100 {
