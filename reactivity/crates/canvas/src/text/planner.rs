@@ -168,9 +168,7 @@ impl<'font> Planner<'font> {
             font_size: size,
             glyphs: GlyphBuffer::new(planned.glyphs, text_len).map_err(|_| Error::ResourceLimit)?,
             fonts: self.font_set(planned.mask),
-            mapping: planned
-                .details
-                .map(|details| G::from(Arc::try_unwrap(Arc::new(details)).ok().unwrap())),
+            mapping: planned.details.map(G::from),
         })
     }
     pub fn measure(
