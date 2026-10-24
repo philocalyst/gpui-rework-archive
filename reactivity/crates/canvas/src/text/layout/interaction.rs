@@ -440,6 +440,50 @@ impl TextGeometry {
         self.move_visual(position, true)
     }
 
+    /// Nearest legal caret on the preceding visual line at layout-local `x`.
+    /// Affinity determines the current line at a wrap. Document edges preserve
+    /// the current position. Invalid positions or nonfinite x return None.
+    /// Borrows the existing interaction map without allocation.
+    pub fn previous_visual_line(&self, position: TextPosition, x: f32) -> Option<TextPosition> {
+        self.move_visual_line(position, x, false)
+    }
+
+    /// Nearest legal caret on the following visual line; see
+    /// [`Self::previous_visual_line`]. The caller owns preferred-x policy.
+    pub fn next_visual_line(&self, position: TextPosition, x: f32) -> Option<TextPosition> {
+        self.move_visual_line(position, x, true)
+    }
+
+    fn move_visual_line(&self, position: TextPosition, x: f32, down: bool) -> Option<TextPosition> {
+        self.caret_bounds(position)?;
+        if !x.is_finite() {
+            return None;
+        }
+        let line = self.source_line(position);
+        let next = if down {
+            line.checked_add(1)
+        } else {
+            line.checked_sub(1)
+        };
+        match next.filter(|&line| line < self.lines.len()) {
+            Some(line) => self.position_on_line(line, x),
+            None => Some(position),
+        }
+    }
+
+    /// Physical left edge of the current visual line, including RTL text.
+    /// Invalid positions return None. No geometry or navigation state is retained.
+    pub fn visual_line_start(&self, position: TextPosition) -> Option<TextPosition> {
+        self.caret_bounds(position)?;
+        self.position_on_line(self.source_line(position), -f32::MAX)
+    }
+
+    /// Physical right edge of the current visual line; see [`Self::visual_line_start`].
+    pub fn visual_line_end(&self, position: TextPosition) -> Option<TextPosition> {
+        self.caret_bounds(position)?;
+        self.position_on_line(self.source_line(position), f32::MAX)
+    }
+
     fn move_visual(&self, position: TextPosition, right: bool) -> Option<TextPosition> {
         let bounds = self.caret_bounds(position)?;
         let map = self;
@@ -497,6 +541,18 @@ impl TextLayout {
     }
     pub fn next_visual(&self, position: TextPosition) -> Option<TextPosition> {
         self.geometry()?.next_visual(position)
+    }
+    pub fn previous_visual_line(&self, position: TextPosition, x: f32) -> Option<TextPosition> {
+        self.geometry()?.previous_visual_line(position, x)
+    }
+    pub fn next_visual_line(&self, position: TextPosition, x: f32) -> Option<TextPosition> {
+        self.geometry()?.next_visual_line(position, x)
+    }
+    pub fn visual_line_start(&self, position: TextPosition) -> Option<TextPosition> {
+        self.geometry()?.visual_line_start(position)
+    }
+    pub fn visual_line_end(&self, position: TextPosition) -> Option<TextPosition> {
+        self.geometry()?.visual_line_end(position)
     }
 }
 

@@ -9,6 +9,7 @@ struct LogicalSelection {
     field: FieldId,
     value: SharedText,
     selection: TextSelection,
+    preferred_x: Option<f32>,
 }
 
 /// The two immutable presentation endpoints, not another logical editor. This
@@ -22,7 +23,7 @@ pub(super) struct SelectionSnapshot {
 /// One cold owner keeps logical, candidate and acknowledged lifetimes separate.
 /// Revocation drops the logical source lease immediately; old P/C offsets remain
 /// until the corresponding complete scene is replaced. This avoids another
-/// Metadata slot/allocation, at the cost of 40 empty bytes while only P/C survive.
+/// Metadata slot/allocation, at the cost of 48 empty bytes while only P/C survive.
 #[derive(Default)]
 pub(super) struct Editing {
     logical: Option<LogicalSelection>,
@@ -169,13 +170,23 @@ impl<M: View + 'static> Runtime<M> {
         })
     }
 
-    fn set_selection(&mut self, index: usize, selection: TextSelection) -> bool {
+    fn set_selection(
+        &mut self,
+        index: usize,
+        selection: TextSelection,
+        preferred_x: Option<f32>,
+    ) -> bool {
         let node = &self.nodes[index];
-        if self
-            .editing_at(index)
-            .is_some_and(|state| state.selection == selection)
-        {
-            return false;
+        if self.editing_at(index).is_some() {
+            // The proof above includes identity, field and the exact immutable
+            // source lease. Moving its caret needs no lease clone or retirement.
+            let editing = self.metadata.as_mut().unwrap().editing.as_mut().unwrap();
+            let state = editing.logical.as_mut().unwrap();
+            let changed = state.selection != selection;
+            state.selection = selection;
+            state.preferred_x = preferred_x;
+            self.dirty |= changed;
+            return changed;
         }
         let text = node.text_slot().get(&self.texts).unwrap();
         let next = LogicalSelection {
@@ -183,13 +194,8 @@ impl<M: View + 'static> Runtime<M> {
             field: text.field.unwrap(),
             value: text.value.clone(),
             selection,
+            preferred_x,
         };
-        let previous = self
-            .metadata
-            .as_mut()
-            .and_then(|metadata| metadata.editing.as_mut())
-            .and_then(|editing| editing.logical.take());
-        drop(previous);
         self.metadata
             .get_or_insert_with(|| Box::new(Metadata::default()))
             .editing
@@ -235,6 +241,7 @@ impl<M: View + 'static> Runtime<M> {
                         anchor: caret,
                         focus: caret,
                     },
+                    None,
                 ));
             }
             return Ok(self.clear_editing());
@@ -287,6 +294,7 @@ impl<M: View + 'static, L: LaneSet<M>> Win<M, L> {
 
     /// Set UTF-8 grapheme endpoints on a live input. Invalid endpoints are
     /// rejected before state or publication changes. This does not change focus.
+    /// An accepted selection resets vertical preferred x, even if unchanged.
     pub fn select(&mut self, target: Target, selection: TextSelection) -> Result<Commit, Error> {
         self.runtime_mut()?.select_input(target, selection)
     }
@@ -441,10 +449,59 @@ impl<M: View + 'static, L: LaneSet<M>> RuntimeMut<'_, M, L> {
         )
     }
 
+    pub(super) fn move_line_selection(
+        &mut self,
+        target: Target,
+        key: Key<'_>,
+        extend: bool,
+    ) -> Result<Commit, Error> {
+        self.live()?;
+        self.current_presentation()?;
+        let index = self.input_index(target)?;
+        let selection = self.selection_at(index)?;
+        let preferred_x = self.editing_at(index).and_then(|state| state.preferred_x);
+        let layout = self.runtime.interaction_layout(index)?;
+        let vertical = matches!(key, Key::Up { .. } | Key::Down { .. });
+        let focus = selection.focus;
+        let x = if vertical {
+            Some(match preferred_x {
+                Some(x) => x,
+                None => layout.caret_bounds(focus).ok_or(Error::InvalidSelection)?.x,
+            })
+        } else {
+            None
+        };
+        let focus = match key {
+            Key::Up { .. } => layout.previous_visual_line(focus, x.unwrap()),
+            Key::Down { .. } => layout.next_visual_line(focus, x.unwrap()),
+            Key::Home { .. } => layout.visual_line_start(focus),
+            Key::End { .. } => layout.visual_line_end(focus),
+            _ => unreachable!("line navigation keys only"),
+        }
+        .ok_or(Error::InvalidSelection)?;
+        self.select_input_with_x(
+            target,
+            TextSelection {
+                anchor: if extend { selection.anchor } else { focus },
+                focus,
+            },
+            x,
+        )
+    }
+
     pub(super) fn select_input(
         &mut self,
         target: Target,
         selection: TextSelection,
+    ) -> Result<Commit, Error> {
+        self.select_input_with_x(target, selection, None)
+    }
+
+    fn select_input_with_x(
+        &mut self,
+        target: Target,
+        selection: TextSelection,
+        preferred_x: Option<f32>,
     ) -> Result<Commit, Error> {
         self.live()?;
         let index = self.input_index(target)?;
@@ -461,7 +518,7 @@ impl<M: View + 'static, L: LaneSet<M>> RuntimeMut<'_, M, L> {
             .checked_add(1)
             .ok_or(Error::EpochExhausted)?;
         self.changed_nodes = 0;
-        if !self.set_selection(index, selection) {
+        if !self.set_selection(index, selection, preferred_x) {
             return Ok(self.commit());
         }
         self.runtime.source_epoch = epoch;
@@ -755,9 +812,9 @@ mod tests {
             allocation
         );
         if cfg!(target_pointer_width = "64") {
-            assert_eq!(std::mem::size_of::<LogicalSelection>(), 40);
-            assert_eq!(std::mem::size_of::<Option<LogicalSelection>>(), 40);
-            assert_eq!(std::mem::size_of::<Editing>(), 88);
+            assert_eq!(std::mem::size_of::<LogicalSelection>(), 48);
+            assert_eq!(std::mem::size_of::<Option<LogicalSelection>>(), 48);
+            assert_eq!(std::mem::size_of::<Editing>(), 96);
             assert_eq!(std::mem::size_of::<SelectionSnapshot>(), 24);
             assert_eq!(std::mem::size_of::<Option<SelectionSnapshot>>(), 24);
             assert_eq!(std::mem::size_of::<Option<Box<Editing>>>(), 8);

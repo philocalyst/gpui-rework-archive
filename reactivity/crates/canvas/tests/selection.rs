@@ -547,3 +547,93 @@ fn directional_run_boxes_do_not_span_disconnected_isolate_fragments() {
         }
     }
 }
+
+#[test]
+fn vertical_navigation_uses_affinity_line_ownership_and_one_allocation_free_map() {
+    let font = FontFace::bundled().unwrap();
+    let mut split_wraps = 0;
+    for source in [
+        "office office office",
+        "abc אבג 123 xyz",
+        "אבג דהו זחט",
+        "e\u{301}\r\n\r\n",
+        "",
+    ] {
+        let layout = font
+            .shaper()
+            .shape_interactive(source, 18., Some(55.))
+            .unwrap();
+        let lines: Vec<_> = layout.lines().map(|line| line.bounds()).collect();
+        for byte in 0..=source.len() {
+            if let (Some(up), Some(down)) = (
+                layout.caret_bounds(position(byte, A::Upstream)),
+                layout.caret_bounds(position(byte, A::Downstream)),
+            ) {
+                split_wraps += usize::from(up.y != down.y);
+            }
+            for affinity in [A::Upstream, A::Downstream] {
+                let current = position(byte, affinity);
+                let Some(bounds) = layout.caret_bounds(current) else {
+                    continue;
+                };
+                let line = lines.iter().position(|line| line.y == bounds.y).unwrap();
+                for (down, next) in [
+                    (false, line.checked_sub(1)),
+                    (true, line.checked_add(1).filter(|&n| n < lines.len())),
+                ] {
+                    let expected = next
+                        .map(|n| {
+                            layout
+                                .position_at(Point {
+                                    x: bounds.x,
+                                    y: lines[n].y + lines[n].height * 0.5,
+                                })
+                                .unwrap()
+                        })
+                        .unwrap_or(current);
+                    let measured = allocation_counter::measure(|| {
+                        let actual = if down {
+                            layout.next_visual_line(current, bounds.x)
+                        } else {
+                            layout.previous_visual_line(current, bounds.x)
+                        };
+                        assert_eq!(actual, Some(expected), "{source:?} {current:?}");
+                    });
+                    assert_eq!(measured.count_total, 0);
+                }
+                for (end, x) in [(false, -f32::MAX), (true, f32::MAX)] {
+                    let expected = layout.position_at(Point {
+                        x,
+                        y: bounds.y + bounds.height * 0.5,
+                    });
+                    let measured = allocation_counter::measure(|| {
+                        let actual = if end {
+                            layout.visual_line_end(current)
+                        } else {
+                            layout.visual_line_start(current)
+                        };
+                        assert_eq!(actual, expected);
+                    });
+                    assert_eq!(measured.count_total, 0);
+                }
+                assert_eq!(layout.next_visual_line(current, f32::NAN), None);
+                assert_eq!(layout.previous_visual_line(current, f32::INFINITY), None);
+            }
+        }
+    }
+    assert!(
+        split_wraps > 0,
+        "fixture must exercise split-affinity wrap ownership"
+    );
+    let layout = font
+        .shaper()
+        .shape_interactive("e\u{301}\r\nx", 18., None)
+        .unwrap();
+    for byte in [1, 2, 4, 99] {
+        assert_eq!(
+            layout.next_visual_line(position(byte, A::Downstream), 0.),
+            None
+        );
+        assert_eq!(layout.visual_line_start(position(byte, A::Upstream)), None);
+    }
+}

@@ -780,3 +780,40 @@ fn input_root_survives_wrap_and_font_changes_but_old_run_positions_retire() {
     assert!(cohort.target(&win, root).is_err());
     assert!(cohort.selection(root, previous).is_none());
 }
+
+#[test]
+fn keyboard_vertical_selection_projects_the_same_acknowledged_endpoints() {
+    let mut win = Win::demo(Inputs::new("abcdefghij\nx\nabcdefghij"));
+    let input = target(&win, 1);
+    win.focus(input).unwrap();
+    win.select(input, crate::TextSelection::caret(8).unwrap())
+        .unwrap();
+    for expected in [12, 21] {
+        win.key(crate::Key::Down { extend: true }).unwrap();
+        let mut cohort = Cohort::default();
+        cohort.refresh(&win).unwrap();
+        let id = native_id(&win, &cohort, input);
+        let tree = Tree::new(
+            project(
+                &win.accessibility_sheet().unwrap(),
+                win.accessibility_state().unwrap(),
+                "Inputs",
+                &cohort,
+            ),
+            true,
+        );
+        let node = tree
+            .state()
+            .node_by_tree_local_id(id, TreeId::ROOT)
+            .unwrap();
+        assert_eq!(
+            node.text_selection_anchor().unwrap().to_global_usv_index(),
+            8
+        );
+        assert_eq!(
+            node.text_selection_focus().unwrap().to_global_usv_index(),
+            expected
+        );
+        assert_eq!(win.selection(input).unwrap().focus.offset.byte(), expected);
+    }
+}

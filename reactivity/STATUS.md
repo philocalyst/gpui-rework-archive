@@ -13,7 +13,7 @@ describe the intended complete system; this page records what is connected now.
 | Worker delivery | Static typed inbox/question chains, frozen batches, versioned input-family admission, one physical completion credit, borrowed cooperative cancellation, native wakes and exclusive cleanup | Reader lookup scans earlier lanes; cross-turn results remain progressive; dynamic graph and demand parking remain; queue capacity is not a byte bound |
 | Collections | Borrowed keyed uniform lists and ordinary two-axis scroll panes, f64 rebased offsets, viewport-only virtual rows, shared wheel/reveal/accessibility routing | Explicit uniform-height finite virtual viewports; rotated/sheared scroll apertures and variable-height virtual rows remain |
 | Properties and inspector | Typed selectors and closed reflection catalog share validated Set/Inherit transactions; all 13 properties and eight value families feed retained native inspector controls; contained components select mounted targets, edit and refresh canonical state through ordinary typed click methods; edit counts join description changes by exact identity | Arbitrary built-in entry, descendant picking for contained tools, complete theme cascade and user-defined component schemas remain |
-| Layout and text | Cephal perf/cold-layout with direct lazy cache handles, selective nonparent containing blocks and allocation-free hidden markers; literal/direct-Signal dimensions and flex recipes; Parley/Engine/Fontique 0.12 with scoped paragraph reuse; source-qualified grapheme editing, native selection/caret paint and horizontal visual navigation; acknowledged wrapped/bidi text geometry | General Reader/Motion recipe algebra, IME/clipboard/vertical navigation/autoscroll, arbitrary font discovery and hostile-font transient budgets remain |
+| Layout and text | Cephal perf/cold-layout with direct lazy cache handles, selective nonparent containing blocks and allocation-free hidden markers; literal/direct-Signal dimensions and flex recipes; Parley/Engine/Fontique 0.12 with scoped paragraph reuse; source-qualified grapheme editing, native selection/caret paint, horizontal and vertical visual navigation and line-edge keys; acknowledged wrapped/bidi text geometry | General Reader/Motion recipe algebra, IME/clipboard/autoscroll, native macOS range-origin policy, arbitrary font discovery and hostile-font transient budgets remain |
 | Canvas | Canonical grouped display list, rounded solid/image shapes, linear-light 4×4 sampling, exact per-pixel sample promotion, separable rectangle/glyph addresses, tile proofs, optional CPU image, exact scene-support damage, certified software-buffer repair, lazy bounds-only CSR membership reused across contained repairs and disjoint parallel bands | Multiple damage islands, persistent GPU repair and complete effect/path/media library remain |
 | Images | Borrowed immutable resources, packed RGBA8/P3 or explicit linear HDR, linear-light filtering, CPU/WGSL rendering and native accessible Image roles | Caller decoding/I/O, direct source fanout, mipmaps and native HDR negotiation remain |
 | GPU | Vendored WGPU/Core/HAL 30, typed wgsl-rs generation/validation and optional guarded static SPIR-V recipes with scoped Vulkan module lifetime; shared device/pipeline context and independent renderer states; grouped packets, tile proofs, lazy R8 atlas, boundary corrections, SDR/HDR targets, replay and transactional color patches | Native shared-device multiwindow remains; coalesced token gaps can rebuild packets; replay/patch draws the full target; native HDR negotiation, legacy DX11, other primitives and hardware/backend conformance remain |
@@ -68,6 +68,14 @@ precision limits, source/stack costs and the unadopted alternatives.
 
 ## Current verification
 
+The [visual-line navigation slice](evidence/text-navigation/README.md) shares the
+existing geometry through public/native Up/Down and line-edge keys. Same-source
+selection updates reuse their owned lease. Producer and Root composition checks
+pass, including a real acknowledged X11 dispatcher and an actual reversed-Down
+fault control. Core is **31,745** non-test, non-comment lines, **+129**; preferred
+x adds eight bytes to the single cold editor, with Node/TextSite unchanged.
+Clipboard, IME, autoscroll and native macOS range-origin policy remain.
+
 The [Hummingbird composition](evidence/hummingbird-composition/README.md) integrates
 the Browser and Files routes with one existing worker and checked playback
 authority. Fresh libraries execute a generated final schema in one transaction
@@ -86,8 +94,8 @@ native suites pass 838/211/648 cases and strict checks pass. Core is **31,616**
 non-test, non-comment lines, **+298** from 5381. The public glyph API is a
 borrowed value iterator. Its removed private Debug field caused an original
 oracle failure; the separate exact semantic comparison and all costs are kept.
-Common-eight compression, vertical navigation and the new axis-boundary GPU
-correction remain separate candidates. No whole-campaign,
+Common-eight compression and the new axis-boundary GPU correction remain
+separate candidates. No whole-campaign,
 application-parity, speed or RSS claim follows from this text integration.
 
 The bundled primary now embeds a reproducible [full static default instance](crates/canvas/evidence/default-font/README.md).

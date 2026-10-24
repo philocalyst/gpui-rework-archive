@@ -85,9 +85,10 @@ validates endpoints in that layout only; it is not a document revision token.
 
 GPUI owns one source-qualified logical selection, paints acknowledged caret and
 selection geometry, and shares legal range edits with native accessibility.
-Horizontal visual navigation and deletion use grapheme boundaries. Canvas
-geometry alone grants no authority to edit a later source revision. IME/preedit,
-clipboard, vertical navigation, language/variation authoring, discretionary
+Horizontal and vertical visual navigation use canonical grapheme destinations;
+line-edge keys and preferred local x share that same map. Canvas geometry alone
+grants no authority to edit a later source revision. IME/preedit,
+clipboard, autoscroll, language/variation authoring, discretionary
 hyphens, vertical writing, color glyphs and OS font discovery remain outside
 this integrated slice. Native `Key::Text` excludes controls; CRLF can enter
 through the typed source/SetValue path.

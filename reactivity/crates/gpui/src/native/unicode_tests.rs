@@ -90,6 +90,57 @@ impl Script {
                     .unwrap();
                 assert_eq!(actual, expected, "complete native X11 framebuffer");
                 assert!(expected.iter().any(|&pixel| pixel != 0xffffff));
+                let commit = owner
+                    .set(Document::VALUE, "abcdefghij\nx\nabcdefghij".into())
+                    .unwrap();
+                self.host.input_result(Ok(commit)).unwrap();
+            }
+            2 => {
+                let owner = self.host.owner.as_mut().unwrap();
+                let result = owner.select(owner.input(), crate::TextSelection::caret(8).unwrap());
+                self.host.input_result(result).unwrap();
+            }
+            3 | 4 => {
+                self.host
+                    .key_input(&NativeKey::Named(NamedKey::ArrowDown), None)
+                    .unwrap();
+                let owner = self.host.owner.as_ref().unwrap();
+                assert_eq!(
+                    owner.selection(owner.input()).unwrap().focus.offset.byte(),
+                    if self.stage == 3 { 12 } else { 21 }
+                );
+            }
+            5 => {
+                self.host.modifiers = ModifiersState::SHIFT;
+                self.host
+                    .key_input(&NativeKey::Named(NamedKey::ArrowUp), None)
+                    .unwrap();
+                self.host.modifiers = ModifiersState::empty();
+                let owner = self.host.owner.as_ref().unwrap();
+                let range = owner.selection(owner.input()).unwrap();
+                assert_eq!(
+                    (range.anchor.offset.byte(), range.focus.offset.byte()),
+                    (21, 12)
+                );
+            }
+            6 | 7 => {
+                self.host
+                    .key_input(
+                        &NativeKey::Named(if self.stage == 6 {
+                            NamedKey::Home
+                        } else {
+                            NamedKey::End
+                        }),
+                        None,
+                    )
+                    .unwrap();
+                let owner = self.host.owner.as_ref().unwrap();
+                assert_eq!(
+                    owner.selection(owner.input()).unwrap().focus.offset.byte(),
+                    if self.stage == 6 { 11 } else { 12 }
+                );
+            }
+            8 => {
                 self.complete = true;
                 event_loop.exit();
             }

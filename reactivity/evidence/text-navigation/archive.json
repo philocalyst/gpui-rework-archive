@@ -1,0 +1,7 @@
+{
+  "bytes": 863269,
+  "sha256": "ca082e404f1a1fb4f371dac5b8a5bafa2274e148c3620bcb075ec62ad46fc757",
+  "verified_members": 83,
+  "uncompressed_bytes": 2876713,
+  "scope": "Commands, original failed/canceled attempts, source/ELF guards, final logs, actual assembly and type/source ledgers; frozen executable bytes remain external with original identities in qualification.json."
+}

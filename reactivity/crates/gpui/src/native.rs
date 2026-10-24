@@ -1006,6 +1006,18 @@ impl<V: View + 'static, L: LaneSet<V>> NativeHost<V, L> {
             NativeKey::Named(NamedKey::ArrowRight) => Key::Right {
                 extend: self.modifiers.shift_key(),
             },
+            NativeKey::Named(NamedKey::ArrowUp) => Key::Up {
+                extend: self.modifiers.shift_key(),
+            },
+            NativeKey::Named(NamedKey::ArrowDown) => Key::Down {
+                extend: self.modifiers.shift_key(),
+            },
+            NativeKey::Named(NamedKey::Home) => Key::Home {
+                extend: self.modifiers.shift_key(),
+            },
+            NativeKey::Named(NamedKey::End) => Key::End {
+                extend: self.modifiers.shift_key(),
+            },
             NativeKey::Named(NamedKey::Enter) => Key::Enter,
             NativeKey::Named(NamedKey::Space) => Key::Space,
             NativeKey::Named(NamedKey::Tab) if self.modifiers.shift_key() => Key::ReverseTab,

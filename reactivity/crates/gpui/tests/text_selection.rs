@@ -473,3 +473,286 @@ fn transformed_padded_input_hits_and_shared_caret_ink_follow_the_real_paint_bank
         oracle.with_pixels(|p, _, _| p.to_vec()).unwrap()
     );
 }
+
+#[test]
+fn vertical_keys_restore_preferred_x_extend_and_move_from_the_focus() {
+    let mut win = Win::demo(Page::new("abcdefghij\nx\nabcdefghij"));
+    let input = win.input();
+    win.focus(input).unwrap();
+    win.select(input, range(8, 8)).unwrap();
+    win.key(Key::Down { extend: false }).unwrap();
+    assert_eq!(win.selection(input).unwrap().focus.offset.byte(), 12);
+    win.key(Key::Down { extend: false }).unwrap();
+    assert_eq!(win.selection(input).unwrap().focus.offset.byte(), 21);
+    win.key(Key::Up { extend: true }).unwrap();
+    let selection = win.selection(input).unwrap();
+    assert_eq!(selection.anchor.offset.byte(), 21);
+    assert_eq!(selection.focus.offset.byte(), 12);
+    win.key(Key::Up { extend: true }).unwrap();
+    assert_eq!(win.selection(input).unwrap().focus.offset.byte(), 8);
+    win.key(Key::Down { extend: false }).unwrap();
+    assert_eq!(win.selection(input).unwrap().focus.offset.byte(), 12);
+    win.key(Key::Down { extend: false }).unwrap();
+    assert_eq!(win.selection(input).unwrap().focus.offset.byte(), 21);
+    win.select(input, range(21, 8)).unwrap();
+    win.key(Key::Up { extend: false }).unwrap();
+    assert_eq!(win.selection(input).unwrap().focus.offset.byte(), 8);
+    win.key(Key::Up { extend: false }).unwrap();
+    assert_eq!(win.selection(input).unwrap().focus.offset.byte(), 8);
+    win.select(input, range(8, 12)).unwrap();
+    win.key(Key::Down { extend: false }).unwrap();
+    assert_eq!(win.selection(input).unwrap().focus.offset.byte(), 14);
+    win.select(input, range(21, 12)).unwrap();
+    win.key(Key::Up { extend: false }).unwrap();
+    assert_eq!(win.selection(input).unwrap().focus.offset.byte(), 1);
+    win.key(Key::Down { extend: false }).unwrap();
+    win.key(Key::Home { extend: false }).unwrap();
+    assert_eq!(win.selection(input).unwrap().focus.offset.byte(), 11);
+    win.key(Key::End { extend: true }).unwrap();
+    let selection = win.selection(input).unwrap();
+    assert_eq!(selection.anchor.offset.byte(), 11);
+    assert_eq!(selection.focus.offset.byte(), 12);
+    assert_eq!(
+        win.root().unwrap().value.as_str(),
+        "abcdefghij\nx\nabcdefghij"
+    );
+}
+
+#[test]
+fn unchanged_explicit_selection_horizontal_motion_and_source_rebind_reset_preferred_x() {
+    let mut win = Win::demo(Page::new("abcdefghij\nx\nabcdefghij"));
+    let input = win.input();
+    win.focus(input).unwrap();
+    win.select(input, range(8, 8)).unwrap();
+    win.key(Key::Down { extend: false }).unwrap();
+    let short = win.selection(input).unwrap();
+    let before = win.snapshot().unwrap();
+    win.select(input, short).unwrap();
+    assert_eq!(win.snapshot().unwrap(), before);
+    win.key(Key::Down { extend: false }).unwrap();
+    assert_eq!(win.selection(input).unwrap().focus.offset.byte(), 14);
+    win.select(input, range(8, 8)).unwrap();
+    win.key(Key::Down { extend: false }).unwrap();
+    win.key(Key::Left { extend: false }).unwrap();
+    win.key(Key::Down { extend: false }).unwrap();
+    assert_eq!(win.selection(input).unwrap().focus.offset.byte(), 13);
+    win.select(input, range(8, 8)).unwrap();
+    win.key(Key::Down { extend: false }).unwrap();
+    win.update(|m| m.swap = true).unwrap();
+    assert_eq!(win.input(), input);
+    assert_eq!(win.selection(input).unwrap(), range(23, 23));
+    win.key(Key::Up { extend: false }).unwrap();
+    win.key(Key::Up { extend: false }).unwrap();
+    assert_eq!(win.selection(input).unwrap().focus.offset.byte(), 10);
+}
+
+#[test]
+fn line_navigation_handles_crlf_empty_lines_and_stale_geometry_without_mutation() {
+    let mut win =
+        Win::recording(Page::new("ab\r\n\r\ne\u{301}"), WindowOptions::default()).unwrap();
+    win.presented(win.with_scene(|_, token| token).unwrap())
+        .unwrap();
+    let input = win.input();
+    win.focus(input).unwrap();
+    win.select(input, range(1, 1)).unwrap();
+    let before = win.selection(input).unwrap();
+    assert_eq!(
+        win.key(Key::Down { extend: true }),
+        Err(Error::PresentationStale)
+    );
+    assert_eq!(win.selection(input).unwrap(), before);
+    win.presented(win.with_scene(|_, token| token).unwrap())
+        .unwrap();
+    win.key(Key::Down { extend: false }).unwrap();
+    assert_eq!(win.selection(input).unwrap().focus.offset.byte(), 4);
+    win.presented(win.with_scene(|_, token| token).unwrap())
+        .unwrap();
+    win.key(Key::Down { extend: true }).unwrap();
+    assert!(matches!(
+        win.selection(input).unwrap().focus.offset.byte(),
+        6 | 9
+    ));
+    win.presented(win.with_scene(|_, token| token).unwrap())
+        .unwrap();
+    assert!(win.update(|m| *m.value = "漢".into()).is_err());
+    let before = win.selection(input).unwrap();
+    assert_eq!(
+        win.key(Key::Up { extend: false }),
+        Err(Error::PresentationStale)
+    );
+    assert_eq!(win.selection(input).unwrap(), before);
+    win.set(Page::VALUE, "abcdefghij\nx\nabcdefghij".into())
+        .unwrap();
+    win.presented(win.with_scene(|_, token| token).unwrap())
+        .unwrap();
+    win.key(Key::Up { extend: false }).unwrap();
+    win.presented(win.with_scene(|_, token| token).unwrap())
+        .unwrap();
+    win.key(Key::Up { extend: false }).unwrap();
+    assert_eq!(win.selection(input).unwrap().focus.offset.byte(), 10);
+}
+
+#[test]
+fn transformed_input_navigates_in_local_coordinates_and_pointer_restarts_preferred_x() {
+    struct Transformed {
+        value: Signal<String>,
+    }
+    impl View for Transformed {
+        fn sources() -> Sources<Self> {
+            Sources::new().direct(Source::new(
+                FieldId::new(1),
+                "value",
+                |m: &Self| &m.value,
+                |m| &mut m.value,
+            ))
+        }
+        fn view(&self) -> El<'_> {
+            text_input(&self.value).w(180).h(100).transform(Affine {
+                a: 1.2,
+                b: 0.2,
+                c: 0.5,
+                d: 0.9,
+                tx: 5.,
+                ty: 3.,
+            })
+        }
+    }
+    let mut win = Win::demo(Transformed {
+        value: Signal::new("abcdefghij\nx\nabcdefghij".into()),
+    });
+    let input = win.input();
+    win.focus(input).unwrap();
+    win.select(input, range(8, 8)).unwrap();
+    win.key(Key::Down { extend: false }).unwrap();
+    let short = win.selection(input).unwrap();
+    let mut point = None;
+    win.visit(|part| {
+        if part.target() == input {
+            let geometry = part.text_geometry().unwrap();
+            let bounds = geometry.layout().caret_bounds(short.focus).unwrap();
+            point = geometry.transform().unwrap().to_window(Point {
+                x: bounds.x + 1.,
+                y: bounds.y + bounds.height * 0.5,
+            });
+        }
+    })
+    .unwrap();
+    win.click_at(point.unwrap()).unwrap();
+    assert_eq!(
+        win.selection(input).unwrap(),
+        short,
+        "same pointer selection must reset x"
+    );
+    win.key(Key::Down { extend: false }).unwrap();
+    assert_eq!(win.selection(input).unwrap().focus.offset.byte(), 14);
+    win.select(input, range(8, 8)).unwrap();
+    win.key(Key::Down { extend: false }).unwrap();
+    win.key(Key::Down { extend: false }).unwrap();
+    assert_eq!(win.selection(input).unwrap().focus.offset.byte(), 21);
+    // At local (0, 0), the transformed pointer selects the first line start.
+    win.click_at(Point { x: 5., y: 3. }).unwrap();
+    assert_eq!(win.selection(input).unwrap().focus.offset.byte(), 0);
+    win.key(Key::Down { extend: false }).unwrap();
+    assert_eq!(win.selection(input).unwrap().focus.offset.byte(), 11);
+    win.key(Key::Down { extend: false }).unwrap();
+    assert_eq!(win.selection(input).unwrap().focus.offset.byte(), 13);
+}
+
+#[test]
+fn rtl_line_edges_are_physical_and_vertical_ranges_move_from_either_focus() {
+    let mut win = Win::demo(Page::new("אבג\nדהו\nאבג"));
+    let input = win.input();
+    win.focus(input).unwrap();
+    win.select(input, range(6, 0)).unwrap();
+    win.key(Key::Down { extend: false }).unwrap();
+    assert_eq!(win.selection(input).unwrap().focus.offset.byte(), 7);
+    win.key(Key::Home { extend: false }).unwrap();
+    assert_eq!(win.selection(input).unwrap().focus.offset.byte(), 13);
+    win.key(Key::End { extend: true }).unwrap();
+    let selection = win.selection(input).unwrap();
+    assert_eq!(
+        (
+            selection.anchor.offset.byte(),
+            selection.focus.offset.byte()
+        ),
+        (13, 7)
+    );
+    win.select(input, range(0, 6)).unwrap();
+    win.key(Key::Down { extend: false }).unwrap();
+    assert_eq!(win.selection(input).unwrap().focus.offset.byte(), 13);
+    win.key(Key::Up { extend: false }).unwrap();
+    assert_eq!(win.selection(input).unwrap().focus.offset.byte(), 6);
+}
+
+#[test]
+fn ordinary_wrapped_navigation_keeps_each_affinity_on_its_canonical_source_line() {
+    for source in [
+        "office office office office office",
+        "abc אבג 123 abc אבג 123 abc אבג 123",
+    ] {
+        let mut win = Win::demo(Page::new(source));
+        let input = win.input();
+        win.focus(input).unwrap();
+        let mut cases = Vec::new();
+        win.visit(|part| {
+            if part.target() != input {
+                return;
+            }
+            let map = part.text_geometry().unwrap().layout();
+            for byte in 0..=source.len() {
+                let selection = range(byte, byte);
+                let down = selection.focus;
+                let up = gpui::TextPosition {
+                    affinity: A::Upstream,
+                    ..down
+                };
+                let (Some(a), Some(b)) = (map.caret_bounds(up), map.caret_bounds(down)) else {
+                    continue;
+                };
+                if a.y == b.y {
+                    continue;
+                }
+                for (position, bounds) in [(up, a), (down, b)] {
+                    let line = map
+                        .lines()
+                        .position(|line| line.bounds().y == bounds.y)
+                        .unwrap();
+                    let next = map.lines().nth(line + 1);
+                    let expected = next
+                        .map(|line| {
+                            map.position_at(Point {
+                                x: bounds.x,
+                                y: line.bounds().y + line.bounds().height * 0.5,
+                            })
+                            .unwrap()
+                        })
+                        .unwrap_or(position);
+                    cases.push((position, expected));
+                }
+            }
+        })
+        .unwrap();
+        assert!(
+            !cases.is_empty(),
+            "fixture must contain split wrap affinity"
+        );
+        for (position, expected) in cases {
+            win.select(
+                input,
+                TextSelection {
+                    anchor: position,
+                    focus: position,
+                },
+            )
+            .unwrap();
+            win.key(Key::Down { extend: true }).unwrap();
+            assert_eq!(
+                win.selection(input).unwrap(),
+                TextSelection {
+                    anchor: position,
+                    focus: expected
+                }
+            );
+        }
+    }
+}

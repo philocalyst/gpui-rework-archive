@@ -79,6 +79,8 @@ impl PointerSession {
 /// Committed text and portable editing keys. Text replaces the current range;
 /// backspace removes a selected range or one whole extended grapheme.
 /// Visual arrows require an acknowledged current layout; IME is separate.
+/// Vertical commands move from focus on all platforms. The native macOS
+/// convention of choosing a range endpoint remains adapter policy work.
 #[derive(Clone, Copy, Debug, PartialEq, Eq)]
 pub enum Key<'a> {
     /// Committed printable text; payloads containing control characters are ignored.
@@ -88,6 +90,23 @@ pub enum Key<'a> {
         extend: bool,
     },
     Right {
+        extend: bool,
+    },
+    /// Move the focus to the preceding visual line, retaining layout-local
+    /// preferred x even when releasing Shift. Without Shift, collapse at the result.
+    Up {
+        extend: bool,
+    },
+    /// Move the focus to the following visual line, with the same policy as Up.
+    Down {
+        extend: bool,
+    },
+    /// Move to the physical left edge of the focus's visual line.
+    Home {
+        extend: bool,
+    },
+    /// Move to the physical right edge of the focus's visual line.
+    End {
         extend: bool,
     },
     Tab,
@@ -239,7 +258,8 @@ impl<M: View + 'static, L: LaneSet<M>> Win<M, L> {
         Ok(self.runtime()?.focused)
     }
     /// Use the same keyboard barrier as the native adapter. Tab requires current
-    /// presented geometry; focused editing and activation use logical authority.
+    /// presented geometry, as do visual arrow and line-edge commands. Source
+    /// editing and activation use logical authority.
     pub fn key(&mut self, key: Key<'_>) -> Result<Commit, Error> {
         let mut runtime = self.runtime_mut()?;
         runtime.live()?;
@@ -293,6 +313,17 @@ impl<M: View + 'static, L: LaneSet<M>> Win<M, L> {
                 let index = runtime.resolve_index(target)?;
                 if runtime.nodes[index].kind() == NodeKind::Input {
                     runtime.move_selection(target, matches!(key, Key::Right { .. }), extend)
+                } else {
+                    Ok(runtime.commit())
+                }
+            }
+            Key::Up { extend }
+            | Key::Down { extend }
+            | Key::Home { extend }
+            | Key::End { extend } => {
+                let index = runtime.resolve_index(target)?;
+                if runtime.nodes[index].kind() == NodeKind::Input {
+                    runtime.move_line_selection(target, key, extend)
                 } else {
                     Ok(runtime.commit())
                 }
