@@ -74,6 +74,14 @@ impl Node {
         let (x, y) = self.map.local(x, y);
         rounded::contains(self.rect, self.radius, x, y)
     }
+    fn same_geometry(&self, other: &Self) -> bool {
+        let bits = |r: Rect| [r.x, r.y, r.width, r.height].map(f32::to_bits);
+        bits(self.rect) == bits(other.rect)
+            && self.map.inverse.map(f64::to_bits) == other.map.inverse.map(f64::to_bits)
+            && bits(self.bounds) == bits(other.bounds)
+            && bits(self.raster) == bits(other.raster)
+            && self.radius.to_bits() == other.radius.to_bits()
+    }
     fn command(&self) -> BorrowedCommand<'_> {
         BorrowedCommand {
             rect: self.rect,
@@ -226,8 +234,28 @@ impl ClipChain<'_> {
         }
         result
     }
+    // Damage compares immutable shape content across scene owners. This does
+    // not grant capability equality or let handles escape their own arena.
     pub(super) fn same(self, other: Self) -> bool {
-        std::ptr::eq(self.arena, other.arena) && self.index == other.index
+        if std::ptr::eq(self.arena, other.arena) && self.index == other.index {
+            return true;
+        }
+        if self.depth() != other.depth() {
+            return false;
+        }
+        let (mut left, mut right) = (self.index, other.index);
+        loop {
+            let a = &self.arena.nodes[left as usize];
+            let b = &other.arena.nodes[right as usize];
+            if !a.same_geometry(b) {
+                return false;
+            }
+            match (a.parent(), b.parent()) {
+                (Some(a), Some(b)) => (left, right) = (a, b),
+                (None, None) => return true,
+                _ => return false,
+            }
+        }
     }
 }
 
