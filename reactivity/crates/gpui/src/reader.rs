@@ -1,7 +1,7 @@
 //! A typed, inert read key. Question state belongs to the window's static lane
 //! chain; workers carry owned input and a linear completion, never an owner borrow.
 use crate::El;
-use gpui_reactivity_state::{RequestStamp, Revision};
+use gpui_reactivity_state::Revision;
 use std::{
     any::Any,
     fmt,
@@ -253,15 +253,24 @@ impl InputVersion {
         self.policy
     }
 }
-pub(crate) struct Message<T, E> {
-    pub stamp: RequestStamp,
-    pub value: Result<T, E>,
+// A Producer is physically bound to its Owner, so this local generation is
+// sufficient authority. Only the owner mints checked, nonrecycled tickets.
+#[derive(Clone, Copy, PartialEq, Eq)]
+struct Ticket(NonZeroU64);
+impl Ticket {
+    fn get(self) -> u64 {
+        self.0.get()
+    }
+}
+struct Message<T, E> {
+    ticket: Ticket,
+    value: Result<T, E>,
 }
 
 // Exactly one physical completion lease exists per question. The owner does
 // not reuse its immutable local launched ticket until acquiring a terminal
 // state. The unique cap is the sole Running -> terminal writer; after publish
-// it cannot touch this lease again. Queued messages carry independent stamps.
+// it cannot touch this lease again. Each message carries its launched ticket.
 #[cfg(test)]
 type Controller<T, E> = Shared<Message<T, E>, QuestionContext>;
 struct QuestionContext {
@@ -301,7 +310,7 @@ impl linear_mailbox::Context for QuestionContext {
 /// }
 /// ```
 pub struct Completion<T, E> {
-    stamp: RequestStamp,
+    ticket: Ticket,
     producer: Producer<Message<T, E>, QuestionContext>,
 }
 
@@ -310,12 +319,12 @@ pub struct Completion<T, E> {
 /// A worker may poll it while computing without cloning a controller Arc.
 pub struct Cancellation<'a> {
     current: &'a AtomicU64,
-    ticket: u64,
+    ticket: Ticket,
 }
 impl Cancellation<'_> {
     #[inline]
     pub fn is_cancelled(&self) -> bool {
-        self.current.load(Ordering::Acquire) != self.ticket
+        self.current.load(Ordering::Acquire) != self.ticket.get()
     }
 }
 pub enum CompleteError<T, E> {
@@ -339,18 +348,17 @@ impl<T, E> Completion<T, E> {
     /// A hint for cooperative worker cancellation; only owner admission decides
     /// whether the owned result is still applicable.
     pub fn is_cancelled(&self) -> bool {
-        self.producer.context().current.load(Ordering::Acquire) != self.stamp.ticket()
+        self.producer.context().current.load(Ordering::Acquire) != self.ticket.get()
     }
     pub fn complete(self, value: Result<T, E>) -> Result<(), CompleteError<T, E>> {
         self.producer
             .complete(Message {
-                stamp: self.stamp,
+                ticket: self.ticket,
                 value,
             })
             .map_err(|message| CompleteError::Closed(message.value))
     }
     fn panicked(self) {
-        drop(self.stamp);
         self.producer.panicked();
     }
 
@@ -400,7 +408,7 @@ impl<T, E> Completion<T, E> {
                 input,
                 Cancellation {
                     current: &self.producer.context().current,
-                    ticket: self.stamp.ticket(),
+                    ticket: self.ticket,
                 },
             )
         })) {
@@ -465,21 +473,20 @@ mod tests {
             size_of::<Producer<u64, QuestionContext>>(),
             size_of::<usize>()
         );
-        assert_eq!(size_of::<Completion<u64, Infallible>>(), 40);
-        assert_eq!(size_of::<Option<Completion<u64, Infallible>>>(), 40);
+        assert_eq!(size_of::<Completion<u64, Infallible>>(), 16);
+        assert_eq!(size_of::<Option<Completion<u64, Infallible>>>(), 16);
     }
 
     #[test]
     fn cancellation_borrows_the_existing_lease_without_allocating_or_cloning_it() {
-        let mut scope = gpui_reactivity_state::OwnerRegistry::new().mount().unwrap();
-        let stamp = scope.producer(1).unwrap().begin().unwrap();
+        let ticket = Ticket(NonZeroU64::MIN);
         let mut controller = Owner::new(QuestionContext::new());
         controller
             .context()
             .current
-            .store(stamp.ticket(), Ordering::Release);
+            .store(ticket.get(), Ordering::Release);
         let cap = Completion::<u64, Infallible> {
-            stamp,
+            ticket,
             producer: controller.begin(),
         };
         let memory = allocation_counter::measure(|| {
@@ -505,15 +512,14 @@ mod tests {
 
     #[test]
     fn closed_completion_returns_the_same_owned_result() {
-        let mut scope = gpui_reactivity_state::OwnerRegistry::new().mount().unwrap();
-        let stamp = scope.producer(1).unwrap().begin().unwrap();
+        let ticket = Ticket(NonZeroU64::MIN);
         let mut controller = Owner::new(QuestionContext::new());
         controller
             .context()
             .current
-            .store(stamp.ticket(), Ordering::Release);
+            .store(ticket.get(), Ordering::Release);
         let cap = Completion::<String, Infallible> {
-            stamp,
+            ticket,
             producer: controller.begin(),
         };
         drop(controller.close());
@@ -595,7 +601,7 @@ mod tests {
                 allocations.count_total,
                 allocations.bytes_total
             );
-            assert_eq!(allocations.count_total, 2);
+            assert_eq!(allocations.count_total, 1);
         }
         report("one_source", A);
         report("two_sources", (A, B));
@@ -667,8 +673,8 @@ mod tests {
             );
         });
         assert_eq!(
-            cold.count_total, 2,
-            "one shared scope and one response controller"
+            cold.count_total, 1,
+            "one response controller and no independent scope"
         );
         let (questions, reader) = built.unwrap();
         let mut descriptor = None;

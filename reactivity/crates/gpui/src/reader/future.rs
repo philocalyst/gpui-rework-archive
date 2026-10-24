@@ -175,11 +175,10 @@ mod tests {
                 Poll::Ready(Ok([7; 4096]))
             }
         }
-        let mut owner = gpui_reactivity_state::OwnerRegistry::new().mount().unwrap();
-        let stamp = owner.producer(1).unwrap().begin().unwrap();
+        let ticket = Ticket(NonZeroU64::MIN);
         let mut controller = Owner::new(QuestionContext::new());
         let completion = Completion {
-            stamp,
+            ticket,
             producer: controller.begin(),
         };
         let mut task = std::pin::pin!(RunFuture {

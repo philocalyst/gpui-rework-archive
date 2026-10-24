@@ -7,7 +7,6 @@ use crate::{
     identity::Sites,
     remote::{LaneSet, Stage, sealed},
 };
-use gpui_reactivity_state::{OwnerRegistry, OwnerScope, RequestGate};
 use std::future::Future;
 
 pub(super) trait Starter<I, T, E> {
@@ -40,7 +39,6 @@ pub enum Change {
 /// restoring constructs a new plan and remints Reader keys.
 pub struct Questions<M, L = ()> {
     lanes: L,
-    scope: Option<OwnerScope>,
     namespace: NonZeroU64,
     next_site: u64,
     marker: PhantomData<fn(M)>,
@@ -54,7 +52,6 @@ impl<M> Questions<M> {
     pub fn new() -> Self {
         Self {
             lanes: (),
-            scope: None,
             namespace: Sites::new().namespace(),
             next_site: 0,
             marker: PhantomData,
@@ -211,19 +208,6 @@ impl<M: 'static, L: LaneSet<M>> Questions<M, L> {
             .next_site
             .checked_add(1)
             .ok_or(QuestionFault::Exhausted)?;
-        if self.scope.is_none() {
-            self.scope = Some(
-                OwnerRegistry::new()
-                    .mount()
-                    .map_err(|_| QuestionFault::Exhausted)?,
-            );
-        }
-        let gate = self
-            .scope
-            .as_mut()
-            .unwrap()
-            .producer(self.next_site)
-            .map_err(|_| QuestionFault::Exhausted)?;
         let key = ReaderKey {
             namespace: self.namespace,
             site: NonZeroU64::new(self.next_site).unwrap(),
@@ -234,7 +218,6 @@ impl<M: 'static, L: LaneSet<M>> Questions<M, L> {
             freeze: Some(freeze),
             start: Some(start),
             key,
-            gate,
             controller: Owner::new(QuestionContext::new()),
             state: State::Empty,
             version: None,
@@ -252,7 +235,6 @@ impl<M: 'static, L: LaneSet<M>> Questions<M, L> {
         Ok((
             Questions {
                 lanes,
-                scope: self.scope,
                 namespace: self.namespace,
                 next_site: self.next_site,
                 marker: PhantomData,
@@ -266,7 +248,6 @@ impl<M: 'static, L: LaneSet<M>> Questions<M, L> {
     pub(crate) fn bind<A: LaneSet<M>>(self, tail: A) -> QuestionSet<L, A> {
         QuestionSet {
             lanes: self.lanes,
-            scope: self.scope,
             tail,
             cursor: 0,
         }
@@ -283,12 +264,15 @@ enum State<T, E> {
     Ready(T),
     Pending(Option<T>),
     Fault(StoredFault<E>, Option<T>),
+    Retired(Option<T>),
 }
 impl<T, E> State<T, E> {
     fn take_previous(&mut self) -> Option<T> {
         match std::mem::replace(self, Self::Empty) {
             Self::Ready(value) => Some(value),
-            Self::Pending(previous) | Self::Fault(_, previous) => previous,
+            Self::Pending(previous) | Self::Fault(_, previous) | Self::Retired(previous) => {
+                previous
+            }
             Self::Empty => None,
         }
     }
@@ -304,7 +288,7 @@ struct Frozen<V, I> {
 }
 struct Work<I> {
     input: I,
-    stamp: RequestStamp,
+    ticket: Ticket,
 }
 
 /// Inferred implementation storage, not a model-managed task or an erased result.
@@ -314,7 +298,6 @@ pub struct QuestionLane<M: 'static, A: QuestionInputs<M>, I, T, E, F, S, L> {
     freeze: Option<F>,
     start: Option<S>,
     key: ReaderKey,
-    gate: RequestGate,
     controller: Owner<Message<T, E>, QuestionContext>,
     state: State<T, E>,
     version: Option<A::Versions>,
@@ -323,7 +306,7 @@ pub struct QuestionLane<M: 'static, A: QuestionInputs<M>, I, T, E, F, S, L> {
     coarse: u64,
     policy: u64,
     pending: Option<Work<I>>,
-    running_ticket: Option<u64>,
+    running_ticket: Option<Ticket>,
     staged_terminal: Option<u8>,
     tail: L,
     cursor: usize,
@@ -386,6 +369,11 @@ impl<
                         .unwrap_or(Failure::Framework(QuestionFault::InputUnavailable)),
                 }),
             ),
+            State::Retired(previous) => (
+                QuestionStatus::Fault,
+                previous.as_ref().map(|value| value as &dyn Any),
+                Some(Failure::Framework(QuestionFault::Exhausted)),
+            ),
         };
         Some(Outcome {
             info: QuestionInfo {
@@ -435,6 +423,11 @@ where
     S: Starter<I, T, E>,
 {
     fn fault(&mut self, error: QuestionFault) {
+        // Exhaustion permanently retires this lane, including after another
+        // fault or a diagnostic counter reset. No later refresh may mint work.
+        if matches!(self.state, State::Retired(_)) {
+            return;
+        }
         if matches!(
             error,
             QuestionFault::InputUnavailable | QuestionFault::Exhausted
@@ -445,11 +438,14 @@ where
         }
         self.stats.framework_faults = self.stats.framework_faults.saturating_add(1);
         self.control().current.store(0, Ordering::Release);
-        self.gate.cancel();
         self.start.as_mut().expect("live question").cancel();
         self.pending = None;
         let previous = self.state.take_previous();
-        self.state = State::Fault(StoredFault::Framework(error), previous);
+        self.state = if error == QuestionFault::Exhausted {
+            State::Retired(previous)
+        } else {
+            State::Fault(StoredFault::Framework(error), previous)
+        };
     }
     fn start_pending(&mut self) -> bool {
         if !self.controller.idle() {
@@ -458,9 +454,9 @@ where
         let Some(work) = self.pending.take() else {
             return false;
         };
-        self.running_ticket = Some(work.stamp.ticket());
+        self.running_ticket = Some(work.ticket);
         let completion = Completion {
-            stamp: work.stamp,
+            ticket: work.ticket,
             producer: self.controller.begin(),
         };
         self.stats.dispatched = self.stats.dispatched.saturating_add(1);
@@ -488,8 +484,16 @@ where
         sources: &Sources<M>,
         applied: &mut usize,
     ) -> Result<(), crate::Error> {
-        // The request stamp uniquely selects the current owner's inline pack.
-        // No duplicate version vector crosses the worker boundary.
+        // Only this Owner can receive the consuming Producer's message. A
+        // matching current token admits it once; diagnostic ticket equality
+        // alone would revive a retained Completion after a failed start.
+        // Do not consume a newer queued token when retiring an old response.
+        let admitted = self.control().current.load(Ordering::Relaxed) == message.ticket.get();
+        if admitted {
+            self.control().current.store(0, Ordering::Release);
+        }
+        // Resolve even stale messages: a checked binding rejection remains an
+        // owner fault and must retire the staged physical completion below.
         let current = self
             .inputs
             .resolve(model, sources, &self.tail)
@@ -507,14 +511,13 @@ where
                 return Err(error);
             }
         };
-        let current_ticket = message.stamp.ticket() == self.ticket;
-        if current_ticket && (Some(version) != self.version || !ready) {
+        if admitted && (Some(version) != self.version || !ready) {
             self.fault(QuestionFault::InputUnavailable);
             self.stats.stale_results = self.stats.stale_results.saturating_add(1);
             *applied += 1;
             return Ok(());
         }
-        if current_ticket && self.gate.accept(&message.stamp).is_ok() {
+        if admitted {
             self.state = match message.value {
                 Ok(value) => State::Ready(value),
                 Err(error) => {
@@ -567,10 +570,12 @@ where
                 return Ok(false);
             }
             Change::Retry(key) if key != self.key && !A::READERS => return Ok(false),
+            _ if matches!(self.state, State::Retired(_)) => {
+                return Err(QuestionFault::Exhausted.into());
+            }
             Change::Source(None) => {
                 let Some(next) = self.coarse.checked_add(1) else {
                     self.fault(QuestionFault::Exhausted);
-                    self.gate.revoke();
                     return Err(QuestionFault::Exhausted.into());
                 };
                 self.coarse = next;
@@ -578,7 +583,6 @@ where
             Change::Retry(key) if key == self.key => {
                 let Some(next) = self.policy.checked_add(1) else {
                     self.fault(QuestionFault::Exhausted);
-                    self.gate.revoke();
                     return Err(QuestionFault::Exhausted.into());
                 };
                 self.policy = next;
@@ -599,14 +603,16 @@ where
         if matches!(input, FrozenInput::Ready(_)) {
             self.stats.frozen = self.stats.frozen.saturating_add(1);
         }
-        let stamp = match self.gate.begin() {
-            Ok(stamp) => stamp,
-            Err(_) => {
-                self.fault(QuestionFault::Exhausted);
-                return Err(QuestionFault::Exhausted.into());
-            }
+        let Some(ticket) = self
+            .ticket
+            .checked_add(1)
+            .and_then(NonZeroU64::new)
+            .map(Ticket)
+        else {
+            self.fault(QuestionFault::Exhausted);
+            return Err(QuestionFault::Exhausted.into());
         };
-        self.ticket = stamp.ticket();
+        self.ticket = ticket.get();
         self.version = Some(version);
         self.control().current.store(
             if matches!(input, FrozenInput::Ready(_)) {
@@ -624,7 +630,7 @@ where
         match input {
             FrozenInput::Ready(input) => {
                 self.state = State::Pending(previous);
-                self.pending = Some(Work { input, stamp });
+                self.pending = Some(Work { input, ticket });
             }
             FrozenInput::Pending => {
                 self.state = State::Pending(previous);
@@ -746,7 +752,7 @@ where
                 .expect("terminal belongs to one launched cap");
             self.start.as_mut().expect("live question").retire();
             self.controller.retire();
-            if ticket == self.ticket && matches!(self.state, State::Pending(_)) {
+            if ticket.get() == self.ticket && matches!(self.state, State::Pending(_)) {
                 let failure = match terminal {
                     ABANDONED => Some(QuestionFault::Abandoned),
                     PANICKED => Some(QuestionFault::WorkerPanicked),
@@ -767,7 +773,6 @@ where
         Ok(())
     }
     fn cancel_questions(&mut self) -> Self::Retired {
-        self.gate.revoke();
         // Relinquish the owner lease before running input/result destructors.
         // A still-running physical cap owns any deferred response reclamation.
         let response = self.controller.close();
@@ -800,11 +805,10 @@ where
     }
 }
 
-/// One owner scope around a concrete chain; no per-producer trait-object box.
+/// A concrete question chain; no independent scope or per-producer box.
 #[doc(hidden)]
 pub struct QuestionSet<Q, L> {
     lanes: Q,
-    scope: Option<OwnerScope>,
     tail: L,
     cursor: usize,
 }
@@ -883,9 +887,9 @@ impl<M, Q: LaneSet<M>, L: LaneSet<M>> LaneSet<M> for QuestionSet<Q, L> {
         own.and(tail)
     }
     fn cancel_questions(&mut self) -> Self::Retired {
-        if let Some(scope) = &mut self.scope {
-            scope.revoke();
-        }
+        // Each inline owner closes before its task callbacks. Those callbacks
+        // can queue work, but cannot reborrow this exclusive chain to admit it.
+        // Retained responses remain deferred until all lanes are cancelled.
         (self.lanes.cancel_questions(), self.tail.cancel_questions())
     }
     fn clear(&mut self) {
@@ -1083,6 +1087,80 @@ mod tests {
         }
     }
     #[test]
+    fn the_maximum_ticket_is_admissible_then_exhaustion_never_recycles_it() {
+        let (send, jobs) = std::sync::mpsc::channel();
+        let (mut plan, reader) = Questions::new()
+            .question(
+                VALUE,
+                |v| *v,
+                move |input, cap: Completion<u32, Infallible>| {
+                    send.send((input, cap)).unwrap();
+                    Ok(())
+                },
+            )
+            .unwrap();
+        let mut model = Model {
+            value: crate::Signal::new(1),
+            other: crate::Signal::new(2),
+        };
+        let sources = Sources::new().direct(VALUE);
+        plan.lanes
+            .refresh_self(&model, &sources, Change::Mount)
+            .unwrap();
+        plan.lanes.start_pending();
+        let old = jobs.recv().unwrap().1;
+        plan.lanes.ticket = u64::MAX - 1;
+        *model.value = 9;
+        plan.lanes
+            .refresh_self(&model, &sources, Change::Source(None))
+            .unwrap();
+        assert_eq!(
+            plan.lanes.control().current.load(Ordering::Acquire),
+            u64::MAX
+        );
+        old.complete(Ok(1)).unwrap();
+        assert!(matches!(plan.lanes.stage(0), Stage::Ready));
+        plan.lanes
+            .apply_questions(&model, &sources, &mut 0, &mut 1)
+            .unwrap();
+        let (input, last) = jobs.recv().unwrap();
+        assert_eq!(input, 9);
+        assert!(
+            !last.is_cancelled(),
+            "old retirement must preserve the last valid token"
+        );
+        last.complete(Ok(9)).unwrap();
+        assert!(matches!(plan.lanes.stage(0), Stage::Ready));
+        plan.lanes
+            .apply_questions(&model, &sources, &mut 0, &mut 1)
+            .unwrap();
+        let outcome = plan.lanes.read(reader.key).unwrap();
+        assert_eq!(outcome.info.status, QuestionStatus::Ready);
+        assert_eq!(outcome.info.ticket, u64::MAX);
+        assert_eq!(plan.lanes.control().current.load(Ordering::Acquire), 0);
+        assert!(
+            plan.lanes
+                .refresh_self(&model, &sources, Change::Retry(reader.key))
+                .is_err()
+        );
+        plan.lanes.ticket = 0;
+        plan.lanes.fault(QuestionFault::InputUnavailable);
+        assert!(
+            plan.lanes
+                .refresh_self(&model, &sources, Change::Mount)
+                .is_err()
+        );
+        let outcome = plan.lanes.read(reader.key).unwrap();
+        assert_eq!(outcome.info.status, QuestionStatus::Fault);
+        assert!(matches!(
+            outcome.failure,
+            Some(Failure::Framework(QuestionFault::Exhausted))
+        ));
+        assert_eq!(outcome.value.unwrap().downcast_ref::<u32>(), Some(&9));
+        assert!(plan.lanes.pending.is_none());
+        assert_eq!(plan.lanes.stats.dispatched, 2);
+    }
+    #[test]
     fn binding_rejection_retires_a_stale_staged_terminal_before_returning_error() {
         let (send, jobs) = std::sync::mpsc::channel();
         let (mut plan, _) = Questions::new()
@@ -1112,7 +1190,7 @@ mod tests {
         jobs.recv().unwrap().1.complete(Ok(1)).unwrap();
         assert!(matches!(plan.lanes.stage(0), Stage::Ready));
         // Simulate a checked projection mismatch without invoking unsafe code or
-        // constructing a forged request stamp. No rejected value is admitted.
+        // constructing a forged request ticket. No rejected value is admitted.
         plan.lanes.inputs = Source::new(FieldId::new(1), "value", |m| &m.other, |m| &mut m.other);
         assert!(
             plan.lanes
