@@ -3188,7 +3188,18 @@ impl<M: View + 'static> Runtime<M> {
                 .images
                 .as_deref()
                 .and_then(|r| r.backgrounds.as_deref())
-                .and_then(|b| b.gradient(node.identity()));
+                .and_then(|b| {
+                    b.gradient(
+                        node.identity(),
+                        matches!(
+                            self.overrides.contribution(
+                                node.identity(),
+                                crate::property::PropertyId::Background,
+                            ),
+                            Contribution::Set(_)
+                        ),
+                    )
+                });
             if paint && let Some(gradient) = gradient {
                 scene.fill_gradient(
                     gradient,
@@ -5290,20 +5301,45 @@ mod ordinary_background_allocation_audit {
         let target = win.query().name("plain").one().unwrap();
         assert!(win.runtime().unwrap().images.is_none());
         for (phase, contribution) in [
-            ("first", Contribution::Set(PropertyValue::Color(Color::WHITE))),
-            ("warm", Contribution::Set(PropertyValue::Color(Color::BLACK))),
-            ("equal", Contribution::Set(PropertyValue::Color(Color::BLACK))),
+            (
+                "first",
+                Contribution::Set(PropertyValue::Color(Color::WHITE)),
+            ),
+            (
+                "warm",
+                Contribution::Set(PropertyValue::Color(Color::BLACK)),
+            ),
+            (
+                "equal",
+                Contribution::Set(PropertyValue::Color(Color::BLACK)),
+            ),
             ("inherit", Contribution::Inherit),
         ] {
             let cost = allocation_counter::measure(|| {
-                win.set_property_value(target, PropertyId::Background, contribution).unwrap();
+                win.set_property_value(target, PropertyId::Background, contribution)
+                    .unwrap();
             });
             let runtime = win.runtime().unwrap();
+            assert!(
+                runtime.images.is_none(),
+                "a solid contribution has no resource authority"
+            );
             let style_capacity = match &runtime.styles {
                 styles::Styles::Dense(values) => values.capacity() * size_of::<Style>(),
                 _ => 0,
             };
-            eprintln!("ordinary_background_audit,phase={phase},allocs={},requested={},retained_delta={},peak_delta={},images_present={},style_dense_bytes={style_capacity},contribution={:?}", cost.count_total, cost.bytes_total, cost.bytes_current, cost.bytes_max, runtime.images.is_some(), runtime.property_contribution_at(runtime.resolve(target).unwrap(), PropertyId::Background));
+            eprintln!(
+                "ordinary_background_audit,phase={phase},allocs={},requested={},retained_delta={},peak_delta={},images_present={},style_dense_bytes={style_capacity},contribution={:?}",
+                cost.count_total,
+                cost.bytes_total,
+                cost.bytes_current,
+                cost.bytes_max,
+                runtime.images.is_some(),
+                runtime.property_contribution_at(
+                    runtime.resolve(target).unwrap(),
+                    PropertyId::Background
+                )
+            );
         }
     }
 }

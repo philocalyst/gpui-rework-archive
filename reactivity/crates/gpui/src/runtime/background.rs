@@ -9,30 +9,28 @@ use gpui_canvas::{Gradient, GradientKey, GradientView};
 pub(super) struct Backgrounds {
     pub(super) declared: BTreeMap<u64, GradientKey>,
     pub(super) resources: BTreeMap<GradientKey, Gradient>,
-    overrides: BTreeMap<u64, Brush>,
+    overrides: BTreeMap<u64, GradientKey>,
 }
 impl Backgrounds {
-    fn brush(&self, identity: u64, solid: Color) -> Brush {
-        self.overrides.get(&identity).copied().unwrap_or_else(|| {
-            self.declared
-                .get(&identity)
-                .copied()
-                .map_or(Brush::Solid(solid), Brush::Gradient)
-        })
+    fn key(&self, identity: u64, solid_override: bool) -> Option<GradientKey> {
+        if let Some(key) = self.overrides.get(&identity) {
+            Some(*key)
+        } else if solid_override {
+            None
+        } else {
+            self.declared.get(&identity).copied()
+        }
     }
-    pub(super) fn gradient(&self, identity: u64) -> Option<&Gradient> {
-        let Brush::Gradient(key) = self.brush(identity, Color::TRANSPARENT) else {
-            return None;
-        };
-        self.resources.get(&key)
+    pub(super) fn gradient(&self, identity: u64, solid_override: bool) -> Option<&Gradient> {
+        self.resources.get(&self.key(identity, solid_override)?)
     }
-    fn retain(&mut self, live: impl Fn(u64) -> bool) {
-        self.declared.retain(|identity, _| live(*identity));
-        self.overrides.retain(|identity, _| live(*identity));
-        self.resources.retain(|key, _| {
-            self.declared.values().any(|v| v == key)
-                || self.overrides.values().any(|v| *v == Brush::Gradient(*key))
-        });
+    fn release_unused(&mut self, key: GradientKey) {
+        // A setter can displace only this key. Unchanged keys need no scan;
+        // complete descriptions prune through their admitted needed-key map.
+        if !self.declared.values().any(|v| *v == key) && !self.overrides.values().any(|v| *v == key)
+        {
+            self.resources.remove(&key);
+        }
     }
     pub(super) fn unused(&self) -> bool {
         self.declared.is_empty() && self.overrides.is_empty()
@@ -44,17 +42,34 @@ impl<M> Runtime<M> {
     }
     pub(super) fn background(&self, index: usize) -> Brush {
         let solid = self.styles.get(index).bg;
-        self.backgrounds().map_or(Brush::Solid(solid), |b| {
-            b.brush(self.nodes[index].identity(), solid)
-        })
+        let identity = self.nodes[index].identity();
+        self.backgrounds()
+            .and_then(|b| {
+                b.key(
+                    identity,
+                    matches!(
+                        self.overrides
+                            .contribution(identity, PropertyId::Background),
+                        Contribution::Set(_)
+                    ),
+                )
+            })
+            .map_or(Brush::Solid(solid), Brush::Gradient)
     }
     pub(super) fn background_contribution(&self, identity: u64) -> Contribution<PropertyValue> {
-        self.backgrounds()
-            .and_then(|b| b.overrides.get(&identity))
-            .copied()
-            .map_or(Contribution::Inherit, |v| {
-                Contribution::Set(PropertyValue::Brush(v))
-            })
+        let brush = if let Some(key) = self.backgrounds().and_then(|b| b.overrides.get(&identity)) {
+            Brush::Gradient(*key)
+        } else {
+            match self
+                .overrides
+                .contribution(identity, PropertyId::Background)
+            {
+                Contribution::Inherit => return Contribution::Inherit,
+                Contribution::Set(PropertyValue::Color(color)) => Brush::Solid(color),
+                _ => unreachable!("compiled solid background contribution"),
+            }
+        };
+        Contribution::Set(PropertyValue::Brush(brush))
     }
 }
 pub(super) fn reconcile(
@@ -72,10 +87,8 @@ pub(super) fn reconcile(
         .map(|(_, g)| (g.key(), g.view().byte_len()))
         .collect();
     if let Some(bank) = resources.as_ref().and_then(|r| r.backgrounds.as_deref()) {
-        for (identity, brush) in &bank.overrides {
-            if live.contains(identity)
-                && let Brush::Gradient(key) = brush
-            {
+        for (identity, key) in &bank.overrides {
+            if live.contains(identity) {
                 needed.insert(*key, bank.resources[key].view().byte_len());
             }
         }
@@ -181,8 +194,8 @@ impl<M: View + 'static, L: crate::remote::LaneSet<M>> RuntimeMut<'_, M, L> {
             return Err(Error::StaleResource);
         }
         let before = self.background(index);
-        // This is the existing solid port's compiled cache and override mask.
-        // The Brush contribution below is the sole inspected paint authority.
+        // Solid contributions live only in the existing style override lane.
+        // A gradient also masks solid source ports with a transparent cache.
         let compiled = match brush {
             None => Contribution::Inherit,
             Some(Brush::Solid(c)) => Contribution::Set(PropertyValue::Color(c)),
@@ -190,18 +203,19 @@ impl<M: View + 'static, L: crate::remote::LaneSet<M>> RuntimeMut<'_, M, L> {
         };
         self.set_style_value(index, PropertyId::Background, compiled)?;
         let identity = self.nodes[index].identity();
-        if brush.is_some() || self.backgrounds().is_some() {
-            let bank = self
-                .images
-                .get_or_insert_with(Default::default)
-                .backgrounds
-                .get_or_insert_with(Default::default);
-            if let Some(brush) = brush {
-                bank.overrides.insert(identity, brush);
+        if let Some(bank) = self.images.as_mut().and_then(|r| r.backgrounds.as_mut()) {
+            let key = match brush {
+                Some(Brush::Gradient(key)) => Some(key),
+                _ => None,
+            };
+            let previous = if let Some(key) = key {
+                bank.overrides.insert(identity, key)
             } else {
-                bank.overrides.remove(&identity);
+                bank.overrides.remove(&identity)
+            };
+            if let Some(previous) = previous.filter(|previous| Some(*previous) != key) {
+                bank.release_unused(previous);
             }
-            bank.retain(|_| true);
             if bank.unused() {
                 self.images.as_mut().unwrap().backgrounds = None;
             }
@@ -253,6 +267,148 @@ mod tests {
             }
             el
         }
+    }
+    #[test]
+    fn solid_and_gradient_overrides_share_presence_and_prune_only_displaced_resources() {
+        let first = gradient(Color::WHITE);
+        let first_key = first.key();
+        let mut win = Win::with_size(
+            Page {
+                paint: Some(first),
+                bad: false,
+            },
+            24,
+            24,
+        )
+        .unwrap();
+        let target = win.inspect().unwrap().nodes[0].target.unwrap();
+        win.set_property(
+            target,
+            BACKGROUND,
+            Contribution::Set(Brush::Gradient(first_key)),
+        )
+        .unwrap();
+        let second = gradient(Color::rgb(255, 0, 0));
+        let second_key = second.key();
+        win.update(|page| page.paint = Some(second)).unwrap();
+        // The explicit resource contribution pins its preceding author lease.
+        assert_eq!(
+            win.property(target, BACKGROUND).unwrap(),
+            Brush::Gradient(first_key)
+        );
+        assert_eq!(
+            win.runtime()
+                .unwrap()
+                .backgrounds()
+                .unwrap()
+                .resources
+                .len(),
+            2
+        );
+        win.set_property(
+            target,
+            BACKGROUND,
+            Contribution::Set(Brush::Solid(Color::WHITE)),
+        )
+        .unwrap();
+        assert_eq!(
+            win.contribution(target, BACKGROUND).unwrap(),
+            Contribution::Set(Brush::Solid(Color::WHITE))
+        );
+        assert!(
+            win.runtime()
+                .unwrap()
+                .backgrounds()
+                .unwrap()
+                .overrides
+                .is_empty()
+        );
+        assert_eq!(
+            win.runtime()
+                .unwrap()
+                .backgrounds()
+                .unwrap()
+                .resources
+                .len(),
+            1
+        );
+        assert_eq!(
+            win.set_property(
+                target,
+                BACKGROUND,
+                Contribution::Set(Brush::Gradient(first_key))
+            ),
+            Err(Error::StaleResource)
+        );
+        assert_eq!(
+            win.property(target, BACKGROUND).unwrap(),
+            Brush::Solid(Color::WHITE)
+        );
+        let third = gradient(Color::rgb(0, 255, 0));
+        let third_key = third.key();
+        win.update(|page| page.paint = Some(third)).unwrap();
+        assert_eq!(
+            win.property(target, BACKGROUND).unwrap(),
+            Brush::Solid(Color::WHITE)
+        );
+        assert!(
+            !win.runtime()
+                .unwrap()
+                .backgrounds()
+                .unwrap()
+                .resources
+                .contains_key(&second_key)
+        );
+        win.set_property(target, BACKGROUND, Contribution::Inherit)
+            .unwrap();
+        assert_eq!(
+            win.property(target, BACKGROUND).unwrap(),
+            Brush::Gradient(third_key)
+        );
+        // An equal transparent compiled value is still an explicit solid arm.
+        win.set_property(
+            target,
+            BACKGROUND,
+            Contribution::Set(Brush::Solid(Color::TRANSPARENT)),
+        )
+        .unwrap();
+        assert_eq!(
+            win.property(target, BACKGROUND).unwrap(),
+            Brush::Solid(Color::TRANSPARENT)
+        );
+        assert_eq!(
+            win.with_scene(|scene, _| scene.gradients().count())
+                .unwrap(),
+            0
+        );
+        win.set_property(target, BACKGROUND, Contribution::Inherit)
+            .unwrap();
+        assert_eq!(
+            win.property(target, BACKGROUND).unwrap(),
+            Brush::Gradient(third_key)
+        );
+        win.set_property(
+            target,
+            BACKGROUND,
+            Contribution::Set(Brush::Gradient(third_key)),
+        )
+        .unwrap();
+        win.update(|page| page.paint = None).unwrap();
+        assert_eq!(
+            win.property(target, BACKGROUND).unwrap(),
+            Brush::Gradient(third_key)
+        );
+        win.set_property(target, BACKGROUND, Contribution::Inherit)
+            .unwrap();
+        assert!(win.runtime().unwrap().images.is_none());
+        assert_eq!(
+            win.contribution(target, BACKGROUND).unwrap(),
+            Contribution::Inherit
+        );
+        assert_eq!(
+            win.property(target, BACKGROUND).unwrap(),
+            Brush::Solid(Color::TRANSPARENT)
+        );
     }
     #[test]
     fn gradient_background_typed_reflection_owner_validation_and_replacement_are_coherent() {
