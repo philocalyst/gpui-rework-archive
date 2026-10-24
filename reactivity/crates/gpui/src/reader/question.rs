@@ -1032,6 +1032,57 @@ mod tests {
         assert!(plan.lanes.pending.is_none());
     }
     #[test]
+    fn exhaustion_stays_terminal_after_counters_reset_rebinding_and_another_fault() {
+        for exhaust_policy in [false, true] {
+            let (mut plan, reader) = Questions::new()
+                .question(
+                    VALUE,
+                    |v| *v,
+                    |_, cap: Completion<u32, Infallible>| {
+                        drop(cap);
+                        Ok(())
+                    },
+                )
+                .unwrap();
+            let model = Model {
+                value: crate::Signal::new(1),
+                other: crate::Signal::new(2),
+            };
+            let sources = Sources::new().direct(VALUE);
+            let change = if exhaust_policy {
+                plan.lanes.policy = u64::MAX;
+                Change::Retry(reader.key)
+            } else {
+                plan.lanes.coarse = u64::MAX;
+                Change::Source(None)
+            };
+            assert!(plan.lanes.refresh_self(&model, &sources, change).is_err());
+            plan.lanes.coarse = 0;
+            plan.lanes.policy = 0;
+            plan.lanes.inputs =
+                Source::new(FieldId::new(1), "value", |m| &m.other, |m| &mut m.other);
+            assert!(
+                plan.lanes
+                    .refresh_self(&model, &sources, Change::Mount)
+                    .is_err()
+            );
+            plan.lanes.inputs = VALUE;
+            plan.lanes.fault(QuestionFault::ExecutorPanicked);
+            assert!(matches!(
+                plan.lanes
+                    .refresh_self(&model, &sources, Change::Retry(reader.key)),
+                Err(crate::Error::Question(QuestionFault::Exhausted))
+            ));
+            assert!(plan.lanes.pending.is_none());
+            assert_eq!(plan.lanes.control().current.load(Ordering::Acquire), 0);
+            assert_eq!(plan.lanes.stats.dispatched, 0);
+            assert!(matches!(
+                plan.lanes.read(reader.key).unwrap().failure,
+                Some(Failure::Framework(QuestionFault::Exhausted))
+            ));
+        }
+    }
+    #[test]
     fn binding_rejection_retires_the_staged_terminal_before_returning_error() {
         let (send, jobs) = std::sync::mpsc::channel();
         let (mut plan, _) = Questions::new()

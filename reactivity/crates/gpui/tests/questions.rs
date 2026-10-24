@@ -89,6 +89,71 @@ fn open_mode(
     (win, receive, answer)
 }
 #[test]
+fn a_retained_completion_cannot_revive_a_rejected_or_panicking_start() {
+    for panic_after_enqueue in [false, true] {
+        let (send, jobs) = mpsc::channel();
+        let mut starts = 0;
+        let (questions, answer) = Questions::new()
+            .question(Model::QUERY, Clone::clone, move |input, completion| {
+                starts += 1;
+                send.send((input, completion)).unwrap();
+                if starts == 2 {
+                    assert!(
+                        !panic_after_enqueue,
+                        "starter panicked after retaining completion"
+                    );
+                    return Err(StartError::Busy);
+                }
+                Ok(())
+            })
+            .unwrap();
+        let mut win = Win::recording_questions(
+            Model {
+                caption: "Caption".into(),
+                query: Signal::new("A".into()),
+                theme: Signal::new(1),
+                broken: Signal::new(false),
+                answer,
+            },
+            questions,
+            WindowOptions::default(),
+        )
+        .unwrap();
+        jobs.recv()
+            .unwrap()
+            .1
+            .complete(Ok("previous".into()))
+            .unwrap();
+        drain(&mut win);
+        win.retry(answer).unwrap();
+        let rejected = jobs.recv().unwrap().1;
+        assert!(rejected.is_cancelled());
+        let rejected_ticket = win.question_info(answer).unwrap().ticket;
+        assert_eq!(win.question_status(answer), Ok(QuestionStatus::Fault));
+        rejected
+            .complete(Ok("must never become ready".into()))
+            .unwrap();
+        drain(&mut win);
+        let info = win.question_info(answer).unwrap();
+        assert_eq!(info.ticket, rejected_ticket);
+        assert_eq!(info.status, QuestionStatus::Fault);
+        assert_eq!(info.stats.accepted, 1);
+        assert_eq!(info.stats.stale_results, 1);
+        assert!(win.contains_text("previous").unwrap());
+        assert!(!win.contains_text("must never become ready").unwrap());
+        win.retry(answer).unwrap();
+        jobs.recv()
+            .unwrap()
+            .1
+            .complete(Ok("recovered".into()))
+            .unwrap();
+        drain(&mut win);
+        assert_eq!(win.question_status(answer), Ok(QuestionStatus::Ready));
+        assert!(win.contains_text("recovered").unwrap());
+    }
+}
+
+#[test]
 fn queued_model_callback_supersedes_a_completion_in_the_same_batch() {
     let (win, jobs, answer) = open();
     let (remote, inbox) = gpui::Remote::bounded(1);
