@@ -2570,18 +2570,10 @@ impl<M: View + 'static> Runtime<M> {
             base.sort_unstable_by_key(|entry| entry.identity);
             metadata.base = base;
         }
-        let by_identity = IdentityIndex::from_ids(nodes.iter().map(Node::identity));
-        // Enter the material bank only for declared paint or an existing cold
-        // override/resource arm. Plain descriptions never take its stack frame.
-        if !background_drafts.is_empty()
-            || self
-                .images
-                .as_ref()
-                .is_some_and(|resources| resources.backgrounds.is_some())
-        {
-            self.dirty |=
-                background::reconcile(&mut self.images, &nodes, &by_identity, background_drafts)?;
-        }
+        let (by_identity, backgrounds_changed) =
+            image::finish_description(&mut self.images, &nodes, background_drafts)?;
+        self.by_identity = by_identity;
+        self.dirty |= backgrounds_changed;
         self.reconcile_geometry(&nodes, geometry_drafts);
         self.viewports = viewports;
         self.list_rows = list_rows;
@@ -2593,7 +2585,6 @@ impl<M: View + 'static> Runtime<M> {
         self.dirty |= matches!(self.styles, styles::Styles::Colors(_));
         self.texts = texts;
         self.fanout = fanout;
-        self.by_identity = by_identity;
         self.overrides
             .retain(|identity| self.by_identity.contains(identity));
         if let Some(metadata) = &mut self.metadata {

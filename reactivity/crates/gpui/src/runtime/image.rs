@@ -1,6 +1,6 @@
 //! Cold distinct-resource ownership. No image handle is cloned per node.
 use super::*;
-use crate::{Image, ImageKey, ImageSampling};
+use crate::{Gradient, Image, ImageKey, ImageSampling};
 
 #[derive(Clone, Copy, Debug, PartialEq, Eq)]
 pub(super) struct ImageUse {
@@ -67,6 +67,26 @@ pub(super) fn prune(current: &mut Option<Box<SceneResources>>) {
     if current.as_deref().is_some_and(SceneResources::unused) {
         *current = None;
     }
+}
+
+/// Finalize resource liveness against the same index published with these nodes.
+/// Admission failure leaves the preceding index and material bank unpublished.
+pub(super) fn finish_description(
+    current: &mut Option<Box<SceneResources>>,
+    nodes: &[Node],
+    backgrounds: Vec<(usize, &Gradient)>,
+) -> Result<(IdentityIndex, bool), Error> {
+    let identities = IdentityIndex::from_ids(nodes.iter().map(Node::identity));
+    let changed = if !backgrounds.is_empty()
+        || current
+            .as_ref()
+            .is_some_and(|resources| resources.backgrounds.is_some())
+    {
+        super::background::reconcile(current, nodes, &identities, backgrounds)?
+    } else {
+        false
+    };
+    Ok((identities, changed))
 }
 
 pub(super) fn measure(image: &Image, input: WidthMeasureInput) -> MeasureOutput {
