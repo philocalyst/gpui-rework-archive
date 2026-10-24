@@ -75,6 +75,27 @@ pub struct TextGeometry {
     pub(super) lines: Vec<Line>,
     pub(super) carets: Option<Vec<Stop>>,
 }
+/// Borrowed canonical geometry. The owning standalone layout or immutable text
+/// page must outlive every iterator returned from this view.
+#[derive(Clone, Copy, Debug)]
+pub struct TextGeometryView<'a> {
+    pub(super) len: u32,
+    pub(super) font_size: f32,
+    pub(super) runs: &'a [Run],
+    pub(super) lines: &'a [Line],
+    pub(super) carets: Option<&'a [Stop]>,
+}
+impl TextGeometry {
+    pub fn view(&self) -> TextGeometryView<'_> {
+        TextGeometryView {
+            len: self.len,
+            font_size: self.font_size,
+            runs: &self.runs,
+            lines: &self.lines,
+            carets: self.carets.as_deref(),
+        }
+    }
+}
 impl AsRef<TextGeometry> for TextGeometry {
     fn as_ref(&self) -> &TextGeometry {
         self
@@ -249,21 +270,21 @@ impl TextLayout {
     }
 }
 
-impl TextGeometry {
-    pub fn text_len(&self) -> usize {
+impl<'a> TextGeometryView<'a> {
+    pub fn text_len(self) -> usize {
         self.len as usize
     }
-    pub fn lines(&self) -> impl Iterator<Item = TextLine> + Clone {
+    pub fn lines(self) -> impl Iterator<Item = TextLine> + Clone + 'a {
         self.lines.iter().copied().map(TextLine)
     }
     /// Geometry exists only when interactive shaping was requested. Invalid
     /// bytes (including CRLF/combining interiors) produce None, never a snap.
-    pub fn caret_bounds(&self, position: TextPosition) -> Option<Rect> {
+    pub fn caret_bounds(self, position: TextPosition) -> Option<Rect> {
         self.caret_stop(position).map(|stop| self.stop_bounds(stop))
     }
-    fn caret_stop(&self, position: TextPosition) -> Option<&Stop> {
+    fn caret_stop(self, position: TextPosition) -> Option<&'a Stop> {
         let map = self;
-        let stops = map.carets.as_ref()?;
+        let stops = map.carets?;
         let mask = match position.affinity {
             CaretAffinity::Upstream => 1,
             CaretAffinity::Downstream => 2,
@@ -274,7 +295,7 @@ impl TextGeometry {
             .take_while(|stop| stop.byte == position.offset.0)
             .find(|stop| stop.affinities & mask != 0)
     }
-    fn stop_bounds(&self, stop: &Stop) -> Rect {
+    fn stop_bounds(self, stop: &Stop) -> Rect {
         // Equal producer rectangles retain upstream bits, even when the two
         // requested affinities own different source lines with equal geometry.
         let affinity = if stop.affinities & 1 != 0 {
@@ -282,7 +303,7 @@ impl TextGeometry {
         } else {
             CaretAffinity::Downstream
         };
-        let line = &self.lines[self.source_line(TextPosition {
+        let line = self.lines[self.source_line(TextPosition {
             offset: TextOffset(stop.byte),
             affinity,
         })];
@@ -296,13 +317,31 @@ impl TextGeometry {
     /// Source line owning this legal caret, including its requested affinity.
     /// Soft-wrap aliases can own different lines. After a hard separator both
     /// affinities belong to the following line, even when caret tops coincide.
-    pub fn caret_line(&self, position: TextPosition) -> Option<usize> {
+    pub fn caret_line(self, position: TextPosition) -> Option<usize> {
         self.caret_stop(position)?;
         Some(self.source_line(position))
     }
     /// Validates both endpoints in this layout's current interaction map.
     /// It is not a document-revision token or an editor mutation.
-    pub fn validates_selection(&self, selection: TextSelection) -> bool {
+    pub fn validates_selection(self, selection: TextSelection) -> bool {
         self.caret_stop(selection.anchor).is_some() && self.caret_stop(selection.focus).is_some()
+    }
+}
+
+impl TextGeometry {
+    pub fn text_len(&self) -> usize {
+        self.view().text_len()
+    }
+    pub fn lines(&self) -> impl Iterator<Item = TextLine> + Clone + '_ {
+        self.view().lines()
+    }
+    pub fn caret_bounds(&self, position: TextPosition) -> Option<Rect> {
+        self.view().caret_bounds(position)
+    }
+    pub fn caret_line(&self, position: TextPosition) -> Option<usize> {
+        self.view().caret_line(position)
+    }
+    pub fn validates_selection(&self, selection: TextSelection) -> bool {
+        self.view().validates_selection(selection)
     }
 }

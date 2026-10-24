@@ -32,8 +32,8 @@ mod planner;
 #[cfg(test)]
 use layout::Details;
 pub use layout::{
-    CaretAffinity, GlyphRun, TextDirection, TextGeometry, TextGrapheme, TextLine, TextOffset,
-    TextPosition, TextRun, TextSelection,
+    CaretAffinity, GlyphRun, TextDirection, TextGeometry, TextGeometryView, TextGrapheme, TextLine,
+    TextOffset, TextPosition, TextRun, TextSelection,
 };
 
 const MAX_TEXT: usize = 32 * 1024;

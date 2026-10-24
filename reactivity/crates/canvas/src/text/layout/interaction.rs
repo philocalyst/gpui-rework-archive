@@ -44,11 +44,11 @@ impl TextGrapheme {
     }
 }
 
-impl Details {
+impl<'a> TextGeometryView<'a> {
     // Source-ordered boundaries remain authoritative when caret tops overlap.
     // End excludes hard separators: upstream at a soft wrap stays on the old
     // line, while the end of a hard separator advances across the source gap.
-    pub(super) fn source_line(&self, position: TextPosition) -> usize {
+    pub(super) fn source_line(self, position: TextPosition) -> usize {
         let byte = position.offset.0;
         match position.affinity {
             CaretAffinity::Upstream if byte != 0 => self
@@ -61,14 +61,14 @@ impl Details {
                 .saturating_sub(1),
         }
     }
-    fn line_at(&self, y: f32) -> usize {
+    fn line_at(self, y: f32) -> usize {
         self.lines
             .partition_point(|line| line.top <= y)
             .saturating_sub(1)
     }
 
     /// Inclusive endpoint groups for a validated selection source range.
-    fn stops(&self, start: u32, end: u32) -> &[Stop] {
+    fn stops(self, start: u32, end: u32) -> &'a [Stop] {
         let stops = self.carets.as_deref().unwrap_or_default();
         let first = if start == 0 {
             0
@@ -83,7 +83,7 @@ impl Details {
     /// Zipping with the next group includes the far side of an atomic separator.
     /// At a soft wrap the same extra pair belongs to the next line and filters
     /// out by source-affinity ownership. No upper-bound scan precedes a hit.
-    fn line_tail(&self, line: usize) -> &[Stop] {
+    fn line_tail(self, line: usize) -> &'a [Stop] {
         let stops = self.carets.as_deref().unwrap_or_default();
         let start = self.lines[line].start;
         let first = if start == 0 {
@@ -94,8 +94,8 @@ impl Details {
         &stops[first..]
     }
 
-    fn intervals<'a>(
-        &'a self,
+    fn intervals(
+        self,
         stops: &'a [Stop],
         marker_width: f32,
     ) -> impl Iterator<Item = Interval> + 'a {
@@ -128,7 +128,7 @@ impl Details {
                 } else {
                     line
                 };
-                let metrics = &self.lines[geometry_line];
+                let metrics = self.lines[geometry_line];
                 let left = start.x.min(end.x);
                 let direction = if !hard_break && start.x != end.x {
                     if start.x < end.x {
@@ -178,10 +178,10 @@ impl Details {
     }
 }
 
-impl TextGeometry {
+impl<'a> TextGeometryView<'a> {
     /// Source-ordered grapheme advances, including atomic hard-break markers.
     /// Nothing is retained or allocated. Requires interactive shaping.
-    pub fn graphemes(&self) -> impl Iterator<Item = TextGrapheme> + '_ {
+    pub fn graphemes(self) -> impl Iterator<Item = TextGrapheme> + 'a {
         self.intervals(
             self.carets.as_deref().unwrap_or_default(),
             self.font_size * 0.25,
@@ -190,9 +190,9 @@ impl TextGeometry {
     /// Units in an exact source range. Invalid or reversed endpoints return
     /// None before iteration; bounds use the same source-affinity ownership.
     pub fn graphemes_in(
-        &self,
+        self,
         range: std::ops::Range<TextOffset>,
-    ) -> Option<impl Iterator<Item = TextGrapheme> + '_> {
+    ) -> Option<impl Iterator<Item = TextGrapheme> + 'a> {
         if range.start > range.end {
             return None;
         }
@@ -210,7 +210,7 @@ impl TextGeometry {
     }
     /// The containing grapheme, distinct from nearest-caret midpoint policy.
     /// Outside/zero-area advances and nonfinite points produce None.
-    pub fn grapheme_at(&self, point: Point) -> Option<TextGrapheme> {
+    pub fn grapheme_at(self, point: Point) -> Option<TextGrapheme> {
         if !point.x.is_finite() || !point.y.is_finite() {
             return None;
         }
@@ -221,7 +221,7 @@ impl TextGeometry {
     }
     /// Advance at an exact grapheme start; interiors and the terminal caret
     /// have no grapheme. The byte lookup reuses the existing sorted stops.
-    pub fn grapheme(&self, start: TextOffset) -> Option<TextGrapheme> {
+    pub fn grapheme(self, start: TextOffset) -> Option<TextGrapheme> {
         let stops = self.carets.as_deref()?;
         let first = stops.partition_point(|stop| stop.byte < start.0);
         self.intervals(&stops[first..], self.font_size * 0.25)
@@ -232,7 +232,7 @@ impl TextGeometry {
     /// Font-run boundaries inside a grapheme do not split the selectable unit.
     /// Equal direction does not imply visual adjacency across bidi isolates;
     /// an affinity discontinuity starts a new run instead of spanning a gap.
-    pub fn runs(&self) -> impl Iterator<Item = TextRun> + '_ {
+    pub fn runs(self) -> impl Iterator<Item = TextRun> + 'a {
         let mut units = self.graphemes().peekable();
         let mut terminal = self
             .lines
@@ -290,14 +290,14 @@ impl TextGeometry {
     /// midpoint the left side wins; bidi joins retain that side's affinity.
     /// Nonfinite points and layouts shaped without interaction return None.
     /// Scans the existing caret map and searches line/run tables without allocating.
-    pub fn position_at(&self, point: Point) -> Option<TextPosition> {
+    pub fn position_at(self, point: Point) -> Option<TextPosition> {
         if !point.x.is_finite() || !point.y.is_finite() {
             return None;
         }
         self.position_on_line(self.line_at(point.y), point.x)
     }
 
-    fn position_on_line(&self, line: usize, x: f32) -> Option<TextPosition> {
+    fn position_on_line(self, line: usize, x: f32) -> Option<TextPosition> {
         let map = self;
         map.carets.as_ref()?;
         let stops = map.line_tail(line);
@@ -384,7 +384,7 @@ impl TextGeometry {
     /// byte range succeeds without rectangles, including split-affinity carets.
     /// Scans the existing caret map; no selection geometry is retained.
     pub fn selection_rects(
-        &self,
+        self,
         selection: TextSelection,
         mut visit: impl FnMut(Rect, usize),
     ) -> bool {
@@ -430,13 +430,13 @@ impl TextGeometry {
     /// visual line. Returns None for an invalid current position. At document
     /// edges it returns the current position. This is physical arrow motion;
     /// word movement and paragraph-direction commands are separate policies.
-    pub fn previous_visual(&self, position: TextPosition) -> Option<TextPosition> {
+    pub fn previous_visual(self, position: TextPosition) -> Option<TextPosition> {
         self.move_visual(position, false)
     }
 
     /// Moves one visible grapheme edge to the right, continuing at the left
     /// edge of the next line. See [`Self::previous_visual`] for edge policy.
-    pub fn next_visual(&self, position: TextPosition) -> Option<TextPosition> {
+    pub fn next_visual(self, position: TextPosition) -> Option<TextPosition> {
         self.move_visual(position, true)
     }
 
@@ -444,17 +444,17 @@ impl TextGeometry {
     /// Affinity determines the current line at a wrap. Document edges preserve
     /// the current position. Invalid positions or nonfinite x return None.
     /// Borrows the existing interaction map without allocation.
-    pub fn previous_visual_line(&self, position: TextPosition, x: f32) -> Option<TextPosition> {
+    pub fn previous_visual_line(self, position: TextPosition, x: f32) -> Option<TextPosition> {
         self.move_visual_line(position, x, false)
     }
 
     /// Nearest legal caret on the following visual line; see
     /// [`Self::previous_visual_line`]. The caller owns preferred-x policy.
-    pub fn next_visual_line(&self, position: TextPosition, x: f32) -> Option<TextPosition> {
+    pub fn next_visual_line(self, position: TextPosition, x: f32) -> Option<TextPosition> {
         self.move_visual_line(position, x, true)
     }
 
-    fn move_visual_line(&self, position: TextPosition, x: f32, down: bool) -> Option<TextPosition> {
+    fn move_visual_line(self, position: TextPosition, x: f32, down: bool) -> Option<TextPosition> {
         self.caret_bounds(position)?;
         if !x.is_finite() {
             return None;
@@ -473,18 +473,18 @@ impl TextGeometry {
 
     /// Physical left edge of the current visual line, including RTL text.
     /// Invalid positions return None. No geometry or navigation state is retained.
-    pub fn visual_line_start(&self, position: TextPosition) -> Option<TextPosition> {
+    pub fn visual_line_start(self, position: TextPosition) -> Option<TextPosition> {
         self.caret_bounds(position)?;
         self.position_on_line(self.source_line(position), -f32::MAX)
     }
 
     /// Physical right edge of the current visual line; see [`Self::visual_line_start`].
-    pub fn visual_line_end(&self, position: TextPosition) -> Option<TextPosition> {
+    pub fn visual_line_end(self, position: TextPosition) -> Option<TextPosition> {
         self.caret_bounds(position)?;
         self.position_on_line(self.source_line(position), f32::MAX)
     }
 
-    fn move_visual(&self, position: TextPosition, right: bool) -> Option<TextPosition> {
+    fn move_visual(self, position: TextPosition, right: bool) -> Option<TextPosition> {
         let bounds = self.caret_bounds(position)?;
         let map = self;
         // The successful bounds lookup above already validated byte/affinity.
@@ -553,6 +553,55 @@ impl<G: AsRef<TextGeometry>> TextLayout<G> {
     }
     pub fn visual_line_end(&self, position: TextPosition) -> Option<TextPosition> {
         self.geometry()?.visual_line_end(position)
+    }
+}
+
+impl TextGeometry {
+    pub fn graphemes(&self) -> impl Iterator<Item = TextGrapheme> + '_ {
+        self.view().graphemes()
+    }
+    pub fn graphemes_in(
+        &self,
+        range: std::ops::Range<TextOffset>,
+    ) -> Option<impl Iterator<Item = TextGrapheme> + '_> {
+        self.view().graphemes_in(range)
+    }
+    pub fn grapheme_at(&self, point: Point) -> Option<TextGrapheme> {
+        self.view().grapheme_at(point)
+    }
+    pub fn grapheme(&self, start: TextOffset) -> Option<TextGrapheme> {
+        self.view().grapheme(start)
+    }
+    pub fn runs(&self) -> impl Iterator<Item = TextRun> + '_ {
+        self.view().runs()
+    }
+    pub fn position_at(&self, point: Point) -> Option<TextPosition> {
+        self.view().position_at(point)
+    }
+    pub fn selection_rects(
+        &self,
+        selection: TextSelection,
+        visit: impl FnMut(Rect, usize),
+    ) -> bool {
+        self.view().selection_rects(selection, visit)
+    }
+    pub fn previous_visual(&self, position: TextPosition) -> Option<TextPosition> {
+        self.view().previous_visual(position)
+    }
+    pub fn next_visual(&self, position: TextPosition) -> Option<TextPosition> {
+        self.view().next_visual(position)
+    }
+    pub fn previous_visual_line(&self, position: TextPosition, x: f32) -> Option<TextPosition> {
+        self.view().previous_visual_line(position, x)
+    }
+    pub fn next_visual_line(&self, position: TextPosition, x: f32) -> Option<TextPosition> {
+        self.view().next_visual_line(position, x)
+    }
+    pub fn visual_line_start(&self, position: TextPosition) -> Option<TextPosition> {
+        self.view().visual_line_start(position)
+    }
+    pub fn visual_line_end(&self, position: TextPosition) -> Option<TextPosition> {
+        self.view().visual_line_end(position)
     }
 }
 
