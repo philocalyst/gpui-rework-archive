@@ -55,7 +55,8 @@ pub enum HueInterpolation {
     Decreasing,
 }
 impl Interpolation {
-    /// Per-channel absolute conversion budget in premultiplied linear sRGB,
+    /// Per-channel f32 evaluation budget for prepared f64 color coordinates in
+    /// premultiplied linear sRGB. Host Color conversion is separate. This is
     /// before coverage, compositing and output encoding. Exact endpoint/fixed
     /// paths retain ordinary per-channel f32 rounding. Geometry has its own
     /// admitted sampling domain; this is not a whole-frame error budget.

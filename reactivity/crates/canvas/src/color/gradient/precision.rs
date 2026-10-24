@@ -1,5 +1,5 @@
-//! Conservative preparation-only absolute conversion certificate. The proof and
-//! admitted/rejected cohorts are recorded with the native qualification evidence.
+//! Conservative f32 evaluation bound for prepared f64 color coordinates. Host
+//! Color conversion is separate; pinned evidence states the numeric assumptions.
 use super::{super::OKLAB_TO_LMS, LMS_TO_RGB};
 // WGSL may round toward either adjacent f32, so use one ULP, not nearest-even u.
 const EPS: f64 = f32::EPSILON as f64;

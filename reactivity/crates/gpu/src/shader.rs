@@ -351,7 +351,7 @@ pub mod ui {
                     + z * (bitcast_f32(0xbab60b61_u32)
                         + z * (bitcast_f32(0x37d00d01)
                             + z * (bitcast_f32(0xb493f27e_u32) + z * bitcast_f32(0x310f76c7))))));
-        return vec2f(select(s, -s, angle < 0.0), select(c, -c, folded));
+        vec2f(select(s, -s, angle < 0.0), select(c, -c, folded))
     }
 
     // Same validated parameter/interval word schema as Canvas GradientView.
@@ -449,25 +449,29 @@ pub mod ui {
             let a = q.y * trig.y;
             let b = q.y * trig.x;
             q = vec3f(
-                q.x + a * 0.3963377773761749 + b * 0.2158037573099136,
-                q.x - a * 0.1055613458156586 - b * 0.0638541728258133,
-                q.x - a * 0.0894841775298119 - b * 1.2914855480194092,
+                q.x + a * bitcast_f32(0x3ecaecc9_u32) + b * bitcast_f32(0x3e5cfba9_u32),
+                q.x - a * bitcast_f32(0x3dd8308c_u32) - b * bitcast_f32(0x3d82c5fa_u32),
+                q.x - a * bitcast_f32(0x3db7437b_u32) - b * bitcast_f32(0x3fa54f66_u32),
             );
         }
+        // Exact f32 words of Canvas's canonical f64 matrix coefficients.
         q = q * q * q;
         let mut alpha = color.w;
         if color.w != delta.w {
             alpha = (1.0 - u) * color.w + u * delta.w;
         }
-        return vec4f(
-            (q.x * 4.076741636075958 - q.y * 3.3077115392580616 + q.z * 0.23096990318210442)
+        vec4f(
+            (q.x * bitcast_f32(0x408274ab_u32) - q.y * bitcast_f32(0x4053b18c_u32)
+                + q.z * bitcast_f32(0x3e6c8360_u32))
                 * alpha,
-            (-q.x * 1.268437973285032 + q.y * 2.609757349287688 - q.z * 0.34131937600265727)
+            (-q.x * bitcast_f32(0x3fa25c2d_u32) + q.y * bitcast_f32(0x40270644_u32)
+                - q.z * bitcast_f32(0x3eaec16a_u32))
                 * alpha,
-            (-q.x * 0.004196076138675566 - q.y * 0.7034186179359363 + q.z * 1.7076146940746117)
+            (-q.x * bitcast_f32(0x3b897f3d_u32) - q.y * bitcast_f32(0x3f34133e_u32)
+                + q.z * bitcast_f32(0x3fda931e_u32))
                 * alpha,
             alpha,
-        );
+        )
     }
 
     pub fn sample_draw(draw: Draw, point: Vec2f) -> Vec4f {
