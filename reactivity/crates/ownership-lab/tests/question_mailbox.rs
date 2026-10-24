@@ -150,7 +150,7 @@ fn abandonment_releases_credit_without_a_payload_and_stays_bounded() {
 }
 
 #[test]
-fn notification_and_payload_drop_run_outside_the_mutex() {
+fn notification_and_payload_drop_run_outside_the_slot_borrow() {
     loom::model(|| {
         struct Probe {
             slot: Arc<Mailbox<Probe>>,
@@ -180,7 +180,7 @@ fn notification_and_payload_drop_run_outside_the_mutex() {
 }
 
 #[test]
-fn close_never_waits_for_a_descheduled_producer_holding_the_response_mutex() {
+fn close_never_waits_for_a_descheduled_producer_borrowing_the_response() {
     loom::model(|| {
         let slot = Arc::new(Mailbox::new());
         slot.begin();
@@ -197,13 +197,36 @@ fn close_never_waits_for_a_descheduled_producer_holding_the_response_mutex() {
             })
         };
         ready.recv().unwrap();
-        // If close attempted to lock, Loom would detect this wait cycle:
+        // If close waited for the slot, Loom would detect this wait cycle:
         // close waits for the worker, worker waits for resume after close.
         slot.close();
         assert_eq!(slot.freeze(), None);
         resume.send(()).unwrap();
         drop(slot);
         worker.join().unwrap();
+    });
+}
+
+#[test]
+fn unique_closed_owner_can_extract_a_response_before_running_its_destructor() {
+    loom::model(|| {
+        let slot = Arc::new(Mailbox::new());
+        let drops = Arc::new(AtomicUsize::new(0));
+        slot.begin();
+        assert!(
+            slot.complete(
+                Payload {
+                    drops: drops.clone()
+                },
+                || {}
+            )
+            .is_ok()
+        );
+        slot.close();
+        let value = Arc::try_unwrap(slot).ok().unwrap().into_payload();
+        assert_eq!(drops.load(Ordering::SeqCst), 0);
+        drop(value);
+        assert_eq!(drops.load(Ordering::SeqCst), 1);
     });
 }
 
