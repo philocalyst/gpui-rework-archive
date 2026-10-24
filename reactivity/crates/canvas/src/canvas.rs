@@ -25,6 +25,8 @@ use bins::RasterScratch;
 mod glyph_axis;
 mod image_axis;
 mod mask_kernel;
+mod metric_scale;
+use metric_scale::MetricScale;
 mod paint;
 pub use paint::{PaintCommit, PaintEdit, PaintError, PaintErrorKind, PaintIndex};
 mod rounded;
@@ -277,7 +279,7 @@ struct CommonGroup {
     range: [u32; 2],
     glyphs: SharedGlyphs,
     origin: Point,
-    scale: f32,
+    scale: MetricScale,
 }
 // A raster witness, not expanded glyph geometry. The glyph positions live only
 // in the shared packed owner. Cached admitted bounds avoid repeating forward
@@ -295,13 +297,19 @@ impl DrawRef {
     }
 }
 const _: () = assert!(size_of::<DrawRef>() == 14);
-fn glyph_rect(origin: Point, [x, baseline]: [f32; 2], raster: &Raster, scale: f32) -> Rect {
+fn glyph_rect(origin: Point, [x, baseline]: [f32; 2], raster: &Raster, scale: MetricScale) -> Rect {
     let m = raster.metrics;
+    let [xmin, ymin, width, height] = scale.apply([
+        m.xmin as f32,
+        m.ymin as f32,
+        m.width as f32,
+        m.height as f32,
+    ]);
     Rect::new(
-        origin.x + x + m.xmin as f32 / scale,
-        origin.y + baseline - m.ymin as f32 / scale - m.height as f32 / scale,
-        m.width as f32 / scale,
-        m.height as f32 / scale,
+        origin.x + x + xmin,
+        origin.y + baseline - ymin - height,
+        width,
+        height,
     )
 }
 // Factor the common font identity out of the primary mask index. Glyph+size is
@@ -676,7 +684,7 @@ impl DisplayList {
         common: StoredCommon,
         glyphs: SharedGlyphs,
         origin: Point,
-        scale: f32,
+        scale: MetricScale,
     ) {
         for address in &self.order[start..] {
             self.columns.support(
@@ -1796,6 +1804,7 @@ impl Canvas {
             map: Mapping::new(transform)?,
             color: color.0,
         };
+        let metric_scale = MetricScale::new(raster_scale);
         // Prepare the final unpublished raster-witness tail. A singleton stays
         // inline and never retains a scene lease on the packed glyph owner.
         let order_start = self.commands.order.len();
@@ -1821,7 +1830,7 @@ impl Canvas {
                 let raster = new
                     .as_deref()
                     .unwrap_or_else(|| &self.commands.masks[index as usize]);
-                let rect = glyph_rect(origin, [glyph.x, glyph.baseline], raster, raster_scale);
+                let rect = glyph_rect(origin, [glyph.x, glyph.baseline], raster, metric_scale);
                 let Some(command) = self.prepare(rect, transform, common, index)? else {
                     continue;
                 };
@@ -1905,7 +1914,7 @@ impl Canvas {
                     common,
                     layout.shared_glyphs(),
                     origin,
-                    raster_scale,
+                    metric_scale,
                 );
             }
             self.mask_bytes += bytes;
@@ -3355,6 +3364,80 @@ fn sample_mean(samples: &[[f32; 4]; 16]) -> [f32; 4] {
 #[cfg(test)]
 mod scaled_mask_tests {
     use super::*;
+
+    #[test]
+    fn compiled_metric_scaling_preserves_integer_casts_and_rectangle_operation_order() {
+        fn bits(rect: Rect) -> [u32; 4] {
+            [rect.x, rect.y, rect.width, rect.height].map(f32::to_bits)
+        }
+        let mut scales: Vec<_> = (1..=254)
+            .map(|exponent| f32::from_bits(exponent << 23))
+            .collect();
+        scales.extend([
+            f32::from_bits(1),
+            f32::MIN_POSITIVE.next_down(),
+            1.25,
+            1.0f32.next_up(),
+            f32::MAX,
+        ]);
+        let mut checked = 0;
+        for (xmin, ymin, width, height) in [
+            (0, 0, 0, 0),
+            (-3, 7, 9, 17),
+            (i32::MIN, i32::MAX, usize::MAX, usize::MAX),
+            (-16_777_217, 16_777_219, 16_777_217, 16_777_219),
+            (i32::MAX, i32::MIN, 1, 3),
+        ] {
+            let raster = Raster {
+                key: crate::text::GlyphKey::fixture(),
+                metrics: crate::text::RasterMetrics {
+                    xmin,
+                    ymin,
+                    width,
+                    height,
+                },
+                pixels: Vec::new(),
+            };
+            for scale in &scales {
+                let scale = std::hint::black_box(*scale);
+                for origin in [
+                    Point { x: -0.0, y: 0.0 },
+                    Point {
+                        x: 0.125,
+                        y: -0.375,
+                    },
+                    Point {
+                        x: -1_000_000.0,
+                        y: 1_000_000.0,
+                    },
+                ] {
+                    for [x, baseline] in
+                        [[0.0, -0.0], [0.125f32.next_up(), 17.375], [-9.5, -31.125]]
+                    {
+                        let expected = Rect::new(
+                            origin.x + x + xmin as f32 / scale,
+                            origin.y + baseline - ymin as f32 / scale - height as f32 / scale,
+                            width as f32 / scale,
+                            height as f32 / scale,
+                        );
+                        assert_eq!(
+                            bits(glyph_rect(
+                                origin,
+                                [x, baseline],
+                                &raster,
+                                MetricScale::new(scale)
+                            )),
+                            bits(expected),
+                            "scale={:08x}",
+                            scale.to_bits()
+                        );
+                        checked += 4;
+                    }
+                }
+            }
+        }
+        println!("METRIC_SCALE exact_rectangle_fields={checked}");
+    }
 
     #[test]
     fn separable_masks_and_certificates_match_every_scalar_sample() {
