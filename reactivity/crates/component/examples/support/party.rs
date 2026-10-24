@@ -1,5 +1,5 @@
 //! The same exclusively owned application model runs headlessly and natively.
-use gpui::{Component, El, FieldId, Signal, Source, Sources, View};
+use gpui::{Component, El, FieldId, Signal, SignalMap, Source, Sources, View};
 use gpui_component::{
     Badge, Button, ButtonVariant, Checkbox, Field, Input, Label, Space, Theme,
     layout::{inline, section, stack},
@@ -35,7 +35,7 @@ impl Preparation {
 }
 impl View for Preparation {
     fn sources() -> Sources<Self> {
-        Sources::new().field(Self::LANTERNS).field(Self::TREATS)
+        Sources::new().direct(Self::LANTERNS).direct(Self::TREATS)
     }
     fn view(&self) -> El<'_> {
         let t = &self.theme;
@@ -44,13 +44,13 @@ impl View for Preparation {
                 Label::new("Before the doorbell rings", t)
                     .style(|e: El<'_>| e.font_size(t.rem(9.0 / 7.0)))
                     .build(),
-                Checkbox::new("Light the lanterns", *self.lanterns, t)
+                Checkbox::new("Light the lanterns", &self.lanterns, t)
                     .toggle(Self::LANTERNS)
                     // Application policy replaces the reusable default route.
                     .on_change(Self::set_lanterns)
                     .parts(|parts| parts.indicator(|e: El<'_>| e.rounded(t.radius() / 3.0)))
                     .build(),
-                Checkbox::new("Set out the treats", *self.treats, t)
+                Checkbox::new("Set out the treats", &self.treats, t)
                     .toggle(Self::TREATS)
                     .build(),
             ),
@@ -145,7 +145,7 @@ impl View for Party {
                     Field::new(
                         "Gathering name",
                         Input::new(&self.title, "Gathering name", t)
-                            .invalid(invalid)
+                            .invalid(self.title.map(|title| title.trim().chars().count() < 3))
                             .description("At least three characters")
                             .parts(|parts| {
                                 parts.frame(|e: El<'_>| e.w(gpui::Length::Percent(100.0)))

@@ -1,8 +1,28 @@
 #[path = "support/party.rs"]
 mod party;
-use gpui::{El, Length, PropInput, Signal, Style, View, Win};
+use gpui::{El, Length, PropInput, Signal, Sources, Style, View, Win};
 use gpui_component::{Button, Checkbox, Input, Theme};
 fn main() {
+    let mut direct_schema = None;
+    let direct = allocation_counter::measure(|| {
+        direct_schema = Some(party::Preparation::sources());
+    });
+    let mut conservative_schema = None;
+    let conservative = allocation_counter::measure(|| {
+        conservative_schema = Some(
+            Sources::<party::Preparation>::new()
+                .field(party::Preparation::LANTERNS)
+                .field(party::Preparation::TREATS),
+        );
+    });
+    println!(
+        "preparation_schema direct_allocations={} direct_retained={} conservative_allocations={} conservative_retained={}",
+        direct.count_total,
+        direct.bytes_current,
+        conservative.count_total,
+        conservative.bytes_current
+    );
+    drop((direct_schema, conservative_schema));
     let theme = Theme::halloween();
     let button = allocation_counter::measure(|| {
         drop(Button::new("Send", &theme).build());

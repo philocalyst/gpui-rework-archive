@@ -539,3 +539,52 @@ fn party_default_toggle_and_title_edits_refresh_checked_validation_and_parent_po
     assert_presented(&window, true, false);
     assert!(window.counters().owner_reruns > 0);
 }
+
+#[test]
+fn actual_preparation_binds_directly_while_parent_ready_branch_keeps_its_dependency() {
+    let mut preparation =
+        Win::with_size(party::Preparation::new(Theme::halloween()), 400, 200).unwrap();
+    let treats = preparation
+        .role(Role::CheckBox)
+        .name("Set out the treats")
+        .one()
+        .unwrap();
+    preparation.reset_counters().unwrap();
+    preparation.set(party::Preparation::TREATS, false).unwrap();
+    let mut checked = None;
+    preparation
+        .visit(|part| {
+            if part.target() == treats {
+                checked = part.checked();
+            }
+        })
+        .unwrap();
+    assert_eq!(checked, Some(false));
+    assert_eq!(preparation.counters().owner_reruns, 0);
+    assert_eq!(preparation.counters().descriptions, 0);
+
+    let mut parent = Win::with_size(party::Party::default(), 520, 542).unwrap();
+    parent
+        .set(
+            party::Party::PREPARATION.source(party::Preparation::LANTERNS),
+            true,
+        )
+        .unwrap();
+    parent.reset_counters().unwrap();
+    parent
+        .set(
+            party::Party::PREPARATION.source(party::Preparation::TREATS),
+            false,
+        )
+        .unwrap();
+    assert!(!parent.root().unwrap().ready());
+    assert!(
+        parent.counters().owner_reruns > 0,
+        "ready() is an ordinary parent Rust branch"
+    );
+    let finish = parent.button("Finish invitation");
+    assert!(matches!(
+        parent.activate(finish),
+        Err(Error::NotInteractive)
+    ));
+}
