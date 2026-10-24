@@ -103,22 +103,53 @@ fn nearest(value: &str, byte: usize) -> Result<gpui_canvas::TextPosition, Error>
         .unwrap_or(0);
     position(byte)
 }
-fn decoration(value: &str, start: usize, end: usize) -> Result<gpui_canvas::TextSelection, Error> {
+fn preview_selections(
+    value: &str,
+    marked: Range<usize>,
+    cursor: Option<[u32; 2]>,
+) -> Result<(gpui_canvas::TextSelection, gpui_canvas::TextSelection), Error> {
+    let [a, b] = cursor.map_or([marked.start; 2], |c| c.map(|n| n as usize));
+    let mut anchor = 0;
+    let mut focus = 0;
     let mut left = 0;
     let mut right = value.len();
+    let mut previous = 0;
+    // Admission places both raw cursor endpoints inside the marked range. Each
+    // nearest endpoint needs only its adjacent boundaries; ties go downstream.
+    // The first boundary at/after marked.end also completes its decoration.
     for boundary in icu_segmenter::GraphemeClusterSegmenter::new().segment_str(value) {
-        if boundary <= start {
+        let nearest = |byte: usize| {
+            if byte.abs_diff(previous) < byte.abs_diff(boundary) {
+                previous
+            } else {
+                boundary
+            }
+        };
+        if (previous..=boundary).contains(&a) {
+            anchor = nearest(a);
+        }
+        if (previous..=boundary).contains(&b) {
+            focus = nearest(b);
+        }
+        if boundary <= marked.start {
             left = boundary;
         }
-        if boundary >= end {
+        if boundary >= marked.end {
             right = boundary;
             break;
         }
+        previous = boundary;
     }
-    Ok(gpui_canvas::TextSelection {
-        anchor: position(left)?,
-        focus: position(right)?,
-    })
+    Ok((
+        gpui_canvas::TextSelection {
+            anchor: position(anchor)?,
+            focus: position(focus)?,
+        },
+        gpui_canvas::TextSelection {
+            anchor: position(left)?,
+            focus: position(right)?,
+        },
+    ))
 }
 impl<M: View + 'static> Runtime<M> {
     fn ime_active(&self) -> Option<&Active> {
@@ -455,9 +486,12 @@ impl<M: View + 'static, L: LaneSet<M>> RuntimeMut<'_, M, L> {
                 },
             })
         });
-        let before = preview.display.clone();
-        if text.is_empty() {
-            preview.display = active.source.clone();
+        let changed = if text.is_empty() {
+            let changed = !std::ptr::eq::<str>(preview.display.as_ref(), active.source.as_ref());
+            if changed {
+                preview.display = active.source.clone();
+            }
+            changed
         } else {
             // Source and replacement stay fixed for this composition. Only the
             // raw UTF-8 middle can differ; an empty mark denotes Source itself.
@@ -471,14 +505,15 @@ impl<M: View + 'static, L: LaneSet<M>> RuntimeMut<'_, M, L> {
                 preview.display =
                     SharedText::try_join([&active.source[..start], text, &active.source[end..]])
                         .ok_or(Error::ResourceLimit)?;
+                true
+            } else {
+                false
             }
-        }
+        };
         let finish = start + text.len();
         let exact = cursor.map(|(a, b)| [(start + a) as u32, (start + b) as u32]);
-        let focus = nearest(&preview.display, exact.map_or(start, |c| c[1] as usize))?;
-        let anchor = nearest(&preview.display, exact.map_or(start, |c| c[0] as usize))?;
-        preview.selection = gpui_canvas::TextSelection { anchor, focus };
-        preview.decoration = decoration(&preview.display, start, finish)?;
+        (preview.selection, preview.decoration) =
+            preview_selections(&preview.display, start..finish, exact)?;
         preview.mark = MarkSnapshot {
             identity,
             stamp: active.stamp,
@@ -494,7 +529,7 @@ impl<M: View + 'static, L: LaneSet<M>> RuntimeMut<'_, M, L> {
             },
             None,
         );
-        if !std::ptr::eq::<str>(before.as_ref(), preview.display.as_ref()) {
+        if changed {
             self.runtime.invalidate_display(active.target);
         }
         self.runtime.dirty = true;
@@ -605,6 +640,75 @@ mod tests {
     }
     fn ack(win: &mut Win<Input>) {
         win.presented(win.with_scene(|_, t| t).unwrap()).unwrap();
+    }
+    #[test]
+    fn one_pass_preview_geometry_matches_exact_full_scan_at_all_raw_byte_positions() {
+        fn original_decoration(
+            value: &str,
+            start: usize,
+            end: usize,
+        ) -> gpui_canvas::TextSelection {
+            let mut left = 0;
+            let mut right = value.len();
+            for boundary in icu_segmenter::GraphemeClusterSegmenter::new().segment_str(value) {
+                if boundary <= start {
+                    left = boundary;
+                }
+                if boundary >= end {
+                    right = boundary;
+                    break;
+                }
+            }
+            gpui_canvas::TextSelection {
+                anchor: position(left).unwrap(),
+                focus: position(right).unwrap(),
+            }
+        }
+        let mut cases = 0;
+        for value in [
+            "",
+            "abc",
+            "a\u{301}z",
+            "👩‍❤️‍💋‍👨x",
+            "🇫🇷🇯🇵",
+            "👍🏽x",
+            "עברית",
+            "a\r\nb",
+        ] {
+            for start in 0..=value.len() {
+                for end in start..=value.len() {
+                    let decoration = original_decoration(value, start, end);
+                    let hidden = preview_selections(value, start..end, None).unwrap();
+                    assert_eq!(
+                        hidden,
+                        (
+                            gpui_canvas::TextSelection {
+                                anchor: nearest(value, start).unwrap(),
+                                focus: nearest(value, start).unwrap()
+                            },
+                            decoration
+                        )
+                    );
+                    for anchor in start..=end {
+                        for focus in start..=end {
+                            let cursor = Some([anchor as u32, focus as u32]);
+                            let actual = preview_selections(value, start..end, cursor).unwrap();
+                            let selected = gpui_canvas::TextSelection {
+                                anchor: nearest(value, anchor).unwrap(),
+                                focus: nearest(value, focus).unwrap(),
+                            };
+                            assert_eq!(
+                                actual,
+                                (selected, decoration),
+                                "{value:?}/{start}/{end}/{anchor}/{focus}"
+                            );
+                            cases += 1;
+                        }
+                    }
+                }
+            }
+        }
+        assert_eq!(cases, 79_333);
     }
     #[test]
     fn initial_equal_preedit_and_clear_reuse_the_exact_source_lease() {
