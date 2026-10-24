@@ -165,6 +165,7 @@ fn direct_checkbox_and_default_toggle_publish_without_owner_description() {
         win.property(indicator, BACKGROUND).unwrap().solid(),
         Some(accent)
     );
+    win.focus(target).unwrap();
     win.key(Key::Space).unwrap();
     assert_eq!(state(&win, target), (Some(false), false));
     assert_eq!(win.counters().owner_reruns, 0);
@@ -193,6 +194,7 @@ fn custom_controlled_intent_uses_latest_logical_checked_and_replaces_default_onc
     assert_eq!(win.root().unwrap().requested, Some(false));
     assert_eq!(win.root().unwrap().calls, 1);
     assert_eq!(win.read(Form::CHECKED).unwrap(), &true);
+    win.focus(target).unwrap();
     win.key(Key::Enter).unwrap();
     assert_eq!(win.root().unwrap().calls, 2);
     assert_eq!(win.root().unwrap().requested, Some(false));
@@ -389,4 +391,141 @@ fn literal_and_direct_intrinsic_inputs_preserve_hot_headers_and_default_allocati
     assert_eq!(direct.count_total, 2);
     assert_eq!(direct.bytes_current, 80);
     drop(el);
+}
+
+#[test]
+fn contained_direct_binding_and_intent_follow_projection_then_retire_removed_identity() {
+    struct Shell {
+        child: Form,
+        shown: bool,
+    }
+    const CHILD: Component<Shell, Form> =
+        Component::new(FieldId::new(10), "child", |m| &m.child, |m| &mut m.child);
+    impl View for Shell {
+        fn sources() -> Sources<Self> {
+            Sources::new().direct_component(CHILD)
+        }
+        fn view(&self) -> El<'_> {
+            gpui::div().child(self.shown.then(|| CHILD.view(self)))
+        }
+    }
+    let mut win = Win::with_size(
+        Shell {
+            child: Form {
+                custom: true,
+                ..Default::default()
+            },
+            shown: true,
+        },
+        320,
+        300,
+    )
+    .unwrap();
+    let target = win.role(Role::CheckBox).one().unwrap();
+    win.reset_counters().unwrap();
+    win.set(CHILD.source(Form::CHECKED), true).unwrap();
+    assert_eq!(state(&win, target).0, Some(true));
+    assert_eq!(win.counters().descriptions, 0);
+    win.activate(target).unwrap();
+    assert_eq!(win.root().unwrap().child.requested, Some(false));
+    assert_eq!(win.root().unwrap().child.calls, 1);
+    win.update(|m| m.shown = false).unwrap();
+    assert!(matches!(win.activate(target), Err(Error::StaleTarget)));
+    win.update(|m| m.shown = true).unwrap();
+    assert_ne!(win.role(Role::CheckBox).one().unwrap(), target);
+}
+
+#[test]
+fn invalid_shared_style_output_rejects_boolean_publication_before_any_sink_write() {
+    struct Page(Signal<f64>);
+    const VALUE: Source<Page, f64> = Source::new(FieldId::new(1), "value", |m| &m.0, |m| &mut m.0);
+    impl View for Page {
+        fn sources() -> Sources<Self> {
+            Sources::new().direct(VALUE)
+        }
+        fn view(&self) -> El<'_> {
+            gpui::checkbox("Value", self.0.map(|v| *v > 1.0))
+                .w(&self.0)
+                .on_click(VALUE.update(|v| *v += 1.0))
+        }
+    }
+    let mut win = Win::recording(Page(Signal::new(2.0)), WindowOptions::default()).unwrap();
+    ack(&mut win);
+    let target = win.role(Role::CheckBox).one().unwrap();
+    win.set(VALUE, 3.0).unwrap();
+    let older = win.with_scene(|_, token| token).unwrap();
+    assert!(matches!(
+        win.set(VALUE, f64::NAN),
+        Err(SetError::Committed {
+            error: Error::Property(_),
+            ..
+        })
+    ));
+    win.presented(older).unwrap();
+    assert_eq!(
+        win.snapshot()
+            .unwrap()
+            .nodes
+            .iter()
+            .find(|n| n.role == Role::CheckBox)
+            .unwrap()
+            .checked,
+        Some(true)
+    );
+    assert!(matches!(win.activate(target), Err(Error::StaleTarget)));
+    win.set(VALUE, 1.0).unwrap();
+    ack(&mut win);
+    let repaired = win.role(Role::CheckBox).one().unwrap();
+    assert_ne!(target, repaired);
+    assert_eq!(state(&win, repaired).0, Some(false));
+}
+
+#[test]
+fn composed_capture_rejects_at_mount_and_overwrite_discards_owned_palette() {
+    struct Page {
+        value: Signal<u32>,
+        overwrite: bool,
+    }
+    impl View for Page {
+        fn view(&self) -> El<'_> {
+            use gpui::BoolInput;
+            let parameters = [1_u32; 3];
+            let choice = self.value.map_with(parameters, |value, parameters| {
+                *value < std::hint::black_box(parameters)[0]
+            });
+            let node = gpui::div()
+                .size(20)
+                .bg(choice.select(Color::BLACK, Color::WHITE));
+            if self.overwrite {
+                node.bg(Color::BLACK)
+            } else {
+                node
+            }
+        }
+    }
+    assert!(matches!(
+        Win::with_size(
+            Page {
+                value: Signal::new(0),
+                overwrite: false
+            },
+            30,
+            30
+        ),
+        Err(Error::MapStorage {
+            size: 20,
+            alignment: 4
+        })
+    ));
+    assert!(
+        Win::with_size(
+            Page {
+                value: Signal::new(0),
+                overwrite: true
+            },
+            30,
+            30
+        )
+        .is_ok()
+    );
 }

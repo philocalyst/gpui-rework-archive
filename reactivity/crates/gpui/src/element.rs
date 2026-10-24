@@ -1289,6 +1289,15 @@ pub fn button<'a>(text: impl IntoText<'a>) -> El<'a> {
 }
 
 /// A controlled two-state checkbox with a visual label and semantic checked state.
+/// Accepts bool snapshots or a registered `&Signal<bool>` for direct publication.
+/// A snapshot's dependencies must use `Sources::field`/`component`; declaring a
+/// direct source does not observe an ordinary Rust dereference or branch.
+///
+/// ```compile_fail
+/// use gpui::{Signal, checkbox};
+/// let value = Signal::new(1_u32);
+/// let _ = checkbox("Wrong type", &value);
+/// ```
 /// The model owns `checked`; activation only invokes the installed `on_click`
 /// route. Pointer release, Space, Enter and assistive Click share that route.
 /// Supply a nonempty label or an explicit accessible `name`.
