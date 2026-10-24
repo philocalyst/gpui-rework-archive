@@ -4,6 +4,7 @@ use gpui_canvas::{
     Affine, Canvas, ClipShape, Color, ColorConfig, Extend, Gradient, GradientGeometry,
     GradientStop, Interpolation, Point, Rect, TextSystem,
 };
+#[allow(dead_code)]
 #[path = "clip_reuse_baseline.rs"]
 mod baseline;
 
@@ -74,13 +75,11 @@ fn read(context: &GpuContext, target: &wgpu::Texture) -> Vec<u8> {
     buffer.unmap();
     output
 }
-fn custom(
+fn make_pipeline(
     renderer: &Renderer,
     source: &str,
     format: wgpu::TextureFormat,
-    w: u32,
-    h: u32,
-) -> Vec<u8> {
+) -> wgpu::RenderPipeline {
     let c = &renderer.context;
     let module = c.device.create_shader_module(wgpu::ShaderModuleDescriptor {
         label: Some("clip-reuse probe"),
@@ -120,6 +119,16 @@ fn custom(
             multiview_mask: None,
             cache: None,
         });
+    pipeline
+}
+fn draw_pipeline(
+    renderer: &Renderer,
+    pipeline: &wgpu::RenderPipeline,
+    format: wgpu::TextureFormat,
+    w: u32,
+    h: u32,
+) -> Vec<u8> {
+    let c = &renderer.context;
     let target = texture(&c.device, w, h, format);
     let view = target.create_view(&Default::default());
     let mut encoder = c.device.create_command_encoder(&Default::default());
@@ -140,14 +149,25 @@ fn custom(
             occlusion_query_set: None,
             multiview_mask: None,
         });
-        pass.set_pipeline(&pipeline);
+        pass.set_pipeline(pipeline);
         pass.set_bind_group(0, &renderer.state.packet.as_ref().unwrap().bindings, &[]);
         pass.draw(0..3, 0..1);
     }
     c.queue.submit([encoder.finish()]);
     read(c, &target)
 }
-async fn renderer() -> Renderer {
+fn custom(
+    renderer: &Renderer,
+    source: &str,
+    format: wgpu::TextureFormat,
+    w: u32,
+    h: u32,
+) -> Vec<u8> {
+    let pipeline = make_pipeline(renderer, source, format);
+    draw_pipeline(renderer, &pipeline, format, w, h)
+}
+
+async fn renderer(format: wgpu::TextureFormat) -> Renderer {
     let mut desc = wgpu::InstanceDescriptor::new_without_display_handle();
     desc.backends = wgpu::Backends::VULKAN;
     let instance = wgpu::Instance::new(desc);
@@ -159,9 +179,7 @@ async fn renderer() -> Renderer {
         .await
         .unwrap();
     eprintln!("clip_reuse_adapter {:?}", adapter.get_info());
-    Renderer::request(&adapter, wgpu::TextureFormat::Rgba16Float)
-        .await
-        .unwrap()
+    Renderer::request(&adapter, format).await.unwrap()
 }
 fn representative(kind: u32) -> Canvas {
     let mut canvas = Canvas::recording(
@@ -317,7 +335,7 @@ fn evidence(name: &str, bytes: &[u8]) {
 #[test]
 fn clip_reuse_eligibility_uploaded_csr() {
     pollster::block_on(async {
-        let mut gpu = renderer().await;
+        let mut gpu = renderer(wgpu::TextureFormat::Rgba16Float).await;
         let source = baseline::ui::WGSL_SOURCE.wgsl_source().unwrap();
         evidence("baseline.wgsl", source.as_bytes());
         let diagnostic = diagnostic(&source);
@@ -378,5 +396,279 @@ fn clip_reuse_eligibility_uploaded_csr() {
                 bytemuck::cast_slice(&gpu.state.references),
             );
         }
+    });
+}
+
+fn boundary_scene(
+    config: ColorConfig,
+    map: Affine,
+    edge: f32,
+    depth: usize,
+    banked: bool,
+) -> Canvas {
+    use gpui_canvas::{AlphaMode, Image, ImageProfile, ImageSampling, PaintColor};
+    let mut canvas = Canvas::recording(32, 24, config).unwrap();
+    canvas.clear(Color::linear_srgb(-0.0, -0.0, -0.0, 1.0).unwrap());
+    let flat = Rect::new(0.125, 0.375, 31.5, 23.25);
+    let mut parent = None;
+    for level in 0..depth {
+        parent = Some(
+            canvas
+                .create_clip(
+                    parent,
+                    ClipShape::RoundedRect {
+                        rect: Rect::new(
+                            0.125 + (level % 3) as f32 * 0.25,
+                            0.375,
+                            edge + 20.0,
+                            22.5,
+                        ),
+                        radius: if level % 2 == 0 { 7.0 } else { 0.0 },
+                    },
+                    if level % 3 == 0 {
+                        map
+                    } else {
+                        Affine::IDENTITY
+                    },
+                )
+                .unwrap(),
+        );
+    }
+    let a = parent.unwrap();
+    let b = canvas
+        .create_clip(
+            None,
+            ClipShape::RoundedRect {
+                rect: Rect::new(edge + 4.0, 0.125, 17.5, 22.5),
+                radius: 5.0,
+            },
+            Affine::IDENTITY,
+        )
+        .unwrap();
+    let mut fonts = TextSystem::bundled().unwrap();
+    let layout = fonts.shape("office", 12.0, None).unwrap();
+    let paint = Color::linear_srgb(-0.0, -f32::from_bits(1), 2.0, 0.75).unwrap();
+    let slot = banked.then(|| canvas.paint_slot(PaintColor::new(paint)).unwrap());
+    for (turn, clip) in [a, a, b, b, a].into_iter().enumerate() {
+        if let Some(slot) = slot {
+            canvas
+                .draw_text_scaled_slot(
+                    &mut fonts,
+                    &layout,
+                    Point {
+                        x: edge - 7.0,
+                        y: 0.125 + turn as f32 * 0.25,
+                    },
+                    map,
+                    clip,
+                    slot,
+                    1.0,
+                )
+                .unwrap();
+        } else {
+            canvas
+                .draw_text(
+                    &mut fonts,
+                    &layout,
+                    Point {
+                        x: edge - 7.0,
+                        y: 0.125 + turn as f32 * 0.25,
+                    },
+                    map,
+                    clip,
+                    paint,
+                )
+                .unwrap();
+        }
+        // Lowered flat-solid and generic flat draws preserve a cached chain key.
+        canvas
+            .fill_rect(
+                Rect::new(2.125, 1.375, edge + 12.0, 17.25),
+                Affine::IDENTITY,
+                flat,
+                Color::linear_srgb(f32::from_bits(2), -0.0, -0.25, 0.125).unwrap(),
+            )
+            .unwrap();
+        canvas
+            .fill_rect(
+                Rect::new(edge, 2.125, 11.5, 18.25),
+                Affine {
+                    c: 0.125,
+                    ..Affine::IDENTITY
+                },
+                flat,
+                Color::rgba(17, 29, 61, 1),
+            )
+            .unwrap();
+    }
+    let gradient = Gradient::new(
+        GradientGeometry::Linear {
+            start: Point::default(),
+            end: Point { x: 1.0, y: 0.0 },
+        },
+        &[
+            GradientStop::new(0., Color::linear_srgb(-0.125, 0.25, 3.0, 0.5).unwrap()),
+            GradientStop::new(1., paint),
+        ],
+        Extend::Reflect,
+        Interpolation::LinearSrgb,
+    )
+    .unwrap();
+    canvas
+        .fill_gradient(&gradient, Rect::new(0.125, 0.375, 31.5, 22.25), 3.0, map, a)
+        .unwrap();
+    let image = Image::rgba8(
+        7,
+        11,
+        ImageProfile::Srgb,
+        AlphaMode::Straight,
+        (0..77)
+            .flat_map(|i| [i as u8, (i * 3) as u8, 255, [0, 1, 254, 255][i % 4]])
+            .collect::<Vec<_>>()
+            .into_boxed_slice(),
+    )
+    .unwrap();
+    canvas
+        .draw_image(
+            &image,
+            Rect::new(edge - 7.0, 0.125, 21.0, 22.0),
+            map,
+            b,
+            ImageSampling::Nearest,
+        )
+        .unwrap();
+    canvas
+}
+#[test]
+fn clip_reuse_exact_frozen_shader_and_key_mutant() {
+    pollster::block_on(async {
+        let baseline = baseline::ui::WGSL_SOURCE.wgsl_source().unwrap();
+        let candidate = crate::shader::ui::WGSL_SOURCE.wgsl_source().unwrap();
+        assert_ne!(baseline, candidate);
+        evidence("candidate.wgsl", candidate.as_bytes());
+        let needle = "cached_clip_address != address";
+        assert_eq!(candidate.matches(needle).count(), 1);
+        let mutant = candidate.replace(needle, "cached_clip_address == 4294967295u");
+        evidence("changed-key-mutant.wgsl", mutant.as_bytes());
+        let mut mutant_differences = 0usize;
+        let mut comparisons = 0usize;
+        for mode in 0..3 {
+            let config = if mode == 0 {
+                ColorConfig::linear_hdr(gpui_canvas::OutputProfile::Srgb, 203.0).unwrap()
+            } else {
+                ColorConfig {
+                    mapping: if mode == 2 {
+                        gpui_canvas::SdrMapping::ReinhardPerChannel { exposure: 1.75 }
+                    } else {
+                        gpui_canvas::SdrMapping::Clip
+                    },
+                    ..Default::default()
+                }
+            };
+            let native = if mode == 0 {
+                wgpu::TextureFormat::Rgba16Float
+            } else {
+                wgpu::TextureFormat::Rgba8UnormSrgb
+            };
+            let mut gpu = renderer(native).await;
+            let formats = [
+                wgpu::TextureFormat::Rgba8UnormSrgb,
+                wgpu::TextureFormat::Rgba16Float,
+                wgpu::TextureFormat::Rgba32Float,
+            ];
+            let pipelines = formats.map(|format| {
+                (
+                    make_pipeline(&gpu, &baseline, format),
+                    make_pipeline(&gpu, &candidate, format),
+                    make_pipeline(&gpu, &mutant, format),
+                )
+            });
+            for grouped in [false, true] {
+                gpu.set_grouped_records(grouped);
+                for (variant, map) in [
+                    Affine::IDENTITY,
+                    Affine {
+                        a: -1.0,
+                        b: -0.0,
+                        c: 0.0,
+                        d: 1.0,
+                        tx: 31.125,
+                        ty: -0.0,
+                    },
+                    Affine {
+                        a: 0.9,
+                        b: 0.125,
+                        c: -0.25,
+                        d: 1.0,
+                        tx: 4.0,
+                        ty: 0.375,
+                    },
+                    Affine {
+                        tx: 0.125_f32.next_up(),
+                        ty: 0.375_f32.next_down(),
+                        b: -0.0,
+                        ..Affine::IDENTITY
+                    },
+                ]
+                .into_iter()
+                .enumerate()
+                {
+                    for edge in [8.125_f32.next_down(), 8.125, 8.125_f32.next_up()] {
+                        for banked in [false, true] {
+                            let canvas = boundary_scene(
+                                config,
+                                map,
+                                edge,
+                                if variant == 3 { 64 } else { 2 },
+                                banked,
+                            );
+                            let target = texture(gpu.device(), 32, 24, native);
+                            gpu.render(
+                                canvas.prepared_scene(),
+                                &target.create_view(&Default::default()),
+                            )
+                            .unwrap();
+                            for (index, format) in formats.into_iter().enumerate() {
+                                let (ref before, ref after, ref bad) = pipelines[index];
+                                let expected = draw_pipeline(&gpu, before, format, 32, 24);
+                                let actual = draw_pipeline(&gpu, after, format, 32, 24);
+                                assert_eq!(
+                                    actual, expected,
+                                    "mode{mode} grouped{grouped} variant{variant} edge{edge:?} banked{banked} {format:?}"
+                                );
+                                comparisons += 1;
+                                // The unchanged banked route is a required negative eligibility control.
+                                if !banked && variant == 0 && edge == 8.125 && index == 2 {
+                                    let bad = draw_pipeline(&gpu, bad, format, 32, 24);
+                                    let differences =
+                                        bad.iter().zip(&expected).filter(|(a, b)| a != b).count();
+                                    assert!(
+                                        differences > 0,
+                                        "changed chain key mutant must alter actual target bits"
+                                    );
+                                    mutant_differences += differences;
+                                    evidence(
+                                        &format!(
+                                            "mutant-output-mode{mode}-grouped{grouped}.rgba32"
+                                        ),
+                                        &bad,
+                                    );
+                                    evidence(
+                                        &format!(
+                                            "oracle-output-mode{mode}-grouped{grouped}.rgba32"
+                                        ),
+                                        &expected,
+                                    );
+                                }
+                            }
+                        }
+                    }
+                }
+            }
+        }
+        assert!(mutant_differences > 0);
+        eprintln!(
+            "clip_reuse_exact comparisons={comparisons} mutant_differing_bytes={mutant_differences}"
+        );
     });
 }

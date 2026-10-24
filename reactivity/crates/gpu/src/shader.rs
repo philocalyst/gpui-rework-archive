@@ -413,6 +413,12 @@ pub mod ui {
         {
             return vec4f(0.0, 0.0, 0.0, 0.0);
         }
+        sample_material(draw, point)
+    }
+
+    // Coverage has already been checked by sample_draw or the exact sample-local
+    // chain cache. This body retains every material/correction operation.
+    pub fn sample_material(draw: Draw, point: Vec2f) -> Vec4f {
         if (draw.atlas.x & 0x20000000) != 0 && (draw.atlas.x & 0x80000000) == 0 {
             if !rounded_contains(
                 draw,
@@ -627,11 +633,31 @@ pub mod ui {
                 let point = position.xy()
                     + vec2f((x as f32 + 0.5) * 0.25 - 0.5, (y as f32 + 0.5) * 0.25 - 0.5);
                 let mut color = globals.clear;
+                // Chain membership depends only on this fixed point and immutable
+                // WORDS. Keep the latest chain across intervening flat draws.
+                // Host packet bounds put every chain address below 0xffffffff.
+                let mut cached_clip_address = 0xffffffff_u32;
+                let mut cached_clip_contains = false;
                 // Host-built CSR ranges are monotone and bounded by INDICES.
                 #[wgsl_allow(non_literal_loop_bounds)]
                 for cursor in range.x..range.y {
                     let index = get!(INDICES)[cursor as usize];
-                    let source = sample_draw(load_draw(index), point);
+                    let draw = load_draw(index);
+                    let mut source = vec4f(0.0, 0.0, 0.0, 0.0);
+                    if (draw.atlas.w & 0x40000000) == 0 && bitcast_u32(draw.clip.x) == 0x7fc00003 {
+                        let address = bitcast_u32(draw.clip.y);
+                        if cached_clip_address != address {
+                            cached_clip_address = address;
+                            cached_clip_contains = clip_chain_contains(address, point);
+                        }
+                        if cached_clip_contains {
+                            source = sample_material(draw, point);
+                        }
+                    } else {
+                        source = sample_draw(draw, point);
+                    }
+                    // Even clipped zero sources perform source-over: skipping it
+                    // can change signed-zero bits in float targets.
                     color = source + color * (1.0 - source.w);
                 }
                 if x == 0 && y == 0 {
