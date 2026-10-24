@@ -606,8 +606,21 @@ impl<'a> El<'a> {
             ),
             "this element does not accept children"
         );
-        children.append(&mut self.children);
+        self.append_children(children);
         self
+    }
+
+    fn append_children<C, S>(&mut self, children: C)
+    where
+        C: ChildSeq<'a, S>,
+    {
+        let additional = children.lower_bound();
+        if self.children.capacity() == 0 {
+            self.children.reserve_exact(additional);
+        } else {
+            self.children.reserve(additional);
+        }
+        children.append(&mut self.children);
     }
 
     pub(crate) fn on_window(mut self, action: crate::runtime::inspector::WindowAction) -> Self {
@@ -964,7 +977,7 @@ impl<'a> El<'a> {
                 if let Some(map) = map {
                     map(&mut child);
                 }
-                element.children.push(child);
+                element.append_children(child);
             }
             if !annotation.is_empty() {
                 annotations.push(crate::semantic::AnnotationDraft {
@@ -987,7 +1000,7 @@ impl<'a> El<'a> {
                         map(&mut row);
                     }
                     let mut wrapper = Self::new(NodeKind::ListItem, None);
-                    wrapper.children.push(row);
+                    wrapper.append_children(row);
                     wrapper.style.height = Some(row_height as f32);
                     rows.push((
                         Some(index),
@@ -1282,10 +1295,17 @@ pub mod shape {
 /// blanket iterator implementations from tuples without an application adapter.
 pub trait ChildSeq<'a, S>: sealed::Children<S> {
     #[doc(hidden)]
+    const MIN_ELEMENTS: usize = 0;
+    #[doc(hidden)]
+    fn lower_bound(&self) -> usize {
+        Self::MIN_ELEMENTS
+    }
+    #[doc(hidden)]
     fn append(self, out: &mut Vec<El<'a>>);
 }
 impl<E: Element> sealed::Children<shape::One> for E {}
 impl<'a, E: Element + 'a> ChildSeq<'a, shape::One> for E {
+    const MIN_ELEMENTS: usize = 1;
     fn append(self, out: &mut Vec<El<'a>>) {
         out.push(self.into_el());
     }
@@ -1295,6 +1315,9 @@ impl<'a, C, S> ChildSeq<'a, shape::Optional<S>> for Option<C>
 where
     C: ChildSeq<'a, S>,
 {
+    fn lower_bound(&self) -> usize {
+        self.as_ref().map_or(0, C::lower_bound)
+    }
     fn append(self, out: &mut Vec<El<'a>>) {
         if let Some(children) = self {
             children.append(out);
@@ -1312,6 +1335,13 @@ where
     I: Iterator,
     I::Item: ChildSeq<'a, S>,
 {
+    fn lower_bound(&self) -> usize {
+        if I::Item::MIN_ELEMENTS == 0 {
+            0
+        } else {
+            self.size_hint().0.saturating_mul(I::Item::MIN_ELEMENTS)
+        }
+    }
     fn append(self, out: &mut Vec<El<'a>>) {
         for children in self {
             children.append(out);
@@ -1320,12 +1350,16 @@ where
 }
 impl<T: View> sealed::Children<shape::Views> for &Vec<T> {}
 impl<'a, T: View + 'a> ChildSeq<'a, shape::Views> for &'a Vec<T> {
+    fn lower_bound(&self) -> usize {
+        self.len()
+    }
     fn append(self, out: &mut Vec<El<'a>>) {
         out.extend(self.iter().map(View::view));
     }
 }
 impl<T: View> sealed::Children<shape::View> for &T {}
 impl<'a, T: View + 'a> ChildSeq<'a, shape::View> for &'a T {
+    const MIN_ELEMENTS: usize = 1;
     fn append(self, out: &mut Vec<El<'a>>) {
         out.push(self.view());
     }
@@ -1340,6 +1374,11 @@ macro_rules! tuples {
         where $($ty: sealed::Children<$shape>),+ {}
         impl<'a,$($ty,$shape),+> ChildSeq<'a,shape::Tuple<($($shape,)+)>> for ($($ty,)+)
         where $($ty: ChildSeq<'a,$shape>),+ {
+            const MIN_ELEMENTS: usize = 0_usize$(.saturating_add($ty::MIN_ELEMENTS))+;
+            fn lower_bound(&self) -> usize {
+                let ($($name,)+) = self;
+                0_usize$(.saturating_add($name.lower_bound()))+
+            }
             fn append(self,out: &mut Vec<El<'a>>) {
                 let ($($name,)+) = self;
                 $($name.append(out);)+

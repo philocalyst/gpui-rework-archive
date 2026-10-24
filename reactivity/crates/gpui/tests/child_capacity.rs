@@ -78,3 +78,20 @@ fn nested_child_families_keep_their_public_preorder() {
         ]
     );
 }
+
+#[test]
+fn known_child_counts_need_one_exact_declaration_allocation() {
+    for count in [1, 2, 6, 129, 10_000] {
+        let mut declaration = None;
+        let cost = allocation_counter::measure(|| {
+            declaration = Some(column((0..count).map(|_| div())));
+        });
+        assert_eq!(cost.count_total, 1, "child count {count}");
+        assert_eq!(
+            cost.bytes_total as usize,
+            count * size_of::<El<'_>>(),
+            "child count {count}"
+        );
+        drop(declaration);
+    }
+}
