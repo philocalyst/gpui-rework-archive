@@ -5,7 +5,7 @@
 //! equal. Literal values may share exact authoring bits; implicit defaults need
 //! neither a slot allocation nor a source registration.
 use super::super::{Destination, Fanout, FieldId, Style};
-use crate::{Affine, Align, Color, Flow, Justify};
+use crate::{Affine, Align, Color, Flow, Justify, Length};
 use gpui_canvas::{PaintColor, PaintSlot};
 use std::collections::BTreeMap;
 
@@ -79,6 +79,10 @@ pub(in crate::runtime) struct Bank {
     literals: Vec<Color>,
 }
 impl Bank {
+    pub(in crate::runtime) fn literal_code(&self, code: u32) -> Color {
+        assert!(code < SOURCE);
+        self.get(Slot(code))
+    }
     pub(in crate::runtime) fn get(&self, slot: Slot) -> Color {
         if let Some(index) = slot.source_index() {
             return self.sources[index].value;
@@ -167,6 +171,7 @@ pub(in crate::runtime) struct Discovery {
     pub(in crate::runtime) bank: Bank,
     fields: BTreeMap<FieldId, Slot>,
     ports: Vec<Binding>,
+    has_selectors: bool,
 }
 // Reuse the checked destination encoding instead of introducing another packed
 // node/port format. This vector is transient and contains only registered colors.
@@ -175,6 +180,10 @@ struct Binding {
     slot: Slot,
 }
 impl Discovery {
+    pub(in crate::runtime) fn literal_code(&mut self, color: Color) -> u32 {
+        self.has_selectors = true;
+        self.bank.literal(color).0
+    }
     pub(in crate::runtime) fn register(&mut self, field: FieldId, value: Color) -> Slot {
         *self.fields.entry(field).or_insert_with(|| {
             let slot = Slot::source(self.bank.sources.len());
@@ -269,7 +278,7 @@ impl Discovery {
         self.ports.push(Binding { destination, slot });
     }
     pub(in crate::runtime) fn is_empty(&self) -> bool {
-        self.bank.sources.is_empty()
+        self.bank.sources.is_empty() && !self.has_selectors
     }
     pub(in crate::runtime) fn binding_fields(&self, node: usize) -> [Option<FieldId>; 2] {
         self.bindings(node)
@@ -292,8 +301,8 @@ impl Discovery {
 /// owner read, never mutation or a second retained resolved copy.
 #[derive(Clone, Copy)]
 pub(in crate::runtime) struct LayoutStyle {
-    width: Option<f32>,
-    height: Option<f32>,
+    width: Length,
+    height: Length,
     gap: f32,
     padding: f32,
     font_size: f32,
@@ -337,8 +346,8 @@ impl LayoutStyle {
     }
     pub(in crate::runtime) fn same(self, other: Self) -> bool {
         use crate::property::ExactValue;
-        Option::<f32>::same(&self.width, &other.width)
-            && Option::<f32>::same(&self.height, &other.height)
+        Length::same(&self.width, &other.width)
+            && Length::same(&self.height, &other.height)
             && f32::same(&self.gap, &other.gap)
             && f32::same(&self.padding, &other.padding)
             && f32::same(&self.font_size, &other.font_size)
@@ -390,6 +399,9 @@ pub(in crate::runtime) struct Bound {
     pub(in crate::runtime) transition: Option<super::super::paint::SlotTransition>,
 }
 impl Bound {
+    pub(in crate::runtime) fn literal_code(&self, code: u32) -> Color {
+        self.bank.literal_code(code)
+    }
     #[cfg(test)]
     pub(in crate::runtime) fn bytes(&self) -> usize {
         size_of::<Self>()
@@ -434,6 +446,33 @@ impl Bound {
             record.effective.bg = self.bank.literal(value.bg);
         }
         record.layout = LayoutStyle::from_style(value);
+        self.bank.change_users(old, record.effective);
+        self.records.set(index, record, count);
+    }
+    pub(in crate::runtime) fn select_color(
+        &mut self,
+        index: usize,
+        id: crate::property::PropertyId,
+        code: u32,
+        explicit: bool,
+        count: usize,
+    ) {
+        use crate::property::PropertyId;
+        assert!(code < SOURCE);
+        let mut record = self.records.get(index);
+        let old = record.effective;
+        if id == PropertyId::Foreground {
+            record.declared.fg = Slot(code);
+            if !explicit {
+                record.effective.fg = Slot(code);
+            }
+        } else {
+            assert_eq!(id, PropertyId::Background);
+            record.declared.bg = Slot(code);
+            if !explicit {
+                record.effective.bg = Slot(code);
+            }
+        }
         self.bank.change_users(old, record.effective);
         self.records.set(index, record, count);
     }
@@ -753,8 +792,8 @@ mod admission_tests {
         }
         assert_eq!(discovery.bank.sources.len(), N * 2);
         let declared = Style {
-            width: Some(0.),
-            height: Some(0.),
+            width: crate::Length::Points(0.),
+            height: crate::Length::Points(0.),
             fg: Color::BLACK,
             bg: Color::BLACK,
             ..Style::DEFAULT

@@ -244,9 +244,30 @@ fn handlerless_state_and_default_or_explicit_names_share_the_ordinary_query_sche
 }
 
 #[test]
-#[should_panic(expected = "this element does not accept children")]
-fn checkbox_does_not_admit_an_arbitrary_child_tree() {
-    let _ = checkbox("leaf", false).child(text("independent document"));
+fn explicit_checkbox_parts_keep_one_semantic_root_and_activation_route() {
+    struct Parts(u32);
+    impl View for Parts {
+        fn view(&self) -> El<'_> {
+            checkbox("", false)
+                .name("Choice")
+                .on_click(|m: &mut Self| m.0 += 1)
+                .child((div().size(16).bg(rgb(0xeeeeee)), text("Visible label")))
+                .layout(Flex::row())
+                .gap(8)
+                .p(8)
+        }
+    }
+    let mut win = Win::demo(Parts(0));
+    let root = win.role(Role::CheckBox).name("Choice").one().unwrap();
+    assert!(win.role(Role::Text).text("Visible label").one().is_ok());
+    win.click(root).unwrap();
+    assert_eq!(win.root().unwrap().0, 1);
+    win.visit(|part| {
+        if part.target() == root {
+            assert_eq!(part.checked(), Some(false));
+        }
+    })
+    .unwrap();
 }
 
 #[test]
