@@ -633,6 +633,7 @@ fn clip_reuse_exact_frozen_shader_and_key_mutant() {
                                 &target.create_view(&Default::default()),
                             )
                             .unwrap();
+                            assert_chain_tag_excludes_lowered(&gpu);
                             for (index, format) in formats.into_iter().enumerate() {
                                 let (ref before, ref after, ref bad) = pipelines[index];
                                 let expected = draw_pipeline(&gpu, before, format, 32, 24);
@@ -846,6 +847,7 @@ fn clip_reuse_completed_work_benchmark() {
         for kind in 0..3 {
             let canvas = representative(kind);
             gpu.render(canvas.prepared_scene(), &view).unwrap();
+            assert_chain_tag_excludes_lowered(&gpu);
             completed_frame(&gpu, &pipelines[0], &view);
             let expected = read(&gpu.context, &target);
             completed_frame(&gpu, &pipelines[1], &view);
@@ -883,5 +885,109 @@ fn clip_reuse_completed_work_benchmark() {
                 }
             }
         }
+    });
+}
+
+fn assert_chain_tag_excludes_lowered(gpu: &Renderer) -> usize {
+    let mut count = 0;
+    for &address in &gpu.state.references {
+        let base = (address & !INLINE_RECORD) as usize;
+        let (clip, metadata) = if address & INLINE_RECORD != 0 {
+            (gpu.state.records[base + 3], gpu.state.records[base + 5][3])
+        } else {
+            let common = gpu.state.records[base + 1][3] as usize;
+            (
+                gpu.state.records[common + 2],
+                gpu.state.records[common + 4][0],
+            )
+        };
+        if clip[0] == 0x7fc00003 {
+            assert_eq!(
+                metadata & LOWERED_SOLID,
+                0,
+                "CHAIN tag must exclude LOWERED_SOLID at uploaded address {address}"
+            );
+            count += 1;
+        }
+    }
+    count
+}
+#[test]
+fn clip_reuse_chain_tag_excludes_lowered_in_actual_packets() {
+    pollster::block_on(async {
+        use gpui_canvas::PaintColor;
+        let mut gpu = renderer(wgpu::TextureFormat::Rgba16Float).await;
+        let mut checked = 0;
+        for grouped in [false, true] {
+            gpu.set_grouped_records(grouped);
+            for banked in [false, true] {
+                let mut canvas = Canvas::recording(
+                    32,
+                    24,
+                    ColorConfig::linear_hdr(gpui_canvas::OutputProfile::Srgb, 203.).unwrap(),
+                )
+                .unwrap();
+                canvas.clear(Color::WHITE);
+                let full = Rect::new(0., 0., 32., 24.);
+                canvas
+                    .fill_rect(full, Affine::IDENTITY, full, Color::BLACK)
+                    .unwrap();
+                let clip = canvas
+                    .create_clip(
+                        None,
+                        ClipShape::RoundedRect {
+                            rect: Rect::new(0.125, 0.375, 31.5, 22.25),
+                            radius: 7.,
+                        },
+                        Affine::IDENTITY,
+                    )
+                    .unwrap();
+                let slot = banked.then(|| {
+                    canvas
+                        .paint_slot(PaintColor::new(Color::rgba(91, 37, 211, 127)))
+                        .unwrap()
+                });
+                for x in [0.125, 1.375] {
+                    let rect = Rect::new(x, 0.375, 29.5, 22.25);
+                    if let Some(slot) = slot {
+                        canvas
+                            .fill_rect_slot(rect, Affine::IDENTITY, clip, slot)
+                            .unwrap();
+                    } else {
+                        canvas
+                            .fill_rect(rect, Affine::IDENTITY, clip, Color::rgba(91, 37, 211, 127))
+                            .unwrap();
+                    }
+                }
+                let mut fonts = TextSystem::bundled().unwrap();
+                let layout = fonts.shape("office", 12., None).unwrap();
+                canvas
+                    .draw_text(
+                        &mut fonts,
+                        &layout,
+                        Point::default(),
+                        Affine::IDENTITY,
+                        clip,
+                        Color::WHITE,
+                    )
+                    .unwrap();
+                let target = texture(gpu.device(), 32, 24, gpu.format());
+                gpu.render(
+                    canvas.prepared_scene(),
+                    &target.create_view(&Default::default()),
+                )
+                .unwrap();
+                let count = assert_chain_tag_excludes_lowered(&gpu);
+                assert!(count > 0);
+                checked += count;
+                let frozen = baseline::ui::WGSL_SOURCE.wgsl_source().unwrap();
+                let actual = crate::shader::ui::WGSL_SOURCE.wgsl_source().unwrap();
+                assert_eq!(
+                    custom(&gpu, &frozen, wgpu::TextureFormat::Rgba32Float, 32, 24),
+                    custom(&gpu, &actual, wgpu::TextureFormat::Rgba32Float, 32, 24)
+                );
+            }
+        }
+        eprintln!("clip_reuse_chain_certificate checked_uploaded_references={checked}");
     });
 }

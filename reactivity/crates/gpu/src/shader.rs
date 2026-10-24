@@ -654,7 +654,9 @@ pub mod ui {
                 for cursor in range.x..range.y {
                     let index = get!(INDICES)[cursor as usize];
                     let draw = load_draw(index);
-                    if (draw.atlas.w & 0x40000000) == 0 && bitcast_u32(draw.clip.x) == 0x7fc00003 {
+                    // Host lower_solid requires no logical chain. A CHAIN tag
+                    // therefore proves this is not a lowered-solid record.
+                    if bitcast_u32(draw.clip.x) == 0x7fc00003 {
                         let address = bitcast_u32(draw.clip.y);
                         if cached_clip_address != address {
                             cached_clip_address = address;
