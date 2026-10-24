@@ -1,0 +1,8 @@
+Traceback (most recent call last):
+  File "/tmp/gpui-boolean-cohort-mac-3fc-sol/stage.py", line 6, in <module>
+    print(execute('from pathlib import Path;import shutil;p=Path('+repr(remote)+');assert shutil.disk_usage(p.parent).free>20*1024**3;p.mkdir();(p/"capsule.part").touch(exist_ok=False);print(p)','gateway-setup'),flush=True)
+          ~~~~~~~^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/tmp/gpui-boolean-cohort-mac-3fc-sol/gateway.py", line 16, in execute
+    (local/(name+'.exit')).write_text(str(r.returncode)+'\n');assert r.returncode==0,(name,r.stderr,c.stdout)
+                                                                     ^^^^^^^^^^^^^^^
+AssertionError: ('gateway-setup', 'Error: exit status 1\n', 'Traceback (most recent call last):\n  File "<string>", line 1, in <module>\nAssertionError\n')

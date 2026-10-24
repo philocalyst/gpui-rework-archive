@@ -50,7 +50,7 @@ The final local guard is `fd743fe62ee4629e47d64df224abd59a9a87d8b29bddd2cd3b5096
 - Explicit ignored real AT-SPI invalid state/event fixture: pass over isolated D-Bus, including EditableText GetState and `StateChanged:invalid-entry` transitions in both directions.
 - Explicit ignored native contained inspector entry fixture: pass using real selection, draft, rejection, recovery, Apply, acknowledged pixels and stale target feedback.
 - Native Halloween application: actual pointer and keyboard interaction through S9/P9 and resize to 960 by 700; five actual Xvfb screenshots retained. These are software X11 captures, not physical Mac capture.
-- Darwin qualification is staged separately; its eventual raw receipt must be checked before claiming its outcome.
+- Exact Darwin qualification: **767 native passed, zero failed, twelve ignored**, plus **38 docs passed**. All 75 actual test Mach-Os, the native Halloween application build and strict native all-target checks passed. All 2,089 source hashes and 76 external binary hashes match; the job exited and the exclusive host lock is released. See darwin/summary.json and its sealed raw archive. No physical Mac capture or UI permission request was performed.
 
 The once-evaluation mutant `e5f3a4c31cee934f2b05b849859e1b511ab8e87c` adds a second ordinary recipe call. Its freshly built actual executable fails the ordinary external component test with nine predicate calls versus six, exit 101. Guard `646b738baa7c7b66abf3e48229c6bf7c0cff2e0b20c6b61e3a9aba142be8ad05` matches before/build/after execution. The executable is 30,365,440 bytes, SHA-256 `63f8023ff498903e4ffca0153cb0f06b3f4e70506941a6a7547ed889107afe8b`.
 

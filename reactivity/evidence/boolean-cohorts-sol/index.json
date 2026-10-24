@@ -1,7 +1,7 @@
 {
   "README.md": {
-    "bytes": 11321,
-    "sha256": "9574318a0337fe2b3bb3abe6c24a5337dbc647f7b9f5de646cb8cf07a6f29558"
+    "bytes": 11657,
+    "sha256": "60899e1a12e02c9fea703f46813150274752952c706723b82c332251170c3a3c"
   },
   "actual-frozen-executables.json": {
     "bytes": 174843,
@@ -26,6 +26,58 @@
   "costs-10.log": {
     "bytes": 1109,
     "sha256": "e7edbe066b53e1e9b859088712d7d26246d5b2525414f943fafa62eddd9f658d"
+  },
+  "darwin/README.md": {
+    "bytes": 3283,
+    "sha256": "d44523cb3b753d0e74e2630a7d5a272a7b0c8152584a58b39e862c5ce2b9079f"
+  },
+  "darwin/actual-machos.json": {
+    "bytes": 119397,
+    "sha256": "d67597f6024282ae2abd684bcc1838dc34b2a857002000bbf3d5e4d5dc32eccc"
+  },
+  "darwin/capsule-receipt.json": {
+    "bytes": 361,
+    "sha256": "1787ddae43a1aac8be05a56d3573c824427ef563fa08bc0e6636309e49182e26"
+  },
+  "darwin/collect-compact.py": {
+    "bytes": 3259,
+    "sha256": "f2d6b03a3a6e6cb120aebda133d597e55c885c002459feae8e7761232fd5a6c3"
+  },
+  "darwin/initial-staging.stderr": {
+    "bytes": 976,
+    "sha256": "29f64c50a32767fbb754cf7559c75634395b6bc9e5d7f6a3c81313acfa87f3f9"
+  },
+  "darwin/job.py": {
+    "bytes": 8428,
+    "sha256": "e7fdeee67d52e6057db337021e5de7681dd61297b0254dd3546d311a274e7afe"
+  },
+  "darwin/metadata-original-receipt.json": {
+    "bytes": 379,
+    "sha256": "0f4f2f84756ff97f858beb77119cd948573b29a1003d06fac7458e5cd750953b"
+  },
+  "darwin/metadata-receipt.json": {
+    "bytes": 385,
+    "sha256": "4c24cfbb9900f453b37ae3670758de239524320191bd822a075282447989659a"
+  },
+  "darwin/raw-metadata.tar.gz": {
+    "bytes": 240991,
+    "sha256": "c0aefa3baf34c0a9740c96ae6a8e322b7a21344c9540f797b46f41735d30460d"
+  },
+  "darwin/release.json": {
+    "bytes": 102,
+    "sha256": "0ca7684173871732ef95fa77cf2622f29f3f91333d7468c9a0a6ef6d21726dc5"
+  },
+  "darwin/staging.log": {
+    "bytes": 403,
+    "sha256": "39a7b3a44590323371a6facb8ca072fb37d39111602374adffb0af6c7df84a6e"
+  },
+  "darwin/summary.json": {
+    "bytes": 8480,
+    "sha256": "9cd2136ab640dc864c03bb7aafadc47f13b06bc3cd16837f556bccdbddab1332"
+  },
+  "feature-inventory.json": {
+    "bytes": 13155,
+    "sha256": "3b6e2d7d244343f38d5c95c57fb856e26a22c901959a70675849efc669dc11a8"
   },
   "halloween-native-disabled.png": {
     "bytes": 74760,

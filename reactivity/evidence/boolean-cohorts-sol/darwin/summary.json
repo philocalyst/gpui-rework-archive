@@ -1,0 +1,424 @@
+{
+  "source": "3fc07815a0ce389db54e492dd1d889c6fca10699",
+  "parent": "957cf9d0865e9fd30a7e3d4ba4dea2e8aa97221c",
+  "native_passed": 767,
+  "native_failed": 0,
+  "native_ignored": 12,
+  "test_executables": 75,
+  "app_executables": 1,
+  "docs_passed": 38,
+  "all_gates": [
+    {
+      "name": "clean-first-party-dev",
+      "exit": 0,
+      "seconds": 0.574059291
+    },
+    {
+      "name": "full-native-build",
+      "exit": 0,
+      "seconds": 62.5756155
+    },
+    {
+      "name": "native-run-0",
+      "exit": 0,
+      "seconds": 0.6076370419999932
+    },
+    {
+      "name": "native-run-1",
+      "exit": 0,
+      "seconds": 1.0959553749999884
+    },
+    {
+      "name": "native-run-2",
+      "exit": 0,
+      "seconds": 0.5695750000000004
+    },
+    {
+      "name": "native-run-3",
+      "exit": 0,
+      "seconds": 0.6087804590000019
+    },
+    {
+      "name": "native-run-4",
+      "exit": 0,
+      "seconds": 1.0971087910000108
+    },
+    {
+      "name": "native-run-5",
+      "exit": 0,
+      "seconds": 0.6098603750000109
+    },
+    {
+      "name": "native-run-6",
+      "exit": 0,
+      "seconds": 1.1162289590000114
+    },
+    {
+      "name": "native-run-7",
+      "exit": 0,
+      "seconds": 0.5995550420000058
+    },
+    {
+      "name": "native-run-8",
+      "exit": 0,
+      "seconds": 0.5895819160000002
+    },
+    {
+      "name": "native-run-9",
+      "exit": 0,
+      "seconds": 1.0969799580000057
+    },
+    {
+      "name": "native-run-10",
+      "exit": 0,
+      "seconds": 0.5927899579999973
+    },
+    {
+      "name": "native-run-11",
+      "exit": 0,
+      "seconds": 0.5726141250000012
+    },
+    {
+      "name": "native-run-12",
+      "exit": 0,
+      "seconds": 0.5956545000000091
+    },
+    {
+      "name": "native-run-13",
+      "exit": 0,
+      "seconds": 0.5890742919999923
+    },
+    {
+      "name": "native-run-14",
+      "exit": 0,
+      "seconds": 0.5875155840000019
+    },
+    {
+      "name": "native-run-15",
+      "exit": 0,
+      "seconds": 0.5887035420000046
+    },
+    {
+      "name": "native-run-16",
+      "exit": 0,
+      "seconds": 0.5940661249999977
+    },
+    {
+      "name": "native-run-17",
+      "exit": 0,
+      "seconds": 0.5974580839999959
+    },
+    {
+      "name": "native-run-18",
+      "exit": 0,
+      "seconds": 0.5690469580000013
+    },
+    {
+      "name": "native-run-19",
+      "exit": 0,
+      "seconds": 0.6087510839999908
+    },
+    {
+      "name": "native-run-20",
+      "exit": 0,
+      "seconds": 0.8220308340000031
+    },
+    {
+      "name": "native-run-21",
+      "exit": 0,
+      "seconds": 0.5935899999999918
+    },
+    {
+      "name": "native-run-22",
+      "exit": 0,
+      "seconds": 0.6070011669999928
+    },
+    {
+      "name": "native-run-23",
+      "exit": 0,
+      "seconds": 0.5846933750000005
+    },
+    {
+      "name": "native-run-24",
+      "exit": 0,
+      "seconds": 0.5800025420000026
+    },
+    {
+      "name": "native-run-25",
+      "exit": 0,
+      "seconds": 0.5634762500000079
+    },
+    {
+      "name": "native-run-26",
+      "exit": 0,
+      "seconds": 0.5869379579999929
+    },
+    {
+      "name": "native-run-27",
+      "exit": 0,
+      "seconds": 1.1022898749999968
+    },
+    {
+      "name": "native-run-28",
+      "exit": 0,
+      "seconds": 0.5837912499999902
+    },
+    {
+      "name": "native-run-29",
+      "exit": 0,
+      "seconds": 1.0977863340000056
+    },
+    {
+      "name": "native-run-30",
+      "exit": 0,
+      "seconds": 0.593575541000007
+    },
+    {
+      "name": "native-run-31",
+      "exit": 0,
+      "seconds": 0.5676779169999975
+    },
+    {
+      "name": "native-run-32",
+      "exit": 0,
+      "seconds": 0.5920030000000054
+    },
+    {
+      "name": "native-run-33",
+      "exit": 0,
+      "seconds": 3.1134733340000054
+    },
+    {
+      "name": "native-run-34",
+      "exit": 0,
+      "seconds": 0.580233542000002
+    },
+    {
+      "name": "native-run-35",
+      "exit": 0,
+      "seconds": 0.568362209
+    },
+    {
+      "name": "native-run-36",
+      "exit": 0,
+      "seconds": 0.5923562499999946
+    },
+    {
+      "name": "native-run-37",
+      "exit": 0,
+      "seconds": 0.5663546659999952
+    },
+    {
+      "name": "native-run-38",
+      "exit": 0,
+      "seconds": 14.712799125000004
+    },
+    {
+      "name": "native-run-39",
+      "exit": 0,
+      "seconds": 0.5703412499999985
+    },
+    {
+      "name": "native-run-40",
+      "exit": 0,
+      "seconds": 1.1104210830000056
+    },
+    {
+      "name": "native-run-41",
+      "exit": 0,
+      "seconds": 0.6181538339999975
+    },
+    {
+      "name": "native-run-42",
+      "exit": 0,
+      "seconds": 0.603056125000009
+    },
+    {
+      "name": "native-run-43",
+      "exit": 0,
+      "seconds": 0.5999591250000122
+    },
+    {
+      "name": "native-run-44",
+      "exit": 0,
+      "seconds": 1.1018711250000024
+    },
+    {
+      "name": "native-run-45",
+      "exit": 0,
+      "seconds": 0.6087037500000037
+    },
+    {
+      "name": "native-run-46",
+      "exit": 0,
+      "seconds": 0.5979264999999998
+    },
+    {
+      "name": "native-run-47",
+      "exit": 0,
+      "seconds": 0.5840027079999999
+    },
+    {
+      "name": "native-run-48",
+      "exit": 0,
+      "seconds": 1.1171906670000027
+    },
+    {
+      "name": "native-run-49",
+      "exit": 0,
+      "seconds": 9.675051916000001
+    },
+    {
+      "name": "native-run-50",
+      "exit": 0,
+      "seconds": 0.5930261659999871
+    },
+    {
+      "name": "native-run-51",
+      "exit": 0,
+      "seconds": 0.6123452079999936
+    },
+    {
+      "name": "native-run-52",
+      "exit": 0,
+      "seconds": 0.614102833000004
+    },
+    {
+      "name": "native-run-53",
+      "exit": 0,
+      "seconds": 0.5949575000000209
+    },
+    {
+      "name": "native-run-54",
+      "exit": 0,
+      "seconds": 0.5896610420000172
+    },
+    {
+      "name": "native-run-55",
+      "exit": 0,
+      "seconds": 0.5713799160000121
+    },
+    {
+      "name": "native-run-56",
+      "exit": 0,
+      "seconds": 0.5737561249999885
+    },
+    {
+      "name": "native-run-57",
+      "exit": 0,
+      "seconds": 0.6067416250000122
+    },
+    {
+      "name": "native-run-58",
+      "exit": 0,
+      "seconds": 0.5731755410000119
+    },
+    {
+      "name": "native-run-59",
+      "exit": 0,
+      "seconds": 4.120998625000027
+    },
+    {
+      "name": "native-run-60",
+      "exit": 0,
+      "seconds": 0.5888597080000011
+    },
+    {
+      "name": "native-run-61",
+      "exit": 0,
+      "seconds": 0.5889174579999974
+    },
+    {
+      "name": "native-run-62",
+      "exit": 0,
+      "seconds": 0.6011439170000017
+    },
+    {
+      "name": "native-run-63",
+      "exit": 0,
+      "seconds": 0.5903749999999945
+    },
+    {
+      "name": "native-run-64",
+      "exit": 0,
+      "seconds": 0.5888580419999982
+    },
+    {
+      "name": "native-run-65",
+      "exit": 0,
+      "seconds": 1.113827458000003
+    },
+    {
+      "name": "native-run-66",
+      "exit": 0,
+      "seconds": 1.1082332080000015
+    },
+    {
+      "name": "native-run-67",
+      "exit": 0,
+      "seconds": 0.5900701670000217
+    },
+    {
+      "name": "native-run-68",
+      "exit": 0,
+      "seconds": 0.5755075829999896
+    },
+    {
+      "name": "native-run-69",
+      "exit": 0,
+      "seconds": 1.5952152079999848
+    },
+    {
+      "name": "native-run-70",
+      "exit": 0,
+      "seconds": 0.5753336660000059
+    },
+    {
+      "name": "native-run-71",
+      "exit": 0,
+      "seconds": 1.1065022909999982
+    },
+    {
+      "name": "native-run-72",
+      "exit": 0,
+      "seconds": 0.6255481249999946
+    },
+    {
+      "name": "native-run-73",
+      "exit": 0,
+      "seconds": 0.5844297090000055
+    },
+    {
+      "name": "native-run-74",
+      "exit": 0,
+      "seconds": 0.5750938340000005
+    },
+    {
+      "name": "native-app-build",
+      "exit": 0,
+      "seconds": 10.214110207999994
+    },
+    {
+      "name": "strict-native-clippy",
+      "exit": 0,
+      "seconds": 13.74203995800002
+    },
+    {
+      "name": "native-docs",
+      "exit": 0,
+      "seconds": 2.6209371250000117
+    }
+  ],
+  "source_files": 2089,
+  "source_aggregate": "aed873439a671ddb7c5e382f56c33c6d437ae2f7184c29d90d2f2ebf2a84a50c",
+  "all_source_guards_equal": 162,
+  "binary_hashes_match": true,
+  "final_free": 23961427968,
+  "release": {
+    "exclusive_lock_free": true,
+    "job_pid_absent": true,
+    "process_probe": "",
+    "free_bytes": 23921434624
+  },
+  "actual_external_directory": "/Users/mileswirht/gpui-reactivity-20261024-root/component-3fc07815-sol/qualification"
+}

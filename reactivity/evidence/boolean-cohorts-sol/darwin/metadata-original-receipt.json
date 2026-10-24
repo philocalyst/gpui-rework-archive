@@ -1,0 +1,12 @@
+{
+  "source": "3fc07815a0ce389db54e492dd1d889c6fca10699",
+  "state": "complete",
+  "passed": 767,
+  "failed": 0,
+  "ignored": 12,
+  "bytes": 15722586,
+  "sha256": "421f66fb8b5c368d94c1715c6d4dc01f0bf1e7fe02439affc1f26f7bb3975d84",
+  "path": "/Users/mileswirht/gpui-reactivity-20261024-root/component-3fc07815-sol/metadata.tar.gz",
+  "binaries": 76,
+  "final_free": 23932055552
+}
