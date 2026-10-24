@@ -113,7 +113,7 @@ fn preview_selections(
     // Retain that grapheme: a leading Extend can join it, and LF can follow CR.
     // Keep the complete suffix for joins across the other marked-text seam.
     let mut base = if value.get(..marked.start).is_some_and(str::is_ascii) {
-        marked.start.saturating_sub(1)
+        marked.start.saturating_sub(0)
     } else {
         0
     };
