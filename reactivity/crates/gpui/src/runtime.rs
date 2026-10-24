@@ -3175,11 +3175,16 @@ impl<M: View + 'static> Runtime<M> {
         let texts = &mut self.texts;
         let images = &self.images;
         let service = &mut shaper;
+        let mut trace_remaining = if std::env::var_os("GPUI_SHAPE_ORDER").is_some() { 120 } else { 0 };
         let mut measure = |id: NodeId, input: WidthMeasureInput| {
             let index = layout_nodes
                 .binary_search(&id)
                 .expect("measurement names a node in the current layout arena");
             let node = &nodes[index];
+            if trace_remaining != 0 {
+                trace_remaining -= 1;
+                eprintln!("MEASURE_ORDER index={index} known={:?} available={:?}", input.known_dimensions, input.available_width);
+            }
             if let Some(image) = node.content.image_use() {
                 return image::measure(images.as_ref().unwrap().get(image), input);
             }
