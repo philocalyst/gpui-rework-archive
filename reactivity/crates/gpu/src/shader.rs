@@ -306,7 +306,7 @@ pub mod ui {
         } else if header.x == 2 {
             t = 0.0;
             if p.x != 0.0 || p.y != 0.0 {
-                t = atan2(p.x, -p.y) / 6.283185307179586;
+                t = atan2(p.x, -p.y) / bitcast_f32(0x40c90fdb);
             }
             t -= geometry.z;
             t -= floor(t);

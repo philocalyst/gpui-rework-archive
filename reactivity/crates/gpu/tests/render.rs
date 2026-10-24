@@ -3512,3 +3512,109 @@ fn analytic_gradients_geometry_spreads_hard_edges_hdr_and_cache_match_cpu() {
         }
     });
 }
+
+#[test]
+fn analytic_gradient_exact_edges_and_premultiplied_expected_values() {
+    use gpui_canvas::{
+        Extend, Gradient, GradientGeometry, GradientStop as Stop, Interpolation, OutputProfile,
+    };
+    fn half(bytes: &[u8]) -> f32 {
+        let bits = u16::from_le_bytes([bytes[0], bytes[1]]);
+        let e = ((bits >> 10) & 31) as i32;
+        let sign = if bits & 0x8000 == 0 { 1. } else { -1. };
+        let m = (bits & 1023) as f32;
+        sign * if e == 0 {
+            m * 2f32.powi(-24)
+        } else {
+            (1. + m / 1024.) * 2f32.powi(e - 15)
+        }
+    }
+    pollster::block_on(async {
+        let mut renderer = renderer(wgpu::TextureFormat::Rgba16Float).await;
+        let red = Color::linear_srgb(1., 0., 0., 1.).unwrap();
+        let blue = Color::linear_srgb(0., 0., 1., 1.).unwrap();
+        let fixtures = [
+            (
+                vec![
+                    Stop::new(0., red),
+                    Stop::new(0.375, red),
+                    Stop::new(0.375, blue),
+                    Stop::new(1., blue),
+                ],
+                1,
+                [0.25, 0., 0.75, 1.],
+            ),
+            (
+                vec![
+                    Stop::new(0., Color::linear_srgb(9., -1., 0., 0.).unwrap()),
+                    Stop::new(1., blue),
+                ],
+                1,
+                [0., 0., 0.5, 0.5],
+            ),
+            (
+                vec![Stop::new(0., red), Stop::new(1., blue)],
+                16,
+                [0.5, 0., 0.5, 1.],
+            ),
+            (
+                vec![
+                    Stop::new(0., Color::linear_srgb(-1., 4., 0.5, 0.0001).unwrap()),
+                    Stop::new(1., Color::linear_srgb(0., 0., 1., 0.7).unwrap()),
+                ],
+                1,
+                [-0.00005, 0.0002, 0.350025, 0.35005],
+            ),
+            (
+                vec![
+                    Stop::new(0., Color::linear_srgb(9., -1., 0., 0.).unwrap()),
+                    Stop::new(1., Color::linear_srgb(0., 8., 4., 0.).unwrap()),
+                ],
+                1,
+                [0.; 4],
+            ),
+        ];
+        for (stops, size, expected) in fixtures {
+            let gradient = Gradient::new(
+                GradientGeometry::Linear {
+                    start: Point { x: 0., y: 0. },
+                    end: Point { x: 1., y: 0. },
+                },
+                &stops,
+                Extend::Pad,
+                Interpolation::LinearSrgb,
+            )
+            .unwrap();
+            let mut canvas = Canvas::recording(
+                size,
+                size,
+                ColorConfig::linear_hdr(OutputProfile::Srgb, 203.).unwrap(),
+            )
+            .unwrap();
+            canvas.clear(Color::TRANSPARENT);
+            let rect = Rect::new(0., 0., size as f32, size as f32);
+            canvas
+                .fill_gradient(&gradient, rect, 0., Affine::IDENTITY, rect)
+                .unwrap();
+            let gpu = readback(&mut renderer, &canvas);
+            let cpu = canvas.pixels();
+            // The opaque 16x16 fixture exercises full-tile eligibility: its
+            // material still varies, so compare the mean rather than one pixel.
+            for (name, bytes) in [("GPU", gpu.as_slice()), ("CPU", cpu)] {
+                let mut mean = [0.; 4];
+                for (i, word) in bytes.as_chunks::<2>().0.iter().enumerate() {
+                    mean[i % 4] += half(word) / (size * size) as f32;
+                }
+                for c in 0..4 {
+                    assert!(
+                        (mean[c] - expected[c]).abs()
+                            <= 0.000001f32.max(expected[c].abs() * 0.0015),
+                        "{name} size{size} channel{c}:{} != {}",
+                        mean[c],
+                        expected[c]
+                    );
+                }
+            }
+        }
+    });
+}

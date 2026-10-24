@@ -138,7 +138,7 @@ impl Gradient {
                 return header[word];
             }
             let n = word - HEADER_WORDS;
-            if n % STOP_WORDS == 0 {
+            if n.is_multiple_of(STOP_WORDS) {
                 let i = n / STOP_WORDS;
                 let stop = stops[i];
                 let next = stops.get(i + 1).copied().unwrap_or(stop);
