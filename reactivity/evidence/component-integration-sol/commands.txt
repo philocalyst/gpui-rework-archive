@@ -1,0 +1,31 @@
+Frozen source: 7a2f9325440bc4325f423863a443df0ca2f39743.
+Environment: source /tmp/gpui-native-env.sh then /tmp/gpui-nightly-env.sh.
+Cargo prefix: -Z checksum-freshness --config 'build.fingerprint="content"'.
+Workspace: --manifest-path reactivity/Cargo.toml --locked --offline.
+Full JSON artifacts/freshness and unmodified execution logs: gate-records.tar.gz.
+
+Fresh /root/targets/component-review-sol-20261024:
+  test -j4 -p gpui -p gpui-component
+  clippy -j4 -p gpui -p gpui-component --all-targets -- -D warnings
+  test -j4 -p gpui_reactivity_ownership_lab --test native_question_mailbox
+  run -j4 -p gpui-component --example binding_costs
+  run -j4 -p gpui-component --example costs
+The strict/proof/cost commands started only after the full gate and guard ended.
+
+Fresh /root/targets/component-review-sol-hummingbird-20261024:
+  check --manifest-path reactivity/ports/hummingbird/Cargo.toml
+        --locked --offline -j2 --all-targets
+This uses the standalone port lockfile and expanded 2135-file guard.
+
+Fresh /root/targets/component-review-sol-native-20261024,
+CARGO_PROFILE_DEV_DEBUG=0:
+  test -j2 -p gpui --features x11 --lib --no-run
+  build -j2 -p gpui-component --features x11 --example halloween
+  Run the actual resulting GPUI binary through native-property-test.py.
+  Run the actual resulting Halloween binary through native-capture.py.
+Owned app/dbus/Xvfb processes are reaped by both harnesses.
+
+The compact exact 741 overlay and its flat before/after manifests are prepared
+locally. No remote build, capture-permission request or restart was launched.
+Readable native logs normalize terminal EOL/blank lines; the raw archive retains
+the original output bytes. The shipping feature diff passes git diff --check.

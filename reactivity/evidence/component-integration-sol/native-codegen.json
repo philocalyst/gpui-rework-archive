@@ -1,0 +1,42 @@
+{
+  "path": "/root/targets/component-review-sol-native-20261024/debug/examples/halloween",
+  "sha256": "57cef027bbf530dcee53e247de43e780e37099dd0993555b27edcf4cbff0c084",
+  "elf_bytes": 71269472,
+  "sections": {
+    ".interp": 83,
+    ".note.ABI-tag": 32,
+    ".dynsym": 4320,
+    ".gnu.version": 360,
+    ".gnu.version_r": 464,
+    ".gnu.hash": 28,
+    ".dynstr": 2310,
+    ".rela.dyn": 3477888,
+    ".rela.plt": 96,
+    ".rodata": 5972552,
+    ".gcc_except_table": 1038128,
+    ".eh_frame_hdr": 1073100,
+    ".eh_frame": 3407252,
+    ".text": 25783463,
+    ".init": 27,
+    ".fini": 13,
+    ".plt": 80,
+    ".tdata": 1080,
+    ".tbss": 272,
+    ".fini_array": 8,
+    ".init_array": 24,
+    ".data.rel.ro": 956456,
+    ".dynamic": 480,
+    ".got": 817624,
+    ".got.plt": 56,
+    ".relro_padding": 256,
+    ".tm_clone_table": 0,
+    ".data": 11152,
+    ".bss": 7444,
+    ".comment": 166
+  },
+  "delta_from_b9": {
+    "elf_bytes": 0,
+    "text_bytes": 0
+  },
+  "profile": "fresh x11 native dev debug0; whole ELF charges dependency closure; not an isolated compiler/latency benchmark"
+}

@@ -1,0 +1,5 @@
+Base exact source: 7410240e39d6130a4447ba3445f50c17cfb59298
+Candidate exact source: 7a2f9325440bc4325f423863a443df0ca2f39743
+Source aggregate: 8c243a8f2ad0b64e4760b913d10d313573e33bf5b6057b79842f6fa2740973c1
+Guarded candidate files: 2082
+Verify all before.json entries before applying. This overlay preserves741 Reader/GPU changes. No IME or Remote successor is included; do not apply to differently composed source without a reviewed merge. No Mac job has been launched by this lane.

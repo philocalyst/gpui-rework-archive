@@ -1,0 +1,871 @@
+[
+  {
+    "gate": "full-1",
+    "target": "text_selection_compound",
+    "kind": [
+      "test"
+    ],
+    "path": "/root/targets/component-review-sol-20261024/debug/build/gpui/008ccd399e6f391b/out/text_selection_compound-008ccd399e6f391b",
+    "bytes": 150523184,
+    "sha256": "4a3eef0b1659eb62f52080ac6b13eac78bb30cbb0a7fa583901ed45f1dbc60ad",
+    "cargo_fresh": false
+  },
+  {
+    "gate": "full-1",
+    "target": "question_inputs",
+    "kind": [
+      "test"
+    ],
+    "path": "/root/targets/component-review-sol-20261024/debug/build/gpui/6f1b723a7916224b/out/question_inputs-6f1b723a7916224b",
+    "bytes": 154765424,
+    "sha256": "75b15974ee19742a82b199516f75bd0fbf830394641d015d1def33a3ed80db80",
+    "cargo_fresh": false
+  },
+  {
+    "gate": "full-1",
+    "target": "property_change_union",
+    "kind": [
+      "test"
+    ],
+    "path": "/root/targets/component-review-sol-20261024/debug/build/gpui/88ede33e3cccc755/out/property_change_union-88ede33e3cccc755",
+    "bytes": 154704952,
+    "sha256": "2ae8a60e3a1070277e971a1e1102151db016fab11a81a298c7ae50e9baa335ce",
+    "cargo_fresh": false
+  },
+  {
+    "gate": "full-1",
+    "target": "bindings",
+    "kind": [
+      "test"
+    ],
+    "path": "/root/targets/component-review-sol-20261024/debug/build/gpui-component/0c6fccb097874e3d/out/bindings-0c6fccb097874e3d",
+    "bytes": 160901216,
+    "sha256": "83a8208747f97c92bd62e58219459ae1b0bab0e758830c38b274c110d5edba52",
+    "cargo_fresh": false
+  },
+  {
+    "gate": "full-1",
+    "target": "child_capacity",
+    "kind": [
+      "test"
+    ],
+    "path": "/root/targets/component-review-sol-20261024/debug/build/gpui/aebc04b6568f57ca/out/child_capacity-aebc04b6568f57ca",
+    "bytes": 148451328,
+    "sha256": "12a7fcdc4437fecc52e95f9711c7e76d5deea6457f9ddeef235c0bd01814ca43",
+    "cargo_fresh": false
+  },
+  {
+    "gate": "full-1",
+    "target": "paint_slot_rebind",
+    "kind": [
+      "test"
+    ],
+    "path": "/root/targets/component-review-sol-20261024/debug/build/gpui/9903f474937f53f0/out/paint_slot_rebind-9903f474937f53f0",
+    "bytes": 149946232,
+    "sha256": "5f748c036973069f62fdd57fd1c54290fed226676749d04322b9ea18ae8c531d",
+    "cargo_fresh": false
+  },
+  {
+    "gate": "full-1",
+    "target": "routes",
+    "kind": [
+      "test"
+    ],
+    "path": "/root/targets/component-review-sol-20261024/debug/build/gpui/6ea35f2d5635970d/out/routes-6ea35f2d5635970d",
+    "bytes": 153891648,
+    "sha256": "1f3c44fd83c52426a7a094ea42b1e97e7824c83a3dfb47de96de3e5753a29066",
+    "cargo_fresh": false
+  },
+  {
+    "gate": "full-1",
+    "target": "source_inbox",
+    "kind": [
+      "test"
+    ],
+    "path": "/root/targets/component-review-sol-20261024/debug/build/gpui/b32268d505226a32/out/source_inbox-b32268d505226a32",
+    "bytes": 164362864,
+    "sha256": "86fbdba8c68fa80439f47ef7ba526a90c841462db790e8a15c94335781ffb904",
+    "cargo_fresh": false
+  },
+  {
+    "gate": "full-1",
+    "target": "inspector",
+    "kind": [
+      "test"
+    ],
+    "path": "/root/targets/component-review-sol-20261024/debug/build/gpui/4ebc70cd39190da1/out/inspector-4ebc70cd39190da1",
+    "bytes": 167311488,
+    "sha256": "995349f0921452b6c68473975aa365fa341887ed106c45dc672dac0bafb5c0d9",
+    "cargo_fresh": false
+  },
+  {
+    "gate": "full-1",
+    "target": "question_input_cost",
+    "kind": [
+      "test"
+    ],
+    "path": "/root/targets/component-review-sol-20261024/debug/build/gpui/610c095d72cacedd/out/question_input_cost-610c095d72cacedd",
+    "bytes": 149045376,
+    "sha256": "941c35e20cb2e41e0e2041ac8a092fdec6a0400d0ec03f28f7f5c460d63147f6",
+    "cargo_fresh": false
+  },
+  {
+    "gate": "full-1",
+    "target": "checkbox",
+    "kind": [
+      "test"
+    ],
+    "path": "/root/targets/component-review-sol-20261024/debug/build/gpui/19eb3f827183aac3/out/checkbox-19eb3f827183aac3",
+    "bytes": 161456712,
+    "sha256": "5ea4e908256a296332e22ac3ece4eb3a92d33be48fef49f20291d781b899526d",
+    "cargo_fresh": false
+  },
+  {
+    "gate": "full-1",
+    "target": "flex",
+    "kind": [
+      "test"
+    ],
+    "path": "/root/targets/component-review-sol-20261024/debug/build/gpui/6e39d7b89a64d205/out/flex-6e39d7b89a64d205",
+    "bytes": 165005744,
+    "sha256": "2ba8a4fafb24e3bbf4d9a2c8c158369f131d784e9a199401a444471a938ff1e0",
+    "cargo_fresh": false
+  },
+  {
+    "gate": "full-1",
+    "target": "property_actions",
+    "kind": [
+      "test"
+    ],
+    "path": "/root/targets/component-review-sol-20261024/debug/build/gpui/1777ab843c0da67b/out/property_actions-1777ab843c0da67b",
+    "bytes": 156966032,
+    "sha256": "3c7842fb431df923158d004474c192070a66f8e282dddaae2f6c129f41ced032",
+    "cargo_fresh": false
+  },
+  {
+    "gate": "full-1",
+    "target": "text_selection",
+    "kind": [
+      "test"
+    ],
+    "path": "/root/targets/component-review-sol-20261024/debug/build/gpui/bc40161a8a52c5b7/out/text_selection-bc40161a8a52c5b7",
+    "bytes": 158173480,
+    "sha256": "927fe7d5ab07f58ea51f200acbd910849eb9331b0128106156977e0014a2879b",
+    "cargo_fresh": false
+  },
+  {
+    "gate": "full-1",
+    "target": "sibling_reconciliation_cost",
+    "kind": [
+      "test"
+    ],
+    "path": "/root/targets/component-review-sol-20261024/debug/build/gpui/91241232712ae12c/out/sibling_reconciliation_cost-91241232712ae12c",
+    "bytes": 148339888,
+    "sha256": "e5348b395796bc8b88b028d8020c10fa4086697f42cdaadee56309e826fbcfaa",
+    "cargo_fresh": false
+  },
+  {
+    "gate": "full-1",
+    "target": "paint_patch",
+    "kind": [
+      "test"
+    ],
+    "path": "/root/targets/component-review-sol-20261024/debug/build/gpui/b15c8de70d981ec1/out/paint_patch-b15c8de70d981ec1",
+    "bytes": 153331816,
+    "sha256": "a3f2bb65fca44ccff8d48c5d42c7cd3da8d6b5d8f8301ce6d9d340239309f36b",
+    "cargo_fresh": false
+  },
+  {
+    "gate": "full-1",
+    "target": "rounded",
+    "kind": [
+      "test"
+    ],
+    "path": "/root/targets/component-review-sol-20261024/debug/build/gpui/31abf228c3331fb5/out/rounded-31abf228c3331fb5",
+    "bytes": 159589360,
+    "sha256": "90ca32d7e6f9e4961a6b148c9fd6d260aa6ff8f41000110eaf1ef41f2f9356aa",
+    "cargo_fresh": false
+  },
+  {
+    "gate": "full-1",
+    "target": "inbox_storage",
+    "kind": [
+      "test"
+    ],
+    "path": "/root/targets/component-review-sol-20261024/debug/build/gpui/a205064e2e4f1cfd/out/inbox_storage-a205064e2e4f1cfd",
+    "bytes": 153407776,
+    "sha256": "5a5f9ad8ec66864a04dccf026fd600e0d245adbe00a6fbf701c2c31daf12419d",
+    "cargo_fresh": false
+  },
+  {
+    "gate": "full-1",
+    "target": "field_identity",
+    "kind": [
+      "test"
+    ],
+    "path": "/root/targets/component-review-sol-20261024/debug/build/gpui/1ddcc6405ee1efbd/out/field_identity-1ddcc6405ee1efbd",
+    "bytes": 148209456,
+    "sha256": "ab267af444cd26e173ef67501ecf79b8eb309d6c5a258f806f331e270722f6a7",
+    "cargo_fresh": false
+  },
+  {
+    "gate": "full-1",
+    "target": "question_futures",
+    "kind": [
+      "test"
+    ],
+    "path": "/root/targets/component-review-sol-20261024/debug/build/gpui/68b0bf2a1d73715a/out/question_futures-68b0bf2a1d73715a",
+    "bytes": 161838064,
+    "sha256": "f6502e2fcb4db03c40b75189e3b684673aa2c0c6d766b679bc9767c2ccd2a2af",
+    "cargo_fresh": false
+  },
+  {
+    "gate": "full-1",
+    "target": "text_geometry",
+    "kind": [
+      "test"
+    ],
+    "path": "/root/targets/component-review-sol-20261024/debug/build/gpui/8668807d8974697f/out/text_geometry-8668807d8974697f",
+    "bytes": 151615560,
+    "sha256": "5fd63c0302eb0cef151e0da97990ee9aadb47e918c586e2f31b160a513d9b49e",
+    "cargo_fresh": false
+  },
+  {
+    "gate": "full-1",
+    "target": "application",
+    "kind": [
+      "test"
+    ],
+    "path": "/root/targets/component-review-sol-20261024/debug/build/gpui/b6208b1a343028cd/out/application-b6208b1a343028cd",
+    "bytes": 155930424,
+    "sha256": "49b064c900d8edeab52123ce3822f94a1cf30a5f085fbe29e2eddbd7081c6767",
+    "cargo_fresh": false
+  },
+  {
+    "gate": "full-1",
+    "target": "semantics",
+    "kind": [
+      "test"
+    ],
+    "path": "/root/targets/component-review-sol-20261024/debug/build/gpui/691e694843aa8ad5/out/semantics-691e694843aa8ad5",
+    "bytes": 154426800,
+    "sha256": "68de5c7de85895b92a180c8cd5fb3f55624a360cb1c7f011b02ce189511fa781",
+    "cargo_fresh": false
+  },
+  {
+    "gate": "full-1",
+    "target": "projected_sources",
+    "kind": [
+      "test"
+    ],
+    "path": "/root/targets/component-review-sol-20261024/debug/build/gpui/0bab1bfc794756f0/out/projected_sources-0bab1bfc794756f0",
+    "bytes": 159988752,
+    "sha256": "5f91d22c055b8c2e1f96ef0e5ad05985dbd030a3f7b063dfa168a4c1c7d486d6",
+    "cargo_fresh": false
+  },
+  {
+    "gate": "full-1",
+    "target": "mapped_properties",
+    "kind": [
+      "test"
+    ],
+    "path": "/root/targets/component-review-sol-20261024/debug/build/gpui/c3a3c7b4805d3551/out/mapped_properties-c3a3c7b4805d3551",
+    "bytes": 163961544,
+    "sha256": "61331c76beb303831c6214becc331902d81792a6146a4ae7e0dd5b298643c816",
+    "cargo_fresh": false
+  },
+  {
+    "gate": "full-1",
+    "target": "immutable_text",
+    "kind": [
+      "test"
+    ],
+    "path": "/root/targets/component-review-sol-20261024/debug/build/gpui/864b9d129710898d/out/immutable_text-864b9d129710898d",
+    "bytes": 148049224,
+    "sha256": "8a74bee74ea86151c4e63598f6cc192e0aeab25ed210f3176dc5f8f34be88326",
+    "cargo_fresh": false
+  },
+  {
+    "gate": "full-1",
+    "target": "dpi",
+    "kind": [
+      "test"
+    ],
+    "path": "/root/targets/component-review-sol-20261024/debug/build/gpui/509ba220809bd8f6/out/dpi-509ba220809bd8f6",
+    "bytes": 153596240,
+    "sha256": "34249856b87f4447066e3b4bb197ab1433d26f1aa5cf30f7c28aa0264df8bf29",
+    "cargo_fresh": false
+  },
+  {
+    "gate": "full-1",
+    "target": "question_cost",
+    "kind": [
+      "test"
+    ],
+    "path": "/root/targets/component-review-sol-20261024/debug/build/gpui/c91f2912e779fd2f/out/question_cost-c91f2912e779fd2f",
+    "bytes": 151320112,
+    "sha256": "81d16bbb058ba5550456deb4cfce4f7870857e26c2bc8d06420301e1da860434",
+    "cargo_fresh": false
+  },
+  {
+    "gate": "full-1",
+    "target": "presentation",
+    "kind": [
+      "test"
+    ],
+    "path": "/root/targets/component-review-sol-20261024/debug/build/gpui/b3535c355619365d/out/presentation-b3535c355619365d",
+    "bytes": 151296256,
+    "sha256": "a0640d189010046611bbcdc02cfccbfc15e2637e11adcb380c54958e144501ad",
+    "cargo_fresh": false
+  },
+  {
+    "gate": "full-1",
+    "target": "retained_styles",
+    "kind": [
+      "test"
+    ],
+    "path": "/root/targets/component-review-sol-20261024/debug/build/gpui/e3ddf447c61383cf/out/retained_styles-e3ddf447c61383cf",
+    "bytes": 152870768,
+    "sha256": "8f590df40ac262a9392e0bed75e1b205036888483eeafcaea1e74d60c1e0aed9",
+    "cargo_fresh": false
+  },
+  {
+    "gate": "full-1",
+    "target": "text_cache",
+    "kind": [
+      "test"
+    ],
+    "path": "/root/targets/component-review-sol-20261024/debug/build/gpui/21420168966b1720/out/text_cache-21420168966b1720",
+    "bytes": 153137064,
+    "sha256": "f7cf074f09853ba6484e57db02a993801bf3880fffcff03a4a7892f4faf4a797",
+    "cargo_fresh": false
+  },
+  {
+    "gate": "full-1",
+    "target": "acceptance",
+    "kind": [
+      "test"
+    ],
+    "path": "/root/targets/component-review-sol-20261024/debug/build/gpui/2e1ff2f3e75cff91/out/acceptance-2e1ff2f3e75cff91",
+    "bytes": 160561464,
+    "sha256": "bfdd7f2f449f044d5a5cb12d3cf7346066c62ff372ffe829e0d7fc6a22900499",
+    "cargo_fresh": false
+  },
+  {
+    "gate": "full-1",
+    "target": "semantic_serialization",
+    "kind": [
+      "test"
+    ],
+    "path": "/root/targets/component-review-sol-20261024/debug/build/gpui/bc8e49426ab96e94/out/semantic_serialization-bc8e49426ab96e94",
+    "bytes": 156417336,
+    "sha256": "2f32697dcdb0ab02b3036c3a42a80ec7b14233b41f39d0bae416c1f1f9359fa6",
+    "cargo_fresh": false
+  },
+  {
+    "gate": "full-1",
+    "target": "mapped_paint",
+    "kind": [
+      "test"
+    ],
+    "path": "/root/targets/component-review-sol-20261024/debug/build/gpui/930318858482df78/out/mapped_paint-930318858482df78",
+    "bytes": 150204640,
+    "sha256": "9d5a0109b1f452839dae31239bba89f9390edd6a0afce78b2db4847c4791265b",
+    "cargo_fresh": false
+  },
+  {
+    "gate": "full-1",
+    "target": "remote",
+    "kind": [
+      "test"
+    ],
+    "path": "/root/targets/component-review-sol-20261024/debug/build/gpui/51a6ffa6ff05de8b/out/remote-51a6ffa6ff05de8b",
+    "bytes": 159902608,
+    "sha256": "26aba3874398f72b24f594b504b9da9724a6698cca12d6a40b497f4962b9e74b",
+    "cargo_fresh": false
+  },
+  {
+    "gate": "full-1",
+    "target": "images",
+    "kind": [
+      "test"
+    ],
+    "path": "/root/targets/component-review-sol-20261024/debug/build/gpui/0993d8f5db3cb21b/out/images-0993d8f5db3cb21b",
+    "bytes": 155249848,
+    "sha256": "ff4cedd9591f0debb1bac6874aed1a4a6d13827726e5640bbb6296d9a3e29c75",
+    "cargo_fresh": false
+  },
+  {
+    "gate": "full-1",
+    "target": "unit_action_cost_two",
+    "kind": [
+      "test"
+    ],
+    "path": "/root/targets/component-review-sol-20261024/debug/build/gpui/fbc20d53e3eb6977/out/unit_action_cost_two-fbc20d53e3eb6977",
+    "bytes": 151943232,
+    "sha256": "cf6e2e78c5e6deb2f226d24f2c3934e7891241b138b8ecab4496829083f5d66b",
+    "cargo_fresh": false
+  },
+  {
+    "gate": "full-1",
+    "target": "dimensions",
+    "kind": [
+      "test"
+    ],
+    "path": "/root/targets/component-review-sol-20261024/debug/build/gpui/e8ae7702cadf9403/out/dimensions-e8ae7702cadf9403",
+    "bytes": 154118320,
+    "sha256": "e8a6c022783a559b534dfbb90e19ac723521eb027a9136fca6fdba9978d8bc68",
+    "cargo_fresh": false
+  },
+  {
+    "gate": "full-1",
+    "target": "queries",
+    "kind": [
+      "test"
+    ],
+    "path": "/root/targets/component-review-sol-20261024/debug/build/gpui/ed9e1d1f18edf974/out/queries-ed9e1d1f18edf974",
+    "bytes": 150893632,
+    "sha256": "e73867400baaa3c041e11f659146a56b3027255a7e6be6ae86b2bac34c6380a5",
+    "cargo_fresh": false
+  },
+  {
+    "gate": "full-1",
+    "target": "ports",
+    "kind": [
+      "test"
+    ],
+    "path": "/root/targets/component-review-sol-20261024/debug/build/gpui/cca9ef766a91813a/out/ports-cca9ef766a91813a",
+    "bytes": 157196560,
+    "sha256": "5d2c33e75ecbf72a34a9a4d96c7ccaa8cc3c3607be11c321a785713a4baecf71",
+    "cargo_fresh": false
+  },
+  {
+    "gate": "full-1",
+    "target": "literal_dispatch",
+    "kind": [
+      "test"
+    ],
+    "path": "/root/targets/component-review-sol-20261024/debug/build/gpui/d7ee860f9c3f94dc/out/literal_dispatch-d7ee860f9c3f94dc",
+    "bytes": 150974984,
+    "sha256": "db9c696cd1f56b39859f7442bc708d4ec2bfc488a4f8c6c4e0fefd6450ecd51d",
+    "cargo_fresh": false
+  },
+  {
+    "gate": "full-1",
+    "target": "style_ports",
+    "kind": [
+      "test"
+    ],
+    "path": "/root/targets/component-review-sol-20261024/debug/build/gpui/1644cce55ed6004f/out/style_ports-1644cce55ed6004f",
+    "bytes": 180609584,
+    "sha256": "960544bfc5511fa600f3eb866d88dc8700bd7d9b9628b5747ff627a1e24095fa",
+    "cargo_fresh": false
+  },
+  {
+    "gate": "full-1",
+    "target": "semantic_metadata",
+    "kind": [
+      "test"
+    ],
+    "path": "/root/targets/component-review-sol-20261024/debug/build/gpui/19d961d36691cce4/out/semantic_metadata-19d961d36691cce4",
+    "bytes": 169628136,
+    "sha256": "639b3c96a5431632ae29eb2109466ddbdb949090b89c9b58c07c52650e0ad101",
+    "cargo_fresh": false
+  },
+  {
+    "gate": "full-1",
+    "target": "identity_recovery",
+    "kind": [
+      "test"
+    ],
+    "path": "/root/targets/component-review-sol-20261024/debug/build/gpui/85df942346408137/out/identity_recovery-85df942346408137",
+    "bytes": 149369928,
+    "sha256": "a9911953a9ea671f322fc4b5a92e3332100e72218f834229dd5e08e75661f2d2",
+    "cargo_fresh": false
+  },
+  {
+    "gate": "full-1",
+    "target": "questions",
+    "kind": [
+      "test"
+    ],
+    "path": "/root/targets/component-review-sol-20261024/debug/build/gpui/76e73600938b87ae/out/questions-76e73600938b87ae",
+    "bytes": 156555240,
+    "sha256": "6d9bdffb644c3e9e5d4383c097c05ad54af3853def74caca7282f17242d39165",
+    "cargo_fresh": false
+  },
+  {
+    "gate": "full-1",
+    "target": "unit_action_cost",
+    "kind": [
+      "test"
+    ],
+    "path": "/root/targets/component-review-sol-20261024/debug/build/gpui/ddca900dd72cd427/out/unit_action_cost-ddca900dd72cd427",
+    "bytes": 149522144,
+    "sha256": "d432e9a298f8f7418357a71501c703828052842add936d4a8d56dcbcaf5708a7",
+    "cargo_fresh": false
+  },
+  {
+    "gate": "full-1",
+    "target": "property_state_shell",
+    "kind": [
+      "test"
+    ],
+    "path": "/root/targets/component-review-sol-20261024/debug/build/gpui/0b9c7ea948b21ad9/out/property_state_shell-0b9c7ea948b21ad9",
+    "bytes": 149168024,
+    "sha256": "1cff3841178a29685f1603bd2bbd0d4b9dbe20cba3fec5a21f92ab54ea121b9f",
+    "cargo_fresh": false
+  },
+  {
+    "gate": "full-1",
+    "target": "pointer_focus",
+    "kind": [
+      "test"
+    ],
+    "path": "/root/targets/component-review-sol-20261024/debug/build/gpui/25a4a49b039e6bc7/out/pointer_focus-25a4a49b039e6bc7",
+    "bytes": 150479392,
+    "sha256": "38f8f481cc6da71e0ee8fae83d133b8fdc4b73c87216ed7f05f65627da28f803",
+    "cargo_fresh": false
+  },
+  {
+    "gate": "full-1",
+    "target": "source_values",
+    "kind": [
+      "test"
+    ],
+    "path": "/root/targets/component-review-sol-20261024/debug/build/gpui/8caa0b961888386e/out/source_values-8caa0b961888386e",
+    "bytes": 151576088,
+    "sha256": "683f56f238d6670ddf535abf385eb78c9b7678a9b8c47ce23d1641f317145608",
+    "cargo_fresh": false
+  },
+  {
+    "gate": "full-1",
+    "target": "components",
+    "kind": [
+      "test"
+    ],
+    "path": "/root/targets/component-review-sol-20261024/debug/build/gpui/e0dffa0cd6f51255/out/components-e0dffa0cd6f51255",
+    "bytes": 164895160,
+    "sha256": "5eba834784266ccaee6bb4c49609f55e750a4954e3aba53a74c1feddde347226",
+    "cargo_fresh": false
+  },
+  {
+    "gate": "full-1",
+    "target": "search_library",
+    "kind": [
+      "test"
+    ],
+    "path": "/root/targets/component-review-sol-20261024/debug/build/gpui/f105079d724c2c4b/out/search_library-f105079d724c2c4b",
+    "bytes": 156407152,
+    "sha256": "5a4a038e38998fad94585b347c776394c168f5243d94c264d7d9705c0a718afe",
+    "cargo_fresh": false
+  },
+  {
+    "gate": "full-1",
+    "target": "question_storage",
+    "kind": [
+      "test"
+    ],
+    "path": "/root/targets/component-review-sol-20261024/debug/build/gpui/bc18e07206bab4af/out/question_storage-bc18e07206bab4af",
+    "bytes": 157488472,
+    "sha256": "eeba8e8f8c7133fcb5692487000cdd8f300b9c49c0ef7cd96322af6b248e3c6d",
+    "cargo_fresh": false
+  },
+  {
+    "gate": "full-1",
+    "target": "contracts",
+    "kind": [
+      "test"
+    ],
+    "path": "/root/targets/component-review-sol-20261024/debug/build/gpui-component/775f0d228618ecec/out/contracts-775f0d228618ecec",
+    "bytes": 169836072,
+    "sha256": "89c6cda917f0029c8666f658fa39b62ee2ed9aaa084bbedf2a26133aadb396a2",
+    "cargo_fresh": false
+  },
+  {
+    "gate": "full-1",
+    "target": "lists",
+    "kind": [
+      "test"
+    ],
+    "path": "/root/targets/component-review-sol-20261024/debug/build/gpui/8fff1c6c4e700e36/out/lists-8fff1c6c4e700e36",
+    "bytes": 182518576,
+    "sha256": "9cd8e3f1e5ced8df67f3177704fa72ed30ea4e7f474f4095cbfc5a4a9135022c",
+    "cargo_fresh": false
+  },
+  {
+    "gate": "full-1",
+    "target": "color_packing",
+    "kind": [
+      "test"
+    ],
+    "path": "/root/targets/component-review-sol-20261024/debug/build/gpui/1acfecbd266ffcf4/out/color_packing-1acfecbd266ffcf4",
+    "bytes": 150442992,
+    "sha256": "7178f9aa53da28f399778e5a262e5a304fbc1d896676afddf10caf9e0964a667",
+    "cargo_fresh": false
+  },
+  {
+    "gate": "full-1",
+    "target": "handler_storage",
+    "kind": [
+      "test"
+    ],
+    "path": "/root/targets/component-review-sol-20261024/debug/build/gpui/f883cb70ccab2de8/out/handler_storage-f883cb70ccab2de8",
+    "bytes": 167881856,
+    "sha256": "9a8b00ef2748df6b75b8b61c03a9b9713d7f63632284284fe3e8237fa1302ca8",
+    "cargo_fresh": false
+  },
+  {
+    "gate": "full-1",
+    "target": "unicode_text",
+    "kind": [
+      "test"
+    ],
+    "path": "/root/targets/component-review-sol-20261024/debug/build/gpui/140c2cf010321e09/out/unicode_text-140c2cf010321e09",
+    "bytes": 149898400,
+    "sha256": "e993f283ebc544a8eaa4656634730ddd96f169340aa9791cadbefb2bdb07ec79",
+    "cargo_fresh": false
+  },
+  {
+    "gate": "full-1",
+    "target": "property_selection",
+    "kind": [
+      "test"
+    ],
+    "path": "/root/targets/component-review-sol-20261024/debug/build/gpui/38ac07684ba8dc00/out/property_selection-38ac07684ba8dc00",
+    "bytes": 161116400,
+    "sha256": "d0023b4ad813de84121f9148027501ecd86d2bf3422dad0da9eb5779810e01dd",
+    "cargo_fresh": false
+  },
+  {
+    "gate": "full-1",
+    "target": "source_value_isolation",
+    "kind": [
+      "test"
+    ],
+    "path": "/root/targets/component-review-sol-20261024/debug/build/gpui/929d91eb01a40580/out/source_value_isolation-929d91eb01a40580",
+    "bytes": 155062448,
+    "sha256": "50cf85aedb3b78014c4c89b419a7c1582427330a3118253a2601589d97e55bfa",
+    "cargo_fresh": false
+  },
+  {
+    "gate": "full-1",
+    "target": "pointer",
+    "kind": [
+      "test"
+    ],
+    "path": "/root/targets/component-review-sol-20261024/debug/build/gpui/d816adab1d563161/out/pointer-d816adab1d563161",
+    "bytes": 155372648,
+    "sha256": "c039efc2f4129c8c1d9c22e0c0f4a530680e4ea37812fcb2a4b3fe22ab5bb8c2",
+    "cargo_fresh": false
+  },
+  {
+    "gate": "full-1",
+    "target": "library",
+    "kind": [
+      "test"
+    ],
+    "path": "/root/targets/component-review-sol-20261024/debug/build/gpui/d00a7ee35e0511d9/out/library-d00a7ee35e0511d9",
+    "bytes": 152800600,
+    "sha256": "6b15804868a7f469a06fc115576cb71f65c5f3c98dfd46f788938e3d4f87fd91",
+    "cargo_fresh": false
+  },
+  {
+    "gate": "full-1",
+    "target": "gpui_component",
+    "kind": [
+      "lib"
+    ],
+    "path": "/root/targets/component-review-sol-20261024/debug/build/gpui-component/8e8987dcc789a7e2/out/gpui_component-8e8987dcc789a7e2",
+    "bytes": 7282392,
+    "sha256": "c00471b4ad6e8c6b710e8d954896d07a666404e62355b0d15b8b37ad0f89f6ac",
+    "cargo_fresh": false
+  },
+  {
+    "gate": "full-1",
+    "target": "question_mailbox",
+    "kind": [
+      "test"
+    ],
+    "path": "/root/targets/component-review-sol-20261024/debug/build/gpui/a4bb98995e34fff2/out/question_mailbox-a4bb98995e34fff2",
+    "bytes": 149727856,
+    "sha256": "42c63089d6f4e5e2e74bce294c011090f660ffa05ed1592378ae910328a9c442",
+    "cargo_fresh": false
+  },
+  {
+    "gate": "full-1",
+    "target": "scroll",
+    "kind": [
+      "test"
+    ],
+    "path": "/root/targets/component-review-sol-20261024/debug/build/gpui/fd2d51a302cd564b/out/scroll-fd2d51a302cd564b",
+    "bytes": 181682152,
+    "sha256": "5feb865800980c9765f67fbe3de3cf1a400d148866fc104ce9da2b80a786992c",
+    "cargo_fresh": false
+  },
+  {
+    "gate": "full-1",
+    "target": "frontier",
+    "kind": [
+      "test"
+    ],
+    "path": "/root/targets/component-review-sol-20261024/debug/build/gpui/3505a27f7f5a7e54/out/frontier-3505a27f7f5a7e54",
+    "bytes": 155199008,
+    "sha256": "fce350a91aa74278d03246d543958f94da649e5c75e40d412841c4b38c68a057",
+    "cargo_fresh": false
+  },
+  {
+    "gate": "full-1",
+    "target": "todo_comparison",
+    "kind": [
+      "test"
+    ],
+    "path": "/root/targets/component-review-sol-20261024/debug/build/gpui/946b0742b1ffc88c/out/todo_comparison-946b0742b1ffc88c",
+    "bytes": 153176944,
+    "sha256": "16c7c3f4e1eb748b1965c5b351b0fdde71f123dc53b3e89e1c039ba45ee94141",
+    "cargo_fresh": false
+  },
+  {
+    "gate": "full-1",
+    "target": "property_outline_allocations",
+    "kind": [
+      "test"
+    ],
+    "path": "/root/targets/component-review-sol-20261024/debug/build/gpui/8775c1f95576b0ef/out/property_outline_allocations-8775c1f95576b0ef",
+    "bytes": 149355704,
+    "sha256": "48618ecdc5bd659872fe977ec150fc4420bd441866cfa7aa13523df06d2fdea1",
+    "cargo_fresh": false
+  },
+  {
+    "gate": "full-1",
+    "target": "source_inbox_reader_gate",
+    "kind": [
+      "test"
+    ],
+    "path": "/root/targets/component-review-sol-20261024/debug/build/gpui/a271db0d8da3c108/out/source_inbox_reader_gate-a271db0d8da3c108",
+    "bytes": 149576040,
+    "sha256": "6791f745a03c643c54fa06cab4bc9d87cc83dc74f3e195b552e1a8663351864e",
+    "cargo_fresh": false
+  },
+  {
+    "gate": "full-1",
+    "target": "paint_slots",
+    "kind": [
+      "test"
+    ],
+    "path": "/root/targets/component-review-sol-20261024/debug/build/gpui/7e0a69994c0368ff/out/paint_slots-7e0a69994c0368ff",
+    "bytes": 155244568,
+    "sha256": "bc7cf4ab226646fcfd12bc7b21f049a81df43361cc61f5c3ba6fb4938a676e42",
+    "cargo_fresh": false
+  },
+  {
+    "gate": "full-1",
+    "target": "clipping",
+    "kind": [
+      "test"
+    ],
+    "path": "/root/targets/component-review-sol-20261024/debug/build/gpui/998cc0351a90c6d3/out/clipping-998cc0351a90c6d3",
+    "bytes": 161117672,
+    "sha256": "12a4ab07275502e112dc4c115072d832f51128be4fb0934b9eab64208c64615d",
+    "cargo_fresh": false
+  },
+  {
+    "gate": "full-1",
+    "target": "intrinsic_text",
+    "kind": [
+      "test"
+    ],
+    "path": "/root/targets/component-review-sol-20261024/debug/build/gpui/fb311fc6c1601f93/out/intrinsic_text-fb311fc6c1601f93",
+    "bytes": 150188048,
+    "sha256": "11419e2e4a6e2d04e8b2f2280b7f2f3588f00cba081e50bab8b79b1a789cb56b",
+    "cargo_fresh": false
+  },
+  {
+    "gate": "full-1",
+    "target": "gpui",
+    "kind": [
+      "lib"
+    ],
+    "path": "/root/targets/component-review-sol-20261024/debug/build/gpui/29a6364882bcbe58/out/gpui-29a6364882bcbe58",
+    "bytes": 292824512,
+    "sha256": "ba8c6c2d9243ca8cbb79e39a850e4fb4be264b239a309812d8b13a6a0e75d53a",
+    "cargo_fresh": false
+  },
+  {
+    "gate": "full-1",
+    "target": "focus",
+    "kind": [
+      "test"
+    ],
+    "path": "/root/targets/component-review-sol-20261024/debug/build/gpui/ac2905fa5a411151/out/focus-ac2905fa5a411151",
+    "bytes": 160269392,
+    "sha256": "a46435e83143a984cafcaa555d804f6244d8251567753d90b4cecd7a2f36f402",
+    "cargo_fresh": false
+  },
+  {
+    "gate": "full-1",
+    "target": "runtime",
+    "kind": [
+      "test"
+    ],
+    "path": "/root/targets/component-review-sol-20261024/debug/build/gpui/1635f631cab00c58/out/runtime-1635f631cab00c58",
+    "bytes": 177007072,
+    "sha256": "af3fc12e8946d788a293984a9314ade11787d8e0366b30f2340cdfef80c5ba4b",
+    "cargo_fresh": false
+  },
+  {
+    "gate": "native-test-3a",
+    "target": "gpui",
+    "kind": [
+      "lib"
+    ],
+    "path": "/root/targets/component-review-sol-native-20261024/debug/build/gpui/8fbaac6a12ec2b60/out/gpui-8fbaac6a12ec2b60",
+    "bytes": 169533968,
+    "sha256": "a06c7a992702ac1beec1f7c1974af7297f62ffc5ddad38e0c34c72093d07c287",
+    "cargo_fresh": false
+  },
+  {
+    "gate": "native-3b",
+    "target": "halloween",
+    "kind": [
+      "example"
+    ],
+    "path": "/root/targets/component-review-sol-native-20261024/debug/examples/halloween",
+    "bytes": 71269472,
+    "sha256": "57cef027bbf530dcee53e247de43e780e37099dd0993555b27edcf4cbff0c084",
+    "cargo_fresh": false
+  },
+  {
+    "gate": "mailbox-5",
+    "target": "native_question_mailbox",
+    "kind": [
+      "test"
+    ],
+    "path": "/root/targets/component-review-sol-20261024/debug/build/gpui_reactivity_ownership_lab/081112d2e4e1d520/out/native_question_mailbox-081112d2e4e1d520",
+    "bytes": 8792104,
+    "sha256": "29632564d1e84699d8b89f21e94ad19d25ad54039a7bd69fb87a1a19ee7a8967",
+    "cargo_fresh": false
+  },
+  {
+    "gate": "bindings-costs-6",
+    "target": "binding_costs",
+    "kind": [
+      "example"
+    ],
+    "path": "/root/targets/component-review-sol-20261024/debug/examples/binding_costs",
+    "bytes": 145276832,
+    "sha256": "8b7e8e2614421e20c5b1433eed54c299dc6b03eb19896de3dea280d1e9d1c4f6",
+    "cargo_fresh": false
+  },
+  {
+    "gate": "party-costs-6",
+    "target": "costs",
+    "kind": [
+      "example"
+    ],
+    "path": "/root/targets/component-review-sol-20261024/debug/examples/costs",
+    "bytes": 142252256,
+    "sha256": "50d196604a467fc4b9178efa4b6a117ed20a3f446e25320211398b82b5498fd3",
+    "cargo_fresh": false
+  }
+]

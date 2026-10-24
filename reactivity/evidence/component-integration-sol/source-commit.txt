@@ -1,0 +1,32 @@
+commit 7a2f9325440bc4325f423863a443df0ca2f39743
+Author:     Codex <codex@openai.com>
+AuthorDate: Sat Oct 24 16:51:24 2026 -0400
+Commit:     Codex <codex@openai.com>
+CommitDate: Sat Oct 24 16:51:24 2026 -0400
+
+    Compose reusable typed controls and relative dimensions with Reader and GPU Main
+
+    Port the reusable button, checkbox, input, label, badge, field, layout and theme
+    foundation onto Main7410240e39. The Halloween invitation app uses those real
+    controls, application-owned Oklch tokens, typed named parts, caller route/style
+    overrides, and the same public model under headless and native hosting.
+
+    Make controlled checked/disabled inputs accept typed signals and recipes through
+    the existing source/fanout path. Preserve current logical activation authority,
+    physical route retirement, inherited disabled policy and acknowledged semantic
+    state. Lower selected palettes through the existing color bank without expanding
+    the closed property catalog. Keep PropInput Copy and existing hot headers; charge
+    the added retained direct bindings rather than claiming mount memory savings.
+
+    Use typed Auto/Points/Percent dimensions through declarations, sources, exact
+    style equality and inspector codecs. Validate before layout and keep explicit
+    Auto separate from Inherit. Require point viewports for uniform lists until a
+    containing-block model exists for their earlier materialization phase.
+
+    Apply the reviewed7d-to-b9 feature delta, not an old full-tree replacement. Keep
+    Reader shipping/tests, canonical ownership proofs and portable GPU oracle/helper
+    byte-identical to741. The sole overlapping file keeps Main's deny(unsafe_code)
+    while adding typed exports. Retain prior source, failures and executable seals
+    in their original branches; this direct-parent commit receives new composition
+    gates before adoption. No IME successor or complete reference-family port is
+    claimed.

@@ -1,0 +1,4 @@
+public_headers,PropertyValue=28,PropertyValueAlignment=4,El=176,Style=88,Button=192,Checkbox=536,Input=360,PropInputColor=48
+direct=false,description_allocations=13,description_requested=2000,description_retained=2000,mount_allocations=420,mount_requested=164778,mount_retained=28716,update_allocations=5750,update_requested=1821800,update_retained=0,owner_reruns=100,descriptions=100,source_reads=0,destination_compares=1200
+direct=true,description_allocations=44,description_requested=3608,description_retained=3488,mount_allocations=476,mount_requested=169138,mount_retained=29996,update_allocations=2050,update_requested=367600,update_retained=0,owner_reruns=0,descriptions=0,source_reads=100,destination_compares=400
+initial_and_final_pixels_equal=true,bytes_each=281600

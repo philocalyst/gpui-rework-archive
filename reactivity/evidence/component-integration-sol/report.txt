@@ -1,0 +1,139 @@
+Component/Length/binding integration review on Reader/GPU Main
+
+Qualified source: 7a2f9325440bc4325f423863a443df0ca2f39743
+Direct and sole parent: 7410240e39d6130a4447ba3445f50c17cfb59298
+Worktree: /root/gpui-component-review-sol-20261024
+Branch: codex/component-review-sol-20261024
+Compiled input aggregate:
+8c243a8f2ad0b64e4760b913d10d313573e33bf5b6057b79842f6fa2740973c1
+2082 files. Expanded standalone Hummingbird aggregate:
+1eb4c5ef12b13de2b9b96c2cd0e97ba29633f8576e453122952bd312ee8744a0
+2135 files. An evidence-only seal follows this compiled source commit.
+
+Composition method and review
+
+The indexed three-way application contains only the reviewed 7d7353c2-to-b9de850f
+feature delta in reactivity/Cargo.lock, crates/component and crates/gpui. It does
+not copy an old full tree or replay old Root baseline changes. There are 65
+feature files: 20 additions, 45 modifications, zero deletions. All match b9
+byte-for-byte except the one intentionally overlapping lib.rs file. That file
+keeps Main's deny(unsafe_code), needed for its narrowly allowed private Reader
+mailbox, and adds the typed feature exports. No other overlap resolution exists.
+
+All 30 Root-changed files outside that overlap remain byte-identical to 741.
+A second post-gate audit checks the complete 35-file Reader/question-test/GPU/
+canonical-proof closure against the pinned Main commit. This includes the
+portable GPU manifest, renderer, pixel oracle, shared adapter helper and examples;
+the Reader shipping files, public question/future tests and both ownership proof
+targets. Root's portable-GPU historical evidence and STATUS are also unchanged.
+No IME or independent Remote successor is composed. The old b9/9e6d source,
+failure receipts, source guards and actual ELF archives remain untouched.
+
+The component crate remains genuinely reusable: button, checkbox, writable input,
+label, textual badge, field, layout, theme and consuming recipes. The Halloween
+app uses these real controls, application-owned Oklch palette tokens, typed named
+parts and caller route/style replacement through ordinary APIs. Licensing and
+notices are preserved. The same public model hosts headless and native output.
+
+  Checkbox::new("Treats", &self.treats, &self.theme)
+      .disabled(&self.disabled).toggle(Self::TREATS).build()
+  Input::new(&self.title, "Title", &self.theme)
+      .invalid(self.title.map(|title| title.len() < 3)).build()
+  div().size(Length::Percent(100.0))
+  win.set_property(target, WIDTH, Contribution::Set(Length::Auto))?
+
+Direct bool/control sources use the existing binding accumulator. Arbitrary Rust
+snapshot branches retain field/component dependencies. Checked intent uses the
+current logical state; a later caller handler replaces default behavior exactly
+once. Disabled inheritance preserves each descendant's own state and physical
+route storage while revoking logical focus/input/activation authority. The old
+acknowledged semantic sheet stays frozen until a new ACK. Typed relative lengths
+validate before layout and preserve Auto versus Inherit and exact author bits.
+The public style property catalog remains closed at 14 entries.
+
+Actual composed gates
+
+The fresh default GPUI+component gate passes 77 result groups: 686 ordinary tests
+plus 35 doctests, 721 total passed, zero failed, 10 ignored. GPUI units pass 185
+with 5 ignored. The suite includes all 16 binding contracts, 12 component contracts,
+7 dimensions, inspector/property/source/layout/allocation gates and the current
+Root Reader tests. This is one green full gate, superseding the earlier b9 split
+qualification without erasing that older negative evidence.
+
+The actual Root public tests pass for Completion Send/Sync/UnwindSafe/
+RefUnwindSafe with a Send-only Cell payload, completion before spawn returns,
+cancellation before first poll, rejected/panicking starters retaining a cap,
+stale-credit behavior, owner close and forwarded reader control projection.
+The independent canonical std-Arc mailbox integration target passes all 6 tests,
+including its control-role unwind trait certificate and real last-producer race.
+This normal execution is not represented as a new Miri or Loom run.
+
+Strict all-target Clippy -Dwarnings passes for gpui and gpui-component.
+Hummingbird's own unchanged lockfile passes its default all-target locked/offline
+check against this composition. All targets were fresh and private to this lane;
+Cargo content fingerprints, exact features/profiles/freshness and actual ELF
+identities are retained. Before/after input maps are byte-identical for every
+gate. No source editing occurred during compilers, tests or source checks.
+
+The actual native inspector test passes public pointer selection, typed draft,
+canonical rejection, syntax error, recovery, Apply pointer, server pixel,
+stale-target feedback and exact ACK. The actual Halloween app reaches S9/P9
+through pointer/Space/Enter/Tab, then acknowledges a 960×700 resize at S9/P9.
+Five screenshots and the live-process receipt are retained. Owned Xvfb/dbus/app
+processes were reaped. These are ReferenceCpu software-display results, with no
+hardware GPU, physical capture or native AT-SPI-client state-roundtrip claim.
+
+Measured costs
+
+Committed shipping inventory: core 35793 non-test/comment lines, component 593.
+The exact 741 core is separately measured 34902: the feature core delta is 891.
+The Main Reader/GPU composition contributes 50 lines over b9's 35743. Component
+and vendor dependency declarations remain unchanged except the new component's
+workspace lock entry; no unrelated package upgrade or GPU feature rollback.
+
+The composed equal-workload binding fixture reproduces the b9 costs exactly:
+snapshot mount 420 allocations/28716 retained; direct 476/29996. Direct binding
+adds 56 allocations/1280 retained bytes. Over 100 checked writes snapshot requests
+1821800 bytes/5750 allocations and reruns/describes 100 owners; direct requests
+367600 bytes/2050 allocations and reruns/describes zero. Both initial and final
+framebuffers are byte-exact equal, 281600 bytes each. Retained growth is zero in
+both update loops. This is a storage-for-description tradeoff, not a memory or
+general latency win. Fonts are prewarmed equally and captures lie outside the
+allocation measurements.
+
+Actual mixed Party: description 60 allocations/7616 requested/7440 retained;
+window 1017 allocations/323151 requested/92382 retained. Preparation direct schema
+is 3 allocations/144 retained versus 4/176 for conservative dependencies. Parent
+snapshot branches remain declared. Public measured headers remain El 176,
+Style 88, Button 192, Checkbox 536, Input 360, PropInput<Color> 48, PropertyValue 28
+with alignment 4. Runtime Node 24 remains unchanged; MapDraft 80 is transient.
+The existing mapped33 allocation floor and zero-allocation warm patch pass.
+The composed native dev debug0 executable is 71269472 B, .text 25783463 B,
+matching the b9 byte counts. Its actual SHA256 is
+57cef027bbf530dcee53e247de43e780e37099dd0993555b27edcf4cbff0c084.
+Whole ELF/section sizes charge dependencies and do not imply identical binaries
+or an isolated compiler-performance result. Key actual ELFs are archived in a
+264062784-byte local archive; all 79 resulting executable identities are retained.
+
+Limits and the next isolated review
+
+This is a foundation/control subset of a 75+ component-family reference, not a
+complete port. The exact 81-module inventory records 67 unported and 7 partial
+modules. Rounded focus outlines, relative uniform-list viewports, arbitrary
+component/theme reflection and cross-sink predicate cohorts remain gaps.
+
+Two concrete API/accessibility gaps were identified during this integration:
+component BoolInput accepts concrete literal/signal/map recipes while primitives
+also accept explicitly erased PropInput<bool>; Input.invalid currently selects
+palette only and does not publish semantic or AccessKit invalid state. Neither
+is concealed as complete support. A separate successor will investigate a shared
+boolean recipe with a compound semantic/palette destination, uniform erased bool
+admission, public acknowledged invalid query and native accessibility projection.
+This frozen qualification makes no successor functionality or cost claim.
+
+The exact 741-to-7a Mac overlay is prepared at
+/tmp/component-review-sol-7a2f9325-overlay, 266701 bytes, SHA256
+bed460af22c197d8592803745da4522cafecb5c8ee4153b61ef5a857fa780a38.
+It has flat before/after maps, pin, delta and deletion list. Verify the exact
+2062-file before map before application. No remote job, capture-permission
+request or restart was made by this lane. Root coordinates serial Mac jobs.

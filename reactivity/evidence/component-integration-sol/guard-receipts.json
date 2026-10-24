@@ -1,0 +1,30 @@
+[
+  {
+    "gate": "1",
+    "commit": "7a2f9325440bc4325f423863a443df0ca2f39743",
+    "aggregate": "8c243a8f2ad0b64e4760b913d10d313573e33bf5b6057b79842f6fa2740973c1",
+    "files": 2082,
+    "stable": true
+  },
+  {
+    "gate": "3",
+    "commit": "7a2f9325440bc4325f423863a443df0ca2f39743",
+    "aggregate": "8c243a8f2ad0b64e4760b913d10d313573e33bf5b6057b79842f6fa2740973c1",
+    "files": 2082,
+    "stable": true
+  },
+  {
+    "gate": "4",
+    "commit": "7a2f9325440bc4325f423863a443df0ca2f39743",
+    "aggregate": "8c243a8f2ad0b64e4760b913d10d313573e33bf5b6057b79842f6fa2740973c1",
+    "files": 2082,
+    "stable": true
+  },
+  {
+    "gate": "Hummingbird2",
+    "commit": "7a2f9325440bc4325f423863a443df0ca2f39743",
+    "aggregate": "1eb4c5ef12b13de2b9b96c2cd0e97ba29633f8576e453122952bd312ee8744a0",
+    "files": 2135,
+    "stable": true
+  }
+]
