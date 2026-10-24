@@ -1,0 +1,18 @@
+ .../crates/component/examples/binding_costs.rs     | 136 +++++
+ reactivity/crates/component/examples/costs.rs      |  22 +-
+ .../crates/component/examples/support/party.rs     |  10 +-
+ reactivity/crates/component/src/button.rs          |  30 +-
+ reactivity/crates/component/src/checkbox.rs        |  43 +-
+ reactivity/crates/component/src/input.rs           |  22 +-
+ reactivity/crates/component/tests/bindings.rs      | 599 +++++++++++++++++++++
+ reactivity/crates/component/tests/contracts.rs     |  49 ++
+ reactivity/crates/gpui/src/element.rs              | 247 +++++++--
+ reactivity/crates/gpui/src/lib.rs                  |   5 +-
+ reactivity/crates/gpui/src/runtime.rs              | 154 ++++--
+ reactivity/crates/gpui/src/runtime/metadata.rs     |  37 +-
+ reactivity/crates/gpui/src/runtime/styles.rs       |  16 +
+ .../crates/gpui/src/runtime/styles/colours.rs      |  10 +
+ reactivity/crates/gpui/src/runtime/turn.rs         |   8 +-
+ reactivity/crates/gpui/src/semantic.rs             |  39 +-
+ reactivity/crates/gpui/src/style_port.rs           | 425 ++++++++++++---
+ 17 files changed, 1628 insertions(+), 224 deletions(-)

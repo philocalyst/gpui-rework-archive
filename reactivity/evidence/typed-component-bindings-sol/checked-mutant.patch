@@ -1,0 +1,13 @@
+diff --git a/reactivity/crates/gpui/src/runtime.rs b/reactivity/crates/gpui/src/runtime.rs
+index 736153f40d..18433865f1 100644
+--- a/reactivity/crates/gpui/src/runtime.rs
++++ b/reactivity/crates/gpui/src/runtime.rs
+@@ -2853,7 +2853,7 @@ impl<M: View + 'static> Runtime<M> {
+                 };
+                 let before = node.content;
+                 let after = if control == crate::style_port::Sink::CHECKED {
+-                    before.with_checked(value)
++                    before
+                 } else {
+                     before.with_own_disabled(value)
+                 };

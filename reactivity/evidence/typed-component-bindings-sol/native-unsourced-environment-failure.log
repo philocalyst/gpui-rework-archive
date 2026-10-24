@@ -1,0 +1,5 @@
+Traceback (most recent call last):
+  File "/tmp/gpui-binding-native-capture.py", line 23, in <module>
+    if app.poll() is not None: raise RuntimeError('application exited '+str(app.returncode))
+                               ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+RuntimeError: application exited 1

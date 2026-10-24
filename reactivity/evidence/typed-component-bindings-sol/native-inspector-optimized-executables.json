@@ -1,0 +1,23 @@
+[
+  {
+    "target": "gpui",
+    "path": "/root/targets/typed-binding-sol-native-20261024/debug/build/gpui/8fbaac6a12ec2b60/out/gpui-8fbaac6a12ec2b60",
+    "sha256": "2bacb1fda3bc25993e2996e1d93abcd7f0dacefd465c3c2b8dda89fa7f7f3a22",
+    "bytes": 169504448,
+    "cargo_fresh": false
+  },
+  {
+    "target": "bindings",
+    "path": "/root/targets/typed-binding-sol-release-20261024/release/build/gpui-component/824d685d86d022a5/out/bindings-824d685d86d022a5",
+    "sha256": "68efaadf36ad95a4724a40dc9c391988394ee0fbaa05b36ffabd95b8a82cef40",
+    "bytes": 11443144,
+    "cargo_fresh": false
+  },
+  {
+    "target": "contracts",
+    "path": "/root/targets/typed-binding-sol-release-20261024/release/build/gpui-component/6ffbd0bee3b8c971/out/contracts-6ffbd0bee3b8c971",
+    "sha256": "3e2df709f944fe9f07dbcef3f02594285060e739a9d55373affc5884c5ce3c8d",
+    "bytes": 12263536,
+    "cargo_fresh": false
+  }
+]

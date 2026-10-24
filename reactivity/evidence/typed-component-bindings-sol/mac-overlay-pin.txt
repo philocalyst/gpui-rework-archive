@@ -1,0 +1,5 @@
+Base exact source: 9b9500b9b6685e9a3eb261b988fdfba63e333f88
+Candidate exact source: b9de850f55ccc97841fde7713f2b11d3c7fb482c
+Source input aggregate: a12f27deab4ead13fc9f2e55d0ce892ee7df50cceccebe91317c19647a78d94b
+Guarded files: 2080
+Overlay only applies after byte-exact before.json verification. No composition with Reader/IME/Node16/GPU experiments is implied. Local Linux native/release/contracts qualification only; this successor has not been built on Darwin.

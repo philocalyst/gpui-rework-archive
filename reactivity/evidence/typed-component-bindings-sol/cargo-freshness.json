@@ -1,0 +1,4468 @@
+[
+  {
+    "gate": "lib-17",
+    "package_id": "path+file:///root/gpui-typed-binding-sol-20261024/reactivity/vendor/parley_engine#0.12.0",
+    "target": "parley_engine",
+    "features": [
+      "complex-scripts",
+      "std"
+    ],
+    "profile": {
+      "opt_level": "0",
+      "debuginfo": 2,
+      "debug_assertions": true,
+      "overflow_checks": true,
+      "test": false
+    },
+    "fresh": true,
+    "executable": null
+  },
+  {
+    "gate": "lib-17",
+    "package_id": "path+file:///root/gpui-typed-binding-sol-20261024/reactivity/vendor/cephal#0.1.1",
+    "target": "cephal",
+    "features": [
+      "block",
+      "default",
+      "flex",
+      "grid"
+    ],
+    "profile": {
+      "opt_level": "0",
+      "debuginfo": 2,
+      "debug_assertions": true,
+      "overflow_checks": true,
+      "test": false
+    },
+    "fresh": true,
+    "executable": null
+  },
+  {
+    "gate": "lib-17",
+    "package_id": "path+file:///root/gpui-typed-binding-sol-20261024/reactivity/crates/core#gpui_reactivity_core@0.1.0",
+    "target": "gpui_reactivity_core",
+    "features": [
+      "default",
+      "layout"
+    ],
+    "profile": {
+      "opt_level": "0",
+      "debuginfo": 2,
+      "debug_assertions": true,
+      "overflow_checks": true,
+      "test": false
+    },
+    "fresh": true,
+    "executable": null
+  },
+  {
+    "gate": "lib-17",
+    "package_id": "path+file:///root/gpui-typed-binding-sol-20261024/reactivity/vendor/parley#0.12.0",
+    "target": "parley",
+    "features": [
+      "complex-scripts",
+      "std"
+    ],
+    "profile": {
+      "opt_level": "0",
+      "debuginfo": 2,
+      "debug_assertions": true,
+      "overflow_checks": true,
+      "test": false
+    },
+    "fresh": true,
+    "executable": null
+  },
+  {
+    "gate": "lib-17",
+    "package_id": "path+file:///root/gpui-typed-binding-sol-20261024/reactivity/vendor/accesskit#0.25.1",
+    "target": "accesskit",
+    "features": [],
+    "profile": {
+      "opt_level": "0",
+      "debuginfo": 2,
+      "debug_assertions": true,
+      "overflow_checks": true,
+      "test": false
+    },
+    "fresh": true,
+    "executable": null
+  },
+  {
+    "gate": "lib-17",
+    "package_id": "path+file:///root/gpui-typed-binding-sol-20261024/reactivity/crates/canvas#gpui_canvas@0.1.0",
+    "target": "gpui_canvas",
+    "features": [
+      "simd"
+    ],
+    "profile": {
+      "opt_level": "0",
+      "debuginfo": 2,
+      "debug_assertions": true,
+      "overflow_checks": true,
+      "test": false
+    },
+    "fresh": true,
+    "executable": null
+  },
+  {
+    "gate": "lib-17",
+    "package_id": "path+file:///root/gpui-typed-binding-sol-20261024/reactivity/vendor/accesskit_consumer#0.39.1",
+    "target": "accesskit_consumer",
+    "features": [],
+    "profile": {
+      "opt_level": "0",
+      "debuginfo": 2,
+      "debug_assertions": true,
+      "overflow_checks": true,
+      "test": false
+    },
+    "fresh": true,
+    "executable": null
+  },
+  {
+    "gate": "lib-17",
+    "package_id": "path+file:///root/gpui-typed-binding-sol-20261024/reactivity/crates/state#gpui_reactivity_state@0.1.0",
+    "target": "gpui_reactivity_state",
+    "features": [
+      "default",
+      "serde"
+    ],
+    "profile": {
+      "opt_level": "0",
+      "debuginfo": 2,
+      "debug_assertions": true,
+      "overflow_checks": true,
+      "test": false
+    },
+    "fresh": true,
+    "executable": null
+  },
+  {
+    "gate": "lib-17",
+    "package_id": "path+file:///root/gpui-typed-binding-sol-20261024/reactivity/crates/inline-call#gpui_inline_call@0.1.0",
+    "target": "gpui_inline_call",
+    "features": [],
+    "profile": {
+      "opt_level": "0",
+      "debuginfo": 2,
+      "debug_assertions": true,
+      "overflow_checks": true,
+      "test": false
+    },
+    "fresh": true,
+    "executable": null
+  },
+  {
+    "gate": "lib-17",
+    "package_id": "path+file:///root/gpui-typed-binding-sol-20261024/reactivity/crates/gpui#0.1.0",
+    "target": "gpui",
+    "features": [
+      "default",
+      "simd"
+    ],
+    "profile": {
+      "opt_level": "0",
+      "debuginfo": 2,
+      "debug_assertions": true,
+      "overflow_checks": true,
+      "test": true
+    },
+    "fresh": false,
+    "executable": "/root/targets/typed-binding-sol-20261024/debug/build/gpui/29a6364882bcbe58/out/gpui-29a6364882bcbe58"
+  },
+  {
+    "gate": "component-18",
+    "package_id": "path+file:///root/gpui-typed-binding-sol-20261024/reactivity/vendor/parley_engine#0.12.0",
+    "target": "parley_engine",
+    "features": [
+      "complex-scripts",
+      "std"
+    ],
+    "profile": {
+      "opt_level": "0",
+      "debuginfo": 2,
+      "debug_assertions": true,
+      "overflow_checks": true,
+      "test": false
+    },
+    "fresh": true,
+    "executable": null
+  },
+  {
+    "gate": "component-18",
+    "package_id": "path+file:///root/gpui-typed-binding-sol-20261024/reactivity/vendor/cephal#0.1.1",
+    "target": "cephal",
+    "features": [
+      "block",
+      "default",
+      "flex",
+      "grid"
+    ],
+    "profile": {
+      "opt_level": "0",
+      "debuginfo": 2,
+      "debug_assertions": true,
+      "overflow_checks": true,
+      "test": false
+    },
+    "fresh": true,
+    "executable": null
+  },
+  {
+    "gate": "component-18",
+    "package_id": "path+file:///root/gpui-typed-binding-sol-20261024/reactivity/vendor/parley#0.12.0",
+    "target": "parley",
+    "features": [
+      "complex-scripts",
+      "std"
+    ],
+    "profile": {
+      "opt_level": "0",
+      "debuginfo": 2,
+      "debug_assertions": true,
+      "overflow_checks": true,
+      "test": false
+    },
+    "fresh": true,
+    "executable": null
+  },
+  {
+    "gate": "component-18",
+    "package_id": "path+file:///root/gpui-typed-binding-sol-20261024/reactivity/crates/core#gpui_reactivity_core@0.1.0",
+    "target": "gpui_reactivity_core",
+    "features": [
+      "default",
+      "layout"
+    ],
+    "profile": {
+      "opt_level": "0",
+      "debuginfo": 2,
+      "debug_assertions": true,
+      "overflow_checks": true,
+      "test": false
+    },
+    "fresh": true,
+    "executable": null
+  },
+  {
+    "gate": "component-18",
+    "package_id": "path+file:///root/gpui-typed-binding-sol-20261024/reactivity/crates/state#gpui_reactivity_state@0.1.0",
+    "target": "gpui_reactivity_state",
+    "features": [
+      "default",
+      "serde"
+    ],
+    "profile": {
+      "opt_level": "0",
+      "debuginfo": 2,
+      "debug_assertions": true,
+      "overflow_checks": true,
+      "test": false
+    },
+    "fresh": true,
+    "executable": null
+  },
+  {
+    "gate": "component-18",
+    "package_id": "path+file:///root/gpui-typed-binding-sol-20261024/reactivity/crates/inline-call#gpui_inline_call@0.1.0",
+    "target": "gpui_inline_call",
+    "features": [],
+    "profile": {
+      "opt_level": "0",
+      "debuginfo": 2,
+      "debug_assertions": true,
+      "overflow_checks": true,
+      "test": false
+    },
+    "fresh": true,
+    "executable": null
+  },
+  {
+    "gate": "component-18",
+    "package_id": "path+file:///root/gpui-typed-binding-sol-20261024/reactivity/crates/canvas#gpui_canvas@0.1.0",
+    "target": "gpui_canvas",
+    "features": [],
+    "profile": {
+      "opt_level": "0",
+      "debuginfo": 2,
+      "debug_assertions": true,
+      "overflow_checks": true,
+      "test": false
+    },
+    "fresh": true,
+    "executable": null
+  },
+  {
+    "gate": "component-18",
+    "package_id": "path+file:///root/gpui-typed-binding-sol-20261024/reactivity/crates/component#gpui-component@0.1.0",
+    "target": "gpui_component",
+    "features": [
+      "default"
+    ],
+    "profile": {
+      "opt_level": "0",
+      "debuginfo": 2,
+      "debug_assertions": true,
+      "overflow_checks": true,
+      "test": false
+    },
+    "fresh": false,
+    "executable": null
+  },
+  {
+    "gate": "component-18",
+    "package_id": "path+file:///root/gpui-typed-binding-sol-20261024/reactivity/crates/gpui#0.1.0",
+    "target": "gpui",
+    "features": [],
+    "profile": {
+      "opt_level": "0",
+      "debuginfo": 2,
+      "debug_assertions": true,
+      "overflow_checks": true,
+      "test": false
+    },
+    "fresh": false,
+    "executable": null
+  },
+  {
+    "gate": "component-18",
+    "package_id": "path+file:///root/gpui-typed-binding-sol-20261024/reactivity/crates/component#gpui-component@0.1.0",
+    "target": "gpui_component",
+    "features": [
+      "default"
+    ],
+    "profile": {
+      "opt_level": "0",
+      "debuginfo": 2,
+      "debug_assertions": true,
+      "overflow_checks": true,
+      "test": true
+    },
+    "fresh": false,
+    "executable": "/root/targets/typed-binding-sol-20261024/debug/build/gpui-component/dbb113c1be7a5a7d/out/gpui_component-dbb113c1be7a5a7d"
+  },
+  {
+    "gate": "component-18",
+    "package_id": "path+file:///root/gpui-typed-binding-sol-20261024/reactivity/crates/component#gpui-component@0.1.0",
+    "target": "costs",
+    "features": [
+      "default"
+    ],
+    "profile": {
+      "opt_level": "0",
+      "debuginfo": 2,
+      "debug_assertions": true,
+      "overflow_checks": true,
+      "test": false
+    },
+    "fresh": false,
+    "executable": "/root/targets/typed-binding-sol-20261024/debug/examples/costs"
+  },
+  {
+    "gate": "component-18",
+    "package_id": "path+file:///root/gpui-typed-binding-sol-20261024/reactivity/crates/component#gpui-component@0.1.0",
+    "target": "halloween",
+    "features": [
+      "default"
+    ],
+    "profile": {
+      "opt_level": "0",
+      "debuginfo": 2,
+      "debug_assertions": true,
+      "overflow_checks": true,
+      "test": false
+    },
+    "fresh": false,
+    "executable": "/root/targets/typed-binding-sol-20261024/debug/examples/halloween"
+  },
+  {
+    "gate": "component-18",
+    "package_id": "path+file:///root/gpui-typed-binding-sol-20261024/reactivity/crates/component#gpui-component@0.1.0",
+    "target": "contracts",
+    "features": [
+      "default"
+    ],
+    "profile": {
+      "opt_level": "0",
+      "debuginfo": 2,
+      "debug_assertions": true,
+      "overflow_checks": true,
+      "test": true
+    },
+    "fresh": false,
+    "executable": "/root/targets/typed-binding-sol-20261024/debug/build/gpui-component/16ef123558dd1f8e/out/contracts-16ef123558dd1f8e"
+  },
+  {
+    "gate": "component-18",
+    "package_id": "path+file:///root/gpui-typed-binding-sol-20261024/reactivity/crates/component#gpui-component@0.1.0",
+    "target": "bindings",
+    "features": [
+      "default"
+    ],
+    "profile": {
+      "opt_level": "0",
+      "debuginfo": 2,
+      "debug_assertions": true,
+      "overflow_checks": true,
+      "test": true
+    },
+    "fresh": false,
+    "executable": "/root/targets/typed-binding-sol-20261024/debug/build/gpui-component/db62208d15d1d72d/out/bindings-db62208d15d1d72d"
+  },
+  {
+    "gate": "component-18",
+    "package_id": "path+file:///root/gpui-typed-binding-sol-20261024/reactivity/crates/component#gpui-component@0.1.0",
+    "target": "binding_costs",
+    "features": [
+      "default"
+    ],
+    "profile": {
+      "opt_level": "0",
+      "debuginfo": 2,
+      "debug_assertions": true,
+      "overflow_checks": true,
+      "test": false
+    },
+    "fresh": false,
+    "executable": "/root/targets/typed-binding-sol-20261024/debug/examples/binding_costs"
+  },
+  {
+    "gate": "clippy-19",
+    "package_id": "path+file:///root/gpui-typed-binding-sol-20261024/reactivity/vendor/cephal#0.1.1",
+    "target": "cephal",
+    "features": [
+      "block",
+      "default",
+      "flex",
+      "grid"
+    ],
+    "profile": {
+      "opt_level": "0",
+      "debuginfo": 2,
+      "debug_assertions": true,
+      "overflow_checks": true,
+      "test": false
+    },
+    "fresh": true,
+    "executable": null
+  },
+  {
+    "gate": "clippy-19",
+    "package_id": "path+file:///root/gpui-typed-binding-sol-20261024/reactivity/crates/core#gpui_reactivity_core@0.1.0",
+    "target": "gpui_reactivity_core",
+    "features": [
+      "default",
+      "layout"
+    ],
+    "profile": {
+      "opt_level": "0",
+      "debuginfo": 2,
+      "debug_assertions": true,
+      "overflow_checks": true,
+      "test": false
+    },
+    "fresh": true,
+    "executable": null
+  },
+  {
+    "gate": "clippy-19",
+    "package_id": "path+file:///root/gpui-typed-binding-sol-20261024/reactivity/crates/state#gpui_reactivity_state@0.1.0",
+    "target": "gpui_reactivity_state",
+    "features": [
+      "default",
+      "serde"
+    ],
+    "profile": {
+      "opt_level": "0",
+      "debuginfo": 2,
+      "debug_assertions": true,
+      "overflow_checks": true,
+      "test": false
+    },
+    "fresh": false,
+    "executable": null
+  },
+  {
+    "gate": "clippy-19",
+    "package_id": "path+file:///root/gpui-typed-binding-sol-20261024/reactivity/crates/inline-call#gpui_inline_call@0.1.0",
+    "target": "gpui_inline_call",
+    "features": [],
+    "profile": {
+      "opt_level": "0",
+      "debuginfo": 2,
+      "debug_assertions": true,
+      "overflow_checks": true,
+      "test": false
+    },
+    "fresh": true,
+    "executable": null
+  },
+  {
+    "gate": "clippy-19",
+    "package_id": "path+file:///root/gpui-typed-binding-sol-20261024/reactivity/vendor/parley_engine#0.12.0",
+    "target": "parley_engine",
+    "features": [
+      "complex-scripts",
+      "std"
+    ],
+    "profile": {
+      "opt_level": "0",
+      "debuginfo": 2,
+      "debug_assertions": true,
+      "overflow_checks": true,
+      "test": false
+    },
+    "fresh": false,
+    "executable": null
+  },
+  {
+    "gate": "clippy-19",
+    "package_id": "path+file:///root/gpui-typed-binding-sol-20261024/reactivity/vendor/parley#0.12.0",
+    "target": "parley",
+    "features": [
+      "complex-scripts",
+      "std"
+    ],
+    "profile": {
+      "opt_level": "0",
+      "debuginfo": 2,
+      "debug_assertions": true,
+      "overflow_checks": true,
+      "test": false
+    },
+    "fresh": false,
+    "executable": null
+  },
+  {
+    "gate": "clippy-19",
+    "package_id": "path+file:///root/gpui-typed-binding-sol-20261024/reactivity/vendor/accesskit#0.25.1",
+    "target": "accesskit",
+    "features": [],
+    "profile": {
+      "opt_level": "0",
+      "debuginfo": 2,
+      "debug_assertions": true,
+      "overflow_checks": true,
+      "test": false
+    },
+    "fresh": false,
+    "executable": null
+  },
+  {
+    "gate": "clippy-19",
+    "package_id": "path+file:///root/gpui-typed-binding-sol-20261024/reactivity/crates/canvas#gpui_canvas@0.1.0",
+    "target": "gpui_canvas",
+    "features": [
+      "simd"
+    ],
+    "profile": {
+      "opt_level": "0",
+      "debuginfo": 2,
+      "debug_assertions": true,
+      "overflow_checks": true,
+      "test": false
+    },
+    "fresh": false,
+    "executable": null
+  },
+  {
+    "gate": "clippy-19",
+    "package_id": "path+file:///root/gpui-typed-binding-sol-20261024/reactivity/vendor/accesskit_consumer#0.39.1",
+    "target": "accesskit_consumer",
+    "features": [],
+    "profile": {
+      "opt_level": "0",
+      "debuginfo": 2,
+      "debug_assertions": true,
+      "overflow_checks": true,
+      "test": false
+    },
+    "fresh": false,
+    "executable": null
+  },
+  {
+    "gate": "clippy-19",
+    "package_id": "path+file:///root/gpui-typed-binding-sol-20261024/reactivity/crates/gpui#0.1.0",
+    "target": "gpui",
+    "features": [
+      "default",
+      "simd"
+    ],
+    "profile": {
+      "opt_level": "0",
+      "debuginfo": 2,
+      "debug_assertions": true,
+      "overflow_checks": true,
+      "test": false
+    },
+    "fresh": false,
+    "executable": null
+  },
+  {
+    "gate": "clippy-19",
+    "package_id": "path+file:///root/gpui-typed-binding-sol-20261024/reactivity/crates/component#gpui-component@0.1.0",
+    "target": "gpui_component",
+    "features": [
+      "default"
+    ],
+    "profile": {
+      "opt_level": "0",
+      "debuginfo": 2,
+      "debug_assertions": true,
+      "overflow_checks": true,
+      "test": false
+    },
+    "fresh": false,
+    "executable": null
+  },
+  {
+    "gate": "clippy-19",
+    "package_id": "path+file:///root/gpui-typed-binding-sol-20261024/reactivity/crates/component#gpui-component@0.1.0",
+    "target": "gpui_component",
+    "features": [
+      "default"
+    ],
+    "profile": {
+      "opt_level": "0",
+      "debuginfo": 2,
+      "debug_assertions": true,
+      "overflow_checks": true,
+      "test": true
+    },
+    "fresh": false,
+    "executable": null
+  },
+  {
+    "gate": "clippy-19",
+    "package_id": "path+file:///root/gpui-typed-binding-sol-20261024/reactivity/crates/component#gpui-component@0.1.0",
+    "target": "binding_costs",
+    "features": [
+      "default"
+    ],
+    "profile": {
+      "opt_level": "0",
+      "debuginfo": 2,
+      "debug_assertions": true,
+      "overflow_checks": true,
+      "test": false
+    },
+    "fresh": false,
+    "executable": null
+  },
+  {
+    "gate": "clippy-19",
+    "package_id": "path+file:///root/gpui-typed-binding-sol-20261024/reactivity/crates/component#gpui-component@0.1.0",
+    "target": "bindings",
+    "features": [
+      "default"
+    ],
+    "profile": {
+      "opt_level": "0",
+      "debuginfo": 2,
+      "debug_assertions": true,
+      "overflow_checks": true,
+      "test": true
+    },
+    "fresh": false,
+    "executable": null
+  },
+  {
+    "gate": "clippy-19",
+    "package_id": "path+file:///root/gpui-typed-binding-sol-20261024/reactivity/crates/component#gpui-component@0.1.0",
+    "target": "costs",
+    "features": [
+      "default"
+    ],
+    "profile": {
+      "opt_level": "0",
+      "debuginfo": 2,
+      "debug_assertions": true,
+      "overflow_checks": true,
+      "test": false
+    },
+    "fresh": false,
+    "executable": null
+  },
+  {
+    "gate": "clippy-19",
+    "package_id": "path+file:///root/gpui-typed-binding-sol-20261024/reactivity/crates/component#gpui-component@0.1.0",
+    "target": "halloween",
+    "features": [
+      "default"
+    ],
+    "profile": {
+      "opt_level": "0",
+      "debuginfo": 2,
+      "debug_assertions": true,
+      "overflow_checks": true,
+      "test": false
+    },
+    "fresh": false,
+    "executable": null
+  },
+  {
+    "gate": "clippy-19",
+    "package_id": "path+file:///root/gpui-typed-binding-sol-20261024/reactivity/crates/component#gpui-component@0.1.0",
+    "target": "contracts",
+    "features": [
+      "default"
+    ],
+    "profile": {
+      "opt_level": "0",
+      "debuginfo": 2,
+      "debug_assertions": true,
+      "overflow_checks": true,
+      "test": true
+    },
+    "fresh": false,
+    "executable": null
+  },
+  {
+    "gate": "clippy-19",
+    "package_id": "path+file:///root/gpui-typed-binding-sol-20261024/reactivity/crates/gpui#0.1.0",
+    "target": "unit_action_cost",
+    "features": [
+      "default",
+      "simd"
+    ],
+    "profile": {
+      "opt_level": "0",
+      "debuginfo": 2,
+      "debug_assertions": true,
+      "overflow_checks": true,
+      "test": true
+    },
+    "fresh": false,
+    "executable": null
+  },
+  {
+    "gate": "clippy-19",
+    "package_id": "path+file:///root/gpui-typed-binding-sol-20261024/reactivity/crates/gpui#0.1.0",
+    "target": "source_values",
+    "features": [
+      "default",
+      "simd"
+    ],
+    "profile": {
+      "opt_level": "0",
+      "debuginfo": 2,
+      "debug_assertions": true,
+      "overflow_checks": true,
+      "test": true
+    },
+    "fresh": false,
+    "executable": null
+  },
+  {
+    "gate": "clippy-19",
+    "package_id": "path+file:///root/gpui-typed-binding-sol-20261024/reactivity/crates/gpui#0.1.0",
+    "target": "lists",
+    "features": [
+      "default",
+      "simd"
+    ],
+    "profile": {
+      "opt_level": "0",
+      "debuginfo": 2,
+      "debug_assertions": true,
+      "overflow_checks": true,
+      "test": true
+    },
+    "fresh": false,
+    "executable": null
+  },
+  {
+    "gate": "clippy-19",
+    "package_id": "path+file:///root/gpui-typed-binding-sol-20261024/reactivity/crates/gpui#0.1.0",
+    "target": "pointer_focus",
+    "features": [
+      "default",
+      "simd"
+    ],
+    "profile": {
+      "opt_level": "0",
+      "debuginfo": 2,
+      "debug_assertions": true,
+      "overflow_checks": true,
+      "test": true
+    },
+    "fresh": false,
+    "executable": null
+  },
+  {
+    "gate": "clippy-19",
+    "package_id": "path+file:///root/gpui-typed-binding-sol-20261024/reactivity/crates/gpui#0.1.0",
+    "target": "handler_storage",
+    "features": [
+      "default",
+      "simd"
+    ],
+    "profile": {
+      "opt_level": "0",
+      "debuginfo": 2,
+      "debug_assertions": true,
+      "overflow_checks": true,
+      "test": true
+    },
+    "fresh": false,
+    "executable": null
+  },
+  {
+    "gate": "clippy-19",
+    "package_id": "path+file:///root/gpui-typed-binding-sol-20261024/reactivity/crates/gpui#0.1.0",
+    "target": "sheet_access_measure",
+    "features": [
+      "default",
+      "simd"
+    ],
+    "profile": {
+      "opt_level": "0",
+      "debuginfo": 2,
+      "debug_assertions": true,
+      "overflow_checks": true,
+      "test": false
+    },
+    "fresh": false,
+    "executable": null
+  },
+  {
+    "gate": "clippy-19",
+    "package_id": "path+file:///root/gpui-typed-binding-sol-20261024/reactivity/crates/gpui#0.1.0",
+    "target": "question_storage",
+    "features": [
+      "default",
+      "simd"
+    ],
+    "profile": {
+      "opt_level": "0",
+      "debuginfo": 2,
+      "debug_assertions": true,
+      "overflow_checks": true,
+      "test": true
+    },
+    "fresh": false,
+    "executable": null
+  },
+  {
+    "gate": "clippy-19",
+    "package_id": "path+file:///root/gpui-typed-binding-sol-20261024/reactivity/crates/gpui#0.1.0",
+    "target": "color_packing",
+    "features": [
+      "default",
+      "simd"
+    ],
+    "profile": {
+      "opt_level": "0",
+      "debuginfo": 2,
+      "debug_assertions": true,
+      "overflow_checks": true,
+      "test": true
+    },
+    "fresh": false,
+    "executable": null
+  },
+  {
+    "gate": "clippy-19",
+    "package_id": "path+file:///root/gpui-typed-binding-sol-20261024/reactivity/crates/gpui#0.1.0",
+    "target": "property_selection",
+    "features": [
+      "default",
+      "simd"
+    ],
+    "profile": {
+      "opt_level": "0",
+      "debuginfo": 2,
+      "debug_assertions": true,
+      "overflow_checks": true,
+      "test": true
+    },
+    "fresh": false,
+    "executable": null
+  },
+  {
+    "gate": "clippy-19",
+    "package_id": "path+file:///root/gpui-typed-binding-sol-20261024/reactivity/crates/gpui#0.1.0",
+    "target": "search_library",
+    "features": [
+      "default",
+      "simd"
+    ],
+    "profile": {
+      "opt_level": "0",
+      "debuginfo": 2,
+      "debug_assertions": true,
+      "overflow_checks": true,
+      "test": true
+    },
+    "fresh": false,
+    "executable": null
+  },
+  {
+    "gate": "clippy-19",
+    "package_id": "path+file:///root/gpui-typed-binding-sol-20261024/reactivity/crates/gpui#0.1.0",
+    "target": "counter",
+    "features": [
+      "default",
+      "simd"
+    ],
+    "profile": {
+      "opt_level": "0",
+      "debuginfo": 2,
+      "debug_assertions": true,
+      "overflow_checks": true,
+      "test": false
+    },
+    "fresh": false,
+    "executable": null
+  },
+  {
+    "gate": "clippy-19",
+    "package_id": "path+file:///root/gpui-typed-binding-sol-20261024/reactivity/crates/gpui#0.1.0",
+    "target": "source_value_isolation",
+    "features": [
+      "default",
+      "simd"
+    ],
+    "profile": {
+      "opt_level": "0",
+      "debuginfo": 2,
+      "debug_assertions": true,
+      "overflow_checks": true,
+      "test": true
+    },
+    "fresh": false,
+    "executable": null
+  },
+  {
+    "gate": "clippy-19",
+    "package_id": "path+file:///root/gpui-typed-binding-sol-20261024/reactivity/crates/gpui#0.1.0",
+    "target": "retained_list",
+    "features": [
+      "default",
+      "simd"
+    ],
+    "profile": {
+      "opt_level": "0",
+      "debuginfo": 2,
+      "debug_assertions": true,
+      "overflow_checks": true,
+      "test": false
+    },
+    "fresh": false,
+    "executable": null
+  },
+  {
+    "gate": "clippy-19",
+    "package_id": "path+file:///root/gpui-typed-binding-sol-20261024/reactivity/crates/gpui#0.1.0",
+    "target": "pointer",
+    "features": [
+      "default",
+      "simd"
+    ],
+    "profile": {
+      "opt_level": "0",
+      "debuginfo": 2,
+      "debug_assertions": true,
+      "overflow_checks": true,
+      "test": true
+    },
+    "fresh": false,
+    "executable": null
+  },
+  {
+    "gate": "clippy-19",
+    "package_id": "path+file:///root/gpui-typed-binding-sol-20261024/reactivity/crates/gpui#0.1.0",
+    "target": "scroll",
+    "features": [
+      "default",
+      "simd"
+    ],
+    "profile": {
+      "opt_level": "0",
+      "debuginfo": 2,
+      "debug_assertions": true,
+      "overflow_checks": true,
+      "test": true
+    },
+    "fresh": false,
+    "executable": null
+  },
+  {
+    "gate": "clippy-19",
+    "package_id": "path+file:///root/gpui-typed-binding-sol-20261024/reactivity/crates/gpui#0.1.0",
+    "target": "library",
+    "features": [
+      "default",
+      "simd"
+    ],
+    "profile": {
+      "opt_level": "0",
+      "debuginfo": 2,
+      "debug_assertions": true,
+      "overflow_checks": true,
+      "test": true
+    },
+    "fresh": false,
+    "executable": null
+  },
+  {
+    "gate": "clippy-19",
+    "package_id": "path+file:///root/gpui-typed-binding-sol-20261024/reactivity/crates/gpui#0.1.0",
+    "target": "contained_owner_spike",
+    "features": [
+      "default",
+      "simd"
+    ],
+    "profile": {
+      "opt_level": "0",
+      "debuginfo": 2,
+      "debug_assertions": true,
+      "overflow_checks": true,
+      "test": false
+    },
+    "fresh": false,
+    "executable": null
+  },
+  {
+    "gate": "clippy-19",
+    "package_id": "path+file:///root/gpui-typed-binding-sol-20261024/reactivity/crates/gpui#0.1.0",
+    "target": "question_mailbox",
+    "features": [
+      "default",
+      "simd"
+    ],
+    "profile": {
+      "opt_level": "0",
+      "debuginfo": 2,
+      "debug_assertions": true,
+      "overflow_checks": true,
+      "test": true
+    },
+    "fresh": false,
+    "executable": null
+  },
+  {
+    "gate": "clippy-19",
+    "package_id": "path+file:///root/gpui-typed-binding-sol-20261024/reactivity/crates/gpui#0.1.0",
+    "target": "property_outline_allocations",
+    "features": [
+      "default",
+      "simd"
+    ],
+    "profile": {
+      "opt_level": "0",
+      "debuginfo": 2,
+      "debug_assertions": true,
+      "overflow_checks": true,
+      "test": true
+    },
+    "fresh": false,
+    "executable": null
+  },
+  {
+    "gate": "clippy-19",
+    "package_id": "path+file:///root/gpui-typed-binding-sol-20261024/reactivity/crates/gpui#0.1.0",
+    "target": "frontier",
+    "features": [
+      "default",
+      "simd"
+    ],
+    "profile": {
+      "opt_level": "0",
+      "debuginfo": 2,
+      "debug_assertions": true,
+      "overflow_checks": true,
+      "test": true
+    },
+    "fresh": false,
+    "executable": null
+  },
+  {
+    "gate": "clippy-19",
+    "package_id": "path+file:///root/gpui-typed-binding-sol-20261024/reactivity/crates/gpui#0.1.0",
+    "target": "clipping",
+    "features": [
+      "default",
+      "simd"
+    ],
+    "profile": {
+      "opt_level": "0",
+      "debuginfo": 2,
+      "debug_assertions": true,
+      "overflow_checks": true,
+      "test": true
+    },
+    "fresh": false,
+    "executable": null
+  },
+  {
+    "gate": "clippy-19",
+    "package_id": "path+file:///root/gpui-typed-binding-sol-20261024/reactivity/crates/gpui#0.1.0",
+    "target": "todo_comparison",
+    "features": [
+      "default",
+      "simd"
+    ],
+    "profile": {
+      "opt_level": "0",
+      "debuginfo": 2,
+      "debug_assertions": true,
+      "overflow_checks": true,
+      "test": true
+    },
+    "fresh": false,
+    "executable": null
+  },
+  {
+    "gate": "clippy-19",
+    "package_id": "path+file:///root/gpui-typed-binding-sol-20261024/reactivity/crates/gpui#0.1.0",
+    "target": "remote_delivery_measure",
+    "features": [
+      "default",
+      "simd"
+    ],
+    "profile": {
+      "opt_level": "0",
+      "debuginfo": 2,
+      "debug_assertions": true,
+      "overflow_checks": true,
+      "test": false
+    },
+    "fresh": false,
+    "executable": null
+  },
+  {
+    "gate": "clippy-19",
+    "package_id": "path+file:///root/gpui-typed-binding-sol-20261024/reactivity/crates/gpui#0.1.0",
+    "target": "source_inbox_reader_gate",
+    "features": [
+      "default",
+      "simd"
+    ],
+    "profile": {
+      "opt_level": "0",
+      "debuginfo": 2,
+      "debug_assertions": true,
+      "overflow_checks": true,
+      "test": true
+    },
+    "fresh": false,
+    "executable": null
+  },
+  {
+    "gate": "clippy-19",
+    "package_id": "path+file:///root/gpui-typed-binding-sol-20261024/reactivity/crates/gpui#0.1.0",
+    "target": "paint_slots",
+    "features": [
+      "default",
+      "simd"
+    ],
+    "profile": {
+      "opt_level": "0",
+      "debuginfo": 2,
+      "debug_assertions": true,
+      "overflow_checks": true,
+      "test": true
+    },
+    "fresh": false,
+    "executable": null
+  },
+  {
+    "gate": "clippy-19",
+    "package_id": "path+file:///root/gpui-typed-binding-sol-20261024/reactivity/crates/gpui#0.1.0",
+    "target": "runtime",
+    "features": [
+      "default",
+      "simd"
+    ],
+    "profile": {
+      "opt_level": "0",
+      "debuginfo": 2,
+      "debug_assertions": true,
+      "overflow_checks": true,
+      "test": true
+    },
+    "fresh": false,
+    "executable": null
+  },
+  {
+    "gate": "clippy-19",
+    "package_id": "path+file:///root/gpui-typed-binding-sol-20261024/reactivity/crates/gpui#0.1.0",
+    "target": "intrinsic_text",
+    "features": [
+      "default",
+      "simd"
+    ],
+    "profile": {
+      "opt_level": "0",
+      "debuginfo": 2,
+      "debug_assertions": true,
+      "overflow_checks": true,
+      "test": true
+    },
+    "fresh": false,
+    "executable": null
+  },
+  {
+    "gate": "clippy-19",
+    "package_id": "path+file:///root/gpui-typed-binding-sol-20261024/reactivity/crates/gpui#0.1.0",
+    "target": "color_cost",
+    "features": [
+      "default",
+      "simd"
+    ],
+    "profile": {
+      "opt_level": "0",
+      "debuginfo": 2,
+      "debug_assertions": true,
+      "overflow_checks": true,
+      "test": false
+    },
+    "fresh": false,
+    "executable": null
+  },
+  {
+    "gate": "clippy-19",
+    "package_id": "path+file:///root/gpui-typed-binding-sol-20261024/reactivity/crates/gpui#0.1.0",
+    "target": "question_inputs",
+    "features": [
+      "default",
+      "simd"
+    ],
+    "profile": {
+      "opt_level": "0",
+      "debuginfo": 2,
+      "debug_assertions": true,
+      "overflow_checks": true,
+      "test": true
+    },
+    "fresh": false,
+    "executable": null
+  },
+  {
+    "gate": "clippy-19",
+    "package_id": "path+file:///root/gpui-typed-binding-sol-20261024/reactivity/crates/gpui#0.1.0",
+    "target": "focus",
+    "features": [
+      "default",
+      "simd"
+    ],
+    "profile": {
+      "opt_level": "0",
+      "debuginfo": 2,
+      "debug_assertions": true,
+      "overflow_checks": true,
+      "test": true
+    },
+    "fresh": false,
+    "executable": null
+  },
+  {
+    "gate": "clippy-19",
+    "package_id": "path+file:///root/gpui-typed-binding-sol-20261024/reactivity/crates/gpui#0.1.0",
+    "target": "text_selection_compound",
+    "features": [
+      "default",
+      "simd"
+    ],
+    "profile": {
+      "opt_level": "0",
+      "debuginfo": 2,
+      "debug_assertions": true,
+      "overflow_checks": true,
+      "test": true
+    },
+    "fresh": false,
+    "executable": null
+  },
+  {
+    "gate": "clippy-19",
+    "package_id": "path+file:///root/gpui-typed-binding-sol-20261024/reactivity/crates/gpui#0.1.0",
+    "target": "property_change_union",
+    "features": [
+      "default",
+      "simd"
+    ],
+    "profile": {
+      "opt_level": "0",
+      "debuginfo": 2,
+      "debug_assertions": true,
+      "overflow_checks": true,
+      "test": true
+    },
+    "fresh": false,
+    "executable": null
+  },
+  {
+    "gate": "clippy-19",
+    "package_id": "path+file:///root/gpui-typed-binding-sol-20261024/reactivity/crates/gpui#0.1.0",
+    "target": "child_capacity",
+    "features": [
+      "default",
+      "simd"
+    ],
+    "profile": {
+      "opt_level": "0",
+      "debuginfo": 2,
+      "debug_assertions": true,
+      "overflow_checks": true,
+      "test": true
+    },
+    "fresh": false,
+    "executable": null
+  },
+  {
+    "gate": "clippy-19",
+    "package_id": "path+file:///root/gpui-typed-binding-sol-20261024/reactivity/crates/gpui#0.1.0",
+    "target": "source_inbox",
+    "features": [
+      "default",
+      "simd"
+    ],
+    "profile": {
+      "opt_level": "0",
+      "debuginfo": 2,
+      "debug_assertions": true,
+      "overflow_checks": true,
+      "test": true
+    },
+    "fresh": false,
+    "executable": null
+  },
+  {
+    "gate": "clippy-19",
+    "package_id": "path+file:///root/gpui-typed-binding-sol-20261024/reactivity/crates/gpui#0.1.0",
+    "target": "reactive_styles",
+    "features": [
+      "default",
+      "simd"
+    ],
+    "profile": {
+      "opt_level": "0",
+      "debuginfo": 2,
+      "debug_assertions": true,
+      "overflow_checks": true,
+      "test": false
+    },
+    "fresh": false,
+    "executable": null
+  },
+  {
+    "gate": "clippy-19",
+    "package_id": "path+file:///root/gpui-typed-binding-sol-20261024/reactivity/crates/gpui#0.1.0",
+    "target": "paint_slot_rebind",
+    "features": [
+      "default",
+      "simd"
+    ],
+    "profile": {
+      "opt_level": "0",
+      "debuginfo": 2,
+      "debug_assertions": true,
+      "overflow_checks": true,
+      "test": true
+    },
+    "fresh": false,
+    "executable": null
+  },
+  {
+    "gate": "clippy-19",
+    "package_id": "path+file:///root/gpui-typed-binding-sol-20261024/reactivity/crates/gpui#0.1.0",
+    "target": "unit_action_cost_two",
+    "features": [
+      "default",
+      "simd"
+    ],
+    "profile": {
+      "opt_level": "0",
+      "debuginfo": 2,
+      "debug_assertions": true,
+      "overflow_checks": true,
+      "test": true
+    },
+    "fresh": false,
+    "executable": null
+  },
+  {
+    "gate": "clippy-19",
+    "package_id": "path+file:///root/gpui-typed-binding-sol-20261024/reactivity/crates/gpui#0.1.0",
+    "target": "inspector",
+    "features": [
+      "default",
+      "simd"
+    ],
+    "profile": {
+      "opt_level": "0",
+      "debuginfo": 2,
+      "debug_assertions": true,
+      "overflow_checks": true,
+      "test": true
+    },
+    "fresh": false,
+    "executable": null
+  },
+  {
+    "gate": "clippy-19",
+    "package_id": "path+file:///root/gpui-typed-binding-sol-20261024/reactivity/crates/gpui#0.1.0",
+    "target": "routes",
+    "features": [
+      "default",
+      "simd"
+    ],
+    "profile": {
+      "opt_level": "0",
+      "debuginfo": 2,
+      "debug_assertions": true,
+      "overflow_checks": true,
+      "test": true
+    },
+    "fresh": false,
+    "executable": null
+  },
+  {
+    "gate": "clippy-19",
+    "package_id": "path+file:///root/gpui-typed-binding-sol-20261024/reactivity/crates/gpui#0.1.0",
+    "target": "question_input_cost",
+    "features": [
+      "default",
+      "simd"
+    ],
+    "profile": {
+      "opt_level": "0",
+      "debuginfo": 2,
+      "debug_assertions": true,
+      "overflow_checks": true,
+      "test": true
+    },
+    "fresh": false,
+    "executable": null
+  },
+  {
+    "gate": "clippy-19",
+    "package_id": "path+file:///root/gpui-typed-binding-sol-20261024/reactivity/crates/gpui#0.1.0",
+    "target": "property_actions",
+    "features": [
+      "default",
+      "simd"
+    ],
+    "profile": {
+      "opt_level": "0",
+      "debuginfo": 2,
+      "debug_assertions": true,
+      "overflow_checks": true,
+      "test": true
+    },
+    "fresh": false,
+    "executable": null
+  },
+  {
+    "gate": "clippy-19",
+    "package_id": "path+file:///root/gpui-typed-binding-sol-20261024/reactivity/crates/gpui#0.1.0",
+    "target": "text_selection",
+    "features": [
+      "default",
+      "simd"
+    ],
+    "profile": {
+      "opt_level": "0",
+      "debuginfo": 2,
+      "debug_assertions": true,
+      "overflow_checks": true,
+      "test": true
+    },
+    "fresh": false,
+    "executable": null
+  },
+  {
+    "gate": "clippy-19",
+    "package_id": "path+file:///root/gpui-typed-binding-sol-20261024/reactivity/crates/gpui#0.1.0",
+    "target": "flex",
+    "features": [
+      "default",
+      "simd"
+    ],
+    "profile": {
+      "opt_level": "0",
+      "debuginfo": 2,
+      "debug_assertions": true,
+      "overflow_checks": true,
+      "test": true
+    },
+    "fresh": false,
+    "executable": null
+  },
+  {
+    "gate": "clippy-19",
+    "package_id": "path+file:///root/gpui-typed-binding-sol-20261024/reactivity/crates/gpui#0.1.0",
+    "target": "checkbox",
+    "features": [
+      "default",
+      "simd"
+    ],
+    "profile": {
+      "opt_level": "0",
+      "debuginfo": 2,
+      "debug_assertions": true,
+      "overflow_checks": true,
+      "test": true
+    },
+    "fresh": false,
+    "executable": null
+  },
+  {
+    "gate": "clippy-19",
+    "package_id": "path+file:///root/gpui-typed-binding-sol-20261024/reactivity/crates/gpui#0.1.0",
+    "target": "sibling_reconciliation_cost",
+    "features": [
+      "default",
+      "simd"
+    ],
+    "profile": {
+      "opt_level": "0",
+      "debuginfo": 2,
+      "debug_assertions": true,
+      "overflow_checks": true,
+      "test": true
+    },
+    "fresh": false,
+    "executable": null
+  },
+  {
+    "gate": "clippy-19",
+    "package_id": "path+file:///root/gpui-typed-binding-sol-20261024/reactivity/crates/gpui#0.1.0",
+    "target": "paint_slot_storage",
+    "features": [
+      "default",
+      "simd"
+    ],
+    "profile": {
+      "opt_level": "0",
+      "debuginfo": 2,
+      "debug_assertions": true,
+      "overflow_checks": true,
+      "test": false
+    },
+    "fresh": false,
+    "executable": null
+  },
+  {
+    "gate": "clippy-19",
+    "package_id": "path+file:///root/gpui-typed-binding-sol-20261024/reactivity/crates/gpui#0.1.0",
+    "target": "paint_patch",
+    "features": [
+      "default",
+      "simd"
+    ],
+    "profile": {
+      "opt_level": "0",
+      "debuginfo": 2,
+      "debug_assertions": true,
+      "overflow_checks": true,
+      "test": true
+    },
+    "fresh": false,
+    "executable": null
+  },
+  {
+    "gate": "clippy-19",
+    "package_id": "path+file:///root/gpui-typed-binding-sol-20261024/reactivity/crates/gpui#0.1.0",
+    "target": "inbox_storage",
+    "features": [
+      "default",
+      "simd"
+    ],
+    "profile": {
+      "opt_level": "0",
+      "debuginfo": 2,
+      "debug_assertions": true,
+      "overflow_checks": true,
+      "test": true
+    },
+    "fresh": false,
+    "executable": null
+  },
+  {
+    "gate": "clippy-19",
+    "package_id": "path+file:///root/gpui-typed-binding-sol-20261024/reactivity/crates/gpui#0.1.0",
+    "target": "rounded",
+    "features": [
+      "default",
+      "simd"
+    ],
+    "profile": {
+      "opt_level": "0",
+      "debuginfo": 2,
+      "debug_assertions": true,
+      "overflow_checks": true,
+      "test": true
+    },
+    "fresh": false,
+    "executable": null
+  },
+  {
+    "gate": "clippy-19",
+    "package_id": "path+file:///root/gpui-typed-binding-sol-20261024/reactivity/crates/gpui#0.1.0",
+    "target": "question_futures",
+    "features": [
+      "default",
+      "simd"
+    ],
+    "profile": {
+      "opt_level": "0",
+      "debuginfo": 2,
+      "debug_assertions": true,
+      "overflow_checks": true,
+      "test": true
+    },
+    "fresh": false,
+    "executable": null
+  },
+  {
+    "gate": "clippy-19",
+    "package_id": "path+file:///root/gpui-typed-binding-sol-20261024/reactivity/crates/gpui#0.1.0",
+    "target": "unicode_text_measure",
+    "features": [
+      "default",
+      "simd"
+    ],
+    "profile": {
+      "opt_level": "0",
+      "debuginfo": 2,
+      "debug_assertions": true,
+      "overflow_checks": true,
+      "test": false
+    },
+    "fresh": false,
+    "executable": null
+  },
+  {
+    "gate": "clippy-19",
+    "package_id": "path+file:///root/gpui-typed-binding-sol-20261024/reactivity/crates/gpui#0.1.0",
+    "target": "field_identity",
+    "features": [
+      "default",
+      "simd"
+    ],
+    "profile": {
+      "opt_level": "0",
+      "debuginfo": 2,
+      "debug_assertions": true,
+      "overflow_checks": true,
+      "test": true
+    },
+    "fresh": false,
+    "executable": null
+  },
+  {
+    "gate": "clippy-19",
+    "package_id": "path+file:///root/gpui-typed-binding-sol-20261024/reactivity/crates/gpui#0.1.0",
+    "target": "text_geometry",
+    "features": [
+      "default",
+      "simd"
+    ],
+    "profile": {
+      "opt_level": "0",
+      "debuginfo": 2,
+      "debug_assertions": true,
+      "overflow_checks": true,
+      "test": true
+    },
+    "fresh": false,
+    "executable": null
+  },
+  {
+    "gate": "clippy-19",
+    "package_id": "path+file:///root/gpui-typed-binding-sol-20261024/reactivity/crates/gpui#0.1.0",
+    "target": "projected_sources",
+    "features": [
+      "default",
+      "simd"
+    ],
+    "profile": {
+      "opt_level": "0",
+      "debuginfo": 2,
+      "debug_assertions": true,
+      "overflow_checks": true,
+      "test": true
+    },
+    "fresh": false,
+    "executable": null
+  },
+  {
+    "gate": "clippy-19",
+    "package_id": "path+file:///root/gpui-typed-binding-sol-20261024/reactivity/crates/gpui#0.1.0",
+    "target": "application",
+    "features": [
+      "default",
+      "simd"
+    ],
+    "profile": {
+      "opt_level": "0",
+      "debuginfo": 2,
+      "debug_assertions": true,
+      "overflow_checks": true,
+      "test": true
+    },
+    "fresh": false,
+    "executable": null
+  },
+  {
+    "gate": "clippy-19",
+    "package_id": "path+file:///root/gpui-typed-binding-sol-20261024/reactivity/crates/gpui#0.1.0",
+    "target": "mapped_properties",
+    "features": [
+      "default",
+      "simd"
+    ],
+    "profile": {
+      "opt_level": "0",
+      "debuginfo": 2,
+      "debug_assertions": true,
+      "overflow_checks": true,
+      "test": true
+    },
+    "fresh": false,
+    "executable": null
+  },
+  {
+    "gate": "clippy-19",
+    "package_id": "path+file:///root/gpui-typed-binding-sol-20261024/reactivity/crates/gpui#0.1.0",
+    "target": "immutable_text_measure",
+    "features": [
+      "default",
+      "simd"
+    ],
+    "profile": {
+      "opt_level": "0",
+      "debuginfo": 2,
+      "debug_assertions": true,
+      "overflow_checks": true,
+      "test": false
+    },
+    "fresh": false,
+    "executable": null
+  },
+  {
+    "gate": "clippy-19",
+    "package_id": "path+file:///root/gpui-typed-binding-sol-20261024/reactivity/crates/gpui#0.1.0",
+    "target": "semantics",
+    "features": [
+      "default",
+      "simd"
+    ],
+    "profile": {
+      "opt_level": "0",
+      "debuginfo": 2,
+      "debug_assertions": true,
+      "overflow_checks": true,
+      "test": true
+    },
+    "fresh": false,
+    "executable": null
+  },
+  {
+    "gate": "clippy-19",
+    "package_id": "path+file:///root/gpui-typed-binding-sol-20261024/reactivity/crates/gpui#0.1.0",
+    "target": "immutable_text",
+    "features": [
+      "default",
+      "simd"
+    ],
+    "profile": {
+      "opt_level": "0",
+      "debuginfo": 2,
+      "debug_assertions": true,
+      "overflow_checks": true,
+      "test": true
+    },
+    "fresh": false,
+    "executable": null
+  },
+  {
+    "gate": "clippy-19",
+    "package_id": "path+file:///root/gpui-typed-binding-sol-20261024/reactivity/crates/gpui#0.1.0",
+    "target": "dpi",
+    "features": [
+      "default",
+      "simd"
+    ],
+    "profile": {
+      "opt_level": "0",
+      "debuginfo": 2,
+      "debug_assertions": true,
+      "overflow_checks": true,
+      "test": true
+    },
+    "fresh": false,
+    "executable": null
+  },
+  {
+    "gate": "clippy-19",
+    "package_id": "path+file:///root/gpui-typed-binding-sol-20261024/reactivity/crates/gpui#0.1.0",
+    "target": "question_cost",
+    "features": [
+      "default",
+      "simd"
+    ],
+    "profile": {
+      "opt_level": "0",
+      "debuginfo": 2,
+      "debug_assertions": true,
+      "overflow_checks": true,
+      "test": true
+    },
+    "fresh": false,
+    "executable": null
+  },
+  {
+    "gate": "clippy-19",
+    "package_id": "path+file:///root/gpui-typed-binding-sol-20261024/reactivity/crates/gpui#0.1.0",
+    "target": "retained_styles",
+    "features": [
+      "default",
+      "simd"
+    ],
+    "profile": {
+      "opt_level": "0",
+      "debuginfo": 2,
+      "debug_assertions": true,
+      "overflow_checks": true,
+      "test": true
+    },
+    "fresh": false,
+    "executable": null
+  },
+  {
+    "gate": "clippy-19",
+    "package_id": "path+file:///root/gpui-typed-binding-sol-20261024/reactivity/crates/gpui#0.1.0",
+    "target": "text_cache",
+    "features": [
+      "default",
+      "simd"
+    ],
+    "profile": {
+      "opt_level": "0",
+      "debuginfo": 2,
+      "debug_assertions": true,
+      "overflow_checks": true,
+      "test": true
+    },
+    "fresh": false,
+    "executable": null
+  },
+  {
+    "gate": "clippy-19",
+    "package_id": "path+file:///root/gpui-typed-binding-sol-20261024/reactivity/crates/gpui#0.1.0",
+    "target": "acceptance",
+    "features": [
+      "default",
+      "simd"
+    ],
+    "profile": {
+      "opt_level": "0",
+      "debuginfo": 2,
+      "debug_assertions": true,
+      "overflow_checks": true,
+      "test": true
+    },
+    "fresh": false,
+    "executable": null
+  },
+  {
+    "gate": "clippy-19",
+    "package_id": "path+file:///root/gpui-typed-binding-sol-20261024/reactivity/crates/gpui#0.1.0",
+    "target": "semantic_serialization",
+    "features": [
+      "default",
+      "simd"
+    ],
+    "profile": {
+      "opt_level": "0",
+      "debuginfo": 2,
+      "debug_assertions": true,
+      "overflow_checks": true,
+      "test": true
+    },
+    "fresh": false,
+    "executable": null
+  },
+  {
+    "gate": "clippy-19",
+    "package_id": "path+file:///root/gpui-typed-binding-sol-20261024/reactivity/crates/gpui#0.1.0",
+    "target": "presentation",
+    "features": [
+      "default",
+      "simd"
+    ],
+    "profile": {
+      "opt_level": "0",
+      "debuginfo": 2,
+      "debug_assertions": true,
+      "overflow_checks": true,
+      "test": true
+    },
+    "fresh": false,
+    "executable": null
+  },
+  {
+    "gate": "clippy-19",
+    "package_id": "path+file:///root/gpui-typed-binding-sol-20261024/reactivity/crates/gpui#0.1.0",
+    "target": "unicode_text",
+    "features": [
+      "default",
+      "simd"
+    ],
+    "profile": {
+      "opt_level": "0",
+      "debuginfo": 2,
+      "debug_assertions": true,
+      "overflow_checks": true,
+      "test": true
+    },
+    "fresh": false,
+    "executable": null
+  },
+  {
+    "gate": "clippy-19",
+    "package_id": "path+file:///root/gpui-typed-binding-sol-20261024/reactivity/crates/gpui#0.1.0",
+    "target": "mapped_paint",
+    "features": [
+      "default",
+      "simd"
+    ],
+    "profile": {
+      "opt_level": "0",
+      "debuginfo": 2,
+      "debug_assertions": true,
+      "overflow_checks": true,
+      "test": true
+    },
+    "fresh": false,
+    "executable": null
+  },
+  {
+    "gate": "clippy-19",
+    "package_id": "path+file:///root/gpui-typed-binding-sol-20261024/reactivity/crates/gpui#0.1.0",
+    "target": "gradient_backgrounds",
+    "features": [
+      "default",
+      "simd"
+    ],
+    "profile": {
+      "opt_level": "0",
+      "debuginfo": 2,
+      "debug_assertions": true,
+      "overflow_checks": true,
+      "test": false
+    },
+    "fresh": false,
+    "executable": null
+  },
+  {
+    "gate": "clippy-19",
+    "package_id": "path+file:///root/gpui-typed-binding-sol-20261024/reactivity/crates/gpui#0.1.0",
+    "target": "text_lease_measure",
+    "features": [
+      "default",
+      "simd"
+    ],
+    "profile": {
+      "opt_level": "0",
+      "debuginfo": 2,
+      "debug_assertions": true,
+      "overflow_checks": true,
+      "test": false
+    },
+    "fresh": false,
+    "executable": null
+  },
+  {
+    "gate": "clippy-19",
+    "package_id": "path+file:///root/gpui-typed-binding-sol-20261024/reactivity/crates/gpui#0.1.0",
+    "target": "remote",
+    "features": [
+      "default",
+      "simd"
+    ],
+    "profile": {
+      "opt_level": "0",
+      "debuginfo": 2,
+      "debug_assertions": true,
+      "overflow_checks": true,
+      "test": true
+    },
+    "fresh": false,
+    "executable": null
+  },
+  {
+    "gate": "clippy-19",
+    "package_id": "path+file:///root/gpui-typed-binding-sol-20261024/reactivity/crates/gpui#0.1.0",
+    "target": "images",
+    "features": [
+      "default",
+      "simd"
+    ],
+    "profile": {
+      "opt_level": "0",
+      "debuginfo": 2,
+      "debug_assertions": true,
+      "overflow_checks": true,
+      "test": true
+    },
+    "fresh": false,
+    "executable": null
+  },
+  {
+    "gate": "clippy-19",
+    "package_id": "path+file:///root/gpui-typed-binding-sol-20261024/reactivity/crates/gpui#0.1.0",
+    "target": "dimensions",
+    "features": [
+      "default",
+      "simd"
+    ],
+    "profile": {
+      "opt_level": "0",
+      "debuginfo": 2,
+      "debug_assertions": true,
+      "overflow_checks": true,
+      "test": true
+    },
+    "fresh": false,
+    "executable": null
+  },
+  {
+    "gate": "clippy-19",
+    "package_id": "path+file:///root/gpui-typed-binding-sol-20261024/reactivity/crates/gpui#0.1.0",
+    "target": "style_ports",
+    "features": [
+      "default",
+      "simd"
+    ],
+    "profile": {
+      "opt_level": "0",
+      "debuginfo": 2,
+      "debug_assertions": true,
+      "overflow_checks": true,
+      "test": true
+    },
+    "fresh": false,
+    "executable": null
+  },
+  {
+    "gate": "clippy-19",
+    "package_id": "path+file:///root/gpui-typed-binding-sol-20261024/reactivity/crates/gpui#0.1.0",
+    "target": "queries",
+    "features": [
+      "default",
+      "simd"
+    ],
+    "profile": {
+      "opt_level": "0",
+      "debuginfo": 2,
+      "debug_assertions": true,
+      "overflow_checks": true,
+      "test": true
+    },
+    "fresh": false,
+    "executable": null
+  },
+  {
+    "gate": "clippy-19",
+    "package_id": "path+file:///root/gpui-typed-binding-sol-20261024/reactivity/crates/gpui#0.1.0",
+    "target": "ports",
+    "features": [
+      "default",
+      "simd"
+    ],
+    "profile": {
+      "opt_level": "0",
+      "debuginfo": 2,
+      "debug_assertions": true,
+      "overflow_checks": true,
+      "test": true
+    },
+    "fresh": false,
+    "executable": null
+  },
+  {
+    "gate": "clippy-19",
+    "package_id": "path+file:///root/gpui-typed-binding-sol-20261024/reactivity/crates/gpui#0.1.0",
+    "target": "text_lane_measure",
+    "features": [
+      "default",
+      "simd"
+    ],
+    "profile": {
+      "opt_level": "0",
+      "debuginfo": 2,
+      "debug_assertions": true,
+      "overflow_checks": true,
+      "test": false
+    },
+    "fresh": false,
+    "executable": null
+  },
+  {
+    "gate": "clippy-19",
+    "package_id": "path+file:///root/gpui-typed-binding-sol-20261024/reactivity/crates/gpui#0.1.0",
+    "target": "semantic_metadata",
+    "features": [
+      "default",
+      "simd"
+    ],
+    "profile": {
+      "opt_level": "0",
+      "debuginfo": 2,
+      "debug_assertions": true,
+      "overflow_checks": true,
+      "test": true
+    },
+    "fresh": false,
+    "executable": null
+  },
+  {
+    "gate": "clippy-19",
+    "package_id": "path+file:///root/gpui-typed-binding-sol-20261024/reactivity/crates/gpui#0.1.0",
+    "target": "first_frame",
+    "features": [
+      "default",
+      "simd"
+    ],
+    "profile": {
+      "opt_level": "0",
+      "debuginfo": 2,
+      "debug_assertions": true,
+      "overflow_checks": true,
+      "test": false
+    },
+    "fresh": false,
+    "executable": null
+  },
+  {
+    "gate": "clippy-19",
+    "package_id": "path+file:///root/gpui-typed-binding-sol-20261024/reactivity/crates/gpui#0.1.0",
+    "target": "literal_dispatch",
+    "features": [
+      "default",
+      "simd"
+    ],
+    "profile": {
+      "opt_level": "0",
+      "debuginfo": 2,
+      "debug_assertions": true,
+      "overflow_checks": true,
+      "test": true
+    },
+    "fresh": false,
+    "executable": null
+  },
+  {
+    "gate": "clippy-19",
+    "package_id": "path+file:///root/gpui-typed-binding-sol-20261024/reactivity/crates/gpui#0.1.0",
+    "target": "identity_recovery",
+    "features": [
+      "default",
+      "simd"
+    ],
+    "profile": {
+      "opt_level": "0",
+      "debuginfo": 2,
+      "debug_assertions": true,
+      "overflow_checks": true,
+      "test": true
+    },
+    "fresh": false,
+    "executable": null
+  },
+  {
+    "gate": "clippy-19",
+    "package_id": "path+file:///root/gpui-typed-binding-sol-20261024/reactivity/crates/gpui#0.1.0",
+    "target": "gpui",
+    "features": [
+      "default",
+      "simd"
+    ],
+    "profile": {
+      "opt_level": "0",
+      "debuginfo": 2,
+      "debug_assertions": true,
+      "overflow_checks": true,
+      "test": true
+    },
+    "fresh": false,
+    "executable": null
+  },
+  {
+    "gate": "clippy-19",
+    "package_id": "path+file:///root/gpui-typed-binding-sol-20261024/reactivity/crates/gpui#0.1.0",
+    "target": "property_state_shell",
+    "features": [
+      "default",
+      "simd"
+    ],
+    "profile": {
+      "opt_level": "0",
+      "debuginfo": 2,
+      "debug_assertions": true,
+      "overflow_checks": true,
+      "test": true
+    },
+    "fresh": false,
+    "executable": null
+  },
+  {
+    "gate": "clippy-19",
+    "package_id": "path+file:///root/gpui-typed-binding-sol-20261024/reactivity/crates/gpui#0.1.0",
+    "target": "components",
+    "features": [
+      "default",
+      "simd"
+    ],
+    "profile": {
+      "opt_level": "0",
+      "debuginfo": 2,
+      "debug_assertions": true,
+      "overflow_checks": true,
+      "test": true
+    },
+    "fresh": false,
+    "executable": null
+  },
+  {
+    "gate": "clippy-19",
+    "package_id": "path+file:///root/gpui-typed-binding-sol-20261024/reactivity/crates/gpui#0.1.0",
+    "target": "questions",
+    "features": [
+      "default",
+      "simd"
+    ],
+    "profile": {
+      "opt_level": "0",
+      "debuginfo": 2,
+      "debug_assertions": true,
+      "overflow_checks": true,
+      "test": true
+    },
+    "fresh": false,
+    "executable": null
+  },
+  {
+    "gate": "party-costs-20",
+    "package_id": "path+file:///root/gpui-typed-binding-sol-20261024/reactivity/vendor/cephal#0.1.1",
+    "target": "cephal",
+    "features": [
+      "block",
+      "default",
+      "flex",
+      "grid"
+    ],
+    "profile": {
+      "opt_level": "0",
+      "debuginfo": 2,
+      "debug_assertions": true,
+      "overflow_checks": true,
+      "test": false
+    },
+    "fresh": true,
+    "executable": null
+  },
+  {
+    "gate": "party-costs-20",
+    "package_id": "path+file:///root/gpui-typed-binding-sol-20261024/reactivity/crates/core#gpui_reactivity_core@0.1.0",
+    "target": "gpui_reactivity_core",
+    "features": [
+      "default",
+      "layout"
+    ],
+    "profile": {
+      "opt_level": "0",
+      "debuginfo": 2,
+      "debug_assertions": true,
+      "overflow_checks": true,
+      "test": false
+    },
+    "fresh": true,
+    "executable": null
+  },
+  {
+    "gate": "party-costs-20",
+    "package_id": "path+file:///root/gpui-typed-binding-sol-20261024/reactivity/crates/state#gpui_reactivity_state@0.1.0",
+    "target": "gpui_reactivity_state",
+    "features": [
+      "default",
+      "serde"
+    ],
+    "profile": {
+      "opt_level": "0",
+      "debuginfo": 2,
+      "debug_assertions": true,
+      "overflow_checks": true,
+      "test": false
+    },
+    "fresh": false,
+    "executable": null
+  },
+  {
+    "gate": "party-costs-20",
+    "package_id": "path+file:///root/gpui-typed-binding-sol-20261024/reactivity/crates/inline-call#gpui_inline_call@0.1.0",
+    "target": "gpui_inline_call",
+    "features": [],
+    "profile": {
+      "opt_level": "0",
+      "debuginfo": 2,
+      "debug_assertions": true,
+      "overflow_checks": true,
+      "test": false
+    },
+    "fresh": true,
+    "executable": null
+  },
+  {
+    "gate": "party-costs-20",
+    "package_id": "path+file:///root/gpui-typed-binding-sol-20261024/reactivity/vendor/parley#0.12.0",
+    "target": "parley",
+    "features": [
+      "complex-scripts",
+      "std"
+    ],
+    "profile": {
+      "opt_level": "0",
+      "debuginfo": 2,
+      "debug_assertions": true,
+      "overflow_checks": true,
+      "test": false
+    },
+    "fresh": false,
+    "executable": null
+  },
+  {
+    "gate": "party-costs-20",
+    "package_id": "path+file:///root/gpui-typed-binding-sol-20261024/reactivity/crates/component#gpui-component@0.1.0",
+    "target": "gpui_component",
+    "features": [
+      "default"
+    ],
+    "profile": {
+      "opt_level": "0",
+      "debuginfo": 2,
+      "debug_assertions": true,
+      "overflow_checks": true,
+      "test": false
+    },
+    "fresh": false,
+    "executable": null
+  },
+  {
+    "gate": "party-costs-20",
+    "package_id": "path+file:///root/gpui-typed-binding-sol-20261024/reactivity/vendor/parley_engine#0.12.0",
+    "target": "parley_engine",
+    "features": [
+      "complex-scripts",
+      "std"
+    ],
+    "profile": {
+      "opt_level": "0",
+      "debuginfo": 2,
+      "debug_assertions": true,
+      "overflow_checks": true,
+      "test": false
+    },
+    "fresh": false,
+    "executable": null
+  },
+  {
+    "gate": "party-costs-20",
+    "package_id": "path+file:///root/gpui-typed-binding-sol-20261024/reactivity/crates/gpui#0.1.0",
+    "target": "gpui",
+    "features": [],
+    "profile": {
+      "opt_level": "0",
+      "debuginfo": 2,
+      "debug_assertions": true,
+      "overflow_checks": true,
+      "test": false
+    },
+    "fresh": false,
+    "executable": null
+  },
+  {
+    "gate": "party-costs-20",
+    "package_id": "path+file:///root/gpui-typed-binding-sol-20261024/reactivity/crates/canvas#gpui_canvas@0.1.0",
+    "target": "gpui_canvas",
+    "features": [],
+    "profile": {
+      "opt_level": "0",
+      "debuginfo": 2,
+      "debug_assertions": true,
+      "overflow_checks": true,
+      "test": false
+    },
+    "fresh": false,
+    "executable": null
+  },
+  {
+    "gate": "party-costs-20",
+    "package_id": "path+file:///root/gpui-typed-binding-sol-20261024/reactivity/crates/component#gpui-component@0.1.0",
+    "target": "costs",
+    "features": [
+      "default"
+    ],
+    "profile": {
+      "opt_level": "0",
+      "debuginfo": 2,
+      "debug_assertions": true,
+      "overflow_checks": true,
+      "test": false
+    },
+    "fresh": false,
+    "executable": "/root/targets/typed-binding-sol-20261024/debug/examples/costs"
+  },
+  {
+    "gate": "native-21",
+    "package_id": "path+file:///root/gpui-typed-binding-sol-20261024/reactivity/vendor/wgpu-hal#30.0.1",
+    "target": "build-script-build",
+    "features": [
+      "dx12",
+      "gles",
+      "portable-atomic",
+      "renderdoc",
+      "vulkan"
+    ],
+    "profile": {
+      "opt_level": "0",
+      "debuginfo": 0,
+      "debug_assertions": true,
+      "overflow_checks": true,
+      "test": false
+    },
+    "fresh": false,
+    "executable": null
+  },
+  {
+    "gate": "native-21",
+    "package_id": "path+file:///root/gpui-typed-binding-sol-20261024/reactivity/vendor/wgpu-hal#30.0.1",
+    "target": "wgpu_hal",
+    "features": [
+      "dx12",
+      "gles",
+      "portable-atomic",
+      "renderdoc",
+      "vulkan"
+    ],
+    "profile": {
+      "opt_level": "0",
+      "debuginfo": 0,
+      "debug_assertions": true,
+      "overflow_checks": true,
+      "test": false
+    },
+    "fresh": false,
+    "executable": null
+  },
+  {
+    "gate": "native-21",
+    "package_id": "path+file:///root/gpui-typed-binding-sol-20261024/reactivity/vendor/accesskit#0.25.1",
+    "target": "accesskit",
+    "features": [],
+    "profile": {
+      "opt_level": "0",
+      "debuginfo": 0,
+      "debug_assertions": true,
+      "overflow_checks": true,
+      "test": false
+    },
+    "fresh": false,
+    "executable": null
+  },
+  {
+    "gate": "native-21",
+    "package_id": "path+file:///root/gpui-typed-binding-sol-20261024/reactivity/vendor/wgpu-core#30.0.1",
+    "target": "build-script-build",
+    "features": [
+      "default",
+      "dx12",
+      "gles",
+      "metal",
+      "portable-atomic",
+      "renderdoc",
+      "std",
+      "vulkan",
+      "wgpu-core-deps-windows-linux-android",
+      "wgsl"
+    ],
+    "profile": {
+      "opt_level": "0",
+      "debuginfo": 0,
+      "debug_assertions": true,
+      "overflow_checks": true,
+      "test": false
+    },
+    "fresh": false,
+    "executable": null
+  },
+  {
+    "gate": "native-21",
+    "package_id": "path+file:///root/gpui-typed-binding-sol-20261024/reactivity/vendor/winit#0.30.13",
+    "target": "build-script-build",
+    "features": [
+      "bytemuck",
+      "percent-encoding",
+      "rwh_06",
+      "x11",
+      "x11-dl",
+      "x11rb"
+    ],
+    "profile": {
+      "opt_level": "0",
+      "debuginfo": 0,
+      "debug_assertions": true,
+      "overflow_checks": true,
+      "test": false
+    },
+    "fresh": false,
+    "executable": null
+  },
+  {
+    "gate": "native-21",
+    "package_id": "path+file:///root/gpui-typed-binding-sol-20261024/reactivity/vendor/parley_engine#0.12.0",
+    "target": "parley_engine",
+    "features": [
+      "complex-scripts",
+      "std"
+    ],
+    "profile": {
+      "opt_level": "0",
+      "debuginfo": 0,
+      "debug_assertions": true,
+      "overflow_checks": true,
+      "test": false
+    },
+    "fresh": false,
+    "executable": null
+  },
+  {
+    "gate": "native-21",
+    "package_id": "path+file:///root/gpui-typed-binding-sol-20261024/reactivity/vendor/accesskit_consumer#0.39.1",
+    "target": "accesskit_consumer",
+    "features": [],
+    "profile": {
+      "opt_level": "0",
+      "debuginfo": 0,
+      "debug_assertions": true,
+      "overflow_checks": true,
+      "test": false
+    },
+    "fresh": false,
+    "executable": null
+  },
+  {
+    "gate": "native-21",
+    "package_id": "path+file:///root/gpui-typed-binding-sol-20261024/reactivity/vendor/wgpu#30.0.1",
+    "target": "build-script-build",
+    "features": [
+      "dx12",
+      "gles",
+      "metal",
+      "std",
+      "vulkan",
+      "wgsl"
+    ],
+    "profile": {
+      "opt_level": "0",
+      "debuginfo": 0,
+      "debug_assertions": true,
+      "overflow_checks": true,
+      "test": false
+    },
+    "fresh": false,
+    "executable": null
+  },
+  {
+    "gate": "native-21",
+    "package_id": "path+file:///root/gpui-typed-binding-sol-20261024/reactivity/vendor/cephal#0.1.1",
+    "target": "cephal",
+    "features": [
+      "block",
+      "default",
+      "flex",
+      "grid"
+    ],
+    "profile": {
+      "opt_level": "0",
+      "debuginfo": 0,
+      "debug_assertions": true,
+      "overflow_checks": true,
+      "test": false
+    },
+    "fresh": false,
+    "executable": null
+  },
+  {
+    "gate": "native-21",
+    "package_id": "path+file:///root/gpui-typed-binding-sol-20261024/reactivity/vendor/winit#0.30.13",
+    "target": "winit",
+    "features": [
+      "bytemuck",
+      "percent-encoding",
+      "rwh_06",
+      "x11",
+      "x11-dl",
+      "x11rb"
+    ],
+    "profile": {
+      "opt_level": "0",
+      "debuginfo": 0,
+      "debug_assertions": true,
+      "overflow_checks": true,
+      "test": false
+    },
+    "fresh": false,
+    "executable": null
+  },
+  {
+    "gate": "native-21",
+    "package_id": "path+file:///root/gpui-typed-binding-sol-20261024/reactivity/crates/core#gpui_reactivity_core@0.1.0",
+    "target": "gpui_reactivity_core",
+    "features": [
+      "default",
+      "layout"
+    ],
+    "profile": {
+      "opt_level": "0",
+      "debuginfo": 0,
+      "debug_assertions": true,
+      "overflow_checks": true,
+      "test": false
+    },
+    "fresh": false,
+    "executable": null
+  },
+  {
+    "gate": "native-21",
+    "package_id": "path+file:///root/gpui-typed-binding-sol-20261024/reactivity/crates/gpu#gpui_gpu@0.1.0",
+    "target": "build-script-build",
+    "features": [],
+    "profile": {
+      "opt_level": "0",
+      "debuginfo": 0,
+      "debug_assertions": true,
+      "overflow_checks": true,
+      "test": false
+    },
+    "fresh": false,
+    "executable": null
+  },
+  {
+    "gate": "native-21",
+    "package_id": "path+file:///root/gpui-typed-binding-sol-20261024/reactivity/vendor/accesskit_atspi_common#0.21.0",
+    "target": "accesskit_atspi_common",
+    "features": [],
+    "profile": {
+      "opt_level": "0",
+      "debuginfo": 0,
+      "debug_assertions": true,
+      "overflow_checks": true,
+      "test": false
+    },
+    "fresh": false,
+    "executable": null
+  },
+  {
+    "gate": "native-21",
+    "package_id": "path+file:///root/gpui-typed-binding-sol-20261024/reactivity/vendor/parley#0.12.0",
+    "target": "parley",
+    "features": [
+      "complex-scripts",
+      "std"
+    ],
+    "profile": {
+      "opt_level": "0",
+      "debuginfo": 0,
+      "debug_assertions": true,
+      "overflow_checks": true,
+      "test": false
+    },
+    "fresh": false,
+    "executable": null
+  },
+  {
+    "gate": "native-21",
+    "package_id": "path+file:///root/gpui-typed-binding-sol-20261024/reactivity/vendor/wgpu-core#30.0.1",
+    "target": "wgpu_core",
+    "features": [
+      "default",
+      "dx12",
+      "gles",
+      "metal",
+      "portable-atomic",
+      "renderdoc",
+      "std",
+      "vulkan",
+      "wgpu-core-deps-windows-linux-android",
+      "wgsl"
+    ],
+    "profile": {
+      "opt_level": "0",
+      "debuginfo": 0,
+      "debug_assertions": true,
+      "overflow_checks": true,
+      "test": false
+    },
+    "fresh": false,
+    "executable": null
+  },
+  {
+    "gate": "native-21",
+    "package_id": "path+file:///root/gpui-typed-binding-sol-20261024/reactivity/vendor/wgpu#30.0.1",
+    "target": "wgpu",
+    "features": [
+      "dx12",
+      "gles",
+      "metal",
+      "std",
+      "vulkan",
+      "wgsl"
+    ],
+    "profile": {
+      "opt_level": "0",
+      "debuginfo": 0,
+      "debug_assertions": true,
+      "overflow_checks": true,
+      "test": false
+    },
+    "fresh": false,
+    "executable": null
+  },
+  {
+    "gate": "native-21",
+    "package_id": "path+file:///root/gpui-typed-binding-sol-20261024/reactivity/crates/canvas#gpui_canvas@0.1.0",
+    "target": "gpui_canvas",
+    "features": [],
+    "profile": {
+      "opt_level": "0",
+      "debuginfo": 0,
+      "debug_assertions": true,
+      "overflow_checks": true,
+      "test": false
+    },
+    "fresh": false,
+    "executable": null
+  },
+  {
+    "gate": "native-21",
+    "package_id": "path+file:///root/gpui-typed-binding-sol-20261024/reactivity/vendor/accesskit_unix#0.24.0",
+    "target": "accesskit_unix",
+    "features": [
+      "async-io"
+    ],
+    "profile": {
+      "opt_level": "0",
+      "debuginfo": 0,
+      "debug_assertions": true,
+      "overflow_checks": true,
+      "test": false
+    },
+    "fresh": false,
+    "executable": null
+  },
+  {
+    "gate": "native-21",
+    "package_id": "path+file:///root/gpui-typed-binding-sol-20261024/reactivity/vendor/softbuffer#0.4.8",
+    "target": "softbuffer",
+    "features": [
+      "as-raw-xcb-connection",
+      "bytemuck",
+      "fastrand",
+      "rustix",
+      "tiny-xlib",
+      "x11",
+      "x11-dlopen",
+      "x11rb"
+    ],
+    "profile": {
+      "opt_level": "0",
+      "debuginfo": 0,
+      "debug_assertions": true,
+      "overflow_checks": true,
+      "test": false
+    },
+    "fresh": false,
+    "executable": null
+  },
+  {
+    "gate": "native-21",
+    "package_id": "path+file:///root/gpui-typed-binding-sol-20261024/reactivity/crates/host#gpui_reactivity_host@0.1.0",
+    "target": "gpui_reactivity_host",
+    "features": [
+      "default",
+      "native",
+      "x11"
+    ],
+    "profile": {
+      "opt_level": "0",
+      "debuginfo": 0,
+      "debug_assertions": true,
+      "overflow_checks": true,
+      "test": false
+    },
+    "fresh": false,
+    "executable": null
+  },
+  {
+    "gate": "native-21",
+    "package_id": "path+file:///root/gpui-typed-binding-sol-20261024/reactivity/crates/state#gpui_reactivity_state@0.1.0",
+    "target": "gpui_reactivity_state",
+    "features": [
+      "default",
+      "serde"
+    ],
+    "profile": {
+      "opt_level": "0",
+      "debuginfo": 0,
+      "debug_assertions": true,
+      "overflow_checks": true,
+      "test": false
+    },
+    "fresh": false,
+    "executable": null
+  },
+  {
+    "gate": "native-21",
+    "package_id": "path+file:///root/gpui-typed-binding-sol-20261024/reactivity/crates/inline-call#gpui_inline_call@0.1.0",
+    "target": "gpui_inline_call",
+    "features": [],
+    "profile": {
+      "opt_level": "0",
+      "debuginfo": 0,
+      "debug_assertions": true,
+      "overflow_checks": true,
+      "test": false
+    },
+    "fresh": false,
+    "executable": null
+  },
+  {
+    "gate": "native-21",
+    "package_id": "path+file:///root/gpui-typed-binding-sol-20261024/reactivity/crates/gpu#gpui_gpu@0.1.0",
+    "target": "gpui_gpu",
+    "features": [],
+    "profile": {
+      "opt_level": "0",
+      "debuginfo": 0,
+      "debug_assertions": true,
+      "overflow_checks": true,
+      "test": false
+    },
+    "fresh": false,
+    "executable": null
+  },
+  {
+    "gate": "native-21",
+    "package_id": "path+file:///root/gpui-typed-binding-sol-20261024/reactivity/crates/component#gpui-component@0.1.0",
+    "target": "gpui_component",
+    "features": [
+      "default",
+      "native",
+      "x11"
+    ],
+    "profile": {
+      "opt_level": "0",
+      "debuginfo": 0,
+      "debug_assertions": true,
+      "overflow_checks": true,
+      "test": false
+    },
+    "fresh": false,
+    "executable": null
+  },
+  {
+    "gate": "native-21",
+    "package_id": "path+file:///root/gpui-typed-binding-sol-20261024/reactivity/crates/gpui#0.1.0",
+    "target": "gpui",
+    "features": [
+      "accessibility",
+      "native",
+      "native-core",
+      "x11",
+      "x11-minimal"
+    ],
+    "profile": {
+      "opt_level": "0",
+      "debuginfo": 0,
+      "debug_assertions": true,
+      "overflow_checks": true,
+      "test": false
+    },
+    "fresh": false,
+    "executable": null
+  },
+  {
+    "gate": "native-21",
+    "package_id": "path+file:///root/gpui-typed-binding-sol-20261024/reactivity/crates/component#gpui-component@0.1.0",
+    "target": "halloween",
+    "features": [
+      "default",
+      "native",
+      "x11"
+    ],
+    "profile": {
+      "opt_level": "0",
+      "debuginfo": 0,
+      "debug_assertions": true,
+      "overflow_checks": true,
+      "test": false
+    },
+    "fresh": false,
+    "executable": "/root/targets/typed-binding-sol-native-20261024/debug/examples/halloween"
+  },
+  {
+    "gate": "release-22",
+    "package_id": "path+file:///root/gpui-typed-binding-sol-20261024/reactivity/vendor/parley_engine#0.12.0",
+    "target": "parley_engine",
+    "features": [
+      "complex-scripts",
+      "std"
+    ],
+    "profile": {
+      "opt_level": "3",
+      "debuginfo": 0,
+      "debug_assertions": false,
+      "overflow_checks": false,
+      "test": false
+    },
+    "fresh": false,
+    "executable": null
+  },
+  {
+    "gate": "release-22",
+    "package_id": "path+file:///root/gpui-typed-binding-sol-20261024/reactivity/vendor/cephal#0.1.1",
+    "target": "cephal",
+    "features": [
+      "block",
+      "default",
+      "flex",
+      "grid"
+    ],
+    "profile": {
+      "opt_level": "3",
+      "debuginfo": 0,
+      "debug_assertions": false,
+      "overflow_checks": false,
+      "test": false
+    },
+    "fresh": false,
+    "executable": null
+  },
+  {
+    "gate": "release-22",
+    "package_id": "path+file:///root/gpui-typed-binding-sol-20261024/reactivity/vendor/parley#0.12.0",
+    "target": "parley",
+    "features": [
+      "complex-scripts",
+      "std"
+    ],
+    "profile": {
+      "opt_level": "3",
+      "debuginfo": 0,
+      "debug_assertions": false,
+      "overflow_checks": false,
+      "test": false
+    },
+    "fresh": false,
+    "executable": null
+  },
+  {
+    "gate": "release-22",
+    "package_id": "path+file:///root/gpui-typed-binding-sol-20261024/reactivity/crates/core#gpui_reactivity_core@0.1.0",
+    "target": "gpui_reactivity_core",
+    "features": [
+      "default",
+      "layout"
+    ],
+    "profile": {
+      "opt_level": "3",
+      "debuginfo": 0,
+      "debug_assertions": false,
+      "overflow_checks": false,
+      "test": false
+    },
+    "fresh": false,
+    "executable": null
+  },
+  {
+    "gate": "release-22",
+    "package_id": "path+file:///root/gpui-typed-binding-sol-20261024/reactivity/crates/state#gpui_reactivity_state@0.1.0",
+    "target": "gpui_reactivity_state",
+    "features": [
+      "default",
+      "serde"
+    ],
+    "profile": {
+      "opt_level": "3",
+      "debuginfo": 0,
+      "debug_assertions": false,
+      "overflow_checks": false,
+      "test": false
+    },
+    "fresh": false,
+    "executable": null
+  },
+  {
+    "gate": "release-22",
+    "package_id": "path+file:///root/gpui-typed-binding-sol-20261024/reactivity/crates/inline-call#gpui_inline_call@0.1.0",
+    "target": "gpui_inline_call",
+    "features": [],
+    "profile": {
+      "opt_level": "3",
+      "debuginfo": 0,
+      "debug_assertions": false,
+      "overflow_checks": false,
+      "test": false
+    },
+    "fresh": false,
+    "executable": null
+  },
+  {
+    "gate": "release-22",
+    "package_id": "path+file:///root/gpui-typed-binding-sol-20261024/reactivity/crates/gpui#0.1.0",
+    "target": "gpui",
+    "features": [],
+    "profile": {
+      "opt_level": "3",
+      "debuginfo": 0,
+      "debug_assertions": false,
+      "overflow_checks": false,
+      "test": false
+    },
+    "fresh": false,
+    "executable": null
+  },
+  {
+    "gate": "release-22",
+    "package_id": "path+file:///root/gpui-typed-binding-sol-20261024/reactivity/crates/component#gpui-component@0.1.0",
+    "target": "gpui_component",
+    "features": [
+      "default"
+    ],
+    "profile": {
+      "opt_level": "3",
+      "debuginfo": 0,
+      "debug_assertions": false,
+      "overflow_checks": false,
+      "test": false
+    },
+    "fresh": false,
+    "executable": null
+  },
+  {
+    "gate": "release-22",
+    "package_id": "path+file:///root/gpui-typed-binding-sol-20261024/reactivity/crates/canvas#gpui_canvas@0.1.0",
+    "target": "gpui_canvas",
+    "features": [],
+    "profile": {
+      "opt_level": "3",
+      "debuginfo": 0,
+      "debug_assertions": false,
+      "overflow_checks": false,
+      "test": false
+    },
+    "fresh": false,
+    "executable": null
+  },
+  {
+    "gate": "release-22",
+    "package_id": "path+file:///root/gpui-typed-binding-sol-20261024/reactivity/crates/component#gpui-component@0.1.0",
+    "target": "halloween",
+    "features": [
+      "default"
+    ],
+    "profile": {
+      "opt_level": "3",
+      "debuginfo": 0,
+      "debug_assertions": false,
+      "overflow_checks": false,
+      "test": false
+    },
+    "fresh": false,
+    "executable": "/root/targets/typed-binding-sol-release-20261024/release/examples/halloween"
+  },
+  {
+    "gate": "release-22",
+    "package_id": "path+file:///root/gpui-typed-binding-sol-20261024/reactivity/crates/component#gpui-component@0.1.0",
+    "target": "costs",
+    "features": [
+      "default"
+    ],
+    "profile": {
+      "opt_level": "3",
+      "debuginfo": 0,
+      "debug_assertions": false,
+      "overflow_checks": false,
+      "test": false
+    },
+    "fresh": false,
+    "executable": "/root/targets/typed-binding-sol-release-20261024/release/examples/costs"
+  },
+  {
+    "gate": "release-22",
+    "package_id": "path+file:///root/gpui-typed-binding-sol-20261024/reactivity/crates/component#gpui-component@0.1.0",
+    "target": "binding_costs",
+    "features": [
+      "default"
+    ],
+    "profile": {
+      "opt_level": "3",
+      "debuginfo": 0,
+      "debug_assertions": false,
+      "overflow_checks": false,
+      "test": false
+    },
+    "fresh": false,
+    "executable": "/root/targets/typed-binding-sol-release-20261024/release/examples/binding_costs"
+  },
+  {
+    "gate": "hummingbird-27",
+    "package_id": "path+file:///root/gpui-typed-binding-sol-20261024/reactivity/vendor/parley_engine#0.12.0",
+    "target": "parley_engine",
+    "features": [
+      "complex-scripts",
+      "std"
+    ],
+    "profile": {
+      "opt_level": "0",
+      "debuginfo": 2,
+      "debug_assertions": true,
+      "overflow_checks": true,
+      "test": false
+    },
+    "fresh": false,
+    "executable": null
+  },
+  {
+    "gate": "hummingbird-27",
+    "package_id": "path+file:///root/gpui-typed-binding-sol-20261024/reactivity/vendor/cephal#0.1.1",
+    "target": "cephal",
+    "features": [
+      "block",
+      "default",
+      "flex",
+      "grid"
+    ],
+    "profile": {
+      "opt_level": "0",
+      "debuginfo": 2,
+      "debug_assertions": true,
+      "overflow_checks": true,
+      "test": false
+    },
+    "fresh": false,
+    "executable": null
+  },
+  {
+    "gate": "hummingbird-27",
+    "package_id": "path+file:///root/gpui-typed-binding-sol-20261024/reactivity/crates/core#gpui_reactivity_core@0.1.0",
+    "target": "gpui_reactivity_core",
+    "features": [
+      "default",
+      "layout"
+    ],
+    "profile": {
+      "opt_level": "0",
+      "debuginfo": 2,
+      "debug_assertions": true,
+      "overflow_checks": true,
+      "test": false
+    },
+    "fresh": false,
+    "executable": null
+  },
+  {
+    "gate": "hummingbird-27",
+    "package_id": "path+file:///root/gpui-typed-binding-sol-20261024/reactivity/vendor/parley#0.12.0",
+    "target": "parley",
+    "features": [
+      "complex-scripts",
+      "std"
+    ],
+    "profile": {
+      "opt_level": "0",
+      "debuginfo": 2,
+      "debug_assertions": true,
+      "overflow_checks": true,
+      "test": false
+    },
+    "fresh": false,
+    "executable": null
+  },
+  {
+    "gate": "hummingbird-27",
+    "package_id": "path+file:///root/gpui-typed-binding-sol-20261024/reactivity/vendor/symphonia-format-riff#0.6.1",
+    "target": "symphonia_format_riff",
+    "features": [
+      "wav"
+    ],
+    "profile": {
+      "opt_level": "0",
+      "debuginfo": 2,
+      "debug_assertions": true,
+      "overflow_checks": true,
+      "test": false
+    },
+    "fresh": false,
+    "executable": null
+  },
+  {
+    "gate": "hummingbird-27",
+    "package_id": "path+file:///root/gpui-typed-binding-sol-20261024/reactivity/crates/state#gpui_reactivity_state@0.1.0",
+    "target": "gpui_reactivity_state",
+    "features": [
+      "default",
+      "serde"
+    ],
+    "profile": {
+      "opt_level": "0",
+      "debuginfo": 2,
+      "debug_assertions": true,
+      "overflow_checks": true,
+      "test": false
+    },
+    "fresh": false,
+    "executable": null
+  },
+  {
+    "gate": "hummingbird-27",
+    "package_id": "path+file:///root/gpui-typed-binding-sol-20261024/reactivity/crates/canvas#gpui_canvas@0.1.0",
+    "target": "gpui_canvas",
+    "features": [
+      "simd"
+    ],
+    "profile": {
+      "opt_level": "0",
+      "debuginfo": 2,
+      "debug_assertions": true,
+      "overflow_checks": true,
+      "test": false
+    },
+    "fresh": false,
+    "executable": null
+  },
+  {
+    "gate": "hummingbird-27",
+    "package_id": "path+file:///root/gpui-typed-binding-sol-20261024/reactivity/crates/inline-call#gpui_inline_call@0.1.0",
+    "target": "gpui_inline_call",
+    "features": [],
+    "profile": {
+      "opt_level": "0",
+      "debuginfo": 2,
+      "debug_assertions": true,
+      "overflow_checks": true,
+      "test": false
+    },
+    "fresh": false,
+    "executable": null
+  },
+  {
+    "gate": "hummingbird-27",
+    "package_id": "path+file:///root/gpui-typed-binding-sol-20261024/reactivity/crates/gpui#0.1.0",
+    "target": "gpui",
+    "features": [
+      "default",
+      "simd"
+    ],
+    "profile": {
+      "opt_level": "0",
+      "debuginfo": 2,
+      "debug_assertions": true,
+      "overflow_checks": true,
+      "test": false
+    },
+    "fresh": false,
+    "executable": null
+  },
+  {
+    "gate": "hummingbird-27",
+    "package_id": "path+file:///root/gpui-typed-binding-sol-20261024/reactivity/ports/hummingbird#hummingbird-gpui-port@0.1.0",
+    "target": "hummingbird_gpui_port",
+    "features": [
+      "default"
+    ],
+    "profile": {
+      "opt_level": "0",
+      "debuginfo": 2,
+      "debug_assertions": true,
+      "overflow_checks": true,
+      "test": false
+    },
+    "fresh": false,
+    "executable": null
+  },
+  {
+    "gate": "hummingbird-27",
+    "package_id": "path+file:///root/gpui-typed-binding-sol-20261024/reactivity/ports/hummingbird#hummingbird-gpui-port@0.1.0",
+    "target": "hummingbird-gpui-port",
+    "features": [
+      "default"
+    ],
+    "profile": {
+      "opt_level": "0",
+      "debuginfo": 2,
+      "debug_assertions": true,
+      "overflow_checks": true,
+      "test": false
+    },
+    "fresh": false,
+    "executable": null
+  },
+  {
+    "gate": "hummingbird-27",
+    "package_id": "path+file:///root/gpui-typed-binding-sol-20261024/reactivity/ports/hummingbird#hummingbird-gpui-port@0.1.0",
+    "target": "library_audio",
+    "features": [
+      "default"
+    ],
+    "profile": {
+      "opt_level": "0",
+      "debuginfo": 2,
+      "debug_assertions": true,
+      "overflow_checks": true,
+      "test": true
+    },
+    "fresh": false,
+    "executable": null
+  },
+  {
+    "gate": "hummingbird-27",
+    "package_id": "path+file:///root/gpui-typed-binding-sol-20261024/reactivity/ports/hummingbird#hummingbird-gpui-port@0.1.0",
+    "target": "preparation_authority",
+    "features": [
+      "default"
+    ],
+    "profile": {
+      "opt_level": "0",
+      "debuginfo": 2,
+      "debug_assertions": true,
+      "overflow_checks": true,
+      "test": true
+    },
+    "fresh": false,
+    "executable": null
+  },
+  {
+    "gate": "hummingbird-27",
+    "package_id": "path+file:///root/gpui-typed-binding-sol-20261024/reactivity/ports/hummingbird#hummingbird-gpui-port@0.1.0",
+    "target": "queue_consumer",
+    "features": [
+      "default"
+    ],
+    "profile": {
+      "opt_level": "0",
+      "debuginfo": 2,
+      "debug_assertions": true,
+      "overflow_checks": true,
+      "test": true
+    },
+    "fresh": false,
+    "executable": null
+  },
+  {
+    "gate": "hummingbird-27",
+    "package_id": "path+file:///root/gpui-typed-binding-sol-20261024/reactivity/ports/hummingbird#hummingbird-gpui-port@0.1.0",
+    "target": "transcript",
+    "features": [
+      "default"
+    ],
+    "profile": {
+      "opt_level": "0",
+      "debuginfo": 2,
+      "debug_assertions": true,
+      "overflow_checks": true,
+      "test": true
+    },
+    "fresh": false,
+    "executable": null
+  },
+  {
+    "gate": "hummingbird-27",
+    "package_id": "path+file:///root/gpui-typed-binding-sol-20261024/reactivity/ports/hummingbird#hummingbird-gpui-port@0.1.0",
+    "target": "riff_metadata",
+    "features": [
+      "default"
+    ],
+    "profile": {
+      "opt_level": "0",
+      "debuginfo": 2,
+      "debug_assertions": true,
+      "overflow_checks": true,
+      "test": true
+    },
+    "fresh": false,
+    "executable": null
+  },
+  {
+    "gate": "hummingbird-27",
+    "package_id": "path+file:///root/gpui-typed-binding-sol-20261024/reactivity/ports/hummingbird#hummingbird-gpui-port@0.1.0",
+    "target": "hummingbird-gpui-port",
+    "features": [
+      "default"
+    ],
+    "profile": {
+      "opt_level": "0",
+      "debuginfo": 2,
+      "debug_assertions": true,
+      "overflow_checks": true,
+      "test": true
+    },
+    "fresh": false,
+    "executable": null
+  },
+  {
+    "gate": "hummingbird-27",
+    "package_id": "path+file:///root/gpui-typed-binding-sol-20261024/reactivity/ports/hummingbird#hummingbird-gpui-port@0.1.0",
+    "target": "indexing",
+    "features": [
+      "default"
+    ],
+    "profile": {
+      "opt_level": "0",
+      "debuginfo": 2,
+      "debug_assertions": true,
+      "overflow_checks": true,
+      "test": true
+    },
+    "fresh": false,
+    "executable": null
+  },
+  {
+    "gate": "hummingbird-27",
+    "package_id": "path+file:///root/gpui-typed-binding-sol-20261024/reactivity/ports/hummingbird#hummingbird-gpui-port@0.1.0",
+    "target": "preparation",
+    "features": [
+      "default"
+    ],
+    "profile": {
+      "opt_level": "0",
+      "debuginfo": 2,
+      "debug_assertions": true,
+      "overflow_checks": true,
+      "test": true
+    },
+    "fresh": false,
+    "executable": null
+  },
+  {
+    "gate": "hummingbird-27",
+    "package_id": "path+file:///root/gpui-typed-binding-sol-20261024/reactivity/ports/hummingbird#hummingbird-gpui-port@0.1.0",
+    "target": "queue",
+    "features": [
+      "default"
+    ],
+    "profile": {
+      "opt_level": "0",
+      "debuginfo": 2,
+      "debug_assertions": true,
+      "overflow_checks": true,
+      "test": true
+    },
+    "fresh": false,
+    "executable": null
+  },
+  {
+    "gate": "hummingbird-27",
+    "package_id": "path+file:///root/gpui-typed-binding-sol-20261024/reactivity/ports/hummingbird#hummingbird-gpui-port@0.1.0",
+    "target": "queue_playback",
+    "features": [
+      "default"
+    ],
+    "profile": {
+      "opt_level": "0",
+      "debuginfo": 2,
+      "debug_assertions": true,
+      "overflow_checks": true,
+      "test": true
+    },
+    "fresh": false,
+    "executable": null
+  },
+  {
+    "gate": "hummingbird-27",
+    "package_id": "path+file:///root/gpui-typed-binding-sol-20261024/reactivity/ports/hummingbird#hummingbird-gpui-port@0.1.0",
+    "target": "source_authority",
+    "features": [
+      "default"
+    ],
+    "profile": {
+      "opt_level": "0",
+      "debuginfo": 2,
+      "debug_assertions": true,
+      "overflow_checks": true,
+      "test": true
+    },
+    "fresh": false,
+    "executable": null
+  },
+  {
+    "gate": "hummingbird-27",
+    "package_id": "path+file:///root/gpui-typed-binding-sol-20261024/reactivity/ports/hummingbird#hummingbird-gpui-port@0.1.0",
+    "target": "browser",
+    "features": [
+      "default"
+    ],
+    "profile": {
+      "opt_level": "0",
+      "debuginfo": 2,
+      "debug_assertions": true,
+      "overflow_checks": true,
+      "test": true
+    },
+    "fresh": false,
+    "executable": null
+  },
+  {
+    "gate": "hummingbird-27",
+    "package_id": "path+file:///root/gpui-typed-binding-sol-20261024/reactivity/ports/hummingbird#hummingbird-gpui-port@0.1.0",
+    "target": "library_startup",
+    "features": [
+      "default"
+    ],
+    "profile": {
+      "opt_level": "0",
+      "debuginfo": 2,
+      "debug_assertions": true,
+      "overflow_checks": true,
+      "test": true
+    },
+    "fresh": false,
+    "executable": null
+  },
+  {
+    "gate": "hummingbird-27",
+    "package_id": "path+file:///root/gpui-typed-binding-sol-20261024/reactivity/ports/hummingbird#hummingbird-gpui-port@0.1.0",
+    "target": "hummingbird_gpui_port",
+    "features": [
+      "default"
+    ],
+    "profile": {
+      "opt_level": "0",
+      "debuginfo": 2,
+      "debug_assertions": true,
+      "overflow_checks": true,
+      "test": true
+    },
+    "fresh": false,
+    "executable": null
+  },
+  {
+    "gate": "hummingbird-27",
+    "package_id": "path+file:///root/gpui-typed-binding-sol-20261024/reactivity/ports/hummingbird#hummingbird-gpui-port@0.1.0",
+    "target": "query",
+    "features": [
+      "default"
+    ],
+    "profile": {
+      "opt_level": "0",
+      "debuginfo": 2,
+      "debug_assertions": true,
+      "overflow_checks": true,
+      "test": true
+    },
+    "fresh": false,
+    "executable": null
+  },
+  {
+    "gate": "hummingbird-27",
+    "package_id": "path+file:///root/gpui-typed-binding-sol-20261024/reactivity/ports/hummingbird#hummingbird-gpui-port@0.1.0",
+    "target": "search",
+    "features": [
+      "default"
+    ],
+    "profile": {
+      "opt_level": "0",
+      "debuginfo": 2,
+      "debug_assertions": true,
+      "overflow_checks": true,
+      "test": true
+    },
+    "fresh": false,
+    "executable": null
+  },
+  {
+    "gate": "hummingbird-27",
+    "package_id": "path+file:///root/gpui-typed-binding-sol-20261024/reactivity/ports/hummingbird#hummingbird-gpui-port@0.1.0",
+    "target": "queue_costs",
+    "features": [
+      "default"
+    ],
+    "profile": {
+      "opt_level": "0",
+      "debuginfo": 2,
+      "debug_assertions": true,
+      "overflow_checks": true,
+      "test": true
+    },
+    "fresh": false,
+    "executable": null
+  },
+  {
+    "gate": "hummingbird-27",
+    "package_id": "path+file:///root/gpui-typed-binding-sol-20261024/reactivity/ports/hummingbird#hummingbird-gpui-port@0.1.0",
+    "target": "audio",
+    "features": [
+      "default"
+    ],
+    "profile": {
+      "opt_level": "0",
+      "debuginfo": 2,
+      "debug_assertions": true,
+      "overflow_checks": true,
+      "test": true
+    },
+    "fresh": false,
+    "executable": null
+  },
+  {
+    "gate": "optimized-28",
+    "package_id": "path+file:///root/gpui-typed-binding-sol-20261024/reactivity/vendor/parley_engine#0.12.0",
+    "target": "parley_engine",
+    "features": [
+      "complex-scripts",
+      "std"
+    ],
+    "profile": {
+      "opt_level": "3",
+      "debuginfo": 0,
+      "debug_assertions": false,
+      "overflow_checks": false,
+      "test": false
+    },
+    "fresh": true,
+    "executable": null
+  },
+  {
+    "gate": "optimized-28",
+    "package_id": "path+file:///root/gpui-typed-binding-sol-20261024/reactivity/vendor/cephal#0.1.1",
+    "target": "cephal",
+    "features": [
+      "block",
+      "default",
+      "flex",
+      "grid"
+    ],
+    "profile": {
+      "opt_level": "3",
+      "debuginfo": 0,
+      "debug_assertions": false,
+      "overflow_checks": false,
+      "test": false
+    },
+    "fresh": true,
+    "executable": null
+  },
+  {
+    "gate": "optimized-28",
+    "package_id": "path+file:///root/gpui-typed-binding-sol-20261024/reactivity/crates/core#gpui_reactivity_core@0.1.0",
+    "target": "gpui_reactivity_core",
+    "features": [
+      "default",
+      "layout"
+    ],
+    "profile": {
+      "opt_level": "3",
+      "debuginfo": 0,
+      "debug_assertions": false,
+      "overflow_checks": false,
+      "test": false
+    },
+    "fresh": true,
+    "executable": null
+  },
+  {
+    "gate": "optimized-28",
+    "package_id": "path+file:///root/gpui-typed-binding-sol-20261024/reactivity/vendor/parley#0.12.0",
+    "target": "parley",
+    "features": [
+      "complex-scripts",
+      "std"
+    ],
+    "profile": {
+      "opt_level": "3",
+      "debuginfo": 0,
+      "debug_assertions": false,
+      "overflow_checks": false,
+      "test": false
+    },
+    "fresh": true,
+    "executable": null
+  },
+  {
+    "gate": "optimized-28",
+    "package_id": "path+file:///root/gpui-typed-binding-sol-20261024/reactivity/crates/canvas#gpui_canvas@0.1.0",
+    "target": "gpui_canvas",
+    "features": [],
+    "profile": {
+      "opt_level": "3",
+      "debuginfo": 0,
+      "debug_assertions": false,
+      "overflow_checks": false,
+      "test": false
+    },
+    "fresh": true,
+    "executable": null
+  },
+  {
+    "gate": "optimized-28",
+    "package_id": "path+file:///root/gpui-typed-binding-sol-20261024/reactivity/crates/state#gpui_reactivity_state@0.1.0",
+    "target": "gpui_reactivity_state",
+    "features": [
+      "default",
+      "serde"
+    ],
+    "profile": {
+      "opt_level": "3",
+      "debuginfo": 0,
+      "debug_assertions": false,
+      "overflow_checks": false,
+      "test": false
+    },
+    "fresh": true,
+    "executable": null
+  },
+  {
+    "gate": "optimized-28",
+    "package_id": "path+file:///root/gpui-typed-binding-sol-20261024/reactivity/crates/inline-call#gpui_inline_call@0.1.0",
+    "target": "gpui_inline_call",
+    "features": [],
+    "profile": {
+      "opt_level": "3",
+      "debuginfo": 0,
+      "debug_assertions": false,
+      "overflow_checks": false,
+      "test": false
+    },
+    "fresh": true,
+    "executable": null
+  },
+  {
+    "gate": "optimized-28",
+    "package_id": "path+file:///root/gpui-typed-binding-sol-20261024/reactivity/crates/gpui#0.1.0",
+    "target": "gpui",
+    "features": [],
+    "profile": {
+      "opt_level": "3",
+      "debuginfo": 0,
+      "debug_assertions": false,
+      "overflow_checks": false,
+      "test": false
+    },
+    "fresh": true,
+    "executable": null
+  },
+  {
+    "gate": "optimized-28",
+    "package_id": "path+file:///root/gpui-typed-binding-sol-20261024/reactivity/crates/component#gpui-component@0.1.0",
+    "target": "gpui_component",
+    "features": [
+      "default"
+    ],
+    "profile": {
+      "opt_level": "3",
+      "debuginfo": 0,
+      "debug_assertions": false,
+      "overflow_checks": false,
+      "test": false
+    },
+    "fresh": true,
+    "executable": null
+  },
+  {
+    "gate": "optimized-28",
+    "package_id": "path+file:///root/gpui-typed-binding-sol-20261024/reactivity/crates/component#gpui-component@0.1.0",
+    "target": "gpui_component",
+    "features": [
+      "default"
+    ],
+    "profile": {
+      "opt_level": "3",
+      "debuginfo": 0,
+      "debug_assertions": false,
+      "overflow_checks": false,
+      "test": true
+    },
+    "fresh": false,
+    "executable": "/root/targets/typed-binding-sol-release-20261024/release/build/gpui-component/5c2a91af15593b06/out/gpui_component-5c2a91af15593b06"
+  },
+  {
+    "gate": "optimized-28",
+    "package_id": "path+file:///root/gpui-typed-binding-sol-20261024/reactivity/crates/component#gpui-component@0.1.0",
+    "target": "bindings",
+    "features": [
+      "default"
+    ],
+    "profile": {
+      "opt_level": "3",
+      "debuginfo": 0,
+      "debug_assertions": false,
+      "overflow_checks": false,
+      "test": true
+    },
+    "fresh": false,
+    "executable": "/root/targets/typed-binding-sol-release-20261024/release/build/gpui-component/824d685d86d022a5/out/bindings-824d685d86d022a5"
+  },
+  {
+    "gate": "optimized-28",
+    "package_id": "path+file:///root/gpui-typed-binding-sol-20261024/reactivity/crates/component#gpui-component@0.1.0",
+    "target": "contracts",
+    "features": [
+      "default"
+    ],
+    "profile": {
+      "opt_level": "3",
+      "debuginfo": 0,
+      "debug_assertions": false,
+      "overflow_checks": false,
+      "test": true
+    },
+    "fresh": false,
+    "executable": "/root/targets/typed-binding-sol-release-20261024/release/build/gpui-component/6ffbd0bee3b8c971/out/contracts-6ffbd0bee3b8c971"
+  },
+  {
+    "gate": "native-test-29",
+    "package_id": "path+file:///root/gpui-typed-binding-sol-20261024/reactivity/vendor/wgpu-hal#30.0.1",
+    "target": "build-script-build",
+    "features": [
+      "dx12",
+      "gles",
+      "portable-atomic",
+      "renderdoc",
+      "vulkan"
+    ],
+    "profile": {
+      "opt_level": "0",
+      "debuginfo": 0,
+      "debug_assertions": true,
+      "overflow_checks": true,
+      "test": false
+    },
+    "fresh": true,
+    "executable": null
+  },
+  {
+    "gate": "native-test-29",
+    "package_id": "path+file:///root/gpui-typed-binding-sol-20261024/reactivity/vendor/wgpu-hal#30.0.1",
+    "target": "wgpu_hal",
+    "features": [
+      "dx12",
+      "gles",
+      "portable-atomic",
+      "renderdoc",
+      "vulkan"
+    ],
+    "profile": {
+      "opt_level": "0",
+      "debuginfo": 0,
+      "debug_assertions": true,
+      "overflow_checks": true,
+      "test": false
+    },
+    "fresh": true,
+    "executable": null
+  },
+  {
+    "gate": "native-test-29",
+    "package_id": "path+file:///root/gpui-typed-binding-sol-20261024/reactivity/vendor/accesskit#0.25.1",
+    "target": "accesskit",
+    "features": [],
+    "profile": {
+      "opt_level": "0",
+      "debuginfo": 0,
+      "debug_assertions": true,
+      "overflow_checks": true,
+      "test": false
+    },
+    "fresh": true,
+    "executable": null
+  },
+  {
+    "gate": "native-test-29",
+    "package_id": "path+file:///root/gpui-typed-binding-sol-20261024/reactivity/vendor/winit#0.30.13",
+    "target": "build-script-build",
+    "features": [
+      "bytemuck",
+      "percent-encoding",
+      "rwh_06",
+      "x11",
+      "x11-dl",
+      "x11rb"
+    ],
+    "profile": {
+      "opt_level": "0",
+      "debuginfo": 0,
+      "debug_assertions": true,
+      "overflow_checks": true,
+      "test": false
+    },
+    "fresh": true,
+    "executable": null
+  },
+  {
+    "gate": "native-test-29",
+    "package_id": "path+file:///root/gpui-typed-binding-sol-20261024/reactivity/vendor/wgpu-core#30.0.1",
+    "target": "build-script-build",
+    "features": [
+      "default",
+      "dx12",
+      "gles",
+      "metal",
+      "portable-atomic",
+      "renderdoc",
+      "std",
+      "vulkan",
+      "wgpu-core-deps-windows-linux-android",
+      "wgsl"
+    ],
+    "profile": {
+      "opt_level": "0",
+      "debuginfo": 0,
+      "debug_assertions": true,
+      "overflow_checks": true,
+      "test": false
+    },
+    "fresh": true,
+    "executable": null
+  },
+  {
+    "gate": "native-test-29",
+    "package_id": "path+file:///root/gpui-typed-binding-sol-20261024/reactivity/vendor/parley_engine#0.12.0",
+    "target": "parley_engine",
+    "features": [
+      "complex-scripts",
+      "std"
+    ],
+    "profile": {
+      "opt_level": "0",
+      "debuginfo": 0,
+      "debug_assertions": true,
+      "overflow_checks": true,
+      "test": false
+    },
+    "fresh": true,
+    "executable": null
+  },
+  {
+    "gate": "native-test-29",
+    "package_id": "path+file:///root/gpui-typed-binding-sol-20261024/reactivity/vendor/accesskit_consumer#0.39.1",
+    "target": "accesskit_consumer",
+    "features": [],
+    "profile": {
+      "opt_level": "0",
+      "debuginfo": 0,
+      "debug_assertions": true,
+      "overflow_checks": true,
+      "test": false
+    },
+    "fresh": true,
+    "executable": null
+  },
+  {
+    "gate": "native-test-29",
+    "package_id": "path+file:///root/gpui-typed-binding-sol-20261024/reactivity/vendor/wgpu#30.0.1",
+    "target": "build-script-build",
+    "features": [
+      "dx12",
+      "gles",
+      "metal",
+      "std",
+      "vulkan",
+      "wgsl"
+    ],
+    "profile": {
+      "opt_level": "0",
+      "debuginfo": 0,
+      "debug_assertions": true,
+      "overflow_checks": true,
+      "test": false
+    },
+    "fresh": true,
+    "executable": null
+  },
+  {
+    "gate": "native-test-29",
+    "package_id": "path+file:///root/gpui-typed-binding-sol-20261024/reactivity/vendor/cephal#0.1.1",
+    "target": "cephal",
+    "features": [
+      "block",
+      "default",
+      "flex",
+      "grid"
+    ],
+    "profile": {
+      "opt_level": "0",
+      "debuginfo": 0,
+      "debug_assertions": true,
+      "overflow_checks": true,
+      "test": false
+    },
+    "fresh": true,
+    "executable": null
+  },
+  {
+    "gate": "native-test-29",
+    "package_id": "path+file:///root/gpui-typed-binding-sol-20261024/reactivity/crates/core#gpui_reactivity_core@0.1.0",
+    "target": "gpui_reactivity_core",
+    "features": [
+      "default",
+      "layout"
+    ],
+    "profile": {
+      "opt_level": "0",
+      "debuginfo": 0,
+      "debug_assertions": true,
+      "overflow_checks": true,
+      "test": false
+    },
+    "fresh": true,
+    "executable": null
+  },
+  {
+    "gate": "native-test-29",
+    "package_id": "path+file:///root/gpui-typed-binding-sol-20261024/reactivity/vendor/winit#0.30.13",
+    "target": "winit",
+    "features": [
+      "bytemuck",
+      "percent-encoding",
+      "rwh_06",
+      "x11",
+      "x11-dl",
+      "x11rb"
+    ],
+    "profile": {
+      "opt_level": "0",
+      "debuginfo": 0,
+      "debug_assertions": true,
+      "overflow_checks": true,
+      "test": false
+    },
+    "fresh": true,
+    "executable": null
+  },
+  {
+    "gate": "native-test-29",
+    "package_id": "path+file:///root/gpui-typed-binding-sol-20261024/reactivity/vendor/wgpu-core#30.0.1",
+    "target": "wgpu_core",
+    "features": [
+      "default",
+      "dx12",
+      "gles",
+      "metal",
+      "portable-atomic",
+      "renderdoc",
+      "std",
+      "vulkan",
+      "wgpu-core-deps-windows-linux-android",
+      "wgsl"
+    ],
+    "profile": {
+      "opt_level": "0",
+      "debuginfo": 0,
+      "debug_assertions": true,
+      "overflow_checks": true,
+      "test": false
+    },
+    "fresh": true,
+    "executable": null
+  },
+  {
+    "gate": "native-test-29",
+    "package_id": "path+file:///root/gpui-typed-binding-sol-20261024/reactivity/vendor/accesskit_atspi_common#0.21.0",
+    "target": "accesskit_atspi_common",
+    "features": [],
+    "profile": {
+      "opt_level": "0",
+      "debuginfo": 0,
+      "debug_assertions": true,
+      "overflow_checks": true,
+      "test": false
+    },
+    "fresh": true,
+    "executable": null
+  },
+  {
+    "gate": "native-test-29",
+    "package_id": "path+file:///root/gpui-typed-binding-sol-20261024/reactivity/vendor/parley#0.12.0",
+    "target": "parley",
+    "features": [
+      "complex-scripts",
+      "std"
+    ],
+    "profile": {
+      "opt_level": "0",
+      "debuginfo": 0,
+      "debug_assertions": true,
+      "overflow_checks": true,
+      "test": false
+    },
+    "fresh": true,
+    "executable": null
+  },
+  {
+    "gate": "native-test-29",
+    "package_id": "path+file:///root/gpui-typed-binding-sol-20261024/reactivity/vendor/wgpu#30.0.1",
+    "target": "wgpu",
+    "features": [
+      "dx12",
+      "gles",
+      "metal",
+      "std",
+      "vulkan",
+      "wgsl"
+    ],
+    "profile": {
+      "opt_level": "0",
+      "debuginfo": 0,
+      "debug_assertions": true,
+      "overflow_checks": true,
+      "test": false
+    },
+    "fresh": true,
+    "executable": null
+  },
+  {
+    "gate": "native-test-29",
+    "package_id": "path+file:///root/gpui-typed-binding-sol-20261024/reactivity/vendor/accesskit_unix#0.24.0",
+    "target": "accesskit_unix",
+    "features": [
+      "async-io"
+    ],
+    "profile": {
+      "opt_level": "0",
+      "debuginfo": 0,
+      "debug_assertions": true,
+      "overflow_checks": true,
+      "test": false
+    },
+    "fresh": true,
+    "executable": null
+  },
+  {
+    "gate": "native-test-29",
+    "package_id": "path+file:///root/gpui-typed-binding-sol-20261024/reactivity/crates/gpu#gpui_gpu@0.1.0",
+    "target": "build-script-build",
+    "features": [
+      "simd"
+    ],
+    "profile": {
+      "opt_level": "0",
+      "debuginfo": 0,
+      "debug_assertions": true,
+      "overflow_checks": true,
+      "test": false
+    },
+    "fresh": false,
+    "executable": null
+  },
+  {
+    "gate": "native-test-29",
+    "package_id": "path+file:///root/gpui-typed-binding-sol-20261024/reactivity/crates/gpu#gpui_gpu@0.1.0",
+    "target": "gpui_gpu",
+    "features": [
+      "simd"
+    ],
+    "profile": {
+      "opt_level": "0",
+      "debuginfo": 0,
+      "debug_assertions": true,
+      "overflow_checks": true,
+      "test": false
+    },
+    "fresh": false,
+    "executable": null
+  },
+  {
+    "gate": "native-test-29",
+    "package_id": "path+file:///root/gpui-typed-binding-sol-20261024/reactivity/vendor/softbuffer#0.4.8",
+    "target": "softbuffer",
+    "features": [
+      "as-raw-xcb-connection",
+      "bytemuck",
+      "fastrand",
+      "rustix",
+      "tiny-xlib",
+      "x11",
+      "x11-dlopen",
+      "x11rb"
+    ],
+    "profile": {
+      "opt_level": "0",
+      "debuginfo": 0,
+      "debug_assertions": true,
+      "overflow_checks": true,
+      "test": false
+    },
+    "fresh": true,
+    "executable": null
+  },
+  {
+    "gate": "native-test-29",
+    "package_id": "path+file:///root/gpui-typed-binding-sol-20261024/reactivity/crates/host#gpui_reactivity_host@0.1.0",
+    "target": "gpui_reactivity_host",
+    "features": [
+      "default",
+      "native",
+      "x11"
+    ],
+    "profile": {
+      "opt_level": "0",
+      "debuginfo": 0,
+      "debug_assertions": true,
+      "overflow_checks": true,
+      "test": false
+    },
+    "fresh": true,
+    "executable": null
+  },
+  {
+    "gate": "native-test-29",
+    "package_id": "path+file:///root/gpui-typed-binding-sol-20261024/reactivity/crates/state#gpui_reactivity_state@0.1.0",
+    "target": "gpui_reactivity_state",
+    "features": [
+      "default",
+      "serde"
+    ],
+    "profile": {
+      "opt_level": "0",
+      "debuginfo": 0,
+      "debug_assertions": true,
+      "overflow_checks": true,
+      "test": false
+    },
+    "fresh": true,
+    "executable": null
+  },
+  {
+    "gate": "native-test-29",
+    "package_id": "path+file:///root/gpui-typed-binding-sol-20261024/reactivity/crates/inline-call#gpui_inline_call@0.1.0",
+    "target": "gpui_inline_call",
+    "features": [],
+    "profile": {
+      "opt_level": "0",
+      "debuginfo": 0,
+      "debug_assertions": true,
+      "overflow_checks": true,
+      "test": false
+    },
+    "fresh": true,
+    "executable": null
+  },
+  {
+    "gate": "native-test-29",
+    "package_id": "path+file:///root/gpui-typed-binding-sol-20261024/reactivity/crates/canvas#gpui_canvas@0.1.0",
+    "target": "gpui_canvas",
+    "features": [
+      "simd"
+    ],
+    "profile": {
+      "opt_level": "0",
+      "debuginfo": 0,
+      "debug_assertions": true,
+      "overflow_checks": true,
+      "test": false
+    },
+    "fresh": false,
+    "executable": null
+  },
+  {
+    "gate": "native-test-29",
+    "package_id": "path+file:///root/gpui-typed-binding-sol-20261024/reactivity/crates/gpui#0.1.0",
+    "target": "gpui",
+    "features": [
+      "accessibility",
+      "default",
+      "native",
+      "native-core",
+      "simd",
+      "x11",
+      "x11-minimal"
+    ],
+    "profile": {
+      "opt_level": "0",
+      "debuginfo": 0,
+      "debug_assertions": true,
+      "overflow_checks": true,
+      "test": true
+    },
+    "fresh": false,
+    "executable": "/root/targets/typed-binding-sol-native-20261024/debug/build/gpui/8fbaac6a12ec2b60/out/gpui-8fbaac6a12ec2b60"
+  },
+  {
+    "gate": "mutant-build-25",
+    "package_id": "path+file:///root/gpui-typed-binding-mutant-sol-20261024/reactivity/vendor/cephal#0.1.1",
+    "target": "cephal",
+    "features": [
+      "block",
+      "default",
+      "flex",
+      "grid"
+    ],
+    "profile": {
+      "opt_level": "0",
+      "debuginfo": 2,
+      "debug_assertions": true,
+      "overflow_checks": true,
+      "test": false
+    },
+    "fresh": false,
+    "executable": null
+  },
+  {
+    "gate": "mutant-build-25",
+    "package_id": "path+file:///root/gpui-typed-binding-mutant-sol-20261024/reactivity/crates/core#gpui_reactivity_core@0.1.0",
+    "target": "gpui_reactivity_core",
+    "features": [
+      "default",
+      "layout"
+    ],
+    "profile": {
+      "opt_level": "0",
+      "debuginfo": 2,
+      "debug_assertions": true,
+      "overflow_checks": true,
+      "test": false
+    },
+    "fresh": false,
+    "executable": null
+  },
+  {
+    "gate": "mutant-build-25",
+    "package_id": "path+file:///root/gpui-typed-binding-mutant-sol-20261024/reactivity/crates/state#gpui_reactivity_state@0.1.0",
+    "target": "gpui_reactivity_state",
+    "features": [
+      "default",
+      "serde"
+    ],
+    "profile": {
+      "opt_level": "0",
+      "debuginfo": 2,
+      "debug_assertions": true,
+      "overflow_checks": true,
+      "test": false
+    },
+    "fresh": false,
+    "executable": null
+  },
+  {
+    "gate": "mutant-build-25",
+    "package_id": "path+file:///root/gpui-typed-binding-mutant-sol-20261024/reactivity/crates/inline-call#gpui_inline_call@0.1.0",
+    "target": "gpui_inline_call",
+    "features": [],
+    "profile": {
+      "opt_level": "0",
+      "debuginfo": 2,
+      "debug_assertions": true,
+      "overflow_checks": true,
+      "test": false
+    },
+    "fresh": false,
+    "executable": null
+  },
+  {
+    "gate": "mutant-build-25",
+    "package_id": "path+file:///root/gpui-typed-binding-mutant-sol-20261024/reactivity/vendor/parley_engine#0.12.0",
+    "target": "parley_engine",
+    "features": [
+      "complex-scripts",
+      "std"
+    ],
+    "profile": {
+      "opt_level": "0",
+      "debuginfo": 2,
+      "debug_assertions": true,
+      "overflow_checks": true,
+      "test": false
+    },
+    "fresh": false,
+    "executable": null
+  },
+  {
+    "gate": "mutant-build-25",
+    "package_id": "path+file:///root/gpui-typed-binding-mutant-sol-20261024/reactivity/vendor/parley#0.12.0",
+    "target": "parley",
+    "features": [
+      "complex-scripts",
+      "std"
+    ],
+    "profile": {
+      "opt_level": "0",
+      "debuginfo": 2,
+      "debug_assertions": true,
+      "overflow_checks": true,
+      "test": false
+    },
+    "fresh": false,
+    "executable": null
+  },
+  {
+    "gate": "mutant-build-25",
+    "package_id": "path+file:///root/gpui-typed-binding-mutant-sol-20261024/reactivity/crates/canvas#gpui_canvas@0.1.0",
+    "target": "gpui_canvas",
+    "features": [],
+    "profile": {
+      "opt_level": "0",
+      "debuginfo": 2,
+      "debug_assertions": true,
+      "overflow_checks": true,
+      "test": false
+    },
+    "fresh": false,
+    "executable": null
+  },
+  {
+    "gate": "mutant-build-25",
+    "package_id": "path+file:///root/gpui-typed-binding-mutant-sol-20261024/reactivity/crates/component#gpui-component@0.1.0",
+    "target": "gpui_component",
+    "features": [
+      "default"
+    ],
+    "profile": {
+      "opt_level": "0",
+      "debuginfo": 2,
+      "debug_assertions": true,
+      "overflow_checks": true,
+      "test": false
+    },
+    "fresh": false,
+    "executable": null
+  },
+  {
+    "gate": "mutant-build-25",
+    "package_id": "path+file:///root/gpui-typed-binding-mutant-sol-20261024/reactivity/crates/gpui#0.1.0",
+    "target": "gpui",
+    "features": [],
+    "profile": {
+      "opt_level": "0",
+      "debuginfo": 2,
+      "debug_assertions": true,
+      "overflow_checks": true,
+      "test": false
+    },
+    "fresh": false,
+    "executable": null
+  },
+  {
+    "gate": "mutant-build-25",
+    "package_id": "path+file:///root/gpui-typed-binding-mutant-sol-20261024/reactivity/crates/component#gpui-component@0.1.0",
+    "target": "bindings",
+    "features": [
+      "default"
+    ],
+    "profile": {
+      "opt_level": "0",
+      "debuginfo": 2,
+      "debug_assertions": true,
+      "overflow_checks": true,
+      "test": true
+    },
+    "fresh": false,
+    "executable": "/root/targets/typed-binding-mutant-sol-20261024/debug/build/gpui-component/db62208d15d1d72d/out/bindings-db62208d15d1d72d"
+  }
+]

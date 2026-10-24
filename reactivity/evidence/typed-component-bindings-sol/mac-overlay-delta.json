@@ -1,0 +1,26 @@
+{
+  "added": [
+    "reactivity/crates/component/examples/binding_costs.rs",
+    "reactivity/crates/component/tests/bindings.rs"
+  ],
+  "base_commit": "9b9500b9b6685e9a3eb261b988fdfba63e333f88",
+  "changed": [
+    "reactivity/crates/component/examples/costs.rs",
+    "reactivity/crates/component/examples/support/party.rs",
+    "reactivity/crates/component/src/button.rs",
+    "reactivity/crates/component/src/checkbox.rs",
+    "reactivity/crates/component/src/input.rs",
+    "reactivity/crates/component/tests/contracts.rs",
+    "reactivity/crates/gpui/src/element.rs",
+    "reactivity/crates/gpui/src/lib.rs",
+    "reactivity/crates/gpui/src/runtime.rs",
+    "reactivity/crates/gpui/src/runtime/metadata.rs",
+    "reactivity/crates/gpui/src/runtime/styles.rs",
+    "reactivity/crates/gpui/src/runtime/styles/colours.rs",
+    "reactivity/crates/gpui/src/runtime/turn.rs",
+    "reactivity/crates/gpui/src/semantic.rs",
+    "reactivity/crates/gpui/src/style_port.rs"
+  ],
+  "commit": "b9de850f55ccc97841fde7713f2b11d3c7fb482c",
+  "deleted": []
+}

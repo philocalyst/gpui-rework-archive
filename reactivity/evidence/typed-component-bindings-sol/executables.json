@@ -1,0 +1,54 @@
+[
+  {
+    "group": "gpui_unit",
+    "target": "gpui",
+    "path": "/root/targets/typed-binding-sol-20261024/debug/build/gpui/29a6364882bcbe58/out/gpui-29a6364882bcbe58",
+    "sha256": "b7cb39d92d9072b71187b8b3139b589b5f70b2d6c71db1e086dd2fc90adc2445",
+    "bytes": 292654376,
+    "cargo_fresh": false
+  },
+  {
+    "group": "component",
+    "target": "contracts",
+    "path": "/root/targets/typed-binding-sol-20261024/debug/build/gpui-component/16ef123558dd1f8e/out/contracts-16ef123558dd1f8e",
+    "sha256": "7e1b49c4508be4e0c8dd9b1e52defab65c858a60d93d106a3d5a3537a06041c5",
+    "bytes": 165194104,
+    "cargo_fresh": false
+  },
+  {
+    "group": "component",
+    "target": "bindings",
+    "path": "/root/targets/typed-binding-sol-20261024/debug/build/gpui-component/db62208d15d1d72d/out/bindings-db62208d15d1d72d",
+    "sha256": "1e739fd10d8e1770b56890ea867b90f63209a519e59a9633bb67fe70f4dcb38b",
+    "bytes": 156941128,
+    "cargo_fresh": false
+  },
+  {
+    "group": "final_executables",
+    "target": "release-halloween",
+    "path": "/root/targets/typed-binding-sol-release-20261024/release/examples/halloween",
+    "sha256": "520f73312d7c419f9ac2336430c53cd2b9ea921bcd3b7ab6d84834db02954d56",
+    "bytes": 9981672
+  },
+  {
+    "group": "final_executables",
+    "target": "release-costs",
+    "path": "/root/targets/typed-binding-sol-release-20261024/release/examples/costs",
+    "sha256": "5d7e098d306127e5e5c45bd9339b7be68b661def551042a8ca6c3c5d61cee275",
+    "bytes": 9842808
+  },
+  {
+    "group": "final_executables",
+    "target": "release-binding-costs",
+    "path": "/root/targets/typed-binding-sol-release-20261024/release/examples/binding_costs",
+    "sha256": "058d85dea0d0f950303efe8a2a6d15e00f92c35960eab943a4813ebdd65a52fe",
+    "bytes": 10143976
+  },
+  {
+    "group": "final_executables",
+    "target": "native-halloween",
+    "path": "/root/targets/typed-binding-sol-native-20261024/debug/examples/halloween",
+    "sha256": "50b3b5a133643cbc166f8651960ed132fddb5d01913ae0a112f979e4fca22faa",
+    "bytes": 71269472
+  }
+]

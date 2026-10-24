@@ -1,0 +1,11 @@
+{
+  "before": "gpui-binding-mutant-before-25.json",
+  "after": [
+    "gpui-binding-mutant-after-build-25.json",
+    "gpui-binding-mutant-after-execute-25.json"
+  ],
+  "commit": "d4563f3796ce62e67a12e87fc7829316338f1a8f",
+  "aggregate": "3c689f79604dbfa7bd61b2a5d0f06a7bcf65598aa6d989c30e69f364718be6be",
+  "stable": true,
+  "file_count": 2080
+}

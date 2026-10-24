@@ -1,0 +1,207 @@
+Direct typed control bindings following the component/Length port
+
+Worktree: /root/gpui-typed-binding-sol-20261024
+Branch: codex/typed-binding-sol-20261024
+Qualified source: b9de850f55ccc97841fde7713f2b11d3c7fb482c
+Base evidence seal: c31dd34833b5a65a7314462130fef0d0126c5130
+Base qualified source: 9b9500b9b6685e9a3eb261b988fdfba63e333f88
+Build-input aggregate: a12f27deab4ead13fc9f2e55d0ce892ee7df50cceccebe91317c19647a78d94b
+Guarded files: 2080. Standalone Hummingbird closure: 2133 files,
+6d6a02a571dcab8a603885f3c705084cba641b893e91e1879d777f237cd23ccc.
+An evidence-only seal follows; no integration to Main is implied.
+
+The original port's modules, licensing, complete reference inventory and limits
+remain documented in ../component-port-sol and ../typed-length-component-sol.
+This successor changes genuine reusable controls and their ordinary core path;
+it is not a new gallery or a separate test-only binding implementation.
+
+Public syntax and dependency meaning
+
+  fn sources() -> Sources<Self> {
+      Sources::new().direct(Self::CHECKED).direct(Self::DISABLED)
+          .direct(Self::TITLE)
+  }
+  Checkbox::new("Treats", &self.checked, &self.theme)
+      .disabled(&self.disabled).toggle(Self::CHECKED)
+      .parts(|p| p.indicator(|e: El<'_>| e.rounded(0))).build()
+  Input::new(&self.title, "Title", &self.theme)
+      .invalid(self.title.map(|title| title.len() < 3))
+      .disabled(&self.disabled).build()
+  Button::new("Finish", &self.theme).disabled(&self.disabled).build()
+  gpui::checkbox("Plain", &self.checked).disabled(&self.disabled)
+
+BoolInput accepts bool, &bool, &Signal<bool>, and concrete typed bool mappings.
+By-value bool remains an honest Rust snapshot. If a view branches or computes
+other descriptions from that snapshot it must retain Sources::field and its
+containing component dependency. Direct intrinsic operands require a registered
+source even when their initial value is false; an unregistered intrinsic returns
+UnregisteredControl. Existing style-only unregistered snapshot behavior is not
+silently redefined. No public bind scope or allocated group is required.
+
+The real Party app now binds both Preparation checkboxes directly. Its parent
+still declares field(TITLE).component(PREPARATION), because ready(), help text
+and finish policy use ordinary Rust snapshot branches. The actual Preparation
+test proves a direct checkbox write needs zero child owner reruns/descriptions;
+the parent test proves the mixed ready/disabled branches still refresh.
+The measured child schema saves one allocation/32 retained bytes: direct 3/144
+versus conservative 4/176. This does not remove every parent dependency.
+
+Checkbox::on_change now reports the next value from the current logical checked
+state through the same activation path used by keyboard and pointer. It does not
+capture !initial_snapshot. A later on_change/on_click replaces the default route;
+custom controlled callbacks report intent once and only the owner changes state.
+Contained routes retain their lexical component projection. Removed identities
+and old targets remain retired. Explicit named parts remain static Rust types.
+
+Recipe composition and lowering
+
+Mapped keeps concrete &Signal<T> and F until the element consumes it. A zero-
+capture mapped operand is 8 B. BoolInput::select(false_color,true_color) returns a
+concrete Copy SelectedColors<T,F>, 40 B for a zero-capture predicate. It owns token
+values and retains no theme borrow. Foreground/background share the same closed
+IntoColor boundary. Existing explicit PropInput<T> stays Copy and 48 B; explicit
+ColorInput erasure owns its new descriptor. Wrong property types and forged
+selectors remain compile failures; the style catalog still has 14 properties.
+Checked/disabled are semantic sinks, not a claim of arbitrary component schema.
+
+The one existing source/binding/fanout accumulator now admits private Sink values
+for checked and disabled. Destination remains 4 B; no per-control registry, TypeId
+table, additional retained bool vector or parallel palette bank was introduced.
+The two selected endpoints are interned in the existing canonical color bank.
+The retained recipe captures two color codes (8B) plus the predicate inside the
+existing 16 B capture bound. A 20 B composed capture is rejected at ordinary mount;
+there is no heap callable fallback. Exceptional oversized diagnostic payloads
+alone can allocate their original full-width error. Literal/default overwrites
+release obsolete bindings, including previously rejected capture descriptors.
+
+Each mapped destination evaluates once at initial admission and once at source
+publication. The admitted initial value travels through MapDraft to avoid a
+second predicate poll during lowering. Arbitrary separate sinks do not share
+predicate evaluation: no cross-sink CSE/cohort is promised. Closures are ordinary
+pure Copy+Send+Sync+'static mappings. All scalar/map outputs are admitted before
+the first sink mutation, preserving the shared failure barrier.
+
+Checked updates preserve text/flags and change the existing checkbox content
+kind. Effective disabled inheritance is recomputed only for disabled changes;
+own-disabled survives an ancestor's disable/enable cycle. Content uses 24 bits,
+including own-disabled bit 23 and effective-disabled bit 22, within the existing
+u32; Main's 24 B Node is unchanged. This does not depend on the unadopted Node16
+prototype. Installed physical route membership remains separate from semantic
+eligibility. Disabling prunes focus before ordinary reconciliation/preparation,
+rejects logical input/actions immediately, and leaves old acknowledged Part
+semantics honest until the next ACK. No IME successor is present in this base;
+that independent lane is not falsely claimed tested here.
+
+Measured storage, allocations and code
+
+Measured layout, not guessed padding: PropertyValue is 28 B/alignment 4: its
+24 B Affine payload plus tag/alignment occupies 28 B, with no 8 B rounding.
+The shared storage measurements are Destination 4,
+Binding 24, Draft 24, ElementExtra 56, Decorations 48, Fanout 32, Recipe 24,
+MappedRecord 32, MappedFanout 88, MapBinding 48, MapDraft 80, MapOperand 40,
+OwnedMapOperand 40, PropInput<Color> 48. MapDraft adds 32 transient bytes relative
+to the prior 48 B form: the 28 B admitted initial value plus alignment. Existing
+source-color records remain 48/72/88. El 176, Style 88, Node 24 and the runtime's
+P 64/DraftNode 152 remain unchanged. Button 192(+8 for variant preservation),
+Checkbox 536(-8 snapshot field), Input 360 and Theme 192 are fully charged.
+
+Each dynamic selected-color description owns a transient 56 B descriptor. Palette
+endpoints and ordinary retained binding/style storage are charged in the complete
+fixture. Stock button description's existing focus/control extra allocation is
+one 56 B allocation. Plain literal checkbox and disabled(false) controls allocate
+zero extra; plain directly bound intrinsic checkbox costs 2 allocations/80 B.
+The original mapped33 exact description floor remains 3432 B. Its mount ledger
+remains 188 allocations/104070 requested/33672 retained, and first/warm mapped
+patches remain zero-allocation. The attempted 8 B per map regression was fixed,
+and its failed gate is preserved.
+
+Equal geometry and framebuffer workload, snapshot versus direct:
+                         snapshot              direct
+description allocations  13                    44
+description requested    2000                  3608
+description retained     2000                  3488
+mount allocations        420                   476
+mount requested          164778                169138
+mount retained           28716                 29996
+100 writes allocations   5750                  2050
+100 writes requested     1821800               367600
+100 writes retained delta 0                     0
+owner reruns/descriptions 100/100                0/0
+source reads             0                     100
+destination compares     1200                  400
+
+Both initial and final pixels are byte-exact equal, 281600 B each. Fonts are
+prewarmed for both and framebuffer captures occur outside allocation measures.
+Direct bindings add 56 mount allocations/1280 retained bytes here; they trade
+retained binding storage for avoiding descriptions. No memory-saving, RSS,
+hardware GPU or general latency claim follows from this workload.
+
+Actual mixed Party: description 60 allocations/7616 requested/7440 retained;
+window 1017 allocations/323151 requested/92382 retained. These replace the 9b
+baseline's snapshot-derived figures and include the shared selected palettes.
+Shipping libraries: core 35743 non-test/comment lines (+521 over 9b), reusable
+component 593 (-2). Existing vendors/dependencies are unchanged; the component
+crate still depends only on gpui, with allocation-counter dev-only.
+
+Fresh release Halloween ELF 9981672 B, .text 3160231 B; relative to9b this is
++26184 ELF/+12384 text. Native dev debug0 ELF 71269472 B, .text 25783463 B,
++62352/+26176. Whole ELF charges the linked dependency closure. Named component
+text is 11610 B release and 20532 B native, excluding inlining/shared helpers; it is
+not the complete component machine-code bill. Model and implementation changed,
+so this delta is not an isolated compiler benchmark. Fresh builds used -j2:
+release 1m42s, native 2m21s on this local shared host, without a timing comparison.
+Exact executable hashes, section tables, symbol lists and archives are retained.
+
+Qualification and negative evidence
+
+Final b9 source passes GPUI units 180 (5 ignored), component bindings 16 and
+contracts 12, component compile-fail docs 4, optimized bindings 16/contracts 12,
+strict all-target gpui+component Clippy -Dwarnings, and standalone Hummingbird
+default all-target locked/offline check. The earlier broad gate at 65329 ran
+77 result groups: ordinary 677 passed/1 failed/10 ignored, GPUI docs 31 and
+component docs 4 passed. Its sole failure was this slice's new PropertyValue
+assertion expecting 32 instead of actual 28. The corrected assertion passed the
+whole final GPUI unit binary; the production implementation is unchanged from
+that broad gate. The final app-only migration adds one tested component contract.
+This is a split qualification, not a fabricated single green whole-suite run.
+
+The 16 new ordinary external contracts cover current controlled intent and last
+route replacement exactly once, direct semantics/palette/style precedence,
+explicit Set(default)/Inherit/latest lower source, disabled focus/input and own/
+inherited state, projection and removed identity, rebinding, validation, failed
+new preparation plus older eligible ACK, all-sink invalid-output rejection,
+capture rejection, operand Copy/static typing and zero/default allocation floors.
+
+Bounded mutant d4563f3796ce62e67a12e87fc7829316338f1a8f suppresses only direct
+checked publication. A fresh distinct executable fails the ordinary public
+direct_checkbox_and_default_toggle_publish_without_owner_description test:
+actual Some(false), expected Some(true), exit 101. The original b9 source remains
+unchanged; mutant input guards, patch/commit, actual binary hash and executable
+archive are separate. Existing snapshot dependency mutants remain in the 9b seal.
+
+All failed attempts remain in gate-records.tar.gz: initial compile errors; focus
+test setup and wrong test snapshot API; the genuine +8 B mapped-allocation
+regression; newly guessed MapDraft 72 versus measured 80 and PropertyValue 32
+versus measured 28 assertions; and a small cost example compile error. These were
+corrected with actual probes before final gates. The first native launch omitted
+the native environment and exited 1 before creating a window; that failure is
+retained, and the retry with the native environment succeeded.
+
+The actual native inspector test also passes on this b9 binary: public pointer
+selection, typed draft, canonical rejection, syntax error, recovery, Apply pointer,
+server pixel, stale-target feedback and exact ACK. Its source guards and actual
+executable identity are retained.
+
+Actual native screenshots show pointer/Space/Enter/Tab through S9/P9 and a
+960x700 resize ACK at S9/P9, with the process alive afterward. The same reusable
+model runs headlessly and natively, with the inspector visible. These are owned
+Xvfb/ReferenceCpu frames, not physical scanout. Rounded focus outlines, relative
+uniform-list viewports, cross-sink predicate cohorts, arbitrary component/theme
+reflection, richer validation messaging, and the unported reference component
+families remain explicit gaps. Switch/menu/list/etc. are not placeholder widgets.
+
+The predecessor 9b exact source has independent Darwin 33-member/MachO qualification
+reported by the parent. This successor has not been built on Darwin. A compact
+overlay is available at /tmp/component-bindings-sol-b9de850f-mac-overlay against
+the exact 9b guard: 2 added/15 changed/0 deleted, 109885 B source tar. Applying it to
+any differently composed source is not qualified.

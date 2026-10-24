@@ -1,0 +1,17 @@
+
+running 1 test
+test direct_checkbox_and_default_toggle_publish_without_owner_description ... FAILED
+
+failures:
+
+failures:
+    direct_checkbox_and_default_toggle_publish_without_owner_description
+
+test result: FAILED. 0 passed; 1 failed; 0 ignored; 0 measured; 15 filtered out; finished in 0.01s
+
+
+thread 'direct_checkbox_and_default_toggle_publish_without_owner_description' (3092662) panicked at crates/component/tests/bindings.rs:163:5:
+assertion `left == right` failed
+  left: (Some(false), false)
+ right: (Some(true), false)
+note: run with `RUST_BACKTRACE=1` environment variable to display a backtrace

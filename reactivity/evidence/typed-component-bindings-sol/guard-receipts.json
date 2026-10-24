@@ -1,0 +1,226 @@
+[
+  {
+    "before": "gpui-binding-before-1.json",
+    "after": "gpui-binding-after-1.json",
+    "commit": "3f7f55b14f8f7418bed2d3f7fe561329963582df",
+    "aggregate": "30cc04e4ccd13e30fc803fb395cc4a8196eea250052d9c5939deec6cf9910d2e",
+    "file_count": 2078,
+    "stable": true
+  },
+  {
+    "before": "gpui-binding-before-10.json",
+    "after": "gpui-binding-after-10.json",
+    "commit": "8233b39d29b9315430fe5fa9da463485e2b640a3",
+    "aggregate": "2b924472dd0c07a341615828a655757df01a3bb002d375c30110a7bfff3a2a57",
+    "file_count": 2080,
+    "stable": true
+  },
+  {
+    "before": "gpui-binding-before-11.json",
+    "after": "gpui-binding-after-11.json",
+    "commit": "0e3d7dcc2975b0b28832a9fbf99b50a5162444cf",
+    "aggregate": "62d5f20ced5b67ba0201c7e1038365ace285597a2ff94ed78fdada4b7ecc6ae9",
+    "file_count": 2080,
+    "stable": true
+  },
+  {
+    "before": "gpui-binding-before-12.json",
+    "after": "gpui-binding-after-12.json",
+    "commit": "65329dcd97a283f1a7d30597437a44451a78f2ef",
+    "aggregate": "ac8c76da0d75fd8c8bd70279e5e305f13d1bfeb25fad80311c9c6bfc0fd4cdf2",
+    "file_count": 2080,
+    "stable": true
+  },
+  {
+    "before": "gpui-binding-before-13.json",
+    "after": "gpui-binding-after-13.json",
+    "commit": "65329dcd97a283f1a7d30597437a44451a78f2ef",
+    "aggregate": "ac8c76da0d75fd8c8bd70279e5e305f13d1bfeb25fad80311c9c6bfc0fd4cdf2",
+    "file_count": 2080,
+    "stable": true
+  },
+  {
+    "before": "gpui-binding-before-14.json",
+    "after": "gpui-binding-after-14.json",
+    "commit": "65329dcd97a283f1a7d30597437a44451a78f2ef",
+    "aggregate": "ac8c76da0d75fd8c8bd70279e5e305f13d1bfeb25fad80311c9c6bfc0fd4cdf2",
+    "file_count": 2080,
+    "stable": true
+  },
+  {
+    "before": "gpui-binding-before-15.json",
+    "after": "gpui-binding-after-15.json",
+    "commit": "65329dcd97a283f1a7d30597437a44451a78f2ef",
+    "aggregate": "ac8c76da0d75fd8c8bd70279e5e305f13d1bfeb25fad80311c9c6bfc0fd4cdf2",
+    "file_count": 2080,
+    "stable": true
+  },
+  {
+    "before": "gpui-binding-before-16.json",
+    "after": "gpui-binding-after-16.json",
+    "commit": "d62f4030c3b681458334ebd34174b9e2a89f8b63",
+    "aggregate": "d1563a61f0d697e2a854e94ae9241853f13b69278e97e4b0d1b075c3a4821454",
+    "file_count": 2080,
+    "stable": true
+  },
+  {
+    "before": "gpui-binding-before-17.json",
+    "after": "gpui-binding-after-17.json",
+    "commit": "b9de850f55ccc97841fde7713f2b11d3c7fb482c",
+    "aggregate": "a12f27deab4ead13fc9f2e55d0ce892ee7df50cceccebe91317c19647a78d94b",
+    "file_count": 2080,
+    "stable": true
+  },
+  {
+    "before": "gpui-binding-before-18.json",
+    "after": "gpui-binding-after-18.json",
+    "commit": "b9de850f55ccc97841fde7713f2b11d3c7fb482c",
+    "aggregate": "a12f27deab4ead13fc9f2e55d0ce892ee7df50cceccebe91317c19647a78d94b",
+    "file_count": 2080,
+    "stable": true
+  },
+  {
+    "before": "gpui-binding-before-19.json",
+    "after": "gpui-binding-after-19.json",
+    "commit": "b9de850f55ccc97841fde7713f2b11d3c7fb482c",
+    "aggregate": "a12f27deab4ead13fc9f2e55d0ce892ee7df50cceccebe91317c19647a78d94b",
+    "file_count": 2080,
+    "stable": true
+  },
+  {
+    "before": "gpui-binding-before-2.json",
+    "after": "gpui-binding-after-2.json",
+    "commit": "9318ca486d34b6a4a489de77b740d07a65841a63",
+    "aggregate": "a018891395d09151a2155c8e1ad2ab334c254542d7d06fe22ad68193dc59c920",
+    "file_count": 2078,
+    "stable": true
+  },
+  {
+    "before": "gpui-binding-before-20.json",
+    "after": "gpui-binding-after-20.json",
+    "commit": "b9de850f55ccc97841fde7713f2b11d3c7fb482c",
+    "aggregate": "a12f27deab4ead13fc9f2e55d0ce892ee7df50cceccebe91317c19647a78d94b",
+    "file_count": 2080,
+    "stable": true
+  },
+  {
+    "before": "gpui-binding-before-21.json",
+    "after": "gpui-binding-after-21.json",
+    "commit": "b9de850f55ccc97841fde7713f2b11d3c7fb482c",
+    "aggregate": "a12f27deab4ead13fc9f2e55d0ce892ee7df50cceccebe91317c19647a78d94b",
+    "file_count": 2080,
+    "stable": true
+  },
+  {
+    "before": "gpui-binding-before-22.json",
+    "after": "gpui-binding-after-22.json",
+    "commit": "b9de850f55ccc97841fde7713f2b11d3c7fb482c",
+    "aggregate": "a12f27deab4ead13fc9f2e55d0ce892ee7df50cceccebe91317c19647a78d94b",
+    "file_count": 2080,
+    "stable": true
+  },
+  {
+    "before": "gpui-binding-before-23.json",
+    "after": "gpui-binding-after-23.json",
+    "commit": "b9de850f55ccc97841fde7713f2b11d3c7fb482c",
+    "aggregate": "a12f27deab4ead13fc9f2e55d0ce892ee7df50cceccebe91317c19647a78d94b",
+    "file_count": 2080,
+    "stable": true
+  },
+  {
+    "before": "gpui-binding-before-24.json",
+    "after": "gpui-binding-after-24.json",
+    "commit": "b9de850f55ccc97841fde7713f2b11d3c7fb482c",
+    "aggregate": "a12f27deab4ead13fc9f2e55d0ce892ee7df50cceccebe91317c19647a78d94b",
+    "file_count": 2080,
+    "stable": true
+  },
+  {
+    "before": "gpui-binding-before-26.json",
+    "after": "gpui-binding-after-26.json",
+    "commit": "b9de850f55ccc97841fde7713f2b11d3c7fb482c",
+    "aggregate": "a12f27deab4ead13fc9f2e55d0ce892ee7df50cceccebe91317c19647a78d94b",
+    "file_count": 2080,
+    "stable": true
+  },
+  {
+    "before": "gpui-binding-before-28.json",
+    "after": "gpui-binding-after-28.json",
+    "commit": "b9de850f55ccc97841fde7713f2b11d3c7fb482c",
+    "aggregate": "a12f27deab4ead13fc9f2e55d0ce892ee7df50cceccebe91317c19647a78d94b",
+    "file_count": 2080,
+    "stable": true
+  },
+  {
+    "before": "gpui-binding-before-29.json",
+    "after": "gpui-binding-after-29.json",
+    "commit": "b9de850f55ccc97841fde7713f2b11d3c7fb482c",
+    "aggregate": "a12f27deab4ead13fc9f2e55d0ce892ee7df50cceccebe91317c19647a78d94b",
+    "file_count": 2080,
+    "stable": true
+  },
+  {
+    "before": "gpui-binding-before-3.json",
+    "after": "gpui-binding-after-3.json",
+    "commit": "4ef7ddc5e78b994e85cf91360c360c6cf44cd1b6",
+    "aggregate": "7bb0e109e1480f43cf06b3e1b8cd898e2bb0c44debffc126f43b2903c8194de1",
+    "file_count": 2079,
+    "stable": true
+  },
+  {
+    "before": "gpui-binding-before-4.json",
+    "after": "gpui-binding-after-4.json",
+    "commit": "9c8c3e43e58957242536b134fd4223d4a1ed3c24",
+    "aggregate": "9733be4224c2eeefff66b394660af226271434e2faccf590e49fb802ee87bd84",
+    "file_count": 2079,
+    "stable": true
+  },
+  {
+    "before": "gpui-binding-before-5.json",
+    "after": "gpui-binding-after-5.json",
+    "commit": "1b84ffa31daf5bf1a63776ac8856babd51d18d57",
+    "aggregate": "6d0755cd40ea7d456ebc39e52b9fc7341030f518c4d2ec633695d50edd3bd137",
+    "file_count": 2080,
+    "stable": true
+  },
+  {
+    "before": "gpui-binding-before-6.json",
+    "after": "gpui-binding-after-6.json",
+    "commit": "450692c55d17373473616423d8a98b352ea22c48",
+    "aggregate": "385d1930abecd6ac303f603675d455eb356c79d9d6780a5c12c390d0faeaa482",
+    "file_count": 2080,
+    "stable": true
+  },
+  {
+    "before": "gpui-binding-before-7.json",
+    "after": "gpui-binding-after-7.json",
+    "commit": "450692c55d17373473616423d8a98b352ea22c48",
+    "aggregate": "385d1930abecd6ac303f603675d455eb356c79d9d6780a5c12c390d0faeaa482",
+    "file_count": 2080,
+    "stable": true
+  },
+  {
+    "before": "gpui-binding-before-8.json",
+    "after": "gpui-binding-after-8.json",
+    "commit": "e2b1e9c4ef343205e00436920fd0ebefb6b237d9",
+    "aggregate": "9c42d3d95702feb363f75970cf9848c262e41628725a0477a0aea28ba4d874fb",
+    "file_count": 2080,
+    "stable": true
+  },
+  {
+    "before": "gpui-binding-before-9.json",
+    "after": "gpui-binding-after-9.json",
+    "commit": "96f704de2bba4610ec9db6140444f7ff2d9bc2a3",
+    "aggregate": "571f6087c11990526d43ae005722866d1615d2853773800614ac7de99c8c761f",
+    "file_count": 2080,
+    "stable": true
+  },
+  {
+    "before": "gpui-binding-port-before-27.json",
+    "after": "gpui-binding-port-after-27.json",
+    "commit": "b9de850f55ccc97841fde7713f2b11d3c7fb482c",
+    "aggregate": "6d6a02a571dcab8a603885f3c705084cba641b893e91e1879d777f237cd23ccc",
+    "file_count": 2133,
+    "stable": true
+  }
+]

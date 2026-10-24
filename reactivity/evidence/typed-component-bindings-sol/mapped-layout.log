@@ -1,0 +1,12 @@
+
+running 1 test
+test runtime::mapped_qualification::mapped_layout_and_cold_owner_bill_and_zero_allocation_warm_patch ... ok
+
+test result: ok. 1 passed; 0 failed; 0 ignored; 0 measured; 184 filtered out; finished in 0.00s
+
+mapped_headers,Destination=4,Binding=24,Draft=24,ElementExtra=56,Decorations=48,Fanout=32,Recipe=24,MappedRecord=32,MappedFanout=88,PropertyValue=28,MapBinding=48,MapDraft=80,MappedOperand=40,PropInputColor=48
+mapped_color_headers,SourceColor=48,Record=72,Bound=88
+mapped_public_operands,Color=48,Affine=48,number=48
+mapped_owner,33,requests=188,requested=104070,retained=33672,peak=35160,fanout_bytes=2068
+mapped_first_patch,requests=0,requested=0,retained=0,peak=0
+mapped_warm_patch,requests=0,requested=0,retained=0,peak=0

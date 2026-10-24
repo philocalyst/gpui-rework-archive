@@ -1,0 +1,12 @@
+{
+  "source_commit": "d4563f3796ce62e67a12e87fc7829316338f1a8f",
+  "parent_commit": "b9de850f55ccc97841fde7713f2b11d3c7fb482c",
+  "executable": "/root/targets/typed-binding-mutant-sol-20261024/debug/build/gpui-component/db62208d15d1d72d/out/bindings-db62208d15d1d72d",
+  "sha256": "e3ddfb0134ace2c3403e09e945ea48b569637a3f5d33f27f4f0bd6ad85805b32",
+  "elf_bytes": 156940216,
+  "cargo_fresh": false,
+  "test": "direct_checkbox_and_default_toggle_publish_without_owner_description",
+  "exit_code": 101,
+  "mutation": "Suppress checked semantic sink update, preserve palette writes",
+  "production_source_retained": "b9de850f55ccc97841fde7713f2b11d3c7fb482c"
+}

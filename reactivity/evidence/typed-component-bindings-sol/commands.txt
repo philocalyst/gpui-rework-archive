@@ -1,0 +1,40 @@
+All source gates used the frozen commit identified in their before/after guard.
+Environment: source /tmp/gpui-native-env.sh, then /tmp/gpui-nightly-env.sh.
+Cargo common: -Z checksum-freshness --config 'build.fingerprint="content"'
+--manifest-path reactivity/Cargo.toml --locked --offline.
+
+Final source: b9de850f55ccc97841fde7713f2b11d3c7fb482c.
+Each named target belongs only to this lane. No Main target was reused.
+
+typed-binding-sol-20261024, debug:
+  test -p gpui --lib -j4
+  test -p gpui-component -j4 (lib, integrations, doctests)
+  clippy -p gpui -p gpui-component --all-targets -j4 -- -D warnings
+  run -p gpui-component --example costs -j4
+
+Fresh typed-binding-sol-release-20261024:
+  build -p gpui-component --release --examples -j2
+  test -p gpui-component --release --tests -j2
+  Actual release binding_costs, costs and halloween executables then ran directly.
+
+Fresh typed-binding-sol-native-20261024, CARGO_PROFILE_DEV_DEBUG=0:
+  build -p gpui-component --features x11 --example halloween -j2
+  test -p gpui --features x11 --lib --no-run -j4
+  Actual native Halloween ran through native-capture.py under owned Xvfb/dbus.
+  Actual GPUI test binary ran native-property-test.py's one exact ignored test.
+
+Fresh typed-binding-sol-hummingbird-20261024:
+  check --manifest-path reactivity/ports/hummingbird/Cargo.toml
+        --locked --offline --all-targets -j2
+  This standalone workspace uses its own unchanged Cargo.lock and expanded guard.
+
+Fresh typed-binding-mutant-sol-20261024, separate d4563f3 worktree:
+  test -p gpui-component --test bindings --no-run -j4
+  Actual resulting binary ran the exact public direct-checkbox test, exit101.
+
+Cargo JSON logs retain exact requested features/profiles/freshness and executable
+paths. Original commands and failed attempts are in the parent conversation;
+full build/execution stdout/stderr and source guards are in gate-records.tar.gz.
+
+Readable native logs normalize line endings/terminal blank lines; gate-records.tar.gz
+preserves the original execution bytes. Shipping source diff --check passes.
