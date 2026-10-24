@@ -488,7 +488,7 @@ where
         // matching current token admits it once; diagnostic ticket equality
         // alone would revive a retained Completion after a failed start.
         // Do not consume a newer queued token when retiring an old response.
-        let admitted = self.control().current.load(Ordering::Relaxed) == message.ticket.get();
+        let admitted = self.ticket == message.ticket.get();
         if admitted {
             self.control().current.store(0, Ordering::Release);
         }
