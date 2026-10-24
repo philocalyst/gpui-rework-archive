@@ -10,6 +10,7 @@ use crate::layout::{
     line::Line, line_break::BreakLines,
 };
 use crate::style::Brush;
+use alloc::vec::Vec;
 
 use core::cmp::Ordering;
 use core::fmt;
@@ -46,11 +47,7 @@ impl<B: Brush> Layout<B> {
     /// Diagnostic-only Vec length/capacity/payload bytes; shared font bytes excluded.
     pub fn diagnostic_storage(&self) -> [[usize; 3]; 14] {
         fn row<T>(v: &Vec<T>) -> [usize; 3] {
-            [
-                v.len(),
-                v.capacity(),
-                v.capacity() * core::mem::size_of::<T>(),
-            ]
+            [v.len(), v.capacity(), v.capacity() * size_of::<T>()]
         }
         let d = &self.data;
         let s = d.shaped_text.diagnostic_storage();

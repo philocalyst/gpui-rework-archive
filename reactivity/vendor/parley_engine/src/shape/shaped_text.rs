@@ -158,11 +158,7 @@ impl ShapedText {
     /// Diagnostic-only allocation-capacity view; not part of the candidate.
     pub fn diagnostic_storage(&self) -> [[usize; 3]; 6] {
         fn row<T>(v: &Vec<T>) -> [usize; 3] {
-            [
-                v.len(),
-                v.capacity(),
-                v.capacity() * core::mem::size_of::<T>(),
-            ]
+            [v.len(), v.capacity(), v.capacity() * size_of::<T>()]
         }
         [
             row(&self.runs),
