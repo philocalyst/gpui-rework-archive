@@ -7,10 +7,11 @@ mod damage;
 mod image;
 mod text;
 pub use canvas::{
-    Canvas, CanvasScene, GlyphMask, PaintColor, PaintCommit, PaintEdit, PaintError, PaintErrorKind,
-    PaintIndex, PaintSlot, PreparedDraw, PreparedGroup, PreparedPaint, PreparedPlacement,
-    PreparedScene, PreparedSource, RenderStats, SceneStorage, SlotCommit, SlotEdit, SlotError,
-    SlotErrorKind, rounded_rect_contains, sampled_rect_clip,
+    Canvas, CanvasScene, Clip, ClipChain, ClipGeometry, ClipId, ClipShape, GlyphMask,
+    MAX_CLIP_DEPTH, MAX_CLIP_NODES, PaintColor, PaintCommit, PaintEdit, PaintError, PaintErrorKind,
+    PaintIndex, PaintSlot, PreparedClipNode, PreparedDraw, PreparedGroup, PreparedPaint,
+    PreparedPlacement, PreparedScene, PreparedSource, RenderStats, SceneStorage, SlotCommit,
+    SlotEdit, SlotError, SlotErrorKind, rounded_rect_contains, sampled_rect_clip,
 };
 pub use color::{
     Color, ColorConfig, ColorSpace, FloatRangePolicy, OutputMetadata, OutputProfile,
@@ -31,6 +32,7 @@ pub use text::{
 pub enum Error {
     InvalidDimensions,
     InvalidGeometry,
+    InvalidClip,
     InvalidPaintSlot,
     InvalidFont,
     UnsupportedFontFormat,

@@ -70,6 +70,7 @@ fn groups_are_the_same_canonical_painter_sequence_in_both_directions() {
         .flat_map(|group| {
             group.placements().map(move |p| {
                 snapshot(PreparedDraw {
+                    clip_chain: None,
                     local_rect: p.local_rect,
                     inverse: group.inverse,
                     clip: group.clip,

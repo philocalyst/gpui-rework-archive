@@ -221,6 +221,7 @@ impl<'a> Part<'a> {
             .context
             .metadata
             .is_none_or(|metadata| metadata.viewports.is_empty())
+            && !self.context.geometry.has_clips()
         {
             return viewport;
         }
@@ -228,10 +229,12 @@ impl<'a> Part<'a> {
         let mut index = Some(self.index);
         while let Some(row) = index {
             let node = &self.context.nodes[row];
-            if matches!(
-                node.kind,
-                super::NodeKind::List | super::NodeKind::ListItem | super::NodeKind::Scroll
-            ) {
+            if self.context.geometry.clips(node.identity)
+                || matches!(
+                    node.kind,
+                    super::NodeKind::List | super::NodeKind::ListItem | super::NodeKind::Scroll
+                )
+            {
                 clip = node
                     .transform(self.context.geometry.bases())
                     .and_then(|map| {
@@ -320,6 +323,9 @@ impl<'a> Part<'a> {
     /// Physical viewport-clipped bounds of the acknowledged presentation.
     /// Uniform local radius from this acknowledged sheet, independent of a
     /// newer logical inspector edit or an unacknowledged visual candidate.
+    pub fn clips_children(self) -> bool {
+        self.context.geometry.clips(self.node().identity)
+    }
     pub fn corner_radius(self) -> f32 {
         self.context.geometry.radius(self.node().identity)
     }
@@ -673,34 +679,46 @@ pub(super) fn contains_point(
     index: usize,
     point: crate::Point,
 ) -> bool {
-    use gpui_reactivity_core::CoordinateSpace;
     let node = &nodes[index];
     if !node.bounds.contains(point)
         || !node.transform(geometry.bases()).is_some_and(|map| {
-            let radius = geometry.radius(node.identity);
-            if radius == 0. {
-                CoordinateSpace::new(map).hit(node.local_rect(), point)
-            } else {
-                gpui_canvas::rounded_rect_contains(node.local_rect(), radius, map, point)
-                    .unwrap_or(false)
-            }
+            gpui_canvas::rounded_rect_contains(
+                node.local_rect(),
+                geometry.radius(node.identity),
+                map,
+                point,
+            )
+            .unwrap_or(false)
         })
     {
         return false;
     }
     // The empty frozen P column proves absence without consulting L.
-    if !has_viewports {
+    if !has_viewports && !geometry.has_clips() {
         return true;
     }
     let mut parent = node.parent.index();
     while let Some(index) = parent {
         let node = &nodes[index];
-        if matches!(
-            node.kind,
-            super::NodeKind::List | super::NodeKind::ListItem | super::NodeKind::Scroll
-        ) && !node
-            .transform(geometry.bases())
-            .is_some_and(|map| CoordinateSpace::new(map).hit(node.local_rect(), point))
+        let clipped = geometry.clips(node.identity);
+        if (clipped
+            || matches!(
+                node.kind,
+                super::NodeKind::List | super::NodeKind::ListItem | super::NodeKind::Scroll
+            ))
+            && !node.transform(geometry.bases()).is_some_and(|map| {
+                gpui_canvas::rounded_rect_contains(
+                    node.local_rect(),
+                    if clipped {
+                        geometry.radius(node.identity)
+                    } else {
+                        0.0
+                    },
+                    map,
+                    point,
+                )
+                .unwrap_or(false)
+            })
         {
             return false;
         }

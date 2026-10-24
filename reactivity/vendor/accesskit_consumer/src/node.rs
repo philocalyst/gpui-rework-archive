@@ -346,6 +346,16 @@ impl<'a> NodeRef<'a> {
         point: Point,
         filter: &impl Fn(&NodeRef) -> FilterResult,
     ) -> Option<(NodeRef<'a>, Point)> {
+        // A subtree query still obeys clips above its entry node.
+        let mut ancestor = *self;
+        let mut ancestor_point = point;
+        while let Some(parent) = ancestor.parent() {
+            ancestor_point = ancestor.direct_transform() * ancestor_point;
+            if parent.clips_children() && !parent.point_in_child_clip(ancestor_point) {
+                return None;
+            }
+            ancestor = parent;
+        }
         // A node's `Test` frame is pushed before its children, then children in
         // forward order, so that children are searched last-to-first and the
         // node's own bounds are tested only after all descendants miss.
@@ -359,15 +369,15 @@ impl<'a> NodeRef<'a> {
         while let Some(frame) = stack.pop() {
             match frame {
                 Frame::Test(node, point) => {
-                    if let Some(rect) = &node.raw_bounds() {
-                        if rect.contains(point) {
-                            return Some((node, point));
-                        }
+                    if node.point_in_bounds(point) {
+                        return Some((node, point));
                     }
                 }
                 Frame::Visit(node, point) => {
                     let filter_result = filter(&node);
-                    if filter_result == FilterResult::ExcludeSubtree {
+                    if filter_result == FilterResult::ExcludeSubtree
+                        || (node.clips_children() && !node.point_in_child_clip(point))
+                    {
                         continue;
                     }
                     if filter_result == FilterResult::Include {
@@ -382,6 +392,20 @@ impl<'a> NodeRef<'a> {
         }
 
         None
+    }
+
+    fn point_in_child_clip(&self, point: Point) -> bool {
+        self.data().hit_test_shape().map_or_else(
+            || self.raw_bounds().is_some_and(|rect| rect.contains(point)),
+            |shape| shape.contains_child_clip(point),
+        )
+    }
+
+    fn point_in_bounds(&self, point: Point) -> bool {
+        self.data().hit_test_shape().map_or_else(
+            || self.raw_bounds().is_some_and(|rect| rect.contains(point)),
+            |shape| shape.contains(point),
+        )
     }
 
     /// Returns the deepest filtered node, either this node or a descendant,

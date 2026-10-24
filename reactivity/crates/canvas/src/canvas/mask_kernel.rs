@@ -30,6 +30,7 @@ pub(super) fn coverage<S: Simd>(
     y: usize,
     stats: &mut RenderStats,
 ) -> u16 {
+    let x_pixel = x;
     stats.sample_tests += 16;
     let world_x = f64x4::from_fn(simd, |lane| x as f64 + SAMPLES[lane]);
     let clip_x = world_x.simd_ge(command.clip.x as f64)
@@ -69,7 +70,9 @@ pub(super) fn coverage<S: Simd>(
         }
         mask |= (inside.to_bitmask() as u16) << (row * 4);
     }
-    mask
+    mask & command
+        .clip_chain
+        .map_or(u16::MAX, |chain| chain.mask(simd, x_pixel, y, stats))
 }
 
 #[cfg(test)]
@@ -131,6 +134,53 @@ mod tests {
             },
         ];
         for transform in maps {
+            // Exercise exact AND of correlated prefixes on every supported
+            // backend, including a proven rectangular prefix below two equal
+            // rounded clips. No independently filtered alpha is multiplied.
+            let mut canvas = crate::Canvas::recording(64, 64, Default::default()).unwrap();
+            let rect = Rect::new(0.125, 0.375, 31.5, 30.5);
+            let parent = canvas
+                .create_clip(
+                    None,
+                    crate::ClipShape::Rect(Rect::new(0., 0., 64., 64.)),
+                    Affine::IDENTITY,
+                )
+                .unwrap();
+            let parent = canvas
+                .create_clip(
+                    Some(parent),
+                    crate::ClipShape::RoundedRect { rect, radius: 7.25 },
+                    transform,
+                )
+                .unwrap();
+            let clip = canvas
+                .create_clip(
+                    Some(parent),
+                    crate::ClipShape::RoundedRect { rect, radius: 7.25 },
+                    transform,
+                )
+                .unwrap();
+            let geometry = canvas.clip_geometry().unwrap();
+            let chain = geometry.chain(clip).unwrap();
+            let command = BorrowedCommand {
+                rect: Rect::new(0., 0., 64., 64.),
+                map: Mapping::new(Affine::IDENTITY).unwrap(),
+                clip: Rect::new(0., 0., 64., 64.),
+                clip_chain: Some(chain),
+                source: BorrowedSource::Rect,
+                color: [1.; 4],
+                bounds: [0, 0, 64, 64],
+            };
+            for y in 0..64 {
+                for x in 0..64 {
+                    assert_eq!(
+                        coverage(simd, &command, x, y, &mut RenderStats::default()),
+                        chain.sample_mask(x as u32, y as u32),
+                        "clip AND {:?} {transform:?} {x},{y}",
+                        simd.level()
+                    );
+                }
+            }
             let map = Mapping::new(transform).unwrap();
             for world_x in [
                 [0.0, -0.0, 1.0, -1.0],
@@ -169,6 +219,7 @@ mod tests {
                     for radius in [0.0, -0.0, f32::from_bits(1), 0.125, 3.25, f32::MAX] {
                         for source in [BorrowedSource::Rect, BorrowedSource::Rounded(radius)] {
                             let command = BorrowedCommand {
+                                clip_chain: None,
                                 rect,
                                 clip,
                                 map,
@@ -208,6 +259,10 @@ mod tests {
 
     #[test]
     fn every_supported_backend_matches_mapping_bits_and_all_primitive_sites() {
+        eprintln!(
+            "clip mask backend: Fallback; detected {:?}",
+            fearless_simd::Level::new()
+        );
         check(fearless_simd::Fallback::new());
         let level = fearless_simd::Level::new();
         #[cfg(any(target_arch = "x86", target_arch = "x86_64"))]

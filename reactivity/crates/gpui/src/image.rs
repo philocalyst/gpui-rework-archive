@@ -12,11 +12,25 @@ pub fn image(resource: &Image) -> El<'_> {
 
 #[derive(Clone, Copy)]
 pub(crate) struct ImageSpec<'a> {
-    pub geometry: crate::property::GeometryStyle,
+    pub corner_radius: f32,
+    pub clip_children: bool,
     pub resource: &'a Image,
     pub sampling: ImageSampling,
 }
 pub(crate) struct ImageDraft<'a> {
     pub node: u32,
     pub spec: ImageSpec<'a>,
+}
+
+impl ImageSpec<'_> {
+    pub fn geometry(self) -> crate::property::GeometryStyle {
+        crate::property::GeometryStyle {
+            corner_radius: self.corner_radius,
+            clip_children: self.clip_children,
+        }
+    }
+    pub fn set_geometry(&mut self, geometry: crate::property::GeometryStyle) {
+        self.corner_radius = geometry.corner_radius;
+        self.clip_children = geometry.clip_children;
+    }
 }

@@ -587,8 +587,28 @@ fn projected_node(part: Part<'_>) -> Node {
             y1: f64::from(bounds.y) + f64::from(bounds.height),
         });
     }
-    if matches!(part.role(), Role::List | Role::ListItem | Role::ScrollView) {
+    let clips_children = part.clips_children()
+        || matches!(part.role(), Role::List | Role::ListItem | Role::ScrollView);
+    if clips_children {
         node.set_clips_children();
+    }
+    if let Some(map) = part.transform()
+        && (clips_children || part.corner_radius() != 0.0 || map.b != 0.0 || map.c != 0.0)
+    {
+        let rect = part.local_bounds();
+        let shape = accesskit::HitTestShape::rounded_rect(
+            [rect.x, rect.y, rect.width, rect.height],
+            part.corner_radius(),
+            [map.a, map.b, map.c, map.d, map.tx, map.ty],
+        )
+        .expect("acknowledged paint geometry is finite and invertible")
+        .with_child_radius(if part.clips_children() {
+            part.corner_radius()
+        } else {
+            0.0
+        })
+        .expect("acknowledged clip radius is finite and nonnegative");
+        node.set_hit_test_shape(shape);
     }
     if let (Some(viewport), Some([x, y])) = (part.viewport(), scroll_basis(part)) {
         node.set_scroll_x(viewport.offset.x * x);
@@ -643,6 +663,7 @@ fn project(
 ) -> TreeUpdate {
     let mut root = Node::new(accesskit::Role::Window);
     root.set_label(title);
+    root.set_clips_children();
     root.set_clips_children();
     root.set_bounds(accesskit::Rect {
         x0: 0.0,

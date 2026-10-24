@@ -32,6 +32,7 @@ pub enum PropertyId {
     Justify = 11,
     Wrap = 12,
     CornerRadius = 13,
+    Clip = 14,
 }
 
 #[derive(Clone, Copy, Debug, PartialEq, Eq)]
@@ -67,6 +68,7 @@ pub enum PropertyDestination {
 #[derive(Clone, Copy, Debug, Default, PartialEq)]
 pub struct GeometryStyle {
     pub(crate) corner_radius: f32,
+    pub(crate) clip_children: bool,
 }
 
 mod sealed {
@@ -124,12 +126,18 @@ impl sealed::Domain for Style {
         id.set_erased(value, edit)
     }
 }
+impl GeometryStyle {
+    pub(crate) fn same(self, other: Self) -> bool {
+        self.corner_radius.to_bits() == other.corner_radius.to_bits()
+            && self.clip_children == other.clip_children
+    }
+}
 impl sealed::Domain for GeometryStyle {
     fn get_erased(id: PropertyId, value: &Self) -> Result<PropertyValue, PropertyError> {
-        if id == PropertyId::CornerRadius {
-            Ok(PropertyValue::Number(value.corner_radius))
-        } else {
-            Err(wrong_destination(id, PropertyDestination::Geometry))
+        match id {
+            PropertyId::CornerRadius => Ok(PropertyValue::Number(value.corner_radius)),
+            PropertyId::Clip => Ok(PropertyValue::Flag(value.clip_children)),
+            _ => Err(wrong_destination(id, PropertyDestination::Geometry)),
         }
     }
     fn set_erased(
@@ -137,19 +145,21 @@ impl sealed::Domain for GeometryStyle {
         value: &mut Self,
         edit: PropertyValue,
     ) -> Result<bool, PropertyError> {
-        if id != PropertyId::CornerRadius {
-            return Err(wrong_destination(id, PropertyDestination::Geometry));
-        }
-        if let PropertyValue::Number(number) = edit {
-            CORNER_RADIUS.set(value, number)
-        } else {
-            Err(PropertyError {
+        match (id, edit) {
+            (PropertyId::CornerRadius, PropertyValue::Number(radius)) => {
+                CORNER_RADIUS.set(value, radius)
+            }
+            (PropertyId::Clip, PropertyValue::Flag(clipped)) => CLIP.set(value, clipped),
+            _ if id.info().destination != PropertyDestination::Geometry => {
+                Err(wrong_destination(id, PropertyDestination::Geometry))
+            }
+            _ => Err(PropertyError {
                 property: id,
                 reason: PropertyErrorKind::WrongKind {
-                    expected: ValueKind::Number,
+                    expected: id.info().kind,
                     actual: edit.kind(),
                 },
-            })
+            }),
         }
     }
 }
@@ -380,13 +390,14 @@ macro_rules! properties {
         };
         pub const $name: Property<$ty> = Property(&$decl);)+
         /// References to the same declaration metadata as the typed selectors.
-        pub static PROPERTIES: &[&PropertyInfo] = &[$($name.info()),+, CORNER_RADIUS.info()];
-        const _: () = { $(assert!(PropertyId::$id as u16 <= 8191);)+ assert!(PropertyId::CornerRadius as u16 <= 8191); };
+        pub static PROPERTIES: &[&PropertyInfo] = &[$($name.info()),+, CORNER_RADIUS.info(), CLIP.info()];
+        const _: () = { $(assert!(PropertyId::$id as u16 <= 8191);)+ assert!(PropertyId::CornerRadius as u16 <= 8191); assert!(PropertyId::Clip as u16 <= 8191); };
         impl PropertyId {
             pub(crate) const fn from_code(code: u16) -> Option<Self> {
                 match code {
                     $(value if value == Self::$id as u16 => Some(Self::$id),)+
                     value if value == Self::CornerRadius as u16 => Some(Self::CornerRadius),
+                    value if value == Self::Clip as u16 => Some(Self::Clip),
                     _ => None,
                 }
             }
@@ -394,17 +405,18 @@ macro_rules! properties {
                 match (self, value) {
                     $((Self::$id, PropertyValue::$kind(value)) => $name.validate(&value),)+
                     (Self::CornerRadius, PropertyValue::Number(value)) => CORNER_RADIUS.validate(&value),
+                    (Self::Clip, PropertyValue::Flag(value)) => CLIP.validate(&value),
                     _ => Err(PropertyError { property: self, reason: PropertyErrorKind::WrongKind { expected: self.info().kind, actual: value.kind() } }),
                 }
             }
             pub const fn info(self) -> &'static PropertyInfo {
-                match self { $(Self::$id => $name.info()),+, Self::CornerRadius => CORNER_RADIUS.info() }
+                match self { $(Self::$id => $name.info()),+, Self::CornerRadius => CORNER_RADIUS.info(), Self::Clip => CLIP.info() }
             }
             pub(crate) const fn value_kind(self) -> ValueKind {
-                match self { $(Self::$id => ValueKind::$kind),+, Self::CornerRadius => ValueKind::Number }
+                match self { $(Self::$id => ValueKind::$kind),+, Self::CornerRadius => ValueKind::Number, Self::Clip => ValueKind::Flag }
             }
             pub(crate) fn get_erased(self, style: &Style) -> Result<PropertyValue,PropertyError> {
-                match self { $(Self::$id => Ok(PropertyValue::$kind($name.get(style)))),+, Self::CornerRadius=>Err(wrong_destination(self,PropertyDestination::Style)) }
+                match self { $(Self::$id => Ok(PropertyValue::$kind($name.get(style)))),+, Self::CornerRadius|Self::Clip=>Err(wrong_destination(self,PropertyDestination::Style)) }
             }
             pub(crate) fn set_erased(self, style: &mut Style, value: PropertyValue) -> Result<bool, PropertyError> {
                 if self.info().destination != PropertyDestination::Style { return Err(wrong_destination(self,PropertyDestination::Style)); }
@@ -478,6 +490,23 @@ static RADIUS_DECL: Declaration<f32, GeometryStyle> = Declaration {
 /// ```
 pub const CORNER_RADIUS: Property<f32, GeometryStyle> = Property(&RADIUS_DECL);
 
+static CLIP_DECL: Declaration<bool, GeometryStyle> = Declaration {
+    info: PropertyInfo {
+        destination: PropertyDestination::Geometry,
+        id: PropertyId::Clip,
+        name: "clip",
+        kind: ValueKind::Flag,
+        impact: Impact::Geometry,
+    },
+    get: |geometry| geometry.clip_children,
+    put: |geometry, value| geometry.clip_children = value,
+    validate: |_| Ok(()),
+    same: <bool as ExactValue>::same,
+};
+/// Intersect this part and its descendants with its transformed local bounds
+/// and uniform corner radius. Its presence and overrides are geometry-owned.
+pub const CLIP: Property<bool, GeometryStyle> = Property(&CLIP_DECL);
+
 /// Closed inspector seam. No boxed erased values, type IDs or external setters.
 /// New schema families may be added; external tools should retain an unsupported
 /// read-only row for unfamiliar kinds. IDs are not a versioned preset format.
@@ -508,6 +537,13 @@ impl PropertyValue {
     }
 }
 impl PropertyId {
+    pub(crate) fn set_geometry(
+        self,
+        destination: &mut GeometryStyle,
+        value: PropertyValue,
+    ) -> Result<bool, PropertyError> {
+        <GeometryStyle as sealed::Domain>::set_erased(self, destination, value)
+    }
     pub(crate) fn value<D: PropertyDomain>(
         self,
         destination: &D,
@@ -768,7 +804,7 @@ mod tests {
             size_of_val(PROPERTIES)
         );
         assert_eq!(std::mem::size_of_val(&WIDTH), std::mem::size_of::<usize>());
-        assert_eq!(PROPERTIES.len(), 13);
+        assert_eq!(PROPERTIES.len(), 14);
         for (index, info) in PROPERTIES.iter().enumerate() {
             assert!(!info.name.is_empty());
             assert!(std::ptr::eq(*info, info.id.info()));
@@ -779,7 +815,9 @@ mod tests {
             );
             let expected = match info.id {
                 PropertyId::Foreground | PropertyId::Background => Impact::Paint,
-                PropertyId::Transform | PropertyId::CornerRadius => Impact::Geometry,
+                PropertyId::Transform | PropertyId::CornerRadius | PropertyId::Clip => {
+                    Impact::Geometry
+                }
                 _ => Impact::Layout,
             };
             assert_eq!(info.impact, expected);

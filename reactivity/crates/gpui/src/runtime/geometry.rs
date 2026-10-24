@@ -46,6 +46,7 @@ impl Basis {
     }
 }
 struct Radius {
+    clip_children: bool,
     identity: u64,
     value: f32,
 }
@@ -58,6 +59,7 @@ struct Radius {
 pub(super) struct Record([u32; 4]);
 impl Record {
     const RADIUS: u32 = 0x7fc0_0000;
+    const CLIPPED: u32 = 0x7fc0_0001;
 
     fn from_basis(basis: Basis) -> Self {
         debug_assert!(
@@ -70,22 +72,30 @@ impl Record {
     }
     fn from_radius(radius: Radius) -> Self {
         Self([
-            Self::RADIUS,
+            if radius.clip_children {
+                Self::CLIPPED
+            } else {
+                Self::RADIUS
+            },
             radius.value.to_bits(),
             radius.identity as u32,
             (radius.identity >> 32) as u32,
         ])
     }
     fn is_basis(&self) -> bool {
-        self.0[0] != Self::RADIUS
+        f32::from_bits(self.0[0]).is_finite()
     }
     fn basis(self) -> Basis {
         debug_assert!(self.is_basis());
         Basis(self.0)
     }
     fn radius(self) -> Radius {
-        debug_assert!(!self.is_basis());
+        assert!(
+            matches!(self.0[0], Self::RADIUS | Self::CLIPPED),
+            "closed shape record tag"
+        );
         Radius {
+            clip_children: self.0[0] == Self::CLIPPED,
             identity: u64::from(self.0[2]) | (u64::from(self.0[3]) << 32),
             value: f32::from_bits(self.0[1]),
         }
@@ -171,6 +181,18 @@ impl<'a> GeometryView<'a> {
     pub fn bases(self) -> Bases<'a> {
         Bases::new(&self.records[..self.radius_start])
     }
+    pub fn clips(self, identity: u64) -> bool {
+        let radii = &self.records[self.radius_start..];
+        radii
+            .binary_search_by_key(&identity, |record| record.radius().identity)
+            .ok()
+            .is_some_and(|index| radii[index].radius().clip_children)
+    }
+    pub fn has_clips(self) -> bool {
+        self.records[self.radius_start..]
+            .iter()
+            .any(|record| record.radius().clip_children)
+    }
     pub fn radius(self, identity: u64) -> f32 {
         let radii = &self.records[self.radius_start..];
         radii
@@ -213,11 +235,13 @@ impl Geometry {
             self.current
                 .iter()
                 .filter(|(identity, style)| {
-                    style.corner_radius.to_bits() != 0 && include(*identity)
+                    (style.corner_radius.to_bits() != 0 || style.clip_children)
+                        && include(*identity)
                 })
                 .map(|(identity, style)| {
                     Record::from_radius(Radius {
                         identity: *identity,
+                        clip_children: style.clip_children,
                         value: style.corner_radius,
                     })
                 }),
@@ -232,6 +256,9 @@ impl Geometry {
             self.presented = column;
         }
     }
+    pub fn has_logical_clips(&self) -> bool {
+        self.current.iter().any(|(_, style)| style.clip_children)
+    }
     pub fn get(&self, identity: u64) -> GeometryStyle {
         self.current
             .binary_search_by_key(&identity, |entry| entry.0)
@@ -243,7 +270,10 @@ impl Geometry {
             .current
             .binary_search_by_key(&identity, |entry| entry.0);
         // Keep authored -0 for logical inspection; paint/hit use ordinary zero.
-        match (at, value.corner_radius.to_bits() != 0) {
+        match (
+            at,
+            value.corner_radius.to_bits() != 0 || value.clip_children,
+        ) {
             (Ok(i), true) => self.current[i].1 = value,
             (Ok(i), false) => {
                 self.current.remove(i);
@@ -273,20 +303,16 @@ pub(super) fn patch(
         .as_deref()
         .and_then(|m| m.geometry.as_ref())
         .map_or_else(Default::default, |g| g.get(identity));
-    let crate::property::PropertyValue::Number(radius) = value else {
-        unreachable!("validated geometry value")
-    };
     let after = if let Some(geometry) = metadata.as_deref_mut().and_then(|m| m.geometry.as_mut()) {
         geometry
             .overrides
             .update_base(identity, before, id, value)?
     } else {
-        GeometryStyle {
-            corner_radius: radius,
-        }
+        let mut after = before;
+        id.set_geometry(&mut after, value)?;
+        after
     };
-    let changed =
-        !crate::property::CORNER_RADIUS.same_authoring(&before.corner_radius, &after.corner_radius);
+    let changed = !before.same(after);
     if changed {
         metadata
             .get_or_insert_with(Default::default)
@@ -318,12 +344,10 @@ impl<M: View + 'static> Runtime<M> {
             };
             let before = geometry.get(node.identity());
             let after = geometry.overrides.resolve(node.identity(), declared);
-            if !crate::property::CORNER_RADIUS
-                .same_authoring(&before.corner_radius, &after.corner_radius)
-            {
+            if !before.same(after) {
                 self.dirty = true;
             }
-            if after.corner_radius.to_bits() != 0 {
+            if after.corner_radius.to_bits() != 0 || after.clip_children {
                 next.push((node.identity(), after));
             }
         }
@@ -391,8 +415,7 @@ impl<M: View + 'static, L: crate::remote::LaneSet<M>> RuntimeMut<'_, M, L> {
         if geometry.unused() {
             metadata.geometry = None;
         }
-        let changed = !crate::property::CORNER_RADIUS
-            .same_authoring(&before.corner_radius, &after.corner_radius);
+        let changed = !before.same(after);
         runtime.changed_nodes = usize::from(changed);
         runtime.dirty |= changed;
         if runtime.metadata.as_deref().is_some_and(Metadata::unused) {
@@ -706,6 +729,7 @@ mod basis_tests {
             geometry.store(
                 identity,
                 GeometryStyle {
+                    clip_children: false,
                     corner_radius: value,
                 },
             );
@@ -843,5 +867,46 @@ mod virtual_basis_tests {
             .as_ref()
             .unwrap();
         assert_eq!(geometry.view().radius_start, after.len());
+    }
+}
+
+#[cfg(test)]
+mod clip_layout_tests {
+    use super::*;
+    #[test]
+    fn clipping_headers_and_cold_builder_costs_are_explicit() {
+        println!(
+            "CLIP_LAYOUT geometry_style={} decorations={} extra={} parts={} image_spec={} image_draft={} el={} node={} presented={} style={} record={}",
+            size_of::<GeometryStyle>(),
+            size_of::<crate::semantic::Decorations<'_>>(),
+            size_of::<crate::semantic::ElementExtra<'_>>(),
+            size_of::<crate::semantic::ExtraParts<'_>>(),
+            size_of::<crate::image::ImageSpec<'_>>(),
+            size_of::<crate::image::ImageDraft<'_>>(),
+            size_of::<crate::El<'_>>(),
+            size_of::<Node>(),
+            size_of::<Presented>(),
+            size_of::<crate::Style>(),
+            size_of::<Record>()
+        );
+        for clipped in [false, true] {
+            let mut held = None;
+            let measured = allocation_counter::measure(|| {
+                held = Some(if clipped {
+                    crate::div().clip()
+                } else {
+                    crate::div()
+                });
+            });
+            println!(
+                "CLIP_BUILDER clipped={clipped} count={} bytes={}",
+                measured.count_total, measured.bytes_total
+            );
+            drop(held);
+        }
+        assert_eq!(size_of::<Node>(), 40);
+        assert_eq!(size_of::<Presented>(), 64);
+        assert_eq!(size_of::<crate::Style>(), 88);
+        assert_eq!(size_of::<Record>(), 16);
     }
 }

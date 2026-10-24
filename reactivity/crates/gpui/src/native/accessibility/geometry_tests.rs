@@ -493,3 +493,255 @@ fn nonpainted_unplaced_text_preserves_content_without_inventing_window_geometry(
     })
     .unwrap();
 }
+
+#[test]
+fn native_consumer_rounded_clip_hits_match_acknowledged_parts() {
+    use crate::{
+        Color, Point, div,
+        property::{CLIP, Contribution},
+    };
+    struct ClipPage {
+        map: Affine,
+        broken: bool,
+    }
+    impl View for ClipPage {
+        fn view(&self) -> El<'_> {
+            div()
+                .size(32)
+                .rounded(16.0)
+                .clip()
+                .name("clip-parent")
+                .transform(if self.broken {
+                    Affine::scale(0., 1.)
+                } else {
+                    self.map
+                })
+                .child(
+                    div()
+                        .size(48)
+                        .bg(Color::BLACK)
+                        .name("clip-child")
+                        .on_click(|_: &mut Self| {}),
+                )
+        }
+    }
+    for map in [
+        Affine::IDENTITY,
+        Affine {
+            a: -1.,
+            b: 0.125,
+            c: 0.25,
+            d: 1.,
+            tx: 40.,
+            ty: 4.,
+        },
+    ] {
+        let mut win = Win::recording_scaled(
+            ClipPage { map, broken: false },
+            WindowOptions {
+                size: [80, 80],
+                ..Default::default()
+            },
+            1.25,
+        )
+        .unwrap();
+        win.presented(win.with_scene(|_, token| token).unwrap())
+            .unwrap();
+        let parent = win.query().name("clip-parent").one().unwrap();
+        let child = win.query().name("clip-child").one().unwrap();
+        let verify = |win: &Win<ClipPage>| {
+            let mut cohort = Cohort::default();
+            cohort.refresh(win).unwrap();
+            let sheet = win.accessibility_sheet().unwrap();
+            let tree = Tree::new(
+                project(&sheet, win.accessibility_state().unwrap(), "Clip", &cohort),
+                true,
+            );
+            let mut child_id = None;
+            let mut points = Vec::new();
+            win.visit(|part| {
+                if part.target() == child {
+                    child_id = Some(cohort.id(part));
+                    for y in 0..64 {
+                        for x in 0..64 {
+                            let point = Point {
+                                x: x as f32 + 0.5,
+                                y: y as f32 + 0.5,
+                            };
+                            points.push((point, part.contains_point(point)));
+                        }
+                    }
+                }
+                if part.target() == parent {
+                    let node = tree
+                        .state()
+                        .node_by_tree_local_id(cohort.id(part), TreeId::ROOT)
+                        .unwrap();
+                    assert_eq!(node.clips_children(), part.clips_children());
+                    assert!(node.data().hit_test_shape().is_some());
+                    close(
+                        node.bounding_box().unwrap(),
+                        part.unclipped_bounds().unwrap(),
+                    );
+                }
+            })
+            .unwrap();
+            let child_id = child_id.unwrap();
+            let child_node = tree
+                .state()
+                .node_by_tree_local_id(child_id, TreeId::ROOT)
+                .unwrap();
+            let filter = |node: &accesskit_consumer::NodeRef<'_>| {
+                if node.id() == child_node.id() {
+                    accesskit_consumer::FilterResult::Include
+                } else {
+                    accesskit_consumer::FilterResult::ExcludeNode
+                }
+            };
+            let parent_id = child_node.parent().unwrap().id();
+            let blocked = |node: &accesskit_consumer::NodeRef<'_>| {
+                if node.id() == parent_id {
+                    accesskit_consumer::FilterResult::ExcludeSubtree
+                } else {
+                    filter(node)
+                }
+            };
+            for (point, expected) in points {
+                let point = accesskit::Point::new(f64::from(point.x), f64::from(point.y));
+                assert!(
+                    tree.state().root().node_at_point(point, &blocked).is_none(),
+                    "ExcludeSubtree blocks descendants; ExcludeNode below keeps them reachable"
+                );
+                assert_eq!(
+                    tree.state().root().node_at_point(point, &filter).is_some(),
+                    expected,
+                    "root query {map:?} {point:?}"
+                );
+                assert_eq!(
+                    child_node.node_at_point(point, &filter).is_some(),
+                    expected,
+                    "subtree query obeys ancestor {map:?} {point:?}"
+                );
+            }
+        };
+        verify(&win);
+        win.set_property(parent, CLIP, Contribution::Set(false))
+            .unwrap();
+        let eligible = win.with_scene(|_, token| token).unwrap();
+        verify(&win); // C cannot rewrite native P.
+        assert!(win.update(|page| page.broken = true).is_err());
+        verify(&win); // A failed newer L cannot rewrite native P either.
+        win.presented(eligible).unwrap();
+        verify(&win);
+    }
+    eprintln!(
+        "native_clip_headers,node={},shape={}",
+        size_of::<accesskit::Node>(),
+        size_of::<accesskit::HitTestShape>()
+    );
+}
+
+#[test]
+fn native_shape_predicate_matches_canvas_at_circle_ties_and_signed_zero() {
+    for map in [
+        Affine::IDENTITY,
+        Affine {
+            a: -1.,
+            b: -0.,
+            c: 0.,
+            d: 1.,
+            tx: 10.,
+            ty: -0.,
+        },
+        Affine {
+            a: 1.,
+            b: 0.125,
+            c: 0.25,
+            d: 1.,
+            tx: 4.,
+            ty: 3.,
+        },
+    ] {
+        let rect = crate::Rect::new(0., 0., 10., 10.);
+        for radius in [0., f32::from_bits(1), 5., f32::MAX] {
+            let shape = accesskit::HitTestShape::rounded_rect(
+                [0., 0., 10., 10.],
+                radius,
+                [map.a, map.b, map.c, map.d, map.tx, map.ty],
+            )
+            .unwrap();
+            for x in [-0., 0., 2., 5., 10., 10_f32.next_down(), 10_f32.next_up()] {
+                for y in [0., 1_f32.next_down(), 1., 1_f32.next_up(), 5., 10.] {
+                    let point = map.apply(crate::Point { x, y }).unwrap();
+                    assert_eq!(
+                        shape.contains(accesskit::Point::new(point.x.into(), point.y.into())),
+                        gpui_canvas::rounded_rect_contains(rect, radius, map, point).unwrap(),
+                        "{map:?} {point:?} {radius:?}"
+                    );
+                }
+            }
+        }
+    }
+    for (bounds, radius, map) in [
+        ([0., 0., -1., 1.], 0., [1., 0., 0., 1., 0., 0.]),
+        ([0., 0., 1., 1.], f32::NAN, [1., 0., 0., 1., 0., 0.]),
+        ([0., 0., 1., 1.], 0., [0., 0., 0., 1., 0., 0.]),
+    ] {
+        assert!(accesskit::HitTestShape::rounded_rect(bounds, radius, map).is_none());
+    }
+}
+
+#[test]
+fn continuous_zero_radius_edge_ties_share_canvas_and_native_arithmetic() {
+    struct Edge;
+    impl View for Edge {
+        fn view(&self) -> El<'_> {
+            crate::div()
+                .size(32)
+                .clip()
+                .bg(crate::Color::BLACK)
+                .transform(Affine {
+                    a: 0.1,
+                    tx: 0.3,
+                    ..Affine::IDENTITY
+                })
+        }
+    }
+    let win = Win::demo(Edge);
+    let mut cohort = Cohort::default();
+    cohort.refresh(&win).unwrap();
+    let mut update = project(
+        &win.accessibility_sheet().unwrap(),
+        win.accessibility_state().unwrap(),
+        "Edge",
+        &cohort,
+    );
+    let (_, node) = update.nodes.pop().unwrap();
+    let shape = node.hit_test_shape().unwrap();
+    win.visit(|part| {
+        let map = part.transform().unwrap();
+        for x in [0.3_f32.next_down(), 0.3, 0.3_f32.next_up()] {
+            let point = crate::Point { x, y: 0.5 };
+            let expected =
+                gpui_canvas::rounded_rect_contains(part.local_bounds(), 0., map, point).unwrap();
+            assert_eq!(part.contains_point(point), expected);
+            assert_eq!(
+                shape.contains(accesskit::Point::new(x.into(), 0.5)),
+                expected
+            );
+            assert_eq!(expected, x > 0.3);
+        }
+        // This lies before the first accepted 4x4 sample column, yet continuous
+        // input accepts it. No coverage-lattice rectangle enters the hit path.
+        assert!(part.contains_point(crate::Point {
+            x: 0.3_f32.next_up(),
+            y: 0.5
+        }));
+        assert!(
+            gpui_reactivity_core::CoordinateSpace::new(map)
+                .hit(part.local_bounds(), crate::Point { x: 0.3, y: 0.5 }),
+            "freeze the old subtract-first positive control"
+        );
+    })
+    .unwrap();
+}
