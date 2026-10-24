@@ -425,9 +425,6 @@ where
     fn fault(&mut self, error: QuestionFault) {
         // Exhaustion permanently retires this lane, including after another
         // fault or a diagnostic counter reset. No later refresh may mint work.
-        if matches!(self.state, State::Retired(_)) {
-            return;
-        }
         if matches!(
             error,
             QuestionFault::InputUnavailable | QuestionFault::Exhausted
@@ -570,9 +567,6 @@ where
                 return Ok(false);
             }
             Change::Retry(key) if key != self.key && !A::READERS => return Ok(false),
-            _ if matches!(self.state, State::Retired(_)) => {
-                return Err(QuestionFault::Exhausted.into());
-            }
             Change::Source(None) => {
                 let Some(next) = self.coarse.checked_add(1) else {
                     self.fault(QuestionFault::Exhausted);
