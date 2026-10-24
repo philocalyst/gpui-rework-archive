@@ -427,6 +427,7 @@ impl Cohort {
                 node.add_action(accesskit::Action::SetTextSelection);
                 node.add_action(accesskit::Action::ReplaceSelectedText);
             } else {
+                node.set_read_only();
                 node.remove_action(accesskit::Action::SetValue);
                 node.remove_action(accesskit::Action::Focus);
                 node.remove_action(accesskit::Action::Blur);

@@ -105,17 +105,12 @@ fn client(
                     }
                     let input = observe(&runtime, deadline, &bus, &window, value, caret).await;
                     let extents = if (2..=4).contains(&step) {
-                        let interfaces: Vec<String> =
-                            proxy(&bus, &input, "org.a11y.atspi.Accessible")
-                                .await?
-                                .call("GetInterfaces", &())
-                                .await?;
-                        assert!(
-                            !interfaces
-                                .iter()
-                                .any(|name| name == "org.a11y.atspi.EditableText"),
-                            "preview is read-only native text"
-                        );
+                        // AccessKit keeps EditableText alongside text ranges. Its
+                        // live action guards must reject edits of preview bytes.
+                        let editable = proxy(&bus, &input, "org.a11y.atspi.EditableText").await?;
+                        let admitted: bool =
+                            editable.call("SetTextContents", &("forbidden",)).await?;
+                        assert!(!admitted, "preview cannot acquire source edit authority");
                         let text = proxy(&bus, &input, "org.a11y.atspi.Text").await?;
                         let rect: (i32, i32, i32, i32) =
                             text.call("GetCharacterExtents", &(4i32, 1u32)).await?;

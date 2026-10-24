@@ -1226,6 +1226,7 @@ fn ime_accesskit_uses_acknowledged_display_and_selection_without_preview_edit_au
         // Every acknowledged display byte, selection, TextRun and bound stays P.
         for (_, node) in &mut tree.nodes {
             node.clear_actions();
+            node.clear_read_only();
         }
         tree
     }
@@ -1298,6 +1299,7 @@ fn ime_accesskit_uses_acknowledged_display_and_selection_without_preview_edit_au
     assert!(!node.supports_action(accesskit::Action::ReplaceSelectedText));
     assert!(!node.supports_action(accesskit::Action::SetTextSelection));
     assert!(!node.supports_action(accesskit::Action::SetValue));
+    assert!(node.is_read_only());
     let tree = Tree::new(current.clone(), true);
     assert_eq!(
         tree.state()
