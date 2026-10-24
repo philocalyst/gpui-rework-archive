@@ -20,6 +20,7 @@ struct Context<'a> {
     metadata: Option<&'a super::metadata::Sheet>,
     geometry: super::geometry::GeometryView<'a>,
     selection: Option<super::editing::SelectionSnapshot>,
+    composition: Option<&'a super::ime::MarkSnapshot>,
 }
 impl<'a> Context<'a> {
     fn new<M>(runtime: &'a Runtime<M>) -> Self {
@@ -39,6 +40,12 @@ impl<'a> Context<'a> {
                 .as_ref()
                 .and_then(|m| m.editing.as_ref())
                 .and_then(|frozen| frozen.presented),
+            composition: runtime
+                .metadata
+                .as_ref()
+                .and_then(|m| m.editing.as_ref())
+                .and_then(|e| e.ime.as_ref())
+                .and_then(|ime| ime.presented.as_ref()),
             geometry: runtime.presented_geometry(),
             metadata: runtime
                 .metadata
@@ -302,6 +309,11 @@ impl<'a> Part<'a> {
     }
     /// Selection in the acknowledged input text, independent of newer logical
     /// edits or an unacknowledged candidate. Other parts have no selection.
+    pub fn marked_text(self) -> Option<super::ime::MarkedText> {
+        self.context
+            .composition
+            .and_then(|mark| mark.marked(self.node().identity))
+    }
     pub fn selection(self) -> Option<gpui_canvas::TextSelection> {
         let value = self.value()?;
         if let Some(selection) = self

@@ -305,6 +305,9 @@ impl<M: View + 'static, L: LaneSet<M>> Win<M, L> {
         let Some(target) = runtime.focused else {
             return Ok(runtime.commit());
         };
+        if runtime.ime_composing() {
+            return Ok(runtime.commit());
+        }
         match key {
             Key::Text(text) if text.chars().any(char::is_control) => Ok(runtime.commit()),
             Key::Text(text) => runtime.replace_input(target, None, text),
@@ -439,6 +442,7 @@ impl<M: View + 'static> Runtime<M> {
         }) {
             self.focused = None;
         }
+        self.reconcile_ime();
     }
     fn tab(&mut self, reverse: bool) -> Result<Commit, Error> {
         self.current_presentation()?;

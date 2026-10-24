@@ -44,6 +44,8 @@ const _: () = assert!(MAX_LAYOUT_DEPTH <= u8::MAX as usize);
 mod accessibility;
 mod delivery;
 mod editing;
+mod ime;
+pub use ime::{ImeEvent, ImeSession, MarkedText};
 mod frontier;
 mod text_geometry;
 use editing::EditingIntent;
@@ -693,6 +695,15 @@ impl TextSite {
         font_size: f32,
         input: WidthMeasureInput,
     ) -> Result<TextMetrics, Error> {
+        self.measure_text(service, font_size, input, None)
+    }
+    fn measure_text(
+        &mut self,
+        service: &mut TextShaper<'_>,
+        font_size: f32,
+        input: WidthMeasureInput,
+        display: Option<&str>,
+    ) -> Result<TextMetrics, Error> {
         let width = input
             .known_dimensions
             .width
@@ -703,7 +714,7 @@ impl TextSite {
             });
         let width = width.map(|value| value.max(f32::MIN_POSITIVE));
         if self.shaped.is_none() && input.known_dimensions.width.is_some() {
-            self.shape_for(service, font_size, width)?;
+            self.shape_text(service, font_size, width, display)?;
         }
         if let Some(shape) = &self.shaped
             && shape.width == width.map(f32::to_bits)
@@ -715,13 +726,22 @@ impl TextSite {
                 baseline: shape.layout.baseline,
             });
         }
-        Ok(service.measure(&self.value, font_size, width)?)
+        Ok(service.measure(display.unwrap_or(&self.value), font_size, width)?)
     }
     fn shape_for<'n>(
         &'n mut self,
         service: &mut TextShaper<'_>,
         font_size: f32,
         width: Option<f32>,
+    ) -> Result<&'n TextLayout, Error> {
+        self.shape_text(service, font_size, width, None)
+    }
+    fn shape_text<'n>(
+        &'n mut self,
+        service: &mut TextShaper<'_>,
+        font_size: f32,
+        width: Option<f32>,
+        display: Option<&str>,
     ) -> Result<&'n TextLayout, Error> {
         let width = width.map(|value| value.max(f32::MIN_POSITIVE));
         let key = width.map(f32::to_bits);
@@ -730,7 +750,8 @@ impl TextSite {
             .as_ref()
             .is_none_or(|shape| shape.width != key || shape.layout.font_size() != font_size)
         {
-            let layout = service.shape_interactive(&self.value, font_size, width)?;
+            let layout =
+                service.shape_interactive(display.unwrap_or(&self.value), font_size, width)?;
             self.shaped = Some(Shaped { width: key, layout });
         }
         Ok(&self.shaped.as_ref().unwrap().layout)
@@ -1282,6 +1303,15 @@ impl<M: View + 'static> Win<M> {
     ) -> Result<Self, Error> {
         Self::mount(model, options, true, scale_factor)
     }
+    /// Record with an explicit immutable outline font, including initial text.
+    /// Custom font coverage is explicit; this does not discover OS fallback fonts.
+    pub fn recording_with_font(
+        model: M,
+        options: WindowOptions,
+        font: gpui_canvas::FontFace,
+    ) -> Result<Self, Error> {
+        Self::mount_text_lanes(model, (), options, false, 1., false, Some(font))
+    }
     /// Native/backend path: command recording, no CPU framebuffer. Initial S0
     /// has no presented authority until the adapter acknowledges its token.
     pub fn recording(model: M, options: WindowOptions) -> Result<Self, Error> {
@@ -1330,6 +1360,25 @@ impl<M: View + 'static, L: LaneSet<M>> Win<M, L> {
         automatic_presentation: bool,
         scale_factor: f32,
         inspector: bool,
+    ) -> Result<Self, Error> {
+        Self::mount_text_lanes(
+            model,
+            lanes,
+            options,
+            automatic_presentation,
+            scale_factor,
+            inspector,
+            None,
+        )
+    }
+    fn mount_text_lanes(
+        model: M,
+        lanes: L,
+        options: WindowOptions,
+        automatic_presentation: bool,
+        scale_factor: f32,
+        inspector: bool,
+        font: Option<gpui_canvas::FontFace>,
     ) -> Result<Self, Error> {
         // Until the full Win exists, this ordinary field-ordered value closes
         // every receiver before model destruction on ANY preparation failure.
@@ -1394,7 +1443,12 @@ impl<M: View + 'static, L: LaneSet<M>> Win<M, L> {
             complete_epoch: 0,
             presented: Vec::new(),
             canvas,
-            text: None,
+            text: font.map(|font| {
+                Box::new(text_geometry::TextResources {
+                    font: Some(font),
+                    ..Default::default()
+                })
+            }),
             poisoned: false,
             counters: Counters::default(),
             changed_nodes: 0,
@@ -1422,6 +1476,21 @@ impl<M: View + 'static, L: LaneSet<M>> Win<M, L> {
         inspector: bool,
     ) -> Result<Self, Error> {
         Self::mount_lanes(model, lanes, options, false, scale_factor, inspector)
+    }
+    /// Select the window's outline font through its existing cold text owner.
+    /// Only a completed acknowledged candidate replaces displayed text geometry.
+    pub fn set_text_font(&mut self, font: gpui_canvas::FontFace) -> Result<Commit, Error> {
+        let mut runtime = self.runtime_mut()?;
+        runtime.live()?;
+        let text = runtime.text.get_or_insert_with(Default::default);
+        text.system = Some(TextSystem::from_font(font.clone()));
+        text.font = Some(font);
+        for site in runtime.texts.iter_mut().flatten() {
+            site.shaped = None;
+        }
+        runtime.rebuild_layout = true;
+        runtime.dirty = true;
+        runtime.present()
     }
     fn runtime_mut(&mut self) -> Result<RuntimeMut<'_, M, L>, Error> {
         Ok(RuntimeMut {
@@ -2909,6 +2978,9 @@ impl<M: View + 'static> Runtime<M> {
                 }
                 if let Some(frozen) = self.metadata.as_mut().and_then(|m| m.editing.as_mut()) {
                     frozen.presented = frozen.candidate;
+                    if let Some(ime) = &mut frozen.ime {
+                        ime.presented = ime.candidate;
+                    }
                 }
             }
             self.presentation_scale_factor = prepared.scale_factor;
@@ -3021,7 +3093,10 @@ impl<M: View + 'static> Runtime<M> {
         if !self.texts.is_empty() {
             let text = self.text.get_or_insert_with(Default::default);
             if text.system.is_none() {
-                text.system = Some(TextSystem::bundled()?);
+                text.system = Some(match &text.font {
+                    Some(font) => TextSystem::from_font(font.clone()),
+                    None => TextSystem::bundled()?,
+                });
             }
         }
         // One immutable parser for every measurement and final line layout in
@@ -3036,6 +3111,10 @@ impl<M: View + 'static> Runtime<M> {
         let mut shaper = font.as_ref().map(|font| font.shaper());
         let active_selection = self.active_selection();
         let selection_snapshot = self.selection_snapshot();
+        let composition_snapshot = self.composition_snapshot();
+        let composition = self
+            .composition_preview()
+            .map(|(identity, preview)| (identity, preview.display.clone(), preview.decoration));
         if self.rebuild_layout || self.topology_changed || self.layout.is_poisoned() {
             self.layout = LayoutTree::new();
             self.layout_nodes.clear();
@@ -3115,10 +3194,14 @@ impl<M: View + 'static> Runtime<M> {
             let service = service
                 .as_mut()
                 .expect("measured text has an initialized service");
-            match node.text_slot().get_mut(texts).unwrap().measure_for(
+            match node.text_slot().get_mut(texts).unwrap().measure_text(
                 service,
                 styles.get(index).font_size,
                 input,
+                composition
+                    .as_ref()
+                    .filter(|(identity, _, _)| *identity == node.identity())
+                    .map(|(_, value, _)| value.as_ref()),
             ) {
                 Ok(shape) => MeasureOutput {
                     size: Size {
@@ -3400,10 +3483,14 @@ impl<M: View + 'static> Runtime<M> {
                 let selection = active_selection
                     .filter(|(identity, _)| *identity == node.identity())
                     .map(|(_, selection)| selection);
-                let shape = text.shape_for(
+                let shape = text.shape_text(
                     shaper.as_mut().expect("text initialized before layout"),
                     style.font_size,
                     Some(layout.content_box_width()),
+                    composition
+                        .as_ref()
+                        .filter(|(identity, _, _)| *identity == node.identity())
+                        .map(|(_, value, _)| value.as_ref()),
                 )?;
                 let origin = Point {
                     x: layout.padding.left,
@@ -3443,6 +3530,34 @@ impl<M: View + 'static> Runtime<M> {
                             return Err(error.into());
                         }
                     }
+                    if let Some((_, _, marked)) = composition
+                        .as_ref()
+                        .filter(|(identity, _, _)| *identity == node.identity())
+                    {
+                        let mut failure = None;
+                        if !shape.selection_rects(*marked, |bounds, _| {
+                            if failure.is_none() && bounds.width > 0. {
+                                failure = scene
+                                    .fill_rect(
+                                        Rect::new(
+                                            origin.x + bounds.x,
+                                            origin.y + bounds.y + bounds.height - 1.,
+                                            bounds.width,
+                                            1.,
+                                        ),
+                                        transform,
+                                        clip,
+                                        fg,
+                                    )
+                                    .err();
+                            }
+                        }) {
+                            return Err(Error::InvalidSelection);
+                        }
+                        if let Some(error) = failure {
+                            return Err(error.into());
+                        }
+                    }
                     if let Some((value, cache)) = self.styles.shared_paint(index, true) {
                         scene.draw_text_scaled_shared(
                             service,
@@ -3467,6 +3582,8 @@ impl<M: View + 'static> Runtime<M> {
                     }
                     if let Some(selection) = selection
                         && selection.anchor.offset == selection.focus.offset
+                        && composition_snapshot
+                            .is_none_or(|mark| mark.caret_visible(node.identity()))
                         && self.focused.and_then(|target| self.sites.resolve(target))
                             == Some(node.identity())
                     {
@@ -3550,10 +3667,12 @@ impl<M: View + 'static> Runtime<M> {
                 identity: node.identity(),
                 parent: link,
                 kind: node.kind(),
-                text: node
-                    .text_slot()
-                    .get(&self.texts)
-                    .map(|text| text.value.clone()),
+                text: node.text_slot().get(&self.texts).map(|text| {
+                    composition
+                        .as_ref()
+                        .filter(|(identity, _, _)| *identity == node.identity())
+                        .map_or_else(|| text.value.clone(), |(_, value, _)| value.clone())
+                }),
                 placement: geometry::Placement::new([rect.width, rect.height], transform),
                 basis,
                 bounds,
@@ -3685,6 +3804,13 @@ impl<M: View + 'static> Runtime<M> {
         self.styles.clear_slot_transition();
         if let Some(editing) = self.metadata.as_mut().and_then(|m| m.editing.as_mut()) {
             editing.candidate = selection_snapshot;
+            if let Some(ime) = &mut editing.ime {
+                ime.candidate = composition_snapshot.filter(|mark| {
+                    presented
+                        .iter()
+                        .any(|node| mark.marked(node.identity).is_some())
+                });
+            }
         }
         if let Some(text) = &mut self.text {
             text.candidate = Some(text_geometry);

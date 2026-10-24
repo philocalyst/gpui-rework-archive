@@ -10,12 +10,16 @@ pub(super) struct Entry {
 #[derive(Default)]
 pub(super) struct TextResources {
     pub system: Option<TextSystem>,
+    pub font: Option<gpui_canvas::FontFace>,
     pub presented: Vec<Entry>,
     pub candidate: Option<Vec<Entry>>,
 }
 impl TextResources {
     pub fn unused(&self) -> bool {
-        self.system.is_none() && self.presented.is_empty() && self.candidate.is_none()
+        self.system.is_none()
+            && self.font.is_none()
+            && self.presented.is_empty()
+            && self.candidate.is_none()
     }
     pub fn acknowledge(&mut self) {
         if let Some(column) = self.candidate.take() {

@@ -1,0 +1,459 @@
+//! IME owns a temporary display domain; source writes happen only at commit.
+use super::editing::{position, validates};
+use super::*;
+use std::{
+    ops::Range,
+    sync::atomic::{AtomicU64, Ordering},
+};
+
+static NEXT_SESSION: AtomicU64 = AtomicU64::new(1);
+
+/// One caller-owned IME stream, shared by native input and ordinary tests.
+/// Enable binds it to this window's current focused source. Focus/source changes
+/// revoke it; events from an old stream never acquire the next field's authority.
+#[derive(Default, Debug)]
+pub struct ImeSession {
+    stamp: Option<NonZeroU64>,
+}
+impl ImeSession {
+    pub fn is_enabled(&self) -> bool {
+        self.stamp.is_some()
+    }
+}
+
+/// Winit-compatible composition events. Cursor endpoints are UTF-8 byte offsets
+/// within preedit, including valid character boundaries inside a grapheme.
+/// None hides the caret. Empty Preedit clears the preview while retaining the
+/// original replacement range for the following Commit; Cancel ends the stream.
+#[derive(Clone, Copy, Debug, PartialEq, Eq)]
+pub enum ImeEvent<'a> {
+    Enabled,
+    Preedit {
+        text: &'a str,
+        cursor: Option<(usize, usize)>,
+    },
+    Commit(&'a str),
+    Disabled,
+    Cancel,
+}
+
+/// Marked UTF-8 bytes from the acknowledged display, not a source-edit range.
+/// Cursor preserves the IME's exact byte intent. Part::selection supplies its
+/// nearest legal grapheme endpoints for canonical geometry (ties downstream).
+#[derive(Clone, Debug, PartialEq, Eq, Serialize)]
+pub struct MarkedText {
+    pub session: u64,
+    pub range: Range<usize>,
+    pub cursor: Option<Range<usize>>,
+}
+#[derive(Clone, Copy, PartialEq, Eq)]
+pub(super) struct MarkSnapshot {
+    identity: NonZeroU64,
+    stamp: NonZeroU64,
+    range: [u32; 2],
+    cursor: Option<[u32; 2]>,
+}
+impl MarkSnapshot {
+    pub fn marked(self, identity: u64) -> Option<MarkedText> {
+        (self.identity.get() == identity).then(|| MarkedText {
+            session: self.stamp.get(),
+            range: self.range[0] as usize..self.range[1] as usize,
+            cursor: self.cursor.map(|c| c[0] as usize..c[1] as usize),
+        })
+    }
+    pub fn caret_visible(self, identity: u64) -> bool {
+        self.identity.get() != identity || self.cursor.is_some()
+    }
+}
+#[derive(Default)]
+pub(super) struct Ime {
+    active: Option<Box<Active>>,
+    pub candidate: Option<MarkSnapshot>,
+    pub presented: Option<MarkSnapshot>,
+}
+impl Ime {
+    pub fn unused(&self) -> bool {
+        self.active.is_none() && self.candidate.is_none() && self.presented.is_none()
+    }
+}
+struct Active {
+    stamp: NonZeroU64,
+    target: Target,
+    field: FieldId,
+    epoch: u64,
+    source: SharedText,
+    preview: Option<Box<Preview>>,
+}
+pub(super) struct Preview {
+    replacement: gpui_canvas::TextSelection,
+    buffer: String,
+    pub display: SharedText,
+    pub selection: gpui_canvas::TextSelection,
+    pub decoration: gpui_canvas::TextSelection,
+    pub mark: MarkSnapshot,
+}
+fn nearest(value: &str, byte: usize) -> Result<gpui_canvas::TextPosition, Error> {
+    let byte = icu_segmenter::GraphemeClusterSegmenter::new()
+        .segment_str(value)
+        .min_by_key(|&boundary| (boundary.abs_diff(byte), std::cmp::Reverse(boundary)))
+        .unwrap_or(0);
+    position(byte)
+}
+fn decoration(value: &str, start: usize, end: usize) -> Result<gpui_canvas::TextSelection, Error> {
+    let mut left = 0;
+    let mut right = value.len();
+    for boundary in icu_segmenter::GraphemeClusterSegmenter::new().segment_str(value) {
+        if boundary <= start {
+            left = boundary;
+        }
+        if boundary >= end {
+            right = boundary;
+            break;
+        }
+    }
+    Ok(gpui_canvas::TextSelection {
+        anchor: position(left)?,
+        focus: position(right)?,
+    })
+}
+impl<M: View + 'static> Runtime<M> {
+    fn ime_active(&self) -> Option<&Active> {
+        self.metadata
+            .as_ref()?
+            .editing
+            .as_ref()?
+            .ime
+            .as_ref()?
+            .active
+            .as_deref()
+    }
+    fn ime_valid(&self, active: &Active) -> bool {
+        self.logical_valid
+            && self.focused == Some(active.target)
+            && self.source_epoch == active.epoch
+            && self.input_index(active.target).ok().is_some_and(|index| {
+                let site = self.nodes[index].text_slot().get(&self.texts).unwrap();
+                site.field == Some(active.field)
+                    && std::ptr::eq::<str>(site.value.as_ref(), active.source.as_ref())
+            })
+    }
+    pub(super) fn composition_preview(&self) -> Option<(u64, &Preview)> {
+        let active = self.ime_active()?;
+        self.ime_valid(active).then_some(())?;
+        Some((
+            self.sites.resolve(active.target)?,
+            active.preview.as_deref()?,
+        ))
+    }
+    pub(super) fn composition_snapshot(&self) -> Option<MarkSnapshot> {
+        Some(self.composition_preview()?.1.mark)
+    }
+    pub(super) fn ime_composing(&self) -> bool {
+        self.composition_preview().is_some()
+    }
+    fn invalidate_display(&mut self, target: Target) {
+        if let Ok(index) = self.input_index(target) {
+            self.nodes[index]
+                .text_slot()
+                .get_mut(&mut self.texts)
+                .unwrap()
+                .shaped = None;
+            self.layout_dirty.insert(self.nodes[index].identity());
+        }
+        self.dirty = true;
+    }
+    pub(super) fn cancel_ime(&mut self) -> bool {
+        let active = self
+            .metadata
+            .as_mut()
+            .and_then(|m| m.editing.as_mut())
+            .and_then(|e| e.ime.as_mut())
+            .and_then(|ime| ime.active.take());
+        let Some(active) = active else { return false };
+        let changed = if let Some(preview) = active.preview.as_ref() {
+            if self.ime_valid(&active)
+                && let Ok(index) = self.input_index(active.target)
+            {
+                self.set_selection(index, preview.replacement, None);
+            }
+            self.invalidate_display(active.target);
+            true
+        } else {
+            false
+        };
+        self.reclaim_ime();
+        changed
+    }
+    pub(super) fn reconcile_ime(&mut self) -> bool {
+        if self
+            .ime_active()
+            .is_some_and(|active| !self.ime_valid(active))
+        {
+            self.cancel_ime()
+        } else {
+            false
+        }
+    }
+    fn reclaim_ime(&mut self) {
+        if let Some(editing) = self.metadata.as_mut().and_then(|m| m.editing.as_mut())
+            && editing.ime.as_ref().is_some_and(|ime| ime.unused())
+        {
+            editing.ime = None;
+        }
+        if let Some(metadata) = &mut self.metadata
+            && metadata.editing.as_ref().is_some_and(|e| e.unused())
+        {
+            metadata.editing = None;
+        }
+        if self.metadata.as_deref().is_some_and(Metadata::unused) {
+            self.metadata = None;
+        }
+    }
+    fn install_ime(&mut self, active: Box<Active>) {
+        self.metadata
+            .get_or_insert_with(Default::default)
+            .editing
+            .get_or_insert_with(Default::default)
+            .ime
+            .get_or_insert_with(Default::default)
+            .active = Some(active);
+    }
+    fn bind_ime(&self, stamp: NonZeroU64) -> Result<Box<Active>, Error> {
+        let target = self.focused.ok_or(Error::NotInput)?;
+        let index = self.input_index(target)?;
+        let site = self.nodes[index].text_slot().get(&self.texts).unwrap();
+        Ok(Box::new(Active {
+            stamp,
+            target,
+            field: site.field.unwrap(),
+            epoch: self.source_epoch,
+            source: site.value.clone(),
+            preview: None,
+        }))
+    }
+}
+impl<M: View + 'static, L: LaneSet<M>> Win<M, L> {
+    /// Apply the same scoped IME protocol as the native adapter. Preedit prepares
+    /// a display candidate without changing Signal or source_epoch. Commit writes
+    /// once through the ordinary text codec. A stale/cancelled stream is consumed.
+    pub fn ime_event(
+        &mut self,
+        session: &mut ImeSession,
+        event: ImeEvent<'_>,
+    ) -> Result<Commit, Error> {
+        let ending = matches!(event, ImeEvent::Cancel | ImeEvent::Disabled);
+        let stamp = if ending {
+            session.stamp.take()
+        } else {
+            session.stamp
+        };
+        let mut runtime = self.runtime_mut()?;
+        let prior = runtime.ime_active().map(|active| active.target);
+        let result = runtime.ime_event(stamp, event);
+        match result {
+            Ok((commit, next)) => {
+                session.stamp = next;
+                Ok(commit)
+            }
+            Err(error) => {
+                session.stamp = None;
+                runtime.cancel_ime();
+                if let Some(target) = prior {
+                    runtime.invalidate_display(target);
+                }
+                runtime.reclaim_ime();
+                Err(error)
+            }
+        }
+    }
+    /// Candidate-window area from acknowledged text geometry in physical window
+    /// coordinates, clipped by that presentation's transforms and viewports.
+    /// A hidden IME cursor, detached P or revoked stream has no area.
+    pub fn ime_cursor_area(&self, session: &ImeSession) -> Result<Option<Rect>, Error> {
+        let runtime = self.runtime()?;
+        let Some(active) = runtime
+            .ime_active()
+            .filter(|a| Some(a.stamp) == session.stamp && runtime.ime_valid(a))
+        else {
+            return Ok(None);
+        };
+        if !runtime.presentation_valid {
+            return Ok(None);
+        }
+        let mut area = None;
+        self.visit(|part| {
+            if part.target() == active.target
+                && part.marked_text().is_none_or(|mark| mark.cursor.is_some())
+                && let Some(selection) = part.selection()
+                && let Some(geometry) = part.text_geometry()
+                && let Some(local) = geometry.layout().caret_bounds(selection.focus)
+            {
+                area = geometry.visible_bounds(local);
+            }
+        })?;
+        Ok(area)
+    }
+}
+impl<M: View + 'static, L: LaneSet<M>> RuntimeMut<'_, M, L> {
+    fn ime_event(
+        &mut self,
+        stamp: Option<NonZeroU64>,
+        event: ImeEvent<'_>,
+    ) -> Result<(Commit, Option<NonZeroU64>), Error> {
+        self.live()?;
+        self.changed_nodes = 0;
+        self.runtime.reconcile_ime();
+        if matches!(event, ImeEvent::Enabled) {
+            self.runtime.cancel_ime();
+            let next = NEXT_SESSION
+                .try_update(Ordering::Relaxed, Ordering::Relaxed, |n| n.checked_add(1))
+                .map_err(|_| Error::EpochExhausted)?;
+            let stamp = NonZeroU64::new(next).expect("IME stamps start at one");
+            let active = self.runtime.bind_ime(stamp)?;
+            self.runtime.install_ime(active);
+            let commit = if self.dirty {
+                self.present()?
+            } else {
+                self.commit()
+            };
+            return Ok((commit, Some(stamp)));
+        }
+        if self.ime_active().is_none_or(|a| Some(a.stamp) != stamp) {
+            return Ok((self.commit(), None));
+        }
+        if matches!(event, ImeEvent::Disabled | ImeEvent::Cancel) {
+            let changed = self.runtime.cancel_ime();
+            return Ok((
+                if changed {
+                    self.present()?
+                } else {
+                    self.commit()
+                },
+                None,
+            ));
+        }
+        let mut active = self
+            .metadata
+            .as_mut()
+            .unwrap()
+            .editing
+            .as_mut()
+            .unwrap()
+            .ime
+            .as_mut()
+            .unwrap()
+            .active
+            .take()
+            .unwrap();
+        match event {
+            ImeEvent::Commit(text) => {
+                let (range, buffer) = match active.preview.take() {
+                    Some(preview) => (preview.replacement, Some(preview.buffer)),
+                    None => (self.selection_at(self.input_index(active.target)?)?, None),
+                };
+                self.runtime.invalidate_display(active.target);
+                let commit = self.replace_input_buffer(active.target, Some(range), text, buffer)?;
+                let rebound = self.runtime.bind_ime(active.stamp)?;
+                self.runtime.install_ime(rebound);
+                Ok((commit, stamp))
+            }
+            ImeEvent::Preedit { text, cursor } => {
+                if cursor
+                    .is_some_and(|(a, b)| !text.is_char_boundary(a) || !text.is_char_boundary(b))
+                {
+                    self.runtime.invalidate_display(active.target);
+                    return Err(Error::InvalidSelection);
+                }
+                let index = self.input_index(active.target)?;
+                let replacement = active
+                    .preview
+                    .as_ref()
+                    .map_or_else(|| self.selection_at(index), |p| Ok(p.replacement))?;
+                if !validates(&active.source, replacement) {
+                    return Err(Error::InvalidSelection);
+                }
+                let start = replacement
+                    .anchor
+                    .offset
+                    .byte()
+                    .min(replacement.focus.offset.byte());
+                let end = replacement
+                    .anchor
+                    .offset
+                    .byte()
+                    .max(replacement.focus.offset.byte());
+                let joined_len = active
+                    .source
+                    .len()
+                    .checked_sub(end - start)
+                    .and_then(|n| n.checked_add(text.len()))
+                    .ok_or(Error::ResourceLimit)?;
+                if joined_len > 32 * 1024 {
+                    self.runtime.invalidate_display(active.target);
+                    return Err(Error::ResourceLimit);
+                }
+                let identity = NonZeroU64::new(self.nodes[index].identity()).unwrap();
+                let mut preview = active.preview.take().unwrap_or_else(|| {
+                    Box::new(Preview {
+                        replacement,
+                        buffer: String::new(),
+                        display: active.source.clone(),
+                        selection: replacement,
+                        decoration: replacement,
+                        mark: MarkSnapshot {
+                            identity,
+                            stamp: active.stamp,
+                            range: [start as u32; 2],
+                            cursor: None,
+                        },
+                    })
+                });
+                let before = preview.display.clone();
+                if text.is_empty() {
+                    preview.display = active.source.clone();
+                } else {
+                    preview.buffer.clear();
+                    preview
+                        .buffer
+                        .try_reserve(joined_len)
+                        .map_err(|_| Error::ResourceLimit)?;
+                    preview.buffer.push_str(&active.source[..start]);
+                    preview.buffer.push_str(text);
+                    preview.buffer.push_str(&active.source[end..]);
+                    if preview.display.as_ref() != preview.buffer {
+                        preview.display = SharedText::from(preview.buffer.as_str());
+                    }
+                }
+                let finish = start + text.len();
+                let exact = cursor.map(|(a, b)| [(start + a) as u32, (start + b) as u32]);
+                let focus = nearest(&preview.display, exact.map_or(start, |c| c[1] as usize))?;
+                let anchor = nearest(&preview.display, exact.map_or(start, |c| c[0] as usize))?;
+                preview.selection = gpui_canvas::TextSelection { anchor, focus };
+                preview.decoration = decoration(&preview.display, start, finish)?;
+                preview.mark = MarkSnapshot {
+                    identity,
+                    stamp: active.stamp,
+                    range: [start as u32, finish as u32],
+                    cursor: exact,
+                };
+                let source_caret = position(start)?;
+                self.runtime.set_selection(
+                    index,
+                    gpui_canvas::TextSelection {
+                        anchor: source_caret,
+                        focus: source_caret,
+                    },
+                    None,
+                );
+                if !std::ptr::eq::<str>(before.as_ref(), preview.display.as_ref()) {
+                    self.runtime.invalidate_display(active.target);
+                }
+                self.runtime.dirty = true;
+                active.preview = Some(preview);
+                self.runtime.install_ime(active);
+                Ok((self.present()?, stamp))
+            }
+            _ => unreachable!(),
+        }
+    }
+}
