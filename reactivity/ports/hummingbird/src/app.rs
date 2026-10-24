@@ -1,6 +1,6 @@
 //! One public GPUI View, shared by the ordinary native and headless owners.
 use crate::{
-    browser::{Browser, Input, Page, PlayRequest, Route, RowKey},
+    browser::{Browser, Input, Listing, Page, PlayRequest, PlayStamp, Route, RowKey},
     queue::TrackRef,
     queue_view::QueueScreen,
     search::Version,
@@ -25,11 +25,11 @@ enum Preparation {
     },
     #[cfg(feature = "audio")]
     ListingPlayed {
-        request: PlayRequest,
+        request: PlayStamp,
         edits: [u32; 3],
     },
     ListingFailed {
-        request: PlayRequest,
+        request: PlayStamp,
         edits: [u32; 3],
         error: String,
     },
@@ -51,6 +51,8 @@ enum Preparation {
 
 pub struct Library {
     browser: Browser,
+    roots: crate::files::Roots,
+    indexing: Option<crate::indexing::Request>,
     pub version: Signal<Version>,
     pub selected: Signal<Selection>,
     pub results: Reader<Page>,
@@ -77,6 +79,46 @@ impl Library {
         |m| &m.browser,
         |m| &mut m.browser,
     );
+    pub const ROOTS: Component<Self, crate::files::Roots> = Component::new(
+        FieldId::new(7),
+        "library roots",
+        |m| &m.roots,
+        |m| &mut m.roots,
+    );
+    pub fn indexing_request(&self) -> Option<crate::indexing::Request> {
+        self.indexing
+    }
+    pub fn request_index(&mut self, command: crate::indexing::Command) {
+        let Some(sequence) = self.issued.checked_add(1) else {
+            self.notice = "Library request space exhausted".into();
+            return;
+        };
+        self.issued = sequence;
+        let request = crate::indexing::Request {
+            version: *self.version,
+            sequence,
+        };
+        let notice = if matches!(command, crate::indexing::Command::Cancel) {
+            "Canceling indexing after the current file"
+        } else {
+            "Library acquisition pending"
+        };
+        match self.worker.index(request, command) {
+            Ok(()) => {
+                self.indexing = Some(request);
+                self.notice = notice.into();
+            }
+            Err(error) => self.notice = crate::worker::QueueError(error).to_string(),
+        }
+    }
+    pub fn edit_root(&mut self, input: &Input, id: i64, delete_recordings: bool) {
+        if self.browser.matches(input, *self.version) {
+            self.request_index(crate::indexing::Command::RemoveRoot {
+                id,
+                delete_recordings,
+            });
+        }
+    }
     pub fn browser(&self) -> &Browser {
         &self.browser
     }
@@ -108,15 +150,22 @@ impl Library {
             None
         }
     }
-    fn current_listing(&self, request: &PlayRequest, edits: [u32; 3]) -> bool {
-        let id = request.start.map(|key| match key {
-            RowKey::Track(id) | RowKey::PlaylistItem { track: id, .. } => id,
+    fn current_listing(
+        &self,
+        input: &Input,
+        start: Option<RowKey>,
+        sequence: u64,
+        edits: [u32; 3],
+    ) -> bool {
+        let id = start.and_then(|key| match key {
+            RowKey::Track(id) | RowKey::PlaylistItem { track: id, .. } => Some(id),
+            RowKey::File(_) => None,
         });
-        self.selected.sequence == request.sequence
+        self.selected.sequence == sequence
             && self.selected.id == id
-            && self.selected.generation == request.input.version.generation
+            && self.selected.generation == input.version.generation
             && self.browser.revisions() == edits
-            && self.browser.matches(&request.input, *self.version)
+            && self.browser.matches(input, *self.version)
     }
     pub fn navigate(&mut self, route: Route) {
         self.browser.navigate(route);
@@ -127,7 +176,17 @@ impl Library {
         }
     }
     pub fn play_listing(&mut self, input: triomphe::Arc<Input>, start: Option<RowKey>) {
-        if !self.browser.matches(&input, *self.version) {
+        self.play_context(Listing::Sql(input), start);
+    }
+    pub fn play_files(
+        &mut self,
+        files: triomphe::Arc<crate::files::FileListing>,
+        start: Option<RowKey>,
+    ) {
+        self.play_context(Listing::Files(files), start);
+    }
+    fn play_context(&mut self, listing: Listing, start: Option<RowKey>) {
+        if !self.browser.matches(listing.input(), *self.version) {
             self.notice = "This listing is no longer current".into();
             return;
         }
@@ -144,16 +203,17 @@ impl Library {
         };
         self.issued = sequence;
         let request = PlayRequest {
-            input,
+            listing,
             start,
             sequence,
         };
         *self.selected = Selection {
-            id: start.map(|key| match key {
-                RowKey::Track(id) | RowKey::PlaylistItem { track: id, .. } => id,
+            id: start.and_then(|key| match key {
+                RowKey::Track(id) | RowKey::PlaylistItem { track: id, .. } => Some(id),
+                RowKey::File(_) => None,
             }),
             sequence,
-            generation: request.input.version.generation,
+            generation: request.input().version.generation,
         };
         let edits = self.browser.revisions();
         self.preparation = Preparation::ListingPending {
@@ -163,7 +223,7 @@ impl Library {
         };
         if let Err(error) = self.worker.prepare_listing(request.clone()) {
             self.preparation = Preparation::ListingFailed {
-                request,
+                request: request.stamp(),
                 edits,
                 error: crate::worker::QueueError(error).to_string(),
             };
@@ -178,19 +238,29 @@ impl Library {
                 request,
                 edits,
                 revision,
-            } if self.current_listing(request, *edits)
+            } if self.current_listing(request.input(), request.start, request.sequence, *edits)
                 && self.audio_revision() == Some(*revision) =>
             {
                 PreparationStatus::Pending
             }
             #[cfg(feature = "audio")]
             Preparation::ListingPlayed { request, edits }
-                if self.current_listing(request, *edits) =>
+                if self.current_listing(
+                    request.input(),
+                    request.start,
+                    request.sequence,
+                    *edits,
+                ) =>
             {
                 PreparationStatus::Ready
             }
             Preparation::ListingFailed { request, edits, .. }
-                if self.current_listing(request, *edits) =>
+                if self.current_listing(
+                    request.input(),
+                    request.start,
+                    request.sequence,
+                    *edits,
+                ) =>
             {
                 PreparationStatus::Failed
             }
@@ -230,7 +300,7 @@ impl Library {
                     match std::mem::replace(&mut self.preparation, Preparation::Canceled) {
                         Preparation::ListingPending { request, edits, .. } => {
                             Preparation::ListingFailed {
-                                request,
+                                request: request.stamp(),
                                 edits,
                                 error: "Library worker closed before preparation completed".into(),
                             }
@@ -243,10 +313,53 @@ impl Library {
             } else if matches!(self.preparation, Preparation::Pending { .. }) {
                 self.preparation = Preparation::Canceled;
             }
+            self.indexing = None;
             self.notice = "Library worker closed".into();
             return;
         };
         match event {
+            LibraryEvent::Indexed {
+                request,
+                version,
+                result,
+            } => {
+                // Publication is worker-owned. A request owns only its status;
+                // Version must advance even when a newer task replaced it.
+                if result.is_ok() && version.revision > self.version.revision {
+                    let replacement = version.generation != self.version.generation;
+                    *self.version = version;
+                    self.browser.source_changed();
+                    if replacement {
+                        *self.selected = Selection {
+                            sequence: self.issued,
+                            generation: version.generation,
+                            ..Selection::default()
+                        };
+                        self.preparation = Preparation::Canceled;
+                    }
+                }
+                if self.indexing != Some(request) {
+                    return;
+                }
+                self.indexing = None;
+                self.notice = match result {
+                    Ok(crate::indexing::Outcome::RootsChanged) => "Library roots updated".into(),
+                    Ok(crate::indexing::Outcome::Canceled) => {
+                        "Indexing canceled; committed recordings kept".into()
+                    }
+                    Ok(crate::indexing::Outcome::Indexed(report)) => format!(
+                        "Indexed {}; unchanged {}; removed {}; failed {}{}",
+                        report.indexed,
+                        report.unchanged,
+                        report.removed,
+                        report.failed,
+                        report
+                            .first_error
+                            .map_or(String::new(), |error| format!(": {error}"))
+                    ),
+                    Err(error) => format!("Library acquisition failed: {error}"),
+                };
+            }
             LibraryEvent::ListingPrepared { request, result } => {
                 let (edits, revision) = match &self.preparation {
                     Preparation::ListingPending {
@@ -264,30 +377,35 @@ impl Library {
                 match result {
                     Err(error) => {
                         self.preparation = Preparation::ListingFailed {
-                            request,
+                            request: request.stamp(),
                             edits,
                             error: error.to_string(),
                         }
                     }
                     Ok(listing) => {
                         #[cfg(feature = "audio")]
-                        match self.worker.with_current_version(request.input.version, || {
-                            self.queue.play_listing_if(listing, revision)
-                        }) {
+                        match self
+                            .worker
+                            .with_current_version(request.input().version, || {
+                                self.queue.play_listing_if(listing, revision)
+                            }) {
                             Ok(Some(Ok(true))) => {
-                                self.preparation = Preparation::ListingPlayed { request, edits }
+                                self.preparation = Preparation::ListingPlayed {
+                                    request: request.stamp(),
+                                    edits,
+                                }
                             }
                             Ok(Some(Ok(false))) | Ok(None) => {}
                             Ok(Some(Err(error))) => {
                                 self.preparation = Preparation::ListingFailed {
-                                    request,
+                                    request: request.stamp(),
                                     edits,
                                     error: error.to_string(),
                                 }
                             }
                             Err(error) => {
                                 self.preparation = Preparation::ListingFailed {
-                                    request,
+                                    request: request.stamp(),
                                     edits,
                                     error: error.to_string(),
                                 }
@@ -502,6 +620,8 @@ pub fn connect(
     Ok((
         Library {
             browser: Browser::new(),
+            roots: crate::files::Roots::new(),
+            indexing: None,
             version: Signal::new(Version::default()),
             selected: Signal::new(Selection::default()),
             results,
@@ -525,6 +645,7 @@ impl View for Library {
     fn sources() -> Sources<Self> {
         Sources::new()
             .direct_component(Self::BROWSER)
+            .direct_component(Self::ROOTS)
             .field(Self::VERSION)
             .field(Self::SELECTED)
             .direct_component(Self::QUEUE)
@@ -533,59 +654,113 @@ impl View for Library {
         column((
             text("Hummingbird — Library").font_size(24),
             Self::BROWSER.view(self),
+            if matches!(self.browser.navigation().current(), Route::Files) {
+                column((
+                    Self::ROOTS.view(self),
+                    row((
+                        button("Add library root").on_click(|model: &mut Library| {
+                            model.request_index(crate::indexing::Command::AddRoot(
+                                model.roots.path().into(),
+                            ))
+                        }),
+                        button("Index library roots").on_click(|model: &mut Library| {
+                            model.request_index(crate::indexing::Command::Scan)
+                        }),
+                        button("Cancel indexing").on_click(|model: &mut Library| {
+                            model.request_index(crate::indexing::Command::Cancel)
+                        }),
+                    ))
+                    .gap(8),
+                ))
+                .gap(6)
+            } else {
+                text("")
+            },
             self.results
-                .project(|page| {
-                    #[cfg(feature = "audio")]
-                    let play_all = {
-                        if page.rows.is_empty() {
+                .project(|page| match page {
+                    Page::Files(files) => {
+                        #[cfg(feature = "audio")]
+                        let play = if files.recording_count() != 0 {
+                            let listing = files.0.clone();
+                            button("Play all files").on_click(move |model: &mut Library| {
+                                model.play_files(listing.clone(), None)
+                            })
+                        } else {
+                            text("")
+                        };
+                        #[cfg(not(feature = "audio"))]
+                        let play = text("Audio output is not attached");
+                        column((
+                            text(match &files.input.route {
+                                Route::Directory(path) => path.to_string_lossy().into_owned(),
+                                _ => "Library roots".into(),
+                            }),
+                            text(format!(
+                                "{} entries; {} recordings",
+                                files.entries.len(),
+                                files.recording_count()
+                            )),
+                            play,
+                            uniform_list(files.list(), files, 32)
+                                .name("Library files")
+                                .w(650)
+                                .h(160),
+                        ))
+                        .gap(6)
+                    }
+                    Page::Library(page) => {
+                        #[cfg(feature = "audio")]
+                        let play_all = {
+                            if page.rows.is_empty() {
+                                text("")
+                            } else {
+                                let input = page.input().clone();
+                                button("Play all")
+                                    .name(format!("Play all {}", page.title))
+                                    .on_click(move |model: &mut Library| {
+                                        model.play_listing(input.clone(), None)
+                                    })
+                            }
+                        };
+                        #[cfg(not(feature = "audio"))]
+                        let play_all = text("");
+                        let collections = if page.collections.rows.is_empty() {
                             text("")
                         } else {
-                            let input = page.input().clone();
-                            button("Play all")
-                                .name(format!("Play all {}", page.title))
-                                .on_click(move |model: &mut Library| {
-                                    model.play_listing(input.clone(), None)
-                                })
-                        }
-                    };
-                    #[cfg(not(feature = "audio"))]
-                    let play_all = text("");
-                    let collections = if page.collections.rows.is_empty() {
-                        text("")
-                    } else {
-                        uniform_list(page.collection_list(), &page.collections, 32)
-                            .name("Collections")
-                            .w(650)
-                            .h(96)
-                    };
-                    let summary = if matches!(
-                        page.input().route,
-                        Route::Albums | Route::Artists | Route::Playlists
-                    ) {
-                        format!(
-                            "{} {}",
-                            page.collections.rows.len(),
-                            page.input().route.label().to_lowercase()
-                        )
-                    } else {
-                        format!(
-                            "{} recordings for ‘{}’ — {}",
-                            page.rows.len(),
-                            page.input().query,
-                            page.input().sort_label()
-                        )
-                    };
-                    column((
-                        text(format!("{} — {}", page.input().route.label(), page.title)),
-                        text(summary),
-                        play_all,
-                        collections,
-                        uniform_list(page.track_list(), &page.rows, 32)
-                            .name("Library recordings")
-                            .w(650)
-                            .h(160),
-                    ))
-                    .gap(6)
+                            uniform_list(page.collection_list(), &page.collections, 32)
+                                .name("Collections")
+                                .w(650)
+                                .h(96)
+                        };
+                        let summary = if matches!(
+                            page.input().route,
+                            Route::Albums | Route::Artists | Route::Playlists
+                        ) {
+                            format!(
+                                "{} {}",
+                                page.collections.rows.len(),
+                                page.input().route.label().to_lowercase()
+                            )
+                        } else {
+                            format!(
+                                "{} recordings for ‘{}’ — {}",
+                                page.rows.len(),
+                                page.input().query,
+                                page.input().sort_label()
+                            )
+                        };
+                        column((
+                            text(format!("{} — {}", page.input().route.label(), page.title)),
+                            text(summary),
+                            play_all,
+                            collections,
+                            uniform_list(page.track_list(), &page.rows, 32)
+                                .name("Library recordings")
+                                .w(650)
+                                .h(160),
+                        ))
+                        .gap(6)
+                    }
                 })
                 .loading(|| text("Searching recordings…"))
                 .failed(|failure| text(format!("Library unavailable: {failure}"))),

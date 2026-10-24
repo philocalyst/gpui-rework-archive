@@ -140,7 +140,10 @@ pub fn run() -> Result<Transcript, Box<dyn StdError>> {
         .recv_timeout(Duration::from_secs(10))??;
     settle(&mut win, &worker)?;
     assert_eq!(win.question_status(results)?, QuestionStatus::Fault);
-    assert_eq!(win.with_ready(results, |page| page.rows.len())?, None);
+    assert_eq!(
+        win.with_ready(results, |page| page.library().unwrap().rows.len())?,
+        None
+    );
     let source_failure_visible =
         win.contains_text("Library unavailable: Library source: no such table: track")?;
     assert!(source_failure_visible);
