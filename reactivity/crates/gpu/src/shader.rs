@@ -460,7 +460,7 @@ pub mod ui {
     // Keep four neighboring samples live at once. Every sample still blends
     // draws in scene order, then contributes in the canonical row-major order.
     // Compared with the full sixteen-color array, each record is loaded four
-    // times. This is a measured tradeoff, not a register-allocation guarantee.
+    // times. Timing must decide this tradeoff; register allocation is backend-specific.
     pub fn banked_fragment(position: Vec2f, range: Vec2u, clear: Vec4f) -> Vec4f {
         let mut anchor = vec4f(0.0, 0.0, 0.0, 0.0);
         let mut delta = vec4f(0.0, 0.0, 0.0, 0.0);
