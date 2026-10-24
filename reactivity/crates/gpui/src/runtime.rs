@@ -465,6 +465,38 @@ mod parent_tests {
     }
 
     #[test]
+    fn disabled_content_flag_preserves_all_carriers_and_resource_decoding() {
+        assert_eq!(size_of::<Node>(), 24);
+        assert_eq!(size_of::<Presented>(), 64);
+        assert_eq!(size_of::<crate::El<'_>>(), 176);
+        assert_eq!(size_of::<crate::element::DraftNode<'_>>(), 152);
+        for slot in [TextSlot::NONE, TextSlot(0), TextSlot(MAX_NODES as u32 - 1)] {
+            for kind in [
+                NodeKind::Input,
+                NodeKind::Button,
+                NodeKind::CheckBox(false),
+                NodeKind::CheckBox(true),
+            ] {
+                let original = Content::new(kind, slot);
+                let disabled = original.with_disabled(true);
+                assert!(disabled.disabled());
+                assert_eq!(disabled.kind(), kind);
+                assert_eq!(disabled.text_slot().0, slot.0);
+                assert_eq!(disabled.with_disabled(false).0, original.0);
+            }
+        }
+        for resource in [0, MAX_NODES as u32 - 1] {
+            for sampling in [crate::ImageSampling::Linear, crate::ImageSampling::Nearest] {
+                let content =
+                    Content::image(image::ImageUse { resource, sampling }).with_disabled(true);
+                let image = content.image_use().unwrap();
+                assert_eq!(image.resource, resource);
+                assert_eq!(image.sampling, sampling);
+            }
+        }
+    }
+
+    #[test]
     fn checkbox_state_preserves_carrier_layouts() {
         macro_rules! carrier {
             ($ty:ty) => {

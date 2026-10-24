@@ -118,9 +118,8 @@ impl View for Styled {
         fn geometry(e: El<'_>) -> El<'_> {
             e.w(160).rounded(8.0)
         }
-        let caller = |e| e.w(200).fg(&self.tint);
         Button::new("Styled", &self.theme)
-            .style(geometry.then(caller))
+            .style(geometry.then(|e| e.w(200).fg(&self.tint)))
             .build()
     }
 }

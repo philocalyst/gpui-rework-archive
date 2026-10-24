@@ -5,6 +5,7 @@ mod party;
 fn main() -> Result<(), gpui::NativeError> {
     gpui::Application::run_window(
         gpui::Window::document(party::Party::default())
+            .renderer(gpui::RendererPolicy::ReferenceCpu)
             .title("After dark — Halloween invitations")
             .size(940, 680)
             .inspector(),
