@@ -786,3 +786,96 @@ fn clip_reuse_signed_zero_is_observed() {
         eprintln!("clip_reuse_signed_zero negative_zero_channels={negative_zeros}");
     });
 }
+
+// Opt-in completed-work software diagnostic. One immutable uploaded packet and
+// two precompiled pipelines share the same preallocated target in balanced order.
+fn completed_frame(
+    renderer: &Renderer,
+    pipeline: &wgpu::RenderPipeline,
+    view: &wgpu::TextureView,
+) -> std::time::Duration {
+    let start = std::time::Instant::now();
+    let c = &renderer.context;
+    let mut encoder = c.device.create_command_encoder(&Default::default());
+    {
+        let mut pass = encoder.begin_render_pass(&wgpu::RenderPassDescriptor {
+            label: Some("clip reuse measured frame"),
+            color_attachments: &[Some(wgpu::RenderPassColorAttachment {
+                view,
+                resolve_target: None,
+                depth_slice: None,
+                ops: wgpu::Operations {
+                    load: wgpu::LoadOp::Clear(wgpu::Color::TRANSPARENT),
+                    store: wgpu::StoreOp::Store,
+                },
+            })],
+            depth_stencil_attachment: None,
+            timestamp_writes: None,
+            occlusion_query_set: None,
+            multiview_mask: None,
+        });
+        pass.set_pipeline(pipeline);
+        pass.set_bind_group(0, &renderer.state.packet.as_ref().unwrap().bindings, &[]);
+        pass.draw(0..3, 0..1);
+    }
+    c.queue.submit([encoder.finish()]);
+    c.device.poll(wgpu::PollType::wait_indefinitely()).unwrap();
+    start.elapsed()
+}
+#[test]
+fn clip_reuse_completed_work_benchmark() {
+    if std::env::var("GPUI_CLIP_REUSE_BENCH").as_deref() != Ok("1") {
+        return;
+    }
+    pollster::block_on(async {
+        let mut gpu = renderer(wgpu::TextureFormat::Rgba16Float).await;
+        let baseline = baseline::ui::WGSL_SOURCE.wgsl_source().unwrap();
+        let candidate = crate::shader::ui::WGSL_SOURCE.wgsl_source().unwrap();
+        let pipelines = [
+            make_pipeline(&gpu, &baseline, gpu.format()),
+            make_pipeline(&gpu, &candidate, gpu.format()),
+        ];
+        let target = texture(gpu.device(), 512, 256, gpu.format());
+        let view = target.create_view(&Default::default());
+        for kind in 0..3 {
+            let canvas = representative(kind);
+            gpu.render(canvas.prepared_scene(), &view).unwrap();
+            completed_frame(&gpu, &pipelines[0], &view);
+            let expected = read(&gpu.context, &target);
+            completed_frame(&gpu, &pipelines[1], &view);
+            let actual = read(&gpu.context, &target);
+            assert_eq!(actual, expected);
+            evidence(&format!("bench-output-{kind}.rgba16"), &expected);
+            evidence(
+                &format!("bench-records-{kind}.bin"),
+                bytemuck::cast_slice(&gpu.state.records),
+            );
+            evidence(
+                &format!("bench-ranges-{kind}.bin"),
+                bytemuck::cast_slice(&gpu.state.ranges),
+            );
+            evidence(
+                &format!("bench-indices-{kind}.bin"),
+                bytemuck::cast_slice(&gpu.state.references),
+            );
+            eprintln!(
+                "clip_reuse_bench_fixture kind={kind} stats={:?}",
+                gpu.stats()
+            );
+            for warmup in 0..6 {
+                for shader in [warmup % 2, 1 - warmup % 2] {
+                    completed_frame(&gpu, &pipelines[shader], &view);
+                }
+            }
+            for round in 0..24 {
+                for (position, shader) in [round % 2, 1 - round % 2].into_iter().enumerate() {
+                    let elapsed = completed_frame(&gpu, &pipelines[shader], &view);
+                    eprintln!(
+                        "clip_reuse_bench,{kind},{round},{position},{shader},{}",
+                        elapsed.as_nanos()
+                    );
+                }
+            }
+        }
+    });
+}
