@@ -50,7 +50,14 @@ in the separately hashed [first-fix](first-fix-original-seal.json) and
 [borrowed](borrowed-original-seal.json) original archives.
 [Luna's certified-seed research](lattice-inversion-research-luna.md) explores
 removing search work while preserving the exact predicate and fallback. That
-experiment is separate and is not included in this adoption.
+experiment is separate and is not included in this adoption. The subsequent
+[matched linked checkpoint](certified-seed-linked-cost.json) holds that seed:
+its production lowerer grows 1,119→2,207 code bytes and its proven geometry
+subchain grows 160→288 stack bytes. Whole `.text` grows 1,088 bytes, shaders
+remain equal, and fewer probes do not establish a speed win. The initial
+missing offline dependency failure and all actual ELF/assembly evidence remain
+in [the original sealed archive](certified-seed-original-seal.json). These costs
+attach to `e872330f30`/`ae1618396c`, not a new execution of Main.
 
 General glyph/image/shear precision, hardware/backend conformance, native HDR,
 legacy DX and persistent GPU damage repair remain. Apple/MSVC compile checks and
