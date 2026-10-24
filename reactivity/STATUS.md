@@ -4,7 +4,19 @@ The clean-room workspace runs real applications through one exclusively owned
 runtime. Start at [the GPUI crate](crates/gpui/README.md). The design documents
 describe the intended complete system; this page records what is connected now.
 
-The latest [packed tree and typed child composition](evidence/packed-children/README.md)
+The [Reader one-shot handoff](evidence/reader-one-shot/README.md) adopts private
+consuming response roles and lane-bound tickets. A default u64 question now
+uses one allocation/48 requested bytes instead of two/112 at its typed-mailbox
+predecessor; Completion is 16 bytes and the empty-future wrapper 32. The actual
+Darwin first-poll allocation regression is fixed. The correction preserves public
+unwind traits, stale binding errors and permanent exhaustion. Fresh affected
+GPUI tests pass 204 cases; exact-source Loom passes 11, native Arc passes six,
+and both Miri borrowing models pass six each. Strict checks and the affected
+Darwin Reader/public-question suite pass. The predecessor's full default suite
+passed 675 cases; these scopes overlap. Paired owner-turn timing tracks its
+unchanged control and establishes no distinct CPU improvement.
+
+The [packed tree and typed child composition](evidence/packed-children/README.md)
 qualifies library source `ce79d00fb004859994c8574254bbd091e964a2d4` over the
 [component boundary composition](evidence/component-boundaries/README.md).
 Safe packed logical links shrink ordinary retained nodes from 40 to 24 bytes;
@@ -17,7 +29,7 @@ Tiny/all-handler owners and machine-code growth remain charged in the dossier.
 Component scope remains boundary-only, with parent-qualified identity matching;
 lexical component route wrappers remain an unresolved allocation cost.
 
-Final GPUI passes 712 tests across 70 frozen executables, strict all-target
+That packed-tree source passed 712 tests across 70 frozen executables, strict all-target
 native/GPU Clippy, 28 GPUI doctests and 194 scalar tests. Actual native
 paint/inspector and AT-SPI fixtures pass; Hummingbird passes 70 default-feature
 tests in 18 frozen executables. Counts overlap and source pins remain explicit.
@@ -26,8 +38,9 @@ Hummingbird's standalone lock remains `c6bef498a41a96ab23938f9025aa0ef0a63431b5`
 Generated WGSL and all eight SPIR-V recipes are verified in the executed native
 binary. These compose with the [text and preorder preparation](evidence/frontier-text-integration/README.md)
 and [gradients, transformed clips and exact clip damage](evidence/clipping-gradients-integration/README.md).
-The seven-library inventory is **34,852 non-test, non-comment shipping lines**,
-including build scripts. EcoVec adds 2,315 separately charged dependency lines;
+The current seven-library inventory is **34,902 non-test, non-comment shipping lines**,
+including 18 build-script lines, 50 above the packed-tree source. EcoVec adds
+2,315 separately charged dependency lines;
 tiny-layout costs and changed AccessKit vendor code remain explicit.
 The [mapped Todo](comparisons/mapped-todo/README.md) and
 [matched shader](comparisons/todo-shader-profiles/README.md) experiments retain
@@ -41,8 +54,9 @@ The [portable GPU oracle](evidence/portable-gpu-oracle/README.md) now passes
 69 software Vulkan checks and 71 with offline shaders. The hardware profile
 rejects software adapters. This adds no shipping core lines or dependencies.
 Windows/DX12 runtime and hardware performance remain unqualified. A subsequent
-native Mac suite exposed two first-lock allocation regressions; its zero-allocation
-contracts remain intact and a structural transport repair is pending.
+native Mac suite exposed three first-lock allocation failures across Reader and
+Remote. The adopted Reader handoff fixes its first-poll case; the two Remote
+contracts remain intact and their separate transport repair is under review.
 
 | Boundary | Integrated behavior | Remaining limit |
 | --- | --- | --- |
@@ -50,7 +64,7 @@ contracts remain intact and a structural transport repair is pending.
 | Public testing | Application::demo, borrowed semantic queries/visits and streaming serialization, conjunctive name/description filters, actions, shared native pointer/focus/keyboard input, typed worker delivery, source JSON and explicit scene/pixel diagnostics | Virtual time, replay, touch/capture/drag and hover callbacks remain |
 | Accessibility | Native AccessKit in ordinary desktop profiles, exact acknowledged transitions, controlled checkbox role/state/actions, source-qualified selection and atomic range edits, analytic rounded descendant clips, retired provider authority on text rebind; actual Linux AT-SPI client execution | Topology/missed/capped transitions use full projection; IME, relationships, virtual-item realization and UIA/VoiceOver runtime coverage remain |
 | Identity | Window-qualified, never-reused 16-byte target stamps; logical membership checks; keyed realized-row identity; no target allocation table or visited-key history | Cross-window list transfer and unrealized-row accessibility realization remain |
-| Worker delivery | Static typed inbox/question chains, frozen batches, versioned input-family admission, one physical completion credit, borrowed cooperative cancellation, native wakes and exclusive cleanup | Reader lookup scans earlier lanes; cross-turn results remain progressive; dynamic graph and demand parking remain; queue capacity is not a byte bound |
+| Worker delivery | Static typed inbox/question chains, frozen batches, versioned input-family admission, consuming inline response credit, checked lane-bound tickets, borrowed cooperative cancellation, native wakes and exclusive cleanup | Reader lookup scans earlier lanes; cross-turn results remain progressive; dynamic graph and demand parking remain; queue capacity is not a byte bound |
 | Collections | Borrowed keyed uniform lists and ordinary two-axis scroll panes, f64 rebased offsets, viewport-only virtual rows, shared wheel/reveal/accessibility routing | Explicit uniform-height finite virtual viewports; rotated/sheared scroll apertures and variable-height virtual rows remain |
 | Properties and inspector | Typed selectors and closed reflection catalog share validated Set/Inherit transactions; all 14 properties and nine value families feed retained native inspector controls; contained components select mounted targets, edit and refresh canonical state through ordinary typed click methods; edit counts join description changes by exact identity | Arbitrary built-in entry, descendant picking for contained tools, complete theme cascade and user-defined component schemas remain |
 | Layout and text | Cephal perf/cold-layout with direct lazy cache handles, selective nonparent containing blocks and allocation-free hidden markers; literal/direct-Signal/mapped properties and flex recipes; Parley/Engine/Fontique 0.12 with scoped paragraph reuse, shared packed glyphs and direct raster witnesses; source-qualified grapheme editing, native selection/caret paint, horizontal and vertical visual navigation and line-edge keys; acknowledged wrapped/bidi text geometry | Rich styled spans/color fonts, general Reader/Motion recipe algebra, IME/clipboard/autoscroll, native macOS range-origin policy, arbitrary font discovery and hostile-font transient budgets remain |
@@ -61,8 +75,10 @@ contracts remain intact and a structural transport repair is pending.
 | Blank X11 | Exact zero-command certificate uses server fill; no retained client pixel backing; normal-buffer→solid releases backing after server completion | Server/compositor storage remains; other platforms use ordinary software buffers |
 | Applications | Counter, Todo, Oklch/transform gallery, composed Workspace and synthetic 250K Library; real Hummingbird SQLite/Nucleo Library, album/artist/playlist and Files navigation, persistent roots, cancellable metadata indexing, queue, decoding and lazy CPAL output through the shared native/headless View | Hummingbird artwork, settings/media services, watchers, rename matching, playlist editing and full codec/output policy plus the complete Zed port remain; synthetic scaling is separate from real domain evidence |
 
-Mutable model/window state uses ordinary exclusive Rust borrows. The production
-window engine contains no Rc, RefCell or Cell. Native observation callbacks use
+Mutable model/window state uses ordinary exclusive Rust borrows. The private
+worker response handoff has one audited UnsafeCell payload, tested independently
+with Loom and native Arc/Miri; the window ownership engine uses no Rc, RefCell
+or Cell. Native observation callbacks use
 FnMut, allowing plain captured state. Immutable text uses one-word ArcStr leases
 between source and presented epochs; fonts, masks and in-flight backend resources have
 explicit immutable resource leases. Some test-only read/drop counters still use

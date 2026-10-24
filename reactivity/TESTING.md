@@ -146,9 +146,9 @@ caps to choose result timing and check previous controls, failed C repair,
 same-batch supersession, faults, physical credit and restored domain state.
 The model's ephemeral Reader is rebound through a fresh Questions plan after
 domain DTO restoration; it is not serialized as authority. A separate actual
-X11 script requires result/credit progress through WorkReady. Nine Loom cases
-compile the production single-completion mailbox through the Loom facade,
-including sealed staging, paused publication, close and late wake registration;
+X11 script requires result/credit progress through WorkReady. Eleven Loom cases
+compile the production single-completion mailbox through the tracked facade,
+including direct polling, paused notification, close and generation reuse;
 the three historical question-credit cases remain separate. These are not the complete multi-input
 dependency/cohort graph; see [the Reader contract](docs/reader-question.md). See
 [the delivery contract](crates/gpui/REMOTE.md) for the exact capacity and lifetime
@@ -312,8 +312,17 @@ fairness, all queue internals or device synchronization.
 
 Every new production unsafe block needs its local invariant, provenance/alias/
 initialization/drop proof, an optimized safe comparison, and Miri/sanitizer/fuzz
-fixtures appropriate to the operation. The current first-party library experiments
-forbid unsafe; the allocation-counter example has isolated System-forwarding
+fixtures appropriate to the operation. GPUI denies unsafe except in its reviewed
+private response handoff, whose exact source is imported by the Loom and native
+Arc tests. Run `cargo test -p gpui_reactivity_ownership_lab --features loom --test
+question_mailbox` and `cargo test -p gpui_reactivity_ownership_lab --test
+native_question_mailbox`. Run the latter through Miri with strict provenance
+under both Stacked and Tree Borrows; Miri checks native reclamation/aliasing,
+while Loom checks publication with tracked borrows. Its Arc `try_unwrap`
+adapter does not model std `Arc::into_inner`'s destructor-thread guarantee.
+The [adopted Reader dossier](evidence/reader-one-shot/README.md) records the
+eleven models, six native cases, two failing admission mutants and exact limits.
+The allocation-counter example has isolated System-forwarding
 instrumentation and is not an accepted production allocator. Unavailable unsafe
 validation is a failed adoption gate, not an implied waiver.
 
