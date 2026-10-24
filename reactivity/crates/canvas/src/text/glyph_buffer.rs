@@ -40,7 +40,6 @@ impl GlyphBuffer {
     pub(super) fn shared(&self) -> EcoVec<PackedGlyph> {
         self.values.clone()
     }
-    #[cfg(test)]
     pub(super) fn capacity(&self) -> usize {
         self.values.capacity()
     }

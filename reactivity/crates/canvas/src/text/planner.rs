@@ -559,6 +559,7 @@ mod tests {
         let source = "office אבג\r\nnext";
         let shared_plan = planner.plan::<true>(source, 16., Some(80.), true).unwrap();
         let owned_plan = planner.plan::<true>(source, 16., Some(80.), true).unwrap();
+        drop(planner.font_set(shared_plan.mask));
         let mut shared = None;
         let shared_cost = allocation_counter::measure(|| {
             shared = Some(

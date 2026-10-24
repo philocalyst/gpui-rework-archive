@@ -291,6 +291,21 @@ pub struct TextLayout<G = Arc<TextGeometry>> {
 /// A layout whose interaction data is owned directly. Immutable resource pages
 /// can own these values without one reference-counted geometry allocation each.
 pub type OwnedTextLayout = TextLayout<TextGeometry>;
+impl OwnedTextLayout {
+    /// Allocated glyph and interaction buffer capacity. This excludes the
+    /// layout header, shared font faces and raster masks; page owners can use
+    /// it to bound the payload retained with neighboring immutable resources.
+    pub fn buffer_capacity_bytes(&self) -> usize {
+        self.glyphs.capacity() * std::mem::size_of::<PackedGlyph>()
+            + self.mapping.as_ref().map_or(0, |map| {
+                map.runs.capacity() * std::mem::size_of::<layout::Run>()
+                    + map.lines.capacity() * std::mem::size_of::<layout::Line>()
+                    + map.carets.as_ref().map_or(0, |stops| {
+                        stops.capacity() * std::mem::size_of::<layout::Stop>()
+                    })
+            })
+    }
+}
 
 #[derive(Clone, Copy)]
 pub(crate) struct LayoutView<'a> {
