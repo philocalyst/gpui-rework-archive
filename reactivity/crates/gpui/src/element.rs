@@ -614,7 +614,7 @@ impl<'a> El<'a> {
     where
         C: ChildSeq<'a, S>,
     {
-        let additional = children.lower_bound();
+        let additional = 0;
         if self.children.capacity() == 0 {
             self.children.reserve_exact(additional);
         } else {
