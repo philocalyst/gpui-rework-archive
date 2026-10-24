@@ -111,7 +111,7 @@ fn a_retained_completion_cannot_revive_a_rejected_or_panicking_start() {
                 },
             )
             .unwrap();
-        let mut win = Win::recording_questions(
+        let mut win = Win::with_questions(
             Model {
                 caption: "Caption".into(),
                 query: Signal::new("A".into()),
