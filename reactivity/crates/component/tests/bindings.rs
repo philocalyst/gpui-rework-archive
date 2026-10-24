@@ -581,3 +581,19 @@ fn dynamic_intrinsic_operands_require_registration_even_when_false() {
         }
     }
 }
+
+#[test]
+fn typed_recipes_keep_thin_source_borrows_and_literal_overwrite_releases_bindings() {
+    use gpui::BoolInput;
+    let signal = Signal::new(false);
+    let mapped = signal.map(|flag| *flag);
+    assert_eq!(size_of_val(&mapped), 8);
+    let selected = mapped.select(Color::BLACK, Color::WHITE);
+    assert_eq!(size_of_val(&selected), 40);
+    let mut element = None;
+    let cost = allocation_counter::measure(|| {
+        element = Some(gpui::button("").disabled(&signal).disabled(false))
+    });
+    assert_eq!(cost.bytes_current, 0);
+    drop(element);
+}

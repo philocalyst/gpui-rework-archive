@@ -2835,7 +2835,7 @@ impl<M: View + 'static> Runtime<M> {
         let mut promoted: Option<SharedText> = None;
         let mut semantic = false;
         let mut visual_changed = false;
-        let mut controls_changed = false;
+        let mut disabled_changed = false;
         let mut last_changed = None;
         for (destination, mapped_value, color) in fanout.all_destinations() {
             self.counters.destination_compares += 1;
@@ -2862,7 +2862,7 @@ impl<M: View + 'static> Runtime<M> {
                     self.nodes[index].content = after;
                     self.dirty = true;
                     visual_changed = true;
-                    controls_changed = true;
+                    disabled_changed |= control == crate::style_port::Sink::DISABLED;
                 }
                 changed
             } else if let Some(id) = destination.property() {
@@ -2975,7 +2975,7 @@ impl<M: View + 'static> Runtime<M> {
             }
             self.dirty = visual_changed;
         }
-        if controls_changed {
+        if disabled_changed {
             for index in 0..self.nodes.len() {
                 let node = &self.nodes[index];
                 let disabled = node.content.own_disabled()

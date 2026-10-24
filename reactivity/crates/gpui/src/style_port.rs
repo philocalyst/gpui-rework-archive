@@ -76,36 +76,47 @@ impl<T: Value> MapValue for T {}
 /// immutable parameters, with no I/O or external mutable reads. This semantic
 /// law matches Source::new; Rust cannot prove purity. Outputs use the existing
 /// closed property validators and impacts. Recipes are rebuilt on description.
-pub struct Mapped<'a, U, F> {
-    signal: &'a dyn ErasedSignal,
+pub struct Mapped<'a, T, U, F> {
+    signal: &'a Signal<T>,
     map: F,
-    output: std::marker::PhantomData<U>,
+    output: std::marker::PhantomData<fn() -> U>,
 }
-impl<U, F: Copy> Copy for Mapped<'_, U, F> {}
-impl<U, F: Copy> Clone for Mapped<'_, U, F> {
+impl<T, U, F: Copy> Copy for Mapped<'_, T, U, F> {}
+impl<T, U, F: Copy> Clone for Mapped<'_, T, U, F> {
     fn clone(&self) -> Self {
         *self
     }
 }
-impl<'a, U: MapValue, F> Mapped<'a, U, F>
+impl<'a, T: 'static, U: MapValue, F> Mapped<'a, T, U, F>
 where
-    F: Fn(&dyn std::any::Any) -> Option<U> + Copy + Send + Sync + 'static,
+    F: Fn(&T) -> U + Copy + Send + Sync + 'static,
 {
     fn operand(self) -> MapOperand<'a> {
         let map = self.map;
         MapOperand {
             signal: self.signal,
-            recipe: Recipe::new(move |input| map(input).map(Value::scalar)),
+            recipe: Recipe::new(move |input: &dyn std::any::Any| {
+                input
+                    .downcast_ref::<Signal<T>>()
+                    .map(|signal| map(&**signal).scalar())
+            }),
         }
     }
 }
-// The largest variant remains the original inline recipe plus its result tag.
+// The small deferred alternative fits the inline function pointer niche.
 // Color endpoints exist only during description; retained selectors carry two
 // codes into the existing owner color bank, never a borrowed theme.
 #[derive(Clone)]
 pub(crate) enum PendingRecipe {
     Inline(Recipe),
-    Rejected(gpui_inline_call::TooLarge),
+    Deferred(DeferredRecipe),
+}
+// A small cold alternative fits the inline function pointer's existing niche.
+// Exceptional large rejection diagnostics retain their complete usize payload.
+#[derive(Clone)]
+pub(crate) enum DeferredRecipe {
+    Rejected { size: u32, alignment: u32 },
+    RejectedLarge(Box<gpui_inline_call::TooLarge>),
     Select(Box<ColorSelection>),
 }
 #[derive(Clone)]
@@ -114,6 +125,24 @@ pub(crate) struct ColorSelection {
     colors: [Color; 2],
 }
 impl PendingRecipe {
+    fn rejected(error: gpui_inline_call::TooLarge) -> Self {
+        Self::Deferred(
+            match (u32::try_from(error.size), u32::try_from(error.alignment)) {
+                (Ok(size), Ok(alignment)) => DeferredRecipe::Rejected { size, alignment },
+                _ => DeferredRecipe::RejectedLarge(Box::new(error)),
+            },
+        )
+    }
+    fn deferred_error(error: &DeferredRecipe) -> crate::Error {
+        Self::error(match error {
+            DeferredRecipe::Rejected { size, alignment } => gpui_inline_call::TooLarge {
+                size: *size as usize,
+                alignment: *alignment as usize,
+            },
+            DeferredRecipe::RejectedLarge(error) => **error,
+            DeferredRecipe::Select(_) => unreachable!("selection is not a rejection"),
+        })
+    }
     fn error(error: gpui_inline_call::TooLarge) -> crate::Error {
         crate::Error::MapStorage {
             size: error.size,
@@ -123,8 +152,10 @@ impl PendingRecipe {
     pub(crate) fn scalar(&self, source: &dyn std::any::Any) -> Result<Scalar, crate::Error> {
         match self {
             Self::Inline(recipe) => recipe.call(source).ok_or(crate::Error::MapInput),
-            Self::Rejected(error) => Err(Self::error(*error)),
-            Self::Select(selection) => {
+            Self::Deferred(
+                error @ (DeferredRecipe::Rejected { .. } | DeferredRecipe::RejectedLarge(_)),
+            ) => Err(Self::deferred_error(error)),
+            Self::Deferred(DeferredRecipe::Select(selection)) => {
                 let recipe = selection.build.call(&[0_u32, 1]).map_err(Self::error)?;
                 let Some(Scalar::ColorSlot(code)) = recipe.call(source) else {
                     return Err(crate::Error::MapInput);
@@ -141,8 +172,10 @@ impl PendingRecipe {
     ) -> Result<Recipe, crate::Error> {
         match self {
             Self::Inline(recipe) => Ok(recipe),
-            Self::Rejected(error) => Err(Self::error(error)),
-            Self::Select(selection) => selection
+            Self::Deferred(
+                error @ (DeferredRecipe::Rejected { .. } | DeferredRecipe::RejectedLarge(_)),
+            ) => Err(Self::deferred_error(&error)),
+            Self::Deferred(DeferredRecipe::Select(selection)) => selection
                 .build
                 .call(&selection.colors.map(&mut literal))
                 .map_err(Self::error),
@@ -179,7 +212,7 @@ impl<'a> From<MapOperand<'a>> for OwnedMapOperand<'a> {
             signal: value.signal,
             recipe: match value.recipe {
                 Ok(recipe) => PendingRecipe::Inline(recipe),
-                Err(error) => PendingRecipe::Rejected(error),
+                Err(error) => PendingRecipe::rejected(error),
             },
         }
     }
@@ -228,21 +261,21 @@ impl<'a> IntoColor<'a> for ColorInput<'a> {
 }
 /// A concrete, Copy selection recipe. Its palette is owned by value until the
 /// element consumes it; it never retains a borrow of an application theme.
-pub struct SelectedColors<'a, F> {
-    signal: &'a dyn ErasedSignal,
+pub struct SelectedColors<'a, T, F> {
+    signal: &'a Signal<T>,
     map: F,
     colors: [Color; 2],
 }
-impl<F: Copy> Copy for SelectedColors<'_, F> {}
-impl<F: Copy> Clone for SelectedColors<'_, F> {
+impl<T, F: Copy> Copy for SelectedColors<'_, T, F> {}
+impl<T, F: Copy> Clone for SelectedColors<'_, T, F> {
     fn clone(&self) -> Self {
         *self
     }
 }
-impl<F> sealed::ColorInput for SelectedColors<'_, F> {}
-impl<'a, F> IntoColor<'a> for SelectedColors<'a, F>
+impl<T, F> sealed::ColorInput for SelectedColors<'_, T, F> {}
+impl<'a, T: 'static, F> IntoColor<'a> for SelectedColors<'a, T, F>
 where
-    F: Fn(&dyn std::any::Any) -> Option<bool> + Copy + Send + Sync + 'static,
+    F: Fn(&T) -> bool + Copy + Send + Sync + 'static,
 {
     fn into_color(self) -> ColorInput<'a> {
         let map = self.map;
@@ -251,15 +284,19 @@ where
                 .downcast_ref::<[u32; 2]>()
                 .expect("internal palette pair");
             Recipe::new(move |input: &dyn std::any::Any| {
-                map(input).map(|flag| Scalar::ColorSlot(codes[usize::from(flag)]))
+                input
+                    .downcast_ref::<Signal<T>>()
+                    .map(|signal| Scalar::ColorSlot(codes[usize::from(map(&**signal))]))
             })
         });
         let recipe = match build {
-            Ok(build) => PendingRecipe::Select(Box::new(ColorSelection {
-                build,
-                colors: self.colors,
-            })),
-            Err(error) => PendingRecipe::Rejected(error),
+            Ok(build) => {
+                PendingRecipe::Deferred(DeferredRecipe::Select(Box::new(ColorSelection {
+                    build,
+                    colors: self.colors,
+                })))
+            }
+            Err(error) => PendingRecipe::rejected(error),
         };
         ColorInput(ColorOperand::Selection(OwnedMapOperand {
             signal: self.signal,
@@ -271,36 +308,26 @@ where
 /// element consumes the operand. Its final capture must fit sixteen bytes with
 /// alignment at most eight; admission rejects larger recipes without fallback.
 pub trait SignalMap<T> {
-    fn map<U: MapValue, F>(
-        &self,
-        map: F,
-    ) -> Mapped<'_, U, impl Fn(&dyn std::any::Any) -> Option<U> + Copy + Send + Sync + 'static>
+    fn map<U: MapValue, F>(&self, map: F) -> Mapped<'_, T, U, F>
     where
         F: Fn(&T) -> U + Copy + Send + Sync + 'static;
     fn map_with<P, U: MapValue, F>(
         &self,
         parameter: P,
         map: F,
-    ) -> Mapped<'_, U, impl Fn(&dyn std::any::Any) -> Option<U> + Copy + Send + Sync + 'static>
+    ) -> Mapped<'_, T, U, impl Fn(&T) -> U + Copy + Send + Sync + 'static>
     where
         P: Copy + Send + Sync + 'static,
         F: Fn(&T, P) -> U + Copy + Send + Sync + 'static;
 }
 impl<T: 'static> SignalMap<T> for Signal<T> {
-    fn map<U: MapValue, F>(
-        &self,
-        map: F,
-    ) -> Mapped<'_, U, impl Fn(&dyn std::any::Any) -> Option<U> + Copy + Send + Sync + 'static>
+    fn map<U: MapValue, F>(&self, map: F) -> Mapped<'_, T, U, F>
     where
         F: Fn(&T) -> U + Copy + Send + Sync + 'static,
     {
         Mapped {
             signal: self,
-            map: move |input: &dyn std::any::Any| {
-                input
-                    .downcast_ref::<Signal<T>>()
-                    .map(|signal| map(&**signal))
-            },
+            map,
             output: std::marker::PhantomData,
         }
     }
@@ -308,7 +335,7 @@ impl<T: 'static> SignalMap<T> for Signal<T> {
         &self,
         parameter: P,
         map: F,
-    ) -> Mapped<'_, U, impl Fn(&dyn std::any::Any) -> Option<U> + Copy + Send + Sync + 'static>
+    ) -> Mapped<'_, T, U, impl Fn(&T) -> U + Copy + Send + Sync + 'static>
     where
         P: Copy + Send + Sync + 'static,
         F: Fn(&T, P) -> U + Copy + Send + Sync + 'static,
@@ -337,16 +364,14 @@ impl<'a> BoolInput<'a> for &'a Signal<bool> {
     fn select(self, when_false: Color, when_true: Color) -> impl IntoColor<'a> + Copy {
         SelectedColors {
             signal: self,
-            map: |input: &dyn std::any::Any| {
-                input.downcast_ref::<Signal<bool>>().map(|value| **value)
-            },
+            map: |value: &bool| *value,
             colors: [when_false, when_true],
         }
     }
 }
-impl<'a, F> BoolInput<'a> for Mapped<'a, bool, F>
+impl<'a, T: 'static, F> BoolInput<'a> for Mapped<'a, T, bool, F>
 where
-    F: Fn(&dyn std::any::Any) -> Option<bool> + Copy + Send + Sync + 'static,
+    F: Fn(&T) -> bool + Copy + Send + Sync + 'static,
 {
     fn select(self, when_false: Color, when_true: Color) -> impl IntoColor<'a> + Copy {
         SelectedColors {
@@ -535,12 +560,12 @@ impl<'a, T> PropInput<'a, T> {
     }
 }
 
-impl<U, F> sealed::Input<U> for Mapped<'_, U, F> {
+impl<T, U, F> sealed::Input<U> for Mapped<'_, T, U, F> {
     const IS_LITERAL: bool = false;
 }
-impl<'a, U: MapValue, F> IntoProp<'a, U> for Mapped<'a, U, F>
+impl<'a, T: 'static, U: MapValue, F> IntoProp<'a, U> for Mapped<'a, T, U, F>
 where
-    F: Fn(&dyn std::any::Any) -> Option<U> + Copy + Send + Sync + 'static,
+    F: Fn(&T) -> U + Copy + Send + Sync + 'static,
 {
     fn into_prop(self) -> PropInput<'a, U> {
         PropInput(Operand::Mapped(self.operand()))
@@ -587,8 +612,8 @@ numbers!(f32 => for_style, f64 => for_value, u8 => for_style,
 
 macro_rules! mapped_numbers {
     ($($ty:ty),+ $(,)?) => {$(
-        impl<F> sealed::Input<f64> for Mapped<'_, $ty, F> { const IS_LITERAL: bool = false; }
-        impl<'a, F> IntoProp<'a, f64> for Mapped<'a, $ty, F> where F: Fn(&dyn std::any::Any) -> Option<$ty> + Copy + Send + Sync + 'static {
+        impl<T, F> sealed::Input<f64> for Mapped<'_, T, $ty, F> { const IS_LITERAL: bool = false; }
+        impl<'a, T: 'static, F> IntoProp<'a, f64> for Mapped<'a, T, $ty, F> where F: Fn(&T) -> $ty + Copy + Send + Sync + 'static {
             fn into_prop(self) -> PropInput<'a, f64> { PropInput(Operand::Mapped(self.operand())) }
         }
     )+};
@@ -597,8 +622,8 @@ mapped_numbers!(f32, u8, u16, u32, u64, usize, i8, i16, i32, i64, isize);
 
 macro_rules! mapped_dimensions {
     ($($ty:ty),+ $(,)?) => {$(
-        impl<F> sealed::Input<Length> for Mapped<'_, $ty, F> { const IS_LITERAL: bool = false; }
-        impl<'a, F> IntoProp<'a, Length> for Mapped<'a, $ty, F> where F: Fn(&dyn std::any::Any) -> Option<$ty> + Copy + Send + Sync + 'static {
+        impl<T, F> sealed::Input<Length> for Mapped<'_, T, $ty, F> { const IS_LITERAL: bool = false; }
+        impl<'a, T: 'static, F> IntoProp<'a, Length> for Mapped<'a, T, $ty, F> where F: Fn(&T) -> $ty + Copy + Send + Sync + 'static {
             fn into_prop(self) -> PropInput<'a, Length> { PropInput(Operand::Mapped(self.operand())) }
         }
     )+};
@@ -793,5 +818,26 @@ mod admission_tests {
             panic!("dimension")
         };
         assert_eq!(value.to_bits(), (-0_f32).to_bits());
+    }
+}
+
+#[cfg(test)]
+mod binding_storage_tests {
+    use super::*;
+    #[test]
+    fn deferred_selections_preserve_existing_operands_and_full_rejection_payloads() {
+        assert_eq!(size_of::<Recipe>(), 24);
+        assert_eq!(size_of::<PendingRecipe>(), 24);
+        assert_eq!(size_of::<MapOperand<'_>>(), 40);
+        assert_eq!(size_of::<OwnedMapOperand<'_>>(), 40);
+        assert_eq!(size_of::<MapBinding<'_>>(), 48);
+        assert_eq!(size_of::<MapDraft<'_>>(), 72);
+        assert_eq!(size_of::<ColorSelection>(), 56);
+        for (size, alignment) in [(20, 4), (usize::MAX, 1), (1, usize::MAX)] {
+            let expected = crate::Error::MapStorage { size, alignment };
+            let pending = PendingRecipe::rejected(gpui_inline_call::TooLarge { size, alignment });
+            assert_eq!(pending.scalar(&()).unwrap_err(), expected);
+            assert_eq!(pending.lower(|_| unreachable!()).err(), Some(expected));
+        }
     }
 }

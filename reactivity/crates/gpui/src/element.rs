@@ -693,13 +693,20 @@ impl<'a> El<'a> {
                     })
                     .set_disabled(value);
             }
+            if self
+                .extra
+                .as_deref()
+                .is_some_and(crate::semantic::ElementExtra::empty)
+            {
+                self.extra = None;
+            }
         } else if let Some(signal) = input.signal() {
             self.extra
                 .get_or_insert_with(|| {
                     Box::new(crate::semantic::ElementExtra::Semantic(Default::default()))
                 })
                 .bind(sink, signal);
-        } else if let Some(map) = input.clone().mapped() {
+        } else if let Some(map) = input.mapped() {
             self.extra
                 .get_or_insert_with(|| {
                     Box::new(crate::semantic::ElementExtra::Semantic(Default::default()))
