@@ -8,7 +8,7 @@ pub(super) enum LayoutNodes {
 }
 pub(super) struct Edited {
     ordered: Vec<NodeId>,
-    reverse: BTreeMap<NodeId, usize>,
+    reverse: Vec<(NodeId, usize)>,
 }
 impl Default for LayoutNodes {
     fn default() -> Self {
@@ -37,7 +37,8 @@ impl LayoutNodes {
     pub fn index_of(&self, id: NodeId) -> Option<usize> {
         match self {
             Self::Fresh(range) => range.index_of(id),
-            Self::Edited(map) => map.reverse.get(&id).copied(),
+            Self::Edited(map) => map.reverse.binary_search_by_key(&id, |(id, _)| *id)
+                .ok().map(|index| map.reverse[index].1),
         }
     }
     pub fn push(&mut self, id: NodeId) -> Result<(), gpui_reactivity_core::TreeError> {
@@ -47,11 +48,14 @@ impl LayoutNodes {
         }
     }
     fn edited(ordered: Vec<NodeId>) -> Result<Self, LayoutError> {
-        let mut reverse = BTreeMap::new();
-        for (index, id) in ordered.iter().copied().enumerate() {
-            if reverse.insert(id, index).is_some() {
-                return Err(gpui_reactivity_core::TreeError::InvalidNode.into());
-            }
+        // Keep full namespace/generation/slot capabilities, but allocate one
+        // contiguous inverse rather than one tree node per small fanout. This
+        // is built once per topology turn; measurements only binary-search it.
+        let mut reverse: Vec<_> = ordered.iter().copied().enumerate()
+            .map(|(index, id)| (id, index)).collect();
+        reverse.sort_unstable_by_key(|(id, _)| *id);
+        if reverse.windows(2).any(|pair| pair[0].0 == pair[1].0) {
+            return Err(gpui_reactivity_core::TreeError::InvalidNode.into());
         }
         Ok(Self::Edited(Box::new(Edited { ordered, reverse })))
     }
@@ -576,13 +580,16 @@ mod tests {
                 win.update(|model| model.popup = popup).unwrap();
             });
             let runtime = win.runtime().unwrap();
-            let (ordered_capacity, inverse_entries) = match &runtime.layout_nodes {
-                LayoutNodes::Fresh(_) => (0, 0),
-                LayoutNodes::Edited(map) => (map.ordered.capacity(), map.reverse.len()),
+            let (ordered_capacity, inverse_entries, inverse_capacity) = match &runtime.layout_nodes {
+                LayoutNodes::Fresh(_) => (0, 0, 0),
+                LayoutNodes::Edited(map) => (
+                    map.ordered.capacity(), map.reverse.len(), map.reverse.capacity(),
+                ),
             };
             eprintln!(
-                "RETAINED_TOPOLOGY_POPUP open={popup} allocations={} requested={} retained={} peak={} ordered_capacity={ordered_capacity} inverse_entries={inverse_entries}",
+                "RETAINED_TOPOLOGY_POPUP open={popup} allocations={} requested={} retained={} peak={} ordered_capacity={ordered_capacity} inverse_entries={inverse_entries} inverse_capacity={inverse_capacity} inverse_entry_bytes={}",
                 cost.count_total, cost.bytes_total, cost.bytes_current, cost.bytes_max,
+                size_of::<(NodeId, usize)>(),
             );
             // Allocation measurements cover the whole public update, not
             // guessed BTreeMap node sizes or production-allocator CPU timing.
@@ -605,5 +612,20 @@ mod tests {
         assert_eq!(mapping.index_of(removed), None);
         assert_eq!(mapping.index_of(foreign), None);
         assert!(LayoutNodes::edited(vec![survivor, survivor]).is_err());
+        let mut ids = vec![survivor, replacement];
+        for _ in 0..65 {
+            ids.push(tree.insert(None, gpui_reactivity_core::NodeKind::Element, cephal::Style::DEFAULT).unwrap());
+        }
+        // Logical order is deliberately unrelated to capability order, across
+        // multiple search partitions and mixed recycled-slot generations.
+        ids.reverse();
+        ids.rotate_left(17);
+        let mapping = LayoutNodes::edited(ids.clone()).unwrap();
+        for (index, id) in ids.into_iter().enumerate() {
+            assert_eq!(mapping.get(index), Some(id));
+            assert_eq!(mapping.index_of(id), Some(index));
+        }
+        assert_eq!(mapping.index_of(removed), None);
+        assert_eq!(mapping.index_of(foreign), None);
     }
 }
