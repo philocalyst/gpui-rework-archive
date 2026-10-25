@@ -205,6 +205,54 @@ mod tests {
         }
     }
     #[test]
+    fn inspector_color_admission_needs_only_one_candidate_and_preserves_failed_predecessor() {
+        struct Inspected { color: Signal<Color> }
+        impl Inspected {
+            const COLOR: crate::Source<Self, Color> = crate::Source::new(
+                FieldId::new(1), "color", |model| &model.color, |model| &mut model.color,
+            );
+        }
+        impl View for Inspected {
+            fn sources() -> Sources<Self> { Sources::new().direct(Self::COLOR) }
+            fn view(&self) -> crate::El<'_> {
+                crate::div().name("color target").size(32).bg(&self.color)
+            }
+        }
+        let window = || {
+            let mut win = Win::with_inspector(
+                Inspected { color: Signal::new(Color::BLACK) },
+                WindowOptions { size: [640, 480], ..Default::default() },
+            ).unwrap();
+            let target = win.query().name("color target").one().unwrap();
+            win.inspector_select(target).unwrap();
+            win
+        };
+        let mut expected = window();
+        expected.set(Inspected::COLOR, Color::WHITE).unwrap();
+        let expected_pixels = expected.with_pixels(|pixels, _, _| pixels.to_vec()).unwrap();
+        for sequence in [u64::MAX - 1, u64::MAX] {
+            let mut win = window();
+            let old_token = win.with_scene(|_, token| token).unwrap();
+            let old_nodes = win.snapshot().unwrap().nodes;
+            let old_pixels = win.with_pixels(|pixels, _, _| pixels.to_vec()).unwrap();
+            win.runtime_mut().unwrap().next_presentation = NonZeroU64::new(sequence).unwrap();
+            let result = win.set(Inspected::COLOR, Color::WHITE);
+            if sequence == u64::MAX - 1 {
+                // One admitted source edit has enough namespace capacity for
+                // one complete candidate, including the inspector captions.
+                let commit = result.expect("do not publish a slot candidate before guarded full preparation");
+                assert_eq!(commit.source_epoch, commit.presentation_epoch);
+                assert_eq!(win.with_scene(|_, token| token.sequence.get()).unwrap(), sequence);
+                win.with_pixels(|pixels, _, _| assert_eq!(pixels, expected_pixels)).unwrap();
+            } else {
+                assert!(result.is_err());
+                assert_eq!(win.with_scene(|_, token| token).unwrap(), old_token);
+                assert_eq!(win.snapshot().unwrap().nodes, old_nodes);
+                win.with_pixels(|pixels, _, _| assert_eq!(pixels, old_pixels)).unwrap();
+            }
+        }
+    }
+    #[test]
     fn cold_storage_and_warm_edits_have_explicit_allocation_costs() {
         eprintln!(
             "paint_headers,Node={},Presented={},Runtime={},Fanout={},Metadata={},Transition={},Prepared={}",
