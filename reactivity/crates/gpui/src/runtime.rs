@@ -2206,8 +2206,11 @@ fn layout_style(style: Style) -> cephal::Style {
     cephal::Style {
         display: Display::Flex,
         size: Size {
-            width: style.width.map_or(Dimension::AUTO, Dimension::length),
-            height: style.height.map_or(Dimension::AUTO, Dimension::length),
+            width: style.width.get().map_or(Dimension::AUTO, Dimension::length),
+            height: style
+                .height
+                .get()
+                .map_or(Dimension::AUTO, Dimension::length),
         },
         padding: cephal::Rect::splat(LengthPercentage::length(style.padding)),
         gap: Size {
@@ -2545,9 +2548,9 @@ mod semantic_storage_ledger {
         );
         // Parent/transform packing and the source namespace niche are shared
         // baseline improvements; semantic columns add no hot-node fields.
-        assert_eq!(size_of::<Node>(), 128);
+        assert_eq!(size_of::<Node>(), 120);
         assert_eq!(size_of::<Presented>(), 80);
-        assert_eq!(size_of::<crate::El<'_>>(), 176);
+        assert_eq!(size_of::<crate::El<'_>>(), 168);
         assert_eq!(size_of::<ListRow>(), 32);
         assert_eq!(size_of::<metadata::Row>(), 24);
         assert_eq!(size_of::<Destination>(), 4);

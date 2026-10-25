@@ -12,10 +12,44 @@ pub enum Flow {
     Column,
 }
 
+/// A dimension after the builder/property boundary has admitted its value.
+/// Finite lengths retain their exact bits; NaN denotes automatic sizing.
+/// Public selectors continue to accept and return `Option<f32>`.
+#[derive(Clone, Copy)]
+pub(crate) struct OptionalLength(f32);
+impl OptionalLength {
+    pub const AUTO: Self = Self(f32::NAN);
+
+    #[inline]
+    pub fn from_validated(value: Option<f32>) -> Self {
+        debug_assert!(value.is_none_or(|value| value.is_finite() && value >= 0.0));
+        Self(value.unwrap_or(f32::NAN))
+    }
+
+    #[inline]
+    pub fn get(self) -> Option<f32> {
+        (!self.0.is_nan()).then_some(self.0)
+    }
+}
+impl PartialEq for OptionalLength {
+    #[inline]
+    fn eq(&self, other: &Self) -> bool {
+        // Admitted lengths are nonnegative and Auto has one canonical NaN.
+        // Removing the sign bit equates the two zeros while preserving every
+        // other admitted value, including Auto, without float/option branches.
+        self.0.to_bits() & 0x7fff_ffff == other.0.to_bits() & 0x7fff_ffff
+    }
+}
+impl std::fmt::Debug for OptionalLength {
+    fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
+        self.get().fmt(f)
+    }
+}
+
 #[derive(Clone, Copy, Debug, PartialEq)]
 pub struct Style {
-    pub(crate) width: Option<f32>,
-    pub(crate) height: Option<f32>,
+    pub(crate) width: OptionalLength,
+    pub(crate) height: OptionalLength,
     pub(crate) gap: f32,
     pub(crate) padding: f32,
     pub(crate) font_size: f32,
@@ -28,8 +62,8 @@ pub struct Style {
 impl Default for Style {
     fn default() -> Self {
         Self {
-            width: None,
-            height: None,
+            width: OptionalLength::AUTO,
+            height: OptionalLength::AUTO,
             gap: 0.0,
             padding: 0.0,
             font_size: 16.0,
@@ -108,5 +142,26 @@ mod tests {
         for invalid in [f64::NAN, f64::INFINITY, f64::MAX, -1.0, -f64::MIN_POSITIVE] {
             assert!(std::panic::catch_unwind(|| nonnegative(invalid, "width")).is_err());
         }
+    }
+
+    #[test]
+    fn optional_lengths_preserve_the_admitted_float_domain() {
+        assert_eq!(size_of::<OptionalLength>(), size_of::<f32>());
+        assert_eq!(OptionalLength::AUTO.get(), None);
+        assert_eq!(OptionalLength::AUTO, OptionalLength::AUTO);
+        assert_eq!(format!("{:?}", OptionalLength::AUTO), "None");
+        for value in [0.0, -0.0, f32::from_bits(1), f32::MIN_POSITIVE, f32::MAX] {
+            let length = OptionalLength::from_validated(Some(value));
+            assert_eq!(length.get().unwrap().to_bits(), value.to_bits());
+            assert_eq!(format!("{length:?}"), format!("{:?}", Some(value)));
+        }
+        assert_eq!(
+            OptionalLength::from_validated(Some(0.0)),
+            OptionalLength::from_validated(Some(-0.0))
+        );
+        assert_ne!(
+            OptionalLength::AUTO,
+            OptionalLength::from_validated(Some(0.0))
+        );
     }
 }

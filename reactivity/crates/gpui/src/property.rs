@@ -2,7 +2,7 @@
 //! reference; callers cannot supply a setter, validator or impact claim.
 //! Contributions retain presence separately from resolved destination equality.
 
-use crate::style::{Affine, Color, Flow, Style};
+use crate::style::{Affine, Color, Flow, OptionalLength, Style};
 use std::{collections::BTreeMap, fmt};
 
 /// Inclusive ceilings: Geometry includes hit/bounds/damage/paint; Layout also
@@ -177,11 +177,11 @@ fn font_size(value: &f32) -> Result<(), PropertyErrorKind> {
 // This closed declaration list also generates the catalog and erased dispatch.
 // Applications provide neither callbacks nor macros.
 macro_rules! properties {
-    ($($name:ident, $decl:ident, $ty:ty, $id:ident, $text:literal, $kind:ident, $impact:ident, $field:ident, $validate:expr);+ $(;)?) => {
+    ($($name:ident, $decl:ident, $ty:ty, $id:ident, $text:literal, $kind:ident, $impact:ident, $get:expr, $put:expr, $validate:expr);+ $(;)?) => {
         $(static $decl: Declaration<$ty> = Declaration {
             info: PropertyInfo { id: PropertyId::$id, name: $text, kind: ValueKind::$kind, impact: Impact::$impact },
-            get: |style| style.$field,
-            put: |style, value| style.$field = value,
+            get: $get,
+            put: $put,
             validate: $validate,
         };
         pub const $name: Property<$ty> = Property(&$decl);)+
@@ -213,15 +213,15 @@ fn finite_transform(value: &Affine) -> Result<(), PropertyErrorKind> {
 // Color's private fields and checked constructors already guarantee finite,
 // valid tagged color values, including extended RGB; do not clip them here.
 properties! {
-    WIDTH, WIDTH_DECL, Option<f32>, Width, "width", Dimension, Layout, width, dimension;
-    HEIGHT, HEIGHT_DECL, Option<f32>, Height, "height", Dimension, Layout, height, dimension;
-    GAP, GAP_DECL, f32, Gap, "gap", Number, Layout, gap, nonnegative;
-    PADDING, PADDING_DECL, f32, Padding, "padding", Number, Layout, padding, nonnegative;
-    FONT_SIZE, FONT_SIZE_DECL, f32, FontSize, "font_size", Number, Layout, font_size, font_size;
-    FOREGROUND, FOREGROUND_DECL, Color, Foreground, "foreground", Color, Paint, fg, |_| Ok(());
-    BACKGROUND, BACKGROUND_DECL, Color, Background, "background", Color, Paint, bg, |_| Ok(());
-    FLOW, FLOW_DECL, Flow, Flow, "flow", Flow, Layout, flow, |_| Ok(());
-    TRANSFORM, TRANSFORM_DECL, Affine, Transform, "transform", Transform, Geometry, transform, finite_transform;
+    WIDTH, WIDTH_DECL, Option<f32>, Width, "width", Dimension, Layout, |style| style.width.get(), |style, value| style.width = OptionalLength::from_validated(value), dimension;
+    HEIGHT, HEIGHT_DECL, Option<f32>, Height, "height", Dimension, Layout, |style| style.height.get(), |style, value| style.height = OptionalLength::from_validated(value), dimension;
+    GAP, GAP_DECL, f32, Gap, "gap", Number, Layout, |style| style.gap, |style, value| style.gap = value, nonnegative;
+    PADDING, PADDING_DECL, f32, Padding, "padding", Number, Layout, |style| style.padding, |style, value| style.padding = value, nonnegative;
+    FONT_SIZE, FONT_SIZE_DECL, f32, FontSize, "font_size", Number, Layout, |style| style.font_size, |style, value| style.font_size = value, font_size;
+    FOREGROUND, FOREGROUND_DECL, Color, Foreground, "foreground", Color, Paint, |style| style.fg, |style, value| style.fg = value, |_| Ok(());
+    BACKGROUND, BACKGROUND_DECL, Color, Background, "background", Color, Paint, |style| style.bg, |style, value| style.bg = value, |_| Ok(());
+    FLOW, FLOW_DECL, Flow, Flow, "flow", Flow, Layout, |style| style.flow, |style, value| style.flow = value, |_| Ok(());
+    TRANSFORM, TRANSFORM_DECL, Affine, Transform, "transform", Transform, Geometry, |style| style.transform, |style, value| style.transform = value, finite_transform;
 }
 
 /// Closed inspector seam. No boxed erased values, type IDs or external setters.
@@ -384,9 +384,10 @@ mod tests {
     #[test]
     fn invalid_typed_and_erased_edits_leave_all_fields_unchanged() {
         let mut style = Style::default();
-        for invalid in [f32::NAN, f32::INFINITY, -1.0] {
+        for invalid in [f32::NAN, f32::INFINITY, f32::NEG_INFINITY, -1.0] {
             let before = style;
             assert!(WIDTH.set(&mut style, Some(invalid)).is_err());
+            assert!(HEIGHT.set(&mut style, Some(invalid)).is_err());
             assert!(GAP.set(&mut style, invalid).is_err());
             assert!(PADDING.set(&mut style, invalid).is_err());
             assert!(
@@ -425,6 +426,28 @@ mod tests {
             }
         );
         assert_eq!(style, before);
+    }
+
+    #[test]
+    fn dimension_selectors_round_trip_extremes_and_preserve_equality_semantics() {
+        for property in [WIDTH, HEIGHT] {
+            let mut style = Style::default();
+            for value in [-0.0, f32::from_bits(1), f32::MIN_POSITIVE, f32::MAX] {
+                assert!(property.set(&mut style, Some(value)).unwrap());
+                assert_eq!(property.get(&style).unwrap().to_bits(), value.to_bits());
+                assert!(!property.set(&mut style, Some(value)).unwrap());
+            }
+            assert!(property.set(&mut style, Some(-0.0)).unwrap());
+            // A destination equal to the current one does not overwrite it.
+            assert!(!property.set(&mut style, Some(0.0)).unwrap());
+            assert_eq!(
+                property.get(&style).unwrap().to_bits(),
+                (-0.0_f32).to_bits()
+            );
+            assert!(property.set(&mut style, None).unwrap());
+            assert!(!property.set(&mut style, None).unwrap());
+            assert_eq!(property.get(&style), None);
+        }
     }
 
     #[test]

@@ -9,7 +9,7 @@ use crate::{
     View,
     component::Component,
     source::{BindError, FieldAction, FieldId, IntoText, Sources, Text},
-    style::{Affine, Color, Flex, IntoLength, Style, nonnegative},
+    style::{Affine, Color, Flex, IntoLength, OptionalLength, Style, nonnegative},
 };
 
 #[derive(Clone, Copy, Debug, PartialEq, Eq, PartialOrd, Ord)]
@@ -287,17 +287,17 @@ impl<'a> El<'a> {
     }
 
     pub fn w(mut self, width: impl IntoLength) -> Self {
-        self.style.width = Some(nonnegative(width, "width"));
+        self.style.width = OptionalLength::from_validated(Some(nonnegative(width, "width")));
         self
     }
     pub fn h(mut self, height: impl IntoLength) -> Self {
-        self.style.height = Some(nonnegative(height, "height"));
+        self.style.height = OptionalLength::from_validated(Some(nonnegative(height, "height")));
         self
     }
     pub fn size(mut self, size: impl IntoLength) -> Self {
         let size = nonnegative(size, "size");
-        self.style.width = Some(size);
-        self.style.height = Some(size);
+        self.style.width = OptionalLength::from_validated(Some(size));
+        self.style.height = OptionalLength::from_validated(Some(size));
         self
     }
     pub fn gap(mut self, gap: impl IntoLength) -> Self {
@@ -454,7 +454,7 @@ impl<'a> El<'a> {
                     }
                     let mut wrapper = Self::new(NodeKind::ListItem, None);
                     wrapper.children.push(row);
-                    wrapper.style.height = Some(row_height as f32);
+                    wrapper.style.height = OptionalLength::from_validated(Some(row_height as f32));
                     rows.push((
                         Some(index),
                         wrapper,
@@ -950,8 +950,8 @@ mod tests {
             .flatten();
         assert_eq!(nodes[0].kind.role(), Role::TextInput);
         assert!(nodes[0].text.as_ref().unwrap().signal().is_some());
-        assert_eq!(nodes[0].style.width, Some(320.0));
-        assert_eq!(nodes[0].style.height, Some(24.0));
+        assert_eq!(nodes[0].style.width.get(), Some(320.0));
+        assert_eq!(nodes[0].style.height.get(), Some(24.0));
         assert_eq!(nodes[0].style.fg, Color::rgb(1, 2, 3));
     }
 

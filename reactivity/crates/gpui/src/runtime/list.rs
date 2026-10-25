@@ -52,7 +52,7 @@ pub(super) fn plan(
     row_height: f64,
     request: Option<ScrollPosition>,
 ) -> Result<ListPlan, ListError> {
-    let viewport = f64::from(style.height.ok_or(ListError::MissingViewport)?);
+    let viewport = f64::from(style.height.get().ok_or(ListError::MissingViewport)?);
     if !row_height.is_finite()
         || !(1.0 / 64.0..f64::from(MAX_COORDINATE)).contains(&row_height)
         || !viewport.is_finite()
@@ -135,7 +135,7 @@ pub(super) fn row_style(
     slot: Option<&ListRow>,
 ) -> cephal::Style {
     let mut style = layout_style(node.style);
-    if node.kind() == NodeKind::List && node.style.width.is_none() {
+    if node.kind() == NodeKind::List && node.style.width.get().is_none() {
         use cephal::style::Dimension;
         if parent.is_none() {
             style.size.width = Dimension::percent(1.0);
