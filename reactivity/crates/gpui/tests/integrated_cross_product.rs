@@ -37,7 +37,7 @@ impl View for Page {
 }
 fn token(win:&Win<Page>)->PresentationToken { win.with_scene(|_,token|token).unwrap() }
 fn ack(win:&mut Win<Page>) { win.presented(token(win)).unwrap(); }
-fn exact_cold(win:&mut Win<Page>,hover:u32,popup:bool,map:Affine) {
+fn exact_cold_rows_and_pixels(win:&mut Win<Page>,hover:u32,popup:bool,map:Affine) {
     let mut fresh=Win::with_size(Page::new(hover,popup,map),160,140).unwrap();
     let normalize=|win:&Win<Page>| {
         let mut nodes=win.snapshot().unwrap().nodes;
@@ -63,7 +63,7 @@ fn edited_keyed_text_mapping_then_disjoint_transform_and_two_color_transfer_shar
     assert_eq!(win.list(LIST).unwrap(),pane);
     assert_eq!(win.list_item(pane,ItemKey::new(1)).unwrap(),first);
     assert_eq!(win.list_item(pane,ItemKey::new(2)).unwrap(),second);
-    exact_cold(&mut win,1,true,Affine::IDENTITY);
+    exact_cold_rows_and_pixels(&mut win,1,true,Affine::IDENTITY);
     win.reset_counters().unwrap();
     let changed=win.set(Page::HOVER,2).unwrap();
     assert_eq!(changed.changed_nodes,2);
@@ -71,7 +71,7 @@ fn edited_keyed_text_mapping_then_disjoint_transform_and_two_color_transfer_shar
     assert_eq!(win.counters().descriptions,0);
     assert_eq!(win.counters().layout_runs,0);
     assert_eq!(win.counters().paint_passes,0);
-    ack(&mut win);exact_cold(&mut win,2,true,Affine::IDENTITY);
+    ack(&mut win);exact_cold_rows_and_pixels(&mut win,2,true,Affine::IDENTITY);
     // This disjoint transform consults bits from the NEW complete description,
     // not predecessor positions, and still runs the ordinary full presentation.
     win.reset_counters().unwrap();
@@ -79,12 +79,12 @@ fn edited_keyed_text_mapping_then_disjoint_transform_and_two_color_transfer_shar
     win.set(Page::POPUP,map).unwrap();
     assert_eq!(win.counters().descriptions,0);
     assert!(win.counters().paint_passes>0);
-    ack(&mut win);exact_cold(&mut win,2,true,map);
+    ack(&mut win);exact_cold_rows_and_pixels(&mut win,2,true,map);
     win.update(|m|m.popup=false).unwrap();ack(&mut win);
     assert_eq!(win.list_item(pane,ItemKey::new(1)).unwrap(),first);
     assert_eq!(win.list_item(pane,ItemKey::new(2)).unwrap(),second);
     win.reset_counters().unwrap();
     win.set(Page::HOVER,1).unwrap();
     assert_eq!(win.counters().paint_passes,0);
-    ack(&mut win);exact_cold(&mut win,1,false,map);
+    ack(&mut win);exact_cold_rows_and_pixels(&mut win,1,false,map);
 }
