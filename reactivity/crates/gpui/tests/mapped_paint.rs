@@ -173,6 +173,26 @@ fn two_slot_pending_candidate_survives_failed_newer_source_and_eligible_ack() {
 }
 
 #[test]
+fn repeated_two_slot_transfers_expose_their_transport_allocation_cost() {
+    let mut win = window(false, true);
+    ack(&mut win);
+    for value in [1, 0, 1, 0, 1, 0] {
+        win.reset_counters().unwrap();
+        let cost = allocation_counter::measure(|| {
+            win.set(Panel::VALUE, value).unwrap();
+        });
+        eprintln!(
+            "MAPPED_TWO_SLOT_TRANSFER value={value} allocations={} requested={} retained={} peak={}",
+            cost.count_total, cost.bytes_total, cost.bytes_current, cost.bytes_max,
+        );
+        assert_eq!(win.counters().paint_passes, 0);
+        assert_eq!(win.counters().layout_runs, 0);
+        assert_eq!(win.counters().owner_reruns, 0);
+        ack(&mut win);
+    }
+}
+
+#[test]
 fn mounted_inspector_refreshes_the_mapped_color_after_a_complete_paint_turn() {
     let mut win = Win::with_inspector(
         Panel {

@@ -29,6 +29,9 @@ impl PaintIntent {
             return;
         }
         self.fallback_dirty = true;
+        if self.requires_full {
+            return;
+        }
         if change.previous.working().map(f32::to_bits)
             == change.value.working().map(f32::to_bits)
         {
@@ -36,6 +39,7 @@ impl PaintIntent {
         }
         if change.previous.working()[3].to_bits() != change.value.working()[3].to_bits() {
             self.requires_full = true;
+            self.edits = PaintEdits::Empty;
             return;
         }
         if let Some(slot) = change.canvas {
@@ -277,8 +281,34 @@ mod tests {
         edits.push(gpui_canvas::SlotEdit::new(slots[1], color));
         assert!(edits.order());
         assert_eq!(edits.as_slice().iter().map(|edit| edit.slot()).collect::<Vec<_>>(), slots);
+        let PaintEdits::Many(values) = &edits else { panic!("three-slot frontier owns a vector") };
+        eprintln!("PAINT_FRONTIER_MANY len={} capacity={} slot_edit_bytes={}", values.len(), values.capacity(), size_of::<gpui_canvas::SlotEdit>());
         edits.push(gpui_canvas::SlotEdit::new(slots[1], color));
         assert!(!edits.order(), "ambiguous same-slot aliases must take full fallback");
+    }
+    #[test]
+    fn alpha_revocation_drops_partial_slot_transport_without_stopping_logical_admission() {
+        let mut canvas = Canvas::recording(32, 32, Default::default()).unwrap();
+        let black = gpui_canvas::PaintColor::new(Color::BLACK);
+        let white = gpui_canvas::PaintColor::new(Color::WHITE);
+        let transparent = gpui_canvas::PaintColor::new(Color::TRANSPARENT);
+        let a = canvas.paint_slot(black).unwrap();
+        let b = canvas.paint_slot(black).unwrap();
+        let mut intent = PaintIntent::new(None, false);
+        intent.include(styles::ColorChange { users: 1, previous: black, value: white, canvas: Some(a) });
+        intent.include(styles::ColorChange { users: 1, previous: black, value: white, canvas: Some(b) });
+        assert_eq!(intent.edits.as_slice().len(), 2);
+        intent.include(styles::ColorChange { users: 1, previous: black, value: transparent, canvas: Some(b) });
+        assert!(intent.requires_full);
+        assert!(intent.edits.as_slice().is_empty());
+        let after = allocation_counter::measure(|| {
+            for _ in 0..32 {
+                intent.include(styles::ColorChange { users: 1, previous: black, value: white, canvas: Some(a) });
+            }
+        });
+        assert_eq!(after.count_total, 0);
+        assert!(intent.edits.as_slice().is_empty());
+        assert!(intent.fallback_dirty);
     }
     #[test]
     fn late_invalid_changed_slot_leaves_the_entire_complete_bank_and_token_untouched() {
