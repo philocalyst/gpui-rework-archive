@@ -1,5 +1,5 @@
 //! Explicit multi-edit publication, not hidden workload coalescing.
-use gpui::property::{Contribution, HEIGHT, TRANSFORM, WIDTH};
+use gpui::property::{Contribution, HEIGHT, WIDTH};
 use gpui::{Error, PresentationToken, SetError, WindowOptions, prelude::*};
 use std::panic::{AssertUnwindSafe, catch_unwind};
 
