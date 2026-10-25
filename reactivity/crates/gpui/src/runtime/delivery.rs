@@ -243,7 +243,12 @@ impl<M: View + 'static, L: LaneSet<M>> Win<M, L> {
             });
         }
         let mut applied = 0;
-        let result = RuntimeMut { runtime, lanes }.deliver(&mut applied, budget);
+        let result = RuntimeMut {
+            runtime,
+            lanes,
+            deferred: false,
+        }
+        .deliver(&mut applied, budget);
         if result.is_err() {
             more |= lanes.staged() != 0;
         }

@@ -43,7 +43,9 @@ const _: () = assert!(MAX_LAYOUT_DEPTH <= u8::MAX as usize);
 #[cfg(feature = "accessibility")]
 mod accessibility;
 mod delivery;
+mod edit_turn;
 mod editing;
+pub use edit_turn::EditTurn;
 pub(crate) mod ime;
 pub use ime::{ImeEvent, ImeSession, MarkedText};
 mod frontier;
@@ -1237,6 +1239,7 @@ pub struct Win<M: View + 'static, L: LaneSet<M> = ()> {
 struct RuntimeMut<'a, M: View + 'static, L: LaneSet<M>> {
     runtime: &'a mut Runtime<M>,
     lanes: &'a mut L,
+    deferred: bool,
 }
 impl<M: View + 'static, L: LaneSet<M>> std::ops::Deref for RuntimeMut<'_, M, L> {
     type Target = Runtime<M>;
@@ -1487,6 +1490,7 @@ impl<M: View + 'static, L: LaneSet<M>> Win<M, L> {
         Ok(RuntimeMut {
             runtime: self.inner.as_deref_mut().ok_or(Error::Closed)?,
             lanes: &mut self.lanes,
+            deferred: false,
         })
     }
     fn runtime(&self) -> Result<&Runtime<M>, Error> {
@@ -1519,46 +1523,9 @@ impl<M: View + 'static, L: LaneSet<M>> Win<M, L> {
         source: impl SourcePath<M, T>,
         value: T,
     ) -> Result<Commit, SetError<T>> {
-        let mut runtime = match self.runtime_mut() {
-            Ok(runtime) => runtime,
-            Err(error) => return Err(SetError::Rejected { error, value }),
-        };
-        let mut value = Some(value);
-        let previous_epoch = runtime.source_epoch;
-        let result = (|| {
-            runtime.live()?;
-            let field = match catch_unwind(AssertUnwindSafe(|| {
-                source
-                    .resolve(&runtime.model, &runtime.sources)
-                    .map(|(field, _)| field)
-            })) {
-                Ok(result) => result?,
-                Err(_) => {
-                    runtime.poison();
-                    return Err(Error::OwnerPanicked);
-                }
-            };
-            runtime.operation(Some(field), |model, _| {
-                source.modify(model, |old| {
-                    // Projector agreement and mutable-value admission have
-                    // succeeded. This is the only ownership-transfer point.
-                    *old = value.take().expect("source assignment runs once");
-                })?;
-                Ok(())
-            })
-        })();
-        match result {
-            Ok(commit) => Ok(commit),
-            Err(error) => Err(if let Some(value) = value {
-                SetError::Rejected { error, value }
-            } else if runtime.source_epoch != previous_epoch {
-                SetError::Committed {
-                    error,
-                    commit: runtime.commit(),
-                }
-            } else {
-                SetError::OwnerFault { error }
-            }),
+        match self.runtime_mut() {
+            Ok(mut runtime) => runtime.set_source(source, value),
+            Err(error) => Err(SetError::Rejected { error, value }),
         }
     }
     /// Position-free semantic activation validates the current logical target.
@@ -2740,7 +2707,11 @@ impl<M: View + 'static> Runtime<M> {
         self.changed_nodes = changed;
         Ok(())
     }
+    #[cfg(test)]
     fn patch(&mut self, field: FieldId) -> Result<PatchOutcome, Error> {
+        self.patch_admitted(field, true)
+    }
+    fn patch_admitted(&mut self, field: FieldId, publish: bool) -> Result<PatchOutcome, Error> {
         if let Some(Fanout::Color(slot)) = self.fanout.get(&field) {
             let slot = *slot;
             self.counters.source_reads += 1;
@@ -2760,8 +2731,9 @@ impl<M: View + 'static> Runtime<M> {
             else {
                 return Err(Error::Binding(BindError::TypeMismatch(field)));
             };
-            let eligible =
-                !self.dirty && self.complete_epoch.checked_add(1) == Some(self.source_epoch);
+            let eligible = publish
+                && !self.dirty
+                && self.complete_epoch.checked_add(1) == Some(self.source_epoch);
             let change = self.styles.update_color(slot, color);
             self.changed_nodes = change.as_ref().map_or(0, |change| change.users as usize);
             if eligible && self.finish_color_slot(change.as_ref())? {
@@ -2770,7 +2742,8 @@ impl<M: View + 'static> Runtime<M> {
             self.dirty |= self.changed_nodes != 0;
             return Ok(PatchOutcome::Visual);
         }
-        let eligible = !self.dirty && self.complete_epoch.checked_add(1) == Some(self.source_epoch);
+        let eligible =
+            publish && !self.dirty && self.complete_epoch.checked_add(1) == Some(self.source_epoch);
         let Some(fanout) = self.fanout.get_mut(&field) else {
             if eligible {
                 // No installed destination changed. Extend the same complete

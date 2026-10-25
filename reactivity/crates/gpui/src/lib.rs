@@ -58,9 +58,9 @@ pub use remote::{Delivery, DeliveryError, Inbox, Remote, SendError};
 #[doc(hidden)]
 pub use remote::{Lane, LaneSet, StatusLane};
 pub use runtime::{
-    Action, ActionKind, Actions, Commit, Counters, Error, ImeEvent, ImeSession, Key, ListInfo,
-    ListItemInfo, MarkedText, Part, PointerEvent, PointerSession, PresentationToken, Query,
-    SemanticSnapshot, SetError, Snapshot, SnapshotNode, TextGeometry, Win, WindowOptions,
+    Action, ActionKind, Actions, Commit, Counters, EditTurn, Error, ImeEvent, ImeSession, Key,
+    ListInfo, ListItemInfo, MarkedText, Part, PointerEvent, PointerSession, PresentationToken,
+    Query, SemanticSnapshot, SetError, Snapshot, SnapshotNode, TextGeometry, Win, WindowOptions,
 };
 pub use scroll::{
     Axis, ScrollDelta, ScrollDirection, ScrollError, ScrollOffset, ScrollUnit, ScrollViewport,

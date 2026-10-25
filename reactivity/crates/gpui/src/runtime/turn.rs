@@ -255,7 +255,7 @@ impl<M: View + 'static, L: LaneSet<M>> RuntimeMut<'_, M, L> {
                         })
                     });
                 match catch_unwind(AssertUnwindSafe(|| {
-                    let semantic = self.patch(field)?;
+                    let semantic = self.runtime.patch_admitted(field, !self.deferred)?;
                     // Ordinary retained trees patch directly. Mixed virtual-list
                     // windows still need their list realization boundary.
                     if realize && self.dirty {
@@ -288,6 +288,9 @@ impl<M: View + 'static, L: LaneSet<M>> RuntimeMut<'_, M, L> {
             }
         };
         let editing_changed = self.runtime.reconcile_editing(editing)? || ime_changed;
+        if self.deferred {
+            return self.present();
+        }
         if !self.inspector_enabled() && !editing_changed {
             match outcome {
                 PatchOutcome::Unchanged => {
