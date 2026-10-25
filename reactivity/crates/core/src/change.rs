@@ -129,15 +129,16 @@ pub enum PrepareError { Revision, Capacity }
 
 pub struct Journal {
     owner: NonZeroU64, base: Option<SceneRevision>, source_epoch: u64, snapshot_epoch: u64, limit: usize,
-    full: FullReasons, entries: BTreeMap<SiteId, Change>,
+    full: FullReasons, entries: BTreeMap<SiteId, Change>, mutation: u64,
 }
 impl Journal {
     pub fn new(owner: NonZeroU64, limit: usize) -> Self {
-        Self { owner, base: None, source_epoch: 0, snapshot_epoch: 0, limit, full: FullReasons::INITIAL, entries: BTreeMap::new() }
+        Self { owner, base: None, source_epoch: 0, snapshot_epoch: 0, limit, full: FullReasons::INITIAL, entries: BTreeMap::new(), mutation: 0 }
     }
     pub fn base(&self) -> Option<SceneRevision> { self.base }
     pub fn full(&mut self, reason: FullReasons) { self.full = self.full.union(reason); }
     pub fn record(&mut self, mut change: Change) {
+        match self.mutation.checked_add(1) { Some(next) => self.mutation = next, None => self.full(FullReasons::CAPACITY) }
         if change.site.owner != self.owner { self.full(FullReasons::REVISION_GAP); return; }
         for support in [&mut change.before, &mut change.after] {
             if matches!(support, Support::Finite(rect) if !rect.is_valid()) { *support = Support::Unbounded; }
@@ -164,19 +165,41 @@ impl Journal {
         entries.try_reserve_exact(self.entries.len()).map_err(|_| PrepareError::Capacity)?;
         entries.extend(self.entries.values().copied());
         let full = self.full;
-        Ok(PreparedChanges { journal: self, batch: ChangeBatch { stamp, full, entries } })
+        Ok(PreparedChanges { journal: self, batch: ChangeBatch { stamp, full, entries }, closed: None })
     }
 }
-pub struct PreparedChanges<'a> { journal: &'a mut Journal, batch: ChangeBatch }
+pub struct PreparedChanges<'a> { journal: &'a mut Journal, batch: ChangeBatch, closed: Option<ClosedDependencies> }
 impl PreparedChanges<'_> {
     pub fn batch(&self) -> &ChangeBatch { &self.batch }
+    /// Bind the already-computed OLD+NEW logical closure; never recompute after C.
+    /// This remains producer schema authority, not output/image completion proof.
+    pub fn with_closed(mut self, closure: Invalidated) -> Result<Self, PrepareError> {
+        let stamp = self.batch.stamp;
+        if closure.basis.owner != stamp.to.owner || closure.basis.from != stamp.from
+            || closure.basis.to.is_some_and(|to| to != stamp.to) { return Err(PrepareError::Revision); }
+        let mut full = closure.full.union(self.batch.full);
+        if closure.basis.facts != Some(self.journal.mutation) { full = full.union(FullReasons::UNKNOWN_DEPENDENCY); }
+        // A producer may add late facts (e.g. post-layout text) after an earlier
+        // solve closure. Never label uncovered facts incrementally complete.
+        if full.is_empty() && self.batch.entries.iter().any(|change| !matches!((change.before, change.after), (Support::Empty, Support::Empty)) && change.facets.phases().any(|phase|
+            !closure.artifacts.contains(&DependencyNode::Site(Artifact { site: change.site, phase })))) {
+            full = full.union(FullReasons::UNKNOWN_DEPENDENCY);
+        }
+        self.batch.full = self.batch.full.union(full);
+        self.closed = Some(ClosedDependencies { stamp, full, artifacts: if full.is_empty() { closure.artifacts } else { BTreeSet::new() } });
+        Ok(self)
+    }
+    pub fn commit_with_closure(mut self) -> (ChangeBatch, Option<ClosedDependencies>) {
+        let closed = self.closed.take(); (self.commit(), closed)
+    }
+
     /// Call only AFTER the corresponding immutable C has actually committed.
     /// No fallible work remains here; failed preparations must DROP this guard.
     pub fn commit(self) -> ChangeBatch {
         self.journal.base = Some(self.batch.stamp.to);
         self.journal.source_epoch = self.batch.stamp.source_epoch;
         self.journal.snapshot_epoch = self.batch.stamp.snapshot_epoch;
-        self.journal.entries.clear(); self.journal.full = FullReasons::default(); self.batch
+        self.journal.entries.clear(); self.journal.mutation = 0; self.journal.full = FullReasons::default(); self.batch
     }
 }
 
@@ -255,10 +278,37 @@ pub struct Dependencies {
 }
 #[derive(Clone, Copy, Debug, PartialEq, Eq)]
 pub enum SnapshotSide { Before, After, Both }
-#[derive(Clone, Copy)]
-struct ClosureContext { owner: NonZeroU64, from: Option<SceneRevision>, to: Option<SceneRevision>, surface: Option<SurfaceGeneration> }
+#[derive(Clone, Copy, Debug, PartialEq, Eq)]
+struct ClosureContext { owner: NonZeroU64, from: Option<SceneRevision>, to: Option<SceneRevision>, surface: Option<SurfaceGeneration>, facts: Option<u64> }
 #[derive(Debug)]
-pub struct Invalidated { pub full: FullReasons, pub artifacts: BTreeSet<DependencyNode> }
+pub struct Invalidated { full: FullReasons, artifacts: BTreeSet<DependencyNode>, basis: ClosureContext, limit: usize }
+impl Invalidated {
+    pub fn full(&self) -> FullReasons { self.full }
+    pub fn artifacts(&self) -> &BTreeSet<DependencyNode> { &self.artifacts }
+    pub fn merge(&mut self, other: Self) {
+        if self.basis != other.basis { self.full = self.full.union(FullReasons::REVISION_GAP); self.artifacts.clear(); return; }
+        self.full = self.full.union(other.full);
+        if !self.full.is_empty() { self.artifacts.clear(); return; }
+        self.limit = self.limit.min(other.limit);
+        if self.artifacts.len() > self.limit { self.full = self.full.union(FullReasons::CAPACITY); self.artifacts.clear(); return; }
+        for key in other.artifacts {
+            if !self.artifacts.contains(&key) && self.artifacts.len() >= self.limit {
+                self.full = self.full.union(FullReasons::CAPACITY); self.artifacts.clear(); return;
+            }
+            self.artifacts.insert(key);
+        }
+    }
+}
+/// Accepted logical closure with exact publication range. It is NOT a completed
+/// pixel revision: a target must still consume every intervening group/damage
+/// delta from its actual image base, or reject that history as a gap.
+#[derive(Debug)]
+pub struct ClosedDependencies { stamp: BatchStamp, full: FullReasons, artifacts: BTreeSet<DependencyNode> }
+impl ClosedDependencies {
+    pub fn stamp(&self) -> BatchStamp { self.stamp }
+    pub fn full(&self) -> FullReasons { self.full }
+    pub fn artifacts(&self) -> &BTreeSet<DependencyNode> { &self.artifacts }
+}
 impl Dependencies {
     pub fn new(limit: usize) -> Self { Self { snapshot: None, owner: None, reverse: BTreeMap::new(), edges: 0, limit, overflow: false, sites: BTreeSet::new(), complete: false, resources: ResourceReads::default() } }
     pub fn reset_initial(&mut self, owner: NonZeroU64) { self.reset_from(owner, None); }
@@ -337,28 +387,28 @@ impl Dependencies {
         Ok(PreparedResourceReads { graph: self, owners: patch.replacements, buckets, edges })
     }
     pub fn invalidate(&self, batch: &ChangeBatch) -> Invalidated {
-        self.invalidate_entries(ClosureContext { owner: batch.stamp.to.owner, from: batch.stamp.from, to: Some(batch.stamp.to), surface: None }, SnapshotSide::Both, batch.full, batch.entries.iter().copied(), &mut |_, _| Ok(()))
+        self.invalidate_entries(ClosureContext { owner: batch.stamp.to.owner, from: batch.stamp.from, to: Some(batch.stamp.to), surface: None, facts: None }, SnapshotSide::Both, batch.full, batch.entries.iter().copied(), &mut |_, _| Ok(()))
     }
     pub fn invalidate_pending(&self, journal: &Journal) -> Invalidated {
         self.invalidate_pending_side(journal, SnapshotSide::Both)
     }
     pub fn invalidate_pending_side(&self, journal: &Journal, side: SnapshotSide) -> Invalidated {
-        self.invalidate_entries(ClosureContext { owner: journal.owner, from: journal.base, to: None, surface: None }, side, journal.full, journal.entries.values().copied(), &mut |_, _| Ok(()))
+        self.invalidate_entries(ClosureContext { owner: journal.owner, from: journal.base, to: None, surface: None, facts: Some(journal.mutation) }, side, journal.full, journal.entries.values().copied(), &mut |_, _| Ok(()))
     }
     /// The SAME bounded queue owns dynamically discovered canonical group,
     /// resource and tile edges. The adapter emits neighbors, not another
     /// fixed-point authority. Stop on false; never materialize an unbounded list.
     pub fn invalidate_with(&self, batch: &ChangeBatch, mut expand: impl FnMut(DependencyNode, &mut dyn FnMut(DependencyNode) -> bool) -> Result<(), FullReasons>) -> Invalidated {
-        self.invalidate_entries(ClosureContext { owner: batch.stamp.to.owner, from: batch.stamp.from, to: Some(batch.stamp.to), surface: None }, SnapshotSide::Both, batch.full, batch.entries.iter().copied(), &mut expand)
+        self.invalidate_entries(ClosureContext { owner: batch.stamp.to.owner, from: batch.stamp.from, to: Some(batch.stamp.to), surface: None, facts: None }, SnapshotSide::Both, batch.full, batch.entries.iter().copied(), &mut expand)
     }
     pub fn invalidate_with_surface(&self, batch: &ChangeBatch, surface: SurfaceGeneration, mut expand: impl FnMut(DependencyNode, &mut dyn FnMut(DependencyNode) -> bool) -> Result<(), FullReasons>) -> Invalidated {
-        self.invalidate_entries(ClosureContext { owner: batch.stamp.to.owner, from: batch.stamp.from, to: Some(batch.stamp.to), surface: Some(surface) }, SnapshotSide::Both, batch.full, batch.entries.iter().copied(), &mut expand)
+        self.invalidate_entries(ClosureContext { owner: batch.stamp.to.owner, from: batch.stamp.from, to: Some(batch.stamp.to), surface: Some(surface), facts: None }, SnapshotSide::Both, batch.full, batch.entries.iter().copied(), &mut expand)
     }
     fn invalidate_entries(&self, context: ClosureContext, side: SnapshotSide, mut full: FullReasons, entries: impl ExactSizeIterator<Item = Change>, expand: &mut impl FnMut(DependencyNode, &mut dyn FnMut(DependencyNode) -> bool) -> Result<(), FullReasons>) -> Invalidated {
         if self.snapshot != context.from { full = full.union(FullReasons::REVISION_GAP); }
         if self.overflow || entries.len() > self.limit { full = full.union(FullReasons::CAPACITY); }
         if !self.complete { full = full.union(FullReasons::UNKNOWN_DEPENDENCY); }
-        if !full.is_empty() { return Invalidated { full, artifacts: BTreeSet::new() }; }
+        if !full.is_empty() { return Invalidated { full, artifacts: BTreeSet::new(), basis: context, limit: self.limit }; }
         let mut artifacts = BTreeSet::new(); let mut pending = Vec::new();
         // Deduplicate and cap BEFORE enqueue, not after pop. Both containers
         // together hold at most limit distinct artifacts, never an event log.
@@ -376,17 +426,17 @@ impl Dependencies {
             seen.insert(key); queue.push(key); Ok(())
         }
         for change in entries {
-            if change.site.owner != context.owner { return Invalidated { full: FullReasons::REVISION_GAP, artifacts: BTreeSet::new() }; }
+            if change.site.owner != context.owner { return Invalidated { full: FullReasons::REVISION_GAP, artifacts: BTreeSet::new(), basis: context, limit: self.limit }; }
             if !self.sites.contains(&change.site) {
                 // The OLD graph has no newly inserted site; the NEW graph has
                 // no removed site. Both closures are consumed by the producer.
                 let allowed = match side { SnapshotSide::Before => matches!(change.before, Support::Empty), SnapshotSide::After => matches!(change.after, Support::Empty), SnapshotSide::Both => matches!((change.before, change.after), (Support::Empty, Support::Empty)) };
                 if allowed { continue; }
-                return Invalidated { full: FullReasons::UNKNOWN_DEPENDENCY, artifacts: BTreeSet::new() };
+                return Invalidated { full: FullReasons::UNKNOWN_DEPENDENCY, artifacts: BTreeSet::new(), basis: context, limit: self.limit };
             }
             for phase in change.facets.phases() {
                 if let Err(reason) = enqueue(DependencyNode::Site(Artifact { site: change.site, phase }), context, self.limit, &mut artifacts, &mut pending) {
-                    return Invalidated { full: reason, artifacts: BTreeSet::new() };
+                    return Invalidated { full: reason, artifacts: BTreeSet::new(), basis: context, limit: self.limit };
                 }
             }
         }
@@ -394,7 +444,7 @@ impl Dependencies {
             if let DependencyNode::Site(site) = key {
                 for phase in site.phase.downstream() {
                     if let Err(reason) = enqueue(DependencyNode::Site(Artifact { site: site.site, phase: *phase }), context, self.limit, &mut artifacts, &mut pending) {
-                        return Invalidated { full: reason, artifacts: BTreeSet::new() };
+                        return Invalidated { full: reason, artifacts: BTreeSet::new(), basis: context, limit: self.limit };
                     }
                 }
             }
@@ -404,13 +454,13 @@ impl Dependencies {
                     Ok(()) => true, Err(reason) => { rejected = rejected.union(reason); false }
                 }
             });
-            if !rejected.is_empty() { return Invalidated { full: rejected, artifacts: BTreeSet::new() }; }
-            if let Err(reason) = expanded { return Invalidated { full: reason, artifacts: BTreeSet::new() }; }
+            if !rejected.is_empty() { return Invalidated { full: rejected, artifacts: BTreeSet::new(), basis: context, limit: self.limit }; }
+            if let Err(reason) = expanded { return Invalidated { full: reason, artifacts: BTreeSet::new(), basis: context, limit: self.limit }; }
             if let DependencyNode::Resource(resource) = key {
                 if let Some(consumers) = self.resources.reverse.get(&resource) {
                     for consumer in consumers {
                         if let Err(reason) = enqueue(DependencyNode::Site(*consumer), context, self.limit, &mut artifacts, &mut pending) {
-                            return Invalidated { full: reason, artifacts: BTreeSet::new() };
+                            return Invalidated { full: reason, artifacts: BTreeSet::new(), basis: context, limit: self.limit };
                         }
                     }
                 }
@@ -418,12 +468,12 @@ impl Dependencies {
             if let Some(consumers) = self.reverse.get(&key) {
                 for consumer in consumers {
                     if let Err(reason) = enqueue(*consumer, context, self.limit, &mut artifacts, &mut pending) {
-                        return Invalidated { full: reason, artifacts: BTreeSet::new() };
+                        return Invalidated { full: reason, artifacts: BTreeSet::new(), basis: context, limit: self.limit };
                     }
                 }
             }
         }
-        Invalidated { full, artifacts }
+        Invalidated { full, artifacts, basis: context, limit: self.limit }
     }
 }
 
@@ -635,6 +685,33 @@ mod tests {
         let mut too_many_owners = ResourceReadPatch::new(99);
         for phase in [Phase::Shape,Phase::Measure,Phase::Layout] {too_many_owners.replace(Artifact {site:site(1),phase},Vec::new());}
         assert!(matches!(small.prepare_resource_reads(too_many_owners), Err(reason) if reason.contains(FullReasons::CAPACITY)));
+    }
+
+    #[test]
+    fn closed_receipt_binds_exact_pending_facts_and_preserves_them_on_drop() {
+        let mut graph = Dependencies::new(64); graph.reset(revision(1)); graph.register_site(site(1)); assert!(graph.finish(1));
+        let mut journal = Journal::new(owner(), 8); journal.prepare(stamp(None, 1)).unwrap().commit();
+        journal.record(change(1, Facet::Paint));
+        let closed = graph.invalidate_pending(&journal);
+        drop(journal.prepare(stamp(Some(revision(1)), 2)).unwrap().with_closed(closed).unwrap());
+        assert_eq!(journal.base(), Some(revision(1)));
+        let closed = graph.invalidate_pending(&journal);
+        let (batch, receipt) = journal.prepare(stamp(Some(revision(1)), 2)).unwrap().with_closed(closed).unwrap().commit_with_closure();
+        let receipt = receipt.unwrap(); assert_eq!(receipt.stamp(), batch.stamp); assert!(receipt.full().is_empty());
+        assert!(receipt.artifacts().contains(&DependencyNode::Site(Artifact {site:site(1),phase:Phase::Raster})));
+        graph.rebase(revision(2));
+        journal.record(change(1, Facet::Paint)); let stale = graph.invalidate_pending(&journal);
+        journal.record(change(1, Facet::Paint)); // Same seed phases, different admitted fact generation.
+        let guard = journal.prepare(stamp(Some(revision(2)), 3)).unwrap().with_closed(stale).unwrap();
+        assert!(guard.batch().full.contains(FullReasons::UNKNOWN_DEPENDENCY));
+    }
+    #[test]
+    fn merging_lower_budget_empty_closure_cannot_keep_oversized_existing_set() {
+        let mut graph = Dependencies::new(64); graph.reset(revision(1)); graph.register_site(site(1)); assert!(graph.finish(1));
+        let mut journal = Journal::new(owner(), 8); journal.prepare(stamp(None, 1)).unwrap().commit(); journal.record(change(1,Facet::Paint));
+        let mut large = graph.invalidate_pending(&journal); assert!(large.artifacts.len() > 2);
+        let small = Invalidated {full:FullReasons::default(),artifacts:BTreeSet::new(),basis:large.basis,limit:2};
+        large.merge(small); assert!(large.full.contains(FullReasons::CAPACITY)); assert!(large.artifacts.is_empty());
     }
 
 }
