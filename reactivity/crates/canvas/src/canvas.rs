@@ -316,7 +316,33 @@ impl Canvas {
         clip: Rect,
         color: Color,
     ) -> Result<(), Error> {
+        self.draw_text_scaled(text, layout, origin, transform, clip, color, 1.0)
+    }
+    /// Shape positions remain logical; rasterize masks at the supplied device
+    /// density and express their extents back in logical units. This preserves
+    /// device-resolution glyph coverage without changing layout or enlarging a
+    /// low-resolution bitmap. Physical font sizes are bounded to 4096px, and
+    /// each bitmap remains subject to the existing 1MiB raster resource limit.
+    #[allow(clippy::too_many_arguments)]
+    pub fn draw_text_scaled(
+        &mut self,
+        text: &mut TextSystem,
+        layout: &TextLayout,
+        origin: Point,
+        transform: Affine,
+        clip: Rect,
+        color: Color,
+        raster_scale: f32,
+    ) -> Result<(), Error> {
         text.validate(layout)?;
+        if !raster_scale.is_finite() || raster_scale <= 0.0 {
+            return Err(Error::InvalidGeometry);
+        }
+        let physical_font_size = layout.font_size() * raster_scale;
+        if !physical_font_size.is_finite() || !(0.0..=4096.0).contains(&physical_font_size)
+            || physical_font_size == 0.0 {
+            return Err(Error::InvalidFontSize);
+        }
         if !origin.x.is_finite() || !origin.y.is_finite() {
             return Err(Error::InvalidGeometry);
         }
@@ -327,13 +353,13 @@ impl Canvas {
         let mut pending_masks = HashSet::new();
         let mut pending_bytes = 0;
         for glyph in layout.glyphs() {
-            let raster = text.raster(glyph.id, layout.font_size())?;
+            let raster = text.raster(glyph.id, physical_font_size)?;
             let m = raster.metrics;
             let rect = Rect::new(
-                origin.x + glyph.x + m.xmin as f32,
-                origin.y + glyph.baseline - m.ymin as f32 - m.height as f32,
-                m.width as f32,
-                m.height as f32,
+                origin.x + glyph.x + m.xmin as f32 / raster_scale,
+                origin.y + glyph.baseline - m.ymin as f32 / raster_scale - m.height as f32 / raster_scale,
+                m.width as f32 / raster_scale,
+                m.height as f32 / raster_scale,
             );
             if let Some(command) =
                 self.prepare(rect, transform, clip, color, Source::Glyph(raster))?
@@ -709,14 +735,8 @@ fn render_band<W: PixelWriter>(
     // cache uniform colors without a heap allocation or repeated transfer work.
     let mut clear = [0u8; 8];
     writer.write(frame.clear, &mut clear[..W::BYTES]);
-    for pixel in pixels.chunks_exact_mut(W::BYTES) {
-        pixel.copy_from_slice(&clear[..W::BYTES]);
-    }
     for tile in band_index * columns..(band_index + 1) * columns {
         let ordered = &frame.indices[frame.offsets[tile]..frame.offsets[tile + 1]];
-        if ordered.is_empty() {
-            continue;
-        }
         let left = tile % columns * TILE;
         let top = band_index * TILE;
         let right = (left + TILE).min(frame.width);
@@ -772,9 +792,13 @@ fn render_band<W: PixelWriter>(
                 }
             }
         }
-        let uniform_color = uniform.map(|color| sample_mean(std::iter::repeat_n(color, 16)));
-        let mut uniform_bytes = [0u8; 8];
-        if let Some(color) = uniform_color {
+        // Each output pixel is written exactly once: empty tiles write the
+        // cached clear, uniform tiles encode once, and sampled tiles reduce.
+        let uniform_color = uniform;
+        let mut uniform_bytes = clear;
+        if !ordered.is_empty()
+            && let Some(color) = uniform_color
+        {
             writer.write(color, &mut uniform_bytes[..W::BYTES]);
         }
         for y in top..bottom {
@@ -838,6 +862,19 @@ impl CanvasScene<'_> {
     ) -> Result<(), Error> {
         self.pending
             .draw_text(text, layout, origin, transform, clip, color)
+    }
+    #[allow(clippy::too_many_arguments)]
+    pub fn draw_text_scaled(
+        &mut self,
+        text: &mut TextSystem,
+        layout: &TextLayout,
+        origin: Point,
+        transform: Affine,
+        clip: Rect,
+        color: Color,
+        raster_scale: f32,
+    ) -> Result<(), Error> {
+        self.pending.draw_text_scaled(text, layout, origin, transform, clip, color, raster_scale)
     }
     pub fn commit(self) {
         self.target.clear = self.pending.clear;
@@ -924,21 +961,33 @@ fn sample(command: &Command, x: usize, y: usize, stats: &mut RenderStats) -> [f3
                         0.0
                     }
                 }
-                Source::Glyph(mask) => mask_sample(mask, lx - r.x as f64, ly - r.y as f64),
+                Source::Glyph(mask) => mask_sample(
+                    mask,
+                    lx - r.x as f64,
+                    ly - r.y as f64,
+                    r.width as f64,
+                    r.height as f64,
+                ),
             };
         }
     }
     values
 }
-fn mask_sample(mask: &Raster, x: f64, y: f64) -> f32 {
+fn mask_sample(mask: &Raster, x: f64, y: f64, width: f64, height: f64) -> f32 {
     // Fontdue has already integrated outline coverage into each raster cell.
     // Reconstruct it as a piecewise-constant field, preserving that native AA
     // at integer placement. General affine resampling uses the common 4x4 grid;
     // this is bounded sampling, not a scalable outline or exact area renderer.
-    if x < 0.0 || y < 0.0 || x >= mask.metrics.width as f64 || y >= mask.metrics.height as f64 {
+    // The half-open logical rectangle defines coverage. Normalization can round
+    // an exterior edge inward, or the last interior point up to the texel count;
+    // test the local domain first, then clamp only an admitted texel index.
+    if x < 0.0 || y < 0.0 || x >= width || y >= height
+        || mask.metrics.width == 0 || mask.metrics.height == 0 {
         return 0.0;
     }
-    mask.pixels[y as usize * mask.metrics.width + x as usize] as f32 / 255.0
+    let column = ((x * (mask.metrics.width as f64 / width)) as usize).min(mask.metrics.width - 1);
+    let row = ((y * (mask.metrics.height as f64 / height)) as usize).min(mask.metrics.height - 1);
+    mask.pixels[row * mask.metrics.width + column] as f32 / 255.0
 }
 fn blend(dst: &mut [f32; 4], src: [f32; 4], coverage: f32) {
     let alpha = src[3] * coverage;
