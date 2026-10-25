@@ -4,6 +4,8 @@ use super::*;
 pub(super) enum PatchOutcome {
     Visual,
     Metadata,
+    /// Equal exact operands; publication waits for the turn's editing guards.
+    Unchanged,
     Complete,
 }
 /// Exactly one transition, never an accumulated change log. A coalesced native

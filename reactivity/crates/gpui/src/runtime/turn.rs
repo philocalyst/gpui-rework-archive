@@ -285,6 +285,10 @@ impl<M: View + 'static, L: LaneSet<M>> RuntimeMut<'_, M, L> {
             return Err(error);
         }
         let editing_changed = self.runtime.reconcile_editing(editing)? || ime_changed;
+        if result == Ok(PatchOutcome::Unchanged) && !self.inspector_enabled() && !editing_changed {
+            self.runtime.publish_paint(None)?;
+            return Ok(self.commit());
+        }
         if result == Ok(PatchOutcome::Complete) && !self.inspector_enabled() && !editing_changed {
             return Ok(self.commit());
         }

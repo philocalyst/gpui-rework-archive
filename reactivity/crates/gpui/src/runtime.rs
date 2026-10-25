@@ -2776,8 +2776,7 @@ impl<M: View + 'static> Runtime<M> {
                 // No installed destination changed. Extend the same complete
                 // cohort rather than freezing every semantic row for an
                 // unrelated source. Failed/incomplete cohorts still retry.
-                self.publish_paint(None)?;
-                return Ok(PatchOutcome::Complete);
+                return Ok(PatchOutcome::Unchanged);
             }
             return Ok(PatchOutcome::Visual);
         };
@@ -2905,10 +2904,9 @@ impl<M: View + 'static> Runtime<M> {
         if eligible && last_changed.is_none() {
             // Exact comparisons established that every installed operand is
             // unchanged. Contribution/source state was still admitted above;
-            // only publication work is removed. Reuse the existing unchanged
-            // paint cohort's ACK/accessibility relabelling protocol.
-            self.publish_paint(None)?;
-            return Ok(PatchOutcome::Complete);
+            // only publication work is removed. The turn checks editing and
+            // inspector work before extending the complete cohort.
+            return Ok(PatchOutcome::Unchanged);
         }
         Ok(if semantic && !visual_changed {
             PatchOutcome::Metadata
