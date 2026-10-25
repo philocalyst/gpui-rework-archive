@@ -145,6 +145,8 @@ fn hover_leave_enter_admits_both_properties_but_prepares_once() {
     assert_eq!(b.counters().source_operations, 2);
     assert_eq!(a.counters().paint_passes, 2);
     assert_eq!(b.counters().paint_passes, 1);
+    assert_eq!(a.counters().layout_runs, 2);
+    assert_eq!(b.counters().layout_runs, 1);
     ack(&mut a);
     ack(&mut b);
     equivalent(&mut a, &mut b);
