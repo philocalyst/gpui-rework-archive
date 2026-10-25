@@ -63,7 +63,8 @@ impl Facets {
             let measure = geometry || source || self.contains(TextWidth);
             let placement = measure || self.contains(Transform);
             let clip = placement || self.contains(Clip);
-            let lower = clip || self.contains(Paint) || self.contains(Stacking) || self.contains(ResourcePixels) || self.contains(PrimitiveContent);
+            let primitive = clip || self.contains(Stacking) || self.contains(PrimitiveContent);
+            let lower = primitive || self.contains(Paint) || self.contains(ResourcePixels);
             match phase {
                 Phase::WidthConstraint => self.contains(WidthConstraint),
                 Phase::HeightConstraint => self.contains(HeightConstraint),
@@ -74,15 +75,16 @@ impl Facets {
                 Phase::Measure | Phase::Layout => measure,
                 Phase::Placement => placement,
                 Phase::Clip => clip,
-                Phase::Primitive | Phase::Raster => lower,
-                Phase::Hit => placement || clip || self.contains(Stacking) || self.contains(Hit),
+                Phase::Primitive => primitive,
+                Phase::Material | Phase::Raster => lower,
+                Phase::Hit => placement || clip || self.contains(Stacking) || self.contains(PrimitiveContent) || self.contains(Hit),
                 Phase::Semantics => lower || self.contains(Hit) || self.contains(Semantics),
             }
         })
     }
 }
 #[derive(Clone, Copy, Debug, PartialEq, Eq, PartialOrd, Ord)]
-pub enum Phase { WidthConstraint, HeightConstraint, BoxConstraint, Realize, Shape, TextLayout, Measure, Layout, Placement, Clip, Primitive, Raster, Hit, Semantics }
+pub enum Phase { WidthConstraint, HeightConstraint, BoxConstraint, Realize, Shape, TextLayout, Measure, Layout, Placement, Clip, Primitive, Material, Raster, Hit, Semantics }
 impl Phase {
     pub const fn downstream(self) -> &'static [Self] {
         match self {
@@ -91,10 +93,10 @@ impl Phase {
             Self::Measure => &[Self::Layout], Self::Layout => &[Self::Placement],
             Self::Placement => &[Self::Clip, Self::Primitive, Self::Hit, Self::Semantics],
             Self::Clip => &[Self::Primitive, Self::Hit, Self::Semantics],
-            Self::Primitive => &[Self::Raster], _ => &[],
+            Self::Primitive => &[Self::Material, Self::Raster, Self::Hit, Self::Semantics], Self::Material => &[Self::Raster], _ => &[],
         }
     }
-    pub const ALL: [Self; 14] = [Self::WidthConstraint, Self::HeightConstraint, Self::BoxConstraint, Self::Realize, Self::Shape, Self::TextLayout, Self::Measure, Self::Layout, Self::Placement, Self::Clip, Self::Primitive, Self::Raster, Self::Hit, Self::Semantics];
+    pub const ALL: [Self; 15] = [Self::WidthConstraint, Self::HeightConstraint, Self::BoxConstraint, Self::Realize, Self::Shape, Self::TextLayout, Self::Measure, Self::Layout, Self::Placement, Self::Clip, Self::Primitive, Self::Material, Self::Raster, Self::Hit, Self::Semantics];
 }
 #[derive(Clone, Copy, Debug, PartialEq, Eq)]
 pub enum Scope { Site, Subtree, Scene }
@@ -167,10 +169,16 @@ impl Journal {
         if stamp.from != self.base || stamp.to.owner != self.owner || stamp.snapshot_epoch <= self.snapshot_epoch || stamp.source_epoch < self.source_epoch
             || self.base.is_some_and(|old| old.owner != stamp.to.owner || old.sequence >= stamp.to.sequence)
         { return Err(PrepareError::Revision); }
-        let mut entries = Vec::new();
-        entries.try_reserve_exact(self.entries.len()).map_err(|_| PrepareError::Capacity)?;
-        entries.extend(self.entries.values().copied());
         let full = self.full;
+        // Hard-full candidates require complete canonical admission; a partial
+        // delta cannot be consumed (slot-only publication rejects it outright).
+        // Keep the pending map for failure/drop repair, but do not copy/retain
+        // that unusable list inside the accepted immutable Canvas binding.
+        let mut entries = Vec::new();
+        if full.is_empty() {
+            entries.try_reserve_exact(self.entries.len()).map_err(|_| PrepareError::Capacity)?;
+            entries.extend(self.entries.values().copied());
+        }
         Ok(PreparedChanges { journal: self, batch: ChangeBatch { stamp, full, entries }, closed: None })
     }
 }
@@ -237,6 +245,23 @@ pub struct ResourceReadPatch {
 }
 impl ResourceReadPatch {
     pub fn new(limit: usize) -> Self { Self { replacements: BTreeMap::new(), limit, edges: 0, overflow: false } }
+    /// Observe one immutable resource during mandatory preparation. An unchanged
+    /// owner allocates nothing; A→B→A cancels only that owner's pending change.
+    /// New immutable read inputs cannot create a new event from an old value.
+    /// Every changed consumer must already belong to the logical closure; an
+    /// arbitrary owner rebind is not certified by a same-stamp receipt.
+    pub fn covered_by(&self, closed: &Invalidated) -> bool {
+        !closed.full.is_empty() || self.replacements.keys().all(|owner| closed.artifacts.contains(&DependencyNode::Site(*owner)))
+    }
+    pub fn observe_one(&mut self, graph: &Dependencies, owner: Artifact, input: Option<crate::resource::ResourceId>) {
+        let desired = input.as_slice();
+        if graph.resources.owners.get(&owner).map_or(&[][..], Vec::as_slice) == desired {
+            if let Some(previous) = self.replacements.remove(&owner) { self.edges -= previous.len(); }
+            return;
+        }
+        if self.replacements.get(&owner).is_some_and(|previous| previous.as_slice() == desired) { return; }
+        self.replace(owner, input.into_iter().collect());
+    }
     pub fn replace(&mut self, owner: Artifact, mut inputs: Vec<crate::resource::ResourceId>) {
         if inputs.len() > self.limit { self.overflow = true; return; }
         inputs.sort_unstable(); inputs.dedup();
@@ -273,23 +298,37 @@ impl PreparedResourceReads<'_> {
             else { self.graph.resources.owners.insert(owner, inputs); }
         }
         self.graph.resources.edges = self.edges;
+        self.graph.touch();
     }
 }
 
+/// Typed graph identity/generation, never a scene/resource/storage owner.
+#[derive(Clone, Copy, Debug, PartialEq, Eq)]
+pub struct GraphVersion { domain: NonZeroU64, generation: u64 }
+static NEXT_GRAPH_DOMAIN: std::sync::atomic::AtomicU64 = std::sync::atomic::AtomicU64::new(1);
 /// Actual sparse reverse consumer edges. Same-site facet closure is implicit;
 /// cross-site layout/placement/clip/resource dependencies are registered explicitly.
 pub struct Dependencies {
     snapshot: Option<SceneRevision>, owner: Option<NonZeroU64>, reverse: BTreeMap<DependencyNode, BTreeSet<DependencyNode>>,
     edges: usize, limit: usize, overflow: bool, sites: BTreeSet<SiteId>, complete: bool,
-    resources: ResourceReads,
+    resources: ResourceReads, domain: Option<NonZeroU64>, generation: u64,
 }
 #[derive(Clone, Copy, Debug, PartialEq, Eq)]
 pub enum SnapshotSide { Before, After, Both }
 #[derive(Clone, Copy, Debug, PartialEq, Eq)]
 struct ClosureContext { owner: NonZeroU64, from: Option<SceneRevision>, to: Option<SceneRevision>, surface: Option<SurfaceGeneration>, facts: Option<u64> }
 #[derive(Debug)]
-pub struct Invalidated { full: FullReasons, artifacts: BTreeSet<DependencyNode>, basis: ClosureContext, limit: usize }
+pub struct Invalidated { full: FullReasons, artifacts: BTreeSet<DependencyNode>, basis: ClosureContext, limit: usize, graphs: [Option<GraphVersion>; 2] }
 impl Invalidated {
+    /// Monotonic conservative fallback; callers cannot remove reasons/artifacts.
+    pub fn require_full(&mut self, reason: FullReasons) {
+        self.full = self.full.union(reason); if !self.full.is_empty() { self.artifacts.clear(); }
+    }
+    pub fn matches_graphs(&self, before: &Dependencies, after: Option<&Dependencies>) -> bool {
+        if after.is_some_and(|graph| graph.version().is_none()) { return false; }
+        let first = before.version(); let second = after.and_then(Dependencies::version).filter(|version| Some(*version) != first);
+        first.is_some() && self.graphs == [first, second]
+    }
     pub fn matches_pending(&self, journal: &Journal) -> bool {
         self.basis.owner == journal.owner && self.basis.from == journal.base
             && self.basis.to.is_none() && self.basis.facts == Some(journal.mutation)
@@ -299,6 +338,12 @@ impl Invalidated {
     pub fn artifacts(&self) -> &BTreeSet<DependencyNode> { &self.artifacts }
     pub fn merge(&mut self, other: Self) {
         if self.basis != other.basis { self.full = self.full.union(FullReasons::REVISION_GAP); self.artifacts.clear(); return; }
+        for version in other.graphs.into_iter().flatten() {
+            if !self.graphs.contains(&Some(version)) {
+                if let Some(slot) = self.graphs.iter_mut().find(|slot| slot.is_none()) { *slot = Some(version); }
+                else { self.full = self.full.union(FullReasons::UNKNOWN_DEPENDENCY); self.artifacts.clear(); return; }
+            }
+        }
         self.full = self.full.union(other.full);
         if !self.full.is_empty() { self.artifacts.clear(); return; }
         self.limit = self.limit.min(other.limit);
@@ -322,12 +367,20 @@ impl ClosedDependencies {
     pub fn artifacts(&self) -> &BTreeSet<DependencyNode> { &self.artifacts }
 }
 impl Dependencies {
-    pub fn new(limit: usize) -> Self { Self { snapshot: None, owner: None, reverse: BTreeMap::new(), edges: 0, limit, overflow: false, sites: BTreeSet::new(), complete: false, resources: ResourceReads::default() } }
+    pub fn new(limit: usize) -> Self {
+        let domain = NEXT_GRAPH_DOMAIN.fetch_update(std::sync::atomic::Ordering::Relaxed, std::sync::atomic::Ordering::Relaxed, |value| value.checked_add(1)).ok().and_then(NonZeroU64::new);
+        Self { snapshot: None, owner: None, reverse: BTreeMap::new(), edges: 0, limit, overflow: false, sites: BTreeSet::new(), complete: false, resources: ResourceReads::default(), domain, generation: 0 } }
+    pub fn version(&self) -> Option<GraphVersion> { self.domain.filter(|_| self.generation < u64::MAX).map(|domain| GraphVersion { domain, generation: self.generation }) }
+    fn touch(&mut self) {
+        if let Some(next) = self.generation.checked_add(1) { self.generation = next; }
+        if self.version().is_none() { self.overflow = true; self.complete = false; }
+    }
     pub fn reset_initial(&mut self, owner: NonZeroU64) { self.reset_from(owner, None); }
     pub fn reset(&mut self, snapshot: SceneRevision) { self.reset_from(snapshot.owner, Some(snapshot)); }
-    pub fn rebase(&mut self, snapshot: SceneRevision) { if self.owner != Some(snapshot.owner) { self.overflow = true; } self.snapshot = Some(snapshot); }
-    fn reset_from(&mut self, owner: NonZeroU64, snapshot: Option<SceneRevision>) { self.owner = Some(owner); self.resources = ResourceReads::default(); self.reverse.clear(); self.edges = 0; self.overflow = false; self.complete = false; self.sites.clear(); self.snapshot = snapshot; }
+    pub fn rebase(&mut self, snapshot: SceneRevision) { self.touch(); if self.owner != Some(snapshot.owner) { self.overflow = true; } self.snapshot = Some(snapshot); }
+    fn reset_from(&mut self, owner: NonZeroU64, snapshot: Option<SceneRevision>) { self.owner = Some(owner); self.resources = ResourceReads::default(); self.reverse.clear(); self.edges = 0; self.overflow = false; self.complete = false; self.sites.clear(); self.snapshot = snapshot; self.touch(); }
     pub fn register_site(&mut self, site: SiteId) {
+        self.touch();
         self.complete = false;
         if self.owner != Some(site.owner) || (!self.sites.contains(&site) && self.sites.len() == self.limit) { self.overflow = true; return; }
         self.sites.insert(site);
@@ -336,6 +389,7 @@ impl Dependencies {
     /// registered during the mandatory traversal, including isolated sites.
     /// Required edge coverage remains the producer/consumer schema obligation.
     pub fn finish(&mut self, expected_sites: usize) -> bool {
+        self.touch();
         self.complete = !self.overflow && self.sites.len() == expected_sites; self.complete
     }
     /// `consumer` reads `input`; order is intentionally reverse from evaluation.
@@ -348,6 +402,7 @@ impl Dependencies {
         self.depends_on_node(DependencyNode::Site(consumer), DependencyNode::Resource(resource));
     }
     pub fn depends_on_node(&mut self, consumer: DependencyNode, input: DependencyNode) {
+        self.touch();
         if self.overflow { return; }
         self.complete = false;
         if self.reverse.get(&input).is_some_and(|v| v.contains(&consumer)) { return; }
@@ -357,7 +412,8 @@ impl Dependencies {
     /// Stage ONLY affected owners and their old/new reverse buckets. No clone or
     /// traversal of unrelated graph edges. Empty replacement retires an owner.
     pub fn prepare_resource_reads(&mut self, patch: ResourceReadPatch) -> Result<PreparedResourceReads<'_>, FullReasons> {
-        if !self.complete { return Err(FullReasons::UNKNOWN_DEPENDENCY); }
+        if !self.complete || self.version().is_none() { return Err(FullReasons::UNKNOWN_DEPENDENCY); }
+        if self.generation >= u64::MAX - 1 { return Err(FullReasons::CAPACITY); }
         if self.overflow || patch.overflow || patch.replacements.len() > self.limit { return Err(FullReasons::CAPACITY); }
         let mut edges = self.resources.edges;
         for (owner, inputs) in &patch.replacements {
@@ -420,7 +476,7 @@ impl Dependencies {
         if self.snapshot != context.from { full = full.union(FullReasons::REVISION_GAP); }
         if self.overflow || entries.len() > self.limit { full = full.union(FullReasons::CAPACITY); }
         if !self.complete { full = full.union(FullReasons::UNKNOWN_DEPENDENCY); }
-        if !full.is_empty() { return Invalidated { full, artifacts: BTreeSet::new(), basis: context, limit: self.limit }; }
+        if !full.is_empty() { return Invalidated { full, artifacts: BTreeSet::new(), basis: context, limit: self.limit, graphs: [self.version(), None] }; }
         let mut artifacts = BTreeSet::new(); let mut pending = Vec::new();
         // Deduplicate and cap BEFORE enqueue, not after pop. Both containers
         // together hold at most limit distinct artifacts, never an event log.
@@ -438,17 +494,17 @@ impl Dependencies {
             seen.insert(key); queue.push(key); Ok(())
         }
         for change in entries {
-            if change.site.owner != context.owner { return Invalidated { full: FullReasons::REVISION_GAP, artifacts: BTreeSet::new(), basis: context, limit: self.limit }; }
+            if change.site.owner != context.owner { return Invalidated { full: FullReasons::REVISION_GAP, artifacts: BTreeSet::new(), basis: context, limit: self.limit, graphs: [self.version(), None] }; }
             if !self.sites.contains(&change.site) {
                 // The OLD graph has no newly inserted site; the NEW graph has
                 // no removed site. Both closures are consumed by the producer.
                 let allowed = match side { SnapshotSide::Before => matches!(change.before, Support::Empty), SnapshotSide::After => matches!(change.after, Support::Empty), SnapshotSide::Both => matches!((change.before, change.after), (Support::Empty, Support::Empty)) };
                 if allowed { continue; }
-                return Invalidated { full: FullReasons::UNKNOWN_DEPENDENCY, artifacts: BTreeSet::new(), basis: context, limit: self.limit };
+                return Invalidated { full: FullReasons::UNKNOWN_DEPENDENCY, artifacts: BTreeSet::new(), basis: context, limit: self.limit, graphs: [self.version(), None] };
             }
             for phase in change.facets.phases() {
                 if let Err(reason) = enqueue(DependencyNode::Site(Artifact { site: change.site, phase }), context, self.limit, &mut artifacts, &mut pending) {
-                    return Invalidated { full: reason, artifacts: BTreeSet::new(), basis: context, limit: self.limit };
+                    return Invalidated { full: reason, artifacts: BTreeSet::new(), basis: context, limit: self.limit, graphs: [self.version(), None] };
                 }
             }
         }
@@ -456,7 +512,7 @@ impl Dependencies {
             if let DependencyNode::Site(site) = key {
                 for phase in site.phase.downstream() {
                     if let Err(reason) = enqueue(DependencyNode::Site(Artifact { site: site.site, phase: *phase }), context, self.limit, &mut artifacts, &mut pending) {
-                        return Invalidated { full: reason, artifacts: BTreeSet::new(), basis: context, limit: self.limit };
+                        return Invalidated { full: reason, artifacts: BTreeSet::new(), basis: context, limit: self.limit, graphs: [self.version(), None] };
                     }
                 }
             }
@@ -466,13 +522,13 @@ impl Dependencies {
                     Ok(()) => true, Err(reason) => { rejected = rejected.union(reason); false }
                 }
             });
-            if !rejected.is_empty() { return Invalidated { full: rejected, artifacts: BTreeSet::new(), basis: context, limit: self.limit }; }
-            if let Err(reason) = expanded { return Invalidated { full: reason, artifacts: BTreeSet::new(), basis: context, limit: self.limit }; }
+            if !rejected.is_empty() { return Invalidated { full: rejected, artifacts: BTreeSet::new(), basis: context, limit: self.limit, graphs: [self.version(), None] }; }
+            if let Err(reason) = expanded { return Invalidated { full: reason, artifacts: BTreeSet::new(), basis: context, limit: self.limit, graphs: [self.version(), None] }; }
             if let DependencyNode::Resource(resource) = key {
                 if let Some(consumers) = self.resources.reverse.get(&resource) {
                     for consumer in consumers {
                         if let Err(reason) = enqueue(DependencyNode::Site(*consumer), context, self.limit, &mut artifacts, &mut pending) {
-                            return Invalidated { full: reason, artifacts: BTreeSet::new(), basis: context, limit: self.limit };
+                            return Invalidated { full: reason, artifacts: BTreeSet::new(), basis: context, limit: self.limit, graphs: [self.version(), None] };
                         }
                     }
                 }
@@ -480,12 +536,12 @@ impl Dependencies {
             if let Some(consumers) = self.reverse.get(&key) {
                 for consumer in consumers {
                     if let Err(reason) = enqueue(*consumer, context, self.limit, &mut artifacts, &mut pending) {
-                        return Invalidated { full: reason, artifacts: BTreeSet::new(), basis: context, limit: self.limit };
+                        return Invalidated { full: reason, artifacts: BTreeSet::new(), basis: context, limit: self.limit, graphs: [self.version(), None] };
                     }
                 }
             }
         }
-        Invalidated { full, artifacts, basis: context, limit: self.limit }
+        Invalidated { full, artifacts, basis: context, limit: self.limit, graphs: [self.version(), None] }
     }
 }
 
@@ -572,11 +628,13 @@ mod tests {
         { let candidate = journal.prepare(stamp(None, 1)).unwrap(); drop(candidate); }
         let mut later = change(1, Facet::Paint); later.before = Support::Empty; later.after = Support::Empty;
         journal.record(later); journal.record(change(2, Facet::Clip));
-        let batch = journal.prepare(stamp(None, 1)).unwrap().commit();
-        assert!(batch.full.contains(FullReasons::CAPACITY)); assert_eq!(batch.entries.len(), 1);
-        assert_eq!(batch.entries[0].before, change(1, Facet::Transform).before);
-        assert_eq!(batch.entries[0].after, Support::Empty);
-        assert!(batch.entries[0].facets.contains(Facet::Paint)); assert_eq!(journal.base(), Some(revision(1)));
+        let guard = journal.prepare(stamp(None, 1)).unwrap();
+        assert!(guard.batch().full.contains(FullReasons::CAPACITY)); assert!(guard.batch().entries.is_empty()); assert_eq!(guard.batch().entries.capacity(),0);
+        drop(guard);
+        assert_eq!(journal.entries[&site(1)].before, change(1, Facet::Transform).before);
+        assert_eq!(journal.entries[&site(1)].after, Support::Empty);
+        assert!(journal.entries[&site(1)].facets.contains(Facet::Paint));
+        journal.prepare(stamp(None, 1)).unwrap().commit(); assert_eq!(journal.base(), Some(revision(1)));
         assert!(matches!(journal.prepare(stamp(None, 2)), Err(PrepareError::Revision)));
     }
     #[test]
@@ -663,7 +721,7 @@ mod tests {
         let patch = |resource| { let mut patch = ResourceReadPatch::new(8); patch.replace(consumer, vec![resource]); patch };
         let batch = ChangeBatch { stamp: stamp(Some(revision(1)), 2), full: FullReasons::default(), entries: vec![change(1, Facet::Paint)] };
         let reaches = |graph: &Dependencies, resource| graph.invalidate_with(&batch, |node, emit| {
-            if node == DependencyNode::Site(Artifact { site: site(1), phase: Phase::Primitive }) { emit(DependencyNode::Resource(resource)); }
+            if node == DependencyNode::Site(Artifact { site: site(1), phase: Phase::Material }) { emit(DependencyNode::Resource(resource)); }
             Ok(())
         }).artifacts.contains(&DependencyNode::Site(consumer));
         drop(graph.prepare_resource_reads(patch(first)).unwrap()); assert!(!reaches(&graph, first));
@@ -722,13 +780,16 @@ mod tests {
         let mut graph = Dependencies::new(64); graph.reset(revision(1)); graph.register_site(site(1)); assert!(graph.finish(1));
         let mut journal = Journal::new(owner(), 8); journal.prepare(stamp(None, 1)).unwrap().commit(); journal.record(change(1,Facet::Paint));
         let mut large = graph.invalidate_pending(&journal); assert!(large.artifacts.len() > 2);
-        let small = Invalidated {full:FullReasons::default(),artifacts:BTreeSet::new(),basis:large.basis,limit:2};
+        let small = Invalidated {full:FullReasons::default(),artifacts:BTreeSet::new(),basis:large.basis,limit:2,graphs:large.graphs};
         large.merge(small); assert!(large.full.contains(FullReasons::CAPACITY)); assert!(large.artifacts.is_empty());
     }
 
     #[test]
     fn material_admission_excludes_constraints_text_and_primitive_content_by_construction() {
         assert!(Facets::one(Facet::Paint).union(Facets::one(Facet::Semantics)).is_material_only());
+        let paint = Facets::one(Facet::Paint).phases().collect::<Vec<_>>();
+        assert!(paint.contains(&Phase::Material)); assert!(!paint.contains(&Phase::Primitive));
+
         for facet in [Facet::Topology,Facet::Layout,Facet::TextSource,Facet::TextPolicy,Facet::TextWidth,
             Facet::Transform,Facet::Clip,Facet::Stacking,Facet::ResourcePixels,Facet::ResourceMetrics,
             Facet::WidthConstraint,Facet::HeightConstraint,Facet::PrimitiveContent] {
@@ -737,6 +798,42 @@ mod tests {
         let phases = Facets::one(Facet::PrimitiveContent).phases().collect::<Vec<_>>();
         assert!(phases.contains(&Phase::Primitive)); assert!(phases.contains(&Phase::Raster));
         assert!(!phases.contains(&Phase::Shape)); assert!(!phases.contains(&Phase::Layout));
+    }
+
+    #[test]
+    fn closure_reuse_requires_exact_graph_domain_and_resource_read_generation() {
+        let mut graph = Dependencies::new(64); graph.reset(revision(1)); graph.register_site(site(1)); assert!(graph.finish(1));
+        let mut journal = Journal::new(owner(),8); journal.prepare(stamp(None,1)).unwrap().commit(); journal.record(change(1,Facet::Paint));
+        let closed = graph.invalidate_pending(&journal);
+        assert!(closed.matches_pending(&journal)); assert!(closed.matches_graphs(&graph,None));
+        let mut foreign = Dependencies::new(64); foreign.reset(revision(1)); foreign.register_site(site(1)); assert!(foreign.finish(1));
+        assert!(!closed.matches_graphs(&foreign,None),"same logical owner/base is not the same graph allocation domain");
+        foreign.generation = u64::MAX;
+        assert!(!closed.matches_graphs(&graph,Some(&foreign)),"invalid NEW graph is not absence of NEW graph");
+        foreign.generation = 0; foreign.domain = None;
+        assert!(!closed.matches_graphs(&graph,Some(&foreign)));
+
+        let mut domain = crate::resource::IdentityDomain::new().unwrap(); let resource = domain.mint().unwrap();
+        let mut patch = ResourceReadPatch::new(8); patch.replace(Artifact {site:site(1),phase:Phase::Shape},vec![resource]);
+        drop(graph.prepare_resource_reads(patch).unwrap()); assert!(closed.matches_graphs(&graph,None));
+        let mut patch = ResourceReadPatch::new(8); patch.replace(Artifact {site:site(1),phase:Phase::Shape},vec![resource]);
+        graph.prepare_resource_reads(patch).unwrap().commit();
+        assert!(closed.matches_pending(&journal)); assert!(!closed.matches_graphs(&graph,None),"read replacement changes provenance even without a journal write");
+    }
+
+    #[test]
+    fn full_candidate_keeps_pending_failure_facts_but_retains_no_unusable_delta_vector() {
+        let mut journal = Journal::new(owner(),128);
+        for id in 1..=64 {journal.record(change(id,Facet::Topology));}
+        let guard = journal.prepare(stamp(None,1)).unwrap();
+        assert!(guard.batch().full.contains(FullReasons::INITIAL));
+        assert_eq!(guard.batch().entries.capacity(),0); drop(guard);
+        assert_eq!(journal.entries.len(),64,"failed/dropped preparation keeps original pending facts");
+        let batch = journal.prepare(stamp(None,1)).unwrap().commit();
+        assert!(batch.entries.is_empty());assert_eq!(batch.entries.capacity(),0);assert!(journal.entries.is_empty());
+        journal.record(change(1,Facet::Paint));
+        let batch = journal.prepare(stamp(Some(revision(1)),2)).unwrap().commit();
+        assert!(batch.full.is_empty());assert_eq!(batch.entries.len(),1,"complete incremental delta still retained");
     }
 
 }
