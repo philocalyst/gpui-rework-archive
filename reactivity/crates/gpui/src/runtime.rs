@@ -51,6 +51,8 @@ mod text_geometry;
 use editing::EditingIntent;
 pub use text_geometry::TextGeometry;
 mod identity_index;
+mod layout_nodes;
+use layout_nodes::LayoutNodes;
 mod image;
 mod siblings;
 use identity_index::IdentityIndex;
@@ -1177,7 +1179,8 @@ struct Runtime<M> {
     viewports: BTreeMap<ViewportKey, ViewportState>,
     list_rows: BTreeMap<u64, ListRow>,
     layout: LayoutTree,
-    layout_nodes: NodeIdRange,
+    layout_nodes: LayoutNodes,
+    layout_edits: Option<Box<layout_nodes::EditPlan>>,
     layout_dirty: BTreeSet<u64>,
     rebuild_layout: bool,
     layout_depth: u8,
@@ -1419,7 +1422,8 @@ impl<M: View + 'static, L: LaneSet<M>> Win<M, L> {
             viewports: BTreeMap::new(),
             list_rows: BTreeMap::new(),
             layout,
-            layout_nodes: NodeIdRange::default(),
+            layout_nodes: LayoutNodes::default(),
+            layout_edits: None,
             layout_dirty: BTreeSet::new(),
             rebuild_layout: true,
             layout_depth: 0,
@@ -2050,6 +2054,8 @@ impl<M: View + 'static> Runtime<M> {
         mut property_changed: Option<NonZeroU64>,
     ) -> Result<(), Error> {
         let reuse_identities = self.logical_valid;
+        // A second unprepared description conservatively takes full rebuild.
+        self.layout_edits = None;
         self.counters.descriptions += 1;
         if !mount {
             self.counters.owner_reruns += 1;
@@ -2308,6 +2314,14 @@ impl<M: View + 'static> Runtime<M> {
             .iter()
             .map(|node| node.as_ref().unwrap().identity())
             .collect::<Vec<_>>();
+        // First supported retention cohort: genuinely surviving keyed lists.
+        // Unkeyed logical remints still retain their existing Target semantics.
+        let layout_eligible = reuse_identities
+            && !self.rebuild_layout && !self.topology_changed && !self.layout.is_poisoned()
+            && self.layout_nodes.len() == old.len() && !old_list_ids.is_empty();
+        let mut layout_edits: Option<layout_nodes::EditPlan> = None;
+        let mut retained_list = false;
+        let next_count = drafts.len();
         let mut styles = styles::Builder::with_colors(drafts.len(), color_discovery);
         // New captures must drop before remaining old captures on unwind,
         // just as they did when these Node vectors owned routes directly.
@@ -2368,6 +2382,7 @@ impl<M: View + 'static> Runtime<M> {
                             .is_some_and(|node| node.kind().site_kind() == draft.kind.site_kind())
                     })
             };
+            let consumed = previous_index.is_some_and(|old_index| old[old_index].is_some());
             let previous = previous_index
                 .and_then(|old_index| old[old_index].take())
                 .filter(|node| {
@@ -2379,6 +2394,25 @@ impl<M: View + 'static> Runtime<M> {
                     }
                     retained
                 });
+            let retained = previous.is_some();
+            retained_list |= retained && list_indices.contains_key(&index);
+            if layout_eligible {
+                if layout_edits.is_none() && (!retained || previous_index != Some(index)) {
+                    layout_edits = Some(layout_nodes::EditPlan::prefix(
+                        &self.layout_nodes, index, next_count,
+                    ));
+                }
+                if let Some(plan) = &mut layout_edits {
+                    plan.nodes.push(if retained {
+                        Some(self.layout_nodes.required(previous_index.unwrap()))
+                    } else { None });
+                    // Component-scope rejection consumed the old Node already;
+                    // capture its handle here rather than losing retirement.
+                    if consumed && !retained && let Some(previous) = previous_index {
+                        plan.retired.push(self.layout_nodes.required(previous));
+                    }
+                }
+            }
             let previous_handler = previous.as_ref().and_then(Node::handler_slot);
             let previous_style = if previous.is_some() {
                 old_styles.get(previous_index.unwrap())
@@ -2472,7 +2506,9 @@ impl<M: View + 'static> Runtime<M> {
             }
             self.counters.destination_compares += 1;
             if site.as_ref().map(|site| site.value.as_ref()) != text.as_deref() {
-                self.rebuild_layout |= site.is_some() != text.is_some();
+                // Brand-new sites initialize their measure during insertion.
+                // Existing measure-kind changes retain the full fallback.
+                self.rebuild_layout |= retained && site.is_some() != text.is_some();
                 site = text.as_deref().map(|text| {
                     let value = if let Some(value) =
                         fields[index].and_then(|field| promotions.get(&field))
@@ -2556,7 +2592,19 @@ impl<M: View + 'static> Runtime<M> {
             nodes.push(node);
         }
         image::reconcile(&mut self.images, image_resources);
-        changed += old.iter().filter(|node| node.is_some()).count();
+        if layout_eligible && layout_edits.is_none() && old_ids.len() != nodes.len() {
+            layout_edits = Some(layout_nodes::EditPlan::prefix(
+                &self.layout_nodes, nodes.len(), nodes.len(),
+            ));
+        }
+        for (index, node) in old.iter().enumerate() {
+            if node.is_some() {
+                changed += 1;
+                if let Some(plan) = &mut layout_edits {
+                    plan.retired.push(self.layout_nodes.required(index));
+                }
+            }
+        }
         // A previous site can be consumed before its component scope rejects
         // reuse. The still-old identity index locates its original slot: Some
         // was counted as retired above, while None needs the edited old site.
@@ -2738,6 +2786,9 @@ impl<M: View + 'static> Runtime<M> {
         self.logical_valid = true;
         self.prune_focus();
         self.changed_nodes = changed;
+        if layout_eligible && topology && retained_list && !self.rebuild_layout {
+            self.layout_edits = layout_edits.map(Box::new);
+        }
         Ok(())
     }
     fn patch(&mut self, field: FieldId) -> Result<PatchOutcome, Error> {
@@ -3107,7 +3158,10 @@ impl<M: View + 'static> Runtime<M> {
         let composition = self
             .composition_preview()
             .map(|(identity, preview)| (identity, preview.display.clone(), preview.decoration));
-        if self.rebuild_layout || self.topology_changed || self.layout.is_poisoned() {
+        if self.rebuild_layout || self.layout.is_poisoned()
+            || (self.topology_changed && self.layout_edits.is_none())
+        {
+            self.layout_edits = None;
             self.layout = LayoutTree::new();
             self.layout_nodes.clear();
             for (index, node) in self.nodes.iter().enumerate() {
@@ -3138,6 +3192,9 @@ impl<M: View + 'static> Runtime<M> {
             // Callback routing validates the complete namespace and generation,
             // without retaining or searching another identity vector.
         } else {
+            if let Some(plan) = self.layout_edits.take() {
+                self.apply_layout_edits(*plan)?;
+            }
             // Auto-sized viewports depend on their immediate parent's flow. A
             // retained parent change must refresh the child's grow/basis too,
             // including inspector contributions applied before description.

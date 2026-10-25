@@ -573,7 +573,7 @@ impl DisplayCaptions {
         bases: geometry::Bases<'_>,
         texts: &mut [Option<TextSite>],
         layout: &mut LayoutTree,
-        layout_nodes: &NodeIdRange,
+        layout_nodes: &LayoutNodes,
     ) -> Result<(), Error> {
         let values = if let Some(node) = candidate.iter().find(|n| n.identity == self.identity) {
             let b = node.bounds;
