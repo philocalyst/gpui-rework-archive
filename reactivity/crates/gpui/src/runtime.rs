@@ -2736,10 +2736,12 @@ impl<M: View + 'static> Runtime<M> {
                 && self.complete_epoch.checked_add(1) == Some(self.source_epoch);
             let change = self.styles.update_color(slot, color);
             self.changed_nodes = change.as_ref().map_or(0, |change| change.users as usize);
-            if eligible && self.finish_color_slot(change.as_ref())? {
-                return Ok(PatchOutcome::Complete);
-            }
             self.dirty |= self.changed_nodes != 0;
+            if eligible {
+                return Ok(PatchOutcome::Paint(paint::PaintIntent::new(
+                    change, self.changed_nodes != 0,
+                )));
+            }
             return Ok(PatchOutcome::Visual);
         }
         let eligible =
@@ -2866,13 +2868,12 @@ impl<M: View + 'static> Runtime<M> {
             && let ColorPatch::Candidate(change) =
                 mapped.publish_colors(&mut self.styles, frozen.style, eligible)
         {
-            // Only color relationships changed; preserve complete geometry
-            // through the existing alpha-checked transaction and ACK path.
-            self.dirty = false;
-            if self.finish_color_slot(change.as_ref())? {
-                return Ok(PatchOutcome::Complete);
-            }
-            self.dirty = visual_changed;
+            // Admission updates logical banks only. The turn decides whether
+            // the existing alpha-checked transaction may publish after guards.
+            self.dirty |= visual_changed;
+            return Ok(PatchOutcome::Paint(paint::PaintIntent::new(
+                change, visual_changed,
+            )));
         }
         if eligible && last_changed.is_none() {
             // Exact comparisons established that every installed operand is

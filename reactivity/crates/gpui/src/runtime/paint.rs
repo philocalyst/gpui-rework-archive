@@ -1,12 +1,24 @@
 //! Complete-C working-color updates, separate from mutable logical colors.
 use super::*;
-#[derive(Clone, Copy, PartialEq, Eq)]
 pub(super) enum PatchOutcome {
     Visual,
     Metadata,
     /// Equal exact operands; publication waits for the turn's editing guards.
     Unchanged,
-    Complete,
+    Paint(PaintIntent),
+}
+/// Logical color admission only. No Canvas command, token, complete coverage or
+/// acknowledgement changes until the owning turn consumes this after its
+/// editing/IME/inspector guards. The fallback remains dirty even if token or
+/// slot admission fails, so settle cannot certify an unprepared source epoch.
+pub(super) struct PaintIntent {
+    change: Option<styles::ColorChange>,
+    fallback_dirty: bool,
+}
+impl PaintIntent {
+    pub(super) fn new(change: Option<styles::ColorChange>, fallback_dirty: bool) -> Self {
+        Self { change, fallback_dirty }
+    }
 }
 /// Exactly one transition, never an accumulated change log. A coalesced native
 /// packet that does not match from rebuilds from the latest complete C bank.
@@ -17,7 +29,17 @@ pub(crate) struct SlotTransition {
     pub(crate) edits: [gpui_canvas::SlotEdit; 1],
 }
 impl<M: View + 'static> Runtime<M> {
-    pub(super) fn finish_color_slot(
+    pub(super) fn publish_paint_intent(&mut self, intent: PaintIntent) -> Result<bool, Error> {
+        self.dirty |= intent.fallback_dirty;
+        let complete = self.finish_color_slot(intent.change.as_ref())?;
+        if complete {
+            // publish_paint(None) intentionally preserves caller dirty state;
+            // this admitted paint-only outcome is the owner of that state.
+            self.dirty = false;
+        }
+        Ok(complete)
+    }
+    fn finish_color_slot(
         &mut self,
         change: Option<&styles::ColorChange>,
     ) -> Result<bool, Error> {
@@ -182,7 +204,15 @@ impl<M: View + 'static, L: LaneSet<M>> Win<M, L> {
 #[cfg(test)]
 mod tests {
     use super::*;
-    use crate::Signal;
+    use crate::{Signal, SignalMap};
+    #[test]
+    fn paint_admission_transient_layout_ledger() {
+        eprintln!(
+            "PAINT_ADMISSION_BYTES outcome={} intent={} change={} result={}",
+            size_of::<PatchOutcome>(), size_of::<PaintIntent>(),
+            size_of::<styles::ColorChange>(), size_of::<Result<PatchOutcome, Error>>(),
+        );
+    }
     struct Panel {
         bound: bool,
         color: Signal<Color>,
@@ -203,6 +233,110 @@ mod tests {
                 el.bg(Color::BLACK)
             }
         }
+    }
+    struct Inspected { color: Signal<Color>, mapped: bool }
+    impl Inspected {
+        const COLOR: crate::Source<Self, Color> = crate::Source::new(
+            FieldId::new(1), "color", |model| &model.color, |model| &mut model.color,
+        );
+    }
+    impl View for Inspected {
+        fn sources() -> Sources<Self> { Sources::new().direct(Self::COLOR) }
+        fn view(&self) -> crate::El<'_> {
+            let node = crate::div().name("color target").size(32);
+            if self.mapped { node.bg(self.color.map(|color| *color)) }
+            else { node.bg(&self.color) }
+        }
+    }
+    fn acknowledge_inspected(win: &mut Win<Inspected>) {
+        win.presented(win.with_scene(|_, token| token).unwrap()).unwrap();
+    }
+    fn inspected(mapped: bool, recording: bool) -> Win<Inspected> {
+        let model = Inspected { color: Signal::new(Color::BLACK), mapped };
+        let options = WindowOptions { size: [640, 480], ..Default::default() };
+        let mut win = if recording { Win::recording_with_inspector(model, options) }
+            else { Win::with_inspector(model, options) }.unwrap();
+        if recording { acknowledge_inspected(&mut win); }
+        let target = win.query().name("color target").one().unwrap();
+        win.inspector_select(target).unwrap();
+        if recording { acknowledge_inspected(&mut win); }
+        win
+    }
+    fn inspected_rows(win: &Win<Inspected>) -> Vec<SnapshotNode> {
+        let mut nodes = win.snapshot().unwrap().nodes;
+        for node in &mut nodes { node.target = None; }
+        nodes
+    }
+    #[test]
+    fn inspector_color_admission_needs_only_one_candidate_and_preserves_failed_predecessor() {
+        for mapped in [false, true] {
+            let mut expected = inspected(mapped, false);
+            expected.set(Inspected::COLOR, Color::WHITE).unwrap();
+            let expected_pixels = expected.with_pixels(|pixels, _, _| pixels.to_vec()).unwrap();
+            for sequence in [u64::MAX - 1, u64::MAX] {
+                let mut win = inspected(mapped, false);
+                let old_token = win.with_scene(|_, token| token).unwrap();
+                let old_nodes = inspected_rows(&win);
+                let old_pixels = win.with_pixels(|pixels, _, _| pixels.to_vec()).unwrap();
+                win.runtime_mut().unwrap().next_presentation = NonZeroU64::new(sequence).unwrap();
+                let result = win.set(Inspected::COLOR, Color::WHITE);
+                if sequence == u64::MAX - 1 {
+                    let commit = result.expect("one guarded source edit needs only one complete candidate");
+                    assert_eq!(commit.source_epoch, commit.presentation_epoch);
+                    assert_eq!(win.with_scene(|_, token| token.sequence.get()).unwrap(), sequence);
+                    assert_eq!(inspected_rows(&win), inspected_rows(&expected));
+                    win.with_pixels(|pixels, _, _| assert_eq!(pixels, expected_pixels)).unwrap();
+                } else {
+                    assert!(result.is_err());
+                    assert_eq!(win.with_scene(|_, token| token).unwrap(), old_token);
+                    assert_eq!(inspected_rows(&win), old_nodes);
+                    win.with_pixels(|pixels, _, _| assert_eq!(pixels, old_pixels)).unwrap();
+                }
+            }
+        }
+    }
+    #[test]
+    fn rejected_inspector_color_keeps_distinct_pending_c_and_old_p_until_eligible_ack() {
+        for mapped in [false, true] {
+            let mut win = inspected(mapped, true);
+            let old_p = inspected_rows(&win);
+            win.set(Inspected::COLOR, Color::WHITE).unwrap();
+            let eligible = win.with_scene(|_, token| token).unwrap();
+            let covered = win.runtime().unwrap().complete_epoch;
+            let pixels = win.with_pixels(|pixels, _, _| pixels.to_vec()).unwrap();
+            assert_eq!(inspected_rows(&win), old_p);
+            let mut expected = inspected(mapped, false);
+            expected.set(Inspected::COLOR, Color::WHITE).unwrap();
+            win.runtime_mut().unwrap().next_presentation = NonZeroU64::MAX;
+            assert!(win.set(Inspected::COLOR, Color::BLACK).is_err());
+            assert_eq!(win.with_scene(|_, token| token).unwrap(), eligible);
+            assert_eq!(inspected_rows(&win), old_p);
+            win.with_pixels(|actual, _, _| assert_eq!(actual, pixels)).unwrap();
+            let commit = win.presented(eligible).unwrap();
+            assert_eq!(commit.presentation_epoch, covered);
+            assert!(commit.presentation_epoch < commit.source_epoch);
+            assert_eq!(inspected_rows(&win), inspected_rows(&expected));
+            win.with_pixels(|actual, _, _| assert_eq!(actual, pixels)).unwrap();
+        }
+    }
+    #[test]
+    fn rejected_paint_intent_keeps_retry_dirty_instead_of_covering_failed_source() {
+        let mut win = Win::recording(
+            Panel { bound: true, color: Signal::new(Color::BLACK) },
+            WindowOptions { size: [32, 32], ..Default::default() },
+        ).unwrap();
+        let old = win.with_scene(|_, token| token).unwrap();
+        win.presented(old).unwrap();
+        let covered = win.snapshot().unwrap().presentation_epoch;
+        let pixels = win.with_pixels(|pixels, _, _| pixels.to_vec()).unwrap();
+        win.runtime_mut().unwrap().next_presentation = NonZeroU64::MAX;
+        assert!(win.set(Panel::COLOR, Color::WHITE).is_err());
+        assert!(win.settle().is_err(), "failed paint source must not be certified by an idle relabel");
+        assert!(win.set(Panel::COLOR, Color::WHITE).is_err());
+        assert_eq!(win.with_scene(|_, token| token).unwrap(), old);
+        assert_eq!(win.snapshot().unwrap().presentation_epoch, covered);
+        assert!(win.snapshot().unwrap().source_epoch > covered);
+        win.with_pixels(|actual, _, _| assert_eq!(actual, pixels)).unwrap();
     }
     #[test]
     fn cold_storage_and_warm_edits_have_explicit_allocation_costs() {
