@@ -201,8 +201,11 @@ impl View for Wide {
             // a prepended control, not an anchored overlay/popover protocol.
             column((button("").name("inserted").size(1).bg(Color::BLACK), grid))
                 .align(gpui::Align::Stretch)
+                .scroll(gpui::Axis::Y)
         } else {
-            column(grid).align(gpui::Align::Stretch)
+            column(grid)
+                .align(gpui::Align::Stretch)
+                .scroll(gpui::Axis::Y)
         }
     }
 }
@@ -431,7 +434,7 @@ fn topology_costs(mode: &str, leaves: usize, samples: usize, timed: bool) {
         }
         println!(
             "{}",
-            serde_json::json!({"scenario": mode, "leaves": leaves, "samples": samples, "ns": elapsed, "signatures": signatures, "counters": window.counters(), "scope": "full public owner update/resize plus automatic scene ACK; canonical checks outside the clock; no raster/GPU/OS"})
+            serde_json::json!({"scenario": mode, "leaves": leaves, "samples": samples, "ns": elapsed, "signatures": signatures, "counters": window.counters(), "scope": "full public owner update/resize of viewport-filling scroll root plus automatic scene ACK; canonical checks outside the clock; no raster/GPU/OS"})
         );
         return;
     }
