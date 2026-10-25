@@ -361,6 +361,41 @@ fn forgetting_a_borrow_guard_cannot_leave_deferred_policy_in_the_window() {
 }
 
 #[test]
+fn first_color_equal_or_metadata_edit_cannot_publish_through_a_deferred_turn() {
+    for mode in 0..3 {
+        let mut a = recording();
+        let mut b = recording();
+        let mut turn = b.edit_turn().unwrap();
+        let receipt = match mode {
+            0 => turn.set(Panel::COLOR, Color::rgb(50, 90, 130)).unwrap(),
+            1 => turn.set(Panel::WIDTH, 40.).unwrap(),
+            _ => turn.set(Panel::DESCRIPTION, "new".into()).unwrap(),
+        };
+        assert!(receipt.prepared_epoch.is_none());
+        assert!(receipt.presentation_epoch < receipt.source_epoch);
+        turn.set(Panel::WIDTH, 24.).unwrap();
+        turn.finish().unwrap();
+        match mode {
+            0 => {
+                a.set(Panel::COLOR, Color::rgb(50, 90, 130)).unwrap();
+            }
+            1 => {
+                a.set(Panel::WIDTH, 40.).unwrap();
+            }
+            _ => {
+                a.set(Panel::DESCRIPTION, "new".into()).unwrap();
+            }
+        }
+        a.set(Panel::WIDTH, 24.).unwrap();
+        assert_eq!(b.counters().source_operations, 2);
+        assert_eq!(b.counters().paint_passes, 1);
+        ack(&mut a);
+        ack(&mut b);
+        equivalent(&mut a, &mut b);
+    }
+}
+
+#[test]
 fn inspector_observes_final_admitted_properties_and_publishes_once() {
     let options = WindowOptions {
         size: [640, 480],
