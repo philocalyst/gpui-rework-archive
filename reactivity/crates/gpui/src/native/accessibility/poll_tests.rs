@@ -1,0 +1,226 @@
+//! Actual native wake/owner proof; the ingress is driven directly so each
+//! activation and queue schedule is deterministic, without an AT service.
+use super::super::{NativeHost, RendererPolicy, Window};
+use super::*;
+use crate::{El, button, column, text};
+use accesskit::{ActionHandler, ActivationHandler, DeactivationHandler};
+use gpui_reactivity_host::native::{Callback, Driver, Host, winit};
+use std::{
+    sync::atomic::AtomicUsize,
+    time::{Duration, Instant},
+};
+use winit::{
+    event_loop::{ActiveEventLoop, ControlFlow, EventLoop},
+    platform::{run_on_demand::EventLoopExtRunOnDemand, x11::EventLoopBuilderExtX11},
+};
+
+#[derive(Clone, Copy, Debug, PartialEq, Eq)]
+enum Scenario {
+    Fatal,
+    Repair,
+    StaleBudget,
+}
+struct Page {
+    scenario: Scenario,
+    bad: bool,
+    started: Arc<AtomicUsize>,
+    repaired: Arc<AtomicUsize>,
+}
+impl View for Page {
+    fn view(&self) -> El<'_> {
+        column((
+            button("Start").on_click(|m: &mut Self| {
+                m.started.fetch_add(1, Ordering::Relaxed);
+                assert_ne!(m.scenario, Scenario::Fatal, "intentional action failure");
+                m.bad = true;
+            }),
+            button("Repair").on_click(|m: &mut Self| {
+                m.bad = false;
+                m.repaired.fetch_add(1, Ordering::Relaxed);
+            }),
+            text(if self.bad { "🚀" } else { "Ready" }),
+        ))
+    }
+}
+struct Script {
+    host: NativeHost<Page>,
+    scenario: Scenario,
+    started: Arc<AtomicUsize>,
+    repaired: Arc<AtomicUsize>,
+    failures: Arc<AtomicUsize>,
+    deadline: Instant,
+    armed: bool,
+    ready: usize,
+    checked: bool,
+}
+fn click(id: NodeId) -> ActionRequest {
+    ActionRequest {
+        action: accesskit::Action::Click,
+        target_tree: TreeId::ROOT,
+        target_node: id,
+        data: None,
+    }
+}
+fn node_id(owner: &Win<Page>, cohort: &Cohort, target: Target) -> NodeId {
+    let mut found = None;
+    owner
+        .visit(|part| {
+            if part.target() == target {
+                found = Some(cohort.id(part));
+            }
+        })
+        .unwrap();
+    found.unwrap()
+}
+impl Host for Script {
+    fn dispatch(&mut self, event_loop: &ActiveEventLoop, callback: Callback<'_>) {
+        let ready = self.armed && matches!(callback, Callback::WorkReady);
+        let idle = matches!(callback, Callback::AboutToWait);
+        self.host.dispatch(event_loop, callback);
+        if self.checked {
+            return;
+        }
+        if ready {
+            self.ready += 1;
+            if self.scenario == Scenario::Fatal {
+                assert!(matches!(
+                    self.host.error,
+                    Some(NativeError::Runtime(Error::OwnerPanicked))
+                ));
+                assert_eq!(self.started.load(Ordering::Relaxed), 1);
+                assert_eq!(self.repaired.load(Ordering::Relaxed), 0);
+                let receiver = self
+                    .host
+                    .accessibility
+                    .as_ref()
+                    .unwrap()
+                    .receiver
+                    .as_ref()
+                    .unwrap();
+                assert!(
+                    matches!(
+                        receiver
+                            .try_recv()
+                            .expect("the command after a fatal action must remain unconsumed")
+                            .command,
+                        Command::Activate(_)
+                    ),
+                    "the command after a fatal action must remain unconsumed"
+                );
+                assert!(matches!(receiver.try_recv(), Err(TryRecvError::Empty)));
+                self.checked = true;
+                return;
+            }
+            if self.scenario == Scenario::StaleBudget && self.ready == 1 {
+                assert_eq!(
+                    self.repaired.load(Ordering::Relaxed),
+                    0,
+                    "discarded old-session commands still consume the turn budget"
+                );
+            }
+        }
+        assert!(self.host.error.is_none(), "{:?}", self.host.error);
+        if !idle {
+            return;
+        }
+        assert!(
+            Instant::now() < self.deadline,
+            "native action wake was lost"
+        );
+        event_loop.set_control_flow(ControlFlow::WaitUntil(self.deadline));
+        let Some(owner) = &mut self.host.owner else {
+            return;
+        };
+        let sheet = owner.snapshot().unwrap();
+        if !sheet.presentation_valid || sheet.source_epoch != sheet.presentation_epoch {
+            return;
+        }
+        if !self.armed {
+            let bridge = self.host.accessibility.as_mut().unwrap();
+            bridge.cohort.refresh(owner).unwrap();
+            bridge.published = Some(owner.accessibility_state().unwrap());
+            bridge.ingress.prepare_publication(&mut bridge.receiver);
+            bridge.ingress.request_initial_tree();
+            let start = node_id(owner, &bridge.cohort, owner.button("Start"));
+            let repair = node_id(owner, &bridge.cohort, owner.button("Repair"));
+            if self.scenario == Scenario::StaleBudget {
+                for _ in 0..APPLY_BUDGET {
+                    bridge.ingress.do_action(click(start));
+                }
+                bridge.ingress.deactivate_accessibility();
+                bridge.ingress.request_initial_tree();
+            } else {
+                bridge.ingress.do_action(click(start));
+            }
+            bridge.ingress.do_action(click(repair));
+            self.armed = true;
+        } else if self.repaired.load(Ordering::Relaxed) == 1 {
+            assert_eq!(
+                self.started.load(Ordering::Relaxed),
+                usize::from(self.scenario == Scenario::Repair)
+            );
+            assert_eq!(
+                self.failures.load(Ordering::Relaxed),
+                usize::from(self.scenario == Scenario::Repair)
+            );
+            assert_eq!(
+                self.ready,
+                if self.scenario == Scenario::Repair {
+                    1
+                } else {
+                    2
+                }
+            );
+            assert!(!owner.root().unwrap().bad);
+            self.checked = true;
+            event_loop.exit();
+        }
+    }
+}
+
+#[test]
+#[ignore = "requires real X11; direct ingress schedule, actual Driver WorkReady and native presentation"]
+fn native_action_poll_stops_on_fatal_continues_after_repair_and_rearms_stale_budget() {
+    let mut event_loop = EventLoop::builder()
+        .with_x11()
+        .with_any_thread(true)
+        .build()
+        .unwrap();
+    for scenario in [Scenario::Fatal, Scenario::Repair, Scenario::StaleBudget] {
+        let started = Arc::new(AtomicUsize::new(0));
+        let repaired = Arc::new(AtomicUsize::new(0));
+        let failures = Arc::new(AtomicUsize::new(0));
+        let observe = failures.clone();
+        let root = Page {
+            scenario,
+            bad: false,
+            started: started.clone(),
+            repaired: repaired.clone(),
+        };
+        let window = Window::document(root)
+            .size(200, 100)
+            .renderer(RendererPolicy::ReferenceCpu)
+            .on_presentation_error(move |error| {
+                assert!(matches!(error, Error::Canvas(_)));
+                observe.fetch_add(1, Ordering::Relaxed);
+            });
+        let script = Script {
+            host: NativeHost::new(window),
+            scenario,
+            started,
+            repaired,
+            failures,
+            deadline: Instant::now() + Duration::from_secs(15),
+            armed: false,
+            ready: 0,
+            checked: false,
+        };
+        let (mut driver, wake) = Driver::new(&event_loop, script);
+        driver.host_mut().host.wake = Some(wake);
+        event_loop.run_app_on_demand(&mut driver).unwrap();
+        assert!(
+            driver.host().checked,
+            "{scenario:?} did not reach its native assertion"
+        );
+    }
+}
