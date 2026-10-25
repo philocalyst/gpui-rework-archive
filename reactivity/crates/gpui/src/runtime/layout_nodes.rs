@@ -193,7 +193,7 @@ mod tests {
                 ));
             }
             children.push(uniform_list(LIST, self, 12).w(120).h(72));
-            column(children)
+            column(children.into_iter())
         }
     }
     fn window() -> Win<Page> {
@@ -629,7 +629,7 @@ mod tests {
                 let mut children = vec![div().size(8)];
                 if self.page.popup { children.push(button("popup").size(10)); }
                 children.push(uniform_list(LIST, &self.page, 12).h(72));
-                column(children).w(140).h(100).flow(
+                column(children.into_iter()).w(140).h(100).flow(
                     if self.horizontal { Flow::Row } else { Flow::Column },
                 )
             }
@@ -789,7 +789,7 @@ mod tests {
             fn view(&self) -> El<'_> {
                 let mut children = vec![uniform_list(LIST, &self.0, 12).w(120).h(72)];
                 if self.0.popup { children.push(button("tail").size(10)); }
-                column(children)
+                column(children.into_iter())
             }
         }
         let mut model = Page::new();

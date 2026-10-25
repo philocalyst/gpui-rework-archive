@@ -32,7 +32,7 @@ impl View for Page {
                 .name("popup").w(80).h(16).bg(rgb(0xf8c060)).transform(&self.popup_map));
         }
         children.push(uniform_list(LIST,self,12).w(120).h(72));
-        column(children)
+        column(children.into_iter())
     }
 }
 fn token(win:&Win<Page>)->PresentationToken { win.with_scene(|_,token|token).unwrap() }

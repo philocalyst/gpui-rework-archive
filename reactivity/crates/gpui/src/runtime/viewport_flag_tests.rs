@@ -27,7 +27,7 @@ impl View for Page {
                 .scroll(crate::Axis::Y).w(120).h(48)),
             _ => (),
         }
-        column((column(left), column(right)))
+        column((column(left.into_iter()), column(right.into_iter())))
     }
 }
 fn is_viewport(node: &Node) -> bool {
