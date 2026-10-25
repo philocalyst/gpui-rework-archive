@@ -188,7 +188,9 @@ fn coalesced_hover_predecessor(
         let previous_capacity = owner.with_paint_scene(|_, _, state| {
             state.map_or(0, |state| state.retained_edit_capacity())
         }).unwrap();
-        let cost = allocation_counter::measure(|| owner.set(Hover::CURRENT, current).unwrap());
+        let cost = allocation_counter::measure(|| {
+            owner.set(Hover::CURRENT, current).unwrap();
+        });
         owner.with_paint_scene(|_, _, state| {
             let state = state.expect("two actual changed hover relationships");
             assert_eq!(state.edits().len(), 2);
