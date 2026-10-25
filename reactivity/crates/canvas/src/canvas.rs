@@ -18,7 +18,7 @@ pub use clips::{
 mod columns;
 use columns::{Columns, PaintUse, StoredCommon};
 pub use columns::{
-    PaintColor, PaintSlot, PreparedPaint, SlotCommit, SlotEdit, SlotError, SlotErrorKind,
+    PaintColor, PaintSlot, PreparedPaint, PreparedSlotMutation, SlotCommit, SlotEdit, SlotError, SlotErrorKind,
 };
 mod bins;
 use bins::RasterScratch;

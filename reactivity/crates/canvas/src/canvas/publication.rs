@@ -213,6 +213,14 @@ pub(super) fn check_slot_publication(canvas:&mut Canvas,changes:&PreparedChanges
     drop(old.groups.prepare_retarget(stamp).map_err(|_|PublicationError::Stamp)?);
     Ok(stamp)
 }
+pub(super) fn slot_origin(canvas:&Canvas)->Result<(SceneRevision,SceneRevision),PublicationError> {
+    let binding=canvas.publication.as_ref().ok_or(PublicationError::NoPublication)?;
+    Ok((binding.receipt.stamp().to,binding.users.bank))
+}
+pub(super) fn slot_users(canvas:&Canvas,slot:PaintSlot)->Option<impl Iterator<Item=SiteId>+'_> {
+    let binding=canvas.publication.as_ref()?;let owner=binding.users.bank.owner;
+    binding.users.owners(slot).map(move |users|users.iter().map(move |local|SiteId::from_monotonic(owner,*local)))
+}
 pub(super) struct SlotParts {pub(super) groups:SceneGroups,users:MaterialUsers,mutation:SlotMutation,scratch:Vec<PaintSlot>}
 pub(super) fn take_slot_groups(canvas:&mut Canvas)->SlotParts {
     let Binding {receipt,batch:_,groups,users,mutation,scratch}=canvas.publication.take().expect("prevalidated old binding");

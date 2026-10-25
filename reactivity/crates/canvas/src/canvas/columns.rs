@@ -496,7 +496,40 @@ pub struct SlotCommit<'canvas, 'edits> {
     damage: DamageRegion,
     changed: usize,
 }
-impl<'canvas> SlotCommit<'canvas, '_> {
+/// Borrowed precommit witness of the SAME checked SlotCommit. Consumers may
+/// derive common resource roots, but must drop this borrow before committing.
+/// It certifies physical edits/users, not complete source logical dirty closure.
+pub struct PreparedSlotMutation<'plan,'canvas,'edits> {
+    plan:&'plan SlotCommit<'canvas,'edits>,
+    base:gpui_reactivity_core::change::SceneRevision,
+    bank:gpui_reactivity_core::change::SceneRevision,
+}
+impl PreparedSlotMutation<'_,'_,'_> {
+    pub fn base(&self)->gpui_reactivity_core::change::SceneRevision {self.base}
+    pub fn bank_origin(&self)->gpui_reactivity_core::change::SceneRevision {self.bank}
+    pub fn changed_slots(&self)->impl Iterator<Item=PaintSlot>+'_ {
+        self.plan.canvas.commands.columns.changed_slots(self.plan.edits)
+    }
+    pub fn actual_users(&self,slot:PaintSlot)->Option<impl Iterator<Item=gpui_reactivity_core::change::SiteId>+'_> {
+        super::publication::slot_users(self.plan.canvas,slot)
+    }
+}
+impl<'canvas,'edits> SlotCommit<'canvas, 'edits> {
+    /// Read ACTUAL validated edits while the exclusive plan still pins this
+    /// bank. No allocation, caller-list constructor, resource mint or mutation.
+    ///
+    /// ```compile_fail,E0505
+    /// use gpui_canvas::SlotCommit;
+    /// fn no_mutation_while_borrowed(plan:SlotCommit<'_,'_>) {
+    ///     let witness=plan.prepared_mutation().unwrap();
+    ///     let _=plan.commit();
+    ///     let _=witness.base();
+    /// }
+    /// ```
+    pub fn prepared_mutation(&self)->Result<PreparedSlotMutation<'_,'canvas,'edits>,super::PublicationError> {
+        let (base,bank)=super::publication::slot_origin(self.canvas)?;
+        Ok(PreparedSlotMutation {plan:self,base,bank})
+    }
     pub fn damage(&self) -> DamageRegion {
         self.damage
     }

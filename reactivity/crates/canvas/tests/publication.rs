@@ -153,3 +153,18 @@ fn truncated_paint_plus_hidden_layout_requires_full_snapshot_before_publication(
     let view=canvas.accepted_scene().unwrap();assert!(view.is_full_snapshot());assert!(view.checked_slot_mutation().is_none());
     assert_eq!(view.stamp().to,next.to);assert_eq!(view.scene().draws().next().unwrap().local_rect,Rect::new(2.,2.,12.,12.));
 }
+#[test]
+fn precommit_witness_borrows_actual_changed_slots_and_all_users_without_mutation_or_allocation() {
+    let (mut canvas,_,_,slot)=setup();let stamp=canvas.accepted_scene().unwrap().stamp();
+    for (color,count) in [(Color::WHITE,0),(Color::BLACK,1)] {
+        let edits=[SlotEdit::new(slot,PaintColor::new(color))];let plan=canvas.prepare_slots(&edits).unwrap();
+        let measured=allocation_counter::measure(|| {
+            let witness=plan.prepared_mutation().unwrap();assert_eq!(witness.base(),stamp.to);
+            assert_eq!(witness.bank_origin(),stamp.to);
+            assert_eq!(witness.changed_slots().count(),count);
+            assert_eq!(witness.actual_users(slot).unwrap().count(),1);
+        });
+        assert_eq!((measured.count_total,measured.bytes_total),(0,0));drop(plan);
+        assert_eq!(canvas.accepted_scene().unwrap().stamp(),stamp);
+    }
+}
