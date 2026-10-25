@@ -121,23 +121,33 @@ impl<M: View + 'static> Runtime<M> {
             }
             plan.nodes[index] = Some(id);
         }
-        // Logical parents are already checked dense preorder indices. Reserve
-        // bucket zero for the forest roots and index each parent at index + 1.
-        // Unlike a BTreeMap this temporary has no per-parent allocation or
-        // comparison walk; complete NodeId authority remains in LayoutNodes.
-        let mut following = vec![None; plan.nodes.len() + 1];
+        // Reverse preorder needs only the open ancestor frontier: once a
+        // parent's own row is reached, no later row can name it as parent.
+        // Store one following sibling per open depth, not one bucket per row.
+        let mut following: Vec<(Option<usize>, NodeId)> = Vec::new();
         for index in (0..plan.nodes.len()).rev() {
             let id = plan.nodes[index].expect("every admitted row now has a handle");
             let parent_index = self.nodes[index].parent().index();
             let parent = parent_index.map(|parent| plan.nodes[parent].unwrap());
-            let bucket = parent_index.map_or(0, |parent| parent + 1);
-            let before = following[bucket];
+            if following.last().is_some_and(|(parent, _)| *parent == Some(index)) {
+                following.pop();
+            }
+            let before = match following.last_mut() {
+                Some((parent, next)) if *parent == parent_index => {
+                    let before = *next;
+                    *next = id;
+                    Some(before)
+                }
+                _ => {
+                    following.push((parent_index, id));
+                    None
+                }
+            };
             let current_parent = self.layout.tree().parent(id).map_err(LayoutError::from)?;
             let current_next = self.layout.tree().next_sibling(id).map_err(LayoutError::from)?;
             if current_parent != parent || current_next != before {
                 self.layout.reparent_before(id, parent, before)?;
             }
-            following[bucket] = Some(id);
         }
         let ordered = plan.nodes.into_iter().map(|id| id.unwrap()).collect();
         self.layout_nodes = LayoutNodes::edited(ordered)?;
