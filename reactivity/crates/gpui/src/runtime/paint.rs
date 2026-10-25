@@ -96,6 +96,13 @@ impl SlotTransition {
     pub(crate) fn edits(&self) -> &[gpui_canvas::SlotEdit] {
         self.edits.as_slice()
     }
+    #[cfg(test)]
+    pub(crate) fn retained_edit_capacity(&self) -> usize {
+        match &self.edits {
+            PaintEdits::Empty | PaintEdits::One(_) => 0,
+            PaintEdits::Many(edits) => edits.capacity(),
+        }
+    }
 }
 impl<M: View + 'static> Runtime<M> {
     pub(super) fn publish_paint_intent(&mut self, mut intent: PaintIntent) -> Result<bool, Error> {

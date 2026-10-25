@@ -91,10 +91,10 @@ fn read(gpu: &GpuSurface, texture: &wgpu::Texture) -> Vec<u8> {
     }
     output
 }
-fn render(
+fn render<M: View + 'static>(
     gpu: &mut GpuSurface,
     oracle: &mut Renderer,
-    owner: &mut Win<Paint>,
+    owner: &mut Win<M>,
     texture: &wgpu::Texture,
 ) {
     let view = texture.create_view(&Default::default());
@@ -148,6 +148,64 @@ fn render(
         );
     }
     owner.presented(token).unwrap();
+}
+struct Hover {
+    current: Signal<u32>,
+}
+impl Hover {
+    const CURRENT: Source<Self, u32> = Source::new(
+        FieldId::new(1), "current", |model| &model.current, |model| &mut model.current,
+    );
+}
+impl View for Hover {
+    fn sources() -> Sources<Self> { Sources::new().direct(Self::CURRENT) }
+    fn view(&self) -> El<'_> {
+        crate::row((0..3).map(|index| {
+            div().size(8).bg(self.current.map_with(index, |current, index| {
+                if *current == index { Color::WHITE } else { Color::BLACK }
+            }))
+        }))
+    }
+}
+fn coalesced_hover_predecessor(
+    gpu: &mut GpuSurface,
+    oracle: &mut Renderer,
+    texture: &wgpu::Texture,
+    hdr: bool,
+) {
+    let mut owner = Win::recording(
+        Hover { current: Signal::new(0) },
+        WindowOptions {
+            size: [32, 24],
+            colors: if hdr {
+                gpui_canvas::ColorConfig::linear_hdr(gpui_canvas::OutputProfile::Srgb, 203.0).unwrap()
+            } else { Default::default() },
+        },
+    ).unwrap();
+    gpu.packet_token = None;
+    render(gpu, oracle, &mut owner, texture);
+    for current in [1, 2] {
+        let previous_capacity = owner.with_paint_scene(|_, _, state| {
+            state.map_or(0, |state| state.retained_edit_capacity())
+        }).unwrap();
+        let cost = allocation_counter::measure(|| owner.set(Hover::CURRENT, current).unwrap());
+        owner.with_paint_scene(|_, _, state| {
+            let state = state.expect("two actual changed hover relationships");
+            assert_eq!(state.edits().len(), 2);
+            eprintln!(
+                "NATIVE_TWO_SLOT_TRANSPORT previous_capacity={previous_capacity} current_capacity={} slot_edit_bytes={} allocations={} requested={} scoped_net_retained={} scoped_peak={}",
+                state.retained_edit_capacity(), size_of::<gpui_canvas::SlotEdit>(),
+                cost.count_total, cost.bytes_total, cost.bytes_current, cost.bytes_max,
+            );
+        }).unwrap();
+    }
+    owner.with_paint_scene(|_, _, state| {
+        assert_ne!(Some(state.unwrap().from), gpu.packet_token);
+    }).unwrap();
+    // 0→1 changes A/B, then1→2 changes B/C. Applying only the last delta to
+    // the submitted0 image leaves A wrong, so exact bytes detect a bad guard.
+    render(gpu, oracle, &mut owner, texture);
+    assert!(gpu.renderer.stats().validated_draws > 0);
 }
 pub(super) fn run(gpu: &mut GpuSurface) {
     for (hdr, mapped, two) in [
@@ -216,6 +274,7 @@ pub(super) fn run(gpu: &mut GpuSurface) {
             assert_eq!(Some(state.from), gpu.packet_token);
             assert_eq!(state.edits().len(), if two { 2 } else { 1 });
             assert!(state.edits().windows(2).all(|pair| pair[0].slot() < pair[1].slot()));
+            eprintln!("NATIVE_PAINT_TRANSITION edits={} retained_capacity={}", state.edits().len(), state.retained_edit_capacity());
         }).unwrap();
         render(gpu, &mut oracle, &mut owner, &texture);
         assert_eq!(
@@ -265,6 +324,9 @@ pub(super) fn run(gpu: &mut GpuSurface) {
             gpu.renderer.stats().validated_draws > 0,
             "alpha change rebuilds topology/proofs"
         );
+        if two && mapped {
+            coalesced_hover_predecessor(gpu, &mut oracle, &texture, hdr);
+        }
         if let Some(old) = old {
             gpu.renderer = old;
         }
