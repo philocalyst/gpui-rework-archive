@@ -53,8 +53,10 @@ impl NodeIdRange {
             return Err(TreeError::InvalidNode);
         }
         let len = self.len.checked_add(1).ok_or(TreeError::Capacity)?;
-        self.arena = id.arena;
-        self.generation = id.generation;
+        if self.len == 0 {
+            self.arena = id.arena;
+            self.generation = id.generation;
+        }
         self.len = len;
         Ok(())
     }
@@ -501,6 +503,60 @@ mod tests {
         assert_eq!(range.len(), 1);
         assert_eq!(range.required(0), foreign);
         assert_eq!(range.index_of(ids[1]), None);
+    }
+
+    #[test]
+    fn prefix_seed_and_rejections_preserve_exact_state() {
+        let mut tree = Tree::new();
+        let mut foreign_tree = Tree::new();
+        let first = tree.insert(None, NodeKind::Element).unwrap();
+        let second = tree.insert(None, NodeKind::Element).unwrap();
+        let foreign = foreign_tree.insert(None, NodeKind::Element).unwrap();
+        let foreign_next = foreign_tree.insert(None, NodeKind::Element).unwrap();
+        let mut range = NodeIdRange::default();
+        range.push(first).unwrap();
+        let seed = (range.arena, range.generation);
+        for rejected in [
+            foreign_next,
+            NodeId {
+                generation: second.generation + 1,
+                ..second
+            },
+            NodeId {
+                index: second.index + 1,
+                ..second
+            },
+        ] {
+            let before = (range.arena, range.generation, range.len);
+            assert_eq!(range.push(rejected), Err(TreeError::InvalidNode));
+            assert_eq!((range.arena, range.generation, range.len), before);
+        }
+        range.push(second).unwrap();
+        assert_eq!((range.arena, range.generation), seed);
+        assert_eq!(range.required(0), first);
+        assert_eq!(range.required(1), second);
+        range.clear();
+        range.push(foreign).unwrap();
+        assert_eq!(range.required(0), foreign);
+
+        // A terminal prefix is impractical to allocate. Exercise its checked
+        // pure admission state directly, without touching any Tree storage.
+        range.len = u32::MAX;
+        let terminal = NodeId {
+            arena: range.arena,
+            generation: range.generation,
+            index: u32::MAX,
+        };
+        let before = (range.arena, range.generation, range.len);
+        assert_eq!(range.push(terminal), Err(TreeError::Capacity));
+        assert_eq!((range.arena, range.generation, range.len), before);
+        // Invalid namespace keeps its original precedence over overflow.
+        let wrong_namespace = NodeId {
+            arena: first.arena,
+            ..terminal
+        };
+        assert_eq!(range.push(wrong_namespace), Err(TreeError::InvalidNode));
+        assert_eq!((range.arena, range.generation, range.len), before);
     }
 
     #[test]
