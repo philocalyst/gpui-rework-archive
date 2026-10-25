@@ -652,6 +652,91 @@ fn equal_text_field_rebind_survives_failed_prepare_and_older_ack() {
 }
 
 #[test]
+fn late_observer_same_byte_rebind_noop_and_failed_newer_ack_revoke_old_actions() {
+    let mut model = Inputs::new("same");
+    model.b = Signal::new("same".into());
+    let mut win = Win::recording(model, WindowOptions::default()).unwrap();
+    ack(&mut win);
+    // A provider may have published P before the transition observer activates.
+    let mut cohort = Cohort::default();
+    cohort.refresh(&win).unwrap();
+    let input = target(&win, 1);
+    let retired = native_id(&win, &cohort, input);
+    let base = win.accessibility_state().unwrap();
+    let root = win.inspect().unwrap().nodes[0].target.unwrap();
+    win.set_property(
+        root,
+        crate::property::TRANSFORM,
+        crate::property::Contribution::Set(crate::Affine::translation(1., 0.)),
+    )
+    .unwrap();
+    win.update(|model| model.rebind = true).unwrap();
+    let eligible = win.with_scene(|_, token| token).unwrap();
+    assert!(win.snapshot().unwrap().prepared_epoch.is_some());
+    win.accessibility_observe(true).unwrap();
+    // A is registered but has no destinations after the same-byte B rebind.
+    // This must use the generic unchanged publication protocol, not a color slot.
+    win.set(Inputs::A, "same".into()).unwrap();
+    assert_eq!(win.with_scene(|_, token| token).unwrap(), eligible);
+    assert_eq!(win.accessibility_state().unwrap(), base);
+    assert!(
+        win.set_property(
+            root,
+            crate::property::TRANSFORM,
+            crate::property::Contribution::Set(crate::Affine::scale(0., 1.)),
+        )
+        .is_err()
+    );
+    assert!(win.set(Inputs::A, "same".into()).is_err());
+    let old_ack = win.presented(eligible).unwrap();
+    assert!(old_ack.presentation_epoch < old_ack.source_epoch);
+    let acknowledged = win.accessibility_state().unwrap();
+    assert!(win.accessibility_delta(base, acknowledged).is_none());
+    cohort.refresh(&win).unwrap();
+    assert!(cohort.target(&win, retired).is_err());
+    let unqualified = native_id(&win, &cohort, input);
+    assert!(!cohort.qualified());
+    assert!(cohort.target(&win, unqualified).is_err());
+
+    win.set_property(
+        root,
+        crate::property::TRANSFORM,
+        crate::property::Contribution::Set(crate::Affine::IDENTITY),
+    )
+    .unwrap();
+    ack(&mut win);
+    cohort.refresh(&win).unwrap();
+    assert!(cohort.qualified());
+    let current = native_id(&win, &cohort, input);
+    assert_ne!(current, retired);
+    assert_ne!(current, unqualified);
+    let covered = win.accessibility_state().unwrap();
+    win.set(Inputs::A, "same".into()).unwrap();
+    let next = win.accessibility_state().unwrap();
+    assert_eq!(win.accessibility_delta(covered, next), Some(&[][..]));
+    cohort
+        .update_delta(&win, win.accessibility_delta(covered, next).unwrap())
+        .unwrap();
+    assert_eq!(native_id(&win, &cohort, input), current);
+    assert!(cohort.target(&win, retired).is_err());
+
+    let (mut ingress, receiver) = Ingress::channel(None);
+    ingress.request_initial_tree();
+    for (id, value) in [(retired, "stale mutation"), (current, "accepted current")] {
+        ingress.do_action(request(
+            accesskit::Action::SetValue,
+            id,
+            ActionData::Value(value.into()),
+        ));
+    }
+    let result = drain_actions(&ingress, &receiver, &cohort, &mut win).unwrap();
+    assert!(matches!(result[0], Some(Err(Error::StaleTarget))));
+    assert!(result[1].as_ref().unwrap().is_ok());
+    assert_eq!(win.root().unwrap().a.as_str(), "same");
+    assert_eq!(win.root().unwrap().b.as_str(), "accepted current");
+}
+
+#[test]
 fn cold_unqualified_publication_recovers_after_same_byte_empty_frontier_repair() {
     let mut win = Win::recording(Inputs::new("same"), WindowOptions::default()).unwrap();
     ack(&mut win);
