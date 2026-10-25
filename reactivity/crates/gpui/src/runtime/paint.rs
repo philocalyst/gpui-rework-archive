@@ -287,11 +287,14 @@ mod tests {
             WindowOptions { size: [32, 32], ..Default::default() },
         ).unwrap();
         let before = win.with_scene(|scene, token| {
-            (token, scene.paint_bank().iter().map(|color| color.working().map(f32::to_bits)).collect::<Vec<_>>())
+            (token, scene.paint_bank().map(|paint| (paint.value().working().map(f32::to_bits), paint.shared(), paint.rectangle())).collect::<Vec<_>>())
         }).unwrap();
         let mut foreign = Canvas::recording(32, 32, Default::default()).unwrap();
         let black = gpui_canvas::PaintColor::new(Color::BLACK);
-        let invalid = (0..8).map(|_| foreign.paint_slot(black).unwrap()).last().unwrap();
+        let mut invalid = foreign.paint_slot(black).unwrap();
+        for _ in 1..8 {
+            invalid = foreign.paint_slot(black).unwrap();
+        }
         let mut runtime = win.runtime_mut().unwrap();
         let (_, slot) = runtime.styles.shared_paint(0, false).unwrap();
         let slot = slot.expect("bound emitted background");
@@ -302,7 +305,7 @@ mod tests {
         assert!(!runtime.finish_color_slots(edits).unwrap());
         drop(runtime);
         let after = win.with_scene(|scene, token| {
-            (token, scene.paint_bank().iter().map(|color| color.working().map(f32::to_bits)).collect::<Vec<_>>())
+            (token, scene.paint_bank().map(|paint| (paint.value().working().map(f32::to_bits), paint.shared(), paint.rectangle())).collect::<Vec<_>>())
         }).unwrap();
         assert_eq!(after, before);
     }
