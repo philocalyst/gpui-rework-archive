@@ -893,7 +893,7 @@ mod tests {
 
 #[cfg(test)]
 mod integrated_cross_product_tests {
-    use super::LayoutNodes;
+    use super::{LayoutNodes, NodeKind};
     // Private version additionally proves the retained-layout and current-bit path activated.
     use crate::{ItemKey, ItemSource, ListId, PresentationToken, WindowOptions, prelude::*};
     const LIST: ListId = ListId::new(7);
@@ -944,6 +944,44 @@ mod integrated_cross_product_tests {
         let pixels=win.with_pixels(|p,_,_|p.to_vec()).unwrap();
         fresh.with_pixels(|p,_,_|assert_eq!(pixels,p)).unwrap();
     }
+    // Observe actual current runtime description/viewport state without fabricating
+    // a plan or forcing rebuild. Equal predecessor payload values are not ruled out.
+    fn current_viewport_and_every_layout_roundtrip(win: &Win<Page>) {
+        let rt = win.runtime().unwrap();
+        assert!(matches!(&rt.layout_nodes, LayoutNodes::Edited(_)));
+        assert!(rt.has_lists());
+        assert!(!rt.viewports.is_empty());
+        let (identity, list) = rt.list_by_id(LIST).expect("current real list viewport");
+        assert_eq!(list.identity, identity);
+        assert_eq!(list.viewport.len, 8);
+        assert_eq!(list.viewport.viewport_height, 72.);
+        assert!(!list.viewport.visible_range.is_empty());
+        assert!(!list.viewport.realized_range.is_empty());
+        assert!(list.viewport.realized_rows > 0);
+        let list_index = rt.by_identity.required(identity);
+        assert_eq!(rt.nodes[list_index].identity(), identity);
+        assert_eq!(rt.nodes[list_index].kind(), NodeKind::List);
+        assert!(rt.nodes[list_index].links.viewport_ancestor());
+        assert!(rt.nodes[list_index].links.viewport_subtree());
+        let mut realized = 0;
+        for (&row_identity, row) in &rt.list_rows {
+            if row.list != LIST { continue; }
+            realized += 1;
+            assert!(list.viewport.realized_range.contains(&(row.index as usize)));
+            let index = rt.by_identity.required(row_identity);
+            assert_eq!(rt.nodes[index].identity(), row_identity);
+            assert_eq!(rt.nodes[index].kind(), NodeKind::ListItem);
+            assert!(rt.nodes[index].links.viewport_ancestor());
+        }
+        assert_eq!(realized, list.viewport.realized_rows);
+        assert_eq!(rt.layout_nodes.len(), rt.nodes.len());
+        assert_eq!(rt.layout.tree().len(), rt.nodes.len());
+        for index in 0..rt.nodes.len() {
+            let complete_handle = rt.layout_nodes.required(index);
+            assert!(rt.layout.tree().contains(complete_handle));
+            assert_eq!(rt.layout_nodes.index_of(complete_handle), Some(index));
+        }
+    }
     #[test]
     fn retained_layout_capability_and_inverse_survive_the_full_integrated_cross_product() {
         let mut win=Win::recording(Page::new(1,false,Affine::IDENTITY),WindowOptions {
@@ -971,6 +1009,7 @@ mod integrated_cross_product_tests {
         assert_eq!(win.list_item(pane,ItemKey::new(1)).unwrap(),first);
         assert_eq!(win.list_item(pane,ItemKey::new(2)).unwrap(),second);
         exact_cold_rows_and_pixels(&mut win,1,true,Affine::IDENTITY);
+        current_viewport_and_every_layout_roundtrip(&win);
         win.reset_counters().unwrap();
         let changed=win.set(Page::HOVER,2).unwrap();
         assert_eq!(changed.changed_nodes,2);
@@ -990,6 +1029,7 @@ mod integrated_cross_product_tests {
             assert!(!rt.nodes[index].links.viewport_ancestor());
             assert!(!rt.nodes[index].links.viewport_subtree());
         }
+        current_viewport_and_every_layout_roundtrip(&win);
         win.set(Page::POPUP,map).unwrap();
         assert_eq!(win.counters().descriptions,0);
         assert!(win.counters().paint_passes>0);
@@ -998,6 +1038,7 @@ mod integrated_cross_product_tests {
         assert_eq!(win.list_item(pane,ItemKey::new(1)).unwrap(),first);
         assert_eq!(win.list_item(pane,ItemKey::new(2)).unwrap(),second);
         win.reset_counters().unwrap();
+        current_viewport_and_every_layout_roundtrip(&win);
         win.set(Page::HOVER,1).unwrap();
         assert_eq!(win.counters().paint_passes,0);
         ack(&mut win);exact_cold_rows_and_pixels(&mut win,1,false,map);
