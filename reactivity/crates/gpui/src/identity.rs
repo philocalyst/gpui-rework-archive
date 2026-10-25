@@ -1,11 +1,7 @@
 //! Window-qualified, never-reused retained identities need no capability table.
 use serde::Serialize;
-use std::{
-    num::NonZeroU64,
-    sync::atomic::{AtomicU64, Ordering},
-};
-
-static NEXT_WINDOW: AtomicU64 = AtomicU64::new(1);
+use std::num::NonZeroU64;
+use gpui_reactivity_core::change::FrameIssuer;
 
 /// A process-local site capability. IDs are checked monotonic counters; restore
 /// mints a new window namespace. Inspection serialization cannot restore a live
@@ -22,32 +18,28 @@ pub struct Target {
 }
 
 pub(crate) struct Sites {
-    window: NonZeroU64,
+    issuer: FrameIssuer,
 }
 impl Sites {
     pub(crate) fn new() -> Self {
-        let next = NEXT_WINDOW
-            .try_update(Ordering::Relaxed, Ordering::Relaxed, |value| {
-                value.checked_add(1)
-            })
-            .expect("window namespace exhausted");
-        Self {
-            window: NonZeroU64::new(next).expect("window namespaces start at one"),
-        }
+        Self { issuer: FrameIssuer::new().expect("window namespace exhausted") }
     }
+    pub(crate) fn issuer(&self) -> &FrameIssuer { &self.issuer }
+    pub(crate) fn issuer_mut(&mut self) -> &mut FrameIssuer { &mut self.issuer }
+
     pub(crate) fn namespace(&self) -> NonZeroU64 {
-        self.window
+        self.issuer.owner()
     }
     pub(crate) fn target(&self, identity: u64) -> Target {
         Target {
-            window: self.window,
+            window: self.namespace(),
             identity: NonZeroU64::new(identity).expect("retained identities start at one"),
         }
     }
     /// Namespace check only. The owning runtime must also check logical validity
     /// and its current identity map before dispatching through this stamp.
     pub(crate) fn resolve(&self, target: Target) -> Option<u64> {
-        (target.window == self.window).then_some(target.identity.get())
+        (target.window == self.namespace()).then_some(target.identity.get())
     }
 }
 
@@ -63,7 +55,8 @@ mod tests {
         let foreign = Sites::new();
         assert_eq!(foreign.resolve(target), None);
         assert_ne!(foreign.target(42), target);
-        assert_eq!(std::mem::size_of::<Sites>(), 8);
+        assert_eq!(std::mem::size_of::<Sites>(), std::mem::size_of::<FrameIssuer>());
+        eprintln!("CANONICAL_ISSUER_HEADER sites={} prior_sites=8", std::mem::size_of::<Sites>());
         assert_eq!(std::mem::size_of::<Target>(), 16);
         assert_eq!(std::mem::size_of::<Option<Target>>(), 16);
     }

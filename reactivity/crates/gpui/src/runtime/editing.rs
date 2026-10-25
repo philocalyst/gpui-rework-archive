@@ -193,8 +193,10 @@ impl<M: View + 'static> Runtime<M> {
             state.selection = selection;
             state.preferred_x = preferred_x;
             self.dirty |= changed;
+            if changed { self.record_decoration(self.nodes[index].identity()); }
             return changed;
         }
+        let previous = self.metadata.as_ref().and_then(|m| m.editing.as_ref()).and_then(|e| e.logical.as_ref()).map(|s| s.identity);
         let text = node.text_slot().get(&self.texts).unwrap();
         let next = LogicalSelection {
             identity: node.identity(),
@@ -208,13 +210,15 @@ impl<M: View + 'static> Runtime<M> {
             .editing
             .get_or_insert_with(Default::default)
             .logical = Some(next);
+        if let Some(previous) = previous { self.record_decoration(previous); }
+        self.record_decoration(self.nodes[index].identity());
         self.dirty = true;
         true
     }
 
     pub(super) fn clear_editing(&mut self) -> bool {
         let composition = self.cancel_ime();
-        let Some(_) = self
+        let Some(previous) = self
             .metadata
             .as_mut()
             .and_then(|metadata| metadata.editing.as_mut())
@@ -222,6 +226,7 @@ impl<M: View + 'static> Runtime<M> {
         else {
             return composition;
         };
+        self.record_decoration(previous.identity);
         self.dirty = true;
         true
     }
@@ -351,6 +356,9 @@ impl<M: View + 'static, L: LaneSet<M>> RuntimeMut<'_, M, L> {
         };
         self.runtime.source_epoch = epoch;
         self.runtime.counters.source_operations += 1;
+        for target in [previous, self.runtime.focused].into_iter().flatten() {
+            if let Some(identity) = self.runtime.sites.resolve(target) { self.runtime.record_decoration(identity); }
+        }
         self.runtime.dirty = true;
         self.present()
     }

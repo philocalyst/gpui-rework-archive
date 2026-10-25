@@ -509,6 +509,13 @@ impl fmt::Display for BindError {
 }
 impl std::error::Error for BindError {}
 
+/// Live-owner observation metadata only. Never retained in Canvas/P/C or used
+/// as a semantic/render identity. Signal address distinguishes safe projector
+/// retargets with equal local revisions; no stored pointer is dereferenced.
+#[cfg(feature = "source-observation-experiment")]
+pub(crate) enum ObservationSnapshot { Untracked, Registered(Vec<(FieldId, Revision, usize)>) }
+#[cfg(feature = "source-observation-experiment")]
+impl ObservationSnapshot { pub(crate) fn fields(&self) -> usize { match self {Self::Untracked=>0,Self::Registered(fields)=>fields.len()} } }
 /// A rejected edit owns the submitted payload, so callers can report or retry
 /// without reconstructing it. Validation never mutates a source revision.
 #[derive(Clone, Debug, PartialEq, Eq)]
@@ -972,6 +979,35 @@ impl<M> Sources<M> {
             .find(|field| field.id() == id)
             .map(|field| field.as_ref())
             .ok_or(BindError::UnknownField(id))
+    }
+    #[cfg(feature = "source-observation-experiment")]
+    fn observation_stamp(&self, model: &M, id: FieldId) -> Result<(Revision, usize), BindError> {
+        let signal = self.signal(model, id)?;
+        let revision = self.revision(model, id)?;
+        let identity = signal as *const dyn ErasedSignal as *const () as usize;
+        let again = self.signal(model, id)? as *const dyn ErasedSignal as *const () as usize;
+        if again != identity || self.revision(model, id)? != revision { return Err(BindError::ProjectionMismatch(id)); }
+        Ok((revision, identity))
+    }
+    #[cfg(feature = "source-observation-experiment")]
+    pub(crate) fn observe(&self, model: &M, fields: Option<&[FieldId]>, limit: usize) -> Result<ObservationSnapshot, BindError> {
+        let Some(fields) = fields else { return Ok(ObservationSnapshot::Untracked); };
+        if fields.len() > limit || fields.len() > self.len() { return Ok(ObservationSnapshot::Untracked); }
+        let mut observed = Vec::with_capacity(fields.len());
+        for &field in fields {
+            let (revision, identity) = self.observation_stamp(model, field)?;
+            if revision.get() == u32::MAX { return Ok(ObservationSnapshot::Untracked); }
+            observed.push((field, revision, identity));
+        }
+        Ok(ObservationSnapshot::Registered(observed))
+    }
+    #[cfg(feature = "source-observation-experiment")]
+    pub(crate) fn observation_current(&self, model: &M, observed: &ObservationSnapshot) -> bool {
+        match observed {
+            ObservationSnapshot::Untracked => false,
+            ObservationSnapshot::Registered(fields) => fields.iter().all(|&(field, revision, identity)|
+                revision.get() != u32::MAX && self.observation_stamp(model, field).is_ok_and(|current| current == (revision,identity))),
+        }
     }
     pub fn revision(&self, model: &M, id: FieldId) -> Result<Revision, BindError> {
         if id.scope() == 0 {
@@ -1652,5 +1688,35 @@ mod component_tests {
             Sources::new().component(misplaced).validate(&mut model),
             Err(BindError::NonLocalDeclaration(id))
         );
+    }
+}
+
+#[cfg(all(test, feature = "source-observation-experiment"))]
+mod observation_tests {
+    use super::*;
+    use std::cell::Cell;
+    struct Model { left: Signal<u32>, right: Signal<u32>, right_selected: Cell<bool> }
+    const INPUT: Source<Model,u32> = Source::new(FieldId::new(901),"observed",
+        |m| if m.right_selected.get() {&m.right} else {&m.left},
+        |m| if m.right_selected.get() {&mut m.right} else {&mut m.left});
+    #[test]
+    fn registered_observation_reuses_existing_revision_and_live_projector_incarnation() {
+        let mut model=Model {left:Signal::new(1),right:Signal::new(1),right_selected:Cell::new(false)};
+        let sources=Sources::new().field(INPUT);sources.validate(&mut model).unwrap();
+        let fields=[INPUT.id()];
+        let first=sources.observe(&model,Some(&fields),8).unwrap();
+        assert!(sources.observation_current(&model,&first));
+        *model.left+=1;
+        assert!(!sources.observation_current(&model,&first));
+        *model.right+=1; // Equal local revision does not identify a different signal.
+        let current=sources.observe(&model,Some(&fields),8).unwrap();
+        assert!(sources.observation_current(&model,&current));
+        model.right_selected.set(true);
+        assert!(!sources.observation_current(&model,&current));
+        let retired:Sources<Model>=Sources::new();
+        assert!(!retired.observation_current(&model,&current),"removed registration is not a permanently stable watch");
+        let bounded=sources.observe(&model,Some(&fields),0).unwrap();
+        assert!(!sources.observation_current(&model,&bounded),"optional proof capacity falls back untracked");
+        assert!(sources.observation_current(&model,&sources.observe(&model,Some(&[]),0).unwrap()));
     }
 }

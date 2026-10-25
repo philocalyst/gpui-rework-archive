@@ -1,11 +1,11 @@
 //! PUBLIC source-only regression proposal; genuine 64MiB aggregate limit.
 //! Allocates ~64.012MiB immutable gradient words once. No fault state fabrication.
-use gpui::{Error, Extend, Gradient, GradientGeometry, GradientStop, Interpolation,
+use gpui::{AlphaMode, Image, ImageProfile, image, Error, Extend, Gradient, GradientGeometry, GradientStop, Interpolation,
     ItemKey, ItemSource, ListId, PresentationToken, Role, WindowOptions, prelude::*,
     property::BACKGROUND};
 const LIST: ListId = ListId::new(93);
 const SIZE: [u32; 2] = [32, 32];
-struct Page { gradients: Vec<Gradient>, over_budget_row: bool }
+struct Page { gradients: Vec<Gradient>, safe_gradient: Gradient, safe_image: Image, over_budget_row: bool }
 impl ItemSource for Page {
     fn len(&self) -> usize { 2 }
     fn key(&self, index: usize) -> ItemKey { ItemKey::new(index as u64 + 1) }
@@ -15,7 +15,7 @@ impl ItemSource for Page {
     fn row(&self, index: usize) -> El<'_> {
         if index == 1 && self.over_budget_row {
             column(self.gradients.iter().map(|gradient| div().size(1).bg(gradient)))
-        } else { div().name("safe").size(4).bg(Color::BLACK) }
+        } else { div().name("safe").size(4).bg(&self.safe_gradient).child(image(&self.safe_image).size(2)) }
     }
 }
 impl View for Page {
@@ -26,6 +26,11 @@ fn ack(win: &mut Win<Page>) { let t=token(win);win.presented(t).unwrap(); }
 fn packed(win: &mut Win<Page>) -> Vec<u32> {
     let mut words=vec![0xdecafbad; SIZE[0] as usize*SIZE[1] as usize];
     assert_eq!(win.render_bgrx(&mut words).unwrap(),token(win)); words
+}
+fn safe_gradient() -> Gradient {
+    Gradient::new(GradientGeometry::Linear { start: Point::default(), end: Point { x: 4., y: 0. } },
+        &[GradientStop::new(0., Color::BLACK), GradientStop::new(1., Color::WHITE)],
+        Extend::Pad, Interpolation::LinearSrgb).unwrap()
 }
 fn gradients() -> Vec<Gradient> {
     let stops: Vec<_>=(0..4096).map(|index|GradientStop::new(
@@ -45,11 +50,12 @@ fn gradients() -> Vec<Gradient> {
 }
 #[test]
 fn late_scroll_resource_error_keeps_old_complete_output_but_revokes_broken_working_index() {
-    let mut win=Win::recording(Page {gradients:gradients(),over_budget_row:true},
+    let mut win=Win::recording(Page {gradients:gradients(),safe_gradient:safe_gradient(),safe_image:Image::rgba8(2,2,ImageProfile::Srgb,AlphaMode::Straight,vec![255;16].into_boxed_slice()).unwrap(),over_budget_row:true},
         WindowOptions {size:SIZE,..Default::default()}).unwrap();
     ack(&mut win);
     let pane=win.list(LIST).unwrap();
     let safe=win.role(Role::Generic).name("safe").one().unwrap();
+    assert_eq!(win.with_scene(|scene,_|scene.images().count()).unwrap(),1);
     let old_token=token(&win);let old_p=win.snapshot().unwrap().nodes;
     let old_words=packed(&mut win);let old_viewport=win.list_state(pane).unwrap();
     // Before-destructive-phase rejection must retain usable old target authority.
@@ -61,6 +67,7 @@ fn late_scroll_resource_error_keeps_old_complete_output_but_revokes_broken_worki
     // Row1 is source-valid (<300 nodes/depth5), but its distinct gradients exceed
     // the aggregate limit AFTER destructive logical reconciliation begins.
     assert!(matches!(win.scroll_to_index(pane,1),Err(Error::ResourceLimit)));
+    assert_eq!(win.with_scene(|scene,_|scene.images().count()).unwrap(),1, "old C keeps its image despite logical image-bank replacement");
     assert_eq!(token(&win),old_token);
     assert_eq!(win.snapshot().unwrap().nodes,old_p);
     assert_eq!(packed(&mut win),old_words);

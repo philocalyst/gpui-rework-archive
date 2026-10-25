@@ -258,6 +258,9 @@ impl<M: View + 'static> Runtime<M> {
                 .unwrap()
                 .shaped = None;
             self.layout_dirty.insert(self.nodes[index].identity());
+            changes::record(&mut self.changes, self.sites.namespace(), self.nodes[index].identity,
+                change_model::Facets::one(change_model::Facet::TextSource), change_model::Scope::Site,
+                change_model::Support::Pending, change_model::Support::Pending);
         }
         self.dirty = true;
     }
@@ -396,6 +399,11 @@ impl<M: View + 'static, L: LaneSet<M>> Win<M, L> {
         session: &mut ImeSession,
         event: ImeEvent<'_>,
     ) -> Result<Commit, Error> {
+        // Context rejection precedes caller-owned session consumption. Legacy
+        // closed/poisoned stream-consumption semantics remain unchanged.
+        if self.inner.as_deref().is_some_and(|runtime| matches!(runtime.accounting, gpui_reactivity_core::resource::WindowAccounting::Scoped(_))) {
+            drop(self.runtime_mut()?);
+        }
         let ending = matches!(event, ImeEvent::Cancel | ImeEvent::Disabled);
         let stamp = if ending {
             session.stamp.take()

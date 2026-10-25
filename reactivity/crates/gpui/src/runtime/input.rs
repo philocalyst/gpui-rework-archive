@@ -135,6 +135,11 @@ impl<M: View + 'static, L: LaneSet<M>> Win<M, L> {
         session: &mut PointerSession,
         event: PointerEvent,
     ) -> Result<Commit, Error> {
+        // Context rejection precedes caller-owned session consumption. Legacy
+        // closed/poisoned stream-consumption semantics remain unchanged.
+        if self.inner.as_deref().is_some_and(|runtime| matches!(runtime.accounting, gpui_reactivity_core::resource::WindowAccounting::Scoped(_))) {
+            drop(self.runtime_mut()?);
+        }
         // Consume first, including on a closed/poisoned owner or failed hit.
         // A failed release must never be replayable against a newer sheet.
         let pressed = if matches!(event, PointerEvent::Move(_)) {

@@ -247,6 +247,7 @@ impl<M: View + 'static, L: LaneSet<M>> Win<M, L> {
             runtime,
             lanes,
             deferred: false,
+            resources: None,
         }
         .deliver(&mut applied, budget);
         if result.is_err() {

@@ -410,6 +410,11 @@ impl<M: View + 'static> Runtime<M> {
             crate::property::HEIGHT.set(&mut after, Some(height))?;
             if !styles::exact_eq(&before, &after) {
                 self.styles.set(index, after, self.nodes.len());
+                let mut facets = change_model::Facets::default();
+                if before.width != after.width { facets = facets.union(change_model::Facets::one(change_model::Facet::WidthConstraint)); }
+                if before.height != after.height { facets = facets.union(change_model::Facets::one(change_model::Facet::HeightConstraint)); }
+                changes::record(&mut self.changes, self.sites.namespace(), self.nodes[index].identity,
+                    facets, change_model::Scope::Site, change_model::Support::Pending, change_model::Support::Pending);
                 self.layout_dirty.insert(self.nodes[index].identity());
                 self.dirty = true;
             }
@@ -543,6 +548,9 @@ impl<M: View + 'static> Runtime<M> {
             .get_mut(&mut self.texts)
             .expect("fixed inspector text slot");
         if replace_caption(text, value) {
+            changes::record(&mut self.changes, self.sites.namespace(), self.nodes[index].identity,
+                change_model::Facets::one(change_model::Facet::TextSource), change_model::Scope::Site,
+                change_model::Support::Pending, change_model::Support::Pending);
             self.dirty = true;
             // Description may have shifted logical preorder while the layout
             // mapping still names its predecessor. Queue the actual logical
@@ -569,6 +577,9 @@ impl DisplayCaptions {
         texts: &mut [Option<TextSite>],
         layout: &mut LayoutTree,
         layout_nodes: &LayoutNodes,
+        journal: &mut change_model::Journal,
+        owner: NonZeroU64,
+        nodes: &[Node],
     ) -> Result<(), Error> {
         let values = if let Some(node) = candidate.iter().find(|n| n.identity == self.identity) {
             let b = node.bounds;
@@ -601,7 +612,11 @@ impl DisplayCaptions {
             if text.value.as_ref() != value {
                 text.value = value.into();
                 text.shaped = None;
-                layout.mark_dirty(layout_nodes.required(self.panel + field.offset()))?;
+                let index = self.panel + field.offset();
+                changes::record(journal, owner, nodes[index].identity,
+                    change_model::Facets::one(change_model::Facet::TextSource), change_model::Scope::Site,
+                    change_model::Support::Pending, change_model::Support::Pending);
+                layout.mark_dirty(layout_nodes.required(index))?;
             }
         }
         Ok(())

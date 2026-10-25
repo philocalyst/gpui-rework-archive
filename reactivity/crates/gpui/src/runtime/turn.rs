@@ -9,6 +9,7 @@ impl<M: View + 'static> Runtime<M> {
     /// List/ListItem/Scroll ancestry. Ordinary patch and full publication still
     /// perform geometry, clipping, hit, text/resource and accessibility work.
     #[inline(never)]
+    #[cfg(test)]
     fn disjoint_transform_ports(&self, field: FieldId) -> bool {
         if !self.logical_valid || !self.presentation_valid
             || self.dirty || self.topology_changed || self.rebuild_layout
@@ -37,6 +38,7 @@ impl<M: View + 'static> Runtime<M> {
 
 impl<M: View + 'static, L: LaneSet<M>> RuntimeMut<'_, M, L> {
     pub(super) fn deliver(&mut self, applied: &mut usize, budget: usize) -> Result<Commit, Error> {
+        self.admit_resources()?;
         self.live()?;
         let epoch = self
             .source_epoch
@@ -163,6 +165,7 @@ impl<M: View + 'static, L: LaneSet<M>> RuntimeMut<'_, M, L> {
                 // old P/C without authorizing stale current identity lookups.
                 self.logical_valid = !scroll.is_empty() && was_valid && self.logical_valid;
                 if !self.logical_valid {
+                    self.runtime.changes.full(gpui_reactivity_core::change::FullReasons::UNKNOWN_DEPENDENCY);
                     self.focused = None;
                 }
                 Err(error)
@@ -194,6 +197,7 @@ impl<M: View + 'static, L: LaneSet<M>> RuntimeMut<'_, M, L> {
         edit: impl FnOnce(&mut M, &Sources<M>, &mut L) -> Result<(), Error>,
         editing: EditingIntent,
     ) -> Result<Commit, Error> {
+        self.admit_resources()?;
         self.live()?;
         let epoch = self
             .source_epoch
@@ -281,22 +285,19 @@ impl<M: View + 'static, L: LaneSet<M>> RuntimeMut<'_, M, L> {
         let result = match exact {
             Some(field) => {
                 self.runtime.counters.exact_updates += 1;
-                let realize = self.has_lists()
-                    && self.fanout.get(&field).is_some_and(|fanout| {
-                        fanout.all_destinations().any(|(destination, _, _)| {
-                            destination.property().is_some_and(|id| {
-                                id.info().impact != crate::property::Impact::Paint
-                            })
-                        })
-                    });
-                // Do not re-describe every realized list row merely because an
-                // unrelated sibling popover changed its direct transform.
-                let realize = realize && !self.runtime.disjoint_transform_ports(field);
+                // Source sinks record ordinary typed input facts. Intrinsic
+                // template consumers, not interaction names/ancestry, decide
+                // whether logical realization is required after patching.
                 match catch_unwind(AssertUnwindSafe(|| {
+                    // Preserve legacy observation boundaries from ACTUAL typed
+                    // installed sinks, never transport outcome/case names.
+                    let observe_untracked = self.runtime.fanout.get(&field).is_some_and(|fanout|
+                        fanout.all_destinations().any(|(destination, _, _)| destination.property()
+                            .is_some_and(|property| property.info().impact != crate::property::Impact::Paint)));
                     let semantic = self.runtime.patch_admitted(field, !self.deferred)?;
                     // Ordinary retained trees patch directly. Mixed virtual-list
                     // windows still need their list realization boundary.
-                    if realize && self.dirty {
+                    if self.dirty && self.runtime.requires_realization(observe_untracked)? {
                         self.describe(false)?;
                         Ok(PatchOutcome::Visual)
                     } else {

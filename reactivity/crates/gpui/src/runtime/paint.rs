@@ -132,10 +132,35 @@ impl<M: View + 'static> Runtime<M> {
             window: self.sites.namespace(),
             sequence,
         };
+        let stamp = self.change_stamp(token);
         let Ok(plan) = self.canvas.prepare_slots(edits.as_slice()) else {
             return Ok(false);
         };
-        let damage = plan.commit();
+        {
+            let Ok(witness) = plan.prepared_mutation() else { return Ok(false); };
+            if Some(witness.base()) != self.changes.base() { return Ok(false); }
+            // These owners come from the SAME checked Canvas bank/actual changed
+            // slots, never caller Paint annotations or source fanout guesses.
+            for slot in witness.changed_slots() {
+                let Some(users) = witness.actual_users(slot) else { return Ok(false); };
+                for site in users {
+                    self.changes.record(change_model::Change { site, facets: change_model::Facets::one(change_model::Facet::Paint),
+                        scope: change_model::Scope::Site, before: change_model::Support::Pending, after: change_model::Support::Pending });
+                }
+            }
+        }
+        let closed = changes::take_or_close(&mut self.pending_closure, &self.dependencies, self.pending_dependencies.as_ref(), &self.changes);
+        let pending = self.changes.prepare(stamp).map_err(Error::ChangeProtocol)?.with_closed(closed).map_err(Error::ChangeProtocol)?;
+        let publication = self.sites.issuer_mut().prepare(stamp).map_err(Error::ChangeView)?;
+        let damage = match plan.commit_publication(pending, publication) {
+            Ok(damage) => damage,
+            Err(gpui_canvas::PublicationError::IncompleteChanges
+                | gpui_canvas::PublicationError::NonPaintMutation
+                | gpui_canvas::PublicationError::UncoveredPaint
+                | gpui_canvas::PublicationError::Allocation) => return Ok(false),
+            Err(error) => return Err(Error::Publication(error)),
+        };
+        self.dependencies.rebase(stamp.to);
         #[cfg(feature = "native-core")]
         self.styles.record_slot_transition(
             self.latest_token.expect("complete predecessor has a token"),

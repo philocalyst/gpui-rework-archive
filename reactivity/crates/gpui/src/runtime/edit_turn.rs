@@ -30,8 +30,19 @@ pub struct EditTurn<'a, M: View + 'static, L: LaneSet<M> = ()> {
     runtime: RuntimeMut<'a, M, L>,
 }
 impl<M: View + 'static, L: LaneSet<M>> Win<M, L> {
+    /// Borrow the App/event-loop context for every admission and the one finish
+    /// barrier. A scoped window never downgrades to the legacy unaccounted path.
+    pub fn edit_turn_with_resources<'a>(&'a mut self, resources: &'a mut gpui_reactivity_core::resource::ResourceContext) -> Result<EditTurn<'a, M, L>, Error> {
+        let mut runtime = self.runtime_borrow()?;
+        runtime.resources = Some(resources);
+        runtime.admit_resources()?;
+        runtime.live()?;
+        runtime.deferred = true;
+        Ok(EditTurn { runtime })
+    }
     pub fn edit_turn(&mut self) -> Result<EditTurn<'_, M, L>, Error> {
         let mut runtime = self.runtime_mut()?;
+        runtime.admit_resources()?;
         runtime.live()?;
         runtime.deferred = true;
         Ok(EditTurn { runtime })
@@ -94,6 +105,18 @@ impl<M: View + 'static, L: LaneSet<M>> EditTurn<'_, M, L> {
     }
 }
 impl<M: View + 'static, L: LaneSet<M>> RuntimeMut<'_, M, L> {
+    pub(super) fn admit_resources(&mut self) -> Result<(), Error> {
+        if matches!(self.runtime.accounting, gpui_reactivity_core::resource::WindowAccounting::Unaccounted) && self.resources.is_some() {
+            // Accounting is fixed before initial mount; a later turn cannot
+            // retroactively claim its already-created unaccounted resources.
+            return Err(Error::Resource(gpui_reactivity_core::resource::ResourceError::Unaccounted));
+        }
+        if let gpui_reactivity_core::resource::WindowAccounting::Scoped(_) = self.runtime.accounting {
+            let context = self.resources.as_deref_mut().ok_or(Error::Resource(gpui_reactivity_core::resource::ResourceError::Unaccounted))?;
+            context.ledger_for(self.runtime.accounting, self.runtime.sites.issuer()).map_err(Error::Resource)?;
+        }
+        Ok(())
+    }
     // This shadows Runtime::present only for an explicitly borrowed turn. All
     // ordinary Win/delivery borrows use deferred=false. Logical editing and
     // inspector admission remain ordered before the optional publication.
@@ -103,7 +126,7 @@ impl<M: View + 'static, L: LaneSet<M>> RuntimeMut<'_, M, L> {
             self.runtime.refresh_inspector(false)?;
             Ok(self.runtime.commit())
         } else {
-            self.runtime.present()
+            self.runtime.present_with_resources(self.resources.as_deref_mut())
         }
     }
     pub(super) fn set_source<T: 'static>(

@@ -32,6 +32,14 @@ impl ListId {
 /// runtime checks that agreement for every realized key and requested anchor.
 /// No source reference or row description is retained after the owner turn.
 pub trait ItemSource {
+    /// Opt-in complete registered source/template read set. None preserves the
+    /// legacy externally mutable observation boundary. Some (including empty)
+    /// promises EVERY ordinary item/key/row-template dependency is covered by
+    /// these actual model source fields, or immutable until a coarse owner edit.
+    /// Interior mutations bypassing Signal revision invalidate this promise.
+    /// This is explicit producer evidence, NOT automatic dependency discovery.
+    #[cfg(feature = "source-observation-experiment")]
+    fn observation_dependencies(&self) -> Option<&[crate::FieldId]> { None }
     fn len(&self) -> usize;
     fn is_empty(&self) -> bool {
         self.len() == 0
@@ -108,6 +116,8 @@ pub(crate) struct ListSpec<'a> {
     pub map: Option<RowMap>,
 }
 pub(crate) struct ListPlan {
+    #[cfg(feature = "source-observation-experiment")]
+    pub observation: crate::source::ObservationSnapshot,
     pub viewport: ListViewport,
     pub keys: Vec<ItemKey>,
     pub anchor: Option<(ItemKey, f64)>,

@@ -54,6 +54,14 @@ use editing::EditingIntent;
 pub use text_geometry::TextGeometry;
 mod identity_index;
 mod layout_nodes;
+mod changes;
+#[cfg(feature = "retained-text")]
+mod artifacts;
+#[cfg(feature = "retained-text")]
+mod text_resources;
+#[cfg(all(test, feature = "retained-text"))]
+mod retained_text_tests;
+use gpui_reactivity_core::change as change_model;
 use layout_nodes::LayoutNodes;
 mod image;
 mod siblings;
@@ -132,6 +140,11 @@ pub enum Error {
     DepthLimit { node: usize },
     ResourceLimit,
     EpochExhausted,
+    ChangeProtocol(change_model::PrepareError),
+    Dependency(change_model::FullReasons),
+    Resource(gpui_reactivity_core::resource::ResourceError),
+    ChangeView(change_model::ViewError),
+    Publication(gpui_canvas::PublicationError),
     Binding(BindError),
     MapStorage { size: usize, alignment: usize },
     MapInput,
@@ -151,6 +164,13 @@ impl std::fmt::Display for Error {
     }
 }
 impl std::error::Error for Error {}
+#[cfg(feature = "retained-text")]
+impl From<text_resources::TextResourceError> for Error {
+    fn from(error: text_resources::TextResourceError) -> Self {
+        match error { text_resources::TextResourceError::Resource(error) => Self::Resource(error), text_resources::TextResourceError::Canvas(error) => Self::Canvas(error) }
+    }
+}
+
 impl From<crate::QuestionFault> for Error {
     fn from(error: crate::QuestionFault) -> Self {
         Self::Question(error)
@@ -342,6 +362,8 @@ impl Snapshot {
 /// placement checks its exact width before retaining C/P geometry. Description
 /// moves surviving identities and removed sites drop their glyph buffers.
 struct Shaped {
+    #[cfg(feature = "retained-text")]
+    input: Option<artifacts::ShapeInputs>,
     width: Option<u32>,
     layout: TextLayout,
 }
@@ -759,7 +781,7 @@ impl TextSite {
         {
             let layout =
                 service.shape_interactive(display.unwrap_or(&self.value), font_size, width)?;
-            self.shaped = Some(Shaped { width: key, layout });
+            self.shaped = Some(Shaped { width: key, layout, #[cfg(feature = "retained-text")] input: None });
         }
         Ok(&self.shaped.as_ref().unwrap().layout)
     }
@@ -1168,6 +1190,13 @@ struct Runtime<M> {
     next_identity: u64,
     focused: Option<Target>,
     sites: Sites,
+    changes: change_model::Journal,
+    accounting: gpui_reactivity_core::resource::WindowAccounting,
+    #[cfg(feature = "retained-text")]
+    artifacts: artifacts::ArtifactStore,
+    dependencies: change_model::Dependencies,
+    pending_dependencies: Option<change_model::Dependencies>,
+    pending_closure: Option<change_model::Invalidated>,
     overrides: Overrides,
     metadata: Option<Box<Metadata>>,
     viewports: BTreeMap<ViewportKey, ViewportState>,
@@ -1235,6 +1264,7 @@ struct RuntimeMut<'a, M: View + 'static, L: LaneSet<M>> {
     runtime: &'a mut Runtime<M>,
     lanes: &'a mut L,
     deferred: bool,
+    resources: Option<&'a mut gpui_reactivity_core::resource::ResourceContext>,
 }
 impl<M: View + 'static, L: LaneSet<M>> std::ops::Deref for RuntimeMut<'_, M, L> {
     type Target = Runtime<M>;
@@ -1313,6 +1343,12 @@ impl<M: View + 'static> Win<M> {
     }
     /// Native/backend path: command recording, no CPU framebuffer. Initial S0
     /// has no presented authority until the adapter acknowledges its token.
+    /// Explicit App/event-loop accounting context, admitted before initial text
+    /// preparation. Subsequent mutations require `edit_turn_with_resources`.
+    /// The window retains only its scope witness and immutable resource leases.
+    pub fn recording_with_resources(model: M, options: WindowOptions, resources: &mut gpui_reactivity_core::resource::ResourceContext) -> Result<Self, Error> {
+        Self::mount_text_lanes_with_resources(model, (), options, false, 1., false, None, Some(resources))
+    }
     pub fn recording(model: M, options: WindowOptions) -> Result<Self, Error> {
         Self::recording_scaled(model, options, 1.0)
     }
@@ -1371,6 +1407,12 @@ impl<M: View + 'static, L: LaneSet<M>> Win<M, L> {
         )
     }
     pub(crate) fn mount_text_lanes(
+        model: M, lanes: L, options: WindowOptions, automatic_presentation: bool,
+        scale_factor: f32, inspector: bool, font: Option<gpui_canvas::FontFace>,
+    ) -> Result<Self, Error> {
+        Self::mount_text_lanes_with_resources(model, lanes, options, automatic_presentation, scale_factor, inspector, font, None)
+    }
+    fn mount_text_lanes_with_resources(
         model: M,
         lanes: L,
         options: WindowOptions,
@@ -1378,6 +1420,7 @@ impl<M: View + 'static, L: LaneSet<M>> Win<M, L> {
         scale_factor: f32,
         inspector: bool,
         font: Option<gpui_canvas::FontFace>,
+        mut resources: Option<&mut gpui_reactivity_core::resource::ResourceContext>,
     ) -> Result<Self, Error> {
         // Until the full Win exists, this ordinary field-ordered value closes
         // every receiver before model destruction on ANY preparation failure.
@@ -1393,7 +1436,11 @@ impl<M: View + 'static, L: LaneSet<M>> Win<M, L> {
         // These constructors run while PendingMount still owns the model and
         // receiver order, including checked process-namespace exhaustion.
         let sites = Sites::new();
+        let accounting = resources.as_deref().map_or(gpui_reactivity_core::resource::WindowAccounting::Unaccounted,
+            |context| gpui_reactivity_core::resource::WindowAccounting::Scoped(context.scope(sites.issuer())));
         let layout = LayoutTree::new();
+        let journal = change_model::Journal::new(sites.namespace(), MAX_NODES);
+        let dependencies = change_model::Dependencies::new(MAX_NODES * change_model::Phase::ALL.len());
         let runtime = Runtime {
             model: pending.model,
             sources,
@@ -1407,6 +1454,13 @@ impl<M: View + 'static, L: LaneSet<M>> Win<M, L> {
             next_identity: 1,
             focused: None,
             sites,
+            changes: journal,
+            accounting,
+            #[cfg(feature = "retained-text")]
+            artifacts: artifacts::ArtifactStore::new(MAX_NODES),
+            dependencies,
+            pending_dependencies: None,
+            pending_closure: None,
             overrides: Overrides::default(),
             metadata: inspector.then(|| {
                 Box::new(Metadata {
@@ -1457,7 +1511,8 @@ impl<M: View + 'static, L: LaneSet<M>> Win<M, L> {
             lanes: pending.lanes,
             inner: Some(Box::new(runtime)),
         };
-        let mut runtime = window.runtime_mut()?;
+        let mut runtime = window.runtime_borrow()?;
+        runtime.resources = resources.as_deref_mut();
         runtime.describe(true)?;
         runtime.present()?;
         if runtime.lanes.start_questions() {
@@ -1475,6 +1530,10 @@ impl<M: View + 'static, L: LaneSet<M>> Win<M, L> {
         let text = runtime.text.get_or_insert_with(Default::default);
         text.system = Some(TextSystem::from_font(font.clone()));
         text.font = Some(font);
+        // The legacy font owner is scene-wide and has not yet been replaced by
+        // scoped immutable font ResourceId reverse edges. Never issue a clean
+        // logical closure for this otherwise unjournaled source-policy change.
+        runtime.changes.full(change_model::FullReasons::SCENE);
         for site in runtime.texts.iter_mut().flatten() {
             site.shaped = None;
         }
@@ -1483,10 +1542,18 @@ impl<M: View + 'static, L: LaneSet<M>> Win<M, L> {
         runtime.present()
     }
     fn runtime_mut(&mut self) -> Result<RuntimeMut<'_, M, L>, Error> {
+        let mut runtime = self.runtime_borrow()?;
+        runtime.admit_resources()?;
+        Ok(runtime)
+    }
+    // Callback-free access to already accepted C/P (ACK, raster/readback, loss).
+    // Admission paths must use runtime_mut or attach+validate an explicit context.
+    fn runtime_borrow(&mut self) -> Result<RuntimeMut<'_, M, L>, Error> {
         Ok(RuntimeMut {
             runtime: self.inner.as_deref_mut().ok_or(Error::Closed)?,
             lanes: &mut self.lanes,
             deferred: false,
+            resources: None,
         })
     }
     fn runtime(&self) -> Result<&Runtime<M>, Error> {
@@ -1545,7 +1612,7 @@ impl<M: View + 'static, L: LaneSet<M>> Win<M, L> {
     /// Acknowledge only after the backend's actual submit/present succeeded.
     /// An older coherent candidate remains eligible if a newer preparation failed.
     pub fn presented(&mut self, token: PresentationToken) -> Result<Commit, Error> {
-        let mut runtime = self.runtime_mut()?;
+        let mut runtime = self.runtime_borrow()?;
         runtime.live()?;
         runtime.acknowledge(token)
     }
@@ -1553,7 +1620,7 @@ impl<M: View + 'static, L: LaneSet<M>> Win<M, L> {
     /// Commands, diagnostic geometry and current token stay available for redraw;
     /// only a subsequent actual presentation acknowledgement restores authority.
     pub fn presentation_lost(&mut self) -> Result<(), Error> {
-        let mut runtime = self.runtime_mut()?;
+        let mut runtime = self.runtime_borrow()?;
         runtime.live()?;
         runtime.presentation_valid = false;
         Ok(())
@@ -1576,13 +1643,18 @@ impl<M: View + 'static, L: LaneSet<M>> Win<M, L> {
         validate_scale(size, scale_factor)?;
         runtime.requested_size = size;
         runtime.requested_scale_factor = scale_factor;
+        // Output viewport/scale is a scene-global input. Until it has a typed
+        // GlobalDependency closure, require complete canonical/output admission.
+        // Unversioned ItemSource remains externally mutable between descriptions,
+        // so the existing resize realization fallback is preserved below.
+        runtime.changes.full(change_model::FullReasons::SCENE);
         runtime.dirty = true;
         runtime.changed_nodes = 0;
         if let Some(node) = runtime.nodes.first() {
             let identity = node.identity();
             runtime.layout_dirty.insert(identity);
         }
-        if !runtime.logical_valid || runtime.has_lists() {
+        if !runtime.logical_valid || !runtime.observations_current()? {
             runtime.describe(false)?;
         }
         runtime.present()
@@ -1690,7 +1762,7 @@ impl<M: View + 'static, L: LaneSet<M>> Win<M, L> {
             .counters
     }
     pub fn reset_counters(&mut self) -> Result<(), Error> {
-        self.runtime_mut()?.counters = Counters::default();
+        self.runtime_borrow()?.counters = Counters::default();
         Ok(())
     }
     pub fn snapshot(&self) -> Result<Snapshot, Error> {
@@ -1885,7 +1957,7 @@ impl<M: View + 'static, L: LaneSet<M>> Win<M, L> {
     /// after mount/resize allocates the optional image. It never acknowledges
     /// native presentation. Optional image allocation failures return Canvas errors.
     pub fn with_pixels<R>(&mut self, read: impl FnOnce(&[u8], u32, u32) -> R) -> Result<R, Error> {
-        let mut runtime = self.runtime_mut()?;
+        let mut runtime = self.runtime_borrow()?;
         let (width, height) = (runtime.canvas.width(), runtime.canvas.height());
         Ok(read(runtime.canvas.try_pixels()?, width, height))
     }
@@ -1893,8 +1965,17 @@ impl<M: View + 'static, L: LaneSet<M>> Win<M, L> {
     /// Words are 0x00RRGGBB; no internal CPU image or extra frame copy is created.
     /// The host must acknowledge the returned token only after its buffer present
     /// succeeds. Rendering here alone cannot restore coordinate authority.
+    /// Borrow accepted canonical C and its exact revisioned mutation/group stream.
+    /// This is NOT an ACK, pixel-buffer age, or permission to reuse stale output.
+    pub fn with_change_scene<R>(&self, read: impl FnOnce(gpui_canvas::CanvasAcceptedSceneView<'_>, PresentationToken) -> R) -> Result<R, Error> {
+        let runtime = self.runtime()?;
+        let token = runtime.latest_token.ok_or(Error::NoPreparedScene)?;
+        let view = runtime.canvas.accepted_scene().map_err(Error::Publication)?;
+        if view.stamp().to.owner != token.window || view.stamp().to.sequence != token.sequence { return Err(Error::ChangeView(change_model::ViewError::Revision)); }
+        Ok(read(view, token))
+    }
     pub fn render_bgrx(&mut self, destination: &mut [u32]) -> Result<PresentationToken, Error> {
-        let mut runtime = self.runtime_mut()?;
+        let mut runtime = self.runtime_borrow()?;
         runtime.live()?;
         let token = runtime.latest_token.ok_or(Error::NoPreparedScene)?;
         runtime.canvas.render_bgrx(destination)?;
@@ -1909,7 +1990,7 @@ impl<M: View + 'static, L: LaneSet<M>> Win<M, L> {
         destination: &mut [u32],
         intervening: Option<DamageRegion>,
     ) -> Result<(PresentationToken, DamageRegion), Error> {
-        let mut runtime = self.runtime_mut()?;
+        let mut runtime = self.runtime_borrow()?;
         runtime.live()?;
         let token = runtime.latest_token.ok_or(Error::NoPreparedScene)?;
         let damage = runtime
@@ -2012,6 +2093,8 @@ impl<M: View + 'static> Runtime<M> {
         readers: &dyn crate::reader::ReaderValues,
         mut property_changed: Option<NonZeroU64>,
     ) -> Result<(), Error> {
+        self.pending_closure = None; // New logical topology/read edges invalidate the cached closure.
+
         let reuse_identities = self.logical_valid;
         // A second unprepared description conservatively takes full rebuild.
         self.layout_edits = None;
@@ -2020,6 +2103,8 @@ impl<M: View + 'static> Runtime<M> {
             self.counters.owner_reruns += 1;
         }
         let mut seen = BTreeSet::new();
+        #[cfg(feature = "source-observation-experiment")]
+        let mut observation_budget = MAX_NODES; // Optional proof metadata shares the admitted node bound.
         let crate::element::Description {
             nodes: mut drafts,
             viewports: viewport_drafts,
@@ -2050,7 +2135,11 @@ impl<M: View + 'static> Runtime<M> {
                 self.overrides.resolve(identity, style)
             });
             let previous = previous.map(|(_, state)| state);
-            list::plan(
+            #[cfg(feature = "source-observation-experiment")]
+            let observation = self.sources.observe(&self.model, source.observation_dependencies(), observation_budget).map_err(|_| ListError::ChangedSource)?;
+            #[cfg(feature = "source-observation-experiment")]
+            { observation_budget -= observation.fields(); }
+            let plan = list::plan(
                 previous,
                 style,
                 source,
@@ -2059,7 +2148,10 @@ impl<M: View + 'static> Runtime<M> {
                     .iter()
                     .find(|request| request.id == id)
                     .map(|request| request.position),
-            )
+            )?;
+            #[cfg(feature = "source-observation-experiment")]
+            let plan = { let mut plan = plan; plan.observation = observation; plan };
+            Ok(plan)
         })?;
         let mut scroll_drafts = Vec::new();
         let list_drafts: Vec<_> = viewport_drafts
@@ -2076,6 +2168,13 @@ impl<M: View + 'static> Runtime<M> {
         // every Scroll has a ScrollDraft, every List has a ListDraft, and
         // ListItem wrappers are created only for such a List. No old-window
         // state is used: insertion/remount/removal selects this mode anew.
+        // Sample the declared read set around the COMPLETE borrowed description.
+        // Untracked sources retain their original pure-during-description check.
+        #[cfg(feature = "source-observation-experiment")]
+        if list_drafts.iter().any(|draft| matches!(&draft.plan.observation, crate::source::ObservationSnapshot::Registered(_))
+            && !self.sources.observation_current(&self.model, &draft.plan.observation)) {
+            return Err(ListError::ChangedSource.into());
+        }
         let prepare_viewport_flags = !list_drafts.is_empty() || !scroll_drafts.is_empty();
         let list_indices: BTreeMap<_, _> = list_drafts
             .iter()
@@ -2297,6 +2396,7 @@ impl<M: View + 'static> Runtime<M> {
         // just as they did when these Node vectors owned routes directly.
         let mut handlers = handlers;
         let mut nodes: Vec<Node> = Vec::with_capacity(drafts.len());
+        let mut next_dependencies = changes::dependency_snapshot(&mut self.pending_dependencies, &self.changes, self.sites.namespace());
         // Retain no holes or visited-site history. Moving TextSite transfers
         // its text lease and glyph Vec header without cloning either.
         let mut texts =
@@ -2369,6 +2469,7 @@ impl<M: View + 'static> Runtime<M> {
                     })
             };
             let consumed = previous_index.is_some_and(|old_index| old[old_index].is_some());
+            let consumed_identity = previous_index.and_then(|old_index| old[old_index].as_ref().map(|node| node.identity));
             let previous = previous_index
                 .and_then(|old_index| old[old_index].take())
                 .filter(|node| {
@@ -2381,6 +2482,14 @@ impl<M: View + 'static> Runtime<M> {
                     retained
                 });
             let retained = previous.is_some();
+            if !retained && let Some(identity) = consumed_identity {
+                changes::record(&mut self.changes, self.sites.namespace(), identity, change_model::Facets::one(change_model::Facet::Topology), change_model::Scope::Subtree, change_model::Support::Pending, change_model::Support::Empty);
+            }
+            let order_changed = previous.as_ref().is_some_and(|node| node.ordinal() != ordinal);
+            let mut mutation = change_model::Facets::default();
+            if !retained { mutation = mutation.union(change_model::Facets::one(change_model::Facet::Topology)); }
+            if order_changed { mutation = mutation.union(change_model::Facets::one(change_model::Facet::Stacking)); }
+
             topology |= !retained || previous_index != Some(index);
             retained_list |= retained && list_indices.contains_key(&index);
             if layout_eligible {
@@ -2410,6 +2519,7 @@ impl<M: View + 'static> Runtime<M> {
                 && old_styles.binding_fields(previous_index.unwrap())
                     != styles.binding_fields(index)
             {
+                mutation = mutation.union(change_model::Facets::one(change_model::Facet::Paint));
                 // Equal current colors do not make two source relationships
                 // interchangeable. Rebind the complete scene before slot edits.
                 self.dirty = true;
@@ -2434,6 +2544,7 @@ impl<M: View + 'static> Runtime<M> {
                 })
                 .copied();
             if next_background != previous_background {
+                mutation = mutation.union(change_model::Facets::one(change_model::Facet::ResourcePixels));
                 node_changed = true;
                 self.dirty = true;
             }
@@ -2468,6 +2579,7 @@ impl<M: View + 'static> Runtime<M> {
                 )
             });
             if previous_image != next_key {
+                mutation = mutation.union(change_model::Facets::one(change_model::Facet::ResourceMetrics));
                 self.layout_dirty.insert(node.identity());
                 self.dirty = true;
                 node_changed = true;
@@ -2493,6 +2605,7 @@ impl<M: View + 'static> Runtime<M> {
             }
             self.counters.destination_compares += 1;
             if site.as_ref().map(|site| site.value.as_ref()) != text.as_deref() {
+                mutation = mutation.union(change_model::Facets::one(change_model::Facet::TextSource));
                 // Brand-new sites initialize their measure during insertion.
                 // Existing measure-kind changes retain the full fallback.
                 self.rebuild_layout |= retained && site.is_some() != text.is_some();
@@ -2522,12 +2635,19 @@ impl<M: View + 'static> Runtime<M> {
             }
             let style = self.overrides.resolve(node.identity(), draft.style);
             if !styles::exact_eq(&previous_style, &style) {
+                mutation = mutation.union(change_model::Facets::one(change_model::Facet::Paint));
                 self.dirty = true;
                 node_changed = true;
             }
             if layout_changed(previous_style, style) {
+                if previous_style.width != style.width { mutation = mutation.union(change_model::Facets::one(change_model::Facet::WidthConstraint)); }
+                if previous_style.height != style.height { mutation = mutation.union(change_model::Facets::one(change_model::Facet::HeightConstraint)); }
+                let mut other = previous_style; other.width = style.width; other.height = style.height; other.font_size = style.font_size;
+                if layout_changed(other, style) { mutation = mutation.union(change_model::Facets::one(change_model::Facet::Layout)); }
                 self.layout_dirty.insert(node.identity());
             }
+            if !changes::same_transform(previous_style.transform, style.transform) { mutation = mutation.union(change_model::Facets::one(change_model::Facet::Transform)); }
+            if previous_style.font_size != style.font_size { mutation = mutation.union(change_model::Facets::one(change_model::Facet::TextPolicy)); }
             if previous_style.font_size != style.font_size
                 && let Some(site) = &mut site
             {
@@ -2584,6 +2704,11 @@ impl<M: View + 'static> Runtime<M> {
                 node_changed = true;
                 property_changed = None;
             }
+            if mutation != change_model::Facets::default() {
+                changes::record(&mut self.changes, self.sites.namespace(), node.identity, mutation, change_model::Scope::Subtree,
+                    if retained { change_model::Support::Pending } else { change_model::Support::Empty }, change_model::Support::Pending);
+            }
+            changes::register_node(&mut next_dependencies, self.sites.namespace(), node.identity, parent_identity, node.text_slot().0 != u32::MAX, node.kind() == NodeKind::List);
             changed += usize::from(node_changed);
             nodes.push(node);
         }
@@ -2604,7 +2729,8 @@ impl<M: View + 'static> Runtime<M> {
             ));
         }
         for (index, node) in old.iter().enumerate() {
-            if node.is_some() {
+            if let Some(node) = node {
+                changes::record(&mut self.changes, self.sites.namespace(), node.identity, change_model::Facets::one(change_model::Facet::Topology), change_model::Scope::Subtree, change_model::Support::Pending, change_model::Support::Empty);
                 changed += 1;
                 if let Some(plan) = &mut layout_edits {
                     plan.retired.push(self.layout_nodes.required(index));
@@ -2654,6 +2780,8 @@ impl<M: View + 'static> Runtime<M> {
             viewports.insert(
                 ViewportKey::List(draft.id),
                 ViewportState::List(ListState {
+                    #[cfg(feature = "source-observation-experiment")]
+                    observation: draft.plan.observation,
                     identity,
                     viewport: draft.plan.viewport,
                     anchor: draft.plan.anchor,
@@ -2784,6 +2912,8 @@ impl<M: View + 'static> Runtime<M> {
                 }
             }
         }
+        next_dependencies.finish(self.nodes.len());
+        self.pending_dependencies = Some(next_dependencies);
         self.logical_valid = true;
         self.prune_focus();
         self.changed_nodes = changed;
@@ -2821,6 +2951,21 @@ impl<M: View + 'static> Runtime<M> {
                 && self.complete_epoch.checked_add(1) == Some(self.source_epoch);
             let change = self.styles.update_color(slot, color);
             self.changed_nodes = change.as_ref().map_or(0, |change| change.users as usize);
+            if self.changed_nodes != 0 {
+                let mut covered = false;
+                if eligible && let Some(slot) = change.as_ref().and_then(|change| change.canvas)
+                    && let Ok(frame) = self.canvas.accepted_scene()
+                    && Some(frame.stamp().to) == self.changes.base()
+                    && let Some(users) = frame.material_users(slot)
+                {
+                    covered = true;
+                    for site in users {
+                        self.changes.record(change_model::Change { site, facets: change_model::Facets::one(change_model::Facet::Paint), scope: change_model::Scope::Site,
+                            before: change_model::Support::Pending, after: change_model::Support::Pending });
+                    }
+                }
+                if !covered { self.changes.full(change_model::FullReasons::UNKNOWN_DEPENDENCY); }
+            }
             self.dirty |= self.changed_nodes != 0;
             if eligible {
                 return Ok(PatchOutcome::Paint(paint::PaintIntent::new(
@@ -2944,6 +3089,13 @@ impl<M: View + 'static> Runtime<M> {
                 }
                 changed
             };
+            if changed {
+                let (facets, scope) = if let Some(id) = destination.property() { changes::property_facets(id) }
+                    else if destination.port() == Port::Visual { (change_model::Facets::one(change_model::Facet::TextSource), change_model::Scope::Site) }
+                    else { (change_model::Facets::one(change_model::Facet::Semantics), change_model::Scope::Site) };
+                self.changes.record(change_model::Change { site: change_model::SiteId::from_monotonic(self.sites.namespace(), node.identity), facets, scope,
+                    before: change_model::Support::Pending, after: change_model::Support::Pending });
+            }
             if changed && last_changed != Some(index) {
                 self.changed_nodes += 1;
                 last_changed = Some(index);
@@ -2984,7 +3136,12 @@ impl<M: View + 'static> Runtime<M> {
         (self.latest_token.is_some() && (!self.presentation_valid || self.prepared.is_some()))
             .then_some(self.complete_epoch)
     }
-    fn present(&mut self) -> Result<Commit, Error> {
+    fn present(&mut self) -> Result<Commit, Error> { self.present_with_resources(None) }
+    fn present_with_resources(&mut self, mut resources: Option<&mut gpui_reactivity_core::resource::ResourceContext>) -> Result<Commit, Error> {
+        if let gpui_reactivity_core::resource::WindowAccounting::Scoped(_) = self.accounting {
+            let context = resources.as_deref_mut().ok_or(Error::Resource(gpui_reactivity_core::resource::ResourceError::Unaccounted))?;
+            context.ledger_for(self.accounting, self.sites.issuer()).map_err(Error::Resource)?;
+        }
         self.reconcile_editing(EditingIntent::None)?;
         self.refresh_inspector(false)?;
         if !self.dirty {
@@ -3005,13 +3162,19 @@ impl<M: View + 'static> Runtime<M> {
             }
             return Ok(self.commit());
         }
-        match catch_unwind(AssertUnwindSafe(|| self.present_inner())) {
+        #[cfg(feature = "retained-text")]
+        self.artifacts.begin();
+        match catch_unwind(AssertUnwindSafe(|| self.present_inner(resources.as_deref_mut()))) {
             Ok(Ok(())) => Ok(self.commit()),
             Ok(Err(error)) => {
+                #[cfg(feature = "retained-text")]
+                self.artifacts.abort();
                 self.rebuild_layout = true;
                 Err(error)
             }
             Err(_) => {
+                #[cfg(feature = "retained-text")]
+                self.artifacts.abort();
                 self.rebuild_layout = true;
                 if let Some(text) = &mut self.text {
                     text.system = None;
@@ -3097,7 +3260,7 @@ impl<M: View + 'static> Runtime<M> {
         self.counters.presentations += u64::from(newly_presented);
         Ok(self.commit())
     }
-    fn present_inner(&mut self) -> Result<(), Error> {
+    fn present_inner(&mut self, resources: Option<&mut gpui_reactivity_core::resource::ResourceContext>) -> Result<(), Error> {
         let list_mode = !self.viewports.is_empty();
         let clip_mode = self
             .metadata
@@ -3105,14 +3268,14 @@ impl<M: View + 'static> Runtime<M> {
             .and_then(|m| m.geometry.as_ref())
             .is_some_and(|geometry| geometry.has_logical_clips());
         if list_mode || clip_mode {
-            self.present_clipped(list_mode, clip_mode)
+            self.present_clipped(list_mode, clip_mode, resources)
         } else {
-            self.present_walk(false, false, None)
+            self.present_walk(false, false, None, resources)
         }
     }
     // Keep the optional inline clip frontier out of the common walk's frame.
     #[inline(never)]
-    fn present_clipped(&mut self, list_mode: bool, clip_mode: bool) -> Result<(), Error> {
+    fn present_clipped(&mut self, list_mode: bool, clip_mode: bool, resources: Option<&mut gpui_reactivity_core::resource::ResourceContext>) -> Result<(), Error> {
         let seed = ClipFrame {
             clip: Rect::default(),
             hit_clip: Rect::default(),
@@ -3121,7 +3284,7 @@ impl<M: View + 'static> Runtime<M> {
             published: Parent::NONE,
         };
         let mut clips = frontier::Frontier::new(seed, usize::from(self.layout_depth));
-        self.present_walk(list_mode, clip_mode, Some(&mut clips))
+        self.present_walk(list_mode, clip_mode, Some(&mut clips), resources)
     }
     #[inline(never)]
     fn present_walk(
@@ -3129,7 +3292,13 @@ impl<M: View + 'static> Runtime<M> {
         list_mode: bool,
         clip_mode: bool,
         mut clips: Option<&mut frontier::Frontier<ClipFrame>>,
+        mut resources: Option<&mut gpui_reactivity_core::resource::ResourceContext>,
     ) -> Result<(), Error> {
+        let closed_dependencies = self.consume_dependencies();
+        #[cfg(feature = "retained-text")]
+        let mut closed_dependencies = closed_dependencies;
+        #[cfg(not(feature = "retained-text"))]
+        let _ = &mut resources;
         let sequence = self.next_presentation;
         let next_sequence = sequence.checked_add(1).ok_or(Error::EpochExhausted)?;
         let token = PresentationToken {
@@ -3252,6 +3421,16 @@ impl<M: View + 'static> Runtime<M> {
         let texts = &mut self.texts;
         let images = &self.images;
         let service = &mut shaper;
+        #[cfg(feature = "retained-text")]
+        let mut resource_reads = change_model::ResourceReadPatch::new(MAX_NODES * change_model::Phase::ALL.len());
+        #[cfg(feature = "retained-text")]
+        let artifacts = &mut self.artifacts;
+        #[cfg(feature = "retained-text")]
+        let accounting = self.accounting;
+        #[cfg(feature = "retained-text")]
+        let issuer = self.sites.issuer();
+        #[cfg(feature = "retained-text")]
+        let resource_baseline = self.pending_dependencies.as_ref().unwrap_or(&self.dependencies);
         let mut measure = |id: NodeId, input: WidthMeasureInput| {
             let index = layout_nodes
                 .index_of(id)
@@ -3263,15 +3442,23 @@ impl<M: View + 'static> Runtime<M> {
             let service = service
                 .as_mut()
                 .expect("measured text has an initialized service");
-            match node.text_slot().get_mut(texts).unwrap().measure_text(
-                service,
-                styles.get(index).font_size,
-                input,
-                composition
-                    .as_ref()
-                    .filter(|(identity, _, _)| *identity == node.identity())
-                    .map(|(_, value, _)| value.as_ref()),
-            ) {
+            let site = node.text_slot().get_mut(texts).unwrap();
+            #[cfg(feature = "retained-text")]
+            let result = if let Some(context) = resources.as_deref_mut() {
+                let source = composition.as_ref().filter(|(identity, _, _)| *identity == node.identity())
+                    .map_or_else(|| site.value.clone(), |(_, value, _)| value.clone());
+                let key = change_model::Artifact { site: change_model::SiteId::from_monotonic(issuer.owner(), node.identity), phase: change_model::Phase::Shape };
+                site.measure_accounted(service, styles.get(index).font_size, input, source, artifacts, context, accounting, issuer, node.text_slot().0 as usize, key)
+                    .map(|(metrics, resource)| { resource_reads.observe_one(resource_baseline, key, resource); metrics })
+                    .map_err(Error::from)
+            } else {
+                site.measure_text(service, styles.get(index).font_size, input,
+                    composition.as_ref().filter(|(identity, _, _)| *identity == node.identity()).map(|(_, value, _)| value.as_ref()))
+            };
+            #[cfg(not(feature = "retained-text"))]
+            let result = site.measure_text(service, styles.get(index).font_size, input,
+                composition.as_ref().filter(|(identity, _, _)| *identity == node.identity()).map(|(_, value, _)| value.as_ref()));
+            match result {
                 Ok(shape) => MeasureOutput {
                     size: Size {
                         width: input.known_dimensions.width.unwrap_or(shape.width),
@@ -3353,7 +3540,9 @@ impl<M: View + 'static> Runtime<M> {
         let mut scene = replacement.as_mut().unwrap_or(&mut self.canvas).stage();
         scene.clear(Color::WHITE);
         self.counters.paint_passes += 1;
+        let mut change_groups = Vec::with_capacity(self.nodes.len());
         for index in 0..self.nodes.len() {
+            let first_draw = scene.draw_count();
             if index == inspector_boundary {
                 inspector_display.as_ref().unwrap().refresh(
                     &presented,
@@ -3361,6 +3550,7 @@ impl<M: View + 'static> Runtime<M> {
                     &mut self.texts,
                     &mut self.layout,
                     &self.layout_nodes,
+                    &mut self.changes, self.sites.namespace(), &self.nodes,
                 )?;
             }
             let layout = self.layout.layout(self.layout_nodes.required(index))?;
@@ -3555,6 +3745,20 @@ impl<M: View + 'static> Runtime<M> {
                 let selection = active_selection
                     .filter(|(identity, _)| *identity == node.identity())
                     .map(|(_, selection)| selection);
+                #[cfg(feature = "retained-text")]
+                let shape = if let Some(context) = resources.as_deref_mut() {
+                    let source = composition.as_ref().filter(|(identity, _, _)| *identity == node.identity())
+                        .map_or_else(|| text.value.clone(), |(_, value, _)| value.clone());
+                    let key = change_model::Artifact { site: change_model::SiteId::from_monotonic(self.sites.namespace(), node.identity), phase: change_model::Phase::Shape };
+                    let (shape, resource) = text.shape_accounted(shaper.as_mut().unwrap(), style.font_size, Some(layout.content_box_width()), source,
+                        &mut self.artifacts, context, self.accounting, self.sites.issuer(), node.text_slot().0 as usize, key).map_err(Error::from)?;
+                    resource_reads.observe_one(self.pending_dependencies.as_ref().unwrap_or(&self.dependencies), key, resource);
+                    shape
+                } else {
+                    text.shape_text(shaper.as_mut().unwrap(), style.font_size, Some(layout.content_box_width()),
+                        composition.as_ref().filter(|(identity, _, _)| *identity == node.identity()).map(|(_, value, _)| value.as_ref()))?
+                };
+                #[cfg(not(feature = "retained-text"))]
                 let shape = text.shape_text(
                     shaper.as_mut().expect("text initialized before layout"),
                     style.font_size,
@@ -3699,6 +3903,12 @@ impl<M: View + 'static> Runtime<M> {
                     },
                 )?;
             }
+            change_groups.push(change_model::GroupSpan {
+                local: node.identity,
+                parent: node.parent().index().map(|parent| parent as u32),
+                draws: u32::try_from(first_draw).map_err(|_| Error::ResourceLimit)?..
+                    u32::try_from(scene.draw_count()).map_err(|_| Error::ResourceLimit)?,
+            });
             if omitted {
                 published.record(index, presented.len(), false);
                 continue;
@@ -3834,18 +4044,35 @@ impl<M: View + 'static> Runtime<M> {
                 })
             })
             .or_else(|| (!geometry_records.is_empty()).then_some(geometry_records));
-        let damage = if self.automatic_presentation {
-            // Automatic headless acknowledgement retains no external surface
-            // to repair. Do not compare commands for an unused capability.
-            scene.commit();
-            DamageRegion::default()
-        } else {
-            scene.commit_with_damage().union(
-                self.prepared
-                    .as_ref()
-                    .map_or(DamageRegion::default(), |prepared| prepared.damage),
-            )
+        let change_stamp = change_model::BatchStamp {
+            from: self.changes.base(), to: change_model::SceneRevision { owner: token.window, sequence: token.sequence },
+            source_epoch: self.source_epoch, snapshot_epoch: token.sequence.get(),
         };
+        #[cfg(feature = "retained-text")]
+        if !resource_reads.covered_by(&closed_dependencies) {
+            closed_dependencies.require_full(change_model::FullReasons::UNKNOWN_DEPENDENCY);
+        }
+        #[cfg(feature = "retained-text")]
+        let resource_publication = self.pending_dependencies.as_mut().unwrap_or(&mut self.dependencies)
+            .prepare_resource_reads(resource_reads).map_err(Error::Dependency)?;
+        let pending_changes = self.changes.prepare(change_stamp).map_err(Error::ChangeProtocol)?.with_closed(closed_dependencies).map_err(Error::ChangeProtocol)?;
+        let publication = self.sites.issuer_mut().prepare(change_stamp).map_err(Error::ChangeView)?;
+        let accepted_groups = change_model::SceneGroups::new(change_stamp.to, self.source_epoch,
+            change_stamp.snapshot_epoch, change_groups, scene.draw_count()).ok_or(Error::ChangeView(change_model::ViewError::Snapshot))?;
+        let committed_damage = scene.commit_publication(pending_changes, publication, accepted_groups).map_err(Error::Publication)?;
+        #[cfg(feature = "retained-text")]
+        resource_publication.commit();
+        #[cfg(feature = "retained-text")]
+        {
+            let owner = self.sites.namespace(); let identities = &self.by_identity; let nodes = &self.nodes;
+            self.artifacts.commit(|key| key.site.owner == owner && key.phase == change_model::Phase::Shape
+                && identities.get(key.site.local.get()).is_some_and(|index| nodes[index].text_slot().0 != u32::MAX));
+        }
+        let damage = if self.automatic_presentation { DamageRegion::default() } else {
+            committed_damage.union(self.prepared.as_ref().map_or(DamageRegion::default(), |prepared| prepared.damage))
+        };
+        if let Some(next) = self.pending_dependencies.take() { self.dependencies = next; }
+        self.dependencies.rebase(change_stamp.to);
         for (&key, state) in &mut self.viewports {
             if let (ViewportKey::Scroll(identity), ViewportState::Scroll(state)) = (key, state)
                 && let Some(offset) = viewport_geometry.offset(identity)
@@ -4056,7 +4283,8 @@ impl<M> Runtime<M> {
     }
 }
 impl<M: View + 'static, L: LaneSet<M>> RuntimeMut<'_, M, L> {
-    fn property_edit_target(&self, target: Target) -> Result<(usize, u64), Error> {
+    fn property_edit_target(&mut self, target: Target) -> Result<(usize, u64), Error> {
+        self.admit_resources()?;
         self.live()?;
         let index = self.resolve_index(target)?;
         let epoch = self
@@ -4088,10 +4316,7 @@ impl<M: View + 'static, L: LaneSet<M>> RuntimeMut<'_, M, L> {
         let changed = self.apply_property_value_at(index, id, contribution)?;
         self.source_epoch = epoch;
         self.counters.source_operations += 1;
-        if id.info().destination == crate::property::PropertyDestination::Style && self.has_lists()
-        {
-            self.describe_with_changed(false, &[], changed)?;
-        }
+        if self.requires_realization(id.info().destination == crate::property::PropertyDestination::Style)? { self.describe_with_changed(false, &[], changed)?; }
         self.present()
     }
     // Shared logical mutation, without source admission or presentation. A
@@ -4112,6 +4337,10 @@ impl<M: View + 'static, L: LaneSet<M>> RuntimeMut<'_, M, L> {
             PropertyDestination::Geometry => self.set_geometry_value(index, id, contribution)?,
             PropertyDestination::Paint => self.set_background_value(index, contribution)?,
         };
+        if changed {
+            let (facets, scope) = changes::property_facets(id);
+            self.record_change(self.nodes[index].identity, facets, scope, change_model::Support::Pending, change_model::Support::Pending);
+        }
         Ok(changed.then_some(self.nodes[index].identity))
     }
     fn set_style_value(
@@ -4137,6 +4366,9 @@ impl<M: View + 'static, L: LaneSet<M>> RuntimeMut<'_, M, L> {
         // Equal Set/Inherit still changes which immutable C paint row this
         // node follows. Rebind C before a later shared-source write can occur.
         runtime.dirty |= relationship_changed;
+        if relationship_changed {
+            runtime.record_change(runtime.nodes[index].identity, change_model::Facets::one(change_model::Facet::Paint), change_model::Scope::Site, change_model::Support::Pending, change_model::Support::Pending);
+        }
         let changed = !styles::exact_eq(&before, &after);
         runtime.changed_nodes = usize::from(changed);
         if changed {

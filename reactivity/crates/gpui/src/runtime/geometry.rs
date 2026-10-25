@@ -351,6 +351,12 @@ impl<M: View + 'static> Runtime<M> {
             let after = geometry.overrides.resolve(node.identity(), declared);
             if !before.same(after) {
                 self.dirty = true;
+                self.changes.record(gpui_reactivity_core::change::Change {
+                    site: gpui_reactivity_core::change::SiteId::from_monotonic(self.sites.namespace(), node.identity),
+                    facets: gpui_reactivity_core::change::Facets::one(gpui_reactivity_core::change::Facet::Clip),
+                    scope: gpui_reactivity_core::change::Scope::Subtree,
+                    before: gpui_reactivity_core::change::Support::Pending, after: gpui_reactivity_core::change::Support::Pending,
+                });
             }
             if after.corner_radius.to_bits() != 0 || after.clip_children {
                 next.push((node.identity(), after));

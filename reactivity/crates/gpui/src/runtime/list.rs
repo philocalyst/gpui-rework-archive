@@ -9,6 +9,8 @@ const MAX_EXTENT: f64 = (1_u64 << 40) as f64;
 const MAX_COORDINATE: f32 = 1_000_000.0;
 
 pub(super) struct ListState {
+    #[cfg(feature = "source-observation-experiment")]
+    pub observation: crate::source::ObservationSnapshot,
     pub identity: u64,
     pub viewport: ListViewport,
     pub anchor: Option<(ItemKey, f64)>,
@@ -116,6 +118,8 @@ pub(super) fn plan(
         .copied()
         .map(|key| (key, offset - start as f64 * row_height));
     Ok(ListPlan {
+        #[cfg(feature = "source-observation-experiment")]
+        observation: crate::source::ObservationSnapshot::Untracked,
         viewport: ListViewport {
             len,
             offset,
