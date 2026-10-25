@@ -188,6 +188,10 @@ pub enum DependencyNode {
     Site(Artifact), Group(GroupId), Resource(crate::resource::ResourceId), Tile(TileId),
     Global { owner: NonZeroU64, kind: GlobalDependency },
 }
+impl From<Artifact> for DependencyNode {
+    fn from(value: Artifact) -> Self { Self::Site(value) }
+}
+
 
 /// Actual sparse reverse consumer edges. Same-site facet closure is implicit;
 /// cross-site layout/placement/clip/resource dependencies are registered explicitly.
