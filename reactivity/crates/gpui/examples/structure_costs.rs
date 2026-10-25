@@ -1,7 +1,7 @@
 //! Cross-framework CPU-scene baseline; no native display or GPU measurements.
 #![allow(dead_code)]
 use gpui::prelude::*;
-use gpui::{FontFace, ItemKey, ItemSource, Key, ListId, TextSelection, uniform_list};
+use gpui::{FontFace, ItemKey, ItemSource, ListId, uniform_list};
 use std::hint::black_box;
 use std::time::Instant;
 
@@ -217,7 +217,7 @@ fn wide(leaves: usize) -> Win<Wide> {
     .unwrap()
 }
 
-fn geometry_signature(window: &Win<Wide>, width: u32) -> serde_json::Value {
+fn geometry_signature(window: &mut Win<Wide>, width: u32) -> serde_json::Value {
     let (leaves, inserted) = window
         .with_model(|model| (model.leaves, model.inserted))
         .unwrap();
@@ -358,11 +358,11 @@ fn topology_costs(mode: &str, leaves: usize, samples: usize, timed: bool) {
         let mut foreign = None;
         for _ in 0..samples {
             let start = timed.then(Instant::now);
-            let window = black_box(wide(leaves));
+            let mut window = black_box(wide(leaves));
             if let Some(start) = start {
                 elapsed.push(start.elapsed().as_nanos() as u64);
             }
-            signatures.push(geometry_signature(&window, 1000));
+            signatures.push(geometry_signature(&mut window, 1000));
             let foreign = foreign.get_or_insert_with(|| wide(1));
             assert_foreign(&window, foreign);
             let start = timed.then(Instant::now);
@@ -375,7 +375,7 @@ fn topology_costs(mode: &str, leaves: usize, samples: usize, timed: bool) {
         let mut window = wide(leaves);
         let foreign = wide(1);
         let mut previous_inserted = None;
-        let mut previous_signature = geometry_signature(&window, 1000);
+        let mut previous_signature = geometry_signature(&mut window, 1000);
         window.reset_counters().unwrap();
         for sample in 0..samples {
             let width = if mode == "resize" && sample % 2 == 0 {
@@ -397,7 +397,7 @@ fn topology_costs(mode: &str, leaves: usize, samples: usize, timed: bool) {
             }
             assert!(commit.presentation_valid);
             assert_eq!(commit.source_epoch, commit.presentation_epoch);
-            let signature = geometry_signature(&window, width);
+            let signature = geometry_signature(&mut window, width);
             if mode == "resize" && leaves > 1 {
                 assert_ne!(
                     signature["samples"][1]["window_bits"][0],
