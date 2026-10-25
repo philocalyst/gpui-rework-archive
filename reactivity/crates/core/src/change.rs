@@ -41,7 +41,7 @@ pub struct BatchStamp {
 #[derive(Clone, Copy, Debug, PartialEq, Eq, PartialOrd, Ord)]
 pub enum Facet {
     Topology, Layout, TextSource, TextPolicy, TextWidth, Paint, Transform,
-    Clip, Stacking, ResourcePixels, ResourceMetrics, Hit, Semantics, WidthConstraint, HeightConstraint,
+    Clip, Stacking, ResourcePixels, ResourceMetrics, Hit, Semantics, WidthConstraint, HeightConstraint, PrimitiveContent,
 }
 #[derive(Clone, Copy, Debug, Default, PartialEq, Eq)]
 pub struct Facets(u16);
@@ -49,6 +49,12 @@ impl Facets {
     pub const fn one(facet: Facet) -> Self { Self(1 << facet as u16) }
     pub const fn union(self, other: Self) -> Self { Self(self.0 | other.0) }
     pub const fn contains(self, facet: Facet) -> bool { self.0 & (1 << facet as u16) != 0 }
+    /// Positive admission schema: future facets are forbidden by default.
+    /// Primitive/overlay edits are NOT material-bank color edits.
+    pub const fn is_material_only(self) -> bool {
+        self.0 & !(Self::one(Facet::Paint).0 | Self::one(Facet::Hit).0 | Self::one(Facet::Semantics).0) == 0
+    }
+
     pub fn phases(self) -> impl Iterator<Item = Phase> {
         Phase::ALL.into_iter().filter(move |phase| {
             use Facet::*;
@@ -57,7 +63,7 @@ impl Facets {
             let measure = geometry || source || self.contains(TextWidth);
             let placement = measure || self.contains(Transform);
             let clip = placement || self.contains(Clip);
-            let lower = clip || self.contains(Paint) || self.contains(Stacking) || self.contains(ResourcePixels);
+            let lower = clip || self.contains(Paint) || self.contains(Stacking) || self.contains(ResourcePixels) || self.contains(PrimitiveContent);
             match phase {
                 Phase::WidthConstraint => self.contains(WidthConstraint),
                 Phase::HeightConstraint => self.contains(HeightConstraint),
@@ -284,6 +290,11 @@ struct ClosureContext { owner: NonZeroU64, from: Option<SceneRevision>, to: Opti
 #[derive(Debug)]
 pub struct Invalidated { full: FullReasons, artifacts: BTreeSet<DependencyNode>, basis: ClosureContext, limit: usize }
 impl Invalidated {
+    pub fn matches_pending(&self, journal: &Journal) -> bool {
+        self.basis.owner == journal.owner && self.basis.from == journal.base
+            && self.basis.to.is_none() && self.basis.facts == Some(journal.mutation)
+            && self.full.union(journal.full) == self.full
+    }
     pub fn full(&self) -> FullReasons { self.full }
     pub fn artifacts(&self) -> &BTreeSet<DependencyNode> { &self.artifacts }
     pub fn merge(&mut self, other: Self) {
@@ -713,6 +724,19 @@ mod tests {
         let mut large = graph.invalidate_pending(&journal); assert!(large.artifacts.len() > 2);
         let small = Invalidated {full:FullReasons::default(),artifacts:BTreeSet::new(),basis:large.basis,limit:2};
         large.merge(small); assert!(large.full.contains(FullReasons::CAPACITY)); assert!(large.artifacts.is_empty());
+    }
+
+    #[test]
+    fn material_admission_excludes_constraints_text_and_primitive_content_by_construction() {
+        assert!(Facets::one(Facet::Paint).union(Facets::one(Facet::Semantics)).is_material_only());
+        for facet in [Facet::Topology,Facet::Layout,Facet::TextSource,Facet::TextPolicy,Facet::TextWidth,
+            Facet::Transform,Facet::Clip,Facet::Stacking,Facet::ResourcePixels,Facet::ResourceMetrics,
+            Facet::WidthConstraint,Facet::HeightConstraint,Facet::PrimitiveContent] {
+            assert!(!Facets::one(Facet::Paint).union(Facets::one(facet)).is_material_only(), "{facet:?}");
+        }
+        let phases = Facets::one(Facet::PrimitiveContent).phases().collect::<Vec<_>>();
+        assert!(phases.contains(&Phase::Primitive)); assert!(phases.contains(&Phase::Raster));
+        assert!(!phases.contains(&Phase::Shape)); assert!(!phases.contains(&Phase::Layout));
     }
 
 }
