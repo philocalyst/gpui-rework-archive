@@ -401,6 +401,71 @@ mod tests {
     }
 
     #[test]
+    fn dropped_turn_then_inspector_selection_resolves_clean_caption_ids_after_topology() {
+        fn unselected() -> Win<Page> {
+            let mut win = Win::recording_with_inspector(
+                Page::new(),
+                WindowOptions { size: [720, 640], ..Default::default() },
+            ).unwrap();
+            acknowledge(&mut win);
+            assert_eq!(win.inspector_selected().unwrap(), None);
+            win
+        }
+        let mut retained = unselected();
+        let mut rebuilt = unselected();
+        let selected = retained.query().text("row 2").one().unwrap();
+        let oracle_selected = rebuilt.query().text("row 2").one().unwrap();
+        let old_handle = layout_id(&retained, selected);
+        let old_token = token(&retained);
+        let old_rows = acknowledged_rows(&retained);
+        for win in [&mut retained, &mut rebuilt] {
+            let mut turn = win.edit_turn().unwrap();
+            turn.update(|model| {
+                model.popup = true;
+                model.row_width = 72.;
+            }).unwrap();
+            // Deliberately retain only the accepted logical prefix. No C was
+            // prepared, and unselected captions still contain initial labels.
+            drop(turn);
+            let runtime = win.runtime().unwrap();
+            assert!(runtime.layout_edits.is_some());
+            assert!(runtime.topology_changed);
+            assert!(runtime.layout_nodes.len() < runtime.nodes.len());
+            let width_caption = runtime.nodes.iter().find(|node| {
+                node.text_slot().get(&runtime.texts)
+                    .is_some_and(|site| site.value.as_ref() == "width")
+            }).expect("unchanged initial inspector width label");
+            assert!(!runtime.layout_dirty.contains(&width_caption.identity()));
+        }
+        assert_eq!(token(&retained), old_token);
+        assert_eq!(acknowledged_rows(&retained), old_rows);
+        rebuilt.runtime_mut().unwrap().runtime.rebuild_layout = true;
+        // This public operation is allowed on a surviving logical target; it
+        // does not require current P. New captions were not dirtied by describe.
+        retained.inspector_select(selected).unwrap();
+        rebuilt.inspector_select(oracle_selected).unwrap();
+        assert_eq!(layout_id(&retained, selected), old_handle);
+        {
+            let actual = retained.runtime().unwrap();
+            let expected = rebuilt.runtime().unwrap();
+            assert_eq!(actual.nodes.len(), expected.nodes.len());
+            for index in 0..actual.nodes.len() {
+                assert_eq!(actual.nodes[index].identity(), expected.nodes[index].identity());
+                assert_eq!(
+                    actual.layout.layout(actual.layout_nodes.required(index)).unwrap(),
+                    expected.layout.layout(expected.layout_nodes.required(index)).unwrap(),
+                );
+            }
+        }
+        assert_eq!(acknowledged_rows(&retained), old_rows);
+        acknowledge(&mut retained);
+        acknowledge(&mut rebuilt);
+        assert_eq!(acknowledged_rows(&retained), acknowledged_rows(&rebuilt));
+        let pixels = retained.with_pixels(|pixels, _, _| pixels.to_vec()).unwrap();
+        rebuilt.with_pixels(|expected, _, _| assert_eq!(pixels, expected)).unwrap();
+    }
+
+    #[test]
     fn mixed_generation_inverse_mapping_rejects_stale_and_foreign_capabilities() {
         let mut tree = LayoutTree::new();
         let removed = tree.insert(None, gpui_reactivity_core::NodeKind::Element, cephal::Style::DEFAULT).unwrap();
