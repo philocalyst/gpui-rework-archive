@@ -2274,10 +2274,7 @@ impl<M: View + 'static> Runtime<M> {
                 keyed_lists.insert((parent, id, node.kind().site_kind()), index);
             }
         }
-        let old_ids = old
-            .iter()
-            .map(|node| node.as_ref().unwrap().identity())
-            .collect::<Vec<_>>();
+        let old_count = old.len();
         // First supported retention cohort: genuinely surviving keyed lists.
         // Unkeyed logical remints still retain their existing Target semantics.
         let layout_eligible = reuse_identities
@@ -2286,6 +2283,11 @@ impl<M: View + 'static> Runtime<M> {
         let mut layout_edits: Option<layout_nodes::EditPlan> = None;
         let mut retained_list = false;
         let next_count = drafts.len();
+        // Identities never repeat. A new preorder equals its predecessor iff
+        // lengths agree and every row reuses that exact predecessor ordinal.
+        // Scope rejection allocates a fresh identity even when the ordinal
+        // matched, so retention is part of this certificate, not just position.
+        let mut topology = old_count != next_count;
         let mut styles = styles::Builder::with_colors(drafts.len(), color_discovery);
         // New captures must drop before remaining old captures on unwind,
         // just as they did when these Node vectors owned routes directly.
@@ -2375,6 +2377,7 @@ impl<M: View + 'static> Runtime<M> {
                     retained
                 });
             let retained = previous.is_some();
+            topology |= !retained || previous_index != Some(index);
             retained_list |= retained && list_indices.contains_key(&index);
             if layout_eligible {
                 if layout_edits.is_none() && (!retained || previous_index != Some(index)) {
@@ -2591,7 +2594,7 @@ impl<M: View + 'static> Runtime<M> {
             }
         }
         image::reconcile(&mut self.images, image_resources);
-        if layout_eligible && layout_edits.is_none() && old_ids.len() != nodes.len() {
+        if layout_eligible && layout_edits.is_none() && old_count != nodes.len() {
             layout_edits = Some(layout_nodes::EditPlan::prefix(
                 &self.layout_nodes, nodes.len(), nodes.len(),
             ));
@@ -2610,11 +2613,6 @@ impl<M: View + 'static> Runtime<M> {
         if let Some(identity) = property_changed {
             changed += usize::from(old[self.by_identity.required(identity.get())].is_none());
         }
-        let topology = old_ids.len() != nodes.len()
-            || old_ids
-                .iter()
-                .zip(&nodes)
-                .any(|(old, new)| *old != new.identity());
         self.topology_changed |= topology;
         self.dirty |= topology;
         let mut viewports = BTreeMap::new();

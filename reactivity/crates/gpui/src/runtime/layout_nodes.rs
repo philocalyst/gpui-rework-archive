@@ -782,6 +782,53 @@ mod tests {
     }
 
     #[test]
+    fn tail_removal_changes_topology_even_when_every_remaining_identity_keeps_its_ordinal() {
+        #[derive(Clone)]
+        struct Tail(Page);
+        impl View for Tail {
+            fn view(&self) -> El<'_> {
+                let mut children = vec![uniform_list(LIST, &self.0, 12).w(120).h(72)];
+                if self.0.popup { children.push(button("tail").size(10)); }
+                column(children)
+            }
+        }
+        let mut model = Page::new();
+        model.popup = true;
+        let mut win = Win::recording(
+            Tail(model), WindowOptions { size: [160, 120], ..Default::default() },
+        ).unwrap();
+        let token = win.with_scene(|_, token| token).unwrap();
+        win.presented(token).unwrap();
+        let tail = win.query().text("tail").one().unwrap();
+        let (old, removed) = {
+            let rt = win.runtime().unwrap();
+            (
+                rt.nodes.iter().map(Node::identity).collect::<Vec<_>>(),
+                rt.layout_nodes.required(rt.by_identity.required(rt.resolve(tail).unwrap())),
+            )
+        };
+        win.update(|model| model.0.popup = false).unwrap();
+        let rt = win.runtime().unwrap();
+        let current: Vec<_> = rt.nodes.iter().map(Node::identity).collect();
+        assert!(current.len() < old.len());
+        assert_eq!(current, old[..current.len()]);
+        assert!(!rt.layout.tree().contains(removed));
+        assert_eq!(rt.layout.tree().len(), rt.nodes.len());
+        assert_layout_adjacency(&win);
+        let token = win.with_scene(|_, token| token).unwrap();
+        win.presented(token).unwrap();
+        let mut cold = Win::with_size(win.root().unwrap().clone(), 160, 120).unwrap();
+        let normalize = |win: &Win<Tail>| {
+            let mut nodes = win.snapshot().unwrap().nodes;
+            for node in &mut nodes { node.identity = 0; node.target = None; }
+            nodes
+        };
+        assert_eq!(normalize(&win), normalize(&cold));
+        let pixels = win.with_pixels(|pixels, _, _| pixels.to_vec()).unwrap();
+        cold.with_pixels(|expected, _, _| assert_eq!(pixels, expected)).unwrap();
+    }
+
+    #[test]
     fn retained_topology_storage_ledger_prices_headers_and_whole_popup_turns() {
         eprintln!(
             "RETAINED_TOPOLOGY_HEADERS runtime={} map={} edited={} plan={} node_id={}",
