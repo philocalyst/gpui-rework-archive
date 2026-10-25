@@ -130,6 +130,10 @@ dependencies = [
 ]
 
 [[package]]
+name = "cephal"
+version = "0.1.1"
+
+[[package]]
 name = "cfg-if"
 version = "1.0.5"
 source = "registry+https://github.com/rust-lang/crates.io-index"
@@ -347,6 +351,13 @@ dependencies = [
 
 [[package]]
 name = "gpui_reactivity_core"
+version = "0.1.0"
+dependencies = [
+ "cephal",
+]
+
+[[package]]
+name = "gpui_reactivity_coverage_lab"
 version = "0.1.0"
 
 [[package]]
