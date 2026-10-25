@@ -117,18 +117,23 @@ impl<M: View + 'static> Runtime<M> {
             }
             plan.nodes[index] = Some(id);
         }
-        let mut following = BTreeMap::new();
+        // Logical parents are already checked dense preorder indices. Reserve
+        // bucket zero for the forest roots and index each parent at index + 1.
+        // Unlike a BTreeMap this temporary has no per-parent allocation or
+        // comparison walk; complete NodeId authority remains in LayoutNodes.
+        let mut following = vec![None; plan.nodes.len() + 1];
         for index in (0..plan.nodes.len()).rev() {
             let id = plan.nodes[index].expect("every admitted row now has a handle");
             let parent_index = self.nodes[index].parent().index();
             let parent = parent_index.map(|parent| plan.nodes[parent].unwrap());
-            let before = following.get(&parent_index).copied();
+            let bucket = parent_index.map_or(0, |parent| parent + 1);
+            let before = following[bucket];
             let current_parent = self.layout.tree().parent(id).map_err(LayoutError::from)?;
             let current_next = self.layout.tree().next_sibling(id).map_err(LayoutError::from)?;
             if current_parent != parent || current_next != before {
                 self.layout.reparent_before(id, parent, before)?;
             }
-            following.insert(parent_index, id);
+            following[bucket] = Some(id);
         }
         let ordered = plan.nodes.into_iter().map(|id| id.unwrap()).collect();
         self.layout_nodes = LayoutNodes::edited(ordered)?;
@@ -197,7 +202,22 @@ mod tests {
         for node in &mut nodes { node.target = None; }
         nodes
     }
+    fn assert_layout_adjacency(win: &Win<Page>) {
+        let runtime = win.runtime().unwrap();
+        // Include the root forest and leaf buckets, not only parents that
+        // happen to receive a moved child. Distinct nested parents must never
+        // share a following-sibling anchor.
+        for parent in std::iter::once(None).chain((0..runtime.nodes.len()).map(Some)) {
+            let expected: Vec<_> = runtime.nodes.iter().enumerate()
+                .filter(|(_, node)| node.parent().index() == parent)
+                .map(|(index, _)| runtime.layout_nodes.required(index)).collect();
+            let handle = parent.map(|index| runtime.layout_nodes.required(index));
+            let actual: Vec<_> = runtime.layout.tree().children(handle).unwrap().collect();
+            assert_eq!(actual, expected, "exact children for logical parent {parent:?}");
+        }
+    }
     fn assert_cold(win: &mut Win<Page>) {
+        assert_layout_adjacency(win);
         let mut cold = Win::with_size(win.root().unwrap().clone(), 160, 120).unwrap();
         let normalize = |win: &Win<Page>| {
             let mut nodes = acknowledged_rows(win);
@@ -341,6 +361,8 @@ mod tests {
         let overlap_handle = layout_id(&retained, overlap);
 
         fn assert_pair(retained: &mut Win<Page>, rebuilt: &mut Win<Page>) {
+            assert_layout_adjacency(retained);
+            assert_layout_adjacency(rebuilt);
             {
                 let actual = retained.runtime().unwrap();
                 let expected = rebuilt.runtime().unwrap();
@@ -516,6 +538,29 @@ mod tests {
         assert!(win.runtime().unwrap().layout_edits.is_none());
         acknowledge(&mut win);
         assert_cold(&mut win);
+
+    #[test]
+    fn repeated_popup_and_nested_keyed_reorders_keep_exact_parent_buckets() {
+        let mut win = window();
+        let pane = win.list(LIST).unwrap();
+        let pane_handle = layout_id(&win, pane);
+        let handles: Vec<_> = (1..=4).map(|key| {
+            let target = row_target(&win, key);
+            (target, layout_id(&win, target))
+        }).collect();
+        for step in 0..8 {
+            win.update(|model| {
+                model.popup = step % 2 == 0;
+                model.rows.rotate_left(1);
+            }).unwrap();
+            assert_eq!(layout_id(&win, pane), pane_handle);
+            for &(target, handle) in &handles {
+                assert_eq!(layout_id(&win, target), handle);
+            }
+            assert_layout_adjacency(&win);
+            acknowledge(&mut win);
+            assert_cold(&mut win);
+        }
     }
 
     #[test]
