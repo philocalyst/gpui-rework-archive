@@ -139,3 +139,111 @@ fn unchanged_publication_preserves_pending_failed_and_lost_cohorts() {
     assert_eq!(ack.presentation_epoch, equal.source_epoch);
     assert!(ack.presentation_valid);
 }
+
+struct Input {
+    value: Signal<String>,
+}
+impl Input {
+    const VALUE: Source<Self, String> =
+        Source::new(FieldId::new(1), "value", |m| &m.value, |m| &mut m.value);
+}
+impl View for Input {
+    fn sources() -> Sources<Self> {
+        Sources::new().direct(Self::VALUE)
+    }
+    fn view(&self) -> El<'_> {
+        text_input(&self.value).name("input").w(60).h(24)
+    }
+}
+#[test]
+fn equal_text_output_still_publishes_the_changed_caret() {
+    use gpui::TextSelection;
+    let range = |a, b| TextSelection::from_bytes(a, b).unwrap();
+    let mut win = Win::recording(
+        Input {
+            value: Signal::new("abc".into()),
+        },
+        WindowOptions {
+            size: [64, 64],
+            ..Default::default()
+        },
+    )
+    .unwrap();
+    win.presented(win.with_scene(|_, token| token).unwrap())
+        .unwrap();
+    let input = win.input();
+    win.focus(input).unwrap();
+    win.select(input, range(0, 2)).unwrap();
+    win.presented(win.with_scene(|_, token| token).unwrap())
+        .unwrap();
+    let previous = win.with_scene(|_, token| token).unwrap();
+    let frozen_selection = |win: &Win<Input>| {
+        let mut value = None;
+        win.visit(|part| {
+            if part.target() == input {
+                value = part.selection();
+            }
+        })
+        .unwrap();
+        value.unwrap()
+    };
+    assert_eq!(frozen_selection(&win), range(0, 2));
+    win.reset_counters().unwrap();
+    win.type_text(input, "ab").unwrap();
+    assert_eq!(win.root().unwrap().value.as_str(), "abc");
+    assert_eq!(win.selection(input).unwrap(), range(2, 2));
+    assert_eq!(frozen_selection(&win), range(0, 2));
+    let next = win.with_scene(|_, token| token).unwrap();
+    assert_ne!(
+        previous, next,
+        "equal bytes do not prove unchanged caret pixels"
+    );
+    win.presented(next).unwrap();
+    assert_eq!(frozen_selection(&win), range(2, 2));
+    assert_eq!(win.counters().text_promotions, 0);
+    assert_eq!(win.counters().paint_passes, 1);
+    let mut oracle = Win::with_size(
+        Input {
+            value: Signal::new("abc".into()),
+        },
+        64,
+        64,
+    )
+    .unwrap();
+    oracle.focus(oracle.input()).unwrap();
+    oracle.select(oracle.input(), range(2, 2)).unwrap();
+    let pixels = win.with_pixels(|p, _, _| p.to_vec()).unwrap();
+    oracle.with_pixels(|p, _, _| assert_eq!(pixels, p)).unwrap();
+}
+#[test]
+fn inspector_enabled_noops_preserve_full_publication_parity() {
+    let options = WindowOptions {
+        size: [640, 480],
+        ..Default::default()
+    };
+    let mut exact = Win::with_inspector(Panel::new(), options).unwrap();
+    let mut coarse = Win::with_inspector(Panel::new(), options).unwrap();
+    let a = exact.query().name("surface").one().unwrap();
+    let b = coarse.query().name("surface").one().unwrap();
+    exact.inspector_select(a).unwrap();
+    coarse.inspector_select(b).unwrap();
+    for i in 0..3 {
+        exact.set(Panel::WIDTH, 40.).unwrap();
+        coarse.update(|m| *m.width = 40.).unwrap();
+        exact.set(Panel::UNUSED, i).unwrap();
+        coarse.update(|m| *m.unused = i).unwrap();
+        let mut x = exact.snapshot().unwrap().nodes;
+        let mut y = coarse.snapshot().unwrap().nodes;
+        for row in &mut x {
+            row.target = None;
+        }
+        for row in &mut y {
+            row.target = None;
+        }
+        assert_eq!(x, y);
+        assert_eq!(exact.inspector_selected().unwrap(), Some(a));
+        assert_eq!(coarse.inspector_selected().unwrap(), Some(b));
+        let pixels = exact.with_pixels(|p, _, _| p.to_vec()).unwrap();
+        coarse.with_pixels(|p, _, _| assert_eq!(pixels, p)).unwrap();
+    }
+}
