@@ -451,6 +451,10 @@ impl ResourceContext {
     pub fn new(limits: ResourceLimits) -> Result<Self, ResourceError> {
         Ok(Self { ledger: ResourceLedger::new(limits)? })
     }
+    /// App/event-loop supplied maintenance work limit. No implicit full scan or
+    /// default budget; zero means zero visits. Immutable leases remain guarded.
+    pub fn maintain(&mut self,budget:usize)->Result<usize,ResourceError> {self.ledger.reap(budget)}
+    pub fn stats(&self)->ResourceStats {self.ledger.stats()}
     pub fn id(&self) -> ResourceContextId { ResourceContextId { owner: self.ledger.domain.owner() } }
     pub fn scope(&self, issuer: &crate::change::FrameIssuer) -> WindowResourceScope {
         WindowResourceScope { context: self.id(), window: issuer.owner() }
@@ -509,6 +513,17 @@ mod context_tests {
         assert!(weak.upgrade().is_some()); // Not a type-enforced shutdown/fence protocol.
         drop(queued);assert!(weak.upgrade().is_none());
     }
+    #[test]
+    fn app_maintenance_is_explicit_bounded_and_does_not_retire_queued_payload() {
+        let mut context=ResourceContext::new(limits()).unwrap();let window=FrameIssuer::new().unwrap();let scope=context.scope(&window);
+        let front=admit(&mut context,scope,&window,Arc::new([4u8;8]));let queue=front.render_lease().unwrap();drop(front);
+        let before=context.stats().reap_visits;assert_eq!(context.maintain(0).unwrap(),0);assert_eq!(context.stats().reap_visits,before);
+        assert!(context.maintain(1).unwrap()<=1);assert_eq!(context.stats().retained_payload_bytes,8);
+        drop(queue); // MODEL: actual backend retires its lease after real completion.
+        for _ in 0..4 {assert!(context.maintain(1).unwrap()<=1);}
+        assert_eq!(context.stats().retained_payload_bytes,0);
+    }
+
 }
 
 /// Adoption-facing window reservation. Site and scene-global origins are bound

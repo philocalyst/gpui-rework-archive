@@ -8,6 +8,7 @@ struct ParagraphOwner { range:paragraph::Paragraph, owner:parley::ShapedParagrap
 /// output is transient. This resource is source-side only, never renderable.
 pub struct ShapeResource { source:String, paragraphs:Vec<ParagraphOwner>, size:f32, ids:[Option<u64>;3], faces:FontSet }
 /// The common derived-artifact store owns BOTH payload and accounting lease.
+#[derive(Clone)]
 pub struct ShapeArtifact { resource:Arc<ShapeResource>, lease:ResourceLease }
 impl ShapeArtifact {
     pub fn validate_request(text:&str,size:f32,width:Option<f32>)->Result<(),Error> {validate(text,size,width)}
@@ -101,6 +102,10 @@ fn plan<'a,const M:bool>(planner:&mut Planner<'_>,text:&str,size:f32,width:Optio
     let mut names=FAMILIES.map(|name|FontFamilyName::Named(name.into()));let mut count=1;
     for (index,family) in FAMILIES.iter().enumerate().skip(1) { if needed&(1<<(index-1))!=0 { names[count]=FontFamilyName::Named((*family).into());count+=1; } }
     let mut capture=Capture::new(tx,artifact,text,planner);
+    // A new retained source must not inherit an unrelated site's oversized
+    // ordinary scratch capacities after quota decline. No shaping is rerun.
+    // Source capture already moves every admitted paragraph out of this slot.
+    if capture.is_some() {planner.layout=parley::Layout::default();}
     let mut lower=lowering::Lowering::new();
     for paragraph in paragraph::ranges(text) {
         let content=&text[paragraph.content.clone()];
@@ -202,7 +207,7 @@ mod tests {
         assert!(retained>baseline,"reuse is not intrinsically a retained-memory win");
         assert!(!std::ptr::eq(a.glyphs.as_ptr(),b.glyphs.as_ptr()));
         assert!(!std::ptr::eq(a.glyphs.as_ptr(),a2.glyphs.as_ptr()));
-        eprintln!("CAP_RESOURCE_RETENTION scope=declared_ownership_model_not_actual_live_union baseline_packed_after_service_drop={} raw_exclusive={} retained_font_wrappers={} baseline_unique_font_payload={} retained_unique_font_payload={} raw_plus_packed={} held_initial_a_b_a_payload={} exclusions=arc_headers,allocator_headers,ledger_metadata,store_index,planner_scratch,lower_internal_peak,raster_scene",baseline,raw,wrappers,baseline_fonts,retained_fonts,retained,raw+wrappers+packed_payload(&initial)+packed_payload(&a)+packed_payload(&b)+packed_payload(&a2)+retained_fonts);
+        eprintln!("CAP_RESOURCE_RETENTION scope=declared_ownership_model_not_actual_live_union baseline_packed_after_service_drop={} raw_exclusive={} retained_font_wrappers={} baseline_unique_font_payload={} retained_unique_font_payload={} raw_plus_packed={} held_initial_a_b_a_payload={} exclusions=arc_headers,allocator_headers,ledger_metadata,store_index,gpui_packed_key_metadata,instrumentation,planner_scratch,lower_internal_peak,raster_scene",baseline,raw,wrappers,baseline_fonts,retained_fonts,retained,raw+wrappers+packed_payload(&initial)+packed_payload(&a)+packed_payload(&b)+packed_payload(&a2)+retained_fonts);
         drop(service);drop(face);assert_eq!(words(&resource.shape_interactive(Some(40.)).unwrap()),words(&b));
         assert!(resource.lease().render_lease().is_none());
     }
@@ -230,6 +235,18 @@ mod tests {
         assert!(retained.is_none());assert_eq!(CAPTURES.with(|n|n.get()),0);
         assert_eq!(BUILDS.with(|n|n.get()),paragraph::ranges(text).count());
         assert_eq!(words(&actual),words(&face.shaper().shape_interactive(text,14.1,Some(40.)).unwrap()));
+    }
+
+    #[test]
+    fn declined_large_scratch_does_not_prevent_later_short_source_admission() {
+        let bytes=include_bytes!("../../assets/NotoSans-default.ttf");let face=FontFace::new(bytes).unwrap();let issuer=FrameIssuer::new().unwrap();
+        let mut context=ResourceContext::new(ResourceLimits {retained_payload_bytes:bytes.len()+64*1024,physical_roots:64,resource_records:32,backings_per_resource:16}).unwrap();let scope=context.scope(&issuer);let mut service=face.shaper();
+        let large="office ".repeat(4000);let tx=context.window_reservation(WindowAccounting::Scoped(scope),&issuer).unwrap();
+        let (_,declined)=service.measure_resource(&large,14.1,None,tx,artifact(&issuer)).unwrap();assert!(declined.is_none());
+        let tx=context.window_reservation(WindowAccounting::Scoped(scope),&issuer).unwrap();
+        let (small,retained)=service.measure_resource("office",14.1,None,tx,artifact(&issuer)).unwrap();let retained=retained.expect("fresh short owner must not inherit huge declined scratch capacity");
+        let cold=face.shaper().measure("office",14.1,None).unwrap();assert_eq!(small.width.to_bits(),cold.width.to_bits());assert_eq!(retained.source(),"office");
+        assert!(retained.exclusive_capacity_bytes().unwrap()<64*1024);
     }
 
 }
