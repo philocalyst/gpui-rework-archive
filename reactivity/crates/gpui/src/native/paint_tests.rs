@@ -230,13 +230,13 @@ pub(super) fn run(gpu: &mut GpuSurface) {
             let eligible = owner.with_scene(|_, token| token).unwrap();
             assert!(owner.update(|model| model.broken = true).is_err());
             assert_eq!(owner.with_scene(|_, token| token).unwrap(), eligible);
-            // The actual private bridge may still apply the older two-slot C,
-            // and its ACK cannot certify the newer failed logical description.
+            // Submit the older two-slot C. The failed coarse description may
+            // revoke optional slot transport, so a full GPU fallback is legal;
+            // its ACK cannot certify the newer failed logical description.
             render(gpu, &mut oracle, &mut owner, &texture);
             let receipt = owner.snapshot().unwrap();
             assert!(receipt.presentation_epoch < receipt.source_epoch);
-            assert_eq!(gpu.renderer.stats().validated_draws, 0);
-            assert_eq!(gpu.renderer.stats().instance_upload_bytes, 32);
+            assert_eq!(gpu.packet_token, Some(eligible));
             owner.update(|model| model.broken = false).unwrap();
             render(gpu, &mut oracle, &mut owner, &texture);
         }
