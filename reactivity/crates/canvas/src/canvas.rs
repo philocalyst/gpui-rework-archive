@@ -21,6 +21,9 @@ pub struct RenderStats {
     pub retained_mask_bytes: usize,
     pub command_bytes: usize,
     pub bin_bytes: usize,
+    /// Number of disjoint 16-row output bands rendered in this frame.
+    pub output_bands: usize,
+    pub parallel: bool,
 }
 
 #[derive(Clone, Copy)]
@@ -94,6 +97,70 @@ struct Command {
     bounds: [usize; 4],
 }
 
+/// Immutable mask borrowed from a prepared scene. Backends upload while borrowed
+/// or obtain their own explicit backing lease; this borrow cannot outlive Canvas.
+#[derive(Clone, Copy, Debug)]
+pub struct GlyphMask<'a> {
+    pub key: crate::text::GlyphKey,
+    pub width: usize,
+    pub height: usize,
+    pub coverage: &'a [u8],
+}
+
+/// Canonical ordered draw, with the exact inverse used by the CPU reference.
+/// A backend narrowing f64 to f32 must validate its numeric/coverage contract.
+/// Color is premultiplied extended linear sRGB. Clip is in canvas coordinates;
+/// bounds is a conservative integer device quad, already clipped to the canvas.
+#[derive(Clone, Copy, Debug)]
+pub struct PreparedDraw<'a> {
+    pub local_rect: Rect,
+    pub inverse: [f64; 6],
+    pub clip: Rect,
+    pub bounds: Rect,
+    pub color: [f32; 4],
+    pub mask: Option<GlyphMask<'a>>,
+}
+
+/// Borrowed canonical scene; CPU tile bins are disposable and not part of it.
+/// Clear and draws use the same working-color domain. No rasterization occurs
+/// when obtaining this view or traversing it, and no mask Arc is cloned.
+#[derive(Clone, Copy)]
+pub struct PreparedScene<'a> {
+    pub width: u32,
+    pub height: u32,
+    pub color_config: ColorConfig,
+    pub clear: [f32; 4],
+    commands: &'a [Command],
+}
+impl<'a> PreparedScene<'a> {
+    pub fn draws(self) -> impl ExactSizeIterator<Item = PreparedDraw<'a>> + DoubleEndedIterator {
+        self.commands.iter().map(|command| {
+            let [left, top, right, bottom] = command.bounds;
+            PreparedDraw {
+                local_rect: command.rect,
+                inverse: command.map.inverse,
+                clip: command.clip,
+                bounds: Rect::new(
+                    left as f32,
+                    top as f32,
+                    (right - left) as f32,
+                    (bottom - top) as f32,
+                ),
+                color: command.color,
+                mask: match &command.source {
+                    Source::Rect => None,
+                    Source::Glyph(mask) => Some(GlyphMask {
+                        key: mask.key,
+                        width: mask.metrics.width,
+                        height: mask.metrics.height,
+                        coverage: &mask.pixels,
+                    }),
+                },
+            }
+        })
+    }
+}
+
 /// Retained software display list. Only RGBA8 output is full-frame storage.
 /// Rendering uses one fixed linear-premultiplied tile, then encodes once.
 /// `clear` begins a new scene; appending after `pixels` rerenders the retained scene.
@@ -123,20 +190,36 @@ impl Canvas {
         height: u32,
         color_config: ColorConfig,
     ) -> Result<Self, Error> {
+        let mut canvas = Self::recording(width, height, color_config)?;
+        canvas.allocate_pixels()?;
+        Ok(canvas)
+    }
+    /// Record a canonical scene without allocating a CPU image. Native backends
+    /// can borrow prepared_scene(); CPU diagnostics allocate on first try_pixels.
+    pub fn recording(width: u32, height: u32, color_config: ColorConfig) -> Result<Self, Error> {
         color_config.validate()?;
         let (width, height) = (width as usize, height as usize);
         let count = width.checked_mul(height).ok_or(Error::InvalidDimensions)?;
         if count == 0 || count > MAX_PIXELS || width > 16_384 || height > 16_384 {
             return Err(Error::InvalidDimensions);
         }
-        let mut pixels = Vec::new();
-        pixels
-            .try_reserve_exact(count * 4)
-            .map_err(|_| Error::ResourceLimit)?;
-        pixels.resize(count * 4, 0);
         let mut canvas = Self::empty(width, height, color_config);
-        canvas.pixels = pixels;
+        canvas.dirty = true;
         Ok(canvas)
+    }
+    fn allocate_pixels(&mut self) -> Result<(), Error> {
+        let length = self.width * self.height * 4;
+        if self.pixels.len() != length {
+            self.pixels
+                .try_reserve_exact(length - self.pixels.len())
+                .map_err(|_| Error::ResourceLimit)?;
+            self.pixels.resize(length, 0);
+        }
+        Ok(())
+    }
+    /// Bytes retained by the optional CPU output image, including spare capacity.
+    pub fn output_bytes(&self) -> usize {
+        self.pixels.capacity()
     }
     fn empty(width: usize, height: usize, color_config: ColorConfig) -> Self {
         Self {
@@ -175,6 +258,15 @@ impl Canvas {
     }
     pub fn stats(&self) -> RenderStats {
         self.stats
+    }
+    pub fn prepared_scene(&self) -> PreparedScene<'_> {
+        PreparedScene {
+            width: self.width as u32,
+            height: self.height as u32,
+            color_config: self.color_config,
+            clear: self.clear,
+            commands: &self.commands,
+        }
     }
     /// Describes the bytes returned by pixels. Display P3 requires a tagged,
     /// negotiated presentation path; treating those bytes as sRGB is incorrect.
@@ -371,13 +463,29 @@ impl Canvas {
     /// Both supported profiles use the sRGB transfer curve; see color_config().
     /// Linear composition precedes a single tile encoding. A clean call does no work.
     pub fn pixels(&mut self) -> &[u8] {
+        self.try_pixels()
+            .expect("CPU output allocation failed; use try_pixels for fallible access")
+    }
+    /// Allocate the optional CPU image and render if dirty. Allocation failure
+    /// leaves the canonical scene intact and does not publish a partial image.
+    pub fn try_pixels(&mut self) -> Result<&[u8], Error> {
+        self.allocate_pixels()?;
         if self.dirty {
-            self.render();
+            self.render(&Serial);
+            self.dirty = false;
+        }
+        Ok(&self.pixels)
+    }
+    /// Render using an explicitly owned pool; small scenes use the serial path.
+    #[cfg(feature = "parallel")]
+    pub fn pixels_with(&mut self, pool: &RenderPool) -> &[u8] {
+        if self.dirty {
+            self.render(pool);
             self.dirty = false;
         }
         &self.pixels
     }
-    fn render(&mut self) {
+    fn render(&mut self, schedule: &impl RenderSchedule) {
         let columns = self.width.div_ceil(TILE);
         let rows = self.height.div_ceil(TILE);
         let tiles = columns * rows;
@@ -411,88 +519,255 @@ impl Canvas {
                 + self.indices.capacity() * 4,
             ..RenderStats::default()
         };
-        let mut scratch = [[0.0f32; 4]; TILE * TILE * 16];
-        let encoder = self.color_config.encoder();
-        let clear_bytes = encoder.encode(self.clear);
-        for pixel in self.pixels.chunks_exact_mut(4) {
-            pixel.copy_from_slice(&clear_bytes);
+        let frame = Frame {
+            width: self.width,
+            height: self.height,
+            clear: self.clear,
+            commands: &self.commands,
+            offsets: &self.offsets,
+            indices: &self.indices,
+            tile_proofs: self.tile_proofs,
+        };
+        let rendered = schedule.render(frame, self.color_config.encoder(), &mut self.pixels);
+        stats.full_rect_tiles = rendered.full_rect_tiles;
+        stats.skipped_command_tiles = rendered.skipped_command_tiles;
+        stats.boundary_pixels = rendered.boundary_pixels;
+        stats.sample_tests = rendered.sample_tests;
+        stats.output_bands = rows;
+        stats.parallel = rendered.parallel;
+        self.stats = stats;
+    }
+}
+
+/// A frame borrows immutable commands and CSR bins. Workers never prepare text,
+/// mutate a font cache, clone resource handles, or observe a candidate scene.
+#[derive(Clone, Copy)]
+struct Frame<'a> {
+    width: usize,
+    height: usize,
+    clear: [f32; 4],
+    commands: &'a [Command],
+    offsets: &'a [usize],
+    indices: &'a [u32],
+    tile_proofs: bool,
+}
+
+/// Format dispatch happens once per frame, not through a pixel function pointer.
+pub(crate) trait PixelWriter: Copy + Send + Sync {
+    const BYTES: usize;
+    fn write(self, color: [f32; 4], destination: &mut [u8]);
+}
+impl PixelWriter for crate::color::OutputEncoder {
+    const BYTES: usize = 4;
+    #[inline]
+    fn write(self, color: [f32; 4], destination: &mut [u8]) {
+        destination.copy_from_slice(&self.encode(color));
+    }
+}
+trait RenderSchedule {
+    fn render<W: PixelWriter>(&self, frame: Frame<'_>, writer: W, pixels: &mut [u8])
+    -> RenderStats;
+}
+struct Serial;
+impl RenderSchedule for Serial {
+    fn render<W: PixelWriter>(
+        &self,
+        frame: Frame<'_>,
+        writer: W,
+        pixels: &mut [u8],
+    ) -> RenderStats {
+        pixels
+            .chunks_mut(TILE * frame.width * W::BYTES)
+            .enumerate()
+            .map(|(index, band)| render_band(frame, writer, index, band))
+            .fold(RenderStats::default(), combine_stats)
+    }
+}
+fn combine_stats(mut left: RenderStats, right: RenderStats) -> RenderStats {
+    left.full_rect_tiles += right.full_rect_tiles;
+    left.skipped_command_tiles += right.skipped_command_tiles;
+    left.boundary_pixels += right.boundary_pixels;
+    left.sample_tests += right.sample_tests;
+    left
+}
+
+/// Explicit persistent executor. The default crate feature creates no threads.
+/// A pool owns its worker threads; it never uses Rayon's global pool.
+#[cfg(feature = "parallel")]
+pub struct RenderPool {
+    pool: rayon::ThreadPool,
+    min_work: usize,
+}
+#[cfg(feature = "parallel")]
+impl RenderPool {
+    pub fn new(workers: usize) -> Result<Self, ParallelError> {
+        if !(1..=64).contains(&workers) {
+            return Err(ParallelError::InvalidWorkerCount);
         }
-        for tile in 0..tiles {
-            let ordered = &self.indices[self.offsets[tile]..self.offsets[tile + 1]];
-            if ordered.is_empty() {
-                continue;
-            }
-            let left = tile % columns * TILE;
-            let top = tile / columns * TILE;
-            let right = (left + TILE).min(self.width);
-            let bottom = (top + TILE).min(self.height);
-            let start = if self.tile_proofs {
-                ordered
-                    .iter()
-                    .rposition(|index| {
-                        let command = &self.commands[*index as usize];
-                        command.color[3] == 1.0
-                            && matches!(command.source, Source::Rect)
-                            && full_tile(command, left, top, right, bottom)
-                    })
-                    .unwrap_or(0)
-            } else {
-                0
-            };
-            stats.skipped_command_tiles += start;
-            let mut uniform = Some(self.clear);
-            for &index in &ordered[start..] {
-                let command = &self.commands[index as usize];
-                let full = self.tile_proofs
+        let pool = rayon::ThreadPoolBuilder::new()
+            .num_threads(workers)
+            .stack_size(512 * 1024)
+            .thread_name(|index| format!("gpui-raster-{index}"))
+            .build()
+            .map_err(ParallelError::Build)?;
+        Ok(Self {
+            pool,
+            min_work: 250_000,
+        })
+    }
+    /// Scheduling estimate only: pixel writes /16 plus conservative sample work.
+    /// Zero forces the parallel path for reproducible comparisons.
+    pub fn with_min_work(mut self, min_work: usize) -> Self {
+        self.min_work = min_work;
+        self
+    }
+    pub fn workers(&self) -> usize {
+        self.pool.current_num_threads()
+    }
+}
+#[cfg(feature = "parallel")]
+#[derive(Debug)]
+pub enum ParallelError {
+    InvalidWorkerCount,
+    Build(rayon::ThreadPoolBuildError),
+}
+#[cfg(feature = "parallel")]
+impl std::fmt::Display for ParallelError {
+    fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
+        match self {
+            Self::InvalidWorkerCount => f.write_str("worker count must be in 1..=64"),
+            Self::Build(error) => write!(f, "raster thread pool: {error}"),
+        }
+    }
+}
+#[cfg(feature = "parallel")]
+impl std::error::Error for ParallelError {}
+#[cfg(feature = "parallel")]
+impl RenderSchedule for RenderPool {
+    fn render<W: PixelWriter>(
+        &self,
+        frame: Frame<'_>,
+        writer: W,
+        pixels: &mut [u8],
+    ) -> RenderStats {
+        use rayon::prelude::*;
+        // Estimate distinguishes a proven uniform viewport fill from sampled
+        // edges/text. It chooses scheduling only and cannot affect the pixels.
+        let work = frame
+            .commands
+            .iter()
+            .fold(frame.width * frame.height / 16, |work, command| {
+                let [left, top, right, bottom] = command.bounds;
+                let uniform = frame.tile_proofs
                     && matches!(command.source, Source::Rect)
-                    && full_tile(command, left, top, right, bottom);
-                if full {
-                    stats.full_rect_tiles += 1;
-                    if let Some(value) = &mut uniform {
-                        blend(value, command.color, 1.0);
-                        continue;
-                    }
-                } else if let Some(value) = uniform.take() {
-                    // A uniform prefix needs no tile storage until an edge or
-                    // glyph makes its sample colors differ.
-                    scratch.fill(value);
+                    && full_tile(command, 0, 0, frame.width, frame.height);
+                work.saturating_add(if uniform {
+                    (right - left) * (bottom - top) / 256
+                } else {
+                    (right - left) * (bottom - top) * 16
+                })
+            });
+        if work < self.min_work || frame.height <= TILE {
+            return Serial.render(frame, writer, pixels);
+        }
+        let mut stats = self.pool.install(|| {
+            pixels
+                .par_chunks_mut(TILE * frame.width * W::BYTES)
+                .enumerate()
+                .map(|(index, band)| render_band(frame, writer, index, band))
+                .reduce(RenderStats::default, combine_stats)
+        });
+        stats.parallel = true;
+        stats
+    }
+}
+
+fn render_band<W: PixelWriter>(
+    frame: Frame<'_>,
+    writer: W,
+    band_index: usize,
+    pixels: &mut [u8],
+) -> RenderStats {
+    let columns = frame.width.div_ceil(TILE);
+    let mut stats = RenderStats::default();
+    let mut scratch = [[0.0f32; 4]; TILE * TILE * 16];
+    for pixel in pixels.chunks_exact_mut(W::BYTES) {
+        writer.write(frame.clear, pixel);
+    }
+    for tile in band_index * columns..(band_index + 1) * columns {
+        let ordered = &frame.indices[frame.offsets[tile]..frame.offsets[tile + 1]];
+        if ordered.is_empty() {
+            continue;
+        }
+        let left = tile % columns * TILE;
+        let top = band_index * TILE;
+        let right = (left + TILE).min(frame.width);
+        let bottom = (top + TILE).min(frame.height);
+        let start = if frame.tile_proofs {
+            ordered
+                .iter()
+                .rposition(|index| {
+                    let command = &frame.commands[*index as usize];
+                    command.color[3] == 1.0
+                        && matches!(command.source, Source::Rect)
+                        && full_tile(command, left, top, right, bottom)
+                })
+                .unwrap_or(0)
+        } else {
+            0
+        };
+        stats.skipped_command_tiles += start;
+        let mut uniform = Some(frame.clear);
+        for &index in &ordered[start..] {
+            let command = &frame.commands[index as usize];
+            let full = frame.tile_proofs
+                && matches!(command.source, Source::Rect)
+                && full_tile(command, left, top, right, bottom);
+            if full {
+                stats.full_rect_tiles += 1;
+                if let Some(value) = &mut uniform {
+                    blend(value, command.color, 1.0);
+                    continue;
                 }
-                for y in top.max(command.bounds[1])..bottom.min(command.bounds[3]) {
-                    for x in left.max(command.bounds[0])..right.min(command.bounds[2]) {
-                        let coverages = if full {
-                            [1.0; 16]
-                        } else {
-                            stats.boundary_pixels += 1;
-                            sample(command, x, y, &mut stats)
-                        };
-                        for (sample, coverage) in coverages.into_iter().enumerate() {
-                            if coverage > 0.0 {
-                                blend(
-                                    &mut scratch[((y - top) * TILE + x - left) * 16 + sample],
-                                    command.color,
-                                    coverage,
-                                );
-                            }
+            } else if let Some(value) = uniform.take() {
+                // A uniform prefix needs no tile storage until an edge or
+                // glyph makes its sample colors differ.
+                scratch.fill(value);
+            }
+            for y in top.max(command.bounds[1])..bottom.min(command.bounds[3]) {
+                for x in left.max(command.bounds[0])..right.min(command.bounds[2]) {
+                    let coverages = if full {
+                        [1.0; 16]
+                    } else {
+                        stats.boundary_pixels += 1;
+                        sample(command, x, y, &mut stats)
+                    };
+                    for (sample, coverage) in coverages.into_iter().enumerate() {
+                        if coverage > 0.0 {
+                            blend(
+                                &mut scratch[((y - top) * TILE + x - left) * 16 + sample],
+                                command.color,
+                                coverage,
+                            );
                         }
                     }
                 }
             }
-            let uniform_bytes =
-                uniform.map(|color| encoder.encode(sample_mean(std::iter::repeat_n(color, 16))));
-            for y in top..bottom {
-                for x in left..right {
-                    let rgba = uniform_bytes.unwrap_or_else(|| {
-                        let start = ((y - top) * TILE + x - left) * 16;
-                        let average = sample_mean(scratch[start..start + 16].iter().copied());
-                        encoder.encode(average)
-                    });
-                    let offset = (y * self.width + x) * 4;
-                    self.pixels[offset..offset + 4].copy_from_slice(&rgba);
-                }
+        }
+        let uniform_color = uniform.map(|color| sample_mean(std::iter::repeat_n(color, 16)));
+        for y in top..bottom {
+            for x in left..right {
+                let color = uniform_color.unwrap_or_else(|| {
+                    let start = ((y - top) * TILE + x - left) * 16;
+                    let average = sample_mean(scratch[start..start + 16].iter().copied());
+                    average
+                });
+                let offset = ((y - top) * frame.width + x) * W::BYTES;
+                writer.write(color, &mut pixels[offset..offset + W::BYTES]);
             }
         }
-        self.stats = stats;
     }
+    stats
 }
 
 /// Command-only candidate tied to one canvas. Dropping it leaves the published
