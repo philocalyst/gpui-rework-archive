@@ -419,10 +419,18 @@ mod unchanged_tests {
     }
     impl View for Page {
         fn sources() -> Sources<Self> {
-            Sources::new().direct(Self::WIDTH).direct(Self::MAP).direct(Self::UNUSED)
+            Sources::new()
+                .direct(Self::WIDTH)
+                .direct(Self::MAP)
+                .direct(Self::UNUSED)
         }
         fn view(&self) -> El<'_> {
-            div().name("surface").w(&self.width).h(12).bg(Color::BLACK).transform(&self.map)
+            div()
+                .name("surface")
+                .w(&self.width)
+                .h(12)
+                .bg(Color::BLACK)
+                .transform(&self.map)
         }
     }
     fn token<M: View + 'static>(win: &Win<M>) -> PresentationToken {
@@ -432,9 +440,14 @@ mod unchanged_tests {
         win.presented(token(win)).unwrap();
     }
     fn recording() -> Win<Page> {
-        let mut win = Win::recording(Page::new(), WindowOptions {
-            size: [80, 40], ..Default::default()
-        }).unwrap();
+        let mut win = Win::recording(
+            Page::new(),
+            WindowOptions {
+                size: [80, 40],
+                ..Default::default()
+            },
+        )
+        .unwrap();
         acknowledge(&mut win);
         win
     }
@@ -548,12 +561,18 @@ mod unchanged_tests {
     }
     impl View for Inputs {
         fn sources() -> Sources<Self> {
-            Sources::new().direct(Self::FIRST).direct(Self::SECOND)
-                .direct(Self::MAP).direct(Self::UNUSED)
+            Sources::new()
+                .direct(Self::FIRST)
+                .direct(Self::SECOND)
+                .direct(Self::MAP)
+                .direct(Self::UNUSED)
         }
         fn view(&self) -> El<'_> {
             text_input(if self.peer { &self.second } else { &self.first })
-                .name("input").w(60).h(24).transform(&self.map)
+                .name("input")
+                .w(60)
+                .h(24)
+                .transform(&self.map)
         }
     }
     fn barrier(win: &Win<Inputs>) -> (u64, u64) {
@@ -563,10 +582,20 @@ mod unchanged_tests {
     }
     #[test]
     fn generic_unchanged_publication_does_not_clear_input_rebound_barrier() {
-        let mut win = Win::recording(Inputs {
-            peer: false, first: Signal::new("abc".into()), second: Signal::new("abc".into()),
-            map: Signal::new(Affine::IDENTITY), unused: Signal::new(0),
-        }, WindowOptions { size: [80, 40], ..Default::default() }).unwrap();
+        let mut win = Win::recording(
+            Inputs {
+                peer: false,
+                first: Signal::new("abc".into()),
+                second: Signal::new("abc".into()),
+                map: Signal::new(Affine::IDENTITY),
+                unused: Signal::new(0),
+            },
+            WindowOptions {
+                size: [80, 40],
+                ..Default::default()
+            },
+        )
+        .unwrap();
         acknowledge(&mut win);
         win.accessibility_observe(true).unwrap();
         let base = win.accessibility_state().unwrap();
