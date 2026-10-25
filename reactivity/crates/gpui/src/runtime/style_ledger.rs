@@ -441,3 +441,6 @@ fn inspector_shared_lane_is_reclaimed_after_inherit_and_redescription() {
         styles::Styles::Default
     ));
 }
+
+#[path = "../../../../evidence/style-batch/fixtures/phase.rs"]
+mod batch_phase;
