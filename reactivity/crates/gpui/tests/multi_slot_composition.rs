@@ -1,5 +1,5 @@
 //! One exact hover source is not two property operations or a deferred edit turn.
-use gpui::{Error, WindowOptions, prelude::*, property::BACKGROUND};
+use gpui::{Error, PresentationToken, WindowOptions, prelude::*, property::BACKGROUND};
 const NONE: u32 = u32::MAX;
 const CELLS: u32 = 16;
 struct Page { hovered: Signal<u32>, alpha: bool, hidden: bool }
