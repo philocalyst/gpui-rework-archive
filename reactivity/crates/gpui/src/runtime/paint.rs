@@ -205,6 +205,14 @@ impl<M: View + 'static, L: LaneSet<M>> Win<M, L> {
 mod tests {
     use super::*;
     use crate::{Signal, SignalMap};
+    #[test]
+    fn paint_admission_transient_layout_ledger() {
+        eprintln!(
+            "PAINT_ADMISSION_BYTES outcome={} intent={} change={} result={}",
+            size_of::<PatchOutcome>(), size_of::<PaintIntent>(),
+            size_of::<styles::ColorChange>(), size_of::<Result<PatchOutcome, Error>>(),
+        );
+    }
     struct Panel {
         bound: bool,
         color: Signal<Color>,
