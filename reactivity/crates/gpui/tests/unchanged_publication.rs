@@ -110,7 +110,16 @@ fn unchanged_publication_preserves_pending_failed_and_lost_cohorts() {
     ));
     let presented = win.presented(pending).unwrap();
     assert_eq!(presented.presentation_epoch, equal.source_epoch);
-    assert_eq!(win.bounds(target).unwrap().width, 24.);
+    let mut expected = Panel::new();
+    *expected.width = 24.;
+    let expected = Win::with_size(expected, 64, 64).unwrap();
+    assert_eq!(
+        win.bounds(target).unwrap(),
+        expected
+            .bounds(expected.query().name("surface").one().unwrap())
+            .unwrap(),
+        "compare the exact conservative public bounds, not ideal mathematical width"
+    );
 
     assert!(win.set(Panel::TRANSFORM, Affine::scale(0., 1.)).is_err());
     assert!(
@@ -216,34 +225,25 @@ fn equal_text_output_still_publishes_the_changed_caret() {
     oracle.with_pixels(|p, _, _| assert_eq!(pixels, p)).unwrap();
 }
 #[test]
-fn inspector_enabled_noops_preserve_full_publication_parity() {
+fn inspector_enabled_exact_noops_keep_the_acknowledged_inspector_sheet() {
     let options = WindowOptions {
         size: [640, 480],
         ..Default::default()
     };
-    let mut exact = Win::with_inspector(Panel::new(), options).unwrap();
-    let mut coarse = Win::with_inspector(Panel::new(), options).unwrap();
-    let a = exact.query().name("surface").one().unwrap();
-    let b = coarse.query().name("surface").one().unwrap();
-    exact.inspector_select(a).unwrap();
-    coarse.inspector_select(b).unwrap();
+    let mut win = Win::with_inspector(Panel::new(), options).unwrap();
+    let target = win.query().name("surface").one().unwrap();
+    win.inspector_select(target).unwrap();
+    let before = win.snapshot().unwrap().nodes;
+    let before_pixels = win.with_pixels(|p, _, _| p.to_vec()).unwrap();
+    let token = win.with_scene(|_, token| token).unwrap();
     for i in 0..3 {
-        exact.set(Panel::WIDTH, 40.).unwrap();
-        coarse.update(|m| *m.width = 40.).unwrap();
-        exact.set(Panel::UNUSED, i).unwrap();
-        coarse.update(|m| *m.unused = i).unwrap();
-        let mut x = exact.snapshot().unwrap().nodes;
-        let mut y = coarse.snapshot().unwrap().nodes;
-        for row in &mut x {
-            row.target = None;
-        }
-        for row in &mut y {
-            row.target = None;
-        }
-        assert_eq!(x, y);
-        assert_eq!(exact.inspector_selected().unwrap(), Some(a));
-        assert_eq!(coarse.inspector_selected().unwrap(), Some(b));
-        let pixels = exact.with_pixels(|p, _, _| p.to_vec()).unwrap();
-        coarse.with_pixels(|p, _, _| assert_eq!(pixels, p)).unwrap();
+        win.set(Panel::WIDTH, 40.).unwrap();
+        let commit = win.set(Panel::UNUSED, i).unwrap();
+        assert_eq!(commit.source_epoch, commit.presentation_epoch);
+        assert_eq!(win.snapshot().unwrap().nodes, before);
+        assert_eq!(win.inspector_selected().unwrap(), Some(target));
+        assert_eq!(win.with_scene(|_, next| next).unwrap(), token);
+        win.with_pixels(|p, _, _| assert_eq!(before_pixels, p))
+            .unwrap();
     }
 }
