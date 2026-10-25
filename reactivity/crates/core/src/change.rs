@@ -198,11 +198,60 @@ impl From<Artifact> for DependencyNode {
 }
 
 
+/// Bounded replacements of canonical owners' immutable resource reads.
+/// Snapshot-local Group/Tile dependencies are discovered by the common lazy
+/// queue, not retained here across C generations.
+pub struct ResourceReadPatch {
+    replacements: BTreeMap<Artifact, Vec<crate::resource::ResourceId>>,
+    limit: usize, edges: usize, overflow: bool,
+}
+impl ResourceReadPatch {
+    pub fn new(limit: usize) -> Self { Self { replacements: BTreeMap::new(), limit, edges: 0, overflow: false } }
+    pub fn replace(&mut self, owner: Artifact, mut inputs: Vec<crate::resource::ResourceId>) {
+        if inputs.len() > self.limit { self.overflow = true; return; }
+        inputs.sort_unstable(); inputs.dedup();
+        let next = self.edges.checked_sub(self.replacements.get(&owner).map_or(0, Vec::len)).and_then(|count| count.checked_add(inputs.len()));
+        if next.is_none_or(|count| count > self.limit) || (!self.replacements.contains_key(&owner) && self.replacements.len() == self.limit) {
+            self.overflow = true; return;
+        }
+        self.edges = next.expect("checked bounded edge sum");
+        self.replacements.insert(owner, inputs);
+    }
+}
+#[derive(Default)]
+struct ResourceReads {
+    owners: std::collections::HashMap<Artifact, Vec<crate::resource::ResourceId>>,
+    reverse: std::collections::HashMap<crate::resource::ResourceId, Vec<Artifact>>,
+    edges: usize,
+}
+pub struct PreparedResourceReads<'a> {
+    graph: &'a mut Dependencies,
+    owners: BTreeMap<Artifact, Vec<crate::resource::ResourceId>>,
+    buckets: std::collections::HashMap<crate::resource::ResourceId, Vec<Artifact>>,
+    edges: usize,
+}
+impl PreparedResourceReads<'_> {
+    /// All root-table capacity and changed reverse buckets were admitted before
+    /// canonical C mutation. Existing accepted semantics survive a dropped guard.
+    pub fn commit(self) {
+        for (resource, consumers) in self.buckets {
+            if consumers.is_empty() { self.graph.resources.reverse.remove(&resource); }
+            else { self.graph.resources.reverse.insert(resource, consumers); }
+        }
+        for (owner, inputs) in self.owners {
+            if inputs.is_empty() { self.graph.resources.owners.remove(&owner); }
+            else { self.graph.resources.owners.insert(owner, inputs); }
+        }
+        self.graph.resources.edges = self.edges;
+    }
+}
+
 /// Actual sparse reverse consumer edges. Same-site facet closure is implicit;
 /// cross-site layout/placement/clip/resource dependencies are registered explicitly.
 pub struct Dependencies {
     snapshot: Option<SceneRevision>, owner: Option<NonZeroU64>, reverse: BTreeMap<DependencyNode, BTreeSet<DependencyNode>>,
     edges: usize, limit: usize, overflow: bool, sites: BTreeSet<SiteId>, complete: bool,
+    resources: ResourceReads,
 }
 #[derive(Clone, Copy, Debug, PartialEq, Eq)]
 pub enum SnapshotSide { Before, After, Both }
@@ -211,11 +260,11 @@ struct ClosureContext { owner: NonZeroU64, from: Option<SceneRevision>, to: Opti
 #[derive(Debug)]
 pub struct Invalidated { pub full: FullReasons, pub artifacts: BTreeSet<DependencyNode> }
 impl Dependencies {
-    pub fn new(limit: usize) -> Self { Self { snapshot: None, owner: None, reverse: BTreeMap::new(), edges: 0, limit, overflow: false, sites: BTreeSet::new(), complete: false } }
+    pub fn new(limit: usize) -> Self { Self { snapshot: None, owner: None, reverse: BTreeMap::new(), edges: 0, limit, overflow: false, sites: BTreeSet::new(), complete: false, resources: ResourceReads::default() } }
     pub fn reset_initial(&mut self, owner: NonZeroU64) { self.reset_from(owner, None); }
     pub fn reset(&mut self, snapshot: SceneRevision) { self.reset_from(snapshot.owner, Some(snapshot)); }
     pub fn rebase(&mut self, snapshot: SceneRevision) { if self.owner != Some(snapshot.owner) { self.overflow = true; } self.snapshot = Some(snapshot); }
-    fn reset_from(&mut self, owner: NonZeroU64, snapshot: Option<SceneRevision>) { self.owner = Some(owner); self.reverse.clear(); self.edges = 0; self.overflow = false; self.complete = false; self.sites.clear(); self.snapshot = snapshot; }
+    fn reset_from(&mut self, owner: NonZeroU64, snapshot: Option<SceneRevision>) { self.owner = Some(owner); self.resources = ResourceReads::default(); self.reverse.clear(); self.edges = 0; self.overflow = false; self.complete = false; self.sites.clear(); self.snapshot = snapshot; }
     pub fn register_site(&mut self, site: SiteId) {
         self.complete = false;
         if self.owner != Some(site.owner) || (!self.sites.contains(&site) && self.sites.len() == self.limit) { self.overflow = true; return; }
@@ -240,8 +289,52 @@ impl Dependencies {
         if self.overflow { return; }
         self.complete = false;
         if self.reverse.get(&input).is_some_and(|v| v.contains(&consumer)) { return; }
-        if self.edges == self.limit { self.overflow = true; return; }
+        if self.edges.checked_add(self.resources.edges).is_none_or(|count| count >= self.limit) { self.overflow = true; return; }
         self.reverse.entry(input).or_default().insert(consumer); self.edges += 1;
+    }
+    /// Stage ONLY affected owners and their old/new reverse buckets. No clone or
+    /// traversal of unrelated graph edges. Empty replacement retires an owner.
+    pub fn prepare_resource_reads(&mut self, patch: ResourceReadPatch) -> Result<PreparedResourceReads<'_>, FullReasons> {
+        if !self.complete { return Err(FullReasons::UNKNOWN_DEPENDENCY); }
+        if self.overflow || patch.overflow || patch.replacements.len() > self.limit { return Err(FullReasons::CAPACITY); }
+        let mut edges = self.resources.edges;
+        for (owner, inputs) in &patch.replacements {
+            if !self.sites.contains(&owner.site) { return Err(FullReasons::UNKNOWN_DEPENDENCY); }
+            edges = edges.checked_sub(self.resources.owners.get(owner).map_or(0, Vec::len)).and_then(|n| n.checked_add(inputs.len())).ok_or(FullReasons::CAPACITY)?;
+        }
+        if self.edges.checked_add(edges).is_none_or(|n| n > self.limit) { return Err(FullReasons::CAPACITY); }
+        let mut buckets = std::collections::HashMap::new();
+        for (owner, inputs) in &patch.replacements {
+            for resource in self.resources.owners.get(owner).into_iter().flatten().chain(inputs) {
+                if !buckets.contains_key(resource) {
+                    buckets.try_reserve(1).map_err(|_| FullReasons::CAPACITY)?;
+                    let original = self.resources.reverse.get(resource).map_or(&[][..], Vec::as_slice);
+                    let mut consumers = Vec::new();
+                    consumers.try_reserve(original.len()).map_err(|_| FullReasons::CAPACITY)?;
+                    consumers.extend_from_slice(original); buckets.insert(*resource, consumers);
+                }
+            }
+        }
+        for (owner, inputs) in &patch.replacements {
+            if let Some(previous) = self.resources.owners.get(owner) {
+                for resource in previous {
+                    let consumers = buckets.get_mut(resource).expect("old bucket staged");
+                    if let Ok(index) = consumers.binary_search(owner) { consumers.remove(index); }
+                }
+            }
+            for resource in inputs {
+                let consumers = buckets.get_mut(resource).expect("new bucket staged");
+                if let Err(index) = consumers.binary_search(owner) {
+                    consumers.try_reserve(1).map_err(|_| FullReasons::CAPACITY)?;
+                    consumers.insert(index, *owner);
+                }
+            }
+        }
+        // Reserving may grow metadata but cannot change accepted read edges.
+        // Each commit insertion is now within admitted table capacity.
+        self.resources.reverse.try_reserve(buckets.len()).map_err(|_| FullReasons::CAPACITY)?;
+        self.resources.owners.try_reserve(patch.replacements.len()).map_err(|_| FullReasons::CAPACITY)?;
+        Ok(PreparedResourceReads { graph: self, owners: patch.replacements, buckets, edges })
     }
     pub fn invalidate(&self, batch: &ChangeBatch) -> Invalidated {
         self.invalidate_entries(ClosureContext { owner: batch.stamp.to.owner, from: batch.stamp.from, to: Some(batch.stamp.to), surface: None }, SnapshotSide::Both, batch.full, batch.entries.iter().copied(), &mut |_, _| Ok(()))
@@ -313,6 +406,15 @@ impl Dependencies {
             });
             if !rejected.is_empty() { return Invalidated { full: rejected, artifacts: BTreeSet::new() }; }
             if let Err(reason) = expanded { return Invalidated { full: reason, artifacts: BTreeSet::new() }; }
+            if let DependencyNode::Resource(resource) = key {
+                if let Some(consumers) = self.resources.reverse.get(&resource) {
+                    for consumer in consumers {
+                        if let Err(reason) = enqueue(DependencyNode::Site(*consumer), context, self.limit, &mut artifacts, &mut pending) {
+                            return Invalidated { full: reason, artifacts: BTreeSet::new() };
+                        }
+                    }
+                }
+            }
             if let Some(consumers) = self.reverse.get(&key) {
                 for consumer in consumers {
                     if let Err(reason) = enqueue(*consumer, context, self.limit, &mut artifacts, &mut pending) {
@@ -489,6 +591,52 @@ mod tests {
         assert!(!dirty.artifacts.iter().any(|key| matches!(key, DependencyNode::Site(Artifact { phase: Phase::Shape, .. }))));
         assert!(!Facets::one(Facet::TextWidth).phases().any(|phase| phase == Phase::Shape));
     }
+    #[test]
+    fn owner_local_resource_reads_drop_replace_retire_and_share_one_bounded_queue() {
+        let mut graph = Dependencies::new(32); graph.reset(revision(1));
+        graph.register_site(site(1)); graph.register_site(site(2)); assert!(graph.finish(2));
+        let mut domain = crate::resource::IdentityDomain::new().unwrap();
+        let first = domain.mint().unwrap(); let second = domain.mint().unwrap();
+        let consumer = Artifact { site: site(2), phase: Phase::Shape };
+        let patch = |resource| { let mut patch = ResourceReadPatch::new(8); patch.replace(consumer, vec![resource]); patch };
+        let batch = ChangeBatch { stamp: stamp(Some(revision(1)), 2), full: FullReasons::default(), entries: vec![change(1, Facet::Paint)] };
+        let reaches = |graph: &Dependencies, resource| graph.invalidate_with(&batch, |node, emit| {
+            if node == DependencyNode::Site(Artifact { site: site(1), phase: Phase::Primitive }) { emit(DependencyNode::Resource(resource)); }
+            Ok(())
+        }).artifacts.contains(&DependencyNode::Site(consumer));
+        drop(graph.prepare_resource_reads(patch(first)).unwrap()); assert!(!reaches(&graph, first));
+        graph.prepare_resource_reads(patch(first)).unwrap().commit(); assert!(reaches(&graph, first));
+        drop(graph.prepare_resource_reads(patch(second)).unwrap()); assert!(reaches(&graph, first)); assert!(!reaches(&graph, second));
+        graph.prepare_resource_reads(patch(second)).unwrap().commit(); assert!(!reaches(&graph, first)); assert!(reaches(&graph, second));
+        graph.rebase(revision(2)); // Stable resource edges are not snapshot-local Group IDs.
+        assert_eq!(graph.resources.edges, 1);
+        let mut retire = ResourceReadPatch::new(8); retire.replace(consumer, Vec::new());
+        graph.prepare_resource_reads(retire).unwrap().commit();
+        assert!(graph.resources.reverse.is_empty()); assert!(graph.resources.owners.is_empty());
+        let mut unknown = ResourceReadPatch::new(8); unknown.replace(Artifact { site: site(3), phase: Phase::Shape }, vec![first]);
+        assert!(matches!(graph.prepare_resource_reads(unknown), Err(reason) if reason.contains(FullReasons::UNKNOWN_DEPENDENCY)));
+    }
+
+    #[test]
+    fn resource_patch_budgets_include_raw_inputs_owner_records_and_later_base_edges() {
+        let mut domain = crate::resource::IdentityDomain::new().unwrap();
+        let a = domain.mint().unwrap(); let b = domain.mint().unwrap();
+        let owner = Artifact { site: site(1), phase: Phase::Shape };
+        let mut graph = Dependencies::new(4); graph.reset(revision(1)); graph.register_site(site(1)); assert!(graph.finish(1));
+        let mut oversized = ResourceReadPatch::new(2); oversized.replace(owner, vec![a,a,a]);
+        assert!(matches!(graph.prepare_resource_reads(oversized), Err(reason) if reason.contains(FullReasons::CAPACITY)));
+        let mut patch = ResourceReadPatch::new(4); patch.replace(owner, vec![a,b]);
+        graph.prepare_resource_reads(patch).unwrap().commit();
+        for phase in [Phase::Measure, Phase::Layout, Phase::Placement] {
+            graph.depends_on_node(DependencyNode::Site(Artifact { site: site(1), phase }), DependencyNode::Resource(a));
+        }
+        assert!(!graph.finish(1), "base mutation must count already installed resource edges");
+        let mut small = Dependencies::new(2); small.reset(revision(1)); small.register_site(site(1)); assert!(small.finish(1));
+        let mut too_many_owners = ResourceReadPatch::new(99);
+        for phase in [Phase::Shape,Phase::Measure,Phase::Layout] {too_many_owners.replace(Artifact {site:site(1),phase},Vec::new());}
+        assert!(matches!(small.prepare_resource_reads(too_many_owners), Err(reason) if reason.contains(FullReasons::CAPACITY)));
+    }
+
 }
 
 /// Private producer brand. Fresh domains are globally unique; no raw-owner,
