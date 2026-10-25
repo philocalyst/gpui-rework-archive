@@ -5,3 +5,14 @@ version = 4
 [[package]]
 name = "gpui_reactivity_core"
 version = "0.1.0"
+
+[[package]]
+name = "gpui_reactivity_state"
+version = "0.1.0"
+
+[[package]]
+name = "gpui_reactivity_template_lab"
+version = "0.1.0"
+dependencies = [
+ "gpui_reactivity_core",
+]
