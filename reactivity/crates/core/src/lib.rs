@@ -14,3 +14,5 @@ pub use damage::Damage;
 pub use geometry::{Affine, CoordinateSpace, Geometry, MappedBounds, Point, Rect};
 pub use spatial::SpatialTree;
 pub use tree::{NodeId, NodeIdRange, NodeKind, Tree, TreeError};
+
+pub mod resource;
