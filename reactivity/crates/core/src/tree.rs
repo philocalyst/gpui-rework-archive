@@ -1,4 +1,7 @@
-use std::sync::atomic::{AtomicU64, Ordering};
+use std::{
+    num::NonZeroU64,
+    sync::atomic::{AtomicU64, Ordering},
+};
 
 const NIL: u32 = u32::MAX;
 static NEXT_ARENA: AtomicU64 = AtomicU64::new(1);
@@ -6,9 +9,76 @@ static NEXT_ARENA: AtomicU64 = AtomicU64::new(1);
 /// Arena identity is part of equality; ids from different trees never alias.
 #[derive(Clone, Copy, Debug, Eq, PartialEq, Hash, Ord, PartialOrd)]
 pub struct NodeId {
-    arena: u64,
+    arena: NonZeroU64,
     generation: u32,
     index: u32,
+}
+
+/// A checked consecutive prefix of complete node identities, without a handle
+/// allocation. This describes slots, not tree order, and does not keep nodes
+/// alive. Ordinary Tree operations still validate the namespace and generation.
+///
+/// Append each identity returned by fresh slot-order insertion. A gap, foreign
+/// namespace or mixed generation is rejected without changing the prefix. The
+/// compact form cannot represent arbitrary edits; retain full IDs for those.
+#[derive(Clone, Debug)]
+pub struct NodeIdRange {
+    arena: NonZeroU64,
+    generation: u32,
+    len: u32,
+}
+impl Default for NodeIdRange {
+    fn default() -> Self {
+        Self {
+            arena: NonZeroU64::MIN,
+            generation: 1,
+            len: 0,
+        }
+    }
+}
+impl NodeIdRange {
+    pub fn len(&self) -> usize {
+        self.len as usize
+    }
+    pub fn is_empty(&self) -> bool {
+        self.len == 0
+    }
+    pub fn clear(&mut self) {
+        self.len = 0;
+    }
+    pub fn push(&mut self, id: NodeId) -> Result<(), TreeError> {
+        if id.index != self.len
+            || (self.len != 0 && (id.arena != self.arena || id.generation != self.generation))
+        {
+            return Err(TreeError::InvalidNode);
+        }
+        let len = self.len.checked_add(1).ok_or(TreeError::Capacity)?;
+        if self.len == 0 {
+            self.arena = id.arena;
+            self.generation = id.generation;
+        }
+        self.len = len;
+        Ok(())
+    }
+    pub fn get(&self, index: usize) -> Option<NodeId> {
+        if index >= self.len() {
+            return None;
+        }
+        Some(NodeId {
+            arena: self.arena,
+            generation: self.generation,
+            index: index as u32,
+        })
+    }
+    /// For an index whose membership in this prefix has already been admitted.
+    /// Panics on an index outside the prefix, like indexing a handle vector.
+    pub fn required(&self, index: usize) -> NodeId {
+        self.get(index).expect("admitted consecutive node index")
+    }
+    pub fn index_of(&self, id: NodeId) -> Option<usize> {
+        (id.arena == self.arena && id.generation == self.generation && id.index < self.len)
+            .then_some(id.index as usize)
+    }
 }
 
 /// Embedding sites declare ownership boundaries, without implementing platform hosting.
@@ -45,7 +115,7 @@ struct Entry {
 /// is O(removed nodes), uses no recursion or temporary node queue. Dropping a
 /// million-node chain also drops a flat Vec, never a recursive ownership chain.
 pub struct Tree {
-    arena: u64,
+    arena: NonZeroU64,
     entries: Vec<Entry>,
     free: u32,
     first: u32,
@@ -65,7 +135,7 @@ impl Tree {
             .try_update(Ordering::Relaxed, Ordering::Relaxed, |n| n.checked_add(1))
             .expect("tree arena identity exhausted");
         Self {
-            arena,
+            arena: NonZeroU64::new(arena).expect("tree arena identities start at one"),
             entries: Vec::new(),
             free: NIL,
             first: NIL,
@@ -114,7 +184,19 @@ impl Tree {
         })
     }
     pub fn insert(&mut self, parent: Option<NodeId>, kind: NodeKind) -> Result<NodeId, TreeError> {
+        self.insert_before(parent, None, kind)
+    }
+    /// Insert before a direct child, or append when `before` is None.
+    /// All capabilities and the anchor's parent are checked before allocation
+    /// or free-list mutation. Forest roots use `parent == None`.
+    pub fn insert_before(
+        &mut self,
+        parent: Option<NodeId>,
+        before: Option<NodeId>,
+        kind: NodeKind,
+    ) -> Result<NodeId, TreeError> {
         let parent = self.optional_index(parent)?;
+        let before = self.anchor_index(parent, before)?;
         let index;
         let generation;
         if self.free != NIL {
@@ -146,23 +228,36 @@ impl Tree {
             next: NIL,
             kind: Some(kind),
         };
-        self.attach(index, parent);
+        self.attach_before(index, parent, before);
         self.len += 1;
         Ok(self.id(index))
     }
     /// Move to the end of a parent's children (or the forest roots).
     /// Every error is detected before any links change.
     pub fn reparent(&mut self, node: NodeId, parent: Option<NodeId>) -> Result<(), TreeError> {
-        self.validate_reparent(node, parent)?;
+        self.reparent_before(node, parent, None).map(|_| ())
+    }
+    /// Move a subtree before a direct child, or to the end when None.
+    /// Self-anchor and already-adjacent moves within the same parent are no-ops.
+    /// An invalid node, parent, anchor or cycle changes no topology or storage.
+    pub fn reparent_before(
+        &mut self,
+        node: NodeId,
+        parent: Option<NodeId>,
+        before: Option<NodeId>,
+    ) -> Result<bool, TreeError> {
+        self.validate_reparent_before(node, parent, before)?;
         let index = self.index(node)?;
         let parent = self.optional_index(parent)?;
-        if self.entries[index as usize].parent == parent && self.entries[index as usize].next == NIL
+        let before = self.anchor_index(parent, before)?;
+        if self.entries[index as usize].parent == parent
+            && (before == index || self.entries[index as usize].next == before)
         {
-            return Ok(());
+            return Ok(false);
         }
         self.detach(index);
-        self.attach(index, parent);
-        Ok(())
+        self.attach_before(index, parent, before);
+        Ok(true)
     }
     pub(crate) fn validate_reparent(
         &self,
@@ -177,6 +272,16 @@ impl Tree {
             }
             ancestor = self.entries[ancestor as usize].parent;
         }
+        Ok(())
+    }
+    pub(crate) fn validate_reparent_before(
+        &self,
+        node: NodeId,
+        parent: Option<NodeId>,
+        before: Option<NodeId>,
+    ) -> Result<(), TreeError> {
+        self.validate_reparent(node, parent)?;
+        self.anchor_index(self.optional_index(parent)?, before)?;
         Ok(())
     }
     pub fn remove(&mut self, node: NodeId) -> Result<usize, TreeError> {
@@ -255,6 +360,16 @@ impl Tree {
     fn optional_index(&self, id: Option<NodeId>) -> Result<u32, TreeError> {
         id.map_or(Ok(NIL), |id| self.index(id))
     }
+    fn anchor_index(&self, parent: u32, before: Option<NodeId>) -> Result<u32, TreeError> {
+        let Some(before) = before else {
+            return Ok(NIL);
+        };
+        let before = self.index(before)?;
+        if self.entries[before as usize].parent != parent {
+            return Err(TreeError::InvalidNode);
+        }
+        Ok(before)
+    }
     fn id(&self, index: u32) -> NodeId {
         NodeId {
             arena: self.arena,
@@ -307,6 +422,25 @@ impl Tree {
         let e = &mut self.entries[index as usize];
         e.parent = parent;
         e.prev = last;
+    }
+    fn attach_before(&mut self, index: u32, parent: u32, before: u32) {
+        if before == NIL {
+            self.attach(index, parent);
+            return;
+        }
+        let previous = self.entries[before as usize].prev;
+        if previous != NIL {
+            self.entries[previous as usize].next = index;
+        } else if parent == NIL {
+            self.first = index;
+        } else {
+            self.entries[parent as usize].first = index;
+        }
+        self.entries[before as usize].prev = index;
+        let entry = &mut self.entries[index as usize];
+        entry.parent = parent;
+        entry.prev = previous;
+        entry.next = before;
     }
 }
 
@@ -390,6 +524,176 @@ impl Iterator for Preorder<'_> {
 #[cfg(test)]
 mod tests {
     use super::*;
+
+    #[test]
+    fn rejected_ordered_edits_preserve_links_capacity_free_list_and_generations() {
+        let mut tree = Tree::new();
+        let root = tree.insert(None, NodeKind::Element).unwrap();
+        let child = tree.insert(Some(root), NodeKind::Element).unwrap();
+        let descendant = tree.insert(Some(child), NodeKind::Element).unwrap();
+        let removed = tree.insert(Some(root), NodeKind::Element).unwrap();
+        tree.remove(removed).unwrap();
+        let mut other = Tree::new();
+        let foreign = other.insert(None, NodeKind::Element).unwrap();
+        let state = |tree: &Tree| {
+            (
+                tree.free, tree.first, tree.last, tree.len, tree.entries.capacity(),
+                tree.entries.iter().map(|entry| (
+                    entry.generation, entry.parent, entry.first, entry.last,
+                    entry.prev, entry.next, entry.kind,
+                )).collect::<Vec<_>>(),
+            )
+        };
+        for (parent, anchor) in [
+            (Some(foreign), None),
+            (Some(root), Some(foreign)),
+            (Some(root), Some(removed)),
+            (Some(root), Some(descendant)),
+            (None, Some(child)),
+        ] {
+            let before = state(&tree);
+            assert_eq!(tree.insert_before(parent, anchor, NodeKind::Element), Err(TreeError::InvalidNode));
+            assert_eq!(state(&tree), before);
+        }
+        for (node, parent, anchor, expected) in [
+            (foreign, Some(root), None, TreeError::InvalidNode),
+            (child, Some(foreign), None, TreeError::InvalidNode),
+            (child, Some(root), Some(foreign), TreeError::InvalidNode),
+            (child, Some(root), Some(removed), TreeError::InvalidNode),
+            (child, None, Some(child), TreeError::InvalidNode),
+            (root, Some(descendant), None, TreeError::Cycle),
+        ] {
+            let before = state(&tree);
+            assert_eq!(tree.reparent_before(node, parent, anchor), Err(expected));
+            assert_eq!(state(&tree), before);
+        }
+        let before = state(&tree);
+        assert!(!tree.reparent_before(child, Some(root), Some(child)).unwrap());
+        assert!(!tree.reparent_before(child, Some(root), None).unwrap());
+        assert_eq!(state(&tree), before);
+        let reused = tree.insert_before(Some(root), Some(child), NodeKind::Element).unwrap();
+        assert_eq!(reused.index, removed.index);
+        assert_eq!(reused.generation, removed.generation + 1);
+        assert_eq!(reused.arena, removed.arena);
+    }
+
+    #[test]
+    fn consecutive_ranges_match_vectors_and_reject_nonconsecutive_identity() {
+        assert_eq!(std::mem::size_of::<NodeIdRange>(), 16);
+        let mut tree = Tree::new();
+        let mut other = Tree::new();
+        let foreign = other.insert(None, NodeKind::Element).unwrap();
+        let ids: Vec<_> = (0..1024)
+            .map(|_| tree.insert(None, NodeKind::Element).unwrap())
+            .collect();
+        let mut range = NodeIdRange::default();
+        assert!(range.is_empty());
+        assert_eq!(range.get(0), None);
+        assert_eq!(range.push(ids[1]), Err(TreeError::InvalidNode));
+        for (index, &id) in ids.iter().enumerate() {
+            range.push(id).unwrap();
+            assert_eq!(range.len(), index + 1);
+            assert_eq!(range.required(index), id);
+            assert_eq!(range.index_of(id), Some(index));
+        }
+        assert_eq!(range.get(usize::MAX), None);
+        assert_eq!(range.get(ids.len()), None);
+        assert_eq!(range.index_of(foreign), None);
+        assert_eq!(range.push(foreign), Err(TreeError::InvalidNode));
+        assert_eq!(range.len(), ids.len());
+        tree.remove(ids[0]).unwrap();
+        let reused = tree.insert(None, NodeKind::Element).unwrap();
+        assert_eq!(range.index_of(reused), None);
+        assert!(!tree.contains(range.required(0)));
+        range.clear();
+        range.push(reused).unwrap();
+        assert_eq!(range.push(ids[1]), Err(TreeError::InvalidNode));
+        assert_eq!(range.len(), 1);
+        assert_eq!(range.required(0), reused);
+        range.clear();
+        range.push(foreign).unwrap();
+        assert_eq!(range.required(0), foreign);
+        // This next slot has the right index and generation, isolating the
+        // namespace check rather than accidentally failing the index check.
+        assert_eq!(range.push(ids[1]), Err(TreeError::InvalidNode));
+        assert_eq!(range.len(), 1);
+        assert_eq!(range.required(0), foreign);
+        assert_eq!(range.index_of(ids[1]), None);
+    }
+
+    #[test]
+    fn prefix_seed_and_rejections_preserve_exact_state() {
+        let mut tree = Tree::new();
+        let mut foreign_tree = Tree::new();
+        let first = tree.insert(None, NodeKind::Element).unwrap();
+        let second = tree.insert(None, NodeKind::Element).unwrap();
+        let foreign = foreign_tree.insert(None, NodeKind::Element).unwrap();
+        let foreign_next = foreign_tree.insert(None, NodeKind::Element).unwrap();
+        let mut range = NodeIdRange::default();
+        range.push(first).unwrap();
+        let seed = (range.arena, range.generation);
+        for rejected in [
+            foreign_next,
+            NodeId {
+                generation: second.generation + 1,
+                ..second
+            },
+            NodeId {
+                index: second.index + 1,
+                ..second
+            },
+        ] {
+            let before = (range.arena, range.generation, range.len);
+            assert_eq!(range.push(rejected), Err(TreeError::InvalidNode));
+            assert_eq!((range.arena, range.generation, range.len), before);
+        }
+        range.push(second).unwrap();
+        assert_eq!((range.arena, range.generation), seed);
+        assert_eq!(range.required(0), first);
+        assert_eq!(range.required(1), second);
+        range.clear();
+        range.push(foreign).unwrap();
+        assert_eq!(range.required(0), foreign);
+
+        // A terminal prefix is impractical to allocate. Exercise its checked
+        // pure admission state directly, without touching any Tree storage.
+        range.len = u32::MAX;
+        let terminal = NodeId {
+            arena: range.arena,
+            generation: range.generation,
+            index: u32::MAX,
+        };
+        let before = (range.arena, range.generation, range.len);
+        assert_eq!(range.push(terminal), Err(TreeError::Capacity));
+        assert_eq!((range.arena, range.generation, range.len), before);
+        // Invalid namespace keeps its original precedence over overflow.
+        let wrong_namespace = NodeId {
+            arena: first.arena,
+            ..terminal
+        };
+        assert_eq!(range.push(wrong_namespace), Err(TreeError::InvalidNode));
+        assert_eq!((range.arena, range.generation, range.len), before);
+    }
+
+    #[test]
+    fn nonzero_namespaces_preserve_identity_and_provide_an_option_niche() {
+        assert_eq!(std::mem::size_of::<NodeId>(), 16);
+        assert_eq!(std::mem::size_of::<Option<NodeId>>(), 16);
+        let mut a = Tree::new();
+        let mut b = Tree::new();
+        let local = a.insert(None, NodeKind::Element).unwrap();
+        let foreign = b.insert(None, NodeKind::Element).unwrap();
+        assert_ne!(local, foreign);
+        assert!(!a.contains(foreign));
+        assert!(!b.contains(local));
+        assert_ne!(local.arena.get(), 0);
+        a.remove(local).unwrap();
+        let reused = a.insert(None, NodeKind::Element).unwrap();
+        assert_eq!(reused.index, local.index);
+        assert_ne!(reused.generation, local.generation);
+        assert!(!a.contains(local));
+        assert!(a.contains(reused));
+    }
 
     #[test]
     fn exhausted_generation_retires_slot_without_aba() {

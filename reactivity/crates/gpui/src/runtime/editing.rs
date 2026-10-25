@@ -108,7 +108,7 @@ impl<M: View + 'static> Runtime<M> {
         if !ready {
             let width = self
                 .layout
-                .layout(self.layout_nodes[index])?
+                .layout(self.layout_nodes.required(index))?
                 .content_box_width();
             let font = self
                 .text
@@ -384,7 +384,7 @@ impl<M: View + 'static, L: LaneSet<M>> RuntimeMut<'_, M, L> {
         let local = CoordinateSpace::new(transform)
             .to_local(point)
             .ok_or(Error::NotHittable)?;
-        let measured = self.layout.layout(self.layout_nodes[index])?;
+        let measured = self.layout.layout(self.layout_nodes.required(index))?;
         let point = Point {
             x: local.x - measured.padding.left,
             y: local.y - measured.padding.top,

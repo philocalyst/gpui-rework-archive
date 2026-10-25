@@ -253,7 +253,17 @@ impl LayoutTree {
         kind: NodeKind,
         style: Style,
     ) -> Result<NodeId, LayoutError> {
-        let node = self.tree.insert(parent, kind)?;
+        self.insert_before(parent, None, kind, style)
+    }
+    /// Insert before a checked direct child, retaining every other node/cache.
+    pub fn insert_before(
+        &mut self,
+        parent: Option<NodeId>,
+        before: Option<NodeId>,
+        kind: NodeKind,
+        style: Style,
+    ) -> Result<NodeId, LayoutError> {
+        let node = self.tree.insert_before(parent, before, kind)?;
         let slots = self.tree.slot_count();
         self.style_ids.resize(slots, NO_STYLE);
         self.layouts.resize(slots, Layout::ZERO);
@@ -362,9 +372,21 @@ impl LayoutTree {
         Ok(removed)
     }
     pub fn reparent(&mut self, node: NodeId, parent: Option<NodeId>) -> Result<bool, LayoutError> {
-        self.tree.validate_reparent(node, parent)?;
+        self.reparent_before(node, parent, None)
+    }
+    /// Reorder or move a subtree without replacing its layout capabilities.
+    /// Validation and no-op detection precede cache/depth/pending mutations.
+    pub fn reparent_before(
+        &mut self,
+        node: NodeId,
+        parent: Option<NodeId>,
+        before: Option<NodeId>,
+    ) -> Result<bool, LayoutError> {
+        self.tree.validate_reparent_before(node, parent, before)?;
         let old_parent = self.tree.parent(node)?;
-        if old_parent == parent && self.tree.next_sibling(node)?.is_none() {
+        if old_parent == parent
+            && (before == Some(node) || self.tree.next_sibling(node)? == before)
+        {
             return Ok(false);
         }
         let old_depth = self.depths[self.tree.slot(node)];
@@ -374,7 +396,7 @@ impl LayoutTree {
         if let Some(new) = parent {
             self.invalidate_absolute_above(new);
         }
-        self.tree.reparent(node, parent)?;
+        self.tree.reparent_before(node, parent, before)?;
         self.viewports.remove(&node);
         if old_parent != parent {
             if let Some(old) = old_parent {
@@ -876,6 +898,35 @@ impl Incremental for Engine<'_, '_> {
 #[cfg(test)]
 mod tests {
     use super::*;
+
+    #[test]
+    fn rejected_ordered_layout_edits_preserve_caches_lanes_and_pending_work() {
+        let mut tree = LayoutTree::new();
+        let root = tree.insert(None, NodeKind::Element, Style::DEFAULT).unwrap();
+        let child = tree.insert(Some(root), NodeKind::Element, Style::DEFAULT).unwrap();
+        let descendant = tree.insert(Some(child), NodeKind::Element, Style::DEFAULT).unwrap();
+        tree.compute(root, Size::MAX_CONTENT).unwrap();
+        let mut other = LayoutTree::new();
+        let foreign = other.insert(None, NodeKind::Element, Style::DEFAULT).unwrap();
+        let state = |tree: &LayoutTree| {
+            (
+                tree.stats(), tree.storage(), tree.generation(), tree.pending.clone(),
+                tree.layouts.clone(), tree.depths.clone(), tree.child_counts.clone(),
+                tree.flags.clone(), tree.style_ids.clone(),
+                tree.tree.preorder().collect::<Vec<_>>(),
+            )
+        };
+        let before = state(&tree);
+        assert!(tree.insert_before(Some(root), Some(foreign), NodeKind::Element, Style::DEFAULT).is_err());
+        assert_eq!(state(&tree), before);
+        assert!(tree.reparent_before(root, Some(descendant), None).is_err());
+        assert_eq!(state(&tree), before);
+        assert!(tree.reparent_before(child, Some(root), Some(descendant)).is_err());
+        assert_eq!(state(&tree), before);
+        assert!(!tree.reparent_before(child, Some(root), Some(child)).unwrap());
+        assert!(!tree.reparent_before(child, Some(root), None).unwrap());
+        assert_eq!(state(&tree), before);
+    }
     #[test]
     fn hidden_marker_uses_flags_and_revokes_on_mutation_and_rollover() {
         let mut tree = LayoutTree::new();

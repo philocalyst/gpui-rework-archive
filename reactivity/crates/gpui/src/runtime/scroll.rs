@@ -318,9 +318,11 @@ pub(super) fn geometry<M: View + 'static>(runtime: &Runtime<M>) -> Result<Viewpo
     let mut has_scroll = false;
     for (&key, state) in &runtime.viewports {
         let identity = state.identity(key);
-        let layout = runtime
-            .layout
-            .layout(runtime.layout_nodes[runtime.by_identity.required(identity)])?;
+        let layout = runtime.layout.layout(
+            runtime
+                .layout_nodes
+                .required(runtime.by_identity.required(identity)),
+        )?;
         match key {
             ViewportKey::List(id) => {
                 let state = state.list().unwrap();
@@ -366,7 +368,9 @@ pub(super) fn geometry<M: View + 'static>(runtime: &Runtime<M>) -> Result<Viewpo
     );
     let mut ancestor = Parent::NONE;
     for (index, node) in runtime.nodes.iter().enumerate() {
-        let layout = runtime.layout.layout(runtime.layout_nodes[index])?;
+        let layout = runtime
+            .layout
+            .layout(runtime.layout_nodes.required(index))?;
         while ancestor.index() != node.parent().index() {
             frontier.pop();
             ancestor = runtime.nodes[ancestor.index().unwrap()].parent();
@@ -417,9 +421,11 @@ pub(super) fn geometry<M: View + 'static>(runtime: &Runtime<M>) -> Result<Viewpo
         }
     }
     for viewport in &mut infos.scrolls {
-        let layout = runtime
-            .layout
-            .layout(runtime.layout_nodes[runtime.by_identity.required(viewport.identity)])?;
+        let layout = runtime.layout.layout(
+            runtime
+                .layout_nodes
+                .required(runtime.by_identity.required(viewport.identity)),
+        )?;
         let size = [f64::from(layout.size.width), f64::from(layout.size.height)];
         if [
             viewport.min.x,

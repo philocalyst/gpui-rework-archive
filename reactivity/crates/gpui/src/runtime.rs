@@ -15,7 +15,7 @@ use gpui_canvas::{
     TextSystem,
 };
 use gpui_reactivity_core::{
-    Affine, CoordinateSpace, NodeId, Point, Rect,
+    Affine, CoordinateSpace, NodeId, NodeIdRange, Point, Rect,
     layout::{
         AvailableSpace, LayoutError, LayoutTree, MeasureInput, MeasureOutput, Size,
         WidthMeasureInput,
@@ -53,6 +53,8 @@ mod text_geometry;
 use editing::EditingIntent;
 pub use text_geometry::TextGeometry;
 mod identity_index;
+mod layout_nodes;
+use layout_nodes::LayoutNodes;
 mod image;
 mod siblings;
 use identity_index::IdentityIndex;
@@ -1179,7 +1181,8 @@ struct Runtime<M> {
     viewports: BTreeMap<ViewportKey, ViewportState>,
     list_rows: BTreeMap<u64, ListRow>,
     layout: LayoutTree,
-    layout_nodes: Vec<NodeId>,
+    layout_nodes: LayoutNodes,
+    layout_edits: Option<Box<layout_nodes::EditPlan>>,
     layout_dirty: BTreeSet<u64>,
     rebuild_layout: bool,
     layout_depth: u8,
@@ -1422,7 +1425,8 @@ impl<M: View + 'static, L: LaneSet<M>> Win<M, L> {
             viewports: BTreeMap::new(),
             list_rows: BTreeMap::new(),
             layout,
-            layout_nodes: Vec::new(),
+            layout_nodes: LayoutNodes::default(),
+            layout_edits: None,
             layout_dirty: BTreeSet::new(),
             rebuild_layout: true,
             layout_depth: 0,
@@ -2017,6 +2021,8 @@ impl<M: View + 'static> Runtime<M> {
         mut property_changed: Option<NonZeroU64>,
     ) -> Result<(), Error> {
         let reuse_identities = self.logical_valid;
+        // A second unprepared description conservatively takes full rebuild.
+        self.layout_edits = None;
         self.counters.descriptions += 1;
         if !mount {
             self.counters.owner_reruns += 1;
@@ -2275,6 +2281,14 @@ impl<M: View + 'static> Runtime<M> {
             .iter()
             .map(|node| node.as_ref().unwrap().identity())
             .collect::<Vec<_>>();
+        // First supported retention cohort: genuinely surviving keyed lists.
+        // Unkeyed logical remints still retain their existing Target semantics.
+        let layout_eligible = reuse_identities
+            && !self.rebuild_layout && !self.topology_changed && !self.layout.is_poisoned()
+            && self.layout_nodes.len() == old.len() && !old_list_ids.is_empty();
+        let mut layout_edits: Option<layout_nodes::EditPlan> = None;
+        let mut retained_list = false;
+        let next_count = drafts.len();
         let mut styles = styles::Builder::with_colors(drafts.len(), color_discovery);
         // New captures must drop before remaining old captures on unwind,
         // just as they did when these Node vectors owned routes directly.
@@ -2335,6 +2349,7 @@ impl<M: View + 'static> Runtime<M> {
                             .is_some_and(|node| node.kind().site_kind() == draft.kind.site_kind())
                     })
             };
+            let consumed = previous_index.is_some_and(|old_index| old[old_index].is_some());
             let previous = previous_index
                 .and_then(|old_index| old[old_index].take())
                 .filter(|node| {
@@ -2346,6 +2361,25 @@ impl<M: View + 'static> Runtime<M> {
                     }
                     retained
                 });
+            let retained = previous.is_some();
+            retained_list |= retained && list_indices.contains_key(&index);
+            if layout_eligible {
+                if layout_edits.is_none() && (!retained || previous_index != Some(index)) {
+                    layout_edits = Some(layout_nodes::EditPlan::prefix(
+                        &self.layout_nodes, index, next_count,
+                    ));
+                }
+                if let Some(plan) = &mut layout_edits {
+                    plan.nodes.push(if retained {
+                        Some(self.layout_nodes.required(previous_index.unwrap()))
+                    } else { None });
+                    // Component-scope rejection consumed the old Node already;
+                    // capture its handle here rather than losing retirement.
+                    if consumed && !retained && let Some(previous) = previous_index {
+                        plan.retired.push(self.layout_nodes.required(previous));
+                    }
+                }
+            }
             let previous_handler = previous.as_ref().and_then(Node::handler_slot);
             let previous_style = if previous.is_some() {
                 old_styles.get(previous_index.unwrap())
@@ -2439,7 +2473,9 @@ impl<M: View + 'static> Runtime<M> {
             }
             self.counters.destination_compares += 1;
             if site.as_ref().map(|site| site.value.as_ref()) != text.as_deref() {
-                self.rebuild_layout |= site.is_some() != text.is_some();
+                // Brand-new sites initialize their measure during insertion.
+                // Existing measure-kind changes retain the full fallback.
+                self.rebuild_layout |= retained && site.is_some() != text.is_some();
                 site = text.as_deref().map(|text| {
                     let value = if let Some(value) =
                         fields[index].and_then(|field| promotions.get(&field))
@@ -2523,7 +2559,19 @@ impl<M: View + 'static> Runtime<M> {
             nodes.push(node);
         }
         image::reconcile(&mut self.images, image_resources);
-        changed += old.iter().filter(|node| node.is_some()).count();
+        if layout_eligible && layout_edits.is_none() && old_ids.len() != nodes.len() {
+            layout_edits = Some(layout_nodes::EditPlan::prefix(
+                &self.layout_nodes, nodes.len(), nodes.len(),
+            ));
+        }
+        for (index, node) in old.iter().enumerate() {
+            if node.is_some() {
+                changed += 1;
+                if let Some(plan) = &mut layout_edits {
+                    plan.retired.push(self.layout_nodes.required(index));
+                }
+            }
+        }
         // A previous site can be consumed before its component scope rejects
         // reuse. The still-old identity index locates its original slot: Some
         // was counted as retired above, while None needs the edited old site.
@@ -2705,6 +2753,9 @@ impl<M: View + 'static> Runtime<M> {
         self.logical_valid = true;
         self.prune_focus();
         self.changed_nodes = changed;
+        if layout_eligible && topology && retained_list && !self.rebuild_layout {
+            self.layout_edits = layout_edits.map(Box::new);
+        }
         Ok(())
     }
     #[cfg(test)]
@@ -3094,14 +3145,17 @@ impl<M: View + 'static> Runtime<M> {
         let composition = self
             .composition_preview()
             .map(|(identity, preview)| (identity, preview.display.clone(), preview.decoration));
-        if self.rebuild_layout || self.topology_changed || self.layout.is_poisoned() {
+        if self.rebuild_layout || self.layout.is_poisoned()
+            || (self.topology_changed && self.layout_edits.is_none())
+        {
+            self.layout_edits = None;
             self.layout = LayoutTree::new();
             self.layout_nodes.clear();
             for (index, node) in self.nodes.iter().enumerate() {
                 let parent = node
                     .parent()
                     .index()
-                    .map(|parent| self.layout_nodes[parent]);
+                    .map(|parent| self.layout_nodes.required(parent));
                 let id = self.layout.insert(
                     parent,
                     gpui_reactivity_core::NodeKind::Element,
@@ -3117,13 +3171,17 @@ impl<M: View + 'static> Runtime<M> {
                 if node.text_slot().0 != u32::MAX || node.kind() == NodeKind::Image {
                     self.layout.set_measure(id, Some(measure_marker))?;
                 }
-                self.layout_nodes.push(id);
+                self.layout_nodes
+                    .push(id)
+                    .expect("fresh preorder layout IDs");
             }
-            // A fresh arena only appends, in declaration order, with one
-            // generation. Keep complete capabilities sorted for measurement
-            // routing without rebuilding a map on every layout pass.
-            debug_assert!(self.layout_nodes.is_sorted());
+            // The checked range admits exactly the fresh slot-order prefix.
+            // Callback routing validates the complete namespace and generation,
+            // without retaining or searching another identity vector.
         } else {
+            if let Some(plan) = self.layout_edits.take() {
+                self.apply_layout_edits(*plan)?;
+            }
             // Auto-sized viewports depend on their immediate parent's flow. A
             // retained parent change must refresh the child's grow/basis too,
             // including inspector contributions applied before description.
@@ -3138,7 +3196,7 @@ impl<M: View + 'static> Runtime<M> {
             }
             for identity in &self.layout_dirty {
                 let index = self.by_identity.required(*identity);
-                let id = self.layout_nodes[index];
+                let id = self.layout_nodes.required(index);
                 self.layout.set_style(
                     id,
                     list::row_style(
@@ -3164,7 +3222,7 @@ impl<M: View + 'static> Runtime<M> {
         let service = &mut shaper;
         let mut measure = |id: NodeId, input: WidthMeasureInput| {
             let index = layout_nodes
-                .binary_search(&id)
+                .index_of(id)
                 .expect("measurement names a node in the current layout arena");
             let node = &nodes[index];
             if let Some(image) = node.content.image_use() {
@@ -3199,7 +3257,7 @@ impl<M: View + 'static> Runtime<M> {
             }
         };
         self.layout.compute_with_width_measure(
-            self.layout_nodes[0],
+            self.layout_nodes.required(0),
             Size {
                 width: AvailableSpace::Definite(size[0] as f32 / scale_factor),
                 height: AvailableSpace::Definite(size[1] as f32 / scale_factor),
@@ -3212,6 +3270,9 @@ impl<M: View + 'static> Runtime<M> {
         if let Some(error) = failure {
             return Err(error);
         }
+        // All pre-solve logical invalidations have now been consumed. Inspector
+        // captions changed below are a distinct late set, not every old source.
+        self.layout_dirty.clear();
         self.refresh_inspector(true)?;
         let viewport = Rect::new(0.0, 0.0, size[0] as f32, size[1] as f32);
         let mut presented: Vec<Presented> = Vec::with_capacity(self.nodes.len());
@@ -3270,7 +3331,7 @@ impl<M: View + 'static> Runtime<M> {
                     &self.layout_nodes,
                 )?;
             }
-            let layout = self.layout.layout(self.layout_nodes[index])?;
+            let layout = self.layout.layout(self.layout_nodes.required(index))?;
             while ancestor.index() != self.nodes[index].parent().index() {
                 spaces.pop();
                 if let Some(clips) = &mut clips {
@@ -3699,6 +3760,13 @@ impl<M: View + 'static> Runtime<M> {
                     self.list_rows.get(&node.identity()),
                 );
             }
+        }
+        // Keep late caption measurement invalidations for the next compute.
+        // The mapping is now current, and source/style dirties were cleared
+        // immediately after this compute, so solved sources are not requeued.
+        for identity in &self.layout_dirty {
+            let index = self.by_identity.required(*identity);
+            self.layout.mark_dirty(self.layout_nodes.required(index))?;
         }
         // Everything fallible has finished. This transfers commands; native
         // recording retains no CPU image, while same-size headless updates reuse
