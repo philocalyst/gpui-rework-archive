@@ -2772,6 +2772,13 @@ impl<M: View + 'static> Runtime<M> {
         }
         let eligible = !self.dirty && self.complete_epoch.checked_add(1) == Some(self.source_epoch);
         let Some(fanout) = self.fanout.get_mut(&field) else {
+            if eligible {
+                // No installed destination changed. Extend the same complete
+                // cohort rather than freezing every semantic row for an
+                // unrelated source. Failed/incomplete cohorts still retry.
+                self.publish_paint(None)?;
+                return Ok(PatchOutcome::Complete);
+            }
             return Ok(PatchOutcome::Visual);
         };
         self.counters.source_reads += 1;
@@ -2894,6 +2901,14 @@ impl<M: View + 'static> Runtime<M> {
                 return Ok(PatchOutcome::Complete);
             }
             self.dirty = visual_changed;
+        }
+        if eligible && last_changed.is_none() {
+            // Exact comparisons established that every installed operand is
+            // unchanged. Contribution/source state was still admitted above;
+            // only publication work is removed. Reuse the existing unchanged
+            // paint cohort's ACK/accessibility relabelling protocol.
+            self.publish_paint(None)?;
+            return Ok(PatchOutcome::Complete);
         }
         Ok(if semantic && !visual_changed {
             PatchOutcome::Metadata
