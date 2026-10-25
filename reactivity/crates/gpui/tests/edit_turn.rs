@@ -260,6 +260,13 @@ fn committed_edit_error_must_be_repaired_before_finish_can_publish() {
     let mut turn = b.edit_turn().unwrap();
     turn.set(Panel::WIDTH, 20.).unwrap();
     turn.finish().unwrap();
+    // The reference must follow the same rejected-description history: a
+    // committed invalid source revokes logical identities before repair.
+    assert!(matches!(
+        a.set(Panel::WIDTH, f64::NAN),
+        Err(SetError::Committed { .. })
+    ));
+    assert!(a.settle().is_err());
     a.set(Panel::WIDTH, 20.).unwrap();
     ack(&mut a);
     ack(&mut b);
@@ -319,6 +326,33 @@ fn dropped_prefix_is_realized_by_a_later_edit_without_cheap_old_cohort_ack() {
     }
     b.set(Panel::COLOR, Color::BLACK).unwrap();
     assert_ne!(token(&b), before);
+    assert_eq!(b.counters().paint_passes, 1);
+    a.set(Panel::WIDTH, 20.).unwrap();
+    ack(&mut a);
+    ack(&mut b);
+    equivalent(&mut a, &mut b);
+}
+
+#[test]
+fn owner_callback_panic_keeps_existing_poison_policy_without_publication() {
+    let mut win = recording();
+    let mut turn = win.edit_turn().unwrap();
+    assert!(matches!(
+        turn.update(|_| panic!("owner failure")),
+        Err(Error::OwnerPanicked)
+    ));
+    assert!(turn.finish().is_err());
+    assert_eq!(win.counters().paint_passes, 0);
+    assert!(win.settle().is_err());
+}
+#[test]
+fn forgetting_a_borrow_guard_cannot_leave_deferred_policy_in_the_window() {
+    let mut a = recording();
+    let mut b = recording();
+    let mut turn = b.edit_turn().unwrap();
+    turn.set(Panel::WIDTH, 20.).unwrap();
+    std::mem::forget(turn);
+    b.set(Panel::COLOR, Color::BLACK).unwrap();
     assert_eq!(b.counters().paint_passes, 1);
     a.set(Panel::WIDTH, 20.).unwrap();
     ack(&mut a);
