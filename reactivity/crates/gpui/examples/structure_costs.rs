@@ -246,8 +246,8 @@ fn geometry_signature(window: &Win<Wide>, width: u32) -> serde_json::Value {
             }
             serde_json::json!({
                 "index": index,
-                "local_bits": [local.x, local.y, local.width, local.height].map(f32::to_bits),
-                "window_bits": [clipped.x, clipped.y, clipped.width, clipped.height].map(f32::to_bits),
+                "local_bits": ([local.x, local.y, local.width, local.height].map(f32::to_bits)),
+                "window_bits": ([clipped.x, clipped.y, clipped.width, clipped.height].map(f32::to_bits)),
             })
         }).collect();
         (count, samples)
