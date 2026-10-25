@@ -621,6 +621,167 @@ mod tests {
     }
 
     #[test]
+    fn retained_auto_width_list_refreshes_parent_flow_during_popup_topology_edit() {
+        #[derive(Clone)]
+        struct FlowPage { page: Page, horizontal: bool }
+        impl View for FlowPage {
+            fn view(&self) -> El<'_> {
+                let mut children = vec![div().size(8)];
+                if self.page.popup { children.push(button("popup").size(10)); }
+                children.push(uniform_list(LIST, &self.page, 12).h(72));
+                column(children).w(140).h(100).flow(
+                    if self.horizontal { Flow::Row } else { Flow::Column },
+                )
+            }
+        }
+        let model = FlowPage { page: Page::new(), horizontal: false };
+        let options = WindowOptions { size: [160, 120], ..Default::default() };
+        let mut retained = Win::recording(model.clone(), options).unwrap();
+        let mut rebuilt = Win::recording(model, options).unwrap();
+        for win in [&mut retained, &mut rebuilt] {
+            let token = win.with_scene(|_, token| token).unwrap();
+            win.presented(token).unwrap();
+        }
+        let pane = retained.list(LIST).unwrap();
+        let id = {
+            let rt = retained.runtime().unwrap();
+            rt.layout_nodes.required(rt.by_identity.required(rt.resolve(pane).unwrap()))
+        };
+        for horizontal in [true, false, true, false] {
+            rebuilt.runtime_mut().unwrap().runtime.rebuild_layout = true;
+            for win in [&mut retained, &mut rebuilt] {
+                win.update(|model| {
+                    model.horizontal = horizontal;
+                    model.page.popup = horizontal;
+                }).unwrap();
+            }
+            let actual = retained.runtime().unwrap();
+            let expected = rebuilt.runtime().unwrap();
+            let index = actual.by_identity.required(actual.resolve(pane).unwrap());
+            assert_eq!(actual.layout_nodes.required(index), id);
+            let oracle = expected.layout_nodes.required(index);
+            // Equal style or cached geometry is not enough: this exact solver
+            // input must change despite the list's unchanged declaration.
+            let style = actual.layout.style(id).unwrap();
+            assert_eq!(style, expected.layout.style(oracle).unwrap());
+            assert_eq!(style.flex_grow, if horizontal { 1.0 } else { 0.0 });
+            assert_layout_adjacency(&retained);
+            for win in [&mut retained, &mut rebuilt] {
+                let token = win.with_scene(|_, token| token).unwrap();
+                win.presented(token).unwrap();
+            }
+            let mut actual = retained.snapshot().unwrap();
+            let mut expected = rebuilt.snapshot().unwrap();
+            for node in actual.nodes.iter_mut().chain(expected.nodes.iter_mut()) {
+                node.target = None;
+            }
+            assert_eq!(actual, expected);
+            let pixels = retained.with_pixels(|pixels, _, _| pixels.to_vec()).unwrap();
+            rebuilt.with_pixels(|expected, _, _| assert_eq!(pixels, expected)).unwrap();
+        }
+    }
+
+    #[test]
+    fn retained_scope_rejection_retires_consumed_same_kind_layout_handle() {
+        #[derive(Clone)]
+        struct Child;
+        impl View for Child {
+            fn view(&self) -> El<'_> { button("scoped").w(40).h(12) }
+        }
+        #[derive(Clone)]
+        struct ScopePage { first: Child, second: Child, switched: bool }
+        impl ScopePage {
+            const FIRST: crate::Component<Self, Child> = crate::Component::new(
+                crate::FieldId::new(1), "first", |p| &p.first, |p| &mut p.first,
+            );
+            const SECOND: crate::Component<Self, Child> = crate::Component::new(
+                crate::FieldId::new(2), "second", |p| &p.second, |p| &mut p.second,
+            );
+        }
+        impl ItemSource for ScopePage {
+            fn len(&self) -> usize { 3 }
+            fn key(&self, index: usize) -> ItemKey { ItemKey::new(index as u64 + 1) }
+            fn index_of(&self, key: ItemKey) -> Option<usize> {
+                (1..=3).contains(&key.get()).then(|| key.get() as usize - 1)
+            }
+            fn row(&self, _index: usize) -> El<'_> { text("retained row").h(12) }
+        }
+        impl View for ScopePage {
+            fn sources() -> crate::Sources<Self> {
+                crate::Sources::new().component(Self::FIRST).component(Self::SECOND)
+            }
+            fn view(&self) -> El<'_> {
+                column((
+                    if self.switched { Self::SECOND.view(self) } else { Self::FIRST.view(self) },
+                    uniform_list(LIST, self, 12).w(120).h(48),
+                ))
+            }
+        }
+        fn acknowledge_scope(win: &mut Win<ScopePage>) {
+            let token = win.with_scene(|_, token| token).unwrap();
+            win.presented(token).unwrap();
+        }
+        fn layouts_scope(win: &Win<ScopePage>) -> Vec<gpui_reactivity_core::layout::Layout> {
+            let runtime = win.runtime().unwrap();
+            (0..runtime.nodes.len()).map(|index| {
+                runtime.layout.layout(runtime.layout_nodes.required(index)).unwrap()
+            }).collect()
+        }
+        let model = ScopePage { first: Child, second: Child, switched: false };
+        let options = WindowOptions { size: [160, 120], ..Default::default() };
+        let mut retained = Win::recording(model.clone(), options).unwrap();
+        let mut rebuilt = Win::recording(model, WindowOptions {
+            size: [160, 120], ..Default::default()
+        }).unwrap();
+        acknowledge_scope(&mut retained);
+        acknowledge_scope(&mut rebuilt);
+        let old_target = retained.query().text("scoped").one().unwrap();
+        let old_handle = {
+            let runtime = retained.runtime().unwrap();
+            runtime.layout_nodes.required(runtime.by_identity.required(runtime.resolve(old_target).unwrap()))
+        };
+        let pane = retained.list(LIST).unwrap();
+        let pane_handle = {
+            let runtime = retained.runtime().unwrap();
+            runtime.layout_nodes.required(runtime.by_identity.required(runtime.resolve(pane).unwrap()))
+        };
+        rebuilt.runtime_mut().unwrap().runtime.rebuild_layout = true;
+        for win in [&mut retained, &mut rebuilt] { win.update(|model| model.switched = true).unwrap(); }
+        {
+            let runtime = retained.runtime().unwrap();
+            assert!(runtime.resolve(old_target).is_err());
+            assert!(!runtime.layout.tree().contains(old_handle));
+            assert_eq!(runtime.layout.tree().len(), runtime.nodes.len());
+            assert_eq!(runtime.layout_nodes.required(runtime.by_identity.required(runtime.resolve(pane).unwrap())), pane_handle);
+            for parent in std::iter::once(None).chain((0..runtime.nodes.len()).map(Some)) {
+                let expected: Vec<_> = runtime.nodes.iter().enumerate()
+                    .filter(|(_, node)| node.parent().index() == parent)
+                    .map(|(index, _)| runtime.layout_nodes.required(index)).collect();
+                let actual: Vec<_> = runtime.layout.tree().children(
+                    parent.map(|index| runtime.layout_nodes.required(index)),
+                ).unwrap().collect();
+                assert_eq!(actual, expected);
+            }
+        }
+        assert_eq!(layouts_scope(&retained), layouts_scope(&rebuilt));
+        acknowledge_scope(&mut retained);
+        acknowledge_scope(&mut rebuilt);
+        {
+            let runtime = retained.runtime().unwrap();
+            let new_target = retained.query().text("scoped").one().unwrap();
+            assert_ne!(new_target, old_target);
+            let new_handle = runtime.layout_nodes.required(runtime.by_identity.required(runtime.resolve(new_target).unwrap()));
+            assert_ne!(new_handle, old_handle);
+        }
+        let mut actual = retained.snapshot().unwrap().nodes;
+        let mut expected = rebuilt.snapshot().unwrap().nodes;
+        for node in actual.iter_mut().chain(expected.iter_mut()) { node.target = None; }
+        assert_eq!(actual, expected);
+        let pixels = retained.with_pixels(|pixels, _, _| pixels.to_vec()).unwrap();
+        rebuilt.with_pixels(|expected, _, _| assert_eq!(pixels, expected)).unwrap();
+    }
+
+    #[test]
     fn retained_topology_storage_ledger_prices_headers_and_whole_popup_turns() {
         eprintln!(
             "RETAINED_TOPOLOGY_HEADERS runtime={} map={} edited={} plan={} node_id={}",
