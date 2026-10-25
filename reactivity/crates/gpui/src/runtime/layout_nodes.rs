@@ -216,7 +216,7 @@ mod tests {
         for node in &mut nodes { node.target = None; }
         nodes
     }
-    fn assert_layout_adjacency(win: &Win<Page>) {
+    fn assert_layout_adjacency<M: View + 'static>(win: &Win<M>) {
         let runtime = win.runtime().unwrap();
         // Include the root forest and leaf buckets, not only parents that
         // happen to receive a moved child. Distinct nested parents must never
@@ -574,6 +574,49 @@ mod tests {
             assert_layout_adjacency(&win);
             acknowledge(&mut win);
             assert_cold(&mut win);
+        }
+    }
+
+    #[test]
+    fn deep_comb_reorder_restores_each_active_ancestor_sibling_frontier() {
+        #[derive(Clone)]
+        struct Comb(Page);
+        impl ItemSource for Comb {
+            fn len(&self) -> usize { self.0.len() }
+            fn key(&self, index: usize) -> ItemKey { self.0.key(index) }
+            fn index_of(&self, key: ItemKey) -> Option<usize> { self.0.index_of(key) }
+            fn row(&self, index: usize) -> El<'_> {
+                let mut branch = text(self.0.rows[index].1.as_str()).w(50);
+                for _ in 0..12 {
+                    // Reverse preorder encounters this right sibling before
+                    // descending the left branch, keeping all depths live.
+                    branch = column((branch, div().size(1)));
+                }
+                branch
+            }
+        }
+        impl View for Comb {
+            fn view(&self) -> El<'_> { uniform_list(LIST, self, 12).w(120).h(72) }
+        }
+        let mut win = Win::recording(
+            Comb(Page::new()), WindowOptions { size: [160, 120], ..Default::default() },
+        ).unwrap();
+        let token = win.with_scene(|_, token| token).unwrap();
+        win.presented(token).unwrap();
+        for _ in 0..4 {
+            win.update(|model| model.0.rows.rotate_left(1)).unwrap();
+            assert_layout_adjacency(&win);
+            let token = win.with_scene(|_, token| token).unwrap();
+            win.presented(token).unwrap();
+            let mut cold = Win::with_size(win.root().unwrap().clone(), 160, 120).unwrap();
+            let normalize = |win: &Win<Comb>| {
+                let mut nodes = win.snapshot().unwrap().nodes;
+                for node in &mut nodes { node.identity = 0; node.target = None; }
+                nodes
+            };
+            assert_eq!(normalize(&win), normalize(&cold));
+            let pixels = win.with_pixels(|pixels, _, _| pixels.to_vec()).unwrap();
+            cold.with_pixels(|expected, _, _| assert_eq!(pixels, expected)).unwrap();
         }
     }
 
