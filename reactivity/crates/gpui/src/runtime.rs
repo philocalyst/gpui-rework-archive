@@ -1365,6 +1365,14 @@ impl<M: View + 'static> Runtime<M> {
         scroll: Option<ScrollRequest>,
         readers: &dyn crate::reader::ReaderValues,
     ) -> Result<(), Error> {
+        #[cfg(feature = "route-profile")]
+        let mut profile_mark = std::time::Instant::now();
+        #[cfg(feature = "route-profile")]
+        let profile_flatten_ns;
+        #[cfg(feature = "route-profile")]
+        let profile_preflight_ns;
+        #[cfg(feature = "route-profile")]
+        let profile_reconcile_ns;
         let reuse_identities = self.logical_valid;
         self.counters.descriptions += 1;
         if !mount {
@@ -1396,6 +1404,11 @@ impl<M: View + 'static> Runtime<M> {
                 )
             },
         )?;
+        #[cfg(feature = "route-profile")]
+        {
+            profile_flatten_ns = profile_mark.elapsed().as_nanos();
+            profile_mark = std::time::Instant::now();
+        }
         let list_indices: BTreeMap<_, _> = list_drafts
             .iter()
             .map(|list| (list.index, list.id))
@@ -1506,6 +1519,11 @@ impl<M: View + 'static> Runtime<M> {
             fanout
                 .destinations
                 .sort_unstable_by_key(|destination| destination.packed());
+        }
+        #[cfg(feature = "route-profile")]
+        {
+            profile_preflight_ns = profile_mark.elapsed().as_nanos();
+            profile_mark = std::time::Instant::now();
         }
         let old_styles = std::mem::take(&mut self.styles);
         let mut old = std::mem::take(&mut self.nodes)
@@ -1778,6 +1796,11 @@ impl<M: View + 'static> Runtime<M> {
         self.styles = styles.finish();
         self.texts = texts;
         self.fanout = fanout;
+        #[cfg(feature = "route-profile")]
+        {
+            profile_reconcile_ns = profile_mark.elapsed().as_nanos();
+            profile_mark = std::time::Instant::now();
+        }
         self.by_identity = self
             .nodes
             .iter()
@@ -1794,6 +1817,11 @@ impl<M: View + 'static> Runtime<M> {
         self.logical_valid = true;
         self.prune_focus();
         self.changed_nodes = changed;
+        #[cfg(feature = "route-profile")]
+        eprintln!(
+            "route_profile,phase=describe,mount={mount},flatten_ns={profile_flatten_ns},preflight_ns={profile_preflight_ns},reconcile_ns={profile_reconcile_ns},identity_index_finalize_ns={}",
+            profile_mark.elapsed().as_nanos()
+        );
         Ok(())
     }
     fn patch(&mut self, field: FieldId) -> Result<bool, Error> {
@@ -1946,6 +1974,12 @@ impl<M: View + 'static> Runtime<M> {
         Ok(self.commit())
     }
     fn present_inner(&mut self) -> Result<(), Error> {
+        #[cfg(feature = "route-profile")]
+        let mut profile_mark = std::time::Instant::now();
+        #[cfg(feature = "route-profile")]
+        let profile_layout_setup_ns;
+        #[cfg(feature = "route-profile")]
+        let profile_layout_compute_ns;
         let sequence = self.next_presentation;
         let next_sequence = sequence.checked_add(1).ok_or(Error::EpochExhausted)?;
         let token = PresentationToken {
@@ -2030,6 +2064,11 @@ impl<M: View + 'static> Runtime<M> {
                 self.layout.mark_dirty(id)?;
             }
         }
+        #[cfg(feature = "route-profile")]
+        {
+            profile_layout_setup_ns = profile_mark.elapsed().as_nanos();
+            profile_mark = std::time::Instant::now();
+        }
         let before = self.layout.stats();
         let layout_nodes = &self.layout_nodes;
         let mut failure = None;
@@ -2083,6 +2122,11 @@ impl<M: View + 'static> Runtime<M> {
             &mut measure,
         )?;
         let after = self.layout.stats();
+        #[cfg(feature = "route-profile")]
+        {
+            profile_layout_compute_ns = profile_mark.elapsed().as_nanos();
+            profile_mark = std::time::Instant::now();
+        }
         self.counters.layout_runs += after.computes - before.computes;
         self.counters.measure_calls += after.measure_calls - before.measure_calls;
         if let Some(error) = failure {
@@ -2320,6 +2364,11 @@ impl<M: View + 'static> Runtime<M> {
         if self.automatic_presentation {
             self.acknowledge(token)?;
         }
+        #[cfg(feature = "route-profile")]
+        eprintln!(
+            "route_profile,phase=present,sequence={sequence},layout_setup_ns={profile_layout_setup_ns},layout_compute_ns={profile_layout_compute_ns},paint_commit_ns={}",
+            profile_mark.elapsed().as_nanos()
+        );
         Ok(())
     }
     fn hit(&self, point: Point) -> Option<u64> {

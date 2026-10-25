@@ -71,8 +71,22 @@ fn verify(win: &mut Win<Page>, count: usize, routes: usize) -> Option<Target> {
 }
 fn main() {
     println!("count,every,exact,stage,ns,allocations,requested,delta,retained,peak");
+    let selected = std::env::args().nth(1).map(|argument| {
+        let fields = argument
+            .strip_prefix("--case=")
+            .expect("expected --case=count,every,exact");
+        let mut fields = fields.split(',');
+        let count = fields.next().unwrap().parse::<usize>().unwrap();
+        let every = fields.next().unwrap().parse::<usize>().unwrap();
+        let exact = fields.next().unwrap().parse::<bool>().unwrap();
+        assert!(fields.next().is_none(), "case must have three fields");
+        (count, every, exact)
+    });
     for (count, every) in [(0_usize, 0), (1, 1), (4096, 0), (4096, 16), (4096, 1)] {
         for exact in [false, true] {
+            if selected.is_some_and(|selected| selected != (count, every, exact)) {
+                continue;
+            }
             let routes = if every == 0 { 0 } else { count.div_ceil(every) };
             let mut preflight = open(count, every, exact);
             verify(&mut preflight, count, routes);
