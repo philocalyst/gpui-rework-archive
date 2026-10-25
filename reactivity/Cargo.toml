@@ -1,8 +1,11 @@
 [workspace]
 members = ["crates/*"]
-exclude = ["vendor/winit", "vendor/cephal"]
+exclude = ["vendor/winit", "vendor/cephal", "vendor/softbuffer"]
 resolver = "3"
 
 [workspace.package]
 edition = "2024"
 license = "Apache-2.0"
+
+[patch.crates-io]
+softbuffer = { path = "vendor/softbuffer" }
