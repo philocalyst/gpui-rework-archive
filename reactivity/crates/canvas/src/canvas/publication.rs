@@ -1,6 +1,6 @@
 //! One-shot canonical publication binding. No Target/ACK/image completion grant.
 use super::*;
-use gpui_reactivity_core::change::{BatchStamp,ChangeBatch,Facet,PreparedPublication,PreparedChanges,PublicationReceipt,SceneGroups,SceneRevision,SiteId};
+use gpui_reactivity_core::change::{BatchStamp,ChangeBatch,Facet,PreparedPublication,PreparedChanges,PublicationReceipt,SceneGroups,SceneRevision,SiteId,ClosedDependencies,DependencyNode,Artifact,Phase};
 
 // Intentionally INLINE: no fallible allocation after canonical mutation. All
 // owned batch/range vectors were admitted by the producer before this commit.
@@ -8,6 +8,7 @@ use gpui_reactivity_core::change::{BatchStamp,ChangeBatch,Facet,PreparedPublicat
 pub(super) struct Binding {
     receipt:PublicationReceipt,
     batch:ChangeBatch,
+    closed:Option<ClosedDependencies>,
     groups:SceneGroups,
     users:MaterialUsers,
     mutation:Mutation,
@@ -79,6 +80,10 @@ impl<'a> CanvasAcceptedSceneView<'a> {
     pub fn scene(self)->PreparedScene<'a> {self.scene}
     pub fn batch(self)->&'a ChangeBatch {&self.binding.batch}
     pub fn groups(self)->&'a SceneGroups {&self.binding.groups}
+    /// Already-closed OLD+NEW logical dependencies; physical group/resource/tile
+    /// resolution and target completion are still separate renderer admission.
+    /// Missing closure is a mandatory conservative full-consumer fallback.
+    pub fn closed_dependencies(self)->Option<&'a ClosedDependencies> {self.binding.closed.as_ref()}
     pub fn stamp(self)->BatchStamp {self.binding.receipt.stamp()}
     /// A full source snapshot is NOT an incremental-clean claim. A renderer
     /// must admit/diff its complete immutable catalog before deriving jobs.
@@ -164,8 +169,8 @@ impl CanvasScene<'_> {
         let users=MaterialUsers::build(self.pending.prepared_scene(),&groups,stamp.to)?;
         let damage=DamageRegion::checked_canvas_bounds([0,0,self.pending.width,self.pending.height]);
         let target=self.commit_into(); // infallible canonical mutation revokes old binding first
-        let batch=changes.commit();let receipt=publication.commit();
-        target.publication=Some(Binding {receipt,batch,groups,users,mutation:Mutation::Snapshot,scratch:Vec::new()});
+        let (batch,closed)=changes.commit_with_closure();let receipt=publication.commit();
+        target.publication=Some(Binding {receipt,batch,closed,groups,users,mutation:Mutation::Snapshot,scratch:Vec::new()});
         Ok(damage)
     }
 }
@@ -179,13 +184,19 @@ pub(super) fn check_slot_publication(canvas:&mut Canvas,changes:&PreparedChanges
     // A full RASTER cannot repair missing canonical geometry. Rebuild a full
     // staged snapshot instead; no hard reason certifies paint-only retargeting.
     if !changes.batch().full.is_empty() {return Err(PublicationError::IncompleteChanges);}
-    if changed!=0 && !changes.batch().entries.iter().any(|entry|entry.facets.contains(Facet::Paint)) {
+    if changed!=0 && changes.closed_dependencies().is_none() && !changes.batch().entries.iter().any(|entry|entry.facets.contains(Facet::Paint)) {
         return Err(PublicationError::NonPaintMutation);
     }
-    for entry in &changes.batch().entries {
-        if [Facet::Topology,Facet::Layout,Facet::TextSource,Facet::TextPolicy,Facet::TextWidth,
-            Facet::Transform,Facet::Clip,Facet::Stacking,Facet::ResourcePixels,Facet::ResourceMetrics]
-            .into_iter().any(|facet|entry.facets.contains(facet)) {return Err(PublicationError::NonPaintMutation);}
+    if changes.batch().entries.iter().any(|entry|!entry.facets.is_material_only()) {
+        return Err(PublicationError::NonPaintMutation);
+    }
+    if let Some(closed)=changes.closed_dependencies() {
+        // Material is distinct from primitive CONTENT/generation. Any causal
+        // geometry/content or unknown resource/global domain needs full stage.
+        if closed.artifacts().iter().any(|node|!matches!(node,
+            DependencyNode::Site(Artifact {phase:Phase::Material|Phase::Raster|Phase::Hit|Phase::Semantics,..}))) {
+            return Err(PublicationError::IncompleteChanges);
+        }
     }
     // This checked transaction is Paint-only. Typed resource-pixel operations
     // must use their own actual resource update path, not impersonate a slot.
@@ -201,9 +212,14 @@ pub(super) fn check_slot_publication(canvas:&mut Canvas,changes:&PreparedChanges
             for local in users {
                 // PreparedChanges owns Journal's unique SiteId-ordered rows.
                 let site=SiteId::from_monotonic(old.users.bank.owner,*local);
-                let covered=changes.batch().entries.binary_search_by_key(&site,|entry|entry.site).ok()
-                    .is_some_and(|index| {let entry=&changes.batch().entries[index];
-                        entry.facets.contains(Facet::Paint)});
+                let covered=if let Some(closed)=changes.closed_dependencies() {
+                    closed.stamp()==stamp && closed.full().is_empty()
+                        && [Phase::Material,Phase::Raster].into_iter().all(|phase|
+                            closed.artifacts().contains(&DependencyNode::Site(Artifact {site,phase})))
+                }else{
+                    changes.batch().entries.binary_search_by_key(&site,|entry|entry.site).ok()
+                        .is_some_and(|index|changes.batch().entries[index].facets.contains(Facet::Paint))
+                };
                 if !covered {return Err(PublicationError::UncoveredPaint);}
             }
         }
@@ -223,14 +239,14 @@ pub(super) fn slot_users(canvas:&Canvas,slot:PaintSlot)->Option<impl Iterator<It
 }
 pub(super) struct SlotParts {pub(super) groups:SceneGroups,users:MaterialUsers,mutation:SlotMutation,scratch:Vec<PaintSlot>}
 pub(super) fn take_slot_groups(canvas:&mut Canvas)->SlotParts {
-    let Binding {receipt,batch:_,groups,users,mutation,scratch}=canvas.publication.take().expect("prevalidated old binding");
+    let Binding {receipt,batch:_,closed:_,groups,users,mutation,scratch}=canvas.publication.take().expect("prevalidated old binding");
     let base=receipt.stamp().to;
     let spare=match mutation {Mutation::Snapshot=>Vec::new(),Mutation::Slots(old)=>old.slots};
     SlotParts {groups,users,mutation:SlotMutation {base,slots:scratch},scratch:spare}
 }
-pub(super) fn install(canvas:&mut Canvas,receipt:PublicationReceipt,batch:ChangeBatch,parts:SlotParts) {
+pub(super) fn install(canvas:&mut Canvas,receipt:PublicationReceipt,batch:ChangeBatch,closed:Option<ClosedDependencies>,parts:SlotParts) {
     let SlotParts {groups,users,mutation,scratch}=parts;
-    canvas.publication=Some(Binding {receipt,batch,groups,users,mutation:Mutation::Slots(mutation),scratch});
+    canvas.publication=Some(Binding {receipt,batch,closed,groups,users,mutation:Mutation::Slots(mutation),scratch});
 }
 
 #[cfg(test)]

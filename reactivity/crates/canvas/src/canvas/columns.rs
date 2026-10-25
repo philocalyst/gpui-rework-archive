@@ -554,8 +554,8 @@ impl<'canvas,'edits> SlotCommit<'canvas, 'edits> {
         // fallible allocation occurs between check and this infallible commit.
         parts.groups.prepare_retarget(stamp).expect("prevalidated unchanged group header").commit();
         let (canvas,damage)=self.commit_into();
-        let batch=changes.commit();let receipt=publication.commit();
-        super::publication::install(canvas,receipt,batch,parts);
+        let (batch,closed)=changes.commit_with_closure();let receipt=publication.commit();
+        super::publication::install(canvas,receipt,batch,closed,parts);
         Ok(damage)
     }
 }

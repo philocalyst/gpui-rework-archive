@@ -168,3 +168,102 @@ fn precommit_witness_borrows_actual_changed_slots_and_all_users_without_mutation
         assert_eq!(canvas.accepted_scene().unwrap().stamp(),stamp);
     }
 }
+#[test]
+fn stored_closed_dependencies_cover_actual_reader_not_just_raw_paint_source() {
+    use gpui_reactivity_core::change::{Artifact,Dependencies,DependencyNode,Phase};
+    let (mut canvas,mut issuer,mut journal,slot)=setup();let old=canvas.accepted_scene().unwrap().stamp();
+    assert!(canvas.accepted_scene().unwrap().closed_dependencies().is_none());
+    let source=SiteId::from_monotonic(issuer.owner(),Nz::new(2).unwrap());
+    let reader=SiteId::from_monotonic(issuer.owner(),Nz::new(1).unwrap());
+    let mut graph=Dependencies::new(128);graph.reset(old.to);graph.register_site(source);graph.register_site(reader);
+    graph.depends_on(Artifact {site:reader,phase:Phase::Material},Artifact {site:source,phase:Phase::Material});
+    assert!(graph.finish(2));
+    journal.record(Change {site:source,facets:Facets::one(Facet::Paint),scope:Scope::Site,before:Support::Pending,after:Support::Pending});
+    let closed=graph.invalidate_pending(&journal);let next=stamp(&issuer,&journal,2);
+    let edits=[SlotEdit::new(slot,PaintColor::new(Color::BLACK))];let plan=canvas.prepare_slots(&edits).unwrap();
+    let witness=plan.prepared_mutation().unwrap();assert_eq!(witness.actual_users(slot).unwrap().next(),Some(reader));drop(witness);
+    let changes=journal.prepare(next).unwrap().with_closed(closed).unwrap();
+    assert!(changes.closed_dependencies().unwrap().artifacts().contains(&DependencyNode::Site(Artifact {site:reader,phase:Phase::Raster})));
+    plan.commit_publication(changes,issuer.prepare(next).unwrap()).unwrap();
+    let view=canvas.accepted_scene().unwrap();let closed=view.closed_dependencies().unwrap();
+    assert_eq!(closed.stamp(),view.stamp());assert!(closed.full().is_empty());
+    assert!(closed.artifacts().contains(&DependencyNode::Site(Artifact {site:reader,phase:Phase::Material})));
+    assert_eq!(view.checked_slot_mutation().unwrap().changed_slots(),&[slot]);
+}
+#[test]
+fn paint_source_with_closed_layout_dependency_cannot_retarget_old_geometry() {
+    use gpui_reactivity_core::change::{Artifact,Dependencies,Phase};
+    let (mut canvas,mut issuer,mut journal,slot)=setup();let old=canvas.accepted_scene().unwrap().stamp();
+    let source=SiteId::from_monotonic(issuer.owner(),Nz::new(2).unwrap());let reader=SiteId::from_monotonic(issuer.owner(),Nz::new(1).unwrap());
+    let mut graph=Dependencies::new(128);graph.reset(old.to);graph.register_site(source);graph.register_site(reader);
+    graph.depends_on(Artifact {site:reader,phase:Phase::Layout},Artifact {site:source,phase:Phase::Material});assert!(graph.finish(2));
+    journal.record(Change {site:source,facets:Facets::one(Facet::Paint),scope:Scope::Site,before:Support::Pending,after:Support::Pending});
+    let closed=graph.invalidate_pending(&journal);let next=stamp(&issuer,&journal,2);
+    let changes=journal.prepare(next).unwrap().with_closed(closed).unwrap();let publication=issuer.prepare(next).unwrap();
+    let edits=[SlotEdit::new(slot,PaintColor::new(Color::BLACK))];
+    assert_eq!(canvas.prepare_slots(&edits).unwrap().commit_publication(changes,publication),Err(PublicationError::IncompleteChanges));
+    assert_eq!(canvas.accepted_scene().unwrap().stamp(),old);assert_eq!(journal.base(),Some(old.to));
+}
+#[test]
+fn ordinary_alpha_change_rebuilds_snapshot_and_cannot_reuse_old_opaque_cut() {
+    let mut issuer=FrameIssuer::new().unwrap();let mut journal=Journal::new(issuer.owner(),16);
+    let mut canvas=Canvas::recording(32,32,ColorConfig::default()).unwrap();
+    let clip=Rect::new(0.,0.,32.,32.);let mut old_slot=None;
+    for sequence in 1..=2 {
+        let next=stamp(&issuer,&journal,sequence);let alpha=if sequence==1 {255}else{128};
+        if sequence==2 {
+            record(&mut journal,issuer.owner(),Facet::Paint);
+            let edit=[SlotEdit::new(old_slot.unwrap(),PaintColor::new(Color::rgba(0,0,255,alpha)))];
+            assert!(canvas.prepare_slots(&edit).is_err(),"same-alpha route must NOT certify opacity change");
+            assert_eq!(canvas.accepted_scene().unwrap().stamp().to.sequence.get(),1);
+        }
+        let mut stage=canvas.stage();stage.clear(Color::BLACK);
+        stage.fill_rect(clip,Affine::IDENTITY,clip,Color::rgba(255,0,0,255)).unwrap();
+        let slot=stage.paint_slot(PaintColor::new(Color::rgba(0,0,255,alpha))).unwrap();
+        stage.fill_rect_slot(clip,Affine::IDENTITY,clip,slot).unwrap();old_slot=Some(slot);
+        let metadata=groups(next,stage.draw_count());
+        stage.commit_publication(journal.prepare(next).unwrap(),issuer.prepare(next).unwrap(),metadata).unwrap();
+        assert!(canvas.accepted_scene().unwrap().is_full_snapshot());
+        let mut actual=vec![0;1024];canvas.render_bgrx(&mut actual).unwrap();
+        let mut cold=Canvas::recording(32,32,ColorConfig::default()).unwrap();cold.clear(Color::BLACK);
+        cold.fill_rect(clip,Affine::IDENTITY,clip,Color::rgba(255,0,0,255)).unwrap();
+        cold.fill_rect(clip,Affine::IDENTITY,clip,Color::rgba(0,0,255,alpha)).unwrap();
+        let mut expected=vec![0;1024];cold.render_bgrx(&mut expected).unwrap();assert_eq!(actual,expected);
+        if sequence==1 {assert!(canvas.stats().full_rect_tiles>0);}else{assert!(!canvas.stats().bins_reused);}
+    }
+}
+#[test]
+fn ordinary_image_alpha_revision_is_new_material_snapshot_with_complete_cold_pixels() {
+    use gpui_canvas::{AlphaMode,Image,ImageProfile,ImageSampling};
+    let mut issuer=FrameIssuer::new().unwrap();let mut journal=Journal::new(issuer.owner(),16);
+    let mut canvas=Canvas::recording(32,32,ColorConfig::default()).unwrap();let clip=Rect::new(0.,0.,32.,32.);
+    let mut prior=None;
+    for sequence in 1..=2 {
+        let alpha=if sequence==1 {255}else{80};let image=Image::rgba8(1,1,ImageProfile::Srgb,AlphaMode::Straight,vec![0,0,255,alpha].into_boxed_slice()).unwrap();
+        if let Some(old)=prior {assert_ne!(image.key(),old);}prior=Some(image.key());
+        let next=stamp(&issuer,&journal,sequence);let mut stage=canvas.stage();stage.clear(Color::BLACK);
+        stage.fill_rect(clip,Affine::IDENTITY,clip,Color::WHITE).unwrap();stage.draw_image(&image,clip,Affine::IDENTITY,clip,ImageSampling::Nearest).unwrap();
+        let metadata=groups(next,stage.draw_count());
+        stage.commit_publication(journal.prepare(next).unwrap(),issuer.prepare(next).unwrap(),metadata).unwrap();
+        let view=canvas.accepted_scene().unwrap();assert!(view.is_full_snapshot());assert!(view.checked_slot_mutation().is_none());
+        let mut actual=vec![0;1024];canvas.render_bgrx(&mut actual).unwrap();
+        let mut cold=Canvas::recording(32,32,ColorConfig::default()).unwrap();cold.clear(Color::BLACK);
+        cold.fill_rect(clip,Affine::IDENTITY,clip,Color::WHITE).unwrap();cold.draw_image(&image,clip,Affine::IDENTITY,clip,ImageSampling::Nearest).unwrap();
+        let mut expected=vec![0;1024];cold.render_bgrx(&mut expected).unwrap();assert_eq!(actual,expected);
+        assert!(!canvas.stats().bins_reused);
+    }
+}
+#[test]
+fn material_source_with_closed_primitive_content_dependency_requires_new_snapshot() {
+    use gpui_reactivity_core::change::{Artifact,Dependencies,Phase};
+    let (mut canvas,mut issuer,mut journal,slot)=setup();let old=canvas.accepted_scene().unwrap().stamp();
+    let source=SiteId::from_monotonic(issuer.owner(),Nz::new(2).unwrap());let reader=SiteId::from_monotonic(issuer.owner(),Nz::new(1).unwrap());
+    let mut graph=Dependencies::new(128);graph.reset(old.to);graph.register_site(source);graph.register_site(reader);
+    graph.depends_on(Artifact {site:reader,phase:Phase::Primitive},Artifact {site:source,phase:Phase::Material});assert!(graph.finish(2));
+    journal.record(Change {site:source,facets:Facets::one(Facet::Paint),scope:Scope::Site,before:Support::Pending,after:Support::Pending});
+    let closure=graph.invalidate_pending(&journal);let next=stamp(&issuer,&journal,2);
+    let changes=journal.prepare(next).unwrap().with_closed(closure).unwrap();
+    let edits=[SlotEdit::new(slot,PaintColor::new(Color::BLACK))];
+    assert_eq!(canvas.prepare_slots(&edits).unwrap().commit_publication(changes,issuer.prepare(next).unwrap()),Err(PublicationError::IncompleteChanges));
+    assert_eq!(canvas.accepted_scene().unwrap().stamp(),old);assert_eq!(journal.base(),Some(old.to));
+}
