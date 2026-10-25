@@ -3,7 +3,7 @@ use super::*;
 use super::artifacts::{ArtifactStore,ShapeInputs};
 use gpui_reactivity_core::{change::{Artifact,FrameIssuer},resource::{ResourceContext,WindowAccounting,ResourceError,ResourceId}};
 #[cfg(test)]
-use gpui_canvas::text::FontFace;
+use gpui_canvas::FontFace;
 
 #[derive(Debug)]
 pub(super) enum TextResourceError { Resource(ResourceError), Canvas(gpui_canvas::Error) }
@@ -14,7 +14,7 @@ pub(super) fn measure(store:&mut ArtifactStore,context:&mut ResourceContext,scop
     slot:usize,key:Artifact,source:SharedText,size:f32,width:Option<f32>,service:&mut TextShaper<'_>)
     ->Result<(TextMetrics,Option<ResourceId>),TextResourceError>
 {
-    gpui_canvas::text::ShapeArtifact::validate_request(&source,size,width)?;
+    gpui_canvas::ShapeArtifact::validate_request(&source,size,width)?;
     context.ledger_for(scope,issuer).map_err(TextResourceError::Resource)?;
     if key.site.owner!=issuer.owner() {return Err(TextResourceError::Resource(ResourceError::ForeignOwner));}
     if key.phase!=gpui_reactivity_core::change::Phase::Shape {return Err(TextResourceError::Resource(ResourceError::InvalidLayout));}
@@ -32,7 +32,7 @@ pub(super) fn shape(store:&mut ArtifactStore,context:&mut ResourceContext,scope:
     slot:usize,key:Artifact,source:SharedText,size:f32,width:Option<f32>,service:&mut TextShaper<'_>)
     ->Result<(TextLayout,Option<ResourceId>),TextResourceError>
 {
-    gpui_canvas::text::ShapeArtifact::validate_request(&source,size,width)?;
+    gpui_canvas::ShapeArtifact::validate_request(&source,size,width)?;
     context.ledger_for(scope,issuer).map_err(TextResourceError::Resource)?;
     if key.site.owner!=issuer.owner() {return Err(TextResourceError::Resource(ResourceError::ForeignOwner));}
     if key.phase!=gpui_reactivity_core::change::Phase::Shape {return Err(TextResourceError::Resource(ResourceError::InvalidLayout));}
@@ -204,7 +204,7 @@ impl TextSite {
             AvailableSpace::Definite(width)=>Some(width),AvailableSpace::MinContent=>Some(f32::MIN_POSITIVE),AvailableSpace::MaxContent=>None,
         });
         let width=width.map(|value|value.max(f32::MIN_POSITIVE));
-        gpui_canvas::text::ShapeArtifact::validate_request(&source,font_size,width)?;
+        gpui_canvas::ShapeArtifact::validate_request(&source,font_size,width)?;
         if self.shaped.is_none() && input.known_dimensions.width.is_some() {
             self.shape_accounted(service,font_size,width,source.clone(),store,context,scope,issuer,slot,key)?;
         }
@@ -223,7 +223,7 @@ impl TextSite {
         issuer:&FrameIssuer,slot:usize,key:Artifact)->Result<(&'n TextLayout,Option<ResourceId>),TextResourceError>
     {
         let width=width.map(|value|value.max(f32::MIN_POSITIVE));let width_key=width.map(f32::to_bits);
-        gpui_canvas::text::ShapeArtifact::validate_request(&source,font_size,width)?;
+        gpui_canvas::ShapeArtifact::validate_request(&source,font_size,width)?;
         let inputs=ShapeInputs::new(source.clone(),service.font_face().clone(),font_size);
         let hit=self.shaped.as_ref().is_some_and(|shape|shape.width==width_key && shape.layout.font_size()==font_size
             && shape.input.as_ref().is_some_and(|accepted|accepted.matches(&inputs)));

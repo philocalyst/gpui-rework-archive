@@ -2,7 +2,7 @@
 use super::*;
 use std::collections::BTreeMap;
 use gpui_reactivity_core::{change::Artifact,resource::ResourceLease};
-use gpui_canvas::text::{FontFace,ShapeArtifact};
+use gpui_canvas::{FontFace,ShapeArtifact};
 
 #[derive(Clone)]
 pub(super) struct ShapeInputs { source:SharedText, font:FontFace, size:u32 }
