@@ -12,12 +12,71 @@ pub(super) enum PatchOutcome {
 /// editing/IME/inspector guards. The fallback remains dirty even if token or
 /// slot admission fails, so settle cannot certify an unprepared source epoch.
 pub(super) struct PaintIntent {
-    change: Option<styles::ColorChange>,
+    edits: PaintEdits,
+    requires_full: bool,
     fallback_dirty: bool,
 }
 impl PaintIntent {
     pub(super) fn new(change: Option<styles::ColorChange>, fallback_dirty: bool) -> Self {
-        Self { change, fallback_dirty }
+        let mut intent = Self { edits: PaintEdits::Empty, requires_full: false, fallback_dirty };
+        if let Some(change) = change {
+            intent.include(change);
+        }
+        intent
+    }
+    pub(super) fn include(&mut self, change: styles::ColorChange) {
+        if change.users == 0 {
+            return;
+        }
+        self.fallback_dirty = true;
+        if change.previous.working().map(f32::to_bits)
+            == change.value.working().map(f32::to_bits)
+        {
+            return;
+        }
+        if change.previous.working()[3].to_bits() != change.value.working()[3].to_bits() {
+            self.requires_full = true;
+            return;
+        }
+        if let Some(slot) = change.canvas {
+            self.edits.push(gpui_canvas::SlotEdit::new(slot, change.value));
+        }
+        // An absent complete command stays absent for equal-alpha color only.
+    }
+}
+/// One source operation owns one finite edit set, not a cross-turn change log.
+/// Preserve the allocation-free zero/one case; only genuinely multi-slot
+/// changes allocate a vector proportional to the changed slot frontier.
+#[derive(Default)]
+pub(super) enum PaintEdits {
+    #[default]
+    Empty,
+    One(gpui_canvas::SlotEdit),
+    Many(Vec<gpui_canvas::SlotEdit>),
+}
+impl PaintEdits {
+    fn push(&mut self, edit: gpui_canvas::SlotEdit) {
+        match self {
+            Self::Empty => *self = Self::One(edit),
+            Self::One(previous) => *self = Self::Many(vec![*previous, edit]),
+            Self::Many(edits) => edits.push(edit),
+        }
+    }
+    fn as_slice(&self) -> &[gpui_canvas::SlotEdit] {
+        match self {
+            Self::Empty => &[],
+            Self::One(edit) => std::slice::from_ref(edit),
+            Self::Many(edits) => edits,
+        }
+    }
+    fn order(&mut self) -> bool {
+        if let Self::Many(edits) = self {
+            edits.sort_unstable_by_key(|edit| edit.slot());
+            // Distinct source relationships should have distinct Canvas slots.
+            // Do not silently resolve a conflicting alias by choosing a value.
+            return edits.windows(2).all(|pair| pair[0].slot() < pair[1].slot());
+        }
+        true
     }
 }
 /// Exactly one transition, never an accumulated change log. A coalesced native
@@ -26,12 +85,21 @@ impl PaintIntent {
 #[cfg_attr(not(feature = "native-core"), allow(dead_code))]
 pub(crate) struct SlotTransition {
     pub(crate) from: PresentationToken,
-    pub(crate) edits: [gpui_canvas::SlotEdit; 1],
+    pub(super) edits: PaintEdits,
+}
+#[cfg(feature = "native-core")]
+impl SlotTransition {
+    pub(crate) fn edits(&self) -> &[gpui_canvas::SlotEdit] {
+        self.edits.as_slice()
+    }
 }
 impl<M: View + 'static> Runtime<M> {
-    pub(super) fn publish_paint_intent(&mut self, intent: PaintIntent) -> Result<bool, Error> {
+    pub(super) fn publish_paint_intent(&mut self, mut intent: PaintIntent) -> Result<bool, Error> {
         self.dirty |= intent.fallback_dirty;
-        let complete = self.finish_color_slot(intent.change.as_ref())?;
+        if intent.requires_full || !intent.edits.order() {
+            return Ok(false);
+        }
+        let complete = self.finish_color_slots(intent.edits)?;
         if complete {
             // publish_paint(None) intentionally preserves caller dirty state;
             // this admitted paint-only outcome is the owner of that state.
@@ -39,46 +107,28 @@ impl<M: View + 'static> Runtime<M> {
         }
         Ok(complete)
     }
-    fn finish_color_slot(
+    fn finish_color_slots(
         &mut self,
-        change: Option<&styles::ColorChange>,
+        edits: PaintEdits,
     ) -> Result<bool, Error> {
-        use gpui_canvas::SlotEdit;
-        let Some(change) = change else {
-            self.publish_paint(None)?;
-            return Ok(true);
-        };
-        if change.users == 0
-            || change.previous.working().map(f32::to_bits)
-                == change.value.working().map(f32::to_bits)
-        {
+        if edits.as_slice().is_empty() {
             self.publish_paint(None)?;
             return Ok(true);
         }
-        if change.previous.working()[3].to_bits() != change.value.working()[3].to_bits() {
-            return Ok(false);
-        }
-        let Some(slot) = change.canvas else {
-            // No command from this relationship survived complete preparation.
-            // Equal alpha preserves that geometric/material absence.
-            self.publish_paint(None)?;
-            return Ok(true);
-        };
         let sequence = self.next_presentation;
         let next = sequence.checked_add(1).ok_or(Error::EpochExhausted)?;
         let token = PresentationToken {
             window: self.sites.namespace(),
             sequence,
         };
-        let edits = [SlotEdit::new(slot, change.value)];
-        let Ok(plan) = self.canvas.prepare_slots(&edits) else {
+        let Ok(plan) = self.canvas.prepare_slots(edits.as_slice()) else {
             return Ok(false);
         };
         let damage = plan.commit();
         #[cfg(feature = "native-core")]
         self.styles.record_slot_transition(
             self.latest_token.expect("complete predecessor has a token"),
-            edits[0],
+            edits,
         );
         self.publish_paint(Some((damage, token, next)))?;
         Ok(true)
@@ -208,10 +258,53 @@ mod tests {
     #[test]
     fn paint_admission_transient_layout_ledger() {
         eprintln!(
-            "PAINT_ADMISSION_BYTES outcome={} intent={} change={} result={}",
+            "PAINT_ADMISSION_BYTES outcome={} intent={} change={} edits={} transition={} result={}",
             size_of::<PatchOutcome>(), size_of::<PaintIntent>(),
-            size_of::<styles::ColorChange>(), size_of::<Result<PatchOutcome, Error>>(),
+            size_of::<styles::ColorChange>(), size_of::<PaintEdits>(),
+            size_of::<SlotTransition>(), size_of::<Result<PatchOutcome, Error>>(),
         );
+    }
+    #[test]
+    fn changed_slot_frontier_orders_all_rows_without_allocating_the_single_case() {
+        let mut canvas = Canvas::recording(32, 32, Default::default()).unwrap();
+        let color = gpui_canvas::PaintColor::new(Color::BLACK);
+        let slots = [canvas.paint_slot(color).unwrap(), canvas.paint_slot(color).unwrap(), canvas.paint_slot(color).unwrap()];
+        let mut edits = PaintEdits::Empty;
+        let one = allocation_counter::measure(|| edits.push(gpui_canvas::SlotEdit::new(slots[2], color)));
+        assert_eq!(one.count_total, 0);
+        assert_eq!(edits.as_slice().len(), 1);
+        edits.push(gpui_canvas::SlotEdit::new(slots[0], color));
+        edits.push(gpui_canvas::SlotEdit::new(slots[1], color));
+        assert!(edits.order());
+        assert_eq!(edits.as_slice().iter().map(|edit| edit.slot()).collect::<Vec<_>>(), slots);
+        edits.push(gpui_canvas::SlotEdit::new(slots[1], color));
+        assert!(!edits.order(), "ambiguous same-slot aliases must take full fallback");
+    }
+    #[test]
+    fn late_invalid_changed_slot_leaves_the_entire_complete_bank_and_token_untouched() {
+        let mut win = Win::recording(
+            Panel { bound: true, color: Signal::new(Color::BLACK) },
+            WindowOptions { size: [32, 32], ..Default::default() },
+        ).unwrap();
+        let before = win.with_scene(|scene, token| {
+            (token, scene.paint_bank().iter().map(|color| color.working().map(f32::to_bits)).collect::<Vec<_>>())
+        }).unwrap();
+        let mut foreign = Canvas::recording(32, 32, Default::default()).unwrap();
+        let black = gpui_canvas::PaintColor::new(Color::BLACK);
+        let invalid = (0..8).map(|_| foreign.paint_slot(black).unwrap()).last().unwrap();
+        let mut runtime = win.runtime_mut().unwrap();
+        let (_, slot) = runtime.styles.shared_paint(0, false).unwrap();
+        let slot = slot.expect("bound emitted background");
+        let mut edits = PaintEdits::Empty;
+        edits.push(gpui_canvas::SlotEdit::new(slot, gpui_canvas::PaintColor::new(Color::WHITE)));
+        edits.push(gpui_canvas::SlotEdit::new(invalid, gpui_canvas::PaintColor::new(Color::WHITE)));
+        assert!(edits.order());
+        assert!(!runtime.finish_color_slots(edits).unwrap());
+        drop(runtime);
+        let after = win.with_scene(|scene, token| {
+            (token, scene.paint_bank().iter().map(|color| color.working().map(f32::to_bits)).collect::<Vec<_>>())
+        }).unwrap();
+        assert_eq!(after, before);
     }
     struct Panel {
         bound: bool,

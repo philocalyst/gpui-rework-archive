@@ -780,7 +780,7 @@ struct MappedFanout {
 }
 enum ColorPatch {
     Full,
-    Candidate(Option<styles::ColorChange>),
+    Candidate(paint::PaintIntent),
 }
 impl MappedFanout {
     // Every comparison and inspector base must see the OLD bank. Publish only
@@ -803,25 +803,15 @@ impl MappedFanout {
                     )
                 )
             }) {
-            ColorPatch::Candidate(None)
+            ColorPatch::Candidate(paint::PaintIntent::new(None, false))
         } else {
             ColorPatch::Full
         };
         let mut publish = |slot, color| {
             if let Some(change) = styles.update_color(slot, color)
                 && let ColorPatch::Candidate(candidate) = &mut patch
-                && change.users != 0
-                && change.previous.working().map(f32::to_bits)
-                    != change.value.working().map(f32::to_bits)
-                && (change.canvas.is_some()
-                    || change.previous.working()[3].to_bits()
-                        != change.value.working()[3].to_bits())
             {
-                if candidate.is_some() {
-                    patch = ColorPatch::Full;
-                } else {
-                    *candidate = Some(change);
-                }
+                candidate.include(change);
             }
         };
         for (record, value) in self.records.iter().zip(&self.values) {
@@ -2958,15 +2948,13 @@ impl<M: View + 'static> Runtime<M> {
             }
         }
         if let Fanout::Mapped(mapped) = fanout
-            && let ColorPatch::Candidate(change) =
+            && let ColorPatch::Candidate(intent) =
                 mapped.publish_colors(&mut self.styles, frozen.style, eligible)
         {
             // Admission updates logical banks only. The turn decides whether
             // the existing alpha-checked transaction may publish after guards.
             self.dirty |= visual_changed;
-            return Ok(PatchOutcome::Paint(paint::PaintIntent::new(
-                change, visual_changed,
-            )));
+            return Ok(PatchOutcome::Paint(intent));
         }
         if eligible && last_changed.is_none() {
             // Exact comparisons established that every installed operand is

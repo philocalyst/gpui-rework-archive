@@ -5,6 +5,7 @@ struct Panel {
     value: Signal<u32>,
     alpha: bool,
     two: bool,
+    broken: bool,
 }
 impl Panel {
     const VALUE: Source<Self, u32> =
@@ -19,6 +20,7 @@ impl View for Panel {
             div()
                 .name("paint")
                 .size(4)
+                .transform(if self.broken { Affine::scale(0., 1.) } else { Affine::IDENTITY })
                 .bg(self.value.map_with(self.alpha, |value, alpha| {
                     if alpha {
                         if *value == 0 {
@@ -55,6 +57,7 @@ fn window(alpha: bool, two: bool) -> Win<Panel> {
             value: Signal::new(0),
             alpha,
             two,
+            broken: false,
         },
         WindowOptions {
             size: [32, 32],
@@ -117,18 +120,26 @@ fn one_mapped_color_keeps_ten_thousand_rows_without_allocating_a_replacement_sce
 }
 
 #[test]
-fn alpha_changes_and_two_changed_slots_preserve_complete_pixels() {
+fn alpha_changes_rebuild_while_two_same_alpha_slots_keep_complete_pixels() {
     for (alpha, two) in [(true, false), (false, true)] {
         let mut win = window(alpha, two);
         ack(&mut win);
         let before = first_pixel(&mut win);
         win.reset_counters().unwrap();
         win.set(Panel::VALUE, 1).unwrap();
-        assert!(
-            win.counters().paint_passes > 0,
-            "topology or multiple slots need full preparation"
-        );
+        if alpha {
+            assert!(win.counters().paint_passes > 0, "alpha changes still require full preparation");
+        } else {
+            assert_eq!(win.counters().paint_passes, 0, "one admitted two-slot transfer keeps the complete scene");
+            assert_eq!(win.counters().layout_runs, 0);
+            assert_eq!(win.counters().owner_reruns, 0);
+        }
         assert_ne!(first_pixel(&mut win), before);
+        let mut cold = Win::with_size(
+            Panel { value: Signal::new(1), alpha, two, broken: false }, 32, 32,
+        ).unwrap();
+        let pixels = win.with_pixels(|pixels, _, _| pixels.to_vec()).unwrap();
+        cold.with_pixels(|expected, _, _| assert_eq!(pixels, expected)).unwrap();
         ack(&mut win);
         if two {
             let target = win.query().name("peer").one().unwrap();
@@ -141,12 +152,34 @@ fn alpha_changes_and_two_changed_slots_preserve_complete_pixels() {
 }
 
 #[test]
+fn two_slot_pending_candidate_survives_failed_newer_source_and_eligible_ack() {
+    let mut win = window(false, true);
+    ack(&mut win);
+    let old_rows = win.snapshot().unwrap().nodes;
+    win.set(Panel::VALUE, 1).unwrap();
+    let eligible = win.with_scene(|_, token| token).unwrap();
+    let pending = win.with_pixels(|pixels, _, _| pixels.to_vec()).unwrap();
+    // The newer logical description is admitted, but its singular transform
+    // cannot prepare a complete candidate. The two-slot C stays eligible.
+    assert!(win.update(|model| model.broken = true).is_err());
+    assert_eq!(win.snapshot().unwrap().nodes, old_rows);
+    assert_eq!(win.with_scene(|_, token| token).unwrap(), eligible);
+    let receipt = win.presented(eligible).unwrap();
+    assert!(receipt.presentation_epoch < receipt.source_epoch);
+    win.with_pixels(|pixels, _, _| assert_eq!(pixels, pending)).unwrap();
+    win.update(|model| model.broken = false).unwrap();
+    ack(&mut win);
+    win.with_pixels(|pixels, _, _| assert_eq!(pixels, pending)).unwrap();
+}
+
+#[test]
 fn mounted_inspector_refreshes_the_mapped_color_after_a_complete_paint_turn() {
     let mut win = Win::with_inspector(
         Panel {
             value: Signal::new(0),
             alpha: false,
             two: false,
+            broken: false,
         },
         WindowOptions {
             size: [640, 240],

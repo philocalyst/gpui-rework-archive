@@ -331,7 +331,7 @@ impl GpuSurface {
         }
         if let Some(paint) = paint
             && self.packet_token == Some(paint.from)
-            && let Ok(plan) = self.renderer.prepare_slots(&paint.edits, target)
+            && let Ok(plan) = self.renderer.prepare_slots(paint.edits(), target)
         {
             self.packet_token = None; // revoke before the first queue write
             let submitted = plan.commit();
