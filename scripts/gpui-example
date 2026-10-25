@@ -1,0 +1,22 @@
+#!/usr/bin/env bash
+set -euo pipefail
+
+if (( $# == 0 )); then
+    echo "usage: scripts/gpui-example <example-name> [-- example arguments...]" >&2
+    exit 2
+fi
+
+example_name="$1"
+shift
+if (( $# > 0 )) && [[ "$1" == "--" ]]; then
+    shift
+fi
+script_dir="$(cd -- "$(dirname -- "${BASH_SOURCE[0]}")" && pwd)"
+repo_root="$(cd -- "$script_dir/.." && pwd)"
+
+cargo_config_args=()
+if [[ -f "$repo_root/.cargo/config.toml" ]]; then
+    cargo_config_args+=(--config "$repo_root/.cargo/config.toml")
+fi
+
+exec cargo "${cargo_config_args[@]}" run --manifest-path "$repo_root/Cargo.toml" --package gpui-ce --example "$example_name" -- "$@"

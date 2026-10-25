@@ -1,0 +1,440 @@
+--- a/compiler/rustc_interface/src/util.rs
++++ b/compiler/rustc_interface/src/util.rs
+@@ -185,10 +185,23 @@
+     // the parallel compiler, in particular to ensure there is no accidental
+     // sharing of data between the main thread and the compilation thread
+     // (which might cause problems for the parallel compiler).
++    #[cfg(target_family = "wasm")]
++    {
++        // Native compilation starts a fresh thread. WASM cannot spawn one, so
++        // explicitly end the lifetime of pointer-keyed stable-hash memo tables.
++        return rustc_span::create_session_globals_then(
++            edition, extra_symbols, Some(sm_inputs), || {
++                rustc_middle::ty::reset_stable_hash_caches();
++                f(CurrentGcx::new())
++            },
++        );
++    }
++    #[cfg(not(target_family = "wasm"))]
+     let builder = thread::Builder::new().name("rustc".to_string()).stack_size(thread_stack_size);
+ 
+     // We build the session globals and run `f` on the spawned thread, because
+     // `SessionGlobals` does not impl `Send` in the non-parallel compiler.
++    #[cfg(not(target_family = "wasm"))]
+     thread::scope(|s| {
+         // `unwrap` is ok here because `spawn_scoped` only panics if the thread
+         // name contains null bytes.
+@@ -228,7 +241,22 @@
+     let thread_stack_size = init_stack_size(thread_builder_diag);
+ 
+     let jobs_frontend = jobs.frontend.or(NonZero::new(1)).unwrap();
++    #[cfg(not(target_family = "wasm"))]
+     let registry = sync::Registry::new(jobs_frontend);
++    #[cfg(target_family = "wasm")]
++    let registry = {
++        // Browser compiler sessions share one OS thread. The registry contains
++        // only its thread index, never compiler arenas or query results.
++        assert_eq!(jobs_frontend.get(), 1);
++        thread_local! {
++            static BROWSER_REGISTRY: sync::Registry = {
++                let registry = sync::Registry::new(NonZero::new(1).unwrap());
++                registry.register();
++                registry
++            };
++        }
++        BROWSER_REGISTRY.with(Clone::clone)
++    };
+ 
+     let Some(proof) = sync::check_dyn_thread_safe() else {
+         assert_eq!(jobs_frontend.get(), 1);
+@@ -239,6 +267,7 @@
+             extra_symbols,
+             |current_gcx| {
+                 // Register the thread for use with the `WorkerLocal` type.
++                #[cfg(not(target_family = "wasm"))]
+                 registry.register();
+ 
+                 f(current_gcx)
+--- a/compiler/rustc_interface/src/callbacks.rs
++++ b/compiler/rustc_interface/src/callbacks.rs
+@@ -77,7 +77,7 @@
+ /// in `rustc_middle` otherwise.
+ fn def_id_debug(def_id: rustc_hir::def_id::DefId, f: &mut fmt::Formatter<'_>) -> fmt::Result {
+     write!(f, "DefId({}:{}", def_id.krate, def_id.index.index())?;
+-    tls::with_opt(|opt_tcx| {
++    tls::with_opt(|opt_tcx| -> fmt::Result {
+         if let Some(tcx) = opt_tcx {
+             write!(f, " ~ {}", tcx.def_path_debug_str(def_id))?;
+         }
+--- a/compiler/rustc_session/src/config.rs
++++ b/compiler/rustc_session/src/config.rs
+@@ -1417,7 +1417,10 @@
+ 
+ impl Sysroot {
+     pub fn new(explicit: Option<PathBuf>) -> Sysroot {
+-        Sysroot { explicit, default: filesearch::default_sysroot() }
++        #[cfg(target_family = "wasm")]
++        return Sysroot { default: explicit.clone().unwrap_or_else(|| PathBuf::from("/sysroot")), explicit };
++        #[cfg(not(target_family = "wasm"))]
++        Sysroot { default: explicit.clone().unwrap_or_else(filesearch::default_sysroot), explicit }
+     }
+ 
+     /// Return explicit sysroot if it was passed with `--sysroot`, or default sysroot otherwise.
+--- a/compiler/rustc_metadata/src/host_dylib.rs
++++ b/compiler/rustc_metadata/src/host_dylib.rs
+@@ -13,6 +13,7 @@
+     e.sources().map(|e| format!(": {e}")).collect()
+ }
+ 
++#[cfg(not(target_family = "wasm"))]
+ fn attempt_load_dylib(path: &Path) -> Result<libloading::Library, libloading::Error> {
+     #[cfg(target_os = "aix")]
+     if let Some(ext) = path.extension()
+@@ -40,6 +41,7 @@
+ // proc-macro DLL with `Error::LoadLibraryExW`. It is suspected that something in the
+ // system still holds a lock on the file, so we retry a few times before calling it
+ // an error.
++#[cfg(not(target_family = "wasm"))]
+ fn load_dylib(path: &Path, max_attempts: usize) -> Result<libloading::Library, String> {
+     assert!(max_attempts > 0);
+ 
+@@ -103,6 +105,7 @@
+     }
+ }
+ 
++#[cfg(not(target_family = "wasm"))]
+ pub unsafe fn load_symbol_from_dylib<T: Copy>(
+     path: &Path,
+     sym_name: &str,
+@@ -145,3 +148,8 @@
+         }
+     }
+ }
++
++#[cfg(target_family = "wasm")]
++pub unsafe fn load_symbol_from_dylib<T: Copy>(path: &Path, sym_name: &str) -> Result<T, DylibError> {
++    Err(DylibError::DlOpen(path.display().to_string(), format!("dynamic symbol {sym_name} is not registered in this browser compiler")))
++}
+--- a/compiler/rustc_symbol_mangling/src/v0.rs
++++ b/compiler/rustc_symbol_mangling/src/v0.rs
+@@ -833,7 +833,7 @@
+             ty::Array(..) | ty::Tuple(..) | ty::Slice(_) => {
+                 let fields = cv.to_branch().iter().copied();
+ 
+-                let print_field_list = |this: &mut Self| {
++                let print_field_list = |this: &mut Self| -> Result<(), PrintError> {
+                     for field in fields.clone() {
+                         field.print(this)?;
+                     }
+@@ -857,7 +857,7 @@
+                 let contents = cv.destructure_adt_const();
+                 let fields = contents.fields.iter().copied();
+ 
+-                let print_field_list = |this: &mut Self| {
++                let print_field_list = |this: &mut Self| -> Result<(), PrintError> {
+                     for field in fields.clone() {
+                         field.print(this)?;
+                     }
+--- a/compiler/rustc_data_structures/src/flock.rs
++++ b/compiler/rustc_data_structures/src/flock.rs
+@@ -60,6 +60,10 @@
+ }
+ 
+ cfg_select! {
++    target_family = "wasm" => {
++        mod browser;
++        use browser as fallback;
++    }
+     unix => {
+         mod unix;
+         use unix as fallback;
+--- a/compiler/rustc_data_structures/src/memmap.rs
++++ b/compiler/rustc_data_structures/src/memmap.rs
+@@ -86,7 +86,7 @@
+ impl MmapMut {
+     #[inline]
+     pub fn map_anon(len: usize) -> io::Result<Self> {
+-        let data = Vec::with_capacity(len);
++        let data = vec![0; len];
+         Ok(MmapMut(data))
+     }
+ 
+--- a/compiler/rustc_const_eval/src/interpret/mod.rs
++++ b/compiler/rustc_const_eval/src/interpret/mod.rs
+@@ -1,6 +1,8 @@
+ //! An interpreter for MIR used in CTFE and by miri
+ 
+ mod call;
++#[cfg(target_family = "wasm")]
++mod codepen_float;
+ mod cast;
+ mod discriminant;
+ mod eval_context;
+--- a/compiler/rustc_const_eval/src/interpret/machine.rs
++++ b/compiler/rustc_const_eval/src/interpret/machine.rs
+@@ -288,6 +288,11 @@
+         left: &ImmTy<'tcx, Self::Provenance>,
+         right: &ImmTy<'tcx, Self::Provenance>,
+     ) -> InterpResult<'tcx, ImmTy<'tcx, Self::Provenance>>;
++
++    /// Opt in to validated host IEEE operations for deterministic browser Miri.
++    /// CTFE and all other machines retain rustc's software-float semantics.
++    #[cfg(target_family = "wasm")]
++    fn codepen_host_float(_ecx: &InterpCx<'tcx, Self>) -> bool { false }
+ 
+     /// Generate the NaN returned by a float operation, given the list of inputs.
+     /// (This is all inputs, not just NaN inputs!)
+--- a/compiler/rustc_const_eval/src/interpret/operator.rs
++++ b/compiler/rustc_const_eval/src/interpret/operator.rs
+@@ -393,6 +393,34 @@
+                 let layout = left.layout;
+                 let left = left.to_scalar();
+                 let right = right.to_scalar();
++                #[cfg(target_family = "wasm")]
++                if M::codepen_host_float(self) {
++                    use super::codepen_float::{self, Op, Value};
++                    use mir::BinOp;
++                    let op = match bin_op {
++                        BinOp::Add => Some(Op::Add), BinOp::Sub => Some(Op::Sub),
++                        BinOp::Mul => Some(Op::Mul), BinOp::Div => Some(Op::Div),
++                        BinOp::Eq => Some(Op::Eq), BinOp::Ne => Some(Op::Ne),
++                        BinOp::Lt => Some(Op::Lt), BinOp::Le => Some(Op::Le),
++                        BinOp::Gt => Some(Op::Gt), BinOp::Ge => Some(Op::Ge),
++                        _ => None,
++                    };
++                    let values = match fty {
++                        FloatTy::F32 => Some((32, left.to_u32()? as u64, right.to_u32()? as u64)),
++                        FloatTy::F64 => Some((64, left.to_u64()?, right.to_u64()?)),
++                        _ => None,
++                    };
++                    if let (Some(op), Some((width, l, r))) = (op, values) {
++                        if let Some(value) = codepen_float::binary(width, op, l, r) {
++                            return interp_ok(match value {
++                                Value::Bool(value) => ImmTy::from_bool(value, *self.tcx),
++                                Value::Bits(value) => ImmTy::from_scalar(
++                                    if width == 32 { Scalar::from_u32(value as u32) }
++                                    else { Scalar::from_u64(value) }, layout),
++                            });
++                        }
++                    }
++                }
+                 interp_ok(match fty {
+                     FloatTy::F16 => {
+                         self.binary_float_op(bin_op, layout, left.to_f16()?, right.to_f16()?)
+--- a/compiler/rustc_middle/src/ty/impls_ty.rs
++++ b/compiler/rustc_middle/src/ty/impls_ty.rs
+@@ -13,6 +13,18 @@
+ 
+ use crate::{mir, ty};
+ 
++// These keys contain arena addresses and are valid only within one compiler
++// session. Native rustc drops the thread; browser rustc reuses its Worker.
++thread_local! {
++    static RAW_LIST_HASH_CACHE: RefCell<FxHashMap<(*const (), StableHashControls), Fingerprint>> =
++        RefCell::new(Default::default());
++}
++
++#[cfg(target_family = "wasm")]
++pub(super) fn reset_stable_hash_cache() {
++    RAW_LIST_HASH_CACHE.with(|cache| cache.borrow_mut().clear());
++}
++
+ impl<'tcx, H, T> StableHash for &'tcx ty::list::RawList<H, T>
+ where
+     T: StableHash,
+@@ -21,12 +33,7 @@
+         // Note: this cache makes an *enormous* performance difference on certain benchmarks. E.g.
+         // without it, compiling `diesel-2.2.10` can be 74% slower, and compiling
+         // `deeply-nested-multi` can be ~4,000x slower(!)
+-        thread_local! {
+-            static CACHE: RefCell<FxHashMap<(*const (), StableHashControls), Fingerprint>> =
+-                RefCell::new(Default::default());
+-        }
+-
+-        let hash = CACHE.with(|cache| {
++        let hash = RAW_LIST_HASH_CACHE.with(|cache| {
+             let key = (ptr::from_ref(*self).cast::<()>(), hcx.stable_hash_controls());
+             if let Some(&hash) = cache.borrow().get(&key) {
+                 return hash;
+--- a/compiler/rustc_middle/src/ty/adt.rs
++++ b/compiler/rustc_middle/src/ty/adt.rs
+@@ -156,13 +156,20 @@
+     }
+ }
+ 
++// AdtDefData lives in the current TyCtxt arena. Reused addresses in the next
++// browser compiler session must never reuse the previous session's fingerprint.
++thread_local! {
++    static ADT_HASH_CACHE: RefCell<FxHashMap<(usize, StableHashControls), Fingerprint>> = Default::default();
++}
++
++#[cfg(target_family = "wasm")]
++pub(super) fn reset_stable_hash_cache() {
++    ADT_HASH_CACHE.with(|cache| cache.borrow_mut().clear());
++}
++
+ impl StableHash for AdtDefData {
+     fn stable_hash<Hcx: StableHashCtxt>(&self, hcx: &mut Hcx, hasher: &mut StableHasher) {
+-        thread_local! {
+-            static CACHE: RefCell<FxHashMap<(usize, StableHashControls), Fingerprint>> = Default::default();
+-        }
+-
+-        let hash: Fingerprint = CACHE.with(|cache| {
++        let hash: Fingerprint = ADT_HASH_CACHE.with(|cache| {
+             let addr = self as *const AdtDefData as usize;
+             let stable_hash_controls = hcx.stable_hash_controls();
+             *cache.borrow_mut().entry((addr, stable_hash_controls)).or_insert_with(|| {
+--- a/compiler/rustc_middle/src/ty/mod.rs
++++ b/compiler/rustc_middle/src/ty/mod.rs
+@@ -153,6 +153,16 @@
+ mod generic_args;
+ mod generics;
+ mod impls_ty;
++
++/// Reset memo tables whose pointer keys belong to the previous compiler arena.
++/// Call only between compiler sessions on the browser's single compiler thread.
++#[doc(hidden)]
++#[cfg(target_family = "wasm")]
++pub fn reset_stable_hash_caches() {
++    impls_ty::reset_stable_hash_cache();
++    adt::reset_stable_hash_cache();
++}
++
+ mod instance;
+ mod intrinsic;
+ mod list;
+--- a/compiler/rustc_middle/src/verify_ich.rs
++++ b/compiler/rustc_middle/src/verify_ich.rs
+@@ -64,6 +64,9 @@
+     };
+ 
+     let old_in_panic = INSIDE_VERIFY_PANIC.replace(true);
++    // A browser compiler session may recover from this panic and reuse the
++    // thread. Restore the reentrancy flag during unwind as well as on return.
++    let _reset_in_panic = rustc_data_structures::defer(|| INSIDE_VERIFY_PANIC.set(old_in_panic));
+ 
+     if old_in_panic {
+         tcx.dcx().emit_err(crate::diagnostics::Reentrant);
+@@ -82,5 +85,4 @@
+         panic!("Found unstable fingerprints for {dep_node:?}: {}", result());
+     }
+ 
+-    INSIDE_VERIFY_PANIC.set(old_in_panic);
+ }
+--- a/compiler/rustc_metadata/src/rmeta/decoder.rs
++++ b/compiler/rustc_metadata/src/rmeta/decoder.rs
+@@ -170,6 +170,8 @@
+     opaque: MemDecoder<'a>,
+     blob: &'a MetadataBlob,
+     lazy_state: LazyState,
++    #[cfg(target_family = "wasm")]
++    profile_start: usize,
+ }
+ 
+ /// This trait abstracts over decoders that can decode lazy values using [`LazyState`]:
+@@ -211,6 +213,21 @@
+     }
+ }
+ 
++#[cfg(target_family = "wasm")]
++impl BlobDecodeContext<'_> {
++    fn record_profile_run(&mut self) {
++        let end = self.opaque.position();
++        crate::browser_metadata::record(self.blob.bytes(), self.profile_start,
++            end - self.profile_start, "decoder");
++        self.profile_start = end;
++    }
++}
++
++#[cfg(target_family = "wasm")]
++impl Drop for BlobDecodeContext<'_> {
++    fn drop(&mut self) { self.record_profile_run(); }
++}
++
+ impl<'a> LazyDecoder for BlobDecodeContext<'a> {
+     fn set_lazy_state(&mut self, state: LazyState) {
+         self.lazy_state = state;
+@@ -274,6 +291,8 @@
+             // demands a significant refactoring due to our crate graph.
+             opaque: MemDecoder::new(self, pos).unwrap(),
+             lazy_state: LazyState::NoNode,
++            #[cfg(target_family = "wasm")]
++            profile_start: pos,
+             blob: self.blob(),
+         }
+     }
+@@ -378,7 +397,13 @@
+                 let pos = self.read_usize();
+ 
+                 // move to str offset and read
+-                self.opaque.with_position(pos, |d| read_and_intern_str_or_byte_str_opaque(d))
++                let blob = self.blob;
++                self.opaque.with_position(pos, |d| {
++                    let result = read_and_intern_str_or_byte_str_opaque(d);
++                    #[cfg(target_family = "wasm")]
++                    crate::browser_metadata::record(blob.bytes(), pos, d.position() - pos, "symbol");
++                    result
++                })
+             }
+             SYMBOL_PREDEFINED => new_from_index(self.read_u32()),
+             _ => unreachable!(),
+@@ -410,11 +435,19 @@
+     where
+         F: FnOnce(&mut Self) -> R,
+     {
++        #[cfg(target_family = "wasm")]
++        self.blob_decoder.record_profile_run();
+         let new_opaque = self.blob_decoder.opaque.split_at(pos);
+         let old_opaque = mem::replace(&mut self.blob_decoder.opaque, new_opaque);
+         let old_state = mem::replace(&mut self.blob_decoder.lazy_state, LazyState::NoNode);
++        #[cfg(target_family = "wasm")]
++        { self.blob_decoder.profile_start = pos; }
+         let r = f(self);
++        #[cfg(target_family = "wasm")]
++        self.blob_decoder.record_profile_run();
+         self.blob_decoder.opaque = old_opaque;
++        #[cfg(target_family = "wasm")]
++        { self.blob_decoder.profile_start = self.blob_decoder.opaque.position(); }
+         self.blob_decoder.lazy_state = old_state;
+         r
+     }
+@@ -1023,7 +1056,16 @@
+             .enumerate()
+             .find(|(_pos, (i, _))| *i == id)
+             .unwrap();
+-        (self.raw_proc_macros.unwrap()[pos], kind.decode((self, tcx)))
++        let kind = kind.decode((self, tcx));
++        #[cfg(target_family="wasm")]
++        {
++            let Some(client) = crate::browser_macros::client(self.hash(), self.root.stable_crate_id(), &kind) else {
++                tcx.sess.dcx().fatal(format!("proc macro from {} is not bundled with this GPUI interpreter", self.root.name()));
++            };
++            (client, kind)
++        }
++        #[cfg(not(target_family="wasm"))]
++        (self.raw_proc_macros.unwrap()[pos], kind)
+     }
+ 
+     fn opt_item_name(&self, item_index: DefIndex) -> Option<Symbol> {
+--- a/compiler/rustc_metadata/src/rmeta/table.rs
++++ b/compiler/rustc_metadata/src/rmeta/table.rs
+@@ -523,6 +523,8 @@
+         let width = self.width;
+         let start = self.position.get() + (width * i.index());
+         let end = start + width;
++        #[cfg(target_family = "wasm")]
++        crate::browser_metadata::record(metadata.blob().bytes(), start, width, "table");
+         let bytes = &metadata.blob()[start..end];
+ 
+         if let Ok(fixed) = bytes.try_into() {
+--- a/compiler/rustc_metadata/src/rmeta/def_path_hash_map.rs
++++ b/compiler/rustc_metadata/src/rmeta/def_path_hash_map.rs
+@@ -57,6 +57,8 @@
+     fn decode(d: &mut BlobDecodeContext<'a>) -> DefPathHashMapRef<'static> {
+         let len = d.read_usize();
+         let pos = d.position();
++        #[cfg(target_family = "wasm")]
++        crate::browser_metadata::record(d.blob().bytes(), pos, len, "def-path-map");
+         let o = d.blob().bytes().clone().slice(|blob| &blob[pos..pos + len]);
+ 
+         // Although we already have the data we need via the `OwnedSlice`, we still need

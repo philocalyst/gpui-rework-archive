@@ -1,0 +1,31 @@
+name: Rust codepen
+on:
+  pull_request:
+    paths:
+      - 'crates/gpui_codepen/**'
+      - 'crates/gpui_elements/**'
+      - 'vendor/miri/**'
+      - 'scripts/codepen/**'
+      - 'Cargo.toml'
+      - 'Cargo.lock'
+      - '.github/workflows/codepen.yml'
+  workflow_dispatch:
+permissions:
+  contents: read
+jobs:
+  native-miri:
+    runs-on: macos-latest
+    steps:
+      - uses: actions/checkout@v5
+      - uses: actions-rust-lang/setup-rust-toolchain@v1
+      - uses: Swatinem/rust-cache@v2
+        with:
+          workspaces: |
+            . -> target
+            vendor/miri -> target
+            vendor/miri/cargo-miri -> target
+      - run: python3 scripts/codepen/setup.py
+      - run: cargo test -p gpui_ce_codepen --lib --test session
+      - run: cargo test -p gpui_ce_codepen --test engines --test server -- --ignored --nocapture
+      - run: rustup target add --toolchain nightly-2026-09-30 wasm32-unknown-unknown
+      - run: cargo +nightly-2026-09-30 check -p gpui_ce_codepen --bin gpui-guide --target wasm32-unknown-unknown
