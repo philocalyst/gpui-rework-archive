@@ -194,13 +194,15 @@ impl View for Wide {
                 .p(1)
                 .gap(2)
                 .justify(gpui::Justify::SpaceBetween)
-        }));
+        }))
+        .align(gpui::Align::Stretch);
         if self.inserted {
             // A real visible structural change, not a renamed no-op. This is
             // a prepended control, not an anchored overlay/popover protocol.
             column((button("").name("inserted").size(1).bg(Color::BLACK), grid))
+                .align(gpui::Align::Stretch)
         } else {
-            column(grid)
+            column(grid).align(gpui::Align::Stretch)
         }
     }
 }
