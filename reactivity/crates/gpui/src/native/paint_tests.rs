@@ -286,6 +286,12 @@ pub(super) fn run(gpu: &mut GpuSurface) {
             ),
             (0, if two { 32 } else { 16 })
         );
+        if !hdr && !mapped && !two {
+            // Exercise the exact-byte stale-predecessor oracle before the
+            // older work-counter-only coalescing controls below can fail.
+            coalesced_hover_predecessor(gpu, &mut oracle, &texture, false);
+            render(gpu, &mut oracle, &mut owner, &texture);
+        }
         if two {
             owner.set(Paint::COLOR, rgb(0x708090)).unwrap();
             let eligible = owner.with_scene(|_, token| token).unwrap();
