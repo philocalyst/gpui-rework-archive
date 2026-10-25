@@ -1,0 +1,138 @@
+{
+  "runner": "4f99473dfa0a1eeee44945da6d6459f2d5d79bb548a5661a96b3c6a950cc744b",
+  "fixture": "2c91527eacb977a59eacf5dd681db610970367e9f5f7ffcd6e401d8d219bf2e8",
+  "sources": {
+    "baseline": {
+      "pin": "59467a4136d92822e90dfcff329383c75f9c3c33",
+      "caller": "2c91527eacb977a59eacf5dd681db610970367e9f5f7ffcd6e401d8d219bf2e8"
+    },
+    "packed": {
+      "pin": "8da013d5f81d2687d9fdc7321f91109713e1e6c1",
+      "caller": "2c91527eacb977a59eacf5dd681db610970367e9f5f7ffcd6e401d8d219bf2e8"
+    },
+    "runs": {
+      "pin": "75544537f7596a7e0929306ab27b48f9942b7062",
+      "caller": "2c91527eacb977a59eacf5dd681db610970367e9f5f7ffcd6e401d8d219bf2e8"
+    },
+    "inline": {
+      "pin": "f251f4be7bc215644859df8ee2f70a0f104f8d36",
+      "caller": "2c91527eacb977a59eacf5dd681db610970367e9f5f7ffcd6e401d8d219bf2e8"
+    },
+    "hole": {
+      "pin": "2eae1a93fbddf7705901af359e08aaa7751d1894",
+      "caller": "2c91527eacb977a59eacf5dd681db610970367e9f5f7ffcd6e401d8d219bf2e8"
+    }
+  },
+  "executables": {
+    "baseline": {
+      "path": "/tmp/gpui-idnorm-base-target/release/examples/identity_inline_control",
+      "sha256": "46d8b78d86d90ad93645c74e1e5b9a3d311185a16cc1bdb9465a3217c8ec74cd"
+    },
+    "packed": {
+      "path": "/tmp/gpui-idnorm-packed-target/release/examples/identity_inline_control",
+      "sha256": "c6488f53eba1aff0ed3a29c699d4081590fe1aad35db27ccfaa4f2b4004958c0"
+    },
+    "runs": {
+      "path": "/tmp/gpui-idnorm-runs-target/release/examples/identity_inline_control",
+      "sha256": "a0884b8996761933251ac4716ea941aebcf95df63ff44adda481e3ad65a281c9"
+    },
+    "inline": {
+      "path": "/tmp/gpui-idnorm-inline-target/release/examples/identity_inline_control",
+      "sha256": "51a3a2423207330396967e21d0140e51d816e8909f359b348b1eac0377a8579f"
+    },
+    "hole": {
+      "path": "/tmp/gpui-idnorm-hole-target/release/examples/identity_inline_control",
+      "sha256": "a08557187a3422bcba510bb2310df45a90792430e23e3f1aa2c81a507f26dda4"
+    }
+  },
+  "files": {
+    "/tmp/gpui-idnorm-base-build.jsonl": "490b6cc6c9278b8dbb43106606f5799321623663fde9b88701593a81dd4ec13e",
+    "/tmp/gpui-idnorm-base-target/release/deps/libgpui-ebda70cf724ac75e.rlib": "d23a4d018be34747ac96426c3bf6e9b50bbdce41e24ef8bfa59c57ac6a36a9a1",
+    "/tmp/gpui-idnorm-base-target/release/deps/libgpui-ebda70cf724ac75e.rmeta": "89e9ff995b7e5c357f91904cd13d2eefaac854a698573d00cb879eab5cfbed13",
+    "/tmp/gpui-idnorm-packed-build.jsonl": "d538717e37d1550a3ec5631413410ca1246b666b1159ee9d0278fb01f8ac04f3",
+    "/tmp/gpui-idnorm-packed-target/release/deps/libgpui-ebda70cf724ac75e.rlib": "3382b3aa00ac45e070656a9feb0103dcacad65e20ee101fb9258397e0ebf3726",
+    "/tmp/gpui-idnorm-packed-target/release/deps/libgpui-ebda70cf724ac75e.rmeta": "a04add8f48eb6a25e4d4ac505e8b2f899024eb4c1069be0939fdce683ff28ac8",
+    "/tmp/gpui-idnorm-runs-build.jsonl": "0306194ed7c2299c9e8b2ba8832188ea0a514230b43f25f11e81b215ed075e13",
+    "/tmp/gpui-idnorm-runs-target/release/deps/libgpui-ebda70cf724ac75e.rlib": "da3e7acd45d4b00a5e0ff24c4b3c616c569861ad1b6962c55a3e0f7c5ce402da",
+    "/tmp/gpui-idnorm-runs-target/release/deps/libgpui-ebda70cf724ac75e.rmeta": "d072c4d71723d894bbbd69340759d90839df19db6dad83739530afba5852f26e",
+    "/tmp/gpui-idnorm-inline-build.jsonl": "3909d9e358ccda57f940fe7409413da66994e97cee7a9df01144d59349d10e17",
+    "/tmp/gpui-idnorm-inline-target/release/deps/libgpui-ebda70cf724ac75e.rlib": "d01f5aa0187c86f8d8789fd8102e8e95f8b86dff604a4165138500edb95a9426",
+    "/tmp/gpui-idnorm-inline-target/release/deps/libgpui-ebda70cf724ac75e.rmeta": "953d3a9cbe6f7d23dbee660bf575b1863ab7704281fdb991f7e6e3c5b8295b09",
+    "/tmp/gpui-idnorm-hole-build.jsonl": "b683be00d5e791b77b56b9a7955a2029bb0fedc9280878db6308f176b680e782",
+    "/tmp/gpui-idnorm-hole-target/release/deps/libgpui-ebda70cf724ac75e.rlib": "e76520150ee9e7e74e907ee9ac3440d9253998cf3d60c98c8b741988824a7b8f",
+    "/tmp/gpui-idnorm-hole-target/release/deps/libgpui-ebda70cf724ac75e.rmeta": "6a7d28155ddb72231a42ed41b06a8b8abd88cf6911dc98236d58bcdc0f8b20aa"
+  },
+  "producers": {
+    "baseline": {
+      "root_library_fresh": true,
+      "profile": {
+        "opt_level": "3",
+        "debuginfo": 0,
+        "debug_assertions": false,
+        "overflow_checks": false,
+        "test": false
+      },
+      "features": [
+        "default"
+      ],
+      "package_id": "path+file:///root/gpui-identity-index-base/reactivity/crates/gpui#0.1.0"
+    },
+    "packed": {
+      "root_library_fresh": true,
+      "profile": {
+        "opt_level": "3",
+        "debuginfo": 0,
+        "debug_assertions": false,
+        "overflow_checks": false,
+        "test": false
+      },
+      "features": [
+        "default"
+      ],
+      "package_id": "path+file:///root/gpui-identity-index/reactivity/crates/gpui#0.1.0"
+    },
+    "runs": {
+      "root_library_fresh": true,
+      "profile": {
+        "opt_level": "3",
+        "debuginfo": 0,
+        "debug_assertions": false,
+        "overflow_checks": false,
+        "test": false
+      },
+      "features": [
+        "default"
+      ],
+      "package_id": "path+file:///root/gpui-identity-runs/reactivity/crates/gpui#0.1.0"
+    },
+    "inline": {
+      "root_library_fresh": false,
+      "profile": {
+        "opt_level": "3",
+        "debuginfo": 0,
+        "debug_assertions": false,
+        "overflow_checks": false,
+        "test": false
+      },
+      "features": [
+        "default"
+      ],
+      "package_id": "path+file:///root/gpui-identity-inline/reactivity/crates/gpui#0.1.0"
+    },
+    "hole": {
+      "root_library_fresh": false,
+      "profile": {
+        "opt_level": "3",
+        "debuginfo": 0,
+        "debug_assertions": false,
+        "overflow_checks": false,
+        "test": false
+      },
+      "features": [
+        "default"
+      ],
+      "package_id": "path+file:///root/gpui-identity-hole/reactivity/crates/gpui#0.1.0"
+    }
+  },
+  "old_frozen": "27910b095fb9bf62e612e32ebe50b7eb9dd0d26c7f039d38a27d7487f8f6b74f"
+}
