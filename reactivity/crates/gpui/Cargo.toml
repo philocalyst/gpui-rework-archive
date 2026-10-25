@@ -1,0 +1,18 @@
+[package]
+name = "gpui"
+version = "0.1.0"
+edition.workspace = true
+license.workspace = true
+description = "Clean-room GPUI implementation: typed views and coherent retained presentation"
+publish = false
+
+[dependencies]
+gpui_reactivity_core = { path = "../core", features = ["layout"] }
+gpui_reactivity_state = { path = "../state", features = ["serde"] }
+gpui_canvas = { path = "../canvas" }
+cephal = { path = "../../vendor/cephal", default-features = false }
+serde = { version = "1", features = ["derive"] }
+serde_json = "1"
+
+[features]
+default = []
