@@ -204,7 +204,7 @@ fn mixed_visual_text_sink_keeps_original_description_boundary() {
 }
 
 #[test]
-fn large_sink_viewport_cross_product_falls_back_instead_of_unbounded_proof_work() {
+fn many_sinks_and_viewports_use_topology_bits_without_list_redescription() {
     struct Crowded { transform: Signal<Affine> }
     impl Crowded {
         const TRANSFORM: Source<Self, Affine> = Source::new(
@@ -235,7 +235,7 @@ fn large_sink_viewport_cross_product_falls_back_instead_of_unbounded_proof_work(
     win.presented(token).unwrap();
     win.reset_counters().unwrap();
     win.set(Crowded::TRANSFORM, Affine::translation(2., 1.)).unwrap();
-    assert!(win.counters().descriptions > 0, "bounded optional certificate falls back");
+    assert_eq!(win.counters().descriptions, 0, "topology flags avoid ancestry cross product");
     let token = win.with_scene(|_, token| token).unwrap();
     win.presented(token).unwrap();
     let mut fresh = Win::with_size(Crowded {

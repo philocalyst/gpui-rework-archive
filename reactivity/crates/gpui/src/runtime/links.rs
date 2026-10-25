@@ -4,7 +4,10 @@ use super::{MAX_NODES, Parent};
 
 const BITS: u32 = usize::BITS - MAX_NODES.leading_zeros();
 const MASK: u64 = (1 << BITS) - 1;
-const _: () = assert!(BITS * 3 <= u64::BITS && MAX_NODES as u64 <= MASK);
+const VIEWPORT_ANCESTOR: u64 = 1 << (BITS * 3);
+const VIEWPORT_SUBTREE: u64 = 1 << (BITS * 3 + 1);
+const VIEWPORT_FLAGS: u64 = VIEWPORT_ANCESTOR | VIEWPORT_SUBTREE;
+const _: () = assert!(BITS * 3 + 2 <= u64::BITS && MAX_NODES as u64 <= MASK);
 
 pub(super) struct NodeLinks(u64);
 impl NodeLinks {
@@ -15,6 +18,23 @@ impl NodeLinks {
                 | ((ordinal as u64) << BITS)
                 | (Self::optional(handler) << (BITS * 2)),
         )
+    }
+    // Recomputed for every NEW admitted description, including reused nodes.
+    // ancestor includes self; subtree includes self and every closed child.
+    pub(super) fn set_viewport_flags(&mut self, ancestor: bool, subtree: bool) {
+        self.0 = (self.0 & !VIEWPORT_FLAGS)
+            | (u64::from(ancestor) * VIEWPORT_ANCESTOR)
+            | (u64::from(subtree) * VIEWPORT_SUBTREE);
+    }
+    pub(super) fn viewport_ancestor(&self) -> bool {
+        self.0 & VIEWPORT_ANCESTOR != 0
+    }
+    pub(super) fn viewport_subtree(&self) -> bool {
+        self.0 & VIEWPORT_SUBTREE != 0
+    }
+    // A completed child can only add evidence to its parent's current subtree.
+    pub(super) fn include_viewport_subtree(&mut self, present: bool) {
+        self.0 |= u64::from(present) * VIEWPORT_SUBTREE;
     }
     fn optional(index: Option<usize>) -> u64 {
         index.map_or(0, |index| {
@@ -54,13 +74,33 @@ mod tests {
                 (None, Some(index)),
                 (Some(index), Some(MAX_NODES - 1 - index)),
             ] {
-                let links = NodeLinks::new(parent, index as u32, handler);
-                assert_eq!(
-                    emitted_parent_probe(std::hint::black_box(&links)).index(),
-                    parent
-                );
-                assert_eq!(links.ordinal(), index as u32);
-                assert_eq!(links.handler(), handler);
+                let mut links = NodeLinks::new(parent, index as u32, handler);
+                assert!(!links.viewport_ancestor());
+                assert!(!links.viewport_subtree());
+                for (ancestor, subtree) in [(false, false), (false, true),
+                                            (true, false), (true, true)] {
+                    links.set_viewport_flags(ancestor, subtree);
+                    assert_eq!(links.viewport_ancestor(), ancestor);
+                    assert_eq!(links.viewport_subtree(), subtree);
+                    assert_eq!(
+                        emitted_parent_probe(std::hint::black_box(&links)).index(),
+                        parent
+                    );
+                    assert_eq!(links.ordinal(), index as u32);
+                    assert_eq!(links.handler(), handler);
+                    links.include_viewport_subtree(false);
+                    assert_eq!(links.viewport_subtree(), subtree);
+                    links.include_viewport_subtree(true);
+                    assert!(links.viewport_subtree());
+                    assert_eq!(links.viewport_ancestor(), ancestor);
+                    assert_eq!(links.parent().index(), parent);
+                    assert_eq!(links.ordinal(), index as u32);
+                    assert_eq!(links.handler(), handler);
+                    // Reset must clear earlier subtree evidence on reuse.
+                    links.set_viewport_flags(false, false);
+                    assert!(!links.viewport_ancestor());
+                    assert!(!links.viewport_subtree());
+                }
             }
         }
     }

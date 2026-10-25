@@ -19,49 +19,19 @@ impl<M: View + 'static> Runtime<M> {
             return false;
         }
         let Some(fanout) = self.fanout.get(&field) else { return false };
-        // Optional proof work has a fixed total budget, shared across all
-        // sinks and viewport chains. Exhaustion takes ordinary realization,
-        // never an error or reduced logical work. No persistent index required.
-        let mut probes = 256usize;
         fanout.all_destinations().all(|(destination, _, _)| {
-            let Some(remaining) = probes.checked_sub(1) else { return false };
-            probes = remaining;
             match destination.property() {
                 Some(id) if id.info().impact == crate::property::Impact::Paint => true,
                 Some(crate::property::PropertyId::Transform) => {
-                    self.disjoint_viewport_subtree(destination.node(), &mut probes)
+                    self.nodes.get(destination.node()).is_some_and(|node| {
+                        !node.links.viewport_ancestor() && !node.links.viewport_subtree()
+                    })
                 }
                 // Includes text, semantic ports and every Layout sink. Keep
                 // their existing realization boundary even in a mixed fanout.
                 _ => false,
             }
         })
-    }
-    fn disjoint_viewport_subtree(&self, index: usize, probes: &mut usize) -> bool {
-        let mut current = Some(index);
-        while let Some(index) = current {
-            let Some(remaining) = (*probes).checked_sub(1) else { return false };
-            *probes = remaining;
-            let Some(node) = self.nodes.get(index) else { return false };
-            if matches!(node.kind(), NodeKind::List | NodeKind::ListItem | NodeKind::Scroll) {
-                return false;
-            }
-            current = node.parent().index();
-        }
-        for (&key, state) in &self.viewports {
-            let Some(index_of_viewport) = self.by_identity.get(state.identity(key)) else {
-                return false;
-            };
-            let mut current = Some(index_of_viewport);
-            while let Some(ancestor) = current {
-                if ancestor == index { return false }
-                let Some(remaining) = (*probes).checked_sub(1) else { return false };
-                *probes = remaining;
-                let Some(node) = self.nodes.get(ancestor) else { return false };
-                current = node.parent().index();
-            }
-        }
-        true
     }
 }
 
