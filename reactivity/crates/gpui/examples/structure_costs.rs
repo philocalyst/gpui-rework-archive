@@ -235,7 +235,16 @@ fn geometry_signature(window: &mut Win<Wide>, width: u32) -> serde_json::Value {
     let (draws, samples) = window.with_scene(|scene, _| {
         let count = scene.draws().len();
         assert_eq!(count, leaves + usize::from(inserted));
-        let indices = [0, leaves / 2, leaves - 1];
+        // The midpoint of a whole number of 100-column rows can be column
+        // zero, which correctly does not move under SpaceBetween. Sample the
+        // next admitted column in that case; do not weaken the movement gate.
+        let midpoint = leaves / 2;
+        let midpoint = if midpoint % COLUMNS == 0 && midpoint + 1 < leaves {
+            midpoint + 1
+        } else {
+            midpoint
+        };
+        let indices = [0, midpoint, leaves - 1];
         let samples: Vec<_> = indices.into_iter().map(|index| {
             let draw = scene.draws().nth(index + usize::from(inserted)).unwrap();
             let local = draw.local_rect;
