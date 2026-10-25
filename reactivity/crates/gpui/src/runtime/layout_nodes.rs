@@ -1023,7 +1023,7 @@ mod integrated_cross_product_tests {
         // not predecessor positions, and still runs the ordinary full presentation.
         win.reset_counters().unwrap();
         let map=Affine::translation(4.,2.);
-        let popup=win.query().name("popup").one().unwrap();
+        let popup=win.role(crate::Role::Generic).name("popup").one().unwrap();
         {
             let rt=win.runtime().unwrap();
             let index=rt.by_identity.required(rt.resolve(popup).unwrap());
