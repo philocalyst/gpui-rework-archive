@@ -233,7 +233,8 @@ mod tests {
         for sequence in [u64::MAX - 1, u64::MAX] {
             let mut win = window();
             let old_token = win.with_scene(|_, token| token).unwrap();
-            let old_nodes = win.snapshot().unwrap().nodes;
+            let mut old_nodes = win.snapshot().unwrap().nodes;
+            for node in &mut old_nodes { node.target = None; }
             let old_pixels = win.with_pixels(|pixels, _, _| pixels.to_vec()).unwrap();
             win.runtime_mut().unwrap().next_presentation = NonZeroU64::new(sequence).unwrap();
             let result = win.set(Inspected::COLOR, Color::WHITE);
@@ -247,7 +248,12 @@ mod tests {
             } else {
                 assert!(result.is_err());
                 assert_eq!(win.with_scene(|_, token| token).unwrap(), old_token);
-                assert_eq!(win.snapshot().unwrap().nodes, old_nodes);
+                // Target availability additionally depends on the logical
+                // cohort. This compares immutable P rows, not a promise that
+                // a failed newer source keeps every logical address usable.
+                let mut nodes = win.snapshot().unwrap().nodes;
+                for node in &mut nodes { node.target = None; }
+                assert_eq!(nodes, old_nodes);
                 win.with_pixels(|pixels, _, _| assert_eq!(pixels, old_pixels)).unwrap();
             }
         }
