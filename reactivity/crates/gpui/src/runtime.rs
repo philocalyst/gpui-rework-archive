@@ -2237,6 +2237,10 @@ impl<M: View + 'static> Runtime<M> {
             )));
             *entry = Fanout::Color(slot);
         }
+        // Crossing this boundary destroys the preceding logical cohort. A later
+        // resource/admission error may retain old P/C, but must not re-admit its
+        // stale identity index as if logical reconciliation had never started.
+        self.logical_valid = false;
         let (handlers, old_handlers) =
             handlers::Handlers::replace(self.handlers.take(), handler_count);
         let old_styles = std::mem::take(&mut self.styles);

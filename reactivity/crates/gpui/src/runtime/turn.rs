@@ -157,9 +157,11 @@ impl<M: View + 'static, L: LaneSet<M>> RuntimeMut<'_, M, L> {
         })) {
             Ok(Ok(())) => Ok(()),
             Ok(Err(error)) => {
-                // A rejected presentation-only scroll has not edited the model
-                // or reached reconciliation; its acknowledged cohort stays live.
-                self.logical_valid = !scroll.is_empty() && was_valid;
+                // Only an EARLY rejected scroll leaves the old logical cohort
+                // untouched. describe_inner revokes logical_valid before its
+                // first destructive take; a late resource failure must retain
+                // old P/C without authorizing stale current identity lookups.
+                self.logical_valid = !scroll.is_empty() && was_valid && self.logical_valid;
                 if !self.logical_valid {
                     self.focused = None;
                 }
