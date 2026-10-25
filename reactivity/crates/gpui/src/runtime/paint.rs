@@ -346,6 +346,57 @@ mod tests {
         }).unwrap();
         assert_eq!(after, before);
     }
+    #[cfg(feature = "native-core")]
+    #[test]
+    fn failed_exact_alpha_intent_preserves_the_old_owned_multi_slot_transition() {
+        struct Double(Signal<Color>);
+        impl Double {
+            const COLOR: crate::Source<Self, Color> = crate::Source::new(
+                FieldId::new(1), "color", |model| &model.0, |model| &mut model.0,
+            );
+        }
+        impl View for Double {
+            fn sources() -> Sources<Self> { Sources::new().direct(Self::COLOR) }
+            fn view(&self) -> crate::El<'_> {
+                crate::row((
+                    crate::div().size(8).bg(self.0.map(|color| *color)),
+                    crate::div().size(8).bg(self.0.map(|color| *color)),
+                ))
+            }
+        }
+        let mut win = Win::recording(
+            Double(Signal::new(Color::BLACK)),
+            WindowOptions { size: [32, 24], ..Default::default() },
+        ).unwrap();
+        let initial = win.with_scene(|_, token| token).unwrap();
+        win.presented(initial).unwrap();
+        win.set(Double::COLOR, Color::WHITE).unwrap();
+        let witness = |win: &Win<Double>| {
+            let runtime = win.runtime().unwrap();
+            let state = runtime.styles.slot_transition().unwrap();
+            (
+                state.from,
+                state.edits().iter().map(|edit| (edit.slot(), edit.value().working().map(f32::to_bits))).collect::<Vec<_>>(),
+                state.retained_edit_capacity(),
+            )
+        };
+        let old_witness = witness(&win);
+        assert_eq!(old_witness.1.len(), 2);
+        let bank = |win: &Win<Double>| win.with_scene(|scene, token| {
+            (token, scene.paint_bank().map(|paint| (paint.value().working().map(f32::to_bits), paint.shared(), paint.rectangle())).collect::<Vec<_>>())
+        }).unwrap();
+        let old_bank = bank(&win);
+        win.runtime_mut().unwrap().next_presentation = NonZeroU64::MAX;
+        assert!(win.set(Double::COLOR, Color::TRANSPARENT).is_err());
+        assert_eq!(bank(&win), old_bank);
+        assert_eq!(witness(&win), old_witness);
+        assert!(win.settle().is_err());
+        assert!(win.set(Double::COLOR, Color::TRANSPARENT).is_err());
+        assert_eq!(bank(&win), old_bank);
+        assert_eq!(witness(&win), old_witness);
+        let receipt = win.presented(old_bank.0).unwrap();
+        assert!(receipt.presentation_epoch < receipt.source_epoch);
+    }
     struct Panel {
         bound: bool,
         color: Signal<Color>,
