@@ -100,8 +100,8 @@ fn equivalent(a: &mut Win<Panel>, b: &mut Win<Panel>) {
     for y in [0., 5., 10., 20., 63.] {
         for x in [0., 5., 15., 30., 63.] {
             let point = Point { x, y };
-            let ah = a.hit_target(point).ok();
-            let bh = b.hit_target(point).ok();
+            let ah = a.hit_target(point).unwrap();
+            let bh = b.hit_target(point).unwrap();
             let idx = |w: &Win<Panel>, t: Option<Target>| {
                 w.snapshot()
                     .unwrap()
