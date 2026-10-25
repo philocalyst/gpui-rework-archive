@@ -359,3 +359,135 @@ fn forgetting_a_borrow_guard_cannot_leave_deferred_policy_in_the_window() {
     ack(&mut b);
     equivalent(&mut a, &mut b);
 }
+
+#[test]
+fn inspector_observes_final_admitted_properties_and_publishes_once() {
+    let options = WindowOptions {
+        size: [640, 480],
+        ..Default::default()
+    };
+    let mut a = Win::with_inspector(Panel::new(), options).unwrap();
+    let mut b = Win::with_inspector(Panel::new(), options).unwrap();
+    let al = a.query().name("left").one().unwrap();
+    let bl = b.query().name("left").one().unwrap();
+    a.inspector_select(al).unwrap();
+    b.inspector_select(bl).unwrap();
+    a.reset_counters().unwrap();
+    b.reset_counters().unwrap();
+    a.set_property(al, WIDTH, Contribution::Set(Some(24.)))
+        .unwrap();
+    a.set_property(al, HEIGHT, Contribution::Set(Some(14.)))
+        .unwrap();
+    let mut turn = b.edit_turn().unwrap();
+    turn.set_property(bl, WIDTH, Contribution::Set(Some(24.)))
+        .unwrap();
+    turn.set_property(bl, HEIGHT, Contribution::Set(Some(14.)))
+        .unwrap();
+    turn.finish().unwrap();
+    assert_eq!(b.counters().paint_passes, 1);
+    assert_eq!(a.counters().paint_passes, 2);
+    assert_eq!(b.inspector_selected().unwrap(), Some(bl));
+    equivalent(&mut a, &mut b);
+}
+
+struct Input {
+    value: Signal<String>,
+}
+impl Input {
+    const VALUE: Source<Self, String> =
+        Source::new(FieldId::new(1), "value", |m| &m.value, |m| &mut m.value);
+}
+impl View for Input {
+    fn sources() -> Sources<Self> {
+        Sources::new().direct(Self::VALUE)
+    }
+    fn view(&self) -> El<'_> {
+        text_input(&self.value).name("input").w(70).h(24)
+    }
+}
+#[test]
+fn active_selection_and_ime_reconcile_each_admission_before_final_publication() {
+    use gpui::{ImeEvent, ImeSession, TextSelection};
+    let input_window = || {
+        let mut win = Win::recording(
+            Input {
+                value: Signal::new("abcdef".into()),
+            },
+            WindowOptions {
+                size: [80, 40],
+                ..Default::default()
+            },
+        )
+        .unwrap();
+        let ack = |w: &mut Win<Input>| {
+            let token = w.with_scene(|_, t| t).unwrap();
+            w.presented(token).unwrap();
+        };
+        ack(&mut win);
+        let target = win.input();
+        win.focus(target).unwrap();
+        win.select(target, TextSelection::from_bytes(2, 4).unwrap())
+            .unwrap();
+        ack(&mut win);
+        let mut session = ImeSession::default();
+        win.ime_event(&mut session, ImeEvent::Enabled).unwrap();
+        win.ime_event(
+            &mut session,
+            ImeEvent::Preedit {
+                text: "XYZ",
+                cursor: Some((1, 1)),
+            },
+        )
+        .unwrap();
+        ack(&mut win);
+        win.reset_counters().unwrap();
+        (win, target, session)
+    };
+    let (mut a, at, mut asession) = input_window();
+    let (mut b, bt, mut bsession) = input_window();
+    let old = b.snapshot().unwrap().nodes;
+    a.set(Input::VALUE, "ab".into()).unwrap();
+    a.set(Input::VALUE, "abQ".into()).unwrap();
+    let mut turn = b.edit_turn().unwrap();
+    turn.set(Input::VALUE, "ab".into()).unwrap();
+    turn.set(Input::VALUE, "abQ".into()).unwrap();
+    turn.finish().unwrap();
+    assert_eq!(
+        b.snapshot().unwrap().nodes,
+        old,
+        "pending candidate cannot expose new caret/IME state as acknowledged"
+    );
+    assert_eq!(b.counters().source_operations, 2);
+    assert_eq!(b.counters().paint_passes, 1);
+    assert_eq!(a.counters().paint_passes, 2);
+    assert_eq!(a.selection(at).unwrap(), b.selection(bt).unwrap());
+    for win in [&mut a, &mut b] {
+        let token = win.with_scene(|_, t| t).unwrap();
+        win.presented(token).unwrap();
+    }
+    let nodes = |w: &Win<Input>| {
+        let mut n = w.snapshot().unwrap().nodes;
+        for n in &mut n {
+            n.target = None;
+        }
+        n
+    };
+    assert_eq!(nodes(&a), nodes(&b));
+    let frozen = |w: &Win<Input>| {
+        let mut out = Vec::new();
+        w.visit(|p| out.push((p.value().map(str::to_owned), p.selection(), p.marked_text())))
+            .unwrap();
+        out
+    };
+    assert_eq!(frozen(&a), frozen(&b));
+    let pixels = a.with_pixels(|p, _, _| p.to_vec()).unwrap();
+    b.with_pixels(|p, _, _| assert_eq!(pixels, p)).unwrap();
+    assert!(
+        a.ime_event(&mut asession, ImeEvent::Commit("late"))
+            .is_err()
+    );
+    assert!(
+        b.ime_event(&mut bsession, ImeEvent::Commit("late"))
+            .is_err()
+    );
+}
