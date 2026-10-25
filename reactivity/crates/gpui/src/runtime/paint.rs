@@ -578,4 +578,60 @@ mod tests {
             );
         }
     }
+    #[test]
+    fn two_mapped_slots_wait_for_inspector_and_keep_last_complete_c_after_max_failure() {
+        struct Guard(Signal<u32>);
+        impl Guard {
+            const HOVER: crate::Source<Self,u32> = crate::Source::new(
+                FieldId::new(1),"hover",|m| &m.0,|m| &mut m.0,
+            );
+        }
+        impl View for Guard {
+            fn sources()->Sources<Self> { Sources::new().direct(Self::HOVER) }
+            fn view(&self)->crate::El<'_> {
+                crate::row((
+                    crate::div().name("left").size(24).bg(self.0.map(|id|match *id%3 {
+                        0=>Color::BLACK,1=>Color::rgba(255,0,0,255),_=>Color::rgba(0,0,255,255),
+                    })),
+                    crate::div().name("right").size(24).bg(self.0.map(|id|match *id%3 {
+                        0=>Color::WHITE,1=>Color::rgba(0,255,0,255),_=>Color::rgba(255,255,0,255),
+                    })),
+                ))
+            }
+        }
+        fn ack_guard(win:&mut Win<Guard>) {
+            let token=win.with_scene(|_,token|token).unwrap(); win.presented(token).unwrap();
+        }
+        fn bank(win:&Win<Guard>)->(PresentationToken,Vec<([u32;4],bool,bool)>) {
+            win.with_scene(|scene,token|(token,scene.paint_bank().map(|p|(
+                p.value().working().map(f32::to_bits),p.shared(),p.rectangle(),
+            )).collect())).unwrap()
+        }
+        let mut win=Win::recording_with_inspector(Guard(Signal::new(0)),WindowOptions {
+            size:[720,640],..Default::default()
+        }).unwrap();
+        ack_guard(&mut win);
+        let left=win.query().name("left").one().unwrap();
+        win.inspector_select(left).unwrap(); ack_guard(&mut win);
+        let old_p=win.snapshot().unwrap().nodes;
+        win.set(Guard::HOVER,1).unwrap(); // Distinct pending C, no acknowledgement.
+        let older=bank(&win);
+        win.runtime_mut().unwrap().next_presentation=NonZeroU64::new(u64::MAX-1).unwrap();
+        win.reset_counters().unwrap();
+        win.set(Guard::HOVER,2).unwrap();
+        let eligible=bank(&win);
+        assert_ne!(eligible,older);
+        assert_eq!(eligible.0.sequence.get(),u64::MAX-1);
+        assert_eq!(win.runtime().unwrap().next_presentation.get(),u64::MAX);
+        assert!(win.counters().paint_passes>0);
+        assert_eq!(win.snapshot().unwrap().nodes,old_p);
+        let pixels=win.with_pixels(|p,_,_|p.to_vec()).unwrap();
+        assert!(win.set(Guard::HOVER,3).is_err());
+        assert_eq!(bank(&win),eligible);
+        assert_eq!(win.snapshot().unwrap().nodes,old_p);
+        win.with_pixels(|p,_,_|assert_eq!(pixels,p)).unwrap();
+        let receipt=win.presented(eligible.0).unwrap();
+        assert!(receipt.presentation_epoch<receipt.source_epoch);
+    }
+
 }
