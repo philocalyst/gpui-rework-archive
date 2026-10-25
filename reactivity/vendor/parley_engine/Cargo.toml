@@ -38,6 +38,8 @@ resolver = "2"
 all-features = true
 
 [features]
+# Experimental immutable source resource; ordinary builds remain unchanged.
+retained-text = []
 bytemuck = [
     "fontique/bytemuck",
     "parlance/bytemuck",

@@ -709,3 +709,13 @@ impl ContentWidthsMeasurer {
         }
     }
 }
+
+#[cfg(feature = "retained-text")]
+impl<B: Brush> ParagraphData<B> {
+    pub(crate) fn exclusive_vec_capacity_bytes(&self)->Option<usize> {
+        fn bytes<T>(v:&Vec<T>)->Option<usize> { v.capacity().checked_mul(core::mem::size_of::<T>()) }
+        let mut total=self.shaped_text.exclusive_vec_capacity_bytes()?;
+        for n in [bytes(&self.styles)?,bytes(&self.style_metrics)?,bytes(&self.runs)?,bytes(&self.items)?] { total=total.checked_add(n)?; }
+        Some(total)
+    }
+}

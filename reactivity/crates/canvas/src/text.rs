@@ -341,6 +341,9 @@ pub(crate) struct Raster {
     pub pixels: Vec<u8>,
 }
 
+#[cfg(feature = "retained-text")]
+pub use planner::resource::{ShapeArtifact,ShapeResource};
+
 /// A scoped parser over immutable font bytes, reusable across measurement and
 /// painting. It owns parsed shaping tables and reusable paragraph scratch,
 /// borrows the backing, and releases both on drop. Returned layouts do not
@@ -354,6 +357,10 @@ pub struct TextShaper<'font> {
     planner: Option<Box<planner::Planner<'font>>>,
 }
 impl<'font> TextShaper<'font> {
+    /// Exact bound face identity for common resource keys; no parser creation.
+    #[cfg(feature = "retained-text")]
+    pub fn font_face(&self)->&FontFace {self.font}
+
     /// Measure wrapping without freezing an owned layout. Paragraph scratch is
     /// reused within this shaper; the returned numbers borrow no font storage.
     pub fn measure(
@@ -392,6 +399,24 @@ impl<'font> TextShaper<'font> {
     ) -> Result<TextLayout, Error> {
         self.planner(text, font_size, max_width)?
             .shape(text, font_size, max_width, interactive)
+    }
+    /// Optional live-source artifact admission. Same public validation precedes
+    /// all capture work. A declined retention returns the ordinary result.
+    #[cfg(feature = "retained-text")]
+    pub fn shape_interactive_resource(&mut self,text:&str,size:f32,width:Option<f32>,
+        tx:gpui_reactivity_core::resource::WindowReservation<'_>,artifact:gpui_reactivity_core::change::Artifact)
+        ->Result<(TextLayout,Option<ShapeArtifact>),Error>
+    {
+        let planner=self.planner(text,size,width)?;
+        planner::resource::shape(planner,text,size,width,tx,artifact)
+    }
+    #[cfg(feature = "retained-text")]
+    pub fn measure_resource(&mut self,text:&str,size:f32,width:Option<f32>,
+        tx:gpui_reactivity_core::resource::WindowReservation<'_>,artifact:gpui_reactivity_core::change::Artifact)
+        ->Result<(TextMetrics,Option<ShapeArtifact>),Error>
+    {
+        let planner=self.planner(text,size,width)?;
+        planner::resource::measure(planner,text,size,width,tx,artifact)
     }
     fn planner(
         &mut self,

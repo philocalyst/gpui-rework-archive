@@ -16,6 +16,9 @@ mod immutable_view;
 #[cfg(test)]
 mod break_target_control;
 mod lowering;
+#[cfg(feature = "retained-text")]
+#[path = "../resource.rs"]
+pub(super) mod resource;
 
 const FAMILIES: [&str; 3] = ["GPUI primary", "GPUI fallback one", "GPUI fallback two"];
 struct FontBytes(FontFace);
@@ -55,6 +58,8 @@ pub(super) struct Planner<'font> {
     layout: parley::Layout<()>,
     faces: FontSet,
     blob_ids: [Option<u64>; 3],
+    #[cfg(feature = "retained-text")]
+    font_roots: [Option<Arc<FontBytes>>; 3],
     sets: [Option<Arc<FontSet>>; 4],
     primary_cmap: Cmap<'font>,
 }
@@ -83,6 +88,8 @@ impl<'font> Planner<'font> {
             layout: parley::Layout::default(),
             faces,
             blob_ids: [None; 3],
+            #[cfg(feature = "retained-text")]
+            font_roots: [None, None, None],
             sets: [Some(base), None, None, None],
             primary_cmap: if primary.0.bundled {
                 Cmap(None)
@@ -94,11 +101,20 @@ impl<'font> Planner<'font> {
         Ok(result)
     }
     fn register(&mut self, slot: usize) -> Result<(), Error> {
+        #[cfg(not(feature = "retained-text"))]
         self.blob_ids[slot] = Some(register_font(
             &mut self.fonts,
             self.faces.face(slot)?,
             FAMILIES[slot],
         )?);
+        #[cfg(feature = "retained-text")]
+        {
+            // Capture this EXACT original wrapper before Blob::new; never
+            // register a new planner/Blob merely to retain resource identity.
+            let root=Arc::new(FontBytes(self.faces.face(slot)?.clone()));
+            self.blob_ids[slot]=Some(register_font_root(&mut self.fonts,root.clone(),FAMILIES[slot])?);
+            self.font_roots[slot]=Some(root);
+        }
         Ok(())
     }
     fn coverage(&mut self, text: &str) -> Result<u8, Error> {
@@ -364,6 +380,33 @@ fn register_font(
     family: &'static str,
 ) -> Result<u64, Error> {
     let blob = Blob::new(Arc::new(FontBytes(face.clone())));
+    let id = blob.id();
+    let registered = fonts.collection.register_fonts(
+        blob,
+        Some(FontInfoOverride {
+            family_name: Some(family),
+            // A FontFace is an explicit default instance, not a CSS family
+            // request. Prevent implicit weight/width/slant synthesis from
+            // choosing axes that our default-instance rasterizer does not use.
+            width: Some(Default::default()),
+            style: Some(Default::default()),
+            weight: Some(Default::default()),
+            // Fontique 0.12 compares a variable weight axis's default directly
+            // to the CSS request, independently of the overridden face weight.
+            // This registry describes an explicit default instance: prevent a
+            // synthesized wght=400 coordinate without changing the font bytes.
+            axes: Some(&[(skrifa::Tag::new(b"wght"), 400.)]),
+        }),
+    );
+    if registered.is_empty() {
+        return Err(Error::InvalidFont);
+    }
+    Ok(id)
+}
+
+#[cfg(feature = "retained-text")]
+fn register_font_root(fonts:&mut FontContext,root:Arc<FontBytes>,family:&'static str)->Result<u64,Error> {
+    let blob = Blob::new(root);
     let id = blob.id();
     let registered = fonts.collection.register_fonts(
         blob,

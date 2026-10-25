@@ -117,3 +117,22 @@ impl<B: Brush> WidthView<'_, B> {
         cursor.geometry_read(self.read(), width)
     }
 }
+
+// Deliberately specialized to the Canvas unit brush. The fixed Canvas builder
+// supplies no locale/nested brush allocation. Not a generic deep-heap census.
+#[cfg(feature = "retained-text")]
+impl Layout<()> {
+    #[doc(hidden)]
+    pub fn exclusive_shape_vec_capacity_bytes(&self)->Option<usize> {
+        if self.styles().iter().any(|style| style.locale.is_some()) { return None; }
+        self.data.shape.exclusive_vec_capacity_bytes()
+    }
+}
+#[cfg(feature = "retained-text")]
+impl ShapedParagraph<()> {
+    #[doc(hidden)]
+    pub fn exclusive_shape_vec_capacity_bytes(&self)->Option<usize> {
+        if self.styles().iter().any(|style| style.locale.is_some()) { return None; }
+        self.shape.exclusive_vec_capacity_bytes()
+    }
+}

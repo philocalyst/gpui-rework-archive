@@ -838,3 +838,17 @@ mod tests {
         // `[R0] [R1 R2]`, the last pair should form a single grapheme. We don't do that currently.
     }
 }
+
+#[cfg(feature = "retained-text")]
+impl ShapedText {
+    /// Six exclusive Vec payload capacities only. Shared font roots and allocator
+    /// headers are excluded; this is not an allocator/RSS measurement.
+    #[doc(hidden)]
+    pub fn exclusive_vec_capacity_bytes(&self) -> Option<usize> {
+        fn bytes<T>(v:&Vec<T>)->Option<usize> { v.capacity().checked_mul(core::mem::size_of::<T>()) }
+        let mut total=0usize;
+        for n in [bytes(&self.runs)?,bytes(&self.characters)?,bytes(&self.shaped_clusters)?,
+            bytes(&self.glyphs)?,bytes(&self.fonts)?,bytes(&self.normalized_coords)?] { total=total.checked_add(n)?; }
+        Some(total)
+    }
+}

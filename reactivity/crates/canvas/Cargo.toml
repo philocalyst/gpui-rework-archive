@@ -5,6 +5,8 @@ edition.workspace = true
 license.workspace = true
 
 [features]
+# Experimental immutable source resource; ordinary builds remain unchanged.
+retained-text = ["parley/retained-text"]
 default = ["simd"]
 parallel = ["dep:rayon"]
 # Omit this feature to instantiate the same raster pipeline with Fallback.
