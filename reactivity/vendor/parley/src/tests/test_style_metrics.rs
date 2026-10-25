@@ -53,13 +53,13 @@ fn build() -> Layout<ColorBrush> {
 }
 
 fn metrics(layout: &Layout<ColorBrush>) -> &[StyleMetrics] {
-    &layout.data.style_metrics
+    &layout.data.shape.style_metrics
 }
 
 #[test]
 fn one_metrics_entry_per_style() {
     let layout = build();
-    assert_eq!(layout.data.styles.len(), 5);
+    assert_eq!(layout.data.shape.styles.len(), 5);
     assert_eq!(metrics(&layout).len(), 5);
 }
 
@@ -91,7 +91,7 @@ fn ancestors_without_text_have_metrics() {
 fn super_shifts_relative_to_parent() {
     let layout = build();
     let b = metrics(&layout)[2];
-    assert_eq!(layout.data.styles[2].parent, 1);
+    assert_eq!(layout.data.shape.styles[2].parent, 1);
     // WebKit/Blink constant: a third of the *parent's* font size (40px).
     assert!((b.baseline_offset - 40. / 3.).abs() < 1e-4);
     assert_eq!(b.aligned_subtree_root, 0);

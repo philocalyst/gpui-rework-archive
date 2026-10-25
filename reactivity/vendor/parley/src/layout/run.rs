@@ -4,7 +4,7 @@
 use crate::FontData;
 use crate::layout::cluster::Cluster;
 use crate::layout::data::{LineItemData, RunData};
-use crate::layout::layout::Layout;
+use crate::layout::read::LayoutRead;
 use crate::layout::spacing::{EffectiveSpacing, Gaps, Justification};
 use crate::style::Brush;
 
@@ -17,7 +17,7 @@ use parley_engine::{
 
 /// Sequence of clusters with a single font and style.
 pub struct Run<'a, B: Brush> {
-    pub(crate) layout: &'a Layout<B>,
+    pub(crate) layout: LayoutRead<'a, B>,
     /// The index of the line this run is part of.
     pub(crate) line_index: u32,
     /// The index of the run within the line it is part of.
@@ -49,7 +49,7 @@ impl<'a, B: Brush> Run<'a, B> {
 
     #[expect(clippy::cast_possible_truncation, reason = "deferred")]
     pub(crate) fn new(
-        layout: &'a Layout<B>,
+        layout: LayoutRead<'a, B>,
         line_index: u32,
         index: u32,
         run_index: usize,
@@ -60,8 +60,8 @@ impl<'a, B: Brush> Run<'a, B> {
             line_index,
             index,
             shaped_text_run_index: run_index as u32,
-            shaped: &layout.data.shaped_text.runs()[run_index],
-            data: &layout.data.runs[run_index],
+            shaped: &layout.shape().shaped_text.runs()[run_index],
+            data: &layout.shape().runs[run_index],
             line_data,
         }
     }
@@ -72,8 +72,7 @@ impl<'a, B: Brush> Run<'a, B> {
     /// [`Self::line_slice`].
     pub(crate) fn full_slice(&self) -> ShapedSlice<'a> {
         self.layout
-            .data
-            .shaped_text
+            .shape().shaped_text
             .run_slice(self.shaped_text_run_index)
     }
 
@@ -95,8 +94,7 @@ impl<'a, B: Brush> Run<'a, B> {
     pub fn font(&self) -> &FontData {
         &self
             .layout
-            .data
-            .shaped_text
+            .shape().shaped_text
             .fonts()
             .get(self.shaped.font_index)
             .unwrap()
@@ -122,8 +120,7 @@ impl<'a, B: Brush> Run<'a, B> {
     /// with the run.
     pub fn normalized_coords(&self) -> &[NormalizedCoord] {
         self.layout
-            .data
-            .shaped_text
+            .shape().shaped_text
             .normalized_coords()
             .get(self.shaped.normalized_coords_range.clone())
             .unwrap_or(&[])
@@ -137,7 +134,7 @@ impl<'a, B: Brush> Run<'a, B> {
     #[inline]
     pub(crate) fn line_spacing(&self) -> EffectiveSpacing {
         let justification = if self.line_data.is_some() {
-            self.layout.data.lines[self.line_index as usize].justification
+            self.layout.width().lines[self.line_index as usize].justification
         } else {
             Justification::NONE
         };

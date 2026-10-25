@@ -187,7 +187,7 @@ pub(crate) fn shape_text<'a, B: Brush>(
         char_style_indices,
         items,
         font_selector,
-        &mut layout.data.shaped_text,
+        &mut layout.data.shape.shaped_text,
     );
 
     let mut inline_box_iter = inline_boxes
@@ -195,8 +195,8 @@ pub(crate) fn shape_text<'a, B: Brush>(
         .map(|b| &b.inline_box)
         .enumerate()
         .peekable();
-    for shaped_run_idx in 0..layout.data.shaped_text.runs().len() {
-        let shaped_run = &layout.data.shaped_text.runs()[shaped_run_idx];
+    for shaped_run_idx in 0..layout.data.shape.shaped_text.runs().len() {
+        let shaped_run = &layout.data.shape.shaped_text.runs()[shaped_run_idx];
         let run_text_byte_start = shaped_run.range.byte_range.start;
         let run_style_index = char_style_indices[shaped_run.range.char_range.start];
         let run_style = &styles[usize::from(run_style_index)];
@@ -207,7 +207,7 @@ pub(crate) fn shape_text<'a, B: Brush>(
         // inline boxes should be included in bidi analysis as an object replacement character
         // (U+FFFC). The box should then take the bidi level of that character.
         let prev_bidi_level = if shaped_run_idx > 0 {
-            layout.data.shaped_text.runs()[&shaped_run_idx - 1].bidi_level
+            layout.data.shape.shaped_text.runs()[&shaped_run_idx - 1].bidi_level
         } else {
             BidiLevel::new(0)
         };
@@ -239,7 +239,7 @@ pub(crate) fn shape_text<'a, B: Brush>(
     // text run).
     let bidi_level = layout
         .data
-        .shaped_text
+        .shape.shaped_text
         .runs()
         .last()
         .map(|r| r.bidi_level)

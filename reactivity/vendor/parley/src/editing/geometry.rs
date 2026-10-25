@@ -6,6 +6,7 @@ use super::{Cursor, cursor::line_cursor_rect};
 use crate::BoundingBox;
 use crate::layout::{Affinity, Cluster, ClusterPath, Layout, LineItem};
 use crate::style::Brush;
+use crate::layout::read::LayoutRead;
 use alloc::{vec, vec::Vec};
 
 #[derive(Clone, Copy)]
@@ -20,25 +21,38 @@ struct Entry {
 /// Byte-to-entry and visual-prefix lookup are then constant time; resolving
 /// a stored path uses the engine's atom lookup. Storage is
 /// 16 bytes per source scalar of entry capacity plus four bytes per source byte, released with
-/// this index. No field is added to Layout, Run, Cluster or Cursor. Invalid or
+/// this index. The paired-read header holds two references instead of one;
+/// no source/width arrays are cloned. No field is added to Layout, Run, Cluster
+/// or Cursor. Invalid or
 /// overlapping source ranges return None rather than publishing an index.
 pub struct CursorGeometry<'a, B: Brush> {
-    layout: &'a Layout<B>,
+    layout: LayoutRead<'a, B>,
     entries: Vec<Entry>,
     bytes: Vec<u32>,
 }
 
 impl<'a, B: Brush> CursorGeometry<'a, B> {
     pub fn new(layout: &'a Layout<B>) -> Option<Self> {
-        if layout.data.shaped_text.characters().len() > u32::MAX as usize
+        Self::from_read(layout.read())
+    }
+
+    /// Experimental paired view constructor. The index borrows the exact view,
+    /// so neither its width storage nor its immutable owner can be retired.
+    #[doc(hidden)]
+    pub fn from_width_view(view: &'a crate::WidthView<'_, B>) -> Option<Self> {
+        Self::from_read(LayoutRead::from_width_view(view))
+    }
+
+    fn from_read(layout: LayoutRead<'a, B>) -> Option<Self> {
+        if layout.shape().shaped_text.characters().len() > u32::MAX as usize
             || layout.len() > u32::MAX as usize
         {
             return None;
         }
         let mut result = Self {
             layout,
-            entries: Vec::with_capacity(layout.data.shaped_text.characters().len()),
-            bytes: vec![u32::MAX; layout.data.text_len],
+            entries: Vec::with_capacity(layout.shape().shaped_text.characters().len()),
+            bytes: vec![u32::MAX; layout.shape().text_len],
         };
         for line in layout.lines() {
             let mut origin = line.metrics().offset;
@@ -56,7 +70,7 @@ impl<'a, B: Brush> CursorGeometry<'a, B> {
                             offset += cluster.advance();
                             // The upstream empty-layout metrics space is not
                             // document text and has no legal source byte.
-                            if layout.data.text_len != 0 {
+                            if layout.shape().text_len != 0 {
                                 let range = cluster.text_range();
                                 let bytes = result.bytes.get_mut(range)?;
                                 if bytes.iter().any(|&previous| previous != u32::MAX) {
@@ -78,12 +92,12 @@ impl<'a, B: Brush> CursorGeometry<'a, B> {
 
     fn cluster(&self, byte: usize) -> Option<Cluster<'a, B>> {
         let index = *self.bytes.get(byte)? as usize;
-        self.entries.get(index)?.path.cluster(self.layout)
+        self.entries.get(index)?.path.cluster_read(self.layout)
     }
 
     /// The same snapping and endpoint/affinity policy as Cursor::from_byte_index.
     pub fn cursor(&self, byte: usize, affinity: Affinity) -> Cursor {
-        Cursor::from_source_cluster(self.layout, affinity, self.cluster(byte).as_ref())
+        Cursor::from_source_cluster_read(self.layout, affinity, self.cluster(byte).as_ref())
     }
 
     /// Both affinities at an exact source boundary, upstream first.
@@ -108,7 +122,7 @@ impl<'a, B: Brush> CursorGeometry<'a, B> {
         {
             return None;
         }
-        let line = next.path.line(self.layout)?;
+        let line = next.path.line_read(self.layout)?;
         let rtl = line.item(next.path.run_index())?.run()?.is_rtl();
         let adjacent = if rtl {
             next_index.checked_add(1) == Some(previous_index)
@@ -131,7 +145,7 @@ impl<'a, B: Brush> CursorGeometry<'a, B> {
     #[inline(never)]
     fn boundary_geometries(&self, byte: usize, width: f32) -> Option<[BoundingBox; 2]> {
         let next = self.cluster(byte);
-        let upstream = Cursor::from_source_cluster(self.layout, Affinity::Upstream, next.as_ref());
+        let upstream = Cursor::from_source_cluster_read(self.layout, Affinity::Upstream, next.as_ref());
         if upstream.index() != byte {
             return None;
         }
@@ -141,7 +155,7 @@ impl<'a, B: Brush> CursorGeometry<'a, B> {
         // missing next cluster forces both to the upstream text endpoint.
         let same_edge = byte == 0 || next.is_none();
         let geometry = |cursor: Cursor| {
-            cursor.geometry_with(self.layout, width, clusters, |cluster| {
+            cursor.geometry_with_read(self.layout, width, clusters, |cluster| {
                 let index = self.bytes[cluster.text_range().start] as usize;
                 self.entries[index].offset
             })
@@ -153,7 +167,7 @@ impl<'a, B: Brush> CursorGeometry<'a, B> {
                 first
             } else {
                 let downstream =
-                    Cursor::from_source_cluster(self.layout, Affinity::Downstream, next.as_ref());
+                    Cursor::from_source_cluster_read(self.layout, Affinity::Downstream, next.as_ref());
                 geometry(downstream)
             },
         ])
@@ -168,7 +182,7 @@ impl<'a, B: Brush> CursorGeometry<'a, B> {
                 .and_then(|byte| self.cluster(byte)),
             self.cluster(cursor.index()),
         ];
-        cursor.geometry_with(
+        cursor.geometry_with_read(
             self.layout,
             width,
             clusters.each_ref().map(Option::as_ref),

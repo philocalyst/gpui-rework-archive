@@ -94,7 +94,7 @@ pub(crate) struct LineData {
     /// The number of justification opportunities on the line.
     pub(crate) num_justification_opportunities: u32,
     pub(crate) justification: Justification,
-    /// This line's entries in [`LayoutData::aligned_subtree_offsets`].
+    /// This line's entries in [`WidthData::aligned_subtree_offsets`].
     ///
     /// Empty for lines with only baseline-relative content because the root aligned subtree
     /// for each line trivially has an offset of 0
@@ -116,7 +116,7 @@ pub(crate) struct AlignedSubtreeOffset {
 
 impl LineData {
     /// Offset from the line's baseline to the baseline of the aligned subtree rooted at style
-    /// `root` (positive upwards). `offsets` is [`LayoutData::aligned_subtree_offsets`].
+    /// `root` (positive upwards). `offsets` is [`WidthData::aligned_subtree_offsets`].
     pub(crate) fn aligned_subtree_offset(
         &self,
         offsets: &[AlignedSubtreeOffset],
@@ -134,7 +134,7 @@ impl LineData {
     }
 
     /// Absolute block-axis coordinate (offset from the top of the layout) of the baseline of the given style's span box.
-    // `offsets` is [`LayoutData::aligned_subtree_offsets`].
+    // `offsets` is [`WidthData::aligned_subtree_offsets`].
     pub(crate) fn style_baseline(
         &self,
         offsets: &[AlignedSubtreeOffset],
@@ -190,6 +190,14 @@ pub(crate) struct LayoutItem {
 
 #[derive(Clone, Debug, PartialEq)]
 pub(crate) struct LayoutData<B: Brush> {
+    pub(crate) shape: ParagraphData<B>,
+    // Width-dependent output is independently owned, not shared or published.
+    pub(crate) width_data: WidthData,
+}
+
+/// Built paragraph input. All mutable inline-box placement lives in WidthData.
+#[derive(Clone, Debug, PartialEq)]
+pub(crate) struct ParagraphData<B: Brush> {
     // General settings (directly from the "builder")
     /// The display scale factor
     pub(crate) scale: f32,
@@ -203,12 +211,22 @@ pub(crate) struct LayoutData<B: Brush> {
     // Output of style resolution (input to line breaking)
     pub(crate) styles: Vec<Style<B>>,
     pub(crate) style_metrics: Vec<StyleMetrics>,
-    pub(crate) inline_boxes: Vec<LayoutInlineBox>,
 
     // Output of shaping (input to line breaking)
     pub(crate) shaped_text: ShapedText,
     pub(crate) runs: Vec<RunData>,
     pub(crate) items: Vec<LayoutItem>,
+
+}
+
+/// Width-dependent line storage and alignment state. This first mechanical cut
+/// introduces no sharing: ordinary Layout still owns and clones both halves.
+/// It contains no fonts, style values or shaped-run ownership. General layouts
+/// retain declared inline-box source indices plus mutable placement here.
+#[derive(Clone, Debug, PartialEq)]
+pub(crate) struct WidthData {
+    /// Declared inline boxes and mutable placement, absent in shared paragraphs.
+    pub(crate) inline_boxes: Vec<LayoutInlineBox>,
 
     // Output of line breaking
     /// The lines in the
@@ -238,60 +256,73 @@ pub(crate) struct LayoutData<B: Brush> {
     pub(crate) indent_options: IndentOptions,
 }
 
-impl<B: Brush> Default for LayoutData<B> {
+impl Default for WidthData {
     fn default() -> Self {
         Self {
-            scale: 1.,
-            quantize: true,
-            base_level: BidiLevel::new(0),
-            text_len: 0,
-            width: 0.,
-            full_width: 0.,
-            height: 0.,
-            styles: Vec::new(),
-            style_metrics: Vec::new(),
             inline_boxes: Vec::new(),
-            shaped_text: ShapedText::new(),
-            runs: Vec::new(),
-            items: Vec::new(),
             lines: Vec::new(),
             line_items: Vec::new(),
             aligned_subtree_offsets: Vec::new(),
-            alignment: None,
             layout_max_advance: 0.0,
+            width: 0.,
+            full_width: 0.,
+            height: 0.,
+            alignment: None,
             indent_amount: 0.0,
             indent_options: IndentOptions::default(),
         }
     }
 }
 
+impl<B: Brush> Default for ParagraphData<B> {
+    fn default() -> Self {
+        Self {
+            scale: 1.,
+            quantize: true,
+            base_level: BidiLevel::new(0),
+            text_len: 0,
+            styles: Vec::new(),
+            style_metrics: Vec::new(),
+            shaped_text: ShapedText::new(),
+            runs: Vec::new(),
+            items: Vec::new(),
+        }
+    }
+}
+
+impl<B: Brush> Default for LayoutData<B> {
+    fn default() -> Self {
+        Self { shape: ParagraphData::default(), width_data: WidthData::default() }
+    }
+}
+
 impl<B: Brush> LayoutData<B> {
     pub(crate) fn clear(&mut self) {
-        self.scale = 1.;
-        self.quantize = true;
-        self.base_level = BidiLevel::new(0);
-        self.text_len = 0;
-        self.width = 0.;
-        self.full_width = 0.;
-        self.height = 0.;
-        self.layout_max_advance = 0.0;
-        self.indent_amount = 0.0;
-        self.indent_options = IndentOptions::default();
-        self.styles.clear();
-        self.style_metrics.clear();
-        self.inline_boxes.clear();
-        self.shaped_text.clear();
-        self.runs.clear();
-        self.items.clear();
-        self.lines.clear();
-        self.line_items.clear();
-        self.aligned_subtree_offsets.clear();
-        self.alignment = None;
+        self.shape.scale = 1.;
+        self.shape.quantize = true;
+        self.shape.base_level = BidiLevel::new(0);
+        self.shape.text_len = 0;
+        self.width_data.width = 0.;
+        self.width_data.full_width = 0.;
+        self.width_data.height = 0.;
+        self.width_data.layout_max_advance = 0.0;
+        self.width_data.indent_amount = 0.0;
+        self.width_data.indent_options = IndentOptions::default();
+        self.shape.styles.clear();
+        self.shape.style_metrics.clear();
+        self.width_data.inline_boxes.clear();
+        self.shape.shaped_text.clear();
+        self.shape.runs.clear();
+        self.shape.items.clear();
+        self.width_data.lines.clear();
+        self.width_data.line_items.clear();
+        self.width_data.aligned_subtree_offsets.clear();
+        self.width_data.alignment = None;
     }
 
     /// Push an inline box to the list of items
     pub(crate) fn push_inline_box(&mut self, index: usize, bidi_level: BidiLevel) {
-        self.items.push(LayoutItem {
+        self.shape.items.push(LayoutItem {
             kind: LayoutItemKind::InlineBox,
             index,
             bidi_level,
@@ -308,18 +339,18 @@ impl<B: Brush> LayoutData<B> {
         spacing: Spacing,
         char_styles: &[u16],
     ) {
-        let shaped_run = &self.shaped_text.runs()[shaped_run_idx];
+        let shaped_run = &self.shape.shaped_text.runs()[shaped_run_idx];
         debug_assert!(
             !shaped_run.shaped_clusters_range.is_empty(),
             "Shaped runs returned by `parley_engine` must be non-empty"
         );
         let style_index =
-            self.shaped_text.characters()[shaped_run.characters_range.start as usize].style_index;
+            self.shape.shaped_text.characters()[shaped_run.characters_range.start as usize].style_index;
 
-        let line_height = self.styles[style_index as usize].line_height.resolve(
+        let line_height = self.shape.styles[style_index as usize].line_height.resolve(
             shaped_run.font_size,
             &shaped_run.font_metrics,
-            self.quantize,
+            self.shape.quantize,
         );
 
         // The run's box metrics, if it's uniform across all the styles within the run. A run's box
@@ -327,17 +358,17 @@ impl<B: Brush> LayoutData<B> {
         let run_box = {
             let chars = shaped_run.range.char_range.clone();
             let first_style = char_styles[chars.start];
-            let line_height = self.styles[usize::from(first_style)].line_height;
+            let line_height = self.shape.styles[usize::from(first_style)].line_height;
 
             let uniform_line_height = char_styles[chars].iter().all(|&s| {
-                s == first_style || self.styles[usize::from(s)].line_height == line_height
+                s == first_style || self.shape.styles[usize::from(s)].line_height == line_height
             });
 
             if uniform_line_height {
                 run_box_metrics(
-                    &self.styles[usize::from(first_style)],
+                    &self.shape.styles[usize::from(first_style)],
                     shaped_run,
-                    self.quantize,
+                    self.shape.quantize,
                 )
             } else {
                 None
@@ -348,7 +379,7 @@ impl<B: Brush> LayoutData<B> {
         // first.
         let has_mixed_style_atoms = {
             let chars = shaped_run.range.char_range.clone();
-            let slice = self.shaped_text.run_slice(shaped_run_idx as u32);
+            let slice = self.shape.shaped_text.run_slice(shaped_run_idx as u32);
             (chars.start + 1..chars.end).any(|char_idx| {
                 char_styles[char_idx - 1] != char_styles[char_idx]
                     && slice
@@ -357,7 +388,7 @@ impl<B: Brush> LayoutData<B> {
             })
         };
 
-        let font = &self.shaped_text.fonts()[shaped_run.font_index];
+        let font = &self.shape.shaped_text.fonts()[shaped_run.font_index];
         let run = RunData {
             font_attrs: fontique::Attributes {
                 width: run_style.font_width,
@@ -371,10 +402,10 @@ impl<B: Brush> LayoutData<B> {
             has_mixed_style_atoms,
         };
 
-        self.runs.push(run);
-        self.items.push(LayoutItem {
+        self.shape.runs.push(run);
+        self.shape.items.push(LayoutItem {
             kind: LayoutItemKind::TextRun,
-            index: self.runs.len() - 1,
+            index: self.shape.runs.len() - 1,
             bidi_level: shaped_run.bidi_level,
         });
     }
@@ -397,7 +428,7 @@ impl<B: Brush> LayoutData<B> {
     /// - min-content width: any conditionally-hanging suffix hangs in full, so all hanging
     ///   whitespace hangs in full.
     pub(crate) fn calculate_content_widths(&self) -> ContentWidths {
-        ContentWidthsMeasurer::new(self.indent_amount, self.indent_options).measure(self)
+        ContentWidthsMeasurer::new(self.width_data.indent_amount, self.width_data.indent_options).measure(self)
     }
 }
 
@@ -489,22 +520,22 @@ impl ContentWidthsMeasurer {
 
     #[inline(always)]
     fn measure<B: Brush>(mut self, layout_data: &LayoutData<B>) -> ContentWidths {
-        let mut items = layout_data.items.iter();
+        let mut items = layout_data.shape.items.iter();
         while let Some(item) = items.next() {
             match item.kind {
                 LayoutItemKind::TextRun => {
-                    let slice = layout_data.shaped_text.run_slice(item.index as u32);
-                    let run_spacing = layout_data.runs[item.index].spacing;
+                    let slice = layout_data.shape.shaped_text.run_slice(item.index as u32);
+                    let run_spacing = layout_data.shape.runs[item.index].spacing;
                     // Trailing whitespace can only hang if it ends up at the line's end edge after
                     // bidi reordering. We don't currently apply UAX #9 L1 (resetting trailing
                     // whitespace to paragraph level), so only logically-last items that match the
                     // paragraph level are guaranteed to be at that edge.
-                    let can_hang = item.bidi_level == layout_data.base_level;
+                    let can_hang = item.bidi_level == layout_data.shape.base_level;
                     let is_rtl = item.bidi_level.is_rtl();
 
                     if run_spacing.is_zero() {
                         self.measure_text_run::<B, false>(
-                            &layout_data.styles,
+                            &layout_data.shape.styles,
                             slice,
                             run_spacing,
                             can_hang,
@@ -512,7 +543,7 @@ impl ContentWidthsMeasurer {
                         );
                     } else {
                         self.measure_text_run::<B, true>(
-                            &layout_data.styles,
+                            &layout_data.shape.styles,
                             slice,
                             run_spacing,
                             can_hang,
@@ -521,18 +552,18 @@ impl ContentWidthsMeasurer {
                     }
                 }
                 LayoutItemKind::InlineBox => {
-                    let inline_box = &layout_data.inline_boxes[item.index].inline_box;
+                    let inline_box = &layout_data.width_data.inline_boxes[item.index].inline_box;
                     if inline_box.kind == InlineBoxKind::InFlow {
                         let next = items.as_slice().iter().find(|next| {
                             next.kind == LayoutItemKind::TextRun
-                                || layout_data.inline_boxes[next.index].inline_box.kind
+                                || layout_data.width_data.inline_boxes[next.index].inline_box.kind
                                     == InlineBoxKind::InFlow
                         });
                         // A forced break right after a box suppresses the box's soft wrap
                         // opportunity.
                         let followed_by_inline_content = match next {
                             Some(next) if next.kind == LayoutItemKind::TextRun => {
-                                let slice = layout_data.shaped_text.run_slice(next.index as u32);
+                                let slice = layout_data.shape.shaped_text.run_slice(next.index as u32);
                                 slice.shaped_clusters()[0].whitespace() != Whitespace::Newline
                             }
                             Some(_) => true,

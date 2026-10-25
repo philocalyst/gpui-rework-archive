@@ -363,10 +363,10 @@ fn build_into_layout<B: Brush>(
     );
 
     layout.data.clear();
-    layout.data.scale = options.scale;
-    layout.data.quantize = options.quantize;
-    layout.data.base_level = lcx.analysis.paragraph_level();
-    layout.data.text_len = text.len();
+    layout.data.shape.scale = options.scale;
+    layout.data.shape.quantize = options.quantize;
+    layout.data.shape.base_level = lcx.analysis.paragraph_level();
+    layout.data.shape.text_len = text.len();
 
     // Characters not covered by any style run (e.g. the space substituted for empty text during
     // analysis) use the root style.
@@ -384,7 +384,7 @@ fn build_into_layout<B: Brush>(
     // Copy the visual styles into the layout
     layout
         .data
-        .styles
+        .shape.styles
         .extend(lcx.style_table.iter().map(|s| s.as_layout_style()));
 
     // Sort the inline boxes as subsequent code assumes that they are in text index order.
@@ -414,14 +414,14 @@ fn build_into_layout<B: Brush>(
         &lcx.rcx,
         fcx,
         &lcx.style_table,
-        &layout.data.shaped_text,
+        &layout.data.shape.shaped_text,
         options.quantize,
-        &mut layout.data.style_metrics,
+        &mut layout.data.shape.style_metrics,
     );
 
     // Move inline boxes into the layout
-    layout.data.inline_boxes.clear();
-    core::mem::swap(&mut layout.data.inline_boxes, &mut lcx.inline_boxes);
+    layout.data.width_data.inline_boxes.clear();
+    core::mem::swap(&mut layout.data.width_data.inline_boxes, &mut lcx.inline_boxes);
 }
 
 fn resolve_range(range: impl RangeBounds<usize>, len: usize) -> Range<usize> {

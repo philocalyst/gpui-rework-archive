@@ -71,12 +71,12 @@ pub(crate) fn align<B: Brush>(
     alignment: Alignment,
     options: AlignmentOptions,
 ) {
-    layout.alignment = Some(alignment);
+    layout.width_data.alignment = Some(alignment);
 
-    let is_rtl = layout.base_level.is_rtl();
+    let is_rtl = layout.shape.base_level.is_rtl();
 
     // Apply alignment to line items
-    for line in &mut layout.lines {
+    for line in &mut layout.width_data.lines {
         line.justification.amount_per_opportunity = 0.;
 
         let indent = line.metrics.indent;

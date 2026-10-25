@@ -51,6 +51,10 @@ pub enum ClusterSide {
 impl<'a, B: Brush> Cluster<'a, B> {
     /// Returns the cluster for the given layout and byte index in the source text.
     pub fn from_byte_index(layout: &'a Layout<B>, byte_index: usize) -> Option<Self> {
+        Self::from_byte_index_read(layout.read(), byte_index)
+    }
+
+    pub(crate) fn from_byte_index_read(layout: super::read::LayoutRead<'a, B>, byte_index: usize) -> Option<Self> {
         let (_, line) = layout.line_for_byte_index(byte_index)?;
         line.runs()
             .find(|run| run.text_range().contains(&byte_index))?
@@ -307,11 +311,11 @@ impl<'a, B: Brush> Cluster<'a, B> {
             Some(next)
         } else {
             let index = self.text_range().end;
-            if index >= self.run.layout.data.text_len {
+            if index >= self.run.layout.shape().text_len {
                 return None;
             }
             // We have to search for the cluster containing our end index
-            Self::from_byte_index(self.run.layout, index)
+            Self::from_byte_index_read(self.run.layout, index)
         }
     }
 
@@ -321,7 +325,7 @@ impl<'a, B: Brush> Cluster<'a, B> {
             // Fast path: previous cluster is in the same run
             Some(previous)
         } else {
-            Self::from_byte_index(self.run.layout, self.text_range().start.checked_sub(1)?)
+            Self::from_byte_index_read(self.run.layout, self.text_range().start.checked_sub(1)?)
         }
     }
 
@@ -529,6 +533,10 @@ impl ClusterPath {
 
     /// Returns the line for this path and the specified layout.
     pub fn line<'a, B: Brush>(&self, layout: &'a Layout<B>) -> Option<Line<'a, B>> {
+        self.line_read(layout.read())
+    }
+
+    pub(crate) fn line_read<'a, B: Brush>(&self, layout: super::read::LayoutRead<'a, B>) -> Option<Line<'a, B>> {
         layout.get(self.line_index())
     }
 
@@ -539,7 +547,11 @@ impl ClusterPath {
 
     /// Returns the cluster for this path and the specified layout.
     pub fn cluster<'a, B: Brush>(&self, layout: &'a Layout<B>) -> Option<Cluster<'a, B>> {
-        self.run(layout)?.cluster_containing_char(self.char_index)
+        self.cluster_read(layout.read())
+    }
+
+    pub(crate) fn cluster_read<'a, B: Brush>(&self, layout: super::read::LayoutRead<'a, B>) -> Option<Cluster<'a, B>> {
+        self.line_read(layout)?.item(self.run_index())?.run()?.cluster_containing_char(self.char_index)
     }
 }
 

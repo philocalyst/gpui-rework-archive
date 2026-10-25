@@ -9,6 +9,13 @@ use parley::{
     Affinity, Cursor, CursorGeometry, FontContext, FontFamilyName, LayoutContext, OverflowWrap,
     PositionedLayoutItem, StyleProperty,
 };
+#[cfg(test)]
+mod paragraph_reuse;
+#[cfg(test)]
+mod immutable_view;
+#[cfg(test)]
+mod break_target_control;
+mod lowering;
 
 const FAMILIES: [&str; 3] = ["GPUI primary", "GPUI fallback one", "GPUI fallback two"];
 struct FontBytes(FontFace);
@@ -203,14 +210,7 @@ impl<'font> Planner<'font> {
                 family_count += 1;
             }
         }
-        let mut glyphs = EcoVec::new();
-        let mut details: Option<Details> = None;
-        let mut detailed = false;
-        let mut glyph_count = 0usize;
-        let mut width = 0.0f32;
-        let mut height = 0.0f32;
-        let mut baseline = 0.0f32;
-        let mut mask = 0;
+        let mut lowering = lowering::Lowering::new();
         for paragraph in paragraph::ranges(text) {
             let content = &text[paragraph.content.clone()];
             let mut builder = self
@@ -221,174 +221,12 @@ impl<'font> Planner<'font> {
             builder.push_default(StyleProperty::OverflowWrap(OverflowWrap::Anywhere));
             builder.build_into(&mut self.layout, content);
             self.layout.break_all_lines(max_width);
-            let planned = &self.layout;
-            let simple = !interactive
-                && paragraph.content.end == text.len()
-                && paragraph.content.start == 0
-                && planned.len() == 1
-                && planned
-                    .lines()
-                    .flat_map(|line| line.runs())
-                    .all(|run| !run.is_rtl() && Some(run.font().data.id()) == self.blob_ids[0])
-                && planned.lines().flat_map(|line| line.runs()).count() <= 1;
-            if !simple && !detailed {
-                detailed = true;
-                if MATERIALIZE {
-                    details = Some(Details {
-                        len: text.len() as u32,
-                        font_size: size,
-                        runs: Vec::new(),
-                        lines: Vec::new(),
-                        carets: interactive.then(Vec::new),
-                    });
-                }
-            }
-            let count = planned
-                .lines()
-                .flat_map(|line| line.runs())
-                .map(|run| run.glyph_count())
-                .sum::<usize>();
-            if glyph_count
-                .checked_add(count)
-                .is_none_or(|n| n > MAX_GLYPHS)
-            {
-                return Err(Error::ResourceLimit);
-            }
-            if MATERIALIZE && !content.is_empty() {
-                glyphs.reserve(count);
-            }
-            if paragraph.content.start == 0 {
-                baseline = planned
-                    .lines()
-                    .next()
-                    .map_or(0., |line| line.metrics().baseline);
-            }
-            width = width.max(if content.is_empty() {
-                0.
-            } else if max_width.is_some() {
-                planned.width()
-            } else {
-                planned.full_width()
-            });
-            for (line_index, line) in planned.lines().enumerate() {
-                let global_line = details.as_ref().map_or(line_index, |d| d.lines.len());
-                if detailed {
-                    let frozen = freeze_line(line, content, paragraph.content.start, height)?;
-                    if let Some(d) = &mut details {
-                        d.lines.push(frozen);
-                    }
-                }
-                for item in line.items() {
-                    let PositionedLayoutItem::GlyphRun(run) = item else {
-                        return Err(Error::InvalidGeometry);
-                    };
-                    if run
-                        .run()
-                        .normalized_coords()
-                        .iter()
-                        .any(|coordinate| coordinate.to_bits() != 0)
-                    {
-                        return Err(Error::UnsupportedFontFormat);
-                    }
-                    let slot = self
-                        .blob_ids
-                        .iter()
-                        .position(|&id| id == Some(run.run().font().data.id()))
-                        .ok_or(Error::ForeignLayout)?;
-                    if slot != 0 {
-                        mask |= 1 << (slot - 1);
-                    }
-                    let first = glyph_count;
-                    // This API shapes one style over each paragraph, so every
-                    // positioned item covers its run's full visual glyph range.
-                    let mut clusters = run.run().glyph_source_ranges();
-                    for g in run.positioned_glyphs() {
-                        let source = clusters.next().ok_or(Error::InvalidFont)?;
-                        if content.is_empty() {
-                            continue;
-                        }
-                        if content.get(source.clone()).is_none() {
-                            return Err(Error::InvalidFont);
-                        }
-                        if g.id == 0 {
-                            let ignored = content.get(source.clone()).is_some_and(|s| {
-                                s.chars().all(|c| {
-                                    CodePointSetData::new::<DefaultIgnorableCodePoint>().contains(c)
-                                })
-                            });
-                            if ignored && g.advance == 0. {
-                                continue;
-                            }
-                            return Err(content
-                                .get(source)
-                                .and_then(|s| s.chars().next())
-                                .map_or(Error::InvalidFont, Error::MissingGlyph));
-                        }
-                        if !g.x.is_finite() || !g.y.is_finite() {
-                            return Err(Error::InvalidGeometry);
-                        }
-                        let glyph = PackedGlyph::new(Glyph {
-                            id: u16::try_from(g.id).map_err(|_| Error::InvalidFont)?,
-                            font: FontSlot(slot as u8),
-                            cluster: (paragraph.content.start + source.start) as u32,
-                            x: g.x,
-                            baseline: height + g.y,
-                        })?;
-                        glyph_count += 1;
-                        if MATERIALIZE {
-                            glyphs.push(glyph);
-                        }
-                    }
-                    if clusters.next().is_some() {
-                        return Err(Error::InvalidFont);
-                    }
-                    if detailed {
-                        let source = if content.is_empty() {
-                            0..0
-                        } else {
-                            run.run().text_range()
-                        };
-                        if content.get(source.clone()).is_none() {
-                            return Err(Error::InvalidFont);
-                        }
-                        if let Some(d) = &mut details {
-                            d.runs.push(Run {
-                                start: (paragraph.content.start + source.start) as u32,
-                                end: (paragraph.content.start + source.end) as u32,
-                                glyph_start: first as u32,
-                                glyph_end: glyph_count as u32,
-                                line: global_line as u32,
-                                font: FontSlot(slot as u8),
-                                direction: if run.run().is_rtl() {
-                                    TextDirection::RightToLeft
-                                } else {
-                                    TextDirection::LeftToRight
-                                },
-                            });
-                        }
-                    }
-                }
-            }
-            if let Some(stops) = details.as_mut().and_then(|d| d.carets.as_mut()) {
-                append_carets(stops, planned, content, paragraph.content.start, height)?;
-            }
-            height += planned.height();
+            lowering = lowering.paragraph::<MATERIALIZE>(
+                lowering::PlannedParagraph::Layout(&self.layout), content,
+                &paragraph, text, size, max_width, interactive, &self.blob_ids,
+            )?;
         }
-        // The immutable map cannot append stops after publication. Charge the
-        // trim separately from stop-field compression and query changes.
-        if let Some(stops) = details.as_mut().and_then(|d| d.carets.as_mut()) {
-            stops.shrink_to_fit();
-        }
-        Ok(Planned {
-            metrics: TextMetrics {
-                width,
-                height,
-                baseline,
-            },
-            glyphs,
-            mask,
-            details,
-        })
+        Ok(lowering.finish())
     }
 }
 
@@ -436,12 +274,22 @@ fn append_carets(
     source: usize,
     height: f32,
 ) -> Result<(), Error> {
+    append_carets_read(stops, lowering::PlannedParagraph::Layout(planned), content, source, height)
+}
+
+fn append_carets_read<'a, 'owner: 'a>(
+    stops: &mut Vec<Stop>,
+    planned: lowering::PlannedParagraph<'a, 'owner>,
+    content: &str,
+    source: usize,
+    height: f32,
+) -> Result<(), Error> {
     let segmenter = GraphemeClusterSegmenter::new();
     // A fixed small number of direct queries is linear in source
     // length and avoids an index for e.g. one huge grapheme. Bulk
     // maps use constant-time source/prefix lookup per destination.
     let geometry = if segmenter.segment_str(content).nth(8).is_some() {
-        Some(CursorGeometry::new(planned).ok_or(Error::InvalidFont)?)
+        Some(planned.index().ok_or(Error::InvalidFont)?)
     } else {
         None
     };
@@ -462,11 +310,11 @@ fn append_carets(
             let r = if let Some(bounds) = &indexed_pair {
                 bounds[index]
             } else {
-                let cursor = Cursor::from_byte_index(planned, byte, affinity);
+                let cursor = planned.cursor(byte, affinity);
                 if cursor.index() != byte {
                     continue;
                 }
-                cursor.geometry(planned, 1.)
+                planned.geometry(cursor, 1.)
             };
             let bounds = Rect::new(
                 r.x0 as f32,
@@ -839,3 +687,12 @@ mod tests {
 #[cfg(test)]
 #[path = "line_break_tests.rs"]
 mod line_break_tests;
+
+#[cfg(test)]
+mod cursor_read;
+
+#[cfg(test)]
+mod cursor_control;
+
+#[cfg(test)]
+mod lowering_control;

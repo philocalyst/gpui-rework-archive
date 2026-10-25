@@ -8,6 +8,8 @@ mod cluster;
 mod line;
 mod line_break;
 mod run;
+pub(crate) mod read;
+mod paragraph;
 mod spacing;
 pub(crate) mod style_metrics;
 mod whitespace;
@@ -27,6 +29,8 @@ pub use alignment::{Alignment, AlignmentOptions};
 pub use cluster::{Affinity, Cluster, ClusterPath, ClusterSide};
 pub use data::BreakReason;
 pub use layout::Layout;
+#[doc(hidden)]
+pub use paragraph::{ShapedParagraph, WidthView};
 pub use line::{GlyphRun, Line, LineMetrics, PositionedInlineBox, PositionedLayoutItem};
 pub use line_break::{
     BoxBreakData, BreakLines, BreakerState, LineBreakData, MaxHeightBreakData, YieldData,

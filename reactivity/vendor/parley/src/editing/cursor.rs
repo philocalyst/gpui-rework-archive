@@ -4,6 +4,7 @@
 use crate::BoundingBox;
 use crate::layout::{Affinity, BreakReason, Cluster, ClusterSide, Layout, Line};
 use crate::style::Brush;
+use crate::layout::read::LayoutRead;
 
 /// Defines a position with a text layout.
 #[derive(Copy, Clone, PartialEq, Eq, Default, Debug)]
@@ -15,15 +16,19 @@ pub struct Cursor {
 impl Cursor {
     /// Creates a new cursor from the given byte index and affinity.
     pub fn from_byte_index<B: Brush>(layout: &Layout<B>, index: usize, affinity: Affinity) -> Self {
-        Self::from_source_cluster(
+        Self::from_byte_index_read(layout.read(), index, affinity)
+    }
+
+    pub(crate) fn from_byte_index_read<B: Brush>(layout: LayoutRead<'_, B>, index: usize, affinity: Affinity) -> Self {
+        Self::from_source_cluster_read(
             layout,
             affinity,
-            Cluster::from_byte_index(layout, index).as_ref(),
+            Cluster::from_byte_index_read(layout, index).as_ref(),
         )
     }
 
-    pub(super) fn from_source_cluster<B: Brush>(
-        layout: &Layout<B>,
+    pub(crate) fn from_source_cluster_read<B: Brush>(
+        layout: LayoutRead<'_, B>,
         affinity: Affinity,
         cluster: Option<&Cluster<'_, B>>,
     ) -> Self {
@@ -40,7 +45,7 @@ impl Cursor {
             }
         } else {
             Self {
-                index: layout.data.text_len,
+                index: layout.shape().text_len,
                 affinity: Affinity::Upstream,
             }
         }
@@ -67,7 +72,7 @@ impl Cursor {
                 }
             }
         } else {
-            (layout.data.text_len, Affinity::Downstream)
+            (layout.data.shape.text_len, Affinity::Downstream)
         };
         Self { index, affinity }
     }
@@ -289,8 +294,12 @@ impl Cursor {
     ///
     /// The `width` parameter defines the width of the resulting rectangle.
     pub fn geometry<B: Brush>(&self, layout: &Layout<B>, width: f32) -> BoundingBox {
-        let clusters = self.logical_clusters(layout);
-        self.geometry_with(
+        self.geometry_read(layout.read(), width)
+    }
+
+    pub(crate) fn geometry_read<B: Brush>(&self, layout: LayoutRead<'_, B>, width: f32) -> BoundingBox {
+        let clusters = self.logical_clusters_read(layout);
+        self.geometry_with_read(
             layout,
             width,
             clusters.each_ref().map(Option::as_ref),
@@ -298,9 +307,9 @@ impl Cursor {
         )
     }
 
-    pub(super) fn geometry_with<B: Brush>(
+    pub(crate) fn geometry_with_read<B: Brush>(
         &self,
-        layout: &Layout<B>,
+        layout: LayoutRead<'_, B>,
         width: f32,
         clusters: [Option<&Cluster<'_, B>>; 2],
         mut offset: impl FnMut(&Cluster<'_, B>) -> f32,
@@ -333,11 +342,18 @@ impl Cursor {
         &self,
         layout: &'a Layout<B>,
     ) -> [Option<Cluster<'a, B>>; 2] {
+        self.logical_clusters_read(layout.read())
+    }
+
+    pub(crate) fn logical_clusters_read<'a, B: Brush>(
+        &self,
+        layout: LayoutRead<'a, B>,
+    ) -> [Option<Cluster<'a, B>>; 2] {
         let upstream = self
             .index
             .checked_sub(1)
-            .and_then(|index| Cluster::from_byte_index(layout, index));
-        let downstream = Cluster::from_byte_index(layout, self.index);
+            .and_then(|index| Cluster::from_byte_index_read(layout, index));
+        let downstream = Cluster::from_byte_index_read(layout, self.index);
         [upstream, downstream]
     }
 
@@ -438,7 +454,7 @@ pub(super) fn line_cursor_rect<B: Brush>(
     )
 }
 
-fn last_line_cursor_rect<B: Brush>(layout: &Layout<B>, size: f32) -> BoundingBox {
+fn last_line_cursor_rect<B: Brush>(layout: LayoutRead<'_, B>, size: f32) -> BoundingBox {
     if let Some(line) = layout.get(layout.len().saturating_sub(1)) {
         let metrics = line.metrics();
         BoundingBox::new(

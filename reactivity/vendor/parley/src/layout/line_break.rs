@@ -10,7 +10,7 @@ use alloc::vec::Vec;
 use core_maths::CoreFloat;
 use parlance::BidiLevel;
 
-use crate::layout::data::{AlignedSubtreeOffset, run_box_metrics};
+use crate::layout::data::{AlignedSubtreeOffset, ParagraphData, WidthData, run_box_metrics};
 use crate::layout::spacing::{EffectiveSpacing, Justification, is_word_separator};
 use crate::layout::style_metrics::{
     BoxMetrics, InlineBoxPlacement, StyleMetrics, inline_box_placement,
@@ -39,12 +39,12 @@ struct LineLayout {
 }
 
 impl LineLayout {
-    fn swap<B: Brush>(&mut self, layout: &mut LayoutData<B>) {
-        core::mem::swap(&mut self.lines, &mut layout.lines);
-        core::mem::swap(&mut self.line_items, &mut layout.line_items);
+    fn swap(&mut self, width_data: &mut WidthData) {
+        core::mem::swap(&mut self.lines, &mut width_data.lines);
+        core::mem::swap(&mut self.line_items, &mut width_data.line_items);
         core::mem::swap(
             &mut self.aligned_subtree_offsets,
-            &mut layout.aligned_subtree_offsets,
+            &mut width_data.aligned_subtree_offsets,
         );
     }
 
@@ -392,7 +392,7 @@ impl LineBoxMetrics {
         run_idx: usize,
         style_index: u16,
         characters: &[Character],
-        data: &LayoutData<B>,
+        data: &ParagraphData<B>,
         contributed: &mut Vec<u16>,
         subtrees: &mut SubtreeHistory,
     ) {
@@ -424,7 +424,7 @@ impl LineBoxMetrics {
         run_idx: usize,
         style_index: u16,
         characters: &[Character],
-        data: &LayoutData<B>,
+        data: &ParagraphData<B>,
         contributed: &mut Vec<u16>,
         subtrees: &mut SubtreeHistory,
     ) {
@@ -453,8 +453,7 @@ impl LineBoxMetrics {
         else {
             return;
         };
-        let (baseline_offset, aligned_subtree_root) = data
-            .style_metrics
+        let (baseline_offset, aligned_subtree_root) = data.style_metrics
             .get(style)
             .map_or((0., 0), |m| (m.baseline_offset, m.aligned_subtree_root));
         self.add_box(aligned_subtree_root, baseline_offset, run_box, subtrees);
@@ -667,7 +666,7 @@ impl BreakerState {
         atom: &Atom<'_>,
         next_x: f32,
         style_index: u16,
-        data: &LayoutData<B>,
+        data: &ParagraphData<B>,
         is_word_separator: bool,
     ) {
         self.line.items.end = self.item_idx + 1;
@@ -831,9 +830,23 @@ impl BreakerState {
     }
 }
 
+/// Exclusive width target borrowing immutable built paragraph input. Ordinary
+/// Layout and the unboxed paragraph prototype use this SAME original breaker.
+pub(super) struct BreakTarget<'a, B: Brush> {
+    shape: &'a ParagraphData<B>,
+    width_data: &'a mut WidthData,
+}
+impl<B: Brush> BreakTarget<'_, B> {
+    pub(super) fn shape(&self) -> &ParagraphData<B> { self.shape }
+    pub(super) fn width(&self) -> &WidthData { self.width_data }
+    fn read(&self) -> super::read::LayoutRead<'_, B> {
+        super::read::LayoutRead::from_break_target(self)
+    }
+}
+
 /// Line breaking support for a paragraph.
 pub struct BreakLines<'a, B: Brush> {
-    layout: &'a mut Layout<B>,
+    layout: BreakTarget<'a, B>,
     lines: LineLayout,
     state: BreakerState,
     prev_state: Option<BreakerState>,
@@ -842,10 +855,22 @@ pub struct BreakLines<'a, B: Brush> {
 
 impl<'a, B: Brush> BreakLines<'a, B> {
     pub(crate) fn new(layout: &'a mut Layout<B>) -> Self {
-        layout.data.width = 0.;
-        layout.data.height = 0.;
+        let LayoutData { shape, width_data } = &mut layout.data;
+        Self::from_target(BreakTarget { shape, width_data })
+    }
+
+    pub(super) fn for_paragraph(
+        paragraph: &'a super::paragraph::ShapedParagraph<B>,
+        width_data: &'a mut WidthData,
+    ) -> Self {
+        Self::from_target(BreakTarget { shape: paragraph.shape(), width_data })
+    }
+
+    fn from_target(layout: BreakTarget<'a, B>) -> Self {
+        layout.width_data.width = 0.;
+        layout.width_data.height = 0.;
         let mut lines = LineLayout::default();
-        lines.swap(&mut layout.data);
+        lines.swap(&mut *layout.width_data);
         lines.lines.clear();
         lines.line_items.clear();
         lines.aligned_subtree_offsets.clear();
@@ -870,7 +895,7 @@ impl<'a, B: Brush> BreakLines<'a, B> {
         state.subtrees.clear();
         state.line.box_metrics.add_style(
             0,
-            &self.layout.data.style_metrics,
+            &self.layout.shape.style_metrics,
             &mut state.contributed,
             &mut state.subtrees,
         );
@@ -880,14 +905,14 @@ impl<'a, B: Brush> BreakLines<'a, B> {
     /// Add the layout's inline box `index` to the current line. Out-of-flow boxes contribute
     /// nothing to the line's metrics.
     fn append_layout_inline_box(&mut self, index: usize, next_x: f32) {
-        let quantize = self.layout.data.quantize;
-        let layout_box = &mut self.layout.data.inline_boxes[index];
+        let quantize = self.layout.shape.quantize;
+        let layout_box = &mut self.layout.width_data.inline_boxes[index];
         let inline_box = &layout_box.inline_box;
         if inline_box.kind == InlineBoxKind::InFlow {
             let placement = inline_box_placement(
                 inline_box,
                 layout_box.parent_style_index,
-                &self.layout.data.style_metrics,
+                &self.layout.shape.style_metrics,
                 quantize,
             );
             layout_box.baseline_offset = placement.baseline_offset;
@@ -907,7 +932,7 @@ impl<'a, B: Brush> BreakLines<'a, B> {
         line_indent: f32,
     ) -> Option<YieldData> {
         commit_line(
-            self.layout,
+            self.layout.read(),
             &mut self.lines,
             &mut self.state.line,
             max_advance,
@@ -1050,7 +1075,7 @@ impl<'a, B: Brush> BreakLines<'a, B> {
         // HACK: ignore max_advance for empty layouts
         // Prevents crash when width is too small (https://github.com/linebender/parley/issues/186)
         let max_advance =
-            if self.layout.data.text_len == 0 && self.layout.data.inline_boxes.is_empty() {
+            if self.layout.shape.text_len == 0 && self.layout.width_data.inline_boxes.is_empty() {
                 f32::MAX
             } else {
                 self.state.line_max_advance
@@ -1061,13 +1086,13 @@ impl<'a, B: Brush> BreakLines<'a, B> {
         let max_advance = max_advance - line_indent;
 
         // Iterate over remaining runs in the Layout
-        let item_count = self.layout.data.items.len();
+        let item_count = self.layout.shape.items.len();
         while self.state.item_idx < item_count {
-            let item = &self.layout.data.items[self.state.item_idx];
+            let item = &self.layout.shape.items[self.state.item_idx];
 
             match item.kind {
                 LayoutItemKind::InlineBox => {
-                    let inline_box = &self.layout.data.inline_boxes[item.index].inline_box;
+                    let inline_box = &self.layout.width_data.inline_boxes[item.index].inline_box;
 
                     // In-flow boxes are aligned relative to their containing style's span box
                     // (see `append_aligned_inline_box_to_line`). Out-of-flow boxes are not in-flow
@@ -1123,7 +1148,7 @@ impl<'a, B: Brush> BreakLines<'a, B> {
                 }
                 LayoutItemKind::TextRun => {
                     let run_idx = item.index;
-                    let run = Run::new(self.layout, 0, 0, run_idx, None);
+                    let run = Run::new(self.layout.read(), 0, 0, run_idx, None);
                     let slice = run.full_slice();
 
                     // Additional spacing to apply between atoms.
@@ -1143,7 +1168,7 @@ impl<'a, B: Brush> BreakLines<'a, B> {
                             first_character.flags.is_soft_wrap_opportunity();
                         let max_height_exceeded = self.state.line.max_height_exceeded;
                         let style_index = first_character.style_index;
-                        let style = &self.layout.data.styles[style_index as usize];
+                        let style = &self.layout.shape.styles[style_index as usize];
 
                         // Lag text_wrap_mode style by one atom
                         let text_wrap_mode = self.state.line.text_wrap_mode;
@@ -1159,7 +1184,7 @@ impl<'a, B: Brush> BreakLines<'a, B> {
                                 &atom,
                                 self.state.line.x,
                                 style_index,
-                                &self.layout.data,
+                                self.layout.shape,
                                 is_separator,
                             );
 
@@ -1203,7 +1228,7 @@ impl<'a, B: Brush> BreakLines<'a, B> {
                                 &atom,
                                 next_x,
                                 style_index,
-                                &self.layout.data,
+                                self.layout.shape,
                                 is_separator,
                             );
                         }
@@ -1219,7 +1244,7 @@ impl<'a, B: Brush> BreakLines<'a, B> {
                             let (hanging, all_hang) = atom_hanging_advance(
                                 slice,
                                 &atom,
-                                &self.layout.data.styles,
+                                &self.layout.shape.styles,
                                 spacing,
                                 item.bidi_level.is_rtl(),
                             );
@@ -1231,7 +1256,7 @@ impl<'a, B: Brush> BreakLines<'a, B> {
                                     &atom,
                                     next_x,
                                     style_index,
-                                    &self.layout.data,
+                                    self.layout.shape,
                                     is_separator,
                                 );
                             }
@@ -1275,7 +1300,7 @@ impl<'a, B: Brush> BreakLines<'a, B> {
                                     &atom,
                                     next_x,
                                     style_index,
-                                    &self.layout.data,
+                                    self.layout.shape,
                                     is_separator,
                                 );
                             }
@@ -1316,13 +1341,13 @@ impl<'a, B: Brush> BreakLines<'a, B> {
         // Track cluster count for this line
         let mut char_count: u32 = 0;
 
-        let item_count = self.layout.data.items.len();
+        let item_count = self.layout.shape.items.len();
         while self.state.item_idx < item_count {
-            let item = &self.layout.data.items[self.state.item_idx];
+            let item = &self.layout.shape.items[self.state.item_idx];
 
             match item.kind {
                 LayoutItemKind::InlineBox => {
-                    let inline_box = &self.layout.data.inline_boxes[item.index].inline_box;
+                    let inline_box = &self.layout.width_data.inline_boxes[item.index].inline_box;
 
                     if inline_box.kind != InlineBoxKind::InFlow {
                         self.append_layout_inline_box(item.index, self.state.line.x);
@@ -1344,7 +1369,7 @@ impl<'a, B: Brush> BreakLines<'a, B> {
                     // Check if we've reached the limit after adding this box
                     if char_count >= max_chars {
                         // Check if we've consumed all content (this is the last line).
-                        let is_last_item = self.state.item_idx >= self.layout.data.items.len();
+                        let is_last_item = self.state.item_idx >= self.layout.shape.items.len();
                         let break_reason = if is_last_item {
                             BreakReason::None
                         } else {
@@ -1360,8 +1385,8 @@ impl<'a, B: Brush> BreakLines<'a, B> {
                 }
                 LayoutItemKind::TextRun => {
                     let run_idx = item.index;
-                    let shaped_run = &self.layout.data.shaped_text.runs()[run_idx];
-                    let run = Run::new(self.layout, 0, 0, run_idx, None);
+                    let shaped_run = &self.layout.shape.shaped_text.runs()[run_idx];
+                    let run = Run::new(self.layout.read(), 0, 0, run_idx, None);
                     let slice = run.full_slice();
                     let spacing = run.line_spacing();
                     let cluster_end = shaped_run.shaped_clusters_range.end;
@@ -1390,7 +1415,7 @@ impl<'a, B: Brush> BreakLines<'a, B> {
                             &atom,
                             next_x,
                             first_character.style_index,
-                            &self.layout.data,
+                            self.layout.shape,
                             is_separator,
                         );
                         char_count += atom.char_range().len() as u32;
@@ -1403,7 +1428,7 @@ impl<'a, B: Brush> BreakLines<'a, B> {
                             // - BreakReason::Regular for soft wraps
                             let is_last_cluster_of_run = self.state.cluster_idx >= cluster_end;
                             let is_last_item =
-                                self.state.item_idx + 1 >= self.layout.data.items.len();
+                                self.state.item_idx + 1 >= self.layout.shape.items.len();
                             let break_reason = if is_last_cluster_of_run && is_last_item {
                                 BreakReason::None
                             } else if is_newline {
@@ -1459,7 +1484,7 @@ impl<'a, B: Brush> BreakLines<'a, B> {
 
     /// Consumes the line breaker and finalizes all line computations.
     pub fn finish(mut self) {
-        if self.layout.data.text_len == 0
+        if self.layout.shape.text_len == 0
             && let Some(line) = self.lines.line_items.first_mut()
         {
             line.text_range = 0..0;
@@ -1469,8 +1494,8 @@ impl<'a, B: Brush> BreakLines<'a, B> {
 
     #[inline]
     fn resolve_indent(&self) -> f32 {
-        let options = self.layout.data.indent_options;
-        let amount = self.layout.data.indent_amount;
+        let options = self.layout.width_data.indent_options;
+        let amount = self.layout.width_data.indent_amount;
         match self.lines.lines.last().map(|line| line.break_reason) {
             None => options.indent_for_first_line(amount),
             Some(BreakReason::Explicit) => options.indent_following_forced_line_break(amount),
@@ -1487,11 +1512,11 @@ impl<'a, B: Brush> BreakLines<'a, B> {
         line.metrics.line_height = line_height;
 
         if line.item_range.is_empty() {
-            line.text_range = self.layout.data.text_len..self.layout.data.text_len;
+            line.text_range = self.layout.shape.text_len..self.layout.shape.text_len;
         }
 
         // Whether metrics should be quantized to pixel boundaries
-        let quantize = self.layout.data.quantize;
+        let quantize = self.layout.shape.quantize;
 
         if line.item_range.is_empty() && line_idx > 0 {
             // If we have no items on this line, it must be the last (empty)
@@ -1500,8 +1525,7 @@ impl<'a, B: Brush> BreakLines<'a, B> {
             // something with which to identify the visual cursor position.
             if let Some((index, run)) = self
                 .layout
-                .data
-                .shaped_text
+                .shape.shaped_text
                 .runs()
                 .iter()
                 .enumerate()
@@ -1512,7 +1536,7 @@ impl<'a, B: Brush> BreakLines<'a, B> {
                 let text = run.range.byte_range.end;
                 // The empty run carries the style of the newline that produced this line, so the
                 // line is sized by that style's span box (and its ancestors), not just the strut.
-                let style_index = self.layout.data.shaped_text.shaped_clusters()
+                let style_index = self.layout.shape.shaped_text.shaped_clusters()
                     [cluster as usize - 1]
                     .style_index;
                 self.state.line.box_metrics.add_text(
@@ -1520,7 +1544,7 @@ impl<'a, B: Brush> BreakLines<'a, B> {
                     index,
                     style_index,
                     &[],
-                    &self.layout.data,
+                    self.layout.shape,
                     &mut self.state.contributed,
                     &mut self.state.subtrees,
                 );
@@ -1557,7 +1581,7 @@ impl<'a, B: Brush> BreakLines<'a, B> {
         let mut bottom_height = box_metrics.line_relative_bottom_height;
         for subtree in &subtrees {
             let height = subtree.line_box.height();
-            match self.layout.data.styles[usize::from(subtree.root)]
+            match self.layout.shape.styles[usize::from(subtree.root)]
                 .vertical_align
                 .shift
             {
@@ -1578,7 +1602,7 @@ impl<'a, B: Brush> BreakLines<'a, B> {
         line.aligned_subtree_offsets.start = offsets.len() as u32;
         for subtree in &subtrees {
             let extents = subtree.line_box.or_zero();
-            let offset = match self.layout.data.styles[usize::from(subtree.root)]
+            let offset = match self.layout.shape.styles[usize::from(subtree.root)]
                 .vertical_align
                 .shift
             {
@@ -1669,35 +1693,35 @@ impl<B: Brush> Drop for BreakLines<'_, B> {
         }
 
         // Save the computed widths/height to the layout
-        self.layout.data.width = layout_width;
-        self.layout.data.full_width = layout_full_width;
-        self.layout.data.height = height as f32;
-        self.layout.data.layout_max_advance = self.state.layout_max_advance;
+        self.layout.width_data.width = layout_width;
+        self.layout.width_data.full_width = layout_full_width;
+        self.layout.width_data.height = height as f32;
+        self.layout.width_data.layout_max_advance = self.state.layout_max_advance;
 
         // Save the computed lines to the layout
-        self.lines.swap(&mut self.layout.data);
+        self.lines.swap(&mut *self.layout.width_data);
     }
 }
 
 #[expect(clippy::cast_possible_truncation, reason = "deferred")]
 fn commit_line<B: Brush>(
-    layout: &Layout<B>,
+    layout: super::read::LayoutRead<'_, B>,
     lines: &mut LineLayout,
     state: &mut LineState,
     max_advance: f32,
     break_reason: BreakReason,
     line_indent: f32,
 ) {
-    let shaped_text = &layout.data.shaped_text;
+    let shaped_text = &layout.shape().shaped_text;
     let shaped_clusters = shaped_text.shaped_clusters();
 
     // Ensure that the cluster and item endpoints are within range
     state.clusters.end = state.clusters.end.min(shaped_clusters.len() as u32);
-    state.items.end = state.items.end.min(layout.data.items.len());
+    state.items.end = state.items.end.min(layout.shape().items.len());
 
     let start_item_idx = lines.line_items.len();
 
-    let items_to_commit = &layout.data.items[state.items.clone()];
+    let items_to_commit = &layout.shape().items[state.items.clone()];
 
     // Compute first and last run index
     let is_text_run = |item: &LayoutItem| item.kind == LayoutItemKind::TextRun;
@@ -1873,7 +1897,7 @@ fn commit_line<B: Brush>(
 // sometimes decides to inline it, which (as of writing) makes the line breaker 5-10% slower.
 #[inline(never)]
 fn hanging_whitespace<B: Brush>(
-    layout: &Layout<B>,
+    layout: super::read::LayoutRead<'_, B>,
     line_items: &[LineItemData],
     overflow: f32,
 ) -> (f32, u32, u32) {
@@ -1896,7 +1920,7 @@ fn hanging_whitespace<B: Brush>(
     'items: for line_item in line_items.iter().rev() {
         match line_item.kind {
             LayoutItemKind::InlineBox => {
-                let item = &layout.data.inline_boxes[line_item.index].inline_box;
+                let item = &layout.width().inline_boxes[line_item.index].inline_box;
 
                 // Inline boxes don't hang.
                 if item.kind == InlineBoxKind::InFlow {
@@ -1908,17 +1932,15 @@ fn hanging_whitespace<B: Brush>(
                 // reordering. We don't currently apply UAX #9 L1 (resetting trailing whitespace to
                 // paragraph level), so only logically-last items that match the paragraph level are
                 // guaranteed to be at that edge.
-                if line_item.bidi_level != layout.data.base_level {
+                if line_item.bidi_level != layout.shape().base_level {
                     break;
                 }
 
                 let effective_spacing = EffectiveSpacing::new(
-                    layout.data.runs[line_item.index].spacing,
+                    layout.shape().runs[line_item.index].spacing,
                     Justification::NONE,
                 );
-                let slice = layout
-                    .data
-                    .shaped_text
+                let slice = layout.shape().shaped_text
                     .run_slice(line_item.index as u32)
                     .narrow(line_item.shaped_cluster_range.clone());
 
@@ -1926,7 +1948,7 @@ fn hanging_whitespace<B: Brush>(
                     let (hanging, all_hang) = atom_hanging_advance(
                         slice,
                         &atom,
-                        &layout.data.styles,
+                        &layout.shape().styles,
                         effective_spacing,
                         line_item.is_rtl(),
                     );
@@ -1935,7 +1957,7 @@ fn hanging_whitespace<B: Brush>(
                         // The atom hangs from its logical end, so use the last cluster's style to
                         // decide whether it hangs conditionally.
                         let last_cluster = atom.shaped_clusters().last().unwrap();
-                        if layout.data.styles[last_cluster.style_index as usize]
+                        if layout.shape().styles[last_cluster.style_index as usize]
                             .white_space_collapse
                             == WhiteSpaceCollapse::Preserve
                         {
