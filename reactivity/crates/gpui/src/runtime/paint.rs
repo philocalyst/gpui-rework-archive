@@ -204,7 +204,7 @@ impl<M: View + 'static, L: LaneSet<M>> Win<M, L> {
 #[cfg(test)]
 mod tests {
     use super::*;
-    use crate::Signal;
+    use crate::{Signal, SignalMap};
     struct Panel {
         bound: bool,
         color: Signal<Color>,
@@ -226,59 +226,109 @@ mod tests {
             }
         }
     }
+    struct Inspected { color: Signal<Color>, mapped: bool }
+    impl Inspected {
+        const COLOR: crate::Source<Self, Color> = crate::Source::new(
+            FieldId::new(1), "color", |model| &model.color, |model| &mut model.color,
+        );
+    }
+    impl View for Inspected {
+        fn sources() -> Sources<Self> { Sources::new().direct(Self::COLOR) }
+        fn view(&self) -> crate::El<'_> {
+            let node = crate::div().name("color target").size(32);
+            if self.mapped { node.bg(self.color.map(|color| *color)) }
+            else { node.bg(&self.color) }
+        }
+    }
+    fn acknowledge_inspected(win: &mut Win<Inspected>) {
+        win.presented(win.with_scene(|_, token| token).unwrap()).unwrap();
+    }
+    fn inspected(mapped: bool, recording: bool) -> Win<Inspected> {
+        let model = Inspected { color: Signal::new(Color::BLACK), mapped };
+        let options = WindowOptions { size: [640, 480], ..Default::default() };
+        let mut win = if recording { Win::recording_with_inspector(model, options) }
+            else { Win::with_inspector(model, options) }.unwrap();
+        if recording { acknowledge_inspected(&mut win); }
+        let target = win.query().name("color target").one().unwrap();
+        win.inspector_select(target).unwrap();
+        if recording { acknowledge_inspected(&mut win); }
+        win
+    }
+    fn inspected_rows(win: &Win<Inspected>) -> Vec<SnapshotNode> {
+        let mut nodes = win.snapshot().unwrap().nodes;
+        for node in &mut nodes { node.target = None; }
+        nodes
+    }
     #[test]
     fn inspector_color_admission_needs_only_one_candidate_and_preserves_failed_predecessor() {
-        struct Inspected { color: Signal<Color> }
-        impl Inspected {
-            const COLOR: crate::Source<Self, Color> = crate::Source::new(
-                FieldId::new(1), "color", |model| &model.color, |model| &mut model.color,
-            );
-        }
-        impl View for Inspected {
-            fn sources() -> Sources<Self> { Sources::new().direct(Self::COLOR) }
-            fn view(&self) -> crate::El<'_> {
-                crate::div().name("color target").size(32).bg(&self.color)
+        for mapped in [false, true] {
+            let mut expected = inspected(mapped, false);
+            expected.set(Inspected::COLOR, Color::WHITE).unwrap();
+            let expected_pixels = expected.with_pixels(|pixels, _, _| pixels.to_vec()).unwrap();
+            for sequence in [u64::MAX - 1, u64::MAX] {
+                let mut win = inspected(mapped, false);
+                let old_token = win.with_scene(|_, token| token).unwrap();
+                let old_nodes = inspected_rows(&win);
+                let old_pixels = win.with_pixels(|pixels, _, _| pixels.to_vec()).unwrap();
+                win.runtime_mut().unwrap().next_presentation = NonZeroU64::new(sequence).unwrap();
+                let result = win.set(Inspected::COLOR, Color::WHITE);
+                if sequence == u64::MAX - 1 {
+                    let commit = result.expect("one guarded source edit needs only one complete candidate");
+                    assert_eq!(commit.source_epoch, commit.presentation_epoch);
+                    assert_eq!(win.with_scene(|_, token| token.sequence.get()).unwrap(), sequence);
+                    assert_eq!(inspected_rows(&win), inspected_rows(&expected));
+                    win.with_pixels(|pixels, _, _| assert_eq!(pixels, expected_pixels)).unwrap();
+                } else {
+                    assert!(result.is_err());
+                    assert_eq!(win.with_scene(|_, token| token).unwrap(), old_token);
+                    assert_eq!(inspected_rows(&win), old_nodes);
+                    win.with_pixels(|pixels, _, _| assert_eq!(pixels, old_pixels)).unwrap();
+                }
             }
         }
-        let window = || {
-            let mut win = Win::with_inspector(
-                Inspected { color: Signal::new(Color::BLACK) },
-                WindowOptions { size: [640, 480], ..Default::default() },
-            ).unwrap();
-            let target = win.query().name("color target").one().unwrap();
-            win.inspector_select(target).unwrap();
-            win
-        };
-        let mut expected = window();
-        expected.set(Inspected::COLOR, Color::WHITE).unwrap();
-        let expected_pixels = expected.with_pixels(|pixels, _, _| pixels.to_vec()).unwrap();
-        for sequence in [u64::MAX - 1, u64::MAX] {
-            let mut win = window();
-            let old_token = win.with_scene(|_, token| token).unwrap();
-            let mut old_nodes = win.snapshot().unwrap().nodes;
-            for node in &mut old_nodes { node.target = None; }
-            let old_pixels = win.with_pixels(|pixels, _, _| pixels.to_vec()).unwrap();
-            win.runtime_mut().unwrap().next_presentation = NonZeroU64::new(sequence).unwrap();
-            let result = win.set(Inspected::COLOR, Color::WHITE);
-            if sequence == u64::MAX - 1 {
-                // One admitted source edit has enough namespace capacity for
-                // one complete candidate, including the inspector captions.
-                let commit = result.expect("do not publish a slot candidate before guarded full preparation");
-                assert_eq!(commit.source_epoch, commit.presentation_epoch);
-                assert_eq!(win.with_scene(|_, token| token.sequence.get()).unwrap(), sequence);
-                win.with_pixels(|pixels, _, _| assert_eq!(pixels, expected_pixels)).unwrap();
-            } else {
-                assert!(result.is_err());
-                assert_eq!(win.with_scene(|_, token| token).unwrap(), old_token);
-                // Target availability additionally depends on the logical
-                // cohort. This compares immutable P rows, not a promise that
-                // a failed newer source keeps every logical address usable.
-                let mut nodes = win.snapshot().unwrap().nodes;
-                for node in &mut nodes { node.target = None; }
-                assert_eq!(nodes, old_nodes);
-                win.with_pixels(|pixels, _, _| assert_eq!(pixels, old_pixels)).unwrap();
-            }
+    }
+    #[test]
+    fn rejected_inspector_color_keeps_distinct_pending_c_and_old_p_until_eligible_ack() {
+        for mapped in [false, true] {
+            let mut win = inspected(mapped, true);
+            let old_p = inspected_rows(&win);
+            win.set(Inspected::COLOR, Color::WHITE).unwrap();
+            let eligible = win.with_scene(|_, token| token).unwrap();
+            let covered = win.runtime().unwrap().complete_epoch;
+            let pixels = win.with_pixels(|pixels, _, _| pixels.to_vec()).unwrap();
+            assert_eq!(inspected_rows(&win), old_p);
+            let mut expected = inspected(mapped, false);
+            expected.set(Inspected::COLOR, Color::WHITE).unwrap();
+            win.runtime_mut().unwrap().next_presentation = NonZeroU64::MAX;
+            assert!(win.set(Inspected::COLOR, Color::BLACK).is_err());
+            assert_eq!(win.with_scene(|_, token| token).unwrap(), eligible);
+            assert_eq!(inspected_rows(&win), old_p);
+            win.with_pixels(|actual, _, _| assert_eq!(actual, pixels)).unwrap();
+            let commit = win.presented(eligible).unwrap();
+            assert_eq!(commit.presentation_epoch, covered);
+            assert!(commit.presentation_epoch < commit.source_epoch);
+            assert_eq!(inspected_rows(&win), inspected_rows(&expected));
+            win.with_pixels(|actual, _, _| assert_eq!(actual, pixels)).unwrap();
         }
+    }
+    #[test]
+    fn rejected_paint_intent_keeps_retry_dirty_instead_of_covering_failed_source() {
+        let mut win = Win::recording(
+            Panel { bound: true, color: Signal::new(Color::BLACK) },
+            WindowOptions { size: [32, 32], ..Default::default() },
+        ).unwrap();
+        let old = win.with_scene(|_, token| token).unwrap();
+        win.presented(old).unwrap();
+        let covered = win.snapshot().unwrap().presentation_epoch;
+        let pixels = win.with_pixels(|pixels, _, _| pixels.to_vec()).unwrap();
+        win.runtime_mut().unwrap().next_presentation = NonZeroU64::MAX;
+        assert!(win.set(Panel::COLOR, Color::WHITE).is_err());
+        assert!(win.settle().is_err(), "failed paint source must not be certified by an idle relabel");
+        assert!(win.set(Panel::COLOR, Color::WHITE).is_err());
+        assert_eq!(win.with_scene(|_, token| token).unwrap(), old);
+        assert_eq!(win.snapshot().unwrap().presentation_epoch, covered);
+        assert!(win.snapshot().unwrap().source_epoch > covered);
+        win.with_pixels(|actual, _, _| assert_eq!(actual, pixels)).unwrap();
     }
     #[test]
     fn cold_storage_and_warm_edits_have_explicit_allocation_costs() {
