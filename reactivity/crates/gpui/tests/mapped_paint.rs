@@ -121,7 +121,7 @@ fn one_mapped_color_keeps_ten_thousand_rows_without_allocating_a_replacement_sce
 
 #[test]
 fn alpha_changes_rebuild_while_two_same_alpha_slots_keep_complete_pixels() {
-    for (alpha, two) in [(true, false), (false, true)] {
+    for (alpha, two) in [(true, false), (true, true), (false, true)] {
         let mut win = window(alpha, two);
         ack(&mut win);
         let before = first_pixel(&mut win);
