@@ -41,7 +41,7 @@ pub struct BatchStamp {
 #[derive(Clone, Copy, Debug, PartialEq, Eq, PartialOrd, Ord)]
 pub enum Facet {
     Topology, Layout, TextSource, TextPolicy, TextWidth, Paint, Transform,
-    Clip, Stacking, ResourcePixels, ResourceMetrics, Hit, Semantics,
+    Clip, Stacking, ResourcePixels, ResourceMetrics, Hit, Semantics, WidthConstraint, HeightConstraint,
 }
 #[derive(Clone, Copy, Debug, Default, PartialEq, Eq)]
 pub struct Facets(u16);
@@ -52,15 +52,19 @@ impl Facets {
     pub fn phases(self) -> impl Iterator<Item = Phase> {
         Phase::ALL.into_iter().filter(move |phase| {
             use Facet::*;
-            let geometry = self.contains(Topology) || self.contains(Layout) || self.contains(ResourceMetrics);
+            let geometry = self.contains(Topology) || self.contains(Layout) || self.contains(ResourceMetrics) || self.contains(WidthConstraint) || self.contains(HeightConstraint);
             let source = self.contains(TextSource) || self.contains(TextPolicy);
             let measure = geometry || source || self.contains(TextWidth);
             let placement = measure || self.contains(Transform);
             let clip = placement || self.contains(Clip);
             let lower = clip || self.contains(Paint) || self.contains(Stacking) || self.contains(ResourcePixels);
             match phase {
+                Phase::WidthConstraint => self.contains(WidthConstraint),
+                Phase::HeightConstraint => self.contains(HeightConstraint),
+                Phase::BoxConstraint => self.contains(Layout),
+                Phase::Realize => false,
                 Phase::Shape => source,
-                Phase::TextLayout => source || self.contains(TextWidth),
+                Phase::TextLayout => source || self.contains(TextWidth) || self.contains(WidthConstraint),
                 Phase::Measure | Phase::Layout => measure,
                 Phase::Placement => placement,
                 Phase::Clip => clip,
@@ -72,10 +76,11 @@ impl Facets {
     }
 }
 #[derive(Clone, Copy, Debug, PartialEq, Eq, PartialOrd, Ord)]
-pub enum Phase { Shape, TextLayout, Measure, Layout, Placement, Clip, Primitive, Raster, Hit, Semantics }
+pub enum Phase { WidthConstraint, HeightConstraint, BoxConstraint, Realize, Shape, TextLayout, Measure, Layout, Placement, Clip, Primitive, Raster, Hit, Semantics }
 impl Phase {
     pub const fn downstream(self) -> &'static [Self] {
         match self {
+            Self::WidthConstraint => &[Self::TextLayout], Self::HeightConstraint | Self::BoxConstraint => &[Self::Measure],
             Self::Shape => &[Self::TextLayout], Self::TextLayout => &[Self::Measure],
             Self::Measure => &[Self::Layout], Self::Layout => &[Self::Placement],
             Self::Placement => &[Self::Clip, Self::Primitive, Self::Hit, Self::Semantics],
@@ -83,7 +88,7 @@ impl Phase {
             Self::Primitive => &[Self::Raster], _ => &[],
         }
     }
-    pub const ALL: [Self; 10] = [Self::Shape, Self::TextLayout, Self::Measure, Self::Layout, Self::Placement, Self::Clip, Self::Primitive, Self::Raster, Self::Hit, Self::Semantics];
+    pub const ALL: [Self; 14] = [Self::WidthConstraint, Self::HeightConstraint, Self::BoxConstraint, Self::Realize, Self::Shape, Self::TextLayout, Self::Measure, Self::Layout, Self::Placement, Self::Clip, Self::Primitive, Self::Raster, Self::Hit, Self::Semantics];
 }
 #[derive(Clone, Copy, Debug, PartialEq, Eq)]
 pub enum Scope { Site, Subtree, Scene }
