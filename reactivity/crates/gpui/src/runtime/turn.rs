@@ -2,6 +2,59 @@
 //! It owns no state and cannot outlive the exclusive Win borrow.
 use super::*;
 
+impl<M: View + 'static> Runtime<M> {
+    /// Exact direct sources already exclude branch/format/structural reads.
+    /// This additional certificate excludes every viewport dependency: only
+    /// Transform (plus existing Paint) sinks, on subtrees disjoint from all
+    /// List/ListItem/Scroll ancestry. Ordinary patch and full publication still
+    /// perform geometry, clipping, hit, text/resource and accessibility work.
+    #[inline(never)]
+    fn disjoint_transform_ports(&self, field: FieldId) -> bool {
+        if !self.logical_valid || !self.presentation_valid
+            || self.dirty || self.topology_changed || self.rebuild_layout
+            || self.layout_edits.is_some() || self.layout.is_poisoned()
+            || self.requested_size != self.presentation_size
+            || self.requested_scale_factor != self.presentation_scale_factor
+        {
+            return false;
+        }
+        let Some(fanout) = self.fanout.get(&field) else { return false };
+        fanout.all_destinations().all(|(destination, _, _)| {
+            match destination.property() {
+                Some(id) if id.info().impact == crate::property::Impact::Paint => true,
+                Some(crate::property::PropertyId::Transform) => {
+                    self.disjoint_viewport_subtree(destination.node())
+                }
+                // Includes text, semantic ports and every Layout sink. Keep
+                // their existing realization boundary even in a mixed fanout.
+                _ => false,
+            }
+        })
+    }
+    fn disjoint_viewport_subtree(&self, index: usize) -> bool {
+        let mut current = Some(index);
+        while let Some(index) = current {
+            let Some(node) = self.nodes.get(index) else { return false };
+            if matches!(node.kind(), NodeKind::List | NodeKind::ListItem | NodeKind::Scroll) {
+                return false;
+            }
+            current = node.parent().index();
+        }
+        for (&key, state) in &self.viewports {
+            let Some(index_of_viewport) = self.by_identity.get(state.identity(key)) else {
+                return false;
+            };
+            let mut current = Some(index_of_viewport);
+            while let Some(ancestor) = current {
+                if ancestor == index { return false }
+                let Some(node) = self.nodes.get(ancestor) else { return false };
+                current = node.parent().index();
+            }
+        }
+        true
+    }
+}
+
 impl<M: View + 'static, L: LaneSet<M>> RuntimeMut<'_, M, L> {
     pub(super) fn deliver(&mut self, applied: &mut usize, budget: usize) -> Result<Commit, Error> {
         self.live()?;
@@ -254,6 +307,9 @@ impl<M: View + 'static, L: LaneSet<M>> RuntimeMut<'_, M, L> {
                             })
                         })
                     });
+                // Do not re-describe every realized list row merely because an
+                // unrelated sibling popover changed its direct transform.
+                let realize = realize && !self.runtime.disjoint_transform_ports(field);
                 match catch_unwind(AssertUnwindSafe(|| {
                     let semantic = self.runtime.patch_admitted(field, !self.deferred)?;
                     // Ordinary retained trees patch directly. Mixed virtual-list
