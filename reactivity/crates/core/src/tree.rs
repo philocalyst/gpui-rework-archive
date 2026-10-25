@@ -491,9 +491,16 @@ mod tests {
         range.push(reused).unwrap();
         assert_eq!(range.push(ids[1]), Err(TreeError::InvalidNode));
         assert_eq!(range.len(), 1);
+        assert_eq!(range.required(0), reused);
         range.clear();
         range.push(foreign).unwrap();
         assert_eq!(range.required(0), foreign);
+        // This next slot has the right index and generation, isolating the
+        // namespace check rather than accidentally failing the index check.
+        assert_eq!(range.push(ids[1]), Err(TreeError::InvalidNode));
+        assert_eq!(range.len(), 1);
+        assert_eq!(range.required(0), foreign);
+        assert_eq!(range.index_of(ids[1]), None);
     }
 
     #[test]
