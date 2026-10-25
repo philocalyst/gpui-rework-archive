@@ -466,6 +466,34 @@ mod tests {
     }
 
     #[test]
+    fn retained_topology_storage_ledger_prices_headers_and_whole_popup_turns() {
+        eprintln!(
+            "RETAINED_TOPOLOGY_HEADERS runtime={} map={} edited={} plan={} node_id={}",
+            size_of::<Runtime<()>>(), size_of::<LayoutNodes>(),
+            size_of::<Edited>(), size_of::<EditPlan>(), size_of::<NodeId>(),
+        );
+        let mut win = window();
+        for popup in [true, false, true, false] {
+            let cost = allocation_counter::measure(|| {
+                win.update(|model| model.popup = popup).unwrap();
+            });
+            let runtime = win.runtime().unwrap();
+            let (ordered_capacity, inverse_entries) = match &runtime.layout_nodes {
+                LayoutNodes::Fresh(_) => (0, 0),
+                LayoutNodes::Edited(map) => (map.ordered.capacity(), map.reverse.len()),
+            };
+            eprintln!(
+                "RETAINED_TOPOLOGY_POPUP open={popup} allocations={} requested={} retained={} peak={} ordered_capacity={ordered_capacity} inverse_entries={inverse_entries}",
+                cost.count_total, cost.bytes_total, cost.bytes_current, cost.bytes_max,
+            );
+            // Allocation measurements cover the whole public update, not
+            // guessed BTreeMap node sizes or production-allocator CPU timing.
+            drop(runtime);
+            acknowledge(&mut win);
+        }
+    }
+
+    #[test]
     fn mixed_generation_inverse_mapping_rejects_stale_and_foreign_capabilities() {
         let mut tree = LayoutTree::new();
         let removed = tree.insert(None, gpui_reactivity_core::NodeKind::Element, cephal::Style::DEFAULT).unwrap();
