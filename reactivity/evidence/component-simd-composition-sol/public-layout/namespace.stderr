@@ -1,0 +1,49 @@
+error[E0425]: cannot find type `PropertyValue` in crate `gpui`
+ --> /tmp/gpui-component-simd-layout-probe/probe.rs:3:216
+  |
+3 | ...gpui::PropInput<gpui::Color>>(),size_of::<gpui::PropertyValue>(),align_of::<gpui::PropertyValue>()];
+  |                                                    ^^^^^^^^^^^^^ not found in `gpui`
+  |
+note: similarly named type alias `PropertyChange` defined here
+ --> crates/gpui/src/element.rs:114:0
+help: a type alias with a similar name exists
+  |
+3 - pub static PUBLIC_LAYOUTS:[usize;7]=[size_of::<gpui::ColorInput>(),size_of::<gpui::BoolState>(),size_of::<gpui::BoolBinding>(),size_of::<gpui::BoolColors>(),size_of::<gpui::PropInput<gpui::Color>>(),size_of::<gpui::PropertyValue>(),align_of::<gpui::PropertyValue>()];
+3 + pub static PUBLIC_LAYOUTS:[usize;7]=[size_of::<gpui::ColorInput>(),size_of::<gpui::BoolState>(),size_of::<gpui::BoolBinding>(),size_of::<gpui::BoolColors>(),size_of::<gpui::PropInput<gpui::Color>>(),size_of::<gpui::PropertyChange>(),align_of::<gpui::PropertyValue>()];
+  |
+help: consider importing this enum
+  |
+1 + use gpui::property::PropertyValue;
+  |
+help: if you import `PropertyValue`, refer to it directly
+  |
+3 - pub static PUBLIC_LAYOUTS:[usize;7]=[size_of::<gpui::ColorInput>(),size_of::<gpui::BoolState>(),size_of::<gpui::BoolBinding>(),size_of::<gpui::BoolColors>(),size_of::<gpui::PropInput<gpui::Color>>(),size_of::<gpui::PropertyValue>(),align_of::<gpui::PropertyValue>()];
+3 + pub static PUBLIC_LAYOUTS:[usize;7]=[size_of::<gpui::ColorInput>(),size_of::<gpui::BoolState>(),size_of::<gpui::BoolBinding>(),size_of::<gpui::BoolColors>(),size_of::<gpui::PropInput<gpui::Color>>(),size_of::<PropertyValue>(),align_of::<gpui::PropertyValue>()];
+  |
+
+error[E0425]: cannot find type `PropertyValue` in crate `gpui`
+ --> /tmp/gpui-component-simd-layout-probe/probe.rs:3:250
+  |
+3 | ...ze_of::<gpui::PropertyValue>(),align_of::<gpui::PropertyValue>()];
+  |                                                    ^^^^^^^^^^^^^ not found in `gpui`
+  |
+note: similarly named type alias `PropertyChange` defined here
+ --> crates/gpui/src/element.rs:114:0
+help: a type alias with a similar name exists
+  |
+3 - pub static PUBLIC_LAYOUTS:[usize;7]=[size_of::<gpui::ColorInput>(),size_of::<gpui::BoolState>(),size_of::<gpui::BoolBinding>(),size_of::<gpui::BoolColors>(),size_of::<gpui::PropInput<gpui::Color>>(),size_of::<gpui::PropertyValue>(),align_of::<gpui::PropertyValue>()];
+3 + pub static PUBLIC_LAYOUTS:[usize;7]=[size_of::<gpui::ColorInput>(),size_of::<gpui::BoolState>(),size_of::<gpui::BoolBinding>(),size_of::<gpui::BoolColors>(),size_of::<gpui::PropInput<gpui::Color>>(),size_of::<gpui::PropertyValue>(),align_of::<gpui::PropertyChange>()];
+  |
+help: consider importing this enum
+  |
+1 + use gpui::property::PropertyValue;
+  |
+help: if you import `PropertyValue`, refer to it directly
+  |
+3 - pub static PUBLIC_LAYOUTS:[usize;7]=[size_of::<gpui::ColorInput>(),size_of::<gpui::BoolState>(),size_of::<gpui::BoolBinding>(),size_of::<gpui::BoolColors>(),size_of::<gpui::PropInput<gpui::Color>>(),size_of::<gpui::PropertyValue>(),align_of::<gpui::PropertyValue>()];
+3 + pub static PUBLIC_LAYOUTS:[usize;7]=[size_of::<gpui::ColorInput>(),size_of::<gpui::BoolState>(),size_of::<gpui::BoolBinding>(),size_of::<gpui::BoolColors>(),size_of::<gpui::PropInput<gpui::Color>>(),size_of::<gpui::PropertyValue>(),align_of::<PropertyValue>()];
+  |
+
+error: aborting due to 2 previous errors
+
+For more information about this error, try `rustc --explain E0425`.

@@ -1,0 +1,8 @@
+error: only metadata stub found for `rlib` dependency `gpui`. Please provide path to the corresponding .rmeta file with full metadata
+ --> /tmp/gpui-component-simd-layout-probe/probe.rs:3:48
+  |
+3 | pub static PUBLIC_LAYOUTS:[usize;7]=[size_of::<gpui::ColorInput>(),size_of::<gpui::BoolState>(),size_of::<gpui::BoolBinding>(),size_o...
+  |                                                ^^^^
+
+error: aborting due to 1 previous error
+

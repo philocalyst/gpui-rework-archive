@@ -1,0 +1,25 @@
+{
+  "simd_expected": true,
+  "actual_libraries": {
+    "gpui": [
+      [
+        "accessibility",
+        "native",
+        "native-core",
+        "simd",
+        "x11",
+        "x11-minimal"
+      ]
+    ],
+    "gpui_canvas": [
+      [
+        "simd"
+      ]
+    ],
+    "gpui_gpu": [
+      [
+        "simd"
+      ]
+    ]
+  }
+}

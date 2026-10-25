@@ -1,0 +1,58 @@
+{
+  "actual-frozen-executables.json": {
+    "bytes": 57656,
+    "sha256": "62da9953aba8480dcaa7b06029cd90c4ac71b3f734a90937719f1d0479dcd9a1"
+  },
+  "baseline-inventory.json": {
+    "bytes": 54106,
+    "sha256": "ea9cff4bc0c18af1431fb60b75a7114032d7f21926224f4bf14dcf635d1111d4"
+  },
+  "halloween-disabled.png": {
+    "bytes": 74760,
+    "sha256": "357346fa199beec19d5f5ea221ecb75b6c70e878d307f6d46efe296c3f77294a"
+  },
+  "halloween-draft.png": {
+    "bytes": 74802,
+    "sha256": "81258cef1337741474b884ada37b6dbe5703e507205976ac5b315f3e25fae033"
+  },
+  "halloween-focus.png": {
+    "bytes": 74886,
+    "sha256": "767d01de4ce97a402c4393c584dcb8331efbc1cb3429cef2caf1e38f3cae1ffb"
+  },
+  "halloween-ready.png": {
+    "bytes": 73729,
+    "sha256": "61be9cac31552e1c4b2722930eb6073c1ccf63b3a34a0929f9c3096917f9b9e3"
+  },
+  "halloween-resized.png": {
+    "bytes": 81809,
+    "sha256": "f4f1ffe05561e2645fc674ec12f18099c553c3f5f5c3fa81ee662ba34a264d18"
+  },
+  "inventory.json": {
+    "bytes": 77822,
+    "sha256": "9cf388077f14325c39cfc7058deab96510186c90a9004ff9284d953a0f62440d"
+  },
+  "key-executables.json": {
+    "bytes": 281,
+    "sha256": "c2c1d196fe61d9cd5a54f09e1e6b7efea5f0744be9372c6e84455ca679131a31"
+  },
+  "local-members.json": {
+    "bytes": 17594,
+    "sha256": "c9b1c6417feec9964cae3018baa26e3c096a604d0d1b1b3d5b31758a1878493a"
+  },
+  "local-raw-receipts.tar.gz": {
+    "bytes": 544663,
+    "sha256": "a5f1d82101f78a7d68259bcaa0b48a4ef682085c35e28db0c11ea522b4c92c0e"
+  },
+  "protected.json": {
+    "bytes": 391324,
+    "sha256": "f124885890b22e2dc07033e8dedfba26b2b6f6f1e2cdae20fb94d934d9fc1cbf"
+  },
+  "scalar-opt-out-features.json": {
+    "bytes": 268,
+    "sha256": "5419cdd4c9503b22de4c04b3e0ed4a68f23ffc9f9c3b882f45d8e13f71e8890f"
+  },
+  "standalone-simd-features.json": {
+    "bytes": 327,
+    "sha256": "65cb10ff79c9b1eef863a7dfbb7db9a5485edd69e2b91ca2c8f49b32c7989bcd"
+  }
+}

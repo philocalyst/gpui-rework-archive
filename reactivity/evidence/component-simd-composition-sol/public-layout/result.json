@@ -1,0 +1,14 @@
+{
+  "source": "14006e63d086c29229679db5edc823bec8a7912f",
+  "method": "Rustc emitted static size_of/align_of from exact full-default GPUI metadata; no linking or runtime allocation",
+  "layouts": {
+    "ColorInput": 80,
+    "BoolState": 16,
+    "BoolBinding": 56,
+    "BoolColors": 80,
+    "PropInput<Color>": 48,
+    "PropertyValue": 28,
+    "PropertyValueAlignment": 4
+  },
+  "assembly_sha256": "1299c35a7a434c4fe529873d4081fa05a59d016b239dc432f30e53b73e7dbdcd"
+}

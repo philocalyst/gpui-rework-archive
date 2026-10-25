@@ -1,0 +1,458 @@
+{
+  "gpui-component-simd-app-feature-resolution.json": {
+    "bytes": 327,
+    "sha256": "65cb10ff79c9b1eef863a7dfbb7db9a5485edd69e2b91ca2c8f49b32c7989bcd"
+  },
+  "gpui-component-simd-app-orchestrator.log": {
+    "bytes": 788,
+    "sha256": "77bd0989ef588c73b8409bcd19a361e668a5e4649003288db15f1f13acb9c22c"
+  },
+  "gpui-component-simd-app.after.json": {
+    "bytes": 281801,
+    "sha256": "580edfe5484914cfbd63a65d08e0e934107470aad24805998a70a1a6d7fb41b0"
+  },
+  "gpui-component-simd-app.before.json": {
+    "bytes": 281801,
+    "sha256": "580edfe5484914cfbd63a65d08e0e934107470aad24805998a70a1a6d7fb41b0"
+  },
+  "gpui-component-simd-app.command.json": {
+    "bytes": 490,
+    "sha256": "fa3bce1b98ff529f0869bd204799ed33d95cf5cf4baca9922220655319922cf8"
+  },
+  "gpui-component-simd-app.jsonl": {
+    "bytes": 258069,
+    "sha256": "c6621cf85084a2784245af294d5ec03d2be61095d1ccbc2f7df904576bd68d82"
+  },
+  "gpui-component-simd-app.log": {
+    "bytes": 269,
+    "sha256": "a2e0c699dd76f531a100e6f05b54f5ecfeeee4fd0dcd3e18aa782c50a8636e5a"
+  },
+  "gpui-component-simd-app.py": {
+    "bytes": 2398,
+    "sha256": "ee2a4ebd0b91484e4b3fa120fe423280bb331b1e03e045e68b56736c60365bcc"
+  },
+  "gpui-component-simd-baseline-inventory.json": {
+    "bytes": 54106,
+    "sha256": "ea9cff4bc0c18af1431fb60b75a7114032d7f21926224f4bf14dcf635d1111d4"
+  },
+  "gpui-component-simd-baseline-inventory.py": {
+    "bytes": 484,
+    "sha256": "209d6e7662c802e48ebb18990334b30f0ae9424aa86903d284e3e9692365d065"
+  },
+  "gpui-component-simd-capsules.py": {
+    "bytes": 3346,
+    "sha256": "f40e3573c5dd2721bf6aaa8e2d4460ccdf17138de2f84ec0768a148911ca2cfa"
+  },
+  "gpui-component-simd-clean-default.after.json": {
+    "bytes": 281801,
+    "sha256": "580edfe5484914cfbd63a65d08e0e934107470aad24805998a70a1a6d7fb41b0"
+  },
+  "gpui-component-simd-clean-default.before.json": {
+    "bytes": 281801,
+    "sha256": "580edfe5484914cfbd63a65d08e0e934107470aad24805998a70a1a6d7fb41b0"
+  },
+  "gpui-component-simd-clean-default.command.json": {
+    "bytes": 562,
+    "sha256": "8f3ea1ed413ad6da0962474206ee5a2e2d07dc6bad6ef7ce7b68e4cc92e4e37f"
+  },
+  "gpui-component-simd-clean-default.jsonl": {
+    "bytes": 0,
+    "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+  },
+  "gpui-component-simd-clean-default.log": {
+    "bytes": 142,
+    "sha256": "2eb7fe789d6e95cf4e555210c102571af8a96b3cbf4e4b06b9b1a411a695f9e7"
+  },
+  "gpui-component-simd-clean-native.after.json": {
+    "bytes": 281801,
+    "sha256": "580edfe5484914cfbd63a65d08e0e934107470aad24805998a70a1a6d7fb41b0"
+  },
+  "gpui-component-simd-clean-native.before.json": {
+    "bytes": 281801,
+    "sha256": "580edfe5484914cfbd63a65d08e0e934107470aad24805998a70a1a6d7fb41b0"
+  },
+  "gpui-component-simd-clean-native.command.json": {
+    "bytes": 569,
+    "sha256": "cc0d87c0f4a80728b0f1dbf4628cdfefe89356224de8b61d72d5c023579cf46d"
+  },
+  "gpui-component-simd-clean-native.jsonl": {
+    "bytes": 0,
+    "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+  },
+  "gpui-component-simd-clean-native.log": {
+    "bytes": 143,
+    "sha256": "6e25338d3cb78bd24ac2c948079795bb5496e03eb1ddd519a4db66ad40534696"
+  },
+  "gpui-component-simd-codegen.json": {
+    "bytes": 554,
+    "sha256": "739a29aba157ee78739b27e5cd336a76e2f75a33b17bd9fc7cbffded4e6fda51"
+  },
+  "gpui-component-simd-codegen.py": {
+    "bytes": 1735,
+    "sha256": "e99602670f5464907915913af9b625f753d40674465b0874f0499ef57c15c0cd"
+  },
+  "gpui-component-simd-costs/binding_costs.stderr": {
+    "bytes": 0,
+    "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+  },
+  "gpui-component-simd-costs/binding_costs.stdout": {
+    "bytes": 776,
+    "sha256": "85ff254bd85a565ba26fecd9197446fbfece6b5744c3d5857d6475555ce2dfca"
+  },
+  "gpui-component-simd-costs/costs.stderr": {
+    "bytes": 0,
+    "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+  },
+  "gpui-component-simd-costs/costs.stdout": {
+    "bytes": 719,
+    "sha256": "b63f1582628f6e0990a83eb7c0067291c162780d860709234550a311cf69dcaa"
+  },
+  "gpui-component-simd-costs/receipt.json": {
+    "bytes": 1197,
+    "sha256": "a42a8f2b482f04ec07018c371544b8ba13c3b5a0edc24f59a515f00fda58a082"
+  },
+  "gpui-component-simd-default-gates.json": {
+    "bytes": 352,
+    "sha256": "3523b4f4211f0c4d9979b0744aabdb447b553aa6a9973fde55c37fa7ad95259d"
+  },
+  "gpui-component-simd-default-orchestrator.log": {
+    "bytes": 1161,
+    "sha256": "0c643121bd047184cf974a80d562d0ff592f98c83a213db5173b62ba6746b373"
+  },
+  "gpui-component-simd-final-local.after.json": {
+    "bytes": 281801,
+    "sha256": "580edfe5484914cfbd63a65d08e0e934107470aad24805998a70a1a6d7fb41b0"
+  },
+  "gpui-component-simd-fix-receipt.py": {
+    "bytes": 2084,
+    "sha256": "82070b4e4238526fb97992858579b30b1327dd612919c0f4bb682e61f7569ed1"
+  },
+  "gpui-component-simd-freeze.py": {
+    "bytes": 925,
+    "sha256": "82399f8478d4c0dc9ad6f9e96ac47bd81c8f0682458b66082af1a98667aae0cc"
+  },
+  "gpui-component-simd-frozen.json": {
+    "bytes": 281801,
+    "sha256": "580edfe5484914cfbd63a65d08e0e934107470aad24805998a70a1a6d7fb41b0"
+  },
+  "gpui-component-simd-full-default.after.json": {
+    "bytes": 281801,
+    "sha256": "580edfe5484914cfbd63a65d08e0e934107470aad24805998a70a1a6d7fb41b0"
+  },
+  "gpui-component-simd-full-default.before.json": {
+    "bytes": 281801,
+    "sha256": "580edfe5484914cfbd63a65d08e0e934107470aad24805998a70a1a6d7fb41b0"
+  },
+  "gpui-component-simd-full-default.command.json": {
+    "bytes": 491,
+    "sha256": "17c63d1e15b2b4394fb759803ec9f1c16d4c92966ceb777b07c42ab5bbdf687c"
+  },
+  "gpui-component-simd-full-default.jsonl": {
+    "bytes": 263414,
+    "sha256": "8e303eb15afbd63060360ea24eb4da53c37a3ee4fcd7d482e022bca2cdc5f0e1"
+  },
+  "gpui-component-simd-full-default.log": {
+    "bytes": 12708,
+    "sha256": "f9fae9870849c3254dabd40458bb0154457415590ab72995577b04e6a5c1647d"
+  },
+  "gpui-component-simd-gates.py": {
+    "bytes": 3325,
+    "sha256": "62a48e3305066c428cf702e7df78e713d6f4c4b613e99672e5c3f3aa4ee21130"
+  },
+  "gpui-component-simd-hummingbird-fresh-gates.json": {
+    "bytes": 94,
+    "sha256": "f649caa46e2562d3dfa832abd8d7be0826c0944cfc92f73f5b982db2c71f93c8"
+  },
+  "gpui-component-simd-hummingbird-fresh-orchestrator.log": {
+    "bytes": 294,
+    "sha256": "dfacedccec3785d79cb99e869361831a3425ffb90ba32c203a5c8c8b9936b6b8"
+  },
+  "gpui-component-simd-hummingbird-fresh.after.json": {
+    "bytes": 288310,
+    "sha256": "7e882b66b844ffe67276d5e20d6148db6dbb4ff2f6fb5316b83c4c0f32a0e2b4"
+  },
+  "gpui-component-simd-hummingbird-fresh.before.json": {
+    "bytes": 288310,
+    "sha256": "7e882b66b844ffe67276d5e20d6148db6dbb4ff2f6fb5316b83c4c0f32a0e2b4"
+  },
+  "gpui-component-simd-hummingbird-fresh.command.json": {
+    "bytes": 491,
+    "sha256": "e032e30937e66cbc4eb82873e579a501106cc5f36e969780b978bc6e3000cfbb"
+  },
+  "gpui-component-simd-hummingbird-fresh.jsonl": {
+    "bytes": 131783,
+    "sha256": "d85a3703f9b69a036ddc26468dbef2205103c85b880142c556f353da6ebefe84"
+  },
+  "gpui-component-simd-hummingbird-fresh.log": {
+    "bytes": 4741,
+    "sha256": "f35f141f8cd603e5fe43063dd2d87bc95a49ef5f1ba90cf8a22b72e3a2287efb"
+  },
+  "gpui-component-simd-hummingbird-fresh.py": {
+    "bytes": 3431,
+    "sha256": "9fc88914d24716f52be1f310f3a45da1ced2cebc979d8211c1c594c47769d693"
+  },
+  "gpui-component-simd-hummingbird-gates.json": {
+    "bytes": 88,
+    "sha256": "f732527510bc721fb9de08163b42c3cf5b766b5a41927fc010d9810c1ca0fbf8"
+  },
+  "gpui-component-simd-hummingbird-orchestrator.log": {
+    "bytes": 288,
+    "sha256": "7ed41371b7534327f8f7cde095e0c9012b9af36e034ffdc04b29711a21cda64e"
+  },
+  "gpui-component-simd-hummingbird.after.json": {
+    "bytes": 288310,
+    "sha256": "7e882b66b844ffe67276d5e20d6148db6dbb4ff2f6fb5316b83c4c0f32a0e2b4"
+  },
+  "gpui-component-simd-hummingbird.before.json": {
+    "bytes": 288310,
+    "sha256": "7e882b66b844ffe67276d5e20d6148db6dbb4ff2f6fb5316b83c4c0f32a0e2b4"
+  },
+  "gpui-component-simd-hummingbird.command.json": {
+    "bytes": 489,
+    "sha256": "ffd70d5e62a0aca8f35e4393967bc3ec53ac4bd4da8b28f7dd9db8b33ddc69f4"
+  },
+  "gpui-component-simd-hummingbird.jsonl": {
+    "bytes": 131303,
+    "sha256": "0416ed29575e1079a1d5de626fe6a4c1891d2596e7455937b4557170f7c3e400"
+  },
+  "gpui-component-simd-hummingbird.log": {
+    "bytes": 1311,
+    "sha256": "8288b9ac9dfb226a46f9fad9995d6cb32e359e473342326d2b21f2ab28d2447d"
+  },
+  "gpui-component-simd-inputs.py": {
+    "bytes": 928,
+    "sha256": "3581a82fdad99e0868a06f3a7362fc2d0800d974b844e1c7b9bd5c0f2836f9e7"
+  },
+  "gpui-component-simd-inventory.json": {
+    "bytes": 77822,
+    "sha256": "9cf388077f14325c39cfc7058deab96510186c90a9004ff9284d953a0f62440d"
+  },
+  "gpui-component-simd-inventory.py": {
+    "bytes": 627,
+    "sha256": "c65dff0a8af38ff53b59dff81ee4b266509785af5bce269efede0340664d0260"
+  },
+  "gpui-component-simd-key-executables.json": {
+    "bytes": 281,
+    "sha256": "c2c1d196fe61d9cd5a54f09e1e6b7efea5f0744be9372c6e84455ca679131a31"
+  },
+  "gpui-component-simd-local-evidence.py": {
+    "bytes": 2532,
+    "sha256": "2e28c84051133b6801575a3415c39fb3a158ec971985f2ad3ad51581d14ee15d"
+  },
+  "gpui-component-simd-native-capture.json": {
+    "bytes": 823,
+    "sha256": "44469415bce4a8e6ef061acf9d3ba8dc1852eae476f41c5b5fb1c7fc5ff8727d"
+  },
+  "gpui-component-simd-native-capture.py": {
+    "bytes": 4967,
+    "sha256": "87b218c5f0eac07d68fa5ae5fd55ef0a4f4aa49c276b68abbda99d90c5718ae3"
+  },
+  "gpui-component-simd-native-capture.stderr": {
+    "bytes": 0,
+    "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+  },
+  "gpui-component-simd-native-capture.stdout": {
+    "bytes": 1001,
+    "sha256": "056824dbfa05ed65e62f2401ebd064d9a5361d44a09c5c4ae2ff520effaddea3"
+  },
+  "gpui-component-simd-native-fixtures.py": {
+    "bytes": 2612,
+    "sha256": "9c0195be93859023b3f23844ddfc5a8f88904869c6c24727fcf1067e25eb926c"
+  },
+  "gpui-component-simd-native-fixtures/atspi-address.json": {
+    "bytes": 134,
+    "sha256": "ebded66e81502031f76899a1a55195635ef2d98a751a04752bb23916834813f9"
+  },
+  "gpui-component-simd-native-fixtures/atspi-launcher-reaped.json": {
+    "bytes": 62,
+    "sha256": "644ab192157f426742d0ae9283df879f8ea803698ab706c10dfe4df2b15515d3"
+  },
+  "gpui-component-simd-native-fixtures/atspi-launcher.log": {
+    "bytes": 326,
+    "sha256": "5637d00cfaf243f844f6fb19267829339e7d5de1388fe0221f6f487ceaff9d8e"
+  },
+  "gpui-component-simd-native-fixtures/binary.json": {
+    "bytes": 547,
+    "sha256": "0024d9c8afe626b70142b5d44e28ef5f1ebd859330bdddeded23f53efacc7ddf"
+  },
+  "gpui-component-simd-native-fixtures/ime.stderr.log": {
+    "bytes": 0,
+    "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+  },
+  "gpui-component-simd-native-fixtures/ime.stdout.log": {
+    "bytes": 225,
+    "sha256": "a539fae888a8ef97caf79d9e75d514276ae6f988e9bb8e97afc2a75921498300"
+  },
+  "gpui-component-simd-native-fixtures/inspector.stderr.log": {
+    "bytes": 169,
+    "sha256": "b4e4100bb88f2ae545ad1e05999246000bef2f419bc4ec7af9ee21f13f9d8278"
+  },
+  "gpui-component-simd-native-fixtures/inspector.stdout.log": {
+    "bytes": 224,
+    "sha256": "5c624ed46f5b1d1daa3a0286620a0ef44b804d626af7db9baa0420aec9dc285f"
+  },
+  "gpui-component-simd-native-fixtures/invalid.stderr.log": {
+    "bytes": 249,
+    "sha256": "85648b6b519d47c447ced3cf9f76c324bb799435aac7cbdce94c80333acb2e79"
+  },
+  "gpui-component-simd-native-fixtures/invalid.stdout.log": {
+    "bytes": 215,
+    "sha256": "aff4b47c28f2b654a7802a71d79a241ca789c2384569b6c78b10b19719c761b4"
+  },
+  "gpui-component-simd-native-fixtures/result.json": {
+    "bytes": 1633,
+    "sha256": "6d0c7413baec4ccaedee589997aa14286eba0b43a95cfb110cdedee7196ef82b"
+  },
+  "gpui-component-simd-native-fixtures/xvfb.log": {
+    "bytes": 4085,
+    "sha256": "bc85dcaa23e4ed2f1af7b8849b9feff45d25b40de10c2b0fe03014ed6bd91c78"
+  },
+  "gpui-component-simd-native-gates.json": {
+    "bytes": 259,
+    "sha256": "107f852b3fe2b6b658bdeb6bbe14209b02a9a2ef749e2df5580261e2dfdd254d"
+  },
+  "gpui-component-simd-native-orchestrator.log": {
+    "bytes": 865,
+    "sha256": "7e559ef0cda6719edb851ef4ece50245794c331428c8d1d17f911fb58a350f52"
+  },
+  "gpui-component-simd-native-run.log": {
+    "bytes": 275,
+    "sha256": "0139e94eabed31cd80b064ade835648727c9e0aaa1146b61daf02ed8605c28f8"
+  },
+  "gpui-component-simd-native-unit.after.json": {
+    "bytes": 281801,
+    "sha256": "580edfe5484914cfbd63a65d08e0e934107470aad24805998a70a1a6d7fb41b0"
+  },
+  "gpui-component-simd-native-unit.before.json": {
+    "bytes": 281801,
+    "sha256": "580edfe5484914cfbd63a65d08e0e934107470aad24805998a70a1a6d7fb41b0"
+  },
+  "gpui-component-simd-native-unit.command.json": {
+    "bytes": 515,
+    "sha256": "88bf668bcccdfca258a1e1f94b8a43f2bbe0904cc8780cafe0cd99eb5dd7404f"
+  },
+  "gpui-component-simd-native-unit.jsonl": {
+    "bytes": 296310,
+    "sha256": "8b7acb64e6396709841340b3cc128f8b8c9a14dc94a819ec3c8997ce500b59a5"
+  },
+  "gpui-component-simd-native-unit.log": {
+    "bytes": 1533,
+    "sha256": "77a6d54660366c7cfe954945a50e16419340d6d83e937128784ca6598f829d6d"
+  },
+  "gpui-component-simd-port-inputs.py": {
+    "bytes": 1164,
+    "sha256": "684b6e1896dd633ecf4491fef502be9f32766b71350c6c333d560c8f33614927"
+  },
+  "gpui-component-simd-prepare-capture.py": {
+    "bytes": 386,
+    "sha256": "bfeefe98a750ea5ee50d08737140f08e85c96764ebdd83bd833cc887825e71ea"
+  },
+  "gpui-component-simd-prepare.py": {
+    "bytes": 1142,
+    "sha256": "142e521c9fa4fc146d3b3b912061f85dd17dac51df2abe734a406ff9087cacc3"
+  },
+  "gpui-component-simd-protected.json": {
+    "bytes": 391324,
+    "sha256": "f124885890b22e2dc07033e8dedfba26b2b6f6f1e2cdae20fb94d934d9fc1cbf"
+  },
+  "gpui-component-simd-protected.py": {
+    "bytes": 1578,
+    "sha256": "a75c2ba5de805b3d290af06611c62dd2873239162433357e697b084dfc4902cf"
+  },
+  "gpui-component-simd-run-costs.py": {
+    "bytes": 881,
+    "sha256": "edd4ea8a7002a57f4465139c5ac5d562243f3bf7d427f31b617df93892a70a1c"
+  },
+  "gpui-component-simd-scalar-opt-out-feature-resolution.json": {
+    "bytes": 268,
+    "sha256": "5419cdd4c9503b22de4c04b3e0ed4a68f23ffc9f9c3b882f45d8e13f71e8890f"
+  },
+  "gpui-component-simd-scalar-opt-out.after.json": {
+    "bytes": 281801,
+    "sha256": "580edfe5484914cfbd63a65d08e0e934107470aad24805998a70a1a6d7fb41b0"
+  },
+  "gpui-component-simd-scalar-opt-out.before.json": {
+    "bytes": 281801,
+    "sha256": "580edfe5484914cfbd63a65d08e0e934107470aad24805998a70a1a6d7fb41b0"
+  },
+  "gpui-component-simd-scalar-opt-out.command.json": {
+    "bytes": 519,
+    "sha256": "5ab7ae9434a0b972806691d2c9b2d81548d0e388a9d5fcd6305e542eac65f520"
+  },
+  "gpui-component-simd-scalar-opt-out.jsonl": {
+    "bytes": 254900,
+    "sha256": "ae3c425f651a8a5e9633fd6057d8164400ae2ed37da17645a6be769dfea91dfb"
+  },
+  "gpui-component-simd-scalar-opt-out.log": {
+    "bytes": 932,
+    "sha256": "54f95d811d5a53b3d69651a3c59879d48ea8139cb642a02c1f12f45d2a66ea3c"
+  },
+  "gpui-component-simd-stage-upload-prepare.py": {
+    "bytes": 250,
+    "sha256": "ebe8295ddf5463024d51e834a7a6a34911a34a6db4dcd480a03cde3633ecf324"
+  },
+  "gpui-component-simd-standalone-default.after.json": {
+    "bytes": 281801,
+    "sha256": "580edfe5484914cfbd63a65d08e0e934107470aad24805998a70a1a6d7fb41b0"
+  },
+  "gpui-component-simd-standalone-default.before.json": {
+    "bytes": 281801,
+    "sha256": "580edfe5484914cfbd63a65d08e0e934107470aad24805998a70a1a6d7fb41b0"
+  },
+  "gpui-component-simd-standalone-default.command.json": {
+    "bytes": 469,
+    "sha256": "c5f06f163f43af7653df47d18c7c2f0d828af678cc430500d0d4ad66a2f79947"
+  },
+  "gpui-component-simd-standalone-default.jsonl": {
+    "bytes": 93610,
+    "sha256": "97dc7c8990ad69f76668c84fe41c129ec463c7dfc23f5badfc63a076b768a64c"
+  },
+  "gpui-component-simd-standalone-default.log": {
+    "bytes": 1329,
+    "sha256": "b1b0cd671381e48aa0e7978a741e83965905a4bf8055738a529b77ce3970e144"
+  },
+  "gpui-component-simd-strict-default.after.json": {
+    "bytes": 281801,
+    "sha256": "580edfe5484914cfbd63a65d08e0e934107470aad24805998a70a1a6d7fb41b0"
+  },
+  "gpui-component-simd-strict-default.before.json": {
+    "bytes": 281801,
+    "sha256": "580edfe5484914cfbd63a65d08e0e934107470aad24805998a70a1a6d7fb41b0"
+  },
+  "gpui-component-simd-strict-default.command.json": {
+    "bytes": 550,
+    "sha256": "929d9ebd46849ff3ce89d5e9279c4b78b82d323b56120b72718da595b67f4878"
+  },
+  "gpui-component-simd-strict-default.jsonl": {
+    "bytes": 172698,
+    "sha256": "6a52aab19d0a4d353091f630a56b255a8d727a1e22032bfd4f1bf159030e7479"
+  },
+  "gpui-component-simd-strict-default.log": {
+    "bytes": 719,
+    "sha256": "71ea132a82a927f3752f69770155c6d441b13abb81cf1ca371f0bc770721733c"
+  },
+  "gpui-component-simd-strict-native.after.json": {
+    "bytes": 281801,
+    "sha256": "580edfe5484914cfbd63a65d08e0e934107470aad24805998a70a1a6d7fb41b0"
+  },
+  "gpui-component-simd-strict-native.before.json": {
+    "bytes": 281801,
+    "sha256": "580edfe5484914cfbd63a65d08e0e934107470aad24805998a70a1a6d7fb41b0"
+  },
+  "gpui-component-simd-strict-native.command.json": {
+    "bytes": 593,
+    "sha256": "511d0ccae3aa767b3585eaddc77deabd981e3d676d60a7923e2f689cf0cc95d9"
+  },
+  "gpui-component-simd-strict-native.jsonl": {
+    "bytes": 355184,
+    "sha256": "98b6a15f2e30edbd673ca7bdfa1877660368776af4bd5c57066603ae8f431d72"
+  },
+  "gpui-component-simd-strict-native.log": {
+    "bytes": 1441,
+    "sha256": "58bb9d837773d0bc59a812aa5db12a8f99d8fca5966eaa60dceee8ead7ce6f8c"
+  },
+  "gpui-component-simd-xvfb.log": {
+    "bytes": 817,
+    "sha256": "12dcabf0449b9ff85d589b86d110c814777977daca56e7ba8ec300c5334fe397"
+  }
+}
