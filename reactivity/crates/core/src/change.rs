@@ -195,6 +195,10 @@ pub struct Dependencies {
     snapshot: Option<SceneRevision>, owner: Option<NonZeroU64>, reverse: BTreeMap<DependencyNode, BTreeSet<DependencyNode>>,
     edges: usize, limit: usize, overflow: bool, sites: BTreeSet<SiteId>, complete: bool,
 }
+#[derive(Clone, Copy, Debug, PartialEq, Eq)]
+pub enum SnapshotSide { Before, After, Both }
+#[derive(Clone, Copy)]
+struct ClosureContext { owner: NonZeroU64, from: Option<SceneRevision>, to: Option<SceneRevision>, surface: Option<SurfaceGeneration> }
 #[derive(Debug)]
 pub struct Invalidated { pub full: FullReasons, pub artifacts: BTreeSet<DependencyNode> }
 impl Dependencies {
@@ -231,63 +235,79 @@ impl Dependencies {
         self.reverse.entry(input).or_default().insert(consumer); self.edges += 1;
     }
     pub fn invalidate(&self, batch: &ChangeBatch) -> Invalidated {
-        self.invalidate_entries(batch.stamp.from, batch.stamp.to.owner, batch.full, batch.entries.iter().copied(), &mut |_, _| Ok(()))
+        self.invalidate_entries(ClosureContext { owner: batch.stamp.to.owner, from: batch.stamp.from, to: Some(batch.stamp.to), surface: None }, SnapshotSide::Both, batch.full, batch.entries.iter().copied(), &mut |_, _| Ok(()))
     }
     pub fn invalidate_pending(&self, journal: &Journal) -> Invalidated {
-        self.invalidate_entries(journal.base, journal.owner, journal.full, journal.entries.values().copied(), &mut |_, _| Ok(()))
+        self.invalidate_pending_side(journal, SnapshotSide::Both)
+    }
+    pub fn invalidate_pending_side(&self, journal: &Journal, side: SnapshotSide) -> Invalidated {
+        self.invalidate_entries(ClosureContext { owner: journal.owner, from: journal.base, to: None, surface: None }, side, journal.full, journal.entries.values().copied(), &mut |_, _| Ok(()))
     }
     /// The SAME bounded queue owns dynamically discovered canonical group,
     /// resource and tile edges. The adapter emits neighbors, not another
     /// fixed-point authority. Stop on false; never materialize an unbounded list.
     pub fn invalidate_with(&self, batch: &ChangeBatch, mut expand: impl FnMut(DependencyNode, &mut dyn FnMut(DependencyNode) -> bool) -> Result<(), FullReasons>) -> Invalidated {
-        self.invalidate_entries(batch.stamp.from, batch.stamp.to.owner, batch.full, batch.entries.iter().copied(), &mut expand)
+        self.invalidate_entries(ClosureContext { owner: batch.stamp.to.owner, from: batch.stamp.from, to: Some(batch.stamp.to), surface: None }, SnapshotSide::Both, batch.full, batch.entries.iter().copied(), &mut expand)
     }
-    fn invalidate_entries(&self, from: Option<SceneRevision>, owner: NonZeroU64, mut full: FullReasons, entries: impl ExactSizeIterator<Item = Change>, expand: &mut impl FnMut(DependencyNode, &mut dyn FnMut(DependencyNode) -> bool) -> Result<(), FullReasons>) -> Invalidated {
-        if self.snapshot != from { full = full.union(FullReasons::REVISION_GAP); }
+    pub fn invalidate_with_surface(&self, batch: &ChangeBatch, surface: SurfaceGeneration, mut expand: impl FnMut(DependencyNode, &mut dyn FnMut(DependencyNode) -> bool) -> Result<(), FullReasons>) -> Invalidated {
+        self.invalidate_entries(ClosureContext { owner: batch.stamp.to.owner, from: batch.stamp.from, to: Some(batch.stamp.to), surface: Some(surface) }, SnapshotSide::Both, batch.full, batch.entries.iter().copied(), &mut expand)
+    }
+    fn invalidate_entries(&self, context: ClosureContext, side: SnapshotSide, mut full: FullReasons, entries: impl ExactSizeIterator<Item = Change>, expand: &mut impl FnMut(DependencyNode, &mut dyn FnMut(DependencyNode) -> bool) -> Result<(), FullReasons>) -> Invalidated {
+        if self.snapshot != context.from { full = full.union(FullReasons::REVISION_GAP); }
         if self.overflow || entries.len() > self.limit { full = full.union(FullReasons::CAPACITY); }
         if !self.complete { full = full.union(FullReasons::UNKNOWN_DEPENDENCY); }
         if !full.is_empty() { return Invalidated { full, artifacts: BTreeSet::new() }; }
         let mut artifacts = BTreeSet::new(); let mut pending = Vec::new();
         // Deduplicate and cap BEFORE enqueue, not after pop. Both containers
         // together hold at most limit distinct artifacts, never an event log.
-        fn enqueue(key: DependencyNode, limit: usize, seen: &mut BTreeSet<DependencyNode>, queue: &mut Vec<DependencyNode>) -> bool {
-            if seen.contains(&key) { return true; }
-            if seen.len() == limit { return false; }
-            seen.insert(key); queue.push(key); true
+        fn enqueue(key: DependencyNode, context: ClosureContext, limit: usize, seen: &mut BTreeSet<DependencyNode>, queue: &mut Vec<DependencyNode>) -> Result<(), FullReasons> {
+            let valid = match key {
+                DependencyNode::Site(site) => site.site.owner == context.owner,
+                DependencyNode::Group(group) => group.snapshot.owner == context.owner && (Some(group.snapshot) == context.from || Some(group.snapshot) == context.to),
+                DependencyNode::Global { owner, .. } => owner == context.owner,
+                DependencyNode::Resource(_) => true,
+                DependencyNode::Tile(tile) => Some(tile.surface) == context.surface,
+            };
+            if !valid { return Err(FullReasons::REVISION_GAP); }
+            if seen.contains(&key) { return Ok(()); }
+            if seen.len() == limit { return Err(FullReasons::CAPACITY); }
+            seen.insert(key); queue.push(key); Ok(())
         }
         for change in entries {
-            if change.site.owner != owner { return Invalidated { full: FullReasons::REVISION_GAP, artifacts: BTreeSet::new() }; }
+            if change.site.owner != context.owner { return Invalidated { full: FullReasons::REVISION_GAP, artifacts: BTreeSet::new() }; }
             if !self.sites.contains(&change.site) {
                 // The OLD graph has no newly inserted site; the NEW graph has
                 // no removed site. Both closures are consumed by the producer.
-                if matches!(change.before, Support::Empty) || matches!(change.after, Support::Empty) { continue; }
+                let allowed = match side { SnapshotSide::Before => matches!(change.before, Support::Empty), SnapshotSide::After => matches!(change.after, Support::Empty), SnapshotSide::Both => matches!((change.before, change.after), (Support::Empty, Support::Empty)) };
+                if allowed { continue; }
                 return Invalidated { full: FullReasons::UNKNOWN_DEPENDENCY, artifacts: BTreeSet::new() };
             }
             for phase in change.facets.phases() {
-                if !enqueue(DependencyNode::Site(Artifact { site: change.site, phase }), self.limit, &mut artifacts, &mut pending) {
-                    return Invalidated { full: FullReasons::CAPACITY, artifacts: BTreeSet::new() };
+                if let Err(reason) = enqueue(DependencyNode::Site(Artifact { site: change.site, phase }), context, self.limit, &mut artifacts, &mut pending) {
+                    return Invalidated { full: reason, artifacts: BTreeSet::new() };
                 }
             }
         }
         while let Some(key) = pending.pop() {
             if let DependencyNode::Site(site) = key {
                 for phase in site.phase.downstream() {
-                    if !enqueue(DependencyNode::Site(Artifact { site: site.site, phase: *phase }), self.limit, &mut artifacts, &mut pending) {
-                        return Invalidated { full: FullReasons::CAPACITY, artifacts: BTreeSet::new() };
+                    if let Err(reason) = enqueue(DependencyNode::Site(Artifact { site: site.site, phase: *phase }), context, self.limit, &mut artifacts, &mut pending) {
+                        return Invalidated { full: reason, artifacts: BTreeSet::new() };
                     }
                 }
             }
-            let mut exceeded = false;
+            let mut rejected = FullReasons::default();
             let expanded = expand(key, &mut |neighbor| {
-                let accepted = enqueue(neighbor, self.limit, &mut artifacts, &mut pending);
-                exceeded |= !accepted; accepted
+                match enqueue(neighbor, context, self.limit, &mut artifacts, &mut pending) {
+                    Ok(()) => true, Err(reason) => { rejected = rejected.union(reason); false }
+                }
             });
-            if exceeded { return Invalidated { full: FullReasons::CAPACITY, artifacts: BTreeSet::new() }; }
+            if !rejected.is_empty() { return Invalidated { full: rejected, artifacts: BTreeSet::new() }; }
             if let Err(reason) = expanded { return Invalidated { full: reason, artifacts: BTreeSet::new() }; }
             if let Some(consumers) = self.reverse.get(&key) {
                 for consumer in consumers {
-                    if !enqueue(*consumer, self.limit, &mut artifacts, &mut pending) {
-                        return Invalidated { full: FullReasons::CAPACITY, artifacts: BTreeSet::new() };
+                    if let Err(reason) = enqueue(*consumer, context, self.limit, &mut artifacts, &mut pending) {
+                        return Invalidated { full: reason, artifacts: BTreeSet::new() };
                     }
                 }
             }
@@ -406,6 +426,42 @@ mod tests {
         assert!(matches!(journal.prepare(bad), Err(PrepareError::Revision)));
         bad.snapshot_epoch = 3; bad.source_epoch = 0;
         assert!(matches!(journal.prepare(bad), Err(PrepareError::Revision)));
+    }
+    #[test]
+    fn inserted_removed_and_net_empty_use_validated_snapshot_sides_not_missing_site_guesses() {
+        let mut before = Dependencies::new(64); before.reset(revision(1)); before.register_site(site(1)); before.finish(1);
+        let mut after = Dependencies::new(64); after.reset(revision(1)); after.register_site(site(2)); after.finish(1);
+        let mut journal = Journal::new(owner(), 8); journal.prepare(stamp(None, 1)).unwrap().commit();
+        let mut inserted = change(2, Facet::Topology); inserted.before = Support::Empty; inserted.after = Support::Pending;
+        let mut removed = change(1, Facet::Topology); removed.before = Support::Pending; removed.after = Support::Empty;
+        journal.record(inserted); journal.record(removed);
+        assert!(before.invalidate_pending_side(&journal, SnapshotSide::Before).full.is_empty());
+        assert!(after.invalidate_pending_side(&journal, SnapshotSide::After).full.is_empty());
+        let mut missing = change(3, Facet::Paint); missing.before = Support::Empty; journal.record(missing);
+        assert!(after.invalidate_pending_side(&journal, SnapshotSide::After).full.contains(FullReasons::UNKNOWN_DEPENDENCY));
+        missing.after = Support::Empty; journal.record(missing);
+        assert!(after.invalidate_pending_side(&journal, SnapshotSide::After).full.is_empty());
+    }
+    #[test]
+    fn publication_ticket_is_one_shot_and_failed_prepare_never_advances_namespace_or_c() {
+        let mut issuer = FrameIssuer::new().unwrap(); let owner = issuer.owner();
+        let rev = |n| SceneRevision { owner, sequence: NonZeroU64::new(n).unwrap() };
+        let first = BatchStamp { from: None, to: rev(1), source_epoch: 0, snapshot_epoch: 1 };
+        drop(issuer.prepare(first).unwrap()); let accepted = issuer.prepare(first).unwrap().commit(); assert_eq!(accepted.stamp(), first);
+        assert!(matches!(issuer.prepare(first), Err(ViewError::Revision)));
+        let resize = BatchStamp { from: Some(rev(1)), to: rev(2), source_epoch: 0, snapshot_epoch: 2 };
+        issuer.prepare(resize).unwrap().commit();
+        let wrong = BatchStamp { from: Some(rev(2)), to: revision(3), source_epoch: 0, snapshot_epoch: 3 };
+        if wrong.to.owner != owner { assert!(matches!(issuer.prepare(wrong), Err(ViewError::ForeignOwner))); }
+    }
+    #[test]
+    fn owned_group_partition_checks_preorder_once_and_retarget_drop_preserves_accepted_header() {
+        let group = |id, parent, draws| GroupSpan { local: NonZeroU64::new(id).unwrap(), parent, draws };
+        assert!(SceneGroups::new(revision(1), 1, 1, vec![group(1,None,0..1),group(2,None,1..2),group(3,Some(0),2..3)],3).is_none());
+        let mut groups = SceneGroups::new(revision(1),1,1,vec![group(1,None,0..1),group(2,Some(0),1..2)],2).unwrap();
+        drop(groups.prepare_retarget(stamp(Some(revision(1)),2)).unwrap()); assert_eq!(groups.revision(),revision(1));
+        groups.prepare_retarget(stamp(Some(revision(1)),2)).unwrap().commit(); assert_eq!(groups.revision(),revision(2));
+        assert!(groups.valid_for(revision(2),2,2,2)); assert!(!groups.valid_for(revision(2),1,2,2));
     }
     #[test]
     fn actual_reverse_edges_propagate_parent_layout_and_descendant_clip_but_not_shape_from_paint() {
