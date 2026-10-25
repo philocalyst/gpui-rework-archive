@@ -4,10 +4,11 @@ use crate::{El, ItemKey, ItemSource, column, div, text, uniform_list};
 
 struct Page { location: u8 }
 impl ItemSource for Page {
-    fn len(&self) -> usize { 8 }
+    fn len(&self) -> usize { if self.location == 5 { 0 } else { 8 } }
     fn key(&self, index: usize) -> ItemKey { ItemKey::new(index as u64 + 1) }
     fn index_of(&self, key: ItemKey) -> Option<usize> {
-        (1..=8).contains(&key.get()).then(|| key.get() as usize - 1)
+        (self.location != 5 && (1..=8).contains(&key.get()))
+            .then(|| key.get() as usize - 1)
     }
     fn row(&self, _index: usize) -> El<'_> { column((text("row"), div().size(1))).h(12) }
 }
@@ -21,6 +22,9 @@ impl View for Page {
             3 => left.push(column((
                 uniform_list(ListId::new(1), self, 12).w(120).h(48), div().size(2),
             )).scroll(crate::Axis::Y).w(120).h(48)),
+            5 => right.push(uniform_list(ListId::new(1), self, 12).w(120).h(48)),
+            4 => left.push(column((div().size(4), div().size(5)))
+                .scroll(crate::Axis::Y).w(120).h(48)),
             _ => (),
         }
         column((column(left), column(right)))
@@ -31,6 +35,8 @@ fn is_viewport(node: &Node) -> bool {
 }
 fn verify(win: &Win<Page>) {
     let rt = win.runtime().unwrap();
+    assert_eq!(!rt.viewports.is_empty(), rt.nodes.iter().any(is_viewport),
+        "complete current viewport payloads, including Scroll-only descriptions");
     for index in 0..rt.nodes.len() {
         let mut ancestor = Some(index);
         let mut expected_ancestor = false;
@@ -55,11 +61,11 @@ fn verify(win: &Win<Page>) {
 }
 #[test]
 fn viewport_bits_recompute_without_sibling_leaks_across_remove_move_and_remount() {
-    let mut win = Win::recording(Page { location: 1 }, WindowOptions {
+    let mut win = Win::recording(Page { location: 0 }, WindowOptions {
         size: [180, 140], ..Default::default()
     }).unwrap();
     verify(&win);
-    for location in [2, 0, 3, 1, 0, 2, 3] {
+    for location in [5, 0, 1, 0, 2, 0, 4, 0, 3, 1, 0, 2, 3] {
         let token = win.with_scene(|_, token| token).unwrap();
         win.presented(token).unwrap();
         win.update(|model| model.location = location).unwrap();

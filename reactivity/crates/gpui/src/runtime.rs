@@ -2082,6 +2082,11 @@ impl<M: View + 'static> Runtime<M> {
                 }
             })
             .collect();
+        // flatten_lists completed the entire description before this split:
+        // every Scroll has a ScrollDraft, every List has a ListDraft, and
+        // ListItem wrappers are created only for such a List. No old-window
+        // state is used: insertion/remount/removal selects this mode anew.
+        let prepare_viewport_flags = !list_drafts.is_empty() || !scroll_drafts.is_empty();
         let list_indices: BTreeMap<_, _> = list_drafts
             .iter()
             .map(|list| (list.index, list.id))
@@ -2314,16 +2319,24 @@ impl<M: View + 'static> Runtime<M> {
                 // The preceding subtree ends at the previous sibling. Its
                 // retained ordinal gives this sibling's ordinal directly.
                 let mut sibling = index - 1;
-                loop {
-                    let previous_parent = nodes[sibling].parent().index();
-                    let subtree = nodes[sibling].links.viewport_subtree();
-                    if let Some(previous_parent) = previous_parent {
-                        nodes[previous_parent].links.include_viewport_subtree(subtree);
+                if prepare_viewport_flags {
+                    loop {
+                        let previous_parent = nodes[sibling].parent().index();
+                        let subtree = nodes[sibling].links.viewport_subtree();
+                        if let Some(previous_parent) = previous_parent {
+                            nodes[previous_parent].links.include_viewport_subtree(subtree);
+                        }
+                        // Close the preceding sibling edge too, before stopping.
+                        // Ancestor membership never inherits this subtree flag.
+                        if previous_parent == parent { break }
+                        sibling = previous_parent.unwrap();
                     }
-                    // Close the preceding sibling edge too, before stopping.
-                    // Ancestor membership never inherits this subtree flag.
-                    if previous_parent == parent { break }
-                    sibling = previous_parent.unwrap();
+                } else {
+                    // Original ordinal-only unwind: no certificate loads/stores
+                    // and no repeated mode branch for each unwound edge.
+                    while nodes[sibling].parent().index() != parent {
+                        sibling = nodes[sibling].parent().index().unwrap();
+                    }
                 }
                 nodes[sibling].ordinal() + 1
             };
@@ -2548,11 +2561,15 @@ impl<M: View + 'static> Runtime<M> {
                 .on_click
                 .map(|handler| handlers.as_deref_mut().unwrap().push(handler));
             node.links = links::NodeLinks::new(parent, ordinal, handler);
-            let viewport = matches!(draft.kind, NodeKind::List | NodeKind::ListItem | NodeKind::Scroll);
-            let viewport_ancestor = viewport || parent.is_some_and(|parent| {
-                nodes[parent].links.viewport_ancestor()
-            });
-            node.links.set_viewport_flags(viewport_ancestor, viewport);
+            if prepare_viewport_flags {
+                let viewport = matches!(draft.kind, NodeKind::List | NodeKind::ListItem | NodeKind::Scroll);
+                let viewport_ancestor = viewport || parent.is_some_and(|parent| {
+                    nodes[parent].links.viewport_ancestor()
+                });
+                node.links.set_viewport_flags(viewport_ancestor, viewport);
+            }
+            // NodeLinks::new above clears both flags even for reused nodes.
+            // With no viewport drafts, zero is the exact complete certificate.
             let text_slot = if let Some(mut site) = site {
                 site.field = fields[index];
                 let slot = TextSlot(texts.len() as u32);
@@ -2576,7 +2593,7 @@ impl<M: View + 'static> Runtime<M> {
         // Every earlier branch closed during the ordinary ordinal unwind.
         // Close only the final right spine: one final visit per remaining edge,
         // no whole-node scan, auxiliary index or state retained across describes.
-        if let Some(mut child) = nodes.len().checked_sub(1) {
+        if prepare_viewport_flags && let Some(mut child) = nodes.len().checked_sub(1) {
             while let Some(parent) = nodes[child].parent().index() {
                 let subtree = nodes[child].links.viewport_subtree();
                 nodes[parent].links.include_viewport_subtree(subtree);
