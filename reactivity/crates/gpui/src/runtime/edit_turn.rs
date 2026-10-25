@@ -13,7 +13,8 @@ use super::*;
 ///
 /// A panic in an owner callback keeps the existing poisoned-owner behavior.
 /// An unrelated caller panic drops the turn without publication; its accepted
-/// logical prefix remains available for repair. No user code runs from Drop.
+/// logical prefix remains available for repair. Drop never performs publication;
+/// the existing poisoned-owner lane cleanup still applies.
 ///
 /// ```compile_fail
 /// use gpui::{El, View, Win, div};
