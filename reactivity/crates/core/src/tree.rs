@@ -59,7 +59,10 @@ impl NodeIdRange {
         Ok(())
     }
     pub fn get(&self, index: usize) -> Option<NodeId> {
-        (index < self.len()).then(|| NodeId {
+        if index >= self.len() {
+            return None;
+        }
+        Some(NodeId {
             arena: self.arena,
             generation: self.generation,
             index: index as u32,
