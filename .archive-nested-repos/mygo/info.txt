@@ -1,0 +1,9 @@
+path in worktree: comparators/mygo
+origin: https://github.com/egoist/mygo.git
+HEAD: ea23ad2975a87db9b20efe6690ffedf88f4fe4f3
+head subject: 2026-10-21 EGOIST | Clear a terminal from its context menu as ⌘K does (#582)
+commits not on any remote branch: 0
+partial clone filter: blob:none
+
+git status --porcelain --ignored:
+?? examples/luna-bench/

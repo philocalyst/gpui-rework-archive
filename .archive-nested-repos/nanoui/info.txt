@@ -1,0 +1,12 @@
+path in worktree: comparators/nanoui
+origin: https://github.com/justrach/nanoui.git
+HEAD: dfa7f7ab4e890f643703f4ffe4d834ff10defd4f
+head subject: 2026-10-21 justrach | nui: make and check nanoui apps, for people and agents; a cut-off character shaped safely
+commits not on any remote branch: 0
+partial clone filter: blob:none
+
+git status --porcelain --ignored:
+ M build.zig
+?? examples/luna-bench/
+!! .zig-cache/
+!! zig-out/
