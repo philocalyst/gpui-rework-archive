@@ -22,6 +22,7 @@ pub(super) fn measure(store:&mut ArtifactStore,context:&mut ResourceContext,scop
         context.ledger_for(scope,issuer).and_then(|ledger|ledger.owns(shape.lease())).map_err(TextResourceError::Resource)?;
         return Ok((shape.measure(width)?,Some(shape.lease().id())));
     }
+    store.retire(slot,key);
     let tx=context.window_reservation(scope,issuer).map_err(TextResourceError::Resource)?;
     let (metrics,resource)=service.measure_resource(&source,size,width,tx,key)?;
     let id=resource.and_then(|resource| {let id=resource.lease().id();store.stage(slot,key,inputs,resource).then_some(id)});
@@ -40,6 +41,7 @@ pub(super) fn shape(store:&mut ArtifactStore,context:&mut ResourceContext,scope:
         context.ledger_for(scope,issuer).and_then(|ledger|ledger.owns(shape.lease())).map_err(TextResourceError::Resource)?;
         return Ok((shape.shape_interactive(width)?,Some(shape.lease().id())));
     }
+    store.retire(slot,key);
     let tx=context.window_reservation(scope,issuer).map_err(TextResourceError::Resource)?;
     let (layout,resource)=service.shape_interactive_resource(&source,size,width,tx,key)?;
     let id=resource.and_then(|resource| {let id=resource.lease().id();store.stage(slot,key,inputs,resource).then_some(id)});
@@ -89,6 +91,23 @@ mod tests {
         let font=face();let mut service=font.shaper();let source=SharedText::from("office resource domain witness");let key=key(&issuer);let mut store=ArtifactStore::new(4);
         let (_,id)=measure(&mut store,&mut a,sa,&issuer,1,key,source.clone(),14.1,Some(120.),&mut service).unwrap();assert!(id.is_some());
         assert!(matches!(shape(&mut store,&mut b,sb,&issuer,1,key,source,14.1,Some(120.),&mut service),Err(TextResourceError::Resource(ResourceError::ForeignOwner))));
+    }
+
+    #[test]
+    fn changed_source_quota_decline_retires_old_raw_artifact_only_after_success() {
+        let font_bytes=include_bytes!("../../../canvas/assets/NotoSans-default.ttf");
+        let mut context=ResourceContext::new(ResourceLimits {retained_payload_bytes:font_bytes.len()+64*1024,physical_roots:128,resource_records:64,backings_per_resource:16}).unwrap();
+        let issuer=FrameIssuer::new().unwrap();let scope=WindowAccounting::Scoped(context.scope(&issuer));let font=face();let mut service=font.shaper();let key=key(&issuer);let mut store=ArtifactStore::new(4);
+        let original=SharedText::from("office");let original_inputs=ShapeInputs::new(original.clone(),font.clone(),14.1);
+        let (_,id)=measure(&mut store,&mut context,scope,&issuer,1,key,original,14.1,None,&mut service).unwrap();assert!(id.is_some(),"small resource fixture must admit");
+        store.commit(|slot,actual|slot==1&&actual==key);store.begin();
+        let large=SharedText::from("office ".repeat(4000));
+        let (metrics,declined)=measure(&mut store,&mut context,scope,&issuer,1,key,large,14.1,None,&mut service).unwrap();
+        assert!(metrics.width>0.);assert!(declined.is_none(),"large raw shape must exceed remaining capacity");
+        store.abort();assert_eq!(store.lease(1,key,&original_inputs).unwrap().id(),id.unwrap());
+        store.begin();let large=SharedText::from("office ".repeat(4000));
+        let (_,declined)=measure(&mut store,&mut context,scope,&issuer,1,key,large,14.1,None,&mut service).unwrap();assert!(declined.is_none());
+        store.commit(|slot,actual|slot==1&&actual==key);assert!(store.lease(1,key,&original_inputs).is_none());
     }
 
 }
