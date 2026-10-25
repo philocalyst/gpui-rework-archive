@@ -1,4 +1,7 @@
-use std::sync::atomic::{AtomicU64, Ordering};
+use std::{
+    num::NonZeroU64,
+    sync::atomic::{AtomicU64, Ordering},
+};
 
 const NIL: u32 = u32::MAX;
 static NEXT_ARENA: AtomicU64 = AtomicU64::new(1);
@@ -6,7 +9,7 @@ static NEXT_ARENA: AtomicU64 = AtomicU64::new(1);
 /// Arena identity is part of equality; ids from different trees never alias.
 #[derive(Clone, Copy, Debug, Eq, PartialEq, Hash, Ord, PartialOrd)]
 pub struct NodeId {
-    arena: u64,
+    arena: NonZeroU64,
     generation: u32,
     index: u32,
 }
@@ -45,7 +48,7 @@ struct Entry {
 /// is O(removed nodes), uses no recursion or temporary node queue. Dropping a
 /// million-node chain also drops a flat Vec, never a recursive ownership chain.
 pub struct Tree {
-    arena: u64,
+    arena: NonZeroU64,
     entries: Vec<Entry>,
     free: u32,
     first: u32,
@@ -65,7 +68,7 @@ impl Tree {
             .try_update(Ordering::Relaxed, Ordering::Relaxed, |n| n.checked_add(1))
             .expect("tree arena identity exhausted");
         Self {
-            arena,
+            arena: NonZeroU64::new(arena).expect("tree arena identities start at one"),
             entries: Vec::new(),
             free: NIL,
             first: NIL,
@@ -390,6 +393,26 @@ impl Iterator for Preorder<'_> {
 #[cfg(test)]
 mod tests {
     use super::*;
+
+    #[test]
+    fn nonzero_namespaces_preserve_identity_and_provide_an_option_niche() {
+        assert_eq!(std::mem::size_of::<NodeId>(), 16);
+        assert_eq!(std::mem::size_of::<Option<NodeId>>(), 16);
+        let mut a = Tree::new();
+        let mut b = Tree::new();
+        let local = a.insert(None, NodeKind::Element).unwrap();
+        let foreign = b.insert(None, NodeKind::Element).unwrap();
+        assert_ne!(local, foreign);
+        assert!(!a.contains(foreign));
+        assert!(!b.contains(local));
+        assert_ne!(local.arena.get(), 0);
+        a.remove(local).unwrap();
+        let reused = a.insert(None, NodeKind::Element).unwrap();
+        assert_eq!(reused.index, local.index);
+        assert_ne!(reused.generation, local.generation);
+        assert!(!a.contains(local));
+        assert!(a.contains(reused));
+    }
 
     #[test]
     fn exhausted_generation_retires_slot_without_aba() {
