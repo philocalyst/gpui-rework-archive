@@ -1,0 +1,132 @@
+
+/tmp/gpui-contained-property-exchange-target/release/deps/unit_action_cost_two-c899ee77dd9a9ab3:     file format elf64-x86-64
+
+
+Disassembly of section .text:
+
+0000000000705510 <<gpui::runtime::RuntimeMut<unit_action_cost_two::Model, ()>>::select_input>:
+  705510:	41 57                	push   %r15
+  705512:	41 56                	push   %r14
+  705514:	41 55                	push   %r13
+  705516:	41 54                	push   %r12
+  705518:	53                   	push   %rbx
+  705519:	48 83 ec 40          	sub    $0x40,%rsp
+  70551d:	48 89 fb             	mov    %rdi,%rbx
+  705520:	80 be 22 07 00 00 00 	cmpb   $0x0,0x722(%rsi)
+  705527:	74 0c                	je     705535 <<gpui::runtime::RuntimeMut<unit_action_cost_two::Model, ()>>::select_input+0x25>
+  705529:	48 c7 03 0e 00 00 00 	movq   $0xe,(%rbx)
+  705530:	e9 8c 01 00 00       	jmp    7056c1 <<gpui::runtime::RuntimeMut<unit_action_cost_two::Model, ()>>::select_input+0x1b1>
+  705535:	4d 89 c7             	mov    %r8,%r15
+  705538:	49 89 f6             	mov    %rsi,%r14
+  70553b:	48 8d 7c 24 08       	lea    0x8(%rsp),%rdi
+  705540:	e8 7b d0 ff ff       	call   7025c0 <<gpui::runtime::Runtime<unit_action_cost_two::Model>>::input_index>
+  705545:	48 8b 44 24 08       	mov    0x8(%rsp),%rax
+  70554a:	4c 8b 64 24 10       	mov    0x10(%rsp),%r12
+  70554f:	48 83 f8 fe          	cmp    $0xfffffffffffffffe,%rax
+  705553:	0f 85 e2 00 00 00    	jne    70563b <<gpui::runtime::RuntimeMut<unit_action_cost_two::Model, ()>>::select_input+0x12b>
+  705559:	49 8b b6 a0 02 00 00 	mov    0x2a0(%r14),%rsi
+  705560:	49 39 f4             	cmp    %rsi,%r12
+  705563:	0f 83 89 01 00 00    	jae    7056f2 <<gpui::runtime::RuntimeMut<unit_action_cost_two::Model, ()>>::select_input+0x1e2>
+  705569:	4b 8d 04 a4          	lea    (%r12,%r12,4),%rax
+  70556d:	49 8b 8e 98 02 00 00 	mov    0x298(%r14),%rcx
+  705574:	8b 7c c1 20          	mov    0x20(%rcx,%rax,8),%edi
+  705578:	89 f8                	mov    %edi,%eax
+  70557a:	83 e0 07             	and    $0x7,%eax
+  70557d:	83 f8 06             	cmp    $0x6,%eax
+  705580:	0f 84 49 01 00 00    	je     7056cf <<gpui::runtime::RuntimeMut<unit_action_cost_two::Model, ()>>::select_input+0x1bf>
+  705586:	c1 ef 03             	shr    $0x3,%edi
+  705589:	0f 84 40 01 00 00    	je     7056cf <<gpui::runtime::RuntimeMut<unit_action_cost_two::Model, ()>>::select_input+0x1bf>
+  70558f:	49 8b b6 b8 02 00 00 	mov    0x2b8(%r14),%rsi
+  705596:	ff cf                	dec    %edi
+  705598:	48 39 fe             	cmp    %rdi,%rsi
+  70559b:	0f 86 61 01 00 00    	jbe    705702 <<gpui::runtime::RuntimeMut<unit_action_cost_two::Model, ()>>::select_input+0x1f2>
+  7055a1:	49 8b 86 b0 02 00 00 	mov    0x2b0(%r14),%rax
+  7055a8:	48 8d 0c bf          	lea    (%rdi,%rdi,4),%rcx
+  7055ac:	48 c1 e1 04          	shl    $0x4,%rcx
+  7055b0:	48 83 3c 08 fe       	cmpq   $0xfffffffffffffffe,(%rax,%rcx,1)
+  7055b5:	0f 84 21 01 00 00    	je     7056dc <<gpui::runtime::RuntimeMut<unit_action_cost_two::Model, ()>>::select_input+0x1cc>
+  7055bb:	48 01 c8             	add    %rcx,%rax
+  7055be:	48 8b 78 40          	mov    0x40(%rax),%rdi
+  7055c2:	48 8b 37             	mov    (%rdi),%rsi
+  7055c5:	48 d1 ee             	shr    $1,%rsi
+  7055c8:	48 83 c7 10          	add    $0x10,%rdi
+  7055cc:	4c 89 fa             	mov    %r15,%rdx
+  7055cf:	ff 15 53 3f 42 00    	call   *0x423f53(%rip)        # b29528 <_DYNAMIC+0x4a0>
+  7055d5:	84 c0                	test   %al,%al
+  7055d7:	0f 84 82 00 00 00    	je     70565f <<gpui::runtime::RuntimeMut<unit_action_cost_two::Model, ()>>::select_input+0x14f>
+  7055dd:	4d 8b ae 60 06 00 00 	mov    0x660(%r14),%r13
+  7055e4:	49 ff c5             	inc    %r13
+  7055e7:	0f 84 fc 00 00 00    	je     7056e9 <<gpui::runtime::RuntimeMut<unit_action_cost_two::Model, ()>>::select_input+0x1d9>
+  7055ed:	49 c7 86 08 07 00 00 	movq   $0x0,0x708(%r14)
+  7055f4:	00 00 00 00 
+  7055f8:	4c 89 f7             	mov    %r14,%rdi
+  7055fb:	4c 89 e6             	mov    %r12,%rsi
+  7055fe:	4c 89 fa             	mov    %r15,%rdx
+  705601:	e8 da d0 ff ff       	call   7026e0 <<gpui::runtime::Runtime<unit_action_cost_two::Model>>::set_selection>
+  705606:	84 c0                	test   %al,%al
+  705608:	74 5e                	je     705668 <<gpui::runtime::RuntimeMut<unit_action_cost_two::Model, ()>>::select_input+0x158>
+  70560a:	4d 89 ae 60 06 00 00 	mov    %r13,0x660(%r14)
+  705611:	49 ff 86 b0 06 00 00 	incq   0x6b0(%r14)
+  705618:	49 c7 86 08 07 00 00 	movq   $0x1,0x708(%r14)
+  70561f:	01 00 00 00 
+  705623:	48 89 df             	mov    %rbx,%rdi
+  705626:	4c 89 f6             	mov    %r14,%rsi
+  705629:	48 83 c4 40          	add    $0x40,%rsp
+  70562d:	5b                   	pop    %rbx
+  70562e:	41 5c                	pop    %r12
+  705630:	41 5d                	pop    %r13
+  705632:	41 5e                	pop    %r14
+  705634:	41 5f                	pop    %r15
+  705636:	e9 55 3e 02 00       	jmp    729490 <<gpui::runtime::Runtime<unit_action_cost_two::Model>>::present>
+  70563b:	48 8b 4c 24 38       	mov    0x38(%rsp),%rcx
+  705640:	48 89 4b 30          	mov    %rcx,0x30(%rbx)
+  705644:	0f 10 44 24 18       	movups 0x18(%rsp),%xmm0
+  705649:	0f 10 4c 24 28       	movups 0x28(%rsp),%xmm1
+  70564e:	0f 11 4b 20          	movups %xmm1,0x20(%rbx)
+  705652:	0f 11 43 10          	movups %xmm0,0x10(%rbx)
+  705656:	48 89 03             	mov    %rax,(%rbx)
+  705659:	4c 89 63 08          	mov    %r12,0x8(%rbx)
+  70565d:	eb 62                	jmp    7056c1 <<gpui::runtime::RuntimeMut<unit_action_cost_two::Model, ()>>::select_input+0x1b1>
+  70565f:	48 c7 03 18 00 00 00 	movq   $0x18,(%rbx)
+  705666:	eb 59                	jmp    7056c1 <<gpui::runtime::RuntimeMut<unit_action_cost_two::Model, ()>>::select_input+0x1b1>
+  705668:	41 0f 10 86 60 06 00 	movups 0x660(%r14),%xmm0
+  70566f:	00 
+  705670:	41 0f b6 86 20 07 00 	movzbl 0x720(%r14),%eax
+  705677:	00 
+  705678:	49 83 be 80 06 00 00 	cmpq   $0x0,0x680(%r14)
+  70567f:	00 
+  705680:	74 1c                	je     70569e <<gpui::runtime::RuntimeMut<unit_action_cost_two::Model, ()>>::select_input+0x18e>
+  705682:	84 c0                	test   %al,%al
+  705684:	74 0a                	je     705690 <<gpui::runtime::RuntimeMut<unit_action_cost_two::Model, ()>>::select_input+0x180>
+  705686:	49 83 be 88 05 00 00 	cmpq   $0xffffffffffffffff,0x588(%r14)
+  70568d:	ff 
+  70568e:	74 0e                	je     70569e <<gpui::runtime::RuntimeMut<unit_action_cost_two::Model, ()>>::select_input+0x18e>
+  705690:	49 8b 96 90 06 00 00 	mov    0x690(%r14),%rdx
+  705697:	b9 01 00 00 00       	mov    $0x1,%ecx
+  70569c:	eb 02                	jmp    7056a0 <<gpui::runtime::RuntimeMut<unit_action_cost_two::Model, ()>>::select_input+0x190>
+  70569e:	31 c9                	xor    %ecx,%ecx
+  7056a0:	49 8b b6 08 07 00 00 	mov    0x708(%r14),%rsi
+  7056a7:	48 89 4b 08          	mov    %rcx,0x8(%rbx)
+  7056ab:	48 89 53 10          	mov    %rdx,0x10(%rbx)
+  7056af:	0f 11 43 18          	movups %xmm0,0x18(%rbx)
+  7056b3:	48 89 73 28          	mov    %rsi,0x28(%rbx)
+  7056b7:	88 43 30             	mov    %al,0x30(%rbx)
+  7056ba:	48 c7 03 fe ff ff ff 	movq   $0xfffffffffffffffe,(%rbx)
+  7056c1:	48 83 c4 40          	add    $0x40,%rsp
+  7056c5:	5b                   	pop    %rbx
+  7056c6:	41 5c                	pop    %r12
+  7056c8:	41 5d                	pop    %r13
+  7056ca:	41 5e                	pop    %r14
+  7056cc:	41 5f                	pop    %r15
+  7056ce:	c3                   	ret
+  7056cf:	48 8d 3d ca 58 3f 00 	lea    0x3f58ca(%rip),%rdi        # afafa0 <__frame_dummy_init_array_entry+0x738>
+  7056d6:	ff 15 b4 3c 42 00    	call   *0x423cb4(%rip)        # b29390 <_DYNAMIC+0x308>
+  7056dc:	48 8d 3d d5 52 3f 00 	lea    0x3f52d5(%rip),%rdi        # afa9b8 <__frame_dummy_init_array_entry+0x150>
+  7056e3:	ff 15 a7 3c 42 00    	call   *0x423ca7(%rip)        # b29390 <_DYNAMIC+0x308>
+  7056e9:	48 c7 03 1f 00 00 00 	movq   $0x1f,(%rbx)
+  7056f0:	eb cf                	jmp    7056c1 <<gpui::runtime::RuntimeMut<unit_action_cost_two::Model, ()>>::select_input+0x1b1>
+  7056f2:	48 8d 15 8f 58 3f 00 	lea    0x3f588f(%rip),%rdx        # afaf88 <__frame_dummy_init_array_entry+0x720>
+  7056f9:	4c 89 e7             	mov    %r12,%rdi
+  7056fc:	ff 15 de 3c 42 00    	call   *0x423cde(%rip)        # b293e0 <_DYNAMIC+0x358>
+  705702:	48 8d 15 97 52 3f 00 	lea    0x3f5297(%rip),%rdx        # afa9a0 <__frame_dummy_init_array_entry+0x138>
+  705709:	ff 15 d1 3c 42 00    	call   *0x423cd1(%rip)        # b293e0 <_DYNAMIC+0x358>

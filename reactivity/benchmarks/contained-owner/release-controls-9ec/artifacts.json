@@ -1,0 +1,2572 @@
+{
+  "baseline": {
+    "unit_action_cost": {
+      "head": "e6c231d90f38dd196c937e82cb6ba2c5d00005fc",
+      "binary": "/tmp/gpui-contained-owner-unit-baseline-target/release/deps/unit_action_cost-bcf457ce7db1ee75",
+      "sha256": "38bfc78a93c38311f22dbef4826665d42479d4f560cce605457eddb69f820f13",
+      "client_sha256": "6ca3a0b26e5db4c8af8f6e27a0eda78ab4a5ec24702cb1e3fb0869a31f920062",
+      "sections": {
+        ".text": 4069463,
+        ".rodata": 6570032,
+        ".data.rel.ro": 189776
+      },
+      "bodies": [
+        {
+          "address": 7587872,
+          "bytes": 18,
+          "name": "<gpui::element::MethodRoute<unit_action_cost::Model, <unit_action_cost::Model>::increment> as gpui::element::Route>::owner_scope",
+          "asm": "00.asm",
+          "stack_adjustments": []
+        },
+        {
+          "address": 7534560,
+          "bytes": 76,
+          "name": "<gpui::element::MethodRoute<unit_action_cost::Model, <unit_action_cost::Model>::increment> as gpui::element::Route>::invoke",
+          "asm": "01.asm",
+          "stack_adjustments": [
+            "72f7e0:\t41 56                \tpush   %r14",
+            "72f7e2:\t53                   \tpush   %rbx",
+            "72f7e3:\t48 83 ec 18          \tsub    $0x18,%rsp",
+            "72f824:\t48 83 c4 18          \tadd    $0x18,%rsp",
+            "72f828:\t5b                   \tpop    %rbx",
+            "72f829:\t41 5e                \tpop    %r14"
+          ]
+        },
+        {
+          "address": 7534480,
+          "bytes": 80,
+          "name": "<gpui::element::MethodRoute<unit_action_cost::Model, <unit_action_cost::Model>::increment> as gpui::element::Route>::admit",
+          "asm": "02.asm",
+          "stack_adjustments": [
+            "72f790:\t53                   \tpush   %rbx",
+            "72f791:\t48 83 ec 10          \tsub    $0x10,%rsp",
+            "72f7da:\t48 83 c4 10          \tadd    $0x10,%rsp",
+            "72f7de:\t5b                   \tpop    %rbx"
+          ]
+        },
+        {
+          "address": 7395264,
+          "bytes": 286,
+          "name": "<gpui::runtime::RuntimeMut<unit_action_cost::Model, ()>>::reject_editor",
+          "asm": "03.asm",
+          "stack_adjustments": [
+            "70d8c4:\t50                   \tpush   %rax"
+          ]
+        },
+        {
+          "address": 7590912,
+          "bytes": 389,
+          "name": "allocation_counter::measure::<unit_action_cost::ordinary_unit_action_cost::{closure#1}>",
+          "asm": "04.asm",
+          "stack_adjustments": [
+            "73d400:\t41 57                \tpush   %r15",
+            "73d402:\t41 56                \tpush   %r14",
+            "73d404:\t41 55                \tpush   %r13",
+            "73d406:\t41 54                \tpush   %r12",
+            "73d408:\t53                   \tpush   %rbx",
+            "73d409:\t48 83 ec 70          \tsub    $0x70,%rsp",
+            "73d4b4:\t48 83 c4 70          \tadd    $0x70,%rsp",
+            "73d4b8:\t5b                   \tpop    %rbx",
+            "73d4b9:\t41 5c                \tpop    %r12",
+            "73d4bb:\t41 5d                \tpop    %r13",
+            "73d4bd:\t41 5e                \tpop    %r14",
+            "73d4bf:\t41 5f                \tpop    %r15"
+          ]
+        },
+        {
+          "address": 7368080,
+          "bytes": 425,
+          "name": "<gpui::runtime::RuntimeMut<unit_action_cost::Model, ()>>::describe_with",
+          "asm": "05.asm",
+          "stack_adjustments": [
+            "706d90:\t55                   \tpush   %rbp",
+            "706d91:\t41 57                \tpush   %r15",
+            "706d93:\t41 56                \tpush   %r14",
+            "706d95:\t41 54                \tpush   %r12",
+            "706d97:\t53                   \tpush   %rbx",
+            "706d98:\t48 81 ec 90 00 00 00 \tsub    $0x90,%rsp",
+            "706ebe:\t48 81 c4 90 00 00 00 \tadd    $0x90,%rsp",
+            "706ec5:\t5b                   \tpop    %rbx",
+            "706ec6:\t41 5c                \tpop    %r12",
+            "706ec8:\t41 5e                \tpop    %r14",
+            "706eca:\t41 5f                \tpop    %r15",
+            "706ecc:\t5d                   \tpop    %rbp"
+          ]
+        },
+        {
+          "address": 7398560,
+          "bytes": 450,
+          "name": "<gpui::runtime::RuntimeMut<unit_action_cost::Model, ()>>::inspector_select",
+          "asm": "06.asm",
+          "stack_adjustments": [
+            "70e4a0:\t41 57                \tpush   %r15",
+            "70e4a2:\t41 56                \tpush   %r14",
+            "70e4a4:\t41 55                \tpush   %r13",
+            "70e4a6:\t41 54                \tpush   %r12",
+            "70e4a8:\t53                   \tpush   %rbx",
+            "70e4a9:\t48 83 ec 60          \tsub    $0x60,%rsp",
+            "70e5d1:\t48 83 c4 60          \tadd    $0x60,%rsp",
+            "70e5d5:\t5b                   \tpop    %rbx",
+            "70e5d6:\t41 5c                \tpop    %r12",
+            "70e5d8:\t41 5d                \tpop    %r13",
+            "70e5da:\t41 5e                \tpop    %r14",
+            "70e5dc:\t41 5f                \tpop    %r15",
+            "70e62b:\t48 83 c4 60          \tadd    $0x60,%rsp",
+            "70e62f:\t5b                   \tpop    %rbx",
+            "70e630:\t41 5c                \tpop    %r12",
+            "70e632:\t41 5d                \tpop    %r13",
+            "70e634:\t41 5e                \tpop    %r14",
+            "70e636:\t41 5f                \tpop    %r15"
+          ]
+        },
+        {
+          "address": 7386960,
+          "bytes": 511,
+          "name": "<gpui::runtime::RuntimeMut<unit_action_cost::Model, ()>>::select_input",
+          "asm": "07.asm",
+          "stack_adjustments": [
+            "70b750:\t41 57                \tpush   %r15",
+            "70b752:\t41 56                \tpush   %r14",
+            "70b754:\t41 55                \tpush   %r13",
+            "70b756:\t41 54                \tpush   %r12",
+            "70b758:\t53                   \tpush   %rbx",
+            "70b759:\t48 83 ec 40          \tsub    $0x40,%rsp",
+            "70b869:\t48 83 c4 40          \tadd    $0x40,%rsp",
+            "70b86d:\t5b                   \tpop    %rbx",
+            "70b86e:\t41 5c                \tpop    %r12",
+            "70b870:\t41 5d                \tpop    %r13",
+            "70b872:\t41 5e                \tpop    %r14",
+            "70b874:\t41 5f                \tpop    %r15",
+            "70b901:\t48 83 c4 40          \tadd    $0x40,%rsp",
+            "70b905:\t5b                   \tpop    %rbx",
+            "70b906:\t41 5c                \tpop    %r12",
+            "70b908:\t41 5d                \tpop    %r13",
+            "70b90a:\t41 5e                \tpop    %r14",
+            "70b90c:\t41 5f                \tpop    %r15"
+          ]
+        },
+        {
+          "address": 7388896,
+          "bytes": 671,
+          "name": "<gpui::runtime::RuntimeMut<unit_action_cost::Model, ()>>::publish_focus_change",
+          "asm": "08.asm",
+          "stack_adjustments": [
+            "70bee0:\t41 57                \tpush   %r15",
+            "70bee2:\t41 56                \tpush   %r14",
+            "70bee4:\t41 54                \tpush   %r12",
+            "70bee6:\t53                   \tpush   %rbx",
+            "70bee7:\t50                   \tpush   %rax",
+            "70bf5d:\t48 83 c4 08          \tadd    $0x8,%rsp",
+            "70bf61:\t5b                   \tpop    %rbx",
+            "70bf62:\t41 5c                \tpop    %r12",
+            "70bf64:\t41 5e                \tpop    %r14",
+            "70bf66:\t41 5f                \tpop    %r15",
+            "70c155:\t48 83 c4 08          \tadd    $0x8,%rsp",
+            "70c159:\t5b                   \tpop    %rbx",
+            "70c15a:\t41 5c                \tpop    %r12",
+            "70c15c:\t41 5e                \tpop    %r14",
+            "70c15e:\t41 5f                \tpop    %r15"
+          ]
+        },
+        {
+          "address": 7368512,
+          "bytes": 781,
+          "name": "<gpui::runtime::RuntimeMut<unit_action_cost::Model, ()>>::activate_focused",
+          "asm": "09.asm",
+          "stack_adjustments": [
+            "706f40:\t55                   \tpush   %rbp",
+            "706f41:\t41 57                \tpush   %r15",
+            "706f43:\t41 56                \tpush   %r14",
+            "706f45:\t41 55                \tpush   %r13",
+            "706f47:\t41 54                \tpush   %r12",
+            "706f49:\t53                   \tpush   %rbx",
+            "706f4a:\t48 83 ec 48          \tsub    $0x48,%rsp",
+            "706fcf:\t48 83 c4 48          \tadd    $0x48,%rsp",
+            "706fd3:\t5b                   \tpop    %rbx",
+            "706fd4:\t41 5c                \tpop    %r12",
+            "706fd6:\t41 5d                \tpop    %r13",
+            "706fd8:\t41 5e                \tpop    %r14",
+            "706fda:\t41 5f                \tpop    %r15",
+            "706fdc:\t5d                   \tpop    %rbp",
+            "70723a:\t48 83 c4 48          \tadd    $0x48,%rsp",
+            "70723e:\t5b                   \tpop    %rbx",
+            "70723f:\t41 5c                \tpop    %r12",
+            "707241:\t41 5d                \tpop    %r13",
+            "707243:\t41 5e                \tpop    %r14",
+            "707245:\t41 5f                \tpop    %r15",
+            "707247:\t5d                   \tpop    %rbp"
+          ]
+        },
+        {
+          "address": 7369296,
+          "bytes": 967,
+          "name": "<gpui::runtime::RuntimeMut<unit_action_cost::Model, ()>>::activate_with_editing",
+          "asm": "10.asm",
+          "stack_adjustments": [
+            "707250:\t55                   \tpush   %rbp",
+            "707251:\t41 57                \tpush   %r15",
+            "707253:\t41 56                \tpush   %r14",
+            "707255:\t41 55                \tpush   %r13",
+            "707257:\t41 54                \tpush   %r12",
+            "707259:\t53                   \tpush   %rbx",
+            "70725a:\t48 83 ec 78          \tsub    $0x78,%rsp",
+            "70733a:\t48 83 c4 78          \tadd    $0x78,%rsp",
+            "70733e:\t5b                   \tpop    %rbx",
+            "70733f:\t41 5c                \tpop    %r12",
+            "707341:\t41 5d                \tpop    %r13",
+            "707343:\t41 5e                \tpop    %r14",
+            "707345:\t41 5f                \tpop    %r15",
+            "707347:\t5d                   \tpop    %rbp"
+          ]
+        },
+        {
+          "address": 7402016,
+          "bytes": 1063,
+          "name": "<gpui::runtime::Win<unit_action_cost::Model>>::click",
+          "asm": "11.asm",
+          "stack_adjustments": [
+            "70f220:\t55                   \tpush   %rbp",
+            "70f221:\t41 57                \tpush   %r15",
+            "70f223:\t41 56                \tpush   %r14",
+            "70f225:\t41 55                \tpush   %r13",
+            "70f227:\t41 54                \tpush   %r12",
+            "70f229:\t53                   \tpush   %rbx",
+            "70f22a:\t48 81 ec b8 00 00 00 \tsub    $0xb8,%rsp",
+            "70f554:\t48 81 c4 b8 00 00 00 \tadd    $0xb8,%rsp",
+            "70f55b:\t5b                   \tpop    %rbx",
+            "70f55c:\t41 5c                \tpop    %r12",
+            "70f55e:\t41 5d                \tpop    %r13",
+            "70f560:\t41 5e                \tpop    %r14",
+            "70f562:\t41 5f                \tpop    %r15",
+            "70f564:\t5d                   \tpop    %rbp"
+          ]
+        },
+        {
+          "address": 7387472,
+          "bytes": 1422,
+          "name": "<gpui::runtime::RuntimeMut<unit_action_cost::Model, ()>>::select_pointer",
+          "asm": "12.asm",
+          "stack_adjustments": [
+            "70b950:\t55                   \tpush   %rbp",
+            "70b951:\t41 57                \tpush   %r15",
+            "70b953:\t41 56                \tpush   %r14",
+            "70b955:\t41 55                \tpush   %r13",
+            "70b957:\t41 54                \tpush   %r12",
+            "70b959:\t53                   \tpush   %rbx",
+            "70b95a:\t48 81 ec 18 01 00 00 \tsub    $0x118,%rsp",
+            "70bbad:\t48 81 c4 18 01 00 00 \tadd    $0x118,%rsp",
+            "70bbb4:\t5b                   \tpop    %rbx",
+            "70bbb5:\t41 5c                \tpop    %r12",
+            "70bbb7:\t41 5d                \tpop    %r13",
+            "70bbb9:\t41 5e                \tpop    %r14",
+            "70bbbb:\t41 5f                \tpop    %r15",
+            "70bbbd:\t5d                   \tpop    %rbp"
+          ]
+        },
+        {
+          "address": 7588720,
+          "bytes": 2185,
+          "name": "allocation_counter::measure::<unit_action_cost::ordinary_unit_action_cost::{closure#0}>",
+          "asm": "13.asm",
+          "stack_adjustments": [
+            "73cb70:\t55                   \tpush   %rbp",
+            "73cb71:\t41 57                \tpush   %r15",
+            "73cb73:\t41 56                \tpush   %r14",
+            "73cb75:\t41 55                \tpush   %r13",
+            "73cb77:\t41 54                \tpush   %r12",
+            "73cb79:\t53                   \tpush   %rbx",
+            "73cb7a:\t48 81 ec 98 00 00 00 \tsub    $0x98,%rsp",
+            "73d051:\t48 81 c4 98 00 00 00 \tadd    $0x98,%rsp",
+            "73d058:\t5b                   \tpop    %rbx",
+            "73d059:\t41 5c                \tpop    %r12",
+            "73d05b:\t41 5d                \tpop    %r13",
+            "73d05d:\t41 5e                \tpop    %r14",
+            "73d05f:\t41 5f                \tpop    %r15",
+            "73d061:\t5d                   \tpop    %rbp"
+          ]
+        },
+        {
+          "address": 7395552,
+          "bytes": 2995,
+          "name": "<gpui::runtime::RuntimeMut<unit_action_cost::Model, ()>>::window_action",
+          "asm": "14.asm",
+          "stack_adjustments": [
+            "70d8e0:\t55                   \tpush   %rbp",
+            "70d8e1:\t41 57                \tpush   %r15",
+            "70d8e3:\t41 56                \tpush   %r14",
+            "70d8e5:\t41 55                \tpush   %r13",
+            "70d8e7:\t41 54                \tpush   %r12",
+            "70d8e9:\t53                   \tpush   %rbx",
+            "70d8ea:\t48 81 ec 28 01 00 00 \tsub    $0x128,%rsp",
+            "70d975:\t48 81 c4 28 01 00 00 \tadd    $0x128,%rsp",
+            "70d97c:\t5b                   \tpop    %rbx",
+            "70d97d:\t41 5c                \tpop    %r12",
+            "70d97f:\t41 5d                \tpop    %r13",
+            "70d981:\t41 5e                \tpop    %r14",
+            "70d983:\t41 5f                \tpop    %r15",
+            "70d985:\t5d                   \tpop    %rbp",
+            "70e01c:\t48 81 c4 28 01 00 00 \tadd    $0x128,%rsp",
+            "70e023:\t5b                   \tpop    %rbx",
+            "70e024:\t41 5c                \tpop    %r12",
+            "70e026:\t41 5d                \tpop    %r13",
+            "70e028:\t41 5e                \tpop    %r14",
+            "70e02a:\t41 5f                \tpop    %r15",
+            "70e02c:\t5d                   \tpop    %rbp",
+            "70e1a4:\t48 81 c4 28 01 00 00 \tadd    $0x128,%rsp",
+            "70e1ab:\t5b                   \tpop    %rbx",
+            "70e1ac:\t41 5c                \tpop    %r12",
+            "70e1ae:\t41 5d                \tpop    %r13",
+            "70e1b0:\t41 5e                \tpop    %r14",
+            "70e1b2:\t41 5f                \tpop    %r15",
+            "70e1b4:\t5d                   \tpop    %rbp",
+            "70e2b4:\t48 81 c4 28 01 00 00 \tadd    $0x128,%rsp",
+            "70e2bb:\t5b                   \tpop    %rbx",
+            "70e2bc:\t41 5c                \tpop    %r12",
+            "70e2be:\t41 5d                \tpop    %r13",
+            "70e2c0:\t41 5e                \tpop    %r14",
+            "70e2c2:\t41 5f                \tpop    %r15",
+            "70e2c4:\t5d                   \tpop    %rbp"
+          ]
+        },
+        {
+          "address": 7463264,
+          "bytes": 3665,
+          "name": "<gpui::runtime::RuntimeMut<unit_action_cost::Model, ()>>::set_property_value_at",
+          "asm": "15.asm",
+          "stack_adjustments": [
+            "71e160:\t55                   \tpush   %rbp",
+            "71e161:\t41 57                \tpush   %r15",
+            "71e163:\t41 56                \tpush   %r14",
+            "71e165:\t41 55                \tpush   %r13",
+            "71e167:\t41 54                \tpush   %r12",
+            "71e169:\t53                   \tpush   %rbx",
+            "71e16a:\t48 81 ec 08 02 00 00 \tsub    $0x208,%rsp",
+            "71edb0:\t48 81 c4 08 02 00 00 \tadd    $0x208,%rsp",
+            "71edb7:\t5b                   \tpop    %rbx",
+            "71edb8:\t41 5c                \tpop    %r12",
+            "71edba:\t41 5d                \tpop    %r13",
+            "71edbc:\t41 5e                \tpop    %r14",
+            "71edbe:\t41 5f                \tpop    %r15",
+            "71edc0:\t5d                   \tpop    %rbp"
+          ]
+        },
+        {
+          "address": 7370272,
+          "bytes": 8247,
+          "name": "<gpui::runtime::RuntimeMut<unit_action_cost::Model, ()>>::after_source_with_editing",
+          "asm": "16.asm",
+          "stack_adjustments": [
+            "707620:\t55                   \tpush   %rbp",
+            "707621:\t41 57                \tpush   %r15",
+            "707623:\t41 56                \tpush   %r14",
+            "707625:\t41 55                \tpush   %r13",
+            "707627:\t41 54                \tpush   %r12",
+            "707629:\t53                   \tpush   %rbx",
+            "70762a:\t48 81 ec c8 03 00 00 \tsub    $0x3c8,%rsp",
+            "707a2f:\t48 81 c4 c8 03 00 00 \tadd    $0x3c8,%rsp",
+            "707a36:\t5b                   \tpop    %rbx",
+            "707a37:\t41 5c                \tpop    %r12",
+            "707a39:\t41 5d                \tpop    %r13",
+            "707a3b:\t41 5e                \tpop    %r14",
+            "707a3d:\t41 5f                \tpop    %r15",
+            "707a3f:\t5d                   \tpop    %rbp"
+          ]
+        }
+      ],
+      "method_route_tables": [
+        {
+          "route": "<gpui::element::MethodRoute<unit_action_cost::Model, <unit_action_cost::Model>::increment> as gpui::element::Route>",
+          "file_offset": 11346928,
+          "bytes": 48,
+          "header": [
+            0,
+            0,
+            1
+          ],
+          "methods": [
+            "admit",
+            "invoke",
+            "owner_scope"
+          ],
+          "pointers": [
+            7534480,
+            7534560,
+            7587872
+          ]
+        }
+      ],
+      "frozen_binary": "/tmp/gpui-contained-entry-release-9ec/baseline/unit_action_cost"
+    },
+    "unit_action_cost_two": {
+      "head": "e6c231d90f38dd196c937e82cb6ba2c5d00005fc",
+      "binary": "/tmp/gpui-contained-owner-unit-baseline-target/release/deps/unit_action_cost_two-c899ee77dd9a9ab3",
+      "sha256": "f10d01da027654a41d548cac79d055467c809f7261093c86a33beb4092973eac",
+      "client_sha256": "af63399d490204e079811758815027fd298def126c7bf4888daaf22f0b5d0fab",
+      "sections": {
+        ".text": 4214935,
+        ".rodata": 6570888,
+        ".data.rel.ro": 190344
+      },
+      "bodies": [
+        {
+          "address": 7757392,
+          "bytes": 18,
+          "name": "<gpui::element::MethodRoute<unit_action_cost_two::SecondModel, <unit_action_cost_two::SecondModel>::increment> as gpui::element::Route>::owner_scope",
+          "asm": "00.asm",
+          "stack_adjustments": []
+        },
+        {
+          "address": 7757392,
+          "bytes": 18,
+          "name": "<gpui::element::MethodRoute<unit_action_cost_two::Model, <unit_action_cost_two::Model>::increment> as gpui::element::Route>::owner_scope",
+          "asm": "01.asm",
+          "stack_adjustments": []
+        },
+        {
+          "address": 7734560,
+          "bytes": 76,
+          "name": "<gpui::element::MethodRoute<unit_action_cost_two::Model, <unit_action_cost_two::Model>::increment> as gpui::element::Route>::invoke",
+          "asm": "02.asm",
+          "stack_adjustments": [
+            "760520:\t41 56                \tpush   %r14",
+            "760522:\t53                   \tpush   %rbx",
+            "760523:\t48 83 ec 18          \tsub    $0x18,%rsp",
+            "760564:\t48 83 c4 18          \tadd    $0x18,%rsp",
+            "760568:\t5b                   \tpop    %rbx",
+            "760569:\t41 5e                \tpop    %r14"
+          ]
+        },
+        {
+          "address": 7734320,
+          "bytes": 80,
+          "name": "<gpui::element::MethodRoute<unit_action_cost_two::SecondModel, <unit_action_cost_two::SecondModel>::increment> as gpui::element::Route>::admit",
+          "asm": "03.asm",
+          "stack_adjustments": [
+            "760430:\t53                   \tpush   %rbx",
+            "760431:\t48 83 ec 10          \tsub    $0x10,%rsp",
+            "76047a:\t48 83 c4 10          \tadd    $0x10,%rsp",
+            "76047e:\t5b                   \tpop    %rbx"
+          ]
+        },
+        {
+          "address": 7734400,
+          "bytes": 80,
+          "name": "<gpui::element::MethodRoute<unit_action_cost_two::SecondModel, <unit_action_cost_two::SecondModel>::increment> as gpui::element::Route>::invoke",
+          "asm": "04.asm",
+          "stack_adjustments": [
+            "760480:\t41 56                \tpush   %r14",
+            "760482:\t53                   \tpush   %rbx",
+            "760483:\t48 83 ec 18          \tsub    $0x18,%rsp",
+            "7604c8:\t48 83 c4 18          \tadd    $0x18,%rsp",
+            "7604cc:\t5b                   \tpop    %rbx",
+            "7604cd:\t41 5e                \tpop    %r14"
+          ]
+        },
+        {
+          "address": 7734480,
+          "bytes": 80,
+          "name": "<gpui::element::MethodRoute<unit_action_cost_two::Model, <unit_action_cost_two::Model>::increment> as gpui::element::Route>::admit",
+          "asm": "05.asm",
+          "stack_adjustments": [
+            "7604d0:\t53                   \tpush   %rbx",
+            "7604d1:\t48 83 ec 10          \tsub    $0x10,%rsp",
+            "76051a:\t48 83 c4 10          \tadd    $0x10,%rsp",
+            "76051e:\t5b                   \tpop    %rbx"
+          ]
+        },
+        {
+          "address": 7370992,
+          "bytes": 286,
+          "name": "<gpui::runtime::RuntimeMut<unit_action_cost_two::SecondModel, ()>>::reject_editor",
+          "asm": "06.asm",
+          "stack_adjustments": [
+            "7079f4:\t50                   \tpush   %rax"
+          ]
+        },
+        {
+          "address": 7374752,
+          "bytes": 286,
+          "name": "<gpui::runtime::RuntimeMut<unit_action_cost_two::Model, ()>>::reject_editor",
+          "asm": "07.asm",
+          "stack_adjustments": [
+            "7088a4:\t50                   \tpush   %rax"
+          ]
+        },
+        {
+          "address": 7652944,
+          "bytes": 389,
+          "name": "allocation_counter::measure::<unit_action_cost_two::ordinary_unit_action_cost::{closure#1}>",
+          "asm": "08.asm",
+          "stack_adjustments": [
+            "74c650:\t41 57                \tpush   %r15",
+            "74c652:\t41 56                \tpush   %r14",
+            "74c654:\t41 55                \tpush   %r13",
+            "74c656:\t41 54                \tpush   %r12",
+            "74c658:\t53                   \tpush   %rbx",
+            "74c659:\t48 83 ec 70          \tsub    $0x70,%rsp",
+            "74c704:\t48 83 c4 70          \tadd    $0x70,%rsp",
+            "74c708:\t5b                   \tpop    %rbx",
+            "74c709:\t41 5c                \tpop    %r12",
+            "74c70b:\t41 5d                \tpop    %r13",
+            "74c70d:\t41 5e                \tpop    %r14",
+            "74c70f:\t41 5f                \tpop    %r15"
+          ]
+        },
+        {
+          "address": 7655696,
+          "bytes": 389,
+          "name": "allocation_counter::measure::<unit_action_cost_two::second_ordinary_unit_action_cost::{closure#1}>",
+          "asm": "09.asm",
+          "stack_adjustments": [
+            "74d110:\t41 57                \tpush   %r15",
+            "74d112:\t41 56                \tpush   %r14",
+            "74d114:\t41 55                \tpush   %r13",
+            "74d116:\t41 54                \tpush   %r12",
+            "74d118:\t53                   \tpush   %rbx",
+            "74d119:\t48 83 ec 70          \tsub    $0x70,%rsp",
+            "74d1c4:\t48 83 c4 70          \tadd    $0x70,%rsp",
+            "74d1c8:\t5b                   \tpop    %rbx",
+            "74d1c9:\t41 5c                \tpop    %r12",
+            "74d1cb:\t41 5d                \tpop    %r13",
+            "74d1cd:\t41 5e                \tpop    %r14",
+            "74d1cf:\t41 5f                \tpop    %r15"
+          ]
+        },
+        {
+          "address": 7316640,
+          "bytes": 425,
+          "name": "<gpui::runtime::RuntimeMut<unit_action_cost_two::SecondModel, ()>>::describe_with",
+          "asm": "10.asm",
+          "stack_adjustments": [
+            "6fa4a0:\t55                   \tpush   %rbp",
+            "6fa4a1:\t41 57                \tpush   %r15",
+            "6fa4a3:\t41 56                \tpush   %r14",
+            "6fa4a5:\t41 54                \tpush   %r12",
+            "6fa4a7:\t53                   \tpush   %rbx",
+            "6fa4a8:\t48 81 ec 90 00 00 00 \tsub    $0x90,%rsp",
+            "6fa5ce:\t48 81 c4 90 00 00 00 \tadd    $0x90,%rsp",
+            "6fa5d5:\t5b                   \tpop    %rbx",
+            "6fa5d6:\t41 5c                \tpop    %r12",
+            "6fa5d8:\t41 5e                \tpop    %r14",
+            "6fa5da:\t41 5f                \tpop    %r15",
+            "6fa5dc:\t5d                   \tpop    %rbp"
+          ]
+        },
+        {
+          "address": 7327088,
+          "bytes": 425,
+          "name": "<gpui::runtime::RuntimeMut<unit_action_cost_two::Model, ()>>::describe_with",
+          "asm": "11.asm",
+          "stack_adjustments": [
+            "6fcd70:\t55                   \tpush   %rbp",
+            "6fcd71:\t41 57                \tpush   %r15",
+            "6fcd73:\t41 56                \tpush   %r14",
+            "6fcd75:\t41 54                \tpush   %r12",
+            "6fcd77:\t53                   \tpush   %rbx",
+            "6fcd78:\t48 81 ec 90 00 00 00 \tsub    $0x90,%rsp",
+            "6fce9e:\t48 81 c4 90 00 00 00 \tadd    $0x90,%rsp",
+            "6fcea5:\t5b                   \tpop    %rbx",
+            "6fcea6:\t41 5c                \tpop    %r12",
+            "6fcea8:\t41 5e                \tpop    %r14",
+            "6fceaa:\t41 5f                \tpop    %r15",
+            "6fceac:\t5d                   \tpop    %rbp"
+          ]
+        },
+        {
+          "address": 7374288,
+          "bytes": 450,
+          "name": "<gpui::runtime::RuntimeMut<unit_action_cost_two::SecondModel, ()>>::inspector_select",
+          "asm": "12.asm",
+          "stack_adjustments": [
+            "7085d0:\t41 57                \tpush   %r15",
+            "7085d2:\t41 56                \tpush   %r14",
+            "7085d4:\t41 55                \tpush   %r13",
+            "7085d6:\t41 54                \tpush   %r12",
+            "7085d8:\t53                   \tpush   %rbx",
+            "7085d9:\t48 83 ec 60          \tsub    $0x60,%rsp",
+            "708701:\t48 83 c4 60          \tadd    $0x60,%rsp",
+            "708705:\t5b                   \tpop    %rbx",
+            "708706:\t41 5c                \tpop    %r12",
+            "708708:\t41 5d                \tpop    %r13",
+            "70870a:\t41 5e                \tpop    %r14",
+            "70870c:\t41 5f                \tpop    %r15",
+            "70875b:\t48 83 c4 60          \tadd    $0x60,%rsp",
+            "70875f:\t5b                   \tpop    %rbx",
+            "708760:\t41 5c                \tpop    %r12",
+            "708762:\t41 5d                \tpop    %r13",
+            "708764:\t41 5e                \tpop    %r14",
+            "708766:\t41 5f                \tpop    %r15"
+          ]
+        },
+        {
+          "address": 7378048,
+          "bytes": 450,
+          "name": "<gpui::runtime::RuntimeMut<unit_action_cost_two::Model, ()>>::inspector_select",
+          "asm": "13.asm",
+          "stack_adjustments": [
+            "709480:\t41 57                \tpush   %r15",
+            "709482:\t41 56                \tpush   %r14",
+            "709484:\t41 55                \tpush   %r13",
+            "709486:\t41 54                \tpush   %r12",
+            "709488:\t53                   \tpush   %rbx",
+            "709489:\t48 83 ec 60          \tsub    $0x60,%rsp",
+            "7095b1:\t48 83 c4 60          \tadd    $0x60,%rsp",
+            "7095b5:\t5b                   \tpop    %rbx",
+            "7095b6:\t41 5c                \tpop    %r12",
+            "7095b8:\t41 5d                \tpop    %r13",
+            "7095ba:\t41 5e                \tpop    %r14",
+            "7095bc:\t41 5f                \tpop    %r15",
+            "70960b:\t48 83 c4 60          \tadd    $0x60,%rsp",
+            "70960f:\t5b                   \tpop    %rbx",
+            "709610:\t41 5c                \tpop    %r12",
+            "709612:\t41 5d                \tpop    %r13",
+            "709614:\t41 5e                \tpop    %r14",
+            "709616:\t41 5f                \tpop    %r15"
+          ]
+        },
+        {
+          "address": 7354384,
+          "bytes": 511,
+          "name": "<gpui::runtime::RuntimeMut<unit_action_cost_two::SecondModel, ()>>::select_input",
+          "asm": "14.asm",
+          "stack_adjustments": [
+            "703810:\t41 57                \tpush   %r15",
+            "703812:\t41 56                \tpush   %r14",
+            "703814:\t41 55                \tpush   %r13",
+            "703816:\t41 54                \tpush   %r12",
+            "703818:\t53                   \tpush   %rbx",
+            "703819:\t48 83 ec 40          \tsub    $0x40,%rsp",
+            "703929:\t48 83 c4 40          \tadd    $0x40,%rsp",
+            "70392d:\t5b                   \tpop    %rbx",
+            "70392e:\t41 5c                \tpop    %r12",
+            "703930:\t41 5d                \tpop    %r13",
+            "703932:\t41 5e                \tpop    %r14",
+            "703934:\t41 5f                \tpop    %r15",
+            "7039c1:\t48 83 c4 40          \tadd    $0x40,%rsp",
+            "7039c5:\t5b                   \tpop    %rbx",
+            "7039c6:\t41 5c                \tpop    %r12",
+            "7039c8:\t41 5d                \tpop    %r13",
+            "7039ca:\t41 5e                \tpop    %r14",
+            "7039cc:\t41 5f                \tpop    %r15"
+          ]
+        },
+        {
+          "address": 7356992,
+          "bytes": 511,
+          "name": "<gpui::runtime::RuntimeMut<unit_action_cost_two::Model, ()>>::select_input",
+          "asm": "15.asm",
+          "stack_adjustments": [
+            "704240:\t41 57                \tpush   %r15",
+            "704242:\t41 56                \tpush   %r14",
+            "704244:\t41 55                \tpush   %r13",
+            "704246:\t41 54                \tpush   %r12",
+            "704248:\t53                   \tpush   %rbx",
+            "704249:\t48 83 ec 40          \tsub    $0x40,%rsp",
+            "704359:\t48 83 c4 40          \tadd    $0x40,%rsp",
+            "70435d:\t5b                   \tpop    %rbx",
+            "70435e:\t41 5c                \tpop    %r12",
+            "704360:\t41 5d                \tpop    %r13",
+            "704362:\t41 5e                \tpop    %r14",
+            "704364:\t41 5f                \tpop    %r15",
+            "7043f1:\t48 83 c4 40          \tadd    $0x40,%rsp",
+            "7043f5:\t5b                   \tpop    %rbx",
+            "7043f6:\t41 5c                \tpop    %r12",
+            "7043f8:\t41 5d                \tpop    %r13",
+            "7043fa:\t41 5e                \tpop    %r14",
+            "7043fc:\t41 5f                \tpop    %r15"
+          ]
+        },
+        {
+          "address": 7356320,
+          "bytes": 671,
+          "name": "<gpui::runtime::RuntimeMut<unit_action_cost_two::SecondModel, ()>>::publish_focus_change",
+          "asm": "16.asm",
+          "stack_adjustments": [
+            "703fa0:\t41 57                \tpush   %r15",
+            "703fa2:\t41 56                \tpush   %r14",
+            "703fa4:\t41 54                \tpush   %r12",
+            "703fa6:\t53                   \tpush   %rbx",
+            "703fa7:\t50                   \tpush   %rax",
+            "70401d:\t48 83 c4 08          \tadd    $0x8,%rsp",
+            "704021:\t5b                   \tpop    %rbx",
+            "704022:\t41 5c                \tpop    %r12",
+            "704024:\t41 5e                \tpop    %r14",
+            "704026:\t41 5f                \tpop    %r15",
+            "704215:\t48 83 c4 08          \tadd    $0x8,%rsp",
+            "704219:\t5b                   \tpop    %rbx",
+            "70421a:\t41 5c                \tpop    %r12",
+            "70421c:\t41 5e                \tpop    %r14",
+            "70421e:\t41 5f                \tpop    %r15"
+          ]
+        },
+        {
+          "address": 7358928,
+          "bytes": 671,
+          "name": "<gpui::runtime::RuntimeMut<unit_action_cost_two::Model, ()>>::publish_focus_change",
+          "asm": "17.asm",
+          "stack_adjustments": [
+            "7049d0:\t41 57                \tpush   %r15",
+            "7049d2:\t41 56                \tpush   %r14",
+            "7049d4:\t41 54                \tpush   %r12",
+            "7049d6:\t53                   \tpush   %rbx",
+            "7049d7:\t50                   \tpush   %rax",
+            "704a4d:\t48 83 c4 08          \tadd    $0x8,%rsp",
+            "704a51:\t5b                   \tpop    %rbx",
+            "704a52:\t41 5c                \tpop    %r12",
+            "704a54:\t41 5e                \tpop    %r14",
+            "704a56:\t41 5f                \tpop    %r15",
+            "704c45:\t48 83 c4 08          \tadd    $0x8,%rsp",
+            "704c49:\t5b                   \tpop    %rbx",
+            "704c4a:\t41 5c                \tpop    %r12",
+            "704c4c:\t41 5e                \tpop    %r14",
+            "704c4e:\t41 5f                \tpop    %r15"
+          ]
+        },
+        {
+          "address": 7317072,
+          "bytes": 781,
+          "name": "<gpui::runtime::RuntimeMut<unit_action_cost_two::SecondModel, ()>>::activate_focused",
+          "asm": "18.asm",
+          "stack_adjustments": [
+            "6fa650:\t55                   \tpush   %rbp",
+            "6fa651:\t41 57                \tpush   %r15",
+            "6fa653:\t41 56                \tpush   %r14",
+            "6fa655:\t41 55                \tpush   %r13",
+            "6fa657:\t41 54                \tpush   %r12",
+            "6fa659:\t53                   \tpush   %rbx",
+            "6fa65a:\t48 83 ec 48          \tsub    $0x48,%rsp",
+            "6fa6df:\t48 83 c4 48          \tadd    $0x48,%rsp",
+            "6fa6e3:\t5b                   \tpop    %rbx",
+            "6fa6e4:\t41 5c                \tpop    %r12",
+            "6fa6e6:\t41 5d                \tpop    %r13",
+            "6fa6e8:\t41 5e                \tpop    %r14",
+            "6fa6ea:\t41 5f                \tpop    %r15",
+            "6fa6ec:\t5d                   \tpop    %rbp",
+            "6fa94a:\t48 83 c4 48          \tadd    $0x48,%rsp",
+            "6fa94e:\t5b                   \tpop    %rbx",
+            "6fa94f:\t41 5c                \tpop    %r12",
+            "6fa951:\t41 5d                \tpop    %r13",
+            "6fa953:\t41 5e                \tpop    %r14",
+            "6fa955:\t41 5f                \tpop    %r15",
+            "6fa957:\t5d                   \tpop    %rbp"
+          ]
+        },
+        {
+          "address": 7327520,
+          "bytes": 781,
+          "name": "<gpui::runtime::RuntimeMut<unit_action_cost_two::Model, ()>>::activate_focused",
+          "asm": "19.asm",
+          "stack_adjustments": [
+            "6fcf20:\t55                   \tpush   %rbp",
+            "6fcf21:\t41 57                \tpush   %r15",
+            "6fcf23:\t41 56                \tpush   %r14",
+            "6fcf25:\t41 55                \tpush   %r13",
+            "6fcf27:\t41 54                \tpush   %r12",
+            "6fcf29:\t53                   \tpush   %rbx",
+            "6fcf2a:\t48 83 ec 48          \tsub    $0x48,%rsp",
+            "6fcfaf:\t48 83 c4 48          \tadd    $0x48,%rsp",
+            "6fcfb3:\t5b                   \tpop    %rbx",
+            "6fcfb4:\t41 5c                \tpop    %r12",
+            "6fcfb6:\t41 5d                \tpop    %r13",
+            "6fcfb8:\t41 5e                \tpop    %r14",
+            "6fcfba:\t41 5f                \tpop    %r15",
+            "6fcfbc:\t5d                   \tpop    %rbp",
+            "6fd21a:\t48 83 c4 48          \tadd    $0x48,%rsp",
+            "6fd21e:\t5b                   \tpop    %rbx",
+            "6fd21f:\t41 5c                \tpop    %r12",
+            "6fd221:\t41 5d                \tpop    %r13",
+            "6fd223:\t41 5e                \tpop    %r14",
+            "6fd225:\t41 5f                \tpop    %r15",
+            "6fd227:\t5d                   \tpop    %rbp"
+          ]
+        },
+        {
+          "address": 7317856,
+          "bytes": 967,
+          "name": "<gpui::runtime::RuntimeMut<unit_action_cost_two::SecondModel, ()>>::activate_with_editing",
+          "asm": "20.asm",
+          "stack_adjustments": [
+            "6fa960:\t55                   \tpush   %rbp",
+            "6fa961:\t41 57                \tpush   %r15",
+            "6fa963:\t41 56                \tpush   %r14",
+            "6fa965:\t41 55                \tpush   %r13",
+            "6fa967:\t41 54                \tpush   %r12",
+            "6fa969:\t53                   \tpush   %rbx",
+            "6fa96a:\t48 83 ec 78          \tsub    $0x78,%rsp",
+            "6faa4a:\t48 83 c4 78          \tadd    $0x78,%rsp",
+            "6faa4e:\t5b                   \tpop    %rbx",
+            "6faa4f:\t41 5c                \tpop    %r12",
+            "6faa51:\t41 5d                \tpop    %r13",
+            "6faa53:\t41 5e                \tpop    %r14",
+            "6faa55:\t41 5f                \tpop    %r15",
+            "6faa57:\t5d                   \tpop    %rbp"
+          ]
+        },
+        {
+          "address": 7328304,
+          "bytes": 967,
+          "name": "<gpui::runtime::RuntimeMut<unit_action_cost_two::Model, ()>>::activate_with_editing",
+          "asm": "21.asm",
+          "stack_adjustments": [
+            "6fd230:\t55                   \tpush   %rbp",
+            "6fd231:\t41 57                \tpush   %r15",
+            "6fd233:\t41 56                \tpush   %r14",
+            "6fd235:\t41 55                \tpush   %r13",
+            "6fd237:\t41 54                \tpush   %r12",
+            "6fd239:\t53                   \tpush   %rbx",
+            "6fd23a:\t48 83 ec 78          \tsub    $0x78,%rsp",
+            "6fd31a:\t48 83 c4 78          \tadd    $0x78,%rsp",
+            "6fd31e:\t5b                   \tpop    %rbx",
+            "6fd31f:\t41 5c                \tpop    %r12",
+            "6fd321:\t41 5d                \tpop    %r13",
+            "6fd323:\t41 5e                \tpop    %r14",
+            "6fd325:\t41 5f                \tpop    %r15",
+            "6fd327:\t5d                   \tpop    %rbp"
+          ]
+        },
+        {
+          "address": 7381504,
+          "bytes": 1063,
+          "name": "<gpui::runtime::Win<unit_action_cost_two::SecondModel>>::click",
+          "asm": "22.asm",
+          "stack_adjustments": [
+            "70a200:\t55                   \tpush   %rbp",
+            "70a201:\t41 57                \tpush   %r15",
+            "70a203:\t41 56                \tpush   %r14",
+            "70a205:\t41 55                \tpush   %r13",
+            "70a207:\t41 54                \tpush   %r12",
+            "70a209:\t53                   \tpush   %rbx",
+            "70a20a:\t48 81 ec b8 00 00 00 \tsub    $0xb8,%rsp",
+            "70a534:\t48 81 c4 b8 00 00 00 \tadd    $0xb8,%rsp",
+            "70a53b:\t5b                   \tpop    %rbx",
+            "70a53c:\t41 5c                \tpop    %r12",
+            "70a53e:\t41 5d                \tpop    %r13",
+            "70a540:\t41 5e                \tpop    %r14",
+            "70a542:\t41 5f                \tpop    %r15",
+            "70a544:\t5d                   \tpop    %rbp"
+          ]
+        },
+        {
+          "address": 7385168,
+          "bytes": 1063,
+          "name": "<gpui::runtime::Win<unit_action_cost_two::Model>>::click",
+          "asm": "23.asm",
+          "stack_adjustments": [
+            "70b050:\t55                   \tpush   %rbp",
+            "70b051:\t41 57                \tpush   %r15",
+            "70b053:\t41 56                \tpush   %r14",
+            "70b055:\t41 55                \tpush   %r13",
+            "70b057:\t41 54                \tpush   %r12",
+            "70b059:\t53                   \tpush   %rbx",
+            "70b05a:\t48 81 ec b8 00 00 00 \tsub    $0xb8,%rsp",
+            "70b384:\t48 81 c4 b8 00 00 00 \tadd    $0xb8,%rsp",
+            "70b38b:\t5b                   \tpop    %rbx",
+            "70b38c:\t41 5c                \tpop    %r12",
+            "70b38e:\t41 5d                \tpop    %r13",
+            "70b390:\t41 5e                \tpop    %r14",
+            "70b392:\t41 5f                \tpop    %r15",
+            "70b394:\t5d                   \tpop    %rbp"
+          ]
+        },
+        {
+          "address": 7354896,
+          "bytes": 1422,
+          "name": "<gpui::runtime::RuntimeMut<unit_action_cost_two::SecondModel, ()>>::select_pointer",
+          "asm": "24.asm",
+          "stack_adjustments": [
+            "703a10:\t55                   \tpush   %rbp",
+            "703a11:\t41 57                \tpush   %r15",
+            "703a13:\t41 56                \tpush   %r14",
+            "703a15:\t41 55                \tpush   %r13",
+            "703a17:\t41 54                \tpush   %r12",
+            "703a19:\t53                   \tpush   %rbx",
+            "703a1a:\t48 81 ec 18 01 00 00 \tsub    $0x118,%rsp",
+            "703c6d:\t48 81 c4 18 01 00 00 \tadd    $0x118,%rsp",
+            "703c74:\t5b                   \tpop    %rbx",
+            "703c75:\t41 5c                \tpop    %r12",
+            "703c77:\t41 5d                \tpop    %r13",
+            "703c79:\t41 5e                \tpop    %r14",
+            "703c7b:\t41 5f                \tpop    %r15",
+            "703c7d:\t5d                   \tpop    %rbp"
+          ]
+        },
+        {
+          "address": 7357504,
+          "bytes": 1422,
+          "name": "<gpui::runtime::RuntimeMut<unit_action_cost_two::Model, ()>>::select_pointer",
+          "asm": "25.asm",
+          "stack_adjustments": [
+            "704440:\t55                   \tpush   %rbp",
+            "704441:\t41 57                \tpush   %r15",
+            "704443:\t41 56                \tpush   %r14",
+            "704445:\t41 55                \tpush   %r13",
+            "704447:\t41 54                \tpush   %r12",
+            "704449:\t53                   \tpush   %rbx",
+            "70444a:\t48 81 ec 18 01 00 00 \tsub    $0x118,%rsp",
+            "70469d:\t48 81 c4 18 01 00 00 \tadd    $0x118,%rsp",
+            "7046a4:\t5b                   \tpop    %rbx",
+            "7046a5:\t41 5c                \tpop    %r12",
+            "7046a7:\t41 5d                \tpop    %r13",
+            "7046a9:\t41 5e                \tpop    %r14",
+            "7046ab:\t41 5f                \tpop    %r15",
+            "7046ad:\t5d                   \tpop    %rbp"
+          ]
+        },
+        {
+          "address": 7650752,
+          "bytes": 2185,
+          "name": "allocation_counter::measure::<unit_action_cost_two::ordinary_unit_action_cost::{closure#0}>",
+          "asm": "26.asm",
+          "stack_adjustments": [
+            "74bdc0:\t55                   \tpush   %rbp",
+            "74bdc1:\t41 57                \tpush   %r15",
+            "74bdc3:\t41 56                \tpush   %r14",
+            "74bdc5:\t41 55                \tpush   %r13",
+            "74bdc7:\t41 54                \tpush   %r12",
+            "74bdc9:\t53                   \tpush   %rbx",
+            "74bdca:\t48 81 ec 98 00 00 00 \tsub    $0x98,%rsp",
+            "74c2a1:\t48 81 c4 98 00 00 00 \tadd    $0x98,%rsp",
+            "74c2a8:\t5b                   \tpop    %rbx",
+            "74c2a9:\t41 5c                \tpop    %r12",
+            "74c2ab:\t41 5d                \tpop    %r13",
+            "74c2ad:\t41 5e                \tpop    %r14",
+            "74c2af:\t41 5f                \tpop    %r15",
+            "74c2b1:\t5d                   \tpop    %rbp"
+          ]
+        },
+        {
+          "address": 7653344,
+          "bytes": 2345,
+          "name": "allocation_counter::measure::<unit_action_cost_two::second_ordinary_unit_action_cost::{closure#0}>",
+          "asm": "27.asm",
+          "stack_adjustments": [
+            "74c7e0:\t55                   \tpush   %rbp",
+            "74c7e1:\t41 57                \tpush   %r15",
+            "74c7e3:\t41 56                \tpush   %r14",
+            "74c7e5:\t41 55                \tpush   %r13",
+            "74c7e7:\t41 54                \tpush   %r12",
+            "74c7e9:\t53                   \tpush   %rbx",
+            "74c7ea:\t48 81 ec 68 01 00 00 \tsub    $0x168,%rsp",
+            "74cd61:\t48 81 c4 68 01 00 00 \tadd    $0x168,%rsp",
+            "74cd68:\t5b                   \tpop    %rbx",
+            "74cd69:\t41 5c                \tpop    %r12",
+            "74cd6b:\t41 5d                \tpop    %r13",
+            "74cd6d:\t41 5e                \tpop    %r14",
+            "74cd6f:\t41 5f                \tpop    %r15",
+            "74cd71:\t5d                   \tpop    %rbp"
+          ]
+        },
+        {
+          "address": 7371280,
+          "bytes": 2995,
+          "name": "<gpui::runtime::RuntimeMut<unit_action_cost_two::SecondModel, ()>>::window_action",
+          "asm": "28.asm",
+          "stack_adjustments": [
+            "707a10:\t55                   \tpush   %rbp",
+            "707a11:\t41 57                \tpush   %r15",
+            "707a13:\t41 56                \tpush   %r14",
+            "707a15:\t41 55                \tpush   %r13",
+            "707a17:\t41 54                \tpush   %r12",
+            "707a19:\t53                   \tpush   %rbx",
+            "707a1a:\t48 81 ec 28 01 00 00 \tsub    $0x128,%rsp",
+            "707aa5:\t48 81 c4 28 01 00 00 \tadd    $0x128,%rsp",
+            "707aac:\t5b                   \tpop    %rbx",
+            "707aad:\t41 5c                \tpop    %r12",
+            "707aaf:\t41 5d                \tpop    %r13",
+            "707ab1:\t41 5e                \tpop    %r14",
+            "707ab3:\t41 5f                \tpop    %r15",
+            "707ab5:\t5d                   \tpop    %rbp",
+            "70814c:\t48 81 c4 28 01 00 00 \tadd    $0x128,%rsp",
+            "708153:\t5b                   \tpop    %rbx",
+            "708154:\t41 5c                \tpop    %r12",
+            "708156:\t41 5d                \tpop    %r13",
+            "708158:\t41 5e                \tpop    %r14",
+            "70815a:\t41 5f                \tpop    %r15",
+            "70815c:\t5d                   \tpop    %rbp",
+            "7082d4:\t48 81 c4 28 01 00 00 \tadd    $0x128,%rsp",
+            "7082db:\t5b                   \tpop    %rbx",
+            "7082dc:\t41 5c                \tpop    %r12",
+            "7082de:\t41 5d                \tpop    %r13",
+            "7082e0:\t41 5e                \tpop    %r14",
+            "7082e2:\t41 5f                \tpop    %r15",
+            "7082e4:\t5d                   \tpop    %rbp",
+            "7083e4:\t48 81 c4 28 01 00 00 \tadd    $0x128,%rsp",
+            "7083eb:\t5b                   \tpop    %rbx",
+            "7083ec:\t41 5c                \tpop    %r12",
+            "7083ee:\t41 5d                \tpop    %r13",
+            "7083f0:\t41 5e                \tpop    %r14",
+            "7083f2:\t41 5f                \tpop    %r15",
+            "7083f4:\t5d                   \tpop    %rbp"
+          ]
+        },
+        {
+          "address": 7375040,
+          "bytes": 2995,
+          "name": "<gpui::runtime::RuntimeMut<unit_action_cost_two::Model, ()>>::window_action",
+          "asm": "29.asm",
+          "stack_adjustments": [
+            "7088c0:\t55                   \tpush   %rbp",
+            "7088c1:\t41 57                \tpush   %r15",
+            "7088c3:\t41 56                \tpush   %r14",
+            "7088c5:\t41 55                \tpush   %r13",
+            "7088c7:\t41 54                \tpush   %r12",
+            "7088c9:\t53                   \tpush   %rbx",
+            "7088ca:\t48 81 ec 28 01 00 00 \tsub    $0x128,%rsp",
+            "708955:\t48 81 c4 28 01 00 00 \tadd    $0x128,%rsp",
+            "70895c:\t5b                   \tpop    %rbx",
+            "70895d:\t41 5c                \tpop    %r12",
+            "70895f:\t41 5d                \tpop    %r13",
+            "708961:\t41 5e                \tpop    %r14",
+            "708963:\t41 5f                \tpop    %r15",
+            "708965:\t5d                   \tpop    %rbp",
+            "708ffc:\t48 81 c4 28 01 00 00 \tadd    $0x128,%rsp",
+            "709003:\t5b                   \tpop    %rbx",
+            "709004:\t41 5c                \tpop    %r12",
+            "709006:\t41 5d                \tpop    %r13",
+            "709008:\t41 5e                \tpop    %r14",
+            "70900a:\t41 5f                \tpop    %r15",
+            "70900c:\t5d                   \tpop    %rbp",
+            "709184:\t48 81 c4 28 01 00 00 \tadd    $0x128,%rsp",
+            "70918b:\t5b                   \tpop    %rbx",
+            "70918c:\t41 5c                \tpop    %r12",
+            "70918e:\t41 5d                \tpop    %r13",
+            "709190:\t41 5e                \tpop    %r14",
+            "709192:\t41 5f                \tpop    %r15",
+            "709194:\t5d                   \tpop    %rbp",
+            "709294:\t48 81 c4 28 01 00 00 \tadd    $0x128,%rsp",
+            "70929b:\t5b                   \tpop    %rbx",
+            "70929c:\t41 5c                \tpop    %r12",
+            "70929e:\t41 5d                \tpop    %r13",
+            "7092a0:\t41 5e                \tpop    %r14",
+            "7092a2:\t41 5f                \tpop    %r15",
+            "7092a4:\t5d                   \tpop    %rbp"
+          ]
+        },
+        {
+          "address": 7506592,
+          "bytes": 3665,
+          "name": "<gpui::runtime::RuntimeMut<unit_action_cost_two::SecondModel, ()>>::set_property_value_at",
+          "asm": "30.asm",
+          "stack_adjustments": [
+            "728aa0:\t55                   \tpush   %rbp",
+            "728aa1:\t41 57                \tpush   %r15",
+            "728aa3:\t41 56                \tpush   %r14",
+            "728aa5:\t41 55                \tpush   %r13",
+            "728aa7:\t41 54                \tpush   %r12",
+            "728aa9:\t53                   \tpush   %rbx",
+            "728aaa:\t48 81 ec 08 02 00 00 \tsub    $0x208,%rsp",
+            "7296f0:\t48 81 c4 08 02 00 00 \tadd    $0x208,%rsp",
+            "7296f7:\t5b                   \tpop    %rbx",
+            "7296f8:\t41 5c                \tpop    %r12",
+            "7296fa:\t41 5d                \tpop    %r13",
+            "7296fc:\t41 5e                \tpop    %r14",
+            "7296fe:\t41 5f                \tpop    %r15",
+            "729700:\t5d                   \tpop    %rbp"
+          ]
+        },
+        {
+          "address": 7510272,
+          "bytes": 3665,
+          "name": "<gpui::runtime::RuntimeMut<unit_action_cost_two::Model, ()>>::set_property_value_at",
+          "asm": "31.asm",
+          "stack_adjustments": [
+            "729900:\t55                   \tpush   %rbp",
+            "729901:\t41 57                \tpush   %r15",
+            "729903:\t41 56                \tpush   %r14",
+            "729905:\t41 55                \tpush   %r13",
+            "729907:\t41 54                \tpush   %r12",
+            "729909:\t53                   \tpush   %rbx",
+            "72990a:\t48 81 ec 08 02 00 00 \tsub    $0x208,%rsp",
+            "72a550:\t48 81 c4 08 02 00 00 \tadd    $0x208,%rsp",
+            "72a557:\t5b                   \tpop    %rbx",
+            "72a558:\t41 5c                \tpop    %r12",
+            "72a55a:\t41 5d                \tpop    %r13",
+            "72a55c:\t41 5e                \tpop    %r14",
+            "72a55e:\t41 5f                \tpop    %r15",
+            "72a560:\t5d                   \tpop    %rbp"
+          ]
+        },
+        {
+          "address": 7318832,
+          "bytes": 8247,
+          "name": "<gpui::runtime::RuntimeMut<unit_action_cost_two::SecondModel, ()>>::after_source_with_editing",
+          "asm": "32.asm",
+          "stack_adjustments": [
+            "6fad30:\t55                   \tpush   %rbp",
+            "6fad31:\t41 57                \tpush   %r15",
+            "6fad33:\t41 56                \tpush   %r14",
+            "6fad35:\t41 55                \tpush   %r13",
+            "6fad37:\t41 54                \tpush   %r12",
+            "6fad39:\t53                   \tpush   %rbx",
+            "6fad3a:\t48 81 ec c8 03 00 00 \tsub    $0x3c8,%rsp",
+            "6fb13f:\t48 81 c4 c8 03 00 00 \tadd    $0x3c8,%rsp",
+            "6fb146:\t5b                   \tpop    %rbx",
+            "6fb147:\t41 5c                \tpop    %r12",
+            "6fb149:\t41 5d                \tpop    %r13",
+            "6fb14b:\t41 5e                \tpop    %r14",
+            "6fb14d:\t41 5f                \tpop    %r15",
+            "6fb14f:\t5d                   \tpop    %rbp"
+          ]
+        },
+        {
+          "address": 7329280,
+          "bytes": 8247,
+          "name": "<gpui::runtime::RuntimeMut<unit_action_cost_two::Model, ()>>::after_source_with_editing",
+          "asm": "33.asm",
+          "stack_adjustments": [
+            "6fd600:\t55                   \tpush   %rbp",
+            "6fd601:\t41 57                \tpush   %r15",
+            "6fd603:\t41 56                \tpush   %r14",
+            "6fd605:\t41 55                \tpush   %r13",
+            "6fd607:\t41 54                \tpush   %r12",
+            "6fd609:\t53                   \tpush   %rbx",
+            "6fd60a:\t48 81 ec c8 03 00 00 \tsub    $0x3c8,%rsp",
+            "6fda0f:\t48 81 c4 c8 03 00 00 \tadd    $0x3c8,%rsp",
+            "6fda16:\t5b                   \tpop    %rbx",
+            "6fda17:\t41 5c                \tpop    %r12",
+            "6fda19:\t41 5d                \tpop    %r13",
+            "6fda1b:\t41 5e                \tpop    %r14",
+            "6fda1d:\t41 5f                \tpop    %r15",
+            "6fda1f:\t5d                   \tpop    %rbp"
+          ]
+        }
+      ],
+      "method_route_tables": [
+        {
+          "route": "<gpui::element::MethodRoute<unit_action_cost_two::SecondModel, <unit_action_cost_two::SecondModel>::increment> as gpui::element::Route>",
+          "file_offset": 11506216,
+          "bytes": 48,
+          "header": [
+            0,
+            0,
+            1
+          ],
+          "methods": [
+            "admit",
+            "invoke",
+            "owner_scope"
+          ],
+          "pointers": [
+            7734320,
+            7734400,
+            7757392
+          ]
+        },
+        {
+          "route": "<gpui::element::MethodRoute<unit_action_cost_two::Model, <unit_action_cost_two::Model>::increment> as gpui::element::Route>",
+          "file_offset": 11506264,
+          "bytes": 48,
+          "header": [
+            0,
+            0,
+            1
+          ],
+          "methods": [
+            "admit",
+            "invoke",
+            "owner_scope"
+          ],
+          "pointers": [
+            7734480,
+            7734560,
+            7757392
+          ]
+        }
+      ],
+      "frozen_binary": "/tmp/gpui-contained-entry-release-9ec/baseline/unit_action_cost_two"
+    }
+  },
+  "candidate": {
+    "unit_action_cost": {
+      "head": "7c60bf258b1d1e07a25bc19fd3f6c29de4ebdeda",
+      "binary": "/tmp/gpui-contained-owner-spike-target/release/deps/unit_action_cost-bcf457ce7db1ee75",
+      "sha256": "cac8c03d9c4a687ce844c5d57823bf98b02754d12d30e051faacb5cc5937e749",
+      "client_sha256": "6ca3a0b26e5db4c8af8f6e27a0eda78ab4a5ec24702cb1e3fb0869a31f920062",
+      "sections": {
+        ".text": 4071495,
+        ".rodata": 6570408,
+        ".data.rel.ro": 189976
+      },
+      "bodies": [
+        {
+          "address": 7590912,
+          "bytes": 18,
+          "name": "<gpui::element::MethodRoute<unit_action_cost::Model, <unit_action_cost::Model>::increment> as gpui::element::Route>::owner_scope",
+          "asm": "00.asm",
+          "stack_adjustments": []
+        },
+        {
+          "address": 7537968,
+          "bytes": 26,
+          "name": "<gpui::element::MethodRoute<unit_action_cost::Model, <unit_action_cost::Model>::increment> as gpui::element::Route>::applied_logically",
+          "asm": "01.asm",
+          "stack_adjustments": [
+            "730530:\t50                   \tpush   %rax"
+          ]
+        },
+        {
+          "address": 7538000,
+          "bytes": 26,
+          "name": "<gpui::element::MethodRoute<unit_action_cost::Model, <unit_action_cost::Model>::increment> as gpui::element::Route>::proposal",
+          "asm": "02.asm",
+          "stack_adjustments": [
+            "730550:\t50                   \tpush   %rax"
+          ]
+        },
+        {
+          "address": 7537536,
+          "bytes": 76,
+          "name": "<gpui::element::MethodRoute<unit_action_cost::Model, <unit_action_cost::Model>::increment> as gpui::element::Route>::invoke",
+          "asm": "03.asm",
+          "stack_adjustments": [
+            "730380:\t41 56                \tpush   %r14",
+            "730382:\t53                   \tpush   %rbx",
+            "730383:\t48 83 ec 18          \tsub    $0x18,%rsp",
+            "7303c4:\t48 83 c4 18          \tadd    $0x18,%rsp",
+            "7303c8:\t5b                   \tpop    %rbx",
+            "7303c9:\t41 5e                \tpop    %r14"
+          ]
+        },
+        {
+          "address": 7537456,
+          "bytes": 80,
+          "name": "<gpui::element::MethodRoute<unit_action_cost::Model, <unit_action_cost::Model>::increment> as gpui::element::Route>::admit",
+          "asm": "04.asm",
+          "stack_adjustments": [
+            "730330:\t53                   \tpush   %rbx",
+            "730331:\t48 83 ec 10          \tsub    $0x10,%rsp",
+            "73037a:\t48 83 c4 10          \tadd    $0x10,%rsp",
+            "73037e:\t5b                   \tpop    %rbx"
+          ]
+        },
+        {
+          "address": 7398192,
+          "bytes": 286,
+          "name": "<gpui::runtime::RuntimeMut<unit_action_cost::Model, ()>>::reject_editor",
+          "asm": "05.asm",
+          "stack_adjustments": [
+            "70e434:\t50                   \tpush   %rax"
+          ]
+        },
+        {
+          "address": 7466192,
+          "bytes": 370,
+          "name": "<gpui::runtime::RuntimeMut<unit_action_cost::Model, ()>>::set_property_value_at",
+          "asm": "06.asm",
+          "stack_adjustments": [
+            "71ecd0:\t55                   \tpush   %rbp",
+            "71ecd1:\t41 57                \tpush   %r15",
+            "71ecd3:\t41 56                \tpush   %r14",
+            "71ecd5:\t41 54                \tpush   %r12",
+            "71ecd7:\t53                   \tpush   %rbx",
+            "71ecd8:\t48 83 ec 40          \tsub    $0x40,%rsp",
+            "71ed34:\t48 83 c4 40          \tadd    $0x40,%rsp",
+            "71ed38:\t5b                   \tpop    %rbx",
+            "71ed39:\t41 5c                \tpop    %r12",
+            "71ed3b:\t41 5e                \tpop    %r14",
+            "71ed3d:\t41 5f                \tpop    %r15",
+            "71ed3f:\t5d                   \tpop    %rbp",
+            "71ee26:\t48 83 c4 40          \tadd    $0x40,%rsp",
+            "71ee2a:\t5b                   \tpop    %rbx",
+            "71ee2b:\t41 5c                \tpop    %r12",
+            "71ee2d:\t41 5e                \tpop    %r14",
+            "71ee2f:\t41 5f                \tpop    %r15",
+            "71ee31:\t5d                   \tpop    %rbp"
+          ]
+        },
+        {
+          "address": 7593952,
+          "bytes": 389,
+          "name": "allocation_counter::measure::<unit_action_cost::ordinary_unit_action_cost::{closure#1}>",
+          "asm": "07.asm",
+          "stack_adjustments": [
+            "73dfe0:\t41 57                \tpush   %r15",
+            "73dfe2:\t41 56                \tpush   %r14",
+            "73dfe4:\t41 55                \tpush   %r13",
+            "73dfe6:\t41 54                \tpush   %r12",
+            "73dfe8:\t53                   \tpush   %rbx",
+            "73dfe9:\t48 83 ec 70          \tsub    $0x70,%rsp",
+            "73e094:\t48 83 c4 70          \tadd    $0x70,%rsp",
+            "73e098:\t5b                   \tpop    %rbx",
+            "73e099:\t41 5c                \tpop    %r12",
+            "73e09b:\t41 5d                \tpop    %r13",
+            "73e09d:\t41 5e                \tpop    %r14",
+            "73e09f:\t41 5f                \tpop    %r15"
+          ]
+        },
+        {
+          "address": 7369216,
+          "bytes": 425,
+          "name": "<gpui::runtime::RuntimeMut<unit_action_cost::Model, ()>>::describe_with",
+          "asm": "08.asm",
+          "stack_adjustments": [
+            "707200:\t55                   \tpush   %rbp",
+            "707201:\t41 57                \tpush   %r15",
+            "707203:\t41 56                \tpush   %r14",
+            "707205:\t41 54                \tpush   %r12",
+            "707207:\t53                   \tpush   %rbx",
+            "707208:\t48 81 ec 90 00 00 00 \tsub    $0x90,%rsp",
+            "70732e:\t48 81 c4 90 00 00 00 \tadd    $0x90,%rsp",
+            "707335:\t5b                   \tpop    %rbx",
+            "707336:\t41 5c                \tpop    %r12",
+            "707338:\t41 5e                \tpop    %r14",
+            "70733a:\t41 5f                \tpop    %r15",
+            "70733c:\t5d                   \tpop    %rbp"
+          ]
+        },
+        {
+          "address": 7401488,
+          "bytes": 450,
+          "name": "<gpui::runtime::RuntimeMut<unit_action_cost::Model, ()>>::inspector_select",
+          "asm": "09.asm",
+          "stack_adjustments": [
+            "70f010:\t41 57                \tpush   %r15",
+            "70f012:\t41 56                \tpush   %r14",
+            "70f014:\t41 55                \tpush   %r13",
+            "70f016:\t41 54                \tpush   %r12",
+            "70f018:\t53                   \tpush   %rbx",
+            "70f019:\t48 83 ec 60          \tsub    $0x60,%rsp",
+            "70f141:\t48 83 c4 60          \tadd    $0x60,%rsp",
+            "70f145:\t5b                   \tpop    %rbx",
+            "70f146:\t41 5c                \tpop    %r12",
+            "70f148:\t41 5d                \tpop    %r13",
+            "70f14a:\t41 5e                \tpop    %r14",
+            "70f14c:\t41 5f                \tpop    %r15",
+            "70f19b:\t48 83 c4 60          \tadd    $0x60,%rsp",
+            "70f19f:\t5b                   \tpop    %rbx",
+            "70f1a0:\t41 5c                \tpop    %r12",
+            "70f1a2:\t41 5d                \tpop    %r13",
+            "70f1a4:\t41 5e                \tpop    %r14",
+            "70f1a6:\t41 5f                \tpop    %r15"
+          ]
+        },
+        {
+          "address": 7389888,
+          "bytes": 511,
+          "name": "<gpui::runtime::RuntimeMut<unit_action_cost::Model, ()>>::select_input",
+          "asm": "10.asm",
+          "stack_adjustments": [
+            "70c2c0:\t41 57                \tpush   %r15",
+            "70c2c2:\t41 56                \tpush   %r14",
+            "70c2c4:\t41 55                \tpush   %r13",
+            "70c2c6:\t41 54                \tpush   %r12",
+            "70c2c8:\t53                   \tpush   %rbx",
+            "70c2c9:\t48 83 ec 40          \tsub    $0x40,%rsp",
+            "70c3d9:\t48 83 c4 40          \tadd    $0x40,%rsp",
+            "70c3dd:\t5b                   \tpop    %rbx",
+            "70c3de:\t41 5c                \tpop    %r12",
+            "70c3e0:\t41 5d                \tpop    %r13",
+            "70c3e2:\t41 5e                \tpop    %r14",
+            "70c3e4:\t41 5f                \tpop    %r15",
+            "70c471:\t48 83 c4 40          \tadd    $0x40,%rsp",
+            "70c475:\t5b                   \tpop    %rbx",
+            "70c476:\t41 5c                \tpop    %r12",
+            "70c478:\t41 5d                \tpop    %r13",
+            "70c47a:\t41 5e                \tpop    %r14",
+            "70c47c:\t41 5f                \tpop    %r15"
+          ]
+        },
+        {
+          "address": 7391824,
+          "bytes": 671,
+          "name": "<gpui::runtime::RuntimeMut<unit_action_cost::Model, ()>>::publish_focus_change",
+          "asm": "11.asm",
+          "stack_adjustments": [
+            "70ca50:\t41 57                \tpush   %r15",
+            "70ca52:\t41 56                \tpush   %r14",
+            "70ca54:\t41 54                \tpush   %r12",
+            "70ca56:\t53                   \tpush   %rbx",
+            "70ca57:\t50                   \tpush   %rax",
+            "70cacd:\t48 83 c4 08          \tadd    $0x8,%rsp",
+            "70cad1:\t5b                   \tpop    %rbx",
+            "70cad2:\t41 5c                \tpop    %r12",
+            "70cad4:\t41 5e                \tpop    %r14",
+            "70cad6:\t41 5f                \tpop    %r15",
+            "70ccc5:\t48 83 c4 08          \tadd    $0x8,%rsp",
+            "70ccc9:\t5b                   \tpop    %rbx",
+            "70ccca:\t41 5c                \tpop    %r12",
+            "70cccc:\t41 5e                \tpop    %r14",
+            "70ccce:\t41 5f                \tpop    %r15"
+          ]
+        },
+        {
+          "address": 7369648,
+          "bytes": 781,
+          "name": "<gpui::runtime::RuntimeMut<unit_action_cost::Model, ()>>::activate_focused",
+          "asm": "12.asm",
+          "stack_adjustments": [
+            "7073b0:\t55                   \tpush   %rbp",
+            "7073b1:\t41 57                \tpush   %r15",
+            "7073b3:\t41 56                \tpush   %r14",
+            "7073b5:\t41 55                \tpush   %r13",
+            "7073b7:\t41 54                \tpush   %r12",
+            "7073b9:\t53                   \tpush   %rbx",
+            "7073ba:\t48 83 ec 48          \tsub    $0x48,%rsp",
+            "70743f:\t48 83 c4 48          \tadd    $0x48,%rsp",
+            "707443:\t5b                   \tpop    %rbx",
+            "707444:\t41 5c                \tpop    %r12",
+            "707446:\t41 5d                \tpop    %r13",
+            "707448:\t41 5e                \tpop    %r14",
+            "70744a:\t41 5f                \tpop    %r15",
+            "70744c:\t5d                   \tpop    %rbp",
+            "7076aa:\t48 83 c4 48          \tadd    $0x48,%rsp",
+            "7076ae:\t5b                   \tpop    %rbx",
+            "7076af:\t41 5c                \tpop    %r12",
+            "7076b1:\t41 5d                \tpop    %r13",
+            "7076b3:\t41 5e                \tpop    %r14",
+            "7076b5:\t41 5f                \tpop    %r15",
+            "7076b7:\t5d                   \tpop    %rbp"
+          ]
+        },
+        {
+          "address": 7372176,
+          "bytes": 1024,
+          "name": "<gpui::runtime::RuntimeMut<unit_action_cost::Model, ()>>::activate_with_editing",
+          "asm": "13.asm",
+          "stack_adjustments": [
+            "707d90:\t55                   \tpush   %rbp",
+            "707d91:\t41 57                \tpush   %r15",
+            "707d93:\t41 56                \tpush   %r14",
+            "707d95:\t41 55                \tpush   %r13",
+            "707d97:\t41 54                \tpush   %r12",
+            "707d99:\t53                   \tpush   %rbx",
+            "707d9a:\t48 83 ec 78          \tsub    $0x78,%rsp",
+            "707e7a:\t48 83 c4 78          \tadd    $0x78,%rsp",
+            "707e7e:\t5b                   \tpop    %rbx",
+            "707e7f:\t41 5c                \tpop    %r12",
+            "707e81:\t41 5d                \tpop    %r13",
+            "707e83:\t41 5e                \tpop    %r14",
+            "707e85:\t41 5f                \tpop    %r15",
+            "707e87:\t5d                   \tpop    %rbp"
+          ]
+        },
+        {
+          "address": 7404944,
+          "bytes": 1063,
+          "name": "<gpui::runtime::Win<unit_action_cost::Model>>::click",
+          "asm": "14.asm",
+          "stack_adjustments": [
+            "70fd90:\t55                   \tpush   %rbp",
+            "70fd91:\t41 57                \tpush   %r15",
+            "70fd93:\t41 56                \tpush   %r14",
+            "70fd95:\t41 55                \tpush   %r13",
+            "70fd97:\t41 54                \tpush   %r12",
+            "70fd99:\t53                   \tpush   %rbx",
+            "70fd9a:\t48 81 ec b8 00 00 00 \tsub    $0xb8,%rsp",
+            "7100c4:\t48 81 c4 b8 00 00 00 \tadd    $0xb8,%rsp",
+            "7100cb:\t5b                   \tpop    %rbx",
+            "7100cc:\t41 5c                \tpop    %r12",
+            "7100ce:\t41 5d                \tpop    %r13",
+            "7100d0:\t41 5e                \tpop    %r14",
+            "7100d2:\t41 5f                \tpop    %r15",
+            "7100d4:\t5d                   \tpop    %rbp"
+          ]
+        },
+        {
+          "address": 7390400,
+          "bytes": 1422,
+          "name": "<gpui::runtime::RuntimeMut<unit_action_cost::Model, ()>>::select_pointer",
+          "asm": "15.asm",
+          "stack_adjustments": [
+            "70c4c0:\t55                   \tpush   %rbp",
+            "70c4c1:\t41 57                \tpush   %r15",
+            "70c4c3:\t41 56                \tpush   %r14",
+            "70c4c5:\t41 55                \tpush   %r13",
+            "70c4c7:\t41 54                \tpush   %r12",
+            "70c4c9:\t53                   \tpush   %rbx",
+            "70c4ca:\t48 81 ec 18 01 00 00 \tsub    $0x118,%rsp",
+            "70c71d:\t48 81 c4 18 01 00 00 \tadd    $0x118,%rsp",
+            "70c724:\t5b                   \tpop    %rbx",
+            "70c725:\t41 5c                \tpop    %r12",
+            "70c727:\t41 5d                \tpop    %r13",
+            "70c729:\t41 5e                \tpop    %r14",
+            "70c72b:\t41 5f                \tpop    %r15",
+            "70c72d:\t5d                   \tpop    %rbp"
+          ]
+        },
+        {
+          "address": 7370432,
+          "bytes": 1737,
+          "name": "<gpui::runtime::RuntimeMut<unit_action_cost::Model, ()>>::activate_property",
+          "asm": "16.asm",
+          "stack_adjustments": [
+            "7076c0:\t55                   \tpush   %rbp",
+            "7076c1:\t41 57                \tpush   %r15",
+            "7076c3:\t41 56                \tpush   %r14",
+            "7076c5:\t41 55                \tpush   %r13",
+            "7076c7:\t41 54                \tpush   %r12",
+            "7076c9:\t53                   \tpush   %rbx",
+            "7076ca:\t48 81 ec 38 01 00 00 \tsub    $0x138,%rsp",
+            "707c22:\t48 81 c4 38 01 00 00 \tadd    $0x138,%rsp",
+            "707c29:\t5b                   \tpop    %rbx",
+            "707c2a:\t41 5c                \tpop    %r12",
+            "707c2c:\t41 5d                \tpop    %r13",
+            "707c2e:\t41 5e                \tpop    %r14",
+            "707c30:\t41 5f                \tpop    %r15",
+            "707c32:\t5d                   \tpop    %rbp"
+          ]
+        },
+        {
+          "address": 7591760,
+          "bytes": 2185,
+          "name": "allocation_counter::measure::<unit_action_cost::ordinary_unit_action_cost::{closure#0}>",
+          "asm": "17.asm",
+          "stack_adjustments": [
+            "73d750:\t55                   \tpush   %rbp",
+            "73d751:\t41 57                \tpush   %r15",
+            "73d753:\t41 56                \tpush   %r14",
+            "73d755:\t41 55                \tpush   %r13",
+            "73d757:\t41 54                \tpush   %r12",
+            "73d759:\t53                   \tpush   %rbx",
+            "73d75a:\t48 81 ec 98 00 00 00 \tsub    $0x98,%rsp",
+            "73dc31:\t48 81 c4 98 00 00 00 \tadd    $0x98,%rsp",
+            "73dc38:\t5b                   \tpop    %rbx",
+            "73dc39:\t41 5c                \tpop    %r12",
+            "73dc3b:\t41 5d                \tpop    %r13",
+            "73dc3d:\t41 5e                \tpop    %r14",
+            "73dc3f:\t41 5f                \tpop    %r15",
+            "73dc41:\t5d                   \tpop    %rbp"
+          ]
+        },
+        {
+          "address": 7398480,
+          "bytes": 2995,
+          "name": "<gpui::runtime::RuntimeMut<unit_action_cost::Model, ()>>::window_action",
+          "asm": "18.asm",
+          "stack_adjustments": [
+            "70e450:\t55                   \tpush   %rbp",
+            "70e451:\t41 57                \tpush   %r15",
+            "70e453:\t41 56                \tpush   %r14",
+            "70e455:\t41 55                \tpush   %r13",
+            "70e457:\t41 54                \tpush   %r12",
+            "70e459:\t53                   \tpush   %rbx",
+            "70e45a:\t48 81 ec 28 01 00 00 \tsub    $0x128,%rsp",
+            "70e4e5:\t48 81 c4 28 01 00 00 \tadd    $0x128,%rsp",
+            "70e4ec:\t5b                   \tpop    %rbx",
+            "70e4ed:\t41 5c                \tpop    %r12",
+            "70e4ef:\t41 5d                \tpop    %r13",
+            "70e4f1:\t41 5e                \tpop    %r14",
+            "70e4f3:\t41 5f                \tpop    %r15",
+            "70e4f5:\t5d                   \tpop    %rbp",
+            "70eb8c:\t48 81 c4 28 01 00 00 \tadd    $0x128,%rsp",
+            "70eb93:\t5b                   \tpop    %rbx",
+            "70eb94:\t41 5c                \tpop    %r12",
+            "70eb96:\t41 5d                \tpop    %r13",
+            "70eb98:\t41 5e                \tpop    %r14",
+            "70eb9a:\t41 5f                \tpop    %r15",
+            "70eb9c:\t5d                   \tpop    %rbp",
+            "70ed14:\t48 81 c4 28 01 00 00 \tadd    $0x128,%rsp",
+            "70ed1b:\t5b                   \tpop    %rbx",
+            "70ed1c:\t41 5c                \tpop    %r12",
+            "70ed1e:\t41 5d                \tpop    %r13",
+            "70ed20:\t41 5e                \tpop    %r14",
+            "70ed22:\t41 5f                \tpop    %r15",
+            "70ed24:\t5d                   \tpop    %rbp",
+            "70ee24:\t48 81 c4 28 01 00 00 \tadd    $0x128,%rsp",
+            "70ee2b:\t5b                   \tpop    %rbx",
+            "70ee2c:\t41 5c                \tpop    %r12",
+            "70ee2e:\t41 5d                \tpop    %r13",
+            "70ee30:\t41 5e                \tpop    %r14",
+            "70ee32:\t41 5f                \tpop    %r15",
+            "70ee34:\t5d                   \tpop    %rbp"
+          ]
+        },
+        {
+          "address": 7466576,
+          "bytes": 3332,
+          "name": "<gpui::runtime::RuntimeMut<unit_action_cost::Model, ()>>::apply_property_value_at",
+          "asm": "19.asm",
+          "stack_adjustments": [
+            "71ee50:\t55                   \tpush   %rbp",
+            "71ee51:\t41 57                \tpush   %r15",
+            "71ee53:\t41 56                \tpush   %r14",
+            "71ee55:\t41 55                \tpush   %r13",
+            "71ee57:\t41 54                \tpush   %r12",
+            "71ee59:\t53                   \tpush   %rbx",
+            "71ee5a:\t48 81 ec f8 01 00 00 \tsub    $0x1f8,%rsp",
+            "71fa52:\t48 81 c4 f8 01 00 00 \tadd    $0x1f8,%rsp",
+            "71fa59:\t5b                   \tpop    %rbx",
+            "71fa5a:\t41 5c                \tpop    %r12",
+            "71fa5c:\t41 5d                \tpop    %r13",
+            "71fa5e:\t41 5e                \tpop    %r14",
+            "71fa60:\t41 5f                \tpop    %r15",
+            "71fa62:\t5d                   \tpop    %rbp"
+          ]
+        },
+        {
+          "address": 7373200,
+          "bytes": 8247,
+          "name": "<gpui::runtime::RuntimeMut<unit_action_cost::Model, ()>>::after_source_with_editing",
+          "asm": "20.asm",
+          "stack_adjustments": [
+            "708190:\t55                   \tpush   %rbp",
+            "708191:\t41 57                \tpush   %r15",
+            "708193:\t41 56                \tpush   %r14",
+            "708195:\t41 55                \tpush   %r13",
+            "708197:\t41 54                \tpush   %r12",
+            "708199:\t53                   \tpush   %rbx",
+            "70819a:\t48 81 ec c8 03 00 00 \tsub    $0x3c8,%rsp",
+            "70859f:\t48 81 c4 c8 03 00 00 \tadd    $0x3c8,%rsp",
+            "7085a6:\t5b                   \tpop    %rbx",
+            "7085a7:\t41 5c                \tpop    %r12",
+            "7085a9:\t41 5d                \tpop    %r13",
+            "7085ab:\t41 5e                \tpop    %r14",
+            "7085ad:\t41 5f                \tpop    %r15",
+            "7085af:\t5d                   \tpop    %rbp"
+          ]
+        }
+      ],
+      "method_route_tables": [
+        {
+          "route": "<gpui::element::MethodRoute<unit_action_cost::Model, <unit_action_cost::Model>::increment> as gpui::element::Route>",
+          "file_offset": 11350216,
+          "bytes": 64,
+          "header": [
+            0,
+            0,
+            1
+          ],
+          "methods": [
+            "admit",
+            "invoke",
+            "owner_scope",
+            "proposal",
+            "applied_logically"
+          ],
+          "pointers": [
+            7537456,
+            7537536,
+            7590912,
+            7538000,
+            7537968
+          ]
+        }
+      ],
+      "frozen_binary": "/tmp/gpui-contained-entry-release-9ec/candidate/unit_action_cost"
+    },
+    "unit_action_cost_two": {
+      "head": "7c60bf258b1d1e07a25bc19fd3f6c29de4ebdeda",
+      "binary": "/tmp/gpui-contained-owner-spike-target/release/deps/unit_action_cost_two-c899ee77dd9a9ab3",
+      "sha256": "494ee471af3c85c200398453835c8aa4ff6b4bf435bf53d545c58cfec7ef1052",
+      "client_sha256": "af63399d490204e079811758815027fd298def126c7bf4888daaf22f0b5d0fab",
+      "sections": {
+        ".text": 4218535,
+        ".rodata": 6571232,
+        ".data.rel.ro": 190560
+      },
+      "bodies": [
+        {
+          "address": 7785472,
+          "bytes": 18,
+          "name": "<gpui::element::MethodRoute<unit_action_cost_two::SecondModel, <unit_action_cost_two::SecondModel>::increment> as gpui::element::Route>::owner_scope",
+          "asm": "00.asm",
+          "stack_adjustments": []
+        },
+        {
+          "address": 7785472,
+          "bytes": 18,
+          "name": "<gpui::element::MethodRoute<unit_action_cost_two::Model, <unit_action_cost_two::Model>::increment> as gpui::element::Route>::owner_scope",
+          "asm": "01.asm",
+          "stack_adjustments": []
+        },
+        {
+          "address": 7717536,
+          "bytes": 26,
+          "name": "<gpui::element::MethodRoute<unit_action_cost_two::SecondModel, <unit_action_cost_two::SecondModel>::increment> as gpui::element::Route>::applied_logically",
+          "asm": "02.asm",
+          "stack_adjustments": [
+            "75c2a0:\t50                   \tpush   %rax"
+          ]
+        },
+        {
+          "address": 7717568,
+          "bytes": 26,
+          "name": "<gpui::element::MethodRoute<unit_action_cost_two::SecondModel, <unit_action_cost_two::SecondModel>::increment> as gpui::element::Route>::proposal",
+          "asm": "03.asm",
+          "stack_adjustments": [
+            "75c2c0:\t50                   \tpush   %rax"
+          ]
+        },
+        {
+          "address": 7717536,
+          "bytes": 26,
+          "name": "<gpui::element::MethodRoute<unit_action_cost_two::Model, <unit_action_cost_two::Model>::increment> as gpui::element::Route>::applied_logically",
+          "asm": "04.asm",
+          "stack_adjustments": [
+            "75c2a0:\t50                   \tpush   %rax"
+          ]
+        },
+        {
+          "address": 7717568,
+          "bytes": 26,
+          "name": "<gpui::element::MethodRoute<unit_action_cost_two::Model, <unit_action_cost_two::Model>::increment> as gpui::element::Route>::proposal",
+          "asm": "05.asm",
+          "stack_adjustments": [
+            "75c2c0:\t50                   \tpush   %rax"
+          ]
+        },
+        {
+          "address": 7717136,
+          "bytes": 76,
+          "name": "<gpui::element::MethodRoute<unit_action_cost_two::Model, <unit_action_cost_two::Model>::increment> as gpui::element::Route>::invoke",
+          "asm": "06.asm",
+          "stack_adjustments": [
+            "75c110:\t41 56                \tpush   %r14",
+            "75c112:\t53                   \tpush   %rbx",
+            "75c113:\t48 83 ec 18          \tsub    $0x18,%rsp",
+            "75c154:\t48 83 c4 18          \tadd    $0x18,%rsp",
+            "75c158:\t5b                   \tpop    %rbx",
+            "75c159:\t41 5e                \tpop    %r14"
+          ]
+        },
+        {
+          "address": 7716896,
+          "bytes": 80,
+          "name": "<gpui::element::MethodRoute<unit_action_cost_two::SecondModel, <unit_action_cost_two::SecondModel>::increment> as gpui::element::Route>::admit",
+          "asm": "07.asm",
+          "stack_adjustments": [
+            "75c020:\t53                   \tpush   %rbx",
+            "75c021:\t48 83 ec 10          \tsub    $0x10,%rsp",
+            "75c06a:\t48 83 c4 10          \tadd    $0x10,%rsp",
+            "75c06e:\t5b                   \tpop    %rbx"
+          ]
+        },
+        {
+          "address": 7716976,
+          "bytes": 80,
+          "name": "<gpui::element::MethodRoute<unit_action_cost_two::SecondModel, <unit_action_cost_two::SecondModel>::increment> as gpui::element::Route>::invoke",
+          "asm": "08.asm",
+          "stack_adjustments": [
+            "75c070:\t41 56                \tpush   %r14",
+            "75c072:\t53                   \tpush   %rbx",
+            "75c073:\t48 83 ec 18          \tsub    $0x18,%rsp",
+            "75c0b8:\t48 83 c4 18          \tadd    $0x18,%rsp",
+            "75c0bc:\t5b                   \tpop    %rbx",
+            "75c0bd:\t41 5e                \tpop    %r14"
+          ]
+        },
+        {
+          "address": 7717056,
+          "bytes": 80,
+          "name": "<gpui::element::MethodRoute<unit_action_cost_two::Model, <unit_action_cost_two::Model>::increment> as gpui::element::Route>::admit",
+          "asm": "09.asm",
+          "stack_adjustments": [
+            "75c0c0:\t53                   \tpush   %rbx",
+            "75c0c1:\t48 83 ec 10          \tsub    $0x10,%rsp",
+            "75c10a:\t48 83 c4 10          \tadd    $0x10,%rsp",
+            "75c10e:\t5b                   \tpop    %rbx"
+          ]
+        },
+        {
+          "address": 7375952,
+          "bytes": 286,
+          "name": "<gpui::runtime::RuntimeMut<unit_action_cost_two::SecondModel, ()>>::reject_editor",
+          "asm": "10.asm",
+          "stack_adjustments": [
+            "708d54:\t50                   \tpush   %rax"
+          ]
+        },
+        {
+          "address": 7379712,
+          "bytes": 286,
+          "name": "<gpui::runtime::RuntimeMut<unit_action_cost_two::Model, ()>>::reject_editor",
+          "asm": "11.asm",
+          "stack_adjustments": [
+            "709c04:\t50                   \tpush   %rax"
+          ]
+        },
+        {
+          "address": 7511552,
+          "bytes": 370,
+          "name": "<gpui::runtime::RuntimeMut<unit_action_cost_two::SecondModel, ()>>::set_property_value_at",
+          "asm": "12.asm",
+          "stack_adjustments": [
+            "729e00:\t55                   \tpush   %rbp",
+            "729e01:\t41 57                \tpush   %r15",
+            "729e03:\t41 56                \tpush   %r14",
+            "729e05:\t41 54                \tpush   %r12",
+            "729e07:\t53                   \tpush   %rbx",
+            "729e08:\t48 83 ec 40          \tsub    $0x40,%rsp",
+            "729e64:\t48 83 c4 40          \tadd    $0x40,%rsp",
+            "729e68:\t5b                   \tpop    %rbx",
+            "729e69:\t41 5c                \tpop    %r12",
+            "729e6b:\t41 5e                \tpop    %r14",
+            "729e6d:\t41 5f                \tpop    %r15",
+            "729e6f:\t5d                   \tpop    %rbp",
+            "729f56:\t48 83 c4 40          \tadd    $0x40,%rsp",
+            "729f5a:\t5b                   \tpop    %rbx",
+            "729f5b:\t41 5c                \tpop    %r12",
+            "729f5d:\t41 5e                \tpop    %r14",
+            "729f5f:\t41 5f                \tpop    %r15",
+            "729f61:\t5d                   \tpop    %rbp"
+          ]
+        },
+        {
+          "address": 7515280,
+          "bytes": 370,
+          "name": "<gpui::runtime::RuntimeMut<unit_action_cost_two::Model, ()>>::set_property_value_at",
+          "asm": "13.asm",
+          "stack_adjustments": [
+            "72ac90:\t55                   \tpush   %rbp",
+            "72ac91:\t41 57                \tpush   %r15",
+            "72ac93:\t41 56                \tpush   %r14",
+            "72ac95:\t41 54                \tpush   %r12",
+            "72ac97:\t53                   \tpush   %rbx",
+            "72ac98:\t48 83 ec 40          \tsub    $0x40,%rsp",
+            "72acf4:\t48 83 c4 40          \tadd    $0x40,%rsp",
+            "72acf8:\t5b                   \tpop    %rbx",
+            "72acf9:\t41 5c                \tpop    %r12",
+            "72acfb:\t41 5e                \tpop    %r14",
+            "72acfd:\t41 5f                \tpop    %r15",
+            "72acff:\t5d                   \tpop    %rbp",
+            "72ade6:\t48 83 c4 40          \tadd    $0x40,%rsp",
+            "72adea:\t5b                   \tpop    %rbx",
+            "72adeb:\t41 5c                \tpop    %r12",
+            "72aded:\t41 5e                \tpop    %r14",
+            "72adef:\t41 5f                \tpop    %r15",
+            "72adf1:\t5d                   \tpop    %rbp"
+          ]
+        },
+        {
+          "address": 7658384,
+          "bytes": 389,
+          "name": "allocation_counter::measure::<unit_action_cost_two::ordinary_unit_action_cost::{closure#1}>",
+          "asm": "14.asm",
+          "stack_adjustments": [
+            "74db90:\t41 57                \tpush   %r15",
+            "74db92:\t41 56                \tpush   %r14",
+            "74db94:\t41 55                \tpush   %r13",
+            "74db96:\t41 54                \tpush   %r12",
+            "74db98:\t53                   \tpush   %rbx",
+            "74db99:\t48 83 ec 70          \tsub    $0x70,%rsp",
+            "74dc44:\t48 83 c4 70          \tadd    $0x70,%rsp",
+            "74dc48:\t5b                   \tpop    %rbx",
+            "74dc49:\t41 5c                \tpop    %r12",
+            "74dc4b:\t41 5d                \tpop    %r13",
+            "74dc4d:\t41 5e                \tpop    %r14",
+            "74dc4f:\t41 5f                \tpop    %r15"
+          ]
+        },
+        {
+          "address": 7661136,
+          "bytes": 389,
+          "name": "allocation_counter::measure::<unit_action_cost_two::second_ordinary_unit_action_cost::{closure#1}>",
+          "asm": "15.asm",
+          "stack_adjustments": [
+            "74e650:\t41 57                \tpush   %r15",
+            "74e652:\t41 56                \tpush   %r14",
+            "74e654:\t41 55                \tpush   %r13",
+            "74e656:\t41 54                \tpush   %r12",
+            "74e658:\t53                   \tpush   %rbx",
+            "74e659:\t48 83 ec 70          \tsub    $0x70,%rsp",
+            "74e704:\t48 83 c4 70          \tadd    $0x70,%rsp",
+            "74e708:\t5b                   \tpop    %rbx",
+            "74e709:\t41 5c                \tpop    %r12",
+            "74e70b:\t41 5d                \tpop    %r13",
+            "74e70d:\t41 5e                \tpop    %r14",
+            "74e70f:\t41 5f                \tpop    %r15"
+          ]
+        },
+        {
+          "address": 7318016,
+          "bytes": 425,
+          "name": "<gpui::runtime::RuntimeMut<unit_action_cost_two::SecondModel, ()>>::describe_with",
+          "asm": "16.asm",
+          "stack_adjustments": [
+            "6faa00:\t55                   \tpush   %rbp",
+            "6faa01:\t41 57                \tpush   %r15",
+            "6faa03:\t41 56                \tpush   %r14",
+            "6faa05:\t41 54                \tpush   %r12",
+            "6faa07:\t53                   \tpush   %rbx",
+            "6faa08:\t48 81 ec 90 00 00 00 \tsub    $0x90,%rsp",
+            "6fab2e:\t48 81 c4 90 00 00 00 \tadd    $0x90,%rsp",
+            "6fab35:\t5b                   \tpop    %rbx",
+            "6fab36:\t41 5c                \tpop    %r12",
+            "6fab38:\t41 5e                \tpop    %r14",
+            "6fab3a:\t41 5f                \tpop    %r15",
+            "6fab3c:\t5d                   \tpop    %rbp"
+          ]
+        },
+        {
+          "address": 7330256,
+          "bytes": 425,
+          "name": "<gpui::runtime::RuntimeMut<unit_action_cost_two::Model, ()>>::describe_with",
+          "asm": "17.asm",
+          "stack_adjustments": [
+            "6fd9d0:\t55                   \tpush   %rbp",
+            "6fd9d1:\t41 57                \tpush   %r15",
+            "6fd9d3:\t41 56                \tpush   %r14",
+            "6fd9d5:\t41 54                \tpush   %r12",
+            "6fd9d7:\t53                   \tpush   %rbx",
+            "6fd9d8:\t48 81 ec 90 00 00 00 \tsub    $0x90,%rsp",
+            "6fdafe:\t48 81 c4 90 00 00 00 \tadd    $0x90,%rsp",
+            "6fdb05:\t5b                   \tpop    %rbx",
+            "6fdb06:\t41 5c                \tpop    %r12",
+            "6fdb08:\t41 5e                \tpop    %r14",
+            "6fdb0a:\t41 5f                \tpop    %r15",
+            "6fdb0c:\t5d                   \tpop    %rbp"
+          ]
+        },
+        {
+          "address": 7379248,
+          "bytes": 450,
+          "name": "<gpui::runtime::RuntimeMut<unit_action_cost_two::SecondModel, ()>>::inspector_select",
+          "asm": "18.asm",
+          "stack_adjustments": [
+            "709930:\t41 57                \tpush   %r15",
+            "709932:\t41 56                \tpush   %r14",
+            "709934:\t41 55                \tpush   %r13",
+            "709936:\t41 54                \tpush   %r12",
+            "709938:\t53                   \tpush   %rbx",
+            "709939:\t48 83 ec 60          \tsub    $0x60,%rsp",
+            "709a61:\t48 83 c4 60          \tadd    $0x60,%rsp",
+            "709a65:\t5b                   \tpop    %rbx",
+            "709a66:\t41 5c                \tpop    %r12",
+            "709a68:\t41 5d                \tpop    %r13",
+            "709a6a:\t41 5e                \tpop    %r14",
+            "709a6c:\t41 5f                \tpop    %r15",
+            "709abb:\t48 83 c4 60          \tadd    $0x60,%rsp",
+            "709abf:\t5b                   \tpop    %rbx",
+            "709ac0:\t41 5c                \tpop    %r12",
+            "709ac2:\t41 5d                \tpop    %r13",
+            "709ac4:\t41 5e                \tpop    %r14",
+            "709ac6:\t41 5f                \tpop    %r15"
+          ]
+        },
+        {
+          "address": 7383008,
+          "bytes": 450,
+          "name": "<gpui::runtime::RuntimeMut<unit_action_cost_two::Model, ()>>::inspector_select",
+          "asm": "19.asm",
+          "stack_adjustments": [
+            "70a7e0:\t41 57                \tpush   %r15",
+            "70a7e2:\t41 56                \tpush   %r14",
+            "70a7e4:\t41 55                \tpush   %r13",
+            "70a7e6:\t41 54                \tpush   %r12",
+            "70a7e8:\t53                   \tpush   %rbx",
+            "70a7e9:\t48 83 ec 60          \tsub    $0x60,%rsp",
+            "70a911:\t48 83 c4 60          \tadd    $0x60,%rsp",
+            "70a915:\t5b                   \tpop    %rbx",
+            "70a916:\t41 5c                \tpop    %r12",
+            "70a918:\t41 5d                \tpop    %r13",
+            "70a91a:\t41 5e                \tpop    %r14",
+            "70a91c:\t41 5f                \tpop    %r15",
+            "70a96b:\t48 83 c4 60          \tadd    $0x60,%rsp",
+            "70a96f:\t5b                   \tpop    %rbx",
+            "70a970:\t41 5c                \tpop    %r12",
+            "70a972:\t41 5d                \tpop    %r13",
+            "70a974:\t41 5e                \tpop    %r14",
+            "70a976:\t41 5f                \tpop    %r15"
+          ]
+        },
+        {
+          "address": 7359344,
+          "bytes": 511,
+          "name": "<gpui::runtime::RuntimeMut<unit_action_cost_two::SecondModel, ()>>::select_input",
+          "asm": "20.asm",
+          "stack_adjustments": [
+            "704b70:\t41 57                \tpush   %r15",
+            "704b72:\t41 56                \tpush   %r14",
+            "704b74:\t41 55                \tpush   %r13",
+            "704b76:\t41 54                \tpush   %r12",
+            "704b78:\t53                   \tpush   %rbx",
+            "704b79:\t48 83 ec 40          \tsub    $0x40,%rsp",
+            "704c89:\t48 83 c4 40          \tadd    $0x40,%rsp",
+            "704c8d:\t5b                   \tpop    %rbx",
+            "704c8e:\t41 5c                \tpop    %r12",
+            "704c90:\t41 5d                \tpop    %r13",
+            "704c92:\t41 5e                \tpop    %r14",
+            "704c94:\t41 5f                \tpop    %r15",
+            "704d21:\t48 83 c4 40          \tadd    $0x40,%rsp",
+            "704d25:\t5b                   \tpop    %rbx",
+            "704d26:\t41 5c                \tpop    %r12",
+            "704d28:\t41 5d                \tpop    %r13",
+            "704d2a:\t41 5e                \tpop    %r14",
+            "704d2c:\t41 5f                \tpop    %r15"
+          ]
+        },
+        {
+          "address": 7361952,
+          "bytes": 511,
+          "name": "<gpui::runtime::RuntimeMut<unit_action_cost_two::Model, ()>>::select_input",
+          "asm": "21.asm",
+          "stack_adjustments": [
+            "7055a0:\t41 57                \tpush   %r15",
+            "7055a2:\t41 56                \tpush   %r14",
+            "7055a4:\t41 55                \tpush   %r13",
+            "7055a6:\t41 54                \tpush   %r12",
+            "7055a8:\t53                   \tpush   %rbx",
+            "7055a9:\t48 83 ec 40          \tsub    $0x40,%rsp",
+            "7056b9:\t48 83 c4 40          \tadd    $0x40,%rsp",
+            "7056bd:\t5b                   \tpop    %rbx",
+            "7056be:\t41 5c                \tpop    %r12",
+            "7056c0:\t41 5d                \tpop    %r13",
+            "7056c2:\t41 5e                \tpop    %r14",
+            "7056c4:\t41 5f                \tpop    %r15",
+            "705751:\t48 83 c4 40          \tadd    $0x40,%rsp",
+            "705755:\t5b                   \tpop    %rbx",
+            "705756:\t41 5c                \tpop    %r12",
+            "705758:\t41 5d                \tpop    %r13",
+            "70575a:\t41 5e                \tpop    %r14",
+            "70575c:\t41 5f                \tpop    %r15"
+          ]
+        },
+        {
+          "address": 7361280,
+          "bytes": 671,
+          "name": "<gpui::runtime::RuntimeMut<unit_action_cost_two::SecondModel, ()>>::publish_focus_change",
+          "asm": "22.asm",
+          "stack_adjustments": [
+            "705300:\t41 57                \tpush   %r15",
+            "705302:\t41 56                \tpush   %r14",
+            "705304:\t41 54                \tpush   %r12",
+            "705306:\t53                   \tpush   %rbx",
+            "705307:\t50                   \tpush   %rax",
+            "70537d:\t48 83 c4 08          \tadd    $0x8,%rsp",
+            "705381:\t5b                   \tpop    %rbx",
+            "705382:\t41 5c                \tpop    %r12",
+            "705384:\t41 5e                \tpop    %r14",
+            "705386:\t41 5f                \tpop    %r15",
+            "705575:\t48 83 c4 08          \tadd    $0x8,%rsp",
+            "705579:\t5b                   \tpop    %rbx",
+            "70557a:\t41 5c                \tpop    %r12",
+            "70557c:\t41 5e                \tpop    %r14",
+            "70557e:\t41 5f                \tpop    %r15"
+          ]
+        },
+        {
+          "address": 7363888,
+          "bytes": 671,
+          "name": "<gpui::runtime::RuntimeMut<unit_action_cost_two::Model, ()>>::publish_focus_change",
+          "asm": "23.asm",
+          "stack_adjustments": [
+            "705d30:\t41 57                \tpush   %r15",
+            "705d32:\t41 56                \tpush   %r14",
+            "705d34:\t41 54                \tpush   %r12",
+            "705d36:\t53                   \tpush   %rbx",
+            "705d37:\t50                   \tpush   %rax",
+            "705dad:\t48 83 c4 08          \tadd    $0x8,%rsp",
+            "705db1:\t5b                   \tpop    %rbx",
+            "705db2:\t41 5c                \tpop    %r12",
+            "705db4:\t41 5e                \tpop    %r14",
+            "705db6:\t41 5f                \tpop    %r15",
+            "705fa5:\t48 83 c4 08          \tadd    $0x8,%rsp",
+            "705fa9:\t5b                   \tpop    %rbx",
+            "705faa:\t41 5c                \tpop    %r12",
+            "705fac:\t41 5e                \tpop    %r14",
+            "705fae:\t41 5f                \tpop    %r15"
+          ]
+        },
+        {
+          "address": 7318448,
+          "bytes": 781,
+          "name": "<gpui::runtime::RuntimeMut<unit_action_cost_two::SecondModel, ()>>::activate_focused",
+          "asm": "24.asm",
+          "stack_adjustments": [
+            "6fabb0:\t55                   \tpush   %rbp",
+            "6fabb1:\t41 57                \tpush   %r15",
+            "6fabb3:\t41 56                \tpush   %r14",
+            "6fabb5:\t41 55                \tpush   %r13",
+            "6fabb7:\t41 54                \tpush   %r12",
+            "6fabb9:\t53                   \tpush   %rbx",
+            "6fabba:\t48 83 ec 48          \tsub    $0x48,%rsp",
+            "6fac3f:\t48 83 c4 48          \tadd    $0x48,%rsp",
+            "6fac43:\t5b                   \tpop    %rbx",
+            "6fac44:\t41 5c                \tpop    %r12",
+            "6fac46:\t41 5d                \tpop    %r13",
+            "6fac48:\t41 5e                \tpop    %r14",
+            "6fac4a:\t41 5f                \tpop    %r15",
+            "6fac4c:\t5d                   \tpop    %rbp",
+            "6faeaa:\t48 83 c4 48          \tadd    $0x48,%rsp",
+            "6faeae:\t5b                   \tpop    %rbx",
+            "6faeaf:\t41 5c                \tpop    %r12",
+            "6faeb1:\t41 5d                \tpop    %r13",
+            "6faeb3:\t41 5e                \tpop    %r14",
+            "6faeb5:\t41 5f                \tpop    %r15",
+            "6faeb7:\t5d                   \tpop    %rbp"
+          ]
+        },
+        {
+          "address": 7330688,
+          "bytes": 781,
+          "name": "<gpui::runtime::RuntimeMut<unit_action_cost_two::Model, ()>>::activate_focused",
+          "asm": "25.asm",
+          "stack_adjustments": [
+            "6fdb80:\t55                   \tpush   %rbp",
+            "6fdb81:\t41 57                \tpush   %r15",
+            "6fdb83:\t41 56                \tpush   %r14",
+            "6fdb85:\t41 55                \tpush   %r13",
+            "6fdb87:\t41 54                \tpush   %r12",
+            "6fdb89:\t53                   \tpush   %rbx",
+            "6fdb8a:\t48 83 ec 48          \tsub    $0x48,%rsp",
+            "6fdc0f:\t48 83 c4 48          \tadd    $0x48,%rsp",
+            "6fdc13:\t5b                   \tpop    %rbx",
+            "6fdc14:\t41 5c                \tpop    %r12",
+            "6fdc16:\t41 5d                \tpop    %r13",
+            "6fdc18:\t41 5e                \tpop    %r14",
+            "6fdc1a:\t41 5f                \tpop    %r15",
+            "6fdc1c:\t5d                   \tpop    %rbp",
+            "6fde7a:\t48 83 c4 48          \tadd    $0x48,%rsp",
+            "6fde7e:\t5b                   \tpop    %rbx",
+            "6fde7f:\t41 5c                \tpop    %r12",
+            "6fde81:\t41 5d                \tpop    %r13",
+            "6fde83:\t41 5e                \tpop    %r14",
+            "6fde85:\t41 5f                \tpop    %r15",
+            "6fde87:\t5d                   \tpop    %rbp"
+          ]
+        },
+        {
+          "address": 7320976,
+          "bytes": 1024,
+          "name": "<gpui::runtime::RuntimeMut<unit_action_cost_two::SecondModel, ()>>::activate_with_editing",
+          "asm": "26.asm",
+          "stack_adjustments": [
+            "6fb590:\t55                   \tpush   %rbp",
+            "6fb591:\t41 57                \tpush   %r15",
+            "6fb593:\t41 56                \tpush   %r14",
+            "6fb595:\t41 55                \tpush   %r13",
+            "6fb597:\t41 54                \tpush   %r12",
+            "6fb599:\t53                   \tpush   %rbx",
+            "6fb59a:\t48 83 ec 78          \tsub    $0x78,%rsp",
+            "6fb67a:\t48 83 c4 78          \tadd    $0x78,%rsp",
+            "6fb67e:\t5b                   \tpop    %rbx",
+            "6fb67f:\t41 5c                \tpop    %r12",
+            "6fb681:\t41 5d                \tpop    %r13",
+            "6fb683:\t41 5e                \tpop    %r14",
+            "6fb685:\t41 5f                \tpop    %r15",
+            "6fb687:\t5d                   \tpop    %rbp"
+          ]
+        },
+        {
+          "address": 7333216,
+          "bytes": 1024,
+          "name": "<gpui::runtime::RuntimeMut<unit_action_cost_two::Model, ()>>::activate_with_editing",
+          "asm": "27.asm",
+          "stack_adjustments": [
+            "6fe560:\t55                   \tpush   %rbp",
+            "6fe561:\t41 57                \tpush   %r15",
+            "6fe563:\t41 56                \tpush   %r14",
+            "6fe565:\t41 55                \tpush   %r13",
+            "6fe567:\t41 54                \tpush   %r12",
+            "6fe569:\t53                   \tpush   %rbx",
+            "6fe56a:\t48 83 ec 78          \tsub    $0x78,%rsp",
+            "6fe64a:\t48 83 c4 78          \tadd    $0x78,%rsp",
+            "6fe64e:\t5b                   \tpop    %rbx",
+            "6fe64f:\t41 5c                \tpop    %r12",
+            "6fe651:\t41 5d                \tpop    %r13",
+            "6fe653:\t41 5e                \tpop    %r14",
+            "6fe655:\t41 5f                \tpop    %r15",
+            "6fe657:\t5d                   \tpop    %rbp"
+          ]
+        },
+        {
+          "address": 7386464,
+          "bytes": 1063,
+          "name": "<gpui::runtime::Win<unit_action_cost_two::SecondModel>>::click",
+          "asm": "28.asm",
+          "stack_adjustments": [
+            "70b560:\t55                   \tpush   %rbp",
+            "70b561:\t41 57                \tpush   %r15",
+            "70b563:\t41 56                \tpush   %r14",
+            "70b565:\t41 55                \tpush   %r13",
+            "70b567:\t41 54                \tpush   %r12",
+            "70b569:\t53                   \tpush   %rbx",
+            "70b56a:\t48 81 ec b8 00 00 00 \tsub    $0xb8,%rsp",
+            "70b894:\t48 81 c4 b8 00 00 00 \tadd    $0xb8,%rsp",
+            "70b89b:\t5b                   \tpop    %rbx",
+            "70b89c:\t41 5c                \tpop    %r12",
+            "70b89e:\t41 5d                \tpop    %r13",
+            "70b8a0:\t41 5e                \tpop    %r14",
+            "70b8a2:\t41 5f                \tpop    %r15",
+            "70b8a4:\t5d                   \tpop    %rbp"
+          ]
+        },
+        {
+          "address": 7390128,
+          "bytes": 1063,
+          "name": "<gpui::runtime::Win<unit_action_cost_two::Model>>::click",
+          "asm": "29.asm",
+          "stack_adjustments": [
+            "70c3b0:\t55                   \tpush   %rbp",
+            "70c3b1:\t41 57                \tpush   %r15",
+            "70c3b3:\t41 56                \tpush   %r14",
+            "70c3b5:\t41 55                \tpush   %r13",
+            "70c3b7:\t41 54                \tpush   %r12",
+            "70c3b9:\t53                   \tpush   %rbx",
+            "70c3ba:\t48 81 ec b8 00 00 00 \tsub    $0xb8,%rsp",
+            "70c6e4:\t48 81 c4 b8 00 00 00 \tadd    $0xb8,%rsp",
+            "70c6eb:\t5b                   \tpop    %rbx",
+            "70c6ec:\t41 5c                \tpop    %r12",
+            "70c6ee:\t41 5d                \tpop    %r13",
+            "70c6f0:\t41 5e                \tpop    %r14",
+            "70c6f2:\t41 5f                \tpop    %r15",
+            "70c6f4:\t5d                   \tpop    %rbp"
+          ]
+        },
+        {
+          "address": 7359856,
+          "bytes": 1422,
+          "name": "<gpui::runtime::RuntimeMut<unit_action_cost_two::SecondModel, ()>>::select_pointer",
+          "asm": "30.asm",
+          "stack_adjustments": [
+            "704d70:\t55                   \tpush   %rbp",
+            "704d71:\t41 57                \tpush   %r15",
+            "704d73:\t41 56                \tpush   %r14",
+            "704d75:\t41 55                \tpush   %r13",
+            "704d77:\t41 54                \tpush   %r12",
+            "704d79:\t53                   \tpush   %rbx",
+            "704d7a:\t48 81 ec 18 01 00 00 \tsub    $0x118,%rsp",
+            "704fcd:\t48 81 c4 18 01 00 00 \tadd    $0x118,%rsp",
+            "704fd4:\t5b                   \tpop    %rbx",
+            "704fd5:\t41 5c                \tpop    %r12",
+            "704fd7:\t41 5d                \tpop    %r13",
+            "704fd9:\t41 5e                \tpop    %r14",
+            "704fdb:\t41 5f                \tpop    %r15",
+            "704fdd:\t5d                   \tpop    %rbp"
+          ]
+        },
+        {
+          "address": 7362464,
+          "bytes": 1422,
+          "name": "<gpui::runtime::RuntimeMut<unit_action_cost_two::Model, ()>>::select_pointer",
+          "asm": "31.asm",
+          "stack_adjustments": [
+            "7057a0:\t55                   \tpush   %rbp",
+            "7057a1:\t41 57                \tpush   %r15",
+            "7057a3:\t41 56                \tpush   %r14",
+            "7057a5:\t41 55                \tpush   %r13",
+            "7057a7:\t41 54                \tpush   %r12",
+            "7057a9:\t53                   \tpush   %rbx",
+            "7057aa:\t48 81 ec 18 01 00 00 \tsub    $0x118,%rsp",
+            "7059fd:\t48 81 c4 18 01 00 00 \tadd    $0x118,%rsp",
+            "705a04:\t5b                   \tpop    %rbx",
+            "705a05:\t41 5c                \tpop    %r12",
+            "705a07:\t41 5d                \tpop    %r13",
+            "705a09:\t41 5e                \tpop    %r14",
+            "705a0b:\t41 5f                \tpop    %r15",
+            "705a0d:\t5d                   \tpop    %rbp"
+          ]
+        },
+        {
+          "address": 7319232,
+          "bytes": 1737,
+          "name": "<gpui::runtime::RuntimeMut<unit_action_cost_two::SecondModel, ()>>::activate_property",
+          "asm": "32.asm",
+          "stack_adjustments": [
+            "6faec0:\t55                   \tpush   %rbp",
+            "6faec1:\t41 57                \tpush   %r15",
+            "6faec3:\t41 56                \tpush   %r14",
+            "6faec5:\t41 55                \tpush   %r13",
+            "6faec7:\t41 54                \tpush   %r12",
+            "6faec9:\t53                   \tpush   %rbx",
+            "6faeca:\t48 81 ec 38 01 00 00 \tsub    $0x138,%rsp",
+            "6fb422:\t48 81 c4 38 01 00 00 \tadd    $0x138,%rsp",
+            "6fb429:\t5b                   \tpop    %rbx",
+            "6fb42a:\t41 5c                \tpop    %r12",
+            "6fb42c:\t41 5d                \tpop    %r13",
+            "6fb42e:\t41 5e                \tpop    %r14",
+            "6fb430:\t41 5f                \tpop    %r15",
+            "6fb432:\t5d                   \tpop    %rbp"
+          ]
+        },
+        {
+          "address": 7331472,
+          "bytes": 1737,
+          "name": "<gpui::runtime::RuntimeMut<unit_action_cost_two::Model, ()>>::activate_property",
+          "asm": "33.asm",
+          "stack_adjustments": [
+            "6fde90:\t55                   \tpush   %rbp",
+            "6fde91:\t41 57                \tpush   %r15",
+            "6fde93:\t41 56                \tpush   %r14",
+            "6fde95:\t41 55                \tpush   %r13",
+            "6fde97:\t41 54                \tpush   %r12",
+            "6fde99:\t53                   \tpush   %rbx",
+            "6fde9a:\t48 81 ec 38 01 00 00 \tsub    $0x138,%rsp",
+            "6fe3f2:\t48 81 c4 38 01 00 00 \tadd    $0x138,%rsp",
+            "6fe3f9:\t5b                   \tpop    %rbx",
+            "6fe3fa:\t41 5c                \tpop    %r12",
+            "6fe3fc:\t41 5d                \tpop    %r13",
+            "6fe3fe:\t41 5e                \tpop    %r14",
+            "6fe400:\t41 5f                \tpop    %r15",
+            "6fe402:\t5d                   \tpop    %rbp"
+          ]
+        },
+        {
+          "address": 7656192,
+          "bytes": 2185,
+          "name": "allocation_counter::measure::<unit_action_cost_two::ordinary_unit_action_cost::{closure#0}>",
+          "asm": "34.asm",
+          "stack_adjustments": [
+            "74d300:\t55                   \tpush   %rbp",
+            "74d301:\t41 57                \tpush   %r15",
+            "74d303:\t41 56                \tpush   %r14",
+            "74d305:\t41 55                \tpush   %r13",
+            "74d307:\t41 54                \tpush   %r12",
+            "74d309:\t53                   \tpush   %rbx",
+            "74d30a:\t48 81 ec 98 00 00 00 \tsub    $0x98,%rsp",
+            "74d7e1:\t48 81 c4 98 00 00 00 \tadd    $0x98,%rsp",
+            "74d7e8:\t5b                   \tpop    %rbx",
+            "74d7e9:\t41 5c                \tpop    %r12",
+            "74d7eb:\t41 5d                \tpop    %r13",
+            "74d7ed:\t41 5e                \tpop    %r14",
+            "74d7ef:\t41 5f                \tpop    %r15",
+            "74d7f1:\t5d                   \tpop    %rbp"
+          ]
+        },
+        {
+          "address": 7658784,
+          "bytes": 2345,
+          "name": "allocation_counter::measure::<unit_action_cost_two::second_ordinary_unit_action_cost::{closure#0}>",
+          "asm": "35.asm",
+          "stack_adjustments": [
+            "74dd20:\t55                   \tpush   %rbp",
+            "74dd21:\t41 57                \tpush   %r15",
+            "74dd23:\t41 56                \tpush   %r14",
+            "74dd25:\t41 55                \tpush   %r13",
+            "74dd27:\t41 54                \tpush   %r12",
+            "74dd29:\t53                   \tpush   %rbx",
+            "74dd2a:\t48 81 ec 68 01 00 00 \tsub    $0x168,%rsp",
+            "74e2a1:\t48 81 c4 68 01 00 00 \tadd    $0x168,%rsp",
+            "74e2a8:\t5b                   \tpop    %rbx",
+            "74e2a9:\t41 5c                \tpop    %r12",
+            "74e2ab:\t41 5d                \tpop    %r13",
+            "74e2ad:\t41 5e                \tpop    %r14",
+            "74e2af:\t41 5f                \tpop    %r15",
+            "74e2b1:\t5d                   \tpop    %rbp"
+          ]
+        },
+        {
+          "address": 7376240,
+          "bytes": 2995,
+          "name": "<gpui::runtime::RuntimeMut<unit_action_cost_two::SecondModel, ()>>::window_action",
+          "asm": "36.asm",
+          "stack_adjustments": [
+            "708d70:\t55                   \tpush   %rbp",
+            "708d71:\t41 57                \tpush   %r15",
+            "708d73:\t41 56                \tpush   %r14",
+            "708d75:\t41 55                \tpush   %r13",
+            "708d77:\t41 54                \tpush   %r12",
+            "708d79:\t53                   \tpush   %rbx",
+            "708d7a:\t48 81 ec 28 01 00 00 \tsub    $0x128,%rsp",
+            "708e05:\t48 81 c4 28 01 00 00 \tadd    $0x128,%rsp",
+            "708e0c:\t5b                   \tpop    %rbx",
+            "708e0d:\t41 5c                \tpop    %r12",
+            "708e0f:\t41 5d                \tpop    %r13",
+            "708e11:\t41 5e                \tpop    %r14",
+            "708e13:\t41 5f                \tpop    %r15",
+            "708e15:\t5d                   \tpop    %rbp",
+            "7094ac:\t48 81 c4 28 01 00 00 \tadd    $0x128,%rsp",
+            "7094b3:\t5b                   \tpop    %rbx",
+            "7094b4:\t41 5c                \tpop    %r12",
+            "7094b6:\t41 5d                \tpop    %r13",
+            "7094b8:\t41 5e                \tpop    %r14",
+            "7094ba:\t41 5f                \tpop    %r15",
+            "7094bc:\t5d                   \tpop    %rbp",
+            "709634:\t48 81 c4 28 01 00 00 \tadd    $0x128,%rsp",
+            "70963b:\t5b                   \tpop    %rbx",
+            "70963c:\t41 5c                \tpop    %r12",
+            "70963e:\t41 5d                \tpop    %r13",
+            "709640:\t41 5e                \tpop    %r14",
+            "709642:\t41 5f                \tpop    %r15",
+            "709644:\t5d                   \tpop    %rbp",
+            "709744:\t48 81 c4 28 01 00 00 \tadd    $0x128,%rsp",
+            "70974b:\t5b                   \tpop    %rbx",
+            "70974c:\t41 5c                \tpop    %r12",
+            "70974e:\t41 5d                \tpop    %r13",
+            "709750:\t41 5e                \tpop    %r14",
+            "709752:\t41 5f                \tpop    %r15",
+            "709754:\t5d                   \tpop    %rbp"
+          ]
+        },
+        {
+          "address": 7380000,
+          "bytes": 2995,
+          "name": "<gpui::runtime::RuntimeMut<unit_action_cost_two::Model, ()>>::window_action",
+          "asm": "37.asm",
+          "stack_adjustments": [
+            "709c20:\t55                   \tpush   %rbp",
+            "709c21:\t41 57                \tpush   %r15",
+            "709c23:\t41 56                \tpush   %r14",
+            "709c25:\t41 55                \tpush   %r13",
+            "709c27:\t41 54                \tpush   %r12",
+            "709c29:\t53                   \tpush   %rbx",
+            "709c2a:\t48 81 ec 28 01 00 00 \tsub    $0x128,%rsp",
+            "709cb5:\t48 81 c4 28 01 00 00 \tadd    $0x128,%rsp",
+            "709cbc:\t5b                   \tpop    %rbx",
+            "709cbd:\t41 5c                \tpop    %r12",
+            "709cbf:\t41 5d                \tpop    %r13",
+            "709cc1:\t41 5e                \tpop    %r14",
+            "709cc3:\t41 5f                \tpop    %r15",
+            "709cc5:\t5d                   \tpop    %rbp",
+            "70a35c:\t48 81 c4 28 01 00 00 \tadd    $0x128,%rsp",
+            "70a363:\t5b                   \tpop    %rbx",
+            "70a364:\t41 5c                \tpop    %r12",
+            "70a366:\t41 5d                \tpop    %r13",
+            "70a368:\t41 5e                \tpop    %r14",
+            "70a36a:\t41 5f                \tpop    %r15",
+            "70a36c:\t5d                   \tpop    %rbp",
+            "70a4e4:\t48 81 c4 28 01 00 00 \tadd    $0x128,%rsp",
+            "70a4eb:\t5b                   \tpop    %rbx",
+            "70a4ec:\t41 5c                \tpop    %r12",
+            "70a4ee:\t41 5d                \tpop    %r13",
+            "70a4f0:\t41 5e                \tpop    %r14",
+            "70a4f2:\t41 5f                \tpop    %r15",
+            "70a4f4:\t5d                   \tpop    %rbp",
+            "70a5f4:\t48 81 c4 28 01 00 00 \tadd    $0x128,%rsp",
+            "70a5fb:\t5b                   \tpop    %rbx",
+            "70a5fc:\t41 5c                \tpop    %r12",
+            "70a5fe:\t41 5d                \tpop    %r13",
+            "70a600:\t41 5e                \tpop    %r14",
+            "70a602:\t41 5f                \tpop    %r15",
+            "70a604:\t5d                   \tpop    %rbp"
+          ]
+        },
+        {
+          "address": 7511936,
+          "bytes": 3332,
+          "name": "<gpui::runtime::RuntimeMut<unit_action_cost_two::SecondModel, ()>>::apply_property_value_at",
+          "asm": "38.asm",
+          "stack_adjustments": [
+            "729f80:\t55                   \tpush   %rbp",
+            "729f81:\t41 57                \tpush   %r15",
+            "729f83:\t41 56                \tpush   %r14",
+            "729f85:\t41 55                \tpush   %r13",
+            "729f87:\t41 54                \tpush   %r12",
+            "729f89:\t53                   \tpush   %rbx",
+            "729f8a:\t48 81 ec f8 01 00 00 \tsub    $0x1f8,%rsp",
+            "72ab82:\t48 81 c4 f8 01 00 00 \tadd    $0x1f8,%rsp",
+            "72ab89:\t5b                   \tpop    %rbx",
+            "72ab8a:\t41 5c                \tpop    %r12",
+            "72ab8c:\t41 5d                \tpop    %r13",
+            "72ab8e:\t41 5e                \tpop    %r14",
+            "72ab90:\t41 5f                \tpop    %r15",
+            "72ab92:\t5d                   \tpop    %rbp"
+          ]
+        },
+        {
+          "address": 7515664,
+          "bytes": 3332,
+          "name": "<gpui::runtime::RuntimeMut<unit_action_cost_two::Model, ()>>::apply_property_value_at",
+          "asm": "39.asm",
+          "stack_adjustments": [
+            "72ae10:\t55                   \tpush   %rbp",
+            "72ae11:\t41 57                \tpush   %r15",
+            "72ae13:\t41 56                \tpush   %r14",
+            "72ae15:\t41 55                \tpush   %r13",
+            "72ae17:\t41 54                \tpush   %r12",
+            "72ae19:\t53                   \tpush   %rbx",
+            "72ae1a:\t48 81 ec f8 01 00 00 \tsub    $0x1f8,%rsp",
+            "72ba12:\t48 81 c4 f8 01 00 00 \tadd    $0x1f8,%rsp",
+            "72ba19:\t5b                   \tpop    %rbx",
+            "72ba1a:\t41 5c                \tpop    %r12",
+            "72ba1c:\t41 5d                \tpop    %r13",
+            "72ba1e:\t41 5e                \tpop    %r14",
+            "72ba20:\t41 5f                \tpop    %r15",
+            "72ba22:\t5d                   \tpop    %rbp"
+          ]
+        },
+        {
+          "address": 7322000,
+          "bytes": 8247,
+          "name": "<gpui::runtime::RuntimeMut<unit_action_cost_two::SecondModel, ()>>::after_source_with_editing",
+          "asm": "40.asm",
+          "stack_adjustments": [
+            "6fb990:\t55                   \tpush   %rbp",
+            "6fb991:\t41 57                \tpush   %r15",
+            "6fb993:\t41 56                \tpush   %r14",
+            "6fb995:\t41 55                \tpush   %r13",
+            "6fb997:\t41 54                \tpush   %r12",
+            "6fb999:\t53                   \tpush   %rbx",
+            "6fb99a:\t48 81 ec c8 03 00 00 \tsub    $0x3c8,%rsp",
+            "6fbd9f:\t48 81 c4 c8 03 00 00 \tadd    $0x3c8,%rsp",
+            "6fbda6:\t5b                   \tpop    %rbx",
+            "6fbda7:\t41 5c                \tpop    %r12",
+            "6fbda9:\t41 5d                \tpop    %r13",
+            "6fbdab:\t41 5e                \tpop    %r14",
+            "6fbdad:\t41 5f                \tpop    %r15",
+            "6fbdaf:\t5d                   \tpop    %rbp"
+          ]
+        },
+        {
+          "address": 7334240,
+          "bytes": 8247,
+          "name": "<gpui::runtime::RuntimeMut<unit_action_cost_two::Model, ()>>::after_source_with_editing",
+          "asm": "41.asm",
+          "stack_adjustments": [
+            "6fe960:\t55                   \tpush   %rbp",
+            "6fe961:\t41 57                \tpush   %r15",
+            "6fe963:\t41 56                \tpush   %r14",
+            "6fe965:\t41 55                \tpush   %r13",
+            "6fe967:\t41 54                \tpush   %r12",
+            "6fe969:\t53                   \tpush   %rbx",
+            "6fe96a:\t48 81 ec c8 03 00 00 \tsub    $0x3c8,%rsp",
+            "6fed6f:\t48 81 c4 c8 03 00 00 \tadd    $0x3c8,%rsp",
+            "6fed76:\t5b                   \tpop    %rbx",
+            "6fed77:\t41 5c                \tpop    %r12",
+            "6fed79:\t41 5d                \tpop    %r13",
+            "6fed7b:\t41 5e                \tpop    %r14",
+            "6fed7d:\t41 5f                \tpop    %r15",
+            "6fed7f:\t5d                   \tpop    %rbp"
+          ]
+        }
+      ],
+      "method_route_tables": [
+        {
+          "route": "<gpui::element::MethodRoute<unit_action_cost_two::SecondModel, <unit_action_cost_two::SecondModel>::increment> as gpui::element::Route>",
+          "file_offset": 11511424,
+          "bytes": 64,
+          "header": [
+            0,
+            0,
+            1
+          ],
+          "methods": [
+            "admit",
+            "invoke",
+            "owner_scope",
+            "proposal",
+            "applied_logically"
+          ],
+          "pointers": [
+            7716896,
+            7716976,
+            7785472,
+            7717568,
+            7717536
+          ]
+        },
+        {
+          "route": "<gpui::element::MethodRoute<unit_action_cost_two::Model, <unit_action_cost_two::Model>::increment> as gpui::element::Route>",
+          "file_offset": 11511488,
+          "bytes": 64,
+          "header": [
+            0,
+            0,
+            1
+          ],
+          "methods": [
+            "admit",
+            "invoke",
+            "owner_scope",
+            "proposal",
+            "applied_logically"
+          ],
+          "pointers": [
+            7717056,
+            7717136,
+            7785472,
+            7717568,
+            7717536
+          ]
+        }
+      ],
+      "frozen_binary": "/tmp/gpui-contained-entry-release-9ec/candidate/unit_action_cost_two"
+    }
+  },
+  "qualification": {
+    "candidate_shipping": "9ec0bf4346f2d6a76c3f52ad357965a0af4547a6",
+    "candidate_test_head": "7c60bf258b",
+    "baseline_shipping": "58995b75eaab408f488141ef77ed2b0d9ad0abe0",
+    "notes": "prior control before one-line copied-unit Clippy cleanup; no timings"
+  }
+}
