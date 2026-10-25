@@ -342,13 +342,17 @@ impl Columns {
             .try_reserve(additional)
             .map_err(|_| Error::ResourceLimit)
     }
-    pub(super) fn shared(&mut self, color: PaintColor) -> Result<PaintSlot, Error> {
+    fn reserve_shared(&mut self) -> Result<(), Error> {
         if self.paints.len() >= MAX_ROWS {
             return Err(Error::ResourceLimit);
         }
         self.paints
             .try_reserve(1)
             .map_err(|_| Error::ResourceLimit)?;
+        Ok(())
+    }
+    pub(super) fn shared(&mut self, color: PaintColor) -> Result<PaintSlot, Error> {
+        self.reserve_shared()?;
         Ok(self.shared_reserved(color))
     }
     fn shared_reserved(&mut self, color: PaintColor) -> PaintSlot {
@@ -469,6 +473,9 @@ impl Columns {
         }
         Ok((damage, changed))
     }
+    pub(super) fn changed_slots<'a>(&'a self,edits:&'a[SlotEdit])->impl Iterator<Item=PaintSlot>+'a {
+        edits.iter().filter(|edit|!same_color(self.paints[edit.slot.index() as usize].value,edit.value)).map(|edit|edit.slot)
+    }
     pub(super) fn commit(&mut self, edits: &[SlotEdit]) -> bool {
         let mut revoke = false;
         for edit in edits {
@@ -489,20 +496,34 @@ pub struct SlotCommit<'canvas, 'edits> {
     damage: DamageRegion,
     changed: usize,
 }
-impl SlotCommit<'_, '_> {
+impl<'canvas> SlotCommit<'canvas, '_> {
     pub fn damage(&self) -> DamageRegion {
         self.damage
     }
     pub fn changed_slots(&self) -> usize {
         self.changed
     }
-    pub fn commit(self) -> DamageRegion {
+    pub fn commit(self) -> DamageRegion { self.commit_into().1 }
+    fn commit_into(self) -> (&'canvas mut super::Canvas,DamageRegion) {
+        if !self.edits.is_empty() {self.canvas.revoke_publication();}
         let revoke = self.canvas.commands.columns.commit(self.edits);
         if revoke && let Some(raster) = &mut self.canvas.raster {
             raster.revoke_cuts();
         }
         self.canvas.dirty |= self.changed != 0;
-        self.damage
+        (self.canvas,self.damage)
+    }
+    pub fn commit_publication(self,changes:gpui_reactivity_core::change::PreparedChanges<'_>,publication:gpui_reactivity_core::change::PreparedPublication<'_>)
+        ->Result<DamageRegion,super::PublicationError> {
+        let stamp=super::publication::check_slot_publication(self.canvas,&changes,&publication,self.edits,self.changed)?;
+        let mut parts=super::publication::take_slot_groups(self.canvas);
+        // The same exclusive owner/header passed preflight; no callback or
+        // fallible allocation occurs between check and this infallible commit.
+        parts.groups.prepare_retarget(stamp).expect("prevalidated unchanged group header").commit();
+        let (canvas,damage)=self.commit_into();
+        let batch=changes.commit();let receipt=publication.commit();
+        super::publication::install(canvas,receipt,batch,parts);
+        Ok(damage)
     }
 }
 impl super::Canvas {
@@ -510,7 +531,9 @@ impl super::Canvas {
     /// Equal colors deliberately receive distinct slots. Scene replacement
     /// revokes positional meanings; callers retain their own scene authority.
     pub fn paint_slot(&mut self, value: PaintColor) -> Result<PaintSlot, Error> {
-        self.commands.columns.shared(value)
+        self.commands.columns.reserve_shared()?;
+        self.revoke_publication();
+        Ok(self.commands.columns.shared_reserved(value))
     }
     pub fn prepare_slots<'canvas, 'edits>(
         &'canvas mut self,

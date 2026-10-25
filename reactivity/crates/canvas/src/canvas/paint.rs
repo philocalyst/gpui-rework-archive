@@ -86,6 +86,7 @@ impl PaintCommit<'_, '_> {
         self.changed
     }
     pub fn commit(self) -> DamageRegion {
+        if !self.edits.is_empty() {self.canvas.revoke_publication();}
         let mut revoke = false;
         for edit in self.edits {
             let commands = &mut self.canvas.commands;

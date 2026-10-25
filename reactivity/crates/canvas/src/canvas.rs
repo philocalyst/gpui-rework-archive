@@ -28,6 +28,8 @@ mod mask_kernel;
 mod metric_scale;
 use metric_scale::MetricScale;
 mod paint;
+mod publication;
+pub use publication::{CanvasAcceptedSceneView,CheckedSlotMutation,PublicationError};
 pub use paint::{PaintCommit, PaintEdit, PaintError, PaintErrorKind, PaintIndex};
 mod rounded;
 pub use rounded::rounded_rect_contains;
@@ -1091,6 +1093,30 @@ impl<'a> PreparedScene<'a> {
             remaining: self.commands.commons.len() + self.commands.inline.len(),
         }
     }
+    /// Borrow the COMPLETE common-state group containing a scene-local draw.
+    /// Returns its complete ordered range in O(1), even when a semantic site's
+    /// own range starts inside that group. Backends must preserve whole-group
+    /// correction/error admission when any of its placements changes.
+    /// This is a borrowed read, not a resource address or stable identity.
+    pub fn group_covering_draw(self, draw: usize) -> Option<(PreparedGroup<'a>, std::ops::Range<usize>)> {
+        let address = *self.commands.order.get(draw)?;
+        let (start, end) = if address.inline() {
+            (draw, draw + 1)
+        } else {
+            let [start, end] = self.commands.commons[usize::from(address.command)].range;
+            (start as usize, end as usize)
+        };
+        if start > draw || end <= draw || end > self.commands.order.len() { return None; }
+        let groups = Groups { commands: self.commands, extent: self.extent,
+            front: start, back: end, remaining: 1 };
+        Some((groups.view(start, end), start..end))
+    }
+    /// Borrow one complete group only at an exact ordered group boundary.
+    /// A middle cursor is rejected rather than creating a new correction group.
+    pub fn group_at_draw(self, first: usize) -> Option<(PreparedGroup<'a>, usize)> {
+        let (group, range) = self.group_covering_draw(first)?;
+        (range.start == first).then_some((group, range.end))
+    }
     /// Unique leased masks, in first-admission order. No resource handle clones.
     pub fn masks(self) -> impl ExactSizeIterator<Item = GlyphMask<'a>> + DoubleEndedIterator {
         self.commands.masks.iter().map(|mask| mask_view(mask))
@@ -1158,6 +1184,7 @@ pub struct Canvas {
     raster: Option<Box<RasterScratch>>,
     stats: RenderStats,
     tile_proofs: bool,
+    publication: Option<publication::Binding>,
 }
 impl Canvas {
     pub fn new(width: u32, height: u32) -> Result<Self, Error> {
@@ -1213,6 +1240,7 @@ impl Canvas {
             raster: None,
             stats: RenderStats::default(),
             tile_proofs: true,
+            publication: None,
         }
     }
     /// Prepare a replacement display list while retaining the previous pixels
@@ -1293,6 +1321,7 @@ impl Canvas {
         }
     }
     pub fn clear(&mut self, color: Color) {
+        self.revoke_publication();
         self.invalidate_bins();
         self.commands.clear();
         self.mask_bytes = 0;
@@ -1906,6 +1935,7 @@ impl Canvas {
             return Err(error);
         }
         if count != 0 {
+            self.revoke_publication();
             let viewport = viewport_rect(self.width, self.height);
             let shared = paint.commit(&mut self.commands.columns, color);
             if count == 1 {
@@ -2001,6 +2031,7 @@ impl Canvas {
             return Err(Error::ResourceLimit);
         }
         self.commands.reserve_inline()?;
+        self.revoke_publication();
         self.references += refs;
         self.invalidate_bins();
         Ok(())
@@ -2883,7 +2914,7 @@ pub struct CanvasScene<'a> {
     target: &'a mut Canvas,
     pending: Canvas,
 }
-impl CanvasScene<'_> {
+impl<'canvas> CanvasScene<'canvas> {
     pub fn fill_gradient(
         &mut self,
         gradient: &crate::Gradient,
@@ -2910,6 +2941,11 @@ impl CanvasScene<'_> {
         transform: Affine,
     ) -> Result<ClipId, Error> {
         self.pending.create_clip(parent, shape, transform)
+    }
+    /// Number of admitted ordered draws in this uncommitted scene draft.
+    /// This is a range boundary, not a resource address or publication token.
+    pub fn draw_count(&self) -> usize {
+        self.pending.commands.len()
     }
     pub fn width(&self) -> u32 {
         self.pending.width()
@@ -3065,7 +3101,9 @@ impl CanvasScene<'_> {
         self.pending
             .draw_text_scaled(text, layout, origin, transform, clip, color, raster_scale)
     }
-    pub fn commit(mut self) {
+    pub fn commit(self) { self.commit_into(); }
+    fn commit_into(mut self) -> &'canvas mut Canvas {
+        self.target.revoke_publication();
         // The target is exclusively borrowed throughout staging. Existing
         // leases move only at commit, after damage comparison; aborts preserve
         // the predecessor and warm scene replacement touches no Arc count.
@@ -3097,6 +3135,7 @@ impl CanvasScene<'_> {
         self.target.mask_bytes = self.pending.mask_bytes;
         self.target.references = self.pending.references;
         self.target.dirty = true;
+        self.target
     }
 
     /// Replace the scene and return conservative changed support relative to

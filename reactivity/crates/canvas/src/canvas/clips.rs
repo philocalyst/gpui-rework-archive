@@ -363,6 +363,7 @@ impl Canvas {
             nodes.try_reserve(1).map_err(|_| Error::ResourceLimit)?;
             nodes.push(node);
             let arena = Box::new(ClipArena { owner, nodes });
+            self.revoke_publication();
             self.commands
                 .images
                 .get_or_insert_with(Box::<ImageResources>::default)
@@ -381,6 +382,7 @@ impl Canvas {
                 .nodes
                 .try_reserve(1)
                 .map_err(|_| Error::ResourceLimit)?;
+            self.publication=None;
             arena.nodes.push(node);
             Ok(ClipId {
                 owner: arena.owner,

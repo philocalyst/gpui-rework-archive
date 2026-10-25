@@ -7,7 +7,7 @@ mod damage;
 mod image;
 mod text;
 pub use canvas::{
-    Canvas, CanvasScene, Clip, ClipChain, ClipGeometry, ClipId, ClipShape, GlyphMask,
+    Canvas, CanvasScene, CanvasAcceptedSceneView, CheckedSlotMutation, PublicationError, Clip, ClipChain, ClipGeometry, ClipId, ClipShape, GlyphMask,
     MAX_CLIP_DEPTH, MAX_CLIP_NODES, PaintColor, PaintCommit, PaintEdit, PaintError, PaintErrorKind,
     PaintIndex, PaintSlot, PreparedClipNode, PreparedDraw, PreparedGroup, PreparedPaint,
     PreparedPlacement, PreparedScene, PreparedSource, RenderStats, SceneStorage, SlotCommit,

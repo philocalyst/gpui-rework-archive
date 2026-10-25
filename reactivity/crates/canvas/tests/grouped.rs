@@ -82,6 +82,35 @@ fn groups_are_the_same_canonical_painter_sequence_in_both_directions() {
         })
         .collect::<Vec<_>>();
     assert_eq!(flat, grouped);
+    // Direct changed-range access must preserve the SAME owner, materials,
+    // geometry and group partition as canonical sequential traversal.
+    let mut cursor = 0;
+    let mut direct = Vec::new();
+    for expected in scene.groups() {
+        let (actual, end) = scene.group_at_draw(cursor).unwrap();
+        assert_eq!(actual.inverse.map(f64::to_bits), expected.inverse.map(f64::to_bits));
+        assert_eq!(actual.clip, expected.clip);
+        assert_eq!(actual.color.map(f32::to_bits), expected.color.map(f32::to_bits));
+        assert_eq!(end - cursor, expected.placements().len());
+        for middle in cursor..end {
+            let (whole, range) = scene.group_covering_draw(middle).unwrap();
+            assert_eq!(range, cursor..end);
+            assert_eq!(whole.placements().map(|p|p.local_rect).collect::<Vec<_>>(),
+                expected.placements().map(|p|p.local_rect).collect::<Vec<_>>());
+            if middle > cursor { assert!(scene.group_at_draw(middle).is_none()); }
+        }
+        direct.extend(actual.placements().map(|p| snapshot(PreparedDraw {
+            clip_chain: actual.clip_chain(), local_rect: p.local_rect, inverse: actual.inverse,
+            clip: actual.clip, bounds: p.bounds, color: actual.color, source: p.source,
+        })));
+        cursor = end;
+    }
+    assert_eq!(direct, flat);
+    assert_eq!(cursor, scene.draws().len());
+    assert!(scene.group_at_draw(cursor).is_none());
+    assert!(scene.group_at_draw(usize::MAX).is_none());
+    assert!(scene.group_covering_draw(cursor).is_none());
+    assert!(scene.group_covering_draw(usize::MAX).is_none());
     let bounds = scene
         .groups()
         .flat_map(|group| group.bounds())
