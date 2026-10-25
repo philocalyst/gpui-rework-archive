@@ -322,6 +322,85 @@ mod tests {
     }
 
     #[test]
+    fn virtual_membership_and_keyed_reorder_preserve_only_actual_survivors() {
+        let mut model = Page::new();
+        model.rows = (1..=32).map(|id| (id, format!("row {id}"))).collect();
+        let mut retained = Win::recording(
+            model.clone(), WindowOptions { size: [160, 120], ..Default::default() },
+        ).unwrap();
+        let mut rebuilt = Win::recording(
+            model, WindowOptions { size: [160, 120], ..Default::default() },
+        ).unwrap();
+        acknowledge(&mut retained);
+        acknowledge(&mut rebuilt);
+        let pane = retained.list(LIST).unwrap();
+        let pane_handle = layout_id(&retained, pane);
+        let old_first = row_target(&retained, 1);
+        let old_first_handle = layout_id(&retained, old_first);
+        let overlap = row_target(&retained, 4);
+        let overlap_handle = layout_id(&retained, overlap);
+
+        fn assert_pair(retained: &mut Win<Page>, rebuilt: &mut Win<Page>) {
+            {
+                let actual = retained.runtime().unwrap();
+                let expected = rebuilt.runtime().unwrap();
+                assert_eq!(actual.nodes.len(), expected.nodes.len());
+                for index in 0..actual.nodes.len() {
+                    assert_eq!(actual.nodes[index].identity(), expected.nodes[index].identity());
+                    assert_eq!(
+                        actual.layout.layout(actual.layout_nodes.required(index)).unwrap(),
+                        expected.layout.layout(expected.layout_nodes.required(index)).unwrap(),
+                    );
+                }
+            }
+            acknowledge(retained);
+            acknowledge(rebuilt);
+            assert_eq!(acknowledged_rows(retained), acknowledged_rows(rebuilt));
+            assert_eq!(
+                retained.list_state(retained.list(LIST).unwrap()).unwrap(),
+                rebuilt.list_state(rebuilt.list(LIST).unwrap()).unwrap(),
+            );
+            let pixels = retained.with_pixels(|pixels, _, _| pixels.to_vec()).unwrap();
+            rebuilt.with_pixels(|expected, _, _| assert_eq!(pixels, expected)).unwrap();
+        }
+
+        rebuilt.runtime_mut().unwrap().runtime.rebuild_layout = true;
+        for win in [&mut retained, &mut rebuilt] {
+            let list = win.list(LIST).unwrap();
+            win.scroll_to_index(list, 2).unwrap();
+        }
+        assert_eq!(layout_id(&retained, pane), pane_handle);
+        assert_eq!(layout_id(&retained, overlap), overlap_handle);
+        assert!(retained.runtime().unwrap().resolve(old_first).is_err());
+        assert_pair(&mut retained, &mut rebuilt);
+        assert!(retained.list_item(pane, ItemKey::new(1)).is_err());
+        let sixth = row_target(&retained, 6);
+        let sixth_handle = layout_id(&retained, sixth);
+
+        // Keep the scroll anchor fixed, but reorder two genuine surviving
+        // keyed rows. Their descendants keep identities and measurement routes.
+        rebuilt.runtime_mut().unwrap().runtime.rebuild_layout = true;
+        for win in [&mut retained, &mut rebuilt] {
+            win.update(|model| model.rows.swap(3, 5)).unwrap();
+        }
+        assert_eq!(layout_id(&retained, overlap), overlap_handle);
+        assert_eq!(layout_id(&retained, sixth), sixth_handle);
+        assert_pair(&mut retained, &mut rebuilt);
+
+        rebuilt.runtime_mut().unwrap().runtime.rebuild_layout = true;
+        for win in [&mut retained, &mut rebuilt] {
+            let list = win.list(LIST).unwrap();
+            win.scroll_to_index(list, 0).unwrap();
+        }
+        assert_pair(&mut retained, &mut rebuilt);
+        assert_eq!(layout_id(&retained, pane), pane_handle);
+        let new_first = row_target(&retained, 1);
+        assert_ne!(new_first, old_first);
+        assert_ne!(layout_id(&retained, new_first), old_first_handle);
+        assert!(retained.runtime().unwrap().resolve(old_first).is_err());
+    }
+
+    #[test]
     fn mixed_generation_inverse_mapping_rejects_stale_and_foreign_capabilities() {
         let mut tree = LayoutTree::new();
         let removed = tree.insert(None, gpui_reactivity_core::NodeKind::Element, cephal::Style::DEFAULT).unwrap();
