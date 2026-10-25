@@ -1,0 +1,783 @@
+use crate::{
+    AnyElement, AnyEntity, AnyWeakEntity, App, Bounds, ContentMask, Context, Element, ElementId,
+    Entity, EntityId, GlobalElementId, InspectorElementId, IntoElement, LayoutId, PaintIndex,
+    Pixels, PrepaintStateIndex, Render, RenderOnce, ResolvedDirection, Style, StyleRefinement,
+    TextStyle, UnicodeBidi, WeakEntity,
+};
+use crate::{Empty, Window};
+use anyhow::Result;
+use collections::FxHashSet;
+#[cfg(debug_assertions)]
+use parking_lot::Mutex;
+use refineable::Refineable;
+use std::mem;
+use std::{any::TypeId, fmt, ops::Range};
+#[cfg(debug_assertions)]
+use std::{any::type_name, sync::LazyLock};
+
+/// A dynamically-typed view handle that can be downcast to a specific `Entity<V>`.
+///
+/// This is the type-erased counterpart to [`ViewElement`]: it holds an entity plus
+/// a function pointer to its render, and is itself a [`View`], so embedding it as an
+/// element goes through the same [`ViewElement`] machinery as any other view.
+#[derive(Clone, Debug, gpui_macros::Reflect)]
+pub struct AnyView {
+    entity: AnyEntity,
+    render: fn(&AnyView, &mut Window, &mut App) -> AnyElement,
+}
+
+impl<V: Render> From<Entity<V>> for AnyView {
+    fn from(value: Entity<V>) -> Self {
+        AnyView {
+            entity: value.into_any(),
+            render: any_view::render::<V>,
+        }
+    }
+}
+
+impl AnyView {
+    /// Embed this view as a cached [`ViewElement`] laid out at `style`.
+    ///
+    /// The rendered subtree is recycled from the previous frame unless
+    /// [Context::notify] was called on the backing entity since it was rendered
+    /// (or [Window::refresh] is called, which ignores caching).
+    pub fn cached(self, style: StyleRefinement) -> ViewElement<AnyView> {
+        ViewElement::new(self).cached(style)
+    }
+
+    /// Convert this to a weak handle.
+    pub fn downgrade(&self) -> AnyWeakView {
+        AnyWeakView {
+            entity: self.entity.downgrade(),
+            render: self.render,
+        }
+    }
+
+    /// Convert this to a [Entity] of a specific type.
+    /// If this handle does not contain a view of the specified type, returns itself in an `Err` variant.
+    pub fn downcast<T: 'static>(self) -> Result<Entity<T>, Self> {
+        match self.entity.downcast() {
+            Ok(entity) => Ok(entity),
+            Err(entity) => Err(Self {
+                entity,
+                render: self.render,
+            }),
+        }
+    }
+
+    /// Gets the [TypeId] of the underlying view.
+    pub fn entity_type(&self) -> TypeId {
+        self.entity.entity_type
+    }
+
+    /// The [`EntityId`] of this view.
+    pub fn entity_id(&self) -> EntityId {
+        self.entity.entity_id()
+    }
+}
+
+impl PartialEq for AnyView {
+    fn eq(&self, other: &Self) -> bool {
+        self.entity == other.entity
+    }
+}
+
+impl Eq for AnyView {}
+
+/// `AnyView` is the type-erased [`View`]: its `render` is a function pointer rather
+/// than a concrete type, but it participates in the reactive graph exactly like any
+/// other view via [`ViewElement`].
+impl View for AnyView {
+    fn entity_id(&self) -> Option<EntityId> {
+        Some(self.entity.entity_id())
+    }
+
+    fn render(self, window: &mut Window, cx: &mut App) -> impl IntoElement {
+        (self.render)(&self, window, cx)
+    }
+}
+
+/// A weak, dynamically-typed view handle.
+pub struct AnyWeakView {
+    entity: AnyWeakEntity,
+    render: fn(&AnyView, &mut Window, &mut App) -> AnyElement,
+}
+
+impl AnyWeakView {
+    /// Upgrade to a strong `AnyView` handle, if the view is still alive.
+    pub fn upgrade(&self) -> Option<AnyView> {
+        let entity = self.entity.upgrade()?;
+        Some(AnyView {
+            entity,
+            render: self.render,
+        })
+    }
+}
+
+impl<V: 'static + Render> From<WeakEntity<V>> for AnyWeakView {
+    fn from(view: WeakEntity<V>) -> Self {
+        AnyWeakView {
+            entity: view.into(),
+            render: any_view::render::<V>,
+        }
+    }
+}
+
+impl PartialEq for AnyWeakView {
+    fn eq(&self, other: &Self) -> bool {
+        self.entity == other.entity
+    }
+}
+
+impl std::fmt::Debug for AnyWeakView {
+    fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
+        f.debug_struct("AnyWeakView")
+            .field("entity_id", &self.entity.entity_id)
+            .finish_non_exhaustive()
+    }
+}
+
+mod any_view {
+    use crate::{AnyElement, AnyView, App, IntoElement, Render, Window};
+
+    pub(crate) fn render<V: 'static + Render>(
+        view: &AnyView,
+        window: &mut Window,
+        cx: &mut App,
+    ) -> AnyElement {
+        let view = view.clone().downcast::<V>().unwrap();
+        // Record the view's Render type name so the accessibility debug dump can
+        // attribute nodes to the view that produced them.
+        #[cfg(debug_assertions)]
+        window
+            .a11y
+            .view_type_names
+            .insert(view.entity_id(), std::any::type_name::<V>());
+        view.update(cx, |view, cx| {
+            #[cfg(all(
+                feature = "hot-patching",
+                debug_assertions,
+                not(target_family = "wasm")
+            ))]
+            let element = subsecond::HotFn::current(V::render).call((view, window, cx));
+            #[cfg(not(all(
+                feature = "hot-patching",
+                debug_assertions,
+                not(target_family = "wasm")
+            )))]
+            let element = view.render(window, cx);
+            element.into_any_element()
+        })
+    }
+}
+
+/// A renderable that participates in GPUI's reactive graph — the unifying model
+/// behind [`Render`] and [`RenderOnce`].
+///
+/// When `entity_id()` returns `Some`, that id becomes the view's identity: it gets
+/// a unique element-id space (so internal `use_state` / `.id(..)` never collide
+/// across siblings) and `cx.notify()` on that entity re-renders only this view's
+/// subtree. `None` behaves like a stateless component.
+///
+/// You rarely implement `View` directly. `Entity<T: Render>` and any `T: RenderOnce`
+/// get a blanket impl below; implement it by hand only when a component needs both
+/// parent-supplied props *and* a backing entity for identity.
+pub trait View: 'static + Sized {
+    #[doc(hidden)]
+    fn query_type() -> crate::reflection::Type {
+        crate::reflection::Type::discover::<Self>()
+    }
+
+    /// This view's identity, if it has one. A view typically holds the backing
+    /// entity as a field and returns its [`EntityId`] here.
+    ///
+    /// The id becomes this view's [`ElementId`], so two views keyed on the same
+    /// entity must not be rendered at the same position in the element tree
+    /// (e.g. as siblings under the same parent): their internal element state
+    /// (`use_state`, scroll offsets, etc.) would silently collide. Nesting is
+    /// fine — the id is scoped by the parent path.
+    fn entity_id(&self) -> Option<EntityId>;
+
+    /// Render this view into an element tree, consuming `self`.
+    fn render(self, window: &mut Window, cx: &mut App) -> impl IntoElement;
+}
+
+fn render_view<V: View>(view: V, window: &mut Window, cx: &mut App) -> AnyElement {
+    #[cfg(all(
+        feature = "hot-patching",
+        debug_assertions,
+        not(target_family = "wasm")
+    ))]
+    let element = subsecond::HotFn::current(V::render).call((view, window, cx));
+    #[cfg(not(all(
+        feature = "hot-patching",
+        debug_assertions,
+        not(target_family = "wasm")
+    )))]
+    let element = view.render(window, cx);
+    element.into_any_element()
+}
+
+/// A stateless component (`RenderOnce`) is a `View` with no identity.
+impl<T: RenderOnce> View for T {
+    fn query_type() -> crate::reflection::Type {
+        T::query_type()
+    }
+
+    fn entity_id(&self) -> Option<EntityId> {
+        None
+    }
+
+    #[inline]
+    fn render(self, window: &mut Window, cx: &mut App) -> impl IntoElement {
+        #[cfg(all(
+            feature = "hot-patching",
+            debug_assertions,
+            not(target_family = "wasm")
+        ))]
+        let element = subsecond::HotFn::current(<T as RenderOnce>::render).call((self, window, cx));
+        #[cfg(not(all(
+            feature = "hot-patching",
+            debug_assertions,
+            not(target_family = "wasm")
+        )))]
+        let element = RenderOnce::render(self, window, cx);
+        element
+    }
+}
+
+/// An entity that renders itself (`Render`) is a `View` keyed on its own id.
+impl<T: Render> View for Entity<T> {
+    fn entity_id(&self) -> Option<EntityId> {
+        Some(Entity::entity_id(self))
+    }
+
+    #[inline]
+    fn render(self, window: &mut Window, cx: &mut App) -> impl IntoElement {
+        self.update(cx, |this, cx| {
+            #[cfg(all(
+                feature = "hot-patching",
+                debug_assertions,
+                not(target_family = "wasm")
+            ))]
+            let element = subsecond::HotFn::current(T::render).call((this, window, cx));
+            #[cfg(not(all(
+                feature = "hot-patching",
+                debug_assertions,
+                not(target_family = "wasm")
+            )))]
+            let element = Render::render(this, window, cx);
+            element.into_any_element()
+        })
+    }
+}
+
+impl<T: Render> Entity<T> {
+    /// Embed this entity as a cached [`ViewElement`] laid out at `style`.
+    ///
+    /// The rendered subtree is reused until the entity is notified (or the
+    /// cached bounds / text style change). Caching requires a definite size:
+    /// a cached view is laid out from `style` and is *not* measured from its
+    /// contents. Use [`ViewElement::new`] (or `.child(entity)`) for the
+    /// uncached case.
+    #[track_caller]
+    pub fn cached(self, style: StyleRefinement) -> ViewElement<Entity<T>> {
+        ViewElement::new(self).cached(style)
+    }
+}
+
+/// The element type for [`View`] implementations. Wraps a `View` and hooks it
+/// into layout, prepaint, and paint. Constructed via [`ViewElement::new`].
+/// Reflection targets this wrapper, independently of the view and its rendered root.
+#[doc(hidden)]
+#[derive(gpui_macros::Reflect)]
+#[reflect()]
+pub struct ViewElement<V: View> {
+    view: Option<V>,
+    query_type: fn() -> crate::reflection::Type,
+    entity_id: Option<EntityId>,
+    cached_style: Option<StyleRefinement>,
+    #[cfg(debug_assertions)]
+    source: &'static core::panic::Location<'static>,
+}
+
+impl<V: View> ViewElement<V> {
+    /// Wrap a [`View`] as an element.
+    /// Debug builds warn once per view type when its reflection describes the
+    /// authored component but this wrapper has no reflected traits.
+    #[track_caller]
+    pub fn new(view: V) -> Self {
+        #[cfg(debug_assertions)]
+        if let Some(diagnostic) = component_reflection_diagnostic::<V>() {
+            log::warn!("{diagnostic}");
+        }
+
+        let entity_id = view.entity_id();
+
+        ViewElement {
+            entity_id,
+            cached_style: None,
+            view: Some(view),
+            query_type: V::query_type,
+            #[cfg(debug_assertions)]
+            source: core::panic::Location::caller(),
+        }
+    }
+
+    /// Wraps a described view, retaining its authored fields for queries before render.
+    pub fn reflected(view: V) -> Self
+    where
+        V: crate::reflection::Describe,
+    {
+        let mut element = Self::new(view);
+        element.query_type = V::type_shape;
+        element
+    }
+
+    pub(crate) fn pending_view_mut(&mut self) -> Option<&mut V> {
+        self.view.as_mut()
+    }
+
+    /// Enable caching of this view's rendered subtree, laid out at `style`.
+    /// The composer supplies the layout style because caching skips rendering
+    /// the contents to measure them.
+    ///
+    /// Crate-private on purpose: caching is only sound for entity-backed views,
+    /// where [`Context::notify`] is the contract that busts the cache. A stateless
+    /// view has no such contract, so a frozen subtree could never be invalidated.
+    /// Reach this through [`Entity::cached`] or [`AnyView::cached`], which are
+    /// entity-backed by construction.
+    pub(crate) fn cached(mut self, style: StyleRefinement) -> Self {
+        self.cached_style = Some(style);
+        self
+    }
+}
+
+#[cfg(debug_assertions)]
+fn component_reflection_diagnostic<V: View>() -> Option<String> {
+    static REPORTED: LazyLock<Mutex<FxHashSet<TypeId>>> =
+        LazyLock::new(|| Mutex::new(FxHashSet::default()));
+    let type_id = TypeId::of::<V>();
+
+    if REPORTED.lock().contains(&type_id) {
+        return None;
+    }
+
+    let component = crate::reflection::registered_traits(type_id);
+
+    if component.is_empty()
+        || !crate::reflection::linked_metadata_for::<ViewElement<V>>()
+            .descriptors()
+            .is_empty()
+    {
+        return None;
+    }
+
+    if !REPORTED.lock().insert(type_id) {
+        return None;
+    }
+
+    Some(format!(
+        "Reflection registered for {} describes that component. This node stores {}; \
+         its rendered root is a separate child. Reflect a concrete Element that \
+         implements the required traits, or use the rendered root's own reflection.",
+        type_name::<V>(),
+        type_name::<ViewElement<V>>(),
+    ))
+}
+
+impl<V: View> IntoElement for ViewElement<V> {
+    type Element = Self;
+
+    fn into_element(self) -> Self::Element {
+        self
+    }
+}
+
+struct ViewElementState {
+    prepaint_range: Range<PrepaintStateIndex>,
+    paint_range: Range<PaintIndex>,
+    cache_key: ViewElementCacheKey,
+    accessed_entities: FxHashSet<EntityId>,
+}
+
+#[derive(Default)]
+#[doc(hidden)]
+pub struct ViewElementRequestLayoutState {
+    element: Option<AnyElement>,
+    detached_layout_id: Option<LayoutId>,
+    accessed_entities: FxHashSet<EntityId>,
+}
+
+#[derive(Default)]
+struct ViewDirectionState {
+    known: bool,
+    contribution: Option<ResolvedDirection>,
+}
+
+#[derive(PartialEq)]
+struct ViewElementCacheKey {
+    bounds: Bounds<Pixels>,
+    content_mask: ContentMask<Pixels>,
+    text_style: TextStyle,
+    direction: ResolvedDirection,
+    unicode_bidi: UnicodeBidi,
+}
+
+impl<V: View> Element for ViewElement<V> {
+    type RequestLayoutState = ViewElementRequestLayoutState;
+    type PrepaintState = Option<AnyElement>;
+
+    fn reflection(&self) -> &'static crate::reflection::ElementReflection {
+        <Self as crate::reflection::Reflect>::reflection()
+    }
+
+    fn query_subject(&self) -> Option<&dyn std::any::Any> {
+        self.view.as_ref().map(|view| view as &dyn std::any::Any)
+    }
+
+    fn query_subject_mut(&mut self) -> Option<&mut dyn std::any::Any> {
+        self.view
+            .as_mut()
+            .map(|view| view as &mut dyn std::any::Any)
+    }
+
+    fn query_type(&self) -> crate::reflection::Type {
+        (self.query_type)()
+    }
+
+    fn id(&self) -> Option<ElementId> {
+        self.entity_id.map(ElementId::View)
+    }
+
+    fn source_location(&self) -> Option<&'static core::panic::Location<'static>> {
+        #[cfg(debug_assertions)]
+        return Some(self.source);
+
+        #[cfg(not(debug_assertions))]
+        return None;
+    }
+
+    fn request_layout(
+        &mut self,
+        global_id: Option<&GlobalElementId>,
+        _inspector_id: Option<&InspectorElementId>,
+        window: &mut Window,
+        cx: &mut App,
+    ) -> (LayoutId, Self::RequestLayoutState) {
+        let entity_id = self.entity_id;
+        let request_layout = |window: &mut Window| {
+            let caching_disabled = window.is_inspector_picking(cx)
+                || window.selector_runtime().can_affect_view_contents();
+
+            if let (Some(entity_id), Some(style)) = (
+                entity_id,
+                self.cached_style.as_ref().filter(|_| !caching_disabled),
+            ) {
+                let mut root_style = Style::default();
+                root_style.refine(style);
+                let layout_id = window.request_layout(root_style, None, cx);
+                let (known, contribution) = window.with_element_state::<ViewDirectionState, _>(
+                    global_id.unwrap(),
+                    |state, _window| {
+                        let state = state.unwrap_or_default();
+                        ((state.known, state.contribution), state)
+                    },
+                );
+                let should_probe =
+                    !known || window.dirty_views.contains(&entity_id) || window.refreshing;
+
+                if should_probe {
+                    let ((element, detached_layout_id), accessed_entities) = cx
+                        .detect_accessed_entities(|cx| {
+                            let mut element = render_view(self.view.take().unwrap(), window, cx);
+                            let detached_layout_id = element.request_layout(window, cx);
+
+                            (element, detached_layout_id)
+                        });
+                    window.set_layout_logical_children(
+                        layout_id,
+                        std::slice::from_ref(&detached_layout_id),
+                    );
+
+                    return (
+                        layout_id,
+                        ViewElementRequestLayoutState {
+                            element: Some(element),
+                            detached_layout_id: Some(detached_layout_id),
+                            accessed_entities,
+                        },
+                    );
+                }
+
+                window.set_layout_auto_direction_hint(layout_id, contribution);
+
+                return (layout_id, ViewElementRequestLayoutState::default());
+            }
+
+            // Finish this frame through the uncached prepaint and paint paths.
+            let cached_style = self.cached_style.take();
+            let mut element = render_view(self.view.take().unwrap(), window, cx);
+            let child_layout_id = element.request_layout(window, cx);
+            let layout_id = if let Some(style) = cached_style {
+                let mut root_style = Style::default();
+                root_style.refine(&style);
+
+                window.request_layout(root_style, [child_layout_id], cx)
+            } else {
+                child_layout_id
+            };
+
+            (
+                layout_id,
+                ViewElementRequestLayoutState {
+                    element: Some(element),
+                    ..Default::default()
+                },
+            )
+        };
+
+        if let Some(entity_id) = entity_id {
+            window.with_rendered_view(entity_id, request_layout)
+        } else {
+            window.with_id(
+                ElementId::Name(std::any::type_name::<V>().into()),
+                request_layout,
+            )
+        }
+    }
+
+    fn prepaint(
+        &mut self,
+        global_id: Option<&GlobalElementId>,
+        _inspector_id: Option<&InspectorElementId>,
+        bounds: Bounds<Pixels>,
+        request_layout: &mut Self::RequestLayoutState,
+        window: &mut Window,
+        cx: &mut App,
+    ) -> Option<AnyElement> {
+        if let Some(entity_id) = self.entity_id {
+            // Stateful path.
+            window.set_view_id(entity_id);
+            window.with_rendered_view(entity_id, |window| {
+                if request_layout.detached_layout_id.is_none()
+                    && let Some(mut element) = request_layout.element.take()
+                {
+                    element.prepaint(window, cx);
+                    return Some(element);
+                }
+
+                window.with_element_state::<ViewElementState, _>(
+                    global_id.unwrap(),
+                    |element_state, window| {
+                        let cache_key = ViewElementCacheKey {
+                            bounds,
+                            content_mask: window.content_mask(),
+                            text_style: window.text_style(),
+                            direction: window.resolved_direction(),
+                            unicode_bidi: window.resolved_unicode_bidi(),
+                        };
+
+                        if request_layout.element.is_none()
+                            && let Some(mut element_state) = element_state
+                            && element_state.cache_key == cache_key
+                            && !window.dirty_views.contains(&entity_id)
+                            && !window.refreshing
+                        {
+                            let prepaint_start = window.prepaint_index();
+                            window.reuse_prepaint(element_state.prepaint_range.clone());
+                            cx.entities
+                                .extend_accessed(&element_state.accessed_entities);
+                            let prepaint_end = window.prepaint_index();
+                            element_state.prepaint_range = prepaint_start..prepaint_end;
+
+                            return (None, element_state);
+                        }
+
+                        let refreshing = mem::replace(&mut window.refreshing, true);
+                        let prepaint_start = window.prepaint_index();
+                        let mut accessed_entities =
+                            mem::take(&mut request_layout.accessed_entities);
+                        let (element, additional_entities) = cx.detect_accessed_entities(|cx| {
+                            let mut element = request_layout.element.take().unwrap_or_else(|| {
+                                render_view(self.view.take().unwrap(), window, cx)
+                            });
+                            element.layout_as_root(bounds.size.into(), window, cx);
+                            element.prepaint_at(bounds.origin, window, cx);
+
+                            element
+                        });
+                        accessed_entities.extend(additional_entities);
+
+                        if let Some(detached_layout_id) = request_layout.detached_layout_id.take() {
+                            let contribution =
+                                window.layout_auto_direction_contribution(detached_layout_id);
+                            window.with_element_state::<ViewDirectionState, _>(
+                                global_id.unwrap(),
+                                |_state, _window| {
+                                    (
+                                        (),
+                                        ViewDirectionState {
+                                            known: true,
+                                            contribution,
+                                        },
+                                    )
+                                },
+                            );
+                        }
+
+                        let prepaint_end = window.prepaint_index();
+                        window.refreshing = refreshing;
+
+                        (
+                            Some(element),
+                            ViewElementState {
+                                accessed_entities,
+                                prepaint_range: prepaint_start..prepaint_end,
+                                paint_range: PaintIndex::default()..PaintIndex::default(),
+                                cache_key,
+                            },
+                        )
+                    },
+                )
+            })
+        } else {
+            // Stateless path: just prepaint the element.
+            window.with_id(
+                ElementId::Name(std::any::type_name::<V>().into()),
+                |window| {
+                    request_layout
+                        .element
+                        .as_mut()
+                        .unwrap()
+                        .prepaint(window, cx);
+                },
+            );
+            Some(request_layout.element.take().unwrap())
+        }
+    }
+
+    fn paint(
+        &mut self,
+        global_id: Option<&GlobalElementId>,
+        _inspector_id: Option<&InspectorElementId>,
+        _bounds: Bounds<Pixels>,
+        _request_layout: &mut Self::RequestLayoutState,
+        element: &mut Self::PrepaintState,
+        window: &mut Window,
+        cx: &mut App,
+    ) {
+        if let Some(entity_id) = self.entity_id {
+            // Stateful path.
+            window.with_rendered_view(entity_id, |window| {
+                let caching_disabled = window.is_inspector_picking(cx);
+                if self.cached_style.is_some() && !caching_disabled {
+                    window.with_element_state::<ViewElementState, _>(
+                        global_id.unwrap(),
+                        |element_state, window| {
+                            let mut element_state = element_state.unwrap();
+
+                            let paint_start = window.paint_index();
+
+                            if let Some(element) = element {
+                                let refreshing = mem::replace(&mut window.refreshing, true);
+                                element.paint(window, cx);
+                                window.refreshing = refreshing;
+                            } else {
+                                window.reuse_paint(element_state.paint_range.clone());
+                            }
+
+                            let paint_end = window.paint_index();
+                            element_state.paint_range = paint_start..paint_end;
+
+                            ((), element_state)
+                        },
+                    )
+                } else {
+                    element.as_mut().unwrap().paint(window, cx);
+                }
+            });
+        } else {
+            // Stateless path: just paint the element.
+            window.with_id(
+                ElementId::Name(std::any::type_name::<V>().into()),
+                |window| {
+                    element.as_mut().unwrap().paint(window, cx);
+                },
+            );
+        }
+    }
+}
+
+/// A view that renders nothing
+#[derive(gpui_macros::Reflect)]
+pub struct EmptyView;
+
+impl Render for EmptyView {
+    fn render(&mut self, _window: &mut Window, _cx: &mut Context<Self>) -> impl IntoElement {
+        Empty
+    }
+}
+
+#[cfg(all(test, debug_assertions))]
+mod tests {
+    use super::*;
+    use crate::{div, reflection::Reflect};
+
+    #[gpui_macros::reflect_trait]
+    trait Capability {}
+
+    #[derive(gpui_macros::Reflect)]
+    #[reflect(Capability)]
+    struct LinkedComponent;
+
+    struct ProvidedComponent;
+
+    struct UnreflectedComponent;
+
+    impl Capability for LinkedComponent {}
+    impl Capability for ProvidedComponent {}
+
+    impl Reflect for ProvidedComponent {
+        fn build_reflection() -> Vec<crate::reflection::ReflectedImplementation<Self>> {
+            let mut implementations = Vec::new();
+            Capability.__register::<Self>(&mut implementations);
+
+            implementations
+        }
+    }
+
+    macro_rules! render_components {
+        ($($component:ty),*) => {
+            $(impl RenderOnce for $component {
+                fn render(self, _window: &mut Window, _cx: &mut App) -> impl IntoElement {
+                    div()
+                }
+            })*
+        };
+    }
+
+    render_components!(LinkedComponent, ProvidedComponent, UnreflectedComponent);
+
+    #[test]
+    fn diagnoses_component_receiver_mismatches_once_through_the_provider() {
+        assert!(component_reflection_diagnostic::<UnreflectedComponent>().is_none());
+        assert!(component_reflection_diagnostic::<ProvidedComponent>().is_none());
+        <ProvidedComponent as Reflect>::reflection();
+
+        let diagnostic = component_reflection_diagnostic::<LinkedComponent>().unwrap();
+
+        assert!(diagnostic.contains(type_name::<LinkedComponent>()));
+        assert!(diagnostic.contains(type_name::<ViewElement<LinkedComponent>>()));
+        assert!(diagnostic.contains("rendered root is a separate child"));
+        assert!(diagnostic.contains("Reflect a concrete Element"));
+        assert!(component_reflection_diagnostic::<LinkedComponent>().is_none());
+
+        let element = ViewElement::new(ProvidedComponent).into_any_element();
+
+        assert!(component_reflection_diagnostic::<ProvidedComponent>().is_none());
+        assert!(<ProvidedComponent as Reflect>::reflection().implements_trait(Capability));
+        assert!(element.reflected_traits().is_empty());
+        assert!(!element.implements_trait(Capability));
+    }
+}

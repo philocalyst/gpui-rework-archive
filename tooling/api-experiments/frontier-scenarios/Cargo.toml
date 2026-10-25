@@ -1,0 +1,14 @@
+[package]
+name = "gpui-api-frontier-scenarios"
+version = "0.1.0"
+edition = "2024"
+publish = false
+
+[dependencies]
+gpui = { package = "gpui-ce", path = "../../../crates/gpui", default-features = false }
+
+[[example]]
+name = "frontier"
+path = "examples/frontier.rs"
+
+[workspace]

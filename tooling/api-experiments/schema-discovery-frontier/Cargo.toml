@@ -1,0 +1,11 @@
+[package]
+name = "schema-discovery-frontier"
+version = "0.1.0"
+edition = "2024"
+publish = false
+
+[workspace]
+
+[dependencies]
+inventory = "0.3"
+smallvec = "1"

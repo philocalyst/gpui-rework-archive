@@ -1,0 +1,13 @@
+[package]
+name = "gpui-value-query-consumer"
+version = "0.1.0"
+edition = "2024"
+
+[dependencies]
+gpui = { package = "gpui-ce", path = "../../../crates/gpui", default-features = false }
+
+[[bin]]
+name = "value-query-consumer"
+path = "src/main.rs"
+
+[workspace]

@@ -1,0 +1,13 @@
+[package]
+name = "value-shape-frontier"
+version = "0.1.0"
+edition = "2024"
+
+[workspace]
+
+[lib]
+path = "src/lib.rs"
+
+[[bin]]
+name = "bench"
+path = "src/bin/bench.rs"

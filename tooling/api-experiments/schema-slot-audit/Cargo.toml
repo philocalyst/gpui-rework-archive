@@ -1,0 +1,14 @@
+[package]
+name = "schema-slot-audit"
+version = "0.1.0"
+edition = "2024"
+
+[workspace]
+
+[dependencies]
+inventory = "0.3"
+schema-slots-frontier = { path = "../schema-slots-frontier" }
+
+[[bench]]
+name = "discovery_allocations"
+harness = false

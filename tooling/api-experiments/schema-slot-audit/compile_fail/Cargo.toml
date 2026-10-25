@@ -1,0 +1,9 @@
+[package]
+name = "schema-slot-audit-compile-fail"
+version = "0.1.0"
+edition = "2024"
+
+[workspace]
+
+[dependencies]
+schema-slot-audit = { path = ".." }

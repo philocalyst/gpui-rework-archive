@@ -1,0 +1,16 @@
+[package]
+name = "value-runtime-bench"
+version = "0.1.0"
+edition = "2024"
+
+[workspace]
+
+[dependencies]
+inventory = "0.3"
+
+[lib]
+path = "src/lib.rs"
+
+[[bin]]
+name = "bench"
+path = "src/bin/bench.rs"

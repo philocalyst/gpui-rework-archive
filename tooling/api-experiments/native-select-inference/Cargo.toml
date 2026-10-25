@@ -1,0 +1,13 @@
+[package]
+name = "native-select-inference"
+version = "0.1.0"
+edition = "2024"
+
+[workspace]
+
+[lib]
+path = "src/lib.rs"
+
+[[bin]]
+name = "native-select-inference"
+path = "src/main.rs"

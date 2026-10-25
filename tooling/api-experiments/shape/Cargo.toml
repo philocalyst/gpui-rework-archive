@@ -1,0 +1,10 @@
+[package]
+name = "shape-api-experiment"
+version = "0.1.0"
+edition = "2024"
+
+[workspace]
+
+[dependencies]
+inventory = "0.3"
+shape-api-macros = { path = "shape-macros" }

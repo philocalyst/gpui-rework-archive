@@ -1,0 +1,8 @@
+[package]
+name = "frontier-reflect"
+version = "0.1.0"
+edition.workspace = true
+
+[dependencies]
+frontier-reflect-macros = { path = "../reflect-macros" }
+

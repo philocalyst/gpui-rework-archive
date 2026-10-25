@@ -1,0 +1,16 @@
+[package]
+name = "discovery-macro-audit"
+version = "0.1.0"
+edition = "2024"
+publish = false
+
+[workspace]
+
+[dependencies]
+discovery-macro-audit-macros = { path = "macros" }
+inventory = "0.3"
+smallvec = "1"
+
+[[test]]
+name = "discovery"
+path = "tests/discovery.rs"

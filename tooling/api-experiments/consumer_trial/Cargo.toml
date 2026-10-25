@@ -1,0 +1,30 @@
+[package]
+name = "gpui-api-consumer-trial"
+version = "0.1.0"
+edition = "2024"
+autobins = false
+
+[features]
+compile-fail = []
+
+[dependencies]
+gpui = { package = "gpui-ce", path = "../../../crates/gpui", default-features = false }
+
+[[bin]]
+name = "gpui-api-consumer-trial"
+path = "src/main.rs"
+
+[[bin]]
+name = "concrete_downcast"
+path = "src/bin/concrete_downcast.rs"
+
+[[bin]]
+name = "compositions_positive"
+path = "src/bin/compositions_positive.rs"
+
+[[bin]]
+name = "repeated_reflects_fail"
+path = "src/bin/repeated_reflects_fail.rs"
+required-features = ["compile-fail"]
+
+[workspace]

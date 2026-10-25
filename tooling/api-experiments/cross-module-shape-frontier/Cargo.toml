@@ -1,0 +1,10 @@
+[package]
+name = "cross-module-shape-frontier"
+version = "0.1.0"
+edition = "2024"
+publish = false
+
+[workspace]
+
+[dependencies]
+smallvec = "1"

@@ -1,0 +1,9 @@
+[package]
+name = "value-shape-frontier-compile-fail"
+version = "0.1.0"
+edition = "2024"
+
+[workspace]
+
+[dependencies]
+value-shape-frontier = { path = ".." }

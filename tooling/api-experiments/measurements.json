@@ -1,0 +1,648 @@
+{
+  "date": "2026-10-07",
+  "base_revision": "8fe466f901a2e536e89549d3e07d9dd575bd67ea",
+  "uncommitted_changes": true,
+  "source_sha256": "89f0a1f153d3b69094cce8172c37d2a5ce238fda9e823ab20b12e942d30078e5",
+  "fingerprinted_modified_files": [
+    "crates/gpui/benches/selectors.rs",
+    "crates/gpui/examples/learn/element_selectors.rs",
+    "crates/gpui/examples/learn/trait_reflection.rs",
+    "crates/gpui/src/element.rs",
+    "crates/gpui/src/elements/div.rs",
+    "crates/gpui/src/elements/text.rs",
+    "crates/gpui/src/gpui.rs",
+    "crates/gpui/src/reflection.rs",
+    "crates/gpui/src/reflection/access.rs",
+    "crates/gpui/src/reflection/benchmarks.rs",
+    "crates/gpui/src/reflection/capability.rs",
+    "crates/gpui/src/reflection/element.rs",
+    "crates/gpui/src/reflection/metadata.rs",
+    "crates/gpui/src/reflection/schema.rs",
+    "crates/gpui/src/reflection/test_fixtures.rs",
+    "crates/gpui/src/reflection/tests.rs",
+    "crates/gpui/src/selectors.rs",
+    "crates/gpui/src/selectors/benchmarks.rs",
+    "crates/gpui/src/selectors/targets.rs",
+    "crates/gpui/src/selectors/tests.rs",
+    "crates/gpui/src/styled.rs",
+    "crates/gpui/src/view.rs",
+    "crates/gpui/src/window.rs",
+    "crates/gpui/tests/element_query_api.rs",
+    "crates/gpui/tests/trait_reflection.rs",
+    "crates/gpui_macros/src/derive_element.rs",
+    "crates/gpui_macros/src/derive_element_traits.rs",
+    "crates/gpui_macros/src/derive_reflect.rs",
+    "crates/gpui_macros/src/derive_reflect/dispatch.rs",
+    "crates/gpui_macros/src/derive_reflect/registration.rs",
+    "crates/gpui_macros/src/derive_reflect/tests.rs",
+    "crates/gpui_macros/src/derive_reflect/trait_schema.rs",
+    "crates/gpui_macros/src/gpui_macros.rs",
+    "crates/gpui_macros/src/styles.rs",
+    "crates/gpui_macros/src/trait_set.rs",
+    "tooling/api-experiments/bindings/Cargo.lock",
+    "tooling/api-experiments/bindings/Cargo.toml",
+    "tooling/api-experiments/bindings/src/main.rs",
+    "tooling/api-experiments/components/Cargo.lock",
+    "tooling/api-experiments/components/Cargo.toml",
+    "tooling/api-experiments/components/borrowed_component_fail.rs",
+    "tooling/api-experiments/components/tests/wrapper.rs",
+    "tooling/api-experiments/composition/Cargo.lock",
+    "tooling/api-experiments/composition/Cargo.toml",
+    "tooling/api-experiments/composition/examples/indexed_negative_missing_builtin.rs",
+    "tooling/api-experiments/composition/examples/indexed_negative_repeated.rs",
+    "tooling/api-experiments/composition/examples/indexed_negative_shared_parent.rs",
+    "tooling/api-experiments/composition/examples/indexed_positive.rs",
+    "tooling/api-experiments/composition/examples/individual_bounds.rs",
+    "tooling/api-experiments/composition/examples/negative_ambiguous_supertrait_method.rs",
+    "tooling/api-experiments/composition/examples/negative_missing_capability.rs",
+    "tooling/api-experiments/composition/examples/positive.rs",
+    "tooling/api-experiments/composition/examples/umbrella_bound.rs",
+    "tooling/api-experiments/composition/src/indexed.rs",
+    "tooling/api-experiments/composition/src/lib.rs",
+    "tooling/api-experiments/consumer_trial/Cargo.lock",
+    "tooling/api-experiments/consumer_trial/Cargo.toml",
+    "tooling/api-experiments/consumer_trial/lens_object_safety.rs",
+    "tooling/api-experiments/consumer_trial/src/bin/compositions_positive.rs",
+    "tooling/api-experiments/consumer_trial/src/bin/concrete_downcast.rs",
+    "tooling/api-experiments/consumer_trial/src/bin/repeated_reflects_fail.rs",
+    "tooling/api-experiments/consumer_trial/src/main.rs",
+    "tooling/api-experiments/frontier-dispatch/Cargo.lock",
+    "tooling/api-experiments/frontier-dispatch/Cargo.toml",
+    "tooling/api-experiments/frontier-dispatch/src/main.rs",
+    "tooling/api-experiments/frontier-scenarios/Cargo.lock",
+    "tooling/api-experiments/frontier-scenarios/Cargo.toml",
+    "tooling/api-experiments/frontier-scenarios/examples/frontier.rs",
+    "tooling/api-experiments/lenses/Cargo.lock",
+    "tooling/api-experiments/lenses/Cargo.toml",
+    "tooling/api-experiments/lenses/examples/bench.rs",
+    "tooling/api-experiments/lenses/examples/consumer.rs",
+    "tooling/api-experiments/lenses/examples/registered_consumer.rs",
+    "tooling/api-experiments/lenses/src/lib.rs",
+    "tooling/api-experiments/lenses/src/registry.rs",
+    "tooling/api-experiments/shape/Cargo.lock",
+    "tooling/api-experiments/shape/Cargo.toml",
+    "tooling/api-experiments/shape/compile_fail/Cargo.lock",
+    "tooling/api-experiments/shape/compile_fail/Cargo.toml",
+    "tooling/api-experiments/shape/compile_fail/src/main.rs",
+    "tooling/api-experiments/shape/shape-macros/Cargo.toml",
+    "tooling/api-experiments/shape/shape-macros/src/lib.rs",
+    "tooling/api-experiments/shape/src/lib.rs",
+    "tooling/api-experiments/shape/src/main.rs",
+    "tooling/api-experiments/testing_trial/Cargo.lock",
+    "tooling/api-experiments/testing_trial/Cargo.toml",
+    "tooling/api-experiments/testing_trial/tests/reflection_selector.rs"
+  ],
+  "rustc": "rustc 1.101.0-nightly (5c543b0b8 2026-09-29)",
+  "target": "aarch64-macos",
+  "backend": "CPU TestPlatform for selectors; no renderer for reflection",
+  "gpu": null,
+  "profile": "release",
+  "observed_features": {
+    "bench_support": true,
+    "font_kit": true,
+    "wayland": true,
+    "x11": true,
+    "windows_manifest": true,
+    "debug_assertions": false
+  },
+  "method": {
+    "statistic": "Criterion mean in nanoseconds",
+    "confidence_level": 0.95,
+    "sample_size": 100,
+    "warm_up_seconds": 1,
+    "measurement_seconds_requested": 3,
+    "allocation_scope": "calling thread, warm measured operation; requests include reallocations; fixture construction excluded"
+  },
+  "native_table_record_bytes": {
+    "Styled": 16,
+    "named_Styled_Parent": 32,
+    "tuple_Styled_Parent": 48,
+    "Capability": 8
+  },
+  "means_ns": {
+    "typed-query-full": {
+      "reflection_query/borrow_four_calls": {
+        "confidence_interval": {
+          "confidence_level": 0.95,
+          "lower_bound": 41.489383766386695,
+          "upper_bound": 44.193317243006284
+        },
+        "point_estimate": 42.825610920416715,
+        "standard_error": 0.6892039127785444
+      },
+      "reflection_query/capability_four_calls": {
+        "confidence_interval": {
+          "confidence_level": 0.95,
+          "lower_bound": 19.664204914784072,
+          "upper_bound": 21.135444563012225
+        },
+        "point_estimate": 20.404693059264467,
+        "standard_error": 0.3740172256946642
+      },
+      "reflection_query/prepared_four_calls": {
+        "confidence_interval": {
+          "confidence_level": 0.95,
+          "lower_bound": 14.912413121334412,
+          "upper_bound": 16.0629339884561
+        },
+        "point_estimate": 15.49958442779673,
+        "standard_error": 0.29379402633752005
+      },
+      "reflection_query/resolve_four_calls": {
+        "confidence_interval": {
+          "confidence_level": 0.95,
+          "lower_bound": 40.34827259931374,
+          "upper_bound": 44.1016781270149
+        },
+        "point_estimate": 42.219739995178514,
+        "standard_error": 0.9586711691186804
+      },
+      "reflection_query/tuple_borrow": {
+        "confidence_interval": {
+          "confidence_level": 0.95,
+          "lower_bound": 49.556939853310304,
+          "upper_bound": 53.65217785371967
+        },
+        "point_estimate": 51.63454445410784,
+        "standard_error": 1.0440550924884588
+      },
+      "selectors_frame/cached_lending": {
+        "confidence_interval": {
+          "confidence_level": 0.95,
+          "lower_bound": 1147821.7337173913,
+          "upper_bound": 1245430.763065217
+        },
+        "point_estimate": 1197352.7386956525,
+        "standard_error": 24873.44925096794
+      },
+      "selectors_frame/deferred_lending": {
+        "confidence_interval": {
+          "confidence_level": 0.95,
+          "lower_bound": 1256348.2825900002,
+          "upper_bound": 1352501.9786300007
+        },
+        "point_estimate": 1304857.7492,
+        "standard_error": 24502.86723355261
+      },
+      "selectors_frame/fresh_lending": {
+        "confidence_interval": {
+          "confidence_level": 0.95,
+          "lower_bound": 1174082.5812819079,
+          "upper_bound": 1271067.7787661448
+        },
+        "point_estimate": 1222808.0738039014,
+        "standard_error": 24664.246679366166
+      },
+      "selectors_layout/fluent_32_1": {
+        "confidence_interval": {
+          "confidence_level": 0.95,
+          "lower_bound": 44844.693679254524,
+          "upper_bound": 48217.452566536325
+        },
+        "point_estimate": 46545.177290795895,
+        "standard_error": 860.8231789295929
+      },
+      "selectors_layout/fluent_32_16": {
+        "confidence_interval": {
+          "confidence_level": 0.95,
+          "lower_bound": 133088.98825446633,
+          "upper_bound": 144804.4155720732
+        },
+        "point_estimate": 138979.83989982112,
+        "standard_error": 2974.731221056346
+      },
+      "selectors_layout/lending_32_1": {
+        "confidence_interval": {
+          "confidence_level": 0.95,
+          "lower_bound": 44162.14794427493,
+          "upper_bound": 47789.7093933019
+        },
+        "point_estimate": 45993.07183389673,
+        "standard_error": 927.9770750747026
+      },
+      "selectors_layout/lending_32_16": {
+        "confidence_interval": {
+          "confidence_level": 0.95,
+          "lower_bound": 121014.87604827,
+          "upper_bound": 131295.94686902617
+        },
+        "point_estimate": 126214.23252835759,
+        "standard_error": 2620.802648823566
+      },
+      "selectors_matching/all_256_64": {
+        "confidence_interval": {
+          "confidence_level": 0.95,
+          "lower_bound": 160670.97719469713,
+          "upper_bound": 172303.97693523075
+        },
+        "point_estimate": 166534.4392652601,
+        "standard_error": 2973.038179014954
+      },
+      "selectors_matching/missing_class_256_64": {
+        "confidence_interval": {
+          "confidence_level": 0.95,
+          "lower_bound": 173543.35312984098,
+          "upper_bound": 182189.72525496487
+        },
+        "point_estimate": 177952.61581193152,
+        "standard_error": 2203.945625679234
+      }
+    },
+    "typed-query-repeat": {
+      "reflection_query/borrow_four_calls": {
+        "confidence_interval": {
+          "confidence_level": 0.95,
+          "lower_bound": 38.46312199800819,
+          "upper_bound": 41.54424649686112
+        },
+        "point_estimate": 40.03579626394754,
+        "standard_error": 0.7855530355625296
+      },
+      "reflection_query/tuple_borrow": {
+        "confidence_interval": {
+          "confidence_level": 0.95,
+          "lower_bound": 48.93656263127537,
+          "upper_bound": 52.69218482397047
+        },
+        "point_estimate": 50.802734963577166,
+        "standard_error": 0.9587272371877118
+      }
+    }
+  },
+  "allocation_requests": {
+    "reflection": {
+      "warm/erasure/div/drawable_only": {
+        "requests": 128,
+        "bytes_requested": 124928
+      },
+      "warm/erasure/div/retained": {
+        "requests": 128,
+        "bytes_requested": 124928
+      },
+      "warm/erasure/empty/drawable_only": {
+        "requests": 0,
+        "bytes_requested": 0
+      },
+      "warm/erasure/empty/retained": {
+        "requests": 0,
+        "bytes_requested": 0
+      },
+      "warm/erasure/mixed/drawable_only": {
+        "requests": 64,
+        "bytes_requested": 62464
+      },
+      "warm/erasure/mixed/retained": {
+        "requests": 64,
+        "bytes_requested": 62464
+      },
+      "warm/membership/registry": {
+        "requests": 0,
+        "bytes_requested": 0
+      },
+      "warm/dispatch/style/registry": {
+        "requests": 0,
+        "bytes_requested": 0
+      },
+      "warm/dispatch/override/registry": {
+        "requests": 0,
+        "bytes_requested": 0
+      },
+      "warm/membership/retained": {
+        "requests": 0,
+        "bytes_requested": 0
+      },
+      "warm/dispatch/style/retained": {
+        "requests": 0,
+        "bytes_requested": 0
+      },
+      "warm/dispatch/override/retained": {
+        "requests": 0,
+        "bytes_requested": 0
+      },
+      "warm/query/borrow_four_calls": {
+        "requests": 0,
+        "bytes_requested": 0
+      },
+      "warm/query/capability_four_calls": {
+        "requests": 0,
+        "bytes_requested": 0
+      },
+      "warm/query/tuple_borrow": {
+        "requests": 0,
+        "bytes_requested": 0
+      },
+      "warm/fluent/accessor": {
+        "requests": 0,
+        "bytes_requested": 0
+      },
+      "warm/fluent/styled": {
+        "requests": 0,
+        "bytes_requested": 0
+      },
+      "warm/fluent/styled_parent": {
+        "requests": 0,
+        "bytes_requested": 0
+      }
+    },
+    "selectors": {
+      "matching/all/32/1": {
+        "requests": 0,
+        "bytes_requested": 0
+      },
+      "matching/missing_trait/32/1": {
+        "requests": 0,
+        "bytes_requested": 0
+      },
+      "matching/missing_class/32/1": {
+        "requests": 0,
+        "bytes_requested": 0
+      },
+      "matching/mixed/32/1": {
+        "requests": 0,
+        "bytes_requested": 0
+      },
+      "matching/all/32/16": {
+        "requests": 0,
+        "bytes_requested": 0
+      },
+      "matching/missing_trait/32/16": {
+        "requests": 0,
+        "bytes_requested": 0
+      },
+      "matching/missing_class/32/16": {
+        "requests": 0,
+        "bytes_requested": 0
+      },
+      "matching/mixed/32/16": {
+        "requests": 0,
+        "bytes_requested": 0
+      },
+      "matching/all/32/64": {
+        "requests": 0,
+        "bytes_requested": 0
+      },
+      "matching/missing_trait/32/64": {
+        "requests": 0,
+        "bytes_requested": 0
+      },
+      "matching/missing_class/32/64": {
+        "requests": 0,
+        "bytes_requested": 0
+      },
+      "matching/mixed/32/64": {
+        "requests": 0,
+        "bytes_requested": 0
+      },
+      "matching/all/256/1": {
+        "requests": 0,
+        "bytes_requested": 0
+      },
+      "matching/missing_trait/256/1": {
+        "requests": 0,
+        "bytes_requested": 0
+      },
+      "matching/missing_class/256/1": {
+        "requests": 0,
+        "bytes_requested": 0
+      },
+      "matching/mixed/256/1": {
+        "requests": 0,
+        "bytes_requested": 0
+      },
+      "matching/all/256/16": {
+        "requests": 0,
+        "bytes_requested": 0
+      },
+      "matching/missing_trait/256/16": {
+        "requests": 0,
+        "bytes_requested": 0
+      },
+      "matching/missing_class/256/16": {
+        "requests": 0,
+        "bytes_requested": 0
+      },
+      "matching/mixed/256/16": {
+        "requests": 0,
+        "bytes_requested": 0
+      },
+      "matching/all/256/64": {
+        "requests": 0,
+        "bytes_requested": 0
+      },
+      "matching/missing_trait/256/64": {
+        "requests": 0,
+        "bytes_requested": 0
+      },
+      "matching/missing_class/256/64": {
+        "requests": 0,
+        "bytes_requested": 0
+      },
+      "matching/mixed/256/64": {
+        "requests": 0,
+        "bytes_requested": 0
+      },
+      "layout/none/32/1": {
+        "requests": 81,
+        "bytes_requested": 19540
+      },
+      "layout/miss/32/1": {
+        "requests": 82,
+        "bytes_requested": 19548
+      },
+      "layout/identity/32/1": {
+        "requests": 82,
+        "bytes_requested": 19548
+      },
+      "layout/fluent/32/1": {
+        "requests": 82,
+        "bytes_requested": 19548
+      },
+      "layout/lending/32/1": {
+        "requests": 82,
+        "bytes_requested": 19548
+      },
+      "layout/parent/32/1": {
+        "requests": 211,
+        "bytes_requested": 26852
+      },
+      "layout/none/32/16": {
+        "requests": 81,
+        "bytes_requested": 19540
+      },
+      "layout/miss/32/16": {
+        "requests": 212,
+        "bytes_requested": 46868
+      },
+      "layout/identity/32/16": {
+        "requests": 212,
+        "bytes_requested": 46868
+      },
+      "layout/fluent/32/16": {
+        "requests": 212,
+        "bytes_requested": 46868
+      },
+      "layout/lending/32/16": {
+        "requests": 212,
+        "bytes_requested": 46868
+      },
+      "layout/parent/32/16": {
+        "requests": 3480,
+        "bytes_requested": 628404
+      },
+      "layout/none/256/1": {
+        "requests": 535,
+        "bytes_requested": 162028
+      },
+      "layout/miss/256/1": {
+        "requests": 536,
+        "bytes_requested": 162036
+      },
+      "layout/identity/256/1": {
+        "requests": 536,
+        "bytes_requested": 162036
+      },
+      "layout/fluent/256/1": {
+        "requests": 536,
+        "bytes_requested": 162036
+      },
+      "layout/lending/256/1": {
+        "requests": 536,
+        "bytes_requested": 162036
+      },
+      "layout/parent/256/1": {
+        "requests": 1561,
+        "bytes_requested": 220412
+      },
+      "layout/none/256/16": {
+        "requests": 535,
+        "bytes_requested": 162028
+      },
+      "layout/miss/256/16": {
+        "requests": 1562,
+        "bytes_requested": 375724
+      },
+      "layout/identity/256/16": {
+        "requests": 1562,
+        "bytes_requested": 375724
+      },
+      "layout/fluent/256/16": {
+        "requests": 1562,
+        "bytes_requested": 375724
+      },
+      "layout/lending/256/16": {
+        "requests": 1562,
+        "bytes_requested": 375724
+      },
+      "layout/parent/256/16": {
+        "requests": 27678,
+        "bytes_requested": 5027788
+      },
+      "frame/fresh/none": {
+        "requests": 1317,
+        "bytes_requested": 534508
+      },
+      "frame/fresh/miss": {
+        "requests": 1591,
+        "bytes_requested": 733220
+      },
+      "frame/fresh/identity": {
+        "requests": 1590,
+        "bytes_requested": 552996
+      },
+      "frame/fresh/fluent": {
+        "requests": 1334,
+        "bytes_requested": 542756
+      },
+      "frame/fresh/lending": {
+        "requests": 1334,
+        "bytes_requested": 542756
+      },
+      "frame/fresh/parent": {
+        "requests": 5432,
+        "bytes_requested": 881844
+      },
+      "frame/cached/none": {
+        "requests": 21,
+        "bytes_requested": 69892
+      },
+      "frame/cached/this": {
+        "requests": 39,
+        "bytes_requested": 72060
+      },
+      "frame/cached/exhausted": {
+        "requests": 49,
+        "bytes_requested": 73836
+      },
+      "frame/cached/fluent": {
+        "requests": 1352,
+        "bytes_requested": 546764
+      },
+      "frame/cached/lending": {
+        "requests": 1352,
+        "bytes_requested": 546764
+      },
+      "frame/deferred/none": {
+        "requests": 1341,
+        "bytes_requested": 539252
+      },
+      "frame/deferred/miss": {
+        "requests": 1626,
+        "bytes_requested": 559036
+      },
+      "frame/deferred/identity": {
+        "requests": 1626,
+        "bytes_requested": 559036
+      },
+      "frame/deferred/fluent": {
+        "requests": 1370,
+        "bytes_requested": 548796
+      },
+      "frame/deferred/lending": {
+        "requests": 1370,
+        "bytes_requested": 548796
+      },
+      "frame/deferred/parent": {
+        "requests": 5468,
+        "bytes_requested": 887884
+      },
+      "runtime/0": {
+        "requests": 0,
+        "bytes_requested": 0
+      },
+      "runtime/1": {
+        "requests": 0,
+        "bytes_requested": 0
+      },
+      "runtime/4": {
+        "requests": 0,
+        "bytes_requested": 0
+      },
+      "runtime/16": {
+        "requests": 2,
+        "bytes_requested": 768
+      },
+      "runtime/64": {
+        "requests": 2,
+        "bytes_requested": 3072
+      }
+    }
+  },
+  "validation": {
+    "gpui_library_tests": 436,
+    "macro_tests": 21,
+    "negative_compile_probes": 19,
+    "query_integration_tests": 2,
+    "inherited_reflection_integration_tests": 4,
+    "fresh_luna_external_wrapper_tests": 3,
+    "fresh_luna_external_headless_selector_tests": 1,
+    "fresh_luna_frontier_check_and_run": "passed",
+    "fresh_luna_consumer_default_and_two_bins": "passed"
+  },
+  "limits": [
+    "Microbenchmark ratios are within the current fixture, not generic GPUI or GPU speedups.",
+    "Preparation is excluded only from prepared_four_calls; other query cases include admission or projection.",
+    "Frame allocation counts can vary due to profiler histogram capacity growth, identified by opt-in allocator tracing.",
+    "Tuple binding varied from about 46 ns in a preceding local build to about 51 ns in final full/repeat samples; causal attribution is unresolved.",
+    "Original PR296 quick benchmarks showed unrelated control variance and are not used for general speedup claims."
+  ]
+}

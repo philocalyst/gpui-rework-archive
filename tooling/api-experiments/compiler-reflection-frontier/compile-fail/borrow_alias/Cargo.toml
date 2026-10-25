@@ -1,0 +1,9 @@
+[package]
+name = "compiler-reflection-borrow-alias-fail"
+version = "0.0.0"
+edition = "2024"
+
+[dependencies]
+compiler-reflection-frontier = { path = "../.." }
+
+[workspace]

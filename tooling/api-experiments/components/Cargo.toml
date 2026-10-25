@@ -1,0 +1,10 @@
+[package]
+name = "gpui-component-wrapper-experiment"
+version = "0.1.0"
+edition = "2024"
+publish = false
+
+[workspace]
+
+[dev-dependencies]
+gpui-ce = { path = "../../../crates/gpui", default-features = false, features = ["test-support"] }

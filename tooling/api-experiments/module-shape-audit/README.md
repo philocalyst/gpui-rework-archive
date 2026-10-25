@@ -1,0 +1,7 @@
+# Module reflection shape audit
+
+This is an isolated compile/runtime harness for the production `#[reflect]` module macro. Run `./check.sh` from any directory. It refreshes the macro source from `crates/gpui_macros/src/reflect_module*`, compiles that code in a tiny proc-macro crate, and path-imports the production `crates/gpui/src/reflection/value.rs` runtime. It does not build the GPUI workspace.
+
+The passing runtime probes cover tuple and enum payloads, recursive `Vec`/`Option` fields, private and restricted fields, renamed generic impl parameters, overlapping generic impls, concrete impl specializations, cfg-gated members and trait definitions, associated types in native method signatures, local supertraits (including diamonds), and object-safe trait roles.
+
+The role regression probes cover three object-safety edges: RPITIT methods compile without generating an invalid trait-object cast, inherited associated types are bound through projections such as `<Root as SuperTrait>::Assoc`, and async/generic methods with `where Self: Sized` do not prevent a role from being registered. An associated GAT with a `Self: Sized` bound is also supported. External supertraits whose associated items are unknown, and associated items with their own cfg conditions, simply omit the optional role; the underlying Rust module still compiles. Trait-level cfg attrs are carried to generated role registrations, while unrelated cfg_attr payloads remain attached only to the trait declaration.
