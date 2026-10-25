@@ -526,6 +526,17 @@ impl ResourceContext {
 
 }
 impl WindowReservation<'_> {
+    /// Conservative preflight for one NEW exclusive backing while this mutable
+    /// reservation prevents competing admission. Final share/commit rechecks.
+    /// This is not a reservation for allocations outside this ledger or RSS.
+    pub fn can_fit_new_root(&self, draft:DraftResource, capacity:usize)->bool {
+        self.inner.live().is_ok()
+            && self.inner.rows.get(draft.index).is_some_and(|row| row.id==draft.id
+                && row.backings.len()<self.inner.ledger.limits.backings_per_resource)
+            && self.inner.ledger.stats.retained_payload_bytes.checked_add(capacity)
+                .is_some_and(|n| n<=self.inner.ledger.limits.retained_payload_bytes)
+            && self.inner.ledger.roots.len()<self.inner.ledger.limits.physical_roots
+    }
     /// Genuine WINDOW global, e.g. an unused material-bank descriptor. No owner
     /// argument or fake Site is accepted. This does not mint App-global authority.
     pub fn stage_scene_global(&mut self, kind:ResourceKind, global:crate::change::GlobalDependency)->Result<DraftResource,ResourceError> {
