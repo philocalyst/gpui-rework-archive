@@ -488,7 +488,6 @@ mod tests {
             );
             // Allocation measurements cover the whole public update, not
             // guessed BTreeMap node sizes or production-allocator CPU timing.
-            drop(runtime);
             acknowledge(&mut win);
         }
     }
