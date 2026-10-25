@@ -4,6 +4,8 @@ use crate::{Color, El, FieldId, Signal, SignalMap, Source, Sources, div, rgb};
 struct Paint {
     color: Signal<Color>,
     mapped: bool,
+    two: bool,
+    broken: bool,
 }
 impl Paint {
     const COLOR: Source<Self, Color> =
@@ -14,11 +16,17 @@ impl View for Paint {
         Sources::new().direct(Self::COLOR)
     }
     fn view(&self) -> El<'_> {
-        let node = div().size(24).rounded(5.0);
-        if self.mapped {
+        let node = div().size(if self.two { 12 } else { 24 }).rounded(5.0)
+            .transform(if self.broken { crate::Affine::scale(0., 1.) } else { crate::Affine::IDENTITY });
+        let node = if self.mapped {
             node.bg(self.color.map(|color| *color))
         } else {
             node.bg(&self.color)
+        };
+        if self.two {
+            crate::row((node, div().size(12).rounded(3.).bg(self.color.map(|color| *color))))
+        } else {
+            node
         }
     }
 }
@@ -142,7 +150,12 @@ fn render(
     owner.presented(token).unwrap();
 }
 pub(super) fn run(gpu: &mut GpuSurface) {
-    for (hdr, mapped) in [(false, false), (true, false), (false, true), (true, true)] {
+    for (hdr, mapped, two) in [
+        (false, false, false), (true, false, false),
+        (false, true, false), (true, true, false),
+        (false, false, true), (true, false, true),
+        (false, true, true), (true, true, true),
+    ] {
         let old = if hdr {
             let renderer = pollster::block_on(Renderer::new(
                 gpu.renderer.device().clone(),
@@ -165,6 +178,8 @@ pub(super) fn run(gpu: &mut GpuSurface) {
             Paint {
                 color: Signal::new(Color::BLACK),
                 mapped,
+                two,
+                broken: false,
             },
             WindowOptions {
                 size: [32, 24],
@@ -196,14 +211,35 @@ pub(super) fn run(gpu: &mut GpuSurface) {
             });
         render(gpu, &mut oracle, &mut owner, &texture);
         owner.set(Paint::COLOR, Color::WHITE).unwrap();
+        owner.with_paint_scene(|_, _, state| {
+            let state = state.expect("same-alpha source update owns one slot transition");
+            assert_eq!(Some(state.from), gpu.packet_token);
+            assert_eq!(state.edits().len(), if two { 2 } else { 1 });
+            assert!(state.edits().windows(2).all(|pair| pair[0].slot() < pair[1].slot()));
+        }).unwrap();
         render(gpu, &mut oracle, &mut owner, &texture);
         assert_eq!(
             (
                 gpu.renderer.stats().validated_draws,
                 gpu.renderer.stats().instance_upload_bytes
             ),
-            (0, 16)
+            (0, if two { 32 } else { 16 })
         );
+        if two {
+            owner.set(Paint::COLOR, rgb(0x708090)).unwrap();
+            let eligible = owner.with_scene(|_, token| token).unwrap();
+            assert!(owner.update(|model| model.broken = true).is_err());
+            assert_eq!(owner.with_scene(|_, token| token).unwrap(), eligible);
+            // The actual private bridge may still apply the older two-slot C,
+            // and its ACK cannot certify the newer failed logical description.
+            render(gpu, &mut oracle, &mut owner, &texture);
+            let receipt = owner.snapshot().unwrap();
+            assert!(receipt.presentation_epoch < receipt.source_epoch);
+            assert_eq!(gpu.renderer.stats().validated_draws, 0);
+            assert_eq!(gpu.renderer.stats().instance_upload_bytes, 32);
+            owner.update(|model| model.broken = false).unwrap();
+            render(gpu, &mut oracle, &mut owner, &texture);
+        }
         owner.set(Paint::COLOR, rgb(0x102030)).unwrap();
         owner.set(Paint::COLOR, rgb(0x405060)).unwrap();
         render(gpu, &mut oracle, &mut owner, &texture);
