@@ -552,6 +552,7 @@ mod tests {
         assert!(win.runtime().unwrap().layout_edits.is_none());
         acknowledge(&mut win);
         assert_cold(&mut win);
+    }
 
     #[test]
     fn repeated_popup_and_nested_keyed_reorders_keep_exact_parent_buckets() {
