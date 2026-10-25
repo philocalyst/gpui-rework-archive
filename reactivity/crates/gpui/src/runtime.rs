@@ -2197,7 +2197,7 @@ impl<M: View + 'static> Runtime<M> {
             if list_mode {
                 published.push(Parent::new(Some(presented.len())));
             }
-            presented.push(Presented {
+            let record=Presented {
                 identity: node.identity,
                 parent: published_parent,
                 kind: node.kind(),
@@ -2213,7 +2213,13 @@ impl<M: View + 'static> Runtime<M> {
                     || node.handler.is_some()
                     || node.kind() == NodeKind::Input,
                 actions: Actions::for_node(node.kind(), node.handler.is_some()),
-            });
+            };
+            // At most one published row per admitted node; the output has
+            // already reserved that bound. State it before push so its cold
+            // growth call cannot split construction of the retained record.
+            if presented.len()==presented.capacity() {return Err(Error::ResourceLimit)}
+            presented.push(record);
+
             if let Some(sheet) = &mut metadata_sheet
                 && let Some(metadata) = &self.metadata
             {

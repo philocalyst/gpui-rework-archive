@@ -26,6 +26,7 @@ x11 = ["native", "gpui_reactivity_host/x11", "softbuffer/x11", "softbuffer/x11-d
 wayland = ["native", "gpui_reactivity_host/wayland", "softbuffer/wayland", "softbuffer/wayland-dlopen"]
 
 [dev-dependencies]
+arcstr = { version = "=1.2.0", default-features = false, features = ["std"] }
 allocation-counter = "=0.8.1"
 
 [[example]]
