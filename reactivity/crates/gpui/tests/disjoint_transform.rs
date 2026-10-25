@@ -202,3 +202,45 @@ fn mixed_visual_text_sink_keeps_original_description_boundary() {
     let pixels = win.with_pixels(|pixels, _, _| pixels.to_vec()).unwrap();
     fresh.with_pixels(|expected, _, _| assert_eq!(pixels, expected)).unwrap();
 }
+
+#[test]
+fn large_sink_viewport_cross_product_falls_back_instead_of_unbounded_proof_work() {
+    struct Crowded { transform: Signal<Affine> }
+    impl Crowded {
+        const TRANSFORM: Source<Self, Affine> = Source::new(
+            FieldId::new(1), "transform", |m| &m.transform, |m| &mut m.transform,
+        );
+    }
+    impl ItemSource for Crowded {
+        fn len(&self) -> usize { 2 }
+        fn key(&self, index: usize) -> ItemKey { ItemKey::new(index as u64 + 1) }
+        fn index_of(&self, key: ItemKey) -> Option<usize> {
+            (1..=2).contains(&key.get()).then(|| key.get() as usize - 1)
+        }
+        fn row(&self, _index: usize) -> El<'_> { text("row").h(12) }
+    }
+    impl View for Crowded {
+        fn sources() -> Sources<Self> { Sources::new().direct(Self::TRANSFORM) }
+        fn view(&self) -> El<'_> {
+            column((0..32).map(|index| column((
+                div().size(3).bg(rgb(0x3388aa)).transform(&self.transform),
+                uniform_list(ListId::new(index + 1), self, 12).w(120).h(12),
+            ))))
+        }
+    }
+    let mut win = Win::recording(Crowded { transform: Signal::new(Affine::IDENTITY) }, WindowOptions {
+        size: [160, 120], ..Default::default()
+    }).unwrap();
+    let token = win.with_scene(|_, token| token).unwrap();
+    win.presented(token).unwrap();
+    win.reset_counters().unwrap();
+    win.set(Crowded::TRANSFORM, Affine::translation(2., 1.)).unwrap();
+    assert!(win.counters().descriptions > 0, "bounded optional certificate falls back");
+    let token = win.with_scene(|_, token| token).unwrap();
+    win.presented(token).unwrap();
+    let mut fresh = Win::with_size(Crowded {
+        transform: Signal::new(Affine::translation(2., 1.)),
+    }, 160, 120).unwrap();
+    let pixels = win.with_pixels(|pixels, _, _| pixels.to_vec()).unwrap();
+    fresh.with_pixels(|expected, _, _| assert_eq!(pixels, expected)).unwrap();
+}
