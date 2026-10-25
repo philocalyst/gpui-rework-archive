@@ -294,7 +294,11 @@ impl<M: View + 'static, L: LaneSet<M>> RuntimeMut<'_, M, L> {
                     self.runtime.publish_paint(None)?;
                     return Ok(self.commit());
                 }
-                PatchOutcome::Complete => return Ok(self.commit()),
+                PatchOutcome::Paint(intent) => {
+                    if self.runtime.publish_paint_intent(intent)? {
+                        return Ok(self.commit());
+                    }
+                }
                 PatchOutcome::Metadata => {
                     return Ok(self.publish_metadata(Publish::Field(exact.unwrap())));
                 }

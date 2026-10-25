@@ -1,12 +1,24 @@
 //! Complete-C working-color updates, separate from mutable logical colors.
 use super::*;
-#[derive(Clone, Copy, PartialEq, Eq)]
 pub(super) enum PatchOutcome {
     Visual,
     Metadata,
     /// Equal exact operands; publication waits for the turn's editing guards.
     Unchanged,
-    Complete,
+    Paint(PaintIntent),
+}
+/// Logical color admission only. No Canvas command, token, complete coverage or
+/// acknowledgement changes until the owning turn consumes this after its
+/// editing/IME/inspector guards. The fallback remains dirty even if token or
+/// slot admission fails, so settle cannot certify an unprepared source epoch.
+pub(super) struct PaintIntent {
+    change: Option<styles::ColorChange>,
+    fallback_dirty: bool,
+}
+impl PaintIntent {
+    pub(super) fn new(change: Option<styles::ColorChange>, fallback_dirty: bool) -> Self {
+        Self { change, fallback_dirty }
+    }
 }
 /// Exactly one transition, never an accumulated change log. A coalesced native
 /// packet that does not match from rebuilds from the latest complete C bank.
@@ -17,7 +29,17 @@ pub(crate) struct SlotTransition {
     pub(crate) edits: [gpui_canvas::SlotEdit; 1],
 }
 impl<M: View + 'static> Runtime<M> {
-    pub(super) fn finish_color_slot(
+    pub(super) fn publish_paint_intent(&mut self, intent: PaintIntent) -> Result<bool, Error> {
+        self.dirty |= intent.fallback_dirty;
+        let complete = self.finish_color_slot(intent.change.as_ref())?;
+        if complete {
+            // publish_paint(None) intentionally preserves caller dirty state;
+            // this admitted paint-only outcome is the owner of that state.
+            self.dirty = false;
+        }
+        Ok(complete)
+    }
+    fn finish_color_slot(
         &mut self,
         change: Option<&styles::ColorChange>,
     ) -> Result<bool, Error> {
