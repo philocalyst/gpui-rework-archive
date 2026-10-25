@@ -25,10 +25,37 @@ win.click(win.button("Increment")).unwrap();
 assert_eq!(win.with_model(|m| *m.count).unwrap(), 1);
 ```
 
-Run `cargo run -p gpui --example counter` from the clean-room workspace for a
-complete input/layout/font/raster/inspection example. `Win` currently provides
-the headless application path; native hosting and the GPU adapter are being
-connected to the same prepared scene and operations.
+From this workspace, run the native application ports with:
+
+```sh
+cargo run -p gpui --features x11 --example counter
+cargo run -p gpui --features x11 --example workbench -- --gpu
+```
+
+Linux can instead enable `wayland`; macOS/Windows use `native`.
+`Application::run(root)` opens a default document window;
+`Application::run_window(Window::document(root).title("Todos").size(540, 620))`
+configures it. The Todo model is shared unchanged by the native example and
+`tests/ports.rs`: add, complete, filter, delete, undo and serialization use the
+ordinary library operations. `counter` without native features runs headlessly.
+
+The GPU backend uses `wgsl-rs` shaders and Wgpu over the vendored Winit callback
+adapter. Native surfaces are currently opaque tagged sRGB; offscreen linear
+RGBA16Float does not imply OS HDR negotiation. Components retain no GPU/Winit
+handles. Native recording allocates no CPU output image; `with_pixels` opts in.
+
+Submission borrows the complete scene and acknowledges its token after actual
+surface presentation. New geometry cannot accept coordinate input beforehand.
+Surface detach revokes that authority; exposure redraws reuse commands without
+description/layout. Resize retains the owner and Target namespace. Device
+recovery replaces one graphics resource cohort; late errors from the previous
+device generation cannot invalidate it. Surface recovery is bounded; timeouts
+back off. Ordinary idle windows use `ControlFlow::Wait` without a timer.
+
+Recoverable runtime presentation errors retain accepted source edits and the
+preceding sheet. Focused backspace can repair a shaping failure.
+`Window::on_presentation_error` observes these failures (default: stderr).
+GPU admission/device/platform faults currently return `NativeError`.
 
 `Sources::field` conservatively invalidates the owner, including ordinary Rust
 branches and formatting. `direct` explicitly declares that edits only affect
@@ -64,11 +91,25 @@ visual/hit change; layout topology rebuilds after structural changes; Cephal
 depth bounded to 128; viewport clipping; the canvas's documented text/script
 limits; append and Unicode-scalar backspace rather than selection/IME; no
 integrated async graph, virtualized collections, embedded native/web content,
-or compatibility facade yet. Native submit/release barriers are distinct from
-this synchronous prepared sheet. Those remain application-porting gates.
+or compatibility facade yet. GPU completion is distinct from presentation
+acknowledgement; Wgpu retains submitted resource leases. Multiwindow device
+sharing, native HDR and the remaining primitives remain porting gates.
 
 Tests cover public input/pixels/serialization, rejected resource recovery,
 owner faults, reentrancy, exact/direct versus conservative branching, repeated
 text sharing, target lifecycle, wide transforms, presentation recovery, and
 typed override presence/validation. See the canvas and retained crates for
 independent graphics oracles, exhaustive quantization and storage evidence.
+
+`cargo test -p gpui` runs public headless acceptance and port tests. The native
+lifecycle test additionally needs a real X11 display and Vulkan driver (Xvfb
+and Mesa llvmpipe are sufficient):
+
+```sh
+cargo test -p gpui --features x11 native_todo_port -- --ignored --nocapture --test-threads=1
+```
+
+It submits actual surface frames, exercises the keyboard/pointer adapter,
+resizes, edits a typed inspector property and suspends/recreates the surface.
+The model and targets survive; unsupported shaping repairs through backspace.
+The GPU crate has separate actual readback conformance tests.

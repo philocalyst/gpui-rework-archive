@@ -24,6 +24,17 @@ impl View for Counter {
         .gap(8)
     }
 }
+#[cfg(feature = "native")]
+fn main() -> Result<(), gpui::NativeError> {
+    gpui::Application::run_window(
+        gpui::Window::document(Counter {
+            count: Signal::new(0),
+        })
+        .title("GPUI — Counter")
+        .size(360, 240),
+    )
+}
+#[cfg(not(feature = "native"))]
 fn main() -> Result<(), gpui::Error> {
     let win = Win::with_size(
         Counter {
