@@ -482,12 +482,25 @@ fn active_selection_and_ime_reconcile_each_admission_before_final_publication() 
     assert_eq!(frozen(&a), frozen(&b));
     let pixels = a.with_pixels(|p, _, _| p.to_vec()).unwrap();
     b.with_pixels(|p, _, _| assert_eq!(pixels, p)).unwrap();
-    assert!(
-        a.ime_event(&mut asession, ImeEvent::Commit("late"))
-            .is_err()
-    );
-    assert!(
-        b.ime_event(&mut bsession, ImeEvent::Commit("late"))
-            .is_err()
-    );
+    // A source value change cancels preedit, not necessarily the still-enabled
+    // platform session. Compare its actual ordinary admission, not an invented
+    // rejection requirement.
+    let ordinary = a.ime_event(&mut asession, ImeEvent::Commit("late"));
+    let deferred = b.ime_event(&mut bsession, ImeEvent::Commit("late"));
+    assert_eq!(ordinary.is_ok(), deferred.is_ok());
+    if let (Err(a), Err(b)) = (&ordinary, &deferred) {
+        assert_eq!(a.to_string(), b.to_string());
+    }
+    assert_eq!(a.read(Input::VALUE).unwrap(), b.read(Input::VALUE).unwrap());
+    assert_eq!(a.selection(at).unwrap(), b.selection(bt).unwrap());
+    if ordinary.is_ok() {
+        for win in [&mut a, &mut b] {
+            let token = win.with_scene(|_, t| t).unwrap();
+            win.presented(token).unwrap();
+        }
+        assert_eq!(nodes(&a), nodes(&b));
+        assert_eq!(frozen(&a), frozen(&b));
+        let pixels = a.with_pixels(|p, _, _| p.to_vec()).unwrap();
+        b.with_pixels(|p, _, _| assert_eq!(pixels, p)).unwrap();
+    }
 }
