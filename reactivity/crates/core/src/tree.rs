@@ -14,6 +14,68 @@ pub struct NodeId {
     index: u32,
 }
 
+/// A checked consecutive prefix of complete node identities, without a handle
+/// allocation. This describes slots, not tree order, and does not keep nodes
+/// alive. Ordinary Tree operations still validate the namespace and generation.
+///
+/// Append each identity returned by fresh slot-order insertion. A gap, foreign
+/// namespace or mixed generation is rejected without changing the prefix. The
+/// compact form cannot represent arbitrary edits; retain full IDs for those.
+#[derive(Clone, Debug)]
+pub struct NodeIdRange {
+    arena: NonZeroU64,
+    generation: u32,
+    len: u32,
+}
+impl Default for NodeIdRange {
+    fn default() -> Self {
+        Self {
+            arena: NonZeroU64::MIN,
+            generation: 1,
+            len: 0,
+        }
+    }
+}
+impl NodeIdRange {
+    pub fn len(&self) -> usize {
+        self.len as usize
+    }
+    pub fn is_empty(&self) -> bool {
+        self.len == 0
+    }
+    pub fn clear(&mut self) {
+        self.len = 0;
+    }
+    pub fn push(&mut self, id: NodeId) -> Result<(), TreeError> {
+        if id.index != self.len
+            || (self.len != 0 && (id.arena != self.arena || id.generation != self.generation))
+        {
+            return Err(TreeError::InvalidNode);
+        }
+        let len = self.len.checked_add(1).ok_or(TreeError::Capacity)?;
+        self.arena = id.arena;
+        self.generation = id.generation;
+        self.len = len;
+        Ok(())
+    }
+    pub fn get(&self, index: usize) -> Option<NodeId> {
+        (index < self.len()).then_some(NodeId {
+            arena: self.arena,
+            generation: self.generation,
+            index: index as u32,
+        })
+    }
+    /// For an index whose membership in this prefix has already been admitted.
+    /// Panics on an index outside the prefix, like indexing a handle vector.
+    pub fn required(&self, index: usize) -> NodeId {
+        self.get(index).expect("admitted consecutive node index")
+    }
+    pub fn index_of(&self, id: NodeId) -> Option<usize> {
+        (id.arena == self.arena && id.generation == self.generation && id.index < self.len)
+            .then_some(id.index as usize)
+    }
+}
+
 /// Embedding sites declare ownership boundaries, without implementing platform hosting.
 #[derive(Clone, Copy, Debug, Eq, PartialEq)]
 pub enum NodeKind {
@@ -393,6 +455,43 @@ impl Iterator for Preorder<'_> {
 #[cfg(test)]
 mod tests {
     use super::*;
+
+    #[test]
+    fn consecutive_ranges_match_vectors_and_reject_nonconsecutive_identity() {
+        assert_eq!(std::mem::size_of::<NodeIdRange>(), 16);
+        let mut tree = Tree::new();
+        let mut other = Tree::new();
+        let foreign = other.insert(None, NodeKind::Element).unwrap();
+        let ids: Vec<_> = (0..1024)
+            .map(|_| tree.insert(None, NodeKind::Element).unwrap())
+            .collect();
+        let mut range = NodeIdRange::default();
+        assert!(range.is_empty());
+        assert_eq!(range.get(0), None);
+        assert_eq!(range.push(ids[1]), Err(TreeError::InvalidNode));
+        for (index, &id) in ids.iter().enumerate() {
+            range.push(id).unwrap();
+            assert_eq!(range.len(), index + 1);
+            assert_eq!(range.required(index), id);
+            assert_eq!(range.index_of(id), Some(index));
+        }
+        assert_eq!(range.get(usize::MAX), None);
+        assert_eq!(range.get(ids.len()), None);
+        assert_eq!(range.index_of(foreign), None);
+        assert_eq!(range.push(foreign), Err(TreeError::InvalidNode));
+        assert_eq!(range.len(), ids.len());
+        tree.remove(ids[0]).unwrap();
+        let reused = tree.insert(None, NodeKind::Element).unwrap();
+        assert_eq!(range.index_of(reused), None);
+        assert!(!tree.contains(range.required(0)));
+        range.clear();
+        range.push(reused).unwrap();
+        assert_eq!(range.push(ids[1]), Err(TreeError::InvalidNode));
+        assert_eq!(range.len(), 1);
+        range.clear();
+        range.push(foreign).unwrap();
+        assert_eq!(range.required(0), foreign);
+    }
 
     #[test]
     fn nonzero_namespaces_preserve_identity_and_provide_an_option_niche() {

@@ -504,7 +504,7 @@ impl<M: View + 'static> Runtime<M> {
                 format_args!("Component: {}", component_name(value, component)),
             )?;
             if laid_out {
-                let size = self.layout.layout(self.layout_nodes[index])?.size;
+                let size = self.layout.layout(self.layout_nodes.required(index))?.size;
                 let epoch = self.source_epoch;
                 self.refresh_caption(
                     panel,
@@ -548,7 +548,7 @@ impl<M: View + 'static> Runtime<M> {
             // Late captions leave this invalidation pending for the next pass.
             // Before a topology rebuild this may name the old layout cohort;
             // that whole tree will be replaced. Afterward it names the new one.
-            if let Some(&node) = self.layout_nodes.get(index)
+            if let Some(node) = self.layout_nodes.get(index)
                 && !self.layout.is_poisoned()
             {
                 self.layout.mark_dirty(node)?;
@@ -573,7 +573,7 @@ impl DisplayCaptions {
         bases: geometry::Bases<'_>,
         texts: &mut [Option<TextSite>],
         layout: &mut LayoutTree,
-        layout_nodes: &[NodeId],
+        layout_nodes: &NodeIdRange,
     ) -> Result<(), Error> {
         let values = if let Some(node) = candidate.iter().find(|n| n.identity == self.identity) {
             let b = node.bounds;
@@ -606,7 +606,7 @@ impl DisplayCaptions {
             if text.value.as_ref() != value {
                 text.value = value.into();
                 text.shaped = None;
-                layout.mark_dirty(layout_nodes[self.panel + field.offset()])?;
+                layout.mark_dirty(layout_nodes.required(self.panel + field.offset()))?;
             }
         }
         Ok(())

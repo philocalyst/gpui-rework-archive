@@ -15,7 +15,7 @@ use gpui_canvas::{
     TextSystem,
 };
 use gpui_reactivity_core::{
-    Affine, CoordinateSpace, NodeId, Point, Rect,
+    Affine, CoordinateSpace, NodeId, NodeIdRange, Point, Rect,
     layout::{
         AvailableSpace, LayoutError, LayoutTree, MeasureInput, MeasureOutput, Size,
         WidthMeasureInput,
@@ -1177,7 +1177,7 @@ struct Runtime<M> {
     viewports: BTreeMap<ViewportKey, ViewportState>,
     list_rows: BTreeMap<u64, ListRow>,
     layout: LayoutTree,
-    layout_nodes: Vec<NodeId>,
+    layout_nodes: NodeIdRange,
     layout_dirty: BTreeSet<u64>,
     rebuild_layout: bool,
     layout_depth: u8,
@@ -1419,7 +1419,7 @@ impl<M: View + 'static, L: LaneSet<M>> Win<M, L> {
             viewports: BTreeMap::new(),
             list_rows: BTreeMap::new(),
             layout,
-            layout_nodes: Vec::new(),
+            layout_nodes: NodeIdRange::default(),
             layout_dirty: BTreeSet::new(),
             rebuild_layout: true,
             layout_depth: 0,
@@ -3114,7 +3114,7 @@ impl<M: View + 'static> Runtime<M> {
                 let parent = node
                     .parent()
                     .index()
-                    .map(|parent| self.layout_nodes[parent]);
+                    .map(|parent| self.layout_nodes.required(parent));
                 let id = self.layout.insert(
                     parent,
                     gpui_reactivity_core::NodeKind::Element,
@@ -3130,12 +3130,13 @@ impl<M: View + 'static> Runtime<M> {
                 if node.text_slot().0 != u32::MAX || node.kind() == NodeKind::Image {
                     self.layout.set_measure(id, Some(measure_marker))?;
                 }
-                self.layout_nodes.push(id);
+                self.layout_nodes
+                    .push(id)
+                    .expect("fresh preorder layout IDs");
             }
-            // A fresh arena only appends, in declaration order, with one
-            // generation. Keep complete capabilities sorted for measurement
-            // routing without rebuilding a map on every layout pass.
-            debug_assert!(self.layout_nodes.is_sorted());
+            // The checked range admits exactly the fresh slot-order prefix.
+            // Callback routing validates the complete namespace and generation,
+            // without retaining or searching another identity vector.
         } else {
             // Auto-sized viewports depend on their immediate parent's flow. A
             // retained parent change must refresh the child's grow/basis too,
@@ -3151,7 +3152,7 @@ impl<M: View + 'static> Runtime<M> {
             }
             for identity in &self.layout_dirty {
                 let index = self.by_identity.required(*identity);
-                let id = self.layout_nodes[index];
+                let id = self.layout_nodes.required(index);
                 self.layout.set_style(
                     id,
                     list::row_style(
@@ -3177,7 +3178,7 @@ impl<M: View + 'static> Runtime<M> {
         let service = &mut shaper;
         let mut measure = |id: NodeId, input: WidthMeasureInput| {
             let index = layout_nodes
-                .binary_search(&id)
+                .index_of(id)
                 .expect("measurement names a node in the current layout arena");
             let node = &nodes[index];
             if let Some(image) = node.content.image_use() {
@@ -3212,7 +3213,7 @@ impl<M: View + 'static> Runtime<M> {
             }
         };
         self.layout.compute_with_width_measure(
-            self.layout_nodes[0],
+            self.layout_nodes.required(0),
             Size {
                 width: AvailableSpace::Definite(size[0] as f32 / scale_factor),
                 height: AvailableSpace::Definite(size[1] as f32 / scale_factor),
@@ -3283,7 +3284,7 @@ impl<M: View + 'static> Runtime<M> {
                     &self.layout_nodes,
                 )?;
             }
-            let layout = self.layout.layout(self.layout_nodes[index])?;
+            let layout = self.layout.layout(self.layout_nodes.required(index))?;
             while ancestor.index() != self.nodes[index].parent().index() {
                 spaces.pop();
                 if let Some(clips) = &mut clips {
