@@ -466,6 +466,59 @@ mod tests {
     }
 
     #[test]
+    fn second_unprepared_description_discards_plan_and_rebuilds_from_final_logical_state() {
+        let mut win = window();
+        let row = row_target(&win, 2);
+        let old_handle = layout_id(&win, row);
+        // Keep a genuinely eligible unacknowledged C, distinct from old P.
+        win.update(|model| model.row_width = 76.).unwrap();
+        let eligible = token(&win);
+        let previous = acknowledged_rows(&win);
+        let (descriptions, computes) = {
+            let rt = win.runtime().unwrap();
+            (rt.counters.descriptions, rt.layout.stats().computes)
+        };
+        {
+            let mut turn = win.edit_turn().unwrap();
+            turn.update(|model| model.popup = true).unwrap();
+            drop(turn);
+        }
+        {
+            let rt = win.runtime().unwrap();
+            assert!(rt.layout_edits.is_some());
+            assert!(rt.topology_changed);
+            assert!(rt.layout.tree().contains(old_handle), "preparation has not edited old scratch");
+        }
+        {
+            let mut turn = win.edit_turn().unwrap();
+            turn.update(|model| {
+                model.rows.rotate_left(1);
+                model.rows[0].1 = "final description only".into();
+                model.row_width = 68.;
+            }).unwrap();
+            drop(turn);
+        }
+        {
+            let rt = win.runtime().unwrap();
+            assert!(rt.layout_edits.is_none(), "never replay a predecessor topology plan");
+            assert!(rt.topology_changed);
+            assert_eq!(rt.counters.descriptions, descriptions + 2);
+            assert_eq!(rt.layout.stats().computes, computes);
+        }
+        assert_eq!(token(&win), eligible);
+        assert_eq!(acknowledged_rows(&win), previous);
+        let ack = win.presented(eligible).unwrap();
+        assert!(ack.presentation_epoch < ack.source_epoch);
+        win.settle().unwrap();
+        // Full reconstruction uses a new arena authority, not a partially
+        // replayed stale plan or the earlier eligible candidate's layout.
+        assert_ne!(layout_id(&win, row), old_handle);
+        assert!(win.runtime().unwrap().layout_edits.is_none());
+        acknowledge(&mut win);
+        assert_cold(&mut win);
+    }
+
+    #[test]
     fn retained_topology_storage_ledger_prices_headers_and_whole_popup_turns() {
         eprintln!(
             "RETAINED_TOPOLOGY_HEADERS runtime={} map={} edited={} plan={} node_id={}",
