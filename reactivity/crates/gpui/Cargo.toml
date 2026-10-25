@@ -23,6 +23,7 @@ accesskit_winit = { version = "=0.34.1", default-features = false, features = ["
 
 [features]
 default = []
+route-profile = []
 accessibility = ["native", "dep:accesskit", "dep:accesskit_winit"]
 native = ["dep:gpui_gpu", "dep:gpui_reactivity_host", "gpui_reactivity_host/native", "dep:pollster", "dep:softbuffer"]
 desktop = ["native", "accessibility"]
