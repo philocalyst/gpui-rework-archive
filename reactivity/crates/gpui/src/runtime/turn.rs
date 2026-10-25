@@ -278,25 +278,28 @@ impl<M: View + 'static, L: LaneSet<M>> RuntimeMut<'_, M, L> {
                     .map(|()| PatchOutcome::Visual)
             }
         };
-        if let Err(error) = result {
-            self.runtime.clear_editing();
-            self.runtime.logical_valid = false;
-            self.runtime.focused = None;
-            return Err(error);
-        }
+        let outcome = match result {
+            Ok(outcome) => outcome,
+            Err(error) => {
+                self.runtime.clear_editing();
+                self.runtime.logical_valid = false;
+                self.runtime.focused = None;
+                return Err(error);
+            }
+        };
         let editing_changed = self.runtime.reconcile_editing(editing)? || ime_changed;
-        if matches!(result, Ok(PatchOutcome::Unchanged))
-            && !self.inspector_enabled()
-            && !editing_changed
-        {
-            self.runtime.publish_paint(None)?;
-            return Ok(self.commit());
-        }
-        if result == Ok(PatchOutcome::Complete) && !self.inspector_enabled() && !editing_changed {
-            return Ok(self.commit());
-        }
-        if result == Ok(PatchOutcome::Metadata) && !self.inspector_enabled() && !editing_changed {
-            return Ok(self.publish_metadata(Publish::Field(exact.unwrap())));
+        if !self.inspector_enabled() && !editing_changed {
+            match outcome {
+                PatchOutcome::Unchanged => {
+                    self.runtime.publish_paint(None)?;
+                    return Ok(self.commit());
+                }
+                PatchOutcome::Complete => return Ok(self.commit()),
+                PatchOutcome::Metadata => {
+                    return Ok(self.publish_metadata(Publish::Field(exact.unwrap())));
+                }
+                PatchOutcome::Visual => {}
+            }
         }
         self.present()
     }
