@@ -3283,6 +3283,9 @@ impl<M: View + 'static> Runtime<M> {
         if let Some(error) = failure {
             return Err(error);
         }
+        // All pre-solve logical invalidations have now been consumed. Inspector
+        // captions changed below are a distinct late set, not every old source.
+        self.layout_dirty.clear();
         self.refresh_inspector(true)?;
         let viewport = Rect::new(0.0, 0.0, size[0] as f32, size[1] as f32);
         let mut presented: Vec<Presented> = Vec::with_capacity(self.nodes.len());
@@ -3770,6 +3773,13 @@ impl<M: View + 'static> Runtime<M> {
                     self.list_rows.get(&node.identity()),
                 );
             }
+        }
+        // Keep late caption measurement invalidations for the next compute.
+        // The mapping is now current, and source/style dirties were cleared
+        // immediately after this compute, so solved sources are not requeued.
+        for identity in &self.layout_dirty {
+            let index = self.by_identity.required(*identity);
+            self.layout.mark_dirty(self.layout_nodes.required(index))?;
         }
         // Everything fallible has finished. This transfers commands; native
         // recording retains no CPU image, while same-size headless updates reuse

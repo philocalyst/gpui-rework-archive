@@ -544,15 +544,10 @@ impl<M: View + 'static> Runtime<M> {
             .expect("fixed inspector text slot");
         if replace_caption(text, value) {
             self.dirty = true;
-            // Fixed caption boxes still have content-size measurement answers.
-            // Late captions leave this invalidation pending for the next pass.
-            // Before a topology rebuild this may name the old layout cohort;
-            // that whole tree will be replaced. Afterward it names the new one.
-            if let Some(node) = self.layout_nodes.get(index)
-                && !self.layout.is_poisoned()
-            {
-                self.layout.mark_dirty(node)?;
-            }
+            // Description may have shifted logical preorder while the layout
+            // mapping still names its predecessor. Queue the actual logical
+            // identity; preparation resolves it only after the edit plan.
+            self.layout_dirty.insert(self.nodes[index].identity());
         }
         Ok(())
     }

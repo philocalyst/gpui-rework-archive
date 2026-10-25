@@ -147,11 +147,12 @@ mod tests {
     struct Page {
         popup: bool,
         broken: bool,
+        row_width: f32,
         rows: Vec<(u64, String)>,
     }
     impl Page {
         fn new() -> Self {
-            Self { popup: false, broken: false, rows: (1..=4).map(|id| (id, format!("row {id}"))).collect() }
+            Self { popup: false, broken: false, row_width: 80., rows: (1..=4).map(|id| (id, format!("row {id}"))).collect() }
         }
     }
     impl ItemSource for Page {
@@ -161,7 +162,7 @@ mod tests {
             self.rows.iter().position(|entry| entry.0 == key.get())
         }
         fn row(&self, index: usize) -> El<'_> {
-            row((text(self.rows[index].1.as_str()).w(80), div().size(4))).h(12)
+            row((text(self.rows[index].1.as_str()).w(self.row_width), div().size(4))).h(12)
         }
     }
     impl View for Page {
@@ -257,6 +258,67 @@ mod tests {
         acknowledge(&mut win);
         assert_cold(&mut win);
         assert!(!win.runtime().unwrap().rebuild_layout);
+    }
+
+    #[test]
+    fn inspector_caption_invalidations_follow_the_current_map_after_middle_insertion() {
+        fn inspected() -> Win<Page> {
+            let mut win = Win::recording_with_inspector(
+                Page::new(),
+                WindowOptions { size: [720, 640], ..Default::default() },
+            ).unwrap();
+            acknowledge(&mut win);
+            let selected = win.query().text("row 2").one().unwrap();
+            win.inspector_select(selected).unwrap();
+            acknowledge(&mut win);
+            win
+        }
+        fn layouts(win: &Win<Page>) -> Vec<gpui_reactivity_core::layout::Layout> {
+            let runtime = win.runtime().unwrap();
+            (0..runtime.nodes.len()).map(|index| {
+                runtime.layout.layout(runtime.layout_nodes.required(index)).unwrap()
+            }).collect()
+        }
+
+        // Identical logical histories keep inspector identities and printed
+        // epochs comparable. Only the oracle discards all layout caches.
+        let mut retained = inspected();
+        let mut rebuilt = inspected();
+        let selected = retained.inspector_selected().unwrap().unwrap();
+        let old_handle = layout_id(&retained, selected);
+        let old_oracle_handle = layout_id(&rebuilt, rebuilt.inspector_selected().unwrap().unwrap());
+        let old_rows = acknowledged_rows(&retained);
+        rebuilt.runtime_mut().unwrap().runtime.rebuild_layout = true;
+        for win in [&mut retained, &mut rebuilt] {
+            win.update(|model| {
+                model.popup = true;
+                model.row_width = 72.;
+            }).unwrap();
+        }
+        assert_eq!(acknowledged_rows(&retained), old_rows);
+        assert_eq!(layout_id(&retained, selected), old_handle);
+        assert_ne!(layout_id(&rebuilt, rebuilt.inspector_selected().unwrap().unwrap()), old_oracle_handle);
+        assert_eq!(layouts(&retained), layouts(&rebuilt));
+        acknowledge(&mut retained);
+        acknowledge(&mut rebuilt);
+        assert_eq!(acknowledged_rows(&retained), acknowledged_rows(&rebuilt));
+        assert!(acknowledged_rows(&retained).iter().any(|row| {
+            row.text.as_deref().is_some_and(|text| text.starts_with("> width:") && text.contains("72.0"))
+        }));
+        let pixels = retained.with_pixels(|pixels, _, _| pixels.to_vec()).unwrap();
+        rebuilt.with_pixels(|expected, _, _| assert_eq!(pixels, expected)).unwrap();
+        // A subsequent changed constraint also consumes late layout/bounds
+        // caption dirties without routing through the predecessor preorder.
+        rebuilt.runtime_mut().unwrap().runtime.rebuild_layout = true;
+        for win in [&mut retained, &mut rebuilt] {
+            win.update(|model| model.row_width = 64.).unwrap();
+        }
+        assert_eq!(layouts(&retained), layouts(&rebuilt));
+        acknowledge(&mut retained);
+        acknowledge(&mut rebuilt);
+        assert_eq!(acknowledged_rows(&retained), acknowledged_rows(&rebuilt));
+        let pixels = retained.with_pixels(|pixels, _, _| pixels.to_vec()).unwrap();
+        rebuilt.with_pixels(|expected, _, _| assert_eq!(pixels, expected)).unwrap();
     }
 
     #[test]
