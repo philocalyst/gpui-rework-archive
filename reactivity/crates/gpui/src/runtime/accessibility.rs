@@ -391,3 +391,204 @@ mod tests {
         }
     }
 }
+
+#[cfg(test)]
+mod unchanged_tests {
+    use super::*;
+    use crate::{El, Signal, Source, div, text_input};
+
+    struct Page {
+        width: Signal<f64>,
+        map: Signal<Affine>,
+        unused: Signal<u64>,
+    }
+    impl Page {
+        const WIDTH: Source<Self, f64> =
+            Source::new(FieldId::new(1), "width", |m| &m.width, |m| &mut m.width);
+        const MAP: Source<Self, Affine> =
+            Source::new(FieldId::new(2), "map", |m| &m.map, |m| &mut m.map);
+        const UNUSED: Source<Self, u64> =
+            Source::new(FieldId::new(3), "unused", |m| &m.unused, |m| &mut m.unused);
+        fn new() -> Self {
+            Self {
+                width: Signal::new(40.),
+                map: Signal::new(Affine::IDENTITY),
+                unused: Signal::new(0),
+            }
+        }
+    }
+    impl View for Page {
+        fn sources() -> Sources<Self> {
+            Sources::new().direct(Self::WIDTH).direct(Self::MAP).direct(Self::UNUSED)
+        }
+        fn view(&self) -> El<'_> {
+            div().name("surface").w(&self.width).h(12).bg(Color::BLACK).transform(&self.map)
+        }
+    }
+    fn token<M: View + 'static>(win: &Win<M>) -> PresentationToken {
+        win.with_scene(|_, token| token).unwrap()
+    }
+    fn acknowledge<M: View + 'static>(win: &mut Win<M>) {
+        win.presented(token(win)).unwrap();
+    }
+    fn recording() -> Win<Page> {
+        let mut win = Win::recording(Page::new(), WindowOptions {
+            size: [80, 40], ..Default::default()
+        }).unwrap();
+        acknowledge(&mut win);
+        win
+    }
+    fn noop(win: &mut Win<Page>, mode: usize) -> Commit {
+        match mode {
+            0 => {
+                let value = *win.read(Page::WIDTH).unwrap();
+                win.set(Page::WIDTH, value).unwrap()
+            }
+            1 => {
+                let value = *win.read(Page::MAP).unwrap();
+                win.set(Page::MAP, value).unwrap()
+            }
+            _ => {
+                let value = *win.read(Page::UNUSED).unwrap() + 1;
+                win.set(Page::UNUSED, value).unwrap()
+            }
+        }
+    }
+    #[test]
+    fn acknowledged_generic_noops_advance_epoch_with_exact_empty_delta() {
+        for mode in 0..3 {
+            let mut win = recording();
+            win.accessibility_observe(true).unwrap();
+            let base = win.accessibility_state().unwrap();
+            let before = token(&win);
+            let commit = noop(&mut win, mode);
+            let next = win.accessibility_state().unwrap();
+            assert_eq!(next.token, base.token);
+            assert!(next.epoch > base.epoch);
+            assert_eq!(next.epoch, commit.source_epoch);
+            assert_eq!(token(&win), before);
+            assert_eq!(win.accessibility_delta(base, next), Some(&[][..]));
+        }
+    }
+    #[test]
+    fn early_observer_retains_pending_nonempty_transition_through_generic_noop() {
+        for mode in 0..3 {
+            let mut win = recording();
+            win.accessibility_observe(true).unwrap();
+            let base = win.accessibility_state().unwrap();
+            win.set(Page::MAP, Affine::translation(5., 0.)).unwrap();
+            let eligible = token(&win);
+            let commit = noop(&mut win, mode);
+            assert_eq!(win.accessibility_state().unwrap(), base);
+            assert_eq!(token(&win), eligible);
+            assert!(commit.presentation_epoch < commit.source_epoch);
+            assert!(win.accessibility_delta(base, base).is_none());
+            win.presented(eligible).unwrap();
+            let next = win.accessibility_state().unwrap();
+            assert_eq!(next.epoch, commit.source_epoch);
+            assert_eq!(win.accessibility_delta(base, next), Some(&[0][..]));
+        }
+    }
+    #[test]
+    fn late_observer_does_not_invent_exact_delta_for_unobserved_candidate() {
+        for mode in 0..3 {
+            let mut win = recording();
+            let base = win.accessibility_state().unwrap();
+            win.set(Page::MAP, Affine::translation(5., 0.)).unwrap();
+            let eligible = token(&win);
+            win.accessibility_observe(true).unwrap();
+            noop(&mut win, mode);
+            win.presented(eligible).unwrap();
+            let next = win.accessibility_state().unwrap();
+            assert!(win.accessibility_delta(base, next).is_none());
+            // An actual full consumer publication at next can establish this
+            // new base; only the subsequent unchanged transition may be empty.
+            noop(&mut win, mode);
+            let after = win.accessibility_state().unwrap();
+            assert_eq!(win.accessibility_delta(next, after), Some(&[][..]));
+            assert!(win.accessibility_delta(base, after).is_none());
+        }
+    }
+    #[test]
+    fn failed_newer_candidate_and_generic_noop_preserve_old_ack_fallback() {
+        for mode in 0..3 {
+            let mut win = recording();
+            win.accessibility_observe(true).unwrap();
+            let base = win.accessibility_state().unwrap();
+            win.set(Page::MAP, Affine::translation(5., 0.)).unwrap();
+            noop(&mut win, mode);
+            let eligible = token(&win);
+            assert!(win.set(Page::MAP, Affine::scale(0., 1.)).is_err());
+            let value = *win.read(Page::WIDTH).unwrap();
+            assert!(win.set(Page::WIDTH, value).is_err());
+            assert_eq!(token(&win), eligible);
+            let commit = win.presented(eligible).unwrap();
+            let next = win.accessibility_state().unwrap();
+            assert!(commit.presentation_epoch < commit.source_epoch);
+            assert!(win.accessibility_delta(base, next).is_none());
+        }
+    }
+
+    struct Inputs {
+        peer: bool,
+        first: Signal<String>,
+        second: Signal<String>,
+        map: Signal<Affine>,
+        unused: Signal<u64>,
+    }
+    impl Inputs {
+        const FIRST: Source<Self, String> =
+            Source::new(FieldId::new(1), "first", |m| &m.first, |m| &mut m.first);
+        const SECOND: Source<Self, String> =
+            Source::new(FieldId::new(2), "second", |m| &m.second, |m| &mut m.second);
+        const MAP: Source<Self, Affine> =
+            Source::new(FieldId::new(3), "map", |m| &m.map, |m| &mut m.map);
+        const UNUSED: Source<Self, u64> =
+            Source::new(FieldId::new(4), "unused", |m| &m.unused, |m| &mut m.unused);
+    }
+    impl View for Inputs {
+        fn sources() -> Sources<Self> {
+            Sources::new().direct(Self::FIRST).direct(Self::SECOND)
+                .direct(Self::MAP).direct(Self::UNUSED)
+        }
+        fn view(&self) -> El<'_> {
+            text_input(if self.peer { &self.second } else { &self.first })
+                .name("input").w(60).h(24).transform(&self.map)
+        }
+    }
+    fn barrier(win: &Win<Inputs>) -> (u64, u64) {
+        let runtime = win.runtime().unwrap();
+        let observer = runtime.accessibility.as_ref().unwrap();
+        (observer.input_epoch, observer.input_sequence)
+    }
+    #[test]
+    fn generic_unchanged_publication_does_not_clear_input_rebound_barrier() {
+        let mut win = Win::recording(Inputs {
+            peer: false, first: Signal::new("abc".into()), second: Signal::new("abc".into()),
+            map: Signal::new(Affine::IDENTITY), unused: Signal::new(0),
+        }, WindowOptions { size: [80, 40], ..Default::default() }).unwrap();
+        acknowledge(&mut win);
+        win.accessibility_observe(true).unwrap();
+        let base = win.accessibility_state().unwrap();
+        win.set(Inputs::MAP, Affine::translation(5., 0.)).unwrap();
+        win.update(|model| model.peer = true).unwrap();
+        let lower = barrier(&win);
+        assert!(lower.0 > base.epoch || lower.1 > base.token.unwrap().sequence.get());
+        let eligible = token(&win);
+        win.set(Inputs::UNUSED, 1).unwrap();
+        assert_eq!(barrier(&win), lower);
+        assert!(win.set(Inputs::MAP, Affine::scale(0., 1.)).is_err());
+        assert!(win.set(Inputs::UNUSED, 2).is_err());
+        win.presented(eligible).unwrap();
+        let old_ack = win.accessibility_state().unwrap();
+        assert!(win.accessibility_delta(base, old_ack).is_none());
+        assert_eq!(barrier(&win), lower);
+        win.set(Inputs::MAP, Affine::IDENTITY).unwrap();
+        acknowledge(&mut win);
+        let covered = win.accessibility_state().unwrap();
+        win.set(Inputs::UNUSED, 3).unwrap();
+        let next = win.accessibility_state().unwrap();
+        assert_eq!(win.accessibility_delta(covered, next), Some(&[][..]));
+        assert_eq!(barrier(&win), lower);
+    }
+}
