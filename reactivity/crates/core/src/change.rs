@@ -171,6 +171,7 @@ impl Journal {
 pub struct PreparedChanges<'a> { journal: &'a mut Journal, batch: ChangeBatch, closed: Option<ClosedDependencies> }
 impl PreparedChanges<'_> {
     pub fn batch(&self) -> &ChangeBatch { &self.batch }
+    pub fn closed_dependencies(&self) -> Option<&ClosedDependencies> { self.closed.as_ref() }
     /// Bind the already-computed OLD+NEW logical closure; never recompute after C.
     /// This remains producer schema authority, not output/image completion proof.
     pub fn with_closed(mut self, closure: Invalidated) -> Result<Self, PrepareError> {
