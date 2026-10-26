@@ -54,6 +54,11 @@ impl Facets {
     pub const fn is_material_only(self) -> bool {
         self.0 & !(Self::one(Facet::Paint).0 | Self::one(Facet::Hit).0 | Self::one(Facet::Semantics).0) == 0
     }
+    /// Positive graphical-clean input schema. Future bits are forbidden.
+    pub const fn is_non_graphical(self) -> bool {
+        self.0 & !(Self::one(Facet::Hit).0 | Self::one(Facet::Semantics).0) == 0
+    }
+
 
     pub fn phases(self) -> impl Iterator<Item = Phase> {
         Phase::ALL.into_iter().filter(move |phase| {
@@ -894,5 +899,21 @@ mod input_output_phase_tests {
         for content in [Facet::TextSource,Facet::TextPolicy,Facet::TextWidth,Facet::ResourceMetrics,Facet::PrimitiveContent] {
             assert!(Facets::one(content).phases().any(|phase|phase==Phase::Primitive));
         }
+    }
+}
+
+#[cfg(test)]
+mod non_graphical_schema_tests {
+    use super::*;
+    #[test]
+    fn only_explicit_hit_and_semantics_bits_are_non_graphical() {
+        assert!(Facets::default().is_non_graphical());
+        assert!(Facets::one(Facet::Hit).union(Facets::one(Facet::Semantics)).is_non_graphical());
+        for facet in [Facet::Topology,Facet::Layout,Facet::TextSource,Facet::TextPolicy,Facet::TextWidth,
+            Facet::Paint,Facet::Transform,Facet::Clip,Facet::Stacking,Facet::ResourcePixels,Facet::ResourceMetrics,
+            Facet::WidthConstraint,Facet::HeightConstraint,Facet::PrimitiveContent] {
+            assert!(!Facets::one(facet).is_non_graphical(),"{facet:?}");
+        }
+        assert!(!Facets(u16::MAX).is_non_graphical());
     }
 }
