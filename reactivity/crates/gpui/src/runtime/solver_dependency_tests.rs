@@ -1,6 +1,6 @@
 //! Real solver propagation, without a duplicate potential parent/child SCC.
 use super::*;
-use crate::{column, div, image, text, rgb, Image, ImageProfile, AlphaMode};
+use crate::{column, div, image, text, rgb, El, Signal, Image, ImageProfile, AlphaMode};
 use gpui_reactivity_core::change::FullReasons;
 const COUNT:usize=128;
 const SIZE:[u32;2]=[128,128];
