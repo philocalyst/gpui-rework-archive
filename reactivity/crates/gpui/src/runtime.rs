@@ -55,6 +55,7 @@ pub use text_geometry::TextGeometry;
 mod identity_index;
 mod layout_nodes;
 mod changes;
+mod layout_writes;
 #[cfg(test)]
 mod solver_dependency_tests;
 #[cfg(feature = "retained-text")]
@@ -1207,6 +1208,7 @@ struct Runtime<M> {
     layout_nodes: LayoutNodes,
     layout_edits: Option<Box<layout_nodes::EditPlan>>,
     layout_dirty: BTreeSet<u64>,
+    layout_writes: layout_writes::LayoutWrites,
     rebuild_layout: bool,
     layout_depth: u8,
     topology_changed: bool,
@@ -1476,6 +1478,7 @@ impl<M: View + 'static, L: LaneSet<M>> Win<M, L> {
             layout_nodes: LayoutNodes::default(),
             layout_edits: None,
             layout_dirty: BTreeSet::new(),
+            layout_writes: layout_writes::LayoutWrites::new(layout_writes::MAX_ENTRIES),
             rebuild_layout: true,
             layout_depth: 0,
             topology_changed: true,
@@ -3346,9 +3349,11 @@ impl<M: View + 'static> Runtime<M> {
         let composition = self
             .composition_preview()
             .map(|(identity, preview)| (identity, preview.display.clone(), preview.decoration));
+        if self.topology_changed { self.layout_writes.invalidate(); }
         if self.rebuild_layout || self.layout.is_poisoned()
             || (self.topology_changed && self.layout_edits.is_none())
         {
+            self.layout_writes.invalidate();
             self.layout_edits = None;
             self.layout = LayoutTree::new();
             self.layout_nodes.clear();
@@ -3475,13 +3480,15 @@ impl<M: View + 'static> Runtime<M> {
                 }
             }
         };
-        self.layout.compute_with_width_measure(
+        let layout_writes = &mut self.layout_writes;
+        self.layout.compute_with_width_measure_and_changes(
             self.layout_nodes.required(0),
             Size {
                 width: AvailableSpace::Definite(size[0] as f32 / scale_factor),
                 height: AvailableSpace::Definite(size[1] as f32 / scale_factor),
             },
             &mut measure,
+            &mut |id, before, after| layout_writes.record(id, before, after),
         )?;
         let after = self.layout.stats();
         self.counters.layout_runs += after.computes - before.computes;
@@ -3497,6 +3504,40 @@ impl<M: View + 'static> Runtime<M> {
             // This is AFTER solve: it must NOT trigger an arena rebuild here.
             closed_dependencies.require_full(change_model::FullReasons::UNKNOWN_DEPENDENCY);
             self.changes.full(change_model::FullReasons::UNKNOWN_DEPENDENCY);
+        }
+        // Resolve actual full layout capabilities only in the current map, after
+        // topology plans have been applied. Old values stay journaled through
+        // failures; no presentation/ACK state participates in this baseline.
+        for (id, write) in self.layout_writes.entries() {
+            let Some(index) = self.layout_nodes.index_of(id) else {
+                closed_dependencies.require_full(change_model::FullReasons::UNKNOWN_DEPENDENCY);
+                continue;
+            };
+            if write.before == write.after { continue; }
+            let channels = write.channels();
+            let mut facets = change_model::Facets::one(change_model::Facet::PrimitiveContent);
+            let mut scope = change_model::Scope::Site;
+            if channels.location {
+                facets = facets.union(change_model::Facets::one(change_model::Facet::Transform));
+                scope = change_model::Scope::Subtree;
+            }
+            if channels.size || channels.content || channels.overflow {
+                facets = facets.union(change_model::Facets::one(change_model::Facet::Clip));
+                scope = change_model::Scope::Subtree;
+            }
+            if channels.order {
+                facets = facets.union(change_model::Facets::one(change_model::Facet::Stacking));
+                scope = change_model::Scope::Subtree;
+            }
+            if write.before.content_box_width() != write.after.content_box_width() {
+                facets = facets.union(change_model::Facets::one(change_model::Facet::TextWidth));
+            }
+            changes::record(&mut self.changes, self.sites.namespace(), self.nodes[index].identity,
+                facets, scope, change_model::Support::Pending, change_model::Support::Pending);
+        }
+        if self.layout_writes.incomplete() {
+            self.changes.full(change_model::FullReasons::UNKNOWN_DEPENDENCY);
+            closed_dependencies.require_full(change_model::FullReasons::UNKNOWN_DEPENDENCY);
         }
         // All pre-solve logical invalidations have now been consumed. Inspector
         // captions changed below are a distinct late set, not every old source.
@@ -4069,6 +4110,7 @@ impl<M: View + 'static> Runtime<M> {
         let accepted_groups = change_model::SceneGroups::new(change_stamp.to, self.source_epoch,
             change_stamp.snapshot_epoch, change_groups, scene.draw_count()).ok_or(Error::ChangeView(change_model::ViewError::Snapshot))?;
         let committed_damage = scene.commit_publication(pending_changes, publication, accepted_groups).map_err(Error::Publication)?;
+        self.layout_writes.published();
         #[cfg(feature = "retained-text")]
         resource_publication.commit();
         #[cfg(feature = "retained-text")]

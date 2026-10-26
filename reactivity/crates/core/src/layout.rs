@@ -438,7 +438,7 @@ impl LayoutTree {
         root: NodeId,
         viewport: Size<AvailableSpace>,
     ) -> Result<bool, LayoutError> {
-        self.compute_inner(root, viewport, None, false)
+        self.compute_inner(root, viewport, None, false, None)
     }
     /// Borrow a content service for this computation instead of storing it in
     /// every measured node. Only nodes installed with `set_measure` invoke it.
@@ -452,7 +452,7 @@ impl LayoutTree {
         viewport: Size<AvailableSpace>,
         measure: &mut dyn FnMut(NodeId, MeasureInput) -> MeasureOutput,
     ) -> Result<bool, LayoutError> {
-        self.compute_inner(root, viewport, Some(measure), false)
+        self.compute_inner(root, viewport, Some(measure), false, None)
     }
     /// Like `compute_with`, with no available height in the callback's input.
     /// The existing leaf cache can therefore share answers across available
@@ -477,7 +477,20 @@ impl LayoutTree {
                 )
             }),
             true,
+            None,
         )
+    }
+    /// Streams actual non-speculative layout writes before overwrite. The
+    /// observer must bound its own retained history; no callback is retained.
+    /// A callback panic poisons this adapter, just like a measure panic.
+    pub fn compute_with_width_measure_and_changes(
+        &mut self, root: NodeId, viewport: Size<AvailableSpace>,
+        measure: &mut dyn FnMut(NodeId, WidthMeasureInput) -> MeasureOutput,
+        changes: &mut dyn FnMut(NodeId, Layout, Layout),
+    ) -> Result<bool, LayoutError> {
+        self.compute_inner(root, viewport, Some(&mut |node, input| {
+            measure(node, WidthMeasureInput { known_dimensions: input.known_dimensions, available_width: input.available_space.width })
+        }), true, Some(changes))
     }
     fn compute_inner(
         &mut self,
@@ -485,6 +498,7 @@ impl LayoutTree {
         viewport: Size<AvailableSpace>,
         measure: Option<&mut dyn FnMut(NodeId, MeasureInput) -> MeasureOutput>,
         width_only: bool,
+        changes: Option<&mut dyn FnMut(NodeId, Layout, Layout)>,
     ) -> Result<bool, LayoutError> {
         self.tree.index(root)?;
         if self.poisoned {
@@ -533,6 +547,7 @@ impl LayoutTree {
                 measure,
                 observed: 0,
                 width_only,
+                changes,
             };
             for node in selected {
                 let key = EngineId::new(engine.owner.tree.layout_key(node));
@@ -676,6 +691,7 @@ struct Engine<'a, 'service> {
     width_only: bool,
     owner: &'a mut LayoutTree,
     measure: Option<&'service mut dyn FnMut(NodeId, MeasureInput) -> MeasureOutput>,
+    changes: Option<&'service mut dyn FnMut(NodeId, Layout, Layout)>,
 }
 impl Engine<'_, '_> {
     fn node(&self, node: EngineId) -> NodeId {
@@ -789,6 +805,9 @@ impl EngineTree for Engine<'_, '_> {
         }
         let index = self.slot(node);
         if self.owner.layouts[index] != *layout {
+            let node = self.node(node);
+            let before = self.owner.layouts[index];
+            if let Some(changes) = self.changes.as_mut() { changes(node, before, *layout); }
             self.owner.stats.changed_layout_writes += 1;
             self.owner.layouts[index] = *layout;
         }
@@ -958,6 +977,7 @@ mod tests {
                 measure: None,
                 observed: 0,
                 width_only: false,
+                changes: None,
             };
             engine.set_speculation(1);
             cephal::compute::compute_hidden_layout(&mut engine, key);
@@ -1129,6 +1149,7 @@ mod tests {
             observed: 0,
             measure: None,
             width_only: false,
+            changes: None,
         };
         engine.set_speculation(1);
         engine.set_absolute_context(key, AbsoluteContext::default());
@@ -1139,5 +1160,50 @@ mod tests {
         engine.clear_absolute_context(key);
         assert!(engine.take_absolute_context(key).is_none());
         assert!(engine.absolute_context(key).is_some());
+    }
+}
+
+#[cfg(test)]
+mod write_observer_tests {
+    use super::*;
+    #[test]
+    fn compute_observer_matches_actual_write_count_and_clean_call_emits_nothing() {
+        let mut tree = LayoutTree::new();
+        let root = tree.insert(None, NodeKind::Element, Style::DEFAULT).unwrap();
+        let viewport = Size { width: AvailableSpace::Definite(20.), height: AvailableSpace::Definite(10.) };
+        let mut writes = Vec::new();
+        let before = tree.stats().changed_layout_writes;
+        assert!(tree.compute_with_width_measure_and_changes(root, viewport,
+            &mut |_, _| panic!("unmeasured root must not ask content service"),
+            &mut |id, old, new| writes.push((id, old, new))).unwrap());
+        assert_eq!(writes.len() as u64, tree.stats().changed_layout_writes - before);
+        assert!(!writes.is_empty());
+        assert!(writes.iter().all(|(id, old, new)| *id == root && old != new));
+        writes.clear();
+        assert!(!tree.compute_with_width_measure_and_changes(root, viewport,
+            &mut |_, _| panic!("clean root must not measure"),
+            &mut |id, old, new| writes.push((id, old, new))).unwrap());
+        assert!(writes.is_empty());
+    }
+    #[test]
+    fn observer_receives_real_full_capability_before_overwrite_not_speculation_or_equal_write() {
+        let mut owner = LayoutTree::new();
+        let node = owner.insert(None, NodeKind::Element, Style::DEFAULT).unwrap();
+        let initial = owner.layout(node).unwrap();
+        let mut next = initial; next.size.width += 17.;
+        let mut writes = Vec::new();
+        {
+            let mut observer = |id, before, after| writes.push((id, before, after));
+            let key = EngineId::new(owner.tree.layout_key(node));
+            let mut engine = Engine { owner: &mut owner, observed: 0, width_only: false, measure: None, changes: Some(&mut observer) };
+            engine.set_speculation(1);
+            engine.set_unrounded_layout(key, &next);
+            assert_eq!(engine.owner.layout(node).unwrap(), initial);
+            engine.set_speculation(0);
+            engine.set_unrounded_layout(key, &next);
+            engine.set_unrounded_layout(key, &next);
+        }
+        assert_eq!(writes, vec![(node, initial, next)]);
+        assert_eq!(owner.layout(node).unwrap(), next);
     }
 }

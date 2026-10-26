@@ -50,3 +50,33 @@ fn parent_width_child_rewrap_and_sibling_placement_match_full_cold_output() {
     }
     assert_eq!(pixels(&mut win),initial);
 }
+
+struct FailedWrites { width:f64, broken:bool }
+impl View for FailedWrites {
+    fn view(&self)->El<'_> {
+        column((text("ordinary content that wraps under changed allocation").font_size(12), div().h(8)))
+            .w(self.width).transform(if self.broken { Affine::scale(0.,1.) } else { Affine::IDENTITY })
+    }
+}
+#[test]
+fn failed_newer_solves_and_old_ack_do_not_replace_first_write_baseline() {
+    let mut win=Win::recording(FailedWrites{width:100.,broken:false},options()).unwrap();ack(&mut win);
+    let old_token=win.with_scene(|_,t|t).unwrap();let old_pixels=pixels(&mut win);
+    let root=win.runtime().unwrap().layout_nodes.required(0);
+    let baseline=win.runtime().unwrap().layout.layout(root).unwrap();
+    for width in [40.,60.] {
+        assert!(win.update(|model|{model.width=width;model.broken=true;}).is_err());
+        let rt=win.runtime().unwrap();
+        let (_,write)=rt.layout_writes.entries().find(|(id,_)|*id==root).expect("actual first failed solve recorded old full capability");
+        assert_eq!(write.before,baseline,"failed working layout is never the accepted baseline");
+        if width == 60. { assert!(rt.layout_writes.incomplete(),"repair rebuilt the arena; do not claim continuous old-space reconstruction"); }
+        assert_eq!(win.with_scene(|_,t|t).unwrap(),old_token);
+        assert_eq!(pixels(&mut win),old_pixels);
+    }
+    win.presented(old_token).unwrap();
+    assert_eq!(win.runtime().unwrap().layout_writes.entries().find(|(id,_)|*id==root).unwrap().1.before,baseline);
+    win.update(|model|{model.width=80.;model.broken=false;}).unwrap();ack(&mut win);
+    assert_eq!(win.runtime().unwrap().layout_writes.entries().count(),0);
+    let mut cold=Win::with_options(FailedWrites{width:80.,broken:false},options()).unwrap();
+    assert_eq!(rows(&win),rows(&cold));assert_eq!(pixels(&mut win),pixels(&mut cold));
+}
