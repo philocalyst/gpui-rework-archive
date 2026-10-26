@@ -265,7 +265,7 @@ pub(super) fn encoded_index(rect: Rect) -> Option<u32> {
 impl super::DisplayList {
     pub(super) fn clip_geometry(&self) -> Option<ClipGeometry<'_>> {
         Some(ClipGeometry {
-            arena: self.images.as_ref()?.clips.as_deref()?,
+            arena: self.geometry.images.as_ref()?.clips.as_deref()?,
         })
     }
     pub(super) fn clip_chain(&self, clip: Rect) -> Option<ClipChain<'_>> {
@@ -364,15 +364,13 @@ impl Canvas {
             nodes.push(node);
             let arena = Box::new(ClipArena { owner, nodes });
             self.revoke_publication();
-            self.commands
-                .images
+            self.commands.geometry.images
                 .get_or_insert_with(Box::<ImageResources>::default)
                 .clips = Some(arena);
             Ok(ClipId { owner, index: 0 })
         } else {
             let arena = self
-                .commands
-                .images
+                .commands.geometry.images
                 .as_mut()
                 .unwrap()
                 .clips

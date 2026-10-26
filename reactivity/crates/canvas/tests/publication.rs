@@ -143,15 +143,24 @@ fn truncated_paint_plus_hidden_layout_requires_full_snapshot_before_publication(
     journal.record(Change {site:SiteId::from_monotonic(owner,Nz::new(2).unwrap()),facets:Facets::one(Facet::Layout),scope:Scope::Site,before:Support::Pending,after:Support::Pending});
     let next=stamp(&issuer,&journal,2);let edits=[SlotEdit::new(slot,PaintColor::new(Color::BLACK))];
     let changes=journal.prepare(next).unwrap();assert!(changes.batch().full.contains(gpui_reactivity_core::change::FullReasons::CAPACITY));
-    assert_eq!(changes.batch().entries.len(),1);let publication=issuer.prepare(next).unwrap();
+    // Core6d retains pending facts in Journal but deliberately exports no
+    // unusable partial rows in a hard-full immutable candidate.
+    assert_eq!((changes.batch().entries.len(),changes.batch().entries.capacity()),(0,0));let publication=issuer.prepare(next).unwrap();
     assert_eq!(canvas.prepare_slots(&edits).unwrap().commit_publication(changes,publication),Err(PublicationError::IncompleteChanges));
     assert_eq!(canvas.accepted_scene().unwrap().stamp(),old);assert_eq!(journal.base(),Some(old.to));
+    let retry=journal.prepare(next).unwrap();
+    assert!(retry.batch().full.contains(gpui_reactivity_core::change::FullReasons::CAPACITY),"rejected Canvas publication must not drain hard-full history");
+    assert_eq!((retry.batch().entries.len(),retry.batch().entries.capacity()),(0,0));drop(retry);
     let mut stage=canvas.stage();stage.clear(Color::BLACK);
     stage.fill_rect(Rect::new(2.,2.,12.,12.),Affine::IDENTITY,Rect::new(0.,0.,16.,16.),Color::WHITE).unwrap();
     let metadata=groups(next,stage.draw_count());
     stage.commit_publication(journal.prepare(next).unwrap(),issuer.prepare(next).unwrap(),metadata).unwrap();
     let view=canvas.accepted_scene().unwrap();assert!(view.is_full_snapshot());assert!(view.checked_slot_mutation().is_none());
+    assert!(view.batch().full.contains(gpui_reactivity_core::change::FullReasons::CAPACITY));
+    assert_eq!((view.batch().entries.len(),view.batch().entries.capacity()),(0,0));
     assert_eq!(view.stamp().to,next.to);assert_eq!(view.scene().draws().next().unwrap().local_rect,Rect::new(2.,2.,12.,12.));
+    assert_eq!(journal.base(),Some(next.to));let after=stamp(&issuer,&journal,3);let clean=journal.prepare(after).unwrap();
+    assert!(clean.batch().full.is_empty());assert!(clean.batch().entries.is_empty(),"only accepted full snapshot drains pending history");
 }
 #[test]
 fn precommit_witness_borrows_actual_changed_slots_and_all_users_without_mutation_or_allocation() {
@@ -266,6 +275,102 @@ fn material_source_with_closed_primitive_content_dependency_requires_new_snapsho
     let edits=[SlotEdit::new(slot,PaintColor::new(Color::BLACK))];
     assert_eq!(canvas.prepare_slots(&edits).unwrap().commit_publication(changes,issuer.prepare(next).unwrap()),Err(PublicationError::IncompleteChanges));
     assert_eq!(canvas.accepted_scene().unwrap().stamp(),old);assert_eq!(journal.base(),Some(old.to));
+}
+
+#[test]
+fn material_users_resolve_bound_group_indexes_in_identity_order_across_retarget_and_replacement() {
+    let mut issuer=FrameIssuer::new().unwrap();let owner=issuer.owner();let mut journal=Journal::new(owner,16);
+    let mut canvas=Canvas::recording(48,16,ColorConfig::default()).unwrap();let first=stamp(&issuer,&journal,1);
+    let clip=Rect::new(0.,0.,48.,16.);
+    let mut stage=canvas.stage();stage.clear(Color::BLACK);let slot=stage.paint_slot(PaintColor::new(Color::WHITE)).unwrap();
+    for x in [0.,16.,32.] {stage.fill_rect_slot(Rect::new(x,0.,16.,16.),Affine::IDENTITY,clip,slot).unwrap();}
+    let spans=|ids:[u64;3]|vec![
+        GroupSpan {local:Nz::new(ids[0]).unwrap(),parent:None,draws:0..1},
+        GroupSpan {local:Nz::new(ids[1]).unwrap(),parent:None,draws:1..2},
+        GroupSpan {local:Nz::new(ids[2]).unwrap(),parent:None,draws:2..3},
+        GroupSpan {local:Nz::new(4).unwrap(),parent:None,draws:3..3},
+    ];
+    let metadata=SceneGroups::new(first.to,1,1,spans([9,2,7]),3).unwrap();
+    stage.commit_publication(journal.prepare(first).unwrap(),issuer.prepare(first).unwrap(),metadata).unwrap();
+    assert_eq!(canvas.accepted_scene().unwrap().material_users(slot).unwrap().map(|site|site.local.get()).collect::<Vec<_>>(),vec![2,7,9]);
+    let edits=[SlotEdit::new(slot,PaintColor::new(Color::rgba(12,34,56,255)))];
+    let plan=canvas.prepare_slots(&edits).unwrap();
+    assert_eq!(plan.prepared_mutation().unwrap().actual_users(slot).unwrap().map(|site|site.local.get()).collect::<Vec<_>>(),vec![2,7,9]);
+    drop(plan);
+    for n in [9,2,7] {journal.record(Change {site:SiteId::from_monotonic(owner,Nz::new(n).unwrap()),facets:Facets::one(Facet::Paint),scope:Scope::Site,before:Support::Pending,after:Support::Pending});}
+    let second=stamp(&issuer,&journal,2);
+    canvas.prepare_slots(&edits).unwrap().commit_publication(journal.prepare(second).unwrap(),issuer.prepare(second).unwrap()).unwrap();
+    let view=canvas.accepted_scene().unwrap();assert_eq!(view.checked_slot_mutation().unwrap().bank_origin(),first.to);
+    assert_eq!(view.material_users(slot).unwrap().map(|site|site.local.get()).collect::<Vec<_>>(),vec![2,7,9]);
+    // A new table changes addresses, not identities. Rebuild the paired CSR.
+    let third=stamp(&issuer,&journal,3);let mut stage=canvas.stage();stage.clear(Color::BLACK);
+    let replacement=stage.paint_slot(PaintColor::new(Color::rgba(12,34,56,255))).unwrap();
+    for x in [0.,16.,32.] {stage.fill_rect_slot(Rect::new(x,0.,16.,16.),Affine::IDENTITY,clip,replacement).unwrap();}
+    let metadata=SceneGroups::new(third.to,3,3,spans([7,9,2]),3).unwrap();
+    stage.commit_publication(journal.prepare(third).unwrap(),issuer.prepare(third).unwrap(),metadata).unwrap();
+    let view=canvas.accepted_scene().unwrap();assert!(view.is_full_snapshot());assert!(view.checked_slot_mutation().is_none());
+    assert_eq!(view.material_users(replacement).unwrap().map(|site|site.local.get()).collect::<Vec<_>>(),vec![2,7,9]);
+    let mut actual=vec![0;48*16];canvas.render_bgrx(&mut actual).unwrap();
+    let mut cold=Canvas::recording(48,16,ColorConfig::default()).unwrap();cold.clear(Color::rgba(12,34,56,255));
+    let mut expected=vec![0;48*16];cold.render_bgrx(&mut expected).unwrap();assert_eq!(actual,expected);
+    assert!(SceneGroups::new(third.to,3,3,spans([7,7,2]),3).is_none(),"duplicate semantic owners cannot alias two indexes");
+}
+
+/// Consumer bridge fixture: each receipt is one canonical edge, not cumulative
+/// target damage. No output is rendered between the accepted intermediate Cs.
+#[test]
+fn skipped_output_receipts_keep_exact_edges_across_failed_newer_and_reversion() {
+    let mut issuer=FrameIssuer::new().unwrap();let owner=issuer.owner();let mut journal=Journal::new(owner,16);
+    let mut canvas=Canvas::recording(64,16,ColorConfig::default()).unwrap();let first=stamp(&issuer,&journal,1);
+    let mut stage=canvas.stage();stage.clear(Color::BLACK);
+    let left=stage.paint_slot(PaintColor::new(Color::WHITE)).unwrap();
+    let right=stage.paint_slot(PaintColor::new(Color::WHITE)).unwrap();
+    let clip=Rect::new(0.,0.,64.,16.);
+    for (x,slot) in [(0.,left),(48.,right)] {
+        stage.fill_rect_slot(Rect::new(x,0.,16.,16.),Affine::IDENTITY,clip,slot).unwrap();
+    }
+    let metadata=SceneGroups::new(first.to,1,1,vec![
+        GroupSpan {local:Nz::new(1).unwrap(),parent:None,draws:0..1},
+        GroupSpan {local:Nz::new(2).unwrap(),parent:None,draws:1..2},
+    ],2).unwrap();
+    stage.commit_publication(journal.prepare(first).unwrap(),issuer.prepare(first).unwrap(),metadata).unwrap();
+    let mut target_seed=vec![0;64*16];canvas.render_bgrx(&mut target_seed).unwrap();let seed_copy=target_seed.clone();
+    record(&mut journal,owner,Facet::Paint);let second=stamp(&issuer,&journal,2);
+    let edits=[SlotEdit::new(left,PaintColor::new(Color::rgba(220,20,30,255)))];
+    canvas.prepare_slots(&edits).unwrap().commit_publication(journal.prepare(second).unwrap(),issuer.prepare(second).unwrap()).unwrap();
+    {
+        let frame=canvas.accepted_scene().unwrap();let edge=frame.checked_slot_mutation().unwrap();
+        assert_eq!(frame.stamp().from,Some(first.to));assert_eq!(edge.base(),first.to);
+        assert_eq!(edge.changed_slots(),&[left]);assert_eq!(edge.bank_origin(),first.to);
+    }
+    // Wrong owner coverage rejects before consuming the old bound C or journal.
+    record(&mut journal,owner,Facet::Paint);let third=stamp(&issuer,&journal,3);
+    let edits=[SlotEdit::new(right,PaintColor::new(Color::rgba(20,40,230,255)))];
+    assert_eq!(canvas.prepare_slots(&edits).unwrap().commit_publication(journal.prepare(third).unwrap(),issuer.prepare(third).unwrap()),Err(PublicationError::UncoveredPaint));
+    assert_eq!(canvas.accepted_scene().unwrap().stamp(),second);assert_eq!(journal.base(),Some(second.to));
+    journal.record(Change {site:SiteId::from_monotonic(owner,Nz::new(2).unwrap()),facets:Facets::one(Facet::Paint),scope:Scope::Site,before:Support::Pending,after:Support::Pending});
+    canvas.prepare_slots(&edits).unwrap().commit_publication(journal.prepare(third).unwrap(),issuer.prepare(third).unwrap()).unwrap();
+    {
+        let frame=canvas.accepted_scene().unwrap();let edge=frame.checked_slot_mutation().unwrap();
+        assert_eq!(frame.stamp().from,Some(second.to));assert_eq!(edge.base(),second.to);
+        assert_eq!(edge.changed_slots(),&[right]);assert_eq!(edge.bank_origin(),first.to);
+    }
+    // Revert the first change. Latest receipt alone cannot repair the right tile
+    // of a target that still contains C1. Consumers must retain the edge union.
+    record(&mut journal,owner,Facet::Paint);let fourth=stamp(&issuer,&journal,4);
+    let edits=[SlotEdit::new(left,PaintColor::new(Color::WHITE))];
+    canvas.prepare_slots(&edits).unwrap().commit_publication(journal.prepare(fourth).unwrap(),issuer.prepare(fourth).unwrap()).unwrap();
+    let frame=canvas.accepted_scene().unwrap();let edge=frame.checked_slot_mutation().unwrap();
+    assert_eq!(frame.stamp().from,Some(third.to));assert_eq!(edge.changed_slots(),&[left]);
+    assert_eq!(edge.base(),third.to);assert_eq!(edge.bank_origin(),first.to);
+    assert_eq!(target_seed,seed_copy,"canonical publication never writes an unrelated target");
+    let mut actual=vec![0;64*16];canvas.render_bgrx(&mut actual).unwrap();
+    let mut cold=Canvas::recording(64,16,ColorConfig::default()).unwrap();cold.clear(Color::BLACK);
+    for (x,color) in [(0.,Color::WHITE),(48.,Color::rgba(20,40,230,255))] {
+        cold.fill_rect(Rect::new(x,0.,16.,16.),Affine::IDENTITY,clip,color).unwrap();
+    }
+    let mut expected=vec![0;64*16];cold.render_bgrx(&mut expected).unwrap();assert_eq!(actual,expected);
+    assert_ne!(actual,target_seed,"latest accepted C differs from the skipped target base");
 }
 
 #[test]

@@ -3617,10 +3617,10 @@ impl<M: View + 'static> Runtime<M> {
             .map_or(usize::MAX, |captions| captions.panel);
         let mut scene = replacement.as_mut().unwrap_or(&mut self.canvas).stage();
         scene.clear(Color::WHITE);
+        scene.start_recording_with_capacity(change_stamp, self.nodes.len()).map_err(Error::Publication)?;
         self.counters.paint_passes += 1;
-        let mut change_groups = Vec::with_capacity(self.nodes.len());
+        // One mandatory own-span table; node ordinal indexes this existing table.
         for index in 0..self.nodes.len() {
-            let first_draw = scene.draw_count();
             if index == inspector_boundary {
                 inspector_display.as_ref().unwrap().refresh(
                     &presented,
@@ -3631,6 +3631,11 @@ impl<M: View + 'static> Runtime<M> {
                     &mut self.changes, self.sites.namespace(), &self.nodes,
                 )?;
             }
+            let parent = self.nodes[index].parent().index().map(|parent|
+                scene.recorded_site(parent).ok_or(Error::Publication(gpui_canvas::PublicationError::Metadata))).transpose()?;
+            let site = change_model::SiteId::from_monotonic(self.sites.namespace(), self.nodes[index].identity);
+            let mut own_recording = scene.begin_recorded_site(site, parent).map_err(Error::Publication)?;
+            let scene = own_recording.scene_mut();
             let layout = self.layout.layout(self.layout_nodes.required(index))?;
             while ancestor.index() != self.nodes[index].parent().index() {
                 spaces.pop();
@@ -3981,12 +3986,7 @@ impl<M: View + 'static> Runtime<M> {
                     },
                 )?;
             }
-            change_groups.push(change_model::GroupSpan {
-                local: node.identity,
-                parent: node.parent().index().map(|parent| parent as u32),
-                draws: u32::try_from(first_draw).map_err(|_| Error::ResourceLimit)?..
-                    u32::try_from(scene.draw_count()).map_err(|_| Error::ResourceLimit)?,
-            });
+            own_recording.finish(); // Always close before descendants or omitted-node continue.
             if omitted {
                 published.record(index, presented.len(), false);
                 continue;
@@ -4132,9 +4132,7 @@ impl<M: View + 'static> Runtime<M> {
             .prepare_resource_reads(resource_reads).map_err(Error::Dependency)?;
         let pending_changes = self.changes.prepare(change_stamp).map_err(Error::ChangeProtocol)?.with_closed(closed_dependencies).map_err(Error::ChangeProtocol)?;
         let publication = self.sites.issuer_mut().prepare(change_stamp).map_err(Error::ChangeView)?;
-        let accepted_groups = change_model::SceneGroups::new(change_stamp.to, self.source_epoch,
-            change_stamp.snapshot_epoch, change_groups, scene.draw_count()).ok_or(Error::ChangeView(change_model::ViewError::Snapshot))?;
-        let committed_damage = scene.commit_publication(pending_changes, publication, accepted_groups).map_err(Error::Publication)?;
+        let committed_damage = scene.commit_recorded_publication(pending_changes, publication).map_err(Error::Publication)?;
         self.layout_writes.published();
         #[cfg(feature = "retained-text")]
         resource_publication.commit();

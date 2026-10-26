@@ -167,7 +167,7 @@ mod tests {
             )
             .unwrap();
         let commands = &canvas.commands;
-        assert!(!commands.inline.is_empty());
+        assert!(!commands.geometry.inline.is_empty());
         let expected: Vec<_> = commands
             .iter(super::super::viewport_rect(65, 49))
             .map(|c| c.bounds)

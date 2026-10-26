@@ -14,7 +14,9 @@ pub(super) struct Binding {
     mutation:Mutation,
     scratch:Vec<PaintSlot>,
 }
-struct MaterialUsers { bank:SceneRevision, offsets:Vec<u32>, owners:Vec<std::num::NonZeroU64> }
+// Owners are checked addresses in Binding.groups, never semantic identities.
+// The table and CSR move together and checked-slot retarget changes headers only.
+struct MaterialUsers { bank:SceneRevision, offsets:Vec<u32>, owners:Vec<u32> }
 struct SlotMutation {base:SceneRevision,slots:Vec<PaintSlot>}
 enum Mutation {Snapshot,Slots(SlotMutation)}
 /// Opaque actual checked transaction witness; no caller-list constructor.
@@ -28,6 +30,7 @@ impl<'a> CheckedSlotMutation<'a> {
 impl MaterialUsers {
     fn build(scene:PreparedScene<'_>,groups:&SceneGroups,bank:SceneRevision)->Result<Self,PublicationError> {
         let rows=scene.paint_bank().len();
+        if u32::try_from(groups.groups().len()).is_err() || groups.revision()!=bank {return Err(PublicationError::Metadata);}
         if rows==0 {return Ok(Self {bank,offsets:Vec::new(),owners:Vec::new()});}
         let spans=groups.groups();let mut edges=Vec::new();let mut first=0;let mut owner=0;
         for group in scene.groups() {
@@ -39,15 +42,26 @@ impl MaterialUsers {
                 while index<spans.len() && (spans[index].draws.start as usize)<end {
                     if spans[index].draws.start<spans[index].draws.end {
                         edges.try_reserve(1).map_err(|_|PublicationError::Allocation)?;
-                        edges.push((slot.index(),spans[index].local));
+                        edges.push((slot.index(),u32::try_from(index).map_err(|_|PublicationError::Metadata)?));
                     }
                     index+=1;
                 }
             }
             first=end;
         }
-        edges.sort_unstable();edges.dedup();
-        let mut offsets=Vec::new();offsets.try_reserve_exact(rows+1).map_err(|_|PublicationError::Allocation)?;
+        Self::from_edges(rows,edges,bank,groups)
+    }
+    fn from_edges(rows:usize,mut edges:Vec<(u32,u32)>,bank:SceneRevision,groups:&SceneGroups)->Result<Self,PublicationError> {
+        // Addresses are meaningful only in this exact owned canonical table.
+        if u32::try_from(groups.groups().len()).is_err() || groups.revision()!=bank
+            || edges.iter().any(|(slot,index)|*slot as usize>=rows || *index as usize>=groups.groups().len()) {
+            return Err(PublicationError::Metadata);
+        }
+        if rows==0 {return Ok(Self {bank,offsets:Vec::new(),owners:Vec::new()});}
+        edges.sort_unstable_by_key(|(slot,index)|(*slot,groups.groups()[*index as usize].local));edges.dedup();
+        if u32::try_from(edges.len()).is_err() {return Err(PublicationError::Metadata);}
+        let offset_count=rows.checked_add(1).ok_or(PublicationError::Metadata)?;
+        let mut offsets=Vec::new();offsets.try_reserve_exact(offset_count).map_err(|_|PublicationError::Allocation)?;
         let mut owners=Vec::new();owners.try_reserve_exact(edges.len()).map_err(|_|PublicationError::Allocation)?;
         let mut cursor=0;
         for row in 0..rows {
@@ -56,7 +70,7 @@ impl MaterialUsers {
         }
         offsets.push(owners.len() as u32);Ok(Self {bank,offsets,owners})
     }
-    fn owners(&self,slot:PaintSlot)->Option<&[std::num::NonZeroU64]> {
+    fn owners(&self,slot:PaintSlot)->Option<&[u32]> {
         let index=slot.index() as usize;let first=*self.offsets.get(index)? as usize;
         let end=*self.offsets.get(index+1)? as usize;Some(&self.owners[first..end])
     }
@@ -97,8 +111,8 @@ impl<'a> CanvasAcceptedSceneView<'a> {
     /// Complete actual users, derived at full admission, not caller annotations.
     pub fn material_users(self,slot:PaintSlot)->Option<impl Iterator<Item=SiteId>+'a> {
         let owner=self.binding.users.bank.owner;
-        self.binding.users.owners(slot).map(move |users|users.iter().map(move |local|
-            SiteId::from_monotonic(owner,*local)))
+        self.binding.users.owners(slot).map(move |users|users.iter().map(move |index|
+            SiteId::from_monotonic(owner,self.binding.groups.groups()[*index as usize].local)))
     }
     /// Exact immutable view pairing only, not canonical/backend validation.
     pub fn matches_scene(self,scene:PreparedScene<'_>)->bool {same_view(self.scene,scene)}
@@ -177,6 +191,12 @@ impl CanvasScene<'_> {
     /// }
     /// ```
     pub fn commit_publication(self,changes:PreparedChanges<'_>,publication:PreparedPublication<'_>,groups:SceneGroups)->Result<DamageRegion,PublicationError> {
+        // Once recorded ownership begins, there is ONE mandatory metadata
+        // authority. External tables cannot bypass failed/incomplete scopes.
+        if self.recording.is_some() {return Err(PublicationError::Metadata);}
+        self.commit_with_materials(changes,publication,groups,None)
+    }
+    pub(super) fn commit_with_materials(self,changes:PreparedChanges<'_>,publication:PreparedPublication<'_>,groups:SceneGroups,edges:Option<Vec<(u32,u32)>>)->Result<DamageRegion,PublicationError> {
         let stamp=matching(&changes,&publication)?;
         if groups.revision()!=stamp.to || groups.source_epoch()!=stamp.source_epoch
             || groups.snapshot_epoch()!=stamp.snapshot_epoch || groups.draw_count()!=self.pending.commands.len() {
@@ -188,7 +208,9 @@ impl CanvasScene<'_> {
         // Conservative legacy stage damage in O(1). Incremental renderer jobs
         // derive exact old/new support from the bound dependency/range contract;
         // do not add another whole-command diff to canonical publication.
-        let users=MaterialUsers::build(self.pending.prepared_scene(),&groups,stamp.to)?;
+        let users=if let Some(edges)=edges {
+            MaterialUsers::from_edges(self.pending.prepared_scene().paint_bank().len(),edges,stamp.to,&groups)?
+        }else{MaterialUsers::build(self.pending.prepared_scene(),&groups,stamp.to)?};
         let damage=DamageRegion::checked_canvas_bounds([0,0,self.pending.width,self.pending.height]);
         let target=self.commit_into(); // infallible canonical mutation revokes old binding first
         let (batch,closed)=changes.commit_with_closure();let receipt=publication.commit();
@@ -233,14 +255,14 @@ pub(super) fn check_slot_publication(canvas:&mut Canvas,changes:&PreparedChanges
     // unrelated Paint annotation. Hard/truncated histories already rejected;
     // this route never treats a full-raster request as a geometry certificate.
     old.scratch.clear();old.scratch.try_reserve_exact(changed).map_err(|_|PublicationError::Allocation)?;
-    for slot in canvas.commands.columns.changed_slots(edits) {old.scratch.push(slot);}
+    for slot in canvas.commands.paint_state.changed_slots(edits) {old.scratch.push(slot);}
     if old.scratch.len()!=changed {return Err(PublicationError::Metadata);}
     if changes.batch().full.is_empty() {
         for slot in &old.scratch {
             let users=old.users.owners(*slot).ok_or(PublicationError::Metadata)?;
-            for local in users {
+            for index in users {
                 // PreparedChanges owns Journal's unique SiteId-ordered rows.
-                let site=SiteId::from_monotonic(old.users.bank.owner,*local);
+                let site=SiteId::from_monotonic(old.users.bank.owner,old.groups.groups()[*index as usize].local);
                 let covered=if let Some(closed)=changes.closed_dependencies() {
                     closed.stamp()==stamp && closed.full().is_empty()
                         && [Phase::Material,Phase::Raster].into_iter().all(|phase|
@@ -264,7 +286,7 @@ pub(super) fn slot_origin(canvas:&Canvas)->Result<(SceneRevision,SceneRevision),
 }
 pub(super) fn slot_users(canvas:&Canvas,slot:PaintSlot)->Option<impl Iterator<Item=SiteId>+'_> {
     let binding=canvas.publication.as_ref()?;let owner=binding.users.bank.owner;
-    binding.users.owners(slot).map(move |users|users.iter().map(move |local|SiteId::from_monotonic(owner,*local)))
+    binding.users.owners(slot).map(move |users|users.iter().map(move |index|SiteId::from_monotonic(owner,binding.groups.groups()[*index as usize].local)))
 }
 pub(super) struct SlotParts {pub(super) groups:SceneGroups,users:MaterialUsers,mutation:SlotMutation,scratch:Vec<PaintSlot>}
 pub(super) fn take_slot_groups(canvas:&mut Canvas)->SlotParts {
@@ -288,9 +310,9 @@ mod tests {
         use std::num::NonZeroU64 as Nz;
         fn pointers(canvas:&Canvas)->[usize;7] {
             let commands=&canvas.commands;
-            [commands.order.as_ptr() as usize,commands.inline.as_ptr() as usize,commands.commons.as_ptr() as usize,
-             commands.masks.as_ptr() as usize,commands.images.as_deref().map_or(0,|r|r as *const ImageResources as usize),
-             commands.images.as_deref().and_then(|r|r.clips.as_deref()).map_or(0,|r|r as *const clips::ClipArena as usize),
+            [commands.geometry.order.as_ptr() as usize,commands.geometry.inline.as_ptr() as usize,commands.geometry.commons.as_ptr() as usize,
+             commands.geometry.masks.as_ptr() as usize,commands.geometry.images.as_deref().map_or(0,|r|r as *const ImageResources as usize),
+             commands.geometry.images.as_deref().and_then(|r|r.clips.as_deref()).map_or(0,|r|r as *const clips::ClipArena as usize),
              canvas.raster.as_deref().map_or(0,|r|r as *const RasterScratch as usize)]
         }
         let mut issuer=FrameIssuer::new().unwrap();let mut journal=Journal::new(issuer.owner(),16);
@@ -313,7 +335,7 @@ mod tests {
         let groups=SceneGroups::new(first.to,1,1,vec![GroupSpan {local:site.local,parent:None,draws:0..count as u32}],count).unwrap();
         scene.commit_publication(journal.prepare(first).unwrap(),issuer.prepare(first).unwrap(),groups).unwrap();
         let mut seed=vec![0;64*32];canvas.render_bgrx(&mut seed).unwrap();
-        let before=pointers(&canvas);let storage=canvas.prepared_scene().storage();let masks:Vec<_>=canvas.commands.masks.iter().map(Arc::as_ptr).collect();
+        let before=pointers(&canvas);let storage=canvas.prepared_scene().storage();let masks:Vec<_>=canvas.commands.geometry.masks.iter().map(Arc::as_ptr).collect();
         assert!(!masks.is_empty());assert_ne!(before[4],0);assert_ne!(before[5],0);assert_ne!(before[6],0);
         let mut graph=Dependencies::new(64);graph.reset(first.to);graph.register_site(site);assert!(graph.finish(1));
         for (sequence,facet) in [(2,Facet::Hit),(3,Facet::Semantics)] {
@@ -325,7 +347,7 @@ mod tests {
             let allocations=allocation_counter::measure(|| {damage=Some(canvas.commit_non_graphical_publication(changes,publication).unwrap());});
             assert_eq!((allocations.count_total,allocations.bytes_total),(0,0),"guard/closure construction is outside this commit-only scope");
             assert!(damage.unwrap().is_empty());assert_eq!(pointers(&canvas),before,"no command/resource/raster owner replaced");
-            assert_eq!(canvas.commands.masks.iter().map(Arc::as_ptr).collect::<Vec<_>>(),masks);
+            assert_eq!(canvas.commands.geometry.masks.iter().map(Arc::as_ptr).collect::<Vec<_>>(),masks);
             assert_eq!(canvas.prepared_scene().storage().lane_bytes(),storage.lane_bytes());
             let frame=canvas.accepted_scene().unwrap();assert_eq!(frame.stamp(),next);
             let mutation=frame.checked_slot_mutation().unwrap();assert_eq!(mutation.base(),next.from.unwrap());assert_eq!(mutation.bank_origin(),first.to);assert!(mutation.changed_slots().is_empty());
@@ -337,6 +359,34 @@ mod tests {
     }
 
     #[test]
+    fn material_owner_addresses_reject_revision_mismatch_and_out_of_range_before_csr_allocation() {
+        use std::num::NonZeroU64 as Nz;
+        use gpui_reactivity_core::change::{FrameIssuer,GroupSpan};
+        let issuer=FrameIssuer::new().unwrap();
+        let bank=SceneRevision {owner:issuer.owner(),sequence:Nz::new(1).unwrap()};
+        let groups=SceneGroups::new(bank,1,1,vec![GroupSpan {local:Nz::new(9).unwrap(),parent:None,draws:0..1}],1).unwrap();
+        assert!(matches!(MaterialUsers::from_edges(1,vec![(0,1)],bank,&groups),Err(PublicationError::Metadata)));
+        let other=SceneRevision {owner:issuer.owner(),sequence:Nz::new(2).unwrap()};
+        assert!(matches!(MaterialUsers::from_edges(1,vec![(0,0)],other,&groups),Err(PublicationError::Metadata)));
+        assert!(matches!(MaterialUsers::from_edges(1,vec![(1,0)],bank,&groups),Err(PublicationError::Metadata)));
+        let users=MaterialUsers::from_edges(1,vec![(0,0),(0,0)],bank,&groups).unwrap();
+        assert_eq!(users.offsets,vec![0,1]);assert_eq!(users.owners,vec![0]);
+        assert_eq!(size_of::<(u32,u32)>(),8);assert_eq!(size_of::<u32>(),4);
+        assert_eq!(size_of::<(u32,Nz)>(),16);assert_eq!(size_of::<Nz>(),8);
+        assert_eq!(size_of::<Vec<u32>>(),size_of::<Vec<Nz>>(),"no header saving claimed");
+        let groups=SceneGroups::new(bank,1,1,vec![
+            GroupSpan {local:Nz::new(9).unwrap(),parent:None,draws:0..1},
+            GroupSpan {local:Nz::new(2).unwrap(),parent:None,draws:1..2},
+            GroupSpan {local:Nz::new(7).unwrap(),parent:None,draws:2..3},
+        ],3).unwrap();
+        let edges=vec![(0,0),(0,1),(0,2)];let mut retained=None;
+        let allocations=allocation_counter::measure(|| {
+            retained=Some(MaterialUsers::from_edges(1,edges,bank,&groups).unwrap());
+        });
+        assert_eq!((allocations.count_total,allocations.bytes_total),(2,20),"offsets8 + owners12; old u64 owners requested24");
+        let retained=retained.unwrap();assert_eq!(retained.owners,vec![1,2,0]);
+    }
+    #[test]
     fn common_model_inline_binding_layout_is_explicit_not_a_silent_old_budget_change() {
         println!("COMMON_PUBLICATION_LAYOUT Canvas={} oldCanvas=464 Binding={} OptionBinding={} Receipt={} Batch={} Groups={} Stats={} Scratch={}",
             size_of::<Canvas>(),size_of::<Binding>(),size_of::<Option<Binding>>(),size_of::<PublicationReceipt>(),
@@ -345,4 +395,41 @@ mod tests {
         assert_eq!(size_of::<Canvas>(),464+size_of::<Option<Binding>>(),"versioned common-model cost; old ABI test deliberately remains frozen until accounting descendant");
         assert_eq!(size_of::<RenderStats>(),96);assert_eq!(size_of::<RasterScratch>(),56);
     }
+    #[test]
+    fn fused_actual_admission_edges_equal_independent_group_scan_for_shared_empty_and_rolled_back_text() {
+        use gpui_reactivity_core::change::{FrameIssuer,Journal,SiteId};
+        use std::num::NonZeroU64 as Nz;
+        let mut issuer=FrameIssuer::new().unwrap();let mut journal=Journal::new(issuer.owner(),32);
+        let stamp=BatchStamp {from:None,to:SceneRevision {owner:issuer.owner(),sequence:Nz::new(1).unwrap()},source_epoch:1,snapshot_epoch:1};
+        let mut canvas=Canvas::recording(64,32,ColorConfig::default()).unwrap();let mut stage=canvas.stage();stage.start_recording(stamp).unwrap();
+        let slot=stage.paint_slot(PaintColor::new(Color::WHITE)).unwrap();let clip=Rect::new(0.,0.,64.,32.);
+        let site=|n|SiteId::from_monotonic(stamp.to.owner,Nz::new(n).unwrap());
+        let mut text=TextSystem::bundled().unwrap();let layout=text.shape("MMMM",4.,None).unwrap();let empty=text.shape("",4.,None).unwrap();let failing=text.shape("WWWW",4.,None).unwrap();
+        let mut cached=None;
+        for n in 1..=7 {
+            let mut scope=stage.begin_recorded_site(site(n),None).unwrap();let scene=scope.scene_mut();
+            match n {
+                1=>scene.fill_rect_slot(Rect::new(1.,1.,8.,8.),Affine::IDENTITY,clip,slot).unwrap(),
+                2=>scene.fill_rounded_rect_slot(Rect::new(12.,2.,9.,9.),2.,Affine::IDENTITY,clip,slot).unwrap(),
+                3=>scene.fill_rounded_rect_shared(Rect::new(24.,2.,9.,9.),2.,Affine::IDENTITY,clip,PaintColor::new(Color::BLACK),&mut cached).unwrap(),
+                4=>scene.draw_text_scaled_shared(&mut text,&layout,Point{x:1.,y:24.},Affine::IDENTITY,clip,PaintColor::new(Color::BLACK),&mut cached,1.).unwrap(),
+                5=>scene.draw_text_scaled_slot(&mut text,&empty,Point::default(),Affine::IDENTITY,clip,slot,1.).unwrap(),
+                6=>{let old=scene.pending.references;let draws=scene.draw_count();let masks=scene.pending.commands.geometry.masks.len();
+                    scene.pending.references=MAX_REFERENCES-1;
+                    assert!(scene.draw_text_scaled_slot(&mut text,&failing,Point{x:0.,y:10.},Affine::IDENTITY,clip,slot,1.).is_err());
+                    assert_eq!(scene.draw_count(),draws);assert_eq!(scene.pending.commands.geometry.masks.len(),masks);scene.pending.references=old;},
+                _=>scene.fill_rect_slot(Rect::new(1000.,1000.,8.,8.),Affine::IDENTITY,clip,slot).unwrap(),
+            }
+            scope.finish();
+        }
+        let (groups,edges)=stage.recording_parts_for_test();
+        assert_eq!(groups.groups().len(),7);assert_eq!(groups.groups()[4].draws.start,groups.groups()[4].draws.end);
+        let actual=MaterialUsers::from_edges(stage.pending.prepared_scene().paint_bank().len(),edges.unwrap(),stamp.to,&groups).unwrap();
+        let reference=MaterialUsers::build(stage.pending.prepared_scene(),&groups,stamp.to).unwrap();
+        assert_eq!(actual.bank,reference.bank);assert_eq!(actual.offsets,reference.offsets);assert_eq!(actual.owners,reference.owners);
+        stage.commit_recorded_publication(journal.prepare(stamp).unwrap(),issuer.prepare(stamp).unwrap()).unwrap();
+        let view=canvas.accepted_scene().unwrap();assert_eq!(view.material_users(slot).unwrap().map(|s|s.local.get()).collect::<Vec<_>>(),vec![1,2]);
+        assert_eq!(view.material_users(cached.unwrap()).unwrap().map(|s|s.local.get()).collect::<Vec<_>>(),vec![3,4]);
+    }
+
 }
