@@ -340,8 +340,8 @@ impl<M: View + 'static, L: LaneSet<M>> RuntimeMut<'_, M, L> {
         if !self.inspector_enabled() && !editing_changed {
             match outcome {
                 PatchOutcome::Unchanged => {
-                    self.runtime.publish_paint(None)?;
-                    return Ok(self.commit());
+                    if self.runtime.publish_paint(None)? { return Ok(self.commit()); }
+                    self.runtime.dirty = true;
                 }
                 PatchOutcome::Paint(intent) => {
                     if self.runtime.publish_paint_intent(intent)? {
@@ -349,7 +349,7 @@ impl<M: View + 'static, L: LaneSet<M>> RuntimeMut<'_, M, L> {
                     }
                 }
                 PatchOutcome::Metadata => {
-                    return Ok(self.publish_metadata(Publish::Field(exact.unwrap())));
+                    return self.publish_metadata(Publish::Field(exact.unwrap()));
                 }
                 PatchOutcome::Visual => {}
             }

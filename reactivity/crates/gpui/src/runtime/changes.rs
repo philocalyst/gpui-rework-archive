@@ -92,8 +92,45 @@ impl<M: View + 'static> Runtime<M> {
     pub(super) fn record_change(&mut self, identity: NonZeroU64, facets: Facets, scope: Scope, before: Support, after: Support) {
         self.changes.record(Change { site: SiteId::from_monotonic(self.sites.namespace(), identity), facets, scope, before, after });
     }
-    pub(super) fn change_stamp(&self, token: PresentationToken) -> BatchStamp {
-        BatchStamp { from: self.changes.base(), to: SceneRevision { owner: token.window, sequence: token.sequence }, source_epoch: self.source_epoch, snapshot_epoch: token.sequence.get() }
+    /// Canonical scene and public draw-token revisions are separate domains.
+    /// Metadata may advance C while the same pixel token remains eligible.
+    pub(super) fn change_stamp(&self) -> Result<BatchStamp, Error> {
+        let sequence = match self.changes.base() {
+            Some(base) => base.sequence.checked_add(1).ok_or(Error::EpochExhausted)?,
+            None => NonZeroU64::new(1).unwrap(),
+        };
+        Ok(BatchStamp { from: self.changes.base(), to: SceneRevision { owner: self.sites.namespace(), sequence },
+            source_epoch: self.source_epoch, snapshot_epoch: sequence.get() })
+    }
+    /// Preflight and bind non-graphical C before changing any published metadata.
+    /// False requests the ordinary full canonical preparation fallback.
+    pub(super) fn bind_non_graphical_change(&mut self) -> Result<bool, Error> {
+        if self.changes.base().is_none() || self.topology_changed || !self.logical_valid
+            || self.rebuild_layout || self.layout.is_poisoned() || self.layout_edits.is_some()
+            || !self.layout_dirty.is_empty() || self.layout_writes.incomplete()
+            || self.layout_writes.entries().next().is_some() || self.layout_writes.answer_sites().next().is_some()
+        { return Ok(false); }
+        let stamp = self.change_stamp()?;
+        let closed = take_or_close(&mut self.pending_closure, &self.dependencies,
+            self.pending_dependencies.as_ref(), &self.changes);
+        let changes = self.changes.prepare(stamp).map_err(Error::ChangeProtocol)?
+            .with_closed(closed).map_err(Error::ChangeProtocol)?;
+        let publication = self.sites.issuer_mut().prepare(stamp).map_err(Error::ChangeView)?;
+        match self.canvas.commit_non_graphical_publication(changes, publication) {
+            Ok(_) => {
+                // No graphical/input topology changed. Keep accepted derived
+                // resource edges rather than replacing them with an unobserved
+                // freshly described base graph. Stable resource IDs survive C.
+                self.pending_dependencies = None;
+                self.dependencies.rebase(stamp.to);
+                Ok(true)
+            }
+            Err(gpui_canvas::PublicationError::IncompleteChanges
+                | gpui_canvas::PublicationError::NonPaintMutation
+                | gpui_canvas::PublicationError::UncoveredPaint
+                | gpui_canvas::PublicationError::Allocation) => Ok(false),
+            Err(error) => Err(Error::Publication(error)),
+        }
     }
     /// Existing direct sinks are still admitted normally. This graph consumes
     /// their canonical facts and extends invalidation through actual OLD and

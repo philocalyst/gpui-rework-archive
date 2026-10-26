@@ -55,6 +55,8 @@ pub use text_geometry::TextGeometry;
 mod identity_index;
 mod layout_nodes;
 mod changes;
+#[cfg(test)]
+mod canonical_revision_tests;
 mod layout_writes;
 #[cfg(test)]
 mod solver_dependency_tests;
@@ -1980,7 +1982,10 @@ impl<M: View + 'static, L: LaneSet<M>> Win<M, L> {
         let runtime = self.runtime()?;
         let token = runtime.latest_token.ok_or(Error::NoPreparedScene)?;
         let view = runtime.canvas.accepted_scene().map_err(Error::Publication)?;
-        if view.stamp().to.owner != token.window || view.stamp().to.sequence != token.sequence { return Err(Error::ChangeView(change_model::ViewError::Revision)); }
+        if view.stamp().to.owner != token.window || Some(view.stamp().to) != runtime.changes.base()
+            || view.stamp().source_epoch != runtime.complete_epoch {
+            return Err(Error::ChangeView(change_model::ViewError::Revision));
+        }
         Ok(read(view, token))
     }
     pub fn render_bgrx(&mut self, destination: &mut [u32]) -> Result<PresentationToken, Error> {
@@ -3154,22 +3159,17 @@ impl<M: View + 'static> Runtime<M> {
         self.reconcile_editing(EditingIntent::None)?;
         self.refresh_inspector(false)?;
         if !self.dirty {
-            if self.source_epoch > 0
-                && self
-                    .metadata
-                    .as_deref()
-                    .is_some_and(Metadata::has_semantics)
-            {
-                return Ok(self.publish_metadata(Publish::All));
+            if self.source_epoch > 0 && self.metadata.as_deref().is_some_and(Metadata::has_semantics) {
+                let commit = self.publish_metadata(Publish::All)?;
+                if self.complete_epoch == self.source_epoch { return Ok(commit); }
+            } else if self.complete_epoch == self.source_epoch || self.bind_non_graphical_change()? {
+                self.complete_epoch = self.source_epoch;
+                if self.prepared.is_none() && self.presentation_valid { self.presentation_epoch = self.source_epoch; }
+                return Ok(self.commit());
             }
-            // Equal logical output extends the complete scene's coverage, even
-            // during surface loss. It cannot advance displayed coverage past an
-            // outstanding visual candidate or restore a lost surface's authority.
-            self.complete_epoch = self.source_epoch;
-            if self.prepared.is_none() && self.presentation_valid {
-                self.presentation_epoch = self.source_epoch;
-            }
-            return Ok(self.commit());
+            // This is an explicit preparation barrier. A declined zero-edit
+            // proof requires complete canonical C, not a coverage relabel.
+            self.dirty = true;
         }
         #[cfg(feature = "retained-text")]
         self.artifacts.begin();
@@ -3303,6 +3303,7 @@ impl<M: View + 'static> Runtime<M> {
         mut clips: Option<&mut frontier::Frontier<ClipFrame>>,
         mut resources: Option<&mut gpui_reactivity_core::resource::ResourceContext>,
     ) -> Result<(), Error> {
+        let change_stamp = self.change_stamp()?;
         let mut closed_dependencies = self.consume_dependencies();
         #[cfg(not(feature = "retained-text"))]
         let _ = &mut resources;
@@ -4111,10 +4112,7 @@ impl<M: View + 'static> Runtime<M> {
                 })
             })
             .or_else(|| (!geometry_records.is_empty()).then_some(geometry_records));
-        let change_stamp = change_model::BatchStamp {
-            from: self.changes.base(), to: change_model::SceneRevision { owner: token.window, sequence: token.sequence },
-            source_epoch: self.source_epoch, snapshot_epoch: token.sequence.get(),
-        };
+
         #[cfg(feature = "retained-text")]
         if !resource_reads.covered_by(&closed_dependencies) {
             closed_dependencies.require_full(change_model::FullReasons::UNKNOWN_DEPENDENCY);

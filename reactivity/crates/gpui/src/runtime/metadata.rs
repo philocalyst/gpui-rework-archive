@@ -305,12 +305,12 @@ impl<M: View + 'static> Runtime<M> {
         sheet.sort();
         Some(sheet)
     }
-    pub(super) fn publish_metadata(&mut self, publish: Publish) -> Commit {
+    pub(super) fn publish_metadata(&mut self, publish: Publish) -> Result<Commit, Error> {
         // A newer failed visual preparation cannot be repaired by relabelling
         // an older complete candidate. In particular do not retry the failed
         // glyph/layout path for an otherwise independent name edit.
-        if self.dirty || self.complete_epoch != self.source_epoch - 1 {
-            return self.commit();
+        if self.dirty || self.complete_epoch == self.source_epoch {
+            return Ok(self.commit());
         }
         let candidate = self.prepared.is_some() || !self.presentation_valid;
         let frozen = matches!(publish, Publish::All)
@@ -322,6 +322,12 @@ impl<M: View + 'static> Runtime<M> {
                 self.freeze_metadata(nodes)
             })
             .flatten();
+        if !self.bind_non_graphical_change()? {
+            // A failed graphical prefix remains logically pending. Do not
+            // retry it, patch P, or relabel the older eligible complete C.
+            self.dirty = true;
+            return Ok(self.commit());
+        }
         #[cfg(feature = "accessibility")]
         let base_stamp = self.semantic_stamp();
         #[cfg(feature = "accessibility")]
@@ -487,7 +493,7 @@ impl<M: View + 'static> Runtime<M> {
                 observer.acknowledge(stamp);
             }
         }
-        self.commit()
+        Ok(self.commit())
     }
 }
 impl SemanticText {
@@ -577,6 +583,7 @@ impl<M: View + 'static, L: LaneSet<M>> Win<M, L> {
         let admission = (|| {
             runtime.live()?;
             let identity = runtime.resolve(target)?;
+            let _ = runtime.change_stamp()?;
             let epoch = runtime
                 .source_epoch
                 .checked_add(1)
@@ -611,7 +618,12 @@ impl<M: View + 'static, L: LaneSet<M>> Win<M, L> {
         runtime.source_epoch = epoch;
         runtime.counters.source_operations += 1;
         runtime.changed_nodes = usize::from(changed);
-        Ok(runtime.publish_metadata(Publish::Identity(identity)))
+        if changed {
+            let identity = NonZeroU64::new(identity).expect("admitted semantic identity");
+            runtime.record_change(identity, change_model::Facets::one(change_model::Facet::Semantics),
+                change_model::Scope::Site, change_model::Support::Pending, change_model::Support::Pending);
+        }
+        runtime.publish_metadata(Publish::Identity(identity)).map_err(|error| SetError::Committed { error, commit: runtime.commit() })
     }
 }
 

@@ -123,8 +123,7 @@ impl<M: View + 'static> Runtime<M> {
         edits: PaintEdits,
     ) -> Result<bool, Error> {
         if edits.as_slice().is_empty() {
-            self.publish_paint(None)?;
-            return Ok(true);
+            return self.publish_paint(None);
         }
         let sequence = self.next_presentation;
         let next = sequence.checked_add(1).ok_or(Error::EpochExhausted)?;
@@ -132,7 +131,7 @@ impl<M: View + 'static> Runtime<M> {
             window: self.sites.namespace(),
             sequence,
         };
-        let stamp = self.change_stamp(token);
+        let stamp = self.change_stamp()?;
         let Ok(plan) = self.canvas.prepare_slots(edits.as_slice()) else {
             return Ok(false);
         };
@@ -172,7 +171,7 @@ impl<M: View + 'static> Runtime<M> {
     pub(super) fn publish_paint(
         &mut self,
         change: Option<(gpui_canvas::DamageRegion, PresentationToken, NonZeroU64)>,
-    ) -> Result<(), Error> {
+    ) -> Result<bool, Error> {
         #[cfg(feature = "accessibility")]
         let previous = accessibility::Stamp {
             sequence: self.latest_token.map(|token| token.sequence),
@@ -183,6 +182,7 @@ impl<M: View + 'static> Runtime<M> {
             ),
         };
         let Some((damage, token, next)) = change else {
+            if self.complete_epoch != self.source_epoch && !self.bind_non_graphical_change()? { return Ok(false); }
             #[cfg(feature = "accessibility")]
             let base = self.semantic_stamp();
             let acknowledged = self.prepared.is_none() && self.presentation_valid;
@@ -203,7 +203,7 @@ impl<M: View + 'static> Runtime<M> {
                     }
                 }
             }
-            return Ok(());
+            return Ok(true);
         };
         #[cfg(feature = "accessibility")]
         let sequence = token.sequence;
@@ -242,7 +242,7 @@ impl<M: View + 'static> Runtime<M> {
         if self.automatic_presentation {
             self.acknowledge(token)?;
         }
-        Ok(())
+        Ok(true)
     }
 }
 
