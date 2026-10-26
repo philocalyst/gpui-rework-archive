@@ -9,7 +9,7 @@ impl View for Page {
     fn sources()->Sources<Self> {Sources::new().direct(Self::HOVER)}
     fn view(&self)->El<'_> {
         row((0..2).map(|id|div().size(16).bg(self.hover.map_with(id,|hover,id| {
-            if hover==id {rgb(0xe05020)} else if *id==0 {rgb(0x406080)} else {rgb(0x8098b0)}
+            if *hover==id {rgb(0xe05020)} else if id==0 {rgb(0x406080)} else {rgb(0x8098b0)}
         })))).gap(2)
     }
 }
