@@ -4339,7 +4339,8 @@ impl<M: View + 'static, L: LaneSet<M>> RuntimeMut<'_, M, L> {
         };
         if changed {
             let (facets, scope) = changes::property_facets(id);
-            self.record_change(self.nodes[index].identity, facets, scope, change_model::Support::Pending, change_model::Support::Pending);
+            let identity = self.nodes[index].identity;
+            self.record_change(identity, facets, scope, change_model::Support::Pending, change_model::Support::Pending);
         }
         Ok(changed.then_some(self.nodes[index].identity))
     }
@@ -4350,7 +4351,8 @@ impl<M: View + 'static, L: LaneSet<M>> RuntimeMut<'_, M, L> {
         contribution: Contribution<crate::property::PropertyValue>,
     ) -> Result<bool, Error> {
         let runtime = self;
-        let identity = runtime.nodes[index].identity();
+        let site_identity = runtime.nodes[index].identity;
+        let identity = site_identity.get();
         let before = runtime.styles.get(index);
         if let Some(colors) = runtime.styles.declared_colors(index) {
             runtime.overrides.refresh_color_base(identity, colors);
@@ -4367,7 +4369,7 @@ impl<M: View + 'static, L: LaneSet<M>> RuntimeMut<'_, M, L> {
         // node follows. Rebind C before a later shared-source write can occur.
         runtime.dirty |= relationship_changed;
         if relationship_changed {
-            runtime.record_change(runtime.nodes[index].identity, change_model::Facets::one(change_model::Facet::Paint), change_model::Scope::Site, change_model::Support::Pending, change_model::Support::Pending);
+            runtime.record_change(site_identity, change_model::Facets::one(change_model::Facet::Paint), change_model::Scope::Site, change_model::Support::Pending, change_model::Support::Pending);
         }
         let changed = !styles::exact_eq(&before, &after);
         runtime.changed_nodes = usize::from(changed);
