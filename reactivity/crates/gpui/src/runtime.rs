@@ -57,6 +57,8 @@ mod layout_nodes;
 mod changes;
 #[cfg(test)]
 mod canonical_revision_tests;
+#[cfg(test)]
+mod style_delta_tests;
 mod layout_writes;
 #[cfg(test)]
 mod solver_dependency_tests;
@@ -2533,7 +2535,7 @@ impl<M: View + 'static> Runtime<M> {
                 && old_styles.binding_fields(previous_index.unwrap())
                     != styles.binding_fields(index)
             {
-                mutation = mutation.union(change_model::Facets::one(change_model::Facet::Paint));
+                mutation = mutation.union(changes::binding_facets());
                 // Equal current colors do not make two source relationships
                 // interchangeable. Rebind the complete scene before slot edits.
                 self.dirty = true;
@@ -2558,7 +2560,7 @@ impl<M: View + 'static> Runtime<M> {
                 })
                 .copied();
             if next_background != previous_background {
-                mutation = mutation.union(change_model::Facets::one(change_model::Facet::ResourcePixels));
+                mutation = mutation.union(changes::brush_binding_facets());
                 node_changed = true;
                 self.dirty = true;
             }
@@ -2599,7 +2601,16 @@ impl<M: View + 'static> Runtime<M> {
                 node_changed = true;
             }
             if node.kind() != draft.kind {
-                // State belongs to the next presentation, not the mount identity.
+                // CheckBox state is the one retained site-kind value. Its
+                // primitive and semantic payload changes without a remount.
+                if matches!((node.kind(),draft.kind),(NodeKind::CheckBox(_),NodeKind::CheckBox(_))) {
+                    mutation=mutation.union(change_model::Facets::one(change_model::Facet::PrimitiveContent))
+                        .union(change_model::Facets::one(change_model::Facet::Semantics));
+                } else {
+                    mutation=mutation.union(change_model::Facets::one(change_model::Facet::Topology));
+                    self.changes.full(change_model::FullReasons::UNKNOWN_DEPENDENCY);
+                    self.layout_dirty.insert(node.identity());
+                }
                 self.dirty = true;
                 node_changed = true;
             }
@@ -2648,26 +2659,21 @@ impl<M: View + 'static> Runtime<M> {
                 node_changed = true;
             }
             let style = self.overrides.resolve(node.identity(), draft.style);
+            let style_delta = changes::style_facets(&previous_style, &style, false);
+            mutation = mutation.union(style_delta);
             if !styles::exact_eq(&previous_style, &style) {
-                mutation = mutation.union(change_model::Facets::one(change_model::Facet::Paint));
                 self.dirty = true;
                 node_changed = true;
             }
-            if layout_changed(previous_style, style) {
-                if previous_style.width != style.width { mutation = mutation.union(change_model::Facets::one(change_model::Facet::WidthConstraint)); }
-                if previous_style.height != style.height { mutation = mutation.union(change_model::Facets::one(change_model::Facet::HeightConstraint)); }
-                let mut other = previous_style; other.width = style.width; other.height = style.height; other.font_size = style.font_size;
-                if layout_changed(other, style) { mutation = mutation.union(change_model::Facets::one(change_model::Facet::Layout)); }
-                self.layout_dirty.insert(node.identity());
-            }
-            if !changes::same_transform(previous_style.transform, style.transform) { mutation = mutation.union(change_model::Facets::one(change_model::Facet::Transform)); }
-            if previous_style.font_size != style.font_size { mutation = mutation.union(change_model::Facets::one(change_model::Facet::TextPolicy)); }
-            if previous_style.font_size != style.font_size
+            if changes::affects_layout(style_delta) { self.layout_dirty.insert(node.identity()); }
+            if style_delta.contains(change_model::Facet::TextPolicy)
                 && let Some(site) = &mut site
             {
                 site.shaped = None;
             }
             if node.has_handler() != draft.on_click.is_some() {
+                mutation=mutation.union(change_model::Facets::one(change_model::Facet::Hit))
+                    .union(change_model::Facets::one(change_model::Facet::Semantics));
                 // Eligibility is part of the published hit sheet even when
                 // this transparent site's pixels and layout remain equal.
                 self.dirty = true;
@@ -2719,7 +2725,7 @@ impl<M: View + 'static> Runtime<M> {
                 property_changed = None;
             }
             if mutation != change_model::Facets::default() {
-                changes::record(&mut self.changes, self.sites.namespace(), node.identity, mutation, change_model::Scope::Subtree,
+                changes::record(&mut self.changes, self.sites.namespace(), node.identity, mutation, changes::mutation_scope(mutation),
                     if retained { change_model::Support::Pending } else { change_model::Support::Empty }, change_model::Support::Pending);
             }
             changes::register_node(&mut next_dependencies, self.sites.namespace(), node.identity, parent_identity, node.text_slot().0 != u32::MAX, node.kind() == NodeKind::List);
@@ -2974,7 +2980,8 @@ impl<M: View + 'static> Runtime<M> {
                 {
                     covered = true;
                     for site in users {
-                        self.changes.record(change_model::Change { site, facets: change_model::Facets::one(change_model::Facet::Paint), scope: change_model::Scope::Site,
+                        self.changes.record(change_model::Change { site, facets: change.as_ref().map_or(change_model::Facets::one(change_model::Facet::Paint), |change|
+                            changes::material_facets(change.previous.working()[3],change.value.working()[3])), scope: change_model::Scope::Site,
                             before: change_model::Support::Pending, after: change_model::Support::Pending });
                     }
                 }
@@ -3010,6 +3017,7 @@ impl<M: View + 'static> Runtime<M> {
             let index = destination.node();
             let node = &self.nodes[index];
             let identity = node.identity();
+            let mut style_delta = None;
             let changed = if let Some(id) = destination.property() {
                 let value = match mapped_value {
                     Some(value) => value,
@@ -3020,12 +3028,13 @@ impl<M: View + 'static> Runtime<M> {
                     | crate::property::PropertyDestination::Paint => {
                         let before = self.styles.get(index);
                         let after = self.overrides.update_base(identity, before, id, value)?;
+                        style_delta = Some(changes::style_facets(&before, &after, false));
                         let changed = !styles::exact_eq(&before, &after);
                         if changed {
-                            if id.info().impact == crate::property::Impact::Layout {
+                            if changes::affects_layout(style_delta.unwrap()) {
                                 self.layout_dirty.insert(identity);
                             }
-                            if id == crate::property::PropertyId::FontSize
+                            if style_delta.unwrap().contains(change_model::Facet::TextPolicy)
                                 && let Some(text) = node.text_slot().get_mut(&mut self.texts)
                             {
                                 text.shaped = None;
@@ -3104,7 +3113,8 @@ impl<M: View + 'static> Runtime<M> {
                 changed
             };
             if changed {
-                let (facets, scope) = if let Some(id) = destination.property() { changes::property_facets(id) }
+                let (facets, scope) = if let Some(facets) = style_delta { (facets, changes::mutation_scope(facets)) }
+                    else if let Some(id) = destination.property() { changes::property_facets(id) }
                     else if destination.port() == Port::Visual { (change_model::Facets::one(change_model::Facet::TextSource), change_model::Scope::Site) }
                     else { (change_model::Facets::one(change_model::Facet::Semantics), change_model::Scope::Site) };
                 self.changes.record(change_model::Change { site: change_model::SiteId::from_monotonic(self.sites.namespace(), node.identity), facets, scope,
@@ -4253,17 +4263,6 @@ fn validate_scale(size: [u32; 2], scale_factor: f32) -> Result<(), Error> {
 fn measure_marker(_: MeasureInput) -> MeasureOutput {
     panic!("measured content requires its borrowed service")
 }
-fn layout_changed(a: Style, b: Style) -> bool {
-    a.width != b.width
-        || a.height != b.height
-        || a.gap != b.gap
-        || a.padding != b.padding
-        || a.font_size != b.font_size
-        || a.flow != b.flow
-        || a.align != b.align
-        || a.justify != b.justify
-        || a.wrap != b.wrap
-}
 fn layout_style(style: &Style) -> cephal::Style {
     use cephal::style::{
         AlignItems, Dimension, Display, FlexDirection, FlexWrap, JustifyContent, LengthPercentage,
@@ -4403,7 +4402,7 @@ impl<M: View + 'static, L: LaneSet<M>> RuntimeMut<'_, M, L> {
             PropertyDestination::Geometry => self.set_geometry_value(index, id, contribution)?,
             PropertyDestination::Paint => self.set_background_value(index, contribution)?,
         };
-        if changed {
+        if changed && id.info().destination == PropertyDestination::Geometry {
             let (facets, scope) = changes::property_facets(id);
             let identity = self.nodes[index].identity;
             self.record_change(identity, facets, scope, change_model::Support::Pending, change_model::Support::Pending);
@@ -4434,16 +4433,17 @@ impl<M: View + 'static, L: LaneSet<M>> RuntimeMut<'_, M, L> {
         // Equal Set/Inherit still changes which immutable C paint row this
         // node follows. Rebind C before a later shared-source write can occur.
         runtime.dirty |= relationship_changed;
-        if relationship_changed {
-            runtime.record_change(site_identity, change_model::Facets::one(change_model::Facet::Paint), change_model::Scope::Site, change_model::Support::Pending, change_model::Support::Pending);
+        let facets = changes::style_facets(&before, &after, relationship_changed);
+        if facets != change_model::Facets::default() {
+            runtime.record_change(site_identity, facets, changes::mutation_scope(facets), change_model::Support::Pending, change_model::Support::Pending);
         }
         let changed = !styles::exact_eq(&before, &after);
         runtime.changed_nodes = usize::from(changed);
         if changed {
-            if layout_changed(before, after) {
+            if changes::affects_layout(facets) {
                 runtime.layout_dirty.insert(identity);
             }
-            if before.font_size != after.font_size {
+            if facets.contains(change_model::Facet::TextPolicy) {
                 let slot = runtime.nodes[index].text_slot();
                 if let Some(text) = slot.get_mut(&mut runtime.texts) {
                     text.shaped = None;

@@ -2,8 +2,38 @@
 use super::*;
 use gpui_reactivity_core::change::{Artifact, BatchStamp, Change, Dependencies, Facet, Facets, FullReasons, Phase, SceneRevision, Scope, SiteId, Support};
 
-pub(super) fn same_transform(a: Affine, b: Affine) -> bool {
-    [a.a,a.b,a.c,a.d,a.tx,a.ty].map(f32::to_bits) == [b.a,b.b,b.c,b.d,b.tx,b.ty].map(f32::to_bits)
+/// One semantic comparison shared by coarse, direct and mapped style writes.
+/// It borrows existing values; no persistent style mirror or epsilon is used.
+pub(super) fn style_facets(before: &Style, after: &Style, relationship_changed: bool) -> Facets {
+    use crate::property::ExactValue;
+    // Exhaustive field inventory: new style fields require semantic classification.
+    let Style { width: _, height: _, gap: _, padding: _, font_size: _, fg: _, bg: _,
+        flow: _, align: _, justify: _, wrap: _, transform: _ } = before;
+    let mut facets=Facets::default();
+    if !Option::<f32>::same(&before.width,&after.width) { facets=facets.union(Facets::one(Facet::WidthConstraint)); }
+    if !Option::<f32>::same(&before.height,&after.height) { facets=facets.union(Facets::one(Facet::HeightConstraint)); }
+    if !f32::same(&before.gap,&after.gap) || !f32::same(&before.padding,&after.padding)
+        || before.flow!=after.flow || before.align!=after.align || before.justify!=after.justify || before.wrap!=after.wrap {
+        facets=facets.union(Facets::one(Facet::Layout));
+    }
+    if !f32::same(&before.font_size,&after.font_size) { facets=facets.union(Facets::one(Facet::TextPolicy)); }
+    if !crate::Affine::same(&before.transform,&after.transform) { facets=facets.union(Facets::one(Facet::Transform)); }
+    if !crate::Color::same(&before.fg,&after.fg) { facets=facets.union(material_facets(before.fg.alpha(),after.fg.alpha())); }
+    if !crate::Color::same(&before.bg,&after.bg) { facets=facets.union(material_facets(before.bg.alpha(),after.bg.alpha())); }
+    if relationship_changed { facets=facets.union(binding_facets()); }
+    facets
+}
+pub(super) fn material_facets(before_alpha: f32, after_alpha: f32) -> Facets {
+    let paint=Facets::one(Facet::Paint);
+    if before_alpha.to_bits()!=after_alpha.to_bits() { paint.union(Facets::one(Facet::PrimitiveContent)) } else { paint }
+}
+pub(super) fn binding_facets() -> Facets { Facets::one(Facet::Paint).union(Facets::one(Facet::PrimitiveContent)) }
+pub(super) fn brush_binding_facets() -> Facets { binding_facets().union(Facets::one(Facet::ResourcePixels)) }
+pub(super) fn mutation_scope(facets: Facets) -> Scope {
+    if [Facet::Topology,Facet::Transform,Facet::Clip,Facet::Stacking].into_iter().any(|facet|facets.contains(facet)) { Scope::Subtree } else { Scope::Site }
+}
+pub(super) fn affects_layout(facets: Facets) -> bool {
+    [Facet::WidthConstraint,Facet::HeightConstraint,Facet::Layout,Facet::TextPolicy].into_iter().any(|facet|facets.contains(facet))
 }
 pub(super) fn property_facets(id: crate::property::PropertyId) -> (Facets, Scope) {
     use crate::property::PropertyId::*;

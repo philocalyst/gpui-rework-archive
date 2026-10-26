@@ -258,7 +258,13 @@ impl<M: View + 'static, L: crate::remote::LaneSet<M>> RuntimeMut<'_, M, L> {
             }
             super::image::prune(&mut self.images);
         }
-        let changed = !crate::property::BACKGROUND.same_authoring(&before, &self.background(index));
+        let after = self.background(index);
+        let changed = !crate::property::BACKGROUND.same_authoring(&before, &after);
+        if changed && !matches!((before,after),(Brush::Solid(_),Brush::Solid(_))) {
+            let identity = self.nodes[index].identity;
+            self.record_change(identity, changes::brush_binding_facets(), change_model::Scope::Site,
+                change_model::Support::Pending, change_model::Support::Pending);
+        }
         self.changed_nodes = usize::from(changed);
         self.dirty |= changed;
         Ok(changed)
