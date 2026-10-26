@@ -1,6 +1,6 @@
 # Collected GPUI rework checkpoint
 
-Start with the original normative reactivity designs and ladder; see [the preservation inventory](DESIGN-PRESERVATION.md) for the collection boundary. The new brief must not replace those originals.
+Start with the original normative reactivity designs and ladder; see [the verified corpus and implementation crosswalk](DESIGN-CROSSWALK.md). The new brief must not replace those originals.
 
 Then read [the expansive engineering brief](BRIEF.md). This is an experimental source preservation checkpoint, not a finished release.
 

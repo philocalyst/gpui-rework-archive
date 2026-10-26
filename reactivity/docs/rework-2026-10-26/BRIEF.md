@@ -6,7 +6,9 @@ This brief preserves design, implementation state, measured evidence, failures, 
 
 ## Normative design comes first
 
-The original reactivity design corpus, including the progressive ladder and its structural review, is the normative starting point. The requested criterion is: **one semantic model, proofs at boundaries, no third language, nothing ambient**. This status brief is subordinate to those originals and to explicitly documented amendments; it must not silently replace them. The restored cloud source references the original statutes but did not contain their exact files. The publication owner must recover and prominently link the unchanged corpus, or explicitly record missing originals rather than reconstruct them from summaries. See [design-preservation inventory](DESIGN-PRESERVATION.md).
+All127 user-designated original design files are preserved unchanged. Start with the [original design README](../../../../designs/reactivity/README.md), [final constitution](../../../../designs/reactivity/final/00-model.md), [ladder](../../../../designs/reactivity/07-the-ladder.md), and [structural consolidation review](../../../../designs/reactivity/11-consolidations.md). The original README gives the consolidated final statutes precedence over historical passes. **One semantic model, proofs at boundaries, no third language, nothing ambient** remains the criterion; this status brief does not silently amend it.
+
+Read the [design-to-implementation crosswalk and complete127-file index](DESIGN-CROSSWALK.md). It explicitly distinguishes preserved originals from a still-incomplete conformance audit, including the nightly/stable and Source-algebra gaps.
 
 ## Contents
 1. [Chapter 1: Executive overview](#chapter-1)
@@ -2441,3 +2443,7 @@ No item above authorizes host builds, security/affinity changes, driver installa
 
 #### Constructor follow-up (02:37 UTC, source-only)
 A separately reviewed21-line successor in `paragraph-view-lane/font-resource-constructor` adds `recording_with_font_and_resources`, forwarding the SAME supplied immutable font and context into the existing mount. Its authored test checks exact same_face in stored/system font, actual raw admission, and ordinary same-font cold pixels. No compiler/test execution is claimed here. This closes only initial constructor expressibility: subsequent property/source/pointer/resize/scroll operations still need explicit scoped resource threading and full trace qualification. It does not retroactively qualify a feature-ON unchanged original fixture or change the historical font identity.
+
+## Original-design crosswalk and complete corpus
+
+The full companion [DESIGN-CROSSWALK.md](DESIGN-CROSSWALK.md) is an integral part of this brief, with every original file linked and all SHA256 values available in [the manifest](ORIGINAL-DESIGNS-MANIFEST.json). The original sources are authoritative; the engineering chapters report implementation progress, not replacement statutes.
