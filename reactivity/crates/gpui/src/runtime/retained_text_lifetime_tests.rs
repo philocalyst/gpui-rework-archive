@@ -154,3 +154,17 @@ fn accepted_packed_scene_survives_explicit_source_and_shape_cache_reclaim() {
     let mut after=vec![0x00a55aa5;160*96];assert_eq!(win.render_bgrx(&mut after).unwrap(),token);assert_eq!(after,before);
     let mut cold=Win::with_options(model(),options()).unwrap();let mut expected=vec![0x00123456;160*96];cold.render_bgrx(&mut expected).unwrap();assert_eq!(after,expected);
 }
+
+#[test]
+fn accounted_custom_font_constructor_preserves_exact_face_and_cold_output() {
+    let font=gpui_canvas::FontFace::new(include_bytes!("../../../canvas/assets/NotoSans-default.ttf")).unwrap();
+    let page=||DetachedPage {value:Signal::new(String::from("office custom immutable font paragraph wraps"))};
+    let mut resources=ResourceContext::new(ResourceLimits {retained_payload_bytes:8*1024*1024,physical_roots:128,resource_records:128,backings_per_resource:16}).unwrap();
+    let mut win=Win::recording_with_font_and_resources(page(),options(),font.clone(),&mut resources).unwrap();
+    let text=win.runtime().unwrap().text.as_ref().unwrap();
+    assert!(text.font.as_ref().unwrap().same_face(&font));
+    assert!(text.system.as_ref().unwrap().font_face().same_face(&font));
+    assert!(!win.runtime().unwrap().artifacts.owned_resource_ids().is_empty(),"constructor must actually enter scoped shape path");
+    let mut actual=vec![0x00123456;160*96];win.render_bgrx(&mut actual).unwrap();
+    let mut cold=Win::recording_with_font(page(),options(),font).unwrap();let mut expected=vec![0x00abcdef;160*96];cold.render_bgrx(&mut expected).unwrap();assert_eq!(actual,expected);
+}

@@ -1365,6 +1365,13 @@ impl<M: View + 'static> Win<M> {
     pub fn recording_with_resources(model: M, options: WindowOptions, resources: &mut gpui_reactivity_core::resource::ResourceContext) -> Result<Self, Error> {
         Self::mount_text_lanes_with_resources(model, (), options, false, 1., false, None, Some(resources))
     }
+    /// Command recording with the caller's exact immutable font and explicit
+    /// App accounting scope. Neither font nor budget silently falls back.
+    pub fn recording_with_font_and_resources(model:M,options:WindowOptions,font:gpui_canvas::FontFace,
+        resources:&mut gpui_reactivity_core::resource::ResourceContext)->Result<Self,Error>
+    {
+        Self::mount_text_lanes_with_resources(model,(),options,false,1.,false,Some(font),Some(resources))
+    }
     pub fn recording(model: M, options: WindowOptions) -> Result<Self, Error> {
         Self::recording_scaled(model, options, 1.0)
     }
