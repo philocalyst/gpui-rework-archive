@@ -99,17 +99,20 @@ fn ordinary_scroll_offset_is_a_typed_subtree_output_not_an_empty_publication() {
     let old= pixels(&mut win);win.reset_counters().unwrap();
     win.scroll_by(pane,crate::ScrollDelta{x:0.,y:16.}).unwrap();
     assert_eq!(win.counters().layout_runs,0);
-    win.with_change_scene(|frame,_| {
-        assert!(frame.batch().full.is_empty());
-        assert!(frame.batch().entries.iter().any(|change|change.site.local.get()==identity
-            && change.facets.contains(change_model::Facet::Transform)
-            && change.scope==change_model::Scope::Subtree));
-    }).unwrap();
     ack(&mut win);let after=pixels(&mut win);assert_ne!(after,old);
     let mut cold=Win::with_options(ScrollFacts,options()).unwrap();
     let cold_pane=cold.role(crate::Role::ScrollView).name("ordinary viewport").one().unwrap();
     cold.scroll_by(cold_pane,crate::ScrollDelta{x:0.,y:16.}).unwrap();
     assert_eq!(rows(&win),rows(&cold));assert_eq!(after,pixels(&mut cold));
+    // Full output is validated before the work/receipt discriminator. A missing
+    // fact must not look safe merely because the legacy full scene still draws.
+    win.with_change_scene(|frame,_| {
+        assert!(frame.batch().full.is_empty());
+        assert!(frame.batch().entries.iter().any(|change|change.site.local.get()==identity
+            && change.facets.contains(change_model::Facet::Transform)
+            && change.scope==change_model::Scope::Subtree),
+            "actual admitted scroll offset must carry its subtree placement fact");
+    }).unwrap();
 }
 
 #[test]
