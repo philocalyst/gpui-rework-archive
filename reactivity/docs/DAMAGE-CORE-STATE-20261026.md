@@ -203,8 +203,10 @@ headers are additional, as is one active stack-local question. Exact host size
 and allocation measurements remain required.
 
 Initial/full rebuild history is already unusable: it does not allocate new
-records. Once incomplete or overflowed, new identities are not accumulated on
-repeated failed turns; existing earliest-old records are retained. Successful C
+records. Once structurally incomplete or overflowed, new identities are not accumulated
+on repeated failed turns; existing earliest-old records are retained. An answer-
+comparison gap independently forces full but may still retain useful final-layout
+writes under the same combined budget. Successful C
 resets the optional budget. ACK and failures do not. If repair rebuilds the arena,
 the old capability record is diagnostic evidence and the history is explicitly
 incomplete; it is not continuous reconstructable placement across the arena gap.
@@ -230,9 +232,9 @@ and derived clamp changes now emit typed Transform/Subtree facts.
 The 128-child width fixture changes real parent pixels, compares full cold output
 and unchanged child matrices, then asserts a small **materialized input closure**.
 That count is not elapsed time, retired instructions, edge visits, or a removed
-presentation walk. Parent Placement/Clip fanout still exists when the actual
-outgoing context changes. Exact f64 context cancellation and immutable segment
-reuse are not implemented by this cut.
+presentation walk. Local Transform/Clip facts still conservatively fan out to descendants; that
+fanout is NOT gated by exact outgoing f64-context equality. Exact context
+cancellation and immutable segment reuse are not implemented by this cut.
 
 ## 5. Style semantics, not mutation-route guesses
 
