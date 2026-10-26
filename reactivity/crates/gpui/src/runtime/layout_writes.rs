@@ -1,5 +1,5 @@
 //! Sparse first-write history relative to accepted C, never P or a failed solve.
-use std::collections::BTreeMap;
+use std::collections::{BTreeMap, BTreeSet};
 use gpui_reactivity_core::{NodeId, layout::Layout};
 
 // Internal optional-evidence policy budget, not an algorithmic threshold or
@@ -27,22 +27,35 @@ pub(super) struct LayoutWrites {
     limit: usize,
     entries: BTreeMap<NodeId, Write>,
     incomplete: bool,
+    answers: BTreeSet<NodeId>,
+    answer_incomplete: bool,
 }
 impl LayoutWrites {
-    pub fn new(limit: usize) -> Self { Self { limit: limit.min(MAX_ENTRIES), entries: BTreeMap::new(), incomplete: false } }
+    pub fn new(limit: usize) -> Self { Self { limit: limit.min(MAX_ENTRIES), entries: BTreeMap::new(), incomplete: false, answers: BTreeSet::new(), answer_incomplete: false } }
     pub fn record(&mut self, id: NodeId, before: Layout, after: Layout) {
         if let Some(write) = self.entries.get_mut(&id) { write.after = after; return; }
         // A known gap already requires full canonical fallback. Preserve any
         // earlier records, but do not materialize unusable new partial history.
         if self.incomplete { return; }
-        if self.entries.len() == self.limit { self.incomplete = true; return; }
+        if self.entries.len() + self.answers.len() == self.limit { self.incomplete = true; return; }
         self.entries.insert(id, Write { before, after });
     }
     pub fn invalidate(&mut self) { self.incomplete = true; }
-    pub fn incomplete(&self) -> bool { self.incomplete }
+    pub fn answer_sites(&self) -> impl Iterator<Item=NodeId> + '_ { self.answers.iter().copied() }
+    pub fn incomplete(&self) -> bool { self.incomplete || self.answer_incomplete }
     pub fn entries(&self) -> impl Iterator<Item=(NodeId, &Write)> { self.entries.iter().map(|(id,write)| (*id,write)) }
     /// Called only after a successful canonical Canvas publication.
-    pub fn published(&mut self) { self.entries.clear(); self.incomplete = false; }
+    pub fn published(&mut self) { self.entries.clear(); self.answers.clear(); self.incomplete = false; self.answer_incomplete = false; }
+}
+
+impl gpui_reactivity_core::layout::LayoutObserver for LayoutWrites {
+    fn layout_changed(&mut self, id: NodeId, before: Layout, after: Layout) { self.record(id, before, after); }
+    fn answer_changed(&mut self, id: NodeId, before: cephal::tree::LayoutOutput, after: cephal::tree::LayoutOutput) {
+        if before == after || self.answers.contains(&id) || self.incomplete || self.answer_incomplete { return; }
+        if self.entries.len() + self.answers.len() == self.limit { self.invalidate(); return; }
+        self.answers.insert(id);
+    }
+    fn answer_gap(&mut self, _id: NodeId) { self.answer_incomplete = true; }
 }
 
 #[cfg(test)]
@@ -79,5 +92,30 @@ mod tests {
         writes.record(b, repaired, old);
         assert_eq!(writes.entries().count(), 1,"successful C resets the optional tracking budget");
         eprintln!("layout evidence entry payload={} bytes; policy entries={}; BTree allocation overhead excluded", ENTRY_PAYLOAD_BYTES, MAX_ENTRIES);
+    }
+}
+
+#[cfg(test)]
+mod answer_tests {
+    use super::*;
+    use gpui_reactivity_core::{NodeKind, layout::{LayoutObserver, LayoutTree, Style}};
+    #[test]
+    fn baseline_only_answer_is_recorded_and_shares_the_bounded_policy() {
+        let mut tree=LayoutTree::new();
+        let node=tree.insert(None,NodeKind::Element,Style::DEFAULT).unwrap();
+        let old=cephal::tree::LayoutOutput::HIDDEN;
+        let mut new=old;new.baselines=cephal::tree::Baselines::from_first(Some(7.));
+        let mut evidence=LayoutWrites::new(1);
+        evidence.answer_changed(node,old,new);
+        assert_eq!(evidence.entries().count(),0);
+        assert_eq!(evidence.answer_sites().collect::<Vec<_>>(),vec![node]);
+        let layout=tree.layout(node).unwrap();
+        evidence.record(node,layout,layout);
+        assert!(evidence.incomplete(),"answer and final-write cells share one budget");
+        evidence.published();
+        evidence.answer_gap(node);
+        evidence.answer_changed(node,old,new);
+        assert_eq!(evidence.answer_sites().count(),0);
+        assert!(evidence.incomplete());
     }
 }

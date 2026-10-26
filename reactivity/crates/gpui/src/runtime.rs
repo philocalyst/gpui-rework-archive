@@ -3481,14 +3481,14 @@ impl<M: View + 'static> Runtime<M> {
             }
         };
         let layout_writes = &mut self.layout_writes;
-        self.layout.compute_with_width_measure_and_changes(
+        self.layout.compute_with_width_measure_and_observer(
             self.layout_nodes.required(0),
             Size {
                 width: AvailableSpace::Definite(size[0] as f32 / scale_factor),
                 height: AvailableSpace::Definite(size[1] as f32 / scale_factor),
             },
             &mut measure,
-            &mut |id, before, after| layout_writes.record(id, before, after),
+            layout_writes,
         )?;
         let after = self.layout.stats();
         self.counters.layout_runs += after.computes - before.computes;
@@ -3496,20 +3496,12 @@ impl<M: View + 'static> Runtime<M> {
         if let Some(error) = failure {
             return Err(error);
         }
-        if after.computes > before.computes || after.measure_calls > before.measure_calls {
-            // The solver, not a potential layout SCC, now owns propagation.
-            // Until its actual changed-answer/placement/overflow write feed is
-            // bound into this closure, publish complete C but conservatively
-            // deny a clean sparse renderer receipt for solved layout updates.
-            // This is AFTER solve: it must NOT trigger an arena rebuild here.
-            closed_dependencies.require_full(change_model::FullReasons::UNKNOWN_DEPENDENCY);
-            self.changes.full(change_model::FullReasons::UNKNOWN_DEPENDENCY);
-        }
         // Resolve actual full layout capabilities only in the current map, after
         // topology plans have been applied. Old values stay journaled through
         // failures; no presentation/ACK state participates in this baseline.
         for (id, write) in self.layout_writes.entries() {
             let Some(index) = self.layout_nodes.index_of(id) else {
+                self.changes.full(change_model::FullReasons::UNKNOWN_DEPENDENCY);
                 closed_dependencies.require_full(change_model::FullReasons::UNKNOWN_DEPENDENCY);
                 continue;
             };
@@ -3534,6 +3526,16 @@ impl<M: View + 'static> Runtime<M> {
             }
             changes::record(&mut self.changes, self.sites.namespace(), self.nodes[index].identity,
                 facets, scope, change_model::Support::Pending, change_model::Support::Pending);
+        }
+        for id in self.layout_writes.answer_sites() {
+            if let Some(index) = self.layout_nodes.index_of(id) {
+                changes::record(&mut self.changes, self.sites.namespace(), self.nodes[index].identity,
+                    change_model::Facets::one(change_model::Facet::PrimitiveContent), change_model::Scope::Site,
+                    change_model::Support::Pending, change_model::Support::Pending);
+            } else {
+                self.changes.full(change_model::FullReasons::UNKNOWN_DEPENDENCY);
+                closed_dependencies.require_full(change_model::FullReasons::UNKNOWN_DEPENDENCY);
+            }
         }
         if self.layout_writes.incomplete() {
             self.changes.full(change_model::FullReasons::UNKNOWN_DEPENDENCY);
@@ -3569,6 +3571,24 @@ impl<M: View + 'static> Runtime<M> {
         } else {
             scroll::ViewportBuild::default()
         };
+        // Effective clamping is a derived placement value, not just a user's
+        // requested scroll. It can change when an ordinary child extent shrinks.
+        for (&key, state) in &self.viewports {
+            if let (scroll::ViewportKey::Scroll(identity), scroll::ViewportState::Scroll(state)) = (key, state)
+                && viewport_geometry.offset(identity).is_some_and(|offset| offset != state.offset)
+            {
+                if let Some(index) = self.by_identity.get(identity) {
+                    changes::record(&mut self.changes, self.sites.namespace(), self.nodes[index].identity,
+                        change_model::Facets::one(change_model::Facet::Transform), change_model::Scope::Subtree,
+                        change_model::Support::Pending, change_model::Support::Pending);
+                } else { self.changes.full(change_model::FullReasons::UNKNOWN_DEPENDENCY); }
+            }
+        }
+        // Extend the logical output cohort only after actual solver writes and
+        // viewport values exist. No unchanged decision closure is recomputed.
+        closed_dependencies = changes::close_outputs(closed_dependencies, &self.dependencies,
+            self.pending_dependencies.as_ref(), &self.changes);
+
         #[cfg(feature = "accessibility")]
         let base_stamp = self.semantic_stamp();
         let inspector_display = self.inspector_display();

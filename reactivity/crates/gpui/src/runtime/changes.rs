@@ -55,6 +55,13 @@ pub(super) fn close_dependencies(before: &Dependencies, after: Option<&Dependenc
     if let Some(after) = after { closed.merge(after.invalidate_pending_side(journal, gpui_reactivity_core::change::SnapshotSide::After)); }
     closed
 }
+pub(super) fn close_outputs(prior: gpui_reactivity_core::change::Invalidated, before: &Dependencies, after: Option<&Dependencies>, journal: &gpui_reactivity_core::change::Journal) -> gpui_reactivity_core::change::Invalidated {
+    if prior.matches_pending(journal) && prior.matches_graphs(before, after) { return prior; }
+    let full = prior.full();
+    let mut next = close_dependencies(before, after, journal);
+    next.require_full(full);
+    next
+}
 pub(super) fn take_or_close(cache: &mut Option<gpui_reactivity_core::change::Invalidated>, before: &Dependencies, after: Option<&Dependencies>, journal: &gpui_reactivity_core::change::Journal) -> gpui_reactivity_core::change::Invalidated {
     match cache.take() {
         Some(closed) if closed.matches_pending(journal) && closed.matches_graphs(before, after) => closed,
@@ -102,6 +109,7 @@ impl<M: View + 'static> Runtime<M> {
     pub(super) fn consume_dependencies(&mut self) -> gpui_reactivity_core::change::Invalidated {
         let invalidated = take_or_close(&mut self.pending_closure, &self.dependencies, self.pending_dependencies.as_ref(), &self.changes);
         if !invalidated.full().is_empty() {
+            self.changes.full(invalidated.full());
             self.rebuild_layout = true;
             return invalidated;
         }
@@ -118,6 +126,24 @@ impl<M: View + 'static> Runtime<M> {
 #[cfg(test)]
 mod tests {
     use super::*;
+    #[test]
+    fn late_valid_output_facts_cannot_erase_an_earlier_unknown_mapping_reason() {
+        let owner=NonZeroU64::new(9002).unwrap();
+        let revision=SceneRevision { owner,sequence:NonZeroU64::new(1).unwrap() };
+        let mut journal=gpui_reactivity_core::change::Journal::new(owner,32);
+        journal.prepare(BatchStamp { from:None,to:revision,source_epoch:1,snapshot_epoch:1 }).unwrap().commit();
+        let mut graph=Dependencies::new(128);graph.reset(revision);
+        let identity=NonZeroU64::new(1).unwrap();register_node(&mut graph,owner,identity,None,false,false);assert!(graph.finish(1));
+        record(&mut journal,owner,identity,Facets::one(Facet::Paint),Scope::Site,Support::Pending,Support::Pending);
+        let mut prior=close_dependencies(&graph,None,&journal);
+        assert!(prior.full().is_empty());
+        prior.require_full(FullReasons::UNKNOWN_DEPENDENCY);
+        record(&mut journal,owner,identity,Facets::one(Facet::Hit),Scope::Site,Support::Pending,Support::Pending);
+        let next=close_outputs(prior,&graph,None,&journal);
+        assert!(next.full().contains(FullReasons::UNKNOWN_DEPENDENCY));
+        assert!(next.artifacts().is_empty());
+    }
+
     #[test]
     fn intrinsic_viewport_dependencies_read_own_constraints_not_world_placement() {
         let owner = NonZeroU64::new(9001).unwrap();

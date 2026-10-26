@@ -385,6 +385,7 @@ fn block_observing<T: LayoutTree + CacheAccess + ?Sized>(tree: &mut T, f: impl F
 /// nothing stored, cleared or edited in it since, nothing is visited again (see
 /// [`CacheAccess::is_hidden_layout`]).
 pub fn compute_hidden_layout<T: LayoutTree + CacheAccess + ?Sized>(tree: &mut T, node: NodeId) -> LayoutOutput {
+    tree.observe_answer_gap(node);
     // Parents write a hidden child's layout before asking for it, so the node's own is rewritten.
     tree.set_unrounded_layout(node, &Layout::with_order(0));
     if tree.is_hidden_layout(node) {
@@ -435,6 +436,7 @@ pub fn compute_root_layout_incremental<T: LayoutTree + CacheAccess + ?Sized>(
     let viewport = available_space.into_options();
     let (layout, oof, recomputed) = match (style.position.is_out_of_flow(), viewport.width, viewport.height) {
         (true, Some(width), Some(height)) => {
+            tree.observe_answer_gap(root);
             let geometry = oof::OofGeometry {
                 area_size: Size { width, height },
                 area_offset: Point::ZERO,
@@ -473,6 +475,7 @@ pub fn compute_root_layout_incremental<T: LayoutTree + CacheAccess + ?Sized>(
         #[cfg(feature = "grid")]
         grid: None,
     };
+    tree.observe_answer_gap(root);
     oof::initial_containing_block_pass(tree, root, oof, &geometry);
 }
 

@@ -31,6 +31,12 @@ pub trait Incremental: LayoutTree + CacheAccess {
     fn flags(&self, node: NodeId) -> u8;
     fn set_flags(&mut self, node: NodeId, flags: u8);
 
+    /// Optional observation of comparisons the scheduler already performs.
+    /// This is not a second propagation authority and must not mutate the tree.
+    fn observe_answer_change(&mut self, _node: NodeId, _old: LayoutOutput, _new: LayoutOutput) {}
+    fn observe_replay(&mut self, _node: NodeId, _input: Option<LayoutInput>) {}
+
+
     /// Whether `node` is laid out by a containing block's out-of-flow pass rather than its parent.
     #[inline]
     fn is_out_of_flow(&self, node: NodeId) -> bool {
@@ -191,6 +197,7 @@ impl Scheduler {
             if parent_reruns {
                 // The parent re-runs anyway; nothing to compare against. An out-of-flow node is
                 // laid out again by its containing block, which the parent's re-run reaches.
+                tree.observe_answer_gap(node);
                 tree.cache_mut(node).clear();
                 continue;
             }
@@ -278,6 +285,7 @@ impl Scheduler {
         tree.cache_mut(node).drain_observed(&mut self.scratch);
         // Nothing cached (hidden, never laid out, or already cleared): only the parent can tell.
         if self.scratch.is_empty() {
+            tree.observe_answer_gap(node);
             return Change::Full;
         }
         // Answers given inside a shared block formatting context depend on siblings; let the
@@ -286,18 +294,23 @@ impl Scheduler {
             input.context_key != 0 || input.vertical_margins_are_collapsible != Line::FALSE
         });
         if context_bound {
+            tree.observe_answer_gap(node);
             self.scratch.clear();
             return Change::Full;
         }
+        if evicted { tree.observe_answer_gap(node); }
         let mut change = if evicted { Change::Full } else { Change::None };
         for i in 0..self.scratch.len() {
             let (input, old, old_observed) = self.scratch[i];
+            tree.observe_replay(node, Some(input));
             let new = crate::compute::compute_child_layout(tree, node, input, None);
+            tree.observe_replay(node, None);
             change = change.max(answer_changed(tree, node, input.run_mode, new, old));
             // An answer that now tells min-content from max-content no longer stands for the
             // questions it answered on axes it did not observe before.
             let observed = tree.cache(node).observed(&input).unwrap_or(crate::compute::OBSERVED_ALL);
             if observed & !old_observed != 0 {
+                tree.observe_answer_gap(node);
                 change = Change::Full;
             }
         }
@@ -305,7 +318,7 @@ impl Scheduler {
         // A parent that asked this node questions speculatively depends on answers no entry
         // records, which may have changed with the recorded ones unchanged, or with only their
         // overflow changed.
-        if tree.cache(node).has_unstored() { Change::Full } else { change }
+        if tree.cache(node).has_unstored() { tree.observe_answer_gap(node); Change::Full } else { change }
     }
 }
 
@@ -330,6 +343,7 @@ fn in_hidden_subtree<T: Incremental + ?Sized>(tree: &T, node: NodeId) -> bool {
 fn answer_changed<T: Incremental + ?Sized>(tree: &mut T, node: NodeId, run_mode: RunMode, new: LayoutOutput, old: LayoutOutput) -> Change {
     // Size answers leave their overflow and out-of-flow bits unspecified: a cached one has none.
     let (new, old) = if run_mode == RunMode::ComputeSize { (new.size_answer(), old.size_answer()) } else { (new, old) };
+    tree.observe_answer_change(node, old, new);
     if new == old {
         return Change::None;
     }

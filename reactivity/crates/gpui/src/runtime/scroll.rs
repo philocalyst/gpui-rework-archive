@@ -718,11 +718,20 @@ impl<M: View + 'static, L: LaneSet<M>> Win<M, L> {
                 return Ok(state.commit());
             }
             for (identity, offset, list) in plan.iter(context) {
-                if list.is_none()
-                    && let Some(ViewportState::Scroll(state)) =
-                        state.viewports.get_mut(&ViewportKey::Scroll(identity))
-                {
-                    state.offset = offset;
+                if list.is_none() {
+                    let changed = match state.viewports.get_mut(&ViewportKey::Scroll(identity)) {
+                        Some(ViewportState::Scroll(viewport)) if viewport.offset != offset => {
+                            viewport.offset = offset; true
+                        }
+                        _ => false,
+                    };
+                    if changed {
+                        if let Some(index) = state.by_identity.get(identity) {
+                            changes::record(&mut state.changes, state.sites.namespace(), state.nodes[index].identity,
+                                change_model::Facets::one(change_model::Facet::Transform), change_model::Scope::Subtree,
+                                change_model::Support::Pending, change_model::Support::Pending);
+                        } else { state.changes.full(change_model::FullReasons::UNKNOWN_DEPENDENCY); }
+                    }
                 }
             }
         }

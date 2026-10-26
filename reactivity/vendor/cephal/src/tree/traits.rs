@@ -286,6 +286,8 @@ pub trait LayoutTree {
     /// only: the answer is fixed by its question, and nothing a later query reads may change here.
     #[inline]
     fn observe_answer(&mut self, _node: NodeId, _inputs: &LayoutInput, _output: &LayoutOutput, _source: AnswerSource) {}
+    /// An answer path has no comparable old-answer provenance. Optional observer only.
+    fn observe_answer_gap(&mut self, _node: NodeId) {}
 
     /// Whether [`Self::compute_child_layouts`] may beat asking one by one; algorithms then spend
     /// extra work collecting questions that a serial tree would rather answer lazily.

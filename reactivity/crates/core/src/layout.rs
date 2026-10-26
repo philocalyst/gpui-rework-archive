@@ -34,6 +34,18 @@ use cephal::{NodeCache, NodeId as EngineId};
 
 use crate::{NodeId, NodeKind, Tree, TreeError};
 
+/// Streaming observations from the existing solver. These observations do not
+/// replace its propagation/cache authority. Consumers must bound retained data.
+pub trait LayoutObserver {
+    fn layout_changed(&mut self, node: NodeId, before: Layout, after: Layout);
+    fn answer_changed(&mut self, _node: NodeId, _before: LayoutOutput, _after: LayoutOutput) {}
+    fn answer_gap(&mut self, _node: NodeId) {}
+}
+impl<F: FnMut(NodeId, Layout, Layout)> LayoutObserver for F {
+    fn layout_changed(&mut self, node: NodeId, before: Layout, after: Layout) { self(node, before, after); }
+}
+
+
 const NO_STYLE: u32 = u32::MAX;
 // The scheduler preserves META_MASK for tree-owned facts. Query metadata comes
 // from StyleTable, so this adapter can use one of those bits for hidden layout.
@@ -488,9 +500,17 @@ impl LayoutTree {
         measure: &mut dyn FnMut(NodeId, WidthMeasureInput) -> MeasureOutput,
         changes: &mut dyn FnMut(NodeId, Layout, Layout),
     ) -> Result<bool, LayoutError> {
+        self.compute_with_width_measure_and_observer(root, viewport, measure, &mut |id, old, new| changes(id, old, new))
+    }
+    /// Also observes comparable cached answers and explicit missing-history gaps.
+    pub fn compute_with_width_measure_and_observer(
+        &mut self, root: NodeId, viewport: Size<AvailableSpace>,
+        measure: &mut dyn FnMut(NodeId, WidthMeasureInput) -> MeasureOutput,
+        observer: &mut dyn LayoutObserver,
+    ) -> Result<bool, LayoutError> {
         self.compute_inner(root, viewport, Some(&mut |node, input| {
             measure(node, WidthMeasureInput { known_dimensions: input.known_dimensions, available_width: input.available_space.width })
-        }), true, Some(changes))
+        }), true, Some(observer))
     }
     fn compute_inner(
         &mut self,
@@ -498,7 +518,7 @@ impl LayoutTree {
         viewport: Size<AvailableSpace>,
         measure: Option<&mut dyn FnMut(NodeId, MeasureInput) -> MeasureOutput>,
         width_only: bool,
-        changes: Option<&mut dyn FnMut(NodeId, Layout, Layout)>,
+        changes: Option<&mut dyn LayoutObserver>,
     ) -> Result<bool, LayoutError> {
         self.tree.index(root)?;
         if self.poisoned {
@@ -548,6 +568,7 @@ impl LayoutTree {
                 observed: 0,
                 width_only,
                 changes,
+                replay: None,
             };
             for node in selected {
                 let key = EngineId::new(engine.owner.tree.layout_key(node));
@@ -556,6 +577,7 @@ impl LayoutTree {
             scheduler.run(&mut engine, engine_root, changed);
             if changed {
                 let slot = engine.owner.tree.slot(root);
+                if let Some(observer) = engine.changes.as_mut() { observer.answer_gap(root); }
                 engine.owner.clear_cache(slot);
             }
             cephal::compute::compute_root_layout(&mut engine, engine_root, viewport);
@@ -691,7 +713,8 @@ struct Engine<'a, 'service> {
     width_only: bool,
     owner: &'a mut LayoutTree,
     measure: Option<&'service mut dyn FnMut(NodeId, MeasureInput) -> MeasureOutput>,
-    changes: Option<&'service mut dyn FnMut(NodeId, Layout, Layout)>,
+    changes: Option<&'service mut dyn LayoutObserver>,
+    replay: Option<(EngineId, LayoutInput)>,
 }
 impl Engine<'_, '_> {
     fn node(&self, node: EngineId) -> NodeId {
@@ -700,6 +723,27 @@ impl Engine<'_, '_> {
     fn slot(&self, node: EngineId) -> usize {
         self.owner.tree.slot(self.node(node))
     }
+}
+// Exact replay provenance, including signed-zero float question bits. This
+// is one stack-local active question, not a retained question/answer mirror.
+fn same_question(a: &LayoutInput, b: &LayoutInput) -> bool {
+    // Deliberately exhaustive: a new question field requires revisiting this
+    // provenance comparator rather than silently inheriting float PartialEq.
+    let LayoutInput { run_mode: _, sizing_mode: _, axis: _, known_dimensions: _,
+        known_dimensions_are_definite: _, parent_size: _, available_space: _,
+        vertical_margins_are_collapsible: _, context_key: _ } = a;
+    let option = |x: Option<f32>| x.map(f32::to_bits);
+    let space = |x: AvailableSpace| match x {
+        AvailableSpace::Definite(value) => (0, value.to_bits()),
+        AvailableSpace::MinContent => (1, 0), AvailableSpace::MaxContent => (2, 0),
+    };
+    a == b
+        && option(a.known_dimensions.width) == option(b.known_dimensions.width)
+        && option(a.known_dimensions.height) == option(b.known_dimensions.height)
+        && option(a.parent_size.width) == option(b.parent_size.width)
+        && option(a.parent_size.height) == option(b.parent_size.height)
+        && space(a.available_space.width) == space(b.available_space.width)
+        && space(a.available_space.height) == space(b.available_space.height)
 }
 struct Children<'a> {
     tree: &'a Tree,
@@ -714,6 +758,11 @@ impl Iterator for Children<'_> {
     }
 }
 impl EngineTree for Engine<'_, '_> {
+    fn observe_answer_gap(&mut self, node: EngineId) {
+        let node = self.node(node);
+        if let Some(observer) = self.changes.as_mut() { observer.answer_gap(node); }
+    }
+
     type ChildIter<'a>
         = Children<'a>
     where
@@ -807,7 +856,7 @@ impl EngineTree for Engine<'_, '_> {
         if self.owner.layouts[index] != *layout {
             let node = self.node(node);
             let before = self.owner.layouts[index];
-            if let Some(changes) = self.changes.as_mut() { changes(node, before, *layout); }
+            if let Some(changes) = self.changes.as_mut() { changes.layout_changed(node, before, *layout); }
             self.owner.stats.changed_layout_writes += 1;
             self.owner.layouts[index] = *layout;
         }
@@ -854,11 +903,18 @@ impl EngineTree for Engine<'_, '_> {
     }
     fn observe_answer(
         &mut self,
-        _node: EngineId,
-        _input: &LayoutInput,
+        node: EngineId,
+        input: &LayoutInput,
         _output: &LayoutOutput,
         source: AnswerSource,
     ) {
+        // A newly computed question has no complete before-answer unless it
+        // is exactly the scheduler's current cached-question replay. Recursive
+        // fresh child questions are NOT covered by their parent's replay.
+        if self.changes.is_some() && !matches!(source, AnswerSource::Cached) && !self.replay.as_ref().is_some_and(|(old_node, old_input)| *old_node == node && same_question(old_input, input)) {
+            let id = self.node(node);
+            if let Some(observer) = self.changes.as_mut() { observer.answer_gap(id); }
+        }
         match source {
             AnswerSource::CheapLeaf => self.owner.stats.cheap_answers += 1,
             AnswerSource::Cached => self.owner.stats.cached_answers += 1,
@@ -895,6 +951,14 @@ impl CacheAccess for Engine<'_, '_> {
     }
 }
 impl Incremental for Engine<'_, '_> {
+    fn observe_replay(&mut self, node: EngineId, input: Option<LayoutInput>) {
+        if self.changes.is_some() { self.replay = input.map(|input| (node, input)); }
+    }
+    fn observe_answer_change(&mut self, node: EngineId, before: LayoutOutput, after: LayoutOutput) {
+        let node = self.node(node);
+        if let Some(observer) = self.changes.as_mut() { observer.answer_changed(node, before, after); }
+    }
+
     fn parent(&self, node: EngineId) -> Option<EngineId> {
         self.owner
             .tree
@@ -978,6 +1042,7 @@ mod tests {
                 observed: 0,
                 width_only: false,
                 changes: None,
+                replay: None,
             };
             engine.set_speculation(1);
             cephal::compute::compute_hidden_layout(&mut engine, key);
@@ -1150,6 +1215,7 @@ mod tests {
             measure: None,
             width_only: false,
             changes: None,
+            replay: None,
         };
         engine.set_speculation(1);
         engine.set_absolute_context(key, AbsoluteContext::default());
@@ -1166,6 +1232,34 @@ mod tests {
 #[cfg(test)]
 mod write_observer_tests {
     use super::*;
+    #[test]
+    fn fresh_computed_answers_require_exact_node_and_full_question_replay() {
+        #[derive(Default)] struct Observer { gaps:usize }
+        impl LayoutObserver for Observer {
+            fn layout_changed(&mut self,_:NodeId,_:Layout,_:Layout) {}
+            fn answer_gap(&mut self,_:NodeId) { self.gaps+=1; }
+        }
+        let mut owner=LayoutTree::new();
+        let a=owner.insert(None,NodeKind::Element,Style::DEFAULT).unwrap();
+        let b=owner.insert(None,NodeKind::Element,Style::DEFAULT).unwrap();
+        let ka=EngineId::new(owner.tree.layout_key(a));let kb=EngineId::new(owner.tree.layout_key(b));
+        let mut observer=Observer::default();
+        let mut input=LayoutInput::HIDDEN;input.known_dimensions.width=Some(0.);
+        {
+            let mut engine=Engine { owner:&mut owner,observed:0,width_only:false,measure:None,changes:Some(&mut observer),replay:None };
+            engine.observe_replay(ka,Some(input));
+            engine.observe_answer(ka,&input,&LayoutOutput::HIDDEN,AnswerSource::Computed);
+            engine.observe_answer(kb,&input,&LayoutOutput::HIDDEN,AnswerSource::Computed);
+            let mut different=input;different.known_dimensions.width=Some(-0.);
+            engine.observe_answer(ka,&different,&LayoutOutput::HIDDEN,AnswerSource::Computed);
+            engine.observe_replay(ka,None);
+            engine.observe_answer(ka,&input,&LayoutOutput::HIDDEN,AnswerSource::Cached);
+            engine.observe_answer(ka,&input,&LayoutOutput::HIDDEN,AnswerSource::CheapLeaf);
+            cephal::compute::compute_hidden_layout(&mut engine,ka);
+        }
+        assert_eq!(observer.gaps,4);
+    }
+
     #[test]
     fn compute_observer_matches_actual_write_count_and_clean_call_emits_nothing() {
         let mut tree = LayoutTree::new();
@@ -1195,7 +1289,7 @@ mod write_observer_tests {
         {
             let mut observer = |id, before, after| writes.push((id, before, after));
             let key = EngineId::new(owner.tree.layout_key(node));
-            let mut engine = Engine { owner: &mut owner, observed: 0, width_only: false, measure: None, changes: Some(&mut observer) };
+            let mut engine = Engine { owner: &mut owner, observed: 0, width_only: false, measure: None, changes: Some(&mut observer), replay: None };
             engine.set_speculation(1);
             engine.set_unrounded_layout(key, &next);
             assert_eq!(engine.owner.layout(node).unwrap(), initial);
