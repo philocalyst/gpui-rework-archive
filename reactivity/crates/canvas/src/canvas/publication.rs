@@ -255,7 +255,7 @@ pub(super) fn check_slot_publication(canvas:&mut Canvas,changes:&PreparedChanges
     // unrelated Paint annotation. Hard/truncated histories already rejected;
     // this route never treats a full-raster request as a geometry certificate.
     old.scratch.clear();old.scratch.try_reserve_exact(changed).map_err(|_|PublicationError::Allocation)?;
-    for slot in canvas.commands.paint_state.changed_slots(edits) {old.scratch.push(slot);}
+    for slot in canvas.commands.columns.changed_slots(edits) {old.scratch.push(slot);}
     if old.scratch.len()!=changed {return Err(PublicationError::Metadata);}
     if changes.batch().full.is_empty() {
         for slot in &old.scratch {
@@ -310,9 +310,9 @@ mod tests {
         use std::num::NonZeroU64 as Nz;
         fn pointers(canvas:&Canvas)->[usize;7] {
             let commands=&canvas.commands;
-            [commands.geometry.order.as_ptr() as usize,commands.geometry.inline.as_ptr() as usize,commands.geometry.commons.as_ptr() as usize,
-             commands.geometry.masks.as_ptr() as usize,commands.geometry.images.as_deref().map_or(0,|r|r as *const ImageResources as usize),
-             commands.geometry.images.as_deref().and_then(|r|r.clips.as_deref()).map_or(0,|r|r as *const clips::ClipArena as usize),
+            [commands.order.as_ptr() as usize,commands.inline.as_ptr() as usize,commands.commons.as_ptr() as usize,
+             commands.masks.as_ptr() as usize,commands.images.as_deref().map_or(0,|r|r as *const ImageResources as usize),
+             commands.images.as_deref().and_then(|r|r.clips.as_deref()).map_or(0,|r|r as *const clips::ClipArena as usize),
              canvas.raster.as_deref().map_or(0,|r|r as *const RasterScratch as usize)]
         }
         let mut issuer=FrameIssuer::new().unwrap();let mut journal=Journal::new(issuer.owner(),16);
@@ -335,7 +335,7 @@ mod tests {
         let groups=SceneGroups::new(first.to,1,1,vec![GroupSpan {local:site.local,parent:None,draws:0..count as u32}],count).unwrap();
         scene.commit_publication(journal.prepare(first).unwrap(),issuer.prepare(first).unwrap(),groups).unwrap();
         let mut seed=vec![0;64*32];canvas.render_bgrx(&mut seed).unwrap();
-        let before=pointers(&canvas);let storage=canvas.prepared_scene().storage();let masks:Vec<_>=canvas.commands.geometry.masks.iter().map(Arc::as_ptr).collect();
+        let before=pointers(&canvas);let storage=canvas.prepared_scene().storage();let masks:Vec<_>=canvas.commands.masks.iter().map(Arc::as_ptr).collect();
         assert!(!masks.is_empty());assert_ne!(before[4],0);assert_ne!(before[5],0);assert_ne!(before[6],0);
         let mut graph=Dependencies::new(64);graph.reset(first.to);graph.register_site(site);assert!(graph.finish(1));
         for (sequence,facet) in [(2,Facet::Hit),(3,Facet::Semantics)] {
@@ -347,7 +347,7 @@ mod tests {
             let allocations=allocation_counter::measure(|| {damage=Some(canvas.commit_non_graphical_publication(changes,publication).unwrap());});
             assert_eq!((allocations.count_total,allocations.bytes_total),(0,0),"guard/closure construction is outside this commit-only scope");
             assert!(damage.unwrap().is_empty());assert_eq!(pointers(&canvas),before,"no command/resource/raster owner replaced");
-            assert_eq!(canvas.commands.geometry.masks.iter().map(Arc::as_ptr).collect::<Vec<_>>(),masks);
+            assert_eq!(canvas.commands.masks.iter().map(Arc::as_ptr).collect::<Vec<_>>(),masks);
             assert_eq!(canvas.prepared_scene().storage().lane_bytes(),storage.lane_bytes());
             let frame=canvas.accepted_scene().unwrap();assert_eq!(frame.stamp(),next);
             let mutation=frame.checked_slot_mutation().unwrap();assert_eq!(mutation.base(),next.from.unwrap());assert_eq!(mutation.bank_origin(),first.to);assert!(mutation.changed_slots().is_empty());
@@ -414,10 +414,10 @@ mod tests {
                 3=>scene.fill_rounded_rect_shared(Rect::new(24.,2.,9.,9.),2.,Affine::IDENTITY,clip,PaintColor::new(Color::BLACK),&mut cached).unwrap(),
                 4=>scene.draw_text_scaled_shared(&mut text,&layout,Point{x:1.,y:24.},Affine::IDENTITY,clip,PaintColor::new(Color::BLACK),&mut cached,1.).unwrap(),
                 5=>scene.draw_text_scaled_slot(&mut text,&empty,Point::default(),Affine::IDENTITY,clip,slot,1.).unwrap(),
-                6=>{let old=scene.pending.references;let draws=scene.draw_count();let masks=scene.pending.commands.geometry.masks.len();
+                6=>{let old=scene.pending.references;let draws=scene.draw_count();let masks=scene.pending.commands.masks.len();
                     scene.pending.references=MAX_REFERENCES-1;
                     assert!(scene.draw_text_scaled_slot(&mut text,&failing,Point{x:0.,y:10.},Affine::IDENTITY,clip,slot,1.).is_err());
-                    assert_eq!(scene.draw_count(),draws);assert_eq!(scene.pending.commands.geometry.masks.len(),masks);scene.pending.references=old;},
+                    assert_eq!(scene.draw_count(),draws);assert_eq!(scene.pending.commands.masks.len(),masks);scene.pending.references=old;},
                 _=>scene.fill_rect_slot(Rect::new(1000.,1000.,8.,8.),Affine::IDENTITY,clip,slot).unwrap(),
             }
             scope.finish();

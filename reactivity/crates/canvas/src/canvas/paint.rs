@@ -90,15 +90,16 @@ impl PaintCommit<'_, '_> {
         let mut revoke = false;
         for edit in self.edits {
             let commands = &mut self.canvas.commands;
-            let address = commands.geometry.order[edit.index.0 as usize];
+            let address = commands.order[edit.index.0 as usize];
             let common = if address.inline() {
-                &mut commands.geometry.inline[usize::from(address.command)].common
+                &mut commands.inline[usize::from(address.command)].common
             } else {
-                &mut commands.geometry.commons[usize::from(address.command)].common
+                &mut commands.commons[usize::from(address.command)].common
             };
-            revoke |= can_discard_backdrop(commands.paint_state.paint(common.paint).0)
+            revoke |= can_discard_backdrop(commands.columns.paint(common.paint).0)
                 != can_discard_backdrop(edit.color);
-            common.paint = commands.paint_state
+            common.paint = commands
+                .columns
                 .set_literal(common.paint, PaintColor(edit.color));
         }
         if revoke && let Some(raster) = &mut self.canvas.raster {
@@ -115,19 +116,20 @@ impl DisplayList {
         start: u32,
         viewport: Rect,
     ) -> Result<(DrawRef, Common, DamageRegion), PaintErrorKind> {
-        let &address = self.geometry.order
+        let &address = self
+            .order
             .get(start as usize)
             .ok_or(PaintErrorKind::MissingGroup)?;
         let (stored, source) = self.state(address);
         let image = source & ROUNDED_SOURCE == 0 && source & IMAGE_SOURCE != 0;
-        let common = self.resolve_common(stored, viewport, image);
+        let common = self.columns.resolve(stored, viewport, image);
         if source != RECT_SOURCE && source & ROUNDED_SOURCE == 0 && source & IMAGE_SOURCE != 0 {
             return Err(PaintErrorKind::NotColor);
         }
         let damage = if address.inline() {
             DamageRegion::checked_canvas_bounds(address.bounds.map(usize::from))
         } else {
-            if self.geometry.commons[usize::from(address.command)].range[0] != start {
+            if self.commons[usize::from(address.command)].range[0] != start {
                 return Err(PaintErrorKind::MissingGroup);
             }
             // All placements share this clip. Using it avoids a glyph-count
@@ -143,7 +145,7 @@ impl Canvas {
     /// Capture immediately before one paint call, then resolve immediately
     /// afterward with paint_index. An empty/clipped call emits no index.
     pub fn paint_cursor(&self) -> u32 {
-        self.commands.geometry.order.len() as u32
+        self.commands.order.len() as u32
     }
 
     pub fn paint_index(&self, cursor: u32) -> Option<PaintIndex> {
@@ -187,16 +189,17 @@ impl Canvas {
                 return Err(fail(PaintErrorKind::AlphaChanged));
             }
             let reference = if address.inline() {
-                self.commands.geometry.inline[usize::from(address.command)]
+                self.commands.inline[usize::from(address.command)]
                     .common
                     .paint
             } else {
-                self.commands.geometry.commons[usize::from(address.command)]
+                self.commands.commons[usize::from(address.command)]
                     .common
                     .paint
             };
             literals += usize::from(
-                self.commands.paint_state
+                self.commands
+                    .columns
                     .needs_literal_entry(reference, PaintColor(edit.color)),
             );
             if edit.color.map(f32::to_bits) == common.color.map(f32::to_bits) {
@@ -222,7 +225,8 @@ impl Canvas {
             };
             damage = damage.union(support);
         }
-        self.commands.paint_state
+        self.commands
+            .columns
             .reserve_literals(literals)
             .map_err(|_| PaintError {
                 edit: 0,
