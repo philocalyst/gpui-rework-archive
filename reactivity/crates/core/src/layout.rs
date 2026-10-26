@@ -708,15 +708,15 @@ impl LayoutTree {
 // Private view: Cephal's engine-local u64 ids cannot be used as public GPUI
 // capabilities. The codec includes generation; arena validation occurs at the
 // public boundary, and every engine id is minted from this adapter's topology.
-struct Engine<'a, 'service> {
+struct Engine<'a, 'measure, 'observer> {
     observed: u8,
     width_only: bool,
     owner: &'a mut LayoutTree,
-    measure: Option<&'service mut dyn FnMut(NodeId, MeasureInput) -> MeasureOutput>,
-    changes: Option<&'service mut dyn LayoutObserver>,
+    measure: Option<&'measure mut dyn FnMut(NodeId, MeasureInput) -> MeasureOutput>,
+    changes: Option<&'observer mut dyn LayoutObserver>,
     replay: Option<(EngineId, LayoutInput)>,
 }
-impl Engine<'_, '_> {
+impl Engine<'_, '_, '_> {
     fn node(&self, node: EngineId) -> NodeId {
         self.owner.tree.node_for_layout_key(node.raw())
     }
@@ -757,7 +757,7 @@ impl Iterator for Children<'_> {
             .map(|id| EngineId::new(self.tree.layout_key(id)))
     }
 }
-impl EngineTree for Engine<'_, '_> {
+impl EngineTree for Engine<'_, '_, '_> {
     fn observe_answer_gap(&mut self, node: EngineId) {
         let node = self.node(node);
         if let Some(observer) = self.changes.as_mut() { observer.answer_gap(node); }
@@ -922,7 +922,7 @@ impl EngineTree for Engine<'_, '_> {
         }
     }
 }
-impl CacheAccess for Engine<'_, '_> {
+impl CacheAccess for Engine<'_, '_, '_> {
     fn cache(&self, node: EngineId) -> &NodeCache {
         &self.owner.caches[self.slot(node)]
     }
@@ -950,7 +950,7 @@ impl CacheAccess for Engine<'_, '_> {
         self.owner.speculation = depth;
     }
 }
-impl Incremental for Engine<'_, '_> {
+impl Incremental for Engine<'_, '_, '_> {
     fn observe_replay(&mut self, node: EngineId, input: Option<LayoutInput>) {
         if self.changes.is_some() { self.replay = input.map(|input| (node, input)); }
     }
