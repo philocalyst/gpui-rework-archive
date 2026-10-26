@@ -79,7 +79,10 @@ impl PayloadLayout {
     pub fn domain(self) -> AccountingDomain { self.domain }
 }
 #[derive(Clone, Copy, Debug, PartialEq, Eq)]
-pub enum ResourceKind { Font, Shape, TextLayout, PackedGlyphs, Mask, Image, Gradient, MaterialBinding }
+pub enum ResourceKind { Font, Shape, TextLayout, PackedGlyphs, Mask, Image, Gradient, MaterialBinding,
+    #[cfg(feature = "shared-utf8")]
+    Utf8Source,
+}
 impl ResourceKind { fn renderable(self) -> bool { matches!(self, Self::PackedGlyphs | Self::Mask | Self::Image | Self::Gradient | Self::MaterialBinding) } }
 #[derive(Clone, Copy, Debug)]
 pub struct ResourceLimits {
@@ -88,6 +91,11 @@ pub struct ResourceLimits {
 }
 #[derive(Clone, Copy, Debug, Default, PartialEq, Eq)]
 pub struct ResourceStats {
+    /// Extra sized Arc guards created ONLY for newly registered dynamic ArcStr
+    /// roots. Payload is one Utf8Backing handle; Arc control blocks/allocator
+    /// metadata remain separate bounded metadata, not UTF-8 payload bytes.
+    #[cfg(feature = "shared-utf8")]
+    pub utf8_guard_wrappers_created: usize,
     pub retained_payload_bytes: usize, pub root_weak_entries: usize, pub record_weak_entries: usize,
     pub retained_reference_capacity_bytes: usize,
     pub root_records_created: usize, pub resource_records_created: usize,
@@ -438,7 +446,7 @@ mod origin_tests {
 /// Admission is serialized by an explicit mutable borrow. The App must keep this
 /// accounting scope alive through queued jobs; leases independently keep payloads
 /// alive even if that shutdown obligation is violated. This is not a fence proof.
-pub struct ResourceContext { ledger: ResourceLedger }
+pub struct ResourceContext { ledger: ResourceLedger, optional: optional::OptionalOwners }
 #[derive(Clone, Copy, Debug, PartialEq, Eq)]
 pub struct ResourceContextId { owner: NonZeroU64 }
 /// Opaque membership witness, not a payload lease or GPU completion token.
@@ -449,7 +457,7 @@ pub struct WindowResourceScope { context: ResourceContextId, window: NonZeroU64 
 pub enum WindowAccounting { Unaccounted, Scoped(WindowResourceScope) }
 impl ResourceContext {
     pub fn new(limits: ResourceLimits) -> Result<Self, ResourceError> {
-        Ok(Self { ledger: ResourceLedger::new(limits)? })
+        Ok(Self { ledger: ResourceLedger::new(limits)?, optional: optional::OptionalOwners::new(limits.resource_records) })
     }
     /// App/event-loop supplied maintenance work limit. No implicit full scan or
     /// default budget; zero means zero visits. Immutable leases remain guarded.
@@ -614,3 +622,10 @@ mod scoped_tests {
     }
 
 }
+
+mod optional;
+pub use optional::{OptionalHandle, OptionalPin, OptionalReclaim, OptionalMetadata};
+#[cfg(feature = "shared-utf8")]
+mod utf8;
+#[cfg(feature = "shared-utf8")]
+pub use utf8::Utf8Backing;

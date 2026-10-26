@@ -65,9 +65,13 @@ mod solver_dependency_tests;
 #[cfg(feature = "retained-text")]
 mod artifacts;
 #[cfg(feature = "retained-text")]
+mod artifact_retirements;
+#[cfg(feature = "retained-text")]
 mod text_resources;
 #[cfg(all(test, feature = "retained-text"))]
 mod retained_text_tests;
+#[cfg(all(test, feature = "retained-text"))]
+mod retained_text_lifetime_tests;
 use gpui_reactivity_core::change as change_model;
 use layout_nodes::LayoutNodes;
 mod image;
@@ -370,7 +374,7 @@ impl Snapshot {
 /// moves surviving identities and removed sites drop their glyph buffers.
 struct Shaped {
     #[cfg(feature = "retained-text")]
-    input: Option<artifacts::ShapeInputs>,
+    input: Option<artifacts::RetainedInputs>,
     width: Option<u32>,
     layout: TextLayout,
 }
@@ -1201,6 +1205,8 @@ struct Runtime<M> {
     accounting: gpui_reactivity_core::resource::WindowAccounting,
     #[cfg(feature = "retained-text")]
     artifacts: artifacts::ArtifactStore,
+    #[cfg(feature = "retained-text")]
+    artifact_retirements: artifact_retirements::Retirements,
     dependencies: change_model::Dependencies,
     pending_dependencies: Option<change_model::Dependencies>,
     pending_closure: Option<change_model::Invalidated>,
@@ -1468,6 +1474,8 @@ impl<M: View + 'static, L: LaneSet<M>> Win<M, L> {
             accounting,
             #[cfg(feature = "retained-text")]
             artifacts: artifacts::ArtifactStore::new(MAX_NODES),
+            #[cfg(feature = "retained-text")]
+            artifact_retirements: artifact_retirements::Retirements::new(MAX_NODES),
             dependencies,
             pending_dependencies: None,
             pending_closure: None,
@@ -2486,6 +2494,8 @@ impl<M: View + 'static> Runtime<M> {
             };
             let consumed = previous_index.is_some_and(|old_index| old[old_index].is_some());
             let consumed_identity = previous_index.and_then(|old_index| old[old_index].as_ref().map(|node| node.identity));
+            #[cfg(feature = "retained-text")]
+            let consumed_text = previous_index.is_some_and(|old_index| old[old_index].as_ref().is_some_and(|node| node.text_slot().0 != u32::MAX));
             let previous = previous_index
                 .and_then(|old_index| old[old_index].take())
                 .filter(|node| {
@@ -2499,6 +2509,8 @@ impl<M: View + 'static> Runtime<M> {
                 });
             let retained = previous.is_some();
             if !retained && let Some(identity) = consumed_identity {
+                #[cfg(feature = "retained-text")]
+                if consumed_text {self.artifact_retirements.removed_shape(change_model::SiteId::from_monotonic(self.sites.namespace(),identity));}
                 changes::record(&mut self.changes, self.sites.namespace(), identity, change_model::Facets::one(change_model::Facet::Topology), change_model::Scope::Subtree, change_model::Support::Pending, change_model::Support::Empty);
             }
             let order_changed = previous.as_ref().is_some_and(|node| node.ordinal() != ordinal);
@@ -2581,6 +2593,8 @@ impl<M: View + 'static> Runtime<M> {
                 }
             };
             let mut site = node.text_slot().take(&mut self.texts);
+            #[cfg(feature = "retained-text")]
+            let previously_text = site.is_some();
             let previous_image = node.content.image_use().map(|image| {
                 (
                     self.images.as_ref().unwrap().get(image).key(),
@@ -2715,6 +2729,8 @@ impl<M: View + 'static> Runtime<M> {
             } else {
                 TextSlot::NONE
             };
+            #[cfg(feature = "retained-text")]
+            if previously_text && text_slot.0==u32::MAX {self.artifact_retirements.removed_shape(change_model::SiteId::from_monotonic(self.sites.namespace(),node.identity));}
             node.content = if let Some(image) = next_image {
                 Content::image(image)
             } else {
@@ -2750,6 +2766,8 @@ impl<M: View + 'static> Runtime<M> {
         }
         for (index, node) in old.iter().enumerate() {
             if let Some(node) = node {
+                #[cfg(feature = "retained-text")]
+                if node.text_slot().0!=u32::MAX {self.artifact_retirements.removed_shape(change_model::SiteId::from_monotonic(self.sites.namespace(),node.identity));}
                 changes::record(&mut self.changes, self.sites.namespace(), node.identity, change_model::Facets::one(change_model::Facet::Topology), change_model::Scope::Subtree, change_model::Support::Pending, change_model::Support::Empty);
                 changed += 1;
                 if let Some(plan) = &mut layout_edits {
@@ -3451,6 +3469,8 @@ impl<M: View + 'static> Runtime<M> {
         let issuer = self.sites.issuer();
         #[cfg(feature = "retained-text")]
         let resource_baseline = self.pending_dependencies.as_ref().unwrap_or(&self.dependencies);
+        #[cfg(feature = "retained-text")]
+        let complete_owner_history = self.artifact_retirements.stage(&closed_dependencies,artifacts,resource_baseline,&mut resource_reads);
         let mut measure = |id: NodeId, input: WidthMeasureInput| {
             let index = layout_nodes
                 .index_of(id)
@@ -4126,7 +4146,13 @@ impl<M: View + 'static> Runtime<M> {
         #[cfg(feature = "retained-text")]
         if !resource_reads.covered_by(&closed_dependencies) {
             closed_dependencies.require_full(change_model::FullReasons::UNKNOWN_DEPENDENCY);
+            // A late unknown read-set change cannot claim complete owner history.
+            // Optional accepted caches may abstain; packed output is already owned.
+            let baseline=self.pending_dependencies.as_ref().unwrap_or(&self.dependencies);
+            self.artifacts.retire_all(|key|resource_reads.observe_one(baseline,key,None));
         }
+        #[cfg(feature = "retained-text")]
+        let complete_owner_history=complete_owner_history && closed_dependencies.full().is_empty();
         #[cfg(feature = "retained-text")]
         let resource_publication = self.pending_dependencies.as_mut().unwrap_or(&mut self.dependencies)
             .prepare_resource_reads(resource_reads).map_err(Error::Dependency)?;
@@ -4138,9 +4164,12 @@ impl<M: View + 'static> Runtime<M> {
         resource_publication.commit();
         #[cfg(feature = "retained-text")]
         {
-            let owner = self.sites.namespace(); let identities = &self.by_identity; let nodes = &self.nodes;
-            self.artifacts.commit(|key| key.site.owner == owner && key.phase == change_model::Phase::Shape
-                && identities.get(key.site.local.get()).is_some_and(|index| nodes[index].text_slot().0 != u32::MAX));
+            if complete_owner_history {self.artifacts.commit_touched();} else {
+                let owner=self.sites.namespace();let identities=&self.by_identity;let nodes=&self.nodes;
+                self.artifacts.commit(|key|key.site.owner==owner && key.phase==change_model::Phase::Shape
+                    && identities.get(key.site.local.get()).is_some_and(|index|nodes[index].text_slot().0!=u32::MAX));
+            }
+            self.artifact_retirements.accepted();
         }
         let damage = if self.automatic_presentation { DamageRegion::default() } else {
             committed_damage.union(self.prepared.as_ref().map_or(DamageRegion::default(), |prepared| prepared.damage))

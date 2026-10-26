@@ -10,6 +10,8 @@ fn joined_len(lengths: [usize; 3]) -> Option<usize> {
     lengths[0].checked_add(lengths[1])?.checked_add(lengths[2])
 }
 impl SharedText {
+    #[cfg(feature = "retained-text")]
+    pub(crate) fn utf8_backing(&self)->gpui_reactivity_core::resource::Utf8Backing {gpui_reactivity_core::resource::Utf8Backing::new(self.0.clone())}
     /// Copy three UTF-8 fragments directly into their final immutable lease.
     pub(crate) fn try_join(parts: [&str; 3]) -> Option<Self> {
         let length = joined_len(parts.map(str::len))?;

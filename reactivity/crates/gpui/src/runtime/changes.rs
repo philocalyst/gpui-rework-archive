@@ -184,6 +184,8 @@ impl<M: View + 'static> Runtime<M> {
         }
         for key in invalidated.artifacts() {
             let gpui_reactivity_core::change::DependencyNode::Site(key) = *key else { continue };
+            #[cfg(feature = "retained-text")]
+            if key.phase==Phase::Shape {self.artifact_retirements.changed_shape(key.site);}
             if matches!(key.phase, Phase::TextLayout | Phase::Measure | Phase::Layout)
                 && self.by_identity.contains(key.site.local.get())
             { self.layout_dirty.insert(key.site.local.get()); }

@@ -68,4 +68,4 @@ impl std::error::Error for Error {}
 pub use canvas::{ParallelError, RenderPool};
 
 #[cfg(feature = "retained-text")]
-pub use text::{ShapeArtifact, ShapeResource};
+pub use text::{OwnedShapeSource,OptionalShape, ShapeArtifact, ShapeResource};

@@ -3,14 +3,57 @@ use super::*;
 use gpui_reactivity_core::{change::Artifact,resource::{ResourceLease,ResourceKind,WindowReservation,PayloadLayout,AccountingDomain,DraftResource}};
 use std::{mem::size_of,num::NonZeroU64};
 
+/// Whole immutable source plus a DISTINCT child accounting record. Private
+/// construction derives text from this backing only, never a separately supplied
+/// &str. It does not contain the parent raw record and cannot self-pin that owner.
+pub struct OwnedShapeSource { backing:gpui_reactivity_core::resource::Utf8Backing, lease:ResourceLease }
+impl OwnedShapeSource {
+    pub fn admit(backing:gpui_reactivity_core::resource::Utf8Backing,context:&mut gpui_reactivity_core::resource::ResourceContext,
+        scope:gpui_reactivity_core::resource::WindowAccounting,issuer:&gpui_reactivity_core::change::FrameIssuer,artifact:Artifact)
+        ->Result<Self,gpui_reactivity_core::resource::ResourceError>
+    {
+        if artifact.phase!=gpui_reactivity_core::change::Phase::Shape {return Err(gpui_reactivity_core::resource::ResourceError::InvalidLayout);}
+        let mut tx=context.window_reservation(scope,issuer)?;
+        let draft=tx.stage(ResourceKind::Utf8Source,artifact)?;tx.share_utf8(draft,backing.clone())?;
+        let lease=tx.commit()?.pop().ok_or(gpui_reactivity_core::resource::ResourceError::Aborted)?;
+        Ok(Self {backing,lease})
+    }
+    pub fn as_str(&self)->&str {self.backing.as_str()}
+}
+enum SourceStorage { Copied(String), Shared(OwnedShapeSource) }
+impl std::ops::Deref for SourceStorage {
+    type Target=str;
+    fn deref(&self)->&str {match self {Self::Copied(source)=>source,Self::Shared(source)=>source.as_str()}}
+}
+impl SourceStorage {
+    fn capacity(&self)->usize {match self {Self::Copied(source)=>source.capacity(),Self::Shared(_)=>0}}
+}
 struct ParagraphOwner { range:paragraph::Paragraph, owner:parley::ShapedParagraph<()> }
 /// Immutable shape/source and exact ORIGINAL font registration identity. Width
 /// output is transient. This resource is source-side only, never renderable.
-pub struct ShapeResource { source:String, paragraphs:Vec<ParagraphOwner>, size:f32, ids:[Option<u64>;3], faces:FontSet }
+pub struct ShapeResource { source:SourceStorage, paragraphs:Vec<ParagraphOwner>, size:f32, ids:[Option<u64>;3], faces:FontSet }
 /// The common derived-artifact store owns BOTH payload and accounting lease.
 #[derive(Clone)]
 pub struct ShapeArtifact { resource:Arc<ShapeResource>, lease:ResourceLease }
+/// Reclaimable source-side handle. No naked shape root or font map escapes.
+#[derive(Clone)]
+pub struct OptionalShape { handle:gpui_reactivity_core::resource::OptionalHandle<Arc<ShapeResource>> }
+impl OptionalShape {
+    pub fn id(&self)->gpui_reactivity_core::resource::ResourceId {self.handle.id()}
+    pub fn pin(&self,context:&gpui_reactivity_core::resource::ResourceContext)->Result<Option<ShapeArtifact>,gpui_reactivity_core::resource::ResourceError> {
+        Ok(context.pin_optional(&self.handle)?.map(|pin|ShapeArtifact {
+            resource:pin.payload().clone(),lease:pin.lease().clone(),
+        }))
+    }
+}
 impl ShapeArtifact {
+    /// Transfer the SAME root and record, without hiding a second lease inside
+    /// the optional payload. An actual reflow pin reconstructs this pair.
+    pub fn into_optional(self,context:&mut gpui_reactivity_core::resource::ResourceContext)->Result<OptionalShape,gpui_reactivity_core::resource::ResourceError> {
+        let Self {resource,lease}=self;
+        Ok(OptionalShape {handle:context.retain_optional(resource,lease)?})
+    }
+
     pub fn validate_request(text:&str,size:f32,width:Option<f32>)->Result<(),Error> {validate(text,size,width)}
     /// Exclusive source/shape payload capacity only, excluding shared font roots,
     /// opaque Arc/allocator headers and packed outputs (which coexist separately).
@@ -53,11 +96,24 @@ impl ShapeResource {
         Ok(lower.finish())
     }
 }
-struct Capture<'a> { tx:WindowReservation<'a>,draft:DraftResource,source:String,paragraphs:Vec<ParagraphOwner>,shape_bytes:usize }
+impl FontFace {
+    /// Sealed exact FontData backing adapter for a retained validity witness.
+    /// No fresh registration IDs, bytes copy, or caller-supplied projection.
+    pub fn share_retained_text_backing(&self,tx:&mut WindowReservation<'_>,draft:DraftResource)->Result<(),gpui_reactivity_core::resource::ResourceError> {
+        let bytes=size_of::<FontData>().checked_add(match &self.0.bytes {Cow::Owned(v)=>v.capacity(),Cow::Borrowed(_)=>0})
+            .ok_or(gpui_reactivity_core::resource::ResourceError::Overflow)?;
+        tx.share_arc(draft,self.0.clone(),layout(bytes).ok_or(gpui_reactivity_core::resource::ResourceError::Overflow)?)
+    }
+}
+struct Capture<'a> { tx:WindowReservation<'a>,draft:DraftResource,source:SourceStorage,paragraphs:Vec<ParagraphOwner>,shape_bytes:usize }
 fn layout(bytes:usize)->Option<PayloadLayout> { PayloadLayout::new(bytes,bytes,NonZeroU64::MIN,AccountingDomain::Host).ok() }
 impl<'a> Capture<'a> {
-    fn new(mut tx:WindowReservation<'a>,artifact:Artifact,text:&str,planner:&Planner<'_>)->Option<Self> {
+    fn new(mut tx:WindowReservation<'a>,artifact:Artifact,text:&str,planner:&Planner<'_>,shared:Option<OwnedShapeSource>)->Option<Self> {
         let draft=tx.stage(ResourceKind::Shape,artifact).ok()?;
+        if let Some(source)=&shared {
+            if source.lease.id().owner()!=draft.id().owner() || source.lease.origin()!=gpui_reactivity_core::change::DependencyNode::Site(artifact)
+                || !std::ptr::eq::<str>(source.as_str(),text) {return None;}
+        }
         // SAME roots accepted by the ORIGINAL builder; never create/register a
         // fresh FontBytes/Blob. Shared font bytes excluded from shape Vec charge.
         for slot in 0..3 {
@@ -68,9 +124,13 @@ impl<'a> Capture<'a> {
                 tx.share_arc(draft,face.clone(),layout(bytes)?).ok()?;
             }
         }
-        let minimum=size_of::<ShapeResource>().checked_add(text.len())?;
+        let minimum=size_of::<ShapeResource>().checked_add(if shared.is_some() {0} else {text.len()})?;
         if !tx.can_fit_new_root(draft,minimum) { return None; }
-        let mut source=String::new();source.try_reserve_exact(text.len()).ok()?;source.push_str(text);
+        let source=match shared {
+            Some(source)=>SourceStorage::Shared(source),None=> {
+                let mut source=String::new();source.try_reserve_exact(text.len()).ok()?;source.push_str(text);SourceStorage::Copied(source)
+            }
+        };
         Some(Self {tx,draft,source,paragraphs:Vec::new(),shape_bytes:0})
     }
     fn bytes(&self,extra:usize)->Option<usize> {
@@ -95,13 +155,13 @@ impl<'a> Capture<'a> {
 }
 /// First pass preserves interleaving: build -> break -> canonical admission/
 /// lowering -> optional capture. Decline keeps ordinary outputs and never reruns.
-fn plan<'a,const M:bool>(planner:&mut Planner<'_>,text:&str,size:f32,width:Option<f32>,interactive:bool,tx:WindowReservation<'a>,artifact:Artifact)
+fn plan<'a,const M:bool>(planner:&mut Planner<'_>,text:&str,size:f32,width:Option<f32>,interactive:bool,tx:WindowReservation<'a>,artifact:Artifact,shared:Option<OwnedShapeSource>)
     ->Result<(Planned,Option<Capture<'a>>),Error>
 {
     let needed=planner.coverage(text)?;
     let mut names=FAMILIES.map(|name|FontFamilyName::Named(name.into()));let mut count=1;
     for (index,family) in FAMILIES.iter().enumerate().skip(1) { if needed&(1<<(index-1))!=0 { names[count]=FontFamilyName::Named((*family).into());count+=1; } }
-    let mut capture=Capture::new(tx,artifact,text,planner);
+    let mut capture=Capture::new(tx,artifact,text,planner,shared);
     // A new retained source must not inherit an unrelated site's oversized
     // ordinary scratch capacities after quota decline. No shaping is rerun.
     // Source capture already moves every admitted paragraph out of this slot.
@@ -135,7 +195,7 @@ fn plan<'a,const M:bool>(planner:&mut Planner<'_>,text:&str,size:f32,width:Optio
 pub(in crate::text) fn shape(planner:&mut Planner<'_>,text:&str,size:f32,width:Option<f32>,tx:WindowReservation<'_>,artifact:Artifact)
     ->Result<(TextLayout,Option<ShapeArtifact>),Error>
 {
-    let result=(|| { let (planned,capture)=plan::<true>(planner,text,size,width,true,tx,artifact)?;
+    let result=(|| { let (planned,capture)=plan::<true>(planner,text,size,width,true,tx,artifact,None)?;
         let output=output(planned,&planner.faces,size,text.len())?;
         Ok((output,capture.and_then(|c|c.finish(planner,size)))) })();
     if result.is_err() {planner.layout=parley::Layout::default();} result
@@ -143,11 +203,28 @@ pub(in crate::text) fn shape(planner:&mut Planner<'_>,text:&str,size:f32,width:O
 pub(in crate::text) fn measure(planner:&mut Planner<'_>,text:&str,size:f32,width:Option<f32>,tx:WindowReservation<'_>,artifact:Artifact)
     ->Result<(TextMetrics,Option<ShapeArtifact>),Error>
 {
-    let result=(|| {let (planned,capture)=plan::<false>(planner,text,size,width,false,tx,artifact)?;
+    let result=(|| {let (planned,capture)=plan::<false>(planner,text,size,width,false,tx,artifact,None)?;
         Ok((planned.metrics,capture.and_then(|c|c.finish(planner,size))))})();
     if result.is_err() {planner.layout=parley::Layout::default();} result
 }
 
+pub(in crate::text) fn shape_owned(planner:&mut Planner<'_>,source:OwnedShapeSource,size:f32,width:Option<f32>,tx:WindowReservation<'_>,artifact:Artifact)
+    ->Result<(TextLayout,Option<ShapeArtifact>),Error>
+{
+    let text=source.backing.clone();
+    let result=(|| {let (planned,capture)=plan::<true>(planner,text.as_str(),size,width,true,tx,artifact,Some(source))?;
+        let output=output(planned,&planner.faces,size,text.as_str().len())?;
+        Ok((output,capture.and_then(|c|c.finish(planner,size))))})();
+    if result.is_err() {planner.layout=parley::Layout::default();}result
+}
+pub(in crate::text) fn measure_owned(planner:&mut Planner<'_>,source:OwnedShapeSource,size:f32,width:Option<f32>,tx:WindowReservation<'_>,artifact:Artifact)
+    ->Result<(TextMetrics,Option<ShapeArtifact>),Error>
+{
+    let text=source.backing.clone();
+    let result=(|| {let (planned,capture)=plan::<false>(planner,text.as_str(),size,width,false,tx,artifact,Some(source))?;
+        Ok((planned.metrics,capture.and_then(|c|c.finish(planner,size))))})();
+    if result.is_err() {planner.layout=parley::Layout::default();}result
+}
 #[cfg(test)]
 std::thread_local! { static BUILDS:std::cell::Cell<usize>=const { std::cell::Cell::new(0) };
     static CAPTURES:std::cell::Cell<usize>=const { std::cell::Cell::new(0) }; }
@@ -158,6 +235,115 @@ mod tests {
     fn context(bytes:usize)->ResourceContext { ResourceContext::new(ResourceLimits {retained_payload_bytes:bytes,physical_roots:64,resource_records:32,backings_per_resource:16}).unwrap() }
     fn artifact(issuer:&FrameIssuer)->Artifact { Artifact {site:SiteId::from_monotonic(issuer.owner(),NonZeroU64::MIN),phase:Phase::Shape} }
     fn words(layout:&TextLayout)->Vec<u64> { super::super::lowering_control::packed_words(layout) }
+    #[test]
+    fn optional_shape_keeps_same_root_and_original_ids_until_unpinned_reclaim() {
+        let face=FontFace::new(include_bytes!("../../assets/NotoSans-default.ttf")).unwrap();
+        let mut service=face.shaper();let mut context=context(8*1024*1024);let issuer=FrameIssuer::new().unwrap();
+        let scope=WindowAccounting::Scoped(context.scope(&issuer));
+        let tx=context.window_reservation(scope,&issuer).unwrap();
+        let source="office affinity wraps at narrow widths";
+        let (packed,shape)=service.shape_interactive_resource(source,14.1,Some(120.),tx,artifact(&issuer)).unwrap();
+        let shape=shape.unwrap();let ptr=Arc::as_ptr(&shape.resource);let ids=shape.resource.ids;
+        let optional=shape.into_optional(&mut context).unwrap();
+        let pin=optional.pin(&context).unwrap().unwrap();
+        assert_eq!(Arc::as_ptr(&pin.resource),ptr);assert_eq!(pin.resource.ids,ids);
+        assert_eq!(words(&pin.shape_interactive(Some(120.)).unwrap()),words(&packed));
+        assert_eq!(context.reclaim_optional(usize::MAX).removed,0);
+        drop(pin);assert_eq!(context.reclaim_optional(usize::MAX).removed,1);
+        assert!(optional.pin(&context).unwrap().is_none());
+        // Packed output remains independent of the raw source-side owner.
+        assert!(!words(&packed).is_empty());
+    }
+    #[test]
+    fn shared_source_child_survives_witness_reclaim_and_raw_owner_does_not_self_pin() {
+        use gpui_reactivity_core::resource::Utf8Backing;
+        let _lock=super::super::super::BUNDLED_TEST_LOCK.lock().unwrap();
+        let face=FontFace::bundled().unwrap();let mut service=face.shaper();
+        let text="office affinity source α\r\nאבג العربية wraps repeatedly";
+        let backing=Utf8Backing::new(String::from(text).into());let mut context=context(8*1024*1024);let issuer=FrameIssuer::new().unwrap();let key=artifact(&issuer);let scope=WindowAccounting::Scoped(context.scope(&issuer));
+        let mut tx=context.window_reservation(scope,&issuer).unwrap();let draft=tx.stage(ResourceKind::Utf8Source,key).unwrap();tx.share_utf8(draft,backing.clone()).unwrap();let witness_lease=tx.commit().unwrap().pop().unwrap();let witness_id=witness_lease.id();
+        let witness=context.retain_optional(backing.clone(),witness_lease).unwrap();
+        let owned=OwnedShapeSource::admit(backing.clone(),&mut context,scope,&issuer,key).unwrap();let child_id=owned.lease.id();assert_ne!(child_id,witness_id);
+        assert_eq!(context.stats().utf8_guard_wrappers_created,1,"child must alias SAME physical backing");
+        let tx=context.window_reservation(scope,&issuer).unwrap();let (packed,raw)=service.shape_interactive_owned_resource(owned,14.1,Some(120.),tx,key).unwrap();let raw=raw.unwrap();
+        assert_ne!(raw.lease().id(),child_id);assert_eq!(raw.resource.source.capacity(),0);
+        assert_eq!(raw.source().as_ptr(),backing.as_str().as_ptr());
+        assert_eq!(context.reclaim_optional(usize::MAX).removed,1);assert!(context.pin_optional(&witness).unwrap().is_none());
+        for _ in 0..4 {context.maintain(usize::MAX).unwrap();}
+        let wrapper_bytes=raw.resource.ids.iter().filter(|id|id.is_some()).count()*size_of::<FontBytes>();
+        let accepted_fonts=font_payload((0..3).filter_map(|slot|raw.resource.faces.face(slot).ok().cloned()));
+        assert_eq!(context.stats().retained_payload_bytes,raw.exclusive_capacity_bytes().unwrap()+wrapper_bytes+accepted_fonts+backing.retained_allocation_bytes().unwrap(),"exact declared live-root union must still include source ONCE after witness retirement");
+        assert_eq!(context.stats().utf8_guard_wrappers_created,1);
+        for width in [Some(120.),Some(40.),Some(120.)] {
+            let reused=raw.shape_interactive(width).unwrap();let cold=face.shaper().shape_interactive(text,14.1,width).unwrap();assert_eq!(words(&reused),words(&cold));
+        }
+        assert_eq!(words(&raw.shape_interactive(Some(120.)).unwrap()),words(&packed));
+        let optional=raw.into_optional(&mut context).unwrap();assert_eq!(context.reclaim_optional(usize::MAX).removed,1,"raw owner must not contain its OWN record lease");
+        assert!(optional.pin(&context).unwrap().is_none());for _ in 0..4 {context.maintain(usize::MAX).unwrap();}assert_eq!(context.stats().retained_payload_bytes,0);
+    }
+    #[test]
+    fn shared_source_matches_copied_resource_and_reports_removed_copy_capacity() {
+        use gpui_reactivity_core::resource::Utf8Backing;
+        let _lock=super::super::super::BUNDLED_TEST_LOCK.lock().unwrap();
+        let face=FontFace::bundled().unwrap();let mut service=face.shaper();
+        for text in [String::new(),String::from("office"),String::from("office affinity\r\n\r\nאבג العربية\nlast"),"office ".repeat(2000)] {
+            let mut context=context(16*1024*1024);let issuer=FrameIssuer::new().unwrap();let scope=WindowAccounting::Scoped(context.scope(&issuer));let key=artifact(&issuer);
+            let tx=context.window_reservation(scope,&issuer).unwrap();let (copied_output,copied)=service.shape_interactive_resource(&text,14.1,Some(120.),tx,key).unwrap();let copied=copied.unwrap();
+            let backing=Utf8Backing::new(text.clone().into());let owned=OwnedShapeSource::admit(backing.clone(),&mut context,scope,&issuer,key).unwrap();
+            let tx=context.window_reservation(scope,&issuer).unwrap();let (shared_output,shared)=service.shape_interactive_owned_resource(owned,14.1,Some(120.),tx,key).unwrap();let shared=shared.unwrap();
+            assert!(matches!(&copied.resource.source,SourceStorage::Copied(_)));assert!(matches!(&shared.resource.source,SourceStorage::Shared(_)));
+            assert_eq!(words(&copied_output),words(&shared_output));assert_eq!(copied.resource.ids,shared.resource.ids);
+            let removed=copied.resource.source.capacity();assert_eq!(shared.resource.source.capacity(),0);
+            assert_eq!(copied.exclusive_capacity_bytes().unwrap()-shared.exclusive_capacity_bytes().unwrap(),removed);
+            assert!(shared.same_font(&face));assert_eq!(shared.source().as_ptr(),backing.as_str().as_ptr());
+            for width in [Some(120.),Some(40.),Some(120.)] {
+                let owned=OwnedShapeSource::admit(backing.clone(),&mut context,scope,&issuer,key).unwrap();let tx=context.window_reservation(scope,&issuer).unwrap();
+                let (measured,raw)=service.measure_owned_resource(owned,14.1,width,tx,key).unwrap();let raw=raw.expect("explicit test quota must admit owned measure");
+                assert_eq!(raw.source().as_ptr(),backing.as_str().as_ptr());assert_eq!(raw.resource.source.capacity(),0);
+                let ordinary=face.shaper().measure(&text,14.1,width).unwrap();let reused=shared.measure(width).unwrap();
+                assert_eq!([measured.width,measured.height,measured.baseline].map(f32::to_bits),[ordinary.width,ordinary.height,ordinary.baseline].map(f32::to_bits));
+                assert_eq!([measured.width,measured.height,measured.baseline].map(f32::to_bits),[reused.width,reused.height,reused.baseline].map(f32::to_bits));
+            }
+            eprintln!("CAP_SHARED_SHAPE_SOURCE scope=declared_payload_capacities_not_total_memory bytes={} removed_string_capacity={} shared_source_field={} copied_string_field={} child_lease_handle={} current_shape_header={} exclusions=child_record_and_vec_refs,arc_btree_metadata,mandatory_packed_outputs",text.len(),removed,size_of::<SourceStorage>(),size_of::<String>(),size_of::<ResourceLease>(),size_of::<ShapeResource>());
+        }
+    }
+    #[test]
+    fn shared_source_child_record_limit_and_foreign_domain_decline_without_reshaping() {
+        use gpui_reactivity_core::resource::{Utf8Backing,ResourceError};
+        let face=FontFace::new(include_bytes!("../../assets/NotoSans-default.ttf")).unwrap();let mut service=face.shaper();let text="office\r\nlast";
+        let issuer=FrameIssuer::new().unwrap();let key=artifact(&issuer);
+        for foreign in [false,true] {
+            let mut a=ResourceContext::new(ResourceLimits {retained_payload_bytes:8*1024*1024,physical_roots:64,resource_records:1,backings_per_resource:16}).unwrap();let sa=WindowAccounting::Scoped(a.scope(&issuer));
+            let mut b=context(8*1024*1024);let sb=WindowAccounting::Scoped(b.scope(&issuer));
+            let owned=OwnedShapeSource::admit(Utf8Backing::new(String::from(text).into()),&mut a,sa,&issuer,key).unwrap();
+            let (target,scope)=if foreign {(&mut b,sb)} else {(&mut a,sa)};
+            let before_build=BUILDS.with(|n|n.get());let before_capture=CAPTURES.with(|n|n.get());
+            let tx=target.window_reservation(scope,&issuer).unwrap();let (actual,raw)=service.shape_interactive_owned_resource(owned,14.1,Some(40.),tx,key).unwrap();
+            assert!(raw.is_none());assert_eq!(BUILDS.with(|n|n.get())-before_build,paragraph::ranges(text).count());assert_eq!(CAPTURES.with(|n|n.get()),before_capture);
+            assert_eq!(words(&actual),words(&face.shaper().shape_interactive(text,14.1,Some(40.)).unwrap()));
+        }
+        let mut c=context(8*1024*1024);let scope=WindowAccounting::Scoped(c.scope(&issuer));let wrong=Artifact {phase:Phase::Material,..key};
+        assert!(matches!(OwnedShapeSource::admit(Utf8Backing::new("office".into()),&mut c,scope,&issuer,wrong),Err(ResourceError::InvalidLayout)));
+    }
+    #[test]
+    fn shared_source_child_alias_record_metadata_is_additional_without_source_payload_charge() {
+        use gpui_reactivity_core::resource::Utf8Backing;
+        for text in [String::new(),String::from("office"),"office ".repeat(2000)] {
+            let mut context=context(8*1024*1024);let issuer=FrameIssuer::new().unwrap();let scope=WindowAccounting::Scoped(context.scope(&issuer));let key=artifact(&issuer);
+            let backing=Utf8Backing::new(text.clone().into());
+            let mut tx=context.window_reservation(scope,&issuer).unwrap();let draft=tx.stage(ResourceKind::Utf8Source,key).unwrap();tx.share_utf8(draft,backing.clone()).unwrap();let witness=tx.commit().unwrap().pop().unwrap();
+            let before=context.stats();let mut owned=None;
+            let admission=allocation_counter::measure(|| {owned=Some(OwnedShapeSource::admit(backing.clone(),&mut context,scope,&issuer,key).unwrap());});
+            let after=context.stats();assert_eq!(after.retained_payload_bytes,before.retained_payload_bytes);assert_eq!(after.root_records_created,before.root_records_created);assert_eq!(after.resource_records_created,before.resource_records_created+1);
+            assert_ne!(owned.as_ref().unwrap().lease.id(),witness.id());
+            let child_refs=after.retained_reference_capacity_bytes-before.retained_reference_capacity_bytes;
+            let dropped=allocation_counter::measure(||drop(owned.take()));
+            let reaped=allocation_counter::measure(|| {for _ in 0..4 {context.maintain(usize::MAX).unwrap();}});
+            assert_eq!(context.stats().retained_reference_capacity_bytes,before.retained_reference_capacity_bytes);assert_eq!(context.stats().retained_payload_bytes,before.retained_payload_bytes);
+            assert!(admission.bytes_current>0,"distinct child record has real metadata cost even for empty source");
+            eprintln!("CAP_SHARED_SOURCE_CHILD_METADATA scope=isolated_alias_record_allocator_requests_not_rss bytes={} extra_child_records=1 extra_source_payload=0 child_reference_capacity_bytes={} admit_total={} admit_live={} drop_delta={} reap_delta={} source_owner_inline={} exclusions=existing_witness_root,allocator_internal_overhead,btree_spare_capacity_until_context_drop",text.len(),child_refs,admission.bytes_total,admission.bytes_current,dropped.bytes_current,reaped.bytes_current,size_of::<OwnedShapeSource>());
+        }
+    }
     fn packed_payload(layout:&TextLayout)->usize {
         let mut n=size_of::<TextLayout>()+layout.glyphs.capacity()*size_of::<PackedGlyph>()+size_of::<FontSet>();
         if let Some(details)=&layout.mapping {

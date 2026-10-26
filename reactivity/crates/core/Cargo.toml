@@ -5,9 +5,12 @@ edition.workspace = true
 license.workspace = true
 
 [dependencies]
+arcstr = { version = "=1.2.0", default-features = false, features = ["std"], optional = true }
 cephal = { path = "../../vendor/cephal", optional = true }
 
 [features]
+# Sealed full-root immutable UTF-8 backing adapter; no semantic source interner.
+shared-utf8 = ["dep:arcstr"]
 default = []
 layout = ["dep:cephal"]
 

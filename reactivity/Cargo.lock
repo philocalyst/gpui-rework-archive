@@ -1170,6 +1170,7 @@ version = "0.1.0"
 name = "gpui_reactivity_core"
 version = "0.1.0"
 dependencies = [
+ "arcstr",
  "cephal",
 ]
 

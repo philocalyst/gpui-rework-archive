@@ -342,7 +342,7 @@ pub(crate) struct Raster {
 }
 
 #[cfg(feature = "retained-text")]
-pub use planner::resource::{ShapeArtifact,ShapeResource};
+pub use planner::resource::{OwnedShapeSource,OptionalShape,ShapeArtifact,ShapeResource};
 
 /// A scoped parser over immutable font bytes, reusable across measurement and
 /// painting. It owns parsed shaping tables and reusable paragraph scratch,
@@ -417,6 +417,24 @@ impl<'font> TextShaper<'font> {
     {
         let planner=self.planner(text,size,width)?;
         planner::resource::measure(planner,text,size,width,tx,artifact)
+    }
+    /// Derives all source bytes from the sealed owned backing; retention decline
+    /// preserves the ordinary output and never reruns shaping.
+    #[cfg(feature = "retained-text")]
+    pub fn shape_interactive_owned_resource(&mut self,source:OwnedShapeSource,size:f32,width:Option<f32>,
+        tx:gpui_reactivity_core::resource::WindowReservation<'_>,artifact:gpui_reactivity_core::change::Artifact)
+        ->Result<(TextLayout,Option<ShapeArtifact>),Error>
+    {
+        let planner=self.planner(source.as_str(),size,width)?;
+        planner::resource::shape_owned(planner,source,size,width,tx,artifact)
+    }
+    #[cfg(feature = "retained-text")]
+    pub fn measure_owned_resource(&mut self,source:OwnedShapeSource,size:f32,width:Option<f32>,
+        tx:gpui_reactivity_core::resource::WindowReservation<'_>,artifact:gpui_reactivity_core::change::Artifact)
+        ->Result<(TextMetrics,Option<ShapeArtifact>),Error>
+    {
+        let planner=self.planner(source.as_str(),size,width)?;
+        planner::resource::measure_owned(planner,source,size,width,tx,artifact)
     }
     fn planner(
         &mut self,

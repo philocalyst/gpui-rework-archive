@@ -30,7 +30,7 @@ accesskit_winit = { version = "=0.34.1", default-features = false, features = ["
 # Provisional explicit source/template read-set capability, OFF in first assembly.
 source-observation-experiment = []
 # Experimental common live-source derived text artifact; default remains stock.
-retained-text = ["gpui_canvas/retained-text"]
+retained-text = ["gpui_canvas/retained-text", "gpui_reactivity_core/shared-utf8"]
 default = ["simd"]
 simd = ["gpui_canvas/simd", "gpui_gpu?/simd"]
 accessibility = ["native-core", "dep:accesskit", "dep:accesskit_winit"]
