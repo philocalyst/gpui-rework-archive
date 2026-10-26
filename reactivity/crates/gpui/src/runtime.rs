@@ -55,6 +55,8 @@ pub use text_geometry::TextGeometry;
 mod identity_index;
 mod layout_nodes;
 mod changes;
+#[cfg(test)]
+mod solver_dependency_tests;
 #[cfg(feature = "retained-text")]
 mod artifacts;
 #[cfg(feature = "retained-text")]
@@ -3294,9 +3296,7 @@ impl<M: View + 'static> Runtime<M> {
         mut clips: Option<&mut frontier::Frontier<ClipFrame>>,
         mut resources: Option<&mut gpui_reactivity_core::resource::ResourceContext>,
     ) -> Result<(), Error> {
-        let closed_dependencies = self.consume_dependencies();
-        #[cfg(feature = "retained-text")]
-        let mut closed_dependencies = closed_dependencies;
+        let mut closed_dependencies = self.consume_dependencies();
         #[cfg(not(feature = "retained-text"))]
         let _ = &mut resources;
         let sequence = self.next_presentation;
@@ -3488,6 +3488,15 @@ impl<M: View + 'static> Runtime<M> {
         self.counters.measure_calls += after.measure_calls - before.measure_calls;
         if let Some(error) = failure {
             return Err(error);
+        }
+        if after.computes > before.computes || after.measure_calls > before.measure_calls {
+            // The solver, not a potential layout SCC, now owns propagation.
+            // Until its actual changed-answer/placement/overflow write feed is
+            // bound into this closure, publish complete C but conservatively
+            // deny a clean sparse renderer receipt for solved layout updates.
+            // This is AFTER solve: it must NOT trigger an arena rebuild here.
+            closed_dependencies.require_full(change_model::FullReasons::UNKNOWN_DEPENDENCY);
+            self.changes.full(change_model::FullReasons::UNKNOWN_DEPENDENCY);
         }
         // All pre-solve logical invalidations have now been consumed. Inspector
         // captions changed below are a distinct late set, not every old source.

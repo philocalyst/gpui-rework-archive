@@ -32,10 +32,11 @@ pub(super) fn register_node(graph: &mut Dependencies, owner: NonZeroU64, identit
     if let Some(parent) = parent {
         let parent = SiteId::from_monotonic(owner, NonZeroU64::new(parent).expect("admitted parent identity"));
         let key = |site, phase| Artifact { site, phase };
-        // Child intrinsic/layout results affect parent flow; parent allocation
-        // affects child layout and text wrapping. Cycles terminate by fullkey.
-        graph.depends_on(key(parent, Phase::Layout), key(site, Phase::Layout));
-        graph.depends_on(key(site, if text { Phase::TextLayout } else { Phase::Layout }), key(parent, Phase::Layout));
+        // Cephal owns cached parent/child LayoutInput answers and propagates
+        // only changed observable answers (None/Overflow/Full). Mirroring both
+        // directions here premarked the entire connected tree and defeated it.
+        // Direct changed style/measure owners still enter LayoutTree's adapter,
+        // including its immediate-parent style guard and cheap-leaf redirect.
         graph.depends_on(key(site, Phase::Placement), key(parent, Phase::Placement));
         graph.depends_on(key(site, Phase::Clip), key(parent, Phase::Clip));
     }
