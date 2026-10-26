@@ -61,9 +61,12 @@ impl Facets {
             let geometry = self.contains(Topology) || self.contains(Layout) || self.contains(ResourceMetrics) || self.contains(WidthConstraint) || self.contains(HeightConstraint);
             let source = self.contains(TextSource) || self.contains(TextPolicy);
             let measure = geometry || source || self.contains(TextWidth);
-            let placement = measure || self.contains(Transform);
+            // Measurement/layout INPUTS do not prove that world placement
+            // changed. The producer emits actual output facts after the solver.
+            let placement = self.contains(Topology) || self.contains(Transform);
             let clip = placement || self.contains(Clip);
-            let primitive = clip || self.contains(Stacking) || self.contains(PrimitiveContent);
+            let primitive = clip || source || self.contains(TextWidth) || self.contains(ResourceMetrics)
+                || self.contains(Stacking) || self.contains(PrimitiveContent);
             let lower = primitive || self.contains(Paint) || self.contains(ResourcePixels);
             match phase {
                 Phase::WidthConstraint => self.contains(WidthConstraint),
@@ -90,7 +93,10 @@ impl Phase {
         match self {
             Self::WidthConstraint => &[Self::TextLayout], Self::HeightConstraint | Self::BoxConstraint => &[Self::Measure],
             Self::Shape => &[Self::TextLayout], Self::TextLayout => &[Self::Measure],
-            Self::Measure => &[Self::Layout], Self::Layout => &[Self::Placement],
+            Self::Measure => &[Self::Layout],
+            // Layout is an input/question phase. Actual output facts seed
+            // Placement/Clip/Primitive after value comparison, not eagerly.
+            Self::Layout => &[],
             Self::Placement => &[Self::Clip, Self::Primitive, Self::Hit, Self::Semantics],
             Self::Clip => &[Self::Primitive, Self::Hit, Self::Semantics],
             Self::Primitive => &[Self::Material, Self::Raster, Self::Hit, Self::Semantics], Self::Material => &[Self::Raster], _ => &[],
@@ -871,5 +877,22 @@ impl PreparedPublication<'_> {
     pub fn commit(self) -> PublicationReceipt {
         self.issuer.last = Some(self.stamp.to.sequence); self.issuer.source_epoch = self.stamp.source_epoch;
         self.issuer.snapshot_epoch = self.stamp.snapshot_epoch; PublicationReceipt { stamp: self.stamp }
+    }
+}
+
+#[cfg(test)]
+mod input_output_phase_tests {
+    use super::*;
+    #[test]
+    fn layout_questions_do_not_speculate_placement_but_content_sources_still_seed_own_primitives() {
+        assert!(Phase::Layout.downstream().is_empty());
+        for input in [Facet::Layout,Facet::WidthConstraint,Facet::HeightConstraint] {
+            let phases:Vec<_>=Facets::one(input).phases().collect();
+            assert!(phases.contains(&Phase::Layout));
+            assert!(!phases.contains(&Phase::Placement));assert!(!phases.contains(&Phase::Clip));assert!(!phases.contains(&Phase::Primitive));
+        }
+        for content in [Facet::TextSource,Facet::TextPolicy,Facet::TextWidth,Facet::ResourceMetrics,Facet::PrimitiveContent] {
+            assert!(Facets::one(content).phases().any(|phase|phase==Phase::Primitive));
+        }
     }
 }

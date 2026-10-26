@@ -128,3 +128,30 @@ fn changed_intrinsic_metrics_keep_full_fallback_and_cold_output() {
     let after=pixels(&mut win);assert_ne!(after,before);
     assert_eq!(rows(&win),rows(&cold));assert_eq!(after,pixels(&mut cold));
 }
+
+struct ParentInput { width:Signal<f64>, clip:bool }
+impl ParentInput { const WIDTH:Source<Self,f64>=Source::new(FieldId::new(31),"parent allocation",|m|&m.width,|m|&mut m.width); }
+impl View for ParentInput {
+    fn sources()->Sources<Self>{Sources::new().direct(Self::WIDTH)}
+    fn view(&self)->El<'_> {
+        column((0..COUNT).map(|index|div().w(80).h(8).bg(rgb(if index%2==0{0x406080}else{0x8098b0}))))
+            .w(&self.width).h((COUNT*8) as f32).bg(rgb(0xb06030)).clipped(self.clip)
+    }
+}
+#[test]
+fn parent_layout_input_does_not_materialize_descendant_placement_before_actual_outputs() {
+    for clip in [false,true] {
+        let mut win=Win::recording(ParentInput{width:Signal::new(100.),clip},options()).unwrap();ack(&mut win);
+        let before=pixels(&mut win);
+        let old_child_spaces:Vec<_>=win.snapshot().unwrap().nodes.into_iter().skip(1).map(|node|node.transform).collect();
+        win.set(ParentInput::WIDTH,40.).unwrap();
+        let input_artifacts=win.runtime().unwrap().last_input_closure_artifacts;
+        ack(&mut win);
+        let new_child_spaces:Vec<_>=win.snapshot().unwrap().nodes.into_iter().skip(1).map(|node|node.transform).collect();
+        assert_eq!(old_child_spaces,new_child_spaces,"parent extent alone is not a new child coordinate space");
+        let mut cold=Win::with_options(ParentInput{width:Signal::new(40.),clip},options()).unwrap();
+        let after=pixels(&mut win);assert_ne!(after,before);
+        assert_eq!(rows(&win),rows(&cold));assert_eq!(after,pixels(&mut cold));
+        assert!(input_artifacts<16,"count materialized input artifacts, not elapsed time or scene visits: {input_artifacts}");
+    }
+}

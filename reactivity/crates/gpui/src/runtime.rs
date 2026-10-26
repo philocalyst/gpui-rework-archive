@@ -1209,6 +1209,8 @@ struct Runtime<M> {
     layout_edits: Option<Box<layout_nodes::EditPlan>>,
     layout_dirty: BTreeSet<u64>,
     layout_writes: layout_writes::LayoutWrites,
+    #[cfg(test)]
+    last_input_closure_artifacts: usize,
     rebuild_layout: bool,
     layout_depth: u8,
     topology_changed: bool,
@@ -1479,6 +1481,8 @@ impl<M: View + 'static, L: LaneSet<M>> Win<M, L> {
             layout_edits: None,
             layout_dirty: BTreeSet::new(),
             layout_writes: layout_writes::LayoutWrites::new(layout_writes::MAX_ENTRIES),
+            #[cfg(test)]
+            last_input_closure_artifacts: 0,
             rebuild_layout: true,
             layout_depth: 0,
             topology_changed: true,
@@ -3507,22 +3511,15 @@ impl<M: View + 'static> Runtime<M> {
             };
             if write.before == write.after { continue; }
             let channels = write.channels();
-            let mut facets = change_model::Facets::one(change_model::Facet::PrimitiveContent);
-            let mut scope = change_model::Scope::Site;
-            if channels.location {
-                facets = facets.union(change_model::Facets::one(change_model::Facet::Transform));
-                scope = change_model::Scope::Subtree;
-            }
-            if channels.size || channels.content || channels.overflow {
-                facets = facets.union(change_model::Facets::one(change_model::Facet::Clip));
-                scope = change_model::Scope::Subtree;
-            }
+            let node = &self.nodes[index];
+            let active_clip = matches!(node.kind(), NodeKind::List | NodeKind::ListItem | NodeKind::Scroll)
+                || self.metadata.as_ref().and_then(|metadata|metadata.geometry.as_ref())
+                    .is_some_and(|geometry|geometry.get(node.identity()).clip_children);
+            let (facets, scope) = write.output_facets(active_clip);
             if channels.order {
-                facets = facets.union(change_model::Facets::one(change_model::Facet::Stacking));
-                scope = change_model::Scope::Subtree;
-            }
-            if write.before.content_box_width() != write.after.content_box_width() {
-                facets = facets.union(change_model::Facets::one(change_model::Facet::TextWidth));
+                // Painter-order output needs the complete ordered subtree
+                // catalog; do not infer it from a local layout capability.
+                self.changes.full(change_model::FullReasons::UNKNOWN_DEPENDENCY);
             }
             changes::record(&mut self.changes, self.sites.namespace(), self.nodes[index].identity,
                 facets, scope, change_model::Support::Pending, change_model::Support::Pending);

@@ -108,6 +108,8 @@ impl<M: View + 'static> Runtime<M> {
     }
     pub(super) fn consume_dependencies(&mut self) -> gpui_reactivity_core::change::Invalidated {
         let invalidated = take_or_close(&mut self.pending_closure, &self.dependencies, self.pending_dependencies.as_ref(), &self.changes);
+        #[cfg(test)]
+        { self.last_input_closure_artifacts = invalidated.artifacts().len(); }
         if !invalidated.full().is_empty() {
             self.changes.full(invalidated.full());
             self.rebuild_layout = true;

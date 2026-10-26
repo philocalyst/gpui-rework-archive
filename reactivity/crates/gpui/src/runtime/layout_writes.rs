@@ -15,6 +15,20 @@ pub(super) struct Write { pub before: Layout, pub after: Layout }
 #[derive(Clone, Copy, Debug, PartialEq, Eq)]
 pub(super) struct Channels { pub location: bool, pub size: bool, pub content: bool, pub overflow: bool, pub order: bool }
 impl Write {
+    /// Own canonical geometry always changes; only an active outgoing clip
+    /// depends on this box's extent. Parent size alone is not child placement.
+    pub fn output_facets(&self, active_clip: bool) -> (gpui_reactivity_core::change::Facets, gpui_reactivity_core::change::Scope) {
+        use gpui_reactivity_core::change::{Facet, Facets, Scope};
+        let channels=self.channels();
+        let mut facets=Facets::one(Facet::PrimitiveContent);let mut scope=Scope::Site;
+        if channels.location { facets=facets.union(Facets::one(Facet::Transform));scope=Scope::Subtree; }
+        if active_clip && (channels.size || channels.content || channels.overflow) {
+            facets=facets.union(Facets::one(Facet::Clip));scope=Scope::Subtree;
+        }
+        if channels.order { facets=facets.union(Facets::one(Facet::Stacking));scope=Scope::Subtree; }
+        if self.before.content_box_width()!=self.after.content_box_width() { facets=facets.union(Facets::one(Facet::TextWidth)); }
+        (facets,scope)
+    }
     pub fn channels(&self) -> Channels { Channels {
         location: self.before.location != self.after.location,
         size: self.before.size != self.after.size,
@@ -117,5 +131,28 @@ mod answer_tests {
         evidence.answer_changed(node,old,new);
         assert_eq!(evidence.answer_sites().count(),0);
         assert!(evidence.incomplete());
+    }
+}
+
+#[cfg(test)]
+mod output_tests {
+    use super::*;
+    use gpui_reactivity_core::change::{Facet,Scope};
+    #[test]
+    fn extent_and_content_affect_own_primitive_but_only_active_outgoing_clip_propagates() {
+        let mut before=Layout::ZERO;before.size.width=100.;before.size.height=40.;
+        let mut after=before;after.size.width=40.;
+        let write=Write{before,after};
+        let (plain,scope)=write.output_facets(false);
+        assert!(plain.contains(Facet::PrimitiveContent));assert!(plain.contains(Facet::TextWidth));
+        assert!(!plain.contains(Facet::Transform));assert!(!plain.contains(Facet::Clip));assert_eq!(scope,Scope::Site);
+        let (clipped,scope)=write.output_facets(true);
+        assert!(clipped.contains(Facet::PrimitiveContent));assert!(clipped.contains(Facet::Clip));assert_eq!(scope,Scope::Subtree);
+        let mut inset=before;inset.padding.left=7.;
+        let (content,_)=Write{before,after:inset}.output_facets(false);
+        assert!(content.contains(Facet::PrimitiveContent));assert!(content.contains(Facet::TextWidth));assert!(!content.contains(Facet::Transform));
+        let mut moved=before;moved.location.x=7.;
+        let (location,scope)=Write{before,after:moved}.output_facets(false);
+        assert!(location.contains(Facet::Transform));assert_eq!(scope,Scope::Subtree);
     }
 }
