@@ -57,7 +57,7 @@ fn pixels(renderer: &Renderer, texture: &wgpu::Texture) -> Vec<u8> {
     buffer.map_async(wgpu::MapMode::Read, .., move |r| send.send(r).unwrap());
     device.poll(wgpu::PollType::wait_indefinitely()).unwrap();
     receive.recv().unwrap().unwrap();
-    buffer.get_mapped_range(..).to_vec()
+    buffer.get_mapped_range(..).unwrap().to_vec()
 }
 fn timed(renderer: &Renderer, operation: impl FnOnce()) -> (f64, f64) {
     let start = Instant::now();

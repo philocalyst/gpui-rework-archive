@@ -233,6 +233,31 @@ pub(super) fn run(gpu: &mut GpuSurface) {
             gpu.renderer.stats().validated_draws > 0,
             "alpha change rebuilds topology/proofs"
         );
+        // A different window can have the same source epoch. Its damage must
+        // not authorize repair over this window's pixels, even on one device.
+        let mut other = Win::recording(
+            Paint {
+                color: Signal::new(Color::BLACK),
+                mapped,
+            },
+            WindowOptions {
+                size: [32, 24],
+                colors: if hdr {
+                    gpui_canvas::ColorConfig::linear_hdr(gpui_canvas::OutputProfile::Srgb, 203.0)
+                        .unwrap()
+                } else {
+                    Default::default()
+                },
+            },
+        )
+        .unwrap();
+        let other_token = other.with_scene(|_, token| token).unwrap();
+        other.presented(other_token).unwrap();
+        other.set(Paint::COLOR, Color::WHITE).unwrap();
+        render(gpu, &mut oracle, &mut other, &texture);
+        assert_eq!(gpu.renderer.retained_stats().composited_pixels, 32 * 24);
+        render(gpu, &mut oracle, &mut owner, &texture);
+        assert_eq!(gpu.renderer.retained_stats().composited_pixels, 32 * 24);
         if let Some(old) = old {
             gpu.renderer = old;
         }

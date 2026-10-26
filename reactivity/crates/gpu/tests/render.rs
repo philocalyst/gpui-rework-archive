@@ -4363,7 +4363,8 @@ fn retained_color_slots_and_srgb_copy_preserve_every_channel_code() {
             let edits = [SlotEdit::new(slot, PaintColor::new(color))];
             let damage = canvas.prepare_slots(&edits).unwrap().commit();
             gpu.patch_slots(&edits, &view, Some(damage)).unwrap();
-            assert_eq!(gpu.retained_stats().composited_pixels, 25);
+            assert_eq!(damage.bounds(), Some([1, 19, 8, 26]));
+            assert_eq!(gpu.retained_stats().composited_pixels, 49);
             assert_eq!(gpu.stats().instance_upload_bytes, 16);
             assert_eq!(read_texture(&gpu, &target), readback(&mut oracle, &canvas));
         }
@@ -4372,5 +4373,46 @@ fn retained_color_slots_and_srgb_copy_preserve_every_channel_code() {
         assert!(gpu.patch_slots(&bad, &view, None).is_err());
         gpu.redraw(&view).unwrap().unwrap();
         assert_eq!(read_texture(&gpu, &target), before);
+    });
+}
+
+#[test]
+fn retained_banked_text_images_and_transforms_survive_slot_repairs() {
+    use gpui_canvas::{PaintColor, SlotEdit};
+    use gpui_gpu::RetainedRenderer;
+    pollster::block_on(async {
+        for format in [
+            wgpu::TextureFormat::Rgba8UnormSrgb,
+            wgpu::TextureFormat::Rgba16Float,
+        ] {
+            let inner = renderer(format).await;
+            let mut oracle = Renderer::new(inner.device().clone(), inner.queue().clone(), format)
+                .await
+                .unwrap();
+            let mut gpu = RetainedRenderer::new(inner);
+            let config = if format == wgpu::TextureFormat::Rgba16Float {
+                ColorConfig::linear_hdr(gpui_canvas::OutputProfile::Srgb, 203.).unwrap()
+            } else {
+                ColorConfig::default()
+            };
+            for grouped in [false, true] {
+                gpu.set_grouped_records(grouped);
+                let mut canvas = Canvas::recording(64, 48, config).unwrap();
+                let slots = bank_scene(&mut canvas, [Color::WHITE, Color::BLACK], true).unwrap();
+                let target = output_texture(&gpu, &canvas);
+                let view = target.create_view(&Default::default());
+                gpu.render(canvas.prepared_scene(), &view, None).unwrap();
+                for color in [
+                    Color::rgb(139, 71, 33),
+                    Color::linear_srgb(2., 0.5, 0., 1.).unwrap(),
+                    Color::BLACK,
+                ] {
+                    let edits = [SlotEdit::new(slots[1], PaintColor::new(color))];
+                    let damage = canvas.prepare_slots(&edits).unwrap().commit();
+                    gpu.patch_slots(&edits, &view, Some(damage)).unwrap();
+                    assert_eq!(read_texture(&gpu, &target), readback(&mut oracle, &canvas));
+                }
+            }
+        }
     });
 }
