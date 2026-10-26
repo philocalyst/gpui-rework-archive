@@ -83,7 +83,7 @@ impl Facets {
         })
     }
 }
-#[derive(Clone, Copy, Debug, PartialEq, Eq, PartialOrd, Ord)]
+#[derive(Clone, Copy, Debug, PartialEq, Eq, PartialOrd, Ord, Hash)]
 pub enum Phase { WidthConstraint, HeightConstraint, BoxConstraint, Realize, Shape, TextLayout, Measure, Layout, Placement, Clip, Primitive, Material, Raster, Hit, Semantics }
 impl Phase {
     pub const fn downstream(self) -> &'static [Self] {
@@ -218,7 +218,7 @@ impl PreparedChanges<'_> {
     }
 }
 
-#[derive(Clone, Copy, Debug, PartialEq, Eq, PartialOrd, Ord)]
+#[derive(Clone, Copy, Debug, PartialEq, Eq, PartialOrd, Ord, Hash)]
 pub struct Artifact { pub site: SiteId, pub phase: Phase }
 #[derive(Clone, Copy, Debug, PartialEq, Eq, PartialOrd, Ord)]
 pub struct GroupId { pub snapshot: SceneRevision, pub first_draw: u32 }
