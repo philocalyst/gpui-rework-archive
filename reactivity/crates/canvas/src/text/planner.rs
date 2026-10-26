@@ -102,11 +102,13 @@ impl<'font> Planner<'font> {
     }
     fn register(&mut self, slot: usize) -> Result<(), Error> {
         #[cfg(not(feature = "retained-text"))]
-        self.blob_ids[slot] = Some(register_font(
-            &mut self.fonts,
-            self.faces.face(slot)?,
-            FAMILIES[slot],
-        )?);
+        {
+            self.blob_ids[slot] = Some(register_font(
+                &mut self.fonts,
+                self.faces.face(slot)?,
+                FAMILIES[slot],
+            )?);
+        }
         #[cfg(feature = "retained-text")]
         {
             // Capture this EXACT original wrapper before Blob::new; never
