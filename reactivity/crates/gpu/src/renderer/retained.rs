@@ -253,7 +253,7 @@ impl Backing {
     ) -> Output<'a> {
         Output {
             view: &self.view,
-            damage,
+            damage: damage.map(|_| DamageRegion::default()),
             present: Some((self, target)),
         }
     }
