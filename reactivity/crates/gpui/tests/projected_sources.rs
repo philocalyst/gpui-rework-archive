@@ -1,0 +1,417 @@
+//! Ordinary public operations share one nested declaration, not root wrappers.
+use gpui::{
+    BindError, Completion, Error, QuestionInputs, Questions, SetError, SourcePath, StartError,
+    WindowOptions, prelude::*,
+};
+use std::{convert::Infallible, mem::size_of_val, sync::mpsc};
+struct Leaf {
+    value: Signal<String>,
+    other: Signal<String>,
+}
+impl Leaf {
+    const VALUE: Source<Self, String> =
+        Source::new(FieldId::new(1), "value", |m| &m.value, |m| &mut m.value);
+    fn new(value: &str) -> Self {
+        Self {
+            value: Signal::new(value.into()),
+            other: Signal::new("other".into()),
+        }
+    }
+}
+impl View for Leaf {
+    fn sources() -> Sources<Self> {
+        Sources::new().direct(Self::VALUE)
+    }
+    fn view(&self) -> El<'_> {
+        text(&self.value).w(140).h(40)
+    }
+}
+struct Panel {
+    leaf: Leaf,
+}
+impl Panel {
+    const LEAF: Component<Self, Leaf> =
+        Component::new(FieldId::new(1), "leaf", |m| &m.leaf, |m| &mut m.leaf);
+}
+impl View for Panel {
+    fn sources() -> Sources<Self> {
+        Sources::new().direct_component(Self::LEAF)
+    }
+    fn view(&self) -> El<'_> {
+        Self::LEAF.view(self)
+    }
+}
+struct Page {
+    left: Panel,
+    right: Panel,
+}
+impl Page {
+    const LEFT: Component<Self, Panel> =
+        Component::new(FieldId::new(1), "left", |m| &m.left, |m| &mut m.left);
+    const RIGHT: Component<Self, Panel> =
+        Component::new(FieldId::new(2), "right", |m| &m.right, |m| &mut m.right);
+    fn new() -> Self {
+        Self {
+            left: Panel {
+                leaf: Leaf::new("left"),
+            },
+            right: Panel {
+                leaf: Leaf::new("right"),
+            },
+        }
+    }
+}
+impl View for Page {
+    fn sources() -> Sources<Self> {
+        Sources::new()
+            .direct_component(Self::LEFT)
+            .direct_component(Self::RIGHT)
+    }
+    fn view(&self) -> El<'_> {
+        column((
+            Self::LEFT.view(self),
+            Self::RIGHT.view(self),
+            button("Bump left").on_click(
+                Self::LEFT
+                    .source(Panel::LEAF.source(&Leaf::VALUE))
+                    .update(|value| value.push('!')),
+            ),
+        ))
+    }
+}
+#[test]
+fn repeated_child_schemas_read_set_and_action_have_distinct_exact_grains() {
+    let mut win = Win::with_size(Page::new(), 300, 180).unwrap();
+    let left = Page::LEFT.source(Panel::LEAF.source(&Leaf::VALUE));
+    let right = Page::RIGHT.source(Panel::LEAF.source(&Leaf::VALUE));
+    assert_eq!(win.read(left).unwrap(), "left");
+    assert_eq!(win.read(right).unwrap(), "right");
+    win.reset_counters().unwrap();
+    win.set(left, "changed".into()).unwrap();
+    win.activate(win.button("Bump left")).unwrap();
+    assert_eq!(win.read(left).unwrap(), "changed!");
+    assert_eq!(win.read(right).unwrap(), "right");
+    assert_eq!(win.counters().owner_reruns, 0);
+    assert_eq!(win.counters().descriptions, 0);
+    assert_eq!(win.counters().exact_updates, 2);
+}
+#[test]
+fn path_storage_borrows_only_declarations_and_adds_no_owner_header() {
+    let path = Page::LEFT.source(Panel::LEAF.source(&Leaf::VALUE));
+    assert_eq!(size_of_val(&Leaf::VALUE), 40);
+    assert_eq!(size_of_val(&Panel::LEAF.source(&Leaf::VALUE)), 16);
+    assert_eq!(size_of_val(&path), 24);
+    assert_eq!(std::mem::size_of::<Win<Page>>(), 8);
+    assert_eq!(std::mem::size_of::<Option<Win<Page>>>(), 16);
+}
+#[test]
+fn mismatched_registered_component_read_and_exclusive_projectors_reject_before_transfer() {
+    let mut win = Win::with_size(Page::new(), 300, 180).unwrap();
+    let wrong_read = Component::new(
+        Page::LEFT.id(),
+        "left",
+        |m: &Page| &m.right,
+        |m| &mut m.right,
+    );
+    let path = wrong_read.source(Panel::LEAF.source(&Leaf::VALUE));
+    assert!(matches!(
+        win.read(path),
+        Err(Error::Binding(BindError::ComponentProjectionMismatch(_)))
+    ));
+    let wrong_write = Component::new(
+        Page::LEFT.id(),
+        "left",
+        |m: &Page| &m.left,
+        |m| &mut m.right,
+    );
+    let path = wrong_write.source(Panel::LEAF.source(&Leaf::VALUE));
+    assert!(
+        matches!(win.set(path, "untouched".into()), Err(SetError::Rejected { value, .. }) if value=="untouched")
+    );
+    assert_eq!(
+        win.read(Page::LEFT.source(Panel::LEAF.source(&Leaf::VALUE)))
+            .unwrap(),
+        "left"
+    );
+    assert_eq!(
+        win.read(Page::RIGHT.source(Panel::LEAF.source(&Leaf::VALUE)))
+            .unwrap(),
+        "right"
+    );
+    assert_eq!(win.counters().source_operations, 0);
+}
+#[test]
+fn leaf_projector_mismatches_do_not_change_either_signal() {
+    let mut win = Win::with_size(Page::new(), 300, 180).unwrap();
+    let wrong_read = Source::new(
+        Leaf::VALUE.id(),
+        "value",
+        |m: &Leaf| &m.other,
+        |m| &mut m.other,
+    );
+    assert!(
+        win.read(Page::LEFT.source(Panel::LEAF.source(&wrong_read)))
+            .is_err()
+    );
+    let wrong_write = Source::new(
+        Leaf::VALUE.id(),
+        "value",
+        |m: &Leaf| &m.value,
+        |m| &mut m.other,
+    );
+    assert!(
+        matches!(win.set(Page::LEFT.source(Panel::LEAF.source(&wrong_write)), "untouched".into()), Err(SetError::Rejected { value, .. }) if value=="untouched")
+    );
+    assert_eq!(&**win.root().unwrap().left.leaf.value, "left");
+    assert_eq!(&**win.root().unwrap().left.leaf.other, "other");
+}
+#[test]
+fn failed_nested_edit_retains_exact_candidate_ack_and_logical_read_then_repairs() {
+    let mut win = Win::recording(
+        Page::new(),
+        WindowOptions {
+            size: [300, 180],
+            ..Default::default()
+        },
+    )
+    .unwrap();
+    let initial = win.with_scene(|_, token| token).unwrap();
+    win.presented(initial).unwrap();
+    let left = Page::LEFT.source(Panel::LEAF.source(&Leaf::VALUE));
+    win.set(left, "complete".into()).unwrap();
+    let candidate = win.with_scene(|_, token| token).unwrap();
+    assert!(matches!(
+        win.set(left, "bad🚀".into()),
+        Err(SetError::Committed { .. })
+    ));
+    assert_eq!(win.read(left).unwrap(), "bad🚀");
+    assert_eq!(win.with_scene(|_, token| token).unwrap(), candidate);
+    win.presented(candidate).unwrap();
+    assert!(win.contains_text("complete").unwrap());
+    win.set(left, "repaired".into()).unwrap();
+    let repaired = win.with_scene(|_, token| token).unwrap();
+    win.presented(repaired).unwrap();
+    assert!(win.contains_text("repaired").unwrap());
+    win.close();
+    assert!(matches!(win.read(left), Err(Error::Closed)));
+}
+struct QuestionPage {
+    page: Page,
+}
+impl QuestionPage {
+    const PAGE: Component<Self, Page> =
+        Component::new(FieldId::new(1), "page", |m| &m.page, |m| &mut m.page);
+}
+impl View for QuestionPage {
+    fn sources() -> Sources<Self> {
+        Sources::new().direct_component(Self::PAGE)
+    }
+    fn view(&self) -> El<'_> {
+        Self::PAGE.view(self)
+    }
+}
+#[test]
+fn question_inputs_qualify_mounted_scopes_before_filtering_edits() {
+    check_question_input(
+        QuestionPage::PAGE.source(Page::LEFT.source(Panel::LEAF.source(&Leaf::VALUE))),
+    );
+}
+#[test]
+fn borrowed_question_path_uses_the_same_scoped_admission_and_credit_protocol() {
+    let input =
+        &const { QuestionPage::PAGE.source(Page::LEFT.source(Panel::LEAF.source(&Leaf::VALUE))) };
+    check_question_input(input);
+}
+fn check_question_input<I>(left: I)
+where
+    I: SourcePath<QuestionPage, String> + Copy,
+    for<'a> I: QuestionInputs<QuestionPage, Borrowed<'a> = &'a String>,
+{
+    let right = QuestionPage::PAGE.source(Page::RIGHT.source(Panel::LEAF.source(&Leaf::VALUE)));
+    let (send, jobs) = mpsc::channel::<(String, Completion<String, Infallible>)>();
+    let (questions, answer) = Questions::new()
+        .question(left, Clone::clone, move |input, completion| {
+            send.send((input, completion))
+                .map_err(|_| StartError::Closed)
+        })
+        .unwrap();
+    let mut win = Win::with_questions(
+        QuestionPage { page: Page::new() },
+        questions,
+        WindowOptions {
+            size: [300, 180],
+            ..Default::default()
+        },
+    )
+    .unwrap();
+    let (first, lease) = jobs
+        .recv_timeout(std::time::Duration::from_secs(3))
+        .expect("mount must start the first question within 3s");
+    assert_eq!(first, "left");
+    lease.complete(Ok("answer".into())).unwrap();
+    win.deliver_ready(8).unwrap();
+    let field = win.question_info(answer).unwrap().input.unwrap().source();
+    assert_eq!(field.get(), Leaf::VALUE.id().get());
+    win.set(right, "peer".into()).unwrap();
+    assert!(
+        jobs.try_recv().is_err(),
+        "equal local IDs in a peer scope are not this input"
+    );
+    win.set(left, "new left".into()).unwrap();
+    let (next, lease) = jobs
+        .recv_timeout(std::time::Duration::from_secs(3))
+        .expect("changed input must start its question within 3s");
+    assert_eq!(next, "new left");
+    assert_eq!(
+        win.question_info(answer).unwrap().input.unwrap().source(),
+        field
+    );
+    win.set(left, "latest".into()).unwrap();
+    assert!(
+        lease.is_cancelled(),
+        "the old completion loses authority promptly"
+    );
+    assert!(
+        jobs.try_recv().is_err(),
+        "held completion credit blocks replacement start"
+    );
+    drop(lease);
+    win.deliver_ready(8).unwrap();
+    let (latest, _lease) = jobs
+        .recv_timeout(std::time::Duration::from_secs(3))
+        .expect("releasing completion credit must start the latest input within 3s");
+    assert_eq!(latest, "latest");
+}
+
+#[test]
+fn fabricated_question_path_is_rejected_at_mount_before_any_job_or_edit_filtering() {
+    const WRONG: Component<QuestionPage, Page> = Component::new(
+        QuestionPage::PAGE.id(),
+        "page",
+        |m| &m.page,
+        |m| &mut m.page,
+    );
+    // Same component and local field IDs, but the input claims a peer Signal.
+    const OTHER: Source<Leaf, String> =
+        Source::new(Leaf::VALUE.id(), "value", |m| &m.other, |m| &mut m.other);
+    let input = WRONG.source(Page::LEFT.source(Panel::LEAF.source(&OTHER)));
+    let (questions, _) = Questions::new()
+        .question(
+            input,
+            Clone::clone,
+            |_: String, _: Completion<String, Infallible>| -> Result<(), StartError> {
+                panic!("invalid input must fail before worker start")
+            },
+        )
+        .unwrap();
+    assert!(matches!(
+        Win::with_questions(
+            QuestionPage { page: Page::new() },
+            questions,
+            WindowOptions::default()
+        ),
+        Err(Error::Binding(BindError::ProjectionMismatch(_)))
+    ));
+}
+#[test]
+fn wrong_component_question_cannot_mount_a_different_scope_with_the_same_id() {
+    const WRONG: Component<Page, Panel> =
+        Component::new(Page::LEFT.id(), "left", |m| &m.right, |m| &mut m.right);
+    let input = WRONG.source(Panel::LEAF.source(&Leaf::VALUE));
+    let (questions, _) = Questions::new()
+        .question(
+            input,
+            Clone::clone,
+            |_: String, _: Completion<String, Infallible>| -> Result<(), StartError> {
+                panic!("invalid input must fail before worker start")
+            },
+        )
+        .unwrap();
+    assert!(matches!(
+        Win::with_questions(Page::new(), questions, WindowOptions::default()),
+        Err(Error::Binding(BindError::ComponentProjectionMismatch(_)))
+    ));
+}
+
+struct BadActionPage {
+    page: Page,
+}
+impl BadActionPage {
+    const PAGE: Component<Self, Page> =
+        Component::new(FieldId::new(1), "page", |m| &m.page, |m| &mut m.page);
+    const WRITE: Source<Leaf, String> =
+        Source::new(Leaf::VALUE.id(), "value", |m| &m.value, |m| &mut m.other);
+}
+impl View for BadActionPage {
+    fn sources() -> Sources<Self> {
+        Sources::new().direct_component(Self::PAGE)
+    }
+    fn view(&self) -> El<'_> {
+        column((
+            Self::PAGE.view(self),
+            button("Bad write").on_click(
+                Self::PAGE
+                    .source(Page::LEFT.source(Panel::LEAF.source(&Self::WRITE)))
+                    .update(|value| value.clear()),
+            ),
+        ))
+    }
+}
+#[test]
+fn action_checks_exclusive_leaf_projection_after_successful_mounted_read_admission() {
+    let mut win = Win::with_size(BadActionPage { page: Page::new() }, 300, 220).unwrap();
+    assert!(matches!(
+        win.activate(win.button("Bad write")),
+        Err(Error::Binding(BindError::ProjectionMismatch(_)))
+    ));
+    assert_eq!(&**win.root().unwrap().page.left.leaf.value, "left");
+    assert_eq!(&**win.root().unwrap().page.left.leaf.other, "other");
+    assert_eq!(win.counters().source_operations, 0);
+}
+
+fn finish_question(_: String, completion: Completion<(), Infallible>) -> Result<(), StartError> {
+    completion.complete(Ok(())).unwrap();
+    Ok(())
+}
+#[test]
+fn borrowed_question_declarations_reduce_actual_lane_storage_without_growing_versions() {
+    let (owned, _) = Questions::<Leaf>::new()
+        .question(Leaf::VALUE, Clone::clone, finish_question)
+        .unwrap();
+    let (borrowed, _) = Questions::<Leaf>::new()
+        .question(&Leaf::VALUE, Clone::clone, finish_question)
+        .unwrap();
+    assert_eq!(size_of_val(&owned) - size_of_val(&borrowed), 32);
+    let input =
+        &const { QuestionPage::PAGE.source(Page::LEFT.source(Panel::LEAF.source(&Leaf::VALUE))) };
+    let (owned_path, _) = Questions::<QuestionPage>::new()
+        .question(*input, Clone::clone, finish_question)
+        .unwrap();
+    let (borrowed_path, _) = Questions::<QuestionPage>::new()
+        .question(input, Clone::clone, finish_question)
+        .unwrap();
+    assert_eq!(size_of_val(&owned_path) - size_of_val(&borrowed_path), 24);
+    eprintln!(
+        "QUESTION_DECLARATIONS leafOwned={} leafBorrowed={} pathOwned={} pathBorrowed={}",
+        size_of_val(&owned),
+        size_of_val(&borrowed),
+        size_of_val(&owned_path),
+        size_of_val(&borrowed_path)
+    );
+}
+#[test]
+fn borrowed_pair_keeps_every_reflected_input_instead_of_using_single_source_default() {
+    const INPUTS: (&Source<Leaf, String>, &Source<Leaf, String>) = (&Leaf::VALUE, &Leaf::VALUE);
+    let (questions, answer) = Questions::new()
+        .question(&INPUTS, |(a, b)| format!("{a}{b}"), finish_question)
+        .unwrap();
+    let win = Win::with_questions(Leaf::new("seed"), questions, WindowOptions::default()).unwrap();
+    assert!(win.question_info(answer).unwrap().input.is_none());
+    let mut sources = Vec::new();
+    win.visit_question_inputs(answer, |input| match input {
+        gpui::QuestionInput::Source(version) => sources.push(version.source()),
+        gpui::QuestionInput::Reader { .. } => panic!("source pair must not invent Reader input"),
+    })
+    .unwrap();
+    assert_eq!(sources, [Leaf::VALUE.id(), Leaf::VALUE.id()]);
+}

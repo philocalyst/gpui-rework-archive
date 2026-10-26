@@ -1,0 +1,2983 @@
+{
+  "schema": "experimental-checkpoint-archive-v1",
+  "refs": [
+    {
+      "ref": "refs/heads/archive/damage-rework-2026-10-26/cloud/auxiliary/codex/cursor-read-v1/candidate",
+      "original_transport_ref": "refs/codex/cursor-read-v1/candidate",
+      "commit": "85348d926ca3f181429ccb5bd6c09ae219748ad4",
+      "group": "cloud/auxiliary",
+      "qualification": "ARCHIVAL source alias otherwise unreachable from canonical refs; unqualified control/source history preserved",
+      "transport_sha256": "c0353bf1f8fb821620d7539a17b49562e36a1c2a2cffcf783a3f6b35c55b5c7f"
+    },
+    {
+      "ref": "refs/heads/archive/damage-rework-2026-10-26/cloud/auxiliary/codex/cursor-read-v1/control",
+      "original_transport_ref": "refs/codex/cursor-read-v1/control",
+      "commit": "eb4cafcf3f5e0f8fdefbaccba94b7ba94a5cb9f8",
+      "group": "cloud/auxiliary",
+      "qualification": "ARCHIVAL source alias otherwise unreachable from canonical refs; unqualified control/source history preserved",
+      "transport_sha256": "c0353bf1f8fb821620d7539a17b49562e36a1c2a2cffcf783a3f6b35c55b5c7f"
+    },
+    {
+      "ref": "refs/heads/archive/damage-rework-2026-10-26/cloud/auxiliary/codex/required-inputs-v2/text-corrected-facade",
+      "original_transport_ref": "refs/codex/required-inputs-v2/text-corrected-facade",
+      "commit": "117213e6e68421beaed615973c7ff5833deab3fb",
+      "group": "cloud/auxiliary",
+      "qualification": "ARCHIVAL source alias otherwise unreachable from canonical refs; unqualified control/source history preserved",
+      "transport_sha256": "c0353bf1f8fb821620d7539a17b49562e36a1c2a2cffcf783a3f6b35c55b5c7f"
+    },
+    {
+      "ref": "refs/heads/archive/damage-rework-2026-10-26/cloud/auxiliary/codex/required-inputs-v2/text-mechanical",
+      "original_transport_ref": "refs/codex/required-inputs-v2/text-mechanical",
+      "commit": "09d0ee014abd694dab8e957e56183e3a74bb1a99",
+      "group": "cloud/auxiliary",
+      "qualification": "ARCHIVAL source alias otherwise unreachable from canonical refs; unqualified control/source history preserved",
+      "transport_sha256": "c0353bf1f8fb821620d7539a17b49562e36a1c2a2cffcf783a3f6b35c55b5c7f"
+    },
+    {
+      "ref": "refs/heads/archive/damage-rework-2026-10-26/cloud/auxiliary/codex/required-inputs-v2/text-original",
+      "original_transport_ref": "refs/codex/required-inputs-v2/text-original",
+      "commit": "3c5dd394324cab99991d6dea2cc2494d486135c8",
+      "group": "cloud/auxiliary",
+      "qualification": "ARCHIVAL source alias otherwise unreachable from canonical refs; unqualified control/source history preserved",
+      "transport_sha256": "c0353bf1f8fb821620d7539a17b49562e36a1c2a2cffcf783a3f6b35c55b5c7f"
+    },
+    {
+      "ref": "refs/heads/archive/damage-rework-2026-10-26/cloud/auxiliary/codex/shared-lowering-v1/candidate",
+      "original_transport_ref": "refs/codex/shared-lowering-v1/candidate",
+      "commit": "0ee218479a3fdef3e68985248c1c8278860eb8ac",
+      "group": "cloud/auxiliary",
+      "qualification": "ARCHIVAL source alias otherwise unreachable from canonical refs; unqualified control/source history preserved",
+      "transport_sha256": "c0353bf1f8fb821620d7539a17b49562e36a1c2a2cffcf783a3f6b35c55b5c7f"
+    },
+    {
+      "ref": "refs/heads/archive/damage-rework-2026-10-26/cloud/auxiliary/codex/shared-lowering-v1/control",
+      "original_transport_ref": "refs/codex/shared-lowering-v1/control",
+      "commit": "d71d7931d1b51ec00280607922c8bf702d1d6128",
+      "group": "cloud/auxiliary",
+      "qualification": "ARCHIVAL source alias otherwise unreachable from canonical refs; unqualified control/source history preserved",
+      "transport_sha256": "c0353bf1f8fb821620d7539a17b49562e36a1c2a2cffcf783a3f6b35c55b5c7f"
+    },
+    {
+      "ref": "refs/heads/archive/damage-rework-2026-10-26/cloud/auxiliary/codex/wrapping-resize-v1/stock-control-required-input",
+      "original_transport_ref": "refs/codex/wrapping-resize-v1/stock-control-required-input",
+      "commit": "b17d27dd19a451ccd300aab329f2ccccf574cd06",
+      "group": "cloud/auxiliary",
+      "qualification": "ARCHIVAL source alias otherwise unreachable from canonical refs; unqualified control/source history preserved",
+      "transport_sha256": "c0353bf1f8fb821620d7539a17b49562e36a1c2a2cffcf783a3f6b35c55b5c7f"
+    },
+    {
+      "ref": "refs/heads/archive/damage-rework-2026-10-26/cloud/auxiliary/codex/wrapping-resize-v1/stock-fixture-required-input",
+      "original_transport_ref": "refs/codex/wrapping-resize-v1/stock-fixture-required-input",
+      "commit": "48e0f92bf8c60fe6d97ff46b1458b096c30b87f5",
+      "group": "cloud/auxiliary",
+      "qualification": "ARCHIVAL source alias otherwise unreachable from canonical refs; unqualified control/source history preserved",
+      "transport_sha256": "c0353bf1f8fb821620d7539a17b49562e36a1c2a2cffcf783a3f6b35c55b5c7f"
+    },
+    {
+      "ref": "refs/heads/archive/damage-rework-2026-10-26/cloud/brief/checkpoint-cloud-20261026",
+      "original_transport_ref": "refs/heads/checkpoint-cloud-20261026",
+      "commit": "6c94b32ea789f71c25052cfc72e30afce9ab37e1",
+      "group": "cloud/brief",
+      "qualification": "ARCHIVAL; consult source-specific HOST-RESULTS and bundle status inventory; never inherited as selected-source qualification",
+      "transport_sha256": "74b06e2a6bcd2402002271432fdc5b3ed4da4aea4e76150b0d5990daea01bb5d"
+    },
+    {
+      "ref": "refs/heads/archive/damage-rework-2026-10-26/cloud/checkpoints/20261026/baseline-1b0eee3b9252",
+      "original_transport_ref": "refs/checkpoints/20261026/baseline-1b0eee3b9252",
+      "commit": "1b0eee3b9252b6647f13be63477cb158d21c04c8",
+      "group": "cloud",
+      "qualification": "ARCHIVAL; consult source-specific HOST-RESULTS and bundle status inventory; never inherited as selected-source qualification",
+      "transport_sha256": "c0353bf1f8fb821620d7539a17b49562e36a1c2a2cffcf783a3f6b35c55b5c7f"
+    },
+    {
+      "ref": "refs/heads/archive/damage-rework-2026-10-26/cloud/checkpoints/20261026/borrowed-read-872a5be88247",
+      "original_transport_ref": "refs/checkpoints/20261026/borrowed-read-872a5be88247",
+      "commit": "872a5be882475cdb7b5ffb9d313f1aede42321ec",
+      "group": "cloud",
+      "qualification": "ARCHIVAL; consult source-specific HOST-RESULTS and bundle status inventory; never inherited as selected-source qualification",
+      "transport_sha256": "c0353bf1f8fb821620d7539a17b49562e36a1c2a2cffcf783a3f6b35c55b5c7f"
+    },
+    {
+      "ref": "refs/heads/archive/damage-rework-2026-10-26/cloud/checkpoints/20261026/candidate-7c548a90d1d5",
+      "original_transport_ref": "refs/checkpoints/20261026/candidate-7c548a90d1d5",
+      "commit": "7c548a90d1d50ea8de0166ca0031f7cf53b9ee37",
+      "group": "cloud",
+      "qualification": "ARCHIVAL; consult source-specific HOST-RESULTS and bundle status inventory; never inherited as selected-source qualification",
+      "transport_sha256": "c0353bf1f8fb821620d7539a17b49562e36a1c2a2cffcf783a3f6b35c55b5c7f"
+    },
+    {
+      "ref": "refs/heads/archive/damage-rework-2026-10-26/cloud/checkpoints/20261026/canonical-text-prerequisite-fa95e5ca92b2",
+      "original_transport_ref": "refs/checkpoints/20261026/canonical-text-prerequisite-fa95e5ca92b2",
+      "commit": "fa95e5ca92b26a56aff983cdf785577875e92573",
+      "group": "cloud",
+      "qualification": "ARCHIVAL; consult source-specific HOST-RESULTS and bundle status inventory; never inherited as selected-source qualification",
+      "transport_sha256": "c0353bf1f8fb821620d7539a17b49562e36a1c2a2cffcf783a3f6b35c55b5c7f"
+    },
+    {
+      "ref": "refs/heads/archive/damage-rework-2026-10-26/cloud/checkpoints/20261026/capacity-diagnostic-b4906a5c8767",
+      "original_transport_ref": "refs/checkpoints/20261026/capacity-diagnostic-b4906a5c8767",
+      "commit": "b4906a5c87673dacb0f1fe812a95ea0a66789678",
+      "group": "cloud",
+      "qualification": "ARCHIVAL; consult source-specific HOST-RESULTS and bundle status inventory; never inherited as selected-source qualification",
+      "transport_sha256": "c0353bf1f8fb821620d7539a17b49562e36a1c2a2cffcf783a3f6b35c55b5c7f"
+    },
+    {
+      "ref": "refs/heads/archive/damage-rework-2026-10-26/cloud/checkpoints/20261026/changed-slots-worktree-f00c493caaf6",
+      "original_transport_ref": "refs/checkpoints/20261026/changed-slots-worktree-f00c493caaf6",
+      "commit": "f00c493caaf64f6b23671ed413550d5416f1a783",
+      "group": "cloud",
+      "qualification": "ARCHIVAL; consult source-specific HOST-RESULTS and bundle status inventory; never inherited as selected-source qualification",
+      "transport_sha256": "c0353bf1f8fb821620d7539a17b49562e36a1c2a2cffcf783a3f6b35c55b5c7f"
+    },
+    {
+      "ref": "refs/heads/archive/damage-rework-2026-10-26/cloud/checkpoints/20261026/composed-source-099e2bb5e543",
+      "original_transport_ref": "refs/checkpoints/20261026/composed-source-099e2bb5e543",
+      "commit": "099e2bb5e543594fcab7ed44b532cdd234f9dd34",
+      "group": "cloud",
+      "qualification": "ARCHIVAL; consult source-specific HOST-RESULTS and bundle status inventory; never inherited as selected-source qualification",
+      "transport_sha256": "c0353bf1f8fb821620d7539a17b49562e36a1c2a2cffcf783a3f6b35c55b5c7f"
+    },
+    {
+      "ref": "refs/heads/archive/damage-rework-2026-10-26/cloud/checkpoints/20261026/cursor-read-27098e3f53ec",
+      "original_transport_ref": "refs/checkpoints/20261026/cursor-read-27098e3f53ec",
+      "commit": "27098e3f53ecc1b71879f567052fd4900beddcc6",
+      "group": "cloud",
+      "qualification": "ARCHIVAL; consult source-specific HOST-RESULTS and bundle status inventory; never inherited as selected-source qualification",
+      "transport_sha256": "c0353bf1f8fb821620d7539a17b49562e36a1c2a2cffcf783a3f6b35c55b5c7f"
+    },
+    {
+      "ref": "refs/heads/archive/damage-rework-2026-10-26/cloud/checkpoints/20261026/edit-turn-fc02349c9eb0",
+      "original_transport_ref": "refs/checkpoints/20261026/edit-turn-fc02349c9eb0",
+      "commit": "fc02349c9eb0259f0ca76dfb697ea8c8fda07aff",
+      "group": "cloud",
+      "qualification": "ARCHIVAL; consult source-specific HOST-RESULTS and bundle status inventory; never inherited as selected-source qualification",
+      "transport_sha256": "c0353bf1f8fb821620d7539a17b49562e36a1c2a2cffcf783a3f6b35c55b5c7f"
+    },
+    {
+      "ref": "refs/heads/archive/damage-rework-2026-10-26/cloud/checkpoints/20261026/endpoint-candidate-bc408f97537e",
+      "original_transport_ref": "refs/checkpoints/20261026/endpoint-candidate-bc408f97537e",
+      "commit": "bc408f97537e5450edba8c83083448ed2cd6da04",
+      "group": "cloud",
+      "qualification": "ARCHIVAL; consult source-specific HOST-RESULTS and bundle status inventory; never inherited as selected-source qualification",
+      "transport_sha256": "c0353bf1f8fb821620d7539a17b49562e36a1c2a2cffcf783a3f6b35c55b5c7f"
+    },
+    {
+      "ref": "refs/heads/archive/damage-rework-2026-10-26/cloud/checkpoints/20261026/facade-corrected-17d5ac1fc7f9",
+      "original_transport_ref": "refs/checkpoints/20261026/facade-corrected-17d5ac1fc7f9",
+      "commit": "17d5ac1fc7f9eb630ed52cb787093ea93b1491e6",
+      "group": "cloud",
+      "qualification": "ARCHIVAL; consult source-specific HOST-RESULTS and bundle status inventory; never inherited as selected-source qualification",
+      "transport_sha256": "c0353bf1f8fb821620d7539a17b49562e36a1c2a2cffcf783a3f6b35c55b5c7f"
+    },
+    {
+      "ref": "refs/heads/archive/damage-rework-2026-10-26/cloud/checkpoints/20261026/icb-adapter-b1147697c9fa",
+      "original_transport_ref": "refs/checkpoints/20261026/icb-adapter-b1147697c9fa",
+      "commit": "b1147697c9fa088d5590b4983be6b2f32e93c8aa",
+      "group": "cloud",
+      "qualification": "ARCHIVAL; consult source-specific HOST-RESULTS and bundle status inventory; never inherited as selected-source qualification",
+      "transport_sha256": "c0353bf1f8fb821620d7539a17b49562e36a1c2a2cffcf783a3f6b35c55b5c7f"
+    },
+    {
+      "ref": "refs/heads/archive/damage-rework-2026-10-26/cloud/checkpoints/20261026/immutable-view-b80dcc8c6cf4",
+      "original_transport_ref": "refs/checkpoints/20261026/immutable-view-b80dcc8c6cf4",
+      "commit": "b80dcc8c6cf4015257034637ae5742e5f75a772f",
+      "group": "cloud",
+      "qualification": "ARCHIVAL; consult source-specific HOST-RESULTS and bundle status inventory; never inherited as selected-source qualification",
+      "transport_sha256": "c0353bf1f8fb821620d7539a17b49562e36a1c2a2cffcf783a3f6b35c55b5c7f"
+    },
+    {
+      "ref": "refs/heads/archive/damage-rework-2026-10-26/cloud/checkpoints/20261026/layout-certificate-5baed181b36e",
+      "original_transport_ref": "refs/checkpoints/20261026/layout-certificate-5baed181b36e",
+      "commit": "5baed181b36eeceed8b09c66664333e30047303f",
+      "group": "cloud",
+      "qualification": "ARCHIVAL; consult source-specific HOST-RESULTS and bundle status inventory; never inherited as selected-source qualification",
+      "transport_sha256": "c0353bf1f8fb821620d7539a17b49562e36a1c2a2cffcf783a3f6b35c55b5c7f"
+    },
+    {
+      "ref": "refs/heads/archive/damage-rework-2026-10-26/cloud/checkpoints/20261026/multi-slot-source-5d6e60bb2022",
+      "original_transport_ref": "refs/checkpoints/20261026/multi-slot-source-5d6e60bb2022",
+      "commit": "5d6e60bb202201493fb5255be8864f93ca949abe",
+      "group": "cloud",
+      "qualification": "ARCHIVAL; consult source-specific HOST-RESULTS and bundle status inventory; never inherited as selected-source qualification",
+      "transport_sha256": "c0353bf1f8fb821620d7539a17b49562e36a1c2a2cffcf783a3f6b35c55b5c7f"
+    },
+    {
+      "ref": "refs/heads/archive/damage-rework-2026-10-26/cloud/checkpoints/20261026/native-id-boundary-9279566ee7b8",
+      "original_transport_ref": "refs/checkpoints/20261026/native-id-boundary-9279566ee7b8",
+      "commit": "9279566ee7b8eb04c95fbf8c62a0906da1ff144a",
+      "group": "cloud",
+      "qualification": "ARCHIVAL; consult source-specific HOST-RESULTS and bundle status inventory; never inherited as selected-source qualification",
+      "transport_sha256": "c0353bf1f8fb821620d7539a17b49562e36a1c2a2cffcf783a3f6b35c55b5c7f"
+    },
+    {
+      "ref": "refs/heads/archive/damage-rework-2026-10-26/cloud/checkpoints/20261026/outcome-candidate-b4d7f0e37b82",
+      "original_transport_ref": "refs/checkpoints/20261026/outcome-candidate-b4d7f0e37b82",
+      "commit": "b4d7f0e37b82e80b279c632979c1ecce762c53dc",
+      "group": "cloud",
+      "qualification": "ARCHIVAL; consult source-specific HOST-RESULTS and bundle status inventory; never inherited as selected-source qualification",
+      "transport_sha256": "c0353bf1f8fb821620d7539a17b49562e36a1c2a2cffcf783a3f6b35c55b5c7f"
+    },
+    {
+      "ref": "refs/heads/archive/damage-rework-2026-10-26/cloud/checkpoints/20261026/paint-admission-ad3226830661",
+      "original_transport_ref": "refs/checkpoints/20261026/paint-admission-ad3226830661",
+      "commit": "ad32268306615dbd10719384aa653546d3711713",
+      "group": "cloud",
+      "qualification": "ARCHIVAL; consult source-specific HOST-RESULTS and bundle status inventory; never inherited as selected-source qualification",
+      "transport_sha256": "c0353bf1f8fb821620d7539a17b49562e36a1c2a2cffcf783a3f6b35c55b5c7f"
+    },
+    {
+      "ref": "refs/heads/archive/damage-rework-2026-10-26/cloud/checkpoints/20261026/raw-target-worktree-b81a4099ad89",
+      "original_transport_ref": "refs/checkpoints/20261026/raw-target-worktree-b81a4099ad89",
+      "commit": "b81a4099ad89c1bd0ca457b22c02a4396aaff60e",
+      "group": "cloud",
+      "qualification": "ARCHIVAL; consult source-specific HOST-RESULTS and bundle status inventory; never inherited as selected-source qualification",
+      "transport_sha256": "c0353bf1f8fb821620d7539a17b49562e36a1c2a2cffcf783a3f6b35c55b5c7f"
+    },
+    {
+      "ref": "refs/heads/archive/damage-rework-2026-10-26/cloud/checkpoints/20261026/resource-ledger-7bb859f60242",
+      "original_transport_ref": "refs/checkpoints/20261026/resource-ledger-7bb859f60242",
+      "commit": "7bb859f6024294137ebfe501808b8e015be9f204",
+      "group": "cloud",
+      "qualification": "ARCHIVAL; consult source-specific HOST-RESULTS and bundle status inventory; never inherited as selected-source qualification",
+      "transport_sha256": "c0353bf1f8fb821620d7539a17b49562e36a1c2a2cffcf783a3f6b35c55b5c7f"
+    },
+    {
+      "ref": "refs/heads/archive/damage-rework-2026-10-26/cloud/checkpoints/20261026/resource-ledger-origin-4d19575b4228",
+      "original_transport_ref": "refs/checkpoints/20261026/resource-ledger-origin-4d19575b4228",
+      "commit": "4d19575b422801434bb8497d55f532c2b0c28192",
+      "group": "cloud",
+      "qualification": "ARCHIVAL; consult source-specific HOST-RESULTS and bundle status inventory; never inherited as selected-source qualification",
+      "transport_sha256": "c0353bf1f8fb821620d7539a17b49562e36a1c2a2cffcf783a3f6b35c55b5c7f"
+    },
+    {
+      "ref": "refs/heads/archive/damage-rework-2026-10-26/cloud/checkpoints/20261026/retained-target-worktree-1f966374fc16",
+      "original_transport_ref": "refs/checkpoints/20261026/retained-target-worktree-1f966374fc16",
+      "commit": "1f966374fc169897dec8be5aa5c08b5b65b1325b",
+      "group": "cloud",
+      "qualification": "ARCHIVAL; consult source-specific HOST-RESULTS and bundle status inventory; never inherited as selected-source qualification",
+      "transport_sha256": "c0353bf1f8fb821620d7539a17b49562e36a1c2a2cffcf783a3f6b35c55b5c7f"
+    },
+    {
+      "ref": "refs/heads/archive/damage-rework-2026-10-26/cloud/checkpoints/20261026/retained-topology-d4096fd2590a",
+      "original_transport_ref": "refs/checkpoints/20261026/retained-topology-d4096fd2590a",
+      "commit": "d4096fd2590a26c9f073b758643a0333e48bf824",
+      "group": "cloud",
+      "qualification": "ARCHIVAL; consult source-specific HOST-RESULTS and bundle status inventory; never inherited as selected-source qualification",
+      "transport_sha256": "c0353bf1f8fb821620d7539a17b49562e36a1c2a2cffcf783a3f6b35c55b5c7f"
+    },
+    {
+      "ref": "refs/heads/archive/damage-rework-2026-10-26/cloud/checkpoints/20261026/reuse-seam-30f5dc8182c5",
+      "original_transport_ref": "refs/checkpoints/20261026/reuse-seam-30f5dc8182c5",
+      "commit": "30f5dc8182c53b7916849b08226fa8314d6a0f0a",
+      "group": "cloud",
+      "qualification": "ARCHIVAL; consult source-specific HOST-RESULTS and bundle status inventory; never inherited as selected-source qualification",
+      "transport_sha256": "c0353bf1f8fb821620d7539a17b49562e36a1c2a2cffcf783a3f6b35c55b5c7f"
+    },
+    {
+      "ref": "refs/heads/archive/damage-rework-2026-10-26/cloud/checkpoints/20261026/shape-resource-a8f92cc44547",
+      "original_transport_ref": "refs/checkpoints/20261026/shape-resource-a8f92cc44547",
+      "commit": "a8f92cc4454776c2de94309e34637aadf60eec1d",
+      "group": "cloud",
+      "qualification": "ARCHIVAL; consult source-specific HOST-RESULTS and bundle status inventory; never inherited as selected-source qualification",
+      "transport_sha256": "c0353bf1f8fb821620d7539a17b49562e36a1c2a2cffcf783a3f6b35c55b5c7f"
+    },
+    {
+      "ref": "refs/heads/archive/damage-rework-2026-10-26/cloud/checkpoints/20261026/shared-lowering-88d4c8052187",
+      "original_transport_ref": "refs/checkpoints/20261026/shared-lowering-88d4c8052187",
+      "commit": "88d4c8052187c7a73f3351da6b2466391f59d281",
+      "group": "cloud",
+      "qualification": "ARCHIVAL; consult source-specific HOST-RESULTS and bundle status inventory; never inherited as selected-source qualification",
+      "transport_sha256": "c0353bf1f8fb821620d7539a17b49562e36a1c2a2cffcf783a3f6b35c55b5c7f"
+    },
+    {
+      "ref": "refs/heads/archive/damage-rework-2026-10-26/cloud/checkpoints/20261026/source-71cc8a53da32",
+      "original_transport_ref": "refs/checkpoints/20261026/source-71cc8a53da32",
+      "commit": "71cc8a53da32a3bc63ffe0c2bd08e50886137a1d",
+      "group": "cloud",
+      "qualification": "ARCHIVAL; consult source-specific HOST-RESULTS and bundle status inventory; never inherited as selected-source qualification",
+      "transport_sha256": "c0353bf1f8fb821620d7539a17b49562e36a1c2a2cffcf783a3f6b35c55b5c7f"
+    },
+    {
+      "ref": "refs/heads/archive/damage-rework-2026-10-26/cloud/checkpoints/20261026/staged-candidate-f72dfdcdc9ad",
+      "original_transport_ref": "refs/checkpoints/20261026/staged-candidate-f72dfdcdc9ad",
+      "commit": "f72dfdcdc9adaf5f9c63719158d3b0a5cbc531cf",
+      "group": "cloud",
+      "qualification": "ARCHIVAL; consult source-specific HOST-RESULTS and bundle status inventory; never inherited as selected-source qualification",
+      "transport_sha256": "c0353bf1f8fb821620d7539a17b49562e36a1c2a2cffcf783a3f6b35c55b5c7f"
+    },
+    {
+      "ref": "refs/heads/archive/damage-rework-2026-10-26/cloud/checkpoints/20261026/stock-fixture-a47bad473ed4",
+      "original_transport_ref": "refs/checkpoints/20261026/stock-fixture-a47bad473ed4",
+      "commit": "a47bad473ed426a5e63393c12d0d1632f98bd524",
+      "group": "cloud",
+      "qualification": "ARCHIVAL; consult source-specific HOST-RESULTS and bundle status inventory; never inherited as selected-source qualification",
+      "transport_sha256": "c0353bf1f8fb821620d7539a17b49562e36a1c2a2cffcf783a3f6b35c55b5c7f"
+    },
+    {
+      "ref": "refs/heads/archive/damage-rework-2026-10-26/cloud/checkpoints/20261026/text-default-cfg-fix-e1e9c0d49006",
+      "original_transport_ref": "refs/checkpoints/20261026/text-default-cfg-fix-e1e9c0d49006",
+      "commit": "e1e9c0d490063b16e585a23486f8447520b035e9",
+      "group": "cloud",
+      "qualification": "ARCHIVAL; consult source-specific HOST-RESULTS and bundle status inventory; never inherited as selected-source qualification",
+      "transport_sha256": "c0353bf1f8fb821620d7539a17b49562e36a1c2a2cffcf783a3f6b35c55b5c7f"
+    },
+    {
+      "ref": "refs/heads/archive/damage-rework-2026-10-26/cloud/checkpoints/20261026/text-hook-e257-4347f6baa168",
+      "original_transport_ref": "refs/checkpoints/20261026/text-hook-e257-4347f6baa168",
+      "commit": "4347f6baa168659fc46e41a5c8329c51b9f3d0d6",
+      "group": "cloud",
+      "qualification": "ARCHIVAL; consult source-specific HOST-RESULTS and bundle status inventory; never inherited as selected-source qualification",
+      "transport_sha256": "c0353bf1f8fb821620d7539a17b49562e36a1c2a2cffcf783a3f6b35c55b5c7f"
+    },
+    {
+      "ref": "refs/heads/archive/damage-rework-2026-10-26/cloud/checkpoints/20261026/text-retirement-integration-0113e501c8ee",
+      "original_transport_ref": "refs/checkpoints/20261026/text-retirement-integration-0113e501c8ee",
+      "commit": "0113e501c8ee82ae9d4749413c5f42129da79db4",
+      "group": "cloud",
+      "qualification": "ARCHIVAL; consult source-specific HOST-RESULTS and bundle status inventory; never inherited as selected-source qualification",
+      "transport_sha256": "c0353bf1f8fb821620d7539a17b49562e36a1c2a2cffcf783a3f6b35c55b5c7f"
+    },
+    {
+      "ref": "refs/heads/archive/damage-rework-2026-10-26/cloud/checkpoints/20261026/utf8-backing-b582e6a296dd",
+      "original_transport_ref": "refs/checkpoints/20261026/utf8-backing-b582e6a296dd",
+      "commit": "b582e6a296dd28c5543fc1acccec2f66aad9ea86",
+      "group": "cloud",
+      "qualification": "ARCHIVAL; consult source-specific HOST-RESULTS and bundle status inventory; never inherited as selected-source qualification",
+      "transport_sha256": "c0353bf1f8fb821620d7539a17b49562e36a1c2a2cffcf783a3f6b35c55b5c7f"
+    },
+    {
+      "ref": "refs/heads/archive/damage-rework-2026-10-26/cloud/checkpoints/20261026/utf8-corrected-11d-481db61b6546",
+      "original_transport_ref": "refs/checkpoints/20261026/utf8-corrected-11d-481db61b6546",
+      "commit": "481db61b654608fc81a9f767c3c0d439a35c8fb4",
+      "group": "cloud",
+      "qualification": "ARCHIVAL; consult source-specific HOST-RESULTS and bundle status inventory; never inherited as selected-source qualification",
+      "transport_sha256": "c0353bf1f8fb821620d7539a17b49562e36a1c2a2cffcf783a3f6b35c55b5c7f"
+    },
+    {
+      "ref": "refs/heads/archive/damage-rework-2026-10-26/cloud/checkpoints/20261026/width-storage-a727080c89d1",
+      "original_transport_ref": "refs/checkpoints/20261026/width-storage-a727080c89d1",
+      "commit": "a727080c89d15b54478a80440a229520d2a167a8",
+      "group": "cloud",
+      "qualification": "ARCHIVAL; consult source-specific HOST-RESULTS and bundle status inventory; never inherited as selected-source qualification",
+      "transport_sha256": "c0353bf1f8fb821620d7539a17b49562e36a1c2a2cffcf783a3f6b35c55b5c7f"
+    },
+    {
+      "ref": "refs/heads/archive/damage-rework-2026-10-26/cloud/heads/benchmark/common-baseline",
+      "original_transport_ref": "refs/heads/benchmark/common-baseline",
+      "commit": "7ac6f33898989d48fb1a6023966fea738f266ced",
+      "group": "cloud",
+      "qualification": "ARCHIVAL; consult source-specific HOST-RESULTS and bundle status inventory; never inherited as selected-source qualification",
+      "transport_sha256": "c0353bf1f8fb821620d7539a17b49562e36a1c2a2cffcf783a3f6b35c55b5c7f"
+    },
+    {
+      "ref": "refs/heads/archive/damage-rework-2026-10-26/cloud/heads/canonical-csr-end-offset",
+      "original_transport_ref": "refs/heads/canonical-csr-end-offset",
+      "commit": "5c458586ff7e7dd2bdfcb2dcea3f30447e7d7e1a",
+      "group": "cloud",
+      "qualification": "ARCHIVAL; consult source-specific HOST-RESULTS and bundle status inventory; never inherited as selected-source qualification",
+      "transport_sha256": "c0353bf1f8fb821620d7539a17b49562e36a1c2a2cffcf783a3f6b35c55b5c7f"
+    },
+    {
+      "ref": "refs/heads/archive/damage-rework-2026-10-26/cloud/heads/canonical-draw-geometry-corrected",
+      "original_transport_ref": "refs/heads/canonical-draw-geometry-corrected",
+      "commit": "14e3e6ed267838d8c150ec425f2421fbfca5b9a8",
+      "group": "cloud",
+      "qualification": "ARCHIVAL; consult source-specific HOST-RESULTS and bundle status inventory; never inherited as selected-source qualification",
+      "transport_sha256": "c0353bf1f8fb821620d7539a17b49562e36a1c2a2cffcf783a3f6b35c55b5c7f"
+    },
+    {
+      "ref": "refs/heads/archive/damage-rework-2026-10-26/cloud/heads/canonical-draw-geometry-extraction",
+      "original_transport_ref": "refs/heads/canonical-draw-geometry-extraction",
+      "commit": "cedf50fcab0384b273990df909641de84aaa8833",
+      "group": "cloud",
+      "qualification": "ARCHIVAL; consult source-specific HOST-RESULTS and bundle status inventory; never inherited as selected-source qualification",
+      "transport_sha256": "c0353bf1f8fb821620d7539a17b49562e36a1c2a2cffcf783a3f6b35c55b5c7f"
+    },
+    {
+      "ref": "refs/heads/archive/damage-rework-2026-10-26/cloud/heads/canonical-draw-geometry-integrated",
+      "original_transport_ref": "refs/heads/canonical-draw-geometry-integrated",
+      "commit": "f414f7e857ffd16ac7053ce63df2948b8900dd37",
+      "group": "cloud",
+      "qualification": "ARCHIVAL; consult source-specific HOST-RESULTS and bundle status inventory; never inherited as selected-source qualification",
+      "transport_sha256": "c0353bf1f8fb821620d7539a17b49562e36a1c2a2cffcf783a3f6b35c55b5c7f"
+    },
+    {
+      "ref": "refs/heads/archive/damage-rework-2026-10-26/cloud/heads/canonical-hard-full-fixture-correction",
+      "original_transport_ref": "refs/heads/canonical-hard-full-fixture-correction",
+      "commit": "539973331b2409adb746966d0bbcc778b9766f6e",
+      "group": "cloud",
+      "qualification": "ARCHIVAL; consult source-specific HOST-RESULTS and bundle status inventory; never inherited as selected-source qualification",
+      "transport_sha256": "c0353bf1f8fb821620d7539a17b49562e36a1c2a2cffcf783a3f6b35c55b5c7f"
+    },
+    {
+      "ref": "refs/heads/archive/damage-rework-2026-10-26/cloud/heads/canonical-material-fusion",
+      "original_transport_ref": "refs/heads/canonical-material-fusion",
+      "commit": "7bc59cf4ad61fbae562bb0f6651818698347b90c",
+      "group": "cloud",
+      "qualification": "ARCHIVAL; consult source-specific HOST-RESULTS and bundle status inventory; never inherited as selected-source qualification",
+      "transport_sha256": "c0353bf1f8fb821620d7539a17b49562e36a1c2a2cffcf783a3f6b35c55b5c7f"
+    },
+    {
+      "ref": "refs/heads/archive/damage-rework-2026-10-26/cloud/heads/canonical-material-fusion-composed",
+      "original_transport_ref": "refs/heads/canonical-material-fusion-composed",
+      "commit": "28dc3cb9597f799931fb8ce43ffc7586eecba21d",
+      "group": "cloud",
+      "qualification": "ARCHIVAL; consult source-specific HOST-RESULTS and bundle status inventory; never inherited as selected-source qualification",
+      "transport_sha256": "c0353bf1f8fb821620d7539a17b49562e36a1c2a2cffcf783a3f6b35c55b5c7f"
+    },
+    {
+      "ref": "refs/heads/archive/damage-rework-2026-10-26/cloud/heads/canonical-material-owner-index",
+      "original_transport_ref": "refs/heads/canonical-material-owner-index",
+      "commit": "41c5ee921d0dfa6abba7aca3f14f9cd8f24dfff7",
+      "group": "cloud",
+      "qualification": "ARCHIVAL; consult source-specific HOST-RESULTS and bundle status inventory; never inherited as selected-source qualification",
+      "transport_sha256": "c0353bf1f8fb821620d7539a17b49562e36a1c2a2cffcf783a3f6b35c55b5c7f"
+    },
+    {
+      "ref": "refs/heads/archive/damage-rework-2026-10-26/cloud/heads/canonical-next-rendering-packet",
+      "original_transport_ref": "refs/heads/canonical-next-rendering-packet",
+      "commit": "8ec1422e04a89a26dd381e152dbd3341f770a14c",
+      "group": "cloud",
+      "qualification": "ARCHIVAL; consult source-specific HOST-RESULTS and bundle status inventory; never inherited as selected-source qualification",
+      "transport_sha256": "c0353bf1f8fb821620d7539a17b49562e36a1c2a2cffcf783a3f6b35c55b5c7f"
+    },
+    {
+      "ref": "refs/heads/archive/damage-rework-2026-10-26/cloud/heads/canonical-ordered-rendering",
+      "original_transport_ref": "refs/heads/canonical-ordered-rendering",
+      "commit": "b02f3b90bc6edb7ffd377e9801142febb65f2981",
+      "group": "cloud",
+      "qualification": "ARCHIVAL; consult source-specific HOST-RESULTS and bundle status inventory; never inherited as selected-source qualification",
+      "transport_sha256": "c0353bf1f8fb821620d7539a17b49562e36a1c2a2cffcf783a3f6b35c55b5c7f"
+    },
+    {
+      "ref": "refs/heads/archive/damage-rework-2026-10-26/cloud/heads/canonical-publication-transition-tests",
+      "original_transport_ref": "refs/heads/canonical-publication-transition-tests",
+      "commit": "ee0ab00b4a23657e0bb407f47c4885d4388283f6",
+      "group": "cloud",
+      "qualification": "ARCHIVAL; consult source-specific HOST-RESULTS and bundle status inventory; never inherited as selected-source qualification",
+      "transport_sha256": "c0353bf1f8fb821620d7539a17b49562e36a1c2a2cffcf783a3f6b35c55b5c7f"
+    },
+    {
+      "ref": "refs/heads/archive/damage-rework-2026-10-26/cloud/heads/canonical-whole-owner-reuse",
+      "original_transport_ref": "refs/heads/canonical-whole-owner-reuse",
+      "commit": "bf52c3682d8e5bd2fc0ef3c5cb388a312d668ba6",
+      "group": "cloud",
+      "qualification": "ARCHIVAL; consult source-specific HOST-RESULTS and bundle status inventory; never inherited as selected-source qualification",
+      "transport_sha256": "c0353bf1f8fb821620d7539a17b49562e36a1c2a2cffcf783a3f6b35c55b5c7f"
+    },
+    {
+      "ref": "refs/heads/archive/damage-rework-2026-10-26/cloud/heads/canonical-whole-owner-reuse-586",
+      "original_transport_ref": "refs/heads/canonical-whole-owner-reuse-586",
+      "commit": "47ca43cf43304b5ecf3821b3a5c91e267dadc500",
+      "group": "cloud",
+      "qualification": "ARCHIVAL; consult source-specific HOST-RESULTS and bundle status inventory; never inherited as selected-source qualification",
+      "transport_sha256": "c0353bf1f8fb821620d7539a17b49562e36a1c2a2cffcf783a3f6b35c55b5c7f"
+    },
+    {
+      "ref": "refs/heads/archive/damage-rework-2026-10-26/cloud/heads/checkpoint-cloud-20261026",
+      "original_transport_ref": "refs/heads/checkpoint-cloud-20261026",
+      "commit": "ba16a0bb0c35bd54ba965a96419893292b84e8ff",
+      "group": "cloud",
+      "qualification": "ARCHIVAL; consult source-specific HOST-RESULTS and bundle status inventory; never inherited as selected-source qualification",
+      "transport_sha256": "c0353bf1f8fb821620d7539a17b49562e36a1c2a2cffcf783a3f6b35c55b5c7f"
+    },
+    {
+      "ref": "refs/heads/archive/damage-rework-2026-10-26/cloud/heads/cpu-checked-slot-output-cache",
+      "original_transport_ref": "refs/heads/cpu-checked-slot-output-cache",
+      "commit": "91cac8a804266368ce3baf6def7e18dbccee5244",
+      "group": "cloud",
+      "qualification": "ARCHIVAL; consult source-specific HOST-RESULTS and bundle status inventory; never inherited as selected-source qualification",
+      "transport_sha256": "c0353bf1f8fb821620d7539a17b49562e36a1c2a2cffcf783a3f6b35c55b5c7f"
+    },
+    {
+      "ref": "refs/heads/archive/damage-rework-2026-10-26/cloud/heads/cpu-clip-mask-control",
+      "original_transport_ref": "refs/heads/cpu-clip-mask-control",
+      "commit": "a4774e141edc9fa0be094ddcb80a771cccff11d8",
+      "group": "cloud",
+      "qualification": "ARCHIVAL; consult source-specific HOST-RESULTS and bundle status inventory; never inherited as selected-source qualification",
+      "transport_sha256": "c0353bf1f8fb821620d7539a17b49562e36a1c2a2cffcf783a3f6b35c55b5c7f"
+    },
+    {
+      "ref": "refs/heads/archive/damage-rework-2026-10-26/cloud/heads/cpu-clip-mask-trial",
+      "original_transport_ref": "refs/heads/cpu-clip-mask-trial",
+      "commit": "820ec1802661954c82bc01df213208be87ad7eff",
+      "group": "cloud",
+      "qualification": "ARCHIVAL; consult source-specific HOST-RESULTS and bundle status inventory; never inherited as selected-source qualification",
+      "transport_sha256": "c0353bf1f8fb821620d7539a17b49562e36a1c2a2cffcf783a3f6b35c55b5c7f"
+    },
+    {
+      "ref": "refs/heads/archive/damage-rework-2026-10-26/cloud/heads/cpu-clip-option-lazy-trial",
+      "original_transport_ref": "refs/heads/cpu-clip-option-lazy-trial",
+      "commit": "2166e7f73571afcc7c3f9157d36b65dc1bae22e4",
+      "group": "cloud",
+      "qualification": "ARCHIVAL; consult source-specific HOST-RESULTS and bundle status inventory; never inherited as selected-source qualification",
+      "transport_sha256": "c0353bf1f8fb821620d7539a17b49562e36a1c2a2cffcf783a3f6b35c55b5c7f"
+    },
+    {
+      "ref": "refs/heads/archive/damage-rework-2026-10-26/cloud/heads/cpu-clip-option-reset-mutant",
+      "original_transport_ref": "refs/heads/cpu-clip-option-reset-mutant",
+      "commit": "cb1feb4dd25d8e280dcc21f71afae49f9c1035b4",
+      "group": "cloud",
+      "qualification": "ARCHIVAL; consult source-specific HOST-RESULTS and bundle status inventory; never inherited as selected-source qualification",
+      "transport_sha256": "c0353bf1f8fb821620d7539a17b49562e36a1c2a2cffcf783a3f6b35c55b5c7f"
+    },
+    {
+      "ref": "refs/heads/archive/damage-rework-2026-10-26/cloud/heads/cpu-clip-validity-mutant",
+      "original_transport_ref": "refs/heads/cpu-clip-validity-mutant",
+      "commit": "30dfdc2e6fe3ea81260c41707c3a77594fc9c81e",
+      "group": "cloud",
+      "qualification": "ARCHIVAL; consult source-specific HOST-RESULTS and bundle status inventory; never inherited as selected-source qualification",
+      "transport_sha256": "c0353bf1f8fb821620d7539a17b49562e36a1c2a2cffcf783a3f6b35c55b5c7f"
+    },
+    {
+      "ref": "refs/heads/archive/damage-rework-2026-10-26/cloud/heads/cpu-fractional-rowstrip-control",
+      "original_transport_ref": "refs/heads/cpu-fractional-rowstrip-control",
+      "commit": "7b270ef5067b6a262ac32fb98053b33fd4d7e7a7",
+      "group": "cloud",
+      "qualification": "ARCHIVAL; consult source-specific HOST-RESULTS and bundle status inventory; never inherited as selected-source qualification",
+      "transport_sha256": "c0353bf1f8fb821620d7539a17b49562e36a1c2a2cffcf783a3f6b35c55b5c7f"
+    },
+    {
+      "ref": "refs/heads/archive/damage-rework-2026-10-26/cloud/heads/cpu-fractional-rowstrip-proof",
+      "original_transport_ref": "refs/heads/cpu-fractional-rowstrip-proof",
+      "commit": "48dbb8ddbdb6cb1b8f7e6417fee08fb46de6933b",
+      "group": "cloud",
+      "qualification": "ARCHIVAL; consult source-specific HOST-RESULTS and bundle status inventory; never inherited as selected-source qualification",
+      "transport_sha256": "c0353bf1f8fb821620d7539a17b49562e36a1c2a2cffcf783a3f6b35c55b5c7f"
+    },
+    {
+      "ref": "refs/heads/archive/damage-rework-2026-10-26/cloud/heads/cpu-interaction-phase-probe",
+      "original_transport_ref": "refs/heads/cpu-interaction-phase-probe",
+      "commit": "48763555e81cff41c487958f132744f55bc0a891",
+      "group": "cloud",
+      "qualification": "ARCHIVAL; consult source-specific HOST-RESULTS and bundle status inventory; never inherited as selected-source qualification",
+      "transport_sha256": "c0353bf1f8fb821620d7539a17b49562e36a1c2a2cffcf783a3f6b35c55b5c7f"
+    },
+    {
+      "ref": "refs/heads/archive/damage-rework-2026-10-26/cloud/heads/cpu-opaque-span-control",
+      "original_transport_ref": "refs/heads/cpu-opaque-span-control",
+      "commit": "4899459b3f981e681fe7b2a772dca559e4508267",
+      "group": "cloud",
+      "qualification": "ARCHIVAL; consult source-specific HOST-RESULTS and bundle status inventory; never inherited as selected-source qualification",
+      "transport_sha256": "c0353bf1f8fb821620d7539a17b49562e36a1c2a2cffcf783a3f6b35c55b5c7f"
+    },
+    {
+      "ref": "refs/heads/archive/damage-rework-2026-10-26/cloud/heads/cpu-opaque-span-integrated-bridge",
+      "original_transport_ref": "refs/heads/cpu-opaque-span-integrated-bridge",
+      "commit": "657b714bfd01fc4624236c7affb0f17097c7f7f7",
+      "group": "cloud",
+      "qualification": "ARCHIVAL; consult source-specific HOST-RESULTS and bundle status inventory; never inherited as selected-source qualification",
+      "transport_sha256": "c0353bf1f8fb821620d7539a17b49562e36a1c2a2cffcf783a3f6b35c55b5c7f"
+    },
+    {
+      "ref": "refs/heads/archive/damage-rework-2026-10-26/cloud/heads/cpu-opaque-span-proof",
+      "original_transport_ref": "refs/heads/cpu-opaque-span-proof",
+      "commit": "73a6aff9f18c9e4881692b36d48ba4df3f39f13d",
+      "group": "cloud",
+      "qualification": "ARCHIVAL; consult source-specific HOST-RESULTS and bundle status inventory; never inherited as selected-source qualification",
+      "transport_sha256": "c0353bf1f8fb821620d7539a17b49562e36a1c2a2cffcf783a3f6b35c55b5c7f"
+    },
+    {
+      "ref": "refs/heads/archive/damage-rework-2026-10-26/cloud/heads/cpu-paint-cache-feature-accounting",
+      "original_transport_ref": "refs/heads/cpu-paint-cache-feature-accounting",
+      "commit": "7a8ea8ace99d040efa9ee091a32d297c2e39d8c2",
+      "group": "cloud",
+      "qualification": "ARCHIVAL; consult source-specific HOST-RESULTS and bundle status inventory; never inherited as selected-source qualification",
+      "transport_sha256": "c0353bf1f8fb821620d7539a17b49562e36a1c2a2cffcf783a3f6b35c55b5c7f"
+    },
+    {
+      "ref": "refs/heads/archive/damage-rework-2026-10-26/cloud/heads/cpu-paint-cache-tiny-grid-decline",
+      "original_transport_ref": "refs/heads/cpu-paint-cache-tiny-grid-decline",
+      "commit": "db30008693a4389cff361484adf86271068afd2a",
+      "group": "cloud",
+      "qualification": "ARCHIVAL; consult source-specific HOST-RESULTS and bundle status inventory; never inherited as selected-source qualification",
+      "transport_sha256": "c0353bf1f8fb821620d7539a17b49562e36a1c2a2cffcf783a3f6b35c55b5c7f"
+    },
+    {
+      "ref": "refs/heads/archive/damage-rework-2026-10-26/cloud/heads/cpu-slot-cache-control",
+      "original_transport_ref": "refs/heads/cpu-slot-cache-control",
+      "commit": "57f1de9e4f51ab91268128d34515f0d981206a0c",
+      "group": "cloud",
+      "qualification": "ARCHIVAL; consult source-specific HOST-RESULTS and bundle status inventory; never inherited as selected-source qualification",
+      "transport_sha256": "c0353bf1f8fb821620d7539a17b49562e36a1c2a2cffcf783a3f6b35c55b5c7f"
+    },
+    {
+      "ref": "refs/heads/archive/damage-rework-2026-10-26/cloud/heads/experiment/blend-sources-control",
+      "original_transport_ref": "refs/heads/experiment/blend-sources-control",
+      "commit": "15edfe11c9b15664e549231d37042a6ca35e43de",
+      "group": "cloud",
+      "qualification": "ARCHIVAL; consult source-specific HOST-RESULTS and bundle status inventory; never inherited as selected-source qualification",
+      "transport_sha256": "c0353bf1f8fb821620d7539a17b49562e36a1c2a2cffcf783a3f6b35c55b5c7f"
+    },
+    {
+      "ref": "refs/heads/archive/damage-rework-2026-10-26/cloud/heads/experiment/changed-slot-fold-source-only",
+      "original_transport_ref": "refs/heads/experiment/changed-slot-fold-source-only",
+      "commit": "f59d7aa4470f79ce8e64ff61cc0be62578c29243",
+      "group": "cloud",
+      "qualification": "ARCHIVAL; consult source-specific HOST-RESULTS and bundle status inventory; never inherited as selected-source qualification",
+      "transport_sha256": "c0353bf1f8fb821620d7539a17b49562e36a1c2a2cffcf783a3f6b35c55b5c7f"
+    },
+    {
+      "ref": "refs/heads/archive/damage-rework-2026-10-26/cloud/heads/experiment/device-limit-source-only",
+      "original_transport_ref": "refs/heads/experiment/device-limit-source-only",
+      "commit": "c13dd1b3b991ca1c145455e2acba553805195fad",
+      "group": "cloud",
+      "qualification": "ARCHIVAL; consult source-specific HOST-RESULTS and bundle status inventory; never inherited as selected-source qualification",
+      "transport_sha256": "c0353bf1f8fb821620d7539a17b49562e36a1c2a2cffcf783a3f6b35c55b5c7f"
+    },
+    {
+      "ref": "refs/heads/archive/damage-rework-2026-10-26/cloud/heads/experiment/device-preflight-superseded-ddd9059",
+      "original_transport_ref": "refs/heads/experiment/device-preflight-superseded-ddd9059",
+      "commit": "ddd9059a5a9eee66473020c9db702bab3805ee34",
+      "group": "cloud",
+      "qualification": "ARCHIVAL; consult source-specific HOST-RESULTS and bundle status inventory; never inherited as selected-source qualification",
+      "transport_sha256": "c0353bf1f8fb821620d7539a17b49562e36a1c2a2cffcf783a3f6b35c55b5c7f"
+    },
+    {
+      "ref": "refs/heads/archive/damage-rework-2026-10-26/cloud/heads/experiment/fold-equal-row-mutant",
+      "original_transport_ref": "refs/heads/experiment/fold-equal-row-mutant",
+      "commit": "24642a27d10db8b997e652b569ab4f525d228ff5",
+      "group": "cloud",
+      "qualification": "ARCHIVAL; consult source-specific HOST-RESULTS and bundle status inventory; never inherited as selected-source qualification",
+      "transport_sha256": "c0353bf1f8fb821620d7539a17b49562e36a1c2a2cffcf783a3f6b35c55b5c7f"
+    },
+    {
+      "ref": "refs/heads/archive/damage-rework-2026-10-26/cloud/heads/experiment/fold-omission-mutant",
+      "original_transport_ref": "refs/heads/experiment/fold-omission-mutant",
+      "commit": "5881574023f8159b4807e5f4eeafbfa294f85d02",
+      "group": "cloud",
+      "qualification": "ARCHIVAL; consult source-specific HOST-RESULTS and bundle status inventory; never inherited as selected-source qualification",
+      "transport_sha256": "c0353bf1f8fb821620d7539a17b49562e36a1c2a2cffcf783a3f6b35c55b5c7f"
+    },
+    {
+      "ref": "refs/heads/archive/damage-rework-2026-10-26/cloud/heads/experiment/ordinary-slot-codegen",
+      "original_transport_ref": "refs/heads/experiment/ordinary-slot-codegen",
+      "commit": "29ef681c3047c3eb6be0fe963b9f2d33bb38ebe3",
+      "group": "cloud",
+      "qualification": "ARCHIVAL; consult source-specific HOST-RESULTS and bundle status inventory; never inherited as selected-source qualification",
+      "transport_sha256": "c0353bf1f8fb821620d7539a17b49562e36a1c2a2cffcf783a3f6b35c55b5c7f"
+    },
+    {
+      "ref": "refs/heads/archive/damage-rework-2026-10-26/cloud/heads/experiment/raw-patch-target-admission",
+      "original_transport_ref": "refs/heads/experiment/raw-patch-target-admission",
+      "commit": "9fdea16d40248ee5b7087dded1cbc096e303dbc5",
+      "group": "cloud",
+      "qualification": "ARCHIVAL; consult source-specific HOST-RESULTS and bundle status inventory; never inherited as selected-source qualification",
+      "transport_sha256": "c0353bf1f8fb821620d7539a17b49562e36a1c2a2cffcf783a3f6b35c55b5c7f"
+    },
+    {
+      "ref": "refs/heads/archive/damage-rework-2026-10-26/cloud/heads/experiment/retained-composed",
+      "original_transport_ref": "refs/heads/experiment/retained-composed",
+      "commit": "d8c4262cec20e5d19010166b36fcf75f97349f11",
+      "group": "cloud",
+      "qualification": "ARCHIVAL; consult source-specific HOST-RESULTS and bundle status inventory; never inherited as selected-source qualification",
+      "transport_sha256": "c0353bf1f8fb821620d7539a17b49562e36a1c2a2cffcf783a3f6b35c55b5c7f"
+    },
+    {
+      "ref": "refs/heads/archive/damage-rework-2026-10-26/cloud/heads/experiment/retained-delivery-7ac6",
+      "original_transport_ref": "refs/heads/experiment/retained-delivery-7ac6",
+      "commit": "6957114d5a2b9875ff6da0e6484402a34d5f1d05",
+      "group": "cloud",
+      "qualification": "ARCHIVAL; consult source-specific HOST-RESULTS and bundle status inventory; never inherited as selected-source qualification",
+      "transport_sha256": "c0353bf1f8fb821620d7539a17b49562e36a1c2a2cffcf783a3f6b35c55b5c7f"
+    },
+    {
+      "ref": "refs/heads/archive/damage-rework-2026-10-26/cloud/heads/experiment/retained-scissor-control-e0eab5b",
+      "original_transport_ref": "refs/heads/experiment/retained-scissor-control-e0eab5b",
+      "commit": "e0eab5b4f1ea74fdd0193155e532083e6dbdad62",
+      "group": "cloud",
+      "qualification": "ARCHIVAL; consult source-specific HOST-RESULTS and bundle status inventory; never inherited as selected-source qualification",
+      "transport_sha256": "c0353bf1f8fb821620d7539a17b49562e36a1c2a2cffcf783a3f6b35c55b5c7f"
+    },
+    {
+      "ref": "refs/heads/archive/damage-rework-2026-10-26/cloud/heads/experiment/retained-target-472bb94",
+      "original_transport_ref": "refs/heads/experiment/retained-target-472bb94",
+      "commit": "472bb94c8e451de006275c24cacb93692c1df1c1",
+      "group": "cloud",
+      "qualification": "ARCHIVAL; consult source-specific HOST-RESULTS and bundle status inventory; never inherited as selected-source qualification",
+      "transport_sha256": "c0353bf1f8fb821620d7539a17b49562e36a1c2a2cffcf783a3f6b35c55b5c7f"
+    },
+    {
+      "ref": "refs/heads/archive/damage-rework-2026-10-26/cloud/heads/experiment/samples-storage-control",
+      "original_transport_ref": "refs/heads/experiment/samples-storage-control",
+      "commit": "109efa03bf49e8a7e4b0b972ac876ac225fd2c3f",
+      "group": "cloud",
+      "qualification": "ARCHIVAL; consult source-specific HOST-RESULTS and bundle status inventory; never inherited as selected-source qualification",
+      "transport_sha256": "c0353bf1f8fb821620d7539a17b49562e36a1c2a2cffcf783a3f6b35c55b5c7f"
+    },
+    {
+      "ref": "refs/heads/archive/damage-rework-2026-10-26/cloud/heads/experiment/samples-storage-nested-control",
+      "original_transport_ref": "refs/heads/experiment/samples-storage-nested-control",
+      "commit": "2f62759dba5b90723a89b7c464b69f9060883178",
+      "group": "cloud",
+      "qualification": "ARCHIVAL; consult source-specific HOST-RESULTS and bundle status inventory; never inherited as selected-source qualification",
+      "transport_sha256": "c0353bf1f8fb821620d7539a17b49562e36a1c2a2cffcf783a3f6b35c55b5c7f"
+    },
+    {
+      "ref": "refs/heads/archive/damage-rework-2026-10-26/cloud/heads/experiment/samples-storage-option",
+      "original_transport_ref": "refs/heads/experiment/samples-storage-option",
+      "commit": "227ee72529135148e979d3a4b68184e212343a19",
+      "group": "cloud",
+      "qualification": "ARCHIVAL; consult source-specific HOST-RESULTS and bundle status inventory; never inherited as selected-source qualification",
+      "transport_sha256": "c0353bf1f8fb821620d7539a17b49562e36a1c2a2cffcf783a3f6b35c55b5c7f"
+    },
+    {
+      "ref": "refs/heads/archive/damage-rework-2026-10-26/cloud/heads/geometry-controlled-timing",
+      "original_transport_ref": "refs/heads/geometry-controlled-timing",
+      "commit": "694516583b89e90ab82c03f0af28bf180b876783",
+      "group": "cloud",
+      "qualification": "ARCHIVAL; consult source-specific HOST-RESULTS and bundle status inventory; never inherited as selected-source qualification",
+      "transport_sha256": "c0353bf1f8fb821620d7539a17b49562e36a1c2a2cffcf783a3f6b35c55b5c7f"
+    },
+    {
+      "ref": "refs/heads/archive/damage-rework-2026-10-26/cloud/heads/lane1-canonical-changes",
+      "original_transport_ref": "refs/heads/lane1-canonical-changes",
+      "commit": "8c4a6a28a8804fc6ddeb332845b09ce83d99a5a0",
+      "group": "cloud",
+      "qualification": "ARCHIVAL; consult source-specific HOST-RESULTS and bundle status inventory; never inherited as selected-source qualification",
+      "transport_sha256": "c0353bf1f8fb821620d7539a17b49562e36a1c2a2cffcf783a3f6b35c55b5c7f"
+    },
+    {
+      "ref": "refs/heads/archive/damage-rework-2026-10-26/cloud/heads/lane1-canonical-compile-corrections",
+      "original_transport_ref": "refs/heads/lane1-canonical-compile-corrections",
+      "commit": "11d4bb3929b00255ba566c7411dd7613163f3308",
+      "group": "cloud",
+      "qualification": "ARCHIVAL; consult source-specific HOST-RESULTS and bundle status inventory; never inherited as selected-source qualification",
+      "transport_sha256": "c0353bf1f8fb821620d7539a17b49562e36a1c2a2cffcf783a3f6b35c55b5c7f"
+    },
+    {
+      "ref": "refs/heads/archive/damage-rework-2026-10-26/cloud/heads/lane1-canonical-revision",
+      "original_transport_ref": "refs/heads/lane1-canonical-revision",
+      "commit": "c99816d53578cb2c34cd1e49426b20fc8f5fb03a",
+      "group": "cloud",
+      "qualification": "ARCHIVAL; consult source-specific HOST-RESULTS and bundle status inventory; never inherited as selected-source qualification",
+      "transport_sha256": "c0353bf1f8fb821620d7539a17b49562e36a1c2a2cffcf783a3f6b35c55b5c7f"
+    },
+    {
+      "ref": "refs/heads/archive/damage-rework-2026-10-26/cloud/heads/lane1-coherent-damage",
+      "original_transport_ref": "refs/heads/lane1-coherent-damage",
+      "commit": "31f9098a78e868ea1cdb6f48440a9023c4648a6f",
+      "group": "cloud",
+      "qualification": "ARCHIVAL; consult source-specific HOST-RESULTS and bundle status inventory; never inherited as selected-source qualification",
+      "transport_sha256": "c0353bf1f8fb821620d7539a17b49562e36a1c2a2cffcf783a3f6b35c55b5c7f"
+    },
+    {
+      "ref": "refs/heads/archive/damage-rework-2026-10-26/cloud/heads/lane1-composed-plan-falsifiers",
+      "original_transport_ref": "refs/heads/lane1-composed-plan-falsifiers",
+      "commit": "1c5cefe31b1e1b7386dc44f7f1c2283eb15c99c4",
+      "group": "cloud",
+      "qualification": "ARCHIVAL; consult source-specific HOST-RESULTS and bundle status inventory; never inherited as selected-source qualification",
+      "transport_sha256": "c0353bf1f8fb821620d7539a17b49562e36a1c2a2cffcf783a3f6b35c55b5c7f"
+    },
+    {
+      "ref": "refs/heads/archive/damage-rework-2026-10-26/cloud/heads/lane1-disjoint-transform",
+      "original_transport_ref": "refs/heads/lane1-disjoint-transform",
+      "commit": "33c180a6ed6f82c792c91590c382ff2e12afcee9",
+      "group": "cloud",
+      "qualification": "ARCHIVAL; consult source-specific HOST-RESULTS and bundle status inventory; never inherited as selected-source qualification",
+      "transport_sha256": "c0353bf1f8fb821620d7539a17b49562e36a1c2a2cffcf783a3f6b35c55b5c7f"
+    },
+    {
+      "ref": "refs/heads/archive/damage-rework-2026-10-26/cloud/heads/lane1-integrated-core",
+      "original_transport_ref": "refs/heads/lane1-integrated-core",
+      "commit": "5d44bceeded2cbdef51bce89013d05212fe3c2cd",
+      "group": "cloud",
+      "qualification": "ARCHIVAL; consult source-specific HOST-RESULTS and bundle status inventory; never inherited as selected-source qualification",
+      "transport_sha256": "c0353bf1f8fb821620d7539a17b49562e36a1c2a2cffcf783a3f6b35c55b5c7f"
+    },
+    {
+      "ref": "refs/heads/archive/damage-rework-2026-10-26/cloud/heads/lane1-integrated-cpu-cache",
+      "original_transport_ref": "refs/heads/lane1-integrated-cpu-cache",
+      "commit": "2bc2349b57802b83ca552a047860b404a7228377",
+      "group": "cloud",
+      "qualification": "ARCHIVAL; consult source-specific HOST-RESULTS and bundle status inventory; never inherited as selected-source qualification",
+      "transport_sha256": "c0353bf1f8fb821620d7539a17b49562e36a1c2a2cffcf783a3f6b35c55b5c7f"
+    },
+    {
+      "ref": "refs/heads/archive/damage-rework-2026-10-26/cloud/heads/lane1-integrated-diagnostics",
+      "original_transport_ref": "refs/heads/lane1-integrated-diagnostics",
+      "commit": "c71f907aef11d28f00ec839a404541d70b3752ec",
+      "group": "cloud",
+      "qualification": "ARCHIVAL; consult source-specific HOST-RESULTS and bundle status inventory; never inherited as selected-source qualification",
+      "transport_sha256": "c0353bf1f8fb821620d7539a17b49562e36a1c2a2cffcf783a3f6b35c55b5c7f"
+    },
+    {
+      "ref": "refs/heads/archive/damage-rework-2026-10-26/cloud/heads/lane1-integrated-popup-selector",
+      "original_transport_ref": "refs/heads/lane1-integrated-popup-selector",
+      "commit": "81cd14dc055c05091fb74ecc04779a8b443bcc9e",
+      "group": "cloud",
+      "qualification": "ARCHIVAL; consult source-specific HOST-RESULTS and bundle status inventory; never inherited as selected-source qualification",
+      "transport_sha256": "c0353bf1f8fb821620d7539a17b49562e36a1c2a2cffcf783a3f6b35c55b5c7f"
+    },
+    {
+      "ref": "refs/heads/archive/damage-rework-2026-10-26/cloud/heads/lane1-integrated-test-delimiter",
+      "original_transport_ref": "refs/heads/lane1-integrated-test-delimiter",
+      "commit": "0fc36536d862b3b7426e872263633fb99cc8994a",
+      "group": "cloud",
+      "qualification": "ARCHIVAL; consult source-specific HOST-RESULTS and bundle status inventory; never inherited as selected-source qualification",
+      "transport_sha256": "c0353bf1f8fb821620d7539a17b49562e36a1c2a2cffcf783a3f6b35c55b5c7f"
+    },
+    {
+      "ref": "refs/heads/archive/damage-rework-2026-10-26/cloud/heads/lane1-integrated-viewport-witness",
+      "original_transport_ref": "refs/heads/lane1-integrated-viewport-witness",
+      "commit": "95eb5bebfdc0fb32692c2bf23b13e347ef56c2c9",
+      "group": "cloud",
+      "qualification": "ARCHIVAL; consult source-specific HOST-RESULTS and bundle status inventory; never inherited as selected-source qualification",
+      "transport_sha256": "c0353bf1f8fb821620d7539a17b49562e36a1c2a2cffcf783a3f6b35c55b5c7f"
+    },
+    {
+      "ref": "refs/heads/archive/damage-rework-2026-10-26/cloud/heads/lane1-interaction-diagnostics",
+      "original_transport_ref": "refs/heads/lane1-interaction-diagnostics",
+      "commit": "c89ce5140acb9bbe5cf4364721d2187dd8c073e9",
+      "group": "cloud",
+      "qualification": "ARCHIVAL; consult source-specific HOST-RESULTS and bundle status inventory; never inherited as selected-source qualification",
+      "transport_sha256": "c0353bf1f8fb821620d7539a17b49562e36a1c2a2cffcf783a3f6b35c55b5c7f"
+    },
+    {
+      "ref": "refs/heads/archive/damage-rework-2026-10-26/cloud/heads/lane1-multi-slot-composed",
+      "original_transport_ref": "refs/heads/lane1-multi-slot-composed",
+      "commit": "e0acd32528c4d8cfd6a867a90ecd1e4c8b8a9cf0",
+      "group": "cloud",
+      "qualification": "ARCHIVAL; consult source-specific HOST-RESULTS and bundle status inventory; never inherited as selected-source qualification",
+      "transport_sha256": "c0353bf1f8fb821620d7539a17b49562e36a1c2a2cffcf783a3f6b35c55b5c7f"
+    },
+    {
+      "ref": "refs/heads/archive/damage-rework-2026-10-26/cloud/heads/lane1-multi-slot-diagnostics",
+      "original_transport_ref": "refs/heads/lane1-multi-slot-diagnostics",
+      "commit": "c18db73c666e1a0b0225840a78e2ad33f5a8c4a2",
+      "group": "cloud",
+      "qualification": "ARCHIVAL; consult source-specific HOST-RESULTS and bundle status inventory; never inherited as selected-source qualification",
+      "transport_sha256": "c0353bf1f8fb821620d7539a17b49562e36a1c2a2cffcf783a3f6b35c55b5c7f"
+    },
+    {
+      "ref": "refs/heads/archive/damage-rework-2026-10-26/cloud/heads/lane1-next-compile",
+      "original_transport_ref": "refs/heads/lane1-next-compile",
+      "commit": "7c49cbeffcfafac668aa5c8f64208078d59301ce",
+      "group": "cloud",
+      "qualification": "ARCHIVAL; consult source-specific HOST-RESULTS and bundle status inventory; never inherited as selected-source qualification",
+      "transport_sha256": "c0353bf1f8fb821620d7539a17b49562e36a1c2a2cffcf783a3f6b35c55b5c7f"
+    },
+    {
+      "ref": "refs/heads/archive/damage-rework-2026-10-26/cloud/heads/lane1-next-compile-v2",
+      "original_transport_ref": "refs/heads/lane1-next-compile-v2",
+      "commit": "4bcb7c37e743f9623bbd9d5d21ce9e5c4182e78a",
+      "group": "cloud",
+      "qualification": "ARCHIVAL; consult source-specific HOST-RESULTS and bundle status inventory; never inherited as selected-source qualification",
+      "transport_sha256": "c0353bf1f8fb821620d7539a17b49562e36a1c2a2cffcf783a3f6b35c55b5c7f"
+    },
+    {
+      "ref": "refs/heads/archive/damage-rework-2026-10-26/cloud/heads/lane1-observation-compatibility-correction",
+      "original_transport_ref": "refs/heads/lane1-observation-compatibility-correction",
+      "commit": "3236bed0e2f39fe5a79ce5a6059013a3deaabaab",
+      "group": "cloud",
+      "qualification": "ARCHIVAL; consult source-specific HOST-RESULTS and bundle status inventory; never inherited as selected-source qualification",
+      "transport_sha256": "c0353bf1f8fb821620d7539a17b49562e36a1c2a2cffcf783a3f6b35c55b5c7f"
+    },
+    {
+      "ref": "refs/heads/archive/damage-rework-2026-10-26/cloud/heads/lane1-recorded-scenes",
+      "original_transport_ref": "refs/heads/lane1-recorded-scenes",
+      "commit": "7e9544685e3bbe4655b7217043373840d868f961",
+      "group": "cloud",
+      "qualification": "ARCHIVAL; consult source-specific HOST-RESULTS and bundle status inventory; never inherited as selected-source qualification",
+      "transport_sha256": "c0353bf1f8fb821620d7539a17b49562e36a1c2a2cffcf783a3f6b35c55b5c7f"
+    },
+    {
+      "ref": "refs/heads/archive/damage-rework-2026-10-26/cloud/heads/lane1-retained-order-linear",
+      "original_transport_ref": "refs/heads/lane1-retained-order-linear",
+      "commit": "6041f0be1503862c47c4b3e7fda65225caa53118",
+      "group": "cloud",
+      "qualification": "ARCHIVAL; consult source-specific HOST-RESULTS and bundle status inventory; never inherited as selected-source qualification",
+      "transport_sha256": "c0353bf1f8fb821620d7539a17b49562e36a1c2a2cffcf783a3f6b35c55b5c7f"
+    },
+    {
+      "ref": "refs/heads/archive/damage-rework-2026-10-26/cloud/heads/lane1-selective-output-compile",
+      "original_transport_ref": "refs/heads/lane1-selective-output-compile",
+      "commit": "016f603121191e440a90d1790441f24b887bab4a",
+      "group": "cloud",
+      "qualification": "ARCHIVAL; consult source-specific HOST-RESULTS and bundle status inventory; never inherited as selected-source qualification",
+      "transport_sha256": "c0353bf1f8fb821620d7539a17b49562e36a1c2a2cffcf783a3f6b35c55b5c7f"
+    },
+    {
+      "ref": "refs/heads/archive/damage-rework-2026-10-26/cloud/heads/lane1-solver-compiler-corrections",
+      "original_transport_ref": "refs/heads/lane1-solver-compiler-corrections",
+      "commit": "76301eb99b733304f33d851ff20936e0dd174c1f",
+      "group": "cloud",
+      "qualification": "ARCHIVAL; consult source-specific HOST-RESULTS and bundle status inventory; never inherited as selected-source qualification",
+      "transport_sha256": "c0353bf1f8fb821620d7539a17b49562e36a1c2a2cffcf783a3f6b35c55b5c7f"
+    },
+    {
+      "ref": "refs/heads/archive/damage-rework-2026-10-26/cloud/heads/lane1-solver-propagation",
+      "original_transport_ref": "refs/heads/lane1-solver-propagation",
+      "commit": "46ebdf454436aa4d97861f7eda75c984e51196f2",
+      "group": "cloud",
+      "qualification": "ARCHIVAL; consult source-specific HOST-RESULTS and bundle status inventory; never inherited as selected-source qualification",
+      "transport_sha256": "c0353bf1f8fb821620d7539a17b49562e36a1c2a2cffcf783a3f6b35c55b5c7f"
+    },
+    {
+      "ref": "refs/heads/archive/damage-rework-2026-10-26/cloud/heads/master",
+      "original_transport_ref": "refs/heads/master",
+      "commit": "71cc8a53da32a3bc63ffe0c2bd08e50886137a1d",
+      "group": "cloud",
+      "qualification": "ARCHIVAL; consult source-specific HOST-RESULTS and bundle status inventory; never inherited as selected-source qualification",
+      "transport_sha256": "c0353bf1f8fb821620d7539a17b49562e36a1c2a2cffcf783a3f6b35c55b5c7f"
+    },
+    {
+      "ref": "refs/heads/archive/damage-rework-2026-10-26/cloud/heads/render-blend-sources-borrow",
+      "original_transport_ref": "refs/heads/render-blend-sources-borrow",
+      "commit": "0d65be6480b1d6512086417bbbee4111226a8ecd",
+      "group": "cloud",
+      "qualification": "ARCHIVAL; consult source-specific HOST-RESULTS and bundle status inventory; never inherited as selected-source qualification",
+      "transport_sha256": "c0353bf1f8fb821620d7539a17b49562e36a1c2a2cffcf783a3f6b35c55b5c7f"
+    },
+    {
+      "ref": "refs/heads/archive/damage-rework-2026-10-26/cloud/heads/render-borrow-tests-v2",
+      "original_transport_ref": "refs/heads/render-borrow-tests-v2",
+      "commit": "48066ea52f8fa8fcd668439f15ab93cbf271fbc2",
+      "group": "cloud",
+      "qualification": "ARCHIVAL; consult source-specific HOST-RESULTS and bundle status inventory; never inherited as selected-source qualification",
+      "transport_sha256": "c0353bf1f8fb821620d7539a17b49562e36a1c2a2cffcf783a3f6b35c55b5c7f"
+    },
+    {
+      "ref": "refs/heads/archive/damage-rework-2026-10-26/cloud/heads/render-borrow-v2",
+      "original_transport_ref": "refs/heads/render-borrow-v2",
+      "commit": "4883cbfaa4479d879bb3fadca73a5a2c04bc424b",
+      "group": "cloud",
+      "qualification": "ARCHIVAL; consult source-specific HOST-RESULTS and bundle status inventory; never inherited as selected-source qualification",
+      "transport_sha256": "c0353bf1f8fb821620d7539a17b49562e36a1c2a2cffcf783a3f6b35c55b5c7f"
+    },
+    {
+      "ref": "refs/heads/archive/damage-rework-2026-10-26/cloud/heads/render-fragment-read-control",
+      "original_transport_ref": "refs/heads/render-fragment-read-control",
+      "commit": "c82c25729a0cf7367740937b2315b0fe870a7de4",
+      "group": "cloud",
+      "qualification": "ARCHIVAL; consult source-specific HOST-RESULTS and bundle status inventory; never inherited as selected-source qualification",
+      "transport_sha256": "c0353bf1f8fb821620d7539a17b49562e36a1c2a2cffcf783a3f6b35c55b5c7f"
+    },
+    {
+      "ref": "refs/heads/archive/damage-rework-2026-10-26/cloud/heads/render-fragment-read-qualified",
+      "original_transport_ref": "refs/heads/render-fragment-read-qualified",
+      "commit": "2b55df5f2ec4709734f790706dd634fc48dede09",
+      "group": "cloud",
+      "qualification": "ARCHIVAL; consult source-specific HOST-RESULTS and bundle status inventory; never inherited as selected-source qualification",
+      "transport_sha256": "c0353bf1f8fb821620d7539a17b49562e36a1c2a2cffcf783a3f6b35c55b5c7f"
+    },
+    {
+      "ref": "refs/heads/archive/damage-rework-2026-10-26/cloud/heads/render-geometry-exact-interactions",
+      "original_transport_ref": "refs/heads/render-geometry-exact-interactions",
+      "commit": "33e5adf08deb4ec1a04266ec2d94fbb40fef0425",
+      "group": "cloud",
+      "qualification": "ARCHIVAL; consult source-specific HOST-RESULTS and bundle status inventory; never inherited as selected-source qualification",
+      "transport_sha256": "c0353bf1f8fb821620d7539a17b49562e36a1c2a2cffcf783a3f6b35c55b5c7f"
+    },
+    {
+      "ref": "refs/heads/archive/damage-rework-2026-10-26/cloud/heads/render-geometry-interaction-diagnostic",
+      "original_transport_ref": "refs/heads/render-geometry-interaction-diagnostic",
+      "commit": "982e19b1ca1294d646d50132264bc941fde78a4c",
+      "group": "cloud",
+      "qualification": "ARCHIVAL; consult source-specific HOST-RESULTS and bundle status inventory; never inherited as selected-source qualification",
+      "transport_sha256": "c0353bf1f8fb821620d7539a17b49562e36a1c2a2cffcf783a3f6b35c55b5c7f"
+    },
+    {
+      "ref": "refs/heads/archive/damage-rework-2026-10-26/cloud/heads/render-geometry-proof-boundary",
+      "original_transport_ref": "refs/heads/render-geometry-proof-boundary",
+      "commit": "464bfdddc07a34bf8ed5e37980ccf1fdef6428b2",
+      "group": "cloud",
+      "qualification": "ARCHIVAL; consult source-specific HOST-RESULTS and bundle status inventory; never inherited as selected-source qualification",
+      "transport_sha256": "c0353bf1f8fb821620d7539a17b49562e36a1c2a2cffcf783a3f6b35c55b5c7f"
+    },
+    {
+      "ref": "refs/heads/archive/damage-rework-2026-10-26/cloud/heads/render-paired-local-read",
+      "original_transport_ref": "refs/heads/render-paired-local-read",
+      "commit": "83a7c16047aec16228eb2dd8de1c5f3f42654dc8",
+      "group": "cloud",
+      "qualification": "ARCHIVAL; consult source-specific HOST-RESULTS and bundle status inventory; never inherited as selected-source qualification",
+      "transport_sha256": "c0353bf1f8fb821620d7539a17b49562e36a1c2a2cffcf783a3f6b35c55b5c7f"
+    },
+    {
+      "ref": "refs/heads/archive/damage-rework-2026-10-26/cloud/heads/render-solid-geometry-repair",
+      "original_transport_ref": "refs/heads/render-solid-geometry-repair",
+      "commit": "b4831a893bc7b38ec372be14cf35b4506bb69518",
+      "group": "cloud",
+      "qualification": "ARCHIVAL; consult source-specific HOST-RESULTS and bundle status inventory; never inherited as selected-source qualification",
+      "transport_sha256": "c0353bf1f8fb821620d7539a17b49562e36a1c2a2cffcf783a3f6b35c55b5c7f"
+    },
+    {
+      "ref": "refs/heads/archive/damage-rework-2026-10-26/cloud/heads/renderer-incremental-jobs-proof",
+      "original_transport_ref": "refs/heads/renderer-incremental-jobs-proof",
+      "commit": "58658123114570054a901285e58733eb083f7926",
+      "group": "cloud",
+      "qualification": "ARCHIVAL; consult source-specific HOST-RESULTS and bundle status inventory; never inherited as selected-source qualification",
+      "transport_sha256": "c0353bf1f8fb821620d7539a17b49562e36a1c2a2cffcf783a3f6b35c55b5c7f"
+    },
+    {
+      "ref": "refs/heads/archive/damage-rework-2026-10-26/cloud/heads/structures-cold-control",
+      "original_transport_ref": "refs/heads/structures-cold-control",
+      "commit": "2c8e19d25d363675b91da2daaa935213ac2ac2e2",
+      "group": "cloud",
+      "qualification": "ARCHIVAL; consult source-specific HOST-RESULTS and bundle status inventory; never inherited as selected-source qualification",
+      "transport_sha256": "c0353bf1f8fb821620d7539a17b49562e36a1c2a2cffcf783a3f6b35c55b5c7f"
+    },
+    {
+      "ref": "refs/heads/archive/damage-rework-2026-10-26/cloud/heads/structures-niche-trial",
+      "original_transport_ref": "refs/heads/structures-niche-trial",
+      "commit": "515b02e9c076d92435e13935ecda77059bc4add5",
+      "group": "cloud",
+      "qualification": "ARCHIVAL; consult source-specific HOST-RESULTS and bundle status inventory; never inherited as selected-source qualification",
+      "transport_sha256": "c0353bf1f8fb821620d7539a17b49562e36a1c2a2cffcf783a3f6b35c55b5c7f"
+    },
+    {
+      "ref": "refs/heads/archive/damage-rework-2026-10-26/cloud/heads/structures-release-control",
+      "original_transport_ref": "refs/heads/structures-release-control",
+      "commit": "ec2f38a1b53ca033c36207f6d5a16b27a3f7793d",
+      "group": "cloud",
+      "qualification": "ARCHIVAL; consult source-specific HOST-RESULTS and bundle status inventory; never inherited as selected-source qualification",
+      "transport_sha256": "c0353bf1f8fb821620d7539a17b49562e36a1c2a2cffcf783a3f6b35c55b5c7f"
+    },
+    {
+      "ref": "refs/heads/archive/damage-rework-2026-10-26/cloud/heads/structures-release-inline",
+      "original_transport_ref": "refs/heads/structures-release-inline",
+      "commit": "b8b0084267de03904c42eb98b54087c735904ff3",
+      "group": "cloud",
+      "qualification": "ARCHIVAL; consult source-specific HOST-RESULTS and bundle status inventory; never inherited as selected-source qualification",
+      "transport_sha256": "c0353bf1f8fb821620d7539a17b49562e36a1c2a2cffcf783a3f6b35c55b5c7f"
+    },
+    {
+      "ref": "refs/heads/archive/damage-rework-2026-10-26/cloud/heads/structures-seed-only",
+      "original_transport_ref": "refs/heads/structures-seed-only",
+      "commit": "b603a9ebb3b0be3e37389eb4d819b8b918cebfff",
+      "group": "cloud",
+      "qualification": "ARCHIVAL; consult source-specific HOST-RESULTS and bundle status inventory; never inherited as selected-source qualification",
+      "transport_sha256": "c0353bf1f8fb821620d7539a17b49562e36a1c2a2cffcf783a3f6b35c55b5c7f"
+    },
+    {
+      "ref": "refs/heads/archive/damage-rework-2026-10-26/cloud/heads/text-edit-exact-buffer",
+      "original_transport_ref": "refs/heads/text-edit-exact-buffer",
+      "commit": "a5fc29386feb1b797bdfb017aa99b61353e80333",
+      "group": "cloud",
+      "qualification": "ARCHIVAL; consult source-specific HOST-RESULTS and bundle status inventory; never inherited as selected-source qualification",
+      "transport_sha256": "c0353bf1f8fb821620d7539a17b49562e36a1c2a2cffcf783a3f6b35c55b5c7f"
+    },
+    {
+      "ref": "refs/heads/archive/damage-rework-2026-10-26/cloud/heads/text-edit-traffic-baseline",
+      "original_transport_ref": "refs/heads/text-edit-traffic-baseline",
+      "commit": "d1fad8fca93b076b8f87252786ac35ec301d6c8e",
+      "group": "cloud",
+      "qualification": "ARCHIVAL; consult source-specific HOST-RESULTS and bundle status inventory; never inherited as selected-source qualification",
+      "transport_sha256": "c0353bf1f8fb821620d7539a17b49562e36a1c2a2cffcf783a3f6b35c55b5c7f"
+    },
+    {
+      "ref": "refs/heads/archive/damage-rework-2026-10-26/cloud/heads/text-font-resource-constructor",
+      "original_transport_ref": "refs/heads/text-font-resource-constructor",
+      "commit": "4c334a37f527394b11aa50f969ade6c674d68a14",
+      "group": "cloud",
+      "qualification": "ARCHIVAL; consult source-specific HOST-RESULTS and bundle status inventory; never inherited as selected-source qualification",
+      "transport_sha256": "c0353bf1f8fb821620d7539a17b49562e36a1c2a2cffcf783a3f6b35c55b5c7f"
+    },
+    {
+      "ref": "refs/heads/archive/damage-rework-2026-10-26/cloud/heads/text-optional-retention-core",
+      "original_transport_ref": "refs/heads/text-optional-retention-core",
+      "commit": "ccc53c8161f300a644cc0523e5d3d4bd115f5416",
+      "group": "cloud",
+      "qualification": "ARCHIVAL; consult source-specific HOST-RESULTS and bundle status inventory; never inherited as selected-source qualification",
+      "transport_sha256": "c0353bf1f8fb821620d7539a17b49562e36a1c2a2cffcf783a3f6b35c55b5c7f"
+    },
+    {
+      "ref": "refs/heads/archive/damage-rework-2026-10-26/cloud/heads/text-optional-shape-binding",
+      "original_transport_ref": "refs/heads/text-optional-shape-binding",
+      "commit": "13f383c10c215ea18d441fb7ef6036ce4b929644",
+      "group": "cloud",
+      "qualification": "ARCHIVAL; consult source-specific HOST-RESULTS and bundle status inventory; never inherited as selected-source qualification",
+      "transport_sha256": "c0353bf1f8fb821620d7539a17b49562e36a1c2a2cffcf783a3f6b35c55b5c7f"
+    },
+    {
+      "ref": "refs/heads/archive/damage-rework-2026-10-26/cloud/heads/text-reflow-control",
+      "original_transport_ref": "refs/heads/text-reflow-control",
+      "commit": "af981acf8df210331fac306d8d24c2a4d9fbc2d7",
+      "group": "cloud",
+      "qualification": "ARCHIVAL; consult source-specific HOST-RESULTS and bundle status inventory; never inherited as selected-source qualification",
+      "transport_sha256": "c0353bf1f8fb821620d7539a17b49562e36a1c2a2cffcf783a3f6b35c55b5c7f"
+    },
+    {
+      "ref": "refs/heads/archive/damage-rework-2026-10-26/cloud/heads/text-shared-shape-source",
+      "original_transport_ref": "refs/heads/text-shared-shape-source",
+      "commit": "cf6e8fff5e90282729ef8acedfb587da94009f8b",
+      "group": "cloud",
+      "qualification": "ARCHIVAL; consult source-specific HOST-RESULTS and bundle status inventory; never inherited as selected-source qualification",
+      "transport_sha256": "c0353bf1f8fb821620d7539a17b49562e36a1c2a2cffcf783a3f6b35c55b5c7f"
+    },
+    {
+      "ref": "refs/heads/archive/damage-rework-2026-10-26/mac/heads/mac/assembly65db-borrow-export-core-compiler-20261026-r1",
+      "original_transport_ref": "refs/heads/mac/assembly65db-borrow-export-core-compiler-20261026-r1",
+      "commit": "fb6810a26419545653b978f0f00c902161ba2f04",
+      "group": "mac",
+      "qualification": "ARCHIVAL; consult source-specific HOST-RESULTS and bundle status inventory; never inherited as selected-source qualification",
+      "transport_sha256": "3007b412ccb5114e5fcc3d6f472595b7d497b95d1ae947f2a5e340b46c05524b"
+    },
+    {
+      "ref": "refs/heads/archive/damage-rework-2026-10-26/mac/heads/mac/assembly65db-cfg-block-core-compiler-20261026-r1",
+      "original_transport_ref": "refs/heads/mac/assembly65db-cfg-block-core-compiler-20261026-r1",
+      "commit": "a10f20e10573f442990860754eeeaffe70d205fe",
+      "group": "mac",
+      "qualification": "ARCHIVAL; consult source-specific HOST-RESULTS and bundle status inventory; never inherited as selected-source qualification",
+      "transport_sha256": "3007b412ccb5114e5fcc3d6f472595b7d497b95d1ae947f2a5e340b46c05524b"
+    },
+    {
+      "ref": "refs/heads/archive/damage-rework-2026-10-26/mac/heads/mac/assembly65db-core-default-compiler-20261026-r1",
+      "original_transport_ref": "refs/heads/mac/assembly65db-core-default-compiler-20261026-r1",
+      "commit": "1d0a01be7463d886271588bb261dfa7ac98a67ea",
+      "group": "mac",
+      "qualification": "ARCHIVAL; consult source-specific HOST-RESULTS and bundle status inventory; never inherited as selected-source qualification",
+      "transport_sha256": "3007b412ccb5114e5fcc3d6f472595b7d497b95d1ae947f2a5e340b46c05524b"
+    },
+    {
+      "ref": "refs/heads/archive/damage-rework-2026-10-26/mac/heads/mac/assembly65db-hash-core-compiler-20261026-r1",
+      "original_transport_ref": "refs/heads/mac/assembly65db-hash-core-compiler-20261026-r1",
+      "commit": "161b5c6ba6beda0d6c4cb6311da832100cdf2edc",
+      "group": "mac",
+      "qualification": "ARCHIVAL; consult source-specific HOST-RESULTS and bundle status inventory; never inherited as selected-source qualification",
+      "transport_sha256": "3007b412ccb5114e5fcc3d6f472595b7d497b95d1ae947f2a5e340b46c05524b"
+    },
+    {
+      "ref": "refs/heads/archive/damage-rework-2026-10-26/mac/heads/mac/assembly65db-hash-repair-20261026-r1",
+      "original_transport_ref": "refs/heads/mac/assembly65db-hash-repair-20261026-r1",
+      "commit": "161b5c6ba6beda0d6c4cb6311da832100cdf2edc",
+      "group": "mac",
+      "qualification": "ARCHIVAL; consult source-specific HOST-RESULTS and bundle status inventory; never inherited as selected-source qualification",
+      "transport_sha256": "3007b412ccb5114e5fcc3d6f472595b7d497b95d1ae947f2a5e340b46c05524b"
+    },
+    {
+      "ref": "refs/heads/archive/damage-rework-2026-10-26/mac/heads/mac/assembly65db-native-smoke-port-20261026-r1",
+      "original_transport_ref": "refs/heads/mac/assembly65db-native-smoke-port-20261026-r1",
+      "commit": "06d1e1ce02d77b813514a74d5b8b3566a73c76b6",
+      "group": "mac",
+      "qualification": "ARCHIVAL; consult source-specific HOST-RESULTS and bundle status inventory; never inherited as selected-source qualification",
+      "transport_sha256": "3007b412ccb5114e5fcc3d6f472595b7d497b95d1ae947f2a5e340b46c05524b"
+    },
+    {
+      "ref": "refs/heads/archive/damage-rework-2026-10-26/mac/heads/mac/assembly65db-privacy-raw-20261026-r1",
+      "original_transport_ref": "refs/heads/mac/assembly65db-privacy-raw-20261026-r1",
+      "commit": "6292a578574e37657ea865cac446abe7386d05a2",
+      "group": "mac",
+      "qualification": "ARCHIVAL; consult source-specific HOST-RESULTS and bundle status inventory; never inherited as selected-source qualification",
+      "transport_sha256": "3007b412ccb5114e5fcc3d6f472595b7d497b95d1ae947f2a5e340b46c05524b"
+    },
+    {
+      "ref": "refs/heads/archive/damage-rework-2026-10-26/mac/heads/mac/assembly65db-publication-fixture-core-compiler-20261026-r1",
+      "original_transport_ref": "refs/heads/mac/assembly65db-publication-fixture-core-compiler-20261026-r1",
+      "commit": "d7872d1a20da4a968f1326f1ed37802a4f790b85",
+      "group": "mac",
+      "qualification": "ARCHIVAL; consult source-specific HOST-RESULTS and bundle status inventory; never inherited as selected-source qualification",
+      "transport_sha256": "3007b412ccb5114e5fcc3d6f472595b7d497b95d1ae947f2a5e340b46c05524b"
+    },
+    {
+      "ref": "refs/heads/archive/damage-rework-2026-10-26/mac/heads/mac/assembly65db-raw-reference-20261026-r1",
+      "original_transport_ref": "refs/heads/mac/assembly65db-raw-reference-20261026-r1",
+      "commit": "535ffa9a5f7f6fcf13770b4ff78ef0cb7fffc4ef",
+      "group": "mac",
+      "qualification": "ARCHIVAL; consult source-specific HOST-RESULTS and bundle status inventory; never inherited as selected-source qualification",
+      "transport_sha256": "3007b412ccb5114e5fcc3d6f472595b7d497b95d1ae947f2a5e340b46c05524b"
+    },
+    {
+      "ref": "refs/heads/archive/damage-rework-2026-10-26/mac/heads/mac/assembly65db-record-adapters-20261026-r1",
+      "original_transport_ref": "refs/heads/mac/assembly65db-record-adapters-20261026-r1",
+      "commit": "a54e27f8c865326b6d0a87bc0f8be1af83234072",
+      "group": "mac",
+      "qualification": "ARCHIVAL; consult source-specific HOST-RESULTS and bundle status inventory; never inherited as selected-source qualification",
+      "transport_sha256": "3007b412ccb5114e5fcc3d6f472595b7d497b95d1ae947f2a5e340b46c05524b"
+    },
+    {
+      "ref": "refs/heads/archive/damage-rework-2026-10-26/mac/heads/mac/assembly65db-retained-module-core-compiler-20261026-r1",
+      "original_transport_ref": "refs/heads/mac/assembly65db-retained-module-core-compiler-20261026-r1",
+      "commit": "d56da752855a7c98d404b3b28076a9e4985194ff",
+      "group": "mac",
+      "qualification": "ARCHIVAL; consult source-specific HOST-RESULTS and bundle status inventory; never inherited as selected-source qualification",
+      "transport_sha256": "3007b412ccb5114e5fcc3d6f472595b7d497b95d1ae947f2a5e340b46c05524b"
+    },
+    {
+      "ref": "refs/heads/archive/damage-rework-2026-10-26/mac/heads/mac/assembly65db-stable-default-20261026-r1",
+      "original_transport_ref": "refs/heads/mac/assembly65db-stable-default-20261026-r1",
+      "commit": "1d0a01be7463d886271588bb261dfa7ac98a67ea",
+      "group": "mac",
+      "qualification": "ARCHIVAL; consult source-specific HOST-RESULTS and bundle status inventory; never inherited as selected-source qualification",
+      "transport_sha256": "3007b412ccb5114e5fcc3d6f472595b7d497b95d1ae947f2a5e340b46c05524b"
+    },
+    {
+      "ref": "refs/heads/archive/damage-rework-2026-10-26/mac/heads/mac/assembly65db-todo-unitchoice-20261026-r1",
+      "original_transport_ref": "refs/heads/mac/assembly65db-todo-unitchoice-20261026-r1",
+      "commit": "2e1cf7c4389e88fd63b4fc56898750248c22dbe0",
+      "group": "mac",
+      "qualification": "ARCHIVAL; consult source-specific HOST-RESULTS and bundle status inventory; never inherited as selected-source qualification",
+      "transport_sha256": "3007b412ccb5114e5fcc3d6f472595b7d497b95d1ae947f2a5e340b46c05524b"
+    },
+    {
+      "ref": "refs/heads/archive/damage-rework-2026-10-26/mac/heads/mac/assembly65db-todo-unitchoice-controls-20261026-r2",
+      "original_transport_ref": "refs/heads/mac/assembly65db-todo-unitchoice-controls-20261026-r2",
+      "commit": "0e0bf29c0a3432908a2c6d4aea3a7bbfa9abf33b",
+      "group": "mac",
+      "qualification": "ARCHIVAL; consult source-specific HOST-RESULTS and bundle status inventory; never inherited as selected-source qualification",
+      "transport_sha256": "3007b412ccb5114e5fcc3d6f472595b7d497b95d1ae947f2a5e340b46c05524b"
+    },
+    {
+      "ref": "refs/heads/archive/damage-rework-2026-10-26/mac/heads/mac/assembly65db-unitchoice-library-20261026-r1",
+      "original_transport_ref": "refs/heads/mac/assembly65db-unitchoice-library-20261026-r1",
+      "commit": "52ef112f19101d2f45028b63c25cea78af34b6ee",
+      "group": "mac",
+      "qualification": "ARCHIVAL; consult source-specific HOST-RESULTS and bundle status inventory; never inherited as selected-source qualification",
+      "transport_sha256": "3007b412ccb5114e5fcc3d6f472595b7d497b95d1ae947f2a5e340b46c05524b"
+    },
+    {
+      "ref": "refs/heads/archive/damage-rework-2026-10-26/mac/heads/mac/canvas-accounting-legacy-20261025-r1",
+      "original_transport_ref": "refs/heads/mac/canvas-accounting-legacy-20261025-r1",
+      "commit": "dc1a5779f5ef00ef8f496d583dc5486dcfbf9454",
+      "group": "mac",
+      "qualification": "ARCHIVAL; consult source-specific HOST-RESULTS and bundle status inventory; never inherited as selected-source qualification",
+      "transport_sha256": "3007b412ccb5114e5fcc3d6f472595b7d497b95d1ae947f2a5e340b46c05524b"
+    },
+    {
+      "ref": "refs/heads/archive/damage-rework-2026-10-26/mac/heads/mac/canvas-accounting-v1-20261025-r1",
+      "original_transport_ref": "refs/heads/mac/canvas-accounting-v1-20261025-r1",
+      "commit": "05cdb5706c92b69b7e4a97de198855eef53659a3",
+      "group": "mac",
+      "qualification": "ARCHIVAL; consult source-specific HOST-RESULTS and bundle status inventory; never inherited as selected-source qualification",
+      "transport_sha256": "3007b412ccb5114e5fcc3d6f472595b7d497b95d1ae947f2a5e340b46c05524b"
+    },
+    {
+      "ref": "refs/heads/archive/damage-rework-2026-10-26/mac/heads/mac/canvas-c386-compatibility-20261025-r1",
+      "original_transport_ref": "refs/heads/mac/canvas-c386-compatibility-20261025-r1",
+      "commit": "4159855659c2acac45926c4edfb522ef553f5537",
+      "group": "mac",
+      "qualification": "ARCHIVAL; consult source-specific HOST-RESULTS and bundle status inventory; never inherited as selected-source qualification",
+      "transport_sha256": "3007b412ccb5114e5fcc3d6f472595b7d497b95d1ae947f2a5e340b46c05524b"
+    },
+    {
+      "ref": "refs/heads/archive/damage-rework-2026-10-26/mac/heads/mac/canvas-publication-v1-gamut-20261025-r1",
+      "original_transport_ref": "refs/heads/mac/canvas-publication-v1-gamut-20261025-r1",
+      "commit": "d75a389f4af1741639c24c9d078cbab0729181be",
+      "group": "mac",
+      "qualification": "ARCHIVAL; consult source-specific HOST-RESULTS and bundle status inventory; never inherited as selected-source qualification",
+      "transport_sha256": "3007b412ccb5114e5fcc3d6f472595b7d497b95d1ae947f2a5e340b46c05524b"
+    },
+    {
+      "ref": "refs/heads/archive/damage-rework-2026-10-26/mac/heads/mac/canvas-publication-v1-hostadapt-20261025-r1",
+      "original_transport_ref": "refs/heads/mac/canvas-publication-v1-hostadapt-20261025-r1",
+      "commit": "9ad1b392bd13061f8b077f635fd702061c6aff24",
+      "group": "mac",
+      "qualification": "ARCHIVAL; consult source-specific HOST-RESULTS and bundle status inventory; never inherited as selected-source qualification",
+      "transport_sha256": "3007b412ccb5114e5fcc3d6f472595b7d497b95d1ae947f2a5e340b46c05524b"
+    },
+    {
+      "ref": "refs/heads/archive/damage-rework-2026-10-26/mac/heads/mac/native-geometry-oracle-20261025-r1",
+      "original_transport_ref": "refs/heads/mac/native-geometry-oracle-20261025-r1",
+      "commit": "4e5994f1272e35efcab16c79f5562fd558a7003e",
+      "group": "mac",
+      "qualification": "ARCHIVAL; consult source-specific HOST-RESULTS and bundle status inventory; never inherited as selected-source qualification",
+      "transport_sha256": "3007b412ccb5114e5fcc3d6f472595b7d497b95d1ae947f2a5e340b46c05524b"
+    },
+    {
+      "ref": "refs/heads/archive/damage-rework-2026-10-26/mac/heads/mac/native-property-stream-candidate-20261025",
+      "original_transport_ref": "refs/heads/mac/native-property-stream-candidate-20261025",
+      "commit": "f463a7a48b31c3954e25d2f3403c9de374fc9e50",
+      "group": "mac",
+      "qualification": "ARCHIVAL; consult source-specific HOST-RESULTS and bundle status inventory; never inherited as selected-source qualification",
+      "transport_sha256": "3007b412ccb5114e5fcc3d6f472595b7d497b95d1ae947f2a5e340b46c05524b"
+    },
+    {
+      "ref": "refs/heads/archive/damage-rework-2026-10-26/mac/heads/mac/native-qualification-20261025",
+      "original_transport_ref": "refs/heads/mac/native-qualification-20261025",
+      "commit": "f77bc07bb4a15e3a0c52543a8a831b3e492e3503",
+      "group": "mac",
+      "qualification": "ARCHIVAL; consult source-specific HOST-RESULTS and bundle status inventory; never inherited as selected-source qualification",
+      "transport_sha256": "3007b412ccb5114e5fcc3d6f472595b7d497b95d1ae947f2a5e340b46c05524b"
+    },
+    {
+      "ref": "refs/heads/archive/damage-rework-2026-10-26/mac/heads/mac/native-window-smoke-20261025",
+      "original_transport_ref": "refs/heads/mac/native-window-smoke-20261025",
+      "commit": "6a65abf225d6793549d3201f6fdeff485fc8743a",
+      "group": "mac",
+      "qualification": "ARCHIVAL; consult source-specific HOST-RESULTS and bundle status inventory; never inherited as selected-source qualification",
+      "transport_sha256": "3007b412ccb5114e5fcc3d6f472595b7d497b95d1ae947f2a5e340b46c05524b"
+    },
+    {
+      "ref": "refs/heads/archive/damage-rework-2026-10-26/mac/heads/mac/native-window-source-review-20261025",
+      "original_transport_ref": "refs/heads/mac/native-window-source-review-20261025",
+      "commit": "528896bac51b24ac3115d8b86c0a486f222f70d5",
+      "group": "mac",
+      "qualification": "ARCHIVAL; consult source-specific HOST-RESULTS and bundle status inventory; never inherited as selected-source qualification",
+      "transport_sha256": "3007b412ccb5114e5fcc3d6f472595b7d497b95d1ae947f2a5e340b46c05524b"
+    },
+    {
+      "ref": "refs/heads/archive/damage-rework-2026-10-26/mac/heads/mac/p1-native-diagnostic-20261025-r1",
+      "original_transport_ref": "refs/heads/mac/p1-native-diagnostic-20261025-r1",
+      "commit": "4a2d070437facb5808fc80292371500ad4822675",
+      "group": "mac",
+      "qualification": "ARCHIVAL; consult source-specific HOST-RESULTS and bundle status inventory; never inherited as selected-source qualification",
+      "transport_sha256": "3007b412ccb5114e5fcc3d6f472595b7d497b95d1ae947f2a5e340b46c05524b"
+    },
+    {
+      "ref": "refs/heads/archive/damage-rework-2026-10-26/mac/heads/mac/p1-native-diagnostic-importfix-20261025-r1",
+      "original_transport_ref": "refs/heads/mac/p1-native-diagnostic-importfix-20261025-r1",
+      "commit": "03c8d38e63145954ea70487033858c85dee2a746",
+      "group": "mac",
+      "qualification": "ARCHIVAL; consult source-specific HOST-RESULTS and bundle status inventory; never inherited as selected-source qualification",
+      "transport_sha256": "3007b412ccb5114e5fcc3d6f472595b7d497b95d1ae947f2a5e340b46c05524b"
+    },
+    {
+      "ref": "refs/heads/archive/damage-rework-2026-10-26/mac/heads/mac/paint-before-dto-qualification-20261025-r1",
+      "original_transport_ref": "refs/heads/mac/paint-before-dto-qualification-20261025-r1",
+      "commit": "ccffdc73a47a482c0e832f5819117d832e69c932",
+      "group": "mac",
+      "qualification": "ARCHIVAL; consult source-specific HOST-RESULTS and bundle status inventory; never inherited as selected-source qualification",
+      "transport_sha256": "3007b412ccb5114e5fcc3d6f472595b7d497b95d1ae947f2a5e340b46c05524b"
+    },
+    {
+      "ref": "refs/heads/archive/damage-rework-2026-10-26/mac/heads/mac/paint-before-stable-c288-20261025",
+      "original_transport_ref": "refs/heads/mac/paint-before-stable-c288-20261025",
+      "commit": "3ebb0d1116ac5fff91571443e73a271b7f797a25",
+      "group": "mac",
+      "qualification": "ARCHIVAL; consult source-specific HOST-RESULTS and bundle status inventory; never inherited as selected-source qualification",
+      "transport_sha256": "3007b412ccb5114e5fcc3d6f472595b7d497b95d1ae947f2a5e340b46c05524b"
+    },
+    {
+      "ref": "refs/heads/archive/damage-rework-2026-10-26/mac/heads/mac/paint-before-todos-dto-qualification-20261025-r1",
+      "original_transport_ref": "refs/heads/mac/paint-before-todos-dto-qualification-20261025-r1",
+      "commit": "c2a4b22d3733be96018c29067186c43cf30d515a",
+      "group": "mac",
+      "qualification": "ARCHIVAL; consult source-specific HOST-RESULTS and bundle status inventory; never inherited as selected-source qualification",
+      "transport_sha256": "3007b412ccb5114e5fcc3d6f472595b7d497b95d1ae947f2a5e340b46c05524b"
+    },
+    {
+      "ref": "refs/heads/archive/damage-rework-2026-10-26/mac/heads/mac/paint-before-todos-dto-qualification-20261025-r2",
+      "original_transport_ref": "refs/heads/mac/paint-before-todos-dto-qualification-20261025-r2",
+      "commit": "245d184aec1ec08b4c9df88b8089419541ac0617",
+      "group": "mac",
+      "qualification": "ARCHIVAL; consult source-specific HOST-RESULTS and bundle status inventory; never inherited as selected-source qualification",
+      "transport_sha256": "3007b412ccb5114e5fcc3d6f472595b7d497b95d1ae947f2a5e340b46c05524b"
+    },
+    {
+      "ref": "refs/heads/archive/damage-rework-2026-10-26/mac/heads/mac/paint-fixed-dto-qualification-20261025-r1",
+      "original_transport_ref": "refs/heads/mac/paint-fixed-dto-qualification-20261025-r1",
+      "commit": "55db265e3736d8027ced066500b83fbb7bdf546a",
+      "group": "mac",
+      "qualification": "ARCHIVAL; consult source-specific HOST-RESULTS and bundle status inventory; never inherited as selected-source qualification",
+      "transport_sha256": "3007b412ccb5114e5fcc3d6f472595b7d497b95d1ae947f2a5e340b46c05524b"
+    },
+    {
+      "ref": "refs/heads/archive/damage-rework-2026-10-26/mac/heads/mac/paint-fixed-stable-c288-20261025",
+      "original_transport_ref": "refs/heads/mac/paint-fixed-stable-c288-20261025",
+      "commit": "c7900ae22da68540a87da1eaec55c32fda61eb2d",
+      "group": "mac",
+      "qualification": "ARCHIVAL; consult source-specific HOST-RESULTS and bundle status inventory; never inherited as selected-source qualification",
+      "transport_sha256": "3007b412ccb5114e5fcc3d6f472595b7d497b95d1ae947f2a5e340b46c05524b"
+    },
+    {
+      "ref": "refs/heads/archive/damage-rework-2026-10-26/mac/heads/mac/paint-fixed-todos-dto-qualification-20261025-r1",
+      "original_transport_ref": "refs/heads/mac/paint-fixed-todos-dto-qualification-20261025-r1",
+      "commit": "9542e8b9e4a9d3c163c31766c139bd41e7cd00b0",
+      "group": "mac",
+      "qualification": "ARCHIVAL; consult source-specific HOST-RESULTS and bundle status inventory; never inherited as selected-source qualification",
+      "transport_sha256": "3007b412ccb5114e5fcc3d6f472595b7d497b95d1ae947f2a5e340b46c05524b"
+    },
+    {
+      "ref": "refs/heads/archive/damage-rework-2026-10-26/mac/heads/mac/paint-fixed-todos-dto-qualification-20261025-r2",
+      "original_transport_ref": "refs/heads/mac/paint-fixed-todos-dto-qualification-20261025-r2",
+      "commit": "93347ed80be1cbcd30eb25b91fd4277ac2725acc",
+      "group": "mac",
+      "qualification": "ARCHIVAL; consult source-specific HOST-RESULTS and bundle status inventory; never inherited as selected-source qualification",
+      "transport_sha256": "3007b412ccb5114e5fcc3d6f472595b7d497b95d1ae947f2a5e340b46c05524b"
+    },
+    {
+      "ref": "refs/heads/archive/damage-rework-2026-10-26/mac/heads/mac/public-subtree-contract-20261025-r1",
+      "original_transport_ref": "refs/heads/mac/public-subtree-contract-20261025-r1",
+      "commit": "597f6f3666e426b5617e861f59c9a84bdb9d7a84",
+      "group": "mac",
+      "qualification": "ARCHIVAL; consult source-specific HOST-RESULTS and bundle status inventory; never inherited as selected-source qualification",
+      "transport_sha256": "3007b412ccb5114e5fcc3d6f472595b7d497b95d1ae947f2a5e340b46c05524b"
+    },
+    {
+      "ref": "refs/heads/archive/damage-rework-2026-10-26/mac/heads/mac/public-subtree-contract-formatted-20261025-r1",
+      "original_transport_ref": "refs/heads/mac/public-subtree-contract-formatted-20261025-r1",
+      "commit": "32d0cd162eced4f07df43c94a1c17ef8c01785d4",
+      "group": "mac",
+      "qualification": "ARCHIVAL; consult source-specific HOST-RESULTS and bundle status inventory; never inherited as selected-source qualification",
+      "transport_sha256": "3007b412ccb5114e5fcc3d6f472595b7d497b95d1ae947f2a5e340b46c05524b"
+    },
+    {
+      "ref": "refs/heads/archive/damage-rework-2026-10-26/mac/heads/mac/rendering-packet-qualification-20261025",
+      "original_transport_ref": "refs/heads/mac/rendering-packet-qualification-20261025",
+      "commit": "a2259388041f2b180403710a8ed5b64b37b7d8c6",
+      "group": "mac",
+      "qualification": "ARCHIVAL; consult source-specific HOST-RESULTS and bundle status inventory; never inherited as selected-source qualification",
+      "transport_sha256": "3007b412ccb5114e5fcc3d6f472595b7d497b95d1ae947f2a5e340b46c05524b"
+    },
+    {
+      "ref": "refs/heads/archive/damage-rework-2026-10-26/mac/heads/mac/sourcevalue-r4-focused-20261026-r1",
+      "original_transport_ref": "refs/heads/mac/sourcevalue-r4-focused-20261026-r1",
+      "commit": "b3d0386ac23eda4f04a4f1965996cd2961d60c33",
+      "group": "mac",
+      "qualification": "ARCHIVAL; consult source-specific HOST-RESULTS and bundle status inventory; never inherited as selected-source qualification",
+      "transport_sha256": "3007b412ccb5114e5fcc3d6f472595b7d497b95d1ae947f2a5e340b46c05524b"
+    },
+    {
+      "ref": "refs/heads/archive/damage-rework-2026-10-26/mac/heads/mac/sourcevalue-record-capabilities-20261026-r1",
+      "original_transport_ref": "refs/heads/mac/sourcevalue-record-capabilities-20261026-r1",
+      "commit": "1f554cb71a7ff906affc06c2b8b3708aa96ce98b",
+      "group": "mac",
+      "qualification": "ARCHIVAL; consult source-specific HOST-RESULTS and bundle status inventory; never inherited as selected-source qualification",
+      "transport_sha256": "3007b412ccb5114e5fcc3d6f472595b7d497b95d1ae947f2a5e340b46c05524b"
+    },
+    {
+      "ref": "refs/heads/archive/damage-rework-2026-10-26/mac/heads/mac/sourcevalue-record-capabilities-public-api-20261026-r2",
+      "original_transport_ref": "refs/heads/mac/sourcevalue-record-capabilities-public-api-20261026-r2",
+      "commit": "f13b178591097e90959d1e2d86698e6d5fd45b80",
+      "group": "mac",
+      "qualification": "ARCHIVAL; consult source-specific HOST-RESULTS and bundle status inventory; never inherited as selected-source qualification",
+      "transport_sha256": "3007b412ccb5114e5fcc3d6f472595b7d497b95d1ae947f2a5e340b46c05524b"
+    },
+    {
+      "ref": "refs/heads/archive/damage-rework-2026-10-26/mac/heads/mac/sourcevalue-registered-unit-enum-20261026-r1",
+      "original_transport_ref": "refs/heads/mac/sourcevalue-registered-unit-enum-20261026-r1",
+      "commit": "5e9a287b57b3be62f6e8a98545b0854639b482a3",
+      "group": "mac",
+      "qualification": "ARCHIVAL; consult source-specific HOST-RESULTS and bundle status inventory; never inherited as selected-source qualification",
+      "transport_sha256": "3007b412ccb5114e5fcc3d6f472595b7d497b95d1ae947f2a5e340b46c05524b"
+    },
+    {
+      "ref": "refs/heads/archive/damage-rework-2026-10-26/mac/heads/mac/stable-owned-record-20261025",
+      "original_transport_ref": "refs/heads/mac/stable-owned-record-20261025",
+      "commit": "f64b9dde2255cc136762d2d0f1e19512cc0519bd",
+      "group": "mac",
+      "qualification": "ARCHIVAL; consult source-specific HOST-RESULTS and bundle status inventory; never inherited as selected-source qualification",
+      "transport_sha256": "3007b412ccb5114e5fcc3d6f472595b7d497b95d1ae947f2a5e340b46c05524b"
+    },
+    {
+      "ref": "refs/heads/archive/damage-rework-2026-10-26/mac/heads/mac/stable-sourcevalue-20261025",
+      "original_transport_ref": "refs/heads/mac/stable-sourcevalue-20261025",
+      "commit": "c288135531688e21fc2c6e0186ae8cfd18ebadbf",
+      "group": "mac",
+      "qualification": "ARCHIVAL; consult source-specific HOST-RESULTS and bundle status inventory; never inherited as selected-source qualification",
+      "transport_sha256": "3007b412ccb5114e5fcc3d6f472595b7d497b95d1ae947f2a5e340b46c05524b"
+    },
+    {
+      "ref": "refs/heads/archive/damage-rework-2026-10-26/nudox/core-independent/017-ref-refs-heads-master",
+      "original_transport_ref": "refs/checkpoint/core/017-ref-refs-heads-master",
+      "commit": "9e4ad389bbb8a539a3933aa26f770929383e7f05",
+      "group": "nudox/core-independent",
+      "qualification": "ARCHIVAL; consult source-specific HOST-RESULTS and bundle status inventory; never inherited as selected-source qualification",
+      "transport_sha256": "cc20ee707d4616f78679148f987db2635fbb424be7800765b18977a6a3cfaed8"
+    },
+    {
+      "ref": "refs/heads/archive/damage-rework-2026-10-26/nudox/core-independent/018-worktree-jit-consumer-r4",
+      "original_transport_ref": "refs/checkpoint/core/018-worktree-jit-consumer-r4",
+      "commit": "9e4ad389bbb8a539a3933aa26f770929383e7f05",
+      "group": "nudox/core-independent",
+      "qualification": "ARCHIVAL; consult source-specific HOST-RESULTS and bundle status inventory; never inherited as selected-source qualification",
+      "transport_sha256": "cc20ee707d4616f78679148f987db2635fbb424be7800765b18977a6a3cfaed8"
+    },
+    {
+      "ref": "refs/heads/archive/damage-rework-2026-10-26/nudox/core-independent/019-worktree-jit-consumer-stable19-r4-source",
+      "original_transport_ref": "refs/checkpoint/core/019-worktree-jit-consumer-stable19-r4-source",
+      "commit": "44518cd9aaf6c1159c89bd9ea0ffb0753d1f5375",
+      "group": "nudox/core-independent",
+      "qualification": "ARCHIVAL; consult source-specific HOST-RESULTS and bundle status inventory; never inherited as selected-source qualification",
+      "transport_sha256": "cc20ee707d4616f78679148f987db2635fbb424be7800765b18977a6a3cfaed8"
+    },
+    {
+      "ref": "refs/heads/archive/damage-rework-2026-10-26/nudox/core-independent/021-ref-refs-heads-master",
+      "original_transport_ref": "refs/checkpoint/core/021-ref-refs-heads-master",
+      "commit": "cfa96f3a0b60bf943f0baf07bf1db023605b7e98",
+      "group": "nudox/core-independent",
+      "qualification": "ARCHIVAL; consult source-specific HOST-RESULTS and bundle status inventory; never inherited as selected-source qualification",
+      "transport_sha256": "cc20ee707d4616f78679148f987db2635fbb424be7800765b18977a6a3cfaed8"
+    },
+    {
+      "ref": "refs/heads/archive/damage-rework-2026-10-26/nudox/core-independent/022-worktree-intrinsic-storage-independent-observer-comparison-r7",
+      "original_transport_ref": "refs/checkpoint/core/022-worktree-intrinsic-storage-independent-observer-comparison-r7",
+      "commit": "cfa96f3a0b60bf943f0baf07bf1db023605b7e98",
+      "group": "nudox/core-independent",
+      "qualification": "ARCHIVAL; consult source-specific HOST-RESULTS and bundle status inventory; never inherited as selected-source qualification",
+      "transport_sha256": "cc20ee707d4616f78679148f987db2635fbb424be7800765b18977a6a3cfaed8"
+    },
+    {
+      "ref": "refs/heads/archive/damage-rework-2026-10-26/nudox/core-independent/023-ref-refs-heads-master",
+      "original_transport_ref": "refs/checkpoint/core/023-ref-refs-heads-master",
+      "commit": "5a5361c8c245b27640ab6c1039a0cc917719c7b9",
+      "group": "nudox/core-independent",
+      "qualification": "ARCHIVAL; consult source-specific HOST-RESULTS and bundle status inventory; never inherited as selected-source qualification",
+      "transport_sha256": "cc20ee707d4616f78679148f987db2635fbb424be7800765b18977a6a3cfaed8"
+    },
+    {
+      "ref": "refs/heads/archive/damage-rework-2026-10-26/nudox/core-independent/024-worktree-intrinsic-storage-independent-observer-comparison-r8",
+      "original_transport_ref": "refs/checkpoint/core/024-worktree-intrinsic-storage-independent-observer-comparison-r8",
+      "commit": "5a5361c8c245b27640ab6c1039a0cc917719c7b9",
+      "group": "nudox/core-independent",
+      "qualification": "ARCHIVAL; consult source-specific HOST-RESULTS and bundle status inventory; never inherited as selected-source qualification",
+      "transport_sha256": "cc20ee707d4616f78679148f987db2635fbb424be7800765b18977a6a3cfaed8"
+    },
+    {
+      "ref": "refs/heads/archive/damage-rework-2026-10-26/nudox/core-independent/025-worktree-intrinsic-storage-independent-source",
+      "original_transport_ref": "refs/checkpoint/core/025-worktree-intrinsic-storage-independent-source",
+      "commit": "9cd6691f343ae1bd99ca895521a63358dcbffe06",
+      "group": "nudox/core-independent",
+      "qualification": "ARCHIVAL; consult source-specific HOST-RESULTS and bundle status inventory; never inherited as selected-source qualification",
+      "transport_sha256": "cc20ee707d4616f78679148f987db2635fbb424be7800765b18977a6a3cfaed8"
+    },
+    {
+      "ref": "refs/heads/archive/damage-rework-2026-10-26/nudox/core-independent/026-ref-refs-heads-master",
+      "original_transport_ref": "refs/checkpoint/core/026-ref-refs-heads-master",
+      "commit": "c8e1d384d19c565547a8138fe11bf4a0f92c276c",
+      "group": "nudox/core-independent",
+      "qualification": "ARCHIVAL; consult source-specific HOST-RESULTS and bundle status inventory; never inherited as selected-source qualification",
+      "transport_sha256": "cc20ee707d4616f78679148f987db2635fbb424be7800765b18977a6a3cfaed8"
+    },
+    {
+      "ref": "refs/heads/archive/damage-rework-2026-10-26/nudox/core-independent/027-worktree-jit-consumer-r2",
+      "original_transport_ref": "refs/checkpoint/core/027-worktree-jit-consumer-r2",
+      "commit": "c8e1d384d19c565547a8138fe11bf4a0f92c276c",
+      "group": "nudox/core-independent",
+      "qualification": "ARCHIVAL; consult source-specific HOST-RESULTS and bundle status inventory; never inherited as selected-source qualification",
+      "transport_sha256": "cc20ee707d4616f78679148f987db2635fbb424be7800765b18977a6a3cfaed8"
+    },
+    {
+      "ref": "refs/heads/archive/damage-rework-2026-10-26/nudox/core-independent/030-worktree-intrinsic-storage-promotion-mutant-r9-source",
+      "original_transport_ref": "refs/checkpoint/core/030-worktree-intrinsic-storage-promotion-mutant-r9-source",
+      "commit": "e773818a1b58fd2e92548e71191cd6a1fcc413b1",
+      "group": "nudox/core-independent",
+      "qualification": "ARCHIVAL; consult source-specific HOST-RESULTS and bundle status inventory; never inherited as selected-source qualification",
+      "transport_sha256": "cc20ee707d4616f78679148f987db2635fbb424be7800765b18977a6a3cfaed8"
+    },
+    {
+      "ref": "refs/heads/archive/damage-rework-2026-10-26/nudox/core-independent/031-worktree-resource-ledger-source",
+      "original_transport_ref": "refs/checkpoint/core/031-worktree-resource-ledger-source",
+      "commit": "18513136299c06667c667dff9ec03d8e3914bcce",
+      "group": "nudox/core-independent",
+      "qualification": "ARCHIVAL; consult source-specific HOST-RESULTS and bundle status inventory; never inherited as selected-source qualification",
+      "transport_sha256": "cc20ee707d4616f78679148f987db2635fbb424be7800765b18977a6a3cfaed8"
+    },
+    {
+      "ref": "refs/heads/archive/damage-rework-2026-10-26/nudox/core-independent/032-ref-refs-heads-master",
+      "original_transport_ref": "refs/checkpoint/core/032-ref-refs-heads-master",
+      "commit": "4cf8af1fd0e9bd202fcc1714f003025a958e946b",
+      "group": "nudox/core-independent",
+      "qualification": "ARCHIVAL; consult source-specific HOST-RESULTS and bundle status inventory; never inherited as selected-source qualification",
+      "transport_sha256": "cc20ee707d4616f78679148f987db2635fbb424be7800765b18977a6a3cfaed8"
+    },
+    {
+      "ref": "refs/heads/archive/damage-rework-2026-10-26/nudox/core-independent/033-worktree-intrinsic-storage-compact-r2-observer-comparison-r8",
+      "original_transport_ref": "refs/checkpoint/core/033-worktree-intrinsic-storage-compact-r2-observer-comparison-r8",
+      "commit": "4cf8af1fd0e9bd202fcc1714f003025a958e946b",
+      "group": "nudox/core-independent",
+      "qualification": "ARCHIVAL; consult source-specific HOST-RESULTS and bundle status inventory; never inherited as selected-source qualification",
+      "transport_sha256": "cc20ee707d4616f78679148f987db2635fbb424be7800765b18977a6a3cfaed8"
+    },
+    {
+      "ref": "refs/heads/archive/damage-rework-2026-10-26/nudox/core-independent/034-worktree-intrinsic-storage-compact-r2-source",
+      "original_transport_ref": "refs/checkpoint/core/034-worktree-intrinsic-storage-compact-r2-source",
+      "commit": "2925ed090dbeb2af9bfb3038bbfaad4b5950c967",
+      "group": "nudox/core-independent",
+      "qualification": "ARCHIVAL; consult source-specific HOST-RESULTS and bundle status inventory; never inherited as selected-source qualification",
+      "transport_sha256": "cc20ee707d4616f78679148f987db2635fbb424be7800765b18977a6a3cfaed8"
+    },
+    {
+      "ref": "refs/heads/archive/damage-rework-2026-10-26/nudox/core-independent/035-ref-refs-heads-master",
+      "original_transport_ref": "refs/checkpoint/core/035-ref-refs-heads-master",
+      "commit": "f02d3550c9118584e2b4814be03118409ae7b5c1",
+      "group": "nudox/core-independent",
+      "qualification": "ARCHIVAL; consult source-specific HOST-RESULTS and bundle status inventory; never inherited as selected-source qualification",
+      "transport_sha256": "cc20ee707d4616f78679148f987db2635fbb424be7800765b18977a6a3cfaed8"
+    },
+    {
+      "ref": "refs/heads/archive/damage-rework-2026-10-26/nudox/core-independent/036-worktree-intrinsic-storage-lazy-observer-comparison-r5",
+      "original_transport_ref": "refs/checkpoint/core/036-worktree-intrinsic-storage-lazy-observer-comparison-r5",
+      "commit": "f02d3550c9118584e2b4814be03118409ae7b5c1",
+      "group": "nudox/core-independent",
+      "qualification": "ARCHIVAL; consult source-specific HOST-RESULTS and bundle status inventory; never inherited as selected-source qualification",
+      "transport_sha256": "cc20ee707d4616f78679148f987db2635fbb424be7800765b18977a6a3cfaed8"
+    },
+    {
+      "ref": "refs/heads/archive/damage-rework-2026-10-26/nudox/core-independent/037-worktree-intrinsic-storage-lazy-source",
+      "original_transport_ref": "refs/checkpoint/core/037-worktree-intrinsic-storage-lazy-source",
+      "commit": "d95e9ea47bde8c792aec5bb02558dcdb00dd3eb2",
+      "group": "nudox/core-independent",
+      "qualification": "ARCHIVAL; consult source-specific HOST-RESULTS and bundle status inventory; never inherited as selected-source qualification",
+      "transport_sha256": "cc20ee707d4616f78679148f987db2635fbb424be7800765b18977a6a3cfaed8"
+    },
+    {
+      "ref": "refs/heads/archive/damage-rework-2026-10-26/nudox/core-independent/038-ref-refs-heads-master",
+      "original_transport_ref": "refs/checkpoint/core/038-ref-refs-heads-master",
+      "commit": "f164c6cfbb7582a4db62100ae7151e4520489ff7",
+      "group": "nudox/core-independent",
+      "qualification": "ARCHIVAL; consult source-specific HOST-RESULTS and bundle status inventory; never inherited as selected-source qualification",
+      "transport_sha256": "cc20ee707d4616f78679148f987db2635fbb424be7800765b18977a6a3cfaed8"
+    },
+    {
+      "ref": "refs/heads/archive/damage-rework-2026-10-26/nudox/core-independent/039-worktree-text-three-way-facade-source",
+      "original_transport_ref": "refs/checkpoint/core/039-worktree-text-three-way-facade-source",
+      "commit": "f164c6cfbb7582a4db62100ae7151e4520489ff7",
+      "group": "nudox/core-independent",
+      "qualification": "ARCHIVAL; consult source-specific HOST-RESULTS and bundle status inventory; never inherited as selected-source qualification",
+      "transport_sha256": "cc20ee707d4616f78679148f987db2635fbb424be7800765b18977a6a3cfaed8"
+    },
+    {
+      "ref": "refs/heads/archive/damage-rework-2026-10-26/nudox/core-independent/040-ref-refs-heads-master",
+      "original_transport_ref": "refs/checkpoint/core/040-ref-refs-heads-master",
+      "commit": "ece273a6ec64eb30d399f9b6b88b17217a4bec0e",
+      "group": "nudox/core-independent",
+      "qualification": "ARCHIVAL; consult source-specific HOST-RESULTS and bundle status inventory; never inherited as selected-source qualification",
+      "transport_sha256": "cc20ee707d4616f78679148f987db2635fbb424be7800765b18977a6a3cfaed8"
+    },
+    {
+      "ref": "refs/heads/archive/damage-rework-2026-10-26/nudox/core-independent/041-worktree-text-three-way-original-source",
+      "original_transport_ref": "refs/checkpoint/core/041-worktree-text-three-way-original-source",
+      "commit": "ece273a6ec64eb30d399f9b6b88b17217a4bec0e",
+      "group": "nudox/core-independent",
+      "qualification": "ARCHIVAL; consult source-specific HOST-RESULTS and bundle status inventory; never inherited as selected-source qualification",
+      "transport_sha256": "cc20ee707d4616f78679148f987db2635fbb424be7800765b18977a6a3cfaed8"
+    },
+    {
+      "ref": "refs/heads/archive/damage-rework-2026-10-26/nudox/core-independent/042-ref-refs-heads-master",
+      "original_transport_ref": "refs/checkpoint/core/042-ref-refs-heads-master",
+      "commit": "45625f1a450d5469afda949134f5434bc1253e97",
+      "group": "nudox/core-independent",
+      "qualification": "ARCHIVAL; consult source-specific HOST-RESULTS and bundle status inventory; never inherited as selected-source qualification",
+      "transport_sha256": "cc20ee707d4616f78679148f987db2635fbb424be7800765b18977a6a3cfaed8"
+    },
+    {
+      "ref": "refs/heads/archive/damage-rework-2026-10-26/nudox/core-independent/043-worktree-text-three-way-mechanical-source",
+      "original_transport_ref": "refs/checkpoint/core/043-worktree-text-three-way-mechanical-source",
+      "commit": "45625f1a450d5469afda949134f5434bc1253e97",
+      "group": "nudox/core-independent",
+      "qualification": "ARCHIVAL; consult source-specific HOST-RESULTS and bundle status inventory; never inherited as selected-source qualification",
+      "transport_sha256": "cc20ee707d4616f78679148f987db2635fbb424be7800765b18977a6a3cfaed8"
+    },
+    {
+      "ref": "refs/heads/archive/damage-rework-2026-10-26/nudox/core-independent/044-worktree-text-three-way-mutant-source",
+      "original_transport_ref": "refs/checkpoint/core/044-worktree-text-three-way-mutant-source",
+      "commit": "ffa6a98b2bc6d9f1fe589dedf57d2f1456bc4d57",
+      "group": "nudox/core-independent",
+      "qualification": "ARCHIVAL; consult source-specific HOST-RESULTS and bundle status inventory; never inherited as selected-source qualification",
+      "transport_sha256": "cc20ee707d4616f78679148f987db2635fbb424be7800765b18977a6a3cfaed8"
+    },
+    {
+      "ref": "refs/heads/archive/damage-rework-2026-10-26/nudox/core-independent/045-ref-refs-heads-master",
+      "original_transport_ref": "refs/checkpoint/core/045-ref-refs-heads-master",
+      "commit": "da78aa9217d6f9826e8808faf521ff4e24f50ce9",
+      "group": "nudox/core-independent",
+      "qualification": "ARCHIVAL; consult source-specific HOST-RESULTS and bundle status inventory; never inherited as selected-source qualification",
+      "transport_sha256": "cc20ee707d4616f78679148f987db2635fbb424be7800765b18977a6a3cfaed8"
+    },
+    {
+      "ref": "refs/heads/archive/damage-rework-2026-10-26/nudox/core-independent/046-worktree-intrinsic-storage-ranked-observer-comparison-r7",
+      "original_transport_ref": "refs/checkpoint/core/046-worktree-intrinsic-storage-ranked-observer-comparison-r7",
+      "commit": "da78aa9217d6f9826e8808faf521ff4e24f50ce9",
+      "group": "nudox/core-independent",
+      "qualification": "ARCHIVAL; consult source-specific HOST-RESULTS and bundle status inventory; never inherited as selected-source qualification",
+      "transport_sha256": "cc20ee707d4616f78679148f987db2635fbb424be7800765b18977a6a3cfaed8"
+    },
+    {
+      "ref": "refs/heads/archive/damage-rework-2026-10-26/nudox/core-independent/047-ref-refs-heads-master",
+      "original_transport_ref": "refs/checkpoint/core/047-ref-refs-heads-master",
+      "commit": "857cd07635e8f168702dab64d3994475256450c7",
+      "group": "nudox/core-independent",
+      "qualification": "ARCHIVAL; consult source-specific HOST-RESULTS and bundle status inventory; never inherited as selected-source qualification",
+      "transport_sha256": "cc20ee707d4616f78679148f987db2635fbb424be7800765b18977a6a3cfaed8"
+    },
+    {
+      "ref": "refs/heads/archive/damage-rework-2026-10-26/nudox/core-independent/048-worktree-intrinsic-storage-ranked-observer-comparison-r6",
+      "original_transport_ref": "refs/checkpoint/core/048-worktree-intrinsic-storage-ranked-observer-comparison-r6",
+      "commit": "857cd07635e8f168702dab64d3994475256450c7",
+      "group": "nudox/core-independent",
+      "qualification": "ARCHIVAL; consult source-specific HOST-RESULTS and bundle status inventory; never inherited as selected-source qualification",
+      "transport_sha256": "cc20ee707d4616f78679148f987db2635fbb424be7800765b18977a6a3cfaed8"
+    },
+    {
+      "ref": "refs/heads/archive/damage-rework-2026-10-26/nudox/core-independent/049-worktree-intrinsic-storage-ranked-source",
+      "original_transport_ref": "refs/checkpoint/core/049-worktree-intrinsic-storage-ranked-source",
+      "commit": "82035bb5e83f0809e0ccc79db132ff2660d252dd",
+      "group": "nudox/core-independent",
+      "qualification": "ARCHIVAL; consult source-specific HOST-RESULTS and bundle status inventory; never inherited as selected-source qualification",
+      "transport_sha256": "cc20ee707d4616f78679148f987db2635fbb424be7800765b18977a6a3cfaed8"
+    },
+    {
+      "ref": "refs/heads/archive/damage-rework-2026-10-26/nudox/core-independent/050-ref-refs-heads-master",
+      "original_transport_ref": "refs/checkpoint/core/050-ref-refs-heads-master",
+      "commit": "483a9341733c082688e518470d1527a70e1b19c5",
+      "group": "nudox/core-independent",
+      "qualification": "ARCHIVAL; consult source-specific HOST-RESULTS and bundle status inventory; never inherited as selected-source qualification",
+      "transport_sha256": "cc20ee707d4616f78679148f987db2635fbb424be7800765b18977a6a3cfaed8"
+    },
+    {
+      "ref": "refs/heads/archive/damage-rework-2026-10-26/nudox/core-independent/051-worktree-intrinsic-storage-outlined-r9-observer-comparison-r9",
+      "original_transport_ref": "refs/checkpoint/core/051-worktree-intrinsic-storage-outlined-r9-observer-comparison-r9",
+      "commit": "483a9341733c082688e518470d1527a70e1b19c5",
+      "group": "nudox/core-independent",
+      "qualification": "ARCHIVAL; consult source-specific HOST-RESULTS and bundle status inventory; never inherited as selected-source qualification",
+      "transport_sha256": "cc20ee707d4616f78679148f987db2635fbb424be7800765b18977a6a3cfaed8"
+    },
+    {
+      "ref": "refs/heads/archive/damage-rework-2026-10-26/nudox/core-independent/052-worktree-intrinsic-storage-outlined-r9-source",
+      "original_transport_ref": "refs/checkpoint/core/052-worktree-intrinsic-storage-outlined-r9-source",
+      "commit": "a6278268abbe95210647402d8d7de8983c863404",
+      "group": "nudox/core-independent",
+      "qualification": "ARCHIVAL; consult source-specific HOST-RESULTS and bundle status inventory; never inherited as selected-source qualification",
+      "transport_sha256": "cc20ee707d4616f78679148f987db2635fbb424be7800765b18977a6a3cfaed8"
+    },
+    {
+      "ref": "refs/heads/archive/damage-rework-2026-10-26/nudox/core-independent/053-ref-refs-heads-unused-observer",
+      "original_transport_ref": "refs/checkpoint/core/053-ref-refs-heads-unused-observer",
+      "commit": "e84d49a9a581e3dac00f406f16394c03155d069e",
+      "group": "nudox/core-independent",
+      "qualification": "ARCHIVAL; consult source-specific HOST-RESULTS and bundle status inventory; never inherited as selected-source qualification",
+      "transport_sha256": "cc20ee707d4616f78679148f987db2635fbb424be7800765b18977a6a3cfaed8"
+    },
+    {
+      "ref": "refs/heads/archive/damage-rework-2026-10-26/nudox/core-independent/054-worktree-intrinsic-storage-observer-source",
+      "original_transport_ref": "refs/checkpoint/core/054-worktree-intrinsic-storage-observer-source",
+      "commit": "e84d49a9a581e3dac00f406f16394c03155d069e",
+      "group": "nudox/core-independent",
+      "qualification": "ARCHIVAL; consult source-specific HOST-RESULTS and bundle status inventory; never inherited as selected-source qualification",
+      "transport_sha256": "cc20ee707d4616f78679148f987db2635fbb424be7800765b18977a6a3cfaed8"
+    },
+    {
+      "ref": "refs/heads/archive/damage-rework-2026-10-26/nudox/core-independent/055-ref-refs-heads-master",
+      "original_transport_ref": "refs/checkpoint/core/055-ref-refs-heads-master",
+      "commit": "bf1c80f89838e7f337ee204b5e236abc05e47858",
+      "group": "nudox/core-independent",
+      "qualification": "ARCHIVAL; consult source-specific HOST-RESULTS and bundle status inventory; never inherited as selected-source qualification",
+      "transport_sha256": "cc20ee707d4616f78679148f987db2635fbb424be7800765b18977a6a3cfaed8"
+    },
+    {
+      "ref": "refs/heads/archive/damage-rework-2026-10-26/nudox/core-independent/056-worktree-intrinsic-storage-observer-comparison-r4",
+      "original_transport_ref": "refs/checkpoint/core/056-worktree-intrinsic-storage-observer-comparison-r4",
+      "commit": "bf1c80f89838e7f337ee204b5e236abc05e47858",
+      "group": "nudox/core-independent",
+      "qualification": "ARCHIVAL; consult source-specific HOST-RESULTS and bundle status inventory; never inherited as selected-source qualification",
+      "transport_sha256": "cc20ee707d4616f78679148f987db2635fbb424be7800765b18977a6a3cfaed8"
+    },
+    {
+      "ref": "refs/heads/archive/damage-rework-2026-10-26/nudox/core-independent/057-ref-refs-heads-master",
+      "original_transport_ref": "refs/checkpoint/core/057-ref-refs-heads-master",
+      "commit": "de287b483fd31373477739a134404f600b371c0d",
+      "group": "nudox/core-independent",
+      "qualification": "ARCHIVAL; consult source-specific HOST-RESULTS and bundle status inventory; never inherited as selected-source qualification",
+      "transport_sha256": "cc20ee707d4616f78679148f987db2635fbb424be7800765b18977a6a3cfaed8"
+    },
+    {
+      "ref": "refs/heads/archive/damage-rework-2026-10-26/nudox/core-independent/058-worktree-intrinsic-storage-observer-comparison-r6",
+      "original_transport_ref": "refs/checkpoint/core/058-worktree-intrinsic-storage-observer-comparison-r6",
+      "commit": "de287b483fd31373477739a134404f600b371c0d",
+      "group": "nudox/core-independent",
+      "qualification": "ARCHIVAL; consult source-specific HOST-RESULTS and bundle status inventory; never inherited as selected-source qualification",
+      "transport_sha256": "cc20ee707d4616f78679148f987db2635fbb424be7800765b18977a6a3cfaed8"
+    },
+    {
+      "ref": "refs/heads/archive/damage-rework-2026-10-26/nudox/core-independent/059-worktree-intrinsic-storage-source",
+      "original_transport_ref": "refs/checkpoint/core/059-worktree-intrinsic-storage-source",
+      "commit": "fb019539fa55e679696f836ceac4078f849257a4",
+      "group": "nudox/core-independent",
+      "qualification": "ARCHIVAL; consult source-specific HOST-RESULTS and bundle status inventory; never inherited as selected-source qualification",
+      "transport_sha256": "cc20ee707d4616f78679148f987db2635fbb424be7800765b18977a6a3cfaed8"
+    },
+    {
+      "ref": "refs/heads/archive/damage-rework-2026-10-26/nudox/core-independent/060-ref-refs-heads-unused-observer",
+      "original_transport_ref": "refs/checkpoint/core/060-ref-refs-heads-unused-observer",
+      "commit": "44034edd40507f97532826604756d078ce8110e1",
+      "group": "nudox/core-independent",
+      "qualification": "ARCHIVAL; consult source-specific HOST-RESULTS and bundle status inventory; never inherited as selected-source qualification",
+      "transport_sha256": "cc20ee707d4616f78679148f987db2635fbb424be7800765b18977a6a3cfaed8"
+    },
+    {
+      "ref": "refs/heads/archive/damage-rework-2026-10-26/nudox/core-independent/061-worktree-intrinsic-storage-observer-source-r2",
+      "original_transport_ref": "refs/checkpoint/core/061-worktree-intrinsic-storage-observer-source-r2",
+      "commit": "44034edd40507f97532826604756d078ce8110e1",
+      "group": "nudox/core-independent",
+      "qualification": "ARCHIVAL; consult source-specific HOST-RESULTS and bundle status inventory; never inherited as selected-source qualification",
+      "transport_sha256": "cc20ee707d4616f78679148f987db2635fbb424be7800765b18977a6a3cfaed8"
+    },
+    {
+      "ref": "refs/heads/archive/damage-rework-2026-10-26/nudox/core-independent/062-ref-refs-heads-master",
+      "original_transport_ref": "refs/checkpoint/core/062-ref-refs-heads-master",
+      "commit": "9c37bba182549e9997c13335fbfcf70bf58cd68e",
+      "group": "nudox/core-independent",
+      "qualification": "ARCHIVAL; consult source-specific HOST-RESULTS and bundle status inventory; never inherited as selected-source qualification",
+      "transport_sha256": "cc20ee707d4616f78679148f987db2635fbb424be7800765b18977a6a3cfaed8"
+    },
+    {
+      "ref": "refs/heads/archive/damage-rework-2026-10-26/nudox/core-independent/063-worktree-intrinsic-storage-observer-comparison-r3",
+      "original_transport_ref": "refs/checkpoint/core/063-worktree-intrinsic-storage-observer-comparison-r3",
+      "commit": "9c37bba182549e9997c13335fbfcf70bf58cd68e",
+      "group": "nudox/core-independent",
+      "qualification": "ARCHIVAL; consult source-specific HOST-RESULTS and bundle status inventory; never inherited as selected-source qualification",
+      "transport_sha256": "cc20ee707d4616f78679148f987db2635fbb424be7800765b18977a6a3cfaed8"
+    },
+    {
+      "ref": "refs/heads/archive/damage-rework-2026-10-26/nudox/core-independent/064-ref-refs-heads-master",
+      "original_transport_ref": "refs/checkpoint/core/064-ref-refs-heads-master",
+      "commit": "6e86f82469daccf8006324173b2e99cc38e9c9c2",
+      "group": "nudox/core-independent",
+      "qualification": "ARCHIVAL; consult source-specific HOST-RESULTS and bundle status inventory; never inherited as selected-source qualification",
+      "transport_sha256": "cc20ee707d4616f78679148f987db2635fbb424be7800765b18977a6a3cfaed8"
+    },
+    {
+      "ref": "refs/heads/archive/damage-rework-2026-10-26/nudox/core-independent/065-worktree-jit-consumer-r3",
+      "original_transport_ref": "refs/checkpoint/core/065-worktree-jit-consumer-r3",
+      "commit": "6e86f82469daccf8006324173b2e99cc38e9c9c2",
+      "group": "nudox/core-independent",
+      "qualification": "ARCHIVAL; consult source-specific HOST-RESULTS and bundle status inventory; never inherited as selected-source qualification",
+      "transport_sha256": "cc20ee707d4616f78679148f987db2635fbb424be7800765b18977a6a3cfaed8"
+    },
+    {
+      "ref": "refs/heads/archive/damage-rework-2026-10-26/nudox/core-independent/066-ref-refs-heads-master",
+      "original_transport_ref": "refs/checkpoint/core/066-ref-refs-heads-master",
+      "commit": "5e83ed3e16daa59b03570060531c69eff7ef46a1",
+      "group": "nudox/core-independent",
+      "qualification": "ARCHIVAL; consult source-specific HOST-RESULTS and bundle status inventory; never inherited as selected-source qualification",
+      "transport_sha256": "cc20ee707d4616f78679148f987db2635fbb424be7800765b18977a6a3cfaed8"
+    },
+    {
+      "ref": "refs/heads/archive/damage-rework-2026-10-26/nudox/core-independent/067-worktree-intrinsic-storage-paged-observer-comparison-r4",
+      "original_transport_ref": "refs/checkpoint/core/067-worktree-intrinsic-storage-paged-observer-comparison-r4",
+      "commit": "5e83ed3e16daa59b03570060531c69eff7ef46a1",
+      "group": "nudox/core-independent",
+      "qualification": "ARCHIVAL; consult source-specific HOST-RESULTS and bundle status inventory; never inherited as selected-source qualification",
+      "transport_sha256": "cc20ee707d4616f78679148f987db2635fbb424be7800765b18977a6a3cfaed8"
+    },
+    {
+      "ref": "refs/heads/archive/damage-rework-2026-10-26/nudox/core-independent/068-worktree-intrinsic-storage-paged-source",
+      "original_transport_ref": "refs/checkpoint/core/068-worktree-intrinsic-storage-paged-source",
+      "commit": "5b04e9500ed084f7f65661fa2ed2f940e3c67dfe",
+      "group": "nudox/core-independent",
+      "qualification": "ARCHIVAL; consult source-specific HOST-RESULTS and bundle status inventory; never inherited as selected-source qualification",
+      "transport_sha256": "cc20ee707d4616f78679148f987db2635fbb424be7800765b18977a6a3cfaed8"
+    },
+    {
+      "ref": "refs/heads/archive/damage-rework-2026-10-26/nudox/core-independent/069-ref-refs-heads-master",
+      "original_transport_ref": "refs/checkpoint/core/069-ref-refs-heads-master",
+      "commit": "24386ca2b0eb9941fc627409d0af82b7f4f93543",
+      "group": "nudox/core-independent",
+      "qualification": "ARCHIVAL; consult source-specific HOST-RESULTS and bundle status inventory; never inherited as selected-source qualification",
+      "transport_sha256": "cc20ee707d4616f78679148f987db2635fbb424be7800765b18977a6a3cfaed8"
+    },
+    {
+      "ref": "refs/heads/archive/damage-rework-2026-10-26/nudox/core-independent/070-worktree-intrinsic-storage-paged-observer-comparison-r3",
+      "original_transport_ref": "refs/checkpoint/core/070-worktree-intrinsic-storage-paged-observer-comparison-r3",
+      "commit": "24386ca2b0eb9941fc627409d0af82b7f4f93543",
+      "group": "nudox/core-independent",
+      "qualification": "ARCHIVAL; consult source-specific HOST-RESULTS and bundle status inventory; never inherited as selected-source qualification",
+      "transport_sha256": "cc20ee707d4616f78679148f987db2635fbb424be7800765b18977a6a3cfaed8"
+    },
+    {
+      "ref": "refs/heads/archive/damage-rework-2026-10-26/nudox/core/000-worktree-baseline-source",
+      "original_transport_ref": "refs/checkpoint/core/000-worktree-baseline-source",
+      "commit": "3ac8fe24c4072109246a5361845ea018a8bb8452",
+      "group": "nudox/core",
+      "qualification": "ARCHIVAL; consult source-specific HOST-RESULTS and bundle status inventory; never inherited as selected-source qualification",
+      "transport_sha256": "e9f3f4010c4314abbae4783fc105d8dde3316d16d50a7533d937aa68418233d5"
+    },
+    {
+      "ref": "refs/heads/archive/damage-rework-2026-10-26/nudox/core/001-worktree-borrow-v2-borrow-source",
+      "original_transport_ref": "refs/checkpoint/core/001-worktree-borrow-v2-borrow-source",
+      "commit": "484e05bd2f505fef8d5f9cae80a04a29e6ba351e",
+      "group": "nudox/core",
+      "qualification": "ARCHIVAL; consult source-specific HOST-RESULTS and bundle status inventory; never inherited as selected-source qualification",
+      "transport_sha256": "e9f3f4010c4314abbae4783fc105d8dde3316d16d50a7533d937aa68418233d5"
+    },
+    {
+      "ref": "refs/heads/archive/damage-rework-2026-10-26/nudox/core/002-worktree-borrow-v2-control-source",
+      "original_transport_ref": "refs/checkpoint/core/002-worktree-borrow-v2-control-source",
+      "commit": "2af6fc0b9376c1a6c63103f17a1cde0e78384ba9",
+      "group": "nudox/core",
+      "qualification": "ARCHIVAL; consult source-specific HOST-RESULTS and bundle status inventory; never inherited as selected-source qualification",
+      "transport_sha256": "e9f3f4010c4314abbae4783fc105d8dde3316d16d50a7533d937aa68418233d5"
+    },
+    {
+      "ref": "refs/heads/archive/damage-rework-2026-10-26/nudox/core/003-worktree-cloud-mutant-ordered-anchor-source",
+      "original_transport_ref": "refs/checkpoint/core/003-worktree-cloud-mutant-ordered-anchor-source",
+      "commit": "b0b41053979bc2ccd66502d8889c12e3c35830b2",
+      "group": "nudox/core",
+      "qualification": "ARCHIVAL; consult source-specific HOST-RESULTS and bundle status inventory; never inherited as selected-source qualification",
+      "transport_sha256": "e9f3f4010c4314abbae4783fc105d8dde3316d16d50a7533d937aa68418233d5"
+    },
+    {
+      "ref": "refs/heads/archive/damage-rework-2026-10-26/nudox/core/004-worktree-cloud-mutant-ordered-link-source",
+      "original_transport_ref": "refs/checkpoint/core/004-worktree-cloud-mutant-ordered-link-source",
+      "commit": "bd1c92e98a3f0f38cfe3a5fddf23287a81143825",
+      "group": "nudox/core",
+      "qualification": "ARCHIVAL; consult source-specific HOST-RESULTS and bundle status inventory; never inherited as selected-source qualification",
+      "transport_sha256": "e9f3f4010c4314abbae4783fc105d8dde3316d16d50a7533d937aa68418233d5"
+    },
+    {
+      "ref": "refs/heads/archive/damage-rework-2026-10-26/nudox/core/005-worktree-cloud-mutant-slots-dead-source",
+      "original_transport_ref": "refs/checkpoint/core/005-worktree-cloud-mutant-slots-dead-source",
+      "commit": "271f7156c96ac674cce638c192fde9ba078b141d",
+      "group": "nudox/core",
+      "qualification": "ARCHIVAL; consult source-specific HOST-RESULTS and bundle status inventory; never inherited as selected-source qualification",
+      "transport_sha256": "e9f3f4010c4314abbae4783fc105d8dde3316d16d50a7533d937aa68418233d5"
+    },
+    {
+      "ref": "refs/heads/archive/damage-rework-2026-10-26/nudox/core/006-worktree-cloud-mutant-slots-speculation-source",
+      "original_transport_ref": "refs/checkpoint/core/006-worktree-cloud-mutant-slots-speculation-source",
+      "commit": "43ab2ebe638428960b0b47ed4335bdbcf2ea91b9",
+      "group": "nudox/core",
+      "qualification": "ARCHIVAL; consult source-specific HOST-RESULTS and bundle status inventory; never inherited as selected-source qualification",
+      "transport_sha256": "e9f3f4010c4314abbae4783fc105d8dde3316d16d50a7533d937aa68418233d5"
+    },
+    {
+      "ref": "refs/heads/archive/damage-rework-2026-10-26/nudox/core/007-worktree-cloud-ordered-corrected-source",
+      "original_transport_ref": "refs/checkpoint/core/007-worktree-cloud-ordered-corrected-source",
+      "commit": "28804c24bb8db8b31a6d3c3777629f9c69c725e2",
+      "group": "nudox/core",
+      "qualification": "ARCHIVAL; consult source-specific HOST-RESULTS and bundle status inventory; never inherited as selected-source qualification",
+      "transport_sha256": "e9f3f4010c4314abbae4783fc105d8dde3316d16d50a7533d937aa68418233d5"
+    },
+    {
+      "ref": "refs/heads/archive/damage-rework-2026-10-26/nudox/core/008-worktree-cloud-ordered-source",
+      "original_transport_ref": "refs/checkpoint/core/008-worktree-cloud-ordered-source",
+      "commit": "6c12de29ee7eb7dd8148dac532839f7612fac78c",
+      "group": "nudox/core",
+      "qualification": "ARCHIVAL; consult source-specific HOST-RESULTS and bundle status inventory; never inherited as selected-source qualification",
+      "transport_sha256": "e9f3f4010c4314abbae4783fc105d8dde3316d16d50a7533d937aa68418233d5"
+    },
+    {
+      "ref": "refs/heads/archive/damage-rework-2026-10-26/nudox/core/009-worktree-cloud-slots-source",
+      "original_transport_ref": "refs/checkpoint/core/009-worktree-cloud-slots-source",
+      "commit": "5baed181b36eeceed8b09c66664333e30047303f",
+      "group": "nudox/core",
+      "qualification": "ARCHIVAL; consult source-specific HOST-RESULTS and bundle status inventory; never inherited as selected-source qualification",
+      "transport_sha256": "e9f3f4010c4314abbae4783fc105d8dde3316d16d50a7533d937aa68418233d5"
+    },
+    {
+      "ref": "refs/heads/archive/damage-rework-2026-10-26/nudox/core/010-worktree-mutant-source",
+      "original_transport_ref": "refs/checkpoint/core/010-worktree-mutant-source",
+      "commit": "122393bf493d2e9bd9af7cc92c65fcd9e94de050",
+      "group": "nudox/core",
+      "qualification": "ARCHIVAL; consult source-specific HOST-RESULTS and bundle status inventory; never inherited as selected-source qualification",
+      "transport_sha256": "e9f3f4010c4314abbae4783fc105d8dde3316d16d50a7533d937aa68418233d5"
+    },
+    {
+      "ref": "refs/heads/archive/damage-rework-2026-10-26/nudox/core/011-worktree-source",
+      "original_transport_ref": "refs/checkpoint/core/011-worktree-source",
+      "commit": "84f0512e6ec8196900e74ad4f71903c3e3e92b32",
+      "group": "nudox/core",
+      "qualification": "ARCHIVAL; consult source-specific HOST-RESULTS and bundle status inventory; never inherited as selected-source qualification",
+      "transport_sha256": "e9f3f4010c4314abbae4783fc105d8dde3316d16d50a7533d937aa68418233d5"
+    },
+    {
+      "ref": "refs/heads/archive/damage-rework-2026-10-26/nudox/core/012-worktree-three-way-flat-source",
+      "original_transport_ref": "refs/checkpoint/core/012-worktree-three-way-flat-source",
+      "commit": "47cd2b1f0794c68b12390dd4499ca50e24442f8e",
+      "group": "nudox/core",
+      "qualification": "ARCHIVAL; consult source-specific HOST-RESULTS and bundle status inventory; never inherited as selected-source qualification",
+      "transport_sha256": "e9f3f4010c4314abbae4783fc105d8dde3316d16d50a7533d937aa68418233d5"
+    },
+    {
+      "ref": "refs/heads/archive/damage-rework-2026-10-26/nudox/core/013-worktree-three-way-nested-source",
+      "original_transport_ref": "refs/checkpoint/core/013-worktree-three-way-nested-source",
+      "commit": "da554cc9489464249cf1d0c04fe687ad08c18f2b",
+      "group": "nudox/core",
+      "qualification": "ARCHIVAL; consult source-specific HOST-RESULTS and bundle status inventory; never inherited as selected-source qualification",
+      "transport_sha256": "e9f3f4010c4314abbae4783fc105d8dde3316d16d50a7533d937aa68418233d5"
+    },
+    {
+      "ref": "refs/heads/archive/damage-rework-2026-10-26/nudox/core/014-worktree-three-way-option-source",
+      "original_transport_ref": "refs/checkpoint/core/014-worktree-three-way-option-source",
+      "commit": "0d0d04e5372bfc8d95bb859016daf51b3f4fa5c9",
+      "group": "nudox/core",
+      "qualification": "ARCHIVAL; consult source-specific HOST-RESULTS and bundle status inventory; never inherited as selected-source qualification",
+      "transport_sha256": "e9f3f4010c4314abbae4783fc105d8dde3316d16d50a7533d937aa68418233d5"
+    },
+    {
+      "ref": "refs/heads/archive/damage-rework-2026-10-26/nudox/core/015-worktree-next-rendering-hardfull-r2-source",
+      "original_transport_ref": "refs/checkpoint/core/015-worktree-next-rendering-hardfull-r2-source",
+      "commit": "ef3bd59b7301c722271e757a3bd4c04dd1016981",
+      "group": "nudox/core",
+      "qualification": "ARCHIVAL; consult source-specific HOST-RESULTS and bundle status inventory; never inherited as selected-source qualification",
+      "transport_sha256": "e9f3f4010c4314abbae4783fc105d8dde3316d16d50a7533d937aa68418233d5"
+    },
+    {
+      "ref": "refs/heads/archive/damage-rework-2026-10-26/nudox/core/016-worktree-next-rendering-r1-source",
+      "original_transport_ref": "refs/checkpoint/core/016-worktree-next-rendering-r1-source",
+      "commit": "55d97528a5f9d1a31a9a792778ae4744ad9dd0f3",
+      "group": "nudox/core",
+      "qualification": "ARCHIVAL; consult source-specific HOST-RESULTS and bundle status inventory; never inherited as selected-source qualification",
+      "transport_sha256": "e9f3f4010c4314abbae4783fc105d8dde3316d16d50a7533d937aa68418233d5"
+    },
+    {
+      "ref": "refs/heads/archive/damage-rework-2026-10-26/nudox/core/020-worktree-coherent-catalog-r1-source",
+      "original_transport_ref": "refs/checkpoint/core/020-worktree-coherent-catalog-r1-source",
+      "commit": "3f26549bc4d228df72a2eadc0d4b90b9db2aef04",
+      "group": "nudox/core",
+      "qualification": "ARCHIVAL; consult source-specific HOST-RESULTS and bundle status inventory; never inherited as selected-source qualification",
+      "transport_sha256": "e9f3f4010c4314abbae4783fc105d8dde3316d16d50a7533d937aa68418233d5"
+    },
+    {
+      "ref": "refs/heads/archive/damage-rework-2026-10-26/nudox/core/028-worktree-integrated-normal-source",
+      "original_transport_ref": "refs/checkpoint/core/028-worktree-integrated-normal-source",
+      "commit": "c7f5480cd38427381a029415fbfa648c252ca0ff",
+      "group": "nudox/core",
+      "qualification": "ARCHIVAL; consult source-specific HOST-RESULTS and bundle status inventory; never inherited as selected-source qualification",
+      "transport_sha256": "e9f3f4010c4314abbae4783fc105d8dde3316d16d50a7533d937aa68418233d5"
+    },
+    {
+      "ref": "refs/heads/archive/damage-rework-2026-10-26/nudox/core/029-worktree-integrated-public-core-corrected-source",
+      "original_transport_ref": "refs/checkpoint/core/029-worktree-integrated-public-core-corrected-source",
+      "commit": "1f14e91b77f7c9a6702fbc444d2c0f3927ba7989",
+      "group": "nudox/core",
+      "qualification": "ARCHIVAL; consult source-specific HOST-RESULTS and bundle status inventory; never inherited as selected-source qualification",
+      "transport_sha256": "e9f3f4010c4314abbae4783fc105d8dde3316d16d50a7533d937aa68418233d5"
+    },
+    {
+      "ref": "refs/heads/archive/damage-rework-2026-10-26/nudox/render/heads/render-checkpoint/coherent59ac-unfinished-59acb124a0a2",
+      "original_transport_ref": "refs/heads/render-checkpoint/coherent59ac-unfinished-59acb124a0a2",
+      "commit": "59acb124a0a2148ffb8cc55d39725f1fb2012491",
+      "group": "nudox/render",
+      "qualification": "ARCHIVAL; consult source-specific HOST-RESULTS and bundle status inventory; never inherited as selected-source qualification",
+      "transport_sha256": "03e74efbd3495d662b1ee1af7a24d7ec36b724e8d235cef5ec29429892712a53"
+    },
+    {
+      "ref": "refs/heads/archive/damage-rework-2026-10-26/nudox/render/heads/render-checkpoint/compiledR2-executor-dc2d62d5a18a",
+      "original_transport_ref": "refs/heads/render-checkpoint/compiledR2-executor-dc2d62d5a18a",
+      "commit": "dc2d62d5a18a3d70090c5383429ec007d38f3950",
+      "group": "nudox/render",
+      "qualification": "ARCHIVAL; consult source-specific HOST-RESULTS and bundle status inventory; never inherited as selected-source qualification",
+      "transport_sha256": "03e74efbd3495d662b1ee1af7a24d7ec36b724e8d235cef5ec29429892712a53"
+    },
+    {
+      "ref": "refs/heads/archive/damage-rework-2026-10-26/nudox/render/heads/render-checkpoint/csr-mechanism-mutants-r1-forward-painters-source-85b1987200cb",
+      "original_transport_ref": "refs/heads/render-checkpoint/csr-mechanism-mutants-r1-forward-painters-source-85b1987200cb",
+      "commit": "85b1987200cb64973b49161ae4eaacf05a76dd76",
+      "group": "nudox/render",
+      "qualification": "ARCHIVAL; consult source-specific HOST-RESULTS and bundle status inventory; never inherited as selected-source qualification",
+      "transport_sha256": "03e74efbd3495d662b1ee1af7a24d7ec36b724e8d235cef5ec29429892712a53"
+    },
+    {
+      "ref": "refs/heads/archive/damage-rework-2026-10-26/nudox/render/heads/render-checkpoint/csr-mechanism-mutants-r1-missed-persist-source-95bdac16bfd0",
+      "original_transport_ref": "refs/heads/render-checkpoint/csr-mechanism-mutants-r1-missed-persist-source-95bdac16bfd0",
+      "commit": "95bdac16bfd0872e3d7af78904c7221375c8fc51",
+      "group": "nudox/render",
+      "qualification": "ARCHIVAL; consult source-specific HOST-RESULTS and bundle status inventory; never inherited as selected-source qualification",
+      "transport_sha256": "03e74efbd3495d662b1ee1af7a24d7ec36b724e8d235cef5ec29429892712a53"
+    },
+    {
+      "ref": "refs/heads/archive/damage-rework-2026-10-26/nudox/render/heads/render-checkpoint/csr-mechanism-mutants-r1-publish-ends-source-173cbe8e5d26",
+      "original_transport_ref": "refs/heads/render-checkpoint/csr-mechanism-mutants-r1-publish-ends-source-173cbe8e5d26",
+      "commit": "173cbe8e5d266fda37175aa6ab5dbcee0400167c",
+      "group": "nudox/render",
+      "qualification": "ARCHIVAL; consult source-specific HOST-RESULTS and bundle status inventory; never inherited as selected-source qualification",
+      "transport_sha256": "03e74efbd3495d662b1ee1af7a24d7ec36b724e8d235cef5ec29429892712a53"
+    },
+    {
+      "ref": "refs/heads/archive/damage-rework-2026-10-26/nudox/render/heads/render-checkpoint/failed0fea-fixture-0feaeadf8702",
+      "original_transport_ref": "refs/heads/render-checkpoint/failed0fea-fixture-0feaeadf8702",
+      "commit": "0feaeadf87025a1b9619e540ff8e5d829ad6936e",
+      "group": "nudox/render",
+      "qualification": "ARCHIVAL; consult source-specific HOST-RESULTS and bundle status inventory; never inherited as selected-source qualification",
+      "transport_sha256": "03e74efbd3495d662b1ee1af7a24d7ec36b724e8d235cef5ec29429892712a53"
+    },
+    {
+      "ref": "refs/heads/archive/damage-rework-2026-10-26/nudox/render/heads/render-checkpoint/failedR1-E0061-ab3cc6d13c4c",
+      "original_transport_ref": "refs/heads/render-checkpoint/failedR1-E0061-ab3cc6d13c4c",
+      "commit": "ab3cc6d13c4cda3b38e9ad06ead455a7eb60c492",
+      "group": "nudox/render",
+      "qualification": "ARCHIVAL; consult source-specific HOST-RESULTS and bundle status inventory; never inherited as selected-source qualification",
+      "transport_sha256": "03e74efbd3495d662b1ee1af7a24d7ec36b724e8d235cef5ec29429892712a53"
+    },
+    {
+      "ref": "refs/heads/archive/damage-rework-2026-10-26/nudox/render/heads/render-checkpoint/failedR3-threshold-0c898f3d8d77",
+      "original_transport_ref": "refs/heads/render-checkpoint/failedR3-threshold-0c898f3d8d77",
+      "commit": "0c898f3d8d778e25a17dee09f992f2e4cdff3031",
+      "group": "nudox/render",
+      "qualification": "ARCHIVAL; consult source-specific HOST-RESULTS and bundle status inventory; never inherited as selected-source qualification",
+      "transport_sha256": "03e74efbd3495d662b1ee1af7a24d7ec36b724e8d235cef5ec29429892712a53"
+    },
+    {
+      "ref": "refs/heads/archive/damage-rework-2026-10-26/nudox/render/heads/render-checkpoint/functionalR3a-control-693886ea030f",
+      "original_transport_ref": "refs/heads/render-checkpoint/functionalR3a-control-693886ea030f",
+      "commit": "693886ea030f20bb2673142463f0408b0cc1b6d7",
+      "group": "nudox/render",
+      "qualification": "ARCHIVAL; consult source-specific HOST-RESULTS and bundle status inventory; never inherited as selected-source qualification",
+      "transport_sha256": "03e74efbd3495d662b1ee1af7a24d7ec36b724e8d235cef5ec29429892712a53"
+    },
+    {
+      "ref": "refs/heads/archive/damage-rework-2026-10-26/nudox/render/heads/render-checkpoint/geometry-diagnostic464-c288-9788327e20ad",
+      "original_transport_ref": "refs/heads/render-checkpoint/geometry-diagnostic464-c288-9788327e20ad",
+      "commit": "9788327e20ad392f8bcabbecc1eb37555d0e3b8d",
+      "group": "nudox/render",
+      "qualification": "ARCHIVAL; consult source-specific HOST-RESULTS and bundle status inventory; never inherited as selected-source qualification",
+      "transport_sha256": "03e74efbd3495d662b1ee1af7a24d7ec36b724e8d235cef5ec29429892712a53"
+    },
+    {
+      "ref": "refs/heads/archive/damage-rework-2026-10-26/nudox/render/heads/render-checkpoint/geometry-diagnostic464-c288-mutant-c41c55450fa1",
+      "original_transport_ref": "refs/heads/render-checkpoint/geometry-diagnostic464-c288-mutant-c41c55450fa1",
+      "commit": "c41c55450fa17535bbe6caf380c7537b7578bd77",
+      "group": "nudox/render",
+      "qualification": "ARCHIVAL; consult source-specific HOST-RESULTS and bundle status inventory; never inherited as selected-source qualification",
+      "transport_sha256": "03e74efbd3495d662b1ee1af7a24d7ec36b724e8d235cef5ec29429892712a53"
+    },
+    {
+      "ref": "refs/heads/archive/damage-rework-2026-10-26/nudox/render/heads/render-checkpoint/geometry-diagnostic464-c288-r2-128e07209c28",
+      "original_transport_ref": "refs/heads/render-checkpoint/geometry-diagnostic464-c288-r2-128e07209c28",
+      "commit": "128e07209c2868996a98b9071ff2dfbc036b9e87",
+      "group": "nudox/render",
+      "qualification": "ARCHIVAL; consult source-specific HOST-RESULTS and bundle status inventory; never inherited as selected-source qualification",
+      "transport_sha256": "03e74efbd3495d662b1ee1af7a24d7ec36b724e8d235cef5ec29429892712a53"
+    },
+    {
+      "ref": "refs/heads/archive/damage-rework-2026-10-26/nudox/render/heads/render-checkpoint/geometry-exact-source33-7342b2495f91",
+      "original_transport_ref": "refs/heads/render-checkpoint/geometry-exact-source33-7342b2495f91",
+      "commit": "7342b2495f91603ce707733e42ed1386a9acd766",
+      "group": "nudox/render",
+      "qualification": "ARCHIVAL; consult source-specific HOST-RESULTS and bundle status inventory; never inherited as selected-source qualification",
+      "transport_sha256": "03e74efbd3495d662b1ee1af7a24d7ec36b724e8d235cef5ec29429892712a53"
+    },
+    {
+      "ref": "refs/heads/archive/damage-rework-2026-10-26/nudox/render/heads/render-checkpoint/geometry-final464-c1d0944d5f10",
+      "original_transport_ref": "refs/heads/render-checkpoint/geometry-final464-c1d0944d5f10",
+      "commit": "c1d0944d5f100fa175ec36c52fe9d01d603008bf",
+      "group": "nudox/render",
+      "qualification": "ARCHIVAL; consult source-specific HOST-RESULTS and bundle status inventory; never inherited as selected-source qualification",
+      "transport_sha256": "03e74efbd3495d662b1ee1af7a24d7ec36b724e8d235cef5ec29429892712a53"
+    },
+    {
+      "ref": "refs/heads/archive/damage-rework-2026-10-26/nudox/render/heads/render-checkpoint/geometry-mutant464-6c315f499f32",
+      "original_transport_ref": "refs/heads/render-checkpoint/geometry-mutant464-6c315f499f32",
+      "commit": "6c315f499f3286ebad04de9a06cfac3d66fce26c",
+      "group": "nudox/render",
+      "qualification": "ARCHIVAL; consult source-specific HOST-RESULTS and bundle status inventory; never inherited as selected-source qualification",
+      "transport_sha256": "03e74efbd3495d662b1ee1af7a24d7ec36b724e8d235cef5ec29429892712a53"
+    },
+    {
+      "ref": "refs/heads/archive/damage-rework-2026-10-26/nudox/render/heads/render-checkpoint/geometry-source-730752916756",
+      "original_transport_ref": "refs/heads/render-checkpoint/geometry-source-730752916756",
+      "commit": "7307529167569ad05eeb775aa448917c98b5d312",
+      "group": "nudox/render",
+      "qualification": "ARCHIVAL; consult source-specific HOST-RESULTS and bundle status inventory; never inherited as selected-source qualification",
+      "transport_sha256": "03e74efbd3495d662b1ee1af7a24d7ec36b724e8d235cef5ec29429892712a53"
+    },
+    {
+      "ref": "refs/heads/archive/damage-rework-2026-10-26/nudox/render/heads/render-checkpoint/geometry-timing-stable-r1-489936ff72d5",
+      "original_transport_ref": "refs/heads/render-checkpoint/geometry-timing-stable-r1-489936ff72d5",
+      "commit": "489936ff72d5f4b7e0cdb269434f95105728a753",
+      "group": "nudox/render",
+      "qualification": "ARCHIVAL; consult source-specific HOST-RESULTS and bundle status inventory; never inherited as selected-source qualification",
+      "transport_sha256": "03e74efbd3495d662b1ee1af7a24d7ec36b724e8d235cef5ec29429892712a53"
+    },
+    {
+      "ref": "refs/heads/archive/damage-rework-2026-10-26/nudox/render/heads/render-checkpoint/geometry-timing-stable-r3-9ec80d13fcc6",
+      "original_transport_ref": "refs/heads/render-checkpoint/geometry-timing-stable-r3-9ec80d13fcc6",
+      "commit": "9ec80d13fcc6d151096ee6f1af759cce57a576ac",
+      "group": "nudox/render",
+      "qualification": "ARCHIVAL; consult source-specific HOST-RESULTS and bundle status inventory; never inherited as selected-source qualification",
+      "transport_sha256": "03e74efbd3495d662b1ee1af7a24d7ec36b724e8d235cef5ec29429892712a53"
+    },
+    {
+      "ref": "refs/heads/archive/damage-rework-2026-10-26/nudox/render/heads/render-checkpoint/integrated-viewport-mutant-c6f70a8dfd36",
+      "original_transport_ref": "refs/heads/render-checkpoint/integrated-viewport-mutant-c6f70a8dfd36",
+      "commit": "c6f70a8dfd3695aee1623ba62e1d5ed41eeb443f",
+      "group": "nudox/render",
+      "qualification": "ARCHIVAL; consult source-specific HOST-RESULTS and bundle status inventory; never inherited as selected-source qualification",
+      "transport_sha256": "03e74efbd3495d662b1ee1af7a24d7ec36b724e8d235cef5ec29429892712a53"
+    },
+    {
+      "ref": "refs/heads/archive/damage-rework-2026-10-26/nudox/render/heads/render-checkpoint/option-formatted-host-0602e4fe3bd5",
+      "original_transport_ref": "refs/heads/render-checkpoint/option-formatted-host-0602e4fe3bd5",
+      "commit": "0602e4fe3bd5f8295a8d0fa470c68234ce8d04c1",
+      "group": "nudox/render",
+      "qualification": "ARCHIVAL; consult source-specific HOST-RESULTS and bundle status inventory; never inherited as selected-source qualification",
+      "transport_sha256": "03e74efbd3495d662b1ee1af7a24d7ec36b724e8d235cef5ec29429892712a53"
+    },
+    {
+      "ref": "refs/heads/archive/damage-rework-2026-10-26/nudox/render/heads/render-checkpoint/owner-width120-mutant-r1-source-b93622d03343",
+      "original_transport_ref": "refs/heads/render-checkpoint/owner-width120-mutant-r1-source-b93622d03343",
+      "commit": "b93622d03343328cb8cc9e89a3194fb408f20bde",
+      "group": "nudox/render",
+      "qualification": "ARCHIVAL; consult source-specific HOST-RESULTS and bundle status inventory; never inherited as selected-source qualification",
+      "transport_sha256": "03e74efbd3495d662b1ee1af7a24d7ec36b724e8d235cef5ec29429892712a53"
+    },
+    {
+      "ref": "refs/heads/archive/damage-rework-2026-10-26/nudox/render/heads/render-checkpoint/paint-cache-B-mutant-keep-image-on-unclassified-mutation-r1-4e2597c58067",
+      "original_transport_ref": "refs/heads/render-checkpoint/paint-cache-B-mutant-keep-image-on-unclassified-mutation-r1-4e2597c58067",
+      "commit": "4e2597c5806752dff1cc8a85e066163dcd191a02",
+      "group": "nudox/render",
+      "qualification": "ARCHIVAL; consult source-specific HOST-RESULTS and bundle status inventory; never inherited as selected-source qualification",
+      "transport_sha256": "03e74efbd3495d662b1ee1af7a24d7ec36b724e8d235cef5ec29429892712a53"
+    },
+    {
+      "ref": "refs/heads/archive/damage-rework-2026-10-26/nudox/render/heads/render-checkpoint/paint-cache-B-mutant-lose-earlier-dirty-tiles-r1-09b95b165803",
+      "original_transport_ref": "refs/heads/render-checkpoint/paint-cache-B-mutant-lose-earlier-dirty-tiles-r1-09b95b165803",
+      "commit": "09b95b165803dd45df9640296327fc2b1ff4c5e9",
+      "group": "nudox/render",
+      "qualification": "ARCHIVAL; consult source-specific HOST-RESULTS and bundle status inventory; never inherited as selected-source qualification",
+      "transport_sha256": "03e74efbd3495d662b1ee1af7a24d7ec36b724e8d235cef5ec29429892712a53"
+    },
+    {
+      "ref": "refs/heads/archive/damage-rework-2026-10-26/nudox/render/heads/render-checkpoint/paint-cache-B-mutant-partial-caller-copy-r1-9e5ad3bfa69d",
+      "original_transport_ref": "refs/heads/render-checkpoint/paint-cache-B-mutant-partial-caller-copy-r1-9e5ad3bfa69d",
+      "commit": "9e5ad3bfa69d5a6bb45f4fd30b0090e32ebe9768",
+      "group": "nudox/render",
+      "qualification": "ARCHIVAL; consult source-specific HOST-RESULTS and bundle status inventory; never inherited as selected-source qualification",
+      "transport_sha256": "03e74efbd3495d662b1ee1af7a24d7ec36b724e8d235cef5ec29429892712a53"
+    },
+    {
+      "ref": "refs/heads/archive/damage-rework-2026-10-26/nudox/render/heads/render-checkpoint/paint-cache-B-mutant-remove-tiny-grid-guard-r1-7ef6f06bf91d",
+      "original_transport_ref": "refs/heads/render-checkpoint/paint-cache-B-mutant-remove-tiny-grid-guard-r1-7ef6f06bf91d",
+      "commit": "7ef6f06bf91d38d21f8bf9e517ec8287f9218d6c",
+      "group": "nudox/render",
+      "qualification": "ARCHIVAL; consult source-specific HOST-RESULTS and bundle status inventory; never inherited as selected-source qualification",
+      "transport_sha256": "03e74efbd3495d662b1ee1af7a24d7ec36b724e8d235cef5ec29429892712a53"
+    },
+    {
+      "ref": "refs/heads/archive/damage-rework-2026-10-26/nudox/render/heads/render-checkpoint/paint-cache-accounting-A-r1-f8f81f6156c2",
+      "original_transport_ref": "refs/heads/render-checkpoint/paint-cache-accounting-A-r1-f8f81f6156c2",
+      "commit": "f8f81f6156c2043f2d89a7074d9a19e7507d28c9",
+      "group": "nudox/render",
+      "qualification": "ARCHIVAL; consult source-specific HOST-RESULTS and bundle status inventory; never inherited as selected-source qualification",
+      "transport_sha256": "03e74efbd3495d662b1ee1af7a24d7ec36b724e8d235cef5ec29429892712a53"
+    },
+    {
+      "ref": "refs/heads/archive/damage-rework-2026-10-26/nudox/render/heads/render-checkpoint/paint-cache-candidate-r3-2ffe6da613b5",
+      "original_transport_ref": "refs/heads/render-checkpoint/paint-cache-candidate-r3-2ffe6da613b5",
+      "commit": "2ffe6da613b5ce1a5830bb621642f2c47231e111",
+      "group": "nudox/render",
+      "qualification": "ARCHIVAL; consult source-specific HOST-RESULTS and bundle status inventory; never inherited as selected-source qualification",
+      "transport_sha256": "03e74efbd3495d662b1ee1af7a24d7ec36b724e8d235cef5ec29429892712a53"
+    },
+    {
+      "ref": "refs/heads/archive/damage-rework-2026-10-26/nudox/render/heads/render-checkpoint/paint-cache-control-r2-57f1de9e4f51",
+      "original_transport_ref": "refs/heads/render-checkpoint/paint-cache-control-r2-57f1de9e4f51",
+      "commit": "57f1de9e4f51ab91268128d34515f0d981206a0c",
+      "group": "nudox/render",
+      "qualification": "ARCHIVAL; consult source-specific HOST-RESULTS and bundle status inventory; never inherited as selected-source qualification",
+      "transport_sha256": "03e74efbd3495d662b1ee1af7a24d7ec36b724e8d235cef5ec29429892712a53"
+    },
+    {
+      "ref": "refs/heads/archive/damage-rework-2026-10-26/nudox/render/heads/render-checkpoint/paint-cache-control-r3-b04b93a85f15",
+      "original_transport_ref": "refs/heads/render-checkpoint/paint-cache-control-r3-b04b93a85f15",
+      "commit": "b04b93a85f15294898d8b4043fd8cf5dc46e6fde",
+      "group": "nudox/render",
+      "qualification": "ARCHIVAL; consult source-specific HOST-RESULTS and bundle status inventory; never inherited as selected-source qualification",
+      "transport_sha256": "03e74efbd3495d662b1ee1af7a24d7ec36b724e8d235cef5ec29429892712a53"
+    },
+    {
+      "ref": "refs/heads/archive/damage-rework-2026-10-26/nudox/render/heads/render-checkpoint/paint-cache-mutant-keep-image-on-unclassified-mutation-r1-bc5163523688",
+      "original_transport_ref": "refs/heads/render-checkpoint/paint-cache-mutant-keep-image-on-unclassified-mutation-r1-bc5163523688",
+      "commit": "bc51635236881fe676966cf88cd082a7597f08f7",
+      "group": "nudox/render",
+      "qualification": "ARCHIVAL; consult source-specific HOST-RESULTS and bundle status inventory; never inherited as selected-source qualification",
+      "transport_sha256": "03e74efbd3495d662b1ee1af7a24d7ec36b724e8d235cef5ec29429892712a53"
+    },
+    {
+      "ref": "refs/heads/archive/damage-rework-2026-10-26/nudox/render/heads/render-checkpoint/paint-cache-mutant-lose-earlier-dirty-tiles-r1-c2e9513ba682",
+      "original_transport_ref": "refs/heads/render-checkpoint/paint-cache-mutant-lose-earlier-dirty-tiles-r1-c2e9513ba682",
+      "commit": "c2e9513ba6820801421c71348c0342adf86a2e10",
+      "group": "nudox/render",
+      "qualification": "ARCHIVAL; consult source-specific HOST-RESULTS and bundle status inventory; never inherited as selected-source qualification",
+      "transport_sha256": "03e74efbd3495d662b1ee1af7a24d7ec36b724e8d235cef5ec29429892712a53"
+    },
+    {
+      "ref": "refs/heads/archive/damage-rework-2026-10-26/nudox/render/heads/render-checkpoint/paint-cache-mutant-partial-caller-copy-r1-1ac3ad5b5b1c",
+      "original_transport_ref": "refs/heads/render-checkpoint/paint-cache-mutant-partial-caller-copy-r1-1ac3ad5b5b1c",
+      "commit": "1ac3ad5b5b1c9c81d808e56b57e700dd36b81b1c",
+      "group": "nudox/render",
+      "qualification": "ARCHIVAL; consult source-specific HOST-RESULTS and bundle status inventory; never inherited as selected-source qualification",
+      "transport_sha256": "03e74efbd3495d662b1ee1af7a24d7ec36b724e8d235cef5ec29429892712a53"
+    },
+    {
+      "ref": "refs/heads/archive/damage-rework-2026-10-26/nudox/render/heads/render-checkpoint/paint-cache-tiny-grid-B-r1-68b0bc6deb46",
+      "original_transport_ref": "refs/heads/render-checkpoint/paint-cache-tiny-grid-B-r1-68b0bc6deb46",
+      "commit": "68b0bc6deb46dfcdc23a493c8b901b06d69bdc43",
+      "group": "nudox/render",
+      "qualification": "ARCHIVAL; consult source-specific HOST-RESULTS and bundle status inventory; never inherited as selected-source qualification",
+      "transport_sha256": "03e74efbd3495d662b1ee1af7a24d7ec36b724e8d235cef5ec29429892712a53"
+    },
+    {
+      "ref": "refs/heads/archive/damage-rework-2026-10-26/nudox/render/heads/render-checkpoint/qualified149-prefix-149cc86c6599",
+      "original_transport_ref": "refs/heads/render-checkpoint/qualified149-prefix-149cc86c6599",
+      "commit": "149cc86c659958b1ea3b588aa5d11db650507ecd",
+      "group": "nudox/render",
+      "qualification": "ARCHIVAL; consult source-specific HOST-RESULTS and bundle status inventory; never inherited as selected-source qualification",
+      "transport_sha256": "03e74efbd3495d662b1ee1af7a24d7ec36b724e8d235cef5ec29429892712a53"
+    },
+    {
+      "ref": "refs/heads/archive/damage-rework-2026-10-26/nudox/render/heads/render-checkpoint/qualified8be-CSR-8be82d4d0aeb",
+      "original_transport_ref": "refs/heads/render-checkpoint/qualified8be-CSR-8be82d4d0aeb",
+      "commit": "8be82d4d0aeb245e912c23b2152990add0cfe90a",
+      "group": "nudox/render",
+      "qualification": "ARCHIVAL; consult source-specific HOST-RESULTS and bundle status inventory; never inherited as selected-source qualification",
+      "transport_sha256": "03e74efbd3495d662b1ee1af7a24d7ec36b724e8d235cef5ec29429892712a53"
+    },
+    {
+      "ref": "refs/heads/archive/damage-rework-2026-10-26/nudox/render/heads/render-checkpoint/qualifiedR4-partition-42927b4aaff4",
+      "original_transport_ref": "refs/heads/render-checkpoint/qualifiedR4-partition-42927b4aaff4",
+      "commit": "42927b4aaff46e1d72009c5cfa9b081eba1ff0f9",
+      "group": "nudox/render",
+      "qualification": "ARCHIVAL; consult source-specific HOST-RESULTS and bundle status inventory; never inherited as selected-source qualification",
+      "transport_sha256": "03e74efbd3495d662b1ee1af7a24d7ec36b724e8d235cef5ec29429892712a53"
+    },
+    {
+      "ref": "refs/heads/archive/damage-rework-2026-10-26/nudox/render/heads/render-checkpoint/qualifiedc0-byref-c0b4c1da330d",
+      "original_transport_ref": "refs/heads/render-checkpoint/qualifiedc0-byref-c0b4c1da330d",
+      "commit": "c0b4c1da330dc866c193edbbc08d1c793511a53f",
+      "group": "nudox/render",
+      "qualification": "ARCHIVAL; consult source-specific HOST-RESULTS and bundle status inventory; never inherited as selected-source qualification",
+      "transport_sha256": "03e74efbd3495d662b1ee1af7a24d7ec36b724e8d235cef5ec29429892712a53"
+    },
+    {
+      "ref": "refs/heads/archive/damage-rework-2026-10-26/nudox/render/heads/render-checkpoint/refs-heads-shared-normal-372636b1798f",
+      "original_transport_ref": "refs/heads/render-checkpoint/refs-heads-shared-normal-372636b1798f",
+      "commit": "372636b1798ff743832e79d33307f895647058c5",
+      "group": "nudox/render",
+      "qualification": "ARCHIVAL; consult source-specific HOST-RESULTS and bundle status inventory; never inherited as selected-source qualification",
+      "transport_sha256": "03e74efbd3495d662b1ee1af7a24d7ec36b724e8d235cef5ec29429892712a53"
+    },
+    {
+      "ref": "refs/heads/archive/damage-rework-2026-10-26/nudox/render/heads/render-checkpoint/samples-control-8aaf8c9a7bbe",
+      "original_transport_ref": "refs/heads/render-checkpoint/samples-control-8aaf8c9a7bbe",
+      "commit": "8aaf8c9a7bbe00728b7c6c8bdb21e56ab638e9d8",
+      "group": "nudox/render",
+      "qualification": "ARCHIVAL; consult source-specific HOST-RESULTS and bundle status inventory; never inherited as selected-source qualification",
+      "transport_sha256": "03e74efbd3495d662b1ee1af7a24d7ec36b724e8d235cef5ec29429892712a53"
+    },
+    {
+      "ref": "refs/heads/archive/damage-rework-2026-10-26/nudox/render/heads/render-checkpoint/source-93856c901bfd",
+      "original_transport_ref": "refs/heads/render-checkpoint/source-93856c901bfd",
+      "commit": "93856c901bfd1a2c5cbf0c26016c4451324dc422",
+      "group": "nudox/render",
+      "qualification": "ARCHIVAL; consult source-specific HOST-RESULTS and bundle status inventory; never inherited as selected-source qualification",
+      "transport_sha256": "03e74efbd3495d662b1ee1af7a24d7ec36b724e8d235cef5ec29429892712a53"
+    },
+    {
+      "ref": "refs/heads/archive/damage-rework-2026-10-26/nudox/render/heads/render-checkpoint/source-candidate-31e6a7353afd",
+      "original_transport_ref": "refs/heads/render-checkpoint/source-candidate-31e6a7353afd",
+      "commit": "31e6a7353afd35ccf44ff91bc8dd047d24fccdea",
+      "group": "nudox/render",
+      "qualification": "ARCHIVAL; consult source-specific HOST-RESULTS and bundle status inventory; never inherited as selected-source qualification",
+      "transport_sha256": "03e74efbd3495d662b1ee1af7a24d7ec36b724e8d235cef5ec29429892712a53"
+    },
+    {
+      "ref": "refs/heads/archive/damage-rework-2026-10-26/nudox/render/heads/render-checkpoint/source-mutant-75c3a0841d5a",
+      "original_transport_ref": "refs/heads/render-checkpoint/source-mutant-75c3a0841d5a",
+      "commit": "75c3a0841d5aa699ec676c21832d1320f6b1c3eb",
+      "group": "nudox/render",
+      "qualification": "ARCHIVAL; consult source-specific HOST-RESULTS and bundle status inventory; never inherited as selected-source qualification",
+      "transport_sha256": "03e74efbd3495d662b1ee1af7a24d7ec36b724e8d235cef5ec29429892712a53"
+    },
+    {
+      "ref": "refs/heads/archive/damage-rework-2026-10-26/nudox/render/heads/render-checkpoint/work-executor-r3-control-source-afab940dfba4",
+      "original_transport_ref": "refs/heads/render-checkpoint/work-executor-r3-control-source-afab940dfba4",
+      "commit": "afab940dfba4a31e6425b0ab5a539f76ac97615d",
+      "group": "nudox/render",
+      "qualification": "ARCHIVAL; consult source-specific HOST-RESULTS and bundle status inventory; never inherited as selected-source qualification",
+      "transport_sha256": "03e74efbd3495d662b1ee1af7a24d7ec36b724e8d235cef5ec29429892712a53"
+    }
+  ],
+  "transports": [
+    {
+      "name": "core-primary-sources.bundle",
+      "sha256": "e9f3f4010c4314abbae4783fc105d8dde3316d16d50a7533d937aa68418233d5",
+      "bytes": 381048,
+      "group": "nudox/core",
+      "refs": 20,
+      "bundle_is_transport_only_not_committed": true
+    },
+    {
+      "name": "core-independent-sources.bundle",
+      "sha256": "cc20ee707d4616f78679148f987db2635fbb424be7800765b18977a6a3cfaed8",
+      "bytes": 6245398,
+      "group": "nudox/core-independent",
+      "refs": 51,
+      "bundle_is_transport_only_not_committed": true
+    },
+    {
+      "name": "render-task-source-thin-71cc-r1.bundle",
+      "sha256": "03e74efbd3495d662b1ee1af7a24d7ec36b724e8d235cef5ec29429892712a53",
+      "bytes": 498565,
+      "group": "nudox/render",
+      "refs": 43,
+      "bundle_is_transport_only_not_committed": true
+    },
+    {
+      "name": "cloud-source-history-20261026.bundle",
+      "sha256": "c0353bf1f8fb821620d7539a17b49562e36a1c2a2cffcf783a3f6b35c55b5c7f",
+      "bytes": 6795323,
+      "group": "cloud",
+      "refs": 128,
+      "excluded_redundant_pseudo_refs": [
+        {
+          "commit": "b4906a5c87673dacb0f1fe812a95ea0a66789678",
+          "original_ref": "refs/codex/capacity-diagnostic-v1"
+        },
+        {
+          "commit": "85348d926ca3f181429ccb5bd6c09ae219748ad4",
+          "original_ref": "refs/codex/cursor-read-v1/candidate"
+        },
+        {
+          "commit": "eb4cafcf3f5e0f8fdefbaccba94b7ba94a5cb9f8",
+          "original_ref": "refs/codex/cursor-read-v1/control"
+        },
+        {
+          "commit": "117213e6e68421beaed615973c7ff5833deab3fb",
+          "original_ref": "refs/codex/required-inputs-v2/text-corrected-facade"
+        },
+        {
+          "commit": "09d0ee014abd694dab8e957e56183e3a74bb1a99",
+          "original_ref": "refs/codex/required-inputs-v2/text-mechanical"
+        },
+        {
+          "commit": "3c5dd394324cab99991d6dea2cc2494d486135c8",
+          "original_ref": "refs/codex/required-inputs-v2/text-original"
+        },
+        {
+          "commit": "2b8a34110b1d5d50652afa7d85d43462d7482d40",
+          "original_ref": "refs/codex/required-inputs-v2/text-owner"
+        },
+        {
+          "commit": "0ee218479a3fdef3e68985248c1c8278860eb8ac",
+          "original_ref": "refs/codex/shared-lowering-v1/candidate"
+        },
+        {
+          "commit": "d71d7931d1b51ec00280607922c8bf702d1d6128",
+          "original_ref": "refs/codex/shared-lowering-v1/control"
+        },
+        {
+          "commit": "b17d27dd19a451ccd300aab329f2ccccf574cd06",
+          "original_ref": "refs/codex/wrapping-resize-v1/stock-control-required-input"
+        },
+        {
+          "commit": "48e0f92bf8c60fe6d97ff46b1458b096c30b87f5",
+          "original_ref": "refs/codex/wrapping-resize-v1/stock-fixture-required-input"
+        },
+        {
+          "commit": "74d1bb75a2d7ec5835d6491febe24f05d2619e25",
+          "original_ref": "refs/tags/lane1-composed-74d1bb7"
+        },
+        {
+          "commit": "5d6e60bb202201493fb5255be8864f93ca949abe",
+          "original_ref": "refs/tags/lane1-multi-slots-5d6e60b"
+        },
+        {
+          "commit": "9279566ee7b8eb04c95fbf8c62a0906da1ff144a",
+          "original_ref": "refs/tags/lane1-native-id-tests-9279566"
+        },
+        {
+          "commit": "6c12de29ee7eb7dd8148dac532839f7612fac78c",
+          "original_ref": "refs/tags/lane1-ordered-6c12de2"
+        },
+        {
+          "commit": "ad32268306615dbd10719384aa653546d3711713",
+          "original_ref": "refs/tags/lane1-paint-after-ad32268"
+        },
+        {
+          "commit": "b4d7f0e37b82e80b279c632979c1ecce762c53dc",
+          "original_ref": "refs/tags/lane1-paint-before-b4d7f0e"
+        },
+        {
+          "commit": "5baed181b36eeceed8b09c66664333e30047303f",
+          "original_ref": "refs/tags/lane1-private-slots-5baed18"
+        },
+        {
+          "commit": "62218c3ef911654c80bdf78f221975e3c5b4f64c",
+          "original_ref": "refs/tags/lane1-retained-62218c3"
+        },
+        {
+          "commit": "71cc8a53da32a3bc63ffe0c2bd08e50886137a1d",
+          "original_ref": "HEAD"
+        },
+        {
+          "commit": "e1e9c0d490063b16e585a23486f8447520b035e9",
+          "original_ref": "worktrees/text-default-cfg-fix/HEAD"
+        },
+        {
+          "commit": "5c458586ff7e7dd2bdfcb2dcea3f30447e7d7e1a",
+          "original_ref": "worktrees/csr-end-offset-worktree/HEAD"
+        },
+        {
+          "commit": "2bc2349b57802b83ca552a047860b404a7228377",
+          "original_ref": "worktrees/integrated-cpu-cache-source/HEAD"
+        },
+        {
+          "commit": "d4096fd2590a26c9f073b758643a0333e48bf824",
+          "original_ref": "worktrees/retained-topology/HEAD"
+        },
+        {
+          "commit": "cedf50fcab0384b273990df909641de84aaa8833",
+          "original_ref": "worktrees/draw-geometry-extraction-worktree/HEAD"
+        },
+        {
+          "commit": "91cac8a804266368ce3baf6def7e18dbccee5244",
+          "original_ref": "worktrees/paint-cache-proof/HEAD"
+        },
+        {
+          "commit": "7bc59cf4ad61fbae562bb0f6651818698347b90c",
+          "original_ref": "worktrees/material-fusion-worktree/HEAD"
+        },
+        {
+          "commit": "fc02349c9eb0259f0ca76dfb697ea8c8fda07aff",
+          "original_ref": "worktrees/edit-turn/HEAD"
+        },
+        {
+          "commit": "8ec1422e04a89a26dd381e152dbd3341f770a14c",
+          "original_ref": "worktrees/next-rendering-packet-worktree/HEAD"
+        },
+        {
+          "commit": "515b02e9c076d92435e13935ecda77059bc4add5",
+          "original_ref": "worktrees/worktree/HEAD"
+        },
+        {
+          "commit": "13f383c10c215ea18d441fb7ef6036ce4b929644",
+          "original_ref": "worktrees/optional-shape-binding/HEAD"
+        },
+        {
+          "commit": "a727080c89d15b54478a80440a229520d2a167a8",
+          "original_ref": "worktrees/width-storage/HEAD"
+        },
+        {
+          "commit": "48066ea52f8fa8fcd668439f15ab93cbf271fbc2",
+          "original_ref": "worktrees/blend-sources-control-v2-worktree/HEAD"
+        },
+        {
+          "commit": "0113e501c8ee82ae9d4749413c5f42129da79db4",
+          "original_ref": "worktrees/text-retirement-integration/HEAD"
+        },
+        {
+          "commit": "d8c4262cec20e5d19010166b36fcf75f97349f11",
+          "original_ref": "worktrees/composed-worktree/HEAD"
+        },
+        {
+          "commit": "d1fad8fca93b076b8f87252786ac35ec301d6c8e",
+          "original_ref": "worktrees/baseline/HEAD"
+        },
+        {
+          "commit": "7b270ef5067b6a262ac32fb98053b33fd4d7e7a7",
+          "original_ref": "worktrees/fractional-span-control-worktree/HEAD"
+        },
+        {
+          "commit": "2166e7f73571afcc7c3f9157d36b65dc1bae22e4",
+          "original_ref": "worktrees/option-lazy-candidate/HEAD"
+        },
+        {
+          "commit": "48dbb8ddbdb6cb1b8f7e6417fee08fb46de6933b",
+          "original_ref": "worktrees/fractional-span-worktree/HEAD"
+        },
+        {
+          "commit": "f414f7e857ffd16ac7053ce63df2948b8900dd37",
+          "original_ref": "worktrees/draw-geometry-integrated-worktree/HEAD"
+        },
+        {
+          "commit": "cb1feb4dd25d8e280dcc21f71afae49f9c1035b4",
+          "original_ref": "worktrees/option-lazy-mutant/HEAD"
+        },
+        {
+          "commit": "ee0ab00b4a23657e0bb407f47c4885d4388283f6",
+          "original_ref": "worktrees/publication-transition-tests/HEAD"
+        },
+        {
+          "commit": "227ee72529135148e979d3a4b68184e212343a19",
+          "original_ref": "worktrees/samples-candidate-worktree/HEAD"
+        },
+        {
+          "commit": "83a7c16047aec16228eb2dd8de1c5f3f42654dc8",
+          "original_ref": "worktrees/fragment-read-worktree/HEAD"
+        },
+        {
+          "commit": "41c5ee921d0dfa6abba7aca3f14f9cd8f24dfff7",
+          "original_ref": "worktrees/material-owner-index-worktree/HEAD"
+        },
+        {
+          "commit": "a4774e141edc9fa0be094ddcb80a771cccff11d8",
+          "original_ref": "worktrees/baseline1/HEAD"
+        },
+        {
+          "commit": "4347f6baa168659fc46e41a5c8329c51b9f3d0d6",
+          "original_ref": "worktrees/text-hook-e257/HEAD"
+        },
+        {
+          "commit": "30f5dc8182c53b7916849b08226fa8314d6a0f0a",
+          "original_ref": "worktrees/reuse-seam/HEAD"
+        },
+        {
+          "commit": "a47bad473ed426a5e63393c12d0d1632f98bd524",
+          "original_ref": "worktrees/stock-fixture/HEAD"
+        },
+        {
+          "commit": "15edfe11c9b15664e549231d37042a6ca35e43de",
+          "original_ref": "worktrees/blend-sources-control-worktree/HEAD"
+        },
+        {
+          "commit": "2b55df5f2ec4709734f790706dd634fc48dede09",
+          "original_ref": "worktrees/fragment-read-qualified-worktree/HEAD"
+        },
+        {
+          "commit": "db30008693a4389cff361484adf86271068afd2a",
+          "original_ref": "worktrees/paint-cache-tiny-grid-worktree/HEAD"
+        },
+        {
+          "commit": "b80dcc8c6cf4015257034637ae5742e5f75a772f",
+          "original_ref": "worktrees/immutable-view/HEAD"
+        },
+        {
+          "commit": "b1147697c9fa088d5590b4983be6b2f32e93c8aa",
+          "original_ref": "worktrees/icb-adapter/HEAD"
+        },
+        {
+          "commit": "4c334a37f527394b11aa50f969ade6c674d68a14",
+          "original_ref": "worktrees/font-resource-constructor/HEAD"
+        },
+        {
+          "commit": "c82c25729a0cf7367740937b2315b0fe870a7de4",
+          "original_ref": "worktrees/fragment-read-control-worktree/HEAD"
+        },
+        {
+          "commit": "1f966374fc169897dec8be5aa5c08b5b65b1325b",
+          "original_ref": "worktrees/retained-target-worktree/HEAD"
+        },
+        {
+          "commit": "5d6e60bb202201493fb5255be8864f93ca949abe",
+          "original_ref": "worktrees/multi-slot-source/HEAD"
+        },
+        {
+          "commit": "0fc36536d862b3b7426e872263633fb99cc8994a",
+          "original_ref": "worktrees/integrated-test-delimiter-source/HEAD"
+        },
+        {
+          "commit": "17d5ac1fc7f9eb630ed52cb787093ea93b1491e6",
+          "original_ref": "worktrees/facade-corrected/HEAD"
+        },
+        {
+          "commit": "4bcb7c37e743f9623bbd9d5d21ce9e5c4182e78a",
+          "original_ref": "worktrees/canonical-next-compile-v2-source/HEAD"
+        },
+        {
+          "commit": "88d4c8052187c7a73f3351da6b2466391f59d281",
+          "original_ref": "worktrees/shared-lowering/HEAD"
+        },
+        {
+          "commit": "ad32268306615dbd10719384aa653546d3711713",
+          "original_ref": "worktrees/paint-admission/HEAD"
+        },
+        {
+          "commit": "4883cbfaa4479d879bb3fadca73a5a2c04bc424b",
+          "original_ref": "worktrees/blend-sources-borrow-v2-worktree/HEAD"
+        },
+        {
+          "commit": "872a5be882475cdb7b5ffb9d313f1aede42321ec",
+          "original_ref": "worktrees/borrowed-read/HEAD"
+        },
+        {
+          "commit": "58658123114570054a901285e58733eb083f7926",
+          "original_ref": "worktrees/incremental-scene-worktree/HEAD"
+        },
+        {
+          "commit": "539973331b2409adb746966d0bbcc778b9766f6e",
+          "original_ref": "worktrees/hard-full-fixture-correction-worktree/HEAD"
+        },
+        {
+          "commit": "f72dfdcdc9adaf5f9c63719158d3b0a5cbc531cf",
+          "original_ref": "worktrees/staged-candidate/HEAD"
+        },
+        {
+          "commit": "28dc3cb9597f799931fb8ce43ffc7586eecba21d",
+          "original_ref": "worktrees/material-fusion-composed-worktree/HEAD"
+        },
+        {
+          "commit": "099e2bb5e543594fcab7ed44b532cdd234f9dd34",
+          "original_ref": "worktrees/composed-source/HEAD"
+        },
+        {
+          "commit": "2c8e19d25d363675b91da2daaa935213ac2ac2e2",
+          "original_ref": "worktrees/structure-baseline-worktree/HEAD"
+        },
+        {
+          "commit": "5baed181b36eeceed8b09c66664333e30047303f",
+          "original_ref": "worktrees/layout-certificate/HEAD"
+        },
+        {
+          "commit": "46ebdf454436aa4d97861f7eda75c984e51196f2",
+          "original_ref": "worktrees/canonical-solver-source/HEAD"
+        },
+        {
+          "commit": "1b0eee3b9252b6647f13be63477cb158d21c04c8",
+          "original_ref": "worktrees/baseline2/HEAD"
+        },
+        {
+          "commit": "b603a9ebb3b0be3e37389eb4d819b8b918cebfff",
+          "original_ref": "worktrees/seed-only-worktree/HEAD"
+        },
+        {
+          "commit": "464bfdddc07a34bf8ed5e37980ccf1fdef6428b2",
+          "original_ref": "worktrees/geometry-hardened-worktree/HEAD"
+        },
+        {
+          "commit": "657b714bfd01fc4624236c7affb0f17097c7f7f7",
+          "original_ref": "worktrees/opaque-span-integrated-bridge/HEAD"
+        },
+        {
+          "commit": "47ca43cf43304b5ecf3821b3a5c91e267dadc500",
+          "original_ref": "worktrees/whole-owner-reuse-586-worktree/HEAD"
+        },
+        {
+          "commit": "7bb859f6024294137ebfe501808b8e015be9f204",
+          "original_ref": "worktrees/resource-ledger/HEAD"
+        },
+        {
+          "commit": "b582e6a296dd28c5543fc1acccec2f66aad9ea86",
+          "original_ref": "worktrees/utf8-backing/HEAD"
+        },
+        {
+          "commit": "f00c493caaf64f6b23671ed413550d5416f1a783",
+          "original_ref": "worktrees/changed-slots-worktree/HEAD"
+        },
+        {
+          "commit": "0d65be6480b1d6512086417bbbee4111226a8ecd",
+          "original_ref": "worktrees/blend-sources-borrow-worktree/HEAD"
+        },
+        {
+          "commit": "48763555e81cff41c487958f132744f55bc0a891",
+          "original_ref": "worktrees/interaction-probe/HEAD"
+        },
+        {
+          "commit": "14e3e6ed267838d8c150ec425f2421fbfca5b9a8",
+          "original_ref": "worktrees/draw-geometry-corrected-worktree/HEAD"
+        },
+        {
+          "commit": "b81a4099ad89c1bd0ca457b22c02a4396aaff60e",
+          "original_ref": "worktrees/raw-target-worktree/HEAD"
+        },
+        {
+          "commit": "33e5adf08deb4ec1a04266ec2d94fbb40fef0425",
+          "original_ref": "worktrees/geometry-exact-diagnostic-worktree/HEAD"
+        },
+        {
+          "commit": "c89ce5140acb9bbe5cf4364721d2187dd8c073e9",
+          "original_ref": "worktrees/interaction-diagnostic-source/HEAD"
+        },
+        {
+          "commit": "8c4a6a28a8804fc6ddeb332845b09ce83d99a5a0",
+          "original_ref": "worktrees/canonical-change-source/HEAD"
+        },
+        {
+          "commit": "a5fc29386feb1b797bdfb017aa99b61353e80333",
+          "original_ref": "worktrees/candidate1/HEAD"
+        },
+        {
+          "commit": "7a8ea8ace99d040efa9ee091a32d297c2e39d8c2",
+          "original_ref": "worktrees/paint-cache-accounting-worktree/HEAD"
+        },
+        {
+          "commit": "7ac6f33898989d48fb1a6023966fea738f266ced",
+          "original_ref": "worktrees/gpui-baseline-worktree/HEAD"
+        },
+        {
+          "commit": "73a6aff9f18c9e4881692b36d48ba4df3f39f13d",
+          "original_ref": "worktrees/opaque-span-proof/HEAD"
+        },
+        {
+          "commit": "1c5cefe31b1e1b7386dc44f7f1c2283eb15c99c4",
+          "original_ref": "worktrees/composed-falsifiers-source/HEAD"
+        },
+        {
+          "commit": "5d44bceeded2cbdef51bce89013d05212fe3c2cd",
+          "original_ref": "worktrees/integrated-core-source/HEAD"
+        },
+        {
+          "commit": "b4906a5c87673dacb0f1fe812a95ea0a66789678",
+          "original_ref": "worktrees/capacity-diagnostic/HEAD"
+        },
+        {
+          "commit": "71cc8a53da32a3bc63ffe0c2bd08e50886137a1d",
+          "original_ref": "worktrees/source/HEAD"
+        },
+        {
+          "commit": "76301eb99b733304f33d851ff20936e0dd174c1f",
+          "original_ref": "worktrees/canonical-solver-compile-correction-source/HEAD"
+        },
+        {
+          "commit": "af981acf8df210331fac306d8d24c2a4d9fbc2d7",
+          "original_ref": "worktrees/baseline3/HEAD"
+        },
+        {
+          "commit": "6041f0be1503862c47c4b3e7fda65225caa53118",
+          "original_ref": "worktrees/retained-order-source/HEAD"
+        },
+        {
+          "commit": "95eb5bebfdc0fb32692c2bf23b13e347ef56c2c9",
+          "original_ref": "worktrees/integrated-viewport-witness-source/HEAD"
+        },
+        {
+          "commit": "016f603121191e440a90d1790441f24b887bab4a",
+          "original_ref": "worktrees/canonical-selective-output-source/HEAD"
+        },
+        {
+          "commit": "9279566ee7b8eb04c95fbf8c62a0906da1ff144a",
+          "original_ref": "worktrees/native-id-boundary/HEAD"
+        },
+        {
+          "commit": "4899459b3f981e681fe7b2a772dca559e4508267",
+          "original_ref": "worktrees/opaque-span-control/HEAD"
+        },
+        {
+          "commit": "109efa03bf49e8a7e4b0b972ac876ac225fd2c3f",
+          "original_ref": "worktrees/samples-control-worktree/HEAD"
+        },
+        {
+          "commit": "29ef681c3047c3eb6be0fe963b9f2d33bb38ebe3",
+          "original_ref": "worktrees/codegen-worktree/HEAD"
+        },
+        {
+          "commit": "7c49cbeffcfafac668aa5c8f64208078d59301ce",
+          "original_ref": "worktrees/canonical-next-compile-source/HEAD"
+        },
+        {
+          "commit": "a8f92cc4454776c2de94309e34637aadf60eec1d",
+          "original_ref": "worktrees/shape-resource/HEAD"
+        },
+        {
+          "commit": "b4831a893bc7b38ec372be14cf35b4506bb69518",
+          "original_ref": "worktrees/geometry-repair-worktree/HEAD"
+        },
+        {
+          "commit": "bc408f97537e5450edba8c83083448ed2cd6da04",
+          "original_ref": "worktrees/endpoint-candidate/HEAD"
+        },
+        {
+          "commit": "27098e3f53ecc1b71879f567052fd4900beddcc6",
+          "original_ref": "worktrees/cursor-read/HEAD"
+        },
+        {
+          "commit": "57f1de9e4f51ab91268128d34515f0d981206a0c",
+          "original_ref": "worktrees/paint-cache-control/HEAD"
+        },
+        {
+          "commit": "81cd14dc055c05091fb74ecc04779a8b443bcc9e",
+          "original_ref": "worktrees/integrated-popup-selector-source/HEAD"
+        },
+        {
+          "commit": "820ec1802661954c82bc01df213208be87ad7eff",
+          "original_ref": "worktrees/candidate2/HEAD"
+        },
+        {
+          "commit": "2f62759dba5b90723a89b7c464b69f9060883178",
+          "original_ref": "worktrees/samples-nested-control-worktree/HEAD"
+        },
+        {
+          "commit": "ba16a0bb0c35bd54ba965a96419893292b84e8ff",
+          "original_ref": "worktrees/repository-handoff-worktree-20261026/HEAD"
+        },
+        {
+          "commit": "b8b0084267de03904c42eb98b54087c735904ff3",
+          "original_ref": "worktrees/inline-benchmark-worktree/HEAD"
+        },
+        {
+          "commit": "b02f3b90bc6edb7ffd377e9801142febb65f2981",
+          "original_ref": "worktrees/ordered-rendering-worktree/HEAD"
+        },
+        {
+          "commit": "bf52c3682d8e5bd2fc0ef3c5cb388a312d668ba6",
+          "original_ref": "worktrees/whole-owner-reuse-worktree/HEAD"
+        },
+        {
+          "commit": "694516583b89e90ab82c03f0af28bf180b876783",
+          "original_ref": "worktrees/geometry-timing-worktree/HEAD"
+        },
+        {
+          "commit": "30dfdc2e6fe3ea81260c41707c3a77594fc9c81e",
+          "original_ref": "worktrees/mutant/HEAD"
+        },
+        {
+          "commit": "3236bed0e2f39fe5a79ce5a6059013a3deaabaab",
+          "original_ref": "worktrees/canonical-observation-correction-source/HEAD"
+        },
+        {
+          "commit": "cf6e8fff5e90282729ef8acedfb587da94009f8b",
+          "original_ref": "worktrees/shared-shape-source/HEAD"
+        },
+        {
+          "commit": "982e19b1ca1294d646d50132264bc941fde78a4c",
+          "original_ref": "worktrees/geometry-diagnostic-worktree/HEAD"
+        },
+        {
+          "commit": "6957114d5a2b9875ff6da0e6484402a34d5f1d05",
+          "original_ref": "worktrees/gpu-delivery-worktree/HEAD"
+        },
+        {
+          "commit": "ccc53c8161f300a644cc0523e5d3d4bd115f5416",
+          "original_ref": "worktrees/optional-retention-core/HEAD"
+        },
+        {
+          "commit": "31f9098a78e868ea1cdb6f48440a9023c4648a6f",
+          "original_ref": "worktrees/coherent-damage-source/HEAD"
+        },
+        {
+          "commit": "c99816d53578cb2c34cd1e49426b20fc8f5fb03a",
+          "original_ref": "worktrees/canonical-revision-source/HEAD"
+        },
+        {
+          "commit": "fa95e5ca92b26a56aff983cdf785577875e92573",
+          "original_ref": "worktrees/canonical-text-prerequisite/HEAD"
+        },
+        {
+          "commit": "c71f907aef11d28f00ec839a404541d70b3752ec",
+          "original_ref": "worktrees/integrated-diagnostic-source/HEAD"
+        },
+        {
+          "commit": "4d19575b422801434bb8497d55f532c2b0c28192",
+          "original_ref": "worktrees/resource-ledger-origin/HEAD"
+        },
+        {
+          "commit": "e0acd32528c4d8cfd6a867a90ecd1e4c8b8a9cf0",
+          "original_ref": "worktrees/multi-slot-composed-source/HEAD"
+        },
+        {
+          "commit": "ec2f38a1b53ca033c36207f6d5a16b27a3f7793d",
+          "original_ref": "worktrees/benchmark-worktree/HEAD"
+        },
+        {
+          "commit": "b4d7f0e37b82e80b279c632979c1ecce762c53dc",
+          "original_ref": "worktrees/outcome-candidate/HEAD"
+        },
+        {
+          "commit": "7e9544685e3bbe4655b7217043373840d868f961",
+          "original_ref": "worktrees/canonical-recorded-scenes-source/HEAD"
+        },
+        {
+          "commit": "7c548a90d1d50ea8de0166ca0031f7cf53b9ee37",
+          "original_ref": "worktrees/candidate/HEAD"
+        },
+        {
+          "commit": "33c180a6ed6f82c792c91590c382ff2e12afcee9",
+          "original_ref": "worktrees/disjoint-transform-source/HEAD"
+        },
+        {
+          "commit": "481db61b654608fc81a9f767c3c0d439a35c8fb4",
+          "original_ref": "worktrees/utf8-corrected-11d/HEAD"
+        },
+        {
+          "commit": "11d4bb3929b00255ba566c7411dd7613163f3308",
+          "original_ref": "worktrees/canonical-compile-correction-source/HEAD"
+        },
+        {
+          "commit": "c18db73c666e1a0b0225840a78e2ad33f5a8c4a2",
+          "original_ref": "worktrees/multi-slot-diagnostic-source/HEAD"
+        }
+      ],
+      "bundle_is_transport_only_not_committed": true
+    },
+    {
+      "name": "mac-task-source-history.bundle",
+      "sha256": "3007b412ccb5114e5fcc3d6f472595b7d497b95d1ae947f2a5e340b46c05524b",
+      "bytes": 374433,
+      "group": "mac",
+      "refs": 44,
+      "excluded_redundant_pseudo_refs": [],
+      "bundle_is_transport_only_not_committed": true
+    },
+    {
+      "name": "engineering-brief-checkpoint-20261026.bundle",
+      "sha256": "74b06e2a6bcd2402002271432fdc5b3ed4da4aea4e76150b0d5990daea01bb5d",
+      "bytes": 497791,
+      "group": "cloud/brief",
+      "refs": 1,
+      "excluded_redundant_pseudo_refs": [],
+      "bundle_is_transport_only_not_committed": true
+    }
+  ]
+}

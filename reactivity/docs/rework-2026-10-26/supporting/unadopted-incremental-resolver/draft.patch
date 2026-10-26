@@ -1,0 +1,358 @@
+diff --git a/reactivity/crates/gpu/src/renderer/incremental.rs b/reactivity/crates/gpu/src/renderer/incremental.rs
+index a92d78c..2518f8b 100644
+--- a/reactivity/crates/gpu/src/renderer/incremental.rs
++++ b/reactivity/crates/gpu/src/renderer/incremental.rs
+@@ -4,6 +4,7 @@ use std::{collections::HashMap, hash::Hash, ops::Range};
+ use gpui_reactivity_core::change::{ChangeBatch, FullReasons, SceneRevision, SurfaceGeneration};
+ 
+ mod catalog;
++mod resolve;
+ 
+ const TILE: u32 = 16;
+ const MAX_REFERENCES: usize = 4 * 1024 * 1024;
+diff --git a/reactivity/crates/gpu/src/renderer/incremental/resolve.rs b/reactivity/crates/gpu/src/renderer/incremental/resolve.rs
+new file mode 100644
+index 0000000..02e06fe
+--- /dev/null
++++ b/reactivity/crates/gpu/src/renderer/incremental/resolve.rs
+@@ -0,0 +1,340 @@
++//! Stage-specific changed-group resolution using REAL canonical Canvas groups.
++//! Private adapter until producer SceneGroups/closure interface lands. This does
++//! not clear v0 FullReasons or claim that a list of dirty sites proves closure.
++use super::*;
++use gpui_canvas::{PreparedGroup, PreparedScene};
++use gpui_reactivity_core::change::SiteId;
++use std::{collections::{BTreeMap,HashSet}, ops::Range};
++
++#[derive(Clone)]
++struct Span { site: SiteId, draws: Range<usize> }
++// Immutable accepted snapshot adapter. Replace storage with canonical owner's
++// SceneGroups, not a second production group/rank catalog.
++struct Ranges {
++    revision: SceneRevision, source_epoch: u64, snapshot_epoch: u64,
++    draws:usize, ordered: Vec<Span>, by_site: BTreeMap<SiteId,usize>,
++}
++#[derive(Clone,Copy,Debug,PartialEq,Eq)]
++enum ResolveFallback { Header, Metadata, HardFull(FullReasons), TrulyUnbounded, Allocation }
++impl Ranges {
++    fn checked(revision:SceneRevision,source_epoch:u64,snapshot_epoch:u64,ordered:Vec<Span>,draws:usize)->Result<Self,ResolveFallback> {
++        if snapshot_epoch==0 {return Err(ResolveFallback::Header);}
++        let mut cursor=0;let mut by_site=BTreeMap::new();
++        for (index,span) in ordered.iter().enumerate() {
++            if span.site.owner!=revision.owner || span.draws.start!=cursor || span.draws.end<span.draws.start
++                || span.draws.end>draws || by_site.insert(span.site,index).is_some() {return Err(ResolveFallback::Metadata);}
++            cursor=span.draws.end;
++        }
++        if cursor!=draws {return Err(ResolveFallback::Metadata);}
++        Ok(Self {revision,source_epoch,snapshot_epoch,draws,ordered,by_site})
++    }
++}
++// Captured from the backend's admitted OLD complete-group allocations, never
++// inferred from new scene offsets. Build/validate once during initial admission.
++struct StoredGroups { revision:SceneRevision, groups:Vec<Range<usize>>, draws:usize }
++impl StoredGroups {
++    fn checked(revision:SceneRevision,groups:Vec<Range<usize>>,draws:usize)->Result<Self,ResolveFallback> {
++        let mut cursor=0;
++        for group in &groups {
++            if group.start!=cursor || group.end<=group.start || group.end>draws {return Err(ResolveFallback::Metadata);}
++            cursor=group.end;
++        }
++        if cursor!=draws {return Err(ResolveFallback::Metadata);}
++        Ok(Self {revision,groups,draws})
++    }
++    fn covering(&self,draw:usize)->Option<&Range<usize>> {
++        let index=self.groups.partition_point(|group|group.end<=draw);
++        self.groups.get(index).filter(|group|group.start<=draw && draw<group.end)
++    }
++}
++// This is a typed producer/closure boundary, not user-supplied dirty rectangles.
++// The actual producer must issue it ONLY after old/new ancestor, sibling-layout,
++// clip, stacking, resource and nonlocal/readback/filter closure is complete.
++struct ClosedSites<'a>(&'a [SiteId]);
++enum PendingSupport { LogicalUnresolved, AlreadyResolved, TrulyUnbounded }
++struct Pending<'a> {
++    batch: &'a ChangeBatch,
++    old: &'a Ranges, new: &'a Ranges, old_groups:&'a StoredGroups,
++    scene: PreparedScene<'a>,
++    closed: ClosedSites<'a>,
++    // Source adapter separates unresolved logical bounds from genuine hard full
++    // reasons. NEVER derive this by removing UNKNOWN_SUPPORT from a v0 batch.
++    hard: FullReasons, support: PendingSupport,
++}
++struct SelectedGroup<'a> {
++    group: PreparedGroup<'a>, draws: Range<usize>,
++    // Ordered overlap WINDOW into paired metadata; empty own ranges inside it
++    // are not contributors. Includes unchanged real owners of this full group.
++    owners: Range<usize>,
++}
++#[derive(Default,Debug)]
++struct ResolveWork { sites:usize, range_reads:usize, old_group_queries:usize, new_group_queries:usize, owner_edges:usize, old_groups:usize, canonical_groups:usize, placements:usize }
++struct Resolved<'a> {
++    old_metadata:&'a Ranges, new_metadata:&'a Ranges,
++    new_groups:Vec<SelectedGroup<'a>>,
++    // Old scene-local spans locate OLD stored supports/handles; never reused as
++    // identities or as offsets into the NEW snapshot.
++    old_ranges:Vec<Range<usize>>,
++    work:ResolveWork,
++}
++fn vec_reserve<T>(value:&mut Vec<T>,additional:usize)->Result<(),ResolveFallback> {
++    value.try_reserve(additional).map_err(|_|ResolveFallback::Allocation)
++}
++fn enqueue(site:SiteId,pending:&mut Vec<SiteId>,seen:&mut HashSet<SiteId>)->Result<(),ResolveFallback> {
++    if seen.contains(&site) {return Ok(());}
++    seen.try_reserve(1).map_err(|_|ResolveFallback::Allocation)?;
++    vec_reserve(pending,1)?;seen.insert(site);pending.push(site);Ok(())
++}
++fn owners(ranges:&Ranges,whole:&Range<usize>)->Range<usize> {
++    let first=ranges.ordered.partition_point(|s|s.draws.end<=whole.start);
++    let end=ranges.ordered.partition_point(|s|s.draws.start<whole.end);
++    first..end
++}
++// Read-only lazy adjacency for the SHARED core dependency frontier. This owns
++// no visited set/queue and grants no accepted-scene or output authority. The
++// provisional range adapter will be replaced by producer view/backend receipts.
++struct MembershipEdges<'a> {
++    old:&'a Ranges, old_groups:&'a StoredGroups,
++    new:&'a Ranges, scene:PreparedScene<'a>,
++}
++impl MembershipEdges<'_> {
++    fn site_groups(&self,site:SiteId,mut emit:impl FnMut(SceneRevision,usize)->Result<(),ResolveFallback>)->Result<usize,ResolveFallback> {
++        if site.owner!=self.old.revision.owner || site.owner!=self.new.revision.owner {return Err(ResolveFallback::Header);}
++        let mut queries=0;
++        if let Some(index)=self.old.by_site.get(&site) {
++            let span=&self.old.ordered[*index];let mut draw=span.draws.start;
++            while draw<span.draws.end {
++                let group=self.old_groups.covering(draw).ok_or(ResolveFallback::Metadata)?;
++                queries+=1;emit(self.old.revision,group.start)?;draw=group.end.min(span.draws.end);
++            }
++        }
++        if let Some(index)=self.new.by_site.get(&site) {
++            let span=&self.new.ordered[*index];let mut draw=span.draws.start;
++            while draw<span.draws.end {
++                let (_,group)=self.scene.group_covering_draw(draw).ok_or(ResolveFallback::Metadata)?;
++                queries+=1;emit(self.new.revision,group.start)?;draw=group.end.min(span.draws.end);
++            }
++        }
++        Ok(queries)
++    }
++    fn group_owners(&self,snapshot:SceneRevision,first:usize,mut emit:impl FnMut(SiteId)->Result<(),ResolveFallback>)->Result<usize,ResolveFallback> {
++        let (ranges,whole)=if snapshot==self.old.revision {
++            let whole=self.old_groups.covering(first).ok_or(ResolveFallback::Metadata)?;
++            if whole.start!=first {return Err(ResolveFallback::Metadata);}
++            (self.old,whole.clone())
++        }else if snapshot==self.new.revision {
++            let (_,whole)=self.scene.group_covering_draw(first).ok_or(ResolveFallback::Metadata)?;
++            if whole.start!=first {return Err(ResolveFallback::Metadata);}
++            (self.new,whole)
++        }else{return Err(ResolveFallback::Header)};
++        let mut edges=0;
++        for owner in owners(ranges,&whole) {
++            let span=&ranges.ordered[owner];if span.draws.is_empty() {continue;}
++            edges+=1;emit(span.site)?;
++        }
++        Ok(edges)
++    }
++}
++impl<'a> Pending<'a> {
++    fn resolve(self)->Result<Resolved<'a>,ResolveFallback> {
++        // Until the producer exports the stage-specific Pending/HardFull split,
++        // every v0 full reason remains binding. Independent hard input may only
++        // ADD reasons, never erase a raw revision/history/capacity failure.
++        let hard=self.hard.union(self.batch.full);
++        if !hard.is_empty() {return Err(ResolveFallback::HardFull(hard));}
++        if matches!(self.support,PendingSupport::TrulyUnbounded) {return Err(ResolveFallback::TrulyUnbounded);}
++        if self.old.revision.owner!=self.new.revision.owner || self.new.revision.sequence<=self.old.revision.sequence
++            || self.batch.stamp.from!=Some(self.old.revision) || self.batch.stamp.to!=self.new.revision
++            || self.batch.stamp.source_epoch!=self.new.source_epoch
++            || self.batch.stamp.snapshot_epoch!=self.new.snapshot_epoch
++            || self.old_groups.revision!=self.old.revision || self.old_groups.draws!=self.old.draws
++            || self.scene.draws().len()!=self.new.draws {return Err(ResolveFallback::Header);}
++        let mut pending=Vec::new();let mut seen=HashSet::new();
++        for site in self.closed.0 {enqueue(*site,&mut pending,&mut seen)?;}
++        let mut old_seen=HashSet::new();let mut new_seen=HashSet::new();
++        let mut old_ranges=Vec::new();let mut groups=Vec::new();let mut work=ResolveWork::default();
++        while let Some(site)=pending.pop() {
++            if site.owner!=self.new.revision.owner {return Err(ResolveFallback::Metadata);}
++            work.sites+=1;
++            if let Some(index)=self.old.by_site.get(&site) {
++                let span=&self.old.ordered[*index];work.range_reads+=1;let mut draw=span.draws.start;
++                while draw<span.draws.end {
++                    work.old_group_queries+=1;
++                    let whole=self.old_groups.covering(draw).ok_or(ResolveFallback::Metadata)?;
++                    if !old_seen.contains(&whole.start) {
++                        old_seen.try_reserve(1).map_err(|_|ResolveFallback::Allocation)?;old_seen.insert(whole.start);
++                        vec_reserve(&mut old_ranges,1)?;old_ranges.push(whole.clone());work.old_groups+=1;
++                        for owner in owners(self.old,whole) {
++                            if self.old.ordered[owner].draws.is_empty() {continue;}
++                            work.owner_edges+=1;
++                            enqueue(self.old.ordered[owner].site,&mut pending,&mut seen)?;
++                        }
++                    }
++                    draw=whole.end.min(span.draws.end);
++                }
++            }
++            if let Some(index)=self.new.by_site.get(&site) {
++                let span=&self.new.ordered[*index];work.range_reads+=1;let mut draw=span.draws.start;
++                while draw<span.draws.end {
++                    work.new_group_queries+=1;
++                    let (group,whole)=self.scene.group_covering_draw(draw).ok_or(ResolveFallback::Metadata)?;
++                    if !new_seen.contains(&whole.start) {
++                        new_seen.try_reserve(1).map_err(|_|ResolveFallback::Allocation)?;new_seen.insert(whole.start);
++                        let owner_range=owners(self.new,&whole);
++                        if owner_range.is_empty() {return Err(ResolveFallback::Metadata);}
++                        for owner in owner_range.clone() {
++                            if self.new.ordered[owner].draws.is_empty() {continue;}
++                            work.owner_edges+=1;
++                            enqueue(self.new.ordered[owner].site,&mut pending,&mut seen)?;
++                        }
++                        vec_reserve(&mut groups,1)?;
++                        work.canonical_groups+=1;work.placements+=group.placements().len();
++                        groups.push(SelectedGroup {group,draws:whole.clone(),owners:owner_range});
++                    }
++                    draw=whole.end.min(span.draws.end);
++                }
++            }
++            // A nonpainting removed ancestor may be absent from both snapshots;
++            // the producer's CLOSED dependency set must contain its consumers.
++        }
++        old_ranges.sort_unstable_by_key(|range|range.start);
++        groups.sort_unstable_by_key(|group|group.draws.start);
++        Ok(Resolved {old_metadata:self.old,new_metadata:self.new,new_groups:groups,old_ranges,work})
++    }
++}
++
++#[cfg(test)]
++mod tests {
++    use super::*;
++    use gpui_canvas::{Affine,Canvas,Color,ColorConfig,Point,Rect,TextSystem};
++    use gpui_reactivity_core::change::BatchStamp;
++    use std::num::NonZeroU64 as Nz;
++    fn revision(n:u64)->SceneRevision {SceneRevision {owner:Nz::new(11).unwrap(),sequence:Nz::new(n).unwrap()}}
++    fn site(n:u64)->SiteId {SiteId::from_monotonic(Nz::new(11).unwrap(),Nz::new(n).unwrap())}
++    fn batch()->ChangeBatch {ChangeBatch {stamp:BatchStamp {from:Some(revision(1)),to:revision(2),source_epoch:2,snapshot_epoch:2},full:FullReasons::default(),entries:Vec::new()}}
++    fn canvas(text_first:bool)->Canvas {
++        let mut text=TextSystem::bundled().unwrap();let glyphs=text.shape("MMMM",16.0,None).unwrap();
++        let mut canvas=Canvas::recording(128,48,ColorConfig::default()).unwrap();
++        let clip=Rect::new(0.,0.,128.,48.);
++        if !text_first {canvas.fill_rect(Rect::new(3.,3.,8.,8.),Affine::IDENTITY,clip,Color::WHITE).unwrap();}
++        canvas.draw_text(&mut text,&glyphs,Point{x:12.,y:24.},Affine::IDENTITY,clip,Color::BLACK).unwrap();
++        if text_first {canvas.fill_rect(Rect::new(3.,3.,8.,8.),Affine::IDENTITY,clip,Color::WHITE).unwrap();}
++        canvas
++    }
++    fn stored(scene:PreparedScene<'_>,revision:SceneRevision)->StoredGroups {
++        let mut start=0;
++        let groups=scene.groups().map(|group| {let end=start+group.placements().len();let range=start..end;start=end;range}).collect();
++        StoredGroups::checked(revision,groups,scene.draws().len()).unwrap()
++    }
++    fn spans(draws:usize)->Vec<Span> {
++        assert!(draws>=4);
++        vec![Span{site:site(1),draws:0..1},Span{site:site(2),draws:1..draws-1},Span{site:site(3),draws:draws-1..draws}]
++    }
++    #[test]
++    fn actual_shared_glyph_group_resolution_closes_old_new_owners_to_fixed_point() {
++        let old_canvas=canvas(true);let new_canvas=canvas(false);
++        let old_scene=old_canvas.prepared_scene();let new_scene=new_canvas.prepared_scene();
++        assert_eq!(old_scene.draws().len(),new_scene.draws().len());let draws=new_scene.draws().len();
++        let mut own_ranges=spans(draws);
++        own_ranges.insert(1,Span{site:site(4),draws:1..1});
++        let old=Ranges::checked(revision(1),1,1,own_ranges.clone(),draws).unwrap();
++        let new=Ranges::checked(revision(2),2,2,own_ranges,draws).unwrap();
++        let old_groups=stored(old_scene,revision(1));let batch=batch();let closed=[site(1)];
++        let resolved=Pending {batch:&batch,old:&old,new:&new,old_groups:&old_groups,scene:new_scene,
++            closed:ClosedSites(&closed),hard:FullReasons::default(),support:PendingSupport::LogicalUnresolved}.resolve().unwrap();
++        // OLD text common covers sites1+2; NEW text common covers sites2+3.
++        // A one-sided suffix pass would miss site3's old singleton allocation.
++        assert_eq!(resolved.work.sites,3);assert_eq!(resolved.work.old_groups,2);
++        assert_eq!(resolved.work.canonical_groups,2);assert_eq!(resolved.work.placements,draws);
++        assert_eq!(resolved.old_ranges,vec![0..draws-1,draws-1..draws]);
++        assert_eq!(resolved.old_metadata.revision,revision(1));assert_eq!(resolved.new_metadata.revision,revision(2));
++        assert_eq!(resolved.work.range_reads,6);
++        assert_eq!(resolved.work.old_group_queries,3);assert_eq!(resolved.work.new_group_queries,3);
++        assert_eq!(resolved.work.owner_edges,6);
++        let mut output=Vec::new();let mut covered=Vec::new();
++        for selected in &resolved.new_groups {
++            assert!(!selected.owners.is_empty());covered.push(selected.draws.clone());
++            output.extend(selected.group.placements().map(|p| (p.local_rect,p.bounds,
++                p.source.mask().map(|mask|(mask.width,mask.height,mask.coverage.to_vec())))));
++        }
++        let expected:Vec<_>=new_scene.draws().map(|p|(p.local_rect,p.bounds,
++            p.source.mask().map(|mask|(mask.width,mask.height,mask.coverage.to_vec())))).collect();
++        assert_eq!(output,expected,"full original geometry AND mask bytes, canonical order");
++        assert_eq!(covered,vec![0..1,1..draws]);
++    }
++    #[test]
++    fn no_change_resolution_does_not_traverse_canonical_groups_and_hard_failures_stay_distinct() {
++        let canvas=canvas(true);let scene=canvas.prepared_scene();let draws=scene.draws().len();
++        let old=Ranges::checked(revision(1),1,1,spans(draws),draws).unwrap();
++        let new=Ranges::checked(revision(2),2,2,spans(draws),draws).unwrap();
++        let stored=stored(scene,revision(1));let batch=batch();
++        let make=|hard,support|Pending {batch:&batch,old:&old,new:&new,old_groups:&stored,scene,
++            closed:ClosedSites(&[]),hard,support};
++        let result=make(FullReasons::default(),PendingSupport::AlreadyResolved).resolve().unwrap();
++        assert!(result.new_groups.is_empty());assert!(result.old_ranges.is_empty());
++        assert_eq!(result.work.sites,0);assert_eq!(result.work.canonical_groups,0);assert_eq!(result.work.range_reads,0);
++        assert_eq!(make(FullReasons::REVISION_GAP,PendingSupport::LogicalUnresolved).resolve().err(),Some(ResolveFallback::HardFull(FullReasons::REVISION_GAP)));
++        assert_eq!(make(FullReasons::default(),PendingSupport::TrulyUnbounded).resolve().err(),Some(ResolveFallback::TrulyUnbounded));
++        let raw_hard_batch=ChangeBatch {stamp:batch.stamp,full:FullReasons::REVISION_GAP,entries:Vec::new()};
++        assert_eq!(Pending {batch:&raw_hard_batch,..make(FullReasons::default(),PendingSupport::LogicalUnresolved)}.resolve().err(),
++            Some(ResolveFallback::HardFull(FullReasons::REVISION_GAP)),"independent harddefault cannot erase raw full");
++        let wrong=Ranges::checked(revision(3),2,2,spans(draws),draws).unwrap();
++        assert_eq!(Pending {new:&wrong,..make(FullReasons::default(),PendingSupport::LogicalUnresolved)}.resolve().err(),Some(ResolveFallback::Header));
++    }
++    #[test]
++    fn metadata_holes_duplicate_identity_and_old_group_partial_receipts_are_rejected() {
++        assert_eq!(Ranges::checked(revision(1),1,1,vec![Span{site:site(1),draws:1..2}],2).err(),Some(ResolveFallback::Metadata));
++        assert_eq!(Ranges::checked(revision(1),1,1,vec![Span{site:site(1),draws:0..1},Span{site:site(1),draws:1..2}],2).err(),Some(ResolveFallback::Metadata));
++        assert_eq!(StoredGroups::checked(revision(1),vec![1..2],2).err(),Some(ResolveFallback::Metadata));
++    }
++    #[test]
++    fn nonadvancing_and_foreign_owner_scene_revisions_do_not_resolve() {
++        let canvas=Canvas::recording(16,16,ColorConfig::default()).unwrap();let scene=canvas.prepared_scene();
++        let old=Ranges::checked(revision(1),1,1,Vec::new(),0).unwrap();let old_groups=stored(scene,revision(1));
++        for next in [revision(1),SceneRevision {owner:Nz::new(12).unwrap(),sequence:Nz::new(2).unwrap()}] {
++            let new=Ranges::checked(next,2,2,Vec::new(),0).unwrap();
++            let batch=ChangeBatch {stamp:BatchStamp {from:Some(revision(1)),to:next,source_epoch:2,snapshot_epoch:2},full:FullReasons::default(),entries:Vec::new()};
++            let outcome=Pending {batch:&batch,old:&old,new:&new,old_groups:&old_groups,scene,
++                closed:ClosedSites(&[]),hard:FullReasons::default(),support:PendingSupport::AlreadyResolved}.resolve();
++            assert_eq!(outcome.err(),Some(ResolveFallback::Header));
++        }
++    }
++
++    // REQUIRED NEGATIVE, source-predicted to expose the CURRENT prototype gap.
++    // Not transported/qualified: keep this assertion while replacing independent
++    // scene+metadata arguments with the trusted producer's committed scene view.
++    #[test]
++    fn same_length_foreign_scene_cannot_substitute_for_the_accepted_metadata_owner() {
++        let intended=canvas(false);let foreign=canvas(true);
++        let intended_scene=intended.prepared_scene();let foreign_scene=foreign.prepared_scene();
++        assert_eq!(intended_scene.draws().len(),foreign_scene.draws().len());
++        let draws=intended_scene.draws().len();
++        let old=Ranges::checked(revision(1),1,1,spans(draws),draws).unwrap();
++        let new=Ranges::checked(revision(2),2,2,spans(draws),draws).unwrap();
++        let old_groups=stored(foreign_scene,revision(1));let batch=batch();let closed=[site(1)];
++        let result=Pending {batch:&batch,old:&old,new:&new,old_groups:&old_groups,scene:foreign_scene,
++            closed:ClosedSites(&closed),hard:FullReasons::default(),support:PendingSupport::LogicalUnresolved}.resolve();
++        assert_eq!(result.err(),Some(ResolveFallback::Header),"must bind exact immutable accepted scene, not equal count");
++    }
++
++    #[test]
++    fn lazy_membership_adjacency_emits_snapshot_local_groups_and_owners_without_own_graph() {
++        let old_canvas=canvas(true);let new_canvas=canvas(false);let old_scene=old_canvas.prepared_scene();let scene=new_canvas.prepared_scene();
++        let draws=scene.draws().len();let old=Ranges::checked(revision(1),1,1,spans(draws),draws).unwrap();
++        let new=Ranges::checked(revision(2),2,2,spans(draws),draws).unwrap();let stored=stored(old_scene,revision(1));
++        let adjacency=MembershipEdges {old:&old,old_groups:&stored,new:&new,scene};
++        let mut emitted=Vec::new();
++        assert_eq!(adjacency.site_groups(site(2),|snapshot,first| {emitted.push((snapshot,first));Ok(())}).unwrap(),2);
++        assert_eq!(emitted,vec![(revision(1),0),(revision(2),1)]);
++        let mut old_owners=Vec::new();let mut new_owners=Vec::new();
++        assert_eq!(adjacency.group_owners(revision(1),0,|site|{old_owners.push(site);Ok(())}).unwrap(),2);
++        assert_eq!(adjacency.group_owners(revision(2),1,|site|{new_owners.push(site);Ok(())}).unwrap(),2);
++        assert_eq!(old_owners,vec![site(1),site(2)]);assert_eq!(new_owners,vec![site(2),site(3)]);
++        assert_eq!(adjacency.group_owners(revision(2),2,|_|Ok(())).err(),Some(ResolveFallback::Metadata));
++        assert_eq!(adjacency.group_owners(revision(3),0,|_|Ok(())).err(),Some(ResolveFallback::Header));
++        // Shared graph may decline an edge at capacity; discovery propagates
++        // its draft failure instead of publishing a partial closure/output.
++        assert_eq!(adjacency.site_groups(site(2),|_,_|Err(ResolveFallback::Allocation)).err(),Some(ResolveFallback::Allocation));
++    }
++
++}

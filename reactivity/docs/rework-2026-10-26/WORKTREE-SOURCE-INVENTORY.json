@@ -1,0 +1,719 @@
+{
+  "scope": "Source worktree commit inventory; absolute machine paths deliberately omitted. A listed commit is not a qualification claim.",
+  "worktrees": [
+    {
+      "label": "gpui-rework-archive",
+      "commit": "71cc8a53da32a3bc63ffe0c2bd08e50886137a1d",
+      "branch": "refs/heads/master",
+      "detached": false
+    },
+    {
+      "label": "baseline",
+      "commit": "a4774e141edc9fa0be094ddcb80a771cccff11d8",
+      "branch": "refs/heads/cpu-clip-mask-control",
+      "detached": false
+    },
+    {
+      "label": "candidate",
+      "commit": "820ec1802661954c82bc01df213208be87ad7eff",
+      "branch": "refs/heads/cpu-clip-mask-trial",
+      "detached": false
+    },
+    {
+      "label": "fractional-span-control-worktree",
+      "commit": "7b270ef5067b6a262ac32fb98053b33fd4d7e7a7",
+      "branch": "refs/heads/cpu-fractional-rowstrip-control",
+      "detached": false
+    },
+    {
+      "label": "fractional-span-worktree",
+      "commit": "48dbb8ddbdb6cb1b8f7e6417fee08fb46de6933b",
+      "branch": "refs/heads/cpu-fractional-rowstrip-proof",
+      "detached": false
+    },
+    {
+      "label": "interaction-probe",
+      "commit": "48763555e81cff41c487958f132744f55bc0a891",
+      "branch": "refs/heads/cpu-interaction-phase-probe",
+      "detached": false
+    },
+    {
+      "label": "mutant",
+      "commit": "30dfdc2e6fe3ea81260c41707c3a77594fc9c81e",
+      "branch": "refs/heads/cpu-clip-validity-mutant",
+      "detached": false
+    },
+    {
+      "label": "opaque-span-control",
+      "commit": "4899459b3f981e681fe7b2a772dca559e4508267",
+      "branch": "refs/heads/cpu-opaque-span-control",
+      "detached": false
+    },
+    {
+      "label": "opaque-span-integrated-bridge",
+      "commit": "657b714bfd01fc4624236c7affb0f17097c7f7f7",
+      "branch": "refs/heads/cpu-opaque-span-integrated-bridge",
+      "detached": false
+    },
+    {
+      "label": "opaque-span-proof",
+      "commit": "73a6aff9f18c9e4881692b36d48ba4df3f39f13d",
+      "branch": "refs/heads/cpu-opaque-span-proof",
+      "detached": false
+    },
+    {
+      "label": "option-lazy-candidate",
+      "commit": "2166e7f73571afcc7c3f9157d36b65dc1bae22e4",
+      "branch": "refs/heads/cpu-clip-option-lazy-trial",
+      "detached": false
+    },
+    {
+      "label": "option-lazy-mutant",
+      "commit": "cb1feb4dd25d8e280dcc21f71afae49f9c1035b4",
+      "branch": "refs/heads/cpu-clip-option-reset-mutant",
+      "detached": false
+    },
+    {
+      "label": "paint-cache-accounting-worktree",
+      "commit": "7a8ea8ace99d040efa9ee091a32d297c2e39d8c2",
+      "branch": "refs/heads/cpu-paint-cache-feature-accounting",
+      "detached": false
+    },
+    {
+      "label": "paint-cache-control",
+      "commit": "57f1de9e4f51ab91268128d34515f0d981206a0c",
+      "branch": "refs/heads/cpu-slot-cache-control",
+      "detached": false
+    },
+    {
+      "label": "paint-cache-proof",
+      "commit": "91cac8a804266368ce3baf6def7e18dbccee5244",
+      "branch": "refs/heads/cpu-checked-slot-output-cache",
+      "detached": false
+    },
+    {
+      "label": "paint-cache-tiny-grid-worktree",
+      "commit": "db30008693a4389cff361484adf86271068afd2a",
+      "branch": "refs/heads/cpu-paint-cache-tiny-grid-decline",
+      "detached": false
+    },
+    {
+      "label": "gpui-baseline-worktree",
+      "commit": "7ac6f33898989d48fb1a6023966fea738f266ced",
+      "branch": "refs/heads/benchmark/common-baseline",
+      "detached": false
+    },
+    {
+      "label": "baseline",
+      "commit": "1b0eee3b9252b6647f13be63477cb158d21c04c8",
+      "branch": null,
+      "detached": true
+    },
+    {
+      "label": "stock-fixture",
+      "commit": "a47bad473ed426a5e63393c12d0d1632f98bd524",
+      "branch": null,
+      "detached": true
+    },
+    {
+      "label": "candidate",
+      "commit": "7c548a90d1d50ea8de0166ca0031f7cf53b9ee37",
+      "branch": null,
+      "detached": true
+    },
+    {
+      "label": "canonical-change-source",
+      "commit": "bce94cea5d60c19ef226e861d37f396244100757",
+      "branch": "refs/heads/lane1-canonical-changes",
+      "detached": false
+    },
+    {
+      "label": "canonical-compile-correction-source",
+      "commit": "11d4bb3929b00255ba566c7411dd7613163f3308",
+      "branch": "refs/heads/lane1-canonical-compile-corrections",
+      "detached": false
+    },
+    {
+      "label": "canonical-next-compile-source",
+      "commit": "7c49cbeffcfafac668aa5c8f64208078d59301ce",
+      "branch": "refs/heads/lane1-next-compile",
+      "detached": false
+    },
+    {
+      "label": "canonical-next-compile-v2-source",
+      "commit": "4bcb7c37e743f9623bbd9d5d21ce9e5c4182e78a",
+      "branch": "refs/heads/lane1-next-compile-v2",
+      "detached": false
+    },
+    {
+      "label": "canonical-observation-correction-source",
+      "commit": "3236bed0e2f39fe5a79ce5a6059013a3deaabaab",
+      "branch": "refs/heads/lane1-observation-compatibility-correction",
+      "detached": false
+    },
+    {
+      "label": "canonical-recorded-scenes-source",
+      "commit": "7e9544685e3bbe4655b7217043373840d868f961",
+      "branch": "refs/heads/lane1-recorded-scenes",
+      "detached": false
+    },
+    {
+      "label": "canonical-revision-source",
+      "commit": "c99816d53578cb2c34cd1e49426b20fc8f5fb03a",
+      "branch": "refs/heads/lane1-canonical-revision",
+      "detached": false
+    },
+    {
+      "label": "canonical-selective-output-source",
+      "commit": "016f603121191e440a90d1790441f24b887bab4a",
+      "branch": "refs/heads/lane1-selective-output-compile",
+      "detached": false
+    },
+    {
+      "label": "canonical-solver-compile-correction-source",
+      "commit": "76301eb99b733304f33d851ff20936e0dd174c1f",
+      "branch": "refs/heads/lane1-solver-compiler-corrections",
+      "detached": false
+    },
+    {
+      "label": "canonical-solver-source",
+      "commit": "46ebdf454436aa4d97861f7eda75c984e51196f2",
+      "branch": "refs/heads/lane1-solver-propagation",
+      "detached": false
+    },
+    {
+      "label": "coherent-damage-source",
+      "commit": "3c5cc3330cf6e6878489a55f1ab7218731a379af",
+      "branch": "refs/heads/lane1-coherent-damage",
+      "detached": false
+    },
+    {
+      "label": "composed-falsifiers-source",
+      "commit": "1c5cefe31b1e1b7386dc44f7f1c2283eb15c99c4",
+      "branch": "refs/heads/lane1-composed-plan-falsifiers",
+      "detached": false
+    },
+    {
+      "label": "composed-source",
+      "commit": "099e2bb5e543594fcab7ed44b532cdd234f9dd34",
+      "branch": null,
+      "detached": true
+    },
+    {
+      "label": "disjoint-transform-source",
+      "commit": "33c180a6ed6f82c792c91590c382ff2e12afcee9",
+      "branch": "refs/heads/lane1-disjoint-transform",
+      "detached": false
+    },
+    {
+      "label": "edit-turn",
+      "commit": "fc02349c9eb0259f0ca76dfb697ea8c8fda07aff",
+      "branch": null,
+      "detached": true
+    },
+    {
+      "label": "icb-adapter",
+      "commit": "b1147697c9fa088d5590b4983be6b2f32e93c8aa",
+      "branch": null,
+      "detached": true
+    },
+    {
+      "label": "integrated-core-source",
+      "commit": "5d44bceeded2cbdef51bce89013d05212fe3c2cd",
+      "branch": "refs/heads/lane1-integrated-core",
+      "detached": false
+    },
+    {
+      "label": "integrated-cpu-cache-source",
+      "commit": "2bc2349b57802b83ca552a047860b404a7228377",
+      "branch": "refs/heads/lane1-integrated-cpu-cache",
+      "detached": false
+    },
+    {
+      "label": "integrated-diagnostic-source",
+      "commit": "c71f907aef11d28f00ec839a404541d70b3752ec",
+      "branch": "refs/heads/lane1-integrated-diagnostics",
+      "detached": false
+    },
+    {
+      "label": "integrated-popup-selector-source",
+      "commit": "81cd14dc055c05091fb74ecc04779a8b443bcc9e",
+      "branch": "refs/heads/lane1-integrated-popup-selector",
+      "detached": false
+    },
+    {
+      "label": "integrated-test-delimiter-source",
+      "commit": "0fc36536d862b3b7426e872263633fb99cc8994a",
+      "branch": "refs/heads/lane1-integrated-test-delimiter",
+      "detached": false
+    },
+    {
+      "label": "integrated-viewport-witness-source",
+      "commit": "95eb5bebfdc0fb32692c2bf23b13e347ef56c2c9",
+      "branch": "refs/heads/lane1-integrated-viewport-witness",
+      "detached": false
+    },
+    {
+      "label": "interaction-diagnostic-source",
+      "commit": "c89ce5140acb9bbe5cf4364721d2187dd8c073e9",
+      "branch": "refs/heads/lane1-interaction-diagnostics",
+      "detached": false
+    },
+    {
+      "label": "layout-certificate",
+      "commit": "5baed181b36eeceed8b09c66664333e30047303f",
+      "branch": null,
+      "detached": true
+    },
+    {
+      "label": "multi-slot-composed-source",
+      "commit": "e0acd32528c4d8cfd6a867a90ecd1e4c8b8a9cf0",
+      "branch": "refs/heads/lane1-multi-slot-composed",
+      "detached": false
+    },
+    {
+      "label": "multi-slot-diagnostic-source",
+      "commit": "c18db73c666e1a0b0225840a78e2ad33f5a8c4a2",
+      "branch": "refs/heads/lane1-multi-slot-diagnostics",
+      "detached": false
+    },
+    {
+      "label": "multi-slot-source",
+      "commit": "5d6e60bb202201493fb5255be8864f93ca949abe",
+      "branch": null,
+      "detached": true
+    },
+    {
+      "label": "native-id-boundary",
+      "commit": "9279566ee7b8eb04c95fbf8c62a0906da1ff144a",
+      "branch": null,
+      "detached": true
+    },
+    {
+      "label": "outcome-candidate",
+      "commit": "b4d7f0e37b82e80b279c632979c1ecce762c53dc",
+      "branch": null,
+      "detached": true
+    },
+    {
+      "label": "paint-admission",
+      "commit": "ad32268306615dbd10719384aa653546d3711713",
+      "branch": null,
+      "detached": true
+    },
+    {
+      "label": "retained-order-source",
+      "commit": "6041f0be1503862c47c4b3e7fda65225caa53118",
+      "branch": "refs/heads/lane1-retained-order-linear",
+      "detached": false
+    },
+    {
+      "label": "retained-topology",
+      "commit": "d4096fd2590a26c9f073b758643a0333e48bf824",
+      "branch": null,
+      "detached": true
+    },
+    {
+      "label": "source",
+      "commit": "71cc8a53da32a3bc63ffe0c2bd08e50886137a1d",
+      "branch": null,
+      "detached": true
+    },
+    {
+      "label": "borrowed-read",
+      "commit": "872a5be882475cdb7b5ffb9d313f1aede42321ec",
+      "branch": null,
+      "detached": true
+    },
+    {
+      "label": "canonical-text-prerequisite",
+      "commit": "fa95e5ca92b26a56aff983cdf785577875e92573",
+      "branch": null,
+      "detached": true
+    },
+    {
+      "label": "capacity-diagnostic",
+      "commit": "b4906a5c87673dacb0f1fe812a95ea0a66789678",
+      "branch": null,
+      "detached": true
+    },
+    {
+      "label": "cursor-read",
+      "commit": "27098e3f53ecc1b71879f567052fd4900beddcc6",
+      "branch": null,
+      "detached": true
+    },
+    {
+      "label": "facade-corrected",
+      "commit": "17d5ac1fc7f9eb630ed52cb787093ea93b1491e6",
+      "branch": null,
+      "detached": true
+    },
+    {
+      "label": "font-resource-constructor",
+      "commit": "4c334a37f527394b11aa50f969ade6c674d68a14",
+      "branch": "refs/heads/text-font-resource-constructor",
+      "detached": false
+    },
+    {
+      "label": "immutable-view",
+      "commit": "b80dcc8c6cf4015257034637ae5742e5f75a772f",
+      "branch": null,
+      "detached": true
+    },
+    {
+      "label": "optional-retention-core",
+      "commit": "ccc53c8161f300a644cc0523e5d3d4bd115f5416",
+      "branch": "refs/heads/text-optional-retention-core",
+      "detached": false
+    },
+    {
+      "label": "optional-shape-binding",
+      "commit": "13f383c10c215ea18d441fb7ef6036ce4b929644",
+      "branch": "refs/heads/text-optional-shape-binding",
+      "detached": false
+    },
+    {
+      "label": "resource-ledger",
+      "commit": "7bb859f6024294137ebfe501808b8e015be9f204",
+      "branch": null,
+      "detached": true
+    },
+    {
+      "label": "resource-ledger-origin",
+      "commit": "4d19575b422801434bb8497d55f532c2b0c28192",
+      "branch": null,
+      "detached": true
+    },
+    {
+      "label": "reuse-seam",
+      "commit": "30f5dc8182c53b7916849b08226fa8314d6a0f0a",
+      "branch": null,
+      "detached": true
+    },
+    {
+      "label": "shape-resource",
+      "commit": "a8f92cc4454776c2de94309e34637aadf60eec1d",
+      "branch": null,
+      "detached": true
+    },
+    {
+      "label": "shared-lowering",
+      "commit": "88d4c8052187c7a73f3351da6b2466391f59d281",
+      "branch": null,
+      "detached": true
+    },
+    {
+      "label": "shared-shape-source",
+      "commit": "cf6e8fff5e90282729ef8acedfb587da94009f8b",
+      "branch": "refs/heads/text-shared-shape-source",
+      "detached": false
+    },
+    {
+      "label": "text-default-cfg-fix",
+      "commit": "e1e9c0d490063b16e585a23486f8447520b035e9",
+      "branch": null,
+      "detached": true
+    },
+    {
+      "label": "text-hook-e257",
+      "commit": "4347f6baa168659fc46e41a5c8329c51b9f3d0d6",
+      "branch": null,
+      "detached": true
+    },
+    {
+      "label": "text-retirement-integration",
+      "commit": "0113e501c8ee82ae9d4749413c5f42129da79db4",
+      "branch": null,
+      "detached": true
+    },
+    {
+      "label": "utf8-backing",
+      "commit": "b582e6a296dd28c5543fc1acccec2f66aad9ea86",
+      "branch": null,
+      "detached": true
+    },
+    {
+      "label": "utf8-corrected-11d",
+      "commit": "481db61b654608fc81a9f767c3c0d439a35c8fb4",
+      "branch": null,
+      "detached": true
+    },
+    {
+      "label": "width-storage",
+      "commit": "a727080c89d15b54478a80440a229520d2a167a8",
+      "branch": null,
+      "detached": true
+    },
+    {
+      "label": "blend-sources-borrow-v2-worktree",
+      "commit": "4883cbfaa4479d879bb3fadca73a5a2c04bc424b",
+      "branch": "refs/heads/render-borrow-v2",
+      "detached": false
+    },
+    {
+      "label": "blend-sources-borrow-worktree",
+      "commit": "0d65be6480b1d6512086417bbbee4111226a8ecd",
+      "branch": "refs/heads/render-blend-sources-borrow",
+      "detached": false
+    },
+    {
+      "label": "blend-sources-control-v2-worktree",
+      "commit": "48066ea52f8fa8fcd668439f15ab93cbf271fbc2",
+      "branch": "refs/heads/render-borrow-tests-v2",
+      "detached": false
+    },
+    {
+      "label": "blend-sources-control-worktree",
+      "commit": "15edfe11c9b15664e549231d37042a6ca35e43de",
+      "branch": "refs/heads/experiment/blend-sources-control",
+      "detached": false
+    },
+    {
+      "label": "changed-slots-worktree",
+      "commit": "f00c493caaf64f6b23671ed413550d5416f1a783",
+      "branch": null,
+      "detached": true
+    },
+    {
+      "label": "codegen-worktree",
+      "commit": "29ef681c3047c3eb6be0fe963b9f2d33bb38ebe3",
+      "branch": "refs/heads/experiment/ordinary-slot-codegen",
+      "detached": false
+    },
+    {
+      "label": "composed-worktree",
+      "commit": "d8c4262cec20e5d19010166b36fcf75f97349f11",
+      "branch": "refs/heads/experiment/retained-composed",
+      "detached": false
+    },
+    {
+      "label": "csr-end-offset-worktree",
+      "commit": "5c458586ff7e7dd2bdfcb2dcea3f30447e7d7e1a",
+      "branch": "refs/heads/canonical-csr-end-offset",
+      "detached": false
+    },
+    {
+      "label": "draw-geometry-corrected-worktree",
+      "commit": "14e3e6ed267838d8c150ec425f2421fbfca5b9a8",
+      "branch": "refs/heads/canonical-draw-geometry-corrected",
+      "detached": false
+    },
+    {
+      "label": "draw-geometry-extraction-worktree",
+      "commit": "cedf50fcab0384b273990df909641de84aaa8833",
+      "branch": "refs/heads/canonical-draw-geometry-extraction",
+      "detached": false
+    },
+    {
+      "label": "draw-geometry-integrated-worktree",
+      "commit": "f414f7e857ffd16ac7053ce63df2948b8900dd37",
+      "branch": "refs/heads/canonical-draw-geometry-integrated",
+      "detached": false
+    },
+    {
+      "label": "fragment-read-control-worktree",
+      "commit": "c82c25729a0cf7367740937b2315b0fe870a7de4",
+      "branch": "refs/heads/render-fragment-read-control",
+      "detached": false
+    },
+    {
+      "label": "fragment-read-qualified-worktree",
+      "commit": "2b55df5f2ec4709734f790706dd634fc48dede09",
+      "branch": "refs/heads/render-fragment-read-qualified",
+      "detached": false
+    },
+    {
+      "label": "fragment-read-worktree",
+      "commit": "83a7c16047aec16228eb2dd8de1c5f3f42654dc8",
+      "branch": "refs/heads/render-paired-local-read",
+      "detached": false
+    },
+    {
+      "label": "geometry-diagnostic-worktree",
+      "commit": "982e19b1ca1294d646d50132264bc941fde78a4c",
+      "branch": "refs/heads/render-geometry-interaction-diagnostic",
+      "detached": false
+    },
+    {
+      "label": "geometry-exact-diagnostic-worktree",
+      "commit": "33e5adf08deb4ec1a04266ec2d94fbb40fef0425",
+      "branch": "refs/heads/render-geometry-exact-interactions",
+      "detached": false
+    },
+    {
+      "label": "geometry-hardened-worktree",
+      "commit": "464bfdddc07a34bf8ed5e37980ccf1fdef6428b2",
+      "branch": "refs/heads/render-geometry-proof-boundary",
+      "detached": false
+    },
+    {
+      "label": "geometry-repair-worktree",
+      "commit": "b4831a893bc7b38ec372be14cf35b4506bb69518",
+      "branch": "refs/heads/render-solid-geometry-repair",
+      "detached": false
+    },
+    {
+      "label": "geometry-timing-worktree",
+      "commit": "694516583b89e90ab82c03f0af28bf180b876783",
+      "branch": "refs/heads/geometry-controlled-timing",
+      "detached": false
+    },
+    {
+      "label": "gpu-delivery-worktree",
+      "commit": "6957114d5a2b9875ff6da0e6484402a34d5f1d05",
+      "branch": "refs/heads/experiment/retained-delivery-7ac6",
+      "detached": false
+    },
+    {
+      "label": "hard-full-fixture-correction-worktree",
+      "commit": "539973331b2409adb746966d0bbcc778b9766f6e",
+      "branch": "refs/heads/canonical-hard-full-fixture-correction",
+      "detached": false
+    },
+    {
+      "label": "incremental-scene-worktree",
+      "commit": "58658123114570054a901285e58733eb083f7926",
+      "branch": "refs/heads/renderer-incremental-jobs-proof",
+      "detached": false
+    },
+    {
+      "label": "material-fusion-composed-worktree",
+      "commit": "28dc3cb9597f799931fb8ce43ffc7586eecba21d",
+      "branch": "refs/heads/canonical-material-fusion-composed",
+      "detached": false
+    },
+    {
+      "label": "material-fusion-worktree",
+      "commit": "7bc59cf4ad61fbae562bb0f6651818698347b90c",
+      "branch": "refs/heads/canonical-material-fusion",
+      "detached": false
+    },
+    {
+      "label": "material-owner-index-worktree",
+      "commit": "41c5ee921d0dfa6abba7aca3f14f9cd8f24dfff7",
+      "branch": "refs/heads/canonical-material-owner-index",
+      "detached": false
+    },
+    {
+      "label": "next-rendering-packet-worktree",
+      "commit": "8ec1422e04a89a26dd381e152dbd3341f770a14c",
+      "branch": "refs/heads/canonical-next-rendering-packet",
+      "detached": false
+    },
+    {
+      "label": "ordered-rendering-worktree",
+      "commit": "b02f3b90bc6edb7ffd377e9801142febb65f2981",
+      "branch": "refs/heads/canonical-ordered-rendering",
+      "detached": false
+    },
+    {
+      "label": "publication-transition-tests",
+      "commit": "ee0ab00b4a23657e0bb407f47c4885d4388283f6",
+      "branch": "refs/heads/canonical-publication-transition-tests",
+      "detached": false
+    },
+    {
+      "label": "raw-target-worktree",
+      "commit": "b81a4099ad89c1bd0ca457b22c02a4396aaff60e",
+      "branch": null,
+      "detached": true
+    },
+    {
+      "label": "retained-target-worktree",
+      "commit": "1f966374fc169897dec8be5aa5c08b5b65b1325b",
+      "branch": null,
+      "detached": true
+    },
+    {
+      "label": "samples-candidate-worktree",
+      "commit": "227ee72529135148e979d3a4b68184e212343a19",
+      "branch": "refs/heads/experiment/samples-storage-option",
+      "detached": false
+    },
+    {
+      "label": "samples-control-worktree",
+      "commit": "109efa03bf49e8a7e4b0b972ac876ac225fd2c3f",
+      "branch": "refs/heads/experiment/samples-storage-control",
+      "detached": false
+    },
+    {
+      "label": "samples-nested-control-worktree",
+      "commit": "2f62759dba5b90723a89b7c464b69f9060883178",
+      "branch": "refs/heads/experiment/samples-storage-nested-control",
+      "detached": false
+    },
+    {
+      "label": "whole-owner-reuse-586-worktree",
+      "commit": "47ca43cf43304b5ecf3821b3a5c91e267dadc500",
+      "branch": "refs/heads/canonical-whole-owner-reuse-586",
+      "detached": false
+    },
+    {
+      "label": "whole-owner-reuse-worktree",
+      "commit": "bf52c3682d8e5bd2fc0ef3c5cb388a312d668ba6",
+      "branch": "refs/heads/canonical-whole-owner-reuse",
+      "detached": false
+    },
+    {
+      "label": "benchmark-worktree",
+      "commit": "ec2f38a1b53ca033c36207f6d5a16b27a3f7793d",
+      "branch": "refs/heads/structures-release-control",
+      "detached": false
+    },
+    {
+      "label": "inline-benchmark-worktree",
+      "commit": "b8b0084267de03904c42eb98b54087c735904ff3",
+      "branch": "refs/heads/structures-release-inline",
+      "detached": false
+    },
+    {
+      "label": "seed-only-worktree",
+      "commit": "b603a9ebb3b0be3e37389eb4d819b8b918cebfff",
+      "branch": "refs/heads/structures-seed-only",
+      "detached": false
+    },
+    {
+      "label": "structure-baseline-worktree",
+      "commit": "2c8e19d25d363675b91da2daaa935213ac2ac2e2",
+      "branch": "refs/heads/structures-cold-control",
+      "detached": false
+    },
+    {
+      "label": "worktree",
+      "commit": "515b02e9c076d92435e13935ecda77059bc4add5",
+      "branch": "refs/heads/structures-niche-trial",
+      "detached": false
+    },
+    {
+      "label": "endpoint-candidate",
+      "commit": "bc408f97537e5450edba8c83083448ed2cd6da04",
+      "branch": null,
+      "detached": true
+    },
+    {
+      "label": "baseline",
+      "commit": "d1fad8fca93b076b8f87252786ac35ec301d6c8e",
+      "branch": "refs/heads/text-edit-traffic-baseline",
+      "detached": false
+    },
+    {
+      "label": "candidate",
+      "commit": "a5fc29386feb1b797bdfb017aa99b61353e80333",
+      "branch": "refs/heads/text-edit-exact-buffer",
+      "detached": false
+    },
+    {
+      "label": "baseline",
+      "commit": "af981acf8df210331fac306d8d24c2a4d9fbc2d7",
+      "branch": "refs/heads/text-reflow-control",
+      "detached": false
+    },
+    {
+      "label": "staged-candidate",
+      "commit": "f72dfdcdc9adaf5f9c63719158d3b0a5cbc531cf",
+      "branch": null,
+      "detached": true
+    }
+  ]
+}

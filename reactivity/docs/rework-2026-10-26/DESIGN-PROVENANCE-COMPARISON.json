@@ -1,0 +1,483 @@
+{
+  "scope": "Independently authorized consumer metadata comparison; no parent-denied content proxy",
+  "mac_authoritative_archive_sha256": "3fa775be54ab5120b5186453e771a851c7cb802201db1fcca5f8175ba169ce39",
+  "nudox_archive_sha256": "cce9557dcb49dacea0a0b86a703f9520ef7c7b8364a7403ea2e46348ce21243b",
+  "mac_files": 127,
+  "nudox_files": 387,
+  "overlap": 127,
+  "equal_bytes": 114,
+  "different_bytes": [
+    {
+      "path": "README.md",
+      "mac": {
+        "sha256": "ddd231023317a705f297d537e9fa2480a577cb12aeffcef12262f8ce2a9f0662",
+        "bytes": 9986,
+        "mode": 420
+      },
+      "nudox": {
+        "sha256": "db709a6ec85d9352bdc01e5d133baa5bdff0a73c1204064f4e87d818461ad233",
+        "bytes": 10610,
+        "mode": 420
+      }
+    },
+    {
+      "path": "final/00-model.md",
+      "mac": {
+        "sha256": "7c80e42e6074056900e4d372dc20aeb482b9fc9a93916b9565e491a9be27dd33",
+        "bytes": 27288,
+        "mode": 420
+      },
+      "nudox": {
+        "sha256": "c650783110c05e9948272904110044f383fb2a01168ac67517ac219ebe6cdd72",
+        "bytes": 27569,
+        "mode": 420
+      }
+    },
+    {
+      "path": "final/01-state.md",
+      "mac": {
+        "sha256": "2a9700eb05583308d8be883bea15562933e8ffa539e89f817df9ca0b2f9d0474",
+        "bytes": 21987,
+        "mode": 420
+      },
+      "nudox": {
+        "sha256": "c0942b7126105fb85a27a0fe36b23d716512b3d5f0c882e50ff213c0f1d44728",
+        "bytes": 22268,
+        "mode": 420
+      }
+    },
+    {
+      "path": "final/02-elements.md",
+      "mac": {
+        "sha256": "d1106478486b0eb226bdbe785cbb9e13d67d92e7ce07c2917c351943699fe6d2",
+        "bytes": 20637,
+        "mode": 420
+      },
+      "nudox": {
+        "sha256": "d72d758a5aeda45fb08c8bac498c0e34e91e1450c43007fd196e04122580594c",
+        "bytes": 20918,
+        "mode": 420
+      }
+    },
+    {
+      "path": "final/03-ports.md",
+      "mac": {
+        "sha256": "3cbc5be5824f871287c50a72af535f0ed2ada41a69692cfcee9c952427830a95",
+        "bytes": 17851,
+        "mode": 420
+      },
+      "nudox": {
+        "sha256": "54dd750703e7690414e6b8a1b6464511a56affd7ef78303bec5f869b5068c1b2",
+        "bytes": 18132,
+        "mode": 420
+      }
+    },
+    {
+      "path": "final/04-reactions.md",
+      "mac": {
+        "sha256": "7eba4ee1a2a8cade321851d4f216eb3cf5c4d774131c12e71a9fbae51fc8841e",
+        "bytes": 22186,
+        "mode": 420
+      },
+      "nudox": {
+        "sha256": "c2081c960c4c371d2aa877d966ca1b058115818ab60c1ccb74990b5a47e09032",
+        "bytes": 22467,
+        "mode": 420
+      }
+    },
+    {
+      "path": "final/05-async.md",
+      "mac": {
+        "sha256": "b4fc06815c9407b8f9e82ebdb7b944e650eb791a554a8e1a00f0ae7e58ebcce2",
+        "bytes": 25418,
+        "mode": 420
+      },
+      "nudox": {
+        "sha256": "c67d9050128408375e46f46b251c23b32455b824e84bfcb32f15331b4c226f37",
+        "bytes": 25699,
+        "mode": 420
+      }
+    },
+    {
+      "path": "final/06-text.md",
+      "mac": {
+        "sha256": "11395d3dad0ecdc461eadd612101330267913caa8f661aecd8fc90517f1628ba",
+        "bytes": 16841,
+        "mode": 420
+      },
+      "nudox": {
+        "sha256": "4995f0206140fb3d7222c2d57b9d63e81200fa9d651f7304f4b32cead2d9e02c",
+        "bytes": 17122,
+        "mode": 420
+      }
+    },
+    {
+      "path": "final/07-platform.md",
+      "mac": {
+        "sha256": "0487b2892affce8112da8b34482be70567c1829feadda319f94eb0add6fd8b99",
+        "bytes": 21877,
+        "mode": 420
+      },
+      "nudox": {
+        "sha256": "57e85cc687caaf48441eea1418336f245d9e6f6e42d019d21a3e5b2333c8a1d5",
+        "bytes": 22158,
+        "mode": 420
+      }
+    },
+    {
+      "path": "final/08-runtime.md",
+      "mac": {
+        "sha256": "0f4960d4b74d28c48095da5babb3cfe08c95d930968966e2064f513f598839fd",
+        "bytes": 28541,
+        "mode": 420
+      },
+      "nudox": {
+        "sha256": "9bd616da39752460f6b6ec281979828a97145c4d55467ecfd7389434e41f0841",
+        "bytes": 28822,
+        "mode": 420
+      }
+    },
+    {
+      "path": "final/09-boundaries.md",
+      "mac": {
+        "sha256": "f250e108fea9cc8d564cc5450693d6da30d6b994da8f4132c9ac681463735cd5",
+        "bytes": 15524,
+        "mode": 420
+      },
+      "nudox": {
+        "sha256": "7e19f939984a2cdb6993985e082ea8cb7d53d9139bc0c28e1d736942b6590134",
+        "bytes": 15805,
+        "mode": 420
+      }
+    },
+    {
+      "path": "final/10-quality.md",
+      "mac": {
+        "sha256": "4b65882e3640aaeeb81409fc8f58cef273fd759ae32d0306165f9d9d075c0e2a",
+        "bytes": 37801,
+        "mode": 420
+      },
+      "nudox": {
+        "sha256": "8b606a635a0583d767fb9a73e3ee300fed87b0f477fa8faa1e965b6ddc7d361f",
+        "bytes": 38082,
+        "mode": 420
+      }
+    },
+    {
+      "path": "final/11-roadmap.md",
+      "mac": {
+        "sha256": "6da813cc6156f30f5f1a7d64f48c745694011449ba5c588ca8102907905a7948",
+        "bytes": 18246,
+        "mode": 420
+      },
+      "nudox": {
+        "sha256": "b4062571546e33b755e52be9d06e65e77fa01380ff8891074793365d97d61bf1",
+        "bytes": 18527,
+        "mode": 420
+      }
+    }
+  ],
+  "mac_only": [],
+  "nudox_only": [
+    "rework/CONCURRENCY.md",
+    "rework/CONTRACT.md",
+    "rework/DESIGN.md",
+    "rework/EXPERIMENTS.md",
+    "rework/FORMULATIONS.md",
+    "rework/GRAPHICS.md",
+    "rework/MEMORY.md",
+    "rework/PLAN.md",
+    "rework/REACTIVITY.md",
+    "rework/README.md",
+    "rework/RETAINED_DAMAGE.md",
+    "rework/REVIEW.md",
+    "rework/SAMPLE_STORAGE.md",
+    "rework/SCROLL.md",
+    "rework/STATUS.md",
+    "rework/TESTING.md",
+    "rework/TEXT.md",
+    "rework/accessibility-frontier-luna.md",
+    "rework/accessibility-incremental-luna.md",
+    "rework/accessibility-text-virtualization-luna.md",
+    "rework/accessibility-transition-descriptor-luna.md",
+    "rework/color-packing-luna.md",
+    "rework/comparisons/five-app-todo/README.md",
+    "rework/comparisons/five-app-todo/capture-2026-10-24/report.md",
+    "rework/comparisons/mapped-todo/README.md",
+    "rework/comparisons/mapped-todo/capture-2026-10-24/README.md",
+    "rework/comparisons/mapped-todo/capture-2026-10-24/report.md",
+    "rework/comparisons/mapped-todo/capture-2026-10-24/resources.md",
+    "rework/comparisons/mapped-todo/protocol.md",
+    "rework/comparisons/todo-shader-profiles/README.md",
+    "rework/comparisons/todo-shader-profiles/capture-2026-10-24/report.md",
+    "rework/comparisons/todo-shader-profiles/protocol.md",
+    "rework/comparisons/zgui/README.md",
+    "rework/comparisons/zgui/capture-2026-10-23/report.md",
+    "rework/comparisons/zgui/port-notes.md",
+    "rework/compression-production-review-luna.md",
+    "rework/concurrency-research.md",
+    "rework/crates/gpu/README.md",
+    "rework/crates/gpui/README.md",
+    "rework/cross-platform-startup-floor-luna.md",
+    "rework/docs/README.md",
+    "rework/docs/accessibility-checkbox-luna.md",
+    "rework/docs/accessibility-floor-and-renderer-reuse-luna.md",
+    "rework/docs/accessibility-frontier-luna.md",
+    "rework/docs/accessibility-generation-channel-audit-luna.md",
+    "rework/docs/accessibility-incremental-luna.md",
+    "rework/docs/accessibility-native-activation-luna.md",
+    "rework/docs/accessibility-text-virtualization-luna.md",
+    "rework/docs/accessibility-transition-descriptor-luna.md",
+    "rework/docs/acknowledged-text-geometry-luna.md",
+    "rework/docs/async-admission-luna.md",
+    "rework/docs/async-graph-luna.md",
+    "rework/docs/codegen-linked-artifacts.md",
+    "rework/docs/color-formulation-luna.md",
+    "rework/docs/color-packing-luna.md",
+    "rework/docs/concurrency-research.md",
+    "rework/docs/constant-coverage-luna.md",
+    "rework/docs/cross-platform-startup-floor-luna.md",
+    "rework/docs/designer-color-next-luna.md",
+    "rework/docs/feature-parity.md",
+    "rework/docs/font-measure-dirty-causes-luna.md",
+    "rework/docs/frontier-research.md",
+    "rework/docs/future-questions.md",
+    "rework/docs/gpu-zero-floor-luna.md",
+    "rework/docs/graphics-research.md",
+    "rework/docs/graphics-work-elimination-luna.md",
+    "rework/docs/hummingbird-source-audit-luna.md",
+    "rework/docs/inputs/final/00-model.md",
+    "rework/docs/inputs/final/01-state.md",
+    "rework/docs/inputs/final/02-elements.md",
+    "rework/docs/inputs/final/03-ports.md",
+    "rework/docs/inputs/final/04-reactions.md",
+    "rework/docs/inputs/final/05-async.md",
+    "rework/docs/inputs/final/06-text.md",
+    "rework/docs/inputs/final/07-platform.md",
+    "rework/docs/inputs/final/08-runtime.md",
+    "rework/docs/inputs/final/09-boundaries.md",
+    "rework/docs/inputs/final/10-quality.md",
+    "rework/docs/inputs/final/11-roadmap.md",
+    "rework/docs/inputs/final/examples/README.md",
+    "rework/docs/inputs/final/examples/commands.rs",
+    "rework/docs/inputs/final/examples/plugin_item.rs",
+    "rework/docs/inputs/final/examples/ports_gallery.rs",
+    "rework/docs/inputs/final/examples/progressive.rs",
+    "rework/docs/inputs/final/examples/reactions.rs",
+    "rework/docs/inputs/manifest.json",
+    "rework/docs/inputs/runtime/collections.md",
+    "rework/docs/inputs/runtime/color.md",
+    "rework/docs/inputs/runtime/datastructures-2.md",
+    "rework/docs/inputs/runtime/datastructures.md",
+    "rework/docs/inputs/runtime/fastpath.md",
+    "rework/docs/inputs/runtime/media.md",
+    "rework/docs/inputs/runtime/memory.md",
+    "rework/docs/inputs/runtime/scheduler.md",
+    "rework/docs/inputs/runtime/shader-renderer-migration.md",
+    "rework/docs/inspector.md",
+    "rework/docs/intrinsic-text-measure-luna.md",
+    "rework/docs/layout-measure-index-luna.md",
+    "rework/docs/lazy-indirect-validation-luna.md",
+    "rework/docs/linux-blank-floor-luna.md",
+    "rework/docs/memory-floor-attribution-luna.md",
+    "rework/docs/monotonic-caret-preflight-luna.md",
+    "rework/docs/monotonic-caret-stream-luna.md",
+    "rework/docs/monotonic-iterator-copy-luna.md",
+    "rework/docs/native-destination-invalidation.md",
+    "rework/docs/native-shader-lifecycle-luna.md",
+    "rework/docs/offline-shader-proof-luna.md",
+    "rework/docs/paint-only-command-patch-luna.md",
+    "rework/docs/paint-patch.md",
+    "rework/docs/pointer-gesture-authority-luna.md",
+    "rework/docs/portable-graphics-boundary-next-luna.md",
+    "rework/docs/portable-presenter-luna.md",
+    "rework/docs/presented-transform-factorization-luna.md",
+    "rework/docs/production-gaps-luna.md",
+    "rework/docs/property-state-routes.md",
+    "rework/docs/question-cancellation.md",
+    "rework/docs/question-mailbox.md",
+    "rework/docs/question-sealed-staging.md",
+    "rework/docs/reader-cohort-implementation-luna.md",
+    "rework/docs/reader-question.md",
+    "rework/docs/ready-publication-mpsc-luna.md",
+    "rework/docs/renderer-work-removal-luna.md",
+    "rework/docs/research-core.md",
+    "rework/docs/research-native-invalidation-boundary-luna.md",
+    "rework/docs/research-platform.md",
+    "rework/docs/review-close-luna.md",
+    "rework/docs/review-concurrency-luna.md",
+    "rework/docs/review-design-luna.md",
+    "rework/docs/review-design-sol.md",
+    "rework/docs/review-final-sol.md",
+    "rework/docs/review-sol.md",
+    "rework/docs/rounded-geometry.md",
+    "rework/docs/route-density-census-luna.md",
+    "rework/docs/route-storage-frontier-luna.md",
+    "rework/docs/route-storage-luna.md",
+    "rework/docs/scene-preparation-luna.md",
+    "rework/docs/scoped-parallel-text-next-luna.md",
+    "rework/docs/semantic-review.md",
+    "rework/docs/shared-tile-prefix-luna.md",
+    "rework/docs/source-schema-erasure-luna.md",
+    "rework/docs/source-schema-products-luna.md",
+    "rework/docs/source-schema-root-dispatch-luna.md",
+    "rework/docs/source-schema-tait-luna.md",
+    "rework/docs/style-core-representation-luna.md",
+    "rework/docs/style-ports-luna.md",
+    "rework/docs/text-map-compression-luna.md",
+    "rework/docs/text-ownership-luna.md",
+    "rework/docs/text-transaction-frontier-luna.md",
+    "rework/docs/thin-route-handle-luna.md",
+    "rework/docs/typed-reflection-composition-luna.md",
+    "rework/docs/upstream-dependencies-luna.md",
+    "rework/docs/virtual-list-api-review-luna.md",
+    "rework/docs/xshm-shared-pixmap-luna.md",
+    "rework/evidence/accessibility-schema.txt",
+    "rework/evidence/baseline.json",
+    "rework/evidence/certified-solid/README.md",
+    "rework/evidence/checks-source.json",
+    "rework/evidence/checks.json",
+    "rework/evidence/clipping-gradients-integration/README.md",
+    "rework/evidence/cmap-apple-clippy.txt",
+    "rework/evidence/cmap-integration-atspi.txt",
+    "rework/evidence/cmap-integration-canvas.txt",
+    "rework/evidence/cmap-integration-checks.json",
+    "rework/evidence/cmap-integration-clippy.txt",
+    "rework/evidence/cmap-integration-native-unicode.txt",
+    "rework/evidence/cmap-integration-owners.txt",
+    "rework/evidence/cmap-integration-vulkan.txt",
+    "rework/evidence/cmap-platform-checks.json",
+    "rework/evidence/cmap-windows-clippy.txt",
+    "rework/evidence/component-boundaries/README.md",
+    "rework/evidence/damage-apple-clippy.txt",
+    "rework/evidence/damage-platform-checks.json",
+    "rework/evidence/damage-windows-clippy.txt",
+    "rework/evidence/environment.json",
+    "rework/evidence/format.txt",
+    "rework/evidence/frontier-text-integration/README.md",
+    "rework/evidence/gpu-vulkan.txt",
+    "rework/evidence/gradient-bank/README.md",
+    "rework/evidence/gradient-bank/REPORT.md",
+    "rework/evidence/ime-ascii-restart/README.md",
+    "rework/evidence/ime-integration/README.md",
+    "rework/evidence/layout-example.txt",
+    "rework/evidence/line-counts.json",
+    "rework/evidence/loom.txt",
+    "rework/evidence/mapped-properties-integration/README.md",
+    "rework/evidence/native-atspi.txt",
+    "rework/evidence/native-check.txt",
+    "rework/evidence/native-clippy.txt",
+    "rework/evidence/native-library.txt",
+    "rework/evidence/native-minimal-check.txt",
+    "rework/evidence/native-no-bus.txt",
+    "rework/evidence/native-question.txt",
+    "rework/evidence/native-remote.txt",
+    "rework/evidence/native-unicode.txt",
+    "rework/evidence/native-x11.txt",
+    "rework/evidence/nested-clips/README.md",
+    "rework/evidence/nodes2-x86_64.txt",
+    "rework/evidence/output-cache-apple.txt",
+    "rework/evidence/output-cache-canvas.txt",
+    "rework/evidence/output-cache-checks.json",
+    "rework/evidence/output-cache-clippy.txt",
+    "rework/evidence/output-cache-gpu.txt",
+    "rework/evidence/output-cache-native.txt",
+    "rework/evidence/output-cache-platform-checks.json",
+    "rework/evidence/output-cache-windows.txt",
+    "rework/evidence/packed-children/README.md",
+    "rework/evidence/parallel-canvas.txt",
+    "rework/evidence/portable-gpu-oracle/README.md",
+    "rework/evidence/question-credit.txt",
+    "rework/evidence/question-integrated-clippy.txt",
+    "rework/evidence/question-integrated-loom.txt",
+    "rework/evidence/question-integrated-native-library.txt",
+    "rework/evidence/question-integrated-native-question.txt",
+    "rework/evidence/question-integrated-suite.txt",
+    "rework/evidence/question-integration-checks.json",
+    "rework/evidence/question-mailbox.txt",
+    "rework/evidence/reader-apple-clippy.txt",
+    "rework/evidence/reader-one-shot/README.md",
+    "rework/evidence/reader-platform-checks.json",
+    "rework/evidence/reader-windows-clippy.txt",
+    "rework/evidence/remote-first-lock/README.md",
+    "rework/evidence/text-canonical-tail/README.md",
+    "rework/evidence/text-composition/README.md",
+    "rework/evidence/todo-recording-per-phase/README.md",
+    "rework/evidence/todo-recording/README.md",
+    "rework/evidence/turn-apple-clippy.txt",
+    "rework/evidence/turn-checks.json",
+    "rework/evidence/turn-gpui.txt",
+    "rework/evidence/turn-linux-clippy.txt",
+    "rework/evidence/turn-native-remote.txt",
+    "rework/evidence/turn-windows-clippy.txt",
+    "rework/evidence/workspace-clippy.txt",
+    "rework/evidence/workspace-debug.txt",
+    "rework/evidence/workspace-release.txt",
+    "rework/font-measure-dirty-causes-luna.md",
+    "rework/font-memory-research-luna.md",
+    "rework/frontier-research.md",
+    "rework/graphics-port-manager.md",
+    "rework/graphics-research.md",
+    "rework/hummingbird-source-audit-luna.md",
+    "rework/layout-measure-index-luna.md",
+    "rework/linux-blank-floor-luna.md",
+    "rework/mirror.json",
+    "rework/production-review-sol.md",
+    "rework/reader-cohort-implementation-luna.md",
+    "rework/research-core.md",
+    "rework/research-platform.md",
+    "rework/review-close-luna.md",
+    "rework/review-concurrency-luna.md",
+    "rework/review-design-luna.md",
+    "rework/review-design-sol.md",
+    "rework/review-final-sol.md",
+    "rework/review-sol.md",
+    "rework/semantic-compression-research-luna.md",
+    "rework/semantic-review.md",
+    "rework/style-core-representation-luna.md",
+    "rework/style-ports-luna.md",
+    "rework/text-ownership-luna.md",
+    "rework/video-compression-research.md",
+    "rework/virtual-list-api-review-luna.md"
+  ],
+  "foreground": {
+    "01-problem.md": {
+      "mac": {
+        "sha256": "5db09541d81d70b8f1c4406af624c8b8efd62b19cb61e7944b4159d63ac9c240",
+        "bytes": 9269,
+        "mode": 420
+      },
+      "nudox": {
+        "sha256": "5db09541d81d70b8f1c4406af624c8b8efd62b19cb61e7944b4159d63ac9c240",
+        "bytes": 9269,
+        "mode": 420
+      }
+    },
+    "07-the-ladder.md": {
+      "mac": {
+        "sha256": "066e26b139d76283f36ea7a59683ca3e2b7a27b71074661c7a2744e8d7987d4a",
+        "bytes": 152054,
+        "mode": 420
+      },
+      "nudox": {
+        "sha256": "066e26b139d76283f36ea7a59683ca3e2b7a27b71074661c7a2744e8d7987d4a",
+        "bytes": 152054,
+        "mode": 420
+      }
+    },
+    "11-consolidations.md": {
+      "mac": {
+        "sha256": "1ae6cb50cf96bb30ea353e175d959bb3f8a622964dc2d608c3bf41c061be2fb7",
+        "bytes": 33590,
+        "mode": 420
+      },
+      "nudox": {
+        "sha256": "1ae6cb50cf96bb30ea353e175d959bb3f8a622964dc2d608c3bf41c061be2fb7",
+        "bytes": 33590,
+        "mode": 420
+      }
+    }
+  },
+  "no_original_content_rewritten": true,
+  "parent_Library_denial_unchanged": true
+}

@@ -1,0 +1,55 @@
+{
+  "scope": "Component prose source identities at collation; no executable qualification implied.",
+  "code_pin": "3c5cc3330cf6e6878489a55f1ab7218731a379af",
+  "chapters": [
+    {
+      "chapter": 1,
+      "title": "Executive overview",
+      "source_filename": "EXECUTIVE-BRIEF.md",
+      "source_sha256": "b6a79ba7df0c9edd82d547d0b0e647a9ed46d728c7480c0d4344ca11cf5ee793",
+      "bytes": 13565
+    },
+    {
+      "chapter": 2,
+      "title": "Core damage model and solver",
+      "source_filename": "DAMAGE-CORE-STATE-20261026.md",
+      "source_sha256": "4afbe39ccedb499b85e4294d7d01c6b78a9a171ef0c94614c2cb967ef8255f1b",
+      "bytes": 33893
+    },
+    {
+      "chapter": 3,
+      "title": "Rendering, retained ownership and parallel execution",
+      "source_filename": "RENDERING-DAMAGE-TECHNICAL-BRIEF.md",
+      "source_sha256": "8ee2bc8256d40b3e5d08c6a554c95e0e26fb384be0bb9cc7b652bd9bba972524",
+      "bytes": 60164
+    },
+    {
+      "chapter": 4,
+      "title": "Correctness, authority and completion",
+      "source_filename": "CORRECTNESS-AND-COMPLETION.md",
+      "source_sha256": "4b04d677c28275eda0853854b799c5cda94ad25e8bb413c2c9d0304125da373e",
+      "bytes": 33961
+    },
+    {
+      "chapter": 5,
+      "title": "Text ownership and accounting",
+      "source_filename": "TEXT-OWNERSHIP-CHECKPOINT-BRIEF.md",
+      "source_sha256": "9cd82f05a56814104403b2807726657fd3e88d27499b0dcae87239e22cdf7ace",
+      "bytes": 30397
+    },
+    {
+      "chapter": 6,
+      "title": "Measured evidence and operational lessons",
+      "source_filename": "TECHNICAL_BRIEF_EVIDENCE_SECTION.md",
+      "source_sha256": "c5d76dd2e866b75e7cc0789916b1d1e0b51aafa5d059b5202376089ad046013e",
+      "bytes": 34096
+    },
+    {
+      "chapter": 7,
+      "title": "Realistic benchmarking and research atlas",
+      "source_filename": "REALISTIC-BENCHMARKING-AND-RESEARCH-ATLAS.md",
+      "source_sha256": "c2e000161465c565ee3d7cee60114078e904687231975c060fdd034d9653e60f",
+      "bytes": 30064
+    }
+  ]
+}

@@ -1,0 +1,17 @@
+[package]
+name = "ds-lab"
+version = "0.1.0"
+edition = "2021"
+
+[profile.release]
+opt-level = 3
+lto = false
+codegen-units = 16
+debug = false
+strip = true
+
+[lib]
+name = "dslab"
+path = "src/lib.rs"
+
+[workspace]

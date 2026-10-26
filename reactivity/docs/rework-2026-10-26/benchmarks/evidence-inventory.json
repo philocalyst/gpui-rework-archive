@@ -1,0 +1,107 @@
+{
+  "historical_interaction": {
+    "source": "gui-comparison/interaction-lane/raw/primary-analysis/summary.json",
+    "pin": "1b0eee3b9252b6647f13be63477cb158d21c04c8",
+    "qualification": "Historical nightly/non-Nix baseline only; not stable/Nix shipping qualification",
+    "compiler": "rustc 1.101.0-nightly 7189d39d9, nightly-2026-10-23, LLVM 23.1.4",
+    "graphs": [
+      "report/interaction-update/scene-costs.png",
+      "report/interaction-update/cpu-output-costs.png",
+      "report/interaction-update/raster-phase-share.png"
+    ],
+    "rows": [
+      {
+        "scenario": "app-ticked-geometry",
+        "mode": "cpu-raster",
+        "p50_ms": 10.224797,
+        "p95_ms": 13.244478
+      },
+      {
+        "scenario": "app-ticked-geometry",
+        "mode": "scene",
+        "p50_ms": 1.4897155,
+        "p95_ms": 2.534085
+      },
+      {
+        "scenario": "hover-property-layout",
+        "mode": "cpu-raster",
+        "p50_ms": 7.534001,
+        "p95_ms": 10.203606
+      },
+      {
+        "scenario": "hover-property-layout",
+        "mode": "scene",
+        "p50_ms": 1.1550985,
+        "p95_ms": 1.958739
+      },
+      {
+        "scenario": "hover-property-paint",
+        "mode": "cpu-raster",
+        "p50_ms": 7.0903905,
+        "p95_ms": 9.543271
+      },
+      {
+        "scenario": "hover-property-paint",
+        "mode": "scene",
+        "p50_ms": 0.8413345,
+        "p95_ms": 1.314966
+      },
+      {
+        "scenario": "hover-source-paint",
+        "mode": "cpu-raster",
+        "p50_ms": 6.6921345,
+        "p95_ms": 8.875404
+      },
+      {
+        "scenario": "hover-source-paint",
+        "mode": "scene",
+        "p50_ms": 0.4702755,
+        "p95_ms": 0.77659
+      },
+      {
+        "scenario": "popover-scroll",
+        "mode": "cpu-raster",
+        "p50_ms": 15.9153165,
+        "p95_ms": 22.374713
+      },
+      {
+        "scenario": "popover-scroll",
+        "mode": "scene",
+        "p50_ms": 1.5271915,
+        "p95_ms": 2.316152
+      },
+      {
+        "scenario": "window-resize-layout",
+        "mode": "cpu-raster",
+        "p50_ms": 6.5305045,
+        "p95_ms": 8.823498
+      },
+      {
+        "scenario": "window-resize-layout",
+        "mode": "scene",
+        "p50_ms": 0.5480375,
+        "p95_ms": 0.939561
+      }
+    ]
+  },
+  "historical_structure_paired": {
+    "report": "structures-lane/TIMING-RESULTS.md",
+    "raw": "structures-lane/results/paired-timing/",
+    "pins": "baseline7ac6f33; plain ec2f38a/shipping515b02e; inline b8b0084",
+    "scope": "CPU scene/ACK; 7 retained rounds x240; no raster/GPU/native",
+    "clearest_signal": "sparse-owner paired mean -4.36% plain/-5.49% inline; other gates unresolved"
+  },
+  "isolated_cpu_clip": {
+    "report": "cpu-raster-lane/RESULT.md",
+    "raw": "cpu-raster-lane/evidence/timing-summary.stdout",
+    "pins": "control a4774e1; candidate820ec18",
+    "decision": "REJECT four adverse cells; targeted synthetic wins not adopted"
+  },
+  "gpu_work_only": {
+    "spec": "render-lane/CHART_SPECS.json",
+    "data": "render-lane/work-counts.csv",
+    "pin": "ea60b2d5968378e554b99329d018db4a45693726",
+    "scope": "360 correctness-checked counter rows on SwiftShader; not timing or current unified backend"
+  },
+  "current_unified": "No completed matched unified timing result found in this bounded accessible-local inventory. Parent reports current software-GPU attempt0 completed pairs due affinity guard; do not substitute historical results."
+}
