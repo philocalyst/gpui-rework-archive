@@ -162,7 +162,11 @@ fn main() {
                     Color::rgb(41, 79, 137)
                 };
                 let edits = [SlotEdit::new(slot, PaintColor::new(color))];
-                let damage = canvas.prepare_slots(&edits).unwrap().commit();
+                let damage = if case == "text-exposure" {
+                    Default::default()
+                } else {
+                    canvas.prepare_slots(&edits).unwrap().commit()
+                };
                 let mut full_time = (0., 0.);
                 let mut retained_time = (0., 0.);
                 for is_retained in if pair % 2 == 0 {
