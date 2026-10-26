@@ -267,3 +267,70 @@ fn material_source_with_closed_primitive_content_dependency_requires_new_snapsho
     assert_eq!(canvas.prepare_slots(&edits).unwrap().commit_publication(changes,issuer.prepare(next).unwrap()),Err(PublicationError::IncompleteChanges));
     assert_eq!(canvas.accepted_scene().unwrap().stamp(),old);assert_eq!(journal.base(),Some(old.to));
 }
+
+#[test]
+fn non_graphical_reuse_rejects_raw_and_closed_graphical_domains_without_consuming_old_c() {
+    use gpui_reactivity_core::change::{Artifact,Dependencies,DependencyNode,GlobalDependency,Phase};
+    let forbidden=[Facet::Topology,Facet::Layout,Facet::TextSource,Facet::TextPolicy,Facet::TextWidth,
+        Facet::Paint,Facet::Transform,Facet::Clip,Facet::Stacking,Facet::ResourcePixels,
+        Facet::ResourceMetrics,Facet::WidthConstraint,Facet::HeightConstraint,Facet::PrimitiveContent];
+    for facet in forbidden {
+        let (mut canvas,mut issuer,mut journal,_)=setup();let old=canvas.accepted_scene().unwrap().stamp();
+        let site=SiteId::from_monotonic(issuer.owner(),Nz::new(1).unwrap());
+        let mut graph=Dependencies::new(128);graph.reset(old.to);graph.register_site(site);assert!(graph.finish(1));
+        record(&mut journal,issuer.owner(),facet);let closed=graph.invalidate_pending(&journal);let next=stamp(&issuer,&journal,2);
+        let changes=journal.prepare(next).unwrap().with_closed(closed).unwrap();
+        assert_eq!(canvas.commit_non_graphical_publication(changes,issuer.prepare(next).unwrap()),Err(PublicationError::IncompleteChanges),"raw {facet:?}");
+        assert_eq!(canvas.accepted_scene().unwrap().stamp(),old);assert_eq!(journal.base(),Some(old.to));
+    }
+    // A raw Hit fact can invalidate graphical work through the REAL graph.
+    for phase in Phase::ALL.into_iter().filter(|phase|!matches!(phase,Phase::Hit|Phase::Semantics)) {
+        let (mut canvas,mut issuer,mut journal,_)=setup();let old=canvas.accepted_scene().unwrap().stamp();
+        let site=SiteId::from_monotonic(issuer.owner(),Nz::new(1).unwrap());
+        let mut graph=Dependencies::new(128);graph.reset(old.to);graph.register_site(site);
+        graph.depends_on(Artifact {site,phase},Artifact {site,phase:Phase::Hit});assert!(graph.finish(1));
+        record(&mut journal,issuer.owner(),Facet::Hit);let closed=graph.invalidate_pending(&journal);let next=stamp(&issuer,&journal,2);
+        assert_eq!(canvas.commit_non_graphical_publication(journal.prepare(next).unwrap().with_closed(closed).unwrap(),issuer.prepare(next).unwrap()),Err(PublicationError::IncompleteChanges),"closed {phase:?}");
+        assert_eq!(canvas.accepted_scene().unwrap().stamp(),old);assert_eq!(journal.base(),Some(old.to));
+    }
+    let (mut canvas,mut issuer,mut journal,_)=setup();let old=canvas.accepted_scene().unwrap().stamp();
+    let site=SiteId::from_monotonic(issuer.owner(),Nz::new(1).unwrap());
+    let mut graph=Dependencies::new(128);graph.reset(old.to);graph.register_site(site);
+    graph.depends_on_node(DependencyNode::Global {owner:issuer.owner(),kind:GlobalDependency::Pipeline},DependencyNode::Site(Artifact {site,phase:Phase::Hit}));assert!(graph.finish(1));
+    record(&mut journal,issuer.owner(),Facet::Hit);let closed=graph.invalidate_pending(&journal);let next=stamp(&issuer,&journal,2);
+    assert_eq!(canvas.commit_non_graphical_publication(journal.prepare(next).unwrap().with_closed(closed).unwrap(),issuer.prepare(next).unwrap()),Err(PublicationError::IncompleteChanges));
+    assert_eq!(canvas.accepted_scene().unwrap().stamp(),old);
+}
+
+#[test]
+fn non_graphical_reuse_requires_closed_receipt_and_preserves_failed_newer_until_retry() {
+    use gpui_reactivity_core::change::Dependencies;
+    let (mut canvas,mut issuer,mut journal,_)=setup();let old=canvas.accepted_scene().unwrap().stamp();
+    let mut seed=vec![0;256];canvas.render_bgrx(&mut seed).unwrap();
+    record(&mut journal,issuer.owner(),Facet::Hit);let next=stamp(&issuer,&journal,2);
+    let wrong=groups(next,2);let stage=canvas.stage();
+    assert_eq!(stage.commit_publication(journal.prepare(next).unwrap(),issuer.prepare(next).unwrap(),wrong),Err(PublicationError::Metadata));
+    assert_eq!(canvas.commit_non_graphical_publication(journal.prepare(next).unwrap(),issuer.prepare(next).unwrap()),Err(PublicationError::IncompleteChanges));
+    assert_eq!(canvas.prepare_slots(&[]).unwrap().commit_publication(journal.prepare(next).unwrap(),issuer.prepare(next).unwrap()),Err(PublicationError::IncompleteChanges),"empty SlotCommit cannot bypass the same mandatory receipt guard");
+    let slot=canvas.accepted_scene().unwrap().scene().groups().next().unwrap().paint_slot().unwrap();
+    let no_op=[SlotEdit::new(slot,PaintColor::new(Color::WHITE))];
+    assert_eq!(canvas.prepare_slots(&no_op).unwrap().commit_publication(journal.prepare(next).unwrap(),issuer.prepare(next).unwrap()),Err(PublicationError::IncompleteChanges),"nonempty same-color edits cannot bypass the zero-actual-mutation guard");
+    assert_eq!(canvas.accepted_scene().unwrap().stamp(),old);assert_eq!(journal.base(),Some(old.to));
+    let mut graph=Dependencies::new(64);graph.reset(old.to);graph.register_site(SiteId::from_monotonic(issuer.owner(),Nz::new(1).unwrap()));assert!(graph.finish(1));
+    let closed=graph.invalidate_pending(&journal);
+    assert!(canvas.commit_non_graphical_publication(journal.prepare(next).unwrap().with_closed(closed).unwrap(),issuer.prepare(next).unwrap()).unwrap().is_empty());
+    assert_eq!(canvas.accepted_scene().unwrap().stamp(),next);
+    let mut output=vec![0;256];canvas.render_bgrx(&mut output).unwrap();assert_eq!(output,seed);
+    graph.reset(next.to);graph.register_site(SiteId::from_monotonic(issuer.owner(),Nz::new(1).unwrap()));assert!(graph.finish(1));
+    record(&mut journal,issuer.owner(),Facet::Paint);let third=stamp(&issuer,&journal,3);let closed=graph.invalidate_pending(&journal);
+    assert_eq!(canvas.prepare_slots(&no_op).unwrap().commit_publication(journal.prepare(third).unwrap().with_closed(closed).unwrap(),issuer.prepare(third).unwrap()),Err(PublicationError::IncompleteChanges),"raw Paint no-op needs full stage until completed-output proof exists");
+    assert_eq!(canvas.accepted_scene().unwrap().stamp(),next);assert_eq!(journal.base(),Some(next.to));
+    // A truncated journal must not turn an empty retained row list into proof.
+    let mut issuer=FrameIssuer::new().unwrap();let mut journal=Journal::new(issuer.owner(),0);
+    let mut canvas=Canvas::recording(16,16,ColorConfig::default()).unwrap();initial(&mut canvas,&mut issuer,&mut journal);
+    let old=canvas.accepted_scene().unwrap().stamp();record(&mut journal,issuer.owner(),Facet::Hit);let next=stamp(&issuer,&journal,2);
+    let mut graph=Dependencies::new(64);graph.reset(old.to);graph.register_site(SiteId::from_monotonic(issuer.owner(),Nz::new(1).unwrap()));assert!(graph.finish(1));
+    let closed=graph.invalidate_pending(&journal);
+    assert_eq!(canvas.commit_non_graphical_publication(journal.prepare(next).unwrap().with_closed(closed).unwrap(),issuer.prepare(next).unwrap()),Err(PublicationError::IncompleteChanges));
+    assert_eq!(canvas.accepted_scene().unwrap().stamp(),old);
+}

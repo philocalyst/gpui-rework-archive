@@ -123,8 +123,30 @@ fn matching(changes:&PreparedChanges<'_>,publication:&PreparedPublication<'_>)->
     if changes.batch().stamp!=stamp {return Err(PublicationError::Stamp);}
     Ok(stamp)
 }
+fn check_non_graphical(changes:&PreparedChanges<'_>,stamp:BatchStamp)->Result<(),PublicationError> {
+    if changes.batch().entries.iter().any(|entry|!entry.facets.is_non_graphical()) {
+        return Err(PublicationError::IncompleteChanges);
+    }
+    let closed=changes.closed_dependencies().ok_or(PublicationError::IncompleteChanges)?;
+    if closed.stamp()!=stamp || !closed.full().is_empty() || closed.artifacts().iter().any(|node|!matches!(node,
+        DependencyNode::Site(Artifact {site,phase:Phase::Hit|Phase::Semantics}) if site.owner==stamp.to.owner)) {
+        return Err(PublicationError::IncompleteChanges);
+    }
+    Ok(())
+}
 impl Canvas {
     pub(super) fn revoke_publication(&mut self) {self.publication=None;}
+    /// Reuse the COMPLETE canonical command owner for a strictly non-graphical
+    /// accepted transition. This is not partial group reuse or image completion.
+    /// Both the raw facts and mandatory closed receipt must contain only
+    /// Hit/Semantics work. Unknown/future/graphical domains fail closed.
+    /// No command traversal, drawing, rasterization or resource cloning occurs.
+    pub fn commit_non_graphical_publication(&mut self,changes:PreparedChanges<'_>,publication:PreparedPublication<'_>)->Result<DamageRegion,PublicationError> {
+        // All authority lives in the one checked retarget guard, including
+        // direct callers of SlotCommit with an empty edit list.
+        self.prepare_slots(&[]).map_err(|_|PublicationError::Metadata)?.commit_publication(changes,publication)
+    }
+
     /// This view pins the canonical owner against mutation while it is live.
     ///
     /// ```compile_fail,E0502
@@ -184,18 +206,25 @@ pub(super) fn check_slot_publication(canvas:&mut Canvas,changes:&PreparedChanges
     // A full RASTER cannot repair missing canonical geometry. Rebuild a full
     // staged snapshot instead; no hard reason certifies paint-only retargeting.
     if !changes.batch().full.is_empty() {return Err(PublicationError::IncompleteChanges);}
-    if changed!=0 && changes.closed_dependencies().is_none() && !changes.batch().entries.iter().any(|entry|entry.facets.contains(Facet::Paint)) {
-        return Err(PublicationError::NonPaintMutation);
-    }
-    if changes.batch().entries.iter().any(|entry|!entry.facets.is_material_only()) {
-        return Err(PublicationError::NonPaintMutation);
-    }
-    if let Some(closed)=changes.closed_dependencies() {
-        // Material is distinct from primitive CONTENT/generation. Any causal
-        // geometry/content or unknown resource/global domain needs full stage.
-        if closed.artifacts().iter().any(|node|!matches!(node,
-            DependencyNode::Site(Artifact {phase:Phase::Material|Phase::Raster|Phase::Hit|Phase::Semantics,..}))) {
-            return Err(PublicationError::IncompleteChanges);
+    if changed==0 {
+        // A nonempty same-color list is not a substitute for a closed
+        // non-graphical proof. Raw Paint no-ops conservatively take full stage
+        // until a separate completed-output proof can certify that intent.
+        check_non_graphical(changes,stamp)?;
+    }else{
+        if changed!=0 && changes.closed_dependencies().is_none() && !changes.batch().entries.iter().any(|entry|entry.facets.contains(Facet::Paint)) {
+            return Err(PublicationError::NonPaintMutation);
+        }
+        if changes.batch().entries.iter().any(|entry|!entry.facets.is_material_only()) {
+            return Err(PublicationError::NonPaintMutation);
+        }
+        if let Some(closed)=changes.closed_dependencies() {
+            // Material is distinct from primitive CONTENT/generation. Any causal
+            // geometry/content or unknown resource/global domain needs full stage.
+            if closed.artifacts().iter().any(|node|!matches!(node,
+                DependencyNode::Site(Artifact {phase:Phase::Material|Phase::Raster|Phase::Hit|Phase::Semantics,..}))) {
+                return Err(PublicationError::IncompleteChanges);
+            }
         }
     }
     // This checked transaction is Paint-only. Typed resource-pixel operations
@@ -252,6 +281,61 @@ pub(super) fn install(canvas:&mut Canvas,receipt:PublicationReceipt,batch:Change
 #[cfg(test)]
 mod tests {
     use super::*;
+    #[test]
+    fn non_graphical_receipt_reuses_complete_command_and_resource_owner_without_emission() {
+        use crate::{AlphaMode,Image,ImageProfile,ImageSampling,TextSystem,Point,Gradient,GradientGeometry,GradientStop,Extend,Interpolation};
+        use gpui_reactivity_core::change::{FrameIssuer,Journal,GroupSpan,Change,Facets,Scope,Support,Dependencies};
+        use std::num::NonZeroU64 as Nz;
+        fn pointers(canvas:&Canvas)->[usize;7] {
+            let commands=&canvas.commands;
+            [commands.order.as_ptr() as usize,commands.inline.as_ptr() as usize,commands.commons.as_ptr() as usize,
+             commands.masks.as_ptr() as usize,commands.images.as_deref().map_or(0,|r|r as *const ImageResources as usize),
+             commands.images.as_deref().and_then(|r|r.clips.as_deref()).map_or(0,|r|r as *const clips::ClipArena as usize),
+             canvas.raster.as_deref().map_or(0,|r|r as *const RasterScratch as usize)]
+        }
+        let mut issuer=FrameIssuer::new().unwrap();let mut journal=Journal::new(issuer.owner(),16);
+        let site=SiteId::from_monotonic(issuer.owner(),Nz::new(1).unwrap());
+        let image=Image::rgba8(1,1,ImageProfile::Srgb,AlphaMode::Straight,vec![30,60,190,170].into_boxed_slice()).unwrap();
+        let gradient=Gradient::new(GradientGeometry::Linear {start:Point::default(),end:Point{x:1.,y:0.}},
+            &[GradientStop::new(0.,Color::BLACK),GradientStop::new(1.,Color::WHITE)],Extend::Pad,Interpolation::LinearSrgb).unwrap();
+        let mut text=TextSystem::bundled().unwrap();let layout=text.shape("owner reuse",10.,None).unwrap();
+        let mut emit=|scene:&mut CanvasScene<'_>| {
+            scene.clear(Color::BLACK);
+            let clip=scene.create_clip(None,ClipShape::RoundedRect {rect:Rect::new(1.,1.,62.,30.),radius:4.},Affine::IDENTITY).unwrap();
+            scene.fill_gradient(&gradient,Rect::new(0.,0.,64.,32.),0.,Affine::IDENTITY,clip).unwrap();
+            scene.draw_image(&image,Rect::new(28.,2.,30.,24.),Affine::IDENTITY,clip,ImageSampling::Nearest).unwrap();
+            scene.draw_text_scaled(&mut text,&layout,Point{x:2.,y:5.},Affine::IDENTITY,clip,Color::WHITE,1.).unwrap();
+        };
+        let mut canvas=Canvas::recording(64,32,ColorConfig::default()).unwrap();
+        let first=BatchStamp {from:None,to:SceneRevision {owner:issuer.owner(),sequence:Nz::new(1).unwrap()},source_epoch:1,snapshot_epoch:1};
+        let mut scene=canvas.stage();emit(&mut scene);
+        let count=scene.draw_count();assert!(count>2);
+        let groups=SceneGroups::new(first.to,1,1,vec![GroupSpan {local:site.local,parent:None,draws:0..count as u32}],count).unwrap();
+        scene.commit_publication(journal.prepare(first).unwrap(),issuer.prepare(first).unwrap(),groups).unwrap();
+        let mut seed=vec![0;64*32];canvas.render_bgrx(&mut seed).unwrap();
+        let before=pointers(&canvas);let storage=canvas.prepared_scene().storage();let masks:Vec<_>=canvas.commands.masks.iter().map(Arc::as_ptr).collect();
+        assert!(!masks.is_empty());assert_ne!(before[4],0);assert_ne!(before[5],0);assert_ne!(before[6],0);
+        let mut graph=Dependencies::new(64);graph.reset(first.to);graph.register_site(site);assert!(graph.finish(1));
+        for (sequence,facet) in [(2,Facet::Hit),(3,Facet::Semantics)] {
+            journal.record(Change {site,facets:Facets::one(facet),scope:Scope::Site,before:Support::Pending,after:Support::Pending});
+            let closed=graph.invalidate_pending(&journal);
+            let next=BatchStamp {from:journal.base(),to:SceneRevision {owner:issuer.owner(),sequence:Nz::new(sequence).unwrap()},source_epoch:sequence,snapshot_epoch:sequence};
+            let changes=journal.prepare(next).unwrap().with_closed(closed).unwrap();let publication=issuer.prepare(next).unwrap();
+            let mut damage=None;
+            let allocations=allocation_counter::measure(|| {damage=Some(canvas.commit_non_graphical_publication(changes,publication).unwrap());});
+            assert_eq!((allocations.count_total,allocations.bytes_total),(0,0),"guard/closure construction is outside this commit-only scope");
+            assert!(damage.unwrap().is_empty());assert_eq!(pointers(&canvas),before,"no command/resource/raster owner replaced");
+            assert_eq!(canvas.commands.masks.iter().map(Arc::as_ptr).collect::<Vec<_>>(),masks);
+            assert_eq!(canvas.prepared_scene().storage().lane_bytes(),storage.lane_bytes());
+            let frame=canvas.accepted_scene().unwrap();assert_eq!(frame.stamp(),next);
+            let mutation=frame.checked_slot_mutation().unwrap();assert_eq!(mutation.base(),next.from.unwrap());assert_eq!(mutation.bank_origin(),first.to);assert!(mutation.changed_slots().is_empty());
+            let mut output=vec![0;64*32];canvas.render_bgrx(&mut output).unwrap();assert_eq!(output,seed);
+            graph.reset(next.to);graph.register_site(site);assert!(graph.finish(1));
+        }
+        let mut cold=Canvas::recording(64,32,ColorConfig::default()).unwrap();let mut scene=cold.stage();emit(&mut scene);scene.commit();
+        let mut expected=vec![0;64*32];cold.render_bgrx(&mut expected).unwrap();assert_eq!(seed,expected);
+    }
+
     #[test]
     fn common_model_inline_binding_layout_is_explicit_not_a_silent_old_budget_change() {
         println!("COMMON_PUBLICATION_LAYOUT Canvas={} oldCanvas=464 Binding={} OptionBinding={} Receipt={} Batch={} Groups={} Stats={} Scratch={}",
