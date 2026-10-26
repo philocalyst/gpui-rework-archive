@@ -8,9 +8,10 @@ impl<M: View + 'static> Runtime<M> {
     /// Transform (plus existing Paint) sinks, on subtrees disjoint from all
     /// List/ListItem/Scroll ancestry. Ordinary patch and full publication still
     /// perform geometry, clipping, hit, text/resource and accessibility work.
+    // Admission for legacy UNTRACKED provider observation only. This grants
+    // no dependency/output cleanliness and never bypasses full presentation.
     #[inline(never)]
-    #[cfg(test)]
-    fn disjoint_transform_ports(&self, field: FieldId) -> bool {
+    fn source_observation_disjoint(&self, field: FieldId) -> bool {
         if !self.logical_valid || !self.presentation_valid
             || self.dirty || self.topology_changed || self.rebuild_layout
             || self.layout_edits.is_some() || self.layout.is_poisoned()
@@ -34,6 +35,11 @@ impl<M: View + 'static> Runtime<M> {
             }
         })
     }
+}
+
+#[cfg(test)]
+impl<M: View + 'static> Runtime<M> {
+    fn disjoint_transform_ports(&self, field: FieldId) -> bool { self.source_observation_disjoint(field) }
 }
 
 impl<M: View + 'static, L: LaneSet<M>> RuntimeMut<'_, M, L> {
@@ -293,7 +299,8 @@ impl<M: View + 'static, L: LaneSet<M>> RuntimeMut<'_, M, L> {
                     // installed sinks, never transport outcome/case names.
                     let observe_untracked = self.runtime.fanout.get(&field).is_some_and(|fanout|
                         fanout.all_destinations().any(|(destination, _, _)| destination.property()
-                            .is_some_and(|property| property.info().impact != crate::property::Impact::Paint)));
+                            .is_some_and(|property| property.info().impact != crate::property::Impact::Paint)))
+                        && !self.runtime.source_observation_disjoint(field);
                     let semantic = self.runtime.patch_admitted(field, !self.deferred)?;
                     // Ordinary retained trees patch directly. Mixed virtual-list
                     // windows still need their list realization boundary.
