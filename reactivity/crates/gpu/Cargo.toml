@@ -43,3 +43,7 @@ required-features = ["gpu-tests"]
 [[example]]
 name = "images"
 required-features = ["gpu-tests"]
+
+[[example]]
+name = "retained"
+required-features = ["gpu-tests"]

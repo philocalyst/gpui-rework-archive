@@ -4353,7 +4353,7 @@ fn retained_color_slots_and_srgb_copy_preserve_every_channel_code() {
         }
         let slot = canvas.paint_slot(PaintColor::new(Color::BLACK)).unwrap();
         canvas
-            .fill_rect(Rect::new(2., 20., 5., 5.), Affine::IDENTITY, clip, slot)
+            .fill_rect_slot(Rect::new(2., 20., 5., 5.), Affine::IDENTITY, clip, slot)
             .unwrap();
         let target = output_texture(&gpu, &canvas);
         let view = target.create_view(&Default::default());
