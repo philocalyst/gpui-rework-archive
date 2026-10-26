@@ -115,7 +115,7 @@ impl RendererState {
             owner: self,
             context,
             edits,
-            target,
+            output: target.into(),
             changed,
         })
     }
@@ -125,7 +125,7 @@ pub struct GpuSlotCommit<'owner, 'edits, 'target> {
     owner: &'owner mut RendererState,
     context: &'owner GpuContext,
     edits: &'edits [SlotEdit],
-    target: &'target wgpu::TextureView,
+    pub(super) output: Output<'target>,
     changed: usize,
 }
 impl GpuSlotCommit<'_, '_, '_> {
@@ -152,7 +152,7 @@ impl GpuSlotCommit<'_, '_, '_> {
                 bytemuck::bytes_of(&next),
             );
         }
-        let submitted = self.context.submit(self.target, &packet.bindings);
+        let submitted = self.context.submit(self.output, &packet.bindings);
         self.owner.packet = Some(packet);
         let stats = &mut self.owner.stats;
         stats.submissions = stats.submissions.saturating_add(1);

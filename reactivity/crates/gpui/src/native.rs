@@ -312,11 +312,13 @@ fn surface_config(size: [u32; 2], format: wgpu::TextureFormat) -> wgpu::SurfaceC
 
 struct GpuSurface {
     handle: wgpu::Surface<'static>,
-    renderer: Renderer,
+    renderer: gpui_gpu::RetainedRenderer,
     errors: Arc<DeviceErrors>,
     packet_token: Option<crate::PresentationToken>,
+    packet_epoch: Option<crate::runtime::paint::SceneEpoch>,
 }
 impl GpuSurface {
+    #[cfg(test)]
     fn render_paint(
         &mut self,
         scene: gpui_canvas::PreparedScene<'_>,
@@ -324,26 +326,43 @@ impl GpuSurface {
         paint: Option<&crate::runtime::paint::SlotTransition>,
         target: &wgpu::TextureView,
     ) -> Result<wgpu::SubmissionIndex, gpui_gpu::Error> {
+        self.render_damaged(scene, token, paint, target, None)
+    }
+    fn render_damaged(
+        &mut self,
+        scene: gpui_canvas::PreparedScene<'_>,
+        token: crate::PresentationToken,
+        paint: Option<&crate::runtime::paint::SlotTransition>,
+        target: &wgpu::TextureView,
+        transition: Option<crate::runtime::paint::SceneDamage>,
+    ) -> Result<wgpu::SubmissionIndex, gpui_gpu::Error> {
+        let epoch = transition.map(|d| d.epoch);
+        let damage = transition
+            .filter(|d| d.base.is_some() && d.base == self.packet_epoch)
+            .map(|d| d.region);
         if self.packet_token == Some(token)
             && let Some(submitted) = self.renderer.redraw(target)?
         {
+            self.packet_epoch = epoch;
             return Ok(submitted);
         }
+        let previous = self.packet_token.take();
+        self.packet_epoch = None; // revoke before any packet or image mutation
         if let Some(paint) = paint
-            && self.packet_token == Some(paint.from)
-            && let Ok(plan) = self.renderer.prepare_slots(&paint.edits, target)
+            && previous == Some(paint.from)
+            && let Ok(submitted) = self.renderer.patch_slots(&paint.edits, target, damage)
         {
-            self.packet_token = None; // revoke before the first queue write
-            let submitted = plan.commit();
             self.packet_token = Some(token);
+            self.packet_epoch = epoch;
             return Ok(submitted);
         }
-        self.packet_token = None;
-        let submitted = self.renderer.render(scene, target)?;
+        let submitted = self.renderer.render(scene, target, damage)?;
         self.packet_token = Some(token);
+        self.packet_epoch = epoch;
         Ok(submitted)
     }
 }
+
 type CpuSurface = softbuffer::Surface<Arc<NativeWindow>, Arc<NativeWindow>>;
 enum Graphics {
     Gpu(Box<GpuSurface>),
@@ -574,9 +593,10 @@ impl<V: View + 'static, L: LaneSet<V>> NativeHost<V, L> {
         let size = window.inner_size();
         self.graphics = Some(Graphics::Gpu(Box::new(GpuSurface {
             handle,
-            renderer,
+            renderer: gpui_gpu::RetainedRenderer::new(renderer),
             errors,
             packet_token: None,
+            packet_epoch: None,
         })));
         self.resize([size.width, size.height])
     }
@@ -720,9 +740,9 @@ impl<V: View + 'static, L: LaneSet<V>> NativeHost<V, L> {
                 wgpu::CurrentSurfaceTexture::Success(frame) => {
                     let owner = self.owner.as_mut().expect("surface has an owner");
                     let view = frame.texture.create_view(&Default::default());
-                    let rendered = owner.with_paint_scene(|scene, token, paint| {
+                    let rendered = owner.with_paint_scene(|scene, token, paint, damage| {
                         graphics
-                            .render_paint(scene, token, paint, &view)
+                            .render_damaged(scene, token, paint, &view, Some(damage))
                             .map(|_| token)
                     })?;
                     let token = match rendered {
@@ -883,8 +903,9 @@ impl<V: View + 'static, L: LaneSet<V>> NativeHost<V, L> {
                 _ => return Err(NativeError::SurfaceUnavailable),
             };
             let view = frame.texture.create_view(&Default::default());
-            let token = owner.with_paint_scene(|scene, token, paint| {
-                gpu.render_paint(scene, token, paint, &view).map(|_| token)
+            let token = owner.with_paint_scene(|scene, token, paint, damage| {
+                gpu.render_damaged(scene, token, paint, &view, Some(damage))
+                    .map(|_| token)
             })??;
             window.pre_present_notify();
             gpu.renderer.queue().present(frame);

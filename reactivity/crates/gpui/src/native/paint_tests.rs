@@ -91,8 +91,9 @@ fn render(
 ) {
     let view = texture.create_view(&Default::default());
     let token = owner
-        .with_paint_scene(|scene, token, state| {
-            gpu.render_paint(scene, token, state, &view).unwrap();
+        .with_paint_scene(|scene, token, state, damage| {
+            gpu.render_damaged(scene, token, state, &view, Some(damage))
+                .unwrap();
             token
         })
         .unwrap();
@@ -150,7 +151,10 @@ pub(super) fn run(gpu: &mut GpuSurface) {
                 wgpu::TextureFormat::Rgba16Float,
             ))
             .unwrap();
-            Some(std::mem::replace(&mut gpu.renderer, renderer))
+            Some(std::mem::replace(
+                &mut gpu.renderer,
+                gpui_gpu::RetainedRenderer::new(renderer),
+            ))
         } else {
             None
         };

@@ -154,7 +154,7 @@ impl PaintRenderer {
         let result = self.inner.state.render_observed(
             &self.inner.context,
             scene,
-            target,
+            target.into(),
             |ordinal, group, word, compact| {
                 if let Some(site) = sites.get_mut(next)
                     && site.index.order() as usize == ordinal
@@ -366,7 +366,7 @@ impl GpuPaintCommit<'_, '_, '_> {
                 bytemuck::bytes_of(&next),
             );
         }
-        let submitted = context.submit(self.target, &packet.bindings);
+        let submitted = context.submit(self.target.into(), &packet.bindings);
         inner.packet = Some(packet);
         inner.stats.submissions = inner.stats.submissions.saturating_add(1);
         inner.stats.packet_reused = true;

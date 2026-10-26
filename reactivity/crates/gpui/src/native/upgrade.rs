@@ -381,9 +381,10 @@ impl Upgrade {
                     instance,
                     gpu: Box::new(GpuSurface {
                         handle,
-                        renderer,
+                        renderer: gpui_gpu::RetainedRenderer::new(renderer),
                         errors,
                         packet_token: None,
+                        packet_epoch: None,
                     }),
                 })
             }

@@ -4214,3 +4214,163 @@ fn retained_text_packet_cost_probe() {
         }
     });
 }
+
+#[test]
+fn retained_repair_matches_full_gpu_through_moves_removals_resize_and_failures() {
+    use gpui_canvas::DamageRegion;
+    use gpui_gpu::RetainedRenderer;
+    pollster::block_on(async {
+        for format in [
+            wgpu::TextureFormat::Rgba8UnormSrgb,
+            wgpu::TextureFormat::Bgra8UnormSrgb,
+            wgpu::TextureFormat::Rgba16Float,
+        ] {
+            let inner = renderer(format).await;
+            let mut oracle = Renderer::new(inner.device().clone(), inner.queue().clone(), format)
+                .await
+                .unwrap();
+            let mut gpu = RetainedRenderer::new(inner);
+            let config = if format == wgpu::TextureFormat::Rgba16Float {
+                ColorConfig::linear_hdr(gpui_canvas::OutputProfile::Srgb, 203.).unwrap()
+            } else {
+                ColorConfig::default()
+            };
+            for proofs in [true, false] {
+                gpu.set_tile_proofs(proofs);
+                for size in [[64, 48], [33, 25], [64, 48]] {
+                    let mut canvas = Canvas::recording(size[0], size[1], config).unwrap();
+                    let clip = Rect::new(0., 0., size[0] as f32, size[1] as f32);
+                    for (step, x) in [Some(2.), Some(8.25), Some(8.25), None, Some(3.5)]
+                        .into_iter()
+                        .enumerate()
+                    {
+                        let mut scene = canvas.stage();
+                        scene.clear(Color::rgb(19, 73, 127));
+                        if let Some(x) = x {
+                            scene
+                                .fill_rounded_rect(
+                                    Rect::new(x, 4.25, 9., 12.),
+                                    3.,
+                                    Affine::rotation(0.1),
+                                    clip,
+                                    Color::rgba(213, 37, 117, 181),
+                                )
+                                .unwrap();
+                        }
+                        // The foreground overlaps the changed primitive. Repair
+                        // must composite the whole stack, not just changed draws.
+                        scene
+                            .fill_rect(
+                                Rect::new(6., 6., 18., 12.),
+                                Affine::IDENTITY,
+                                clip,
+                                Color::rgba(47, 139, 231, 91),
+                            )
+                            .unwrap();
+                        let damage = scene.commit_with_damage();
+                        let target = output_texture(&gpu, &canvas);
+                        let view = target.create_view(&Default::default());
+                        gpu.render(canvas.prepared_scene(), &view, Some(damage))
+                            .unwrap();
+                        assert_eq!(
+                            read_texture(&gpu, &target),
+                            readback(&mut oracle, &canvas),
+                            "{format:?}/{proofs}/{size:?}/{step}"
+                        );
+                        if step == 2 {
+                            assert_eq!(gpu.retained_stats().composited_pixels, 0);
+                        }
+                        if step == 1 {
+                            assert!(
+                                gpu.retained_stats().composited_pixels
+                                    < u64::from(size[0] * size[1])
+                            );
+                        }
+                        // A different, uninitialized target must get every pixel.
+                        let fresh = output_texture(&gpu, &canvas);
+                        assert!(
+                            gpu.redraw(&fresh.create_view(&Default::default()))
+                                .unwrap()
+                                .is_some()
+                        );
+                        assert_eq!(read_texture(&gpu, &fresh), read_texture(&gpu, &target));
+                        assert_eq!(gpu.retained_stats().composited_pixels, 0);
+                        assert_eq!(
+                            gpu.retained_stats().copied_pixels,
+                            u64::from(size[0] * size[1])
+                        );
+                    }
+                    let target = output_texture(&gpu, &canvas);
+                    let view = target.create_view(&Default::default());
+                    let mut invalid = canvas.prepared_scene();
+                    invalid.clear[0] = f32::NAN;
+                    assert!(gpu.render(invalid, &view, None).is_err());
+                    assert!(gpu.redraw(&view).unwrap().is_none());
+                    // Even empty damage cannot authorize reuse after failure.
+                    gpu.render(
+                        canvas.prepared_scene(),
+                        &view,
+                        Some(DamageRegion::default()),
+                    )
+                    .unwrap();
+                    assert_eq!(
+                        gpu.retained_stats().composited_pixels,
+                        u64::from(size[0] * size[1])
+                    );
+                    assert_eq!(read_texture(&gpu, &target), readback(&mut oracle, &canvas));
+                }
+            }
+        }
+    });
+}
+
+#[test]
+fn retained_color_slots_and_srgb_copy_preserve_every_channel_code() {
+    use gpui_canvas::{PaintColor, SlotEdit};
+    use gpui_gpu::RetainedRenderer;
+    pollster::block_on(async {
+        let inner = renderer(wgpu::TextureFormat::Rgba8UnormSrgb).await;
+        let mut oracle = Renderer::new(
+            inner.device().clone(),
+            inner.queue().clone(),
+            inner.format(),
+        )
+        .await
+        .unwrap();
+        let mut gpu = RetainedRenderer::new(inner);
+        let mut canvas = Canvas::recording(256, 32, ColorConfig::default()).unwrap();
+        canvas.clear(Color::WHITE);
+        let clip = Rect::new(0., 0., 256., 32.);
+        for x in 0..256 {
+            canvas
+                .fill_rect(
+                    Rect::new(x as f32, 0., 1., 16.),
+                    Affine::IDENTITY,
+                    clip,
+                    Color::rgb(x as u8, (255 - x) as u8, (x / 2) as u8),
+                )
+                .unwrap();
+        }
+        let slot = canvas.paint_slot(PaintColor::new(Color::BLACK)).unwrap();
+        canvas
+            .fill_rect(Rect::new(2., 20., 5., 5.), Affine::IDENTITY, clip, slot)
+            .unwrap();
+        let target = output_texture(&gpu, &canvas);
+        let view = target.create_view(&Default::default());
+        gpu.render(canvas.prepared_scene(), &view, None).unwrap();
+        assert_eq!(read_texture(&gpu, &target), readback(&mut oracle, &canvas));
+        for color in [Color::WHITE, Color::rgb(77, 139, 207), Color::BLACK] {
+            let edits = [SlotEdit::new(slot, PaintColor::new(color))];
+            let damage = canvas.prepare_slots(&edits).unwrap().commit();
+            gpu.patch_slots(&edits, &view, Some(damage)).unwrap();
+            assert_eq!(gpu.retained_stats().composited_pixels, 25);
+            assert_eq!(gpu.stats().instance_upload_bytes, 16);
+            assert_eq!(read_texture(&gpu, &target), readback(&mut oracle, &canvas));
+        }
+        let before = read_texture(&gpu, &target);
+        let bad = [SlotEdit::new(slot, PaintColor::new(Color::TRANSPARENT))];
+        assert!(gpu.patch_slots(&bad, &view, None).is_err());
+        gpu.redraw(&view).unwrap().unwrap();
+        assert_eq!(read_texture(&gpu, &target), before);
+    });
+}

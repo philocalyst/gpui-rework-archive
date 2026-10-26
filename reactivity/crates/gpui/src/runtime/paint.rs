@@ -157,6 +157,19 @@ impl Prepared {
 }
 
 #[cfg(feature = "native-core")]
+#[derive(Clone, Copy, PartialEq, Eq)]
+pub(crate) struct SceneEpoch(NonZeroU64, u64);
+
+/// Damage relative to the acknowledged epoch, never to an arbitrary GPU packet.
+#[cfg(feature = "native-core")]
+#[derive(Clone, Copy)]
+pub(crate) struct SceneDamage {
+    pub(crate) base: Option<SceneEpoch>,
+    pub(crate) epoch: SceneEpoch,
+    pub(crate) region: gpui_canvas::DamageRegion,
+}
+
+#[cfg(feature = "native-core")]
 impl<M: View + 'static, L: LaneSet<M>> Win<M, L> {
     pub(crate) fn with_paint_scene<R>(
         &self,
@@ -164,6 +177,7 @@ impl<M: View + 'static, L: LaneSet<M>> Win<M, L> {
             gpui_canvas::PreparedScene<'_>,
             PresentationToken,
             Option<&SlotTransition>,
+            SceneDamage,
         ) -> R,
     ) -> Result<R, Error> {
         let runtime = self.runtime()?;
@@ -173,6 +187,16 @@ impl<M: View + 'static, L: LaneSet<M>> Win<M, L> {
             runtime.canvas.prepared_scene(),
             token,
             runtime.styles.slot_transition(),
+            SceneDamage {
+                base: (!runtime.automatic_presentation && runtime.presentation_valid).then_some(
+                    SceneEpoch(runtime.sites.namespace(), runtime.presentation_epoch),
+                ),
+                epoch: SceneEpoch(runtime.sites.namespace(), runtime.complete_epoch),
+                region: runtime
+                    .prepared
+                    .as_ref()
+                    .map_or(Default::default(), |p| p.damage),
+            },
         ))
     }
 }

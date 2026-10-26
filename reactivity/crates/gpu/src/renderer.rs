@@ -11,6 +11,9 @@ mod clips;
 mod images;
 mod owned;
 mod paint;
+mod retained;
+use retained::Output;
+pub use retained::{RetainedRenderer, RetainedStats};
 mod slots;
 pub use images::ImageStats;
 pub use paint::{GpuPaintCommit, GpuPaintEdit, PaintBinding, PaintError, PaintRenderer};
@@ -524,25 +527,25 @@ impl GpuContext {
     pub fn format(&self) -> wgpu::TextureFormat {
         self.format
     }
-    fn submit(
-        &self,
-        target: &wgpu::TextureView,
-        bindings: &wgpu::BindGroup,
-    ) -> wgpu::SubmissionIndex {
+    fn submit(&self, output: Output<'_>, bindings: &wgpu::BindGroup) -> wgpu::SubmissionIndex {
         let mut encoder = self
             .device
             .create_command_encoder(&wgpu::CommandEncoderDescriptor {
                 label: Some("GPUI frame"),
             });
-        {
+        if output.damage.is_none_or(|damage| !damage.is_empty()) {
             let mut pass = encoder.begin_render_pass(&wgpu::RenderPassDescriptor {
                 label: Some("GPUI frame"),
                 color_attachments: &[Some(wgpu::RenderPassColorAttachment {
-                    view: target,
+                    view: output.view,
                     resolve_target: None,
                     depth_slice: None,
                     ops: wgpu::Operations {
-                        load: wgpu::LoadOp::Clear(wgpu::Color::TRANSPARENT),
+                        load: if output.damage.is_some() {
+                            wgpu::LoadOp::Load
+                        } else {
+                            wgpu::LoadOp::Clear(wgpu::Color::TRANSPARENT)
+                        },
                         store: wgpu::StoreOp::Store,
                     },
                 })],
@@ -551,9 +554,15 @@ impl GpuContext {
                 occlusion_query_set: None,
                 multiview_mask: None,
             });
+            if let Some([left, top, right, bottom]) = output.damage.and_then(|d| d.bounds()) {
+                pass.set_scissor_rect(left, top, right - left, bottom - top);
+            }
             pass.set_pipeline(&self.pipeline);
             pass.set_bind_group(0, bindings, &[]);
             pass.draw(0..3, 0..1);
+        }
+        if let Some((backing, target)) = output.present {
+            backing.copy(&mut encoder, target);
         }
         self.queue.submit([encoder.finish()])
     }
@@ -631,15 +640,16 @@ impl RendererState {
         scene: PreparedScene<'_>,
         target: &wgpu::TextureView,
     ) -> Result<wgpu::SubmissionIndex, Error> {
-        self.render_observed(context, scene, target, |_, _, _, _| {})
+        self.render_observed(context, scene, target.into(), |_, _, _, _| {})
     }
     fn render_observed(
         &mut self,
         context: &GpuContext,
         scene: PreparedScene<'_>,
-        target: &wgpu::TextureView,
+        output: Output<'_>,
         mut group_ready: impl FnMut(usize, PreparedGroup<'_>, usize, bool),
     ) -> Result<wgpu::SubmissionIndex, Error> {
+        let target = output.view;
         self.check_context(context)?;
         self.packet = None;
         scene
@@ -1002,7 +1012,7 @@ impl RendererState {
                     },
                 ],
             });
-        let submitted = context.submit(target, &bindings);
+        let submitted = context.submit(output, &bindings);
         self.packet = Some(Packet {
             bindings,
             size: [
@@ -1067,6 +1077,14 @@ impl RendererState {
         context: &GpuContext,
         target: &wgpu::TextureView,
     ) -> Result<Option<wgpu::SubmissionIndex>, Error> {
+        self.redraw_output(context, target.into())
+    }
+    fn redraw_output(
+        &mut self,
+        context: &GpuContext,
+        output: Output<'_>,
+    ) -> Result<Option<wgpu::SubmissionIndex>, Error> {
+        let target = output.view;
         self.check_context(context)?;
         let Some(packet) = &self.packet else {
             return Ok(None);
@@ -1076,7 +1094,7 @@ impl RendererState {
         {
             return Err(Error::InvalidScene);
         }
-        let submitted = context.submit(target, &packet.bindings);
+        let submitted = context.submit(output, &packet.bindings);
         self.stats.submissions = self.stats.submissions.saturating_add(1);
         self.stats.packet_reused = true;
         self.stats.validated_draws = 0;
