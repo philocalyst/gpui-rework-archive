@@ -17,7 +17,7 @@ mod immutable_view;
 mod break_target_control;
 mod lowering;
 #[cfg(feature = "retained-text")]
-#[path = "../resource.rs"]
+#[path = "resource.rs"]
 pub(super) mod resource;
 
 const FAMILIES: [&str; 3] = ["GPUI primary", "GPUI fallback one", "GPUI fallback two"];
