@@ -1,0 +1,563 @@
+{
+  "scope": "Cloud source branch snapshot before final documentation commit. Final checkpoint branch and host archival mappings are recorded by the push owner. Host-only refs inventoried separately.",
+  "refs": [
+    {
+      "branch": "benchmark/common-baseline",
+      "commit": "7ac6f33898989d48fb1a6023966fea738f266ced",
+      "subject": "Check exact draw geometry rather than conservative hit bounds",
+      "qualification": "Not inferred from branch name; see component and host evidence chapters."
+    },
+    {
+      "branch": "canonical-csr-end-offset",
+      "commit": "5c458586ff7e7dd2bdfcb2dcea3f30447e7d7e1a",
+      "subject": "Build CSR starts directly from cumulative ends without the offset copy pass",
+      "qualification": "Not inferred from branch name; see component and host evidence chapters."
+    },
+    {
+      "branch": "canonical-draw-geometry-corrected",
+      "commit": "14e3e6ed267838d8c150ec425f2421fbfca5b9a8",
+      "subject": "Keep historical combined column-header log lane in extraction controls",
+      "qualification": "Not inferred from branch name; see component and host evidence chapters."
+    },
+    {
+      "branch": "canonical-draw-geometry-extraction",
+      "commit": "cedf50fcab0384b273990df909641de84aaa8833",
+      "subject": "Extract existing draw geometry and resource ownership from mutable paint state",
+      "qualification": "Not inferred from branch name; see component and host evidence chapters."
+    },
+    {
+      "branch": "canonical-draw-geometry-integrated",
+      "commit": "f414f7e857ffd16ac7053ce63df2948b8900dd37",
+      "subject": "Keep historical combined column-header log lane in extraction controls",
+      "qualification": "Not inferred from branch name; see component and host evidence chapters."
+    },
+    {
+      "branch": "canonical-hard-full-fixture-correction",
+      "commit": "539973331b2409adb746966d0bbcc778b9766f6e",
+      "subject": "Align hard-full publication fixture with zero-retained-entry core contract",
+      "qualification": "Not inferred from branch name; see component and host evidence chapters."
+    },
+    {
+      "branch": "canonical-material-fusion",
+      "commit": "7bc59cf4ad61fbae562bb0f6651818698347b90c",
+      "subject": "Fuse actual material users into scoped canonical site recording",
+      "qualification": "Not inferred from branch name; see component and host evidence chapters."
+    },
+    {
+      "branch": "canonical-material-fusion-composed",
+      "commit": "28dc3cb9597f799931fb8ce43ffc7586eecba21d",
+      "subject": "Fuse actual material users into scoped canonical site recording",
+      "qualification": "Not inferred from branch name; see component and host evidence chapters."
+    },
+    {
+      "branch": "canonical-material-owner-index",
+      "commit": "41c5ee921d0dfa6abba7aca3f14f9cd8f24dfff7",
+      "subject": "Resolve material users through owned canonical group addresses instead of duplicated IDs",
+      "qualification": "Not inferred from branch name; see component and host evidence chapters."
+    },
+    {
+      "branch": "canonical-next-rendering-packet",
+      "commit": "8ec1422e04a89a26dd381e152dbd3341f770a14c",
+      "subject": "Resolve material users through owned canonical group addresses instead of duplicated IDs",
+      "qualification": "Not inferred from branch name; see component and host evidence chapters."
+    },
+    {
+      "branch": "canonical-ordered-rendering",
+      "commit": "b02f3b90bc6edb7ffd377e9801142febb65f2981",
+      "subject": "Compose exact skipped-output receipt edge fixture after material compaction",
+      "qualification": "Not inferred from branch name; see component and host evidence chapters."
+    },
+    {
+      "branch": "canonical-publication-transition-tests",
+      "commit": "ee0ab00b4a23657e0bb407f47c4885d4388283f6",
+      "subject": "Test skipped-output receipt edges across failed newer and reversion",
+      "qualification": "Not inferred from branch name; see component and host evidence chapters."
+    },
+    {
+      "branch": "canonical-whole-owner-reuse",
+      "commit": "bf52c3682d8e5bd2fc0ef3c5cb388a312d668ba6",
+      "subject": "Centralize zero-mutation publication under closed non-graphical owner reuse",
+      "qualification": "Not inferred from branch name; see component and host evidence chapters."
+    },
+    {
+      "branch": "canonical-whole-owner-reuse-586",
+      "commit": "47ca43cf43304b5ecf3821b3a5c91e267dadc500",
+      "subject": "Add strict zero-mutation owner retarget on exact pre-fusion Canvas publication base",
+      "qualification": "Not inferred from branch name; see component and host evidence chapters."
+    },
+    {
+      "branch": "checkpoint-cloud-20261026",
+      "commit": "ba16a0bb0c35bd54ba965a96419893292b84e8ff",
+      "subject": "Clarify answer-gap evidence retention and conservative placement fanout",
+      "qualification": "Not inferred from branch name; see component and host evidence chapters."
+    },
+    {
+      "branch": "cpu-checked-slot-output-cache",
+      "commit": "91cac8a804266368ce3baf6def7e18dbccee5244",
+      "subject": "Restore canonical omitted gamut test input from exact archive blob",
+      "qualification": "Not inferred from branch name; see component and host evidence chapters."
+    },
+    {
+      "branch": "cpu-clip-mask-control",
+      "commit": "a4774e141edc9fa0be094ddcb80a771cccff11d8",
+      "subject": "Attribute repair allocation and work counters to the measured region",
+      "qualification": "Not inferred from branch name; see component and host evidence chapters."
+    },
+    {
+      "branch": "cpu-clip-mask-trial",
+      "commit": "820ec1802661954c82bc01df213208be87ad7eff",
+      "subject": "Attribute repair allocation and work counters to the measured region",
+      "qualification": "Not inferred from branch name; see component and host evidence chapters."
+    },
+    {
+      "branch": "cpu-clip-option-lazy-trial",
+      "commit": "2166e7f73571afcc7c3f9157d36b65dc1bae22e4",
+      "subject": "Defer exact CPU clip-mask cache initialization until first use",
+      "qualification": "Not inferred from branch name; see component and host evidence chapters."
+    },
+    {
+      "branch": "cpu-clip-option-reset-mutant",
+      "commit": "cb1feb4dd25d8e280dcc21f71afae49f9c1035b4",
+      "subject": "Restore Option cache per-tile reset",
+      "qualification": "Not inferred from branch name; see component and host evidence chapters."
+    },
+    {
+      "branch": "cpu-clip-validity-mutant",
+      "commit": "30dfdc2e6fe3ea81260c41707c3a77594fc9c81e",
+      "subject": "Restore exact mask-cache prefix invalidation",
+      "qualification": "Not inferred from branch name; see component and host evidence chapters."
+    },
+    {
+      "branch": "cpu-fractional-rowstrip-control",
+      "commit": "7b270ef5067b6a262ac32fb98053b33fd4d7e7a7",
+      "subject": "gpui tests: same buffered complete capture writer on old control",
+      "qualification": "Not inferred from branch name; see component and host evidence chapters."
+    },
+    {
+      "branch": "cpu-fractional-rowstrip-proof",
+      "commit": "48dbb8ddbdb6cb1b8f7e6417fee08fb46de6933b",
+      "subject": "tests: expose actual fractional command domains and check every Cartesian site address",
+      "qualification": "Not inferred from branch name; see component and host evidence chapters."
+    },
+    {
+      "branch": "cpu-interaction-phase-probe",
+      "commit": "48763555e81cff41c487958f132744f55bc0a891",
+      "subject": "Prepare nonshipping constant-boundary interaction attribution",
+      "qualification": "Not inferred from branch name; see component and host evidence chapters."
+    },
+    {
+      "branch": "cpu-opaque-span-control",
+      "commit": "4899459b3f981e681fe7b2a772dca559e4508267",
+      "subject": "canvas: matched optional span stats and ordinary strategy control",
+      "qualification": "Not inferred from branch name; see component and host evidence chapters."
+    },
+    {
+      "branch": "cpu-opaque-span-integrated-bridge",
+      "commit": "657b714bfd01fc4624236c7affb0f17097c7f7f7",
+      "subject": "canvas tests: price optional dense span counter headers exactly",
+      "qualification": "Not inferred from branch name; see component and host evidence chapters."
+    },
+    {
+      "branch": "cpu-opaque-span-proof",
+      "commit": "73a6aff9f18c9e4881692b36d48ba4df3f39f13d",
+      "subject": "canvas: isolate optional borrowed opaque integer span consumer",
+      "qualification": "Not inferred from branch name; see component and host evidence chapters."
+    },
+    {
+      "branch": "cpu-paint-cache-feature-accounting",
+      "commit": "7a8ea8ace99d040efa9ee091a32d297c2e39d8c2",
+      "subject": "canvas tests: account exact optional packed-cache scratch storage separately",
+      "qualification": "Not inferred from branch name; see component and host evidence chapters."
+    },
+    {
+      "branch": "cpu-paint-cache-tiny-grid-decline",
+      "commit": "db30008693a4389cff361484adf86271068afd2a",
+      "subject": "canvas: decline packed tracking on grids with zero sparse tile budget",
+      "qualification": "Not inferred from branch name; see component and host evidence chapters."
+    },
+    {
+      "branch": "cpu-slot-cache-control",
+      "commit": "57f1de9e4f51ab91268128d34515f0d981206a0c",
+      "subject": "Restore canonical omitted gamut test input from exact archive blob",
+      "qualification": "Not inferred from branch name; see component and host evidence chapters."
+    },
+    {
+      "branch": "experiment/blend-sources-control",
+      "commit": "15edfe11c9b15664e549231d37042a6ca35e43de",
+      "subject": "Freeze shared source-array site and input-bit invariants",
+      "qualification": "Not inferred from branch name; see component and host evidence chapters."
+    },
+    {
+      "branch": "experiment/changed-slot-fold-source-only",
+      "commit": "f59d7aa4470f79ce8e64ff61cc0be62578c29243",
+      "subject": "Draft retained support from effectively changed admitted slot rows",
+      "qualification": "Not inferred from branch name; see component and host evidence chapters."
+    },
+    {
+      "branch": "experiment/device-limit-source-only",
+      "commit": "c13dd1b3b991ca1c145455e2acba553805195fad",
+      "subject": "Discriminate private target device guard with requested small limits",
+      "qualification": "Not inferred from branch name; see component and host evidence chapters."
+    },
+    {
+      "branch": "experiment/device-preflight-superseded-ddd9059",
+      "commit": "ddd9059a5a9eee66473020c9db702bab3805ee34",
+      "subject": "Preflight private target extents before allocation and mutation",
+      "qualification": "Not inferred from branch name; see component and host evidence chapters."
+    },
+    {
+      "branch": "experiment/fold-equal-row-mutant",
+      "commit": "24642a27d10db8b997e652b569ab4f525d228ff5",
+      "subject": "Negative control: observe equal rows before the equality cut",
+      "qualification": "Not inferred from branch name; see component and host evidence chapters."
+    },
+    {
+      "branch": "experiment/fold-omission-mutant",
+      "commit": "5881574023f8159b4807e5f4eeafbfa294f85d02",
+      "subject": "Mutant omit changed support callback to require image oracle failure",
+      "qualification": "Not inferred from branch name; see component and host evidence chapters."
+    },
+    {
+      "branch": "experiment/ordinary-slot-codegen",
+      "commit": "29ef681c3047c3eb6be0fe963b9f2d33bb38ebe3",
+      "subject": "Avoid cross-crate getter evaluation for ordinary empty slot observer",
+      "qualification": "Not inferred from branch name; see component and host evidence chapters."
+    },
+    {
+      "branch": "experiment/raw-patch-target-admission",
+      "commit": "9fdea16d40248ee5b7087dded1cbc096e303dbc5",
+      "subject": "Reject queryable incompatible transactional paint targets",
+      "qualification": "Not inferred from branch name; see component and host evidence chapters."
+    },
+    {
+      "branch": "experiment/retained-composed",
+      "commit": "d8c4262cec20e5d19010166b36fcf75f97349f11",
+      "subject": "Pass admitted slot write by borrow and initialize device-limit fixture directly",
+      "qualification": "Not inferred from branch name; see component and host evidence chapters."
+    },
+    {
+      "branch": "experiment/retained-delivery-7ac6",
+      "commit": "6957114d5a2b9875ff6da0e6484402a34d5f1d05",
+      "subject": "Rebase feature-gated retained conformance source onto interaction production pin",
+      "qualification": "Not inferred from branch name; see component and host evidence chapters."
+    },
+    {
+      "branch": "experiment/retained-scissor-control-e0eab5b",
+      "commit": "e0eab5b4f1ea74fdd0193155e532083e6dbdad62",
+      "subject": "Bounded negative control: omit one valid repair column",
+      "qualification": "Not inferred from branch name; see component and host evidence chapters."
+    },
+    {
+      "branch": "experiment/retained-target-472bb94",
+      "commit": "472bb94c8e451de006275c24cacb93692c1df1c1",
+      "subject": "Qualify retained repair resources and failure memory counters",
+      "qualification": "Not inferred from branch name; see component and host evidence chapters."
+    },
+    {
+      "branch": "experiment/samples-storage-control",
+      "commit": "109efa03bf49e8a7e4b0b972ac876ac225fd2c3f",
+      "subject": "Freeze unchanged sample storage with reset regression and prior diagnostic fixture",
+      "qualification": "Not inferred from branch name; see component and host evidence chapters."
+    },
+    {
+      "branch": "experiment/samples-storage-nested-control",
+      "commit": "2f62759dba5b90723a89b7c464b69f9060883178",
+      "subject": "Isolate eager nested sample arrays and direct promotion assignment",
+      "qualification": "Not inferred from branch name; see component and host evidence chapters."
+    },
+    {
+      "branch": "experiment/samples-storage-option",
+      "commit": "227ee72529135148e979d3a4b68184e212343a19",
+      "subject": "Keep divergent sample payloads as initialized per-pixel Options",
+      "qualification": "Not inferred from branch name; see component and host evidence chapters."
+    },
+    {
+      "branch": "geometry-controlled-timing",
+      "commit": "694516583b89e90ab82c03f0af28bf180b876783",
+      "subject": "gpui: isolated synchronous software geometry timing and history preflight harness",
+      "qualification": "Not inferred from branch name; see component and host evidence chapters."
+    },
+    {
+      "branch": "lane1-canonical-changes",
+      "commit": "8c4a6a28a8804fc6ddeb332845b09ce83d99a5a0",
+      "subject": "Archive superseded unqualified opacity classification prototype",
+      "qualification": "Not inferred from branch name; see component and host evidence chapters."
+    },
+    {
+      "branch": "lane1-canonical-compile-corrections",
+      "commit": "11d4bb3929b00255ba566c7411dd7613163f3308",
+      "subject": "Gate ordinary font registration with a cfg block instead of an expression",
+      "qualification": "Not inferred from branch name; see component and host evidence chapters."
+    },
+    {
+      "branch": "lane1-canonical-revision",
+      "commit": "c99816d53578cb2c34cd1e49426b20fc8f5fb03a",
+      "subject": "Advance canonical metadata C independently from public presentation tokens",
+      "qualification": "Not inferred from branch name; see component and host evidence chapters."
+    },
+    {
+      "branch": "lane1-coherent-damage",
+      "commit": "31f9098a78e868ea1cdb6f48440a9023c4648a6f",
+      "subject": "Clarify answer-gap evidence retention and conservative placement fanout",
+      "qualification": "Not inferred from branch name; see component and host evidence chapters."
+    },
+    {
+      "branch": "lane1-composed-plan-falsifiers",
+      "commit": "1c5cefe31b1e1b7386dc44f7f1c2283eb15c99c4",
+      "subject": "Falsify stale retained plans after a second unprepared description",
+      "qualification": "Not inferred from branch name; see component and host evidence chapters."
+    },
+    {
+      "branch": "lane1-disjoint-transform",
+      "commit": "33c180a6ed6f82c792c91590c382ff2e12afcee9",
+      "subject": "Skip viewport certificate preparation when complete current drafts have no viewports",
+      "qualification": "Not inferred from branch name; see component and host evidence chapters."
+    },
+    {
+      "branch": "lane1-integrated-core",
+      "commit": "5d44bceeded2cbdef51bce89013d05212fe3c2cd",
+      "subject": "Prove retained capability and current viewport bits in integrated cross-product test",
+      "qualification": "Not inferred from branch name; see component and host evidence chapters."
+    },
+    {
+      "branch": "lane1-integrated-cpu-cache",
+      "commit": "2bc2349b57802b83ca552a047860b404a7228377",
+      "subject": "Compose default-off checked-slot CPU consumer with guarded integrated GPUI core",
+      "qualification": "Not inferred from branch name; see component and host evidence chapters."
+    },
+    {
+      "branch": "lane1-integrated-diagnostics",
+      "commit": "c71f907aef11d28f00ec839a404541d70b3752ec",
+      "subject": "Prove retained capability and current viewport bits in integrated cross-product test",
+      "qualification": "Not inferred from branch name; see component and host evidence chapters."
+    },
+    {
+      "branch": "lane1-integrated-popup-selector",
+      "commit": "81cd14dc055c05091fb74ecc04779a8b443bcc9e",
+      "subject": "Disambiguate integrated popup target by its Generic semantic role",
+      "qualification": "Not inferred from branch name; see component and host evidence chapters."
+    },
+    {
+      "branch": "lane1-integrated-test-delimiter",
+      "commit": "0fc36536d862b3b7426e872263633fb99cc8994a",
+      "subject": "Close second-unprepared-description test before subsequent test item",
+      "qualification": "Not inferred from branch name; see component and host evidence chapters."
+    },
+    {
+      "branch": "lane1-integrated-viewport-witness",
+      "commit": "95eb5bebfdc0fb32692c2bf23b13e347ef56c2c9",
+      "subject": "Witness current real list viewport and every layout map roundtrip before integrated updates",
+      "qualification": "Not inferred from branch name; see component and host evidence chapters."
+    },
+    {
+      "branch": "lane1-interaction-diagnostics",
+      "commit": "c89ce5140acb9bbe5cf4364721d2187dd8c073e9",
+      "subject": "Record original raster mode explicitly in diagnostic history",
+      "qualification": "Not inferred from branch name; see component and host evidence chapters."
+    },
+    {
+      "branch": "lane1-multi-slot-composed",
+      "commit": "e0acd32528c4d8cfd6a867a90ecd1e4c8b8a9cf0",
+      "subject": "Import public token type explicitly in composition test",
+      "qualification": "Not inferred from branch name; see component and host evidence chapters."
+    },
+    {
+      "branch": "lane1-multi-slot-diagnostics",
+      "commit": "c18db73c666e1a0b0225840a78e2ad33f5a8c4a2",
+      "subject": "Import public token type explicitly in composition test",
+      "qualification": "Not inferred from branch name; see component and host evidence chapters."
+    },
+    {
+      "branch": "lane1-next-compile",
+      "commit": "7c49cbeffcfafac668aa5c8f64208078d59301ce",
+      "subject": "Gate ordinary font registration with a cfg block instead of an expression",
+      "qualification": "Not inferred from branch name; see component and host evidence chapters."
+    },
+    {
+      "branch": "lane1-next-compile-v2",
+      "commit": "4bcb7c37e743f9623bbd9d5d21ce9e5c4182e78a",
+      "subject": "Journal bounded actual solver writes against accepted layout baseline",
+      "qualification": "Not inferred from branch name; see component and host evidence chapters."
+    },
+    {
+      "branch": "lane1-observation-compatibility-correction",
+      "commit": "3236bed0e2f39fe5a79ce5a6059013a3deaabaab",
+      "subject": "Test disjoint source admission and untracked resize observation together",
+      "qualification": "Not inferred from branch name; see component and host evidence chapters."
+    },
+    {
+      "branch": "lane1-recorded-scenes",
+      "commit": "7e9544685e3bbe4655b7217043373840d868f961",
+      "subject": "gpui: preserve earned region-local untracked observation admission",
+      "qualification": "Not inferred from branch name; see component and host evidence chapters."
+    },
+    {
+      "branch": "lane1-retained-order-linear",
+      "commit": "6041f0be1503862c47c4b3e7fda65225caa53118",
+      "subject": "Derive topology during reconciliation instead of collecting and comparing old identities",
+      "qualification": "Not inferred from branch name; see component and host evidence chapters."
+    },
+    {
+      "branch": "lane1-selective-output-compile",
+      "commit": "016f603121191e440a90d1790441f24b887bab4a",
+      "subject": "Unify exact style mutation facts across coarse direct and mapped routes",
+      "qualification": "Not inferred from branch name; see component and host evidence chapters."
+    },
+    {
+      "branch": "lane1-solver-compiler-corrections",
+      "commit": "76301eb99b733304f33d851ff20936e0dd174c1f",
+      "subject": "Import element and signal types in private solver regression fixtures",
+      "qualification": "Not inferred from branch name; see component and host evidence chapters."
+    },
+    {
+      "branch": "lane1-solver-propagation",
+      "commit": "46ebdf454436aa4d97861f7eda75c984e51196f2",
+      "subject": "Import element and signal types for solver fixtures",
+      "qualification": "Not inferred from branch name; see component and host evidence chapters."
+    },
+    {
+      "branch": "master",
+      "commit": "71cc8a53da32a3bc63ffe0c2bd08e50886137a1d",
+      "subject": "Restore pinned clean-room source and vendors from cc193f85f5",
+      "qualification": "Not inferred from branch name; see component and host evidence chapters."
+    },
+    {
+      "branch": "render-blend-sources-borrow",
+      "commit": "0d65be6480b1d6512086417bbbee4111226a8ecd",
+      "subject": "Borrow precomputed source array at private raster blend boundary",
+      "qualification": "Not inferred from branch name; see component and host evidence chapters."
+    },
+    {
+      "branch": "render-borrow-tests-v2",
+      "commit": "48066ea52f8fa8fcd668439f15ab93cbf271fbc2",
+      "subject": "Add public source-site correlation oracle and uniform directed cases",
+      "qualification": "Not inferred from branch name; see component and host evidence chapters."
+    },
+    {
+      "branch": "render-borrow-v2",
+      "commit": "4883cbfaa4479d879bb3fadca73a5a2c04bc424b",
+      "subject": "Borrow precomputed source array at private raster blend boundary",
+      "qualification": "Not inferred from branch name; see component and host evidence chapters."
+    },
+    {
+      "branch": "render-fragment-read-control",
+      "commit": "c82c25729a0cf7367740937b2315b0fe870a7de4",
+      "subject": "Restore exact canonical gamut fixture for private read qualification",
+      "qualification": "Not inferred from branch name; see component and host evidence chapters."
+    },
+    {
+      "branch": "render-fragment-read-qualified",
+      "commit": "2b55df5f2ec4709734f790706dd634fc48dede09",
+      "subject": "Restore exact canonical gamut fixture for private read qualification",
+      "qualification": "Not inferred from branch name; see component and host evidence chapters."
+    },
+    {
+      "branch": "render-geometry-exact-interactions",
+      "commit": "33e5adf08deb4ec1a04266ec2d94fbb40fef0425",
+      "subject": "Compare complete actual interaction GPU images with independent full output and queued leases",
+      "qualification": "Not inferred from branch name; see component and host evidence chapters."
+    },
+    {
+      "branch": "render-geometry-interaction-diagnostic",
+      "commit": "982e19b1ca1294d646d50132264bc941fde78a4c",
+      "subject": "Report zero requested image upload for successful resource-free scenes",
+      "qualification": "Not inferred from branch name; see component and host evidence chapters."
+    },
+    {
+      "branch": "render-geometry-proof-boundary",
+      "commit": "464bfdddc07a34bf8ed5e37980ccf1fdef6428b2",
+      "subject": "Keep old-support pixel falsifier discriminating after tile expansion",
+      "qualification": "Not inferred from branch name; see component and host evidence chapters."
+    },
+    {
+      "branch": "render-paired-local-read",
+      "commit": "83a7c16047aec16228eb2dd8de1c5f3f42654dc8",
+      "subject": "Restore exact canonical gamut fixture for private read qualification",
+      "qualification": "Not inferred from branch name; see component and host evidence chapters."
+    },
+    {
+      "branch": "render-solid-geometry-repair",
+      "commit": "b4831a893bc7b38ec372be14cf35b4506bb69518",
+      "subject": "Use device-independent tiny-radius Precision discriminator",
+      "qualification": "Not inferred from branch name; see component and host evidence chapters."
+    },
+    {
+      "branch": "renderer-incremental-jobs-proof",
+      "commit": "58658123114570054a901285e58733eb083f7926",
+      "subject": "Bind closed dependency receipts and fail closed outside causal material domain",
+      "qualification": "Not inferred from branch name; see component and host evidence chapters."
+    },
+    {
+      "branch": "structures-cold-control",
+      "commit": "2c8e19d25d363675b91da2daaa935213ac2ac2e2",
+      "subject": "Use public viewport-filling scroll root instead of intrinsically sized flex root",
+      "qualification": "Not inferred from branch name; see component and host evidence chapters."
+    },
+    {
+      "branch": "structures-niche-trial",
+      "commit": "515b02e9c076d92435e13935ecda77059bc4add5",
+      "subject": "Isolate foreign next-slot and failed-push identity invariants",
+      "qualification": "Not inferred from branch name; see component and host evidence chapters."
+    },
+    {
+      "branch": "structures-release-control",
+      "commit": "ec2f38a1b53ca033c36207f6d5a16b27a3f7793d",
+      "subject": "Freeze the identical common comparison harness over checked-range control",
+      "qualification": "Not inferred from branch name; see component and host evidence chapters."
+    },
+    {
+      "branch": "structures-release-inline",
+      "commit": "b8b0084267de03904c42eb98b54087c735904ff3",
+      "subject": "Expose checked range reconstruction for measured cross-crate inlining",
+      "qualification": "Not inferred from branch name; see component and host evidence chapters."
+    },
+    {
+      "branch": "structures-seed-only",
+      "commit": "b603a9ebb3b0be3e37389eb4d819b8b918cebfff",
+      "subject": "Use public viewport-filling scroll root instead of intrinsically sized flex root",
+      "qualification": "Not inferred from branch name; see component and host evidence chapters."
+    },
+    {
+      "branch": "text-edit-exact-buffer",
+      "commit": "a5fc29386feb1b797bdfb017aa99b61353e80333",
+      "subject": "Bound general deletion traces to nonempty source operations",
+      "qualification": "Not inferred from branch name; see component and host evidence chapters."
+    },
+    {
+      "branch": "text-edit-traffic-baseline",
+      "commit": "d1fad8fca93b076b8f87252786ac35ec301d6c8e",
+      "subject": "Bound general deletion traces to nonempty source operations",
+      "qualification": "Not inferred from branch name; see component and host evidence chapters."
+    },
+    {
+      "branch": "text-font-resource-constructor",
+      "commit": "4c334a37f527394b11aa50f969ade6c674d68a14",
+      "subject": "Compose explicit resource scope with caller selected immutable font",
+      "qualification": "Not inferred from branch name; see component and host evidence chapters."
+    },
+    {
+      "branch": "text-optional-retention-core",
+      "commit": "ccc53c8161f300a644cc0523e5d3d4bd115f5416",
+      "subject": "Prototype bounded common optional resource ownership with real lease pins",
+      "qualification": "Not inferred from branch name; see component and host evidence chapters."
+    },
+    {
+      "branch": "text-optional-shape-binding",
+      "commit": "13f383c10c215ea18d441fb7ef6036ce4b929644",
+      "subject": "Bind reclaimable shape and source witnesses to actual text preparation",
+      "qualification": "Not inferred from branch name; see component and host evidence chapters."
+    },
+    {
+      "branch": "text-reflow-control",
+      "commit": "af981acf8df210331fac306d8d24c2a4d9fbc2d7",
+      "subject": "Import canonical text direction for exact glyph geometry oracle",
+      "qualification": "Not inferred from branch name; see component and host evidence chapters."
+    },
+    {
+      "branch": "text-shared-shape-source",
+      "commit": "cf6e8fff5e90282729ef8acedfb587da94009f8b",
+      "subject": "Share immutable UTF8 backing with a distinct child shape source lease",
+      "qualification": "Not inferred from branch name; see component and host evidence chapters."
+    }
+  ]
+}

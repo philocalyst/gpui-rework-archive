@@ -1,0 +1,180 @@
+{
+  "scope": "Detached source snapshots explicitly preserved for repository handoff; not shipping/qualification claims.",
+  "refs": [
+    {
+      "ref": "refs/checkpoints/20261026/baseline-1b0eee3b9252",
+      "commit": "1b0eee3b9252b6647f13be63477cb158d21c04c8",
+      "worktree_label": "baseline"
+    },
+    {
+      "ref": "refs/checkpoints/20261026/stock-fixture-a47bad473ed4",
+      "commit": "a47bad473ed426a5e63393c12d0d1632f98bd524",
+      "worktree_label": "stock-fixture"
+    },
+    {
+      "ref": "refs/checkpoints/20261026/candidate-7c548a90d1d5",
+      "commit": "7c548a90d1d50ea8de0166ca0031f7cf53b9ee37",
+      "worktree_label": "candidate"
+    },
+    {
+      "ref": "refs/checkpoints/20261026/composed-source-099e2bb5e543",
+      "commit": "099e2bb5e543594fcab7ed44b532cdd234f9dd34",
+      "worktree_label": "composed-source"
+    },
+    {
+      "ref": "refs/checkpoints/20261026/edit-turn-fc02349c9eb0",
+      "commit": "fc02349c9eb0259f0ca76dfb697ea8c8fda07aff",
+      "worktree_label": "edit-turn"
+    },
+    {
+      "ref": "refs/checkpoints/20261026/icb-adapter-b1147697c9fa",
+      "commit": "b1147697c9fa088d5590b4983be6b2f32e93c8aa",
+      "worktree_label": "icb-adapter"
+    },
+    {
+      "ref": "refs/checkpoints/20261026/layout-certificate-5baed181b36e",
+      "commit": "5baed181b36eeceed8b09c66664333e30047303f",
+      "worktree_label": "layout-certificate"
+    },
+    {
+      "ref": "refs/checkpoints/20261026/multi-slot-source-5d6e60bb2022",
+      "commit": "5d6e60bb202201493fb5255be8864f93ca949abe",
+      "worktree_label": "multi-slot-source"
+    },
+    {
+      "ref": "refs/checkpoints/20261026/native-id-boundary-9279566ee7b8",
+      "commit": "9279566ee7b8eb04c95fbf8c62a0906da1ff144a",
+      "worktree_label": "native-id-boundary"
+    },
+    {
+      "ref": "refs/checkpoints/20261026/outcome-candidate-b4d7f0e37b82",
+      "commit": "b4d7f0e37b82e80b279c632979c1ecce762c53dc",
+      "worktree_label": "outcome-candidate"
+    },
+    {
+      "ref": "refs/checkpoints/20261026/paint-admission-ad3226830661",
+      "commit": "ad32268306615dbd10719384aa653546d3711713",
+      "worktree_label": "paint-admission"
+    },
+    {
+      "ref": "refs/checkpoints/20261026/retained-topology-d4096fd2590a",
+      "commit": "d4096fd2590a26c9f073b758643a0333e48bf824",
+      "worktree_label": "retained-topology"
+    },
+    {
+      "ref": "refs/checkpoints/20261026/source-71cc8a53da32",
+      "commit": "71cc8a53da32a3bc63ffe0c2bd08e50886137a1d",
+      "worktree_label": "source"
+    },
+    {
+      "ref": "refs/checkpoints/20261026/borrowed-read-872a5be88247",
+      "commit": "872a5be882475cdb7b5ffb9d313f1aede42321ec",
+      "worktree_label": "borrowed-read"
+    },
+    {
+      "ref": "refs/checkpoints/20261026/canonical-text-prerequisite-fa95e5ca92b2",
+      "commit": "fa95e5ca92b26a56aff983cdf785577875e92573",
+      "worktree_label": "canonical-text-prerequisite"
+    },
+    {
+      "ref": "refs/checkpoints/20261026/capacity-diagnostic-b4906a5c8767",
+      "commit": "b4906a5c87673dacb0f1fe812a95ea0a66789678",
+      "worktree_label": "capacity-diagnostic"
+    },
+    {
+      "ref": "refs/checkpoints/20261026/cursor-read-27098e3f53ec",
+      "commit": "27098e3f53ecc1b71879f567052fd4900beddcc6",
+      "worktree_label": "cursor-read"
+    },
+    {
+      "ref": "refs/checkpoints/20261026/facade-corrected-17d5ac1fc7f9",
+      "commit": "17d5ac1fc7f9eb630ed52cb787093ea93b1491e6",
+      "worktree_label": "facade-corrected"
+    },
+    {
+      "ref": "refs/checkpoints/20261026/immutable-view-b80dcc8c6cf4",
+      "commit": "b80dcc8c6cf4015257034637ae5742e5f75a772f",
+      "worktree_label": "immutable-view"
+    },
+    {
+      "ref": "refs/checkpoints/20261026/resource-ledger-7bb859f60242",
+      "commit": "7bb859f6024294137ebfe501808b8e015be9f204",
+      "worktree_label": "resource-ledger"
+    },
+    {
+      "ref": "refs/checkpoints/20261026/resource-ledger-origin-4d19575b4228",
+      "commit": "4d19575b422801434bb8497d55f532c2b0c28192",
+      "worktree_label": "resource-ledger-origin"
+    },
+    {
+      "ref": "refs/checkpoints/20261026/reuse-seam-30f5dc8182c5",
+      "commit": "30f5dc8182c53b7916849b08226fa8314d6a0f0a",
+      "worktree_label": "reuse-seam"
+    },
+    {
+      "ref": "refs/checkpoints/20261026/shape-resource-a8f92cc44547",
+      "commit": "a8f92cc4454776c2de94309e34637aadf60eec1d",
+      "worktree_label": "shape-resource"
+    },
+    {
+      "ref": "refs/checkpoints/20261026/shared-lowering-88d4c8052187",
+      "commit": "88d4c8052187c7a73f3351da6b2466391f59d281",
+      "worktree_label": "shared-lowering"
+    },
+    {
+      "ref": "refs/checkpoints/20261026/text-default-cfg-fix-e1e9c0d49006",
+      "commit": "e1e9c0d490063b16e585a23486f8447520b035e9",
+      "worktree_label": "text-default-cfg-fix"
+    },
+    {
+      "ref": "refs/checkpoints/20261026/text-hook-e257-4347f6baa168",
+      "commit": "4347f6baa168659fc46e41a5c8329c51b9f3d0d6",
+      "worktree_label": "text-hook-e257"
+    },
+    {
+      "ref": "refs/checkpoints/20261026/text-retirement-integration-0113e501c8ee",
+      "commit": "0113e501c8ee82ae9d4749413c5f42129da79db4",
+      "worktree_label": "text-retirement-integration"
+    },
+    {
+      "ref": "refs/checkpoints/20261026/utf8-backing-b582e6a296dd",
+      "commit": "b582e6a296dd28c5543fc1acccec2f66aad9ea86",
+      "worktree_label": "utf8-backing"
+    },
+    {
+      "ref": "refs/checkpoints/20261026/utf8-corrected-11d-481db61b6546",
+      "commit": "481db61b654608fc81a9f767c3c0d439a35c8fb4",
+      "worktree_label": "utf8-corrected-11d"
+    },
+    {
+      "ref": "refs/checkpoints/20261026/width-storage-a727080c89d1",
+      "commit": "a727080c89d15b54478a80440a229520d2a167a8",
+      "worktree_label": "width-storage"
+    },
+    {
+      "ref": "refs/checkpoints/20261026/changed-slots-worktree-f00c493caaf6",
+      "commit": "f00c493caaf64f6b23671ed413550d5416f1a783",
+      "worktree_label": "changed-slots-worktree"
+    },
+    {
+      "ref": "refs/checkpoints/20261026/raw-target-worktree-b81a4099ad89",
+      "commit": "b81a4099ad89c1bd0ca457b22c02a4396aaff60e",
+      "worktree_label": "raw-target-worktree"
+    },
+    {
+      "ref": "refs/checkpoints/20261026/retained-target-worktree-1f966374fc16",
+      "commit": "1f966374fc169897dec8be5aa5c08b5b65b1325b",
+      "worktree_label": "retained-target-worktree"
+    },
+    {
+      "ref": "refs/checkpoints/20261026/endpoint-candidate-bc408f97537e",
+      "commit": "bc408f97537e5450edba8c83083448ed2cd6da04",
+      "worktree_label": "endpoint-candidate"
+    },
+    {
+      "ref": "refs/checkpoints/20261026/staged-candidate-f72dfdcdc9ad",
+      "commit": "f72dfdcdc9adaf5f9c63719158d3b0a5cbc531cf",
+      "worktree_label": "staged-candidate"
+    }
+  ]
+}

@@ -1,0 +1,4061 @@
+{
+  "scope": "Historical nightly/non-Nix baseline only; not stable/Nix shipping qualification",
+  "source_commit": "1b0eee3b9252b6647f13be63477cb158d21c04c8",
+  "production_base": "7ac6f33",
+  "binary_sha256": "e77873f203e04cbaf3e98193e7870b07ea4cb27c19a76a895514821f9674ed1c",
+  "contract_sha256": "2764a6ee0ab56e71ea6b4b2f30feb95f005b105d7c4d2c5c9cd09a2de857a202",
+  "compiler": "rustc 1.101.0-nightly 7189d39d9, nightly-2026-10-23, LLVM 23.1.4",
+  "features": "default simd, stock counters; no native-core/accessibility",
+  "all_children": 96,
+  "discarded_children": 12,
+  "measured_children": 84,
+  "campaign_whole_children_elapsed_seconds": 141.983689252,
+  "quantiles": "within-process p50=median, p95/p99=nearest rank; report median/MAD of seven per-process values",
+  "phase_share": "median across processes of sum(phase durations)/sum(total durations); phase p50 values do not sum to total p50",
+  "memory_scope": "wait4 whole-child HWM including launch/setup, initial/final fresh reconstruction oracles and output buffers; not application-only or steady-state RSS; all measured child values share the same 20.88 MiB floor and do not discriminate scenario footprint",
+  "unavailable": [
+    "isolated source/layout elapsed time",
+    "visited-node counts",
+    "GPU execution",
+    "upload bytes/time",
+    "native presentation",
+    "display scanout/input latency",
+    "application-only private resident memory"
+  ],
+  "scenarios": [
+    {
+      "scenario": "app-ticked-geometry",
+      "mode": "cpu-raster",
+      "measured_processes": 7,
+      "warmup": 32,
+      "samples_per_process": 240,
+      "logical_controls": 1024,
+      "logical_list_items": null,
+      "samples": {
+        "median": 240,
+        "mad": 0,
+        "min": 240,
+        "max": 240,
+        "n": 7
+      },
+      "logical_submissions_per_op": {
+        "median": 1.0,
+        "mad": 0.0,
+        "min": 1.0,
+        "max": 1.0,
+        "n": 7
+      },
+      "public_edit_prepare_calls_per_op": {
+        "median": 1.0,
+        "mad": 0.0,
+        "min": 1.0,
+        "max": 1.0,
+        "n": 7
+      },
+      "whole_child_cpu_seconds": {
+        "median": 2.959858,
+        "mad": 0.04962000000000044,
+        "min": 2.9019779999999997,
+        "max": 3.275418,
+        "n": 7
+      },
+      "whole_child_peak_rss_bytes": {
+        "median": 21889024,
+        "mad": 0,
+        "min": 21889024,
+        "max": 21889024,
+        "n": 7
+      },
+      "routing_ns_p50": {
+        "median": 0.0,
+        "mad": 0.0,
+        "min": 0.0,
+        "max": 0.0,
+        "n": 7
+      },
+      "routing_ns_p95": {
+        "median": 0,
+        "mad": 0,
+        "min": 0,
+        "max": 0,
+        "n": 7
+      },
+      "routing_ns_p99": {
+        "median": 0,
+        "mad": 0,
+        "min": 0,
+        "max": 0,
+        "n": 7
+      },
+      "routing_ns_share": {
+        "median": 0.0,
+        "mad": 0.0,
+        "min": 0.0,
+        "max": 0.0,
+        "n": 7
+      },
+      "edit_prepare_ns_p50": {
+        "median": 1532963.0,
+        "mad": 23687.0,
+        "min": 1490559.0,
+        "max": 1587236.0,
+        "n": 7
+      },
+      "edit_prepare_ns_p95": {
+        "median": 2294474,
+        "mad": 25930,
+        "min": 2139983,
+        "max": 3100970,
+        "n": 7
+      },
+      "edit_prepare_ns_p99": {
+        "median": 3532003,
+        "mad": 520030,
+        "min": 2536450,
+        "max": 5258929,
+        "n": 7
+      },
+      "edit_prepare_ns_share": {
+        "median": 0.1537055422568497,
+        "mad": 0.00045024780639302264,
+        "min": 0.15110054208617318,
+        "max": 0.1548160820439297,
+        "n": 7
+      },
+      "scene_borrow_ns_p50": {
+        "median": 58.0,
+        "mad": 1.0,
+        "min": 45.0,
+        "max": 59.0,
+        "n": 7
+      },
+      "scene_borrow_ns_p95": {
+        "median": 70,
+        "mad": 4,
+        "min": 66,
+        "max": 135,
+        "n": 7
+      },
+      "scene_borrow_ns_p99": {
+        "median": 89,
+        "mad": 17,
+        "min": 72,
+        "max": 211,
+        "n": 7
+      },
+      "scene_borrow_ns_share": {
+        "median": 5.245997226106508e-06,
+        "mad": 1.8853979095350382e-07,
+        "min": 4.836759409020993e-06,
+        "max": 2.7283008915966723e-05,
+        "n": 7
+      },
+      "raster_ns_p50": {
+        "median": 8618960.0,
+        "mad": 104980.0,
+        "min": 8438115.5,
+        "max": 9101974.0,
+        "n": 7
+      },
+      "raster_ns_p95": {
+        "median": 11317904,
+        "mad": 493143,
+        "min": 10824761,
+        "max": 16157796,
+        "n": 7
+      },
+      "raster_ns_p99": {
+        "median": 14640554,
+        "mad": 632250,
+        "min": 12210064,
+        "max": 19709409,
+        "n": 7
+      },
+      "raster_ns_share": {
+        "median": 0.8432215055042356,
+        "mad": 0.00084197025845556,
+        "min": 0.8423342654585048,
+        "max": 0.8461588623585667,
+        "n": 7
+      },
+      "logical_ack_ns_p50": {
+        "median": 23409.0,
+        "mad": 989.5,
+        "min": 22419.5,
+        "max": 25600.0,
+        "n": 7
+      },
+      "logical_ack_ns_p95": {
+        "median": 47400,
+        "mad": 6549,
+        "min": 36836,
+        "max": 74814,
+        "n": 7
+      },
+      "logical_ack_ns_p99": {
+        "median": 189697,
+        "mad": 14010,
+        "min": 112300,
+        "max": 233763,
+        "n": 7
+      },
+      "logical_ack_ns_share": {
+        "median": 0.0029612310382049027,
+        "mad": 0.00022569294037998395,
+        "min": 0.002559003473586451,
+        "max": 0.003954910489575971,
+        "n": 7
+      },
+      "total_ns_p50": {
+        "median": 10224797.0,
+        "mad": 155648.0,
+        "min": 10055943.0,
+        "max": 10854532.5,
+        "n": 7
+      },
+      "total_ns_p95": {
+        "median": 13244478,
+        "mad": 548528,
+        "min": 12695950,
+        "max": 19477992,
+        "n": 7
+      },
+      "total_ns_p99": {
+        "median": 18186863,
+        "mad": 1670695,
+        "min": 14388100,
+        "max": 22636236,
+        "n": 7
+      },
+      "coarse_updates_per_op": {
+        "median": 0.0,
+        "mad": 0.0,
+        "min": 0.0,
+        "max": 0.0,
+        "n": 7
+      },
+      "descriptions_per_op": {
+        "median": 0.0,
+        "mad": 0.0,
+        "min": 0.0,
+        "max": 0.0,
+        "n": 7
+      },
+      "destination_compares_per_op": {
+        "median": 3072.0,
+        "mad": 0.0,
+        "min": 3072.0,
+        "max": 3072.0,
+        "n": 7
+      },
+      "exact_updates_per_op": {
+        "median": 1.0,
+        "mad": 0.0,
+        "min": 1.0,
+        "max": 1.0,
+        "n": 7
+      },
+      "layout_runs_per_op": {
+        "median": 1.0,
+        "mad": 0.0,
+        "min": 1.0,
+        "max": 1.0,
+        "n": 7
+      },
+      "measure_calls_per_op": {
+        "median": 0.0,
+        "mad": 0.0,
+        "min": 0.0,
+        "max": 0.0,
+        "n": 7
+      },
+      "owner_reruns_per_op": {
+        "median": 0.0,
+        "mad": 0.0,
+        "min": 0.0,
+        "max": 0.0,
+        "n": 7
+      },
+      "paint_passes_per_op": {
+        "median": 1.0,
+        "mad": 0.0,
+        "min": 1.0,
+        "max": 1.0,
+        "n": 7
+      },
+      "presentations_per_op": {
+        "median": 1.0,
+        "mad": 0.0,
+        "min": 1.0,
+        "max": 1.0,
+        "n": 7
+      },
+      "source_operations_per_op": {
+        "median": 1.0,
+        "mad": 0.0,
+        "min": 1.0,
+        "max": 1.0,
+        "n": 7
+      },
+      "source_reads_per_op": {
+        "median": 1.0,
+        "mad": 0.0,
+        "min": 1.0,
+        "max": 1.0,
+        "n": 7
+      },
+      "text_bytes_copied_per_op": {
+        "median": 0.0,
+        "mad": 0.0,
+        "min": 0.0,
+        "max": 0.0,
+        "n": 7
+      },
+      "text_promotions_per_op": {
+        "median": 0.0,
+        "mad": 0.0,
+        "min": 0.0,
+        "max": 0.0,
+        "n": 7
+      }
+    },
+    {
+      "scenario": "app-ticked-geometry",
+      "mode": "scene",
+      "measured_processes": 7,
+      "warmup": 32,
+      "samples_per_process": 240,
+      "logical_controls": 1024,
+      "logical_list_items": null,
+      "samples": {
+        "median": 240,
+        "mad": 0,
+        "min": 240,
+        "max": 240,
+        "n": 7
+      },
+      "logical_submissions_per_op": {
+        "median": 1.0,
+        "mad": 0.0,
+        "min": 1.0,
+        "max": 1.0,
+        "n": 7
+      },
+      "public_edit_prepare_calls_per_op": {
+        "median": 1.0,
+        "mad": 0.0,
+        "min": 1.0,
+        "max": 1.0,
+        "n": 7
+      },
+      "whole_child_cpu_seconds": {
+        "median": 0.513942,
+        "mad": 0.02151599999999998,
+        "min": 0.479599,
+        "max": 0.625225,
+        "n": 7
+      },
+      "whole_child_peak_rss_bytes": {
+        "median": 21889024,
+        "mad": 0,
+        "min": 21889024,
+        "max": 21889024,
+        "n": 7
+      },
+      "routing_ns_p50": {
+        "median": 0.0,
+        "mad": 0.0,
+        "min": 0.0,
+        "max": 0.0,
+        "n": 7
+      },
+      "routing_ns_p95": {
+        "median": 0,
+        "mad": 0,
+        "min": 0,
+        "max": 0,
+        "n": 7
+      },
+      "routing_ns_p99": {
+        "median": 0,
+        "mad": 0,
+        "min": 0,
+        "max": 0,
+        "n": 7
+      },
+      "routing_ns_share": {
+        "median": 0.0,
+        "mad": 0.0,
+        "min": 0.0,
+        "max": 0.0,
+        "n": 7
+      },
+      "edit_prepare_ns_p50": {
+        "median": 1479087.5,
+        "mad": 24654.0,
+        "min": 1421526.5,
+        "max": 1539109.5,
+        "n": 7
+      },
+      "edit_prepare_ns_p95": {
+        "median": 2498707,
+        "mad": 406418,
+        "min": 2091674,
+        "max": 3004879,
+        "n": 7
+      },
+      "edit_prepare_ns_p99": {
+        "median": 3638112,
+        "mad": 851717,
+        "min": 2423113,
+        "max": 5233133,
+        "n": 7
+      },
+      "edit_prepare_ns_share": {
+        "median": 0.9917094550333405,
+        "mad": 0.0007202582788700118,
+        "min": 0.9902022127186394,
+        "max": 0.992843482344171,
+        "n": 7
+      },
+      "scene_borrow_ns_p50": {
+        "median": 45.0,
+        "mad": 1.0,
+        "min": 44.0,
+        "max": 105.0,
+        "n": 7
+      },
+      "scene_borrow_ns_p95": {
+        "median": 69,
+        "mad": 5,
+        "min": 58,
+        "max": 208,
+        "n": 7
+      },
+      "scene_borrow_ns_p99": {
+        "median": 73,
+        "mad": 2,
+        "min": 59,
+        "max": 272,
+        "n": 7
+      },
+      "scene_borrow_ns_share": {
+        "median": 2.8768523349191264e-05,
+        "mad": 2.3327831863114724e-06,
+        "min": 2.5652207267452656e-05,
+        "max": 6.172446259696663e-05,
+        "n": 7
+      },
+      "raster_ns_p50": {
+        "median": 0.0,
+        "mad": 0.0,
+        "min": 0.0,
+        "max": 0.0,
+        "n": 7
+      },
+      "raster_ns_p95": {
+        "median": 0,
+        "mad": 0,
+        "min": 0,
+        "max": 0,
+        "n": 7
+      },
+      "raster_ns_p99": {
+        "median": 0,
+        "mad": 0,
+        "min": 0,
+        "max": 0,
+        "n": 7
+      },
+      "raster_ns_share": {
+        "median": 0.0,
+        "mad": 0.0,
+        "min": 0.0,
+        "max": 0.0,
+        "n": 7
+      },
+      "logical_ack_ns_p50": {
+        "median": 10548.0,
+        "mad": 111.5,
+        "min": 10413.0,
+        "max": 10799.0,
+        "n": 7
+      },
+      "logical_ack_ns_p95": {
+        "median": 12767,
+        "mad": 653,
+        "min": 11628,
+        "max": 14833,
+        "n": 7
+      },
+      "logical_ack_ns_p99": {
+        "median": 119923,
+        "mad": 37524,
+        "min": 32459,
+        "max": 178027,
+        "n": 7
+      },
+      "logical_ack_ns_share": {
+        "median": 0.008262158467833168,
+        "mad": 0.0007198762543471713,
+        "min": 0.007130865448561526,
+        "max": 0.009736062818763684,
+        "n": 7
+      },
+      "total_ns_p50": {
+        "median": 1489715.5,
+        "mad": 31959.5,
+        "min": 1432355.0,
+        "max": 1550335.5,
+        "n": 7
+      },
+      "total_ns_p95": {
+        "median": 2534085,
+        "mad": 430089,
+        "min": 2102958,
+        "max": 3067103,
+        "n": 7
+      },
+      "total_ns_p99": {
+        "median": 3650197,
+        "mad": 851836,
+        "min": 2434414,
+        "max": 5246130,
+        "n": 7
+      },
+      "coarse_updates_per_op": {
+        "median": 0.0,
+        "mad": 0.0,
+        "min": 0.0,
+        "max": 0.0,
+        "n": 7
+      },
+      "descriptions_per_op": {
+        "median": 0.0,
+        "mad": 0.0,
+        "min": 0.0,
+        "max": 0.0,
+        "n": 7
+      },
+      "destination_compares_per_op": {
+        "median": 3072.0,
+        "mad": 0.0,
+        "min": 3072.0,
+        "max": 3072.0,
+        "n": 7
+      },
+      "exact_updates_per_op": {
+        "median": 1.0,
+        "mad": 0.0,
+        "min": 1.0,
+        "max": 1.0,
+        "n": 7
+      },
+      "layout_runs_per_op": {
+        "median": 1.0,
+        "mad": 0.0,
+        "min": 1.0,
+        "max": 1.0,
+        "n": 7
+      },
+      "measure_calls_per_op": {
+        "median": 0.0,
+        "mad": 0.0,
+        "min": 0.0,
+        "max": 0.0,
+        "n": 7
+      },
+      "owner_reruns_per_op": {
+        "median": 0.0,
+        "mad": 0.0,
+        "min": 0.0,
+        "max": 0.0,
+        "n": 7
+      },
+      "paint_passes_per_op": {
+        "median": 1.0,
+        "mad": 0.0,
+        "min": 1.0,
+        "max": 1.0,
+        "n": 7
+      },
+      "presentations_per_op": {
+        "median": 1.0,
+        "mad": 0.0,
+        "min": 1.0,
+        "max": 1.0,
+        "n": 7
+      },
+      "source_operations_per_op": {
+        "median": 1.0,
+        "mad": 0.0,
+        "min": 1.0,
+        "max": 1.0,
+        "n": 7
+      },
+      "source_reads_per_op": {
+        "median": 1.0,
+        "mad": 0.0,
+        "min": 1.0,
+        "max": 1.0,
+        "n": 7
+      },
+      "text_bytes_copied_per_op": {
+        "median": 0.0,
+        "mad": 0.0,
+        "min": 0.0,
+        "max": 0.0,
+        "n": 7
+      },
+      "text_promotions_per_op": {
+        "median": 0.0,
+        "mad": 0.0,
+        "min": 0.0,
+        "max": 0.0,
+        "n": 7
+      }
+    },
+    {
+      "scenario": "hover-property-layout",
+      "mode": "cpu-raster",
+      "measured_processes": 7,
+      "warmup": 32,
+      "samples_per_process": 240,
+      "logical_controls": 1024,
+      "logical_list_items": null,
+      "samples": {
+        "median": 240,
+        "mad": 0,
+        "min": 240,
+        "max": 240,
+        "n": 7
+      },
+      "logical_submissions_per_op": {
+        "median": 1.0,
+        "mad": 0.0,
+        "min": 1.0,
+        "max": 1.0,
+        "n": 7
+      },
+      "public_edit_prepare_calls_per_op": {
+        "median": 1.5,
+        "mad": 0.0,
+        "min": 1.5,
+        "max": 1.5,
+        "n": 7
+      },
+      "whole_child_cpu_seconds": {
+        "median": 2.20561,
+        "mad": 0.08407000000000009,
+        "min": 2.086565,
+        "max": 2.618497,
+        "n": 7
+      },
+      "whole_child_peak_rss_bytes": {
+        "median": 21889024,
+        "mad": 0,
+        "min": 21889024,
+        "max": 21889024,
+        "n": 7
+      },
+      "routing_ns_p50": {
+        "median": 6211.0,
+        "mad": 226.5,
+        "min": 5568.0,
+        "max": 6595.0,
+        "n": 7
+      },
+      "routing_ns_p95": {
+        "median": 14593,
+        "mad": 2622,
+        "min": 11789,
+        "max": 19308,
+        "n": 7
+      },
+      "routing_ns_p99": {
+        "median": 58332,
+        "mad": 24518,
+        "min": 25862,
+        "max": 184399,
+        "n": 7
+      },
+      "routing_ns_share": {
+        "median": 0.0008781939633377701,
+        "mad": 0.000124614545500263,
+        "min": 0.0007296982307232262,
+        "max": 0.001042153884309376,
+        "n": 7
+      },
+      "edit_prepare_ns_p50": {
+        "median": 1190480.5,
+        "mad": 17680.5,
+        "min": 1168236.0,
+        "max": 1214191.0,
+        "n": 7
+      },
+      "edit_prepare_ns_p95": {
+        "median": 1874268,
+        "mad": 79022,
+        "min": 1795246,
+        "max": 2750379,
+        "n": 7
+      },
+      "edit_prepare_ns_p99": {
+        "median": 3701351,
+        "mad": 953145,
+        "min": 2301841,
+        "max": 7950214,
+        "n": 7
+      },
+      "edit_prepare_ns_share": {
+        "median": 0.14930079932027435,
+        "mad": 0.0015258795657052127,
+        "min": 0.14010229393786158,
+        "max": 0.15159911089789524,
+        "n": 7
+      },
+      "scene_borrow_ns_p50": {
+        "median": 49.0,
+        "mad": 3.5,
+        "min": 43.0,
+        "max": 56.5,
+        "n": 7
+      },
+      "scene_borrow_ns_p95": {
+        "median": 61,
+        "mad": 3,
+        "min": 58,
+        "max": 70,
+        "n": 7
+      },
+      "scene_borrow_ns_p99": {
+        "median": 82,
+        "mad": 3,
+        "min": 68,
+        "max": 103,
+        "n": 7
+      },
+      "scene_borrow_ns_share": {
+        "median": 6.161438998619026e-06,
+        "mad": 5.404166122068332e-07,
+        "min": 5.348431658271829e-06,
+        "max": 6.966451745410275e-06,
+        "n": 7
+      },
+      "raster_ns_p50": {
+        "median": 6376227.5,
+        "mad": 212951.5,
+        "min": 6060544.0,
+        "max": 6674271.0,
+        "n": 7
+      },
+      "raster_ns_p95": {
+        "median": 8691684,
+        "mad": 677036,
+        "min": 7741127,
+        "max": 11738452,
+        "n": 7
+      },
+      "raster_ns_p99": {
+        "median": 9846471,
+        "mad": 1214700,
+        "min": 8631771,
+        "max": 30135590,
+        "n": 7
+      },
+      "raster_ns_share": {
+        "median": 0.8479786093791005,
+        "mad": 0.0016072820108646857,
+        "min": 0.8453375235030091,
+        "max": 0.8565074387278309,
+        "n": 7
+      },
+      "logical_ack_ns_p50": {
+        "median": 13424.5,
+        "mad": 215.5,
+        "min": 12459.5,
+        "max": 14042.5,
+        "n": 7
+      },
+      "logical_ack_ns_p95": {
+        "median": 17404,
+        "mad": 1195,
+        "min": 15613,
+        "max": 59761,
+        "n": 7
+      },
+      "logical_ack_ns_p99": {
+        "median": 96351,
+        "mad": 11387,
+        "min": 82238,
+        "max": 263695,
+        "n": 7
+      },
+      "logical_ack_ns_share": {
+        "median": 0.0020476998184545212,
+        "mad": 5.2903793927141455e-05,
+        "min": 0.0018370489056290585,
+        "max": 0.002342519652443674,
+        "n": 7
+      },
+      "total_ns_p50": {
+        "median": 7534001.0,
+        "mad": 147625.0,
+        "min": 7260913.5,
+        "max": 7830683.5,
+        "n": 7
+      },
+      "total_ns_p95": {
+        "median": 10203606,
+        "mad": 709010,
+        "min": 9355481,
+        "max": 14022489,
+        "n": 7
+      },
+      "total_ns_p99": {
+        "median": 12559133,
+        "mad": 1793229,
+        "min": 10765904,
+        "max": 31770504,
+        "n": 7
+      },
+      "coarse_updates_per_op": {
+        "median": 0.0,
+        "mad": 0.0,
+        "min": 0.0,
+        "max": 0.0,
+        "n": 7
+      },
+      "descriptions_per_op": {
+        "median": 0.0,
+        "mad": 0.0,
+        "min": 0.0,
+        "max": 0.0,
+        "n": 7
+      },
+      "destination_compares_per_op": {
+        "median": 0.0,
+        "mad": 0.0,
+        "min": 0.0,
+        "max": 0.0,
+        "n": 7
+      },
+      "exact_updates_per_op": {
+        "median": 0.0,
+        "mad": 0.0,
+        "min": 0.0,
+        "max": 0.0,
+        "n": 7
+      },
+      "layout_runs_per_op": {
+        "median": 1.5,
+        "mad": 0.0,
+        "min": 1.5,
+        "max": 1.5,
+        "n": 7
+      },
+      "measure_calls_per_op": {
+        "median": 0.0,
+        "mad": 0.0,
+        "min": 0.0,
+        "max": 0.0,
+        "n": 7
+      },
+      "owner_reruns_per_op": {
+        "median": 0.0,
+        "mad": 0.0,
+        "min": 0.0,
+        "max": 0.0,
+        "n": 7
+      },
+      "paint_passes_per_op": {
+        "median": 1.5,
+        "mad": 0.0,
+        "min": 1.5,
+        "max": 1.5,
+        "n": 7
+      },
+      "presentations_per_op": {
+        "median": 1.0,
+        "mad": 0.0,
+        "min": 1.0,
+        "max": 1.0,
+        "n": 7
+      },
+      "source_operations_per_op": {
+        "median": 1.5,
+        "mad": 0.0,
+        "min": 1.5,
+        "max": 1.5,
+        "n": 7
+      },
+      "source_reads_per_op": {
+        "median": 0.0,
+        "mad": 0.0,
+        "min": 0.0,
+        "max": 0.0,
+        "n": 7
+      },
+      "text_bytes_copied_per_op": {
+        "median": 0.0,
+        "mad": 0.0,
+        "min": 0.0,
+        "max": 0.0,
+        "n": 7
+      },
+      "text_promotions_per_op": {
+        "median": 0.0,
+        "mad": 0.0,
+        "min": 0.0,
+        "max": 0.0,
+        "n": 7
+      }
+    },
+    {
+      "scenario": "hover-property-layout",
+      "mode": "scene",
+      "measured_processes": 7,
+      "warmup": 32,
+      "samples_per_process": 240,
+      "logical_controls": 1024,
+      "logical_list_items": null,
+      "samples": {
+        "median": 240,
+        "mad": 0,
+        "min": 240,
+        "max": 240,
+        "n": 7
+      },
+      "logical_submissions_per_op": {
+        "median": 1.0,
+        "mad": 0.0,
+        "min": 1.0,
+        "max": 1.0,
+        "n": 7
+      },
+      "public_edit_prepare_calls_per_op": {
+        "median": 1.5,
+        "mad": 0.0,
+        "min": 1.5,
+        "max": 1.5,
+        "n": 7
+      },
+      "whole_child_cpu_seconds": {
+        "median": 0.361368,
+        "mad": 0.00797800000000004,
+        "min": 0.34292,
+        "max": 0.42222,
+        "n": 7
+      },
+      "whole_child_peak_rss_bytes": {
+        "median": 21889024,
+        "mad": 0,
+        "min": 21889024,
+        "max": 21889024,
+        "n": 7
+      },
+      "routing_ns_p50": {
+        "median": 3194.5,
+        "mad": 69.0,
+        "min": 3125.5,
+        "max": 4094.5,
+        "n": 7
+      },
+      "routing_ns_p95": {
+        "median": 7456,
+        "mad": 48,
+        "min": 7370,
+        "max": 8922,
+        "n": 7
+      },
+      "routing_ns_p99": {
+        "median": 18310,
+        "mad": 6381,
+        "min": 9870,
+        "max": 90412,
+        "n": 7
+      },
+      "routing_ns_share": {
+        "median": 0.003196189929177177,
+        "mad": 0.00035404932476765846,
+        "min": 0.0028421406044095185,
+        "max": 0.004493376468392007,
+        "n": 7
+      },
+      "edit_prepare_ns_p50": {
+        "median": 1145589.5,
+        "mad": 20370.0,
+        "min": 1120678.0,
+        "max": 1206812.0,
+        "n": 7
+      },
+      "edit_prepare_ns_p95": {
+        "median": 1947531,
+        "mad": 67883,
+        "min": 1833069,
+        "max": 2485924,
+        "n": 7
+      },
+      "edit_prepare_ns_p99": {
+        "median": 2644393,
+        "mad": 223043,
+        "min": 2125868,
+        "max": 3828768,
+        "n": 7
+      },
+      "edit_prepare_ns_share": {
+        "median": 0.9862748470314658,
+        "mad": 0.0004216286105845901,
+        "min": 0.9811006268372835,
+        "max": 0.9889731412711126,
+        "n": 7
+      },
+      "scene_borrow_ns_p50": {
+        "median": 35.0,
+        "mad": 0.0,
+        "min": 35.0,
+        "max": 36.0,
+        "n": 7
+      },
+      "scene_borrow_ns_p95": {
+        "median": 49,
+        "mad": 1,
+        "min": 48,
+        "max": 70,
+        "n": 7
+      },
+      "scene_borrow_ns_p99": {
+        "median": 59,
+        "mad": 0,
+        "min": 59,
+        "max": 133,
+        "n": 7
+      },
+      "scene_borrow_ns_share": {
+        "median": 3.4116212928237735e-05,
+        "mad": 6.521194934709515e-07,
+        "min": 3.146386802267333e-05,
+        "max": 3.511306206403611e-05,
+        "n": 7
+      },
+      "raster_ns_p50": {
+        "median": 0.0,
+        "mad": 0.0,
+        "min": 0.0,
+        "max": 0.0,
+        "n": 7
+      },
+      "raster_ns_p95": {
+        "median": 0,
+        "mad": 0,
+        "min": 0,
+        "max": 0,
+        "n": 7
+      },
+      "raster_ns_p99": {
+        "median": 0,
+        "mad": 0,
+        "min": 0,
+        "max": 0,
+        "n": 7
+      },
+      "raster_ns_share": {
+        "median": 0.0,
+        "mad": 0.0,
+        "min": 0.0,
+        "max": 0.0,
+        "n": 7
+      },
+      "logical_ack_ns_p50": {
+        "median": 8584.0,
+        "mad": 113.0,
+        "min": 8407.0,
+        "max": 9403.0,
+        "n": 7
+      },
+      "logical_ack_ns_p95": {
+        "median": 11731,
+        "mad": 1240,
+        "min": 10270,
+        "max": 23729,
+        "n": 7
+      },
+      "logical_ack_ns_p99": {
+        "median": 83345,
+        "mad": 11152,
+        "min": 26359,
+        "max": 149613,
+        "n": 7
+      },
+      "logical_ack_ns_share": {
+        "median": 0.010436304697626565,
+        "mad": 0.0006422131994859304,
+        "min": 0.008153254256455262,
+        "max": 0.01513487940150118,
+        "n": 7
+      },
+      "total_ns_p50": {
+        "median": 1155098.5,
+        "mad": 22589.5,
+        "min": 1131399.5,
+        "max": 1217244.0,
+        "n": 7
+      },
+      "total_ns_p95": {
+        "median": 1958739,
+        "mad": 61051,
+        "min": 1844284,
+        "max": 2499384,
+        "n": 7
+      },
+      "total_ns_p99": {
+        "median": 2667395,
+        "mad": 211160,
+        "min": 2139836,
+        "max": 3862457,
+        "n": 7
+      },
+      "coarse_updates_per_op": {
+        "median": 0.0,
+        "mad": 0.0,
+        "min": 0.0,
+        "max": 0.0,
+        "n": 7
+      },
+      "descriptions_per_op": {
+        "median": 0.0,
+        "mad": 0.0,
+        "min": 0.0,
+        "max": 0.0,
+        "n": 7
+      },
+      "destination_compares_per_op": {
+        "median": 0.0,
+        "mad": 0.0,
+        "min": 0.0,
+        "max": 0.0,
+        "n": 7
+      },
+      "exact_updates_per_op": {
+        "median": 0.0,
+        "mad": 0.0,
+        "min": 0.0,
+        "max": 0.0,
+        "n": 7
+      },
+      "layout_runs_per_op": {
+        "median": 1.5,
+        "mad": 0.0,
+        "min": 1.5,
+        "max": 1.5,
+        "n": 7
+      },
+      "measure_calls_per_op": {
+        "median": 0.0,
+        "mad": 0.0,
+        "min": 0.0,
+        "max": 0.0,
+        "n": 7
+      },
+      "owner_reruns_per_op": {
+        "median": 0.0,
+        "mad": 0.0,
+        "min": 0.0,
+        "max": 0.0,
+        "n": 7
+      },
+      "paint_passes_per_op": {
+        "median": 1.5,
+        "mad": 0.0,
+        "min": 1.5,
+        "max": 1.5,
+        "n": 7
+      },
+      "presentations_per_op": {
+        "median": 1.0,
+        "mad": 0.0,
+        "min": 1.0,
+        "max": 1.0,
+        "n": 7
+      },
+      "source_operations_per_op": {
+        "median": 1.5,
+        "mad": 0.0,
+        "min": 1.5,
+        "max": 1.5,
+        "n": 7
+      },
+      "source_reads_per_op": {
+        "median": 0.0,
+        "mad": 0.0,
+        "min": 0.0,
+        "max": 0.0,
+        "n": 7
+      },
+      "text_bytes_copied_per_op": {
+        "median": 0.0,
+        "mad": 0.0,
+        "min": 0.0,
+        "max": 0.0,
+        "n": 7
+      },
+      "text_promotions_per_op": {
+        "median": 0.0,
+        "mad": 0.0,
+        "min": 0.0,
+        "max": 0.0,
+        "n": 7
+      }
+    },
+    {
+      "scenario": "hover-property-paint",
+      "mode": "cpu-raster",
+      "measured_processes": 7,
+      "warmup": 32,
+      "samples_per_process": 240,
+      "logical_controls": 1024,
+      "logical_list_items": null,
+      "samples": {
+        "median": 240,
+        "mad": 0,
+        "min": 240,
+        "max": 240,
+        "n": 7
+      },
+      "logical_submissions_per_op": {
+        "median": 1.0,
+        "mad": 0.0,
+        "min": 1.0,
+        "max": 1.0,
+        "n": 7
+      },
+      "public_edit_prepare_calls_per_op": {
+        "median": 1.5,
+        "mad": 0.0,
+        "min": 1.5,
+        "max": 1.5,
+        "n": 7
+      },
+      "whole_child_cpu_seconds": {
+        "median": 2.052701,
+        "mad": 0.07505600000000001,
+        "min": 1.8803759999999998,
+        "max": 2.361268,
+        "n": 7
+      },
+      "whole_child_peak_rss_bytes": {
+        "median": 21889024,
+        "mad": 0,
+        "min": 21889024,
+        "max": 21889024,
+        "n": 7
+      },
+      "routing_ns_p50": {
+        "median": 5893.5,
+        "mad": 210.0,
+        "min": 5256.0,
+        "max": 6205.5,
+        "n": 7
+      },
+      "routing_ns_p95": {
+        "median": 13074,
+        "mad": 474,
+        "min": 10832,
+        "max": 15312,
+        "n": 7
+      },
+      "routing_ns_p99": {
+        "median": 28768,
+        "mad": 4976,
+        "min": 23792,
+        "max": 108699,
+        "n": 7
+      },
+      "routing_ns_share": {
+        "median": 0.0009722756102382496,
+        "mad": 7.780277006340386e-05,
+        "min": 0.0007631873060493069,
+        "max": 0.0011128686640404768,
+        "n": 7
+      },
+      "edit_prepare_ns_p50": {
+        "median": 864381.0,
+        "mad": 8908.5,
+        "min": 840947.0,
+        "max": 882606.5,
+        "n": 7
+      },
+      "edit_prepare_ns_p95": {
+        "median": 1468818,
+        "mad": 71306,
+        "min": 1194497,
+        "max": 1549805,
+        "n": 7
+      },
+      "edit_prepare_ns_p99": {
+        "median": 2196458,
+        "mad": 558353,
+        "min": 1493817,
+        "max": 3609767,
+        "n": 7
+      },
+      "edit_prepare_ns_share": {
+        "median": 0.11389572023938573,
+        "mad": 0.0020020868179068813,
+        "min": 0.09861994987043202,
+        "max": 0.1158978070572926,
+        "n": 7
+      },
+      "scene_borrow_ns_p50": {
+        "median": 44.0,
+        "mad": 1.0,
+        "min": 43.0,
+        "max": 54.0,
+        "n": 7
+      },
+      "scene_borrow_ns_p95": {
+        "median": 60,
+        "mad": 1,
+        "min": 46,
+        "max": 61,
+        "n": 7
+      },
+      "scene_borrow_ns_p99": {
+        "median": 72,
+        "mad": 10,
+        "min": 52,
+        "max": 85,
+        "n": 7
+      },
+      "scene_borrow_ns_share": {
+        "median": 6.118892432060838e-06,
+        "mad": 2.539613800264127e-07,
+        "min": 5.4319558119107296e-06,
+        "max": 7.326990447408975e-06,
+        "n": 7
+      },
+      "raster_ns_p50": {
+        "median": 6292547.0,
+        "mad": 144944.0,
+        "min": 5725465.5,
+        "max": 6706978.5,
+        "n": 7
+      },
+      "raster_ns_p95": {
+        "median": 8267635,
+        "mad": 432999,
+        "min": 7029782,
+        "max": 13226510,
+        "n": 7
+      },
+      "raster_ns_p99": {
+        "median": 10628304,
+        "mad": 1890437,
+        "min": 8737867,
+        "max": 19019358,
+        "n": 7
+      },
+      "raster_ns_share": {
+        "median": 0.8827773905614746,
+        "mad": 0.0023894055835190775,
+        "min": 0.8803879849779556,
+        "max": 0.8983352504601834,
+        "n": 7
+      },
+      "logical_ack_ns_p50": {
+        "median": 13344.0,
+        "mad": 62.5,
+        "min": 12215.5,
+        "max": 13973.5,
+        "n": 7
+      },
+      "logical_ack_ns_p95": {
+        "median": 17935,
+        "mad": 960,
+        "min": 13719,
+        "max": 19575,
+        "n": 7
+      },
+      "logical_ack_ns_p99": {
+        "median": 101369,
+        "mad": 15518,
+        "min": 19334,
+        "max": 190581,
+        "n": 7
+      },
+      "logical_ack_ns_share": {
+        "median": 0.002201294363246152,
+        "mad": 0.00015844382545482285,
+        "min": 0.0019107854819479368,
+        "max": 0.002714908194618414,
+        "n": 7
+      },
+      "total_ns_p50": {
+        "median": 7090390.5,
+        "mad": 113726.5,
+        "min": 6527082.5,
+        "max": 7634140.5,
+        "n": 7
+      },
+      "total_ns_p95": {
+        "median": 9543271,
+        "mad": 498370,
+        "min": 7969670,
+        "max": 14611517,
+        "n": 7
+      },
+      "total_ns_p99": {
+        "median": 12053947,
+        "mad": 1476933,
+        "min": 9847561,
+        "max": 21103828,
+        "n": 7
+      },
+      "coarse_updates_per_op": {
+        "median": 0.0,
+        "mad": 0.0,
+        "min": 0.0,
+        "max": 0.0,
+        "n": 7
+      },
+      "descriptions_per_op": {
+        "median": 0.0,
+        "mad": 0.0,
+        "min": 0.0,
+        "max": 0.0,
+        "n": 7
+      },
+      "destination_compares_per_op": {
+        "median": 0.0,
+        "mad": 0.0,
+        "min": 0.0,
+        "max": 0.0,
+        "n": 7
+      },
+      "exact_updates_per_op": {
+        "median": 0.0,
+        "mad": 0.0,
+        "min": 0.0,
+        "max": 0.0,
+        "n": 7
+      },
+      "layout_runs_per_op": {
+        "median": 0.0,
+        "mad": 0.0,
+        "min": 0.0,
+        "max": 0.0,
+        "n": 7
+      },
+      "measure_calls_per_op": {
+        "median": 0.0,
+        "mad": 0.0,
+        "min": 0.0,
+        "max": 0.0,
+        "n": 7
+      },
+      "owner_reruns_per_op": {
+        "median": 0.0,
+        "mad": 0.0,
+        "min": 0.0,
+        "max": 0.0,
+        "n": 7
+      },
+      "paint_passes_per_op": {
+        "median": 1.5,
+        "mad": 0.0,
+        "min": 1.5,
+        "max": 1.5,
+        "n": 7
+      },
+      "presentations_per_op": {
+        "median": 1.0,
+        "mad": 0.0,
+        "min": 1.0,
+        "max": 1.0,
+        "n": 7
+      },
+      "source_operations_per_op": {
+        "median": 1.5,
+        "mad": 0.0,
+        "min": 1.5,
+        "max": 1.5,
+        "n": 7
+      },
+      "source_reads_per_op": {
+        "median": 0.0,
+        "mad": 0.0,
+        "min": 0.0,
+        "max": 0.0,
+        "n": 7
+      },
+      "text_bytes_copied_per_op": {
+        "median": 0.0,
+        "mad": 0.0,
+        "min": 0.0,
+        "max": 0.0,
+        "n": 7
+      },
+      "text_promotions_per_op": {
+        "median": 0.0,
+        "mad": 0.0,
+        "min": 0.0,
+        "max": 0.0,
+        "n": 7
+      }
+    },
+    {
+      "scenario": "hover-property-paint",
+      "mode": "scene",
+      "measured_processes": 7,
+      "warmup": 32,
+      "samples_per_process": 240,
+      "logical_controls": 1024,
+      "logical_list_items": null,
+      "samples": {
+        "median": 240,
+        "mad": 0,
+        "min": 240,
+        "max": 240,
+        "n": 7
+      },
+      "logical_submissions_per_op": {
+        "median": 1.0,
+        "mad": 0.0,
+        "min": 1.0,
+        "max": 1.0,
+        "n": 7
+      },
+      "public_edit_prepare_calls_per_op": {
+        "median": 1.5,
+        "mad": 0.0,
+        "min": 1.5,
+        "max": 1.5,
+        "n": 7
+      },
+      "whole_child_cpu_seconds": {
+        "median": 0.265605,
+        "mad": 0.0012820000000000054,
+        "min": 0.26129899999999995,
+        "max": 0.33341899999999997,
+        "n": 7
+      },
+      "whole_child_peak_rss_bytes": {
+        "median": 21889024,
+        "mad": 0,
+        "min": 21889024,
+        "max": 21889024,
+        "n": 7
+      },
+      "routing_ns_p50": {
+        "median": 3111.5,
+        "mad": 71.0,
+        "min": 2980.5,
+        "max": 3474.0,
+        "n": 7
+      },
+      "routing_ns_p95": {
+        "median": 7140,
+        "mad": 74,
+        "min": 7066,
+        "max": 7840,
+        "n": 7
+      },
+      "routing_ns_p99": {
+        "median": 21544,
+        "mad": 10016,
+        "min": 9462,
+        "max": 71063,
+        "n": 7
+      },
+      "routing_ns_share": {
+        "median": 0.004656037367053581,
+        "mad": 0.0003254768038041646,
+        "min": 0.00397968412850546,
+        "max": 0.005276507927731578,
+        "n": 7
+      },
+      "edit_prepare_ns_p50": {
+        "median": 830538.0,
+        "mad": 6115.5,
+        "min": 806296.5,
+        "max": 837360.5,
+        "n": 7
+      },
+      "edit_prepare_ns_p95": {
+        "median": 1298195,
+        "mad": 53755,
+        "min": 1233180,
+        "max": 1522618,
+        "n": 7
+      },
+      "edit_prepare_ns_p99": {
+        "median": 1913512,
+        "mad": 165002,
+        "min": 1417522,
+        "max": 3390548,
+        "n": 7
+      },
+      "edit_prepare_ns_share": {
+        "median": 0.9818408728027861,
+        "mad": 0.0011685431337729035,
+        "min": 0.9752437299043327,
+        "max": 0.9838694562872797,
+        "n": 7
+      },
+      "scene_borrow_ns_p50": {
+        "median": 35.0,
+        "mad": 0.0,
+        "min": 34.0,
+        "max": 35.0,
+        "n": 7
+      },
+      "scene_borrow_ns_p95": {
+        "median": 49,
+        "mad": 0,
+        "min": 45,
+        "max": 57,
+        "n": 7
+      },
+      "scene_borrow_ns_p99": {
+        "median": 58,
+        "mad": 1,
+        "min": 50,
+        "max": 59,
+        "n": 7
+      },
+      "scene_borrow_ns_share": {
+        "median": 4.4891658378557396e-05,
+        "mad": 1.3711235466454865e-06,
+        "min": 4.030675819072077e-05,
+        "max": 4.837467247793231e-05,
+        "n": 7
+      },
+      "raster_ns_p50": {
+        "median": 0.0,
+        "mad": 0.0,
+        "min": 0.0,
+        "max": 0.0,
+        "n": 7
+      },
+      "raster_ns_p95": {
+        "median": 0,
+        "mad": 0,
+        "min": 0,
+        "max": 0,
+        "n": 7
+      },
+      "raster_ns_p99": {
+        "median": 0,
+        "mad": 0,
+        "min": 0,
+        "max": 0,
+        "n": 7
+      },
+      "raster_ns_share": {
+        "median": 0.0,
+        "mad": 0.0,
+        "min": 0.0,
+        "max": 0.0,
+        "n": 7
+      },
+      "logical_ack_ns_p50": {
+        "median": 8193.0,
+        "mad": 64.5,
+        "min": 8002.0,
+        "max": 8325.0,
+        "n": 7
+      },
+      "logical_ack_ns_p95": {
+        "median": 11631,
+        "mad": 1286,
+        "min": 9971,
+        "max": 23899,
+        "n": 7
+      },
+      "logical_ack_ns_p99": {
+        "median": 77704,
+        "mad": 12862,
+        "min": 43386,
+        "max": 122360,
+        "n": 7
+      },
+      "logical_ack_ns_share": {
+        "median": 0.013777779948990296,
+        "mad": 0.0017373938490139774,
+        "min": 0.011430985810834812,
+        "max": 0.020730190263703367,
+        "n": 7
+      },
+      "total_ns_p50": {
+        "median": 841334.5,
+        "mad": 6965.0,
+        "min": 823462.5,
+        "max": 851296.0,
+        "n": 7
+      },
+      "total_ns_p95": {
+        "median": 1314966,
+        "mad": 54980,
+        "min": 1258741,
+        "max": 1539112,
+        "n": 7
+      },
+      "total_ns_p99": {
+        "median": 1925693,
+        "mad": 164983,
+        "min": 1613539,
+        "max": 3402272,
+        "n": 7
+      },
+      "coarse_updates_per_op": {
+        "median": 0.0,
+        "mad": 0.0,
+        "min": 0.0,
+        "max": 0.0,
+        "n": 7
+      },
+      "descriptions_per_op": {
+        "median": 0.0,
+        "mad": 0.0,
+        "min": 0.0,
+        "max": 0.0,
+        "n": 7
+      },
+      "destination_compares_per_op": {
+        "median": 0.0,
+        "mad": 0.0,
+        "min": 0.0,
+        "max": 0.0,
+        "n": 7
+      },
+      "exact_updates_per_op": {
+        "median": 0.0,
+        "mad": 0.0,
+        "min": 0.0,
+        "max": 0.0,
+        "n": 7
+      },
+      "layout_runs_per_op": {
+        "median": 0.0,
+        "mad": 0.0,
+        "min": 0.0,
+        "max": 0.0,
+        "n": 7
+      },
+      "measure_calls_per_op": {
+        "median": 0.0,
+        "mad": 0.0,
+        "min": 0.0,
+        "max": 0.0,
+        "n": 7
+      },
+      "owner_reruns_per_op": {
+        "median": 0.0,
+        "mad": 0.0,
+        "min": 0.0,
+        "max": 0.0,
+        "n": 7
+      },
+      "paint_passes_per_op": {
+        "median": 1.5,
+        "mad": 0.0,
+        "min": 1.5,
+        "max": 1.5,
+        "n": 7
+      },
+      "presentations_per_op": {
+        "median": 1.0,
+        "mad": 0.0,
+        "min": 1.0,
+        "max": 1.0,
+        "n": 7
+      },
+      "source_operations_per_op": {
+        "median": 1.5,
+        "mad": 0.0,
+        "min": 1.5,
+        "max": 1.5,
+        "n": 7
+      },
+      "source_reads_per_op": {
+        "median": 0.0,
+        "mad": 0.0,
+        "min": 0.0,
+        "max": 0.0,
+        "n": 7
+      },
+      "text_bytes_copied_per_op": {
+        "median": 0.0,
+        "mad": 0.0,
+        "min": 0.0,
+        "max": 0.0,
+        "n": 7
+      },
+      "text_promotions_per_op": {
+        "median": 0.0,
+        "mad": 0.0,
+        "min": 0.0,
+        "max": 0.0,
+        "n": 7
+      }
+    },
+    {
+      "scenario": "hover-source-paint",
+      "mode": "cpu-raster",
+      "measured_processes": 7,
+      "warmup": 32,
+      "samples_per_process": 240,
+      "logical_controls": 1024,
+      "logical_list_items": null,
+      "samples": {
+        "median": 240,
+        "mad": 0,
+        "min": 240,
+        "max": 240,
+        "n": 7
+      },
+      "logical_submissions_per_op": {
+        "median": 1.0,
+        "mad": 0.0,
+        "min": 1.0,
+        "max": 1.0,
+        "n": 7
+      },
+      "public_edit_prepare_calls_per_op": {
+        "median": 1.0,
+        "mad": 0.0,
+        "min": 1.0,
+        "max": 1.0,
+        "n": 7
+      },
+      "whole_child_cpu_seconds": {
+        "median": 1.940061,
+        "mad": 0.05489999999999995,
+        "min": 1.885161,
+        "max": 2.321793,
+        "n": 7
+      },
+      "whole_child_peak_rss_bytes": {
+        "median": 21889024,
+        "mad": 0,
+        "min": 21889024,
+        "max": 21889024,
+        "n": 7
+      },
+      "routing_ns_p50": {
+        "median": 7057.0,
+        "mad": 352.0,
+        "min": 6652.5,
+        "max": 7871.0,
+        "n": 7
+      },
+      "routing_ns_p95": {
+        "median": 18480,
+        "mad": 2562,
+        "min": 15092,
+        "max": 22495,
+        "n": 7
+      },
+      "routing_ns_p99": {
+        "median": 71052,
+        "mad": 38782,
+        "min": 30741,
+        "max": 196263,
+        "n": 7
+      },
+      "routing_ns_share": {
+        "median": 0.0011824660805255798,
+        "mad": 0.00015857477106752458,
+        "min": 0.0009959097532556945,
+        "max": 0.0016092426076783845,
+        "n": 7
+      },
+      "edit_prepare_ns_p50": {
+        "median": 492685.0,
+        "mad": 8518.5,
+        "min": 472359.5,
+        "max": 504356.5,
+        "n": 7
+      },
+      "edit_prepare_ns_p95": {
+        "median": 928972,
+        "mad": 81497,
+        "min": 832452,
+        "max": 1080574,
+        "n": 7
+      },
+      "edit_prepare_ns_p99": {
+        "median": 1259914,
+        "mad": 126818,
+        "min": 1062814,
+        "max": 3076464,
+        "n": 7
+      },
+      "edit_prepare_ns_share": {
+        "median": 0.05757904780027347,
+        "mad": 0.0014454444273914527,
+        "min": 0.05600929967459123,
+        "max": 0.10667752611910294,
+        "n": 7
+      },
+      "scene_borrow_ns_p50": {
+        "median": 43.0,
+        "mad": 0.5,
+        "min": 36.0,
+        "max": 45.0,
+        "n": 7
+      },
+      "scene_borrow_ns_p95": {
+        "median": 59,
+        "mad": 2,
+        "min": 56,
+        "max": 73,
+        "n": 7
+      },
+      "scene_borrow_ns_p99": {
+        "median": 70,
+        "mad": 10,
+        "min": 60,
+        "max": 91,
+        "n": 7
+      },
+      "scene_borrow_ns_share": {
+        "median": 6.148371749139254e-06,
+        "mad": 3.971045503684718e-07,
+        "min": 4.746260133004553e-06,
+        "max": 1.7181614356827174e-05,
+        "n": 7
+      },
+      "raster_ns_p50": {
+        "median": 6300162.0,
+        "mad": 91092.5,
+        "min": 6173249.0,
+        "max": 6740705.0,
+        "n": 7
+      },
+      "raster_ns_p95": {
+        "median": 8211688,
+        "mad": 488717,
+        "min": 7716054,
+        "max": 10789738,
+        "n": 7
+      },
+      "raster_ns_p99": {
+        "median": 10416227,
+        "mad": 1023992,
+        "min": 9113129,
+        "max": 21945682,
+        "n": 7
+      },
+      "raster_ns_share": {
+        "median": 0.9396315639605641,
+        "mad": 0.001920406224740212,
+        "min": 0.8895767026835629,
+        "max": 0.941612441998897,
+        "n": 7
+      },
+      "logical_ack_ns_p50": {
+        "median": 7036.0,
+        "mad": 426.0,
+        "min": 6610.0,
+        "max": 13291.0,
+        "n": 7
+      },
+      "logical_ack_ns_p95": {
+        "median": 17789,
+        "mad": 1522,
+        "min": 15485,
+        "max": 25059,
+        "n": 7
+      },
+      "logical_ack_ns_p99": {
+        "median": 69763,
+        "mad": 33437,
+        "min": 35745,
+        "max": 163240,
+        "n": 7
+      },
+      "logical_ack_ns_share": {
+        "median": 0.0013947329983367632,
+        "mad": 0.00010236374280893096,
+        "min": 0.0011610725927593422,
+        "max": 0.0025585588566755775,
+        "n": 7
+      },
+      "total_ns_p50": {
+        "median": 6692134.5,
+        "mad": 52646.0,
+        "min": 6586528.5,
+        "max": 7243679.0,
+        "n": 7
+      },
+      "total_ns_p95": {
+        "median": 8875404,
+        "mad": 576427,
+        "min": 8276970,
+        "max": 11424529,
+        "n": 7
+      },
+      "total_ns_p99": {
+        "median": 11145456,
+        "mad": 1224234,
+        "min": 9655830,
+        "max": 28290420,
+        "n": 7
+      },
+      "coarse_updates_per_op": {
+        "median": 0.0,
+        "mad": 0.0,
+        "min": 0.0,
+        "max": 0.0,
+        "n": 7
+      },
+      "descriptions_per_op": {
+        "median": 0.0,
+        "mad": 0.0,
+        "min": 0.0,
+        "max": 0.0,
+        "n": 7
+      },
+      "destination_compares_per_op": {
+        "median": 1024.0,
+        "mad": 0.0,
+        "min": 1024.0,
+        "max": 1024.0,
+        "n": 7
+      },
+      "exact_updates_per_op": {
+        "median": 1.0,
+        "mad": 0.0,
+        "min": 1.0,
+        "max": 1.0,
+        "n": 7
+      },
+      "layout_runs_per_op": {
+        "median": 0.0,
+        "mad": 0.0,
+        "min": 0.0,
+        "max": 0.0,
+        "n": 7
+      },
+      "measure_calls_per_op": {
+        "median": 0.0,
+        "mad": 0.0,
+        "min": 0.0,
+        "max": 0.0,
+        "n": 7
+      },
+      "owner_reruns_per_op": {
+        "median": 0.0,
+        "mad": 0.0,
+        "min": 0.0,
+        "max": 0.0,
+        "n": 7
+      },
+      "paint_passes_per_op": {
+        "median": 0.5,
+        "mad": 0.0,
+        "min": 0.5,
+        "max": 0.5,
+        "n": 7
+      },
+      "presentations_per_op": {
+        "median": 1.0,
+        "mad": 0.0,
+        "min": 1.0,
+        "max": 1.0,
+        "n": 7
+      },
+      "source_operations_per_op": {
+        "median": 1.0,
+        "mad": 0.0,
+        "min": 1.0,
+        "max": 1.0,
+        "n": 7
+      },
+      "source_reads_per_op": {
+        "median": 1.0,
+        "mad": 0.0,
+        "min": 1.0,
+        "max": 1.0,
+        "n": 7
+      },
+      "text_bytes_copied_per_op": {
+        "median": 0.0,
+        "mad": 0.0,
+        "min": 0.0,
+        "max": 0.0,
+        "n": 7
+      },
+      "text_promotions_per_op": {
+        "median": 0.0,
+        "mad": 0.0,
+        "min": 0.0,
+        "max": 0.0,
+        "n": 7
+      }
+    },
+    {
+      "scenario": "hover-source-paint",
+      "mode": "scene",
+      "measured_processes": 7,
+      "warmup": 32,
+      "samples_per_process": 240,
+      "logical_controls": 1024,
+      "logical_list_items": null,
+      "samples": {
+        "median": 240,
+        "mad": 0,
+        "min": 240,
+        "max": 240,
+        "n": 7
+      },
+      "logical_submissions_per_op": {
+        "median": 1.0,
+        "mad": 0.0,
+        "min": 1.0,
+        "max": 1.0,
+        "n": 7
+      },
+      "public_edit_prepare_calls_per_op": {
+        "median": 1.0,
+        "mad": 0.0,
+        "min": 1.0,
+        "max": 1.0,
+        "n": 7
+      },
+      "whole_child_cpu_seconds": {
+        "median": 0.15323599999999998,
+        "mad": 0.00490199999999999,
+        "min": 0.144732,
+        "max": 0.17727300000000001,
+        "n": 7
+      },
+      "whole_child_peak_rss_bytes": {
+        "median": 21889024,
+        "mad": 0,
+        "min": 21889024,
+        "max": 21889024,
+        "n": 7
+      },
+      "routing_ns_p50": {
+        "median": 2869.5,
+        "mad": 57.5,
+        "min": 2705.0,
+        "max": 3023.5,
+        "n": 7
+      },
+      "routing_ns_p95": {
+        "median": 6795,
+        "mad": 20,
+        "min": 6725,
+        "max": 7222,
+        "n": 7
+      },
+      "routing_ns_p99": {
+        "median": 9526,
+        "mad": 2167,
+        "min": 7047,
+        "max": 79258,
+        "n": 7
+      },
+      "routing_ns_share": {
+        "median": 0.008415273608311291,
+        "mad": 0.000544035995552021,
+        "min": 0.007769194994229982,
+        "max": 0.011846926265827656,
+        "n": 7
+      },
+      "edit_prepare_ns_p50": {
+        "median": 461124.0,
+        "mad": 1779.5,
+        "min": 412448.5,
+        "max": 463930.0,
+        "n": 7
+      },
+      "edit_prepare_ns_p95": {
+        "median": 765426,
+        "mad": 40732,
+        "min": 712378,
+        "max": 1073082,
+        "n": 7
+      },
+      "edit_prepare_ns_p99": {
+        "median": 1079959,
+        "mad": 135319,
+        "min": 896740,
+        "max": 1659109,
+        "n": 7
+      },
+      "edit_prepare_ns_share": {
+        "median": 0.9762121503096447,
+        "mad": 0.0013576896917686376,
+        "min": 0.9665629826068751,
+        "max": 0.9795577749817506,
+        "n": 7
+      },
+      "scene_borrow_ns_p50": {
+        "median": 34.0,
+        "mad": 0.0,
+        "min": 33.0,
+        "max": 34.0,
+        "n": 7
+      },
+      "scene_borrow_ns_p95": {
+        "median": 43,
+        "mad": 6,
+        "min": 36,
+        "max": 62,
+        "n": 7
+      },
+      "scene_borrow_ns_p99": {
+        "median": 51,
+        "mad": 6,
+        "min": 43,
+        "max": 69,
+        "n": 7
+      },
+      "scene_borrow_ns_share": {
+        "median": 8.913914638223964e-05,
+        "mad": 2.626903948947906e-06,
+        "min": 7.743357072190154e-05,
+        "max": 9.553596519039709e-05,
+        "n": 7
+      },
+      "raster_ns_p50": {
+        "median": 0.0,
+        "mad": 0.0,
+        "min": 0.0,
+        "max": 0.0,
+        "n": 7
+      },
+      "raster_ns_p95": {
+        "median": 0,
+        "mad": 0,
+        "min": 0,
+        "max": 0,
+        "n": 7
+      },
+      "raster_ns_p99": {
+        "median": 0,
+        "mad": 0,
+        "min": 0,
+        "max": 0,
+        "n": 7
+      },
+      "raster_ns_share": {
+        "median": 0.0,
+        "mad": 0.0,
+        "min": 0.0,
+        "max": 0.0,
+        "n": 7
+      },
+      "logical_ack_ns_p50": {
+        "median": 3833.0,
+        "mad": 26.5,
+        "min": 3749.5,
+        "max": 3951.0,
+        "n": 7
+      },
+      "logical_ack_ns_p95": {
+        "median": 9374,
+        "mad": 322,
+        "min": 8840,
+        "max": 9761,
+        "n": 7
+      },
+      "logical_ack_ns_p99": {
+        "median": 30377,
+        "mad": 10831,
+        "min": 12112,
+        "max": 55153,
+        "n": 7
+      },
+      "logical_ack_ns_share": {
+        "median": 0.015644711840782487,
+        "mad": 0.002260685863443978,
+        "min": 0.012577494058829079,
+        "max": 0.021512657556575283,
+        "n": 7
+      },
+      "total_ns_p50": {
+        "median": 470275.5,
+        "mad": 2678.5,
+        "min": 418257.0,
+        "max": 474372.0,
+        "n": 7
+      },
+      "total_ns_p95": {
+        "median": 776590,
+        "mad": 43178,
+        "min": 727888,
+        "max": 1085428,
+        "n": 7
+      },
+      "total_ns_p99": {
+        "median": 1092921,
+        "mad": 134051,
+        "min": 910122,
+        "max": 2472502,
+        "n": 7
+      },
+      "coarse_updates_per_op": {
+        "median": 0.0,
+        "mad": 0.0,
+        "min": 0.0,
+        "max": 0.0,
+        "n": 7
+      },
+      "descriptions_per_op": {
+        "median": 0.0,
+        "mad": 0.0,
+        "min": 0.0,
+        "max": 0.0,
+        "n": 7
+      },
+      "destination_compares_per_op": {
+        "median": 1024.0,
+        "mad": 0.0,
+        "min": 1024.0,
+        "max": 1024.0,
+        "n": 7
+      },
+      "exact_updates_per_op": {
+        "median": 1.0,
+        "mad": 0.0,
+        "min": 1.0,
+        "max": 1.0,
+        "n": 7
+      },
+      "layout_runs_per_op": {
+        "median": 0.0,
+        "mad": 0.0,
+        "min": 0.0,
+        "max": 0.0,
+        "n": 7
+      },
+      "measure_calls_per_op": {
+        "median": 0.0,
+        "mad": 0.0,
+        "min": 0.0,
+        "max": 0.0,
+        "n": 7
+      },
+      "owner_reruns_per_op": {
+        "median": 0.0,
+        "mad": 0.0,
+        "min": 0.0,
+        "max": 0.0,
+        "n": 7
+      },
+      "paint_passes_per_op": {
+        "median": 0.5,
+        "mad": 0.0,
+        "min": 0.5,
+        "max": 0.5,
+        "n": 7
+      },
+      "presentations_per_op": {
+        "median": 1.0,
+        "mad": 0.0,
+        "min": 1.0,
+        "max": 1.0,
+        "n": 7
+      },
+      "source_operations_per_op": {
+        "median": 1.0,
+        "mad": 0.0,
+        "min": 1.0,
+        "max": 1.0,
+        "n": 7
+      },
+      "source_reads_per_op": {
+        "median": 1.0,
+        "mad": 0.0,
+        "min": 1.0,
+        "max": 1.0,
+        "n": 7
+      },
+      "text_bytes_copied_per_op": {
+        "median": 0.0,
+        "mad": 0.0,
+        "min": 0.0,
+        "max": 0.0,
+        "n": 7
+      },
+      "text_promotions_per_op": {
+        "median": 0.0,
+        "mad": 0.0,
+        "min": 0.0,
+        "max": 0.0,
+        "n": 7
+      }
+    },
+    {
+      "scenario": "popover-scroll",
+      "mode": "cpu-raster",
+      "measured_processes": 7,
+      "warmup": 32,
+      "samples_per_process": 240,
+      "logical_controls": null,
+      "logical_list_items": 10000,
+      "samples": {
+        "median": 240,
+        "mad": 0,
+        "min": 240,
+        "max": 240,
+        "n": 7
+      },
+      "logical_submissions_per_op": {
+        "median": 1.575,
+        "mad": 0.0,
+        "min": 1.575,
+        "max": 1.575,
+        "n": 7
+      },
+      "public_edit_prepare_calls_per_op": {
+        "median": 1.8583333333333334,
+        "mad": 0.0,
+        "min": 1.8583333333333334,
+        "max": 1.8583333333333334,
+        "n": 7
+      },
+      "whole_child_cpu_seconds": {
+        "median": 4.09548,
+        "mad": 0.22736799999999935,
+        "min": 3.8165859999999996,
+        "max": 5.069382,
+        "n": 7
+      },
+      "whole_child_peak_rss_bytes": {
+        "median": 21889024,
+        "mad": 0,
+        "min": 21889024,
+        "max": 21889024,
+        "n": 7
+      },
+      "routing_ns_p50": {
+        "median": 2013.5,
+        "mad": 65.5,
+        "min": 1907.0,
+        "max": 2283.5,
+        "n": 7
+      },
+      "routing_ns_p95": {
+        "median": 2958,
+        "mad": 67,
+        "min": 2653,
+        "max": 3364,
+        "n": 7
+      },
+      "routing_ns_p99": {
+        "median": 3660,
+        "mad": 268,
+        "min": 3230,
+        "max": 16810,
+        "n": 7
+      },
+      "routing_ns_share": {
+        "median": 0.00010818978147480496,
+        "mad": 1.0399810460724323e-05,
+        "min": 9.778997101408063e-05,
+        "max": 0.00020540333914091094,
+        "n": 7
+      },
+      "edit_prepare_ns_p50": {
+        "median": 1778610.5,
+        "mad": 72225.0,
+        "min": 1663536.0,
+        "max": 1873598.0,
+        "n": 7
+      },
+      "edit_prepare_ns_p95": {
+        "median": 2844441,
+        "mad": 255807,
+        "min": 2408377,
+        "max": 4216257,
+        "n": 7
+      },
+      "edit_prepare_ns_p99": {
+        "median": 3810267,
+        "mad": 606215,
+        "min": 3005308,
+        "max": 6192976,
+        "n": 7
+      },
+      "edit_prepare_ns_share": {
+        "median": 0.11589137616365182,
+        "mad": 0.0018090074910470932,
+        "min": 0.11240125495965705,
+        "max": 0.12041374138819094,
+        "n": 7
+      },
+      "scene_borrow_ns_p50": {
+        "median": 90.0,
+        "mad": 1.0,
+        "min": 89.0,
+        "max": 96.5,
+        "n": 7
+      },
+      "scene_borrow_ns_p95": {
+        "median": 135,
+        "mad": 17,
+        "min": 117,
+        "max": 159,
+        "n": 7
+      },
+      "scene_borrow_ns_p99": {
+        "median": 215,
+        "mad": 35,
+        "min": 123,
+        "max": 250,
+        "n": 7
+      },
+      "scene_borrow_ns_share": {
+        "median": 5.807955939096389e-06,
+        "mad": 5.533991955292035e-07,
+        "min": 5.035513133499672e-06,
+        "max": 1.0975844117568078e-05,
+        "n": 7
+      },
+      "raster_ns_p50": {
+        "median": 14144131.5,
+        "mad": 351227.0,
+        "min": 13573517.5,
+        "max": 14967083.5,
+        "n": 7
+      },
+      "raster_ns_p95": {
+        "median": 19647893,
+        "mad": 1639887,
+        "min": 17464450,
+        "max": 29887580,
+        "n": 7
+      },
+      "raster_ns_p99": {
+        "median": 25273751,
+        "mad": 3531089,
+        "min": 20634459,
+        "max": 59650113,
+        "n": 7
+      },
+      "raster_ns_share": {
+        "median": 0.8833328593950898,
+        "mad": 0.0018814907215930488,
+        "min": 0.8787674977922378,
+        "max": 0.886889495033121,
+        "n": 7
+      },
+      "logical_ack_ns_p50": {
+        "median": 8233.0,
+        "mad": 381.5,
+        "min": 7771.0,
+        "max": 10222.5,
+        "n": 7
+      },
+      "logical_ack_ns_p95": {
+        "median": 11627,
+        "mad": 629,
+        "min": 10998,
+        "max": 22303,
+        "n": 7
+      },
+      "logical_ack_ns_p99": {
+        "median": 66940,
+        "mad": 12321,
+        "min": 34483,
+        "max": 92694,
+        "n": 7
+      },
+      "logical_ack_ns_share": {
+        "median": 0.0007027997986854461,
+        "mad": 7.167310608815526e-05,
+        "min": 0.0005962459153517513,
+        "max": 0.0008157589118027659,
+        "n": 7
+      },
+      "total_ns_p50": {
+        "median": 15915316.5,
+        "mad": 418797.5,
+        "min": 15345135.5,
+        "max": 16801908.0,
+        "n": 7
+      },
+      "total_ns_p95": {
+        "median": 22374713,
+        "mad": 2236130,
+        "min": 19408841,
+        "max": 33071462,
+        "n": 7
+      },
+      "total_ns_p99": {
+        "median": 27569924,
+        "mad": 3197207,
+        "min": 23605137,
+        "max": 60123464,
+        "n": 7
+      },
+      "coarse_updates_per_op": {
+        "median": 0.2833333333333333,
+        "mad": 0.0,
+        "min": 0.2833333333333333,
+        "max": 0.2833333333333333,
+        "n": 7
+      },
+      "descriptions_per_op": {
+        "median": 1.575,
+        "mad": 0.0,
+        "min": 1.575,
+        "max": 1.575,
+        "n": 7
+      },
+      "destination_compares_per_op": {
+        "median": 209.34166666666667,
+        "mad": 0.0,
+        "min": 209.34166666666667,
+        "max": 209.34166666666667,
+        "n": 7
+      },
+      "exact_updates_per_op": {
+        "median": 0.7166666666666667,
+        "mad": 0.0,
+        "min": 0.7166666666666667,
+        "max": 0.7166666666666667,
+        "n": 7
+      },
+      "layout_runs_per_op": {
+        "median": 0.8583333333333333,
+        "mad": 0.0,
+        "min": 0.8583333333333333,
+        "max": 0.8583333333333333,
+        "n": 7
+      },
+      "measure_calls_per_op": {
+        "median": 84.7,
+        "mad": 0.0,
+        "min": 84.7,
+        "max": 84.7,
+        "n": 7
+      },
+      "owner_reruns_per_op": {
+        "median": 1.575,
+        "mad": 0.0,
+        "min": 1.575,
+        "max": 1.575,
+        "n": 7
+      },
+      "paint_passes_per_op": {
+        "median": 1.575,
+        "mad": 0.0,
+        "min": 1.575,
+        "max": 1.575,
+        "n": 7
+      },
+      "presentations_per_op": {
+        "median": 1.575,
+        "mad": 0.0,
+        "min": 1.575,
+        "max": 1.575,
+        "n": 7
+      },
+      "source_operations_per_op": {
+        "median": 1.0,
+        "mad": 0.0,
+        "min": 1.0,
+        "max": 1.0,
+        "n": 7
+      },
+      "source_reads_per_op": {
+        "median": 0.7166666666666667,
+        "mad": 0.0,
+        "min": 0.7166666666666667,
+        "max": 0.7166666666666667,
+        "n": 7
+      },
+      "text_bytes_copied_per_op": {
+        "median": 17.5,
+        "mad": 0.0,
+        "min": 17.5,
+        "max": 17.5,
+        "n": 7
+      },
+      "text_promotions_per_op": {
+        "median": 1.85,
+        "mad": 0.0,
+        "min": 1.85,
+        "max": 1.85,
+        "n": 7
+      }
+    },
+    {
+      "scenario": "popover-scroll",
+      "mode": "scene",
+      "measured_processes": 7,
+      "warmup": 32,
+      "samples_per_process": 240,
+      "logical_controls": null,
+      "logical_list_items": 10000,
+      "samples": {
+        "median": 240,
+        "mad": 0,
+        "min": 240,
+        "max": 240,
+        "n": 7
+      },
+      "logical_submissions_per_op": {
+        "median": 1.575,
+        "mad": 0.0,
+        "min": 1.575,
+        "max": 1.575,
+        "n": 7
+      },
+      "public_edit_prepare_calls_per_op": {
+        "median": 1.8583333333333334,
+        "mad": 0.0,
+        "min": 1.8583333333333334,
+        "max": 1.8583333333333334,
+        "n": 7
+      },
+      "whole_child_cpu_seconds": {
+        "median": 0.46272399999999997,
+        "mad": 0.00777300000000003,
+        "min": 0.445857,
+        "max": 0.5239010000000001,
+        "n": 7
+      },
+      "whole_child_peak_rss_bytes": {
+        "median": 21889024,
+        "mad": 0,
+        "min": 21889024,
+        "max": 21889024,
+        "n": 7
+      },
+      "routing_ns_p50": {
+        "median": 1284.5,
+        "mad": 9.5,
+        "min": 1269.0,
+        "max": 1304.5,
+        "n": 7
+      },
+      "routing_ns_p95": {
+        "median": 1534,
+        "mad": 7,
+        "min": 1500,
+        "max": 1561,
+        "n": 7
+      },
+      "routing_ns_p99": {
+        "median": 1910,
+        "mad": 274,
+        "min": 1636,
+        "max": 3817,
+        "n": 7
+      },
+      "routing_ns_share": {
+        "median": 0.0008598729202659618,
+        "mad": 7.948423632869533e-05,
+        "min": 0.0005844437736337539,
+        "max": 0.0012282640623327273,
+        "n": 7
+      },
+      "edit_prepare_ns_p50": {
+        "median": 1524131.0,
+        "mad": 12993.0,
+        "min": 1462292.0,
+        "max": 1537124.0,
+        "n": 7
+      },
+      "edit_prepare_ns_p95": {
+        "median": 2314062,
+        "mad": 156340,
+        "min": 2131250,
+        "max": 3396780,
+        "n": 7
+      },
+      "edit_prepare_ns_p99": {
+        "median": 2934573,
+        "mad": 158945,
+        "min": 2647651,
+        "max": 3989415,
+        "n": 7
+      },
+      "edit_prepare_ns_share": {
+        "median": 0.997398796247054,
+        "mad": 0.0003420060012694348,
+        "min": 0.9967387993989921,
+        "max": 0.9977970478353956,
+        "n": 7
+      },
+      "scene_borrow_ns_p50": {
+        "median": 88.0,
+        "mad": 1.0,
+        "min": 80.5,
+        "max": 89.0,
+        "n": 7
+      },
+      "scene_borrow_ns_p95": {
+        "median": 112,
+        "mad": 5,
+        "min": 103,
+        "max": 118,
+        "n": 7
+      },
+      "scene_borrow_ns_p99": {
+        "median": 119,
+        "mad": 10,
+        "min": 105,
+        "max": 194,
+        "n": 7
+      },
+      "scene_borrow_ns_share": {
+        "median": 5.3781028813431166e-05,
+        "mad": 2.0988620603613133e-06,
+        "min": 4.7896503081616964e-05,
+        "max": 5.587989087379248e-05,
+        "n": 7
+      },
+      "raster_ns_p50": {
+        "median": 0.0,
+        "mad": 0.0,
+        "min": 0.0,
+        "max": 0.0,
+        "n": 7
+      },
+      "raster_ns_p95": {
+        "median": 0,
+        "mad": 0,
+        "min": 0,
+        "max": 0,
+        "n": 7
+      },
+      "raster_ns_p99": {
+        "median": 0,
+        "mad": 0,
+        "min": 0,
+        "max": 0,
+        "n": 7
+      },
+      "raster_ns_share": {
+        "median": 0.0,
+        "mad": 0.0,
+        "min": 0.0,
+        "max": 0.0,
+        "n": 7
+      },
+      "logical_ack_ns_p50": {
+        "median": 2353.5,
+        "mad": 47.0,
+        "min": 2300.0,
+        "max": 2435.0,
+        "n": 7
+      },
+      "logical_ack_ns_p95": {
+        "median": 3120,
+        "mad": 101,
+        "min": 3004,
+        "max": 3373,
+        "n": 7
+      },
+      "logical_ack_ns_p99": {
+        "median": 3963,
+        "mad": 521,
+        "min": 3442,
+        "max": 51127,
+        "n": 7
+      },
+      "logical_ack_ns_share": {
+        "median": 0.0016993821346623923,
+        "mad": 0.00025065037104659844,
+        "min": 0.0013514283283289662,
+        "max": 0.002293619684583422,
+        "n": 7
+      },
+      "total_ns_p50": {
+        "median": 1527191.5,
+        "mad": 13714.0,
+        "min": 1465100.0,
+        "max": 1540905.5,
+        "n": 7
+      },
+      "total_ns_p95": {
+        "median": 2316152,
+        "mad": 153485,
+        "min": 2133372,
+        "max": 3403565,
+        "n": 7
+      },
+      "total_ns_p99": {
+        "median": 2936777,
+        "mad": 161093,
+        "min": 2649999,
+        "max": 3993748,
+        "n": 7
+      },
+      "coarse_updates_per_op": {
+        "median": 0.2833333333333333,
+        "mad": 0.0,
+        "min": 0.2833333333333333,
+        "max": 0.2833333333333333,
+        "n": 7
+      },
+      "descriptions_per_op": {
+        "median": 1.575,
+        "mad": 0.0,
+        "min": 1.575,
+        "max": 1.575,
+        "n": 7
+      },
+      "destination_compares_per_op": {
+        "median": 209.34166666666667,
+        "mad": 0.0,
+        "min": 209.34166666666667,
+        "max": 209.34166666666667,
+        "n": 7
+      },
+      "exact_updates_per_op": {
+        "median": 0.7166666666666667,
+        "mad": 0.0,
+        "min": 0.7166666666666667,
+        "max": 0.7166666666666667,
+        "n": 7
+      },
+      "layout_runs_per_op": {
+        "median": 0.8583333333333333,
+        "mad": 0.0,
+        "min": 0.8583333333333333,
+        "max": 0.8583333333333333,
+        "n": 7
+      },
+      "measure_calls_per_op": {
+        "median": 84.7,
+        "mad": 0.0,
+        "min": 84.7,
+        "max": 84.7,
+        "n": 7
+      },
+      "owner_reruns_per_op": {
+        "median": 1.575,
+        "mad": 0.0,
+        "min": 1.575,
+        "max": 1.575,
+        "n": 7
+      },
+      "paint_passes_per_op": {
+        "median": 1.575,
+        "mad": 0.0,
+        "min": 1.575,
+        "max": 1.575,
+        "n": 7
+      },
+      "presentations_per_op": {
+        "median": 1.575,
+        "mad": 0.0,
+        "min": 1.575,
+        "max": 1.575,
+        "n": 7
+      },
+      "source_operations_per_op": {
+        "median": 1.0,
+        "mad": 0.0,
+        "min": 1.0,
+        "max": 1.0,
+        "n": 7
+      },
+      "source_reads_per_op": {
+        "median": 0.7166666666666667,
+        "mad": 0.0,
+        "min": 0.7166666666666667,
+        "max": 0.7166666666666667,
+        "n": 7
+      },
+      "text_bytes_copied_per_op": {
+        "median": 17.5,
+        "mad": 0.0,
+        "min": 17.5,
+        "max": 17.5,
+        "n": 7
+      },
+      "text_promotions_per_op": {
+        "median": 1.85,
+        "mad": 0.0,
+        "min": 1.85,
+        "max": 1.85,
+        "n": 7
+      }
+    },
+    {
+      "scenario": "window-resize-layout",
+      "mode": "cpu-raster",
+      "measured_processes": 7,
+      "warmup": 32,
+      "samples_per_process": 240,
+      "logical_controls": 1024,
+      "logical_list_items": null,
+      "samples": {
+        "median": 240,
+        "mad": 0,
+        "min": 240,
+        "max": 240,
+        "n": 7
+      },
+      "logical_submissions_per_op": {
+        "median": 1.0,
+        "mad": 0.0,
+        "min": 1.0,
+        "max": 1.0,
+        "n": 7
+      },
+      "public_edit_prepare_calls_per_op": {
+        "median": 1.0,
+        "mad": 0.0,
+        "min": 1.0,
+        "max": 1.0,
+        "n": 7
+      },
+      "whole_child_cpu_seconds": {
+        "median": 1.913338,
+        "mad": 0.051372000000000195,
+        "min": 1.859186,
+        "max": 2.0780149999999997,
+        "n": 7
+      },
+      "whole_child_peak_rss_bytes": {
+        "median": 21889024,
+        "mad": 0,
+        "min": 21889024,
+        "max": 21889024,
+        "n": 7
+      },
+      "routing_ns_p50": {
+        "median": 0.0,
+        "mad": 0.0,
+        "min": 0.0,
+        "max": 0.0,
+        "n": 7
+      },
+      "routing_ns_p95": {
+        "median": 0,
+        "mad": 0,
+        "min": 0,
+        "max": 0,
+        "n": 7
+      },
+      "routing_ns_p99": {
+        "median": 0,
+        "mad": 0,
+        "min": 0,
+        "max": 0,
+        "n": 7
+      },
+      "routing_ns_share": {
+        "median": 0.0,
+        "mad": 0.0,
+        "min": 0.0,
+        "max": 0.0,
+        "n": 7
+      },
+      "edit_prepare_ns_p50": {
+        "median": 593668.0,
+        "mad": 12044.5,
+        "min": 575163.0,
+        "max": 631473.5,
+        "n": 7
+      },
+      "edit_prepare_ns_p95": {
+        "median": 1042141,
+        "mad": 64761,
+        "min": 954613,
+        "max": 1177996,
+        "n": 7
+      },
+      "edit_prepare_ns_p99": {
+        "median": 1599569,
+        "mad": 357695,
+        "min": 1241874,
+        "max": 2733305,
+        "n": 7
+      },
+      "edit_prepare_ns_share": {
+        "median": 0.09743154552287235,
+        "mad": 0.0012195957891844161,
+        "min": 0.09061245533992353,
+        "max": 0.09987725724703632,
+        "n": 7
+      },
+      "scene_borrow_ns_p50": {
+        "median": 44.0,
+        "mad": 1.0,
+        "min": 36.5,
+        "max": 46.0,
+        "n": 7
+      },
+      "scene_borrow_ns_p95": {
+        "median": 59,
+        "mad": 2,
+        "min": 46,
+        "max": 152,
+        "n": 7
+      },
+      "scene_borrow_ns_p99": {
+        "median": 78,
+        "mad": 10,
+        "min": 58,
+        "max": 227,
+        "n": 7
+      },
+      "scene_borrow_ns_share": {
+        "median": 6.144012741716375e-06,
+        "mad": 2.2994967043157608e-07,
+        "min": 5.914063071284799e-06,
+        "max": 1.0858985278740546e-05,
+        "n": 7
+      },
+      "raster_ns_p50": {
+        "median": 5884706.0,
+        "mad": 89893.5,
+        "min": 5755625.0,
+        "max": 6038110.5,
+        "n": 7
+      },
+      "raster_ns_p95": {
+        "median": 8046319,
+        "mad": 616635,
+        "min": 7324197,
+        "max": 9744734,
+        "n": 7
+      },
+      "raster_ns_p99": {
+        "median": 11469774,
+        "mad": 478021,
+        "min": 8584526,
+        "max": 13366924,
+        "n": 7
+      },
+      "raster_ns_share": {
+        "median": 0.9003902371499977,
+        "mad": 0.0009195926629641527,
+        "min": 0.8968230226003182,
+        "max": 0.9068509277505268,
+        "n": 7
+      },
+      "logical_ack_ns_p50": {
+        "median": 12973.5,
+        "mad": 368.0,
+        "min": 12328.5,
+        "max": 14087.5,
+        "n": 7
+      },
+      "logical_ack_ns_p95": {
+        "median": 18363,
+        "mad": 2310,
+        "min": 14805,
+        "max": 73307,
+        "n": 7
+      },
+      "logical_ack_ns_p99": {
+        "median": 160805,
+        "mad": 51695,
+        "min": 81417,
+        "max": 302849,
+        "n": 7
+      },
+      "logical_ack_ns_share": {
+        "median": 0.002825376642466835,
+        "mad": 0.0002953631662519218,
+        "min": 0.002167358341851193,
+        "max": 0.0034572624454270126,
+        "n": 7
+      },
+      "total_ns_p50": {
+        "median": 6530504.5,
+        "mad": 135482.0,
+        "min": 6381115.0,
+        "max": 6718400.5,
+        "n": 7
+      },
+      "total_ns_p95": {
+        "median": 8823498,
+        "mad": 728573,
+        "min": 8080665,
+        "max": 10700887,
+        "n": 7
+      },
+      "total_ns_p99": {
+        "median": 12313419,
+        "mad": 1344757,
+        "min": 9615481,
+        "max": 14075901,
+        "n": 7
+      },
+      "coarse_updates_per_op": {
+        "median": 0.0,
+        "mad": 0.0,
+        "min": 0.0,
+        "max": 0.0,
+        "n": 7
+      },
+      "descriptions_per_op": {
+        "median": 0.0,
+        "mad": 0.0,
+        "min": 0.0,
+        "max": 0.0,
+        "n": 7
+      },
+      "destination_compares_per_op": {
+        "median": 0.0,
+        "mad": 0.0,
+        "min": 0.0,
+        "max": 0.0,
+        "n": 7
+      },
+      "exact_updates_per_op": {
+        "median": 0.0,
+        "mad": 0.0,
+        "min": 0.0,
+        "max": 0.0,
+        "n": 7
+      },
+      "layout_runs_per_op": {
+        "median": 1.0,
+        "mad": 0.0,
+        "min": 1.0,
+        "max": 1.0,
+        "n": 7
+      },
+      "measure_calls_per_op": {
+        "median": 0.0,
+        "mad": 0.0,
+        "min": 0.0,
+        "max": 0.0,
+        "n": 7
+      },
+      "owner_reruns_per_op": {
+        "median": 0.0,
+        "mad": 0.0,
+        "min": 0.0,
+        "max": 0.0,
+        "n": 7
+      },
+      "paint_passes_per_op": {
+        "median": 1.0,
+        "mad": 0.0,
+        "min": 1.0,
+        "max": 1.0,
+        "n": 7
+      },
+      "presentations_per_op": {
+        "median": 1.0,
+        "mad": 0.0,
+        "min": 1.0,
+        "max": 1.0,
+        "n": 7
+      },
+      "source_operations_per_op": {
+        "median": 0.0,
+        "mad": 0.0,
+        "min": 0.0,
+        "max": 0.0,
+        "n": 7
+      },
+      "source_reads_per_op": {
+        "median": 0.0,
+        "mad": 0.0,
+        "min": 0.0,
+        "max": 0.0,
+        "n": 7
+      },
+      "text_bytes_copied_per_op": {
+        "median": 0.0,
+        "mad": 0.0,
+        "min": 0.0,
+        "max": 0.0,
+        "n": 7
+      },
+      "text_promotions_per_op": {
+        "median": 0.0,
+        "mad": 0.0,
+        "min": 0.0,
+        "max": 0.0,
+        "n": 7
+      }
+    },
+    {
+      "scenario": "window-resize-layout",
+      "mode": "scene",
+      "measured_processes": 7,
+      "warmup": 32,
+      "samples_per_process": 240,
+      "logical_controls": 1024,
+      "logical_list_items": null,
+      "samples": {
+        "median": 240,
+        "mad": 0,
+        "min": 240,
+        "max": 240,
+        "n": 7
+      },
+      "logical_submissions_per_op": {
+        "median": 1.0,
+        "mad": 0.0,
+        "min": 1.0,
+        "max": 1.0,
+        "n": 7
+      },
+      "public_edit_prepare_calls_per_op": {
+        "median": 1.0,
+        "mad": 0.0,
+        "min": 1.0,
+        "max": 1.0,
+        "n": 7
+      },
+      "whole_child_cpu_seconds": {
+        "median": 0.21736399999999997,
+        "mad": 0.0062329999999999885,
+        "min": 0.209942,
+        "max": 0.24467199999999997,
+        "n": 7
+      },
+      "whole_child_peak_rss_bytes": {
+        "median": 21889024,
+        "mad": 0,
+        "min": 21889024,
+        "max": 21889024,
+        "n": 7
+      },
+      "routing_ns_p50": {
+        "median": 0.0,
+        "mad": 0.0,
+        "min": 0.0,
+        "max": 0.0,
+        "n": 7
+      },
+      "routing_ns_p95": {
+        "median": 0,
+        "mad": 0,
+        "min": 0,
+        "max": 0,
+        "n": 7
+      },
+      "routing_ns_p99": {
+        "median": 0,
+        "mad": 0,
+        "min": 0,
+        "max": 0,
+        "n": 7
+      },
+      "routing_ns_share": {
+        "median": 0.0,
+        "mad": 0.0,
+        "min": 0.0,
+        "max": 0.0,
+        "n": 7
+      },
+      "edit_prepare_ns_p50": {
+        "median": 540104.0,
+        "mad": 10106.0,
+        "min": 509356.5,
+        "max": 553717.5,
+        "n": 7
+      },
+      "edit_prepare_ns_p95": {
+        "median": 911106,
+        "mad": 78948,
+        "min": 802765,
+        "max": 1458438,
+        "n": 7
+      },
+      "edit_prepare_ns_p99": {
+        "median": 1133407,
+        "mad": 115551,
+        "min": 1017856,
+        "max": 2657433,
+        "n": 7
+      },
+      "edit_prepare_ns_share": {
+        "median": 0.983072527900052,
+        "mad": 0.0014899444598235334,
+        "min": 0.9811309120612417,
+        "max": 0.9853654204568653,
+        "n": 7
+      },
+      "scene_borrow_ns_p50": {
+        "median": 34.0,
+        "mad": 0.0,
+        "min": 34.0,
+        "max": 35.0,
+        "n": 7
+      },
+      "scene_borrow_ns_p95": {
+        "median": 48,
+        "mad": 5,
+        "min": 43,
+        "max": 138,
+        "n": 7
+      },
+      "scene_borrow_ns_p99": {
+        "median": 60,
+        "mad": 5,
+        "min": 49,
+        "max": 278,
+        "n": 7
+      },
+      "scene_borrow_ns_share": {
+        "median": 5.84454118968526e-05,
+        "mad": 3.0710290034155664e-06,
+        "min": 4.885745105590091e-05,
+        "max": 9.160262647395414e-05,
+        "n": 7
+      },
+      "raster_ns_p50": {
+        "median": 0.0,
+        "mad": 0.0,
+        "min": 0.0,
+        "max": 0.0,
+        "n": 7
+      },
+      "raster_ns_p95": {
+        "median": 0,
+        "mad": 0,
+        "min": 0,
+        "max": 0,
+        "n": 7
+      },
+      "raster_ns_p99": {
+        "median": 0,
+        "mad": 0,
+        "min": 0,
+        "max": 0,
+        "n": 7
+      },
+      "raster_ns_share": {
+        "median": 0.0,
+        "mad": 0.0,
+        "min": 0.0,
+        "max": 0.0,
+        "n": 7
+      },
+      "logical_ack_ns_p50": {
+        "median": 8004.5,
+        "mad": 79.5,
+        "min": 7903.5,
+        "max": 8205.0,
+        "n": 7
+      },
+      "logical_ack_ns_p95": {
+        "median": 9912,
+        "mad": 402,
+        "min": 9007,
+        "max": 10361,
+        "n": 7
+      },
+      "logical_ack_ns_p99": {
+        "median": 70620,
+        "mad": 31057,
+        "min": 27858,
+        "max": 110130,
+        "n": 7
+      },
+      "logical_ack_ns_share": {
+        "median": 0.016870947856467828,
+        "mad": 0.001461960080689266,
+        "min": 0.014579205160241257,
+        "max": 0.018820230487702358,
+        "n": 7
+      },
+      "total_ns_p50": {
+        "median": 548037.5,
+        "mad": 12661.0,
+        "min": 517598.0,
+        "max": 561777.5,
+        "n": 7
+      },
+      "total_ns_p95": {
+        "median": 939561,
+        "mad": 79946,
+        "min": 812699,
+        "max": 1468833,
+        "n": 7
+      },
+      "total_ns_p99": {
+        "median": 1142942,
+        "mad": 116454,
+        "min": 1026488,
+        "max": 2668462,
+        "n": 7
+      },
+      "coarse_updates_per_op": {
+        "median": 0.0,
+        "mad": 0.0,
+        "min": 0.0,
+        "max": 0.0,
+        "n": 7
+      },
+      "descriptions_per_op": {
+        "median": 0.0,
+        "mad": 0.0,
+        "min": 0.0,
+        "max": 0.0,
+        "n": 7
+      },
+      "destination_compares_per_op": {
+        "median": 0.0,
+        "mad": 0.0,
+        "min": 0.0,
+        "max": 0.0,
+        "n": 7
+      },
+      "exact_updates_per_op": {
+        "median": 0.0,
+        "mad": 0.0,
+        "min": 0.0,
+        "max": 0.0,
+        "n": 7
+      },
+      "layout_runs_per_op": {
+        "median": 1.0,
+        "mad": 0.0,
+        "min": 1.0,
+        "max": 1.0,
+        "n": 7
+      },
+      "measure_calls_per_op": {
+        "median": 0.0,
+        "mad": 0.0,
+        "min": 0.0,
+        "max": 0.0,
+        "n": 7
+      },
+      "owner_reruns_per_op": {
+        "median": 0.0,
+        "mad": 0.0,
+        "min": 0.0,
+        "max": 0.0,
+        "n": 7
+      },
+      "paint_passes_per_op": {
+        "median": 1.0,
+        "mad": 0.0,
+        "min": 1.0,
+        "max": 1.0,
+        "n": 7
+      },
+      "presentations_per_op": {
+        "median": 1.0,
+        "mad": 0.0,
+        "min": 1.0,
+        "max": 1.0,
+        "n": 7
+      },
+      "source_operations_per_op": {
+        "median": 0.0,
+        "mad": 0.0,
+        "min": 0.0,
+        "max": 0.0,
+        "n": 7
+      },
+      "source_reads_per_op": {
+        "median": 0.0,
+        "mad": 0.0,
+        "min": 0.0,
+        "max": 0.0,
+        "n": 7
+      },
+      "text_bytes_copied_per_op": {
+        "median": 0.0,
+        "mad": 0.0,
+        "min": 0.0,
+        "max": 0.0,
+        "n": 7
+      },
+      "text_promotions_per_op": {
+        "median": 0.0,
+        "mad": 0.0,
+        "min": 0.0,
+        "max": 0.0,
+        "n": 7
+      }
+    }
+  ],
+  "hover_routing_bands": [
+    {
+      "scenario": "hover-property-layout",
+      "mode": "cpu-raster",
+      "band": "first-row",
+      "samples_per_process": 30,
+      "routing_p50_ns": {
+        "median": 12181.5,
+        "mad": 830.0,
+        "min": 10927.5,
+        "max": 13205.0,
+        "n": 7
+      },
+      "routing_p95_ns": {
+        "median": 21292,
+        "mad": 5070,
+        "min": 15482,
+        "max": 184399,
+        "n": 7
+      }
+    },
+    {
+      "scenario": "hover-property-layout",
+      "mode": "cpu-raster",
+      "band": "last-row",
+      "samples_per_process": 32,
+      "routing_p50_ns": {
+        "median": 2911.0,
+        "mad": 62.5,
+        "min": 2558.5,
+        "max": 3009.5,
+        "n": 7
+      },
+      "routing_p95_ns": {
+        "median": 4134,
+        "mad": 1113,
+        "min": 3021,
+        "max": 26640,
+        "n": 7
+      }
+    },
+    {
+      "scenario": "hover-property-layout",
+      "mode": "cpu-raster",
+      "band": "leave",
+      "samples_per_process": 60,
+      "routing_p50_ns": {
+        "median": 193.5,
+        "mad": 23.5,
+        "min": 164.5,
+        "max": 230.5,
+        "n": 7
+      },
+      "routing_p95_ns": {
+        "median": 341,
+        "mad": 6,
+        "min": 302,
+        "max": 367,
+        "n": 7
+      }
+    },
+    {
+      "scenario": "hover-property-layout",
+      "mode": "cpu-raster",
+      "band": "middle",
+      "samples_per_process": 118,
+      "routing_p50_ns": {
+        "median": 7462.0,
+        "mad": 337.5,
+        "min": 6562.5,
+        "max": 7799.5,
+        "n": 7
+      },
+      "routing_p95_ns": {
+        "median": 15333,
+        "mad": 3702,
+        "min": 11038,
+        "max": 23829,
+        "n": 7
+      }
+    },
+    {
+      "scenario": "hover-property-layout",
+      "mode": "scene",
+      "band": "first-row",
+      "samples_per_process": 30,
+      "routing_p50_ns": {
+        "median": 7186.0,
+        "mad": 73.0,
+        "min": 7042.0,
+        "max": 7434.5,
+        "n": 7
+      },
+      "routing_p95_ns": {
+        "median": 10095,
+        "mad": 156,
+        "min": 8160,
+        "max": 13818,
+        "n": 7
+      }
+    },
+    {
+      "scenario": "hover-property-layout",
+      "mode": "scene",
+      "band": "last-row",
+      "samples_per_process": 32,
+      "routing_p50_ns": {
+        "median": 1045.5,
+        "mad": 93.5,
+        "min": 945.5,
+        "max": 1418.5,
+        "n": 7
+      },
+      "routing_p95_ns": {
+        "median": 1770,
+        "mad": 172,
+        "min": 1517,
+        "max": 4287,
+        "n": 7
+      }
+    },
+    {
+      "scenario": "hover-property-layout",
+      "mode": "scene",
+      "band": "leave",
+      "samples_per_process": 60,
+      "routing_p50_ns": {
+        "median": 165.5,
+        "mad": 9.5,
+        "min": 143.5,
+        "max": 207.0,
+        "n": 7
+      },
+      "routing_p95_ns": {
+        "median": 235,
+        "mad": 10,
+        "min": 204,
+        "max": 646,
+        "n": 7
+      }
+    },
+    {
+      "scenario": "hover-property-layout",
+      "mode": "scene",
+      "band": "middle",
+      "samples_per_process": 118,
+      "routing_p50_ns": {
+        "median": 4315.5,
+        "mad": 51.5,
+        "min": 4179.5,
+        "max": 4801.5,
+        "n": 7
+      },
+      "routing_p95_ns": {
+        "median": 7067,
+        "mad": 119,
+        "min": 6662,
+        "max": 9306,
+        "n": 7
+      }
+    },
+    {
+      "scenario": "hover-property-paint",
+      "mode": "cpu-raster",
+      "band": "first-row",
+      "samples_per_process": 30,
+      "routing_p50_ns": {
+        "median": 11894.0,
+        "mad": 377.5,
+        "min": 10166.5,
+        "max": 13116.5,
+        "n": 7
+      },
+      "routing_p95_ns": {
+        "median": 18167,
+        "mad": 4465,
+        "min": 13702,
+        "max": 108699,
+        "n": 7
+      }
+    },
+    {
+      "scenario": "hover-property-paint",
+      "mode": "cpu-raster",
+      "band": "last-row",
+      "samples_per_process": 32,
+      "routing_p50_ns": {
+        "median": 2825.0,
+        "mad": 105.5,
+        "min": 2515.0,
+        "max": 2992.5,
+        "n": 7
+      },
+      "routing_p95_ns": {
+        "median": 3810,
+        "mad": 680,
+        "min": 2912,
+        "max": 20271,
+        "n": 7
+      }
+    },
+    {
+      "scenario": "hover-property-paint",
+      "mode": "cpu-raster",
+      "band": "leave",
+      "samples_per_process": 60,
+      "routing_p50_ns": {
+        "median": 210.0,
+        "mad": 6.0,
+        "min": 179.5,
+        "max": 254.0,
+        "n": 7
+      },
+      "routing_p95_ns": {
+        "median": 360,
+        "mad": 25,
+        "min": 286,
+        "max": 399,
+        "n": 7
+      }
+    },
+    {
+      "scenario": "hover-property-paint",
+      "mode": "cpu-raster",
+      "band": "middle",
+      "samples_per_process": 118,
+      "routing_p50_ns": {
+        "median": 7135.0,
+        "mad": 315.5,
+        "min": 6296.0,
+        "max": 7617.0,
+        "n": 7
+      },
+      "routing_p95_ns": {
+        "median": 13059,
+        "mad": 1042,
+        "min": 10468,
+        "max": 14362,
+        "n": 7
+      }
+    },
+    {
+      "scenario": "hover-property-paint",
+      "mode": "scene",
+      "band": "first-row",
+      "samples_per_process": 30,
+      "routing_p50_ns": {
+        "median": 6935.0,
+        "mad": 51.0,
+        "min": 6821.5,
+        "max": 7013.0,
+        "n": 7
+      },
+      "routing_p95_ns": {
+        "median": 10766,
+        "mad": 3384,
+        "min": 7382,
+        "max": 58335,
+        "n": 7
+      }
+    },
+    {
+      "scenario": "hover-property-paint",
+      "mode": "scene",
+      "band": "last-row",
+      "samples_per_process": 32,
+      "routing_p50_ns": {
+        "median": 850.0,
+        "mad": 51.0,
+        "min": 799.0,
+        "max": 990.0,
+        "n": 7
+      },
+      "routing_p95_ns": {
+        "median": 1576,
+        "mad": 283,
+        "min": 1268,
+        "max": 4688,
+        "n": 7
+      }
+    },
+    {
+      "scenario": "hover-property-paint",
+      "mode": "scene",
+      "band": "leave",
+      "samples_per_process": 60,
+      "routing_p50_ns": {
+        "median": 133.5,
+        "mad": 1.0,
+        "min": 117.0,
+        "max": 161.0,
+        "n": 7
+      },
+      "routing_p95_ns": {
+        "median": 189,
+        "mad": 14,
+        "min": 163,
+        "max": 307,
+        "n": 7
+      }
+    },
+    {
+      "scenario": "hover-property-paint",
+      "mode": "scene",
+      "band": "middle",
+      "samples_per_process": 118,
+      "routing_p50_ns": {
+        "median": 4010.5,
+        "mad": 56.5,
+        "min": 3954.0,
+        "max": 4283.0,
+        "n": 7
+      },
+      "routing_p95_ns": {
+        "median": 6902,
+        "mad": 164,
+        "min": 6566,
+        "max": 8326,
+        "n": 7
+      }
+    },
+    {
+      "scenario": "hover-source-paint",
+      "mode": "cpu-raster",
+      "band": "first-row",
+      "samples_per_process": 30,
+      "routing_p50_ns": {
+        "median": 14410.5,
+        "mad": 42.0,
+        "min": 13512.0,
+        "max": 14802.5,
+        "n": 7
+      },
+      "routing_p95_ns": {
+        "median": 27904,
+        "mad": 5183,
+        "min": 18094,
+        "max": 124384,
+        "n": 7
+      }
+    },
+    {
+      "scenario": "hover-source-paint",
+      "mode": "cpu-raster",
+      "band": "last-row",
+      "samples_per_process": 32,
+      "routing_p50_ns": {
+        "median": 3028.5,
+        "mad": 106.5,
+        "min": 2824.0,
+        "max": 3283.5,
+        "n": 7
+      },
+      "routing_p95_ns": {
+        "median": 4378,
+        "mad": 668,
+        "min": 3505,
+        "max": 12141,
+        "n": 7
+      }
+    },
+    {
+      "scenario": "hover-source-paint",
+      "mode": "cpu-raster",
+      "band": "leave",
+      "samples_per_process": 60,
+      "routing_p50_ns": {
+        "median": 200.0,
+        "mad": 14.0,
+        "min": 175.0,
+        "max": 227.5,
+        "n": 7
+      },
+      "routing_p95_ns": {
+        "median": 335,
+        "mad": 5,
+        "min": 264,
+        "max": 385,
+        "n": 7
+      }
+    },
+    {
+      "scenario": "hover-source-paint",
+      "mode": "cpu-raster",
+      "band": "middle",
+      "samples_per_process": 118,
+      "routing_p50_ns": {
+        "median": 9022.0,
+        "mad": 411.0,
+        "min": 8567.5,
+        "max": 9640.5,
+        "n": 7
+      },
+      "routing_p95_ns": {
+        "median": 19772,
+        "mad": 4632,
+        "min": 15140,
+        "max": 63011,
+        "n": 7
+      }
+    },
+    {
+      "scenario": "hover-source-paint",
+      "mode": "scene",
+      "band": "first-row",
+      "samples_per_process": 30,
+      "routing_p50_ns": {
+        "median": 6709.5,
+        "mad": 136.0,
+        "min": 6551.5,
+        "max": 6864.5,
+        "n": 7
+      },
+      "routing_p95_ns": {
+        "median": 7359,
+        "mad": 303,
+        "min": 7047,
+        "max": 171876,
+        "n": 7
+      }
+    },
+    {
+      "scenario": "hover-source-paint",
+      "mode": "scene",
+      "band": "last-row",
+      "samples_per_process": 32,
+      "routing_p50_ns": {
+        "median": 626.0,
+        "mad": 44.0,
+        "min": 575.0,
+        "max": 718.5,
+        "n": 7
+      },
+      "routing_p95_ns": {
+        "median": 1135,
+        "mad": 186,
+        "min": 910,
+        "max": 1582,
+        "n": 7
+      }
+    },
+    {
+      "scenario": "hover-source-paint",
+      "mode": "scene",
+      "band": "leave",
+      "samples_per_process": 60,
+      "routing_p50_ns": {
+        "median": 97.5,
+        "mad": 8.0,
+        "min": 79.5,
+        "max": 120.5,
+        "n": 7
+      },
+      "routing_p95_ns": {
+        "median": 180,
+        "mad": 21,
+        "min": 132,
+        "max": 222,
+        "n": 7
+      }
+    },
+    {
+      "scenario": "hover-source-paint",
+      "mode": "scene",
+      "band": "middle",
+      "samples_per_process": 118,
+      "routing_p50_ns": {
+        "median": 3843.0,
+        "mad": 46.0,
+        "min": 3771.5,
+        "max": 3991.0,
+        "n": 7
+      },
+      "routing_p95_ns": {
+        "median": 6525,
+        "mad": 258,
+        "min": 5988,
+        "max": 7218,
+        "n": 7
+      }
+    }
+  ]
+}
