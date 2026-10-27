@@ -196,3 +196,27 @@ fn schema_rejects_invalid_pitch_and_keeps_normal_distinct_from_inherit() {
     assert_eq!(LINE_HEIGHT.get(&style), None);
     eprintln!("style_bytes={}", std::mem::size_of::<gpui::Style>());
 }
+
+#[test]
+fn failed_newer_pitch_preserves_older_candidate_ack_and_repairs() {
+    let mut win = window(20., false);
+    let displayed = lines(&win);
+    win.set(Page::PITCH, 28.).unwrap();
+    let candidate = win.with_scene(|_, token| token).unwrap();
+    assert!(matches!(
+        win.set(Page::PITCH, 0.),
+        Err(gpui::SetError::Committed { error: gpui::Error::Property(error), .. })
+            if error.property == LINE_HEIGHT.id()
+                && error.reason == gpui::property::PropertyErrorKind::NonPositive
+    ));
+    assert_eq!(*win.root().unwrap().pitch, 0.);
+    assert_eq!(lines(&win), displayed);
+    assert_eq!(win.with_scene(|_, token| token).unwrap(), candidate);
+    win.presented(candidate).unwrap();
+    assert_eq!(lines(&win), lines(&window(28., false)));
+    win.set(Page::PITCH, 40.).unwrap();
+    let mut fresh = window(40., false);
+    assert_eq!(pixels(&mut win), pixels(&mut fresh));
+    ack(&mut win);
+    assert_eq!(lines(&win), lines(&fresh));
+}
