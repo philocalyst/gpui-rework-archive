@@ -354,3 +354,22 @@ scissored tile spans can reuse the unchanged shader and one presentation copy.
 This is an unimplemented hypothesis, not an inferred speedup or an adoption of
 the rejected base. It must charge comparisons, scratch, commands and full controls,
 and preserve exact painter order, sample arithmetic, old/new support and fallback.
+
+
+## Changed-record tile repair in progress
+
+Protocol f720eab863; source32aae50d17 on local/gpu-text-tiles. It retains the
+previous full CSR rebuild, then identifies tiles with changed references or
+changed referenced glyph/common words. Adjacent dirty tiles become disjoint row
+spans, intersected with certified damage. More than256 spans falls back to the
+original damage. Explicit None remains full compositing; no shader arithmetic
+changes. Common-word changes conservatively mark the whole run. Headers and
+public application APIs are unchanged; spans are temporary allocation/commands.
+
+77 GPU tests/doctests and strict Clippy pass, including copy-only unchanged
+records, one changed glyph in a paragraph, moved/occluded old support, SDR/HDR,
+fractional and near-tile-boundary positions, and full/span-limit fallbacks. Two
+fixture corrections (coordinate types; singleton seed was not a tracked run)
+remain recorded. Native composition, omitted-old-tile mutant and preregistered
+paired costs remain. Shipping37461 lines(+94), timed ELF14733192 B(+3832 over
+packet-only); no performance claim before timing.

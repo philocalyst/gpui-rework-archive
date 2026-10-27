@@ -26,6 +26,7 @@ isolated worktree, preregistration, freeze, oracle, mutant and evidence rules.
 | `local/sparse-text-batch` / `/home/user/gpui-sparse-batch-lab` | Atomically prepare disjoint sparse command/geometry runs | Rejected: primary 14.4x/8.1x, 25-label two-field owner +5.62%; complete dossier `2d55c3dff1`, 975 default / 1048 X11 GPUI+Canvas tests, six native scripts |
 | `local/sparse-text-outline` / `/home/user/gpui-sparse-outline-lab` | Isolate batch preparation from the single-run routine | Rejected: primary 15.2x/8.0x, 1000-label four-field owner +5.0214% fails fixed control; complete dossier `5b670209df`, 975 default / 1048 X11 tests and six native scripts; single routine 2133 B vs 5337 B inline |
 | `local/gpu-text-packet` / `/home/user/gpui-gpu-text-packet-lab` | Preserve admitted GPU records/resources across bounded text transactions; repack complete CSR | Rejected at local dossier de8e4f6fea: large two/four-field completion ratios .690910/.547986; tiny full controls1.080780/1.076605 fail.75 GPU,975 default,1048 native tests,6 actual native scripts, mutant and42 allocation probes; temporary bytes increase |
+| `local/gpu-text-tiles` / `/home/user/gpui-gpu-text-tiles-lab` | Repaint only tile spans whose admitted references or glyph/common words change; same shader | Protocol f720eab863, candidate32aae50d17:77 GPU tests/Clippy pass; native composition and negative control pending, timings not begun |
 
 [BBTree transfer research](../bbtree-transfer/README.md) records the pinned
 implementation, failed historical trials, applicability and next hypotheses.
