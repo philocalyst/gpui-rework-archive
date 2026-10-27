@@ -107,3 +107,12 @@ warm stream update do not establish whole-frame improvement. Qualification:
 Post-run inspection found sparse text marks the entire run dirty while full
 Canvas replacement compares draws individually. Actual damage/phase diagnosis
 is still required before attributing the regression or proposing a new variant.
+
+The next local hypothesis is preserving changed glyph support through GPU repair.
+All 30 stream/owner pairs in the failed local-publication trial composite 7.921545%
+more pixels than complete-scene damage. Single bounding rectangles also cover gaps.
+Protocol f9cbf7e1ecbe19457747ebc5a86756f262ffa9c8 registers diagnostic exact old/new
+support before GPU changes. This applies validated local work and publication
+boundaries shared by the research, without claiming an async cache-hit breakthrough.
+The independent scroll-output follow-up failed its fixed tiny-list predecessor gate
+(1.108649280) and remains unadopted in dossier 6bdfad2b75541bfb0cbac2882329c3e31e885bde.

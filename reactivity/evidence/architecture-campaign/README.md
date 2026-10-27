@@ -115,3 +115,23 @@ External raw staging directories are `/home/user/gpui-state-evidence`,
 and `/home/user/gpui-native-evidence`. Completed experiments copy their raw data,
 failures, source/compiler/binary receipts and independent verifier into their
 own committed dossier. Pending staging data is not an acceptance verdict.
+
+Completed scroll-output follow-up at /home/user/gpui-scroll-output-lab:
+dossier 6bdfad2b75541bfb0cbac2882329c3e31e885bde verifies 1842 files and 232
+preserved ELFs. 450 three-way timing processes, 90 qualification and 30 allocation
+processes pass exact oracles. Original-control gates pass (scroll .084791941,
+mixed .443562072), but tiny-list candidate/predecessor 1.108649280 fails the fixed
+1.05 ceiling, CI [.968239,1.243926]. Unadopted; no threshold change or selective win.
+995 default/1080 X11/74 GPU, 10 port and 11 native gates pass; Clear-for-Load mutant
+fails pixels. Output/SlotGuard restored 40/80 bytes, Backing remains 192; shipping
+37473 lines, example 26329864 bytes. Image-placement correction is absent from all
+three historical variants (none of these ten workloads contains images).
+
+New isolated exact-glyph diagnostic at /home/user/gpui-glyph-damage-lab, protocol
+f9cbf7e1ecbe19457747ebc5a86756f262ffa9c8, baseline failed-local-publication
+957719565444c9900c6e6c20916a6fb88c933395. Existing raw frame counters show exactly
+7.921545% more composited pixels in all 15 pairs of both streaming modes. Stage A
+checks exact changed glyph support and independent pixel repair before any sparse
+GPU implementation or new timing. This is a post-verdict hypothesis, not causation
+or an accepted performance result. Application API unchanged; the additive low-level
+Canvas observer must retain exact common/resource/lifetime validation.
