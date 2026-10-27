@@ -137,8 +137,8 @@ pub(super) fn run(gpu: &mut GpuSurface, case: &str, options: Options) {
             if options.owner {
                 owner
                     .update(|m| {
-                        for i in 0..options.fields {
-                            *m.values[i] = value(frame, i);
+                        for (i, slot) in m.values.iter_mut().enumerate().take(options.fields) {
+                            **slot = value(frame, i);
                         }
                     })
                     .unwrap();
