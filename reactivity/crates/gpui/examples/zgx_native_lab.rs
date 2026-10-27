@@ -205,6 +205,7 @@ fn main() -> Result<(), Box<dyn std::error::Error>> {
     let (remote, inbox) = Remote::bounded(4);
     let (start_send, start_receive) = std::sync::mpsc::sync_channel(1);
     let (stop_send, stop_receive) = std::sync::mpsc::channel::<()>();
+    let (delivered_send, delivered_receive) = std::sync::mpsc::channel::<()>();
     let worker = std::thread::spawn(move || {
         if start_receive.recv().is_err() {
             return;
@@ -237,6 +238,19 @@ fn main() -> Result<(), Box<dyn std::error::Error>> {
             if finished {
                 break;
             }
+            // Match the reference's UI-loop pacing: at most one pending tick.
+            // A blocked UI cannot accumulate an external producer backlog.
+            loop {
+                match delivered_receive.recv_timeout(Duration::from_millis(50)) {
+                    Ok(()) => break,
+                    Err(std::sync::mpsc::RecvTimeoutError::Disconnected) => return,
+                    Err(std::sync::mpsc::RecvTimeoutError::Timeout) => {
+                        if stop_receive.try_recv().is_ok() {
+                            return;
+                        }
+                    }
+                }
+            }
             next += workload::PERIOD;
             let now = Instant::now();
             if next <= now {
@@ -260,13 +274,15 @@ fn main() -> Result<(), Box<dyn std::error::Error>> {
         .size(960, 720)
         .text_font(font)
         .renderer(renderer)
-        .with_inbox(inbox, |model, finished| {
+        .with_inbox(inbox, move |model, finished| {
             if finished {
                 eprintln!("WORKLOAD_FINISHED admitted_ticks={}", model.received);
             } else {
                 model.tick();
+                let _ = delivered_send.send(());
             }
         })
+        .on_presentation_error(|error| eprintln!("PRESENTATION_ERROR {error:?}"))
         .on_presented(move |frame| {
             presents.record();
             if let Some(sender) = start_send.take() {
