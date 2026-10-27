@@ -201,3 +201,179 @@ fn a_late_text_packet_rejection_keeps_the_old_image_and_replay() {
         assert_eq!(read_texture(&gpu, &target), before);
     });
 }
+
+fn rect_damage(size: [usize; 2], rect: Rect) -> gpui_canvas::DamageRegion {
+    let mut canvas = Canvas::recording(size[0], size[1], ColorConfig::default()).unwrap();
+    let mut stage = canvas.stage();
+    stage
+        .fill_rect(rect, Affine::IDENTITY, rect, Color::BLACK)
+        .unwrap();
+    stage.commit_with_damage()
+}
+
+#[test]
+fn text_tile_repairs_preserve_old_support_and_explicit_full_repaint() {
+    pollster::block_on(async {
+        for (format, config) in [
+            (wgpu::TextureFormat::Rgba8UnormSrgb, ColorConfig::default()),
+            (
+                wgpu::TextureFormat::Rgba16Float,
+                ColorConfig::linear_hdr(gpui_canvas::OutputProfile::Srgb, 203.).unwrap(),
+            ),
+        ] {
+            for map in [Affine::IDENTITY, Affine::translation(0.25, 0.5)] {
+                let mut text = TextSystem::bundled().unwrap();
+                let mut gpu = RetainedRenderer::new(renderer(format).await);
+                let mut full = renderer(format).await;
+                let (initial, slots) = scene(
+                    &mut text,
+                    ["0011", "1100"],
+                    [Point { x: 2., y: 2. }, Point { x: 6., y: 24. }],
+                    map,
+                    config,
+                    Color::BLACK,
+                );
+                let target = output_texture(&gpu, &initial);
+                let view = target.create_view(&Default::default());
+                gpu.render(initial.prepared_scene(), &view, None).unwrap();
+                let partial = rect_damage([128, 96], Rect::new(0., 0., 128., 51.));
+                // Same records produce a copy-only submit even with broad damage.
+                gpu.patch_texts(&edits(&initial, slots), &view, Some(partial))
+                    .unwrap();
+                assert_eq!(gpu.retained_stats().composited_pixels, 0);
+                assert_eq!(read_texture(&gpu, &target), readback(&mut full, &initial));
+                for (labels, positions) in [
+                    (
+                        ["0010", "1100"],
+                        [Point { x: 2., y: 2. }, Point { x: 6., y: 24. }],
+                    ),
+                    (
+                        ["1100", "0011"],
+                        [Point { x: 48., y: 2. }, Point { x: 82., y: 24. }],
+                    ),
+                    (
+                        ["0011", "1100"],
+                        [Point { x: 2., y: 2. }, Point { x: 6., y: 24. }],
+                    ),
+                    (
+                        ["0011", "1100"],
+                        [
+                            Point {
+                                x: 15.999999999,
+                                y: 2.,
+                            },
+                            Point { x: 6., y: 24. },
+                        ],
+                    ),
+                    (
+                        ["0011", "1100"],
+                        [
+                            Point {
+                                x: 16.000000001,
+                                y: 2.,
+                            },
+                            Point { x: 6., y: 24. },
+                        ],
+                    ),
+                ] {
+                    let (next, next_slots) =
+                        scene(&mut text, labels, positions, map, config, Color::BLACK);
+                    assert_eq!(slots, next_slots);
+                    gpu.patch_texts(&edits(&next, slots), &view, Some(partial))
+                        .unwrap();
+                    assert!(gpu.retained_stats().composited_pixels < 128 * 51);
+                    assert_eq!(
+                        read_texture(&gpu, &target),
+                        readback(&mut full, &next),
+                        "old dirty tile membership must survive movement"
+                    );
+                    // None remains explicit full repaint, including unchanged words.
+                    gpu.patch_texts(&edits(&next, slots), &view, None).unwrap();
+                    assert_eq!(gpu.retained_stats().composited_pixels, 128 * 96);
+                    assert_eq!(read_texture(&gpu, &target), readback(&mut full, &next));
+                    gpu.patch_texts(
+                        &edits(&next, slots),
+                        &view,
+                        Some(gpui_canvas::DamageRegion::default()),
+                    )
+                    .unwrap();
+                    assert_eq!(gpu.retained_stats().composited_pixels, 0);
+                }
+            }
+        }
+    });
+}
+
+fn paragraphs(
+    text: &mut TextSystem,
+    labels: [&str; 2],
+    size: [usize; 2],
+    x: [f64; 2],
+) -> (Canvas, [TextRunSlot; 2]) {
+    let layouts = labels.map(|label| text.shape(label, 12., None).unwrap());
+    let clip = Rect::new(0., 0., size[0] as f64, size[1] as f64);
+    let mut canvas = Canvas::recording(size[0], size[1], ColorConfig::default()).unwrap();
+    let mut stage = canvas.stage();
+    stage.clear(Color::WHITE);
+    let slots = std::array::from_fn(|i| {
+        stage
+            .draw_text_scaled_tracked(
+                text,
+                &layouts[i],
+                Point { x: x[i], y: 2. },
+                Affine::IDENTITY,
+                clip,
+                Color::BLACK,
+                1.,
+            )
+            .unwrap()
+            .unwrap()
+    });
+    stage.commit();
+    (canvas, slots)
+}
+
+#[test]
+fn text_tile_repairs_skip_unchanged_paragraphs_and_bound_scissor_count() {
+    pollster::block_on(async {
+        let mut text = TextSystem::bundled().unwrap();
+        let mut gpu = RetainedRenderer::new(renderer(wgpu::TextureFormat::Rgba8UnormSrgb).await);
+        let mut full = renderer(wgpu::TextureFormat::Rgba8UnormSrgb).await;
+        let label = "0000000000000000\n".repeat(12);
+        let mut changed = label.clone();
+        changed.replace_range(100..101, "1");
+        let size = [256, 256];
+        let (initial, slots) = paragraphs(&mut text, [&label, "1"], size, [2., 230.]);
+        let target = output_texture(&gpu, &initial);
+        let view = target.create_view(&Default::default());
+        gpu.render(initial.prepared_scene(), &view, None).unwrap();
+        let (next, _) = paragraphs(&mut text, [&changed, "1"], size, [2., 230.]);
+        let broad = rect_damage(size, Rect::new(0., 0., 256., 256.));
+        gpu.patch_texts(&edits(&next, slots), &view, Some(broad))
+            .unwrap();
+        assert!(gpu.retained_stats().composited_pixels > 0);
+        assert!(
+            gpu.retained_stats().composited_pixels < 256 * 32,
+            "one changed glyph must not repaint the whole paragraph"
+        );
+        assert_eq!(read_texture(&gpu, &target), readback(&mut full, &next));
+        // Two separated columns over more than128 tile rows exceed256 spans.
+        let zeros = "0\n".repeat(180);
+        let ones = "1\n".repeat(180);
+        let size = [128, 4096];
+        let (initial, slots) = paragraphs(&mut text, [&zeros, &ones], size, [2., 98.]);
+        let target = output_texture(&gpu, &initial);
+        let view = target.create_view(&Default::default());
+        gpu.render(initial.prepared_scene(), &view, None).unwrap();
+        let (next, _) = paragraphs(&mut text, [&ones, &zeros], size, [2., 98.]);
+        let broad = rect_damage(size, Rect::new(0., 0., 128., 4096.));
+        gpu.patch_texts(&edits(&next, slots), &view, Some(broad))
+            .unwrap();
+        assert_eq!(
+            gpu.retained_stats().composited_pixels,
+            128 * 4096,
+            "bounded command count must fall back to caller damage"
+        );
+        assert_eq!(read_texture(&gpu, &target), readback(&mut full, &next));
+    });
+}

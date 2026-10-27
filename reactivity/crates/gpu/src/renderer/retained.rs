@@ -184,7 +184,7 @@ impl RetainedRenderer {
         check_target(target, backing.size(), self.inner.format())
             .map_err(|_| TextPacketError::InvalidTarget)?;
         check_damage(damage, backing.size()).map_err(|_| TextPacketError::InvalidTarget)?;
-        let submitted = text_packet::patch(
+        let (submitted, composited_pixels) = text_packet::patch(
             &mut self.inner.state,
             &self.inner.context,
             &mut self.text_runs,
@@ -192,6 +192,7 @@ impl RetainedRenderer {
             backing.output(target, damage),
         )?;
         self.stats = backing.stats(damage);
+        self.stats.composited_pixels = composited_pixels;
         Ok(submitted)
     }
 }

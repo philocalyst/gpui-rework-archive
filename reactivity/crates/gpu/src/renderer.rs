@@ -530,12 +530,23 @@ impl GpuContext {
         self.format
     }
     fn submit(&self, output: Output<'_>, bindings: &wgpu::BindGroup) -> wgpu::SubmissionIndex {
+        self.submit_regions(output, bindings, None)
+    }
+    fn submit_regions(
+        &self,
+        output: Output<'_>,
+        bindings: &wgpu::BindGroup,
+        regions: Option<&[[u32; 4]]>,
+    ) -> wgpu::SubmissionIndex {
         let mut encoder = self
             .device
             .create_command_encoder(&wgpu::CommandEncoderDescriptor {
                 label: Some("GPUI frame"),
             });
-        if output.damage.is_none_or(|damage| !damage.is_empty()) {
+        if regions.map_or_else(
+            || output.damage.is_none_or(|damage| !damage.is_empty()),
+            |regions| !regions.is_empty(),
+        ) {
             let mut pass = encoder.begin_render_pass(&wgpu::RenderPassDescriptor {
                 label: Some("GPUI frame"),
                 color_attachments: &[Some(wgpu::RenderPassColorAttachment {
@@ -556,12 +567,19 @@ impl GpuContext {
                 occlusion_query_set: None,
                 multiview_mask: None,
             });
-            if let Some([left, top, right, bottom]) = output.damage.and_then(|d| d.bounds()) {
-                pass.set_scissor_rect(left, top, right - left, bottom - top);
-            }
             pass.set_pipeline(&self.pipeline);
             pass.set_bind_group(0, bindings, &[]);
-            pass.draw(0..3, 0..1);
+            if let Some(regions) = regions {
+                for &[left, top, right, bottom] in regions {
+                    pass.set_scissor_rect(left, top, right - left, bottom - top);
+                    pass.draw(0..3, 0..1);
+                }
+            } else {
+                if let Some([left, top, right, bottom]) = output.damage.and_then(|d| d.bounds()) {
+                    pass.set_scissor_rect(left, top, right - left, bottom - top);
+                }
+                pass.draw(0..3, 0..1);
+            }
         }
         if let Some((backing, target)) = output.present {
             backing.copy(&mut encoder, target);

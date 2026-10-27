@@ -49,6 +49,41 @@ struct Patch {
     slot: TextRunSlot,
     run: Run,
     words: Vec<Word>,
+    common_changed: bool,
+}
+impl Patch {
+    fn changes(&self, address: u32, old: &[Word]) -> bool {
+        if !self.run.contains(address) {
+            return false;
+        }
+        let offset = 5 + (address - self.run.word.get()) as usize;
+        self.common_changed
+            || self.words[offset..offset + 2] != old[address as usize..address as usize + 2]
+    }
+}
+// Rows are disjoint. Cap command count; overflow uses the original damage.
+fn append_region(regions: &mut Option<Vec<[u32; 4]>>, rect: [u32; 4], damage: [u32; 4]) {
+    let [l, t, r, b] = [
+        rect[0].max(damage[0]),
+        rect[1].max(damage[1]),
+        rect[2].min(damage[2]),
+        rect[3].min(damage[3]),
+    ];
+    if l >= r || t >= b {
+        return;
+    }
+    let Some(spans) = regions else { return };
+    if let Some(last) = spans.last_mut()
+        && last[1] == t
+        && last[3] == b
+        && last[2] == l
+    {
+        last[2] = r;
+    } else if spans.len() == 256 {
+        *regions = None;
+    } else {
+        spans.push([l, t, r, b]);
+    }
 }
 fn correction_matches(state: &RendererState, group: PreparedGroup<'_>, index: u32) -> bool {
     let Some(old) = state.residuals.get(index as usize) else {
@@ -76,7 +111,7 @@ pub(super) fn patch(
     runs: &mut [Option<Run>],
     edits: &[(TextRunSlot, PreparedGroup<'_>)],
     output: Output<'_>,
-) -> Result<wgpu::SubmissionIndex, TextPacketError> {
+) -> Result<(wgpu::SubmissionIndex, u64), TextPacketError> {
     let packet = state.packet.as_ref().ok_or(TextPacketError::NoPacket)?;
     state
         .check_context(context)
@@ -178,7 +213,13 @@ pub(super) fn patch(
             .and_then(|n| n.checked_add(references))
             .ok_or(TextPacketError::Capacity)?;
         run.references = references as u32;
-        patches.push(Patch { slot, run, words });
+        let common_changed = words[..5] != state.records[common..word];
+        patches.push(Patch {
+            slot,
+            run,
+            words,
+            common_changed,
+        });
     }
     if original > MAX_REFERENCES {
         return Err(TextPacketError::Capacity);
@@ -187,6 +228,8 @@ pub(super) fn patch(
     let mut next_ranges = Vec::with_capacity(state.ranges.len());
     let mut next_references = Vec::with_capacity(state.references.len());
     let mut cursor = 0;
+    let damage_bounds = output.damage.and_then(|d| d.bounds());
+    let mut regions = output.damage.map(|_| Vec::new());
     for (tile, &[start, end]) in state.ranges.iter().enumerate() {
         let begin = cursor;
         while cursor < additions.len() && additions[cursor].0 == tile {
@@ -216,6 +259,30 @@ pub(super) fn patch(
             return Err(TextPacketError::Capacity);
         }
         next_ranges.push([offset as u32, next_references.len() as u32]);
+        if regions.is_some()
+            && let Some(damage) = damage_bounds
+        {
+            let old = if end == UNIFORM_TILE {
+                std::slice::from_ref(&start)
+            } else {
+                &state.references[start as usize..end as usize]
+            };
+            let next = &next_references[offset..];
+            // Both memberships matter: a moved glyph can leave an empty tile.
+            // Equal lists only need repaint when a referenced record changed.
+            let dirty = old != next
+                || old
+                    .iter()
+                    .chain(next)
+                    .any(|&address| patches.iter().any(|p| p.changes(address, &state.records)));
+            if dirty {
+                append_region(
+                    &mut regions,
+                    tile_bounds(tile, columns, width, height),
+                    damage,
+                );
+            }
+        }
     }
     debug_assert_eq!(cursor, additions.len());
     if next_references.len().max(1) as u64 * 4 > state.indices.size {
@@ -235,6 +302,17 @@ pub(super) fn patch(
         } else {
             0
         };
+    let area = |[l, t, r, b]: [u32; 4]| u64::from(r - l) * u64::from(b - t);
+    let composited_pixels = regions.as_ref().map_or_else(
+        || {
+            output
+                .damage
+                .map_or(u64::from(width) * u64::from(height), |_| {
+                    damage_bounds.map_or(0, area)
+                })
+        },
+        |regions| regions.iter().copied().map(area).sum(),
+    );
     // No semantic validation remains. Revoke replay before the first queue write.
     let mut packet = state.packet.take().unwrap();
     for p in patches {
@@ -264,7 +342,7 @@ pub(super) fn patch(
     if rebind {
         packet.bindings = state.bindings(context);
     }
-    let submitted = context.submit(output, &packet.bindings);
+    let submitted = context.submit_regions(output, &packet.bindings, regions.as_deref());
     state.packet = Some(packet);
     let mut uniform = 0;
     let mut samples = 0;
@@ -301,5 +379,5 @@ pub(super) fn patch(
     if let Some(images) = &mut state.images {
         images.redrawn();
     }
-    Ok(submitted)
+    Ok((submitted, composited_pixels))
 }
