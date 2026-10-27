@@ -58,11 +58,20 @@ pub(super) struct PlannerState {
 impl PlannerState {
     pub(super) fn for_cache(mut self: Box<Self>) -> Box<Self> {
         if self.large_scratch {
-            self.context = LayoutContext::new();
-            self.layout = parley::Layout::default();
-            self.large_scratch = false;
+            self.trim_scratch();
         }
         self
+    }
+
+    // Paragraph replacement needs substantial drop/construction machinery.
+    // Short-label sessions only test the flag; keep that machinery out of
+    // their cache-return path without changing the trimming certificate.
+    #[cold]
+    #[inline(never)]
+    fn trim_scratch(&mut self) {
+        self.context = LayoutContext::new();
+        self.layout = parley::Layout::default();
+        self.large_scratch = false;
     }
 }
 struct Planned {
