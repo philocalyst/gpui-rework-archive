@@ -65,10 +65,13 @@ fn certify(
     let area = viewport.map(|v| v as i32);
     let destination = intersection(area, translated(area, delta))?;
     let source = translated(destination, -delta);
-    let old_scene = previous.prepared_scene();
-    let next_scene = next.prepared_scene();
-    let mut old = old_scene.draws();
-    let mut new = next_scene.draws();
+    // Staging can borrow gradient identity before its canonical lease moves.
+    // Inspect the admission witnesses directly, rejecting unsupported materials
+    // without invoking a prepared-scene view that requires committed resources.
+    let mut old = previous
+        .commands
+        .iter(viewport_rect(previous.width, previous.height));
+    let mut new = next.commands.iter(viewport_rect(next.width, next.height));
     loop {
         match (
             contribution(&mut old, source, delta).ok()?,
@@ -130,19 +133,19 @@ impl Contribution<'_> {
 }
 
 fn contribution<'a>(
-    draws: &mut impl Iterator<Item = PreparedDraw<'a>>,
+    draws: &mut impl Iterator<Item = BorrowedCommand<'a>>,
     query: Bounds,
     delta: i32,
 ) -> Result<Option<Contribution<'a>>, ()> {
     for draw in draws {
-        let bounds = integer_rect(draw.bounds).ok_or(())?;
+        let bounds = draw.bounds.map(|v| v as i32);
         if intersection(bounds, query).is_none() {
             continue;
         }
         // Translation by integer pixels leaves the 4x4 sample lattice exact.
         // With |translation| <= 1e6 and canvas <= 16384, every mapped eighth
         // remains exactly representable in f32 as well as the CPU's f64.
-        let [a, b, c, d, x, y] = draw.inverse;
+        let [a, b, c, d, x, y] = draw.map.inverse;
         if [a, b, c, d] != [1., 0., 0., 1.]
             || [x, y]
                 .iter()
@@ -156,8 +159,8 @@ fn contribution<'a>(
             continue;
         };
         let material = match draw.source {
-            PreparedSource::Solid => {
-                let local = integer_rect(draw.local_rect).ok_or(())?;
+            BorrowedSource::Rect => {
+                let local = integer_rect(draw.rect).ok_or(())?;
                 let world = [
                     local[0] - x as i32,
                     local[1] - y as i32,
@@ -170,16 +173,11 @@ fn contribution<'a>(
                 area = actual;
                 Material::Solid
             }
-            PreparedSource::Mask(mask) => Material::Mask {
-                rect: [
-                    draw.local_rect.x,
-                    draw.local_rect.y,
-                    draw.local_rect.width,
-                    draw.local_rect.height,
-                ]
-                .map(f32::to_bits),
+            BorrowedSource::Glyph(mask) => Material::Mask {
+                rect: [draw.rect.x, draw.rect.y, draw.rect.width, draw.rect.height]
+                    .map(f32::to_bits),
                 translation: [x as i32, y as i32 - delta],
-                mask,
+                mask: mask_view(mask),
             },
             _ => return Err(()),
         };
