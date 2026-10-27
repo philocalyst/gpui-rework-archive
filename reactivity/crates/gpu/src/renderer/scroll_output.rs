@@ -14,12 +14,12 @@ impl GpuContext {
         let mut encoder = self
             .device
             .create_command_encoder(&wgpu::CommandEncoderDescriptor {
-                label: Some("GPUI scroll frame"),
+                label: Some("GPUI frame"),
             });
         backing.scroll(&mut encoder, scroll);
         if scroll.repairs().iter().any(|repair| !repair.is_empty()) {
             let mut pass = encoder.begin_render_pass(&wgpu::RenderPassDescriptor {
-                label: Some("GPUI scroll repair"),
+                label: Some("GPUI frame"),
                 color_attachments: &[Some(wgpu::RenderPassColorAttachment {
                     view: output.view,
                     resolve_target: None,
