@@ -90,6 +90,7 @@ impl Tree {
     pub fn kind(&self, id: NodeId) -> Result<NodeKind, TreeError> {
         Ok(self.entries[self.index(id)? as usize].kind.unwrap())
     }
+    #[inline(always)]
     pub fn parent(&self, id: NodeId) -> Result<Option<NodeId>, TreeError> {
         Ok(self.id_opt(self.parents[self.index(id)? as usize]))
     }
