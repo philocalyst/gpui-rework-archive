@@ -329,7 +329,6 @@ pub(super) fn exact_eq(a: &Style, b: &Style) -> bool {
         && f32::same(&a.gap, &b.gap)
         && f32::same(&a.padding, &b.padding)
         && f32::same(&a.font_size, &b.font_size)
-        && Option::<f32>::same(&a.line_height, &b.line_height)
         && crate::Flow::same(&a.flow, &b.flow)
         && crate::Align::same(&a.align, &b.align)
         && crate::Justify::same(&a.justify, &b.justify)
