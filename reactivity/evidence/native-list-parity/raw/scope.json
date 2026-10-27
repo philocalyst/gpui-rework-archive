@@ -1,0 +1,8 @@
+{
+  "base": "93f63b4a03f7d428911330a3b71c04b0f4396dfa",
+  "source": "ce00e554f23c542f74b34ff1c2574223690cb217",
+  "changed_crate_files": [
+    "reactivity/crates/gpui/examples/zgx_native_lab.rs"
+  ],
+  "shipping_code_delta": 0
+}

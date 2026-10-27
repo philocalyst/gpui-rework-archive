@@ -1,0 +1,80 @@
+[
+  {
+    "mode": "stream",
+    "ingress": "exact",
+    "exit": 0,
+    "ticks": 35,
+    "total_ticks": 225,
+    "acknowledgements": 36,
+    "distinct_presentation_epochs": 36,
+    "final_ack_source_epoch": 35,
+    "final_workload_offset": 2660.0,
+    "wheel": false,
+    "screenshot": "stream-exact.png"
+  },
+  {
+    "mode": "stream",
+    "ingress": "owner",
+    "exit": 0,
+    "ticks": 40,
+    "total_ticks": 230,
+    "acknowledgements": 41,
+    "distinct_presentation_epochs": 41,
+    "final_ack_source_epoch": 40,
+    "final_workload_offset": 2660.0,
+    "wheel": false,
+    "screenshot": "stream-owner.png"
+  },
+  {
+    "mode": "scroll",
+    "ingress": "owner",
+    "exit": 0,
+    "ticks": 29,
+    "total_ticks": 219,
+    "acknowledgements": 30,
+    "distinct_presentation_epochs": 30,
+    "final_ack_source_epoch": 30,
+    "final_workload_offset": 3066.0,
+    "wheel": false,
+    "screenshot": "scroll-owner.png"
+  },
+  {
+    "mode": "both",
+    "ingress": "owner",
+    "exit": 0,
+    "ticks": 22,
+    "total_ticks": 212,
+    "acknowledgements": 23,
+    "distinct_presentation_epochs": 23,
+    "final_ack_source_epoch": 23,
+    "final_workload_offset": 2968.0,
+    "wheel": false,
+    "screenshot": "both-owner.png"
+  },
+  {
+    "mode": "idle",
+    "ingress": "owner",
+    "exit": 0,
+    "ticks": 0,
+    "total_ticks": 190,
+    "acknowledgements": 1,
+    "distinct_presentation_epochs": 1,
+    "final_ack_source_epoch": 0,
+    "final_workload_offset": 2660.0,
+    "wheel": false,
+    "screenshot": "idle-owner.png"
+  },
+  {
+    "mode": "both",
+    "ingress": "owner",
+    "exit": 0,
+    "ticks": 18,
+    "total_ticks": 208,
+    "acknowledgements": 19,
+    "distinct_presentation_epochs": 19,
+    "final_ack_source_epoch": 19,
+    "final_workload_offset": 2944.0,
+    "wheel": true,
+    "screenshot": "both-owner-wheel.png"
+  }
+]
