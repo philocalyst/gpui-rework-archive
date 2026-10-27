@@ -42,13 +42,37 @@ show seven lines at20px pitch; text edges differ, so no exact cross-framework
 quality equivalence. Optional keyed list overscan is now qualified in the follow-up below.
 
 Completed local/list-overscan at /home/user/gpui-list-overscan-lab: optional
-bounded keyed buffer; default0 preserves prior policy. Dossier commit is recorded
-in the local branch tip. 974 default/1048 X11 tests, strict Clippy and10 actual
+bounded keyed buffer; default0 preserves prior policy. Dossier41acc60740f4. 974 default/1048 X11 tests, strict Clippy and10 actual
 native scripts pass. Fresh wrong-key mutant preserves images but fails public
 authority and keyed bounds; both outcomes retained. Shipping+42 lines, cold
 ElementExtra56→64B; hot node/row/runtime headers unchanged. This is prerequisite
-behavior, not a speed result. Native lab integration still needs controlled
-source offset/wheel writeback, deferred controls and equal profiles.
+behavior, not a speed result. Controlled source offset and native integration are now qualified below; deferred
+controls and equal profiles remain.
+
+Completed local/list-source at /home/user/gpui-list-source-lab: additive
+registered offset operand, gathered/validated ordered wheel writeback and Owner
+fanout invalidation. Production93f63b4a03; dossier954ccd59a44d.989 default/1063
+X11 GPUI+Canvas tests, strict Clippy and11 actual native scripts. Fresh missing-owner
+mutant and epoch-overflow regression fail as expected before correction. Native
+test cursor placement failure is preserved and fixed without changing production.
+Shipping+263 lines; common ElementExtra restored64->56B, ListState112->120B;
+complete allocation and ELF/stack costs recorded. No speed verdict.
+
+Completed local/native-list-parity dossier19e47ef37f at
+/home/user/gpui-native-list-parity-lab: public keyed100K list/overscan2/controlled
+offset with readback before UI timer work.10 tests, strict Clippy, frozen positional
+pixel oracle, reference ranges, exact stream path and6 actual native runs pass.
+Those native runs overlap compilation and are correctness only. Shipping delta0;
+example ELF+1032B. Misleading nominal mounted-row log removed; native retained-count
+observability remains open.
+
+Input correction: earlier wheel28 notes confused row height with native wheel
+conversion. Pinned ZGX Linux defaults to40px, can read desktop settings and enables
+resampling by default; GPUI remains32px with direct events. Fixed14px timer traces
+match. Default interactive trajectories, deferred controls, native retained counts,
+matched profiles, text quality and physical hardware remain separate gates. Next
+architecture trial: prove integer viewport scroll-copy eligibility, retain the full
+compositor oracle, and charge proof/copy/repair plus complete GPU completion costs.
 
 [BBTree transfer research](../bbtree-transfer/README.md) records the pinned
 implementation, failed historical trials, applicability and next hypotheses.
@@ -63,7 +87,7 @@ in `/home/user/zgx-reference-local`. Its unchanged `RENDER=0` microbenchmark
 performs layout/damage while GPUI's recorder additionally materializes canonical
 glyph commands. Those endpoints and initial profiles differ: no speed ranking
 may be derived from their numbers. Native equivalents must match typography,
-content, overscan, keyed row retention, controls, timing and acknowledged output before measurement. The reference plus/equals controls explicitly yield before their batched update; the current port still performs them synchronously. Wheel routing remains incomplete; explicit line pitch is now qualified locally.
+content, overscan, keyed row retention, controls, timing and acknowledged output before measurement. The reference plus/equals controls explicitly yield before their batched update; the current port still performs them synchronously. Controlled wheel writeback and keyed lists are qualified; native input policy and deferred controls remain unmatched. Explicit line pitch is qualified locally.
 
 This VM has no `/dev/dri`. Software Vulkan is llvmpipe, not a hardware GPU.
 The documented `ssh mothership` does not resolve and no SSH keys are installed.
