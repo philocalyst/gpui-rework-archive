@@ -142,6 +142,16 @@ impl FontFace {
         TextShaper {
             font: self,
             planner: None,
+            cache: None,
+        }
+    }
+    /// Borrow a reusable exclusively owned planning cache. Immutable cmap views
+    /// still borrow this face only for the session, never the retained cache.
+    pub fn shaper_reusing<'a>(&'a self, cache: &'a mut TextCache) -> TextShaper<'a> {
+        TextShaper {
+            font: self,
+            planner: None,
+            cache: Some(cache),
         }
     }
     /// Process-local identity, not byte equality or a persistent font ID.
@@ -341,17 +351,25 @@ pub(crate) struct Raster {
     pub pixels: Vec<u8>,
 }
 
-/// A scoped parser over immutable font bytes, reusable across measurement and
-/// painting. It owns parsed shaping tables and reusable paragraph scratch,
-/// borrows the backing, and releases both on drop. Returned layouts do not
-/// borrow this parser.
-///
-/// This separates read-only shaping from a service's mutable glyph cache without
-/// a self reference, permanent table cache or shared mutable lock. Each returned
-/// layout owns one immutable FontSet lease shared by layouts from this pass.
+/// Owned font registration and paragraph scratch; contains no borrowed views.
+/// A different immutable font identity replaces the cache on first use.
+#[derive(Default)]
+pub struct TextCache {
+    state: Option<Box<planner::PlannerState>>,
+}
+impl TextCache {
+    pub fn clear(&mut self) {
+        self.state = None;
+    }
+}
+
+/// Scoped immutable cmap parsing and mutable paragraph planning. Outputs own
+/// their font and geometry leases. `shaper()` releases planning state on drop;
+/// `shaper_reusing()` returns only owned state to its exclusively borrowed cache.
 pub struct TextShaper<'font> {
     font: &'font FontFace,
     planner: Option<Box<planner::Planner<'font>>>,
+    cache: Option<&'font mut TextCache>,
 }
 impl<'font> TextShaper<'font> {
     /// Measure wrapping without freezing an owned layout. Paragraph scratch is
@@ -409,9 +427,29 @@ impl<'font> TextShaper<'font> {
             return Err(Error::ResourceLimit);
         }
         if self.planner.is_none() {
-            self.planner = Some(Box::new(planner::Planner::new(self.font)?));
+            let cached = self
+                .cache
+                .as_deref_mut()
+                .and_then(|cache| cache.state.take());
+            self.planner = Some(Box::new(if self.cache.is_some() {
+                planner::Planner::reusing(self.font, cached)?
+            } else {
+                planner::Planner::new(self.font)?
+            }));
         }
         Ok(self.planner.as_mut().unwrap())
+    }
+}
+
+impl Drop for TextShaper<'_> {
+    fn drop(&mut self) {
+        if let Some(cache) = self.cache.as_deref_mut() {
+            if std::thread::panicking() {
+                cache.clear();
+            } else if let Some(planner) = self.planner.take() {
+                cache.state = Some(planner.state);
+            }
+        }
     }
 }
 

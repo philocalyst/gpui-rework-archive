@@ -33,10 +33,12 @@ fn indexed_affinity_pairs_preserve_every_direct_geometry_bit() {
             for height in [0., 22.] {
                 for spacing in [-20., -0., 1.25] {
                     for styled in [false, true] {
-                        let mut builder =
-                            planner
-                                .context
-                                .ranged_builder(&mut planner.fonts, source, 1., false);
+                        let mut builder = planner.state.context.ranged_builder(
+                            &mut planner.state.fonts,
+                            source,
+                            1.,
+                            false,
+                        );
                         builder.push_default(&families[..]);
                         builder.push_default(StyleProperty::FontSize(16.));
                         builder.push_default(StyleProperty::LineHeight(
@@ -48,28 +50,31 @@ fn indexed_affinity_pairs_preserve_every_direct_geometry_bit() {
                             let split = source.char_indices().nth(3).map_or(source.len(), |x| x.0);
                             builder.push(StyleProperty::FontSize(23.), split..source.len());
                         }
-                        builder.build_into(&mut planner.layout, source);
-                        planner.layout.break_all_lines(wrap);
+                        builder.build_into(&mut planner.state.layout, source);
+                        planner.state.layout.break_all_lines(wrap);
                         for alignment in [
                             Alignment::Start,
                             Alignment::Center,
                             Alignment::End,
                             Alignment::Justify,
                         ] {
-                            planner.layout.align(alignment, AlignmentOptions::default());
-                            let geometry = CursorGeometry::new(&planner.layout).unwrap();
-                            assert_lowered_stops(&planner.layout, source);
+                            planner
+                                .state
+                                .layout
+                                .align(alignment, AlignmentOptions::default());
+                            let geometry = CursorGeometry::new(&planner.state.layout).unwrap();
+                            assert_lowered_stops(&planner.state.layout, source);
                             for byte in (0..=source.len()).chain([usize::MAX]) {
                                 for width in [-0., 1., -1., 1e20] {
                                     let direct = [Affinity::Upstream, Affinity::Downstream].map(
                                         |affinity| {
                                             let cursor = Cursor::from_byte_index(
-                                                &planner.layout,
+                                                &planner.state.layout,
                                                 byte,
                                                 affinity,
                                             );
                                             (cursor.index() == byte).then(|| {
-                                                bits(cursor.geometry(&planner.layout, width))
+                                                bits(cursor.geometry(&planner.state.layout, width))
                                             })
                                         },
                                     );

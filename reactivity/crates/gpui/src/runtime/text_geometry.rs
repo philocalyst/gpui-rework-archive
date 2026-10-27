@@ -11,6 +11,7 @@ pub(super) struct Entry {
 #[derive(Default)]
 pub(super) struct TextResources {
     pub system: Option<TextSystem>,
+    pub shaping: gpui_canvas::TextCache,
     pub font: Option<gpui_canvas::FontFace>,
     pub presented: Vec<Entry>,
     pub candidate: Option<Vec<Entry>>,

@@ -3111,7 +3111,14 @@ impl<M: View + 'static> Runtime<M> {
             .and_then(|text| text.system.as_ref())
             .map(|text| text.font_face().clone());
         let mut text_geometry = Vec::new();
-        let mut shaper = font.as_ref().map(|font| font.shaper());
+        let mut shaping = self
+            .text
+            .as_mut()
+            .map(|text| std::mem::take(&mut text.shaping));
+        let mut shaper = font
+            .as_ref()
+            .zip(shaping.as_mut())
+            .map(|(font, cache)| font.shaper_reusing(cache));
         let active_selection = self.active_selection();
         let selection_snapshot = self.selection_snapshot();
         let composition_snapshot = self.composition_snapshot();
@@ -3236,12 +3243,16 @@ impl<M: View + 'static> Runtime<M> {
         if let Some(error) = failure {
             return Err(error);
         }
-        if !self.rebuild_layout
+        let sparse = !self.rebuild_layout
             && !self.topology_changed
             && before.changed_layout_writes == after.changed_layout_writes
-            && let Some(shaper) = &mut shaper
-            && self.try_sparse_text(shaper)?
-        {
+            && match &mut shaper {
+                Some(shaper) => self.try_sparse_text(shaper)?,
+                None => false,
+            };
+        if sparse {
+            drop(shaper);
+            self.text.as_mut().unwrap().shaping = shaping.unwrap();
             return Ok(());
         }
         self.refresh_inspector(true)?;
@@ -3842,10 +3853,13 @@ impl<M: View + 'static> Runtime<M> {
         self.latest_token = Some(token);
         self.complete_epoch = self.source_epoch;
         self.next_presentation = next_sequence;
-        if self.texts.is_empty()
-            && let Some(text) = &mut self.text
-        {
-            text.system = None;
+        drop(shaper);
+        if let Some(text) = &mut self.text {
+            if self.texts.is_empty() {
+                text.system = None;
+            } else if let Some(cache) = shaping {
+                text.shaping = cache;
+            }
         }
         self.dirty = false;
         self.rebuild_layout = false;

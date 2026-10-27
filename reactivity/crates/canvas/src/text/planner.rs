@@ -41,6 +41,10 @@ impl<'font> Cmap<'font> {
 }
 
 pub(super) struct Planner<'font> {
+    pub(super) state: Box<PlannerState>,
+    primary_cmap: Cmap<'font>,
+}
+pub(super) struct PlannerState {
     fonts: FontContext,
     context: LayoutContext<()>,
     // Reuse the one paragraph being lowered, including Parley Engine's shaped
@@ -49,7 +53,6 @@ pub(super) struct Planner<'font> {
     faces: FontSet,
     blob_ids: [Option<u64>; 3],
     sets: [Option<Arc<FontSet>>; 4],
-    primary_cmap: Cmap<'font>,
 }
 struct Planned {
     metrics: TextMetrics,
@@ -59,37 +62,52 @@ struct Planned {
 }
 impl<'font> Planner<'font> {
     pub fn new(primary: &'font FontFace) -> Result<Self, Error> {
+        Self::reusing(primary, None)
+    }
+    pub(super) fn reusing(
+        primary: &'font FontFace,
+        state: Option<Box<PlannerState>>,
+    ) -> Result<Self, Error> {
+        let primary_cmap = if primary.0.bundled {
+            Cmap(None)
+        } else {
+            Cmap::parse(&primary.0.bytes)?
+        };
+        if let Some(state) = state.filter(|state| state.faces.primary.same_face(primary)) {
+            return Ok(Self {
+                state,
+                primary_cmap,
+            });
+        }
         let faces = FontSet {
             primary: primary.clone(),
             fallbacks: [None, None],
         };
         let base = Arc::new(faces.clone());
         let mut result = Self {
-            fonts: FontContext {
-                collection: Collection::new(CollectionOptions {
-                    shared: false,
-                    system_fonts: false,
-                }),
-                source_cache: SourceCache::default(),
-            },
-            context: LayoutContext::new(),
-            layout: parley::Layout::default(),
-            faces,
-            blob_ids: [None; 3],
-            sets: [Some(base), None, None, None],
-            primary_cmap: if primary.0.bundled {
-                Cmap(None)
-            } else {
-                Cmap::parse(&primary.0.bytes)?
-            },
+            state: Box::new(PlannerState {
+                fonts: FontContext {
+                    collection: Collection::new(CollectionOptions {
+                        shared: false,
+                        system_fonts: false,
+                    }),
+                    source_cache: SourceCache::default(),
+                },
+                context: LayoutContext::new(),
+                layout: parley::Layout::default(),
+                faces,
+                blob_ids: [None; 3],
+                sets: [Some(base), None, None, None],
+            }),
+            primary_cmap,
         };
         result.register(0)?;
         Ok(result)
     }
     fn register(&mut self, slot: usize) -> Result<(), Error> {
-        self.blob_ids[slot] = Some(register_font(
-            &mut self.fonts,
-            self.faces.face(slot)?,
+        self.state.blob_ids[slot] = Some(register_font(
+            &mut self.state.fonts,
+            self.state.faces.face(slot)?,
             FAMILIES[slot],
         )?);
         Ok(())
@@ -97,7 +115,7 @@ impl<'font> Planner<'font> {
     fn coverage(&mut self, text: &str) -> Result<u8, Error> {
         let ignorable = CodePointSetData::new::<DefaultIgnorableCodePoint>();
         let mut needed = 0_u8;
-        for c in coverage::characters(text, self.faces.primary.0.bundled) {
+        for c in coverage::characters(text, self.state.faces.primary.0.bundled) {
             if matches!(c, '\r' | '\n' | '\u{85}' | '\u{2028}' | '\u{2029}')
                 || ignorable.contains(c)
             {
@@ -106,7 +124,7 @@ impl<'font> Planner<'font> {
             if c.is_control() {
                 return Err(Error::UnsupportedControl(c));
             }
-            let covered = if self.faces.primary.0.bundled {
+            let covered = if self.state.faces.primary.0.bundled {
                 let mask = bundled_coverage::mask(c);
                 if mask & 1 != 0 {
                     continue;
@@ -124,20 +142,20 @@ impl<'font> Planner<'font> {
             needed |= covered;
         }
         for slot in 1..=2 {
-            if needed & (1 << (slot - 1)) != 0 && self.faces.fallbacks[slot - 1].is_none() {
-                self.faces.fallbacks[slot - 1] = Some(FontFace::fallback(slot)?);
+            if needed & (1 << (slot - 1)) != 0 && self.state.faces.fallbacks[slot - 1].is_none() {
+                self.state.faces.fallbacks[slot - 1] = Some(FontFace::fallback(slot)?);
                 self.register(slot)?;
             }
         }
         Ok(needed)
     }
     fn font_set(&mut self, mask: usize) -> Arc<FontSet> {
-        Arc::clone(self.sets[mask].get_or_insert_with(|| {
+        Arc::clone(self.state.sets[mask].get_or_insert_with(|| {
             Arc::new(FontSet {
-                primary: self.faces.primary.clone(),
+                primary: self.state.faces.primary.clone(),
                 fallbacks: std::array::from_fn(|i| {
                     if mask & (1 << i) != 0 {
-                        self.faces.fallbacks[i].clone()
+                        self.state.faces.fallbacks[i].clone()
                     } else {
                         None
                     }
@@ -183,7 +201,7 @@ impl<'font> Planner<'font> {
         if result.is_err() {
             // An invalid or expanding font can create a rejected large layout.
             // Do not keep its buffers for later calls in this planning pass.
-            self.layout = parley::Layout::default();
+            self.state.layout = parley::Layout::default();
         }
         result
     }
@@ -213,23 +231,23 @@ impl<'font> Planner<'font> {
         let mut mask = 0;
         for paragraph in paragraph::ranges(text) {
             let content = &text[paragraph.content.clone()];
-            let mut builder = self
-                .context
-                .ranged_builder(&mut self.fonts, content, 1., false);
+            let mut builder =
+                self.state
+                    .context
+                    .ranged_builder(&mut self.state.fonts, content, 1., false);
             builder.push_default(&names[..family_count]);
             builder.push_default(StyleProperty::FontSize(size));
             builder.push_default(StyleProperty::OverflowWrap(OverflowWrap::Anywhere));
-            builder.build_into(&mut self.layout, content);
-            self.layout.break_all_lines(max_width);
-            let planned = &self.layout;
+            builder.build_into(&mut self.state.layout, content);
+            self.state.layout.break_all_lines(max_width);
+            let planned = &self.state.layout;
             let simple = !interactive
                 && paragraph.content.end == text.len()
                 && paragraph.content.start == 0
                 && planned.len() == 1
-                && planned
-                    .lines()
-                    .flat_map(|line| line.runs())
-                    .all(|run| !run.is_rtl() && Some(run.font().data.id()) == self.blob_ids[0])
+                && planned.lines().flat_map(|line| line.runs()).all(|run| {
+                    !run.is_rtl() && Some(run.font().data.id()) == self.state.blob_ids[0]
+                })
                 && planned.lines().flat_map(|line| line.runs()).count() <= 1;
             if !simple && !detailed {
                 detailed = true;
@@ -291,6 +309,7 @@ impl<'font> Planner<'font> {
                         return Err(Error::UnsupportedFontFormat);
                     }
                     let slot = self
+                        .state
                         .blob_ids
                         .iter()
                         .position(|&id| id == Some(run.run().font().data.id()))
@@ -560,7 +579,7 @@ mod tests {
         ] {
             for width in [None, Some(0.), Some(17.), Some(80.)] {
                 planner.shape(source, 18., width, true).unwrap();
-                for line in planner.layout.lines() {
+                for line in planner.state.layout.lines() {
                     let raw = line.runs().map(|run| run.glyph_count()).sum::<usize>();
                     let positioned = line
                         .items()

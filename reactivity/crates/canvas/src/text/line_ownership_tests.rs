@@ -28,18 +28,20 @@ fn lower(source: &str, line_height: f32) -> Fixture {
     let mut height = 0.;
     for paragraph in paragraph::ranges(source) {
         let content = &source[paragraph.content.clone()];
-        let mut builder = planner
-            .context
-            .ranged_builder(&mut planner.fonts, content, 1., false);
+        let mut builder =
+            planner
+                .state
+                .context
+                .ranged_builder(&mut planner.state.fonts, content, 1., false);
         builder.push_default(&families[..]);
         builder.push_default(StyleProperty::FontSize(16.));
         builder.push_default(StyleProperty::LineHeight(parley::LineHeight::Absolute(
             line_height,
         )));
         builder.push_default(StyleProperty::OverflowWrap(OverflowWrap::Anywhere));
-        builder.build_into(&mut planner.layout, content);
-        planner.layout.break_all_lines(Some(30.));
-        let planned = &planner.layout;
+        builder.build_into(&mut planner.state.layout, content);
+        planner.state.layout.break_all_lines(Some(30.));
+        let planned = &planner.state.layout;
         let base = fixture.map.lines.len();
         for (line_index, line) in planned.lines().enumerate() {
             fixture
