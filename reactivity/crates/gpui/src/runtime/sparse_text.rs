@@ -2,6 +2,40 @@
 use super::*;
 
 impl<M: View + 'static> Runtime<M> {
+    // Owner callbacks still run and reconcile normally. This only starts a
+    // transient witness; every non-text description change must revoke it.
+    #[inline(never)]
+    pub(super) fn can_record_text_change(&self) -> bool {
+        if self.text.is_none()
+            || self.dirty
+            || !self.logical_valid
+            || !self.presentation_valid
+            || self.prepared.is_some()
+            || self.complete_epoch.checked_add(1) != Some(self.source_epoch)
+            || self.inspector_enabled()
+            || self.metadata.as_ref().is_some_and(|m| m.editing.is_some())
+        {
+            return false;
+        }
+        // A wheel cohort can change logical offsets before describing. Check
+        // P itself; an already-mutated logical predecessor is not a witness.
+        self.viewports.iter().all(|(&key, state)| {
+            let offset = match state {
+                ViewportState::List(list) => crate::ScrollOffset {
+                    x: 0.,
+                    y: list.viewport.offset,
+                },
+                ViewportState::Scroll(scroll) => scroll.offset,
+            };
+            self.metadata
+                .as_ref()
+                .and_then(|m| m.presented.viewports.offset(state.identity(key)))
+                .is_some_and(|old| {
+                    old.x.to_bits() == offset.x.to_bits() && old.y.to_bits() == offset.y.to_bits()
+                })
+        })
+    }
+
     pub(super) fn try_sparse_text(
         &mut self,
         shaper: &mut gpui_canvas::TextShaper<'_>,
@@ -197,6 +231,9 @@ mod tests {
             println!(
                 "LOCAL_PUBLICATION,{case},updates=80,patches={patches},full={full},unchanged_layout={unchanged_layout}"
             );
+            if matches!(case, "stream" | "stream-owner") {
+                assert!(patches > 0, "representative {case} never admitted");
+            }
         }
     }
     struct Page {

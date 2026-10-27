@@ -2073,6 +2073,8 @@ impl<M: View + 'static> Runtime<M> {
         readers: &dyn crate::reader::ReaderValues,
         mut property_changed: Option<NonZeroU64>,
     ) -> Result<(), Error> {
+        let mut text_only = !mount && property_changed.is_none() && self.can_record_text_change();
+        let mut changed_text = None;
         let reuse_identities = self.logical_valid;
         self.counters.descriptions += 1;
         if !mount {
@@ -2294,7 +2296,9 @@ impl<M: View + 'static> Runtime<M> {
         }
         for (&field, ports) in &mut fanout {
             // Equal outputs do not identify recipes or preserve old Canvas slots.
-            self.dirty |= ports.finish_description(field, &drafts, &mut color_discovery);
+            let rebound = ports.finish_description(field, &drafts, &mut color_discovery);
+            self.dirty |= rebound;
+            text_only &= !rebound;
         }
         // Promotion is lazy and shared by all changed ports of a registered
         // field in this description. Unchanged retained operands keep their Arc.
@@ -2436,6 +2440,7 @@ impl<M: View + 'static> Runtime<M> {
                 // Equal current colors do not make two source relationships
                 // interchangeable. Rebind the complete scene before slot edits.
                 self.dirty = true;
+                text_only = false;
             }
             let mut node_changed = previous.is_none();
             let next_background = if background_cursor
@@ -2500,6 +2505,7 @@ impl<M: View + 'static> Runtime<M> {
                 self.dirty = true;
                 node_changed = true;
             }
+            text_only &= !node_changed;
             let text = draft.text.as_ref().map(|text| text.borrowed_value());
             #[cfg(feature = "accessibility")]
             if node.kind() == NodeKind::Input
@@ -2516,6 +2522,11 @@ impl<M: View + 'static> Runtime<M> {
             }
             self.counters.destination_compares += 1;
             if site.as_ref().map(|site| site.value.as_ref()) != text.as_deref() {
+                text_only &= node.kind() == NodeKind::Text
+                    && site.is_some()
+                    && text.is_some()
+                    && changed_text.is_none();
+                changed_text = Some(index);
                 self.rebuild_layout |= site.is_some() != text.is_some();
                 site = text.as_deref().map(|text| {
                     let value = if let Some(value) =
@@ -2543,6 +2554,7 @@ impl<M: View + 'static> Runtime<M> {
             }
             let style = self.overrides.resolve(node.identity(), draft.style);
             if !styles::exact_eq(&previous_style, &style) {
+                text_only = false;
                 self.dirty = true;
                 node_changed = true;
             }
@@ -2556,6 +2568,7 @@ impl<M: View + 'static> Runtime<M> {
                 site.shaped = None;
             }
             if node.has_handler() != draft.on_click.is_some() {
+                text_only = false;
                 // Eligibility is part of the published hit sheet even when
                 // this transparent site's pixels and layout remain equal.
                 self.dirty = true;
@@ -2613,6 +2626,7 @@ impl<M: View + 'static> Runtime<M> {
                 .iter()
                 .zip(&nodes)
                 .any(|(old, new)| *old != new.identity());
+        text_only &= !topology;
         self.topology_changed |= topology;
         self.dirty |= topology;
         let mut viewports = BTreeMap::new();
@@ -2625,6 +2639,7 @@ impl<M: View + 'static> Runtime<M> {
                 .and_then(ViewportState::list)
                 .is_none_or(|old| old.viewport != draft.plan.viewport);
             self.dirty |= changed;
+            text_only &= !changed;
             for row in draft.rows {
                 let identity = nodes[row.index].identity();
                 if self
@@ -2635,6 +2650,22 @@ impl<M: View + 'static> Runtime<M> {
                     self.layout_dirty.insert(identity);
                     self.dirty = true;
                 }
+                text_only = text_only
+                    && self.list_rows.get(&identity).is_some_and(|old| {
+                        old.list == draft.id
+                            && old.key == row.key
+                            && old.index == row.item_index
+                            && old.y.to_bits() == row.y.to_bits()
+                            && old.height.to_bits() == row.height.to_bits()
+                            && old.visible
+                            && old.retain_offscreen == draft.plan.retain_offscreen
+                            && old.buffered
+                                == !draft
+                                    .plan
+                                    .viewport
+                                    .visible_range
+                                    .contains(&(row.item_index as usize))
+                    });
                 list_rows.insert(
                     identity,
                     ListRow {
@@ -2682,6 +2713,7 @@ impl<M: View + 'static> Runtime<M> {
                 .and_then(ViewportState::scroll)
                 .is_none_or(|state| state.axes != draft.axes)
             {
+                text_only = false;
                 self.dirty = true;
             }
             viewports.insert(
@@ -2692,6 +2724,8 @@ impl<M: View + 'static> Runtime<M> {
                 }),
             );
         }
+        text_only &=
+            self.viewports.len() == viewports.len() && self.list_rows.len() == list_rows.len();
         if !annotation_drafts.is_empty() || !viewports.is_empty() || self.metadata.is_some() {
             let metadata = self
                 .metadata
@@ -2752,6 +2786,13 @@ impl<M: View + 'static> Runtime<M> {
                 }
             }
             base.sort_unstable_by_key(|entry| entry.identity);
+            text_only = text_only
+                && metadata.base.len() == base.len()
+                && metadata.base.iter().zip(&base).all(|(old, new)| {
+                    old.identity == new.identity
+                        && old.name == new.name
+                        && old.description == new.description
+                });
             metadata.base = base;
         }
         let by_identity = IdentityIndex::from_ids(nodes.iter().map(Node::identity));
@@ -2763,10 +2804,12 @@ impl<M: View + 'static> Runtime<M> {
                 .as_ref()
                 .is_some_and(|resources| resources.backgrounds.is_some())
         {
-            self.dirty |=
+            let changed =
                 background::reconcile(&mut self.images, &nodes, &by_identity, background_drafts)?;
+            self.dirty |= changed;
+            text_only &= !changed;
         }
-        self.reconcile_geometry(&nodes, geometry_drafts);
+        text_only &= !self.reconcile_geometry(&nodes, geometry_drafts);
         self.viewports = viewports;
         self.list_rows = list_rows;
         self.nodes = nodes;
@@ -2776,7 +2819,9 @@ impl<M: View + 'static> Runtime<M> {
         // A replacement source bank has no authority over the preceding
         // Canvas slots, even if every effective value and binding is equal.
         // Rebuild the complete commands before admitting another slot patch.
-        self.dirty |= matches!(self.styles, styles::Styles::Colors(_));
+        let replaces_bank = matches!(self.styles, styles::Styles::Colors(_));
+        self.dirty |= replaces_bank;
+        text_only &= !replaces_bank;
         self.texts = texts;
         self.fanout = fanout;
         self.by_identity = by_identity;
@@ -2796,6 +2841,13 @@ impl<M: View + 'static> Runtime<M> {
         self.logical_valid = true;
         self.prune_focus();
         self.changed_nodes = changed;
+        if let Some(text) = &mut self.text {
+            text.dirty_text = if text_only && changed == 1 {
+                changed_text.map(|index| (self.source_epoch, index))
+            } else {
+                None
+            };
+        }
         Ok(())
     }
     fn patch(&mut self, field: FieldId) -> Result<PatchOutcome, Error> {

@@ -236,29 +236,6 @@ fn image_clip_and_scroller_preserve_older_candidate_after_newer_failure() {
         for scrolled in [false, true] {
             let mut win = decorated("Count: 10", rounded, scrolled);
             ack(&mut win);
-            eprintln!(
-                "DECORATED rounded={rounded} scrolled={scrolled} images={}",
-                win.with_scene(|s, _| s.images().count()).unwrap()
-            );
-            win.visit(|p| {
-                if p.role() == Role::Image {
-                    eprintln!("IMAGE {:?}", p.bounds());
-                }
-            })
-            .unwrap();
-            if rounded {
-                win.with_scene(|s, _| {
-                    for c in s.clip_nodes() {
-                        eprintln!("CLIP {c:?}");
-                    }
-                    eprintln!("GROUPS {}", s.groups().len());
-                })
-                .unwrap();
-                win.with_pixels(|p, w, _| {
-                    eprintln!("IMAGE_PIXEL {:?}", &p[(55 * w as usize + 8) * 4..][..4])
-                })
-                .unwrap();
-            }
             let before = text_state(&win);
             win.set(Decorated::LABEL, "Count: 11".into()).unwrap();
             let eligible = win.with_scene(|_, token| token).unwrap();
@@ -403,5 +380,163 @@ fn nested_sample_clips_and_unsupported_shapes_preserve_exact_publication() {
                 }
             }
         }
+    }
+}
+
+#[test]
+fn owner_text_with_unchanged_or_changed_list_keeps_complete_publication() {
+    for after in [false, true] {
+        for clipped in [false, true] {
+            let mut win = window("Count: 10", after, clipped);
+            ack(&mut win);
+            for (value, offset) in [
+                ("Count: 11", 48.),
+                ("Count: 12", 4800.),
+                ("Count: 10", 4800.),
+            ] {
+                let before = text_state(&win);
+                win.update(|m| {
+                    *m.label = value.into();
+                    *m.offset = offset;
+                })
+                .unwrap();
+                assert_eq!(text_state(&win), before);
+                let mut full = window(value, after, clipped);
+                full.set(Page::OFFSET, offset).unwrap();
+                assert_eq!(pixels(&mut win), pixels(&mut full));
+                ack(&mut win);
+                ack(&mut full);
+                assert_eq!(text_state(&win), text_state(&full));
+            }
+        }
+    }
+}
+
+struct OwnerMixed {
+    label: String,
+    variant: u8,
+    cover: Image,
+}
+impl OwnerMixed {
+    fn cover(variant: u8) -> Image {
+        let color = if variant == 6 {
+            [20, 220, 30, 127]
+        } else {
+            [220, 20, 30, 127]
+        };
+        Image::rgba8(
+            1,
+            1,
+            ImageProfile::Srgb,
+            AlphaMode::Straight,
+            color.to_vec().into_boxed_slice(),
+        )
+        .unwrap()
+    }
+    fn set(&mut self, value: &str, variant: u8) {
+        self.label = value.into();
+        self.variant = variant;
+        if variant == 6 {
+            self.cover = Self::cover(variant);
+        }
+    }
+}
+impl View for OwnerMixed {
+    fn view(&self) -> El<'_> {
+        let button = button("").w(40).h(12).bg(rgb(0x556677));
+        let button = if self.variant == 4 {
+            button
+        } else {
+            button.on_click(|_: &mut Self| {})
+        };
+        let body = column((
+            text(self.label.as_str()).w(140).h(24).name("changing"),
+            text("Count: 0123456789").w(140).h(24),
+            image(&self.cover).size(12),
+            button,
+        ));
+        let body = if self.variant == 7 {
+            body.child(div().size(3).bg(rgb(0x123456)))
+        } else {
+            body
+        };
+        body.w(150)
+            .h(90)
+            .name(if self.variant == 1 {
+                "new caption"
+            } else {
+                "old caption"
+            })
+            .bg(if self.variant == 2 {
+                rgb(0xaaccdd)
+            } else {
+                rgb(0xddeeff)
+            })
+            .rounded(if self.variant == 8 {
+                f32::NAN
+            } else if self.variant == 3 {
+                9.
+            } else {
+                0.
+            })
+            .clipped(true)
+            .transform(Affine::translation(
+                if self.variant == 5 { 7.125 } else { 3.125 },
+                2.375,
+            ))
+    }
+}
+fn mixed(value: &str, variant: u8) -> Win<OwnerMixed> {
+    Win::recording(
+        OwnerMixed {
+            label: value.into(),
+            variant,
+            cover: OwnerMixed::cover(variant),
+        },
+        WindowOptions {
+            size: [170, 110],
+            ..Default::default()
+        },
+    )
+    .unwrap()
+}
+fn semantic_state<M: View + 'static>(win: &Win<M>) -> Vec<(Role, Option<String>, Actions, Rect)> {
+    let mut result = Vec::new();
+    win.visit(|part| {
+        result.push((
+            part.role(),
+            part.name().map(str::to_owned),
+            part.actions(),
+            part.bounds(),
+        ))
+    })
+    .unwrap();
+    result
+}
+#[test]
+fn owner_text_plus_other_changes_does_not_hide_non_text_publication() {
+    for variant in 0..8 {
+        let mut win = mixed("Count: 10", 0);
+        ack(&mut win);
+        let before = (text_state(&win), semantic_state(&win));
+        win.update(|m| m.set("Count: 11", variant)).unwrap();
+        assert_eq!((text_state(&win), semantic_state(&win)), before);
+        let candidate = win.with_scene(|_, token| token).unwrap();
+        let candidate_pixels = pixels(&mut win);
+        let mut full = mixed("Count: 11", variant);
+        assert_eq!(candidate_pixels, pixels(&mut full), "variant={variant}");
+        // A newer rejected owner description must preserve both the older C
+        // and the exact P that remains authoritative before its ACK.
+        assert!(win.update(|m| m.set("Count: 12", 8)).is_err());
+        assert_eq!((text_state(&win), semantic_state(&win)), before);
+        assert_eq!(pixels(&mut win), candidate_pixels);
+        win.presented(candidate).unwrap();
+        ack(&mut full);
+        assert_eq!(text_state(&win), text_state(&full));
+        assert_eq!(
+            semantic_state(&win),
+            semantic_state(&full),
+            "variant={variant}"
+        );
     }
 }

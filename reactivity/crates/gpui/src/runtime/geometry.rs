@@ -333,10 +333,11 @@ impl<M: View + 'static> Runtime<M> {
         &mut self,
         nodes: &[Node],
         drafts: Vec<(usize, GeometryStyle)>,
-    ) {
+    ) -> bool {
         if drafts.is_empty() && self.metadata.as_ref().is_none_or(|m| m.geometry.is_none()) {
-            return;
+            return false;
         }
+        let mut changed = false;
         let metadata = self.metadata.get_or_insert_with(Default::default);
         let mut geometry = metadata.geometry.take().unwrap_or_default();
         let mut next = Vec::with_capacity(drafts.len());
@@ -350,7 +351,7 @@ impl<M: View + 'static> Runtime<M> {
             let before = geometry.get(node.identity());
             let after = geometry.overrides.resolve(node.identity(), declared);
             if !before.same(after) {
-                self.dirty = true;
+                changed = true;
             }
             if after.corner_radius.to_bits() != 0 || after.clip_children {
                 next.push((node.identity(), after));
@@ -362,6 +363,8 @@ impl<M: View + 'static> Runtime<M> {
         if !geometry.unused() {
             metadata.geometry = Some(geometry);
         }
+        self.dirty |= changed;
+        changed
     }
 }
 impl<M: View + 'static, L: crate::remote::LaneSet<M>> Win<M, L> {
