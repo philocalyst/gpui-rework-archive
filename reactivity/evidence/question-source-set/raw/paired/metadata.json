@@ -1,0 +1,145 @@
+{
+  "binaries": {
+    "control": "/home/user/gpui-question-source-control-target/release/examples/question_source_cost",
+    "candidate": "/home/user/gpui-question-source-set-target/release/examples/question_source_cost"
+  },
+  "hashes": {
+    "control": "7ac4e547bfb37a25cb04cb7055dbb7d6057e6af13d0b70ce5505227de550b4c1",
+    "candidate": "2bfcb26f2d4046aa62aca57e9660b8bdde9e0e8795dbe06ec1edccb27ed90f38",
+    "font": "7da195a74c55bef988d0d48f9508bd5d849425c1770dba5d7bfc6ce9ed848954"
+  },
+  "font": "/home/user/zgx-reference-local/comparisons/fonts/DejaVuSans.ttf",
+  "sources": {
+    "control": "b0e8e37a2115adac044c618a5bb0b33e8e2fa833",
+    "candidate": "fd13116e55071733e397a9fcc9b7d8f6834a9cd5"
+  },
+  "cases": [
+    [
+      0,
+      1,
+      "unrelated"
+    ],
+    [
+      0,
+      2,
+      "unrelated"
+    ],
+    [
+      0,
+      4,
+      "unrelated"
+    ],
+    [
+      0,
+      1,
+      "dependent"
+    ],
+    [
+      0,
+      2,
+      "dependent"
+    ],
+    [
+      0,
+      4,
+      "dependent"
+    ],
+    [
+      1,
+      1,
+      "unrelated"
+    ],
+    [
+      1,
+      2,
+      "unrelated"
+    ],
+    [
+      1,
+      4,
+      "unrelated"
+    ],
+    [
+      1,
+      1,
+      "dependent"
+    ],
+    [
+      1,
+      2,
+      "dependent"
+    ],
+    [
+      1,
+      4,
+      "dependent"
+    ],
+    [
+      40,
+      1,
+      "unrelated"
+    ],
+    [
+      40,
+      2,
+      "unrelated"
+    ],
+    [
+      40,
+      4,
+      "unrelated"
+    ],
+    [
+      40,
+      1,
+      "dependent"
+    ],
+    [
+      40,
+      2,
+      "dependent"
+    ],
+    [
+      40,
+      4,
+      "dependent"
+    ],
+    [
+      0,
+      4,
+      "owner"
+    ],
+    [
+      0,
+      4,
+      "opaque"
+    ],
+    [
+      1,
+      4,
+      "owner"
+    ],
+    [
+      1,
+      4,
+      "opaque"
+    ],
+    [
+      40,
+      4,
+      "owner"
+    ],
+    [
+      40,
+      4,
+      "opaque"
+    ]
+  ],
+  "warmup": 200,
+  "batches": 40,
+  "ops": 100,
+  "cpu_affinity": 2,
+  "platform": "Linux-6.8.0-117-generic-x86_64-with-glibc2.39",
+  "compiler": "rustc 1.101.0-nightly (7189d39d9 2026-10-22)\nbinary: rustc\ncommit-hash: 7189d39d9ce936881b8132c6addeaf3e295cd455\ncommit-date: 2026-10-22\nhost: x86_64-unknown-linux-gnu\nrelease: 1.101.0-nightly\nLLVM version: 23.1.4\n",
+  "started": 1793083406.5443308
+}

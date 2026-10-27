@@ -1,0 +1,39 @@
+
+running 2 tests
+test crates/gpui/src/reader/question.rs - reader::question::Questions<M,L>::question_future (line 122) ... ok
+test crates/gpui/src/remote.rs - remote::Remote (line 67) ... ok
+
+test result: ok. 2 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 0.00s
+
+
+running 26 tests
+test crates/gpui/src/component.rs - component::Component<P,C>::view (line 63) - compile fail ... ok
+test crates/gpui/src/property.rs - property::Property (line 367) - compile fail ... ok
+test crates/gpui/src/identity.rs - identity::Target (line 14) - compile fail ... ok
+test crates/gpui/src/element.rs - element::text_input (line 1161) - compile fail ... ok
+test crates/gpui/src/reader.rs - reader::Completion (line 306) - compile fail ... ok
+test crates/gpui/src/element.rs - element::text_input (line 1156) - compile fail ... ok
+test crates/gpui/src/property.rs - property::Property (line 372) - compile fail ... ok
+test crates/gpui/src/property.rs - property::CORNER_RADIUS (line 597) - compile fail ... ok
+test crates/gpui/src/reader.rs - reader::Reader<T>::project (line 81) - compile fail ... ok
+test crates/gpui/src/reader.rs - reader::Completion<T,E>::run_cancellable (line 381) - compile fail ... ok
+test crates/gpui/src/reader/question.rs - reader::question::Questions<M,L>::question_future (line 133) - compile fail ... ok
+test crates/gpui/src/reader/question.rs - reader::question::Questions<M,L>::question (line 71) - compile fail ... ok
+test crates/gpui/src/reader/question.rs - reader::question::Questions<M,L>::question_future (line 140) - compile fail ... ok
+test crates/gpui/src/reader.rs - reader::Completion<T,E>::run_cancellable (line 389) - compile fail ... ok
+test crates/gpui/src/reader/question.rs - reader::question::Questions<M,L>::question_future (line 147) - compile fail ... ok
+test crates/gpui/src/runtime.rs - runtime::Win (line 1215) - compile fail ... ok
+test crates/gpui/src/runtime.rs - runtime::Win (line 1223) - compile fail ... ok
+test crates/gpui/src/runtime.rs - runtime::PresentationToken (line 219) - compile fail ... ok
+test crates/gpui/src/reader.rs - reader::Reader (line 56) - compile fail ... ok
+test crates/gpui/src/remote.rs - remote::Inbox (line 159) - compile fail ... ok
+test crates/gpui/src/runtime.rs - runtime::PresentationToken (line 213) - compile fail ... ok
+test crates/gpui/src/runtime/delivery.rs - runtime::delivery::Win<M,L>::with_ready (line 58) - compile fail ... ok
+test crates/gpui/src/runtime/delivery.rs - runtime::delivery::Win<M,L>::visit_question_inputs (line 28) - compile fail ... ok
+test crates/gpui/src/runtime/query/serialize.rs - runtime::query::serialize::SemanticSnapshot (line 17) - compile fail ... ok
+test crates/gpui/src/runtime/delivery.rs - runtime::delivery::Win<M,L>::with_ready (line 52) - compile fail ... ok
+test crates/gpui/src/runtime/query.rs - runtime::query::Part (line 128) - compile fail ... ok
+
+test result: ok. 26 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 0.30s
+
+all doctests ran in 1.39s; merged doctests compilation took 1.08s

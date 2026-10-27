@@ -1,0 +1,458 @@
+0 0-1-unrelated {'control': 20044.2, 'candidate': 18620.6}
+0 0-2-unrelated {'candidate': 34286.5, 'control': 90518.4}
+0 0-4-unrelated {'control': 128548.3, 'candidate': 63970.4}
+0 0-1-dependent {'candidate': 87445.0, 'control': 84203.9}
+0 0-2-dependent {'control': 98880.4, 'candidate': 101047.5}
+0 0-4-dependent {'candidate': 122737.4, 'control': 136936.9}
+0 1-1-unrelated {'control': 18834.2, 'candidate': 18086.1}
+0 1-2-unrelated {'candidate': 46618.7, 'control': 261335.1}
+0 1-4-unrelated {'control': 277114.7, 'candidate': 73940.6}
+0 1-1-dependent {'candidate': 253493.1, 'control': 285496.9}
+0 1-2-dependent {'control': 272796.6, 'candidate': 283553.1}
+0 1-4-dependent {'candidate': 333906.5, 'control': 322177.6}
+0 40-1-unrelated {'control': 16365.1, 'candidate': 17865.3}
+0 40-2-unrelated {'candidate': 477606.5, 'control': 9124306.2}
+0 40-4-unrelated {'control': 9538755.7, 'candidate': 541983.2}
+0 40-1-dependent {'candidate': 9169138.2, 'control': 8548544.9}
+0 40-2-dependent {'control': 8500757.2, 'candidate': 8319073.3}
+0 40-4-dependent {'candidate': 8236001.8, 'control': 8373231.4}
+0 0-4-owner {'control': 114174.9, 'candidate': 118791.3}
+0 0-4-opaque {'candidate': 110873.4, 'control': 108814.7}
+0 1-4-owner {'control': 273018.2, 'candidate': 273016.5}
+0 1-4-opaque {'candidate': 276964.7, 'control': 268212.7}
+0 40-4-owner {'control': 8439112.3, 'candidate': 8872386.2}
+0 40-4-opaque {'candidate': 8550263.2, 'control': 8169731.3}
+1 0-1-unrelated {'candidate': 18357.1, 'control': 17613.5}
+1 0-2-unrelated {'control': 80843.5, 'candidate': 32535.3}
+1 0-4-unrelated {'candidate': 62235.0, 'control': 106407.5}
+1 0-1-dependent {'control': 71063.1, 'candidate': 76009.2}
+1 0-2-dependent {'candidate': 87799.2, 'control': 86347.5}
+1 0-4-dependent {'control': 111423.7, 'candidate': 111267.2}
+1 1-1-unrelated {'candidate': 14384.3, 'control': 14566.2}
+1 1-2-unrelated {'control': 231184.5, 'candidate': 44047.8}
+1 1-4-unrelated {'candidate': 72414.1, 'control': 265535.4}
+1 1-1-dependent {'control': 228540.0, 'candidate': 242934.4}
+1 1-2-dependent {'candidate': 244465.4, 'control': 244752.4}
+1 1-4-dependent {'control': 264435.0, 'candidate': 263365.4}
+1 40-1-unrelated {'candidate': 14929.8, 'control': 15495.5}
+1 40-2-unrelated {'control': 7883729.4, 'candidate': 461746.3}
+1 40-4-unrelated {'candidate': 474324.3, 'control': 7890825.4}
+1 40-1-dependent {'control': 7588493.2, 'candidate': 7047349.8}
+1 40-2-dependent {'candidate': 7217413.5, 'control': 7050904.8}
+1 40-4-dependent {'control': 6964797.4, 'candidate': 7897452.2}
+1 0-4-owner {'candidate': 154686.4, 'control': 137372.6}
+1 0-4-opaque {'control': 116332.7, 'candidate': 122922.4}
+1 1-4-owner {'candidate': 336645.0, 'control': 332265.3}
+1 1-4-opaque {'control': 370284.4, 'candidate': 390938.1}
+1 40-4-owner {'candidate': 11378781.0, 'control': 10439053.8}
+1 40-4-opaque {'control': 11183702.0, 'candidate': 10671623.6}
+2 0-1-unrelated {'control': 19689.5, 'candidate': 24690.3}
+2 0-2-unrelated {'candidate': 38576.1, 'control': 108050.6}
+2 0-4-unrelated {'control': 136956.1, 'candidate': 72352.1}
+2 0-1-dependent {'candidate': 85038.0, 'control': 84664.2}
+2 0-2-dependent {'control': 100014.4, 'candidate': 96869.3}
+2 0-4-dependent {'candidate': 139138.1, 'control': 145730.0}
+2 1-1-unrelated {'control': 19239.0, 'candidate': 17409.5}
+2 1-2-unrelated {'candidate': 53702.7, 'control': 293937.3}
+2 1-4-unrelated {'control': 311940.7, 'candidate': 82577.4}
+2 1-1-dependent {'candidate': 323520.3, 'control': 307480.0}
+2 1-2-dependent {'control': 305793.3, 'candidate': 338106.6}
+2 1-4-dependent {'candidate': 347821.2, 'control': 355228.1}
+2 40-1-unrelated {'control': 20272.4, 'candidate': 19108.9}
+2 40-2-unrelated {'candidate': 562388.8, 'control': 9744048.2}
+2 40-4-unrelated {'control': 8021570.0, 'candidate': 440889.7}
+2 40-1-dependent {'candidate': 8316822.8, 'control': 8307623.2}
+2 40-2-dependent {'control': 8647503.6, 'candidate': 7986336.0}
+2 40-4-dependent {'candidate': 7786621.3, 'control': 7380009.2}
+2 0-4-owner {'control': 110734.9, 'candidate': 112549.6}
+2 0-4-opaque {'candidate': 98057.5, 'control': 97673.7}
+2 1-4-owner {'control': 262175.0, 'candidate': 254189.4}
+2 1-4-opaque {'candidate': 240430.5, 'control': 250193.7}
+2 40-4-owner {'control': 7325475.7, 'candidate': 7928587.3}
+2 40-4-opaque {'candidate': 8358011.3, 'control': 8238105.6}
+3 0-1-unrelated {'candidate': 17834.4, 'control': 17714.0}
+3 0-2-unrelated {'control': 81098.6, 'candidate': 32117.3}
+3 0-4-unrelated {'candidate': 58336.9, 'control': 101048.7}
+3 0-1-dependent {'control': 74762.2, 'candidate': 70900.5}
+3 0-2-dependent {'candidate': 83655.2, 'control': 84768.8}
+3 0-4-dependent {'control': 108852.0, 'candidate': 107183.8}
+3 1-1-unrelated {'candidate': 14213.0, 'control': 14900.7}
+3 1-2-unrelated {'control': 235939.1, 'candidate': 39219.0}
+3 1-4-unrelated {'candidate': 68398.6, 'control': 254112.2}
+3 1-1-dependent {'control': 221440.0, 'candidate': 219741.1}
+3 1-2-dependent {'candidate': 258521.3, 'control': 245289.7}
+3 1-4-dependent {'control': 266585.8, 'candidate': 271822.4}
+3 40-1-unrelated {'candidate': 14953.9, 'control': 14821.9}
+3 40-2-unrelated {'control': 7386138.5, 'candidate': 410557.7}
+3 40-4-unrelated {'candidate': 438801.5, 'control': 7005126.7}
+3 40-1-dependent {'control': 6891350.7, 'candidate': 7218791.2}
+3 40-2-dependent {'candidate': 8162101.4, 'control': 8175232.3}
+3 40-4-dependent {'control': 8079309.9, 'candidate': 8040823.8}
+3 0-4-owner {'candidate': 112402.1, 'control': 114001.3}
+3 0-4-opaque {'control': 105994.3, 'candidate': 111814.2}
+3 1-4-owner {'candidate': 291345.0, 'control': 285435.3}
+3 1-4-opaque {'control': 277085.8, 'candidate': 276809.6}
+3 40-4-owner {'candidate': 8137095.3, 'control': 7957575.3}
+3 40-4-opaque {'control': 7732494.8, 'candidate': 7974787.0}
+4 0-1-unrelated {'control': 16457.8, 'candidate': 17955.9}
+4 0-2-unrelated {'candidate': 34380.2, 'control': 80653.3}
+4 0-4-unrelated {'control': 99571.6, 'candidate': 59576.6}
+4 0-1-dependent {'candidate': 75010.1, 'control': 73745.9}
+4 0-2-dependent {'control': 85512.1, 'candidate': 93944.0}
+4 0-4-dependent {'candidate': 115840.9, 'control': 110792.1}
+4 1-1-unrelated {'control': 15809.2, 'candidate': 15266.6}
+4 1-2-unrelated {'candidate': 43125.2, 'control': 232704.2}
+4 1-4-unrelated {'control': 248700.4, 'candidate': 70196.7}
+4 1-1-dependent {'candidate': 241373.3, 'control': 234258.2}
+4 1-2-dependent {'control': 240578.9, 'candidate': 257175.9}
+4 1-4-dependent {'candidate': 270182.0, 'control': 281188.3}
+4 40-1-unrelated {'control': 14800.4, 'candidate': 15090.2}
+4 40-2-unrelated {'candidate': 417066.3, 'control': 7989116.1}
+4 40-4-unrelated {'control': 8282554.5, 'candidate': 521178.0}
+4 40-1-dependent {'candidate': 8436540.4, 'control': 7762821.9}
+4 40-2-dependent {'control': 8220261.0, 'candidate': 8090250.9}
+4 40-4-dependent {'candidate': 8182647.2, 'control': 8153673.0}
+4 0-4-owner {'control': 116504.7, 'candidate': 123538.5}
+4 0-4-opaque {'candidate': 102959.5, 'control': 107890.5}
+4 1-4-owner {'control': 278563.3, 'candidate': 285249.5}
+4 1-4-opaque {'candidate': 262930.5, 'control': 266326.2}
+4 40-4-owner {'control': 8721426.7, 'candidate': 8874528.9}
+4 40-4-opaque {'candidate': 8268099.9, 'control': 8110593.2}
+{
+  "0-1-unrelated": {
+    "paired_ratios": [
+      0.9289772826485533,
+      1.042217689075463,
+      1.2539849980725737,
+      1.0067985965863062,
+      1.0910280177350664
+    ],
+    "median": 1.042217689075463,
+    "range": [
+      0.9289772826485533,
+      1.2539849980725737
+    ]
+  },
+  "0-2-unrelated": {
+    "paired_ratios": [
+      0.3787791094291931,
+      0.4024473451922924,
+      0.3570192509876857,
+      0.39602737950749095,
+      0.4262721151913617
+    ],
+    "median": 0.39602737950749095,
+    "range": [
+      0.3570192509876857,
+      0.4262721151913617
+    ]
+  },
+  "0-4-unrelated": {
+    "paired_ratios": [
+      0.497637618743342,
+      0.5848741634398412,
+      0.5282864363106134,
+      0.5773152108468909,
+      0.598329202134866
+    ],
+    "median": 0.5773152108468909,
+    "range": [
+      0.497637618743342,
+      0.598329202134866
+    ]
+  },
+  "0-1-dependent": {
+    "paired_ratios": [
+      1.03849110955246,
+      1.0696016442846867,
+      1.0044150876940592,
+      0.9483472724240081,
+      1.0171425216276548
+    ],
+    "median": 1.0171425216276548,
+    "range": [
+      0.9483472724240081,
+      1.0696016442846867
+    ]
+  },
+  "0-2-dependent": {
+    "paired_ratios": [
+      1.0219162768269825,
+      1.0168126465734386,
+      0.9685533377533623,
+      0.9868630957865054,
+      1.0986042564955405
+    ],
+    "median": 1.0168126465734386,
+    "range": [
+      0.9685533377533623,
+      1.0986042564955405
+    ]
+  },
+  "0-4-dependent": {
+    "paired_ratios": [
+      0.896306589766992,
+      0.9985955412900899,
+      0.9547662832109872,
+      0.9846751510330957,
+      1.045570023791401
+    ],
+    "median": 0.9846751510330957,
+    "range": [
+      0.896306589766992,
+      1.045570023791401
+    ]
+  },
+  "1-1-unrelated": {
+    "paired_ratios": [
+      0.9602791097245063,
+      0.9875087788672842,
+      0.9049042493306576,
+      0.9538483530259733,
+      0.9656825753660692
+    ],
+    "median": 0.9602791097245063,
+    "range": [
+      0.9049042493306576,
+      0.9875087788672842
+    ]
+  },
+  "1-2-unrelated": {
+    "paired_ratios": [
+      0.1783866384576737,
+      0.190531139368674,
+      0.1827012829845441,
+      0.16622494247243824,
+      0.18532200965861378
+    ],
+    "median": 0.1827012829845441,
+    "range": [
+      0.16622494247243824,
+      0.190531139368674
+    ]
+  },
+  "1-4-unrelated": {
+    "paired_ratios": [
+      0.2668231866868417,
+      0.2727096171467301,
+      0.26472144432327827,
+      0.269166887697639,
+      0.28225397778797384
+    ],
+    "median": 0.269166887697639,
+    "range": [
+      0.26472144432327827,
+      0.28225397778797384
+    ]
+  },
+  "1-1-dependent": {
+    "paired_ratios": [
+      0.887901514867587,
+      1.0629837089822989,
+      1.0521670044284832,
+      0.9923279433247756,
+      1.030372937622976
+    ],
+    "median": 1.030372937622976,
+    "range": [
+      0.887901514867587,
+      1.0629837089822989
+    ]
+  },
+  "1-2-dependent": {
+    "paired_ratios": [
+      1.0394306996077443,
+      0.9988276314207853,
+      1.1056701923485381,
+      1.0539428320017377,
+      1.06898754886754
+    ],
+    "median": 1.0539428320017377,
+    "range": [
+      0.9988276314207853,
+      1.1056701923485381
+    ]
+  },
+  "1-4-dependent": {
+    "paired_ratios": [
+      1.0364053598270468,
+      0.9959554514257665,
+      0.9791487779260706,
+      1.0196433950961903,
+      0.960857793900308
+    ],
+    "median": 0.9959554514257665,
+    "range": [
+      0.960857793900308,
+      1.0364053598270468
+    ]
+  },
+  "40-1-unrelated": {
+    "paired_ratios": [
+      1.0916717435180778,
+      0.9634945393788773,
+      0.9426061468855654,
+      1.0089030361134295,
+      1.0195832942014287
+    ],
+    "median": 1.0089030361134295,
+    "range": [
+      0.9426061468855654,
+      1.0916717435180778
+    ]
+  },
+  "40-2-unrelated": {
+    "paired_ratios": [
+      0.052344422808863283,
+      0.0585695245124447,
+      0.057716132571199175,
+      0.05558488745110258,
+      0.05220431713616518
+    ],
+    "median": 0.05558488745110258,
+    "range": [
+      0.05220431713616518,
+      0.0585695245124447
+    ]
+  },
+  "40-4-unrelated": {
+    "paired_ratios": [
+      0.056819062888883935,
+      0.060110855931216386,
+      0.05496301970811201,
+      0.0626400488583881,
+      0.06292479006884162
+    ],
+    "median": 0.060110855931216386,
+    "range": [
+      0.05496301970811201,
+      0.06292479006884162
+    ]
+  },
+  "40-1-dependent": {
+    "paired_ratios": [
+      1.0725963606447306,
+      0.928688955008881,
+      1.0011073564271225,
+      1.0475147059197827,
+      1.0867878328024145
+    ],
+    "median": 1.0475147059197827,
+    "range": [
+      0.928688955008881,
+      1.0867878328024145
+    ]
+  },
+  "40-2-dependent": {
+    "paired_ratios": [
+      0.9786273240288413,
+      1.023615215988145,
+      0.9235423814649638,
+      0.9983938254515183,
+      0.9841841943370808
+    ],
+    "median": 0.9841841943370808,
+    "range": [
+      0.9235423814649638,
+      1.023615215988145
+    ]
+  },
+  "40-4-dependent": {
+    "paired_ratios": [
+      0.9836109127279236,
+      1.1339098268698087,
+      1.0550964188970262,
+      0.995236457026518,
+      1.003553511383437
+    ],
+    "median": 1.003553511383437,
+    "range": [
+      0.9836109127279236,
+      1.1339098268698087
+    ]
+  },
+  "0-4-owner": {
+    "paired_ratios": [
+      1.0404327081024558,
+      1.1260354960236967,
+      1.0163877844495666,
+      0.9859719106638023,
+      1.0603738785108137
+    ],
+    "median": 1.0404327081024558,
+    "range": [
+      0.9859719106638023,
+      1.1260354960236967
+    ]
+  },
+  "0-4-opaque": {
+    "paired_ratios": [
+      1.0189191332679193,
+      1.0566453135344795,
+      1.0039296138203806,
+      1.05490824081184,
+      0.9542963298145174
+    ],
+    "median": 1.0189191332679193,
+    "range": [
+      0.9542963298145174,
+      1.0566453135344795
+    ]
+  },
+  "1-4-owner": {
+    "paired_ratios": [
+      0.9999937733088856,
+      1.0131814863822959,
+      0.9695408387177145,
+      1.0207043088963743,
+      1.0240024046236667
+    ],
+    "median": 1.0131814863822959,
+    "range": [
+      0.9695408387177145,
+      1.0240024046236667
+    ]
+  },
+  "1-4-opaque": {
+    "paired_ratios": [
+      1.032631123103254,
+      1.0557781592503666,
+      0.9609775161813621,
+      0.9990034854190991,
+      0.9872498462411884
+    ],
+    "median": 0.9990034854190991,
+    "range": [
+      0.9609775161813621,
+      1.0557781592503666
+    ]
+  },
+  "40-4-owner": {
+    "paired_ratios": [
+      1.0513411626757168,
+      1.0900203456945885,
+      1.0823307047086064,
+      1.0225596407488597,
+      1.017554719493063
+    ],
+    "median": 1.0513411626757168,
+    "range": [
+      1.017554719493063,
+      1.0900203456945885
+    ]
+  },
+  "40-4-opaque": {
+    "paired_ratios": [
+      1.0465782700179849,
+      0.9542120854638618,
+      1.014555010003489,
+      1.0313342908750966,
+      1.0194198729885506
+    ],
+    "median": 1.0194198729885506,
+    "range": [
+      0.9542120854638618,
+      1.0465782700179849
+    ]
+  }
+}

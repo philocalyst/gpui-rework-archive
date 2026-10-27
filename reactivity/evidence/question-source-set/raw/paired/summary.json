@@ -1,0 +1,4662 @@
+{
+  "runs": [
+    {
+      "repeat": 0,
+      "case": "0-1-unrelated",
+      "variant": "control",
+      "final": "FINAL,pixel_hash=12230463492156930872",
+      "counters": "COUNTERS,Counters { owner_reruns: 0, descriptions: 0, source_operations: 4000, source_reads: 4000, destination_compares: 4000, text_promotions: 4000, text_bytes_copied: 27201, layout_runs: 4000, measure_calls: 8000, presentations: 4000, paint_passes: 4000, exact_updates: 4000, coarse_updates: 0 }",
+      "tasks": "TASKS,frozen=0,dispatched=0,accepted=0",
+      "cpu": {
+        "0.5": 20044.15,
+        "0.95": 22578.42,
+        "0.99": 23868.95
+      },
+      "wall": {
+        "0.5": 20050.77,
+        "0.95": 22586.03,
+        "0.99": 23878.76
+      }
+    },
+    {
+      "repeat": 0,
+      "case": "0-1-unrelated",
+      "variant": "candidate",
+      "final": "FINAL,pixel_hash=12230463492156930872",
+      "counters": "COUNTERS,Counters { owner_reruns: 0, descriptions: 0, source_operations: 4000, source_reads: 4000, destination_compares: 4000, text_promotions: 4000, text_bytes_copied: 27201, layout_runs: 4000, measure_calls: 8000, presentations: 4000, paint_passes: 4000, exact_updates: 4000, coarse_updates: 0 }",
+      "tasks": "TASKS,frozen=0,dispatched=0,accepted=0",
+      "cpu": {
+        "0.5": 18620.56,
+        "0.95": 24880.55,
+        "0.99": 25805.5
+      },
+      "wall": {
+        "0.5": 18627.89,
+        "0.95": 24903.49,
+        "0.99": 25816.61
+      }
+    },
+    {
+      "repeat": 0,
+      "case": "0-2-unrelated",
+      "variant": "candidate",
+      "final": "FINAL,pixel_hash=7578910431315845812",
+      "counters": "COUNTERS,Counters { owner_reruns: 0, descriptions: 0, source_operations: 4000, source_reads: 8000, destination_compares: 8000, text_promotions: 8000, text_bytes_copied: 54402, layout_runs: 4000, measure_calls: 16000, presentations: 4000, paint_passes: 4000, exact_updates: 4000, coarse_updates: 0 }",
+      "tasks": "TASKS,frozen=0,dispatched=0,accepted=0",
+      "cpu": {
+        "0.5": 34286.46,
+        "0.95": 40862.24,
+        "0.99": 42552.23
+      },
+      "wall": {
+        "0.5": 34292.33,
+        "0.95": 40870.49,
+        "0.99": 42566.69
+      }
+    },
+    {
+      "repeat": 0,
+      "case": "0-2-unrelated",
+      "variant": "control",
+      "final": "FINAL,pixel_hash=7578910431315845812",
+      "counters": "COUNTERS,Counters { owner_reruns: 8000, descriptions: 8000, source_operations: 8000, source_reads: 0, destination_compares: 88000, text_promotions: 12000, text_bytes_copied: 98402, layout_runs: 8000, measure_calls: 88000, presentations: 8000, paint_passes: 8000, exact_updates: 0, coarse_updates: 8000 }",
+      "tasks": "TASKS,frozen=4000,dispatched=4000,accepted=4000",
+      "cpu": {
+        "0.5": 90518.35,
+        "0.95": 99784.6,
+        "0.99": 99885.69
+      },
+      "wall": {
+        "0.5": 91240.23,
+        "0.95": 99798.42,
+        "0.99": 99927.15
+      }
+    },
+    {
+      "repeat": 0,
+      "case": "0-4-unrelated",
+      "variant": "control",
+      "final": "FINAL,pixel_hash=970880845196872716",
+      "counters": "COUNTERS,Counters { owner_reruns: 8000, descriptions: 8000, source_operations: 8000, source_reads: 0, destination_compares: 88000, text_promotions: 20000, text_bytes_copied: 152804, layout_runs: 8000, measure_calls: 88000, presentations: 8000, paint_passes: 8000, exact_updates: 0, coarse_updates: 8000 }",
+      "tasks": "TASKS,frozen=4000,dispatched=4000,accepted=4000",
+      "cpu": {
+        "0.5": 128548.26,
+        "0.95": 148523.97,
+        "0.99": 155082.32
+      },
+      "wall": {
+        "0.5": 128567.77,
+        "0.95": 148598.72,
+        "0.99": 155108.73
+      }
+    },
+    {
+      "repeat": 0,
+      "case": "0-4-unrelated",
+      "variant": "candidate",
+      "final": "FINAL,pixel_hash=970880845196872716",
+      "counters": "COUNTERS,Counters { owner_reruns: 0, descriptions: 0, source_operations: 4000, source_reads: 16000, destination_compares: 16000, text_promotions: 16000, text_bytes_copied: 108804, layout_runs: 4000, measure_calls: 32000, presentations: 4000, paint_passes: 4000, exact_updates: 4000, coarse_updates: 0 }",
+      "tasks": "TASKS,frozen=0,dispatched=0,accepted=0",
+      "cpu": {
+        "0.5": 63970.45,
+        "0.95": 71366.09,
+        "0.99": 75454.59
+      },
+      "wall": {
+        "0.5": 63990.34,
+        "0.95": 71387.73,
+        "0.99": 75471.4
+      }
+    },
+    {
+      "repeat": 0,
+      "case": "0-1-dependent",
+      "variant": "candidate",
+      "final": "FINAL,pixel_hash=8829556083644644402",
+      "counters": "COUNTERS,Counters { owner_reruns: 8000, descriptions: 8000, source_operations: 8000, source_reads: 0, destination_compares: 88000, text_promotions: 12000, text_bytes_copied: 126402, layout_runs: 8000, measure_calls: 88000, presentations: 8000, paint_passes: 8000, exact_updates: 0, coarse_updates: 8000 }",
+      "tasks": "TASKS,frozen=4000,dispatched=4000,accepted=4000",
+      "cpu": {
+        "0.5": 87444.96,
+        "0.95": 107917.42,
+        "0.99": 115980.6
+      },
+      "wall": {
+        "0.5": 87479.06,
+        "0.95": 107938.71,
+        "0.99": 116007.47
+      }
+    },
+    {
+      "repeat": 0,
+      "case": "0-1-dependent",
+      "variant": "control",
+      "final": "FINAL,pixel_hash=8829556083644644402",
+      "counters": "COUNTERS,Counters { owner_reruns: 8000, descriptions: 8000, source_operations: 8000, source_reads: 0, destination_compares: 88000, text_promotions: 12000, text_bytes_copied: 126402, layout_runs: 8000, measure_calls: 88000, presentations: 8000, paint_passes: 8000, exact_updates: 0, coarse_updates: 8000 }",
+      "tasks": "TASKS,frozen=4000,dispatched=4000,accepted=4000",
+      "cpu": {
+        "0.5": 84203.86,
+        "0.95": 99504.97,
+        "0.99": 100403.16
+      },
+      "wall": {
+        "0.5": 84230.26,
+        "0.95": 99536.01,
+        "0.99": 100430.1
+      }
+    },
+    {
+      "repeat": 0,
+      "case": "0-2-dependent",
+      "variant": "control",
+      "final": "FINAL,pixel_hash=17759712045857455370",
+      "counters": "COUNTERS,Counters { owner_reruns: 8000, descriptions: 8000, source_operations: 8000, source_reads: 0, destination_compares: 88000, text_promotions: 16000, text_bytes_copied: 164804, layout_runs: 8000, measure_calls: 88000, presentations: 8000, paint_passes: 8000, exact_updates: 0, coarse_updates: 8000 }",
+      "tasks": "TASKS,frozen=4000,dispatched=4000,accepted=4000",
+      "cpu": {
+        "0.5": 98880.39,
+        "0.95": 113582.38,
+        "0.99": 132069.58
+      },
+      "wall": {
+        "0.5": 98915.15,
+        "0.95": 113599.05,
+        "0.99": 132109.73
+      }
+    },
+    {
+      "repeat": 0,
+      "case": "0-2-dependent",
+      "variant": "candidate",
+      "final": "FINAL,pixel_hash=17759712045857455370",
+      "counters": "COUNTERS,Counters { owner_reruns: 8000, descriptions: 8000, source_operations: 8000, source_reads: 0, destination_compares: 88000, text_promotions: 16000, text_bytes_copied: 164804, layout_runs: 8000, measure_calls: 88000, presentations: 8000, paint_passes: 8000, exact_updates: 0, coarse_updates: 8000 }",
+      "tasks": "TASKS,frozen=4000,dispatched=4000,accepted=4000",
+      "cpu": {
+        "0.5": 101047.48,
+        "0.95": 123542.43,
+        "0.99": 136930.24
+      },
+      "wall": {
+        "0.5": 101064.7,
+        "0.95": 123568.59,
+        "0.99": 136959.24
+      }
+    },
+    {
+      "repeat": 0,
+      "case": "0-4-dependent",
+      "variant": "candidate",
+      "final": "FINAL,pixel_hash=3408001187935195458",
+      "counters": "COUNTERS,Counters { owner_reruns: 8000, descriptions: 8000, source_operations: 8000, source_reads: 0, destination_compares: 88000, text_promotions: 24000, text_bytes_copied: 219206, layout_runs: 8000, measure_calls: 88000, presentations: 8000, paint_passes: 8000, exact_updates: 0, coarse_updates: 8000 }",
+      "tasks": "TASKS,frozen=4000,dispatched=4000,accepted=4000",
+      "cpu": {
+        "0.5": 122737.41,
+        "0.95": 157370.04,
+        "0.99": 205214.13
+      },
+      "wall": {
+        "0.5": 122766.47,
+        "0.95": 157406.86,
+        "0.99": 205239.44
+      }
+    },
+    {
+      "repeat": 0,
+      "case": "0-4-dependent",
+      "variant": "control",
+      "final": "FINAL,pixel_hash=3408001187935195458",
+      "counters": "COUNTERS,Counters { owner_reruns: 8000, descriptions: 8000, source_operations: 8000, source_reads: 0, destination_compares: 88000, text_promotions: 24000, text_bytes_copied: 219206, layout_runs: 8000, measure_calls: 88000, presentations: 8000, paint_passes: 8000, exact_updates: 0, coarse_updates: 8000 }",
+      "tasks": "TASKS,frozen=4000,dispatched=4000,accepted=4000",
+      "cpu": {
+        "0.5": 136936.86,
+        "0.95": 160687.68,
+        "0.99": 171905.2
+      },
+      "wall": {
+        "0.5": 136963.15,
+        "0.95": 160727.0,
+        "0.99": 171957.9
+      }
+    },
+    {
+      "repeat": 0,
+      "case": "1-1-unrelated",
+      "variant": "control",
+      "final": "FINAL,pixel_hash=8627942319840186434",
+      "counters": "COUNTERS,Counters { owner_reruns: 0, descriptions: 0, source_operations: 4000, source_reads: 4000, destination_compares: 4000, text_promotions: 4000, text_bytes_copied: 27201, layout_runs: 4000, measure_calls: 8000, presentations: 4000, paint_passes: 4000, exact_updates: 4000, coarse_updates: 0 }",
+      "tasks": "TASKS,frozen=0,dispatched=0,accepted=0",
+      "cpu": {
+        "0.5": 18834.17,
+        "0.95": 23706.94,
+        "0.99": 24198.07
+      },
+      "wall": {
+        "0.5": 18839.31,
+        "0.95": 23726.58,
+        "0.99": 24210.69
+      }
+    },
+    {
+      "repeat": 0,
+      "case": "1-1-unrelated",
+      "variant": "candidate",
+      "final": "FINAL,pixel_hash=8627942319840186434",
+      "counters": "COUNTERS,Counters { owner_reruns: 0, descriptions: 0, source_operations: 4000, source_reads: 4000, destination_compares: 4000, text_promotions: 4000, text_bytes_copied: 27201, layout_runs: 4000, measure_calls: 8000, presentations: 4000, paint_passes: 4000, exact_updates: 4000, coarse_updates: 0 }",
+      "tasks": "TASKS,frozen=0,dispatched=0,accepted=0",
+      "cpu": {
+        "0.5": 18086.06,
+        "0.95": 22463.5,
+        "0.99": 23844.01
+      },
+      "wall": {
+        "0.5": 18089.3,
+        "0.95": 22476.83,
+        "0.99": 23880.56
+      }
+    },
+    {
+      "repeat": 0,
+      "case": "1-2-unrelated",
+      "variant": "candidate",
+      "final": "FINAL,pixel_hash=3284881484069841934",
+      "counters": "COUNTERS,Counters { owner_reruns: 0, descriptions: 0, source_operations: 4000, source_reads: 8000, destination_compares: 8000, text_promotions: 8000, text_bytes_copied: 54402, layout_runs: 4000, measure_calls: 16000, presentations: 4000, paint_passes: 4000, exact_updates: 4000, coarse_updates: 0 }",
+      "tasks": "TASKS,frozen=0,dispatched=0,accepted=0",
+      "cpu": {
+        "0.5": 46618.69,
+        "0.95": 55996.15,
+        "0.99": 58292.06
+      },
+      "wall": {
+        "0.5": 46632.92,
+        "0.95": 56026.17,
+        "0.99": 58312.26
+      }
+    },
+    {
+      "repeat": 0,
+      "case": "1-2-unrelated",
+      "variant": "control",
+      "final": "FINAL,pixel_hash=3284881484069841934",
+      "counters": "COUNTERS,Counters { owner_reruns: 8000, descriptions: 8000, source_operations: 8000, source_reads: 0, destination_compares: 296000, text_promotions: 12000, text_bytes_copied: 98402, layout_runs: 8000, measure_calls: 488000, presentations: 8000, paint_passes: 8000, exact_updates: 0, coarse_updates: 8000 }",
+      "tasks": "TASKS,frozen=4000,dispatched=4000,accepted=4000",
+      "cpu": {
+        "0.5": 261335.1,
+        "0.95": 331039.86,
+        "0.99": 341794.9
+      },
+      "wall": {
+        "0.5": 261355.16,
+        "0.95": 331066.94,
+        "0.99": 341884.08
+      }
+    },
+    {
+      "repeat": 0,
+      "case": "1-4-unrelated",
+      "variant": "control",
+      "final": "FINAL,pixel_hash=17907747960521954518",
+      "counters": "COUNTERS,Counters { owner_reruns: 8000, descriptions: 8000, source_operations: 8000, source_reads: 0, destination_compares: 296000, text_promotions: 20000, text_bytes_copied: 152804, layout_runs: 8000, measure_calls: 488000, presentations: 8000, paint_passes: 8000, exact_updates: 0, coarse_updates: 8000 }",
+      "tasks": "TASKS,frozen=4000,dispatched=4000,accepted=4000",
+      "cpu": {
+        "0.5": 277114.71,
+        "0.95": 308696.08,
+        "0.99": 364606.87
+      },
+      "wall": {
+        "0.5": 277137.13,
+        "0.95": 308782.37,
+        "0.99": 364631.72
+      }
+    },
+    {
+      "repeat": 0,
+      "case": "1-4-unrelated",
+      "variant": "candidate",
+      "final": "FINAL,pixel_hash=17907747960521954518",
+      "counters": "COUNTERS,Counters { owner_reruns: 0, descriptions: 0, source_operations: 4000, source_reads: 16000, destination_compares: 16000, text_promotions: 16000, text_bytes_copied: 108804, layout_runs: 4000, measure_calls: 32000, presentations: 4000, paint_passes: 4000, exact_updates: 4000, coarse_updates: 0 }",
+      "tasks": "TASKS,frozen=0,dispatched=0,accepted=0",
+      "cpu": {
+        "0.5": 73940.63,
+        "0.95": 82477.11,
+        "0.99": 89080.34
+      },
+      "wall": {
+        "0.5": 73987.11,
+        "0.95": 82498.91,
+        "0.99": 89098.51
+      }
+    },
+    {
+      "repeat": 0,
+      "case": "1-1-dependent",
+      "variant": "candidate",
+      "final": "FINAL,pixel_hash=13195835639209551848",
+      "counters": "COUNTERS,Counters { owner_reruns: 8000, descriptions: 8000, source_operations: 8000, source_reads: 0, destination_compares: 296000, text_promotions: 12000, text_bytes_copied: 126402, layout_runs: 8000, measure_calls: 488000, presentations: 8000, paint_passes: 8000, exact_updates: 0, coarse_updates: 8000 }",
+      "tasks": "TASKS,frozen=4000,dispatched=4000,accepted=4000",
+      "cpu": {
+        "0.5": 253493.13,
+        "0.95": 276829.97,
+        "0.99": 299005.83
+      },
+      "wall": {
+        "0.5": 253514.43,
+        "0.95": 276901.19,
+        "0.99": 299024.64
+      }
+    },
+    {
+      "repeat": 0,
+      "case": "1-1-dependent",
+      "variant": "control",
+      "final": "FINAL,pixel_hash=13195835639209551848",
+      "counters": "COUNTERS,Counters { owner_reruns: 8000, descriptions: 8000, source_operations: 8000, source_reads: 0, destination_compares: 296000, text_promotions: 12000, text_bytes_copied: 126402, layout_runs: 8000, measure_calls: 488000, presentations: 8000, paint_passes: 8000, exact_updates: 0, coarse_updates: 8000 }",
+      "tasks": "TASKS,frozen=4000,dispatched=4000,accepted=4000",
+      "cpu": {
+        "0.5": 285496.9,
+        "0.95": 318759.33,
+        "0.99": 365630.29
+      },
+      "wall": {
+        "0.5": 285512.55,
+        "0.95": 318781.58,
+        "0.99": 365667.97
+      }
+    },
+    {
+      "repeat": 0,
+      "case": "1-2-dependent",
+      "variant": "control",
+      "final": "FINAL,pixel_hash=14124934070918126864",
+      "counters": "COUNTERS,Counters { owner_reruns: 8000, descriptions: 8000, source_operations: 8000, source_reads: 0, destination_compares: 296000, text_promotions: 16000, text_bytes_copied: 164804, layout_runs: 8000, measure_calls: 488000, presentations: 8000, paint_passes: 8000, exact_updates: 0, coarse_updates: 8000 }",
+      "tasks": "TASKS,frozen=4000,dispatched=4000,accepted=4000",
+      "cpu": {
+        "0.5": 272796.58,
+        "0.95": 291985.92,
+        "0.99": 342000.9
+      },
+      "wall": {
+        "0.5": 273114.56,
+        "0.95": 292009.65,
+        "0.99": 342028.65
+      }
+    },
+    {
+      "repeat": 0,
+      "case": "1-2-dependent",
+      "variant": "candidate",
+      "final": "FINAL,pixel_hash=14124934070918126864",
+      "counters": "COUNTERS,Counters { owner_reruns: 8000, descriptions: 8000, source_operations: 8000, source_reads: 0, destination_compares: 296000, text_promotions: 16000, text_bytes_copied: 164804, layout_runs: 8000, measure_calls: 488000, presentations: 8000, paint_passes: 8000, exact_updates: 0, coarse_updates: 8000 }",
+      "tasks": "TASKS,frozen=4000,dispatched=4000,accepted=4000",
+      "cpu": {
+        "0.5": 283553.14,
+        "0.95": 310700.86,
+        "0.99": 321980.5
+      },
+      "wall": {
+        "0.5": 283573.12,
+        "0.95": 310717.42,
+        "0.99": 322008.33
+      }
+    },
+    {
+      "repeat": 0,
+      "case": "1-4-dependent",
+      "variant": "candidate",
+      "final": "FINAL,pixel_hash=14118930585116151960",
+      "counters": "COUNTERS,Counters { owner_reruns: 8000, descriptions: 8000, source_operations: 8000, source_reads: 0, destination_compares: 296000, text_promotions: 24000, text_bytes_copied: 219206, layout_runs: 8000, measure_calls: 488000, presentations: 8000, paint_passes: 8000, exact_updates: 0, coarse_updates: 8000 }",
+      "tasks": "TASKS,frozen=4000,dispatched=4000,accepted=4000",
+      "cpu": {
+        "0.5": 333906.55,
+        "0.95": 361666.63,
+        "0.99": 377632.29
+      },
+      "wall": {
+        "0.5": 333923.62,
+        "0.95": 361691.1,
+        "0.99": 377649.18
+      }
+    },
+    {
+      "repeat": 0,
+      "case": "1-4-dependent",
+      "variant": "control",
+      "final": "FINAL,pixel_hash=14118930585116151960",
+      "counters": "COUNTERS,Counters { owner_reruns: 8000, descriptions: 8000, source_operations: 8000, source_reads: 0, destination_compares: 296000, text_promotions: 24000, text_bytes_copied: 219206, layout_runs: 8000, measure_calls: 488000, presentations: 8000, paint_passes: 8000, exact_updates: 0, coarse_updates: 8000 }",
+      "tasks": "TASKS,frozen=4000,dispatched=4000,accepted=4000",
+      "cpu": {
+        "0.5": 322177.56,
+        "0.95": 347551.56,
+        "0.99": 397639.27
+      },
+      "wall": {
+        "0.5": 323867.73,
+        "0.95": 389984.97,
+        "0.99": 689351.24
+      }
+    },
+    {
+      "repeat": 0,
+      "case": "40-1-unrelated",
+      "variant": "control",
+      "final": "FINAL,pixel_hash=15889697540729426171",
+      "counters": "COUNTERS,Counters { owner_reruns: 0, descriptions: 0, source_operations: 4000, source_reads: 4000, destination_compares: 4000, text_promotions: 4000, text_bytes_copied: 27201, layout_runs: 4000, measure_calls: 8000, presentations: 4000, paint_passes: 4000, exact_updates: 4000, coarse_updates: 0 }",
+      "tasks": "TASKS,frozen=0,dispatched=0,accepted=0",
+      "cpu": {
+        "0.5": 16365.13,
+        "0.95": 19758.61,
+        "0.99": 20791.55
+      },
+      "wall": {
+        "0.5": 16402.31,
+        "0.95": 19765.94,
+        "0.99": 20798.98
+      }
+    },
+    {
+      "repeat": 0,
+      "case": "40-1-unrelated",
+      "variant": "candidate",
+      "final": "FINAL,pixel_hash=15889697540729426171",
+      "counters": "COUNTERS,Counters { owner_reruns: 0, descriptions: 0, source_operations: 4000, source_reads: 4000, destination_compares: 4000, text_promotions: 4000, text_bytes_copied: 27201, layout_runs: 4000, measure_calls: 8000, presentations: 4000, paint_passes: 4000, exact_updates: 4000, coarse_updates: 0 }",
+      "tasks": "TASKS,frozen=0,dispatched=0,accepted=0",
+      "cpu": {
+        "0.5": 17865.35,
+        "0.95": 21600.08,
+        "0.99": 27182.88
+      },
+      "wall": {
+        "0.5": 17874.49,
+        "0.95": 21610.11,
+        "0.99": 27199.51
+      }
+    },
+    {
+      "repeat": 0,
+      "case": "40-2-unrelated",
+      "variant": "candidate",
+      "final": "FINAL,pixel_hash=486252068588713791",
+      "counters": "COUNTERS,Counters { owner_reruns: 0, descriptions: 0, source_operations: 4000, source_reads: 8000, destination_compares: 8000, text_promotions: 8000, text_bytes_copied: 54402, layout_runs: 4000, measure_calls: 16000, presentations: 4000, paint_passes: 4000, exact_updates: 4000, coarse_updates: 0 }",
+      "tasks": "TASKS,frozen=0,dispatched=0,accepted=0",
+      "cpu": {
+        "0.5": 477606.54,
+        "0.95": 511111.85,
+        "0.99": 579081.62
+      },
+      "wall": {
+        "0.5": 477623.72,
+        "0.95": 512684.2,
+        "0.99": 579490.93
+      }
+    },
+    {
+      "repeat": 0,
+      "case": "40-2-unrelated",
+      "variant": "control",
+      "final": "FINAL,pixel_hash=486252068588713791",
+      "counters": "COUNTERS,Counters { owner_reruns: 8000, descriptions: 8000, source_operations: 8000, source_reads: 0, destination_compares: 8408000, text_promotions: 12000, text_bytes_copied: 98402, layout_runs: 8000, measure_calls: 16088000, presentations: 8000, paint_passes: 8000, exact_updates: 0, coarse_updates: 8000 }",
+      "tasks": "TASKS,frozen=4000,dispatched=4000,accepted=4000",
+      "cpu": {
+        "0.5": 9124306.17,
+        "0.95": 10459591.44,
+        "0.99": 10976467.25
+      },
+      "wall": {
+        "0.5": 9126164.87,
+        "0.95": 10545566.39,
+        "0.99": 10977435.44
+      }
+    },
+    {
+      "repeat": 0,
+      "case": "40-4-unrelated",
+      "variant": "control",
+      "final": "FINAL,pixel_hash=3081166828330265799",
+      "counters": "COUNTERS,Counters { owner_reruns: 8000, descriptions: 8000, source_operations: 8000, source_reads: 0, destination_compares: 8408000, text_promotions: 20000, text_bytes_copied: 152804, layout_runs: 8000, measure_calls: 16088000, presentations: 8000, paint_passes: 8000, exact_updates: 0, coarse_updates: 8000 }",
+      "tasks": "TASKS,frozen=4000,dispatched=4000,accepted=4000",
+      "cpu": {
+        "0.5": 9538755.7,
+        "0.95": 10305032.02,
+        "0.99": 11149470.21
+      },
+      "wall": {
+        "0.5": 9539435.72,
+        "0.95": 10305708.2,
+        "0.99": 11150336.34
+      }
+    },
+    {
+      "repeat": 0,
+      "case": "40-4-unrelated",
+      "variant": "candidate",
+      "final": "FINAL,pixel_hash=3081166828330265799",
+      "counters": "COUNTERS,Counters { owner_reruns: 0, descriptions: 0, source_operations: 4000, source_reads: 16000, destination_compares: 16000, text_promotions: 16000, text_bytes_copied: 108804, layout_runs: 4000, measure_calls: 32000, presentations: 4000, paint_passes: 4000, exact_updates: 4000, coarse_updates: 0 }",
+      "tasks": "TASKS,frozen=0,dispatched=0,accepted=0",
+      "cpu": {
+        "0.5": 541983.16,
+        "0.95": 603229.5,
+        "0.99": 628793.94
+      },
+      "wall": {
+        "0.5": 542288.74,
+        "0.95": 603423.71,
+        "0.99": 629362.85
+      }
+    },
+    {
+      "repeat": 0,
+      "case": "40-1-dependent",
+      "variant": "candidate",
+      "final": "FINAL,pixel_hash=9187653472009869049",
+      "counters": "COUNTERS,Counters { owner_reruns: 8000, descriptions: 8000, source_operations: 8000, source_reads: 0, destination_compares: 8408000, text_promotions: 12000, text_bytes_copied: 126402, layout_runs: 8000, measure_calls: 16088000, presentations: 8000, paint_passes: 8000, exact_updates: 0, coarse_updates: 8000 }",
+      "tasks": "TASKS,frozen=4000,dispatched=4000,accepted=4000",
+      "cpu": {
+        "0.5": 9169138.17,
+        "0.95": 10371945.72,
+        "0.99": 10450885.18
+      },
+      "wall": {
+        "0.5": 9171189.18,
+        "0.95": 10373211.72,
+        "0.99": 10457091.92
+      }
+    },
+    {
+      "repeat": 0,
+      "case": "40-1-dependent",
+      "variant": "control",
+      "final": "FINAL,pixel_hash=9187653472009869049",
+      "counters": "COUNTERS,Counters { owner_reruns: 8000, descriptions: 8000, source_operations: 8000, source_reads: 0, destination_compares: 8408000, text_promotions: 12000, text_bytes_copied: 126402, layout_runs: 8000, measure_calls: 16088000, presentations: 8000, paint_passes: 8000, exact_updates: 0, coarse_updates: 8000 }",
+      "tasks": "TASKS,frozen=4000,dispatched=4000,accepted=4000",
+      "cpu": {
+        "0.5": 8548544.92,
+        "0.95": 10639349.26,
+        "0.99": 10753260.53
+      },
+      "wall": {
+        "0.5": 8573239.58,
+        "0.95": 10640487.97,
+        "0.99": 10754729.4
+      }
+    },
+    {
+      "repeat": 0,
+      "case": "40-2-dependent",
+      "variant": "control",
+      "final": "FINAL,pixel_hash=18228237087345915393",
+      "counters": "COUNTERS,Counters { owner_reruns: 8000, descriptions: 8000, source_operations: 8000, source_reads: 0, destination_compares: 8408000, text_promotions: 16000, text_bytes_copied: 164804, layout_runs: 8000, measure_calls: 16088000, presentations: 8000, paint_passes: 8000, exact_updates: 0, coarse_updates: 8000 }",
+      "tasks": "TASKS,frozen=4000,dispatched=4000,accepted=4000",
+      "cpu": {
+        "0.5": 8500757.24,
+        "0.95": 9143520.25,
+        "0.99": 10533359.37
+      },
+      "wall": {
+        "0.5": 8501685.02,
+        "0.95": 9144698.51,
+        "0.99": 10535092.65
+      }
+    },
+    {
+      "repeat": 0,
+      "case": "40-2-dependent",
+      "variant": "candidate",
+      "final": "FINAL,pixel_hash=18228237087345915393",
+      "counters": "COUNTERS,Counters { owner_reruns: 8000, descriptions: 8000, source_operations: 8000, source_reads: 0, destination_compares: 8408000, text_promotions: 16000, text_bytes_copied: 164804, layout_runs: 8000, measure_calls: 16088000, presentations: 8000, paint_passes: 8000, exact_updates: 0, coarse_updates: 8000 }",
+      "tasks": "TASKS,frozen=4000,dispatched=4000,accepted=4000",
+      "cpu": {
+        "0.5": 8319073.31,
+        "0.95": 9150646.58,
+        "0.99": 9350936.23
+      },
+      "wall": {
+        "0.5": 8320618.24,
+        "0.95": 9152317.18,
+        "0.99": 9351748.91
+      }
+    },
+    {
+      "repeat": 0,
+      "case": "40-4-dependent",
+      "variant": "candidate",
+      "final": "FINAL,pixel_hash=3650281480745005001",
+      "counters": "COUNTERS,Counters { owner_reruns: 8000, descriptions: 8000, source_operations: 8000, source_reads: 0, destination_compares: 8408000, text_promotions: 24000, text_bytes_copied: 219206, layout_runs: 8000, measure_calls: 16088000, presentations: 8000, paint_passes: 8000, exact_updates: 0, coarse_updates: 8000 }",
+      "tasks": "TASKS,frozen=4000,dispatched=4000,accepted=4000",
+      "cpu": {
+        "0.5": 8236001.77,
+        "0.95": 9462215.26,
+        "0.99": 9657557.11
+      },
+      "wall": {
+        "0.5": 8236840.1,
+        "0.95": 9643407.66,
+        "0.99": 10217602.29
+      }
+    },
+    {
+      "repeat": 0,
+      "case": "40-4-dependent",
+      "variant": "control",
+      "final": "FINAL,pixel_hash=3650281480745005001",
+      "counters": "COUNTERS,Counters { owner_reruns: 8000, descriptions: 8000, source_operations: 8000, source_reads: 0, destination_compares: 8408000, text_promotions: 24000, text_bytes_copied: 219206, layout_runs: 8000, measure_calls: 16088000, presentations: 8000, paint_passes: 8000, exact_updates: 0, coarse_updates: 8000 }",
+      "tasks": "TASKS,frozen=4000,dispatched=4000,accepted=4000",
+      "cpu": {
+        "0.5": 8373231.39,
+        "0.95": 9311959.24,
+        "0.99": 9573779.14
+      },
+      "wall": {
+        "0.5": 8374405.72,
+        "0.95": 9313972.11,
+        "0.99": 9574985.85
+      }
+    },
+    {
+      "repeat": 0,
+      "case": "0-4-owner",
+      "variant": "control",
+      "final": "FINAL,pixel_hash=3985071684859849092",
+      "counters": "COUNTERS,Counters { owner_reruns: 8000, descriptions: 8000, source_operations: 8000, source_reads: 0, destination_compares: 96000, text_promotions: 24000, text_bytes_copied: 204005, layout_runs: 8000, measure_calls: 104000, presentations: 8000, paint_passes: 8000, exact_updates: 0, coarse_updates: 8000 }",
+      "tasks": "TASKS,frozen=4000,dispatched=4000,accepted=4000",
+      "cpu": {
+        "0.5": 114174.89,
+        "0.95": 129391.15,
+        "0.99": 139193.31
+      },
+      "wall": {
+        "0.5": 114217.52,
+        "0.95": 129410.66,
+        "0.99": 139215.09
+      }
+    },
+    {
+      "repeat": 0,
+      "case": "0-4-owner",
+      "variant": "candidate",
+      "final": "FINAL,pixel_hash=3985071684859849092",
+      "counters": "COUNTERS,Counters { owner_reruns: 8000, descriptions: 8000, source_operations: 8000, source_reads: 0, destination_compares: 96000, text_promotions: 24000, text_bytes_copied: 204005, layout_runs: 8000, measure_calls: 104000, presentations: 8000, paint_passes: 8000, exact_updates: 0, coarse_updates: 8000 }",
+      "tasks": "TASKS,frozen=4000,dispatched=4000,accepted=4000",
+      "cpu": {
+        "0.5": 118791.29,
+        "0.95": 130333.02,
+        "0.99": 142168.2
+      },
+      "wall": {
+        "0.5": 118805.93,
+        "0.95": 130502.72,
+        "0.99": 142399.47
+      }
+    },
+    {
+      "repeat": 0,
+      "case": "0-4-opaque",
+      "variant": "candidate",
+      "final": "FINAL,pixel_hash=970880845196872716",
+      "counters": "COUNTERS,Counters { owner_reruns: 8000, descriptions: 8000, source_operations: 8000, source_reads: 0, destination_compares: 88000, text_promotions: 20000, text_bytes_copied: 152804, layout_runs: 8000, measure_calls: 88000, presentations: 8000, paint_passes: 8000, exact_updates: 0, coarse_updates: 8000 }",
+      "tasks": "TASKS,frozen=4000,dispatched=4000,accepted=4000",
+      "cpu": {
+        "0.5": 110873.39,
+        "0.95": 150066.79,
+        "0.99": 158565.28
+      },
+      "wall": {
+        "0.5": 110890.87,
+        "0.95": 150266.96,
+        "0.99": 158592.8
+      }
+    },
+    {
+      "repeat": 0,
+      "case": "0-4-opaque",
+      "variant": "control",
+      "final": "FINAL,pixel_hash=970880845196872716",
+      "counters": "COUNTERS,Counters { owner_reruns: 8000, descriptions: 8000, source_operations: 8000, source_reads: 0, destination_compares: 88000, text_promotions: 20000, text_bytes_copied: 152804, layout_runs: 8000, measure_calls: 88000, presentations: 8000, paint_passes: 8000, exact_updates: 0, coarse_updates: 8000 }",
+      "tasks": "TASKS,frozen=4000,dispatched=4000,accepted=4000",
+      "cpu": {
+        "0.5": 108814.71,
+        "0.95": 120476.67,
+        "0.99": 133812.08
+      },
+      "wall": {
+        "0.5": 108840.22,
+        "0.95": 120688.68,
+        "0.99": 133837.2
+      }
+    },
+    {
+      "repeat": 0,
+      "case": "1-4-owner",
+      "variant": "control",
+      "final": "FINAL,pixel_hash=13191195305542509566",
+      "counters": "COUNTERS,Counters { owner_reruns: 8000, descriptions: 8000, source_operations: 8000, source_reads: 0, destination_compares: 304000, text_promotions: 24000, text_bytes_copied: 204005, layout_runs: 8000, measure_calls: 504000, presentations: 8000, paint_passes: 8000, exact_updates: 0, coarse_updates: 8000 }",
+      "tasks": "TASKS,frozen=4000,dispatched=4000,accepted=4000",
+      "cpu": {
+        "0.5": 273018.2,
+        "0.95": 300749.21,
+        "0.99": 320602.59
+      },
+      "wall": {
+        "0.5": 273586.77,
+        "0.95": 300956.6,
+        "0.99": 320634.88
+      }
+    },
+    {
+      "repeat": 0,
+      "case": "1-4-owner",
+      "variant": "candidate",
+      "final": "FINAL,pixel_hash=13191195305542509566",
+      "counters": "COUNTERS,Counters { owner_reruns: 8000, descriptions: 8000, source_operations: 8000, source_reads: 0, destination_compares: 304000, text_promotions: 24000, text_bytes_copied: 204005, layout_runs: 8000, measure_calls: 504000, presentations: 8000, paint_passes: 8000, exact_updates: 0, coarse_updates: 8000 }",
+      "tasks": "TASKS,frozen=4000,dispatched=4000,accepted=4000",
+      "cpu": {
+        "0.5": 273016.5,
+        "0.95": 305715.77,
+        "0.99": 314361.55
+      },
+      "wall": {
+        "0.5": 273040.15,
+        "0.95": 305953.79,
+        "0.99": 314385.13
+      }
+    },
+    {
+      "repeat": 0,
+      "case": "1-4-opaque",
+      "variant": "candidate",
+      "final": "FINAL,pixel_hash=17907747960521954518",
+      "counters": "COUNTERS,Counters { owner_reruns: 8000, descriptions: 8000, source_operations: 8000, source_reads: 0, destination_compares: 296000, text_promotions: 20000, text_bytes_copied: 152804, layout_runs: 8000, measure_calls: 488000, presentations: 8000, paint_passes: 8000, exact_updates: 0, coarse_updates: 8000 }",
+      "tasks": "TASKS,frozen=4000,dispatched=4000,accepted=4000",
+      "cpu": {
+        "0.5": 276964.73,
+        "0.95": 308842.66,
+        "0.99": 319287.83
+      },
+      "wall": {
+        "0.5": 276990.27,
+        "0.95": 308864.25,
+        "0.99": 319309.99
+      }
+    },
+    {
+      "repeat": 0,
+      "case": "1-4-opaque",
+      "variant": "control",
+      "final": "FINAL,pixel_hash=17907747960521954518",
+      "counters": "COUNTERS,Counters { owner_reruns: 8000, descriptions: 8000, source_operations: 8000, source_reads: 0, destination_compares: 296000, text_promotions: 20000, text_bytes_copied: 152804, layout_runs: 8000, measure_calls: 488000, presentations: 8000, paint_passes: 8000, exact_updates: 0, coarse_updates: 8000 }",
+      "tasks": "TASKS,frozen=4000,dispatched=4000,accepted=4000",
+      "cpu": {
+        "0.5": 268212.65,
+        "0.95": 283627.17,
+        "0.99": 303668.32
+      },
+      "wall": {
+        "0.5": 268236.64,
+        "0.95": 283961.09,
+        "0.99": 303861.06
+      }
+    },
+    {
+      "repeat": 0,
+      "case": "40-4-owner",
+      "variant": "control",
+      "final": "FINAL,pixel_hash=3023726611500290992",
+      "counters": "COUNTERS,Counters { owner_reruns: 8000, descriptions: 8000, source_operations: 8000, source_reads: 0, destination_compares: 8416000, text_promotions: 24000, text_bytes_copied: 204005, layout_runs: 8000, measure_calls: 16104000, presentations: 8000, paint_passes: 8000, exact_updates: 0, coarse_updates: 8000 }",
+      "tasks": "TASKS,frozen=4000,dispatched=4000,accepted=4000",
+      "cpu": {
+        "0.5": 8439112.35,
+        "0.95": 8954878.93,
+        "0.99": 9026260.97
+      },
+      "wall": {
+        "0.5": 8440864.26,
+        "0.95": 8956593.14,
+        "0.99": 9027422.85
+      }
+    },
+    {
+      "repeat": 0,
+      "case": "40-4-owner",
+      "variant": "candidate",
+      "final": "FINAL,pixel_hash=3023726611500290992",
+      "counters": "COUNTERS,Counters { owner_reruns: 8000, descriptions: 8000, source_operations: 8000, source_reads: 0, destination_compares: 8416000, text_promotions: 24000, text_bytes_copied: 204005, layout_runs: 8000, measure_calls: 16104000, presentations: 8000, paint_passes: 8000, exact_updates: 0, coarse_updates: 8000 }",
+      "tasks": "TASKS,frozen=4000,dispatched=4000,accepted=4000",
+      "cpu": {
+        "0.5": 8872386.19,
+        "0.95": 9646812.55,
+        "0.99": 9788992.79
+      },
+      "wall": {
+        "0.5": 8873005.14,
+        "0.95": 9648241.53,
+        "0.99": 9791589.8
+      }
+    },
+    {
+      "repeat": 0,
+      "case": "40-4-opaque",
+      "variant": "candidate",
+      "final": "FINAL,pixel_hash=3081166828330265799",
+      "counters": "COUNTERS,Counters { owner_reruns: 8000, descriptions: 8000, source_operations: 8000, source_reads: 0, destination_compares: 8408000, text_promotions: 20000, text_bytes_copied: 152804, layout_runs: 8000, measure_calls: 16088000, presentations: 8000, paint_passes: 8000, exact_updates: 0, coarse_updates: 8000 }",
+      "tasks": "TASKS,frozen=4000,dispatched=4000,accepted=4000",
+      "cpu": {
+        "0.5": 8550263.24,
+        "0.95": 9682991.49,
+        "0.99": 10127366.25
+      },
+      "wall": {
+        "0.5": 8551106.93,
+        "0.95": 9684853.46,
+        "0.99": 10128575.06
+      }
+    },
+    {
+      "repeat": 0,
+      "case": "40-4-opaque",
+      "variant": "control",
+      "final": "FINAL,pixel_hash=3081166828330265799",
+      "counters": "COUNTERS,Counters { owner_reruns: 8000, descriptions: 8000, source_operations: 8000, source_reads: 0, destination_compares: 8408000, text_promotions: 20000, text_bytes_copied: 152804, layout_runs: 8000, measure_calls: 16088000, presentations: 8000, paint_passes: 8000, exact_updates: 0, coarse_updates: 8000 }",
+      "tasks": "TASKS,frozen=4000,dispatched=4000,accepted=4000",
+      "cpu": {
+        "0.5": 8169731.29,
+        "0.95": 8644223.47,
+        "0.99": 9029374.24
+      },
+      "wall": {
+        "0.5": 8171694.06,
+        "0.95": 8647779.92,
+        "0.99": 9030122.18
+      }
+    },
+    {
+      "repeat": 1,
+      "case": "0-1-unrelated",
+      "variant": "candidate",
+      "final": "FINAL,pixel_hash=12230463492156930872",
+      "counters": "COUNTERS,Counters { owner_reruns: 0, descriptions: 0, source_operations: 4000, source_reads: 4000, destination_compares: 4000, text_promotions: 4000, text_bytes_copied: 27201, layout_runs: 4000, measure_calls: 8000, presentations: 4000, paint_passes: 4000, exact_updates: 4000, coarse_updates: 0 }",
+      "tasks": "TASKS,frozen=0,dispatched=0,accepted=0",
+      "cpu": {
+        "0.5": 18357.07,
+        "0.95": 22252.5,
+        "0.99": 25003.38
+      },
+      "wall": {
+        "0.5": 18362.91,
+        "0.95": 22260.33,
+        "0.99": 25015.1
+      }
+    },
+    {
+      "repeat": 1,
+      "case": "0-1-unrelated",
+      "variant": "control",
+      "final": "FINAL,pixel_hash=12230463492156930872",
+      "counters": "COUNTERS,Counters { owner_reruns: 0, descriptions: 0, source_operations: 4000, source_reads: 4000, destination_compares: 4000, text_promotions: 4000, text_bytes_copied: 27201, layout_runs: 4000, measure_calls: 8000, presentations: 4000, paint_passes: 4000, exact_updates: 4000, coarse_updates: 0 }",
+      "tasks": "TASKS,frozen=0,dispatched=0,accepted=0",
+      "cpu": {
+        "0.5": 17613.47,
+        "0.95": 19632.36,
+        "0.99": 21327.47
+      },
+      "wall": {
+        "0.5": 17615.31,
+        "0.95": 19645.73,
+        "0.99": 21348.2
+      }
+    },
+    {
+      "repeat": 1,
+      "case": "0-2-unrelated",
+      "variant": "control",
+      "final": "FINAL,pixel_hash=7578910431315845812",
+      "counters": "COUNTERS,Counters { owner_reruns: 8000, descriptions: 8000, source_operations: 8000, source_reads: 0, destination_compares: 88000, text_promotions: 12000, text_bytes_copied: 98402, layout_runs: 8000, measure_calls: 88000, presentations: 8000, paint_passes: 8000, exact_updates: 0, coarse_updates: 8000 }",
+      "tasks": "TASKS,frozen=4000,dispatched=4000,accepted=4000",
+      "cpu": {
+        "0.5": 80843.52,
+        "0.95": 100764.34,
+        "0.99": 107258.88
+      },
+      "wall": {
+        "0.5": 80863.95,
+        "0.95": 100788.98,
+        "0.99": 107287.41
+      }
+    },
+    {
+      "repeat": 1,
+      "case": "0-2-unrelated",
+      "variant": "candidate",
+      "final": "FINAL,pixel_hash=7578910431315845812",
+      "counters": "COUNTERS,Counters { owner_reruns: 0, descriptions: 0, source_operations: 4000, source_reads: 8000, destination_compares: 8000, text_promotions: 8000, text_bytes_copied: 54402, layout_runs: 4000, measure_calls: 16000, presentations: 4000, paint_passes: 4000, exact_updates: 4000, coarse_updates: 0 }",
+      "tasks": "TASKS,frozen=0,dispatched=0,accepted=0",
+      "cpu": {
+        "0.5": 32535.26,
+        "0.95": 40441.85,
+        "0.99": 40708.75
+      },
+      "wall": {
+        "0.5": 32541.34,
+        "0.95": 40453.91,
+        "0.99": 40722.53
+      }
+    },
+    {
+      "repeat": 1,
+      "case": "0-4-unrelated",
+      "variant": "candidate",
+      "final": "FINAL,pixel_hash=970880845196872716",
+      "counters": "COUNTERS,Counters { owner_reruns: 0, descriptions: 0, source_operations: 4000, source_reads: 16000, destination_compares: 16000, text_promotions: 16000, text_bytes_copied: 108804, layout_runs: 4000, measure_calls: 32000, presentations: 4000, paint_passes: 4000, exact_updates: 4000, coarse_updates: 0 }",
+      "tasks": "TASKS,frozen=0,dispatched=0,accepted=0",
+      "cpu": {
+        "0.5": 62234.98,
+        "0.95": 76385.33,
+        "0.99": 77403.95
+      },
+      "wall": {
+        "0.5": 62242.85,
+        "0.95": 76398.66,
+        "0.99": 77419.07
+      }
+    },
+    {
+      "repeat": 1,
+      "case": "0-4-unrelated",
+      "variant": "control",
+      "final": "FINAL,pixel_hash=970880845196872716",
+      "counters": "COUNTERS,Counters { owner_reruns: 8000, descriptions: 8000, source_operations: 8000, source_reads: 0, destination_compares: 88000, text_promotions: 20000, text_bytes_copied: 152804, layout_runs: 8000, measure_calls: 88000, presentations: 8000, paint_passes: 8000, exact_updates: 0, coarse_updates: 8000 }",
+      "tasks": "TASKS,frozen=4000,dispatched=4000,accepted=4000",
+      "cpu": {
+        "0.5": 106407.47,
+        "0.95": 132736.84,
+        "0.99": 145856.15
+      },
+      "wall": {
+        "0.5": 106434.38,
+        "0.95": 132909.75,
+        "0.99": 145880.82
+      }
+    },
+    {
+      "repeat": 1,
+      "case": "0-1-dependent",
+      "variant": "control",
+      "final": "FINAL,pixel_hash=8829556083644644402",
+      "counters": "COUNTERS,Counters { owner_reruns: 8000, descriptions: 8000, source_operations: 8000, source_reads: 0, destination_compares: 88000, text_promotions: 12000, text_bytes_copied: 126402, layout_runs: 8000, measure_calls: 88000, presentations: 8000, paint_passes: 8000, exact_updates: 0, coarse_updates: 8000 }",
+      "tasks": "TASKS,frozen=4000,dispatched=4000,accepted=4000",
+      "cpu": {
+        "0.5": 71063.12,
+        "0.95": 76096.59,
+        "0.99": 103957.55
+      },
+      "wall": {
+        "0.5": 71070.84,
+        "0.95": 76108.3,
+        "0.99": 103976.08
+      }
+    },
+    {
+      "repeat": 1,
+      "case": "0-1-dependent",
+      "variant": "candidate",
+      "final": "FINAL,pixel_hash=8829556083644644402",
+      "counters": "COUNTERS,Counters { owner_reruns: 8000, descriptions: 8000, source_operations: 8000, source_reads: 0, destination_compares: 88000, text_promotions: 12000, text_bytes_copied: 126402, layout_runs: 8000, measure_calls: 88000, presentations: 8000, paint_passes: 8000, exact_updates: 0, coarse_updates: 8000 }",
+      "tasks": "TASKS,frozen=4000,dispatched=4000,accepted=4000",
+      "cpu": {
+        "0.5": 76009.23,
+        "0.95": 100869.35,
+        "0.99": 112294.34
+      },
+      "wall": {
+        "0.5": 76024.15,
+        "0.95": 100894.69,
+        "0.99": 112316.35
+      }
+    },
+    {
+      "repeat": 1,
+      "case": "0-2-dependent",
+      "variant": "candidate",
+      "final": "FINAL,pixel_hash=17759712045857455370",
+      "counters": "COUNTERS,Counters { owner_reruns: 8000, descriptions: 8000, source_operations: 8000, source_reads: 0, destination_compares: 88000, text_promotions: 16000, text_bytes_copied: 164804, layout_runs: 8000, measure_calls: 88000, presentations: 8000, paint_passes: 8000, exact_updates: 0, coarse_updates: 8000 }",
+      "tasks": "TASKS,frozen=4000,dispatched=4000,accepted=4000",
+      "cpu": {
+        "0.5": 87799.23,
+        "0.95": 92434.55,
+        "0.99": 99711.66
+      },
+      "wall": {
+        "0.5": 87814.31,
+        "0.95": 92458.33,
+        "0.99": 99732.5
+      }
+    },
+    {
+      "repeat": 1,
+      "case": "0-2-dependent",
+      "variant": "control",
+      "final": "FINAL,pixel_hash=17759712045857455370",
+      "counters": "COUNTERS,Counters { owner_reruns: 8000, descriptions: 8000, source_operations: 8000, source_reads: 0, destination_compares: 88000, text_promotions: 16000, text_bytes_copied: 164804, layout_runs: 8000, measure_calls: 88000, presentations: 8000, paint_passes: 8000, exact_updates: 0, coarse_updates: 8000 }",
+      "tasks": "TASKS,frozen=4000,dispatched=4000,accepted=4000",
+      "cpu": {
+        "0.5": 86347.5,
+        "0.95": 99000.72,
+        "0.99": 116550.16
+      },
+      "wall": {
+        "0.5": 86363.38,
+        "0.95": 99030.49,
+        "0.99": 116566.24
+      }
+    },
+    {
+      "repeat": 1,
+      "case": "0-4-dependent",
+      "variant": "control",
+      "final": "FINAL,pixel_hash=3408001187935195458",
+      "counters": "COUNTERS,Counters { owner_reruns: 8000, descriptions: 8000, source_operations: 8000, source_reads: 0, destination_compares: 88000, text_promotions: 24000, text_bytes_copied: 219206, layout_runs: 8000, measure_calls: 88000, presentations: 8000, paint_passes: 8000, exact_updates: 0, coarse_updates: 8000 }",
+      "tasks": "TASKS,frozen=4000,dispatched=4000,accepted=4000",
+      "cpu": {
+        "0.5": 111423.71,
+        "0.95": 118152.39,
+        "0.99": 119036.86
+      },
+      "wall": {
+        "0.5": 111448.41,
+        "0.95": 118168.94,
+        "0.99": 119148.49
+      }
+    },
+    {
+      "repeat": 1,
+      "case": "0-4-dependent",
+      "variant": "candidate",
+      "final": "FINAL,pixel_hash=3408001187935195458",
+      "counters": "COUNTERS,Counters { owner_reruns: 8000, descriptions: 8000, source_operations: 8000, source_reads: 0, destination_compares: 88000, text_promotions: 24000, text_bytes_copied: 219206, layout_runs: 8000, measure_calls: 88000, presentations: 8000, paint_passes: 8000, exact_updates: 0, coarse_updates: 8000 }",
+      "tasks": "TASKS,frozen=4000,dispatched=4000,accepted=4000",
+      "cpu": {
+        "0.5": 111267.22,
+        "0.95": 118911.51,
+        "0.99": 136002.7
+      },
+      "wall": {
+        "0.5": 111293.11,
+        "0.95": 118931.19,
+        "0.99": 136027.5
+      }
+    },
+    {
+      "repeat": 1,
+      "case": "1-1-unrelated",
+      "variant": "candidate",
+      "final": "FINAL,pixel_hash=8627942319840186434",
+      "counters": "COUNTERS,Counters { owner_reruns: 0, descriptions: 0, source_operations: 4000, source_reads: 4000, destination_compares: 4000, text_promotions: 4000, text_bytes_copied: 27201, layout_runs: 4000, measure_calls: 8000, presentations: 4000, paint_passes: 4000, exact_updates: 4000, coarse_updates: 0 }",
+      "tasks": "TASKS,frozen=0,dispatched=0,accepted=0",
+      "cpu": {
+        "0.5": 14384.28,
+        "0.95": 19010.2,
+        "0.99": 20355.43
+      },
+      "wall": {
+        "0.5": 14386.23,
+        "0.95": 19023.44,
+        "0.99": 20367.58
+      }
+    },
+    {
+      "repeat": 1,
+      "case": "1-1-unrelated",
+      "variant": "control",
+      "final": "FINAL,pixel_hash=8627942319840186434",
+      "counters": "COUNTERS,Counters { owner_reruns: 0, descriptions: 0, source_operations: 4000, source_reads: 4000, destination_compares: 4000, text_promotions: 4000, text_bytes_copied: 27201, layout_runs: 4000, measure_calls: 8000, presentations: 4000, paint_passes: 4000, exact_updates: 4000, coarse_updates: 0 }",
+      "tasks": "TASKS,frozen=0,dispatched=0,accepted=0",
+      "cpu": {
+        "0.5": 14566.23,
+        "0.95": 14738.15,
+        "0.99": 16151.12
+      },
+      "wall": {
+        "0.5": 14568.08,
+        "0.95": 14740.4,
+        "0.99": 16153.96
+      }
+    },
+    {
+      "repeat": 1,
+      "case": "1-2-unrelated",
+      "variant": "control",
+      "final": "FINAL,pixel_hash=3284881484069841934",
+      "counters": "COUNTERS,Counters { owner_reruns: 8000, descriptions: 8000, source_operations: 8000, source_reads: 0, destination_compares: 296000, text_promotions: 12000, text_bytes_copied: 98402, layout_runs: 8000, measure_calls: 488000, presentations: 8000, paint_passes: 8000, exact_updates: 0, coarse_updates: 8000 }",
+      "tasks": "TASKS,frozen=4000,dispatched=4000,accepted=4000",
+      "cpu": {
+        "0.5": 231184.52,
+        "0.95": 247086.68,
+        "0.99": 271020.74
+      },
+      "wall": {
+        "0.5": 231208.45,
+        "0.95": 247615.47,
+        "0.99": 271042.0
+      }
+    },
+    {
+      "repeat": 1,
+      "case": "1-2-unrelated",
+      "variant": "candidate",
+      "final": "FINAL,pixel_hash=3284881484069841934",
+      "counters": "COUNTERS,Counters { owner_reruns: 0, descriptions: 0, source_operations: 4000, source_reads: 8000, destination_compares: 8000, text_promotions: 8000, text_bytes_copied: 54402, layout_runs: 4000, measure_calls: 16000, presentations: 4000, paint_passes: 4000, exact_updates: 4000, coarse_updates: 0 }",
+      "tasks": "TASKS,frozen=0,dispatched=0,accepted=0",
+      "cpu": {
+        "0.5": 44047.85,
+        "0.95": 48732.87,
+        "0.99": 51179.47
+      },
+      "wall": {
+        "0.5": 44055.88,
+        "0.95": 48741.68,
+        "0.99": 51202.91
+      }
+    },
+    {
+      "repeat": 1,
+      "case": "1-4-unrelated",
+      "variant": "candidate",
+      "final": "FINAL,pixel_hash=17907747960521954518",
+      "counters": "COUNTERS,Counters { owner_reruns: 0, descriptions: 0, source_operations: 4000, source_reads: 16000, destination_compares: 16000, text_promotions: 16000, text_bytes_copied: 108804, layout_runs: 4000, measure_calls: 32000, presentations: 4000, paint_passes: 4000, exact_updates: 4000, coarse_updates: 0 }",
+      "tasks": "TASKS,frozen=0,dispatched=0,accepted=0",
+      "cpu": {
+        "0.5": 72414.06,
+        "0.95": 76817.95,
+        "0.99": 85874.4
+      },
+      "wall": {
+        "0.5": 72427.09,
+        "0.95": 76835.48,
+        "0.99": 85887.08
+      }
+    },
+    {
+      "repeat": 1,
+      "case": "1-4-unrelated",
+      "variant": "control",
+      "final": "FINAL,pixel_hash=17907747960521954518",
+      "counters": "COUNTERS,Counters { owner_reruns: 8000, descriptions: 8000, source_operations: 8000, source_reads: 0, destination_compares: 296000, text_promotions: 20000, text_bytes_copied: 152804, layout_runs: 8000, measure_calls: 488000, presentations: 8000, paint_passes: 8000, exact_updates: 0, coarse_updates: 8000 }",
+      "tasks": "TASKS,frozen=4000,dispatched=4000,accepted=4000",
+      "cpu": {
+        "0.5": 265535.41,
+        "0.95": 286647.17,
+        "0.99": 291921.09
+      },
+      "wall": {
+        "0.5": 265548.57,
+        "0.95": 286665.97,
+        "0.99": 291938.45
+      }
+    },
+    {
+      "repeat": 1,
+      "case": "1-1-dependent",
+      "variant": "control",
+      "final": "FINAL,pixel_hash=13195835639209551848",
+      "counters": "COUNTERS,Counters { owner_reruns: 8000, descriptions: 8000, source_operations: 8000, source_reads: 0, destination_compares: 296000, text_promotions: 12000, text_bytes_copied: 126402, layout_runs: 8000, measure_calls: 488000, presentations: 8000, paint_passes: 8000, exact_updates: 0, coarse_updates: 8000 }",
+      "tasks": "TASKS,frozen=4000,dispatched=4000,accepted=4000",
+      "cpu": {
+        "0.5": 228540.05,
+        "0.95": 260012.51,
+        "0.99": 262686.65
+      },
+      "wall": {
+        "0.5": 228557.38,
+        "0.95": 260040.34,
+        "0.99": 263015.71
+      }
+    },
+    {
+      "repeat": 1,
+      "case": "1-1-dependent",
+      "variant": "candidate",
+      "final": "FINAL,pixel_hash=13195835639209551848",
+      "counters": "COUNTERS,Counters { owner_reruns: 8000, descriptions: 8000, source_operations: 8000, source_reads: 0, destination_compares: 296000, text_promotions: 12000, text_bytes_copied: 126402, layout_runs: 8000, measure_calls: 488000, presentations: 8000, paint_passes: 8000, exact_updates: 0, coarse_updates: 8000 }",
+      "tasks": "TASKS,frozen=4000,dispatched=4000,accepted=4000",
+      "cpu": {
+        "0.5": 242934.35,
+        "0.95": 270946.7,
+        "0.99": 278802.79
+      },
+      "wall": {
+        "0.5": 243073.25,
+        "0.95": 270964.56,
+        "0.99": 278822.91
+      }
+    },
+    {
+      "repeat": 1,
+      "case": "1-2-dependent",
+      "variant": "candidate",
+      "final": "FINAL,pixel_hash=14124934070918126864",
+      "counters": "COUNTERS,Counters { owner_reruns: 8000, descriptions: 8000, source_operations: 8000, source_reads: 0, destination_compares: 296000, text_promotions: 16000, text_bytes_copied: 164804, layout_runs: 8000, measure_calls: 488000, presentations: 8000, paint_passes: 8000, exact_updates: 0, coarse_updates: 8000 }",
+      "tasks": "TASKS,frozen=4000,dispatched=4000,accepted=4000",
+      "cpu": {
+        "0.5": 244465.44,
+        "0.95": 266336.53,
+        "0.99": 292510.9
+      },
+      "wall": {
+        "0.5": 244479.6,
+        "0.95": 266352.69,
+        "0.99": 292526.07
+      }
+    },
+    {
+      "repeat": 1,
+      "case": "1-2-dependent",
+      "variant": "control",
+      "final": "FINAL,pixel_hash=14124934070918126864",
+      "counters": "COUNTERS,Counters { owner_reruns: 8000, descriptions: 8000, source_operations: 8000, source_reads: 0, destination_compares: 296000, text_promotions: 16000, text_bytes_copied: 164804, layout_runs: 8000, measure_calls: 488000, presentations: 8000, paint_passes: 8000, exact_updates: 0, coarse_updates: 8000 }",
+      "tasks": "TASKS,frozen=4000,dispatched=4000,accepted=4000",
+      "cpu": {
+        "0.5": 244752.38,
+        "0.95": 274391.79,
+        "0.99": 299933.49
+      },
+      "wall": {
+        "0.5": 244767.02,
+        "0.95": 274412.33,
+        "0.99": 299948.11
+      }
+    },
+    {
+      "repeat": 1,
+      "case": "1-4-dependent",
+      "variant": "control",
+      "final": "FINAL,pixel_hash=14118930585116151960",
+      "counters": "COUNTERS,Counters { owner_reruns: 8000, descriptions: 8000, source_operations: 8000, source_reads: 0, destination_compares: 296000, text_promotions: 24000, text_bytes_copied: 219206, layout_runs: 8000, measure_calls: 488000, presentations: 8000, paint_passes: 8000, exact_updates: 0, coarse_updates: 8000 }",
+      "tasks": "TASKS,frozen=4000,dispatched=4000,accepted=4000",
+      "cpu": {
+        "0.5": 264434.95,
+        "0.95": 298186.68,
+        "0.99": 348097.68
+      },
+      "wall": {
+        "0.5": 264550.41,
+        "0.95": 298634.54,
+        "0.99": 348306.09
+      }
+    },
+    {
+      "repeat": 1,
+      "case": "1-4-dependent",
+      "variant": "candidate",
+      "final": "FINAL,pixel_hash=14118930585116151960",
+      "counters": "COUNTERS,Counters { owner_reruns: 8000, descriptions: 8000, source_operations: 8000, source_reads: 0, destination_compares: 296000, text_promotions: 24000, text_bytes_copied: 219206, layout_runs: 8000, measure_calls: 488000, presentations: 8000, paint_passes: 8000, exact_updates: 0, coarse_updates: 8000 }",
+      "tasks": "TASKS,frozen=4000,dispatched=4000,accepted=4000",
+      "cpu": {
+        "0.5": 263365.43,
+        "0.95": 277383.22,
+        "0.99": 317464.49
+      },
+      "wall": {
+        "0.5": 263384.31,
+        "0.95": 277600.12,
+        "0.99": 317490.17
+      }
+    },
+    {
+      "repeat": 1,
+      "case": "40-1-unrelated",
+      "variant": "candidate",
+      "final": "FINAL,pixel_hash=15889697540729426171",
+      "counters": "COUNTERS,Counters { owner_reruns: 0, descriptions: 0, source_operations: 4000, source_reads: 4000, destination_compares: 4000, text_promotions: 4000, text_bytes_copied: 27201, layout_runs: 4000, measure_calls: 8000, presentations: 4000, paint_passes: 4000, exact_updates: 4000, coarse_updates: 0 }",
+      "tasks": "TASKS,frozen=0,dispatched=0,accepted=0",
+      "cpu": {
+        "0.5": 14929.82,
+        "0.95": 15426.46,
+        "0.99": 18471.18
+      },
+      "wall": {
+        "0.5": 14932.46,
+        "0.95": 15431.0,
+        "0.99": 18481.04
+      }
+    },
+    {
+      "repeat": 1,
+      "case": "40-1-unrelated",
+      "variant": "control",
+      "final": "FINAL,pixel_hash=15889697540729426171",
+      "counters": "COUNTERS,Counters { owner_reruns: 0, descriptions: 0, source_operations: 4000, source_reads: 4000, destination_compares: 4000, text_promotions: 4000, text_bytes_copied: 27201, layout_runs: 4000, measure_calls: 8000, presentations: 4000, paint_passes: 4000, exact_updates: 4000, coarse_updates: 0 }",
+      "tasks": "TASKS,frozen=0,dispatched=0,accepted=0",
+      "cpu": {
+        "0.5": 15495.49,
+        "0.95": 18671.96,
+        "0.99": 20954.96
+      },
+      "wall": {
+        "0.5": 15500.64,
+        "0.95": 18681.09,
+        "0.99": 20959.59
+      }
+    },
+    {
+      "repeat": 1,
+      "case": "40-2-unrelated",
+      "variant": "control",
+      "final": "FINAL,pixel_hash=486252068588713791",
+      "counters": "COUNTERS,Counters { owner_reruns: 8000, descriptions: 8000, source_operations: 8000, source_reads: 0, destination_compares: 8408000, text_promotions: 12000, text_bytes_copied: 98402, layout_runs: 8000, measure_calls: 16088000, presentations: 8000, paint_passes: 8000, exact_updates: 0, coarse_updates: 8000 }",
+      "tasks": "TASKS,frozen=4000,dispatched=4000,accepted=4000",
+      "cpu": {
+        "0.5": 7883729.36,
+        "0.95": 8387044.09,
+        "0.99": 8705443.34
+      },
+      "wall": {
+        "0.5": 7885087.35,
+        "0.95": 8387688.27,
+        "0.99": 8709249.21
+      }
+    },
+    {
+      "repeat": 1,
+      "case": "40-2-unrelated",
+      "variant": "candidate",
+      "final": "FINAL,pixel_hash=486252068588713791",
+      "counters": "COUNTERS,Counters { owner_reruns: 0, descriptions: 0, source_operations: 4000, source_reads: 8000, destination_compares: 8000, text_promotions: 8000, text_bytes_copied: 54402, layout_runs: 4000, measure_calls: 16000, presentations: 4000, paint_passes: 4000, exact_updates: 4000, coarse_updates: 0 }",
+      "tasks": "TASKS,frozen=0,dispatched=0,accepted=0",
+      "cpu": {
+        "0.5": 461746.28,
+        "0.95": 522849.63,
+        "0.99": 576516.49
+      },
+      "wall": {
+        "0.5": 461761.57,
+        "0.95": 523192.92,
+        "0.99": 576794.33
+      }
+    },
+    {
+      "repeat": 1,
+      "case": "40-4-unrelated",
+      "variant": "candidate",
+      "final": "FINAL,pixel_hash=3081166828330265799",
+      "counters": "COUNTERS,Counters { owner_reruns: 0, descriptions: 0, source_operations: 4000, source_reads: 16000, destination_compares: 16000, text_promotions: 16000, text_bytes_copied: 108804, layout_runs: 4000, measure_calls: 32000, presentations: 4000, paint_passes: 4000, exact_updates: 4000, coarse_updates: 0 }",
+      "tasks": "TASKS,frozen=0,dispatched=0,accepted=0",
+      "cpu": {
+        "0.5": 474324.27,
+        "0.95": 512377.82,
+        "0.99": 527141.02
+      },
+      "wall": {
+        "0.5": 474345.42,
+        "0.95": 515792.59,
+        "0.99": 527526.56
+      }
+    },
+    {
+      "repeat": 1,
+      "case": "40-4-unrelated",
+      "variant": "control",
+      "final": "FINAL,pixel_hash=3081166828330265799",
+      "counters": "COUNTERS,Counters { owner_reruns: 8000, descriptions: 8000, source_operations: 8000, source_reads: 0, destination_compares: 8408000, text_promotions: 20000, text_bytes_copied: 152804, layout_runs: 8000, measure_calls: 16088000, presentations: 8000, paint_passes: 8000, exact_updates: 0, coarse_updates: 8000 }",
+      "tasks": "TASKS,frozen=4000,dispatched=4000,accepted=4000",
+      "cpu": {
+        "0.5": 7890825.42,
+        "0.95": 8303487.47,
+        "0.99": 9577784.88
+      },
+      "wall": {
+        "0.5": 7891773.14,
+        "0.95": 8304093.22,
+        "0.99": 9578728.14
+      }
+    },
+    {
+      "repeat": 1,
+      "case": "40-1-dependent",
+      "variant": "control",
+      "final": "FINAL,pixel_hash=9187653472009869049",
+      "counters": "COUNTERS,Counters { owner_reruns: 8000, descriptions: 8000, source_operations: 8000, source_reads: 0, destination_compares: 8408000, text_promotions: 12000, text_bytes_copied: 126402, layout_runs: 8000, measure_calls: 16088000, presentations: 8000, paint_passes: 8000, exact_updates: 0, coarse_updates: 8000 }",
+      "tasks": "TASKS,frozen=4000,dispatched=4000,accepted=4000",
+      "cpu": {
+        "0.5": 7588493.2,
+        "0.95": 8090299.41,
+        "0.99": 8617032.69
+      },
+      "wall": {
+        "0.5": 7589222.09,
+        "0.95": 8091013.28,
+        "0.99": 8617744.22
+      }
+    },
+    {
+      "repeat": 1,
+      "case": "40-1-dependent",
+      "variant": "candidate",
+      "final": "FINAL,pixel_hash=9187653472009869049",
+      "counters": "COUNTERS,Counters { owner_reruns: 8000, descriptions: 8000, source_operations: 8000, source_reads: 0, destination_compares: 8408000, text_promotions: 12000, text_bytes_copied: 126402, layout_runs: 8000, measure_calls: 16088000, presentations: 8000, paint_passes: 8000, exact_updates: 0, coarse_updates: 8000 }",
+      "tasks": "TASKS,frozen=4000,dispatched=4000,accepted=4000",
+      "cpu": {
+        "0.5": 7047349.82,
+        "0.95": 7423643.7,
+        "0.99": 7608306.22
+      },
+      "wall": {
+        "0.5": 7047760.28,
+        "0.95": 7424036.9,
+        "0.99": 7610321.95
+      }
+    },
+    {
+      "repeat": 1,
+      "case": "40-2-dependent",
+      "variant": "candidate",
+      "final": "FINAL,pixel_hash=18228237087345915393",
+      "counters": "COUNTERS,Counters { owner_reruns: 8000, descriptions: 8000, source_operations: 8000, source_reads: 0, destination_compares: 8408000, text_promotions: 16000, text_bytes_copied: 164804, layout_runs: 8000, measure_calls: 16088000, presentations: 8000, paint_passes: 8000, exact_updates: 0, coarse_updates: 8000 }",
+      "tasks": "TASKS,frozen=4000,dispatched=4000,accepted=4000",
+      "cpu": {
+        "0.5": 7217413.45,
+        "0.95": 7578005.45,
+        "0.99": 8127507.89
+      },
+      "wall": {
+        "0.5": 7218685.26,
+        "0.95": 7578714.1,
+        "0.99": 8128043.03
+      }
+    },
+    {
+      "repeat": 1,
+      "case": "40-2-dependent",
+      "variant": "control",
+      "final": "FINAL,pixel_hash=18228237087345915393",
+      "counters": "COUNTERS,Counters { owner_reruns: 8000, descriptions: 8000, source_operations: 8000, source_reads: 0, destination_compares: 8408000, text_promotions: 16000, text_bytes_copied: 164804, layout_runs: 8000, measure_calls: 16088000, presentations: 8000, paint_passes: 8000, exact_updates: 0, coarse_updates: 8000 }",
+      "tasks": "TASKS,frozen=4000,dispatched=4000,accepted=4000",
+      "cpu": {
+        "0.5": 7050904.81,
+        "0.95": 7291239.18,
+        "0.99": 7499950.28
+      },
+      "wall": {
+        "0.5": 7051480.89,
+        "0.95": 7291714.43,
+        "0.99": 7500834.46
+      }
+    },
+    {
+      "repeat": 1,
+      "case": "40-4-dependent",
+      "variant": "control",
+      "final": "FINAL,pixel_hash=3650281480745005001",
+      "counters": "COUNTERS,Counters { owner_reruns: 8000, descriptions: 8000, source_operations: 8000, source_reads: 0, destination_compares: 8408000, text_promotions: 24000, text_bytes_copied: 219206, layout_runs: 8000, measure_calls: 16088000, presentations: 8000, paint_passes: 8000, exact_updates: 0, coarse_updates: 8000 }",
+      "tasks": "TASKS,frozen=4000,dispatched=4000,accepted=4000",
+      "cpu": {
+        "0.5": 6964797.37,
+        "0.95": 7625938.41,
+        "0.99": 7950852.55
+      },
+      "wall": {
+        "0.5": 6964978.47,
+        "0.95": 7626777.58,
+        "0.99": 7951152.59
+      }
+    },
+    {
+      "repeat": 1,
+      "case": "40-4-dependent",
+      "variant": "candidate",
+      "final": "FINAL,pixel_hash=3650281480745005001",
+      "counters": "COUNTERS,Counters { owner_reruns: 8000, descriptions: 8000, source_operations: 8000, source_reads: 0, destination_compares: 8408000, text_promotions: 24000, text_bytes_copied: 219206, layout_runs: 8000, measure_calls: 16088000, presentations: 8000, paint_passes: 8000, exact_updates: 0, coarse_updates: 8000 }",
+      "tasks": "TASKS,frozen=4000,dispatched=4000,accepted=4000",
+      "cpu": {
+        "0.5": 7897452.18,
+        "0.95": 9533713.1,
+        "0.99": 11284115.67
+      },
+      "wall": {
+        "0.5": 7898604.5,
+        "0.95": 9535308.4,
+        "0.99": 11286465.8
+      }
+    },
+    {
+      "repeat": 1,
+      "case": "0-4-owner",
+      "variant": "candidate",
+      "final": "FINAL,pixel_hash=3985071684859849092",
+      "counters": "COUNTERS,Counters { owner_reruns: 8000, descriptions: 8000, source_operations: 8000, source_reads: 0, destination_compares: 96000, text_promotions: 24000, text_bytes_copied: 204005, layout_runs: 8000, measure_calls: 104000, presentations: 8000, paint_passes: 8000, exact_updates: 0, coarse_updates: 8000 }",
+      "tasks": "TASKS,frozen=4000,dispatched=4000,accepted=4000",
+      "cpu": {
+        "0.5": 154686.39,
+        "0.95": 166063.0,
+        "0.99": 173148.15
+      },
+      "wall": {
+        "0.5": 154739.93,
+        "0.95": 166100.39,
+        "0.99": 173236.93
+      }
+    },
+    {
+      "repeat": 1,
+      "case": "0-4-owner",
+      "variant": "control",
+      "final": "FINAL,pixel_hash=3985071684859849092",
+      "counters": "COUNTERS,Counters { owner_reruns: 8000, descriptions: 8000, source_operations: 8000, source_reads: 0, destination_compares: 96000, text_promotions: 24000, text_bytes_copied: 204005, layout_runs: 8000, measure_calls: 104000, presentations: 8000, paint_passes: 8000, exact_updates: 0, coarse_updates: 8000 }",
+      "tasks": "TASKS,frozen=4000,dispatched=4000,accepted=4000",
+      "cpu": {
+        "0.5": 137372.57,
+        "0.95": 161212.87,
+        "0.99": 169807.86
+      },
+      "wall": {
+        "0.5": 137410.64,
+        "0.95": 161239.16,
+        "0.99": 169863.78
+      }
+    },
+    {
+      "repeat": 1,
+      "case": "0-4-opaque",
+      "variant": "control",
+      "final": "FINAL,pixel_hash=970880845196872716",
+      "counters": "COUNTERS,Counters { owner_reruns: 8000, descriptions: 8000, source_operations: 8000, source_reads: 0, destination_compares: 88000, text_promotions: 20000, text_bytes_copied: 152804, layout_runs: 8000, measure_calls: 88000, presentations: 8000, paint_passes: 8000, exact_updates: 0, coarse_updates: 8000 }",
+      "tasks": "TASKS,frozen=4000,dispatched=4000,accepted=4000",
+      "cpu": {
+        "0.5": 116332.66,
+        "0.95": 146373.92,
+        "0.99": 148461.16
+      },
+      "wall": {
+        "0.5": 116348.22,
+        "0.95": 146427.7,
+        "0.99": 148527.03
+      }
+    },
+    {
+      "repeat": 1,
+      "case": "0-4-opaque",
+      "variant": "candidate",
+      "final": "FINAL,pixel_hash=970880845196872716",
+      "counters": "COUNTERS,Counters { owner_reruns: 8000, descriptions: 8000, source_operations: 8000, source_reads: 0, destination_compares: 88000, text_promotions: 20000, text_bytes_copied: 152804, layout_runs: 8000, measure_calls: 88000, presentations: 8000, paint_passes: 8000, exact_updates: 0, coarse_updates: 8000 }",
+      "tasks": "TASKS,frozen=4000,dispatched=4000,accepted=4000",
+      "cpu": {
+        "0.5": 122922.36,
+        "0.95": 146382.84,
+        "0.99": 181255.6
+      },
+      "wall": {
+        "0.5": 122946.83,
+        "0.95": 146421.7,
+        "0.99": 181332.05
+      }
+    },
+    {
+      "repeat": 1,
+      "case": "1-4-owner",
+      "variant": "candidate",
+      "final": "FINAL,pixel_hash=13191195305542509566",
+      "counters": "COUNTERS,Counters { owner_reruns: 8000, descriptions: 8000, source_operations: 8000, source_reads: 0, destination_compares: 304000, text_promotions: 24000, text_bytes_copied: 204005, layout_runs: 8000, measure_calls: 504000, presentations: 8000, paint_passes: 8000, exact_updates: 0, coarse_updates: 8000 }",
+      "tasks": "TASKS,frozen=4000,dispatched=4000,accepted=4000",
+      "cpu": {
+        "0.5": 336645.01,
+        "0.95": 409366.24,
+        "0.99": 440937.29
+      },
+      "wall": {
+        "0.5": 337091.99,
+        "0.95": 409409.5,
+        "0.99": 440955.52
+      }
+    },
+    {
+      "repeat": 1,
+      "case": "1-4-owner",
+      "variant": "control",
+      "final": "FINAL,pixel_hash=13191195305542509566",
+      "counters": "COUNTERS,Counters { owner_reruns: 8000, descriptions: 8000, source_operations: 8000, source_reads: 0, destination_compares: 304000, text_promotions: 24000, text_bytes_copied: 204005, layout_runs: 8000, measure_calls: 504000, presentations: 8000, paint_passes: 8000, exact_updates: 0, coarse_updates: 8000 }",
+      "tasks": "TASKS,frozen=4000,dispatched=4000,accepted=4000",
+      "cpu": {
+        "0.5": 332265.26,
+        "0.95": 415840.14,
+        "0.99": 443511.44
+      },
+      "wall": {
+        "0.5": 332467.0,
+        "0.95": 415895.49,
+        "0.99": 443555.42
+      }
+    },
+    {
+      "repeat": 1,
+      "case": "1-4-opaque",
+      "variant": "control",
+      "final": "FINAL,pixel_hash=17907747960521954518",
+      "counters": "COUNTERS,Counters { owner_reruns: 8000, descriptions: 8000, source_operations: 8000, source_reads: 0, destination_compares: 296000, text_promotions: 20000, text_bytes_copied: 152804, layout_runs: 8000, measure_calls: 488000, presentations: 8000, paint_passes: 8000, exact_updates: 0, coarse_updates: 8000 }",
+      "tasks": "TASKS,frozen=4000,dispatched=4000,accepted=4000",
+      "cpu": {
+        "0.5": 370284.36,
+        "0.95": 402899.77,
+        "0.99": 423699.94
+      },
+      "wall": {
+        "0.5": 370321.27,
+        "0.95": 402941.83,
+        "0.99": 424147.71
+      }
+    },
+    {
+      "repeat": 1,
+      "case": "1-4-opaque",
+      "variant": "candidate",
+      "final": "FINAL,pixel_hash=17907747960521954518",
+      "counters": "COUNTERS,Counters { owner_reruns: 8000, descriptions: 8000, source_operations: 8000, source_reads: 0, destination_compares: 296000, text_promotions: 20000, text_bytes_copied: 152804, layout_runs: 8000, measure_calls: 488000, presentations: 8000, paint_passes: 8000, exact_updates: 0, coarse_updates: 8000 }",
+      "tasks": "TASKS,frozen=4000,dispatched=4000,accepted=4000",
+      "cpu": {
+        "0.5": 390938.14,
+        "0.95": 427126.89,
+        "0.99": 436330.82
+      },
+      "wall": {
+        "0.5": 390992.16,
+        "0.95": 427457.93,
+        "0.99": 436394.15
+      }
+    },
+    {
+      "repeat": 1,
+      "case": "40-4-owner",
+      "variant": "candidate",
+      "final": "FINAL,pixel_hash=3023726611500290992",
+      "counters": "COUNTERS,Counters { owner_reruns: 8000, descriptions: 8000, source_operations: 8000, source_reads: 0, destination_compares: 8416000, text_promotions: 24000, text_bytes_copied: 204005, layout_runs: 8000, measure_calls: 16104000, presentations: 8000, paint_passes: 8000, exact_updates: 0, coarse_updates: 8000 }",
+      "tasks": "TASKS,frozen=4000,dispatched=4000,accepted=4000",
+      "cpu": {
+        "0.5": 11378781.01,
+        "0.95": 13829766.17,
+        "0.99": 14118687.62
+      },
+      "wall": {
+        "0.5": 11380984.5,
+        "0.95": 13833996.64,
+        "0.99": 14123714.78
+      }
+    },
+    {
+      "repeat": 1,
+      "case": "40-4-owner",
+      "variant": "control",
+      "final": "FINAL,pixel_hash=3023726611500290992",
+      "counters": "COUNTERS,Counters { owner_reruns: 8000, descriptions: 8000, source_operations: 8000, source_reads: 0, destination_compares: 8416000, text_promotions: 24000, text_bytes_copied: 204005, layout_runs: 8000, measure_calls: 16104000, presentations: 8000, paint_passes: 8000, exact_updates: 0, coarse_updates: 8000 }",
+      "tasks": "TASKS,frozen=4000,dispatched=4000,accepted=4000",
+      "cpu": {
+        "0.5": 10439053.78,
+        "0.95": 12048465.75,
+        "0.99": 12192396.29
+      },
+      "wall": {
+        "0.5": 10441352.94,
+        "0.95": 12051115.0,
+        "0.99": 12202650.34
+      }
+    },
+    {
+      "repeat": 1,
+      "case": "40-4-opaque",
+      "variant": "control",
+      "final": "FINAL,pixel_hash=3081166828330265799",
+      "counters": "COUNTERS,Counters { owner_reruns: 8000, descriptions: 8000, source_operations: 8000, source_reads: 0, destination_compares: 8408000, text_promotions: 20000, text_bytes_copied: 152804, layout_runs: 8000, measure_calls: 16088000, presentations: 8000, paint_passes: 8000, exact_updates: 0, coarse_updates: 8000 }",
+      "tasks": "TASKS,frozen=4000,dispatched=4000,accepted=4000",
+      "cpu": {
+        "0.5": 11183701.97,
+        "0.95": 13683310.7,
+        "0.99": 14083689.01
+      },
+      "wall": {
+        "0.5": 11184968.16,
+        "0.95": 13692492.93,
+        "0.99": 14085714.88
+      }
+    },
+    {
+      "repeat": 1,
+      "case": "40-4-opaque",
+      "variant": "candidate",
+      "final": "FINAL,pixel_hash=3081166828330265799",
+      "counters": "COUNTERS,Counters { owner_reruns: 8000, descriptions: 8000, source_operations: 8000, source_reads: 0, destination_compares: 8408000, text_promotions: 20000, text_bytes_copied: 152804, layout_runs: 8000, measure_calls: 16088000, presentations: 8000, paint_passes: 8000, exact_updates: 0, coarse_updates: 8000 }",
+      "tasks": "TASKS,frozen=4000,dispatched=4000,accepted=4000",
+      "cpu": {
+        "0.5": 10671623.58,
+        "0.95": 11644704.94,
+        "0.99": 11976884.95
+      },
+      "wall": {
+        "0.5": 10674483.99,
+        "0.95": 11646225.94,
+        "0.99": 11981510.45
+      }
+    },
+    {
+      "repeat": 2,
+      "case": "0-1-unrelated",
+      "variant": "control",
+      "final": "FINAL,pixel_hash=12230463492156930872",
+      "counters": "COUNTERS,Counters { owner_reruns: 0, descriptions: 0, source_operations: 4000, source_reads: 4000, destination_compares: 4000, text_promotions: 4000, text_bytes_copied: 27201, layout_runs: 4000, measure_calls: 8000, presentations: 4000, paint_passes: 4000, exact_updates: 4000, coarse_updates: 0 }",
+      "tasks": "TASKS,frozen=0,dispatched=0,accepted=0",
+      "cpu": {
+        "0.5": 19689.47,
+        "0.95": 23110.31,
+        "0.99": 24216.1
+      },
+      "wall": {
+        "0.5": 19695.33,
+        "0.95": 23123.89,
+        "0.99": 24232.66
+      }
+    },
+    {
+      "repeat": 2,
+      "case": "0-1-unrelated",
+      "variant": "candidate",
+      "final": "FINAL,pixel_hash=12230463492156930872",
+      "counters": "COUNTERS,Counters { owner_reruns: 0, descriptions: 0, source_operations: 4000, source_reads: 4000, destination_compares: 4000, text_promotions: 4000, text_bytes_copied: 27201, layout_runs: 4000, measure_calls: 8000, presentations: 4000, paint_passes: 4000, exact_updates: 4000, coarse_updates: 0 }",
+      "tasks": "TASKS,frozen=0,dispatched=0,accepted=0",
+      "cpu": {
+        "0.5": 24690.3,
+        "0.95": 26266.66,
+        "0.99": 27052.54
+      },
+      "wall": {
+        "0.5": 24724.8,
+        "0.95": 26281.72,
+        "0.99": 27065.59
+      }
+    },
+    {
+      "repeat": 2,
+      "case": "0-2-unrelated",
+      "variant": "candidate",
+      "final": "FINAL,pixel_hash=7578910431315845812",
+      "counters": "COUNTERS,Counters { owner_reruns: 0, descriptions: 0, source_operations: 4000, source_reads: 8000, destination_compares: 8000, text_promotions: 8000, text_bytes_copied: 54402, layout_runs: 4000, measure_calls: 16000, presentations: 4000, paint_passes: 4000, exact_updates: 4000, coarse_updates: 0 }",
+      "tasks": "TASKS,frozen=0,dispatched=0,accepted=0",
+      "cpu": {
+        "0.5": 38576.13,
+        "0.95": 46458.98,
+        "0.99": 52036.49
+      },
+      "wall": {
+        "0.5": 38598.89,
+        "0.95": 46969.72,
+        "0.99": 52059.49
+      }
+    },
+    {
+      "repeat": 2,
+      "case": "0-2-unrelated",
+      "variant": "control",
+      "final": "FINAL,pixel_hash=7578910431315845812",
+      "counters": "COUNTERS,Counters { owner_reruns: 8000, descriptions: 8000, source_operations: 8000, source_reads: 0, destination_compares: 88000, text_promotions: 12000, text_bytes_copied: 98402, layout_runs: 8000, measure_calls: 88000, presentations: 8000, paint_passes: 8000, exact_updates: 0, coarse_updates: 8000 }",
+      "tasks": "TASKS,frozen=4000,dispatched=4000,accepted=4000",
+      "cpu": {
+        "0.5": 108050.56,
+        "0.95": 121131.99,
+        "0.99": 148829.05
+      },
+      "wall": {
+        "0.5": 108095.05,
+        "0.95": 121189.07,
+        "0.99": 148901.59
+      }
+    },
+    {
+      "repeat": 2,
+      "case": "0-4-unrelated",
+      "variant": "control",
+      "final": "FINAL,pixel_hash=970880845196872716",
+      "counters": "COUNTERS,Counters { owner_reruns: 8000, descriptions: 8000, source_operations: 8000, source_reads: 0, destination_compares: 88000, text_promotions: 20000, text_bytes_copied: 152804, layout_runs: 8000, measure_calls: 88000, presentations: 8000, paint_passes: 8000, exact_updates: 0, coarse_updates: 8000 }",
+      "tasks": "TASKS,frozen=4000,dispatched=4000,accepted=4000",
+      "cpu": {
+        "0.5": 136956.1,
+        "0.95": 152328.74,
+        "0.99": 160379.09
+      },
+      "wall": {
+        "0.5": 136998.5,
+        "0.95": 152361.2,
+        "0.99": 160513.12
+      }
+    },
+    {
+      "repeat": 2,
+      "case": "0-4-unrelated",
+      "variant": "candidate",
+      "final": "FINAL,pixel_hash=970880845196872716",
+      "counters": "COUNTERS,Counters { owner_reruns: 0, descriptions: 0, source_operations: 4000, source_reads: 16000, destination_compares: 16000, text_promotions: 16000, text_bytes_copied: 108804, layout_runs: 4000, measure_calls: 32000, presentations: 4000, paint_passes: 4000, exact_updates: 4000, coarse_updates: 0 }",
+      "tasks": "TASKS,frozen=0,dispatched=0,accepted=0",
+      "cpu": {
+        "0.5": 72352.05,
+        "0.95": 85403.82,
+        "0.99": 97021.6
+      },
+      "wall": {
+        "0.5": 72377.08,
+        "0.95": 85441.36,
+        "0.99": 97584.3
+      }
+    },
+    {
+      "repeat": 2,
+      "case": "0-1-dependent",
+      "variant": "candidate",
+      "final": "FINAL,pixel_hash=8829556083644644402",
+      "counters": "COUNTERS,Counters { owner_reruns: 8000, descriptions: 8000, source_operations: 8000, source_reads: 0, destination_compares: 88000, text_promotions: 12000, text_bytes_copied: 126402, layout_runs: 8000, measure_calls: 88000, presentations: 8000, paint_passes: 8000, exact_updates: 0, coarse_updates: 8000 }",
+      "tasks": "TASKS,frozen=4000,dispatched=4000,accepted=4000",
+      "cpu": {
+        "0.5": 85038.03,
+        "0.95": 108618.73,
+        "0.99": 113346.93
+      },
+      "wall": {
+        "0.5": 85060.25,
+        "0.95": 108691.08,
+        "0.99": 113380.5
+      }
+    },
+    {
+      "repeat": 2,
+      "case": "0-1-dependent",
+      "variant": "control",
+      "final": "FINAL,pixel_hash=8829556083644644402",
+      "counters": "COUNTERS,Counters { owner_reruns: 8000, descriptions: 8000, source_operations: 8000, source_reads: 0, destination_compares: 88000, text_promotions: 12000, text_bytes_copied: 126402, layout_runs: 8000, measure_calls: 88000, presentations: 8000, paint_passes: 8000, exact_updates: 0, coarse_updates: 8000 }",
+      "tasks": "TASKS,frozen=4000,dispatched=4000,accepted=4000",
+      "cpu": {
+        "0.5": 84664.23,
+        "0.95": 104790.73,
+        "0.99": 109488.56
+      },
+      "wall": {
+        "0.5": 84695.45,
+        "0.95": 104836.43,
+        "0.99": 109523.54
+      }
+    },
+    {
+      "repeat": 2,
+      "case": "0-2-dependent",
+      "variant": "control",
+      "final": "FINAL,pixel_hash=17759712045857455370",
+      "counters": "COUNTERS,Counters { owner_reruns: 8000, descriptions: 8000, source_operations: 8000, source_reads: 0, destination_compares: 88000, text_promotions: 16000, text_bytes_copied: 164804, layout_runs: 8000, measure_calls: 88000, presentations: 8000, paint_passes: 8000, exact_updates: 0, coarse_updates: 8000 }",
+      "tasks": "TASKS,frozen=4000,dispatched=4000,accepted=4000",
+      "cpu": {
+        "0.5": 100014.43,
+        "0.95": 116423.23,
+        "0.99": 126879.32
+      },
+      "wall": {
+        "0.5": 100043.32,
+        "0.95": 116452.06,
+        "0.99": 126907.12
+      }
+    },
+    {
+      "repeat": 2,
+      "case": "0-2-dependent",
+      "variant": "candidate",
+      "final": "FINAL,pixel_hash=17759712045857455370",
+      "counters": "COUNTERS,Counters { owner_reruns: 8000, descriptions: 8000, source_operations: 8000, source_reads: 0, destination_compares: 88000, text_promotions: 16000, text_bytes_copied: 164804, layout_runs: 8000, measure_calls: 88000, presentations: 8000, paint_passes: 8000, exact_updates: 0, coarse_updates: 8000 }",
+      "tasks": "TASKS,frozen=4000,dispatched=4000,accepted=4000",
+      "cpu": {
+        "0.5": 96869.31,
+        "0.95": 118259.59,
+        "0.99": 139656.78
+      },
+      "wall": {
+        "0.5": 97110.9,
+        "0.95": 118287.52,
+        "0.99": 139692.48
+      }
+    },
+    {
+      "repeat": 2,
+      "case": "0-4-dependent",
+      "variant": "candidate",
+      "final": "FINAL,pixel_hash=3408001187935195458",
+      "counters": "COUNTERS,Counters { owner_reruns: 8000, descriptions: 8000, source_operations: 8000, source_reads: 0, destination_compares: 88000, text_promotions: 24000, text_bytes_copied: 219206, layout_runs: 8000, measure_calls: 88000, presentations: 8000, paint_passes: 8000, exact_updates: 0, coarse_updates: 8000 }",
+      "tasks": "TASKS,frozen=4000,dispatched=4000,accepted=4000",
+      "cpu": {
+        "0.5": 139138.1,
+        "0.95": 157069.86,
+        "0.99": 174180.39
+      },
+      "wall": {
+        "0.5": 139168.68,
+        "0.95": 157122.04,
+        "0.99": 174222.09
+      }
+    },
+    {
+      "repeat": 2,
+      "case": "0-4-dependent",
+      "variant": "control",
+      "final": "FINAL,pixel_hash=3408001187935195458",
+      "counters": "COUNTERS,Counters { owner_reruns: 8000, descriptions: 8000, source_operations: 8000, source_reads: 0, destination_compares: 88000, text_promotions: 24000, text_bytes_copied: 219206, layout_runs: 8000, measure_calls: 88000, presentations: 8000, paint_passes: 8000, exact_updates: 0, coarse_updates: 8000 }",
+      "tasks": "TASKS,frozen=4000,dispatched=4000,accepted=4000",
+      "cpu": {
+        "0.5": 145730.01,
+        "0.95": 163362.41,
+        "0.99": 164310.1
+      },
+      "wall": {
+        "0.5": 146162.04,
+        "0.95": 163396.23,
+        "0.99": 164331.1
+      }
+    },
+    {
+      "repeat": 2,
+      "case": "1-1-unrelated",
+      "variant": "control",
+      "final": "FINAL,pixel_hash=8627942319840186434",
+      "counters": "COUNTERS,Counters { owner_reruns: 0, descriptions: 0, source_operations: 4000, source_reads: 4000, destination_compares: 4000, text_promotions: 4000, text_bytes_copied: 27201, layout_runs: 4000, measure_calls: 8000, presentations: 4000, paint_passes: 4000, exact_updates: 4000, coarse_updates: 0 }",
+      "tasks": "TASKS,frozen=0,dispatched=0,accepted=0",
+      "cpu": {
+        "0.5": 19239.03,
+        "0.95": 22010.84,
+        "0.99": 23766.06
+      },
+      "wall": {
+        "0.5": 19250.5,
+        "0.95": 22040.54,
+        "0.99": 23794.05
+      }
+    },
+    {
+      "repeat": 2,
+      "case": "1-1-unrelated",
+      "variant": "candidate",
+      "final": "FINAL,pixel_hash=8627942319840186434",
+      "counters": "COUNTERS,Counters { owner_reruns: 0, descriptions: 0, source_operations: 4000, source_reads: 4000, destination_compares: 4000, text_promotions: 4000, text_bytes_copied: 27201, layout_runs: 4000, measure_calls: 8000, presentations: 4000, paint_passes: 4000, exact_updates: 4000, coarse_updates: 0 }",
+      "tasks": "TASKS,frozen=0,dispatched=0,accepted=0",
+      "cpu": {
+        "0.5": 17409.48,
+        "0.95": 19770.03,
+        "0.99": 20409.34
+      },
+      "wall": {
+        "0.5": 17417.34,
+        "0.95": 19780.59,
+        "0.99": 20415.09
+      }
+    },
+    {
+      "repeat": 2,
+      "case": "1-2-unrelated",
+      "variant": "candidate",
+      "final": "FINAL,pixel_hash=3284881484069841934",
+      "counters": "COUNTERS,Counters { owner_reruns: 0, descriptions: 0, source_operations: 4000, source_reads: 8000, destination_compares: 8000, text_promotions: 8000, text_bytes_copied: 54402, layout_runs: 4000, measure_calls: 16000, presentations: 4000, paint_passes: 4000, exact_updates: 4000, coarse_updates: 0 }",
+      "tasks": "TASKS,frozen=0,dispatched=0,accepted=0",
+      "cpu": {
+        "0.5": 53702.72,
+        "0.95": 59518.58,
+        "0.99": 61104.35
+      },
+      "wall": {
+        "0.5": 53722.22,
+        "0.95": 59546.87,
+        "0.99": 61129.44
+      }
+    },
+    {
+      "repeat": 2,
+      "case": "1-2-unrelated",
+      "variant": "control",
+      "final": "FINAL,pixel_hash=3284881484069841934",
+      "counters": "COUNTERS,Counters { owner_reruns: 8000, descriptions: 8000, source_operations: 8000, source_reads: 0, destination_compares: 296000, text_promotions: 12000, text_bytes_copied: 98402, layout_runs: 8000, measure_calls: 488000, presentations: 8000, paint_passes: 8000, exact_updates: 0, coarse_updates: 8000 }",
+      "tasks": "TASKS,frozen=4000,dispatched=4000,accepted=4000",
+      "cpu": {
+        "0.5": 293937.29,
+        "0.95": 342552.93,
+        "0.99": 428012.66
+      },
+      "wall": {
+        "0.5": 293953.73,
+        "0.95": 342804.57,
+        "0.99": 428123.09
+      }
+    },
+    {
+      "repeat": 2,
+      "case": "1-4-unrelated",
+      "variant": "control",
+      "final": "FINAL,pixel_hash=17907747960521954518",
+      "counters": "COUNTERS,Counters { owner_reruns: 8000, descriptions: 8000, source_operations: 8000, source_reads: 0, destination_compares: 296000, text_promotions: 20000, text_bytes_copied: 152804, layout_runs: 8000, measure_calls: 488000, presentations: 8000, paint_passes: 8000, exact_updates: 0, coarse_updates: 8000 }",
+      "tasks": "TASKS,frozen=4000,dispatched=4000,accepted=4000",
+      "cpu": {
+        "0.5": 311940.69,
+        "0.95": 358742.53,
+        "0.99": 381384.46
+      },
+      "wall": {
+        "0.5": 312000.24,
+        "0.95": 359060.74,
+        "0.99": 381415.27
+      }
+    },
+    {
+      "repeat": 2,
+      "case": "1-4-unrelated",
+      "variant": "candidate",
+      "final": "FINAL,pixel_hash=17907747960521954518",
+      "counters": "COUNTERS,Counters { owner_reruns: 0, descriptions: 0, source_operations: 4000, source_reads: 16000, destination_compares: 16000, text_promotions: 16000, text_bytes_copied: 108804, layout_runs: 4000, measure_calls: 32000, presentations: 4000, paint_passes: 4000, exact_updates: 4000, coarse_updates: 0 }",
+      "tasks": "TASKS,frozen=0,dispatched=0,accepted=0",
+      "cpu": {
+        "0.5": 82577.39,
+        "0.95": 93900.32,
+        "0.99": 99638.91
+      },
+      "wall": {
+        "0.5": 82615.83,
+        "0.95": 93986.22,
+        "0.99": 99698.87
+      }
+    },
+    {
+      "repeat": 2,
+      "case": "1-1-dependent",
+      "variant": "candidate",
+      "final": "FINAL,pixel_hash=13195835639209551848",
+      "counters": "COUNTERS,Counters { owner_reruns: 8000, descriptions: 8000, source_operations: 8000, source_reads: 0, destination_compares: 296000, text_promotions: 12000, text_bytes_copied: 126402, layout_runs: 8000, measure_calls: 488000, presentations: 8000, paint_passes: 8000, exact_updates: 0, coarse_updates: 8000 }",
+      "tasks": "TASKS,frozen=4000,dispatched=4000,accepted=4000",
+      "cpu": {
+        "0.5": 323520.3,
+        "0.95": 352996.3,
+        "0.99": 378602.92
+      },
+      "wall": {
+        "0.5": 323828.59,
+        "0.95": 353301.31,
+        "0.99": 378632.84
+      }
+    },
+    {
+      "repeat": 2,
+      "case": "1-1-dependent",
+      "variant": "control",
+      "final": "FINAL,pixel_hash=13195835639209551848",
+      "counters": "COUNTERS,Counters { owner_reruns: 8000, descriptions: 8000, source_operations: 8000, source_reads: 0, destination_compares: 296000, text_promotions: 12000, text_bytes_copied: 126402, layout_runs: 8000, measure_calls: 488000, presentations: 8000, paint_passes: 8000, exact_updates: 0, coarse_updates: 8000 }",
+      "tasks": "TASKS,frozen=4000,dispatched=4000,accepted=4000",
+      "cpu": {
+        "0.5": 307479.99,
+        "0.95": 334029.79,
+        "0.99": 366654.02
+      },
+      "wall": {
+        "0.5": 307513.32,
+        "0.95": 334079.26,
+        "0.99": 366693.39
+      }
+    },
+    {
+      "repeat": 2,
+      "case": "1-2-dependent",
+      "variant": "control",
+      "final": "FINAL,pixel_hash=14124934070918126864",
+      "counters": "COUNTERS,Counters { owner_reruns: 8000, descriptions: 8000, source_operations: 8000, source_reads: 0, destination_compares: 296000, text_promotions: 16000, text_bytes_copied: 164804, layout_runs: 8000, measure_calls: 488000, presentations: 8000, paint_passes: 8000, exact_updates: 0, coarse_updates: 8000 }",
+      "tasks": "TASKS,frozen=4000,dispatched=4000,accepted=4000",
+      "cpu": {
+        "0.5": 305793.33,
+        "0.95": 349802.17,
+        "0.99": 361188.63
+      },
+      "wall": {
+        "0.5": 306110.57,
+        "0.95": 350257.59,
+        "0.99": 361220.0
+      }
+    },
+    {
+      "repeat": 2,
+      "case": "1-2-dependent",
+      "variant": "candidate",
+      "final": "FINAL,pixel_hash=14124934070918126864",
+      "counters": "COUNTERS,Counters { owner_reruns: 8000, descriptions: 8000, source_operations: 8000, source_reads: 0, destination_compares: 296000, text_promotions: 16000, text_bytes_copied: 164804, layout_runs: 8000, measure_calls: 488000, presentations: 8000, paint_passes: 8000, exact_updates: 0, coarse_updates: 8000 }",
+      "tasks": "TASKS,frozen=4000,dispatched=4000,accepted=4000",
+      "cpu": {
+        "0.5": 338106.57,
+        "0.95": 371048.1,
+        "0.99": 385486.79
+      },
+      "wall": {
+        "0.5": 338142.61,
+        "0.95": 371089.76,
+        "0.99": 385529.21
+      }
+    },
+    {
+      "repeat": 2,
+      "case": "1-4-dependent",
+      "variant": "candidate",
+      "final": "FINAL,pixel_hash=14118930585116151960",
+      "counters": "COUNTERS,Counters { owner_reruns: 8000, descriptions: 8000, source_operations: 8000, source_reads: 0, destination_compares: 296000, text_promotions: 24000, text_bytes_copied: 219206, layout_runs: 8000, measure_calls: 488000, presentations: 8000, paint_passes: 8000, exact_updates: 0, coarse_updates: 8000 }",
+      "tasks": "TASKS,frozen=4000,dispatched=4000,accepted=4000",
+      "cpu": {
+        "0.5": 347821.16,
+        "0.95": 405126.46,
+        "0.99": 416001.04
+      },
+      "wall": {
+        "0.5": 347863.39,
+        "0.95": 405465.19,
+        "0.99": 416035.17
+      }
+    },
+    {
+      "repeat": 2,
+      "case": "1-4-dependent",
+      "variant": "control",
+      "final": "FINAL,pixel_hash=14118930585116151960",
+      "counters": "COUNTERS,Counters { owner_reruns: 8000, descriptions: 8000, source_operations: 8000, source_reads: 0, destination_compares: 296000, text_promotions: 24000, text_bytes_copied: 219206, layout_runs: 8000, measure_calls: 488000, presentations: 8000, paint_passes: 8000, exact_updates: 0, coarse_updates: 8000 }",
+      "tasks": "TASKS,frozen=4000,dispatched=4000,accepted=4000",
+      "cpu": {
+        "0.5": 355228.1,
+        "0.95": 402635.67,
+        "0.99": 433279.98
+      },
+      "wall": {
+        "0.5": 355542.01,
+        "0.95": 402689.77,
+        "0.99": 433339.5
+      }
+    },
+    {
+      "repeat": 2,
+      "case": "40-1-unrelated",
+      "variant": "control",
+      "final": "FINAL,pixel_hash=15889697540729426171",
+      "counters": "COUNTERS,Counters { owner_reruns: 0, descriptions: 0, source_operations: 4000, source_reads: 4000, destination_compares: 4000, text_promotions: 4000, text_bytes_copied: 27201, layout_runs: 4000, measure_calls: 8000, presentations: 4000, paint_passes: 4000, exact_updates: 4000, coarse_updates: 0 }",
+      "tasks": "TASKS,frozen=0,dispatched=0,accepted=0",
+      "cpu": {
+        "0.5": 20272.38,
+        "0.95": 21943.61,
+        "0.99": 23153.8
+      },
+      "wall": {
+        "0.5": 20276.82,
+        "0.95": 21960.19,
+        "0.99": 23178.48
+      }
+    },
+    {
+      "repeat": 2,
+      "case": "40-1-unrelated",
+      "variant": "candidate",
+      "final": "FINAL,pixel_hash=15889697540729426171",
+      "counters": "COUNTERS,Counters { owner_reruns: 0, descriptions: 0, source_operations: 4000, source_reads: 4000, destination_compares: 4000, text_promotions: 4000, text_bytes_copied: 27201, layout_runs: 4000, measure_calls: 8000, presentations: 4000, paint_passes: 4000, exact_updates: 4000, coarse_updates: 0 }",
+      "tasks": "TASKS,frozen=0,dispatched=0,accepted=0",
+      "cpu": {
+        "0.5": 19108.87,
+        "0.95": 22080.87,
+        "0.99": 29083.86
+      },
+      "wall": {
+        "0.5": 19177.06,
+        "0.95": 22330.69,
+        "0.99": 29101.82
+      }
+    },
+    {
+      "repeat": 2,
+      "case": "40-2-unrelated",
+      "variant": "candidate",
+      "final": "FINAL,pixel_hash=486252068588713791",
+      "counters": "COUNTERS,Counters { owner_reruns: 0, descriptions: 0, source_operations: 4000, source_reads: 8000, destination_compares: 8000, text_promotions: 8000, text_bytes_copied: 54402, layout_runs: 4000, measure_calls: 16000, presentations: 4000, paint_passes: 4000, exact_updates: 4000, coarse_updates: 0 }",
+      "tasks": "TASKS,frozen=0,dispatched=0,accepted=0",
+      "cpu": {
+        "0.5": 562388.78,
+        "0.95": 618385.23,
+        "0.99": 648710.23
+      },
+      "wall": {
+        "0.5": 564374.48,
+        "0.95": 618857.02,
+        "0.99": 705602.94
+      }
+    },
+    {
+      "repeat": 2,
+      "case": "40-2-unrelated",
+      "variant": "control",
+      "final": "FINAL,pixel_hash=486252068588713791",
+      "counters": "COUNTERS,Counters { owner_reruns: 8000, descriptions: 8000, source_operations: 8000, source_reads: 0, destination_compares: 8408000, text_promotions: 12000, text_bytes_copied: 98402, layout_runs: 8000, measure_calls: 16088000, presentations: 8000, paint_passes: 8000, exact_updates: 0, coarse_updates: 8000 }",
+      "tasks": "TASKS,frozen=4000,dispatched=4000,accepted=4000",
+      "cpu": {
+        "0.5": 9744048.24,
+        "0.95": 11466930.39,
+        "0.99": 12061809.67
+      },
+      "wall": {
+        "0.5": 9745706.94,
+        "0.95": 11469098.01,
+        "0.99": 12063592.84
+      }
+    },
+    {
+      "repeat": 2,
+      "case": "40-4-unrelated",
+      "variant": "control",
+      "final": "FINAL,pixel_hash=3081166828330265799",
+      "counters": "COUNTERS,Counters { owner_reruns: 8000, descriptions: 8000, source_operations: 8000, source_reads: 0, destination_compares: 8408000, text_promotions: 20000, text_bytes_copied: 152804, layout_runs: 8000, measure_calls: 16088000, presentations: 8000, paint_passes: 8000, exact_updates: 0, coarse_updates: 8000 }",
+      "tasks": "TASKS,frozen=4000,dispatched=4000,accepted=4000",
+      "cpu": {
+        "0.5": 8021570.0,
+        "0.95": 9513593.47,
+        "0.99": 10676232.19
+      },
+      "wall": {
+        "0.5": 8023232.95,
+        "0.95": 9515652.24,
+        "0.99": 10677087.41
+      }
+    },
+    {
+      "repeat": 2,
+      "case": "40-4-unrelated",
+      "variant": "candidate",
+      "final": "FINAL,pixel_hash=3081166828330265799",
+      "counters": "COUNTERS,Counters { owner_reruns: 0, descriptions: 0, source_operations: 4000, source_reads: 16000, destination_compares: 16000, text_promotions: 16000, text_bytes_copied: 108804, layout_runs: 4000, measure_calls: 32000, presentations: 4000, paint_passes: 4000, exact_updates: 4000, coarse_updates: 0 }",
+      "tasks": "TASKS,frozen=0,dispatched=0,accepted=0",
+      "cpu": {
+        "0.5": 440889.71,
+        "0.95": 460893.79,
+        "0.99": 483320.0
+      },
+      "wall": {
+        "0.5": 440911.38,
+        "0.95": 460922.4,
+        "0.99": 483448.14
+      }
+    },
+    {
+      "repeat": 2,
+      "case": "40-1-dependent",
+      "variant": "candidate",
+      "final": "FINAL,pixel_hash=9187653472009869049",
+      "counters": "COUNTERS,Counters { owner_reruns: 8000, descriptions: 8000, source_operations: 8000, source_reads: 0, destination_compares: 8408000, text_promotions: 12000, text_bytes_copied: 126402, layout_runs: 8000, measure_calls: 16088000, presentations: 8000, paint_passes: 8000, exact_updates: 0, coarse_updates: 8000 }",
+      "tasks": "TASKS,frozen=4000,dispatched=4000,accepted=4000",
+      "cpu": {
+        "0.5": 8316822.75,
+        "0.95": 8983519.36,
+        "0.99": 9251847.25
+      },
+      "wall": {
+        "0.5": 8318110.68,
+        "0.95": 9020261.29,
+        "0.99": 9254662.21
+      }
+    },
+    {
+      "repeat": 2,
+      "case": "40-1-dependent",
+      "variant": "control",
+      "final": "FINAL,pixel_hash=9187653472009869049",
+      "counters": "COUNTERS,Counters { owner_reruns: 8000, descriptions: 8000, source_operations: 8000, source_reads: 0, destination_compares: 8408000, text_promotions: 12000, text_bytes_copied: 126402, layout_runs: 8000, measure_calls: 16088000, presentations: 8000, paint_passes: 8000, exact_updates: 0, coarse_updates: 8000 }",
+      "tasks": "TASKS,frozen=4000,dispatched=4000,accepted=4000",
+      "cpu": {
+        "0.5": 8307623.25,
+        "0.95": 9031270.48,
+        "0.99": 9437986.69
+      },
+      "wall": {
+        "0.5": 8307980.9,
+        "0.95": 9032964.5,
+        "0.99": 9439966.7
+      }
+    },
+    {
+      "repeat": 2,
+      "case": "40-2-dependent",
+      "variant": "control",
+      "final": "FINAL,pixel_hash=18228237087345915393",
+      "counters": "COUNTERS,Counters { owner_reruns: 8000, descriptions: 8000, source_operations: 8000, source_reads: 0, destination_compares: 8408000, text_promotions: 16000, text_bytes_copied: 164804, layout_runs: 8000, measure_calls: 16088000, presentations: 8000, paint_passes: 8000, exact_updates: 0, coarse_updates: 8000 }",
+      "tasks": "TASKS,frozen=4000,dispatched=4000,accepted=4000",
+      "cpu": {
+        "0.5": 8647503.58,
+        "0.95": 9595265.02,
+        "0.99": 10970803.7
+      },
+      "wall": {
+        "0.5": 8648865.89,
+        "0.95": 9597100.85,
+        "0.99": 10973705.99
+      }
+    },
+    {
+      "repeat": 2,
+      "case": "40-2-dependent",
+      "variant": "candidate",
+      "final": "FINAL,pixel_hash=18228237087345915393",
+      "counters": "COUNTERS,Counters { owner_reruns: 8000, descriptions: 8000, source_operations: 8000, source_reads: 0, destination_compares: 8408000, text_promotions: 16000, text_bytes_copied: 164804, layout_runs: 8000, measure_calls: 16088000, presentations: 8000, paint_passes: 8000, exact_updates: 0, coarse_updates: 8000 }",
+      "tasks": "TASKS,frozen=4000,dispatched=4000,accepted=4000",
+      "cpu": {
+        "0.5": 7986336.05,
+        "0.95": 8385155.55,
+        "0.99": 8917720.07
+      },
+      "wall": {
+        "0.5": 7987539.64,
+        "0.95": 8386261.41,
+        "0.99": 8918662.12
+      }
+    },
+    {
+      "repeat": 2,
+      "case": "40-4-dependent",
+      "variant": "candidate",
+      "final": "FINAL,pixel_hash=3650281480745005001",
+      "counters": "COUNTERS,Counters { owner_reruns: 8000, descriptions: 8000, source_operations: 8000, source_reads: 0, destination_compares: 8408000, text_promotions: 24000, text_bytes_copied: 219206, layout_runs: 8000, measure_calls: 16088000, presentations: 8000, paint_passes: 8000, exact_updates: 0, coarse_updates: 8000 }",
+      "tasks": "TASKS,frozen=4000,dispatched=4000,accepted=4000",
+      "cpu": {
+        "0.5": 7786621.31,
+        "0.95": 8178674.25,
+        "0.99": 8516219.24
+      },
+      "wall": {
+        "0.5": 7788502.92,
+        "0.95": 8180013.5,
+        "0.99": 8516967.8
+      }
+    },
+    {
+      "repeat": 2,
+      "case": "40-4-dependent",
+      "variant": "control",
+      "final": "FINAL,pixel_hash=3650281480745005001",
+      "counters": "COUNTERS,Counters { owner_reruns: 8000, descriptions: 8000, source_operations: 8000, source_reads: 0, destination_compares: 8408000, text_promotions: 24000, text_bytes_copied: 219206, layout_runs: 8000, measure_calls: 16088000, presentations: 8000, paint_passes: 8000, exact_updates: 0, coarse_updates: 8000 }",
+      "tasks": "TASKS,frozen=4000,dispatched=4000,accepted=4000",
+      "cpu": {
+        "0.5": 7380009.23,
+        "0.95": 7702992.41,
+        "0.99": 8119523.45
+      },
+      "wall": {
+        "0.5": 7380333.43,
+        "0.95": 7703753.25,
+        "0.99": 8120898.05
+      }
+    },
+    {
+      "repeat": 2,
+      "case": "0-4-owner",
+      "variant": "control",
+      "final": "FINAL,pixel_hash=3985071684859849092",
+      "counters": "COUNTERS,Counters { owner_reruns: 8000, descriptions: 8000, source_operations: 8000, source_reads: 0, destination_compares: 96000, text_promotions: 24000, text_bytes_copied: 204005, layout_runs: 8000, measure_calls: 104000, presentations: 8000, paint_passes: 8000, exact_updates: 0, coarse_updates: 8000 }",
+      "tasks": "TASKS,frozen=4000,dispatched=4000,accepted=4000",
+      "cpu": {
+        "0.5": 110734.92,
+        "0.95": 136091.16,
+        "0.99": 147214.61
+      },
+      "wall": {
+        "0.5": 110748.1,
+        "0.95": 136111.78,
+        "0.99": 147234.6
+      }
+    },
+    {
+      "repeat": 2,
+      "case": "0-4-owner",
+      "variant": "candidate",
+      "final": "FINAL,pixel_hash=3985071684859849092",
+      "counters": "COUNTERS,Counters { owner_reruns: 8000, descriptions: 8000, source_operations: 8000, source_reads: 0, destination_compares: 96000, text_promotions: 24000, text_bytes_copied: 204005, layout_runs: 8000, measure_calls: 104000, presentations: 8000, paint_passes: 8000, exact_updates: 0, coarse_updates: 8000 }",
+      "tasks": "TASKS,frozen=4000,dispatched=4000,accepted=4000",
+      "cpu": {
+        "0.5": 112549.62,
+        "0.95": 124139.85,
+        "0.99": 126167.77
+      },
+      "wall": {
+        "0.5": 112561.0,
+        "0.95": 124157.31,
+        "0.99": 126195.43
+      }
+    },
+    {
+      "repeat": 2,
+      "case": "0-4-opaque",
+      "variant": "candidate",
+      "final": "FINAL,pixel_hash=970880845196872716",
+      "counters": "COUNTERS,Counters { owner_reruns: 8000, descriptions: 8000, source_operations: 8000, source_reads: 0, destination_compares: 88000, text_promotions: 20000, text_bytes_copied: 152804, layout_runs: 8000, measure_calls: 88000, presentations: 8000, paint_passes: 8000, exact_updates: 0, coarse_updates: 8000 }",
+      "tasks": "TASKS,frozen=4000,dispatched=4000,accepted=4000",
+      "cpu": {
+        "0.5": 98057.54,
+        "0.95": 112513.17,
+        "0.99": 122420.52
+      },
+      "wall": {
+        "0.5": 98075.27,
+        "0.95": 112534.46,
+        "0.99": 122438.26
+      }
+    },
+    {
+      "repeat": 2,
+      "case": "0-4-opaque",
+      "variant": "control",
+      "final": "FINAL,pixel_hash=970880845196872716",
+      "counters": "COUNTERS,Counters { owner_reruns: 8000, descriptions: 8000, source_operations: 8000, source_reads: 0, destination_compares: 88000, text_promotions: 20000, text_bytes_copied: 152804, layout_runs: 8000, measure_calls: 88000, presentations: 8000, paint_passes: 8000, exact_updates: 0, coarse_updates: 8000 }",
+      "tasks": "TASKS,frozen=4000,dispatched=4000,accepted=4000",
+      "cpu": {
+        "0.5": 97673.72,
+        "0.95": 99453.48,
+        "0.99": 103589.26
+      },
+      "wall": {
+        "0.5": 97688.44,
+        "0.95": 99472.4,
+        "0.99": 103605.16
+      }
+    },
+    {
+      "repeat": 2,
+      "case": "1-4-owner",
+      "variant": "control",
+      "final": "FINAL,pixel_hash=13191195305542509566",
+      "counters": "COUNTERS,Counters { owner_reruns: 8000, descriptions: 8000, source_operations: 8000, source_reads: 0, destination_compares: 304000, text_promotions: 24000, text_bytes_copied: 204005, layout_runs: 8000, measure_calls: 504000, presentations: 8000, paint_passes: 8000, exact_updates: 0, coarse_updates: 8000 }",
+      "tasks": "TASKS,frozen=4000,dispatched=4000,accepted=4000",
+      "cpu": {
+        "0.5": 262174.98,
+        "0.95": 286883.41,
+        "0.99": 301721.95
+      },
+      "wall": {
+        "0.5": 262185.57,
+        "0.95": 286894.92,
+        "0.99": 301732.32
+      }
+    },
+    {
+      "repeat": 2,
+      "case": "1-4-owner",
+      "variant": "candidate",
+      "final": "FINAL,pixel_hash=13191195305542509566",
+      "counters": "COUNTERS,Counters { owner_reruns: 8000, descriptions: 8000, source_operations: 8000, source_reads: 0, destination_compares: 304000, text_promotions: 24000, text_bytes_copied: 204005, layout_runs: 8000, measure_calls: 504000, presentations: 8000, paint_passes: 8000, exact_updates: 0, coarse_updates: 8000 }",
+      "tasks": "TASKS,frozen=4000,dispatched=4000,accepted=4000",
+      "cpu": {
+        "0.5": 254189.35,
+        "0.95": 266313.58,
+        "0.99": 291038.55
+      },
+      "wall": {
+        "0.5": 254198.04,
+        "0.95": 266442.57,
+        "0.99": 291321.64
+      }
+    },
+    {
+      "repeat": 2,
+      "case": "1-4-opaque",
+      "variant": "candidate",
+      "final": "FINAL,pixel_hash=17907747960521954518",
+      "counters": "COUNTERS,Counters { owner_reruns: 8000, descriptions: 8000, source_operations: 8000, source_reads: 0, destination_compares: 296000, text_promotions: 20000, text_bytes_copied: 152804, layout_runs: 8000, measure_calls: 488000, presentations: 8000, paint_passes: 8000, exact_updates: 0, coarse_updates: 8000 }",
+      "tasks": "TASKS,frozen=4000,dispatched=4000,accepted=4000",
+      "cpu": {
+        "0.5": 240430.53,
+        "0.95": 264089.98,
+        "0.99": 280427.36
+      },
+      "wall": {
+        "0.5": 240437.79,
+        "0.95": 264105.79,
+        "0.99": 280442.29
+      }
+    },
+    {
+      "repeat": 2,
+      "case": "1-4-opaque",
+      "variant": "control",
+      "final": "FINAL,pixel_hash=17907747960521954518",
+      "counters": "COUNTERS,Counters { owner_reruns: 8000, descriptions: 8000, source_operations: 8000, source_reads: 0, destination_compares: 296000, text_promotions: 20000, text_bytes_copied: 152804, layout_runs: 8000, measure_calls: 488000, presentations: 8000, paint_passes: 8000, exact_updates: 0, coarse_updates: 8000 }",
+      "tasks": "TASKS,frozen=4000,dispatched=4000,accepted=4000",
+      "cpu": {
+        "0.5": 250193.71,
+        "0.95": 291480.27,
+        "0.99": 335418.09
+      },
+      "wall": {
+        "0.5": 250216.67,
+        "0.95": 291708.48,
+        "0.99": 335439.48
+      }
+    },
+    {
+      "repeat": 2,
+      "case": "40-4-owner",
+      "variant": "control",
+      "final": "FINAL,pixel_hash=3023726611500290992",
+      "counters": "COUNTERS,Counters { owner_reruns: 8000, descriptions: 8000, source_operations: 8000, source_reads: 0, destination_compares: 8416000, text_promotions: 24000, text_bytes_copied: 204005, layout_runs: 8000, measure_calls: 16104000, presentations: 8000, paint_passes: 8000, exact_updates: 0, coarse_updates: 8000 }",
+      "tasks": "TASKS,frozen=4000,dispatched=4000,accepted=4000",
+      "cpu": {
+        "0.5": 7325475.74,
+        "0.95": 7759497.01,
+        "0.99": 7855290.1
+      },
+      "wall": {
+        "0.5": 7326238.52,
+        "0.95": 7759818.62,
+        "0.99": 7856017.37
+      }
+    },
+    {
+      "repeat": 2,
+      "case": "40-4-owner",
+      "variant": "candidate",
+      "final": "FINAL,pixel_hash=3023726611500290992",
+      "counters": "COUNTERS,Counters { owner_reruns: 8000, descriptions: 8000, source_operations: 8000, source_reads: 0, destination_compares: 8416000, text_promotions: 24000, text_bytes_copied: 204005, layout_runs: 8000, measure_calls: 16104000, presentations: 8000, paint_passes: 8000, exact_updates: 0, coarse_updates: 8000 }",
+      "tasks": "TASKS,frozen=4000,dispatched=4000,accepted=4000",
+      "cpu": {
+        "0.5": 7928587.32,
+        "0.95": 8928841.14,
+        "0.99": 9184929.42
+      },
+      "wall": {
+        "0.5": 7928997.47,
+        "0.95": 9073104.54,
+        "0.99": 9327836.2
+      }
+    },
+    {
+      "repeat": 2,
+      "case": "40-4-opaque",
+      "variant": "candidate",
+      "final": "FINAL,pixel_hash=3081166828330265799",
+      "counters": "COUNTERS,Counters { owner_reruns: 8000, descriptions: 8000, source_operations: 8000, source_reads: 0, destination_compares: 8408000, text_promotions: 20000, text_bytes_copied: 152804, layout_runs: 8000, measure_calls: 16088000, presentations: 8000, paint_passes: 8000, exact_updates: 0, coarse_updates: 8000 }",
+      "tasks": "TASKS,frozen=4000,dispatched=4000,accepted=4000",
+      "cpu": {
+        "0.5": 8358011.35,
+        "0.95": 8956540.28,
+        "0.99": 10067552.23
+      },
+      "wall": {
+        "0.5": 8359070.66,
+        "0.95": 8958338.84,
+        "0.99": 10071117.09
+      }
+    },
+    {
+      "repeat": 2,
+      "case": "40-4-opaque",
+      "variant": "control",
+      "final": "FINAL,pixel_hash=3081166828330265799",
+      "counters": "COUNTERS,Counters { owner_reruns: 8000, descriptions: 8000, source_operations: 8000, source_reads: 0, destination_compares: 8408000, text_promotions: 20000, text_bytes_copied: 152804, layout_runs: 8000, measure_calls: 16088000, presentations: 8000, paint_passes: 8000, exact_updates: 0, coarse_updates: 8000 }",
+      "tasks": "TASKS,frozen=4000,dispatched=4000,accepted=4000",
+      "cpu": {
+        "0.5": 8238105.64,
+        "0.95": 9029043.61,
+        "0.99": 9254121.92
+      },
+      "wall": {
+        "0.5": 8239670.47,
+        "0.95": 9030093.1,
+        "0.99": 9258184.06
+      }
+    },
+    {
+      "repeat": 3,
+      "case": "0-1-unrelated",
+      "variant": "candidate",
+      "final": "FINAL,pixel_hash=12230463492156930872",
+      "counters": "COUNTERS,Counters { owner_reruns: 0, descriptions: 0, source_operations: 4000, source_reads: 4000, destination_compares: 4000, text_promotions: 4000, text_bytes_copied: 27201, layout_runs: 4000, measure_calls: 8000, presentations: 4000, paint_passes: 4000, exact_updates: 4000, coarse_updates: 0 }",
+      "tasks": "TASKS,frozen=0,dispatched=0,accepted=0",
+      "cpu": {
+        "0.5": 17834.38,
+        "0.95": 21534.15,
+        "0.99": 22744.92
+      },
+      "wall": {
+        "0.5": 17837.72,
+        "0.95": 21554.21,
+        "0.99": 22765.78
+      }
+    },
+    {
+      "repeat": 3,
+      "case": "0-1-unrelated",
+      "variant": "control",
+      "final": "FINAL,pixel_hash=12230463492156930872",
+      "counters": "COUNTERS,Counters { owner_reruns: 0, descriptions: 0, source_operations: 4000, source_reads: 4000, destination_compares: 4000, text_promotions: 4000, text_bytes_copied: 27201, layout_runs: 4000, measure_calls: 8000, presentations: 4000, paint_passes: 4000, exact_updates: 4000, coarse_updates: 0 }",
+      "tasks": "TASKS,frozen=0,dispatched=0,accepted=0",
+      "cpu": {
+        "0.5": 17713.95,
+        "0.95": 25327.29,
+        "0.99": 26044.24
+      },
+      "wall": {
+        "0.5": 17716.0,
+        "0.95": 25350.64,
+        "0.99": 26050.07
+      }
+    },
+    {
+      "repeat": 3,
+      "case": "0-2-unrelated",
+      "variant": "control",
+      "final": "FINAL,pixel_hash=7578910431315845812",
+      "counters": "COUNTERS,Counters { owner_reruns: 8000, descriptions: 8000, source_operations: 8000, source_reads: 0, destination_compares: 88000, text_promotions: 12000, text_bytes_copied: 98402, layout_runs: 8000, measure_calls: 88000, presentations: 8000, paint_passes: 8000, exact_updates: 0, coarse_updates: 8000 }",
+      "tasks": "TASKS,frozen=4000,dispatched=4000,accepted=4000",
+      "cpu": {
+        "0.5": 81098.61,
+        "0.95": 94254.38,
+        "0.99": 102171.79
+      },
+      "wall": {
+        "0.5": 81135.41,
+        "0.95": 94277.43,
+        "0.99": 102199.21
+      }
+    },
+    {
+      "repeat": 3,
+      "case": "0-2-unrelated",
+      "variant": "candidate",
+      "final": "FINAL,pixel_hash=7578910431315845812",
+      "counters": "COUNTERS,Counters { owner_reruns: 0, descriptions: 0, source_operations: 4000, source_reads: 8000, destination_compares: 8000, text_promotions: 8000, text_bytes_copied: 54402, layout_runs: 4000, measure_calls: 16000, presentations: 4000, paint_passes: 4000, exact_updates: 4000, coarse_updates: 0 }",
+      "tasks": "TASKS,frozen=0,dispatched=0,accepted=0",
+      "cpu": {
+        "0.5": 32117.27,
+        "0.95": 34452.47,
+        "0.99": 36446.14
+      },
+      "wall": {
+        "0.5": 32122.69,
+        "0.95": 34470.9,
+        "0.99": 36458.93
+      }
+    },
+    {
+      "repeat": 3,
+      "case": "0-4-unrelated",
+      "variant": "candidate",
+      "final": "FINAL,pixel_hash=970880845196872716",
+      "counters": "COUNTERS,Counters { owner_reruns: 0, descriptions: 0, source_operations: 4000, source_reads: 16000, destination_compares: 16000, text_promotions: 16000, text_bytes_copied: 108804, layout_runs: 4000, measure_calls: 32000, presentations: 4000, paint_passes: 4000, exact_updates: 4000, coarse_updates: 0 }",
+      "tasks": "TASKS,frozen=0,dispatched=0,accepted=0",
+      "cpu": {
+        "0.5": 58336.94,
+        "0.95": 62070.28,
+        "0.99": 63652.26
+      },
+      "wall": {
+        "0.5": 58358.59,
+        "0.95": 62077.88,
+        "0.99": 63659.76
+      }
+    },
+    {
+      "repeat": 3,
+      "case": "0-4-unrelated",
+      "variant": "control",
+      "final": "FINAL,pixel_hash=970880845196872716",
+      "counters": "COUNTERS,Counters { owner_reruns: 8000, descriptions: 8000, source_operations: 8000, source_reads: 0, destination_compares: 88000, text_promotions: 20000, text_bytes_copied: 152804, layout_runs: 8000, measure_calls: 88000, presentations: 8000, paint_passes: 8000, exact_updates: 0, coarse_updates: 8000 }",
+      "tasks": "TASKS,frozen=4000,dispatched=4000,accepted=4000",
+      "cpu": {
+        "0.5": 101048.68,
+        "0.95": 109856.76,
+        "0.99": 110319.44
+      },
+      "wall": {
+        "0.5": 101072.9,
+        "0.95": 109892.47,
+        "0.99": 110333.5
+      }
+    },
+    {
+      "repeat": 3,
+      "case": "0-1-dependent",
+      "variant": "control",
+      "final": "FINAL,pixel_hash=8829556083644644402",
+      "counters": "COUNTERS,Counters { owner_reruns: 8000, descriptions: 8000, source_operations: 8000, source_reads: 0, destination_compares: 88000, text_promotions: 12000, text_bytes_copied: 126402, layout_runs: 8000, measure_calls: 88000, presentations: 8000, paint_passes: 8000, exact_updates: 0, coarse_updates: 8000 }",
+      "tasks": "TASKS,frozen=4000,dispatched=4000,accepted=4000",
+      "cpu": {
+        "0.5": 74762.17,
+        "0.95": 82370.31,
+        "0.99": 91791.24
+      },
+      "wall": {
+        "0.5": 74775.15,
+        "0.95": 82389.87,
+        "0.99": 91807.87
+      }
+    },
+    {
+      "repeat": 3,
+      "case": "0-1-dependent",
+      "variant": "candidate",
+      "final": "FINAL,pixel_hash=8829556083644644402",
+      "counters": "COUNTERS,Counters { owner_reruns: 8000, descriptions: 8000, source_operations: 8000, source_reads: 0, destination_compares: 88000, text_promotions: 12000, text_bytes_copied: 126402, layout_runs: 8000, measure_calls: 88000, presentations: 8000, paint_passes: 8000, exact_updates: 0, coarse_updates: 8000 }",
+      "tasks": "TASKS,frozen=4000,dispatched=4000,accepted=4000",
+      "cpu": {
+        "0.5": 70900.5,
+        "0.95": 76483.82,
+        "0.99": 76665.16
+      },
+      "wall": {
+        "0.5": 70918.11,
+        "0.95": 76505.02,
+        "0.99": 76680.73
+      }
+    },
+    {
+      "repeat": 3,
+      "case": "0-2-dependent",
+      "variant": "candidate",
+      "final": "FINAL,pixel_hash=17759712045857455370",
+      "counters": "COUNTERS,Counters { owner_reruns: 8000, descriptions: 8000, source_operations: 8000, source_reads: 0, destination_compares: 88000, text_promotions: 16000, text_bytes_copied: 164804, layout_runs: 8000, measure_calls: 88000, presentations: 8000, paint_passes: 8000, exact_updates: 0, coarse_updates: 8000 }",
+      "tasks": "TASKS,frozen=4000,dispatched=4000,accepted=4000",
+      "cpu": {
+        "0.5": 83655.23,
+        "0.95": 93162.53,
+        "0.99": 96256.36
+      },
+      "wall": {
+        "0.5": 83676.89,
+        "0.95": 93190.56,
+        "0.99": 96283.58
+      }
+    },
+    {
+      "repeat": 3,
+      "case": "0-2-dependent",
+      "variant": "control",
+      "final": "FINAL,pixel_hash=17759712045857455370",
+      "counters": "COUNTERS,Counters { owner_reruns: 8000, descriptions: 8000, source_operations: 8000, source_reads: 0, destination_compares: 88000, text_promotions: 16000, text_bytes_copied: 164804, layout_runs: 8000, measure_calls: 88000, presentations: 8000, paint_passes: 8000, exact_updates: 0, coarse_updates: 8000 }",
+      "tasks": "TASKS,frozen=4000,dispatched=4000,accepted=4000",
+      "cpu": {
+        "0.5": 84768.83,
+        "0.95": 94141.97,
+        "0.99": 104911.95
+      },
+      "wall": {
+        "0.5": 84805.2,
+        "0.95": 94154.79,
+        "0.99": 104932.24
+      }
+    },
+    {
+      "repeat": 3,
+      "case": "0-4-dependent",
+      "variant": "control",
+      "final": "FINAL,pixel_hash=3408001187935195458",
+      "counters": "COUNTERS,Counters { owner_reruns: 8000, descriptions: 8000, source_operations: 8000, source_reads: 0, destination_compares: 88000, text_promotions: 24000, text_bytes_copied: 219206, layout_runs: 8000, measure_calls: 88000, presentations: 8000, paint_passes: 8000, exact_updates: 0, coarse_updates: 8000 }",
+      "tasks": "TASKS,frozen=4000,dispatched=4000,accepted=4000",
+      "cpu": {
+        "0.5": 108851.97,
+        "0.95": 124199.97,
+        "0.99": 126544.48
+      },
+      "wall": {
+        "0.5": 108875.96,
+        "0.95": 124253.37,
+        "0.99": 126568.52
+      }
+    },
+    {
+      "repeat": 3,
+      "case": "0-4-dependent",
+      "variant": "candidate",
+      "final": "FINAL,pixel_hash=3408001187935195458",
+      "counters": "COUNTERS,Counters { owner_reruns: 8000, descriptions: 8000, source_operations: 8000, source_reads: 0, destination_compares: 88000, text_promotions: 24000, text_bytes_copied: 219206, layout_runs: 8000, measure_calls: 88000, presentations: 8000, paint_passes: 8000, exact_updates: 0, coarse_updates: 8000 }",
+      "tasks": "TASKS,frozen=4000,dispatched=4000,accepted=4000",
+      "cpu": {
+        "0.5": 107183.83,
+        "0.95": 115463.22,
+        "0.99": 125714.33
+      },
+      "wall": {
+        "0.5": 107197.4,
+        "0.95": 115510.62,
+        "0.99": 125738.46
+      }
+    },
+    {
+      "repeat": 3,
+      "case": "1-1-unrelated",
+      "variant": "candidate",
+      "final": "FINAL,pixel_hash=8627942319840186434",
+      "counters": "COUNTERS,Counters { owner_reruns: 0, descriptions: 0, source_operations: 4000, source_reads: 4000, destination_compares: 4000, text_promotions: 4000, text_bytes_copied: 27201, layout_runs: 4000, measure_calls: 8000, presentations: 4000, paint_passes: 4000, exact_updates: 4000, coarse_updates: 0 }",
+      "tasks": "TASKS,frozen=0,dispatched=0,accepted=0",
+      "cpu": {
+        "0.5": 14212.97,
+        "0.95": 16166.35,
+        "0.99": 18438.32
+      },
+      "wall": {
+        "0.5": 14218.83,
+        "0.95": 16176.81,
+        "0.99": 18450.18
+      }
+    },
+    {
+      "repeat": 3,
+      "case": "1-1-unrelated",
+      "variant": "control",
+      "final": "FINAL,pixel_hash=8627942319840186434",
+      "counters": "COUNTERS,Counters { owner_reruns: 0, descriptions: 0, source_operations: 4000, source_reads: 4000, destination_compares: 4000, text_promotions: 4000, text_bytes_copied: 27201, layout_runs: 4000, measure_calls: 8000, presentations: 4000, paint_passes: 4000, exact_updates: 4000, coarse_updates: 0 }",
+      "tasks": "TASKS,frozen=0,dispatched=0,accepted=0",
+      "cpu": {
+        "0.5": 14900.66,
+        "0.95": 16833.11,
+        "0.99": 17156.71
+      },
+      "wall": {
+        "0.5": 14908.53,
+        "0.95": 16843.06,
+        "0.99": 17165.76
+      }
+    },
+    {
+      "repeat": 3,
+      "case": "1-2-unrelated",
+      "variant": "control",
+      "final": "FINAL,pixel_hash=3284881484069841934",
+      "counters": "COUNTERS,Counters { owner_reruns: 8000, descriptions: 8000, source_operations: 8000, source_reads: 0, destination_compares: 296000, text_promotions: 12000, text_bytes_copied: 98402, layout_runs: 8000, measure_calls: 488000, presentations: 8000, paint_passes: 8000, exact_updates: 0, coarse_updates: 8000 }",
+      "tasks": "TASKS,frozen=4000,dispatched=4000,accepted=4000",
+      "cpu": {
+        "0.5": 235939.08,
+        "0.95": 251107.45,
+        "0.99": 252731.91
+      },
+      "wall": {
+        "0.5": 236139.48,
+        "0.95": 251125.16,
+        "0.99": 252956.5
+      }
+    },
+    {
+      "repeat": 3,
+      "case": "1-2-unrelated",
+      "variant": "candidate",
+      "final": "FINAL,pixel_hash=3284881484069841934",
+      "counters": "COUNTERS,Counters { owner_reruns: 0, descriptions: 0, source_operations: 4000, source_reads: 8000, destination_compares: 8000, text_promotions: 8000, text_bytes_copied: 54402, layout_runs: 4000, measure_calls: 16000, presentations: 4000, paint_passes: 4000, exact_updates: 4000, coarse_updates: 0 }",
+      "tasks": "TASKS,frozen=0,dispatched=0,accepted=0",
+      "cpu": {
+        "0.5": 39218.96,
+        "0.95": 40666.28,
+        "0.99": 50390.28
+      },
+      "wall": {
+        "0.5": 39224.63,
+        "0.95": 40674.46,
+        "0.99": 50399.83
+      }
+    },
+    {
+      "repeat": 3,
+      "case": "1-4-unrelated",
+      "variant": "candidate",
+      "final": "FINAL,pixel_hash=17907747960521954518",
+      "counters": "COUNTERS,Counters { owner_reruns: 0, descriptions: 0, source_operations: 4000, source_reads: 16000, destination_compares: 16000, text_promotions: 16000, text_bytes_copied: 108804, layout_runs: 4000, measure_calls: 32000, presentations: 4000, paint_passes: 4000, exact_updates: 4000, coarse_updates: 0 }",
+      "tasks": "TASKS,frozen=0,dispatched=0,accepted=0",
+      "cpu": {
+        "0.5": 68398.59,
+        "0.95": 75724.8,
+        "0.99": 76608.46
+      },
+      "wall": {
+        "0.5": 68416.7,
+        "0.95": 75735.86,
+        "0.99": 76623.83
+      }
+    },
+    {
+      "repeat": 3,
+      "case": "1-4-unrelated",
+      "variant": "control",
+      "final": "FINAL,pixel_hash=17907747960521954518",
+      "counters": "COUNTERS,Counters { owner_reruns: 8000, descriptions: 8000, source_operations: 8000, source_reads: 0, destination_compares: 296000, text_promotions: 20000, text_bytes_copied: 152804, layout_runs: 8000, measure_calls: 488000, presentations: 8000, paint_passes: 8000, exact_updates: 0, coarse_updates: 8000 }",
+      "tasks": "TASKS,frozen=4000,dispatched=4000,accepted=4000",
+      "cpu": {
+        "0.5": 254112.2,
+        "0.95": 271869.63,
+        "0.99": 287008.45
+      },
+      "wall": {
+        "0.5": 254152.14,
+        "0.95": 271912.02,
+        "0.99": 287146.05
+      }
+    },
+    {
+      "repeat": 3,
+      "case": "1-1-dependent",
+      "variant": "control",
+      "final": "FINAL,pixel_hash=13195835639209551848",
+      "counters": "COUNTERS,Counters { owner_reruns: 8000, descriptions: 8000, source_operations: 8000, source_reads: 0, destination_compares: 296000, text_promotions: 12000, text_bytes_copied: 126402, layout_runs: 8000, measure_calls: 488000, presentations: 8000, paint_passes: 8000, exact_updates: 0, coarse_updates: 8000 }",
+      "tasks": "TASKS,frozen=4000,dispatched=4000,accepted=4000",
+      "cpu": {
+        "0.5": 221439.97,
+        "0.95": 234526.62,
+        "0.99": 238561.62
+      },
+      "wall": {
+        "0.5": 221466.1,
+        "0.95": 234549.19,
+        "0.99": 238985.53
+      }
+    },
+    {
+      "repeat": 3,
+      "case": "1-1-dependent",
+      "variant": "candidate",
+      "final": "FINAL,pixel_hash=13195835639209551848",
+      "counters": "COUNTERS,Counters { owner_reruns: 8000, descriptions: 8000, source_operations: 8000, source_reads: 0, destination_compares: 296000, text_promotions: 12000, text_bytes_copied: 126402, layout_runs: 8000, measure_calls: 488000, presentations: 8000, paint_passes: 8000, exact_updates: 0, coarse_updates: 8000 }",
+      "tasks": "TASKS,frozen=4000,dispatched=4000,accepted=4000",
+      "cpu": {
+        "0.5": 219741.07,
+        "0.95": 229793.4,
+        "0.99": 235932.17
+      },
+      "wall": {
+        "0.5": 219779.62,
+        "0.95": 229949.25,
+        "0.99": 235952.03
+      }
+    },
+    {
+      "repeat": 3,
+      "case": "1-2-dependent",
+      "variant": "candidate",
+      "final": "FINAL,pixel_hash=14124934070918126864",
+      "counters": "COUNTERS,Counters { owner_reruns: 8000, descriptions: 8000, source_operations: 8000, source_reads: 0, destination_compares: 296000, text_promotions: 16000, text_bytes_copied: 164804, layout_runs: 8000, measure_calls: 488000, presentations: 8000, paint_passes: 8000, exact_updates: 0, coarse_updates: 8000 }",
+      "tasks": "TASKS,frozen=4000,dispatched=4000,accepted=4000",
+      "cpu": {
+        "0.5": 258521.3,
+        "0.95": 294564.57,
+        "0.99": 319645.2
+      },
+      "wall": {
+        "0.5": 258551.71,
+        "0.95": 294937.11,
+        "0.99": 319668.89
+      }
+    },
+    {
+      "repeat": 3,
+      "case": "1-2-dependent",
+      "variant": "control",
+      "final": "FINAL,pixel_hash=14124934070918126864",
+      "counters": "COUNTERS,Counters { owner_reruns: 8000, descriptions: 8000, source_operations: 8000, source_reads: 0, destination_compares: 296000, text_promotions: 16000, text_bytes_copied: 164804, layout_runs: 8000, measure_calls: 488000, presentations: 8000, paint_passes: 8000, exact_updates: 0, coarse_updates: 8000 }",
+      "tasks": "TASKS,frozen=4000,dispatched=4000,accepted=4000",
+      "cpu": {
+        "0.5": 245289.68,
+        "0.95": 260676.15,
+        "0.99": 289802.7
+      },
+      "wall": {
+        "0.5": 245305.71,
+        "0.95": 260692.93,
+        "0.99": 289819.5
+      }
+    },
+    {
+      "repeat": 3,
+      "case": "1-4-dependent",
+      "variant": "control",
+      "final": "FINAL,pixel_hash=14118930585116151960",
+      "counters": "COUNTERS,Counters { owner_reruns: 8000, descriptions: 8000, source_operations: 8000, source_reads: 0, destination_compares: 296000, text_promotions: 24000, text_bytes_copied: 219206, layout_runs: 8000, measure_calls: 488000, presentations: 8000, paint_passes: 8000, exact_updates: 0, coarse_updates: 8000 }",
+      "tasks": "TASKS,frozen=4000,dispatched=4000,accepted=4000",
+      "cpu": {
+        "0.5": 266585.79,
+        "0.95": 296279.0,
+        "0.99": 312576.19
+      },
+      "wall": {
+        "0.5": 266599.04,
+        "0.95": 296303.37,
+        "0.99": 312598.9
+      }
+    },
+    {
+      "repeat": 3,
+      "case": "1-4-dependent",
+      "variant": "candidate",
+      "final": "FINAL,pixel_hash=14118930585116151960",
+      "counters": "COUNTERS,Counters { owner_reruns: 8000, descriptions: 8000, source_operations: 8000, source_reads: 0, destination_compares: 296000, text_promotions: 24000, text_bytes_copied: 219206, layout_runs: 8000, measure_calls: 488000, presentations: 8000, paint_passes: 8000, exact_updates: 0, coarse_updates: 8000 }",
+      "tasks": "TASKS,frozen=4000,dispatched=4000,accepted=4000",
+      "cpu": {
+        "0.5": 271822.44,
+        "0.95": 292350.71,
+        "0.99": 378837.76
+      },
+      "wall": {
+        "0.5": 271845.29,
+        "0.95": 292988.63,
+        "0.99": 378870.87
+      }
+    },
+    {
+      "repeat": 3,
+      "case": "40-1-unrelated",
+      "variant": "candidate",
+      "final": "FINAL,pixel_hash=15889697540729426171",
+      "counters": "COUNTERS,Counters { owner_reruns: 0, descriptions: 0, source_operations: 4000, source_reads: 4000, destination_compares: 4000, text_promotions: 4000, text_bytes_copied: 27201, layout_runs: 4000, measure_calls: 8000, presentations: 4000, paint_passes: 4000, exact_updates: 4000, coarse_updates: 0 }",
+      "tasks": "TASKS,frozen=0,dispatched=0,accepted=0",
+      "cpu": {
+        "0.5": 14953.87,
+        "0.95": 17700.03,
+        "0.99": 19744.88
+      },
+      "wall": {
+        "0.5": 14962.33,
+        "0.95": 17705.68,
+        "0.99": 19748.92
+      }
+    },
+    {
+      "repeat": 3,
+      "case": "40-1-unrelated",
+      "variant": "control",
+      "final": "FINAL,pixel_hash=15889697540729426171",
+      "counters": "COUNTERS,Counters { owner_reruns: 0, descriptions: 0, source_operations: 4000, source_reads: 4000, destination_compares: 4000, text_promotions: 4000, text_bytes_copied: 27201, layout_runs: 4000, measure_calls: 8000, presentations: 4000, paint_passes: 4000, exact_updates: 4000, coarse_updates: 0 }",
+      "tasks": "TASKS,frozen=0,dispatched=0,accepted=0",
+      "cpu": {
+        "0.5": 14821.91,
+        "0.95": 17735.3,
+        "0.99": 24224.31
+      },
+      "wall": {
+        "0.5": 14823.66,
+        "0.95": 17743.55,
+        "0.99": 24228.65
+      }
+    },
+    {
+      "repeat": 3,
+      "case": "40-2-unrelated",
+      "variant": "control",
+      "final": "FINAL,pixel_hash=486252068588713791",
+      "counters": "COUNTERS,Counters { owner_reruns: 8000, descriptions: 8000, source_operations: 8000, source_reads: 0, destination_compares: 8408000, text_promotions: 12000, text_bytes_copied: 98402, layout_runs: 8000, measure_calls: 16088000, presentations: 8000, paint_passes: 8000, exact_updates: 0, coarse_updates: 8000 }",
+      "tasks": "TASKS,frozen=4000,dispatched=4000,accepted=4000",
+      "cpu": {
+        "0.5": 7386138.55,
+        "0.95": 7954732.93,
+        "0.99": 8321269.57
+      },
+      "wall": {
+        "0.5": 7387071.32,
+        "0.95": 7955607.16,
+        "0.99": 8323134.14
+      }
+    },
+    {
+      "repeat": 3,
+      "case": "40-2-unrelated",
+      "variant": "candidate",
+      "final": "FINAL,pixel_hash=486252068588713791",
+      "counters": "COUNTERS,Counters { owner_reruns: 0, descriptions: 0, source_operations: 4000, source_reads: 8000, destination_compares: 8000, text_promotions: 8000, text_bytes_copied: 54402, layout_runs: 4000, measure_calls: 16000, presentations: 4000, paint_passes: 4000, exact_updates: 4000, coarse_updates: 0 }",
+      "tasks": "TASKS,frozen=0,dispatched=0,accepted=0",
+      "cpu": {
+        "0.5": 410557.68,
+        "0.95": 428459.6,
+        "0.99": 450849.57
+      },
+      "wall": {
+        "0.5": 410570.84,
+        "0.95": 428474.81,
+        "0.99": 450861.79
+      }
+    },
+    {
+      "repeat": 3,
+      "case": "40-4-unrelated",
+      "variant": "candidate",
+      "final": "FINAL,pixel_hash=3081166828330265799",
+      "counters": "COUNTERS,Counters { owner_reruns: 0, descriptions: 0, source_operations: 4000, source_reads: 16000, destination_compares: 16000, text_promotions: 16000, text_bytes_copied: 108804, layout_runs: 4000, measure_calls: 32000, presentations: 4000, paint_passes: 4000, exact_updates: 4000, coarse_updates: 0 }",
+      "tasks": "TASKS,frozen=0,dispatched=0,accepted=0",
+      "cpu": {
+        "0.5": 438801.48,
+        "0.95": 452474.92,
+        "0.99": 464778.7
+      },
+      "wall": {
+        "0.5": 439035.46,
+        "0.95": 452493.85,
+        "0.99": 464967.3
+      }
+    },
+    {
+      "repeat": 3,
+      "case": "40-4-unrelated",
+      "variant": "control",
+      "final": "FINAL,pixel_hash=3081166828330265799",
+      "counters": "COUNTERS,Counters { owner_reruns: 8000, descriptions: 8000, source_operations: 8000, source_reads: 0, destination_compares: 8408000, text_promotions: 20000, text_bytes_copied: 152804, layout_runs: 8000, measure_calls: 16088000, presentations: 8000, paint_passes: 8000, exact_updates: 0, coarse_updates: 8000 }",
+      "tasks": "TASKS,frozen=4000,dispatched=4000,accepted=4000",
+      "cpu": {
+        "0.5": 7005126.72,
+        "0.95": 7398245.76,
+        "0.99": 8040098.0
+      },
+      "wall": {
+        "0.5": 7005507.28,
+        "0.95": 7399986.03,
+        "0.99": 8042694.6
+      }
+    },
+    {
+      "repeat": 3,
+      "case": "40-1-dependent",
+      "variant": "control",
+      "final": "FINAL,pixel_hash=9187653472009869049",
+      "counters": "COUNTERS,Counters { owner_reruns: 8000, descriptions: 8000, source_operations: 8000, source_reads: 0, destination_compares: 8408000, text_promotions: 12000, text_bytes_copied: 126402, layout_runs: 8000, measure_calls: 16088000, presentations: 8000, paint_passes: 8000, exact_updates: 0, coarse_updates: 8000 }",
+      "tasks": "TASKS,frozen=4000,dispatched=4000,accepted=4000",
+      "cpu": {
+        "0.5": 6891350.66,
+        "0.95": 7160269.65,
+        "0.99": 7339932.49
+      },
+      "wall": {
+        "0.5": 6891769.33,
+        "0.95": 7160585.67,
+        "0.99": 7341048.47
+      }
+    },
+    {
+      "repeat": 3,
+      "case": "40-1-dependent",
+      "variant": "candidate",
+      "final": "FINAL,pixel_hash=9187653472009869049",
+      "counters": "COUNTERS,Counters { owner_reruns: 8000, descriptions: 8000, source_operations: 8000, source_reads: 0, destination_compares: 8408000, text_promotions: 12000, text_bytes_copied: 126402, layout_runs: 8000, measure_calls: 16088000, presentations: 8000, paint_passes: 8000, exact_updates: 0, coarse_updates: 8000 }",
+      "tasks": "TASKS,frozen=4000,dispatched=4000,accepted=4000",
+      "cpu": {
+        "0.5": 7218791.16,
+        "0.95": 7756246.09,
+        "0.99": 7898844.01
+      },
+      "wall": {
+        "0.5": 7220944.5,
+        "0.95": 7759080.17,
+        "0.99": 7899476.16
+      }
+    },
+    {
+      "repeat": 3,
+      "case": "40-2-dependent",
+      "variant": "candidate",
+      "final": "FINAL,pixel_hash=18228237087345915393",
+      "counters": "COUNTERS,Counters { owner_reruns: 8000, descriptions: 8000, source_operations: 8000, source_reads: 0, destination_compares: 8408000, text_promotions: 16000, text_bytes_copied: 164804, layout_runs: 8000, measure_calls: 16088000, presentations: 8000, paint_passes: 8000, exact_updates: 0, coarse_updates: 8000 }",
+      "tasks": "TASKS,frozen=4000,dispatched=4000,accepted=4000",
+      "cpu": {
+        "0.5": 8162101.42,
+        "0.95": 8868053.64,
+        "0.99": 8999421.8
+      },
+      "wall": {
+        "0.5": 8162513.95,
+        "0.95": 8870590.98,
+        "0.99": 9000103.8
+      }
+    },
+    {
+      "repeat": 3,
+      "case": "40-2-dependent",
+      "variant": "control",
+      "final": "FINAL,pixel_hash=18228237087345915393",
+      "counters": "COUNTERS,Counters { owner_reruns: 8000, descriptions: 8000, source_operations: 8000, source_reads: 0, destination_compares: 8408000, text_promotions: 16000, text_bytes_copied: 164804, layout_runs: 8000, measure_calls: 16088000, presentations: 8000, paint_passes: 8000, exact_updates: 0, coarse_updates: 8000 }",
+      "tasks": "TASKS,frozen=4000,dispatched=4000,accepted=4000",
+      "cpu": {
+        "0.5": 8175232.27,
+        "0.95": 8806927.84,
+        "0.99": 9541539.34
+      },
+      "wall": {
+        "0.5": 8176690.3,
+        "0.95": 8808018.04,
+        "0.99": 9569035.4
+      }
+    },
+    {
+      "repeat": 3,
+      "case": "40-4-dependent",
+      "variant": "control",
+      "final": "FINAL,pixel_hash=3650281480745005001",
+      "counters": "COUNTERS,Counters { owner_reruns: 8000, descriptions: 8000, source_operations: 8000, source_reads: 0, destination_compares: 8408000, text_promotions: 24000, text_bytes_copied: 219206, layout_runs: 8000, measure_calls: 16088000, presentations: 8000, paint_passes: 8000, exact_updates: 0, coarse_updates: 8000 }",
+      "tasks": "TASKS,frozen=4000,dispatched=4000,accepted=4000",
+      "cpu": {
+        "0.5": 8079309.92,
+        "0.95": 8726624.83,
+        "0.99": 8759814.51
+      },
+      "wall": {
+        "0.5": 8080029.76,
+        "0.95": 8728159.15,
+        "0.99": 8760834.74
+      }
+    },
+    {
+      "repeat": 3,
+      "case": "40-4-dependent",
+      "variant": "candidate",
+      "final": "FINAL,pixel_hash=3650281480745005001",
+      "counters": "COUNTERS,Counters { owner_reruns: 8000, descriptions: 8000, source_operations: 8000, source_reads: 0, destination_compares: 8408000, text_promotions: 24000, text_bytes_copied: 219206, layout_runs: 8000, measure_calls: 16088000, presentations: 8000, paint_passes: 8000, exact_updates: 0, coarse_updates: 8000 }",
+      "tasks": "TASKS,frozen=4000,dispatched=4000,accepted=4000",
+      "cpu": {
+        "0.5": 8040823.78,
+        "0.95": 8557955.59,
+        "0.99": 8644629.02
+      },
+      "wall": {
+        "0.5": 8049095.44,
+        "0.95": 8639689.55,
+        "0.99": 9502466.81
+      }
+    },
+    {
+      "repeat": 3,
+      "case": "0-4-owner",
+      "variant": "candidate",
+      "final": "FINAL,pixel_hash=3985071684859849092",
+      "counters": "COUNTERS,Counters { owner_reruns: 8000, descriptions: 8000, source_operations: 8000, source_reads: 0, destination_compares: 96000, text_promotions: 24000, text_bytes_copied: 204005, layout_runs: 8000, measure_calls: 104000, presentations: 8000, paint_passes: 8000, exact_updates: 0, coarse_updates: 8000 }",
+      "tasks": "TASKS,frozen=4000,dispatched=4000,accepted=4000",
+      "cpu": {
+        "0.5": 112402.05,
+        "0.95": 153755.42,
+        "0.99": 162084.01
+      },
+      "wall": {
+        "0.5": 112416.89,
+        "0.95": 153772.82,
+        "0.99": 162100.89
+      }
+    },
+    {
+      "repeat": 3,
+      "case": "0-4-owner",
+      "variant": "control",
+      "final": "FINAL,pixel_hash=3985071684859849092",
+      "counters": "COUNTERS,Counters { owner_reruns: 8000, descriptions: 8000, source_operations: 8000, source_reads: 0, destination_compares: 96000, text_promotions: 24000, text_bytes_copied: 204005, layout_runs: 8000, measure_calls: 104000, presentations: 8000, paint_passes: 8000, exact_updates: 0, coarse_updates: 8000 }",
+      "tasks": "TASKS,frozen=4000,dispatched=4000,accepted=4000",
+      "cpu": {
+        "0.5": 114001.27,
+        "0.95": 164577.3,
+        "0.99": 173326.78
+      },
+      "wall": {
+        "0.5": 114018.7,
+        "0.95": 164600.98,
+        "0.99": 173346.7
+      }
+    },
+    {
+      "repeat": 3,
+      "case": "0-4-opaque",
+      "variant": "control",
+      "final": "FINAL,pixel_hash=970880845196872716",
+      "counters": "COUNTERS,Counters { owner_reruns: 8000, descriptions: 8000, source_operations: 8000, source_reads: 0, destination_compares: 88000, text_promotions: 20000, text_bytes_copied: 152804, layout_runs: 8000, measure_calls: 88000, presentations: 8000, paint_passes: 8000, exact_updates: 0, coarse_updates: 8000 }",
+      "tasks": "TASKS,frozen=4000,dispatched=4000,accepted=4000",
+      "cpu": {
+        "0.5": 105994.29,
+        "0.95": 118097.18,
+        "0.99": 126118.0
+      },
+      "wall": {
+        "0.5": 106021.37,
+        "0.95": 118113.0,
+        "0.99": 126283.55
+      }
+    },
+    {
+      "repeat": 3,
+      "case": "0-4-opaque",
+      "variant": "candidate",
+      "final": "FINAL,pixel_hash=970880845196872716",
+      "counters": "COUNTERS,Counters { owner_reruns: 8000, descriptions: 8000, source_operations: 8000, source_reads: 0, destination_compares: 88000, text_promotions: 20000, text_bytes_copied: 152804, layout_runs: 8000, measure_calls: 88000, presentations: 8000, paint_passes: 8000, exact_updates: 0, coarse_updates: 8000 }",
+      "tasks": "TASKS,frozen=4000,dispatched=4000,accepted=4000",
+      "cpu": {
+        "0.5": 111814.25,
+        "0.95": 130339.72,
+        "0.99": 136479.39
+      },
+      "wall": {
+        "0.5": 112145.08,
+        "0.95": 130498.28,
+        "0.99": 136512.38
+      }
+    },
+    {
+      "repeat": 3,
+      "case": "1-4-owner",
+      "variant": "candidate",
+      "final": "FINAL,pixel_hash=13191195305542509566",
+      "counters": "COUNTERS,Counters { owner_reruns: 8000, descriptions: 8000, source_operations: 8000, source_reads: 0, destination_compares: 304000, text_promotions: 24000, text_bytes_copied: 204005, layout_runs: 8000, measure_calls: 504000, presentations: 8000, paint_passes: 8000, exact_updates: 0, coarse_updates: 8000 }",
+      "tasks": "TASKS,frozen=4000,dispatched=4000,accepted=4000",
+      "cpu": {
+        "0.5": 291345.01,
+        "0.95": 326958.07,
+        "0.99": 346078.68
+      },
+      "wall": {
+        "0.5": 291368.44,
+        "0.95": 326974.27,
+        "0.99": 346098.41
+      }
+    },
+    {
+      "repeat": 3,
+      "case": "1-4-owner",
+      "variant": "control",
+      "final": "FINAL,pixel_hash=13191195305542509566",
+      "counters": "COUNTERS,Counters { owner_reruns: 8000, descriptions: 8000, source_operations: 8000, source_reads: 0, destination_compares: 304000, text_promotions: 24000, text_bytes_copied: 204005, layout_runs: 8000, measure_calls: 504000, presentations: 8000, paint_passes: 8000, exact_updates: 0, coarse_updates: 8000 }",
+      "tasks": "TASKS,frozen=4000,dispatched=4000,accepted=4000",
+      "cpu": {
+        "0.5": 285435.27,
+        "0.95": 308039.54,
+        "0.99": 324557.54
+      },
+      "wall": {
+        "0.5": 285460.74,
+        "0.95": 308220.62,
+        "0.99": 324568.44
+      }
+    },
+    {
+      "repeat": 3,
+      "case": "1-4-opaque",
+      "variant": "control",
+      "final": "FINAL,pixel_hash=17907747960521954518",
+      "counters": "COUNTERS,Counters { owner_reruns: 8000, descriptions: 8000, source_operations: 8000, source_reads: 0, destination_compares: 296000, text_promotions: 20000, text_bytes_copied: 152804, layout_runs: 8000, measure_calls: 488000, presentations: 8000, paint_passes: 8000, exact_updates: 0, coarse_updates: 8000 }",
+      "tasks": "TASKS,frozen=4000,dispatched=4000,accepted=4000",
+      "cpu": {
+        "0.5": 277085.76,
+        "0.95": 324501.04,
+        "0.99": 355728.45
+      },
+      "wall": {
+        "0.5": 277100.03,
+        "0.95": 324539.0,
+        "0.99": 355991.22
+      }
+    },
+    {
+      "repeat": 3,
+      "case": "1-4-opaque",
+      "variant": "candidate",
+      "final": "FINAL,pixel_hash=17907747960521954518",
+      "counters": "COUNTERS,Counters { owner_reruns: 8000, descriptions: 8000, source_operations: 8000, source_reads: 0, destination_compares: 296000, text_promotions: 20000, text_bytes_copied: 152804, layout_runs: 8000, measure_calls: 488000, presentations: 8000, paint_passes: 8000, exact_updates: 0, coarse_updates: 8000 }",
+      "tasks": "TASKS,frozen=4000,dispatched=4000,accepted=4000",
+      "cpu": {
+        "0.5": 276809.64,
+        "0.95": 315369.95,
+        "0.99": 462799.76
+      },
+      "wall": {
+        "0.5": 276825.91,
+        "0.95": 315417.86,
+        "0.99": 462838.53
+      }
+    },
+    {
+      "repeat": 3,
+      "case": "40-4-owner",
+      "variant": "candidate",
+      "final": "FINAL,pixel_hash=3023726611500290992",
+      "counters": "COUNTERS,Counters { owner_reruns: 8000, descriptions: 8000, source_operations: 8000, source_reads: 0, destination_compares: 8416000, text_promotions: 24000, text_bytes_copied: 204005, layout_runs: 8000, measure_calls: 16104000, presentations: 8000, paint_passes: 8000, exact_updates: 0, coarse_updates: 8000 }",
+      "tasks": "TASKS,frozen=4000,dispatched=4000,accepted=4000",
+      "cpu": {
+        "0.5": 8137095.34,
+        "0.95": 8754557.55,
+        "0.99": 12384573.57
+      },
+      "wall": {
+        "0.5": 8138618.02,
+        "0.95": 8755642.14,
+        "0.99": 12388112.93
+      }
+    },
+    {
+      "repeat": 3,
+      "case": "40-4-owner",
+      "variant": "control",
+      "final": "FINAL,pixel_hash=3023726611500290992",
+      "counters": "COUNTERS,Counters { owner_reruns: 8000, descriptions: 8000, source_operations: 8000, source_reads: 0, destination_compares: 8416000, text_promotions: 24000, text_bytes_copied: 204005, layout_runs: 8000, measure_calls: 16104000, presentations: 8000, paint_passes: 8000, exact_updates: 0, coarse_updates: 8000 }",
+      "tasks": "TASKS,frozen=4000,dispatched=4000,accepted=4000",
+      "cpu": {
+        "0.5": 7957575.3,
+        "0.95": 8450034.88,
+        "0.99": 9293248.49
+      },
+      "wall": {
+        "0.5": 7958233.9,
+        "0.95": 8452213.38,
+        "0.99": 9294610.26
+      }
+    },
+    {
+      "repeat": 3,
+      "case": "40-4-opaque",
+      "variant": "control",
+      "final": "FINAL,pixel_hash=3081166828330265799",
+      "counters": "COUNTERS,Counters { owner_reruns: 8000, descriptions: 8000, source_operations: 8000, source_reads: 0, destination_compares: 8408000, text_promotions: 20000, text_bytes_copied: 152804, layout_runs: 8000, measure_calls: 16088000, presentations: 8000, paint_passes: 8000, exact_updates: 0, coarse_updates: 8000 }",
+      "tasks": "TASKS,frozen=4000,dispatched=4000,accepted=4000",
+      "cpu": {
+        "0.5": 7732494.76,
+        "0.95": 8425133.71,
+        "0.99": 8811487.42
+      },
+      "wall": {
+        "0.5": 7733508.79,
+        "0.95": 8425797.73,
+        "0.99": 8812933.3
+      }
+    },
+    {
+      "repeat": 3,
+      "case": "40-4-opaque",
+      "variant": "candidate",
+      "final": "FINAL,pixel_hash=3081166828330265799",
+      "counters": "COUNTERS,Counters { owner_reruns: 8000, descriptions: 8000, source_operations: 8000, source_reads: 0, destination_compares: 8408000, text_promotions: 20000, text_bytes_copied: 152804, layout_runs: 8000, measure_calls: 16088000, presentations: 8000, paint_passes: 8000, exact_updates: 0, coarse_updates: 8000 }",
+      "tasks": "TASKS,frozen=4000,dispatched=4000,accepted=4000",
+      "cpu": {
+        "0.5": 7974787.0,
+        "0.95": 8327295.4,
+        "0.99": 8767575.96
+      },
+      "wall": {
+        "0.5": 7975838.26,
+        "0.95": 8328278.66,
+        "0.99": 8769392.43
+      }
+    },
+    {
+      "repeat": 4,
+      "case": "0-1-unrelated",
+      "variant": "control",
+      "final": "FINAL,pixel_hash=12230463492156930872",
+      "counters": "COUNTERS,Counters { owner_reruns: 0, descriptions: 0, source_operations: 4000, source_reads: 4000, destination_compares: 4000, text_promotions: 4000, text_bytes_copied: 27201, layout_runs: 4000, measure_calls: 8000, presentations: 4000, paint_passes: 4000, exact_updates: 4000, coarse_updates: 0 }",
+      "tasks": "TASKS,frozen=0,dispatched=0,accepted=0",
+      "cpu": {
+        "0.5": 16457.79,
+        "0.95": 16800.52,
+        "0.99": 21991.22
+      },
+      "wall": {
+        "0.5": 16485.99,
+        "0.95": 16802.28,
+        "0.99": 21994.25
+      }
+    },
+    {
+      "repeat": 4,
+      "case": "0-1-unrelated",
+      "variant": "candidate",
+      "final": "FINAL,pixel_hash=12230463492156930872",
+      "counters": "COUNTERS,Counters { owner_reruns: 0, descriptions: 0, source_operations: 4000, source_reads: 4000, destination_compares: 4000, text_promotions: 4000, text_bytes_copied: 27201, layout_runs: 4000, measure_calls: 8000, presentations: 4000, paint_passes: 4000, exact_updates: 4000, coarse_updates: 0 }",
+      "tasks": "TASKS,frozen=0,dispatched=0,accepted=0",
+      "cpu": {
+        "0.5": 17955.91,
+        "0.95": 20030.52,
+        "0.99": 21787.82
+      },
+      "wall": {
+        "0.5": 17959.26,
+        "0.95": 20036.05,
+        "0.99": 21843.15
+      }
+    },
+    {
+      "repeat": 4,
+      "case": "0-2-unrelated",
+      "variant": "candidate",
+      "final": "FINAL,pixel_hash=7578910431315845812",
+      "counters": "COUNTERS,Counters { owner_reruns: 0, descriptions: 0, source_operations: 4000, source_reads: 8000, destination_compares: 8000, text_promotions: 8000, text_bytes_copied: 54402, layout_runs: 4000, measure_calls: 16000, presentations: 4000, paint_passes: 4000, exact_updates: 4000, coarse_updates: 0 }",
+      "tasks": "TASKS,frozen=0,dispatched=0,accepted=0",
+      "cpu": {
+        "0.5": 34380.24,
+        "0.95": 38299.61,
+        "0.99": 39236.88
+      },
+      "wall": {
+        "0.5": 34396.35,
+        "0.95": 38387.75,
+        "0.99": 39245.36
+      }
+    },
+    {
+      "repeat": 4,
+      "case": "0-2-unrelated",
+      "variant": "control",
+      "final": "FINAL,pixel_hash=7578910431315845812",
+      "counters": "COUNTERS,Counters { owner_reruns: 8000, descriptions: 8000, source_operations: 8000, source_reads: 0, destination_compares: 88000, text_promotions: 12000, text_bytes_copied: 98402, layout_runs: 8000, measure_calls: 88000, presentations: 8000, paint_passes: 8000, exact_updates: 0, coarse_updates: 8000 }",
+      "tasks": "TASKS,frozen=4000,dispatched=4000,accepted=4000",
+      "cpu": {
+        "0.5": 80653.27,
+        "0.95": 101957.99,
+        "0.99": 104607.19
+      },
+      "wall": {
+        "0.5": 80667.61,
+        "0.95": 101978.47,
+        "0.99": 104625.35
+      }
+    },
+    {
+      "repeat": 4,
+      "case": "0-4-unrelated",
+      "variant": "control",
+      "final": "FINAL,pixel_hash=970880845196872716",
+      "counters": "COUNTERS,Counters { owner_reruns: 8000, descriptions: 8000, source_operations: 8000, source_reads: 0, destination_compares: 88000, text_promotions: 20000, text_bytes_copied: 152804, layout_runs: 8000, measure_calls: 88000, presentations: 8000, paint_passes: 8000, exact_updates: 0, coarse_updates: 8000 }",
+      "tasks": "TASKS,frozen=4000,dispatched=4000,accepted=4000",
+      "cpu": {
+        "0.5": 99571.59,
+        "0.95": 112599.83,
+        "0.99": 119851.38
+      },
+      "wall": {
+        "0.5": 99631.76,
+        "0.95": 112619.16,
+        "0.99": 119872.2
+      }
+    },
+    {
+      "repeat": 4,
+      "case": "0-4-unrelated",
+      "variant": "candidate",
+      "final": "FINAL,pixel_hash=970880845196872716",
+      "counters": "COUNTERS,Counters { owner_reruns: 0, descriptions: 0, source_operations: 4000, source_reads: 16000, destination_compares: 16000, text_promotions: 16000, text_bytes_copied: 108804, layout_runs: 4000, measure_calls: 32000, presentations: 4000, paint_passes: 4000, exact_updates: 4000, coarse_updates: 0 }",
+      "tasks": "TASKS,frozen=0,dispatched=0,accepted=0",
+      "cpu": {
+        "0.5": 59576.59,
+        "0.95": 66111.69,
+        "0.99": 68009.16
+      },
+      "wall": {
+        "0.5": 59586.29,
+        "0.95": 66127.7,
+        "0.99": 68018.44
+      }
+    },
+    {
+      "repeat": 4,
+      "case": "0-1-dependent",
+      "variant": "candidate",
+      "final": "FINAL,pixel_hash=8829556083644644402",
+      "counters": "COUNTERS,Counters { owner_reruns: 8000, descriptions: 8000, source_operations: 8000, source_reads: 0, destination_compares: 88000, text_promotions: 12000, text_bytes_copied: 126402, layout_runs: 8000, measure_calls: 88000, presentations: 8000, paint_passes: 8000, exact_updates: 0, coarse_updates: 8000 }",
+      "tasks": "TASKS,frozen=4000,dispatched=4000,accepted=4000",
+      "cpu": {
+        "0.5": 75010.05,
+        "0.95": 89876.44,
+        "0.99": 99315.62
+      },
+      "wall": {
+        "0.5": 75052.66,
+        "0.95": 89886.54,
+        "0.99": 99338.22
+      }
+    },
+    {
+      "repeat": 4,
+      "case": "0-1-dependent",
+      "variant": "control",
+      "final": "FINAL,pixel_hash=8829556083644644402",
+      "counters": "COUNTERS,Counters { owner_reruns: 8000, descriptions: 8000, source_operations: 8000, source_reads: 0, destination_compares: 88000, text_promotions: 12000, text_bytes_copied: 126402, layout_runs: 8000, measure_calls: 88000, presentations: 8000, paint_passes: 8000, exact_updates: 0, coarse_updates: 8000 }",
+      "tasks": "TASKS,frozen=4000,dispatched=4000,accepted=4000",
+      "cpu": {
+        "0.5": 73745.86,
+        "0.95": 76605.75,
+        "0.99": 93727.5
+      },
+      "wall": {
+        "0.5": 73752.91,
+        "0.95": 76671.41,
+        "0.99": 93751.91
+      }
+    },
+    {
+      "repeat": 4,
+      "case": "0-2-dependent",
+      "variant": "control",
+      "final": "FINAL,pixel_hash=17759712045857455370",
+      "counters": "COUNTERS,Counters { owner_reruns: 8000, descriptions: 8000, source_operations: 8000, source_reads: 0, destination_compares: 88000, text_promotions: 16000, text_bytes_copied: 164804, layout_runs: 8000, measure_calls: 88000, presentations: 8000, paint_passes: 8000, exact_updates: 0, coarse_updates: 8000 }",
+      "tasks": "TASKS,frozen=4000,dispatched=4000,accepted=4000",
+      "cpu": {
+        "0.5": 85512.13,
+        "0.95": 94227.23,
+        "0.99": 99095.29
+      },
+      "wall": {
+        "0.5": 85527.25,
+        "0.95": 94241.62,
+        "0.99": 99120.99
+      }
+    },
+    {
+      "repeat": 4,
+      "case": "0-2-dependent",
+      "variant": "candidate",
+      "final": "FINAL,pixel_hash=17759712045857455370",
+      "counters": "COUNTERS,Counters { owner_reruns: 8000, descriptions: 8000, source_operations: 8000, source_reads: 0, destination_compares: 88000, text_promotions: 16000, text_bytes_copied: 164804, layout_runs: 8000, measure_calls: 88000, presentations: 8000, paint_passes: 8000, exact_updates: 0, coarse_updates: 8000 }",
+      "tasks": "TASKS,frozen=4000,dispatched=4000,accepted=4000",
+      "cpu": {
+        "0.5": 93943.99,
+        "0.95": 109646.68,
+        "0.99": 114436.59
+      },
+      "wall": {
+        "0.5": 93955.09,
+        "0.95": 109664.81,
+        "0.99": 114462.03
+      }
+    },
+    {
+      "repeat": 4,
+      "case": "0-4-dependent",
+      "variant": "candidate",
+      "final": "FINAL,pixel_hash=3408001187935195458",
+      "counters": "COUNTERS,Counters { owner_reruns: 8000, descriptions: 8000, source_operations: 8000, source_reads: 0, destination_compares: 88000, text_promotions: 24000, text_bytes_copied: 219206, layout_runs: 8000, measure_calls: 88000, presentations: 8000, paint_passes: 8000, exact_updates: 0, coarse_updates: 8000 }",
+      "tasks": "TASKS,frozen=4000,dispatched=4000,accepted=4000",
+      "cpu": {
+        "0.5": 115840.93,
+        "0.95": 131132.42,
+        "0.99": 147174.93
+      },
+      "wall": {
+        "0.5": 115852.96,
+        "0.95": 131152.1,
+        "0.99": 147197.76
+      }
+    },
+    {
+      "repeat": 4,
+      "case": "0-4-dependent",
+      "variant": "control",
+      "final": "FINAL,pixel_hash=3408001187935195458",
+      "counters": "COUNTERS,Counters { owner_reruns: 8000, descriptions: 8000, source_operations: 8000, source_reads: 0, destination_compares: 88000, text_promotions: 24000, text_bytes_copied: 219206, layout_runs: 8000, measure_calls: 88000, presentations: 8000, paint_passes: 8000, exact_updates: 0, coarse_updates: 8000 }",
+      "tasks": "TASKS,frozen=4000,dispatched=4000,accepted=4000",
+      "cpu": {
+        "0.5": 110792.13,
+        "0.95": 126830.93,
+        "0.99": 164193.18
+      },
+      "wall": {
+        "0.5": 110803.05,
+        "0.95": 126844.31,
+        "0.99": 164217.26
+      }
+    },
+    {
+      "repeat": 4,
+      "case": "1-1-unrelated",
+      "variant": "control",
+      "final": "FINAL,pixel_hash=8627942319840186434",
+      "counters": "COUNTERS,Counters { owner_reruns: 0, descriptions: 0, source_operations: 4000, source_reads: 4000, destination_compares: 4000, text_promotions: 4000, text_bytes_copied: 27201, layout_runs: 4000, measure_calls: 8000, presentations: 4000, paint_passes: 4000, exact_updates: 4000, coarse_updates: 0 }",
+      "tasks": "TASKS,frozen=0,dispatched=0,accepted=0",
+      "cpu": {
+        "0.5": 15809.17,
+        "0.95": 18040.47,
+        "0.99": 20945.54
+      },
+      "wall": {
+        "0.5": 15834.06,
+        "0.95": 18044.32,
+        "0.99": 20962.3
+      }
+    },
+    {
+      "repeat": 4,
+      "case": "1-1-unrelated",
+      "variant": "candidate",
+      "final": "FINAL,pixel_hash=8627942319840186434",
+      "counters": "COUNTERS,Counters { owner_reruns: 0, descriptions: 0, source_operations: 4000, source_reads: 4000, destination_compares: 4000, text_promotions: 4000, text_bytes_copied: 27201, layout_runs: 4000, measure_calls: 8000, presentations: 4000, paint_passes: 4000, exact_updates: 4000, coarse_updates: 0 }",
+      "tasks": "TASKS,frozen=0,dispatched=0,accepted=0",
+      "cpu": {
+        "0.5": 15266.64,
+        "0.95": 20310.35,
+        "0.99": 21375.76
+      },
+      "wall": {
+        "0.5": 15270.0,
+        "0.95": 20321.59,
+        "0.99": 21388.09
+      }
+    },
+    {
+      "repeat": 4,
+      "case": "1-2-unrelated",
+      "variant": "candidate",
+      "final": "FINAL,pixel_hash=3284881484069841934",
+      "counters": "COUNTERS,Counters { owner_reruns: 0, descriptions: 0, source_operations: 4000, source_reads: 8000, destination_compares: 8000, text_promotions: 8000, text_bytes_copied: 54402, layout_runs: 4000, measure_calls: 16000, presentations: 4000, paint_passes: 4000, exact_updates: 4000, coarse_updates: 0 }",
+      "tasks": "TASKS,frozen=0,dispatched=0,accepted=0",
+      "cpu": {
+        "0.5": 43125.21,
+        "0.95": 50446.89,
+        "0.99": 57907.74
+      },
+      "wall": {
+        "0.5": 43139.58,
+        "0.95": 50463.64,
+        "0.99": 57929.89
+      }
+    },
+    {
+      "repeat": 4,
+      "case": "1-2-unrelated",
+      "variant": "control",
+      "final": "FINAL,pixel_hash=3284881484069841934",
+      "counters": "COUNTERS,Counters { owner_reruns: 8000, descriptions: 8000, source_operations: 8000, source_reads: 0, destination_compares: 296000, text_promotions: 12000, text_bytes_copied: 98402, layout_runs: 8000, measure_calls: 488000, presentations: 8000, paint_passes: 8000, exact_updates: 0, coarse_updates: 8000 }",
+      "tasks": "TASKS,frozen=4000,dispatched=4000,accepted=4000",
+      "cpu": {
+        "0.5": 232704.2,
+        "0.95": 293090.9,
+        "0.99": 377290.15
+      },
+      "wall": {
+        "0.5": 232925.38,
+        "0.95": 293124.43,
+        "0.99": 377868.42
+      }
+    },
+    {
+      "repeat": 4,
+      "case": "1-4-unrelated",
+      "variant": "control",
+      "final": "FINAL,pixel_hash=17907747960521954518",
+      "counters": "COUNTERS,Counters { owner_reruns: 8000, descriptions: 8000, source_operations: 8000, source_reads: 0, destination_compares: 296000, text_promotions: 20000, text_bytes_copied: 152804, layout_runs: 8000, measure_calls: 488000, presentations: 8000, paint_passes: 8000, exact_updates: 0, coarse_updates: 8000 }",
+      "tasks": "TASKS,frozen=4000,dispatched=4000,accepted=4000",
+      "cpu": {
+        "0.5": 248700.41,
+        "0.95": 270836.18,
+        "0.99": 281908.75
+      },
+      "wall": {
+        "0.5": 249076.94,
+        "0.95": 270862.38,
+        "0.99": 281962.34
+      }
+    },
+    {
+      "repeat": 4,
+      "case": "1-4-unrelated",
+      "variant": "candidate",
+      "final": "FINAL,pixel_hash=17907747960521954518",
+      "counters": "COUNTERS,Counters { owner_reruns: 0, descriptions: 0, source_operations: 4000, source_reads: 16000, destination_compares: 16000, text_promotions: 16000, text_bytes_copied: 108804, layout_runs: 4000, measure_calls: 32000, presentations: 4000, paint_passes: 4000, exact_updates: 4000, coarse_updates: 0 }",
+      "tasks": "TASKS,frozen=0,dispatched=0,accepted=0",
+      "cpu": {
+        "0.5": 70196.68,
+        "0.95": 87589.73,
+        "0.99": 93508.19
+      },
+      "wall": {
+        "0.5": 70210.66,
+        "0.95": 87605.96,
+        "0.99": 93526.68
+      }
+    },
+    {
+      "repeat": 4,
+      "case": "1-1-dependent",
+      "variant": "candidate",
+      "final": "FINAL,pixel_hash=13195835639209551848",
+      "counters": "COUNTERS,Counters { owner_reruns: 8000, descriptions: 8000, source_operations: 8000, source_reads: 0, destination_compares: 296000, text_promotions: 12000, text_bytes_copied: 126402, layout_runs: 8000, measure_calls: 488000, presentations: 8000, paint_passes: 8000, exact_updates: 0, coarse_updates: 8000 }",
+      "tasks": "TASKS,frozen=4000,dispatched=4000,accepted=4000",
+      "cpu": {
+        "0.5": 241373.32,
+        "0.95": 283646.61,
+        "0.99": 314906.57
+      },
+      "wall": {
+        "0.5": 241383.79,
+        "0.95": 283668.85,
+        "0.99": 315106.05
+      }
+    },
+    {
+      "repeat": 4,
+      "case": "1-1-dependent",
+      "variant": "control",
+      "final": "FINAL,pixel_hash=13195835639209551848",
+      "counters": "COUNTERS,Counters { owner_reruns: 8000, descriptions: 8000, source_operations: 8000, source_reads: 0, destination_compares: 296000, text_promotions: 12000, text_bytes_copied: 126402, layout_runs: 8000, measure_calls: 488000, presentations: 8000, paint_passes: 8000, exact_updates: 0, coarse_updates: 8000 }",
+      "tasks": "TASKS,frozen=4000,dispatched=4000,accepted=4000",
+      "cpu": {
+        "0.5": 234258.21,
+        "0.95": 259457.36,
+        "0.99": 277447.03
+      },
+      "wall": {
+        "0.5": 234275.62,
+        "0.95": 259482.61,
+        "0.99": 277959.84
+      }
+    },
+    {
+      "repeat": 4,
+      "case": "1-2-dependent",
+      "variant": "control",
+      "final": "FINAL,pixel_hash=14124934070918126864",
+      "counters": "COUNTERS,Counters { owner_reruns: 8000, descriptions: 8000, source_operations: 8000, source_reads: 0, destination_compares: 296000, text_promotions: 16000, text_bytes_copied: 164804, layout_runs: 8000, measure_calls: 488000, presentations: 8000, paint_passes: 8000, exact_updates: 0, coarse_updates: 8000 }",
+      "tasks": "TASKS,frozen=4000,dispatched=4000,accepted=4000",
+      "cpu": {
+        "0.5": 240578.92,
+        "0.95": 266142.75,
+        "0.99": 293985.79
+      },
+      "wall": {
+        "0.5": 240593.69,
+        "0.95": 266162.06,
+        "0.99": 294018.3
+      }
+    },
+    {
+      "repeat": 4,
+      "case": "1-2-dependent",
+      "variant": "candidate",
+      "final": "FINAL,pixel_hash=14124934070918126864",
+      "counters": "COUNTERS,Counters { owner_reruns: 8000, descriptions: 8000, source_operations: 8000, source_reads: 0, destination_compares: 296000, text_promotions: 16000, text_bytes_copied: 164804, layout_runs: 8000, measure_calls: 488000, presentations: 8000, paint_passes: 8000, exact_updates: 0, coarse_updates: 8000 }",
+      "tasks": "TASKS,frozen=4000,dispatched=4000,accepted=4000",
+      "cpu": {
+        "0.5": 257175.87,
+        "0.95": 294773.96,
+        "0.99": 312693.91
+      },
+      "wall": {
+        "0.5": 257352.49,
+        "0.95": 294797.26,
+        "0.99": 312715.34
+      }
+    },
+    {
+      "repeat": 4,
+      "case": "1-4-dependent",
+      "variant": "candidate",
+      "final": "FINAL,pixel_hash=14118930585116151960",
+      "counters": "COUNTERS,Counters { owner_reruns: 8000, descriptions: 8000, source_operations: 8000, source_reads: 0, destination_compares: 296000, text_promotions: 24000, text_bytes_copied: 219206, layout_runs: 8000, measure_calls: 488000, presentations: 8000, paint_passes: 8000, exact_updates: 0, coarse_updates: 8000 }",
+      "tasks": "TASKS,frozen=4000,dispatched=4000,accepted=4000",
+      "cpu": {
+        "0.5": 270181.96,
+        "0.95": 303808.48,
+        "0.99": 363876.58
+      },
+      "wall": {
+        "0.5": 270197.94,
+        "0.95": 303842.38,
+        "0.99": 363895.85
+      }
+    },
+    {
+      "repeat": 4,
+      "case": "1-4-dependent",
+      "variant": "control",
+      "final": "FINAL,pixel_hash=14118930585116151960",
+      "counters": "COUNTERS,Counters { owner_reruns: 8000, descriptions: 8000, source_operations: 8000, source_reads: 0, destination_compares: 296000, text_promotions: 24000, text_bytes_copied: 219206, layout_runs: 8000, measure_calls: 488000, presentations: 8000, paint_passes: 8000, exact_updates: 0, coarse_updates: 8000 }",
+      "tasks": "TASKS,frozen=4000,dispatched=4000,accepted=4000",
+      "cpu": {
+        "0.5": 281188.29,
+        "0.95": 318770.55,
+        "0.99": 421760.58
+      },
+      "wall": {
+        "0.5": 281205.83,
+        "0.95": 318976.62,
+        "0.99": 421981.81
+      }
+    },
+    {
+      "repeat": 4,
+      "case": "40-1-unrelated",
+      "variant": "control",
+      "final": "FINAL,pixel_hash=15889697540729426171",
+      "counters": "COUNTERS,Counters { owner_reruns: 0, descriptions: 0, source_operations: 4000, source_reads: 4000, destination_compares: 4000, text_promotions: 4000, text_bytes_copied: 27201, layout_runs: 4000, measure_calls: 8000, presentations: 4000, paint_passes: 4000, exact_updates: 4000, coarse_updates: 0 }",
+      "tasks": "TASKS,frozen=0,dispatched=0,accepted=0",
+      "cpu": {
+        "0.5": 14800.37,
+        "0.95": 18720.56,
+        "0.99": 21443.88
+      },
+      "wall": {
+        "0.5": 14804.23,
+        "0.95": 18752.85,
+        "0.99": 21452.52
+      }
+    },
+    {
+      "repeat": 4,
+      "case": "40-1-unrelated",
+      "variant": "candidate",
+      "final": "FINAL,pixel_hash=15889697540729426171",
+      "counters": "COUNTERS,Counters { owner_reruns: 0, descriptions: 0, source_operations: 4000, source_reads: 4000, destination_compares: 4000, text_promotions: 4000, text_bytes_copied: 27201, layout_runs: 4000, measure_calls: 8000, presentations: 4000, paint_passes: 4000, exact_updates: 4000, coarse_updates: 0 }",
+      "tasks": "TASKS,frozen=0,dispatched=0,accepted=0",
+      "cpu": {
+        "0.5": 15090.21,
+        "0.95": 19476.97,
+        "0.99": 19926.12
+      },
+      "wall": {
+        "0.5": 15100.57,
+        "0.95": 19485.51,
+        "0.99": 19931.86
+      }
+    },
+    {
+      "repeat": 4,
+      "case": "40-2-unrelated",
+      "variant": "candidate",
+      "final": "FINAL,pixel_hash=486252068588713791",
+      "counters": "COUNTERS,Counters { owner_reruns: 0, descriptions: 0, source_operations: 4000, source_reads: 8000, destination_compares: 8000, text_promotions: 8000, text_bytes_copied: 54402, layout_runs: 4000, measure_calls: 16000, presentations: 4000, paint_passes: 4000, exact_updates: 4000, coarse_updates: 0 }",
+      "tasks": "TASKS,frozen=0,dispatched=0,accepted=0",
+      "cpu": {
+        "0.5": 417066.35,
+        "0.95": 439039.12,
+        "0.99": 492198.23
+      },
+      "wall": {
+        "0.5": 417079.8,
+        "0.95": 439225.63,
+        "0.99": 492240.47
+      }
+    },
+    {
+      "repeat": 4,
+      "case": "40-2-unrelated",
+      "variant": "control",
+      "final": "FINAL,pixel_hash=486252068588713791",
+      "counters": "COUNTERS,Counters { owner_reruns: 8000, descriptions: 8000, source_operations: 8000, source_reads: 0, destination_compares: 8408000, text_promotions: 12000, text_bytes_copied: 98402, layout_runs: 8000, measure_calls: 16088000, presentations: 8000, paint_passes: 8000, exact_updates: 0, coarse_updates: 8000 }",
+      "tasks": "TASKS,frozen=4000,dispatched=4000,accepted=4000",
+      "cpu": {
+        "0.5": 7989116.09,
+        "0.95": 8704369.23,
+        "0.99": 8867285.1
+      },
+      "wall": {
+        "0.5": 7989942.47,
+        "0.95": 8706439.4,
+        "0.99": 8868230.63
+      }
+    },
+    {
+      "repeat": 4,
+      "case": "40-4-unrelated",
+      "variant": "control",
+      "final": "FINAL,pixel_hash=3081166828330265799",
+      "counters": "COUNTERS,Counters { owner_reruns: 8000, descriptions: 8000, source_operations: 8000, source_reads: 0, destination_compares: 8408000, text_promotions: 20000, text_bytes_copied: 152804, layout_runs: 8000, measure_calls: 16088000, presentations: 8000, paint_passes: 8000, exact_updates: 0, coarse_updates: 8000 }",
+      "tasks": "TASKS,frozen=4000,dispatched=4000,accepted=4000",
+      "cpu": {
+        "0.5": 8282554.45,
+        "0.95": 8892002.75,
+        "0.99": 9307630.48
+      },
+      "wall": {
+        "0.5": 8284031.76,
+        "0.95": 8893329.61,
+        "0.99": 9309832.19
+      }
+    },
+    {
+      "repeat": 4,
+      "case": "40-4-unrelated",
+      "variant": "candidate",
+      "final": "FINAL,pixel_hash=3081166828330265799",
+      "counters": "COUNTERS,Counters { owner_reruns: 0, descriptions: 0, source_operations: 4000, source_reads: 16000, destination_compares: 16000, text_promotions: 16000, text_bytes_copied: 108804, layout_runs: 4000, measure_calls: 32000, presentations: 4000, paint_passes: 4000, exact_updates: 4000, coarse_updates: 0 }",
+      "tasks": "TASKS,frozen=0,dispatched=0,accepted=0",
+      "cpu": {
+        "0.5": 521178.0,
+        "0.95": 567674.15,
+        "0.99": 643434.6
+      },
+      "wall": {
+        "0.5": 521477.89,
+        "0.95": 567733.23,
+        "0.99": 643527.38
+      }
+    },
+    {
+      "repeat": 4,
+      "case": "40-1-dependent",
+      "variant": "candidate",
+      "final": "FINAL,pixel_hash=9187653472009869049",
+      "counters": "COUNTERS,Counters { owner_reruns: 8000, descriptions: 8000, source_operations: 8000, source_reads: 0, destination_compares: 8408000, text_promotions: 12000, text_bytes_copied: 126402, layout_runs: 8000, measure_calls: 16088000, presentations: 8000, paint_passes: 8000, exact_updates: 0, coarse_updates: 8000 }",
+      "tasks": "TASKS,frozen=4000,dispatched=4000,accepted=4000",
+      "cpu": {
+        "0.5": 8436540.4,
+        "0.95": 8881126.74,
+        "0.99": 9309756.87
+      },
+      "wall": {
+        "0.5": 8437580.48,
+        "0.95": 8882500.42,
+        "0.99": 9311527.09
+      }
+    },
+    {
+      "repeat": 4,
+      "case": "40-1-dependent",
+      "variant": "control",
+      "final": "FINAL,pixel_hash=9187653472009869049",
+      "counters": "COUNTERS,Counters { owner_reruns: 8000, descriptions: 8000, source_operations: 8000, source_reads: 0, destination_compares: 8408000, text_promotions: 12000, text_bytes_copied: 126402, layout_runs: 8000, measure_calls: 16088000, presentations: 8000, paint_passes: 8000, exact_updates: 0, coarse_updates: 8000 }",
+      "tasks": "TASKS,frozen=4000,dispatched=4000,accepted=4000",
+      "cpu": {
+        "0.5": 7762821.91,
+        "0.95": 8358153.5,
+        "0.99": 8574719.6
+      },
+      "wall": {
+        "0.5": 7764386.02,
+        "0.95": 8359860.52,
+        "0.99": 8575291.01
+      }
+    },
+    {
+      "repeat": 4,
+      "case": "40-2-dependent",
+      "variant": "control",
+      "final": "FINAL,pixel_hash=18228237087345915393",
+      "counters": "COUNTERS,Counters { owner_reruns: 8000, descriptions: 8000, source_operations: 8000, source_reads: 0, destination_compares: 8408000, text_promotions: 16000, text_bytes_copied: 164804, layout_runs: 8000, measure_calls: 16088000, presentations: 8000, paint_passes: 8000, exact_updates: 0, coarse_updates: 8000 }",
+      "tasks": "TASKS,frozen=4000,dispatched=4000,accepted=4000",
+      "cpu": {
+        "0.5": 8220260.97,
+        "0.95": 8757885.11,
+        "0.99": 9523755.22
+      },
+      "wall": {
+        "0.5": 8221350.41,
+        "0.95": 8771793.26,
+        "0.99": 9585437.81
+      }
+    },
+    {
+      "repeat": 4,
+      "case": "40-2-dependent",
+      "variant": "candidate",
+      "final": "FINAL,pixel_hash=18228237087345915393",
+      "counters": "COUNTERS,Counters { owner_reruns: 8000, descriptions: 8000, source_operations: 8000, source_reads: 0, destination_compares: 8408000, text_promotions: 16000, text_bytes_copied: 164804, layout_runs: 8000, measure_calls: 16088000, presentations: 8000, paint_passes: 8000, exact_updates: 0, coarse_updates: 8000 }",
+      "tasks": "TASKS,frozen=4000,dispatched=4000,accepted=4000",
+      "cpu": {
+        "0.5": 8090250.92,
+        "0.95": 8820902.45,
+        "0.99": 9147221.52
+      },
+      "wall": {
+        "0.5": 8092437.43,
+        "0.95": 8822003.14,
+        "0.99": 9148638.35
+      }
+    },
+    {
+      "repeat": 4,
+      "case": "40-4-dependent",
+      "variant": "candidate",
+      "final": "FINAL,pixel_hash=3650281480745005001",
+      "counters": "COUNTERS,Counters { owner_reruns: 8000, descriptions: 8000, source_operations: 8000, source_reads: 0, destination_compares: 8408000, text_promotions: 24000, text_bytes_copied: 219206, layout_runs: 8000, measure_calls: 16088000, presentations: 8000, paint_passes: 8000, exact_updates: 0, coarse_updates: 8000 }",
+      "tasks": "TASKS,frozen=4000,dispatched=4000,accepted=4000",
+      "cpu": {
+        "0.5": 8182647.22,
+        "0.95": 8731986.03,
+        "0.99": 8892115.37
+      },
+      "wall": {
+        "0.5": 8184649.22,
+        "0.95": 8734226.16,
+        "0.99": 8900893.67
+      }
+    },
+    {
+      "repeat": 4,
+      "case": "40-4-dependent",
+      "variant": "control",
+      "final": "FINAL,pixel_hash=3650281480745005001",
+      "counters": "COUNTERS,Counters { owner_reruns: 8000, descriptions: 8000, source_operations: 8000, source_reads: 0, destination_compares: 8408000, text_promotions: 24000, text_bytes_copied: 219206, layout_runs: 8000, measure_calls: 16088000, presentations: 8000, paint_passes: 8000, exact_updates: 0, coarse_updates: 8000 }",
+      "tasks": "TASKS,frozen=4000,dispatched=4000,accepted=4000",
+      "cpu": {
+        "0.5": 8153673.05,
+        "0.95": 8819756.42,
+        "0.99": 9155235.46
+      },
+      "wall": {
+        "0.5": 8155228.07,
+        "0.95": 8820807.44,
+        "0.99": 9156831.68
+      }
+    },
+    {
+      "repeat": 4,
+      "case": "0-4-owner",
+      "variant": "control",
+      "final": "FINAL,pixel_hash=3985071684859849092",
+      "counters": "COUNTERS,Counters { owner_reruns: 8000, descriptions: 8000, source_operations: 8000, source_reads: 0, destination_compares: 96000, text_promotions: 24000, text_bytes_copied: 204005, layout_runs: 8000, measure_calls: 104000, presentations: 8000, paint_passes: 8000, exact_updates: 0, coarse_updates: 8000 }",
+      "tasks": "TASKS,frozen=4000,dispatched=4000,accepted=4000",
+      "cpu": {
+        "0.5": 116504.69,
+        "0.95": 132915.99,
+        "0.99": 136461.06
+      },
+      "wall": {
+        "0.5": 116537.83,
+        "0.95": 132941.66,
+        "0.99": 136482.11
+      }
+    },
+    {
+      "repeat": 4,
+      "case": "0-4-owner",
+      "variant": "candidate",
+      "final": "FINAL,pixel_hash=3985071684859849092",
+      "counters": "COUNTERS,Counters { owner_reruns: 8000, descriptions: 8000, source_operations: 8000, source_reads: 0, destination_compares: 96000, text_promotions: 24000, text_bytes_copied: 204005, layout_runs: 8000, measure_calls: 104000, presentations: 8000, paint_passes: 8000, exact_updates: 0, coarse_updates: 8000 }",
+      "tasks": "TASKS,frozen=4000,dispatched=4000,accepted=4000",
+      "cpu": {
+        "0.5": 123538.53,
+        "0.95": 139560.39,
+        "0.99": 152633.02
+      },
+      "wall": {
+        "0.5": 123569.34,
+        "0.95": 139587.05,
+        "0.99": 152784.74
+      }
+    },
+    {
+      "repeat": 4,
+      "case": "0-4-opaque",
+      "variant": "candidate",
+      "final": "FINAL,pixel_hash=970880845196872716",
+      "counters": "COUNTERS,Counters { owner_reruns: 8000, descriptions: 8000, source_operations: 8000, source_reads: 0, destination_compares: 88000, text_promotions: 20000, text_bytes_copied: 152804, layout_runs: 8000, measure_calls: 88000, presentations: 8000, paint_passes: 8000, exact_updates: 0, coarse_updates: 8000 }",
+      "tasks": "TASKS,frozen=4000,dispatched=4000,accepted=4000",
+      "cpu": {
+        "0.5": 102959.47,
+        "0.95": 116076.67,
+        "0.99": 131226.19
+      },
+      "wall": {
+        "0.5": 102967.32,
+        "0.95": 116090.09,
+        "0.99": 131248.47
+      }
+    },
+    {
+      "repeat": 4,
+      "case": "0-4-opaque",
+      "variant": "control",
+      "final": "FINAL,pixel_hash=970880845196872716",
+      "counters": "COUNTERS,Counters { owner_reruns: 8000, descriptions: 8000, source_operations: 8000, source_reads: 0, destination_compares: 88000, text_promotions: 20000, text_bytes_copied: 152804, layout_runs: 8000, measure_calls: 88000, presentations: 8000, paint_passes: 8000, exact_updates: 0, coarse_updates: 8000 }",
+      "tasks": "TASKS,frozen=4000,dispatched=4000,accepted=4000",
+      "cpu": {
+        "0.5": 107890.46,
+        "0.95": 129960.62,
+        "0.99": 131159.78
+      },
+      "wall": {
+        "0.5": 107909.01,
+        "0.95": 129979.38,
+        "0.99": 131186.86
+      }
+    },
+    {
+      "repeat": 4,
+      "case": "1-4-owner",
+      "variant": "control",
+      "final": "FINAL,pixel_hash=13191195305542509566",
+      "counters": "COUNTERS,Counters { owner_reruns: 8000, descriptions: 8000, source_operations: 8000, source_reads: 0, destination_compares: 304000, text_promotions: 24000, text_bytes_copied: 204005, layout_runs: 8000, measure_calls: 504000, presentations: 8000, paint_passes: 8000, exact_updates: 0, coarse_updates: 8000 }",
+      "tasks": "TASKS,frozen=4000,dispatched=4000,accepted=4000",
+      "cpu": {
+        "0.5": 278563.34,
+        "0.95": 323321.62,
+        "0.99": 346579.12
+      },
+      "wall": {
+        "0.5": 278588.38,
+        "0.95": 323341.09,
+        "0.99": 346593.7
+      }
+    },
+    {
+      "repeat": 4,
+      "case": "1-4-owner",
+      "variant": "candidate",
+      "final": "FINAL,pixel_hash=13191195305542509566",
+      "counters": "COUNTERS,Counters { owner_reruns: 8000, descriptions: 8000, source_operations: 8000, source_reads: 0, destination_compares: 304000, text_promotions: 24000, text_bytes_copied: 204005, layout_runs: 8000, measure_calls: 504000, presentations: 8000, paint_passes: 8000, exact_updates: 0, coarse_updates: 8000 }",
+      "tasks": "TASKS,frozen=4000,dispatched=4000,accepted=4000",
+      "cpu": {
+        "0.5": 285249.53,
+        "0.95": 335153.61,
+        "0.99": 352085.89
+      },
+      "wall": {
+        "0.5": 285275.35,
+        "0.95": 335478.51,
+        "0.99": 352117.37
+      }
+    },
+    {
+      "repeat": 4,
+      "case": "1-4-opaque",
+      "variant": "candidate",
+      "final": "FINAL,pixel_hash=17907747960521954518",
+      "counters": "COUNTERS,Counters { owner_reruns: 8000, descriptions: 8000, source_operations: 8000, source_reads: 0, destination_compares: 296000, text_promotions: 20000, text_bytes_copied: 152804, layout_runs: 8000, measure_calls: 488000, presentations: 8000, paint_passes: 8000, exact_updates: 0, coarse_updates: 8000 }",
+      "tasks": "TASKS,frozen=4000,dispatched=4000,accepted=4000",
+      "cpu": {
+        "0.5": 262930.5,
+        "0.95": 287580.92,
+        "0.99": 289833.26
+      },
+      "wall": {
+        "0.5": 262959.21,
+        "0.95": 287598.33,
+        "0.99": 290076.08
+      }
+    },
+    {
+      "repeat": 4,
+      "case": "1-4-opaque",
+      "variant": "control",
+      "final": "FINAL,pixel_hash=17907747960521954518",
+      "counters": "COUNTERS,Counters { owner_reruns: 8000, descriptions: 8000, source_operations: 8000, source_reads: 0, destination_compares: 296000, text_promotions: 20000, text_bytes_copied: 152804, layout_runs: 8000, measure_calls: 488000, presentations: 8000, paint_passes: 8000, exact_updates: 0, coarse_updates: 8000 }",
+      "tasks": "TASKS,frozen=4000,dispatched=4000,accepted=4000",
+      "cpu": {
+        "0.5": 266326.2,
+        "0.95": 316599.56,
+        "0.99": 360183.04
+      },
+      "wall": {
+        "0.5": 266342.76,
+        "0.95": 316624.96,
+        "0.99": 360210.19
+      }
+    },
+    {
+      "repeat": 4,
+      "case": "40-4-owner",
+      "variant": "control",
+      "final": "FINAL,pixel_hash=3023726611500290992",
+      "counters": "COUNTERS,Counters { owner_reruns: 8000, descriptions: 8000, source_operations: 8000, source_reads: 0, destination_compares: 8416000, text_promotions: 24000, text_bytes_copied: 204005, layout_runs: 8000, measure_calls: 16104000, presentations: 8000, paint_passes: 8000, exact_updates: 0, coarse_updates: 8000 }",
+      "tasks": "TASKS,frozen=4000,dispatched=4000,accepted=4000",
+      "cpu": {
+        "0.5": 8721426.74,
+        "0.95": 9400980.07,
+        "0.99": 9719197.8
+      },
+      "wall": {
+        "0.5": 8722217.67,
+        "0.95": 9403643.16,
+        "0.99": 9719878.52
+      }
+    },
+    {
+      "repeat": 4,
+      "case": "40-4-owner",
+      "variant": "candidate",
+      "final": "FINAL,pixel_hash=3023726611500290992",
+      "counters": "COUNTERS,Counters { owner_reruns: 8000, descriptions: 8000, source_operations: 8000, source_reads: 0, destination_compares: 8416000, text_promotions: 24000, text_bytes_copied: 204005, layout_runs: 8000, measure_calls: 16104000, presentations: 8000, paint_passes: 8000, exact_updates: 0, coarse_updates: 8000 }",
+      "tasks": "TASKS,frozen=4000,dispatched=4000,accepted=4000",
+      "cpu": {
+        "0.5": 8874528.94,
+        "0.95": 10572108.03,
+        "0.99": 10912692.34
+      },
+      "wall": {
+        "0.5": 8875206.03,
+        "0.95": 10575436.66,
+        "0.99": 10913583.07
+      }
+    },
+    {
+      "repeat": 4,
+      "case": "40-4-opaque",
+      "variant": "candidate",
+      "final": "FINAL,pixel_hash=3081166828330265799",
+      "counters": "COUNTERS,Counters { owner_reruns: 8000, descriptions: 8000, source_operations: 8000, source_reads: 0, destination_compares: 8408000, text_promotions: 20000, text_bytes_copied: 152804, layout_runs: 8000, measure_calls: 16088000, presentations: 8000, paint_passes: 8000, exact_updates: 0, coarse_updates: 8000 }",
+      "tasks": "TASKS,frozen=4000,dispatched=4000,accepted=4000",
+      "cpu": {
+        "0.5": 8268099.9,
+        "0.95": 9019551.61,
+        "0.99": 9354567.66
+      },
+      "wall": {
+        "0.5": 8269110.67,
+        "0.95": 9021110.48,
+        "0.99": 9356233.24
+      }
+    },
+    {
+      "repeat": 4,
+      "case": "40-4-opaque",
+      "variant": "control",
+      "final": "FINAL,pixel_hash=3081166828330265799",
+      "counters": "COUNTERS,Counters { owner_reruns: 8000, descriptions: 8000, source_operations: 8000, source_reads: 0, destination_compares: 8408000, text_promotions: 20000, text_bytes_copied: 152804, layout_runs: 8000, measure_calls: 16088000, presentations: 8000, paint_passes: 8000, exact_updates: 0, coarse_updates: 8000 }",
+      "tasks": "TASKS,frozen=4000,dispatched=4000,accepted=4000",
+      "cpu": {
+        "0.5": 8110593.21,
+        "0.95": 8900400.15,
+        "0.99": 9383620.37
+      },
+      "wall": {
+        "0.5": 8111321.61,
+        "0.95": 8901659.05,
+        "0.99": 9384711.12
+      }
+    }
+  ],
+  "ratios": {
+    "0-1-unrelated": {
+      "paired_ratios": [
+        0.9289772826485533,
+        1.042217689075463,
+        1.2539849980725737,
+        1.0067985965863062,
+        1.0910280177350664
+      ],
+      "median": 1.042217689075463,
+      "range": [
+        0.9289772826485533,
+        1.2539849980725737
+      ]
+    },
+    "0-2-unrelated": {
+      "paired_ratios": [
+        0.3787791094291931,
+        0.4024473451922924,
+        0.3570192509876857,
+        0.39602737950749095,
+        0.4262721151913617
+      ],
+      "median": 0.39602737950749095,
+      "range": [
+        0.3570192509876857,
+        0.4262721151913617
+      ]
+    },
+    "0-4-unrelated": {
+      "paired_ratios": [
+        0.497637618743342,
+        0.5848741634398412,
+        0.5282864363106134,
+        0.5773152108468909,
+        0.598329202134866
+      ],
+      "median": 0.5773152108468909,
+      "range": [
+        0.497637618743342,
+        0.598329202134866
+      ]
+    },
+    "0-1-dependent": {
+      "paired_ratios": [
+        1.03849110955246,
+        1.0696016442846867,
+        1.0044150876940592,
+        0.9483472724240081,
+        1.0171425216276548
+      ],
+      "median": 1.0171425216276548,
+      "range": [
+        0.9483472724240081,
+        1.0696016442846867
+      ]
+    },
+    "0-2-dependent": {
+      "paired_ratios": [
+        1.0219162768269825,
+        1.0168126465734386,
+        0.9685533377533623,
+        0.9868630957865054,
+        1.0986042564955405
+      ],
+      "median": 1.0168126465734386,
+      "range": [
+        0.9685533377533623,
+        1.0986042564955405
+      ]
+    },
+    "0-4-dependent": {
+      "paired_ratios": [
+        0.896306589766992,
+        0.9985955412900899,
+        0.9547662832109872,
+        0.9846751510330957,
+        1.045570023791401
+      ],
+      "median": 0.9846751510330957,
+      "range": [
+        0.896306589766992,
+        1.045570023791401
+      ]
+    },
+    "1-1-unrelated": {
+      "paired_ratios": [
+        0.9602791097245063,
+        0.9875087788672842,
+        0.9049042493306576,
+        0.9538483530259733,
+        0.9656825753660692
+      ],
+      "median": 0.9602791097245063,
+      "range": [
+        0.9049042493306576,
+        0.9875087788672842
+      ]
+    },
+    "1-2-unrelated": {
+      "paired_ratios": [
+        0.1783866384576737,
+        0.190531139368674,
+        0.1827012829845441,
+        0.16622494247243824,
+        0.18532200965861378
+      ],
+      "median": 0.1827012829845441,
+      "range": [
+        0.16622494247243824,
+        0.190531139368674
+      ]
+    },
+    "1-4-unrelated": {
+      "paired_ratios": [
+        0.2668231866868417,
+        0.2727096171467301,
+        0.26472144432327827,
+        0.269166887697639,
+        0.28225397778797384
+      ],
+      "median": 0.269166887697639,
+      "range": [
+        0.26472144432327827,
+        0.28225397778797384
+      ]
+    },
+    "1-1-dependent": {
+      "paired_ratios": [
+        0.887901514867587,
+        1.0629837089822989,
+        1.0521670044284832,
+        0.9923279433247756,
+        1.030372937622976
+      ],
+      "median": 1.030372937622976,
+      "range": [
+        0.887901514867587,
+        1.0629837089822989
+      ]
+    },
+    "1-2-dependent": {
+      "paired_ratios": [
+        1.0394306996077443,
+        0.9988276314207853,
+        1.1056701923485381,
+        1.0539428320017377,
+        1.06898754886754
+      ],
+      "median": 1.0539428320017377,
+      "range": [
+        0.9988276314207853,
+        1.1056701923485381
+      ]
+    },
+    "1-4-dependent": {
+      "paired_ratios": [
+        1.0364053598270468,
+        0.9959554514257665,
+        0.9791487779260706,
+        1.0196433950961903,
+        0.960857793900308
+      ],
+      "median": 0.9959554514257665,
+      "range": [
+        0.960857793900308,
+        1.0364053598270468
+      ]
+    },
+    "40-1-unrelated": {
+      "paired_ratios": [
+        1.0916717435180778,
+        0.9634945393788773,
+        0.9426061468855654,
+        1.0089030361134295,
+        1.0195832942014287
+      ],
+      "median": 1.0089030361134295,
+      "range": [
+        0.9426061468855654,
+        1.0916717435180778
+      ]
+    },
+    "40-2-unrelated": {
+      "paired_ratios": [
+        0.052344422808863283,
+        0.0585695245124447,
+        0.057716132571199175,
+        0.05558488745110258,
+        0.05220431713616518
+      ],
+      "median": 0.05558488745110258,
+      "range": [
+        0.05220431713616518,
+        0.0585695245124447
+      ]
+    },
+    "40-4-unrelated": {
+      "paired_ratios": [
+        0.056819062888883935,
+        0.060110855931216386,
+        0.05496301970811201,
+        0.0626400488583881,
+        0.06292479006884162
+      ],
+      "median": 0.060110855931216386,
+      "range": [
+        0.05496301970811201,
+        0.06292479006884162
+      ]
+    },
+    "40-1-dependent": {
+      "paired_ratios": [
+        1.0725963606447306,
+        0.928688955008881,
+        1.0011073564271225,
+        1.0475147059197827,
+        1.0867878328024145
+      ],
+      "median": 1.0475147059197827,
+      "range": [
+        0.928688955008881,
+        1.0867878328024145
+      ]
+    },
+    "40-2-dependent": {
+      "paired_ratios": [
+        0.9786273240288413,
+        1.023615215988145,
+        0.9235423814649638,
+        0.9983938254515183,
+        0.9841841943370808
+      ],
+      "median": 0.9841841943370808,
+      "range": [
+        0.9235423814649638,
+        1.023615215988145
+      ]
+    },
+    "40-4-dependent": {
+      "paired_ratios": [
+        0.9836109127279236,
+        1.1339098268698087,
+        1.0550964188970262,
+        0.995236457026518,
+        1.003553511383437
+      ],
+      "median": 1.003553511383437,
+      "range": [
+        0.9836109127279236,
+        1.1339098268698087
+      ]
+    },
+    "0-4-owner": {
+      "paired_ratios": [
+        1.0404327081024558,
+        1.1260354960236967,
+        1.0163877844495666,
+        0.9859719106638023,
+        1.0603738785108137
+      ],
+      "median": 1.0404327081024558,
+      "range": [
+        0.9859719106638023,
+        1.1260354960236967
+      ]
+    },
+    "0-4-opaque": {
+      "paired_ratios": [
+        1.0189191332679193,
+        1.0566453135344795,
+        1.0039296138203806,
+        1.05490824081184,
+        0.9542963298145174
+      ],
+      "median": 1.0189191332679193,
+      "range": [
+        0.9542963298145174,
+        1.0566453135344795
+      ]
+    },
+    "1-4-owner": {
+      "paired_ratios": [
+        0.9999937733088856,
+        1.0131814863822959,
+        0.9695408387177145,
+        1.0207043088963743,
+        1.0240024046236667
+      ],
+      "median": 1.0131814863822959,
+      "range": [
+        0.9695408387177145,
+        1.0240024046236667
+      ]
+    },
+    "1-4-opaque": {
+      "paired_ratios": [
+        1.032631123103254,
+        1.0557781592503666,
+        0.9609775161813621,
+        0.9990034854190991,
+        0.9872498462411884
+      ],
+      "median": 0.9990034854190991,
+      "range": [
+        0.9609775161813621,
+        1.0557781592503666
+      ]
+    },
+    "40-4-owner": {
+      "paired_ratios": [
+        1.0513411626757168,
+        1.0900203456945885,
+        1.0823307047086064,
+        1.0225596407488597,
+        1.017554719493063
+      ],
+      "median": 1.0513411626757168,
+      "range": [
+        1.017554719493063,
+        1.0900203456945885
+      ]
+    },
+    "40-4-opaque": {
+      "paired_ratios": [
+        1.0465782700179849,
+        0.9542120854638618,
+        1.014555010003489,
+        1.0313342908750966,
+        1.0194198729885506
+      ],
+      "median": 1.0194198729885506,
+      "range": [
+        0.9542120854638618,
+        1.0465782700179849
+      ]
+    }
+  }
+}

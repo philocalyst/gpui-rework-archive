@@ -1,0 +1,12 @@
+
+running 7 tests
+test overflow_keeps_coarse_question_refresh ... ok
+test batched_diamond_never_freezes_a_partial_join ... ok
+test opaque_callback_still_supersedes_unrelated_question ... ok
+test unrelated_direct_batch_keeps_ready_question_and_patches_text ... ok
+test tuple_freezes_final_pair_once_and_aba_never_accepts_old_completion ... ok
+test owner_dependent_batch_keeps_coarse_question_refresh ... ok
+test every_typed_member_can_invalidate_its_own_question ... ok
+
+test result: ok. 7 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 0.00s
+

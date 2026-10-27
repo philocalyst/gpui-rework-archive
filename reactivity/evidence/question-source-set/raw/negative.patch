@@ -1,0 +1,15 @@
+diff --git a/reactivity/crates/gpui/src/remote.rs b/reactivity/crates/gpui/src/remote.rs
+index 08e9f0c397..b192342975 100644
+--- a/reactivity/crates/gpui/src/remote.rs
++++ b/reactivity/crates/gpui/src/remote.rs
+@@ -305,7 +305,9 @@ impl SourceEdits {
+                     return Ok(Change::Source(None));
+                 }
+             }
+-            Ok(Change::Sources(self.fields))
++            let mut fields = self.fields;
++            fields[0] = None;
++            Ok(Change::Sources(fields))
+         } else {
+             Ok(Change::Source(self.single()))
+         }

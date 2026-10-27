@@ -1,0 +1,4 @@
+COLD,wall_ns=1376664
+TASKS,frozen=0,dispatched=0,accepted=0
+FINAL,pixel_hash=7578910431315845812
+COUNTERS,Counters { owner_reruns: 0, descriptions: 0, source_operations: 4000, source_reads: 8000, destination_compares: 8000, text_promotions: 8000, text_bytes_copied: 54402, layout_runs: 4000, measure_calls: 16000, presentations: 4000, paint_passes: 4000, exact_updates: 4000, coarse_updates: 0 }

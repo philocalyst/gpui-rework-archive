@@ -1,0 +1,1 @@
+{"command": ["cargo", "+nightly-2026-10-23", "-Z", "checksum-freshness", "--config", "build.fingerprint=\"content\"", "test", "--locked", "--offline", "--release", "-p", "gpui", "--test", "question_source_set", "every_typed_member_can_invalidate_its_own_question", "--", "--exact"], "exit": 101}

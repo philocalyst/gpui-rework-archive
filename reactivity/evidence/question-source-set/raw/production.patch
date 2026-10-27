@@ -1,0 +1,87 @@
+diff --git a/reactivity/crates/gpui/src/reader/question.rs b/reactivity/crates/gpui/src/reader/question.rs
+index 5ed383deba..308a0358c8 100644
+--- a/reactivity/crates/gpui/src/reader/question.rs
++++ b/reactivity/crates/gpui/src/reader/question.rs
+@@ -32,6 +32,7 @@ pub enum Change {
+     Mount,
+     Dependencies,
+     Source(Option<FieldId>),
++    Sources([Option<FieldId>; 4]),
+     Retry(ReaderKey),
+ }
+ 
+@@ -563,6 +564,20 @@ where
+         sources: &Sources<M>,
+         change: Change,
+     ) -> Result<bool, crate::Error> {
++        if let Change::Sources(fields) = change
++            && !A::READERS
++        {
++            let mut relevant = false;
++            for field in fields.into_iter().flatten() {
++                if self.inputs.contains(sources, field)? {
++                    relevant = true;
++                    break;
++                }
++            }
++            if !relevant {
++                return Ok(false);
++            }
++        }
+         match change {
+             Change::Source(Some(field))
+                 if !A::READERS && !self.inputs.contains(sources, field)? =>
+diff --git a/reactivity/crates/gpui/src/remote.rs b/reactivity/crates/gpui/src/remote.rs
+index 14982420f1..08e9f0c397 100644
+--- a/reactivity/crates/gpui/src/remote.rs
++++ b/reactivity/crates/gpui/src/remote.rs
+@@ -295,6 +295,21 @@ impl SourceEdits {
+             self.fields[0]
+         }
+     }
++    pub(crate) fn question_change<M: 'static>(
++        &self,
++        sources: &Sources<M>,
++    ) -> Result<Change, Error> {
++        if let Some(fields) = self.multiple() {
++            for field in fields {
++                if sources.invalidates_owner(field)? {
++                    return Ok(Change::Source(None));
++                }
++            }
++            Ok(Change::Sources(self.fields))
++        } else {
++            Ok(Change::Source(self.single()))
++        }
++    }
+     pub(crate) fn multiple(&self) -> Option<impl Iterator<Item = FieldId> + Clone + '_> {
+         (!self.coarse && self.fields[1].is_some()).then(|| self.fields.iter().copied().flatten())
+     }
+diff --git a/reactivity/crates/gpui/src/runtime/turn.rs b/reactivity/crates/gpui/src/runtime/turn.rs
+index d367144b32..f2ddedf53b 100644
+--- a/reactivity/crates/gpui/src/runtime/turn.rs
++++ b/reactivity/crates/gpui/src/runtime/turn.rs
+@@ -44,11 +44,11 @@ impl<M: View + 'static, L: LaneSet<M>> RuntimeMut<'_, M, L> {
+         let mut questions = 0;
+         let mut questions_changed = false;
+         let result = match catch_unwind(AssertUnwindSafe(|| {
+-            if models != 0 {
++            if models != 0 && L::QUESTIONS {
+                 questions_changed = self.lanes.refresh(
+                     &self.runtime.model,
+                     &self.runtime.sources,
+-                    crate::reader::question::Change::Source(exact.single()),
++                    exact.question_change(&self.runtime.sources)?,
+                 )?;
+             }
+             // An accepted prefix supersedes old answers even when a later
+@@ -87,7 +87,8 @@ impl<M: View + 'static, L: LaneSet<M>> RuntimeMut<'_, M, L> {
+         if *applied == 0 {
+             return Ok(self.commit());
+         }
+-        if !L::QUESTIONS
++        if !questions_changed
++            && questions == 0
+             && let Some(fields) = exact.multiple()
+             && self.admits_text_batch(fields.clone())?
+         {

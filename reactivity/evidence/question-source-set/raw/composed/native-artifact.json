@@ -1,0 +1,12 @@
+{
+  "binary": "/home/user/gpui-question-source-set-target/release/build/gpui/d51c62efad296df0/out/gpui-d51c62efad296df0",
+  "sha256": "6e25aa85d832467e7af6853a80a50e96f0a82add1dfe1a5afd08313cbd4defab",
+  "bytes": 56508248,
+  "environment": {
+    "DISPLAY": ":94",
+    "XDG_RUNTIME_DIR": "/home/user/gpui-xdg",
+    "VK_ICD_FILENAMES": "/usr/share/vulkan/icd.d/lvp_icd.json",
+    "LP_NUM_THREADS": "4",
+    "DBUS_SESSION_BUS_ADDRESS": "unix:path=/nonexistent"
+  }
+}
