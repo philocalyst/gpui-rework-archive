@@ -28,11 +28,13 @@ HDR completion regresses 2.6%, and its host median ratio is 1.0540. No aggregate
 win or code deletion overrides these gates. **Rejected; do not compose this
 shader into the subsequent pixel-uniform experiment.**
 
-59 real software-Vulkan readback tests and 8 GPU units pass unchanged, with one
+59 real software-Vulkan readback tests and 10 GPU units pass unchanged, with one
 added exact painter-order witness. Strict Clippy passes. A reversed-painter-order
 mutant returns [255,0,0,255] where [0,0,255,255] is required, exiting 101 with one
 failed test. The first audit looked for the panic in stdout; corrected audit
-checks stderr, preserving the mistake. Source guards match before/after.
+checks stderr, preserving the mistake. The first dossier verifier expected
+eight default-feature unit tests; this Vulkan-enabled suite has ten. Its count
+was corrected without changing any test or performance gate. Source guards match before/after.
 The typed shader is compared directly with generated WGSL by a unit assertion;
 the complete WGSL byte string is verified inside the benchmark ELF. Both initial
 and final executable identities are retained. No SPIR-V artifact is embedded in

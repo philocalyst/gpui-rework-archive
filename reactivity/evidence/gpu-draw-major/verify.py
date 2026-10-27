@@ -20,7 +20,7 @@ for case,reported in s['ratios'].items():
   assert ratios==reported[clock]['paired_ratios'] and statistics.median(ratios)==reported[clock]['median']
 assert s['ratios']['text']['complete']['median']>.8 and s['ratios']['transformed-text']['complete']['median']>.8
 assert '59 passed; 0 failed' in (raw/'correctness/test.out').read_text()
-assert '8 passed; 0 failed' in (raw/'correctness/test.out').read_text()
+assert '10 passed; 0 failed' in (raw/'correctness/test.out').read_text()
 assert (raw/'negative/test.status').read_text().strip()=='101'
 assert 'left: [255, 0, 0, 255]' in (raw/'negative/test.log').read_text()
 for phase in ['control','candidate','correctness','negative']:assert json.loads((raw/phase/'guard-after.json').read_text())==[]
