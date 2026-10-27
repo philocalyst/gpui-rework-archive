@@ -106,10 +106,10 @@ fn four_disjoint_visual_sources_publish_one_exact_cohort() {
     assert_eq!(win.counters().owner_reruns, 0);
     assert_eq!(win.counters().exact_updates, 1);
     assert_eq!(win.counters().source_operations, 1);
+    ack(&mut win);
     for i in 0..4 {
         assert!(win.contains_text(&format!("new{i}")).unwrap());
     }
-    ack(&mut win);
     oracle(&mut win);
 }
 #[test]
@@ -126,9 +126,9 @@ fn owner_dependent_source_cannot_reuse_only_its_bound_text_destinations() {
     let (mut win, r) = open::<true, false>();
     send(&r, 2);
     win.deliver_ready(8).unwrap();
+    ack(&mut win);
     assert!(win.contains_text("owner:new0").unwrap());
     assert_eq!(win.counters().owner_reruns, 1);
-    ack(&mut win);
     oracle(&mut win);
 }
 #[test]
