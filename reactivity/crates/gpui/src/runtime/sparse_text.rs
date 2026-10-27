@@ -140,15 +140,37 @@ mod tests {
             fixture.owner.presented(token).unwrap();
             let mut patches = 0;
             let mut full = 0;
+            let mut unchanged_layout = 0;
+            let runtime = fixture.owner.runtime().unwrap();
+            println!(
+                "LOCAL_INPUT,{case},clips={},editing={},inspector={}",
+                runtime.canvas.prepared_scene().clip_nodes().count(),
+                runtime
+                    .metadata
+                    .as_ref()
+                    .is_some_and(|m| m.editing.is_some()),
+                runtime.inspector_enabled(),
+            );
             for _ in 0..80 {
+                let writes = fixture
+                    .owner
+                    .runtime()
+                    .unwrap()
+                    .layout
+                    .stats()
+                    .changed_layout_writes;
                 fixture.advance(case);
                 let runtime = fixture.owner.runtime().unwrap();
+                unchanged_layout +=
+                    usize::from(runtime.layout.stats().changed_layout_writes == writes);
                 patches += usize::from(runtime.text.as_ref().is_some_and(|t| t.patch.is_some()));
                 full += usize::from(runtime.prepared.as_ref().is_some_and(|p| !p.keeps_rows()));
                 let token = fixture.owner.with_scene(|_, token| token).unwrap();
                 fixture.owner.presented(token).unwrap();
             }
-            println!("LOCAL_PUBLICATION,{case},updates=80,patches={patches},full={full}");
+            println!(
+                "LOCAL_PUBLICATION,{case},updates=80,patches={patches},full={full},unchanged_layout={unchanged_layout}"
+            );
         }
     }
     struct Page {
