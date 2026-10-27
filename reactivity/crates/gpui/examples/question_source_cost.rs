@@ -89,7 +89,7 @@ fn base<const O: bool, Q: LaneSet<Page<O>>>(
     font: gpui_canvas::FontFace,
     plan: Questions<Page<O>, Q>,
     answer: Reader<String>,
-) -> Win<Page<O>, Q> {
+) -> Win<Page<O>, impl LaneSet<Page<O>> + use<O, Q>> {
     let mut win = Win::recording_questions(
         Page {
             values: values.map(Signal::new),
