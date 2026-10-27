@@ -1,11 +1,9 @@
 //! Complete owner publication + native packet bridge + GPU completion ablation.
 //! Offscreen completion is not swapchain/scanout latency.
 use super::*;
+use crate::native::workload_port;
 use std::time::Instant;
 use winit::{application::ApplicationHandler, event::WindowEvent, window::WindowId};
-#[allow(dead_code)]
-#[path = "../../examples/zgx_native_lab.rs"]
-mod workload_port;
 
 struct Flat {
     color: crate::Signal<crate::Color>,
@@ -402,6 +400,7 @@ impl ApplicationHandler for Harness {
             packet_epoch: None,
         };
         run(&mut gpu);
+        assert!(gpu.errors.take().is_none(), "native GPU device fault");
         self.complete = true;
         event_loop.exit();
     }

@@ -1,9 +1,7 @@
 use super::*;
 use crate::{ItemKey, ItemSource, ListId, prelude::*};
 // Exercise the actual application model and UI-thread workload operation.
-#[allow(dead_code)]
-#[path = "../../examples/zgx_native_lab.rs"]
-mod workload_port;
+use crate::native::workload_port;
 const LIST: ListId = ListId::new(1);
 struct Rows {
     offset: Signal<f64>,

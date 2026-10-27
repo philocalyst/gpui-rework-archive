@@ -2190,3 +2190,12 @@ mod property_action_tests;
 
 #[cfg(all(test, feature = "x11", target_os = "linux"))]
 mod scroll_bench;
+
+#[cfg(all(
+    test,
+    any(feature = "x11", feature = "x11-minimal"),
+    target_os = "linux"
+))]
+#[allow(dead_code)]
+#[path = "../examples/zgx_native_lab.rs"]
+mod workload_port;
