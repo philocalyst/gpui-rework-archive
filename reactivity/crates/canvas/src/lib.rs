@@ -11,7 +11,7 @@ pub use canvas::{
     MAX_CLIP_DEPTH, MAX_CLIP_NODES, PaintColor, PaintCommit, PaintEdit, PaintError, PaintErrorKind,
     PaintIndex, PaintSlot, PreparedClipNode, PreparedDraw, PreparedGroup, PreparedPaint,
     PreparedPlacement, PreparedScene, PreparedSource, RenderStats, SceneStorage, SlotCommit,
-    SlotEdit, SlotError, SlotErrorKind, rounded_rect_contains, sampled_rect_clip,
+    SlotEdit, SlotError, SlotErrorKind, TextRunSlot, rounded_rect_contains, sampled_rect_clip,
 };
 pub use color::gradient::{
     Extend, Gradient, GradientGeometry, GradientKey, GradientStop, GradientView, Interpolation,

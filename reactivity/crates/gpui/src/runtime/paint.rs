@@ -59,7 +59,7 @@ impl<M: View + 'static> Runtime<M> {
         self.publish_paint(Some((damage, token, next)))?;
         Ok(true)
     }
-    fn publish_paint(
+    pub(super) fn publish_paint(
         &mut self,
         change: Option<(gpui_canvas::DamageRegion, PresentationToken, NonZeroU64)>,
     ) -> Result<(), Error> {

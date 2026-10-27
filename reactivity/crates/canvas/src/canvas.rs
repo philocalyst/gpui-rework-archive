@@ -26,7 +26,9 @@ mod glyph_axis;
 mod image_axis;
 mod mask_kernel;
 mod metric_scale;
+mod text_patch;
 use metric_scale::MetricScale;
+pub use text_patch::TextRunSlot;
 mod paint;
 pub use paint::{PaintCommit, PaintEdit, PaintError, PaintErrorKind, PaintIndex};
 mod rounded;
@@ -365,13 +367,23 @@ impl MaskIndex {
     }
 }
 
+struct LeasedMask {
+    raster: Arc<Raster>,
+    uses: u32,
+}
+impl std::ops::Deref for LeasedMask {
+    type Target = Raster;
+    fn deref(&self) -> &Raster {
+        &self.raster
+    }
+}
 #[derive(Default)]
 struct DisplayList {
     order: Vec<DrawRef>,
     inline: Vec<InlineDraw>,
     commons: Vec<CommonGroup>,
     columns: Columns,
-    masks: Vec<Arc<Raster>>,
+    masks: Vec<LeasedMask>,
     mask_index: MaskIndex,
     images: Option<Box<ImageResources>>,
 }
@@ -507,7 +519,7 @@ impl DisplayList {
             common_bytes: self.commons.capacity() * size_of::<CommonGroup>() + self.columns.bytes(),
             placement_bytes: 0,
             clip_node_bytes: self.clip_geometry().map_or(0, ClipGeometry::node_bytes),
-            resource_handles_bytes: self.masks.capacity() * size_of::<Arc<Raster>>()
+            resource_handles_bytes: self.masks.capacity() * size_of::<LeasedMask>()
                 + self.images.as_ref().map_or(0, |r| {
                     r.values.capacity() * size_of::<Image>()
                         + r.gradients.as_ref().map_or(0, |g| {
@@ -672,6 +684,9 @@ impl DisplayList {
             glyph: INLINE_GLYPH,
             mask: 0,
         });
+        if let Some(mask) = self.masks.get_mut(command.source as usize) {
+            mask.uses += 1;
+        }
         self.inline.push(InlineDraw {
             common,
             rect: command.geometry.rect,
@@ -687,6 +702,7 @@ impl DisplayList {
         scale: MetricScale,
     ) {
         for address in &self.order[start..] {
+            self.masks[usize::from(address.mask)].uses += 1;
             self.columns.support(
                 common.paint,
                 DamageRegion::checked_canvas_bounds(address.bounds.map(usize::from)),
@@ -1857,7 +1873,10 @@ impl Canvas {
                         .map_err(|_| Error::ResourceLimit)?;
                     self.commands.mask_index.reserve_key(key)?;
                     self.commands.mask_index.insert(key, index);
-                    self.commands.masks.push(mask);
+                    self.commands.masks.push(LeasedMask {
+                        raster: mask,
+                        uses: 0,
+                    });
                 }
                 let witness = DrawRef {
                     bounds: command.geometry.bounds,

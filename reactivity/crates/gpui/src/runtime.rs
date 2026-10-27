@@ -65,6 +65,7 @@ mod background;
 mod geometry;
 mod metadata;
 pub(crate) mod paint;
+mod sparse_text;
 use paint::PatchOutcome;
 mod published;
 mod query;
@@ -2780,12 +2781,14 @@ impl<M: View + 'static> Runtime<M> {
         let mut semantic = false;
         let mut visual_changed = false;
         let mut last_changed = None;
+        let mut text_only = true;
         for (destination, mapped_value, color) in fanout.all_destinations() {
             self.counters.destination_compares += 1;
             let index = destination.node();
             let node = &self.nodes[index];
             let identity = node.identity();
             let changed = if let Some(id) = destination.property() {
+                text_only = false;
                 let value = match mapped_value {
                     Some(value) => value,
                     None => frozen.style.expect("style codec requested").admit(id)?,
@@ -2895,6 +2898,14 @@ impl<M: View + 'static> Runtime<M> {
             }
             self.dirty = visual_changed;
         }
+        if eligible
+            && text_only
+            && !semantic
+            && self.changed_nodes == 1
+            && let Some(text) = &mut self.text
+        {
+            text.dirty_text = last_changed.map(|index| (self.source_epoch, index));
+        }
         Ok(if semantic && !visual_changed {
             PatchOutcome::Metadata
         } else {
@@ -2964,15 +2975,15 @@ impl<M: View + 'static> Runtime<M> {
             self.presentation_size = prepared.dimensions();
             if !prepared.keeps_rows() {
                 self.presented = prepared.nodes;
-                if let Some(text) = &mut self.text {
-                    text.acknowledge();
-                }
                 if let Some(frozen) = self.metadata.as_mut().and_then(|m| m.editing.as_mut()) {
                     frozen.presented = frozen.candidate;
                     if let Some(ime) = &mut frozen.ime {
                         ime.presented = ime.candidate;
                     }
                 }
+            }
+            if let Some(text) = &mut self.text {
+                text.acknowledge(&mut self.presented);
             }
             self.presentation_scale_factor = prepared.scale_factor;
         }
@@ -3225,6 +3236,14 @@ impl<M: View + 'static> Runtime<M> {
         if let Some(error) = failure {
             return Err(error);
         }
+        if !self.rebuild_layout
+            && !self.topology_changed
+            && before.changed_layout_writes == after.changed_layout_writes
+            && let Some(shaper) = &mut shaper
+            && self.try_sparse_text(shaper)?
+        {
+            return Ok(());
+        }
         self.refresh_inspector(true)?;
         let viewport = Rect::new(0.0, 0.0, size[0] as f32, size[1] as f32);
         let mut presented: Vec<Presented> = Vec::with_capacity(self.nodes.len());
@@ -3465,6 +3484,7 @@ impl<M: View + 'static> Runtime<M> {
                     Color::TRANSPARENT,
                 )?;
             }
+            let mut text_run = None;
             let geometry = if let Some(text) = node.text_slot().get_mut(&mut self.texts) {
                 let fg = style.fg;
                 let service = self
@@ -3562,7 +3582,7 @@ impl<M: View + 'static> Runtime<M> {
                             scale_factor,
                         )?;
                     } else {
-                        scene.draw_text_scaled(
+                        text_run = scene.draw_text_scaled_tracked(
                             service,
                             shape,
                             origin,
@@ -3646,6 +3666,7 @@ impl<M: View + 'static> Runtime<M> {
             if let Some((origin, map)) = geometry {
                 text_geometry.push(text_geometry::Entry {
                     row: presented.len() as u32,
+                    run: text_run,
                     origin,
                     map,
                 });
@@ -3806,6 +3827,8 @@ impl<M: View + 'static> Runtime<M> {
         }
         if let Some(text) = &mut self.text {
             text.candidate = Some(text_geometry);
+            text.patch = None;
+            text.dirty_text = None;
         }
         self.prepared = Some(Prepared {
             size: prepared_size,

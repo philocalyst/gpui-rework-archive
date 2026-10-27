@@ -4,6 +4,7 @@ use std::sync::Arc;
 
 pub(super) struct Entry {
     pub row: u32,
+    pub run: Option<gpui_canvas::TextRunSlot>,
     pub origin: Point,
     pub map: Arc<gpui_canvas::TextGeometry>,
 }
@@ -13,6 +14,13 @@ pub(super) struct TextResources {
     pub font: Option<gpui_canvas::FontFace>,
     pub presented: Vec<Entry>,
     pub candidate: Option<Vec<Entry>>,
+    pub dirty_text: Option<(u64, usize)>,
+    pub patch: Option<Box<TextPatch>>,
+}
+pub(super) struct TextPatch {
+    pub row: usize,
+    pub value: SharedText,
+    pub geometry: Entry,
 }
 impl TextResources {
     pub fn unused(&self) -> bool {
@@ -21,9 +29,17 @@ impl TextResources {
             && self.presented.is_empty()
             && self.candidate.is_none()
     }
-    pub fn acknowledge(&mut self) {
+    pub fn acknowledge(&mut self, rows: &mut [Presented]) {
         if let Some(column) = self.candidate.take() {
             self.presented = column;
+        }
+        if let Some(patch) = self.patch.take() {
+            rows[patch.row].text = Some(patch.value);
+            let index = self
+                .presented
+                .binary_search_by_key(&(patch.row as u32), |e| e.row)
+                .expect("sparse C retains the P text row");
+            self.presented[index] = patch.geometry;
         }
     }
     pub fn entry(&self, row: usize) -> Option<&Entry> {
