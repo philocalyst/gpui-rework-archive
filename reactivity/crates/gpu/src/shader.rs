@@ -614,11 +614,12 @@ pub mod ui {
             let source = sample_draw(load_banked_draw(get!(INDICES)[cursor as usize]), position);
             color = source + color * (1.0 - source.w);
         }
+        let anchor = color;
         let mut delta = vec4f(0.0, 0.0, 0.0, 0.0);
         for index in 0..16 {
-            delta += (color - color) * 0.0625;
+            delta += (color - anchor) * 0.0625;
         }
-        output(color + delta)
+        output(anchor + delta)
     }
 
     #[fragment]

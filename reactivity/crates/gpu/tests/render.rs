@@ -4416,3 +4416,107 @@ fn retained_banked_text_images_and_transforms_survive_slot_repairs() {
         }
     });
 }
+
+#[test]
+fn pixel_uniform_tiles_preserve_mixed_alpha_colors_hdr_and_slot_updates() {
+    use gpui_canvas::{OutputProfile, PaintColor, SlotEdit};
+    pollster::block_on(async {
+        for hdr in [false, true] {
+            let format = if hdr {
+                wgpu::TextureFormat::Rgba16Float
+            } else {
+                wgpu::TextureFormat::Rgba8UnormSrgb
+            };
+            let mut renderer = renderer(format).await;
+            for grouped in [false, true] {
+                renderer.set_grouped_records(grouped);
+                renderer.set_tile_proofs(true);
+                let config = if hdr {
+                    ColorConfig::linear_hdr(OutputProfile::DisplayP3, 203.).unwrap()
+                } else {
+                    ColorConfig::default()
+                };
+                let mut canvas = Canvas::recording(3, 2, config).unwrap();
+                canvas.clear(if hdr {
+                    Color::linear_srgb(-0., 0.25, 0.5, 0.5).unwrap()
+                } else {
+                    Color::WHITE
+                });
+                let clip = Rect::new(0., 0., 3., 2.);
+                let first = if hdr {
+                    Color::linear_srgb(2., -0.5, 0.25, 0.5).unwrap()
+                } else {
+                    Color::rgba(210, 40, 30, 127)
+                };
+                let slot = canvas.paint_slot(PaintColor::new(first)).unwrap();
+                canvas
+                    .fill_rect_slot(Rect::new(0., 0., 2., 2.), Affine::IDENTITY, clip, slot)
+                    .unwrap();
+                canvas
+                    .fill_rect(
+                        Rect::new(1., 0., 2., 2.),
+                        Affine::IDENTITY,
+                        clip,
+                        Color::rgba(10, 40, 180, 91),
+                    )
+                    .unwrap();
+                let actual = readback(&mut renderer, &canvas);
+                assert_eq!(renderer.stats().pixel_uniform_tiles, 1);
+                assert_eq!(renderer.stats().sample_evaluations, 6);
+                renderer.set_tile_proofs(false);
+                let expected = readback(&mut renderer, &canvas);
+                assert_eq!(
+                    actual, expected,
+                    "pixel-uniform exact HDR={hdr}, grouped={grouped}"
+                );
+                assert_eq!(renderer.stats().pixel_uniform_tiles, 0);
+                assert_eq!(renderer.stats().sample_evaluations, 96);
+                renderer.set_tile_proofs(true);
+                let target = output_texture(&renderer, &canvas);
+                let view = target.create_view(&Default::default());
+                renderer.render(canvas.prepared_scene(), &view).unwrap();
+                let next = if hdr {
+                    Color::linear_srgb(-0.5, 2., 0.25, 0.5).unwrap()
+                } else {
+                    Color::rgba(40, 210, 30, 127)
+                };
+                let edits = [SlotEdit::new(slot, PaintColor::new(next))];
+                renderer.prepare_slots(&edits, &view).unwrap().commit();
+                canvas.prepare_slots(&edits).unwrap().commit();
+                let patched = read_texture(&renderer, &target);
+                renderer.set_tile_proofs(false);
+                assert_eq!(
+                    patched,
+                    readback(&mut renderer, &canvas),
+                    "slot update exact HDR={hdr}"
+                );
+            }
+        }
+    });
+}
+
+#[test]
+fn fractional_solid_edges_reject_pixel_uniform_coverage_and_match_full_samples() {
+    pollster::block_on(async {
+        let mut renderer = renderer(wgpu::TextureFormat::Rgba8UnormSrgb).await;
+        let mut canvas = Canvas::recording(1, 1, ColorConfig::default()).unwrap();
+        canvas.clear(Color::WHITE);
+        canvas
+            .fill_rect(
+                Rect::new(0., 0., 0.5, 1.),
+                Affine::IDENTITY,
+                Rect::new(0., 0., 1., 1.),
+                Color::rgb(255, 0, 0),
+            )
+            .unwrap();
+        let actual = readback(&mut renderer, &canvas);
+        let accelerated = renderer.stats().pixel_uniform_tiles;
+        renderer.set_tile_proofs(false);
+        let reference = readback(&mut renderer, &canvas);
+        assert_eq!(
+            actual, reference,
+            "fractional edge must retain correlated samples"
+        );
+        assert_eq!(accelerated, 0);
+    });
+}
