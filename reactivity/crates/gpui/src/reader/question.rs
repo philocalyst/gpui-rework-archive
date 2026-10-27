@@ -568,7 +568,7 @@ where
             && !A::READERS
         {
             let mut relevant = false;
-            for field in fields.iter().copied().flatten() {
+            for field in fields.iter().copied().skip(1).flatten() {
                 if self.inputs.contains(sources, field)? {
                     relevant = true;
                     break;
