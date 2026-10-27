@@ -169,9 +169,7 @@ fn pixel_uniform_record(records: &[Word], address: u32) -> bool {
         return false;
     }
     let [x, y, w, h] = records[base].map(f32::from_bits);
-    [x, y, x + w, y + h]
-        .iter()
-        .all(|v| v.is_finite() && v.fract() == 0.)
+    [x, y, x + w, y + h].iter().all(|v| v.is_finite())
 }
 fn sampled_solid_rect(
     draw: &PreparedDraw<'_>,
