@@ -1013,7 +1013,7 @@ impl<'a> El<'a> {
                     spec.overscan,
                 )?;
                 let list = viewports.len();
-                let start = list_plan.viewport.realized_range.start;
+                let start = list_plan.viewport.visible_range.start;
                 let row_height = list_plan.viewport.row_height;
                 let intra = list_plan.viewport.offset - start as f64 * row_height;
                 let mut rows = Vec::with_capacity(list_plan.keys.len());
