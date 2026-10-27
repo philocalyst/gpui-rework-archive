@@ -142,16 +142,22 @@ impl FontFace {
         TextShaper {
             font: self,
             planner: None,
-            cache: None,
+            cached: None,
         }
     }
     /// Borrow a reusable exclusively owned planning cache. Immutable cmap views
     /// still borrow this face only for the session, never the retained cache.
-    pub fn shaper_reusing<'a>(&'a self, cache: &'a mut TextCache) -> TextShaper<'a> {
-        TextShaper {
-            font: self,
-            planner: None,
-            cache: Some(cache),
+    pub fn shaper_reusing<'font, 'cache>(
+        &'font self,
+        cache: &'cache mut TextCache,
+    ) -> CachedTextShaper<'font, 'cache> {
+        CachedTextShaper {
+            shaper: TextShaper {
+                font: self,
+                planner: None,
+                cached: cache.state.take(),
+            },
+            cache,
         }
     }
     /// Process-local identity, not byte equality or a persistent font ID.
@@ -369,7 +375,7 @@ impl TextCache {
 pub struct TextShaper<'font> {
     font: &'font FontFace,
     planner: Option<Box<planner::Planner<'font>>>,
-    cache: Option<&'font mut TextCache>,
+    cached: Option<Box<planner::PlannerState>>,
 }
 impl<'font> TextShaper<'font> {
     /// Measure wrapping without freezing an owned layout. Paragraph scratch is
@@ -427,28 +433,44 @@ impl<'font> TextShaper<'font> {
             return Err(Error::ResourceLimit);
         }
         if self.planner.is_none() {
-            let cached = self
-                .cache
-                .as_deref_mut()
-                .and_then(|cache| cache.state.take());
-            self.planner = Some(Box::new(if self.cache.is_some() {
-                planner::Planner::reusing(self.font, cached)?
-            } else {
-                planner::Planner::new(self.font)?
+            self.planner = Some(Box::new(match self.cached.take() {
+                Some(state) => planner::Planner::reusing(self.font, Some(state))?,
+                None => planner::Planner::new(self.font)?,
             }));
         }
         Ok(self.planner.as_mut().unwrap())
     }
 }
 
-impl Drop for TextShaper<'_> {
+/// A scoped shaper that returns exclusively owned planning state to its cache.
+/// The ordinary `TextShaper` has no destructor and preserves its existing
+/// non-lexical font borrow behavior.
+pub struct CachedTextShaper<'font, 'cache> {
+    shaper: TextShaper<'font>,
+    cache: &'cache mut TextCache,
+}
+impl<'font> std::ops::Deref for CachedTextShaper<'font, '_> {
+    type Target = TextShaper<'font>;
+    fn deref(&self) -> &Self::Target {
+        &self.shaper
+    }
+}
+impl std::ops::DerefMut for CachedTextShaper<'_, '_> {
+    fn deref_mut(&mut self) -> &mut Self::Target {
+        &mut self.shaper
+    }
+}
+impl Drop for CachedTextShaper<'_, '_> {
     fn drop(&mut self) {
-        if let Some(cache) = self.cache.as_deref_mut() {
-            if std::thread::panicking() {
-                cache.clear();
-            } else if let Some(planner) = self.planner.take() {
-                cache.state = Some(planner.state);
-            }
+        if std::thread::panicking() {
+            self.cache.clear();
+        } else {
+            self.cache.state = self
+                .shaper
+                .planner
+                .take()
+                .map(|planner| planner.state)
+                .or_else(|| self.shaper.cached.take());
         }
     }
 }

@@ -27,9 +27,9 @@ pub use image::{
     MAX_IMAGE_SCENE_BYTES,
 };
 pub use text::{
-    CaretAffinity, FontFace, Glyph, GlyphKey, GlyphRun, TextCache, TextDirection, TextGeometry,
-    TextGrapheme, TextLayout, TextLine, TextMetrics, TextOffset, TextPosition, TextRun,
-    TextSelection, TextShaper, TextSystem,
+    CachedTextShaper, CaretAffinity, FontFace, Glyph, GlyphKey, GlyphRun, TextCache, TextDirection,
+    TextGeometry, TextGrapheme, TextLayout, TextLine, TextMetrics, TextOffset, TextPosition,
+    TextRun, TextSelection, TextShaper, TextSystem,
 };
 
 #[derive(Clone, Debug, PartialEq, Eq)]
