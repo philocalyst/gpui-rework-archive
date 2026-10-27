@@ -200,3 +200,161 @@ fn moved_reused_gradient_falls_back_before_staged_lease_transfer() {
     canvas.render_bgrx_region(&mut pixels, damage).unwrap();
     assert!(pixels == full(&mut canvas));
 }
+
+#[test]
+fn unsupported_materials_clips_and_maps_keep_the_full_damage_fallback() {
+    use gpui_canvas::{AlphaMode, Clip, ClipShape, Image, ImageProfile, ImageSampling};
+    let image = Image::rgba8(
+        1,
+        1,
+        ImageProfile::Srgb,
+        AlphaMode::Straight,
+        vec![60, 120, 180, 170].into_boxed_slice(),
+    )
+    .unwrap();
+    for case in 0..8 {
+        let mut canvas =
+            Canvas::recording(WIDTH as u32, HEIGHT as u32, Default::default()).unwrap();
+        let mut pixels = Vec::new();
+        for offset in [0., 6.] {
+            let mut scene = canvas.stage();
+            scene.clear(Color::WHITE);
+            let rect = Rect::new(0., 0., 30., 30.);
+            let mut map = Affine::translation(10., 15. - offset);
+            match case {
+                0 => map.a = 1.25,
+                1 => {
+                    map.b = 0.25;
+                    map.c = -0.25;
+                }
+                2 => map.tx += 0.5,
+                _ => {}
+            }
+            let clip = Rect::new(5., 7., 60., 48.);
+            let clip: Clip = if case == 3 {
+                scene
+                    .create_clip(
+                        None,
+                        ClipShape::RoundedRect {
+                            rect: clip,
+                            radius: 3.,
+                        },
+                        Affine::IDENTITY,
+                    )
+                    .unwrap()
+                    .into()
+            } else if case == 4 {
+                Rect::new(5.5, 7., 59.5, 48.).into()
+            } else {
+                clip.into()
+            };
+            match case {
+                5 => scene
+                    .draw_image(&image, rect, map, clip, ImageSampling::Linear)
+                    .unwrap(),
+                6 => scene
+                    .fill_rounded_rect(rect, 3., map, clip, Color::BLACK)
+                    .unwrap(),
+                7 => scene
+                    .fill_rect(Rect::new(0.5, 0., 29.5, 30.), map, clip, Color::BLACK)
+                    .unwrap(),
+                _ => scene.fill_rect(rect, map, clip, Color::BLACK).unwrap(),
+            }
+            if offset == 0. {
+                scene.commit();
+                pixels = full(&mut canvas);
+            } else {
+                let (damage, plan) = scene.commit_with_scroll_damage(VIEW, -6);
+                assert!(plan.is_none(), "unsupported case {case}");
+                canvas.render_bgrx_region(&mut pixels, damage).unwrap();
+                assert!(pixels == full(&mut canvas), "fallback case {case}");
+            }
+        }
+    }
+}
+
+#[test]
+fn changed_clear_order_glyph_identity_and_color_cannot_reuse_overlap() {
+    use gpui_canvas::FontFace;
+    for case in 0..5 {
+        let mut canvas =
+            Canvas::recording(WIDTH as u32, HEIGHT as u32, Default::default()).unwrap();
+        let mut text = TextSystem::bundled().unwrap();
+        let mut pixels = Vec::new();
+        for after in [false, true] {
+            if case == 3 && after {
+                text = TextSystem::from_font(
+                    FontFace::new(include_bytes!("../assets/NotoSans.ttf")).unwrap(),
+                );
+            }
+            let mut scene = canvas.stage();
+            scene.clear(if case == 0 && after {
+                Color::WHITE
+            } else {
+                Color::BLACK
+            });
+            let clip = Rect::new(5., 7., 60., 48.);
+            let map = Affine::translation(10., if after { 9. } else { 15. });
+            for layer in 0..2 {
+                let color = if (layer == 0) ^ (case == 1 && after) {
+                    Color::rgba(200, 50, 30, 180)
+                } else {
+                    Color::rgba(30, 50, 200, 180)
+                };
+                scene
+                    .fill_rect(Rect::new(0., 0., 30., 30.), map, clip, color)
+                    .unwrap();
+            }
+            let label = if case == 2 && after {
+                "changed"
+            } else {
+                "before"
+            };
+            let layout = text.shape(label, 9., None).unwrap();
+            scene
+                .draw_text(
+                    &mut text,
+                    &layout,
+                    Point::default(),
+                    map,
+                    clip,
+                    if case == 4 && after {
+                        Color::BLACK
+                    } else {
+                        Color::WHITE
+                    },
+                )
+                .unwrap();
+            if after {
+                let (damage, plan) = scene.commit_with_scroll_damage(VIEW, -6);
+                assert!(plan.is_none(), "changed contribution case {case}");
+                canvas.render_bgrx_region(&mut pixels, damage).unwrap();
+                assert!(pixels == full(&mut canvas), "fallback case {case}");
+            } else {
+                scene.commit();
+                pixels = full(&mut canvas);
+            }
+        }
+    }
+}
+
+#[test]
+fn changed_content_copy_would_fail_the_complete_pixel_oracle() {
+    let mut text = TextSystem::bundled().unwrap();
+    let mut canvas = Canvas::recording(WIDTH as u32, HEIGHT as u32, Default::default()).unwrap();
+    scene(&mut canvas, &mut text, 0., true, 0, false, false).commit();
+    let mut pixels = full(&mut canvas);
+    let (damage, plan) =
+        scene(&mut canvas, &mut text, 6., true, 1, true, false).commit_with_scroll_damage(VIEW, -6);
+    // Exercise the complete operation before inspecting admission. A mutant
+    // that admits the changed row must fail pixels, not only an Option assertion.
+    if let Some(plan) = plan {
+        apply(&mut canvas, &mut pixels, plan);
+    } else {
+        canvas.render_bgrx_region(&mut pixels, damage).unwrap();
+    }
+    assert!(
+        pixels == full(&mut canvas),
+        "changed overlap reused stale pixels"
+    );
+}
