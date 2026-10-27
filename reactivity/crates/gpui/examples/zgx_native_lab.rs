@@ -7,7 +7,7 @@ use std::time::{Duration, Instant};
 mod workload;
 use workload::{Mode, Workload};
 
-struct Lab {
+pub(crate) struct Lab {
     scroll_offset: Signal<f64>,
     stream: Signal<String>,
     items: Vec<i32>,
@@ -368,12 +368,31 @@ fn main() -> Result<(), Box<dyn std::error::Error>> {
 }
 
 #[cfg(test)]
+pub(crate) fn visit_scroll_frames(mut visit: impl FnMut(&mut gpui::Win<Lab>, usize)) {
+    for mode in [Mode::Scroll, Mode::Both] {
+        let work = port_tests::seeded(mode);
+        let mut window = port_tests::window(&work);
+        let (delivered, _received) = std::sync::mpsc::channel();
+        let mut driver = Driver {
+            work,
+            received: 0,
+            delivered,
+        };
+        visit(&mut window, 0);
+        for tick in 1..=4 {
+            window.update(|model| driver.owner(model, false)).unwrap();
+            visit(&mut window, tick);
+        }
+    }
+}
+
+#[cfg(test)]
 mod port_tests {
     use super::*;
     use gpui::{Win, WindowOptions};
     use std::sync::mpsc;
 
-    fn seeded(mode: Mode) -> Workload {
+    pub(super) fn seeded(mode: Mode) -> Workload {
         let mut work = Workload {
             text: String::with_capacity(8256),
             scroll_offset: 0.,
@@ -387,7 +406,7 @@ mod port_tests {
         work.mode = mode;
         work
     }
-    fn window(work: &Workload) -> Win<Lab> {
+    pub(super) fn window(work: &Workload) -> Win<Lab> {
         Win::recording_with_font(
             Lab::new(work),
             WindowOptions {
@@ -698,5 +717,57 @@ mod port_tests {
                 oracle.row_range()
             );
         }
+    }
+}
+
+#[cfg(test)]
+#[allow(dead_code)]
+pub(crate) struct CostFixture {
+    pub(crate) owner: gpui::Win<Lab>,
+    driver: Driver,
+    received: std::sync::mpsc::Receiver<()>,
+}
+#[cfg(test)]
+#[allow(dead_code)]
+impl CostFixture {
+    pub(crate) fn new(case: &str) -> Self {
+        let mode = match case {
+            "scroll" | "fractional" => Mode::Scroll,
+            "both" => Mode::Both,
+            "stream" | "stream-owner" | "exposure" => Mode::Stream,
+            _ => panic!("unknown complete workload case: {case}"),
+        };
+        let work = port_tests::seeded(mode);
+        let owner = port_tests::window(&work);
+        let (delivered, received) = std::sync::mpsc::channel();
+        Self {
+            owner,
+            driver: Driver {
+                work,
+                received: 0,
+                delivered,
+            },
+            received,
+        }
+    }
+    pub(crate) fn advance(&mut self, case: &str) {
+        if case == "exposure" {
+            return;
+        }
+        if case == "stream" {
+            let mut value = String::new();
+            self.driver.stream(&mut value, false);
+            self.owner.set(Lab::STREAM, value).unwrap();
+        } else {
+            self.owner
+                .update(|model| {
+                    self.driver.owner(model, false);
+                    if case == "fractional" {
+                        *model.scroll_offset += 0.5;
+                    }
+                })
+                .unwrap();
+        }
+        self.received.try_recv().unwrap();
     }
 }
