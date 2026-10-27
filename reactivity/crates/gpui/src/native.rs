@@ -1419,6 +1419,12 @@ mod paint_tests;
     target_os = "linux"
 ))]
 mod solid_tests;
+#[cfg(all(
+    test,
+    any(feature = "x11", feature = "x11-minimal"),
+    target_os = "linux"
+))]
+mod text_repair_tests;
 
 #[cfg(all(
     test,
@@ -1522,6 +1528,7 @@ mod tests {
             .unwrap();
         assert!(!gpu.renderer.stats().packet_reused);
         super::paint_tests::run(gpu);
+        super::text_repair_tests::run(gpu);
     }
     #[test]
     fn packet_gpu_header_ledger() {
