@@ -34,6 +34,8 @@ pub use paint::{PaintCommit, PaintEdit, PaintError, PaintErrorKind, PaintIndex};
 mod rounded;
 pub use rounded::rounded_rect_contains;
 mod samples;
+mod scroll;
+pub use scroll::ScrollCopy;
 #[cfg(test)]
 mod simd_tests;
 use glyph_axis::GlyphAxis;
