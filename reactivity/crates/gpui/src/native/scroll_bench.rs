@@ -397,7 +397,6 @@ impl ApplicationHandler for Harness {
             renderer: gpui_gpu::RetainedRenderer::new(renderer),
             errors,
             packet_token: None,
-            packet_epoch: None,
         };
         run(&mut gpu);
         assert!(gpu.errors.take().is_none(), "native GPU device fault");

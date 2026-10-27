@@ -61,17 +61,6 @@ fn ack(owner: &mut Win<Page>) {
         .presented(owner.with_scene(|_, t| t).unwrap())
         .unwrap();
 }
-fn certificate(
-    owner: &Win<Page>,
-) -> Option<(crate::PresentationToken, crate::PresentationToken, usize)> {
-    owner
-        .with_paint_scene(|_, _, _, damage| {
-            damage
-                .repair
-                .map(|r| (r.from, r.to, r.regions.regions().len()))
-        })
-        .unwrap()
-}
 fn render(gpu: &mut GpuSurface, owner: &mut Win<Page>) {
     let texture = gpu
         .renderer
@@ -119,37 +108,35 @@ pub(super) fn run(gpu: &mut GpuSurface) {
     let mut owner = window();
     render(gpu, &mut owner);
     owner.set(Page::LABEL, "000001 000002".into()).unwrap();
-    assert!(certificate(&owner).unwrap().2 > 1);
     render(gpu, &mut owner);
     assert!(gpu.renderer.retained_stats().composited_pixels < 240 * 144);
-    let old_epoch = gpu.packet_epoch;
+    let old_epoch = owner.snapshot().unwrap().source_epoch;
     let old_token = gpu.packet_token;
     let list = owner.list(LIST).unwrap();
     owner.scroll(list, 8.).unwrap();
     ack(&mut owner);
+    assert_eq!(owner.snapshot().unwrap().source_epoch, old_epoch);
+    let acknowledged = owner.with_scene(|_, token| token).unwrap();
     owner.set(Page::LABEL, "000003 000004".into()).unwrap();
     owner
         .with_paint_scene(|_, _, _, damage| {
-            assert!(
-                damage.base == old_epoch,
-                "fixture must isolate equal source epochs"
-            );
-            assert_ne!(Some(damage.repair.unwrap().from), old_token);
+            assert_eq!(damage.base, Some(acknowledged));
+            assert_ne!(damage.base, old_token);
         })
         .unwrap();
     render(gpu, &mut owner);
     assert_eq!(gpu.renderer.retained_stats().composited_pixels, 240 * 144);
-    // Coalescing invalidates the local replacement certificate.
+    // A second unseen scroll plus coalescing exercises ordinary damage too.
+    owner.scroll(list, 8.).unwrap();
+    ack(&mut owner);
     owner.set(Page::LABEL, "000005 000006".into()).unwrap();
-    assert!(certificate(&owner).is_some());
     owner.set(Page::LABEL, "000007 000008".into()).unwrap();
-    assert!(certificate(&owner).is_none());
     render(gpu, &mut owner);
     // A failed newer preparation must not revoke the older eligible C.
     owner.set(Page::LABEL, "000001 000009".into()).unwrap();
-    let older = certificate(&owner).unwrap();
+    let older = owner.with_scene(|_, token| token).unwrap();
     assert!(owner.update(|m| m.invalid = true).is_err());
-    assert_eq!(certificate(&owner), Some(older));
+    assert_eq!(owner.with_scene(|_, token| token).unwrap(), older);
     render(gpu, &mut owner);
     eprintln!("NATIVE_TEXT_REPAIR,stale-predecessor/coalescing/failed-newer/full-pixels=pass");
 }

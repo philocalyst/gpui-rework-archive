@@ -315,7 +315,6 @@ struct GpuSurface {
     renderer: gpui_gpu::RetainedRenderer,
     errors: Arc<DeviceErrors>,
     packet_token: Option<crate::PresentationToken>,
-    packet_epoch: Option<crate::runtime::paint::SceneEpoch>,
 }
 impl GpuSurface {
     #[cfg(test)]
@@ -336,24 +335,21 @@ impl GpuSurface {
         target: &wgpu::TextureView,
         transition: Option<crate::runtime::paint::SceneDamage<'_>>,
     ) -> Result<wgpu::SubmissionIndex, gpui_gpu::Error> {
-        let epoch = transition.map(|d| d.epoch);
         let valid_transition =
-            transition.filter(|d| d.base.is_some() && d.base == self.packet_epoch);
+            transition.filter(|d| d.base.is_some() && d.base == self.packet_token);
         let damage = valid_transition.map(|d| d.region);
         if self.packet_token == Some(token)
             && let Some(submitted) = self.renderer.redraw(target)?
         {
-            self.packet_epoch = epoch;
             return Ok(submitted);
         }
+        // Revoke image authority before any packet or image mutation.
         let previous = self.packet_token.take();
-        self.packet_epoch = None; // revoke before any packet or image mutation
         if let Some(paint) = paint
             && previous == Some(paint.from)
             && let Ok(submitted) = self.renderer.patch_slots(&paint.edits, target, damage)
         {
             self.packet_token = Some(token);
-            self.packet_epoch = epoch;
             return Ok(submitted);
         }
         let submitted = if let Some(repair) = valid_transition
@@ -366,7 +362,6 @@ impl GpuSurface {
             self.renderer.render(scene, target, damage)?
         };
         self.packet_token = Some(token);
-        self.packet_epoch = epoch;
         Ok(submitted)
     }
 }
@@ -604,7 +599,6 @@ impl<V: View + 'static, L: LaneSet<V>> NativeHost<V, L> {
             renderer: gpui_gpu::RetainedRenderer::new(renderer),
             errors,
             packet_token: None,
-            packet_epoch: None,
         })));
         self.resize([size.width, size.height])
     }
