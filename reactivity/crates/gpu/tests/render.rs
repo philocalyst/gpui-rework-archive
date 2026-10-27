@@ -4461,8 +4461,11 @@ fn pixel_uniform_tiles_preserve_mixed_alpha_colors_hdr_and_slot_updates() {
                     )
                     .unwrap();
                 let actual = readback(&mut renderer, &canvas);
-                assert_eq!(renderer.stats().pixel_uniform_tiles, 1);
-                assert_eq!(renderer.stats().sample_evaluations, 6);
+                assert_eq!(renderer.stats().pixel_uniform_tiles, usize::from(!hdr));
+                assert_eq!(
+                    renderer.stats().sample_evaluations,
+                    if hdr { 96 } else { 6 }
+                );
                 renderer.set_tile_proofs(false);
                 let expected = readback(&mut renderer, &canvas);
                 assert_eq!(

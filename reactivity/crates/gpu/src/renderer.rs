@@ -942,7 +942,9 @@ impl RendererState {
         debug_assert_eq!((word, reverse_ordinal), (bank_words, 0));
         let mut pixel_uniform_tiles = 0;
         let mut pixel_uniform_checks = 0;
-        if self.tile_proofs {
+        // Float-target signed-zero/subnormal reduction is not certified here.
+        // Keep its original sampled arithmetic and unchanged exact oracle.
+        if self.tile_proofs && !hdr {
             for range in &mut self.ranges {
                 if range[1] != UNIFORM_TILE
                     && range[0] != range[1]

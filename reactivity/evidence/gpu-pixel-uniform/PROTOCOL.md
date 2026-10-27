@@ -32,3 +32,13 @@ Check actual generated WGSL against typed source and binary bytes.
 Local software Vulkan is diagnostic, not hardware acceptance or scanout latency.
 Native benchmark output/typography and feature parity, equivalent dist builds,
 complete-workload tail latency and two physical hardware classes remain gates.
+
+## Pre-timing eligibility correction
+
+The first prototype (bf1687a328) failed the unchanged float-bit oracle: direct
+uniform evaluation retained a negative zero instead of the reference positive
+zero. Before any performance capture, narrow certification to SDR targets only.
+HDR continues through the original sixteen-sample evaluator. Keep the failing
+transcript and exact bit oracle. The HDR benchmark remains a no-regression cell;
+its positive witness now explicitly proves fallback rather than acceleration.
+No timing threshold changes and no tolerance added.

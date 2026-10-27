@@ -616,7 +616,7 @@ pub mod ui {
         }
         let anchor = color;
         let mut delta = vec4f(0.0, 0.0, 0.0, 0.0);
-        for index in 0..16 {
+        for _sample in 0..16 {
             delta += (color - anchor) * 0.0625;
         }
         output(anchor + delta)
