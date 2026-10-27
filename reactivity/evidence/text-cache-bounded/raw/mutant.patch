@@ -1,0 +1,14 @@
+diff --git a/reactivity/crates/canvas/src/text/planner.rs b/reactivity/crates/canvas/src/text/planner.rs
+index 2c07bd3909..758e348be1 100644
+--- a/reactivity/crates/canvas/src/text/planner.rs
++++ b/reactivity/crates/canvas/src/text/planner.rs
+@@ -58,8 +58,7 @@ pub(super) struct PlannerState {
+ impl PlannerState {
+     pub(super) fn for_cache(mut self: Box<Self>) -> Box<Self> {
+         if self.large_scratch {
+-            self.context = LayoutContext::new();
+-            self.layout = parley::Layout::default();
++            // Negative control: retain oversized paragraph scratch.
+             self.large_scratch = false;
+         }
+         self

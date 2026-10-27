@@ -1,0 +1,9 @@
+
+running 4 tests
+test a_new_font_identity_cannot_inherit_the_previous_planner_font_authority ... ok
+test rejected_and_panicked_sessions_recover_without_poisoning_future_layouts ... ok
+test reusable_planning_matches_scoped_unicode_metrics_and_original_byte_geometry ... ok
+test oversized_sessions_trim_scratch_without_revoking_held_layouts ... ok
+
+test result: ok. 4 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 0.07s
+

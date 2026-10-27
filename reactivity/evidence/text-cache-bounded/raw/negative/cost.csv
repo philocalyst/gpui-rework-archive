@@ -1,0 +1,17 @@
+variant,stage,allocations,requested,live_delta,live_total,peak_new
+false,cold,215,110346,0,0,45870
+false,long,268,5775576,0,0,4863036
+false,short,215,110346,0,0,45870
+false,mixed,748,360380,0,0,150488
+false,invalid,13,4328,0,0,4288
+false,foreign,215,110346,0,0,45870
+false,return,215,110346,0,0,45870
+false,clear,0,0,0,0,0
+true,cold,215,110346,45046,45046,45870
+true,long,74,5667296,3211758,3256804,4817990
+true,short,14,1184,0,3256804,824
+true,mixed,542,248940,33888,3290692,103804
+true,invalid,1,40,-1780672,1510020,40
+true,foreign,215,110346,-1464974,45046,0
+true,return,215,110346,0,45046,824
+true,clear,0,0,-45046,0,0

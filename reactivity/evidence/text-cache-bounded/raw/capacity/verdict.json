@@ -1,0 +1,32 @@
+{
+  "capacity": {
+    "retained_bytes": [
+      45046,
+      4364,
+      45046,
+      5428,
+      5428,
+      45046,
+      45046,
+      0
+    ],
+    "peak_retained": 45046,
+    "reclaimed": true,
+    "within_256k": true
+  },
+  "negative": {
+    "retained_bytes": [
+      45046,
+      3256804,
+      3256804,
+      3290692,
+      1510020,
+      45046,
+      45046,
+      0
+    ],
+    "peak_retained": 3290692,
+    "reclaimed": true,
+    "within_256k": false
+  }
+}
