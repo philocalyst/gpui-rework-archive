@@ -858,6 +858,8 @@ impl MappedFanout {
     }
 }
 enum Fanout {
+    // This source owns list realization; all of its sinks rebuild together.
+    Owner,
     General {
         codec: TextCodec,
         destinations: Vec<Destination>,
@@ -874,6 +876,7 @@ impl Fanout {
     }
     fn codec(&self) -> TextCodec {
         match self {
+            Self::Owner => unreachable!("owner source never enters sparse patching"),
             Self::General { codec, .. } => *codec,
             Self::Color(_) => TextCodec::for_style::<Color>(),
             Self::Mapped(mapped) => mapped.codec,
@@ -882,14 +885,16 @@ impl Fanout {
     fn destinations(&self) -> &[Destination] {
         match self {
             Self::General { destinations, .. } => destinations,
-            Self::Color(_) => &[],
+            Self::Owner | Self::Color(_) => &[],
             Self::Mapped(mapped) => &mapped.destinations,
         }
     }
     fn destinations_mut(&mut self) -> &mut Vec<Destination> {
         match self {
             Self::General { destinations, .. } => destinations,
-            Self::Color(_) => unreachable!("color fanout installed after description"),
+            Self::Owner | Self::Color(_) => {
+                unreachable!("closed fanout installed after description")
+            }
             Self::Mapped(mapped) => &mut mapped.destinations,
         }
     }
@@ -1051,7 +1056,7 @@ impl Fanout {
             Self::General { destinations, .. } => {
                 destinations.capacity() * size_of::<Destination>()
             }
-            Self::Color(_) => 0,
+            Self::Owner | Self::Color(_) => 0,
             Self::Mapped(mapped) => {
                 mapped.destinations.capacity() * size_of::<Destination>()
                     + size_of::<MappedFanout>()
@@ -2647,6 +2652,12 @@ impl<M: View + 'static> Runtime<M> {
                             .contains(&(row.item_index as usize)),
                     },
                 );
+            }
+            if let Some(field) = draft.plan.offset_field {
+                // Complete description has already admitted every text/style sink.
+                // A source owning list realization needs the owner barrier for all
+                // of them; no unrelated edit scans the window's list directory.
+                fanout.insert(field, Fanout::Owner);
             }
             viewports.insert(
                 ViewportKey::List(draft.id),

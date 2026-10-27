@@ -51,3 +51,10 @@ headers and representative complete allocation costs separately. Keep>=8GiB free
 Native lab integration will then use lazy keyed100K rows, overscan2 and real offset
 round-trip. Matching wheel28, deferred controls, quality and profiles remain
 separate named gates; no benchmark-specific native injection or reduced work.
+
+Before full qualification, direct source routing uses a closed Owner fanout
+marker installed after complete sink admission. All sinks for a controlled-offset
+source already require owner realization; redundant sparse destinations are not
+retained. This avoids scanning all lists on unrelated source updates. Wheel
+control detection inspects only its ordered ancestor movement plan and allocates
+no movement vector if no controlled list is affected. No global runtime flag.

@@ -327,7 +327,7 @@ impl<M: View + 'static, L: LaneSet<M>> RuntimeMut<'_, M, L> {
             Some(field)
                 if self.runtime.logical_valid
                     && !questions_changed
-                    && !self.runtime.list_offset_depends_on(field)
+                    && !matches!(self.runtime.fanout.get(&field), Some(Fanout::Owner))
                     && !self.runtime.sources.invalidates_owner(field)? =>
             {
                 Some(field)
