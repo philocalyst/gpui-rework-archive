@@ -146,7 +146,7 @@ fn main() {
         }
         step += 1;
     };
-    for _ in 0..20 {
+    for _ in 0..200 {
         run();
     }
     println!("case,batch,ops,cpu_ns,wall_ns");

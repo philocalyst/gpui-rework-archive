@@ -648,15 +648,10 @@ impl LayoutTree {
     fn is_cheap(&self, node: NodeId) -> bool {
         self.child_counts[self.tree.slot(node)] == 0 && !self.measures.contains_key(&node)
     }
-    fn root_of(&self, mut node: NodeId) -> NodeId {
-        while let Some(parent) = self
-            .tree
-            .parent(node)
+    fn root_of(&self, node: NodeId) -> NodeId {
+        self.tree
+            .root(node)
             .expect("pending ids are removed with their subtree")
-        {
-            node = parent;
-        }
-        node
     }
 }
 

@@ -4,6 +4,16 @@ use super::{NIL, NodeId, Tree, TreeError};
 const WIDTH: usize = 32;
 
 impl Tree {
+    // Admission proves the start capability. The shared borrow keeps every
+    // ancestor link and generation fixed until the resulting root is minted.
+    pub(crate) fn root(&self, node: NodeId) -> Result<NodeId, TreeError> {
+        let mut index = self.index(node)?;
+        while self.parents[index as usize] != NIL {
+            index = self.parents[index as usize];
+        }
+        Ok(self.id(index))
+    }
+
     pub(crate) fn select_pending_root(
         &self,
         pending: impl Iterator<Item = NodeId>,
@@ -87,6 +97,9 @@ mod tests {
             let ids = std::array::from_fn::<_, 32, _>(|i| {
                 (i % 7 != 0).then_some(nodes[(offset + i * 19) % nodes.len()])
             });
+            for id in ids.into_iter().flatten() {
+                assert_eq!(tree.root(id).unwrap(), oracle(&tree, id));
+            }
             assert_eq!(
                 tree.root_batch(ids).unwrap(),
                 ids.map(|id| id.map(|id| oracle(&tree, id)))
@@ -106,6 +119,7 @@ mod tests {
         assert_eq!(tree.root_batch([Some(moving)]), Err(TreeError::InvalidNode));
         let mut foreign = Tree::new();
         let foreign = foreign.insert(None, NodeKind::Element).unwrap();
+        assert_eq!(tree.root(foreign), Err(TreeError::InvalidNode));
         assert_eq!(
             tree.root_batch([Some(foreign)]),
             Err(TreeError::InvalidNode)
