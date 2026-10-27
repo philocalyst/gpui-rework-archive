@@ -152,3 +152,51 @@ fn changed_overlap_stationary_overlay_fractional_maps_and_bad_proposals_fall_bac
         assert!(pixels == full(&mut canvas));
     }
 }
+
+#[test]
+fn moved_reused_gradient_falls_back_before_staged_lease_transfer() {
+    use gpui_canvas::{Extend, Gradient, GradientGeometry, GradientStop, Interpolation};
+    let gradient = Gradient::new(
+        GradientGeometry::Linear {
+            start: Point::default(),
+            end: Point { x: 1., y: 0. },
+        },
+        &[
+            GradientStop::new(0., Color::BLACK),
+            GradientStop::new(1., Color::WHITE),
+        ],
+        Extend::Pad,
+        Interpolation::LinearSrgb,
+    )
+    .unwrap();
+    let mut canvas = Canvas::recording(WIDTH as u32, HEIGHT as u32, Default::default()).unwrap();
+    let clip = Rect::new(0., 0., WIDTH as f32, HEIGHT as f32);
+    let mut before = canvas.stage();
+    before.clear(Color::WHITE);
+    before
+        .fill_gradient(
+            &gradient,
+            Rect::new(5., 1., 10., 4.),
+            0.,
+            Affine::IDENTITY,
+            clip,
+        )
+        .unwrap();
+    before.commit();
+    let mut pixels = full(&mut canvas);
+    let mut after = canvas.stage();
+    after.clear(Color::WHITE);
+    after
+        .fill_gradient(
+            &gradient,
+            Rect::new(5., 20., 10., 4.),
+            0.,
+            Affine::IDENTITY,
+            clip,
+        )
+        .unwrap();
+    let (damage, plan) = after.commit_with_scroll_damage(VIEW, -6);
+    assert!(plan.is_none());
+    canvas.render_bgrx_region(&mut pixels, damage).unwrap();
+    assert!(pixels == full(&mut canvas));
+}
