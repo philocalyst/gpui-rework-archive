@@ -1,0 +1,34 @@
+diff --git a/reactivity/crates/gpui/src/native.rs b/reactivity/crates/gpui/src/native.rs
+index c8aa281ce9..144d29d1f8 100644
+--- a/reactivity/crates/gpui/src/native.rs
++++ b/reactivity/crates/gpui/src/native.rs
+@@ -335,8 +335,11 @@ impl GpuSurface {
+         target: &wgpu::TextureView,
+         transition: Option<crate::runtime::paint::SceneDamage<'_>>,
+     ) -> Result<wgpu::SubmissionIndex, gpui_gpu::Error> {
+-        let valid_transition =
+-            transition.filter(|d| d.base.is_some() && d.base == self.packet_token);
++        let valid_transition = transition.filter(|d| {
++            d.base
++                .zip(self.packet_token)
++                .is_some_and(|(a, b)| a.same_image_window(b))
++        });
+         let damage = valid_transition.map(|d| d.region);
+         if self.packet_token == Some(token)
+             && let Some(submitted) = self.renderer.redraw(target)?
+diff --git a/reactivity/crates/gpui/src/runtime.rs b/reactivity/crates/gpui/src/runtime.rs
+index db5d8d48d0..14bfc8a91a 100644
+--- a/reactivity/crates/gpui/src/runtime.rs
++++ b/reactivity/crates/gpui/src/runtime.rs
+@@ -224,6 +224,11 @@ pub struct PresentationToken {
+     window: NonZeroU64,
+     sequence: NonZeroU64,
+ }
++impl PresentationToken {
++    pub(crate) fn same_image_window(self, other: Self) -> bool {
++        self.window == other.window
++    }
++}
+ 
+ #[derive(Clone, Copy, Debug, PartialEq, Eq, Serialize)]
+ pub struct Commit {

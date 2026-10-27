@@ -1,0 +1,1508 @@
+{
+  "variant_sources": {
+    "candidate": "aed951bc175d7bdf624b293a95d4c05a3401849e",
+    "control": "bb83c5d8f3da446d4cc1c259141f335797b1b60d",
+    "predecessor": "f9fd1d140555c1b3e230bfa9a2dd3b2247e19adc",
+    "bounds": "be8300c1e3eafacedfa20c062bf2e31ed1ada9ca"
+  },
+  "gates": {
+    "candidate/full-default": {
+      "test": {
+        "command": [
+          "cargo",
+          "+nightly-2026-10-23",
+          "-Z",
+          "checksum-freshness",
+          "--config",
+          "build.fingerprint=\"content\"",
+          "test",
+          "--locked",
+          "--offline",
+          "--release",
+          "-p",
+          "gpui",
+          "-p",
+          "gpui_canvas"
+        ],
+        "exit": 0
+      },
+      "clippy": {
+        "command": [
+          "cargo",
+          "+nightly-2026-10-23",
+          "-Z",
+          "checksum-freshness",
+          "--config",
+          "build.fingerprint=\"content\"",
+          "clippy",
+          "--locked",
+          "--offline",
+          "--release",
+          "-p",
+          "gpui",
+          "-p",
+          "gpui_canvas",
+          "--all-targets",
+          "--",
+          "-D",
+          "warnings"
+        ],
+        "exit": 0
+      }
+    },
+    "candidate/full-native": {
+      "build": {
+        "command": [
+          "cargo",
+          "+nightly-2026-10-23",
+          "-Z",
+          "checksum-freshness",
+          "--config",
+          "build.fingerprint=\"content\"",
+          "build",
+          "--locked",
+          "--offline",
+          "--release",
+          "-p",
+          "gpui",
+          "--features",
+          "x11",
+          "--example",
+          "zgx_native_lab",
+          "--message-format=json"
+        ],
+        "exit": 0
+      },
+      "test": {
+        "command": [
+          "cargo",
+          "+nightly-2026-10-23",
+          "-Z",
+          "checksum-freshness",
+          "--config",
+          "build.fingerprint=\"content\"",
+          "test",
+          "--locked",
+          "--offline",
+          "--release",
+          "-p",
+          "gpui",
+          "-p",
+          "gpui_canvas",
+          "--features",
+          "gpui/x11"
+        ],
+        "exit": 0
+      },
+      "port": {
+        "command": [
+          "cargo",
+          "+nightly-2026-10-23",
+          "-Z",
+          "checksum-freshness",
+          "--config",
+          "build.fingerprint=\"content\"",
+          "test",
+          "--locked",
+          "--offline",
+          "--release",
+          "-p",
+          "gpui",
+          "--features",
+          "x11",
+          "--example",
+          "zgx_native_lab"
+        ],
+        "exit": 0
+      },
+      "clippy": {
+        "command": [
+          "cargo",
+          "+nightly-2026-10-23",
+          "-Z",
+          "checksum-freshness",
+          "--config",
+          "build.fingerprint=\"content\"",
+          "clippy",
+          "--locked",
+          "--offline",
+          "--release",
+          "-p",
+          "gpui",
+          "-p",
+          "gpui_canvas",
+          "--features",
+          "gpui/x11",
+          "--all-targets",
+          "--",
+          "-D",
+          "warnings"
+        ],
+        "exit": 0
+      }
+    },
+    "candidate/gpu-full": {
+      "test": {
+        "command": [
+          "cargo",
+          "+nightly-2026-10-23",
+          "-Z",
+          "checksum-freshness",
+          "--config",
+          "build.fingerprint=\"content\"",
+          "test",
+          "--locked",
+          "--offline",
+          "--release",
+          "-p",
+          "gpui_gpu",
+          "--features",
+          "vulkan-tests",
+          "--",
+          "--test-threads=1"
+        ],
+        "exit": 0
+      },
+      "clippy": {
+        "command": [
+          "cargo",
+          "+nightly-2026-10-23",
+          "-Z",
+          "checksum-freshness",
+          "--config",
+          "build.fingerprint=\"content\"",
+          "clippy",
+          "--locked",
+          "--offline",
+          "--release",
+          "-p",
+          "gpui_gpu",
+          "--features",
+          "vulkan-tests",
+          "--all-targets",
+          "--",
+          "-D",
+          "warnings"
+        ],
+        "exit": 0
+      }
+    },
+    "candidate/minimal-library": {
+      "unit-build": {
+        "command": [
+          "cargo",
+          "+nightly-2026-10-23",
+          "-Z",
+          "checksum-freshness",
+          "--config",
+          "build.fingerprint=\"content\"",
+          "test",
+          "--locked",
+          "--offline",
+          "--release",
+          "-p",
+          "gpui",
+          "-p",
+          "gpui_canvas",
+          "--features",
+          "gpui/x11-minimal",
+          "--lib"
+        ],
+        "exit": 0
+      },
+      "clippy": {
+        "command": [
+          "cargo",
+          "+nightly-2026-10-23",
+          "-Z",
+          "checksum-freshness",
+          "--config",
+          "build.fingerprint=\"content\"",
+          "clippy",
+          "--locked",
+          "--offline",
+          "--release",
+          "-p",
+          "gpui",
+          "-p",
+          "gpui_canvas",
+          "--features",
+          "gpui/x11-minimal",
+          "--all-targets",
+          "--",
+          "-D",
+          "warnings"
+        ],
+        "exit": 0
+      }
+    },
+    "-control/full-native": {
+      "build": {
+        "command": [
+          "cargo",
+          "+nightly-2026-10-23",
+          "-Z",
+          "checksum-freshness",
+          "--config",
+          "build.fingerprint=\"content\"",
+          "build",
+          "--locked",
+          "--offline",
+          "--release",
+          "-p",
+          "gpui",
+          "--features",
+          "x11",
+          "--example",
+          "zgx_native_lab",
+          "--message-format=json"
+        ],
+        "exit": 0
+      },
+      "test": {
+        "command": [
+          "cargo",
+          "+nightly-2026-10-23",
+          "-Z",
+          "checksum-freshness",
+          "--config",
+          "build.fingerprint=\"content\"",
+          "test",
+          "--locked",
+          "--offline",
+          "--release",
+          "-p",
+          "gpui",
+          "-p",
+          "gpui_canvas",
+          "--features",
+          "gpui/x11"
+        ],
+        "exit": 0
+      },
+      "port": {
+        "command": [
+          "cargo",
+          "+nightly-2026-10-23",
+          "-Z",
+          "checksum-freshness",
+          "--config",
+          "build.fingerprint=\"content\"",
+          "test",
+          "--locked",
+          "--offline",
+          "--release",
+          "-p",
+          "gpui",
+          "--features",
+          "x11",
+          "--example",
+          "zgx_native_lab"
+        ],
+        "exit": 0
+      },
+      "clippy": {
+        "command": [
+          "cargo",
+          "+nightly-2026-10-23",
+          "-Z",
+          "checksum-freshness",
+          "--config",
+          "build.fingerprint=\"content\"",
+          "clippy",
+          "--locked",
+          "--offline",
+          "--release",
+          "-p",
+          "gpui",
+          "-p",
+          "gpui_canvas",
+          "--features",
+          "gpui/x11",
+          "--all-targets",
+          "--",
+          "-D",
+          "warnings"
+        ],
+        "exit": 0
+      }
+    },
+    "-predecessor/full-native": {
+      "build": {
+        "command": [
+          "cargo",
+          "+nightly-2026-10-23",
+          "-Z",
+          "checksum-freshness",
+          "--config",
+          "build.fingerprint=\"content\"",
+          "build",
+          "--locked",
+          "--offline",
+          "--release",
+          "-p",
+          "gpui",
+          "--features",
+          "x11",
+          "--example",
+          "zgx_native_lab",
+          "--message-format=json"
+        ],
+        "exit": 0
+      },
+      "test": {
+        "command": [
+          "cargo",
+          "+nightly-2026-10-23",
+          "-Z",
+          "checksum-freshness",
+          "--config",
+          "build.fingerprint=\"content\"",
+          "test",
+          "--locked",
+          "--offline",
+          "--release",
+          "-p",
+          "gpui",
+          "-p",
+          "gpui_canvas",
+          "--features",
+          "gpui/x11"
+        ],
+        "exit": 0
+      },
+      "port": {
+        "command": [
+          "cargo",
+          "+nightly-2026-10-23",
+          "-Z",
+          "checksum-freshness",
+          "--config",
+          "build.fingerprint=\"content\"",
+          "test",
+          "--locked",
+          "--offline",
+          "--release",
+          "-p",
+          "gpui",
+          "--features",
+          "x11",
+          "--example",
+          "zgx_native_lab"
+        ],
+        "exit": 0
+      },
+      "clippy": {
+        "command": [
+          "cargo",
+          "+nightly-2026-10-23",
+          "-Z",
+          "checksum-freshness",
+          "--config",
+          "build.fingerprint=\"content\"",
+          "clippy",
+          "--locked",
+          "--offline",
+          "--release",
+          "-p",
+          "gpui",
+          "-p",
+          "gpui_canvas",
+          "--features",
+          "gpui/x11",
+          "--all-targets",
+          "--",
+          "-D",
+          "warnings"
+        ],
+        "exit": 0
+      }
+    },
+    "-bounds/full-native": {
+      "build": {
+        "command": [
+          "cargo",
+          "+nightly-2026-10-23",
+          "-Z",
+          "checksum-freshness",
+          "--config",
+          "build.fingerprint=\"content\"",
+          "build",
+          "--locked",
+          "--offline",
+          "--release",
+          "-p",
+          "gpui",
+          "--features",
+          "x11",
+          "--example",
+          "zgx_native_lab",
+          "--message-format=json"
+        ],
+        "exit": 0
+      },
+      "test": {
+        "command": [
+          "cargo",
+          "+nightly-2026-10-23",
+          "-Z",
+          "checksum-freshness",
+          "--config",
+          "build.fingerprint=\"content\"",
+          "test",
+          "--locked",
+          "--offline",
+          "--release",
+          "-p",
+          "gpui",
+          "-p",
+          "gpui_canvas",
+          "--features",
+          "gpui/x11"
+        ],
+        "exit": 0
+      },
+      "port": {
+        "command": [
+          "cargo",
+          "+nightly-2026-10-23",
+          "-Z",
+          "checksum-freshness",
+          "--config",
+          "build.fingerprint=\"content\"",
+          "test",
+          "--locked",
+          "--offline",
+          "--release",
+          "-p",
+          "gpui",
+          "--features",
+          "x11",
+          "--example",
+          "zgx_native_lab"
+        ],
+        "exit": 0
+      },
+      "clippy": {
+        "command": [
+          "cargo",
+          "+nightly-2026-10-23",
+          "-Z",
+          "checksum-freshness",
+          "--config",
+          "build.fingerprint=\"content\"",
+          "clippy",
+          "--locked",
+          "--offline",
+          "--release",
+          "-p",
+          "gpui",
+          "-p",
+          "gpui_canvas",
+          "--features",
+          "gpui/x11",
+          "--all-targets",
+          "--",
+          "-D",
+          "warnings"
+        ],
+        "exit": 0
+      }
+    },
+    "candidate/native-checks": {
+      "native-5": {
+        "command": [
+          "/home/user/gpui-preserved-test-binaries/21d71cb600b6f4e972e8fb32fe8ba50558f39af0667933a4360e7b979d4d3f9f",
+          "--ignored",
+          "--exact",
+          "native::tests::native_todo_port_presents_edits_pointer_actions_resize_and_inspection",
+          "--nocapture"
+        ],
+        "exit": 0
+      },
+      "native-list-default": {
+        "command": [
+          "/home/user/gpui-preserved-test-binaries/21d71cb600b6f4e972e8fb32fe8ba50558f39af0667933a4360e7b979d4d3f9f",
+          "native::list_tests::native_library_250k_wheel_pointer_resize_resume",
+          "--ignored",
+          "--exact",
+          "--nocapture",
+          "--test-threads=1"
+        ],
+        "exit": 0
+      },
+      "native-0": {
+        "command": [
+          "/home/user/gpui-preserved-test-binaries/21d71cb600b6f4e972e8fb32fe8ba50558f39af0667933a4360e7b979d4d3f9f",
+          "--ignored",
+          "--exact",
+          "native::remote_tests::native_source_inbox_patches_and_rearms_without_describing_the_owner",
+          "--nocapture"
+        ],
+        "exit": 0
+      },
+      "native-2": {
+        "command": [
+          "/home/user/gpui-preserved-test-binaries/21d71cb600b6f4e972e8fb32fe8ba50558f39af0667933a4360e7b979d4d3f9f",
+          "--ignored",
+          "--exact",
+          "native::remote_tests::native_final_producer_drop_drains_saturated_and_quiescent_status_lanes",
+          "--nocapture"
+        ],
+        "exit": 0
+      },
+      "native-1": {
+        "command": [
+          "/home/user/gpui-preserved-test-binaries/21d71cb600b6f4e972e8fb32fe8ba50558f39af0667933a4360e7b979d4d3f9f",
+          "--ignored",
+          "--exact",
+          "native::remote_tests::native_remote_results_wake_bounded_owner_turns_without_polling",
+          "--nocapture"
+        ],
+        "exit": 0
+      },
+      "native_atspi_ime_cjk_preview_old_candidate_ack_and_commit": {
+        "command": [
+          "dbus-run-session",
+          "--",
+          "/home/user/gpui-preserved-test-binaries/21d71cb600b6f4e972e8fb32fe8ba50558f39af0667933a4360e7b979d4d3f9f",
+          "native::accessibility::linux_tests::ime::native_atspi_ime_cjk_preview_old_candidate_ack_and_commit",
+          "--ignored",
+          "--exact",
+          "--nocapture",
+          "--test-threads=1"
+        ],
+        "exit": 0
+      },
+      "native_atspi_ime_explicit_line_height_preview_ack_and_commit": {
+        "command": [
+          "dbus-run-session",
+          "--",
+          "/home/user/gpui-preserved-test-binaries/21d71cb600b6f4e972e8fb32fe8ba50558f39af0667933a4360e7b979d4d3f9f",
+          "native::accessibility::linux_tests::ime::native_atspi_ime_explicit_line_height_preview_ack_and_commit",
+          "--ignored",
+          "--exact",
+          "--nocapture",
+          "--test-threads=1"
+        ],
+        "exit": 0
+      },
+      "native-overscan": {
+        "command": [
+          "/home/user/gpui-preserved-test-binaries/21d71cb600b6f4e972e8fb32fe8ba50558f39af0667933a4360e7b979d4d3f9f",
+          "native::list_tests::native_library_250k_overscan_wheel_pointer_resize_resume",
+          "--ignored",
+          "--exact",
+          "--nocapture",
+          "--test-threads=1"
+        ],
+        "exit": 0
+      },
+      "native-3": {
+        "command": [
+          "/home/user/gpui-preserved-test-binaries/21d71cb600b6f4e972e8fb32fe8ba50558f39af0667933a4360e7b979d4d3f9f",
+          "--ignored",
+          "--exact",
+          "native::question_tests::native_question_result_and_credit_wake_without_unrelated_input",
+          "--nocapture"
+        ],
+        "exit": 0
+      },
+      "native-4": {
+        "command": [
+          "/home/user/gpui-preserved-test-binaries/21d71cb600b6f4e972e8fb32fe8ba50558f39af0667933a4360e7b979d4d3f9f",
+          "--ignored",
+          "--exact",
+          "native::question_tests::native_future_cancellation_and_result_wake_without_unrelated_input",
+          "--nocapture"
+        ],
+        "exit": 0
+      },
+      "native-list-controlled": {
+        "command": [
+          "/home/user/gpui-preserved-test-binaries/21d71cb600b6f4e972e8fb32fe8ba50558f39af0667933a4360e7b979d4d3f9f",
+          "native::list_tests::native_library_250k_controlled_wheel_pointer_resize_resume",
+          "--ignored",
+          "--exact",
+          "--nocapture",
+          "--test-threads=1"
+        ],
+        "exit": 0
+      }
+    },
+    "control/native-checks": {
+      "native-5": {
+        "command": [
+          "/home/user/gpui-preserved-test-binaries/476f016811408381227991d412c0915f6bde7de6c2e9c06e034d2aeb94ed5a94",
+          "--ignored",
+          "--exact",
+          "native::tests::native_todo_port_presents_edits_pointer_actions_resize_and_inspection",
+          "--nocapture"
+        ],
+        "exit": 0
+      },
+      "native-list-default": {
+        "command": [
+          "/home/user/gpui-preserved-test-binaries/476f016811408381227991d412c0915f6bde7de6c2e9c06e034d2aeb94ed5a94",
+          "native::list_tests::native_library_250k_wheel_pointer_resize_resume",
+          "--ignored",
+          "--exact",
+          "--nocapture",
+          "--test-threads=1"
+        ],
+        "exit": 0
+      },
+      "native-0": {
+        "command": [
+          "/home/user/gpui-preserved-test-binaries/476f016811408381227991d412c0915f6bde7de6c2e9c06e034d2aeb94ed5a94",
+          "--ignored",
+          "--exact",
+          "native::remote_tests::native_source_inbox_patches_and_rearms_without_describing_the_owner",
+          "--nocapture"
+        ],
+        "exit": 0
+      },
+      "native-2": {
+        "command": [
+          "/home/user/gpui-preserved-test-binaries/476f016811408381227991d412c0915f6bde7de6c2e9c06e034d2aeb94ed5a94",
+          "--ignored",
+          "--exact",
+          "native::remote_tests::native_final_producer_drop_drains_saturated_and_quiescent_status_lanes",
+          "--nocapture"
+        ],
+        "exit": 0
+      },
+      "native-1": {
+        "command": [
+          "/home/user/gpui-preserved-test-binaries/476f016811408381227991d412c0915f6bde7de6c2e9c06e034d2aeb94ed5a94",
+          "--ignored",
+          "--exact",
+          "native::remote_tests::native_remote_results_wake_bounded_owner_turns_without_polling",
+          "--nocapture"
+        ],
+        "exit": 0
+      },
+      "native_atspi_ime_cjk_preview_old_candidate_ack_and_commit": {
+        "command": [
+          "dbus-run-session",
+          "--",
+          "/home/user/gpui-preserved-test-binaries/476f016811408381227991d412c0915f6bde7de6c2e9c06e034d2aeb94ed5a94",
+          "native::accessibility::linux_tests::ime::native_atspi_ime_cjk_preview_old_candidate_ack_and_commit",
+          "--ignored",
+          "--exact",
+          "--nocapture",
+          "--test-threads=1"
+        ],
+        "exit": 0
+      },
+      "native_atspi_ime_explicit_line_height_preview_ack_and_commit": {
+        "command": [
+          "dbus-run-session",
+          "--",
+          "/home/user/gpui-preserved-test-binaries/476f016811408381227991d412c0915f6bde7de6c2e9c06e034d2aeb94ed5a94",
+          "native::accessibility::linux_tests::ime::native_atspi_ime_explicit_line_height_preview_ack_and_commit",
+          "--ignored",
+          "--exact",
+          "--nocapture",
+          "--test-threads=1"
+        ],
+        "exit": 0
+      },
+      "native-overscan": {
+        "command": [
+          "/home/user/gpui-preserved-test-binaries/476f016811408381227991d412c0915f6bde7de6c2e9c06e034d2aeb94ed5a94",
+          "native::list_tests::native_library_250k_overscan_wheel_pointer_resize_resume",
+          "--ignored",
+          "--exact",
+          "--nocapture",
+          "--test-threads=1"
+        ],
+        "exit": 0
+      },
+      "native-3": {
+        "command": [
+          "/home/user/gpui-preserved-test-binaries/476f016811408381227991d412c0915f6bde7de6c2e9c06e034d2aeb94ed5a94",
+          "--ignored",
+          "--exact",
+          "native::question_tests::native_question_result_and_credit_wake_without_unrelated_input",
+          "--nocapture"
+        ],
+        "exit": 0
+      },
+      "native-4": {
+        "command": [
+          "/home/user/gpui-preserved-test-binaries/476f016811408381227991d412c0915f6bde7de6c2e9c06e034d2aeb94ed5a94",
+          "--ignored",
+          "--exact",
+          "native::question_tests::native_future_cancellation_and_result_wake_without_unrelated_input",
+          "--nocapture"
+        ],
+        "exit": 0
+      },
+      "native-list-controlled": {
+        "command": [
+          "/home/user/gpui-preserved-test-binaries/476f016811408381227991d412c0915f6bde7de6c2e9c06e034d2aeb94ed5a94",
+          "native::list_tests::native_library_250k_controlled_wheel_pointer_resize_resume",
+          "--ignored",
+          "--exact",
+          "--nocapture",
+          "--test-threads=1"
+        ],
+        "exit": 0
+      }
+    },
+    "predecessor/native-checks": {
+      "native-5": {
+        "command": [
+          "/home/user/gpui-preserved-test-binaries/4acfd1d814fa974c3ef277e2d285ae7dff8336747f644232bbb830b2a0d30825",
+          "--ignored",
+          "--exact",
+          "native::tests::native_todo_port_presents_edits_pointer_actions_resize_and_inspection",
+          "--nocapture"
+        ],
+        "exit": 0
+      },
+      "native-list-default": {
+        "command": [
+          "/home/user/gpui-preserved-test-binaries/4acfd1d814fa974c3ef277e2d285ae7dff8336747f644232bbb830b2a0d30825",
+          "native::list_tests::native_library_250k_wheel_pointer_resize_resume",
+          "--ignored",
+          "--exact",
+          "--nocapture",
+          "--test-threads=1"
+        ],
+        "exit": 0
+      },
+      "native-0": {
+        "command": [
+          "/home/user/gpui-preserved-test-binaries/4acfd1d814fa974c3ef277e2d285ae7dff8336747f644232bbb830b2a0d30825",
+          "--ignored",
+          "--exact",
+          "native::remote_tests::native_source_inbox_patches_and_rearms_without_describing_the_owner",
+          "--nocapture"
+        ],
+        "exit": 0
+      },
+      "native-2": {
+        "command": [
+          "/home/user/gpui-preserved-test-binaries/4acfd1d814fa974c3ef277e2d285ae7dff8336747f644232bbb830b2a0d30825",
+          "--ignored",
+          "--exact",
+          "native::remote_tests::native_final_producer_drop_drains_saturated_and_quiescent_status_lanes",
+          "--nocapture"
+        ],
+        "exit": 0
+      },
+      "native-1": {
+        "command": [
+          "/home/user/gpui-preserved-test-binaries/4acfd1d814fa974c3ef277e2d285ae7dff8336747f644232bbb830b2a0d30825",
+          "--ignored",
+          "--exact",
+          "native::remote_tests::native_remote_results_wake_bounded_owner_turns_without_polling",
+          "--nocapture"
+        ],
+        "exit": 0
+      },
+      "native_atspi_ime_cjk_preview_old_candidate_ack_and_commit": {
+        "command": [
+          "dbus-run-session",
+          "--",
+          "/home/user/gpui-preserved-test-binaries/4acfd1d814fa974c3ef277e2d285ae7dff8336747f644232bbb830b2a0d30825",
+          "native::accessibility::linux_tests::ime::native_atspi_ime_cjk_preview_old_candidate_ack_and_commit",
+          "--ignored",
+          "--exact",
+          "--nocapture",
+          "--test-threads=1"
+        ],
+        "exit": 0
+      },
+      "native_atspi_ime_explicit_line_height_preview_ack_and_commit": {
+        "command": [
+          "dbus-run-session",
+          "--",
+          "/home/user/gpui-preserved-test-binaries/4acfd1d814fa974c3ef277e2d285ae7dff8336747f644232bbb830b2a0d30825",
+          "native::accessibility::linux_tests::ime::native_atspi_ime_explicit_line_height_preview_ack_and_commit",
+          "--ignored",
+          "--exact",
+          "--nocapture",
+          "--test-threads=1"
+        ],
+        "exit": 0
+      },
+      "native-overscan": {
+        "command": [
+          "/home/user/gpui-preserved-test-binaries/4acfd1d814fa974c3ef277e2d285ae7dff8336747f644232bbb830b2a0d30825",
+          "native::list_tests::native_library_250k_overscan_wheel_pointer_resize_resume",
+          "--ignored",
+          "--exact",
+          "--nocapture",
+          "--test-threads=1"
+        ],
+        "exit": 0
+      },
+      "native-3": {
+        "command": [
+          "/home/user/gpui-preserved-test-binaries/4acfd1d814fa974c3ef277e2d285ae7dff8336747f644232bbb830b2a0d30825",
+          "--ignored",
+          "--exact",
+          "native::question_tests::native_question_result_and_credit_wake_without_unrelated_input",
+          "--nocapture"
+        ],
+        "exit": 0
+      },
+      "native-4": {
+        "command": [
+          "/home/user/gpui-preserved-test-binaries/4acfd1d814fa974c3ef277e2d285ae7dff8336747f644232bbb830b2a0d30825",
+          "--ignored",
+          "--exact",
+          "native::question_tests::native_future_cancellation_and_result_wake_without_unrelated_input",
+          "--nocapture"
+        ],
+        "exit": 0
+      },
+      "native-list-controlled": {
+        "command": [
+          "/home/user/gpui-preserved-test-binaries/4acfd1d814fa974c3ef277e2d285ae7dff8336747f644232bbb830b2a0d30825",
+          "native::list_tests::native_library_250k_controlled_wheel_pointer_resize_resume",
+          "--ignored",
+          "--exact",
+          "--nocapture",
+          "--test-threads=1"
+        ],
+        "exit": 0
+      }
+    },
+    "bounds/native-checks": {
+      "native-5": {
+        "command": [
+          "/home/user/gpui-preserved-test-binaries/44bfdf22e404210b3d27977157a3da2890c32601b67199c52400409e329079d6",
+          "--ignored",
+          "--exact",
+          "native::tests::native_todo_port_presents_edits_pointer_actions_resize_and_inspection",
+          "--nocapture"
+        ],
+        "exit": 0
+      },
+      "native-list-default": {
+        "command": [
+          "/home/user/gpui-preserved-test-binaries/44bfdf22e404210b3d27977157a3da2890c32601b67199c52400409e329079d6",
+          "native::list_tests::native_library_250k_wheel_pointer_resize_resume",
+          "--ignored",
+          "--exact",
+          "--nocapture",
+          "--test-threads=1"
+        ],
+        "exit": 0
+      },
+      "native-0": {
+        "command": [
+          "/home/user/gpui-preserved-test-binaries/44bfdf22e404210b3d27977157a3da2890c32601b67199c52400409e329079d6",
+          "--ignored",
+          "--exact",
+          "native::remote_tests::native_source_inbox_patches_and_rearms_without_describing_the_owner",
+          "--nocapture"
+        ],
+        "exit": 0
+      },
+      "native-2": {
+        "command": [
+          "/home/user/gpui-preserved-test-binaries/44bfdf22e404210b3d27977157a3da2890c32601b67199c52400409e329079d6",
+          "--ignored",
+          "--exact",
+          "native::remote_tests::native_final_producer_drop_drains_saturated_and_quiescent_status_lanes",
+          "--nocapture"
+        ],
+        "exit": 0
+      },
+      "native-1": {
+        "command": [
+          "/home/user/gpui-preserved-test-binaries/44bfdf22e404210b3d27977157a3da2890c32601b67199c52400409e329079d6",
+          "--ignored",
+          "--exact",
+          "native::remote_tests::native_remote_results_wake_bounded_owner_turns_without_polling",
+          "--nocapture"
+        ],
+        "exit": 0
+      },
+      "native_atspi_ime_cjk_preview_old_candidate_ack_and_commit": {
+        "command": [
+          "dbus-run-session",
+          "--",
+          "/home/user/gpui-preserved-test-binaries/44bfdf22e404210b3d27977157a3da2890c32601b67199c52400409e329079d6",
+          "native::accessibility::linux_tests::ime::native_atspi_ime_cjk_preview_old_candidate_ack_and_commit",
+          "--ignored",
+          "--exact",
+          "--nocapture",
+          "--test-threads=1"
+        ],
+        "exit": 0
+      },
+      "native_atspi_ime_explicit_line_height_preview_ack_and_commit": {
+        "command": [
+          "dbus-run-session",
+          "--",
+          "/home/user/gpui-preserved-test-binaries/44bfdf22e404210b3d27977157a3da2890c32601b67199c52400409e329079d6",
+          "native::accessibility::linux_tests::ime::native_atspi_ime_explicit_line_height_preview_ack_and_commit",
+          "--ignored",
+          "--exact",
+          "--nocapture",
+          "--test-threads=1"
+        ],
+        "exit": 0
+      },
+      "native-overscan": {
+        "command": [
+          "/home/user/gpui-preserved-test-binaries/44bfdf22e404210b3d27977157a3da2890c32601b67199c52400409e329079d6",
+          "native::list_tests::native_library_250k_overscan_wheel_pointer_resize_resume",
+          "--ignored",
+          "--exact",
+          "--nocapture",
+          "--test-threads=1"
+        ],
+        "exit": 0
+      },
+      "native-3": {
+        "command": [
+          "/home/user/gpui-preserved-test-binaries/44bfdf22e404210b3d27977157a3da2890c32601b67199c52400409e329079d6",
+          "--ignored",
+          "--exact",
+          "native::question_tests::native_question_result_and_credit_wake_without_unrelated_input",
+          "--nocapture"
+        ],
+        "exit": 0
+      },
+      "native-4": {
+        "command": [
+          "/home/user/gpui-preserved-test-binaries/44bfdf22e404210b3d27977157a3da2890c32601b67199c52400409e329079d6",
+          "--ignored",
+          "--exact",
+          "native::question_tests::native_future_cancellation_and_result_wake_without_unrelated_input",
+          "--nocapture"
+        ],
+        "exit": 0
+      },
+      "native-list-controlled": {
+        "command": [
+          "/home/user/gpui-preserved-test-binaries/44bfdf22e404210b3d27977157a3da2890c32601b67199c52400409e329079d6",
+          "native::list_tests::native_library_250k_controlled_wheel_pointer_resize_resume",
+          "--ignored",
+          "--exact",
+          "--nocapture",
+          "--test-threads=1"
+        ],
+        "exit": 0
+      }
+    },
+    "candidate/minimal-native-checks": {
+      "native-list-default": {
+        "command": [
+          "/home/user/gpui-preserved-test-binaries/194e4f6f47cde049f33f4c432c8d1b76e87ec662ea3ced22e8e223f03f490666",
+          "native::list_tests::native_library_250k_wheel_pointer_resize_resume",
+          "--ignored",
+          "--exact",
+          "--nocapture",
+          "--test-threads=1"
+        ],
+        "exit": 0
+      },
+      "native-todo": {
+        "command": [
+          "/home/user/gpui-preserved-test-binaries/194e4f6f47cde049f33f4c432c8d1b76e87ec662ea3ced22e8e223f03f490666",
+          "native::tests::native_todo_port_presents_edits_pointer_actions_resize_and_inspection",
+          "--ignored",
+          "--exact",
+          "--nocapture",
+          "--test-threads=1"
+        ],
+        "exit": 0
+      },
+      "native-overscan": {
+        "command": [
+          "/home/user/gpui-preserved-test-binaries/194e4f6f47cde049f33f4c432c8d1b76e87ec662ea3ced22e8e223f03f490666",
+          "native::list_tests::native_library_250k_overscan_wheel_pointer_resize_resume",
+          "--ignored",
+          "--exact",
+          "--nocapture",
+          "--test-threads=1"
+        ],
+        "exit": 0
+      },
+      "native-list-controlled": {
+        "command": [
+          "/home/user/gpui-preserved-test-binaries/194e4f6f47cde049f33f4c432c8d1b76e87ec662ea3ced22e8e223f03f490666",
+          "native::list_tests::native_library_250k_controlled_wheel_pointer_resize_resume",
+          "--ignored",
+          "--exact",
+          "--nocapture",
+          "--test-threads=1"
+        ],
+        "exit": 0
+      }
+    },
+    "candidate/cost-fixture": {
+      "test": {
+        "command": [
+          "cargo",
+          "+nightly-2026-10-23",
+          "-Z",
+          "checksum-freshness",
+          "--config",
+          "build.fingerprint=\"content\"",
+          "test",
+          "--locked",
+          "--offline",
+          "--release",
+          "-p",
+          "gpui",
+          "-p",
+          "gpui_canvas",
+          "--features",
+          "gpui/x11",
+          "--lib",
+          "runtime::damage_header_ledger::runtime_damage_headers",
+          "--",
+          "--exact",
+          "--nocapture"
+        ],
+        "exit": 0
+      },
+      "clippy": {
+        "command": [
+          "cargo",
+          "+nightly-2026-10-23",
+          "-Z",
+          "checksum-freshness",
+          "--config",
+          "build.fingerprint=\"content\"",
+          "clippy",
+          "--locked",
+          "--offline",
+          "--release",
+          "-p",
+          "gpui",
+          "-p",
+          "gpui_canvas",
+          "--features",
+          "gpui/x11",
+          "--all-targets",
+          "--",
+          "-D",
+          "warnings"
+        ],
+        "exit": 0
+      },
+      "gpu-headers": {
+        "command": [
+          "cargo",
+          "+nightly-2026-10-23",
+          "-Z",
+          "checksum-freshness",
+          "--config",
+          "build.fingerprint=\"content\"",
+          "test",
+          "--locked",
+          "--offline",
+          "--release",
+          "-p",
+          "gpui_gpu",
+          "--lib",
+          "renderer::retained::damage_header_ledger::retained_damage_headers",
+          "--",
+          "--exact",
+          "--nocapture"
+        ],
+        "exit": 0
+      },
+      "gpu-clippy": {
+        "command": [
+          "cargo",
+          "+nightly-2026-10-23",
+          "-Z",
+          "checksum-freshness",
+          "--config",
+          "build.fingerprint=\"content\"",
+          "clippy",
+          "--locked",
+          "--offline",
+          "--release",
+          "-p",
+          "gpui_gpu",
+          "--features",
+          "vulkan-tests",
+          "--all-targets",
+          "--",
+          "-D",
+          "warnings"
+        ],
+        "exit": 0
+      }
+    },
+    "control/cost-fixture": {
+      "test": {
+        "command": [
+          "cargo",
+          "+nightly-2026-10-23",
+          "-Z",
+          "checksum-freshness",
+          "--config",
+          "build.fingerprint=\"content\"",
+          "test",
+          "--locked",
+          "--offline",
+          "--release",
+          "-p",
+          "gpui",
+          "-p",
+          "gpui_canvas",
+          "--features",
+          "gpui/x11",
+          "--lib",
+          "runtime::damage_header_ledger::runtime_damage_headers",
+          "--",
+          "--exact",
+          "--nocapture"
+        ],
+        "exit": 0
+      },
+      "clippy": {
+        "command": [
+          "cargo",
+          "+nightly-2026-10-23",
+          "-Z",
+          "checksum-freshness",
+          "--config",
+          "build.fingerprint=\"content\"",
+          "clippy",
+          "--locked",
+          "--offline",
+          "--release",
+          "-p",
+          "gpui",
+          "-p",
+          "gpui_canvas",
+          "--features",
+          "gpui/x11",
+          "--all-targets",
+          "--",
+          "-D",
+          "warnings"
+        ],
+        "exit": 0
+      },
+      "gpu-headers": {
+        "command": [
+          "cargo",
+          "+nightly-2026-10-23",
+          "-Z",
+          "checksum-freshness",
+          "--config",
+          "build.fingerprint=\"content\"",
+          "test",
+          "--locked",
+          "--offline",
+          "--release",
+          "-p",
+          "gpui_gpu",
+          "--lib",
+          "renderer::retained::damage_header_ledger::retained_damage_headers",
+          "--",
+          "--exact",
+          "--nocapture"
+        ],
+        "exit": 0
+      },
+      "gpu-clippy": {
+        "command": [
+          "cargo",
+          "+nightly-2026-10-23",
+          "-Z",
+          "checksum-freshness",
+          "--config",
+          "build.fingerprint=\"content\"",
+          "clippy",
+          "--locked",
+          "--offline",
+          "--release",
+          "-p",
+          "gpui_gpu",
+          "--features",
+          "vulkan-tests",
+          "--all-targets",
+          "--",
+          "-D",
+          "warnings"
+        ],
+        "exit": 0
+      }
+    },
+    "predecessor/cost-fixture": {
+      "test": {
+        "command": [
+          "cargo",
+          "+nightly-2026-10-23",
+          "-Z",
+          "checksum-freshness",
+          "--config",
+          "build.fingerprint=\"content\"",
+          "test",
+          "--locked",
+          "--offline",
+          "--release",
+          "-p",
+          "gpui",
+          "-p",
+          "gpui_canvas",
+          "--features",
+          "gpui/x11",
+          "--lib",
+          "runtime::damage_header_ledger::runtime_damage_headers",
+          "--",
+          "--exact",
+          "--nocapture"
+        ],
+        "exit": 0
+      },
+      "clippy": {
+        "command": [
+          "cargo",
+          "+nightly-2026-10-23",
+          "-Z",
+          "checksum-freshness",
+          "--config",
+          "build.fingerprint=\"content\"",
+          "clippy",
+          "--locked",
+          "--offline",
+          "--release",
+          "-p",
+          "gpui",
+          "-p",
+          "gpui_canvas",
+          "--features",
+          "gpui/x11",
+          "--all-targets",
+          "--",
+          "-D",
+          "warnings"
+        ],
+        "exit": 0
+      },
+      "gpu-headers": {
+        "command": [
+          "cargo",
+          "+nightly-2026-10-23",
+          "-Z",
+          "checksum-freshness",
+          "--config",
+          "build.fingerprint=\"content\"",
+          "test",
+          "--locked",
+          "--offline",
+          "--release",
+          "-p",
+          "gpui_gpu",
+          "--lib",
+          "renderer::retained::damage_header_ledger::retained_damage_headers",
+          "--",
+          "--exact",
+          "--nocapture"
+        ],
+        "exit": 0
+      },
+      "gpu-clippy": {
+        "command": [
+          "cargo",
+          "+nightly-2026-10-23",
+          "-Z",
+          "checksum-freshness",
+          "--config",
+          "build.fingerprint=\"content\"",
+          "clippy",
+          "--locked",
+          "--offline",
+          "--release",
+          "-p",
+          "gpui_gpu",
+          "--features",
+          "vulkan-tests",
+          "--all-targets",
+          "--",
+          "-D",
+          "warnings"
+        ],
+        "exit": 0
+      }
+    },
+    "bounds/cost-fixture": {
+      "test": {
+        "command": [
+          "cargo",
+          "+nightly-2026-10-23",
+          "-Z",
+          "checksum-freshness",
+          "--config",
+          "build.fingerprint=\"content\"",
+          "test",
+          "--locked",
+          "--offline",
+          "--release",
+          "-p",
+          "gpui",
+          "-p",
+          "gpui_canvas",
+          "--features",
+          "gpui/x11",
+          "--lib",
+          "runtime::damage_header_ledger::runtime_damage_headers",
+          "--",
+          "--exact",
+          "--nocapture"
+        ],
+        "exit": 0
+      },
+      "clippy": {
+        "command": [
+          "cargo",
+          "+nightly-2026-10-23",
+          "-Z",
+          "checksum-freshness",
+          "--config",
+          "build.fingerprint=\"content\"",
+          "clippy",
+          "--locked",
+          "--offline",
+          "--release",
+          "-p",
+          "gpui",
+          "-p",
+          "gpui_canvas",
+          "--features",
+          "gpui/x11",
+          "--all-targets",
+          "--",
+          "-D",
+          "warnings"
+        ],
+        "exit": 0
+      },
+      "gpu-headers": {
+        "command": [
+          "cargo",
+          "+nightly-2026-10-23",
+          "-Z",
+          "checksum-freshness",
+          "--config",
+          "build.fingerprint=\"content\"",
+          "test",
+          "--locked",
+          "--offline",
+          "--release",
+          "-p",
+          "gpui_gpu",
+          "--lib",
+          "renderer::retained::damage_header_ledger::retained_damage_headers",
+          "--",
+          "--exact",
+          "--nocapture"
+        ],
+        "exit": 0
+      },
+      "gpu-clippy": {
+        "command": [
+          "cargo",
+          "+nightly-2026-10-23",
+          "-Z",
+          "checksum-freshness",
+          "--config",
+          "build.fingerprint=\"content\"",
+          "clippy",
+          "--locked",
+          "--offline",
+          "--release",
+          "-p",
+          "gpui_gpu",
+          "--features",
+          "vulkan-tests",
+          "--all-targets",
+          "--",
+          "-D",
+          "warnings"
+        ],
+        "exit": 0
+      }
+    },
+    "negative/omit-region": [
+      {
+        "command": [
+          "cargo",
+          "+nightly-2026-10-23",
+          "-Z",
+          "checksum-freshness",
+          "--config",
+          "build.fingerprint=\"content\"",
+          "test",
+          "--locked",
+          "--offline",
+          "--release",
+          "-p",
+          "gpui_gpu",
+          "--features",
+          "vulkan-tests",
+          "--test",
+          "render",
+          "sparse_text_regions_match_full_gpu_and_revoke_after_failure_or_resize",
+          "--",
+          "--exact",
+          "--nocapture",
+          "--test-threads=1"
+        ],
+        "exit": 101
+      }
+    ],
+    "negative/wrong-sequence": [
+      {
+        "command": [
+          "cargo",
+          "+nightly-2026-10-23",
+          "-Z",
+          "checksum-freshness",
+          "--config",
+          "build.fingerprint=\"content\"",
+          "test",
+          "--locked",
+          "--offline",
+          "--release",
+          "-p",
+          "gpui",
+          "--features",
+          "x11",
+          "--lib",
+          "--no-run"
+        ],
+        "exit": 0
+      },
+      {
+        "command": [
+          "/home/user/gpui-preserved-test-binaries/7cc145a5fc15865fc8ba3ba75545ff149f79a2ea2a79e5a562e64fa42b7ece05",
+          "native::tests::native_todo_port_presents_edits_pointer_actions_resize_and_inspection",
+          "--ignored",
+          "--exact",
+          "--nocapture",
+          "--test-threads=1"
+        ],
+        "exit": 101
+      }
+    ]
+  },
+  "limits": "The native cost endpoint directly calls the GpuSurface bridge and waits for GPU completion before ACK. It excludes NativeHost event dispatch, producer transport, active native accessibility-provider projection, WSI and display scanout. The separately qualified native scripts exercise accessibility and interaction semantics; these are not timed by the cost endpoint. No competitor ranking or physical hardware adoption is implied.\n\nThe first cost fixture source c20e1a3d3aa53586fa976031a9add0cbbb594b0b compiled and ran its header probe, but strict Clippy rejected a needless range loop. The immutable failed unit is retained in cost-fixture-first/test-artifacts.json. aed951bc175d7bdf624b293a95d4c05a3401849e changes only the owner test fixture to iter_mut/enumerate/take, identically in all four variants. No production correction or changed cost threshold resulted. All timings will use the corrected identical fixture.\n\nThe four-way matrix runner independently reconstructs the preregistered balanced order and checks its SHA. Correctness and allocation phases use separate processes and their latencies are excluded from all timing acceptance. Every process asserts full GPU output; small-text cases additionally compare canonical CPU pixels to a fresh owner. The runner checks frame ordinal, copy count, explicit retained image bytes, final pixel hash and source epoch across variants. GPU region counters describe conservative submitted area, not cache hit rate or hardware utilization.\n",
+  "qualification_processes": 336,
+  "allocations_processes": 112,
+  "runner": {
+    "qualification_and_allocations_sha256": "de2887be50fe9594e9a6bc2e36522b8c2f53d13f8af9ea61b3433f158f6ed2ba",
+    "timing_sha256": "348abdbe410cacbb209405c8eed71322d801284be564d79d326b58a82f397e59",
+    "change_before_any_timing": "Timing appends one JSONL result per process and writes aggregate JSON only at completion/failure. Avoids repeatedly rewriting the growing 2688-process result set. Source binary, command, workload, order, gates and estimator unchanged."
+  },
+  "free_bytes": 11682308096,
+  "processes": "    PID     ELAPSED %CPU COMMAND\n      1    19:55:31  0.0 systemd\n      2    19:55:31  0.0 kthreadd\n      3    19:55:31  0.0 pool_workqueue_release\n      4    19:55:31  0.0 kworker/R-rcu_g\n      5    19:55:31  0.0 kworker/R-rcu_p\n      6    19:55:31  0.0 kworker/R-slub_\n      7    19:55:31  0.0 kworker/R-netns\n      9    19:55:31  0.0 kworker/0:0H-events_highpri\n     12    19:55:31  0.0 kworker/R-mm_pe\n     13    19:55:31  0.0 rcu_tasks_kthread\n     14    19:55:31  0.0 rcu_tasks_rude_kthread\n     15    19:55:31  0.0 rcu_tasks_trace_kthread\n     16    19:55:31  0.0 ksoftirqd/0\n     17    19:55:31  0.0 rcu_preempt\n     18    19:55:31  0.0 migration/0\n     19    19:55:31  0.0 idle_inject/0\n     20    19:55:31  0.0 cpuhp/0\n     21    19:55:31  0.0 cpuhp/1\n     22    19:55:31  0.0 idle_inject/1\n     23    19:55:31  0.0 migration/1\n     24    19:55:31  0.0 ksoftirqd/1\n     26    19:55:31  0.0 kworker/1:0H-kblockd\n     27    19:55:31  0.0 cpuhp/2\n     28    19:55:31  0.0 idle_inject/2\n     29    19:55:31  0.0 migration/2\n     30    19:55:31  0.0 ksoftirqd/2\n     32    19:55:31  0.0 kworker/2:0H-events_highpri\n     33    19:55:31  0.0 cpuhp/3\n     34    19:55:31  0.0 idle_inject/3\n     35    19:55:31  0.0 migration/3\n     36    19:55:31  0.0 ksoftirqd/3\n     38    19:55:31  0.0 kworker/3:0H-events_highpri\n     39    19:55:31  0.0 cpuhp/4\n     40    19:55:31  0.0 idle_inject/4\n     41    19:55:31  0.0 migration/4\n     42    19:55:31  0.0 ksoftirqd/4\n     44    19:55:31  0.0 kworker/4:0H-events_highpri\n     45    19:55:31  0.0 cpuhp/5\n     46    19:55:31  0.0 idle_inject/5\n     47    19:55:31  0.0 migration/5\n     48    19:55:31  0.0 ksoftirqd/5\n     50    19:55:31  0.0 kworker/5:0H-events_highpri\n     51    19:55:31  0.0 cpuhp/6\n     52    19:55:31  0.0 idle_inject/6\n     53    19:55:31  0.0 migration/6\n     54    19:55:31  0.0 ksoftirqd/6\n     56    19:55:31  0.0 kworker/6:0H-events_highpri\n     57    19:55:31  0.0 cpuhp/7\n     58    19:55:31  0.0 idle_inject/7\n     59    19:55:31  0.0 migration/7\n     60    19:55:31  0.0 ksoftirqd/7\n     62    19:55:31  0.0 kworker/7:0H-events_highpri\n     63    19:55:31  0.0 kdevtmpfs\n     64    19:55:31  0.0 kworker/R-inet_\n     65    19:55:31  0.0 kauditd\n     66    19:55:31  0.0 khungtaskd\n     67    19:55:31  0.0 oom_reaper\n     69    19:55:31  0.0 kworker/R-write\n     71    19:55:31  1.2 kcompactd0\n     72    19:55:31  0.0 ksmd\n     73    19:55:31  0.0 khugepaged\n     74    19:55:31  0.0 kworker/R-kinte\n     75    19:55:31  0.0 kworker/R-kbloc\n     76    19:55:31  0.0 kworker/R-blkcg\n     79    19:55:31  0.0 kworker/R-tpm_d\n     80    19:55:31  0.0 kworker/R-ata_s\n     81    19:55:31  0.0 kworker/R-md\n     82    19:55:31  0.0 kworker/R-md_bi\n     83    19:55:31  0.0 kworker/R-edac-\n     84    19:55:31  0.0 kworker/R-devfr\n     85    19:55:31  0.0 watchdogd\n     87    19:55:31  0.0 kworker/R-quota\n     88    19:55:31  0.0 kworker/0:1H-kblockd\n     89    19:55:30  0.7 kswapd0\n     90    19:55:30  0.0 ecryptfs-kthread\n     91    19:55:30  0.0 kworker/R-kthro\n     92    19:55:30  0.0 irq/48-ACPI:Ged\n     93    19:55:30  0.0 kworker/R-acpi_\n     94    19:55:30  0.0 kworker/R-mld\n     95    19:55:30  0.0 kworker/R-ipv6_\n    102    19:55:30  0.0 kworker/R-kstrp\n    106    19:55:30  0.0 kworker/u17:0\n    111    19:55:30  0.0 kworker/R-crypt\n    121    19:55:30  0.0 kworker/R-charg\n    147    19:55:30  0.0 kworker/3:1H-kblockd\n    150    19:55:30  0.0 kworker/5:1H-kblockd\n    152    19:55:30  0.0 kworker/1:1H\n    168    19:55:30  0.0 kworker/4:1H-kblockd\n    169    19:55:30  0.0 kworker/6:1H-kblockd\n    170    19:55:30  0.0 kworker/2:1H-kblockd\n    171    19:55:30  0.0 kworker/7:1H-kblockd\n    196    19:55:30  0.0 hwrng\n    239    19:55:29  0.0 kworker/R-raid5\n    278    19:55:29  0.0 jbd2/vda1-8\n    279    19:55:29  0.0 kworker/R-ext4-\n    352    19:55:29  0.1 systemd-journal\n    388    19:55:28  0.0 kworker/R-kmpat\n    389    19:55:28  0.0 kworker/R-kmpat\n    391    19:55:28  0.0 multipathd\n    438    19:55:28  0.0 systemd-udevd\n    439    19:55:28  0.0 psimon\n    660    19:55:28  0.0 systemd-timesyn\n    809    19:55:27  0.0 systemd-network\n    814    19:55:27  0.0 kworker/R-cfg80\n    910    19:55:24  0.0 accounts-daemon\n    913    19:55:24  0.0 avahi-daemon\n    914    19:55:24  0.0 dbus-daemon\n    918    19:55:24  0.0 gnome-remote-de\n    939    19:55:24  0.0 polkitd\n    944    19:55:24  0.0 power-profiles-\n    970    19:55:24  0.0 switcheroo-cont\n    975    19:55:24  0.0 systemd-logind\n    976    19:55:24  0.0 udisksd\n   1011    19:55:24  0.0 avahi-daemon\n   1053    19:55:24  0.0 rsyslogd\n   1061    19:55:24  0.0 NetworkManager\n   1063    19:55:24  0.0 wpa_supplicant\n   1102    19:55:24  0.0 ModemManager\n   1277    19:55:23  0.0 cupsd\n   1278    19:55:23  0.0 epmd\n   1285    19:55:23  0.1 containerd\n   1291    19:55:23  0.0 cron\n   1293    19:55:23  0.0 atd\n   1298    19:55:23  0.0 cups-browsed\n   1306    19:55:23  0.0 agetty\n   1312    19:55:23  0.0 agetty\n   1352    19:55:23  0.0 sshd\n   1357    19:55:23  0.0 dockerd\n   1436    19:55:22  0.0 systemd\n   1437    19:55:22  0.0 (sd-pam)\n   1448    19:55:22  0.0 pipewire\n   1449    19:55:22  0.0 pipewire\n   1450    19:55:22  0.0 wireplumber\n   1451    19:55:22  0.0 pipewire-pulse\n   1466    19:55:22  0.0 dbus-daemon\n   1536    19:55:22  0.0 rtkit-daemon\n   2156    19:55:21  0.0 upowerd\n   2158    19:55:21  0.0 kworker/R-tls-s\n   2400    19:55:21  0.0 gvfsd\n   2408    19:55:21  0.0 gvfsd-fuse\n   2412    19:55:21  0.0 at-spi-bus-laun\n   2424    19:55:21  0.0 dbus-daemon\n   2612    19:55:20  0.0 gnome-keyring-d\n   3067    19:55:19  0.0 colord\n   3124    19:55:19  0.0 dconf-service\n   3133    19:55:19  0.0 kworker/R-wg-cr\n   3159    19:55:19  0.0 napi/wg0-0\n   3168    19:55:19  0.0 uuidd\n   3274    19:55:18  0.0 obexd\n   3360    19:55:18  0.0 gvfs-udisks2-vo\n   3378    19:55:18  0.0 gvfs-gphoto2-vo\n   3446    19:55:18  0.0 gvfs-afc-volume\n   3503    19:55:18  0.0 gvfs-goa-volume\n   3508    19:55:18  0.0 goa-daemon\n   3517    19:55:18  0.0 goa-identity-se\n   3524    19:55:18  0.0 gvfs-mtp-volume\n   3533    19:55:18  0.0 gvfsd-trash\n   3544    19:55:18  0.0 evolution-sourc\n   3554    19:55:18  0.0 gvfsd-metadata\n   3678    19:55:17  0.0 evolution-calen\n   3692    19:55:17  0.0 evolution-addre\n  12030    19:54:11  0.0 systemd-resolve\n  12947    19:54:09  0.0 pulseaudio\n  13569    19:54:09  0.0 xdg-desktop-por\n  13578    19:54:09  0.0 xdg-document-po\n  13582    19:54:09  0.0 xdg-permission-\n  13590    19:54:09  0.0 fusermount3\n  14575    19:54:06  0.0 socat\n  14894    19:54:06  0.5 ariana-fswatch\n  16450    19:54:03  0.3 ariana-fswatch\n  16878    19:53:57  0.4 ariana-fswatch\n  17295    19:53:37  1.1 ascii-lazyfs\n  18893    19:53:33  2.4 zeron\n  19024    19:53:32  0.0 lightdm\n  19036    19:53:32  0.0 Xorg\n  19234    19:53:31  0.0 lightdm\n  19291    19:53:30  0.0 dbus-run-sessio\n  19301    19:53:30  0.0 cua-driver\n  19316    19:53:30  0.0 at-spi2-registr\n  19344    19:53:30  0.0 sunshine\n  19603    19:53:30  0.0 ibus-daemon\n  19604    19:53:30  0.0 dbus-daemon\n  19621    19:53:30  0.0 ibus-memconf\n  19622    19:53:30  0.0 ibus-ui-gtk3\n  19623    19:53:30  0.0 ibus-extension-\n  19625    19:53:30  0.0 ibus-x11\n  19627    19:53:30  0.0 ibus-portal\n  19635    19:53:30  0.0 ascii-desktop\n  19639    19:53:30  0.0 openbox\n  19641    19:53:30  0.0 dbus-launch\n  19642    19:53:29  0.0 dbus-daemon\n  19654    19:53:29  0.0 at-spi-bus-laun\n  19662    19:53:29  0.0 dbus-daemon\n  19676    19:53:29  0.0 at-spi2-registr\n  19685    19:53:29  0.0 ibus-engine-sim\n 112788    19:33:05  0.0 MainThread\n 112817    19:33:05  0.7 codex\n 112939    19:33:03  0.0 python3\n 112940    19:33:03  0.0 zeron\n 115830    19:30:12  0.0 codex-code-mode\n 264096    18:09:03  0.0 bash\n 264101    18:09:03  0.0 Xvfb\n 264811    18:08:54  0.0 openbox\n 444767    16:27:08  2.7 ascii-agents-se\n 444815    16:27:07  0.0 sudo\n 444816    16:27:07  0.2 ascii-proclog\n 445728    16:27:06  0.1 web-server\n 445967    16:27:05  0.0 psimon\n1919307    03:31:12  0.0 kworker/u16:4-ext4-rsv-conversion\n2142539    01:43:07  0.0 kworker/1:0-wg-crypt-wg0\n2158938    01:36:55  0.0 kworker/u16:1-flush-253:0\n2182033    01:24:55  0.0 kworker/u16:3-events_power_efficient\n2216769    01:08:55  0.0 kworker/u16:8-flush-253:0\n2254794       56:54  0.0 kworker/u16:5-events_power_efficient\n2282675       43:55  0.0 kworker/1:3-events\n2287242       41:25  0.0 kworker/4:1-events\n2350612       20:54  0.0 kworker/7:2-events\n2355748       19:53  0.0 kworker/u16:2-flush-253:0\n2355749       19:53  0.0 kworker/u16:6-flush-253:0\n2358258       19:23  0.0 kworker/2:0-cgroup_free\n2363483       17:53  0.0 kworker/5:0-events\n2368511       16:58  0.0 kworker/6:0-wg-crypt-wg0\n2375616       15:22  0.0 kworker/0:0-events\n2380294       14:23  0.0 kworker/3:1-events\n2382598       13:53  0.0 kworker/4:2-wg-crypt-wg0\n2382916       13:53  0.0 kworker/u16:0-events_power_efficient\n2383200       13:48  0.0 kworker/7:1-cgroup_free\n2385699       12:51  0.0 kworker/u16:9-events_power_efficient\n2387348       12:21  0.0 kworker/2:2-wg-crypt-wg0\n2391041       10:43  0.0 kworker/5:2-wg-crypt-wg0\n2393955       09:29  0.0 kworker/6:2-events\n2395184       08:52  0.0 kworker/3:0-cgroup_free\n2395710       08:46  0.0 kworker/0:2-cgroup_free\n2398472       07:05  0.0 kworker/1:1-wg-crypt-wg0\n2402474       04:43  0.0 kworker/2:1-events\n2402596       04:35  0.0 kworker/4:0-wg-crypt-wg0\n2403365       03:51  0.0 kworker/6:1-wg-crypt-wg0\n2403980       03:43  0.0 kworker/0:1-wg-crypt-wg0\n2405841       03:04  0.0 kworker/5:1-cgroup_free\n2406474       02:56  0.0 kworker/3:2\n2406475       02:56  0.0 kworker/3:3-wg-crypt-wg0\n2407015       02:51  0.0 kworker/u16:7\n2411928       02:06  0.0 kworker/7:0\n2416169       00:52  0.0 bash\n2417067       00:00 69.3 python3\n2417160       00:00  0.0 ps\n",
+  "note": "No source edits, other tests, allocation probes, builds or cache cleanup may overlap timing. Normal private X11 software Vulkan environment; physical GPU and ZGX parity gates remain open."
+}

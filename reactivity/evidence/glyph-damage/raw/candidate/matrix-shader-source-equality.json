@@ -1,0 +1,50 @@
+{
+  "candidate": {
+    "reactivity/crates/gpu/build.rs": "87911cab74ef7b6a8826a67db93784eed37ef401b0c63ad91f06ccd10b33a530",
+    "reactivity/crates/gpu/src/renderer/retained.wgsl": "fd21e0b88972391734e38774ff14136f8f47d48204c87743ba982b7b9184fba1",
+    "reactivity/crates/gpu/src/shader.rs": "433b9760e356cb45144262aabec37d61c1d5eb1e0529b47e4103da7d69b4859c",
+    "reactivity/crates/gpu/src/shader_build.rs": "042f52e9d46f8c9b01ba4564419f00c6ef9777fc8cc6f00e2850de343856cbbc",
+    "reactivity/vendor/wgpu-core/src/indirect_validation/validate_draw.wgsl": "75ed361eb7f3ca4d0c7841f1077ed2e1c5f97e0150734a2d1535874e55465a86",
+    "reactivity/vendor/wgpu-core/src/timestamp_normalization/common.wgsl": "9f65aef0526ff9dde945fae70cef064ad961b0aee4291759ae82974cd2ead0a7",
+    "reactivity/vendor/wgpu-core/src/timestamp_normalization/timestamp_normalization.wgsl": "c0225bf02fdd741542bd20664a6d9195b91936e6f7758c9c4c0ac05b08122e79",
+    "reactivity/vendor/wgpu-hal/examples/halmark/shader.wgsl": "26c256ec36d6f0e9a1647431ca772766bee4382d64eaa718ba7b488dcfb6bcca",
+    "reactivity/vendor/wgpu-hal/examples/ray-traced-triangle/shader.wgsl": "90a66ffa57a642fd806a5b3c96347448158cd562d8951b5afd067bfd0b3d1e98",
+    "reactivity/vendor/wgpu/src/util/blit.wgsl": "8c91d8168c8f72ea4ad7e7facc21072d014a82b3d84de9b0504d0a0fcb3a146b"
+  },
+  "control": {
+    "reactivity/crates/gpu/build.rs": "87911cab74ef7b6a8826a67db93784eed37ef401b0c63ad91f06ccd10b33a530",
+    "reactivity/crates/gpu/src/renderer/retained.wgsl": "fd21e0b88972391734e38774ff14136f8f47d48204c87743ba982b7b9184fba1",
+    "reactivity/crates/gpu/src/shader.rs": "433b9760e356cb45144262aabec37d61c1d5eb1e0529b47e4103da7d69b4859c",
+    "reactivity/crates/gpu/src/shader_build.rs": "042f52e9d46f8c9b01ba4564419f00c6ef9777fc8cc6f00e2850de343856cbbc",
+    "reactivity/vendor/wgpu-core/src/indirect_validation/validate_draw.wgsl": "75ed361eb7f3ca4d0c7841f1077ed2e1c5f97e0150734a2d1535874e55465a86",
+    "reactivity/vendor/wgpu-core/src/timestamp_normalization/common.wgsl": "9f65aef0526ff9dde945fae70cef064ad961b0aee4291759ae82974cd2ead0a7",
+    "reactivity/vendor/wgpu-core/src/timestamp_normalization/timestamp_normalization.wgsl": "c0225bf02fdd741542bd20664a6d9195b91936e6f7758c9c4c0ac05b08122e79",
+    "reactivity/vendor/wgpu-hal/examples/halmark/shader.wgsl": "26c256ec36d6f0e9a1647431ca772766bee4382d64eaa718ba7b488dcfb6bcca",
+    "reactivity/vendor/wgpu-hal/examples/ray-traced-triangle/shader.wgsl": "90a66ffa57a642fd806a5b3c96347448158cd562d8951b5afd067bfd0b3d1e98",
+    "reactivity/vendor/wgpu/src/util/blit.wgsl": "8c91d8168c8f72ea4ad7e7facc21072d014a82b3d84de9b0504d0a0fcb3a146b"
+  },
+  "predecessor": {
+    "reactivity/crates/gpu/build.rs": "87911cab74ef7b6a8826a67db93784eed37ef401b0c63ad91f06ccd10b33a530",
+    "reactivity/crates/gpu/src/renderer/retained.wgsl": "fd21e0b88972391734e38774ff14136f8f47d48204c87743ba982b7b9184fba1",
+    "reactivity/crates/gpu/src/shader.rs": "433b9760e356cb45144262aabec37d61c1d5eb1e0529b47e4103da7d69b4859c",
+    "reactivity/crates/gpu/src/shader_build.rs": "042f52e9d46f8c9b01ba4564419f00c6ef9777fc8cc6f00e2850de343856cbbc",
+    "reactivity/vendor/wgpu-core/src/indirect_validation/validate_draw.wgsl": "75ed361eb7f3ca4d0c7841f1077ed2e1c5f97e0150734a2d1535874e55465a86",
+    "reactivity/vendor/wgpu-core/src/timestamp_normalization/common.wgsl": "9f65aef0526ff9dde945fae70cef064ad961b0aee4291759ae82974cd2ead0a7",
+    "reactivity/vendor/wgpu-core/src/timestamp_normalization/timestamp_normalization.wgsl": "c0225bf02fdd741542bd20664a6d9195b91936e6f7758c9c4c0ac05b08122e79",
+    "reactivity/vendor/wgpu-hal/examples/halmark/shader.wgsl": "26c256ec36d6f0e9a1647431ca772766bee4382d64eaa718ba7b488dcfb6bcca",
+    "reactivity/vendor/wgpu-hal/examples/ray-traced-triangle/shader.wgsl": "90a66ffa57a642fd806a5b3c96347448158cd562d8951b5afd067bfd0b3d1e98",
+    "reactivity/vendor/wgpu/src/util/blit.wgsl": "8c91d8168c8f72ea4ad7e7facc21072d014a82b3d84de9b0504d0a0fcb3a146b"
+  },
+  "bounds": {
+    "reactivity/crates/gpu/build.rs": "87911cab74ef7b6a8826a67db93784eed37ef401b0c63ad91f06ccd10b33a530",
+    "reactivity/crates/gpu/src/renderer/retained.wgsl": "fd21e0b88972391734e38774ff14136f8f47d48204c87743ba982b7b9184fba1",
+    "reactivity/crates/gpu/src/shader.rs": "433b9760e356cb45144262aabec37d61c1d5eb1e0529b47e4103da7d69b4859c",
+    "reactivity/crates/gpu/src/shader_build.rs": "042f52e9d46f8c9b01ba4564419f00c6ef9777fc8cc6f00e2850de343856cbbc",
+    "reactivity/vendor/wgpu-core/src/indirect_validation/validate_draw.wgsl": "75ed361eb7f3ca4d0c7841f1077ed2e1c5f97e0150734a2d1535874e55465a86",
+    "reactivity/vendor/wgpu-core/src/timestamp_normalization/common.wgsl": "9f65aef0526ff9dde945fae70cef064ad961b0aee4291759ae82974cd2ead0a7",
+    "reactivity/vendor/wgpu-core/src/timestamp_normalization/timestamp_normalization.wgsl": "c0225bf02fdd741542bd20664a6d9195b91936e6f7758c9c4c0ac05b08122e79",
+    "reactivity/vendor/wgpu-hal/examples/halmark/shader.wgsl": "26c256ec36d6f0e9a1647431ca772766bee4382d64eaa718ba7b488dcfb6bcca",
+    "reactivity/vendor/wgpu-hal/examples/ray-traced-triangle/shader.wgsl": "90a66ffa57a642fd806a5b3c96347448158cd562d8951b5afd067bfd0b3d1e98",
+    "reactivity/vendor/wgpu/src/util/blit.wgsl": "8c91d8168c8f72ea4ad7e7facc21072d014a82b3d84de9b0504d0a0fcb3a146b"
+  }
+}

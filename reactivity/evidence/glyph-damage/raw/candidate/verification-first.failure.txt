@@ -1,0 +1,1 @@
+Verifier incorrectly treated deleted regenerable .rlib/.rmeta cache receipts as executed ELF artifacts. First failure: completed-library-cleanup.json, sha195199b0c6b43c844c43cf127b9f1fbac01f9954958c73088dd8f58b140f1331. Restrict executable verification to executable receipts; no production, timing, gate or artifact data changes.

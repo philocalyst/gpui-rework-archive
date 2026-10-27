@@ -1,0 +1,56 @@
+   Compiling serde_core v1.0.229
+   Compiling serde v1.0.229
+   Compiling syn v3.0.9
+   Compiling proc-macro2 v1.0.107
+   Compiling quote v1.0.47
+   Compiling zmij v1.0.23
+   Compiling winnow v1.0.4
+   Compiling serde_json v1.0.154
+   Compiling socket2 v0.6.5
+   Compiling zruntime v0.2.0
+   Compiling parking_lot v0.12.5
+   Compiling uuid v1.28.0
+   Compiling accesskit v0.25.1 (/home/user/gpui-glyph-damage-lab/reactivity/vendor/accesskit)
+   Compiling accesskit_consumer v0.39.1 (/home/user/gpui-glyph-damage-lab/reactivity/vendor/accesskit_consumer)
+   Compiling synstructure v0.14.0
+   Compiling zerofrom-derive v0.1.8
+   Compiling yoke-derive v0.8.4
+   Compiling zerovec-derive v0.11.6
+   Compiling zerofrom v0.1.8
+   Compiling yoke v0.8.3
+   Compiling displaydoc v0.2.7
+   Compiling bytemuck_derive v1.12.1
+   Compiling zerotrie v0.2.5
+   Compiling zerovec v0.11.8
+   Compiling serde_derive v1.0.229
+   Compiling bytemuck v1.25.2
+   Compiling font-types v0.12.7
+   Compiling read-fonts v0.41.0
+   Compiling tinystr v0.8.4
+   Compiling icu_locale_core v2.3.0
+   Compiling potential_utf v0.1.6
+   Compiling read-fonts v0.46.0
+   Compiling icu_collections v2.3.0
+   Compiling fearless_simd_macros v0.1.0
+   Compiling icu_provider v2.3.1
+   Compiling icu_properties v2.3.0
+   Compiling icu_locale_fallback v2.3.0
+   Compiling parley_data v0.12.0
+   Compiling icu_segmenter v2.3.0
+   Compiling icu_normalizer v2.3.0
+   Compiling zbus_utils v6.0.0
+   Compiling gpui_reactivity_state v0.1.0 (/home/user/gpui-glyph-damage-lab/reactivity/crates/state)
+   Compiling zbus_macros v6.0.0
+   Compiling zcheapstr v1.1.0
+   Compiling async-trait v0.1.92
+   Compiling serde_repr v0.1.21
+   Compiling fontique v0.12.0
+   Compiling harfrust v0.12.0
+   Compiling zbus v6.0.0
+   Compiling skrifa v0.49.0
+   Compiling parley_engine v0.12.0 (/home/user/gpui-glyph-damage-lab/reactivity/vendor/parley_engine)
+   Compiling parley v0.12.0 (/home/user/gpui-glyph-damage-lab/reactivity/vendor/parley)
+   Compiling gpui_canvas v0.1.0 (/home/user/gpui-glyph-damage-lab/reactivity/crates/canvas)
+   Compiling gpui v0.1.0 (/home/user/gpui-glyph-damage-lab/reactivity/crates/gpui)
+    Finished `release` profile [optimized] target(s) in 24.90s
+     Running tests/local_publication.rs (/home/user/gpui-glyph-damage-target/release/build/gpui/f841f62fd819f558/out/local_publication-f841f62fd819f558)

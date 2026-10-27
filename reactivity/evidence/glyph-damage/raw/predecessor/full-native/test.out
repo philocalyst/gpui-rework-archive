@@ -1,0 +1,1709 @@
+
+running 315 tests
+test component::tests::component_storage_ledger_has_no_owning_model_pointer ... ok
+test element::tests::literal_radius_retains_original_bits_until_typed_admission ... ok
+test element::tests::concrete_branches_opaque_leaves_and_constructor_children_lower ... ok
+test element::tests::method_items_keep_zero_sized_callback_and_receiver_check ... ok
+test element::tests::input_role_and_literal_style_reach_the_same_draft ... ok
+test element::tests::property_method_items_keep_an_empty_capture_and_ordinary_headers ... ok
+test element::tests::size_ledger_counts_inline_route_and_style_costs ... ok
+test element::tests::typed_field_routes_validate_projection_before_exact_admission ... ok
+test element::tests::static_and_erased_literals_match_the_canonical_typed_schema ... ok
+test element::tests::unlowered_handler_payloads_drop_once_in_preorder ... ok
+test identity::tests::target_stamps_are_pure_and_window_qualified ... ok
+test element::tests::window_admission_cannot_be_projected_into_a_component_receiver ... ok
+test native::accessibility::geometry_tests::failed_new_l_and_old_c_ack_never_reinterpret_native_p_geometry ... ok
+test native::accessibility::geometry_tests::native_caret_runs_match_canonical_line_at_wraps_and_hard_separators ... ok
+test native::accessibility::geometry_tests::text_input_and_label_are_leaf_documents_but_button_children_keep_own_carriers ... ok
+test native::accessibility::geometry_tests::native_shape_predicate_matches_canvas_at_circle_ties_and_signed_zero ... ok
+test native::accessibility::geometry_tests::continuous_zero_radius_edge_ties_share_canvas_and_native_arithmetic ... ok
+test native::accessibility::geometry_tests::native_consumer_rounded_clip_hits_match_acknowledged_parts ... ok
+test native::accessibility::linux_tests::checkbox::native_atspi_checkbox_action_state_and_events ... ignored, requires X11 and an isolated session bus initially lacking org.a11y.Bus
+test native::accessibility::linux_tests::clipping::native_atspi_rounded_clip_point_queries_pointer_and_ack ... ignored, requires X11 and an isolated session bus initially lacking org.a11y.Bus
+test native::accessibility::linux_tests::failure::native_atspi_failed_source_keeps_old_p_and_public_action_repairs ... ignored, requires private X11/session with a real AT-SPI Registry and status service
+test native::accessibility::linux_tests::ime::native_atspi_ime_cjk_preview_old_candidate_ack_and_commit ... ignored, requires X11 and isolated session bus with actual AT-SPI registry
+test native::accessibility::linux_tests::ime::native_atspi_ime_explicit_line_height_preview_ack_and_commit ... ignored, requires X11 and isolated session bus with actual AT-SPI registry
+test native::accessibility::linux_tests::native_accessible_profile_without_session_bus_still_presents ... ignored, requires X11 and DBUS_SESSION_BUS_ADDRESS=unix:path=/tmp/gpui-no-session-bus
+test native::accessibility::linux_tests::native_atspi_late_service_owner_replacement_and_destroy ... ignored, requires X11 and an isolated session bus initially lacking org.a11y.Bus
+test native::accessibility::linux_tests::native_atspi_todo_activation_edit_invoke_and_reactivation ... ignored, requires X11 and an isolated session bus with org.a11y.Bus/AT-SPI registry
+test native::accessibility::poll_tests::native_action_poll_stops_on_fatal_continues_after_repair_and_rearms_stale_budget ... ignored, requires real X11; direct ingress schedule, actual Driver WorkReady and native presentation
+test native::accessibility::geometry_tests::nonpainted_unplaced_text_preserves_content_without_inventing_window_geometry ... ok
+test native::accessibility::selection_tests::cold_unqualified_publication_recovers_after_same_byte_empty_frontier_repair ... ok
+test native::accessibility::geometry_tests::wrapped_directional_extents_and_hits_use_same_p_affine_clip_and_units ... ok
+test element::tests::wide_description_preserves_order ... ok
+test native::accessibility::selection_tests::equal_text_field_rebind_survives_failed_prepare_and_older_ack ... ok
+test native::accessibility::selection_tests::empty_static_text_does_not_qualify_another_owner ... ok
+test native::accessibility::selection_tests::failed_newer_edit_and_cold_provider_keep_older_candidate_selection ... ok
+test native::accessibility::selection_tests::long_graphemes_terminal_crlf_and_invalid_foreign_ranges_roundtrip ... ok
+test native::accessibility::selection_tests::keyboard_vertical_selection_projects_the_same_acknowledged_endpoints ... ok
+test native::accessibility::selection_tests::independent_inputs_list_rebind_and_provider_restart_do_not_reuse_authority ... ok
+test native::accessibility::selection_tests::native_text_transport_memory_budget ... ok
+test native::accessibility::selection_tests::native_selection_and_atomic_replacement_use_acknowledged_grapheme_source ... ok
+test native::accessibility::tests::checkbox_native_carrier_sizes ... ok
+test native::accessibility::selection_tests::old_provider_run_endpoints_fail_on_both_sides_of_geometry_publication ... ok
+test native::accessibility::tests::activation_exhaustion_keeps_the_session_and_fails_closed ... ok
+test native::accessibility::selection_tests::unpublished_source_aba_keeps_only_identical_acknowledged_root_authority ... ok
+test native::accessibility::selection_tests::source_aba_and_shared_empty_allocation_cannot_revive_retired_provider_ids ... ok
+test native::accessibility::tests::ime_accesskit_uses_acknowledged_display_and_selection_without_preview_edit_authority ... ok
+test native::accessibility::tests::consumer_validates_topology_names_values_full_geometry_and_live_focus ... ok
+test native::accessibility::tests::native_callbacks_are_inert_bounded_and_activation_bypasses_saturation ... ok
+test native::accessibility::tests::idle_state_and_focus_transport_do_not_allocate ... ok
+test native::accessibility::tests::native_text_boundaries_keep_crlf_together_and_cover_every_utf8_byte ... ok
+test native::accessibility::tests::native_scroll_coordinates_are_physical_displacements_with_reflection_and_dpi ... ok
+test native::accessibility::tests::owner_budget_fifo_old_live_targets_and_revocation ... ok
+test native::accessibility::tests::projection_ledger ... ignored, explicit projection allocation/timing ledger; run alone in release mode
+test native::accessibility::tests::projection_uses_old_p_during_pending_edit_and_failed_preparation ... ok
+test native::accessibility::tests::placeholder_actions_do_not_initialize_or_saturate_transport ... ok
+test native::accessibility::tests::renamed_static_text_preserves_content_and_explicit_none_then_inherits ... ok
+test native::accessibility::selection_tests::input_root_survives_wrap_and_font_changes_but_old_run_positions_retire ... ok
+test native::accessibility::tests::root_and_synthetic_ids_cannot_invoke_real_sites ... ok
+test native::accessibility::tests::scalar_text_run_has_exact_utf8_lengths_and_no_fabricated_selection ... ok
+test native::accessibility::tests::owner_publication_allocates_transport_once_and_retains_it_across_sessions ... ok
+test native::accessibility::tests::semantic_only_change_advances_p_epoch_at_the_same_scene_token ... ok
+test native::accessibility::tests::provider_boundary_qualifies_text_ids_without_rejecting_unchanged_authority ... ok
+test native::accessibility::tests::scroll_consumer_has_frozen_range_full_offscreen_bounds_and_owner_actions ... ok
+test native::accessibility::transitions::checkbox_state_native_click_and_sparse_updates_match_full_acknowledged_tree ... ok
+test native::accessibility::transitions::clipped_logical_index_hint_is_verified_before_sparse_use ... ok
+test native::accessibility::transitions::exact_window_stamp_empty_recovery_and_observer_storage_are_bounded ... ok
+test native::accessibility::tests::library_projects_bounded_frozen_count_positions_and_never_resurrects_ids ... ok
+test native::accessibility::transitions::list_scroll_same_source_epoch_and_reindex_match_full_oracle ... ok
+test native::accessibility::tests::overscan_native_projection_excludes_buffered_rows_and_reuses_returning_ids ... ok
+test native::accessibility::tests::unsupported_foreign_tree_and_utf8_byte_limit ... ok
+test native::accessibility::text::native_input_authority_memory_budget ... ok
+test native::accessibility::transitions::nonleaf_replacements_keep_all_ordered_children_and_geometry ... ok
+test native::accessibility::transitions::pending_metadata_and_failed_newer_prepare_keep_old_p_and_fallback ... ok
+test native::accessibility::transitions::paint_complete_transitions_preserve_pending_full_rows_and_zero_node_deltas ... ok
+test native::accessibility::transitions::observer_enabled_after_full_candidate_never_invents_empty_paint_delta ... ok
+test native::accessibility::transitions::pending_complete_coverage_noop_preserves_exact_consumer_transition ... ok
+test native::accessibility::transitions::same_pool_index_with_different_exact_basis_updates_native_sparse_tree ... ok
+test native::accessibility::transitions::sparse_transition_measurements ... ignored, serialized release timing; writes CSV rows to stdout
+test native::accessibility::transitions::synthetic_shape_changes_and_value_children_match_full ... ok
+test native::accessibility::transitions::selection_and_placement_keep_native_run_arrays_while_wrap_retires_them ... ok
+test native::accessibility::transitions::shape_only_clip_ack_updates_native_frontier_with_unchanged_map_and_bounds ... ok
+test native::accessibility::transitions::shape_only_radius_ack_updates_native_frontier_with_unchanged_map_and_bounds ... ok
+test native::accessibility::transitions::virtual_focus_revocation_and_reappearance_match_full_consumer ... ok
+test native::destination::tests::takes_and_partial_submits_never_erase_a_full_repair_obligation ... ok
+test native::accessibility::transitions::thousand_node_paint_and_one_input_edit_keep_cohort_frontier_bounded ... ok
+test native::destination::tests::unsupported_backends_need_full_submission_on_every_redraw ... ok
+test native::destination_tests::destination_invalidation_controls_actual_x11_uploads_and_failure_retry ... ignored, requires actual X11 with MIT-SHM + RECORD; complete server-pixel oracle
+test native::destination_tests::invalidation_state_adds_no_host_constructor_allocation ... ok
+test native::destination_tests::wire_fallback_still_uploads_full_for_empty_and_partial_scene_damage ... ignored, requires actual X11 with RECORD and MIT-SHM explicitly disabled
+test native::image_tests::native_image_pointer_resize_resume_matches_complete_surface ... ignored, requires real X11; exact CPU submit, pointer event, resize and resume
+test native::ime::ime_native_header_ledger ... ok
+test native::ime_tests::native_ime_preedit_commit_focus_lifecycle_and_acknowledged_pixels ... ignored, requires real X11; actual initial CJK font, IME callback bridge, caret and complete server pixels
+test native::inspector_tests::native_inspector_picks_and_edits_actual_application_without_owner_rerun ... ignored, requires X11 native presentation and server pixel fetch
+test native::list_tests::native_library_250k_controlled_wheel_pointer_resize_resume ... ignored, requires a real X11 display; runs the actual CPU presenter, without a GPU
+test native::list_tests::native_library_250k_overscan_wheel_pointer_resize_resume ... ignored, requires a real X11 display; runs the actual CPU presenter, without a GPU
+test native::list_tests::native_library_250k_wheel_pointer_resize_resume ... ignored, requires a real X11 display; runs the actual CPU presenter, without a GPU
+test native::property_action_tests::native_contained_property_entry_recovers_and_reports_stale_targets ... ignored, requires X11 native presentation and server pixel fetch
+test native::question_tests::native_future_cancellation_and_result_wake_without_unrelated_input ... ignored, requires real X11; deadline is a watchdog, never a completion delivery poll
+test native::question_tests::native_question_result_and_credit_wake_without_unrelated_input ... ignored, requires real X11; deadline is only a watchdog, never a delivery poll
+test native::remote_tests::native_final_producer_drop_drains_saturated_and_quiescent_status_lanes ... ignored, requires real X11; deadline detects failure and never polls delivery
+test native::remote_tests::native_remote_results_wake_bounded_owner_turns_without_polling ... ignored, requires real X11; deadline is a failure watchdog, not a delivery poll
+test native::remote_tests::native_source_inbox_patches_and_rearms_without_describing_the_owner ... ignored, requires real X11; actual wakes and failed presentation repair
+test native::scroll_bench::complete_workload_cost ... ignored, isolated complete-operation cost measurement; explicit software Vulkan and case required
+test native::scroll_tests::native_ordinary_scroll_wheel_reveal_pointer_resize_resume ... ignored, requires real X11; actual wheel, activation, resize/resume and complete server pixel oracle
+test native::style_tests::native_reactive_dimensions_and_color_match_full_server_image ... ignored, requires real X11 pointer events, native acknowledgements and server pixel fetch
+test native::tests::native_todo_port_presents_edits_pointer_actions_resize_and_inspection ... ignored, requires a real X11 display and Vulkan driver; see README
+test native::unicode_tests::native_unicode_keyboard_and_surface_match_complete_cpu_pixels ... ignored, requires a real X11 display; actual software presenter, no GPU initialization
+test native::accessibility::geometry_tests::native_geometry_projection_allocation_ledger ... ok
+test native::upgrade_tests::automatic_blank_stays_cold_across_resize_resume_then_upgrades_after_complex_cpu_frame ... ignored, requires private X11 and Mesa CPU Vulkan for delayed automatic handoff
+test native::upgrade::tests::initialization_cohort_ledger ... ok
+test native::upgrade::tests::production_policy_rejects_cpu_before_renderer_phase_and_cheap_missing_hint ... ok
+test native::tests::packet_gpu_header_ledger ... ok
+test native::upgrade_tests::automatic_target_rejects_before_renderer_and_close_unmaps_a_worker_retained_window ... ignored, requires private X11 and Mesa CPU Vulkan, with no local render-node hint
+test native::workload_port::workload::heavy::tests::geometry_fits_the_window_and_the_series_is_bounded ... ok
+test native::workload_port::workload::heavy::tests::modes_advance_only_their_parts ... ok
+test native::workload_port::workload::tests::bounded_and_deterministic ... ok
+test native::workload_port::workload::tests::visible_range_uses_two_rows_of_overscan_on_each_side ... ok
+test native::workload_port::workload::vlist::tests::modes_move_as_described ... ok
+test native::workload_port::workload::vlist::tests::rows_are_deterministic_and_varied ... ok
+test property::tests::all_typed_selectors_and_the_erased_seam_edit_the_same_style ... ok
+test property::tests::catalog_metadata_is_the_typed_declaration_and_ceilings_are_library_owned ... ok
+test property::tests::contribution_presence_survives_destination_equality_and_auto_is_explicit ... ok
+test property::tests::independent_overrides_survive_base_changes_and_lifecycle_purge ... ok
+test property::tests::invalid_typed_and_erased_edits_leave_all_fields_unchanged ... ok
+test property::tests::rejected_override_changes_neither_existing_bases_nor_any_contribution ... ok
+test property::tests::sparse_overrides_preserve_explicit_auto_and_reveal_updated_base_on_reset ... ok
+test reader::future::tests::future_wrapper_has_no_result_slot_or_poll_allocation ... ok
+test reader::inputs::tests::earlier_key_validation_rejects_foreign_equal_and_later_sites ... ok
+test reader::question::tests::a_discovered_revision_change_cannot_leave_the_current_ticket_pending_forever ... ok
+test reader::question::tests::binding_rejection_retires_a_stale_staged_terminal_before_returning_error ... ok
+test reader::question::tests::close_and_natural_drop_release_owner_lease_before_synchronous_task_cancellation ... ok
+test reader::question::tests::exhaustion_stays_terminal_after_counters_reset_rebinding_and_another_fault ... ok
+test reader::question::tests::input_family_owner_record_ledger ... ok
+test reader::question::tests::the_maximum_ticket_is_admissible_then_exhaustion_never_recycles_it ... ok
+test reader::question::tests::version_exhaustion_faults_instead_of_leaving_unstartable_pending_work ... ok
+test reader::tests::absent_plan_and_static_producer_projection_allocation_ledger ... ok
+test reader::tests::cancellation_borrows_the_existing_lease_without_allocating_or_cloning_it ... ok
+test reader::tests::close_and_notify_do_not_hold_the_lock_during_user_drop_or_panic ... ok
+test reader::tests::closed_completion_returns_the_same_owned_result ... ok
+test reader::tests::closing_admission_precedes_a_panicking_context_cleanup ... ok
+test reader::tests::input_family_storage_and_allocation_ledger ... ok
+test reader::tests::notification_panic_keeps_the_published_response_and_linear_terminal ... ok
+test reader::tests::response_roles_preserve_pointer_niches_without_an_active_flag ... ok
+test remote::ledger::cold_and_first_lock_transport_allocation_ledger ... ok
+test element::tests::adversarial_depth_drop_and_lowering_fit_a_small_stack ... ok
+test remote::ledger::requested_lane_storage_is_explicit_and_unused_windows_remain_one_pointer ... ok
+test remote::tests::a_checked_producer_overflow_unwinds_without_losing_the_queue ... ok
+test remote::tests::native_status_builder_rejects_zero_capacity_and_an_already_closed_inbox ... ok
+test runtime::accessibility::tests::input_authority_barrier_survives_failure_old_ack_and_same_source_rebind ... ok
+test remote::tests::preallocated_frozen_prefix_has_no_per_message_allocations ... ok
+test runtime::background::tests::gradient_background_typed_reflection_owner_validation_and_replacement_are_coherent ... ok
+test runtime::background::tests::gradient_description_and_paint_edit_allocation_audit ... ok
+test runtime::background::tests::gradient_scene_predecessor_survives_failed_newer_source_stale_ack_loss_and_remove ... ok
+test runtime::background::tests::mounted_gradient_inspector_is_typed_read_only_and_exposes_author_stops ... ok
+test native::workload_port::port_tests::wheel_and_programmatic_scroll_feed_next_ui_tick_and_keep_keys ... ok
+test runtime::background::tests::shared_resource_overrides_follow_surviving_owners_with_one_resource ... ok
+test runtime::background::tests::solid_and_gradient_overrides_share_presence_and_prune_only_displaced_resources ... ok
+test runtime::basis_layout_probe::inline_basis_proposal_uses_existing_row_padding ... ok
+test native::accessibility::transitions::missed_epochs_topology_cap_deactivation_and_resize_are_full ... ok
+test runtime::basis_layout_probe::proposal_basis_headers_and_owner_allocations ... ok
+test runtime::basis_lifecycle_tests::custom_candidate_survives_failed_default_lowering_without_a_custom_p_owner ... ok
+test runtime::basis_lifecycle_tests::typed_paint_keep_preserves_custom_basis_and_radius_storage ... ok
+test runtime::basis_lifecycle_tests::candidate_scale_failed_lowering_and_empty_ack_keep_geometry_epoch_coherent ... ok
+test runtime::basis_lifecycle_tests::unavailable_parent_map_does_not_reject_a_finite_admitted_child ... ok
+test runtime::damage_header_ledger::runtime_damage_headers ... ok
+test runtime::delivery::tests::epoch_exhaustion_retires_delivery_without_consuming_or_retaining_the_remaining_queue ... ok
+test runtime::delivery::tests::mount_preparation_and_description_faults_close_lanes_before_the_model ... ok
+test runtime::editing::tests::all_presented_inputs_retain_stable_geometry_and_share_one_cold_editor ... ok
+test runtime::editing::tests::exhausted_epoch_rejects_focus_publication_without_changing_logical_focus ... ok
+test runtime::frontier::tests::branches_cross_inline_storage_then_reuse_deep_sibling_entries ... ok
+test runtime::frontier::tests::shallow_branches_and_wide_leaves_allocate_no_frontier_storage ... ok
+test runtime::basis_layout_probe::basis_ordinary_window_allocation_cohorts ... ok
+test runtime::geometry::basis_tests::finite_diagonals_are_inline_but_signed_off_diagonal_zeros_are_pooled ... ok
+test runtime::geometry::basis_tests::mixed_stream_keeps_full_radius_identity_and_empty_candidate_clears_p ... ok
+test runtime::geometry::basis_tests::exact_admitted_maps_and_zero_origin_extent_survive_factorization ... ok
+test runtime::geometry::basis_tests::parent_reuse_requires_every_basis_bit_and_keys_are_sheet_local ... ok
+test runtime::geometry::clip_layout_tests::clipping_headers_and_cold_builder_costs_are_explicit ... ok
+test runtime::geometry::tests::cold_geometry_storage_is_absent_from_plain_owners_and_reclaimed_after_removal ... ok
+test runtime::geometry::virtual_basis_tests::omitted_virtual_geometry_has_no_basis_key_and_radius_capacity_is_charged ... ok
+test runtime::handlers::tests::replacement_reuses_only_the_cold_owner_and_releases_empty_capacity ... ok
+test runtime::handlers::tests::retained_header_and_capacity_ledger ... ok
+test runtime::editing::tests::shared_owner_drops_revoked_logical_lease_but_keeps_old_p_until_repair_ack ... ok
+test runtime::hit_tests::compacted_list_parents_and_scroll_keep_exact_routing ... ok
+test runtime::geometry::tests::sparse_frozen_radii_include_only_admitted_list_sites_without_history ... ok
+test runtime::hit_tests::packed_parent_and_saturated_runs_have_independent_exact_domains ... ok
+test runtime::identity_index::tests::a_large_replaced_child_run_retains_only_two_mappings ... ok
+test runtime::identity_index::tests::chunk_permutations_and_holes_match_the_previous_map ... ok
+test runtime::identity_index::tests::dense_reordering_does_not_allocate_an_unprofitable_run_table ... ok
+test runtime::identity_index::tests::empty_and_full_width_contiguous_ranges_allocate_nothing ... ok
+test runtime::identity_index::tests::duplicate_ids_are_an_internal_admission_error - should panic ... ok
+test runtime::identity_index::tests::gaps_and_permutations_match_the_previous_map_exactly ... ok
+test runtime::identity_index::tests::header_and_exact_fallback_entry_layouts ... ok
+test runtime::identity_index::tests::live_storage_uses_no_range_heap_or_spare_fallback_capacity ... ok
+test runtime::identity_index::tests::overlapping_runs_reject_duplicate_identity_admission - should panic ... ok
+test runtime::identity_index::tests::whole_replacement_releases_fallback_and_does_not_revive_ids ... ok
+test runtime::identity_index::tests::sparse_edits_and_moved_subtrees_use_exact_affine_runs ... ok
+test runtime::image::tests::exact_image_cohort_leases_survive_failed_newer_candidate_loss_and_removal ... ok
+test runtime::image::tests::image_only_owner_does_not_initialize_text_services ... ok
+test runtime::ime::tests::ime_cold_ownership_reuses_immutable_display_and_releases_after_final_ack ... ok
+test runtime::ime::tests::initial_equal_preedit_and_clear_reuse_the_exact_source_lease ... ok
+test runtime::ime::tests::ascii_restart_preserves_both_unicode_seams_and_full_scan_geometry ... ok
+test runtime::input::focus_release_tests::failed_focus_preparation_and_epoch_exhaustion_leave_no_pressed_authority ... ok
+test runtime::input::focus_release_tests::inspector_proof_uses_candidate_shapes_clips_sizes_and_required_columns ... ok
+test runtime::background::tests::combined_budget_deduplicates_shared_declarations_and_overrides_before_mutation ... ok
+test runtime::inspector::tests::every_typed_caption_matches_its_constructed_panel_slot ... ok
+test runtime::input::focus_release_tests::private_press_proof_uses_the_existing_session_header ... ok
+test runtime::inspector::tests::outward_bounds_preserve_strict_picking_but_do_not_admit_pending_focus_outside_window ... ok
+test native::workload_port::port_tests::owner_modes_keep_reference_rows_offsets_and_text ... ok
+test runtime::inspector::tests::picking_skip_matches_old_loop_for_compacted_p_and_c_with_outside_points ... ok
+test runtime::inspector::tests::plain_window_has_no_tool_allocation_and_inspector_uses_only_cold_storage ... ok
+test runtime::links::tests::independent_indices_cover_every_admitted_value_and_do_not_alias ... ok
+test runtime::links::tests::out_of_domain_indices_are_rejected_before_encoding ... ok
+test runtime::list::controlled_epoch_tests::exhausted_distant_key_preserves_current_cohort_without_description ... ok
+test runtime::mapped_qualification::late_invalid_transform_cannot_mutate_earlier_paint_sinks_or_masked_bases ... ok
+test runtime::mapped_qualification::mapped_layout_and_cold_owner_bill_and_zero_allocation_warm_patch ... ok
+test runtime::mapped_qualification::mixed_mapped_and_direct_colors_do_not_accumulate_unique_historical_values ... ok
+test runtime::ime::tests::one_pass_preview_geometry_matches_exact_full_scan_at_all_raw_byte_positions ... ok
+test runtime::metadata::destination_tests::closed_destinations_round_trip_without_truncating_or_mixing_node_groups ... ok
+test runtime::ordinary_background_allocation_audit::ordinary_background_allocation_first_warm_equal_clear ... ok
+test runtime::paint::tests::cold_storage_and_warm_edits_have_explicit_allocation_costs ... ok
+test runtime::parent_tests::compact_parent_covers_the_admitted_index_domain ... ok
+test runtime::parent_tests::checkbox_state_preserves_carrier_layouts ... ok
+test runtime::parent_tests::content_preserves_all_image_resources_and_both_sampling_modes ... ok
+test runtime::parent_tests::content_rejects_the_first_unadmitted_text_index - should panic ... ok
+test runtime::published::tests::emission_rank_matches_dense_mapping_and_final_identity_checks ... ok
+test runtime::query::geometry_layout_tests::basis_borrowed_geometry_context_layout_is_explicit ... ok
+test runtime::query::tests::focus_hint_requires_acknowledged_identity_membership ... ok
+test runtime::scroll::tests::frozen_viewport_index_cannot_alias_a_different_p_node ... ok
+test runtime::scroll::tests::viewport_storage_and_allocation_ledger ... ignored, explicit cold and warm whole-operation allocation ledger
+test runtime::scroll::tests::wheel_plan_is_repeatable_without_allocation ... ok
+test runtime::semantic_storage_ledger::dense_annotation_capacity_evidence ... ignored, manual dense storage evidence; includes 30,003 layout nodes
+test runtime::semantic_storage_ledger::shared_ports_retain_one_payload_and_do_not_create_text_service ... ok
+test runtime::semantic_storage_ledger::sparse_metadata_storage_and_cold_allocation_ledger ... ok
+test runtime::parent_tests::content_preserves_every_kind_and_admitted_text_index ... ok
+test runtime::parent_tests::nonzero_identity_keeps_old_node_migration_in_place ... ok
+test runtime::sparse_text::tests::direct_text_prepares_a_sparse_candidate_and_defers_p_mutation ... ok
+test runtime::siblings::tests::scratch_is_two_bounded_arrays_and_empty_allocates_nothing ... ok
+test runtime::style_ledger::inspector_dense_lane_is_reclaimed_after_inherit_and_redescription ... ok
+test runtime::style_ledger::real_application_and_adversarial_distribution ... ignored, explicit retained style/map distribution; no timing claim
+test runtime::style_ledger::retained_style_cost ... ignored, explicit paired release fixture; coordinate a quiet CPU window
+test runtime::style_ledger::retained_style_owner_memory ... ignored, explicit whole-owner allocation and peak ledger, including layout/canvas
+test native::workload_port::port_tests::keyed_list_matches_frozen_positional_pixels_and_reference_range ... ok
+test runtime::style_port_tests::fresh_cold_binding_owner_ledger ... ok
+test runtime::style_port_tests::invalid_shared_scalar_cannot_patch_text_style_or_masked_base_in_either_order ... ok
+test runtime::style_port_tests::ordinary_headers_charge_optional_line_height ... ok
+test runtime::styles::colours::tests::default_authored_spaces_and_negative_zero_do_not_collapse ... ok
+test native::workload_port::port_tests::exact_stream_ingress_keeps_ui_work_and_matches_full_publication ... ok
+test runtime::styles::colours::tests::equal_fields_are_distinct_and_masked_bases_follow_their_source ... ok
+test runtime::styles::colours::tests::existing_fanouts_freeze_one_sparse_port_allocation_and_both_fields ... ok
+test runtime::styles::colours::tests::source_update_has_one_owned_write_and_no_allocation ... ok
+test runtime::styles::colours::tests::sparse_port_storage_compares_exact_old_map_and_paired_payloads ... ok
+test runtime::styles::tests::exact_comparison_covers_every_style_field ... ok
+test runtime::styles::tests::inspector_edits_densify_once_and_do_not_mutate_shared_peers ... ok
+test runtime::styles::tests::late_palette_overflow_and_late_nondefault_prefix_preserve_all_values ... ok
+test runtime::styles::tests::ordinary_property_reads_borrow_the_actual_style_once ... ok
+test runtime::styles::tests::rebuilt_lanes_keep_no_historical_style_palette ... ok
+test runtime::styles::tests::shared_values_preserve_author_channels_profiles_and_signed_zero ... ok
+test runtime::styles::tests::storage_modes_and_overflow_preserve_every_admitted_style ... ok
+test runtime::styles::tests::style_lane_allocation_ledger ... ok
+test runtime::tests::an_unchanged_borrowed_string_keeps_its_retained_allocation ... ok
+test runtime::tests::first_known_width_measurement_fills_only_a_vacant_layout_slot ... ok
+test runtime::tests::headless_acknowledgement_defers_pixels_and_diagnostics_follow_edits_and_resize ... ok
+test runtime::tests::measurements_preserve_the_last_successful_canonical_text_geometry ... ok
+test runtime::tests::native_recording_and_scene_acknowledgements_never_allocate_cpu_pixels ... ok
+test runtime::tests::preserved_surface_repairs_coalesced_candidates_and_keeps_failed_edits_out ... ok
+test runtime::tests::rectangle_windows_do_not_initialize_font_services ... ok
+test runtime::tests::software_surface_rendering_keeps_the_native_runtime_free_of_cpu_image_storage ... ok
+test runtime::mapped_qualification::ten_thousand_direct_color_rows_keep_their_shared_lane_with_one_mapped_color ... ok
+test runtime::tests::text_width_cache_preserves_keys_and_replaces_only_after_success ... ok
+test runtime::tests::surface_damage_repairs_aged_buffers_and_falls_back_when_history_expires ... ok
+test runtime::tests::text_lane_moves_one_cache_per_site_and_releases_removed_capacity ... ok
+test semantic::decoration_tests::binding_accumulator_costs_are_cold_and_literal_overwrites_release_it ... ok
+test semantic::decoration_tests::cold_headers_and_alternating_builders_have_one_nonrecursive_decoration ... ok
+test semantic::decoration_tests::mapped_33_description_bill_preserves_literal_and_direct_floors ... ok
+test semantic::decoration_tests::mapped_builders_normalize_one_wrapper_and_release_overwritten_recipes ... ok
+test shared_text::tests::direct_join_allocates_only_final_lease_and_empty_is_static ... ok
+test shared_text::tests::direct_join_initializes_exact_unicode_fragments_and_checks_length_overflow ... ok
+test shared_text::tests::exact_allocation_requests_include_header_growth_and_static_empty ... ok
+test shared_text::tests::one_word_utf8_lease_preserves_owned_unicode_and_thread_transfer ... ok
+test source::component_tests::component_schemas_reject_duplicate_names_ids_and_cross_scope_source_aliases ... ok
+test source::component_tests::namespace_exhaustion_is_checked_before_a_component_is_registered ... ok
+test source::component_tests::resolved_component_ids_are_rejected_as_local_source_declarations ... ok
+test source::component_tests::scoped_scan_and_revision_preserve_local_ids_without_namespace_collision ... ok
+test source::component_tests::the_last_component_namespace_routes_edits_before_exhaustion ... ok
+test runtime::tests::the_last_text_service_is_released_after_a_text_free_sheet_commits ... ok
+test source::offset_tests::closed_offset_writer_validates_type_and_projectors_without_revision_changes ... ok
+test source::tests::a_text_operand_supplies_the_codec_and_wrong_codecs_cannot_edit ... ok
+test source::tests::aliased_fields_are_ambiguous_even_when_keys_differ ... ok
+test source::tests::bound_key_survives_moving_the_entire_model ... ok
+test source::tests::domain_sources_register_resolve_and_edit_without_text_support ... ok
+test source::tests::duplicate_names_and_ids_are_rejected ... ok
+test source::tests::every_supported_scalar_formats_and_floats_validate ... ok
+test source::tests::exact_action_edits_only_its_value_and_requires_registered_projection ... ok
+test source::tests::field_ids_preserve_the_full_local_domain_and_pair_order ... ok
+test source::tests::mismatched_read_write_paths_fail_before_a_value_mutates ... ok
+test source::tests::owner_dependency_is_the_default_and_direct_ports_are_explicit ... ok
+test source::tests::parse_failure_returns_payload_and_preserves_value_and_revision ... ok
+test source::tests::replacement_revision_equality_requires_owner_boundary_value_comparison ... ok
+test source::tests::same_typed_fields_bind_by_projection_not_equal_value ... ok
+test source::tests::scan_reports_all_registered_field_revisions ... ok
+test source::tests::string_edits_transfer_the_owned_input_allocation ... ok
+test source::tests::unchanged_borrowed_strings_are_zero_copy ... ok
+test source::tests::unknown_key_returns_unchanged_payload ... ok
+test style::recipe_tests::dynamic_recipe_stores_only_thin_references_and_lowers_without_recipe_allocation ... ok
+test style::recipe_tests::stable_const_recipes_store_raw_values_with_the_original_literal_floor ... ok
+test style_port::admission_tests::wide_numeric_admission_preserves_range_sign_and_canonical_property_errors ... ok
+test source::tests::binding_and_scanning_read_each_field_once_exact_edits_read_only_the_target ... ok
+test style_port::tests::numeric_text_and_style_install_orders_share_both_capabilities ... ok
+test style_port::tests::style_only_descriptor_checks_type_and_never_fabricates_text ... ok
+test runtime::styles::colours::admission_tests::more_than_canvas_bank_limit_distinct_source_ports_can_emit_no_commands ... ok
+test style_port::tests::all_length_primitives_and_borrowed_literals_keep_into_length_conversion ... ok
+test runtime::siblings::tests::flat_children_match_the_previous_identity_ordinal_kind_maps ... ok
+test runtime::text_geometry::tests::acknowledged_geometry_owner_epoch_and_allocation_ledger ... ok
+test runtime::sparse_text::tests::representative_workload_local_publication_admission ... ok
+test runtime::hit_tests::compressed_hits_match_exhaustive_routing_across_publication_and_failure ... ok
+test native::accessibility::transitions::hundred_thousand_p_one_leaf_field_and_inspector_match_full_consumer ... ok
+
+test result: ok. 278 passed; 0 failed; 37 ignored; 0 measured; 0 filtered out; finished in 0.64s
+
+
+running 6 tests
+test output_color_configuration_reaches_the_real_pixel_surface ... ok
+test unkeyed_child_run_changes_revoke_targets_instead_of_retargeting_them ... ok
+test ordinary_rust_branches_react_with_the_default_source_registration ... ok
+test restoration_preserves_source_values_and_remints_dispatch_authority ... ok
+test presentation_failure_preserves_source_edits_and_the_previous_complete_image ... ok
+test typed_actions_use_real_input_and_pixels_without_redescribing_the_owner ... ok
+
+test result: ok. 6 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 0.00s
+
+
+running 3 tests
+test reactive_hdr_colors_use_the_ordinary_application_and_property_interface ... ok
+test callback_panics_quarantine_the_owner_and_explicit_close_releases_it_once ... ok
+test typed_windows_use_exclusive_production_owners_and_the_same_input_barrier ... ok
+
+test result: ok. 3 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 0.00s
+
+
+running 9 tests
+test a_literal_checkbox_and_method_route_add_no_constructor_allocation ... ok
+test checkbox_does_not_admit_an_arbitrary_child_tree - should panic ... ok
+test pointer_space_enter_and_semantic_activation_share_one_controlled_route ... ok
+test failed_logical_description_keeps_old_checked_p_but_retires_authority ... ok
+test checked_state_waits_for_ack_and_preserves_target_focus_and_route_across_cycles ... ok
+test repeated_component_controls_keep_their_typed_receivers_and_focus ... ok
+test coherent_checked_candidate_survives_newer_failed_preparation ... ok
+test handlerless_state_and_default_or_explicit_names_share_the_ordinary_query_schema ... ok
+test role_replacement_removal_and_foreign_targets_never_gain_checkbox_authority ... ok
+
+test result: ok. 9 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 0.00s
+
+
+running 3 tests
+test nested_child_families_keep_their_public_preorder ... ok
+test known_child_counts_need_one_exact_declaration_allocation ... ok
+test declaration_allocation_census ... ok
+
+test result: ok. 3 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 0.00s
+
+
+running 6 tests
+test mapped_flag_coalesces_without_describing_and_p_changes_only_on_ack ... ok
+test typed_clipping_overrides_observe_p_and_eligible_c_after_new_logical_failure ... ok
+test scrolling_beneath_rounded_clip_admits_new_glyphs_and_updates_hits_on_ack ... ok
+test declarative_clip_preserves_builder_order_paint_and_acknowledged_hit_geometry ... ok
+test clipped_gradient_text_candidates_keep_their_resource_and_hit_authority_after_failure ... ok
+test nested_clip_depth_failure_keeps_prior_acknowledged_and_eligible_scenes ... ok
+
+test result: ok. 6 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 0.00s
+
+
+running 1 test
+test source_and_typed_inspector_keep_tag_bits_and_rejected_edits_atomic ... ok
+
+test result: ok. 1 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 0.00s
+
+
+running 12 tests
+test default_registration_refreshes_parent_snapshots_even_when_the_child_field_is_direct ... ok
+test owner_changes_remint_unkeyed_and_keyed_descendants_and_recover_after_rejection ... ok
+test changing_the_inner_owner_of_a_shared_visual_root_revokes_both_subtrees ... ok
+test nested_component_roots_qualify_reused_ids_and_compose_typed_route_authority ... ok
+test identical_component_types_dispatch_methods_actions_and_editable_ports_to_their_own_state ... ok
+test read_only_boundaries_also_check_the_registered_projector_not_only_the_id ... ok
+test panicking_component_projectors_follow_the_owner_quarantine_boundary ... ok
+test changing_component_owners_at_equal_ordinals_revokes_old_targets ... ok
+test an_action_with_a_bad_component_writer_is_checked_before_mutation_or_epoch_admission ... ok
+test registration_checks_exclusive_projection_before_describing_the_owner ... ok
+test moving_and_restoring_models_preserves_state_and_remints_target_authority ... ok
+test visual_parentage_does_not_infer_model_ownership_or_exclusive_access ... ok
+
+test result: ok. 12 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 0.00s
+
+
+running 6 tests
+test changing_density_at_equal_size_requires_ack_without_rerunning_view_or_changing_targets ... ok
+test invalid_density_is_rejected_before_requested_geometry_or_authority_changes ... ok
+test layout_units_transform_once_into_matching_physical_pixels_and_hits ... ok
+test failed_physical_font_admission_keeps_the_old_sheet_and_recovers_at_old_density ... ok
+test physical_viewport_constraints_are_divided_by_density_before_text_wrapping ... ok
+test runtime_uses_physical_font_masks_while_layout_and_shaping_stay_logical ... ok
+
+test result: ok. 6 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 0.00s
+
+
+running 1 test
+test public_local_id_extremes_route_independent_input_and_direct_updates ... ok
+
+test result: ok. 1 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 0.00s
+
+
+running 10 tests
+test partial_recipes_preserve_previous_declared_fields ... ok
+test oversized_row_item_and_column_wrapping_preserve_gap_and_order ... ok
+test shared_style_discovery_keeps_distinct_alignment_destinations ... ok
+test pending_layout_keeps_acknowledged_geometry_and_blocks_coordinate_actions ... ok
+test baseline_alignment_uses_shaped_text_baselines_and_stretch_respects_auto_size ... ok
+test explicit_default_contributions_survive_changed_component_recipes ... ok
+test wrapping_reflows_at_resize_and_density_changes_without_replacing_targets ... ok
+test both_axes_and_every_distribution_use_the_same_recipe ... ok
+test wrapping_overrides_and_unset_reveal_changed_declarations ... ok
+test aligned_and_distributed_children_share_layout_hits_and_pixels ... ok
+
+test result: ok. 10 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 0.00s
+
+
+running 9 tests
+test logical_description_failure_revokes_focus_and_recovery_does_not_revive_the_old_target ... ok
+test keyboard_checked_route_rejection_keeps_owner_and_focus_without_advancing_source ... ok
+test focus_revokes_on_removal_ineligibility_fault_and_close ... ok
+test click_focus_uses_geometry_while_explicit_focus_and_activation_are_position_free ... ok
+test focus_navigation_has_no_allocations_or_render_work ... ok
+test reusable_components_share_keyboard_barriers_and_keep_independent_state ... ok
+test tab_waits_for_acknowledged_sheet_and_position_free_editing_repairs_failed_text ... ok
+test focus_changes_are_idle_and_invalid_targets_do_not_replace_focus ... ok
+test todos_keyboard_navigation_edits_unicode_and_activates_real_actions ... ok
+
+test result: ok. 9 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 0.00s
+
+
+running 4 tests
+test layout_depth_128_is_admitted_and_129_is_rejected_without_losing_candidate ... ok
+test repeated_maximum_depth_branches_preserve_sibling_identities_on_redescription ... ok
+test sibling_unwind_nested_viewports_and_late_failure_preserve_acknowledgement ... ok
+test allocation_and_exact_public_sheet_corpus ... ok
+
+test result: ok. 4 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 0.15s
+
+
+running 5 tests
+test a_reconciliation_panic_drops_new_captures_before_remaining_old_captures ... ok
+test sparse_routes_survive_description_growth_removal_and_replacement ... ok
+test ordinary_application_allocation_census ... ok
+test each_target_calls_its_own_capture_after_sparse_slots_move ... ok
+test public_allocation_census ... ok
+
+test result: ok. 5 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 0.03s
+
+
+running 1 test
+test checked_description_failure_permanently_retires_pre_failure_target_stamps ... ok
+
+test result: ok. 1 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 0.00s
+
+
+running 2 tests
+test a_scrolled_image_enters_the_visible_clip_at_its_single_placement ... ok
+test positioned_padded_images_match_independent_canvas_under_parent_clips ... ok
+
+test result: ok. 2 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 0.00s
+
+
+running 3 tests
+test one_shared_resource_is_leased_for_many_public_image_nodes ... ok
+test image_measurement_preserves_aspect_when_flex_constrains_only_one_axis ... ok
+test borrowed_image_port_matches_canvas_and_survives_resource_and_filter_changes ... ok
+
+test result: ok. 3 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 0.00s
+
+
+running 18 tests
+test commit_without_preedit_and_ordinary_keyboard_both_use_canonical_input ... ok
+test equal_initial_preedit_clear_and_commit_keep_original_replacement ... ok
+test ime_cursor_area_tracks_acknowledged_physical_transform_clip_and_dpi ... ok
+test external_equal_edit_rebind_and_focus_turnover_revoke_old_stream ... ok
+test cjk_preedit_replaces_original_selection_then_commits_different_text_once ... ok
+test cleared_preedit_noop_key_publishes_cancel_while_control_text_stays_ignored ... ok
+test cleared_preedit_resumes_keys_at_original_replacement_and_revokes_late_commit ... ok
+test failed_preedit_restores_original_source_selection_and_releases_stream ... ok
+test initial_font_and_same_selection_cancel_preserve_source_and_revoke_late_commit ... ok
+test pointer_preview_suffix_resolves_back_to_source_before_cancel ... ok
+test own_commit_rebind_or_removal_finishes_the_valid_edit_and_revokes_stream ... ok
+test interior_combining_and_zwj_byte_intent_uses_legal_geometry_and_invalid_utf8_revokes ... ok
+test old_candidate_ack_after_failed_new_source_retains_preview_bytes_mark_and_geometry ... ok
+test unsupported_preview_and_foreign_session_fail_closed_without_source_edits ... ok
+test unshapable_commit_keeps_canonical_source_write_and_old_p_without_live_stream ... ok
+test long_preedit_capacity_does_not_escape_into_canonical_committed_source ... ok
+test public_preedit_allocation_and_old_candidate_lifetime_workload ... ok
+test tiny_preedit_on_large_source_preserves_raw_seam_cursor_and_original_replacement ... ok
+
+test result: ok. 18 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 0.06s
+
+
+running 2 tests
+test a_failed_unicode_visual_candidate_cannot_rewrite_old_names_and_value ... ok
+test exact_sources_share_promotions_through_empty_short_long_and_unicode_pending_frames ... ok
+
+test result: ok. 2 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 0.00s
+
+
+running 9 tests
+test logical_capacity_bounds_zst_values_and_zero_capacity ... ok
+test all_lane_producers_are_revoked_before_a_payload_drop_can_unwind ... ok
+test mixed_question_chain_is_cancelled_before_retired_inbox_payload_unwinds ... ok
+test shared_transport_does_not_require_payload_sync ... ok
+test receiver_drop_releases_the_lock_before_payload_destructors_reenter ... ok
+test abandoned_inbox_revokes_before_a_reentrant_panicking_payload_drop ... ok
+test payload_drop_unwind_after_callback_fault_keeps_the_owner_quarantined ... ok
+test simultaneous_final_two_producers_publish_one_bound_terminal ... ok
+test concurrent_clone_drop_and_prebind_fifo_end_with_one_terminal ... ok
+
+test result: ok. 9 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 0.00s
+
+
+running 15 tests
+test inspector_controls_without_a_selection_are_inert ... ok
+test idle_inspector_refreshes_allocate_nothing_with_or_without_selection ... ok
+test inspector_controls_preserve_exact_bound_sources_and_reveal_latest_masked_base ... ok
+test inspector_parent_walk_stops_at_the_application_root ... ok
+test invalid_and_foreign_inspector_edits_fail_before_source_admission ... ok
+test paint_and_transform_edits_skip_owner_and_layout_but_publish_real_output ... ok
+test actual_inspector_controls_pick_noninteractive_app_shape_and_edit_real_properties ... ok
+test inspector_geometry_captions_publish_the_same_candidate_and_need_no_followup_frame ... ok
+test basis_inspector_captions_resolve_partial_candidate_pool_and_scale ... ok
+test inspector_selection_rejects_foreign_panel_and_removed_targets_before_admission ... ok
+test typed_inspection_preserves_presence_and_reveals_updated_component_defaults ... ok
+test pending_presentation_consumes_pick_release_and_failed_geometry_keeps_logical_repair ... ok
+test catalog_controls_edit_and_inherit_all_thirteen_picked_live_properties ... ok
+test transform_editor_exposes_each_of_the_six_components ... ok
+test color_editor_preserves_every_author_space_and_rejects_invalid_steps_visibly ... ok
+
+test result: ok. 15 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 0.02s
+
+
+running 3 tests
+test unmodified_main_todo_add_remains_one_line ... ok
+test explicit_ulp_adjacent_widths_keep_real_wrapping_constraints ... ok
+test intrinsic_fractional_captions_preserve_single_line_across_padding_and_dpi ... ok
+
+test result: ok. 3 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 0.00s
+
+
+running 4 tests
+test the_same_library_component_routes_to_its_exclusive_parent_field ... ok
+test far_tail_geometry_stays_local_and_borrowed_queries_do_not_allocate ... ok
+test quarter_million_catalogue_uses_bounded_visible_rows_and_real_actions ... ok
+test catalogue_reorder_and_prepend_preserve_key_routes_and_anchor ... ok
+
+test result: ok. 4 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 0.01s
+
+
+running 4 tests
+test schema_rejects_invalid_pitch_and_keeps_normal_distinct_from_inherit ... ok
+test failed_newer_pitch_preserves_older_candidate_ack_and_repairs ... ok
+test sparse_text_and_ime_use_the_same_explicit_pitch ... ok
+test source_and_override_line_pitch_match_fresh_pixels_and_acknowledged_geometry ... ok
+
+test result: ok. 4 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 0.00s
+
+
+running 13 tests
+test optional_list_description_storage_has_exact_charged_costs ... ok
+test controlled_source_without_any_other_sink_is_not_lost ... ok
+test contained_source_resolution_and_writeback_use_component_namespace ... ok
+test controlled_offset_is_absolute_across_prepend_and_clamps_without_shared_writeback ... ok
+test nested_wheel_commits_controlled_list_and_ordinary_residual_together ... ok
+test complete_list_source_allocation_ledger ... ok
+test controlled_offset_boundaries_and_into_view_keep_source_and_pixels_coherent ... ok
+test pending_and_failed_newer_source_keep_old_sheet_and_eligible_ack ... ok
+test unregistered_scroll_operand_rejects_mount ... ok
+test rejected_writer_does_not_mutate_sources_and_rebinding_does_not_use_old_field ... ok
+test shared_offset_updates_both_lists_in_one_source_epoch ... ok
+test wheel_offset_index_key_and_next_tick_share_one_source ... ok
+test direct_source_without_owner_dependency_realizes_and_matches_fresh_pixels ... ok
+
+test result: ok. 13 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 0.00s
+
+
+running 25 tests
+test malformed_source_metrics_and_duplicate_list_ids_fail_admission ... ok
+test overscan_checks_buffered_key_coherence_before_any_row_description ... ok
+test collapsed_forward_span_keeps_inverse_sample_semantics_and_point_authority ... ok
+test invalid_requests_leave_the_current_cohort_usable ... ok
+test fractional_scroll_clips_fixed_slots_and_does_not_hit_header_or_footer ... ok
+test empty_shrink_and_invalid_scroll_admission_are_checked ... ok
+test overlap_survives_scroll_reorder_and_prepend_but_offscreen_target_never_revives ... ok
+test overscan_anchor_is_first_visible_key_across_prepend_and_reverse ... ok
+test parent_flow_updates_list_layout_like_a_cold_mount_including_property_overrides ... ok
+test raster_clip_matches_finite_canvas_edges_and_keeps_off_lattice_pointer_hits ... ok
+test recording_scroll_publishes_semantics_only_after_exact_acknowledgement ... ok
+test reflected_half_open_viewport_matches_ordinary_paint ... ok
+test root_auto_width_and_flex_row_available_width_are_real_viewports ... ok
+test ordinary_fractional_device_scales_admit_list_and_row_clips ... ok
+test quarter_million_rows_have_bounded_realization_and_wide_local_scroll ... ok
+test overscan_preserves_buffered_identity_but_not_offscreen_authority_or_departed_keys ... ok
+test wheel_rejects_the_physical_window_edge_even_with_an_outward_envelope ... ok
+test row_slots_clip_overflow_and_keep_empty_structural_ancestors ... ok
+test wheel_obeys_painter_order_and_nested_viewports ... ok
+test window_clip_removes_authority_and_resize_return_mints_a_fresh_capability ... ok
+test overscan_rejects_excess_before_rows_and_preserves_older_candidate_after_failure ... ok
+test overscan_pixels_match_independently_materialized_eager_rows ... ok
+test zero_raster_samples_do_not_erase_a_continuous_pointer_action_ancestor ... ok
+test zero_width_is_an_empty_viewport_and_flex_can_exhaust_available_width ... ok
+test overscan_ranges_clamp_and_pixels_match_zero_buffer_at_fractional_offsets ... ok
+
+test result: ok. 25 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 0.04s
+
+
+running 2 tests
+test erased_size_keeps_two_sinks_latest_inspector_base_and_literal_edge_removal ... ok
+test erased_numeric_failure_preserves_every_sink_and_the_pending_cohort ... ok
+
+test result: ok. 2 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 0.00s
+
+
+running 6 tests
+test image_clip_and_scroller_preserve_older_candidate_after_newer_failure ... ok
+test coalesced_new_glyphs_resize_and_list_retirement_keep_complete_outputs ... ok
+test owner_text_plus_other_changes_does_not_hide_non_text_publication ... ok
+test exact_text_keeps_list_identity_and_old_geometry_until_ack ... ok
+test owner_text_with_unchanged_or_changed_list_keeps_complete_publication ... ok
+test nested_sample_clips_and_unsupported_shapes_preserve_exact_publication ... ok
+
+test result: ok. 6 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 0.03s
+
+
+running 3 tests
+test one_mapped_color_keeps_ten_thousand_rows_without_allocating_a_replacement_scene ... ok
+test alpha_changes_and_two_changed_slots_preserve_complete_pixels ... ok
+test mounted_inspector_refreshes_the_mapped_color_after_a_complete_paint_turn ... ok
+
+test result: ok. 3 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 0.02s
+
+
+running 7 tests
+test masked_first_direct_sink_cannot_hide_a_shared_peer_change_in_a_mapped_group ... ok
+test mapped_outputs_keep_inspector_bases_and_mix_with_direct_text_in_either_install_order ... ok
+test oversized_recipe_rejects_mount_and_literal_overwrite_removes_it ... ok
+test source_authority_is_checked_before_inbox_callback_and_rebinding_replaces_recipes ... ok
+test mapped_geometry_queries_wait_for_ack_and_invalid_output_preserves_all_sinks ... ok
+test source_dependent_question_refreshes_reader_before_exact_patch_gate ... ok
+test one_exact_inbox_updates_transform_and_32_colors_without_describing_1000_rows ... ok
+
+test result: ok. 7 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 0.03s
+
+
+running 5 tests
+test keep_rows_flag_preserves_virtual_membership_and_semantic_columns ... ok
+test paint_preserves_prior_full_candidate_and_failed_newer_visual_is_not_relabelled ... ok
+test masked_bases_and_alpha_topology_fallback_remain_exact ... ok
+test pending_colors_preserve_targets_and_geometry_until_acknowledgement ... ok
+test colors_commit_without_description_layout_or_paint_walk_and_match_full_oracle ... ok
+
+test result: ok. 5 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 0.00s
+
+
+running 1 test
+test equal_coarse_description_rebinds_the_complete_canvas_before_exact_color_edits ... ok
+
+test result: ok. 1 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 0.00s
+
+
+running 3 tests
+test equal_source_values_do_not_merge_relationships_or_masked_lower_bases ... ok
+test equal_inspector_set_rebinds_only_masked_member_of_shared_color_source ... ok
+test shared_fg_bg_source_updates_once_without_writing_each_style ... ok
+
+test result: ok. 3 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 0.00s
+
+
+running 9 tests
+test press_focuses_and_release_rechecks_the_same_live_hit_once ... ok
+test a_fresh_hit_on_a_new_acknowledged_sheet_can_activate_the_surviving_target ... ok
+test session_cannot_transfer_a_press_between_window_namespaces ... ok
+test pending_geometry_rejects_and_consumes_release_before_later_acknowledgement ... ok
+test failed_prepare_or_removed_target_never_replays_a_press ... ok
+test leave_nonfinite_cancel_and_wheel_consume_a_gesture_without_blurring ... ok
+test wheel_uses_the_ordinary_two_axis_scroll_router ... ok
+test semantic_only_publication_keeps_the_current_gesture_usable ... ok
+test repeated_input_clicks_allocate_nothing_after_selection_activation ... ok
+
+test result: ok. 9 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 0.00s
+
+
+running 12 tests
+test ack_before_release_uses_the_ordinary_current_sheet ... ok
+test equal_viewport_and_fresh_hit_inside_own_focus_paint_keep_the_gesture ... ok
+test cancellation_and_failed_new_press_consume_the_own_focus_proof ... ok
+test absent_point_encoding_preserves_finite_bits_and_public_debug_shape ... ok
+test own_focus_candidate_does_not_lose_rapid_release_or_publish_unacknowledged_state ... ok
+test focus_proof_never_crosses_window_namespaces ... ok
+test inspector_panel_action_uses_the_same_focus_release_proof ... ok
+test viewport_aba_and_surface_loss_revoke_the_exact_focus_candidate ... ok
+test inspector_picking_uses_actual_shape_and_cannot_select_panel_controls ... ok
+test intervening_model_noop_semantic_geometry_replacement_and_failure_revoke_focus_proof ... ok
+test inspector_focus_proof_does_not_cover_later_source_or_viewport_changes ... ok
+test built_in_inspector_accepts_own_focus_c_without_publishing_its_epoch_captions ... ok
+
+test result: ok. 12 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 0.01s
+
+
+running 3 tests
+test tutorial_port_uses_the_ordinary_input_and_serialization_interface ... ok
+test component_graphics_port_reuses_layout_for_geometry_and_color_updates ... ok
+test complete_application_views_compose_without_rewriting_their_state_or_routes ... ok
+
+test result: ok. 3 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 0.01s
+
+
+running 9 tests
+test pending_coherent_sheet_survives_newer_preparation_failure_and_can_be_acknowledged ... ok
+test reacknowledgement_after_surface_loss_cannot_cover_a_failed_new_source ... ok
+test surface_loss_revokes_coordinates_until_current_scene_is_presented_again ... ok
+test tokens_reject_foreign_namespaces_and_replaced_candidates ... ok
+test resize_keeps_targets_and_source_epoch_but_requires_new_geometry_ack ... ok
+test unseen_visual_candidates_block_coordinate_routing_even_after_noop_edits ... ok
+test headless_keeps_automatic_presentation_and_resize_behavior ... ok
+test initial_recording_has_no_input_authority_until_actual_acknowledgement ... ok
+test software_surface_rendering_returns_the_exact_unacknowledged_scene_token ... ok
+
+test result: ok. 9 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 0.00s
+
+
+running 12 tests
+test borrowed_question_declarations_reduce_actual_lane_storage_without_growing_versions ... ok
+test fabricated_question_path_is_rejected_at_mount_before_any_job_or_edit_filtering ... ok
+test path_storage_borrows_only_declarations_and_adds_no_owner_header ... ok
+test borrowed_pair_keeps_every_reflected_input_instead_of_using_single_source_default ... ok
+test leaf_projector_mismatches_do_not_change_either_signal ... ok
+test mismatched_registered_component_read_and_exclusive_projectors_reject_before_transfer ... ok
+test repeated_child_schemas_read_set_and_action_have_distinct_exact_grains ... ok
+test borrowed_question_path_uses_the_same_scoped_admission_and_credit_protocol ... ok
+test wrong_component_question_cannot_mount_a_different_scope_with_the_same_id ... ok
+test failed_nested_edit_retains_exact_candidate_ack_and_logical_read_then_repairs ... ok
+test question_inputs_qualify_mounted_scopes_before_filtering_edits ... ok
+test action_checks_exclusive_leaf_projection_after_successful_mounted_read_admission ... ok
+
+test result: ok. 12 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 0.00s
+
+
+running 9 tests
+test post_mutation_projection_rejection_quarantines_instead_of_leaving_live_l ... ok
+test empty_property_proposal_reports_no_changed_nodes_after_a_nonzero_edit ... ok
+test logical_acceptance_is_distinct_from_acknowledged_presentation ... ok
+test contained_editor_allocation_ledger ... ok
+test proposed_foreign_and_stale_targets_report_but_original_stale_event_rejects ... ok
+test one_editor_family_routes_geometry_color_and_six_affine_components ... ok
+test accepted_contribution_survives_failed_preparation_then_repairs ... ok
+test request_and_reply_panics_restore_the_owned_route_until_close ... ok
+test actual_contained_apply_rejects_and_recovers_without_losing_the_route ... ok
+
+test result: ok. 9 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 0.00s
+
+
+running 11 tests
+test changed_component_scope_counts_consumed_old_target_and_fresh_replacement ... ok
+test inherit_with_no_model_reply_counts_the_property_destination ... ok
+test failed_description_retires_the_old_target_and_discards_its_marker ... ok
+test failed_prepare_keeps_logical_edit_and_repair_has_a_fresh_marker ... ok
+test radius_and_general_map_set_and_inherit_count_their_destination ... ok
+test overlapping_target_change_counts_once_and_a_peer_change_counts_twice ... ok
+test direct_property_setter_keeps_its_destination_through_list_realization ... ok
+test rejected_equal_and_empty_requests_do_not_reuse_a_prior_change_marker ... ok
+test set_with_no_model_reply_counts_the_property_destination ... ok
+test a_foreign_proposal_does_not_reuse_a_previous_property_change ... ok
+test retirement_and_kind_replacement_count_the_old_property_target_once ... ok
+
+test result: ok. 11 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 0.00s
+
+
+running 1 test
+test ordinary_and_property_requests_have_matched_allocation_controls ... ok
+
+test result: ok. 1 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 0.00s
+
+
+running 10 tests
+test public_consumer_headers_remain_explicit ... ok
+test selection_reply_checks_the_same_contained_mutable_owner ... ok
+test foreign_and_empty_selection_requests_do_not_fabricate_property_edits ... ok
+test canonical_edit_result_survives_failed_prepare_until_repair_ack ... ok
+test owned_result_precedes_mutable_reply_source_edits ... ok
+test explicit_selection_surface_keeps_normal_library_behavior_independent ... ok
+test selection_is_logical_before_ack_and_stale_ack_does_not_replace_p ... ok
+test stale_refresh_is_rejected_and_explicit_reselection_recovers ... ok
+test inherit_and_refresh_read_canonical_state_after_a_masked_source_change ... ok
+test every_closed_catalog_family_returns_canonical_value_and_equal_presence ... ok
+
+test result: ok. 10 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 0.00s
+
+
+running 1 test
+test private_inspector_shell_keeps_canonical_width_distinct_from_stored_set ... ok
+
+test result: ok. 1 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 0.00s
+
+
+running 3 tests
+test query_reads_the_acknowledged_sheet_while_source_edits_wait_for_repair ... ok
+test scoped_preorder_queries_match_an_independent_parent_walk_for_every_subtree ... ok
+test semantic_queries_use_presented_roles_and_bounds_without_diagnostic_snapshots ... ok
+
+test result: ok. 3 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 0.00s
+
+
+running 1 test
+test paired_real_owner_turn_cost ... ignored, manual release paired evidence; each question also describes status/content regions
+
+test result: ok. 0 passed; 0 failed; 1 ignored; 0 measured; 0 filtered out; finished in 0.00s
+
+
+running 17 tests
+test close_defers_a_ready_response_destructor_until_both_future_tasks_are_cancelled ... ok
+test a_panicking_poll_payload_is_classified_only_after_future_teardown ... ok
+test cancel_before_first_poll_and_close_or_natural_drop_never_join_the_task ... ok
+test close_cancels_both_future_lanes_before_a_head_freezer_or_outer_inbox_panics ... ok
+test close_requests_cancellation_before_a_freezer_destructor_unwinds_cleanup ... ok
+test cancellation_during_waker_registration_is_not_lost ... ok
+test blocked_future_destructor_holds_credit_even_after_ready_or_cancel ... ok
+test domain_fault_and_refresh_preserve_previous_projection_and_reuse_existing_error_view ... ok
+test dependent_input_becoming_pending_or_fault_cancels_its_future ... ok
+test never_waking_pending_cancels_exact_task_and_only_latest_input_starts_after_teardown ... ok
+test foreign_reader_is_rejected_before_executor_start ... ok
+test ready_result_is_stale_across_a_b_a_and_handle_retires_before_next_factory ... ok
+test poll_panic_tears_down_before_one_worker_fault_and_retry_heals ... ok
+test pending_or_ready_destructor_panic_publishes_exactly_one_worker_terminal ... ok
+test factory_panic_is_a_start_fault_and_retry_is_not_poisoned ... ok
+test worker_completion_before_spawn_returns_still_waits_for_the_owner_barrier ... ok
+test rejection_start_panic_and_broken_half_accept_never_fabricate_credit ... ok
+
+test result: ok. 17 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 0.00s
+
+
+running 1 test
+test one_source_operation_cost ... ignored, manual paired release controls; no benchmark threshold
+
+test result: ok. 0 passed; 0 failed; 1 ignored; 0 measured; 0 filtered out; finished in 0.00s
+
+
+running 11 tests
+test foreign_reader_is_rejected_before_mount ... ok
+test close_revokes_a_held_completion_and_returns_its_same_owned_payload ... ok
+test nested_pairs_preserve_every_member_and_duplicate_sources_are_observed_consistently ... ok
+test a_dependent_freeze_panic_quarantines_the_same_owner_after_counted_upstream_admission ... ok
+test a_coarse_replacement_of_either_source_supersedes_an_equal_revision_pack ... ok
+test both_sources_invalidate_but_unrelated_exact_edits_do_not_and_diagnostics_are_complete ... ok
+test synchronous_completion_waits_for_the_next_frozen_batch ... ok
+test dependency_fault_and_pending_previous_values_never_freeze_fresh_work ... ok
+test same_batch_upstream_and_old_dependent_terminal_dispatch_latest_once ... ok
+test two_reader_inputs_settle_before_their_dependent_freezes_once ... ok
+test accepted_upstream_survives_visual_failure_and_dependency_remains_coherent ... ok
+
+test result: ok. 11 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 0.00s
+
+
+running 3 tests
+test a_frozen_question_response_drops_once_when_an_earlier_model_callback_panics ... ok
+test a_staged_response_stays_owned_until_callbacks_supersede_it_and_apply_retires_it ... ok
+test close_releases_ready_state_and_a_late_physical_cap_returns_its_owned_resource ... ok
+
+test result: ok. 3 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 0.00s
+
+
+running 1 test
+test requested_storage_matrix ... ok
+
+test result: ok. 1 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 0.00s
+
+
+running 21 tests
+test coarse_owner_signal_replacement_supersedes_equal_revision_and_value ... ok
+test a_b_a_coalesces_one_latest_snapshot_but_never_admits_the_first_a ... ok
+test accepted_answer_survives_presentation_failure_and_repairs_without_reacceptance ... ok
+test close_returns_same_owned_outcome_and_reminted_foreign_readers_are_revoked ... ok
+test completion_preserves_send_sync_and_unwind_traits_for_send_only_payloads ... ok
+test cancellable_none_faults_current_work_but_frees_superseded_credit_without_faulting_newer_work ... ok
+test failed_mount_never_dispatches_a_prepared_question ... ok
+test completion_and_terminal_queued_before_ack_start_pending_b_in_that_same_turn ... ok
+test ordinary_owner_drop_cancels_an_outstanding_cap_and_closes_its_payload_lane ... ok
+test abandonment_and_domain_faults_are_distinct_and_retries_heal ... ok
+test forwarded_reader_projection_routes_new_controls_to_the_contained_child ... ok
+test a_retained_completion_cannot_revive_a_rejected_or_panicking_start ... ok
+test old_delayed_drop_cannot_fault_the_latest_ticket_or_release_credit_early ... ok
+test one_source_diagnostic_convenience_agrees_with_the_complete_visitor ... ok
+test cancellable_worker_panic_and_owner_close_keep_their_distinct_lifecycle ... ok
+test ready_is_borrowed_only_after_the_production_barrier_and_unrelated_exact_edits_do_not_cancel ... ok
+test queued_model_callback_supersedes_a_completion_in_the_same_batch ... ok
+test prepared_question_sheet_and_old_presentation_remain_frozen_until_acknowledged ... ok
+test start_error_which_retains_a_cap_cancels_it_without_fabricating_free_credit ... ok
+test worker_panic_is_a_question_fault_and_does_not_quarantine_the_owner ... ok
+test saturated_static_inboxes_keep_question_completion_and_fifo_progress ... ok
+
+test result: ok. 21 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 0.01s
+
+
+running 16 tests
+test an_unopened_native_builder_closes_its_inboxes_before_dropping_the_model ... ok
+test full_and_closed_return_the_same_non_clone_non_debug_payload ... ok
+test close_and_drop_close_receivers_before_a_model_held_sender_can_run_its_destructor ... ok
+test preallocated_transport_and_idle_turns_do_not_allocate ... ok
+test owner_fault_outside_delivery_also_closes_worker_admission_immediately ... ok
+test outside_owner_fault_releases_queued_payloads_before_returning_to_the_caller ... ok
+test messages_enqueued_by_a_callback_wait_for_the_following_turn ... ok
+test pre_mount_messages_are_bounded_and_zero_budget_is_idle ... ok
+test quarantine_revokes_existing_remotes_and_cancels_the_remaining_queue ... ok
+test queued_staged_and_applied_payloads_are_dropped_exactly_once_after_quarantine ... ok
+test terminal_callback_panic_quarantines_the_same_owner_barrier ... ok
+test presentation_and_description_failures_keep_later_queued_repairs_and_never_replay_applied_values ... ok
+test real_worker_completion_is_inert_until_the_same_owner_barrier_accepts_a_frozen_batch ... ok
+test small_budgets_rotate_across_static_lanes_without_losing_per_lane_fifo ... ok
+test status_close_waits_for_every_clone_and_owner_close_revokes_it ... ok
+test status_lanes_deliver_buffered_fifo_then_one_terminal_and_rotate_saturated_turns ... ok
+
+test result: ok. 16 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 0.00s
+
+
+running 2 tests
+test repeated_authored_styles_keep_profile_and_signed_channel_bits ... ok
+test typed_edits_and_style_mode_changes_keep_pending_and_displayed_geometry_independent ... ok
+
+test result: ok. 2 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 0.00s
+
+
+running 9 tests
+test alternating_scroll_and_radius_builders_reuse_one_cold_extension_allocation ... ok
+test malformed_builder_reports_the_node_before_any_new_sheet_is_published ... ok
+test ordinary_builder_paint_hit_and_typed_presence_share_one_geometry ... ok
+test rounded_scroll_panes_preserve_shape_metadata_and_axes_in_both_builder_orders ... ok
+test typed_inspector_retains_signed_zero_bits_in_each_authoring_domain ... ok
+test rounded_album_cover_uses_shared_image_pixels_and_matching_own_hit_shape ... ok
+test removing_radius_keeps_old_recording_shape_until_acknowledgement ... ok
+test old_sheet_and_older_complete_candidate_keep_their_own_radius_after_failure ... ok
+test radius_composes_with_component_routes_without_clipping_descendants ... ok
+
+test result: ok. 9 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 0.00s
+
+
+running 4 tests
+test an_old_sheet_cannot_restore_a_replaced_or_removed_current_callback ... ok
+test rejected_description_drops_new_captures_and_retires_old_authority_before_recovery ... ok
+test a_retired_routes_destructor_panic_quarantines_and_drops_every_capture_once ... ok
+test current_routes_follow_replaced_captures_across_dense_sparse_and_empty_branches ... ok
+
+test result: ok. 4 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 0.00s
+
+
+running 15 tests
+test an_old_values_destructor_panic_reports_consumed_ownership_without_rollback ... ok
+test a_transparent_sites_handler_presence_publishes_new_hit_eligibility ... ok
+test a_non_text_non_clone_domain_action_uses_the_production_dispatcher ... ok
+test handler_panics_poison_and_revoke_without_claiming_rollback ... ok
+test a_bad_action_writer_is_a_checked_error_without_mutation_or_owner_poisoning ... ok
+test direct_fanout_reads_once_and_promotes_one_shared_text_payload ... ok
+test committed_sets_report_the_actual_epochs_without_returning_a_consumed_value ... ok
+test arbitrary_methods_refresh_plain_fields_and_equal_revision_signal_replacement ... ok
+test rejected_sets_return_the_same_non_clone_non_debug_payload_for_retry ... ok
+test poisoned_owners_and_panicking_projectors_return_unconsumed_set_payloads ... ok
+test a_rejected_partial_scene_keeps_the_same_output_buffer_and_complete_sheet ... ok
+test wide_ancestor_products_recover_before_admitting_a_visible_primitive ... ok
+test input_edits_use_the_registered_string_source_and_share_the_fanout ... ok
+test rotated_button_hit_uses_the_exact_painted_matrix_not_its_aabb ... ok
+test targets_survive_preorder_shifts_in_an_unrelated_sibling_subtree ... ok
+
+test result: ok. 15 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 0.00s
+
+
+running 27 tests
+test nested_aperture_contains_both_cephal_and_transformed_overflow ... ok
+test later_overlay_blocks_background_wheel ... ok
+test nested_scaled_wheel_converts_displacement_and_residual_exactly_once ... ok
+test auto_viewport_resize_clamps_from_actual_layout ... ok
+test invalid_offsets_and_foreign_targets_leave_epochs_and_scene_token_unchanged ... ok
+test changing_axes_clamps_disabled_offsets_and_removed_targets_stay_stale ... ok
+test deep_residual_routing_has_no_fixed_ancestry_limit_or_repeated_application ... ok
+test nested_wheel_consumes_once_then_passes_only_residual ... ok
+test ordinary_resize_and_paint_geometry_overrides_never_redescribe_the_owner ... ok
+test ordinary_scroll_is_two_dimensional_retained_and_keeps_offscreen_semantics ... ok
+test parent_flow_changes_match_cold_scroll_layout_for_source_and_property ... ok
+test reflected_dpi_wheel_routes_displacements_instead_of_points ... ok
+test scroll_builder_rejects_role_replacement_and_preserves_container_annotations ... ok
+test scroll_into_view_uses_retained_offscreen_bounds ... ok
+test metadata_only_publication_preserves_cohort_indexed_viewport_dimensions ... ok
+test published_metadata_and_targets_do_not_advance_before_ack ... ok
+test semantic_cardinal_action_rechecks_the_frozen_enabled_axis ... ok
+test tab_reveals_offscreen_controls_but_explicit_focus_remains_logical ... ok
+test transformed_negative_overflow_is_reachable_without_relayout ... ok
+test unsupported_viewport_transform_keeps_old_p_geometry_and_metadata ... ok
+test virtual_focus_retires_with_candidate_authority_and_never_returns ... ok
+test reveal_propagates_the_visible_fragment_through_nested_apertures ... ok
+test semantic_scroll_actions_use_the_public_mutation_path_and_frozen_support ... ok
+test wide_overflow_endpoints_match_continuous_reference_after_p_narrowing ... ok
+test virtual_rows_hidden_by_an_ordinary_ancestor_never_revive_old_targets ... ok
+test virtual_list_and_ordinary_ancestor_share_one_scroll_cohort ... ok
+test reflected_fractional_and_collapsed_viewport_clips_match_ordinary_raster_membership ... ok
+
+test result: ok. 27 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 0.00s
+
+
+running 7 tests
+test paired_real_library_cancellation_cost ... ignored, manual release cancellation-latency evidence; run alone on a quiet CPU
+test bounded_library_snapshot_and_page_allocation_ledger ... ok
+test a_cancelled_catalogue_scan_releases_credit_at_a_bounded_checkpoint_for_the_latest_query ... ok
+test library_domain_restore_remints_readers_and_targets_and_rejects_old_work ... ok
+test query_and_order_are_one_frozen_library_cohort ... ok
+test quarter_million_search_has_bounded_results_virtual_rows_and_exact_play_actions ... ok
+test worker_matches_an_independent_full_scan_and_bounds_utf8_input_and_result_pages ... ok
+
+test result: ok. 6 passed; 0 failed; 1 ignored; 0 measured; 0 filtered out; finished in 0.12s
+
+
+running 12 tests
+test published_semantic_reads_allocate_nothing_and_use_the_same_static_inbox_owner ... ok
+test a_panicking_semantic_projector_quarantines_the_same_owner_and_focus ... ok
+test contained_direct_sources_route_semantic_ports_without_parent_or_sibling_redescriptions ... ok
+test cleared_description_inherits_the_latest_source_without_unmasking_early ... ok
+test metadata_extends_pending_complete_sheet_but_never_relabels_an_older_failed_candidate ... ok
+test query_dimensions_are_conjunctive_and_order_independent ... ok
+test list_position_count_and_key_are_frozen_with_p_not_read_from_logical_s ... ok
+test direct_name_and_description_share_one_read_and_promotion_without_visual_work ... ok
+test nested_realized_rows_keep_their_immediate_frozen_list_parent ... ok
+test real_apps_have_explicit_names_separate_from_values_and_play_labels ... ok
+test surface_loss_and_failed_preparation_keep_names_frozen_until_the_right_ack ... ok
+test typed_contributions_preserve_inheritance_and_explicit_name_absence ... ok
+
+test result: ok. 12 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 0.00s
+
+
+running 7 tests
+test viewport_serialization_uses_the_same_acknowledged_offset_and_range_as_parts ... ok
+test closed_and_quarantined_owners_cannot_serialize_an_old_sheet ... ok
+test virtual_lists_serialize_only_realized_rows_and_frozen_keys ... ok
+test old_semantic_identities_do_not_grant_authority_after_logical_removal ... ok
+test streaming_has_no_framework_allocations_and_writer_failure_does_not_mutate_owner ... ok
+test pending_and_failed_candidates_serialize_old_p_with_current_source_epochs ... ok
+test serializes_the_same_parts_actions_names_geometry_and_focus_as_public_queries ... ok
+
+test result: ok. 7 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 0.00s
+
+
+running 6 tests
+test one_borrowed_sheet_exposes_topology_focus_values_and_advertised_actions ... ok
+test full_geometry_and_visible_bounds_come_from_the_same_retained_shape ... ok
+test semantic_activation_reads_allocate_nothing_and_do_no_render_work ... ok
+test ahead_of_frame_source_cannot_rewrite_advertised_value_or_actions ... ok
+test semantic_actions_reject_foreign_closed_and_unpresented_authority ... ok
+test semantic_actions_drive_the_real_todo_model_and_match_ordinary_input ... ok
+
+test result: ok. 6 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 0.01s
+
+
+running 2 tests
+test ordinary_redescription_release_samples ... ignored, explicit matched release measurement
+test ordinary_redescription_requested_allocation_rows ... ok
+
+test result: ok. 1 passed; 0 failed; 1 ignored; 0 measured; 0 filtered out; finished in 0.03s
+
+
+running 14 tests
+test owner_dependent_source_still_redescribes_ordinary_snapshot_reads ... ok
+test mutable_projector_disagreement_rejects_before_editing_or_advancing_source ... ok
+test messages_sent_during_a_typed_callback_wait_for_the_next_frozen_batch ... ok
+test a_committed_prefix_revokes_a_ready_answer_before_returning_a_later_binding_error ... ok
+test distinct_fields_and_unrestricted_callbacks_keep_one_conservative_barrier ... ok
+test a_rejected_message_does_not_strand_its_frozen_fifo_or_evade_a_smaller_budget ... ok
+test failed_presentation_retains_old_sheet_and_later_buffered_repair ... ok
+test same_field_batches_patch_once_and_keep_callback_inference_and_mutable_captures ... ok
+test typed_callback_panic_quarantines_and_revokes_pending_messages ... ok
+test binding_fault_after_an_applied_prefix_commits_that_prefix_and_drops_only_rejected_value ... ok
+test typed_delivery_refreshes_only_questions_that_depend_on_its_source ... ok
+test projected_peer_sources_keep_distinct_scoped_identities ... ok
+test two_lanes_for_one_field_share_the_exact_grain ... ok
+test unregistered_or_forged_projection_is_rejected_before_any_callback ... ok
+
+test result: ok. 14 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 0.00s
+
+
+running 1 test
+test exact_source_inbox_refresh_publishes_pending_reader_chrome_without_a_completion ... ok
+
+test result: ok. 1 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 0.00s
+
+
+running 3 tests
+test immutable_arcstr_leases_allow_exact_replacement_without_changing_a_peer ... ok
+test coarse_models_still_allow_shared_mutable_resources ... ok
+test immutable_arc_copy_on_write_keeps_peer_data_and_ready_capture_coherent ... ok
+
+test result: ok. 3 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 0.00s
+
+
+running 4 tests
+test generic_leaf_declaration_and_erased_leaf_values_remain_supported ... ok
+test nested_signal_state_construction_default_and_serde_remain_general ... ok
+test coarse_in_place_heap_edit_refreshes_inner_text_and_question ... ok
+test coarse_replacement_refreshes_same_address_zero_revision_inner_source ... ok
+
+test result: ok. 4 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 0.00s
+
+
+running 3 tests
+test changed_layout_rejects_sparse_publication_and_moves_following_content ... ok
+test pending_text_and_geometry_stay_at_acknowledged_epoch_then_survive_newer_failure ... ok
+test direct_text_pixels_match_fresh_windows_through_patch_and_fallback ... ok
+
+test result: ok. 3 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 0.00s
+
+
+running 13 tests
+test final_literal_and_final_signal_win_for_direct_and_flex_fields ... ok
+test literal_and_borrowed_recipes_preserve_unspecified_fields ... ok
+test dynamic_list_height_is_admitted_before_realization_but_paint_does_not_describe ... ok
+test last_write_wins_size_fanout_and_unregistered_snapshots_do_not_keep_obsolete_edges ... ok
+test large_integer_lengths_preserve_the_inherited_f019_narrowing_oracle ... ok
+test masked_sources_advance_inspector_bases_and_inherit_reveals_without_view ... ok
+test borrowed_flex_fields_and_flow_publish_through_the_closed_typed_schema ... ok
+test paint_geometry_and_layout_ports_use_existing_typed_properties_without_view_work ... ok
+test same_local_component_ids_install_distinct_style_sources ... ok
+test pending_and_failed_geometry_keep_acknowledged_style_geometry ... ok
+test radius_literals_keep_deferred_geometry_errors_and_font_uses_its_schema_error ... ok
+test invalid_numeric_publication_commits_source_but_preserves_old_p_and_recovers ... ok
+test text_first_and_style_first_keep_combined_numeric_capabilities ... ok
+
+test result: ok. 13 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 0.00s
+
+
+running 3 tests
+test failed_shaping_retains_old_pixels_and_recovers_without_owner_description ... ok
+test font_override_then_inherit_matches_fresh_shaping ... ok
+test shared_text_at_distinct_widths_survives_actions_remounts_and_resize ... ok
+
+test result: ok. 3 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 0.01s
+
+
+running 4 tests
+test zero_advance_unit_retains_visible_semantic_extent_without_a_damage_rectangle ... ok
+test physical_geometry_keeps_padding_fractional_dpi_reflection_shear_and_exact_target_hits ... ok
+test wrapped_directional_runs_cover_source_and_containing_hit_is_not_nearest_caret ... ok
+test old_p_and_eligible_c_keep_exact_geometry_after_new_l_reshapes_then_fails ... ok
+
+test result: ok. 4 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 0.00s
+
+
+running 20 tests
+test byte_selection_construction_preserves_direction_and_checks_representation ... ok
+test equal_output_replacement_still_collapses_caret_before_publication ... ok
+test acknowledged_selection_does_not_follow_pending_failed_or_repair_edits ... ok
+test logical_selection_survives_pending_and_failed_p_without_rewriting_old_sheet ... ok
+test line_navigation_handles_crlf_empty_lines_and_stale_geometry_without_mutation ... ok
+test grapheme_backspace_and_joined_carets_repair_even_a_failed_visual_source ... ok
+test ordinary_replace_typing_keyboard_and_accessibility_share_selection_aware_source_edits ... ok
+test pointer_drag_uses_current_map_outside_input_and_revokes_on_source_change ... ok
+test rtl_line_edges_are_physical_and_vertical_ranges_move_from_either_focus ... ok
+test ordinary_wrapped_navigation_keeps_each_affinity_on_its_canonical_source_line ... ok
+test unchanged_explicit_selection_horizontal_motion_and_source_rebind_reset_preferred_x ... ok
+test transformed_input_navigates_in_local_coordinates_and_pointer_restarts_preferred_x ... ok
+test transformed_padded_input_hits_and_shared_caret_ink_follow_the_real_paint_bank ... ok
+test vertical_keys_restore_preferred_x_extend_and_move_from_the_focus ... ok
+test visual_arrows_extend_whole_graphemes_and_collapse_bidi_endpoints ... ok
+test invalid_grapheme_crlf_and_foreign_ranges_are_atomic ... ok
+test geometry_navigation_waits_for_ack_but_logical_range_edits_do_not ... ok
+test semantic_range_actions_share_ordinary_editing_and_preserve_reverse_endpoints ... ok
+test stored_selection_is_source_qualified_but_explicit_ranges_address_current_source ... ok
+test selection_and_focus_publish_pixels_without_changing_source_text ... ok
+
+test result: ok. 20 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 0.00s
+
+
+running 6 tests
+test absence_of_a_caret_effect_preserves_complete_metadata_and_bank_fast_paths ... ok
+test tab_reveal_that_scrolls_includes_caret_blur_in_its_one_candidate ... ok
+test tab_with_an_idle_reveal_still_publishes_caret_visibility ... ok
+test rejected_compound_actions_restore_focus_without_publication ... ok
+test committed_failed_preparation_keeps_new_focus_and_logical_failure_clears_it ... ok
+test compound_visual_complete_metadata_and_bank_actions_publish_one_caret_frame ... ok
+
+test result: ok. 6 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 0.00s
+
+
+running 5 tests
+test emit_pointer_driver_geometry ... ignored
+test whitespace_does_not_create_a_task_or_consume_an_id ... ok
+test comparison_preserves_the_tutorial_input_filter_delete_and_undo_contract ... ok
+test animation_uses_the_public_delivery_and_presentation_path ... ok
+test heavy_fixture_really_retains_ten_thousand_rows ... ok
+
+test result: ok. 4 passed; 0 failed; 1 ignored; 0 measured; 0 filtered out; finished in 0.60s
+
+
+running 2 tests
+test absent_font_coverage_preserves_old_pixels_and_recovers_without_retargeting ... ok
+test mixed_bidi_and_crlf_ports_match_a_fresh_owner_after_exact_edit ... ok
+
+test result: ok. 2 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 0.00s
+
+
+running 1 test
+test ordinary_unit_action_cost ... ok
+
+test result: ok. 1 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 0.00s
+
+
+running 2 tests
+test second_ordinary_unit_action_cost ... ok
+test ordinary_unit_action_cost ... ok
+
+test result: ok. 2 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 0.00s
+
+
+running 108 tests
+test canvas::bins::tests::bounds_projection_and_csr_match_independent_command_membership ... ok
+test canvas::clips::tests::canonical_clip_storage_and_transient_views_are_charged ... ok
+test canvas::columns::tests::complete_bank_layout_and_plain_recording_floor_are_explicit ... ok
+test canvas::columns::tests::alternating_late_scopes_disclose_bounded_discovery_fallback_growth ... ok
+test canvas::columns::tests::literal_palette_shares_exact_bits_without_aliasing_mutable_sources ... ok
+test canvas::columns::tests::palette_flags_survive_support_union_without_leaking_into_geometry ... ok
+test canvas::bins::tests::embedded_cut_preserves_a_nonzero_first_painter_and_no_opaque_prefix ... ok
+test canvas::bins::tests::recording_has_no_scratch_allocation_and_first_raster_charges_one_owner ... ok
+test canvas::bins::tests::opaque_certificates_follow_physical_tiles_and_exact_alpha ... ok
+test canvas::columns::tests::positional_writes_detach_once_and_never_rejoin_literal_discovery ... ok
+test canvas::columns::tests::support_flags_never_enter_empty_or_maximum_canvas_geometry ... ok
+test canvas::columns::tests::repeated_last_scope_after_discovery_prefix_needs_no_more_rows_or_allocations ... ok
+test canvas::glyph_axis::tests::clipped_command_bounds_and_signed_zero_axes_match_scalar_samples ... ok
+test canvas::gradient_ownership_tests::gradient_coverage_uses_the_exact_existing_simd_lattice_and_uniform_proofs_are_ineligible ... ok
+test canvas::gradient_ownership_tests::staging_moves_unique_leases_without_warm_refcount_operations_and_aborts_preserve_c ... ok
+test canvas::columns::tests::repeated_unique_and_late_miss_palette_storage_is_explicit ... ok
+test canvas::columns::tests::empty_and_clipped_calls_do_not_admit_literals_when_the_bank_is_full ... ok
+test canvas::image_axis::work_tests::setup_is_per_axis_and_adjacent_filter_rows_are_reused_without_allocation ... ok
+test canvas::metric_scale::tests::encoding_preserves_four_bytes_and_rejects_inexact_or_subnormal_reciprocals ... ok
+test canvas::rounded::storage::rounded_sources_keep_retained_strides_without_image_extension_allocations ... ok
+test canvas::rounded::tests::closed_circle_and_half_open_box ... ok
+test canvas::paint::tests::paint_plan_adds_no_canvas_fields_and_allocates_nothing ... ok
+test canvas::samples::tests::identical_finite_samples_preserve_exact_bits_including_signed_zero ... ok
+test canvas::metric_scale::tests::every_power_and_fallback_keep_signed_zero_extremes_and_random_float_bits ... ok
+test canvas::scaled_mask_tests::compiled_metric_scaling_preserves_integer_casts_and_rectangle_operation_order ... ok
+test canvas::scaled_mask_tests::normalized_mask_obeys_half_open_local_edges_before_texel_rounding ... ok
+test canvas::image_axis::tests::whole_tile_overlaps_match_generic_painter_order_and_partial_tiles ... ok
+test canvas::mask_kernel::tests::every_supported_backend_matches_mapping_bits_and_all_primitive_sites ... ok
+test canvas::samples::tests::promotion_preserves_every_sample_and_later_overlap ... ok
+test color::gamut::tests::author_bits_alpha_validation_and_extended_colors_have_explicit_contracts ... ok
+test color::gamut::tests::first_outward_roots_and_unresolved_contacts_keep_separate_authority ... ok
+test color::gamut::tests::limits_match_independent_high_precision_monotone_interval_oracle ... ok
+test color::gamut::tests::nonbinary_rational_tangent_blocks_later_roots_instead_of_guessing_a_sign ... ok
+test color::gradient::tests::authored_hdr_bits_and_small_handle_are_lossless ... ok
+test color::gradient::tests::geometry_and_numeric_admission_cover_ellipse_conic_and_degeneracy ... ok
+test color::gradient::tests::hard_edges_endpoints_and_negative_spreads_have_explicit_sides ... ok
+test color::gradient::tests::resource_compilation_has_one_allocation_and_no_temporary_stop_vector ... ok
+test color::gradient::tests::transparent_endpoint_is_premultiplied_before_interpolation ... ok
+test color::half_tests::authored_color_keeps_sixteen_byte_provenance_header ... ok
+test color::half_tests::every_adjacent_half_midpoint_rounds_ties_even_on_both_sides ... ok
+test canvas::simd_tests::complete_pixels_all_supported_backends_match_independent_sample_composition ... ok
+test color::half_tests::every_finite_half_roundtrips_including_signed_zero ... ok
+test color::half_tests::p3_matrix_applies_to_premultiplied_linear_channels ... ok
+test color::half_tests::known_values_finite_saturation_and_little_endian_channels ... ok
+test canvas::scaled_mask_tests::separable_masks_and_certificates_match_every_scalar_sample ... ok
+test color::quantizer_tests::every_in_range_float_matches_the_reference_quantizer ... ignored, 107 million inputs; run explicitly with --release
+test color::quantizer_tests::opaque_quantizer_microbenchmark ... ignored, timing experiment; run explicitly with --release --nocapture
+test color::quantizer_tests::quantizer_matches_reference_at_all_thresholds_and_bucket_edges ... ok
+test image::tests::bilinear_reconstruction_is_linear_premultiplied_and_clamps_texel_edges ... ok
+test image::tests::byte_table_preserves_existing_color_bits_for_every_channel_and_alpha ... ok
+test image::tests::encoded_premultiplication_is_undone_before_linear_conversion ... ok
+test image::tests::immutable_ids_and_hdr_working_pixels_keep_their_leases ... ok
+test image::tests::rejects_bad_lengths_alpha_and_nonfinite_hdr_before_publication ... ok
+test image::tests::scenes_lease_each_distinct_image_once_and_failed_candidates_keep_old_leases ... ok
+test color::packing_tests::raw_rgb_and_oklch_layouts_preserve_every_lane ... ok
+test text::bundled_coverage::tests::certificate_is_a_complete_maximal_partition ... ok
+test canvas::glyph_axis::tests::shared_mask_addresses_match_every_original_scalar_sample ... ok
+test image::tests::tile_decode_cache_is_exact_under_collisions_profiles_alpha_and_filters ... ok
+test text::coverage::tests::callback_rejection_stops_before_any_later_event ... ok
+test canvas::samples::tests::binary_masks_preserve_absent_bits_in_both_promotion_modes ... ok
+test text::coverage::tests::immutable_primary_font_covers_the_skipped_ascii_domain ... ok
+test text::coverage::tests::mixed_scripts_continuations_and_controls_keep_source_order ... ok
+test text::font_tests::bundled_concurrency_release_remint_and_poison_recovery ... ok
+test text::coverage::tests::all_ascii_values_at_every_short_and_vector_boundary ... ok
+test canvas::bins::tests::admitted_reference_and_command_limits_fit_narrow_membership_and_cuts ... ok
+test color::gamut::tests::finite_input_sweep_keeps_exact_membership_and_a_nearby_outward_witness ... ok
+test text::geometry_ledger::canonical_caret_group_shapes_are_measured_before_implicit_affinity_encoding ... ok
+test text::geometry_ledger::each_retained_text_call_charges_one_packed_owner_lease ... ok
+test text::glyph_buffer::tests::checked_header_endpoints_and_failed_admission_preserve_the_vector ... ok
+test text::geometry_ledger::retained_geometry_drops_paint_leases_and_detaches_explicit_mutation ... ok
+test text::glyph_buffer::tests::empty_owners_and_scene_leases_preserve_text_length_and_owner_lifetime ... ok
+test text::glyph_buffer::tests::empty_spare_capacity_and_full_buffers_keep_exact_allocation_and_bits ... ok
+test text::geometry_ledger::packed_owner_is_shared_only_when_the_scene_needs_a_retained_run ... ok
+test text::glyph_buffer::tests::one_allocation_survives_until_last_clone_and_is_released ... ok
+test text::glyph_buffer::tests::transfer_allocates_nothing ... ok
+test text::glyph_buffer::tests::cloned_owners_keep_exact_bits_across_threads_and_original_drop ... ok
+test text::glyph_codec_tests::all_font_code_endpoints_and_float_bits_round_trip ... ok
+test text::glyph_codec_tests::exact_embedded_fallback_fonts_fit_the_code_namespaces ... ok
+test text::layout::interaction::tests::byte_cuts_keep_boundary_ownership_and_only_visit_the_requested_source ... ok
+test text::outline_once_gate::accepted_complex_outline_exact_masks_and_retained_scratch ... ok
+test text::outline_once_gate::explicit_zeno_matches_auto_bounds_with_empty_contours ... ok
+test text::geometry_ledger::scoped_geometry_allocation_and_payload_ledger ... ok
+test text::glyph_codec_tests::borrowed_iteration_never_materializes_an_expanded_buffer ... ok
+test text::glyph_codec_tests::document_length_does_not_require_a_long_tail_geometry_owner ... ok
+test text::outline_once_gate::tiny_frozen_masks_and_cold_scratch ... ok
+test text::outline_record_tests::accepted_cubic_contours_fill_but_do_not_exceed_recording_caps ... ok
+test text::outline_record_tests::empty_moves_keep_original_bounds_without_growing_storage ... ok
+test text::outline_once_gate::glyf_memory_geometry_empty_moves_and_transient_recording ... ok
+test text::outline_once_gate::frozen_canvas_pixels_and_leased_clear ... ok
+test text::outline_record_tests::rejected_outline_preserves_warm_backend_and_cached_masks ... ok
+test text::paragraph::tests::original_utf8_ranges_empty_and_crlf_are_exact ... ok
+test text::outline_once_gate::synthetic_cff_cff2_masks_and_deferred_segment_limits ... ok
+test text::coverage::tests::every_unicode_scalar_crossing_a_vector_boundary ... ok
+test text::planner::line_ownership_tests::source_line_geometry_reconstruction_preserves_producer_arithmetic_bits ... ok
+test text::planner::line_break_tests::max_height_revert_then_batch_repair_and_invalid_width_keep_contract ... ok
+test text::planner::line_break_tests::batch_incremental_revert_and_mixed_breaking_preserve_actual_layout_bits ... ok
+test color::packing_tests::every_base199_exponent_triple_round_trips ... ok
+test text::bundled_coverage::tests::every_unicode_scalar_matches_bundled_font_coverage ... ok
+test text::planner::tests::indexed_cursor_geometry_matches_original_at_every_byte_and_affinity ... ok
+test text::planner::tests::raw_run_counts_match_positioned_output_across_wraps_and_scripts ... ok
+test text::planner::cursor_pair_tests::indexed_affinity_pairs_preserve_every_direct_geometry_bit ... ok
+test text::planner::line_ownership_tests::mandatory_break_lines_exclude_separators_but_runs_cover_document ... ok
+test text::planner::line_ownership_tests::visual_line_transitions_do_not_rehit_collapsed_line_tops ... ok
+test text::planner::line_ownership_tests::wrapped_zero_and_small_line_heights_keep_producer_source_ownership ... ok
+test text::planner::tests::measurement_keeps_exact_metrics_and_no_owned_geometry ... ok
+test canvas::image_axis::tests::every_correlated_sample_matches_generic_inverse_filter_and_decoder_bits ... ok
+test text::planner::tests::rejected_expanding_output_does_not_contaminate_the_next_paragraph ... ok
+test text::planner::tests::cached_cmaps_match_face_for_every_scalar_and_absent_or_custom_tables ... ok
+
+test result: ok. 106 passed; 0 failed; 2 ignored; 0 measured; 0 filtered out; finished in 0.55s
+
+
+running 8 tests
+test exceptional_paint_retires_cached_cuts_only_after_commit_and_reuses_geometry ... ok
+test shared_colors_revoke_cached_cuts_without_touching_geometry_or_allocating ... ok
+test fresh_negative_zero_opaque_cut_matches_scalar_hdr ... ok
+test containing_tile_envelopes_survive_empty_regions_and_diagnostic_interleaving ... ok
+test structural_commits_reject_stale_bins_even_with_identical_counts_and_bounds ... ok
+test failed_and_dropped_work_preserves_valid_bins_and_prior_pixels ... ok
+test cached_origin_and_stride_do_not_change_regional_output_or_reference_stats ... ok
+test color_patches_reuse_unpruned_bins_and_match_fresh_full_scenes ... ok
+
+test result: ok. 8 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 0.00s
+
+
+running 6 tests
+test depth_and_invalid_geometry_reject_before_mutating_the_prefix ... ok
+test axis_rect_prefixes_lower_without_losing_continuous_geometry ... ok
+test handles_reject_foreign_cleared_dropped_and_replaced_scenes ... ok
+test identical_nested_rounded_clips_intersect_samples_instead_of_multiplying_alpha ... ok
+test node_budget_failed_draw_and_aborted_candidate_preserve_complete_scene ... ok
+test every_lattice_site_matches_an_independent_oracle_at_ties_and_transformed_corners ... ok
+
+test result: ok. 6 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 0.00s
+
+
+running 6 tests
+test all_profile_pairs_roundtrip_without_gamut_clipping ... ok
+test invalid_color_values_and_configuration_are_rejected ... ok
+test primary_conversion_uses_d65_matrices_and_preserves_extended_channels ... ok
+test p3_bytes_are_explicitly_profiled_and_hdr_is_linear_eight_byte_output ... ok
+test final_mapping_occurs_after_extended_linear_composition ... ok
+test tone_mapping_is_selected_not_implicit ... ok
+
+test result: ok. 6 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 0.00s
+
+
+running 2 tests
+test numeric_equality_remains_distinct_from_exact_authoring ... ok
+test exact_authoring_comparison_matches_observable_channel_bits_and_profile ... ok
+
+test result: ok. 2 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 0.00s
+
+
+running 3 tests
+test const_palette_alpha_and_float_equality_keep_their_contracts ... ok
+test legacy_working_colors_produce_identical_cpu_pixels ... ok
+test legacy_admission_channels_and_conversion_are_bit_exact ... ok
+
+test result: ok. 3 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 0.01s
+
+
+running 8 tests
+test hdr_sample_promotion_matches_the_uncompressed_path ... ok
+test hdr_support_uses_unquantized_working_colors ... ok
+test unpresented_edits_union_without_retaining_the_intermediate_scene ... ok
+test identical_leased_text_is_empty_and_moved_text_repairs_old_and_new_support ... ok
+test a_small_repair_at_a_distant_origin_needs_only_local_bins ... ok
+test insert_remove_reorder_and_transformed_color_edits_repair_every_pixel ... ok
+test rebuilt_clip_geometry_does_not_damage_unchanged_draws ... ok
+test randomized_repairs_cross_partial_tile_and_viewport_edges ... ok
+
+test result: ok. 8 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 0.03s
+
+
+running 4 tests
+test independent_rustybuzz_shaping_is_exact ... ok
+test actual_cpu_sdr_and_hdr_pixels_are_exact ... ok
+test all_glyph_swash_masks_have_exact_placement_and_coverage ... ok
+test exact_cmap_and_all_glyph_metrics_and_outline_commands ... ok
+
+test result: ok. 4 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 0.29s
+
+
+running 3 tests
+test invalid_density_and_physical_font_size_reject_even_empty_layouts_atomically ... ok
+test density_one_preserves_existing_pixels_and_fractional_density_uses_physical_raster_keys ... ok
+test two_x_density_uses_real_physical_masks_and_matches_physical_font_rendering ... ok
+
+test result: ok. 3 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 0.00s
+
+
+running 2 tests
+test invalid_external_targets_leave_buffer_and_scene_untouched ... ok
+test external_native_words_match_rgba_and_preserve_lazy_image_coherence ... ok
+
+test result: ok. 2 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 0.00s
+
+
+running 3 tests
+test immutable_font_admission_has_no_eager_outline_heap ... ok
+test empty_glyphs_do_not_create_masks_and_clearing_cache_preserves_scene_leases ... ok
+test requested_outline_masks_have_real_coverage_and_preserve_placement ... ok
+
+test result: ok. 3 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 0.02s
+
+
+running 3 tests
+test live_services_measurement ... ignored, RSS/timing measurement; GPUI_FONT_SERVICES=1,2,8 in separate processes
+test supplied_font_bytes_are_owned_once_by_the_shared_face ... ok
+test shared_face_accepts_cross_service_layouts_but_caches_are_independent ... ok
+
+test result: ok. 2 passed; 0 failed; 1 ignored; 0 measured; 0 filtered out; finished in 0.00s
+
+
+running 3 tests
+test gradient_numeric_frontiers_are_admitted_or_rejected_explicitly ... ok
+test public_sampling_rejects_unsupported_domains_instead_of_silent_phase_overflow ... ok
+test analytic_material_and_rounded_coverage_match_independent_sixteen_sample_oracle ... ok
+
+test result: ok. 3 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 0.00s
+
+
+running 2 tests
+test groups_are_the_same_canonical_painter_sequence_in_both_directions ... ok
+test masks_are_leased_once_per_stable_key_across_runs_cache_eviction_and_services ... ok
+
+test result: ok. 2 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 0.00s
+
+
+running 6 tests
+test byte_counts_and_checked_configuration_are_format_specific ... ok
+test extended_values_compose_before_finite_storage_saturation ... ok
+test p3_primaries_remain_linear_and_reference_white_is_explicit_metadata ... ok
+test recording_allocates_eight_byte_pixels_lazily_and_staging_reuses_them ... ok
+test rgba16f_is_actual_eight_byte_linear_premultiplied_output ... ok
+test actual_font_coverage_is_encoded_as_extended_linear_half_pixels ... ok
+
+test result: ok. 6 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 0.00s
+
+
+running 4 tests
+test nearest_packed_texels_match_independent_color_rectangles ... ok
+test image_identity_filter_and_removal_damage_repair_preserved_pixels ... ok
+test constant_images_match_independent_solid_geometry_for_every_sample ... ok
+test distinct_payload_budget_is_checked_before_publishing_a_new_resource_or_draw ... ok
+
+test result: ok. 4 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 0.03s
+
+
+running 3 tests
+test line_pitch_rejects_invalid_values_and_overflow_without_poisoning_reuse ... ok
+test absolute_pitch_controls_wrapped_and_hard_lines_and_matches_measurement ... ok
+test omitted_pitch_preserves_defaults_after_explicit_reuse ... ok
+
+test result: ok. 3 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 0.00s
+
+
+running 2 tests
+test dropped_and_rejected_transactions_preserve_all_aliases_and_future_source_updates ... ok
+test equal_and_changed_positional_writes_detach_locally_without_mutating_literal_peers ... ok
+
+test result: ok. 2 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 0.00s
+
+
+running 5 tests
+test hue_alpha_extended_values_and_oklch_neutral_defaults ... ok
+test css_xyz_path_agrees_with_independent_published_direct_srgb_reference ... ok
+test invalid_ranges_and_out_of_working_range_are_rejected ... ok
+test metadata_names_linear_p3_d65_reference_white_and_numeric_conversion ... ok
+test primaries_have_independent_reference_oklch_values_and_roundtrip ... ok
+
+test result: ok. 5 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 0.00s
+
+
+running 4 tests
+test validation_and_dropping_a_prepared_commit_are_transactional ... ok
+test group_boundaries_empty_calls_and_image_material_are_checked ... ok
+test returned_damage_repairs_a_preserved_image_and_leaves_outside_pixels_unchanged ... ok
+test patches_match_full_replacement_for_profiles_hdr_masks_and_ordered_overlap ... ok
+
+test result: ok. 4 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 0.00s
+
+
+running 0 tests
+
+test result: ok. 0 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 0.00s
+
+
+running 3 tests
+test recording_canvas_allocates_sole_cpu_image_only_on_request ... ok
+test canonical_scene_is_ordered_borrowed_and_does_not_rasterize ... ok
+test raster_keys_survive_cache_eviction_and_shared_services_but_not_distinct_faces ... ok
+
+test result: ok. 3 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 0.00s
+
+
+running 10 tests
+test correlated_edges_are_composited_before_sample_average ... ok
+test linear_light_alpha_and_premultiplied_output ... ok
+test staged_scene_keeps_old_pixels_and_reuses_the_output_allocation ... ok
+test wrapped_runs_keep_utf8_and_whole_shaping_clusters ... ok
+test real_shaping_ligatures_unicode_measure_and_paint_are_stable ... ok
+test transformed_text_clip_and_foreign_layout_failure_are_explicit ... ok
+test no_sample_draw_preserves_the_entire_background_at_quantization_thresholds ... ok
+test swash_native_pixels_and_transformed_cells_match_independent_oracles ... ok
+test invalid_inputs_and_caps_do_not_corrupt_scene ... ok
+test transformed_rectangles_match_exhaustive_sample_oracle ... ok
+
+test result: ok. 10 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 0.05s
+
+
+running 5 tests
+test invalid_radius_is_transactional_and_negative_zero_is_rectangular ... ok
+test public_image_views_keep_canonical_material_and_exact_authored_radius ... ok
+test source_word_preserves_every_finite_radius_exponent_and_mantissa_samples ... ok
+test correlated_layers_cannot_fill_each_others_rounded_corners ... ok
+test analytic_sample_oracle_reflections_shear_clips_and_radius_clamping ... ok
+
+test result: ok. 5 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 0.00s
+
+
+running 3 tests
+test prepared_inverse_lowering_preserves_canonical_ties_without_forward_roundtrip ... ok
+test nested_clips_intersect_exact_sample_sets_and_helper_allocates_nothing ... ok
+test sampled_clips_match_independent_ordinary_canvas_for_signs_ties_and_extreme_inverse ... ok
+
+test result: ok. 3 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 0.00s
+
+
+running 2 tests
+test adjacent_hdr_zeros_keep_distinct_output_signs ... ok
+test promoted_pixels_match_uncompressed_samples_across_tiles_and_color_formats ... ok
+
+test result: ok. 2 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 0.10s
+
+
+running 11 tests
+test discarding_interaction_keeps_glyph_storage_source_runs_and_lines ... ok
+test distant_hits_and_line_transitions_choose_physical_extrema ... ok
+test hit_selection_and_motion_share_exact_grapheme_crlf_and_bidi_positions ... ok
+test independent_visible_order_hits_half_intervals_with_source_affinity ... ok
+test ordinary_interaction_queries_allocate_nothing_and_preserve_layout_size ... ok
+test physical_arrows_walk_independent_known_visual_edges ... ok
+test directional_run_boxes_do_not_span_disconnected_isolate_fragments ... ok
+test selected_crlf_is_atomic_and_its_marker_extends_past_the_source_trailing_edge ... ok
+test source_affinity_at_bidi_wrap_owns_the_correct_adjacent_line ... ok
+test vertical_navigation_uses_affinity_line_ownership_and_one_allocation_free_map ... ok
+test derived_selection_intervals_match_parley_real_bidi_ligature_and_wrap_geometry ... ok
+
+test result: ok. 11 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 0.00s
+
+
+running 2 tests
+test batch_parses_once_and_releases_tables_without_an_idle_cache ... ok
+test borrowed_batch_preserves_lines_clusters_errors_and_shared_face_identity ... ok
+
+test result: ok. 2 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 0.00s
+
+
+running 6 tests
+test equal_legacy_edit_of_nondefault_shared_paint_is_infallible_without_allocation ... ok
+test legacy_positional_edit_detaches_only_that_common_from_shared_slot ... ok
+test equal_positional_set_detaches_from_future_shared_color_edits ... ok
+test transaction_rejection_and_drop_leave_complete_bank_untouched ... ok
+test shared_slot_matches_full_literal_oracle_after_each_transaction ... ok
+test deferred_shared_paints_allocate_no_bank_for_empty_geometry_or_clipped_glyphs ... ok
+
+test result: ok. 6 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 0.00s
+
+
+running 3 tests
+test public_scene_metadata_edits_cannot_certify_invalid_content ... ok
+test unsupported_and_nonempty_scenes_use_normal_renderer ... ok
+test solid_certificate_uses_exact_output_quantizer_without_rendering_or_allocating ... ok
+
+test result: ok. 3 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 0.00s
+
+
+running 3 tests
+test rejected_and_panicked_sessions_recover_without_poisoning_future_layouts ... ok
+test a_new_font_identity_cannot_inherit_the_previous_planner_font_authority ... ok
+test reusable_planning_matches_scoped_unicode_metrics_and_original_byte_geometry ... ok
+
+test result: ok. 3 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 0.01s
+
+
+running 1 test
+test repeated_labels_keep_batched_capacity_and_allocate_nothing_when_warm ... ok
+
+test result: ok. 1 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 0.00s
+
+
+running 2 tests
+test retained_text_metadata_preserves_complex_clip_gradient_order_and_lifetime ... ok
+test rebuilt_nested_clip_text_and_gradient_scenes_have_exact_damage ... ok
+
+test result: ok. 2 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 0.01s
+
+
+running 1 test
+test retained_text_metric_scale_cost_and_work_probe ... ok
+
+test result: ok. 1 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 3.12s
+
+
+running 1 test
+test retained_text_cost_and_work_probe ... ok
+
+test result: ok. 1 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 1.01s
+
+
+running 5 tests
+test warm_many_label_rebuild_has_no_submission_allocations ... ok
+test submission_allocation_and_retained_capacity_ledger ... ok
+test mixed_script_paint_selection_density_transform_and_scroll_keep_canonical_output ... ok
+test late_command_limit_failure_preserves_scene_and_new_resource_identity ... ok
+test duplicate_keys_and_foreign_face_rollback_preserve_pixels_and_candidate ... ok
+
+test result: ok. 5 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 0.04s
+
+
+running 14 tests
+test line_separator_keeps_paragraph_bidi_base_but_paragraph_separator_resets_it ... ok
+test bidi_visual_positions_match_explicit_mixed_direction_examples ... ok
+test grapheme_interiors_are_not_legal_byte_positions ... ok
+test every_bidi_grapheme_boundary_has_both_requested_destinations ... ok
+test missing_coverage_is_an_error_and_inherited_arabic_marks_use_fallback ... ok
+test original_crlf_bytes_empty_paragraphs_and_caret_affinity_are_exact ... ok
+test mixed_scripts_rtl_numbers_and_isolates_have_actual_coverage ... ok
+test long_graphemes_take_cold_metadata_without_rejecting_source_or_losing_tail ... ok
+test fallback_layout_leases_survive_later_sets_and_cache_eviction ... ok
+test wrapped_ligatures_never_cross_font_or_bidi_run_boundaries ... ok
+test explicit_variable_face_uses_its_default_instance_for_shape_and_raster ... ok
+test single_script_glyphs_match_independent_harfbuzz_implementation ... ok
+test fallback_choice_is_independent_of_prior_passes_and_ignorables_keep_source_bytes ... ok
+test mixed_paragraph_reordering_preserves_every_grapheme_destination_and_run_range ... ok
+
+test result: ok. 14 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 0.01s
+
+
+running 2 tests
+test crates/gpui/src/reader/question.rs - reader::question::Questions<M,L>::question_future (line 121) ... ok
+test crates/gpui/src/remote.rs - remote::Remote (line 67) ... ok
+
+test result: ok. 2 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 0.00s
+
+
+running 26 tests
+test crates/gpui/src/property.rs - property::Property (line 368) - compile fail ... ok
+test crates/gpui/src/component.rs - component::Component<P,C>::view (line 63) - compile fail ... ok
+test crates/gpui/src/identity.rs - identity::Target (line 14) - compile fail ... ok
+test crates/gpui/src/reader.rs - reader::Completion<T,E>::run_cancellable (line 389) - compile fail ... ok
+test crates/gpui/src/reader.rs - reader::Completion<T,E>::run_cancellable (line 381) - compile fail ... ok
+test crates/gpui/src/reader.rs - reader::Reader<T>::project (line 81) - compile fail ... ok
+test crates/gpui/src/reader/question.rs - reader::question::Questions<M,L>::question (line 70) - compile fail ... ok
+test crates/gpui/src/reader.rs - reader::Completion (line 306) - compile fail ... ok
+test crates/gpui/src/reader.rs - reader::Reader (line 56) - compile fail ... ok
+test crates/gpui/src/element.rs - element::text_input (line 1203) - compile fail ... ok
+test crates/gpui/src/element.rs - element::text_input (line 1208) - compile fail ... ok
+test crates/gpui/src/reader/question.rs - reader::question::Questions<M,L>::question_future (line 139) - compile fail ... ok
+test crates/gpui/src/property.rs - property::CORNER_RADIUS (line 599) - compile fail ... ok
+test crates/gpui/src/property.rs - property::Property (line 373) - compile fail ... ok
+test crates/gpui/src/reader/question.rs - reader::question::Questions<M,L>::question_future (line 132) - compile fail ... ok
+test crates/gpui/src/runtime.rs - runtime::PresentationToken (line 213) - compile fail ... ok
+test crates/gpui/src/runtime.rs - runtime::PresentationToken (line 219) - compile fail ... ok
+test crates/gpui/src/reader/question.rs - reader::question::Questions<M,L>::question_future (line 146) - compile fail ... ok
+test crates/gpui/src/runtime.rs - runtime::Win (line 1238) - compile fail ... ok
+test crates/gpui/src/runtime.rs - runtime::Win (line 1246) - compile fail ... ok
+test crates/gpui/src/runtime/delivery.rs - runtime::delivery::Win<M,L>::visit_question_inputs (line 28) - compile fail ... ok
+test crates/gpui/src/remote.rs - remote::Inbox (line 159) - compile fail ... ok
+test crates/gpui/src/runtime/delivery.rs - runtime::delivery::Win<M,L>::with_ready (line 58) - compile fail ... ok
+test crates/gpui/src/runtime/delivery.rs - runtime::delivery::Win<M,L>::with_ready (line 52) - compile fail ... ok
+test crates/gpui/src/runtime/query/serialize.rs - runtime::query::serialize::SemanticSnapshot (line 17) - compile fail ... ok
+test crates/gpui/src/runtime/query.rs - runtime::query::Part (line 183) - compile fail ... ok
+
+test result: ok. 26 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 0.32s
+
+all doctests ran in 1.09s; merged doctests compilation took 0.77s
+
+running 4 tests
+test crates/canvas/src/canvas/paint.rs - canvas::paint::PaintCommit (line 66) - compile fail ... ok
+test crates/canvas/src/canvas.rs - canvas::PreparedScene (line 1043) - compile fail ... ok
+test crates/canvas/src/text.rs - text::TextLayout::glyphs (line 332) - compile fail ... ok
+test crates/canvas/src/canvas.rs - canvas::CanvasScene (line 2896) - compile fail ... ok
+
+test result: ok. 4 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 0.04s
+

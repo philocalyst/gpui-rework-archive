@@ -1,0 +1,14 @@
+[
+  {
+    "path": "/home/user/gpui-glyph-damage-target/release/build/gpui_canvas/da7502e5ae3511cc/out/damage_regions-da7502e5ae3511cc",
+    "sha256": "f04868340e38bb255a17eac5f4f680216eb439997abef0e8d7bcfc3c34880c90",
+    "preserved": "/home/user/gpui-preserved-test-binaries/f04868340e38bb255a17eac5f4f680216eb439997abef0e8d7bcfc3c34880c90",
+    "bytes": 1206528
+  },
+  {
+    "path": "/home/user/gpui-glyph-damage-target/release/build/gpui_canvas/774d3ceecb744ce7/out/text_patch_damage-774d3ceecb744ce7",
+    "sha256": "c53e07be6be208f5554129940904b9a4949d3b2e31e61284fcf22457d18d53fe",
+    "preserved": "/home/user/gpui-preserved-test-binaries/c53e07be6be208f5554129940904b9a4949d3b2e31e61284fcf22457d18d53fe",
+    "bytes": 8613064
+  }
+]

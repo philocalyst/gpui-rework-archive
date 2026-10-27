@@ -1,0 +1,5 @@
+{
+  "qualification_and_allocations_sha256": "de2887be50fe9594e9a6bc2e36522b8c2f53d13f8af9ea61b3433f158f6ed2ba",
+  "timing_sha256": "348abdbe410cacbb209405c8eed71322d801284be564d79d326b58a82f397e59",
+  "change_before_any_timing": "Timing appends one JSONL result per process and writes aggregate JSON only at completion/failure. Avoids repeatedly rewriting the growing 2688-process result set. Source binary, command, workload, order, gates and estimator unchanged."
+}

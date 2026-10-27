@@ -1,0 +1,778 @@
+diff --git a/reactivity/crates/canvas/src/damage.rs b/reactivity/crates/canvas/src/damage.rs
+index a6adf2e22b..76703a75f5 100644
+--- a/reactivity/crates/canvas/src/damage.rs
++++ b/reactivity/crates/canvas/src/damage.rs
+@@ -38,3 +38,79 @@ impl DamageRegion {
+         Self(bounds.map(|value| u16::try_from(value).expect("checked canvas coordinate")))
+     }
+ }
++
++/// Bounded, pairwise separated conservative repair regions. A single region
++/// allocates nothing. At most 64 regions are retained; overflow permanently
++/// collapses this update to its bounding rectangle. No pixel is omitted.
++#[derive(Debug)]
++pub struct DamageRegions(Regions);
++#[derive(Debug)]
++enum Regions {
++    One(DamageRegion),
++    Many(Vec<DamageRegion>),
++    Dense(DamageRegion),
++}
++impl Default for DamageRegions {
++    fn default() -> Self {
++        Self(Regions::One(DamageRegion::default()))
++    }
++}
++impl DamageRegions {
++    pub fn regions(&self) -> &[DamageRegion] {
++        match &self.0 {
++            Regions::One(region) | Regions::Dense(region) => std::slice::from_ref(region),
++            Regions::Many(regions) => regions,
++        }
++    }
++    pub fn bounds(&self) -> DamageRegion {
++        self.regions()
++            .iter()
++            .fold(DamageRegion::default(), |a, &b| a.union(b))
++    }
++    pub fn pixels(&self) -> u64 {
++        self.regions()
++            .iter()
++            .filter_map(|r| r.bounds())
++            .map(|[l, t, r, b]| u64::from(r - l) * u64::from(b - t))
++            .sum()
++    }
++    /// Add old or new support. Intersecting/touching rectangles are merged into
++    /// their bounds, which may conservatively include otherwise unchanged gaps.
++    pub fn include(&mut self, mut region: DamageRegion) {
++        if region.is_empty() {
++            return;
++        }
++        let touches = |a: DamageRegion, b: DamageRegion| {
++            let [l, t, r, bottom] = a.0;
++            let [x, y, right, down] = b.0;
++            l <= right && x <= r && t <= down && y <= bottom
++        };
++        match &mut self.0 {
++            Regions::Dense(bounds) => *bounds = bounds.union(region),
++            Regions::One(old) if old.is_empty() || touches(*old, region) => {
++                *old = old.union(region)
++            }
++            Regions::One(old) => {
++                let mut regions = Vec::with_capacity(64);
++                regions.extend([*old, region]);
++                self.0 = Regions::Many(regions);
++            }
++            Regions::Many(regions) => {
++                let mut index = 0;
++                while index < regions.len() {
++                    if touches(regions[index], region) {
++                        region = region.union(regions.swap_remove(index));
++                        index = 0;
++                    } else {
++                        index += 1;
++                    }
++                }
++                if regions.len() == 64 {
++                    self.0 = Regions::Dense(regions.iter().fold(region, |a, &b| a.union(b)));
++                } else {
++                    regions.push(region);
++                }
++            }
++        }
++    }
++}
+diff --git a/reactivity/crates/canvas/src/lib.rs b/reactivity/crates/canvas/src/lib.rs
+index c69ddb284a..b679705ce6 100644
+--- a/reactivity/crates/canvas/src/lib.rs
++++ b/reactivity/crates/canvas/src/lib.rs
+@@ -21,7 +21,7 @@ pub use color::{
+     Color, ColorConfig, ColorSpace, FloatRangePolicy, OutputMetadata, OutputProfile,
+     OutputTransfer, PixelFormat, SdrMapping, oklch, rgb,
+ };
+-pub use damage::DamageRegion;
++pub use damage::{DamageRegion, DamageRegions};
+ pub use image::{
+     AlphaMode, Image, ImageKey, ImageOptions, ImagePixels, ImageProfile, ImageSampling, ImageView,
+     MAX_IMAGE_SCENE_BYTES,
+diff --git a/reactivity/crates/canvas/tests/damage_regions.rs b/reactivity/crates/canvas/tests/damage_regions.rs
+new file mode 100644
+index 0000000000..84dc0505d2
+--- /dev/null
++++ b/reactivity/crates/canvas/tests/damage_regions.rs
+@@ -0,0 +1,90 @@
++use gpui_canvas::{Affine, Canvas, Color, DamageRegion, DamageRegions, Rect};
++fn region(x: f32, y: f32, width: f32, height: f32) -> DamageRegion {
++    let mut canvas = Canvas::recording(2048, 32, Default::default()).unwrap();
++    let mut scene = canvas.stage();
++    scene
++        .fill_rect(
++            Rect::new(x, y, width, height),
++            Affine::IDENTITY,
++            Rect::new(0., 0., 2048., 32.),
++            Color::WHITE,
++        )
++        .unwrap();
++    scene.commit_with_damage()
++}
++fn area(region: DamageRegion) -> u64 {
++    region
++        .bounds()
++        .map_or(0, |[l, t, r, b]| u64::from(r - l) * u64::from(b - t))
++}
++fn separated(regions: &DamageRegions) {
++    let rectangles = regions.regions();
++    for (i, a) in rectangles.iter().enumerate() {
++        for b in &rectangles[i + 1..] {
++            let [l, t, r, d] = a.bounds().unwrap();
++            let [x, y, right, down] = b.bounds().unwrap();
++            assert!(r < x || right < l || d < y || down < t);
++        }
++    }
++}
++#[test]
++fn merge_restarts_and_preserves_all_input_support_in_every_order() {
++    let inputs = [
++        region(0., 0., 2., 2.),
++        region(6., 6., 2., 2.),
++        region(2., 0., 4., 6.),
++        region(20., 2., 2., 2.),
++    ];
++    for order in [[0, 1, 2, 3], [3, 2, 1, 0], [1, 3, 0, 2], [2, 0, 3, 1]] {
++        let mut regions = DamageRegions::default();
++        for i in order {
++            regions.include(inputs[i]);
++            separated(&regions);
++        }
++        assert_eq!(regions.regions().len(), 2);
++        for input in inputs {
++            let [l, t, r, b] = input.bounds().unwrap();
++            assert!(regions.regions().iter().any(|part| {
++                part.bounds()
++                    .is_some_and(|[x, y, right, down]| x <= l && y <= t && right >= r && down >= b)
++            }));
++        }
++        assert_eq!(
++            regions.pixels(),
++            area(inputs[0].union(inputs[1]).union(inputs[2])) + area(inputs[3])
++        );
++    }
++}
++#[test]
++fn inline_region_allocates_nothing_and_overflow_stays_bounded() {
++    let first = region(0., 0., 2., 2.);
++    let overlapping = region(1., 0., 2., 2.);
++    let mut regions = DamageRegions::default();
++    let allocation = allocation_counter::measure(|| {
++        regions.include(first);
++        regions.include(overlapping);
++        regions.include(DamageRegion::default());
++    });
++    assert_eq!(allocation.count_total, 0);
++    assert_eq!(regions.regions().len(), 1);
++    assert_eq!(regions.pixels(), area(first.union(overlapping)));
++    let mut regions = DamageRegions::default();
++    let mut expected = DamageRegion::default();
++    for i in 0..64 {
++        let support = region(i as f32 * 4., 0., 1., 1.);
++        expected = expected.union(support);
++        regions.include(support);
++    }
++    assert_eq!(regions.regions().len(), 64);
++    separated(&regions);
++    let last = region(256., 0., 1., 1.);
++    expected = expected.union(last);
++    regions.include(last);
++    assert_eq!(regions.regions().len(), 1);
++    let last = region(300., 5., 1., 1.);
++    expected = expected.union(last);
++    regions.include(last);
++    assert_eq!(regions.regions().len(), 1);
++    assert_eq!(regions.bounds(), expected);
++    assert_eq!(regions.pixels(), area(expected));
++}
+diff --git a/reactivity/crates/gpu/src/renderer.rs b/reactivity/crates/gpu/src/renderer.rs
+index 23b195c6e5..5c8feec4d0 100644
+--- a/reactivity/crates/gpu/src/renderer.rs
++++ b/reactivity/crates/gpu/src/renderer.rs
+@@ -528,12 +528,19 @@ impl GpuContext {
+         self.format
+     }
+     fn submit(&self, output: Output<'_>, bindings: &wgpu::BindGroup) -> wgpu::SubmissionIndex {
++        let damage = match output.damage {
++            retained::Repair::Full => None,
++            retained::Repair::Region(region) => Some(region),
++            retained::Repair::Regions(regions) => {
++                return self.submit_regions(output, bindings, regions);
++            }
++        };
+         let mut encoder = self
+             .device
+             .create_command_encoder(&wgpu::CommandEncoderDescriptor {
+                 label: Some("GPUI frame"),
+             });
+-        if output.damage.is_none_or(|damage| !damage.is_empty()) {
++        if damage.is_none_or(|damage| !damage.is_empty()) {
+             let mut pass = encoder.begin_render_pass(&wgpu::RenderPassDescriptor {
+                 label: Some("GPUI frame"),
+                 color_attachments: &[Some(wgpu::RenderPassColorAttachment {
+@@ -541,7 +548,7 @@ impl GpuContext {
+                     resolve_target: None,
+                     depth_slice: None,
+                     ops: wgpu::Operations {
+-                        load: if output.damage.is_some() {
++                        load: if damage.is_some() {
+                             wgpu::LoadOp::Load
+                         } else {
+                             wgpu::LoadOp::Clear(wgpu::Color::TRANSPARENT)
+@@ -554,7 +561,7 @@ impl GpuContext {
+                 occlusion_query_set: None,
+                 multiview_mask: None,
+             });
+-            if let Some([left, top, right, bottom]) = output.damage.and_then(|d| d.bounds()) {
++            if let Some([left, top, right, bottom]) = damage.and_then(|d| d.bounds()) {
+                 pass.set_scissor_rect(left, top, right - left, bottom - top);
+             }
+             pass.set_pipeline(&self.pipeline);
+@@ -566,6 +573,49 @@ impl GpuContext {
+         }
+         self.queue.submit([encoder.finish()])
+     }
++    #[inline(never)]
++    fn submit_regions(
++        &self,
++        output: Output<'_>,
++        bindings: &wgpu::BindGroup,
++        regions: &gpui_canvas::DamageRegions,
++    ) -> wgpu::SubmissionIndex {
++        let mut encoder = self
++            .device
++            .create_command_encoder(&wgpu::CommandEncoderDescriptor {
++                label: Some("GPUI sparse repair"),
++            });
++        {
++            let mut pass = encoder.begin_render_pass(&wgpu::RenderPassDescriptor {
++                label: Some("GPUI sparse repair"),
++                color_attachments: &[Some(wgpu::RenderPassColorAttachment {
++                    view: output.view,
++                    resolve_target: None,
++                    depth_slice: None,
++                    ops: wgpu::Operations {
++                        load: wgpu::LoadOp::Load,
++                        store: wgpu::StoreOp::Store,
++                    },
++                })],
++                depth_stencil_attachment: None,
++                timestamp_writes: None,
++                occlusion_query_set: None,
++                multiview_mask: None,
++            });
++            pass.set_pipeline(&self.pipeline);
++            pass.set_bind_group(0, bindings, &[]);
++            for region in regions.regions() {
++                if let Some([l, t, r, b]) = region.bounds() {
++                    pass.set_scissor_rect(l, t, r - l, b - t);
++                    pass.draw(0..3, 0..1);
++                }
++            }
++        }
++        if let Some((backing, target)) = output.present {
++            backing.copy(&mut encoder, target);
++        }
++        self.queue.submit([encoder.finish()])
++    }
+ }
+ impl RendererState {
+     /// Create independent resources on a live context. Device health remains
+diff --git a/reactivity/crates/gpu/src/renderer/retained.rs b/reactivity/crates/gpu/src/renderer/retained.rs
+index ec88397be3..744689d12b 100644
+--- a/reactivity/crates/gpu/src/renderer/retained.rs
++++ b/reactivity/crates/gpu/src/renderer/retained.rs
+@@ -1,22 +1,34 @@
+ //! A renderer-owned image, never a preservation assumption about a swapchain.
+ use super::*;
+-use gpui_canvas::{DamageRegion, SlotEdit};
++use gpui_canvas::{DamageRegion, DamageRegions, SlotEdit};
+ 
+ pub(super) struct Output<'a> {
+     pub(super) view: &'a wgpu::TextureView,
+-    pub(super) damage: Option<DamageRegion>,
++    pub(super) damage: Repair<'a>,
+     pub(super) present: Option<(&'a Backing, &'a wgpu::TextureView)>,
+ }
+ impl<'a> From<&'a wgpu::TextureView> for Output<'a> {
+     fn from(view: &'a wgpu::TextureView) -> Self {
+         Self {
+             view,
+-            damage: None,
++            damage: Repair::Full,
+             present: None,
+         }
+     }
+ }
+ 
++#[derive(Clone, Copy)]
++pub(super) enum Repair<'a> {
++    Full,
++    Region(DamageRegion),
++    Regions(&'a DamageRegions),
++}
++impl From<Option<DamageRegion>> for Repair<'_> {
++    fn from(damage: Option<DamageRegion>) -> Self {
++        damage.map_or(Self::Full, Self::Region)
++    }
++}
++
+ /// Work and explicit image storage of the last successful retained submission.
+ /// Packet `Stats` still describe the complete admitted scene; these counters
+ /// describe the pixels actually submitted, not GPU time or driver allocations.
+@@ -73,6 +85,27 @@ impl RetainedRenderer {
+         scene: PreparedScene<'_>,
+         target: &wgpu::TextureView,
+         damage: Option<DamageRegion>,
++    ) -> Result<wgpu::SubmissionIndex, Error> {
++        self.render_repair(scene, target, damage.into())
++    }
++    /// Repair separated regions certified against the preceding retained image.
++    /// The same predecessor/clear/resource requirements as `render` apply.
++    pub fn render_regions(
++        &mut self,
++        scene: PreparedScene<'_>,
++        target: &wgpu::TextureView,
++        damage: &DamageRegions,
++    ) -> Result<wgpu::SubmissionIndex, Error> {
++        if let [region] = damage.regions() {
++            return self.render(scene, target, Some(*region));
++        }
++        self.render_repair(scene, target, Repair::Regions(damage))
++    }
++    fn render_repair(
++        &mut self,
++        scene: PreparedScene<'_>,
++        target: &wgpu::TextureView,
++        damage: Repair<'_>,
+     ) -> Result<wgpu::SubmissionIndex, Error> {
+         let size = [scene.width, scene.height];
+         // Invalidate image authority even when admission fails before uploads.
+@@ -88,22 +121,34 @@ impl RetainedRenderer {
+             return Err(Error::ResourceLimit);
+         }
+         check_target(target, size, self.inner.format())?;
+-        check_damage(damage, size)?;
++        match damage {
++            Repair::Full => {}
++            Repair::Region(region) => check_damage(Some(region), size)?,
++            Repair::Regions(regions) => {
++                for &region in regions.regions() {
++                    check_damage(Some(region), size)?;
++                }
++            }
++        }
+         let resized = self.backing.as_ref().is_none_or(|b| b.size() != size);
+         if resized {
+             let pipeline = self.backing.take().map(|b| b.pipeline);
+             self.backing = Some(Box::new(Backing::new(&self.inner.context, size, pipeline)));
+         }
+         let backing = self.backing.as_mut().unwrap();
+-        let damage = damage.filter(|_| valid && !resized);
++        let damage = if valid && !resized {
++            damage
++        } else {
++            Repair::Full
++        };
+         let submitted = self.inner.state.render_observed(
+             &self.inner.context,
+             scene,
+-            backing.output(target, damage),
++            backing.output_repair(target, damage),
+             |_, _, _, _| {},
+         )?;
+         backing.valid = true;
+-        self.stats = backing.stats(damage);
++        self.stats = backing.stats_repair(damage);
+         Ok(submitted)
+     }
+     /// Copy the last successful image to a fresh target, without compositing.
+@@ -250,6 +295,13 @@ impl Backing {
+         &'a self,
+         target: &'a wgpu::TextureView,
+         damage: Option<DamageRegion>,
++    ) -> Output<'a> {
++        self.output_repair(target, damage.into())
++    }
++    fn output_repair<'a>(
++        &'a self,
++        target: &'a wgpu::TextureView,
++        damage: Repair<'a>,
+     ) -> Output<'a> {
+         Output {
+             view: &self.view,
+@@ -258,13 +310,19 @@ impl Backing {
+         }
+     }
+     fn stats(&self, damage: Option<DamageRegion>) -> RetainedStats {
++        self.stats_repair(damage.into())
++    }
++    fn stats_repair(&self, damage: Repair<'_>) -> RetainedStats {
+         let [width, height] = self.size();
+         let pixels = u64::from(width) * u64::from(height);
+         RetainedStats {
+-            composited_pixels: damage.map_or(pixels, |d| {
+-                d.bounds()
+-                    .map_or(0, |[l, t, r, b]| u64::from(r - l) * u64::from(b - t))
+-            }),
++            composited_pixels: match damage {
++                Repair::Full => pixels,
++                Repair::Region(region) => region
++                    .bounds()
++                    .map_or(0, |[l, t, r, b]| u64::from(r - l) * u64::from(b - t)),
++                Repair::Regions(regions) => regions.pixels(),
++            },
+             copied_pixels: pixels,
+             image_bytes: pixels
+                 * u64::from(self.view.texture().format().block_copy_size(None).unwrap()),
+diff --git a/reactivity/crates/gpu/tests/render.rs b/reactivity/crates/gpu/tests/render.rs
+index efb85de5f4..6c5ed0e254 100644
+--- a/reactivity/crates/gpu/tests/render.rs
++++ b/reactivity/crates/gpu/tests/render.rs
+@@ -4416,3 +4416,145 @@ fn retained_banked_text_images_and_transforms_survive_slot_repairs() {
+         }
+     });
+ }
++
++#[test]
++fn sparse_text_regions_match_full_gpu_and_revoke_after_failure_or_resize() {
++    use gpui_canvas::DamageRegions;
++    use gpui_gpu::RetainedRenderer;
++    pollster::block_on(async {
++        for format in [
++            wgpu::TextureFormat::Rgba8UnormSrgb,
++            wgpu::TextureFormat::Bgra8UnormSrgb,
++            wgpu::TextureFormat::Rgba16Float,
++        ] {
++            let inner = renderer(format).await;
++            let mut oracle = Renderer::new(inner.device().clone(), inner.queue().clone(), format)
++                .await
++                .unwrap();
++            let mut gpu = RetainedRenderer::new(inner);
++            let config = if format == wgpu::TextureFormat::Rgba16Float {
++                ColorConfig::linear_hdr(gpui_canvas::OutputProfile::Srgb, 203.).unwrap()
++            } else {
++                ColorConfig::default()
++            };
++            for size in [[320, 128], [352, 144]] {
++                let mut text = TextSystem::bundled().unwrap();
++                let initial = text
++                    .shape("000000 000000\n000000 000000", 16., None)
++                    .unwrap();
++                let reservoir = text.shape("0123456789", 16., None).unwrap();
++                let mut canvas = Canvas::recording(size[0], size[1], config).unwrap();
++                let clip = Rect::new(0.25, 0.5, size[0] as f32 - 1., size[1] as f32 - 1.);
++                let origin = Point { x: 4.25, y: 3.5 };
++                let mut stage = canvas.stage();
++                stage.clear(Color::rgb(23, 31, 47));
++                let slot = stage
++                    .draw_text_scaled_tracked(
++                        &mut text,
++                        &initial,
++                        origin,
++                        Affine::IDENTITY,
++                        clip,
++                        Color::WHITE,
++                        1.,
++                    )
++                    .unwrap()
++                    .unwrap();
++                stage
++                    .draw_text_scaled(
++                        &mut text,
++                        &reservoir,
++                        Point { x: 4.25, y: 70.5 },
++                        Affine::IDENTITY,
++                        clip,
++                        Color::WHITE,
++                        1.,
++                    )
++                    .unwrap();
++                // A translucent foreground must be recomposited over each repair.
++                stage
++                    .fill_rect(
++                        Rect::new(0., 8., 310., 25.),
++                        Affine::IDENTITY,
++                        clip,
++                        Color::rgba(127, 47, 231, 73),
++                    )
++                    .unwrap();
++                stage.commit();
++                let target = output_texture(&gpu, &canvas);
++                let view = target.create_view(&Default::default());
++                gpu.render_regions(canvas.prepared_scene(), &view, &DamageRegions::default())
++                    .unwrap();
++                assert_eq!(
++                    gpu.retained_stats().composited_pixels,
++                    u64::from(size[0] * size[1])
++                );
++                assert_eq!(read_texture(&gpu, &target), readback(&mut oracle, &canvas));
++                for (index, value) in [
++                    "000001 000002\n000003 000004",
++                    "000001 000002\n000003 000004",
++                    "000009 000008\n000007 000006",
++                    "000000 000000\n000000 000000",
++                ]
++                .into_iter()
++                .enumerate()
++                {
++                    let layout = text.shape(value, 16., None).unwrap();
++                    let mut regions = DamageRegions::default();
++                    canvas
++                        .try_patch_text_observed(
++                            slot,
++                            &mut text,
++                            &layout,
++                            origin,
++                            Affine::IDENTITY,
++                            clip,
++                            Color::WHITE,
++                            1.,
++                            |region| regions.include(region),
++                        )
++                        .unwrap()
++                        .unwrap();
++                    let target = output_texture(&gpu, &canvas);
++                    let view = target.create_view(&Default::default());
++                    gpu.render_regions(canvas.prepared_scene(), &view, &regions)
++                        .unwrap();
++                    assert_eq!(
++                        read_texture(&gpu, &target),
++                        readback(&mut oracle, &canvas),
++                        "{format:?}/{size:?}/{index}"
++                    );
++                    assert_eq!(gpu.retained_stats().composited_pixels, regions.pixels());
++                    if index == 1 {
++                        assert_eq!(regions.pixels(), 0);
++                    } else {
++                        assert!(regions.regions().len() > 1);
++                    }
++                    let fresh = output_texture(&gpu, &canvas);
++                    assert!(
++                        gpu.redraw(&fresh.create_view(&Default::default()))
++                            .unwrap()
++                            .is_some()
++                    );
++                    assert_eq!(read_texture(&gpu, &fresh), read_texture(&gpu, &target));
++                }
++                let target = output_texture(&gpu, &canvas);
++                let view = target.create_view(&Default::default());
++                let mut invalid = canvas.prepared_scene();
++                invalid.clear[0] = f32::NAN;
++                assert!(
++                    gpu.render_regions(invalid, &view, &DamageRegions::default())
++                        .is_err()
++                );
++                assert!(gpu.redraw(&view).unwrap().is_none());
++                gpu.render_regions(canvas.prepared_scene(), &view, &DamageRegions::default())
++                    .unwrap();
++                assert_eq!(
++                    gpu.retained_stats().composited_pixels,
++                    u64::from(size[0] * size[1])
++                );
++                assert_eq!(read_texture(&gpu, &target), readback(&mut oracle, &canvas));
++            }
++        }
++    });
++}
+diff --git a/reactivity/crates/gpui/src/native.rs b/reactivity/crates/gpui/src/native.rs
+index f55062df66..c8aa281ce9 100644
+--- a/reactivity/crates/gpui/src/native.rs
++++ b/reactivity/crates/gpui/src/native.rs
+@@ -333,11 +333,11 @@ impl GpuSurface {
+         token: crate::PresentationToken,
+         paint: Option<&crate::runtime::paint::SlotTransition>,
+         target: &wgpu::TextureView,
+-        transition: Option<crate::runtime::paint::SceneDamage>,
++        transition: Option<crate::runtime::paint::SceneDamage<'_>>,
+     ) -> Result<wgpu::SubmissionIndex, gpui_gpu::Error> {
+-        let damage = transition
+-            .filter(|d| d.base.is_some() && d.base == self.packet_token)
+-            .map(|d| d.region);
++        let valid_transition =
++            transition.filter(|d| d.base.is_some() && d.base == self.packet_token);
++        let damage = valid_transition.map(|d| d.region);
+         if self.packet_token == Some(token)
+             && let Some(submitted) = self.renderer.redraw(target)?
+         {
+@@ -352,7 +352,15 @@ impl GpuSurface {
+             self.packet_token = Some(token);
+             return Ok(submitted);
+         }
+-        let submitted = self.renderer.render(scene, target, damage)?;
++        let submitted = if let Some(repair) = valid_transition
++            .and_then(|d| d.repair)
++            .filter(|repair| previous == Some(repair.from) && token == repair.to)
++        {
++            self.renderer
++                .render_regions(scene, target, &repair.regions)?
++        } else {
++            self.renderer.render(scene, target, damage)?
++        };
+         self.packet_token = Some(token);
+         Ok(submitted)
+     }
+diff --git a/reactivity/crates/gpui/src/runtime/paint.rs b/reactivity/crates/gpui/src/runtime/paint.rs
+index c103a346e8..846d20aa01 100644
+--- a/reactivity/crates/gpui/src/runtime/paint.rs
++++ b/reactivity/crates/gpui/src/runtime/paint.rs
+@@ -156,12 +156,20 @@ impl Prepared {
+     }
+ }
+ 
++#[cfg(feature = "native-core")]
++pub(crate) struct TextRepair {
++    pub(crate) from: PresentationToken,
++    pub(crate) to: PresentationToken,
++    pub(crate) regions: gpui_canvas::DamageRegions,
++}
++
+ /// Damage relative to the exact acknowledged image, including unbound changes.
+ #[cfg(feature = "native-core")]
+ #[derive(Clone, Copy)]
+-pub(crate) struct SceneDamage {
++pub(crate) struct SceneDamage<'a> {
+     pub(crate) base: Option<PresentationToken>,
+     pub(crate) region: gpui_canvas::DamageRegion,
++    pub(crate) repair: Option<&'a TextRepair>,
+ }
+ 
+ #[cfg(feature = "native-core")]
+@@ -172,7 +180,7 @@ impl<M: View + 'static, L: LaneSet<M>> Win<M, L> {
+             gpui_canvas::PreparedScene<'_>,
+             PresentationToken,
+             Option<&SlotTransition>,
+-            SceneDamage,
++            SceneDamage<'_>,
+         ) -> R,
+     ) -> Result<R, Error> {
+         let runtime = self.runtime()?;
+@@ -183,6 +191,12 @@ impl<M: View + 'static, L: LaneSet<M>> Win<M, L> {
+             token,
+             runtime.styles.slot_transition(),
+             SceneDamage {
++                repair: runtime
++                    .text
++                    .as_ref()
++                    .and_then(|text| text.patch.as_ref())
++                    .map(|patch| &patch.repair)
++                    .filter(|repair| repair.to == token),
+                 base: (!runtime.automatic_presentation && runtime.presentation_valid)
+                     .then_some(runtime.presented_sequence)
+                     .flatten()
+diff --git a/reactivity/crates/gpui/src/runtime/sparse_text.rs b/reactivity/crates/gpui/src/runtime/sparse_text.rs
+index 5ebf471171..6f76995b80 100644
+--- a/reactivity/crates/gpui/src/runtime/sparse_text.rs
++++ b/reactivity/crates/gpui/src/runtime/sparse_text.rs
+@@ -103,9 +103,21 @@ impl<M: View + 'static> Runtime<M> {
+             Some(layout.content_box_width()),
+             None,
+         )?;
++        let sequence = self.next_presentation;
++        let next = sequence.checked_add(1).ok_or(Error::EpochExhausted)?;
++        let token = PresentationToken {
++            window: self.sites.namespace(),
++            sequence,
++        };
+         let patch = Box::new(text_geometry::TextPatch {
+             row,
+             value,
++            #[cfg(feature = "native-core")]
++            repair: paint::TextRepair {
++                from: self.latest_token.expect("complete predecessor has a token"),
++                to: token,
++                regions: Default::default(),
++            },
+             geometry: text_geometry::Entry {
+                 row: row as u32,
+                 run: Some(run),
+@@ -113,14 +125,10 @@ impl<M: View + 'static> Runtime<M> {
+                 map: shape.retain_geometry().expect("interactive text geometry"),
+             },
+         });
+-        let sequence = self.next_presentation;
+-        let next = sequence.checked_add(1).ok_or(Error::EpochExhausted)?;
+-        let token = PresentationToken {
+-            window: self.sites.namespace(),
+-            sequence,
+-        };
+         let service = self.text.as_mut().unwrap().system.as_mut().unwrap();
+-        let Some(damage) = self.canvas.try_patch_text(
++        #[cfg(feature = "native-core")]
++        let mut patch = patch;
++        let Some(damage) = self.canvas.try_patch_text_observed(
+             run,
+             service,
+             shape,
+@@ -129,6 +137,12 @@ impl<M: View + 'static> Runtime<M> {
+             clip,
+             style.fg,
+             self.requested_scale_factor,
++            |support| {
++                #[cfg(feature = "native-core")]
++                patch.repair.regions.include(support);
++                #[cfg(not(feature = "native-core"))]
++                let _ = support;
++            },
+         )?
+         else {
+             return Ok(false);
+@@ -211,7 +225,7 @@ mod tests {
+                     .is_some_and(|m| m.editing.is_some()),
+                 runtime.inspector_enabled(),
+             );
+-            for _ in 0..80 {
++            for frame in 0..80 {
+                 let writes = fixture
+                     .owner
+                     .runtime()
+@@ -246,6 +260,30 @@ mod tests {
+                     usize::from(runtime.layout.stats().changed_layout_writes == writes);
+                 patches += usize::from(runtime.text.as_ref().is_some_and(|t| t.patch.is_some()));
+                 full += usize::from(runtime.prepared.as_ref().is_some_and(|p| !p.keeps_rows()));
++                if let Some(patch) = runtime.text.as_ref().and_then(|t| t.patch.as_ref()) {
++                    let mut pixels = std::collections::BTreeSet::new();
++                    let mut tiles = std::collections::BTreeSet::new();
++                    let mut union = gpui_canvas::DamageRegion::default();
++                    for &region in patch.repair.regions.regions() {
++                        union = union.union(region);
++                        if let Some([l, t, r, b]) = region.bounds() {
++                            for y in t..b {
++                                for x in l..r {
++                                    pixels.insert((x, y));
++                                    tiles.insert((x / 16, y / 16));
++                                }
++                            }
++                        }
++                    }
++                    let area = union.bounds().map_or(0, |[l, t, r, b]| (r - l) * (b - t));
++                    assert_eq!(runtime.prepared.as_ref().unwrap().damage, union);
++                    println!(
++                        "GLYPH_DAMAGE,{case},{frame},{},{area},{},{}",
++                        patch.repair.regions.regions().len(),
++                        pixels.len(),
++                        tiles.len() * 256
++                    );
++                }
+                 let token = fixture.owner.with_scene(|_, token| token).unwrap();
+                 fixture.owner.presented(token).unwrap();
+             }
+diff --git a/reactivity/crates/gpui/src/runtime/text_geometry.rs b/reactivity/crates/gpui/src/runtime/text_geometry.rs
+index 7f7b569e32..b7d7679694 100644
+--- a/reactivity/crates/gpui/src/runtime/text_geometry.rs
++++ b/reactivity/crates/gpui/src/runtime/text_geometry.rs
+@@ -22,6 +22,8 @@ pub(super) struct TextPatch {
+     pub row: usize,
+     pub value: SharedText,
+     pub geometry: Entry,
++    #[cfg(feature = "native-core")]
++    pub repair: paint::TextRepair,
+ }
+ impl TextResources {
+     pub fn unused(&self) -> bool {

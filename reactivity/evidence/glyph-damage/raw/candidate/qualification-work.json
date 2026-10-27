@@ -1,0 +1,1962 @@
+{
+  "scroll": {
+    "control": {
+      "processes": 3,
+      "measured_updates": 12,
+      "composited_pixels": {
+        "min": 368000,
+        "median": 368000.0,
+        "max": 368000
+      },
+      "copied_pixels": [
+        691200
+      ],
+      "image_bytes": [
+        2764800
+      ],
+      "hash": "7eed66008e0aba7f",
+      "source_epoch": 20
+    },
+    "predecessor": {
+      "processes": 3,
+      "measured_updates": 12,
+      "composited_pixels": {
+        "min": 368000,
+        "median": 368000.0,
+        "max": 368000
+      },
+      "copied_pixels": [
+        691200
+      ],
+      "image_bytes": [
+        2764800
+      ],
+      "hash": "7eed66008e0aba7f",
+      "source_epoch": 20
+    },
+    "bounds": {
+      "processes": 3,
+      "measured_updates": 12,
+      "composited_pixels": {
+        "min": 368000,
+        "median": 368000.0,
+        "max": 368000
+      },
+      "copied_pixels": [
+        691200
+      ],
+      "image_bytes": [
+        2764800
+      ],
+      "hash": "7eed66008e0aba7f",
+      "source_epoch": 20
+    },
+    "candidate": {
+      "processes": 3,
+      "measured_updates": 12,
+      "composited_pixels": {
+        "min": 368000,
+        "median": 368000.0,
+        "max": 368000
+      },
+      "copied_pixels": [
+        691200
+      ],
+      "image_bytes": [
+        2764800
+      ],
+      "hash": "7eed66008e0aba7f",
+      "source_epoch": 20
+    }
+  },
+  "both": {
+    "control": {
+      "processes": 3,
+      "measured_updates": 12,
+      "composited_pixels": {
+        "min": 524400,
+        "median": 524400.0,
+        "max": 524400
+      },
+      "copied_pixels": [
+        691200
+      ],
+      "image_bytes": [
+        2764800
+      ],
+      "hash": "b83699422ab334b8",
+      "source_epoch": 20
+    },
+    "predecessor": {
+      "processes": 3,
+      "measured_updates": 12,
+      "composited_pixels": {
+        "min": 524400,
+        "median": 524400.0,
+        "max": 524400
+      },
+      "copied_pixels": [
+        691200
+      ],
+      "image_bytes": [
+        2764800
+      ],
+      "hash": "b83699422ab334b8",
+      "source_epoch": 20
+    },
+    "bounds": {
+      "processes": 3,
+      "measured_updates": 12,
+      "composited_pixels": {
+        "min": 524400,
+        "median": 524400.0,
+        "max": 524400
+      },
+      "copied_pixels": [
+        691200
+      ],
+      "image_bytes": [
+        2764800
+      ],
+      "hash": "b83699422ab334b8",
+      "source_epoch": 20
+    },
+    "candidate": {
+      "processes": 3,
+      "measured_updates": 12,
+      "composited_pixels": {
+        "min": 524400,
+        "median": 524400.0,
+        "max": 524400
+      },
+      "copied_pixels": [
+        691200
+      ],
+      "image_bytes": [
+        2764800
+      ],
+      "hash": "b83699422ab334b8",
+      "source_epoch": 20
+    }
+  },
+  "stream": {
+    "control": {
+      "processes": 3,
+      "measured_updates": 12,
+      "composited_pixels": {
+        "min": 99495,
+        "median": 99630.0,
+        "max": 99630
+      },
+      "copied_pixels": [
+        691200
+      ],
+      "image_bytes": [
+        2764800
+      ],
+      "hash": "9aeb018cd41d4d9c",
+      "source_epoch": 20
+    },
+    "predecessor": {
+      "processes": 3,
+      "measured_updates": 12,
+      "composited_pixels": {
+        "min": 107545,
+        "median": 107545.0,
+        "max": 107545
+      },
+      "copied_pixels": [
+        691200
+      ],
+      "image_bytes": [
+        2764800
+      ],
+      "hash": "9aeb018cd41d4d9c",
+      "source_epoch": 20
+    },
+    "bounds": {
+      "processes": 3,
+      "measured_updates": 12,
+      "composited_pixels": {
+        "min": 99495,
+        "median": 99630.0,
+        "max": 99630
+      },
+      "copied_pixels": [
+        691200
+      ],
+      "image_bytes": [
+        2764800
+      ],
+      "hash": "9aeb018cd41d4d9c",
+      "source_epoch": 20
+    },
+    "candidate": {
+      "processes": 3,
+      "measured_updates": 12,
+      "composited_pixels": {
+        "min": 2935,
+        "median": 2960.0,
+        "max": 3095
+      },
+      "copied_pixels": [
+        691200
+      ],
+      "image_bytes": [
+        2764800
+      ],
+      "hash": "9aeb018cd41d4d9c",
+      "source_epoch": 20
+    }
+  },
+  "stream-owner": {
+    "control": {
+      "processes": 3,
+      "measured_updates": 12,
+      "composited_pixels": {
+        "min": 99495,
+        "median": 99630.0,
+        "max": 99630
+      },
+      "copied_pixels": [
+        691200
+      ],
+      "image_bytes": [
+        2764800
+      ],
+      "hash": "9aeb018cd41d4d9c",
+      "source_epoch": 20
+    },
+    "predecessor": {
+      "processes": 3,
+      "measured_updates": 12,
+      "composited_pixels": {
+        "min": 107545,
+        "median": 107545.0,
+        "max": 107545
+      },
+      "copied_pixels": [
+        691200
+      ],
+      "image_bytes": [
+        2764800
+      ],
+      "hash": "9aeb018cd41d4d9c",
+      "source_epoch": 20
+    },
+    "bounds": {
+      "processes": 3,
+      "measured_updates": 12,
+      "composited_pixels": {
+        "min": 99495,
+        "median": 99630.0,
+        "max": 99630
+      },
+      "copied_pixels": [
+        691200
+      ],
+      "image_bytes": [
+        2764800
+      ],
+      "hash": "9aeb018cd41d4d9c",
+      "source_epoch": 20
+    },
+    "candidate": {
+      "processes": 3,
+      "measured_updates": 12,
+      "composited_pixels": {
+        "min": 2935,
+        "median": 2960.0,
+        "max": 3095
+      },
+      "copied_pixels": [
+        691200
+      ],
+      "image_bytes": [
+        2764800
+      ],
+      "hash": "9aeb018cd41d4d9c",
+      "source_epoch": 20
+    }
+  },
+  "fractional": {
+    "control": {
+      "processes": 3,
+      "measured_updates": 12,
+      "composited_pixels": {
+        "min": 368000,
+        "median": 368000.0,
+        "max": 368000
+      },
+      "copied_pixels": [
+        691200
+      ],
+      "image_bytes": [
+        2764800
+      ],
+      "hash": "b1e582e8426e9be6",
+      "source_epoch": 20
+    },
+    "predecessor": {
+      "processes": 3,
+      "measured_updates": 12,
+      "composited_pixels": {
+        "min": 368000,
+        "median": 368000.0,
+        "max": 368000
+      },
+      "copied_pixels": [
+        691200
+      ],
+      "image_bytes": [
+        2764800
+      ],
+      "hash": "b1e582e8426e9be6",
+      "source_epoch": 20
+    },
+    "bounds": {
+      "processes": 3,
+      "measured_updates": 12,
+      "composited_pixels": {
+        "min": 368000,
+        "median": 368000.0,
+        "max": 368000
+      },
+      "copied_pixels": [
+        691200
+      ],
+      "image_bytes": [
+        2764800
+      ],
+      "hash": "b1e582e8426e9be6",
+      "source_epoch": 20
+    },
+    "candidate": {
+      "processes": 3,
+      "measured_updates": 12,
+      "composited_pixels": {
+        "min": 368000,
+        "median": 368000.0,
+        "max": 368000
+      },
+      "copied_pixels": [
+        691200
+      ],
+      "image_bytes": [
+        2764800
+      ],
+      "hash": "b1e582e8426e9be6",
+      "source_epoch": 20
+    }
+  },
+  "flat-tiny": {
+    "control": {
+      "processes": 3,
+      "measured_updates": 12,
+      "composited_pixels": {
+        "min": 64,
+        "median": 64.0,
+        "max": 64
+      },
+      "copied_pixels": [
+        64
+      ],
+      "image_bytes": [
+        256
+      ],
+      "hash": "d219fe4d821f6d25",
+      "source_epoch": 20
+    },
+    "predecessor": {
+      "processes": 3,
+      "measured_updates": 12,
+      "composited_pixels": {
+        "min": 64,
+        "median": 64.0,
+        "max": 64
+      },
+      "copied_pixels": [
+        64
+      ],
+      "image_bytes": [
+        256
+      ],
+      "hash": "d219fe4d821f6d25",
+      "source_epoch": 20
+    },
+    "bounds": {
+      "processes": 3,
+      "measured_updates": 12,
+      "composited_pixels": {
+        "min": 64,
+        "median": 64.0,
+        "max": 64
+      },
+      "copied_pixels": [
+        64
+      ],
+      "image_bytes": [
+        256
+      ],
+      "hash": "d219fe4d821f6d25",
+      "source_epoch": 20
+    },
+    "candidate": {
+      "processes": 3,
+      "measured_updates": 12,
+      "composited_pixels": {
+        "min": 64,
+        "median": 64.0,
+        "max": 64
+      },
+      "copied_pixels": [
+        64
+      ],
+      "image_bytes": [
+        256
+      ],
+      "hash": "d219fe4d821f6d25",
+      "source_epoch": 20
+    }
+  },
+  "flat-full": {
+    "control": {
+      "processes": 3,
+      "measured_updates": 12,
+      "composited_pixels": {
+        "min": 262144,
+        "median": 262144.0,
+        "max": 262144
+      },
+      "copied_pixels": [
+        262144
+      ],
+      "image_bytes": [
+        1048576
+      ],
+      "hash": "dbc20b4b18c22325",
+      "source_epoch": 20
+    },
+    "predecessor": {
+      "processes": 3,
+      "measured_updates": 12,
+      "composited_pixels": {
+        "min": 262144,
+        "median": 262144.0,
+        "max": 262144
+      },
+      "copied_pixels": [
+        262144
+      ],
+      "image_bytes": [
+        1048576
+      ],
+      "hash": "dbc20b4b18c22325",
+      "source_epoch": 20
+    },
+    "bounds": {
+      "processes": 3,
+      "measured_updates": 12,
+      "composited_pixels": {
+        "min": 262144,
+        "median": 262144.0,
+        "max": 262144
+      },
+      "copied_pixels": [
+        262144
+      ],
+      "image_bytes": [
+        1048576
+      ],
+      "hash": "dbc20b4b18c22325",
+      "source_epoch": 20
+    },
+    "candidate": {
+      "processes": 3,
+      "measured_updates": 12,
+      "composited_pixels": {
+        "min": 262144,
+        "median": 262144.0,
+        "max": 262144
+      },
+      "copied_pixels": [
+        262144
+      ],
+      "image_bytes": [
+        1048576
+      ],
+      "hash": "dbc20b4b18c22325",
+      "source_epoch": 20
+    }
+  },
+  "list-tiny": {
+    "control": {
+      "processes": 3,
+      "measured_updates": 12,
+      "composited_pixels": {
+        "min": 256,
+        "median": 256.0,
+        "max": 256
+      },
+      "copied_pixels": [
+        1024
+      ],
+      "image_bytes": [
+        4096
+      ],
+      "hash": "b42928120371e925",
+      "source_epoch": 20
+    },
+    "predecessor": {
+      "processes": 3,
+      "measured_updates": 12,
+      "composited_pixels": {
+        "min": 256,
+        "median": 256.0,
+        "max": 256
+      },
+      "copied_pixels": [
+        1024
+      ],
+      "image_bytes": [
+        4096
+      ],
+      "hash": "b42928120371e925",
+      "source_epoch": 20
+    },
+    "bounds": {
+      "processes": 3,
+      "measured_updates": 12,
+      "composited_pixels": {
+        "min": 256,
+        "median": 256.0,
+        "max": 256
+      },
+      "copied_pixels": [
+        1024
+      ],
+      "image_bytes": [
+        4096
+      ],
+      "hash": "b42928120371e925",
+      "source_epoch": 20
+    },
+    "candidate": {
+      "processes": 3,
+      "measured_updates": 12,
+      "composited_pixels": {
+        "min": 256,
+        "median": 256.0,
+        "max": 256
+      },
+      "copied_pixels": [
+        1024
+      ],
+      "image_bytes": [
+        4096
+      ],
+      "hash": "b42928120371e925",
+      "source_epoch": 20
+    }
+  },
+  "list-flat": {
+    "control": {
+      "processes": 3,
+      "measured_updates": 12,
+      "composited_pixels": {
+        "min": 368000,
+        "median": 368000.0,
+        "max": 368000
+      },
+      "copied_pixels": [
+        691200
+      ],
+      "image_bytes": [
+        2764800
+      ],
+      "hash": "9553b2ae486c3fa5",
+      "source_epoch": 20
+    },
+    "predecessor": {
+      "processes": 3,
+      "measured_updates": 12,
+      "composited_pixels": {
+        "min": 368000,
+        "median": 368000.0,
+        "max": 368000
+      },
+      "copied_pixels": [
+        691200
+      ],
+      "image_bytes": [
+        2764800
+      ],
+      "hash": "9553b2ae486c3fa5",
+      "source_epoch": 20
+    },
+    "bounds": {
+      "processes": 3,
+      "measured_updates": 12,
+      "composited_pixels": {
+        "min": 368000,
+        "median": 368000.0,
+        "max": 368000
+      },
+      "copied_pixels": [
+        691200
+      ],
+      "image_bytes": [
+        2764800
+      ],
+      "hash": "9553b2ae486c3fa5",
+      "source_epoch": 20
+    },
+    "candidate": {
+      "processes": 3,
+      "measured_updates": 12,
+      "composited_pixels": {
+        "min": 368000,
+        "median": 368000.0,
+        "max": 368000
+      },
+      "copied_pixels": [
+        691200
+      ],
+      "image_bytes": [
+        2764800
+      ],
+      "hash": "9553b2ae486c3fa5",
+      "source_epoch": 20
+    }
+  },
+  "exposure": {
+    "control": {
+      "processes": 3,
+      "measured_updates": 12,
+      "composited_pixels": {
+        "min": 0,
+        "median": 0.0,
+        "max": 0
+      },
+      "copied_pixels": [
+        691200
+      ],
+      "image_bytes": [
+        2764800
+      ],
+      "hash": "2cf9ec3d8ec2bfb7",
+      "source_epoch": 0
+    },
+    "predecessor": {
+      "processes": 3,
+      "measured_updates": 12,
+      "composited_pixels": {
+        "min": 0,
+        "median": 0.0,
+        "max": 0
+      },
+      "copied_pixels": [
+        691200
+      ],
+      "image_bytes": [
+        2764800
+      ],
+      "hash": "2cf9ec3d8ec2bfb7",
+      "source_epoch": 0
+    },
+    "bounds": {
+      "processes": 3,
+      "measured_updates": 12,
+      "composited_pixels": {
+        "min": 0,
+        "median": 0.0,
+        "max": 0
+      },
+      "copied_pixels": [
+        691200
+      ],
+      "image_bytes": [
+        2764800
+      ],
+      "hash": "2cf9ec3d8ec2bfb7",
+      "source_epoch": 0
+    },
+    "candidate": {
+      "processes": 3,
+      "measured_updates": 12,
+      "composited_pixels": {
+        "min": 0,
+        "median": 0.0,
+        "max": 0
+      },
+      "copied_pixels": [
+        691200
+      ],
+      "image_bytes": [
+        2764800
+      ],
+      "hash": "2cf9ec3d8ec2bfb7",
+      "source_epoch": 0
+    }
+  },
+  "text-0-1-source": {
+    "control": {
+      "processes": 3,
+      "measured_updates": 12,
+      "composited_pixels": {
+        "min": 390,
+        "median": 390.0,
+        "max": 390
+      },
+      "copied_pixels": [
+        691200
+      ],
+      "image_bytes": [
+        2764800
+      ],
+      "hash": "8002c46c3a3d05da",
+      "source_epoch": 20
+    },
+    "predecessor": {
+      "processes": 3,
+      "measured_updates": 12,
+      "composited_pixels": {
+        "min": 390,
+        "median": 390.0,
+        "max": 390
+      },
+      "copied_pixels": [
+        691200
+      ],
+      "image_bytes": [
+        2764800
+      ],
+      "hash": "8002c46c3a3d05da",
+      "source_epoch": 20
+    },
+    "bounds": {
+      "processes": 3,
+      "measured_updates": 12,
+      "composited_pixels": {
+        "min": 390,
+        "median": 390.0,
+        "max": 390
+      },
+      "copied_pixels": [
+        691200
+      ],
+      "image_bytes": [
+        2764800
+      ],
+      "hash": "8002c46c3a3d05da",
+      "source_epoch": 20
+    },
+    "candidate": {
+      "processes": 3,
+      "measured_updates": 12,
+      "composited_pixels": {
+        "min": 390,
+        "median": 390.0,
+        "max": 390
+      },
+      "copied_pixels": [
+        691200
+      ],
+      "image_bytes": [
+        2764800
+      ],
+      "hash": "8002c46c3a3d05da",
+      "source_epoch": 20
+    }
+  },
+  "text-0-1-owner": {
+    "control": {
+      "processes": 3,
+      "measured_updates": 12,
+      "composited_pixels": {
+        "min": 390,
+        "median": 390.0,
+        "max": 390
+      },
+      "copied_pixels": [
+        691200
+      ],
+      "image_bytes": [
+        2764800
+      ],
+      "hash": "8002c46c3a3d05da",
+      "source_epoch": 20
+    },
+    "predecessor": {
+      "processes": 3,
+      "measured_updates": 12,
+      "composited_pixels": {
+        "min": 390,
+        "median": 390.0,
+        "max": 390
+      },
+      "copied_pixels": [
+        691200
+      ],
+      "image_bytes": [
+        2764800
+      ],
+      "hash": "8002c46c3a3d05da",
+      "source_epoch": 20
+    },
+    "bounds": {
+      "processes": 3,
+      "measured_updates": 12,
+      "composited_pixels": {
+        "min": 390,
+        "median": 390.0,
+        "max": 390
+      },
+      "copied_pixels": [
+        691200
+      ],
+      "image_bytes": [
+        2764800
+      ],
+      "hash": "8002c46c3a3d05da",
+      "source_epoch": 20
+    },
+    "candidate": {
+      "processes": 3,
+      "measured_updates": 12,
+      "composited_pixels": {
+        "min": 390,
+        "median": 390.0,
+        "max": 390
+      },
+      "copied_pixels": [
+        691200
+      ],
+      "image_bytes": [
+        2764800
+      ],
+      "hash": "8002c46c3a3d05da",
+      "source_epoch": 20
+    }
+  },
+  "text-0-2-source": {
+    "control": {
+      "processes": 3,
+      "measured_updates": 12,
+      "composited_pixels": {
+        "min": 1430,
+        "median": 1430.0,
+        "max": 1430
+      },
+      "copied_pixels": [
+        691200
+      ],
+      "image_bytes": [
+        2764800
+      ],
+      "hash": "dbdeb891bbb3715e",
+      "source_epoch": 40
+    },
+    "predecessor": {
+      "processes": 3,
+      "measured_updates": 12,
+      "composited_pixels": {
+        "min": 1430,
+        "median": 1430.0,
+        "max": 1430
+      },
+      "copied_pixels": [
+        691200
+      ],
+      "image_bytes": [
+        2764800
+      ],
+      "hash": "dbdeb891bbb3715e",
+      "source_epoch": 40
+    },
+    "bounds": {
+      "processes": 3,
+      "measured_updates": 12,
+      "composited_pixels": {
+        "min": 1430,
+        "median": 1430.0,
+        "max": 1430
+      },
+      "copied_pixels": [
+        691200
+      ],
+      "image_bytes": [
+        2764800
+      ],
+      "hash": "dbdeb891bbb3715e",
+      "source_epoch": 40
+    },
+    "candidate": {
+      "processes": 3,
+      "measured_updates": 12,
+      "composited_pixels": {
+        "min": 1430,
+        "median": 1430.0,
+        "max": 1430
+      },
+      "copied_pixels": [
+        691200
+      ],
+      "image_bytes": [
+        2764800
+      ],
+      "hash": "dbdeb891bbb3715e",
+      "source_epoch": 40
+    }
+  },
+  "text-0-2-owner": {
+    "control": {
+      "processes": 3,
+      "measured_updates": 12,
+      "composited_pixels": {
+        "min": 1430,
+        "median": 1430.0,
+        "max": 1430
+      },
+      "copied_pixels": [
+        691200
+      ],
+      "image_bytes": [
+        2764800
+      ],
+      "hash": "dbdeb891bbb3715e",
+      "source_epoch": 20
+    },
+    "predecessor": {
+      "processes": 3,
+      "measured_updates": 12,
+      "composited_pixels": {
+        "min": 1430,
+        "median": 1430.0,
+        "max": 1430
+      },
+      "copied_pixels": [
+        691200
+      ],
+      "image_bytes": [
+        2764800
+      ],
+      "hash": "dbdeb891bbb3715e",
+      "source_epoch": 20
+    },
+    "bounds": {
+      "processes": 3,
+      "measured_updates": 12,
+      "composited_pixels": {
+        "min": 1430,
+        "median": 1430.0,
+        "max": 1430
+      },
+      "copied_pixels": [
+        691200
+      ],
+      "image_bytes": [
+        2764800
+      ],
+      "hash": "dbdeb891bbb3715e",
+      "source_epoch": 20
+    },
+    "candidate": {
+      "processes": 3,
+      "measured_updates": 12,
+      "composited_pixels": {
+        "min": 1430,
+        "median": 1430.0,
+        "max": 1430
+      },
+      "copied_pixels": [
+        691200
+      ],
+      "image_bytes": [
+        2764800
+      ],
+      "hash": "dbdeb891bbb3715e",
+      "source_epoch": 20
+    }
+  },
+  "text-0-4-source": {
+    "control": {
+      "processes": 3,
+      "measured_updates": 12,
+      "composited_pixels": {
+        "min": 3510,
+        "median": 3510.0,
+        "max": 3510
+      },
+      "copied_pixels": [
+        691200
+      ],
+      "image_bytes": [
+        2764800
+      ],
+      "hash": "bdc072a1b5cf320e",
+      "source_epoch": 80
+    },
+    "predecessor": {
+      "processes": 3,
+      "measured_updates": 12,
+      "composited_pixels": {
+        "min": 3510,
+        "median": 3510.0,
+        "max": 3510
+      },
+      "copied_pixels": [
+        691200
+      ],
+      "image_bytes": [
+        2764800
+      ],
+      "hash": "bdc072a1b5cf320e",
+      "source_epoch": 80
+    },
+    "bounds": {
+      "processes": 3,
+      "measured_updates": 12,
+      "composited_pixels": {
+        "min": 3510,
+        "median": 3510.0,
+        "max": 3510
+      },
+      "copied_pixels": [
+        691200
+      ],
+      "image_bytes": [
+        2764800
+      ],
+      "hash": "bdc072a1b5cf320e",
+      "source_epoch": 80
+    },
+    "candidate": {
+      "processes": 3,
+      "measured_updates": 12,
+      "composited_pixels": {
+        "min": 3510,
+        "median": 3510.0,
+        "max": 3510
+      },
+      "copied_pixels": [
+        691200
+      ],
+      "image_bytes": [
+        2764800
+      ],
+      "hash": "bdc072a1b5cf320e",
+      "source_epoch": 80
+    }
+  },
+  "text-0-4-owner": {
+    "control": {
+      "processes": 3,
+      "measured_updates": 12,
+      "composited_pixels": {
+        "min": 3510,
+        "median": 3510.0,
+        "max": 3510
+      },
+      "copied_pixels": [
+        691200
+      ],
+      "image_bytes": [
+        2764800
+      ],
+      "hash": "bdc072a1b5cf320e",
+      "source_epoch": 20
+    },
+    "predecessor": {
+      "processes": 3,
+      "measured_updates": 12,
+      "composited_pixels": {
+        "min": 3510,
+        "median": 3510.0,
+        "max": 3510
+      },
+      "copied_pixels": [
+        691200
+      ],
+      "image_bytes": [
+        2764800
+      ],
+      "hash": "bdc072a1b5cf320e",
+      "source_epoch": 20
+    },
+    "bounds": {
+      "processes": 3,
+      "measured_updates": 12,
+      "composited_pixels": {
+        "min": 3510,
+        "median": 3510.0,
+        "max": 3510
+      },
+      "copied_pixels": [
+        691200
+      ],
+      "image_bytes": [
+        2764800
+      ],
+      "hash": "bdc072a1b5cf320e",
+      "source_epoch": 20
+    },
+    "candidate": {
+      "processes": 3,
+      "measured_updates": 12,
+      "composited_pixels": {
+        "min": 3510,
+        "median": 3510.0,
+        "max": 3510
+      },
+      "copied_pixels": [
+        691200
+      ],
+      "image_bytes": [
+        2764800
+      ],
+      "hash": "bdc072a1b5cf320e",
+      "source_epoch": 20
+    }
+  },
+  "text-25-1-source": {
+    "control": {
+      "processes": 3,
+      "measured_updates": 12,
+      "composited_pixels": {
+        "min": 390,
+        "median": 390.0,
+        "max": 390
+      },
+      "copied_pixels": [
+        691200
+      ],
+      "image_bytes": [
+        2764800
+      ],
+      "hash": "6b180efce086309e",
+      "source_epoch": 20
+    },
+    "predecessor": {
+      "processes": 3,
+      "measured_updates": 12,
+      "composited_pixels": {
+        "min": 390,
+        "median": 390.0,
+        "max": 390
+      },
+      "copied_pixels": [
+        691200
+      ],
+      "image_bytes": [
+        2764800
+      ],
+      "hash": "6b180efce086309e",
+      "source_epoch": 20
+    },
+    "bounds": {
+      "processes": 3,
+      "measured_updates": 12,
+      "composited_pixels": {
+        "min": 390,
+        "median": 390.0,
+        "max": 390
+      },
+      "copied_pixels": [
+        691200
+      ],
+      "image_bytes": [
+        2764800
+      ],
+      "hash": "6b180efce086309e",
+      "source_epoch": 20
+    },
+    "candidate": {
+      "processes": 3,
+      "measured_updates": 12,
+      "composited_pixels": {
+        "min": 390,
+        "median": 390.0,
+        "max": 390
+      },
+      "copied_pixels": [
+        691200
+      ],
+      "image_bytes": [
+        2764800
+      ],
+      "hash": "6b180efce086309e",
+      "source_epoch": 20
+    }
+  },
+  "text-25-1-owner": {
+    "control": {
+      "processes": 3,
+      "measured_updates": 12,
+      "composited_pixels": {
+        "min": 390,
+        "median": 390.0,
+        "max": 390
+      },
+      "copied_pixels": [
+        691200
+      ],
+      "image_bytes": [
+        2764800
+      ],
+      "hash": "6b180efce086309e",
+      "source_epoch": 20
+    },
+    "predecessor": {
+      "processes": 3,
+      "measured_updates": 12,
+      "composited_pixels": {
+        "min": 390,
+        "median": 390.0,
+        "max": 390
+      },
+      "copied_pixels": [
+        691200
+      ],
+      "image_bytes": [
+        2764800
+      ],
+      "hash": "6b180efce086309e",
+      "source_epoch": 20
+    },
+    "bounds": {
+      "processes": 3,
+      "measured_updates": 12,
+      "composited_pixels": {
+        "min": 390,
+        "median": 390.0,
+        "max": 390
+      },
+      "copied_pixels": [
+        691200
+      ],
+      "image_bytes": [
+        2764800
+      ],
+      "hash": "6b180efce086309e",
+      "source_epoch": 20
+    },
+    "candidate": {
+      "processes": 3,
+      "measured_updates": 12,
+      "composited_pixels": {
+        "min": 390,
+        "median": 390.0,
+        "max": 390
+      },
+      "copied_pixels": [
+        691200
+      ],
+      "image_bytes": [
+        2764800
+      ],
+      "hash": "6b180efce086309e",
+      "source_epoch": 20
+    }
+  },
+  "text-25-2-source": {
+    "control": {
+      "processes": 3,
+      "measured_updates": 12,
+      "composited_pixels": {
+        "min": 1430,
+        "median": 1430.0,
+        "max": 1430
+      },
+      "copied_pixels": [
+        691200
+      ],
+      "image_bytes": [
+        2764800
+      ],
+      "hash": "5d5abb25e4d1fa2a",
+      "source_epoch": 40
+    },
+    "predecessor": {
+      "processes": 3,
+      "measured_updates": 12,
+      "composited_pixels": {
+        "min": 1430,
+        "median": 1430.0,
+        "max": 1430
+      },
+      "copied_pixels": [
+        691200
+      ],
+      "image_bytes": [
+        2764800
+      ],
+      "hash": "5d5abb25e4d1fa2a",
+      "source_epoch": 40
+    },
+    "bounds": {
+      "processes": 3,
+      "measured_updates": 12,
+      "composited_pixels": {
+        "min": 1430,
+        "median": 1430.0,
+        "max": 1430
+      },
+      "copied_pixels": [
+        691200
+      ],
+      "image_bytes": [
+        2764800
+      ],
+      "hash": "5d5abb25e4d1fa2a",
+      "source_epoch": 40
+    },
+    "candidate": {
+      "processes": 3,
+      "measured_updates": 12,
+      "composited_pixels": {
+        "min": 1430,
+        "median": 1430.0,
+        "max": 1430
+      },
+      "copied_pixels": [
+        691200
+      ],
+      "image_bytes": [
+        2764800
+      ],
+      "hash": "5d5abb25e4d1fa2a",
+      "source_epoch": 40
+    }
+  },
+  "text-25-2-owner": {
+    "control": {
+      "processes": 3,
+      "measured_updates": 12,
+      "composited_pixels": {
+        "min": 1430,
+        "median": 1430.0,
+        "max": 1430
+      },
+      "copied_pixels": [
+        691200
+      ],
+      "image_bytes": [
+        2764800
+      ],
+      "hash": "5d5abb25e4d1fa2a",
+      "source_epoch": 20
+    },
+    "predecessor": {
+      "processes": 3,
+      "measured_updates": 12,
+      "composited_pixels": {
+        "min": 1430,
+        "median": 1430.0,
+        "max": 1430
+      },
+      "copied_pixels": [
+        691200
+      ],
+      "image_bytes": [
+        2764800
+      ],
+      "hash": "5d5abb25e4d1fa2a",
+      "source_epoch": 20
+    },
+    "bounds": {
+      "processes": 3,
+      "measured_updates": 12,
+      "composited_pixels": {
+        "min": 1430,
+        "median": 1430.0,
+        "max": 1430
+      },
+      "copied_pixels": [
+        691200
+      ],
+      "image_bytes": [
+        2764800
+      ],
+      "hash": "5d5abb25e4d1fa2a",
+      "source_epoch": 20
+    },
+    "candidate": {
+      "processes": 3,
+      "measured_updates": 12,
+      "composited_pixels": {
+        "min": 1430,
+        "median": 1430.0,
+        "max": 1430
+      },
+      "copied_pixels": [
+        691200
+      ],
+      "image_bytes": [
+        2764800
+      ],
+      "hash": "5d5abb25e4d1fa2a",
+      "source_epoch": 20
+    }
+  },
+  "text-25-4-source": {
+    "control": {
+      "processes": 3,
+      "measured_updates": 12,
+      "composited_pixels": {
+        "min": 3510,
+        "median": 3510.0,
+        "max": 3510
+      },
+      "copied_pixels": [
+        691200
+      ],
+      "image_bytes": [
+        2764800
+      ],
+      "hash": "7d5af22d61fc0c9a",
+      "source_epoch": 80
+    },
+    "predecessor": {
+      "processes": 3,
+      "measured_updates": 12,
+      "composited_pixels": {
+        "min": 3510,
+        "median": 3510.0,
+        "max": 3510
+      },
+      "copied_pixels": [
+        691200
+      ],
+      "image_bytes": [
+        2764800
+      ],
+      "hash": "7d5af22d61fc0c9a",
+      "source_epoch": 80
+    },
+    "bounds": {
+      "processes": 3,
+      "measured_updates": 12,
+      "composited_pixels": {
+        "min": 3510,
+        "median": 3510.0,
+        "max": 3510
+      },
+      "copied_pixels": [
+        691200
+      ],
+      "image_bytes": [
+        2764800
+      ],
+      "hash": "7d5af22d61fc0c9a",
+      "source_epoch": 80
+    },
+    "candidate": {
+      "processes": 3,
+      "measured_updates": 12,
+      "composited_pixels": {
+        "min": 3510,
+        "median": 3510.0,
+        "max": 3510
+      },
+      "copied_pixels": [
+        691200
+      ],
+      "image_bytes": [
+        2764800
+      ],
+      "hash": "7d5af22d61fc0c9a",
+      "source_epoch": 80
+    }
+  },
+  "text-25-4-owner": {
+    "control": {
+      "processes": 3,
+      "measured_updates": 12,
+      "composited_pixels": {
+        "min": 3510,
+        "median": 3510.0,
+        "max": 3510
+      },
+      "copied_pixels": [
+        691200
+      ],
+      "image_bytes": [
+        2764800
+      ],
+      "hash": "7d5af22d61fc0c9a",
+      "source_epoch": 20
+    },
+    "predecessor": {
+      "processes": 3,
+      "measured_updates": 12,
+      "composited_pixels": {
+        "min": 3510,
+        "median": 3510.0,
+        "max": 3510
+      },
+      "copied_pixels": [
+        691200
+      ],
+      "image_bytes": [
+        2764800
+      ],
+      "hash": "7d5af22d61fc0c9a",
+      "source_epoch": 20
+    },
+    "bounds": {
+      "processes": 3,
+      "measured_updates": 12,
+      "composited_pixels": {
+        "min": 3510,
+        "median": 3510.0,
+        "max": 3510
+      },
+      "copied_pixels": [
+        691200
+      ],
+      "image_bytes": [
+        2764800
+      ],
+      "hash": "7d5af22d61fc0c9a",
+      "source_epoch": 20
+    },
+    "candidate": {
+      "processes": 3,
+      "measured_updates": 12,
+      "composited_pixels": {
+        "min": 3510,
+        "median": 3510.0,
+        "max": 3510
+      },
+      "copied_pixels": [
+        691200
+      ],
+      "image_bytes": [
+        2764800
+      ],
+      "hash": "7d5af22d61fc0c9a",
+      "source_epoch": 20
+    }
+  },
+  "text-1000-1-source": {
+    "control": {
+      "processes": 3,
+      "measured_updates": 12,
+      "composited_pixels": {
+        "min": 390,
+        "median": 390.0,
+        "max": 390
+      },
+      "copied_pixels": [
+        691200
+      ],
+      "image_bytes": [
+        2764800
+      ],
+      "hash": "aa1383fa3385c89a",
+      "source_epoch": 20
+    },
+    "predecessor": {
+      "processes": 3,
+      "measured_updates": 12,
+      "composited_pixels": {
+        "min": 390,
+        "median": 390.0,
+        "max": 390
+      },
+      "copied_pixels": [
+        691200
+      ],
+      "image_bytes": [
+        2764800
+      ],
+      "hash": "aa1383fa3385c89a",
+      "source_epoch": 20
+    },
+    "bounds": {
+      "processes": 3,
+      "measured_updates": 12,
+      "composited_pixels": {
+        "min": 390,
+        "median": 390.0,
+        "max": 390
+      },
+      "copied_pixels": [
+        691200
+      ],
+      "image_bytes": [
+        2764800
+      ],
+      "hash": "aa1383fa3385c89a",
+      "source_epoch": 20
+    },
+    "candidate": {
+      "processes": 3,
+      "measured_updates": 12,
+      "composited_pixels": {
+        "min": 390,
+        "median": 390.0,
+        "max": 390
+      },
+      "copied_pixels": [
+        691200
+      ],
+      "image_bytes": [
+        2764800
+      ],
+      "hash": "aa1383fa3385c89a",
+      "source_epoch": 20
+    }
+  },
+  "text-1000-1-owner": {
+    "control": {
+      "processes": 3,
+      "measured_updates": 12,
+      "composited_pixels": {
+        "min": 390,
+        "median": 390.0,
+        "max": 390
+      },
+      "copied_pixels": [
+        691200
+      ],
+      "image_bytes": [
+        2764800
+      ],
+      "hash": "aa1383fa3385c89a",
+      "source_epoch": 20
+    },
+    "predecessor": {
+      "processes": 3,
+      "measured_updates": 12,
+      "composited_pixels": {
+        "min": 390,
+        "median": 390.0,
+        "max": 390
+      },
+      "copied_pixels": [
+        691200
+      ],
+      "image_bytes": [
+        2764800
+      ],
+      "hash": "aa1383fa3385c89a",
+      "source_epoch": 20
+    },
+    "bounds": {
+      "processes": 3,
+      "measured_updates": 12,
+      "composited_pixels": {
+        "min": 390,
+        "median": 390.0,
+        "max": 390
+      },
+      "copied_pixels": [
+        691200
+      ],
+      "image_bytes": [
+        2764800
+      ],
+      "hash": "aa1383fa3385c89a",
+      "source_epoch": 20
+    },
+    "candidate": {
+      "processes": 3,
+      "measured_updates": 12,
+      "composited_pixels": {
+        "min": 390,
+        "median": 390.0,
+        "max": 390
+      },
+      "copied_pixels": [
+        691200
+      ],
+      "image_bytes": [
+        2764800
+      ],
+      "hash": "aa1383fa3385c89a",
+      "source_epoch": 20
+    }
+  },
+  "text-1000-2-source": {
+    "control": {
+      "processes": 3,
+      "measured_updates": 12,
+      "composited_pixels": {
+        "min": 1430,
+        "median": 1430.0,
+        "max": 1430
+      },
+      "copied_pixels": [
+        691200
+      ],
+      "image_bytes": [
+        2764800
+      ],
+      "hash": "0f46c95337fe261e",
+      "source_epoch": 40
+    },
+    "predecessor": {
+      "processes": 3,
+      "measured_updates": 12,
+      "composited_pixels": {
+        "min": 1430,
+        "median": 1430.0,
+        "max": 1430
+      },
+      "copied_pixels": [
+        691200
+      ],
+      "image_bytes": [
+        2764800
+      ],
+      "hash": "0f46c95337fe261e",
+      "source_epoch": 40
+    },
+    "bounds": {
+      "processes": 3,
+      "measured_updates": 12,
+      "composited_pixels": {
+        "min": 1430,
+        "median": 1430.0,
+        "max": 1430
+      },
+      "copied_pixels": [
+        691200
+      ],
+      "image_bytes": [
+        2764800
+      ],
+      "hash": "0f46c95337fe261e",
+      "source_epoch": 40
+    },
+    "candidate": {
+      "processes": 3,
+      "measured_updates": 12,
+      "composited_pixels": {
+        "min": 1430,
+        "median": 1430.0,
+        "max": 1430
+      },
+      "copied_pixels": [
+        691200
+      ],
+      "image_bytes": [
+        2764800
+      ],
+      "hash": "0f46c95337fe261e",
+      "source_epoch": 40
+    }
+  },
+  "text-1000-2-owner": {
+    "control": {
+      "processes": 3,
+      "measured_updates": 12,
+      "composited_pixels": {
+        "min": 1430,
+        "median": 1430.0,
+        "max": 1430
+      },
+      "copied_pixels": [
+        691200
+      ],
+      "image_bytes": [
+        2764800
+      ],
+      "hash": "0f46c95337fe261e",
+      "source_epoch": 20
+    },
+    "predecessor": {
+      "processes": 3,
+      "measured_updates": 12,
+      "composited_pixels": {
+        "min": 1430,
+        "median": 1430.0,
+        "max": 1430
+      },
+      "copied_pixels": [
+        691200
+      ],
+      "image_bytes": [
+        2764800
+      ],
+      "hash": "0f46c95337fe261e",
+      "source_epoch": 20
+    },
+    "bounds": {
+      "processes": 3,
+      "measured_updates": 12,
+      "composited_pixels": {
+        "min": 1430,
+        "median": 1430.0,
+        "max": 1430
+      },
+      "copied_pixels": [
+        691200
+      ],
+      "image_bytes": [
+        2764800
+      ],
+      "hash": "0f46c95337fe261e",
+      "source_epoch": 20
+    },
+    "candidate": {
+      "processes": 3,
+      "measured_updates": 12,
+      "composited_pixels": {
+        "min": 1430,
+        "median": 1430.0,
+        "max": 1430
+      },
+      "copied_pixels": [
+        691200
+      ],
+      "image_bytes": [
+        2764800
+      ],
+      "hash": "0f46c95337fe261e",
+      "source_epoch": 20
+    }
+  },
+  "text-1000-4-source": {
+    "control": {
+      "processes": 3,
+      "measured_updates": 12,
+      "composited_pixels": {
+        "min": 3510,
+        "median": 3510.0,
+        "max": 3510
+      },
+      "copied_pixels": [
+        691200
+      ],
+      "image_bytes": [
+        2764800
+      ],
+      "hash": "3ce69ea669593dce",
+      "source_epoch": 80
+    },
+    "predecessor": {
+      "processes": 3,
+      "measured_updates": 12,
+      "composited_pixels": {
+        "min": 3510,
+        "median": 3510.0,
+        "max": 3510
+      },
+      "copied_pixels": [
+        691200
+      ],
+      "image_bytes": [
+        2764800
+      ],
+      "hash": "3ce69ea669593dce",
+      "source_epoch": 80
+    },
+    "bounds": {
+      "processes": 3,
+      "measured_updates": 12,
+      "composited_pixels": {
+        "min": 3510,
+        "median": 3510.0,
+        "max": 3510
+      },
+      "copied_pixels": [
+        691200
+      ],
+      "image_bytes": [
+        2764800
+      ],
+      "hash": "3ce69ea669593dce",
+      "source_epoch": 80
+    },
+    "candidate": {
+      "processes": 3,
+      "measured_updates": 12,
+      "composited_pixels": {
+        "min": 3510,
+        "median": 3510.0,
+        "max": 3510
+      },
+      "copied_pixels": [
+        691200
+      ],
+      "image_bytes": [
+        2764800
+      ],
+      "hash": "3ce69ea669593dce",
+      "source_epoch": 80
+    }
+  },
+  "text-1000-4-owner": {
+    "control": {
+      "processes": 3,
+      "measured_updates": 12,
+      "composited_pixels": {
+        "min": 3510,
+        "median": 3510.0,
+        "max": 3510
+      },
+      "copied_pixels": [
+        691200
+      ],
+      "image_bytes": [
+        2764800
+      ],
+      "hash": "3ce69ea669593dce",
+      "source_epoch": 20
+    },
+    "predecessor": {
+      "processes": 3,
+      "measured_updates": 12,
+      "composited_pixels": {
+        "min": 3510,
+        "median": 3510.0,
+        "max": 3510
+      },
+      "copied_pixels": [
+        691200
+      ],
+      "image_bytes": [
+        2764800
+      ],
+      "hash": "3ce69ea669593dce",
+      "source_epoch": 20
+    },
+    "bounds": {
+      "processes": 3,
+      "measured_updates": 12,
+      "composited_pixels": {
+        "min": 3510,
+        "median": 3510.0,
+        "max": 3510
+      },
+      "copied_pixels": [
+        691200
+      ],
+      "image_bytes": [
+        2764800
+      ],
+      "hash": "3ce69ea669593dce",
+      "source_epoch": 20
+    },
+    "candidate": {
+      "processes": 3,
+      "measured_updates": 12,
+      "composited_pixels": {
+        "min": 3510,
+        "median": 3510.0,
+        "max": 3510
+      },
+      "copied_pixels": [
+        691200
+      ],
+      "image_bytes": [
+        2764800
+      ],
+      "hash": "3ce69ea669593dce",
+      "source_epoch": 20
+    }
+  }
+}

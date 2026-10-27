@@ -1,0 +1,15 @@
+
+running 10 tests
+test workload::heavy::tests::modes_advance_only_their_parts ... ok
+test workload::heavy::tests::geometry_fits_the_window_and_the_series_is_bounded ... ok
+test workload::tests::visible_range_uses_two_rows_of_overscan_on_each_side ... ok
+test workload::tests::bounded_and_deterministic ... ok
+test workload::vlist::tests::modes_move_as_described ... ok
+test workload::vlist::tests::rows_are_deterministic_and_varied ... ok
+test port_tests::wheel_and_programmatic_scroll_feed_next_ui_tick_and_keep_keys ... ok
+test port_tests::keyed_list_matches_frozen_positional_pixels_and_reference_range ... ok
+test port_tests::owner_modes_keep_reference_rows_offsets_and_text ... ok
+test port_tests::exact_stream_ingress_keeps_ui_work_and_matches_full_publication ... ok
+
+test result: ok. 10 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 0.10s
+

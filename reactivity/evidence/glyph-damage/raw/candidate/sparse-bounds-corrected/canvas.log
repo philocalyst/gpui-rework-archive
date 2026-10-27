@@ -1,0 +1,8 @@
+   Compiling gpui_canvas v0.1.0 (/home/user/gpui-glyph-damage-lab/reactivity/crates/canvas)
+    Finished `release` profile [optimized] target(s) in 0.25s
+     Running tests/damage_regions.rs (/home/user/gpui-glyph-damage-target/release/build/gpui_canvas/da7502e5ae3511cc/out/damage_regions-da7502e5ae3511cc)
+     Running tests/text_patch_damage.rs (/home/user/gpui-glyph-damage-target/release/build/gpui_canvas/774d3ceecb744ce7/out/text_patch_damage-774d3ceecb744ce7)
+
+thread 'rejection_and_panicking_observer_preserve_the_complete_scene' (2168102) panicked at crates/canvas/tests/text_patch_damage.rs:164:17:
+observer abort
+note: run with `RUST_BACKTRACE=1` environment variable to display a backtrace

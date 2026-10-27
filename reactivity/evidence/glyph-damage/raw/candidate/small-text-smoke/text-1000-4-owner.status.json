@@ -1,0 +1,1 @@
+{"command": ["/home/user/gpui-preserved-test-binaries/42a031b65e2555336d04a696951efc276f9d1803f18cf14f04847b3121b466be", "native::scroll_bench::complete_workload_cost", "--ignored", "--exact", "--nocapture", "--test-threads=1"], "case": "text-1000-4-owner", "exit": 0}

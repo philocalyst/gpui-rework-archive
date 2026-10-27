@@ -1,0 +1,18 @@
+{
+  "candidate": {
+    "source": "aed951bc175d7bdf624b293a95d4c05a3401849e",
+    "inventory": "/home/user/gpui-glyph-damage-evidence/core-lines-cost-candidate.json"
+  },
+  "control": {
+    "source": "bb83c5d8f3da446d4cc1c259141f335797b1b60d",
+    "inventory": "/home/user/gpui-glyph-damage-evidence/core-lines-cost-control.json"
+  },
+  "predecessor": {
+    "source": "f9fd1d140555c1b3e230bfa9a2dd3b2247e19adc",
+    "inventory": "/home/user/gpui-glyph-damage-evidence/core-lines-cost-predecessor.json"
+  },
+  "bounds": {
+    "source": "be8300c1e3eafacedfa20c062bf2e31ed1ada9ca",
+    "inventory": "/home/user/gpui-glyph-damage-evidence/core-lines-cost-bounds.json"
+  }
+}

@@ -1,0 +1,3 @@
+   Compiling gpui v0.1.0 (/home/user/gpui-glyph-damage-control-lab/reactivity/crates/gpui)
+    Finished `release` profile [optimized] target(s) in 2m 32s
+  Executable unittests src/lib.rs (/home/user/gpui-glyph-damage-control-target/release/build/gpui/d51c62efad296df0/out/gpui-d51c62efad296df0)

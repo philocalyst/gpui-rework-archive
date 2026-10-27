@@ -1,0 +1,1 @@
+Public test fixture incorrectly equated integer author rectangles with Canvas conservative support bounds. Both fixed-area assertions failed (97 vs 68; 12 vs 6). Correct the expected union from the independently admitted DamageRegion inputs, preserving nonoverlap, coverage, allocation and overflow gates. No production change.

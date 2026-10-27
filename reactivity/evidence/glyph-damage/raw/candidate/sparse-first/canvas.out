@@ -1,0 +1,13 @@
+
+running 2 tests
+test merge_restarts_and_preserves_all_input_support_in_every_order ... FAILED
+test inline_region_allocates_nothing_and_overflow_stays_bounded ... FAILED
+
+failures:
+
+failures:
+    inline_region_allocates_nothing_and_overflow_stays_bounded
+    merge_restarts_and_preserves_all_input_support_in_every_order
+
+test result: FAILED. 0 passed; 2 failed; 0 ignored; 0 measured; 0 filtered out; finished in 0.00s
+

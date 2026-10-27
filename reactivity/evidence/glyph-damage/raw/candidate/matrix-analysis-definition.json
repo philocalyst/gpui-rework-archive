@@ -1,0 +1,9 @@
+{
+  "analysis_sha256": "a8093c3c38e6a533acba01d939b51d2ea0c08f2dd24c8f681842c22ae6b0c568",
+  "run_driver_sha256": "348abdbe410cacbb209405c8eed71322d801284be564d79d326b58a82f397e59",
+  "process_manifest_sha256": "a5f0ba0cd678db947075da182768dd0bb4c474281cfd37511028e18f5ce180cf",
+  "bootstrap_seed": 20261030,
+  "bootstrap_samples": 10000,
+  "pairs": 24,
+  "estimator": "median of paired process-p50 ratios; type-7 tails; no timing from qualification/allocation"
+}

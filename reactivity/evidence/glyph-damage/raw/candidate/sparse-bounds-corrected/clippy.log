@@ -1,0 +1,131 @@
+   Compiling syn v3.0.9
+    Checking core_maths v0.1.1
+   Compiling serde_core v1.0.229
+   Compiling serde v1.0.229
+   Compiling indexmap v2.14.2
+   Compiling winnow v1.0.4
+    Checking ttf-parser v0.25.1
+   Compiling rustix v1.1.5
+   Compiling toml_parser v1.1.5+spec-1.1.0
+   Compiling toml_datetime v1.1.2+spec-1.1.0
+   Compiling toml_edit v0.25.17+spec-1.1.0
+   Compiling enumflags2_derive v0.7.12
+   Compiling proc-macro2 v1.0.107
+   Compiling quote v1.0.47
+   Compiling crossbeam-utils v0.8.23
+   Compiling endi v1.1.1
+   Compiling tracing-attributes v0.1.31
+   Compiling proc-macro-crate v3.5.0
+    Checking concurrent-queue v2.5.0
+   Compiling async-io v2.6.0
+    Checking uuid v1.28.0
+    Checking errno v0.3.14
+    Checking signal-hook-registry v1.4.8
+    Checking async-channel v2.5.0
+    Checking async-executor v1.14.0
+    Checking blocking v1.7.0
+   Compiling synstructure v0.14.0
+    Checking tracing v0.1.44
+   Compiling siphasher v1.0.4
+   Compiling phf_shared v0.14.0
+   Compiling fastrand v2.5.0
+   Compiling thiserror v1.0.69
+   Compiling rustix v0.38.44
+   Compiling phf_generator v0.14.0
+   Compiling x11-dl v2.21.0
+   Compiling thiserror-impl v1.0.69
+   Compiling phf_macros v0.14.0
+    Checking accesskit v0.25.1 (/home/user/gpui-glyph-damage-lab/reactivity/vendor/accesskit)
+    Checking polling v3.11.0
+   Compiling bytemuck_derive v1.12.1
+   Compiling zerofrom-derive v0.1.8
+   Compiling yoke-derive v0.8.4
+   Compiling zerovec-derive v0.11.6
+   Compiling displaydoc v0.2.7
+   Compiling fearless_simd_macros v0.1.0
+    Checking zerofrom v0.1.8
+    Checking yoke v0.8.3
+   Compiling serde_derive v1.0.229
+    Checking bytemuck v1.25.2
+    Checking zerovec v0.11.8
+    Checking font-types v0.12.7
+    Checking zerotrie v0.2.5
+   Compiling thiserror-impl v2.0.21
+    Checking read-fonts v0.41.0
+    Checking read-fonts v0.46.0
+    Checking tinystr v0.8.4
+    Checking icu_locale_core v2.3.0
+    Checking potential_utf v0.1.6
+    Checking icu_collections v2.3.0
+    Checking thiserror v2.0.21
+    Checking naga-types v30.0.1
+   Compiling serde_repr v0.1.21
+    Checking async-signal v0.2.14
+   Compiling async-trait v0.1.92
+    Checking async-process v2.5.0
+    Checking icu_provider v2.3.1
+    Checking naga v30.0.1
+    Checking icu_locale_fallback v2.3.0
+    Checking icu_properties v2.3.0
+    Checking icu_segmenter v2.3.0
+    Checking icu_normalizer v2.3.0
+   Compiling zvariant_utils v4.2.0
+   Compiling enumflags2 v0.7.12
+    Checking parley_data v0.12.0
+   Compiling zcheapstr v1.1.0
+   Compiling async-recursion v1.2.0
+    Checking wgpu-types v30.0.1
+    Checking gethostname v1.1.0
+   Compiling zvariant_derive v5.15.1
+    Checking gpu-allocator v0.28.0
+   Compiling zvariant v5.15.1
+   Compiling zbus_names v4.3.5
+   Compiling zbus_xml v5.2.1
+    Checking harfrust v0.12.0
+    Checking fontique v0.12.0
+   Compiling zbus-lockstep v0.5.2
+   Compiling zbus_macros v5.19.0
+   Compiling zbus-lockstep-macros v0.5.2
+    Checking x11rb v0.13.2
+   Compiling winit v0.30.13 (/home/user/gpui-glyph-damage-lab/reactivity/vendor/winit)
+    Checking calloop v0.13.0
+    Checking accesskit_consumer v0.39.1 (/home/user/gpui-glyph-damage-lab/reactivity/vendor/accesskit_consumer)
+    Checking zbus v5.19.0
+   Compiling futures-macro v0.3.34
+    Checking phf v0.14.0
+    Checking wgpu-naga-bridge v30.0.1
+    Checking wgpu-hal v30.0.1 (/home/user/gpui-glyph-damage-lab/reactivity/vendor/wgpu-hal)
+   Compiling tiny-xlib v0.2.5
+   Compiling zmij v1.0.23
+    Checking futures-util v0.3.34
+   Compiling wgsl-rs v0.1.0-beta.6
+    Checking skrifa v0.49.0
+    Checking wgpu-core-deps-windows-linux-android v30.0.1
+    Checking wgpu-core v30.0.1 (/home/user/gpui-glyph-damage-lab/reactivity/vendor/wgpu-core)
+    Checking atspi-common v0.13.0
+   Compiling serde_json v1.0.154
+   Compiling zbus_utils v6.0.0
+    Checking parley_engine v0.12.0 (/home/user/gpui-glyph-damage-lab/reactivity/vendor/parley_engine)
+    Checking parley v0.12.0 (/home/user/gpui-glyph-damage-lab/reactivity/vendor/parley)
+   Compiling gpui_gpu v0.1.0 (/home/user/gpui-glyph-damage-lab/reactivity/crates/gpu)
+    Checking socket2 v0.6.5
+    Checking gpui_canvas v0.1.0 (/home/user/gpui-glyph-damage-lab/reactivity/crates/canvas)
+    Checking zruntime v0.2.0
+   Compiling zbus_macros v6.0.0
+    Checking softbuffer v0.4.8 (/home/user/gpui-glyph-damage-lab/reactivity/vendor/softbuffer)
+    Checking gpui_reactivity_host v0.1.0 (/home/user/gpui-glyph-damage-lab/reactivity/crates/host)
+    Checking atspi-proxies v0.13.0
+    Checking accesskit_atspi_common v0.21.0 (/home/user/gpui-glyph-damage-lab/reactivity/vendor/accesskit_atspi_common)
+    Checking gpui_reactivity_state v0.1.0 (/home/user/gpui-glyph-damage-lab/reactivity/crates/state)
+    Checking x11rb v0.14.0
+    Checking skrifa v0.44.0
+    Checking rustybuzz v0.20.1
+    Checking fontdue v0.9.5
+    Checking atspi v0.29.0
+    Checking accesskit_unix v0.24.0 (/home/user/gpui-glyph-damage-lab/reactivity/vendor/accesskit_unix)
+    Checking zbus v6.0.0
+    Checking wgpu v30.0.1 (/home/user/gpui-glyph-damage-lab/reactivity/vendor/wgpu)
+    Checking swash v0.2.10
+    Checking accesskit_winit v0.34.1
+    Checking gpui v0.1.0 (/home/user/gpui-glyph-damage-lab/reactivity/crates/gpui)
+    Finished `release` profile [optimized] target(s) in 18.08s

@@ -1,0 +1,1702 @@
+{
+  "candidate": {
+    "artifact": {
+      "path": "/home/user/gpui-glyph-damage-target/release/build/gpui/c6ca7b724b9767e5/out/zgx_native_lab",
+      "sha256": "b2ce81caf801dbcd8f80a54b75a0a28c6eda7587dfc9fb079708ea6798f48470",
+      "preserved": "/home/user/gpui-preserved-test-binaries/b2ce81caf801dbcd8f80a54b75a0a28c6eda7587dfc9fb079708ea6798f48470",
+      "bytes": 26306728,
+      "fingerprint": {
+        "rustc": 13112353858380123722,
+        "features": "[\"accessibility\", \"default\", \"native\", \"native-core\", \"simd\", \"x11\", \"x11-minimal\"]",
+        "declared_features": "[\"accessibility\", \"default\", \"desktop\", \"native\", \"native-core\", \"simd\", \"wayland\", \"wayland-minimal\", \"x11\", \"x11-minimal\"]",
+        "target": 6415628377601559145,
+        "profile": 854319013279132213,
+        "path": 1919712316253121376,
+        "deps": [
+          [
+            535147103364023206,
+            "icu_segmenter",
+            false,
+            5918058796071201790
+          ],
+          [
+            1001648224152866569,
+            "arcstr",
+            false,
+            8608570567093121818
+          ],
+          [
+            1940408237737794595,
+            "accesskit_winit",
+            false,
+            16378756593770281462
+          ],
+          [
+            2251399859588827949,
+            "pin_project_lite",
+            false,
+            15410928229466948552
+          ],
+          [
+            3750483387937644717,
+            "pollster",
+            false,
+            8289392155308658121
+          ],
+          [
+            4295957145130622623,
+            "zbus",
+            false,
+            14993108245006582512
+          ],
+          [
+            4590322165379248138,
+            "gpui_reactivity_host",
+            false,
+            17695644536370976779
+          ],
+          [
+            5686200050580704112,
+            "gpui",
+            false,
+            18390312721945351618
+          ],
+          [
+            6359120849577304855,
+            "x11rb",
+            false,
+            12807633032213377425
+          ],
+          [
+            6557439603276904804,
+            "serde",
+            false,
+            12193931258300044384
+          ],
+          [
+            8160210889872729633,
+            "serde_json",
+            false,
+            5272800233993643215
+          ],
+          [
+            8676817272026490959,
+            "accesskit",
+            false,
+            6996155117899367100
+          ],
+          [
+            8991190325997472044,
+            "gpui_gpu",
+            false,
+            13037568087828165732
+          ],
+          [
+            11048071599106839258,
+            "allocation_counter",
+            false,
+            6546775363473888567
+          ],
+          [
+            11671159878170094075,
+            "gpui_reactivity_state",
+            false,
+            13903968888743159116
+          ],
+          [
+            11905275778120334160,
+            "softbuffer",
+            false,
+            18044513764605989254
+          ],
+          [
+            12459942763388630573,
+            "parking_lot",
+            false,
+            598572927938174528
+          ],
+          [
+            13316223584457521750,
+            "cephal",
+            false,
+            12816297730444936390
+          ],
+          [
+            13628746454484093079,
+            "gpui_inline_call",
+            false,
+            4148753925670550377
+          ],
+          [
+            13672653153045154758,
+            "gpui_reactivity_core",
+            false,
+            3552894578772788042
+          ],
+          [
+            14670221084672822999,
+            "triomphe",
+            false,
+            7663979559722660298
+          ],
+          [
+            17032968227276897852,
+            "gpui_canvas",
+            false,
+            15604339289954434682
+          ],
+          [
+            17400412893666519160,
+            "zruntime",
+            false,
+            13868007450788544245
+          ],
+          [
+            17719763280398284109,
+            "accesskit_consumer",
+            false,
+            13095883432566665966
+          ]
+        ],
+        "local": [
+          {
+            "CheckDepInfo": {
+              "dep_info": "release/build/gpui/c6ca7b724b9767e5/fingerprint/dep-example-zgx_native_lab",
+              "fingerprint": "content"
+            }
+          }
+        ],
+        "rustflags": [
+          "-C",
+          "symbol-mangling-version=v0",
+          "--cfg",
+          "tokio_unstable"
+        ],
+        "config": 8362119626465528914,
+        "compile_kind": 0
+      }
+    },
+    "functions": [
+      {
+        "symbol": "<gpui_canvas::damage::DamageRegions as core::default::Default>::default",
+        "address": "000000000115e0c0",
+        "bytes": 25,
+        "local_sub_rsp_prologue": []
+      },
+      {
+        "symbol": "<gpui_gpu::renderer::retained::RetainedRenderer>::render",
+        "address": "0000000000d6bb50",
+        "bytes": 56,
+        "local_sub_rsp_prologue": [
+          16
+        ]
+      },
+      {
+        "symbol": "core::ptr::drop_glue::<alloc::boxed::Box<gpui::runtime::text_geometry::TextPatch>>",
+        "address": "00000000008de3c0",
+        "bytes": 68,
+        "local_sub_rsp_prologue": []
+      },
+      {
+        "symbol": "core::ptr::drop_glue::<core::option::Option<alloc::boxed::Box<gpui::runtime::text_geometry::TextResources>>>",
+        "address": "00000000008dbd50",
+        "bytes": 81,
+        "local_sub_rsp_prologue": []
+      },
+      {
+        "symbol": "core::ptr::drop_glue::<core::option::Option<alloc::boxed::Box<gpui::runtime::text_geometry::TextPatch>>>",
+        "address": "00000000008dbdb0",
+        "bytes": 81,
+        "local_sub_rsp_prologue": []
+      },
+      {
+        "symbol": "<gpui_gpu::renderer::retained::RetainedRenderer>::render_regions",
+        "address": "0000000000d6b980",
+        "bytes": 85,
+        "local_sub_rsp_prologue": [
+          16
+        ]
+      },
+      {
+        "symbol": "<gpui::runtime::text_geometry::TextResources>::entry",
+        "address": "00000000009ec990",
+        "bytes": 90,
+        "local_sub_rsp_prologue": []
+      },
+      {
+        "symbol": "<alloc::raw_vec::RawVec<gpui::runtime::text_geometry::Entry>>::grow_one",
+        "address": "00000000009852f0",
+        "bytes": 100,
+        "local_sub_rsp_prologue": [
+          24
+        ]
+      },
+      {
+        "symbol": "<alloc::vec::Vec<gpui::runtime::text_geometry::Entry>>::push_mut",
+        "address": "00000000009001b0",
+        "bytes": 100,
+        "local_sub_rsp_prologue": []
+      },
+      {
+        "symbol": "<gpui::runtime::query::Part>::text_geometry_lease",
+        "address": "0000000000a0d5f0",
+        "bytes": 106,
+        "local_sub_rsp_prologue": []
+      },
+      {
+        "symbol": "<gpui_canvas::damage::DamageRegions>::pixels",
+        "address": "0000000001159fe0",
+        "bytes": 125,
+        "local_sub_rsp_prologue": []
+      },
+      {
+        "symbol": "<gpui::runtime::query::Part>::text_geometry",
+        "address": "0000000000a0d440",
+        "bytes": 140,
+        "local_sub_rsp_prologue": []
+      },
+      {
+        "symbol": "core::ptr::drop_glue::<gpui::runtime::text_geometry::TextPatch>",
+        "address": "00000000008e0e30",
+        "bytes": 180,
+        "local_sub_rsp_prologue": []
+      },
+      {
+        "symbol": "core::ptr::drop_glue::<core::option::Option<alloc::boxed::Box<gpui::runtime::text_geometry::TextPatch>>>",
+        "address": "000000000097dcd0",
+        "bytes": 221,
+        "local_sub_rsp_prologue": []
+      },
+      {
+        "symbol": "core::ptr::drop_glue::<core::option::Option<alloc::boxed::Box<gpui::runtime::text_geometry::TextPatch>>>",
+        "address": "0000000000952340",
+        "bytes": 223,
+        "local_sub_rsp_prologue": []
+      },
+      {
+        "symbol": "core::ptr::drop_glue::<core::option::Option<alloc::boxed::Box<gpui::runtime::text_geometry::TextPatch>>>",
+        "address": "0000000000994c30",
+        "bytes": 223,
+        "local_sub_rsp_prologue": []
+      },
+      {
+        "symbol": "core::ptr::drop_glue::<core::option::Option<alloc::boxed::Box<gpui::runtime::text_geometry::TextPatch>>>",
+        "address": "00000000009c3c10",
+        "bytes": 223,
+        "local_sub_rsp_prologue": []
+      },
+      {
+        "symbol": "core::ptr::drop_glue::<core::option::Option<alloc::vec::Vec<gpui::runtime::text_geometry::Entry>>>",
+        "address": "00000000008db7d0",
+        "bytes": 255,
+        "local_sub_rsp_prologue": []
+      },
+      {
+        "symbol": "core::ptr::drop_glue::<core::option::Option<alloc::vec::Vec<gpui::runtime::text_geometry::Entry>>>",
+        "address": "00000000009513c0",
+        "bytes": 255,
+        "local_sub_rsp_prologue": []
+      },
+      {
+        "symbol": "core::ptr::drop_glue::<core::option::Option<alloc::vec::Vec<gpui::runtime::text_geometry::Entry>>>",
+        "address": "000000000097cdc0",
+        "bytes": 255,
+        "local_sub_rsp_prologue": []
+      },
+      {
+        "symbol": "core::ptr::drop_glue::<core::option::Option<alloc::vec::Vec<gpui::runtime::text_geometry::Entry>>>",
+        "address": "0000000000993cb0",
+        "bytes": 255,
+        "local_sub_rsp_prologue": []
+      },
+      {
+        "symbol": "core::ptr::drop_glue::<core::option::Option<alloc::vec::Vec<gpui::runtime::text_geometry::Entry>>>",
+        "address": "00000000009c3270",
+        "bytes": 255,
+        "local_sub_rsp_prologue": []
+      },
+      {
+        "symbol": "core::ptr::drop_glue::<alloc::vec::Vec<gpui::runtime::text_geometry::Entry>>",
+        "address": "00000000008ddf80",
+        "bytes": 256,
+        "local_sub_rsp_prologue": []
+      },
+      {
+        "symbol": "core::ptr::drop_glue::<alloc::vec::Vec<gpui::runtime::text_geometry::Entry>>",
+        "address": "0000000000953c10",
+        "bytes": 256,
+        "local_sub_rsp_prologue": []
+      },
+      {
+        "symbol": "core::ptr::drop_glue::<alloc::vec::Vec<gpui::runtime::text_geometry::Entry>>",
+        "address": "000000000097fb40",
+        "bytes": 256,
+        "local_sub_rsp_prologue": []
+      },
+      {
+        "symbol": "core::ptr::drop_glue::<alloc::vec::Vec<gpui::runtime::text_geometry::Entry>>",
+        "address": "0000000000996be0",
+        "bytes": 256,
+        "local_sub_rsp_prologue": []
+      },
+      {
+        "symbol": "core::ptr::drop_glue::<alloc::vec::Vec<gpui::runtime::text_geometry::Entry>>",
+        "address": "00000000009c5680",
+        "bytes": 256,
+        "local_sub_rsp_prologue": []
+      },
+      {
+        "symbol": "<gpui::runtime::text_geometry::TextGeometry>::transform",
+        "address": "00000000009ed470",
+        "bytes": 329,
+        "local_sub_rsp_prologue": []
+      },
+      {
+        "symbol": "<gpui::runtime::text_geometry::TextGeometry>::bounds",
+        "address": "00000000009ed2c0",
+        "bytes": 424,
+        "local_sub_rsp_prologue": [
+          56
+        ]
+      },
+      {
+        "symbol": "<gpui::runtime::text_geometry::TextGeometry>::visible_bounds",
+        "address": "00000000009ed080",
+        "bytes": 573,
+        "local_sub_rsp_prologue": [
+          72
+        ]
+      },
+      {
+        "symbol": "<gpui_gpu::renderer::GpuContext>::submit_regions",
+        "address": "0000000000d668f0",
+        "bytes": 592,
+        "local_sub_rsp_prologue": [
+          1320
+        ]
+      },
+      {
+        "symbol": "core::ptr::drop_glue::<gpui::runtime::text_geometry::TextResources>",
+        "address": "00000000008e0b90",
+        "bytes": 662,
+        "local_sub_rsp_prologue": []
+      },
+      {
+        "symbol": "<gpui_gpu::renderer::GpuContext>::submit",
+        "address": "0000000000d66b40",
+        "bytes": 695,
+        "local_sub_rsp_prologue": [
+          1344
+        ]
+      },
+      {
+        "symbol": "<gpui::runtime::text_geometry::TextResources>::acknowledge",
+        "address": "00000000009ec620",
+        "bytes": 865,
+        "local_sub_rsp_prologue": [
+          72
+        ]
+      },
+      {
+        "symbol": "<gpui_canvas::damage::DamageRegions>::include",
+        "address": "000000000115a060",
+        "bytes": 886,
+        "local_sub_rsp_prologue": []
+      },
+      {
+        "symbol": "core::ptr::drop_glue::<core::option::Option<alloc::boxed::Box<gpui::runtime::text_geometry::TextResources>>>",
+        "address": "0000000000951f90",
+        "bytes": 934,
+        "local_sub_rsp_prologue": []
+      },
+      {
+        "symbol": "core::ptr::drop_glue::<core::option::Option<alloc::boxed::Box<gpui::runtime::text_geometry::TextResources>>>",
+        "address": "000000000097d920",
+        "bytes": 934,
+        "local_sub_rsp_prologue": []
+      },
+      {
+        "symbol": "core::ptr::drop_glue::<core::option::Option<alloc::boxed::Box<gpui::runtime::text_geometry::TextResources>>>",
+        "address": "0000000000994880",
+        "bytes": 934,
+        "local_sub_rsp_prologue": []
+      },
+      {
+        "symbol": "core::ptr::drop_glue::<core::option::Option<alloc::boxed::Box<gpui::runtime::text_geometry::TextResources>>>",
+        "address": "00000000009c3860",
+        "bytes": 934,
+        "local_sub_rsp_prologue": []
+      },
+      {
+        "symbol": "<gpui_gpu::renderer::retained::RetainedRenderer>::render_repair",
+        "address": "0000000000d6b0c0",
+        "bytes": 2231,
+        "local_sub_rsp_prologue": [
+          680
+        ]
+      },
+      {
+        "symbol": "<gpui::runtime::Runtime<zgx_native_lab::Lab>>::try_sparse_text",
+        "address": "00000000008e3310",
+        "bytes": 2508,
+        "local_sub_rsp_prologue": [
+          440
+        ]
+      },
+      {
+        "symbol": "<gpui::runtime::Runtime<zgx_native_lab::Lab>>::present_walk",
+        "address": "0000000000904dd0",
+        "bytes": 25795,
+        "local_sub_rsp_prologue": [
+          4096,
+          216
+        ]
+      }
+    ]
+  },
+  "control": {
+    "artifact": {
+      "path": "/home/user/gpui-glyph-damage-control-target/release/build/gpui/c6ca7b724b9767e5/out/zgx_native_lab",
+      "sha256": "b5242e1cdfe7613614ea75a858d04475078cdd8aa5b967fc1b2b2e2f709bf31a",
+      "preserved": "/home/user/gpui-preserved-test-binaries/b5242e1cdfe7613614ea75a858d04475078cdd8aa5b967fc1b2b2e2f709bf31a",
+      "bytes": 26306384,
+      "fingerprint": {
+        "rustc": 13112353858380123722,
+        "features": "[\"accessibility\", \"default\", \"native\", \"native-core\", \"simd\", \"x11\", \"x11-minimal\"]",
+        "declared_features": "[\"accessibility\", \"default\", \"desktop\", \"native\", \"native-core\", \"simd\", \"wayland\", \"wayland-minimal\", \"x11\", \"x11-minimal\"]",
+        "target": 6415628377601559145,
+        "profile": 854319013279132213,
+        "path": 1919712316253121376,
+        "deps": [
+          [
+            535147103364023206,
+            "icu_segmenter",
+            false,
+            5918058796071201790
+          ],
+          [
+            1001648224152866569,
+            "arcstr",
+            false,
+            8608570567093121818
+          ],
+          [
+            1940408237737794595,
+            "accesskit_winit",
+            false,
+            16378756593770281462
+          ],
+          [
+            2251399859588827949,
+            "pin_project_lite",
+            false,
+            15410928229466948552
+          ],
+          [
+            3750483387937644717,
+            "pollster",
+            false,
+            8289392155308658121
+          ],
+          [
+            4295957145130622623,
+            "zbus",
+            false,
+            14993108245006582512
+          ],
+          [
+            4590322165379248138,
+            "gpui_reactivity_host",
+            false,
+            17695644536370976779
+          ],
+          [
+            5686200050580704112,
+            "gpui",
+            false,
+            8951620988661307662
+          ],
+          [
+            6359120849577304855,
+            "x11rb",
+            false,
+            12807633032213377425
+          ],
+          [
+            6557439603276904804,
+            "serde",
+            false,
+            12193931258300044384
+          ],
+          [
+            8160210889872729633,
+            "serde_json",
+            false,
+            5272800233993643215
+          ],
+          [
+            8676817272026490959,
+            "accesskit",
+            false,
+            6996155117899367100
+          ],
+          [
+            8991190325997472044,
+            "gpui_gpu",
+            false,
+            3691020599247430007
+          ],
+          [
+            11048071599106839258,
+            "allocation_counter",
+            false,
+            6546775363473888567
+          ],
+          [
+            11671159878170094075,
+            "gpui_reactivity_state",
+            false,
+            13903968888743159116
+          ],
+          [
+            11905275778120334160,
+            "softbuffer",
+            false,
+            18044513764605989254
+          ],
+          [
+            12459942763388630573,
+            "parking_lot",
+            false,
+            598572927938174528
+          ],
+          [
+            13316223584457521750,
+            "cephal",
+            false,
+            12816297730444936390
+          ],
+          [
+            13628746454484093079,
+            "gpui_inline_call",
+            false,
+            4148753925670550377
+          ],
+          [
+            13672653153045154758,
+            "gpui_reactivity_core",
+            false,
+            3552894578772788042
+          ],
+          [
+            14670221084672822999,
+            "triomphe",
+            false,
+            7663979559722660298
+          ],
+          [
+            17032968227276897852,
+            "gpui_canvas",
+            false,
+            15604339289954434682
+          ],
+          [
+            17400412893666519160,
+            "zruntime",
+            false,
+            13868007450788544245
+          ],
+          [
+            17719763280398284109,
+            "accesskit_consumer",
+            false,
+            13095883432566665966
+          ]
+        ],
+        "local": [
+          {
+            "CheckDepInfo": {
+              "dep_info": "release/build/gpui/c6ca7b724b9767e5/fingerprint/dep-example-zgx_native_lab",
+              "fingerprint": "content"
+            }
+          }
+        ],
+        "rustflags": [
+          "-C",
+          "symbol-mangling-version=v0",
+          "--cfg",
+          "tokio_unstable"
+        ],
+        "config": 8362119626465528914,
+        "compile_kind": 0
+      }
+    },
+    "functions": [
+      {
+        "symbol": "core::ptr::drop_glue::<core::option::Option<alloc::boxed::Box<gpui::runtime::text_geometry::TextResources>>>",
+        "address": "00000000008dbd40",
+        "bytes": 81,
+        "local_sub_rsp_prologue": []
+      },
+      {
+        "symbol": "<gpui::runtime::text_geometry::TextResources>::entry",
+        "address": "00000000009ec240",
+        "bytes": 90,
+        "local_sub_rsp_prologue": []
+      },
+      {
+        "symbol": "<alloc::raw_vec::RawVec<gpui::runtime::text_geometry::Entry>>::grow_one",
+        "address": "00000000009728e0",
+        "bytes": 100,
+        "local_sub_rsp_prologue": [
+          24
+        ]
+      },
+      {
+        "symbol": "<alloc::vec::Vec<gpui::runtime::text_geometry::Entry>>::push_mut",
+        "address": "00000000008ff950",
+        "bytes": 100,
+        "local_sub_rsp_prologue": []
+      },
+      {
+        "symbol": "<gpui::runtime::query::Part>::text_geometry_lease",
+        "address": "00000000009fcdd0",
+        "bytes": 106,
+        "local_sub_rsp_prologue": []
+      },
+      {
+        "symbol": "core::ptr::drop_glue::<gpui::runtime::text_geometry::TextPatch>",
+        "address": "00000000008e0df0",
+        "bytes": 124,
+        "local_sub_rsp_prologue": []
+      },
+      {
+        "symbol": "<gpui::runtime::query::Part>::text_geometry",
+        "address": "00000000009fcc20",
+        "bytes": 140,
+        "local_sub_rsp_prologue": []
+      },
+      {
+        "symbol": "core::ptr::drop_glue::<alloc::boxed::Box<gpui::runtime::text_geometry::TextPatch>>",
+        "address": "00000000008de2f0",
+        "bytes": 153,
+        "local_sub_rsp_prologue": []
+      },
+      {
+        "symbol": "core::ptr::drop_glue::<core::option::Option<alloc::boxed::Box<gpui::runtime::text_geometry::TextPatch>>>",
+        "address": "0000000000949b20",
+        "bytes": 166,
+        "local_sub_rsp_prologue": []
+      },
+      {
+        "symbol": "core::ptr::drop_glue::<core::option::Option<alloc::boxed::Box<gpui::runtime::text_geometry::TextPatch>>>",
+        "address": "0000000000984550",
+        "bytes": 166,
+        "local_sub_rsp_prologue": []
+      },
+      {
+        "symbol": "core::ptr::drop_glue::<core::option::Option<alloc::boxed::Box<gpui::runtime::text_geometry::TextPatch>>>",
+        "address": "00000000009ae5e0",
+        "bytes": 166,
+        "local_sub_rsp_prologue": []
+      },
+      {
+        "symbol": "core::ptr::drop_glue::<core::option::Option<alloc::boxed::Box<gpui::runtime::text_geometry::TextPatch>>>",
+        "address": "00000000009cb020",
+        "bytes": 166,
+        "local_sub_rsp_prologue": []
+      },
+      {
+        "symbol": "core::ptr::drop_glue::<core::option::Option<alloc::vec::Vec<gpui::runtime::text_geometry::Entry>>>",
+        "address": "00000000008db7c0",
+        "bytes": 255,
+        "local_sub_rsp_prologue": []
+      },
+      {
+        "symbol": "core::ptr::drop_glue::<core::option::Option<alloc::vec::Vec<gpui::runtime::text_geometry::Entry>>>",
+        "address": "0000000000948ba0",
+        "bytes": 255,
+        "local_sub_rsp_prologue": []
+      },
+      {
+        "symbol": "core::ptr::drop_glue::<core::option::Option<alloc::vec::Vec<gpui::runtime::text_geometry::Entry>>>",
+        "address": "0000000000983b50",
+        "bytes": 255,
+        "local_sub_rsp_prologue": []
+      },
+      {
+        "symbol": "core::ptr::drop_glue::<core::option::Option<alloc::vec::Vec<gpui::runtime::text_geometry::Entry>>>",
+        "address": "00000000009ad660",
+        "bytes": 255,
+        "local_sub_rsp_prologue": []
+      },
+      {
+        "symbol": "core::ptr::drop_glue::<core::option::Option<alloc::vec::Vec<gpui::runtime::text_geometry::Entry>>>",
+        "address": "00000000009ca0a0",
+        "bytes": 255,
+        "local_sub_rsp_prologue": []
+      },
+      {
+        "symbol": "core::ptr::drop_glue::<alloc::vec::Vec<gpui::runtime::text_geometry::Entry>>",
+        "address": "00000000008ddeb0",
+        "bytes": 256,
+        "local_sub_rsp_prologue": []
+      },
+      {
+        "symbol": "core::ptr::drop_glue::<alloc::vec::Vec<gpui::runtime::text_geometry::Entry>>",
+        "address": "000000000094b360",
+        "bytes": 256,
+        "local_sub_rsp_prologue": []
+      },
+      {
+        "symbol": "core::ptr::drop_glue::<alloc::vec::Vec<gpui::runtime::text_geometry::Entry>>",
+        "address": "0000000000985e90",
+        "bytes": 256,
+        "local_sub_rsp_prologue": []
+      },
+      {
+        "symbol": "core::ptr::drop_glue::<alloc::vec::Vec<gpui::runtime::text_geometry::Entry>>",
+        "address": "00000000009b0720",
+        "bytes": 256,
+        "local_sub_rsp_prologue": []
+      },
+      {
+        "symbol": "core::ptr::drop_glue::<alloc::vec::Vec<gpui::runtime::text_geometry::Entry>>",
+        "address": "00000000009ccc90",
+        "bytes": 256,
+        "local_sub_rsp_prologue": []
+      },
+      {
+        "symbol": "<gpui::runtime::text_geometry::TextGeometry>::transform",
+        "address": "00000000009ecd20",
+        "bytes": 329,
+        "local_sub_rsp_prologue": []
+      },
+      {
+        "symbol": "<gpui::runtime::text_geometry::TextGeometry>::bounds",
+        "address": "00000000009ecb70",
+        "bytes": 424,
+        "local_sub_rsp_prologue": [
+          56
+        ]
+      },
+      {
+        "symbol": "<gpui::runtime::text_geometry::TextGeometry>::visible_bounds",
+        "address": "00000000009ec930",
+        "bytes": 573,
+        "local_sub_rsp_prologue": [
+          72
+        ]
+      },
+      {
+        "symbol": "core::ptr::drop_glue::<gpui::runtime::text_geometry::TextResources>",
+        "address": "00000000008e0b80",
+        "bytes": 614,
+        "local_sub_rsp_prologue": []
+      },
+      {
+        "symbol": "<gpui_gpu::renderer::GpuContext>::submit",
+        "address": "0000000000d65600",
+        "bytes": 636,
+        "local_sub_rsp_prologue": [
+          1344
+        ]
+      },
+      {
+        "symbol": "<gpui::runtime::text_geometry::TextResources>::acknowledge",
+        "address": "00000000009ebf00",
+        "bytes": 817,
+        "local_sub_rsp_prologue": [
+          72
+        ]
+      },
+      {
+        "symbol": "core::ptr::drop_glue::<core::option::Option<alloc::boxed::Box<gpui::runtime::text_geometry::TextResources>>>",
+        "address": "0000000000949770",
+        "bytes": 934,
+        "local_sub_rsp_prologue": []
+      },
+      {
+        "symbol": "core::ptr::drop_glue::<core::option::Option<alloc::boxed::Box<gpui::runtime::text_geometry::TextResources>>>",
+        "address": "00000000009841a0",
+        "bytes": 934,
+        "local_sub_rsp_prologue": []
+      },
+      {
+        "symbol": "core::ptr::drop_glue::<core::option::Option<alloc::boxed::Box<gpui::runtime::text_geometry::TextResources>>>",
+        "address": "00000000009ae230",
+        "bytes": 934,
+        "local_sub_rsp_prologue": []
+      },
+      {
+        "symbol": "core::ptr::drop_glue::<core::option::Option<alloc::boxed::Box<gpui::runtime::text_geometry::TextResources>>>",
+        "address": "00000000009cac70",
+        "bytes": 934,
+        "local_sub_rsp_prologue": []
+      },
+      {
+        "symbol": "<gpui_gpu::renderer::retained::RetainedRenderer>::render",
+        "address": "0000000000d69780",
+        "bytes": 2117,
+        "local_sub_rsp_prologue": [
+          664
+        ]
+      },
+      {
+        "symbol": "<gpui::runtime::Runtime<zgx_native_lab::Lab>>::try_sparse_text",
+        "address": "00000000008e30e0",
+        "bytes": 2141,
+        "local_sub_rsp_prologue": [
+          360
+        ]
+      },
+      {
+        "symbol": "<gpui_canvas::canvas::Canvas>::try_patch_text",
+        "address": "000000000111e850",
+        "bytes": 3928,
+        "local_sub_rsp_prologue": [
+          1768
+        ]
+      },
+      {
+        "symbol": "<gpui::runtime::Runtime<zgx_native_lab::Lab>>::present_walk",
+        "address": "0000000000904570",
+        "bytes": 25792,
+        "local_sub_rsp_prologue": [
+          4096,
+          200
+        ]
+      }
+    ]
+  },
+  "predecessor": {
+    "artifact": {
+      "path": "/home/user/gpui-glyph-damage-predecessor-target/release/build/gpui/c6ca7b724b9767e5/out/zgx_native_lab",
+      "sha256": "036165813c3fbc0f51d4db31de06329059a2fbace5652947d4dd367ca93e3020",
+      "preserved": "/home/user/gpui-preserved-test-binaries/036165813c3fbc0f51d4db31de06329059a2fbace5652947d4dd367ca93e3020",
+      "bytes": 26309536,
+      "fingerprint": {
+        "rustc": 13112353858380123722,
+        "features": "[\"accessibility\", \"default\", \"native\", \"native-core\", \"simd\", \"x11\", \"x11-minimal\"]",
+        "declared_features": "[\"accessibility\", \"default\", \"desktop\", \"native\", \"native-core\", \"simd\", \"wayland\", \"wayland-minimal\", \"x11\", \"x11-minimal\"]",
+        "target": 6415628377601559145,
+        "profile": 854319013279132213,
+        "path": 1919712316253121376,
+        "deps": [
+          [
+            535147103364023206,
+            "icu_segmenter",
+            false,
+            5918058796071201790
+          ],
+          [
+            1001648224152866569,
+            "arcstr",
+            false,
+            8608570567093121818
+          ],
+          [
+            1940408237737794595,
+            "accesskit_winit",
+            false,
+            16378756593770281462
+          ],
+          [
+            2251399859588827949,
+            "pin_project_lite",
+            false,
+            15410928229466948552
+          ],
+          [
+            3750483387937644717,
+            "pollster",
+            false,
+            8289392155308658121
+          ],
+          [
+            4295957145130622623,
+            "zbus",
+            false,
+            14993108245006582512
+          ],
+          [
+            4590322165379248138,
+            "gpui_reactivity_host",
+            false,
+            17695644536370976779
+          ],
+          [
+            5686200050580704112,
+            "gpui",
+            false,
+            10098260540691048216
+          ],
+          [
+            6359120849577304855,
+            "x11rb",
+            false,
+            12807633032213377425
+          ],
+          [
+            6557439603276904804,
+            "serde",
+            false,
+            12193931258300044384
+          ],
+          [
+            8160210889872729633,
+            "serde_json",
+            false,
+            5272800233993643215
+          ],
+          [
+            8676817272026490959,
+            "accesskit",
+            false,
+            6996155117899367100
+          ],
+          [
+            8991190325997472044,
+            "gpui_gpu",
+            false,
+            8914403147033203197
+          ],
+          [
+            11048071599106839258,
+            "allocation_counter",
+            false,
+            6546775363473888567
+          ],
+          [
+            11671159878170094075,
+            "gpui_reactivity_state",
+            false,
+            13903968888743159116
+          ],
+          [
+            11905275778120334160,
+            "softbuffer",
+            false,
+            18044513764605989254
+          ],
+          [
+            12459942763388630573,
+            "parking_lot",
+            false,
+            598572927938174528
+          ],
+          [
+            13316223584457521750,
+            "cephal",
+            false,
+            12816297730444936390
+          ],
+          [
+            13628746454484093079,
+            "gpui_inline_call",
+            false,
+            4148753925670550377
+          ],
+          [
+            13672653153045154758,
+            "gpui_reactivity_core",
+            false,
+            3552894578772788042
+          ],
+          [
+            14670221084672822999,
+            "triomphe",
+            false,
+            7663979559722660298
+          ],
+          [
+            17032968227276897852,
+            "gpui_canvas",
+            false,
+            15604339289954434682
+          ],
+          [
+            17400412893666519160,
+            "zruntime",
+            false,
+            13868007450788544245
+          ],
+          [
+            17719763280398284109,
+            "accesskit_consumer",
+            false,
+            13095883432566665966
+          ]
+        ],
+        "local": [
+          {
+            "CheckDepInfo": {
+              "dep_info": "release/build/gpui/c6ca7b724b9767e5/fingerprint/dep-example-zgx_native_lab",
+              "fingerprint": "content"
+            }
+          }
+        ],
+        "rustflags": [
+          "-C",
+          "symbol-mangling-version=v0",
+          "--cfg",
+          "tokio_unstable"
+        ],
+        "config": 8362119626465528914,
+        "compile_kind": 0
+      }
+    },
+    "functions": [
+      {
+        "symbol": "core::ptr::drop_glue::<core::option::Option<alloc::boxed::Box<gpui::runtime::text_geometry::TextResources>>>",
+        "address": "00000000008dc130",
+        "bytes": 81,
+        "local_sub_rsp_prologue": []
+      },
+      {
+        "symbol": "<gpui::runtime::text_geometry::TextResources>::entry",
+        "address": "00000000009ec730",
+        "bytes": 90,
+        "local_sub_rsp_prologue": []
+      },
+      {
+        "symbol": "<alloc::raw_vec::RawVec<gpui::runtime::text_geometry::Entry>>::grow_one",
+        "address": "000000000097bba0",
+        "bytes": 100,
+        "local_sub_rsp_prologue": [
+          24
+        ]
+      },
+      {
+        "symbol": "<alloc::vec::Vec<gpui::runtime::text_geometry::Entry>>::push_mut",
+        "address": "0000000000900410",
+        "bytes": 100,
+        "local_sub_rsp_prologue": []
+      },
+      {
+        "symbol": "<gpui::runtime::query::Part>::text_geometry_lease",
+        "address": "00000000009fd2c0",
+        "bytes": 106,
+        "local_sub_rsp_prologue": []
+      },
+      {
+        "symbol": "core::ptr::drop_glue::<gpui::runtime::text_geometry::TextPatch>",
+        "address": "00000000008e1170",
+        "bytes": 124,
+        "local_sub_rsp_prologue": []
+      },
+      {
+        "symbol": "<gpui::runtime::query::Part>::text_geometry",
+        "address": "00000000009fd110",
+        "bytes": 140,
+        "local_sub_rsp_prologue": []
+      },
+      {
+        "symbol": "core::ptr::drop_glue::<alloc::boxed::Box<gpui::runtime::text_geometry::TextPatch>>",
+        "address": "00000000008de6e0",
+        "bytes": 153,
+        "local_sub_rsp_prologue": []
+      },
+      {
+        "symbol": "core::ptr::drop_glue::<core::option::Option<alloc::boxed::Box<gpui::runtime::text_geometry::TextPatch>>>",
+        "address": "000000000094ab70",
+        "bytes": 166,
+        "local_sub_rsp_prologue": []
+      },
+      {
+        "symbol": "core::ptr::drop_glue::<core::option::Option<alloc::boxed::Box<gpui::runtime::text_geometry::TextPatch>>>",
+        "address": "000000000095e740",
+        "bytes": 166,
+        "local_sub_rsp_prologue": []
+      },
+      {
+        "symbol": "core::ptr::drop_glue::<core::option::Option<alloc::boxed::Box<gpui::runtime::text_geometry::TextPatch>>>",
+        "address": "00000000009744e0",
+        "bytes": 166,
+        "local_sub_rsp_prologue": []
+      },
+      {
+        "symbol": "core::ptr::drop_glue::<core::option::Option<alloc::boxed::Box<gpui::runtime::text_geometry::TextPatch>>>",
+        "address": "00000000009c77f0",
+        "bytes": 166,
+        "local_sub_rsp_prologue": []
+      },
+      {
+        "symbol": "core::ptr::drop_glue::<core::option::Option<alloc::vec::Vec<gpui::runtime::text_geometry::Entry>>>",
+        "address": "00000000008dbbb0",
+        "bytes": 255,
+        "local_sub_rsp_prologue": []
+      },
+      {
+        "symbol": "core::ptr::drop_glue::<core::option::Option<alloc::vec::Vec<gpui::runtime::text_geometry::Entry>>>",
+        "address": "0000000000949bf0",
+        "bytes": 255,
+        "local_sub_rsp_prologue": []
+      },
+      {
+        "symbol": "core::ptr::drop_glue::<core::option::Option<alloc::vec::Vec<gpui::runtime::text_geometry::Entry>>>",
+        "address": "000000000095d7c0",
+        "bytes": 255,
+        "local_sub_rsp_prologue": []
+      },
+      {
+        "symbol": "core::ptr::drop_glue::<core::option::Option<alloc::vec::Vec<gpui::runtime::text_geometry::Entry>>>",
+        "address": "00000000009735d0",
+        "bytes": 255,
+        "local_sub_rsp_prologue": []
+      },
+      {
+        "symbol": "core::ptr::drop_glue::<core::option::Option<alloc::vec::Vec<gpui::runtime::text_geometry::Entry>>>",
+        "address": "00000000009c6e50",
+        "bytes": 255,
+        "local_sub_rsp_prologue": []
+      },
+      {
+        "symbol": "core::ptr::drop_glue::<alloc::vec::Vec<gpui::runtime::text_geometry::Entry>>",
+        "address": "00000000008de2a0",
+        "bytes": 256,
+        "local_sub_rsp_prologue": []
+      },
+      {
+        "symbol": "core::ptr::drop_glue::<alloc::vec::Vec<gpui::runtime::text_geometry::Entry>>",
+        "address": "000000000094c3b0",
+        "bytes": 256,
+        "local_sub_rsp_prologue": []
+      },
+      {
+        "symbol": "core::ptr::drop_glue::<alloc::vec::Vec<gpui::runtime::text_geometry::Entry>>",
+        "address": "00000000009603b0",
+        "bytes": 256,
+        "local_sub_rsp_prologue": []
+      },
+      {
+        "symbol": "core::ptr::drop_glue::<alloc::vec::Vec<gpui::runtime::text_geometry::Entry>>",
+        "address": "0000000000976520",
+        "bytes": 256,
+        "local_sub_rsp_prologue": []
+      },
+      {
+        "symbol": "core::ptr::drop_glue::<alloc::vec::Vec<gpui::runtime::text_geometry::Entry>>",
+        "address": "00000000009c9400",
+        "bytes": 256,
+        "local_sub_rsp_prologue": []
+      },
+      {
+        "symbol": "<gpui::runtime::text_geometry::TextGeometry>::transform",
+        "address": "00000000009ed210",
+        "bytes": 329,
+        "local_sub_rsp_prologue": []
+      },
+      {
+        "symbol": "<gpui::runtime::text_geometry::TextGeometry>::bounds",
+        "address": "00000000009ed060",
+        "bytes": 424,
+        "local_sub_rsp_prologue": [
+          56
+        ]
+      },
+      {
+        "symbol": "<gpui::runtime::text_geometry::TextGeometry>::visible_bounds",
+        "address": "00000000009ece20",
+        "bytes": 573,
+        "local_sub_rsp_prologue": [
+          72
+        ]
+      },
+      {
+        "symbol": "core::ptr::drop_glue::<gpui::runtime::text_geometry::TextResources>",
+        "address": "00000000008e0f00",
+        "bytes": 614,
+        "local_sub_rsp_prologue": []
+      },
+      {
+        "symbol": "<gpui_gpu::renderer::GpuContext>::submit",
+        "address": "0000000000d65af0",
+        "bytes": 636,
+        "local_sub_rsp_prologue": [
+          1344
+        ]
+      },
+      {
+        "symbol": "<gpui::runtime::text_geometry::TextResources>::acknowledge",
+        "address": "00000000009ec3f0",
+        "bytes": 817,
+        "local_sub_rsp_prologue": [
+          72
+        ]
+      },
+      {
+        "symbol": "core::ptr::drop_glue::<core::option::Option<alloc::boxed::Box<gpui::runtime::text_geometry::TextResources>>>",
+        "address": "000000000094a7c0",
+        "bytes": 934,
+        "local_sub_rsp_prologue": []
+      },
+      {
+        "symbol": "core::ptr::drop_glue::<core::option::Option<alloc::boxed::Box<gpui::runtime::text_geometry::TextResources>>>",
+        "address": "000000000095e390",
+        "bytes": 934,
+        "local_sub_rsp_prologue": []
+      },
+      {
+        "symbol": "core::ptr::drop_glue::<core::option::Option<alloc::boxed::Box<gpui::runtime::text_geometry::TextResources>>>",
+        "address": "0000000000974130",
+        "bytes": 934,
+        "local_sub_rsp_prologue": []
+      },
+      {
+        "symbol": "core::ptr::drop_glue::<core::option::Option<alloc::boxed::Box<gpui::runtime::text_geometry::TextResources>>>",
+        "address": "00000000009c7440",
+        "bytes": 934,
+        "local_sub_rsp_prologue": []
+      },
+      {
+        "symbol": "<gpui_gpu::renderer::retained::RetainedRenderer>::render",
+        "address": "0000000000d69c70",
+        "bytes": 2117,
+        "local_sub_rsp_prologue": [
+          664
+        ]
+      },
+      {
+        "symbol": "<gpui::runtime::Runtime<zgx_native_lab::Lab>>::try_sparse_text",
+        "address": "00000000008e35b0",
+        "bytes": 2274,
+        "local_sub_rsp_prologue": [
+          408
+        ]
+      },
+      {
+        "symbol": "<gpui_canvas::canvas::Canvas>::try_patch_text",
+        "address": "000000000111ed40",
+        "bytes": 3928,
+        "local_sub_rsp_prologue": [
+          1768
+        ]
+      },
+      {
+        "symbol": "<gpui::runtime::Runtime<zgx_native_lab::Lab>>::present_walk",
+        "address": "0000000000905030",
+        "bytes": 25792,
+        "local_sub_rsp_prologue": [
+          4096,
+          200
+        ]
+      }
+    ]
+  },
+  "bounds": {
+    "artifact": {
+      "path": "/home/user/gpui-glyph-damage-bounds-target/release/build/gpui/c6ca7b724b9767e5/out/zgx_native_lab",
+      "sha256": "fbdb6529f205ed1a57421b39a078516098dbc0cfa2e5114fe2fb45986ee0802c",
+      "preserved": "/home/user/gpui-preserved-test-binaries/fbdb6529f205ed1a57421b39a078516098dbc0cfa2e5114fe2fb45986ee0802c",
+      "bytes": 26310776,
+      "fingerprint": {
+        "rustc": 13112353858380123722,
+        "features": "[\"accessibility\", \"default\", \"native\", \"native-core\", \"simd\", \"x11\", \"x11-minimal\"]",
+        "declared_features": "[\"accessibility\", \"default\", \"desktop\", \"native\", \"native-core\", \"simd\", \"wayland\", \"wayland-minimal\", \"x11\", \"x11-minimal\"]",
+        "target": 6415628377601559145,
+        "profile": 854319013279132213,
+        "path": 1919712316253121376,
+        "deps": [
+          [
+            535147103364023206,
+            "icu_segmenter",
+            false,
+            5918058796071201790
+          ],
+          [
+            1001648224152866569,
+            "arcstr",
+            false,
+            8608570567093121818
+          ],
+          [
+            1940408237737794595,
+            "accesskit_winit",
+            false,
+            16378756593770281462
+          ],
+          [
+            2251399859588827949,
+            "pin_project_lite",
+            false,
+            15410928229466948552
+          ],
+          [
+            3750483387937644717,
+            "pollster",
+            false,
+            8289392155308658121
+          ],
+          [
+            4295957145130622623,
+            "zbus",
+            false,
+            14993108245006582512
+          ],
+          [
+            4590322165379248138,
+            "gpui_reactivity_host",
+            false,
+            17695644536370976779
+          ],
+          [
+            5686200050580704112,
+            "gpui",
+            false,
+            730702115498579300
+          ],
+          [
+            6359120849577304855,
+            "x11rb",
+            false,
+            12807633032213377425
+          ],
+          [
+            6557439603276904804,
+            "serde",
+            false,
+            12193931258300044384
+          ],
+          [
+            8160210889872729633,
+            "serde_json",
+            false,
+            5272800233993643215
+          ],
+          [
+            8676817272026490959,
+            "accesskit",
+            false,
+            6996155117899367100
+          ],
+          [
+            8991190325997472044,
+            "gpui_gpu",
+            false,
+            4696640585120602467
+          ],
+          [
+            11048071599106839258,
+            "allocation_counter",
+            false,
+            6546775363473888567
+          ],
+          [
+            11671159878170094075,
+            "gpui_reactivity_state",
+            false,
+            13903968888743159116
+          ],
+          [
+            11905275778120334160,
+            "softbuffer",
+            false,
+            18044513764605989254
+          ],
+          [
+            12459942763388630573,
+            "parking_lot",
+            false,
+            598572927938174528
+          ],
+          [
+            13316223584457521750,
+            "cephal",
+            false,
+            12816297730444936390
+          ],
+          [
+            13628746454484093079,
+            "gpui_inline_call",
+            false,
+            4148753925670550377
+          ],
+          [
+            13672653153045154758,
+            "gpui_reactivity_core",
+            false,
+            3552894578772788042
+          ],
+          [
+            14670221084672822999,
+            "triomphe",
+            false,
+            7663979559722660298
+          ],
+          [
+            17032968227276897852,
+            "gpui_canvas",
+            false,
+            15604339289954434682
+          ],
+          [
+            17400412893666519160,
+            "zruntime",
+            false,
+            13868007450788544245
+          ],
+          [
+            17719763280398284109,
+            "accesskit_consumer",
+            false,
+            13095883432566665966
+          ]
+        ],
+        "local": [
+          {
+            "CheckDepInfo": {
+              "dep_info": "release/build/gpui/c6ca7b724b9767e5/fingerprint/dep-example-zgx_native_lab",
+              "fingerprint": "content"
+            }
+          }
+        ],
+        "rustflags": [
+          "-C",
+          "symbol-mangling-version=v0",
+          "--cfg",
+          "tokio_unstable"
+        ],
+        "config": 8362119626465528914,
+        "compile_kind": 0
+      }
+    },
+    "functions": [
+      {
+        "symbol": "core::ptr::drop_glue::<core::option::Option<alloc::boxed::Box<gpui::runtime::text_geometry::TextResources>>>",
+        "address": "00000000008dc1e0",
+        "bytes": 81,
+        "local_sub_rsp_prologue": []
+      },
+      {
+        "symbol": "<gpui::runtime::text_geometry::TextResources>::entry",
+        "address": "00000000009ec7e0",
+        "bytes": 90,
+        "local_sub_rsp_prologue": []
+      },
+      {
+        "symbol": "<alloc::raw_vec::RawVec<gpui::runtime::text_geometry::Entry>>::grow_one",
+        "address": "000000000097bc50",
+        "bytes": 100,
+        "local_sub_rsp_prologue": [
+          24
+        ]
+      },
+      {
+        "symbol": "<alloc::vec::Vec<gpui::runtime::text_geometry::Entry>>::push_mut",
+        "address": "00000000009004c0",
+        "bytes": 100,
+        "local_sub_rsp_prologue": []
+      },
+      {
+        "symbol": "<gpui::runtime::query::Part>::text_geometry_lease",
+        "address": "00000000009fd370",
+        "bytes": 106,
+        "local_sub_rsp_prologue": []
+      },
+      {
+        "symbol": "core::ptr::drop_glue::<gpui::runtime::text_geometry::TextPatch>",
+        "address": "00000000008e1220",
+        "bytes": 124,
+        "local_sub_rsp_prologue": []
+      },
+      {
+        "symbol": "<gpui::runtime::query::Part>::text_geometry",
+        "address": "00000000009fd1c0",
+        "bytes": 140,
+        "local_sub_rsp_prologue": []
+      },
+      {
+        "symbol": "core::ptr::drop_glue::<alloc::boxed::Box<gpui::runtime::text_geometry::TextPatch>>",
+        "address": "00000000008de790",
+        "bytes": 153,
+        "local_sub_rsp_prologue": []
+      },
+      {
+        "symbol": "core::ptr::drop_glue::<core::option::Option<alloc::boxed::Box<gpui::runtime::text_geometry::TextPatch>>>",
+        "address": "000000000094ac20",
+        "bytes": 166,
+        "local_sub_rsp_prologue": []
+      },
+      {
+        "symbol": "core::ptr::drop_glue::<core::option::Option<alloc::boxed::Box<gpui::runtime::text_geometry::TextPatch>>>",
+        "address": "000000000095e7f0",
+        "bytes": 166,
+        "local_sub_rsp_prologue": []
+      },
+      {
+        "symbol": "core::ptr::drop_glue::<core::option::Option<alloc::boxed::Box<gpui::runtime::text_geometry::TextPatch>>>",
+        "address": "0000000000974590",
+        "bytes": 166,
+        "local_sub_rsp_prologue": []
+      },
+      {
+        "symbol": "core::ptr::drop_glue::<core::option::Option<alloc::boxed::Box<gpui::runtime::text_geometry::TextPatch>>>",
+        "address": "00000000009c78a0",
+        "bytes": 166,
+        "local_sub_rsp_prologue": []
+      },
+      {
+        "symbol": "core::ptr::drop_glue::<core::option::Option<alloc::vec::Vec<gpui::runtime::text_geometry::Entry>>>",
+        "address": "00000000008dbc60",
+        "bytes": 255,
+        "local_sub_rsp_prologue": []
+      },
+      {
+        "symbol": "core::ptr::drop_glue::<core::option::Option<alloc::vec::Vec<gpui::runtime::text_geometry::Entry>>>",
+        "address": "0000000000949ca0",
+        "bytes": 255,
+        "local_sub_rsp_prologue": []
+      },
+      {
+        "symbol": "core::ptr::drop_glue::<core::option::Option<alloc::vec::Vec<gpui::runtime::text_geometry::Entry>>>",
+        "address": "000000000095d870",
+        "bytes": 255,
+        "local_sub_rsp_prologue": []
+      },
+      {
+        "symbol": "core::ptr::drop_glue::<core::option::Option<alloc::vec::Vec<gpui::runtime::text_geometry::Entry>>>",
+        "address": "0000000000973680",
+        "bytes": 255,
+        "local_sub_rsp_prologue": []
+      },
+      {
+        "symbol": "core::ptr::drop_glue::<core::option::Option<alloc::vec::Vec<gpui::runtime::text_geometry::Entry>>>",
+        "address": "00000000009c6f00",
+        "bytes": 255,
+        "local_sub_rsp_prologue": []
+      },
+      {
+        "symbol": "core::ptr::drop_glue::<alloc::vec::Vec<gpui::runtime::text_geometry::Entry>>",
+        "address": "00000000008de350",
+        "bytes": 256,
+        "local_sub_rsp_prologue": []
+      },
+      {
+        "symbol": "core::ptr::drop_glue::<alloc::vec::Vec<gpui::runtime::text_geometry::Entry>>",
+        "address": "000000000094c460",
+        "bytes": 256,
+        "local_sub_rsp_prologue": []
+      },
+      {
+        "symbol": "core::ptr::drop_glue::<alloc::vec::Vec<gpui::runtime::text_geometry::Entry>>",
+        "address": "0000000000960460",
+        "bytes": 256,
+        "local_sub_rsp_prologue": []
+      },
+      {
+        "symbol": "core::ptr::drop_glue::<alloc::vec::Vec<gpui::runtime::text_geometry::Entry>>",
+        "address": "00000000009765d0",
+        "bytes": 256,
+        "local_sub_rsp_prologue": []
+      },
+      {
+        "symbol": "core::ptr::drop_glue::<alloc::vec::Vec<gpui::runtime::text_geometry::Entry>>",
+        "address": "00000000009c94b0",
+        "bytes": 256,
+        "local_sub_rsp_prologue": []
+      },
+      {
+        "symbol": "<gpui::runtime::text_geometry::TextGeometry>::transform",
+        "address": "00000000009ed2c0",
+        "bytes": 329,
+        "local_sub_rsp_prologue": []
+      },
+      {
+        "symbol": "<gpui::runtime::text_geometry::TextGeometry>::bounds",
+        "address": "00000000009ed110",
+        "bytes": 424,
+        "local_sub_rsp_prologue": [
+          56
+        ]
+      },
+      {
+        "symbol": "<gpui::runtime::text_geometry::TextGeometry>::visible_bounds",
+        "address": "00000000009eced0",
+        "bytes": 573,
+        "local_sub_rsp_prologue": [
+          72
+        ]
+      },
+      {
+        "symbol": "core::ptr::drop_glue::<gpui::runtime::text_geometry::TextResources>",
+        "address": "00000000008e0fb0",
+        "bytes": 614,
+        "local_sub_rsp_prologue": []
+      },
+      {
+        "symbol": "<gpui_gpu::renderer::GpuContext>::submit",
+        "address": "0000000000d65ba0",
+        "bytes": 636,
+        "local_sub_rsp_prologue": [
+          1344
+        ]
+      },
+      {
+        "symbol": "<gpui::runtime::text_geometry::TextResources>::acknowledge",
+        "address": "00000000009ec4a0",
+        "bytes": 817,
+        "local_sub_rsp_prologue": [
+          72
+        ]
+      },
+      {
+        "symbol": "core::ptr::drop_glue::<core::option::Option<alloc::boxed::Box<gpui::runtime::text_geometry::TextResources>>>",
+        "address": "000000000094a870",
+        "bytes": 934,
+        "local_sub_rsp_prologue": []
+      },
+      {
+        "symbol": "core::ptr::drop_glue::<core::option::Option<alloc::boxed::Box<gpui::runtime::text_geometry::TextResources>>>",
+        "address": "000000000095e440",
+        "bytes": 934,
+        "local_sub_rsp_prologue": []
+      },
+      {
+        "symbol": "core::ptr::drop_glue::<core::option::Option<alloc::boxed::Box<gpui::runtime::text_geometry::TextResources>>>",
+        "address": "00000000009741e0",
+        "bytes": 934,
+        "local_sub_rsp_prologue": []
+      },
+      {
+        "symbol": "core::ptr::drop_glue::<core::option::Option<alloc::boxed::Box<gpui::runtime::text_geometry::TextResources>>>",
+        "address": "00000000009c74f0",
+        "bytes": 934,
+        "local_sub_rsp_prologue": []
+      },
+      {
+        "symbol": "<gpui_gpu::renderer::retained::RetainedRenderer>::render",
+        "address": "0000000000d69d20",
+        "bytes": 2117,
+        "local_sub_rsp_prologue": [
+          664
+        ]
+      },
+      {
+        "symbol": "<gpui::runtime::Runtime<zgx_native_lab::Lab>>::try_sparse_text",
+        "address": "00000000008e3660",
+        "bytes": 2274,
+        "local_sub_rsp_prologue": [
+          408
+        ]
+      },
+      {
+        "symbol": "<gpui_canvas::canvas::Canvas>::try_patch_text",
+        "address": "000000000111ef30",
+        "bytes": 4464,
+        "local_sub_rsp_prologue": [
+          1768
+        ]
+      },
+      {
+        "symbol": "<gpui::runtime::Runtime<zgx_native_lab::Lab>>::present_walk",
+        "address": "00000000009050e0",
+        "bytes": 25792,
+        "local_sub_rsp_prologue": [
+          4096,
+          200
+        ]
+      }
+    ]
+  }
+}

@@ -1,0 +1,362 @@
+[
+  {
+    "case": "scroll",
+    "pair": 0,
+    "variant": "control",
+    "frames": 4
+  },
+  {
+    "case": "scroll",
+    "pair": 0,
+    "variant": "candidate",
+    "frames": 4
+  },
+  {
+    "case": "scroll",
+    "pair": 1,
+    "variant": "control",
+    "frames": 4
+  },
+  {
+    "case": "scroll",
+    "pair": 1,
+    "variant": "candidate",
+    "frames": 4
+  },
+  {
+    "case": "scroll",
+    "pair": 2,
+    "variant": "control",
+    "frames": 4
+  },
+  {
+    "case": "scroll",
+    "pair": 2,
+    "variant": "candidate",
+    "frames": 4
+  },
+  {
+    "case": "both",
+    "pair": 0,
+    "variant": "control",
+    "frames": 4
+  },
+  {
+    "case": "both",
+    "pair": 0,
+    "variant": "candidate",
+    "frames": 4
+  },
+  {
+    "case": "both",
+    "pair": 1,
+    "variant": "control",
+    "frames": 4
+  },
+  {
+    "case": "both",
+    "pair": 1,
+    "variant": "candidate",
+    "frames": 4
+  },
+  {
+    "case": "both",
+    "pair": 2,
+    "variant": "control",
+    "frames": 4
+  },
+  {
+    "case": "both",
+    "pair": 2,
+    "variant": "candidate",
+    "frames": 4
+  },
+  {
+    "case": "stream",
+    "pair": 0,
+    "variant": "control",
+    "frames": 4
+  },
+  {
+    "case": "stream",
+    "pair": 0,
+    "variant": "candidate",
+    "frames": 4
+  },
+  {
+    "case": "stream",
+    "pair": 1,
+    "variant": "control",
+    "frames": 4
+  },
+  {
+    "case": "stream",
+    "pair": 1,
+    "variant": "candidate",
+    "frames": 4
+  },
+  {
+    "case": "stream",
+    "pair": 2,
+    "variant": "control",
+    "frames": 4
+  },
+  {
+    "case": "stream",
+    "pair": 2,
+    "variant": "candidate",
+    "frames": 4
+  },
+  {
+    "case": "stream-owner",
+    "pair": 0,
+    "variant": "control",
+    "frames": 4
+  },
+  {
+    "case": "stream-owner",
+    "pair": 0,
+    "variant": "candidate",
+    "frames": 4
+  },
+  {
+    "case": "stream-owner",
+    "pair": 1,
+    "variant": "control",
+    "frames": 4
+  },
+  {
+    "case": "stream-owner",
+    "pair": 1,
+    "variant": "candidate",
+    "frames": 4
+  },
+  {
+    "case": "stream-owner",
+    "pair": 2,
+    "variant": "control",
+    "frames": 4
+  },
+  {
+    "case": "stream-owner",
+    "pair": 2,
+    "variant": "candidate",
+    "frames": 4
+  },
+  {
+    "case": "fractional",
+    "pair": 0,
+    "variant": "control",
+    "frames": 4
+  },
+  {
+    "case": "fractional",
+    "pair": 0,
+    "variant": "candidate",
+    "frames": 4
+  },
+  {
+    "case": "fractional",
+    "pair": 1,
+    "variant": "control",
+    "frames": 4
+  },
+  {
+    "case": "fractional",
+    "pair": 1,
+    "variant": "candidate",
+    "frames": 4
+  },
+  {
+    "case": "fractional",
+    "pair": 2,
+    "variant": "control",
+    "frames": 4
+  },
+  {
+    "case": "fractional",
+    "pair": 2,
+    "variant": "candidate",
+    "frames": 4
+  },
+  {
+    "case": "flat-tiny",
+    "pair": 0,
+    "variant": "control",
+    "frames": 4
+  },
+  {
+    "case": "flat-tiny",
+    "pair": 0,
+    "variant": "candidate",
+    "frames": 4
+  },
+  {
+    "case": "flat-tiny",
+    "pair": 1,
+    "variant": "control",
+    "frames": 4
+  },
+  {
+    "case": "flat-tiny",
+    "pair": 1,
+    "variant": "candidate",
+    "frames": 4
+  },
+  {
+    "case": "flat-tiny",
+    "pair": 2,
+    "variant": "control",
+    "frames": 4
+  },
+  {
+    "case": "flat-tiny",
+    "pair": 2,
+    "variant": "candidate",
+    "frames": 4
+  },
+  {
+    "case": "flat-full",
+    "pair": 0,
+    "variant": "control",
+    "frames": 4
+  },
+  {
+    "case": "flat-full",
+    "pair": 0,
+    "variant": "candidate",
+    "frames": 4
+  },
+  {
+    "case": "flat-full",
+    "pair": 1,
+    "variant": "control",
+    "frames": 4
+  },
+  {
+    "case": "flat-full",
+    "pair": 1,
+    "variant": "candidate",
+    "frames": 4
+  },
+  {
+    "case": "flat-full",
+    "pair": 2,
+    "variant": "control",
+    "frames": 4
+  },
+  {
+    "case": "flat-full",
+    "pair": 2,
+    "variant": "candidate",
+    "frames": 4
+  },
+  {
+    "case": "list-tiny",
+    "pair": 0,
+    "variant": "control",
+    "frames": 4
+  },
+  {
+    "case": "list-tiny",
+    "pair": 0,
+    "variant": "candidate",
+    "frames": 4
+  },
+  {
+    "case": "list-tiny",
+    "pair": 1,
+    "variant": "control",
+    "frames": 4
+  },
+  {
+    "case": "list-tiny",
+    "pair": 1,
+    "variant": "candidate",
+    "frames": 4
+  },
+  {
+    "case": "list-tiny",
+    "pair": 2,
+    "variant": "control",
+    "frames": 4
+  },
+  {
+    "case": "list-tiny",
+    "pair": 2,
+    "variant": "candidate",
+    "frames": 4
+  },
+  {
+    "case": "list-flat",
+    "pair": 0,
+    "variant": "control",
+    "frames": 4
+  },
+  {
+    "case": "list-flat",
+    "pair": 0,
+    "variant": "candidate",
+    "frames": 4
+  },
+  {
+    "case": "list-flat",
+    "pair": 1,
+    "variant": "control",
+    "frames": 4
+  },
+  {
+    "case": "list-flat",
+    "pair": 1,
+    "variant": "candidate",
+    "frames": 4
+  },
+  {
+    "case": "list-flat",
+    "pair": 2,
+    "variant": "control",
+    "frames": 4
+  },
+  {
+    "case": "list-flat",
+    "pair": 2,
+    "variant": "candidate",
+    "frames": 4
+  },
+  {
+    "case": "exposure",
+    "pair": 0,
+    "variant": "control",
+    "frames": 4
+  },
+  {
+    "case": "exposure",
+    "pair": 0,
+    "variant": "candidate",
+    "frames": 4
+  },
+  {
+    "case": "exposure",
+    "pair": 1,
+    "variant": "control",
+    "frames": 4
+  },
+  {
+    "case": "exposure",
+    "pair": 1,
+    "variant": "candidate",
+    "frames": 4
+  },
+  {
+    "case": "exposure",
+    "pair": 2,
+    "variant": "control",
+    "frames": 4
+  },
+  {
+    "case": "exposure",
+    "pair": 2,
+    "variant": "candidate",
+    "frames": 4
+  }
+]

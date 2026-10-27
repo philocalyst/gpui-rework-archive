@@ -1,0 +1,153 @@
+diff --git a/reactivity/crates/gpui/src/native.rs b/reactivity/crates/gpui/src/native.rs
+index 2595541bcf..21841ecd3a 100644
+--- a/reactivity/crates/gpui/src/native.rs
++++ b/reactivity/crates/gpui/src/native.rs
+@@ -315,7 +315,6 @@ struct GpuSurface {
+     renderer: gpui_gpu::RetainedRenderer,
+     errors: Arc<DeviceErrors>,
+     packet_token: Option<crate::PresentationToken>,
+-    packet_epoch: Option<crate::runtime::paint::SceneEpoch>,
+ }
+ impl GpuSurface {
+     #[cfg(test)]
+@@ -336,29 +335,25 @@ impl GpuSurface {
+         target: &wgpu::TextureView,
+         transition: Option<crate::runtime::paint::SceneDamage>,
+     ) -> Result<wgpu::SubmissionIndex, gpui_gpu::Error> {
+-        let epoch = transition.map(|d| d.epoch);
+         let damage = transition
+-            .filter(|d| d.base.is_some() && d.base == self.packet_epoch)
++            .filter(|d| d.base.is_some() && d.base == self.packet_token)
+             .map(|d| d.region);
+         if self.packet_token == Some(token)
+             && let Some(submitted) = self.renderer.redraw(target)?
+         {
+-            self.packet_epoch = epoch;
+             return Ok(submitted);
+         }
++        // Revoke image authority before any packet or image mutation.
+         let previous = self.packet_token.take();
+-        self.packet_epoch = None; // revoke before any packet or image mutation
+         if let Some(paint) = paint
+             && previous == Some(paint.from)
+             && let Ok(submitted) = self.renderer.patch_slots(&paint.edits, target, damage)
+         {
+             self.packet_token = Some(token);
+-            self.packet_epoch = epoch;
+             return Ok(submitted);
+         }
+         let submitted = self.renderer.render(scene, target, damage)?;
+         self.packet_token = Some(token);
+-        self.packet_epoch = epoch;
+         Ok(submitted)
+     }
+ }
+@@ -596,7 +591,6 @@ impl<V: View + 'static, L: LaneSet<V>> NativeHost<V, L> {
+             renderer: gpui_gpu::RetainedRenderer::new(renderer),
+             errors,
+             packet_token: None,
+-            packet_epoch: None,
+         })));
+         self.resize([size.width, size.height])
+     }
+diff --git a/reactivity/crates/gpui/src/native/scroll_bench.rs b/reactivity/crates/gpui/src/native/scroll_bench.rs
+index b5abf6073f..115396f2e2 100644
+--- a/reactivity/crates/gpui/src/native/scroll_bench.rs
++++ b/reactivity/crates/gpui/src/native/scroll_bench.rs
+@@ -397,7 +397,6 @@ impl ApplicationHandler for Harness {
+             renderer: gpui_gpu::RetainedRenderer::new(renderer),
+             errors,
+             packet_token: None,
+-            packet_epoch: None,
+         };
+         run(&mut gpu);
+         assert!(gpu.errors.take().is_none(), "native GPU device fault");
+diff --git a/reactivity/crates/gpui/src/native/upgrade.rs b/reactivity/crates/gpui/src/native/upgrade.rs
+index d8497d101f..51e235d43c 100644
+--- a/reactivity/crates/gpui/src/native/upgrade.rs
++++ b/reactivity/crates/gpui/src/native/upgrade.rs
+@@ -384,7 +384,6 @@ impl Upgrade {
+                         renderer: gpui_gpu::RetainedRenderer::new(renderer),
+                         errors,
+                         packet_token: None,
+-                        packet_epoch: None,
+                     }),
+                 })
+             }
+diff --git a/reactivity/crates/gpui/src/runtime.rs b/reactivity/crates/gpui/src/runtime.rs
+index 28518df9de..efcc4b6f2a 100644
+--- a/reactivity/crates/gpui/src/runtime.rs
++++ b/reactivity/crates/gpui/src/runtime.rs
+@@ -1210,7 +1210,7 @@ struct Runtime<M> {
+     dirty: bool,
+     source_epoch: u64,
+     presentation_epoch: u64,
+-    #[cfg(feature = "accessibility")]
++    #[cfg(feature = "native-core")]
+     presented_sequence: Option<NonZeroU64>,
+     #[cfg(feature = "accessibility")]
+     accessibility: Option<Box<accessibility::Observer>>,
+@@ -1452,7 +1452,7 @@ impl<M: View + 'static, L: LaneSet<M>> Win<M, L> {
+             dirty: true,
+             source_epoch: 0,
+             presentation_epoch: 0,
+-            #[cfg(feature = "accessibility")]
++            #[cfg(feature = "native-core")]
+             presented_sequence: None,
+             #[cfg(feature = "accessibility")]
+             accessibility: None,
+@@ -3086,9 +3086,12 @@ impl<M: View + 'static> Runtime<M> {
+         // No-op edits may extend complete coverage, but failed preparations do
+         // not. Re-acknowledging after loss therefore never covers a failed S.
+         self.presentation_epoch = self.complete_epoch;
+-        #[cfg(feature = "accessibility")]
++        #[cfg(feature = "native-core")]
+         {
+             self.presented_sequence = Some(token.sequence);
++        }
++        #[cfg(feature = "accessibility")]
++        {
+             let stamp = self.semantic_stamp();
+             if let Some(observer) = &mut self.accessibility {
+                 observer.acknowledge(stamp);
+diff --git a/reactivity/crates/gpui/src/runtime/paint.rs b/reactivity/crates/gpui/src/runtime/paint.rs
+index 7014f461ab..c103a346e8 100644
+--- a/reactivity/crates/gpui/src/runtime/paint.rs
++++ b/reactivity/crates/gpui/src/runtime/paint.rs
+@@ -156,16 +156,11 @@ impl Prepared {
+     }
+ }
+ 
+-#[cfg(feature = "native-core")]
+-#[derive(Clone, Copy, PartialEq, Eq)]
+-pub(crate) struct SceneEpoch(NonZeroU64, u64);
+-
+-/// Damage relative to the acknowledged epoch, never to an arbitrary GPU packet.
++/// Damage relative to the exact acknowledged image, including unbound changes.
+ #[cfg(feature = "native-core")]
+ #[derive(Clone, Copy)]
+ pub(crate) struct SceneDamage {
+-    pub(crate) base: Option<SceneEpoch>,
+-    pub(crate) epoch: SceneEpoch,
++    pub(crate) base: Option<PresentationToken>,
+     pub(crate) region: gpui_canvas::DamageRegion,
+ }
+ 
+@@ -188,10 +183,13 @@ impl<M: View + 'static, L: LaneSet<M>> Win<M, L> {
+             token,
+             runtime.styles.slot_transition(),
+             SceneDamage {
+-                base: (!runtime.automatic_presentation && runtime.presentation_valid).then_some(
+-                    SceneEpoch(runtime.sites.namespace(), runtime.presentation_epoch),
+-                ),
+-                epoch: SceneEpoch(runtime.sites.namespace(), runtime.complete_epoch),
++                base: (!runtime.automatic_presentation && runtime.presentation_valid)
++                    .then_some(runtime.presented_sequence)
++                    .flatten()
++                    .map(|sequence| PresentationToken {
++                        window: runtime.sites.namespace(),
++                        sequence,
++                    }),
+                 region: runtime
+                     .prepared
+                     .as_ref()

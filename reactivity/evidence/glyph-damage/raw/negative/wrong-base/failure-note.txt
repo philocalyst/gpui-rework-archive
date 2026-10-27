@@ -1,0 +1,1 @@
+This broad base-guard bypass is rejected first by the existing foreign-window work-counter assertion (600 vs 768 composited pixels). It is not yet the required omitted-image pixel witness. Narrow the next mutant to retain window namespace equality while ignoring only predecessor sequence; preserve this failed attempt.
