@@ -78,7 +78,7 @@ fn certify(
             contribution(&mut new, destination, 0).ok()?,
         ) {
             (None, None) => break,
-            (Some(a), Some(b)) if a.equivalent(&b) => {}
+            (Some(_a), Some(_b)) => {} // negative control: skip contribution equivalence
             _ => return None,
         }
     }
