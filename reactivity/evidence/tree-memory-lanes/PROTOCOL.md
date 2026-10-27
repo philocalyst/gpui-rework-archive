@@ -55,3 +55,16 @@ credit and C/P presentation epochs. Memory-yield lanes may be immediately polled
 again; externally blocked tasks must park until wake/completion. Coherent prior
 P remains readable while newer work is pending. No shared mutable root/window,
 no arbitrary user callback replay, and no await holding a mutable window borrow.
+
+## Frozen fixture details before any timings
+
+Each process selects one of tiny, contiguous, shuffled, medium-depth, shallow,
+single-full. Sizes are 256/32768/65536 live descendants; shuffled parent chains
+are allocated in permuted breadth levels. Twenty warmup calls, forty batches
+of five complete public compute calls. Full cells include set_style for every
+edit; filtering cells query a separate clean root while the dirty root stays
+pending, then compute the dirty root and hash every layout outside timing.
+Filtering is explicitly a scheduler workload, not a full frame. Cold construction
+and first complete compute are reported separately. A broad full-GPUI trial is
+required even if these core cells pass. This fixed fixture is shared unchanged
+by all six variants, with exact final layout hashes and stats checked.

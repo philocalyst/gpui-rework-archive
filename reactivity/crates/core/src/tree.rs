@@ -1,3 +1,6 @@
+#[cfg(feature = "layout")]
+pub(crate) mod lanes;
+
 use std::sync::atomic::{AtomicU64, Ordering};
 
 const NIL: u32 = u32::MAX;

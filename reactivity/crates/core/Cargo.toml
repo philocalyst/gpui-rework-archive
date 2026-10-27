@@ -14,3 +14,7 @@ layout = ["dep:cephal"]
 [[example]]
 name = "retained_layout"
 required-features = ["layout"]
+
+[[example]]
+name = "tree_lane_cost"
+required-features = ["layout"]

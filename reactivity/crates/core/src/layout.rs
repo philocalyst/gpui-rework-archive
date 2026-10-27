@@ -479,12 +479,19 @@ impl LayoutTree {
             }
         }
         let changed = self.viewports.get(&root) != Some(&viewport);
-        let selected: Vec<_> = self
-            .pending
-            .iter()
-            .copied()
-            .filter(|&id| self.root_of(id) == root)
-            .collect();
+        let selected: Vec<_> = if crate::tree::lanes::STRATEGY != 0
+            && self.pending.len() >= 32
+            && self.tree.len() >= 32768
+        {
+            self.tree
+                .select_pending_root(self.pending.iter().copied(), root)
+        } else {
+            self.pending
+                .iter()
+                .copied()
+                .filter(|&id| self.root_of(id) == root)
+                .collect()
+        };
         if !changed && selected.is_empty() {
             return Ok(false);
         }
