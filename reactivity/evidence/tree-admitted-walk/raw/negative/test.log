@@ -1,0 +1,5 @@
+   Compiling cephal v0.1.1 (/home/user/gpui-admitted-negative-lab/reactivity/vendor/cephal)
+   Compiling gpui_reactivity_core v0.1.0 (/home/user/gpui-admitted-negative-lab/reactivity/crates/core)
+    Finished `release` profile [optimized] target(s) in 15.38s
+     Running unittests src/lib.rs (/home/user/gpui-admitted-negative-target/release/build/gpui_reactivity_core/bb617653bd0fe641/out/gpui_reactivity_core-bb617653bd0fe641)
+error: test failed, to rerun pass `-p gpui_reactivity_core --lib`

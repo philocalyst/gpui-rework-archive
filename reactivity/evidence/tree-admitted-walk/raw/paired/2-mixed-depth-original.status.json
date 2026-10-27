@@ -1,0 +1,1 @@
+{"command": ["/usr/bin/time", "-v", "-o", "/home/user/gpui-tree-admitted-evidence/paired/2-mixed-depth-original.time", "/home/user/gpui-admitted-original-target/release/examples/tree_lane_cost", "mixed-depth"], "exit": 0}

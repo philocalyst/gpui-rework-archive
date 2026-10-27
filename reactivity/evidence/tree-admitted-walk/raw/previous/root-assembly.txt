@@ -1,0 +1,57 @@
+000000000004a980 <<gpui_reactivity_core::tree::Tree>::parent>:
+   4a980:	50                   	push   %rax
+   4a981:	4c 8b 0a             	mov    (%rdx),%r9
+   4a984:	4c 3b 4e 30          	cmp    0x30(%rsi),%r9
+   4a988:	75 5a                	jne    4a9e4 <<gpui_reactivity_core::tree::Tree>::parent+0x64>
+   4a98a:	48 89 f0             	mov    %rsi,%rax
+   4a98d:	48 8b 76 10          	mov    0x10(%rsi),%rsi
+   4a991:	8b 4a 0c             	mov    0xc(%rdx),%ecx
+   4a994:	48 39 ce             	cmp    %rcx,%rsi
+   4a997:	76 4b                	jbe    4a9e4 <<gpui_reactivity_core::tree::Tree>::parent+0x64>
+   4a999:	4c 8b 50 08          	mov    0x8(%rax),%r10
+   4a99d:	4c 8d 04 49          	lea    (%rcx,%rcx,2),%r8
+   4a9a1:	43 80 7c c2 14 ff    	cmpb   $0xff,0x14(%r10,%r8,8)
+   4a9a7:	74 3b                	je     4a9e4 <<gpui_reactivity_core::tree::Tree>::parent+0x64>
+   4a9a9:	4f 8d 04 c2          	lea    (%r10,%r8,8),%r8
+   4a9ad:	45 8b 00             	mov    (%r8),%r8d
+   4a9b0:	44 3b 42 08          	cmp    0x8(%rdx),%r8d
+   4a9b4:	75 2e                	jne    4a9e4 <<gpui_reactivity_core::tree::Tree>::parent+0x64>
+   4a9b6:	4c 8b 40 28          	mov    0x28(%rax),%r8
+   4a9ba:	49 39 c8             	cmp    %rcx,%r8
+   4a9bd:	76 49                	jbe    4aa08 <<gpui_reactivity_core::tree::Tree>::parent+0x88>
+   4a9bf:	48 8b 40 20          	mov    0x20(%rax),%rax
+   4a9c3:	8b 04 88             	mov    (%rax,%rcx,4),%eax
+   4a9c6:	b9 ff ff ff ff       	mov    $0xffffffff,%ecx
+   4a9cb:	48 39 c8             	cmp    %rcx,%rax
+   4a9ce:	74 24                	je     4a9f4 <<gpui_reactivity_core::tree::Tree>::parent+0x74>
+   4a9d0:	48 39 c6             	cmp    %rax,%rsi
+   4a9d3:	76 46                	jbe    4aa1b <<gpui_reactivity_core::tree::Tree>::parent+0x9b>
+   4a9d5:	48 8d 0c 40          	lea    (%rax,%rax,2),%rcx
+   4a9d9:	41 8b 0c ca          	mov    (%r10,%rcx,8),%ecx
+   4a9dd:	ba 01 00 00 00       	mov    $0x1,%edx
+   4a9e2:	eb 12                	jmp    4a9f6 <<gpui_reactivity_core::tree::Tree>::parent+0x76>
+   4a9e4:	c6 47 08 00          	movb   $0x0,0x8(%rdi)
+   4a9e8:	48 c7 07 02 00 00 00 	movq   $0x2,(%rdi)
+   4a9ef:	48 89 f8             	mov    %rdi,%rax
+   4a9f2:	59                   	pop    %rcx
+   4a9f3:	c3                   	ret
+   4a9f4:	31 d2                	xor    %edx,%edx
+   4a9f6:	48 89 17             	mov    %rdx,(%rdi)
+   4a9f9:	4c 89 4f 08          	mov    %r9,0x8(%rdi)
+   4a9fd:	89 4f 10             	mov    %ecx,0x10(%rdi)
+   4aa00:	89 47 14             	mov    %eax,0x14(%rdi)
+   4aa03:	48 89 f8             	mov    %rdi,%rax
+   4aa06:	59                   	pop    %rcx
+   4aa07:	c3                   	ret
+   4aa08:	48 8d 15 e9 a3 0c 00 	lea    0xca3e9(%rip),%rdx        # 114df8 <anon.954a5c5a41c0da8763a7fdb4438fae4d.34.llvm.6457091288300621998>
+   4aa0f:	48 89 cf             	mov    %rcx,%rdi
+   4aa12:	4c 89 c6             	mov    %r8,%rsi
+   4aa15:	ff 15 cd dc 0c 00    	call   *0xcdccd(%rip)        # 1186e8 <_DYNAMIC+0x458>
+   4aa1b:	48 8d 15 5e a2 0c 00 	lea    0xca25e(%rip),%rdx        # 114c80 <anon.954a5c5a41c0da8763a7fdb4438fae4d.3.llvm.6457091288300621998>
+   4aa22:	48 89 c7             	mov    %rax,%rdi
+   4aa25:	ff 15 bd dc 0c 00    	call   *0xcdcbd(%rip)        # 1186e8 <_DYNAMIC+0x458>
+   4aa2b:	cc                   	int3
+   4aa2c:	cc                   	int3
+   4aa2d:	cc                   	int3
+   4aa2e:	cc                   	int3
+   4aa2f:	cc                   	int3

@@ -1,0 +1,1 @@
+{"command": ["/usr/bin/time", "-v", "-o", "/home/user/gpui-tree-admitted-evidence/paired/1-shuffled-inline.time", "/home/user/gpui-admitted-inline-target/release/examples/tree_lane_cost", "shuffled"], "exit": 0}

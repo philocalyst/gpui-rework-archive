@@ -1,0 +1,3 @@
+TOPOLOGY,header=80,aggregate_slot=28
+COLD,single-full,17176975,LayoutStorage { slots: 32769, active_styles: 2, allocated_caches: 28673, lane_capacity_bytes: 7405568, cache_heap_bytes: 10322280, absolute_contexts: 0 }
+FINAL,single-full,158511f8a42eb60e,LayoutStats { computes: 401, computed_answers: 118673, cached_answers: 1626000, cheap_answers: 16896, measure_calls: 0, changed_layout_writes: 135312 }

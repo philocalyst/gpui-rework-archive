@@ -1,0 +1,1 @@
+{"command": ["/usr/bin/time", "-v", "-o", "/home/user/gpui-tree-admitted-evidence/paired/4-shallow-previous.time", "/home/user/gpui-admitted-previous-target/release/examples/tree_lane_cost", "shallow"], "exit": 0}

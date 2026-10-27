@@ -1,0 +1,36 @@
+{
+  "variants": {
+    "original": "/home/user/gpui-admitted-original-target/release/examples/tree_lane_cost",
+    "previous": "/home/user/gpui-admitted-previous-target/release/examples/tree_lane_cost",
+    "inline": "/home/user/gpui-admitted-inline-target/release/examples/tree_lane_cost",
+    "candidate": "/home/user/gpui-tree-admitted-target/release/examples/tree_lane_cost"
+  },
+  "hashes": {
+    "original": "3cfa3d7b91aa4d72068430b6b44d2a0b4bc2f590977d1c5ca4fda53259c35187",
+    "previous": "4f46984ca4d92fbb721f1a3d502e66fb802092ed3740ed6b39407a4ac559e91a",
+    "inline": "4f49ba7325080f9a2f9f2bf523494b51d39ba3b72c6198b796b670ed97e76e72",
+    "candidate": "7fe87896d9d57331b787ddb9dbfbeacb901c60437c75cd78c440bdceb535fbf4"
+  },
+  "cases": [
+    "tiny",
+    "contiguous",
+    "shuffled",
+    "medium-depth",
+    "shallow",
+    "single-full",
+    "mixed-depth"
+  ],
+  "repetitions": 5,
+  "warmup": 200,
+  "batches": 40,
+  "ops_per_batch": 5,
+  "platform": "Linux-6.8.0-117-generic-x86_64-with-glibc2.39",
+  "compiler": "rustc 1.101.0-nightly (7189d39d9 2026-10-22)\nbinary: rustc\ncommit-hash: 7189d39d9ce936881b8132c6addeaf3e295cd455\ncommit-date: 2026-10-22\nhost: x86_64-unknown-linux-gnu\nrelease: 1.101.0-nightly\nLLVM version: 23.1.4\n",
+  "started": 1793077205.090542,
+  "sources": {
+    "original": "2ddbf73dc373a82e94e907306fa6c113495849da",
+    "previous": "e9f6fddf71ce935b199eb5d2239cf2f726e4367e",
+    "inline": "ca174a4ab2b81b126e463e5364e8890b64d9a8ed",
+    "candidate": "6801b594c1bc9990f4c83ea77ecb130f563b7ff0"
+  }
+}

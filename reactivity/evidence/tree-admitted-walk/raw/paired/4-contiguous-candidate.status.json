@@ -1,0 +1,1 @@
+{"command": ["/usr/bin/time", "-v", "-o", "/home/user/gpui-tree-admitted-evidence/paired/4-contiguous-candidate.time", "/home/user/gpui-tree-admitted-target/release/examples/tree_lane_cost", "contiguous"], "exit": 0}

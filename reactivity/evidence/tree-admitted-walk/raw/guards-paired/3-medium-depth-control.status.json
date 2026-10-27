@@ -1,0 +1,1 @@
+{"command": ["/usr/bin/time", "-v", "-o", "/home/user/gpui-tree-admitted-evidence/guards-paired/3-medium-depth-control.time", "taskset", "-c", "2", "/home/user/gpui-tree-guard-control-target/release/examples/tree_lane_cost", "medium-depth", "20"], "exit": 0}

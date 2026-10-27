@@ -1,0 +1,1 @@
+{"command": ["/usr/bin/time", "-v", "-o", "/home/user/gpui-tree-admitted-evidence/guards-paired/1-single-full-candidate.time", "taskset", "-c", "2", "/home/user/gpui-tree-guard-target/release/examples/tree_lane_cost", "single-full", "20"], "exit": 0}

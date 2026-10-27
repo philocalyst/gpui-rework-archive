@@ -1,0 +1,1 @@
+First dossier verifier failed its command-array assertion: [-5:-2] omitted taskset. Corrected to [-6:-3]; capture command, timing rows and production source were unchanged.

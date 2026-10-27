@@ -1,0 +1,9 @@
+{
+  "binary": "/home/user/gpui-tree-admitted-target/release/build/gpui/e83ddf583a1b076b/out/gpui-e83ddf583a1b076b",
+  "sha256": "2f10db7c5733b6be067c2d3da69c466b0b0cc2300745aac7bf77a5e85dbd4f47",
+  "bytes": 56654904,
+  "test": "native::tests::native_todo_port_presents_edits_pointer_actions_resize_and_inspection",
+  "display": ":94",
+  "driver": "llvmpipe software Vulkan",
+  "exit": 0
+}

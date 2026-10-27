@@ -1,0 +1,4 @@
+    Blocking waiting for file lock on package cache
+   Compiling cephal v0.1.1 (/home/user/gpui-tree-guard-lab/reactivity/vendor/cephal)
+   Compiling gpui_reactivity_core v0.1.0 (/home/user/gpui-tree-guard-lab/reactivity/crates/core)
+    Finished `release` profile [optimized] target(s) in 11.67s

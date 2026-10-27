@@ -1,0 +1,149 @@
+0 tiny {'control': 11192.1, 'candidate': 13227.5}
+0 contiguous {'candidate': 1245.3, 'control': 2052.8}
+0 shuffled {'control': 123908.4, 'candidate': 30456.4}
+0 medium-depth {'candidate': 10271.4, 'control': 37076.3}
+0 shallow {'control': 15.3, 'candidate': 27.5}
+0 single-full {'candidate': 316916.2, 'control': 292704.7}
+0 mixed-depth {'control': 203982.6, 'candidate': 81987.9}
+1 tiny {'control': 19431.1, 'candidate': 13580.0}
+1 contiguous {'candidate': 2307.9, 'control': 3139.9}
+1 shuffled {'control': 130317.9, 'candidate': 35111.6}
+1 medium-depth {'candidate': 10871.5, 'control': 35976.2}
+1 shallow {'control': 23.8, 'candidate': 17.3}
+1 single-full {'candidate': 332531.7, 'control': 316532.5}
+1 mixed-depth {'control': 221236.5, 'candidate': 84692.9}
+2 tiny {'control': 16073.8, 'candidate': 12842.6}
+2 contiguous {'candidate': 1245.4, 'control': 3189.5}
+2 shuffled {'control': 136042.6, 'candidate': 41139.5}
+2 medium-depth {'candidate': 12192.5, 'control': 38337.2}
+2 shallow {'control': 16.2, 'candidate': 22.6}
+2 single-full {'candidate': 365799.3, 'control': 353772.7}
+2 mixed-depth {'control': 228939.1, 'candidate': 90939.2}
+3 tiny {'control': 12012.6, 'candidate': 20670.4}
+3 contiguous {'candidate': 2195.7, 'control': 2139.5}
+3 shuffled {'control': 130993.7, 'candidate': 32370.5}
+3 medium-depth {'candidate': 11533.2, 'control': 34927.8}
+3 shallow {'control': 16.1, 'candidate': 17.7}
+3 single-full {'candidate': 311089.3, 'control': 297627.0}
+3 mixed-depth {'control': 234505.5, 'candidate': 83723.1}
+4 tiny {'control': 14718.7, 'candidate': 13355.6}
+4 contiguous {'candidate': 2259.8, 'control': 2926.5}
+4 shuffled {'control': 132116.2, 'candidate': 38312.2}
+4 medium-depth {'candidate': 9953.7, 'control': 34621.2}
+4 shallow {'control': 16.0, 'candidate': 16.6}
+4 single-full {'candidate': 378328.4, 'control': 356133.6}
+4 mixed-depth {'control': 249274.4, 'candidate': 86915.1}
+{
+  "tiny": {
+    "candidate": {
+      "paired_ratios": [
+        1.181855951966119,
+        0.698882204301352,
+        0.798982813593592,
+        1.7207265704343773,
+        0.9073899189466461
+      ],
+      "median": 0.9073899189466461,
+      "range": [
+        0.698882204301352,
+        1.7207265704343773
+      ]
+    }
+  },
+  "contiguous": {
+    "candidate": {
+      "paired_ratios": [
+        0.6066200647879777,
+        0.7350234083888022,
+        0.39046872550556516,
+        1.0262444496377658,
+        0.7721681189133778
+      ],
+      "median": 0.7350234083888022,
+      "range": [
+        0.39046872550556516,
+        1.0262444496377658
+      ]
+    }
+  },
+  "shuffled": {
+    "candidate": {
+      "paired_ratios": [
+        0.2457978013588269,
+        0.2694303698877898,
+        0.30240160067508265,
+        0.2471149375886016,
+        0.2899881732943525
+      ],
+      "median": 0.2694303698877898,
+      "range": [
+        0.2457978013588269,
+        0.30240160067508265
+      ]
+    }
+  },
+  "medium-depth": {
+    "candidate": {
+      "paired_ratios": [
+        0.27703276756310635,
+        0.30218588956032044,
+        0.3180322480935594,
+        0.33020163050869294,
+        0.28750344803682143
+      ],
+      "median": 0.30218588956032044,
+      "range": [
+        0.27703276756310635,
+        0.33020163050869294
+      ]
+    }
+  },
+  "shallow": {
+    "candidate": {
+      "paired_ratios": [
+        1.799986910138098,
+        0.729001051524711,
+        1.3979332962069178,
+        1.0985687616677038,
+        1.0349968808484091
+      ],
+      "median": 1.0985687616677038,
+      "range": [
+        0.729001051524711,
+        1.799986910138098
+      ]
+    }
+  },
+  "single-full": {
+    "candidate": {
+      "paired_ratios": [
+        1.0827168273548096,
+        1.0505448807713458,
+        1.0339952743668461,
+        1.0452322949921034,
+        1.0623215557307708
+      ],
+      "median": 1.0505448807713458,
+      "range": [
+        1.0339952743668461,
+        1.0827168273548096
+      ]
+    }
+  },
+  "mixed-depth": {
+    "candidate": {
+      "paired_ratios": [
+        0.4019357533436675,
+        0.3828162661187765,
+        0.3972202651272762,
+        0.35701990848404225,
+        0.3486725873174301
+      ],
+      "median": 0.3828162661187765,
+      "range": [
+        0.3486725873174301,
+        0.4019357533436675
+      ]
+    }
+  }
+}

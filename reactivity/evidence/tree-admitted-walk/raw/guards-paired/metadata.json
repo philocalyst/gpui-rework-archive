@@ -1,0 +1,34 @@
+{
+  "variants": {
+    "control": "/home/user/gpui-tree-guard-control-target/release/examples/tree_lane_cost",
+    "candidate": "/home/user/gpui-tree-guard-target/release/examples/tree_lane_cost"
+  },
+  "hashes": {
+    "control": "301861b696c70e431492dd05a8f81e9314b4a223b9e5bd35cb488026a3c96ce3",
+    "candidate": "68a6feb41b17372b475c70a0896ae13e11ef958e97f1c0f8c2d768683dbe692c"
+  },
+  "cases": [
+    "tiny",
+    "contiguous",
+    "shuffled",
+    "medium-depth",
+    "shallow",
+    "single-full",
+    "mixed-depth"
+  ],
+  "repetitions": 5,
+  "warmup": 200,
+  "batches": 40,
+  "ops_per_batch": {
+    "shallow": 1000,
+    "other": 20
+  },
+  "cpu_affinity": 2,
+  "platform": "Linux-6.8.0-117-generic-x86_64-with-glibc2.39",
+  "compiler": "rustc 1.101.0-nightly (7189d39d9 2026-10-22)\nbinary: rustc\ncommit-hash: 7189d39d9ce936881b8132c6addeaf3e295cd455\ncommit-date: 2026-10-22\nhost: x86_64-unknown-linux-gnu\nrelease: 1.101.0-nightly\nLLVM version: 23.1.4\n",
+  "started": 1793077973.6335642,
+  "sources": {
+    "control": "7fcd5e44e985135fcbfad7e97661bf33d3cc49cd",
+    "candidate": "e6445e35e6251620f612143a72c76f670d30bea2"
+  }
+}
