@@ -1,0 +1,11 @@
+
+running 1 test
+test fractional_solid_edges_reject_pixel_uniform_coverage_and_match_full_samples ... FAILED
+
+failures:
+
+failures:
+    fractional_solid_edges_reject_pixel_uniform_coverage_and_match_full_samples
+
+test result: FAILED. 0 passed; 1 failed; 0 ignored; 0 measured; 59 filtered out; finished in 0.19s
+

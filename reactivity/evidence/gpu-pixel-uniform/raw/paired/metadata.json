@@ -1,0 +1,33 @@
+{
+  "binaries": {
+    "control": "/home/user/gpui-pixel-uniform-control-target/release/examples/pixel_uniform",
+    "candidate": "/home/user/gpui-pixel-uniform-target/release/examples/pixel_uniform"
+  },
+  "hashes": {
+    "control": "9841f55fcd7d0b4838bac4e0d87fb5a5e7063c11a339bef9da50205efa995e4f",
+    "candidate": "44ceb2128448f3337b0abedba833fc261311f471263520581c32dc54e9730ac2"
+  },
+  "frames": 60,
+  "warmup": 10,
+  "repetitions": 5,
+  "cases": [
+    "flat",
+    "stripes",
+    "text-stripes",
+    "quarter-stripes",
+    "hdr-stripes"
+  ],
+  "production_sources": {
+    "control": "a0684a2b3498821129453c8c929ecf6c5f6ba810",
+    "candidate": "f813187f98c4428f64567b702b4fa425d79fdbb8"
+  },
+  "qualified_candidate_source": "f813187f98c4428f64567b702b4fa425d79fdbb8",
+  "compiler": "rustc 1.101.0-nightly (7189d39d9 2026-10-22)\nbinary: rustc\ncommit-hash: 7189d39d9ce936881b8132c6addeaf3e295cd455\ncommit-date: 2026-10-22\nhost: x86_64-unknown-linux-gnu\nrelease: 1.101.0-nightly\nLLVM version: 23.1.4\n",
+  "platform": "Linux-6.8.0-117-generic-x86_64-with-glibc2.39",
+  "started": 1793075359.9770288,
+  "environment": {
+    "XDG_RUNTIME_DIR": "/home/user/gpui-xdg",
+    "VK_ICD_FILENAMES": "/usr/share/vulkan/icd.d/lvp_icd.json",
+    "LP_NUM_THREADS": "4"
+  }
+}

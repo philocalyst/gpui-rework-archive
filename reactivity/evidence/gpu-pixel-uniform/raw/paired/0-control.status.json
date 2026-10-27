@@ -1,0 +1,1 @@
+{"command": ["/usr/bin/time", "-v", "-o", "/home/user/gpui-pixel-uniform-evidence/paired/0-control.time", "/home/user/gpui-pixel-uniform-control-target/release/examples/pixel_uniform", "60"], "exit": 0}

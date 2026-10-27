@@ -1,0 +1,8 @@
+{
+  "binary": "/home/user/gpui-pixel-uniform-target/release/examples/pixel_uniform",
+  "binary_sha256": "44ceb2128448f3337b0abedba833fc261311f471263520581c32dc54e9730ac2",
+  "shader": "/home/user/gpui-pixel-uniform-target/release/build/gpui_gpu/aab4e3e5f9fc1354/out/ui.wgsl",
+  "shader_sha256": "f1f13bb817b601b2dac2f22b702493c38996c081308a6581f8256723c041be90",
+  "shader_bytes": 19674,
+  "embedded": true
+}
