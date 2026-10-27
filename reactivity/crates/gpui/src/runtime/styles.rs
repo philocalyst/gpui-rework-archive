@@ -329,6 +329,7 @@ pub(super) fn exact_eq(a: &Style, b: &Style) -> bool {
         && f32::same(&a.gap, &b.gap)
         && f32::same(&a.padding, &b.padding)
         && f32::same(&a.font_size, &b.font_size)
+        && Option::<f32>::same(&a.line_height, &b.line_height)
         && crate::Flow::same(&a.flow, &b.flow)
         && crate::Align::same(&a.align, &b.align)
         && crate::Justify::same(&a.justify, &b.justify)
@@ -487,7 +488,7 @@ mod tests {
     #[test]
     fn exact_comparison_covers_every_style_field() {
         let base = Style::default();
-        let mut changes = [base; 18];
+        let mut changes = [base; 19];
         changes[0].width = Some(0.0);
         changes[1].height = Some(0.0);
         changes[2].gap = -0.0;
@@ -506,6 +507,7 @@ mod tests {
         changes[15].align = Align::End;
         changes[16].justify = Justify::End;
         changes[17].wrap = true;
+        changes[18].line_height = Some(20.0);
         assert!(changes.into_iter().all(|value| !exact_eq(&base, &value)));
     }
 

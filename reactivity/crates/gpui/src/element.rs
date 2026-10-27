@@ -755,6 +755,12 @@ impl<'a> El<'a> {
         self.property_input::<{ PropertyId::FontSize as u16 }, false, f64, _>(size);
         self
     }
+    /// Absolute logical line pitch. The default uses the font's metrics.
+    /// Like font size, an explicit pitch must be finite and positive.
+    pub fn line_height(mut self, height: impl IntoProp<'a, f64>) -> Self {
+        self.property_input::<{ PropertyId::LineHeight as u16 }, false, f64, _>(height);
+        self
+    }
     pub fn text_xs(self) -> Self {
         self.font_size(12)
     }

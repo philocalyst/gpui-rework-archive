@@ -168,9 +168,10 @@ impl<'font> Planner<'font> {
         text: &str,
         size: f32,
         max_width: Option<f32>,
+        line_height: Option<f32>,
         interactive: bool,
     ) -> Result<TextLayout, Error> {
-        let planned = self.plan::<true>(text, size, max_width, interactive)?;
+        let planned = self.plan::<true>(text, size, max_width, line_height, interactive)?;
         Ok(TextLayout {
             width: planned.metrics.width,
             height: planned.metrics.height,
@@ -187,17 +188,22 @@ impl<'font> Planner<'font> {
         text: &str,
         size: f32,
         max_width: Option<f32>,
+        line_height: Option<f32>,
     ) -> Result<TextMetrics, Error> {
-        Ok(self.plan::<false>(text, size, max_width, false)?.metrics)
+        Ok(self
+            .plan::<false>(text, size, max_width, line_height, false)?
+            .metrics)
     }
     fn plan<const MATERIALIZE: bool>(
         &mut self,
         text: &str,
         size: f32,
         max_width: Option<f32>,
+        line_height: Option<f32>,
         interactive: bool,
     ) -> Result<Planned, Error> {
-        let result = self.plan_inner::<MATERIALIZE>(text, size, max_width, interactive);
+        let result =
+            self.plan_inner::<MATERIALIZE>(text, size, max_width, line_height, interactive);
         if result.is_err() {
             // An invalid or expanding font can create a rejected large layout.
             // Do not keep its buffers for later calls in this planning pass.
@@ -210,6 +216,7 @@ impl<'font> Planner<'font> {
         text: &str,
         size: f32,
         max_width: Option<f32>,
+        line_height: Option<f32>,
         interactive: bool,
     ) -> Result<Planned, Error> {
         let needed = self.coverage(text)?;
@@ -237,6 +244,11 @@ impl<'font> Planner<'font> {
                     .ranged_builder(&mut self.state.fonts, content, 1., false);
             builder.push_default(&names[..family_count]);
             builder.push_default(StyleProperty::FontSize(size));
+            if let Some(height) = line_height {
+                builder.push_default(StyleProperty::LineHeight(parley::LineHeight::Absolute(
+                    height,
+                )));
+            }
             builder.push_default(StyleProperty::OverflowWrap(OverflowWrap::Anywhere));
             builder.build_into(&mut self.state.layout, content);
             self.state.layout.break_all_lines(max_width);
@@ -397,6 +409,9 @@ impl<'font> Planner<'font> {
         // trim separately from stop-field compression and query changes.
         if let Some(stops) = details.as_mut().and_then(|d| d.carets.as_mut()) {
             stops.shrink_to_fit();
+        }
+        if !width.is_finite() || !height.is_finite() || !baseline.is_finite() {
+            return Err(Error::InvalidGeometry);
         }
         Ok(Planned {
             metrics: TextMetrics {
@@ -578,7 +593,7 @@ mod tests {
             &stacked,
         ] {
             for width in [None, Some(0.), Some(17.), Some(80.)] {
-                planner.shape(source, 18., width, true).unwrap();
+                planner.shape(source, 18., width, None, true).unwrap();
                 for line in planner.state.layout.lines() {
                     let raw = line.runs().map(|run| run.glyph_count()).sum::<usize>();
                     let positioned = line
@@ -599,20 +614,20 @@ mod tests {
         let face = FontFace::new(&PRIMARY_BYTES[..]).unwrap();
         let mut planner = Planner::new(&face).unwrap();
         planner
-            .shape("first paragraph", 18., Some(40.), true)
+            .shape("first paragraph", 18., Some(40.), None, true)
             .unwrap();
         // Exercise the output guard directly: public TextShaper also limits
         // source bytes, whereas a font may expand short admitted source.
         assert!(matches!(
-            planner.shape(&"W".repeat(MAX_GLYPHS + 1), 18., None, false),
+            planner.shape(&"W".repeat(MAX_GLYPHS + 1), 18., None, None, false),
             Err(Error::ResourceLimit)
         ));
         assert!(matches!(
-            planner.measure(&"W".repeat(MAX_GLYPHS + 1), 18., None),
+            planner.measure(&"W".repeat(MAX_GLYPHS + 1), 18., None, None),
             Err(Error::ResourceLimit)
         ));
         let source = "office\n\nnext";
-        let actual = planner.shape(source, 18., Some(60.), true).unwrap();
+        let actual = planner.shape(source, 18., Some(60.), None, true).unwrap();
         let expected = face
             .shaper()
             .shape_interactive(source, 18., Some(60.))
@@ -655,8 +670,8 @@ mod tests {
             "\r\n\u{2028}\u{2028}end\n",
         ] {
             for width in [None, Some(f32::MIN_POSITIVE), Some(30.), Some(180.)] {
-                let measured = planner.measure(source, 16., width).unwrap();
-                let shape = planner.shape(source, 16., width, true).unwrap();
+                let measured = planner.measure(source, 16., width, None).unwrap();
+                let shape = planner.shape(source, 16., width, None, true).unwrap();
                 assert_eq!(
                     [measured.width, measured.height, measured.baseline].map(f32::to_bits),
                     [shape.width, shape.height, shape.baseline].map(f32::to_bits),
@@ -664,7 +679,9 @@ mod tests {
                 );
                 // Inspect the same specialization used by the public measure
                 // entry point, including scripts that need detailed layouts.
-                let planned = planner.plan::<false>(source, 16., width, false).unwrap();
+                let planned = planner
+                    .plan::<false>(source, 16., width, None, false)
+                    .unwrap();
                 assert_eq!(planned.glyphs.capacity(), 0);
                 assert!(planned.details.is_none());
             }

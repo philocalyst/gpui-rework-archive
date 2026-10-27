@@ -48,6 +48,7 @@ impl<M: View + 'static> Runtime<M> {
         let shape = text.shape_text(
             shaper,
             style.font_size,
+            style.line_height,
             Some(layout.content_box_width()),
             None,
         )?;

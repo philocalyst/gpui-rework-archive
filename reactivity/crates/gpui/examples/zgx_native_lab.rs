@@ -109,6 +109,7 @@ fn label<'a>(value: impl gpui::IntoText<'a>, width: f64, height: f64) -> El<'a> 
         .w(width)
         .h(height)
         .font_size(14)
+        .line_height(20)
         .fg(rgb(0xe5edf7))
 }
 impl View for Lab {
@@ -159,7 +160,9 @@ impl View for Lab {
             .child(at(
                 20.,
                 20.,
-                label("zgx performance lab", 920., 28.).font_size(20),
+                label("zgx performance lab", 920., 28.)
+                    .font_size(20)
+                    .line_height(28),
             ))
             .child(controls)
             .child(at(220., 62., label(self.items.len().to_string(), 50., 24.)))

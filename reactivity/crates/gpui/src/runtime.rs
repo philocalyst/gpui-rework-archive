@@ -340,6 +340,7 @@ impl Snapshot {
 /// moves surviving identities and removed sites drop their glyph buffers.
 struct Shaped {
     width: Option<u32>,
+    line_height: Option<u32>,
     layout: TextLayout,
 }
 /// A compact preorder index, never an externally actionable identity. The
@@ -507,8 +508,8 @@ mod parent_tests {
         assert_eq!(size_of::<Option<Node>>(), size_of::<Node>());
         assert_eq!(size_of::<Presented>(), 64);
         assert_eq!(size_of::<Prepared>(), 40);
-        assert_eq!(size_of::<crate::El<'_>>(), 176);
-        assert_eq!(size_of::<crate::element::DraftNode<'_>>(), 152);
+        assert_eq!(size_of::<crate::El<'_>>(), 184);
+        assert_eq!(size_of::<crate::element::DraftNode<'_>>(), 160);
         println!(
             "CHECKBOX_WRAPPERS option_el={} option_draft={} option_presented={} option_prepared={} ordinal_key={} keyed_key={} runtime={} role={} option_role={}",
             size_of::<Option<crate::El<'_>>>(),
@@ -697,12 +698,13 @@ impl TextSite {
         font_size: f32,
         input: WidthMeasureInput,
     ) -> Result<TextMetrics, Error> {
-        self.measure_text(service, font_size, input, None)
+        self.measure_text(service, font_size, None, input, None)
     }
     fn measure_text(
         &mut self,
         service: &mut TextShaper<'_>,
         font_size: f32,
+        line_height: Option<f32>,
         input: WidthMeasureInput,
         display: Option<&str>,
     ) -> Result<TextMetrics, Error> {
@@ -716,11 +718,12 @@ impl TextSite {
             });
         let width = width.map(|value| value.max(f32::MIN_POSITIVE));
         if self.shaped.is_none() && input.known_dimensions.width.is_some() {
-            self.shape_text(service, font_size, width, display)?;
+            self.shape_text(service, font_size, line_height, width, display)?;
         }
         if let Some(shape) = &self.shaped
             && shape.width == width.map(f32::to_bits)
             && shape.layout.font_size() == font_size
+            && shape.line_height == line_height.map(f32::to_bits)
         {
             return Ok(TextMetrics {
                 width: shape.layout.width,
@@ -728,33 +731,48 @@ impl TextSite {
                 baseline: shape.layout.baseline,
             });
         }
-        Ok(service.measure(display.unwrap_or(&self.value), font_size, width)?)
+        Ok(service.measure_with_line_height(
+            display.unwrap_or(&self.value),
+            font_size,
+            width,
+            line_height,
+        )?)
     }
+    #[cfg(test)]
     fn shape_for<'n>(
         &'n mut self,
         service: &mut TextShaper<'_>,
         font_size: f32,
         width: Option<f32>,
     ) -> Result<&'n TextLayout, Error> {
-        self.shape_text(service, font_size, width, None)
+        self.shape_text(service, font_size, None, width, None)
     }
     fn shape_text<'n>(
         &'n mut self,
         service: &mut TextShaper<'_>,
         font_size: f32,
+        line_height: Option<f32>,
         width: Option<f32>,
         display: Option<&str>,
     ) -> Result<&'n TextLayout, Error> {
         let width = width.map(|value| value.max(f32::MIN_POSITIVE));
         let key = width.map(f32::to_bits);
-        if self
-            .shaped
-            .as_ref()
-            .is_none_or(|shape| shape.width != key || shape.layout.font_size() != font_size)
-        {
-            let layout =
-                service.shape_interactive(display.unwrap_or(&self.value), font_size, width)?;
-            self.shaped = Some(Shaped { width: key, layout });
+        if self.shaped.as_ref().is_none_or(|shape| {
+            shape.width != key
+                || shape.layout.font_size() != font_size
+                || shape.line_height != line_height.map(f32::to_bits)
+        }) {
+            let layout = service.shape_interactive_with_line_height(
+                display.unwrap_or(&self.value),
+                font_size,
+                width,
+                line_height,
+            )?;
+            self.shaped = Some(Shaped {
+                width: key,
+                line_height: line_height.map(f32::to_bits),
+                layout,
+            });
         }
         Ok(&self.shaped.as_ref().unwrap().layout)
     }
@@ -2506,7 +2524,8 @@ impl<M: View + 'static> Runtime<M> {
             if layout_changed(previous_style, style) {
                 self.layout_dirty.insert(node.identity());
             }
-            if previous_style.font_size != style.font_size
+            if (previous_style.font_size != style.font_size
+                || previous_style.line_height != style.line_height)
                 && let Some(site) = &mut site
             {
                 site.shaped = None;
@@ -2803,8 +2822,11 @@ impl<M: View + 'static> Runtime<M> {
                             if id.info().impact == crate::property::Impact::Layout {
                                 self.layout_dirty.insert(identity);
                             }
-                            if id == crate::property::PropertyId::FontSize
-                                && let Some(text) = node.text_slot().get_mut(&mut self.texts)
+                            if matches!(
+                                id,
+                                crate::property::PropertyId::FontSize
+                                    | crate::property::PropertyId::LineHeight
+                            ) && let Some(text) = node.text_slot().get_mut(&mut self.texts)
                             {
                                 text.shaped = None;
                             }
@@ -3207,6 +3229,7 @@ impl<M: View + 'static> Runtime<M> {
             match node.text_slot().get_mut(texts).unwrap().measure_text(
                 service,
                 styles.get(index).font_size,
+                styles.get(index).line_height,
                 input,
                 composition
                     .as_ref()
@@ -3509,6 +3532,7 @@ impl<M: View + 'static> Runtime<M> {
                 let shape = text.shape_text(
                     shaper.as_mut().expect("text initialized before layout"),
                     style.font_size,
+                    style.line_height,
                     Some(layout.content_box_width()),
                     composition
                         .as_ref()
@@ -3916,6 +3940,7 @@ fn layout_changed(a: Style, b: Style) -> bool {
         || a.gap != b.gap
         || a.padding != b.padding
         || a.font_size != b.font_size
+        || a.line_height != b.line_height
         || a.flow != b.flow
         || a.align != b.align
         || a.justify != b.justify
@@ -4093,7 +4118,7 @@ impl<M: View + 'static, L: LaneSet<M>> RuntimeMut<'_, M, L> {
             if layout_changed(before, after) {
                 runtime.layout_dirty.insert(identity);
             }
-            if before.font_size != after.font_size {
+            if before.font_size != after.font_size || before.line_height != after.line_height {
                 let slot = runtime.nodes[index].text_slot();
                 if let Some(text) = slot.get_mut(&mut runtime.texts) {
                     text.shaped = None;
@@ -4830,7 +4855,7 @@ mod semantic_storage_ledger {
         assert_eq!(size_of::<Node>(), 24);
         assert_eq!(size_of::<Prepared>(), 40);
         assert_eq!(size_of::<Presented>(), 64);
-        assert_eq!(size_of::<crate::El<'_>>(), 176);
+        assert_eq!(size_of::<crate::El<'_>>(), 184);
         assert_eq!(size_of::<ListRow>(), 32);
         assert_eq!(size_of::<metadata::Row>(), 24);
         assert_eq!(size_of::<Destination>(), 4);
@@ -5209,7 +5234,7 @@ mod style_port_tests {
     }
 
     #[test]
-    fn ordinary_headers_and_literal_owner_allocation_floor_remain_unchanged() {
+    fn ordinary_headers_charge_optional_line_height() {
         eprintln!(
             "style_headers,Style={},El={},Draft={},Node={},P={},Runtime={},Fanout={},Destination={},Flex={}",
             size_of::<Style>(),
@@ -5224,9 +5249,10 @@ mod style_port_tests {
         );
         assert_eq!(size_of::<Node>(), 24);
         assert_eq!(size_of::<Presented>(), 64);
-        assert_eq!(size_of::<crate::El<'_>>(), 176);
-        assert_eq!(size_of::<crate::element::DraftNode<'_>>(), 152);
-        assert_eq!(size_of::<Style>(), 88);
+        assert_eq!(size_of::<crate::El<'_>>(), 184);
+        assert_eq!(size_of::<crate::element::DraftNode<'_>>(), 160);
+        assert_eq!(size_of::<Style>(), 96);
+        eprintln!("shaped_bytes={}", size_of::<Shaped>());
         assert_eq!(size_of::<Fanout>(), 32);
         assert_eq!(size_of::<Destination>(), 4);
     }

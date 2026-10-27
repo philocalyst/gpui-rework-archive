@@ -117,10 +117,12 @@ impl<M: View + 'static> Runtime<M> {
                 .expect("current text presentation has a font service")
                 .font_face()
                 .clone();
-            slot.get_mut(&mut self.texts).unwrap().shape_for(
+            slot.get_mut(&mut self.texts).unwrap().shape_text(
                 &mut font.shaper(),
                 self.styles.get(index).font_size,
+                self.styles.get(index).line_height,
                 Some(width),
+                None,
             )?;
         }
         Ok(&slot

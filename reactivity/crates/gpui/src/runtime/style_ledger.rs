@@ -22,8 +22,8 @@ mod todos;
 #[path = "../../examples/support/workspace.rs"]
 mod workspace;
 
-fn style_key(style: Style, transform: bool) -> [u32; 24] {
-    let mut key = [0; 24];
+fn style_key(style: Style, transform: bool) -> [u32; 26] {
+    let mut key = [0; 26];
     key[..4].copy_from_slice(&[
         u32::from(style.width.is_some()),
         style.width.unwrap_or_default().to_bits(),
@@ -41,8 +41,10 @@ fn style_key(style: Style, transform: bool) -> [u32; 24] {
         | ((style.justify as u32) << 16)
         | (u32::from(style.wrap) << 24);
     if transform {
-        key[18..].copy_from_slice(&affine_key(style.transform));
+        key[18..24].copy_from_slice(&affine_key(style.transform));
     }
+    key[24] = u32::from(style.line_height.is_some());
+    key[25] = style.line_height.unwrap_or_default().to_bits();
     key
 }
 fn affine_key(map: Affine) -> [u32; 6] {

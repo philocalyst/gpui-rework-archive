@@ -386,8 +386,19 @@ impl<'font> TextShaper<'font> {
         font_size: f32,
         max_width: Option<f32>,
     ) -> Result<TextMetrics, Error> {
-        self.planner(text, font_size, max_width)?
-            .measure(text, font_size, max_width)
+        self.measure_with_line_height(text, font_size, max_width, None)
+    }
+    /// Measure with an optional absolute logical line pitch. None preserves
+    /// font metrics. A nonpositive or nonfinite pitch is InvalidGeometry.
+    pub fn measure_with_line_height(
+        &mut self,
+        text: &str,
+        font_size: f32,
+        max_width: Option<f32>,
+        line_height: Option<f32>,
+    ) -> Result<TextMetrics, Error> {
+        self.planner(text, font_size, max_width, line_height)?
+            .measure(text, font_size, max_width, line_height)
     }
     pub fn shape(
         &mut self,
@@ -395,7 +406,17 @@ impl<'font> TextShaper<'font> {
         font_size: f32,
         max_width: Option<f32>,
     ) -> Result<TextLayout, Error> {
-        self.shape_mode(text, font_size, max_width, false)
+        self.shape_with_line_height(text, font_size, max_width, None)
+    }
+    /// Shape with the same absolute line-pitch rules as measure_with_line_height.
+    pub fn shape_with_line_height(
+        &mut self,
+        text: &str,
+        font_size: f32,
+        max_width: Option<f32>,
+        line_height: Option<f32>,
+    ) -> Result<TextLayout, Error> {
+        self.shape_mode(text, font_size, max_width, line_height, false)
     }
     /// Requests original-byte, grapheme-safe caret geometry as cold layout data.
     /// This does not create selection state or advertise native range actions.
@@ -405,26 +426,42 @@ impl<'font> TextShaper<'font> {
         font_size: f32,
         max_width: Option<f32>,
     ) -> Result<TextLayout, Error> {
-        self.shape_mode(text, font_size, max_width, true)
+        self.shape_interactive_with_line_height(text, font_size, max_width, None)
+    }
+    /// Shape interactive geometry using the same absolute pitch as measurement
+    /// and painting. None preserves the existing font-metric default.
+    pub fn shape_interactive_with_line_height(
+        &mut self,
+        text: &str,
+        font_size: f32,
+        max_width: Option<f32>,
+        line_height: Option<f32>,
+    ) -> Result<TextLayout, Error> {
+        self.shape_mode(text, font_size, max_width, line_height, true)
     }
     fn shape_mode(
         &mut self,
         text: &str,
         font_size: f32,
         max_width: Option<f32>,
+        line_height: Option<f32>,
         interactive: bool,
     ) -> Result<TextLayout, Error> {
-        self.planner(text, font_size, max_width)?
-            .shape(text, font_size, max_width, interactive)
+        self.planner(text, font_size, max_width, line_height)?
+            .shape(text, font_size, max_width, line_height, interactive)
     }
     fn planner(
         &mut self,
         text: &str,
         font_size: f32,
         max_width: Option<f32>,
+        line_height: Option<f32>,
     ) -> Result<&mut planner::Planner<'font>, Error> {
         if !font_size.is_finite() || !(0.0..=512.0).contains(&font_size) || font_size == 0. {
             return Err(Error::InvalidFontSize);
+        }
+        if line_height.is_some_and(|height| !height.is_finite() || height <= 0.) {
+            return Err(Error::InvalidGeometry);
         }
         if max_width.is_some_and(|w| !w.is_finite() || w <= 0.) {
             return Err(Error::InvalidWidth);

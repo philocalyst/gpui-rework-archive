@@ -33,6 +33,7 @@ pub enum PropertyId {
     Wrap = 12,
     CornerRadius = 13,
     Clip = 14,
+    LineHeight = 15,
 }
 
 #[derive(Clone, Copy, Debug, PartialEq, Eq)]
@@ -556,6 +557,7 @@ properties! {
     GAP, GAP_DECL, f32, Gap, "gap", Number, Layout, gap, nonnegative;
     PADDING, PADDING_DECL, f32, Padding, "padding", Number, Layout, padding, nonnegative;
     FONT_SIZE, FONT_SIZE_DECL, f32, FontSize, "font_size", Number, Layout, font_size, font_size;
+    LINE_HEIGHT, LINE_HEIGHT_DECL, Option<f32>, LineHeight, "line_height", Dimension, Layout, line_height, |value: &Option<f32>| value.as_ref().map_or(Ok(()), font_size);
     FOREGROUND, FOREGROUND_DECL, Color, Foreground, "foreground", Color, Paint, fg, |_| Ok(());
     FLOW, FLOW_DECL, Flow, Flow, "flow", Flow, Layout, flow, |_| Ok(());
     TRANSFORM, TRANSFORM_DECL, Affine, Transform, "transform", Transform, Geometry, transform, finite_transform;
@@ -916,7 +918,7 @@ mod tests {
             size_of_val(PROPERTIES)
         );
         assert_eq!(std::mem::size_of_val(&WIDTH), std::mem::size_of::<usize>());
-        assert_eq!(PROPERTIES.len(), 14);
+        assert_eq!(PROPERTIES.len(), 15);
         for (index, info) in PROPERTIES.iter().enumerate() {
             assert!(!info.name.is_empty());
             assert!(std::ptr::eq(*info, info.id.info()));
@@ -947,6 +949,7 @@ mod tests {
             (PropertyId::Gap, PropertyValue::Number(3.0)),
             (PropertyId::Padding, PropertyValue::Number(4.0)),
             (PropertyId::FontSize, PropertyValue::Number(18.0)),
+            (PropertyId::LineHeight, PropertyValue::Dimension(Some(20.0))),
             (PropertyId::Foreground, PropertyValue::Color(Color::WHITE)),
             (
                 PropertyId::Background,

@@ -297,6 +297,7 @@ pub(in crate::runtime) struct LayoutStyle {
     gap: f32,
     padding: f32,
     font_size: f32,
+    line_height: Option<f32>,
     flow: Flow,
     align: Align,
     justify: Justify,
@@ -311,6 +312,7 @@ impl LayoutStyle {
             gap: value.gap,
             padding: value.padding,
             font_size: value.font_size,
+            line_height: value.line_height,
             flow: value.flow,
             align: value.align,
             justify: value.justify,
@@ -326,6 +328,7 @@ impl LayoutStyle {
             gap: self.gap,
             padding: self.padding,
             font_size: self.font_size,
+            line_height: self.line_height,
             fg,
             bg,
             flow: self.flow,
@@ -342,6 +345,7 @@ impl LayoutStyle {
             && f32::same(&self.gap, &other.gap)
             && f32::same(&self.padding, &other.padding)
             && f32::same(&self.font_size, &other.font_size)
+            && Option::<f32>::same(&self.line_height, &other.line_height)
             && Flow::same(&self.flow, &other.flow)
             && Align::same(&self.align, &other.align)
             && Justify::same(&self.justify, &other.justify)
