@@ -4416,3 +4416,21 @@ fn retained_banked_text_images_and_transforms_survive_slot_repairs() {
         }
     });
 }
+
+#[test]
+fn ordered_overlap_without_tile_proofs_preserves_exact_latest_opaque_color() {
+    pollster::block_on(async {
+        let mut renderer = renderer(wgpu::TextureFormat::Rgba8UnormSrgb).await;
+        renderer.set_tile_proofs(false);
+        let mut canvas = Canvas::recording(1, 1, ColorConfig::default()).unwrap();
+        canvas.clear(Color::WHITE);
+        let pixel = Rect::new(0., 0., 1., 1.);
+        for color in [Color::rgb(255, 0, 0), Color::rgb(0, 0, 255)] {
+            canvas
+                .fill_rect(pixel, Affine::IDENTITY, pixel, color)
+                .unwrap();
+        }
+        assert_eq!(readback(&mut renderer, &canvas), [0, 0, 255, 255]);
+        assert_eq!(renderer.stats().uniform_tiles, 0);
+    });
+}
