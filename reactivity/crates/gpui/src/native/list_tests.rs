@@ -28,6 +28,7 @@ struct Script {
     deadline: Instant,
     stage: u8,
     complete: bool,
+    controlled: bool,
     minimum_frames: u64,
     expected_token: Option<PresentationToken>,
     list: Option<Target>,
@@ -107,6 +108,7 @@ impl Script {
         let Some(sheet) = self.ready() else {
             return;
         };
+        let wheel_epoch = u64::from(self.controlled);
         match self.stage {
             0 => {
                 let owner = self.host.owner.as_ref().unwrap();
@@ -133,13 +135,16 @@ impl Script {
                         phase: TouchPhase::Moved,
                     },
                 );
-                self.queued(previous, 0);
+                self.queued(previous, wheel_epoch);
             }
             1 => {
                 let owner = self.host.owner.as_mut().unwrap();
                 let state = owner.list_state(self.list.unwrap()).unwrap();
                 assert_eq!((state.offset, state.visible_range), (32.0, 1..14));
-                assert_eq!(sheet.source_epoch, 0);
+                assert_eq!(sheet.source_epoch, wheel_epoch);
+                if self.controlled {
+                    assert_eq!(*owner.read(Library::OFFSET).unwrap(), 32.);
+                }
                 assert_eq!(play(owner, 2), self.overlap.unwrap());
                 assert_eq!(
                     owner.bounds(self.departed.unwrap()),
@@ -162,13 +167,16 @@ impl Script {
                         phase: TouchPhase::Moved,
                     },
                 );
-                self.queued(previous, 0);
+                self.queued(previous, 2 * wheel_epoch);
             }
             2 => {
                 let owner = self.host.owner.as_ref().unwrap();
                 let state = owner.list_state(self.list.unwrap()).unwrap();
                 assert_eq!((state.offset, state.visible_range), (48.5, 1..15));
-                assert_eq!(sheet.source_epoch, 0);
+                assert_eq!(sheet.source_epoch, 2 * wheel_epoch);
+                if self.controlled {
+                    assert_eq!(*owner.read(Library::OFFSET).unwrap(), 48.5);
+                }
                 assert_eq!(play(owner, 2), self.overlap.unwrap());
                 let bounds = owner.bounds(self.overlap.unwrap()).unwrap();
                 let previous = owner.with_scene(|_, token| token).unwrap();
@@ -183,11 +191,11 @@ impl Script {
                         },
                     );
                 }
-                self.queued(previous, 1);
+                self.queued(previous, 1 + 2 * wheel_epoch);
             }
             3 => {
                 let owner = self.host.owner.as_ref().unwrap();
-                assert_eq!(sheet.source_epoch, 1);
+                assert_eq!(sheet.source_epoch, 1 + 2 * wheel_epoch);
                 assert_eq!(
                     (
                         owner.root().unwrap().selected,
@@ -215,7 +223,7 @@ impl Script {
                     return;
                 }
                 let owner = self.host.owner.as_ref().unwrap();
-                assert_eq!(sheet.source_epoch, 1);
+                assert_eq!(sheet.source_epoch, 1 + 2 * wheel_epoch);
                 assert_eq!(owner.list_state(self.list.unwrap()).unwrap().offset, 48.5);
                 assert_eq!(play(owner, 2), self.overlap.unwrap());
                 self.minimum_frames = self.host.presented_frames + 1;
@@ -235,7 +243,7 @@ impl Script {
             5 => {
                 let owner = self.host.owner.as_mut().unwrap();
                 assert_eq!(sheet.size, [700, 560]);
-                assert_eq!(sheet.source_epoch, 1);
+                assert_eq!(sheet.source_epoch, 1 + 2 * wheel_epoch);
                 assert_eq!(play(owner, 2), self.overlap.unwrap());
                 assert_eq!(
                     owner.bounds(self.departed.unwrap()),
@@ -304,16 +312,22 @@ impl Host for Script {
 #[test]
 #[ignore = "requires a real X11 display; runs the actual CPU presenter, without a GPU"]
 fn native_library_250k_wheel_pointer_resize_resume() {
-    run_library(0);
+    run_library(0, false);
 }
 
 #[test]
 #[ignore = "requires a real X11 display; runs the actual CPU presenter, without a GPU"]
 fn native_library_250k_overscan_wheel_pointer_resize_resume() {
-    run_library(2);
+    run_library(2, false);
 }
 
-fn run_library(overscan: usize) {
+#[test]
+#[ignore = "requires a real X11 display; runs the actual CPU presenter, without a GPU"]
+fn native_library_250k_controlled_wheel_pointer_resize_resume() {
+    run_library(2, true);
+}
+
+fn run_library(overscan: usize, controlled: bool) {
     let event_loop = EventLoop::builder()
         .with_x11()
         .with_any_thread(true)
@@ -324,6 +338,7 @@ fn run_library(overscan: usize) {
             Window::document({
                 let mut model = Library::new(250_000);
                 model.overscan = overscan;
+                model.controlled = controlled;
                 model
             })
             .size(760, 600)
@@ -332,6 +347,7 @@ fn run_library(overscan: usize) {
         deadline: Instant::now() + Duration::from_secs(30),
         stage: 0,
         complete: false,
+        controlled,
         minimum_frames: 1,
         expected_token: None,
         list: None,

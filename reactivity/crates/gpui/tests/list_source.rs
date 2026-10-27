@@ -184,12 +184,10 @@ fn rejected_writer_does_not_mutate_sources_and_rebinding_does_not_use_old_field(
     );
     assert_eq!(*win.read(Rows::OFFSET).unwrap(), 0.);
     assert_eq!(*win.read(Rows::OTHER).unwrap(), 0.);
-    assert_eq!(win.scroll(list, 32.), Err(Error::PresentationStale));
-    win.update(|m| {
-        m.wrong_writer = false;
-        m.alternate = true;
-    })
-    .unwrap();
+    assert_eq!(win.scroll(list, 32.), Err(Error::StaleTarget));
+    win.update(|m| m.wrong_writer = false).unwrap();
+    let list = win.list(LIST).unwrap();
+    win.update(|m| m.alternate = true).unwrap();
     win.scroll(list, 32.).unwrap();
     assert_eq!(*win.read(Rows::OFFSET).unwrap(), 0.);
     assert_eq!(*win.read(Rows::OTHER).unwrap(), 32.);

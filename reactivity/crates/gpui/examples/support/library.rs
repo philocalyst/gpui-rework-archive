@@ -16,9 +16,13 @@ pub struct Library {
     pub play_requests: u64,
     pub viewport_height: f32,
     pub overscan: usize,
+    pub controlled: bool,
+    pub offset: Signal<f64>,
 }
 
 impl Library {
+    pub const OFFSET: Source<Self, f64> =
+        Source::new(FieldId::new(1), "offset", |m| &m.offset, |m| &mut m.offset);
     pub fn new(count: usize) -> Self {
         Self::with_id(count, LIBRARY)
     }
@@ -32,6 +36,8 @@ impl Library {
             play_requests: 0,
             viewport_height: 400.0,
             overscan: 0,
+            controlled: false,
+            offset: Signal::new(0.),
         }
     }
 
@@ -87,6 +93,9 @@ impl ItemSource for Library {
 }
 
 impl View for Library {
+    fn sources() -> Sources<Self> {
+        Sources::new().direct(Self::OFFSET)
+    }
     fn view(&self) -> El<'_> {
         column((
             text(format!(
@@ -102,6 +111,13 @@ impl View for Library {
             .gap(12),
             uniform_list(self.list_id, self, ROW_HEIGHT)
                 .overscan(self.overscan)
+                .apply(|list| {
+                    if self.controlled {
+                        list.scroll_offset(&self.offset)
+                    } else {
+                        list
+                    }
+                })
                 .name("Library recordings")
                 .h(self.viewport_height)
                 .w(700),
