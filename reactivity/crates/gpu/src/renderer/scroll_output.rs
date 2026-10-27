@@ -25,7 +25,7 @@ impl GpuContext {
                     resolve_target: None,
                     depth_slice: None,
                     ops: wgpu::Operations {
-                        load: wgpu::LoadOp::Load,
+                        load: wgpu::LoadOp::Clear(wgpu::Color::TRANSPARENT), // negative: erase copied overlap
                         store: wgpu::StoreOp::Store,
                     },
                 })],
