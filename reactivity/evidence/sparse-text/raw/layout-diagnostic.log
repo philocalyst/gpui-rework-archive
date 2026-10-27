@@ -1,0 +1,9 @@
+   Compiling gpui v0.1.0 (/home/user/gpui-sparse-text-lab/reactivity/crates/gpui)
+    Finished `release` profile [optimized] target(s) in 1m 09s
+     Running unittests src/lib.rs (/home/user/gpui-sparse-text-target/release/build/gpui/ae1265e7bce2c02a/out/gpui-ae1265e7bce2c02a)
+layout write delta=0 final differing layouts=0
+
+thread 'runtime::sparse_text::tests::direct_text_prepares_a_sparse_candidate_and_defers_p_mutation' (166951) panicked at crates/gpui/src/runtime/sparse_text.rs:165:9:
+assertion failed: runtime.prepared.as_ref().unwrap().keeps_rows()
+note: run with `RUST_BACKTRACE=1` environment variable to display a backtrace
+error: test failed, to rerun pass `-p gpui --lib`

@@ -1,0 +1,1 @@
+Initial formatting command was issued from reactivity with reactivity-prefixed paths. File-not-found stopped before commit/build; missing log output directory also prevented test launch. Corrected cwd.

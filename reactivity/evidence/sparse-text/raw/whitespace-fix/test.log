@@ -1,0 +1,5 @@
+   Compiling gpui_canvas v0.1.0 (/home/user/gpui-sparse-text-lab/reactivity/crates/canvas)
+   Compiling gpui v0.1.0 (/home/user/gpui-sparse-text-lab/reactivity/crates/gpui)
+    Finished `release` profile [optimized] target(s) in 1m 18s
+     Running unittests src/lib.rs (/home/user/gpui-sparse-text-target/release/build/gpui/ae1265e7bce2c02a/out/gpui-ae1265e7bce2c02a)
+     Running tests/sparse_text.rs (/home/user/gpui-sparse-text-target/release/build/gpui/f817e973d8a323a0/out/sparse_text-f817e973d8a323a0)

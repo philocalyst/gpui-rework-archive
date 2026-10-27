@@ -1,0 +1,1 @@
+{"command": ["/usr/bin/time", "-v", "-o", "/home/user/gpui-sparse-text-evidence/paired-sparse/3-0-baseline.time", "/home/user/gpui-state-target-baseline/release/examples/state_update_cost", "0", "/home/user/zgx-reference-local/comparisons/fonts/DejaVuSans.ttf"], "exit": 0}

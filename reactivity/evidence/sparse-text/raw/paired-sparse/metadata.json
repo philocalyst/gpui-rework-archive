@@ -1,0 +1,24 @@
+{
+  "binaries": {
+    "baseline": "/home/user/gpui-state-target-baseline/release/examples/state_update_cost",
+    "sparse": "/home/user/gpui-sparse-text-target/release/examples/state_update_cost"
+  },
+  "hashes": {
+    "baseline": "c42504e16c0c2c1d97fe28ec77b647d9307f1b64cbb2dc61593b0b679ad6a841",
+    "sparse": "6f1995ef188586f3f4dc8016451a4eff11e4d3689d9bf0d1c8fc1ad9de10efaa",
+    "font": "7da195a74c55bef988d0d48f9508bd5d849425c1770dba5d7bfc6ce9ed848954"
+  },
+  "clock": "process CPU and wall",
+  "warmup": 200,
+  "ops": 2000,
+  "batches": 200,
+  "rows": [
+    0,
+    1,
+    4,
+    40,
+    400
+  ],
+  "repetitions": 5,
+  "started": 1793069441.6159465
+}

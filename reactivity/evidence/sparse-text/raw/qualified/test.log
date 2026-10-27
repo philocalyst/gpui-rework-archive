@@ -1,0 +1,4 @@
+   Compiling gpui v0.1.0 (/home/user/gpui-sparse-text-lab/reactivity/crates/gpui)
+    Finished `release` profile [optimized] target(s) in 1m 04s
+     Running unittests src/lib.rs (/home/user/gpui-sparse-text-target/release/build/gpui/ae1265e7bce2c02a/out/gpui-ae1265e7bce2c02a)
+error: test failed, to rerun pass `-p gpui --lib`

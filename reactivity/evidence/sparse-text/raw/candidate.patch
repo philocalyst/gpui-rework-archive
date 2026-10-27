@@ -1,0 +1,749 @@
+diff --git a/reactivity/crates/canvas/src/canvas.rs b/reactivity/crates/canvas/src/canvas.rs
+index ed5be2027d..9f8ca4ca27 100644
+--- a/reactivity/crates/canvas/src/canvas.rs
++++ b/reactivity/crates/canvas/src/canvas.rs
+@@ -26,7 +26,9 @@ mod glyph_axis;
+ mod image_axis;
+ mod mask_kernel;
+ mod metric_scale;
++mod text_patch;
+ use metric_scale::MetricScale;
++pub use text_patch::TextRunSlot;
+ mod paint;
+ pub use paint::{PaintCommit, PaintEdit, PaintError, PaintErrorKind, PaintIndex};
+ mod rounded;
+@@ -365,13 +367,23 @@ impl MaskIndex {
+     }
+ }
+ 
++struct LeasedMask {
++    raster: Arc<Raster>,
++    uses: u32,
++}
++impl std::ops::Deref for LeasedMask {
++    type Target = Raster;
++    fn deref(&self) -> &Raster {
++        &self.raster
++    }
++}
+ #[derive(Default)]
+ struct DisplayList {
+     order: Vec<DrawRef>,
+     inline: Vec<InlineDraw>,
+     commons: Vec<CommonGroup>,
+     columns: Columns,
+-    masks: Vec<Arc<Raster>>,
++    masks: Vec<LeasedMask>,
+     mask_index: MaskIndex,
+     images: Option<Box<ImageResources>>,
+ }
+@@ -507,7 +519,7 @@ impl DisplayList {
+             common_bytes: self.commons.capacity() * size_of::<CommonGroup>() + self.columns.bytes(),
+             placement_bytes: 0,
+             clip_node_bytes: self.clip_geometry().map_or(0, ClipGeometry::node_bytes),
+-            resource_handles_bytes: self.masks.capacity() * size_of::<Arc<Raster>>()
++            resource_handles_bytes: self.masks.capacity() * size_of::<LeasedMask>()
+                 + self.images.as_ref().map_or(0, |r| {
+                     r.values.capacity() * size_of::<Image>()
+                         + r.gradients.as_ref().map_or(0, |g| {
+@@ -672,6 +684,9 @@ impl DisplayList {
+             glyph: INLINE_GLYPH,
+             mask: 0,
+         });
++        if let Some(mask) = self.masks.get_mut(command.source as usize) {
++            mask.uses += 1;
++        }
+         self.inline.push(InlineDraw {
+             common,
+             rect: command.geometry.rect,
+@@ -687,6 +702,7 @@ impl DisplayList {
+         scale: MetricScale,
+     ) {
+         for address in &self.order[start..] {
++            self.masks[usize::from(address.mask)].uses += 1;
+             self.columns.support(
+                 common.paint,
+                 DamageRegion::checked_canvas_bounds(address.bounds.map(usize::from)),
+@@ -1857,7 +1873,10 @@ impl Canvas {
+                         .map_err(|_| Error::ResourceLimit)?;
+                     self.commands.mask_index.reserve_key(key)?;
+                     self.commands.mask_index.insert(key, index);
+-                    self.commands.masks.push(mask);
++                    self.commands.masks.push(LeasedMask {
++                        raster: mask,
++                        uses: 0,
++                    });
+                 }
+                 let witness = DrawRef {
+                     bounds: command.geometry.bounds,
+diff --git a/reactivity/crates/canvas/src/canvas/text_patch.rs b/reactivity/crates/canvas/src/canvas/text_patch.rs
+new file mode 100644
+index 0000000000..44b12ed6c1
+--- /dev/null
++++ b/reactivity/crates/canvas/src/canvas/text_patch.rs
+@@ -0,0 +1,157 @@
++//! Bounded text replacement in an already admitted canonical scene.
++use super::*;
++
++/// Positional grouped text run in one complete scene, like `PaintSlot`.
++/// Pair with the owner's scene token; scene replacement reuses positions.
++#[derive(Clone, Copy, Debug, PartialEq, Eq)]
++pub struct TextRunSlot(std::num::NonZeroU32);
++
++impl CanvasScene<'_> {
++    /// Record ordinary literal text and identify its grouped run when present.
++    /// Empty and singleton admission returns no replaceable run.
++    #[allow(clippy::too_many_arguments)]
++    pub fn draw_text_scaled_tracked(
++        &mut self,
++        text: &mut TextSystem,
++        layout: &TextLayout,
++        origin: Point,
++        transform: Affine,
++        clip: impl Into<Clip>,
++        color: Color,
++        raster_scale: f32,
++    ) -> Result<Option<TextRunSlot>, Error> {
++        let before = self.pending.commands.commons.len();
++        self.pending.draw_text_scaled(
++            text,
++            layout,
++            origin,
++            transform,
++            clip,
++            color,
++            raster_scale,
++        )?;
++        Ok((self.pending.commands.commons.len() == before + 1)
++            .then(|| TextRunSlot(std::num::NonZeroU32::new(before as u32 + 1).unwrap())))
++    }
++}
++
++impl Canvas {
++    /// Transactionally replace a run without changing painter-order addresses.
++    /// `None` means the caller must prepare a complete scene: the grouped
++    /// length, common state or already leased raster resources did not match.
++    /// Rejection/error leaves the entire preceding scene and pixels unchanged.
++    #[allow(clippy::too_many_arguments)]
++    pub fn try_patch_text(
++        &mut self,
++        slot: TextRunSlot,
++        text: &mut TextSystem,
++        layout: &TextLayout,
++        origin: Point,
++        transform: Affine,
++        clip: Rect,
++        color: Color,
++        raster_scale: f32,
++    ) -> Result<Option<DamageRegion>, Error> {
++        let index = slot.0.get() as usize - 1;
++        let Some(old) = self.commands.commons.get(index) else {
++            return Ok(None);
++        };
++        text.validate(layout)?;
++        let mut prepared =
++            Self::recording(self.width as u32, self.height as u32, self.color_config)?;
++        prepared.draw_text_scaled(text, layout, origin, transform, clip, color, raster_scale)?;
++        if prepared.commands.commons.len() != 1
++            || !prepared.commands.inline.is_empty()
++            || prepared.commands.order.len() != (old.range[1] - old.range[0]) as usize
++        {
++            return Ok(None);
++        }
++        let viewport = viewport_rect(self.width, self.height);
++        let a = self.commands.columns.resolve(old.common, viewport, false);
++        let b =
++            prepared
++                .commands
++                .columns
++                .resolve(prepared.commands.commons[0].common, viewport, false);
++        let rect_bits = |r: Rect| [r.x, r.y, r.width, r.height].map(f32::to_bits);
++        if self.commands.clip_chain(a.clip).is_some()
++            || rect_bits(a.clip) != rect_bits(b.clip)
++            || a.map.inverse.map(f64::to_bits) != b.map.inverse.map(f64::to_bits)
++            || a.color.map(f32::to_bits) != b.color.map(f32::to_bits)
++        {
++            return Ok(None);
++        }
++        // Remap only into existing leases. No historical resource accumulation.
++        for address in &mut prepared.commands.order {
++            let key = prepared.commands.masks[usize::from(address.mask)].key;
++            let Some(&mask) = self.commands.mask_index.get(&key) else {
++                return Ok(None);
++            };
++            address.command = index as u16;
++            address.mask = mask as u16;
++        }
++        let range = old.range[0] as usize..old.range[1] as usize;
++        let references = |addresses: &[DrawRef]| -> usize {
++            addresses
++                .iter()
++                .map(|a| {
++                    let [l, t, r, b] = a.bounds.map(usize::from);
++                    ((r - 1) / TILE - l / TILE + 1) * ((b - 1) / TILE - t / TILE + 1)
++                })
++                .sum()
++        };
++        let next_references =
++            self.references - references(&self.commands.order[range.clone()]) + prepared.references;
++        if next_references > MAX_REFERENCES {
++            return Ok(None);
++        }
++        // Do not retain a resource whose last admitted use disappears. The
++        // existing scene's exact use counts make this test local to this run.
++        let mut old_masks: Vec<_> = self.commands.order[range.clone()]
++            .iter()
++            .map(|a| a.mask)
++            .collect();
++        let mut new_masks: Vec<_> = prepared.commands.order.iter().map(|a| a.mask).collect();
++        old_masks.sort_unstable();
++        new_masks.sort_unstable();
++        for &mask in &old_masks {
++            let count = |masks: &[u16]| {
++                masks.partition_point(|&m| m <= mask) - masks.partition_point(|&m| m < mask)
++            };
++            if self.commands.masks[usize::from(mask)].uses as usize + count(&new_masks)
++                == count(&old_masks)
++            {
++                return Ok(None);
++            }
++        }
++        let mut damage = DamageRegion::default();
++        for address in self.commands.order[range.clone()]
++            .iter()
++            .chain(&prepared.commands.order)
++        {
++            damage = damage.union(DamageRegion::checked_canvas_bounds(
++                address.bounds.map(usize::from),
++            ));
++        }
++        // All fallible admission is complete. Painter order, resource counts
++        // and common-state ownership remain unchanged.
++        let mut group = prepared.commands.commons.pop().unwrap();
++        group.common = old.common;
++        group.range = old.range;
++        self.commands
++            .columns
++            .support(group.common.paint, damage, false);
++        for mask in old_masks {
++            self.commands.masks[usize::from(mask)].uses -= 1;
++        }
++        for mask in new_masks {
++            self.commands.masks[usize::from(mask)].uses += 1;
++        }
++        self.commands.order[range].copy_from_slice(&prepared.commands.order);
++        self.commands.commons[index] = group;
++        self.references = next_references;
++        self.invalidate_bins();
++        self.dirty = true;
++        Ok(Some(damage))
++    }
++}
+diff --git a/reactivity/crates/canvas/src/lib.rs b/reactivity/crates/canvas/src/lib.rs
+index d02ddc5c8e..7e27caeae2 100644
+--- a/reactivity/crates/canvas/src/lib.rs
++++ b/reactivity/crates/canvas/src/lib.rs
+@@ -11,7 +11,7 @@ pub use canvas::{
+     MAX_CLIP_DEPTH, MAX_CLIP_NODES, PaintColor, PaintCommit, PaintEdit, PaintError, PaintErrorKind,
+     PaintIndex, PaintSlot, PreparedClipNode, PreparedDraw, PreparedGroup, PreparedPaint,
+     PreparedPlacement, PreparedScene, PreparedSource, RenderStats, SceneStorage, SlotCommit,
+-    SlotEdit, SlotError, SlotErrorKind, rounded_rect_contains, sampled_rect_clip,
++    SlotEdit, SlotError, SlotErrorKind, TextRunSlot, rounded_rect_contains, sampled_rect_clip,
+ };
+ pub use color::gradient::{
+     Extend, Gradient, GradientGeometry, GradientKey, GradientStop, GradientView, Interpolation,
+diff --git a/reactivity/crates/gpui/src/runtime.rs b/reactivity/crates/gpui/src/runtime.rs
+index 73e4ec0bed..b5738f0832 100644
+--- a/reactivity/crates/gpui/src/runtime.rs
++++ b/reactivity/crates/gpui/src/runtime.rs
+@@ -65,6 +65,7 @@ mod background;
+ mod geometry;
+ mod metadata;
+ pub(crate) mod paint;
++mod sparse_text;
+ use paint::PatchOutcome;
+ mod published;
+ mod query;
+@@ -2780,12 +2781,14 @@ impl<M: View + 'static> Runtime<M> {
+         let mut semantic = false;
+         let mut visual_changed = false;
+         let mut last_changed = None;
++        let mut text_only = true;
+         for (destination, mapped_value, color) in fanout.all_destinations() {
+             self.counters.destination_compares += 1;
+             let index = destination.node();
+             let node = &self.nodes[index];
+             let identity = node.identity();
+             let changed = if let Some(id) = destination.property() {
++                text_only = false;
+                 let value = match mapped_value {
+                     Some(value) => value,
+                     None => frozen.style.expect("style codec requested").admit(id)?,
+@@ -2895,6 +2898,14 @@ impl<M: View + 'static> Runtime<M> {
+             }
+             self.dirty = visual_changed;
+         }
++        if eligible
++            && text_only
++            && !semantic
++            && self.changed_nodes == 1
++            && let Some(text) = &mut self.text
++        {
++            text.dirty_text = last_changed.map(|index| (self.source_epoch, index));
++        }
+         Ok(if semantic && !visual_changed {
+             PatchOutcome::Metadata
+         } else {
+@@ -2964,9 +2975,6 @@ impl<M: View + 'static> Runtime<M> {
+             self.presentation_size = prepared.dimensions();
+             if !prepared.keeps_rows() {
+                 self.presented = prepared.nodes;
+-                if let Some(text) = &mut self.text {
+-                    text.acknowledge();
+-                }
+                 if let Some(frozen) = self.metadata.as_mut().and_then(|m| m.editing.as_mut()) {
+                     frozen.presented = frozen.candidate;
+                     if let Some(ime) = &mut frozen.ime {
+@@ -2974,6 +2982,9 @@ impl<M: View + 'static> Runtime<M> {
+                     }
+                 }
+             }
++            if let Some(text) = &mut self.text {
++                text.acknowledge(&mut self.presented);
++            }
+             self.presentation_scale_factor = prepared.scale_factor;
+         }
+         self.reclaim_ime();
+@@ -3225,6 +3236,14 @@ impl<M: View + 'static> Runtime<M> {
+         if let Some(error) = failure {
+             return Err(error);
+         }
++        if !self.rebuild_layout
++            && !self.topology_changed
++            && before.changed_layout_writes == after.changed_layout_writes
++            && let Some(shaper) = &mut shaper
++            && self.try_sparse_text(shaper)?
++        {
++            return Ok(());
++        }
+         self.refresh_inspector(true)?;
+         let viewport = Rect::new(0.0, 0.0, size[0] as f32, size[1] as f32);
+         let mut presented: Vec<Presented> = Vec::with_capacity(self.nodes.len());
+@@ -3465,6 +3484,7 @@ impl<M: View + 'static> Runtime<M> {
+                     Color::TRANSPARENT,
+                 )?;
+             }
++            let mut text_run = None;
+             let geometry = if let Some(text) = node.text_slot().get_mut(&mut self.texts) {
+                 let fg = style.fg;
+                 let service = self
+@@ -3562,7 +3582,7 @@ impl<M: View + 'static> Runtime<M> {
+                             scale_factor,
+                         )?;
+                     } else {
+-                        scene.draw_text_scaled(
++                        text_run = scene.draw_text_scaled_tracked(
+                             service,
+                             shape,
+                             origin,
+@@ -3646,6 +3666,7 @@ impl<M: View + 'static> Runtime<M> {
+             if let Some((origin, map)) = geometry {
+                 text_geometry.push(text_geometry::Entry {
+                     row: presented.len() as u32,
++                    run: text_run,
+                     origin,
+                     map,
+                 });
+@@ -3806,6 +3827,8 @@ impl<M: View + 'static> Runtime<M> {
+         }
+         if let Some(text) = &mut self.text {
+             text.candidate = Some(text_geometry);
++            text.patch = None;
++            text.dirty_text = None;
+         }
+         self.prepared = Some(Prepared {
+             size: prepared_size,
+diff --git a/reactivity/crates/gpui/src/runtime/paint.rs b/reactivity/crates/gpui/src/runtime/paint.rs
+index 1094922d4b..7014f461ab 100644
+--- a/reactivity/crates/gpui/src/runtime/paint.rs
++++ b/reactivity/crates/gpui/src/runtime/paint.rs
+@@ -59,7 +59,7 @@ impl<M: View + 'static> Runtime<M> {
+         self.publish_paint(Some((damage, token, next)))?;
+         Ok(true)
+     }
+-    fn publish_paint(
++    pub(super) fn publish_paint(
+         &mut self,
+         change: Option<(gpui_canvas::DamageRegion, PresentationToken, NonZeroU64)>,
+     ) -> Result<(), Error> {
+diff --git a/reactivity/crates/gpui/src/runtime/sparse_text.rs b/reactivity/crates/gpui/src/runtime/sparse_text.rs
+new file mode 100644
+index 0000000000..277d40889f
+--- /dev/null
++++ b/reactivity/crates/gpui/src/runtime/sparse_text.rs
+@@ -0,0 +1,176 @@
++//! Sparse C text and geometry, retaining immutable P until acknowledgement.
++use super::*;
++
++impl<M: View + 'static> Runtime<M> {
++    pub(super) fn try_sparse_text(
++        &mut self,
++        shaper: &mut gpui_canvas::TextShaper<'_>,
++    ) -> Result<bool, Error> {
++        let Some((epoch, index)) = self.text.as_ref().and_then(|t| t.dirty_text) else {
++            return Ok(false);
++        };
++        if epoch != self.source_epoch
++            || self.prepared.is_some()
++            || !self.presentation_valid
++            || self.metadata.is_some()
++            || self.images.is_some()
++            || !self.viewports.is_empty()
++            || self.presentation_size != self.requested_size
++            || self.presentation_scale_factor != self.requested_scale_factor
++            || self.layout_dirty.len() != 1
++            || self.nodes[index].kind() != NodeKind::Text
++            || self.presented.len() != self.nodes.len()
++            || self.presented[index].identity != self.nodes[index].identity()
++        {
++            return Ok(false);
++        }
++        let owner = self.text.as_ref().unwrap();
++        if owner.presented.len() < 2 {
++            return Ok(false);
++        }
++        let Some(previous) = owner.entry(index) else {
++            return Ok(false);
++        };
++        let Some(run) = previous.run else {
++            return Ok(false);
++        };
++        let origin = previous.origin;
++        let transform = self.presented[index]
++            .transform(geometry::Bases::new(&[]))
++            .ok_or(Error::Canvas(gpui_canvas::Error::InvalidGeometry))?;
++        let layout = self.layout.layout(self.layout_nodes[index])?;
++        let style = self.styles.get(index);
++        let text = self.nodes[index]
++            .text_slot()
++            .get_mut(&mut self.texts)
++            .unwrap();
++        let value = text.value.clone();
++        let shape = text.shape_text(
++            shaper,
++            style.font_size,
++            Some(layout.content_box_width()),
++            None,
++        )?;
++        let patch = Box::new(text_geometry::TextPatch {
++            row: index,
++            value,
++            geometry: text_geometry::Entry {
++                row: index as u32,
++                run: Some(run),
++                origin,
++                map: shape.retain_geometry().expect("interactive text geometry"),
++            },
++        });
++        let sequence = self.next_presentation;
++        let next = sequence.checked_add(1).ok_or(Error::EpochExhausted)?;
++        let token = PresentationToken {
++            window: self.sites.namespace(),
++            sequence,
++        };
++        let service = self.text.as_mut().unwrap().system.as_mut().unwrap();
++        let Some(damage) = self.canvas.try_patch_text(
++            run,
++            service,
++            shape,
++            origin,
++            transform,
++            Rect::new(
++                0.,
++                0.,
++                self.requested_size[0] as f32,
++                self.requested_size[1] as f32,
++            ),
++            style.fg,
++            self.requested_scale_factor,
++        )?
++        else {
++            return Ok(false);
++        };
++        self.text.as_mut().unwrap().patch = Some(patch);
++        self.text.as_mut().unwrap().dirty_text = None;
++        self.layout_dirty.clear();
++        self.styles.clear_slot_transition();
++        // Native accessibility takes its independent full projection when the
++        // text changes. Paint-only relabelling cannot certify semantic equality.
++        #[cfg(feature = "accessibility")]
++        if let Some(observer) = &mut self.accessibility {
++            observer.invalidate();
++        }
++        self.counters.paint_passes += 1;
++        self.publish_paint(Some((damage, token, next)))?;
++        Ok(true)
++    }
++}
++
++#[cfg(test)]
++mod tests {
++    use super::*;
++    use crate::{El, Signal, column, text};
++    struct Page {
++        label: Signal<String>,
++    }
++    impl Page {
++        const LABEL: crate::Source<Self, String> =
++            crate::Source::new(FieldId::new(1), "label", |m| &m.label, |m| &mut m.label);
++    }
++    impl View for Page {
++        fn sources() -> Sources<Self> {
++            Sources::new().direct(Self::LABEL)
++        }
++        fn view(&self) -> El<'_> {
++            column((
++                text(&self.label).w(180).h(24),
++                text("Count: 0123456789").w(180).h(24),
++            ))
++            .w(192)
++            .h(80)
++        }
++    }
++    #[test]
++    fn direct_text_prepares_a_sparse_candidate_and_defers_p_mutation() {
++        let mut win = Win::recording(
++            Page {
++                label: Signal::new("Count: 10".into()),
++            },
++            WindowOptions {
++                size: [192, 80],
++                ..Default::default()
++            },
++        )
++        .unwrap();
++        win.presented(win.with_scene(|_, token| token).unwrap())
++            .unwrap();
++        let before = {
++            let r = win.runtime().unwrap();
++            (
++                r.layout.stats(),
++                r.layout_nodes
++                    .iter()
++                    .map(|&id| r.layout.layout(id).unwrap())
++                    .collect::<Vec<_>>(),
++            )
++        };
++        win.set(Page::LABEL, "Count: 11".into()).unwrap();
++        let runtime = win.runtime().unwrap();
++        eprintln!(
++            "layout write delta={} final differing layouts={}",
++            runtime.layout.stats().changed_layout_writes - before.0.changed_layout_writes,
++            runtime
++                .layout_nodes
++                .iter()
++                .enumerate()
++                .filter(|(i, id)| runtime.layout.layout(**id).unwrap() != before.1[*i])
++                .count()
++        );
++        assert!(runtime.prepared.as_ref().unwrap().keeps_rows());
++        assert!(runtime.text.as_ref().unwrap().patch.is_some());
++        assert!(runtime.text.as_ref().unwrap().candidate.is_none());
++        assert!(runtime.prepared.as_ref().unwrap().nodes.is_empty());
++        assert!(
++            runtime
++                .presented
++                .iter()
++                .any(|n| n.text.as_deref() == Some("Count: 10"))
++        );
++    }
++}
+diff --git a/reactivity/crates/gpui/src/runtime/text_geometry.rs b/reactivity/crates/gpui/src/runtime/text_geometry.rs
+index f9a11f1cb8..a68cffab1c 100644
+--- a/reactivity/crates/gpui/src/runtime/text_geometry.rs
++++ b/reactivity/crates/gpui/src/runtime/text_geometry.rs
+@@ -4,6 +4,7 @@ use std::sync::Arc;
+ 
+ pub(super) struct Entry {
+     pub row: u32,
++    pub run: Option<gpui_canvas::TextRunSlot>,
+     pub origin: Point,
+     pub map: Arc<gpui_canvas::TextGeometry>,
+ }
+@@ -13,6 +14,13 @@ pub(super) struct TextResources {
+     pub font: Option<gpui_canvas::FontFace>,
+     pub presented: Vec<Entry>,
+     pub candidate: Option<Vec<Entry>>,
++    pub dirty_text: Option<(u64, usize)>,
++    pub patch: Option<Box<TextPatch>>,
++}
++pub(super) struct TextPatch {
++    pub row: usize,
++    pub value: SharedText,
++    pub geometry: Entry,
+ }
+ impl TextResources {
+     pub fn unused(&self) -> bool {
+@@ -21,10 +29,18 @@ impl TextResources {
+             && self.presented.is_empty()
+             && self.candidate.is_none()
+     }
+-    pub fn acknowledge(&mut self) {
++    pub fn acknowledge(&mut self, rows: &mut [Presented]) {
+         if let Some(column) = self.candidate.take() {
+             self.presented = column;
+         }
++        if let Some(patch) = self.patch.take() {
++            rows[patch.row].text = Some(patch.value);
++            let index = self
++                .presented
++                .binary_search_by_key(&(patch.row as u32), |e| e.row)
++                .expect("sparse C retains the P text row");
++            self.presented[index] = patch.geometry;
++        }
+     }
+     pub fn entry(&self, row: usize) -> Option<&Entry> {
+         self.presented
+diff --git a/reactivity/crates/gpui/tests/sparse_text.rs b/reactivity/crates/gpui/tests/sparse_text.rs
+new file mode 100644
+index 0000000000..e71193d694
+--- /dev/null
++++ b/reactivity/crates/gpui/tests/sparse_text.rs
+@@ -0,0 +1,137 @@
++use gpui::{WindowOptions, prelude::*};
++
++struct Page {
++    label: Signal<String>,
++    broken: bool,
++}
++impl Page {
++    const LABEL: Source<Self, String> =
++        Source::new(FieldId::new(1), "label", |m| &m.label, |m| &mut m.label);
++}
++impl View for Page {
++    fn sources() -> Sources<Self> {
++        Sources::new().direct(Self::LABEL)
++    }
++    fn view(&self) -> El<'_> {
++        column((
++            text(&self.label).w(180).h(24),
++            text("Count: 0123456789").w(180).h(24),
++            div().size(4).bg(Color::BLACK).transform(if self.broken {
++                gpui::Affine::scale(0., 1.)
++            } else {
++                gpui::Affine::IDENTITY
++            }),
++        ))
++        .w(192)
++        .h(80)
++        .bg(Color::WHITE)
++    }
++}
++fn win(value: &str) -> Win<Page> {
++    let mut win = Win::recording(
++        Page {
++            label: Signal::new(value.into()),
++            broken: false,
++        },
++        WindowOptions {
++            size: [192, 80],
++            ..Default::default()
++        },
++    )
++    .unwrap();
++    ack(&mut win);
++    win
++}
++fn ack(win: &mut Win<Page>) {
++    win.presented(win.with_scene(|_, t| t).unwrap()).unwrap();
++}
++fn pixels(win: &mut Win<Page>) -> Vec<u8> {
++    win.with_pixels(|p, _, _| p.to_vec()).unwrap()
++}
++
++#[test]
++fn direct_text_pixels_match_fresh_windows_through_patch_and_fallback() {
++    let mut current = win("Count: 10");
++    for value in [
++        "Count: 11",
++        "Count: 12",
++        "Count: 99",
++        "Count: 100",
++        "héllo",
++        "",
++        "Count: 43",
++    ] {
++        current.set(Page::LABEL, value.to_string()).unwrap();
++        ack(&mut current);
++        assert!(current.contains_text(value).unwrap());
++        assert_eq!(pixels(&mut current), pixels(&mut win(value)), "{value}");
++    }
++}
++
++#[test]
++fn pending_text_and_geometry_stay_at_acknowledged_epoch_then_survive_newer_failure() {
++    let mut current = win("Count: 10");
++    current.set(Page::LABEL, "Count: 11".into()).unwrap();
++    let eligible = current.with_scene(|_, t| t).unwrap();
++    assert!(current.contains_text("Count: 10").unwrap());
++    assert!(!current.contains_text("Count: 11").unwrap());
++    assert!(current.update(|m| m.broken = true).is_err());
++    assert_eq!(current.with_scene(|_, t| t).unwrap(), eligible);
++    current.presented(eligible).unwrap();
++    assert!(current.contains_text("Count: 11").unwrap());
++    assert_eq!(pixels(&mut current), pixels(&mut win("Count: 11")));
++    current.update(|m| m.broken = false).unwrap();
++    ack(&mut current);
++    current.set(Page::LABEL, "Count: 12".into()).unwrap();
++    current.set(Page::LABEL, "Count: 13".into()).unwrap();
++    ack(&mut current);
++    assert!(current.contains_text("Count: 13").unwrap());
++    assert_eq!(pixels(&mut current), pixels(&mut win("Count: 13")));
++}
++
++#[test]
++fn changed_layout_rejects_sparse_publication_and_moves_following_content() {
++    struct Auto {
++        label: Signal<String>,
++    }
++    impl Auto {
++        const LABEL: Source<Self, String> =
++            Source::new(FieldId::new(1), "label", |m| &m.label, |m| &mut m.label);
++    }
++    impl View for Auto {
++        fn sources() -> Sources<Self> {
++            Sources::new().direct(Self::LABEL)
++        }
++        fn view(&self) -> El<'_> {
++            row((text(&self.label), text("iiiWWW")))
++                .w(240)
++                .h(40)
++                .bg(Color::WHITE)
++        }
++    }
++    let mount = |value: &str| {
++        let mut win = Win::recording(
++            Auto {
++                label: Signal::new(value.into()),
++            },
++            WindowOptions {
++                size: [240, 40],
++                ..Default::default()
++            },
++        )
++        .unwrap();
++        win.presented(win.with_scene(|_, t| t).unwrap()).unwrap();
++        win
++    };
++    let mut current = mount("iii");
++    for value in ["WWW", "iii", "WiW"] {
++        current.set(Auto::LABEL, value.into()).unwrap();
++        current
++            .presented(current.with_scene(|_, t| t).unwrap())
++            .unwrap();
++        let mut fresh = mount(value);
++        let actual = current.with_pixels(|p, _, _| p.to_vec()).unwrap();
++        let expected = fresh.with_pixels(|p, _, _| p.to_vec()).unwrap();
++        assert_eq!(actual, expected, "changed layout {value}");
++    }
++}
