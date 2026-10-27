@@ -138,7 +138,7 @@ fn duplicate_slot_and_late_foreign_layout_leave_the_preceding_scene_intact() {
     ];
     assert!(canvas.try_patch_texts(&mut text, &edits).unwrap().is_none());
     assert_eq!(canvas.pixels(), before);
-    let mut foreign = TextSystem::new(include_bytes!("../assets/NotoSans.ttf")).unwrap();
+    let foreign = TextSystem::new(include_bytes!("../assets/NotoSans.ttf")).unwrap();
     let foreign_layout = foreign.shape("22", 12., None).unwrap();
     let edits = [
         replacement(slots[0], &next, 0, Affine::IDENTITY, CLIP),
