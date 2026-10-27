@@ -26,6 +26,7 @@ mod glyph_axis;
 mod image_axis;
 mod mask_kernel;
 mod metric_scale;
+mod replay;
 use metric_scale::MetricScale;
 mod paint;
 pub use paint::{PaintCommit, PaintEdit, PaintError, PaintErrorKind, PaintIndex};
@@ -280,6 +281,8 @@ struct CommonGroup {
     glyphs: SharedGlyphs,
     origin: Point,
     scale: MetricScale,
+    transform: Affine,
+    raster_scale: f32,
 }
 // A raster witness, not expanded glyph geometry. The glyph positions live only
 // in the shared packed owner. Cached admitted bounds avoid repeating forward
@@ -685,6 +688,8 @@ impl DisplayList {
         glyphs: SharedGlyphs,
         origin: Point,
         scale: MetricScale,
+        transform: Affine,
+        raster_scale: f32,
     ) {
         for address in &self.order[start..] {
             self.columns.support(
@@ -699,6 +704,8 @@ impl DisplayList {
             glyphs,
             origin,
             scale,
+            transform,
+            raster_scale,
         });
     }
 }
@@ -1223,6 +1230,7 @@ impl Canvas {
         CanvasScene {
             target: self,
             pending,
+            replay: replay::Replay::default(),
         }
     }
     pub fn width(&self) -> u32 {
@@ -1919,6 +1927,8 @@ impl Canvas {
                     layout.shared_glyphs(),
                     origin,
                     metric_scale,
+                    transform,
+                    raster_scale,
                 );
             }
             self.mask_bytes += bytes;
@@ -2882,6 +2892,7 @@ fn render_image(
 pub struct CanvasScene<'a> {
     target: &'a mut Canvas,
     pending: Canvas,
+    replay: replay::Replay,
 }
 impl CanvasScene<'_> {
     pub fn fill_gradient(
@@ -2919,6 +2930,7 @@ impl CanvasScene<'_> {
     }
     pub fn clear(&mut self, color: Color) {
         self.pending.clear(color);
+        self.replay.clear();
     }
     pub fn fill_rect(
         &mut self,
@@ -3062,6 +3074,20 @@ impl CanvasScene<'_> {
         color: Color,
         raster_scale: f32,
     ) -> Result<(), Error> {
+        let clip = clip.into();
+        if self.replay.text(
+            self.target,
+            &mut self.pending,
+            text,
+            layout,
+            origin,
+            transform,
+            clip,
+            color,
+            raster_scale,
+        )? {
+            return Ok(());
+        }
         self.pending
             .draw_text_scaled(text, layout, origin, transform, clip, color, raster_scale)
     }

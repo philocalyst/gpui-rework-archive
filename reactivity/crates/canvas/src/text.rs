@@ -298,6 +298,11 @@ pub struct TextMetrics {
 /// Shared canonical packed positions; scene readers never copy glyph storage.
 pub(crate) struct SharedGlyphs(EcoVec<PackedGlyph>);
 impl SharedGlyphs {
+    pub(crate) fn same_layout(&self, layout: &TextLayout) -> bool {
+        !self.0.is_empty()
+            && self.0.len() == layout.glyphs.len()
+            && std::ptr::eq(self.0.as_ptr(), layout.glyphs.as_ptr())
+    }
     pub(crate) fn position(&self, index: u16) -> [f32; 2] {
         let glyph = &self.0[usize::from(index)];
         [glyph.x, glyph.baseline]
