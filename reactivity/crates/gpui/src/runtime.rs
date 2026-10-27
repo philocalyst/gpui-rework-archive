@@ -3238,7 +3238,6 @@ impl<M: View + 'static> Runtime<M> {
         }
         if !self.rebuild_layout
             && !self.topology_changed
-            && before.changed_layout_writes == after.changed_layout_writes
             && let Some(shaper) = &mut shaper
             && self.try_sparse_text(shaper)?
         {
