@@ -111,6 +111,36 @@ fn direct_source_without_owner_dependency_realizes_and_matches_fresh_pixels() {
     }
 }
 #[test]
+fn controlled_offset_boundaries_and_into_view_keep_source_and_pixels_coherent() {
+    let limit = (1_u64 << 40) as f64;
+    for value in [
+        f64::NAN,
+        f64::INFINITY,
+        f64::NEG_INFINITY,
+        limit + 1.,
+        -limit - 1.,
+    ] {
+        assert!(matches!(
+            Win::with_size(Rows::new(value), 240, 160),
+            Err(Error::List(ListError::InvalidDelta))
+        ));
+    }
+    for value in [-limit, -0.25, 0., limit] {
+        let win = window(value);
+        assert_eq!(*win.read(Rows::OFFSET).unwrap(), value);
+        assert_eq!(offset(&win), value.clamp(0., 3_199_904.));
+    }
+    let mut win = window(14.);
+    let list = win.list(LIST).unwrap();
+    let row = win.list_item(list, ItemKey::new(100)).unwrap();
+    win.scroll_into_view(row).unwrap();
+    assert_eq!(*win.read(Rows::OFFSET).unwrap(), 0.);
+    assert_eq!(offset(&win), 0.);
+    assert_eq!(win.snapshot().unwrap().source_epoch, 1);
+    assert_eq!(win.list_item(list, ItemKey::new(100)).unwrap(), row);
+    assert_eq!(pixels(&mut win), pixels(&mut window(0.)));
+}
+#[test]
 fn wheel_offset_index_key_and_next_tick_share_one_source() {
     let mut win = window(0.);
     let list = win.list(LIST).unwrap();

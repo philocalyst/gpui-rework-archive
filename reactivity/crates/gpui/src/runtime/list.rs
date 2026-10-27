@@ -370,6 +370,10 @@ impl<M: View + 'static, L: LaneSet<M>> Win<M, L> {
                         // ItemSource is borrowed only during description. Resolve
                         // a distant key without publishing this intermediate tree;
                         // after writeback, rebuild all sinks against the new source.
+                        runtime
+                            .source_epoch
+                            .checked_add(1)
+                            .ok_or(Error::EpochExhausted)?;
                         runtime.validate_offsets(&[(field, 0.0)])?;
                         runtime.describe_with(false, &[ScrollRequest { id, position }])?;
                         previewed = true;
