@@ -1,0 +1,10 @@
+   Compiling gpui v0.1.0 (/home/user/gpui-local-publication-negative-lab/reactivity/crates/gpui)
+    Finished `release` profile [optimized] target(s) in 10.46s
+     Running tests/local_publication.rs (/home/user/gpui-local-publication-negative-target/release/build/gpui/153199f576e63f06/out/local_publication-153199f576e63f06)
+
+thread 'owner_text_plus_other_changes_does_not_hide_non_text_publication' (2058936) panicked at crates/gpui/tests/local_publication.rs:536:9:
+assertion `left == right` failed: variant=1
+  left: [(Generic, Some("old caption"), Actions(0), Rect { x: 3.1249998, y: 2.3749998, width: 150.00003, height: 90.000015 }), (Text, Some("changing"), Actions(0), Rect { x: 3.1249998, y: 2.3749998, width: 140.00003, height: 24.000004 }), (Text, Some("Count: 0123456789"), Actions(0), Rect { x: 3.1249998, y: 26.374998, width: 140.00003, height: 24.000008 }), (Image, None, Actions(0), Rect { x: 3.1249998, y: 50.374996, width: 12.000002, height: 12.000009 }), (Button, Some(""), Actions(7), Rect { x: 3.1249998, y: 62.374996, width: 40.000008, height: 12.000012 })]
+ right: [(Generic, Some("new caption"), Actions(0), Rect { x: 3.1249998, y: 2.3749998, width: 150.00003, height: 90.000015 }), (Text, Some("changing"), Actions(0), Rect { x: 3.1249998, y: 2.3749998, width: 140.00003, height: 24.000004 }), (Text, Some("Count: 0123456789"), Actions(0), Rect { x: 3.1249998, y: 26.374998, width: 140.00003, height: 24.000008 }), (Image, None, Actions(0), Rect { x: 3.1249998, y: 50.374996, width: 12.000002, height: 12.000009 }), (Button, Some(""), Actions(7), Rect { x: 3.1249998, y: 62.374996, width: 40.000008, height: 12.000012 })]
+note: run with `RUST_BACKTRACE=1` environment variable to display a backtrace
+error: test failed, to rerun pass `-p gpui --test local_publication`

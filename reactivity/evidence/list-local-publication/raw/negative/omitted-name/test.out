@@ -1,0 +1,11 @@
+
+running 1 test
+test owner_text_plus_other_changes_does_not_hide_non_text_publication ... FAILED
+
+failures:
+
+failures:
+    owner_text_plus_other_changes_does_not_hide_non_text_publication
+
+test result: FAILED. 0 passed; 1 failed; 0 ignored; 0 measured; 5 filtered out; finished in 0.01s
+

@@ -1,0 +1,24 @@
+{
+  "case": "flat-full",
+  "pair": 12,
+  "variant": "control",
+  "frames": 64,
+  "command": [
+    "/home/user/gpui-preserved-test-binaries/ec2f735bf2a8170c332952b128bd71a632bf527ed411b616aa099f120df26d32",
+    "native::scroll_bench::complete_workload_cost",
+    "--ignored",
+    "--exact",
+    "--nocapture",
+    "--test-threads=1"
+  ],
+  "exit": 0,
+  "wall_seconds": 0.3141958713531494,
+  "environment": {
+    "DISPLAY": ":94",
+    "XDG_RUNTIME_DIR": "/home/user/gpui-xdg",
+    "VK_ICD_FILENAMES": "/usr/share/vulkan/icd.d/lvp_icd.json",
+    "LP_NUM_THREADS": "4",
+    "GPUI_SCROLL_CASE": "flat-full",
+    "GPUI_SCROLL_FRAMES": "64"
+  }
+}

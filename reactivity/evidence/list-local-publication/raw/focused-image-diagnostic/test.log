@@ -1,0 +1,16 @@
+   Compiling gpui v0.1.0 (/home/user/gpui-local-publication-lab/reactivity/crates/gpui)
+    Finished `release` profile [optimized] target(s) in 2.56s
+     Running tests/local_publication.rs (/home/user/gpui-local-publication-target/release/build/gpui/153199f576e63f06/out/local_publication-153199f576e63f06)
+DECORATED rounded=false scrolled=false images=1
+IMAGE Rect { x: 2.9999998, y: 49.999996, width: 12.000002, height: 12.000008 }
+DECORATED rounded=false scrolled=true images=1
+IMAGE Rect { x: 2.9999998, y: 49.999996, width: 12.000002, height: 12.000008 }
+DECORATED rounded=true scrolled=false images=0
+IMAGE Rect { x: 2.9999998, y: 49.999996, width: 12.000002, height: 12.000009 }
+
+thread 'image_clip_and_scroller_preserve_older_candidate_after_newer_failure' (1968867) panicked at crates/gpui/tests/local_publication.rs:265:13:
+assertion `left == right` failed: rounded=true scrolled=false
+  left: 0
+ right: 1
+note: run with `RUST_BACKTRACE=1` environment variable to display a backtrace
+error: test failed, to rerun pass `-p gpui --test local_publication`

@@ -1,0 +1,11 @@
+
+running 6 tests
+test image_clip_and_scroller_preserve_older_candidate_after_newer_failure ... ok
+test coalesced_new_glyphs_resize_and_list_retirement_keep_complete_outputs ... ok
+test owner_text_plus_other_changes_does_not_hide_non_text_publication ... ok
+test exact_text_keeps_list_identity_and_old_geometry_until_ack ... ok
+test owner_text_with_unchanged_or_changed_list_keeps_complete_publication ... ok
+test nested_sample_clips_and_unsupported_shapes_preserve_exact_publication ... ok
+
+test result: ok. 6 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 0.02s
+

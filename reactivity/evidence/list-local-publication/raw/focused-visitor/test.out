@@ -1,0 +1,7 @@
+
+running 2 tests
+test coalesced_new_glyphs_resize_and_list_retirement_keep_complete_outputs ... ok
+test exact_text_keeps_list_identity_and_old_geometry_until_ack ... ok
+
+test result: ok. 2 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 0.01s
+

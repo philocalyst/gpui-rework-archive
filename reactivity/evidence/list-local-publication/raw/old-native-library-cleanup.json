@@ -1,0 +1,3378 @@
+{
+  "root": "/home/user/gpui-target-native",
+  "scope": "regenerable Rust library archives and metadata only; executed ELFs, source, fingerprints and evidence retained",
+  "files": [
+    {
+      "path": "/home/user/gpui-target-native/debug/build/pkg-config/b13b5d17d3d46300/out/libpkg_config-b13b5d17d3d46300.rlib",
+      "bytes": 916064
+    },
+    {
+      "path": "/home/user/gpui-target-native/debug/build/pkg-config/b13b5d17d3d46300/out/libpkg_config-b13b5d17d3d46300.rmeta",
+      "bytes": 71565
+    },
+    {
+      "path": "/home/user/gpui-target-native/debug/build/concurrent-queue/fb1d371bb6888f66/out/libconcurrent_queue-fb1d371bb6888f66.rlib",
+      "bytes": 27360
+    },
+    {
+      "path": "/home/user/gpui-target-native/debug/build/concurrent-queue/fb1d371bb6888f66/out/libconcurrent_queue-fb1d371bb6888f66.rmeta",
+      "bytes": 194899
+    },
+    {
+      "path": "/home/user/gpui-target-native/debug/build/concurrent-queue/e3097ce6a1b0f3b9/out/libconcurrent_queue-e3097ce6a1b0f3b9.rmeta",
+      "bytes": 98435
+    },
+    {
+      "path": "/home/user/gpui-target-native/debug/build/icu_properties_data/c6a87510aae767bf/out/libicu_properties_data-c6a87510aae767bf.rmeta",
+      "bytes": 1860116
+    },
+    {
+      "path": "/home/user/gpui-target-native/debug/build/icu_properties_data/49d83d63e7abaf35/out/libicu_properties_data-49d83d63e7abaf35.rmeta",
+      "bytes": 1860116
+    },
+    {
+      "path": "/home/user/gpui-target-native/debug/build/icu_properties_data/49d83d63e7abaf35/out/libicu_properties_data-49d83d63e7abaf35.rlib",
+      "bytes": 2436
+    },
+    {
+      "path": "/home/user/gpui-target-native/debug/build/icu_locale_fallback_data/2d9add202487fc79/out/libicu_locale_fallback_data-2d9add202487fc79.rlib",
+      "bytes": 2470
+    },
+    {
+      "path": "/home/user/gpui-target-native/debug/build/icu_locale_fallback_data/2d9add202487fc79/out/libicu_locale_fallback_data-2d9add202487fc79.rmeta",
+      "bytes": 27405
+    },
+    {
+      "path": "/home/user/gpui-target-native/debug/build/icu_locale_fallback_data/8ec8b670e66abf14/out/libicu_locale_fallback_data-8ec8b670e66abf14.rmeta",
+      "bytes": 27405
+    },
+    {
+      "path": "/home/user/gpui-target-native/debug/build/icu_segmenter_data/940fd20bd72ec5b3/out/libicu_segmenter_data-940fd20bd72ec5b3.rmeta",
+      "bytes": 12360821
+    },
+    {
+      "path": "/home/user/gpui-target-native/debug/build/icu_segmenter_data/9d0f73203cc5428a/out/libicu_segmenter_data-9d0f73203cc5428a.rlib",
+      "bytes": 2434
+    },
+    {
+      "path": "/home/user/gpui-target-native/debug/build/icu_segmenter_data/9d0f73203cc5428a/out/libicu_segmenter_data-9d0f73203cc5428a.rmeta",
+      "bytes": 12360821
+    },
+    {
+      "path": "/home/user/gpui-target-native/debug/build/indexmap/ac923d66ebabf3b9/out/libindexmap-ac923d66ebabf3b9.rmeta",
+      "bytes": 1304749
+    },
+    {
+      "path": "/home/user/gpui-target-native/debug/build/indexmap/ac923d66ebabf3b9/out/libindexmap-ac923d66ebabf3b9.rlib",
+      "bytes": 6784
+    },
+    {
+      "path": "/home/user/gpui-target-native/debug/build/indexmap/2b201a8066c22bf6/out/libindexmap-2b201a8066c22bf6.rmeta",
+      "bytes": 923881
+    },
+    {
+      "path": "/home/user/gpui-target-native/debug/build/indexmap/fba6ad5ba8df61b4/out/libindexmap-fba6ad5ba8df61b4.rlib",
+      "bytes": 17992
+    },
+    {
+      "path": "/home/user/gpui-target-native/debug/build/indexmap/fba6ad5ba8df61b4/out/libindexmap-fba6ad5ba8df61b4.rmeta",
+      "bytes": 1289352
+    },
+    {
+      "path": "/home/user/gpui-target-native/debug/build/indexmap/c44f59a3e921214e/out/libindexmap-c44f59a3e921214e.rmeta",
+      "bytes": 1304749
+    },
+    {
+      "path": "/home/user/gpui-target-native/debug/build/indexmap/c44f59a3e921214e/out/libindexmap-c44f59a3e921214e.rlib",
+      "bytes": 6784
+    },
+    {
+      "path": "/home/user/gpui-target-native/debug/build/libloading/c092cf7bc6475b06/out/liblibloading-c092cf7bc6475b06.rlib",
+      "bytes": 250130
+    },
+    {
+      "path": "/home/user/gpui-target-native/debug/build/libloading/c092cf7bc6475b06/out/liblibloading-c092cf7bc6475b06.rmeta",
+      "bytes": 136781
+    },
+    {
+      "path": "/home/user/gpui-target-native/debug/build/libloading/0f2a05308b1f0388/out/liblibloading-0f2a05308b1f0388.rmeta",
+      "bytes": 103429
+    },
+    {
+      "path": "/home/user/gpui-target-native/debug/build/async-process/8836a08542314d56/out/libasync_process-8836a08542314d56.rlib",
+      "bytes": 3267708
+    },
+    {
+      "path": "/home/user/gpui-target-native/debug/build/async-process/8836a08542314d56/out/libasync_process-8836a08542314d56.rmeta",
+      "bytes": 237766
+    },
+    {
+      "path": "/home/user/gpui-target-native/debug/build/async-process/42f4c3c947e3ba77/out/libasync_process-42f4c3c947e3ba77.rmeta",
+      "bytes": 212079
+    },
+    {
+      "path": "/home/user/gpui-target-native/debug/build/unicode-width/b3e3e011d86c886b/out/libunicode_width-b3e3e011d86c886b.rmeta",
+      "bytes": 815746
+    },
+    {
+      "path": "/home/user/gpui-target-native/debug/build/unicode-width/0dec2a618eec9d27/out/libunicode_width-0dec2a618eec9d27.rmeta",
+      "bytes": 857833
+    },
+    {
+      "path": "/home/user/gpui-target-native/debug/build/unicode-width/0dec2a618eec9d27/out/libunicode_width-0dec2a618eec9d27.rlib",
+      "bytes": 87060
+    },
+    {
+      "path": "/home/user/gpui-target-native/debug/build/unicode-width/edbf539726167353/out/libunicode_width-edbf539726167353.rmeta",
+      "bytes": 857833
+    },
+    {
+      "path": "/home/user/gpui-target-native/debug/build/unicode-width/edbf539726167353/out/libunicode_width-edbf539726167353.rlib",
+      "bytes": 38980
+    },
+    {
+      "path": "/home/user/gpui-target-native/debug/build/zvariant_utils/313683053bbd2049/out/libzvariant_utils-313683053bbd2049.rlib",
+      "bytes": 5150688
+    },
+    {
+      "path": "/home/user/gpui-target-native/debug/build/zvariant_utils/313683053bbd2049/out/libzvariant_utils-313683053bbd2049.rmeta",
+      "bytes": 316262
+    },
+    {
+      "path": "/home/user/gpui-target-native/debug/build/zvariant_utils/8419efcbf3a84749/out/libzvariant_utils-8419efcbf3a84749.rmeta",
+      "bytes": 253541
+    },
+    {
+      "path": "/home/user/gpui-target-native/debug/build/zvariant_utils/cee77a849a00a78c/out/libzvariant_utils-cee77a849a00a78c.rlib",
+      "bytes": 5151566
+    },
+    {
+      "path": "/home/user/gpui-target-native/debug/build/zvariant_utils/cee77a849a00a78c/out/libzvariant_utils-cee77a849a00a78c.rmeta",
+      "bytes": 316262
+    },
+    {
+      "path": "/home/user/gpui-target-native/debug/build/zvariant_utils/d120a6a6989b0fce/out/libzvariant_utils-d120a6a6989b0fce.rlib",
+      "bytes": 1531192
+    },
+    {
+      "path": "/home/user/gpui-target-native/debug/build/zvariant_utils/d120a6a6989b0fce/out/libzvariant_utils-d120a6a6989b0fce.rmeta",
+      "bytes": 316262
+    },
+    {
+      "path": "/home/user/gpui-target-native/debug/build/softbuffer/5f899d502316dd63/out/libsoftbuffer-5f899d502316dd63.rmeta",
+      "bytes": 207335
+    },
+    {
+      "path": "/home/user/gpui-target-native/debug/build/softbuffer/f96a8563719a18a3/out/libsoftbuffer-f96a8563719a18a3.rlib",
+      "bytes": 930074
+    },
+    {
+      "path": "/home/user/gpui-target-native/debug/build/softbuffer/f96a8563719a18a3/out/libsoftbuffer-f96a8563719a18a3.rmeta",
+      "bytes": 354782
+    },
+    {
+      "path": "/home/user/gpui-target-native/debug/build/wgpu-hal/647dd185bd6d3fe2/out/libwgpu_hal-647dd185bd6d3fe2.rlib",
+      "bytes": 44849858
+    },
+    {
+      "path": "/home/user/gpui-target-native/debug/build/wgpu-hal/647dd185bd6d3fe2/out/libwgpu_hal-647dd185bd6d3fe2.rmeta",
+      "bytes": 3819458
+    },
+    {
+      "path": "/home/user/gpui-target-native/debug/build/wgpu-hal/a1da174d1ac04f38/out/libwgpu_hal-a1da174d1ac04f38.rmeta",
+      "bytes": 2968744
+    },
+    {
+      "path": "/home/user/gpui-target-native/debug/build/equivalent/a72b58498eb63412/out/libequivalent-a72b58498eb63412.rlib",
+      "bytes": 2386
+    },
+    {
+      "path": "/home/user/gpui-target-native/debug/build/equivalent/a72b58498eb63412/out/libequivalent-a72b58498eb63412.rmeta",
+      "bytes": 8570
+    },
+    {
+      "path": "/home/user/gpui-target-native/debug/build/equivalent/afc6f68baebad777/out/libequivalent-afc6f68baebad777.rmeta",
+      "bytes": 8016
+    },
+    {
+      "path": "/home/user/gpui-target-native/debug/build/equivalent/ac8b4788ca33ed35/out/libequivalent-ac8b4788ca33ed35.rlib",
+      "bytes": 2386
+    },
+    {
+      "path": "/home/user/gpui-target-native/debug/build/equivalent/ac8b4788ca33ed35/out/libequivalent-ac8b4788ca33ed35.rmeta",
+      "bytes": 8570
+    },
+    {
+      "path": "/home/user/gpui-target-native/debug/build/accesskit_consumer/8dc40e4b8f311c54/out/libaccesskit_consumer-8dc40e4b8f311c54.rmeta",
+      "bytes": 331995
+    },
+    {
+      "path": "/home/user/gpui-target-native/debug/build/accesskit_consumer/5f5ea53b36e7baa1/out/libaccesskit_consumer-5f5ea53b36e7baa1.rmeta",
+      "bytes": 457394
+    },
+    {
+      "path": "/home/user/gpui-target-native/debug/build/accesskit_consumer/5f5ea53b36e7baa1/out/libaccesskit_consumer-5f5ea53b36e7baa1.rlib",
+      "bytes": 5817054
+    },
+    {
+      "path": "/home/user/gpui-target-native/debug/build/writeable/cdfb67de9d903d60/out/libwriteable-cdfb67de9d903d60.rmeta",
+      "bytes": 321862
+    },
+    {
+      "path": "/home/user/gpui-target-native/debug/build/writeable/cdfb67de9d903d60/out/libwriteable-cdfb67de9d903d60.rlib",
+      "bytes": 643396
+    },
+    {
+      "path": "/home/user/gpui-target-native/debug/build/writeable/e7164fca906d941d/out/libwriteable-e7164fca906d941d.rmeta",
+      "bytes": 236348
+    },
+    {
+      "path": "/home/user/gpui-target-native/debug/build/zbus/624ea756e80ffa15/out/libzbus-624ea756e80ffa15.rlib",
+      "bytes": 37743146
+    },
+    {
+      "path": "/home/user/gpui-target-native/debug/build/zbus/624ea756e80ffa15/out/libzbus-624ea756e80ffa15.rmeta",
+      "bytes": 4749947
+    },
+    {
+      "path": "/home/user/gpui-target-native/debug/build/zbus/017ca5c98b8d08ae/out/libzbus-017ca5c98b8d08ae.rmeta",
+      "bytes": 6718066
+    },
+    {
+      "path": "/home/user/gpui-target-native/debug/build/zbus/eec1d1b2e3ed3e29/out/libzbus-eec1d1b2e3ed3e29.rlib",
+      "bytes": 33498444
+    },
+    {
+      "path": "/home/user/gpui-target-native/debug/build/zbus/eec1d1b2e3ed3e29/out/libzbus-eec1d1b2e3ed3e29.rmeta",
+      "bytes": 8469755
+    },
+    {
+      "path": "/home/user/gpui-target-native/debug/build/zbus/1aa6c5e6b34d9e68/out/libzbus-1aa6c5e6b34d9e68.rmeta",
+      "bytes": 3982327
+    },
+    {
+      "path": "/home/user/gpui-target-native/debug/build/piper/316016e8201356a8/out/libpiper-316016e8201356a8.rmeta",
+      "bytes": 62919
+    },
+    {
+      "path": "/home/user/gpui-target-native/debug/build/piper/904cc7f51bbf582c/out/libpiper-904cc7f51bbf582c.rmeta",
+      "bytes": 75587
+    },
+    {
+      "path": "/home/user/gpui-target-native/debug/build/piper/904cc7f51bbf582c/out/libpiper-904cc7f51bbf582c.rlib",
+      "bytes": 301632
+    },
+    {
+      "path": "/home/user/gpui-target-native/debug/build/gpui_reactivity_host/433712871a5297f6/out/libgpui_reactivity_host-433712871a5297f6.rmeta",
+      "bytes": 37478
+    },
+    {
+      "path": "/home/user/gpui-target-native/debug/build/gpui_reactivity_host/433712871a5297f6/out/libgpui_reactivity_host-433712871a5297f6.rlib",
+      "bytes": 897732
+    },
+    {
+      "path": "/home/user/gpui-target-native/debug/build/gpui_reactivity_host/9cdf5c23a913dc18/out/libgpui_reactivity_host-9cdf5c23a913dc18.rmeta",
+      "bytes": 28599
+    },
+    {
+      "path": "/home/user/gpui-target-native/debug/build/font-types/275f7b4cd1264c39/out/libfont_types-275f7b4cd1264c39.rmeta",
+      "bytes": 609372
+    },
+    {
+      "path": "/home/user/gpui-target-native/debug/build/font-types/3351b9395b55a821/out/libfont_types-3351b9395b55a821.rmeta",
+      "bytes": 730462
+    },
+    {
+      "path": "/home/user/gpui-target-native/debug/build/font-types/3351b9395b55a821/out/libfont_types-3351b9395b55a821.rlib",
+      "bytes": 384018
+    },
+    {
+      "path": "/home/user/gpui-target-native/debug/build/parley_emoji/8112092114e86783/out/libparley_emoji-8112092114e86783.rmeta",
+      "bytes": 46238
+    },
+    {
+      "path": "/home/user/gpui-target-native/debug/build/parley_emoji/1233af17eaca9900/out/libparley_emoji-1233af17eaca9900.rmeta",
+      "bytes": 57271
+    },
+    {
+      "path": "/home/user/gpui-target-native/debug/build/parley_emoji/1233af17eaca9900/out/libparley_emoji-1233af17eaca9900.rlib",
+      "bytes": 8292
+    },
+    {
+      "path": "/home/user/gpui-target-native/debug/build/bit-vec/cdf8a8b8dd7f586b/out/libbit_vec-cdf8a8b8dd7f586b.rlib",
+      "bytes": 188332
+    },
+    {
+      "path": "/home/user/gpui-target-native/debug/build/bit-vec/cdf8a8b8dd7f586b/out/libbit_vec-cdf8a8b8dd7f586b.rmeta",
+      "bytes": 203649
+    },
+    {
+      "path": "/home/user/gpui-target-native/debug/build/bit-vec/e4ddbdc94e35b12e/out/libbit_vec-e4ddbdc94e35b12e.rmeta",
+      "bytes": 100007
+    },
+    {
+      "path": "/home/user/gpui-target-native/debug/build/bit-vec/93b09250b3db8365/out/libbit_vec-93b09250b3db8365.rmeta",
+      "bytes": 203649
+    },
+    {
+      "path": "/home/user/gpui-target-native/debug/build/bit-vec/93b09250b3db8365/out/libbit_vec-93b09250b3db8365.rlib",
+      "bytes": 54492
+    },
+    {
+      "path": "/home/user/gpui-target-native/debug/build/wgsl-rs/e625e4c14f2ae9bb/out/libwgsl_rs-e625e4c14f2ae9bb.rlib",
+      "bytes": 5997380
+    },
+    {
+      "path": "/home/user/gpui-target-native/debug/build/wgsl-rs/e625e4c14f2ae9bb/out/libwgsl_rs-e625e4c14f2ae9bb.rmeta",
+      "bytes": 4621800
+    },
+    {
+      "path": "/home/user/gpui-target-native/debug/build/wgsl-rs/36a025e87063dd5a/out/libwgsl_rs-36a025e87063dd5a.rmeta",
+      "bytes": 4621800
+    },
+    {
+      "path": "/home/user/gpui-target-native/debug/build/wgsl-rs/36a025e87063dd5a/out/libwgsl_rs-36a025e87063dd5a.rlib",
+      "bytes": 14932570
+    },
+    {
+      "path": "/home/user/gpui-target-native/debug/build/wgsl-rs/32fa0919fa5103bb/out/libwgsl_rs-32fa0919fa5103bb.rmeta",
+      "bytes": 4621230
+    },
+    {
+      "path": "/home/user/gpui-target-native/debug/build/wgsl-rs/32fa0919fa5103bb/out/libwgsl_rs-32fa0919fa5103bb.rlib",
+      "bytes": 15014142
+    },
+    {
+      "path": "/home/user/gpui-target-native/debug/build/wgsl-rs/7768797b7030ca1f/out/libwgsl_rs-7768797b7030ca1f.rmeta",
+      "bytes": 4270062
+    },
+    {
+      "path": "/home/user/gpui-target-native/debug/build/toml_datetime/97bcc2d279344af9/out/libtoml_datetime-97bcc2d279344af9.rmeta",
+      "bytes": 65299
+    },
+    {
+      "path": "/home/user/gpui-target-native/debug/build/toml_datetime/97bcc2d279344af9/out/libtoml_datetime-97bcc2d279344af9.rlib",
+      "bytes": 185352
+    },
+    {
+      "path": "/home/user/gpui-target-native/debug/build/phf/1eb9be74b1df8aa7/out/libphf-1eb9be74b1df8aa7.rmeta",
+      "bytes": 113766
+    },
+    {
+      "path": "/home/user/gpui-target-native/debug/build/phf/ef7daf858daa82cd/out/libphf-ef7daf858daa82cd.rmeta",
+      "bytes": 161246
+    },
+    {
+      "path": "/home/user/gpui-target-native/debug/build/phf/ef7daf858daa82cd/out/libphf-ef7daf858daa82cd.rlib",
+      "bytes": 2340
+    },
+    {
+      "path": "/home/user/gpui-target-native/debug/build/renderdoc-sys/5f1399ecc9f79a6d/out/librenderdoc_sys-5f1399ecc9f79a6d.rmeta",
+      "bytes": 49266
+    },
+    {
+      "path": "/home/user/gpui-target-native/debug/build/renderdoc-sys/5f1399ecc9f79a6d/out/librenderdoc_sys-5f1399ecc9f79a6d.rlib",
+      "bytes": 189922
+    },
+    {
+      "path": "/home/user/gpui-target-native/debug/build/renderdoc-sys/1a17825be4808bf1/out/librenderdoc_sys-1a17825be4808bf1.rmeta",
+      "bytes": 45812
+    },
+    {
+      "path": "/home/user/gpui-target-native/debug/build/rustc-hash/f35abb0dd6581aa3/out/librustc_hash-f35abb0dd6581aa3.rmeta",
+      "bytes": 12801
+    },
+    {
+      "path": "/home/user/gpui-target-native/debug/build/rustc-hash/f35abb0dd6581aa3/out/librustc_hash-f35abb0dd6581aa3.rlib",
+      "bytes": 2386
+    },
+    {
+      "path": "/home/user/gpui-target-native/debug/build/rustc-hash/78305c5a77e61c10/out/librustc_hash-78305c5a77e61c10.rmeta",
+      "bytes": 6863
+    },
+    {
+      "path": "/home/user/gpui-target-native/debug/build/rustc-hash/66ac5cdb0061cade/out/librustc_hash-66ac5cdb0061cade.rmeta",
+      "bytes": 12801
+    },
+    {
+      "path": "/home/user/gpui-target-native/debug/build/rustc-hash/66ac5cdb0061cade/out/librustc_hash-66ac5cdb0061cade.rlib",
+      "bytes": 2386
+    },
+    {
+      "path": "/home/user/gpui-target-native/debug/build/bit-set/4afe89118bf41061/out/libbit_set-4afe89118bf41061.rmeta",
+      "bytes": 106486
+    },
+    {
+      "path": "/home/user/gpui-target-native/debug/build/bit-set/4afe89118bf41061/out/libbit_set-4afe89118bf41061.rlib",
+      "bytes": 3060
+    },
+    {
+      "path": "/home/user/gpui-target-native/debug/build/bit-set/8bf0ec287aa5c024/out/libbit_set-8bf0ec287aa5c024.rmeta",
+      "bytes": 65087
+    },
+    {
+      "path": "/home/user/gpui-target-native/debug/build/bit-set/3a917a141428b001/out/libbit_set-3a917a141428b001.rmeta",
+      "bytes": 106486
+    },
+    {
+      "path": "/home/user/gpui-target-native/debug/build/bit-set/3a917a141428b001/out/libbit_set-3a917a141428b001.rlib",
+      "bytes": 6852
+    },
+    {
+      "path": "/home/user/gpui-target-native/debug/build/spirv/6fdd1b7d4b46f2ff/out/libspirv-6fdd1b7d4b46f2ff.rmeta",
+      "bytes": 3266193
+    },
+    {
+      "path": "/home/user/gpui-target-native/debug/build/spirv/cba25ee99b566c38/out/libspirv-cba25ee99b566c38.rmeta",
+      "bytes": 3928110
+    },
+    {
+      "path": "/home/user/gpui-target-native/debug/build/spirv/cba25ee99b566c38/out/libspirv-cba25ee99b566c38.rlib",
+      "bytes": 15454866
+    },
+    {
+      "path": "/home/user/gpui-target-native/debug/build/allocator-api2/21e8d9a43f100d4f/out/liballocator_api2-21e8d9a43f100d4f.rlib",
+      "bytes": 34328
+    },
+    {
+      "path": "/home/user/gpui-target-native/debug/build/allocator-api2/21e8d9a43f100d4f/out/liballocator_api2-21e8d9a43f100d4f.rmeta",
+      "bytes": 674637
+    },
+    {
+      "path": "/home/user/gpui-target-native/debug/build/allocator-api2/7fcb9ad3c8a83b46/out/liballocator_api2-7fcb9ad3c8a83b46.rmeta",
+      "bytes": 487267
+    },
+    {
+      "path": "/home/user/gpui-target-native/debug/build/cfg_aliases/172fe71f6cc5d7f9/out/libcfg_aliases-172fe71f6cc5d7f9.rmeta",
+      "bytes": 18015
+    },
+    {
+      "path": "/home/user/gpui-target-native/debug/build/cfg_aliases/172fe71f6cc5d7f9/out/libcfg_aliases-172fe71f6cc5d7f9.rlib",
+      "bytes": 2388
+    },
+    {
+      "path": "/home/user/gpui-target-native/debug/build/rustix/2702c16583af54b3/out/librustix-2702c16583af54b3.rlib",
+      "bytes": 6428784
+    },
+    {
+      "path": "/home/user/gpui-target-native/debug/build/rustix/2702c16583af54b3/out/librustix-2702c16583af54b3.rmeta",
+      "bytes": 8031142
+    },
+    {
+      "path": "/home/user/gpui-target-native/debug/build/rustix/1b6dbbb3f3be2a7e/out/librustix-1b6dbbb3f3be2a7e.rmeta",
+      "bytes": 6421326
+    },
+    {
+      "path": "/home/user/gpui-target-native/debug/build/rustix/e583401e4dae6ce1/out/librustix-e583401e4dae6ce1.rmeta",
+      "bytes": 9921065
+    },
+    {
+      "path": "/home/user/gpui-target-native/debug/build/rustix/e583401e4dae6ce1/out/librustix-e583401e4dae6ce1.rlib",
+      "bytes": 8542930
+    },
+    {
+      "path": "/home/user/gpui-target-native/debug/build/rustix/083ed166cb428b7f/out/librustix-083ed166cb428b7f.rmeta",
+      "bytes": 7907005
+    },
+    {
+      "path": "/home/user/gpui-target-native/debug/build/zeno/9d1635dc0352e8a4/out/libzeno-9d1635dc0352e8a4.rlib",
+      "bytes": 971940
+    },
+    {
+      "path": "/home/user/gpui-target-native/debug/build/zeno/9d1635dc0352e8a4/out/libzeno-9d1635dc0352e8a4.rmeta",
+      "bytes": 709279
+    },
+    {
+      "path": "/home/user/gpui-target-native/debug/build/zeno/d91385ebfe4f8e08/out/libzeno-d91385ebfe4f8e08.rmeta",
+      "bytes": 447273
+    },
+    {
+      "path": "/home/user/gpui-target-native/debug/build/parley/9ed811ece81419cf/out/libparley-9ed811ece81419cf.rlib",
+      "bytes": 2728782
+    },
+    {
+      "path": "/home/user/gpui-target-native/debug/build/parley/9ed811ece81419cf/out/libparley-9ed811ece81419cf.rmeta",
+      "bytes": 1593618
+    },
+    {
+      "path": "/home/user/gpui-target-native/debug/build/parley/eb115512523a1702/out/libparley-eb115512523a1702.rmeta",
+      "bytes": 963504
+    },
+    {
+      "path": "/home/user/gpui-target-native/debug/build/profiling/cf8ab8a9c5d522eb/out/libprofiling-cf8ab8a9c5d522eb.rlib",
+      "bytes": 2384
+    },
+    {
+      "path": "/home/user/gpui-target-native/debug/build/profiling/cf8ab8a9c5d522eb/out/libprofiling-cf8ab8a9c5d522eb.rmeta",
+      "bytes": 5363
+    },
+    {
+      "path": "/home/user/gpui-target-native/debug/build/profiling/98298bd8695c3bb7/out/libprofiling-98298bd8695c3bb7.rmeta",
+      "bytes": 5363
+    },
+    {
+      "path": "/home/user/gpui-target-native/debug/build/atspi/006992095a6cdce4/out/libatspi-006992095a6cdce4.rmeta",
+      "bytes": 8252
+    },
+    {
+      "path": "/home/user/gpui-target-native/debug/build/atspi/23f4975463950fe6/out/libatspi-23f4975463950fe6.rmeta",
+      "bytes": 8252
+    },
+    {
+      "path": "/home/user/gpui-target-native/debug/build/atspi/23f4975463950fe6/out/libatspi-23f4975463950fe6.rlib",
+      "bytes": 2352
+    },
+    {
+      "path": "/home/user/gpui-target-native/debug/build/winnow/ed7660669550938e/out/libwinnow-ed7660669550938e.rmeta",
+      "bytes": 1526662
+    },
+    {
+      "path": "/home/user/gpui-target-native/debug/build/winnow/8c5826d73e251c9a/out/libwinnow-8c5826d73e251c9a.rlib",
+      "bytes": 833594
+    },
+    {
+      "path": "/home/user/gpui-target-native/debug/build/winnow/8c5826d73e251c9a/out/libwinnow-8c5826d73e251c9a.rmeta",
+      "bytes": 2207502
+    },
+    {
+      "path": "/home/user/gpui-target-native/debug/build/winnow/ede106fb4d7a4ed2/out/libwinnow-ede106fb4d7a4ed2.rmeta",
+      "bytes": 2207502
+    },
+    {
+      "path": "/home/user/gpui-target-native/debug/build/winnow/ede106fb4d7a4ed2/out/libwinnow-ede106fb4d7a4ed2.rlib",
+      "bytes": 261790
+    },
+    {
+      "path": "/home/user/gpui-target-native/debug/build/gpui_canvas/222a371c0805dd71/out/libgpui_canvas-222a371c0805dd71.rmeta",
+      "bytes": 2401051
+    },
+    {
+      "path": "/home/user/gpui-target-native/debug/build/gpui_canvas/222a371c0805dd71/out/libgpui_canvas-222a371c0805dd71.rlib",
+      "bytes": 49675078
+    },
+    {
+      "path": "/home/user/gpui-target-native/debug/build/gpui_canvas/a81bc5ab5232ac02/out/libgpui_canvas-a81bc5ab5232ac02.rmeta",
+      "bytes": 2030193
+    },
+    {
+      "path": "/home/user/gpui-target-native/debug/build/async-lock/1a9ccb45c444dd3b/out/libasync_lock-1a9ccb45c444dd3b.rlib",
+      "bytes": 729124
+    },
+    {
+      "path": "/home/user/gpui-target-native/debug/build/async-lock/1a9ccb45c444dd3b/out/libasync_lock-1a9ccb45c444dd3b.rmeta",
+      "bytes": 901700
+    },
+    {
+      "path": "/home/user/gpui-target-native/debug/build/async-lock/adf3102126af2d60/out/libasync_lock-adf3102126af2d60.rmeta",
+      "bytes": 748189
+    },
+    {
+      "path": "/home/user/gpui-target-native/debug/build/polling/020061a74e4848f2/out/libpolling-020061a74e4848f2.rmeta",
+      "bytes": 89868
+    },
+    {
+      "path": "/home/user/gpui-target-native/debug/build/polling/abcf374f4b945d86/out/libpolling-abcf374f4b945d86.rlib",
+      "bytes": 519806
+    },
+    {
+      "path": "/home/user/gpui-target-native/debug/build/polling/abcf374f4b945d86/out/libpolling-abcf374f4b945d86.rmeta",
+      "bytes": 111531
+    },
+    {
+      "path": "/home/user/gpui-target-native/debug/build/linebender_resource_handle/89c30af92067f882/out/liblinebender_resource_handle-89c30af92067f882.rmeta",
+      "bytes": 24183
+    },
+    {
+      "path": "/home/user/gpui-target-native/debug/build/linebender_resource_handle/89c30af92067f882/out/liblinebender_resource_handle-89c30af92067f882.rlib",
+      "bytes": 8618
+    },
+    {
+      "path": "/home/user/gpui-target-native/debug/build/linebender_resource_handle/6bd67598e02c8220/out/liblinebender_resource_handle-6bd67598e02c8220.rmeta",
+      "bytes": 17534
+    },
+    {
+      "path": "/home/user/gpui-target-native/debug/build/utf8_iter/a56e671eb21b95f0/out/libutf8_iter-a56e671eb21b95f0.rmeta",
+      "bytes": 27288
+    },
+    {
+      "path": "/home/user/gpui-target-native/debug/build/utf8_iter/e76bf5ec98562c36/out/libutf8_iter-e76bf5ec98562c36.rlib",
+      "bytes": 55966
+    },
+    {
+      "path": "/home/user/gpui-target-native/debug/build/utf8_iter/e76bf5ec98562c36/out/libutf8_iter-e76bf5ec98562c36.rmeta",
+      "bytes": 51120
+    },
+    {
+      "path": "/home/user/gpui-target-native/debug/build/wgpu-core-deps-windows-linux-android/8a7a7e45bc5ec979/out/libwgpu_core_deps_windows_linux_android-8a7a7e45bc5ec979.rlib",
+      "bytes": 2542
+    },
+    {
+      "path": "/home/user/gpui-target-native/debug/build/wgpu-core-deps-windows-linux-android/8a7a7e45bc5ec979/out/libwgpu_core_deps_windows_linux_android-8a7a7e45bc5ec979.rmeta",
+      "bytes": 2605
+    },
+    {
+      "path": "/home/user/gpui-target-native/debug/build/wgpu-core-deps-windows-linux-android/5569d91bc62eedcf/out/libwgpu_core_deps_windows_linux_android-5569d91bc62eedcf.rmeta",
+      "bytes": 2605
+    },
+    {
+      "path": "/home/user/gpui-target-native/debug/build/static_assertions/b01fe127ad3d0b20/out/libstatic_assertions-b01fe127ad3d0b20.rmeta",
+      "bytes": 52441
+    },
+    {
+      "path": "/home/user/gpui-target-native/debug/build/static_assertions/b01fe127ad3d0b20/out/libstatic_assertions-b01fe127ad3d0b20.rlib",
+      "bytes": 2432
+    },
+    {
+      "path": "/home/user/gpui-target-native/debug/build/static_assertions/4f8d068bf1c4e5ea/out/libstatic_assertions-4f8d068bf1c4e5ea.rmeta",
+      "bytes": 52441
+    },
+    {
+      "path": "/home/user/gpui-target-native/debug/build/zbus_xml/788a03c0676617dd/out/libzbus_xml-788a03c0676617dd.rlib",
+      "bytes": 3776748
+    },
+    {
+      "path": "/home/user/gpui-target-native/debug/build/zbus_xml/788a03c0676617dd/out/libzbus_xml-788a03c0676617dd.rmeta",
+      "bytes": 587121
+    },
+    {
+      "path": "/home/user/gpui-target-native/debug/build/zbus_xml/5be97f200a4297e2/out/libzbus_xml-5be97f200a4297e2.rmeta",
+      "bytes": 333924
+    },
+    {
+      "path": "/home/user/gpui-target-native/debug/build/zbus_xml/bdbd7c3de2661fd5/out/libzbus_xml-bdbd7c3de2661fd5.rlib",
+      "bytes": 1260166
+    },
+    {
+      "path": "/home/user/gpui-target-native/debug/build/zbus_xml/bdbd7c3de2661fd5/out/libzbus_xml-bdbd7c3de2661fd5.rmeta",
+      "bytes": 587121
+    },
+    {
+      "path": "/home/user/gpui-target-native/debug/build/zbus_xml/f76b4a20f122c047/out/libzbus_xml-f76b4a20f122c047.rlib",
+      "bytes": 3773456
+    },
+    {
+      "path": "/home/user/gpui-target-native/debug/build/zbus_xml/f76b4a20f122c047/out/libzbus_xml-f76b4a20f122c047.rmeta",
+      "bytes": 587121
+    },
+    {
+      "path": "/home/user/gpui-target-native/debug/build/futures-task/50eec13ee4348fa3/out/libfutures_task-50eec13ee4348fa3.rlib",
+      "bytes": 98578
+    },
+    {
+      "path": "/home/user/gpui-target-native/debug/build/futures-task/50eec13ee4348fa3/out/libfutures_task-50eec13ee4348fa3.rmeta",
+      "bytes": 95186
+    },
+    {
+      "path": "/home/user/gpui-target-native/debug/build/futures-task/ca2e84c67150af07/out/libfutures_task-ca2e84c67150af07.rmeta",
+      "bytes": 75271
+    },
+    {
+      "path": "/home/user/gpui-target-native/debug/build/libm/049bb8042c552bf6/out/liblibm-049bb8042c552bf6.rmeta",
+      "bytes": 1130338
+    },
+    {
+      "path": "/home/user/gpui-target-native/debug/build/libm/049bb8042c552bf6/out/liblibm-049bb8042c552bf6.rlib",
+      "bytes": 2513442
+    },
+    {
+      "path": "/home/user/gpui-target-native/debug/build/libm/2d1fdd6b237ff2d5/out/liblibm-2d1fdd6b237ff2d5.rmeta",
+      "bytes": 1066677
+    },
+    {
+      "path": "/home/user/gpui-target-native/debug/build/libm/19cbfba4ff7f29c0/out/liblibm-19cbfba4ff7f29c0.rmeta",
+      "bytes": 1130338
+    },
+    {
+      "path": "/home/user/gpui-target-native/debug/build/libm/19cbfba4ff7f29c0/out/liblibm-19cbfba4ff7f29c0.rlib",
+      "bytes": 1270952
+    },
+    {
+      "path": "/home/user/gpui-target-native/debug/build/zcheapstr/64c574403dc1d327/out/libzcheapstr-64c574403dc1d327.rmeta",
+      "bytes": 46859
+    },
+    {
+      "path": "/home/user/gpui-target-native/debug/build/zcheapstr/64c574403dc1d327/out/libzcheapstr-64c574403dc1d327.rlib",
+      "bytes": 60710
+    },
+    {
+      "path": "/home/user/gpui-target-native/debug/build/zcheapstr/8570759d52005f41/out/libzcheapstr-8570759d52005f41.rlib",
+      "bytes": 210240
+    },
+    {
+      "path": "/home/user/gpui-target-native/debug/build/zcheapstr/8570759d52005f41/out/libzcheapstr-8570759d52005f41.rmeta",
+      "bytes": 46859
+    },
+    {
+      "path": "/home/user/gpui-target-native/debug/build/zcheapstr/d561712a48c1156e/out/libzcheapstr-d561712a48c1156e.rmeta",
+      "bytes": 38986
+    },
+    {
+      "path": "/home/user/gpui-target-native/debug/build/raw-window-handle/037f0bc5ca17694e/out/libraw_window_handle-037f0bc5ca17694e.rmeta",
+      "bytes": 269022
+    },
+    {
+      "path": "/home/user/gpui-target-native/debug/build/raw-window-handle/64c20b7b8eaafdf9/out/libraw_window_handle-64c20b7b8eaafdf9.rmeta",
+      "bytes": 331394
+    },
+    {
+      "path": "/home/user/gpui-target-native/debug/build/raw-window-handle/64c20b7b8eaafdf9/out/libraw_window_handle-64c20b7b8eaafdf9.rlib",
+      "bytes": 264006
+    },
+    {
+      "path": "/home/user/gpui-target-native/debug/build/ttf-parser/a6402f90e86a726e/out/libttf_parser-a6402f90e86a726e.rlib",
+      "bytes": 6405972
+    },
+    {
+      "path": "/home/user/gpui-target-native/debug/build/ttf-parser/a6402f90e86a726e/out/libttf_parser-a6402f90e86a726e.rmeta",
+      "bytes": 2954058
+    },
+    {
+      "path": "/home/user/gpui-target-native/debug/build/ttf-parser/9b528ad8ccd73b04/out/libttf_parser-9b528ad8ccd73b04.rmeta",
+      "bytes": 2262589
+    },
+    {
+      "path": "/home/user/gpui-target-native/debug/build/presser/80d41be2c37c067b/out/libpresser-80d41be2c37c067b.rmeta",
+      "bytes": 58675
+    },
+    {
+      "path": "/home/user/gpui-target-native/debug/build/presser/80d41be2c37c067b/out/libpresser-80d41be2c37c067b.rlib",
+      "bytes": 45144
+    },
+    {
+      "path": "/home/user/gpui-target-native/debug/build/presser/6e923d04e95c97ed/out/libpresser-6e923d04e95c97ed.rmeta",
+      "bytes": 41313
+    },
+    {
+      "path": "/home/user/gpui-target-native/debug/build/percent-encoding/5a137d17f83bf7ca/out/libpercent_encoding-5a137d17f83bf7ca.rmeta",
+      "bytes": 51740
+    },
+    {
+      "path": "/home/user/gpui-target-native/debug/build/percent-encoding/5a137d17f83bf7ca/out/libpercent_encoding-5a137d17f83bf7ca.rlib",
+      "bytes": 224880
+    },
+    {
+      "path": "/home/user/gpui-target-native/debug/build/percent-encoding/6fea5d56006be704/out/libpercent_encoding-6fea5d56006be704.rmeta",
+      "bytes": 45925
+    },
+    {
+      "path": "/home/user/gpui-target-native/debug/build/icu_normalizer/24fd51ea108a8408/out/libicu_normalizer-24fd51ea108a8408.rlib",
+      "bytes": 1882280
+    },
+    {
+      "path": "/home/user/gpui-target-native/debug/build/icu_normalizer/24fd51ea108a8408/out/libicu_normalizer-24fd51ea108a8408.rmeta",
+      "bytes": 595144
+    },
+    {
+      "path": "/home/user/gpui-target-native/debug/build/icu_normalizer/e1398006d2dcacfa/out/libicu_normalizer-e1398006d2dcacfa.rmeta",
+      "bytes": 444770
+    },
+    {
+      "path": "/home/user/gpui-target-native/debug/build/as-raw-xcb-connection/724bb4b26b617153/out/libas_raw_xcb_connection-724bb4b26b617153.rmeta",
+      "bytes": 9567
+    },
+    {
+      "path": "/home/user/gpui-target-native/debug/build/as-raw-xcb-connection/2dfae20aba5a4d5f/out/libas_raw_xcb_connection-2dfae20aba5a4d5f.rlib",
+      "bytes": 12444
+    },
+    {
+      "path": "/home/user/gpui-target-native/debug/build/as-raw-xcb-connection/2dfae20aba5a4d5f/out/libas_raw_xcb_connection-2dfae20aba5a4d5f.rmeta",
+      "bytes": 10886
+    },
+    {
+      "path": "/home/user/gpui-target-native/debug/build/toml_parser/03161703d46df40b/out/libtoml_parser-03161703d46df40b.rlib",
+      "bytes": 748128
+    },
+    {
+      "path": "/home/user/gpui-target-native/debug/build/toml_parser/03161703d46df40b/out/libtoml_parser-03161703d46df40b.rmeta",
+      "bytes": 311580
+    },
+    {
+      "path": "/home/user/gpui-target-native/debug/build/toml_parser/bf11fedeec3c8a8c/out/libtoml_parser-bf11fedeec3c8a8c.rmeta",
+      "bytes": 311580
+    },
+    {
+      "path": "/home/user/gpui-target-native/debug/build/toml_parser/bf11fedeec3c8a8c/out/libtoml_parser-bf11fedeec3c8a8c.rlib",
+      "bytes": 747788
+    },
+    {
+      "path": "/home/user/gpui-target-native/debug/build/zmij/45731d18442464a4/out/libzmij-45731d18442464a4.rlib",
+      "bytes": 241066
+    },
+    {
+      "path": "/home/user/gpui-target-native/debug/build/zmij/45731d18442464a4/out/libzmij-45731d18442464a4.rmeta",
+      "bytes": 489593
+    },
+    {
+      "path": "/home/user/gpui-target-native/debug/build/zmij/e9651d2797d40408/out/libzmij-e9651d2797d40408.rmeta",
+      "bytes": 480323
+    },
+    {
+      "path": "/home/user/gpui-target-native/debug/build/xkbcommon-dl/1184a57d5527f525/out/libxkbcommon_dl-1184a57d5527f525.rlib",
+      "bytes": 3097112
+    },
+    {
+      "path": "/home/user/gpui-target-native/debug/build/xkbcommon-dl/1184a57d5527f525/out/libxkbcommon_dl-1184a57d5527f525.rmeta",
+      "bytes": 268745
+    },
+    {
+      "path": "/home/user/gpui-target-native/debug/build/xkbcommon-dl/31ccfbb38f770bee/out/libxkbcommon_dl-31ccfbb38f770bee.rmeta",
+      "bytes": 191593
+    },
+    {
+      "path": "/home/user/gpui-target-native/debug/build/icu_segmenter/60c07c577a95470a/out/libicu_segmenter-60c07c577a95470a.rmeta",
+      "bytes": 4563053
+    },
+    {
+      "path": "/home/user/gpui-target-native/debug/build/icu_segmenter/60c07c577a95470a/out/libicu_segmenter-60c07c577a95470a.rlib",
+      "bytes": 6095372
+    },
+    {
+      "path": "/home/user/gpui-target-native/debug/build/icu_segmenter/8c70655bc4687d87/out/libicu_segmenter-8c70655bc4687d87.rmeta",
+      "bytes": 4421247
+    },
+    {
+      "path": "/home/user/gpui-target-native/debug/build/libc/bb271d5fab6bcfd3/out/liblibc-bb271d5fab6bcfd3.rmeta",
+      "bytes": 3920399
+    },
+    {
+      "path": "/home/user/gpui-target-native/debug/build/libc/f7ed46a63266465f/out/liblibc-f7ed46a63266465f.rlib",
+      "bytes": 95618
+    },
+    {
+      "path": "/home/user/gpui-target-native/debug/build/libc/f7ed46a63266465f/out/liblibc-f7ed46a63266465f.rmeta",
+      "bytes": 4405023
+    },
+    {
+      "path": "/home/user/gpui-target-native/debug/build/triomphe/148177028a842186/out/libtriomphe-148177028a842186.rlib",
+      "bytes": 172964
+    },
+    {
+      "path": "/home/user/gpui-target-native/debug/build/triomphe/148177028a842186/out/libtriomphe-148177028a842186.rmeta",
+      "bytes": 368138
+    },
+    {
+      "path": "/home/user/gpui-target-native/debug/build/triomphe/efc9d600913a7b91/out/libtriomphe-efc9d600913a7b91.rmeta",
+      "bytes": 258378
+    },
+    {
+      "path": "/home/user/gpui-target-native/debug/build/potential_utf/5a7bcb185215aeb3/out/libpotential_utf-5a7bcb185215aeb3.rmeta",
+      "bytes": 49532
+    },
+    {
+      "path": "/home/user/gpui-target-native/debug/build/potential_utf/81bb67c49c6df442/out/libpotential_utf-81bb67c49c6df442.rmeta",
+      "bytes": 62609
+    },
+    {
+      "path": "/home/user/gpui-target-native/debug/build/potential_utf/81bb67c49c6df442/out/libpotential_utf-81bb67c49c6df442.rlib",
+      "bytes": 122846
+    },
+    {
+      "path": "/home/user/gpui-target-native/debug/build/skrifa/a97912857ea0dda4/out/libskrifa-a97912857ea0dda4.rlib",
+      "bytes": 22296426
+    },
+    {
+      "path": "/home/user/gpui-target-native/debug/build/skrifa/a97912857ea0dda4/out/libskrifa-a97912857ea0dda4.rmeta",
+      "bytes": 2748807
+    },
+    {
+      "path": "/home/user/gpui-target-native/debug/build/skrifa/07da8f050e9d573b/out/libskrifa-07da8f050e9d573b.rmeta",
+      "bytes": 2311999
+    },
+    {
+      "path": "/home/user/gpui-target-native/debug/build/atspi-common/319ed2ec774f773b/out/libatspi_common-319ed2ec774f773b.rmeta",
+      "bytes": 3842519
+    },
+    {
+      "path": "/home/user/gpui-target-native/debug/build/atspi-common/96e18454426543ff/out/libatspi_common-96e18454426543ff.rlib",
+      "bytes": 10059868
+    },
+    {
+      "path": "/home/user/gpui-target-native/debug/build/atspi-common/96e18454426543ff/out/libatspi_common-96e18454426543ff.rmeta",
+      "bytes": 5626525
+    },
+    {
+      "path": "/home/user/gpui-target-native/debug/build/read-fonts/a33c125c271cef97/out/libread_fonts-a33c125c271cef97.rmeta",
+      "bytes": 14989999
+    },
+    {
+      "path": "/home/user/gpui-target-native/debug/build/read-fonts/8f0334c500871dcc/out/libread_fonts-8f0334c500871dcc.rlib",
+      "bytes": 70682876
+    },
+    {
+      "path": "/home/user/gpui-target-native/debug/build/read-fonts/8f0334c500871dcc/out/libread_fonts-8f0334c500871dcc.rmeta",
+      "bytes": 17665673
+    },
+    {
+      "path": "/home/user/gpui-target-native/debug/build/read-fonts/59babe41fbbd04ee/out/libread_fonts-59babe41fbbd04ee.rmeta",
+      "bytes": 8440858
+    },
+    {
+      "path": "/home/user/gpui-target-native/debug/build/read-fonts/7e6e112d5ef8804e/out/libread_fonts-7e6e112d5ef8804e.rlib",
+      "bytes": 40705002
+    },
+    {
+      "path": "/home/user/gpui-target-native/debug/build/read-fonts/7e6e112d5ef8804e/out/libread_fonts-7e6e112d5ef8804e.rmeta",
+      "bytes": 10004256
+    },
+    {
+      "path": "/home/user/gpui-target-native/debug/build/zerofrom/ff76e516ac4d6b9b/out/libzerofrom-ff76e516ac4d6b9b.rmeta",
+      "bytes": 56356
+    },
+    {
+      "path": "/home/user/gpui-target-native/debug/build/zerofrom/faec3e8cfcb542d8/out/libzerofrom-faec3e8cfcb542d8.rmeta",
+      "bytes": 98911
+    },
+    {
+      "path": "/home/user/gpui-target-native/debug/build/zerofrom/faec3e8cfcb542d8/out/libzerofrom-faec3e8cfcb542d8.rlib",
+      "bytes": 2374
+    },
+    {
+      "path": "/home/user/gpui-target-native/debug/build/zvariant/c7258602533af1c4/out/libzvariant-c7258602533af1c4.rmeta",
+      "bytes": 2585713
+    },
+    {
+      "path": "/home/user/gpui-target-native/debug/build/zvariant/c7258602533af1c4/out/libzvariant-c7258602533af1c4.rlib",
+      "bytes": 4842796
+    },
+    {
+      "path": "/home/user/gpui-target-native/debug/build/zvariant/affe82f2801966d7/out/libzvariant-affe82f2801966d7.rlib",
+      "bytes": 4918904
+    },
+    {
+      "path": "/home/user/gpui-target-native/debug/build/zvariant/affe82f2801966d7/out/libzvariant-affe82f2801966d7.rmeta",
+      "bytes": 2586559
+    },
+    {
+      "path": "/home/user/gpui-target-native/debug/build/zvariant/7dbaa4962b76003e/out/libzvariant-7dbaa4962b76003e.rmeta",
+      "bytes": 1635451
+    },
+    {
+      "path": "/home/user/gpui-target-native/debug/build/zvariant/b394dd87b432ce0f/out/libzvariant-b394dd87b432ce0f.rmeta",
+      "bytes": 2585713
+    },
+    {
+      "path": "/home/user/gpui-target-native/debug/build/zvariant/b394dd87b432ce0f/out/libzvariant-b394dd87b432ce0f.rlib",
+      "bytes": 1570412
+    },
+    {
+      "path": "/home/user/gpui-target-native/debug/build/zbus_names/b05cc434fe139e47/out/libzbus_names-b05cc434fe139e47.rlib",
+      "bytes": 537512
+    },
+    {
+      "path": "/home/user/gpui-target-native/debug/build/zbus_names/b05cc434fe139e47/out/libzbus_names-b05cc434fe139e47.rmeta",
+      "bytes": 544801
+    },
+    {
+      "path": "/home/user/gpui-target-native/debug/build/zbus_names/e1f3248084169b7e/out/libzbus_names-e1f3248084169b7e.rmeta",
+      "bytes": 544801
+    },
+    {
+      "path": "/home/user/gpui-target-native/debug/build/zbus_names/e1f3248084169b7e/out/libzbus_names-e1f3248084169b7e.rlib",
+      "bytes": 1271720
+    },
+    {
+      "path": "/home/user/gpui-target-native/debug/build/zbus_names/9f89bb3603cf3aa7/out/libzbus_names-9f89bb3603cf3aa7.rlib",
+      "bytes": 1270488
+    },
+    {
+      "path": "/home/user/gpui-target-native/debug/build/zbus_names/9f89bb3603cf3aa7/out/libzbus_names-9f89bb3603cf3aa7.rmeta",
+      "bytes": 544801
+    },
+    {
+      "path": "/home/user/gpui-target-native/debug/build/zbus_names/ad9a64391319d3fa/out/libzbus_names-ad9a64391319d3fa.rmeta",
+      "bytes": 459221
+    },
+    {
+      "path": "/home/user/gpui-target-native/debug/build/proc-macro2/765043d664e3fbff/out/libproc_macro2-765043d664e3fbff.rmeta",
+      "bytes": 357287
+    },
+    {
+      "path": "/home/user/gpui-target-native/debug/build/proc-macro2/765043d664e3fbff/out/libproc_macro2-765043d664e3fbff.rlib",
+      "bytes": 2532680
+    },
+    {
+      "path": "/home/user/gpui-target-native/debug/build/proc-macro2/33463c5add713688/out/libproc_macro2-33463c5add713688.rlib",
+      "bytes": 1234946
+    },
+    {
+      "path": "/home/user/gpui-target-native/debug/build/proc-macro2/33463c5add713688/out/libproc_macro2-33463c5add713688.rmeta",
+      "bytes": 413526
+    },
+    {
+      "path": "/home/user/gpui-target-native/debug/build/proc-macro2/93d12af780ca4bf0/out/libproc_macro2-93d12af780ca4bf0.rlib",
+      "bytes": 1231038
+    },
+    {
+      "path": "/home/user/gpui-target-native/debug/build/proc-macro2/93d12af780ca4bf0/out/libproc_macro2-93d12af780ca4bf0.rmeta",
+      "bytes": 413526
+    },
+    {
+      "path": "/home/user/gpui-target-native/debug/build/proc-macro2/41f504e3d407527e/out/libproc_macro2-41f504e3d407527e.rmeta",
+      "bytes": 308580
+    },
+    {
+      "path": "/home/user/gpui-target-native/debug/build/calloop/f6219438e35652dd/out/libcalloop-f6219438e35652dd.rmeta",
+      "bytes": 574075
+    },
+    {
+      "path": "/home/user/gpui-target-native/debug/build/calloop/f6219438e35652dd/out/libcalloop-f6219438e35652dd.rlib",
+      "bytes": 1642596
+    },
+    {
+      "path": "/home/user/gpui-target-native/debug/build/calloop/70c873a3433b8a0b/out/libcalloop-70c873a3433b8a0b.rmeta",
+      "bytes": 384774
+    },
+    {
+      "path": "/home/user/gpui-target-native/debug/build/smol_str/1deb55fda22f2ac4/out/libsmol_str-1deb55fda22f2ac4.rmeta",
+      "bytes": 144066
+    },
+    {
+      "path": "/home/user/gpui-target-native/debug/build/smol_str/1deb55fda22f2ac4/out/libsmol_str-1deb55fda22f2ac4.rlib",
+      "bytes": 360026
+    },
+    {
+      "path": "/home/user/gpui-target-native/debug/build/smol_str/2a6622635f0123e2/out/libsmol_str-2a6622635f0123e2.rmeta",
+      "bytes": 100196
+    },
+    {
+      "path": "/home/user/gpui-target-native/debug/build/signal-hook-registry/d6b512c976d4f66d/out/libsignal_hook_registry-d6b512c976d4f66d.rlib",
+      "bytes": 717078
+    },
+    {
+      "path": "/home/user/gpui-target-native/debug/build/signal-hook-registry/d6b512c976d4f66d/out/libsignal_hook_registry-d6b512c976d4f66d.rmeta",
+      "bytes": 79793
+    },
+    {
+      "path": "/home/user/gpui-target-native/debug/build/signal-hook-registry/07804df9862110a8/out/libsignal_hook_registry-07804df9862110a8.rmeta",
+      "bytes": 67128
+    },
+    {
+      "path": "/home/user/gpui-target-native/debug/build/crossbeam-utils/ea3e0d4e6c09df7e/out/libcrossbeam_utils-ea3e0d4e6c09df7e.rmeta",
+      "bytes": 432123
+    },
+    {
+      "path": "/home/user/gpui-target-native/debug/build/crossbeam-utils/ea3e0d4e6c09df7e/out/libcrossbeam_utils-ea3e0d4e6c09df7e.rlib",
+      "bytes": 20822
+    },
+    {
+      "path": "/home/user/gpui-target-native/debug/build/crossbeam-utils/967a4b963a1a3f79/out/libcrossbeam_utils-967a4b963a1a3f79.rmeta",
+      "bytes": 172515
+    },
+    {
+      "path": "/home/user/gpui-target-native/debug/build/zbus_utils/fe5990ecd098a587/out/libzbus_utils-fe5990ecd098a587.rmeta",
+      "bytes": 272320
+    },
+    {
+      "path": "/home/user/gpui-target-native/debug/build/zbus_utils/cf4a67e2ff2a86d7/out/libzbus_utils-cf4a67e2ff2a86d7.rmeta",
+      "bytes": 340881
+    },
+    {
+      "path": "/home/user/gpui-target-native/debug/build/zbus_utils/cf4a67e2ff2a86d7/out/libzbus_utils-cf4a67e2ff2a86d7.rlib",
+      "bytes": 1801412
+    },
+    {
+      "path": "/home/user/gpui-target-native/debug/build/zbus_utils/cd132695abd352bd/out/libzbus_utils-cd132695abd352bd.rlib",
+      "bytes": 5716336
+    },
+    {
+      "path": "/home/user/gpui-target-native/debug/build/zbus_utils/cd132695abd352bd/out/libzbus_utils-cd132695abd352bd.rmeta",
+      "bytes": 340881
+    },
+    {
+      "path": "/home/user/gpui-target-native/debug/build/zbus_utils/abe4fc9e1c83af86/out/libzbus_utils-abe4fc9e1c83af86.rlib",
+      "bytes": 5852252
+    },
+    {
+      "path": "/home/user/gpui-target-native/debug/build/zbus_utils/abe4fc9e1c83af86/out/libzbus_utils-abe4fc9e1c83af86.rmeta",
+      "bytes": 340881
+    },
+    {
+      "path": "/home/user/gpui-target-native/debug/build/gpui/cec4613d450bf986/out/libfocus-cec4613d450bf986.rmeta",
+      "bytes": 0
+    },
+    {
+      "path": "/home/user/gpui-target-native/debug/build/gpui/0046879438564ae8/out/libfield_identity-0046879438564ae8.rmeta",
+      "bytes": 0
+    },
+    {
+      "path": "/home/user/gpui-target-native/debug/build/gpui/0647ea35505b2d98/out/libcomponent_sources-0647ea35505b2d98.rmeta",
+      "bytes": 0
+    },
+    {
+      "path": "/home/user/gpui-target-native/debug/build/gpui/3fae28096a1fab15/out/libpanes-3fae28096a1fab15.rmeta",
+      "bytes": 0
+    },
+    {
+      "path": "/home/user/gpui-target-native/debug/build/gpui/3a47b6113498e4ba/out/libscroll-3a47b6113498e4ba.rmeta",
+      "bytes": 0
+    },
+    {
+      "path": "/home/user/gpui-target-native/debug/build/gpui/dff271bb0f808156/out/libflex-dff271bb0f808156.rmeta",
+      "bytes": 0
+    },
+    {
+      "path": "/home/user/gpui-target-native/debug/build/gpui/9c193bbeac31ecd4/out/libtext_selection-9c193bbeac31ecd4.rmeta",
+      "bytes": 0
+    },
+    {
+      "path": "/home/user/gpui-target-native/debug/build/gpui/eb6eec400af1dcd5/out/libinspector-eb6eec400af1dcd5.rmeta",
+      "bytes": 0
+    },
+    {
+      "path": "/home/user/gpui-target-native/debug/build/gpui/e6a7eb24b11ff1d4/out/libsemantic_metadata-e6a7eb24b11ff1d4.rmeta",
+      "bytes": 0
+    },
+    {
+      "path": "/home/user/gpui-target-native/debug/build/gpui/6b25c8538b009029/out/libqueries-6b25c8538b009029.rmeta",
+      "bytes": 0
+    },
+    {
+      "path": "/home/user/gpui-target-native/debug/build/gpui/3ff8651da2c6ba7a/out/libtodo_comparison-3ff8651da2c6ba7a.rmeta",
+      "bytes": 0
+    },
+    {
+      "path": "/home/user/gpui-target-native/debug/build/gpui/0d77a13ed737772c/out/libempty-0d77a13ed737772c.rmeta",
+      "bytes": 0
+    },
+    {
+      "path": "/home/user/gpui-target-native/debug/build/gpui/abcdfa6203372b6d/out/libdpi-abcdfa6203372b6d.rmeta",
+      "bytes": 0
+    },
+    {
+      "path": "/home/user/gpui-target-native/debug/build/gpui/509ceefd6d9e187a/out/libfirst_frame-509ceefd6d9e187a.rmeta",
+      "bytes": 0
+    },
+    {
+      "path": "/home/user/gpui-target-native/debug/build/gpui/05fe67f2f0c0bd46/out/libintrinsic_text-05fe67f2f0c0bd46.rmeta",
+      "bytes": 0
+    },
+    {
+      "path": "/home/user/gpui-target-native/debug/build/gpui/97896e5640cb5eb6/out/libquestion_mailbox-97896e5640cb5eb6.rmeta",
+      "bytes": 0
+    },
+    {
+      "path": "/home/user/gpui-target-native/debug/build/gpui/93b6337acafaa388/out/liblibrary-93b6337acafaa388.rmeta",
+      "bytes": 0
+    },
+    {
+      "path": "/home/user/gpui-target-native/debug/build/gpui/7c3478ef57a8d24c/out/libports-7c3478ef57a8d24c.rmeta",
+      "bytes": 0
+    },
+    {
+      "path": "/home/user/gpui-target-native/debug/build/gpui/9526765abec2c7ab/out/libchild_capacity-9526765abec2c7ab.rmeta",
+      "bytes": 0
+    },
+    {
+      "path": "/home/user/gpui-target-native/debug/build/gpui/af34196a46d9ffbb/out/libproperty_editor-af34196a46d9ffbb.rmeta",
+      "bytes": 0
+    },
+    {
+      "path": "/home/user/gpui-target-native/debug/build/gpui/a775371ed1c894d8/out/libtodo_comparison-a775371ed1c894d8.rmeta",
+      "bytes": 0
+    },
+    {
+      "path": "/home/user/gpui-target-native/debug/build/gpui/1b39853a3b3ce577/out/libquestion_futures-1b39853a3b3ce577.rmeta",
+      "bytes": 0
+    },
+    {
+      "path": "/home/user/gpui-target-native/debug/build/gpui/12c2239e86fbd52f/out/liblists-12c2239e86fbd52f.rmeta",
+      "bytes": 0
+    },
+    {
+      "path": "/home/user/gpui-target-native/debug/build/gpui/dd4634823437427a/out/libtext_selection_compound-dd4634823437427a.rmeta",
+      "bytes": 0
+    },
+    {
+      "path": "/home/user/gpui-target-native/debug/build/gpui/335f22997be55bbc/out/libgpui-335f22997be55bbc.rmeta",
+      "bytes": 4796901
+    },
+    {
+      "path": "/home/user/gpui-target-native/debug/build/gpui/335f22997be55bbc/out/libgpui-335f22997be55bbc.rlib",
+      "bytes": 51780322
+    },
+    {
+      "path": "/home/user/gpui-target-native/debug/build/gpui/a5a590990c70570e/out/libcontained_owner_spike-a5a590990c70570e.rmeta",
+      "bytes": 0
+    },
+    {
+      "path": "/home/user/gpui-target-native/debug/build/gpui/a10a6f23e2ae4620/out/libgraphics-a10a6f23e2ae4620.rmeta",
+      "bytes": 0
+    },
+    {
+      "path": "/home/user/gpui-target-native/debug/build/gpui/775287ea9c5db7be/out/libreactive_styles-775287ea9c5db7be.rmeta",
+      "bytes": 0
+    },
+    {
+      "path": "/home/user/gpui-target-native/debug/build/gpui/9200490665069d85/out/libtodo_recording_cost-9200490665069d85.rmeta",
+      "bytes": 0
+    },
+    {
+      "path": "/home/user/gpui-target-native/debug/build/gpui/601ab85c50a84fa5/out/libtodo_comparison_mapped-601ab85c50a84fa5.rmeta",
+      "bytes": 0
+    },
+    {
+      "path": "/home/user/gpui-target-native/debug/build/gpui/119df9c5357d4133/out/libunicode_text-119df9c5357d4133.rmeta",
+      "bytes": 0
+    },
+    {
+      "path": "/home/user/gpui-target-native/debug/build/gpui/3c8e59a5dab1c46c/out/libremote_delivery_measure-3c8e59a5dab1c46c.rmeta",
+      "bytes": 0
+    },
+    {
+      "path": "/home/user/gpui-target-native/debug/build/gpui/6e4267e3f616847c/out/libsource_inbox-6e4267e3f616847c.rmeta",
+      "bytes": 0
+    },
+    {
+      "path": "/home/user/gpui-target-native/debug/build/gpui/3826429a42b842d5/out/libimmutable_text_measure-3826429a42b842d5.rmeta",
+      "bytes": 0
+    },
+    {
+      "path": "/home/user/gpui-target-native/debug/build/gpui/dd29b9719320714a/out/libimmutable_text-dd29b9719320714a.rmeta",
+      "bytes": 0
+    },
+    {
+      "path": "/home/user/gpui-target-native/debug/build/gpui/a983b457a4261b05/out/libproperty_outline_allocations-a983b457a4261b05.rmeta",
+      "bytes": 0
+    },
+    {
+      "path": "/home/user/gpui-target-native/debug/build/gpui/44892a379f3bf934/out/libcolor_packing-44892a379f3bf934.rmeta",
+      "bytes": 0
+    },
+    {
+      "path": "/home/user/gpui-target-native/debug/build/gpui/588556d73538539c/out/libsource_inbox_reader_gate-588556d73538539c.rmeta",
+      "bytes": 0
+    },
+    {
+      "path": "/home/user/gpui-target-native/debug/build/gpui/7853380c931fda5f/out/libcolor_cost-7853380c931fda5f.rmeta",
+      "bytes": 0
+    },
+    {
+      "path": "/home/user/gpui-target-native/debug/build/gpui/19092ccd5c8a893b/out/libunit_action_cost_two-19092ccd5c8a893b.rmeta",
+      "bytes": 0
+    },
+    {
+      "path": "/home/user/gpui-target-native/debug/build/gpui/3db797446099e4ad/out/libinspector-3db797446099e4ad.rmeta",
+      "bytes": 0
+    },
+    {
+      "path": "/home/user/gpui-target-native/debug/build/gpui/f6db3a4b419d8226/out/libgpui-f6db3a4b419d8226.rmeta",
+      "bytes": 2844158
+    },
+    {
+      "path": "/home/user/gpui-target-native/debug/build/gpui/e9a4cd308cd166f6/out/libidentity_recovery-e9a4cd308cd166f6.rmeta",
+      "bytes": 0
+    },
+    {
+      "path": "/home/user/gpui-target-native/debug/build/gpui/760d1ae5047f4407/out/libfrontier-760d1ae5047f4407.rmeta",
+      "bytes": 0
+    },
+    {
+      "path": "/home/user/gpui-target-native/debug/build/gpui/d846f153f77b79d3/out/libimages-d846f153f77b79d3.rmeta",
+      "bytes": 0
+    },
+    {
+      "path": "/home/user/gpui-target-native/debug/build/gpui/2b55f2905d7621bf/out/libinbox_storage-2b55f2905d7621bf.rmeta",
+      "bytes": 0
+    },
+    {
+      "path": "/home/user/gpui-target-native/debug/build/gpui/33ca6172b5d859d4/out/libquestions-33ca6172b5d859d4.rmeta",
+      "bytes": 0
+    },
+    {
+      "path": "/home/user/gpui-target-native/debug/build/gpui/8b5ece8e6c61c717/out/libpointer-8b5ece8e6c61c717.rmeta",
+      "bytes": 0
+    },
+    {
+      "path": "/home/user/gpui-target-native/debug/build/gpui/5bc0bab09aa7fdba/out/libsource_value_isolation-5bc0bab09aa7fdba.rmeta",
+      "bytes": 0
+    },
+    {
+      "path": "/home/user/gpui-target-native/debug/build/gpui/ab87bf4b1457c32b/out/libquestion_cost-ab87bf4b1457c32b.rmeta",
+      "bytes": 0
+    },
+    {
+      "path": "/home/user/gpui-target-native/debug/build/gpui/ee7bb978eabfcd99/out/liblibrary-ee7bb978eabfcd99.rmeta",
+      "bytes": 0
+    },
+    {
+      "path": "/home/user/gpui-target-native/debug/build/gpui/a426b126eb386660/out/libsource_values-a426b126eb386660.rmeta",
+      "bytes": 0
+    },
+    {
+      "path": "/home/user/gpui-target-native/debug/build/gpui/ba442af7804c888e/out/libmapped_properties-ba442af7804c888e.rmeta",
+      "bytes": 0
+    },
+    {
+      "path": "/home/user/gpui-target-native/debug/build/gpui/e7d1349229adb339/out/libretained_list-e7d1349229adb339.rmeta",
+      "bytes": 0
+    },
+    {
+      "path": "/home/user/gpui-target-native/debug/build/gpui/2b5e1c7cdd245136/out/libsheet_access_measure-2b5e1c7cdd245136.rmeta",
+      "bytes": 0
+    },
+    {
+      "path": "/home/user/gpui-target-native/debug/build/gpui/cd581d27e2625ce9/out/libluna_bench-cd581d27e2625ce9.rmeta",
+      "bytes": 0
+    },
+    {
+      "path": "/home/user/gpui-target-native/debug/build/gpui/0d339d464a011bca/out/libcheckbox-0d339d464a011bca.rmeta",
+      "bytes": 0
+    },
+    {
+      "path": "/home/user/gpui-target-native/debug/build/gpui/d3c1f5f195e3c421/out/libpaint_slot_rebind-d3c1f5f195e3c421.rmeta",
+      "bytes": 0
+    },
+    {
+      "path": "/home/user/gpui-target-native/debug/build/gpui/dac8cfc2a34ef344/out/libgradient_backgrounds-dac8cfc2a34ef344.rmeta",
+      "bytes": 0
+    },
+    {
+      "path": "/home/user/gpui-target-native/debug/build/gpui/525983dd9c1939d5/out/libgpui-525983dd9c1939d5.rmeta",
+      "bytes": 0
+    },
+    {
+      "path": "/home/user/gpui-target-native/debug/build/gpui/f36cd53bd44283ee/out/libunicode-f36cd53bd44283ee.rmeta",
+      "bytes": 0
+    },
+    {
+      "path": "/home/user/gpui-target-native/debug/build/gpui/2fce495daacf2222/out/libpaint_slot_storage-2fce495daacf2222.rmeta",
+      "bytes": 0
+    },
+    {
+      "path": "/home/user/gpui-target-native/debug/build/gpui/c6ae7a255ec4dae1/out/libacceptance-c6ae7a255ec4dae1.rmeta",
+      "bytes": 0
+    },
+    {
+      "path": "/home/user/gpui-target-native/debug/build/gpui/db4defba1c81f650/out/libquestion_storage-db4defba1c81f650.rmeta",
+      "bytes": 0
+    },
+    {
+      "path": "/home/user/gpui-target-native/debug/build/gpui/951ba4ff48e48f86/out/libtext_lane_measure-951ba4ff48e48f86.rmeta",
+      "bytes": 0
+    },
+    {
+      "path": "/home/user/gpui-target-native/debug/build/gpui/a0217aa77ed626cf/out/libproperty_change_union-a0217aa77ed626cf.rmeta",
+      "bytes": 0
+    },
+    {
+      "path": "/home/user/gpui-target-native/debug/build/gpui/f51dd7aa3c0d0ce7/out/libquestion_inputs-f51dd7aa3c0d0ce7.rmeta",
+      "bytes": 0
+    },
+    {
+      "path": "/home/user/gpui-target-native/debug/build/gpui/4c2776d5b65ad6b2/out/libworkbench-4c2776d5b65ad6b2.rmeta",
+      "bytes": 0
+    },
+    {
+      "path": "/home/user/gpui-target-native/debug/build/gpui/a87a7e4e839f49f3/out/libsemantic_serialization-a87a7e4e839f49f3.rmeta",
+      "bytes": 0
+    },
+    {
+      "path": "/home/user/gpui-target-native/debug/build/gpui/af84dbeb71e9e480/out/libunit_action_cost-af84dbeb71e9e480.rmeta",
+      "bytes": 0
+    },
+    {
+      "path": "/home/user/gpui-target-native/debug/build/gpui/a2c537d2ddedbf1d/out/libroutes-a2c537d2ddedbf1d.rmeta",
+      "bytes": 0
+    },
+    {
+      "path": "/home/user/gpui-target-native/debug/build/gpui/b25067970ce46e7c/out/libhandler_storage-b25067970ce46e7c.rmeta",
+      "bytes": 0
+    },
+    {
+      "path": "/home/user/gpui-target-native/debug/build/gpui/b718033fa87f0479/out/libmapped_paint-b718033fa87f0479.rmeta",
+      "bytes": 0
+    },
+    {
+      "path": "/home/user/gpui-target-native/debug/build/gpui/be06b31779125d6d/out/libquestion_input_cost-be06b31779125d6d.rmeta",
+      "bytes": 0
+    },
+    {
+      "path": "/home/user/gpui-target-native/debug/build/gpui/c01fc1e4cb80470c/out/libpaint_patch-c01fc1e4cb80470c.rmeta",
+      "bytes": 0
+    },
+    {
+      "path": "/home/user/gpui-target-native/debug/build/gpui/17dc391445c81414/out/libpaint_slots-17dc391445c81414.rmeta",
+      "bytes": 0
+    },
+    {
+      "path": "/home/user/gpui-target-native/debug/build/gpui/587d6a5299045f9e/out/libcovers-587d6a5299045f9e.rmeta",
+      "bytes": 0
+    },
+    {
+      "path": "/home/user/gpui-target-native/debug/build/gpui/7fc302df61366b86/out/libstyle_ports-7fc302df61366b86.rmeta",
+      "bytes": 0
+    },
+    {
+      "path": "/home/user/gpui-target-native/debug/build/gpui/76abe30932334439/out/libproperty_selection-76abe30932334439.rmeta",
+      "bytes": 0
+    },
+    {
+      "path": "/home/user/gpui-target-native/debug/build/gpui/58a1d8e052ed71c0/out/libtext_cache-58a1d8e052ed71c0.rmeta",
+      "bytes": 0
+    },
+    {
+      "path": "/home/user/gpui-target-native/debug/build/gpui/1a0077a489a32e33/out/libliteral_dispatch-1a0077a489a32e33.rmeta",
+      "bytes": 0
+    },
+    {
+      "path": "/home/user/gpui-target-native/debug/build/gpui/aaf050dc0673d375/out/libworkspace-aaf050dc0673d375.rmeta",
+      "bytes": 0
+    },
+    {
+      "path": "/home/user/gpui-target-native/debug/build/gpui/b508f271ebfbadaf/out/libruntime-b508f271ebfbadaf.rmeta",
+      "bytes": 0
+    },
+    {
+      "path": "/home/user/gpui-target-native/debug/build/gpui/520fd1fdd2f2efe6/out/libretained_styles-520fd1fdd2f2efe6.rmeta",
+      "bytes": 0
+    },
+    {
+      "path": "/home/user/gpui-target-native/debug/build/gpui/1edac435d70b5bb3/out/libcounter-1edac435d70b5bb3.rmeta",
+      "bytes": 0
+    },
+    {
+      "path": "/home/user/gpui-target-native/debug/build/gpui/e4ca11108570cc08/out/libime-e4ca11108570cc08.rmeta",
+      "bytes": 0
+    },
+    {
+      "path": "/home/user/gpui-target-native/debug/build/gpui/f8ad3e2dd5e08b3a/out/libpointer_focus-f8ad3e2dd5e08b3a.rmeta",
+      "bytes": 0
+    },
+    {
+      "path": "/home/user/gpui-target-native/debug/build/gpui/4b7db2d37c61d708/out/libproperty_state_shell-4b7db2d37c61d708.rmeta",
+      "bytes": 0
+    },
+    {
+      "path": "/home/user/gpui-target-native/debug/build/gpui/1c1c0aa70b220d0c/out/libpresentation-1c1c0aa70b220d0c.rmeta",
+      "bytes": 0
+    },
+    {
+      "path": "/home/user/gpui-target-native/debug/build/gpui/1ccd940d79735b60/out/libapplication-1ccd940d79735b60.rmeta",
+      "bytes": 0
+    },
+    {
+      "path": "/home/user/gpui-target-native/debug/build/gpui/48acff9153377690/out/librounded-48acff9153377690.rmeta",
+      "bytes": 0
+    },
+    {
+      "path": "/home/user/gpui-target-native/debug/build/gpui/de7d106f0c13ebe7/out/libclipping-de7d106f0c13ebe7.rmeta",
+      "bytes": 0
+    },
+    {
+      "path": "/home/user/gpui-target-native/debug/build/gpui/934a48dbdb4ef636/out/libprojected_sources-934a48dbdb4ef636.rmeta",
+      "bytes": 0
+    },
+    {
+      "path": "/home/user/gpui-target-native/debug/build/gpui/a265dce625e47bea/out/libtext_lease_measure-a265dce625e47bea.rmeta",
+      "bytes": 0
+    },
+    {
+      "path": "/home/user/gpui-target-native/debug/build/gpui/d291a2146f167278/out/libsemantics-d291a2146f167278.rmeta",
+      "bytes": 0
+    },
+    {
+      "path": "/home/user/gpui-target-native/debug/build/gpui/dfee975718319440/out/libunicode_text_measure-dfee975718319440.rmeta",
+      "bytes": 0
+    },
+    {
+      "path": "/home/user/gpui-target-native/debug/build/gpui/7eb8dc458dece4d0/out/libime_cursor_cost-7eb8dc458dece4d0.rmeta",
+      "bytes": 0
+    },
+    {
+      "path": "/home/user/gpui-target-native/debug/build/gpui/860607e32e3e1a97/out/libproperty_actions-860607e32e3e1a97.rmeta",
+      "bytes": 0
+    },
+    {
+      "path": "/home/user/gpui-target-native/debug/build/gpui/512051def060794a/out/libtext_geometry-512051def060794a.rmeta",
+      "bytes": 0
+    },
+    {
+      "path": "/home/user/gpui-target-native/debug/build/gpui/7f3b7f06523e7348/out/libsibling_reconciliation_cost-7f3b7f06523e7348.rmeta",
+      "bytes": 0
+    },
+    {
+      "path": "/home/user/gpui-target-native/debug/build/gpui/49e8536cc0e8bd19/out/libremote-49e8536cc0e8bd19.rmeta",
+      "bytes": 0
+    },
+    {
+      "path": "/home/user/gpui-target-native/debug/build/gpui/893e9d86c23383a1/out/libcomponents-893e9d86c23383a1.rmeta",
+      "bytes": 0
+    },
+    {
+      "path": "/home/user/gpui-target-native/debug/build/gpui/93ae1bdeb96eafa0/out/libtodo_comparison_five-93ae1bdeb96eafa0.rmeta",
+      "bytes": 0
+    },
+    {
+      "path": "/home/user/gpui-target-native/debug/build/gpui/acb18077ac7a09f0/out/libmapped_properties-acb18077ac7a09f0.rmeta",
+      "bytes": 0
+    },
+    {
+      "path": "/home/user/gpui-target-native/debug/build/gpui/25177266c5cc1645/out/libsearch_library-25177266c5cc1645.rmeta",
+      "bytes": 0
+    },
+    {
+      "path": "/home/user/gpui-target-native/debug/build/gpui_gpu/323ce26965295e3c/out/libgpui_gpu-323ce26965295e3c.rmeta",
+      "bytes": 404381
+    },
+    {
+      "path": "/home/user/gpui-target-native/debug/build/gpui_gpu/8aac12814ebe8c7f/out/libgpui_gpu-8aac12814ebe8c7f.rlib",
+      "bytes": 20736758
+    },
+    {
+      "path": "/home/user/gpui-target-native/debug/build/gpui_gpu/8aac12814ebe8c7f/out/libgpui_gpu-8aac12814ebe8c7f.rmeta",
+      "bytes": 455896
+    },
+    {
+      "path": "/home/user/gpui-target-native/debug/build/heck/8d88e522a2e788ba/out/libheck-8d88e522a2e788ba.rlib",
+      "bytes": 229432
+    },
+    {
+      "path": "/home/user/gpui-target-native/debug/build/heck/8d88e522a2e788ba/out/libheck-8d88e522a2e788ba.rmeta",
+      "bytes": 79624
+    },
+    {
+      "path": "/home/user/gpui-target-native/debug/build/icu_locale_core/c016d1d928e97091/out/libicu_locale_core-c016d1d928e97091.rmeta",
+      "bytes": 1503260
+    },
+    {
+      "path": "/home/user/gpui-target-native/debug/build/icu_locale_core/9c624f1009476f99/out/libicu_locale_core-9c624f1009476f99.rmeta",
+      "bytes": 1775826
+    },
+    {
+      "path": "/home/user/gpui-target-native/debug/build/icu_locale_core/9c624f1009476f99/out/libicu_locale_core-9c624f1009476f99.rlib",
+      "bytes": 6629928
+    },
+    {
+      "path": "/home/user/gpui-target-native/debug/build/snafu/5cfc54064e7831b8/out/libsnafu-5cfc54064e7831b8.rmeta",
+      "bytes": 200942
+    },
+    {
+      "path": "/home/user/gpui-target-native/debug/build/snafu/5cfc54064e7831b8/out/libsnafu-5cfc54064e7831b8.rlib",
+      "bytes": 606232
+    },
+    {
+      "path": "/home/user/gpui-target-native/debug/build/snafu/9b97539d64528e7f/out/libsnafu-9b97539d64528e7f.rmeta",
+      "bytes": 200942
+    },
+    {
+      "path": "/home/user/gpui-target-native/debug/build/snafu/9b97539d64528e7f/out/libsnafu-9b97539d64528e7f.rlib",
+      "bytes": 200732
+    },
+    {
+      "path": "/home/user/gpui-target-native/debug/build/snafu/ac71e79766374e83/out/libsnafu-ac71e79766374e83.rmeta",
+      "bytes": 180527
+    },
+    {
+      "path": "/home/user/gpui-target-native/debug/build/ordered-float/f69741b401ba0048/out/libordered_float-f69741b401ba0048.rmeta",
+      "bytes": 328835
+    },
+    {
+      "path": "/home/user/gpui-target-native/debug/build/ordered-float/7a7f56f61c381bc9/out/libordered_float-7a7f56f61c381bc9.rmeta",
+      "bytes": 430106
+    },
+    {
+      "path": "/home/user/gpui-target-native/debug/build/ordered-float/7a7f56f61c381bc9/out/libordered_float-7a7f56f61c381bc9.rlib",
+      "bytes": 60056
+    },
+    {
+      "path": "/home/user/gpui-target-native/debug/build/futures-io/56fccee7bd1820cf/out/libfutures_io-56fccee7bd1820cf.rmeta",
+      "bytes": 56218
+    },
+    {
+      "path": "/home/user/gpui-target-native/debug/build/futures-io/54285ddc35183232/out/libfutures_io-54285ddc35183232.rlib",
+      "bytes": 145046
+    },
+    {
+      "path": "/home/user/gpui-target-native/debug/build/futures-io/54285ddc35183232/out/libfutures_io-54285ddc35183232.rmeta",
+      "bytes": 69177
+    },
+    {
+      "path": "/home/user/gpui-target-native/debug/build/glow/0d49d77508584d0f/out/libglow-0d49d77508584d0f.rmeta",
+      "bytes": 2878927
+    },
+    {
+      "path": "/home/user/gpui-target-native/debug/build/glow/c8faad503b38fe18/out/libglow-c8faad503b38fe18.rmeta",
+      "bytes": 2980966
+    },
+    {
+      "path": "/home/user/gpui-target-native/debug/build/glow/c8faad503b38fe18/out/libglow-c8faad503b38fe18.rlib",
+      "bytes": 3834062
+    },
+    {
+      "path": "/home/user/gpui-target-native/debug/build/phf_generator/1c8ac2b0934becbf/out/libphf_generator-1c8ac2b0934becbf.rmeta",
+      "bytes": 18824
+    },
+    {
+      "path": "/home/user/gpui-target-native/debug/build/phf_generator/1c8ac2b0934becbf/out/libphf_generator-1c8ac2b0934becbf.rlib",
+      "bytes": 187846
+    },
+    {
+      "path": "/home/user/gpui-target-native/debug/build/phf_generator/df5f2ec849b32938/out/libphf_generator-df5f2ec849b32938.rmeta",
+      "bytes": 18824
+    },
+    {
+      "path": "/home/user/gpui-target-native/debug/build/phf_generator/df5f2ec849b32938/out/libphf_generator-df5f2ec849b32938.rlib",
+      "bytes": 187876
+    },
+    {
+      "path": "/home/user/gpui-target-native/debug/build/wgpu-types/7a88b4544a9e82e8/out/libwgpu_types-7a88b4544a9e82e8.rmeta",
+      "bytes": 4247931
+    },
+    {
+      "path": "/home/user/gpui-target-native/debug/build/wgpu-types/823c80fbdb0fdbdd/out/libwgpu_types-823c80fbdb0fdbdd.rlib",
+      "bytes": 3905612
+    },
+    {
+      "path": "/home/user/gpui-target-native/debug/build/wgpu-types/823c80fbdb0fdbdd/out/libwgpu_types-823c80fbdb0fdbdd.rmeta",
+      "bytes": 5091032
+    },
+    {
+      "path": "/home/user/gpui-target-native/debug/build/foldhash/e8bfd42f503da1f8/out/libfoldhash-e8bfd42f503da1f8.rmeta",
+      "bytes": 67059
+    },
+    {
+      "path": "/home/user/gpui-target-native/debug/build/foldhash/9098eac94acaac99/out/libfoldhash-9098eac94acaac99.rmeta",
+      "bytes": 88084
+    },
+    {
+      "path": "/home/user/gpui-target-native/debug/build/foldhash/9098eac94acaac99/out/libfoldhash-9098eac94acaac99.rlib",
+      "bytes": 23554
+    },
+    {
+      "path": "/home/user/gpui-target-native/debug/build/foldhash/cbf4d4df19a83344/out/libfoldhash-cbf4d4df19a83344.rmeta",
+      "bytes": 88084
+    },
+    {
+      "path": "/home/user/gpui-target-native/debug/build/foldhash/cbf4d4df19a83344/out/libfoldhash-cbf4d4df19a83344.rlib",
+      "bytes": 78946
+    },
+    {
+      "path": "/home/user/gpui-target-native/debug/build/hashbrown/b6129269bef9153f/out/libhashbrown-b6129269bef9153f.rmeta",
+      "bytes": 1008365
+    },
+    {
+      "path": "/home/user/gpui-target-native/debug/build/hashbrown/116dd8c5c6ac2730/out/libhashbrown-116dd8c5c6ac2730.rmeta",
+      "bytes": 1068433
+    },
+    {
+      "path": "/home/user/gpui-target-native/debug/build/hashbrown/c3123a3fb218aa66/out/libhashbrown-c3123a3fb218aa66.rlib",
+      "bytes": 33440
+    },
+    {
+      "path": "/home/user/gpui-target-native/debug/build/hashbrown/c3123a3fb218aa66/out/libhashbrown-c3123a3fb218aa66.rmeta",
+      "bytes": 1268258
+    },
+    {
+      "path": "/home/user/gpui-target-native/debug/build/hashbrown/8daa7aa718c066c8/out/libhashbrown-8daa7aa718c066c8.rlib",
+      "bytes": 82328
+    },
+    {
+      "path": "/home/user/gpui-target-native/debug/build/hashbrown/8daa7aa718c066c8/out/libhashbrown-8daa7aa718c066c8.rmeta",
+      "bytes": 1422195
+    },
+    {
+      "path": "/home/user/gpui-target-native/debug/build/hashbrown/eba3470f0d720a07/out/libhashbrown-eba3470f0d720a07.rlib",
+      "bytes": 33440
+    },
+    {
+      "path": "/home/user/gpui-target-native/debug/build/hashbrown/eba3470f0d720a07/out/libhashbrown-eba3470f0d720a07.rmeta",
+      "bytes": 1268258
+    },
+    {
+      "path": "/home/user/gpui-target-native/debug/build/hashbrown/e8baa9f124ee2db9/out/libhashbrown-e8baa9f124ee2db9.rlib",
+      "bytes": 72096
+    },
+    {
+      "path": "/home/user/gpui-target-native/debug/build/hashbrown/e8baa9f124ee2db9/out/libhashbrown-e8baa9f124ee2db9.rmeta",
+      "bytes": 1353990
+    },
+    {
+      "path": "/home/user/gpui-target-native/debug/build/itoa/9f0857aa4c8bcff9/out/libitoa-9f0857aa4c8bcff9.rmeta",
+      "bytes": 61843
+    },
+    {
+      "path": "/home/user/gpui-target-native/debug/build/itoa/9f0857aa4c8bcff9/out/libitoa-9f0857aa4c8bcff9.rlib",
+      "bytes": 141562
+    },
+    {
+      "path": "/home/user/gpui-target-native/debug/build/itoa/170fc4248ef5d352/out/libitoa-170fc4248ef5d352.rmeta",
+      "bytes": 50638
+    },
+    {
+      "path": "/home/user/gpui-target-native/debug/build/bitflags/f703b64345c216f6/out/libbitflags-f703b64345c216f6.rlib",
+      "bytes": 66202
+    },
+    {
+      "path": "/home/user/gpui-target-native/debug/build/bitflags/f703b64345c216f6/out/libbitflags-f703b64345c216f6.rmeta",
+      "bytes": 224341
+    },
+    {
+      "path": "/home/user/gpui-target-native/debug/build/bitflags/0d1163c9cb449b6a/out/libbitflags-0d1163c9cb449b6a.rmeta",
+      "bytes": 178931
+    },
+    {
+      "path": "/home/user/gpui-target-native/debug/build/bitflags/153e52e388cf3cb2/out/libbitflags-153e52e388cf3cb2.rlib",
+      "bytes": 290396
+    },
+    {
+      "path": "/home/user/gpui-target-native/debug/build/bitflags/153e52e388cf3cb2/out/libbitflags-153e52e388cf3cb2.rmeta",
+      "bytes": 225964
+    },
+    {
+      "path": "/home/user/gpui-target-native/debug/build/fastrand/6a9c3946d02884be/out/libfastrand-6a9c3946d02884be.rmeta",
+      "bytes": 153760
+    },
+    {
+      "path": "/home/user/gpui-target-native/debug/build/fastrand/6a9c3946d02884be/out/libfastrand-6a9c3946d02884be.rlib",
+      "bytes": 268374
+    },
+    {
+      "path": "/home/user/gpui-target-native/debug/build/fastrand/0507b71b35f89d47/out/libfastrand-0507b71b35f89d47.rmeta",
+      "bytes": 65671
+    },
+    {
+      "path": "/home/user/gpui-target-native/debug/build/fastrand/a3fec457ec559f0e/out/libfastrand-a3fec457ec559f0e.rlib",
+      "bytes": 3214
+    },
+    {
+      "path": "/home/user/gpui-target-native/debug/build/fastrand/a3fec457ec559f0e/out/libfastrand-a3fec457ec559f0e.rmeta",
+      "bytes": 101279
+    },
+    {
+      "path": "/home/user/gpui-target-native/debug/build/once_cell/fc8f655be273676e/out/libonce_cell-fc8f655be273676e.rmeta",
+      "bytes": 121434
+    },
+    {
+      "path": "/home/user/gpui-target-native/debug/build/once_cell/fc8f655be273676e/out/libonce_cell-fc8f655be273676e.rlib",
+      "bytes": 5090
+    },
+    {
+      "path": "/home/user/gpui-target-native/debug/build/once_cell/0b26e60f74a6f864/out/libonce_cell-0b26e60f74a6f864.rmeta",
+      "bytes": 141844
+    },
+    {
+      "path": "/home/user/gpui-target-native/debug/build/once_cell/4677bb77edcca793/out/libonce_cell-4677bb77edcca793.rmeta",
+      "bytes": 197433
+    },
+    {
+      "path": "/home/user/gpui-target-native/debug/build/once_cell/4677bb77edcca793/out/libonce_cell-4677bb77edcca793.rlib",
+      "bytes": 96614
+    },
+    {
+      "path": "/home/user/gpui-target-native/debug/build/icu_locale_fallback/d2da80e396994378/out/libicu_locale_fallback-d2da80e396994378.rmeta",
+      "bytes": 93318
+    },
+    {
+      "path": "/home/user/gpui-target-native/debug/build/icu_locale_fallback/75093341c016735f/out/libicu_locale_fallback-75093341c016735f.rmeta",
+      "bytes": 115878
+    },
+    {
+      "path": "/home/user/gpui-target-native/debug/build/icu_locale_fallback/75093341c016735f/out/libicu_locale_fallback-75093341c016735f.rlib",
+      "bytes": 871540
+    },
+    {
+      "path": "/home/user/gpui-target-native/debug/build/cfg-if/26da691789f39587/out/libcfg_if-26da691789f39587.rmeta",
+      "bytes": 5896
+    },
+    {
+      "path": "/home/user/gpui-target-native/debug/build/cfg-if/0eab6c03ba4e9361/out/libcfg_if-0eab6c03ba4e9361.rlib",
+      "bytes": 2362
+    },
+    {
+      "path": "/home/user/gpui-target-native/debug/build/cfg-if/0eab6c03ba4e9361/out/libcfg_if-0eab6c03ba4e9361.rmeta",
+      "bytes": 5896
+    },
+    {
+      "path": "/home/user/gpui-target-native/debug/build/cfg-if/1d0cc842608de9fb/out/libcfg_if-1d0cc842608de9fb.rmeta",
+      "bytes": 5896
+    },
+    {
+      "path": "/home/user/gpui-target-native/debug/build/cfg-if/1d0cc842608de9fb/out/libcfg_if-1d0cc842608de9fb.rlib",
+      "bytes": 2362
+    },
+    {
+      "path": "/home/user/gpui-target-native/debug/build/siphasher/f05d9da2ffff3b6f/out/libsiphasher-f05d9da2ffff3b6f.rmeta",
+      "bytes": 201564
+    },
+    {
+      "path": "/home/user/gpui-target-native/debug/build/siphasher/f05d9da2ffff3b6f/out/libsiphasher-f05d9da2ffff3b6f.rlib",
+      "bytes": 94340
+    },
+    {
+      "path": "/home/user/gpui-target-native/debug/build/siphasher/1124e9fbf5b6cfcc/out/libsiphasher-1124e9fbf5b6cfcc.rmeta",
+      "bytes": 201564
+    },
+    {
+      "path": "/home/user/gpui-target-native/debug/build/siphasher/1124e9fbf5b6cfcc/out/libsiphasher-1124e9fbf5b6cfcc.rlib",
+      "bytes": 48420
+    },
+    {
+      "path": "/home/user/gpui-target-native/debug/build/siphasher/6f1e347350bf3f67/out/libsiphasher-6f1e347350bf3f67.rmeta",
+      "bytes": 101178
+    },
+    {
+      "path": "/home/user/gpui-target-native/debug/build/litrs/73092da0db237c89/out/liblitrs-73092da0db237c89.rmeta",
+      "bytes": 415371
+    },
+    {
+      "path": "/home/user/gpui-target-native/debug/build/litrs/73092da0db237c89/out/liblitrs-73092da0db237c89.rlib",
+      "bytes": 651140
+    },
+    {
+      "path": "/home/user/gpui-target-native/debug/build/parking_lot_core/ae47d10a976ab525/out/libparking_lot_core-ae47d10a976ab525.rmeta",
+      "bytes": 90297
+    },
+    {
+      "path": "/home/user/gpui-target-native/debug/build/parking_lot_core/6e3e01c0d0f85db6/out/libparking_lot_core-6e3e01c0d0f85db6.rmeta",
+      "bytes": 173815
+    },
+    {
+      "path": "/home/user/gpui-target-native/debug/build/parking_lot_core/6e3e01c0d0f85db6/out/libparking_lot_core-6e3e01c0d0f85db6.rlib",
+      "bytes": 334756
+    },
+    {
+      "path": "/home/user/gpui-target-native/debug/build/tinystr/0dd70cac57db1e65/out/libtinystr-0dd70cac57db1e65.rmeta",
+      "bytes": 264091
+    },
+    {
+      "path": "/home/user/gpui-target-native/debug/build/tinystr/070682ff98d327a3/out/libtinystr-070682ff98d327a3.rmeta",
+      "bytes": 319820
+    },
+    {
+      "path": "/home/user/gpui-target-native/debug/build/tinystr/070682ff98d327a3/out/libtinystr-070682ff98d327a3.rlib",
+      "bytes": 97002
+    },
+    {
+      "path": "/home/user/gpui-target-native/debug/build/parking_lot/eec97daaaf1f7c40/out/libparking_lot-eec97daaaf1f7c40.rmeta",
+      "bytes": 159563
+    },
+    {
+      "path": "/home/user/gpui-target-native/debug/build/parking_lot/b14302845538a39c/out/libparking_lot-b14302845538a39c.rmeta",
+      "bytes": 208586
+    },
+    {
+      "path": "/home/user/gpui-target-native/debug/build/parking_lot/b14302845538a39c/out/libparking_lot-b14302845538a39c.rlib",
+      "bytes": 1240280
+    },
+    {
+      "path": "/home/user/gpui-target-native/debug/build/wgpu-core/73e1c96b21bf799c/out/libwgpu_core-73e1c96b21bf799c.rmeta",
+      "bytes": 5541918
+    },
+    {
+      "path": "/home/user/gpui-target-native/debug/build/wgpu-core/73e1c96b21bf799c/out/libwgpu_core-73e1c96b21bf799c.rlib",
+      "bytes": 111824060
+    },
+    {
+      "path": "/home/user/gpui-target-native/debug/build/wgpu-core/d39470cde0e325e1/out/libwgpu_core-d39470cde0e325e1.rmeta",
+      "bytes": 4283985
+    },
+    {
+      "path": "/home/user/gpui-target-native/debug/build/icu_provider/d13f775c653e3a85/out/libicu_provider-d13f775c653e3a85.rmeta",
+      "bytes": 462730
+    },
+    {
+      "path": "/home/user/gpui-target-native/debug/build/icu_provider/a3b438cf67222c6b/out/libicu_provider-a3b438cf67222c6b.rlib",
+      "bytes": 1697044
+    },
+    {
+      "path": "/home/user/gpui-target-native/debug/build/icu_provider/a3b438cf67222c6b/out/libicu_provider-a3b438cf67222c6b.rmeta",
+      "bytes": 561232
+    },
+    {
+      "path": "/home/user/gpui-target-native/debug/build/xkeysym/3a674bcf47e1ad5f/out/libxkeysym-3a674bcf47e1ad5f.rmeta",
+      "bytes": 2043264
+    },
+    {
+      "path": "/home/user/gpui-target-native/debug/build/xkeysym/3a674bcf47e1ad5f/out/libxkeysym-3a674bcf47e1ad5f.rlib",
+      "bytes": 705620
+    },
+    {
+      "path": "/home/user/gpui-target-native/debug/build/xkeysym/ffd16a06e9b96ee3/out/libxkeysym-ffd16a06e9b96ee3.rmeta",
+      "bytes": 2003289
+    },
+    {
+      "path": "/home/user/gpui-target-native/debug/build/parking/737da8897af8cb4c/out/libparking-737da8897af8cb4c.rmeta",
+      "bytes": 19199
+    },
+    {
+      "path": "/home/user/gpui-target-native/debug/build/parking/a72188aa732ec570/out/libparking-a72188aa732ec570.rmeta",
+      "bytes": 21115
+    },
+    {
+      "path": "/home/user/gpui-target-native/debug/build/parking/a72188aa732ec570/out/libparking-a72188aa732ec570.rlib",
+      "bytes": 200512
+    },
+    {
+      "path": "/home/user/gpui-target-native/debug/build/x11rb-protocol/17bd3577a24829b8/out/libx11rb_protocol-17bd3577a24829b8.rmeta",
+      "bytes": 3496286
+    },
+    {
+      "path": "/home/user/gpui-target-native/debug/build/x11rb-protocol/54dc60bdc7e1dc94/out/libx11rb_protocol-54dc60bdc7e1dc94.rlib",
+      "bytes": 22771568
+    },
+    {
+      "path": "/home/user/gpui-target-native/debug/build/x11rb-protocol/54dc60bdc7e1dc94/out/libx11rb_protocol-54dc60bdc7e1dc94.rmeta",
+      "bytes": 4122556
+    },
+    {
+      "path": "/home/user/gpui-target-native/debug/build/x11rb-protocol/6ca80d9fc1b9e938/out/libx11rb_protocol-6ca80d9fc1b9e938.rmeta",
+      "bytes": 9195552
+    },
+    {
+      "path": "/home/user/gpui-target-native/debug/build/x11rb-protocol/eb2c6279a44e9a5a/out/libx11rb_protocol-eb2c6279a44e9a5a.rlib",
+      "bytes": 55906798
+    },
+    {
+      "path": "/home/user/gpui-target-native/debug/build/x11rb-protocol/eb2c6279a44e9a5a/out/libx11rb_protocol-eb2c6279a44e9a5a.rmeta",
+      "bytes": 10779003
+    },
+    {
+      "path": "/home/user/gpui-target-native/debug/build/ecow/a45ee38bc11ed00c/out/libecow-a45ee38bc11ed00c.rmeta",
+      "bytes": 237989
+    },
+    {
+      "path": "/home/user/gpui-target-native/debug/build/ecow/6f34467800965881/out/libecow-6f34467800965881.rmeta",
+      "bytes": 359797
+    },
+    {
+      "path": "/home/user/gpui-target-native/debug/build/ecow/6f34467800965881/out/libecow-6f34467800965881.rlib",
+      "bytes": 853848
+    },
+    {
+      "path": "/home/user/gpui-target-native/debug/build/wgpu-naga-bridge/2eccceba688a4d2c/out/libwgpu_naga_bridge-2eccceba688a4d2c.rlib",
+      "bytes": 108130
+    },
+    {
+      "path": "/home/user/gpui-target-native/debug/build/wgpu-naga-bridge/2eccceba688a4d2c/out/libwgpu_naga_bridge-2eccceba688a4d2c.rmeta",
+      "bytes": 10325
+    },
+    {
+      "path": "/home/user/gpui-target-native/debug/build/wgpu-naga-bridge/acb8637327a338a9/out/libwgpu_naga_bridge-acb8637327a338a9.rmeta",
+      "bytes": 10289
+    },
+    {
+      "path": "/home/user/gpui-target-native/debug/build/socket2/5c76b7e60b2ac048/out/libsocket2-5c76b7e60b2ac048.rmeta",
+      "bytes": 320865
+    },
+    {
+      "path": "/home/user/gpui-target-native/debug/build/socket2/5c76b7e60b2ac048/out/libsocket2-5c76b7e60b2ac048.rlib",
+      "bytes": 1017120
+    },
+    {
+      "path": "/home/user/gpui-target-native/debug/build/socket2/946ad8cbf65f3841/out/libsocket2-946ad8cbf65f3841.rmeta",
+      "bytes": 304735
+    },
+    {
+      "path": "/home/user/gpui-target-native/debug/build/stable_deref_trait/3731021fc93cd273/out/libstable_deref_trait-3731021fc93cd273.rmeta",
+      "bytes": 13570
+    },
+    {
+      "path": "/home/user/gpui-target-native/debug/build/stable_deref_trait/be570928c2a3096e/out/libstable_deref_trait-be570928c2a3096e.rmeta",
+      "bytes": 13570
+    },
+    {
+      "path": "/home/user/gpui-target-native/debug/build/stable_deref_trait/be570928c2a3096e/out/libstable_deref_trait-be570928c2a3096e.rlib",
+      "bytes": 2434
+    },
+    {
+      "path": "/home/user/gpui-target-native/debug/build/wayland-sys/74b67bf1d78c2dfe/out/libwayland_sys-74b67bf1d78c2dfe.rmeta",
+      "bytes": 38291
+    },
+    {
+      "path": "/home/user/gpui-target-native/debug/build/wayland-sys/2296cc65b0a02e0d/out/libwayland_sys-2296cc65b0a02e0d.rlib",
+      "bytes": 2085118
+    },
+    {
+      "path": "/home/user/gpui-target-native/debug/build/wayland-sys/2296cc65b0a02e0d/out/libwayland_sys-2296cc65b0a02e0d.rmeta",
+      "bytes": 70820
+    },
+    {
+      "path": "/home/user/gpui-target-native/debug/build/naga-types/081d64f3ee37120d/out/libnaga_types-081d64f3ee37120d.rmeta",
+      "bytes": 97915
+    },
+    {
+      "path": "/home/user/gpui-target-native/debug/build/naga-types/5b37cad1caff4271/out/libnaga_types-5b37cad1caff4271.rmeta",
+      "bytes": 119258
+    },
+    {
+      "path": "/home/user/gpui-target-native/debug/build/naga-types/5b37cad1caff4271/out/libnaga_types-5b37cad1caff4271.rlib",
+      "bytes": 99766
+    },
+    {
+      "path": "/home/user/gpui-target-native/debug/build/naga-types/5b74298eb4612c9a/out/libnaga_types-5b74298eb4612c9a.rlib",
+      "bytes": 37854
+    },
+    {
+      "path": "/home/user/gpui-target-native/debug/build/naga-types/5b74298eb4612c9a/out/libnaga_types-5b74298eb4612c9a.rmeta",
+      "bytes": 119137
+    },
+    {
+      "path": "/home/user/gpui-target-native/debug/build/naga-types/866c67bad2bae044/out/libnaga_types-866c67bad2bae044.rmeta",
+      "bytes": 119137
+    },
+    {
+      "path": "/home/user/gpui-target-native/debug/build/naga-types/866c67bad2bae044/out/libnaga_types-866c67bad2bae044.rlib",
+      "bytes": 37862
+    },
+    {
+      "path": "/home/user/gpui-target-native/debug/build/accesskit_atspi_common/170afd167bdfd7e3/out/libaccesskit_atspi_common-170afd167bdfd7e3.rmeta",
+      "bytes": 417520
+    },
+    {
+      "path": "/home/user/gpui-target-native/debug/build/accesskit_atspi_common/170afd167bdfd7e3/out/libaccesskit_atspi_common-170afd167bdfd7e3.rlib",
+      "bytes": 5917608
+    },
+    {
+      "path": "/home/user/gpui-target-native/debug/build/accesskit_atspi_common/b72587c47a11832a/out/libaccesskit_atspi_common-b72587c47a11832a.rmeta",
+      "bytes": 298036
+    },
+    {
+      "path": "/home/user/gpui-target-native/debug/build/serde/a731028a84d4fd4b/out/libserde-a731028a84d4fd4b.rmeta",
+      "bytes": 842508
+    },
+    {
+      "path": "/home/user/gpui-target-native/debug/build/serde/a731028a84d4fd4b/out/libserde-a731028a84d4fd4b.rlib",
+      "bytes": 113372
+    },
+    {
+      "path": "/home/user/gpui-target-native/debug/build/serde/a05b3fdc88ea6dea/out/libserde-a05b3fdc88ea6dea.rmeta",
+      "bytes": 528810
+    },
+    {
+      "path": "/home/user/gpui-target-native/debug/build/serde/00c1c35d64d0d83a/out/libserde-00c1c35d64d0d83a.rlib",
+      "bytes": 352250
+    },
+    {
+      "path": "/home/user/gpui-target-native/debug/build/serde/00c1c35d64d0d83a/out/libserde-00c1c35d64d0d83a.rmeta",
+      "bytes": 842508
+    },
+    {
+      "path": "/home/user/gpui-target-native/debug/build/async-task/252c9e0f9e1a0aef/out/libasync_task-252c9e0f9e1a0aef.rmeta",
+      "bytes": 171810
+    },
+    {
+      "path": "/home/user/gpui-target-native/debug/build/async-task/0b14e0b5ce156400/out/libasync_task-0b14e0b5ce156400.rlib",
+      "bytes": 20896
+    },
+    {
+      "path": "/home/user/gpui-target-native/debug/build/async-task/0b14e0b5ce156400/out/libasync_task-0b14e0b5ce156400.rmeta",
+      "bytes": 269701
+    },
+    {
+      "path": "/home/user/gpui-target-native/debug/build/cursor-icon/7e2f345f4022c131/out/libcursor_icon-7e2f345f4022c131.rlib",
+      "bytes": 45360
+    },
+    {
+      "path": "/home/user/gpui-target-native/debug/build/cursor-icon/7e2f345f4022c131/out/libcursor_icon-7e2f345f4022c131.rmeta",
+      "bytes": 33303
+    },
+    {
+      "path": "/home/user/gpui-target-native/debug/build/cursor-icon/22effa7a6c371e16/out/libcursor_icon-22effa7a6c371e16.rmeta",
+      "bytes": 29031
+    },
+    {
+      "path": "/home/user/gpui-target-native/debug/build/cephal/db4cb9841e85de83/out/libcephal-db4cb9841e85de83.rmeta",
+      "bytes": 2137679
+    },
+    {
+      "path": "/home/user/gpui-target-native/debug/build/cephal/bdd4b8e8f5418d2f/out/libcephal-bdd4b8e8f5418d2f.rmeta",
+      "bytes": 3672364
+    },
+    {
+      "path": "/home/user/gpui-target-native/debug/build/cephal/bdd4b8e8f5418d2f/out/libcephal-bdd4b8e8f5418d2f.rlib",
+      "bytes": 10172628
+    },
+    {
+      "path": "/home/user/gpui-target-native/debug/build/uuid/096a2186aaec9389/out/libuuid-096a2186aaec9389.rmeta",
+      "bytes": 470361
+    },
+    {
+      "path": "/home/user/gpui-target-native/debug/build/uuid/9e3c0a4f9cc21999/out/libuuid-9e3c0a4f9cc21999.rlib",
+      "bytes": 631414
+    },
+    {
+      "path": "/home/user/gpui-target-native/debug/build/uuid/9e3c0a4f9cc21999/out/libuuid-9e3c0a4f9cc21999.rmeta",
+      "bytes": 576201
+    },
+    {
+      "path": "/home/user/gpui-target-native/debug/build/zerocopy/0443ce52c39de92f/out/libzerocopy-0443ce52c39de92f.rmeta",
+      "bytes": 13672532
+    },
+    {
+      "path": "/home/user/gpui-target-native/debug/build/zerocopy/fcb8e7a23d222eea/out/libzerocopy-fcb8e7a23d222eea.rlib",
+      "bytes": 315706
+    },
+    {
+      "path": "/home/user/gpui-target-native/debug/build/zerocopy/fcb8e7a23d222eea/out/libzerocopy-fcb8e7a23d222eea.rmeta",
+      "bytes": 15185619
+    },
+    {
+      "path": "/home/user/gpui-target-native/debug/build/zerocopy/6ed80acbac752bd8/out/libzerocopy-6ed80acbac752bd8.rlib",
+      "bytes": 163514
+    },
+    {
+      "path": "/home/user/gpui-target-native/debug/build/zerocopy/6ed80acbac752bd8/out/libzerocopy-6ed80acbac752bd8.rmeta",
+      "bytes": 15185619
+    },
+    {
+      "path": "/home/user/gpui-target-native/debug/build/enumflags2/4f1c4e4a4800699b/out/libenumflags2-4f1c4e4a4800699b.rmeta",
+      "bytes": 148098
+    },
+    {
+      "path": "/home/user/gpui-target-native/debug/build/enumflags2/ada482e5102ea7cb/out/libenumflags2-ada482e5102ea7cb.rmeta",
+      "bytes": 184764
+    },
+    {
+      "path": "/home/user/gpui-target-native/debug/build/enumflags2/ada482e5102ea7cb/out/libenumflags2-ada482e5102ea7cb.rlib",
+      "bytes": 9472
+    },
+    {
+      "path": "/home/user/gpui-target-native/debug/build/enumflags2/5d3ee5b3e055eab6/out/libenumflags2-5d3ee5b3e055eab6.rlib",
+      "bytes": 23544
+    },
+    {
+      "path": "/home/user/gpui-target-native/debug/build/enumflags2/5d3ee5b3e055eab6/out/libenumflags2-5d3ee5b3e055eab6.rmeta",
+      "bytes": 184764
+    },
+    {
+      "path": "/home/user/gpui-target-native/debug/build/fearless_simd/20f996bdd8f79cc0/out/libfearless_simd-20f996bdd8f79cc0.rmeta",
+      "bytes": 11615212
+    },
+    {
+      "path": "/home/user/gpui-target-native/debug/build/fearless_simd/964e647290e09b5a/out/libfearless_simd-964e647290e09b5a.rlib",
+      "bytes": 87550
+    },
+    {
+      "path": "/home/user/gpui-target-native/debug/build/fearless_simd/964e647290e09b5a/out/libfearless_simd-964e647290e09b5a.rmeta",
+      "bytes": 19329203
+    },
+    {
+      "path": "/home/user/gpui-target-native/debug/build/zbus-lockstep/6c3a068b69c0baaa/out/libzbus_lockstep-6c3a068b69c0baaa.rmeta",
+      "bytes": 95755
+    },
+    {
+      "path": "/home/user/gpui-target-native/debug/build/zbus-lockstep/6c3a068b69c0baaa/out/libzbus_lockstep-6c3a068b69c0baaa.rlib",
+      "bytes": 164456
+    },
+    {
+      "path": "/home/user/gpui-target-native/debug/build/zbus-lockstep/b2377d85fdd79f92/out/libzbus_lockstep-b2377d85fdd79f92.rmeta",
+      "bytes": 95755
+    },
+    {
+      "path": "/home/user/gpui-target-native/debug/build/zbus-lockstep/b2377d85fdd79f92/out/libzbus_lockstep-b2377d85fdd79f92.rlib",
+      "bytes": 164448
+    },
+    {
+      "path": "/home/user/gpui-target-native/debug/build/zbus-lockstep/cfb9881f52a869c8/out/libzbus_lockstep-cfb9881f52a869c8.rmeta",
+      "bytes": 62876
+    },
+    {
+      "path": "/home/user/gpui-target-native/debug/build/zbus-lockstep/e37e763b32d3bc8a/out/libzbus_lockstep-e37e763b32d3bc8a.rlib",
+      "bytes": 58208
+    },
+    {
+      "path": "/home/user/gpui-target-native/debug/build/zbus-lockstep/e37e763b32d3bc8a/out/libzbus_lockstep-e37e763b32d3bc8a.rmeta",
+      "bytes": 95755
+    },
+    {
+      "path": "/home/user/gpui-target-native/debug/build/memmap2/58a7559189251071/out/libmemmap2-58a7559189251071.rmeta",
+      "bytes": 146990
+    },
+    {
+      "path": "/home/user/gpui-target-native/debug/build/memmap2/af2831174b2692e8/out/libmemmap2-af2831174b2692e8.rlib",
+      "bytes": 387800
+    },
+    {
+      "path": "/home/user/gpui-target-native/debug/build/memmap2/af2831174b2692e8/out/libmemmap2-af2831174b2692e8.rmeta",
+      "bytes": 174805
+    },
+    {
+      "path": "/home/user/gpui-target-native/debug/build/zruntime/9ed0602c9d4bf5be/out/libzruntime-9ed0602c9d4bf5be.rmeta",
+      "bytes": 1681201
+    },
+    {
+      "path": "/home/user/gpui-target-native/debug/build/zruntime/6a1180f756aa8da2/out/libzruntime-6a1180f756aa8da2.rlib",
+      "bytes": 6279124
+    },
+    {
+      "path": "/home/user/gpui-target-native/debug/build/zruntime/6a1180f756aa8da2/out/libzruntime-6a1180f756aa8da2.rmeta",
+      "bytes": 2141981
+    },
+    {
+      "path": "/home/user/gpui-target-native/debug/build/accesskit_unix/3fe2b5a23c1b03cc/out/libaccesskit_unix-3fe2b5a23c1b03cc.rmeta",
+      "bytes": 1840799
+    },
+    {
+      "path": "/home/user/gpui-target-native/debug/build/accesskit_unix/c476c646e3f1e40d/out/libaccesskit_unix-c476c646e3f1e40d.rmeta",
+      "bytes": 2003133
+    },
+    {
+      "path": "/home/user/gpui-target-native/debug/build/accesskit_unix/c476c646e3f1e40d/out/libaccesskit_unix-c476c646e3f1e40d.rlib",
+      "bytes": 42819288
+    },
+    {
+      "path": "/home/user/gpui-target-native/debug/build/wgsl-rs-ir/160960770e02e5b0/out/libwgsl_rs_ir-160960770e02e5b0.rlib",
+      "bytes": 7604674
+    },
+    {
+      "path": "/home/user/gpui-target-native/debug/build/wgsl-rs-ir/160960770e02e5b0/out/libwgsl_rs_ir-160960770e02e5b0.rmeta",
+      "bytes": 927367
+    },
+    {
+      "path": "/home/user/gpui-target-native/debug/build/wgsl-rs-ir/9a08f03dc65c8fff/out/libwgsl_rs_ir-9a08f03dc65c8fff.rlib",
+      "bytes": 2343826
+    },
+    {
+      "path": "/home/user/gpui-target-native/debug/build/wgsl-rs-ir/9a08f03dc65c8fff/out/libwgsl_rs_ir-9a08f03dc65c8fff.rmeta",
+      "bytes": 927367
+    },
+    {
+      "path": "/home/user/gpui-target-native/debug/build/wgsl-rs-ir/757069597f371813/out/libwgsl_rs_ir-757069597f371813.rmeta",
+      "bytes": 632738
+    },
+    {
+      "path": "/home/user/gpui-target-native/debug/build/parley_engine/e6590a6a4522e22b/out/libparley_engine-e6590a6a4522e22b.rmeta",
+      "bytes": 629352
+    },
+    {
+      "path": "/home/user/gpui-target-native/debug/build/parley_engine/e6590a6a4522e22b/out/libparley_engine-e6590a6a4522e22b.rlib",
+      "bytes": 4435548
+    },
+    {
+      "path": "/home/user/gpui-target-native/debug/build/parley_engine/5fc12722dcfe6ca0/out/libparley_engine-5fc12722dcfe6ca0.rmeta",
+      "bytes": 446777
+    },
+    {
+      "path": "/home/user/gpui-target-native/debug/build/smallvec/fa82926c9f0a88a1/out/libsmallvec-fa82926c9f0a88a1.rmeta",
+      "bytes": 113565
+    },
+    {
+      "path": "/home/user/gpui-target-native/debug/build/smallvec/2fc6ace6ddeaeffd/out/libsmallvec-2fc6ace6ddeaeffd.rlib",
+      "bytes": 41384
+    },
+    {
+      "path": "/home/user/gpui-target-native/debug/build/smallvec/2fc6ace6ddeaeffd/out/libsmallvec-2fc6ace6ddeaeffd.rmeta",
+      "bytes": 210116
+    },
+    {
+      "path": "/home/user/gpui-target-native/debug/build/syn/48ff54247fff5c39/out/libsyn-48ff54247fff5c39.rmeta",
+      "bytes": 5273941
+    },
+    {
+      "path": "/home/user/gpui-target-native/debug/build/syn/48ff54247fff5c39/out/libsyn-48ff54247fff5c39.rlib",
+      "bytes": 7762118
+    },
+    {
+      "path": "/home/user/gpui-target-native/debug/build/syn/124d82c01c6ee362/out/libsyn-124d82c01c6ee362.rlib",
+      "bytes": 7753158
+    },
+    {
+      "path": "/home/user/gpui-target-native/debug/build/syn/124d82c01c6ee362/out/libsyn-124d82c01c6ee362.rmeta",
+      "bytes": 4389549
+    },
+    {
+      "path": "/home/user/gpui-target-native/debug/build/syn/eda9f3998fdf8f69/out/libsyn-eda9f3998fdf8f69.rlib",
+      "bytes": 7753534
+    },
+    {
+      "path": "/home/user/gpui-target-native/debug/build/syn/eda9f3998fdf8f69/out/libsyn-eda9f3998fdf8f69.rmeta",
+      "bytes": 4389549
+    },
+    {
+      "path": "/home/user/gpui-target-native/debug/build/syn/cdf097649a65df56/out/libsyn-cdf097649a65df56.rmeta",
+      "bytes": 3966247
+    },
+    {
+      "path": "/home/user/gpui-target-native/debug/build/syn/cdf097649a65df56/out/libsyn-cdf097649a65df56.rlib",
+      "bytes": 19300300
+    },
+    {
+      "path": "/home/user/gpui-target-native/debug/build/syn/970d4580eeba6a50/out/libsyn-970d4580eeba6a50.rmeta",
+      "bytes": 3525475
+    },
+    {
+      "path": "/home/user/gpui-target-native/debug/build/syn/33d6c089dcd7d5e1/out/libsyn-33d6c089dcd7d5e1.rlib",
+      "bytes": 7762056
+    },
+    {
+      "path": "/home/user/gpui-target-native/debug/build/syn/33d6c089dcd7d5e1/out/libsyn-33d6c089dcd7d5e1.rmeta",
+      "bytes": 5273941
+    },
+    {
+      "path": "/home/user/gpui-target-native/debug/build/zerotrie/ef1f865dd1e5f807/out/libzerotrie-ef1f865dd1e5f807.rmeta",
+      "bytes": 445506
+    },
+    {
+      "path": "/home/user/gpui-target-native/debug/build/zerotrie/6971afe1374cf3b0/out/libzerotrie-6971afe1374cf3b0.rlib",
+      "bytes": 2586222
+    },
+    {
+      "path": "/home/user/gpui-target-native/debug/build/zerotrie/6971afe1374cf3b0/out/libzerotrie-6971afe1374cf3b0.rmeta",
+      "bytes": 612372
+    },
+    {
+      "path": "/home/user/gpui-target-native/debug/build/arcstr/97523d52ef27e124/out/libarcstr-97523d52ef27e124.rmeta",
+      "bytes": 178067
+    },
+    {
+      "path": "/home/user/gpui-target-native/debug/build/arcstr/97523d52ef27e124/out/libarcstr-97523d52ef27e124.rlib",
+      "bytes": 107900
+    },
+    {
+      "path": "/home/user/gpui-target-native/debug/build/arcstr/be815b538e1579ce/out/libarcstr-be815b538e1579ce.rmeta",
+      "bytes": 124373
+    },
+    {
+      "path": "/home/user/gpui-target-native/debug/build/thiserror/9bb41cd1e1832d50/out/libthiserror-9bb41cd1e1832d50.rlib",
+      "bytes": 3818
+    },
+    {
+      "path": "/home/user/gpui-target-native/debug/build/thiserror/9bb41cd1e1832d50/out/libthiserror-9bb41cd1e1832d50.rmeta",
+      "bytes": 34324
+    },
+    {
+      "path": "/home/user/gpui-target-native/debug/build/thiserror/416cf0d774c77540/out/libthiserror-416cf0d774c77540.rmeta",
+      "bytes": 32621
+    },
+    {
+      "path": "/home/user/gpui-target-native/debug/build/thiserror/2c532ab8cac53204/out/libthiserror-2c532ab8cac53204.rlib",
+      "bytes": 7498
+    },
+    {
+      "path": "/home/user/gpui-target-native/debug/build/thiserror/2c532ab8cac53204/out/libthiserror-2c532ab8cac53204.rmeta",
+      "bytes": 34324
+    },
+    {
+      "path": "/home/user/gpui-target-native/debug/build/thiserror/14d479b978a153a2/out/libthiserror-14d479b978a153a2.rmeta",
+      "bytes": 26365
+    },
+    {
+      "path": "/home/user/gpui-target-native/debug/build/thiserror/3fe6537fb51c8547/out/libthiserror-3fe6537fb51c8547.rlib",
+      "bytes": 2384
+    },
+    {
+      "path": "/home/user/gpui-target-native/debug/build/thiserror/3fe6537fb51c8547/out/libthiserror-3fe6537fb51c8547.rmeta",
+      "bytes": 28183
+    },
+    {
+      "path": "/home/user/gpui-target-native/debug/build/atspi-proxies/24c3b3311633ff27/out/libatspi_proxies-24c3b3311633ff27.rmeta",
+      "bytes": 1831154
+    },
+    {
+      "path": "/home/user/gpui-target-native/debug/build/atspi-proxies/24c3b3311633ff27/out/libatspi_proxies-24c3b3311633ff27.rlib",
+      "bytes": 2656410
+    },
+    {
+      "path": "/home/user/gpui-target-native/debug/build/atspi-proxies/efa01c1d3182b78b/out/libatspi_proxies-efa01c1d3182b78b.rmeta",
+      "bytes": 1700518
+    },
+    {
+      "path": "/home/user/gpui-target-native/debug/build/parley_data/d33432108c20b8dd/out/libparley_data-d33432108c20b8dd.rmeta",
+      "bytes": 64345
+    },
+    {
+      "path": "/home/user/gpui-target-native/debug/build/parley_data/4ad9518f013dbbf3/out/libparley_data-4ad9518f013dbbf3.rlib",
+      "bytes": 52138
+    },
+    {
+      "path": "/home/user/gpui-target-native/debug/build/parley_data/4ad9518f013dbbf3/out/libparley_data-4ad9518f013dbbf3.rmeta",
+      "bytes": 71952
+    },
+    {
+      "path": "/home/user/gpui-target-native/debug/build/gethostname/87910509b440b919/out/libgethostname-87910509b440b919.rlib",
+      "bytes": 43196
+    },
+    {
+      "path": "/home/user/gpui-target-native/debug/build/gethostname/87910509b440b919/out/libgethostname-87910509b440b919.rmeta",
+      "bytes": 5292
+    },
+    {
+      "path": "/home/user/gpui-target-native/debug/build/gethostname/6204ffcb8dd9f1ba/out/libgethostname-6204ffcb8dd9f1ba.rmeta",
+      "bytes": 4880
+    },
+    {
+      "path": "/home/user/gpui-target-native/debug/build/fontique/eec2775f14450c37/out/libfontique-eec2775f14450c37.rmeta",
+      "bytes": 401535
+    },
+    {
+      "path": "/home/user/gpui-target-native/debug/build/fontique/3063014de229396b/out/libfontique-3063014de229396b.rmeta",
+      "bytes": 526685
+    },
+    {
+      "path": "/home/user/gpui-target-native/debug/build/fontique/3063014de229396b/out/libfontique-3063014de229396b.rlib",
+      "bytes": 6413012
+    },
+    {
+      "path": "/home/user/gpui-target-native/debug/build/khronos-egl/09e0b3b117b0975f/out/libkhronos_egl-09e0b3b117b0975f.rmeta",
+      "bytes": 489308
+    },
+    {
+      "path": "/home/user/gpui-target-native/debug/build/khronos-egl/2471a090eec71434/out/libkhronos_egl-2471a090eec71434.rmeta",
+      "bytes": 764842
+    },
+    {
+      "path": "/home/user/gpui-target-native/debug/build/khronos-egl/2471a090eec71434/out/libkhronos_egl-2471a090eec71434.rlib",
+      "bytes": 48976
+    },
+    {
+      "path": "/home/user/gpui-target-native/debug/build/yoke/9641ff32f848b70d/out/libyoke-9641ff32f848b70d.rmeta",
+      "bytes": 221546
+    },
+    {
+      "path": "/home/user/gpui-target-native/debug/build/yoke/86b50046e16a5967/out/libyoke-86b50046e16a5967.rmeta",
+      "bytes": 274979
+    },
+    {
+      "path": "/home/user/gpui-target-native/debug/build/yoke/86b50046e16a5967/out/libyoke-86b50046e16a5967.rlib",
+      "bytes": 4432
+    },
+    {
+      "path": "/home/user/gpui-target-native/debug/build/errno/9eddc9cf2d999a8d/out/liberrno-9eddc9cf2d999a8d.rmeta",
+      "bytes": 17214
+    },
+    {
+      "path": "/home/user/gpui-target-native/debug/build/errno/9eddc9cf2d999a8d/out/liberrno-9eddc9cf2d999a8d.rlib",
+      "bytes": 85532
+    },
+    {
+      "path": "/home/user/gpui-target-native/debug/build/errno/8f4914ad95bd5707/out/liberrno-8f4914ad95bd5707.rmeta",
+      "bytes": 15602
+    },
+    {
+      "path": "/home/user/gpui-target-native/debug/build/serde_json/201db4087f7cff7d/out/libserde_json-201db4087f7cff7d.rlib",
+      "bytes": 3013418
+    },
+    {
+      "path": "/home/user/gpui-target-native/debug/build/serde_json/201db4087f7cff7d/out/libserde_json-201db4087f7cff7d.rmeta",
+      "bytes": 1457068
+    },
+    {
+      "path": "/home/user/gpui-target-native/debug/build/serde_json/6075a1cb4fc6d4d3/out/libserde_json-6075a1cb4fc6d4d3.rmeta",
+      "bytes": 973733
+    },
+    {
+      "path": "/home/user/gpui-target-native/debug/build/dpi/07bd9c2e3fe388fc/out/libdpi-07bd9c2e3fe388fc.rmeta",
+      "bytes": 134266
+    },
+    {
+      "path": "/home/user/gpui-target-native/debug/build/dpi/628d2454e4b80cbd/out/libdpi-628d2454e4b80cbd.rlib",
+      "bytes": 13012
+    },
+    {
+      "path": "/home/user/gpui-target-native/debug/build/dpi/628d2454e4b80cbd/out/libdpi-628d2454e4b80cbd.rmeta",
+      "bytes": 212505
+    },
+    {
+      "path": "/home/user/gpui-target-native/debug/build/half/fd677e2e89979b1b/out/libhalf-fd677e2e89979b1b.rmeta",
+      "bytes": 581162
+    },
+    {
+      "path": "/home/user/gpui-target-native/debug/build/half/280c72d80ea4dbd2/out/libhalf-280c72d80ea4dbd2.rlib",
+      "bytes": 227180
+    },
+    {
+      "path": "/home/user/gpui-target-native/debug/build/half/280c72d80ea4dbd2/out/libhalf-280c72d80ea4dbd2.rmeta",
+      "bytes": 759361
+    },
+    {
+      "path": "/home/user/gpui-target-native/debug/build/half/c5c318f5e71b8619/out/libhalf-c5c318f5e71b8619.rmeta",
+      "bytes": 759361
+    },
+    {
+      "path": "/home/user/gpui-target-native/debug/build/half/c5c318f5e71b8619/out/libhalf-c5c318f5e71b8619.rlib",
+      "bytes": 614852
+    },
+    {
+      "path": "/home/user/gpui-target-native/debug/build/synstructure/2511692ec5baff1a/out/libsynstructure-2511692ec5baff1a.rmeta",
+      "bytes": 238667
+    },
+    {
+      "path": "/home/user/gpui-target-native/debug/build/synstructure/2511692ec5baff1a/out/libsynstructure-2511692ec5baff1a.rlib",
+      "bytes": 1268012
+    },
+    {
+      "path": "/home/user/gpui-target-native/debug/build/synstructure/5fa48f2806f5e1f1/out/libsynstructure-5fa48f2806f5e1f1.rmeta",
+      "bytes": 238667
+    },
+    {
+      "path": "/home/user/gpui-target-native/debug/build/synstructure/5fa48f2806f5e1f1/out/libsynstructure-5fa48f2806f5e1f1.rlib",
+      "bytes": 1270574
+    },
+    {
+      "path": "/home/user/gpui-target-native/debug/build/async-io/4abbf077ba6ab3ce/out/libasync_io-4abbf077ba6ab3ce.rmeta",
+      "bytes": 320674
+    },
+    {
+      "path": "/home/user/gpui-target-native/debug/build/async-io/baa45d26731f9837/out/libasync_io-baa45d26731f9837.rlib",
+      "bytes": 3361184
+    },
+    {
+      "path": "/home/user/gpui-target-native/debug/build/async-io/baa45d26731f9837/out/libasync_io-baa45d26731f9837.rmeta",
+      "bytes": 405892
+    },
+    {
+      "path": "/home/user/gpui-target-native/debug/build/proc-macro-crate/84339f3254549172/out/libproc_macro_crate-84339f3254549172.rmeta",
+      "bytes": 53753
+    },
+    {
+      "path": "/home/user/gpui-target-native/debug/build/proc-macro-crate/84339f3254549172/out/libproc_macro_crate-84339f3254549172.rlib",
+      "bytes": 1116728
+    },
+    {
+      "path": "/home/user/gpui-target-native/debug/build/proc-macro-crate/cb8c3633c60aec90/out/libproc_macro_crate-cb8c3633c60aec90.rmeta",
+      "bytes": 53753
+    },
+    {
+      "path": "/home/user/gpui-target-native/debug/build/proc-macro-crate/cb8c3633c60aec90/out/libproc_macro_crate-cb8c3633c60aec90.rlib",
+      "bytes": 1119126
+    },
+    {
+      "path": "/home/user/gpui-target-native/debug/build/litemap/b4268df91ed56316/out/liblitemap-b4268df91ed56316.rmeta",
+      "bytes": 330267
+    },
+    {
+      "path": "/home/user/gpui-target-native/debug/build/litemap/b4268df91ed56316/out/liblitemap-b4268df91ed56316.rlib",
+      "bytes": 8398
+    },
+    {
+      "path": "/home/user/gpui-target-native/debug/build/litemap/d27ffa29351cc77b/out/liblitemap-d27ffa29351cc77b.rmeta",
+      "bytes": 242253
+    },
+    {
+      "path": "/home/user/gpui-target-native/debug/build/gpui_inline_call/945c9dd570890b5d/out/libgpui_inline_call-945c9dd570890b5d.rmeta",
+      "bytes": 11942
+    },
+    {
+      "path": "/home/user/gpui-target-native/debug/build/gpui_inline_call/160f022627dea0f8/out/libgpui_inline_call-160f022627dea0f8.rmeta",
+      "bytes": 15097
+    },
+    {
+      "path": "/home/user/gpui-target-native/debug/build/gpui_inline_call/160f022627dea0f8/out/libgpui_inline_call-160f022627dea0f8.rlib",
+      "bytes": 2400
+    },
+    {
+      "path": "/home/user/gpui-target-native/debug/build/phf_shared/c86505f6d612bd75/out/libphf_shared-c86505f6d612bd75.rmeta",
+      "bytes": 340332
+    },
+    {
+      "path": "/home/user/gpui-target-native/debug/build/phf_shared/c86505f6d612bd75/out/libphf_shared-c86505f6d612bd75.rlib",
+      "bytes": 357498
+    },
+    {
+      "path": "/home/user/gpui-target-native/debug/build/phf_shared/4b341765a1a1124f/out/libphf_shared-4b341765a1a1124f.rlib",
+      "bytes": 105448
+    },
+    {
+      "path": "/home/user/gpui-target-native/debug/build/phf_shared/4b341765a1a1124f/out/libphf_shared-4b341765a1a1124f.rmeta",
+      "bytes": 327154
+    },
+    {
+      "path": "/home/user/gpui-target-native/debug/build/phf_shared/a7d4007cd62b0cf0/out/libphf_shared-a7d4007cd62b0cf0.rmeta",
+      "bytes": 178132
+    },
+    {
+      "path": "/home/user/gpui-target-native/debug/build/phf_shared/df117cc0a8187847/out/libphf_shared-df117cc0a8187847.rmeta",
+      "bytes": 327154
+    },
+    {
+      "path": "/home/user/gpui-target-native/debug/build/phf_shared/df117cc0a8187847/out/libphf_shared-df117cc0a8187847.rlib",
+      "bytes": 105804
+    },
+    {
+      "path": "/home/user/gpui-target-native/debug/build/num-traits/1ced99e47dfda2a9/out/libnum_traits-1ced99e47dfda2a9.rmeta",
+      "bytes": 1830434
+    },
+    {
+      "path": "/home/user/gpui-target-native/debug/build/num-traits/1ced99e47dfda2a9/out/libnum_traits-1ced99e47dfda2a9.rlib",
+      "bytes": 178646
+    },
+    {
+      "path": "/home/user/gpui-target-native/debug/build/num-traits/8ab96309966f75fc/out/libnum_traits-8ab96309966f75fc.rmeta",
+      "bytes": 1292650
+    },
+    {
+      "path": "/home/user/gpui-target-native/debug/build/num-traits/bf401bfccc041518/out/libnum_traits-bf401bfccc041518.rmeta",
+      "bytes": 1830434
+    },
+    {
+      "path": "/home/user/gpui-target-native/debug/build/num-traits/bf401bfccc041518/out/libnum_traits-bf401bfccc041518.rlib",
+      "bytes": 61342
+    },
+    {
+      "path": "/home/user/gpui-target-native/debug/build/scopeguard/d11289956ba69bf3/out/libscopeguard-d11289956ba69bf3.rmeta",
+      "bytes": 22206
+    },
+    {
+      "path": "/home/user/gpui-target-native/debug/build/scopeguard/d6521354d4eb7ea8/out/libscopeguard-d6521354d4eb7ea8.rmeta",
+      "bytes": 26130
+    },
+    {
+      "path": "/home/user/gpui-target-native/debug/build/scopeguard/d6521354d4eb7ea8/out/libscopeguard-d6521354d4eb7ea8.rlib",
+      "bytes": 2386
+    },
+    {
+      "path": "/home/user/gpui-target-native/debug/build/parlance/3cb505e92ad1dc1c/out/libparlance-3cb505e92ad1dc1c.rmeta",
+      "bytes": 251916
+    },
+    {
+      "path": "/home/user/gpui-target-native/debug/build/parlance/74299907b4dab0e3/out/libparlance-74299907b4dab0e3.rmeta",
+      "bytes": 305546
+    },
+    {
+      "path": "/home/user/gpui-target-native/debug/build/parlance/74299907b4dab0e3/out/libparlance-74299907b4dab0e3.rlib",
+      "bytes": 737824
+    },
+    {
+      "path": "/home/user/gpui-target-native/debug/build/futures-core/8a79dae19ccb6375/out/libfutures_core-8a79dae19ccb6375.rmeta",
+      "bytes": 57161
+    },
+    {
+      "path": "/home/user/gpui-target-native/debug/build/futures-core/c5b6df35feb556e5/out/libfutures_core-c5b6df35feb556e5.rlib",
+      "bytes": 66984
+    },
+    {
+      "path": "/home/user/gpui-target-native/debug/build/futures-core/c5b6df35feb556e5/out/libfutures_core-c5b6df35feb556e5.rmeta",
+      "bytes": 62940
+    },
+    {
+      "path": "/home/user/gpui-target-native/debug/build/x11-dl/57a9473a7ad67fb8/out/libx11_dl-57a9473a7ad67fb8.rmeta",
+      "bytes": 2294099
+    },
+    {
+      "path": "/home/user/gpui-target-native/debug/build/x11-dl/673eac52491b4dfd/out/libx11_dl-673eac52491b4dfd.rmeta",
+      "bytes": 2846080
+    },
+    {
+      "path": "/home/user/gpui-target-native/debug/build/x11-dl/673eac52491b4dfd/out/libx11_dl-673eac52491b4dfd.rlib",
+      "bytes": 6297230
+    },
+    {
+      "path": "/home/user/gpui-target-native/debug/build/futures-util/62c8411548c5ba52/out/libfutures_util-62c8411548c5ba52.rmeta",
+      "bytes": 3522299
+    },
+    {
+      "path": "/home/user/gpui-target-native/debug/build/futures-util/8b1811b0c61aaba8/out/libfutures_util-8b1811b0c61aaba8.rlib",
+      "bytes": 729346
+    },
+    {
+      "path": "/home/user/gpui-target-native/debug/build/futures-util/8b1811b0c61aaba8/out/libfutures_util-8b1811b0c61aaba8.rmeta",
+      "bytes": 4325486
+    },
+    {
+      "path": "/home/user/gpui-target-native/debug/build/async-executor/b0af3bee4192bd82/out/libasync_executor-b0af3bee4192bd82.rlib",
+      "bytes": 1117492
+    },
+    {
+      "path": "/home/user/gpui-target-native/debug/build/async-executor/b0af3bee4192bd82/out/libasync_executor-b0af3bee4192bd82.rmeta",
+      "bytes": 156154
+    },
+    {
+      "path": "/home/user/gpui-target-native/debug/build/async-executor/5cc5170584bf7751/out/libasync_executor-5cc5170584bf7751.rmeta",
+      "bytes": 125133
+    },
+    {
+      "path": "/home/user/gpui-target-native/debug/build/tiny-xlib/1b9ef184878e254a/out/libtiny_xlib-1b9ef184878e254a.rlib",
+      "bytes": 842034
+    },
+    {
+      "path": "/home/user/gpui-target-native/debug/build/tiny-xlib/1b9ef184878e254a/out/libtiny_xlib-1b9ef184878e254a.rmeta",
+      "bytes": 82485
+    },
+    {
+      "path": "/home/user/gpui-target-native/debug/build/tiny-xlib/67bac31629dd2479/out/libtiny_xlib-67bac31629dd2479.rmeta",
+      "bytes": 72443
+    },
+    {
+      "path": "/home/user/gpui-target-native/debug/build/codespan-reporting/8390721d17ce9da9/out/libcodespan_reporting-8390721d17ce9da9.rlib",
+      "bytes": 1633718
+    },
+    {
+      "path": "/home/user/gpui-target-native/debug/build/codespan-reporting/8390721d17ce9da9/out/libcodespan_reporting-8390721d17ce9da9.rmeta",
+      "bytes": 273882
+    },
+    {
+      "path": "/home/user/gpui-target-native/debug/build/codespan-reporting/91337bda29fc193b/out/libcodespan_reporting-91337bda29fc193b.rmeta",
+      "bytes": 177154
+    },
+    {
+      "path": "/home/user/gpui-target-native/debug/build/codespan-reporting/746e8c0db8069369/out/libcodespan_reporting-746e8c0db8069369.rlib",
+      "bytes": 542364
+    },
+    {
+      "path": "/home/user/gpui-target-native/debug/build/codespan-reporting/746e8c0db8069369/out/libcodespan_reporting-746e8c0db8069369.rmeta",
+      "bytes": 273882
+    },
+    {
+      "path": "/home/user/gpui-target-native/debug/build/event-listener-strategy/500fc236809c5e64/out/libevent_listener_strategy-500fc236809c5e64.rmeta",
+      "bytes": 55876
+    },
+    {
+      "path": "/home/user/gpui-target-native/debug/build/event-listener-strategy/03ed73599c828fd2/out/libevent_listener_strategy-03ed73599c828fd2.rmeta",
+      "bytes": 65692
+    },
+    {
+      "path": "/home/user/gpui-target-native/debug/build/event-listener-strategy/03ed73599c828fd2/out/libevent_listener_strategy-03ed73599c828fd2.rlib",
+      "bytes": 2460
+    },
+    {
+      "path": "/home/user/gpui-target-native/debug/build/naga/5db94bb0723c64e8/out/libnaga-5db94bb0723c64e8.rmeta",
+      "bytes": 7953161
+    },
+    {
+      "path": "/home/user/gpui-target-native/debug/build/naga/475989c476e79a92/out/libnaga-475989c476e79a92.rmeta",
+      "bytes": 7742990
+    },
+    {
+      "path": "/home/user/gpui-target-native/debug/build/naga/475989c476e79a92/out/libnaga-475989c476e79a92.rlib",
+      "bytes": 16766236
+    },
+    {
+      "path": "/home/user/gpui-target-native/debug/build/naga/a4713ce82755cef7/out/libnaga-a4713ce82755cef7.rmeta",
+      "bytes": 12598172
+    },
+    {
+      "path": "/home/user/gpui-target-native/debug/build/naga/a4713ce82755cef7/out/libnaga-a4713ce82755cef7.rlib",
+      "bytes": 57954220
+    },
+    {
+      "path": "/home/user/gpui-target-native/debug/build/naga/98dbdbbf246afed8/out/libnaga-98dbdbbf246afed8.rmeta",
+      "bytes": 7742990
+    },
+    {
+      "path": "/home/user/gpui-target-native/debug/build/naga/98dbdbbf246afed8/out/libnaga-98dbdbbf246afed8.rlib",
+      "bytes": 16773992
+    },
+    {
+      "path": "/home/user/gpui-target-native/debug/build/wgpu/0729126fce8dd448/out/libwgpu-0729126fce8dd448.rmeta",
+      "bytes": 2292483
+    },
+    {
+      "path": "/home/user/gpui-target-native/debug/build/wgpu/c804de38196e00c8/out/libwgpu-c804de38196e00c8.rlib",
+      "bytes": 59801290
+    },
+    {
+      "path": "/home/user/gpui-target-native/debug/build/wgpu/c804de38196e00c8/out/libwgpu-c804de38196e00c8.rmeta",
+      "bytes": 2687619
+    },
+    {
+      "path": "/home/user/gpui-target-native/debug/build/itertools/18d30cefbb5dc233/out/libitertools-18d30cefbb5dc233.rlib",
+      "bytes": 74086
+    },
+    {
+      "path": "/home/user/gpui-target-native/debug/build/itertools/18d30cefbb5dc233/out/libitertools-18d30cefbb5dc233.rmeta",
+      "bytes": 2745326
+    },
+    {
+      "path": "/home/user/gpui-target-native/debug/build/linux-raw-sys/588edcc6df91609c/out/liblinux_raw_sys-588edcc6df91609c.rlib",
+      "bytes": 27134
+    },
+    {
+      "path": "/home/user/gpui-target-native/debug/build/linux-raw-sys/588edcc6df91609c/out/liblinux_raw_sys-588edcc6df91609c.rmeta",
+      "bytes": 1352974
+    },
+    {
+      "path": "/home/user/gpui-target-native/debug/build/linux-raw-sys/14d656b862027244/out/liblinux_raw_sys-14d656b862027244.rmeta",
+      "bytes": 5153247
+    },
+    {
+      "path": "/home/user/gpui-target-native/debug/build/linux-raw-sys/f76fdae83cb6b11a/out/liblinux_raw_sys-f76fdae83cb6b11a.rmeta",
+      "bytes": 6030744
+    },
+    {
+      "path": "/home/user/gpui-target-native/debug/build/linux-raw-sys/f76fdae83cb6b11a/out/liblinux_raw_sys-f76fdae83cb6b11a.rlib",
+      "bytes": 38146
+    },
+    {
+      "path": "/home/user/gpui-target-native/debug/build/linux-raw-sys/4feb4de53ee304da/out/liblinux_raw_sys-4feb4de53ee304da.rmeta",
+      "bytes": 1202476
+    },
+    {
+      "path": "/home/user/gpui-target-native/debug/build/memchr/96597254828f24eb/out/libmemchr-96597254828f24eb.rlib",
+      "bytes": 1205394
+    },
+    {
+      "path": "/home/user/gpui-target-native/debug/build/memchr/96597254828f24eb/out/libmemchr-96597254828f24eb.rmeta",
+      "bytes": 1444473
+    },
+    {
+      "path": "/home/user/gpui-target-native/debug/build/memchr/d65fea88f0c2de7a/out/libmemchr-d65fea88f0c2de7a.rmeta",
+      "bytes": 1128336
+    },
+    {
+      "path": "/home/user/gpui-target-native/debug/build/harfrust/24a491e778f3977c/out/libharfrust-24a491e778f3977c.rmeta",
+      "bytes": 2877880
+    },
+    {
+      "path": "/home/user/gpui-target-native/debug/build/harfrust/24a491e778f3977c/out/libharfrust-24a491e778f3977c.rlib",
+      "bytes": 17118926
+    },
+    {
+      "path": "/home/user/gpui-target-native/debug/build/harfrust/3001bee30a921190/out/libharfrust-3001bee30a921190.rmeta",
+      "bytes": 2516109
+    },
+    {
+      "path": "/home/user/gpui-target-native/debug/build/tracing-core/11acd0e96a55982d/out/libtracing_core-11acd0e96a55982d.rmeta",
+      "bytes": 596175
+    },
+    {
+      "path": "/home/user/gpui-target-native/debug/build/tracing-core/11acd0e96a55982d/out/libtracing_core-11acd0e96a55982d.rlib",
+      "bytes": 1638966
+    },
+    {
+      "path": "/home/user/gpui-target-native/debug/build/tracing-core/0bd2394afbef08fb/out/libtracing_core-0bd2394afbef08fb.rmeta",
+      "bytes": 504893
+    },
+    {
+      "path": "/home/user/gpui-target-native/debug/build/lock_api/02870a1e287255d2/out/liblock_api-02870a1e287255d2.rmeta",
+      "bytes": 295558
+    },
+    {
+      "path": "/home/user/gpui-target-native/debug/build/lock_api/bdb409ffcb22bfea/out/liblock_api-bdb409ffcb22bfea.rmeta",
+      "bytes": 390036
+    },
+    {
+      "path": "/home/user/gpui-target-native/debug/build/lock_api/bdb409ffcb22bfea/out/liblock_api-bdb409ffcb22bfea.rlib",
+      "bytes": 8716
+    },
+    {
+      "path": "/home/user/gpui-target-native/debug/build/x11rb/7438872c10302b00/out/libx11rb-7438872c10302b00.rmeta",
+      "bytes": 1640154
+    },
+    {
+      "path": "/home/user/gpui-target-native/debug/build/x11rb/7438872c10302b00/out/libx11rb-7438872c10302b00.rlib",
+      "bytes": 2054576
+    },
+    {
+      "path": "/home/user/gpui-target-native/debug/build/x11rb/59fdd3965cd2ff4c/out/libx11rb-59fdd3965cd2ff4c.rlib",
+      "bytes": 3688280
+    },
+    {
+      "path": "/home/user/gpui-target-native/debug/build/x11rb/59fdd3965cd2ff4c/out/libx11rb-59fdd3965cd2ff4c.rmeta",
+      "bytes": 2882670
+    },
+    {
+      "path": "/home/user/gpui-target-native/debug/build/x11rb/06b6a81be79f6721/out/libx11rb-06b6a81be79f6721.rmeta",
+      "bytes": 973468
+    },
+    {
+      "path": "/home/user/gpui-target-native/debug/build/x11rb/417c788aafb2b76b/out/libx11rb-417c788aafb2b76b.rmeta",
+      "bytes": 1570989
+    },
+    {
+      "path": "/home/user/gpui-target-native/debug/build/slab/32d9cda7328c5413/out/libslab-32d9cda7328c5413.rlib",
+      "bytes": 7740
+    },
+    {
+      "path": "/home/user/gpui-target-native/debug/build/slab/32d9cda7328c5413/out/libslab-32d9cda7328c5413.rmeta",
+      "bytes": 144805
+    },
+    {
+      "path": "/home/user/gpui-target-native/debug/build/slab/9ceb63f22d3a9350/out/libslab-9ceb63f22d3a9350.rmeta",
+      "bytes": 80405
+    },
+    {
+      "path": "/home/user/gpui-target-native/debug/build/gpui_reactivity_core/4f102e67eaf49e48/out/libgpui_reactivity_core-4f102e67eaf49e48.rmeta",
+      "bytes": 190503
+    },
+    {
+      "path": "/home/user/gpui-target-native/debug/build/gpui_reactivity_core/92d664b521d5c059/out/libgpui_reactivity_core-92d664b521d5c059.rmeta",
+      "bytes": 501924
+    },
+    {
+      "path": "/home/user/gpui-target-native/debug/build/gpui_reactivity_core/92d664b521d5c059/out/libgpui_reactivity_core-92d664b521d5c059.rlib",
+      "bytes": 48447300
+    },
+    {
+      "path": "/home/user/gpui-target-native/debug/build/gpu-allocator/fe9a67e8575d7048/out/libgpu_allocator-fe9a67e8575d7048.rlib",
+      "bytes": 3540436
+    },
+    {
+      "path": "/home/user/gpui-target-native/debug/build/gpu-allocator/fe9a67e8575d7048/out/libgpu_allocator-fe9a67e8575d7048.rmeta",
+      "bytes": 173090
+    },
+    {
+      "path": "/home/user/gpui-target-native/debug/build/gpu-allocator/cc208e12211203a9/out/libgpu_allocator-cc208e12211203a9.rmeta",
+      "bytes": 126453
+    },
+    {
+      "path": "/home/user/gpui-target-native/debug/build/serde_core/c78d6b8ee2cc04c9/out/libserde_core-c78d6b8ee2cc04c9.rmeta",
+      "bytes": 4829344
+    },
+    {
+      "path": "/home/user/gpui-target-native/debug/build/serde_core/c78d6b8ee2cc04c9/out/libserde_core-c78d6b8ee2cc04c9.rlib",
+      "bytes": 181426
+    },
+    {
+      "path": "/home/user/gpui-target-native/debug/build/serde_core/817ce381362adef5/out/libserde_core-817ce381362adef5.rmeta",
+      "bytes": 4829344
+    },
+    {
+      "path": "/home/user/gpui-target-native/debug/build/serde_core/817ce381362adef5/out/libserde_core-817ce381362adef5.rlib",
+      "bytes": 518590
+    },
+    {
+      "path": "/home/user/gpui-target-native/debug/build/serde_core/953ea6a2bd7cb6a0/out/libserde_core-953ea6a2bd7cb6a0.rmeta",
+      "bytes": 2741217
+    },
+    {
+      "path": "/home/user/gpui-target-native/debug/build/dlib/6c19434d5d3824a7/out/libdlib-6c19434d5d3824a7.rmeta",
+      "bytes": 34669
+    },
+    {
+      "path": "/home/user/gpui-target-native/debug/build/dlib/7ba917e2336b9eb0/out/libdlib-7ba917e2336b9eb0.rmeta",
+      "bytes": 35985
+    },
+    {
+      "path": "/home/user/gpui-target-native/debug/build/dlib/7ba917e2336b9eb0/out/libdlib-7ba917e2336b9eb0.rlib",
+      "bytes": 67262
+    },
+    {
+      "path": "/home/user/gpui-target-native/debug/build/allocation-counter/6f0ff54b835413c5/out/liballocation_counter-6f0ff54b835413c5.rlib",
+      "bytes": 305970
+    },
+    {
+      "path": "/home/user/gpui-target-native/debug/build/allocation-counter/6f0ff54b835413c5/out/liballocation_counter-6f0ff54b835413c5.rmeta",
+      "bytes": 36460
+    },
+    {
+      "path": "/home/user/gpui-target-native/debug/build/allocation-counter/7aa9b0a7bb8df9a9/out/liballocation_counter-7aa9b0a7bb8df9a9.rmeta",
+      "bytes": 25179
+    },
+    {
+      "path": "/home/user/gpui-target-native/debug/build/zerovec/b1d88013101c103c/out/libzerovec-b1d88013101c103c.rlib",
+      "bytes": 216772
+    },
+    {
+      "path": "/home/user/gpui-target-native/debug/build/zerovec/b1d88013101c103c/out/libzerovec-b1d88013101c103c.rmeta",
+      "bytes": 1807389
+    },
+    {
+      "path": "/home/user/gpui-target-native/debug/build/zerovec/337dfe1c3a541d22/out/libzerovec-337dfe1c3a541d22.rmeta",
+      "bytes": 1321331
+    },
+    {
+      "path": "/home/user/gpui-target-native/debug/build/atomic-waker/dd89edbd24a09a50/out/libatomic_waker-dd89edbd24a09a50.rmeta",
+      "bytes": 14126
+    },
+    {
+      "path": "/home/user/gpui-target-native/debug/build/atomic-waker/fd05ea813f5cfe24/out/libatomic_waker-fd05ea813f5cfe24.rmeta",
+      "bytes": 14232
+    },
+    {
+      "path": "/home/user/gpui-target-native/debug/build/atomic-waker/fd05ea813f5cfe24/out/libatomic_waker-fd05ea813f5cfe24.rlib",
+      "bytes": 65334
+    },
+    {
+      "path": "/home/user/gpui-target-native/debug/build/icu_collections/1b6f287a58c1ea6f/out/libicu_collections-1b6f287a58c1ea6f.rmeta",
+      "bytes": 428524
+    },
+    {
+      "path": "/home/user/gpui-target-native/debug/build/icu_collections/1b6f287a58c1ea6f/out/libicu_collections-1b6f287a58c1ea6f.rlib",
+      "bytes": 1344960
+    },
+    {
+      "path": "/home/user/gpui-target-native/debug/build/icu_collections/ac780ec21b5be23d/out/libicu_collections-ac780ec21b5be23d.rmeta",
+      "bytes": 304143
+    },
+    {
+      "path": "/home/user/gpui-target-native/debug/build/async-signal/21b45e845159e5e7/out/libasync_signal-21b45e845159e5e7.rlib",
+      "bytes": 258552
+    },
+    {
+      "path": "/home/user/gpui-target-native/debug/build/async-signal/21b45e845159e5e7/out/libasync_signal-21b45e845159e5e7.rmeta",
+      "bytes": 77604
+    },
+    {
+      "path": "/home/user/gpui-target-native/debug/build/async-signal/ffac3e1163d5116e/out/libasync_signal-ffac3e1163d5116e.rmeta",
+      "bytes": 63815
+    },
+    {
+      "path": "/home/user/gpui-target-native/debug/build/blocking/11fd47ddc3bb0900/out/libblocking-11fd47ddc3bb0900.rmeta",
+      "bytes": 125390
+    },
+    {
+      "path": "/home/user/gpui-target-native/debug/build/blocking/11fd47ddc3bb0900/out/libblocking-11fd47ddc3bb0900.rlib",
+      "bytes": 573770
+    },
+    {
+      "path": "/home/user/gpui-target-native/debug/build/blocking/f0374a654602b11e/out/libblocking-f0374a654602b11e.rmeta",
+      "bytes": 83919
+    },
+    {
+      "path": "/home/user/gpui-target-native/debug/build/gpui_reactivity_state/420b6292c6b571f6/out/libgpui_reactivity_state-420b6292c6b571f6.rlib",
+      "bytes": 215896
+    },
+    {
+      "path": "/home/user/gpui-target-native/debug/build/gpui_reactivity_state/420b6292c6b571f6/out/libgpui_reactivity_state-420b6292c6b571f6.rmeta",
+      "bytes": 93519
+    },
+    {
+      "path": "/home/user/gpui-target-native/debug/build/gpui_reactivity_state/d61642e933cfdae9/out/libgpui_reactivity_state-d61642e933cfdae9.rmeta",
+      "bytes": 71474
+    },
+    {
+      "path": "/home/user/gpui-target-native/debug/build/winit/ba6cde63c4264b37/out/libwinit-ba6cde63c4264b37.rmeta",
+      "bytes": 2607674
+    },
+    {
+      "path": "/home/user/gpui-target-native/debug/build/winit/fac2f21d2e610ada/out/libwinit-fac2f21d2e610ada.rmeta",
+      "bytes": 3493888
+    },
+    {
+      "path": "/home/user/gpui-target-native/debug/build/winit/fac2f21d2e610ada/out/libwinit-fac2f21d2e610ada.rlib",
+      "bytes": 29466902
+    },
+    {
+      "path": "/home/user/gpui-target-native/debug/build/async-broadcast/6e14c13e7571539d/out/libasync_broadcast-6e14c13e7571539d.rmeta",
+      "bytes": 176690
+    },
+    {
+      "path": "/home/user/gpui-target-native/debug/build/async-broadcast/0bda30b465afba6b/out/libasync_broadcast-0bda30b465afba6b.rlib",
+      "bytes": 31902
+    },
+    {
+      "path": "/home/user/gpui-target-native/debug/build/async-broadcast/0bda30b465afba6b/out/libasync_broadcast-0bda30b465afba6b.rmeta",
+      "bytes": 260141
+    },
+    {
+      "path": "/home/user/gpui-target-native/debug/build/unicode-ident/e70f0152eb7202d5/out/libunicode_ident-e70f0152eb7202d5.rlib",
+      "bytes": 22958
+    },
+    {
+      "path": "/home/user/gpui-target-native/debug/build/unicode-ident/e70f0152eb7202d5/out/libunicode_ident-e70f0152eb7202d5.rmeta",
+      "bytes": 34746
+    },
+    {
+      "path": "/home/user/gpui-target-native/debug/build/unicode-ident/fda4fc5fd3ff5d70/out/libunicode_ident-fda4fc5fd3ff5d70.rmeta",
+      "bytes": 34746
+    },
+    {
+      "path": "/home/user/gpui-target-native/debug/build/unicode-ident/fda4fc5fd3ff5d70/out/libunicode_ident-fda4fc5fd3ff5d70.rlib",
+      "bytes": 34510
+    },
+    {
+      "path": "/home/user/gpui-target-native/debug/build/unicode-ident/27189e6e72f3f665/out/libunicode_ident-27189e6e72f3f665.rmeta",
+      "bytes": 34661
+    },
+    {
+      "path": "/home/user/gpui-target-native/debug/build/icu_normalizer_data/2ffd45b37ab91c13/out/libicu_normalizer_data-2ffd45b37ab91c13.rlib",
+      "bytes": 2436
+    },
+    {
+      "path": "/home/user/gpui-target-native/debug/build/icu_normalizer_data/2ffd45b37ab91c13/out/libicu_normalizer_data-2ffd45b37ab91c13.rmeta",
+      "bytes": 436405
+    },
+    {
+      "path": "/home/user/gpui-target-native/debug/build/icu_normalizer_data/c6cdefacb3a31092/out/libicu_normalizer_data-c6cdefacb3a31092.rmeta",
+      "bytes": 436405
+    },
+    {
+      "path": "/home/user/gpui-target-native/debug/build/arrayvec/75fe3faec8cea75f/out/libarrayvec-75fe3faec8cea75f.rlib",
+      "bytes": 3212
+    },
+    {
+      "path": "/home/user/gpui-target-native/debug/build/arrayvec/75fe3faec8cea75f/out/libarrayvec-75fe3faec8cea75f.rmeta",
+      "bytes": 247678
+    },
+    {
+      "path": "/home/user/gpui-target-native/debug/build/arrayvec/4bb821330e1d9753/out/libarrayvec-4bb821330e1d9753.rmeta",
+      "bytes": 247678
+    },
+    {
+      "path": "/home/user/gpui-target-native/debug/build/arrayvec/4bb821330e1d9753/out/libarrayvec-4bb821330e1d9753.rlib",
+      "bytes": 4836
+    },
+    {
+      "path": "/home/user/gpui-target-native/debug/build/arrayvec/137664fbf26f5513/out/libarrayvec-137664fbf26f5513.rmeta",
+      "bytes": 163919
+    },
+    {
+      "path": "/home/user/gpui-target-native/debug/build/icu_properties/8f917ab5b4667fd9/out/libicu_properties-8f917ab5b4667fd9.rmeta",
+      "bytes": 2752931
+    },
+    {
+      "path": "/home/user/gpui-target-native/debug/build/icu_properties/8f917ab5b4667fd9/out/libicu_properties-8f917ab5b4667fd9.rlib",
+      "bytes": 3464900
+    },
+    {
+      "path": "/home/user/gpui-target-native/debug/build/icu_properties/5bea18d25de32453/out/libicu_properties-5bea18d25de32453.rmeta",
+      "bytes": 2543572
+    },
+    {
+      "path": "/home/user/gpui-target-native/debug/build/endi/fbc9b34c330f9782/out/libendi-fbc9b34c330f9782.rlib",
+      "bytes": 2350
+    },
+    {
+      "path": "/home/user/gpui-target-native/debug/build/endi/fbc9b34c330f9782/out/libendi-fbc9b34c330f9782.rmeta",
+      "bytes": 92673
+    },
+    {
+      "path": "/home/user/gpui-target-native/debug/build/endi/59fa60d8ec330a07/out/libendi-59fa60d8ec330a07.rmeta",
+      "bytes": 92673
+    },
+    {
+      "path": "/home/user/gpui-target-native/debug/build/endi/59fa60d8ec330a07/out/libendi-59fa60d8ec330a07.rlib",
+      "bytes": 2350
+    },
+    {
+      "path": "/home/user/gpui-target-native/debug/build/endi/0621cba670a1d236/out/libendi-0621cba670a1d236.rmeta",
+      "bytes": 54012
+    },
+    {
+      "path": "/home/user/gpui-target-native/debug/build/bytemuck/caaecaddb47103ac/out/libbytemuck-caaecaddb47103ac.rmeta",
+      "bytes": 431566
+    },
+    {
+      "path": "/home/user/gpui-target-native/debug/build/bytemuck/2c3e7c77bb3c383d/out/libbytemuck-2c3e7c77bb3c383d.rlib",
+      "bytes": 84902
+    },
+    {
+      "path": "/home/user/gpui-target-native/debug/build/bytemuck/2c3e7c77bb3c383d/out/libbytemuck-2c3e7c77bb3c383d.rmeta",
+      "bytes": 534670
+    },
+    {
+      "path": "/home/user/gpui-target-native/debug/build/either/49be00634c6afba3/out/libeither-49be00634c6afba3.rmeta",
+      "bytes": 262904
+    },
+    {
+      "path": "/home/user/gpui-target-native/debug/build/either/49be00634c6afba3/out/libeither-49be00634c6afba3.rlib",
+      "bytes": 2362
+    },
+    {
+      "path": "/home/user/gpui-target-native/debug/build/autocfg/bc03317e32d90528/out/libautocfg-bc03317e32d90528.rmeta",
+      "bytes": 82526
+    },
+    {
+      "path": "/home/user/gpui-target-native/debug/build/autocfg/bc03317e32d90528/out/libautocfg-bc03317e32d90528.rlib",
+      "bytes": 610400
+    },
+    {
+      "path": "/home/user/gpui-target-native/debug/build/quote/68b2720f41672087/out/libquote-68b2720f41672087.rlib",
+      "bytes": 637424
+    },
+    {
+      "path": "/home/user/gpui-target-native/debug/build/quote/68b2720f41672087/out/libquote-68b2720f41672087.rmeta",
+      "bytes": 275908
+    },
+    {
+      "path": "/home/user/gpui-target-native/debug/build/quote/8d73404111162eff/out/libquote-8d73404111162eff.rmeta",
+      "bytes": 275908
+    },
+    {
+      "path": "/home/user/gpui-target-native/debug/build/quote/8d73404111162eff/out/libquote-8d73404111162eff.rlib",
+      "bytes": 629496
+    },
+    {
+      "path": "/home/user/gpui-target-native/debug/build/quote/50f865d14eb4deda/out/libquote-50f865d14eb4deda.rlib",
+      "bytes": 245928
+    },
+    {
+      "path": "/home/user/gpui-target-native/debug/build/quote/50f865d14eb4deda/out/libquote-50f865d14eb4deda.rmeta",
+      "bytes": 275908
+    },
+    {
+      "path": "/home/user/gpui-target-native/debug/build/quote/c01616e714be63a5/out/libquote-c01616e714be63a5.rmeta",
+      "bytes": 254445
+    },
+    {
+      "path": "/home/user/gpui-target-native/debug/build/ash/72e32de157e34f44/out/libash-72e32de157e34f44.rlib",
+      "bytes": 7032262
+    },
+    {
+      "path": "/home/user/gpui-target-native/debug/build/ash/72e32de157e34f44/out/libash-72e32de157e34f44.rmeta",
+      "bytes": 68373840
+    },
+    {
+      "path": "/home/user/gpui-target-native/debug/build/ash/d6f618ba661c11f6/out/libash-d6f618ba661c11f6.rmeta",
+      "bytes": 63731452
+    },
+    {
+      "path": "/home/user/gpui-target-native/debug/build/toml_edit/54412a309d8f224e/out/libtoml_edit-54412a309d8f224e.rmeta",
+      "bytes": 640750
+    },
+    {
+      "path": "/home/user/gpui-target-native/debug/build/toml_edit/54412a309d8f224e/out/libtoml_edit-54412a309d8f224e.rlib",
+      "bytes": 2054302
+    },
+    {
+      "path": "/home/user/gpui-target-native/debug/build/toml_edit/e9f3f27b6fbc8e44/out/libtoml_edit-e9f3f27b6fbc8e44.rmeta",
+      "bytes": 640750
+    },
+    {
+      "path": "/home/user/gpui-target-native/debug/build/toml_edit/e9f3f27b6fbc8e44/out/libtoml_edit-e9f3f27b6fbc8e44.rlib",
+      "bytes": 2054310
+    },
+    {
+      "path": "/home/user/gpui-target-native/debug/build/pollster/dbb71ae5e6b341ed/out/libpollster-dbb71ae5e6b341ed.rmeta",
+      "bytes": 14062
+    },
+    {
+      "path": "/home/user/gpui-target-native/debug/build/pollster/08340254307fa116/out/libpollster-08340254307fa116.rmeta",
+      "bytes": 17241
+    },
+    {
+      "path": "/home/user/gpui-target-native/debug/build/pollster/08340254307fa116/out/libpollster-08340254307fa116.rlib",
+      "bytes": 68194
+    },
+    {
+      "path": "/home/user/gpui-target-native/debug/build/hex/0879a46fe676873e/out/libhex-0879a46fe676873e.rmeta",
+      "bytes": 199215
+    },
+    {
+      "path": "/home/user/gpui-target-native/debug/build/hex/871a60ebb74ac43e/out/libhex-871a60ebb74ac43e.rmeta",
+      "bytes": 341927
+    },
+    {
+      "path": "/home/user/gpui-target-native/debug/build/hex/871a60ebb74ac43e/out/libhex-871a60ebb74ac43e.rlib",
+      "bytes": 59988
+    },
+    {
+      "path": "/home/user/gpui-target-native/debug/build/ctor/82cb59f0d74c200e/out/libctor-82cb59f0d74c200e.rmeta",
+      "bytes": 104412
+    },
+    {
+      "path": "/home/user/gpui-target-native/debug/build/ctor/3e8edb82fe0c5732/out/libctor-3e8edb82fe0c5732.rlib",
+      "bytes": 2350
+    },
+    {
+      "path": "/home/user/gpui-target-native/debug/build/ctor/3e8edb82fe0c5732/out/libctor-3e8edb82fe0c5732.rmeta",
+      "bytes": 104412
+    },
+    {
+      "path": "/home/user/gpui-target-native/debug/build/log/0c6f62f43c514f0e/out/liblog-0c6f62f43c514f0e.rlib",
+      "bytes": 57574
+    },
+    {
+      "path": "/home/user/gpui-target-native/debug/build/log/0c6f62f43c514f0e/out/liblog-0c6f62f43c514f0e.rmeta",
+      "bytes": 192375
+    },
+    {
+      "path": "/home/user/gpui-target-native/debug/build/log/9ca769c39d015811/out/liblog-9ca769c39d015811.rlib",
+      "bytes": 140606
+    },
+    {
+      "path": "/home/user/gpui-target-native/debug/build/log/9ca769c39d015811/out/liblog-9ca769c39d015811.rmeta",
+      "bytes": 192375
+    },
+    {
+      "path": "/home/user/gpui-target-native/debug/build/log/3a0f17954988218a/out/liblog-3a0f17954988218a.rmeta",
+      "bytes": 166227
+    },
+    {
+      "path": "/home/user/gpui-target-native/debug/build/glam/aa33a0bcd530891d/out/libglam-aa33a0bcd530891d.rlib",
+      "bytes": 324202
+    },
+    {
+      "path": "/home/user/gpui-target-native/debug/build/glam/aa33a0bcd530891d/out/libglam-aa33a0bcd530891d.rmeta",
+      "bytes": 19789946
+    },
+    {
+      "path": "/home/user/gpui-target-native/debug/build/glam/e13ce2923e6ee800/out/libglam-e13ce2923e6ee800.rmeta",
+      "bytes": 19789946
+    },
+    {
+      "path": "/home/user/gpui-target-native/debug/build/glam/e13ce2923e6ee800/out/libglam-e13ce2923e6ee800.rlib",
+      "bytes": 636210
+    },
+    {
+      "path": "/home/user/gpui-target-native/debug/build/glam/93c9159a87c738a7/out/libglam-93c9159a87c738a7.rmeta",
+      "bytes": 14236669
+    },
+    {
+      "path": "/home/user/gpui-target-native/debug/build/event-listener/82081611b8b6cf02/out/libevent_listener-82081611b8b6cf02.rlib",
+      "bytes": 86994
+    },
+    {
+      "path": "/home/user/gpui-target-native/debug/build/event-listener/82081611b8b6cf02/out/libevent_listener-82081611b8b6cf02.rmeta",
+      "bytes": 319861
+    },
+    {
+      "path": "/home/user/gpui-target-native/debug/build/event-listener/4dd03d54d502c961/out/libevent_listener-4dd03d54d502c961.rmeta",
+      "bytes": 251007
+    },
+    {
+      "path": "/home/user/gpui-target-native/debug/build/accesskit_winit/105f5139bc15eb67/out/libaccesskit_winit-105f5139bc15eb67.rmeta",
+      "bytes": 33078
+    },
+    {
+      "path": "/home/user/gpui-target-native/debug/build/accesskit_winit/5e2e1de0f8d9d0dd/out/libaccesskit_winit-5e2e1de0f8d9d0dd.rmeta",
+      "bytes": 42147
+    },
+    {
+      "path": "/home/user/gpui-target-native/debug/build/accesskit_winit/5e2e1de0f8d9d0dd/out/libaccesskit_winit-5e2e1de0f8d9d0dd.rlib",
+      "bytes": 485204
+    },
+    {
+      "path": "/home/user/gpui-target-native/debug/build/tracing/3af0f5798ad03b60/out/libtracing-3af0f5798ad03b60.rmeta",
+      "bytes": 556742
+    },
+    {
+      "path": "/home/user/gpui-target-native/debug/build/tracing/02e9e7f80cdfd254/out/libtracing-02e9e7f80cdfd254.rmeta",
+      "bytes": 586084
+    },
+    {
+      "path": "/home/user/gpui-target-native/debug/build/tracing/02e9e7f80cdfd254/out/libtracing-02e9e7f80cdfd254.rlib",
+      "bytes": 178994
+    },
+    {
+      "path": "/home/user/gpui-target-native/debug/build/pin-project-lite/1f4d7bad865b54b6/out/libpin_project_lite-1f4d7bad865b54b6.rmeta",
+      "bytes": 93597
+    },
+    {
+      "path": "/home/user/gpui-target-native/debug/build/pin-project-lite/cda0d01a4e1a9b63/out/libpin_project_lite-cda0d01a4e1a9b63.rmeta",
+      "bytes": 94745
+    },
+    {
+      "path": "/home/user/gpui-target-native/debug/build/pin-project-lite/cda0d01a4e1a9b63/out/libpin_project_lite-cda0d01a4e1a9b63.rlib",
+      "bytes": 2422
+    },
+    {
+      "path": "/home/user/gpui-target-native/debug/build/async-channel/a9a685b67613fd89/out/libasync_channel-a9a685b67613fd89.rmeta",
+      "bytes": 172380
+    },
+    {
+      "path": "/home/user/gpui-target-native/debug/build/async-channel/97070ace80ee626f/out/libasync_channel-97070ace80ee626f.rlib",
+      "bytes": 24130
+    },
+    {
+      "path": "/home/user/gpui-target-native/debug/build/async-channel/97070ace80ee626f/out/libasync_channel-97070ace80ee626f.rmeta",
+      "bytes": 224581
+    },
+    {
+      "path": "/home/user/gpui-target-native/debug/build/futures-lite/2700bd3f1963ab0c/out/libfutures_lite-2700bd3f1963ab0c.rmeta",
+      "bytes": 1623339
+    },
+    {
+      "path": "/home/user/gpui-target-native/debug/build/futures-lite/2700bd3f1963ab0c/out/libfutures_lite-2700bd3f1963ab0c.rlib",
+      "bytes": 195806
+    },
+    {
+      "path": "/home/user/gpui-target-native/debug/build/futures-lite/f36a64224598f84b/out/libfutures_lite-f36a64224598f84b.rmeta",
+      "bytes": 1307372
+    },
+    {
+      "path": "/home/user/gpui-target-native/debug/build/accesskit/2eb658cee9cd4586/out/libaccesskit-2eb658cee9cd4586.rmeta",
+      "bytes": 668949
+    },
+    {
+      "path": "/home/user/gpui-target-native/debug/build/accesskit/13dad27910697074/out/libaccesskit-13dad27910697074.rmeta",
+      "bytes": 905405
+    },
+    {
+      "path": "/home/user/gpui-target-native/debug/build/accesskit/13dad27910697074/out/libaccesskit-13dad27910697074.rlib",
+      "bytes": 2000848
+    },
+    {
+      "path": "/home/user/gpui-target-native/debug/build/ordered-stream/6ad6c3c93bac0eeb/out/libordered_stream-6ad6c3c93bac0eeb.rmeta",
+      "bytes": 385434
+    },
+    {
+      "path": "/home/user/gpui-target-native/debug/build/ordered-stream/45279b7fcea5a25f/out/libordered_stream-45279b7fcea5a25f.rmeta",
+      "bytes": 504820
+    },
+    {
+      "path": "/home/user/gpui-target-native/debug/build/ordered-stream/45279b7fcea5a25f/out/libordered_stream-45279b7fcea5a25f.rlib",
+      "bytes": 2410
+    }
+  ]
+}

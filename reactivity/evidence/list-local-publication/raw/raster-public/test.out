@@ -1,0 +1,8 @@
+
+running 3 tests
+test coalesced_new_glyphs_resize_and_list_retirement_keep_complete_outputs ... ok
+test exact_text_keeps_list_identity_and_old_geometry_until_ack ... ok
+test nested_sample_clips_and_unsupported_shapes_preserve_exact_publication ... ok
+
+test result: ok. 3 passed; 0 failed; 0 ignored; 0 measured; 1 filtered out; finished in 0.04s
+

@@ -1,0 +1,1096 @@
+diff --git a/reactivity/crates/gpui/src/native.rs b/reactivity/crates/gpui/src/native.rs
+index aeaeac290b..83335c472c 100644
+--- a/reactivity/crates/gpui/src/native.rs
++++ b/reactivity/crates/gpui/src/native.rs
+@@ -2192,4 +2192,4 @@ mod scroll_bench;
+ ))]
+ #[allow(dead_code)]
+ #[path = "../examples/zgx_native_lab.rs"]
+-mod workload_port;
++pub(crate) mod workload_port;
+diff --git a/reactivity/crates/gpui/src/runtime.rs b/reactivity/crates/gpui/src/runtime.rs
+index 28518df9de..6b4042950a 100644
+--- a/reactivity/crates/gpui/src/runtime.rs
++++ b/reactivity/crates/gpui/src/runtime.rs
+@@ -2073,6 +2073,8 @@ impl<M: View + 'static> Runtime<M> {
+         readers: &dyn crate::reader::ReaderValues,
+         mut property_changed: Option<NonZeroU64>,
+     ) -> Result<(), Error> {
++        let mut text_only = !mount && property_changed.is_none() && self.can_record_text_change();
++        let mut changed_text = None;
+         let reuse_identities = self.logical_valid;
+         self.counters.descriptions += 1;
+         if !mount {
+@@ -2294,7 +2296,9 @@ impl<M: View + 'static> Runtime<M> {
+         }
+         for (&field, ports) in &mut fanout {
+             // Equal outputs do not identify recipes or preserve old Canvas slots.
+-            self.dirty |= ports.finish_description(field, &drafts, &mut color_discovery);
++            let rebound = ports.finish_description(field, &drafts, &mut color_discovery);
++            self.dirty |= rebound;
++            text_only &= !rebound;
+         }
+         // Promotion is lazy and shared by all changed ports of a registered
+         // field in this description. Unchanged retained operands keep their Arc.
+@@ -2436,6 +2440,7 @@ impl<M: View + 'static> Runtime<M> {
+                 // Equal current colors do not make two source relationships
+                 // interchangeable. Rebind the complete scene before slot edits.
+                 self.dirty = true;
++                text_only = false;
+             }
+             let mut node_changed = previous.is_none();
+             let next_background = if background_cursor
+@@ -2500,6 +2505,7 @@ impl<M: View + 'static> Runtime<M> {
+                 self.dirty = true;
+                 node_changed = true;
+             }
++            text_only &= !node_changed;
+             let text = draft.text.as_ref().map(|text| text.borrowed_value());
+             #[cfg(feature = "accessibility")]
+             if node.kind() == NodeKind::Input
+@@ -2516,6 +2522,11 @@ impl<M: View + 'static> Runtime<M> {
+             }
+             self.counters.destination_compares += 1;
+             if site.as_ref().map(|site| site.value.as_ref()) != text.as_deref() {
++                text_only &= node.kind() == NodeKind::Text
++                    && site.is_some()
++                    && text.is_some()
++                    && changed_text.is_none();
++                changed_text = Some(index);
+                 self.rebuild_layout |= site.is_some() != text.is_some();
+                 site = text.as_deref().map(|text| {
+                     let value = if let Some(value) =
+@@ -2543,6 +2554,7 @@ impl<M: View + 'static> Runtime<M> {
+             }
+             let style = self.overrides.resolve(node.identity(), draft.style);
+             if !styles::exact_eq(&previous_style, &style) {
++                text_only = false;
+                 self.dirty = true;
+                 node_changed = true;
+             }
+@@ -2556,6 +2568,7 @@ impl<M: View + 'static> Runtime<M> {
+                 site.shaped = None;
+             }
+             if node.has_handler() != draft.on_click.is_some() {
++                text_only = false;
+                 // Eligibility is part of the published hit sheet even when
+                 // this transparent site's pixels and layout remain equal.
+                 self.dirty = true;
+@@ -2613,6 +2626,7 @@ impl<M: View + 'static> Runtime<M> {
+                 .iter()
+                 .zip(&nodes)
+                 .any(|(old, new)| *old != new.identity());
++        text_only &= !topology;
+         self.topology_changed |= topology;
+         self.dirty |= topology;
+         let mut viewports = BTreeMap::new();
+@@ -2625,6 +2639,7 @@ impl<M: View + 'static> Runtime<M> {
+                 .and_then(ViewportState::list)
+                 .is_none_or(|old| old.viewport != draft.plan.viewport);
+             self.dirty |= changed;
++            text_only &= !changed;
+             for row in draft.rows {
+                 let identity = nodes[row.index].identity();
+                 if self
+@@ -2635,6 +2650,21 @@ impl<M: View + 'static> Runtime<M> {
+                     self.layout_dirty.insert(identity);
+                     self.dirty = true;
+                 }
++                text_only = text_only
++                    && self.list_rows.get(&identity).is_some_and(|old| {
++                        old.list == draft.id
++                            && old.key == row.key
++                            && old.index == row.item_index
++                            && old.y.to_bits() == row.y.to_bits()
++                            && old.height.to_bits() == row.height.to_bits()
++                            && old.retain_offscreen == draft.plan.retain_offscreen
++                            && old.buffered
++                                == !draft
++                                    .plan
++                                    .viewport
++                                    .visible_range
++                                    .contains(&(row.item_index as usize))
++                    });
+                 list_rows.insert(
+                     identity,
+                     ListRow {
+@@ -2643,7 +2673,9 @@ impl<M: View + 'static> Runtime<M> {
+                         index: row.item_index,
+                         y: row.y,
+                         height: row.height,
+-                        visible: true,
++                        // Complete paint recomputes membership. A surviving
++                        // text witness must preserve P's omitted buffer rows.
++                        visible: !text_only || self.list_rows[&identity].visible,
+                         retain_offscreen: draft.plan.retain_offscreen,
+                         buffered: !draft
+                             .plan
+@@ -2682,6 +2714,7 @@ impl<M: View + 'static> Runtime<M> {
+                 .and_then(ViewportState::scroll)
+                 .is_none_or(|state| state.axes != draft.axes)
+             {
++                text_only = false;
+                 self.dirty = true;
+             }
+             viewports.insert(
+@@ -2692,6 +2725,8 @@ impl<M: View + 'static> Runtime<M> {
+                 }),
+             );
+         }
++        text_only &=
++            self.viewports.len() == viewports.len() && self.list_rows.len() == list_rows.len();
+         if !annotation_drafts.is_empty() || !viewports.is_empty() || self.metadata.is_some() {
+             let metadata = self
+                 .metadata
+@@ -2752,6 +2787,13 @@ impl<M: View + 'static> Runtime<M> {
+                 }
+             }
+             base.sort_unstable_by_key(|entry| entry.identity);
++            text_only = text_only
++                && metadata.base.len() == base.len()
++                && metadata.base.iter().zip(&base).all(|(old, new)| {
++                    old.identity == new.identity
++                        && old.name == new.name
++                        && old.description == new.description
++                });
+             metadata.base = base;
+         }
+         let by_identity = IdentityIndex::from_ids(nodes.iter().map(Node::identity));
+@@ -2763,10 +2805,12 @@ impl<M: View + 'static> Runtime<M> {
+                 .as_ref()
+                 .is_some_and(|resources| resources.backgrounds.is_some())
+         {
+-            self.dirty |=
++            let changed =
+                 background::reconcile(&mut self.images, &nodes, &by_identity, background_drafts)?;
++            self.dirty |= changed;
++            text_only &= !changed;
+         }
+-        self.reconcile_geometry(&nodes, geometry_drafts);
++        text_only &= !self.reconcile_geometry(&nodes, geometry_drafts);
+         self.viewports = viewports;
+         self.list_rows = list_rows;
+         self.nodes = nodes;
+@@ -2776,7 +2820,9 @@ impl<M: View + 'static> Runtime<M> {
+         // A replacement source bank has no authority over the preceding
+         // Canvas slots, even if every effective value and binding is equal.
+         // Rebuild the complete commands before admitting another slot patch.
+-        self.dirty |= matches!(self.styles, styles::Styles::Colors(_));
++        let replaces_bank = matches!(self.styles, styles::Styles::Colors(_));
++        self.dirty |= replaces_bank;
++        text_only &= !replaces_bank;
+         self.texts = texts;
+         self.fanout = fanout;
+         self.by_identity = by_identity;
+@@ -2796,6 +2842,13 @@ impl<M: View + 'static> Runtime<M> {
+         self.logical_valid = true;
+         self.prune_focus();
+         self.changed_nodes = changed;
++        if let Some(text) = &mut self.text {
++            text.dirty_text = if text_only && changed == 1 {
++                changed_text.map(|index| (self.source_epoch, index))
++            } else {
++                None
++            };
++        }
+         Ok(())
+     }
+     fn patch(&mut self, field: FieldId) -> Result<PatchOutcome, Error> {
+diff --git a/reactivity/crates/gpui/src/runtime/geometry.rs b/reactivity/crates/gpui/src/runtime/geometry.rs
+index ede011643d..a12e73085a 100644
+--- a/reactivity/crates/gpui/src/runtime/geometry.rs
++++ b/reactivity/crates/gpui/src/runtime/geometry.rs
+@@ -333,10 +333,11 @@ impl<M: View + 'static> Runtime<M> {
+         &mut self,
+         nodes: &[Node],
+         drafts: Vec<(usize, GeometryStyle)>,
+-    ) {
++    ) -> bool {
+         if drafts.is_empty() && self.metadata.as_ref().is_none_or(|m| m.geometry.is_none()) {
+-            return;
++            return false;
+         }
++        let mut changed = false;
+         let metadata = self.metadata.get_or_insert_with(Default::default);
+         let mut geometry = metadata.geometry.take().unwrap_or_default();
+         let mut next = Vec::with_capacity(drafts.len());
+@@ -350,7 +351,7 @@ impl<M: View + 'static> Runtime<M> {
+             let before = geometry.get(node.identity());
+             let after = geometry.overrides.resolve(node.identity(), declared);
+             if !before.same(after) {
+-                self.dirty = true;
++                changed = true;
+             }
+             if after.corner_radius.to_bits() != 0 || after.clip_children {
+                 next.push((node.identity(), after));
+@@ -362,6 +363,8 @@ impl<M: View + 'static> Runtime<M> {
+         if !geometry.unused() {
+             metadata.geometry = Some(geometry);
+         }
++        self.dirty |= changed;
++        changed
+     }
+ }
+ impl<M: View + 'static, L: crate::remote::LaneSet<M>> Win<M, L> {
+diff --git a/reactivity/crates/gpui/src/runtime/query.rs b/reactivity/crates/gpui/src/runtime/query.rs
+index 2e70e1c94f..b23365e953 100644
+--- a/reactivity/crates/gpui/src/runtime/query.rs
++++ b/reactivity/crates/gpui/src/runtime/query.rs
+@@ -61,6 +61,61 @@ impl<'a> Context<'a> {
+     }
+ }
+ 
++// Logical indexes are only hints into P: omitted virtual rows change its rank.
++// Return geometry from that same immutable sheet, never the logical tree.
++pub(super) fn retained_text_placement<M>(
++    runtime: &Runtime<M>,
++    logical: usize,
++) -> Option<(usize, crate::Affine, Rect)> {
++    let identity = runtime.nodes[logical].identity();
++    let row = if runtime
++        .presented
++        .get(logical)
++        .is_some_and(|node| node.identity == identity)
++    {
++        logical
++    } else {
++        runtime
++            .presented
++            .iter()
++            .position(|node| node.identity == identity)?
++    };
++    let geometry = runtime.presented_geometry();
++    let size = runtime.presentation_size;
++    let mut clip = Rect::new(0., 0., size[0] as f32, size[1] as f32);
++    let mut ancestor = Some(row);
++    while let Some(index) = ancestor {
++        let node = &runtime.presented[index];
++        let style = geometry.style(node.identity);
++        if style.clip_children
++            || matches!(
++                node.kind,
++                super::NodeKind::List | super::NodeKind::ListItem | super::NodeKind::Scroll
++            )
++        {
++            if style.clip_children && style.corner_radius != 0.0 {
++                return None;
++            }
++            // P's semantic envelope is outward-rounded, not a raster clip.
++            // Lattice intersections are exact in either ancestor order. Canvas
++            // still verifies every resulting bit against the retained run.
++            clip = gpui_canvas::sampled_rect_clip(
++                node.transform(geometry.bases())?,
++                node.local_rect(),
++                clip,
++                size,
++            )
++            .ok()?;
++        }
++        ancestor = node.parent.index();
++    }
++    Some((
++        row,
++        runtime.presented[row].transform(geometry.bases())?,
++        clip,
++    ))
++}
++
+ /// A checked, borrowed P. Native projection cannot fail halfway through an
+ /// adapter update: this borrow freezes its already-validated context throughout
+ /// conversion, with no callbacks into application code.
+diff --git a/reactivity/crates/gpui/src/runtime/sparse_text.rs b/reactivity/crates/gpui/src/runtime/sparse_text.rs
+index 9239346225..5ebf471171 100644
+--- a/reactivity/crates/gpui/src/runtime/sparse_text.rs
++++ b/reactivity/crates/gpui/src/runtime/sparse_text.rs
+@@ -2,6 +2,40 @@
+ use super::*;
+ 
+ impl<M: View + 'static> Runtime<M> {
++    // Owner callbacks still run and reconcile normally. This only starts a
++    // transient witness; every non-text description change must revoke it.
++    #[inline(never)]
++    pub(super) fn can_record_text_change(&self) -> bool {
++        if self.text.is_none()
++            || self.dirty
++            || !self.logical_valid
++            || !self.presentation_valid
++            || self.prepared.is_some()
++            || self.complete_epoch.checked_add(1) != Some(self.source_epoch)
++            || self.inspector_enabled()
++            || self.metadata.as_ref().is_some_and(|m| m.editing.is_some())
++        {
++            return false;
++        }
++        // A wheel cohort can change logical offsets before describing. Check
++        // P itself; an already-mutated logical predecessor is not a witness.
++        self.viewports.iter().all(|(&key, state)| {
++            let offset = match state {
++                ViewportState::List(list) => crate::ScrollOffset {
++                    x: 0.,
++                    y: list.viewport.offset,
++                },
++                ViewportState::Scroll(scroll) => scroll.offset,
++            };
++            self.metadata
++                .as_ref()
++                .and_then(|m| m.presented.viewports.offset(state.identity(key)))
++                .is_some_and(|old| {
++                    old.x.to_bits() == offset.x.to_bits() && old.y.to_bits() == offset.y.to_bits()
++                })
++        })
++    }
++
+     pub(super) fn try_sparse_text(
+         &mut self,
+         shaper: &mut gpui_canvas::TextShaper<'_>,
+@@ -12,32 +46,49 @@ impl<M: View + 'static> Runtime<M> {
+         if epoch != self.source_epoch
+             || self.prepared.is_some()
+             || !self.presentation_valid
+-            || self.metadata.is_some()
+-            || self.images.is_some()
+-            || !self.viewports.is_empty()
+             || self.presentation_size != self.requested_size
+             || self.presentation_scale_factor != self.requested_scale_factor
+             || self.layout_dirty.len() != 1
+             || self.nodes[index].kind() != NodeKind::Text
+-            || self.presented.len() != self.nodes.len()
+-            || self.presented[index].identity != self.nodes[index].identity()
+         {
+             return Ok(false);
+         }
++        let (row, transform, clip) =
++            if self.metadata.is_some() || self.images.is_some() || !self.viewports.is_empty() {
++                let Some(placement) = self.retained_text_placement(index) else {
++                    return Ok(false);
++                };
++                placement
++            } else {
++                if self.presented.len() != self.nodes.len()
++                    || self.presented[index].identity != self.nodes[index].identity()
++                {
++                    return Ok(false);
++                }
++                (
++                    index,
++                    self.presented[index]
++                        .transform(geometry::Bases::new(&[]))
++                        .ok_or(Error::Canvas(gpui_canvas::Error::InvalidGeometry))?,
++                    Rect::new(
++                        0.,
++                        0.,
++                        self.requested_size[0] as f32,
++                        self.requested_size[1] as f32,
++                    ),
++                )
++            };
+         let owner = self.text.as_ref().unwrap();
+         if owner.presented.len() < 2 {
+             return Ok(false);
+         }
+-        let Some(previous) = owner.entry(index) else {
++        let Some(previous) = owner.entry(row) else {
+             return Ok(false);
+         };
+         let Some(run) = previous.run else {
+             return Ok(false);
+         };
+         let origin = previous.origin;
+-        let transform = self.presented[index]
+-            .transform(geometry::Bases::new(&[]))
+-            .ok_or(Error::Canvas(gpui_canvas::Error::InvalidGeometry))?;
+         let layout = self.layout.layout(self.layout_nodes[index])?;
+         let style = self.styles.get(index);
+         let text = self.nodes[index]
+@@ -53,10 +104,10 @@ impl<M: View + 'static> Runtime<M> {
+             None,
+         )?;
+         let patch = Box::new(text_geometry::TextPatch {
+-            row: index,
++            row,
+             value,
+             geometry: text_geometry::Entry {
+-                row: index as u32,
++                row: row as u32,
+                 run: Some(run),
+                 origin,
+                 map: shape.retain_geometry().expect("interactive text geometry"),
+@@ -75,12 +126,7 @@ impl<M: View + 'static> Runtime<M> {
+             shape,
+             origin,
+             transform,
+-            Rect::new(
+-                0.,
+-                0.,
+-                self.requested_size[0] as f32,
+-                self.requested_size[1] as f32,
+-            ),
++            clip,
+             style.fg,
+             self.requested_scale_factor,
+         )?
+@@ -101,12 +147,116 @@ impl<M: View + 'static> Runtime<M> {
+         self.publish_paint(Some((damage, token, next)))?;
+         Ok(true)
+     }
++
++    // Keep optional scene features out of the ordinary positional proof. The
++    // caller has already certified unchanged layout/topology and an acknowledged
++    // predecessor. Canvas independently verifies exact clip/material/run leases.
++    #[inline(never)]
++    fn retained_text_placement(&self, logical: usize) -> Option<(usize, Affine, Rect)> {
++        if self.inspector_enabled() || self.metadata.as_ref().is_some_and(|m| m.editing.is_some()) {
++            return None;
++        }
++        query::retained_text_placement(self, logical)
++    }
+ }
+ 
+ #[cfg(test)]
+ mod tests {
+     use super::*;
+     use crate::{El, Signal, column, text};
++
++    #[cfg(all(any(feature = "x11", feature = "x11-minimal"), target_os = "linux"))]
++    #[test]
++    fn representative_workload_local_publication_admission() {
++        for case in ["stream", "stream-owner", "scroll", "both", "fractional"] {
++            let mut fixture = crate::native::workload_port::CostFixture::new(case);
++            let token = fixture.owner.with_scene(|_, token| token).unwrap();
++            fixture.owner.presented(token).unwrap();
++            let mut patches = 0;
++            let mut full = 0;
++            let mut unchanged_layout = 0;
++            let runtime = fixture.owner.runtime().unwrap();
++            if case == "stream" {
++                let bits = |r: Rect| [r.x, r.y, r.width, r.height].map(f32::to_bits);
++                for group in runtime.canvas.prepared_scene().groups() {
++                    if group.bounds().len() > 500 {
++                        println!(
++                            "LOCAL_RASTER_CLIP,{:?},chain={}",
++                            bits(group.clip),
++                            group.clip_chain().is_some()
++                        );
++                    }
++                }
++                for (index, node) in runtime.nodes.iter().enumerate() {
++                    if node
++                        .text_slot()
++                        .get(&runtime.texts)
++                        .is_some_and(|t| t.value.len() > 500)
++                    {
++                        println!(
++                            "LOCAL_P_CLIP,{:?}",
++                            runtime
++                                .retained_text_placement(index)
++                                .map(|(row, _, clip)| (row, bits(clip)))
++                        );
++                    }
++                }
++            }
++            println!(
++                "LOCAL_INPUT,{case},clips={},editing={},inspector={}",
++                runtime.canvas.prepared_scene().clip_nodes().count(),
++                runtime
++                    .metadata
++                    .as_ref()
++                    .is_some_and(|m| m.editing.is_some()),
++                runtime.inspector_enabled(),
++            );
++            for _ in 0..80 {
++                let writes = fixture
++                    .owner
++                    .runtime()
++                    .unwrap()
++                    .layout
++                    .stats()
++                    .changed_layout_writes;
++                let old_rows = (case == "stream-owner").then(|| {
++                    fixture
++                        .owner
++                        .runtime()
++                        .unwrap()
++                        .list_rows
++                        .iter()
++                        .map(|(&id, row)| (id, row.visible))
++                        .collect::<Vec<_>>()
++                });
++                fixture.advance(case);
++                let runtime = fixture.owner.runtime().unwrap();
++                if let Some(old_rows) = old_rows {
++                    assert_eq!(
++                        runtime
++                            .list_rows
++                            .iter()
++                            .map(|(&id, row)| (id, row.visible))
++                            .collect::<Vec<_>>(),
++                        old_rows,
++                        "text publication changed retained row membership"
++                    );
++                }
++                unchanged_layout +=
++                    usize::from(runtime.layout.stats().changed_layout_writes == writes);
++                patches += usize::from(runtime.text.as_ref().is_some_and(|t| t.patch.is_some()));
++                full += usize::from(runtime.prepared.as_ref().is_some_and(|p| !p.keeps_rows()));
++                let token = fixture.owner.with_scene(|_, token| token).unwrap();
++                fixture.owner.presented(token).unwrap();
++            }
++            println!(
++                "LOCAL_PUBLICATION,{case},updates=80,patches={patches},full={full},unchanged_layout={unchanged_layout}"
++            );
++            if matches!(case, "stream" | "stream-owner") {
++                assert!(patches > 0, "representative {case} never admitted");
++            }
++        }
++    }
+     struct Page {
+         label: Signal<String>,
+     }
+diff --git a/reactivity/crates/gpui/tests/local_publication.rs b/reactivity/crates/gpui/tests/local_publication.rs
+new file mode 100644
+index 0000000000..278ed22483
+--- /dev/null
++++ b/reactivity/crates/gpui/tests/local_publication.rs
+@@ -0,0 +1,542 @@
++use gpui::{prelude::*, *};
++
++const LIST: ListId = ListId::new(73);
++struct Page {
++    label: Signal<String>,
++    offset: Signal<f64>,
++    after: bool,
++    clipped: bool,
++}
++impl Page {
++    const LABEL: Source<Self, String> =
++        Source::new(FieldId::new(1), "label", |m| &m.label, |m| &mut m.label);
++    const OFFSET: Source<Self, f64> =
++        Source::new(FieldId::new(2), "offset", |m| &m.offset, |m| &mut m.offset);
++}
++impl ItemSource for Page {
++    fn len(&self) -> usize {
++        100_000
++    }
++    fn key(&self, index: usize) -> ItemKey {
++        ItemKey::new(index as u64 + 1)
++    }
++    fn index_of(&self, key: ItemKey) -> Option<usize> {
++        usize::try_from(key.get().checked_sub(1)?)
++            .ok()
++            .filter(|i| *i < self.len())
++    }
++    fn row(&self, index: usize) -> El<'_> {
++        text(format!("row {index:06}")).w(180).h(24)
++    }
++}
++impl View for Page {
++    fn sources() -> Sources<Self> {
++        Sources::new().direct(Self::LABEL).direct(Self::OFFSET)
++    }
++    fn view(&self) -> El<'_> {
++        let label = text(&self.label).w(180).h(24).name("changing");
++        let list = uniform_list(LIST, self, 24)
++            .overscan(2)
++            .scroll_offset(&self.offset)
++            .w(180)
++            .h(72);
++        // Equal-length adjacent text makes wrong-P-row selection observable:
++        // the Canvas run can be valid even when semantic identity is wrong.
++        let neighbor = text("Count: 20").w(180).h(24);
++        let items = if self.after {
++            column((list, label, neighbor))
++        } else {
++            column((label, neighbor, list))
++        };
++        items
++            .child(text("Count: 0123456789").w(180).h(24))
++            .w(192)
++            .h(144)
++            .clipped(self.clipped)
++            .transform(Affine::translation(3., 2.))
++    }
++}
++fn window(label: &str, after: bool, clipped: bool) -> Win<Page> {
++    Win::recording(
++        Page {
++            label: Signal::new(label.into()),
++            offset: Signal::new(48.),
++            after,
++            clipped,
++        },
++        WindowOptions {
++            size: [210, 160],
++            ..Default::default()
++        },
++    )
++    .unwrap()
++}
++fn ack<M: View + 'static>(win: &mut Win<M>) {
++    win.presented(win.with_scene(|_, t| t).unwrap()).unwrap();
++}
++fn pixels<M: View + 'static>(win: &mut Win<M>) -> Vec<u8> {
++    win.with_pixels(|p, _, _| p.to_vec()).unwrap()
++}
++type TextSnapshot = (String, Rect, Vec<(usize, usize, Rect)>);
++fn text_state<M: View + 'static>(win: &Win<M>) -> Vec<TextSnapshot> {
++    let mut result = Vec::new();
++    win.visit(|part| {
++        if let Some(value) = part.text() {
++            let geometry = part.text_geometry().unwrap();
++            result.push((
++                value.into(),
++                part.bounds(),
++                geometry
++                    .layout()
++                    .graphemes()
++                    .map(|g| {
++                        let range = g.text_range();
++                        (
++                            range.start.byte(),
++                            range.end.byte(),
++                            geometry.bounds(g.bounds()).unwrap(),
++                        )
++                    })
++                    .collect(),
++            ));
++        }
++    })
++    .unwrap();
++    result
++}
++
++#[test]
++fn exact_text_keeps_list_identity_and_old_geometry_until_ack() {
++    for after in [false, true] {
++        for clipped in [false, true] {
++            let mut win = window("Count: 10", after, clipped);
++            ack(&mut win);
++            let target = win.query().name("changing").one().unwrap();
++            let list = win.list(LIST).unwrap();
++            let item = win.list_item(list, ItemKey::new(3)).unwrap();
++            for value in ["Count: 11", "Count: 12", "Count: 10"] {
++                let before = text_state(&win);
++                win.set(Page::LABEL, value.into()).unwrap();
++                assert_eq!(text_state(&win), before, "P changed before ACK");
++                let mut retained = false;
++                win.visit(|part| retained |= part.target() == item).unwrap();
++                assert!(retained, "old P lost its list item before ACK");
++                let mut full = window(value, after, clipped);
++                assert_eq!(pixels(&mut win), pixels(&mut full));
++                ack(&mut win);
++                ack(&mut full);
++                assert_eq!(text_state(&win), text_state(&full));
++                assert_eq!(win.query().name("changing").one().unwrap(), target);
++                assert_eq!(win.list_item(list, ItemKey::new(3)).unwrap(), item);
++            }
++        }
++    }
++}
++
++#[test]
++fn coalesced_new_glyphs_resize_and_list_retirement_keep_complete_outputs() {
++    let mut win = window("Count: 10", true, false);
++    ack(&mut win);
++    let old = text_state(&win);
++    for value in ["Count: 11", "Count: 12", "new Ω text with more glyphs"] {
++        win.set(Page::LABEL, value.into()).unwrap();
++        assert_eq!(text_state(&win), old);
++        let mut full = window(value, true, false);
++        assert_eq!(pixels(&mut win), pixels(&mut full));
++    }
++    ack(&mut win);
++    let list = win.list(LIST).unwrap();
++    let retired = win.list_item(list, ItemKey::new(3)).unwrap();
++    win.set(Page::OFFSET, 4800.).unwrap();
++    ack(&mut win);
++    assert!(win.bounds(retired).is_err());
++    win.resize([220, 170]).unwrap();
++    ack(&mut win);
++    win.set(Page::LABEL, "Count: 13".into()).unwrap();
++    let mut full = window("Count: 13", true, false);
++    full.set(Page::OFFSET, 4800.).unwrap();
++    full.resize([220, 170]).unwrap();
++    assert_eq!(pixels(&mut win), pixels(&mut full));
++    ack(&mut win);
++    ack(&mut full);
++    assert_eq!(text_state(&win), text_state(&full));
++}
++
++struct Decorated {
++    label: Signal<String>,
++    cover: Image,
++    rounded: bool,
++    scrolled: bool,
++    broken: bool,
++}
++impl Decorated {
++    const LABEL: Source<Self, String> =
++        Source::new(FieldId::new(1), "label", |m| &m.label, |m| &mut m.label);
++}
++impl View for Decorated {
++    fn sources() -> Sources<Self> {
++        Sources::new().direct(Self::LABEL)
++    }
++    fn view(&self) -> El<'_> {
++        let label = text(&self.label).w(180).h(24).name("changing");
++        let label = if self.scrolled {
++            div()
++                .child(label)
++                .scroll(Axis::X)
++                .w(120)
++                .h(24)
++                .name("scroll")
++        } else {
++            label
++        };
++        column((
++            label,
++            text("Count: 0123456789").w(180).h(24),
++            image(&self.cover).size(12),
++            div()
++                .size(1)
++                .rounded(if self.broken { f32::NAN } else { 0. }),
++        ))
++        .w(192)
++        .h(90)
++        .rounded(if self.rounded { 8. } else { 0. })
++        .clipped(self.rounded)
++        .transform(Affine::translation(3., 2.))
++    }
++}
++fn decorated(value: &str, rounded: bool, scrolled: bool) -> Win<Decorated> {
++    Win::recording(
++        Decorated {
++            label: Signal::new(value.into()),
++            rounded,
++            scrolled,
++            broken: false,
++            cover: Image::rgba8(
++                2,
++                2,
++                ImageProfile::Srgb,
++                AlphaMode::Straight,
++                vec![
++                    20, 90, 180, 127, 200, 20, 10, 255, 30, 200, 40, 255, 50, 60, 70, 80,
++                ]
++                .into_boxed_slice(),
++            )
++            .unwrap(),
++        },
++        WindowOptions {
++            size: [210, 110],
++            ..Default::default()
++        },
++    )
++    .unwrap()
++}
++#[test]
++fn image_clip_and_scroller_preserve_older_candidate_after_newer_failure() {
++    for rounded in [false, true] {
++        for scrolled in [false, true] {
++            let mut win = decorated("Count: 10", rounded, scrolled);
++            ack(&mut win);
++            let before = text_state(&win);
++            win.set(Decorated::LABEL, "Count: 11".into()).unwrap();
++            let eligible = win.with_scene(|_, token| token).unwrap();
++            let candidate_pixels = pixels(&mut win);
++            assert_eq!(text_state(&win), before);
++            assert!(
++                win.update(|m| {
++                    *m.label = "Count: 12".into();
++                    m.broken = true;
++                })
++                .is_err()
++            );
++            assert_eq!(text_state(&win), before);
++            assert_eq!(pixels(&mut win), candidate_pixels);
++            win.presented(eligible).unwrap();
++            let mut full = decorated("Count: 11", rounded, scrolled);
++            assert_eq!(pixels(&mut win), pixels(&mut full));
++            ack(&mut full);
++            assert_eq!(text_state(&win), text_state(&full));
++            assert_eq!(
++                win.with_scene(|scene, _| scene.images().count()).unwrap(),
++                1,
++                "rounded={rounded} scrolled={scrolled}"
++            );
++        }
++    }
++}
++
++struct NestedClips {
++    label: Signal<String>,
++    map: Affine,
++    rounded: bool,
++    scrolled: bool,
++}
++impl NestedClips {
++    const LABEL: Source<Self, String> =
++        Source::new(FieldId::new(1), "label", |m| &m.label, |m| &mut m.label);
++}
++impl View for NestedClips {
++    fn sources() -> Sources<Self> {
++        Sources::new().direct(Self::LABEL)
++    }
++    fn view(&self) -> El<'_> {
++        let content = column((
++            text(&self.label).w(180).h(24).name("changing"),
++            text("Count: 0123456789").w(180).h(24),
++        ));
++        let inner = if self.scrolled {
++            div().child(content).scroll(Axis::X).name("scroll")
++        } else {
++            content
++        };
++        div()
++            .child(
++                inner
++                    .w(100)
++                    .h(60)
++                    .clipped(true)
++                    .rounded(if self.rounded { 7. } else { 0. })
++                    .transform(self.map),
++            )
++            .w(165)
++            .h(95)
++            .clipped(true)
++            .transform(Affine::translation(5.125, 3.375))
++    }
++}
++fn nested(value: &str, map: Affine, rounded: bool, scrolled: bool) -> Win<NestedClips> {
++    let mut win = Win::recording(
++        NestedClips {
++            label: Signal::new(value.into()),
++            map,
++            rounded,
++            scrolled,
++        },
++        WindowOptions {
++            size: [180, 120],
++            ..Default::default()
++        },
++    )
++    .unwrap();
++    ack(&mut win);
++    if scrolled {
++        let target = win.query().name("scroll").one().unwrap();
++        win.scroll_to(target, ScrollOffset { x: 12., y: 0. })
++            .unwrap();
++        ack(&mut win);
++    }
++    win
++}
++#[test]
++fn nested_sample_clips_and_unsupported_shapes_preserve_exact_publication() {
++    let maps = [
++        Affine::translation(3.125, 2.375),
++        Affine {
++            a: 0.75,
++            d: 1.25,
++            tx: 3.375,
++            ty: 2.125,
++            ..Affine::IDENTITY
++        },
++        Affine {
++            a: -1.,
++            tx: 150.125,
++            ty: 2.375,
++            ..Affine::IDENTITY
++        },
++        Affine {
++            c: 0.125,
++            tx: 3.125,
++            ty: 2.375,
++            ..Affine::IDENTITY
++        },
++    ];
++    for map in maps {
++        for rounded in [false, true] {
++            for scrolled in [false, true] {
++                // Ordinary scrolling deliberately rejects sheared ancestors.
++                if scrolled && map.c != 0. {
++                    continue;
++                }
++                let mut win = nested("Count: 10", map, rounded, scrolled);
++                let target = win.query().name("changing").one().unwrap();
++                for value in ["Count: 11", "Count: 12", "Count: 10"] {
++                    let before = text_state(&win);
++                    win.set(NestedClips::LABEL, value.into()).unwrap();
++                    assert_eq!(text_state(&win), before);
++                    let mut full = nested(value, map, rounded, scrolled);
++                    let actual = pixels(&mut win);
++                    assert!(
++                        actual
++                            .as_chunks::<4>()
++                            .0
++                            .iter()
++                            .any(|p| *p != [255, 255, 255, 255])
++                    );
++                    assert_eq!(actual, pixels(&mut full));
++                    ack(&mut win);
++                    ack(&mut full);
++                    assert_eq!(text_state(&win), text_state(&full));
++                    assert_eq!(win.query().name("changing").one().unwrap(), target);
++                }
++            }
++        }
++    }
++}
++
++#[test]
++fn owner_text_with_unchanged_or_changed_list_keeps_complete_publication() {
++    for after in [false, true] {
++        for clipped in [false, true] {
++            let mut win = window("Count: 10", after, clipped);
++            ack(&mut win);
++            for (value, offset) in [
++                ("Count: 11", 48.),
++                ("Count: 12", 4800.),
++                ("Count: 10", 4800.),
++            ] {
++                let before = text_state(&win);
++                win.update(|m| {
++                    *m.label = value.into();
++                    *m.offset = offset;
++                })
++                .unwrap();
++                assert_eq!(text_state(&win), before);
++                let mut full = window(value, after, clipped);
++                full.set(Page::OFFSET, offset).unwrap();
++                assert_eq!(pixels(&mut win), pixels(&mut full));
++                ack(&mut win);
++                ack(&mut full);
++                assert_eq!(text_state(&win), text_state(&full));
++            }
++        }
++    }
++}
++
++struct OwnerMixed {
++    label: String,
++    variant: u8,
++    cover: Image,
++}
++impl OwnerMixed {
++    fn cover(variant: u8) -> Image {
++        let color = if variant == 6 {
++            [20, 220, 30, 127]
++        } else {
++            [220, 20, 30, 127]
++        };
++        Image::rgba8(
++            1,
++            1,
++            ImageProfile::Srgb,
++            AlphaMode::Straight,
++            color.to_vec().into_boxed_slice(),
++        )
++        .unwrap()
++    }
++    fn set(&mut self, value: &str, variant: u8) {
++        self.label = value.into();
++        self.variant = variant;
++        if variant == 6 {
++            self.cover = Self::cover(variant);
++        }
++    }
++}
++impl View for OwnerMixed {
++    fn view(&self) -> El<'_> {
++        let button = button("").w(40).h(12).bg(rgb(0x556677));
++        let button = if self.variant == 4 {
++            button
++        } else {
++            button.on_click(|_: &mut Self| {})
++        };
++        let body = column((
++            text(self.label.as_str()).w(140).h(24).name("changing"),
++            text("Count: 0123456789").w(140).h(24),
++            image(&self.cover).size(12),
++            button,
++        ));
++        let body = if self.variant == 7 {
++            body.child(div().size(3).bg(rgb(0x123456)))
++        } else {
++            body
++        };
++        body.w(150)
++            .h(90)
++            .name(if self.variant == 1 {
++                "new caption"
++            } else {
++                "old caption"
++            })
++            .bg(if self.variant == 2 {
++                rgb(0xaaccdd)
++            } else {
++                rgb(0xddeeff)
++            })
++            .rounded(if self.variant == 8 {
++                f32::NAN
++            } else if self.variant == 3 {
++                9.
++            } else {
++                0.
++            })
++            .clipped(true)
++            .transform(Affine::translation(
++                if self.variant == 5 { 7.125 } else { 3.125 },
++                2.375,
++            ))
++    }
++}
++fn mixed(value: &str, variant: u8) -> Win<OwnerMixed> {
++    Win::recording(
++        OwnerMixed {
++            label: value.into(),
++            variant,
++            cover: OwnerMixed::cover(variant),
++        },
++        WindowOptions {
++            size: [170, 110],
++            ..Default::default()
++        },
++    )
++    .unwrap()
++}
++fn semantic_state<M: View + 'static>(win: &Win<M>) -> Vec<(Role, Option<String>, Actions, Rect)> {
++    let mut result = Vec::new();
++    win.visit(|part| {
++        result.push((
++            part.role(),
++            part.name().map(str::to_owned),
++            part.actions(),
++            part.bounds(),
++        ))
++    })
++    .unwrap();
++    result
++}
++#[test]
++fn owner_text_plus_other_changes_does_not_hide_non_text_publication() {
++    for variant in 0..8 {
++        let mut win = mixed("Count: 10", 0);
++        ack(&mut win);
++        let before = (text_state(&win), semantic_state(&win));
++        win.update(|m| m.set("Count: 11", variant)).unwrap();
++        assert_eq!((text_state(&win), semantic_state(&win)), before);
++        let candidate = win.with_scene(|_, token| token).unwrap();
++        let candidate_pixels = pixels(&mut win);
++        let mut full = mixed("Count: 11", variant);
++        assert_eq!(candidate_pixels, pixels(&mut full), "variant={variant}");
++        // A newer rejected owner description must preserve both the older C
++        // and the exact P that remains authoritative before its ACK.
++        assert!(win.update(|m| m.set("Count: 12", 8)).is_err());
++        assert_eq!((text_state(&win), semantic_state(&win)), before);
++        assert_eq!(pixels(&mut win), candidate_pixels);
++        win.presented(candidate).unwrap();
++        ack(&mut full);
++        assert_eq!(text_state(&win), text_state(&full));
++        assert_eq!(
++            semantic_state(&win),
++            semantic_state(&full),
++            "variant={variant}"
++        );
++    }
++}

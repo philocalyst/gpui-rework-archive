@@ -1,0 +1,11 @@
+
+running 1 test
+test exact_text_keeps_list_identity_and_old_geometry_until_ack ... FAILED
+
+failures:
+
+failures:
+    exact_text_keeps_list_identity_and_old_geometry_until_ack
+
+test result: FAILED. 0 passed; 1 failed; 0 ignored; 0 measured; 5 filtered out; finished in 0.01s
+

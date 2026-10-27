@@ -1,0 +1,1 @@
+{"command": ["cargo", "+nightly-2026-10-23", "-Z", "checksum-freshness", "--config", "build.fingerprint=\"content\"", "test", "--locked", "--offline", "--release", "-p", "gpui", "-p", "gpui_canvas", "--test", "local_publication", "exact_text_keeps_list_identity_and_old_geometry_until_ack", "--", "--exact", "--nocapture"], "exit": 101}

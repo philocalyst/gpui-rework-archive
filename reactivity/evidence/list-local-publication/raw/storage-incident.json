@@ -1,0 +1,9 @@
+{
+  "event": "Archiving a completed old native cache temporarily reduced free space to observed 7.2 GiB because duplicate hard links kept original ELF inodes alive while gzip archives were written.",
+  "scope": "No performance timing or new build gate was started below the 8 GiB reserve. The prior default gate had completed.",
+  "recovery": "Paused archiver, hash-matched and removed 32 duplicate links to already verified archives (11,362,365,312 logical bytes); resumed archiver with 18 GiB free. Source, evidence and every removed executable remain preserved.",
+  "receipts": [
+    "old-native-executable-cleanup.json",
+    "old-native-duplicate-links-cleanup.json"
+  ]
+}

@@ -1,0 +1,14 @@
+[
+  {
+    "path": "/home/user/gpui-local-publication-target/release/build/gpui/7d343a8859c57521/out/gpui-7d343a8859c57521",
+    "sha256": "b446bb31a1a675af705b44eafce7a40c0138d08677ae4cd7725a275ef0f8d9f3",
+    "preserved": "/home/user/gpui-preserved-test-binaries/b446bb31a1a675af705b44eafce7a40c0138d08677ae4cd7725a275ef0f8d9f3",
+    "bytes": 59400216
+  },
+  {
+    "path": "/home/user/gpui-local-publication-target/release/build/gpui_canvas/9f7e8bb7d4bc032d/out/gpui_canvas-9f7e8bb7d4bc032d",
+    "sha256": "6be40471a9818d3ce52c97b39acdcc8483eea737861f0edaf94dadf9872213e9",
+    "preserved": "/home/user/gpui-preserved-test-binaries/6be40471a9818d3ce52c97b39acdcc8483eea737861f0edaf94dadf9872213e9",
+    "bytes": 9981232
+  }
+]

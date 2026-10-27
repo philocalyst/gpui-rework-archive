@@ -1,0 +1,17 @@
+
+running 1 test
+LOCAL_RASTER_CLIP,[1101004800, 1121714176, 1147535360, 1126170624],chain=false
+LOCAL_P_CLIP,Some((24, [1101004800, 1121714176, 1147535360, 1126170624]))
+LOCAL_INPUT,stream,clips=1,editing=false,inspector=false
+LOCAL_PUBLICATION,stream,updates=80,patches=80,full=0,unchanged_layout=80
+LOCAL_INPUT,stream-owner,clips=1,editing=false,inspector=false
+LOCAL_PUBLICATION,stream-owner,updates=80,patches=0,full=80,unchanged_layout=80
+test runtime::sparse_text::tests::representative_workload_local_publication_admission ... FAILED
+
+failures:
+
+failures:
+    runtime::sparse_text::tests::representative_workload_local_publication_admission
+
+test result: FAILED. 0 passed; 1 failed; 0 ignored; 0 measured; 313 filtered out; finished in 0.05s
+

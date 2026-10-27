@@ -1,0 +1,13 @@
+{
+  "analysis_sha256": "dc9b344e9c51c5ed837c70c5366e67ab4ed890c117bb2d70aeb26ab792831371",
+  "run_driver_sha256": "b0e79f8e6da3ef96e1aadffd13c300e620df106398e413571cafddcf86bb0435",
+  "process_manifest_sha256": "102bf664e4b731d00665efb4ee41960e6743bb5607d744f3b64f7156df13f7d4",
+  "seed": 20261029,
+  "primary": [
+    "stream",
+    "stream-owner"
+  ],
+  "primary_limit": 0.8,
+  "other_limit": 1.05,
+  "estimator": "median of fifteen paired process-median ratios; type-7 quantiles; paired median bootstrap seed20261029/10000 resamples"
+}

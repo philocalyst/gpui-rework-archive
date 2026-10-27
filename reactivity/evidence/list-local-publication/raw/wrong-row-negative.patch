@@ -1,0 +1,13 @@
+diff --git a/reactivity/crates/gpui/src/runtime/query.rs b/reactivity/crates/gpui/src/runtime/query.rs
+index b23365e953..20bf88d44d 100644
+--- a/reactivity/crates/gpui/src/runtime/query.rs
++++ b/reactivity/crates/gpui/src/runtime/query.rs
+@@ -78,7 +78,7 @@ pub(super) fn retained_text_placement<M>(
+         runtime
+             .presented
+             .iter()
+-            .position(|node| node.identity == identity)?
++            .position(|node| node.identity == identity)? + 1
+     };
+     let geometry = runtime.presented_geometry();
+     let size = runtime.presentation_size;

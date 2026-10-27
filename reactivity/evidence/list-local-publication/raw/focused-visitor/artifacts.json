@@ -1,0 +1,20 @@
+[
+  {
+    "path": "/home/user/gpui-local-publication-target/release/build/gpui/db0678e9a0ba0465/out/gpui-db0678e9a0ba0465",
+    "sha256": "3e32eed0a33013a382151990f61bcfe4afad4907b1514fca39abe90cf6ab4d3b",
+    "preserved": "/home/user/gpui-preserved-test-binaries/3e32eed0a33013a382151990f61bcfe4afad4907b1514fca39abe90cf6ab4d3b",
+    "bytes": 23123752
+  },
+  {
+    "path": "/home/user/gpui-local-publication-target/release/build/gpui_canvas/d7b5685890d15b51/out/gpui_canvas-d7b5685890d15b51",
+    "sha256": "c69e28658c5e0eec7728cb167b083bd792df33dd791efaacd74990e1d958e9e5",
+    "preserved": "/home/user/gpui-preserved-test-binaries/c69e28658c5e0eec7728cb167b083bd792df33dd791efaacd74990e1d958e9e5",
+    "bytes": 9979288
+  },
+  {
+    "path": "/home/user/gpui-local-publication-target/release/build/gpui/153199f576e63f06/out/local_publication-153199f576e63f06",
+    "sha256": "ab7314c28f3160b277a85f7901cac0c148f20f34bf470d46f8c244bfea2526c1",
+    "preserved": "/home/user/gpui-preserved-test-binaries/ab7314c28f3160b277a85f7901cac0c148f20f34bf470d46f8c244bfea2526c1",
+    "bytes": 10515312
+  }
+]

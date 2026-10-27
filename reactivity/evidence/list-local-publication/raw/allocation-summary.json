@@ -1,0 +1,182 @@
+{
+  "scroll": {
+    "control": {
+      "allocation_requests": 462.5,
+      "requested_bytes": 277334.0,
+      "net_live_byte_delta": 304.0,
+      "peak_above_frame_start": 54532.0,
+      "retained_gpu_image_bytes": 2764800.0,
+      "copied_pixels": 691200.0
+    },
+    "candidate": {
+      "allocation_requests": 462.5,
+      "requested_bytes": 277334.0,
+      "net_live_byte_delta": 304.0,
+      "peak_above_frame_start": 54532.0,
+      "retained_gpu_image_bytes": 2764800.0,
+      "copied_pixels": 691200.0
+    }
+  },
+  "both": {
+    "control": {
+      "allocation_requests": 542.5,
+      "requested_bytes": 350760.0,
+      "net_live_byte_delta": 304.0,
+      "peak_above_frame_start": 74789.0,
+      "retained_gpu_image_bytes": 2764800.0,
+      "copied_pixels": 691200.0
+    },
+    "candidate": {
+      "allocation_requests": 542.5,
+      "requested_bytes": 350760.0,
+      "net_live_byte_delta": 304.0,
+      "peak_above_frame_start": 74789.0,
+      "retained_gpu_image_bytes": 2764800.0,
+      "copied_pixels": 691200.0
+    }
+  },
+  "stream": {
+    "control": {
+      "allocation_requests": 245.0,
+      "requested_bytes": 188319.0,
+      "net_live_byte_delta": 304.0,
+      "peak_above_frame_start": 74381.0,
+      "retained_gpu_image_bytes": 2764800.0,
+      "copied_pixels": 691200.0
+    },
+    "candidate": {
+      "allocation_requests": 216.0,
+      "requested_bytes": 123995.0,
+      "net_live_byte_delta": 304.0,
+      "peak_above_frame_start": 43541.0,
+      "retained_gpu_image_bytes": 2764800.0,
+      "copied_pixels": 691200.0
+    }
+  },
+  "stream-owner": {
+    "control": {
+      "allocation_requests": 405.0,
+      "requested_bytes": 284248.0,
+      "net_live_byte_delta": 304.0,
+      "peak_above_frame_start": 74381.0,
+      "retained_gpu_image_bytes": 2764800.0,
+      "copied_pixels": 691200.0
+    },
+    "candidate": {
+      "allocation_requests": 376.0,
+      "requested_bytes": 219924.0,
+      "net_live_byte_delta": 304.0,
+      "peak_above_frame_start": 43541.0,
+      "retained_gpu_image_bytes": 2764800.0,
+      "copied_pixels": 691200.0
+    }
+  },
+  "fractional": {
+    "control": {
+      "allocation_requests": 573.0,
+      "requested_bytes": 338663.0,
+      "net_live_byte_delta": 304.0,
+      "peak_above_frame_start": 54838.0,
+      "retained_gpu_image_bytes": 2764800.0,
+      "copied_pixels": 691200.0
+    },
+    "candidate": {
+      "allocation_requests": 573.0,
+      "requested_bytes": 338663.0,
+      "net_live_byte_delta": 304.0,
+      "peak_above_frame_start": 54838.0,
+      "retained_gpu_image_bytes": 2764800.0,
+      "copied_pixels": 691200.0
+    }
+  },
+  "flat-tiny": {
+    "control": {
+      "allocation_requests": 69.0,
+      "requested_bytes": 10135.0,
+      "net_live_byte_delta": 0.0,
+      "peak_above_frame_start": 6353.0,
+      "retained_gpu_image_bytes": 256.0,
+      "copied_pixels": 64.0
+    },
+    "candidate": {
+      "allocation_requests": 69.0,
+      "requested_bytes": 10135.0,
+      "net_live_byte_delta": 0.0,
+      "peak_above_frame_start": 6353.0,
+      "retained_gpu_image_bytes": 256.0,
+      "copied_pixels": 64.0
+    }
+  },
+  "flat-full": {
+    "control": {
+      "allocation_requests": 69.0,
+      "requested_bytes": 10135.0,
+      "net_live_byte_delta": 0.0,
+      "peak_above_frame_start": 6353.0,
+      "retained_gpu_image_bytes": 1048576.0,
+      "copied_pixels": 262144.0
+    },
+    "candidate": {
+      "allocation_requests": 69.0,
+      "requested_bytes": 10135.0,
+      "net_live_byte_delta": 0.0,
+      "peak_above_frame_start": 6353.0,
+      "retained_gpu_image_bytes": 1048576.0,
+      "copied_pixels": 262144.0
+    }
+  },
+  "list-tiny": {
+    "control": {
+      "allocation_requests": 210.0,
+      "requested_bytes": 61089.0,
+      "net_live_byte_delta": 312.0,
+      "peak_above_frame_start": 12093.0,
+      "retained_gpu_image_bytes": 4096.0,
+      "copied_pixels": 1024.0
+    },
+    "candidate": {
+      "allocation_requests": 210.0,
+      "requested_bytes": 61089.0,
+      "net_live_byte_delta": 312.0,
+      "peak_above_frame_start": 12093.0,
+      "retained_gpu_image_bytes": 4096.0,
+      "copied_pixels": 1024.0
+    }
+  },
+  "list-flat": {
+    "control": {
+      "allocation_requests": 261.5,
+      "requested_bytes": 107958.0,
+      "net_live_byte_delta": 304.0,
+      "peak_above_frame_start": 22104.0,
+      "retained_gpu_image_bytes": 2764800.0,
+      "copied_pixels": 691200.0
+    },
+    "candidate": {
+      "allocation_requests": 261.5,
+      "requested_bytes": 107958.0,
+      "net_live_byte_delta": 304.0,
+      "peak_above_frame_start": 22104.0,
+      "retained_gpu_image_bytes": 2764800.0,
+      "copied_pixels": 691200.0
+    }
+  },
+  "exposure": {
+    "control": {
+      "allocation_requests": 44.0,
+      "requested_bytes": 8024.0,
+      "net_live_byte_delta": 0.0,
+      "peak_above_frame_start": 5218.0,
+      "retained_gpu_image_bytes": 2764800.0,
+      "copied_pixels": 691200.0
+    },
+    "candidate": {
+      "allocation_requests": 44.0,
+      "requested_bytes": 8024.0,
+      "net_live_byte_delta": 0.0,
+      "peak_above_frame_start": 5218.0,
+      "retained_gpu_image_bytes": 2764800.0,
+      "copied_pixels": 691200.0
+    }
+  }
+}

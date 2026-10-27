@@ -1,0 +1,10 @@
+   Compiling gpui v0.1.0 (/home/user/gpui-local-publication-lab/reactivity/crates/gpui)
+    Finished `release` profile [optimized] target(s) in 4.80s
+     Running tests/local_publication.rs (/home/user/gpui-local-publication-target/release/build/gpui/153199f576e63f06/out/local_publication-153199f576e63f06)
+
+thread 'image_clip_and_scroller_preserve_older_candidate_after_newer_failure' (1967504) panicked at crates/gpui/tests/local_publication.rs:255:13:
+assertion `left == right` failed
+  left: 0
+ right: 1
+note: run with `RUST_BACKTRACE=1` environment variable to display a backtrace
+error: test failed, to rerun pass `-p gpui --test local_publication`

@@ -1,0 +1,10 @@
+   Compiling skrifa v0.44.0
+   Compiling rustybuzz v0.20.1
+   Compiling fontdue v0.9.5
+   Compiling gpui v0.1.0 (/home/user/gpui-local-publication-lab/reactivity/crates/gpui)
+   Compiling swash v0.2.10
+   Compiling gpui_canvas v0.1.0 (/home/user/gpui-local-publication-lab/reactivity/crates/canvas)
+    Finished `release` profile [optimized] target(s) in 1m 00s
+     Running unittests src/lib.rs (/home/user/gpui-local-publication-target/release/build/gpui/db0678e9a0ba0465/out/gpui-db0678e9a0ba0465)
+layout write delta=0 final differing layouts=0
+     Running unittests src/lib.rs (/home/user/gpui-local-publication-target/release/build/gpui_canvas/d7b5685890d15b51/out/gpui_canvas-d7b5685890d15b51)

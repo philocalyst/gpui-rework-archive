@@ -1,0 +1,3 @@
+   Compiling gpui v0.1.0 (/home/user/gpui-local-publication-lab/reactivity/crates/gpui)
+    Finished `release` profile [optimized] target(s) in 2.04s
+     Running tests/local_publication.rs (/home/user/gpui-local-publication-target/release/build/gpui/153199f576e63f06/out/local_publication-153199f576e63f06)

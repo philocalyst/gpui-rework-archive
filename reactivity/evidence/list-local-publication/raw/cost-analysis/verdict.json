@@ -1,0 +1,6 @@
+{
+  "all_point_gates_pass": false,
+  "source": "cost-timing/results.json",
+  "source_sha256": "299520292bcaec6b3cfa033ba67b6a531334ddceaf19abd1214f18466277e41f",
+  "estimator": "median of fifteen paired process-median ratios; type-7 quantiles; paired median bootstrap seed20261029/10000 resamples"
+}

@@ -1,0 +1,8 @@
+   Compiling gpui v0.1.0 (/home/user/gpui-local-publication-lab/reactivity/crates/gpui)
+    Finished `release` profile [optimized] target(s) in 3.52s
+     Running tests/local_publication.rs (/home/user/gpui-local-publication-target/release/build/gpui/153199f576e63f06/out/local_publication-153199f576e63f06)
+
+thread 'exact_text_keeps_list_identity_and_old_geometry_until_ack' (1947446) panicked at crates/gpui/tests/local_publication.rs:118:65:
+called `Result::unwrap()` on an `Err` value: PresentationStale
+note: run with `RUST_BACKTRACE=1` environment variable to display a backtrace
+error: test failed, to rerun pass `-p gpui --test local_publication`

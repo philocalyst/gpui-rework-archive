@@ -1,0 +1,5 @@
+   Compiling ttf-parser v0.25.1
+   Compiling gpui_canvas v0.1.0 (/home/user/gpui-local-publication-lab/reactivity/crates/canvas)
+   Compiling gpui_gpu v0.1.0 (/home/user/gpui-local-publication-lab/reactivity/crates/gpu)
+   Compiling gpui v0.1.0 (/home/user/gpui-local-publication-lab/reactivity/crates/gpui)
+    Finished `release` profile [optimized] target(s) in 16.19s
