@@ -412,7 +412,7 @@ publication; moving that work to the producer would change the comparison.
 Line pitch, wheel, keyed overscan, async controls and matched profiles remain.
 
 
-## Size-gated tile refinement in progress
+## Size-gated tile refinement: rejected mechanism qualification
 
 Protocolcca90b4f89323413bd9bfe0608b80db45391d5aa; source
 a3ac8c5b3475b347e264929f749b71bf81b4cf5f on local/gpu-text-gated.
@@ -428,3 +428,18 @@ Shipping37485 lines(+24), ELF14735568 B(+2376 over ungated). Patch body8637 B
 versus8898, local reservation888 B unchanged; new repair_regions1778 B/216 B
 local reservation. Do not describe outlining as a total-code or stack reduction.
 Shader unchanged. The fixed threshold will not be tuned after timing.
+
+Completed local dossier d9aa807a2c7db0040a363fa0a8ddb1da8ecbcaee preserves
+all 252 timed and 42 allocator processes. Primary/control medians against full
+preparation pass: stream ratios .218615/.212364/.203996. The independent
+comparison against ungated tiles fails three fixed controls: 25-label single
+1.081491 and stream25/1000 1.069717/1.063233. Overall numerical verdict false;
+no adoption. Default975/native1048 tests, six actual native scripts, strict
+Clippy and exact images pass. No threshold retuning or selective repetitions.
+
+Next work is native workload equivalence, beginning with UI-thread owned
+Workload state and exact source inbox publication. Preserve shaping, string
+generation and all source costs on the UI thread. Typography, wheel, keyed
+overscan, deferred controls and equal build profiles remain explicit gates.
+Stop microbenchmark refinement until a representative native comparison can
+test whether the architectural gains survive complete application work.
