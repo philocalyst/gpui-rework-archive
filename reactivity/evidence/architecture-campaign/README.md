@@ -70,9 +70,22 @@ Input correction: earlier wheel28 notes confused row height with native wheel
 conversion. Pinned ZGX Linux defaults to40px, can read desktop settings and enables
 resampling by default; GPUI remains32px with direct events. Fixed14px timer traces
 match. Default interactive trajectories, deferred controls, native retained counts,
-matched profiles, text quality and physical hardware remain separate gates. Next
-architecture trial: prove integer viewport scroll-copy eligibility, retain the full
-compositor oracle, and charge proof/copy/repair plus complete GPU completion costs.
+matched profiles, text quality and physical hardware remain separate gates.
+
+Completed local/gpu-scroll-copy at /home/user/gpui-gpu-scroll-copy-lab:
+dossier8041b7a7fe4f21f27498110e30034d300fee5a7f independently verifies1468 files.
+Exact integer canonical contributions plus exact predecessor tokens admit lazy
+scratch-copy/repair with unchanged application calls.995 default/1070 X11
+GPUI+Canvas,74 GPU,10 port tests and11 native scripts pass. Two bounded mutants
+fail actual pixels; the exact100K-row native Workload model passes scroll/mixed
+full-render oracles.300 paired-cost processes give scroll ratio.082524407 and
+mixed.443327737, but8x8 flat1.071750023 fails the fixed1.05 control. The variant
+is **unadopted**; no selective large-workload verdict.60 qualification and20
+allocation processes pass; no timing overlaps compilation. Shipping+472 lines,
+ELF+22584B, native Metadata+8B, Output+8B, Backing+80B;960x720 scroll scratch
+adds1420480 explicit GPU bytes. This is offscreen complete owner/packet/GPU/ACK
+work, not native WSI/scanout or a ZGX ranking. A separate output-layout trial
+will challenge ordinary dispatch/header overhead without changing this verdict.
 
 [BBTree transfer research](../bbtree-transfer/README.md) records the pinned
 implementation, failed historical trials, applicability and next hypotheses.

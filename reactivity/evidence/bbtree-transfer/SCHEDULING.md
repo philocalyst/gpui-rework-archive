@@ -443,3 +443,24 @@ generation and all source costs on the UI thread. Typography, wheel, keyed
 overscan, deferred controls and equal build profiles remain explicit gates.
 Stop microbenchmark refinement until a representative native comparison can
 test whether the architectural gains survive complete application work.
+
+
+## Native prerequisites and certified scroll-copy cost trial
+
+The campaign index now records completed UI-owned exact ingress, explicit line
+pitch, keyed overscan, controlled source offset and the actual native keyed port.
+Integer scroll-copy dossier8041b7a7fe independently verifies1468 files, including
+the complete production/native oracle and deliberate content/token guard failures.
+The cost harness now uses the actual Workload model and public update path through
+the production native packet bridge, waits for GPU completion and ACKs. It still
+excludes event dispatch, WSI and scanout, so it cannot settle native parity.
+
+Its300 preregistered processes produce scroll/mixed ratios.082524407/.443327737,
+but flat-tiny1.071750023 fails the1.05 ceiling. Preserve the failed verdict.
+The warm flat allocation/image bill is unchanged, while Output40→48, slot guard
+80→88 and GPU submit636→1176 machine bytes expose a dispatch/layout hypothesis.
+A new isolated trial may restore ordinary descriptor size and isolate scroll
+submission; retain the exact certificate, token guard and unchanged shader.
+Test the failed predecessor as a mechanism control as well as the original
+baseline, with no threshold/fixture retuning. Complete native/physical-hardware
+comparison remains necessary; no async executor or cache-hit claim follows.

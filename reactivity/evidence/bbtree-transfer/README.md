@@ -62,3 +62,13 @@ The existing pixel-uniform GPU experiment predates this reference. It follows
 an analogous principle of proving redundant work removable, but must not be
 attributed to BBTree or conflated with its CPU measurements. No competitor
 performance victory is established by this research or any isolated result.
+
+
+## Current campaign result
+
+The historical proposals above have been exercised; see the campaign index and
+[SCHEDULING.md](SCHEDULING.md) for their preserved failures and qualifications.
+The latest certified scroll-copy dossier8041b7a7fe shows a strong whole-owner/GPU
+completion signal but fails its tiny-flat control. The next hypothesis concerns
+aggregate layout and dispatch code generation, consistent with BBTree's measured
+lessons; it does not import its runtime or claim measured cache-hit improvement.
