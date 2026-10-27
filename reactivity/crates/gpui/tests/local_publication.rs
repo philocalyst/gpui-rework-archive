@@ -243,6 +243,19 @@ fn image_clip_and_scroller_preserve_older_candidate_after_newer_failure() {
                 }
             })
             .unwrap();
+            if rounded {
+                win.with_scene(|s, _| {
+                    for c in s.clip_nodes() {
+                        eprintln!("CLIP {c:?}");
+                    }
+                    eprintln!("GROUPS {}", s.groups().len());
+                })
+                .unwrap();
+                win.with_pixels(|p, w, _| {
+                    eprintln!("IMAGE_PIXEL {:?}", &p[(55 * w as usize + 8) * 4..][..4])
+                })
+                .unwrap();
+            }
             let before = text_state(&win);
             win.set(Decorated::LABEL, "Count: 11".into()).unwrap();
             let eligible = win.with_scene(|_, token| token).unwrap();
