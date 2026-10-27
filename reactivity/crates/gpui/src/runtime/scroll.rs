@@ -239,6 +239,67 @@ pub(super) struct ViewportBuild {
     scrolls: Vec<ScrollFrozen>,
 }
 impl ViewportBuild {
+    #[cfg(feature = "native-core")]
+    pub fn scroll_copy_proposal(
+        &self,
+        previous: &ViewportColumn,
+        before: (&[Presented], geometry::Bases<'_>),
+        after: (&[Presented], geometry::Bases<'_>),
+        index: impl Fn(u64) -> Option<usize>,
+    ) -> Option<([u32; 4], i32)> {
+        if self.lists.len() != previous.lists().len()
+            || self.scrolls.len() != previous.scrolls().len()
+            || self
+                .scrolls
+                .iter()
+                .any(|row| previous.offset(row.identity) != Some(row.offset))
+        {
+            return None;
+        }
+        let mut proposal = None;
+        for row in &self.lists {
+            let old = find(previous.lists(), row.identity, |r| r.identity)?;
+            if old.id != row.id || old.count != row.count {
+                return None;
+            }
+            if old.offset == row.offset {
+                continue;
+            }
+            if proposal.is_some() {
+                return None;
+            }
+            let a = before
+                .0
+                .get(old.index as usize)
+                .filter(|n| n.identity == row.identity)?;
+            let b = after
+                .0
+                .get(index(row.identity)?)
+                .filter(|n| n.identity == row.identity)?;
+            let map = a.transform(before.1)?;
+            if map != b.transform(after.1)?
+                || [map.a, map.b, map.c, map.d] != [1., 0., 0., 1.]
+                || a.local_rect() != b.local_rect()
+                || a.bounds != b.bounds
+            {
+                return None;
+            }
+            let delta = old.offset - row.offset;
+            let rect = a.bounds;
+            let edges = [rect.x, rect.y, rect.x + rect.width, rect.y + rect.height];
+            if !delta.is_finite()
+                || delta.fract() != 0.
+                || delta.abs() >= f64::from(rect.height)
+                || edges
+                    .iter()
+                    .any(|v| !v.is_finite() || v.fract() != 0. || *v < 0. || *v > 16_384.)
+            {
+                return None;
+            }
+            proposal = Some((edges.map(|v| v as u32), delta as i32));
+        }
+        proposal
+    }
     #[cfg(feature = "accessibility")]
     pub fn info(&self, identity: u64, size: [f64; 2]) -> Option<ViewportInfo> {
         find(&self.lists, identity, |row| row.identity)

@@ -334,7 +334,7 @@ impl GpuSurface {
         token: crate::PresentationToken,
         paint: Option<&crate::runtime::paint::SlotTransition>,
         target: &wgpu::TextureView,
-        transition: Option<crate::runtime::paint::SceneDamage>,
+        transition: Option<crate::runtime::paint::SceneDamage<'_>>,
     ) -> Result<wgpu::SubmissionIndex, gpui_gpu::Error> {
         let epoch = transition.map(|d| d.epoch);
         let damage = transition
@@ -356,7 +356,13 @@ impl GpuSurface {
             self.packet_epoch = epoch;
             return Ok(submitted);
         }
-        let submitted = self.renderer.render(scene, target, damage)?;
+        let scroll = transition
+            .and_then(|d| d.scroll)
+            .filter(|s| previous == Some(s.from) && s.to == token)
+            .map(|s| &s.copy);
+        let submitted = self
+            .renderer
+            .render_with_scroll(scene, target, damage, scroll)?;
         self.packet_token = Some(token);
         self.packet_epoch = epoch;
         Ok(submitted)

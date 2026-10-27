@@ -31,7 +31,8 @@ pub struct RetainedStats {
 
 /// Optional retained output over the unchanged full-frame renderer.
 ///
-/// A single owned texture costs width × height × bytes-per-pixel. Every submit
+/// The primary texture costs width × height × bytes-per-pixel. Certified scroll
+/// reuse lazily adds a bounded overlap scratch texture; ordinary frames need none. Every submit
 /// copies it to the caller's fresh target; repair and copy use one command buffer.
 /// `None` damage requests full compositing. `Some` is a caller certificate that
 /// all differences from the last successful image are inside those device-pixel

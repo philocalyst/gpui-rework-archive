@@ -1,6 +1,8 @@
 //! The actual private native packet bridge, with offscreen readback oracles.
 use super::*;
 use crate::{Color, El, FieldId, Signal, SignalMap, Source, Sources, div, rgb};
+#[path = "scroll_copy_tests.rs"]
+mod scroll_copy_tests;
 struct Paint {
     color: Signal<Color>,
     mapped: bool,
@@ -83,10 +85,10 @@ fn read(gpu: &GpuSurface, texture: &wgpu::Texture) -> Vec<u8> {
     }
     output
 }
-fn render(
+fn render<M: View + 'static>(
     gpu: &mut GpuSurface,
     oracle: &mut Renderer,
-    owner: &mut Win<Paint>,
+    owner: &mut Win<M>,
     texture: &wgpu::Texture,
 ) {
     let view = texture.create_view(&Default::default());
@@ -263,4 +265,5 @@ pub(super) fn run(gpu: &mut GpuSurface) {
         }
         gpu.packet_token = None;
     }
+    scroll_copy_tests::run(gpu);
 }
