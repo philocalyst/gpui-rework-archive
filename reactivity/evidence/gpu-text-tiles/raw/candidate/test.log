@@ -1,0 +1,68 @@
+   Compiling gpui_gpu v0.1.0 (/home/user/gpui-gpu-text-tiles-lab/reactivity/crates/gpu)
+error[E0308]: arguments to this function are incorrect
+    --> crates/gpu/tests/support/text_packet.rs:206:22
+     |
+ 206 |     let mut canvas = Canvas::recording(size[0], size[1], ColorConfig::default()).unwrap();
+     |                      ^^^^^^^^^^^^^^^^^ -------  ------- expected `u32`, found `usize`
+     |                                        |
+     |                                        expected `u32`, found `usize`
+     |
+note: associated function defined here
+    --> crates/canvas/src/canvas.rs:1193:12
+     |
+1193 |     pub fn recording(width: u32, height: u32, color_config: ColorConfig) -> Result<Self, Error> {
+     |            ^^^^^^^^^
+help: you can convert a `usize` to a `u32` and panic if the converted value doesn't fit
+     |
+ 206 |     let mut canvas = Canvas::recording(size[0].try_into().unwrap(), size[1], ColorConfig::default()).unwrap();
+     |                                               ++++++++++++++++++++
+help: you can convert a `usize` to a `u32` and panic if the converted value doesn't fit
+     |
+ 206 |     let mut canvas = Canvas::recording(size[0], size[1].try_into().unwrap(), ColorConfig::default()).unwrap();
+     |                                                        ++++++++++++++++++++
+
+error[E0308]: arguments to this function are incorrect
+   --> crates/gpu/tests/support/text_packet.rs:314:16
+    |
+314 |     let clip = Rect::new(0., 0., size[0] as f64, size[1] as f64);
+    |                ^^^^^^^^^         --------------  -------------- expected `f32`, found `f64`
+    |                                  |
+    |                                  expected `f32`, found `f64`
+    |
+note: associated function defined here
+   --> crates/core/src/geometry.rs:17:18
+    |
+ 17 |     pub const fn new(x: f32, y: f32, width: f32, height: f32) -> Self {
+    |                  ^^^
+
+error[E0308]: arguments to this function are incorrect
+    --> crates/gpu/tests/support/text_packet.rs:315:22
+     |
+ 315 |     let mut canvas = Canvas::recording(size[0], size[1], ColorConfig::default()).unwrap();
+     |                      ^^^^^^^^^^^^^^^^^ -------  ------- expected `u32`, found `usize`
+     |                                        |
+     |                                        expected `u32`, found `usize`
+     |
+note: associated function defined here
+    --> crates/canvas/src/canvas.rs:1193:12
+     |
+1193 |     pub fn recording(width: u32, height: u32, color_config: ColorConfig) -> Result<Self, Error> {
+     |            ^^^^^^^^^
+help: you can convert a `usize` to a `u32` and panic if the converted value doesn't fit
+     |
+ 315 |     let mut canvas = Canvas::recording(size[0].try_into().unwrap(), size[1], ColorConfig::default()).unwrap();
+     |                                               ++++++++++++++++++++
+help: you can convert a `usize` to a `u32` and panic if the converted value doesn't fit
+     |
+ 315 |     let mut canvas = Canvas::recording(size[0], size[1].try_into().unwrap(), ColorConfig::default()).unwrap();
+     |                                                        ++++++++++++++++++++
+
+error[E0308]: mismatched types
+   --> crates/gpu/tests/support/text_packet.rs:323:28
+    |
+323 |                 Point { x: x[i], y: 2. },
+    |                            ^^^^ expected `f32`, found `f64`
+
+For more information about this error, try `rustc --explain E0308`.
+error: could not compile `gpui_gpu` (test "render") due to 4 previous errors
+warning: build failed, waiting for other jobs to finish...

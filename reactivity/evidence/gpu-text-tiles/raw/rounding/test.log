@@ -1,0 +1,6 @@
+   Compiling gpui_gpu v0.1.0 (/home/user/gpui-gpu-text-tiles-lab/reactivity/crates/gpu)
+    Finished `release` profile [optimized] target(s) in 4.05s
+     Running unittests src/lib.rs (/home/user/gpui-gpu-text-tiles-target/release/build/gpui_gpu/9ea322dc8c0118ee/out/gpui_gpu-9ea322dc8c0118ee)
+     Running tests/presentation.rs (/home/user/gpui-gpu-text-tiles-target/release/build/gpui_gpu/cec5cb8ca5daaf5a/out/presentation-cec5cb8ca5daaf5a)
+     Running tests/render.rs (/home/user/gpui-gpu-text-tiles-target/release/build/gpui_gpu/e5af0729dd37e433/out/render-e5af0729dd37e433)
+error: test failed, to rerun pass `-p gpui_gpu --test render`

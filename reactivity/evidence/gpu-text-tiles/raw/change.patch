@@ -1,0 +1,530 @@
+diff --git a/reactivity/crates/gpu/examples/text_packet_allocations.rs b/reactivity/crates/gpu/examples/text_packet_allocations.rs
+index 7c8a55e2eb..5f263c3d5a 100644
+--- a/reactivity/crates/gpu/examples/text_packet_allocations.rs
++++ b/reactivity/crates/gpu/examples/text_packet_allocations.rs
+@@ -267,9 +267,13 @@ fn main() {
+                     .poll(wgpu::PollType::wait_indefinitely())
+                     .unwrap();
+                 let complete = start.elapsed().as_nanos();
+-                sample = Some((host, complete, sparse));
++                let damage_pixels = damage.map_or(960 * 720_u64, |d| {
++                    d.bounds()
++                        .map_or(0, |[l, t, r, b]| u64::from(r - l) * u64::from(b - t))
++                });
++                sample = Some((host, complete, sparse, damage_pixels));
+             });
+-            let (host, complete, sparse) = sample.unwrap();
++            let (host, complete, sparse, damage_pixels) = sample.unwrap();
+             if frame >= 10 {
+                 eprintln!(
+                     "ALLOC,frame={},requests={},requested={},retained_delta={},peak_new={},text_map_bytes={}",
+@@ -280,6 +284,14 @@ fn main() {
+                     allocations.bytes_max,
+                     memory::map_bytes(&renderer)
+                 );
++                let repair = renderer.retained_stats();
++                eprintln!(
++                    "REPAIR,frame={},damage_pixels={},composited_pixels={},copied_pixels={}",
++                    frame - 10,
++                    damage_pixels,
++                    repair.composited_pixels,
++                    repair.copied_pixels
++                );
+                 let s = renderer.stats();
+                 println!(
+                     "{},{count},{fields},{mode},{host},{complete},{sparse},{},{},{},{},{},{},{},{},{}",
+diff --git a/reactivity/crates/gpu/src/renderer.rs b/reactivity/crates/gpu/src/renderer.rs
+index 604b19a96c..377c1e5f26 100644
+--- a/reactivity/crates/gpu/src/renderer.rs
++++ b/reactivity/crates/gpu/src/renderer.rs
+@@ -530,12 +530,23 @@ impl GpuContext {
+         self.format
+     }
+     fn submit(&self, output: Output<'_>, bindings: &wgpu::BindGroup) -> wgpu::SubmissionIndex {
++        self.submit_regions(output, bindings, None)
++    }
++    fn submit_regions(
++        &self,
++        output: Output<'_>,
++        bindings: &wgpu::BindGroup,
++        regions: Option<&[[u32; 4]]>,
++    ) -> wgpu::SubmissionIndex {
+         let mut encoder = self
+             .device
+             .create_command_encoder(&wgpu::CommandEncoderDescriptor {
+                 label: Some("GPUI frame"),
+             });
+-        if output.damage.is_none_or(|damage| !damage.is_empty()) {
++        if regions.map_or_else(
++            || output.damage.is_none_or(|damage| !damage.is_empty()),
++            |regions| !regions.is_empty(),
++        ) {
+             let mut pass = encoder.begin_render_pass(&wgpu::RenderPassDescriptor {
+                 label: Some("GPUI frame"),
+                 color_attachments: &[Some(wgpu::RenderPassColorAttachment {
+@@ -556,12 +567,19 @@ impl GpuContext {
+                 occlusion_query_set: None,
+                 multiview_mask: None,
+             });
+-            if let Some([left, top, right, bottom]) = output.damage.and_then(|d| d.bounds()) {
+-                pass.set_scissor_rect(left, top, right - left, bottom - top);
+-            }
+             pass.set_pipeline(&self.pipeline);
+             pass.set_bind_group(0, bindings, &[]);
+-            pass.draw(0..3, 0..1);
++            if let Some(regions) = regions {
++                for &[left, top, right, bottom] in regions {
++                    pass.set_scissor_rect(left, top, right - left, bottom - top);
++                    pass.draw(0..3, 0..1);
++                }
++            } else {
++                if let Some([left, top, right, bottom]) = output.damage.and_then(|d| d.bounds()) {
++                    pass.set_scissor_rect(left, top, right - left, bottom - top);
++                }
++                pass.draw(0..3, 0..1);
++            }
+         }
+         if let Some((backing, target)) = output.present {
+             backing.copy(&mut encoder, target);
+diff --git a/reactivity/crates/gpu/src/renderer/retained.rs b/reactivity/crates/gpu/src/renderer/retained.rs
+index f455aa2a60..294e5e4349 100644
+--- a/reactivity/crates/gpu/src/renderer/retained.rs
++++ b/reactivity/crates/gpu/src/renderer/retained.rs
+@@ -184,7 +184,7 @@ impl RetainedRenderer {
+         check_target(target, backing.size(), self.inner.format())
+             .map_err(|_| TextPacketError::InvalidTarget)?;
+         check_damage(damage, backing.size()).map_err(|_| TextPacketError::InvalidTarget)?;
+-        let submitted = text_packet::patch(
++        let (submitted, composited_pixels) = text_packet::patch(
+             &mut self.inner.state,
+             &self.inner.context,
+             &mut self.text_runs,
+@@ -192,6 +192,7 @@ impl RetainedRenderer {
+             backing.output(target, damage),
+         )?;
+         self.stats = backing.stats(damage);
++        self.stats.composited_pixels = composited_pixels;
+         Ok(submitted)
+     }
+ }
+diff --git a/reactivity/crates/gpu/src/renderer/text_packet.rs b/reactivity/crates/gpu/src/renderer/text_packet.rs
+index f3343cd192..6378cbf976 100644
+--- a/reactivity/crates/gpu/src/renderer/text_packet.rs
++++ b/reactivity/crates/gpu/src/renderer/text_packet.rs
+@@ -49,6 +49,41 @@ struct Patch {
+     slot: TextRunSlot,
+     run: Run,
+     words: Vec<Word>,
++    common_changed: bool,
++}
++impl Patch {
++    fn changes(&self, address: u32, old: &[Word]) -> bool {
++        if !self.run.contains(address) {
++            return false;
++        }
++        let offset = 5 + (address - self.run.word.get()) as usize;
++        self.common_changed
++            || self.words[offset..offset + 2] != old[address as usize..address as usize + 2]
++    }
++}
++// Rows are disjoint. Cap command count; overflow uses the original damage.
++fn append_region(regions: &mut Option<Vec<[u32; 4]>>, rect: [u32; 4], damage: [u32; 4]) {
++    let [l, t, r, b] = [
++        rect[0].max(damage[0]),
++        rect[1].max(damage[1]),
++        rect[2].min(damage[2]),
++        rect[3].min(damage[3]),
++    ];
++    if l >= r || t >= b {
++        return;
++    }
++    let Some(spans) = regions else { return };
++    if let Some(last) = spans.last_mut()
++        && last[1] == t
++        && last[3] == b
++        && last[2] == l
++    {
++        last[2] = r;
++    } else if spans.len() == 256 {
++        *regions = None;
++    } else {
++        spans.push([l, t, r, b]);
++    }
+ }
+ fn correction_matches(state: &RendererState, group: PreparedGroup<'_>, index: u32) -> bool {
+     let Some(old) = state.residuals.get(index as usize) else {
+@@ -76,7 +111,7 @@ pub(super) fn patch(
+     runs: &mut [Option<Run>],
+     edits: &[(TextRunSlot, PreparedGroup<'_>)],
+     output: Output<'_>,
+-) -> Result<wgpu::SubmissionIndex, TextPacketError> {
++) -> Result<(wgpu::SubmissionIndex, u64), TextPacketError> {
+     let packet = state.packet.as_ref().ok_or(TextPacketError::NoPacket)?;
+     state
+         .check_context(context)
+@@ -178,7 +213,13 @@ pub(super) fn patch(
+             .and_then(|n| n.checked_add(references))
+             .ok_or(TextPacketError::Capacity)?;
+         run.references = references as u32;
+-        patches.push(Patch { slot, run, words });
++        let common_changed = words[..5] != state.records[common..word];
++        patches.push(Patch {
++            slot,
++            run,
++            words,
++            common_changed,
++        });
+     }
+     if original > MAX_REFERENCES {
+         return Err(TextPacketError::Capacity);
+@@ -187,6 +228,8 @@ pub(super) fn patch(
+     let mut next_ranges = Vec::with_capacity(state.ranges.len());
+     let mut next_references = Vec::with_capacity(state.references.len());
+     let mut cursor = 0;
++    let damage_bounds = output.damage.and_then(|d| d.bounds());
++    let mut regions = output.damage.map(|_| Vec::new());
+     for (tile, &[start, end]) in state.ranges.iter().enumerate() {
+         let begin = cursor;
+         while cursor < additions.len() && additions[cursor].0 == tile {
+@@ -216,6 +259,30 @@ pub(super) fn patch(
+             return Err(TextPacketError::Capacity);
+         }
+         next_ranges.push([offset as u32, next_references.len() as u32]);
++        if regions.is_some()
++            && let Some(damage) = damage_bounds
++        {
++            let old = if end == UNIFORM_TILE {
++                std::slice::from_ref(&start)
++            } else {
++                &state.references[start as usize..end as usize]
++            };
++            let next = &next_references[offset..];
++            // Both memberships matter: a moved glyph can leave an empty tile.
++            // Equal lists only need repaint when a referenced record changed.
++            let dirty = old != next
++                || old
++                    .iter()
++                    .chain(next)
++                    .any(|&address| patches.iter().any(|p| p.changes(address, &state.records)));
++            if dirty {
++                append_region(
++                    &mut regions,
++                    tile_bounds(tile, columns, width, height),
++                    damage,
++                );
++            }
++        }
+     }
+     debug_assert_eq!(cursor, additions.len());
+     if next_references.len().max(1) as u64 * 4 > state.indices.size {
+@@ -235,6 +302,17 @@ pub(super) fn patch(
+         } else {
+             0
+         };
++    let area = |[l, t, r, b]: [u32; 4]| u64::from(r - l) * u64::from(b - t);
++    let composited_pixels = regions.as_ref().map_or_else(
++        || {
++            output
++                .damage
++                .map_or(u64::from(width) * u64::from(height), |_| {
++                    damage_bounds.map_or(0, area)
++                })
++        },
++        |regions| regions.iter().copied().map(area).sum(),
++    );
+     // No semantic validation remains. Revoke replay before the first queue write.
+     let mut packet = state.packet.take().unwrap();
+     for p in patches {
+@@ -264,7 +342,7 @@ pub(super) fn patch(
+     if rebind {
+         packet.bindings = state.bindings(context);
+     }
+-    let submitted = context.submit(output, &packet.bindings);
++    let submitted = context.submit_regions(output, &packet.bindings, regions.as_deref());
+     state.packet = Some(packet);
+     let mut uniform = 0;
+     let mut samples = 0;
+@@ -301,5 +379,5 @@ pub(super) fn patch(
+     if let Some(images) = &mut state.images {
+         images.redrawn();
+     }
+-    Ok(submitted)
++    Ok((submitted, composited_pixels))
+ }
+diff --git a/reactivity/crates/gpu/tests/support/text_packet.rs b/reactivity/crates/gpu/tests/support/text_packet.rs
+index dd6835ecda..407d542c21 100644
+--- a/reactivity/crates/gpu/tests/support/text_packet.rs
++++ b/reactivity/crates/gpu/tests/support/text_packet.rs
+@@ -201,3 +201,272 @@ fn a_late_text_packet_rejection_keeps_the_old_image_and_replay() {
+         assert_eq!(read_texture(&gpu, &target), before);
+     });
+ }
++
++fn rect_damage(size: [u32; 2], rect: Rect) -> gpui_canvas::DamageRegion {
++    let mut canvas = Canvas::recording(size[0], size[1], ColorConfig::default()).unwrap();
++    let mut stage = canvas.stage();
++    stage
++        .fill_rect(rect, Affine::IDENTITY, rect, Color::BLACK)
++        .unwrap();
++    stage.commit_with_damage()
++}
++
++#[test]
++fn text_tile_repairs_preserve_old_support_and_explicit_full_repaint() {
++    pollster::block_on(async {
++        for (format, config) in [
++            (wgpu::TextureFormat::Rgba8UnormSrgb, ColorConfig::default()),
++            (
++                wgpu::TextureFormat::Rgba16Float,
++                ColorConfig::linear_hdr(gpui_canvas::OutputProfile::Srgb, 203.).unwrap(),
++            ),
++        ] {
++            for map in [Affine::IDENTITY, Affine::translation(0.25, 0.5)] {
++                let mut text = TextSystem::bundled().unwrap();
++                let mut gpu = RetainedRenderer::new(renderer(format).await);
++                let mut full = renderer(format).await;
++                let (initial, slots) = scene(
++                    &mut text,
++                    ["0011", "1100"],
++                    [Point { x: 2., y: 2. }, Point { x: 6., y: 24. }],
++                    map,
++                    config,
++                    Color::BLACK,
++                );
++                let target = output_texture(&gpu, &initial);
++                let view = target.create_view(&Default::default());
++                gpu.render(initial.prepared_scene(), &view, None).unwrap();
++                let partial = rect_damage([128, 96], Rect::new(0., 0., 128., 51.));
++                // Same records produce a copy-only submit even with broad damage.
++                gpu.patch_texts(&edits(&initial, slots), &view, Some(partial))
++                    .unwrap();
++                assert_eq!(gpu.retained_stats().composited_pixels, 0);
++                assert_eq!(read_texture(&gpu, &target), readback(&mut full, &initial));
++                for (labels, positions) in [
++                    (
++                        ["0010", "1100"],
++                        [Point { x: 2., y: 2. }, Point { x: 6., y: 24. }],
++                    ),
++                    (
++                        ["1100", "0011"],
++                        [Point { x: 48., y: 2. }, Point { x: 82., y: 24. }],
++                    ),
++                    (
++                        ["0011", "1100"],
++                        [Point { x: 2., y: 2. }, Point { x: 6., y: 24. }],
++                    ),
++                    (
++                        ["0011", "1100"],
++                        [
++                            Point {
++                                x: 15.999999,
++                                y: 2.,
++                            },
++                            Point { x: 6., y: 24. },
++                        ],
++                    ),
++                    (
++                        ["0011", "1100"],
++                        [
++                            Point {
++                                x: 16.000002,
++                                y: 2.,
++                            },
++                            Point { x: 6., y: 24. },
++                        ],
++                    ),
++                ] {
++                    let (next, next_slots) =
++                        scene(&mut text, labels, positions, map, config, Color::BLACK);
++                    assert_eq!(slots, next_slots);
++                    gpu.patch_texts(&edits(&next, slots), &view, Some(partial))
++                        .unwrap();
++                    assert!(gpu.retained_stats().composited_pixels < 128 * 51);
++                    assert_eq!(
++                        read_texture(&gpu, &target),
++                        readback(&mut full, &next),
++                        "old dirty tile membership must survive movement"
++                    );
++                    // None remains explicit full repaint, including unchanged words.
++                    gpu.patch_texts(&edits(&next, slots), &view, None).unwrap();
++                    assert_eq!(gpu.retained_stats().composited_pixels, 128 * 96);
++                    assert_eq!(read_texture(&gpu, &target), readback(&mut full, &next));
++                    gpu.patch_texts(
++                        &edits(&next, slots),
++                        &view,
++                        Some(gpui_canvas::DamageRegion::default()),
++                    )
++                    .unwrap();
++                    assert_eq!(gpu.retained_stats().composited_pixels, 0);
++                }
++            }
++        }
++    });
++}
++
++fn paragraphs(
++    text: &mut TextSystem,
++    labels: [&str; 2],
++    size: [u32; 2],
++    x: [f32; 2],
++) -> (Canvas, [TextRunSlot; 2]) {
++    let layouts = labels.map(|label| text.shape(label, 12., None).unwrap());
++    let clip = Rect::new(0., 0., size[0] as f32, size[1] as f32);
++    let mut canvas = Canvas::recording(size[0], size[1], ColorConfig::default()).unwrap();
++    let mut stage = canvas.stage();
++    stage.clear(Color::WHITE);
++    let slots = std::array::from_fn(|i| {
++        stage
++            .draw_text_scaled_tracked(
++                text,
++                &layouts[i],
++                Point { x: x[i], y: 2. },
++                Affine::IDENTITY,
++                clip,
++                Color::BLACK,
++                1.,
++            )
++            .unwrap()
++            .unwrap()
++    });
++    stage.commit();
++    (canvas, slots)
++}
++
++#[test]
++fn text_tile_repairs_skip_unchanged_paragraphs_and_bound_scissor_count() {
++    pollster::block_on(async {
++        let mut text = TextSystem::bundled().unwrap();
++        let mut gpu = RetainedRenderer::new(renderer(wgpu::TextureFormat::Rgba8UnormSrgb).await);
++        let mut full = renderer(wgpu::TextureFormat::Rgba8UnormSrgb).await;
++        let label = "0000000000000000\n".repeat(12);
++        let mut changed = label.clone();
++        changed.replace_range(100..101, "1");
++        let size = [256, 256];
++        let (initial, slots) = paragraphs(&mut text, [&label, "11"], size, [2., 230.]);
++        let target = output_texture(&gpu, &initial);
++        let view = target.create_view(&Default::default());
++        gpu.render(initial.prepared_scene(), &view, None).unwrap();
++        let (next, _) = paragraphs(&mut text, [&changed, "11"], size, [2., 230.]);
++        let broad = rect_damage(size, Rect::new(0., 0., 256., 256.));
++        gpu.patch_texts(&edits(&next, slots), &view, Some(broad))
++            .unwrap();
++        assert!(gpu.retained_stats().composited_pixels > 0);
++        assert!(
++            gpu.retained_stats().composited_pixels < 256 * 32,
++            "one changed glyph must not repaint the whole paragraph"
++        );
++        assert_eq!(read_texture(&gpu, &target), readback(&mut full, &next));
++        // Two separated columns over more than128 tile rows exceed256 spans.
++        let zeros = "0\n".repeat(180);
++        let ones = "1\n".repeat(180);
++        let size = [128, 4096];
++        let (initial, slots) = paragraphs(&mut text, [&zeros, &ones], size, [2., 98.]);
++        let target = output_texture(&gpu, &initial);
++        let view = target.create_view(&Default::default());
++        gpu.render(initial.prepared_scene(), &view, None).unwrap();
++        let (next, _) = paragraphs(&mut text, [&ones, &zeros], size, [2., 98.]);
++        let broad = rect_damage(size, Rect::new(0., 0., 128., 4096.));
++        gpu.patch_texts(&edits(&next, slots), &view, Some(broad))
++            .unwrap();
++        assert_eq!(
++            gpu.retained_stats().composited_pixels,
++            128 * 4096,
++            "bounded command count must fall back to caller damage"
++        );
++        assert_eq!(read_texture(&gpu, &target), readback(&mut full, &next));
++    });
++}
++
++#[test]
++fn identical_shader_words_can_have_different_conservative_memberships() {
++    pollster::block_on(async {
++        let mut text = TextSystem::bundled().unwrap();
++        // Inverse translation loses this perturbation when subtracting it from
++        //3000 in f64, while outward bounds near32 can still distinguish it. Both are
++        // ordinary Canvas scenes; no packet or prepared geometry is forged.
++        let map = Affine {
++            a: 1.,
++            b: 1.,
++            c: 0.,
++            d: 1.,
++            tx: 3000.,
++            ty: 0.,
++        };
++        let mut positions = [
++            Point {
++                x: -2984.,
++                y: 3000.,
++            },
++            Point {
++                x: -2920.,
++                y: 2940.,
++            },
++        ];
++        let (provisional, slots) = scene(
++            &mut text,
++            ["0011", "1100"],
++            positions,
++            map,
++            ColorConfig::default(),
++            Color::BLACK,
++        );
++        let r = provisional
++            .prepared_scene()
++            .text_run(slots[0])
++            .unwrap()
++            .placements()
++            .next()
++            .unwrap()
++            .local_rect;
++        // Canvas adds a one-pixel outward guard: geometric max31 gives bound32.
++        positions[0].y += 31. - (r.x + r.y + r.width + r.height);
++        let (initial, slots) = scene(
++            &mut text,
++            ["0011", "1100"],
++            positions,
++            map,
++            ColorConfig::default(),
++            Color::BLACK,
++        );
++        let (next, next_slots) = scene(
++            &mut text,
++            ["0011", "1100"],
++            positions,
++            Affine { ty: 1e-13, ..map },
++            ColorConfig::default(),
++            Color::BLACK,
++        );
++        assert_eq!(slots, next_slots);
++        let old = edits(&initial, slots);
++        let new = edits(&next, slots);
++        for ((_, a), (_, b)) in old.iter().zip(&new) {
++            assert_eq!(a.inverse.map(f64::to_bits), b.inverse.map(f64::to_bits));
++            assert_eq!(a.clip, b.clip);
++            assert_eq!(a.color.map(f32::to_bits), b.color.map(f32::to_bits));
++            for (a, b) in a.placements().zip(b.placements()) {
++                assert_eq!(a.local_rect, b.local_rect);
++                assert_eq!(a.source.mask().unwrap().key, b.source.mask().unwrap().key);
++            }
++        }
++        let a = old[0].1.bounds().next().unwrap();
++        let b = new[0].1.bounds().next().unwrap();
++        assert_eq!(a.y + a.height, 32.);
++        assert_eq!(b.y + b.height, 33.);
++        let mut gpu = RetainedRenderer::new(renderer(wgpu::TextureFormat::Rgba8UnormSrgb).await);
++        let mut full = renderer(wgpu::TextureFormat::Rgba8UnormSrgb).await;
++        let target = output_texture(&gpu, &initial);
++        let view = target.create_view(&Default::default());
++        gpu.render(initial.prepared_scene(), &view, None).unwrap();
++        let before = read_texture(&gpu, &target);
++        let damage = rect_damage([128, 96], CLIP);
++        gpu.patch_texts(&new, &view, Some(damage)).unwrap();
++        assert!(
++            gpu.retained_stats().composited_pixels > 0,
++            "changed memberships must be considered even with identical shader words"
++        );
++        let after = read_texture(&gpu, &target);
++        assert_eq!(after, before);
++        assert_eq!(after, readback(&mut full, &next));
++    });
++}

@@ -1,0 +1,7 @@
+qualified build 0
+qualified test 101
+Traceback (most recent call last):
+  File "/home/user/gpui-gpu-text-tiles-evidence/gate.py", line 18, in <module>
+    after=inputs();changes=[p for p in set(before)|set(after) if before.get(p)!=after.get(p)];(out/'guard-after.json').write_text(json.dumps(changes));assert not changes and not failed
+                                                                                                                                                              ^^^^^^^^^^^^^^^^^^^^^^^^^^
+AssertionError

@@ -1,0 +1,32 @@
+A successful text packet patch preserves globals, atlas leases, corrections,
+clip/color/transform authority, opaque cutoffs and all records outside its runs.
+Its only mutable shader inputs are the replaced common/glyph words and the
+ordered per-tile reference sequence. For an unchanged reference sequence,
+checking every referenced compact address against old/new words establishes
+byte-identical inputs; an edited common makes every address in that run changed.
+For a different reference sequence, repaint conservatively regardless of whether
+that difference ultimately affects a sample. Uniform tiles with no additions
+remain the original opaque solid and cannot refer to an admitted masked run.
+All other uniform-to-sampled changes are treated as sequence changes.
+
+The dirty set includes both old and new reference lists. Removing the last
+changed draw from a tile cannot erase its old contribution without repainting.
+Occluded references below the unchanged opaque cutoff need not be visited:
+masked text does not introduce an opaque-solid cutoff, and no other record's
+opacity or ordering changes. Run admission and capacity checks precede any queue
+write, so rejected batches preserve previous packet and image authority.
+
+Disjoint row spans are intersected with the caller's certified old/new damage.
+They retain global viewport/builtin pixel coordinates, painter order, sixteen
+sample arithmetic, the same shader and its no-blend output. Each selected pixel
+is evaluated once; untouched pixels keep the previous owned backing. Presentation
+still copies the whole backing once to the fresh caller target. More than256
+spans falls back to ordinary bounding damage. None explicitly requests a full
+repaint and does not use this optimization; empty damage copies only.
+
+This is input equivalence, not a claim that all host-side conservative bounds
+are recoverable from compact GPU words. Comparing old/new references remains
+necessary even when the compact records compare equal. Near-boundary public
+geometry tests supplement this argument but do not exhaust the numeric domain.
+The implementation still rebuilds/scans complete CSR and performs conservative
+word/list comparisons. It is not O(changed) overall or a cache-hit measurement.

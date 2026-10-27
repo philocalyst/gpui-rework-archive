@@ -1,0 +1,2466 @@
+{
+  "runs": [
+    {
+      "repeat": 0,
+      "case": "0-1-stream",
+      "variant": "control",
+      "final": "FINAL,initial_hash=ed296128abce036f,final_hash=69cdd54e434fd4ce,frames=60,warmups=10,labels=0,fields=1,mode=stream",
+      "images": {
+        "initial": "becd5bded5e997da515e146de4ef0d1eba80d0b2e09f412849afc0788d07de3b",
+        "final": "e6d3bb0f9f65c6da3430bdf94209b5e06fbd161c8f222ce96f51f2daeb4b89a2"
+      },
+      "canonical_sparse": 60,
+      "packet_reused": 60,
+      "host_ns": {
+        "p50": 366338.5,
+        "p95": 497003,
+        "p99": 689917
+      },
+      "complete_ns": {
+        "p50": 20137362.5,
+        "p95": 22092567,
+        "p99": 23694337
+      },
+      "cold_wall_ns": 157588029,
+      "max_rss_kib": 154372,
+      "validated_draws": {
+        "median": 601.0,
+        "range": [
+          601,
+          601
+        ]
+      },
+      "binning_tile_visits": {
+        "median": 1478.0,
+        "range": [
+          1478,
+          1478
+        ]
+      },
+      "upload_bytes": {
+        "median": 19312.0,
+        "range": [
+          19312,
+          19312
+        ]
+      },
+      "bind_groups": {
+        "median": 0.0,
+        "range": [
+          0,
+          0
+        ]
+      },
+      "mask_upload_bytes": {
+        "median": 0.0,
+        "range": [
+          0,
+          0
+        ]
+      },
+      "cpu_index_bytes": {
+        "median": 60236.0,
+        "range": [
+          60236,
+          60236
+        ]
+      },
+      "gpu_buffer_bytes": {
+        "median": 73808.0,
+        "range": [
+          73808,
+          73808
+        ]
+      },
+      "atlas_bytes": {
+        "median": 65536.0,
+        "range": [
+          65536,
+          65536
+        ]
+      }
+    },
+    {
+      "repeat": 0,
+      "case": "0-1-stream",
+      "variant": "candidate",
+      "final": "FINAL,initial_hash=ed296128abce036f,final_hash=69cdd54e434fd4ce,frames=60,warmups=10,labels=0,fields=1,mode=stream",
+      "images": {
+        "initial": "becd5bded5e997da515e146de4ef0d1eba80d0b2e09f412849afc0788d07de3b",
+        "final": "e6d3bb0f9f65c6da3430bdf94209b5e06fbd161c8f222ce96f51f2daeb4b89a2"
+      },
+      "canonical_sparse": 60,
+      "packet_reused": 60,
+      "host_ns": {
+        "p50": 343160.0,
+        "p95": 413417,
+        "p99": 523654
+      },
+      "complete_ns": {
+        "p50": 4585106.0,
+        "p95": 5580817,
+        "p99": 6554538
+      },
+      "cold_wall_ns": 167815109,
+      "max_rss_kib": 154012,
+      "validated_draws": {
+        "median": 601.0,
+        "range": [
+          601,
+          601
+        ]
+      },
+      "binning_tile_visits": {
+        "median": 1478.0,
+        "range": [
+          1478,
+          1478
+        ]
+      },
+      "upload_bytes": {
+        "median": 19312.0,
+        "range": [
+          19312,
+          19312
+        ]
+      },
+      "bind_groups": {
+        "median": 0.0,
+        "range": [
+          0,
+          0
+        ]
+      },
+      "mask_upload_bytes": {
+        "median": 0.0,
+        "range": [
+          0,
+          0
+        ]
+      },
+      "cpu_index_bytes": {
+        "median": 60236.0,
+        "range": [
+          60236,
+          60236
+        ]
+      },
+      "gpu_buffer_bytes": {
+        "median": 73808.0,
+        "range": [
+          73808,
+          73808
+        ]
+      },
+      "atlas_bytes": {
+        "median": 65536.0,
+        "range": [
+          65536,
+          65536
+        ]
+      }
+    },
+    {
+      "repeat": 0,
+      "case": "25-1-stream",
+      "variant": "candidate",
+      "final": "FINAL,initial_hash=bae6986294bfc43f,final_hash=c59e4766af452926,frames=60,warmups=10,labels=25,fields=1,mode=stream",
+      "images": {
+        "initial": "3599c54a33da9c079bb220eac8b8639650e7ceffb0bae3300cbcb60b24d0cb85",
+        "final": "c025d66f744975e130ee9e4031bfa94ba75f0e04eaa4f4c98efb1f41aa4b5432"
+      },
+      "canonical_sparse": 60,
+      "packet_reused": 60,
+      "host_ns": {
+        "p50": 288763.0,
+        "p95": 440679,
+        "p99": 510279
+      },
+      "complete_ns": {
+        "p50": 4250723.0,
+        "p95": 5497832,
+        "p99": 5820668
+      },
+      "cold_wall_ns": 184999370,
+      "max_rss_kib": 153604,
+      "validated_draws": {
+        "median": 601.0,
+        "range": [
+          601,
+          601
+        ]
+      },
+      "binning_tile_visits": {
+        "median": 1478.0,
+        "range": [
+          1478,
+          1478
+        ]
+      },
+      "upload_bytes": {
+        "median": 19312.0,
+        "range": [
+          19312,
+          19312
+        ]
+      },
+      "bind_groups": {
+        "median": 0.0,
+        "range": [
+          0,
+          0
+        ]
+      },
+      "mask_upload_bytes": {
+        "median": 0.0,
+        "range": [
+          0,
+          0
+        ]
+      },
+      "cpu_index_bytes": {
+        "median": 67628.0,
+        "range": [
+          67628,
+          67628
+        ]
+      },
+      "gpu_buffer_bytes": {
+        "median": 73808.0,
+        "range": [
+          73808,
+          73808
+        ]
+      },
+      "atlas_bytes": {
+        "median": 65536.0,
+        "range": [
+          65536,
+          65536
+        ]
+      }
+    },
+    {
+      "repeat": 0,
+      "case": "25-1-stream",
+      "variant": "control",
+      "final": "FINAL,initial_hash=bae6986294bfc43f,final_hash=c59e4766af452926,frames=60,warmups=10,labels=25,fields=1,mode=stream",
+      "images": {
+        "initial": "3599c54a33da9c079bb220eac8b8639650e7ceffb0bae3300cbcb60b24d0cb85",
+        "final": "c025d66f744975e130ee9e4031bfa94ba75f0e04eaa4f4c98efb1f41aa4b5432"
+      },
+      "canonical_sparse": 60,
+      "packet_reused": 60,
+      "host_ns": {
+        "p50": 334178.0,
+        "p95": 412817,
+        "p99": 498868
+      },
+      "complete_ns": {
+        "p50": 19770388.0,
+        "p95": 21817950,
+        "p99": 25184988
+      },
+      "cold_wall_ns": 156678831,
+      "max_rss_kib": 153992,
+      "validated_draws": {
+        "median": 601.0,
+        "range": [
+          601,
+          601
+        ]
+      },
+      "binning_tile_visits": {
+        "median": 1478.0,
+        "range": [
+          1478,
+          1478
+        ]
+      },
+      "upload_bytes": {
+        "median": 19312.0,
+        "range": [
+          19312,
+          19312
+        ]
+      },
+      "bind_groups": {
+        "median": 0.0,
+        "range": [
+          0,
+          0
+        ]
+      },
+      "mask_upload_bytes": {
+        "median": 0.0,
+        "range": [
+          0,
+          0
+        ]
+      },
+      "cpu_index_bytes": {
+        "median": 67628.0,
+        "range": [
+          67628,
+          67628
+        ]
+      },
+      "gpu_buffer_bytes": {
+        "median": 73808.0,
+        "range": [
+          73808,
+          73808
+        ]
+      },
+      "atlas_bytes": {
+        "median": 65536.0,
+        "range": [
+          65536,
+          65536
+        ]
+      }
+    },
+    {
+      "repeat": 0,
+      "case": "1000-1-stream",
+      "variant": "control",
+      "final": "FINAL,initial_hash=cb6881686ce90a6f,final_hash=b435e4fdb781518e,frames=60,warmups=10,labels=1000,fields=1,mode=stream",
+      "images": {
+        "initial": "b3848e809ffb75900ade067c9e7e287d91a95cf0a3f2999ff0712ccb5312cc53",
+        "final": "dd95bca955190bdd2da09d2e68437a3cb7250579cf137d5248b10b4efb7445a4"
+      },
+      "canonical_sparse": 60,
+      "packet_reused": 60,
+      "host_ns": {
+        "p50": 359986.0,
+        "p95": 533532,
+        "p99": 713911
+      },
+      "complete_ns": {
+        "p50": 19832233.0,
+        "p95": 23057149,
+        "p99": 25304502
+      },
+      "cold_wall_ns": 318714787,
+      "max_rss_kib": 155400,
+      "validated_draws": {
+        "median": 601.0,
+        "range": [
+          601,
+          601
+        ]
+      },
+      "binning_tile_visits": {
+        "median": 1478.0,
+        "range": [
+          1478,
+          1478
+        ]
+      },
+      "upload_bytes": {
+        "median": 19312.0,
+        "range": [
+          19312,
+          19312
+        ]
+      },
+      "bind_groups": {
+        "median": 0.0,
+        "range": [
+          0,
+          0
+        ]
+      },
+      "mask_upload_bytes": {
+        "median": 0.0,
+        "range": [
+          0,
+          0
+        ]
+      },
+      "cpu_index_bytes": {
+        "median": 343996.0,
+        "range": [
+          343996,
+          343996
+        ]
+      },
+      "gpu_buffer_bytes": {
+        "median": 360528.0,
+        "range": [
+          360528,
+          360528
+        ]
+      },
+      "atlas_bytes": {
+        "median": 65536.0,
+        "range": [
+          65536,
+          65536
+        ]
+      }
+    },
+    {
+      "repeat": 0,
+      "case": "1000-1-stream",
+      "variant": "candidate",
+      "final": "FINAL,initial_hash=cb6881686ce90a6f,final_hash=b435e4fdb781518e,frames=60,warmups=10,labels=1000,fields=1,mode=stream",
+      "images": {
+        "initial": "b3848e809ffb75900ade067c9e7e287d91a95cf0a3f2999ff0712ccb5312cc53",
+        "final": "dd95bca955190bdd2da09d2e68437a3cb7250579cf137d5248b10b4efb7445a4"
+      },
+      "canonical_sparse": 60,
+      "packet_reused": 60,
+      "host_ns": {
+        "p50": 340805.0,
+        "p95": 494148,
+        "p99": 554901
+      },
+      "complete_ns": {
+        "p50": 4516282.0,
+        "p95": 5704049,
+        "p99": 8387061
+      },
+      "cold_wall_ns": 315300592,
+      "max_rss_kib": 155400,
+      "validated_draws": {
+        "median": 601.0,
+        "range": [
+          601,
+          601
+        ]
+      },
+      "binning_tile_visits": {
+        "median": 1478.0,
+        "range": [
+          1478,
+          1478
+        ]
+      },
+      "upload_bytes": {
+        "median": 19312.0,
+        "range": [
+          19312,
+          19312
+        ]
+      },
+      "bind_groups": {
+        "median": 0.0,
+        "range": [
+          0,
+          0
+        ]
+      },
+      "mask_upload_bytes": {
+        "median": 0.0,
+        "range": [
+          0,
+          0
+        ]
+      },
+      "cpu_index_bytes": {
+        "median": 343996.0,
+        "range": [
+          343996,
+          343996
+        ]
+      },
+      "gpu_buffer_bytes": {
+        "median": 360528.0,
+        "range": [
+          360528,
+          360528
+        ]
+      },
+      "atlas_bytes": {
+        "median": 65536.0,
+        "range": [
+          65536,
+          65536
+        ]
+      }
+    },
+    {
+      "repeat": 0,
+      "case": "1000-2-exact",
+      "variant": "candidate",
+      "final": "FINAL,initial_hash=c08b163f7fad9704,final_hash=c08b163f7fad9704,frames=60,warmups=10,labels=1000,fields=2,mode=exact",
+      "images": {
+        "initial": "390fc82476478ace9c1474e7fa9c3feda4a3c80ebfe5ef7783196c3ee0c393c5",
+        "final": "390fc82476478ace9c1474e7fa9c3feda4a3c80ebfe5ef7783196c3ee0c393c5"
+      },
+      "canonical_sparse": 60,
+      "packet_reused": 60,
+      "host_ns": {
+        "p50": 119278.5,
+        "p95": 243698,
+        "p99": 334118
+      },
+      "complete_ns": {
+        "p50": 1617680.0,
+        "p95": 1926681,
+        "p99": 2376897
+      },
+      "cold_wall_ns": 284126841,
+      "max_rss_kib": 154504,
+      "validated_draws": {
+        "median": 8.0,
+        "range": [
+          8,
+          8
+        ]
+      },
+      "binning_tile_visits": {
+        "median": 24.0,
+        "range": [
+          24,
+          24
+        ]
+      },
+      "upload_bytes": {
+        "median": 416.0,
+        "range": [
+          416,
+          416
+        ]
+      },
+      "bind_groups": {
+        "median": 0.0,
+        "range": [
+          0,
+          0
+        ]
+      },
+      "mask_upload_bytes": {
+        "median": 0.0,
+        "range": [
+          0,
+          0
+        ]
+      },
+      "cpu_index_bytes": {
+        "median": 319284.0,
+        "range": [
+          319284,
+          319284
+        ]
+      },
+      "gpu_buffer_bytes": {
+        "median": 360528.0,
+        "range": [
+          360528,
+          360528
+        ]
+      },
+      "atlas_bytes": {
+        "median": 65536.0,
+        "range": [
+          65536,
+          65536
+        ]
+      }
+    },
+    {
+      "repeat": 0,
+      "case": "1000-2-exact",
+      "variant": "control",
+      "final": "FINAL,initial_hash=c08b163f7fad9704,final_hash=c08b163f7fad9704,frames=60,warmups=10,labels=1000,fields=2,mode=exact",
+      "images": {
+        "initial": "390fc82476478ace9c1474e7fa9c3feda4a3c80ebfe5ef7783196c3ee0c393c5",
+        "final": "390fc82476478ace9c1474e7fa9c3feda4a3c80ebfe5ef7783196c3ee0c393c5"
+      },
+      "canonical_sparse": 60,
+      "packet_reused": 60,
+      "host_ns": {
+        "p50": 103139.0,
+        "p95": 216396,
+        "p99": 352223
+      },
+      "complete_ns": {
+        "p50": 1629246.5,
+        "p95": 2099395,
+        "p99": 2298308
+      },
+      "cold_wall_ns": 281374188,
+      "max_rss_kib": 154504,
+      "validated_draws": {
+        "median": 8.0,
+        "range": [
+          8,
+          8
+        ]
+      },
+      "binning_tile_visits": {
+        "median": 24.0,
+        "range": [
+          24,
+          24
+        ]
+      },
+      "upload_bytes": {
+        "median": 416.0,
+        "range": [
+          416,
+          416
+        ]
+      },
+      "bind_groups": {
+        "median": 0.0,
+        "range": [
+          0,
+          0
+        ]
+      },
+      "mask_upload_bytes": {
+        "median": 0.0,
+        "range": [
+          0,
+          0
+        ]
+      },
+      "cpu_index_bytes": {
+        "median": 319284.0,
+        "range": [
+          319284,
+          319284
+        ]
+      },
+      "gpu_buffer_bytes": {
+        "median": 360528.0,
+        "range": [
+          360528,
+          360528
+        ]
+      },
+      "atlas_bytes": {
+        "median": 65536.0,
+        "range": [
+          65536,
+          65536
+        ]
+      }
+    },
+    {
+      "repeat": 0,
+      "case": "1000-4-exact",
+      "variant": "control",
+      "final": "FINAL,initial_hash=a3e55a7fc708ecff,final_hash=a3e55a7fc708ecff,frames=60,warmups=10,labels=1000,fields=4,mode=exact",
+      "images": {
+        "initial": "b570e734ad6c6282c78da4a5aae8c470f70ee0e626ca770d055d59d37bef1246",
+        "final": "b570e734ad6c6282c78da4a5aae8c470f70ee0e626ca770d055d59d37bef1246"
+      },
+      "canonical_sparse": 60,
+      "packet_reused": 60,
+      "host_ns": {
+        "p50": 156614.5,
+        "p95": 248307,
+        "p99": 416613
+      },
+      "complete_ns": {
+        "p50": 2026017.5,
+        "p95": 2703751,
+        "p99": 2856026
+      },
+      "cold_wall_ns": 305394025,
+      "max_rss_kib": 154628,
+      "validated_draws": {
+        "median": 16.0,
+        "range": [
+          16,
+          16
+        ]
+      },
+      "binning_tile_visits": {
+        "median": 48.0,
+        "range": [
+          48,
+          48
+        ]
+      },
+      "upload_bytes": {
+        "median": 832.0,
+        "range": [
+          832,
+          832
+        ]
+      },
+      "bind_groups": {
+        "median": 0.0,
+        "range": [
+          0,
+          0
+        ]
+      },
+      "mask_upload_bytes": {
+        "median": 0.0,
+        "range": [
+          0,
+          0
+        ]
+      },
+      "cpu_index_bytes": {
+        "median": 319796.0,
+        "range": [
+          319796,
+          319796
+        ]
+      },
+      "gpu_buffer_bytes": {
+        "median": 360528.0,
+        "range": [
+          360528,
+          360528
+        ]
+      },
+      "atlas_bytes": {
+        "median": 65536.0,
+        "range": [
+          65536,
+          65536
+        ]
+      }
+    },
+    {
+      "repeat": 0,
+      "case": "1000-4-exact",
+      "variant": "candidate",
+      "final": "FINAL,initial_hash=a3e55a7fc708ecff,final_hash=a3e55a7fc708ecff,frames=60,warmups=10,labels=1000,fields=4,mode=exact",
+      "images": {
+        "initial": "b570e734ad6c6282c78da4a5aae8c470f70ee0e626ca770d055d59d37bef1246",
+        "final": "b570e734ad6c6282c78da4a5aae8c470f70ee0e626ca770d055d59d37bef1246"
+      },
+      "canonical_sparse": 60,
+      "packet_reused": 60,
+      "host_ns": {
+        "p50": 258525.5,
+        "p95": 392136,
+        "p99": 471196
+      },
+      "complete_ns": {
+        "p50": 2512411.0,
+        "p95": 3284322,
+        "p99": 3622557
+      },
+      "cold_wall_ns": 307206553,
+      "max_rss_kib": 154632,
+      "validated_draws": {
+        "median": 16.0,
+        "range": [
+          16,
+          16
+        ]
+      },
+      "binning_tile_visits": {
+        "median": 48.0,
+        "range": [
+          48,
+          48
+        ]
+      },
+      "upload_bytes": {
+        "median": 832.0,
+        "range": [
+          832,
+          832
+        ]
+      },
+      "bind_groups": {
+        "median": 0.0,
+        "range": [
+          0,
+          0
+        ]
+      },
+      "mask_upload_bytes": {
+        "median": 0.0,
+        "range": [
+          0,
+          0
+        ]
+      },
+      "cpu_index_bytes": {
+        "median": 319796.0,
+        "range": [
+          319796,
+          319796
+        ]
+      },
+      "gpu_buffer_bytes": {
+        "median": 360528.0,
+        "range": [
+          360528,
+          360528
+        ]
+      },
+      "atlas_bytes": {
+        "median": 65536.0,
+        "range": [
+          65536,
+          65536
+        ]
+      }
+    },
+    {
+      "repeat": 1,
+      "case": "0-1-stream",
+      "variant": "candidate",
+      "final": "FINAL,initial_hash=ed296128abce036f,final_hash=69cdd54e434fd4ce,frames=60,warmups=10,labels=0,fields=1,mode=stream",
+      "images": {
+        "initial": "becd5bded5e997da515e146de4ef0d1eba80d0b2e09f412849afc0788d07de3b",
+        "final": "e6d3bb0f9f65c6da3430bdf94209b5e06fbd161c8f222ce96f51f2daeb4b89a2"
+      },
+      "canonical_sparse": 60,
+      "packet_reused": 60,
+      "host_ns": {
+        "p50": 440973.0,
+        "p95": 588686,
+        "p99": 673375
+      },
+      "complete_ns": {
+        "p50": 5825276.0,
+        "p95": 6977993,
+        "p99": 7754422
+      },
+      "cold_wall_ns": 203095577,
+      "max_rss_kib": 153860,
+      "validated_draws": {
+        "median": 601.0,
+        "range": [
+          601,
+          601
+        ]
+      },
+      "binning_tile_visits": {
+        "median": 1478.0,
+        "range": [
+          1478,
+          1478
+        ]
+      },
+      "upload_bytes": {
+        "median": 19312.0,
+        "range": [
+          19312,
+          19312
+        ]
+      },
+      "bind_groups": {
+        "median": 0.0,
+        "range": [
+          0,
+          0
+        ]
+      },
+      "mask_upload_bytes": {
+        "median": 0.0,
+        "range": [
+          0,
+          0
+        ]
+      },
+      "cpu_index_bytes": {
+        "median": 60236.0,
+        "range": [
+          60236,
+          60236
+        ]
+      },
+      "gpu_buffer_bytes": {
+        "median": 73808.0,
+        "range": [
+          73808,
+          73808
+        ]
+      },
+      "atlas_bytes": {
+        "median": 65536.0,
+        "range": [
+          65536,
+          65536
+        ]
+      }
+    },
+    {
+      "repeat": 1,
+      "case": "0-1-stream",
+      "variant": "control",
+      "final": "FINAL,initial_hash=ed296128abce036f,final_hash=69cdd54e434fd4ce,frames=60,warmups=10,labels=0,fields=1,mode=stream",
+      "images": {
+        "initial": "becd5bded5e997da515e146de4ef0d1eba80d0b2e09f412849afc0788d07de3b",
+        "final": "e6d3bb0f9f65c6da3430bdf94209b5e06fbd161c8f222ce96f51f2daeb4b89a2"
+      },
+      "canonical_sparse": 60,
+      "packet_reused": 60,
+      "host_ns": {
+        "p50": 373777.5,
+        "p95": 591482,
+        "p99": 803680
+      },
+      "complete_ns": {
+        "p50": 20598643.0,
+        "p95": 23183596,
+        "p99": 24530157
+      },
+      "cold_wall_ns": 178370262,
+      "max_rss_kib": 153992,
+      "validated_draws": {
+        "median": 601.0,
+        "range": [
+          601,
+          601
+        ]
+      },
+      "binning_tile_visits": {
+        "median": 1478.0,
+        "range": [
+          1478,
+          1478
+        ]
+      },
+      "upload_bytes": {
+        "median": 19312.0,
+        "range": [
+          19312,
+          19312
+        ]
+      },
+      "bind_groups": {
+        "median": 0.0,
+        "range": [
+          0,
+          0
+        ]
+      },
+      "mask_upload_bytes": {
+        "median": 0.0,
+        "range": [
+          0,
+          0
+        ]
+      },
+      "cpu_index_bytes": {
+        "median": 60236.0,
+        "range": [
+          60236,
+          60236
+        ]
+      },
+      "gpu_buffer_bytes": {
+        "median": 73808.0,
+        "range": [
+          73808,
+          73808
+        ]
+      },
+      "atlas_bytes": {
+        "median": 65536.0,
+        "range": [
+          65536,
+          65536
+        ]
+      }
+    },
+    {
+      "repeat": 1,
+      "case": "25-1-stream",
+      "variant": "control",
+      "final": "FINAL,initial_hash=bae6986294bfc43f,final_hash=c59e4766af452926,frames=60,warmups=10,labels=25,fields=1,mode=stream",
+      "images": {
+        "initial": "3599c54a33da9c079bb220eac8b8639650e7ceffb0bae3300cbcb60b24d0cb85",
+        "final": "c025d66f744975e130ee9e4031bfa94ba75f0e04eaa4f4c98efb1f41aa4b5432"
+      },
+      "canonical_sparse": 60,
+      "packet_reused": 60,
+      "host_ns": {
+        "p50": 339488.5,
+        "p95": 432993,
+        "p99": 455086
+      },
+      "complete_ns": {
+        "p50": 19564295.5,
+        "p95": 22534187,
+        "p99": 23866771
+      },
+      "cold_wall_ns": 188051315,
+      "max_rss_kib": 154116,
+      "validated_draws": {
+        "median": 601.0,
+        "range": [
+          601,
+          601
+        ]
+      },
+      "binning_tile_visits": {
+        "median": 1478.0,
+        "range": [
+          1478,
+          1478
+        ]
+      },
+      "upload_bytes": {
+        "median": 19312.0,
+        "range": [
+          19312,
+          19312
+        ]
+      },
+      "bind_groups": {
+        "median": 0.0,
+        "range": [
+          0,
+          0
+        ]
+      },
+      "mask_upload_bytes": {
+        "median": 0.0,
+        "range": [
+          0,
+          0
+        ]
+      },
+      "cpu_index_bytes": {
+        "median": 67628.0,
+        "range": [
+          67628,
+          67628
+        ]
+      },
+      "gpu_buffer_bytes": {
+        "median": 73808.0,
+        "range": [
+          73808,
+          73808
+        ]
+      },
+      "atlas_bytes": {
+        "median": 65536.0,
+        "range": [
+          65536,
+          65536
+        ]
+      }
+    },
+    {
+      "repeat": 1,
+      "case": "25-1-stream",
+      "variant": "candidate",
+      "final": "FINAL,initial_hash=bae6986294bfc43f,final_hash=c59e4766af452926,frames=60,warmups=10,labels=25,fields=1,mode=stream",
+      "images": {
+        "initial": "3599c54a33da9c079bb220eac8b8639650e7ceffb0bae3300cbcb60b24d0cb85",
+        "final": "c025d66f744975e130ee9e4031bfa94ba75f0e04eaa4f4c98efb1f41aa4b5432"
+      },
+      "canonical_sparse": 60,
+      "packet_reused": 60,
+      "host_ns": {
+        "p50": 479767.0,
+        "p95": 615126,
+        "p99": 749558
+      },
+      "complete_ns": {
+        "p50": 6091141.0,
+        "p95": 7446473,
+        "p99": 8216802
+      },
+      "cold_wall_ns": 176694204,
+      "max_rss_kib": 154120,
+      "validated_draws": {
+        "median": 601.0,
+        "range": [
+          601,
+          601
+        ]
+      },
+      "binning_tile_visits": {
+        "median": 1478.0,
+        "range": [
+          1478,
+          1478
+        ]
+      },
+      "upload_bytes": {
+        "median": 19312.0,
+        "range": [
+          19312,
+          19312
+        ]
+      },
+      "bind_groups": {
+        "median": 0.0,
+        "range": [
+          0,
+          0
+        ]
+      },
+      "mask_upload_bytes": {
+        "median": 0.0,
+        "range": [
+          0,
+          0
+        ]
+      },
+      "cpu_index_bytes": {
+        "median": 67628.0,
+        "range": [
+          67628,
+          67628
+        ]
+      },
+      "gpu_buffer_bytes": {
+        "median": 73808.0,
+        "range": [
+          73808,
+          73808
+        ]
+      },
+      "atlas_bytes": {
+        "median": 65536.0,
+        "range": [
+          65536,
+          65536
+        ]
+      }
+    },
+    {
+      "repeat": 1,
+      "case": "1000-1-stream",
+      "variant": "candidate",
+      "final": "FINAL,initial_hash=cb6881686ce90a6f,final_hash=b435e4fdb781518e,frames=60,warmups=10,labels=1000,fields=1,mode=stream",
+      "images": {
+        "initial": "b3848e809ffb75900ade067c9e7e287d91a95cf0a3f2999ff0712ccb5312cc53",
+        "final": "dd95bca955190bdd2da09d2e68437a3cb7250579cf137d5248b10b4efb7445a4"
+      },
+      "canonical_sparse": 60,
+      "packet_reused": 60,
+      "host_ns": {
+        "p50": 302047.0,
+        "p95": 448604,
+        "p99": 472217
+      },
+      "complete_ns": {
+        "p50": 4198264.5,
+        "p95": 4972875,
+        "p99": 6013410
+      },
+      "cold_wall_ns": 322752847,
+      "max_rss_kib": 155140,
+      "validated_draws": {
+        "median": 601.0,
+        "range": [
+          601,
+          601
+        ]
+      },
+      "binning_tile_visits": {
+        "median": 1478.0,
+        "range": [
+          1478,
+          1478
+        ]
+      },
+      "upload_bytes": {
+        "median": 19312.0,
+        "range": [
+          19312,
+          19312
+        ]
+      },
+      "bind_groups": {
+        "median": 0.0,
+        "range": [
+          0,
+          0
+        ]
+      },
+      "mask_upload_bytes": {
+        "median": 0.0,
+        "range": [
+          0,
+          0
+        ]
+      },
+      "cpu_index_bytes": {
+        "median": 343996.0,
+        "range": [
+          343996,
+          343996
+        ]
+      },
+      "gpu_buffer_bytes": {
+        "median": 360528.0,
+        "range": [
+          360528,
+          360528
+        ]
+      },
+      "atlas_bytes": {
+        "median": 65536.0,
+        "range": [
+          65536,
+          65536
+        ]
+      }
+    },
+    {
+      "repeat": 1,
+      "case": "1000-1-stream",
+      "variant": "control",
+      "final": "FINAL,initial_hash=cb6881686ce90a6f,final_hash=b435e4fdb781518e,frames=60,warmups=10,labels=1000,fields=1,mode=stream",
+      "images": {
+        "initial": "b3848e809ffb75900ade067c9e7e287d91a95cf0a3f2999ff0712ccb5312cc53",
+        "final": "dd95bca955190bdd2da09d2e68437a3cb7250579cf137d5248b10b4efb7445a4"
+      },
+      "canonical_sparse": 60,
+      "packet_reused": 60,
+      "host_ns": {
+        "p50": 316033.5,
+        "p95": 414058,
+        "p99": 587104
+      },
+      "complete_ns": {
+        "p50": 18930184.0,
+        "p95": 21062782,
+        "p99": 22927156
+      },
+      "cold_wall_ns": 304682769,
+      "max_rss_kib": 155268,
+      "validated_draws": {
+        "median": 601.0,
+        "range": [
+          601,
+          601
+        ]
+      },
+      "binning_tile_visits": {
+        "median": 1478.0,
+        "range": [
+          1478,
+          1478
+        ]
+      },
+      "upload_bytes": {
+        "median": 19312.0,
+        "range": [
+          19312,
+          19312
+        ]
+      },
+      "bind_groups": {
+        "median": 0.0,
+        "range": [
+          0,
+          0
+        ]
+      },
+      "mask_upload_bytes": {
+        "median": 0.0,
+        "range": [
+          0,
+          0
+        ]
+      },
+      "cpu_index_bytes": {
+        "median": 343996.0,
+        "range": [
+          343996,
+          343996
+        ]
+      },
+      "gpu_buffer_bytes": {
+        "median": 360528.0,
+        "range": [
+          360528,
+          360528
+        ]
+      },
+      "atlas_bytes": {
+        "median": 65536.0,
+        "range": [
+          65536,
+          65536
+        ]
+      }
+    },
+    {
+      "repeat": 1,
+      "case": "1000-2-exact",
+      "variant": "control",
+      "final": "FINAL,initial_hash=c08b163f7fad9704,final_hash=c08b163f7fad9704,frames=60,warmups=10,labels=1000,fields=2,mode=exact",
+      "images": {
+        "initial": "390fc82476478ace9c1474e7fa9c3feda4a3c80ebfe5ef7783196c3ee0c393c5",
+        "final": "390fc82476478ace9c1474e7fa9c3feda4a3c80ebfe5ef7783196c3ee0c393c5"
+      },
+      "canonical_sparse": 60,
+      "packet_reused": 60,
+      "host_ns": {
+        "p50": 101165.0,
+        "p95": 190299,
+        "p99": 217258
+      },
+      "complete_ns": {
+        "p50": 1748932.5,
+        "p95": 2126145,
+        "p99": 2345297
+      },
+      "cold_wall_ns": 295427385,
+      "max_rss_kib": 154500,
+      "validated_draws": {
+        "median": 8.0,
+        "range": [
+          8,
+          8
+        ]
+      },
+      "binning_tile_visits": {
+        "median": 24.0,
+        "range": [
+          24,
+          24
+        ]
+      },
+      "upload_bytes": {
+        "median": 416.0,
+        "range": [
+          416,
+          416
+        ]
+      },
+      "bind_groups": {
+        "median": 0.0,
+        "range": [
+          0,
+          0
+        ]
+      },
+      "mask_upload_bytes": {
+        "median": 0.0,
+        "range": [
+          0,
+          0
+        ]
+      },
+      "cpu_index_bytes": {
+        "median": 319284.0,
+        "range": [
+          319284,
+          319284
+        ]
+      },
+      "gpu_buffer_bytes": {
+        "median": 360528.0,
+        "range": [
+          360528,
+          360528
+        ]
+      },
+      "atlas_bytes": {
+        "median": 65536.0,
+        "range": [
+          65536,
+          65536
+        ]
+      }
+    },
+    {
+      "repeat": 1,
+      "case": "1000-2-exact",
+      "variant": "candidate",
+      "final": "FINAL,initial_hash=c08b163f7fad9704,final_hash=c08b163f7fad9704,frames=60,warmups=10,labels=1000,fields=2,mode=exact",
+      "images": {
+        "initial": "390fc82476478ace9c1474e7fa9c3feda4a3c80ebfe5ef7783196c3ee0c393c5",
+        "final": "390fc82476478ace9c1474e7fa9c3feda4a3c80ebfe5ef7783196c3ee0c393c5"
+      },
+      "canonical_sparse": 60,
+      "packet_reused": 60,
+      "host_ns": {
+        "p50": 169237.0,
+        "p95": 289825,
+        "p99": 415240
+      },
+      "complete_ns": {
+        "p50": 2059751.5,
+        "p95": 2454352,
+        "p99": 2576592
+      },
+      "cold_wall_ns": 365296135,
+      "max_rss_kib": 154376,
+      "validated_draws": {
+        "median": 8.0,
+        "range": [
+          8,
+          8
+        ]
+      },
+      "binning_tile_visits": {
+        "median": 24.0,
+        "range": [
+          24,
+          24
+        ]
+      },
+      "upload_bytes": {
+        "median": 416.0,
+        "range": [
+          416,
+          416
+        ]
+      },
+      "bind_groups": {
+        "median": 0.0,
+        "range": [
+          0,
+          0
+        ]
+      },
+      "mask_upload_bytes": {
+        "median": 0.0,
+        "range": [
+          0,
+          0
+        ]
+      },
+      "cpu_index_bytes": {
+        "median": 319284.0,
+        "range": [
+          319284,
+          319284
+        ]
+      },
+      "gpu_buffer_bytes": {
+        "median": 360528.0,
+        "range": [
+          360528,
+          360528
+        ]
+      },
+      "atlas_bytes": {
+        "median": 65536.0,
+        "range": [
+          65536,
+          65536
+        ]
+      }
+    },
+    {
+      "repeat": 1,
+      "case": "1000-4-exact",
+      "variant": "candidate",
+      "final": "FINAL,initial_hash=a3e55a7fc708ecff,final_hash=a3e55a7fc708ecff,frames=60,warmups=10,labels=1000,fields=4,mode=exact",
+      "images": {
+        "initial": "b570e734ad6c6282c78da4a5aae8c470f70ee0e626ca770d055d59d37bef1246",
+        "final": "b570e734ad6c6282c78da4a5aae8c470f70ee0e626ca770d055d59d37bef1246"
+      },
+      "canonical_sparse": 60,
+      "packet_reused": 60,
+      "host_ns": {
+        "p50": 138736.0,
+        "p95": 220695,
+        "p99": 270859
+      },
+      "complete_ns": {
+        "p50": 1580119.5,
+        "p95": 1745311,
+        "p99": 1980822
+      },
+      "cold_wall_ns": 299879522,
+      "max_rss_kib": 154500,
+      "validated_draws": {
+        "median": 16.0,
+        "range": [
+          16,
+          16
+        ]
+      },
+      "binning_tile_visits": {
+        "median": 48.0,
+        "range": [
+          48,
+          48
+        ]
+      },
+      "upload_bytes": {
+        "median": 832.0,
+        "range": [
+          832,
+          832
+        ]
+      },
+      "bind_groups": {
+        "median": 0.0,
+        "range": [
+          0,
+          0
+        ]
+      },
+      "mask_upload_bytes": {
+        "median": 0.0,
+        "range": [
+          0,
+          0
+        ]
+      },
+      "cpu_index_bytes": {
+        "median": 319796.0,
+        "range": [
+          319796,
+          319796
+        ]
+      },
+      "gpu_buffer_bytes": {
+        "median": 360528.0,
+        "range": [
+          360528,
+          360528
+        ]
+      },
+      "atlas_bytes": {
+        "median": 65536.0,
+        "range": [
+          65536,
+          65536
+        ]
+      }
+    },
+    {
+      "repeat": 1,
+      "case": "1000-4-exact",
+      "variant": "control",
+      "final": "FINAL,initial_hash=a3e55a7fc708ecff,final_hash=a3e55a7fc708ecff,frames=60,warmups=10,labels=1000,fields=4,mode=exact",
+      "images": {
+        "initial": "b570e734ad6c6282c78da4a5aae8c470f70ee0e626ca770d055d59d37bef1246",
+        "final": "b570e734ad6c6282c78da4a5aae8c470f70ee0e626ca770d055d59d37bef1246"
+      },
+      "canonical_sparse": 60,
+      "packet_reused": 60,
+      "host_ns": {
+        "p50": 105909.5,
+        "p95": 167956,
+        "p99": 266511
+      },
+      "complete_ns": {
+        "p50": 1559089.5,
+        "p95": 1914769,
+        "p99": 2067456
+      },
+      "cold_wall_ns": 276821793,
+      "max_rss_kib": 154500,
+      "validated_draws": {
+        "median": 16.0,
+        "range": [
+          16,
+          16
+        ]
+      },
+      "binning_tile_visits": {
+        "median": 48.0,
+        "range": [
+          48,
+          48
+        ]
+      },
+      "upload_bytes": {
+        "median": 832.0,
+        "range": [
+          832,
+          832
+        ]
+      },
+      "bind_groups": {
+        "median": 0.0,
+        "range": [
+          0,
+          0
+        ]
+      },
+      "mask_upload_bytes": {
+        "median": 0.0,
+        "range": [
+          0,
+          0
+        ]
+      },
+      "cpu_index_bytes": {
+        "median": 319796.0,
+        "range": [
+          319796,
+          319796
+        ]
+      },
+      "gpu_buffer_bytes": {
+        "median": 360528.0,
+        "range": [
+          360528,
+          360528
+        ]
+      },
+      "atlas_bytes": {
+        "median": 65536.0,
+        "range": [
+          65536,
+          65536
+        ]
+      }
+    },
+    {
+      "repeat": 2,
+      "case": "0-1-stream",
+      "variant": "control",
+      "final": "FINAL,initial_hash=ed296128abce036f,final_hash=69cdd54e434fd4ce,frames=60,warmups=10,labels=0,fields=1,mode=stream",
+      "images": {
+        "initial": "becd5bded5e997da515e146de4ef0d1eba80d0b2e09f412849afc0788d07de3b",
+        "final": "e6d3bb0f9f65c6da3430bdf94209b5e06fbd161c8f222ce96f51f2daeb4b89a2"
+      },
+      "canonical_sparse": 60,
+      "packet_reused": 60,
+      "host_ns": {
+        "p50": 355858.5,
+        "p95": 484249,
+        "p99": 631687
+      },
+      "complete_ns": {
+        "p50": 20580089.5,
+        "p95": 23976998,
+        "p99": 26761001
+      },
+      "cold_wall_ns": 167453789,
+      "max_rss_kib": 154248,
+      "validated_draws": {
+        "median": 601.0,
+        "range": [
+          601,
+          601
+        ]
+      },
+      "binning_tile_visits": {
+        "median": 1478.0,
+        "range": [
+          1478,
+          1478
+        ]
+      },
+      "upload_bytes": {
+        "median": 19312.0,
+        "range": [
+          19312,
+          19312
+        ]
+      },
+      "bind_groups": {
+        "median": 0.0,
+        "range": [
+          0,
+          0
+        ]
+      },
+      "mask_upload_bytes": {
+        "median": 0.0,
+        "range": [
+          0,
+          0
+        ]
+      },
+      "cpu_index_bytes": {
+        "median": 60236.0,
+        "range": [
+          60236,
+          60236
+        ]
+      },
+      "gpu_buffer_bytes": {
+        "median": 73808.0,
+        "range": [
+          73808,
+          73808
+        ]
+      },
+      "atlas_bytes": {
+        "median": 65536.0,
+        "range": [
+          65536,
+          65536
+        ]
+      }
+    },
+    {
+      "repeat": 2,
+      "case": "0-1-stream",
+      "variant": "candidate",
+      "final": "FINAL,initial_hash=ed296128abce036f,final_hash=69cdd54e434fd4ce,frames=60,warmups=10,labels=0,fields=1,mode=stream",
+      "images": {
+        "initial": "becd5bded5e997da515e146de4ef0d1eba80d0b2e09f412849afc0788d07de3b",
+        "final": "e6d3bb0f9f65c6da3430bdf94209b5e06fbd161c8f222ce96f51f2daeb4b89a2"
+      },
+      "canonical_sparse": 60,
+      "packet_reused": 60,
+      "host_ns": {
+        "p50": 362531.5,
+        "p95": 586804,
+        "p99": 1080722
+      },
+      "complete_ns": {
+        "p50": 5262414.5,
+        "p95": 6434643,
+        "p99": 8515783
+      },
+      "cold_wall_ns": 176971753,
+      "max_rss_kib": 154120,
+      "validated_draws": {
+        "median": 601.0,
+        "range": [
+          601,
+          601
+        ]
+      },
+      "binning_tile_visits": {
+        "median": 1478.0,
+        "range": [
+          1478,
+          1478
+        ]
+      },
+      "upload_bytes": {
+        "median": 19312.0,
+        "range": [
+          19312,
+          19312
+        ]
+      },
+      "bind_groups": {
+        "median": 0.0,
+        "range": [
+          0,
+          0
+        ]
+      },
+      "mask_upload_bytes": {
+        "median": 0.0,
+        "range": [
+          0,
+          0
+        ]
+      },
+      "cpu_index_bytes": {
+        "median": 60236.0,
+        "range": [
+          60236,
+          60236
+        ]
+      },
+      "gpu_buffer_bytes": {
+        "median": 73808.0,
+        "range": [
+          73808,
+          73808
+        ]
+      },
+      "atlas_bytes": {
+        "median": 65536.0,
+        "range": [
+          65536,
+          65536
+        ]
+      }
+    },
+    {
+      "repeat": 2,
+      "case": "25-1-stream",
+      "variant": "candidate",
+      "final": "FINAL,initial_hash=bae6986294bfc43f,final_hash=c59e4766af452926,frames=60,warmups=10,labels=25,fields=1,mode=stream",
+      "images": {
+        "initial": "3599c54a33da9c079bb220eac8b8639650e7ceffb0bae3300cbcb60b24d0cb85",
+        "final": "c025d66f744975e130ee9e4031bfa94ba75f0e04eaa4f4c98efb1f41aa4b5432"
+      },
+      "canonical_sparse": 60,
+      "packet_reused": 60,
+      "host_ns": {
+        "p50": 399827.5,
+        "p95": 579508,
+        "p99": 684786
+      },
+      "complete_ns": {
+        "p50": 5467805.5,
+        "p95": 6486750,
+        "p99": 7759691
+      },
+      "cold_wall_ns": 215670398,
+      "max_rss_kib": 154120,
+      "validated_draws": {
+        "median": 601.0,
+        "range": [
+          601,
+          601
+        ]
+      },
+      "binning_tile_visits": {
+        "median": 1478.0,
+        "range": [
+          1478,
+          1478
+        ]
+      },
+      "upload_bytes": {
+        "median": 19312.0,
+        "range": [
+          19312,
+          19312
+        ]
+      },
+      "bind_groups": {
+        "median": 0.0,
+        "range": [
+          0,
+          0
+        ]
+      },
+      "mask_upload_bytes": {
+        "median": 0.0,
+        "range": [
+          0,
+          0
+        ]
+      },
+      "cpu_index_bytes": {
+        "median": 67628.0,
+        "range": [
+          67628,
+          67628
+        ]
+      },
+      "gpu_buffer_bytes": {
+        "median": 73808.0,
+        "range": [
+          73808,
+          73808
+        ]
+      },
+      "atlas_bytes": {
+        "median": 65536.0,
+        "range": [
+          65536,
+          65536
+        ]
+      }
+    },
+    {
+      "repeat": 2,
+      "case": "25-1-stream",
+      "variant": "control",
+      "final": "FINAL,initial_hash=bae6986294bfc43f,final_hash=c59e4766af452926,frames=60,warmups=10,labels=25,fields=1,mode=stream",
+      "images": {
+        "initial": "3599c54a33da9c079bb220eac8b8639650e7ceffb0bae3300cbcb60b24d0cb85",
+        "final": "c025d66f744975e130ee9e4031bfa94ba75f0e04eaa4f4c98efb1f41aa4b5432"
+      },
+      "canonical_sparse": 60,
+      "packet_reused": 60,
+      "host_ns": {
+        "p50": 375751.5,
+        "p95": 499038,
+        "p99": 509848
+      },
+      "complete_ns": {
+        "p50": 21577725.0,
+        "p95": 26938362,
+        "p99": 30664075
+      },
+      "cold_wall_ns": 240297948,
+      "max_rss_kib": 153864,
+      "validated_draws": {
+        "median": 601.0,
+        "range": [
+          601,
+          601
+        ]
+      },
+      "binning_tile_visits": {
+        "median": 1478.0,
+        "range": [
+          1478,
+          1478
+        ]
+      },
+      "upload_bytes": {
+        "median": 19312.0,
+        "range": [
+          19312,
+          19312
+        ]
+      },
+      "bind_groups": {
+        "median": 0.0,
+        "range": [
+          0,
+          0
+        ]
+      },
+      "mask_upload_bytes": {
+        "median": 0.0,
+        "range": [
+          0,
+          0
+        ]
+      },
+      "cpu_index_bytes": {
+        "median": 67628.0,
+        "range": [
+          67628,
+          67628
+        ]
+      },
+      "gpu_buffer_bytes": {
+        "median": 73808.0,
+        "range": [
+          73808,
+          73808
+        ]
+      },
+      "atlas_bytes": {
+        "median": 65536.0,
+        "range": [
+          65536,
+          65536
+        ]
+      }
+    },
+    {
+      "repeat": 2,
+      "case": "1000-1-stream",
+      "variant": "control",
+      "final": "FINAL,initial_hash=cb6881686ce90a6f,final_hash=b435e4fdb781518e,frames=60,warmups=10,labels=1000,fields=1,mode=stream",
+      "images": {
+        "initial": "b3848e809ffb75900ade067c9e7e287d91a95cf0a3f2999ff0712ccb5312cc53",
+        "final": "dd95bca955190bdd2da09d2e68437a3cb7250579cf137d5248b10b4efb7445a4"
+      },
+      "canonical_sparse": 60,
+      "packet_reused": 60,
+      "host_ns": {
+        "p50": 388746.5,
+        "p95": 497265,
+        "p99": 565353
+      },
+      "complete_ns": {
+        "p50": 21350031.0,
+        "p95": 27748496,
+        "p99": 29223867
+      },
+      "cold_wall_ns": 425317837,
+      "max_rss_kib": 155396,
+      "validated_draws": {
+        "median": 601.0,
+        "range": [
+          601,
+          601
+        ]
+      },
+      "binning_tile_visits": {
+        "median": 1478.0,
+        "range": [
+          1478,
+          1478
+        ]
+      },
+      "upload_bytes": {
+        "median": 19312.0,
+        "range": [
+          19312,
+          19312
+        ]
+      },
+      "bind_groups": {
+        "median": 0.0,
+        "range": [
+          0,
+          0
+        ]
+      },
+      "mask_upload_bytes": {
+        "median": 0.0,
+        "range": [
+          0,
+          0
+        ]
+      },
+      "cpu_index_bytes": {
+        "median": 343996.0,
+        "range": [
+          343996,
+          343996
+        ]
+      },
+      "gpu_buffer_bytes": {
+        "median": 360528.0,
+        "range": [
+          360528,
+          360528
+        ]
+      },
+      "atlas_bytes": {
+        "median": 65536.0,
+        "range": [
+          65536,
+          65536
+        ]
+      }
+    },
+    {
+      "repeat": 2,
+      "case": "1000-1-stream",
+      "variant": "candidate",
+      "final": "FINAL,initial_hash=cb6881686ce90a6f,final_hash=b435e4fdb781518e,frames=60,warmups=10,labels=1000,fields=1,mode=stream",
+      "images": {
+        "initial": "b3848e809ffb75900ade067c9e7e287d91a95cf0a3f2999ff0712ccb5312cc53",
+        "final": "dd95bca955190bdd2da09d2e68437a3cb7250579cf137d5248b10b4efb7445a4"
+      },
+      "canonical_sparse": 60,
+      "packet_reused": 60,
+      "host_ns": {
+        "p50": 475414.5,
+        "p95": 572166,
+        "p99": 669297
+      },
+      "complete_ns": {
+        "p50": 5953603.0,
+        "p95": 7724506,
+        "p99": 9037973
+      },
+      "cold_wall_ns": 382446152,
+      "max_rss_kib": 155144,
+      "validated_draws": {
+        "median": 601.0,
+        "range": [
+          601,
+          601
+        ]
+      },
+      "binning_tile_visits": {
+        "median": 1478.0,
+        "range": [
+          1478,
+          1478
+        ]
+      },
+      "upload_bytes": {
+        "median": 19312.0,
+        "range": [
+          19312,
+          19312
+        ]
+      },
+      "bind_groups": {
+        "median": 0.0,
+        "range": [
+          0,
+          0
+        ]
+      },
+      "mask_upload_bytes": {
+        "median": 0.0,
+        "range": [
+          0,
+          0
+        ]
+      },
+      "cpu_index_bytes": {
+        "median": 343996.0,
+        "range": [
+          343996,
+          343996
+        ]
+      },
+      "gpu_buffer_bytes": {
+        "median": 360528.0,
+        "range": [
+          360528,
+          360528
+        ]
+      },
+      "atlas_bytes": {
+        "median": 65536.0,
+        "range": [
+          65536,
+          65536
+        ]
+      }
+    },
+    {
+      "repeat": 2,
+      "case": "1000-2-exact",
+      "variant": "candidate",
+      "final": "FINAL,initial_hash=c08b163f7fad9704,final_hash=c08b163f7fad9704,frames=60,warmups=10,labels=1000,fields=2,mode=exact",
+      "images": {
+        "initial": "390fc82476478ace9c1474e7fa9c3feda4a3c80ebfe5ef7783196c3ee0c393c5",
+        "final": "390fc82476478ace9c1474e7fa9c3feda4a3c80ebfe5ef7783196c3ee0c393c5"
+      },
+      "canonical_sparse": 60,
+      "packet_reused": 60,
+      "host_ns": {
+        "p50": 143830.0,
+        "p95": 222248,
+        "p99": 283102
+      },
+      "complete_ns": {
+        "p50": 1773002.5,
+        "p95": 2254597,
+        "p99": 2695345
+      },
+      "cold_wall_ns": 299276398,
+      "max_rss_kib": 154376,
+      "validated_draws": {
+        "median": 8.0,
+        "range": [
+          8,
+          8
+        ]
+      },
+      "binning_tile_visits": {
+        "median": 24.0,
+        "range": [
+          24,
+          24
+        ]
+      },
+      "upload_bytes": {
+        "median": 416.0,
+        "range": [
+          416,
+          416
+        ]
+      },
+      "bind_groups": {
+        "median": 0.0,
+        "range": [
+          0,
+          0
+        ]
+      },
+      "mask_upload_bytes": {
+        "median": 0.0,
+        "range": [
+          0,
+          0
+        ]
+      },
+      "cpu_index_bytes": {
+        "median": 319284.0,
+        "range": [
+          319284,
+          319284
+        ]
+      },
+      "gpu_buffer_bytes": {
+        "median": 360528.0,
+        "range": [
+          360528,
+          360528
+        ]
+      },
+      "atlas_bytes": {
+        "median": 65536.0,
+        "range": [
+          65536,
+          65536
+        ]
+      }
+    },
+    {
+      "repeat": 2,
+      "case": "1000-2-exact",
+      "variant": "control",
+      "final": "FINAL,initial_hash=c08b163f7fad9704,final_hash=c08b163f7fad9704,frames=60,warmups=10,labels=1000,fields=2,mode=exact",
+      "images": {
+        "initial": "390fc82476478ace9c1474e7fa9c3feda4a3c80ebfe5ef7783196c3ee0c393c5",
+        "final": "390fc82476478ace9c1474e7fa9c3feda4a3c80ebfe5ef7783196c3ee0c393c5"
+      },
+      "canonical_sparse": 60,
+      "packet_reused": 60,
+      "host_ns": {
+        "p50": 179733.0,
+        "p95": 269337,
+        "p99": 343375
+      },
+      "complete_ns": {
+        "p50": 2686103.0,
+        "p95": 3893467,
+        "p99": 4593272
+      },
+      "cold_wall_ns": 318854810,
+      "max_rss_kib": 154244,
+      "validated_draws": {
+        "median": 8.0,
+        "range": [
+          8,
+          8
+        ]
+      },
+      "binning_tile_visits": {
+        "median": 24.0,
+        "range": [
+          24,
+          24
+        ]
+      },
+      "upload_bytes": {
+        "median": 416.0,
+        "range": [
+          416,
+          416
+        ]
+      },
+      "bind_groups": {
+        "median": 0.0,
+        "range": [
+          0,
+          0
+        ]
+      },
+      "mask_upload_bytes": {
+        "median": 0.0,
+        "range": [
+          0,
+          0
+        ]
+      },
+      "cpu_index_bytes": {
+        "median": 319284.0,
+        "range": [
+          319284,
+          319284
+        ]
+      },
+      "gpu_buffer_bytes": {
+        "median": 360528.0,
+        "range": [
+          360528,
+          360528
+        ]
+      },
+      "atlas_bytes": {
+        "median": 65536.0,
+        "range": [
+          65536,
+          65536
+        ]
+      }
+    },
+    {
+      "repeat": 2,
+      "case": "1000-4-exact",
+      "variant": "control",
+      "final": "FINAL,initial_hash=a3e55a7fc708ecff,final_hash=a3e55a7fc708ecff,frames=60,warmups=10,labels=1000,fields=4,mode=exact",
+      "images": {
+        "initial": "b570e734ad6c6282c78da4a5aae8c470f70ee0e626ca770d055d59d37bef1246",
+        "final": "b570e734ad6c6282c78da4a5aae8c470f70ee0e626ca770d055d59d37bef1246"
+      },
+      "canonical_sparse": 60,
+      "packet_reused": 60,
+      "host_ns": {
+        "p50": 157987.5,
+        "p95": 253226,
+        "p99": 330922
+      },
+      "complete_ns": {
+        "p50": 2100191.5,
+        "p95": 2744678,
+        "p99": 3060973
+      },
+      "cold_wall_ns": 324906202,
+      "max_rss_kib": 154632,
+      "validated_draws": {
+        "median": 16.0,
+        "range": [
+          16,
+          16
+        ]
+      },
+      "binning_tile_visits": {
+        "median": 48.0,
+        "range": [
+          48,
+          48
+        ]
+      },
+      "upload_bytes": {
+        "median": 832.0,
+        "range": [
+          832,
+          832
+        ]
+      },
+      "bind_groups": {
+        "median": 0.0,
+        "range": [
+          0,
+          0
+        ]
+      },
+      "mask_upload_bytes": {
+        "median": 0.0,
+        "range": [
+          0,
+          0
+        ]
+      },
+      "cpu_index_bytes": {
+        "median": 319796.0,
+        "range": [
+          319796,
+          319796
+        ]
+      },
+      "gpu_buffer_bytes": {
+        "median": 360528.0,
+        "range": [
+          360528,
+          360528
+        ]
+      },
+      "atlas_bytes": {
+        "median": 65536.0,
+        "range": [
+          65536,
+          65536
+        ]
+      }
+    },
+    {
+      "repeat": 2,
+      "case": "1000-4-exact",
+      "variant": "candidate",
+      "final": "FINAL,initial_hash=a3e55a7fc708ecff,final_hash=a3e55a7fc708ecff,frames=60,warmups=10,labels=1000,fields=4,mode=exact",
+      "images": {
+        "initial": "b570e734ad6c6282c78da4a5aae8c470f70ee0e626ca770d055d59d37bef1246",
+        "final": "b570e734ad6c6282c78da4a5aae8c470f70ee0e626ca770d055d59d37bef1246"
+      },
+      "canonical_sparse": 60,
+      "packet_reused": 60,
+      "host_ns": {
+        "p50": 229346.0,
+        "p95": 326274,
+        "p99": 344118
+      },
+      "complete_ns": {
+        "p50": 2262707.0,
+        "p95": 3018712,
+        "p99": 4635971
+      },
+      "cold_wall_ns": 337324929,
+      "max_rss_kib": 154120,
+      "validated_draws": {
+        "median": 16.0,
+        "range": [
+          16,
+          16
+        ]
+      },
+      "binning_tile_visits": {
+        "median": 48.0,
+        "range": [
+          48,
+          48
+        ]
+      },
+      "upload_bytes": {
+        "median": 832.0,
+        "range": [
+          832,
+          832
+        ]
+      },
+      "bind_groups": {
+        "median": 0.0,
+        "range": [
+          0,
+          0
+        ]
+      },
+      "mask_upload_bytes": {
+        "median": 0.0,
+        "range": [
+          0,
+          0
+        ]
+      },
+      "cpu_index_bytes": {
+        "median": 319796.0,
+        "range": [
+          319796,
+          319796
+        ]
+      },
+      "gpu_buffer_bytes": {
+        "median": 360528.0,
+        "range": [
+          360528,
+          360528
+        ]
+      },
+      "atlas_bytes": {
+        "median": 65536.0,
+        "range": [
+          65536,
+          65536
+        ]
+      }
+    }
+  ],
+  "ratios": {
+    "0-1-stream": {
+      "paired_ratios": [
+        0.227691486409901,
+        0.28279901739158253,
+        0.2557041600815196
+      ],
+      "median": 0.2557041600815196,
+      "range": [
+        0.227691486409901,
+        0.28279901739158253
+      ]
+    },
+    "25-1-stream": {
+      "paired_ratios": [
+        0.21500453101881462,
+        0.3113396544230279,
+        0.25340046274572503
+      ],
+      "median": 0.25340046274572503,
+      "range": [
+        0.21500453101881462,
+        0.3113396544230279
+      ]
+    },
+    "1000-1-stream": {
+      "paired_ratios": [
+        0.2277243313952594,
+        0.22177621200089762,
+        0.27885687847479
+      ],
+      "median": 0.2277243313952594,
+      "range": [
+        0.22177621200089762,
+        0.27885687847479
+      ]
+    },
+    "1000-2-exact": {
+      "paired_ratios": [
+        0.9929007059398317,
+        1.177719265895053,
+        0.6600649714474836
+      ],
+      "median": 0.9929007059398317,
+      "range": [
+        0.6600649714474836,
+        1.177719265895053
+      ]
+    },
+    "1000-4-exact": {
+      "paired_ratios": [
+        1.240073691367424,
+        1.0134886419285103,
+        1.0773812768978448
+      ],
+      "median": 1.0773812768978448,
+      "range": [
+        1.0134886419285103,
+        1.240073691367424
+      ]
+    }
+  }
+}

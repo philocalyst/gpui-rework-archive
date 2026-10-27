@@ -1,0 +1,38 @@
+commit 4eb6ba28b5cae7e59195d4de0d1a926da73547ef
+Author:     Wing <44917547+wingleeio@users.noreply.github.com>
+AuthorDate: Tue Oct 27 11:12:28 2026 +0000
+Commit:     Wing <44917547+wingleeio@users.noreply.github.com>
+CommitDate: Tue Oct 27 11:12:28 2026 +0000
+
+    Negative control: omit old-only dirty tile memberships
+    
+    Co-authored-by: zeronsh[bot] <346184242+zeronsh[bot]@users.noreply.github.com>
+
+diff --git a/reactivity/crates/gpu/src/renderer/text_packet.rs b/reactivity/crates/gpu/src/renderer/text_packet.rs
+index 6378cbf976..0e5c965a9e 100644
+--- a/reactivity/crates/gpu/src/renderer/text_packet.rs
++++ b/reactivity/crates/gpu/src/renderer/text_packet.rs
+@@ -262,7 +262,7 @@ pub(super) fn patch(
+         if regions.is_some()
+             && let Some(damage) = damage_bounds
+         {
+-            let old = if end == UNIFORM_TILE {
++            let _old = if end == UNIFORM_TILE {
+                 std::slice::from_ref(&start)
+             } else {
+                 &state.references[start as usize..end as usize]
+@@ -270,11 +270,9 @@ pub(super) fn patch(
+             let next = &next_references[offset..];
+             // Both memberships matter: a moved glyph can leave an empty tile.
+             // Equal lists only need repaint when a referenced record changed.
+-            let dirty = old != next
+-                || old
+-                    .iter()
+-                    .chain(next)
+-                    .any(|&address| patches.iter().any(|p| p.changes(address, &state.records)));
++            let dirty = next
++                .iter()
++                .any(|&address| patches.iter().any(|p| p.changes(address, &state.records)));
+             if dirty {
+                 append_region(
+                     &mut regions,
