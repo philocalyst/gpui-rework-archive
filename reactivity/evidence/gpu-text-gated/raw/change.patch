@@ -1,0 +1,201 @@
+diff --git a/reactivity/crates/gpu/src/renderer/text_packet.rs b/reactivity/crates/gpu/src/renderer/text_packet.rs
+index 6378cbf976..f028d96e80 100644
+--- a/reactivity/crates/gpu/src/renderer/text_packet.rs
++++ b/reactivity/crates/gpu/src/renderer/text_packet.rs
+@@ -49,15 +49,14 @@ struct Patch {
+     slot: TextRunSlot,
+     run: Run,
+     words: Vec<Word>,
+-    common_changed: bool,
+ }
+ impl Patch {
+-    fn changes(&self, address: u32, old: &[Word]) -> bool {
++    fn changes(&self, address: u32, old: &[Word], common_changed: bool) -> bool {
+         if !self.run.contains(address) {
+             return false;
+         }
+         let offset = 5 + (address - self.run.word.get()) as usize;
+-        self.common_changed
++        common_changed
+             || self.words[offset..offset + 2] != old[address as usize..address as usize + 2]
+     }
+ }
+@@ -85,6 +84,60 @@ fn append_region(regions: &mut Option<Vec<[u32; 4]>>, rect: [u32; 4], damage: [u
+         spans.push([l, t, r, b]);
+     }
+ }
++// Keep small edits on packet-only preparation. All borrows are read-only and
++// end before commit; equal compact words alone do not imply equal membership.
++#[inline(never)]
++fn repair_regions(
++    state: &RendererState,
++    patches: &[Patch],
++    next_ranges: &[[u32; 2]],
++    next_references: &[u32],
++    damage: [u32; 4],
++) -> Option<Vec<[u32; 4]>> {
++    let [width, height] = state.packet.as_ref().unwrap().dimensions();
++    let columns = width.div_ceil(16) as usize;
++    let common_changed: [bool; 4] = std::array::from_fn(|i| {
++        patches.get(i).is_some_and(|p| {
++            let word = p.run.word.get() as usize;
++            p.words[..5] != state.records[word - 5..word]
++        })
++    });
++    let mut regions = Some(Vec::new());
++    for (tile, (old, next)) in state.ranges.iter().zip(next_ranges).enumerate() {
++        if old == next && old[1] == UNIFORM_TILE {
++            continue;
++        }
++        let old = if old[1] == UNIFORM_TILE {
++            &old[..1]
++        } else {
++            &state.references[old[0] as usize..old[1] as usize]
++        };
++        let next = if next[1] == UNIFORM_TILE {
++            &next[..1]
++        } else {
++            &next_references[next[0] as usize..next[1] as usize]
++        };
++        let dirty = old != next
++            || old.iter().chain(next).any(|&address| {
++                patches
++                    .iter()
++                    .zip(&common_changed)
++                    .any(|(p, &common)| p.changes(address, &state.records, common))
++            });
++        if dirty {
++            append_region(
++                &mut regions,
++                tile_bounds(tile, columns, width, height),
++                damage,
++            );
++            if regions.is_none() {
++                break;
++            }
++        }
++    }
++    regions
++}
++
+ fn correction_matches(state: &RendererState, group: PreparedGroup<'_>, index: u32) -> bool {
+     let Some(old) = state.residuals.get(index as usize) else {
+         return false;
+@@ -213,13 +266,7 @@ pub(super) fn patch(
+             .and_then(|n| n.checked_add(references))
+             .ok_or(TextPacketError::Capacity)?;
+         run.references = references as u32;
+-        let common_changed = words[..5] != state.records[common..word];
+-        patches.push(Patch {
+-            slot,
+-            run,
+-            words,
+-            common_changed,
+-        });
++        patches.push(Patch { slot, run, words });
+     }
+     if original > MAX_REFERENCES {
+         return Err(TextPacketError::Capacity);
+@@ -229,7 +276,6 @@ pub(super) fn patch(
+     let mut next_references = Vec::with_capacity(state.references.len());
+     let mut cursor = 0;
+     let damage_bounds = output.damage.and_then(|d| d.bounds());
+-    let mut regions = output.damage.map(|_| Vec::new());
+     for (tile, &[start, end]) in state.ranges.iter().enumerate() {
+         let begin = cursor;
+         while cursor < additions.len() && additions[cursor].0 == tile {
+@@ -259,30 +305,6 @@ pub(super) fn patch(
+             return Err(TextPacketError::Capacity);
+         }
+         next_ranges.push([offset as u32, next_references.len() as u32]);
+-        if regions.is_some()
+-            && let Some(damage) = damage_bounds
+-        {
+-            let old = if end == UNIFORM_TILE {
+-                std::slice::from_ref(&start)
+-            } else {
+-                &state.references[start as usize..end as usize]
+-            };
+-            let next = &next_references[offset..];
+-            // Both memberships matter: a moved glyph can leave an empty tile.
+-            // Equal lists only need repaint when a referenced record changed.
+-            let dirty = old != next
+-                || old
+-                    .iter()
+-                    .chain(next)
+-                    .any(|&address| patches.iter().any(|p| p.changes(address, &state.records)));
+-            if dirty {
+-                append_region(
+-                    &mut regions,
+-                    tile_bounds(tile, columns, width, height),
+-                    damage,
+-                );
+-            }
+-        }
+     }
+     debug_assert_eq!(cursor, additions.len());
+     if next_references.len().max(1) as u64 * 4 > state.indices.size {
+@@ -303,6 +325,10 @@ pub(super) fn patch(
+             0
+         };
+     let area = |[l, t, r, b]: [u32; 4]| u64::from(r - l) * u64::from(b - t);
++    // Sixteen tiles of potential pixel work before paying another CSR pass.
++    let regions = damage_bounds
++        .filter(|&bounds| area(bounds) >= 4096)
++        .and_then(|bounds| repair_regions(state, &patches, &next_ranges, &next_references, bounds));
+     let composited_pixels = regions.as_ref().map_or_else(
+         || {
+             output
+diff --git a/reactivity/crates/gpu/tests/support/text_packet.rs b/reactivity/crates/gpu/tests/support/text_packet.rs
+index 407d542c21..9d522b007d 100644
+--- a/reactivity/crates/gpu/tests/support/text_packet.rs
++++ b/reactivity/crates/gpu/tests/support/text_packet.rs
+@@ -470,3 +470,48 @@ fn identical_shader_words_can_have_different_conservative_memberships() {
+         assert_eq!(after, readback(&mut full, &next));
+     });
+ }
++
++#[test]
++fn text_refinement_area_boundary_preserves_exact_output() {
++    pollster::block_on(async {
++        let mut text = TextSystem::bundled().unwrap();
++        let mut gpu = RetainedRenderer::new(renderer(wgpu::TextureFormat::Rgba8UnormSrgb).await);
++        let mut full = renderer(wgpu::TextureFormat::Rgba8UnormSrgb).await;
++        let positions = [Point { x: 2., y: 2. }, Point { x: 6., y: 24. }];
++        let (initial, slots) = scene(
++            &mut text,
++            ["0011", "1100"],
++            positions,
++            Affine::IDENTITY,
++            ColorConfig::default(),
++            Color::BLACK,
++        );
++        let target = output_texture(&gpu, &initial);
++        let view = target.create_view(&Default::default());
++        gpu.render(initial.prepared_scene(), &view, None).unwrap();
++        for (labels, rect, expected_full) in [
++            (["1100", "0011"], Rect::new(0., 0., 63., 65.), Some(4095)),
++            (["0011", "1100"], Rect::new(0., 0., 64., 64.), None),
++        ] {
++            let (next, next_slots) = scene(
++                &mut text,
++                labels,
++                positions,
++                Affine::IDENTITY,
++                ColorConfig::default(),
++                Color::BLACK,
++            );
++            assert_eq!(slots, next_slots);
++            let damage = rect_damage([128, 96], rect);
++            gpu.patch_texts(&edits(&next, slots), &view, Some(damage))
++                .unwrap();
++            if let Some(pixels) = expected_full {
++                assert_eq!(gpu.retained_stats().composited_pixels, pixels);
++            } else {
++                assert!(gpu.retained_stats().composited_pixels > 0);
++                assert!(gpu.retained_stats().composited_pixels < 4096);
++            }
++            assert_eq!(read_texture(&gpu, &target), readback(&mut full, &next));
++        }
++    });
++}

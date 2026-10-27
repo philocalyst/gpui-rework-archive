@@ -1,0 +1,958 @@
+{
+  "paired": {
+    "0-1-exact": {
+      "control": {
+        "cold_wall_ns": {
+          "median": 142961808,
+          "range": [
+            133175536,
+            174452884
+          ]
+        },
+        "max_rss_kib": {
+          "median": 152712,
+          "range": [
+            152584,
+            152716
+          ]
+        }
+      },
+      "candidate": {
+        "cold_wall_ns": {
+          "median": 141078257,
+          "range": [
+            130588715,
+            160056661
+          ]
+        },
+        "max_rss_kib": {
+          "median": 152716,
+          "range": [
+            152588,
+            152972
+          ]
+        }
+      }
+    },
+    "0-2-exact": {
+      "control": {
+        "cold_wall_ns": {
+          "median": 141669178,
+          "range": [
+            125883454,
+            143370415
+          ]
+        },
+        "max_rss_kib": {
+          "median": 152712,
+          "range": [
+            152708,
+            152836
+          ]
+        }
+      },
+      "candidate": {
+        "cold_wall_ns": {
+          "median": 142519555,
+          "range": [
+            126316788,
+            158671729
+          ]
+        },
+        "max_rss_kib": {
+          "median": 152840,
+          "range": [
+            152584,
+            153100
+          ]
+        }
+      }
+    },
+    "0-4-exact": {
+      "control": {
+        "cold_wall_ns": {
+          "median": 142808158,
+          "range": [
+            124680974,
+            150229444
+          ]
+        },
+        "max_rss_kib": {
+          "median": 152836,
+          "range": [
+            152584,
+            152968
+          ]
+        }
+      },
+      "candidate": {
+        "cold_wall_ns": {
+          "median": 150334291,
+          "range": [
+            119526798,
+            227051884
+          ]
+        },
+        "max_rss_kib": {
+          "median": 153096,
+          "range": [
+            152844,
+            153100
+          ]
+        }
+      }
+    },
+    "0-1-full": {
+      "control": {
+        "cold_wall_ns": {
+          "median": 142917453,
+          "range": [
+            134902763,
+            161209848
+          ]
+        },
+        "max_rss_kib": {
+          "median": 152836,
+          "range": [
+            152580,
+            152840
+          ]
+        }
+      },
+      "candidate": {
+        "cold_wall_ns": {
+          "median": 138760993,
+          "range": [
+            119465684,
+            152116872
+          ]
+        },
+        "max_rss_kib": {
+          "median": 152588,
+          "range": [
+            152460,
+            152972
+          ]
+        }
+      }
+    },
+    "0-2-full": {
+      "control": {
+        "cold_wall_ns": {
+          "median": 131779654,
+          "range": [
+            127512847,
+            141365838
+          ]
+        },
+        "max_rss_kib": {
+          "median": 152708,
+          "range": [
+            152452,
+            152968
+          ]
+        }
+      },
+      "candidate": {
+        "cold_wall_ns": {
+          "median": 132931658,
+          "range": [
+            127816588,
+            160230606
+          ]
+        },
+        "max_rss_kib": {
+          "median": 152840,
+          "range": [
+            152584,
+            152972
+          ]
+        }
+      }
+    },
+    "0-4-full": {
+      "control": {
+        "cold_wall_ns": {
+          "median": 137101745,
+          "range": [
+            126374146,
+            141966568
+          ]
+        },
+        "max_rss_kib": {
+          "median": 153092,
+          "range": [
+            152584,
+            153096
+          ]
+        }
+      },
+      "candidate": {
+        "cold_wall_ns": {
+          "median": 133110546,
+          "range": [
+            130407285,
+            140125666
+          ]
+        },
+        "max_rss_kib": {
+          "median": 152972,
+          "range": [
+            152716,
+            153228
+          ]
+        }
+      }
+    },
+    "25-1-exact": {
+      "control": {
+        "cold_wall_ns": {
+          "median": 142755038,
+          "range": [
+            128696791,
+            156443832
+          ]
+        },
+        "max_rss_kib": {
+          "median": 152836,
+          "range": [
+            152712,
+            152840
+          ]
+        }
+      },
+      "candidate": {
+        "cold_wall_ns": {
+          "median": 139808561,
+          "range": [
+            131276279,
+            152258366
+          ]
+        },
+        "max_rss_kib": {
+          "median": 152844,
+          "range": [
+            152588,
+            152844
+          ]
+        }
+      }
+    },
+    "25-2-exact": {
+      "control": {
+        "cold_wall_ns": {
+          "median": 139421002,
+          "range": [
+            133192087,
+            146574877
+          ]
+        },
+        "max_rss_kib": {
+          "median": 152968,
+          "range": [
+            152452,
+            152968
+          ]
+        }
+      },
+      "candidate": {
+        "cold_wall_ns": {
+          "median": 136735586,
+          "range": [
+            134887823,
+            144334556
+          ]
+        },
+        "max_rss_kib": {
+          "median": 152840,
+          "range": [
+            152712,
+            153224
+          ]
+        }
+      }
+    },
+    "25-4-exact": {
+      "control": {
+        "cold_wall_ns": {
+          "median": 137291503,
+          "range": [
+            128008448,
+            147022187
+          ]
+        },
+        "max_rss_kib": {
+          "median": 152968,
+          "range": [
+            152836,
+            152972
+          ]
+        }
+      },
+      "candidate": {
+        "cold_wall_ns": {
+          "median": 131534895,
+          "range": [
+            127899562,
+            151166435
+          ]
+        },
+        "max_rss_kib": {
+          "median": 152968,
+          "range": [
+            152712,
+            153480
+          ]
+        }
+      }
+    },
+    "25-1-full": {
+      "control": {
+        "cold_wall_ns": {
+          "median": 144800904,
+          "range": [
+            134120172,
+            152628864
+          ]
+        },
+        "max_rss_kib": {
+          "median": 152836,
+          "range": [
+            152456,
+            153096
+          ]
+        }
+      },
+      "candidate": {
+        "cold_wall_ns": {
+          "median": 140072387,
+          "range": [
+            130592864,
+            147887121
+          ]
+        },
+        "max_rss_kib": {
+          "median": 152588,
+          "range": [
+            152460,
+            152972
+          ]
+        }
+      }
+    },
+    "25-2-full": {
+      "control": {
+        "cold_wall_ns": {
+          "median": 141100699,
+          "range": [
+            127998638,
+            154438924
+          ]
+        },
+        "max_rss_kib": {
+          "median": 152584,
+          "range": [
+            152456,
+            153092
+          ]
+        }
+      },
+      "candidate": {
+        "cold_wall_ns": {
+          "median": 146273550,
+          "range": [
+            128092786,
+            152952240
+          ]
+        },
+        "max_rss_kib": {
+          "median": 152588,
+          "range": [
+            152588,
+            152968
+          ]
+        }
+      }
+    },
+    "25-4-full": {
+      "control": {
+        "cold_wall_ns": {
+          "median": 134862998,
+          "range": [
+            126960208,
+            169344183
+          ]
+        },
+        "max_rss_kib": {
+          "median": 153092,
+          "range": [
+            152968,
+            153480
+          ]
+        }
+      },
+      "candidate": {
+        "cold_wall_ns": {
+          "median": 142047058,
+          "range": [
+            126693767,
+            147629358
+          ]
+        },
+        "max_rss_kib": {
+          "median": 152844,
+          "range": [
+            152716,
+            152968
+          ]
+        }
+      }
+    },
+    "1000-1-exact": {
+      "control": {
+        "cold_wall_ns": {
+          "median": 274835968,
+          "range": [
+            245272964,
+            310104613
+          ]
+        },
+        "max_rss_kib": {
+          "median": 153864,
+          "range": [
+            153860,
+            154116
+          ]
+        }
+      },
+      "candidate": {
+        "cold_wall_ns": {
+          "median": 270773134,
+          "range": [
+            261069369,
+            310638196
+          ]
+        },
+        "max_rss_kib": {
+          "median": 154124,
+          "range": [
+            153996,
+            154252
+          ]
+        }
+      }
+    },
+    "1000-2-exact": {
+      "control": {
+        "cold_wall_ns": {
+          "median": 263506980,
+          "range": [
+            249288381,
+            283353515
+          ]
+        },
+        "max_rss_kib": {
+          "median": 154120,
+          "range": [
+            153864,
+            154248
+          ]
+        }
+      },
+      "candidate": {
+        "cold_wall_ns": {
+          "median": 279620027,
+          "range": [
+            259843656,
+            301602346
+          ]
+        },
+        "max_rss_kib": {
+          "median": 154120,
+          "range": [
+            153740,
+            154508
+          ]
+        }
+      }
+    },
+    "1000-4-exact": {
+      "control": {
+        "cold_wall_ns": {
+          "median": 260285367,
+          "range": [
+            258966768,
+            303702653
+          ]
+        },
+        "max_rss_kib": {
+          "median": 154244,
+          "range": [
+            154116,
+            154632
+          ]
+        }
+      },
+      "candidate": {
+        "cold_wall_ns": {
+          "median": 269379385,
+          "range": [
+            253698809,
+            301444530
+          ]
+        },
+        "max_rss_kib": {
+          "median": 154252,
+          "range": [
+            154248,
+            154380
+          ]
+        }
+      }
+    },
+    "1000-1-full": {
+      "control": {
+        "cold_wall_ns": {
+          "median": 279956449,
+          "range": [
+            248763675,
+            287120763
+          ]
+        },
+        "max_rss_kib": {
+          "median": 153992,
+          "range": [
+            153864,
+            154248
+          ]
+        }
+      },
+      "candidate": {
+        "cold_wall_ns": {
+          "median": 259262925,
+          "range": [
+            246376728,
+            270911354
+          ]
+        },
+        "max_rss_kib": {
+          "median": 154124,
+          "range": [
+            153996,
+            154252
+          ]
+        }
+      }
+    },
+    "1000-2-full": {
+      "control": {
+        "cold_wall_ns": {
+          "median": 273836138,
+          "range": [
+            262086451,
+            308128931
+          ]
+        },
+        "max_rss_kib": {
+          "median": 153992,
+          "range": [
+            153732,
+            154120
+          ]
+        }
+      },
+      "candidate": {
+        "cold_wall_ns": {
+          "median": 272943962,
+          "range": [
+            259231154,
+            299649477
+          ]
+        },
+        "max_rss_kib": {
+          "median": 154252,
+          "range": [
+            153992,
+            154508
+          ]
+        }
+      }
+    },
+    "1000-4-full": {
+      "control": {
+        "cold_wall_ns": {
+          "median": 280953946,
+          "range": [
+            244387721,
+            327052291
+          ]
+        },
+        "max_rss_kib": {
+          "median": 154244,
+          "range": [
+            154116,
+            154628
+          ]
+        }
+      },
+      "candidate": {
+        "cold_wall_ns": {
+          "median": 283052258,
+          "range": [
+            242969105,
+            318057868
+          ]
+        },
+        "max_rss_kib": {
+          "median": 154252,
+          "range": [
+            153996,
+            154380
+          ]
+        }
+      }
+    },
+    "0-1-stream": {
+      "control": {
+        "cold_wall_ns": {
+          "median": 160169563,
+          "range": [
+            144410348,
+            166900722
+          ]
+        },
+        "max_rss_kib": {
+          "median": 153608,
+          "range": [
+            153352,
+            153736
+          ]
+        }
+      },
+      "candidate": {
+        "cold_wall_ns": {
+          "median": 158909906,
+          "range": [
+            143562326,
+            166791868
+          ]
+        },
+        "max_rss_kib": {
+          "median": 153740,
+          "range": [
+            153612,
+            153868
+          ]
+        }
+      }
+    },
+    "25-1-stream": {
+      "control": {
+        "cold_wall_ns": {
+          "median": 167146934,
+          "range": [
+            151401005,
+            177562707
+          ]
+        },
+        "max_rss_kib": {
+          "median": 153864,
+          "range": [
+            153732,
+            154120
+          ]
+        }
+      },
+      "candidate": {
+        "cold_wall_ns": {
+          "median": 160578471,
+          "range": [
+            147514803,
+            171193539
+          ]
+        },
+        "max_rss_kib": {
+          "median": 153868,
+          "range": [
+            153740,
+            153996
+          ]
+        }
+      }
+    },
+    "1000-1-stream": {
+      "control": {
+        "cold_wall_ns": {
+          "median": 288357789,
+          "range": [
+            255458867,
+            327059695
+          ]
+        },
+        "max_rss_kib": {
+          "median": 154884,
+          "range": [
+            154628,
+            155144
+          ]
+        }
+      },
+      "candidate": {
+        "cold_wall_ns": {
+          "median": 287627105,
+          "range": [
+            280157259,
+            330304563
+          ]
+        },
+        "max_rss_kib": {
+          "median": 155020,
+          "range": [
+            155016,
+            155276
+          ]
+        }
+      }
+    }
+  },
+  "mechanism": {
+    "0-1-exact": {
+      "control": {
+        "cold_wall_ns": {
+          "median": 150231417,
+          "range": [
+            133783950,
+            251749677
+          ]
+        },
+        "max_rss_kib": {
+          "median": 152584,
+          "range": [
+            152452,
+            152712
+          ]
+        }
+      },
+      "candidate": {
+        "cold_wall_ns": {
+          "median": 163681503,
+          "range": [
+            157741300,
+            226191779
+          ]
+        },
+        "max_rss_kib": {
+          "median": 152712,
+          "range": [
+            152588,
+            152840
+          ]
+        }
+      }
+    },
+    "25-1-exact": {
+      "control": {
+        "cold_wall_ns": {
+          "median": 147768249,
+          "range": [
+            138018097,
+            155031017
+          ]
+        },
+        "max_rss_kib": {
+          "median": 152960,
+          "range": [
+            152584,
+            152968
+          ]
+        }
+      },
+      "candidate": {
+        "cold_wall_ns": {
+          "median": 166648878,
+          "range": [
+            152152037,
+            167082954
+          ]
+        },
+        "max_rss_kib": {
+          "median": 152716,
+          "range": [
+            152712,
+            152716
+          ]
+        }
+      }
+    },
+    "25-2-exact": {
+      "control": {
+        "cold_wall_ns": {
+          "median": 161094432,
+          "range": [
+            144865114,
+            167991623
+          ]
+        },
+        "max_rss_kib": {
+          "median": 152840,
+          "range": [
+            152712,
+            152968
+          ]
+        }
+      },
+      "candidate": {
+        "cold_wall_ns": {
+          "median": 149011626,
+          "range": [
+            138329412,
+            155834316
+          ]
+        },
+        "max_rss_kib": {
+          "median": 152840,
+          "range": [
+            152716,
+            153096
+          ]
+        }
+      }
+    },
+    "1000-4-exact": {
+      "control": {
+        "cold_wall_ns": {
+          "median": 294168056,
+          "range": [
+            272463932,
+            310841438
+          ]
+        },
+        "max_rss_kib": {
+          "median": 154372,
+          "range": [
+            154372,
+            154376
+          ]
+        }
+      },
+      "candidate": {
+        "cold_wall_ns": {
+          "median": 298499866,
+          "range": [
+            279639295,
+            300185544
+          ]
+        },
+        "max_rss_kib": {
+          "median": 154504,
+          "range": [
+            154120,
+            154636
+          ]
+        }
+      }
+    },
+    "0-1-stream": {
+      "control": {
+        "cold_wall_ns": {
+          "median": 156124221,
+          "range": [
+            154133029,
+            177110568
+          ]
+        },
+        "max_rss_kib": {
+          "median": 153992,
+          "range": [
+            153736,
+            154116
+          ]
+        }
+      },
+      "candidate": {
+        "cold_wall_ns": {
+          "median": 168538690,
+          "range": [
+            162319603,
+            169209320
+          ]
+        },
+        "max_rss_kib": {
+          "median": 153868,
+          "range": [
+            153612,
+            153868
+          ]
+        }
+      }
+    },
+    "25-1-stream": {
+      "control": {
+        "cold_wall_ns": {
+          "median": 157512511,
+          "range": [
+            155989698,
+            175916313
+          ]
+        },
+        "max_rss_kib": {
+          "median": 153860,
+          "range": [
+            153860,
+            153992
+          ]
+        }
+      },
+      "candidate": {
+        "cold_wall_ns": {
+          "median": 175217349,
+          "range": [
+            159201514,
+            183197366
+          ]
+        },
+        "max_rss_kib": {
+          "median": 153608,
+          "range": [
+            153352,
+            153740
+          ]
+        }
+      }
+    },
+    "1000-1-stream": {
+      "control": {
+        "cold_wall_ns": {
+          "median": 314167488,
+          "range": [
+            286018753,
+            325386822
+          ]
+        },
+        "max_rss_kib": {
+          "median": 155016,
+          "range": [
+            154756,
+            155016
+          ]
+        }
+      },
+      "candidate": {
+        "cold_wall_ns": {
+          "median": 316277964,
+          "range": [
+            273765447,
+            500756527
+          ]
+        },
+        "max_rss_kib": {
+          "median": 155016,
+          "range": [
+            154760,
+            155020
+          ]
+        }
+      }
+    }
+  }
+}

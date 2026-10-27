@@ -1,0 +1,143 @@
+{
+  "path": "/home/user/gpui-gpu-text-gated-target/release/build/gpui/fa3ab23b5d2107c8/out/source_batch_allocations",
+  "sha256": "33cc2a8518f2ccacf1bbb97a60f5198853f27c6edaee63e9c2e539d430b0a904",
+  "bytes": 10305520,
+  "features": [
+    "default",
+    "simd"
+  ],
+  "fingerprint": {
+    "rustc": 13112353858380123722,
+    "features": "[\"default\", \"simd\"]",
+    "declared_features": "[\"accessibility\", \"default\", \"desktop\", \"native\", \"native-core\", \"simd\", \"wayland\", \"wayland-minimal\", \"x11\", \"x11-minimal\"]",
+    "target": 2955662468658502469,
+    "profile": 854319013279132213,
+    "path": 13032707874732540366,
+    "deps": [
+      [
+        535147103364023206,
+        "icu_segmenter",
+        false,
+        2485711984859362076
+      ],
+      [
+        1001648224152866569,
+        "arcstr",
+        false,
+        8608570567093121818
+      ],
+      [
+        2251399859588827949,
+        "pin_project_lite",
+        false,
+        15410928229466948552
+      ],
+      [
+        4295957145130622623,
+        "zbus",
+        false,
+        18379667884694257944
+      ],
+      [
+        5686200050580704112,
+        "gpui",
+        false,
+        957807289477873267
+      ],
+      [
+        6359120849577304855,
+        "x11rb",
+        false,
+        5324069912867457553
+      ],
+      [
+        6557439603276904804,
+        "serde",
+        false,
+        5707135675310011643
+      ],
+      [
+        8160210889872729633,
+        "serde_json",
+        false,
+        5272800233993643215
+      ],
+      [
+        11048071599106839258,
+        "allocation_counter",
+        false,
+        6546775363473888567
+      ],
+      [
+        11671159878170094075,
+        "gpui_reactivity_state",
+        false,
+        14114907476681891339
+      ],
+      [
+        12459942763388630573,
+        "parking_lot",
+        false,
+        4059520991161427665
+      ],
+      [
+        13316223584457521750,
+        "cephal",
+        false,
+        12816297730444936390
+      ],
+      [
+        13628746454484093079,
+        "gpui_inline_call",
+        false,
+        4148753925670550377
+      ],
+      [
+        13672653153045154758,
+        "gpui_reactivity_core",
+        false,
+        3552894578772788042
+      ],
+      [
+        14670221084672822999,
+        "triomphe",
+        false,
+        7663979559722660298
+      ],
+      [
+        17032968227276897852,
+        "gpui_canvas",
+        false,
+        4286302238453905616
+      ],
+      [
+        17400412893666519160,
+        "zruntime",
+        false,
+        15262377513529591232
+      ],
+      [
+        17719763280398284109,
+        "accesskit_consumer",
+        false,
+        11901362020866182581
+      ]
+    ],
+    "local": [
+      {
+        "CheckDepInfo": {
+          "dep_info": "release/build/gpui/fa3ab23b5d2107c8/fingerprint/dep-example-source_batch_allocations",
+          "fingerprint": "content"
+        }
+      }
+    ],
+    "rustflags": [
+      "-C",
+      "symbol-mangling-version=v0",
+      "--cfg",
+      "tokio_unstable"
+    ],
+    "config": 8362119626465528914,
+    "compile_kind": 0
+  }
+}

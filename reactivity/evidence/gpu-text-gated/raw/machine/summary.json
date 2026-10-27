@@ -1,0 +1,327 @@
+{
+  "control": {
+    "artifact": {
+      "path": "/home/user/gpui-gpu-text-packet-control-target/release/build/gpui_gpu/5217074578ba2e76/out/text_packet",
+      "sha256": "8773b9f402d60b583ad96bba77ba20b98c4615e938e4f0114bb014b91ded4470",
+      "bytes": 14695000,
+      "fingerprint": {
+        "rustc": 13112353858380123722,
+        "features": "[\"default\", \"gpu-tests\", \"simd\", \"vulkan-tests\"]",
+        "declared_features": "[\"default\", \"gpu-tests\", \"offline-shader\", \"simd\", \"vulkan-tests\"]",
+        "target": 2582181131836719270,
+        "profile": 854319013279132213,
+        "path": 8164714853351974581,
+        "deps": [
+          [
+            3750483387937644717,
+            "pollster",
+            false,
+            8289392155308658121
+          ],
+          [
+            6697289019564802635,
+            "wgpu",
+            false,
+            4382175561800417924
+          ],
+          [
+            8991190325997472044,
+            "gpui_gpu",
+            false,
+            4626861574554259420
+          ],
+          [
+            8991190325997472044,
+            "build_script_build",
+            false,
+            17099836806818717613
+          ],
+          [
+            11000357280469314662,
+            "wgsl_rs",
+            false,
+            5636540923487536018
+          ],
+          [
+            17032968227276897852,
+            "gpui_canvas",
+            false,
+            5295641151753295086
+          ],
+          [
+            18075512308826438882,
+            "bytemuck",
+            false,
+            13748305756524915767
+          ]
+        ],
+        "local": [
+          {
+            "CheckDepInfo": {
+              "dep_info": "release/build/gpui_gpu/5217074578ba2e76/fingerprint/dep-example-text_packet",
+              "fingerprint": "content"
+            }
+          }
+        ],
+        "rustflags": [
+          "-C",
+          "symbol-mangling-version=v0",
+          "--cfg",
+          "tokio_unstable"
+        ],
+        "config": 8362119626465528914,
+        "compile_kind": 0
+      }
+    },
+    "symbols": [
+      {
+        "name": "<gpui_gpu::renderer::retained::RetainedRenderer>::render::{closure#3}",
+        "bytes": 192,
+        "address": 6326816
+      },
+      {
+        "name": "<gpui_canvas::canvas::Groups as core::iter::traits::iterator::Iterator>::try_fold::<usize, <gpui_gpu::renderer::RendererState>::render_observed<<gpui_gpu::renderer::RendererState>::render::{closure#0}>::{closure#2}, core::result::Result<usize, gpui_gpu::renderer::Error>>",
+        "bytes": 273,
+        "address": 6297472
+      },
+      {
+        "name": "<core::slice::iter::Iter<gpui_canvas::canvas::DrawRef> as core::iter::traits::iterator::Iterator>::try_fold::<(), core::iter::adapters::map::map_try_fold<&gpui_canvas::canvas::DrawRef, gpui_canvas::canvas::PreparedSource, (), core::ops::control_flow::ControlFlow<()>, <gpui_canvas::canvas::PreparedGroup>::sources::{closure#0}, core::iter::traits::iterator::Iterator::all::check<gpui_canvas::canvas::PreparedSource, <gpui_gpu::renderer::RendererState>::render_observed<<gpui_gpu::renderer::RendererState>::render::{closure#0}>::{closure#4}>::{closure#0}>::{closure#0}, core::ops::control_flow::ControlFlow<()>>",
+        "bytes": 278,
+        "address": 6297184
+      },
+      {
+        "name": "<core::option::Option<gpui_canvas::canvas::GlyphMask>>::map_or::<[u32; 3], <gpui_gpu::renderer::RendererState>::render_observed<<gpui_gpu::renderer::RendererState>::render::{closure#0}>::{closure#5}>",
+        "bytes": 325,
+        "address": 6281200
+      },
+      {
+        "name": "gpui_gpu::renderer::visit::<<gpui_gpu::renderer::RendererState>::render_observed<<gpui_gpu::renderer::RendererState>::render::{closure#0}>::{closure#6}>",
+        "bytes": 515,
+        "address": 6296656
+      },
+      {
+        "name": "<gpui_gpu::renderer::GpuContext>::submit",
+        "bytes": 636,
+        "address": 6299872
+      },
+      {
+        "name": "<gpui_gpu::renderer::retained::RetainedRenderer>::render",
+        "bytes": 2117,
+        "address": 6327008
+      },
+      {
+        "name": "<gpui_gpu::renderer::RendererState>::render_observed::<<gpui_gpu::renderer::retained::RetainedRenderer>::render::{closure#5}>",
+        "bytes": 11655,
+        "address": 6281536
+      }
+    ]
+  },
+  "candidate": {
+    "artifact": {
+      "path": "/home/user/gpui-gpu-text-gated-target/release/build/gpui_gpu/f49ad2ba58fd87fb/out/text_packet",
+      "sha256": "5fb76301dbb70f7caf1f04fcd134e2cf425310a9a70d71784f55fa984d9164e6",
+      "bytes": 14735568,
+      "fingerprint": {
+        "rustc": 13112353858380123722,
+        "features": "[\"default\", \"gpu-tests\", \"simd\", \"vulkan-tests\"]",
+        "declared_features": "[\"default\", \"gpu-tests\", \"offline-shader\", \"simd\", \"vulkan-tests\"]",
+        "target": 2582181131836719270,
+        "profile": 854319013279132213,
+        "path": 8164714853351974581,
+        "deps": [
+          [
+            3750483387937644717,
+            "pollster",
+            false,
+            8289392155308658121
+          ],
+          [
+            6697289019564802635,
+            "wgpu",
+            false,
+            17790846607992674601
+          ],
+          [
+            8991190325997472044,
+            "gpui_gpu",
+            false,
+            2117031680315999824
+          ],
+          [
+            8991190325997472044,
+            "build_script_build",
+            false,
+            17099836806818717613
+          ],
+          [
+            11000357280469314662,
+            "wgsl_rs",
+            false,
+            5636540923487536018
+          ],
+          [
+            11048071599106839258,
+            "allocation_counter",
+            false,
+            6546775363473888567
+          ],
+          [
+            17032968227276897852,
+            "gpui_canvas",
+            false,
+            5295641151753295086
+          ],
+          [
+            18075512308826438882,
+            "bytemuck",
+            false,
+            13748305756524915767
+          ]
+        ],
+        "local": [
+          {
+            "CheckDepInfo": {
+              "dep_info": "release/build/gpui_gpu/f49ad2ba58fd87fb/fingerprint/dep-example-text_packet",
+              "fingerprint": "content"
+            }
+          }
+        ],
+        "rustflags": [
+          "-C",
+          "symbol-mangling-version=v0",
+          "--cfg",
+          "tokio_unstable"
+        ],
+        "config": 8362119626465528914,
+        "compile_kind": 0
+      }
+    },
+    "symbols": [
+      {
+        "name": "<[u32]>::sort_unstable_by_key::<u32, gpui_gpu::renderer::text_packet::patch::{closure#8}>",
+        "bytes": 67,
+        "address": 6330912
+      },
+      {
+        "name": "core::slice::sort::shared::smallsort::insertion_sort_shift_left::<u32, <[u32]>::sort_unstable_by_key<u32, gpui_gpu::renderer::text_packet::patch::{closure#8}>::{closure#0}>",
+        "bytes": 149,
+        "address": 6356656
+      },
+      {
+        "name": "core::slice::sort::shared::pivot::median3_rec::<u32, <[u32]>::sort_unstable_by_key<u32, gpui_gpu::renderer::text_packet::patch::{closure#8}>::{closure#0}>",
+        "bytes": 181,
+        "address": 6369152
+      },
+      {
+        "name": "<gpui_gpu::renderer::retained::RetainedRenderer>::render::{closure#3}",
+        "bytes": 192,
+        "address": 6381696
+      },
+      {
+        "name": "core::slice::sort::unstable::heapsort::heapsort::<u32, <[u32]>::sort_unstable_by_key<u32, gpui_gpu::renderer::text_packet::patch::{closure#8}>::{closure#0}>",
+        "bytes": 196,
+        "address": 6365792
+      },
+      {
+        "name": "<core::option::Option<&alloc::vec::Vec<[u32; 4]>>>::map_or_else::<u64, gpui_gpu::renderer::text_packet::patch::{closure#13}, gpui_gpu::renderer::text_packet::patch::{closure#14}>",
+        "bytes": 211,
+        "address": 6330992
+      },
+      {
+        "name": "<alloc::vec::Vec<u32>>::extend_desugared::<core::iter::adapters::filter::Filter<core::iter::adapters::copied::Copied<core::slice::iter::Iter<u32>>, gpui_gpu::renderer::text_packet::patch::{closure#6}>>",
+        "bytes": 219,
+        "address": 6348240
+      },
+      {
+        "name": "<gpui_canvas::canvas::Groups as core::iter::traits::iterator::Iterator>::try_fold::<usize, <gpui_gpu::renderer::RendererState>::render_observed<<gpui_gpu::renderer::RendererState>::render::{closure#0}>::{closure#2}, core::result::Result<usize, gpui_gpu::renderer::Error>>",
+        "bytes": 273,
+        "address": 6303472
+      },
+      {
+        "name": "<core::slice::iter::Iter<gpui_canvas::canvas::DrawRef> as core::iter::traits::iterator::Iterator>::try_fold::<(), core::iter::adapters::map::map_try_fold<&gpui_canvas::canvas::DrawRef, gpui_canvas::canvas::PreparedSource, (), core::ops::control_flow::ControlFlow<()>, <gpui_canvas::canvas::PreparedGroup>::sources::{closure#0}, core::iter::traits::iterator::Iterator::all::check<gpui_canvas::canvas::PreparedSource, <gpui_gpu::renderer::RendererState>::render_observed<<gpui_gpu::renderer::RendererState>::render::{closure#0}>::{closure#4}>::{closure#0}>::{closure#0}, core::ops::control_flow::ControlFlow<()>>",
+        "bytes": 278,
+        "address": 6303184
+      },
+      {
+        "name": "<core::option::Option<gpui_canvas::canvas::GlyphMask>>::map_or::<[u32; 3], <gpui_gpu::renderer::RendererState>::render_observed<<gpui_gpu::renderer::RendererState>::render::{closure#0}>::{closure#5}>",
+        "bytes": 325,
+        "address": 6286944
+      },
+      {
+        "name": "core::slice::sort::unstable::ipnsort::<u32, <[u32]>::sort_unstable_by_key<u32, gpui_gpu::renderer::text_packet::patch::{closure#8}>::{closure#0}>",
+        "bytes": 419,
+        "address": 6368480
+      },
+      {
+        "name": "<gpui_gpu::renderer::retained::RetainedRenderer>::patch_texts",
+        "bytes": 455,
+        "address": 6381888
+      },
+      {
+        "name": "<gpui_gpu::renderer::RendererState>::bindings",
+        "bytes": 461,
+        "address": 6327584
+      },
+      {
+        "name": "gpui_gpu::renderer::visit::<<gpui_gpu::renderer::RendererState>::render_observed<<gpui_gpu::renderer::RendererState>::render::{closure#0}>::{closure#6}>",
+        "bytes": 515,
+        "address": 6302080
+      },
+      {
+        "name": "<alloc::vec::Vec<u32>>::extend_trusted::<core::iter::adapters::map::Map<core::slice::iter::Iter<(usize, u32)>, gpui_gpu::renderer::text_packet::patch::{closure#7}>>",
+        "bytes": 519,
+        "address": 6347712
+      },
+      {
+        "name": "gpui_gpu::renderer::visit::<gpui_gpu::renderer::text_packet::patch::{closure#3}>",
+        "bytes": 575,
+        "address": 6302608
+      },
+      {
+        "name": "<gpui_gpu::renderer::GpuContext>::submit_regions",
+        "bytes": 801,
+        "address": 6306992
+      },
+      {
+        "name": "core::slice::sort::unstable::quicksort::quicksort::<u32, <[u32]>::sort_unstable_by_key<u32, gpui_gpu::renderer::text_packet::patch::{closure#8}>::{closure#0}>",
+        "bytes": 892,
+        "address": 6370512
+      },
+      {
+        "name": "<gpui_gpu::renderer::retained::RetainedRenderer>::render::{closure#6}",
+        "bytes": 1117,
+        "address": 6303760
+      },
+      {
+        "name": "<core::iter::adapters::chain::Chain<core::slice::iter::Iter<u32>, core::slice::iter::Iter<u32>> as core::iter::traits::iterator::Iterator>::try_fold::<(), core::iter::traits::iterator::Iterator::any::check<&u32, gpui_gpu::renderer::text_packet::repair_regions::{closure#1}>::{closure#0}, core::ops::control_flow::ControlFlow<()>>",
+        "bytes": 1349,
+        "address": 6371408
+      },
+      {
+        "name": "gpui_gpu::renderer::text_packet::repair_regions",
+        "bytes": 1778,
+        "address": 6331488
+      },
+      {
+        "name": "<gpui_gpu::renderer::retained::RetainedRenderer>::render",
+        "bytes": 2228,
+        "address": 6382352
+      },
+      {
+        "name": "core::slice::sort::shared::smallsort::small_sort_network::<u32, <[u32]>::sort_unstable_by_key<u32, gpui_gpu::renderer::text_packet::patch::{closure#8}>::{closure#0}>",
+        "bytes": 3051,
+        "address": 6353392
+      },
+      {
+        "name": "gpui_gpu::renderer::text_packet::patch",
+        "bytes": 8637,
+        "address": 6333728
+      },
+      {
+        "name": "<gpui_gpu::renderer::RendererState>::render_observed::<<gpui_gpu::renderer::retained::RetainedRenderer>::render::{closure#6}>",
+        "bytes": 11331,
+        "address": 6287280
+      }
+    ]
+  }
+}

@@ -1,0 +1,69 @@
+{
+  "cases": [
+    [
+      0,
+      1,
+      "exact"
+    ],
+    [
+      25,
+      1,
+      "exact"
+    ],
+    [
+      25,
+      2,
+      "exact"
+    ],
+    [
+      1000,
+      4,
+      "exact"
+    ],
+    [
+      0,
+      1,
+      "stream"
+    ],
+    [
+      25,
+      1,
+      "stream"
+    ],
+    [
+      1000,
+      1,
+      "stream"
+    ]
+  ],
+  "warmup": 10,
+  "frames": 60,
+  "affinity": "2-5",
+  "environment": {
+    "XDG_RUNTIME_DIR": "/home/user/gpui-xdg",
+    "VK_ICD_FILENAMES": "/usr/share/vulkan/icd.d/lvp_icd.json",
+    "LP_NUM_THREADS": "4"
+  },
+  "hashes": {
+    "control": "58f1d07001088c0e420f290b32a56ed5fff7e516e8fb8e01d772ff652f6878fc",
+    "candidate": "5fb76301dbb70f7caf1f04fcd134e2cf425310a9a70d71784f55fa984d9164e6",
+    "font": "7da195a74c55bef988d0d48f9508bd5d849425c1770dba5d7bfc6ce9ed848954"
+  },
+  "binaries": {
+    "control": "/home/user/gpui-gpu-text-tiles-target/release/build/gpui_gpu/f49ad2ba58fd87fb/out/text_packet",
+    "candidate": "/home/user/gpui-gpu-text-gated-target/release/build/gpui_gpu/f49ad2ba58fd87fb/out/text_packet"
+  },
+  "font": "/home/user/zgx-reference-local/comparisons/fonts/DejaVuSans.ttf",
+  "current_heads": {
+    "control": "3dd29a0ebdea85ed7b4076ab51069865293e8737",
+    "candidate": "a3ac8c5b3475b347e264929f749b71bf81b4cf5f"
+  },
+  "built_sources": {
+    "control": "ef71ae300172d5e3ee958c654900cd36839e015c",
+    "candidate": "a3ac8c5b3475b347e264929f749b71bf81b4cf5f"
+  },
+  "endpoint": "Canonical delta construction plus GPU preparation/submission/queue completion; cached shaped layouts prepared outside timing; no native scanout",
+  "compiler": "rustc 1.101.0-nightly (7189d39d9 2026-10-22)\nbinary: rustc\ncommit-hash: 7189d39d9ce936881b8132c6addeaf3e295cd455\ncommit-date: 2026-10-22\nhost: x86_64-unknown-linux-gnu\nrelease: 1.101.0-nightly\nLLVM version: 23.1.4\n",
+  "platform": "Linux-6.8.0-117-generic-x86_64-with-glibc2.39",
+  "start": 1793104321.7033293
+}

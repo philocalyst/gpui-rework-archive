@@ -1,0 +1,29 @@
+{
+  "primary": {
+    "1000-2-exact": true,
+    "1000-4-exact": true,
+    "1000-1-stream": true
+  },
+  "controls": {
+    "0-1-exact": true,
+    "0-1-full": true,
+    "0-2-full": true,
+    "0-4-full": true,
+    "25-1-exact": true,
+    "25-1-full": true,
+    "25-2-full": true,
+    "25-4-full": true,
+    "1000-1-exact": true,
+    "1000-1-full": true,
+    "1000-2-full": true,
+    "1000-4-full": true
+  },
+  "mechanism": {
+    "0-1-exact": true,
+    "25-1-exact": false,
+    "0-1-stream": true,
+    "25-1-stream": false,
+    "1000-1-stream": false
+  },
+  "numerical_pass": false
+}

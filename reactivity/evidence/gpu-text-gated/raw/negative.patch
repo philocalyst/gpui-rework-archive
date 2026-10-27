@@ -1,0 +1,43 @@
+commit 9032bc6e89f4fb8d4341670591371cc63a5fb952
+Author:     Wing <44917547+wingleeio@users.noreply.github.com>
+AuthorDate: Tue Oct 27 12:01:37 2026 +0000
+Commit:     Wing <44917547+wingleeio@users.noreply.github.com>
+CommitDate: Tue Oct 27 12:01:37 2026 +0000
+
+    Negative control: skip old-only membership during large-damage refinement
+    
+    Co-authored-by: zeronsh[bot] <346184242+zeronsh[bot]@users.noreply.github.com>
+
+diff --git a/reactivity/crates/gpu/src/renderer/text_packet.rs b/reactivity/crates/gpu/src/renderer/text_packet.rs
+index f028d96e80..0c0cbede6d 100644
+--- a/reactivity/crates/gpu/src/renderer/text_packet.rs
++++ b/reactivity/crates/gpu/src/renderer/text_packet.rs
+@@ -107,7 +107,7 @@ fn repair_regions(
+         if old == next && old[1] == UNIFORM_TILE {
+             continue;
+         }
+-        let old = if old[1] == UNIFORM_TILE {
++        let _old = if old[1] == UNIFORM_TILE {
+             &old[..1]
+         } else {
+             &state.references[old[0] as usize..old[1] as usize]
+@@ -117,13 +117,12 @@ fn repair_regions(
+         } else {
+             &next_references[next[0] as usize..next[1] as usize]
+         };
+-        let dirty = old != next
+-            || old.iter().chain(next).any(|&address| {
+-                patches
+-                    .iter()
+-                    .zip(&common_changed)
+-                    .any(|(p, &common)| p.changes(address, &state.records, common))
+-            });
++        let dirty = next.iter().any(|&address| {
++            patches
++                .iter()
++                .zip(&common_changed)
++                .any(|(p, &common)| p.changes(address, &state.records, common))
++        });
+         if dirty {
+             append_region(
+                 &mut regions,
