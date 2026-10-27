@@ -69,8 +69,6 @@ impl PlannerState {
     #[cold]
     #[inline(never)]
     fn trim_scratch(&mut self) {
-        self.context = LayoutContext::new();
-        self.layout = parley::Layout::default();
         self.large_scratch = false;
     }
 }
