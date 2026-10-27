@@ -40,10 +40,13 @@ impl View for Page {
             .scroll_offset(&self.offset)
             .w(180)
             .h(72);
+        // Equal-length adjacent text makes wrong-P-row selection observable:
+        // the Canvas run can be valid even when semantic identity is wrong.
+        let neighbor = text("Count: 20").w(180).h(24);
         let items = if self.after {
-            column((list, label))
+            column((list, label, neighbor))
         } else {
-            column((label, list))
+            column((label, neighbor, list))
         };
         items
             .child(text("Count: 0123456789").w(180).h(24))
