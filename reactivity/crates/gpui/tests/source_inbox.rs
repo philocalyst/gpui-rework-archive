@@ -176,7 +176,10 @@ fn projected_peer_sources_keep_distinct_scoped_identities() {
     win.deliver_ready(8).unwrap();
     assert_eq!(&**win.read(A.source(&Panel::LEFT)).unwrap(), "aa");
     assert_eq!(&**win.read(B.source(&Panel::LEFT)).unwrap(), "bb");
-    assert_eq!(win.counters().owner_reruns, 1);
+    assert_eq!(win.counters().owner_reruns, 0);
+    assert_eq!(win.counters().exact_updates, 1);
+    assert!(win.contains_text("aa").unwrap());
+    assert!(win.contains_text("bb").unwrap());
 }
 
 #[test]
