@@ -66,6 +66,15 @@ performance victory is established by this research or any isolated result.
 
 ## Current campaign result
 
+The maintainer's renewed BBTree/Solid/Ripple request led to a deeper
+[compiler, dependency and publication study](LOCALITY.md), pinned to official
+source and including rejected upstream approaches. Its next experiment is
+`local/list-local-publication`: carry an exact text destination through complete
+scene publication despite an unrelated virtual list. Preregistration
+`be40749317e272b5fb4e9080a6d30ad1912abaae`; initial frozen candidate
+`903db9a5bccaed52387adeace84f97ffe55f3e4c`. Correctness and actual Workload
+admission are gates before timing. No async runtime or new public API is added.
+
 The historical proposals above have been exercised; see the campaign index and
 [SCHEDULING.md](SCHEDULING.md) for their preserved failures and qualifications.
 The latest certified scroll-copy dossier8041b7a7fe shows a strong whole-owner/GPU
