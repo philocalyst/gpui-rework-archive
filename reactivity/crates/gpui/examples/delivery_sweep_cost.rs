@@ -24,7 +24,7 @@ fn receive(value: &mut u64, message: u64) {
 fn attach<L: LaneSet<Model>>(
     win: Win<Model, L>,
     senders: &mut Vec<Remote<u64>>,
-) -> Win<Model, impl LaneSet<Model>> {
+) -> Win<Model, impl LaneSet<Model> + use<L>> {
     let (sender, inbox) = Remote::bounded(128);
     senders.push(sender);
     win.with_inbox_for(inbox, Model::VALUE, receive).unwrap()
