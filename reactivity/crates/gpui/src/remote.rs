@@ -295,6 +295,21 @@ impl SourceEdits {
             self.fields[0]
         }
     }
+    pub(crate) fn question_change<M: 'static>(
+        &self,
+        sources: &Sources<M>,
+    ) -> Result<Change, Error> {
+        if let Some(fields) = self.multiple() {
+            for field in fields {
+                if sources.invalidates_owner(field)? {
+                    return Ok(Change::Source(None));
+                }
+            }
+            Ok(Change::Sources(self.fields))
+        } else {
+            Ok(Change::Source(self.single()))
+        }
+    }
     pub(crate) fn multiple(&self) -> Option<impl Iterator<Item = FieldId> + Clone + '_> {
         (!self.coarse && self.fields[1].is_some()).then(|| self.fields.iter().copied().flatten())
     }

@@ -32,6 +32,7 @@ pub enum Change {
     Mount,
     Dependencies,
     Source(Option<FieldId>),
+    Sources([Option<FieldId>; 4]),
     Retry(ReaderKey),
 }
 
@@ -563,6 +564,20 @@ where
         sources: &Sources<M>,
         change: Change,
     ) -> Result<bool, crate::Error> {
+        if let Change::Sources(fields) = change
+            && !A::READERS
+        {
+            let mut relevant = false;
+            for field in fields.into_iter().flatten() {
+                if self.inputs.contains(sources, field)? {
+                    relevant = true;
+                    break;
+                }
+            }
+            if !relevant {
+                return Ok(false);
+            }
+        }
         match change {
             Change::Source(Some(field))
                 if !A::READERS && !self.inputs.contains(sources, field)? =>

@@ -44,11 +44,11 @@ impl<M: View + 'static, L: LaneSet<M>> RuntimeMut<'_, M, L> {
         let mut questions = 0;
         let mut questions_changed = false;
         let result = match catch_unwind(AssertUnwindSafe(|| {
-            if models != 0 {
+            if models != 0 && L::QUESTIONS {
                 questions_changed = self.lanes.refresh(
                     &self.runtime.model,
                     &self.runtime.sources,
-                    crate::reader::question::Change::Source(exact.single()),
+                    exact.question_change(&self.runtime.sources)?,
                 )?;
             }
             // An accepted prefix supersedes old answers even when a later
@@ -87,7 +87,8 @@ impl<M: View + 'static, L: LaneSet<M>> RuntimeMut<'_, M, L> {
         if *applied == 0 {
             return Ok(self.commit());
         }
-        if !L::QUESTIONS
+        if !questions_changed
+            && questions == 0
             && let Some(fields) = exact.multiple()
             && self.admits_text_batch(fields.clone())?
         {
