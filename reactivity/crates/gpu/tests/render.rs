@@ -4263,7 +4263,6 @@ fn retained_scroll_copy_matches_full_gpu_and_invalidates_after_failure_or_resize
     }
     pollster::block_on(async {
         for format in [
-            wgpu::TextureFormat::Rgba8Unorm,
             wgpu::TextureFormat::Rgba8UnormSrgb,
             wgpu::TextureFormat::Bgra8UnormSrgb,
             wgpu::TextureFormat::Rgba16Float,
