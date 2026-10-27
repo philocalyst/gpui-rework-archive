@@ -22,6 +22,8 @@ pub(super) struct TextPatch {
     pub row: usize,
     pub value: SharedText,
     pub geometry: Entry,
+    #[cfg(test)]
+    pub damage_regions: Vec<gpui_canvas::DamageRegion>,
 }
 impl TextResources {
     pub fn unused(&self) -> bool {

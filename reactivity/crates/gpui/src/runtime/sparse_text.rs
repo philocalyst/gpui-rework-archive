@@ -106,6 +106,8 @@ impl<M: View + 'static> Runtime<M> {
         let patch = Box::new(text_geometry::TextPatch {
             row,
             value,
+            #[cfg(test)]
+            damage_regions: Vec::new(),
             geometry: text_geometry::Entry {
                 row: row as u32,
                 run: Some(run),
@@ -120,7 +122,9 @@ impl<M: View + 'static> Runtime<M> {
             sequence,
         };
         let service = self.text.as_mut().unwrap().system.as_mut().unwrap();
-        let Some(damage) = self.canvas.try_patch_text(
+        #[cfg(test)]
+        let mut patch = patch;
+        let Some(damage) = self.canvas.try_patch_text_observed(
             run,
             service,
             shape,
@@ -129,6 +133,12 @@ impl<M: View + 'static> Runtime<M> {
             clip,
             style.fg,
             self.requested_scale_factor,
+            |support| {
+                #[cfg(test)]
+                patch.damage_regions.push(support);
+                #[cfg(not(test))]
+                let _ = support;
+            },
         )?
         else {
             return Ok(false);
@@ -211,7 +221,7 @@ mod tests {
                     .is_some_and(|m| m.editing.is_some()),
                 runtime.inspector_enabled(),
             );
-            for _ in 0..80 {
+            for frame in 0..80 {
                 let writes = fixture
                     .owner
                     .runtime()
@@ -246,6 +256,30 @@ mod tests {
                     usize::from(runtime.layout.stats().changed_layout_writes == writes);
                 patches += usize::from(runtime.text.as_ref().is_some_and(|t| t.patch.is_some()));
                 full += usize::from(runtime.prepared.as_ref().is_some_and(|p| !p.keeps_rows()));
+                if let Some(patch) = runtime.text.as_ref().and_then(|t| t.patch.as_ref()) {
+                    let mut pixels = std::collections::BTreeSet::new();
+                    let mut tiles = std::collections::BTreeSet::new();
+                    let mut union = gpui_canvas::DamageRegion::default();
+                    for &region in &patch.damage_regions {
+                        union = union.union(region);
+                        if let Some([l, t, r, b]) = region.bounds() {
+                            for y in t..b {
+                                for x in l..r {
+                                    pixels.insert((x, y));
+                                    tiles.insert((x / 16, y / 16));
+                                }
+                            }
+                        }
+                    }
+                    let area = union.bounds().map_or(0, |[l, t, r, b]| (r - l) * (b - t));
+                    assert_eq!(runtime.prepared.as_ref().unwrap().damage, union);
+                    println!(
+                        "GLYPH_DAMAGE,{case},{frame},{},{area},{},{}",
+                        patch.damage_regions.len(),
+                        pixels.len(),
+                        tiles.len() * 256
+                    );
+                }
                 let token = fixture.owner.with_scene(|_, token| token).unwrap();
                 fixture.owner.presented(token).unwrap();
             }
