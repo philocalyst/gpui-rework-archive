@@ -436,3 +436,66 @@ impl<M: View + 'static> Runtime<M> {
         }
     }
 }
+
+#[cfg(test)]
+mod controlled_epoch_tests {
+    use super::*;
+    use crate::{Signal, uniform_list};
+
+    struct Rows(Signal<f64>);
+    impl Rows {
+        const OFFSET: Source<Self, f64> =
+            Source::new(FieldId::new(1), "offset", |m| &m.0, |m| &mut m.0);
+    }
+    impl ItemSource for Rows {
+        fn len(&self) -> usize {
+            1000
+        }
+        fn key(&self, index: usize) -> ItemKey {
+            ItemKey::new(index as u64)
+        }
+        fn index_of(&self, key: ItemKey) -> Option<usize> {
+            usize::try_from(key.get()).ok().filter(|i| *i < self.len())
+        }
+        fn row(&self, index: usize) -> crate::El<'_> {
+            crate::text(index.to_string()).h(32)
+        }
+    }
+    impl View for Rows {
+        fn sources() -> Sources<Self> {
+            Sources::new().direct(Self::OFFSET)
+        }
+        fn view(&self) -> crate::El<'_> {
+            uniform_list(ListId::new(1), self, 32)
+                .scroll_offset(&self.0)
+                .h(96)
+                .w(200)
+        }
+    }
+
+    #[test]
+    fn exhausted_distant_key_preserves_current_cohort_without_description() {
+        let mut win = Win::with_size(Rows(Signal::new(0.)), 240, 160).unwrap();
+        let list = win.list(ListId::new(1)).unwrap();
+        let row = win.list_item(list, ItemKey::new(0)).unwrap();
+        {
+            // Reach the arithmetic boundary without 2^64 public operations.
+            let mut runtime = win.runtime_mut().unwrap();
+            runtime.source_epoch = u64::MAX;
+            runtime.presentation_epoch = u64::MAX;
+            runtime.complete_epoch = u64::MAX;
+        }
+        let before = win.snapshot().unwrap();
+        assert_eq!(win.list_state(list).unwrap().offset, 0.);
+        let descriptions = win.runtime().unwrap().counters.descriptions;
+        assert!(matches!(
+            win.scroll_to_key(list, ItemKey::new(900)),
+            Err(Error::EpochExhausted)
+        ));
+        assert_eq!(win.runtime().unwrap().counters.descriptions, descriptions);
+        assert_eq!(win.snapshot().unwrap(), before);
+        assert_eq!(*win.read(Rows::OFFSET).unwrap(), 0.);
+        assert_eq!(win.list_state(list).unwrap().offset, 0.);
+        assert_eq!(win.list_item(list, ItemKey::new(0)).unwrap(), row);
+    }
+}
