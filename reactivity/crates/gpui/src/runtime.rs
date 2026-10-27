@@ -2787,13 +2787,6 @@ impl<M: View + 'static> Runtime<M> {
                 }
             }
             base.sort_unstable_by_key(|entry| entry.identity);
-            text_only = text_only
-                && metadata.base.len() == base.len()
-                && metadata.base.iter().zip(&base).all(|(old, new)| {
-                    old.identity == new.identity
-                        && old.name == new.name
-                        && old.description == new.description
-                });
             metadata.base = base;
         }
         let by_identity = IdentityIndex::from_ids(nodes.iter().map(Node::identity));
