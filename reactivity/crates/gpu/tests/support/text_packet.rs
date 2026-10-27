@@ -470,3 +470,48 @@ fn identical_shader_words_can_have_different_conservative_memberships() {
         assert_eq!(after, readback(&mut full, &next));
     });
 }
+
+#[test]
+fn text_refinement_area_boundary_preserves_exact_output() {
+    pollster::block_on(async {
+        let mut text = TextSystem::bundled().unwrap();
+        let mut gpu = RetainedRenderer::new(renderer(wgpu::TextureFormat::Rgba8UnormSrgb).await);
+        let mut full = renderer(wgpu::TextureFormat::Rgba8UnormSrgb).await;
+        let positions = [Point { x: 2., y: 2. }, Point { x: 6., y: 24. }];
+        let (initial, slots) = scene(
+            &mut text,
+            ["0011", "1100"],
+            positions,
+            Affine::IDENTITY,
+            ColorConfig::default(),
+            Color::BLACK,
+        );
+        let target = output_texture(&gpu, &initial);
+        let view = target.create_view(&Default::default());
+        gpu.render(initial.prepared_scene(), &view, None).unwrap();
+        for (labels, rect, expected_full) in [
+            (["1100", "0011"], Rect::new(0., 0., 63., 65.), Some(4095)),
+            (["0011", "1100"], Rect::new(0., 0., 64., 64.), None),
+        ] {
+            let (next, next_slots) = scene(
+                &mut text,
+                labels,
+                positions,
+                Affine::IDENTITY,
+                ColorConfig::default(),
+                Color::BLACK,
+            );
+            assert_eq!(slots, next_slots);
+            let damage = rect_damage([128, 96], rect);
+            gpu.patch_texts(&edits(&next, slots), &view, Some(damage))
+                .unwrap();
+            if let Some(pixels) = expected_full {
+                assert_eq!(gpu.retained_stats().composited_pixels, pixels);
+            } else {
+                assert!(gpu.retained_stats().composited_pixels > 0);
+                assert!(gpu.retained_stats().composited_pixels < 4096);
+            }
+            assert_eq!(read_texture(&gpu, &target), readback(&mut full, &next));
+        }
+    });
+}
