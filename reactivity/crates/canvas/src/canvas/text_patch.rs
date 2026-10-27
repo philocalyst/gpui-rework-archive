@@ -52,6 +52,37 @@ impl Canvas {
         color: Color,
         raster_scale: f32,
     ) -> Result<Option<DamageRegion>, Error> {
+        self.try_patch_text_observed(
+            slot,
+            text,
+            layout,
+            origin,
+            transform,
+            clip,
+            color,
+            raster_scale,
+            |_| {},
+        )
+    }
+
+    /// Replace a text run and observe conservative old/new bounds of only the
+    /// changed painter-order contributions. Common state and immutable raster
+    /// leases are validated before observation; rejection observes nothing.
+    /// Bounds may overlap. A caller repairing several regions must deduplicate
+    /// them. The observer runs before commit; if it panics, this Canvas is intact.
+    #[allow(clippy::too_many_arguments)]
+    pub fn try_patch_text_observed(
+        &mut self,
+        slot: TextRunSlot,
+        text: &mut TextSystem,
+        layout: &TextLayout,
+        origin: Point,
+        transform: Affine,
+        clip: Rect,
+        color: Color,
+        raster_scale: f32,
+        mut observe: impl FnMut(DamageRegion),
+    ) -> Result<Option<DamageRegion>, Error> {
         let index = slot.0.get() as usize - 1;
         let Some(old) = self.commands.commons.get(index) else {
             return Ok(None);
@@ -125,13 +156,33 @@ impl Canvas {
             }
         }
         let mut damage = DamageRegion::default();
-        for address in self.commands.order[range.clone()]
+        let new = &prepared.commands.commons[0];
+        for (&before, &after) in self.commands.order[range.clone()]
             .iter()
-            .chain(&prepared.commands.order)
+            .zip(&prepared.commands.order)
         {
-            damage = damage.union(DamageRegion::checked_canvas_bounds(
-                address.bounds.map(usize::from),
-            ));
+            let rect = |run: &CommonGroup, address: DrawRef| {
+                glyph_rect(
+                    run.origin,
+                    run.glyphs.position(address.glyph),
+                    &self.commands.masks[usize::from(address.mask)],
+                    run.scale,
+                )
+            };
+            // Both addresses now name leases in the preceding scene. Common
+            // map/color/clip bits are already equal. Equal bounds alone cannot
+            // prove equal sampling: fractional local placement matters too.
+            if before.mask == after.mask
+                && before.bounds == after.bounds
+                && rect_bits(rect(old, before)) == rect_bits(rect(new, after))
+            {
+                continue;
+            }
+            for address in [before, after] {
+                let support = DamageRegion::checked_canvas_bounds(address.bounds.map(usize::from));
+                damage = damage.union(support);
+                observe(support);
+            }
         }
         // All fallible admission is complete. Painter order, resource counts
         // and common-state ownership remain unchanged.

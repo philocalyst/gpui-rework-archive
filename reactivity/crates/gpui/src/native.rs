@@ -315,7 +315,6 @@ struct GpuSurface {
     renderer: gpui_gpu::RetainedRenderer,
     errors: Arc<DeviceErrors>,
     packet_token: Option<crate::PresentationToken>,
-    packet_epoch: Option<crate::runtime::paint::SceneEpoch>,
 }
 impl GpuSurface {
     #[cfg(test)]
@@ -336,29 +335,25 @@ impl GpuSurface {
         target: &wgpu::TextureView,
         transition: Option<crate::runtime::paint::SceneDamage>,
     ) -> Result<wgpu::SubmissionIndex, gpui_gpu::Error> {
-        let epoch = transition.map(|d| d.epoch);
         let damage = transition
-            .filter(|d| d.base.is_some() && d.base == self.packet_epoch)
+            .filter(|d| d.base.is_some() && d.base == self.packet_token)
             .map(|d| d.region);
         if self.packet_token == Some(token)
             && let Some(submitted) = self.renderer.redraw(target)?
         {
-            self.packet_epoch = epoch;
             return Ok(submitted);
         }
+        // Revoke image authority before any packet or image mutation.
         let previous = self.packet_token.take();
-        self.packet_epoch = None; // revoke before any packet or image mutation
         if let Some(paint) = paint
             && previous == Some(paint.from)
             && let Ok(submitted) = self.renderer.patch_slots(&paint.edits, target, damage)
         {
             self.packet_token = Some(token);
-            self.packet_epoch = epoch;
             return Ok(submitted);
         }
         let submitted = self.renderer.render(scene, target, damage)?;
         self.packet_token = Some(token);
-        self.packet_epoch = epoch;
         Ok(submitted)
     }
 }
@@ -596,7 +591,6 @@ impl<V: View + 'static, L: LaneSet<V>> NativeHost<V, L> {
             renderer: gpui_gpu::RetainedRenderer::new(renderer),
             errors,
             packet_token: None,
-            packet_epoch: None,
         })));
         self.resize([size.width, size.height])
     }
@@ -1411,6 +1405,12 @@ mod paint_tests;
     target_os = "linux"
 ))]
 mod solid_tests;
+#[cfg(all(
+    test,
+    any(feature = "x11", feature = "x11-minimal"),
+    target_os = "linux"
+))]
+mod text_repair_tests;
 
 #[cfg(all(
     test,
@@ -1514,6 +1514,7 @@ mod tests {
             .unwrap();
         assert!(!gpu.renderer.stats().packet_reused);
         super::paint_tests::run(gpu);
+        super::text_repair_tests::run(gpu);
     }
     #[test]
     fn packet_gpu_header_ledger() {
