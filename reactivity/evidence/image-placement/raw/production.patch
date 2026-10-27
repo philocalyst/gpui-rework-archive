@@ -1,0 +1,15 @@
+diff --git a/reactivity/crates/gpui/src/runtime.rs b/reactivity/crates/gpui/src/runtime.rs
+index 7e511339fd..28518df9de 100644
+--- a/reactivity/crates/gpui/src/runtime.rs
++++ b/reactivity/crates/gpui/src/runtime.rs
+@@ -3711,8 +3711,8 @@ impl<M: View + 'static> Runtime<M> {
+                 scene.draw_image_with(
+                     resource,
+                     Rect::new(
+-                        layout.content_box_x(),
+-                        layout.content_box_y(),
++                        layout.border.left + layout.padding.left,
++                        layout.border.top + layout.padding.top,
+                         layout.content_box_width(),
+                         layout.content_box_height(),
+                     ),

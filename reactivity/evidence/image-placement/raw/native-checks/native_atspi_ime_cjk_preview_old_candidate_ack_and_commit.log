@@ -1,0 +1,4 @@
+dbus-daemon[2012098]: [session uid=1000 pid=2012098] Activating service name='org.a11y.Bus' requested by ':1.1' (uid=1000 pid=2012100 comm="/home/user/gpui-image-placement-target/release/bui" label="unconfined")
+dbus-daemon[2012098]: [session uid=1000 pid=2012098] Successfully activated service 'org.a11y.Bus'
+dbus-daemon[2012115]: Activating service name='org.a11y.atspi.Registry' requested by ':1.0' (uid=1000 pid=2012100 comm="/home/user/gpui-image-placement-target/release/bui" label="unconfined")
+dbus-daemon[2012115]: Successfully activated service 'org.a11y.atspi.Registry'

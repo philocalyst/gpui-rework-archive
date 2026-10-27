@@ -1,0 +1,19 @@
+   Compiling gpui v0.1.0 (/home/user/gpui-image-placement-lab/reactivity/crates/gpui)
+    Finished `release` profile [optimized] target(s) in 4.45s
+     Running tests/image_placement.rs (/home/user/gpui-image-placement-target/release/build/gpui/0d5f81483f9514fe/out/image_placement-0d5f81483f9514fe)
+IMAGE_CASE horizontal=false clipped=false scale=1 sampling=Nearest
+IMAGE_CASE horizontal=false clipped=false scale=1 sampling=Linear
+IMAGE_CASE horizontal=false clipped=false scale=1.25 sampling=Nearest
+IMAGE_CASE horizontal=false clipped=false scale=1.25 sampling=Linear
+IMAGE_CASE horizontal=false clipped=true scale=1 sampling=Nearest
+IMAGE_CASE horizontal=false clipped=true scale=1 sampling=Linear
+IMAGE_CASE horizontal=false clipped=true scale=1.25 sampling=Nearest
+IMAGE_CASE horizontal=false clipped=true scale=1.25 sampling=Linear
+IMAGE_CASE horizontal=true clipped=false scale=1 sampling=Nearest
+IMAGE_CASE horizontal=true clipped=false scale=1 sampling=Linear
+IMAGE_CASE horizontal=true clipped=false scale=1.25 sampling=Nearest
+IMAGE_CASE horizontal=true clipped=false scale=1.25 sampling=Linear
+IMAGE_CASE horizontal=true clipped=true scale=1 sampling=Nearest
+IMAGE_CASE horizontal=true clipped=true scale=1 sampling=Linear
+IMAGE_CASE horizontal=true clipped=true scale=1.25 sampling=Nearest
+IMAGE_CASE horizontal=true clipped=true scale=1.25 sampling=Linear
