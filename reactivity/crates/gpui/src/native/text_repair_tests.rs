@@ -38,7 +38,8 @@ impl View for Page {
             text("0123456789").w(220).h(24),
             uniform_list(LIST, self, 8).w(220).h(64),
         ))
-        .w(if self.invalid { f64::NAN } else { 240. })
+        .w(240)
+        .rounded(if self.invalid { f32::NAN } else { 0. })
         .h(144)
         .bg(Color::rgb(23, 31, 47))
     }
@@ -118,7 +119,12 @@ pub(super) fn run(gpu: &mut GpuSurface) {
     assert_eq!(owner.snapshot().unwrap().source_epoch, old_epoch);
     let acknowledged = owner.with_scene(|_, token| token).unwrap();
     owner.set(Page::LABEL, "000003 000004".into()).unwrap();
-    assert_ne!(Some(acknowledged), old_token);
+    owner
+        .with_paint_scene(|_, _, _, damage| {
+            assert_eq!(damage.base, Some(acknowledged));
+            assert_ne!(damage.base, old_token);
+        })
+        .unwrap();
     render(gpu, &mut owner);
     assert_eq!(gpu.renderer.retained_stats().composited_pixels, 240 * 144);
     // A second unseen scroll plus coalescing exercises ordinary damage too.

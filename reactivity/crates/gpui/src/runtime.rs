@@ -1210,7 +1210,7 @@ struct Runtime<M> {
     dirty: bool,
     source_epoch: u64,
     presentation_epoch: u64,
-    #[cfg(feature = "accessibility")]
+    #[cfg(feature = "native-core")]
     presented_sequence: Option<NonZeroU64>,
     #[cfg(feature = "accessibility")]
     accessibility: Option<Box<accessibility::Observer>>,
@@ -1452,7 +1452,7 @@ impl<M: View + 'static, L: LaneSet<M>> Win<M, L> {
             dirty: true,
             source_epoch: 0,
             presentation_epoch: 0,
-            #[cfg(feature = "accessibility")]
+            #[cfg(feature = "native-core")]
             presented_sequence: None,
             #[cfg(feature = "accessibility")]
             accessibility: None,
@@ -3086,9 +3086,12 @@ impl<M: View + 'static> Runtime<M> {
         // No-op edits may extend complete coverage, but failed preparations do
         // not. Re-acknowledging after loss therefore never covers a failed S.
         self.presentation_epoch = self.complete_epoch;
-        #[cfg(feature = "accessibility")]
+        #[cfg(feature = "native-core")]
         {
             self.presented_sequence = Some(token.sequence);
+        }
+        #[cfg(feature = "accessibility")]
+        {
             let stamp = self.semantic_stamp();
             if let Some(observer) = &mut self.accessibility {
                 observer.acknowledge(stamp);
