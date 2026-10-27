@@ -237,3 +237,83 @@ fn opaque_callback_still_supersedes_unrelated_question() {
     assert!(jobs.try_recv().is_ok());
     assert_eq!(win.with_ready(answer, Clone::clone).unwrap(), None);
 }
+#[test]
+fn batched_diamond_never_freezes_a_partial_join() {
+    let (a_send, a_jobs) = mpsc::channel();
+    let (b_send, b_jobs) = mpsc::channel();
+    let (join_send, joins) = mpsc::channel();
+    let (plan, a) = Questions::new()
+        .question(
+            Model::<false>::F[0],
+            Clone::clone,
+            move |input, cap: Completion<String, Infallible>| {
+                a_send.send((input, cap)).unwrap();
+                Ok(())
+            },
+        )
+        .unwrap();
+    let (plan, b) = plan
+        .question(
+            Model::<false>::F[1],
+            Clone::clone,
+            move |input, cap: Completion<String, Infallible>| {
+                b_send.send((input, cap)).unwrap();
+                Ok(())
+            },
+        )
+        .unwrap();
+    let (plan, joined) = plan
+        .question(
+            (a, b),
+            |(a, b)| (a.clone(), b.clone()),
+            move |input, cap: Completion<String, Infallible>| {
+                join_send.send((input, cap)).unwrap();
+                Ok(())
+            },
+        )
+        .unwrap();
+    let (mut win, remotes) = mount(plan, joined);
+    let (_, a_cap) = a_jobs.try_recv().unwrap();
+    let (_, b_cap) = b_jobs.try_recv().unwrap();
+    a_cap.complete(Ok("old-a".into())).unwrap();
+    b_cap.complete(Ok("old-b".into())).unwrap();
+    win.deliver_ready(8).unwrap();
+    let (pair, cap) = joins.try_recv().unwrap();
+    assert_eq!(pair, ("old-a".into(), "old-b".into()));
+    cap.complete(Ok("old-joined".into())).unwrap();
+    win.deliver_ready(8).unwrap();
+    ack(&mut win);
+    let frozen = win.question_info(joined).unwrap().stats.frozen;
+    remotes[0].try_send("new-a".into()).unwrap();
+    remotes[1].try_send("new-b".into()).unwrap();
+    win.deliver_ready(8).unwrap();
+    ack(&mut win);
+    let (a_input, a_cap) = a_jobs.try_recv().unwrap();
+    let (b_input, b_cap) = b_jobs.try_recv().unwrap();
+    assert_eq!((a_input, b_input), ("new-a".into(), "new-b".into()));
+    assert!(a_jobs.try_recv().is_err());
+    assert!(b_jobs.try_recv().is_err());
+    assert!(joins.try_recv().is_err());
+    assert!(win.contains_text("old-joined").unwrap());
+    a_cap.complete(Ok("answer-a".into())).unwrap();
+    win.deliver_ready(8).unwrap();
+    ack(&mut win);
+    assert!(
+        joins.try_recv().is_err(),
+        "one ready child cannot authorize the join"
+    );
+    assert_eq!(win.question_info(joined).unwrap().stats.frozen, frozen);
+    assert!(win.contains_text("old-joined").unwrap());
+    b_cap.complete(Ok("answer-b".into())).unwrap();
+    win.deliver_ready(8).unwrap();
+    ack(&mut win);
+    let (pair, cap) = joins.try_recv().unwrap();
+    assert_eq!(pair, ("answer-a".into(), "answer-b".into()));
+    assert!(joins.try_recv().is_err());
+    assert_eq!(win.question_info(joined).unwrap().stats.frozen, frozen + 1);
+    cap.complete(Ok("new-joined".into())).unwrap();
+    win.deliver_ready(8).unwrap();
+    ack(&mut win);
+    assert!(win.contains_text("new-joined").unwrap());
+    assert!(!win.contains_text("old-joined").unwrap());
+}
