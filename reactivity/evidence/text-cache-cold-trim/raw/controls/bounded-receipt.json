@@ -1,0 +1,8 @@
+{
+  "binary": "/home/user/gpui-bounded-cache-target/release/examples/state_update_cost",
+  "sha256": "00baae690e5fdb90984b11657ee69dd22ad110efbcb2061c872eae2f1a497e7f",
+  "production_source": "fefa519956",
+  "current_head": "e6bda77dfc6784533cbc2b769f05b55fdc701c61",
+  "source_diff": "",
+  "note": "Only separate allocation example may differ; production libraries and measured cost fixture exactly match source pin. Binary matches previous frozen campaign."
+}

@@ -1,0 +1,35 @@
+
+running 2 tests
+test batch_parses_once_and_releases_tables_without_an_idle_cache ... ok
+test borrowed_batch_preserves_lines_clusters_errors_and_shared_face_identity ... ok
+
+test result: ok. 2 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 0.00s
+
+
+running 4 tests
+test a_new_font_identity_cannot_inherit_the_previous_planner_font_authority ... ok
+test rejected_and_panicked_sessions_recover_without_poisoning_future_layouts ... ok
+test reusable_planning_matches_scoped_unicode_metrics_and_original_byte_geometry ... ok
+test oversized_sessions_trim_scratch_without_revoking_held_layouts ... ok
+
+test result: ok. 4 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 0.03s
+
+
+running 14 tests
+test grapheme_interiors_are_not_legal_byte_positions ... ok
+test line_separator_keeps_paragraph_bidi_base_but_paragraph_separator_resets_it ... ok
+test bidi_visual_positions_match_explicit_mixed_direction_examples ... ok
+test every_bidi_grapheme_boundary_has_both_requested_destinations ... ok
+test long_graphemes_take_cold_metadata_without_rejecting_source_or_losing_tail ... ok
+test missing_coverage_is_an_error_and_inherited_arabic_marks_use_fallback ... ok
+test original_crlf_bytes_empty_paragraphs_and_caret_affinity_are_exact ... ok
+test mixed_scripts_rtl_numbers_and_isolates_have_actual_coverage ... ok
+test wrapped_ligatures_never_cross_font_or_bidi_run_boundaries ... ok
+test fallback_layout_leases_survive_later_sets_and_cache_eviction ... ok
+test explicit_variable_face_uses_its_default_instance_for_shape_and_raster ... ok
+test fallback_choice_is_independent_of_prior_passes_and_ignorables_keep_source_bytes ... ok
+test single_script_glyphs_match_independent_harfbuzz_implementation ... ok
+test mixed_paragraph_reordering_preserves_every_grapheme_destination_and_run_range ... ok
+
+test result: ok. 14 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 0.01s
+

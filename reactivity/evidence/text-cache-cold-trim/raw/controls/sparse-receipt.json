@@ -1,0 +1,8 @@
+{
+  "binary": "/home/user/gpui-sparse-text-target/release/examples/state_update_cost",
+  "sha256": "e84a1077c527b6a941fa55a6ea2e524919bc2566f31418fe7d4a351901ffc20f",
+  "production_source": "d5848eb970",
+  "current_head": "a91fd03b9b1623efbde68dfd8c00cadf79e7508e",
+  "source_diff": "reactivity/crates/gpui/examples/state_update_allocations.rs\n",
+  "note": "Only separate allocation example may differ; production libraries and measured cost fixture exactly match source pin. Binary matches previous frozen campaign."
+}

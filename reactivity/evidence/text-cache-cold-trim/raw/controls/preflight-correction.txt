@@ -1,0 +1,1 @@
+Initial diff guard rejected sparse control because its separate allocation example changed. No timing ran. Measured state_update_cost and every production/vendor/build input match the pinned source; ELF equals previous campaign. The explicit allowlist is only that unlinked example, and all current tracked files are guarded through this capture.

@@ -1,0 +1,4 @@
+    Finished `release` profile [optimized] target(s) in 0.18s
+     Running tests/shaping.rs (/home/user/gpui-cold-trim-target/release/build/gpui_canvas/df62154fc3612b0d/out/shaping-df62154fc3612b0d)
+     Running tests/text_cache.rs (/home/user/gpui-cold-trim-target/release/build/gpui_canvas/a44e47977c53266a/out/text_cache-a44e47977c53266a)
+     Running tests/unicode.rs (/home/user/gpui-cold-trim-target/release/build/gpui_canvas/15d8ca0ce5d41240/out/unicode-15d8ca0ce5d41240)

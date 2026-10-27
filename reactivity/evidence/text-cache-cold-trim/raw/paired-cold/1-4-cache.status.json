@@ -1,0 +1,1 @@
+{"command": ["/usr/bin/time", "-v", "-o", "/home/user/gpui-cold-trim-evidence/paired-cold/1-4-cache.time", "/home/user/gpui-text-session-target/release/examples/state_update_cost", "4", "/home/user/zgx-reference-local/comparisons/fonts/DejaVuSans.ttf"], "exit": 0}

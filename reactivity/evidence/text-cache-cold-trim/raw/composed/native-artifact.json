@@ -1,0 +1,8 @@
+{
+  "binary": "/home/user/gpui-cold-trim-target/release/build/gpui/e83ddf583a1b076b/out/gpui-e83ddf583a1b076b",
+  "sha256": "5589058b1bc6fe4c3843513ffc94092facf3ca5befb03e145c63a6d6e2b20f8f",
+  "bytes": 56650520,
+  "display": ":94",
+  "driver": "software Vulkan llvmpipe",
+  "exit": 0
+}

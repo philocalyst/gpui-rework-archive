@@ -1,0 +1,36 @@
+{
+  "binaries": {
+    "sparse": "/home/user/gpui-sparse-text-target/release/examples/state_update_cost",
+    "cache": "/home/user/gpui-text-session-target/release/examples/state_update_cost",
+    "bounded": "/home/user/gpui-bounded-cache-target/release/examples/state_update_cost",
+    "cold": "/home/user/gpui-cold-trim-target/release/examples/state_update_cost"
+  },
+  "hashes": {
+    "sparse": "e84a1077c527b6a941fa55a6ea2e524919bc2566f31418fe7d4a351901ffc20f",
+    "cache": "9a1a02f25fc8d076171b73e17e2b4f371f20de5fd534eb95b52d01555035cff5",
+    "bounded": "00baae690e5fdb90984b11657ee69dd22ad110efbcb2061c872eae2f1a497e7f",
+    "cold": "b90457a1625566aca7a3cc702bd7200f43a6f6bb220d9a43511d5233dfe0e617",
+    "font": "7da195a74c55bef988d0d48f9508bd5d849425c1770dba5d7bfc6ce9ed848954"
+  },
+  "production_source_pins": {
+    "sparse": "d5848eb970",
+    "cache": "c7194c74e6",
+    "bounded": "fefa519956",
+    "cold": "606dd0f67d7a35b03338a3bd764564abeb420959"
+  },
+  "font": "/home/user/zgx-reference-local/comparisons/fonts/DejaVuSans.ttf",
+  "warmup": 200,
+  "operations": 2000,
+  "batch": 10,
+  "repetitions": 5,
+  "rows": [
+    0,
+    1,
+    4,
+    40,
+    400
+  ],
+  "started": 1793078937.976654,
+  "platform": "Linux-6.8.0-117-generic-x86_64-with-glibc2.39",
+  "compiler": "rustc 1.101.0-nightly (7189d39d9 2026-10-22)\nbinary: rustc\ncommit-hash: 7189d39d9ce936881b8132c6addeaf3e295cd455\ncommit-date: 2026-10-22\nhost: x86_64-unknown-linux-gnu\nrelease: 1.101.0-nightly\nLLVM version: 23.1.4\n"
+}

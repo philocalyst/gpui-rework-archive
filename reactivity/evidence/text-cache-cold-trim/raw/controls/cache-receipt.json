@@ -1,0 +1,8 @@
+{
+  "binary": "/home/user/gpui-text-session-target/release/examples/state_update_cost",
+  "sha256": "9a1a02f25fc8d076171b73e17e2b4f371f20de5fd534eb95b52d01555035cff5",
+  "production_source": "c7194c74e6",
+  "current_head": "bc964a0c0a3fbe08f8ad4e35a9dc5d10c27525f1",
+  "source_diff": "",
+  "note": "Only separate allocation example may differ; production libraries and measured cost fixture exactly match source pin. Binary matches previous frozen campaign."
+}
