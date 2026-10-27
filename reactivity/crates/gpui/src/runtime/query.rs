@@ -78,7 +78,7 @@ pub(super) fn retained_text_placement<M>(
         runtime
             .presented
             .iter()
-            .position(|node| node.identity == identity)?
+            .position(|node| node.identity == identity)? + 1
     };
     let geometry = runtime.presented_geometry();
     let size = runtime.presentation_size;
