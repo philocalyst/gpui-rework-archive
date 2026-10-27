@@ -113,3 +113,7 @@ required-features = ["native-core"]
 [[example]]
 name = "todo_comparison_mapped"
 required-features = ["native-core"]
+
+[[example]]
+name = "zgx_native_lab"
+required-features = ["native-core"]
