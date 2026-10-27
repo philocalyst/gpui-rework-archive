@@ -12,6 +12,11 @@ fn region(x: f32, y: f32, width: f32, height: f32) -> DamageRegion {
         .unwrap();
     scene.commit_with_damage()
 }
+fn area(region: DamageRegion) -> u64 {
+    region
+        .bounds()
+        .map_or(0, |[l, t, r, b]| u64::from(r - l) * u64::from(b - t))
+}
 fn separated(regions: &DamageRegions) {
     let rectangles = regions.regions();
     for (i, a) in rectangles.iter().enumerate() {
@@ -44,7 +49,10 @@ fn merge_restarts_and_preserves_all_input_support_in_every_order() {
                     .is_some_and(|[x, y, right, down]| x <= l && y <= t && right >= r && down >= b)
             }));
         }
-        assert_eq!(regions.pixels(), 68);
+        assert_eq!(
+            regions.pixels(),
+            area(inputs[0].union(inputs[1]).union(inputs[2])) + area(inputs[3])
+        );
     }
 }
 #[test]
@@ -59,17 +67,24 @@ fn inline_region_allocates_nothing_and_overflow_stays_bounded() {
     });
     assert_eq!(allocation.count_total, 0);
     assert_eq!(regions.regions().len(), 1);
-    assert_eq!(regions.pixels(), 6);
+    assert_eq!(regions.pixels(), area(first.union(overlapping)));
     let mut regions = DamageRegions::default();
+    let mut expected = DamageRegion::default();
     for i in 0..64 {
-        regions.include(region(i as f32 * 4., 0., 1., 1.));
+        let support = region(i as f32 * 4., 0., 1., 1.);
+        expected = expected.union(support);
+        regions.include(support);
     }
     assert_eq!(regions.regions().len(), 64);
     separated(&regions);
-    regions.include(region(256., 0., 1., 1.));
+    let last = region(256., 0., 1., 1.);
+    expected = expected.union(last);
+    regions.include(last);
     assert_eq!(regions.regions().len(), 1);
-    regions.include(region(300., 5., 1., 1.));
+    let last = region(300., 5., 1., 1.);
+    expected = expected.union(last);
+    regions.include(last);
     assert_eq!(regions.regions().len(), 1);
-    assert_eq!(regions.bounds().bounds(), Some([0, 0, 301, 6]));
-    assert_eq!(regions.pixels(), 1806);
+    assert_eq!(regions.bounds(), expected);
+    assert_eq!(regions.pixels(), area(expected));
 }
