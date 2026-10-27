@@ -1,0 +1,1 @@
+{"command": ["/usr/bin/time", "-v", "-o", "/home/user/gpui-state-evidence/paired-witness/4-1-witness.time", "/home/user/gpui-witness-target/release/examples/state_update_cost", "1", "/home/user/zgx-reference-local/comparisons/fonts/DejaVuSans.ttf"], "exit": 0}

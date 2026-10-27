@@ -1,0 +1,540 @@
+diff --git a/reactivity/crates/canvas/src/canvas.rs b/reactivity/crates/canvas/src/canvas.rs
+index ed5be2027d..763e8188ed 100644
+--- a/reactivity/crates/canvas/src/canvas.rs
++++ b/reactivity/crates/canvas/src/canvas.rs
+@@ -26,6 +26,7 @@ mod glyph_axis;
+ mod image_axis;
+ mod mask_kernel;
+ mod metric_scale;
++mod replay;
+ use metric_scale::MetricScale;
+ mod paint;
+ pub use paint::{PaintCommit, PaintEdit, PaintError, PaintErrorKind, PaintIndex};
+@@ -280,6 +281,8 @@ struct CommonGroup {
+     glyphs: SharedGlyphs,
+     origin: Point,
+     scale: MetricScale,
++    transform: Affine,
++    raster_scale: f32,
+ }
+ // A raster witness, not expanded glyph geometry. The glyph positions live only
+ // in the shared packed owner. Cached admitted bounds avoid repeating forward
+@@ -685,6 +688,8 @@ impl DisplayList {
+         glyphs: SharedGlyphs,
+         origin: Point,
+         scale: MetricScale,
++        transform: Affine,
++        raster_scale: f32,
+     ) {
+         for address in &self.order[start..] {
+             self.columns.support(
+@@ -699,6 +704,8 @@ impl DisplayList {
+             glyphs,
+             origin,
+             scale,
++            transform,
++            raster_scale,
+         });
+     }
+ }
+@@ -1223,6 +1230,7 @@ impl Canvas {
+         CanvasScene {
+             target: self,
+             pending,
++            replay: replay::Replay::default(),
+         }
+     }
+     pub fn width(&self) -> u32 {
+@@ -1919,6 +1927,8 @@ impl Canvas {
+                     layout.shared_glyphs(),
+                     origin,
+                     metric_scale,
++                    transform,
++                    raster_scale,
+                 );
+             }
+             self.mask_bytes += bytes;
+@@ -2882,6 +2892,7 @@ fn render_image(
+ pub struct CanvasScene<'a> {
+     target: &'a mut Canvas,
+     pending: Canvas,
++    replay: replay::Replay,
+ }
+ impl CanvasScene<'_> {
+     pub fn fill_gradient(
+@@ -2919,6 +2930,7 @@ impl CanvasScene<'_> {
+     }
+     pub fn clear(&mut self, color: Color) {
+         self.pending.clear(color);
++        self.replay.clear();
+     }
+     pub fn fill_rect(
+         &mut self,
+@@ -3062,6 +3074,20 @@ impl CanvasScene<'_> {
+         color: Color,
+         raster_scale: f32,
+     ) -> Result<(), Error> {
++        let clip = clip.into();
++        if self.replay.text(
++            self.target,
++            &mut self.pending,
++            text,
++            layout,
++            origin,
++            transform,
++            clip,
++            color,
++            raster_scale,
++        )? {
++            return Ok(());
++        }
+         self.pending
+             .draw_text_scaled(text, layout, origin, transform, clip, color, raster_scale)
+     }
+diff --git a/reactivity/crates/canvas/src/canvas/replay.rs b/reactivity/crates/canvas/src/canvas/replay.rs
+new file mode 100644
+index 0000000000..60ad187983
+--- /dev/null
++++ b/reactivity/crates/canvas/src/canvas/replay.rs
+@@ -0,0 +1,209 @@
++//! Reuse admitted text witnesses from the exclusively borrowed predecessor.
++//! This is bounded sequential discovery, not a retained second scene/cache.
++use super::*;
++
++#[derive(Default)]
++pub(super) struct Replay {
++    next: usize,
++    masks: Vec<Option<u16>>,
++}
++
++#[cfg(test)]
++mod tests {
++    use super::*;
++    #[test]
++    fn unchanged_public_staging_uses_the_predecessor_certificate() {
++        let mut text = TextSystem::bundled().unwrap();
++        let layout = text.shape("retained run", 14., None).unwrap();
++        let mut canvas = Canvas::new(128, 64).unwrap();
++        let origin = Point { x: 0., y: 0. };
++        let clip = Rect::new(0., 0., 128., 64.);
++        canvas
++            .draw_text(
++                &mut text,
++                &layout,
++                origin,
++                Affine::IDENTITY,
++                clip,
++                Color::BLACK,
++            )
++            .unwrap();
++        let mut stage = canvas.stage();
++        stage
++            .draw_text_scaled(
++                &mut text,
++                &layout,
++                origin,
++                Affine::IDENTITY,
++                clip,
++                Color::BLACK,
++                1.,
++            )
++            .unwrap();
++        assert_eq!(stage.replay.next, 1);
++        assert_eq!(
++            stage.pending.commands.order.len(),
++            stage.target.commands.order.len()
++        );
++    }
++}
++
++impl Replay {
++    pub(super) fn clear(&mut self) {
++        self.next = 0;
++        self.masks.fill(None);
++    }
++    #[allow(clippy::too_many_arguments)]
++    pub(super) fn text(
++        &mut self,
++        previous: &Canvas,
++        next: &mut Canvas,
++        text: &TextSystem,
++        layout: &TextLayout,
++        origin: Point,
++        transform: Affine,
++        clip: Clip,
++        color: Color,
++        raster_scale: f32,
++    ) -> Result<bool, Error> {
++        let Clip::Rect(clip) = clip else {
++            return Ok(false);
++        };
++        if layout.glyphs().len() < 2 {
++            return Ok(false);
++        }
++        let rgba = color.premultiplied().map(f32::to_bits);
++        let point_bits = |p: Point| [p.x, p.y].map(f32::to_bits);
++        let rect_bits = |r: Rect| [r.x, r.y, r.width, r.height].map(f32::to_bits);
++        let affine_bits = |a: Affine| [a.a, a.b, a.c, a.d, a.tx, a.ty].map(f32::to_bits);
++        let found = previous
++            .commands
++            .commons
++            .iter()
++            .enumerate()
++            .skip(self.next)
++            .take(8)
++            .find(|(_, group)| {
++                if !group.glyphs.same_layout(layout)
++                    || point_bits(group.origin) != point_bits(origin)
++                    || affine_bits(group.transform) != affine_bits(transform)
++                    || group.raster_scale.to_bits() != raster_scale.to_bits()
++                {
++                    return false;
++                }
++                let common = previous.commands.columns.resolve(
++                    group.common,
++                    viewport_rect(previous.width, previous.height),
++                    false,
++                );
++                previous.commands.clip_chain(common.clip).is_none()
++                    && rect_bits(common.clip) == rect_bits(clip)
++                    && common.color.map(f32::to_bits) == rgba
++            });
++        let Some((index, group)) = found else {
++            return Ok(false);
++        };
++        // The predecessor and layout simultaneously lease immutable glyph
++        // positions. Exact forward transform/clip/scale preserve admission;
++        // inverse equality alone would not certify forward-rounded bounds.
++        text.validate(layout)?;
++        let old = &previous.commands.order[group.range[0] as usize..group.range[1] as usize];
++        let references: usize = old
++            .iter()
++            .map(|a| {
++                let [l, t, r, b] = a.bounds.map(usize::from);
++                ((r - 1) / TILE - l / TILE + 1) * ((b - 1) / TILE - t / TILE + 1)
++            })
++            .sum();
++        if next.commands.order.len() + old.len() > MAX_COMMANDS
++            || next.references + references > MAX_REFERENCES
++        {
++            return Err(Error::ResourceLimit);
++        }
++        let common = Common {
++            clip,
++            map: Mapping::new(transform)?,
++            color: color.premultiplied(),
++        };
++        let viewport = viewport_rect(next.width, next.height);
++        next.commands
++            .columns
++            .admit(common, viewport, None, false, false)?;
++        next.commands.reserve_draws(old.len())?;
++        next.commands
++            .commons
++            .try_reserve(1)
++            .map_err(|_| Error::ResourceLimit)?;
++        if self.masks.is_empty() {
++            self.masks
++                .try_reserve_exact(previous.commands.masks.len())
++                .map_err(|_| Error::ResourceLimit)?;
++            self.masks.resize(previous.commands.masks.len(), None);
++        }
++        let start = next.commands.order.len();
++        let masks = next.commands.masks.len();
++        let face = next.commands.mask_index.face;
++        let mut bytes = 0;
++        let admitted = (|| {
++            for address in old {
++                let source = usize::from(address.mask);
++                let remapped = match self.masks[source] {
++                    Some(index) => index,
++                    None => {
++                        let mask = &previous.commands.masks[source];
++                        let index = if let Some(&index) = next.commands.mask_index.get(&mask.key) {
++                            index as u16
++                        } else {
++                            bytes += mask.pixels.len();
++                            if next.mask_bytes + bytes > MAX_MASK_BYTES {
++                                return Err(Error::ResourceLimit);
++                            }
++                            next.commands
++                                .masks
++                                .try_reserve(1)
++                                .map_err(|_| Error::ResourceLimit)?;
++                            next.commands.mask_index.reserve_key(mask.key)?;
++                            let index = next.commands.masks.len() as u16;
++                            next.commands.masks.push(mask.clone());
++                            next.commands.mask_index.insert(mask.key, u32::from(index));
++                            index
++                        };
++                        self.masks[source] = Some(index);
++                        index
++                    }
++                };
++                next.commands.order.push(DrawRef {
++                    command: next.commands.commons.len() as u16,
++                    mask: remapped,
++                    ..*address
++                });
++            }
++            Ok(())
++        })();
++        if let Err(error) = admitted {
++            next.commands.order.truncate(start);
++            for mask in next.commands.masks.drain(masks..) {
++                next.commands.mask_index.remove(mask.key);
++            }
++            next.commands.mask_index.face = face;
++            self.masks.clear();
++            return Err(error);
++        }
++        let stored = next.commands.columns.store(common, viewport, None, false);
++        next.commands.publish_group(
++            start,
++            stored,
++            layout.shared_glyphs(),
++            origin,
++            MetricScale::new(raster_scale),
++            transform,
++            raster_scale,
++        );
++        next.references += references;
++        next.mask_bytes += bytes;
++        next.invalidate_bins();
++        next.dirty = true;
++        self.next = index + 1;
++        Ok(true)
++    }
++}
+diff --git a/reactivity/crates/canvas/src/text.rs b/reactivity/crates/canvas/src/text.rs
+index 4675a98e3a..210be2766b 100644
+--- a/reactivity/crates/canvas/src/text.rs
++++ b/reactivity/crates/canvas/src/text.rs
+@@ -298,6 +298,11 @@ pub struct TextMetrics {
+ /// Shared canonical packed positions; scene readers never copy glyph storage.
+ pub(crate) struct SharedGlyphs(EcoVec<PackedGlyph>);
+ impl SharedGlyphs {
++    pub(crate) fn same_layout(&self, layout: &TextLayout) -> bool {
++        !self.0.is_empty()
++            && self.0.len() == layout.glyphs.len()
++            && std::ptr::eq(self.0.as_ptr(), layout.glyphs.as_ptr())
++    }
+     pub(crate) fn position(&self, index: u16) -> [f32; 2] {
+         let glyph = &self.0[usize::from(index)];
+         [glyph.x, glyph.baseline]
+diff --git a/reactivity/crates/canvas/tests/text_replay.rs b/reactivity/crates/canvas/tests/text_replay.rs
+new file mode 100644
+index 0000000000..7eb62c8c01
+--- /dev/null
++++ b/reactivity/crates/canvas/tests/text_replay.rs
+@@ -0,0 +1,210 @@
++//! Staged reuse is checked against the independent ordinary recording path.
++use gpui_canvas::{Affine, Canvas, Color, Point, Rect, TextSystem};
++
++#[test]
++fn forward_transform_change_revokes_previous_witness_bounds() {
++    let mut text = TextSystem::bundled().unwrap();
++    let layout = text.shape("Wide witness", 14., None).unwrap();
++    let mut canvas = Canvas::new(192, 64).unwrap();
++    let clip = Rect::new(0., 0., 192., 64.);
++    for x in [0., 0., 90., 90., -15., -15.] {
++        let map = Affine::translation(x, 0.);
++        let origin = Point { x: 0., y: 0. };
++        let mut stage = canvas.stage();
++        stage.clear(Color::WHITE);
++        stage
++            .draw_text_scaled(&mut text, &layout, origin, map, clip, Color::BLACK, 1.)
++            .unwrap();
++        stage.commit();
++        let mut fresh = Canvas::new(192, 64).unwrap();
++        fresh.clear(Color::WHITE);
++        fresh
++            .draw_text(&mut text, &layout, origin, map, clip, Color::BLACK)
++            .unwrap();
++        assert_eq!(canvas.pixels(), fresh.pixels(), "translation={x}");
++    }
++}
++
++#[test]
++fn staged_text_matches_fresh_admission_across_certificate_changes() {
++    let mut text = TextSystem::bundled().unwrap();
++    let layouts: Vec<_> = [
++        "Count: 1",
++        "Count: 123456",
++        "static text",
++        "héllo אבג",
++        "x",
++        "",
++    ]
++    .iter()
++    .map(|s| text.shape(s, 13., Some(90.)).unwrap())
++    .collect();
++    let full = Rect::new(0., 0., 128., 80.);
++    let mut canvas = Canvas::new(128, 80).unwrap();
++    for pass in 0..32 {
++        let transform = match pass % 4 {
++            0 => Affine::IDENTITY,
++            1 => Affine::translation(30., 0.),
++            2 => Affine {
++                a: 0.9,
++                b: 0.1,
++                c: -0.2,
++                d: 1.1,
++                tx: 12.,
++                ty: 2.,
++            },
++            _ => Affine {
++                a: -1.,
++                b: 0.,
++                c: 0.,
++                d: 1.,
++                tx: 110.,
++                ty: 0.,
++            },
++        };
++        let clip = if pass % 3 == 0 {
++            Rect::new(22., 0., 70., 80.)
++        } else {
++            full
++        };
++        let scale = [1., 1., 1.25, 2.][pass % 4];
++        let color = if pass % 5 == 0 {
++            Color::rgba(230, 10, 100, 97)
++        } else {
++            Color::BLACK
++        };
++        // Each configuration repeats, so hits and invalidations both execute.
++        for repeat in 0..2 {
++            let mut fresh = Canvas::new(128, 80).unwrap();
++            let mut staged = canvas.stage();
++            staged.clear(Color::WHITE);
++            fresh.clear(Color::WHITE);
++            for (i, layout) in layouts.iter().enumerate() {
++                let origin = Point {
++                    x: (i % 2) as f32 * 3.,
++                    y: (i / 2) as f32 * 22.,
++                };
++                staged
++                    .draw_text_scaled(&mut text, layout, origin, transform, clip, color, scale)
++                    .unwrap();
++                fresh
++                    .draw_text_scaled(&mut text, layout, origin, transform, clip, color, scale)
++                    .unwrap();
++            }
++            let damage = staged.commit_with_damage();
++            assert_eq!(
++                canvas.pixels(),
++                fresh.pixels(),
++                "pass={pass} repeat={repeat}"
++            );
++            assert_eq!(
++                canvas.prepared_scene().draws().len(),
++                fresh.prepared_scene().draws().len()
++            );
++            if repeat == 1 {
++                assert!(damage.bounds().is_none(), "identical replay has no damage");
++            }
++        }
++    }
++}
++
++#[test]
++fn replay_clear_abort_and_foreign_font_preserve_authority() {
++    let mut text = TextSystem::bundled().unwrap();
++    let mut foreign = TextSystem::new(include_bytes!("../assets/NotoSans.ttf")).unwrap();
++    let a = text.shape("Retained glyphs", 14., None).unwrap();
++    let b = text.shape("Different masks 123", 14., None).unwrap();
++    let origin = Point { x: 0., y: 0. };
++    let clip = Rect::new(0., 0., 128., 64.);
++    let mut canvas = Canvas::new(128, 64).unwrap();
++    canvas.clear(Color::WHITE);
++    canvas
++        .draw_text(&mut text, &a, origin, Affine::IDENTITY, clip, Color::BLACK)
++        .unwrap();
++    let previous = canvas.pixels().to_vec();
++    {
++        let mut stage = canvas.stage();
++        stage.clear(Color::WHITE);
++        assert!(
++            stage
++                .draw_text_scaled(
++                    &mut foreign,
++                    &a,
++                    origin,
++                    Affine::IDENTITY,
++                    clip,
++                    Color::BLACK,
++                    1.
++                )
++                .is_err()
++        );
++        stage
++            .draw_text_scaled(
++                &mut text,
++                &a,
++                origin,
++                Affine::IDENTITY,
++                clip,
++                Color::BLACK,
++                1.,
++            )
++            .unwrap();
++        // Abort after replay: original remains complete and owns every lease.
++    }
++    assert_eq!(canvas.pixels(), previous);
++    let mut stage = canvas.stage();
++    stage.clear(Color::WHITE);
++    stage
++        .draw_text_scaled(
++            &mut text,
++            &a,
++            origin,
++            Affine::IDENTITY,
++            clip,
++            Color::BLACK,
++            1.,
++        )
++        .unwrap();
++    stage.clear(Color::WHITE);
++    stage
++        .draw_text_scaled(
++            &mut text,
++            &b,
++            origin,
++            Affine::IDENTITY,
++            clip,
++            Color::BLACK,
++            1.,
++        )
++        .unwrap();
++    stage
++        .draw_text_scaled(
++            &mut text,
++            &a,
++            origin,
++            Affine::IDENTITY,
++            clip,
++            Color::BLACK,
++            1.,
++        )
++        .unwrap();
++    stage.commit();
++    let mut fresh = Canvas::new(128, 64).unwrap();
++    fresh.clear(Color::WHITE);
++    for layout in [&b, &a] {
++        fresh
++            .draw_text(
++                &mut text,
++                layout,
++                origin,
++                Affine::IDENTITY,
++                clip,
++                Color::BLACK,
++            )
++            .unwrap();
++    }
++    drop(a);
++    drop(b);
++    drop(text);
++    assert_eq!(canvas.pixels(), fresh.pixels());
++}

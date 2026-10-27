@@ -1,0 +1,1 @@
+First guard attempted git ls-files across excluded sparse-checkout files; sha256sum returned missing-file errors and xargs exited 123. No compilation started. Corrected scope to reactivity, .cargo and clippy.toml.

@@ -1,0 +1,14 @@
+{
+  "/home/user/gpui-state-target-baseline/release/examples/state_update_cost": {
+    "bytes": 9866904,
+    "sha256": "c42504e16c0c2c1d97fe28ec77b647d9307f1b64cbb2dc61593b0b679ad6a841"
+  },
+  "/home/user/gpui-witness-target/release/examples/state_update_cost": {
+    "bytes": 9875304,
+    "sha256": "2f19a300b92c686899bfb59be31b452b2efc0b2650a35af267bc326d6b9411e5"
+  },
+  "/home/user/zgx-state-target/release/examples/micro_bench": {
+    "bytes": 15907824,
+    "sha256": "fd57185247f7005132e37c6411cf0f102707b081ab5d1dd43af0cd8a0e391c40"
+  }
+}
