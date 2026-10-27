@@ -1,0 +1,23 @@
+commit 5432db0d159f721bb87edfe2afbf6da43f5e70f4
+Author:     Wing <44917547+wingleeio@users.noreply.github.com>
+AuthorDate: Tue Oct 27 07:40:41 2026 +0000
+Commit:     Wing <44917547+wingleeio@users.noreply.github.com>
+CommitDate: Tue Oct 27 07:40:41 2026 +0000
+
+    Negative control forgets the first borrowed source member
+    
+    Co-authored-by: zeronsh[bot] <346184242+zeronsh[bot]@users.noreply.github.com>
+
+diff --git a/reactivity/crates/gpui/src/reader/question.rs b/reactivity/crates/gpui/src/reader/question.rs
+index 002153b6aa..3ef48cb111 100644
+--- a/reactivity/crates/gpui/src/reader/question.rs
++++ b/reactivity/crates/gpui/src/reader/question.rs
+@@ -568,7 +568,7 @@ where
+             && !A::READERS
+         {
+             let mut relevant = false;
+-            for field in fields.iter().copied().flatten() {
++            for field in fields.iter().copied().skip(1).flatten() {
+                 if self.inputs.contains(sources, field)? {
+                     relevant = true;
+                     break;

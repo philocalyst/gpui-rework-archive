@@ -1,0 +1,818 @@
+{
+  "0-1-unrelated": {
+    "control": {
+      "cold_wall_ns": {
+        "median": 1867576,
+        "range": [
+          779705,
+          2240860
+        ]
+      },
+      "max_rss_kib": {
+        "median": 18656,
+        "range": [
+          18528,
+          18656
+        ]
+      }
+    },
+    "candidate": {
+      "cold_wall_ns": {
+        "median": 1105196,
+        "range": [
+          780365,
+          3978000
+        ]
+      },
+      "max_rss_kib": {
+        "median": 18656,
+        "range": [
+          18656,
+          18696
+        ]
+      }
+    }
+  },
+  "0-2-unrelated": {
+    "candidate": {
+      "cold_wall_ns": {
+        "median": 928764,
+        "range": [
+          747986,
+          1181019
+        ]
+      },
+      "max_rss_kib": {
+        "median": 18660,
+        "range": [
+          18532,
+          18660
+        ]
+      }
+    },
+    "control": {
+      "cold_wall_ns": {
+        "median": 881205,
+        "range": [
+          712629,
+          1905160
+        ]
+      },
+      "max_rss_kib": {
+        "median": 18784,
+        "range": [
+          18780,
+          18784
+        ]
+      }
+    }
+  },
+  "0-4-unrelated": {
+    "control": {
+      "cold_wall_ns": {
+        "median": 1153127,
+        "range": [
+          611829,
+          1751000
+        ]
+      },
+      "max_rss_kib": {
+        "median": 18652,
+        "range": [
+          18652,
+          18784
+        ]
+      }
+    },
+    "candidate": {
+      "cold_wall_ns": {
+        "median": 945065,
+        "range": [
+          781629,
+          1365024
+        ]
+      },
+      "max_rss_kib": {
+        "median": 18784,
+        "range": [
+          18532,
+          18788
+        ]
+      }
+    }
+  },
+  "0-1-dependent": {
+    "candidate": {
+      "cold_wall_ns": {
+        "median": 846921,
+        "range": [
+          714612,
+          1134471
+        ]
+      },
+      "max_rss_kib": {
+        "median": 18788,
+        "range": [
+          18660,
+          18788
+        ]
+      }
+    },
+    "control": {
+      "cold_wall_ns": {
+        "median": 958219,
+        "range": [
+          777901,
+          1218418
+        ]
+      },
+      "max_rss_kib": {
+        "median": 18780,
+        "range": [
+          18528,
+          18912
+        ]
+      }
+    }
+  },
+  "0-2-dependent": {
+    "control": {
+      "cold_wall_ns": {
+        "median": 1020378,
+        "range": [
+          739569,
+          2282738
+        ]
+      },
+      "max_rss_kib": {
+        "median": 18780,
+        "range": [
+          18656,
+          18912
+        ]
+      }
+    },
+    "candidate": {
+      "cold_wall_ns": {
+        "median": 1006280,
+        "range": [
+          841852,
+          1643325
+        ]
+      },
+      "max_rss_kib": {
+        "median": 18788,
+        "range": [
+          18660,
+          18788
+        ]
+      }
+    }
+  },
+  "0-4-dependent": {
+    "candidate": {
+      "cold_wall_ns": {
+        "median": 930970,
+        "range": [
+          886024,
+          1475492
+        ]
+      },
+      "max_rss_kib": {
+        "median": 18784,
+        "range": [
+          18656,
+          18788
+        ]
+      }
+    },
+    "control": {
+      "cold_wall_ns": {
+        "median": 1014707,
+        "range": [
+          817366,
+          1451116
+        ]
+      },
+      "max_rss_kib": {
+        "median": 18784,
+        "range": [
+          18652,
+          18784
+        ]
+      }
+    }
+  },
+  "1-1-unrelated": {
+    "control": {
+      "cold_wall_ns": {
+        "median": 1633739,
+        "range": [
+          1379300,
+          2064849
+        ]
+      },
+      "max_rss_kib": {
+        "median": 18780,
+        "range": [
+          18652,
+          18784
+        ]
+      }
+    },
+    "candidate": {
+      "cold_wall_ns": {
+        "median": 1920579,
+        "range": [
+          1349345,
+          2205012
+        ]
+      },
+      "max_rss_kib": {
+        "median": 18788,
+        "range": [
+          18656,
+          18916
+        ]
+      }
+    }
+  },
+  "1-2-unrelated": {
+    "candidate": {
+      "cold_wall_ns": {
+        "median": 1972362,
+        "range": [
+          1357769,
+          2314679
+        ]
+      },
+      "max_rss_kib": {
+        "median": 18788,
+        "range": [
+          18660,
+          18788
+        ]
+      }
+    },
+    "control": {
+      "cold_wall_ns": {
+        "median": 1478448,
+        "range": [
+          1431769,
+          2425586
+        ]
+      },
+      "max_rss_kib": {
+        "median": 18908,
+        "range": [
+          18784,
+          18912
+        ]
+      }
+    }
+  },
+  "1-4-unrelated": {
+    "control": {
+      "cold_wall_ns": {
+        "median": 1606307,
+        "range": [
+          1483195,
+          2896932
+        ]
+      },
+      "max_rss_kib": {
+        "median": 18908,
+        "range": [
+          18780,
+          18912
+        ]
+      }
+    },
+    "candidate": {
+      "cold_wall_ns": {
+        "median": 1740309,
+        "range": [
+          1360103,
+          4292485
+        ]
+      },
+      "max_rss_kib": {
+        "median": 18912,
+        "range": [
+          18788,
+          18916
+        ]
+      }
+    }
+  },
+  "1-1-dependent": {
+    "candidate": {
+      "cold_wall_ns": {
+        "median": 1526175,
+        "range": [
+          1253394,
+          2258984
+        ]
+      },
+      "max_rss_kib": {
+        "median": 18916,
+        "range": [
+          18660,
+          19040
+        ]
+      }
+    },
+    "control": {
+      "cold_wall_ns": {
+        "median": 1561904,
+        "range": [
+          1376716,
+          1691957
+        ]
+      },
+      "max_rss_kib": {
+        "median": 18912,
+        "range": [
+          18908,
+          18940
+        ]
+      }
+    }
+  },
+  "1-2-dependent": {
+    "control": {
+      "cold_wall_ns": {
+        "median": 1762643,
+        "range": [
+          1521818,
+          2789200
+        ]
+      },
+      "max_rss_kib": {
+        "median": 18784,
+        "range": [
+          18780,
+          18908
+        ]
+      }
+    },
+    "candidate": {
+      "cold_wall_ns": {
+        "median": 1751289,
+        "range": [
+          1179526,
+          2475251
+        ]
+      },
+      "max_rss_kib": {
+        "median": 18912,
+        "range": [
+          18784,
+          19044
+        ]
+      }
+    }
+  },
+  "1-4-dependent": {
+    "candidate": {
+      "cold_wall_ns": {
+        "median": 1647695,
+        "range": [
+          1354223,
+          2940956
+        ]
+      },
+      "max_rss_kib": {
+        "median": 18912,
+        "range": [
+          18784,
+          19040
+        ]
+      }
+    },
+    "control": {
+      "cold_wall_ns": {
+        "median": 1484990,
+        "range": [
+          1360744,
+          1923695
+        ]
+      },
+      "max_rss_kib": {
+        "median": 18784,
+        "range": [
+          18780,
+          18908
+        ]
+      }
+    }
+  },
+  "40-1-unrelated": {
+    "control": {
+      "cold_wall_ns": {
+        "median": 30165252,
+        "range": [
+          24557776,
+          32191084
+        ]
+      },
+      "max_rss_kib": {
+        "median": 22364,
+        "range": [
+          22364,
+          22496
+        ]
+      }
+    },
+    "candidate": {
+      "cold_wall_ns": {
+        "median": 30029824,
+        "range": [
+          25455633,
+          32433496
+        ]
+      },
+      "max_rss_kib": {
+        "median": 22244,
+        "range": [
+          22240,
+          22500
+        ]
+      }
+    }
+  },
+  "40-2-unrelated": {
+    "candidate": {
+      "cold_wall_ns": {
+        "median": 25218482,
+        "range": [
+          24362287,
+          37976357
+        ]
+      },
+      "max_rss_kib": {
+        "median": 22368,
+        "range": [
+          22240,
+          22500
+        ]
+      }
+    },
+    "control": {
+      "cold_wall_ns": {
+        "median": 29141807,
+        "range": [
+          23290596,
+          35843781
+        ]
+      },
+      "max_rss_kib": {
+        "median": 22492,
+        "range": [
+          22364,
+          22624
+        ]
+      }
+    }
+  },
+  "40-4-unrelated": {
+    "control": {
+      "cold_wall_ns": {
+        "median": 27330777,
+        "range": [
+          26375990,
+          37827626
+        ]
+      },
+      "max_rss_kib": {
+        "median": 22496,
+        "range": [
+          22364,
+          22496
+        ]
+      }
+    },
+    "candidate": {
+      "cold_wall_ns": {
+        "median": 28018199,
+        "range": [
+          25049268,
+          36302552
+        ]
+      },
+      "max_rss_kib": {
+        "median": 22368,
+        "range": [
+          22240,
+          22500
+        ]
+      }
+    }
+  },
+  "40-1-dependent": {
+    "candidate": {
+      "cold_wall_ns": {
+        "median": 29489613,
+        "range": [
+          24092962,
+          35594080
+        ]
+      },
+      "max_rss_kib": {
+        "median": 22500,
+        "range": [
+          22496,
+          22628
+        ]
+      }
+    },
+    "control": {
+      "cold_wall_ns": {
+        "median": 25928322,
+        "range": [
+          24975690,
+          29738340
+        ]
+      },
+      "max_rss_kib": {
+        "median": 22492,
+        "range": [
+          22492,
+          22624
+        ]
+      }
+    }
+  },
+  "40-2-dependent": {
+    "control": {
+      "cold_wall_ns": {
+        "median": 27533895,
+        "range": [
+          25177072,
+          39827793
+        ]
+      },
+      "max_rss_kib": {
+        "median": 22496,
+        "range": [
+          22496,
+          22620
+        ]
+      }
+    },
+    "candidate": {
+      "cold_wall_ns": {
+        "median": 26183228,
+        "range": [
+          25684143,
+          27448546
+        ]
+      },
+      "max_rss_kib": {
+        "median": 22500,
+        "range": [
+          22368,
+          22500
+        ]
+      }
+    }
+  },
+  "40-4-dependent": {
+    "candidate": {
+      "cold_wall_ns": {
+        "median": 24315827,
+        "range": [
+          22936984,
+          102719532
+        ]
+      },
+      "max_rss_kib": {
+        "median": 22372,
+        "range": [
+          22256,
+          22496
+        ]
+      }
+    },
+    "control": {
+      "cold_wall_ns": {
+        "median": 24587153,
+        "range": [
+          24243991,
+          26624944
+        ]
+      },
+      "max_rss_kib": {
+        "median": 22368,
+        "range": [
+          22364,
+          22496
+        ]
+      }
+    }
+  },
+  "0-4-owner": {
+    "control": {
+      "cold_wall_ns": {
+        "median": 2409606,
+        "range": [
+          1807326,
+          23223862
+        ]
+      },
+      "max_rss_kib": {
+        "median": 18784,
+        "range": [
+          18656,
+          18908
+        ]
+      }
+    },
+    "candidate": {
+      "cold_wall_ns": {
+        "median": 13066856,
+        "range": [
+          2250929,
+          20240337
+        ]
+      },
+      "max_rss_kib": {
+        "median": 18788,
+        "range": [
+          18660,
+          18788
+        ]
+      }
+    }
+  },
+  "0-4-opaque": {
+    "candidate": {
+      "cold_wall_ns": {
+        "median": 764456,
+        "range": [
+          697720,
+          1123300
+        ]
+      },
+      "max_rss_kib": {
+        "median": 18788,
+        "range": [
+          18656,
+          18912
+        ]
+      }
+    },
+    "control": {
+      "cold_wall_ns": {
+        "median": 1045564,
+        "range": [
+          762694,
+          2145500
+        ]
+      },
+      "max_rss_kib": {
+        "median": 18784,
+        "range": [
+          18780,
+          18784
+        ]
+      }
+    }
+  },
+  "1-4-owner": {
+    "control": {
+      "cold_wall_ns": {
+        "median": 1381115,
+        "range": [
+          1245990,
+          1528392
+        ]
+      },
+      "max_rss_kib": {
+        "median": 18912,
+        "range": [
+          18780,
+          19036
+        ]
+      }
+    },
+    "candidate": {
+      "cold_wall_ns": {
+        "median": 1390932,
+        "range": [
+          1307807,
+          1557006
+        ]
+      },
+      "max_rss_kib": {
+        "median": 18912,
+        "range": [
+          18784,
+          19044
+        ]
+      }
+    }
+  },
+  "1-4-opaque": {
+    "candidate": {
+      "cold_wall_ns": {
+        "median": 1497533,
+        "range": [
+          1163216,
+          1686659
+        ]
+      },
+      "max_rss_kib": {
+        "median": 18916,
+        "range": [
+          18912,
+          19044
+        ]
+      }
+    },
+    "control": {
+      "cold_wall_ns": {
+        "median": 1397305,
+        "range": [
+          1313437,
+          1650933
+        ]
+      },
+      "max_rss_kib": {
+        "median": 18912,
+        "range": [
+          18784,
+          19036
+        ]
+      }
+    }
+  },
+  "40-4-owner": {
+    "control": {
+      "cold_wall_ns": {
+        "median": 24903773,
+        "range": [
+          23947622,
+          27573772
+        ]
+      },
+      "max_rss_kib": {
+        "median": 22496,
+        "range": [
+          22364,
+          22624
+        ]
+      }
+    },
+    "candidate": {
+      "cold_wall_ns": {
+        "median": 25621901,
+        "range": [
+          22343486,
+          26545061
+        ]
+      },
+      "max_rss_kib": {
+        "median": 22500,
+        "range": [
+          22372,
+          22628
+        ]
+      }
+    }
+  },
+  "40-4-opaque": {
+    "candidate": {
+      "cold_wall_ns": {
+        "median": 25919097,
+        "range": [
+          23738977,
+          27007973
+        ]
+      },
+      "max_rss_kib": {
+        "median": 22372,
+        "range": [
+          22368,
+          22496
+        ]
+      }
+    },
+    "control": {
+      "cold_wall_ns": {
+        "median": 27577146,
+        "range": [
+          24349215,
+          30108356
+        ]
+      },
+      "max_rss_kib": {
+        "median": 22496,
+        "range": [
+          22492,
+          22496
+        ]
+      }
+    }
+  }
+}

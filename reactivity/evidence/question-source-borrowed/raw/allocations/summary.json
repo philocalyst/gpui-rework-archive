@@ -1,0 +1,1409 @@
+{
+  "artifacts": {
+    "candidate": {
+      "path": "/home/user/gpui-question-source-borrowed-target/release/examples/question_source_allocations",
+      "sha256": "dee9c762561ccea6ec8cdba740d9f1e1eb43b04cf557e90daff52f2d530add1c",
+      "bytes": 10430640
+    },
+    "control": {
+      "path": "/home/user/gpui-question-source-control-target/release/examples/question_source_allocations",
+      "sha256": "9287b5525ba4b1f22bcd5bf1889ff5851a1c7019fbc85b1bd439bf3bb7883713",
+      "bytes": 10421344
+    }
+  },
+  "font_sha256": "7da195a74c55bef988d0d48f9508bd5d849425c1770dba5d7bfc6ce9ed848954",
+  "runs": [
+    {
+      "variant": "candidate",
+      "rows": 0,
+      "fields": 1,
+      "mode": "unrelated",
+      "COLD_ALLOC": {
+        "requests": 890,
+        "requested": 272737,
+        "retained": 58363,
+        "peak_new": 74365
+      },
+      "LAYOUT": {
+        "win_bytes": 520
+      },
+      "ALLOC": {
+        "requests": 34,
+        "requested": 2609,
+        "retained_delta": 0,
+        "peak_new": 1270
+      },
+      "TASKS": {
+        "frozen": 0,
+        "dispatched": 0,
+        "accepted": 0
+      },
+      "FINAL": {
+        "pixel_hash": 1087203604248371696
+      }
+    },
+    {
+      "variant": "candidate",
+      "rows": 0,
+      "fields": 2,
+      "mode": "unrelated",
+      "COLD_ALLOC": {
+        "requests": 890,
+        "requested": 272737,
+        "retained": 58363,
+        "peak_new": 74365
+      },
+      "LAYOUT": {
+        "win_bytes": 520
+      },
+      "ALLOC": {
+        "requests": 61,
+        "requested": 6733,
+        "retained_delta": 0,
+        "peak_new": 3858
+      },
+      "TASKS": {
+        "frozen": 0,
+        "dispatched": 0,
+        "accepted": 0
+      },
+      "FINAL": {
+        "pixel_hash": 5764002890942619644
+      }
+    },
+    {
+      "variant": "candidate",
+      "rows": 0,
+      "fields": 4,
+      "mode": "unrelated",
+      "COLD_ALLOC": {
+        "requests": 890,
+        "requested": 272737,
+        "retained": 58363,
+        "peak_new": 74365
+      },
+      "LAYOUT": {
+        "win_bytes": 520
+      },
+      "ALLOC": {
+        "requests": 97,
+        "requested": 8801,
+        "retained_delta": 0,
+        "peak_new": 5046
+      },
+      "TASKS": {
+        "frozen": 0,
+        "dispatched": 0,
+        "accepted": 0
+      },
+      "FINAL": {
+        "pixel_hash": 284837220980945188
+      }
+    },
+    {
+      "variant": "candidate",
+      "rows": 0,
+      "fields": 1,
+      "mode": "dependent",
+      "COLD_ALLOC": {
+        "requests": 894,
+        "requested": 274040,
+        "retained": 58346,
+        "peak_new": 74373
+      },
+      "LAYOUT": {
+        "win_bytes": 600
+      },
+      "ALLOC": {
+        "requests": 280,
+        "requested": 73649,
+        "retained_delta": 0,
+        "peak_new": 8511
+      },
+      "TASKS": {
+        "frozen": 1,
+        "dispatched": 1,
+        "accepted": 1
+      },
+      "FINAL": {
+        "pixel_hash": 6158178423165853847
+      }
+    },
+    {
+      "variant": "candidate",
+      "rows": 0,
+      "fields": 2,
+      "mode": "dependent",
+      "COLD_ALLOC": {
+        "requests": 894,
+        "requested": 274040,
+        "retained": 58346,
+        "peak_new": 74373
+      },
+      "LAYOUT": {
+        "win_bytes": 600
+      },
+      "ALLOC": {
+        "requests": 295,
+        "requested": 75455,
+        "retained_delta": 0,
+        "peak_new": 8345
+      },
+      "TASKS": {
+        "frozen": 1,
+        "dispatched": 1,
+        "accepted": 1
+      },
+      "FINAL": {
+        "pixel_hash": 11204471590540251089
+      }
+    },
+    {
+      "variant": "candidate",
+      "rows": 0,
+      "fields": 4,
+      "mode": "dependent",
+      "COLD_ALLOC": {
+        "requests": 894,
+        "requested": 274040,
+        "retained": 58346,
+        "peak_new": 74373
+      },
+      "LAYOUT": {
+        "win_bytes": 600
+      },
+      "ALLOC": {
+        "requests": 323,
+        "requested": 76183,
+        "retained_delta": 0,
+        "peak_new": 8345
+      },
+      "TASKS": {
+        "frozen": 1,
+        "dispatched": 1,
+        "accepted": 1
+      },
+      "FINAL": {
+        "pixel_hash": 17809376123478528745
+      }
+    },
+    {
+      "variant": "candidate",
+      "rows": 1,
+      "fields": 1,
+      "mode": "unrelated",
+      "COLD_ALLOC": {
+        "requests": 1864,
+        "requested": 494877,
+        "retained": 105212,
+        "peak_new": 122368
+      },
+      "LAYOUT": {
+        "win_bytes": 520
+      },
+      "ALLOC": {
+        "requests": 34,
+        "requested": 2609,
+        "retained_delta": 0,
+        "peak_new": 1270
+      },
+      "TASKS": {
+        "frozen": 0,
+        "dispatched": 0,
+        "accepted": 0
+      },
+      "FINAL": {
+        "pixel_hash": 4760509384241480234
+      }
+    },
+    {
+      "variant": "candidate",
+      "rows": 1,
+      "fields": 2,
+      "mode": "unrelated",
+      "COLD_ALLOC": {
+        "requests": 1864,
+        "requested": 494877,
+        "retained": 105212,
+        "peak_new": 122368
+      },
+      "LAYOUT": {
+        "win_bytes": 520
+      },
+      "ALLOC": {
+        "requests": 70,
+        "requested": 16083,
+        "retained_delta": 0,
+        "peak_new": 10046
+      },
+      "TASKS": {
+        "frozen": 0,
+        "dispatched": 0,
+        "accepted": 0
+      },
+      "FINAL": {
+        "pixel_hash": 6294546792856889638
+      }
+    },
+    {
+      "variant": "candidate",
+      "rows": 1,
+      "fields": 4,
+      "mode": "unrelated",
+      "COLD_ALLOC": {
+        "requests": 1864,
+        "requested": 494877,
+        "retained": 105212,
+        "peak_new": 122368
+      },
+      "LAYOUT": {
+        "win_bytes": 520
+      },
+      "ALLOC": {
+        "requests": 106,
+        "requested": 18053,
+        "retained_delta": 0,
+        "peak_new": 11010
+      },
+      "TASKS": {
+        "frozen": 0,
+        "dispatched": 0,
+        "accepted": 0
+      },
+      "FINAL": {
+        "pixel_hash": 14728391564927822750
+      }
+    },
+    {
+      "variant": "candidate",
+      "rows": 1,
+      "fields": 1,
+      "mode": "dependent",
+      "COLD_ALLOC": {
+        "requests": 1871,
+        "requested": 496340,
+        "retained": 105363,
+        "peak_new": 122372
+      },
+      "LAYOUT": {
+        "win_bytes": 600
+      },
+      "ALLOC": {
+        "requests": 577,
+        "requested": 216471,
+        "retained_delta": 0,
+        "peak_new": 20248
+      },
+      "TASKS": {
+        "frozen": 1,
+        "dispatched": 1,
+        "accepted": 1
+      },
+      "FINAL": {
+        "pixel_hash": 18392613026295926021
+      }
+    },
+    {
+      "variant": "candidate",
+      "rows": 1,
+      "fields": 2,
+      "mode": "dependent",
+      "COLD_ALLOC": {
+        "requests": 1871,
+        "requested": 496340,
+        "retained": 105363,
+        "peak_new": 122372
+      },
+      "LAYOUT": {
+        "win_bytes": 600
+      },
+      "ALLOC": {
+        "requests": 592,
+        "requested": 219537,
+        "retained_delta": 0,
+        "peak_new": 20248
+      },
+      "TASKS": {
+        "frozen": 1,
+        "dispatched": 1,
+        "accepted": 1
+      },
+      "FINAL": {
+        "pixel_hash": 2700235599738809595
+      }
+    },
+    {
+      "variant": "candidate",
+      "rows": 1,
+      "fields": 4,
+      "mode": "dependent",
+      "COLD_ALLOC": {
+        "requests": 1871,
+        "requested": 496340,
+        "retained": 105363,
+        "peak_new": 122372
+      },
+      "LAYOUT": {
+        "win_bytes": 600
+      },
+      "ALLOC": {
+        "requests": 619,
+        "requested": 218515,
+        "retained_delta": 0,
+        "peak_new": 20248
+      },
+      "TASKS": {
+        "frozen": 1,
+        "dispatched": 1,
+        "accepted": 1
+      },
+      "FINAL": {
+        "pixel_hash": 8736590574198101987
+      }
+    },
+    {
+      "variant": "candidate",
+      "rows": 40,
+      "fields": 1,
+      "mode": "unrelated",
+      "COLD_ALLOC": {
+        "requests": 32832,
+        "requested": 7925371,
+        "retained": 1540968,
+        "peak_new": 2130328
+      },
+      "LAYOUT": {
+        "win_bytes": 520
+      },
+      "ALLOC": {
+        "requests": 34,
+        "requested": 2609,
+        "retained_delta": 0,
+        "peak_new": 1270
+      },
+      "TASKS": {
+        "frozen": 0,
+        "dispatched": 0,
+        "accepted": 0
+      },
+      "FINAL": {
+        "pixel_hash": 18317644700102263139
+      }
+    },
+    {
+      "variant": "candidate",
+      "rows": 40,
+      "fields": 2,
+      "mode": "unrelated",
+      "COLD_ALLOC": {
+        "requests": 32832,
+        "requested": 7925371,
+        "retained": 1540968,
+        "peak_new": 2130328
+      },
+      "LAYOUT": {
+        "win_bytes": 520
+      },
+      "ALLOC": {
+        "requests": 86,
+        "requested": 342511,
+        "retained_delta": 0,
+        "peak_new": 224984
+      },
+      "TASKS": {
+        "frozen": 0,
+        "dispatched": 0,
+        "accepted": 0
+      },
+      "FINAL": {
+        "pixel_hash": 2654118902307402295
+      }
+    },
+    {
+      "variant": "candidate",
+      "rows": 40,
+      "fields": 4,
+      "mode": "unrelated",
+      "COLD_ALLOC": {
+        "requests": 32832,
+        "requested": 7925371,
+        "retained": 1540968,
+        "peak_new": 2130328
+      },
+      "LAYOUT": {
+        "win_bytes": 520
+      },
+      "ALLOC": {
+        "requests": 122,
+        "requested": 344481,
+        "retained_delta": 0,
+        "peak_new": 225948
+      },
+      "TASKS": {
+        "frozen": 0,
+        "dispatched": 0,
+        "accepted": 0
+      },
+      "FINAL": {
+        "pixel_hash": 6924804100995024623
+      }
+    },
+    {
+      "variant": "candidate",
+      "rows": 40,
+      "fields": 1,
+      "mode": "dependent",
+      "COLD_ALLOC": {
+        "requests": 32839,
+        "requested": 7926834,
+        "retained": 1541119,
+        "peak_new": 2130332
+      },
+      "LAYOUT": {
+        "win_bytes": 600
+      },
+      "ALLOC": {
+        "requests": 9337,
+        "requested": 5044609,
+        "retained_delta": 0,
+        "peak_new": 492170
+      },
+      "TASKS": {
+        "frozen": 1,
+        "dispatched": 1,
+        "accepted": 1
+      },
+      "FINAL": {
+        "pixel_hash": 5951361000939580344
+      }
+    },
+    {
+      "variant": "candidate",
+      "rows": 40,
+      "fields": 2,
+      "mode": "dependent",
+      "COLD_ALLOC": {
+        "requests": 32839,
+        "requested": 7926834,
+        "retained": 1541119,
+        "peak_new": 2130332
+      },
+      "LAYOUT": {
+        "win_bytes": 600
+      },
+      "ALLOC": {
+        "requests": 9350,
+        "requested": 5044679,
+        "retained_delta": 0,
+        "peak_new": 492170
+      },
+      "TASKS": {
+        "frozen": 1,
+        "dispatched": 1,
+        "accepted": 1
+      },
+      "FINAL": {
+        "pixel_hash": 12884597976694700334
+      }
+    },
+    {
+      "variant": "candidate",
+      "rows": 40,
+      "fields": 4,
+      "mode": "dependent",
+      "COLD_ALLOC": {
+        "requests": 32839,
+        "requested": 7926834,
+        "retained": 1541119,
+        "peak_new": 2130332
+      },
+      "LAYOUT": {
+        "win_bytes": 600
+      },
+      "ALLOC": {
+        "requests": 9378,
+        "requested": 5045603,
+        "retained_delta": 0,
+        "peak_new": 492170
+      },
+      "TASKS": {
+        "frozen": 1,
+        "dispatched": 1,
+        "accepted": 1
+      },
+      "FINAL": {
+        "pixel_hash": 979679956218285718
+      }
+    },
+    {
+      "variant": "candidate",
+      "rows": 0,
+      "fields": 4,
+      "mode": "owner",
+      "COLD_ALLOC": {
+        "requests": 940,
+        "requested": 281449,
+        "retained": 59759,
+        "peak_new": 77375
+      },
+      "LAYOUT": {
+        "win_bytes": 520
+      },
+      "ALLOC": {
+        "requests": 328,
+        "requested": 79488,
+        "retained_delta": 0,
+        "peak_new": 8675
+      },
+      "TASKS": {
+        "frozen": 1,
+        "dispatched": 1,
+        "accepted": 1
+      },
+      "FINAL": {
+        "pixel_hash": 14126539586161292626
+      }
+    },
+    {
+      "variant": "candidate",
+      "rows": 0,
+      "fields": 4,
+      "mode": "opaque",
+      "COLD_ALLOC": {
+        "requests": 890,
+        "requested": 272737,
+        "retained": 58363,
+        "peak_new": 74365
+      },
+      "LAYOUT": {
+        "win_bytes": 480
+      },
+      "ALLOC": {
+        "requests": 309,
+        "requested": 75896,
+        "retained_delta": 0,
+        "peak_new": 8306
+      },
+      "TASKS": {
+        "frozen": 1,
+        "dispatched": 1,
+        "accepted": 1
+      },
+      "FINAL": {
+        "pixel_hash": 284837220980945188
+      }
+    },
+    {
+      "variant": "candidate",
+      "rows": 1,
+      "fields": 4,
+      "mode": "owner",
+      "COLD_ALLOC": {
+        "requests": 1924,
+        "requested": 521173,
+        "retained": 106824,
+        "peak_new": 130461
+      },
+      "LAYOUT": {
+        "win_bytes": 520
+      },
+      "ALLOC": {
+        "requests": 623,
+        "requested": 222284,
+        "retained_delta": 0,
+        "peak_new": 20256
+      },
+      "TASKS": {
+        "frozen": 1,
+        "dispatched": 1,
+        "accepted": 1
+      },
+      "FINAL": {
+        "pixel_hash": 8860219222527031560
+      }
+    },
+    {
+      "variant": "candidate",
+      "rows": 1,
+      "fields": 4,
+      "mode": "opaque",
+      "COLD_ALLOC": {
+        "requests": 1864,
+        "requested": 494877,
+        "retained": 105212,
+        "peak_new": 122368
+      },
+      "LAYOUT": {
+        "win_bytes": 480
+      },
+      "ALLOC": {
+        "requests": 604,
+        "requested": 218236,
+        "retained_delta": 0,
+        "peak_new": 20244
+      },
+      "TASKS": {
+        "frozen": 1,
+        "dispatched": 1,
+        "accepted": 1
+      },
+      "FINAL": {
+        "pixel_hash": 14728391564927822750
+      }
+    },
+    {
+      "variant": "candidate",
+      "rows": 40,
+      "fields": 4,
+      "mode": "owner",
+      "COLD_ALLOC": {
+        "requests": 32895,
+        "requested": 7952507,
+        "retained": 1542860,
+        "peak_new": 2136565
+      },
+      "LAYOUT": {
+        "win_bytes": 520
+      },
+      "ALLOC": {
+        "requests": 9383,
+        "requested": 5049652,
+        "retained_delta": 0,
+        "peak_new": 492178
+      },
+      "TASKS": {
+        "frozen": 1,
+        "dispatched": 1,
+        "accepted": 1
+      },
+      "FINAL": {
+        "pixel_hash": 18378013917462588674
+      }
+    },
+    {
+      "variant": "candidate",
+      "rows": 40,
+      "fields": 4,
+      "mode": "opaque",
+      "COLD_ALLOC": {
+        "requests": 32832,
+        "requested": 7925371,
+        "retained": 1540968,
+        "peak_new": 2130328
+      },
+      "LAYOUT": {
+        "win_bytes": 480
+      },
+      "ALLOC": {
+        "requests": 9363,
+        "requested": 5045324,
+        "retained_delta": 0,
+        "peak_new": 492166
+      },
+      "TASKS": {
+        "frozen": 1,
+        "dispatched": 1,
+        "accepted": 1
+      },
+      "FINAL": {
+        "pixel_hash": 6924804100995024623
+      }
+    },
+    {
+      "variant": "control",
+      "rows": 0,
+      "fields": 1,
+      "mode": "unrelated",
+      "COLD_ALLOC": {
+        "requests": 890,
+        "requested": 272737,
+        "retained": 58363,
+        "peak_new": 74365
+      },
+      "LAYOUT": {
+        "win_bytes": 520
+      },
+      "ALLOC": {
+        "requests": 34,
+        "requested": 2609,
+        "retained_delta": 0,
+        "peak_new": 1270
+      },
+      "TASKS": {
+        "frozen": 0,
+        "dispatched": 0,
+        "accepted": 0
+      },
+      "FINAL": {
+        "pixel_hash": 1087203604248371696
+      }
+    },
+    {
+      "variant": "control",
+      "rows": 0,
+      "fields": 2,
+      "mode": "unrelated",
+      "COLD_ALLOC": {
+        "requests": 890,
+        "requested": 272737,
+        "retained": 58363,
+        "peak_new": 74365
+      },
+      "LAYOUT": {
+        "win_bytes": 520
+      },
+      "ALLOC": {
+        "requests": 280,
+        "requested": 74482,
+        "retained_delta": 0,
+        "peak_new": 8642
+      },
+      "TASKS": {
+        "frozen": 1,
+        "dispatched": 1,
+        "accepted": 1
+      },
+      "FINAL": {
+        "pixel_hash": 5764002890942619644
+      }
+    },
+    {
+      "variant": "control",
+      "rows": 0,
+      "fields": 4,
+      "mode": "unrelated",
+      "COLD_ALLOC": {
+        "requests": 890,
+        "requested": 272737,
+        "retained": 58363,
+        "peak_new": 74365
+      },
+      "LAYOUT": {
+        "win_bytes": 520
+      },
+      "ALLOC": {
+        "requests": 309,
+        "requested": 75896,
+        "retained_delta": 0,
+        "peak_new": 8306
+      },
+      "TASKS": {
+        "frozen": 1,
+        "dispatched": 1,
+        "accepted": 1
+      },
+      "FINAL": {
+        "pixel_hash": 284837220980945188
+      }
+    },
+    {
+      "variant": "control",
+      "rows": 0,
+      "fields": 1,
+      "mode": "dependent",
+      "COLD_ALLOC": {
+        "requests": 894,
+        "requested": 274040,
+        "retained": 58346,
+        "peak_new": 74373
+      },
+      "LAYOUT": {
+        "win_bytes": 600
+      },
+      "ALLOC": {
+        "requests": 280,
+        "requested": 73649,
+        "retained_delta": 0,
+        "peak_new": 8511
+      },
+      "TASKS": {
+        "frozen": 1,
+        "dispatched": 1,
+        "accepted": 1
+      },
+      "FINAL": {
+        "pixel_hash": 6158178423165853847
+      }
+    },
+    {
+      "variant": "control",
+      "rows": 0,
+      "fields": 2,
+      "mode": "dependent",
+      "COLD_ALLOC": {
+        "requests": 894,
+        "requested": 274040,
+        "retained": 58346,
+        "peak_new": 74373
+      },
+      "LAYOUT": {
+        "win_bytes": 600
+      },
+      "ALLOC": {
+        "requests": 295,
+        "requested": 75455,
+        "retained_delta": 0,
+        "peak_new": 8345
+      },
+      "TASKS": {
+        "frozen": 1,
+        "dispatched": 1,
+        "accepted": 1
+      },
+      "FINAL": {
+        "pixel_hash": 11204471590540251089
+      }
+    },
+    {
+      "variant": "control",
+      "rows": 0,
+      "fields": 4,
+      "mode": "dependent",
+      "COLD_ALLOC": {
+        "requests": 894,
+        "requested": 274040,
+        "retained": 58346,
+        "peak_new": 74373
+      },
+      "LAYOUT": {
+        "win_bytes": 600
+      },
+      "ALLOC": {
+        "requests": 323,
+        "requested": 76183,
+        "retained_delta": 0,
+        "peak_new": 8345
+      },
+      "TASKS": {
+        "frozen": 1,
+        "dispatched": 1,
+        "accepted": 1
+      },
+      "FINAL": {
+        "pixel_hash": 17809376123478528745
+      }
+    },
+    {
+      "variant": "control",
+      "rows": 1,
+      "fields": 1,
+      "mode": "unrelated",
+      "COLD_ALLOC": {
+        "requests": 1864,
+        "requested": 494877,
+        "retained": 105212,
+        "peak_new": 122368
+      },
+      "LAYOUT": {
+        "win_bytes": 520
+      },
+      "ALLOC": {
+        "requests": 34,
+        "requested": 2609,
+        "retained_delta": 0,
+        "peak_new": 1270
+      },
+      "TASKS": {
+        "frozen": 0,
+        "dispatched": 0,
+        "accepted": 0
+      },
+      "FINAL": {
+        "pixel_hash": 4760509384241480234
+      }
+    },
+    {
+      "variant": "control",
+      "rows": 1,
+      "fields": 2,
+      "mode": "unrelated",
+      "COLD_ALLOC": {
+        "requests": 1864,
+        "requested": 494877,
+        "retained": 105212,
+        "peak_new": 122368
+      },
+      "LAYOUT": {
+        "win_bytes": 520
+      },
+      "ALLOC": {
+        "requests": 575,
+        "requested": 216822,
+        "retained_delta": 0,
+        "peak_new": 20244
+      },
+      "TASKS": {
+        "frozen": 1,
+        "dispatched": 1,
+        "accepted": 1
+      },
+      "FINAL": {
+        "pixel_hash": 6294546792856889638
+      }
+    },
+    {
+      "variant": "control",
+      "rows": 1,
+      "fields": 4,
+      "mode": "unrelated",
+      "COLD_ALLOC": {
+        "requests": 1864,
+        "requested": 494877,
+        "retained": 105212,
+        "peak_new": 122368
+      },
+      "LAYOUT": {
+        "win_bytes": 520
+      },
+      "ALLOC": {
+        "requests": 604,
+        "requested": 218236,
+        "retained_delta": 0,
+        "peak_new": 20244
+      },
+      "TASKS": {
+        "frozen": 1,
+        "dispatched": 1,
+        "accepted": 1
+      },
+      "FINAL": {
+        "pixel_hash": 14728391564927822750
+      }
+    },
+    {
+      "variant": "control",
+      "rows": 1,
+      "fields": 1,
+      "mode": "dependent",
+      "COLD_ALLOC": {
+        "requests": 1871,
+        "requested": 496340,
+        "retained": 105363,
+        "peak_new": 122372
+      },
+      "LAYOUT": {
+        "win_bytes": 600
+      },
+      "ALLOC": {
+        "requests": 577,
+        "requested": 216471,
+        "retained_delta": 0,
+        "peak_new": 20248
+      },
+      "TASKS": {
+        "frozen": 1,
+        "dispatched": 1,
+        "accepted": 1
+      },
+      "FINAL": {
+        "pixel_hash": 18392613026295926021
+      }
+    },
+    {
+      "variant": "control",
+      "rows": 1,
+      "fields": 2,
+      "mode": "dependent",
+      "COLD_ALLOC": {
+        "requests": 1871,
+        "requested": 496340,
+        "retained": 105363,
+        "peak_new": 122372
+      },
+      "LAYOUT": {
+        "win_bytes": 600
+      },
+      "ALLOC": {
+        "requests": 592,
+        "requested": 219537,
+        "retained_delta": 0,
+        "peak_new": 20248
+      },
+      "TASKS": {
+        "frozen": 1,
+        "dispatched": 1,
+        "accepted": 1
+      },
+      "FINAL": {
+        "pixel_hash": 2700235599738809595
+      }
+    },
+    {
+      "variant": "control",
+      "rows": 1,
+      "fields": 4,
+      "mode": "dependent",
+      "COLD_ALLOC": {
+        "requests": 1871,
+        "requested": 496340,
+        "retained": 105363,
+        "peak_new": 122372
+      },
+      "LAYOUT": {
+        "win_bytes": 600
+      },
+      "ALLOC": {
+        "requests": 619,
+        "requested": 218515,
+        "retained_delta": 0,
+        "peak_new": 20248
+      },
+      "TASKS": {
+        "frozen": 1,
+        "dispatched": 1,
+        "accepted": 1
+      },
+      "FINAL": {
+        "pixel_hash": 8736590574198101987
+      }
+    },
+    {
+      "variant": "control",
+      "rows": 40,
+      "fields": 1,
+      "mode": "unrelated",
+      "COLD_ALLOC": {
+        "requests": 32832,
+        "requested": 7925371,
+        "retained": 1540968,
+        "peak_new": 2130328
+      },
+      "LAYOUT": {
+        "win_bytes": 520
+      },
+      "ALLOC": {
+        "requests": 34,
+        "requested": 2609,
+        "retained_delta": 0,
+        "peak_new": 1270
+      },
+      "TASKS": {
+        "frozen": 0,
+        "dispatched": 0,
+        "accepted": 0
+      },
+      "FINAL": {
+        "pixel_hash": 18317644700102263139
+      }
+    },
+    {
+      "variant": "control",
+      "rows": 40,
+      "fields": 2,
+      "mode": "unrelated",
+      "COLD_ALLOC": {
+        "requests": 32832,
+        "requested": 7925371,
+        "retained": 1540968,
+        "peak_new": 2130328
+      },
+      "LAYOUT": {
+        "win_bytes": 520
+      },
+      "ALLOC": {
+        "requests": 9334,
+        "requested": 5043910,
+        "retained_delta": 0,
+        "peak_new": 492166
+      },
+      "TASKS": {
+        "frozen": 1,
+        "dispatched": 1,
+        "accepted": 1
+      },
+      "FINAL": {
+        "pixel_hash": 2654118902307402295
+      }
+    },
+    {
+      "variant": "control",
+      "rows": 40,
+      "fields": 4,
+      "mode": "unrelated",
+      "COLD_ALLOC": {
+        "requests": 32832,
+        "requested": 7925371,
+        "retained": 1540968,
+        "peak_new": 2130328
+      },
+      "LAYOUT": {
+        "win_bytes": 520
+      },
+      "ALLOC": {
+        "requests": 9363,
+        "requested": 5045324,
+        "retained_delta": 0,
+        "peak_new": 492166
+      },
+      "TASKS": {
+        "frozen": 1,
+        "dispatched": 1,
+        "accepted": 1
+      },
+      "FINAL": {
+        "pixel_hash": 6924804100995024623
+      }
+    },
+    {
+      "variant": "control",
+      "rows": 40,
+      "fields": 1,
+      "mode": "dependent",
+      "COLD_ALLOC": {
+        "requests": 32839,
+        "requested": 7926834,
+        "retained": 1541119,
+        "peak_new": 2130332
+      },
+      "LAYOUT": {
+        "win_bytes": 600
+      },
+      "ALLOC": {
+        "requests": 9337,
+        "requested": 5044609,
+        "retained_delta": 0,
+        "peak_new": 492170
+      },
+      "TASKS": {
+        "frozen": 1,
+        "dispatched": 1,
+        "accepted": 1
+      },
+      "FINAL": {
+        "pixel_hash": 5951361000939580344
+      }
+    },
+    {
+      "variant": "control",
+      "rows": 40,
+      "fields": 2,
+      "mode": "dependent",
+      "COLD_ALLOC": {
+        "requests": 32839,
+        "requested": 7926834,
+        "retained": 1541119,
+        "peak_new": 2130332
+      },
+      "LAYOUT": {
+        "win_bytes": 600
+      },
+      "ALLOC": {
+        "requests": 9350,
+        "requested": 5044679,
+        "retained_delta": 0,
+        "peak_new": 492170
+      },
+      "TASKS": {
+        "frozen": 1,
+        "dispatched": 1,
+        "accepted": 1
+      },
+      "FINAL": {
+        "pixel_hash": 12884597976694700334
+      }
+    },
+    {
+      "variant": "control",
+      "rows": 40,
+      "fields": 4,
+      "mode": "dependent",
+      "COLD_ALLOC": {
+        "requests": 32839,
+        "requested": 7926834,
+        "retained": 1541119,
+        "peak_new": 2130332
+      },
+      "LAYOUT": {
+        "win_bytes": 600
+      },
+      "ALLOC": {
+        "requests": 9378,
+        "requested": 5045603,
+        "retained_delta": 0,
+        "peak_new": 492170
+      },
+      "TASKS": {
+        "frozen": 1,
+        "dispatched": 1,
+        "accepted": 1
+      },
+      "FINAL": {
+        "pixel_hash": 979679956218285718
+      }
+    },
+    {
+      "variant": "control",
+      "rows": 0,
+      "fields": 4,
+      "mode": "owner",
+      "COLD_ALLOC": {
+        "requests": 940,
+        "requested": 281449,
+        "retained": 59759,
+        "peak_new": 77375
+      },
+      "LAYOUT": {
+        "win_bytes": 520
+      },
+      "ALLOC": {
+        "requests": 328,
+        "requested": 79488,
+        "retained_delta": 0,
+        "peak_new": 8675
+      },
+      "TASKS": {
+        "frozen": 1,
+        "dispatched": 1,
+        "accepted": 1
+      },
+      "FINAL": {
+        "pixel_hash": 14126539586161292626
+      }
+    },
+    {
+      "variant": "control",
+      "rows": 0,
+      "fields": 4,
+      "mode": "opaque",
+      "COLD_ALLOC": {
+        "requests": 890,
+        "requested": 272737,
+        "retained": 58363,
+        "peak_new": 74365
+      },
+      "LAYOUT": {
+        "win_bytes": 480
+      },
+      "ALLOC": {
+        "requests": 309,
+        "requested": 75896,
+        "retained_delta": 0,
+        "peak_new": 8306
+      },
+      "TASKS": {
+        "frozen": 1,
+        "dispatched": 1,
+        "accepted": 1
+      },
+      "FINAL": {
+        "pixel_hash": 284837220980945188
+      }
+    },
+    {
+      "variant": "control",
+      "rows": 1,
+      "fields": 4,
+      "mode": "owner",
+      "COLD_ALLOC": {
+        "requests": 1924,
+        "requested": 521173,
+        "retained": 106824,
+        "peak_new": 130461
+      },
+      "LAYOUT": {
+        "win_bytes": 520
+      },
+      "ALLOC": {
+        "requests": 623,
+        "requested": 222284,
+        "retained_delta": 0,
+        "peak_new": 20256
+      },
+      "TASKS": {
+        "frozen": 1,
+        "dispatched": 1,
+        "accepted": 1
+      },
+      "FINAL": {
+        "pixel_hash": 8860219222527031560
+      }
+    },
+    {
+      "variant": "control",
+      "rows": 1,
+      "fields": 4,
+      "mode": "opaque",
+      "COLD_ALLOC": {
+        "requests": 1864,
+        "requested": 494877,
+        "retained": 105212,
+        "peak_new": 122368
+      },
+      "LAYOUT": {
+        "win_bytes": 480
+      },
+      "ALLOC": {
+        "requests": 604,
+        "requested": 218236,
+        "retained_delta": 0,
+        "peak_new": 20244
+      },
+      "TASKS": {
+        "frozen": 1,
+        "dispatched": 1,
+        "accepted": 1
+      },
+      "FINAL": {
+        "pixel_hash": 14728391564927822750
+      }
+    },
+    {
+      "variant": "control",
+      "rows": 40,
+      "fields": 4,
+      "mode": "owner",
+      "COLD_ALLOC": {
+        "requests": 32895,
+        "requested": 7952507,
+        "retained": 1542860,
+        "peak_new": 2136565
+      },
+      "LAYOUT": {
+        "win_bytes": 520
+      },
+      "ALLOC": {
+        "requests": 9383,
+        "requested": 5049652,
+        "retained_delta": 0,
+        "peak_new": 492178
+      },
+      "TASKS": {
+        "frozen": 1,
+        "dispatched": 1,
+        "accepted": 1
+      },
+      "FINAL": {
+        "pixel_hash": 18378013917462588674
+      }
+    },
+    {
+      "variant": "control",
+      "rows": 40,
+      "fields": 4,
+      "mode": "opaque",
+      "COLD_ALLOC": {
+        "requests": 32832,
+        "requested": 7925371,
+        "retained": 1540968,
+        "peak_new": 2130328
+      },
+      "LAYOUT": {
+        "win_bytes": 480
+      },
+      "ALLOC": {
+        "requests": 9363,
+        "requested": 5045324,
+        "retained_delta": 0,
+        "peak_new": 492166
+      },
+      "TASKS": {
+        "frozen": 1,
+        "dispatched": 1,
+        "accepted": 1
+      },
+      "FINAL": {
+        "pixel_hash": 6924804100995024623
+      }
+    }
+  ]
+}

@@ -1,0 +1,1 @@
+{"command": ["/usr/bin/time", "-v", "-o", "/home/user/gpui-question-source-borrowed-evidence/paired/0-1-2-dependent-control.time", "taskset", "-c", "2", "/home/user/gpui-question-source-control-target/release/examples/question_source_cost", "1", "2", "dependent", "/home/user/zgx-reference-local/comparisons/fonts/DejaVuSans.ttf"], "exit": 0}

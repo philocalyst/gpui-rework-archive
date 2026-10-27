@@ -1,0 +1,3 @@
+    Finished `release` profile [optimized] target(s) in 0.39s
+     Running unittests src/lib.rs (/home/user/gpui-question-source-borrowed-target/release/build/gpui/ae1265e7bce2c02a/out/gpui-ae1265e7bce2c02a)
+CHANGE_LAYOUT,change_bytes=24,source_edits_bytes=40

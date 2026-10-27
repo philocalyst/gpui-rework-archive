@@ -1,0 +1,110 @@
+diff --git a/reactivity/crates/gpui/src/reader/question.rs b/reactivity/crates/gpui/src/reader/question.rs
+index 308a0358c8..002153b6aa 100644
+--- a/reactivity/crates/gpui/src/reader/question.rs
++++ b/reactivity/crates/gpui/src/reader/question.rs
+@@ -28,11 +28,11 @@ where
+ 
+ #[doc(hidden)]
+ #[derive(Clone, Copy)]
+-pub enum Change {
++pub enum Change<'a> {
+     Mount,
+     Dependencies,
+     Source(Option<FieldId>),
+-    Sources([Option<FieldId>; 4]),
++    Sources(&'a [Option<FieldId>; 4]),
+     Retry(ReaderKey),
+ }
+ 
+@@ -562,13 +562,13 @@ where
+         &mut self,
+         model: &M,
+         sources: &Sources<M>,
+-        change: Change,
++        change: Change<'_>,
+     ) -> Result<bool, crate::Error> {
+         if let Change::Sources(fields) = change
+             && !A::READERS
+         {
+             let mut relevant = false;
+-            for field in fields.into_iter().flatten() {
++            for field in fields.iter().copied().flatten() {
+                 if self.inputs.contains(sources, field)? {
+                     relevant = true;
+                     break;
+@@ -726,7 +726,7 @@ where
+         &mut self,
+         model: &M,
+         sources: &Sources<M>,
+-        change: Change,
++        change: Change<'_>,
+     ) -> Result<bool, crate::Error> {
+         let tail = self.tail.refresh(model, sources, change);
+         let own = self.refresh_self(model, sources, change);
+@@ -881,7 +881,7 @@ impl<M, Q: LaneSet<M>, L: LaneSet<M>> LaneSet<M> for QuestionSet<Q, L> {
+         &mut self,
+         model: &M,
+         sources: &Sources<M>,
+-        change: Change,
++        change: Change<'_>,
+     ) -> Result<bool, crate::Error> {
+         let a = self.lanes.refresh(model, sources, change)?;
+         Ok(self.tail.refresh(model, sources, change)? || a)
+@@ -1280,3 +1280,13 @@ mod tests {
+         );
+     }
+ }
++
++#[cfg(test)]
++#[test]
++fn change_layout_ledger() {
++    eprintln!(
++        "CHANGE_LAYOUT,change_bytes={},source_edits_bytes={}",
++        std::mem::size_of::<Change<'_>>(),
++        std::mem::size_of::<crate::remote::SourceEdits>()
++    );
++}
+diff --git a/reactivity/crates/gpui/src/remote.rs b/reactivity/crates/gpui/src/remote.rs
+index 08e9f0c397..5d73734211 100644
+--- a/reactivity/crates/gpui/src/remote.rs
++++ b/reactivity/crates/gpui/src/remote.rs
+@@ -298,14 +298,14 @@ impl SourceEdits {
+     pub(crate) fn question_change<M: 'static>(
+         &self,
+         sources: &Sources<M>,
+-    ) -> Result<Change, Error> {
++    ) -> Result<Change<'_>, Error> {
+         if let Some(fields) = self.multiple() {
+             for field in fields {
+                 if sources.invalidates_owner(field)? {
+                     return Ok(Change::Source(None));
+                 }
+             }
+-            Ok(Change::Sources(self.fields))
++            Ok(Change::Sources(&self.fields))
+         } else {
+             Ok(Change::Source(self.single()))
+         }
+@@ -340,7 +340,7 @@ pub trait LaneSet<M>: sealed::Sealed + ReaderValues {
+         exact: &mut SourceEdits,
+         remaining: &mut usize,
+     ) -> Result<(), Error>;
+-    fn refresh(&mut self, _: &M, _: &Sources<M>, _: Change) -> Result<bool, Error> {
++    fn refresh(&mut self, _: &M, _: &Sources<M>, _: Change<'_>) -> Result<bool, Error> {
+         Ok(false)
+     }
+     fn apply_questions(
+@@ -560,7 +560,12 @@ impl<M, T: Send + 'static, F: InboxHandler<M, T>, L: LaneSet<M>> LaneSet<M> for
+         self.inbox.close();
+         self.tail.clear();
+     }
+-    fn refresh(&mut self, model: &M, sources: &Sources<M>, change: Change) -> Result<bool, Error> {
++    fn refresh(
++        &mut self,
++        model: &M,
++        sources: &Sources<M>,
++        change: Change<'_>,
++    ) -> Result<bool, Error> {
+         self.tail.refresh(model, sources, change)
+     }
+     fn apply_questions(

@@ -1,0 +1,145 @@
+{
+  "binaries": {
+    "candidate": "/home/user/gpui-question-source-borrowed-target/release/build/gpui/b8c9afc9f840e583/out/question_source_cost",
+    "control": "/home/user/gpui-question-source-control-target/release/examples/question_source_cost"
+  },
+  "hashes": {
+    "candidate": "0e4d5b7e3b7b3af10220f6918f0bc5ba680550a332f3714169ef792b2fefbd8f",
+    "control": "7ac4e547bfb37a25cb04cb7055dbb7d6057e6af13d0b70ce5505227de550b4c1",
+    "font": "7da195a74c55bef988d0d48f9508bd5d849425c1770dba5d7bfc6ce9ed848954"
+  },
+  "font": "/home/user/zgx-reference-local/comparisons/fonts/DejaVuSans.ttf",
+  "sources": {
+    "control": "b0e8e37a2115adac044c618a5bb0b33e8e2fa833",
+    "candidate": "1f1f2afe54e05d0e24d89417ca25bd6b5235477d"
+  },
+  "cases": [
+    [
+      0,
+      1,
+      "unrelated"
+    ],
+    [
+      0,
+      2,
+      "unrelated"
+    ],
+    [
+      0,
+      4,
+      "unrelated"
+    ],
+    [
+      0,
+      1,
+      "dependent"
+    ],
+    [
+      0,
+      2,
+      "dependent"
+    ],
+    [
+      0,
+      4,
+      "dependent"
+    ],
+    [
+      1,
+      1,
+      "unrelated"
+    ],
+    [
+      1,
+      2,
+      "unrelated"
+    ],
+    [
+      1,
+      4,
+      "unrelated"
+    ],
+    [
+      1,
+      1,
+      "dependent"
+    ],
+    [
+      1,
+      2,
+      "dependent"
+    ],
+    [
+      1,
+      4,
+      "dependent"
+    ],
+    [
+      40,
+      1,
+      "unrelated"
+    ],
+    [
+      40,
+      2,
+      "unrelated"
+    ],
+    [
+      40,
+      4,
+      "unrelated"
+    ],
+    [
+      40,
+      1,
+      "dependent"
+    ],
+    [
+      40,
+      2,
+      "dependent"
+    ],
+    [
+      40,
+      4,
+      "dependent"
+    ],
+    [
+      0,
+      4,
+      "owner"
+    ],
+    [
+      0,
+      4,
+      "opaque"
+    ],
+    [
+      1,
+      4,
+      "owner"
+    ],
+    [
+      1,
+      4,
+      "opaque"
+    ],
+    [
+      40,
+      4,
+      "owner"
+    ],
+    [
+      40,
+      4,
+      "opaque"
+    ]
+  ],
+  "warmup": 200,
+  "batches": 40,
+  "ops": 100,
+  "cpu_affinity": 2,
+  "platform": "Linux-6.8.0-117-generic-x86_64-with-glibc2.39",
+  "compiler": "rustc 1.101.0-nightly (7189d39d9 2026-10-22)\nbinary: rustc\ncommit-hash: 7189d39d9ce936881b8132c6addeaf3e295cd455\ncommit-date: 2026-10-22\nhost: x86_64-unknown-linux-gnu\nrelease: 1.101.0-nightly\nLLVM version: 23.1.4\n",
+  "started": 1793089908.5634499
+}

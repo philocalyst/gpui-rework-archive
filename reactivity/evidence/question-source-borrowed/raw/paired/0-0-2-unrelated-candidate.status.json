@@ -1,0 +1,1 @@
+{"command": ["/usr/bin/time", "-v", "-o", "/home/user/gpui-question-source-borrowed-evidence/paired/0-0-2-unrelated-candidate.time", "taskset", "-c", "2", "/home/user/gpui-question-source-borrowed-target/release/build/gpui/b8c9afc9f840e583/out/question_source_cost", "0", "2", "unrelated", "/home/user/zgx-reference-local/comparisons/fonts/DejaVuSans.ttf"], "exit": 0}

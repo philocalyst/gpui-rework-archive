@@ -1,0 +1,27 @@
+{
+  "primary": {
+    "40-2-unrelated": true,
+    "40-4-unrelated": true
+  },
+  "controls": {
+    "0-1-unrelated": true,
+    "0-1-dependent": true,
+    "0-2-dependent": false,
+    "0-4-dependent": true,
+    "1-1-unrelated": true,
+    "1-1-dependent": true,
+    "1-2-dependent": true,
+    "1-4-dependent": true,
+    "40-1-unrelated": true,
+    "40-1-dependent": true,
+    "40-2-dependent": true,
+    "40-4-dependent": true,
+    "0-4-owner": true,
+    "0-4-opaque": true,
+    "1-4-owner": true,
+    "1-4-opaque": true,
+    "40-4-owner": true,
+    "40-4-opaque": true
+  },
+  "numerical_pass": false
+}

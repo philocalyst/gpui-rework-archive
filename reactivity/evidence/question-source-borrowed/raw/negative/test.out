@@ -1,0 +1,18 @@
+
+running 1 test
+test every_typed_member_can_invalidate_its_own_question ... FAILED
+
+failures:
+
+---- every_typed_member_can_invalidate_its_own_question stdout ----
+
+thread 'every_typed_member_can_invalidate_its_own_question' (736534) panicked at crates/gpui/tests/question_source_set.rs:160:14:
+changed member must dispatch its dependent: Empty
+note: run with `RUST_BACKTRACE=1` environment variable to display a backtrace
+
+
+failures:
+    every_typed_member_can_invalidate_its_own_question
+
+test result: FAILED. 0 passed; 1 failed; 0 ignored; 0 measured; 6 filtered out; finished in 0.02s
+

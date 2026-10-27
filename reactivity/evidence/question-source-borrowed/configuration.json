@@ -1,0 +1,15 @@
+{
+  "kind": "question",
+  "tests": {
+    "first": 719,
+    "composed": 792
+  },
+  "clippy": [
+    "first",
+    "allocation-build",
+    "composed"
+  ],
+  "clippy_failures": [],
+  "negative_message": "changed member must dispatch its dependent: Empty",
+  "control_receipt": "control-qualified/artifact.json"
+}
