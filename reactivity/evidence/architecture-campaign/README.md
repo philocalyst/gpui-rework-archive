@@ -135,3 +135,14 @@ checks exact changed glyph support and independent pixel repair before any spars
 GPU implementation or new timing. This is a post-verdict hypothesis, not causation
 or an accepted performance result. Application API unchanged; the additive low-level
 Canvas observer must retain exact common/resource/lifetime validation.
+
+Glyph-damage follow-up: Stage A source5c7bf163d784 diagnoses median99495 bounding
+pixels versus2891 exact changed support on both streaming routes (80/80 each),
+with60 complete GPU qualification processes passing. Stage B bounded regions
+use median16 rectangles/2905 pixels and pass the three-format full-GPU oracle.
+No timing verdict. The subsequent native unseen-ACK witness found a real stale
+image failure: matching source epochs do not identify matching GPU images.
+AUTHORITY.md preregisters exact acknowledged token reuse for all native damage;
+the original baseline is challenged independently and every future comparator
+must receive the same correction. Candidate cee7b76d00 is in full qualification;
+original failure and later invalid-literal fixture failure remain preserved.

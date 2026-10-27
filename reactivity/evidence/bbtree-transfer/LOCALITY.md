@@ -159,3 +159,38 @@ Do not silently change existing Reader behavior to make a benchmark faster.
 
 All changes remain local. Required native parity, physical GPU measurements and
 two hardware classes remain open. None of this research supplies those results.
+
+## Follow-up evidence: precise support and actual image authority
+
+Local glyph-damage Stage A (source 5c7bf163d78461ad096448cecfeadfa2ff9d4576) records
+160 actual stream/owner updates. Median bounding repair is 99495 pixels, while the
+union of changed glyph supports is 2891; 16px tiles cover 11520. Two public Canvas
+regressions, six GPUI publication regressions, strict Clippy and 60 separate final
+GPU-pixel qualification processes pass. These are work/correctness observations,
+not timing evidence. Raw diagnosis and protocol are committed at 49c88983b420e5797fa15e30c6f8e774eac38465.
+
+The bounded rectangle merge in Stage B uses a median 16 regions and 2905 pixels.
+Source f864fdfdbe8a4b53b8b55126fdfad6371df6dd48 passes the GPU full-pixel oracle
+in all three supported formats, including translucent overlap, empty updates and
+failed/resize recovery. The first region tests wrongly assumed author bounds were
+exact raster support; failed fixtures and correction are preserved. No timing yet.
+
+A publication adversary then found a real failure in a2507a017eab076a99d01271c53406f03a9439f6:
+another presenter can ACK an unbound scroll without advancing the source epoch.
+A subsequent text edit reused ordinary bounding damage against the GPU's older
+scroll image. Rejecting the sparse token alone was insufficient: the fallback
+itself needed exact image authority. Source state and rendered-image identity are
+independent versions, just as a BBTree mutation can invalidate a gathered destination
+without making its key meaningless. This is a concrete invalidation requirement,
+not evidence for an async runtime speedup.
+
+AUTHORITY.md registers the prerequisite before correction. Runtime's existing
+acknowledged sequence is made available to all native configurations; native image
+reuse uses the exact window/token identity, and the redundant source-epoch stamp
+is removed. Ordinary X11 already retained that sequence for accessibility; minimal
+native configurations must charge the added field. Corrected 2c49fa9de6 passed
+stale-scroll and coalesced pixel witnesses before a later fixture deliberately
+poisoned its owner by using NaN literal width. cee7b76d00 changes only that fixture
+to the existing recoverable NaN radius admission error. Full qualification is
+pending. The original control is independently challenged before the same fix;
+future timing comparisons must all contain the correctness prerequisite.
