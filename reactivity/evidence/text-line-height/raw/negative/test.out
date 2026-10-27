@@ -1,0 +1,11 @@
+
+running 1 test
+test source_and_override_line_pitch_match_fresh_pixels_and_acknowledged_geometry ... FAILED
+
+failures:
+
+failures:
+    source_and_override_line_pitch_match_fresh_pixels_and_acknowledged_geometry
+
+test result: FAILED. 0 passed; 1 failed; 0 ignored; 0 measured; 2 filtered out; finished in 0.02s
+

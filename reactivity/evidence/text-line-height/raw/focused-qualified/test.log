@@ -1,0 +1,9 @@
+   Compiling gpui v0.1.0 (/home/user/gpui-line-height-lab/reactivity/crates/gpui)
+    Finished `release` profile [optimized] target(s) in 2.66s
+     Running tests/line_height.rs (/home/user/gpui-line-height-target/release/build/gpui/007344fa2ac73cf3/out/line_height-007344fa2ac73cf3)
+style_bytes=96
+
+thread 'sparse_text_and_ime_use_the_same_explicit_pitch' (1312058) panicked at crates/gpui/tests/line_height.rs:157:58:
+called `Option::unwrap()` on a `None` value
+note: run with `RUST_BACKTRACE=1` environment variable to display a backtrace
+error: test failed, to rerun pass `-p gpui --test line_height`

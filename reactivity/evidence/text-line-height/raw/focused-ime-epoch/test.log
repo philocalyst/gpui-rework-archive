@@ -1,0 +1,5 @@
+   Compiling gpui v0.1.0 (/home/user/gpui-line-height-lab/reactivity/crates/gpui)
+    Finished `release` profile [optimized] target(s) in 2.40s
+     Running tests/line_height.rs (/home/user/gpui-line-height-target/release/build/gpui/007344fa2ac73cf3/out/line_height-007344fa2ac73cf3)
+style_bytes=96
+     Running tests/line_height.rs (/home/user/gpui-line-height-target/release/build/gpui_canvas/3fd9f2d02876b933/out/line_height-3fd9f2d02876b933)

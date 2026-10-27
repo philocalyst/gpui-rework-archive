@@ -1,0 +1,7 @@
+focused-first bbe1d90: new GPUI test imported Contribution from root instead of property module. No production compiler failure.
+focused-corrected accidentally repeated same source after edit-script assertion; preserved as harness failure, not a distinct candidate.
+focused-qualified dcad6a73: new IME test assumed session survives an ordinary style source edit. Existing runtime explicitly leases IME to source_epoch and revokes it; corrected test asserts revocation and re-enables before checking geometry. Production unchanged.
+focused-ime-epoch a8767765: six focused tests pass.
+full-first a8767765: four legacy tests failed on deliberately larger Style/TextSite headers and newly valid PropertyId15. Updated exact expectations (Style96,El184,Draft160,TextSite88) and first invalid id16, without relaxing semantic or allocation gates. Additional flex header assertions updated before next gate.
+core-lines-first rejected: HEAD resolved relative to tool repository, not candidate. Corrected explicit SHA inventory:36657 vs36578, +79 shipping lines. Later changes so far tests only.
+reference-snapshot first capture raced X window mapping, terminated owned app through harness. Corrected bounded mapping wait retained captured stderr; reference snapshot-mapped succeeds, source guards unchanged.

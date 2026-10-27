@@ -1,0 +1,1 @@
+Read-only reference launch exited through harness cleanup after import raced the newly created not-yet-viewable X window. Retry preserves bounded wait and capture stderr; no reference source or benchmark modification.

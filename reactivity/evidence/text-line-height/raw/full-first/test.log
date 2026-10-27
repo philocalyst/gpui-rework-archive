@@ -1,0 +1,5 @@
+   Compiling gpui v0.1.0 (/home/user/gpui-line-height-lab/reactivity/crates/gpui)
+   Compiling gpui_canvas v0.1.0 (/home/user/gpui-line-height-lab/reactivity/crates/canvas)
+    Finished `release` profile [optimized] target(s) in 4m 19s
+     Running unittests src/lib.rs (/home/user/gpui-line-height-target/release/build/gpui/db0678e9a0ba0465/out/gpui-db0678e9a0ba0465)
+error: test failed, to rerun pass `-p gpui --lib`
