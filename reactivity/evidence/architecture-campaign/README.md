@@ -15,8 +15,12 @@ isolated worktree, preregistration, freeze, oracle, mutant and evidence rules.
 
 | `local/text-cache-bounded` / `/home/user/gpui-bounded-cache-lab` | Bound paragraph scratch | Memory gate passes at 45 KB; two CPU cells exceed 5%, unadopted; dossier `e6bda77dfc` |
 | `local/gpu-draw-major` / `/home/user/gpui-draw-major-lab` | Load each draw once for sixteen samples | Rejected: exact pixels pass, text gains 7–9% miss 20%; complete `evidence/gpu-draw-major` dossier |
-| `local/gpu-pixel-uniform` / `/home/user/gpui-pixel-uniform-lab` | Certify identical per-pixel coverage | SDR-only corrected candidate; 70 GPU tests pass; paired timing in progress, no acceptance |
-| `local/text-cache-cold-trim` / `/home/user/gpui-cold-trim-lab` | BBTree-inspired cold path isolation | Preregistered `9e05ef15b8`, candidate `c8560a8e41`; qualification pending |
+| `local/gpu-pixel-uniform` / `/home/user/gpui-pixel-uniform-lab` | Certify identical per-pixel coverage | Rejected: stripes 8.33x and text-stripes 30% faster but flat +16.6%; complete dossier `173e7c1a34`, 70 GPU tests and exact pixels |
+| `local/text-cache-cold-trim` / `/home/user/gpui-cold-trim-lab` | BBTree-inspired cold path isolation | Preregistered `9e05ef15b8`, production `c8560a8e41`; exact text/memory gates and corrected fixture Clippy pass, paired CPU qualification pending |
+
+| `local/tree-memory-lanes` / `/home/user/gpui-tree-lanes-lab` | Actual core parent walks: scalar/level/Future/prefetch/proof | Rejected: 2.48x deep level-loop gain, contiguous regression; complete six-way dossier, Miri and mutant |
+| `local/tree-parent-columns` / `/home/user/gpui-tree-columns-lab` | Compact authoritative parent routing | Rejected: selective deep 4.11x but outlined scalar fallback 6.88x slower; complete six-way dossier and code-generation evidence |
+| `local/tree-admitted-walk` / `/home/user/gpui-tree-admitted-lab` | Validate parent walk once per immutable borrow | Production `93117a2cdd`, lifecycle qualification `6801b594c1`; first four-way median gates pass; timer-floor guard qualification and broader GPUI tests in progress |
 
 [BBTree transfer research](../bbtree-transfer/README.md) records the pinned
 implementation, failed historical trials, applicability and next hypotheses.
