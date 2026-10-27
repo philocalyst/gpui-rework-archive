@@ -106,6 +106,7 @@ impl<M: View + 'static> Runtime<M> {
 }
 
 impl<M: View + 'static> Runtime<M> {
+    #[inline(never)]
     fn try_sparse_text_batch(
         &mut self,
         shaper: &mut gpui_canvas::TextShaper<'_>,
