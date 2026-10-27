@@ -84,14 +84,7 @@ fn public_list_scroll_certifies_exact_tokens_and_discards_pending_or_fractional_
         ack(&mut owner);
         let list = owner.list(LIST).unwrap();
         let previous = owner.with_scene(|_, t| t).unwrap();
-        eprintln!(
-            "list_before bounds={:?} state={:?}",
-            owner.bounds(list),
-            owner.list_state(list)
-        );
-        diagnostic(&owner, "before");
         owner.scroll(list, 6.).unwrap();
-        diagnostic(&owner, "after");
         owner
             .with_paint_scene(|_, token, _, damage| {
                 let transition = damage.scroll.expect("ordinary public scroll must certify");
@@ -179,22 +172,4 @@ pub(super) fn run(gpu: &mut GpuSurface) {
         gpu.packet_token = None;
         gpu.packet_epoch = None;
     }
-}
-
-fn diagnostic(owner: &Win<Rows>, label: &str) {
-    owner
-        .with_scene(|scene, _| {
-            for (i, draw) in scene.draws().enumerate().take(36) {
-                eprintln!(
-                    "{label}[{i}] rect={:?} inverse={:?} clip={:?} bounds={:?} mask={:?} chain={}",
-                    draw.local_rect,
-                    draw.inverse,
-                    draw.clip,
-                    draw.bounds,
-                    draw.source.mask().map(|m| (m.key, m.width, m.height)),
-                    draw.clip_chain.is_some()
-                );
-            }
-        })
-        .unwrap();
 }

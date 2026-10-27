@@ -285,8 +285,16 @@ impl ViewportBuild {
                 return None;
             }
             let delta = old.offset - row.offset;
-            let rect = a.bounds;
-            let edges = [rect.x, rect.y, rect.x + rect.width, rect.y + rect.height];
+            // Broad-phase bounds are deliberately expanded by interval geometry.
+            // Propose exact author geometry under this admitted identity basis;
+            // Canvas still proves every pixel over the proposed overlap.
+            let rect = a.local_rect();
+            let edges = [
+                f64::from(map.tx) + f64::from(rect.x),
+                f64::from(map.ty) + f64::from(rect.y),
+                f64::from(map.tx) + f64::from(rect.x) + f64::from(rect.width),
+                f64::from(map.ty) + f64::from(rect.y) + f64::from(rect.height),
+            ];
             if !delta.is_finite()
                 || delta.fract() != 0.
                 || delta.abs() >= f64::from(rect.height)
