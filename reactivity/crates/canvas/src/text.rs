@@ -438,7 +438,9 @@ impl<'font> TextShaper<'font> {
                 None => planner::Planner::new(self.font)?,
             }));
         }
-        Ok(self.planner.as_mut().unwrap())
+        let planner = self.planner.as_mut().unwrap();
+        planner.note_input(text.len());
+        Ok(planner)
     }
 }
 
@@ -469,7 +471,7 @@ impl Drop for CachedTextShaper<'_, '_> {
                 .shaper
                 .planner
                 .take()
-                .map(|planner| planner.state)
+                .map(|planner| planner.state.for_cache())
                 .or_else(|| self.shaper.cached.take());
         }
     }

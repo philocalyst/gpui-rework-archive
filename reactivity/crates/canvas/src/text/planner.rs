@@ -1,5 +1,5 @@
-//! Scoped Unicode planning. Parley layouts and the mutable font database stay
-//! within the planning pass; outputs own only Canvas glyphs and interaction data.
+//! Unicode planning with scoped cmap borrows and exclusively owned scratch.
+//! Cached sessions may retain font registration; outputs own immutable leases.
 use super::layout::{Details, Line, Run, Stop, TextDirection};
 use super::*;
 use fontique::{Blob, Collection, CollectionOptions, FontInfoOverride, SourceCache};
@@ -47,12 +47,23 @@ pub(super) struct Planner<'font> {
 pub(super) struct PlannerState {
     fonts: FontContext,
     context: LayoutContext<()>,
-    // Reuse the one paragraph being lowered, including Parley Engine's shaped
-    // buffers. This scratch dies with TextShaper, never with a returned layout.
+    // Reuse one paragraph. Oversized scratch is dropped when a cached session
+    // ends; returned layouts own their independent geometry and font leases.
     layout: parley::Layout<()>,
     faces: FontSet,
     blob_ids: [Option<u64>; 3],
     sets: [Option<Arc<FontSet>>; 4],
+    large_scratch: bool,
+}
+impl PlannerState {
+    pub(super) fn for_cache(mut self: Box<Self>) -> Box<Self> {
+        if self.large_scratch {
+            self.context = LayoutContext::new();
+            self.layout = parley::Layout::default();
+            self.large_scratch = false;
+        }
+        self
+    }
 }
 struct Planned {
     metrics: TextMetrics,
@@ -61,6 +72,9 @@ struct Planned {
     mask: usize,
 }
 impl<'font> Planner<'font> {
+    pub(super) fn note_input(&mut self, bytes: usize) {
+        self.state.large_scratch |= bytes > 1024;
+    }
     pub fn new(primary: &'font FontFace) -> Result<Self, Error> {
         Self::reusing(primary, None)
     }
@@ -98,6 +112,7 @@ impl<'font> Planner<'font> {
                 faces,
                 blob_ids: [None; 3],
                 sets: [Some(base), None, None, None],
+                large_scratch: false,
             }),
             primary_cmap,
         };

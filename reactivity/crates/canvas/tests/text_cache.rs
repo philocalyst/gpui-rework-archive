@@ -149,3 +149,31 @@ fn rejected_and_panicked_sessions_recover_without_poisoning_future_layouts() {
         .unwrap();
     exact(&cached, &expected, "recovered");
 }
+
+#[test]
+fn oversized_sessions_trim_scratch_without_revoking_held_layouts() {
+    let font = FontFace::bundled().unwrap();
+    let mut cache = TextCache::default();
+    let long = "office AVATAR 123456789 ".repeat(1300);
+    let held = font
+        .shaper_reusing(&mut cache)
+        .shape_interactive(&long, 16., Some(400.))
+        .unwrap();
+    let expected = font
+        .shaper()
+        .shape_interactive(&long, 16., Some(400.))
+        .unwrap();
+    // Full geometry comparison is linear in original bytes, outside any timer.
+    exact(&held, &expected, &long);
+    let short = font
+        .shaper_reusing(&mut cache)
+        .shape_interactive("short", 16., None)
+        .unwrap();
+    cache.clear();
+    exact(&held, &expected, &long);
+    exact(
+        &short,
+        &font.shaper().shape_interactive("short", 16., None).unwrap(),
+        "short",
+    );
+}
