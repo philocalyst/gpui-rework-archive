@@ -116,7 +116,7 @@ impl Future for RootLane<'_> {
     fn poll(mut self: Pin<&mut Self>, _: &mut Context<'_>) -> Poll<NodeId> {
         let parent = self.tree.entries[self.index as usize].parent;
         if parent == NIL {
-            return Poll::Ready(self.tree.id(self.index));
+            return Poll::Ready(self.tree.id(self.tree.first));
         }
         self.index = parent;
         if STRATEGY == 4 {
