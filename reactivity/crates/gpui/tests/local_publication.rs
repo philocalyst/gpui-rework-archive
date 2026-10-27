@@ -115,13 +115,16 @@ fn exact_text_keeps_list_identity_and_old_geometry_until_ack() {
                 let before = text_state(&win);
                 win.set(Page::LABEL, value.into()).unwrap();
                 assert_eq!(text_state(&win), before, "P changed before ACK");
-                assert_eq!(win.list_item(list, ItemKey::new(3)).unwrap(), item);
+                let mut retained = false;
+                win.visit(|part| retained |= part.target() == item).unwrap();
+                assert!(retained, "old P lost its list item before ACK");
                 let mut full = window(value, after, clipped);
                 assert_eq!(pixels(&mut win), pixels(&mut full));
                 ack(&mut win);
                 ack(&mut full);
                 assert_eq!(text_state(&win), text_state(&full));
                 assert_eq!(win.query().name("changing").one().unwrap(), target);
+                assert_eq!(win.list_item(list, ItemKey::new(3)).unwrap(), item);
             }
         }
     }
