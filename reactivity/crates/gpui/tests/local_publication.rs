@@ -209,11 +209,14 @@ fn decorated(value: &str, rounded: bool, scrolled: bool) -> Win<Decorated> {
             scrolled,
             broken: false,
             cover: Image::rgba8(
-                1,
-                1,
+                2,
+                2,
                 ImageProfile::Srgb,
                 AlphaMode::Straight,
-                vec![20, 90, 180, 127].into_boxed_slice(),
+                vec![
+                    20, 90, 180, 127, 200, 20, 10, 255, 30, 200, 40, 255, 50, 60, 70, 80,
+                ]
+                .into_boxed_slice(),
             )
             .unwrap(),
         },

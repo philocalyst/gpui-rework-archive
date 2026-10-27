@@ -142,6 +142,32 @@ mod tests {
             let mut full = 0;
             let mut unchanged_layout = 0;
             let runtime = fixture.owner.runtime().unwrap();
+            if case == "stream" {
+                let bits = |r: Rect| [r.x, r.y, r.width, r.height].map(f32::to_bits);
+                for group in runtime.canvas.prepared_scene().groups() {
+                    if group.bounds().len() > 500 {
+                        println!(
+                            "LOCAL_RASTER_CLIP,{:?},chain={}",
+                            bits(group.clip),
+                            group.clip_chain().is_some()
+                        );
+                    }
+                }
+                for (index, node) in runtime.nodes.iter().enumerate() {
+                    if node
+                        .text_slot()
+                        .get(&runtime.texts)
+                        .is_some_and(|t| t.value.len() > 500)
+                    {
+                        println!(
+                            "LOCAL_P_CLIP,{:?}",
+                            runtime
+                                .retained_text_placement(index)
+                                .map(|(row, _, clip)| (row, bits(clip)))
+                        );
+                    }
+                }
+            }
             println!(
                 "LOCAL_INPUT,{case},clips={},editing={},inspector={}",
                 runtime.canvas.prepared_scene().clip_nodes().count(),
