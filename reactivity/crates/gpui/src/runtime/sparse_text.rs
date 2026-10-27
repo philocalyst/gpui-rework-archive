@@ -140,8 +140,28 @@ mod tests {
         .unwrap();
         win.presented(win.with_scene(|_, token| token).unwrap())
             .unwrap();
+        let before = {
+            let r = win.runtime().unwrap();
+            (
+                r.layout.stats(),
+                r.layout_nodes
+                    .iter()
+                    .map(|&id| r.layout.layout(id).unwrap())
+                    .collect::<Vec<_>>(),
+            )
+        };
         win.set(Page::LABEL, "Count: 11".into()).unwrap();
         let runtime = win.runtime().unwrap();
+        eprintln!(
+            "layout write delta={} final differing layouts={}",
+            runtime.layout.stats().changed_layout_writes - before.0.changed_layout_writes,
+            runtime
+                .layout_nodes
+                .iter()
+                .enumerate()
+                .filter(|(i, id)| runtime.layout.layout(**id).unwrap() != before.1[*i])
+                .count()
+        );
         assert!(runtime.prepared.as_ref().unwrap().keeps_rows());
         assert!(runtime.text.as_ref().unwrap().patch.is_some());
         assert!(runtime.text.as_ref().unwrap().candidate.is_none());
