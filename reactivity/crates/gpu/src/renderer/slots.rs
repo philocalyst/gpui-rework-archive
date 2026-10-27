@@ -159,6 +159,7 @@ impl GpuSlotCommit<'_, '_, '_> {
         stats.packet_reused = true;
         stats.validated_draws = 0;
         stats.binning_tile_visits = 0;
+        stats.pixel_uniform_checks = 0;
         stats.bind_group_creations = 0;
         stats.instance_upload_bytes = self.changed * 16;
         stats.mask_upload_bytes = 0;

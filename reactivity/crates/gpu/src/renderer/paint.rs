@@ -372,6 +372,7 @@ impl GpuPaintCommit<'_, '_, '_> {
         inner.stats.packet_reused = true;
         inner.stats.validated_draws = 0;
         inner.stats.binning_tile_visits = 0;
+        inner.stats.pixel_uniform_checks = 0;
         inner.stats.bind_group_creations = 0;
         inner.stats.instance_upload_bytes = self.changed * 16;
         inner.stats.mask_upload_bytes = 0;

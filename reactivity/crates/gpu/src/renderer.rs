@@ -1151,6 +1151,7 @@ impl RendererState {
         self.stats.packet_reused = true;
         self.stats.validated_draws = 0;
         self.stats.binning_tile_visits = 0;
+        self.stats.pixel_uniform_checks = 0;
         self.stats.bind_group_creations = 0;
         self.stats.instance_upload_bytes = 0;
         self.stats.mask_upload_bytes = 0;

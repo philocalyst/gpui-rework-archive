@@ -1416,6 +1416,10 @@ fn mixed_image_payload_offsets_and_reordered_exact_keys_remain_coherent() {
 }
 
 fn assert_packet_replay(before: Stats, after: Stats) {
+    assert_eq!(
+        after.pixel_uniform_checks, 0,
+        "replay does not revalidate coverage"
+    );
     assert!(after.packet_reused);
     assert_eq!(after.submissions, before.submissions + 1);
     assert_eq!(
