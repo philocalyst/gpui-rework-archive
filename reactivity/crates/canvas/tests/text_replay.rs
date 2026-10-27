@@ -111,7 +111,7 @@ fn staged_text_matches_fresh_admission_across_certificate_changes() {
 #[test]
 fn replay_clear_abort_and_foreign_font_preserve_authority() {
     let mut text = TextSystem::bundled().unwrap();
-    let mut foreign = TextSystem::bundled().unwrap();
+    let mut foreign = TextSystem::new(include_bytes!("../assets/NotoSans.ttf")).unwrap();
     let a = text.shape("Retained glyphs", 14., None).unwrap();
     let b = text.shape("Different masks 123", 14., None).unwrap();
     let origin = Point { x: 0., y: 0. };
