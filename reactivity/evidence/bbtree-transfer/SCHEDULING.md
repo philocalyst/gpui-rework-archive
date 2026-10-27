@@ -96,3 +96,28 @@ not speculative computations that may be retried.
    commit-group semantic/API addition separately.
 4. Qualify combined changes on complete GPUI/ZGX workloads with matched profiles,
    visual/feature equivalence and the required physical hardware classes.
+
+## Earlier research and current experiment receipts
+
+The repo already studied Solid/Ripple and integrated its typed Future adapter;
+see `reactivity/docs/async-graph-luna.md` and `future-questions.md`. The previously
+unreadable article is now resolved through official deploy-prod source. Keep
+those earlier ownership/cancellation findings and real Library consumer gates.
+`QUESTION_INPUTS.md` explicitly identifies the current static earlier-only DAG
+and warns that resolving Reader keys scans the earlier lane chain. Large graph
+routing is another measurable target, not a reason to replace small typed lanes
+with an unbounded executor or duplicate readiness cache.
+
+The older [AMAC paper](https://www.vldb.org/pvldb/vol9/p252-kocberber.pdf) explains
+why independent continuations help irregular pointer chains and why refilling
+completed lanes matters. It is a direct research antecedent for this direction.
+The current GPUI trial uses fixed batches, not AMAC's refill strategy; mixed-depth
+measurements therefore do not establish that we have tested a fully occupied
+adaptive executor. That remains a distinct hypothesis with result-order and
+bounded-storage costs to charge.
+
+Current local dossiers: tree-memory-lanes (first six-way experiment, rejected
+on contiguous overhead); tree-parent-columns (deep gains, rejected outlined
+scalar fallback); tree-admitted-walk (one-time admission/inlining qualification
+in progress). Every variant is local and separate. Full-application composition,
+input latency and hardware gates still decide whether any kernel is worth keeping.

@@ -57,3 +57,28 @@ adapter must have a cancellation path that wakes or drops that exact task, and
 reclaim credit only after physical task retirement. Preserve typed owned input,
 stale-result admission, previous-value projection, panic/failure distinction and
 ordinary-question header costs. No model or reader borrow may cross await.
+
+## Local campaign follow-up, 2026-10-27
+
+The requested first article is now verified in the official site's deployed
+source at `f45bd3655aa55261ac7f09226c05900b79af95c0`:
+[Fetch High, Block Low](https://github.com/solidjs/solid-site/blob/f45bd3655aa55261ac7f09226c05900b79af95c0/src/pages/Articles/async-solid-fetch-high-block-low.mdx).
+The live URL remains challenge-blocked and current main still lacks the article;
+fetching `deploy-prod` supplied its complete text. The historical reports above
+accurately describe their access limits, but no longer limit this campaign.
+
+The article separates creation, consumption, blocking and UI reads; derives
+request ordering from actual data dependencies; and describes coherent prior
+values during revalidation with `isPending`/`latest` projections. This strengthens
+the case for dependency-local readiness, but does not remove the Rust ownership,
+external-effect, cancellation or complete-presentation requirements above.
+Current QUESTION_INPUTS explicitly documents progressive independent Readers
+across turns, not atomic cohort reveal. That semantic gap must remain explicit.
+
+The [BBTree/Solid scheduling study](../evidence/bbtree-transfer/SCHEDULING.md)
+connects these task rules to a separate memory-latency scheduler experiment in
+real display-tree preparation. Memory-yield continuations and externally blocked
+tasks cannot share a busy-poll policy. The first six-way core experiment produces
+large deep-chain gains and rejects contiguous regressions; subsequent compact
+routing and code-generation trials preserve their own preregistrations/evidence.
+None is an async graph parity or competitor performance claim.
