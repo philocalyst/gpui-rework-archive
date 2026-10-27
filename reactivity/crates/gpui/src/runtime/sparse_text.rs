@@ -348,4 +348,16 @@ mod tests {
         assert!(runtime.text.as_ref().unwrap().candidate.is_none());
         assert_eq!(runtime.text.as_ref().unwrap().presented.len(), 2);
     }
+    #[test]
+    fn sparse_batch_layout_ledger() {
+        eprintln!(
+            "SPARSE_LAYOUT,text_resources={},dirty_text={},prior_dirty_text={},patch_owner={},prior_patch_owner={},patch_row={}",
+            size_of::<text_geometry::TextResources>(),
+            size_of::<Option<text_geometry::DirtyText>>(),
+            size_of::<Option<(u64, usize)>>(),
+            size_of::<Option<Box<[text_geometry::TextPatch]>>>(),
+            size_of::<Option<Box<text_geometry::TextPatch>>>(),
+            size_of::<text_geometry::TextPatch>()
+        );
+    }
 }
