@@ -1,5 +1,5 @@
 //! Cold list state and bounded borrowed materialization. No item source survives
-//! an owner description, and historical offscreen row identities are not kept.
+//! an owner description, and rows outside the realized range are not kept.
 use super::*;
 use crate::{ItemKey, ItemSource, ListError, ListId, ListViewport, list::ListPlan};
 
@@ -20,6 +20,7 @@ pub(super) struct ListRow {
     pub y: f32,
     pub height: f32,
     pub visible: bool,
+    pub retain_offscreen: bool,
 }
 #[derive(Clone, Copy)]
 pub(super) enum ScrollPosition {
@@ -51,6 +52,7 @@ pub(super) fn plan(
     style: Style,
     source: &dyn ItemSource,
     row_height: f64,
+    overscan: usize,
     request: Option<ScrollPosition>,
 ) -> Result<ListPlan, ListError> {
     let viewport = f64::from(style.height.ok_or(ListError::MissingViewport)?);
@@ -96,12 +98,14 @@ pub(super) fn plan(
     offset = offset.clamp(0.0, (extent - viewport).max(0.0));
     let start = ((offset / row_height).floor() as usize).min(len);
     let end = (((offset + viewport) / row_height).ceil() as usize).min(len);
-    if end - start > MAX_ROWS {
+    let realized_start = start.saturating_sub(overscan);
+    let realized_end = end.saturating_add(overscan).min(len);
+    if realized_end - realized_start > MAX_ROWS {
         return Err(ListError::ResourceLimit);
     }
-    let mut keys = Vec::with_capacity(end - start);
+    let mut keys = Vec::with_capacity(realized_end - realized_start);
     let mut unique = BTreeSet::new();
-    for index in start..end {
+    for index in realized_start..realized_end {
         let key = source.key(index);
         if !unique.insert(key) {
             return Err(ListError::DuplicateKey(key));
@@ -112,10 +116,11 @@ pub(super) fn plan(
         keys.push(key);
     }
     let anchor = keys
-        .first()
+        .get(start - realized_start)
         .copied()
         .map(|key| (key, offset - start as f64 * row_height));
     Ok(ListPlan {
+        retain_offscreen: overscan != 0,
         viewport: ListViewport {
             len,
             offset,
@@ -123,8 +128,8 @@ pub(super) fn plan(
             row_height,
             viewport_height: viewport,
             visible_range: start..end,
-            realized_range: start..end,
-            realized_rows: end - start,
+            realized_range: realized_start..realized_end,
+            realized_rows: realized_end - realized_start,
         },
         keys,
         anchor,

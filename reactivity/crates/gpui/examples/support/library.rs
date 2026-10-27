@@ -15,6 +15,7 @@ pub struct Library {
     pub selected: Option<TrackId>,
     pub play_requests: u64,
     pub viewport_height: f32,
+    pub overscan: usize,
 }
 
 impl Library {
@@ -30,6 +31,7 @@ impl Library {
             selected: None,
             play_requests: 0,
             viewport_height: 400.0,
+            overscan: 0,
         }
     }
 
@@ -99,6 +101,7 @@ impl View for Library {
             ))
             .gap(12),
             uniform_list(self.list_id, self, ROW_HEIGHT)
+                .overscan(self.overscan)
                 .name("Library recordings")
                 .h(self.viewport_height)
                 .w(700),

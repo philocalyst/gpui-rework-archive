@@ -459,7 +459,7 @@ mod tests {
             size_of::<usize>()
         );
         assert_eq!(size_of::<crate::semantic::Annotations<'_>>(), 48);
-        assert_eq!(size_of::<crate::semantic::ElementExtra<'_>>(), 56);
+        assert_eq!(size_of::<crate::semantic::ElementExtra<'_>>(), 64);
         assert_eq!(size_of::<crate::image::ImageSpec<'_>>(), 16);
         for (name, make) in [
             ("absent", (div as fn() -> El<'static>)),
@@ -478,8 +478,8 @@ mod tests {
                 count.bytes_total,
                 match name {
                     "absent" => 0,
-                    "rounded" | "named" => 56,
-                    _ => 104,
+                    "rounded" | "named" => 64,
+                    _ => 112,
                 }
             );
             drop(value);

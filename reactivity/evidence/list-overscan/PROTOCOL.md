@@ -14,8 +14,9 @@ P/C authority and source coherence validation remain authoritative.
 
 Opt-in overscan retains identities for all rows still in the realized buffer,
 including offscreen rows; default0 preserves existing visible-only reuse policy.
-A held position-free action on a retained site follows existing live authority;
-new visible queries/hits exclude clipped rows. Leaving the realized buffer revokes
+Existing list authority requires candidate membership even for position-free
+actions: buffered offscreen sites reject actions and visible queries/hits. Their
+identity may become usable again when they return to visibility within the buffer. Leaving the realized buffer revokes
 identity permanently. No historical key directory or source borrow is retained.
 Charge cold ListSpec/ElementExtra and ListRow metadata, total shipping lines,
 whole ELF and relevant optimized routine/stack costs; no unsafe/dependency changes.

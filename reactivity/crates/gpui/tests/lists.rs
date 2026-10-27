@@ -14,6 +14,7 @@ struct Rows {
     height: f32,
     calls: AtomicUsize,
     selected: Option<ItemKey>,
+    overscan: usize,
 }
 impl Rows {
     fn new(len: usize) -> Self {
@@ -24,6 +25,7 @@ impl Rows {
             height: 96.0,
             calls: AtomicUsize::new(0),
             selected: None,
+            overscan: 0,
         }
     }
 }
@@ -59,7 +61,10 @@ impl View for Rows {
     fn view(&self) -> El<'_> {
         column((
             div().h(20).w(200).bg(Color::BLACK),
-            uniform_list(LIST, self, 32).h(self.height).w(200),
+            uniform_list(LIST, self, 32)
+                .overscan(self.overscan)
+                .h(self.height)
+                .w(200),
             div().h(20).w(200).bg(Color::BLACK),
         ))
     }
@@ -780,4 +785,146 @@ fn zero_raster_samples_do_not_erase_a_continuous_pointer_action_ancestor() {
     assert_eq!(win.role(Role::ListItem).count().unwrap(), 1);
     win.click_at(Point { x: 0.005, y: 0.005 }).unwrap();
     assert!(win.root().unwrap().selected);
+}
+
+fn buffered(len: usize, overscan: usize) -> Rows {
+    Rows {
+        overscan,
+        ..Rows::new(len)
+    }
+}
+fn scroll_offset(win: &mut Win<Rows>, offset: f64) {
+    let list = win.list(LIST).unwrap();
+    let previous = win.list_state(list).unwrap().offset;
+    win.scroll(list, offset - previous).unwrap();
+}
+fn image(win: &mut Win<Rows>) -> Vec<u8> {
+    win.with_pixels(|pixels, _, _| pixels.to_vec()).unwrap()
+}
+#[test]
+fn overscan_ranges_clamp_and_pixels_match_zero_buffer_at_fractional_offsets() {
+    let mut win = Win::with_size(buffered(250_000, 2), 240, 160).unwrap();
+    let list = win.list(LIST).unwrap();
+    assert_eq!(win.list_state(list).unwrap().realized_range, 0..5);
+    assert_eq!(win.root().unwrap().calls.load(Ordering::Relaxed), 5);
+    for offset in [0., 16.25, 320., 6_400_000.125, 8_000_000.] {
+        scroll_offset(&mut win, offset);
+        let state = win.list_state(list).unwrap();
+        assert_eq!(
+            state.realized_range,
+            state.visible_range.start.saturating_sub(2)
+                ..state.visible_range.end.saturating_add(2).min(state.len)
+        );
+        assert_eq!(state.realized_rows, state.realized_range.len());
+        let mut oracle = Win::with_size(Rows::new(250_000), 240, 160).unwrap();
+        scroll_offset(&mut oracle, offset);
+        assert_eq!(image(&mut win), image(&mut oracle));
+        assert_eq!(
+            win.role(Role::Button).count().unwrap(),
+            state.visible_range.len()
+        );
+        for index in state.visible_range.clone() {
+            let target = item(&win, index as u64 + 100);
+            assert_eq!(
+                win.bounds(target).unwrap(),
+                oracle.bounds(item(&oracle, index as u64 + 100)).unwrap()
+            );
+        }
+        if state.realized_range.start < state.visible_range.start {
+            assert_eq!(
+                win.list_item(list, ItemKey::new(state.realized_range.start as u64 + 100)),
+                Err(Error::MissingElement)
+            );
+        }
+    }
+    for len in [0, 1, 2, 4096] {
+        let win = Win::with_size(buffered(len, usize::MAX), 240, 160).unwrap();
+        assert_eq!(
+            win.list_state(win.list(LIST).unwrap())
+                .unwrap()
+                .realized_range,
+            0..len
+        );
+        assert_eq!(win.root().unwrap().calls.load(Ordering::Relaxed), len);
+    }
+}
+#[test]
+fn overscan_preserves_buffered_identity_but_not_offscreen_authority_or_departed_keys() {
+    let mut win = Win::with_size(buffered(100, 2), 240, 160).unwrap();
+    let list = win.list(LIST).unwrap();
+    let first = item(&win, 100);
+    win.click(first).unwrap();
+    assert_eq!(win.focused().unwrap(), Some(first));
+    win.scroll_to_index(list, 1).unwrap();
+    assert_eq!(
+        win.list_item(list, ItemKey::new(100)),
+        Err(Error::MissingElement)
+    );
+    assert_eq!(win.activate(first), Err(Error::StaleTarget));
+    assert_eq!(win.focused().unwrap(), None);
+    assert_eq!(
+        win.click_at(Point { x: 10., y: 19.875 }),
+        Err(Error::NotHittable)
+    );
+    win.scroll_to_index(list, 0).unwrap();
+    assert_eq!(item(&win, 100), first);
+    win.scroll_to_index(list, 3).unwrap();
+    win.scroll_to_index(list, 0).unwrap();
+    assert_ne!(item(&win, 100), first);
+    assert_eq!(win.activate(first), Err(Error::StaleTarget));
+}
+#[test]
+fn overscan_anchor_is_first_visible_key_across_prepend_and_reverse() {
+    let mut win = Win::with_size(buffered(100, 2), 240, 160).unwrap();
+    let list = win.list(LIST).unwrap();
+    scroll_offset(&mut win, 320.25);
+    let held = item(&win, 110);
+    win.update(|m| {
+        m.first -= 1;
+        m.len += 1;
+    })
+    .unwrap();
+    assert_eq!(win.list_state(list).unwrap().offset, 352.25);
+    assert_eq!(item(&win, 110), held);
+    win.update(|m| m.reverse = true).unwrap();
+    assert_eq!(win.list_state(list).unwrap().offset, 89. * 32. + 0.25);
+    assert_eq!(item(&win, 110), held);
+}
+#[test]
+fn overscan_rejects_excess_before_rows_and_preserves_older_candidate_after_failure() {
+    let mut win = Win::recording(
+        buffered(100, 2),
+        WindowOptions {
+            size: [240, 160],
+            ..Default::default()
+        },
+    )
+    .unwrap();
+    let initial = win.with_scene(|_, token| token).unwrap();
+    win.presented(initial).unwrap();
+    scroll_offset(&mut win, 320.);
+    let candidate = win.with_scene(|_, token| token).unwrap();
+    let old = image(&mut win);
+    let calls = win.root().unwrap().calls.load(Ordering::Relaxed);
+    assert_eq!(
+        win.update(|m| {
+            m.len = 4097;
+            m.overscan = usize::MAX;
+        })
+        .err(),
+        Some(Error::List(ListError::ResourceLimit))
+    );
+    assert_eq!(win.root().unwrap().calls.load(Ordering::Relaxed), calls);
+    win.presented(candidate).unwrap();
+    assert_eq!(image(&mut win), old);
+    win.update(|m| {
+        m.len = 100;
+        m.overscan = 2;
+    })
+    .unwrap();
+    let repaired = win.with_scene(|_, token| token).unwrap();
+    win.presented(repaired).unwrap();
+    let mut fresh = Win::with_size(buffered(100, 2), 240, 160).unwrap();
+    scroll_offset(&mut fresh, 320.);
+    assert_eq!(image(&mut win), image(&mut fresh));
 }

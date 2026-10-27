@@ -1,4 +1,4 @@
-//! Borrowed fixed-height lists. Only viewport-intersecting rows are described.
+//! Borrowed fixed-height lists. Optional bounded overscan preserves nearby keyed rows.
 use crate::{El, IntoLength};
 use std::ops::Range;
 
@@ -51,7 +51,7 @@ pub struct ListViewport {
     /// Slots intersecting the explicit logical list viewport. Ancestor/window
     /// clipping may suppress their semantics; `list_item` checks that visibility.
     pub visible_range: Range<usize>,
-    /// No prefetch: this equals the list-local visible range, before window clipping.
+    /// Visible rows plus requested overscan, clamped to the source bounds.
     pub realized_range: Range<usize>,
     pub realized_rows: usize,
 }
@@ -106,8 +106,10 @@ pub(crate) struct ListSpec<'a> {
     pub source: &'a dyn ItemSource,
     pub row_height: f64,
     pub map: Option<RowMap>,
+    pub overscan: usize,
 }
 pub(crate) struct ListPlan {
+    pub retain_offscreen: bool,
     pub viewport: ListViewport,
     pub keys: Vec<ItemKey>,
     pub anchor: Option<(ItemKey, f64)>,

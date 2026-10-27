@@ -2091,30 +2091,35 @@ impl<M: View + 'static> Runtime<M> {
             self.requested_size,
             self.requested_scale_factor,
         )
-        .flatten_lists(MAX_NODES, readers, |id, style, source, row_height| {
-            if !seen.insert(id) {
-                return Err(ListError::DuplicateList(id));
-            }
-            let previous = self
-                .viewports
-                .get(&ViewportKey::List(id))
-                .and_then(ViewportState::list)
-                .map(|state| (state.identity, state));
-            let style = previous.map_or(style, |(identity, _)| {
-                self.overrides.resolve(identity, style)
-            });
-            let previous = previous.map(|(_, state)| state);
-            list::plan(
-                previous,
-                style,
-                source,
-                row_height,
-                scroll
-                    .iter()
-                    .find(|request| request.id == id)
-                    .map(|request| request.position),
-            )
-        })?;
+        .flatten_lists(
+            MAX_NODES,
+            readers,
+            |id, style, source, row_height, overscan| {
+                if !seen.insert(id) {
+                    return Err(ListError::DuplicateList(id));
+                }
+                let previous = self
+                    .viewports
+                    .get(&ViewportKey::List(id))
+                    .and_then(ViewportState::list)
+                    .map(|state| (state.identity, state));
+                let style = previous.map_or(style, |(identity, _)| {
+                    self.overrides.resolve(identity, style)
+                });
+                let previous = previous.map(|(_, state)| state);
+                list::plan(
+                    previous,
+                    style,
+                    source,
+                    row_height,
+                    overscan,
+                    scroll
+                        .iter()
+                        .find(|request| request.id == id)
+                        .map(|request| request.position),
+                )
+            },
+        )?;
         let mut scroll_drafts = Vec::new();
         let list_drafts: Vec<_> = viewport_drafts
             .into_iter()
@@ -2315,7 +2320,7 @@ impl<M: View + 'static> Runtime<M> {
             if let Some(row) = self
                 .list_rows
                 .get(&node.identity())
-                .filter(|row| row.visible)
+                .filter(|row| row.visible || row.retain_offscreen)
             {
                 keyed_rows.insert((parent, row.key, node.kind().site_kind()), index);
             }
@@ -2619,6 +2624,7 @@ impl<M: View + 'static> Runtime<M> {
                         y: row.y,
                         height: row.height,
                         visible: true,
+                        retain_offscreen: draft.plan.retain_offscreen,
                     },
                 );
             }
@@ -4864,12 +4870,12 @@ mod semantic_storage_ledger {
             allocation("semantic", || crate::div()
                 .name("label")
                 .description("description")),
-            (1, 56)
+            (1, 64)
         );
         static EMPTY: Empty = Empty;
         assert_eq!(
             allocation("list", || crate::uniform_list(ListId::new(1), &EMPTY, 24)),
-            (1, 56)
+            (1, 64)
         );
         assert_eq!(
             allocation("combined", || crate::uniform_list(
@@ -4878,7 +4884,7 @@ mod semantic_storage_ledger {
                 24
             )
             .name("label")),
-            (2, 104)
+            (2, 120)
         );
         // Component boundaries retain the prior independent cold extension.
         let owner = Owner { child: Empty };
@@ -5583,7 +5589,7 @@ mod mapped_qualification {
         );
         assert_eq!(size_of::<Destination>(), 4);
         assert_eq!(size_of::<crate::style_port::Binding<'_>>(), 24);
-        assert_eq!(size_of::<crate::semantic::ElementExtra<'_>>(), 56);
+        assert_eq!(size_of::<crate::semantic::ElementExtra<'_>>(), 64);
         assert_eq!(size_of::<Fanout>(), 32);
         assert_eq!(
             fanout.destination_bytes(),

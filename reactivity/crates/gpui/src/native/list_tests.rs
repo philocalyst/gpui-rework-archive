@@ -114,6 +114,10 @@ impl Script {
                 assert_eq!(owner.root().unwrap().catalogue.len(), 250_000);
                 let list = owner.list(LIBRARY).unwrap();
                 assert_eq!(owner.list_state(list).unwrap().visible_range, 0..13);
+                assert_eq!(
+                    owner.list_state(list).unwrap().realized_range,
+                    0..13 + owner.root().unwrap().overscan
+                );
                 assert_eq!(owner.role(Role::Button).count().unwrap(), 15);
                 self.list = Some(list);
                 self.overlap = Some(play(owner, 2));
@@ -300,6 +304,16 @@ impl Host for Script {
 #[test]
 #[ignore = "requires a real X11 display; runs the actual CPU presenter, without a GPU"]
 fn native_library_250k_wheel_pointer_resize_resume() {
+    run_library(0);
+}
+
+#[test]
+#[ignore = "requires a real X11 display; runs the actual CPU presenter, without a GPU"]
+fn native_library_250k_overscan_wheel_pointer_resize_resume() {
+    run_library(2);
+}
+
+fn run_library(overscan: usize) {
     let event_loop = EventLoop::builder()
         .with_x11()
         .with_any_thread(true)
@@ -307,9 +321,13 @@ fn native_library_250k_wheel_pointer_resize_resume() {
         .unwrap();
     let script = Script {
         host: NativeHost::new(
-            Window::document(Library::new(250_000))
-                .size(760, 600)
-                .renderer(RendererPolicy::ReferenceCpu),
+            Window::document({
+                let mut model = Library::new(250_000);
+                model.overscan = overscan;
+                model
+            })
+            .size(760, 600)
+            .renderer(RendererPolicy::ReferenceCpu),
         ),
         deadline: Instant::now() + Duration::from_secs(30),
         stage: 0,

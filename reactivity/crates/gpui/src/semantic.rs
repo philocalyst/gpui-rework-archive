@@ -466,8 +466,8 @@ mod decoration_tests {
                 cost.bytes_current,
                 match mode {
                     0 => 0,
-                    1 => 33 * 80,
-                    _ => 33 * 104,
+                    1 => 33 * 88,
+                    _ => 33 * 112,
                 }
             );
             drop(nodes);
@@ -502,7 +502,7 @@ mod decoration_tests {
             element = Some(div().bg(number.map(|_| Color::WHITE)).bg(&color));
         });
         assert_eq!(
-            direct.bytes_current, 80,
+            direct.bytes_current, 88,
             "obsolete mapper releases its vector and uses ordinary direct storage"
         );
         drop(element);
@@ -515,9 +515,9 @@ mod decoration_tests {
     }
     #[test]
     fn cold_headers_and_alternating_builders_have_one_nonrecursive_decoration() {
-        assert_eq!(size_of::<ElementExtra<'_>>(), 56);
+        assert_eq!(size_of::<ElementExtra<'_>>(), 64);
         assert_eq!(size_of::<Decorations<'_>>(), 48);
-        assert_eq!(size_of::<LeafExtra<'_>>(), 56);
+        assert_eq!(size_of::<LeafExtra<'_>>(), 64);
         assert_eq!(size_of::<crate::style_port::Binding<'_>>(), 24);
         assert_eq!(size_of::<crate::style_port::Draft<'_>>(), 24);
         let a = Signal::new(Color::BLACK);
@@ -531,7 +531,7 @@ mod decoration_tests {
             element = Some(el);
         });
         assert_eq!(count.count_total, 3);
-        assert_eq!(count.bytes_total, 128);
+        assert_eq!(count.bytes_total, 136);
         eprintln!(
             "style_decorations,alternating,requests={},requested={},retained={},peak={}",
             count.count_total, count.bytes_total, count.bytes_current, count.bytes_max
@@ -571,9 +571,9 @@ mod decoration_tests {
                 count.bytes_current,
                 match ports {
                     0 => 0,
-                    1 => 80,
-                    2 => 104,
-                    8 => 248,
+                    1 => 88,
+                    2 => 112,
+                    8 => 256,
                     _ => unreachable!(),
                 }
             );

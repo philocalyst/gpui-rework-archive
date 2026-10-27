@@ -513,9 +513,21 @@ impl<'a> El<'a> {
                 source,
                 row_height,
                 map: None,
+                overscan: 0,
             },
         )));
         element
+    }
+
+    /// Keep up to `rows` extra keyed rows before and after a uniform list's
+    /// visible range. Defaults to zero; ignored on other elements. The actual
+    /// realized range must fit the list's 4096-row admission limit. Buffered
+    /// rows preserve identity but remain clipped from visible queries and hits.
+    pub fn overscan(mut self, rows: usize) -> Self {
+        if let Some(spec) = self.extra.as_deref_mut().and_then(|extra| extra.list_mut()) {
+            spec.overscan = rows;
+        }
+        self
     }
 
     /// Uniform circular corners for this element's background, own image and
@@ -865,7 +877,7 @@ impl<'a> El<'a> {
     /// borrowed operands only when the runtime promotes a changed destination.
     #[cfg(test)]
     pub(crate) fn flatten(self) -> Vec<DraftNode<'a>> {
-        self.flatten_lists(usize::MAX, &(), |_, _, _, _| {
+        self.flatten_lists(usize::MAX, &(), |_, _, _, _, _| {
             Err(crate::ListError::MissingViewport)
         })
         .unwrap()
@@ -881,6 +893,7 @@ impl<'a> El<'a> {
             Style,
             &dyn crate::ItemSource,
             f64,
+            usize,
         ) -> Result<crate::list::ListPlan, crate::ListError>,
     ) -> Result<Description<'a>, crate::Error> {
         use crate::list::{ListDraft, RowDraft};
@@ -992,9 +1005,15 @@ impl<'a> El<'a> {
                 });
             }
             if let Some(spec) = spec {
-                let mut list_plan = plan(spec.id, element.style, spec.source, spec.row_height)?;
+                let mut list_plan = plan(
+                    spec.id,
+                    element.style,
+                    spec.source,
+                    spec.row_height,
+                    spec.overscan,
+                )?;
                 let list = viewports.len();
-                let start = list_plan.viewport.visible_range.start;
+                let start = list_plan.viewport.realized_range.start;
                 let row_height = list_plan.viewport.row_height;
                 let intra = list_plan.viewport.offset - start as f64 * row_height;
                 let mut rows = Vec::with_capacity(list_plan.keys.len());
