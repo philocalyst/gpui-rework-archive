@@ -269,6 +269,7 @@ pub trait LaneSet<M>: sealed::Sealed + ReaderValues {
     fn cursor(&self) -> usize;
     fn set_cursor(&mut self, cursor: usize);
     fn stage(&mut self, index: usize) -> Stage;
+    fn stage_sweep(&mut self, sweep: &mut StageSweep);
     fn staged(&self) -> usize {
         0
     }
@@ -316,6 +317,62 @@ pub enum Stage {
     Empty,
     Limited,
 }
+/// Transient admission cursor, borrowed only while freezing one delivery batch.
+#[doc(hidden)]
+pub struct StageSweep {
+    pub(crate) cursor: usize,
+    pub(crate) received: usize,
+    pub(crate) staged: usize,
+    pub(crate) limited: bool,
+    skip: usize,
+    misses: usize,
+    count: usize,
+    budget: usize,
+}
+impl StageSweep {
+    pub(crate) fn new(cursor: usize, staged: usize, count: usize, budget: usize) -> Self {
+        Self {
+            cursor,
+            received: 0,
+            staged,
+            limited: false,
+            skip: cursor,
+            misses: 0,
+            count,
+            budget,
+        }
+    }
+    pub(crate) fn done(&self) -> bool {
+        self.staged >= self.budget || self.misses >= self.count
+    }
+    pub(crate) fn visit(&mut self, stage: impl FnOnce() -> Stage) {
+        if self.done() {
+            return;
+        }
+        if self.skip != 0 {
+            self.skip -= 1;
+            return;
+        }
+        match stage() {
+            Stage::Ready => {
+                self.received += 1;
+                self.staged += 1;
+                self.misses = 0;
+            }
+            Stage::Limited => {
+                self.limited = true;
+                self.misses += 1;
+            }
+            Stage::Empty => {
+                self.misses += 1;
+            }
+        }
+        self.cursor += 1;
+        if self.cursor == self.count {
+            self.cursor = 0;
+        }
+    }
+}
 impl sealed::Sealed for () {}
 impl<M> LaneSet<M> for () {
     const EMPTY: bool = true;
@@ -330,6 +387,7 @@ impl<M> LaneSet<M> for () {
     fn stage(&mut self, _: usize) -> Stage {
         Stage::Empty
     }
+    fn stage_sweep(&mut self, _: &mut StageSweep) {}
     fn apply(
         &mut self,
         _: &mut M,
@@ -460,6 +518,13 @@ impl<M, T: Send + 'static, F: InboxHandler<M, T>, L: LaneSet<M>> LaneSet<M> for 
             return self.tail.stage(index - 1);
         }
         self.inbox.stage(F::OBSERVE_CLOSE)
+    }
+    fn stage_sweep(&mut self, sweep: &mut StageSweep) {
+        if sweep.done() {
+            return;
+        }
+        sweep.visit(|| self.inbox.stage(F::OBSERVE_CLOSE));
+        self.tail.stage_sweep(sweep);
     }
     fn staged(&self) -> usize {
         self.inbox.frozen
@@ -692,5 +757,69 @@ mod ledger {
             bind.bytes_total
         );
         drop(bound);
+    }
+}
+
+#[cfg(test)]
+mod sweep_tests {
+    use super::{Stage, StageSweep};
+
+    fn take(lane: usize, states: &mut [u8; 4], order: &mut Vec<usize>) -> Stage {
+        match states[lane] {
+            0 => Stage::Empty,
+            4 => Stage::Limited,
+            _ => {
+                states[lane] -= 1;
+                order.push(lane);
+                Stage::Ready
+            }
+        }
+    }
+
+    #[test]
+    fn structural_sweep_matches_indexed_oracle_for_wrap_backlog_and_limits() {
+        for pattern in 0..625 {
+            let states = std::array::from_fn(|i| ((pattern / 5usize.pow(i as u32)) % 5) as u8);
+            for initial_cursor in 0..4 {
+                for budget in [0, 1, 2, 4, 9, usize::MAX] {
+                    for backlog in [0, 1, 3] {
+                        let mut oracle = states;
+                        let mut order = Vec::new();
+                        let (mut cursor, mut staged, mut received, mut misses, mut limited) =
+                            (initial_cursor, backlog, 0, 0, false);
+                        while staged < budget && misses < 4 {
+                            match take(cursor, &mut oracle, &mut order) {
+                                Stage::Ready => {
+                                    staged += 1;
+                                    received += 1;
+                                    misses = 0;
+                                }
+                                Stage::Empty => misses += 1,
+                                Stage::Limited => {
+                                    limited = true;
+                                    misses += 1;
+                                }
+                            }
+                            cursor = (cursor + 1) % 4;
+                        }
+                        let mut actual = states;
+                        let mut actual_order = Vec::new();
+                        let mut sweep = StageSweep::new(initial_cursor, backlog, 4, budget);
+                        while !sweep.done() {
+                            for lane in 0..4 {
+                                sweep.visit(|| take(lane, &mut actual, &mut actual_order));
+                            }
+                        }
+                        assert_eq!(actual, oracle);
+                        assert_eq!(actual_order, order);
+                        assert_eq!(
+                            (sweep.cursor, sweep.staged, sweep.received, sweep.limited),
+                            (cursor, staged, received, limited)
+                        );
+                    }
+                }
+            }
+        }
+        assert!(StageSweep::new(0, 0, 0, 64).done());
     }
 }

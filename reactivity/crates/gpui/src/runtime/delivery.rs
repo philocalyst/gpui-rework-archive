@@ -210,29 +210,18 @@ impl<M: View + 'static, L: LaneSet<M>> Win<M, L> {
             });
         }
         let count = lanes.count();
-        let mut received = 0;
-        // A checked error may leave part of the preceding frozen batch in its
-        // original lane. Charge that backlog before freezing any newer work.
-        let mut staged = lanes.staged();
-        let mut misses = 0;
-        let mut limited = false;
-        let mut cursor = lanes.cursor();
-        while staged < budget && misses < count {
-            match lanes.stage(cursor) {
-                Stage::Ready => {
-                    received += 1;
-                    staged += 1;
-                    misses = 0;
-                }
-                Stage::Limited => {
-                    limited = true;
-                    misses += 1;
-                }
-                Stage::Empty => misses += 1,
-            }
-            cursor = (cursor + 1) % count;
+        // Charge any frozen backlog first. Structural passes visit each live
+        // lane once, wrapping at the same cursor as indexed round-robin staging.
+        // No callback or task poll runs until the whole batch has been frozen.
+        let mut sweep =
+            crate::remote::StageSweep::new(lanes.cursor(), lanes.staged(), count, budget);
+        while !sweep.done() {
+            lanes.stage_sweep(&mut sweep);
         }
-        lanes.set_cursor(cursor);
+        lanes.set_cursor(sweep.cursor);
+        let received = sweep.received;
+        let staged = sweep.staged;
+        let limited = sweep.limited;
         let mut more = budget != 0 && (staged >= budget || limited);
         if budget == 0 || staged == 0 {
             return Ok(Delivery {

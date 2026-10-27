@@ -5,7 +5,7 @@ use super::*;
 use crate::{
     FieldId, Sources,
     identity::Sites,
-    remote::{LaneSet, Stage, sealed},
+    remote::{LaneSet, Stage, StageSweep, sealed},
 };
 use std::future::Future;
 
@@ -690,6 +690,13 @@ where
         }
     }
 
+    fn stage_sweep(&mut self, sweep: &mut StageSweep) {
+        if sweep.done() {
+            return;
+        }
+        sweep.visit(|| self.stage(0));
+        self.tail.stage_sweep(sweep);
+    }
     fn staged(&self) -> usize {
         usize::from(self.staged_terminal.is_some()) + self.tail.staged()
     }
@@ -842,6 +849,13 @@ impl<M, Q: LaneSet<M>, L: LaneSet<M>> LaneSet<M> for QuestionSet<Q, L> {
         } else {
             self.tail.stage(index - count)
         }
+    }
+    fn stage_sweep(&mut self, sweep: &mut StageSweep) {
+        if sweep.done() {
+            return;
+        }
+        self.lanes.stage_sweep(sweep);
+        self.tail.stage_sweep(sweep);
     }
     fn staged(&self) -> usize {
         self.lanes.staged() + self.tail.staged()

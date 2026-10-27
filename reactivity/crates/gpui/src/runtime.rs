@@ -28,7 +28,7 @@ use crate::{
     element::{Handler, NodeKind},
     identity::Sites,
     property::{Contribution, Overrides, Property, PropertyError},
-    remote::{Delivery, DeliveryError, Inbox, Lane, LaneSet, Stage},
+    remote::{Delivery, DeliveryError, Inbox, Lane, LaneSet},
     source::{BindError, FieldId, SourcePath, Sources, TextCodec, TextEditError},
     style::{Color, Flow, Style},
 };
