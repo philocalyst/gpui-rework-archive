@@ -283,3 +283,116 @@ fn image_clip_and_scroller_preserve_older_candidate_after_newer_failure() {
         }
     }
 }
+
+struct NestedClips {
+    label: Signal<String>,
+    map: Affine,
+    rounded: bool,
+    scrolled: bool,
+}
+impl NestedClips {
+    const LABEL: Source<Self, String> =
+        Source::new(FieldId::new(1), "label", |m| &m.label, |m| &mut m.label);
+}
+impl View for NestedClips {
+    fn sources() -> Sources<Self> {
+        Sources::new().direct(Self::LABEL)
+    }
+    fn view(&self) -> El<'_> {
+        let content = column((
+            text(&self.label).w(180).h(24).name("changing"),
+            text("Count: 0123456789").w(180).h(24),
+        ));
+        let inner = if self.scrolled {
+            div().child(content).scroll(Axis::X).name("scroll")
+        } else {
+            content
+        };
+        div()
+            .child(
+                inner
+                    .w(100)
+                    .h(60)
+                    .clipped(true)
+                    .rounded(if self.rounded { 7. } else { 0. })
+                    .transform(self.map),
+            )
+            .w(165)
+            .h(95)
+            .clipped(true)
+            .transform(Affine::translation(5.125, 3.375))
+    }
+}
+fn nested(value: &str, map: Affine, rounded: bool, scrolled: bool) -> Win<NestedClips> {
+    let mut win = Win::recording(
+        NestedClips {
+            label: Signal::new(value.into()),
+            map,
+            rounded,
+            scrolled,
+        },
+        WindowOptions {
+            size: [180, 120],
+            ..Default::default()
+        },
+    )
+    .unwrap();
+    ack(&mut win);
+    if scrolled {
+        let target = win.query().name("scroll").one().unwrap();
+        win.scroll_to(target, ScrollOffset { x: 12., y: 0. })
+            .unwrap();
+        ack(&mut win);
+    }
+    win
+}
+#[test]
+fn nested_sample_clips_and_unsupported_shapes_preserve_exact_publication() {
+    let maps = [
+        Affine::translation(3.125, 2.375),
+        Affine {
+            a: 0.75,
+            d: 1.25,
+            tx: 3.375,
+            ty: 2.125,
+            ..Affine::IDENTITY
+        },
+        Affine {
+            a: -1.,
+            tx: 150.125,
+            ty: 2.375,
+            ..Affine::IDENTITY
+        },
+        Affine {
+            c: 0.125,
+            tx: 3.125,
+            ty: 2.375,
+            ..Affine::IDENTITY
+        },
+    ];
+    for map in maps {
+        for rounded in [false, true] {
+            for scrolled in [false, true] {
+                // Ordinary scrolling deliberately rejects sheared ancestors.
+                if scrolled && map.c != 0. {
+                    continue;
+                }
+                let mut win = nested("Count: 10", map, rounded, scrolled);
+                let target = win.query().name("changing").one().unwrap();
+                for value in ["Count: 11", "Count: 12", "Count: 10"] {
+                    let before = text_state(&win);
+                    win.set(NestedClips::LABEL, value.into()).unwrap();
+                    assert_eq!(text_state(&win), before);
+                    let mut full = nested(value, map, rounded, scrolled);
+                    let actual = pixels(&mut win);
+                    assert!(actual.chunks_exact(4).any(|p| p != [255, 255, 255, 255]));
+                    assert_eq!(actual, pixels(&mut full));
+                    ack(&mut win);
+                    ack(&mut full);
+                    assert_eq!(text_state(&win), text_state(&full));
+                    assert_eq!(win.query().name("changing").one().unwrap(), target);
+                }
+            }
+        }
+    }
+}

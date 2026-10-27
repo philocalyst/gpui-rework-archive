@@ -80,9 +80,40 @@ pub(super) fn retained_text_placement<M>(
             .iter()
             .position(|node| node.identity == identity)?
     };
-    let context = Context::new(runtime);
-    let part = context.part(row);
-    Some((row, part.transform()?, part.text_clip()))
+    let geometry = runtime.presented_geometry();
+    let size = runtime.presentation_size;
+    let mut clip = Rect::new(0., 0., size[0] as f32, size[1] as f32);
+    let mut ancestor = Some(row);
+    while let Some(index) = ancestor {
+        let node = &runtime.presented[index];
+        let style = geometry.style(node.identity);
+        if style.clip_children
+            || matches!(
+                node.kind,
+                super::NodeKind::List | super::NodeKind::ListItem | super::NodeKind::Scroll
+            )
+        {
+            if style.clip_children && style.corner_radius != 0.0 {
+                return None;
+            }
+            // P's semantic envelope is outward-rounded, not a raster clip.
+            // Lattice intersections are exact in either ancestor order. Canvas
+            // still verifies every resulting bit against the retained run.
+            clip = gpui_canvas::sampled_rect_clip(
+                node.transform(geometry.bases())?,
+                node.local_rect(),
+                clip,
+                size,
+            )
+            .ok()?;
+        }
+        ancestor = node.parent.index();
+    }
+    Some((
+        row,
+        runtime.presented[row].transform(geometry.bases())?,
+        clip,
+    ))
 }
 
 /// A checked, borrowed P. Native projection cannot fail halfway through an
