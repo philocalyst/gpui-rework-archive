@@ -267,9 +267,13 @@ fn main() {
                     .poll(wgpu::PollType::wait_indefinitely())
                     .unwrap();
                 let complete = start.elapsed().as_nanos();
-                sample = Some((host, complete, sparse));
+                let damage_pixels = damage.map_or(960 * 720_u64, |d| {
+                    d.bounds()
+                        .map_or(0, |[l, t, r, b]| u64::from(r - l) * u64::from(b - t))
+                });
+                sample = Some((host, complete, sparse, damage_pixels));
             });
-            let (host, complete, sparse) = sample.unwrap();
+            let (host, complete, sparse, damage_pixels) = sample.unwrap();
             if frame >= 10 {
                 eprintln!(
                     "ALLOC,frame={},requests={},requested={},retained_delta={},peak_new={},text_map_bytes={}",
@@ -279,6 +283,14 @@ fn main() {
                     allocations.bytes_current,
                     allocations.bytes_max,
                     memory::map_bytes(&renderer)
+                );
+                let repair = renderer.retained_stats();
+                eprintln!(
+                    "REPAIR,frame={},damage_pixels={},composited_pixels={},copied_pixels={}",
+                    frame - 10,
+                    damage_pixels,
+                    repair.composited_pixels,
+                    repair.copied_pixels
                 );
                 let s = renderer.stats();
                 println!(
