@@ -39,7 +39,16 @@ Completed local/text-line-height dossier49f2221f8f2: additive explicit pitch,
 old defaults preserved; 967 default/1040 X11 tests, eight native scripts and
 source-invalidation mutant. Shipping +79 lines; Style +8B. Both native images
 show seven lines at20px pitch; text edges differ, so no exact cross-framework
-quality equivalence. Next isolated slice: optional keyed list overscan.
+quality equivalence. Optional keyed list overscan is now qualified in the follow-up below.
+
+Completed local/list-overscan at /home/user/gpui-list-overscan-lab: optional
+bounded keyed buffer; default0 preserves prior policy. Dossier commit is recorded
+in the local branch tip. 974 default/1048 X11 tests, strict Clippy and10 actual
+native scripts pass. Fresh wrong-key mutant preserves images but fails public
+authority and keyed bounds; both outcomes retained. Shipping+42 lines, cold
+ElementExtra56→64B; hot node/row/runtime headers unchanged. This is prerequisite
+behavior, not a speed result. Native lab integration still needs controlled
+source offset/wheel writeback, deferred controls and equal profiles.
 
 [BBTree transfer research](../bbtree-transfer/README.md) records the pinned
 implementation, failed historical trials, applicability and next hypotheses.
