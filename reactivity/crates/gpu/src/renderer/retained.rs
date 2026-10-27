@@ -292,3 +292,18 @@ impl Backing {
         pass.draw(0..3, 0..1);
     }
 }
+
+#[cfg(test)]
+mod damage_header_ledger {
+    use super::*;
+    #[test]
+    fn retained_damage_headers() {
+        eprintln!(
+            "DAMAGE_GPU_HEADERS,Output={},Backing={},RetainedRenderer={},Renderer={}",
+            size_of::<Output<'_>>(),
+            size_of::<Backing>(),
+            size_of::<RetainedRenderer>(),
+            size_of::<Renderer>()
+        );
+    }
+}

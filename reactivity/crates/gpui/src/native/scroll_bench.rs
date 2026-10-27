@@ -190,8 +190,13 @@ fn check<M: View + 'static>(gpu: &GpuSurface, owner: &Win<M>, output: &wgpu::Tex
         (hash ^ u64::from(*byte)).wrapping_mul(0x100000001b3)
     })
 }
+#[path = "text_cost.rs"]
+mod text_cost;
 fn run(gpu: &mut GpuSurface) {
     let case = std::env::var("GPUI_SCROLL_CASE").expect("explicit case");
+    if let Some(options) = text_cost::Options::parse(&case) {
+        return text_cost::run(gpu, &case, options);
+    }
     let allocations = std::env::var_os("GPUI_SCROLL_ALLOC").is_some();
     let frames: usize = std::env::var("GPUI_SCROLL_FRAMES")
         .unwrap()
