@@ -1,0 +1,2 @@
+COLD,medium-depth,41605378,LayoutStorage { slots: 65538, active_styles: 2, allocated_caches: 63489, lane_capacity_bytes: 14811136, cache_heap_bytes: 22856040, absolute_contexts: 0 }
+FINAL,medium-depth,3fb6c666865c0da3,LayoutStats { computes: 3, computed_answers: 79362, cached_answers: 1537, cheap_answers: 2561, measure_calls: 0, changed_layout_writes: 65538 }

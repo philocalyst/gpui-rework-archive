@@ -1,0 +1,6 @@
+info: downloading component rust-src
+Preparing a sysroot for Miri (target: x86_64-unknown-linux-gnu)... done
+   Compiling cephal v0.1.1 (/home/user/gpui-tree-lanes-lab/reactivity/vendor/cephal)
+   Compiling gpui_reactivity_core v0.1.0 (/home/user/gpui-tree-lanes-lab/reactivity/crates/core)
+    Finished `test` profile [unoptimized + debuginfo] target(s) in 2.30s
+     Running unittests src/lib.rs (/home/user/gpui-tree-lanes-miri-target/miri/x86_64-unknown-linux-gnu/debug/build/gpui_reactivity_core/fa9fd833520aa640/out/gpui_reactivity_core-fa9fd833520aa640)

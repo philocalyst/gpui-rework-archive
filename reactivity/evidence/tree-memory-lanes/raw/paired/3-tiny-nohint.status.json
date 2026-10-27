@@ -1,0 +1,1 @@
+{"command": ["/usr/bin/time", "-v", "-o", "/home/user/gpui-tree-lanes-evidence/paired/3-tiny-nohint.time", "/home/user/gpui-tree-nohint-target/release/examples/tree_lane_cost", "tiny"], "exit": 0}

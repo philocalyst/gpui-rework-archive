@@ -1,0 +1,429 @@
+   2d03b:	4c 39 c6             	cmp    %r8,%rsi
+   2d03e:	0f 86 e5 07 00 00    	jbe    2d829 <<[u32; 32]>::try_map::<core::ops::try_trait::NeverShortCircuit<gpui_reactivity_core::tree::lanes::RootLane>, <core::ops::try_trait::NeverShortCircuit<gpui_reactivity_core::tree::lanes::RootLane>>::wrap_mut_1<u32, <gpui_reactivity_core::tree::Tree>::root_batch<32>::{closure#2}>::{closure#0}>+0x8f9>
+   2d044:	48 8b 72 08          	mov    0x8(%rdx),%rsi
+   2d048:	4b 8d 1c c0          	lea    (%r8,%r8,8),%rbx
+   2d04c:	48 8d 1c 5b          	lea    (%rbx,%rbx,2),%rbx
+   2d050:	4c 01 c3             	add    %r8,%rbx
+   2d053:	0f 18 0c 1e          	prefetcht0 (%rsi,%rbx,1)
+   2d057:	4d 89 e7             	mov    %r12,%r15
+   2d05a:	83 f9 ff             	cmp    $0xffffffff,%ecx
+   2d05d:	74 23                	je     2d082 <<[u32; 32]>::try_map::<core::ops::try_trait::NeverShortCircuit<gpui_reactivity_core::tree::lanes::RootLane>, <core::ops::try_trait::NeverShortCircuit<gpui_reactivity_core::tree::lanes::RootLane>>::wrap_mut_1<u32, <gpui_reactivity_core::tree::Tree>::root_batch<32>::{closure#2}>::{closure#0}>+0x152>
+   2d05f:	48 8b 72 10          	mov    0x10(%rdx),%rsi
+   2d063:	48 39 ce             	cmp    %rcx,%rsi
+   2d066:	0f 86 cd 07 00 00    	jbe    2d839 <<[u32; 32]>::try_map::<core::ops::try_trait::NeverShortCircuit<gpui_reactivity_core::tree::lanes::RootLane>, <core::ops::try_trait::NeverShortCircuit<gpui_reactivity_core::tree::lanes::RootLane>>::wrap_mut_1<u32, <gpui_reactivity_core::tree::Tree>::root_batch<32>::{closure#2}>::{closure#0}>+0x909>
+   2d063:	48 39 ce             	cmp    %rcx,%rsi
+   2d066:	0f 86 cd 07 00 00    	jbe    2d839 <<[u32; 32]>::try_map::<core::ops::try_trait::NeverShortCircuit<gpui_reactivity_core::tree::lanes::RootLane>, <core::ops::try_trait::NeverShortCircuit<gpui_reactivity_core::tree::lanes::RootLane>>::wrap_mut_1<u32, <gpui_reactivity_core::tree::Tree>::root_batch<32>::{closure#2}>::{closure#0}>+0x909>
+   2d06c:	48 8b 72 08          	mov    0x8(%rdx),%rsi
+   2d070:	48 8d 1c c9          	lea    (%rcx,%rcx,8),%rbx
+   2d074:	48 8d 1c 5b          	lea    (%rbx,%rbx,2),%rbx
+   2d078:	48 01 cb             	add    %rcx,%rbx
+   2d07b:	0f 18 0c 1e          	prefetcht0 (%rsi,%rbx,1)
+   2d07f:	4d 89 e7             	mov    %r12,%r15
+   2d082:	41 83 fa ff          	cmp    $0xffffffff,%r10d
+   2d086:	74 23                	je     2d0ab <<[u32; 32]>::try_map::<core::ops::try_trait::NeverShortCircuit<gpui_reactivity_core::tree::lanes::RootLane>, <core::ops::try_trait::NeverShortCircuit<gpui_reactivity_core::tree::lanes::RootLane>>::wrap_mut_1<u32, <gpui_reactivity_core::tree::Tree>::root_batch<32>::{closure#2}>::{closure#0}>+0x17b>
+   2d088:	48 8b 72 10          	mov    0x10(%rdx),%rsi
+   2d08c:	4c 39 d6             	cmp    %r10,%rsi
+   2d08f:	0f 86 b4 07 00 00    	jbe    2d849 <<[u32; 32]>::try_map::<core::ops::try_trait::NeverShortCircuit<gpui_reactivity_core::tree::lanes::RootLane>, <core::ops::try_trait::NeverShortCircuit<gpui_reactivity_core::tree::lanes::RootLane>>::wrap_mut_1<u32, <gpui_reactivity_core::tree::Tree>::root_batch<32>::{closure#2}>::{closure#0}>+0x919>
+   2d08c:	4c 39 d6             	cmp    %r10,%rsi
+   2d08f:	0f 86 b4 07 00 00    	jbe    2d849 <<[u32; 32]>::try_map::<core::ops::try_trait::NeverShortCircuit<gpui_reactivity_core::tree::lanes::RootLane>, <core::ops::try_trait::NeverShortCircuit<gpui_reactivity_core::tree::lanes::RootLane>>::wrap_mut_1<u32, <gpui_reactivity_core::tree::Tree>::root_batch<32>::{closure#2}>::{closure#0}>+0x919>
+   2d095:	48 8b 72 08          	mov    0x8(%rdx),%rsi
+   2d099:	4b 8d 1c d2          	lea    (%r10,%r10,8),%rbx
+   2d09d:	48 8d 1c 5b          	lea    (%rbx,%rbx,2),%rbx
+   2d0a1:	4c 01 d3             	add    %r10,%rbx
+   2d0a4:	0f 18 0c 1e          	prefetcht0 (%rsi,%rbx,1)
+   2d0a8:	4d 89 e7             	mov    %r12,%r15
+   2d0ab:	41 83 f9 ff          	cmp    $0xffffffff,%r9d
+   2d0af:	74 23                	je     2d0d4 <<[u32; 32]>::try_map::<core::ops::try_trait::NeverShortCircuit<gpui_reactivity_core::tree::lanes::RootLane>, <core::ops::try_trait::NeverShortCircuit<gpui_reactivity_core::tree::lanes::RootLane>>::wrap_mut_1<u32, <gpui_reactivity_core::tree::Tree>::root_batch<32>::{closure#2}>::{closure#0}>+0x1a4>
+   2d0b1:	48 8b 72 10          	mov    0x10(%rdx),%rsi
+   2d0b5:	4c 39 ce             	cmp    %r9,%rsi
+   2d0b8:	0f 86 9b 07 00 00    	jbe    2d859 <<[u32; 32]>::try_map::<core::ops::try_trait::NeverShortCircuit<gpui_reactivity_core::tree::lanes::RootLane>, <core::ops::try_trait::NeverShortCircuit<gpui_reactivity_core::tree::lanes::RootLane>>::wrap_mut_1<u32, <gpui_reactivity_core::tree::Tree>::root_batch<32>::{closure#2}>::{closure#0}>+0x929>
+   2d0b5:	4c 39 ce             	cmp    %r9,%rsi
+   2d0b8:	0f 86 9b 07 00 00    	jbe    2d859 <<[u32; 32]>::try_map::<core::ops::try_trait::NeverShortCircuit<gpui_reactivity_core::tree::lanes::RootLane>, <core::ops::try_trait::NeverShortCircuit<gpui_reactivity_core::tree::lanes::RootLane>>::wrap_mut_1<u32, <gpui_reactivity_core::tree::Tree>::root_batch<32>::{closure#2}>::{closure#0}>+0x929>
+   2d0be:	48 8b 72 08          	mov    0x8(%rdx),%rsi
+   2d0c2:	4b 8d 1c c9          	lea    (%r9,%r9,8),%rbx
+   2d0c6:	48 8d 1c 5b          	lea    (%rbx,%rbx,2),%rbx
+   2d0ca:	4c 01 cb             	add    %r9,%rbx
+   2d0cd:	0f 18 0c 1e          	prefetcht0 (%rsi,%rbx,1)
+   2d0d1:	4d 89 e7             	mov    %r12,%r15
+   2d0d4:	41 83 fb ff          	cmp    $0xffffffff,%r11d
+   2d0d8:	74 23                	je     2d0fd <<[u32; 32]>::try_map::<core::ops::try_trait::NeverShortCircuit<gpui_reactivity_core::tree::lanes::RootLane>, <core::ops::try_trait::NeverShortCircuit<gpui_reactivity_core::tree::lanes::RootLane>>::wrap_mut_1<u32, <gpui_reactivity_core::tree::Tree>::root_batch<32>::{closure#2}>::{closure#0}>+0x1cd>
+   2d0da:	48 8b 72 10          	mov    0x10(%rdx),%rsi
+   2d0de:	4c 39 de             	cmp    %r11,%rsi
+   2d0e1:	0f 86 82 07 00 00    	jbe    2d869 <<[u32; 32]>::try_map::<core::ops::try_trait::NeverShortCircuit<gpui_reactivity_core::tree::lanes::RootLane>, <core::ops::try_trait::NeverShortCircuit<gpui_reactivity_core::tree::lanes::RootLane>>::wrap_mut_1<u32, <gpui_reactivity_core::tree::Tree>::root_batch<32>::{closure#2}>::{closure#0}>+0x939>
+   2d0de:	4c 39 de             	cmp    %r11,%rsi
+   2d0e1:	0f 86 82 07 00 00    	jbe    2d869 <<[u32; 32]>::try_map::<core::ops::try_trait::NeverShortCircuit<gpui_reactivity_core::tree::lanes::RootLane>, <core::ops::try_trait::NeverShortCircuit<gpui_reactivity_core::tree::lanes::RootLane>>::wrap_mut_1<u32, <gpui_reactivity_core::tree::Tree>::root_batch<32>::{closure#2}>::{closure#0}>+0x939>
+   2d0e7:	48 8b 72 08          	mov    0x8(%rdx),%rsi
+   2d0eb:	4b 8d 1c db          	lea    (%r11,%r11,8),%rbx
+   2d0ef:	48 8d 1c 5b          	lea    (%rbx,%rbx,2),%rbx
+   2d0f3:	4c 01 db             	add    %r11,%rbx
+   2d0f6:	0f 18 0c 1e          	prefetcht0 (%rsi,%rbx,1)
+   2d0fa:	4d 89 e7             	mov    %r12,%r15
+   2d0fd:	83 f8 ff             	cmp    $0xffffffff,%eax
+   2d100:	74 23                	je     2d125 <<[u32; 32]>::try_map::<core::ops::try_trait::NeverShortCircuit<gpui_reactivity_core::tree::lanes::RootLane>, <core::ops::try_trait::NeverShortCircuit<gpui_reactivity_core::tree::lanes::RootLane>>::wrap_mut_1<u32, <gpui_reactivity_core::tree::Tree>::root_batch<32>::{closure#2}>::{closure#0}>+0x1f5>
+   2d102:	48 8b 72 10          	mov    0x10(%rdx),%rsi
+   2d106:	48 39 c6             	cmp    %rax,%rsi
+   2d109:	0f 86 6a 07 00 00    	jbe    2d879 <<[u32; 32]>::try_map::<core::ops::try_trait::NeverShortCircuit<gpui_reactivity_core::tree::lanes::RootLane>, <core::ops::try_trait::NeverShortCircuit<gpui_reactivity_core::tree::lanes::RootLane>>::wrap_mut_1<u32, <gpui_reactivity_core::tree::Tree>::root_batch<32>::{closure#2}>::{closure#0}>+0x949>
+   2d106:	48 39 c6             	cmp    %rax,%rsi
+   2d109:	0f 86 6a 07 00 00    	jbe    2d879 <<[u32; 32]>::try_map::<core::ops::try_trait::NeverShortCircuit<gpui_reactivity_core::tree::lanes::RootLane>, <core::ops::try_trait::NeverShortCircuit<gpui_reactivity_core::tree::lanes::RootLane>>::wrap_mut_1<u32, <gpui_reactivity_core::tree::Tree>::root_batch<32>::{closure#2}>::{closure#0}>+0x949>
+   2d10f:	48 8b 72 08          	mov    0x8(%rdx),%rsi
+   2d113:	48 8d 1c c0          	lea    (%rax,%rax,8),%rbx
+   2d117:	48 8d 1c 5b          	lea    (%rbx,%rbx,2),%rbx
+   2d11b:	48 01 c3             	add    %rax,%rbx
+   2d11e:	0f 18 0c 1e          	prefetcht0 (%rsi,%rbx,1)
+   2d122:	4d 89 e7             	mov    %r12,%r15
+   2d125:	83 fd ff             	cmp    $0xffffffff,%ebp
+   2d128:	74 2a                	je     2d154 <<[u32; 32]>::try_map::<core::ops::try_trait::NeverShortCircuit<gpui_reactivity_core::tree::lanes::RootLane>, <core::ops::try_trait::NeverShortCircuit<gpui_reactivity_core::tree::lanes::RootLane>>::wrap_mut_1<u32, <gpui_reactivity_core::tree::Tree>::root_batch<32>::{closure#2}>::{closure#0}>+0x224>
+   2d12a:	48 8b 72 10          	mov    0x10(%rdx),%rsi
+   2d12e:	48 39 ee             	cmp    %rbp,%rsi
+   2d131:	0f 86 52 07 00 00    	jbe    2d889 <<[u32; 32]>::try_map::<core::ops::try_trait::NeverShortCircuit<gpui_reactivity_core::tree::lanes::RootLane>, <core::ops::try_trait::NeverShortCircuit<gpui_reactivity_core::tree::lanes::RootLane>>::wrap_mut_1<u32, <gpui_reactivity_core::tree::Tree>::root_batch<32>::{closure#2}>::{closure#0}>+0x959>
+   2d137:	48 8b 72 08          	mov    0x8(%rdx),%rsi
+   2d13b:	48 8d 1c ed 00 00 00 	lea    0x0(,%rbp,8),%rbx
+   2d142:	00 
+   2d143:	48 01 eb             	add    %rbp,%rbx
+   2d146:	48 8d 1c 5b          	lea    (%rbx,%rbx,2),%rbx
+   2d14a:	48 01 eb             	add    %rbp,%rbx
+   2d14d:	0f 18 0c 1e          	prefetcht0 (%rsi,%rbx,1)
+   2d151:	4d 89 e7             	mov    %r12,%r15
+   2d154:	41 83 fd ff          	cmp    $0xffffffff,%r13d
+   2d158:	74 2a                	je     2d184 <<[u32; 32]>::try_map::<core::ops::try_trait::NeverShortCircuit<gpui_reactivity_core::tree::lanes::RootLane>, <core::ops::try_trait::NeverShortCircuit<gpui_reactivity_core::tree::lanes::RootLane>>::wrap_mut_1<u32, <gpui_reactivity_core::tree::Tree>::root_batch<32>::{closure#2}>::{closure#0}>+0x254>
+   2d15a:	48 8b 72 10          	mov    0x10(%rdx),%rsi
+   2d15e:	4c 39 ee             	cmp    %r13,%rsi
+   2d161:	0f 86 32 07 00 00    	jbe    2d899 <<[u32; 32]>::try_map::<core::ops::try_trait::NeverShortCircuit<gpui_reactivity_core::tree::lanes::RootLane>, <core::ops::try_trait::NeverShortCircuit<gpui_reactivity_core::tree::lanes::RootLane>>::wrap_mut_1<u32, <gpui_reactivity_core::tree::Tree>::root_batch<32>::{closure#2}>::{closure#0}>+0x969>
+   2d167:	48 8b 72 08          	mov    0x8(%rdx),%rsi
+   2d16b:	4a 8d 1c ed 00 00 00 	lea    0x0(,%r13,8),%rbx
+   2d172:	00 
+   2d173:	4c 01 eb             	add    %r13,%rbx
+   2d176:	48 8d 1c 5b          	lea    (%rbx,%rbx,2),%rbx
+   2d17a:	4c 01 eb             	add    %r13,%rbx
+   2d17d:	0f 18 0c 1e          	prefetcht0 (%rsi,%rbx,1)
+   2d181:	4d 89 e7             	mov    %r12,%r15
+   2d184:	48 8b 9c 24 b0 00 00 	mov    0xb0(%rsp),%rbx
+   2d18b:	00 
+   2d18c:	83 fb ff             	cmp    $0xffffffff,%ebx
+   2d18f:	74 26                	je     2d1b7 <<[u32; 32]>::try_map::<core::ops::try_trait::NeverShortCircuit<gpui_reactivity_core::tree::lanes::RootLane>, <core::ops::try_trait::NeverShortCircuit<gpui_reactivity_core::tree::lanes::RootLane>>::wrap_mut_1<u32, <gpui_reactivity_core::tree::Tree>::root_batch<32>::{closure#2}>::{closure#0}>+0x287>
+   2d191:	48 8b 72 10          	mov    0x10(%rdx),%rsi
+   2d198:	49 89 df             	mov    %rbx,%r15
+   2d19b:	0f 86 78 06 00 00    	jbe    2d819 <<[u32; 32]>::try_map::<core::ops::try_trait::NeverShortCircuit<gpui_reactivity_core::tree::lanes::RootLane>, <core::ops::try_trait::NeverShortCircuit<gpui_reactivity_core::tree::lanes::RootLane>>::wrap_mut_1<u32, <gpui_reactivity_core::tree::Tree>::root_batch<32>::{closure#2}>::{closure#0}>+0x8e9>
+   2d1a1:	48 8b 72 08          	mov    0x8(%rdx),%rsi
+   2d1a5:	4b 8d 1c ff          	lea    (%r15,%r15,8),%rbx
+   2d1a9:	48 8d 1c 5b          	lea    (%rbx,%rbx,2),%rbx
+   2d1ad:	4c 01 fb             	add    %r15,%rbx
+   2d1b0:	0f 18 0c 1e          	prefetcht0 (%rsi,%rbx,1)
+   2d1b4:	4d 89 e7             	mov    %r12,%r15
+   2d1b7:	48 8b 9c 24 a8 00 00 	mov    0xa8(%rsp),%rbx
+   2d1be:	00 
+   2d1bf:	83 fb ff             	cmp    $0xffffffff,%ebx
+   2d1c2:	74 26                	je     2d1ea <<[u32; 32]>::try_map::<core::ops::try_trait::NeverShortCircuit<gpui_reactivity_core::tree::lanes::RootLane>, <core::ops::try_trait::NeverShortCircuit<gpui_reactivity_core::tree::lanes::RootLane>>::wrap_mut_1<u32, <gpui_reactivity_core::tree::Tree>::root_batch<32>::{closure#2}>::{closure#0}>+0x2ba>
+   2d1c4:	48 8b 72 10          	mov    0x10(%rdx),%rsi
+   2d1cb:	49 89 df             	mov    %rbx,%r15
+   2d1ce:	0f 86 45 06 00 00    	jbe    2d819 <<[u32; 32]>::try_map::<core::ops::try_trait::NeverShortCircuit<gpui_reactivity_core::tree::lanes::RootLane>, <core::ops::try_trait::NeverShortCircuit<gpui_reactivity_core::tree::lanes::RootLane>>::wrap_mut_1<u32, <gpui_reactivity_core::tree::Tree>::root_batch<32>::{closure#2}>::{closure#0}>+0x8e9>
+   2d1d4:	48 8b 72 08          	mov    0x8(%rdx),%rsi
+   2d1d8:	4b 8d 1c ff          	lea    (%r15,%r15,8),%rbx
+   2d1dc:	48 8d 1c 5b          	lea    (%rbx,%rbx,2),%rbx
+   2d1e0:	4c 01 fb             	add    %r15,%rbx
+   2d1e3:	0f 18 0c 1e          	prefetcht0 (%rsi,%rbx,1)
+   2d1e7:	4d 89 e7             	mov    %r12,%r15
+   2d1ea:	48 8b 9c 24 a0 00 00 	mov    0xa0(%rsp),%rbx
+   2d1f1:	00 
+   2d1f2:	83 fb ff             	cmp    $0xffffffff,%ebx
+   2d1f5:	74 26                	je     2d21d <<[u32; 32]>::try_map::<core::ops::try_trait::NeverShortCircuit<gpui_reactivity_core::tree::lanes::RootLane>, <core::ops::try_trait::NeverShortCircuit<gpui_reactivity_core::tree::lanes::RootLane>>::wrap_mut_1<u32, <gpui_reactivity_core::tree::Tree>::root_batch<32>::{closure#2}>::{closure#0}>+0x2ed>
+   2d1f7:	48 8b 72 10          	mov    0x10(%rdx),%rsi
+   2d1fe:	49 89 df             	mov    %rbx,%r15
+   2d201:	0f 86 12 06 00 00    	jbe    2d819 <<[u32; 32]>::try_map::<core::ops::try_trait::NeverShortCircuit<gpui_reactivity_core::tree::lanes::RootLane>, <core::ops::try_trait::NeverShortCircuit<gpui_reactivity_core::tree::lanes::RootLane>>::wrap_mut_1<u32, <gpui_reactivity_core::tree::Tree>::root_batch<32>::{closure#2}>::{closure#0}>+0x8e9>
+   2d207:	48 8b 72 08          	mov    0x8(%rdx),%rsi
+   2d20b:	4b 8d 1c ff          	lea    (%r15,%r15,8),%rbx
+   2d20f:	48 8d 1c 5b          	lea    (%rbx,%rbx,2),%rbx
+   2d213:	4c 01 fb             	add    %r15,%rbx
+   2d216:	0f 18 0c 1e          	prefetcht0 (%rsi,%rbx,1)
+   2d21a:	4d 89 e7             	mov    %r12,%r15
+   2d21d:	48 8b 9c 24 98 00 00 	mov    0x98(%rsp),%rbx
+   2d224:	00 
+   2d225:	83 fb ff             	cmp    $0xffffffff,%ebx
+   2d228:	74 26                	je     2d250 <<[u32; 32]>::try_map::<core::ops::try_trait::NeverShortCircuit<gpui_reactivity_core::tree::lanes::RootLane>, <core::ops::try_trait::NeverShortCircuit<gpui_reactivity_core::tree::lanes::RootLane>>::wrap_mut_1<u32, <gpui_reactivity_core::tree::Tree>::root_batch<32>::{closure#2}>::{closure#0}>+0x320>
+   2d22a:	48 8b 72 10          	mov    0x10(%rdx),%rsi
+   2d231:	49 89 df             	mov    %rbx,%r15
+   2d234:	0f 86 df 05 00 00    	jbe    2d819 <<[u32; 32]>::try_map::<core::ops::try_trait::NeverShortCircuit<gpui_reactivity_core::tree::lanes::RootLane>, <core::ops::try_trait::NeverShortCircuit<gpui_reactivity_core::tree::lanes::RootLane>>::wrap_mut_1<u32, <gpui_reactivity_core::tree::Tree>::root_batch<32>::{closure#2}>::{closure#0}>+0x8e9>
+   2d23a:	48 8b 72 08          	mov    0x8(%rdx),%rsi
+   2d23e:	4b 8d 1c ff          	lea    (%r15,%r15,8),%rbx
+   2d242:	48 8d 1c 5b          	lea    (%rbx,%rbx,2),%rbx
+   2d246:	4c 01 fb             	add    %r15,%rbx
+   2d249:	0f 18 0c 1e          	prefetcht0 (%rsi,%rbx,1)
+   2d24d:	4d 89 e7             	mov    %r12,%r15
+   2d250:	48 8b 9c 24 90 00 00 	mov    0x90(%rsp),%rbx
+   2d257:	00 
+   2d258:	83 fb ff             	cmp    $0xffffffff,%ebx
+   2d25b:	74 26                	je     2d283 <<[u32; 32]>::try_map::<core::ops::try_trait::NeverShortCircuit<gpui_reactivity_core::tree::lanes::RootLane>, <core::ops::try_trait::NeverShortCircuit<gpui_reactivity_core::tree::lanes::RootLane>>::wrap_mut_1<u32, <gpui_reactivity_core::tree::Tree>::root_batch<32>::{closure#2}>::{closure#0}>+0x353>
+   2d25d:	48 8b 72 10          	mov    0x10(%rdx),%rsi
+   2d264:	49 89 df             	mov    %rbx,%r15
+   2d267:	0f 86 ac 05 00 00    	jbe    2d819 <<[u32; 32]>::try_map::<core::ops::try_trait::NeverShortCircuit<gpui_reactivity_core::tree::lanes::RootLane>, <core::ops::try_trait::NeverShortCircuit<gpui_reactivity_core::tree::lanes::RootLane>>::wrap_mut_1<u32, <gpui_reactivity_core::tree::Tree>::root_batch<32>::{closure#2}>::{closure#0}>+0x8e9>
+   2d26d:	48 8b 72 08          	mov    0x8(%rdx),%rsi
+   2d271:	4b 8d 1c ff          	lea    (%r15,%r15,8),%rbx
+   2d275:	48 8d 1c 5b          	lea    (%rbx,%rbx,2),%rbx
+   2d279:	4c 01 fb             	add    %r15,%rbx
+   2d27c:	0f 18 0c 1e          	prefetcht0 (%rsi,%rbx,1)
+   2d280:	4d 89 e7             	mov    %r12,%r15
+   2d283:	48 8b 9c 24 88 00 00 	mov    0x88(%rsp),%rbx
+   2d28a:	00 
+   2d28b:	83 fb ff             	cmp    $0xffffffff,%ebx
+   2d28e:	74 26                	je     2d2b6 <<[u32; 32]>::try_map::<core::ops::try_trait::NeverShortCircuit<gpui_reactivity_core::tree::lanes::RootLane>, <core::ops::try_trait::NeverShortCircuit<gpui_reactivity_core::tree::lanes::RootLane>>::wrap_mut_1<u32, <gpui_reactivity_core::tree::Tree>::root_batch<32>::{closure#2}>::{closure#0}>+0x386>
+   2d290:	48 8b 72 10          	mov    0x10(%rdx),%rsi
+   2d297:	49 89 df             	mov    %rbx,%r15
+   2d29a:	0f 86 79 05 00 00    	jbe    2d819 <<[u32; 32]>::try_map::<core::ops::try_trait::NeverShortCircuit<gpui_reactivity_core::tree::lanes::RootLane>, <core::ops::try_trait::NeverShortCircuit<gpui_reactivity_core::tree::lanes::RootLane>>::wrap_mut_1<u32, <gpui_reactivity_core::tree::Tree>::root_batch<32>::{closure#2}>::{closure#0}>+0x8e9>
+   2d2a0:	48 8b 72 08          	mov    0x8(%rdx),%rsi
+   2d2a4:	4b 8d 1c ff          	lea    (%r15,%r15,8),%rbx
+   2d2a8:	48 8d 1c 5b          	lea    (%rbx,%rbx,2),%rbx
+   2d2ac:	4c 01 fb             	add    %r15,%rbx
+   2d2af:	0f 18 0c 1e          	prefetcht0 (%rsi,%rbx,1)
+   2d2b3:	4d 89 e7             	mov    %r12,%r15
+   2d2b6:	48 8b 9c 24 80 00 00 	mov    0x80(%rsp),%rbx
+   2d2bd:	00 
+   2d2be:	83 fb ff             	cmp    $0xffffffff,%ebx
+   2d2c1:	74 26                	je     2d2e9 <<[u32; 32]>::try_map::<core::ops::try_trait::NeverShortCircuit<gpui_reactivity_core::tree::lanes::RootLane>, <core::ops::try_trait::NeverShortCircuit<gpui_reactivity_core::tree::lanes::RootLane>>::wrap_mut_1<u32, <gpui_reactivity_core::tree::Tree>::root_batch<32>::{closure#2}>::{closure#0}>+0x3b9>
+   2d2c3:	48 8b 72 10          	mov    0x10(%rdx),%rsi
+   2d2ca:	49 89 df             	mov    %rbx,%r15
+   2d2cd:	0f 86 46 05 00 00    	jbe    2d819 <<[u32; 32]>::try_map::<core::ops::try_trait::NeverShortCircuit<gpui_reactivity_core::tree::lanes::RootLane>, <core::ops::try_trait::NeverShortCircuit<gpui_reactivity_core::tree::lanes::RootLane>>::wrap_mut_1<u32, <gpui_reactivity_core::tree::Tree>::root_batch<32>::{closure#2}>::{closure#0}>+0x8e9>
+   2d2d3:	48 8b 72 08          	mov    0x8(%rdx),%rsi
+   2d2d7:	4b 8d 1c ff          	lea    (%r15,%r15,8),%rbx
+   2d2db:	48 8d 1c 5b          	lea    (%rbx,%rbx,2),%rbx
+   2d2df:	4c 01 fb             	add    %r15,%rbx
+   2d2e2:	0f 18 0c 1e          	prefetcht0 (%rsi,%rbx,1)
+   2d2e6:	4d 89 e7             	mov    %r12,%r15
+   2d2e9:	48 8b 5c 24 78       	mov    0x78(%rsp),%rbx
+   2d2ee:	83 fb ff             	cmp    $0xffffffff,%ebx
+   2d2f1:	74 26                	je     2d319 <<[u32; 32]>::try_map::<core::ops::try_trait::NeverShortCircuit<gpui_reactivity_core::tree::lanes::RootLane>, <core::ops::try_trait::NeverShortCircuit<gpui_reactivity_core::tree::lanes::RootLane>>::wrap_mut_1<u32, <gpui_reactivity_core::tree::Tree>::root_batch<32>::{closure#2}>::{closure#0}>+0x3e9>
+   2d2f3:	48 8b 72 10          	mov    0x10(%rdx),%rsi
+   2d2f7:	48 39 de             	cmp    %rbx,%rsi
+   2d2fa:	49 89 df             	mov    %rbx,%r15
+   2d2fd:	0f 86 16 05 00 00    	jbe    2d819 <<[u32; 32]>::try_map::<core::ops::try_trait::NeverShortCircuit<gpui_reactivity_core::tree::lanes::RootLane>, <core::ops::try_trait::NeverShortCircuit<gpui_reactivity_core::tree::lanes::RootLane>>::wrap_mut_1<u32, <gpui_reactivity_core::tree::Tree>::root_batch<32>::{closure#2}>::{closure#0}>+0x8e9>
+   2d303:	48 8b 72 08          	mov    0x8(%rdx),%rsi
+   2d307:	4b 8d 1c ff          	lea    (%r15,%r15,8),%rbx
+   2d30b:	48 8d 1c 5b          	lea    (%rbx,%rbx,2),%rbx
+   2d30f:	4c 01 fb             	add    %r15,%rbx
+   2d312:	0f 18 0c 1e          	prefetcht0 (%rsi,%rbx,1)
+   2d316:	4d 89 e7             	mov    %r12,%r15
+   2d319:	48 8b 5c 24 70       	mov    0x70(%rsp),%rbx
+   2d31e:	83 fb ff             	cmp    $0xffffffff,%ebx
+   2d321:	74 26                	je     2d349 <<[u32; 32]>::try_map::<core::ops::try_trait::NeverShortCircuit<gpui_reactivity_core::tree::lanes::RootLane>, <core::ops::try_trait::NeverShortCircuit<gpui_reactivity_core::tree::lanes::RootLane>>::wrap_mut_1<u32, <gpui_reactivity_core::tree::Tree>::root_batch<32>::{closure#2}>::{closure#0}>+0x419>
+   2d323:	48 8b 72 10          	mov    0x10(%rdx),%rsi
+   2d327:	48 39 de             	cmp    %rbx,%rsi
+   2d32a:	49 89 df             	mov    %rbx,%r15
+   2d32d:	0f 86 e6 04 00 00    	jbe    2d819 <<[u32; 32]>::try_map::<core::ops::try_trait::NeverShortCircuit<gpui_reactivity_core::tree::lanes::RootLane>, <core::ops::try_trait::NeverShortCircuit<gpui_reactivity_core::tree::lanes::RootLane>>::wrap_mut_1<u32, <gpui_reactivity_core::tree::Tree>::root_batch<32>::{closure#2}>::{closure#0}>+0x8e9>
+   2d333:	48 8b 72 08          	mov    0x8(%rdx),%rsi
+   2d337:	4b 8d 1c ff          	lea    (%r15,%r15,8),%rbx
+   2d33b:	48 8d 1c 5b          	lea    (%rbx,%rbx,2),%rbx
+   2d33f:	4c 01 fb             	add    %r15,%rbx
+   2d342:	0f 18 0c 1e          	prefetcht0 (%rsi,%rbx,1)
+   2d346:	4d 89 e7             	mov    %r12,%r15
+   2d349:	48 8b 5c 24 68       	mov    0x68(%rsp),%rbx
+   2d34e:	83 fb ff             	cmp    $0xffffffff,%ebx
+   2d351:	74 26                	je     2d379 <<[u32; 32]>::try_map::<core::ops::try_trait::NeverShortCircuit<gpui_reactivity_core::tree::lanes::RootLane>, <core::ops::try_trait::NeverShortCircuit<gpui_reactivity_core::tree::lanes::RootLane>>::wrap_mut_1<u32, <gpui_reactivity_core::tree::Tree>::root_batch<32>::{closure#2}>::{closure#0}>+0x449>
+   2d353:	48 8b 72 10          	mov    0x10(%rdx),%rsi
+   2d357:	48 39 de             	cmp    %rbx,%rsi
+   2d35a:	49 89 df             	mov    %rbx,%r15
+   2d35d:	0f 86 b6 04 00 00    	jbe    2d819 <<[u32; 32]>::try_map::<core::ops::try_trait::NeverShortCircuit<gpui_reactivity_core::tree::lanes::RootLane>, <core::ops::try_trait::NeverShortCircuit<gpui_reactivity_core::tree::lanes::RootLane>>::wrap_mut_1<u32, <gpui_reactivity_core::tree::Tree>::root_batch<32>::{closure#2}>::{closure#0}>+0x8e9>
+   2d363:	48 8b 72 08          	mov    0x8(%rdx),%rsi
+   2d367:	4b 8d 1c ff          	lea    (%r15,%r15,8),%rbx
+   2d36b:	48 8d 1c 5b          	lea    (%rbx,%rbx,2),%rbx
+   2d36f:	4c 01 fb             	add    %r15,%rbx
+   2d372:	0f 18 0c 1e          	prefetcht0 (%rsi,%rbx,1)
+   2d376:	4d 89 e7             	mov    %r12,%r15
+   2d379:	48 8b 5c 24 60       	mov    0x60(%rsp),%rbx
+   2d37e:	83 fb ff             	cmp    $0xffffffff,%ebx
+   2d381:	74 26                	je     2d3a9 <<[u32; 32]>::try_map::<core::ops::try_trait::NeverShortCircuit<gpui_reactivity_core::tree::lanes::RootLane>, <core::ops::try_trait::NeverShortCircuit<gpui_reactivity_core::tree::lanes::RootLane>>::wrap_mut_1<u32, <gpui_reactivity_core::tree::Tree>::root_batch<32>::{closure#2}>::{closure#0}>+0x479>
+   2d383:	48 8b 72 10          	mov    0x10(%rdx),%rsi
+   2d387:	48 39 de             	cmp    %rbx,%rsi
+   2d38a:	49 89 df             	mov    %rbx,%r15
+   2d38d:	0f 86 86 04 00 00    	jbe    2d819 <<[u32; 32]>::try_map::<core::ops::try_trait::NeverShortCircuit<gpui_reactivity_core::tree::lanes::RootLane>, <core::ops::try_trait::NeverShortCircuit<gpui_reactivity_core::tree::lanes::RootLane>>::wrap_mut_1<u32, <gpui_reactivity_core::tree::Tree>::root_batch<32>::{closure#2}>::{closure#0}>+0x8e9>
+   2d393:	48 8b 72 08          	mov    0x8(%rdx),%rsi
+   2d397:	4b 8d 1c ff          	lea    (%r15,%r15,8),%rbx
+   2d39b:	48 8d 1c 5b          	lea    (%rbx,%rbx,2),%rbx
+   2d39f:	4c 01 fb             	add    %r15,%rbx
+   2d3a2:	0f 18 0c 1e          	prefetcht0 (%rsi,%rbx,1)
+   2d3a6:	4d 89 e7             	mov    %r12,%r15
+   2d3a9:	48 8b 5c 24 58       	mov    0x58(%rsp),%rbx
+   2d3ae:	83 fb ff             	cmp    $0xffffffff,%ebx
+   2d3b1:	74 26                	je     2d3d9 <<[u32; 32]>::try_map::<core::ops::try_trait::NeverShortCircuit<gpui_reactivity_core::tree::lanes::RootLane>, <core::ops::try_trait::NeverShortCircuit<gpui_reactivity_core::tree::lanes::RootLane>>::wrap_mut_1<u32, <gpui_reactivity_core::tree::Tree>::root_batch<32>::{closure#2}>::{closure#0}>+0x4a9>
+   2d3b3:	48 8b 72 10          	mov    0x10(%rdx),%rsi
+   2d3b7:	48 39 de             	cmp    %rbx,%rsi
+   2d3ba:	49 89 df             	mov    %rbx,%r15
+   2d3bd:	0f 86 56 04 00 00    	jbe    2d819 <<[u32; 32]>::try_map::<core::ops::try_trait::NeverShortCircuit<gpui_reactivity_core::tree::lanes::RootLane>, <core::ops::try_trait::NeverShortCircuit<gpui_reactivity_core::tree::lanes::RootLane>>::wrap_mut_1<u32, <gpui_reactivity_core::tree::Tree>::root_batch<32>::{closure#2}>::{closure#0}>+0x8e9>
+   2d3c3:	48 8b 72 08          	mov    0x8(%rdx),%rsi
+   2d3c7:	4b 8d 1c ff          	lea    (%r15,%r15,8),%rbx
+   2d3cb:	48 8d 1c 5b          	lea    (%rbx,%rbx,2),%rbx
+   2d3cf:	4c 01 fb             	add    %r15,%rbx
+   2d3d2:	0f 18 0c 1e          	prefetcht0 (%rsi,%rbx,1)
+   2d3d6:	4d 89 e7             	mov    %r12,%r15
+   2d3d9:	48 8b 5c 24 50       	mov    0x50(%rsp),%rbx
+   2d3de:	83 fb ff             	cmp    $0xffffffff,%ebx
+   2d3e1:	74 26                	je     2d409 <<[u32; 32]>::try_map::<core::ops::try_trait::NeverShortCircuit<gpui_reactivity_core::tree::lanes::RootLane>, <core::ops::try_trait::NeverShortCircuit<gpui_reactivity_core::tree::lanes::RootLane>>::wrap_mut_1<u32, <gpui_reactivity_core::tree::Tree>::root_batch<32>::{closure#2}>::{closure#0}>+0x4d9>
+   2d3e3:	48 8b 72 10          	mov    0x10(%rdx),%rsi
+   2d3e7:	48 39 de             	cmp    %rbx,%rsi
+   2d3ea:	49 89 df             	mov    %rbx,%r15
+   2d3ed:	0f 86 26 04 00 00    	jbe    2d819 <<[u32; 32]>::try_map::<core::ops::try_trait::NeverShortCircuit<gpui_reactivity_core::tree::lanes::RootLane>, <core::ops::try_trait::NeverShortCircuit<gpui_reactivity_core::tree::lanes::RootLane>>::wrap_mut_1<u32, <gpui_reactivity_core::tree::Tree>::root_batch<32>::{closure#2}>::{closure#0}>+0x8e9>
+   2d3f3:	48 8b 72 08          	mov    0x8(%rdx),%rsi
+   2d3f7:	4b 8d 1c ff          	lea    (%r15,%r15,8),%rbx
+   2d3fb:	48 8d 1c 5b          	lea    (%rbx,%rbx,2),%rbx
+   2d3ff:	4c 01 fb             	add    %r15,%rbx
+   2d402:	0f 18 0c 1e          	prefetcht0 (%rsi,%rbx,1)
+   2d406:	4d 89 e7             	mov    %r12,%r15
+   2d409:	48 8b 5c 24 48       	mov    0x48(%rsp),%rbx
+   2d40e:	83 fb ff             	cmp    $0xffffffff,%ebx
+   2d411:	74 26                	je     2d439 <<[u32; 32]>::try_map::<core::ops::try_trait::NeverShortCircuit<gpui_reactivity_core::tree::lanes::RootLane>, <core::ops::try_trait::NeverShortCircuit<gpui_reactivity_core::tree::lanes::RootLane>>::wrap_mut_1<u32, <gpui_reactivity_core::tree::Tree>::root_batch<32>::{closure#2}>::{closure#0}>+0x509>
+   2d413:	48 8b 72 10          	mov    0x10(%rdx),%rsi
+   2d417:	48 39 de             	cmp    %rbx,%rsi
+   2d41a:	49 89 df             	mov    %rbx,%r15
+   2d41d:	0f 86 f6 03 00 00    	jbe    2d819 <<[u32; 32]>::try_map::<core::ops::try_trait::NeverShortCircuit<gpui_reactivity_core::tree::lanes::RootLane>, <core::ops::try_trait::NeverShortCircuit<gpui_reactivity_core::tree::lanes::RootLane>>::wrap_mut_1<u32, <gpui_reactivity_core::tree::Tree>::root_batch<32>::{closure#2}>::{closure#0}>+0x8e9>
+   2d423:	48 8b 72 08          	mov    0x8(%rdx),%rsi
+   2d427:	4b 8d 1c ff          	lea    (%r15,%r15,8),%rbx
+   2d42b:	48 8d 1c 5b          	lea    (%rbx,%rbx,2),%rbx
+   2d42f:	4c 01 fb             	add    %r15,%rbx
+   2d432:	0f 18 0c 1e          	prefetcht0 (%rsi,%rbx,1)
+   2d436:	4d 89 e7             	mov    %r12,%r15
+   2d439:	48 8b 5c 24 40       	mov    0x40(%rsp),%rbx
+   2d43e:	83 fb ff             	cmp    $0xffffffff,%ebx
+   2d441:	74 26                	je     2d469 <<[u32; 32]>::try_map::<core::ops::try_trait::NeverShortCircuit<gpui_reactivity_core::tree::lanes::RootLane>, <core::ops::try_trait::NeverShortCircuit<gpui_reactivity_core::tree::lanes::RootLane>>::wrap_mut_1<u32, <gpui_reactivity_core::tree::Tree>::root_batch<32>::{closure#2}>::{closure#0}>+0x539>
+   2d443:	48 8b 72 10          	mov    0x10(%rdx),%rsi
+   2d447:	48 39 de             	cmp    %rbx,%rsi
+   2d44a:	49 89 df             	mov    %rbx,%r15
+   2d44d:	0f 86 c6 03 00 00    	jbe    2d819 <<[u32; 32]>::try_map::<core::ops::try_trait::NeverShortCircuit<gpui_reactivity_core::tree::lanes::RootLane>, <core::ops::try_trait::NeverShortCircuit<gpui_reactivity_core::tree::lanes::RootLane>>::wrap_mut_1<u32, <gpui_reactivity_core::tree::Tree>::root_batch<32>::{closure#2}>::{closure#0}>+0x8e9>
+   2d453:	48 8b 72 08          	mov    0x8(%rdx),%rsi
+   2d457:	4b 8d 1c ff          	lea    (%r15,%r15,8),%rbx
+   2d45b:	48 8d 1c 5b          	lea    (%rbx,%rbx,2),%rbx
+   2d45f:	4c 01 fb             	add    %r15,%rbx
+   2d462:	0f 18 0c 1e          	prefetcht0 (%rsi,%rbx,1)
+   2d466:	4d 89 e7             	mov    %r12,%r15
+   2d469:	48 8b 5c 24 38       	mov    0x38(%rsp),%rbx
+   2d46e:	83 fb ff             	cmp    $0xffffffff,%ebx
+   2d471:	74 26                	je     2d499 <<[u32; 32]>::try_map::<core::ops::try_trait::NeverShortCircuit<gpui_reactivity_core::tree::lanes::RootLane>, <core::ops::try_trait::NeverShortCircuit<gpui_reactivity_core::tree::lanes::RootLane>>::wrap_mut_1<u32, <gpui_reactivity_core::tree::Tree>::root_batch<32>::{closure#2}>::{closure#0}>+0x569>
+   2d473:	48 8b 72 10          	mov    0x10(%rdx),%rsi
+   2d477:	48 39 de             	cmp    %rbx,%rsi
+   2d47a:	49 89 df             	mov    %rbx,%r15
+   2d47d:	0f 86 96 03 00 00    	jbe    2d819 <<[u32; 32]>::try_map::<core::ops::try_trait::NeverShortCircuit<gpui_reactivity_core::tree::lanes::RootLane>, <core::ops::try_trait::NeverShortCircuit<gpui_reactivity_core::tree::lanes::RootLane>>::wrap_mut_1<u32, <gpui_reactivity_core::tree::Tree>::root_batch<32>::{closure#2}>::{closure#0}>+0x8e9>
+   2d483:	48 8b 72 08          	mov    0x8(%rdx),%rsi
+   2d487:	4b 8d 1c ff          	lea    (%r15,%r15,8),%rbx
+   2d48b:	48 8d 1c 5b          	lea    (%rbx,%rbx,2),%rbx
+   2d48f:	4c 01 fb             	add    %r15,%rbx
+   2d492:	0f 18 0c 1e          	prefetcht0 (%rsi,%rbx,1)
+   2d496:	4d 89 e7             	mov    %r12,%r15
+   2d499:	48 8b 5c 24 30       	mov    0x30(%rsp),%rbx
+   2d49e:	83 fb ff             	cmp    $0xffffffff,%ebx
+   2d4a1:	74 26                	je     2d4c9 <<[u32; 32]>::try_map::<core::ops::try_trait::NeverShortCircuit<gpui_reactivity_core::tree::lanes::RootLane>, <core::ops::try_trait::NeverShortCircuit<gpui_reactivity_core::tree::lanes::RootLane>>::wrap_mut_1<u32, <gpui_reactivity_core::tree::Tree>::root_batch<32>::{closure#2}>::{closure#0}>+0x599>
+   2d4a3:	48 8b 72 10          	mov    0x10(%rdx),%rsi
+   2d4a7:	48 39 de             	cmp    %rbx,%rsi
+   2d4aa:	49 89 df             	mov    %rbx,%r15
+   2d4ad:	0f 86 66 03 00 00    	jbe    2d819 <<[u32; 32]>::try_map::<core::ops::try_trait::NeverShortCircuit<gpui_reactivity_core::tree::lanes::RootLane>, <core::ops::try_trait::NeverShortCircuit<gpui_reactivity_core::tree::lanes::RootLane>>::wrap_mut_1<u32, <gpui_reactivity_core::tree::Tree>::root_batch<32>::{closure#2}>::{closure#0}>+0x8e9>
+   2d4b3:	48 8b 72 08          	mov    0x8(%rdx),%rsi
+   2d4b7:	4b 8d 1c ff          	lea    (%r15,%r15,8),%rbx
+   2d4bb:	48 8d 1c 5b          	lea    (%rbx,%rbx,2),%rbx
+   2d4bf:	4c 01 fb             	add    %r15,%rbx
+   2d4c2:	0f 18 0c 1e          	prefetcht0 (%rsi,%rbx,1)
+   2d4c6:	4d 89 e7             	mov    %r12,%r15
+   2d4c9:	48 8b 5c 24 28       	mov    0x28(%rsp),%rbx
+   2d4ce:	83 fb ff             	cmp    $0xffffffff,%ebx
+   2d4d1:	74 26                	je     2d4f9 <<[u32; 32]>::try_map::<core::ops::try_trait::NeverShortCircuit<gpui_reactivity_core::tree::lanes::RootLane>, <core::ops::try_trait::NeverShortCircuit<gpui_reactivity_core::tree::lanes::RootLane>>::wrap_mut_1<u32, <gpui_reactivity_core::tree::Tree>::root_batch<32>::{closure#2}>::{closure#0}>+0x5c9>
+   2d4d3:	48 8b 72 10          	mov    0x10(%rdx),%rsi
+   2d4d7:	48 39 de             	cmp    %rbx,%rsi
+   2d4da:	49 89 df             	mov    %rbx,%r15
+   2d4dd:	0f 86 36 03 00 00    	jbe    2d819 <<[u32; 32]>::try_map::<core::ops::try_trait::NeverShortCircuit<gpui_reactivity_core::tree::lanes::RootLane>, <core::ops::try_trait::NeverShortCircuit<gpui_reactivity_core::tree::lanes::RootLane>>::wrap_mut_1<u32, <gpui_reactivity_core::tree::Tree>::root_batch<32>::{closure#2}>::{closure#0}>+0x8e9>
+   2d4e3:	48 8b 72 08          	mov    0x8(%rdx),%rsi
+   2d4e7:	4b 8d 1c ff          	lea    (%r15,%r15,8),%rbx
+   2d4eb:	48 8d 1c 5b          	lea    (%rbx,%rbx,2),%rbx
+   2d4ef:	4c 01 fb             	add    %r15,%rbx
+   2d4f2:	0f 18 0c 1e          	prefetcht0 (%rsi,%rbx,1)
+   2d4f6:	4d 89 e7             	mov    %r12,%r15
+   2d4f9:	48 8b 5c 24 20       	mov    0x20(%rsp),%rbx
+   2d4fe:	83 fb ff             	cmp    $0xffffffff,%ebx
+   2d501:	74 26                	je     2d529 <<[u32; 32]>::try_map::<core::ops::try_trait::NeverShortCircuit<gpui_reactivity_core::tree::lanes::RootLane>, <core::ops::try_trait::NeverShortCircuit<gpui_reactivity_core::tree::lanes::RootLane>>::wrap_mut_1<u32, <gpui_reactivity_core::tree::Tree>::root_batch<32>::{closure#2}>::{closure#0}>+0x5f9>
+   2d503:	48 8b 72 10          	mov    0x10(%rdx),%rsi
+   2d507:	48 39 de             	cmp    %rbx,%rsi
+   2d50a:	49 89 df             	mov    %rbx,%r15
+   2d50d:	0f 86 06 03 00 00    	jbe    2d819 <<[u32; 32]>::try_map::<core::ops::try_trait::NeverShortCircuit<gpui_reactivity_core::tree::lanes::RootLane>, <core::ops::try_trait::NeverShortCircuit<gpui_reactivity_core::tree::lanes::RootLane>>::wrap_mut_1<u32, <gpui_reactivity_core::tree::Tree>::root_batch<32>::{closure#2}>::{closure#0}>+0x8e9>
+   2d513:	48 8b 72 08          	mov    0x8(%rdx),%rsi
+   2d517:	4b 8d 1c ff          	lea    (%r15,%r15,8),%rbx
+   2d51b:	48 8d 1c 5b          	lea    (%rbx,%rbx,2),%rbx
+   2d51f:	4c 01 fb             	add    %r15,%rbx
+   2d522:	0f 18 0c 1e          	prefetcht0 (%rsi,%rbx,1)
+   2d526:	4d 89 e7             	mov    %r12,%r15
+   2d529:	48 8b 5c 24 18       	mov    0x18(%rsp),%rbx
+   2d52e:	83 fb ff             	cmp    $0xffffffff,%ebx
+   2d531:	74 26                	je     2d559 <<[u32; 32]>::try_map::<core::ops::try_trait::NeverShortCircuit<gpui_reactivity_core::tree::lanes::RootLane>, <core::ops::try_trait::NeverShortCircuit<gpui_reactivity_core::tree::lanes::RootLane>>::wrap_mut_1<u32, <gpui_reactivity_core::tree::Tree>::root_batch<32>::{closure#2}>::{closure#0}>+0x629>
+   2d533:	48 8b 72 10          	mov    0x10(%rdx),%rsi
+   2d537:	48 39 de             	cmp    %rbx,%rsi
+   2d53a:	49 89 df             	mov    %rbx,%r15
+   2d53d:	0f 86 d6 02 00 00    	jbe    2d819 <<[u32; 32]>::try_map::<core::ops::try_trait::NeverShortCircuit<gpui_reactivity_core::tree::lanes::RootLane>, <core::ops::try_trait::NeverShortCircuit<gpui_reactivity_core::tree::lanes::RootLane>>::wrap_mut_1<u32, <gpui_reactivity_core::tree::Tree>::root_batch<32>::{closure#2}>::{closure#0}>+0x8e9>
+   2d543:	48 8b 72 08          	mov    0x8(%rdx),%rsi
+   2d547:	4b 8d 1c ff          	lea    (%r15,%r15,8),%rbx
+   2d54b:	48 8d 1c 5b          	lea    (%rbx,%rbx,2),%rbx
+   2d54f:	4c 01 fb             	add    %r15,%rbx
+   2d552:	0f 18 0c 1e          	prefetcht0 (%rsi,%rbx,1)
+   2d556:	4d 89 e7             	mov    %r12,%r15
+   2d559:	48 8b 5c 24 10       	mov    0x10(%rsp),%rbx
+   2d55e:	83 fb ff             	cmp    $0xffffffff,%ebx
+   2d561:	74 26                	je     2d589 <<[u32; 32]>::try_map::<core::ops::try_trait::NeverShortCircuit<gpui_reactivity_core::tree::lanes::RootLane>, <core::ops::try_trait::NeverShortCircuit<gpui_reactivity_core::tree::lanes::RootLane>>::wrap_mut_1<u32, <gpui_reactivity_core::tree::Tree>::root_batch<32>::{closure#2}>::{closure#0}>+0x659>
+   2d563:	48 8b 72 10          	mov    0x10(%rdx),%rsi
+   2d567:	48 39 de             	cmp    %rbx,%rsi
+   2d56a:	49 89 df             	mov    %rbx,%r15
+   2d56d:	0f 86 a6 02 00 00    	jbe    2d819 <<[u32; 32]>::try_map::<core::ops::try_trait::NeverShortCircuit<gpui_reactivity_core::tree::lanes::RootLane>, <core::ops::try_trait::NeverShortCircuit<gpui_reactivity_core::tree::lanes::RootLane>>::wrap_mut_1<u32, <gpui_reactivity_core::tree::Tree>::root_batch<32>::{closure#2}>::{closure#0}>+0x8e9>
+   2d573:	48 8b 72 08          	mov    0x8(%rdx),%rsi
+   2d577:	4b 8d 1c ff          	lea    (%r15,%r15,8),%rbx
+   2d57b:	48 8d 1c 5b          	lea    (%rbx,%rbx,2),%rbx
+   2d57f:	4c 01 fb             	add    %r15,%rbx
+   2d582:	0f 18 0c 1e          	prefetcht0 (%rsi,%rbx,1)
+   2d586:	4d 89 e7             	mov    %r12,%r15
+   2d589:	48 8b 5c 24 08       	mov    0x8(%rsp),%rbx
+   2d58e:	83 fb ff             	cmp    $0xffffffff,%ebx
+   2d591:	74 26                	je     2d5b9 <<[u32; 32]>::try_map::<core::ops::try_trait::NeverShortCircuit<gpui_reactivity_core::tree::lanes::RootLane>, <core::ops::try_trait::NeverShortCircuit<gpui_reactivity_core::tree::lanes::RootLane>>::wrap_mut_1<u32, <gpui_reactivity_core::tree::Tree>::root_batch<32>::{closure#2}>::{closure#0}>+0x689>
+   2d593:	48 8b 72 10          	mov    0x10(%rdx),%rsi
+   2d597:	48 39 de             	cmp    %rbx,%rsi
+   2d59a:	0f 86 09 03 00 00    	jbe    2d8a9 <<[u32; 32]>::try_map::<core::ops::try_trait::NeverShortCircuit<gpui_reactivity_core::tree::lanes::RootLane>, <core::ops::try_trait::NeverShortCircuit<gpui_reactivity_core::tree::lanes::RootLane>>::wrap_mut_1<u32, <gpui_reactivity_core::tree::Tree>::root_batch<32>::{closure#2}>::{closure#0}>+0x979>
+   2d5a0:	48 8b 72 08          	mov    0x8(%rdx),%rsi
+   2d5a4:	49 89 df             	mov    %rbx,%r15
+   2d5a7:	48 8d 1c db          	lea    (%rbx,%rbx,8),%rbx
+   2d5ab:	48 8d 1c 5b          	lea    (%rbx,%rbx,2),%rbx
+   2d5af:	4c 01 fb             	add    %r15,%rbx
+   2d5b2:	0f 18 0c 1e          	prefetcht0 (%rsi,%rbx,1)
+   2d5b6:	4d 89 e7             	mov    %r12,%r15
+   2d5b9:	41 83 ff ff          	cmp    $0xffffffff,%r15d
+   2d5bd:	74 23                	je     2d5e2 <<[u32; 32]>::try_map::<core::ops::try_trait::NeverShortCircuit<gpui_reactivity_core::tree::lanes::RootLane>, <core::ops::try_trait::NeverShortCircuit<gpui_reactivity_core::tree::lanes::RootLane>>::wrap_mut_1<u32, <gpui_reactivity_core::tree::Tree>::root_batch<32>::{closure#2}>::{closure#0}>+0x6b2>
+   2d5bf:	48 8b 72 10          	mov    0x10(%rdx),%rsi
+   2d5c3:	4c 39 fe             	cmp    %r15,%rsi
+   2d5c6:	0f 86 4d 02 00 00    	jbe    2d819 <<[u32; 32]>::try_map::<core::ops::try_trait::NeverShortCircuit<gpui_reactivity_core::tree::lanes::RootLane>, <core::ops::try_trait::NeverShortCircuit<gpui_reactivity_core::tree::lanes::RootLane>>::wrap_mut_1<u32, <gpui_reactivity_core::tree::Tree>::root_batch<32>::{closure#2}>::{closure#0}>+0x8e9>
+   2d5c3:	4c 39 fe             	cmp    %r15,%rsi
+   2d5c6:	0f 86 4d 02 00 00    	jbe    2d819 <<[u32; 32]>::try_map::<core::ops::try_trait::NeverShortCircuit<gpui_reactivity_core::tree::lanes::RootLane>, <core::ops::try_trait::NeverShortCircuit<gpui_reactivity_core::tree::lanes::RootLane>>::wrap_mut_1<u32, <gpui_reactivity_core::tree::Tree>::root_batch<32>::{closure#2}>::{closure#0}>+0x8e9>
+   2d5cc:	48 8b 72 08          	mov    0x8(%rdx),%rsi
+   2d5d0:	4b 8d 1c e4          	lea    (%r12,%r12,8),%rbx
+   2d5d4:	48 8d 1c 5b          	lea    (%rbx,%rbx,2),%rbx
+   2d5d8:	4c 01 e3             	add    %r12,%rbx
+   2d5db:	0f 18 0c 1e          	prefetcht0 (%rsi,%rbx,1)
+   2d5df:	4d 89 e7             	mov    %r12,%r15
+   2d5e2:	41 83 fe ff          	cmp    $0xffffffff,%r14d
+   2d5e6:	74 23                	je     2d60b <<[u32; 32]>::try_map::<core::ops::try_trait::NeverShortCircuit<gpui_reactivity_core::tree::lanes::RootLane>, <core::ops::try_trait::NeverShortCircuit<gpui_reactivity_core::tree::lanes::RootLane>>::wrap_mut_1<u32, <gpui_reactivity_core::tree::Tree>::root_batch<32>::{closure#2}>::{closure#0}>+0x6db>
+   2d5e8:	48 8b 72 10          	mov    0x10(%rdx),%rsi
+   2d5ec:	4c 39 f6             	cmp    %r14,%rsi
+   2d5ef:	0f 86 c4 02 00 00    	jbe    2d8b9 <<[u32; 32]>::try_map::<core::ops::try_trait::NeverShortCircuit<gpui_reactivity_core::tree::lanes::RootLane>, <core::ops::try_trait::NeverShortCircuit<gpui_reactivity_core::tree::lanes::RootLane>>::wrap_mut_1<u32, <gpui_reactivity_core::tree::Tree>::root_batch<32>::{closure#2}>::{closure#0}>+0x989>
+   2d5ec:	4c 39 f6             	cmp    %r14,%rsi
+   2d5ef:	0f 86 c4 02 00 00    	jbe    2d8b9 <<[u32; 32]>::try_map::<core::ops::try_trait::NeverShortCircuit<gpui_reactivity_core::tree::lanes::RootLane>, <core::ops::try_trait::NeverShortCircuit<gpui_reactivity_core::tree::lanes::RootLane>>::wrap_mut_1<u32, <gpui_reactivity_core::tree::Tree>::root_batch<32>::{closure#2}>::{closure#0}>+0x989>
+   2d5f5:	48 8b 72 08          	mov    0x8(%rdx),%rsi
+   2d5f9:	4b 8d 1c f6          	lea    (%r14,%r14,8),%rbx
+   2d5fd:	48 8d 1c 5b          	lea    (%rbx,%rbx,2),%rbx
+   2d601:	4c 01 f3             	add    %r14,%rbx
+   2d604:	0f 18 0c 1e          	prefetcht0 (%rsi,%rbx,1)
+   2d608:	4d 89 e7             	mov    %r12,%r15
+   2d60b:	48 89 17             	mov    %rdx,(%rdi)
+   2d60e:	44 89 47 08          	mov    %r8d,0x8(%rdi)
+   2d612:	48 89 57 10          	mov    %rdx,0x10(%rdi)
+   2d616:	89 4f 18             	mov    %ecx,0x18(%rdi)
+   2d619:	48 89 57 20          	mov    %rdx,0x20(%rdi)
+   425b9:	44 89 5a 08          	mov    %r11d,0x8(%rdx)
+   425bd:	4c 39 de             	cmp    %r11,%rsi
+   425c0:	0f 86 73 02 00 00    	jbe    42839 <<gpui_reactivity_core::tree::Tree>::select_pending_root::<core::iter::adapters::copied::Copied<alloc::collections::btree::set::Iter<gpui_reactivity_core::tree::NodeId>>>+0xa19>
+   425c6:	4b 8d 14 db          	lea    (%r11,%r11,8),%rdx
+   425ca:	48 8d 14 52          	lea    (%rdx,%rdx,2),%rdx
+   425ce:	4c 01 da             	add    %r11,%rdx
+   425d1:	41 0f 18 0c 10       	prefetcht0 (%r8,%rdx,1)
+   425d6:	48 8d 50 ff          	lea    -0x1(%rax),%rdx
+   425da:	48 21 d0             	and    %rdx,%rax
+   425dd:	75 8d                	jne    4256c <<gpui_reactivity_core::tree::Tree>::select_pending_root::<core::iter::adapters::copied::Copied<alloc::collections::btree::set::Iter<gpui_reactivity_core::tree::NodeId>>>+0x74c>
+   425df:	e9 7c ff ff ff       	jmp    42560 <<gpui_reactivity_core::tree::Tree>::select_pending_root::<core::iter::adapters::copied::Copied<alloc::collections::btree::set::Iter<gpui_reactivity_core::tree::NodeId>>>+0x740>
+   425e4:	66 66 66 2e 0f 1f 84 	data16 data16 cs nopw 0x0(%rax,%rax,1)
+   425eb:	00 00 00 00 00 

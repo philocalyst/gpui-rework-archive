@@ -1,0 +1,21 @@
+   Compiling cephal v0.1.1 (/home/user/gpui-tree-lanes-lab/reactivity/vendor/cephal)
+   Compiling gpui_reactivity_core v0.1.0 (/home/user/gpui-tree-lanes-lab/reactivity/crates/core)
+error[E0609]: no field `content_size` on type `cephal::Layout`
+  --> crates/core/examples/tree_lane_cost.rs:44:15
+   |
+44 |             l.content_size.width,
+   |               ^^^^^^^^^^^^ unknown field
+   |
+   = note: available fields are: `order`, `location`, `size`, `scrollable_overflow_rect`, `scrollbar_size` ... and 3 others
+
+error[E0609]: no field `content_size` on type `cephal::Layout`
+  --> crates/core/examples/tree_lane_cost.rs:45:15
+   |
+45 |             l.content_size.height,
+   |               ^^^^^^^^^^^^ unknown field
+   |
+   = note: available fields are: `order`, `location`, `size`, `scrollable_overflow_rect`, `scrollbar_size` ... and 3 others
+
+For more information about this error, try `rustc --explain E0609`.
+error: could not compile `gpui_reactivity_core` (example "tree_lane_cost") due to 2 previous errors
+warning: build failed, waiting for other jobs to finish...

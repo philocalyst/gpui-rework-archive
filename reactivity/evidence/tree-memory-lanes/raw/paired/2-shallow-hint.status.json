@@ -1,0 +1,1 @@
+{"command": ["/usr/bin/time", "-v", "-o", "/home/user/gpui-tree-lanes-evidence/paired/2-shallow-hint.time", "/home/user/gpui-tree-lanes-target/release/examples/tree_lane_cost", "shallow"], "exit": 0}

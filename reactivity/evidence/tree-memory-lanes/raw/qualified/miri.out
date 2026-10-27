@@ -1,0 +1,6 @@
+I will run `"rustup" "component" "add" "rust-src"` to install the `rust-src` component for the selected toolchain. Proceed? [Y/n] 
+running 1 test
+test tree::lanes::tests::batches_preserve_order_lifecycle_and_full_capabilities ... ok
+
+test result: ok. 1 passed; 0 failed; 0 ignored; 0 measured; 6 filtered out; finished in 130.78s
+

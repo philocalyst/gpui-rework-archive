@@ -1,0 +1,1 @@
+{"command": ["/usr/bin/time", "-v", "-o", "/home/user/gpui-tree-lanes-evidence/paired/1-single-full-levels.time", "/home/user/gpui-tree-levels-target/release/examples/tree_lane_cost", "single-full"], "exit": 0}

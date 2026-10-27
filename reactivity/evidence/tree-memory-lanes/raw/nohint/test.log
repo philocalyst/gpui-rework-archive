@@ -1,0 +1,11 @@
+    Blocking waiting for file lock on package cache
+    Blocking waiting for file lock on package cache
+    Blocking waiting for file lock on package cache
+   Compiling cephal v0.1.1 (/home/user/gpui-tree-nohint-lab/reactivity/vendor/cephal)
+   Compiling gpui_reactivity_core v0.1.0 (/home/user/gpui-tree-nohint-lab/reactivity/crates/core)
+    Finished `release` profile [optimized] target(s) in 37.92s
+     Running unittests src/lib.rs (/home/user/gpui-tree-nohint-target/release/build/gpui_reactivity_core/bb617653bd0fe641/out/gpui_reactivity_core-bb617653bd0fe641)
+     Running tests/layout.rs (/home/user/gpui-tree-nohint-target/release/build/gpui_reactivity_core/eb819a8751d5b624/out/layout-eb819a8751d5b624)
+     Running tests/spatial.rs (/home/user/gpui-tree-nohint-target/release/build/gpui_reactivity_core/3dcafc8c09da7758/out/spatial-3dcafc8c09da7758)
+     Running tests/tree_oracle.rs (/home/user/gpui-tree-nohint-target/release/build/gpui_reactivity_core/80889cdad38a5326/out/tree_oracle-80889cdad38a5326)
+   Doc-tests gpui_reactivity_core

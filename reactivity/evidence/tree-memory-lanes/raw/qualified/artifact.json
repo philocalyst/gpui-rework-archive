@@ -1,0 +1,7 @@
+{
+  "binary": "/home/user/gpui-tree-lanes-target/release/examples/tree_lane_cost",
+  "sha256": "60422f4f916009cae051e58088a9c9098d6ec4ceaafe65fcb3f9b9b32ad0091a",
+  "bytes": 1441288,
+  "prefetcht0_count": 33,
+  "source": "8ec3302553e60f0102fd364398a3b52c07fb2c38"
+}

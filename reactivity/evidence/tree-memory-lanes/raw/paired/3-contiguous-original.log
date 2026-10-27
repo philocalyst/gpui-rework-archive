@@ -1,0 +1,2 @@
+COLD,contiguous,43024774,LayoutStorage { slots: 65538, active_styles: 2, allocated_caches: 57345, lane_capacity_bytes: 14811136, cache_heap_bytes: 20644200, absolute_contexts: 0 }
+FINAL,contiguous,919d03c8ad2c7d86,LayoutStats { computes: 3, computed_answers: 59138, cached_answers: 7937, cheap_answers: 8449, measure_calls: 0, changed_layout_writes: 65538 }

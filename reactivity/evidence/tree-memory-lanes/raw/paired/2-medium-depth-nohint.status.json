@@ -1,0 +1,1 @@
+{"command": ["/usr/bin/time", "-v", "-o", "/home/user/gpui-tree-lanes-evidence/paired/2-medium-depth-nohint.time", "/home/user/gpui-tree-nohint-target/release/examples/tree_lane_cost", "medium-depth"], "exit": 0}
