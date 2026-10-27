@@ -159,6 +159,11 @@ struct Presents {
     count: u64,
     start: Instant,
 }
+impl Presents {
+    fn record(&mut self) {
+        self.count += 1;
+    }
+}
 impl Drop for Presents {
     fn drop(&mut self) {
         eprintln!(
@@ -199,6 +204,7 @@ fn main() -> Result<(), Box<dyn std::error::Error>> {
     let mode = model.work.mode;
     let (remote, inbox) = Remote::bounded(4);
     let (start_send, start_receive) = std::sync::mpsc::sync_channel(1);
+    let (stop_send, stop_receive) = std::sync::mpsc::channel::<()>();
     let worker = std::thread::spawn(move || {
         if start_receive.recv().is_err() {
             return;
@@ -207,13 +213,17 @@ fn main() -> Result<(), Box<dyn std::error::Error>> {
         let end = (seconds > 0.).then(|| start + Duration::from_secs_f64(seconds));
         let mut next = start + workload::PERIOD;
         loop {
-            if mode == Mode::Idle {
+            let wake = if mode == Mode::Idle {
                 let Some(end) = end else {
                     return;
                 };
-                std::thread::sleep(end.saturating_duration_since(Instant::now()));
+                end
             } else {
-                std::thread::sleep(next.saturating_duration_since(Instant::now()));
+                end.map_or(next, |end| end.min(next))
+            };
+            match stop_receive.recv_timeout(wake.saturating_duration_since(Instant::now())) {
+                Err(std::sync::mpsc::RecvTimeoutError::Timeout) => {}
+                _ => return,
             }
             let finished = end.is_some_and(|end| Instant::now() >= end);
             match remote.try_send(finished) {
@@ -258,7 +268,7 @@ fn main() -> Result<(), Box<dyn std::error::Error>> {
             }
         })
         .on_presented(move |frame| {
-            presents.count += 1;
+            presents.record();
             if let Some(sender) = start_send.take() {
                 presents.start = Instant::now();
                 let _ = sender.send(());
@@ -273,6 +283,7 @@ fn main() -> Result<(), Box<dyn std::error::Error>> {
             }
         });
     let result = Application::run_window(window);
+    let _ = stop_send.send(());
     worker.join().unwrap();
     result?;
     Ok(())
