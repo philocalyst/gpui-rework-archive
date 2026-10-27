@@ -73,7 +73,7 @@ impl<'font> Planner<'font> {
         } else {
             Cmap::parse(&primary.0.bytes)?
         };
-        if let Some(state) = state.filter(|state| state.faces.primary.same_face(primary)) {
+        if let Some(state) = state {
             return Ok(Self {
                 state,
                 primary_cmap,
