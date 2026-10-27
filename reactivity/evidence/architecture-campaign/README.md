@@ -6,7 +6,8 @@ isolated worktree, preregistration, freeze, oracle, mutant and evidence rules.
 
 | Local branch / worktree | Experiment | Current disposition |
 | --- | --- | --- |
-| `local/list-local-publication` / `/home/user/gpui-local-publication-lab` | Preserve precise text publication beside unrelated retained lists | Research-driven candidate `903db9a5bc`, protocol `be40749317`; qualification/admission probes pending, no performance claim. See BBTree transfer `LOCALITY.md` for primary-source reasoning |
+| `local/image-placement` / `/home/user/gpui-image-placement-lab` | Correct double application of image layout position | Qualified dossier `131c05c3c9`: independent baseline pixel failures;991 default/1065 X11,10 port tests,11 native scripts; two expression changes, no API/header/source-line growth |
+| `local/list-local-publication` / `/home/user/gpui-local-publication-lab` | Preserve precise text publication beside unrelated retained lists | First candidate failed actual admission (0/80). Exact raster follow-up admits direct stream80/80 but owner0/80, failing its joint gate. Owner-witness trial `1f75a5ec2b` now in qualification; no timing claim. Protocols and failures retained; see BBTree transfer `LOCALITY.md` |
 | `local/architecture-performance` / `/home/user/gpui-architecture-local` | Retained GPU output | Unadopted; sparse software-Vulkan wins, flat/full-damage losses; exact pixels and actual private X11 exercised |
 | `local/state-segments` / `/home/user/gpui-state-lab` | Full state-update control | Production baseline `75a9e2b06b`, identical model/font and independent final pixel oracle |
 | `local/text-witness-replay` / `/home/user/gpui-text-witness-lab` | Replay admitted unchanged text witnesses | Rejected: 15% gain misses 20% target and 10K-label regression exceeds 5%; complete dossier at `reactivity/evidence/state-segments` |

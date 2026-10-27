@@ -81,3 +81,18 @@ The latest certified scroll-copy dossier8041b7a7fe shows a strong whole-owner/GP
 completion signal but fails its tiny-flat control. The next hypothesis concerns
 aggregate layout and dispatch code generation, consistent with BBTree's measured
 lessons; it does not import its runtime or claim measured cache-hit improvement.
+
+
+Follow-up evidence: the first local-publication candidate failed actual stream
+admission (0/80). Exact reconstruction of sample-lattice clips admits direct
+stream80/80 while owner-stream stays0/80, failing the raster trial's joint gate.
+The difference is now traced to description discarding its precise text change.
+Owner trial `1f75a5ec2b` records a transient witness during existing reconciliation;
+non-text changes revoke it, and normal application callbacks still run. It is
+under qualification, without timing or cache-hit claims.
+
+The same investigation found a preexisting image position applied twice. Its
+independent correctness dossier `131c05c3c9` preserves baseline pixel failures
+and qualifies the two-expression correction with991 default/1065 X11 tests,
+10 native-port tests and11 actual native scripts. Both performance alternatives
+must include that correction; omitted images cannot count as faster rendering.
