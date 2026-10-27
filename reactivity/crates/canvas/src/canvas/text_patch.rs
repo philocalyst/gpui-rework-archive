@@ -57,12 +57,6 @@ impl Canvas {
             return Ok(None);
         };
         text.validate(layout)?;
-        for glyph in layout.glyphs() {
-            let key = text.layout_key(layout, glyph, layout.font_size() * raster_scale)?;
-            if self.commands.mask_index.get(&key).is_none() {
-                return Ok(None);
-            }
-        }
         let mut prepared =
             Self::recording(self.width as u32, self.height as u32, self.color_config)?;
         prepared.draw_text_scaled(text, layout, origin, transform, clip, color, raster_scale)?;
