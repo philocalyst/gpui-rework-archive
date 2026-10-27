@@ -330,13 +330,13 @@ pub struct StageSweep {
     budget: usize,
 }
 impl StageSweep {
-    pub(crate) fn new(cursor: usize, staged: usize, count: usize, budget: usize) -> Self {
+    pub(crate) fn new(_cursor: usize, staged: usize, count: usize, budget: usize) -> Self {
         Self {
-            cursor,
+            cursor: 0,
             received: 0,
             staged,
             limited: false,
-            skip: cursor,
+            skip: 0,
             misses: 0,
             count,
             budget,
