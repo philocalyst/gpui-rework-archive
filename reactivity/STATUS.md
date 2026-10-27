@@ -4,6 +4,20 @@ The clean-room workspace runs real applications through one exclusively owned
 runtime. Start at [the GPUI crate](crates/gpui/README.md). The design documents
 describe the intended complete system; this page records what is connected now.
 
+## Local unadopted retained output experiment
+
+The local `local/architecture-performance` branch contains a
+[retained GPU output prototype](evidence/retained-output-local/README.md), with
+its own source, raw runs, checks, costs and deliberately faulty control. It keeps
+the application API and qualifies repair against window-scoped acknowledged
+epochs. Exact exercised pixels and native X11 pass; exploratory llvmpipe timings
+show sparse-scene wins and flat/full-damage losses. There is no preregistered
+performance gate or physical-GPU/ZGX ranking. This is **not adopted** into the
+archived baseline. The [architecture investigation](docs/architecture-against-zgx.md)
+separates the implemented experiment from proposed follow-up slices.
+
+## Integrated archive baseline
+
 The [IME grapheme restart](evidence/ime-ascii-restart/README.md) removes repeated
 grapheme work over certified ASCII prefixes while preserving complete Unicode
 seam context. Main passes 209 affected cases and strict checks; both missing-context
