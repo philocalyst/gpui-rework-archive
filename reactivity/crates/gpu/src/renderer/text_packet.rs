@@ -157,7 +157,9 @@ pub(super) fn patch(
             visit(p.bounds, columns, |tile| {
                 visits += 1;
                 if run.ordinal + index as u32 + 1 >= state.cursors[tile] {
-                    additions.push((tile, address));
+                    if false {
+                        additions.push((tile, address));
+                    }
                 }
             });
             validated += 1;
