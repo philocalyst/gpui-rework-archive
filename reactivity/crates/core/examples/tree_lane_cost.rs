@@ -70,12 +70,18 @@ fn main() {
         "medium-depth" => (65536, 32, 512, true, false),
         "shallow" => (65536, 1, 512, true, false),
         "single-full" => (32768, 8, 32, true, true),
+        "mixed-depth" => (65536, 128, 512, true, false),
         _ => panic!("unknown case"),
     };
     let viewport = Size {
         width: AvailableSpace::Definite(960.),
         height: AvailableSpace::Definite(720.),
     };
+    eprintln!(
+        "TOPOLOGY,header={},aggregate_slot={}",
+        std::mem::size_of::<gpui_reactivity_core::Tree>(),
+        gpui_reactivity_core::Tree::entry_bytes()
+    );
     let cold = Instant::now();
     let mut tree = LayoutTree::new();
     let root = tree.insert(None, NodeKind::Element, style(960.)).unwrap();
@@ -93,6 +99,9 @@ fn main() {
         for level in 0..depth {
             for j in 0..branches {
                 let i = (j * 193 + level * 37) % branches;
+                if case == "mixed-depth" && level > (i * 53) % 128 {
+                    continue;
+                }
                 let node = tree
                     .insert(Some(tips[i]), NodeKind::Element, style(1.))
                     .unwrap();
