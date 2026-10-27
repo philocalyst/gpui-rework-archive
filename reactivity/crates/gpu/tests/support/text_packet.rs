@@ -202,7 +202,7 @@ fn a_late_text_packet_rejection_keeps_the_old_image_and_replay() {
     });
 }
 
-fn rect_damage(size: [usize; 2], rect: Rect) -> gpui_canvas::DamageRegion {
+fn rect_damage(size: [u32; 2], rect: Rect) -> gpui_canvas::DamageRegion {
     let mut canvas = Canvas::recording(size[0], size[1], ColorConfig::default()).unwrap();
     let mut stage = canvas.stage();
     stage
@@ -259,7 +259,7 @@ fn text_tile_repairs_preserve_old_support_and_explicit_full_repaint() {
                         ["0011", "1100"],
                         [
                             Point {
-                                x: 15.999999999,
+                                x: 15.999999,
                                 y: 2.,
                             },
                             Point { x: 6., y: 24. },
@@ -269,7 +269,7 @@ fn text_tile_repairs_preserve_old_support_and_explicit_full_repaint() {
                         ["0011", "1100"],
                         [
                             Point {
-                                x: 16.000000001,
+                                x: 16.000002,
                                 y: 2.,
                             },
                             Point { x: 6., y: 24. },
@@ -307,11 +307,11 @@ fn text_tile_repairs_preserve_old_support_and_explicit_full_repaint() {
 fn paragraphs(
     text: &mut TextSystem,
     labels: [&str; 2],
-    size: [usize; 2],
-    x: [f64; 2],
+    size: [u32; 2],
+    x: [f32; 2],
 ) -> (Canvas, [TextRunSlot; 2]) {
     let layouts = labels.map(|label| text.shape(label, 12., None).unwrap());
-    let clip = Rect::new(0., 0., size[0] as f64, size[1] as f64);
+    let clip = Rect::new(0., 0., size[0] as f32, size[1] as f32);
     let mut canvas = Canvas::recording(size[0], size[1], ColorConfig::default()).unwrap();
     let mut stage = canvas.stage();
     stage.clear(Color::WHITE);
