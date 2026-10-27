@@ -208,3 +208,37 @@ Twenty-four balanced orders per case give 2688 fresh timing processes after
 This measures Win operation through GPU completion/ACK; it excludes event dispatch,
 active NativeHost accessibility-provider projection, WSI and display scanout.
 Current test-only fixture rebuilds do not alter the qualified production source.
+
+
+## Complete glyph-damage result and next isolated hypothesis
+
+The complete four-way dossier is227a0567f912719d741a609c18b76f7f16d0e6c3 on
+local/glyph-damage. Its independent verifier checks10421 files,1131 preserved
+ELFs,2688 timing processes,336 qualification and112 allocation processes.
+Source-stream/control0.107037387 (95% interval[0.105273399,0.112999304]) and
+owner-stream/control0.109522705 ([0.106187406,0.119072611]) are substantial wins.
+The fixed verdict nevertheless fails: flat-tiny exceeds1.05 versus all three
+controls (1.073339175/1.056318804/1.117021753); flat-full versus original/bounds
+is1.058354510/1.069131172;25-label four-field source versus bounds is1.058992056.
+Wide intervals on tiny-flat do not waive the registered failure. No adoption or
+ZGX/hardware ranking follows. Every process passes exact output/work checks.
+
+The source/candidate image authority prerequisite is qualified in all variants.
+Candidate1001 default/1086 X11/74 GPU/319 minimal-library tests,10 port,11 native,
+4 minimal scripts and strict Clippy pass; corrected predecessor/bounds1083/1085
+X11,10 ports each and11 native scripts each also pass. Region omission and
+same-window/wrong-sequence mutants fail actual pixels. Main runtime, renderer,
+backing and GPU surface headers remain equal across variants; candidate TextPatch
+40→96 and SceneDamage24→32. Streaming adds5 allocations/7320 bytes over bounds,
+with unchanged net bytes and GPU image/copy work. Shipping37361 lines versus
+original36956; native example26306728 versus26306384 bytes.
+
+Next hypothesis: separate ordinary and regional GPU submission through static
+internal output types, restoring the original ordinary Output, retained render
+and GpuContext submit bodies. Shared preparation can specialize per output type;
+charge any duplicate machine code and cold cost explicitly. This applies BBTree's
+call-site isolation lesson without adding an executor, changing update admission,
+weakening image authority or introducing new shaders/resources. The current shared
+repair enum changes ordinary render/submit code; that is a concrete difference to
+test, not an established cause of the six failed comparisons. A new preregistered
+trial must retain original, bounding-only and failed sparse-repair controls.
