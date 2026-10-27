@@ -1956,12 +1956,6 @@ impl Canvas {
     ) -> Result<Option<PendingDraw>, Error> {
         validate_rect(rect)?;
         let clip = self.commands.clip_bounds(common.clip);
-        if source & IMAGE_SOURCE != 0 && source & ROUNDED_SOURCE == 0 {
-            eprintln!(
-                "LOCAL_IMAGE_PREPARE rect={rect:?} raw_clip={:?} resolved_clip={clip:?}",
-                common.clip
-            );
-        }
         if rect.is_empty() || clip.is_empty() || common.color[3] == 0.0 {
             return Ok(None);
         }
