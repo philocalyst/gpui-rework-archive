@@ -1695,3 +1695,67 @@ mod component_tests {
         );
     }
 }
+
+#[cfg(test)]
+mod offset_tests {
+    use super::*;
+    struct Model {
+        offset: Signal<f64>,
+        other: Signal<f64>,
+        integer: Signal<u64>,
+        bad: bool,
+    }
+    const OFFSET: Source<Model, f64> = Source::new(
+        FieldId::new(1),
+        "offset",
+        |m| &m.offset,
+        |m| if m.bad { &mut m.other } else { &mut m.offset },
+    );
+    const INTEGER: Source<Model, u64> = Source::new(
+        FieldId::new(2),
+        "integer",
+        |m| &m.integer,
+        |m| &mut m.integer,
+    );
+    #[test]
+    fn closed_offset_writer_validates_type_and_projectors_without_revision_changes() {
+        let mut model = Model {
+            offset: Signal::new(0.),
+            other: Signal::new(99.),
+            integer: Signal::new(7),
+            bad: false,
+        };
+        let sources = Sources::new().direct(OFFSET).direct(INTEGER);
+        let before = model.offset.revision();
+        assert_eq!(
+            sources.offset(&mut model, OFFSET.id(), None).unwrap(),
+            before
+        );
+        assert_eq!(model.offset.revision(), before);
+        sources
+            .offset(&mut model, OFFSET.id(), Some(14.25))
+            .unwrap();
+        assert_eq!(*model.offset, 14.25);
+        assert_ne!(model.offset.revision(), before);
+        let integer = model.integer.revision();
+        assert_eq!(
+            sources.offset(&mut model, INTEGER.id(), Some(3.)),
+            Err(BindError::TypeMismatch(INTEGER.id()))
+        );
+        assert_eq!(*model.integer, 7);
+        assert_eq!(model.integer.revision(), integer);
+        model.bad = true;
+        let before = model.offset.revision();
+        let other = model.other.revision();
+        for value in [None, Some(32.)] {
+            assert_eq!(
+                sources.offset(&mut model, OFFSET.id(), value),
+                Err(BindError::ProjectionMismatch(OFFSET.id()))
+            );
+        }
+        assert_eq!(*model.offset, 14.25);
+        assert_eq!(*model.other, 99.);
+        assert_eq!(model.offset.revision(), before);
+        assert_eq!(model.other.revision(), other);
+    }
+}

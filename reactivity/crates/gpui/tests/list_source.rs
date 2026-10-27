@@ -176,18 +176,15 @@ fn pending_and_failed_newer_source_keep_old_sheet_and_eligible_ack() {
 fn rejected_writer_does_not_mutate_sources_and_rebinding_does_not_use_old_field() {
     let mut win = window(0.);
     let list = win.list(LIST).unwrap();
-    win.update(|m| m.wrong_writer = true).unwrap();
-    let epoch = win.snapshot().unwrap().source_epoch;
     assert_eq!(
-        win.scroll(list, 32.),
+        win.update(|m| m.wrong_writer = true),
         Err(Error::Binding(gpui::BindError::ProjectionMismatch(
             Rows::OFFSET.id()
         )))
     );
     assert_eq!(*win.read(Rows::OFFSET).unwrap(), 0.);
     assert_eq!(*win.read(Rows::OTHER).unwrap(), 0.);
-    assert_eq!(win.snapshot().unwrap().source_epoch, epoch);
-    assert_eq!(offset(&win), 0.);
+    assert_eq!(win.scroll(list, 32.), Err(Error::PresentationStale));
     win.update(|m| {
         m.wrong_writer = false;
         m.alternate = true;
@@ -275,4 +272,88 @@ fn controlled_source_without_any_other_sink_is_not_lost() {
         320.
     );
     assert!(win.role(Role::Text).text("row 110").one().is_ok());
+}
+
+#[test]
+fn shared_offset_updates_both_lists_in_one_source_epoch() {
+    struct Shared(Rows);
+    impl Shared {
+        const OFFSET: Source<Self, f64> = Source::new(
+            FieldId::new(1),
+            "offset",
+            |m| &m.0.offset,
+            |m| &mut m.0.offset,
+        );
+    }
+    impl View for Shared {
+        fn sources() -> Sources<Self> {
+            Sources::new().direct(Self::OFFSET)
+        }
+        fn view(&self) -> El<'_> {
+            row((
+                uniform_list(LIST, &self.0, 32)
+                    .scroll_offset(&self.0.offset)
+                    .h(96)
+                    .w(100),
+                uniform_list(ListId::new(32), &self.0, 32)
+                    .scroll_offset(&self.0.offset)
+                    .h(64)
+                    .w(100),
+            ))
+        }
+    }
+    let mut win = Win::with_size(Shared(Rows::new(0.)), 240, 160).unwrap();
+    let epoch = win.snapshot().unwrap().source_epoch;
+    win.scroll(win.list(LIST).unwrap(), 32.).unwrap();
+    assert_eq!(*win.read(Shared::OFFSET).unwrap(), 32.);
+    for id in [LIST, ListId::new(32)] {
+        assert_eq!(win.list_state(win.list(id).unwrap()).unwrap().offset, 32.);
+    }
+    assert_eq!(win.snapshot().unwrap().source_epoch, epoch + 1);
+}
+#[test]
+fn nested_wheel_commits_controlled_list_and_ordinary_residual_together() {
+    struct Nested(Rows);
+    impl Nested {
+        const OFFSET: Source<Self, f64> = Source::new(
+            FieldId::new(1),
+            "offset",
+            |m| &m.0.offset,
+            |m| &mut m.0.offset,
+        );
+    }
+    impl View for Nested {
+        fn sources() -> Sources<Self> {
+            Sources::new().direct(Self::OFFSET)
+        }
+        fn view(&self) -> El<'_> {
+            div().w(200).h(100).scroll(gpui::Axis::Y).child(column((
+                uniform_list(LIST, &self.0, 32)
+                    .scroll_offset(&self.0.offset)
+                    .h(64)
+                    .w(200),
+                div().h(300).w(200).bg(Color::BLACK),
+            )))
+        }
+    }
+    let model = |value| {
+        let mut rows = Rows::new(value);
+        rows.len = 3;
+        Nested(rows)
+    };
+    let mut win = Win::with_size(model(0.), 220, 120).unwrap();
+    let outer = win.role(Role::ScrollView).one().unwrap();
+    win.scroll_at(Point { x: 10., y: 10. }, 64.).unwrap();
+    assert_eq!(*win.read(Nested::OFFSET).unwrap(), 32.);
+    assert_eq!(win.list_state(win.list(LIST).unwrap()).unwrap().offset, 32.);
+    assert_eq!(win.viewport(outer).unwrap().offset.y, 32.);
+    let actual = win.with_pixels(|p, _, _| p.to_vec()).unwrap();
+    let mut fresh = Win::with_size(model(32.), 220, 120).unwrap();
+    fresh
+        .scroll_to(
+            fresh.role(Role::ScrollView).one().unwrap(),
+            ScrollOffset { x: 0., y: 32. },
+        )
+        .unwrap();
+    fresh.with_pixels(|p, _, _| assert_eq!(actual, p)).unwrap();
 }

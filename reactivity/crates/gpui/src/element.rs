@@ -523,8 +523,14 @@ impl<'a> El<'a> {
     /// realized range must fit the list's 4096-row admission limit. Buffered
     /// rows preserve identity but remain clipped from visible queries and hits.
     pub fn overscan(mut self, rows: usize) -> Self {
-        if let Some(spec) = self.extra.as_deref_mut().and_then(|extra| extra.list_mut()) {
-            spec.options_mut().overscan = rows;
+        if let Some(spec) = self.extra.as_deref_mut().and_then(|extra| extra.list_mut())
+            && (rows != 0 || spec.options.is_some())
+        {
+            let options = spec.options_mut();
+            options.overscan = rows;
+            if rows == 0 && options.map.is_none() && options.offset.is_none() {
+                spec.options = None;
+            }
         }
         self
     }
