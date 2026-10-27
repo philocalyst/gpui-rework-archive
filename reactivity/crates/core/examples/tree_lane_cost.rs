@@ -63,6 +63,8 @@ fn fingerprint(tree: &LayoutTree, nodes: &[NodeId]) -> u64 {
 }
 fn main() {
     let case = std::env::args().nth(1).expect("case");
+    let ops: usize = std::env::args().nth(2).map_or(5, |n| n.parse().unwrap());
+    assert!((1..=10000).contains(&ops));
     let (count, depth, edits, shuffled, full) = match case.as_str() {
         "tiny" => (256, 8, 8, false, true),
         "contiguous" => (65536, 8, 256, false, false),
@@ -153,12 +155,12 @@ fn main() {
     for batch in 0..40 {
         let wall = Instant::now();
         let cpu = cpu_ns();
-        for _ in 0..5 {
+        for _ in 0..ops {
             run();
         }
         let cpu = cpu_ns() - cpu;
         let wall = wall.elapsed().as_nanos();
-        println!("{case},{batch},5,{cpu},{wall}");
+        println!("{case},{batch},{ops},{cpu},{wall}");
     }
     if !full {
         assert!(tree.compute(root, viewport).unwrap());
