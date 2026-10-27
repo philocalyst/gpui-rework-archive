@@ -1,0 +1,18 @@
+
+running 1 test
+test a_new_font_identity_cannot_inherit_the_previous_planner_font_authority ... FAILED
+
+failures:
+
+---- a_new_font_identity_cannot_inherit_the_previous_planner_font_authority stdout ----
+
+thread 'a_new_font_identity_cannot_inherit_the_previous_planner_font_authority' (214107) panicked at crates/canvas/tests/text_cache.rs:99:9:
+cache returned foreign font authority: Err(ForeignLayout)
+note: run with `RUST_BACKTRACE=1` environment variable to display a backtrace
+
+
+failures:
+    a_new_font_identity_cannot_inherit_the_previous_planner_font_authority
+
+test result: FAILED. 0 passed; 1 failed; 0 ignored; 0 measured; 2 filtered out; finished in 0.00s
+

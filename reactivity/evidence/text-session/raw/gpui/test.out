@@ -1,0 +1,8 @@
+
+running 3 tests
+test changed_layout_rejects_sparse_publication_and_moves_following_content ... ok
+test pending_text_and_geometry_stay_at_acknowledged_epoch_then_survive_newer_failure ... ok
+test direct_text_pixels_match_fresh_windows_through_patch_and_fallback ... ok
+
+test result: ok. 3 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 0.00s
+

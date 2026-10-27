@@ -1,0 +1,7 @@
+rows,stage,allocations,requested,live_delta,live_total,peak_new
+1,cold,656,138017,78783,78783,79439
+1,warm,32,3044,0,78783,1608
+1,warm2,32,3044,0,78783,1608
+1,long,56,14984,992,79775,8648
+1,short,48,12664,-208,79567,7648
+1,drop,0,0,-79567,0,0

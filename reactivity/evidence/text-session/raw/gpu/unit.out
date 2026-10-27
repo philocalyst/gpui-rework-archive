@@ -1,0 +1,13 @@
+
+running 8 tests
+test renderer::paint::tests::optional_map_and_guards_have_explicit_storage ... ok
+test renderer::tests::precision_admission_rejects_finite_but_overflowing_intermediates ... ok
+test renderer::tests::word_writers_preserve_float_and_metadata_bits ... ok
+test renderer::tests::certificates_imply_sample_membership_in_both_numeric_domains ... ok
+test renderer::tests::packet_storage_ledger ... ok
+test shader::ui::__validate_wgsl ... ok
+test shader::tests::generated_shader_validates ... ok
+test renderer::tests::storage_records_match_shader_stride_and_offsets ... ok
+
+test result: ok. 8 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 0.01s
+

@@ -1,0 +1,232 @@
+diff --git a/reactivity/crates/canvas/src/lib.rs b/reactivity/crates/canvas/src/lib.rs
+index 641c96fd85..c69ddb284a 100644
+--- a/reactivity/crates/canvas/src/lib.rs
++++ b/reactivity/crates/canvas/src/lib.rs
+@@ -27,9 +27,9 @@ pub use image::{
+     MAX_IMAGE_SCENE_BYTES,
+ };
+ pub use text::{
+-    CaretAffinity, FontFace, Glyph, GlyphKey, GlyphRun, TextCache, TextDirection, TextGeometry,
+-    TextGrapheme, TextLayout, TextLine, TextMetrics, TextOffset, TextPosition, TextRun,
+-    TextSelection, TextShaper, TextSystem,
++    CachedTextShaper, CaretAffinity, FontFace, Glyph, GlyphKey, GlyphRun, TextCache, TextDirection,
++    TextGeometry, TextGrapheme, TextLayout, TextLine, TextMetrics, TextOffset, TextPosition,
++    TextRun, TextSelection, TextShaper, TextSystem,
+ };
+ 
+ #[derive(Clone, Debug, PartialEq, Eq)]
+diff --git a/reactivity/crates/canvas/src/text.rs b/reactivity/crates/canvas/src/text.rs
+index 133fcaba05..abd00d3630 100644
+--- a/reactivity/crates/canvas/src/text.rs
++++ b/reactivity/crates/canvas/src/text.rs
+@@ -142,16 +142,22 @@ impl FontFace {
+         TextShaper {
+             font: self,
+             planner: None,
+-            cache: None,
++            cached: None,
+         }
+     }
+     /// Borrow a reusable exclusively owned planning cache. Immutable cmap views
+     /// still borrow this face only for the session, never the retained cache.
+-    pub fn shaper_reusing<'a>(&'a self, cache: &'a mut TextCache) -> TextShaper<'a> {
+-        TextShaper {
+-            font: self,
+-            planner: None,
+-            cache: Some(cache),
++    pub fn shaper_reusing<'font, 'cache>(
++        &'font self,
++        cache: &'cache mut TextCache,
++    ) -> CachedTextShaper<'font, 'cache> {
++        CachedTextShaper {
++            shaper: TextShaper {
++                font: self,
++                planner: None,
++                cached: cache.state.take(),
++            },
++            cache,
+         }
+     }
+     /// Process-local identity, not byte equality or a persistent font ID.
+@@ -369,7 +375,7 @@ impl TextCache {
+ pub struct TextShaper<'font> {
+     font: &'font FontFace,
+     planner: Option<Box<planner::Planner<'font>>>,
+-    cache: Option<&'font mut TextCache>,
++    cached: Option<Box<planner::PlannerState>>,
+ }
+ impl<'font> TextShaper<'font> {
+     /// Measure wrapping without freezing an owned layout. Paragraph scratch is
+@@ -427,28 +433,44 @@ impl<'font> TextShaper<'font> {
+             return Err(Error::ResourceLimit);
+         }
+         if self.planner.is_none() {
+-            let cached = self
+-                .cache
+-                .as_deref_mut()
+-                .and_then(|cache| cache.state.take());
+-            self.planner = Some(Box::new(if self.cache.is_some() {
+-                planner::Planner::reusing(self.font, cached)?
+-            } else {
+-                planner::Planner::new(self.font)?
++            self.planner = Some(Box::new(match self.cached.take() {
++                Some(state) => planner::Planner::reusing(self.font, Some(state))?,
++                None => planner::Planner::new(self.font)?,
+             }));
+         }
+         Ok(self.planner.as_mut().unwrap())
+     }
+ }
+ 
+-impl Drop for TextShaper<'_> {
++/// A scoped shaper that returns exclusively owned planning state to its cache.
++/// The ordinary `TextShaper` has no destructor and preserves its existing
++/// non-lexical font borrow behavior.
++pub struct CachedTextShaper<'font, 'cache> {
++    shaper: TextShaper<'font>,
++    cache: &'cache mut TextCache,
++}
++impl<'font> std::ops::Deref for CachedTextShaper<'font, '_> {
++    type Target = TextShaper<'font>;
++    fn deref(&self) -> &Self::Target {
++        &self.shaper
++    }
++}
++impl std::ops::DerefMut for CachedTextShaper<'_, '_> {
++    fn deref_mut(&mut self) -> &mut Self::Target {
++        &mut self.shaper
++    }
++}
++impl Drop for CachedTextShaper<'_, '_> {
+     fn drop(&mut self) {
+-        if let Some(cache) = self.cache.as_deref_mut() {
+-            if std::thread::panicking() {
+-                cache.clear();
+-            } else if let Some(planner) = self.planner.take() {
+-                cache.state = Some(planner.state);
+-            }
++        if std::thread::panicking() {
++            self.cache.clear();
++        } else {
++            self.cache.state = self
++                .shaper
++                .planner
++                .take()
++                .map(|planner| planner.state)
++                .or_else(|| self.shaper.cached.take());
+         }
+     }
+ }
+diff --git a/reactivity/crates/gpui/examples/state_update_allocations.rs b/reactivity/crates/gpui/examples/state_update_allocations.rs
+new file mode 100644
+index 0000000000..7600dd5058
+--- /dev/null
++++ b/reactivity/crates/gpui/examples/state_update_allocations.rs
+@@ -0,0 +1,107 @@
++//! Requested allocation costs for the identical state-update model.
++use gpui::{WindowOptions, prelude::*};
++struct Page {
++    label: Signal<String>,
++    rows: usize,
++}
++impl Page {
++    const LABEL: Source<Self, String> =
++        Source::new(FieldId::new(1), "label", |m| &m.label, |m| &mut m.label);
++}
++impl View for Page {
++    fn sources() -> Sources<Self> {
++        Sources::new().direct(Self::LABEL)
++    }
++    fn view(&self) -> El<'_> {
++        column((
++            text(&self.label).h(20).font_size(12).fg(rgb(0xe5edf7)),
++            column((0..self.rows).map(|r| {
++                row((0..25).map(move |c| {
++                    text((r * 25 + c).to_string())
++                        .w(36)
++                        .h(18)
++                        .font_size(12)
++                        .fg(rgb(0xe5edf7))
++                }))
++                .gap(2)
++            }))
++            .gap(2),
++        ))
++        .w(960)
++        .h(720)
++        .p(8)
++        .gap(6)
++        .font_size(12)
++        .fg(rgb(0xe5edf7))
++        .bg(rgb(0x0e1218))
++    }
++}
++
++fn ack(win: &mut Win<Page>) {
++    win.presented(win.with_scene(|_, token| token).unwrap())
++        .unwrap();
++}
++fn mount(rows: usize, label: String, font: gpui_canvas::FontFace) -> Win<Page> {
++    let mut win = Win::recording_with_font(
++        Page {
++            rows,
++            label: Signal::new(label),
++        },
++        WindowOptions {
++            size: [960, 720],
++            ..Default::default()
++        },
++        font,
++    )
++    .unwrap();
++    ack(&mut win);
++    win
++}
++
++fn main() {
++    let args: Vec<_> = std::env::args().skip(1).collect();
++    let rows: usize = args[0].parse().unwrap();
++    let bytes = std::fs::read(&args[1]).unwrap();
++    let font = gpui_canvas::FontFace::new(&bytes).unwrap();
++    // Global immutable text data and code are warmed outside the owner ledger.
++    drop(mount(rows, "Count: 0".into(), font.clone()));
++    let mut win = None;
++    let cold = allocation_counter::measure(|| {
++        win = Some(mount(rows, "Count: 0".into(), font.clone()));
++    });
++    let mut total = cold.bytes_current;
++    println!("rows,stage,allocations,requested,live_delta,live_total,peak_new");
++    println!(
++        "{rows},cold,{},{},{},{},{}",
++        cold.count_total, cold.bytes_total, cold.bytes_current, total, cold.bytes_max
++    );
++    for (stage, value) in [
++        ("warm", "Count: 1"),
++        ("warm2", "Count: 2"),
++        ("long", "Count: 123456789"),
++        ("short", "Count: 3"),
++    ] {
++        let cost = allocation_counter::measure(|| {
++            let owner = win.as_mut().unwrap();
++            owner.set(Page::LABEL, value.into()).unwrap();
++            ack(owner);
++        });
++        total += cost.bytes_current;
++        println!(
++            "{rows},{stage},{},{},{},{},{}",
++            cost.count_total, cost.bytes_total, cost.bytes_current, total, cost.bytes_max
++        );
++        assert!(win.as_ref().unwrap().contains_text(value).unwrap());
++    }
++    let cost = allocation_counter::measure(|| drop(win.take()));
++    total += cost.bytes_current;
++    println!(
++        "{rows},drop,{},{},{},{},{}",
++        cost.count_total, cost.bytes_total, cost.bytes_current, total, cost.bytes_max
++    );
++    assert_eq!(total, 0, "all measured window allocations reclaimed");
++    eprintln!(
++        "font_file_bytes={},shared_immutable_font_is_outside_owner_ledger=true",
++        bytes.len()
++    );
++}

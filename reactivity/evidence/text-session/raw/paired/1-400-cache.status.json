@@ -1,0 +1,1 @@
+{"command": ["/usr/bin/time", "-v", "-o", "/home/user/gpui-text-session-evidence/paired/1-400-cache.time", "/home/user/gpui-text-session-target/release/examples/state_update_cost", "400", "/home/user/zgx-reference-local/comparisons/fonts/DejaVuSans.ttf"], "exit": 0}

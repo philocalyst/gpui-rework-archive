@@ -1,0 +1,13 @@
+diff --git a/reactivity/crates/canvas/src/text/planner.rs b/reactivity/crates/canvas/src/text/planner.rs
+index 3a7949daaf..b52bb22046 100644
+--- a/reactivity/crates/canvas/src/text/planner.rs
++++ b/reactivity/crates/canvas/src/text/planner.rs
+@@ -73,7 +73,7 @@ impl<'font> Planner<'font> {
+         } else {
+             Cmap::parse(&primary.0.bytes)?
+         };
+-        if let Some(state) = state.filter(|state| state.faces.primary.same_face(primary)) {
++        if let Some(state) = state {
+             return Ok(Self {
+                 state,
+                 primary_cmap,

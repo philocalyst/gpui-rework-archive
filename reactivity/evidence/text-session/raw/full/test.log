@@ -1,0 +1,27 @@
+   Compiling gpui_canvas v0.1.0 (/home/user/gpui-text-session-lab/reactivity/crates/canvas)
+   Compiling skrifa v0.44.0
+   Compiling rustybuzz v0.20.1
+   Compiling gpui v0.1.0 (/home/user/gpui-text-session-lab/reactivity/crates/gpui)
+   Compiling swash v0.2.10
+error[E0505]: cannot move out of `font` because it is borrowed
+   --> crates/canvas/tests/unicode.rs:355:43
+    |
+347 |     let font = FontFace::new(&bytes).unwrap();
+    |         ---- binding `font` declared here
+348 |     let mut shaper = font.shaper();
+    |                      ---- borrow of `font` occurs here
+...
+355 |     let mut fresh = TextSystem::from_font(font);
+    |                                           ^^^^ move out of `font` occurs here
+356 |     assert_eq!(paint(&mut fresh, &layout), pixels);
+357 | }
+    | - borrow might be used here, when `shaper` is dropped and runs the `Drop` code for type `TextShaper`
+    |
+help: consider cloning the value if the performance cost is acceptable
+    |
+348 |     let mut shaper = font.clone().shaper();
+    |                          ++++++++
+
+For more information about this error, try `rustc --explain E0505`.
+error: could not compile `gpui_canvas` (test "unicode") due to 1 previous error
+warning: build failed, waiting for other jobs to finish...

@@ -1,0 +1,1 @@
+{"command": ["/usr/bin/time", "-v", "-o", "/home/user/gpui-bounded-cache-evidence/paired-bounded/2-4-bounded.time", "/home/user/gpui-bounded-cache-target/release/examples/state_update_cost", "4", "/home/user/zgx-reference-local/comparisons/fonts/DejaVuSans.ttf"], "exit": 0}

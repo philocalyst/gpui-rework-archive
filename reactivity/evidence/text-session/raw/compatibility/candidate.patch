@@ -1,0 +1,760 @@
+diff --git a/reactivity/crates/canvas/src/lib.rs b/reactivity/crates/canvas/src/lib.rs
+index 7e27caeae2..c69ddb284a 100644
+--- a/reactivity/crates/canvas/src/lib.rs
++++ b/reactivity/crates/canvas/src/lib.rs
+@@ -27,9 +27,9 @@ pub use image::{
+     MAX_IMAGE_SCENE_BYTES,
+ };
+ pub use text::{
+-    CaretAffinity, FontFace, Glyph, GlyphKey, GlyphRun, TextDirection, TextGeometry, TextGrapheme,
+-    TextLayout, TextLine, TextMetrics, TextOffset, TextPosition, TextRun, TextSelection,
+-    TextShaper, TextSystem,
++    CachedTextShaper, CaretAffinity, FontFace, Glyph, GlyphKey, GlyphRun, TextCache, TextDirection,
++    TextGeometry, TextGrapheme, TextLayout, TextLine, TextMetrics, TextOffset, TextPosition,
++    TextRun, TextSelection, TextShaper, TextSystem,
+ };
+ 
+ #[derive(Clone, Debug, PartialEq, Eq)]
+diff --git a/reactivity/crates/canvas/src/text.rs b/reactivity/crates/canvas/src/text.rs
+index 4675a98e3a..abd00d3630 100644
+--- a/reactivity/crates/canvas/src/text.rs
++++ b/reactivity/crates/canvas/src/text.rs
+@@ -142,6 +142,22 @@ impl FontFace {
+         TextShaper {
+             font: self,
+             planner: None,
++            cached: None,
++        }
++    }
++    /// Borrow a reusable exclusively owned planning cache. Immutable cmap views
++    /// still borrow this face only for the session, never the retained cache.
++    pub fn shaper_reusing<'font, 'cache>(
++        &'font self,
++        cache: &'cache mut TextCache,
++    ) -> CachedTextShaper<'font, 'cache> {
++        CachedTextShaper {
++            shaper: TextShaper {
++                font: self,
++                planner: None,
++                cached: cache.state.take(),
++            },
++            cache,
+         }
+     }
+     /// Process-local identity, not byte equality or a persistent font ID.
+@@ -341,17 +357,25 @@ pub(crate) struct Raster {
+     pub pixels: Vec<u8>,
+ }
+ 
+-/// A scoped parser over immutable font bytes, reusable across measurement and
+-/// painting. It owns parsed shaping tables and reusable paragraph scratch,
+-/// borrows the backing, and releases both on drop. Returned layouts do not
+-/// borrow this parser.
+-///
+-/// This separates read-only shaping from a service's mutable glyph cache without
+-/// a self reference, permanent table cache or shared mutable lock. Each returned
+-/// layout owns one immutable FontSet lease shared by layouts from this pass.
++/// Owned font registration and paragraph scratch; contains no borrowed views.
++/// A different immutable font identity replaces the cache on first use.
++#[derive(Default)]
++pub struct TextCache {
++    state: Option<Box<planner::PlannerState>>,
++}
++impl TextCache {
++    pub fn clear(&mut self) {
++        self.state = None;
++    }
++}
++
++/// Scoped immutable cmap parsing and mutable paragraph planning. Outputs own
++/// their font and geometry leases. `shaper()` releases planning state on drop;
++/// `shaper_reusing()` returns only owned state to its exclusively borrowed cache.
+ pub struct TextShaper<'font> {
+     font: &'font FontFace,
+     planner: Option<Box<planner::Planner<'font>>>,
++    cached: Option<Box<planner::PlannerState>>,
+ }
+ impl<'font> TextShaper<'font> {
+     /// Measure wrapping without freezing an owned layout. Paragraph scratch is
+@@ -409,12 +433,48 @@ impl<'font> TextShaper<'font> {
+             return Err(Error::ResourceLimit);
+         }
+         if self.planner.is_none() {
+-            self.planner = Some(Box::new(planner::Planner::new(self.font)?));
++            self.planner = Some(Box::new(match self.cached.take() {
++                Some(state) => planner::Planner::reusing(self.font, Some(state))?,
++                None => planner::Planner::new(self.font)?,
++            }));
+         }
+         Ok(self.planner.as_mut().unwrap())
+     }
+ }
+ 
++/// A scoped shaper that returns exclusively owned planning state to its cache.
++/// The ordinary `TextShaper` has no destructor and preserves its existing
++/// non-lexical font borrow behavior.
++pub struct CachedTextShaper<'font, 'cache> {
++    shaper: TextShaper<'font>,
++    cache: &'cache mut TextCache,
++}
++impl<'font> std::ops::Deref for CachedTextShaper<'font, '_> {
++    type Target = TextShaper<'font>;
++    fn deref(&self) -> &Self::Target {
++        &self.shaper
++    }
++}
++impl std::ops::DerefMut for CachedTextShaper<'_, '_> {
++    fn deref_mut(&mut self) -> &mut Self::Target {
++        &mut self.shaper
++    }
++}
++impl Drop for CachedTextShaper<'_, '_> {
++    fn drop(&mut self) {
++        if std::thread::panicking() {
++            self.cache.clear();
++        } else {
++            self.cache.state = self
++                .shaper
++                .planner
++                .take()
++                .map(|planner| planner.state)
++                .or_else(|| self.shaper.cached.take());
++        }
++    }
++}
++
+ /// Horizontal Unicode paragraph shaping and a bounded grayscale raster cache.
+ /// Bundled text lazily resolves Hebrew/Arabic outline fallback. Custom primary
+ /// fonts have explicit coverage errors; no OS font discovery or color fallback.
+diff --git a/reactivity/crates/canvas/src/text/cursor_pair_tests.rs b/reactivity/crates/canvas/src/text/cursor_pair_tests.rs
+index 55e4e36a4a..0ef9e81cde 100644
+--- a/reactivity/crates/canvas/src/text/cursor_pair_tests.rs
++++ b/reactivity/crates/canvas/src/text/cursor_pair_tests.rs
+@@ -33,10 +33,12 @@ fn indexed_affinity_pairs_preserve_every_direct_geometry_bit() {
+             for height in [0., 22.] {
+                 for spacing in [-20., -0., 1.25] {
+                     for styled in [false, true] {
+-                        let mut builder =
+-                            planner
+-                                .context
+-                                .ranged_builder(&mut planner.fonts, source, 1., false);
++                        let mut builder = planner.state.context.ranged_builder(
++                            &mut planner.state.fonts,
++                            source,
++                            1.,
++                            false,
++                        );
+                         builder.push_default(&families[..]);
+                         builder.push_default(StyleProperty::FontSize(16.));
+                         builder.push_default(StyleProperty::LineHeight(
+@@ -48,28 +50,31 @@ fn indexed_affinity_pairs_preserve_every_direct_geometry_bit() {
+                             let split = source.char_indices().nth(3).map_or(source.len(), |x| x.0);
+                             builder.push(StyleProperty::FontSize(23.), split..source.len());
+                         }
+-                        builder.build_into(&mut planner.layout, source);
+-                        planner.layout.break_all_lines(wrap);
++                        builder.build_into(&mut planner.state.layout, source);
++                        planner.state.layout.break_all_lines(wrap);
+                         for alignment in [
+                             Alignment::Start,
+                             Alignment::Center,
+                             Alignment::End,
+                             Alignment::Justify,
+                         ] {
+-                            planner.layout.align(alignment, AlignmentOptions::default());
+-                            let geometry = CursorGeometry::new(&planner.layout).unwrap();
+-                            assert_lowered_stops(&planner.layout, source);
++                            planner
++                                .state
++                                .layout
++                                .align(alignment, AlignmentOptions::default());
++                            let geometry = CursorGeometry::new(&planner.state.layout).unwrap();
++                            assert_lowered_stops(&planner.state.layout, source);
+                             for byte in (0..=source.len()).chain([usize::MAX]) {
+                                 for width in [-0., 1., -1., 1e20] {
+                                     let direct = [Affinity::Upstream, Affinity::Downstream].map(
+                                         |affinity| {
+                                             let cursor = Cursor::from_byte_index(
+-                                                &planner.layout,
++                                                &planner.state.layout,
+                                                 byte,
+                                                 affinity,
+                                             );
+                                             (cursor.index() == byte).then(|| {
+-                                                bits(cursor.geometry(&planner.layout, width))
++                                                bits(cursor.geometry(&planner.state.layout, width))
+                                             })
+                                         },
+                                     );
+diff --git a/reactivity/crates/canvas/src/text/line_ownership_tests.rs b/reactivity/crates/canvas/src/text/line_ownership_tests.rs
+index 309019a8e8..a1817f3f61 100644
+--- a/reactivity/crates/canvas/src/text/line_ownership_tests.rs
++++ b/reactivity/crates/canvas/src/text/line_ownership_tests.rs
+@@ -28,18 +28,20 @@ fn lower(source: &str, line_height: f32) -> Fixture {
+     let mut height = 0.;
+     for paragraph in paragraph::ranges(source) {
+         let content = &source[paragraph.content.clone()];
+-        let mut builder = planner
+-            .context
+-            .ranged_builder(&mut planner.fonts, content, 1., false);
++        let mut builder =
++            planner
++                .state
++                .context
++                .ranged_builder(&mut planner.state.fonts, content, 1., false);
+         builder.push_default(&families[..]);
+         builder.push_default(StyleProperty::FontSize(16.));
+         builder.push_default(StyleProperty::LineHeight(parley::LineHeight::Absolute(
+             line_height,
+         )));
+         builder.push_default(StyleProperty::OverflowWrap(OverflowWrap::Anywhere));
+-        builder.build_into(&mut planner.layout, content);
+-        planner.layout.break_all_lines(Some(30.));
+-        let planned = &planner.layout;
++        builder.build_into(&mut planner.state.layout, content);
++        planner.state.layout.break_all_lines(Some(30.));
++        let planned = &planner.state.layout;
+         let base = fixture.map.lines.len();
+         for (line_index, line) in planned.lines().enumerate() {
+             fixture
+diff --git a/reactivity/crates/canvas/src/text/planner.rs b/reactivity/crates/canvas/src/text/planner.rs
+index 9c4df5c95e..3a7949daaf 100644
+--- a/reactivity/crates/canvas/src/text/planner.rs
++++ b/reactivity/crates/canvas/src/text/planner.rs
+@@ -41,6 +41,10 @@ impl<'font> Cmap<'font> {
+ }
+ 
+ pub(super) struct Planner<'font> {
++    pub(super) state: Box<PlannerState>,
++    primary_cmap: Cmap<'font>,
++}
++pub(super) struct PlannerState {
+     fonts: FontContext,
+     context: LayoutContext<()>,
+     // Reuse the one paragraph being lowered, including Parley Engine's shaped
+@@ -49,7 +53,6 @@ pub(super) struct Planner<'font> {
+     faces: FontSet,
+     blob_ids: [Option<u64>; 3],
+     sets: [Option<Arc<FontSet>>; 4],
+-    primary_cmap: Cmap<'font>,
+ }
+ struct Planned {
+     metrics: TextMetrics,
+@@ -59,37 +62,52 @@ struct Planned {
+ }
+ impl<'font> Planner<'font> {
+     pub fn new(primary: &'font FontFace) -> Result<Self, Error> {
++        Self::reusing(primary, None)
++    }
++    pub(super) fn reusing(
++        primary: &'font FontFace,
++        state: Option<Box<PlannerState>>,
++    ) -> Result<Self, Error> {
++        let primary_cmap = if primary.0.bundled {
++            Cmap(None)
++        } else {
++            Cmap::parse(&primary.0.bytes)?
++        };
++        if let Some(state) = state.filter(|state| state.faces.primary.same_face(primary)) {
++            return Ok(Self {
++                state,
++                primary_cmap,
++            });
++        }
+         let faces = FontSet {
+             primary: primary.clone(),
+             fallbacks: [None, None],
+         };
+         let base = Arc::new(faces.clone());
+         let mut result = Self {
+-            fonts: FontContext {
+-                collection: Collection::new(CollectionOptions {
+-                    shared: false,
+-                    system_fonts: false,
+-                }),
+-                source_cache: SourceCache::default(),
+-            },
+-            context: LayoutContext::new(),
+-            layout: parley::Layout::default(),
+-            faces,
+-            blob_ids: [None; 3],
+-            sets: [Some(base), None, None, None],
+-            primary_cmap: if primary.0.bundled {
+-                Cmap(None)
+-            } else {
+-                Cmap::parse(&primary.0.bytes)?
+-            },
++            state: Box::new(PlannerState {
++                fonts: FontContext {
++                    collection: Collection::new(CollectionOptions {
++                        shared: false,
++                        system_fonts: false,
++                    }),
++                    source_cache: SourceCache::default(),
++                },
++                context: LayoutContext::new(),
++                layout: parley::Layout::default(),
++                faces,
++                blob_ids: [None; 3],
++                sets: [Some(base), None, None, None],
++            }),
++            primary_cmap,
+         };
+         result.register(0)?;
+         Ok(result)
+     }
+     fn register(&mut self, slot: usize) -> Result<(), Error> {
+-        self.blob_ids[slot] = Some(register_font(
+-            &mut self.fonts,
+-            self.faces.face(slot)?,
++        self.state.blob_ids[slot] = Some(register_font(
++            &mut self.state.fonts,
++            self.state.faces.face(slot)?,
+             FAMILIES[slot],
+         )?);
+         Ok(())
+@@ -97,7 +115,7 @@ impl<'font> Planner<'font> {
+     fn coverage(&mut self, text: &str) -> Result<u8, Error> {
+         let ignorable = CodePointSetData::new::<DefaultIgnorableCodePoint>();
+         let mut needed = 0_u8;
+-        for c in coverage::characters(text, self.faces.primary.0.bundled) {
++        for c in coverage::characters(text, self.state.faces.primary.0.bundled) {
+             if matches!(c, '\r' | '\n' | '\u{85}' | '\u{2028}' | '\u{2029}')
+                 || ignorable.contains(c)
+             {
+@@ -106,7 +124,7 @@ impl<'font> Planner<'font> {
+             if c.is_control() {
+                 return Err(Error::UnsupportedControl(c));
+             }
+-            let covered = if self.faces.primary.0.bundled {
++            let covered = if self.state.faces.primary.0.bundled {
+                 let mask = bundled_coverage::mask(c);
+                 if mask & 1 != 0 {
+                     continue;
+@@ -124,20 +142,20 @@ impl<'font> Planner<'font> {
+             needed |= covered;
+         }
+         for slot in 1..=2 {
+-            if needed & (1 << (slot - 1)) != 0 && self.faces.fallbacks[slot - 1].is_none() {
+-                self.faces.fallbacks[slot - 1] = Some(FontFace::fallback(slot)?);
++            if needed & (1 << (slot - 1)) != 0 && self.state.faces.fallbacks[slot - 1].is_none() {
++                self.state.faces.fallbacks[slot - 1] = Some(FontFace::fallback(slot)?);
+                 self.register(slot)?;
+             }
+         }
+         Ok(needed)
+     }
+     fn font_set(&mut self, mask: usize) -> Arc<FontSet> {
+-        Arc::clone(self.sets[mask].get_or_insert_with(|| {
++        Arc::clone(self.state.sets[mask].get_or_insert_with(|| {
+             Arc::new(FontSet {
+-                primary: self.faces.primary.clone(),
++                primary: self.state.faces.primary.clone(),
+                 fallbacks: std::array::from_fn(|i| {
+                     if mask & (1 << i) != 0 {
+-                        self.faces.fallbacks[i].clone()
++                        self.state.faces.fallbacks[i].clone()
+                     } else {
+                         None
+                     }
+@@ -183,7 +201,7 @@ impl<'font> Planner<'font> {
+         if result.is_err() {
+             // An invalid or expanding font can create a rejected large layout.
+             // Do not keep its buffers for later calls in this planning pass.
+-            self.layout = parley::Layout::default();
++            self.state.layout = parley::Layout::default();
+         }
+         result
+     }
+@@ -213,23 +231,23 @@ impl<'font> Planner<'font> {
+         let mut mask = 0;
+         for paragraph in paragraph::ranges(text) {
+             let content = &text[paragraph.content.clone()];
+-            let mut builder = self
+-                .context
+-                .ranged_builder(&mut self.fonts, content, 1., false);
++            let mut builder =
++                self.state
++                    .context
++                    .ranged_builder(&mut self.state.fonts, content, 1., false);
+             builder.push_default(&names[..family_count]);
+             builder.push_default(StyleProperty::FontSize(size));
+             builder.push_default(StyleProperty::OverflowWrap(OverflowWrap::Anywhere));
+-            builder.build_into(&mut self.layout, content);
+-            self.layout.break_all_lines(max_width);
+-            let planned = &self.layout;
++            builder.build_into(&mut self.state.layout, content);
++            self.state.layout.break_all_lines(max_width);
++            let planned = &self.state.layout;
+             let simple = !interactive
+                 && paragraph.content.end == text.len()
+                 && paragraph.content.start == 0
+                 && planned.len() == 1
+-                && planned
+-                    .lines()
+-                    .flat_map(|line| line.runs())
+-                    .all(|run| !run.is_rtl() && Some(run.font().data.id()) == self.blob_ids[0])
++                && planned.lines().flat_map(|line| line.runs()).all(|run| {
++                    !run.is_rtl() && Some(run.font().data.id()) == self.state.blob_ids[0]
++                })
+                 && planned.lines().flat_map(|line| line.runs()).count() <= 1;
+             if !simple && !detailed {
+                 detailed = true;
+@@ -291,6 +309,7 @@ impl<'font> Planner<'font> {
+                         return Err(Error::UnsupportedFontFormat);
+                     }
+                     let slot = self
++                        .state
+                         .blob_ids
+                         .iter()
+                         .position(|&id| id == Some(run.run().font().data.id()))
+@@ -560,7 +579,7 @@ mod tests {
+         ] {
+             for width in [None, Some(0.), Some(17.), Some(80.)] {
+                 planner.shape(source, 18., width, true).unwrap();
+-                for line in planner.layout.lines() {
++                for line in planner.state.layout.lines() {
+                     let raw = line.runs().map(|run| run.glyph_count()).sum::<usize>();
+                     let positioned = line
+                         .items()
+diff --git a/reactivity/crates/canvas/tests/text_cache.rs b/reactivity/crates/canvas/tests/text_cache.rs
+new file mode 100644
+index 0000000000..9b7317fcce
+--- /dev/null
++++ b/reactivity/crates/canvas/tests/text_cache.rs
+@@ -0,0 +1,151 @@
++use gpui_canvas::{
++    Affine, Canvas, CaretAffinity, Color, FontFace, Point, Rect, TextCache, TextLayout, TextOffset,
++    TextPosition, TextSystem,
++};
++
++fn exact(a: &TextLayout, b: &TextLayout, source: &str) {
++    assert_eq!(
++        [a.width, a.height, a.baseline].map(f32::to_bits),
++        [b.width, b.height, b.baseline].map(f32::to_bits)
++    );
++    let glyphs = |s: &TextLayout| {
++        s.glyphs()
++            .map(|g| (g.id, g.cluster, g.x.to_bits(), g.baseline.to_bits()))
++            .collect::<Vec<_>>()
++    };
++    assert_eq!(glyphs(a), glyphs(b));
++    assert_eq!(
++        format!("{:?}", a.lines().collect::<Vec<_>>()),
++        format!("{:?}", b.lines().collect::<Vec<_>>())
++    );
++    for offset in 0..=source.len() {
++        for affinity in [CaretAffinity::Upstream, CaretAffinity::Downstream] {
++            let position = TextPosition {
++                offset: TextOffset::new(offset).unwrap(),
++                affinity,
++            };
++            let bits = |r: Option<Rect>| r.map(|r| [r.x, r.y, r.width, r.height].map(f32::to_bits));
++            assert_eq!(
++                bits(a.caret_bounds(position)),
++                bits(b.caret_bounds(position))
++            );
++        }
++    }
++}
++
++#[test]
++fn reusable_planning_matches_scoped_unicode_metrics_and_original_byte_geometry() {
++    let font = FontFace::bundled().unwrap();
++    let mut cache = TextCache::default();
++    for _ in 0..3 {
++        for source in [
++            "Count: 1234",
++            "office fi ffi",
++            "a\u{301}b\r\nend",
++            "مرحبا بالعالم",
++            "אבג 123 xyz",
++            "",
++            "\n",
++            "one two three four",
++        ] {
++            for width in [None, Some(27.), Some(160.)] {
++                let cached = font
++                    .shaper_reusing(&mut cache)
++                    .shape_interactive(source, 16., width)
++                    .unwrap();
++                let scoped = font.shaper().shape_interactive(source, 16., width).unwrap();
++                exact(&cached, &scoped, source);
++                let measured = font
++                    .shaper_reusing(&mut cache)
++                    .measure(source, 16., width)
++                    .unwrap();
++                let expected = font.shaper().measure(source, 16., width).unwrap();
++                assert_eq!(
++                    [measured.width, measured.height, measured.baseline].map(f32::to_bits),
++                    [expected.width, expected.height, expected.baseline].map(f32::to_bits)
++                );
++            }
++        }
++    }
++}
++
++#[test]
++fn a_new_font_identity_cannot_inherit_the_previous_planner_font_authority() {
++    let first = FontFace::new(include_bytes!("../assets/NotoSans-default.ttf")).unwrap();
++    let second = FontFace::new(include_bytes!("../assets/NotoSans-default.ttf")).unwrap();
++    assert!(!first.same_face(&second));
++    let mut cache = TextCache::default();
++    let mut held = Vec::new();
++    for font in [&first, &second, &first] {
++        let layout = font
++            .shaper_reusing(&mut cache)
++            .shape_interactive("Count: 101", 16., None)
++            .unwrap();
++        let expected = font
++            .shaper()
++            .shape_interactive("Count: 101", 16., None)
++            .unwrap();
++        exact(&layout, &expected, "Count: 101");
++        let mut service = TextSystem::from_font(font.clone());
++        let mut canvas = Canvas::new(128, 32).unwrap();
++        let result = canvas.draw_text(
++            &mut service,
++            &layout,
++            Point { x: 0., y: 0. },
++            Affine::IDENTITY,
++            Rect::new(0., 0., 128., 32.),
++            Color::BLACK,
++        );
++        assert!(
++            result.is_ok(),
++            "cache returned foreign font authority: {result:?}"
++        );
++        held.push((layout, service));
++    }
++    cache.clear();
++    drop(first);
++    drop(second);
++    for (layout, mut service) in held {
++        let mut canvas = Canvas::new(128, 32).unwrap();
++        canvas
++            .draw_text(
++                &mut service,
++                &layout,
++                Point { x: 0., y: 0. },
++                Affine::IDENTITY,
++                Rect::new(0., 0., 128., 32.),
++                Color::BLACK,
++            )
++            .unwrap();
++    }
++}
++
++#[test]
++fn rejected_and_panicked_sessions_recover_without_poisoning_future_layouts() {
++    let font = FontFace::bundled().unwrap();
++    let mut cache = TextCache::default();
++    assert!(
++        font.shaper_reusing(&mut cache)
++            .shape_interactive("bad\0", 16., None)
++            .is_err()
++    );
++    let failed = std::panic::catch_unwind(std::panic::AssertUnwindSafe(|| {
++        let _layout = font
++            .shaper_reusing(&mut cache)
++            .shape_interactive("prior", 16., None)
++            .unwrap();
++        let mut session = font.shaper_reusing(&mut cache);
++        session.shape_interactive("pending", 16., None).unwrap();
++        panic!("owned cache unwind test");
++    }));
++    assert!(failed.is_err());
++    let cached = font
++        .shaper_reusing(&mut cache)
++        .shape_interactive("recovered", 16., None)
++        .unwrap();
++    let expected = font
++        .shaper()
++        .shape_interactive("recovered", 16., None)
++        .unwrap();
++    exact(&cached, &expected, "recovered");
++}
+diff --git a/reactivity/crates/gpui/examples/state_update_allocations.rs b/reactivity/crates/gpui/examples/state_update_allocations.rs
+new file mode 100644
+index 0000000000..7600dd5058
+--- /dev/null
++++ b/reactivity/crates/gpui/examples/state_update_allocations.rs
+@@ -0,0 +1,107 @@
++//! Requested allocation costs for the identical state-update model.
++use gpui::{WindowOptions, prelude::*};
++struct Page {
++    label: Signal<String>,
++    rows: usize,
++}
++impl Page {
++    const LABEL: Source<Self, String> =
++        Source::new(FieldId::new(1), "label", |m| &m.label, |m| &mut m.label);
++}
++impl View for Page {
++    fn sources() -> Sources<Self> {
++        Sources::new().direct(Self::LABEL)
++    }
++    fn view(&self) -> El<'_> {
++        column((
++            text(&self.label).h(20).font_size(12).fg(rgb(0xe5edf7)),
++            column((0..self.rows).map(|r| {
++                row((0..25).map(move |c| {
++                    text((r * 25 + c).to_string())
++                        .w(36)
++                        .h(18)
++                        .font_size(12)
++                        .fg(rgb(0xe5edf7))
++                }))
++                .gap(2)
++            }))
++            .gap(2),
++        ))
++        .w(960)
++        .h(720)
++        .p(8)
++        .gap(6)
++        .font_size(12)
++        .fg(rgb(0xe5edf7))
++        .bg(rgb(0x0e1218))
++    }
++}
++
++fn ack(win: &mut Win<Page>) {
++    win.presented(win.with_scene(|_, token| token).unwrap())
++        .unwrap();
++}
++fn mount(rows: usize, label: String, font: gpui_canvas::FontFace) -> Win<Page> {
++    let mut win = Win::recording_with_font(
++        Page {
++            rows,
++            label: Signal::new(label),
++        },
++        WindowOptions {
++            size: [960, 720],
++            ..Default::default()
++        },
++        font,
++    )
++    .unwrap();
++    ack(&mut win);
++    win
++}
++
++fn main() {
++    let args: Vec<_> = std::env::args().skip(1).collect();
++    let rows: usize = args[0].parse().unwrap();
++    let bytes = std::fs::read(&args[1]).unwrap();
++    let font = gpui_canvas::FontFace::new(&bytes).unwrap();
++    // Global immutable text data and code are warmed outside the owner ledger.
++    drop(mount(rows, "Count: 0".into(), font.clone()));
++    let mut win = None;
++    let cold = allocation_counter::measure(|| {
++        win = Some(mount(rows, "Count: 0".into(), font.clone()));
++    });
++    let mut total = cold.bytes_current;
++    println!("rows,stage,allocations,requested,live_delta,live_total,peak_new");
++    println!(
++        "{rows},cold,{},{},{},{},{}",
++        cold.count_total, cold.bytes_total, cold.bytes_current, total, cold.bytes_max
++    );
++    for (stage, value) in [
++        ("warm", "Count: 1"),
++        ("warm2", "Count: 2"),
++        ("long", "Count: 123456789"),
++        ("short", "Count: 3"),
++    ] {
++        let cost = allocation_counter::measure(|| {
++            let owner = win.as_mut().unwrap();
++            owner.set(Page::LABEL, value.into()).unwrap();
++            ack(owner);
++        });
++        total += cost.bytes_current;
++        println!(
++            "{rows},{stage},{},{},{},{},{}",
++            cost.count_total, cost.bytes_total, cost.bytes_current, total, cost.bytes_max
++        );
++        assert!(win.as_ref().unwrap().contains_text(value).unwrap());
++    }
++    let cost = allocation_counter::measure(|| drop(win.take()));
++    total += cost.bytes_current;
++    println!(
++        "{rows},drop,{},{},{},{},{}",
++        cost.count_total, cost.bytes_total, cost.bytes_current, total, cost.bytes_max
++    );
++    assert_eq!(total, 0, "all measured window allocations reclaimed");
++    eprintln!(
++        "font_file_bytes={},shared_immutable_font_is_outside_owner_ledger=true",
++        bytes.len()
++    );
++}
+diff --git a/reactivity/crates/gpui/src/runtime.rs b/reactivity/crates/gpui/src/runtime.rs
+index b5738f0832..ff5f9cde0f 100644
+--- a/reactivity/crates/gpui/src/runtime.rs
++++ b/reactivity/crates/gpui/src/runtime.rs
+@@ -3111,7 +3111,14 @@ impl<M: View + 'static> Runtime<M> {
+             .and_then(|text| text.system.as_ref())
+             .map(|text| text.font_face().clone());
+         let mut text_geometry = Vec::new();
+-        let mut shaper = font.as_ref().map(|font| font.shaper());
++        let mut shaping = self
++            .text
++            .as_mut()
++            .map(|text| std::mem::take(&mut text.shaping));
++        let mut shaper = font
++            .as_ref()
++            .zip(shaping.as_mut())
++            .map(|(font, cache)| font.shaper_reusing(cache));
+         let active_selection = self.active_selection();
+         let selection_snapshot = self.selection_snapshot();
+         let composition_snapshot = self.composition_snapshot();
+@@ -3236,12 +3243,16 @@ impl<M: View + 'static> Runtime<M> {
+         if let Some(error) = failure {
+             return Err(error);
+         }
+-        if !self.rebuild_layout
++        let sparse = !self.rebuild_layout
+             && !self.topology_changed
+             && before.changed_layout_writes == after.changed_layout_writes
+-            && let Some(shaper) = &mut shaper
+-            && self.try_sparse_text(shaper)?
+-        {
++            && match &mut shaper {
++                Some(shaper) => self.try_sparse_text(shaper)?,
++                None => false,
++            };
++        if sparse {
++            drop(shaper);
++            self.text.as_mut().unwrap().shaping = shaping.unwrap();
+             return Ok(());
+         }
+         self.refresh_inspector(true)?;
+@@ -3842,10 +3853,13 @@ impl<M: View + 'static> Runtime<M> {
+         self.latest_token = Some(token);
+         self.complete_epoch = self.source_epoch;
+         self.next_presentation = next_sequence;
+-        if self.texts.is_empty()
+-            && let Some(text) = &mut self.text
+-        {
+-            text.system = None;
++        drop(shaper);
++        if let Some(text) = &mut self.text {
++            if self.texts.is_empty() {
++                text.system = None;
++            } else if let Some(cache) = shaping {
++                text.shaping = cache;
++            }
+         }
+         self.dirty = false;
+         self.rebuild_layout = false;
+diff --git a/reactivity/crates/gpui/src/runtime/text_geometry.rs b/reactivity/crates/gpui/src/runtime/text_geometry.rs
+index a68cffab1c..7f7b569e32 100644
+--- a/reactivity/crates/gpui/src/runtime/text_geometry.rs
++++ b/reactivity/crates/gpui/src/runtime/text_geometry.rs
+@@ -11,6 +11,7 @@ pub(super) struct Entry {
+ #[derive(Default)]
+ pub(super) struct TextResources {
+     pub system: Option<TextSystem>,
++    pub shaping: gpui_canvas::TextCache,
+     pub font: Option<gpui_canvas::FontFace>,
+     pub presented: Vec<Entry>,
+     pub candidate: Option<Vec<Entry>>,

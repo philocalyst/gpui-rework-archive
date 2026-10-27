@@ -1,0 +1,19 @@
+   Compiling gpui_canvas v0.1.0 (/home/user/gpui-text-session-lab/reactivity/crates/canvas)
+   Compiling gpui_gpu v0.1.0 (/home/user/gpui-text-session-lab/reactivity/crates/gpu)
+   Compiling gpui v0.1.0 (/home/user/gpui-text-session-lab/reactivity/crates/gpui)
+    Finished `release` profile [optimized] target(s) in 4m 55s
+     Running unittests src/lib.rs (/home/user/gpui-text-session-target/release/build/gpui/24ce1c5fe5661134/out/gpui-24ce1c5fe5661134)
+GPUI_SOLID_MEMORY,initial_solid,0,0,0
+GPUI_SOLID_MEMORY,normal_buffer,2097152,1876,938
+GPUI_SOLID_MEMORY,solid_after_buffer,0,0,0
+GPUI_SOLID_MEMORY,native_redraw,0,0,0
+GPUI_SOLID_MEMORY,resized,0,0,0
+GPUI_SOLID_MEMORY,resumed,0,0,0
+libEGL warning: DRI3 error: Could not get DRI3 device
+libEGL warning: Ensure your X server supports DRI3 to get accelerated rendering
+native GPU port: Stats { submissions: 45, packet_reused: true, validated_draws: 0, binning_tile_visits: 0, bind_group_creations: 0, draws: 58, tile_references: 321, original_tile_references: 355, skipped_tile_references: 34, uniform_tiles: 34, sample_evaluations: 700416, sample_draw_evaluations: 1314816, instance_upload_bytes: 0, draw_record_bytes: 3024, shared_groups: 9, compact_draws: 51, inline_draws: 7, mask_upload_bytes: 0, gpu_buffer_bytes: 22608, atlas_bytes: 65536, atlas_keys: 30, atlas_key_capacity: 56, cpu_index_capacity_bytes: 20616, correction_records: 1, correction_key_capacity: 0 }
+libEGL warning: DRI3 error: Could not get DRI3 device
+libEGL warning: Ensure your X server supports DRI3 to get accelerated rendering
+Auto rejected actual CPU adapter before requesting a device/pipeline
+GPUI_AUTO_CANDIDATE,requests=1,requested=1000,retained=1000,peak=1000
+native GPU port: Stats { submissions: 32, packet_reused: true, validated_draws: 0, binning_tile_visits: 0, bind_group_creations: 0, draws: 73, tile_references: 385, original_tile_references: 403, skipped_tile_references: 18, uniform_tiles: 18, sample_evaluations: 765952, sample_draw_evaluations: 1576960, instance_upload_bytes: 0, draw_record_bytes: 3648, shared_groups: 10, compact_draws: 65, inline_draws: 8, mask_upload_bytes: 0, gpu_buffer_bytes: 22608, atlas_bytes: 65536, atlas_keys: 33, atlas_key_capacity: 56, cpu_index_capacity_bytes: 19716, correction_records: 1, correction_key_capacity: 0 }

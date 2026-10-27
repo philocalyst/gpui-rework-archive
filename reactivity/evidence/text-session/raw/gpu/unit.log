@@ -1,0 +1,3 @@
+   Compiling gpui_gpu v0.1.0 (/home/user/gpui-text-session-lab/reactivity/crates/gpu)
+    Finished `release` profile [optimized] target(s) in 18.66s
+     Running unittests src/lib.rs (/home/user/gpui-text-session-target/release/build/gpui_gpu/e02b747f77180ba1/out/gpui_gpu-e02b747f77180ba1)

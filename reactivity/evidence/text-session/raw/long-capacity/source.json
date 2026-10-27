@@ -1,0 +1,8 @@
+{
+  "commit": "49f1327177d76498d050122b52d8b1365f50f471",
+  "changes_from_previous_guard": [
+    "reactivity/crates/canvas/examples/text_cache_capacity.rs"
+  ],
+  "fixture_sha256": "da974fa669d319516f00f87da3890c5cf0fe40f0da19a09afad2fee22c6d573e",
+  "binary_sha256": "11f64efdb7d13f7022488bc8f5ce6ef8e45a61855ae26cb85cadb80e9af6c54b"
+}

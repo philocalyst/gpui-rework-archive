@@ -1,0 +1,14 @@
+{
+  "baseline": {
+    "path": "/home/user/gpui-state-target-baseline/release/examples/state_update_allocations",
+    "sha256": "0ca8f7e61bee8d1fd5f42b6be4c9a1f16e3411fb9466995852b89834320f68e0"
+  },
+  "sparse": {
+    "path": "/home/user/gpui-sparse-text-target/release/examples/state_update_allocations",
+    "sha256": "8b1f9e28ad092a9824f6207ab60f9f54b30e3ddef62dae6f0065e00478c5b65f"
+  },
+  "cache": {
+    "path": "/home/user/gpui-text-session-target/release/examples/state_update_allocations",
+    "sha256": "f187cf21f13cc70b1e87d2fc07c01b90ecb04eb4fbba9e6b7369be3da3fb8ec5"
+  }
+}
