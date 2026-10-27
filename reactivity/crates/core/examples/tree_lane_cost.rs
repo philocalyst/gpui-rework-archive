@@ -36,14 +36,24 @@ fn fingerprint(tree: &LayoutTree, nodes: &[NodeId]) -> u64 {
     let mut hash = 0xcbf29ce484222325_u64;
     for node in nodes {
         let l = tree.layout(*node).unwrap();
+        for byte in l.order.to_le_bytes() {
+            hash = (hash ^ u64::from(byte)).wrapping_mul(0x100000001b3);
+        }
+        let rects = [l.scrollable_overflow_rect, l.border, l.padding, l.margin];
         for f in [
             l.location.x,
             l.location.y,
             l.size.width,
             l.size.height,
-            l.content_size.width,
-            l.content_size.height,
-        ] {
+            l.scrollbar_size.width,
+            l.scrollbar_size.height,
+        ]
+        .into_iter()
+        .chain(
+            rects
+                .into_iter()
+                .flat_map(|r| [r.left, r.right, r.top, r.bottom]),
+        ) {
             for byte in f.to_bits().to_le_bytes() {
                 hash = (hash ^ u64::from(byte)).wrapping_mul(0x100000001b3);
             }
