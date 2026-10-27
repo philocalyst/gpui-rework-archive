@@ -26,6 +26,8 @@ const MAX_PIXELS: usize = 16 * 1024 * 1024;
 const MAX_ATLAS_SIDE: u32 = 2048;
 const ROUNDED_SOURCE: u32 = 1 << 30;
 const _: () = assert!(MAX_ATLAS_SIDE < ROUNDED_SOURCE);
+const PIXEL_UNIFORM_TILE: u32 = 1 << 30;
+const _: () = assert!(MAX_REFERENCES < PIXEL_UNIFORM_TILE as usize);
 const UNIFORM_TILE: u32 = 1 << 31;
 const _: () = assert!(MAX_REFERENCES < UNIFORM_TILE as usize);
 const _: () = assert!(MAX_DRAWS < UNIFORM_TILE as usize);
@@ -102,6 +104,10 @@ pub struct Stats {
     /// References omitted from the sampled CSR, including uniform tiles.
     pub skipped_tile_references: usize,
     pub uniform_tiles: usize,
+    /// Mixed-color tiles whose surviving solids have pixel-uniform coverage.
+    pub pixel_uniform_tiles: usize,
+    /// Record inspections for that certificate, including rejected prefixes.
+    pub pixel_uniform_checks: usize,
     /// Planned lattice samples, excluding clear and certified uniform pixels.
     pub sample_evaluations: u64,
     /// Planned sample_draw calls, including calls rejected by clip/geometry.
@@ -149,6 +155,24 @@ fn prepared<'a>(group: PreparedGroup<'a>, p: PreparedPlacement<'a>) -> PreparedD
 }
 // Quarter-pixel endpoints select the canonical CPU's exact sample set.
 // Empty rectangles need no special sentinel in the certified bounds sampler.
+// Decodes only the already validated packet address and lowered sample domain.
+// Integer endpoints make membership constant across all sixteen samples in each
+// pixel, regardless of color, alpha, overlap or painter-order position.
+fn pixel_uniform_record(records: &[Word], address: u32) -> bool {
+    let base = (address & !INLINE_RECORD) as usize;
+    let correction = if address & INLINE_RECORD != 0 {
+        records[base + 5][3]
+    } else {
+        records[records[base + 1][3] as usize + 4][0]
+    };
+    if correction & LOWERED_SOLID == 0 {
+        return false;
+    }
+    let [x, y, w, h] = records[base].map(f32::from_bits);
+    [x, y, x + w, y + h]
+        .iter()
+        .all(|v| v.is_finite() && v.fract() == 0.)
+}
 fn sampled_solid_rect(
     draw: &PreparedDraw<'_>,
     viewport: [u32; 2],
@@ -916,6 +940,24 @@ impl RendererState {
             }
         }
         debug_assert_eq!((word, reverse_ordinal), (bank_words, 0));
+        let mut pixel_uniform_tiles = 0;
+        let mut pixel_uniform_checks = 0;
+        if self.tile_proofs {
+            for range in &mut self.ranges {
+                if range[1] != UNIFORM_TILE
+                    && range[0] != range[1]
+                    && self.references[range[0] as usize..range[1] as usize]
+                        .iter()
+                        .all(|&address| {
+                            pixel_uniform_checks += 1;
+                            pixel_uniform_record(&self.records, address)
+                        })
+                {
+                    range[1] |= PIXEL_UNIFORM_TILE;
+                    pixel_uniform_tiles += 1;
+                }
+            }
+        }
         let mut uniform_tiles = 0;
         let mut sample_evaluations = 0;
         let mut sample_draw_evaluations = 0;
@@ -925,9 +967,15 @@ impl RendererState {
             } else if range[0] != range[1] {
                 let [left, top, right, bottom] =
                     tile_bounds(tile, columns, scene.width, scene.height);
-                let samples = u64::from((right - left) * (bottom - top)) * 16;
+                let samples = u64::from((right - left) * (bottom - top))
+                    * if range[1] & PIXEL_UNIFORM_TILE != 0 {
+                        1
+                    } else {
+                        16
+                    };
                 sample_evaluations += samples;
-                sample_draw_evaluations += samples * u64::from(range[1] - range[0]);
+                sample_draw_evaluations +=
+                    samples * u64::from((range[1] & !PIXEL_UNIFORM_TILE) - range[0]);
             }
         }
         let (tone, exposure) = match scene.color_config.mapping {
@@ -1035,6 +1083,8 @@ impl RendererState {
             original_tile_references: original_references,
             skipped_tile_references: original_references - references,
             uniform_tiles,
+            pixel_uniform_tiles,
+            pixel_uniform_checks,
             sample_evaluations,
             sample_draw_evaluations,
             instance_upload_bytes: self.records.len() * 16

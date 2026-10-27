@@ -603,6 +603,24 @@ pub mod ui {
         output(anchor + delta)
     }
 
+    // Every surviving draw has the same membership at all sixteen samples
+    // within this pixel. Keep painter order and the reference reduction, also
+    // for signed zeros or exceptional intermediate arithmetic.
+    pub fn pixel_uniform_fragment(position: Vec2f, range: Vec2u, clear: Vec4f) -> Vec4f {
+        let mut color = clear;
+        let end = range.y & 0x3fffffff;
+        #[wgsl_allow(non_literal_loop_bounds)]
+        for cursor in range.x..end {
+            let source = sample_draw(load_banked_draw(get!(INDICES)[cursor as usize]), position);
+            color = source + color * (1.0 - source.w);
+        }
+        let mut delta = vec4f(0.0, 0.0, 0.0, 0.0);
+        for index in 0..16 {
+            delta += (color - color) * 0.0625;
+        }
+        output(color + delta)
+    }
+
     #[fragment]
     pub fn fragment(#[builtin(position)] position: Vec4f) -> Vec4f {
         let globals = get!(GLOBALS);
@@ -616,6 +634,9 @@ pub mod ui {
         }
         if range.x == range.y {
             return output(globals.clear);
+        }
+        if (range.y & 0x40000000) != 0 {
+            return pixel_uniform_fragment(position.xy(), range, globals.clear);
         }
         if (globals.viewport.w & 8) != 0 {
             return banked_fragment(position.xy(), range, globals.clear);
@@ -649,5 +670,9 @@ mod tests {
     #[test]
     fn generated_shader_validates() {
         super::ui::WGSL_SOURCE.validate().unwrap();
+        assert_eq!(
+            super::ui::WGSL_SOURCE.wgsl_source().unwrap(),
+            include_str!(concat!(env!("OUT_DIR"), "/ui.wgsl"))
+        );
     }
 }
