@@ -1,0 +1,1 @@
+{"command": ["/home/user/gpui-delivery-sweep-target/release/examples/delivery_sweep_cost", "1", "one"], "exit": 0, "purpose": "correctness-only; concurrent compilation; timings not admitted"}

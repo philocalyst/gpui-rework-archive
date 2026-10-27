@@ -1,0 +1,1 @@
+{"command": ["/usr/bin/time", "-v", "-o", "/home/user/gpui-delivery-sweep-evidence/paired/0-1-one-candidate.time", "taskset", "-c", "2", "/home/user/gpui-delivery-sweep-target/release/examples/delivery_sweep_cost", "1", "one"], "exit": 0}

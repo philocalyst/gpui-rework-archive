@@ -1,0 +1,20 @@
+
+running 1 test
+test small_budgets_rotate_across_static_lanes_without_losing_per_lane_fifo ... FAILED
+
+failures:
+
+---- small_budgets_rotate_across_static_lanes_without_losing_per_lane_fifo stdout ----
+
+thread 'small_budgets_rotate_across_static_lanes_without_losing_per_lane_fifo' (467443) panicked at crates/gpui/tests/remote.rs:162:5:
+assertion `left == right` failed
+  left: [100, 101, 102, 103, 0, 1, 2, 3]
+ right: [100, 0, 101, 1, 102, 2, 103, 3]
+note: run with `RUST_BACKTRACE=1` environment variable to display a backtrace
+
+
+failures:
+    small_budgets_rotate_across_static_lanes_without_losing_per_lane_fifo
+
+test result: FAILED. 0 passed; 1 failed; 0 ignored; 0 measured; 14 filtered out; finished in 0.00s
+

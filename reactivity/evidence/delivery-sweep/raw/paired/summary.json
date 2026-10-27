@@ -1,0 +1,2790 @@
+{
+  "runs": [
+    {
+      "repeat": 0,
+      "case": "1-idle",
+      "variant": "control",
+      "final": "FINAL,value=0,pixel_hash=11462430325376205605,counters=Counters { owner_reruns: 0, descriptions: 0, source_operations: 0, source_reads: 0, destination_compares: 0, text_promotions: 0, text_bytes_copied: 0, layout_runs: 0, measure_calls: 0, presentations: 0, paint_passes: 0, exact_updates: 0, coarse_updates: 0 }",
+      "cpu": {
+        "0.5": 13.82,
+        "0.95": 13.94,
+        "0.99": 20.83
+      },
+      "wall": {
+        "0.5": 15.23,
+        "0.95": 16.23,
+        "0.99": 36.07
+      }
+    },
+    {
+      "repeat": 0,
+      "case": "1-idle",
+      "variant": "candidate",
+      "final": "FINAL,value=0,pixel_hash=11462430325376205605,counters=Counters { owner_reruns: 0, descriptions: 0, source_operations: 0, source_reads: 0, destination_compares: 0, text_promotions: 0, text_bytes_copied: 0, layout_runs: 0, measure_calls: 0, presentations: 0, paint_passes: 0, exact_updates: 0, coarse_updates: 0 }",
+      "cpu": {
+        "0.5": 16.83,
+        "0.95": 17.94,
+        "0.99": 23.25
+      },
+      "wall": {
+        "0.5": 18.33,
+        "0.95": 19.64,
+        "0.99": 37.07
+      }
+    },
+    {
+      "repeat": 0,
+      "case": "1-one",
+      "variant": "candidate",
+      "final": "FINAL,value=16514348029754293716,pixel_hash=11240993552904184613,counters=Counters { owner_reruns: 0, descriptions: 0, source_operations: 4000, source_reads: 4000, destination_compares: 4000, text_promotions: 0, text_bytes_copied: 0, layout_runs: 0, measure_calls: 0, presentations: 4000, paint_passes: 0, exact_updates: 4000, coarse_updates: 0 }",
+      "cpu": {
+        "0.5": 210.59,
+        "0.95": 245.36,
+        "0.99": 266.0
+      },
+      "wall": {
+        "0.5": 212.3,
+        "0.95": 247.16,
+        "0.99": 268.0
+      }
+    },
+    {
+      "repeat": 0,
+      "case": "1-one",
+      "variant": "control",
+      "final": "FINAL,value=16514348029754293716,pixel_hash=11240993552904184613,counters=Counters { owner_reruns: 0, descriptions: 0, source_operations: 4000, source_reads: 4000, destination_compares: 4000, text_promotions: 0, text_bytes_copied: 0, layout_runs: 0, measure_calls: 0, presentations: 4000, paint_passes: 0, exact_updates: 4000, coarse_updates: 0 }",
+      "cpu": {
+        "0.5": 201.98,
+        "0.95": 233.24,
+        "0.99": 514.17
+      },
+      "wall": {
+        "0.5": 204.08,
+        "0.95": 235.54,
+        "0.99": 516.76
+      }
+    },
+    {
+      "repeat": 0,
+      "case": "1-all",
+      "variant": "control",
+      "final": "FINAL,value=16514348029754293716,pixel_hash=11240993552904184613,counters=Counters { owner_reruns: 0, descriptions: 0, source_operations: 4000, source_reads: 4000, destination_compares: 4000, text_promotions: 0, text_bytes_copied: 0, layout_runs: 0, measure_calls: 0, presentations: 4000, paint_passes: 0, exact_updates: 4000, coarse_updates: 0 }",
+      "cpu": {
+        "0.5": 195.97,
+        "0.95": 248.36,
+        "0.99": 283.44
+      },
+      "wall": {
+        "0.5": 198.07,
+        "0.95": 250.07,
+        "0.99": 287.13
+      }
+    },
+    {
+      "repeat": 0,
+      "case": "1-all",
+      "variant": "candidate",
+      "final": "FINAL,value=16514348029754293716,pixel_hash=11240993552904184613,counters=Counters { owner_reruns: 0, descriptions: 0, source_operations: 4000, source_reads: 4000, destination_compares: 4000, text_promotions: 0, text_bytes_copied: 0, layout_runs: 0, measure_calls: 0, presentations: 4000, paint_passes: 0, exact_updates: 4000, coarse_updates: 0 }",
+      "cpu": {
+        "0.5": 198.37,
+        "0.95": 226.02,
+        "0.99": 273.61
+      },
+      "wall": {
+        "0.5": 199.98,
+        "0.95": 229.04,
+        "0.99": 276.72
+      }
+    },
+    {
+      "repeat": 0,
+      "case": "1-rotate",
+      "variant": "candidate",
+      "final": "FINAL,value=16514348029754293716,pixel_hash=11240993552904184613,counters=Counters { owner_reruns: 0, descriptions: 0, source_operations: 4000, source_reads: 4000, destination_compares: 4000, text_promotions: 0, text_bytes_copied: 0, layout_runs: 0, measure_calls: 0, presentations: 4000, paint_passes: 0, exact_updates: 4000, coarse_updates: 0 }",
+      "cpu": {
+        "0.5": 206.69,
+        "0.95": 230.73,
+        "0.99": 539.32
+      },
+      "wall": {
+        "0.5": 208.58,
+        "0.95": 232.74,
+        "0.99": 559.05
+      }
+    },
+    {
+      "repeat": 0,
+      "case": "1-rotate",
+      "variant": "control",
+      "final": "FINAL,value=16514348029754293716,pixel_hash=11240993552904184613,counters=Counters { owner_reruns: 0, descriptions: 0, source_operations: 4000, source_reads: 4000, destination_compares: 4000, text_promotions: 0, text_bytes_copied: 0, layout_runs: 0, measure_calls: 0, presentations: 4000, paint_passes: 0, exact_updates: 4000, coarse_updates: 0 }",
+      "cpu": {
+        "0.5": 212.0,
+        "0.95": 233.04,
+        "0.99": 302.37
+      },
+      "wall": {
+        "0.5": 214.5,
+        "0.95": 235.85,
+        "0.99": 304.17
+      }
+    },
+    {
+      "repeat": 0,
+      "case": "8-idle",
+      "variant": "control",
+      "final": "FINAL,value=0,pixel_hash=11462430325376205605,counters=Counters { owner_reruns: 0, descriptions: 0, source_operations: 0, source_reads: 0, destination_compares: 0, text_promotions: 0, text_bytes_copied: 0, layout_runs: 0, measure_calls: 0, presentations: 0, paint_passes: 0, exact_updates: 0, coarse_updates: 0 }",
+      "cpu": {
+        "0.5": 78.95,
+        "0.95": 85.95,
+        "0.99": 236.85
+      },
+      "wall": {
+        "0.5": 81.35,
+        "0.95": 88.77,
+        "0.99": 249.27
+      }
+    },
+    {
+      "repeat": 0,
+      "case": "8-idle",
+      "variant": "candidate",
+      "final": "FINAL,value=0,pixel_hash=11462430325376205605,counters=Counters { owner_reruns: 0, descriptions: 0, source_operations: 0, source_reads: 0, destination_compares: 0, text_promotions: 0, text_bytes_copied: 0, layout_runs: 0, measure_calls: 0, presentations: 0, paint_passes: 0, exact_updates: 0, coarse_updates: 0 }",
+      "cpu": {
+        "0.5": 75.84,
+        "0.95": 77.75,
+        "0.99": 135.46
+      },
+      "wall": {
+        "0.5": 78.05,
+        "0.95": 80.15,
+        "0.99": 138.05
+      }
+    },
+    {
+      "repeat": 0,
+      "case": "8-one",
+      "variant": "candidate",
+      "final": "FINAL,value=16514348029754293716,pixel_hash=11240993552904184613,counters=Counters { owner_reruns: 0, descriptions: 0, source_operations: 4000, source_reads: 4000, destination_compares: 4000, text_promotions: 0, text_bytes_copied: 0, layout_runs: 0, measure_calls: 0, presentations: 4000, paint_passes: 0, exact_updates: 4000, coarse_updates: 0 }",
+      "cpu": {
+        "0.5": 331.72,
+        "0.95": 428.01,
+        "0.99": 584.8
+      },
+      "wall": {
+        "0.5": 334.14,
+        "0.95": 430.71,
+        "0.99": 665.25
+      }
+    },
+    {
+      "repeat": 0,
+      "case": "8-one",
+      "variant": "control",
+      "final": "FINAL,value=16514348029754293716,pixel_hash=11240993552904184613,counters=Counters { owner_reruns: 0, descriptions: 0, source_operations: 4000, source_reads: 4000, destination_compares: 4000, text_promotions: 0, text_bytes_copied: 0, layout_runs: 0, measure_calls: 0, presentations: 4000, paint_passes: 0, exact_updates: 4000, coarse_updates: 0 }",
+      "cpu": {
+        "0.5": 388.33,
+        "0.95": 395.55,
+        "0.99": 408.37
+      },
+      "wall": {
+        "0.5": 390.03,
+        "0.95": 408.17,
+        "0.99": 410.07
+      }
+    },
+    {
+      "repeat": 0,
+      "case": "8-all",
+      "variant": "control",
+      "final": "FINAL,value=7784359077124646912,pixel_hash=1744856074806027045,counters=Counters { owner_reruns: 0, descriptions: 0, source_operations: 4000, source_reads: 4000, destination_compares: 4000, text_promotions: 0, text_bytes_copied: 0, layout_runs: 0, measure_calls: 0, presentations: 4000, paint_passes: 0, exact_updates: 4000, coarse_updates: 0 }",
+      "cpu": {
+        "0.5": 426.1,
+        "0.95": 439.02,
+        "0.99": 502.95
+      },
+      "wall": {
+        "0.5": 427.9,
+        "0.95": 449.15,
+        "0.99": 505.14
+      }
+    },
+    {
+      "repeat": 0,
+      "case": "8-all",
+      "variant": "candidate",
+      "final": "FINAL,value=7784359077124646912,pixel_hash=1744856074806027045,counters=Counters { owner_reruns: 0, descriptions: 0, source_operations: 4000, source_reads: 4000, destination_compares: 4000, text_promotions: 0, text_bytes_copied: 0, layout_runs: 0, measure_calls: 0, presentations: 4000, paint_passes: 0, exact_updates: 4000, coarse_updates: 0 }",
+      "cpu": {
+        "0.5": 413.07,
+        "0.95": 457.26,
+        "0.99": 498.44
+      },
+      "wall": {
+        "0.5": 414.59,
+        "0.95": 459.07,
+        "0.99": 502.25
+      }
+    },
+    {
+      "repeat": 0,
+      "case": "8-rotate",
+      "variant": "candidate",
+      "final": "FINAL,value=7784359077124646912,pixel_hash=1744856074806027045,counters=Counters { owner_reruns: 0, descriptions: 0, source_operations: 32000, source_reads: 32000, destination_compares: 32000, text_promotions: 0, text_bytes_copied: 0, layout_runs: 0, measure_calls: 0, presentations: 32000, paint_passes: 0, exact_updates: 32000, coarse_updates: 0 }",
+      "cpu": {
+        "0.5": 1698.21,
+        "0.95": 2111.88,
+        "0.99": 2500.2
+      },
+      "wall": {
+        "0.5": 1700.18,
+        "0.95": 2114.58,
+        "0.99": 2519.24
+      }
+    },
+    {
+      "repeat": 0,
+      "case": "8-rotate",
+      "variant": "control",
+      "final": "FINAL,value=7784359077124646912,pixel_hash=1744856074806027045,counters=Counters { owner_reruns: 0, descriptions: 0, source_operations: 32000, source_reads: 32000, destination_compares: 32000, text_promotions: 0, text_bytes_copied: 0, layout_runs: 0, measure_calls: 0, presentations: 32000, paint_passes: 0, exact_updates: 32000, coarse_updates: 0 }",
+      "cpu": {
+        "0.5": 1682.18,
+        "0.95": 1869.21,
+        "0.99": 2003.27
+      },
+      "wall": {
+        "0.5": 1684.26,
+        "0.95": 1872.12,
+        "0.99": 2216.87
+      }
+    },
+    {
+      "repeat": 0,
+      "case": "32-idle",
+      "variant": "control",
+      "final": "FINAL,value=0,pixel_hash=11462430325376205605,counters=Counters { owner_reruns: 0, descriptions: 0, source_operations: 0, source_reads: 0, destination_compares: 0, text_promotions: 0, text_bytes_copied: 0, layout_runs: 0, measure_calls: 0, presentations: 0, paint_passes: 0, exact_updates: 0, coarse_updates: 0 }",
+      "cpu": {
+        "0.5": 298.56,
+        "0.95": 310.39,
+        "0.99": 371.9
+      },
+      "wall": {
+        "0.5": 300.85,
+        "0.95": 312.69,
+        "0.99": 374.41
+      }
+    },
+    {
+      "repeat": 0,
+      "case": "32-idle",
+      "variant": "candidate",
+      "final": "FINAL,value=0,pixel_hash=11462430325376205605,counters=Counters { owner_reruns: 0, descriptions: 0, source_operations: 0, source_reads: 0, destination_compares: 0, text_promotions: 0, text_bytes_copied: 0, layout_runs: 0, measure_calls: 0, presentations: 0, paint_passes: 0, exact_updates: 0, coarse_updates: 0 }",
+      "cpu": {
+        "0.5": 279.13,
+        "0.95": 282.84,
+        "0.99": 288.94
+      },
+      "wall": {
+        "0.5": 281.54,
+        "0.95": 285.54,
+        "0.99": 291.64
+      }
+    },
+    {
+      "repeat": 0,
+      "case": "32-one",
+      "variant": "candidate",
+      "final": "FINAL,value=16514348029754293716,pixel_hash=11240993552904184613,counters=Counters { owner_reruns: 0, descriptions: 0, source_operations: 4000, source_reads: 4000, destination_compares: 4000, text_promotions: 0, text_bytes_copied: 0, layout_runs: 0, measure_calls: 0, presentations: 4000, paint_passes: 0, exact_updates: 4000, coarse_updates: 0 }",
+      "cpu": {
+        "0.5": 730.68,
+        "0.95": 817.25,
+        "0.99": 939.27
+      },
+      "wall": {
+        "0.5": 732.48,
+        "0.95": 820.75,
+        "0.99": 952.39
+      }
+    },
+    {
+      "repeat": 0,
+      "case": "32-one",
+      "variant": "control",
+      "final": "FINAL,value=16514348029754293716,pixel_hash=11240993552904184613,counters=Counters { owner_reruns: 0, descriptions: 0, source_operations: 4000, source_reads: 4000, destination_compares: 4000, text_promotions: 0, text_bytes_copied: 0, layout_runs: 0, measure_calls: 0, presentations: 4000, paint_passes: 0, exact_updates: 4000, coarse_updates: 0 }",
+      "cpu": {
+        "0.5": 763.23,
+        "0.95": 817.54,
+        "0.99": 821.85
+      },
+      "wall": {
+        "0.5": 764.94,
+        "0.95": 820.34,
+        "0.99": 824.84
+      }
+    },
+    {
+      "repeat": 0,
+      "case": "32-all",
+      "variant": "control",
+      "final": "FINAL,value=4110017462229318656,pixel_hash=14812928932416127781,counters=Counters { owner_reruns: 0, descriptions: 0, source_operations: 4000, source_reads: 4000, destination_compares: 4000, text_promotions: 0, text_bytes_copied: 0, layout_runs: 0, measure_calls: 0, presentations: 4000, paint_passes: 0, exact_updates: 4000, coarse_updates: 0 }",
+      "cpu": {
+        "0.5": 1255.86,
+        "0.95": 1385.51,
+        "0.99": 1470.37
+      },
+      "wall": {
+        "0.5": 1257.47,
+        "0.95": 1387.81,
+        "0.99": 1599.9
+      }
+    },
+    {
+      "repeat": 0,
+      "case": "32-all",
+      "variant": "candidate",
+      "final": "FINAL,value=4110017462229318656,pixel_hash=14812928932416127781,counters=Counters { owner_reruns: 0, descriptions: 0, source_operations: 4000, source_reads: 4000, destination_compares: 4000, text_promotions: 0, text_bytes_copied: 0, layout_runs: 0, measure_calls: 0, presentations: 4000, paint_passes: 0, exact_updates: 4000, coarse_updates: 0 }",
+      "cpu": {
+        "0.5": 1229.81,
+        "0.95": 1308.97,
+        "0.99": 1361.26
+      },
+      "wall": {
+        "0.5": 1232.22,
+        "0.95": 1310.67,
+        "0.99": 1557.53
+      }
+    },
+    {
+      "repeat": 0,
+      "case": "32-rotate",
+      "variant": "candidate",
+      "final": "FINAL,value=4110017462229318656,pixel_hash=14812928932416127781,counters=Counters { owner_reruns: 0, descriptions: 0, source_operations: 128000, source_reads: 128000, destination_compares: 128000, text_promotions: 0, text_bytes_copied: 0, layout_runs: 0, measure_calls: 0, presentations: 128000, paint_passes: 0, exact_updates: 128000, coarse_updates: 0 }",
+      "cpu": {
+        "0.5": 7435.2,
+        "0.95": 7645.99,
+        "0.99": 7821.73
+      },
+      "wall": {
+        "0.5": 7436.88,
+        "0.95": 7658.49,
+        "0.99": 7881.02
+      }
+    },
+    {
+      "repeat": 0,
+      "case": "32-rotate",
+      "variant": "control",
+      "final": "FINAL,value=4110017462229318656,pixel_hash=14812928932416127781,counters=Counters { owner_reruns: 0, descriptions: 0, source_operations: 128000, source_reads: 128000, destination_compares: 128000, text_promotions: 0, text_bytes_copied: 0, layout_runs: 0, measure_calls: 0, presentations: 128000, paint_passes: 0, exact_updates: 128000, coarse_updates: 0 }",
+      "cpu": {
+        "0.5": 7113.19,
+        "0.95": 7192.55,
+        "0.99": 7314.38
+      },
+      "wall": {
+        "0.5": 7114.97,
+        "0.95": 7237.2,
+        "0.99": 7318.75
+      }
+    },
+    {
+      "repeat": 0,
+      "case": "64-idle",
+      "variant": "control",
+      "final": "FINAL,value=0,pixel_hash=11462430325376205605,counters=Counters { owner_reruns: 0, descriptions: 0, source_operations: 0, source_reads: 0, destination_compares: 0, text_promotions: 0, text_bytes_copied: 0, layout_runs: 0, measure_calls: 0, presentations: 0, paint_passes: 0, exact_updates: 0, coarse_updates: 0 }",
+      "cpu": {
+        "0.5": 579.49,
+        "0.95": 615.77,
+        "0.99": 639.5
+      },
+      "wall": {
+        "0.5": 581.89,
+        "0.95": 618.25,
+        "0.99": 642.81
+      }
+    },
+    {
+      "repeat": 0,
+      "case": "64-idle",
+      "variant": "candidate",
+      "final": "FINAL,value=0,pixel_hash=11462430325376205605,counters=Counters { owner_reruns: 0, descriptions: 0, source_operations: 0, source_reads: 0, destination_compares: 0, text_promotions: 0, text_bytes_copied: 0, layout_runs: 0, measure_calls: 0, presentations: 0, paint_passes: 0, exact_updates: 0, coarse_updates: 0 }",
+      "cpu": {
+        "0.5": 604.14,
+        "0.95": 682.78,
+        "0.99": 701.62
+      },
+      "wall": {
+        "0.5": 608.04,
+        "0.95": 685.09,
+        "0.99": 704.74
+      }
+    },
+    {
+      "repeat": 0,
+      "case": "64-one",
+      "variant": "candidate",
+      "final": "FINAL,value=16514348029754293716,pixel_hash=11240993552904184613,counters=Counters { owner_reruns: 0, descriptions: 0, source_operations: 4000, source_reads: 4000, destination_compares: 4000, text_promotions: 0, text_bytes_copied: 0, layout_runs: 0, measure_calls: 0, presentations: 4000, paint_passes: 0, exact_updates: 4000, coarse_updates: 0 }",
+      "cpu": {
+        "0.5": 1327.0,
+        "0.95": 1544.4,
+        "0.99": 1613.34
+      },
+      "wall": {
+        "0.5": 1328.81,
+        "0.95": 1546.7,
+        "0.99": 1953.87
+      }
+    },
+    {
+      "repeat": 0,
+      "case": "64-one",
+      "variant": "control",
+      "final": "FINAL,value=16514348029754293716,pixel_hash=11240993552904184613,counters=Counters { owner_reruns: 0, descriptions: 0, source_operations: 4000, source_reads: 4000, destination_compares: 4000, text_promotions: 0, text_bytes_copied: 0, layout_runs: 0, measure_calls: 0, presentations: 4000, paint_passes: 0, exact_updates: 4000, coarse_updates: 0 }",
+      "cpu": {
+        "0.5": 1756.91,
+        "0.95": 1902.88,
+        "0.99": 2022.9
+      },
+      "wall": {
+        "0.5": 1759.2,
+        "0.95": 1905.28,
+        "0.99": 2025.3
+      }
+    },
+    {
+      "repeat": 0,
+      "case": "64-all",
+      "variant": "control",
+      "final": "FINAL,value=9207992534111819776,pixel_hash=4285754629872036645,counters=Counters { owner_reruns: 0, descriptions: 0, source_operations: 4000, source_reads: 4000, destination_compares: 4000, text_promotions: 0, text_bytes_copied: 0, layout_runs: 0, measure_calls: 0, presentations: 4000, paint_passes: 0, exact_updates: 4000, coarse_updates: 0 }",
+      "cpu": {
+        "0.5": 2677.33,
+        "0.95": 3210.76,
+        "0.99": 3441.88
+      },
+      "wall": {
+        "0.5": 2679.94,
+        "0.95": 3216.95,
+        "0.99": 3460.3
+      }
+    },
+    {
+      "repeat": 0,
+      "case": "64-all",
+      "variant": "candidate",
+      "final": "FINAL,value=9207992534111819776,pixel_hash=4285754629872036645,counters=Counters { owner_reruns: 0, descriptions: 0, source_operations: 4000, source_reads: 4000, destination_compares: 4000, text_promotions: 0, text_bytes_copied: 0, layout_runs: 0, measure_calls: 0, presentations: 4000, paint_passes: 0, exact_updates: 4000, coarse_updates: 0 }",
+      "cpu": {
+        "0.5": 2344.62,
+        "0.95": 2524.85,
+        "0.99": 2869.7
+      },
+      "wall": {
+        "0.5": 2347.0,
+        "0.95": 2529.55,
+        "0.99": 2876.0
+      }
+    },
+    {
+      "repeat": 0,
+      "case": "64-rotate",
+      "variant": "candidate",
+      "final": "FINAL,value=9207992534111819776,pixel_hash=4285754629872036645,counters=Counters { owner_reruns: 0, descriptions: 0, source_operations: 256000, source_reads: 256000, destination_compares: 256000, text_promotions: 0, text_bytes_copied: 0, layout_runs: 0, measure_calls: 0, presentations: 256000, paint_passes: 0, exact_updates: 256000, coarse_updates: 0 }",
+      "cpu": {
+        "0.5": 20246.13,
+        "0.95": 30306.18,
+        "0.99": 39754.56
+      },
+      "wall": {
+        "0.5": 20251.47,
+        "0.95": 30353.54,
+        "0.99": 39786.97
+      }
+    },
+    {
+      "repeat": 0,
+      "case": "64-rotate",
+      "variant": "control",
+      "final": "FINAL,value=9207992534111819776,pixel_hash=4285754629872036645,counters=Counters { owner_reruns: 0, descriptions: 0, source_operations: 256000, source_reads: 256000, destination_compares: 256000, text_promotions: 0, text_bytes_copied: 0, layout_runs: 0, measure_calls: 0, presentations: 256000, paint_passes: 0, exact_updates: 256000, coarse_updates: 0 }",
+      "cpu": {
+        "0.5": 17730.18,
+        "0.95": 18308.28,
+        "0.99": 19184.03
+      },
+      "wall": {
+        "0.5": 17732.12,
+        "0.95": 18312.41,
+        "0.99": 19186.95
+      }
+    },
+    {
+      "repeat": 1,
+      "case": "1-idle",
+      "variant": "candidate",
+      "final": "FINAL,value=0,pixel_hash=11462430325376205605,counters=Counters { owner_reruns: 0, descriptions: 0, source_operations: 0, source_reads: 0, destination_compares: 0, text_promotions: 0, text_bytes_copied: 0, layout_runs: 0, measure_calls: 0, presentations: 0, paint_passes: 0, exact_updates: 0, coarse_updates: 0 }",
+      "cpu": {
+        "0.5": 16.03,
+        "0.95": 18.54,
+        "0.99": 23.14
+      },
+      "wall": {
+        "0.5": 17.53,
+        "0.95": 20.84,
+        "0.99": 40.57
+      }
+    },
+    {
+      "repeat": 1,
+      "case": "1-idle",
+      "variant": "control",
+      "final": "FINAL,value=0,pixel_hash=11462430325376205605,counters=Counters { owner_reruns: 0, descriptions: 0, source_operations: 0, source_reads: 0, destination_compares: 0, text_promotions: 0, text_bytes_copied: 0, layout_runs: 0, measure_calls: 0, presentations: 0, paint_passes: 0, exact_updates: 0, coarse_updates: 0 }",
+      "cpu": {
+        "0.5": 14.63,
+        "0.95": 16.94,
+        "0.99": 21.03
+      },
+      "wall": {
+        "0.5": 16.34,
+        "0.95": 21.14,
+        "0.99": 36.47
+      }
+    },
+    {
+      "repeat": 1,
+      "case": "1-one",
+      "variant": "control",
+      "final": "FINAL,value=16514348029754293716,pixel_hash=11240993552904184613,counters=Counters { owner_reruns: 0, descriptions: 0, source_operations: 4000, source_reads: 4000, destination_compares: 4000, text_promotions: 0, text_bytes_copied: 0, layout_runs: 0, measure_calls: 0, presentations: 4000, paint_passes: 0, exact_updates: 4000, coarse_updates: 0 }",
+      "cpu": {
+        "0.5": 193.97,
+        "0.95": 231.93,
+        "0.99": 272.61
+      },
+      "wall": {
+        "0.5": 195.67,
+        "0.95": 234.04,
+        "0.99": 274.3
+      }
+    },
+    {
+      "repeat": 1,
+      "case": "1-one",
+      "variant": "candidate",
+      "final": "FINAL,value=16514348029754293716,pixel_hash=11240993552904184613,counters=Counters { owner_reruns: 0, descriptions: 0, source_operations: 4000, source_reads: 4000, destination_compares: 4000, text_promotions: 0, text_bytes_copied: 0, layout_runs: 0, measure_calls: 0, presentations: 4000, paint_passes: 0, exact_updates: 4000, coarse_updates: 0 }",
+      "cpu": {
+        "0.5": 195.37,
+        "0.95": 205.99,
+        "0.99": 283.94
+      },
+      "wall": {
+        "0.5": 196.97,
+        "0.95": 215.0,
+        "0.99": 285.95
+      }
+    },
+    {
+      "repeat": 1,
+      "case": "1-all",
+      "variant": "candidate",
+      "final": "FINAL,value=16514348029754293716,pixel_hash=11240993552904184613,counters=Counters { owner_reruns: 0, descriptions: 0, source_operations: 4000, source_reads: 4000, destination_compares: 4000, text_promotions: 0, text_bytes_copied: 0, layout_runs: 0, measure_calls: 0, presentations: 4000, paint_passes: 0, exact_updates: 4000, coarse_updates: 0 }",
+      "cpu": {
+        "0.5": 190.06,
+        "0.95": 207.59,
+        "0.99": 285.43
+      },
+      "wall": {
+        "0.5": 191.76,
+        "0.95": 209.29,
+        "0.99": 287.53
+      }
+    },
+    {
+      "repeat": 1,
+      "case": "1-all",
+      "variant": "control",
+      "final": "FINAL,value=16514348029754293716,pixel_hash=11240993552904184613,counters=Counters { owner_reruns: 0, descriptions: 0, source_operations: 4000, source_reads: 4000, destination_compares: 4000, text_promotions: 0, text_bytes_copied: 0, layout_runs: 0, measure_calls: 0, presentations: 4000, paint_passes: 0, exact_updates: 4000, coarse_updates: 0 }",
+      "cpu": {
+        "0.5": 184.35,
+        "0.95": 201.98,
+        "0.99": 270.51
+      },
+      "wall": {
+        "0.5": 186.04,
+        "0.95": 203.98,
+        "0.99": 273.11
+      }
+    },
+    {
+      "repeat": 1,
+      "case": "1-rotate",
+      "variant": "control",
+      "final": "FINAL,value=16514348029754293716,pixel_hash=11240993552904184613,counters=Counters { owner_reruns: 0, descriptions: 0, source_operations: 4000, source_reads: 4000, destination_compares: 4000, text_promotions: 0, text_bytes_copied: 0, layout_runs: 0, measure_calls: 0, presentations: 4000, paint_passes: 0, exact_updates: 4000, coarse_updates: 0 }",
+      "cpu": {
+        "0.5": 188.76,
+        "0.95": 212.7,
+        "0.99": 583.4
+      },
+      "wall": {
+        "0.5": 190.36,
+        "0.95": 214.4,
+        "0.99": 642.7
+      }
+    },
+    {
+      "repeat": 1,
+      "case": "1-rotate",
+      "variant": "candidate",
+      "final": "FINAL,value=16514348029754293716,pixel_hash=11240993552904184613,counters=Counters { owner_reruns: 0, descriptions: 0, source_operations: 4000, source_reads: 4000, destination_compares: 4000, text_promotions: 0, text_bytes_copied: 0, layout_runs: 0, measure_calls: 0, presentations: 4000, paint_passes: 0, exact_updates: 4000, coarse_updates: 0 }",
+      "cpu": {
+        "0.5": 188.16,
+        "0.95": 196.18,
+        "0.99": 254.38
+      },
+      "wall": {
+        "0.5": 189.86,
+        "0.95": 205.99,
+        "0.99": 256.59
+      }
+    },
+    {
+      "repeat": 1,
+      "case": "8-idle",
+      "variant": "candidate",
+      "final": "FINAL,value=0,pixel_hash=11462430325376205605,counters=Counters { owner_reruns: 0, descriptions: 0, source_operations: 0, source_reads: 0, destination_compares: 0, text_promotions: 0, text_bytes_copied: 0, layout_runs: 0, measure_calls: 0, presentations: 0, paint_passes: 0, exact_updates: 0, coarse_updates: 0 }",
+      "cpu": {
+        "0.5": 74.45,
+        "0.95": 80.26,
+        "0.99": 167.72
+      },
+      "wall": {
+        "0.5": 76.74,
+        "0.95": 89.77,
+        "0.99": 170.62
+      }
+    },
+    {
+      "repeat": 1,
+      "case": "8-idle",
+      "variant": "control",
+      "final": "FINAL,value=0,pixel_hash=11462430325376205605,counters=Counters { owner_reruns: 0, descriptions: 0, source_operations: 0, source_reads: 0, destination_compares: 0, text_promotions: 0, text_bytes_copied: 0, layout_runs: 0, measure_calls: 0, presentations: 0, paint_passes: 0, exact_updates: 0, coarse_updates: 0 }",
+      "cpu": {
+        "0.5": 74.54,
+        "0.95": 74.94,
+        "0.99": 126.13
+      },
+      "wall": {
+        "0.5": 76.14,
+        "0.95": 76.44,
+        "0.99": 127.95
+      }
+    },
+    {
+      "repeat": 1,
+      "case": "8-one",
+      "variant": "control",
+      "final": "FINAL,value=16514348029754293716,pixel_hash=11240993552904184613,counters=Counters { owner_reruns: 0, descriptions: 0, source_operations: 4000, source_reads: 4000, destination_compares: 4000, text_promotions: 0, text_bytes_copied: 0, layout_runs: 0, measure_calls: 0, presentations: 4000, paint_passes: 0, exact_updates: 4000, coarse_updates: 0 }",
+      "cpu": {
+        "0.5": 323.71,
+        "0.95": 329.93,
+        "0.99": 377.51
+      },
+      "wall": {
+        "0.5": 325.22,
+        "0.95": 339.53,
+        "0.99": 379.2
+      }
+    },
+    {
+      "repeat": 1,
+      "case": "8-one",
+      "variant": "candidate",
+      "final": "FINAL,value=16514348029754293716,pixel_hash=11240993552904184613,counters=Counters { owner_reruns: 0, descriptions: 0, source_operations: 4000, source_reads: 4000, destination_compares: 4000, text_promotions: 0, text_bytes_copied: 0, layout_runs: 0, measure_calls: 0, presentations: 4000, paint_passes: 0, exact_updates: 4000, coarse_updates: 0 }",
+      "cpu": {
+        "0.5": 330.02,
+        "0.95": 371.5,
+        "0.99": 589.6
+      },
+      "wall": {
+        "0.5": 332.33,
+        "0.95": 373.21,
+        "0.99": 592.22
+      }
+    },
+    {
+      "repeat": 1,
+      "case": "8-all",
+      "variant": "candidate",
+      "final": "FINAL,value=7784359077124646912,pixel_hash=1744856074806027045,counters=Counters { owner_reruns: 0, descriptions: 0, source_operations: 4000, source_reads: 4000, destination_compares: 4000, text_promotions: 0, text_bytes_copied: 0, layout_runs: 0, measure_calls: 0, presentations: 4000, paint_passes: 0, exact_updates: 4000, coarse_updates: 0 }",
+      "cpu": {
+        "0.5": 424.7,
+        "0.95": 465.88,
+        "0.99": 492.32
+      },
+      "wall": {
+        "0.5": 426.6,
+        "0.95": 467.68,
+        "0.99": 494.22
+      }
+    },
+    {
+      "repeat": 1,
+      "case": "8-all",
+      "variant": "control",
+      "final": "FINAL,value=7784359077124646912,pixel_hash=1744856074806027045,counters=Counters { owner_reruns: 0, descriptions: 0, source_operations: 4000, source_reads: 4000, destination_compares: 4000, text_promotions: 0, text_bytes_copied: 0, layout_runs: 0, measure_calls: 0, presentations: 4000, paint_passes: 0, exact_updates: 4000, coarse_updates: 0 }",
+      "cpu": {
+        "0.5": 416.18,
+        "0.95": 465.77,
+        "0.99": 481.81
+      },
+      "wall": {
+        "0.5": 417.98,
+        "0.95": 467.39,
+        "0.99": 483.6
+      }
+    },
+    {
+      "repeat": 1,
+      "case": "8-rotate",
+      "variant": "control",
+      "final": "FINAL,value=7784359077124646912,pixel_hash=1744856074806027045,counters=Counters { owner_reruns: 0, descriptions: 0, source_operations: 32000, source_reads: 32000, destination_compares: 32000, text_promotions: 0, text_bytes_copied: 0, layout_runs: 0, measure_calls: 0, presentations: 32000, paint_passes: 0, exact_updates: 32000, coarse_updates: 0 }",
+      "cpu": {
+        "0.5": 1569.95,
+        "0.95": 2252.83,
+        "0.99": 2278.29
+      },
+      "wall": {
+        "0.5": 1572.55,
+        "0.95": 2259.56,
+        "0.99": 2284.3
+      }
+    },
+    {
+      "repeat": 1,
+      "case": "8-rotate",
+      "variant": "candidate",
+      "final": "FINAL,value=7784359077124646912,pixel_hash=1744856074806027045,counters=Counters { owner_reruns: 0, descriptions: 0, source_operations: 32000, source_reads: 32000, destination_compares: 32000, text_promotions: 0, text_bytes_copied: 0, layout_runs: 0, measure_calls: 0, presentations: 32000, paint_passes: 0, exact_updates: 32000, coarse_updates: 0 }",
+      "cpu": {
+        "0.5": 1576.57,
+        "0.95": 2203.95,
+        "0.99": 2542.49
+      },
+      "wall": {
+        "0.5": 1578.36,
+        "0.95": 2206.64,
+        "0.99": 2643.97
+      }
+    },
+    {
+      "repeat": 1,
+      "case": "32-idle",
+      "variant": "candidate",
+      "final": "FINAL,value=0,pixel_hash=11462430325376205605,counters=Counters { owner_reruns: 0, descriptions: 0, source_operations: 0, source_reads: 0, destination_compares: 0, text_promotions: 0, text_bytes_copied: 0, layout_runs: 0, measure_calls: 0, presentations: 0, paint_passes: 0, exact_updates: 0, coarse_updates: 0 }",
+      "cpu": {
+        "0.5": 268.9,
+        "0.95": 307.58,
+        "0.99": 326.42
+      },
+      "wall": {
+        "0.5": 270.31,
+        "0.95": 309.78,
+        "0.99": 329.42
+      }
+    },
+    {
+      "repeat": 1,
+      "case": "32-idle",
+      "variant": "control",
+      "final": "FINAL,value=0,pixel_hash=11462430325376205605,counters=Counters { owner_reruns: 0, descriptions: 0, source_operations: 0, source_reads: 0, destination_compares: 0, text_promotions: 0, text_bytes_copied: 0, layout_runs: 0, measure_calls: 0, presentations: 0, paint_passes: 0, exact_updates: 0, coarse_updates: 0 }",
+      "cpu": {
+        "0.5": 284.53,
+        "0.95": 355.37,
+        "0.99": 363.09
+      },
+      "wall": {
+        "0.5": 286.03,
+        "0.95": 356.97,
+        "0.99": 365.17
+      }
+    },
+    {
+      "repeat": 1,
+      "case": "32-one",
+      "variant": "control",
+      "final": "FINAL,value=16514348029754293716,pixel_hash=11240993552904184613,counters=Counters { owner_reruns: 0, descriptions: 0, source_operations: 4000, source_reads: 4000, destination_compares: 4000, text_promotions: 0, text_bytes_copied: 0, layout_runs: 0, measure_calls: 0, presentations: 4000, paint_passes: 0, exact_updates: 4000, coarse_updates: 0 }",
+      "cpu": {
+        "0.5": 763.24,
+        "0.95": 837.88,
+        "0.99": 1040.06
+      },
+      "wall": {
+        "0.5": 764.94,
+        "0.95": 839.89,
+        "0.99": 1187.74
+      }
+    },
+    {
+      "repeat": 1,
+      "case": "32-one",
+      "variant": "candidate",
+      "final": "FINAL,value=16514348029754293716,pixel_hash=11240993552904184613,counters=Counters { owner_reruns: 0, descriptions: 0, source_operations: 4000, source_reads: 4000, destination_compares: 4000, text_promotions: 0, text_bytes_copied: 0, layout_runs: 0, measure_calls: 0, presentations: 4000, paint_passes: 0, exact_updates: 4000, coarse_updates: 0 }",
+      "cpu": {
+        "0.5": 733.59,
+        "0.95": 806.51,
+        "0.99": 824.75
+      },
+      "wall": {
+        "0.5": 736.09,
+        "0.95": 809.02,
+        "0.99": 827.95
+      }
+    },
+    {
+      "repeat": 1,
+      "case": "32-all",
+      "variant": "candidate",
+      "final": "FINAL,value=4110017462229318656,pixel_hash=14812928932416127781,counters=Counters { owner_reruns: 0, descriptions: 0, source_operations: 4000, source_reads: 4000, destination_compares: 4000, text_promotions: 0, text_bytes_copied: 0, layout_runs: 0, measure_calls: 0, presentations: 4000, paint_passes: 0, exact_updates: 4000, coarse_updates: 0 }",
+      "cpu": {
+        "0.5": 1300.85,
+        "0.95": 1530.38,
+        "0.99": 1658.22
+      },
+      "wall": {
+        "0.5": 1302.44,
+        "0.95": 1618.14,
+        "0.99": 1661.62
+      }
+    },
+    {
+      "repeat": 1,
+      "case": "32-all",
+      "variant": "control",
+      "final": "FINAL,value=4110017462229318656,pixel_hash=14812928932416127781,counters=Counters { owner_reruns: 0, descriptions: 0, source_operations: 4000, source_reads: 4000, destination_compares: 4000, text_promotions: 0, text_bytes_copied: 0, layout_runs: 0, measure_calls: 0, presentations: 4000, paint_passes: 0, exact_updates: 4000, coarse_updates: 0 }",
+      "cpu": {
+        "0.5": 1256.46,
+        "0.95": 1444.72,
+        "0.99": 1475.57
+      },
+      "wall": {
+        "0.5": 1258.15,
+        "0.95": 1447.23,
+        "0.99": 1713.12
+      }
+    },
+    {
+      "repeat": 1,
+      "case": "32-rotate",
+      "variant": "control",
+      "final": "FINAL,value=4110017462229318656,pixel_hash=14812928932416127781,counters=Counters { owner_reruns: 0, descriptions: 0, source_operations: 128000, source_reads: 128000, destination_compares: 128000, text_promotions: 0, text_bytes_copied: 0, layout_runs: 0, measure_calls: 0, presentations: 128000, paint_passes: 0, exact_updates: 128000, coarse_updates: 0 }",
+      "cpu": {
+        "0.5": 6964.31,
+        "0.95": 7059.79,
+        "0.99": 7177.62
+      },
+      "wall": {
+        "0.5": 6966.11,
+        "0.95": 7097.24,
+        "0.99": 7179.38
+      }
+    },
+    {
+      "repeat": 1,
+      "case": "32-rotate",
+      "variant": "candidate",
+      "final": "FINAL,value=4110017462229318656,pixel_hash=14812928932416127781,counters=Counters { owner_reruns: 0, descriptions: 0, source_operations: 128000, source_reads: 128000, destination_compares: 128000, text_promotions: 0, text_bytes_copied: 0, layout_runs: 0, measure_calls: 0, presentations: 128000, paint_passes: 0, exact_updates: 128000, coarse_updates: 0 }",
+      "cpu": {
+        "0.5": 7989.45,
+        "0.95": 8194.33,
+        "0.99": 8864.88
+      },
+      "wall": {
+        "0.5": 7991.52,
+        "0.95": 8196.61,
+        "0.99": 8867.87
+      }
+    },
+    {
+      "repeat": 1,
+      "case": "64-idle",
+      "variant": "candidate",
+      "final": "FINAL,value=0,pixel_hash=11462430325376205605,counters=Counters { owner_reruns: 0, descriptions: 0, source_operations: 0, source_reads: 0, destination_compares: 0, text_promotions: 0, text_bytes_copied: 0, layout_runs: 0, measure_calls: 0, presentations: 0, paint_passes: 0, exact_updates: 0, coarse_updates: 0 }",
+      "cpu": {
+        "0.5": 531.5,
+        "0.95": 617.86,
+        "0.99": 702.83
+      },
+      "wall": {
+        "0.5": 533.0,
+        "0.95": 619.97,
+        "0.99": 705.03
+      }
+    },
+    {
+      "repeat": 1,
+      "case": "64-idle",
+      "variant": "control",
+      "final": "FINAL,value=0,pixel_hash=11462430325376205605,counters=Counters { owner_reruns: 0, descriptions: 0, source_operations: 0, source_reads: 0, destination_compares: 0, text_promotions: 0, text_bytes_copied: 0, layout_runs: 0, measure_calls: 0, presentations: 0, paint_passes: 0, exact_updates: 0, coarse_updates: 0 }",
+      "cpu": {
+        "0.5": 681.38,
+        "0.95": 736.79,
+        "0.99": 758.52
+      },
+      "wall": {
+        "0.5": 683.69,
+        "0.95": 739.19,
+        "0.99": 761.32
+      }
+    },
+    {
+      "repeat": 1,
+      "case": "64-one",
+      "variant": "control",
+      "final": "FINAL,value=16514348029754293716,pixel_hash=11240993552904184613,counters=Counters { owner_reruns: 0, descriptions: 0, source_operations: 4000, source_reads: 4000, destination_compares: 4000, text_promotions: 0, text_bytes_copied: 0, layout_runs: 0, measure_calls: 0, presentations: 4000, paint_passes: 0, exact_updates: 4000, coarse_updates: 0 }",
+      "cpu": {
+        "0.5": 1845.98,
+        "0.95": 1952.58,
+        "0.99": 2135.42
+      },
+      "wall": {
+        "0.5": 1848.56,
+        "0.95": 1955.89,
+        "0.99": 2163.76
+      }
+    },
+    {
+      "repeat": 1,
+      "case": "64-one",
+      "variant": "candidate",
+      "final": "FINAL,value=16514348029754293716,pixel_hash=11240993552904184613,counters=Counters { owner_reruns: 0, descriptions: 0, source_operations: 4000, source_reads: 4000, destination_compares: 4000, text_promotions: 0, text_bytes_copied: 0, layout_runs: 0, measure_calls: 0, presentations: 4000, paint_passes: 0, exact_updates: 4000, coarse_updates: 0 }",
+      "cpu": {
+        "0.5": 1354.05,
+        "0.95": 1448.62,
+        "0.99": 1600.91
+      },
+      "wall": {
+        "0.5": 1356.04,
+        "0.95": 1451.32,
+        "0.99": 1603.51
+      }
+    },
+    {
+      "repeat": 1,
+      "case": "64-all",
+      "variant": "candidate",
+      "final": "FINAL,value=9207992534111819776,pixel_hash=4285754629872036645,counters=Counters { owner_reruns: 0, descriptions: 0, source_operations: 4000, source_reads: 4000, destination_compares: 4000, text_promotions: 0, text_bytes_copied: 0, layout_runs: 0, measure_calls: 0, presentations: 4000, paint_passes: 0, exact_updates: 4000, coarse_updates: 0 }",
+      "cpu": {
+        "0.5": 2388.6,
+        "0.95": 2634.86,
+        "0.99": 3334.88
+      },
+      "wall": {
+        "0.5": 2390.49,
+        "0.95": 2638.56,
+        "0.99": 3363.13
+      }
+    },
+    {
+      "repeat": 1,
+      "case": "64-all",
+      "variant": "control",
+      "final": "FINAL,value=9207992534111819776,pixel_hash=4285754629872036645,counters=Counters { owner_reruns: 0, descriptions: 0, source_operations: 4000, source_reads: 4000, destination_compares: 4000, text_promotions: 0, text_bytes_copied: 0, layout_runs: 0, measure_calls: 0, presentations: 4000, paint_passes: 0, exact_updates: 4000, coarse_updates: 0 }",
+      "cpu": {
+        "0.5": 2327.88,
+        "0.95": 2527.96,
+        "0.99": 2642.98
+      },
+      "wall": {
+        "0.5": 2329.68,
+        "0.95": 2530.85,
+        "0.99": 2655.39
+      }
+    },
+    {
+      "repeat": 1,
+      "case": "64-rotate",
+      "variant": "control",
+      "final": "FINAL,value=9207992534111819776,pixel_hash=4285754629872036645,counters=Counters { owner_reruns: 0, descriptions: 0, source_operations: 256000, source_reads: 256000, destination_compares: 256000, text_promotions: 0, text_bytes_copied: 0, layout_runs: 0, measure_calls: 0, presentations: 256000, paint_passes: 0, exact_updates: 256000, coarse_updates: 0 }",
+      "cpu": {
+        "0.5": 17644.12,
+        "0.95": 22301.4,
+        "0.99": 29732.29
+      },
+      "wall": {
+        "0.5": 17648.76,
+        "0.95": 22305.52,
+        "0.99": 29735.98
+      }
+    },
+    {
+      "repeat": 1,
+      "case": "64-rotate",
+      "variant": "candidate",
+      "final": "FINAL,value=9207992534111819776,pixel_hash=4285754629872036645,counters=Counters { owner_reruns: 0, descriptions: 0, source_operations: 256000, source_reads: 256000, destination_compares: 256000, text_promotions: 0, text_bytes_copied: 0, layout_runs: 0, measure_calls: 0, presentations: 256000, paint_passes: 0, exact_updates: 256000, coarse_updates: 0 }",
+      "cpu": {
+        "0.5": 19523.16,
+        "0.95": 25207.17,
+        "0.99": 30063.71
+      },
+      "wall": {
+        "0.5": 19525.9,
+        "0.95": 25219.21,
+        "0.99": 30072.51
+      }
+    },
+    {
+      "repeat": 2,
+      "case": "1-idle",
+      "variant": "control",
+      "final": "FINAL,value=0,pixel_hash=11462430325376205605,counters=Counters { owner_reruns: 0, descriptions: 0, source_operations: 0, source_reads: 0, destination_compares: 0, text_promotions: 0, text_bytes_copied: 0, layout_runs: 0, measure_calls: 0, presentations: 0, paint_passes: 0, exact_updates: 0, coarse_updates: 0 }",
+      "cpu": {
+        "0.5": 13.23,
+        "0.95": 15.13,
+        "0.99": 17.74
+      },
+      "wall": {
+        "0.5": 14.73,
+        "0.95": 17.53,
+        "0.99": 25.05
+      }
+    },
+    {
+      "repeat": 2,
+      "case": "1-idle",
+      "variant": "candidate",
+      "final": "FINAL,value=0,pixel_hash=11462430325376205605,counters=Counters { owner_reruns: 0, descriptions: 0, source_operations: 0, source_reads: 0, destination_compares: 0, text_promotions: 0, text_bytes_copied: 0, layout_runs: 0, measure_calls: 0, presentations: 0, paint_passes: 0, exact_updates: 0, coarse_updates: 0 }",
+      "cpu": {
+        "0.5": 16.12,
+        "0.95": 16.14,
+        "0.99": 19.24
+      },
+      "wall": {
+        "0.5": 17.53,
+        "0.95": 18.93,
+        "0.99": 25.14
+      }
+    },
+    {
+      "repeat": 2,
+      "case": "1-one",
+      "variant": "candidate",
+      "final": "FINAL,value=16514348029754293716,pixel_hash=11240993552904184613,counters=Counters { owner_reruns: 0, descriptions: 0, source_operations: 4000, source_reads: 4000, destination_compares: 4000, text_promotions: 0, text_bytes_copied: 0, layout_runs: 0, measure_calls: 0, presentations: 4000, paint_passes: 0, exact_updates: 4000, coarse_updates: 0 }",
+      "cpu": {
+        "0.5": 194.56,
+        "0.95": 199.98,
+        "0.99": 274.62
+      },
+      "wall": {
+        "0.5": 196.17,
+        "0.95": 205.19,
+        "0.99": 277.32
+      }
+    },
+    {
+      "repeat": 2,
+      "case": "1-one",
+      "variant": "control",
+      "final": "FINAL,value=16514348029754293716,pixel_hash=11240993552904184613,counters=Counters { owner_reruns: 0, descriptions: 0, source_operations: 4000, source_reads: 4000, destination_compares: 4000, text_promotions: 0, text_bytes_copied: 0, layout_runs: 0, measure_calls: 0, presentations: 4000, paint_passes: 0, exact_updates: 4000, coarse_updates: 0 }",
+      "cpu": {
+        "0.5": 191.06,
+        "0.95": 199.07,
+        "0.99": 269.8
+      },
+      "wall": {
+        "0.5": 192.87,
+        "0.95": 202.27,
+        "0.99": 272.52
+      }
+    },
+    {
+      "repeat": 2,
+      "case": "1-all",
+      "variant": "control",
+      "final": "FINAL,value=16514348029754293716,pixel_hash=11240993552904184613,counters=Counters { owner_reruns: 0, descriptions: 0, source_operations: 4000, source_reads: 4000, destination_compares: 4000, text_promotions: 0, text_bytes_copied: 0, layout_runs: 0, measure_calls: 0, presentations: 4000, paint_passes: 0, exact_updates: 4000, coarse_updates: 0 }",
+      "cpu": {
+        "0.5": 184.95,
+        "0.95": 231.14,
+        "0.99": 490.02
+      },
+      "wall": {
+        "0.5": 186.54,
+        "0.95": 233.64,
+        "0.99": 581.8
+      }
+    },
+    {
+      "repeat": 2,
+      "case": "1-all",
+      "variant": "candidate",
+      "final": "FINAL,value=16514348029754293716,pixel_hash=11240993552904184613,counters=Counters { owner_reruns: 0, descriptions: 0, source_operations: 4000, source_reads: 4000, destination_compares: 4000, text_promotions: 0, text_bytes_copied: 0, layout_runs: 0, measure_calls: 0, presentations: 4000, paint_passes: 0, exact_updates: 4000, coarse_updates: 0 }",
+      "cpu": {
+        "0.5": 190.25,
+        "0.95": 247.17,
+        "0.99": 296.96
+      },
+      "wall": {
+        "0.5": 192.26,
+        "0.95": 249.47,
+        "0.99": 299.46
+      }
+    },
+    {
+      "repeat": 2,
+      "case": "1-rotate",
+      "variant": "candidate",
+      "final": "FINAL,value=16514348029754293716,pixel_hash=11240993552904184613,counters=Counters { owner_reruns: 0, descriptions: 0, source_operations: 4000, source_reads: 4000, destination_compares: 4000, text_promotions: 0, text_bytes_copied: 0, layout_runs: 0, measure_calls: 0, presentations: 4000, paint_passes: 0, exact_updates: 4000, coarse_updates: 0 }",
+      "cpu": {
+        "0.5": 196.16,
+        "0.95": 247.66,
+        "0.99": 271.71
+      },
+      "wall": {
+        "0.5": 199.17,
+        "0.95": 249.77,
+        "0.99": 273.61
+      }
+    },
+    {
+      "repeat": 2,
+      "case": "1-rotate",
+      "variant": "control",
+      "final": "FINAL,value=16514348029754293716,pixel_hash=11240993552904184613,counters=Counters { owner_reruns: 0, descriptions: 0, source_operations: 4000, source_reads: 4000, destination_compares: 4000, text_promotions: 0, text_bytes_copied: 0, layout_runs: 0, measure_calls: 0, presentations: 4000, paint_passes: 0, exact_updates: 4000, coarse_updates: 0 }",
+      "cpu": {
+        "0.5": 188.26,
+        "0.95": 208.29,
+        "0.99": 251.88
+      },
+      "wall": {
+        "0.5": 190.06,
+        "0.95": 210.8,
+        "0.99": 255.28
+      }
+    },
+    {
+      "repeat": 2,
+      "case": "8-idle",
+      "variant": "control",
+      "final": "FINAL,value=0,pixel_hash=11462430325376205605,counters=Counters { owner_reruns: 0, descriptions: 0, source_operations: 0, source_reads: 0, destination_compares: 0, text_promotions: 0, text_bytes_copied: 0, layout_runs: 0, measure_calls: 0, presentations: 0, paint_passes: 0, exact_updates: 0, coarse_updates: 0 }",
+      "cpu": {
+        "0.5": 75.04,
+        "0.95": 77.04,
+        "0.99": 81.46
+      },
+      "wall": {
+        "0.5": 76.64,
+        "0.95": 79.25,
+        "0.99": 84.96
+      }
+    },
+    {
+      "repeat": 2,
+      "case": "8-idle",
+      "variant": "candidate",
+      "final": "FINAL,value=0,pixel_hash=11462430325376205605,counters=Counters { owner_reruns: 0, descriptions: 0, source_operations: 0, source_reads: 0, destination_compares: 0, text_promotions: 0, text_bytes_copied: 0, layout_runs: 0, measure_calls: 0, presentations: 0, paint_passes: 0, exact_updates: 0, coarse_updates: 0 }",
+      "cpu": {
+        "0.5": 76.95,
+        "0.95": 82.25,
+        "0.99": 137.46
+      },
+      "wall": {
+        "0.5": 79.25,
+        "0.95": 85.06,
+        "0.99": 139.67
+      }
+    },
+    {
+      "repeat": 2,
+      "case": "8-one",
+      "variant": "candidate",
+      "final": "FINAL,value=16514348029754293716,pixel_hash=11240993552904184613,counters=Counters { owner_reruns: 0, descriptions: 0, source_operations: 4000, source_reads: 4000, destination_compares: 4000, text_promotions: 0, text_bytes_copied: 0, layout_runs: 0, measure_calls: 0, presentations: 4000, paint_passes: 0, exact_updates: 4000, coarse_updates: 0 }",
+      "cpu": {
+        "0.5": 315.09,
+        "0.95": 321.51,
+        "0.99": 544.83
+      },
+      "wall": {
+        "0.5": 317.5,
+        "0.95": 328.41,
+        "0.99": 547.54
+      }
+    },
+    {
+      "repeat": 2,
+      "case": "8-one",
+      "variant": "control",
+      "final": "FINAL,value=16514348029754293716,pixel_hash=11240993552904184613,counters=Counters { owner_reruns: 0, descriptions: 0, source_operations: 4000, source_reads: 4000, destination_compares: 4000, text_promotions: 0, text_bytes_copied: 0, layout_runs: 0, measure_calls: 0, presentations: 4000, paint_passes: 0, exact_updates: 4000, coarse_updates: 0 }",
+      "cpu": {
+        "0.5": 422.0,
+        "0.95": 483.91,
+        "0.99": 968.02
+      },
+      "wall": {
+        "0.5": 425.11,
+        "0.95": 487.02,
+        "0.99": 971.82
+      }
+    },
+    {
+      "repeat": 2,
+      "case": "8-all",
+      "variant": "control",
+      "final": "FINAL,value=7784359077124646912,pixel_hash=1744856074806027045,counters=Counters { owner_reruns: 0, descriptions: 0, source_operations: 4000, source_reads: 4000, destination_compares: 4000, text_promotions: 0, text_bytes_copied: 0, layout_runs: 0, measure_calls: 0, presentations: 4000, paint_passes: 0, exact_updates: 4000, coarse_updates: 0 }",
+      "cpu": {
+        "0.5": 414.89,
+        "0.95": 498.24,
+        "0.99": 534.4
+      },
+      "wall": {
+        "0.5": 417.39,
+        "0.95": 499.93,
+        "0.99": 537.22
+      }
+    },
+    {
+      "repeat": 2,
+      "case": "8-all",
+      "variant": "candidate",
+      "final": "FINAL,value=7784359077124646912,pixel_hash=1744856074806027045,counters=Counters { owner_reruns: 0, descriptions: 0, source_operations: 4000, source_reads: 4000, destination_compares: 4000, text_promotions: 0, text_bytes_copied: 0, layout_runs: 0, measure_calls: 0, presentations: 4000, paint_passes: 0, exact_updates: 4000, coarse_updates: 0 }",
+      "cpu": {
+        "0.5": 416.58,
+        "0.95": 482.8,
+        "0.99": 733.38
+      },
+      "wall": {
+        "0.5": 418.79,
+        "0.95": 485.62,
+        "0.99": 735.29
+      }
+    },
+    {
+      "repeat": 2,
+      "case": "8-rotate",
+      "variant": "candidate",
+      "final": "FINAL,value=7784359077124646912,pixel_hash=1744856074806027045,counters=Counters { owner_reruns: 0, descriptions: 0, source_operations: 32000, source_reads: 32000, destination_compares: 32000, text_promotions: 0, text_bytes_copied: 0, layout_runs: 0, measure_calls: 0, presentations: 32000, paint_passes: 0, exact_updates: 32000, coarse_updates: 0 }",
+      "cpu": {
+        "0.5": 1782.66,
+        "0.95": 4792.03,
+        "0.99": 20873.3
+      },
+      "wall": {
+        "0.5": 1784.75,
+        "0.95": 4856.33,
+        "0.99": 20884.25
+      }
+    },
+    {
+      "repeat": 2,
+      "case": "8-rotate",
+      "variant": "control",
+      "final": "FINAL,value=7784359077124646912,pixel_hash=1744856074806027045,counters=Counters { owner_reruns: 0, descriptions: 0, source_operations: 32000, source_reads: 32000, destination_compares: 32000, text_promotions: 0, text_bytes_copied: 0, layout_runs: 0, measure_calls: 0, presentations: 32000, paint_passes: 0, exact_updates: 32000, coarse_updates: 0 }",
+      "cpu": {
+        "0.5": 1583.99,
+        "0.95": 1702.31,
+        "0.99": 1853.19
+      },
+      "wall": {
+        "0.5": 1585.57,
+        "0.95": 1704.09,
+        "0.99": 1854.99
+      }
+    },
+    {
+      "repeat": 2,
+      "case": "32-idle",
+      "variant": "control",
+      "final": "FINAL,value=0,pixel_hash=11462430325376205605,counters=Counters { owner_reruns: 0, descriptions: 0, source_operations: 0, source_reads: 0, destination_compares: 0, text_promotions: 0, text_bytes_copied: 0, layout_runs: 0, measure_calls: 0, presentations: 0, paint_passes: 0, exact_updates: 0, coarse_updates: 0 }",
+      "cpu": {
+        "0.5": 285.73,
+        "0.95": 290.34,
+        "0.99": 431.61
+      },
+      "wall": {
+        "0.5": 287.94,
+        "0.95": 298.25,
+        "0.99": 434.11
+      }
+    },
+    {
+      "repeat": 2,
+      "case": "32-idle",
+      "variant": "candidate",
+      "final": "FINAL,value=0,pixel_hash=11462430325376205605,counters=Counters { owner_reruns: 0, descriptions: 0, source_operations: 0, source_reads: 0, destination_compares: 0, text_promotions: 0, text_bytes_copied: 0, layout_runs: 0, measure_calls: 0, presentations: 0, paint_passes: 0, exact_updates: 0, coarse_updates: 0 }",
+      "cpu": {
+        "0.5": 268.1,
+        "0.95": 312.5,
+        "0.99": 362.79
+      },
+      "wall": {
+        "0.5": 270.31,
+        "0.95": 314.7,
+        "0.99": 365.69
+      }
+    },
+    {
+      "repeat": 2,
+      "case": "32-one",
+      "variant": "candidate",
+      "final": "FINAL,value=16514348029754293716,pixel_hash=11240993552904184613,counters=Counters { owner_reruns: 0, descriptions: 0, source_operations: 4000, source_reads: 4000, destination_compares: 4000, text_promotions: 0, text_bytes_copied: 0, layout_runs: 0, measure_calls: 0, presentations: 4000, paint_passes: 0, exact_updates: 4000, coarse_updates: 0 }",
+      "cpu": {
+        "0.5": 949.59,
+        "0.95": 1017.21,
+        "0.99": 1057.49
+      },
+      "wall": {
+        "0.5": 951.9,
+        "0.95": 1020.11,
+        "0.99": 1059.99
+      }
+    },
+    {
+      "repeat": 2,
+      "case": "32-one",
+      "variant": "control",
+      "final": "FINAL,value=16514348029754293716,pixel_hash=11240993552904184613,counters=Counters { owner_reruns: 0, descriptions: 0, source_operations: 4000, source_reads: 4000, destination_compares: 4000, text_promotions: 0, text_bytes_copied: 0, layout_runs: 0, measure_calls: 0, presentations: 4000, paint_passes: 0, exact_updates: 4000, coarse_updates: 0 }",
+      "cpu": {
+        "0.5": 875.85,
+        "0.95": 1214.49,
+        "0.99": 1365.67
+      },
+      "wall": {
+        "0.5": 878.05,
+        "0.95": 1216.59,
+        "0.99": 2306.44
+      }
+    },
+    {
+      "repeat": 2,
+      "case": "32-all",
+      "variant": "control",
+      "final": "FINAL,value=4110017462229318656,pixel_hash=14812928932416127781,counters=Counters { owner_reruns: 0, descriptions: 0, source_operations: 4000, source_reads: 4000, destination_compares: 4000, text_promotions: 0, text_bytes_copied: 0, layout_runs: 0, measure_calls: 0, presentations: 4000, paint_passes: 0, exact_updates: 4000, coarse_updates: 0 }",
+      "cpu": {
+        "0.5": 1554.02,
+        "0.95": 2113.77,
+        "0.99": 2486.48
+      },
+      "wall": {
+        "0.5": 1557.03,
+        "0.95": 2213.28,
+        "0.99": 2495.98
+      }
+    },
+    {
+      "repeat": 2,
+      "case": "32-all",
+      "variant": "candidate",
+      "final": "FINAL,value=4110017462229318656,pixel_hash=14812928932416127781,counters=Counters { owner_reruns: 0, descriptions: 0, source_operations: 4000, source_reads: 4000, destination_compares: 4000, text_promotions: 0, text_bytes_copied: 0, layout_runs: 0, measure_calls: 0, presentations: 4000, paint_passes: 0, exact_updates: 4000, coarse_updates: 0 }",
+      "cpu": {
+        "0.5": 1251.05,
+        "0.95": 1401.03,
+        "0.99": 1647.9
+      },
+      "wall": {
+        "0.5": 1252.76,
+        "0.95": 1403.43,
+        "0.99": 1661.42
+      }
+    },
+    {
+      "repeat": 2,
+      "case": "32-rotate",
+      "variant": "candidate",
+      "final": "FINAL,value=4110017462229318656,pixel_hash=14812928932416127781,counters=Counters { owner_reruns: 0, descriptions: 0, source_operations: 128000, source_reads: 128000, destination_compares: 128000, text_promotions: 0, text_bytes_copied: 0, layout_runs: 0, measure_calls: 0, presentations: 128000, paint_passes: 0, exact_updates: 128000, coarse_updates: 0 }",
+      "cpu": {
+        "0.5": 7845.26,
+        "0.95": 8774.42,
+        "0.99": 10662.18
+      },
+      "wall": {
+        "0.5": 7862.37,
+        "0.95": 8960.44,
+        "0.99": 10778.56
+      }
+    },
+    {
+      "repeat": 2,
+      "case": "32-rotate",
+      "variant": "control",
+      "final": "FINAL,value=4110017462229318656,pixel_hash=14812928932416127781,counters=Counters { owner_reruns: 0, descriptions: 0, source_operations: 128000, source_reads: 128000, destination_compares: 128000, text_promotions: 0, text_bytes_copied: 0, layout_runs: 0, measure_calls: 0, presentations: 128000, paint_passes: 0, exact_updates: 128000, coarse_updates: 0 }",
+      "cpu": {
+        "0.5": 7768.73,
+        "0.95": 9464.63,
+        "0.99": 10000.54
+      },
+      "wall": {
+        "0.5": 7774.21,
+        "0.95": 9481.63,
+        "0.99": 10004.01
+      }
+    },
+    {
+      "repeat": 2,
+      "case": "64-idle",
+      "variant": "control",
+      "final": "FINAL,value=0,pixel_hash=11462430325376205605,counters=Counters { owner_reruns: 0, descriptions: 0, source_operations: 0, source_reads: 0, destination_compares: 0, text_promotions: 0, text_bytes_copied: 0, layout_runs: 0, measure_calls: 0, presentations: 0, paint_passes: 0, exact_updates: 0, coarse_updates: 0 }",
+      "cpu": {
+        "0.5": 572.97,
+        "0.95": 617.56,
+        "0.99": 625.08
+      },
+      "wall": {
+        "0.5": 574.58,
+        "0.95": 619.17,
+        "0.99": 626.68
+      }
+    },
+    {
+      "repeat": 2,
+      "case": "64-idle",
+      "variant": "candidate",
+      "final": "FINAL,value=0,pixel_hash=11462430325376205605,counters=Counters { owner_reruns: 0, descriptions: 0, source_operations: 0, source_reads: 0, destination_compares: 0, text_promotions: 0, text_bytes_copied: 0, layout_runs: 0, measure_calls: 0, presentations: 0, paint_passes: 0, exact_updates: 0, coarse_updates: 0 }",
+      "cpu": {
+        "0.5": 602.73,
+        "0.95": 710.24,
+        "0.99": 852.61
+      },
+      "wall": {
+        "0.5": 605.34,
+        "0.95": 713.84,
+        "0.99": 873.63
+      }
+    },
+    {
+      "repeat": 2,
+      "case": "64-one",
+      "variant": "candidate",
+      "final": "FINAL,value=16514348029754293716,pixel_hash=11240993552904184613,counters=Counters { owner_reruns: 0, descriptions: 0, source_operations: 4000, source_reads: 4000, destination_compares: 4000, text_promotions: 0, text_bytes_copied: 0, layout_runs: 0, measure_calls: 0, presentations: 4000, paint_passes: 0, exact_updates: 4000, coarse_updates: 0 }",
+      "cpu": {
+        "0.5": 1408.25,
+        "0.95": 1472.18,
+        "0.99": 1493.71
+      },
+      "wall": {
+        "0.5": 1409.85,
+        "0.95": 1473.86,
+        "0.99": 1502.03
+      }
+    },
+    {
+      "repeat": 2,
+      "case": "64-one",
+      "variant": "control",
+      "final": "FINAL,value=16514348029754293716,pixel_hash=11240993552904184613,counters=Counters { owner_reruns: 0, descriptions: 0, source_operations: 4000, source_reads: 4000, destination_compares: 4000, text_promotions: 0, text_bytes_copied: 0, layout_runs: 0, measure_calls: 0, presentations: 4000, paint_passes: 0, exact_updates: 4000, coarse_updates: 0 }",
+      "cpu": {
+        "0.5": 1565.05,
+        "0.95": 1641.8,
+        "0.99": 1734.67
+      },
+      "wall": {
+        "0.5": 1566.84,
+        "0.95": 1643.59,
+        "0.99": 1742.48
+      }
+    },
+    {
+      "repeat": 2,
+      "case": "64-all",
+      "variant": "control",
+      "final": "FINAL,value=9207992534111819776,pixel_hash=4285754629872036645,counters=Counters { owner_reruns: 0, descriptions: 0, source_operations: 4000, source_reads: 4000, destination_compares: 4000, text_promotions: 0, text_bytes_copied: 0, layout_runs: 0, measure_calls: 0, presentations: 4000, paint_passes: 0, exact_updates: 4000, coarse_updates: 0 }",
+      "cpu": {
+        "0.5": 2517.23,
+        "0.95": 2910.18,
+        "0.99": 3214.85
+      },
+      "wall": {
+        "0.5": 2518.73,
+        "0.95": 2912.08,
+        "0.99": 3235.98
+      }
+    },
+    {
+      "repeat": 2,
+      "case": "64-all",
+      "variant": "candidate",
+      "final": "FINAL,value=9207992534111819776,pixel_hash=4285754629872036645,counters=Counters { owner_reruns: 0, descriptions: 0, source_operations: 4000, source_reads: 4000, destination_compares: 4000, text_promotions: 0, text_bytes_copied: 0, layout_runs: 0, measure_calls: 0, presentations: 4000, paint_passes: 0, exact_updates: 4000, coarse_updates: 0 }",
+      "cpu": {
+        "0.5": 2466.14,
+        "0.95": 2630.86,
+        "0.99": 2784.24
+      },
+      "wall": {
+        "0.5": 2467.94,
+        "0.95": 2632.74,
+        "0.99": 2786.24
+      }
+    },
+    {
+      "repeat": 2,
+      "case": "64-rotate",
+      "variant": "candidate",
+      "final": "FINAL,value=9207992534111819776,pixel_hash=4285754629872036645,counters=Counters { owner_reruns: 0, descriptions: 0, source_operations: 256000, source_reads: 256000, destination_compares: 256000, text_promotions: 0, text_bytes_copied: 0, layout_runs: 0, measure_calls: 0, presentations: 256000, paint_passes: 0, exact_updates: 256000, coarse_updates: 0 }",
+      "cpu": {
+        "0.5": 20417.24,
+        "0.95": 26990.02,
+        "0.99": 36722.95
+      },
+      "wall": {
+        "0.5": 20421.18,
+        "0.95": 26994.53,
+        "0.99": 36739.05
+      }
+    },
+    {
+      "repeat": 2,
+      "case": "64-rotate",
+      "variant": "control",
+      "final": "FINAL,value=9207992534111819776,pixel_hash=4285754629872036645,counters=Counters { owner_reruns: 0, descriptions: 0, source_operations: 256000, source_reads: 256000, destination_compares: 256000, text_promotions: 0, text_bytes_copied: 0, layout_runs: 0, measure_calls: 0, presentations: 256000, paint_passes: 0, exact_updates: 256000, coarse_updates: 0 }",
+      "cpu": {
+        "0.5": 17047.8,
+        "0.95": 21205.93,
+        "0.99": 23964.73
+      },
+      "wall": {
+        "0.5": 17051.64,
+        "0.95": 21215.66,
+        "0.99": 23976.25
+      }
+    },
+    {
+      "repeat": 3,
+      "case": "1-idle",
+      "variant": "candidate",
+      "final": "FINAL,value=0,pixel_hash=11462430325376205605,counters=Counters { owner_reruns: 0, descriptions: 0, source_operations: 0, source_reads: 0, destination_compares: 0, text_promotions: 0, text_bytes_copied: 0, layout_runs: 0, measure_calls: 0, presentations: 0, paint_passes: 0, exact_updates: 0, coarse_updates: 0 }",
+      "cpu": {
+        "0.5": 16.23,
+        "0.95": 20.44,
+        "0.99": 23.84
+      },
+      "wall": {
+        "0.5": 17.74,
+        "0.95": 24.04,
+        "0.99": 35.77
+      }
+    },
+    {
+      "repeat": 3,
+      "case": "1-idle",
+      "variant": "control",
+      "final": "FINAL,value=0,pixel_hash=11462430325376205605,counters=Counters { owner_reruns: 0, descriptions: 0, source_operations: 0, source_reads: 0, destination_compares: 0, text_promotions: 0, text_bytes_copied: 0, layout_runs: 0, measure_calls: 0, presentations: 0, paint_passes: 0, exact_updates: 0, coarse_updates: 0 }",
+      "cpu": {
+        "0.5": 12.42,
+        "0.95": 12.72,
+        "0.99": 17.83
+      },
+      "wall": {
+        "0.5": 14.72,
+        "0.95": 15.23,
+        "0.99": 26.55
+      }
+    },
+    {
+      "repeat": 3,
+      "case": "1-one",
+      "variant": "control",
+      "final": "FINAL,value=16514348029754293716,pixel_hash=11240993552904184613,counters=Counters { owner_reruns: 0, descriptions: 0, source_operations: 4000, source_reads: 4000, destination_compares: 4000, text_promotions: 0, text_bytes_copied: 0, layout_runs: 0, measure_calls: 0, presentations: 4000, paint_passes: 0, exact_updates: 4000, coarse_updates: 0 }",
+      "cpu": {
+        "0.5": 193.16,
+        "0.95": 199.98,
+        "0.99": 289.15
+      },
+      "wall": {
+        "0.5": 195.46,
+        "0.95": 210.4,
+        "0.99": 292.25
+      }
+    },
+    {
+      "repeat": 3,
+      "case": "1-one",
+      "variant": "candidate",
+      "final": "FINAL,value=16514348029754293716,pixel_hash=11240993552904184613,counters=Counters { owner_reruns: 0, descriptions: 0, source_operations: 4000, source_reads: 4000, destination_compares: 4000, text_promotions: 0, text_bytes_copied: 0, layout_runs: 0, measure_calls: 0, presentations: 4000, paint_passes: 0, exact_updates: 4000, coarse_updates: 0 }",
+      "cpu": {
+        "0.5": 208.5,
+        "0.95": 332.72,
+        "0.99": 438.93
+      },
+      "wall": {
+        "0.5": 210.31,
+        "0.95": 335.84,
+        "0.99": 456.46
+      }
+    },
+    {
+      "repeat": 3,
+      "case": "1-all",
+      "variant": "candidate",
+      "final": "FINAL,value=16514348029754293716,pixel_hash=11240993552904184613,counters=Counters { owner_reruns: 0, descriptions: 0, source_operations: 4000, source_reads: 4000, destination_compares: 4000, text_promotions: 0, text_bytes_copied: 0, layout_runs: 0, measure_calls: 0, presentations: 4000, paint_passes: 0, exact_updates: 4000, coarse_updates: 0 }",
+      "cpu": {
+        "0.5": 200.37,
+        "0.95": 265.5,
+        "0.99": 312.28
+      },
+      "wall": {
+        "0.5": 202.19,
+        "0.95": 268.31,
+        "0.99": 314.09
+      }
+    },
+    {
+      "repeat": 3,
+      "case": "1-all",
+      "variant": "control",
+      "final": "FINAL,value=16514348029754293716,pixel_hash=11240993552904184613,counters=Counters { owner_reruns: 0, descriptions: 0, source_operations: 4000, source_reads: 4000, destination_compares: 4000, text_promotions: 0, text_bytes_copied: 0, layout_runs: 0, measure_calls: 0, presentations: 4000, paint_passes: 0, exact_updates: 4000, coarse_updates: 0 }",
+      "cpu": {
+        "0.5": 209.0,
+        "0.95": 266.2,
+        "0.99": 315.89
+      },
+      "wall": {
+        "0.5": 210.99,
+        "0.95": 269.41,
+        "0.99": 317.9
+      }
+    },
+    {
+      "repeat": 3,
+      "case": "1-rotate",
+      "variant": "control",
+      "final": "FINAL,value=16514348029754293716,pixel_hash=11240993552904184613,counters=Counters { owner_reruns: 0, descriptions: 0, source_operations: 4000, source_reads: 4000, destination_compares: 4000, text_promotions: 0, text_bytes_copied: 0, layout_runs: 0, measure_calls: 0, presentations: 4000, paint_passes: 0, exact_updates: 4000, coarse_updates: 0 }",
+      "cpu": {
+        "0.5": 201.38,
+        "0.95": 273.82,
+        "0.99": 286.65
+      },
+      "wall": {
+        "0.5": 203.19,
+        "0.95": 276.72,
+        "0.99": 288.94
+      }
+    },
+    {
+      "repeat": 3,
+      "case": "1-rotate",
+      "variant": "candidate",
+      "final": "FINAL,value=16514348029754293716,pixel_hash=11240993552904184613,counters=Counters { owner_reruns: 0, descriptions: 0, source_operations: 4000, source_reads: 4000, destination_compares: 4000, text_promotions: 0, text_bytes_copied: 0, layout_runs: 0, measure_calls: 0, presentations: 4000, paint_passes: 0, exact_updates: 4000, coarse_updates: 0 }",
+      "cpu": {
+        "0.5": 198.68,
+        "0.95": 273.81,
+        "0.99": 355.17
+      },
+      "wall": {
+        "0.5": 201.18,
+        "0.95": 276.33,
+        "0.99": 358.37
+      }
+    },
+    {
+      "repeat": 3,
+      "case": "8-idle",
+      "variant": "candidate",
+      "final": "FINAL,value=0,pixel_hash=11462430325376205605,counters=Counters { owner_reruns: 0, descriptions: 0, source_operations: 0, source_reads: 0, destination_compares: 0, text_promotions: 0, text_bytes_copied: 0, layout_runs: 0, measure_calls: 0, presentations: 0, paint_passes: 0, exact_updates: 0, coarse_updates: 0 }",
+      "cpu": {
+        "0.5": 74.04,
+        "0.95": 74.35,
+        "0.99": 86.46
+      },
+      "wall": {
+        "0.5": 76.34,
+        "0.95": 76.64,
+        "0.99": 107.61
+      }
+    },
+    {
+      "repeat": 3,
+      "case": "8-idle",
+      "variant": "control",
+      "final": "FINAL,value=0,pixel_hash=11462430325376205605,counters=Counters { owner_reruns: 0, descriptions: 0, source_operations: 0, source_reads: 0, destination_compares: 0, text_promotions: 0, text_bytes_copied: 0, layout_runs: 0, measure_calls: 0, presentations: 0, paint_passes: 0, exact_updates: 0, coarse_updates: 0 }",
+      "cpu": {
+        "0.5": 83.06,
+        "0.95": 83.96,
+        "0.99": 103.4
+      },
+      "wall": {
+        "0.5": 85.76,
+        "0.95": 87.15,
+        "0.99": 114.11
+      }
+    },
+    {
+      "repeat": 3,
+      "case": "8-one",
+      "variant": "control",
+      "final": "FINAL,value=16514348029754293716,pixel_hash=11240993552904184613,counters=Counters { owner_reruns: 0, descriptions: 0, source_operations: 4000, source_reads: 4000, destination_compares: 4000, text_promotions: 0, text_bytes_copied: 0, layout_runs: 0, measure_calls: 0, presentations: 4000, paint_passes: 0, exact_updates: 4000, coarse_updates: 0 }",
+      "cpu": {
+        "0.5": 339.84,
+        "0.95": 426.7,
+        "0.99": 657.64
+      },
+      "wall": {
+        "0.5": 342.24,
+        "0.95": 429.31,
+        "0.99": 661.14
+      }
+    },
+    {
+      "repeat": 3,
+      "case": "8-one",
+      "variant": "candidate",
+      "final": "FINAL,value=16514348029754293716,pixel_hash=11240993552904184613,counters=Counters { owner_reruns: 0, descriptions: 0, source_operations: 4000, source_reads: 4000, destination_compares: 4000, text_promotions: 0, text_bytes_copied: 0, layout_runs: 0, measure_calls: 0, presentations: 4000, paint_passes: 0, exact_updates: 4000, coarse_updates: 0 }",
+      "cpu": {
+        "0.5": 336.63,
+        "0.95": 416.28,
+        "0.99": 439.54
+      },
+      "wall": {
+        "0.5": 338.54,
+        "0.95": 419.49,
+        "0.99": 442.44
+      }
+    },
+    {
+      "repeat": 3,
+      "case": "8-all",
+      "variant": "candidate",
+      "final": "FINAL,value=7784359077124646912,pixel_hash=1744856074806027045,counters=Counters { owner_reruns: 0, descriptions: 0, source_operations: 4000, source_reads: 4000, destination_compares: 4000, text_promotions: 0, text_bytes_copied: 0, layout_runs: 0, measure_calls: 0, presentations: 4000, paint_passes: 0, exact_updates: 4000, coarse_updates: 0 }",
+      "cpu": {
+        "0.5": 438.63,
+        "0.95": 595.62,
+        "0.99": 944.68
+      },
+      "wall": {
+        "0.5": 440.53,
+        "0.95": 599.62,
+        "0.99": 1088.25
+      }
+    },
+    {
+      "repeat": 3,
+      "case": "8-all",
+      "variant": "control",
+      "final": "FINAL,value=7784359077124646912,pixel_hash=1744856074806027045,counters=Counters { owner_reruns: 0, descriptions: 0, source_operations: 4000, source_reads: 4000, destination_compares: 4000, text_promotions: 0, text_bytes_copied: 0, layout_runs: 0, measure_calls: 0, presentations: 4000, paint_passes: 0, exact_updates: 4000, coarse_updates: 0 }",
+      "cpu": {
+        "0.5": 430.81,
+        "0.95": 541.71,
+        "0.99": 565.16
+      },
+      "wall": {
+        "0.5": 432.61,
+        "0.95": 544.02,
+        "0.99": 567.47
+      }
+    },
+    {
+      "repeat": 3,
+      "case": "8-rotate",
+      "variant": "control",
+      "final": "FINAL,value=7784359077124646912,pixel_hash=1744856074806027045,counters=Counters { owner_reruns: 0, descriptions: 0, source_operations: 32000, source_reads: 32000, destination_compares: 32000, text_promotions: 0, text_bytes_copied: 0, layout_runs: 0, measure_calls: 0, presentations: 32000, paint_passes: 0, exact_updates: 32000, coarse_updates: 0 }",
+      "cpu": {
+        "0.5": 1538.99,
+        "0.95": 1888.35,
+        "0.99": 2093.75
+      },
+      "wall": {
+        "0.5": 1540.58,
+        "0.95": 1890.64,
+        "0.99": 2282.18
+      }
+    },
+    {
+      "repeat": 3,
+      "case": "8-rotate",
+      "variant": "candidate",
+      "final": "FINAL,value=7784359077124646912,pixel_hash=1744856074806027045,counters=Counters { owner_reruns: 0, descriptions: 0, source_operations: 32000, source_reads: 32000, destination_compares: 32000, text_promotions: 0, text_bytes_copied: 0, layout_runs: 0, measure_calls: 0, presentations: 32000, paint_passes: 0, exact_updates: 32000, coarse_updates: 0 }",
+      "cpu": {
+        "0.5": 1554.62,
+        "0.95": 1802.59,
+        "0.99": 1876.73
+      },
+      "wall": {
+        "0.5": 1556.84,
+        "0.95": 1852.8,
+        "0.99": 1878.53
+      }
+    },
+    {
+      "repeat": 3,
+      "case": "32-idle",
+      "variant": "candidate",
+      "final": "FINAL,value=0,pixel_hash=11462430325376205605,counters=Counters { owner_reruns: 0, descriptions: 0, source_operations: 0, source_reads: 0, destination_compares: 0, text_promotions: 0, text_bytes_copied: 0, layout_runs: 0, measure_calls: 0, presentations: 0, paint_passes: 0, exact_updates: 0, coarse_updates: 0 }",
+      "cpu": {
+        "0.5": 270.81,
+        "0.95": 327.82,
+        "0.99": 499.84
+      },
+      "wall": {
+        "0.5": 273.11,
+        "0.95": 330.71,
+        "0.99": 732.16
+      }
+    },
+    {
+      "repeat": 3,
+      "case": "32-idle",
+      "variant": "control",
+      "final": "FINAL,value=0,pixel_hash=11462430325376205605,counters=Counters { owner_reruns: 0, descriptions: 0, source_operations: 0, source_reads: 0, destination_compares: 0, text_promotions: 0, text_bytes_copied: 0, layout_runs: 0, measure_calls: 0, presentations: 0, paint_passes: 0, exact_updates: 0, coarse_updates: 0 }",
+      "cpu": {
+        "0.5": 288.14,
+        "0.95": 363.18,
+        "0.99": 429.11
+      },
+      "wall": {
+        "0.5": 290.34,
+        "0.95": 365.29,
+        "0.99": 521.79
+      }
+    },
+    {
+      "repeat": 3,
+      "case": "32-one",
+      "variant": "control",
+      "final": "FINAL,value=16514348029754293716,pixel_hash=11240993552904184613,counters=Counters { owner_reruns: 0, descriptions: 0, source_operations: 4000, source_reads: 4000, destination_compares: 4000, text_promotions: 0, text_bytes_copied: 0, layout_runs: 0, measure_calls: 0, presentations: 4000, paint_passes: 0, exact_updates: 4000, coarse_updates: 0 }",
+      "cpu": {
+        "0.5": 770.55,
+        "0.95": 865.73,
+        "0.99": 1050.48
+      },
+      "wall": {
+        "0.5": 773.04,
+        "0.95": 868.83,
+        "0.99": 1052.99
+      }
+    },
+    {
+      "repeat": 3,
+      "case": "32-one",
+      "variant": "candidate",
+      "final": "FINAL,value=16514348029754293716,pixel_hash=11240993552904184613,counters=Counters { owner_reruns: 0, descriptions: 0, source_operations: 4000, source_reads: 4000, destination_compares: 4000, text_promotions: 0, text_bytes_copied: 0, layout_runs: 0, measure_calls: 0, presentations: 4000, paint_passes: 0, exact_updates: 4000, coarse_updates: 0 }",
+      "cpu": {
+        "0.5": 896.79,
+        "0.95": 954.8,
+        "0.99": 990.26
+      },
+      "wall": {
+        "0.5": 899.8,
+        "0.95": 958.1,
+        "0.99": 992.47
+      }
+    },
+    {
+      "repeat": 3,
+      "case": "32-all",
+      "variant": "candidate",
+      "final": "FINAL,value=4110017462229318656,pixel_hash=14812928932416127781,counters=Counters { owner_reruns: 0, descriptions: 0, source_operations: 4000, source_reads: 4000, destination_compares: 4000, text_promotions: 0, text_bytes_copied: 0, layout_runs: 0, measure_calls: 0, presentations: 4000, paint_passes: 0, exact_updates: 4000, coarse_updates: 0 }",
+      "cpu": {
+        "0.5": 1216.98,
+        "0.95": 1269.69,
+        "0.99": 1430.5
+      },
+      "wall": {
+        "0.5": 1219.2,
+        "0.95": 1272.19,
+        "0.99": 1433.09
+      }
+    },
+    {
+      "repeat": 3,
+      "case": "32-all",
+      "variant": "control",
+      "final": "FINAL,value=4110017462229318656,pixel_hash=14812928932416127781,counters=Counters { owner_reruns: 0, descriptions: 0, source_operations: 4000, source_reads: 4000, destination_compares: 4000, text_promotions: 0, text_bytes_copied: 0, layout_runs: 0, measure_calls: 0, presentations: 4000, paint_passes: 0, exact_updates: 4000, coarse_updates: 0 }",
+      "cpu": {
+        "0.5": 1266.98,
+        "0.95": 1580.08,
+        "0.99": 1691.28
+      },
+      "wall": {
+        "0.5": 1269.48,
+        "0.95": 1583.27,
+        "0.99": 1693.99
+      }
+    },
+    {
+      "repeat": 3,
+      "case": "32-rotate",
+      "variant": "control",
+      "final": "FINAL,value=4110017462229318656,pixel_hash=14812928932416127781,counters=Counters { owner_reruns: 0, descriptions: 0, source_operations: 128000, source_reads: 128000, destination_compares: 128000, text_promotions: 0, text_bytes_copied: 0, layout_runs: 0, measure_calls: 0, presentations: 128000, paint_passes: 0, exact_updates: 128000, coarse_updates: 0 }",
+      "cpu": {
+        "0.5": 7171.9,
+        "0.95": 8167.08,
+        "0.99": 8537.07
+      },
+      "wall": {
+        "0.5": 7174.09,
+        "0.95": 8172.05,
+        "0.99": 8543.65
+      }
+    },
+    {
+      "repeat": 3,
+      "case": "32-rotate",
+      "variant": "candidate",
+      "final": "FINAL,value=4110017462229318656,pixel_hash=14812928932416127781,counters=Counters { owner_reruns: 0, descriptions: 0, source_operations: 128000, source_reads: 128000, destination_compares: 128000, text_promotions: 0, text_bytes_copied: 0, layout_runs: 0, measure_calls: 0, presentations: 128000, paint_passes: 0, exact_updates: 128000, coarse_updates: 0 }",
+      "cpu": {
+        "0.5": 8177.31,
+        "0.95": 9615.2,
+        "0.99": 10576.21
+      },
+      "wall": {
+        "0.5": 8181.27,
+        "0.95": 9643.32,
+        "0.99": 10579.38
+      }
+    },
+    {
+      "repeat": 3,
+      "case": "64-idle",
+      "variant": "candidate",
+      "final": "FINAL,value=0,pixel_hash=11462430325376205605,counters=Counters { owner_reruns: 0, descriptions: 0, source_operations: 0, source_reads: 0, destination_compares: 0, text_promotions: 0, text_bytes_copied: 0, layout_runs: 0, measure_calls: 0, presentations: 0, paint_passes: 0, exact_updates: 0, coarse_updates: 0 }",
+      "cpu": {
+        "0.5": 558.56,
+        "0.95": 634.4,
+        "0.99": 648.12
+      },
+      "wall": {
+        "0.5": 560.06,
+        "0.95": 636.5,
+        "0.99": 650.13
+      }
+    },
+    {
+      "repeat": 3,
+      "case": "64-idle",
+      "variant": "control",
+      "final": "FINAL,value=0,pixel_hash=11462430325376205605,counters=Counters { owner_reruns: 0, descriptions: 0, source_operations: 0, source_reads: 0, destination_compares: 0, text_promotions: 0, text_bytes_copied: 0, layout_runs: 0, measure_calls: 0, presentations: 0, paint_passes: 0, exact_updates: 0, coarse_updates: 0 }",
+      "cpu": {
+        "0.5": 588.01,
+        "0.95": 736.27,
+        "0.99": 824.44
+      },
+      "wall": {
+        "0.5": 591.02,
+        "0.95": 740.7,
+        "0.99": 826.56
+      }
+    },
+    {
+      "repeat": 3,
+      "case": "64-one",
+      "variant": "control",
+      "final": "FINAL,value=16514348029754293716,pixel_hash=11240993552904184613,counters=Counters { owner_reruns: 0, descriptions: 0, source_operations: 4000, source_reads: 4000, destination_compares: 4000, text_promotions: 0, text_bytes_copied: 0, layout_runs: 0, measure_calls: 0, presentations: 4000, paint_passes: 0, exact_updates: 4000, coarse_updates: 0 }",
+      "cpu": {
+        "0.5": 1653.61,
+        "0.95": 1820.03,
+        "0.99": 1933.85
+      },
+      "wall": {
+        "0.5": 1656.02,
+        "0.95": 1822.93,
+        "0.99": 1936.64
+      }
+    },
+    {
+      "repeat": 3,
+      "case": "64-one",
+      "variant": "candidate",
+      "final": "FINAL,value=16514348029754293716,pixel_hash=11240993552904184613,counters=Counters { owner_reruns: 0, descriptions: 0, source_operations: 4000, source_reads: 4000, destination_compares: 4000, text_promotions: 0, text_bytes_copied: 0, layout_runs: 0, measure_calls: 0, presentations: 4000, paint_passes: 0, exact_updates: 4000, coarse_updates: 0 }",
+      "cpu": {
+        "0.5": 1378.49,
+        "0.95": 1634.97,
+        "0.99": 1940.35
+      },
+      "wall": {
+        "0.5": 1380.49,
+        "0.95": 1636.88,
+        "0.99": 2151.45
+      }
+    },
+    {
+      "repeat": 3,
+      "case": "64-all",
+      "variant": "candidate",
+      "final": "FINAL,value=9207992534111819776,pixel_hash=4285754629872036645,counters=Counters { owner_reruns: 0, descriptions: 0, source_operations: 4000, source_reads: 4000, destination_compares: 4000, text_promotions: 0, text_bytes_copied: 0, layout_runs: 0, measure_calls: 0, presentations: 4000, paint_passes: 0, exact_updates: 4000, coarse_updates: 0 }",
+      "cpu": {
+        "0.5": 2823.21,
+        "0.95": 3024.6,
+        "0.99": 3279.17
+      },
+      "wall": {
+        "0.5": 2825.42,
+        "0.95": 3083.7,
+        "0.99": 3281.68
+      }
+    },
+    {
+      "repeat": 3,
+      "case": "64-all",
+      "variant": "control",
+      "final": "FINAL,value=9207992534111819776,pixel_hash=4285754629872036645,counters=Counters { owner_reruns: 0, descriptions: 0, source_operations: 4000, source_reads: 4000, destination_compares: 4000, text_promotions: 0, text_bytes_copied: 0, layout_runs: 0, measure_calls: 0, presentations: 4000, paint_passes: 0, exact_updates: 4000, coarse_updates: 0 }",
+      "cpu": {
+        "0.5": 2444.71,
+        "0.95": 3063.28,
+        "0.99": 3202.33
+      },
+      "wall": {
+        "0.5": 2446.59,
+        "0.95": 3211.83,
+        "0.99": 3355.21
+      }
+    },
+    {
+      "repeat": 3,
+      "case": "64-rotate",
+      "variant": "control",
+      "final": "FINAL,value=9207992534111819776,pixel_hash=4285754629872036645,counters=Counters { owner_reruns: 0, descriptions: 0, source_operations: 256000, source_reads: 256000, destination_compares: 256000, text_promotions: 0, text_bytes_copied: 0, layout_runs: 0, measure_calls: 0, presentations: 256000, paint_passes: 0, exact_updates: 256000, coarse_updates: 0 }",
+      "cpu": {
+        "0.5": 17486.93,
+        "0.95": 20410.93,
+        "0.99": 22113.24
+      },
+      "wall": {
+        "0.5": 17489.66,
+        "0.95": 20414.16,
+        "0.99": 22115.35
+      }
+    },
+    {
+      "repeat": 3,
+      "case": "64-rotate",
+      "variant": "candidate",
+      "final": "FINAL,value=9207992534111819776,pixel_hash=4285754629872036645,counters=Counters { owner_reruns: 0, descriptions: 0, source_operations: 256000, source_reads: 256000, destination_compares: 256000, text_promotions: 0, text_bytes_copied: 0, layout_runs: 0, measure_calls: 0, presentations: 256000, paint_passes: 0, exact_updates: 256000, coarse_updates: 0 }",
+      "cpu": {
+        "0.5": 19620.76,
+        "0.95": 20743.76,
+        "0.99": 25316.77
+      },
+      "wall": {
+        "0.5": 19634.1,
+        "0.95": 20749.5,
+        "0.99": 25331.2
+      }
+    },
+    {
+      "repeat": 4,
+      "case": "1-idle",
+      "variant": "control",
+      "final": "FINAL,value=0,pixel_hash=11462430325376205605,counters=Counters { owner_reruns: 0, descriptions: 0, source_operations: 0, source_reads: 0, destination_compares: 0, text_promotions: 0, text_bytes_copied: 0, layout_runs: 0, measure_calls: 0, presentations: 0, paint_passes: 0, exact_updates: 0, coarse_updates: 0 }",
+      "cpu": {
+        "0.5": 13.73,
+        "0.95": 13.84,
+        "0.99": 17.34
+      },
+      "wall": {
+        "0.5": 15.23,
+        "0.95": 16.12,
+        "0.99": 23.24
+      }
+    },
+    {
+      "repeat": 4,
+      "case": "1-idle",
+      "variant": "candidate",
+      "final": "FINAL,value=0,pixel_hash=11462430325376205605,counters=Counters { owner_reruns: 0, descriptions: 0, source_operations: 0, source_reads: 0, destination_compares: 0, text_promotions: 0, text_bytes_copied: 0, layout_runs: 0, measure_calls: 0, presentations: 0, paint_passes: 0, exact_updates: 0, coarse_updates: 0 }",
+      "cpu": {
+        "0.5": 16.73,
+        "0.95": 16.92,
+        "0.99": 21.64
+      },
+      "wall": {
+        "0.5": 18.14,
+        "0.95": 19.13,
+        "0.99": 28.36
+      }
+    },
+    {
+      "repeat": 4,
+      "case": "1-one",
+      "variant": "candidate",
+      "final": "FINAL,value=16514348029754293716,pixel_hash=11240993552904184613,counters=Counters { owner_reruns: 0, descriptions: 0, source_operations: 4000, source_reads: 4000, destination_compares: 4000, text_promotions: 0, text_bytes_copied: 0, layout_runs: 0, measure_calls: 0, presentations: 4000, paint_passes: 0, exact_updates: 4000, coarse_updates: 0 }",
+      "cpu": {
+        "0.5": 208.8,
+        "0.95": 215.71,
+        "0.99": 276.42
+      },
+      "wall": {
+        "0.5": 210.5,
+        "0.95": 221.91,
+        "0.99": 278.01
+      }
+    },
+    {
+      "repeat": 4,
+      "case": "1-one",
+      "variant": "control",
+      "final": "FINAL,value=16514348029754293716,pixel_hash=11240993552904184613,counters=Counters { owner_reruns: 0, descriptions: 0, source_operations: 4000, source_reads: 4000, destination_compares: 4000, text_promotions: 0, text_bytes_copied: 0, layout_runs: 0, measure_calls: 0, presentations: 4000, paint_passes: 0, exact_updates: 4000, coarse_updates: 0 }",
+      "cpu": {
+        "0.5": 202.58,
+        "0.95": 207.59,
+        "0.99": 263.7
+      },
+      "wall": {
+        "0.5": 204.78,
+        "0.95": 213.59,
+        "0.99": 265.9
+      }
+    },
+    {
+      "repeat": 4,
+      "case": "1-all",
+      "variant": "control",
+      "final": "FINAL,value=16514348029754293716,pixel_hash=11240993552904184613,counters=Counters { owner_reruns: 0, descriptions: 0, source_operations: 4000, source_reads: 4000, destination_compares: 4000, text_promotions: 0, text_bytes_copied: 0, layout_runs: 0, measure_calls: 0, presentations: 4000, paint_passes: 0, exact_updates: 4000, coarse_updates: 0 }",
+      "cpu": {
+        "0.5": 194.57,
+        "0.95": 242.05,
+        "0.99": 273.81
+      },
+      "wall": {
+        "0.5": 196.97,
+        "0.95": 244.56,
+        "0.99": 280.13
+      }
+    },
+    {
+      "repeat": 4,
+      "case": "1-all",
+      "variant": "candidate",
+      "final": "FINAL,value=16514348029754293716,pixel_hash=11240993552904184613,counters=Counters { owner_reruns: 0, descriptions: 0, source_operations: 4000, source_reads: 4000, destination_compares: 4000, text_promotions: 0, text_bytes_copied: 0, layout_runs: 0, measure_calls: 0, presentations: 4000, paint_passes: 0, exact_updates: 4000, coarse_updates: 0 }",
+      "cpu": {
+        "0.5": 206.19,
+        "0.95": 207.89,
+        "0.99": 213.4
+      },
+      "wall": {
+        "0.5": 208.59,
+        "0.95": 210.49,
+        "0.99": 218.42
+      }
+    },
+    {
+      "repeat": 4,
+      "case": "1-rotate",
+      "variant": "candidate",
+      "final": "FINAL,value=16514348029754293716,pixel_hash=11240993552904184613,counters=Counters { owner_reruns: 0, descriptions: 0, source_operations: 4000, source_reads: 4000, destination_compares: 4000, text_promotions: 0, text_bytes_copied: 0, layout_runs: 0, measure_calls: 0, presentations: 4000, paint_passes: 0, exact_updates: 4000, coarse_updates: 0 }",
+      "cpu": {
+        "0.5": 192.86,
+        "0.95": 200.48,
+        "0.99": 260.19
+      },
+      "wall": {
+        "0.5": 194.57,
+        "0.95": 206.28,
+        "0.99": 262.5
+      }
+    },
+    {
+      "repeat": 4,
+      "case": "1-rotate",
+      "variant": "control",
+      "final": "FINAL,value=16514348029754293716,pixel_hash=11240993552904184613,counters=Counters { owner_reruns: 0, descriptions: 0, source_operations: 4000, source_reads: 4000, destination_compares: 4000, text_promotions: 0, text_bytes_copied: 0, layout_runs: 0, measure_calls: 0, presentations: 4000, paint_passes: 0, exact_updates: 4000, coarse_updates: 0 }",
+      "cpu": {
+        "0.5": 193.77,
+        "0.95": 197.48,
+        "0.99": 263.2
+      },
+      "wall": {
+        "0.5": 195.56,
+        "0.95": 199.27,
+        "0.99": 265.3
+      }
+    },
+    {
+      "repeat": 4,
+      "case": "8-idle",
+      "variant": "control",
+      "final": "FINAL,value=0,pixel_hash=11462430325376205605,counters=Counters { owner_reruns: 0, descriptions: 0, source_operations: 0, source_reads: 0, destination_compares: 0, text_promotions: 0, text_bytes_copied: 0, layout_runs: 0, measure_calls: 0, presentations: 0, paint_passes: 0, exact_updates: 0, coarse_updates: 0 }",
+      "cpu": {
+        "0.5": 74.84,
+        "0.95": 75.05,
+        "0.99": 79.55
+      },
+      "wall": {
+        "0.5": 77.14,
+        "0.95": 77.95,
+        "0.99": 83.76
+      }
+    },
+    {
+      "repeat": 4,
+      "case": "8-idle",
+      "variant": "candidate",
+      "final": "FINAL,value=0,pixel_hash=11462430325376205605,counters=Counters { owner_reruns: 0, descriptions: 0, source_operations: 0, source_reads: 0, destination_compares: 0, text_promotions: 0, text_bytes_copied: 0, layout_runs: 0, measure_calls: 0, presentations: 0, paint_passes: 0, exact_updates: 0, coarse_updates: 0 }",
+      "cpu": {
+        "0.5": 71.94,
+        "0.95": 72.14,
+        "0.99": 77.85
+      },
+      "wall": {
+        "0.5": 73.63,
+        "0.95": 74.14,
+        "0.99": 81.45
+      }
+    },
+    {
+      "repeat": 4,
+      "case": "8-one",
+      "variant": "candidate",
+      "final": "FINAL,value=16514348029754293716,pixel_hash=11240993552904184613,counters=Counters { owner_reruns: 0, descriptions: 0, source_operations: 4000, source_reads: 4000, destination_compares: 4000, text_promotions: 0, text_bytes_copied: 0, layout_runs: 0, measure_calls: 0, presentations: 4000, paint_passes: 0, exact_updates: 4000, coarse_updates: 0 }",
+      "cpu": {
+        "0.5": 314.7,
+        "0.95": 370.3,
+        "0.99": 635.49
+      },
+      "wall": {
+        "0.5": 316.79,
+        "0.95": 372.7,
+        "0.99": 838.69
+      }
+    },
+    {
+      "repeat": 4,
+      "case": "8-one",
+      "variant": "control",
+      "final": "FINAL,value=16514348029754293716,pixel_hash=11240993552904184613,counters=Counters { owner_reruns: 0, descriptions: 0, source_operations: 4000, source_reads: 4000, destination_compares: 4000, text_promotions: 0, text_bytes_copied: 0, layout_runs: 0, measure_calls: 0, presentations: 4000, paint_passes: 0, exact_updates: 4000, coarse_updates: 0 }",
+      "cpu": {
+        "0.5": 408.16,
+        "0.95": 471.9,
+        "0.99": 669.26
+      },
+      "wall": {
+        "0.5": 412.67,
+        "0.95": 474.98,
+        "0.99": 671.56
+      }
+    },
+    {
+      "repeat": 4,
+      "case": "8-all",
+      "variant": "control",
+      "final": "FINAL,value=7784359077124646912,pixel_hash=1744856074806027045,counters=Counters { owner_reruns: 0, descriptions: 0, source_operations: 4000, source_reads: 4000, destination_compares: 4000, text_promotions: 0, text_bytes_copied: 0, layout_runs: 0, measure_calls: 0, presentations: 4000, paint_passes: 0, exact_updates: 4000, coarse_updates: 0 }",
+      "cpu": {
+        "0.5": 427.1,
+        "0.95": 461.07,
+        "0.99": 636.39
+      },
+      "wall": {
+        "0.5": 429.41,
+        "0.95": 463.37,
+        "0.99": 874.74
+      }
+    },
+    {
+      "repeat": 4,
+      "case": "8-all",
+      "variant": "candidate",
+      "final": "FINAL,value=7784359077124646912,pixel_hash=1744856074806027045,counters=Counters { owner_reruns: 0, descriptions: 0, source_operations: 4000, source_reads: 4000, destination_compares: 4000, text_promotions: 0, text_bytes_copied: 0, layout_runs: 0, measure_calls: 0, presentations: 4000, paint_passes: 0, exact_updates: 4000, coarse_updates: 0 }",
+      "cpu": {
+        "0.5": 415.88,
+        "0.95": 475.0,
+        "0.99": 492.82
+      },
+      "wall": {
+        "0.5": 418.18,
+        "0.95": 477.6,
+        "0.99": 494.83
+      }
+    },
+    {
+      "repeat": 4,
+      "case": "8-rotate",
+      "variant": "candidate",
+      "final": "FINAL,value=7784359077124646912,pixel_hash=1744856074806027045,counters=Counters { owner_reruns: 0, descriptions: 0, source_operations: 32000, source_reads: 32000, destination_compares: 32000, text_promotions: 0, text_bytes_copied: 0, layout_runs: 0, measure_calls: 0, presentations: 32000, paint_passes: 0, exact_updates: 32000, coarse_updates: 0 }",
+      "cpu": {
+        "0.5": 1604.02,
+        "0.95": 1729.76,
+        "0.99": 1876.74
+      },
+      "wall": {
+        "0.5": 1606.41,
+        "0.95": 1732.25,
+        "0.99": 2229.89
+      }
+    },
+    {
+      "repeat": 4,
+      "case": "8-rotate",
+      "variant": "control",
+      "final": "FINAL,value=7784359077124646912,pixel_hash=1744856074806027045,counters=Counters { owner_reruns: 0, descriptions: 0, source_operations: 32000, source_reads: 32000, destination_compares: 32000, text_promotions: 0, text_bytes_copied: 0, layout_runs: 0, measure_calls: 0, presentations: 32000, paint_passes: 0, exact_updates: 32000, coarse_updates: 0 }",
+      "cpu": {
+        "0.5": 1553.33,
+        "0.95": 1673.76,
+        "0.99": 1792.68
+      },
+      "wall": {
+        "0.5": 1555.82,
+        "0.95": 1676.45,
+        "0.99": 1797.48
+      }
+    },
+    {
+      "repeat": 4,
+      "case": "32-idle",
+      "variant": "control",
+      "final": "FINAL,value=0,pixel_hash=11462430325376205605,counters=Counters { owner_reruns: 0, descriptions: 0, source_operations: 0, source_reads: 0, destination_compares: 0, text_promotions: 0, text_bytes_copied: 0, layout_runs: 0, measure_calls: 0, presentations: 0, paint_passes: 0, exact_updates: 0, coarse_updates: 0 }",
+      "cpu": {
+        "0.5": 284.84,
+        "0.95": 288.25,
+        "0.99": 329.32
+      },
+      "wall": {
+        "0.5": 287.14,
+        "0.95": 294.45,
+        "0.99": 331.72
+      }
+    },
+    {
+      "repeat": 4,
+      "case": "32-idle",
+      "variant": "candidate",
+      "final": "FINAL,value=0,pixel_hash=11462430325376205605,counters=Counters { owner_reruns: 0, descriptions: 0, source_operations: 0, source_reads: 0, destination_compares: 0, text_promotions: 0, text_bytes_copied: 0, layout_runs: 0, measure_calls: 0, presentations: 0, paint_passes: 0, exact_updates: 0, coarse_updates: 0 }",
+      "cpu": {
+        "0.5": 266.2,
+        "0.95": 268.71,
+        "0.99": 364.79
+      },
+      "wall": {
+        "0.5": 268.5,
+        "0.95": 275.43,
+        "0.99": 367.28
+      }
+    },
+    {
+      "repeat": 4,
+      "case": "32-one",
+      "variant": "candidate",
+      "final": "FINAL,value=16514348029754293716,pixel_hash=11240993552904184613,counters=Counters { owner_reruns: 0, descriptions: 0, source_operations: 4000, source_reads: 4000, destination_compares: 4000, text_promotions: 0, text_bytes_copied: 0, layout_runs: 0, measure_calls: 0, presentations: 4000, paint_passes: 0, exact_updates: 4000, coarse_updates: 0 }",
+      "cpu": {
+        "0.5": 726.36,
+        "0.95": 774.15,
+        "0.99": 878.66
+      },
+      "wall": {
+        "0.5": 728.57,
+        "0.95": 776.75,
+        "0.99": 1015.0
+      }
+    },
+    {
+      "repeat": 4,
+      "case": "32-one",
+      "variant": "control",
+      "final": "FINAL,value=16514348029754293716,pixel_hash=11240993552904184613,counters=Counters { owner_reruns: 0, descriptions: 0, source_operations: 4000, source_reads: 4000, destination_compares: 4000, text_promotions: 0, text_bytes_copied: 0, layout_runs: 0, measure_calls: 0, presentations: 4000, paint_passes: 0, exact_updates: 4000, coarse_updates: 0 }",
+      "cpu": {
+        "0.5": 762.13,
+        "0.95": 811.53,
+        "0.99": 1035.75
+      },
+      "wall": {
+        "0.5": 764.54,
+        "0.95": 814.04,
+        "0.99": 1057.28
+      }
+    },
+    {
+      "repeat": 4,
+      "case": "32-all",
+      "variant": "control",
+      "final": "FINAL,value=4110017462229318656,pixel_hash=14812928932416127781,counters=Counters { owner_reruns: 0, descriptions: 0, source_operations: 4000, source_reads: 4000, destination_compares: 4000, text_promotions: 0, text_bytes_copied: 0, layout_runs: 0, measure_calls: 0, presentations: 4000, paint_passes: 0, exact_updates: 4000, coarse_updates: 0 }",
+      "cpu": {
+        "0.5": 1245.35,
+        "0.95": 1310.37,
+        "0.99": 1332.91
+      },
+      "wall": {
+        "0.5": 1247.85,
+        "0.95": 1311.95,
+        "0.99": 1335.31
+      }
+    },
+    {
+      "repeat": 4,
+      "case": "32-all",
+      "variant": "candidate",
+      "final": "FINAL,value=4110017462229318656,pixel_hash=14812928932416127781,counters=Counters { owner_reruns: 0, descriptions: 0, source_operations: 4000, source_reads: 4000, destination_compares: 4000, text_promotions: 0, text_bytes_copied: 0, layout_runs: 0, measure_calls: 0, presentations: 4000, paint_passes: 0, exact_updates: 4000, coarse_updates: 0 }",
+      "cpu": {
+        "0.5": 1266.68,
+        "0.95": 1359.16,
+        "0.99": 1573.86
+      },
+      "wall": {
+        "0.5": 1269.19,
+        "0.95": 1362.06,
+        "0.99": 1722.43
+      }
+    },
+    {
+      "repeat": 4,
+      "case": "32-rotate",
+      "variant": "candidate",
+      "final": "FINAL,value=4110017462229318656,pixel_hash=14812928932416127781,counters=Counters { owner_reruns: 0, descriptions: 0, source_operations: 128000, source_reads: 128000, destination_compares: 128000, text_promotions: 0, text_bytes_copied: 0, layout_runs: 0, measure_calls: 0, presentations: 128000, paint_passes: 0, exact_updates: 128000, coarse_updates: 0 }",
+      "cpu": {
+        "0.5": 7707.21,
+        "0.95": 7957.79,
+        "0.99": 8332.89
+      },
+      "wall": {
+        "0.5": 7709.08,
+        "0.95": 7986.01,
+        "0.99": 8336.35
+      }
+    },
+    {
+      "repeat": 4,
+      "case": "32-rotate",
+      "variant": "control",
+      "final": "FINAL,value=4110017462229318656,pixel_hash=14812928932416127781,counters=Counters { owner_reruns: 0, descriptions: 0, source_operations: 128000, source_reads: 128000, destination_compares: 128000, text_promotions: 0, text_bytes_copied: 0, layout_runs: 0, measure_calls: 0, presentations: 128000, paint_passes: 0, exact_updates: 128000, coarse_updates: 0 }",
+      "cpu": {
+        "0.5": 7203.17,
+        "0.95": 8966.98,
+        "0.99": 11607.95
+      },
+      "wall": {
+        "0.5": 7205.35,
+        "0.95": 8971.55,
+        "0.99": 11612.94
+      }
+    },
+    {
+      "repeat": 4,
+      "case": "64-idle",
+      "variant": "control",
+      "final": "FINAL,value=0,pixel_hash=11462430325376205605,counters=Counters { owner_reruns: 0, descriptions: 0, source_operations: 0, source_reads: 0, destination_compares: 0, text_promotions: 0, text_bytes_copied: 0, layout_runs: 0, measure_calls: 0, presentations: 0, paint_passes: 0, exact_updates: 0, coarse_updates: 0 }",
+      "cpu": {
+        "0.5": 583.4,
+        "0.95": 626.19,
+        "0.99": 681.99
+      },
+      "wall": {
+        "0.5": 585.71,
+        "0.95": 628.79,
+        "0.99": 689.19
+      }
+    },
+    {
+      "repeat": 4,
+      "case": "64-idle",
+      "variant": "candidate",
+      "final": "FINAL,value=0,pixel_hash=11462430325376205605,counters=Counters { owner_reruns: 0, descriptions: 0, source_operations: 0, source_reads: 0, destination_compares: 0, text_promotions: 0, text_bytes_copied: 0, layout_runs: 0, measure_calls: 0, presentations: 0, paint_passes: 0, exact_updates: 0, coarse_updates: 0 }",
+      "cpu": {
+        "0.5": 525.89,
+        "0.95": 562.56,
+        "0.99": 579.89
+      },
+      "wall": {
+        "0.5": 528.1,
+        "0.95": 564.87,
+        "0.99": 582.4
+      }
+    },
+    {
+      "repeat": 4,
+      "case": "64-one",
+      "variant": "candidate",
+      "final": "FINAL,value=16514348029754293716,pixel_hash=11240993552904184613,counters=Counters { owner_reruns: 0, descriptions: 0, source_operations: 4000, source_reads: 4000, destination_compares: 4000, text_promotions: 0, text_bytes_copied: 0, layout_runs: 0, measure_calls: 0, presentations: 4000, paint_passes: 0, exact_updates: 4000, coarse_updates: 0 }",
+      "cpu": {
+        "0.5": 1302.85,
+        "0.95": 1429.91,
+        "0.99": 1538.09
+      },
+      "wall": {
+        "0.5": 1304.56,
+        "0.95": 1539.78,
+        "0.99": 8537.54
+      }
+    },
+    {
+      "repeat": 4,
+      "case": "64-one",
+      "variant": "control",
+      "final": "FINAL,value=16514348029754293716,pixel_hash=11240993552904184613,counters=Counters { owner_reruns: 0, descriptions: 0, source_operations: 4000, source_reads: 4000, destination_compares: 4000, text_promotions: 0, text_bytes_copied: 0, layout_runs: 0, measure_calls: 0, presentations: 4000, paint_passes: 0, exact_updates: 4000, coarse_updates: 0 }",
+      "cpu": {
+        "0.5": 1431.5,
+        "0.95": 1593.9,
+        "0.99": 1710.92
+      },
+      "wall": {
+        "0.5": 1433.79,
+        "0.95": 1596.31,
+        "0.99": 1713.51
+      }
+    },
+    {
+      "repeat": 4,
+      "case": "64-all",
+      "variant": "control",
+      "final": "FINAL,value=9207992534111819776,pixel_hash=4285754629872036645,counters=Counters { owner_reruns: 0, descriptions: 0, source_operations: 4000, source_reads: 4000, destination_compares: 4000, text_promotions: 0, text_bytes_copied: 0, layout_runs: 0, measure_calls: 0, presentations: 4000, paint_passes: 0, exact_updates: 4000, coarse_updates: 0 }",
+      "cpu": {
+        "0.5": 2338.19,
+        "0.95": 2412.84,
+        "0.99": 2479.57
+      },
+      "wall": {
+        "0.5": 2339.7,
+        "0.95": 2414.53,
+        "0.99": 2722.52
+      }
+    },
+    {
+      "repeat": 4,
+      "case": "64-all",
+      "variant": "candidate",
+      "final": "FINAL,value=9207992534111819776,pixel_hash=4285754629872036645,counters=Counters { owner_reruns: 0, descriptions: 0, source_operations: 4000, source_reads: 4000, destination_compares: 4000, text_promotions: 0, text_bytes_copied: 0, layout_runs: 0, measure_calls: 0, presentations: 4000, paint_passes: 0, exact_updates: 4000, coarse_updates: 0 }",
+      "cpu": {
+        "0.5": 2417.84,
+        "0.95": 2514.84,
+        "0.99": 3048.74
+      },
+      "wall": {
+        "0.5": 2419.55,
+        "0.95": 2516.62,
+        "0.99": 3070.66
+      }
+    },
+    {
+      "repeat": 4,
+      "case": "64-rotate",
+      "variant": "candidate",
+      "final": "FINAL,value=9207992534111819776,pixel_hash=4285754629872036645,counters=Counters { owner_reruns: 0, descriptions: 0, source_operations: 256000, source_reads: 256000, destination_compares: 256000, text_promotions: 0, text_bytes_copied: 0, layout_runs: 0, measure_calls: 0, presentations: 256000, paint_passes: 0, exact_updates: 256000, coarse_updates: 0 }",
+      "cpu": {
+        "0.5": 20523.44,
+        "0.95": 25391.51,
+        "0.99": 29441.34
+      },
+      "wall": {
+        "0.5": 20525.67,
+        "0.95": 25397.03,
+        "0.99": 29445.33
+      }
+    },
+    {
+      "repeat": 4,
+      "case": "64-rotate",
+      "variant": "control",
+      "final": "FINAL,value=9207992534111819776,pixel_hash=4285754629872036645,counters=Counters { owner_reruns: 0, descriptions: 0, source_operations: 256000, source_reads: 256000, destination_compares: 256000, text_promotions: 0, text_bytes_copied: 0, layout_runs: 0, measure_calls: 0, presentations: 256000, paint_passes: 0, exact_updates: 256000, coarse_updates: 0 }",
+      "cpu": {
+        "0.5": 16566.49,
+        "0.95": 17143.88,
+        "0.99": 25148.76
+      },
+      "wall": {
+        "0.5": 16568.64,
+        "0.95": 17146.53,
+        "0.99": 25153.28
+      }
+    }
+  ],
+  "ratios": {
+    "1-idle": {
+      "paired_ratios": [
+        1.2178002894356004,
+        1.0956937799043063,
+        1.218442932728647,
+        1.3067632850241546,
+        1.2184996358339402
+      ],
+      "median": 1.218442932728647,
+      "range": [
+        1.0956937799043063,
+        1.3067632850241546
+      ]
+    },
+    "1-one": {
+      "paired_ratios": [
+        1.042627982968611,
+        1.0072176109707687,
+        1.0183188527164242,
+        1.0794160281631808,
+        1.0307039194392338
+      ],
+      "median": 1.0307039194392338,
+      "range": [
+        1.0072176109707687,
+        1.0794160281631808
+      ]
+    },
+    "1-all": {
+      "paired_ratios": [
+        1.0122467724651734,
+        1.0309736913479794,
+        1.0286563936198974,
+        0.9587081339712918,
+        1.0597214370149561
+      ],
+      "median": 1.0286563936198974,
+      "range": [
+        0.9587081339712918,
+        1.0597214370149561
+      ]
+    },
+    "1-rotate": {
+      "paired_ratios": [
+        0.9749528301886793,
+        0.9968213604577241,
+        1.041963242324445,
+        0.9865925116694806,
+        0.9953037105847139
+      ],
+      "median": 0.9953037105847139,
+      "range": [
+        0.9749528301886793,
+        1.041963242324445
+      ]
+    },
+    "8-idle": {
+      "paired_ratios": [
+        0.9606079797340089,
+        0.9987925945800912,
+        1.0254530916844349,
+        0.8914038044786902,
+        0.9612506680919294
+      ],
+      "median": 0.9612506680919294,
+      "range": [
+        0.8914038044786902,
+        1.0254530916844349
+      ]
+    },
+    "8-one": {
+      "paired_ratios": [
+        0.8542219246517139,
+        1.0194927558617282,
+        0.7466587677725118,
+        0.9905543785310735,
+        0.7710211681693453
+      ],
+      "median": 0.8542219246517139,
+      "range": [
+        0.7466587677725118,
+        1.0194927558617282
+      ]
+    },
+    "8-all": {
+      "paired_ratios": [
+        0.9694203238676367,
+        1.0204719111922724,
+        1.004073368844754,
+        1.0181518534852951,
+        0.9737298056661203
+      ],
+      "median": 1.004073368844754,
+      "range": [
+        0.9694203238676367,
+        1.0204719111922724
+      ]
+    },
+    "8-rotate": {
+      "paired_ratios": [
+        1.0095293012638362,
+        1.0042166947991973,
+        1.1254237716147197,
+        1.0101560114100805,
+        1.032633117238449
+      ],
+      "median": 1.0101560114100805,
+      "range": [
+        1.0042166947991973,
+        1.1254237716147197
+      ]
+    },
+    "32-idle": {
+      "paired_ratios": [
+        0.9349209539121115,
+        0.9450673039749763,
+        0.9382983935883527,
+        0.9398556257374888,
+        0.9345597528437017
+      ],
+      "median": 0.9382983935883527,
+      "range": [
+        0.9345597528437017,
+        0.9450673039749763
+      ]
+    },
+    "32-one": {
+      "paired_ratios": [
+        0.9573523053339097,
+        0.9611524553220482,
+        1.0841924987155336,
+        1.1638310297839205,
+        0.9530657499376747
+      ],
+      "median": 0.9611524553220482,
+      "range": [
+        0.9530657499376747,
+        1.1638310297839205
+      ]
+    },
+    "32-all": {
+      "paired_ratios": [
+        0.979257242049273,
+        1.035329417569998,
+        0.8050411191619156,
+        0.9605360779175678,
+        1.0171277151001727
+      ],
+      "median": 0.979257242049273,
+      "range": [
+        0.8050411191619156,
+        1.035329417569998
+      ]
+    },
+    "32-rotate": {
+      "paired_ratios": [
+        1.045269422017407,
+        1.1471990764339899,
+        1.0098510309921958,
+        1.1401873980395711,
+        1.0699747472293448
+      ],
+      "median": 1.0699747472293448,
+      "range": [
+        1.0098510309921958,
+        1.1471990764339899
+      ]
+    },
+    "64-idle": {
+      "paired_ratios": [
+        1.0425374035790091,
+        0.7800346355924741,
+        1.0519398921409497,
+        0.9499158177582013,
+        0.9014226945491944
+      ],
+      "median": 0.9499158177582013,
+      "range": [
+        0.7800346355924741,
+        1.0519398921409497
+      ]
+    },
+    "64-one": {
+      "paired_ratios": [
+        0.755303345077437,
+        0.7335128224574481,
+        0.8998115076195649,
+        0.8336246152357569,
+        0.9101292350681103
+      ],
+      "median": 0.8336246152357569,
+      "range": [
+        0.7335128224574481,
+        0.9101292350681103
+      ]
+    },
+    "64-all": {
+      "paired_ratios": [
+        0.8757306719754382,
+        1.026083818753544,
+        0.97970388085316,
+        1.1548240895648154,
+        1.0340648108152033
+      ],
+      "median": 1.026083818753544,
+      "range": [
+        0.8757306719754382,
+        1.1548240895648154
+      ]
+    },
+    "64-rotate": {
+      "paired_ratios": [
+        1.1419021126689068,
+        1.1064966685785407,
+        1.1976466171588125,
+        1.1220242775604408,
+        1.2388526477244122
+      ],
+      "median": 1.1419021126689068,
+      "range": [
+        1.1064966685785407,
+        1.2388526477244122
+      ]
+    }
+  }
+}

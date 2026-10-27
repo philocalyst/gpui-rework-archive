@@ -1,0 +1,50 @@
+[
+  {
+    "address": "0000000000577000",
+    "bytes": 4928,
+    "method": "deliver_ready",
+    "lanes": 64
+  },
+  {
+    "address": "0000000000578340",
+    "bytes": 5145,
+    "method": "deliver_ready",
+    "lanes": 32
+  },
+  {
+    "address": "0000000000579760",
+    "bytes": 5573,
+    "method": "deliver_ready",
+    "lanes": 8
+  },
+  {
+    "address": "000000000057ad30",
+    "bytes": 5382,
+    "method": "deliver_ready",
+    "lanes": 1
+  },
+  {
+    "address": "00000000006222b0",
+    "bytes": 104,
+    "method": "stage",
+    "lanes": 0
+  },
+  {
+    "address": "00000000005a0a20",
+    "bytes": 4840,
+    "method": "stage",
+    "lanes": 64
+  },
+  {
+    "address": "00000000005ab7b0",
+    "bytes": 3664,
+    "method": "stage",
+    "lanes": 32
+  },
+  {
+    "address": "00000000005ae670",
+    "bytes": 1252,
+    "method": "stage",
+    "lanes": 8
+  }
+]

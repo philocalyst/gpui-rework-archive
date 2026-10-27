@@ -1,0 +1,2 @@
+COLD,lanes=64,wall_ns=159481
+FINAL,value=9207992534111819776,pixel_hash=4285754629872036645,counters=Counters { owner_reruns: 0, descriptions: 0, source_operations: 4000, source_reads: 4000, destination_compares: 4000, text_promotions: 0, text_bytes_copied: 0, layout_runs: 0, measure_calls: 0, presentations: 4000, paint_passes: 0, exact_updates: 4000, coarse_updates: 0 }

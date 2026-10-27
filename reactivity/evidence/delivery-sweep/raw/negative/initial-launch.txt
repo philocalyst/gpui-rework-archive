@@ -1,0 +1,1 @@
+Initial test launch raced the still-running worktree setup and failed because the evidence directory did not exist. No Cargo build ran. Reaped setup, then ran the source-pinned negative test; its assertion failure is preserved separately.

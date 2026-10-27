@@ -1,0 +1,1 @@
+{"command": ["/usr/bin/time", "-v", "-o", "/home/user/gpui-delivery-sweep-evidence/paired/3-32-idle-control.time", "taskset", "-c", "2", "/home/user/gpui-delivery-control-target/release/examples/delivery_sweep_cost", "32", "idle"], "exit": 0}

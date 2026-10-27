@@ -1,0 +1,87 @@
+{
+  "binaries": {
+    "control": "/home/user/gpui-delivery-control-target/release/examples/delivery_sweep_cost",
+    "candidate": "/home/user/gpui-delivery-sweep-target/release/examples/delivery_sweep_cost"
+  },
+  "hashes": {
+    "control": "488e108975af7a89ff4a5ee022d0f7d6bbdfe5f4d87b7d52c73b3006614be3c3",
+    "candidate": "8c2da82123fb389cdefdfe7653f33bb0449438371c49bf1f3c954e761e4c91e5"
+  },
+  "sources": {
+    "control": "258cbe7b0ecffe01beadc30fd64d02b2da8e9ec8",
+    "candidate": "5aa10c66efcfc7c69be83654148d43ad50f28e07"
+  },
+  "cases": [
+    [
+      1,
+      "idle"
+    ],
+    [
+      1,
+      "one"
+    ],
+    [
+      1,
+      "all"
+    ],
+    [
+      1,
+      "rotate"
+    ],
+    [
+      8,
+      "idle"
+    ],
+    [
+      8,
+      "one"
+    ],
+    [
+      8,
+      "all"
+    ],
+    [
+      8,
+      "rotate"
+    ],
+    [
+      32,
+      "idle"
+    ],
+    [
+      32,
+      "one"
+    ],
+    [
+      32,
+      "all"
+    ],
+    [
+      32,
+      "rotate"
+    ],
+    [
+      64,
+      "idle"
+    ],
+    [
+      64,
+      "one"
+    ],
+    [
+      64,
+      "all"
+    ],
+    [
+      64,
+      "rotate"
+    ]
+  ],
+  "warmup": 200,
+  "batches": 40,
+  "ops": 100,
+  "cpu_affinity": 2,
+  "platform": "Linux-6.8.0-117-generic-x86_64-with-glibc2.39",
+  "compiler": "rustc 1.101.0-nightly (7189d39d9 2026-10-22)\nbinary: rustc\ncommit-hash: 7189d39d9ce936881b8132c6addeaf3e295cd455\ncommit-date: 2026-10-22\nhost: x86_64-unknown-linux-gnu\nrelease: 1.101.0-nightly\nLLVM version: 23.1.4\n",
+  "started": 1793078802.963381
+}
