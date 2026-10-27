@@ -383,24 +383,24 @@ fn identical_shader_words_can_have_different_conservative_memberships() {
     pollster::block_on(async {
         let mut text = TextSystem::bundled().unwrap();
         // Inverse translation loses this perturbation when subtracting it from
-        //10000 in f64, while forward bounds at32 still retain it. Both are
+        //3000 in f64, while outward bounds near32 can still distinguish it. Both are
         // ordinary Canvas scenes; no packet or prepared geometry is forged.
         let map = Affine {
             a: 1.,
             b: 1.,
             c: 0.,
             d: 1.,
-            tx: 10000.,
+            tx: 3000.,
             ty: 0.,
         };
         let mut positions = [
             Point {
-                x: -9984.,
-                y: 10000.,
+                x: -2984.,
+                y: 3000.,
             },
             Point {
-                x: -9920.,
-                y: 9940.,
+                x: -2920.,
+                y: 2940.,
             },
         ];
         let (provisional, slots) = scene(
@@ -420,22 +420,49 @@ fn identical_shader_words_can_have_different_conservative_memberships() {
             .unwrap()
             .local_rect;
         positions[0].y += 32. - (r.x + r.y + r.width + r.height);
-        let (initial, slots) = scene(
-            &mut text,
-            ["0011", "1100"],
-            positions,
-            map,
-            ColorConfig::default(),
-            Color::BLACK,
-        );
-        let (next, next_slots) = scene(
-            &mut text,
-            ["0011", "1100"],
-            positions,
-            Affine { ty: 1e-13, ..map },
-            ColorConfig::default(),
-            Color::BLACK,
-        );
+        // Search a fixed narrow rounding neighborhood using ordinary public
+        // scenes. At least one pair must cross a tile boundary while its exact
+        // inverse words coincide; the subsequent image oracle is independent.
+        let mut witness = None;
+        'search: for k in 1..=16 {
+            let center = -(k as f32) * 2f32.powi(-20);
+            for pair in [center.next_down(), center, center.next_up()].windows(2) {
+                let (initial, slots) = scene(
+                    &mut text,
+                    ["0011", "1100"],
+                    positions,
+                    Affine { ty: pair[0], ..map },
+                    ColorConfig::default(),
+                    Color::BLACK,
+                );
+                let (next, next_slots) = scene(
+                    &mut text,
+                    ["0011", "1100"],
+                    positions,
+                    Affine { ty: pair[1], ..map },
+                    ColorConfig::default(),
+                    Color::BLACK,
+                );
+                let a = initial.prepared_scene().text_run(slots[0]).unwrap();
+                let b = next.prepared_scene().text_run(next_slots[0]).unwrap();
+                let ab = a.bounds().next().unwrap();
+                let bb = b.bounds().next().unwrap();
+                if a.inverse.map(f64::to_bits) == b.inverse.map(f64::to_bits)
+                    && ((ab.y + ab.height) as u32).div_ceil(16)
+                        != ((bb.y + bb.height) as u32).div_ceil(16)
+                {
+                    eprintln!(
+                        "conservative-bound witness: ty bits{:08x}/{:08x}, bounds{ab:?}/{bb:?}",
+                        pair[0].to_bits(),
+                        pair[1].to_bits()
+                    );
+                    witness = Some((initial, slots, next, next_slots));
+                    break 'search;
+                }
+            }
+        }
+        let (initial, slots, next, next_slots) =
+            witness.expect("fixed rounding neighborhood contains a witness");
         assert_eq!(slots, next_slots);
         let old = edits(&initial, slots);
         let new = edits(&next, slots);
