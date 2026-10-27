@@ -113,9 +113,12 @@ mod tests {
             tree.root_batch([Some(moving), Some(roots[0])]).unwrap(),
             [Some(roots[3]), Some(roots[0])]
         );
+        assert_eq!(tree.root(moving).unwrap(), roots[3]);
         tree.remove(moving).unwrap();
         let reused = tree.insert(Some(roots[2]), NodeKind::Element).unwrap();
         assert_eq!(tree.root_batch([Some(reused)]).unwrap(), [Some(roots[2])]);
+        assert_eq!(tree.root(moving), Err(TreeError::InvalidNode));
+        assert_eq!(tree.root(reused).unwrap(), roots[2]);
         assert_eq!(tree.root_batch([Some(moving)]), Err(TreeError::InvalidNode));
         let mut foreign = Tree::new();
         let foreign = foreign.insert(None, NodeKind::Element).unwrap();
