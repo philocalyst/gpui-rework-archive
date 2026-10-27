@@ -44,7 +44,7 @@ mechanism's performance. Report confidence intervals and do not turn uncertain
 point gates into adoption or hardware claims.
 
 15 independent pairs/case for each comparison,450 fresh timing processes across
-original, failed-copy and candidate. Freeze a shuffled30x15 job-group order using
+original, failed-copy and candidate. Freeze a shuffled10x15 job-group order using
 seed20261028 before timing: each(case,pair) group runs all three variants in one
 of the six permutations, chosen cyclically by(pair+case_index)%6. The same original
 and predecessor observations each pair compare to the candidate. Each process has

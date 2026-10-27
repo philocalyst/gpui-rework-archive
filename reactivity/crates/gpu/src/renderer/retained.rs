@@ -2,19 +2,24 @@
 use super::*;
 use gpui_canvas::{DamageRegion, ScrollCopy, SlotEdit};
 
+#[derive(Clone, Copy)]
+pub(super) enum Damage<'a> {
+    Full,
+    Region(DamageRegion),
+    Scroll(&'a ScrollCopy),
+}
+
 pub(super) struct Output<'a> {
     pub(super) view: &'a wgpu::TextureView,
-    pub(super) damage: Option<DamageRegion>,
+    pub(super) damage: Damage<'a>,
     pub(super) present: Option<(&'a Backing, &'a wgpu::TextureView)>,
-    pub(super) scroll: Option<&'a ScrollCopy>,
 }
 impl<'a> From<&'a wgpu::TextureView> for Output<'a> {
     fn from(view: &'a wgpu::TextureView) -> Self {
         Self {
             view,
-            damage: None,
+            damage: Damage::Full,
             present: None,
-            scroll: None,
         }
     }
 }
@@ -116,7 +121,9 @@ impl RetainedRenderer {
             backing.prepare_scroll(&self.inner.context, scroll)?;
         }
         let mut output = backing.output(target, damage);
-        output.scroll = scroll;
+        if let Some(scroll) = scroll {
+            output.damage = Damage::Scroll(scroll);
+        }
         let submitted = self.inner.state.render_observed(
             &self.inner.context,
             scene,
@@ -284,9 +291,8 @@ impl Backing {
     ) -> Output<'a> {
         Output {
             view: &self.view,
-            damage,
+            damage: damage.map_or(Damage::Full, Damage::Region),
             present: Some((self, target)),
-            scroll: None,
         }
     }
     fn stats(&self, damage: Option<DamageRegion>) -> RetainedStats {
