@@ -1528,6 +1528,12 @@ mod tests {
     #[test]
     fn packet_storage_ledger() {
         eprintln!(
+            "retained_storage,Renderer={},Output={},Backing={}",
+            size_of::<RetainedRenderer>(),
+            size_of::<retained::Output>(),
+            size_of::<retained::Backing>()
+        );
+        eprintln!(
             "ownership_storage,Renderer={},GpuContext={},RendererState={},LayoutLease={},SlotGuard={}",
             size_of::<Renderer>(),
             size_of::<GpuContext>(),

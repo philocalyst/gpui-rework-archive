@@ -2187,3 +2187,6 @@ mod inspector_tests;
     any(feature = "x11", feature = "x11-minimal")
 ))]
 mod property_action_tests;
+
+#[cfg(all(test, feature = "x11", target_os = "linux"))]
+mod scroll_bench;

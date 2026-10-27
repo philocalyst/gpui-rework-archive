@@ -82,6 +82,12 @@ fn has_copy(owner: &Win<Rows>) -> bool {
 
 #[test]
 fn public_list_scroll_certifies_exact_tokens_and_discards_pending_or_fractional_proposals() {
+    eprintln!(
+        "scroll_storage,Copy={},Transition={},SceneDamage={}",
+        size_of::<gpui_canvas::ScrollCopy>(),
+        size_of::<crate::runtime::paint::ScrollTransition>(),
+        size_of::<crate::runtime::paint::SceneDamage>()
+    );
     for controlled in [false, true] {
         let mut owner = window(controlled);
         assert!(!has_copy(&owner));
