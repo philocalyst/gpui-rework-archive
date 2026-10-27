@@ -89,6 +89,10 @@ impl<M: View + 'static> Runtime<M> {
         else {
             return Ok(false);
         };
+        #[cfg(feature = "native-core")]
+        {
+            self.text.as_mut().unwrap().patch_from = self.latest_token;
+        }
         self.text.as_mut().unwrap().patch = Some(patch);
         self.text.as_mut().unwrap().dirty_text = None;
         self.layout_dirty.clear();
@@ -211,6 +215,10 @@ impl<M: View + 'static> Runtime<M> {
             return Ok(false);
         };
         let owner = self.text.as_mut().unwrap();
+        #[cfg(feature = "native-core")]
+        {
+            owner.patch_from = self.latest_token;
+        }
         owner.patch = Some(patches.into_boxed_slice());
         owner.dirty_text = None;
         self.layout_dirty.clear();

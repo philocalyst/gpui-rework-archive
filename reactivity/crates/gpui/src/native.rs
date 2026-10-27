@@ -326,13 +326,14 @@ impl GpuSurface {
         paint: Option<&crate::runtime::paint::SlotTransition>,
         target: &wgpu::TextureView,
     ) -> Result<wgpu::SubmissionIndex, gpui_gpu::Error> {
-        self.render_damaged(scene, token, paint, target, None)
+        self.render_damaged(scene, token, paint, None, target, None)
     }
     fn render_damaged(
         &mut self,
         scene: gpui_canvas::PreparedScene<'_>,
         token: crate::PresentationToken,
         paint: Option<&crate::runtime::paint::SlotTransition>,
+        text: Option<crate::runtime::paint::TextTransition>,
         target: &wgpu::TextureView,
         transition: Option<crate::runtime::paint::SceneDamage>,
     ) -> Result<wgpu::SubmissionIndex, gpui_gpu::Error> {
@@ -356,10 +357,38 @@ impl GpuSurface {
             self.packet_epoch = epoch;
             return Ok(submitted);
         }
+        if let Some(text) = text
+            && previous == Some(text.from)
+            && let Some(submitted) = self.patch_text(scene, &text, target, damage)
+        {
+            self.packet_token = Some(token);
+            self.packet_epoch = epoch;
+            return Ok(submitted);
+        }
         let submitted = self.renderer.render(scene, target, damage)?;
         self.packet_token = Some(token);
         self.packet_epoch = epoch;
         Ok(submitted)
+    }
+    fn patch_text(
+        &mut self,
+        scene: gpui_canvas::PreparedScene<'_>,
+        transition: &crate::runtime::paint::TextTransition,
+        target: &wgpu::TextureView,
+        damage: Option<gpui_canvas::DamageRegion>,
+    ) -> Option<wgpu::SubmissionIndex> {
+        let first = transition.runs[0]?;
+        let first = (first, scene.text_run(first)?);
+        let mut edits = [first; 4];
+        let mut count = 0;
+        for slot in transition.runs.into_iter().flatten() {
+            edits[count] = (slot, scene.text_run(slot)?);
+            count += 1;
+        }
+        edits[..count].sort_unstable_by_key(|&(slot, _)| slot.index());
+        self.renderer
+            .patch_texts(&edits[..count], target, damage)
+            .ok()
     }
 }
 
@@ -740,11 +769,12 @@ impl<V: View + 'static, L: LaneSet<V>> NativeHost<V, L> {
                 wgpu::CurrentSurfaceTexture::Success(frame) => {
                     let owner = self.owner.as_mut().expect("surface has an owner");
                     let view = frame.texture.create_view(&Default::default());
-                    let rendered = owner.with_paint_scene(|scene, token, paint, damage| {
-                        graphics
-                            .render_damaged(scene, token, paint, &view, Some(damage))
-                            .map(|_| token)
-                    })?;
+                    let rendered =
+                        owner.with_paint_scene(|scene, token, paint, text, damage| {
+                            graphics
+                                .render_damaged(scene, token, paint, text, &view, Some(damage))
+                                .map(|_| token)
+                        })?;
                     let token = match rendered {
                         Ok(token) => token,
                         Err(error)
@@ -903,8 +933,8 @@ impl<V: View + 'static, L: LaneSet<V>> NativeHost<V, L> {
                 _ => return Err(NativeError::SurfaceUnavailable),
             };
             let view = frame.texture.create_view(&Default::default());
-            let token = owner.with_paint_scene(|scene, token, paint, damage| {
-                gpu.render_damaged(scene, token, paint, &view, Some(damage))
+            let token = owner.with_paint_scene(|scene, token, paint, text, damage| {
+                gpu.render_damaged(scene, token, paint, text, &view, Some(damage))
                     .map(|_| token)
             })??;
             window.pre_present_notify();
@@ -1411,6 +1441,12 @@ mod paint_tests;
     target_os = "linux"
 ))]
 mod solid_tests;
+#[cfg(all(
+    test,
+    any(feature = "x11", feature = "x11-minimal"),
+    target_os = "linux"
+))]
+mod text_packet_tests;
 
 #[cfg(all(
     test,
@@ -1514,6 +1550,7 @@ mod tests {
             .unwrap();
         assert!(!gpu.renderer.stats().packet_reused);
         super::paint_tests::run(gpu);
+        super::text_packet_tests::run(gpu);
     }
     #[test]
     fn packet_gpu_header_ledger() {

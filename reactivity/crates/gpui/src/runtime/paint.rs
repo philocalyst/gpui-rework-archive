@@ -14,6 +14,13 @@ pub(crate) struct SlotTransition {
     pub(crate) from: PresentationToken,
     pub(crate) edits: [gpui_canvas::SlotEdit; 1],
 }
+/// One exact text transition from the previously complete packet, never a log.
+#[cfg(feature = "native-core")]
+pub(crate) struct TextTransition {
+    pub(crate) from: PresentationToken,
+    pub(crate) runs: [Option<gpui_canvas::TextRunSlot>; 4],
+}
+
 impl<M: View + 'static> Runtime<M> {
     pub(super) fn finish_color_slot(
         &mut self,
@@ -177,6 +184,7 @@ impl<M: View + 'static, L: LaneSet<M>> Win<M, L> {
             gpui_canvas::PreparedScene<'_>,
             PresentationToken,
             Option<&SlotTransition>,
+            Option<TextTransition>,
             SceneDamage,
         ) -> R,
     ) -> Result<R, Error> {
@@ -187,6 +195,14 @@ impl<M: View + 'static, L: LaneSet<M>> Win<M, L> {
             runtime.canvas.prepared_scene(),
             token,
             runtime.styles.slot_transition(),
+            runtime.text.as_ref().and_then(|text| {
+                let patches = text.patch.as_ref()?;
+                let from = text.patch_from?;
+                (1..=4).contains(&patches.len()).then(|| TextTransition {
+                    from,
+                    runs: std::array::from_fn(|i| patches.get(i).and_then(|p| p.geometry.run)),
+                })
+            }),
             SceneDamage {
                 base: (!runtime.automatic_presentation && runtime.presentation_valid).then_some(
                     SceneEpoch(runtime.sites.namespace(), runtime.presentation_epoch),

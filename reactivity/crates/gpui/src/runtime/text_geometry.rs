@@ -17,6 +17,8 @@ pub(super) struct TextResources {
     pub candidate: Option<Vec<Entry>>,
     pub dirty_text: Option<DirtyText>,
     pub patch: Option<Box<[TextPatch]>>,
+    #[cfg(feature = "native-core")]
+    pub patch_from: Option<PresentationToken>,
 }
 #[derive(Clone, Copy)]
 pub(super) enum DirtyText {
@@ -38,6 +40,10 @@ impl TextResources {
     pub fn acknowledge(&mut self, rows: &mut [Presented]) {
         if let Some(column) = self.candidate.take() {
             self.presented = column;
+        }
+        #[cfg(feature = "native-core")]
+        {
+            self.patch_from = None;
         }
         if let Some(patches) = self.patch.take() {
             for patch in patches.into_vec() {

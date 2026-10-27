@@ -3840,6 +3840,10 @@ impl<M: View + 'static> Runtime<M> {
         if let Some(text) = &mut self.text {
             text.candidate = Some(text_geometry);
             text.patch = None;
+            #[cfg(feature = "native-core")]
+            {
+                text.patch_from = None;
+            }
             text.dirty_text = None;
         }
         self.prepared = Some(Prepared {

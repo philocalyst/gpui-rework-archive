@@ -22,7 +22,7 @@ impl View for Paint {
         }
     }
 }
-fn read(gpu: &GpuSurface, texture: &wgpu::Texture) -> Vec<u8> {
+pub(super) fn read(gpu: &GpuSurface, texture: &wgpu::Texture) -> Vec<u8> {
     let bytes = texture.format().block_copy_size(None).unwrap();
     let stride = (texture.width() * bytes).next_multiple_of(256);
     let buffer = gpu
@@ -91,8 +91,8 @@ fn render(
 ) {
     let view = texture.create_view(&Default::default());
     let token = owner
-        .with_paint_scene(|scene, token, state, damage| {
-            gpu.render_damaged(scene, token, state, &view, Some(damage))
+        .with_paint_scene(|scene, token, state, text, damage| {
+            gpu.render_damaged(scene, token, state, text, &view, Some(damage))
                 .unwrap();
             token
         })
