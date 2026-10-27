@@ -1,0 +1,17 @@
+[
+  {
+    "address": "0000000000566df0",
+    "bytes": 5672,
+    "name": "<gpui::runtime::Win<source_batch_cost::Page<false>, gpui::remote::Lane<alloc::string::String, gpui::source::FieldAction<source_batch_cost::Page<false>, alloc::string::String, source_batch_cost::run<false>::{closure#5}>, gpui::remote::Lane<alloc::string::String, gpui::source::FieldAction<source_batch_cost::Page<false>, alloc::string::String, source_batch_cost::run<false>::{closure#3}>, gpui::remote::Lane<alloc::string::String, gpui::source::FieldAction<source_batch_cost::Page<false>, alloc::string::String, source_batch_cost::run<false>::{closure#2}>, gpui::remote::Lane<alloc::string::String, gpui::source::FieldAction<source_batch_cost::Page<false>, alloc::string::String, source_batch_cost::run<false>::{closure#1}>, ()>>>>>>::deliver_ready"
+  },
+  {
+    "address": "0000000000568420",
+    "bytes": 5650,
+    "name": "<gpui::runtime::Win<source_batch_cost::Page<false>, gpui::remote::Lane<alloc::string::String, source_batch_cost::run<false>::{closure#4}, gpui::remote::Lane<alloc::string::String, gpui::source::FieldAction<source_batch_cost::Page<false>, alloc::string::String, source_batch_cost::run<false>::{closure#3}>, gpui::remote::Lane<alloc::string::String, gpui::source::FieldAction<source_batch_cost::Page<false>, alloc::string::String, source_batch_cost::run<false>::{closure#2}>, gpui::remote::Lane<alloc::string::String, gpui::source::FieldAction<source_batch_cost::Page<false>, alloc::string::String, source_batch_cost::run<false>::{closure#1}>, ()>>>>>>::deliver_ready"
+  },
+  {
+    "address": "0000000000569a40",
+    "bytes": 5672,
+    "name": "<gpui::runtime::Win<source_batch_cost::Page<true>, gpui::remote::Lane<alloc::string::String, gpui::source::FieldAction<source_batch_cost::Page<true>, alloc::string::String, source_batch_cost::run<true>::{closure#5}>, gpui::remote::Lane<alloc::string::String, gpui::source::FieldAction<source_batch_cost::Page<true>, alloc::string::String, source_batch_cost::run<true>::{closure#3}>, gpui::remote::Lane<alloc::string::String, gpui::source::FieldAction<source_batch_cost::Page<true>, alloc::string::String, source_batch_cost::run<true>::{closure#2}>, gpui::remote::Lane<alloc::string::String, gpui::source::FieldAction<source_batch_cost::Page<true>, alloc::string::String, source_batch_cost::run<true>::{closure#1}>, ()>>>>>>::deliver_ready"
+  }
+]

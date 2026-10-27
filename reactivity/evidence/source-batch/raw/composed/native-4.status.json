@@ -1,0 +1,1 @@
+{"command": ["/home/user/gpui-source-batch-target/release/build/gpui/e83ddf583a1b076b/out/gpui-e83ddf583a1b076b", "--ignored", "--exact", "native::question_tests::native_future_cancellation_and_result_wake_without_unrelated_input", "--nocapture"], "exit": 0}

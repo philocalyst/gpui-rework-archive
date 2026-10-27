@@ -1,0 +1,1 @@
+{"command": ["/usr/bin/time", "-v", "-o", "/home/user/gpui-source-batch-evidence/paired/4-0-2-owner-control.time", "taskset", "-c", "2", "/home/user/gpui-source-batch-control-target/release/examples/source_batch_cost", "0", "2", "owner", "/home/user/zgx-reference-local/comparisons/fonts/DejaVuSans.ttf"], "exit": 0}

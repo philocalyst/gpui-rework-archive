@@ -1,0 +1,18 @@
+
+running 1 test
+test owner_dependent_source_cannot_reuse_only_its_bound_text_destinations ... FAILED
+
+failures:
+
+---- owner_dependent_source_cannot_reuse_only_its_bound_text_destinations stdout ----
+
+thread 'owner_dependent_source_cannot_reuse_only_its_bound_text_destinations' (518353) panicked at crates/gpui/tests/source_batch.rs:130:5:
+assertion failed: win.contains_text("owner:new0").unwrap()
+note: run with `RUST_BACKTRACE=1` environment variable to display a backtrace
+
+
+failures:
+    owner_dependent_source_cannot_reuse_only_its_bound_text_destinations
+
+test result: FAILED. 0 passed; 1 failed; 0 ignored; 0 measured; 4 filtered out; finished in 0.00s
+

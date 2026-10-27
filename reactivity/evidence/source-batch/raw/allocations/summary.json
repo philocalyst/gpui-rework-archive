@@ -1,0 +1,812 @@
+[
+  {
+    "variant": "candidate",
+    "rows": 0,
+    "fields": 1,
+    "mode": "exact",
+    "COLD_ALLOC": {
+      "requests": 271,
+      "requested": 71000,
+      "retained": 47390,
+      "peak_new": 47598
+    },
+    "TRANSPORT_ALLOC": {
+      "requests": 8,
+      "requested": 704,
+      "retained": 704,
+      "peak_new": 704
+    },
+    "LAYOUT": {
+      "win_bytes": 296
+    },
+    "ALLOC": {
+      "requests": 33,
+      "requested": 2602,
+      "retained_delta": 0,
+      "peak_new": 1270
+    }
+  },
+  {
+    "variant": "candidate",
+    "rows": 0,
+    "fields": 2,
+    "mode": "exact",
+    "COLD_ALLOC": {
+      "requests": 271,
+      "requested": 71000,
+      "retained": 47390,
+      "peak_new": 47598
+    },
+    "TRANSPORT_ALLOC": {
+      "requests": 8,
+      "requested": 704,
+      "retained": 704,
+      "peak_new": 704
+    },
+    "LAYOUT": {
+      "win_bytes": 296
+    },
+    "ALLOC": {
+      "requests": 55,
+      "requested": 4872,
+      "retained_delta": 0,
+      "peak_new": 2860
+    }
+  },
+  {
+    "variant": "candidate",
+    "rows": 0,
+    "fields": 4,
+    "mode": "exact",
+    "COLD_ALLOC": {
+      "requests": 271,
+      "requested": 71000,
+      "retained": 47390,
+      "peak_new": 47598
+    },
+    "TRANSPORT_ALLOC": {
+      "requests": 8,
+      "requested": 704,
+      "retained": 704,
+      "peak_new": 704
+    },
+    "LAYOUT": {
+      "win_bytes": 296
+    },
+    "ALLOC": {
+      "requests": 91,
+      "requested": 6716,
+      "retained_delta": 0,
+      "peak_new": 3798
+    }
+  },
+  {
+    "variant": "candidate",
+    "rows": 0,
+    "fields": 4,
+    "mode": "owner",
+    "COLD_ALLOC": {
+      "requests": 316,
+      "requested": 81575,
+      "retained": 53367,
+      "peak_new": 53671
+    },
+    "TRANSPORT_ALLOC": {
+      "requests": 8,
+      "requested": 704,
+      "retained": 704,
+      "peak_new": 704
+    },
+    "LAYOUT": {
+      "win_bytes": 296
+    },
+    "ALLOC": {
+      "requests": 134,
+      "requested": 18386,
+      "retained_delta": 0,
+      "peak_new": 5486
+    }
+  },
+  {
+    "variant": "candidate",
+    "rows": 0,
+    "fields": 4,
+    "mode": "opaque",
+    "COLD_ALLOC": {
+      "requests": 271,
+      "requested": 71000,
+      "retained": 47390,
+      "peak_new": 47598
+    },
+    "TRANSPORT_ALLOC": {
+      "requests": 8,
+      "requested": 704,
+      "retained": 704,
+      "peak_new": 704
+    },
+    "LAYOUT": {
+      "win_bytes": 256
+    },
+    "ALLOC": {
+      "requests": 112,
+      "requested": 14628,
+      "retained_delta": 0,
+      "peak_new": 4000
+    }
+  },
+  {
+    "variant": "candidate",
+    "rows": 1,
+    "fields": 1,
+    "mode": "exact",
+    "COLD_ALLOC": {
+      "requests": 739,
+      "requested": 175094,
+      "retained": 94342,
+      "peak_new": 95350
+    },
+    "TRANSPORT_ALLOC": {
+      "requests": 8,
+      "requested": 704,
+      "retained": 704,
+      "peak_new": 704
+    },
+    "LAYOUT": {
+      "win_bytes": 296
+    },
+    "ALLOC": {
+      "requests": 33,
+      "requested": 2602,
+      "retained_delta": 0,
+      "peak_new": 1270
+    }
+  },
+  {
+    "variant": "candidate",
+    "rows": 1,
+    "fields": 2,
+    "mode": "exact",
+    "COLD_ALLOC": {
+      "requests": 739,
+      "requested": 175094,
+      "retained": 94342,
+      "peak_new": 95350
+    },
+    "TRANSPORT_ALLOC": {
+      "requests": 8,
+      "requested": 704,
+      "retained": 704,
+      "peak_new": 704
+    },
+    "LAYOUT": {
+      "win_bytes": 296
+    },
+    "ALLOC": {
+      "requests": 68,
+      "requested": 15400,
+      "retained_delta": 0,
+      "peak_new": 9518
+    }
+  },
+  {
+    "variant": "candidate",
+    "rows": 1,
+    "fields": 4,
+    "mode": "exact",
+    "COLD_ALLOC": {
+      "requests": 739,
+      "requested": 175094,
+      "retained": 94342,
+      "peak_new": 95350
+    },
+    "TRANSPORT_ALLOC": {
+      "requests": 8,
+      "requested": 704,
+      "retained": 704,
+      "peak_new": 704
+    },
+    "LAYOUT": {
+      "win_bytes": 296
+    },
+    "ALLOC": {
+      "requests": 104,
+      "requested": 17244,
+      "retained_delta": 0,
+      "peak_new": 10482
+    }
+  },
+  {
+    "variant": "candidate",
+    "rows": 1,
+    "fields": 4,
+    "mode": "owner",
+    "COLD_ALLOC": {
+      "requests": 774,
+      "requested": 180066,
+      "retained": 97656,
+      "peak_new": 98416
+    },
+    "TRANSPORT_ALLOC": {
+      "requests": 8,
+      "requested": 704,
+      "retained": 704,
+      "peak_new": 704
+    },
+    "LAYOUT": {
+      "win_bytes": 296
+    },
+    "ALLOC": {
+      "requests": 175,
+      "requested": 60488,
+      "retained_delta": 0,
+      "peak_new": 20244
+    }
+  },
+  {
+    "variant": "candidate",
+    "rows": 1,
+    "fields": 4,
+    "mode": "opaque",
+    "COLD_ALLOC": {
+      "requests": 739,
+      "requested": 175094,
+      "retained": 94342,
+      "peak_new": 95350
+    },
+    "TRANSPORT_ALLOC": {
+      "requests": 8,
+      "requested": 704,
+      "retained": 704,
+      "peak_new": 704
+    },
+    "LAYOUT": {
+      "win_bytes": 256
+    },
+    "ALLOC": {
+      "requests": 158,
+      "requested": 58509,
+      "retained_delta": 0,
+      "peak_new": 20232
+    }
+  },
+  {
+    "variant": "candidate",
+    "rows": 40,
+    "fields": 1,
+    "mode": "exact",
+    "COLD_ALLOC": {
+      "requests": 15117,
+      "requested": 3198456,
+      "retained": 1530098,
+      "peak_new": 1550634
+    },
+    "TRANSPORT_ALLOC": {
+      "requests": 8,
+      "requested": 704,
+      "retained": 704,
+      "peak_new": 704
+    },
+    "LAYOUT": {
+      "win_bytes": 296
+    },
+    "ALLOC": {
+      "requests": 33,
+      "requested": 2602,
+      "retained_delta": 0,
+      "peak_new": 1270
+    }
+  },
+  {
+    "variant": "candidate",
+    "rows": 40,
+    "fields": 2,
+    "mode": "exact",
+    "COLD_ALLOC": {
+      "requests": 15117,
+      "requested": 3198456,
+      "retained": 1530098,
+      "peak_new": 1550634
+    },
+    "TRANSPORT_ALLOC": {
+      "requests": 8,
+      "requested": 704,
+      "retained": 704,
+      "peak_new": 704
+    },
+    "LAYOUT": {
+      "win_bytes": 296
+    },
+    "ALLOC": {
+      "requests": 84,
+      "requested": 341828,
+      "retained_delta": 0,
+      "peak_new": 224456
+    }
+  },
+  {
+    "variant": "candidate",
+    "rows": 40,
+    "fields": 4,
+    "mode": "exact",
+    "COLD_ALLOC": {
+      "requests": 15117,
+      "requested": 3198456,
+      "retained": 1530098,
+      "peak_new": 1550634
+    },
+    "TRANSPORT_ALLOC": {
+      "requests": 8,
+      "requested": 704,
+      "retained": 704,
+      "peak_new": 704
+    },
+    "LAYOUT": {
+      "win_bytes": 296
+    },
+    "ALLOC": {
+      "requests": 120,
+      "requested": 343672,
+      "retained_delta": 0,
+      "peak_new": 225420
+    }
+  },
+  {
+    "variant": "candidate",
+    "rows": 40,
+    "fields": 4,
+    "mode": "owner",
+    "COLD_ALLOC": {
+      "requests": 15154,
+      "requested": 3203724,
+      "retained": 1533412,
+      "peak_new": 1554052
+    },
+    "TRANSPORT_ALLOC": {
+      "requests": 8,
+      "requested": 704,
+      "retained": 704,
+      "peak_new": 704
+    },
+    "LAYOUT": {
+      "win_bytes": 296
+    },
+    "ALLOC": {
+      "requests": 1211,
+      "requested": 1324388,
+      "retained_delta": 0,
+      "peak_new": 487766
+    }
+  },
+  {
+    "variant": "candidate",
+    "rows": 40,
+    "fields": 4,
+    "mode": "opaque",
+    "COLD_ALLOC": {
+      "requests": 15117,
+      "requested": 3198456,
+      "retained": 1530098,
+      "peak_new": 1550634
+    },
+    "TRANSPORT_ALLOC": {
+      "requests": 8,
+      "requested": 704,
+      "retained": 704,
+      "peak_new": 704
+    },
+    "LAYOUT": {
+      "win_bytes": 256
+    },
+    "ALLOC": {
+      "requests": 1194,
+      "requested": 1322409,
+      "retained_delta": 0,
+      "peak_new": 487754
+    }
+  },
+  {
+    "variant": "control",
+    "rows": 0,
+    "fields": 1,
+    "mode": "exact",
+    "COLD_ALLOC": {
+      "requests": 271,
+      "requested": 71000,
+      "retained": 47390,
+      "peak_new": 47598
+    },
+    "TRANSPORT_ALLOC": {
+      "requests": 8,
+      "requested": 704,
+      "retained": 704,
+      "peak_new": 704
+    },
+    "LAYOUT": {
+      "win_bytes": 296
+    },
+    "ALLOC": {
+      "requests": 33,
+      "requested": 2602,
+      "retained_delta": 0,
+      "peak_new": 1270
+    }
+  },
+  {
+    "variant": "control",
+    "rows": 0,
+    "fields": 2,
+    "mode": "exact",
+    "COLD_ALLOC": {
+      "requests": 271,
+      "requested": 71000,
+      "retained": 47390,
+      "peak_new": 47598
+    },
+    "TRANSPORT_ALLOC": {
+      "requests": 8,
+      "requested": 704,
+      "retained": 704,
+      "peak_new": 704
+    },
+    "LAYOUT": {
+      "win_bytes": 296
+    },
+    "ALLOC": {
+      "requests": 76,
+      "requested": 12784,
+      "retained_delta": 0,
+      "peak_new": 4000
+    }
+  },
+  {
+    "variant": "control",
+    "rows": 0,
+    "fields": 4,
+    "mode": "exact",
+    "COLD_ALLOC": {
+      "requests": 271,
+      "requested": 71000,
+      "retained": 47390,
+      "peak_new": 47598
+    },
+    "TRANSPORT_ALLOC": {
+      "requests": 8,
+      "requested": 704,
+      "retained": 704,
+      "peak_new": 704
+    },
+    "LAYOUT": {
+      "win_bytes": 296
+    },
+    "ALLOC": {
+      "requests": 112,
+      "requested": 14628,
+      "retained_delta": 0,
+      "peak_new": 4000
+    }
+  },
+  {
+    "variant": "control",
+    "rows": 0,
+    "fields": 4,
+    "mode": "owner",
+    "COLD_ALLOC": {
+      "requests": 316,
+      "requested": 81575,
+      "retained": 53367,
+      "peak_new": 53671
+    },
+    "TRANSPORT_ALLOC": {
+      "requests": 8,
+      "requested": 704,
+      "retained": 704,
+      "peak_new": 704
+    },
+    "LAYOUT": {
+      "win_bytes": 296
+    },
+    "ALLOC": {
+      "requests": 134,
+      "requested": 18386,
+      "retained_delta": 0,
+      "peak_new": 5486
+    }
+  },
+  {
+    "variant": "control",
+    "rows": 0,
+    "fields": 4,
+    "mode": "opaque",
+    "COLD_ALLOC": {
+      "requests": 271,
+      "requested": 71000,
+      "retained": 47390,
+      "peak_new": 47598
+    },
+    "TRANSPORT_ALLOC": {
+      "requests": 8,
+      "requested": 704,
+      "retained": 704,
+      "peak_new": 704
+    },
+    "LAYOUT": {
+      "win_bytes": 256
+    },
+    "ALLOC": {
+      "requests": 112,
+      "requested": 14628,
+      "retained_delta": 0,
+      "peak_new": 4000
+    }
+  },
+  {
+    "variant": "control",
+    "rows": 1,
+    "fields": 1,
+    "mode": "exact",
+    "COLD_ALLOC": {
+      "requests": 739,
+      "requested": 175094,
+      "retained": 94342,
+      "peak_new": 95350
+    },
+    "TRANSPORT_ALLOC": {
+      "requests": 8,
+      "requested": 704,
+      "retained": 704,
+      "peak_new": 704
+    },
+    "LAYOUT": {
+      "win_bytes": 296
+    },
+    "ALLOC": {
+      "requests": 33,
+      "requested": 2602,
+      "retained_delta": 0,
+      "peak_new": 1270
+    }
+  },
+  {
+    "variant": "control",
+    "rows": 1,
+    "fields": 2,
+    "mode": "exact",
+    "COLD_ALLOC": {
+      "requests": 739,
+      "requested": 175094,
+      "retained": 94342,
+      "peak_new": 95350
+    },
+    "TRANSPORT_ALLOC": {
+      "requests": 8,
+      "requested": 704,
+      "retained": 704,
+      "peak_new": 704
+    },
+    "LAYOUT": {
+      "win_bytes": 296
+    },
+    "ALLOC": {
+      "requests": 122,
+      "requested": 56665,
+      "retained_delta": 0,
+      "peak_new": 20232
+    }
+  },
+  {
+    "variant": "control",
+    "rows": 1,
+    "fields": 4,
+    "mode": "exact",
+    "COLD_ALLOC": {
+      "requests": 739,
+      "requested": 175094,
+      "retained": 94342,
+      "peak_new": 95350
+    },
+    "TRANSPORT_ALLOC": {
+      "requests": 8,
+      "requested": 704,
+      "retained": 704,
+      "peak_new": 704
+    },
+    "LAYOUT": {
+      "win_bytes": 296
+    },
+    "ALLOC": {
+      "requests": 158,
+      "requested": 58509,
+      "retained_delta": 0,
+      "peak_new": 20232
+    }
+  },
+  {
+    "variant": "control",
+    "rows": 1,
+    "fields": 4,
+    "mode": "owner",
+    "COLD_ALLOC": {
+      "requests": 774,
+      "requested": 180066,
+      "retained": 97656,
+      "peak_new": 98416
+    },
+    "TRANSPORT_ALLOC": {
+      "requests": 8,
+      "requested": 704,
+      "retained": 704,
+      "peak_new": 704
+    },
+    "LAYOUT": {
+      "win_bytes": 296
+    },
+    "ALLOC": {
+      "requests": 175,
+      "requested": 60488,
+      "retained_delta": 0,
+      "peak_new": 20244
+    }
+  },
+  {
+    "variant": "control",
+    "rows": 1,
+    "fields": 4,
+    "mode": "opaque",
+    "COLD_ALLOC": {
+      "requests": 739,
+      "requested": 175094,
+      "retained": 94342,
+      "peak_new": 95350
+    },
+    "TRANSPORT_ALLOC": {
+      "requests": 8,
+      "requested": 704,
+      "retained": 704,
+      "peak_new": 704
+    },
+    "LAYOUT": {
+      "win_bytes": 256
+    },
+    "ALLOC": {
+      "requests": 158,
+      "requested": 58509,
+      "retained_delta": 0,
+      "peak_new": 20232
+    }
+  },
+  {
+    "variant": "control",
+    "rows": 40,
+    "fields": 1,
+    "mode": "exact",
+    "COLD_ALLOC": {
+      "requests": 15117,
+      "requested": 3198456,
+      "retained": 1530098,
+      "peak_new": 1550634
+    },
+    "TRANSPORT_ALLOC": {
+      "requests": 8,
+      "requested": 704,
+      "retained": 704,
+      "peak_new": 704
+    },
+    "LAYOUT": {
+      "win_bytes": 296
+    },
+    "ALLOC": {
+      "requests": 33,
+      "requested": 2602,
+      "retained_delta": 0,
+      "peak_new": 1270
+    }
+  },
+  {
+    "variant": "control",
+    "rows": 40,
+    "fields": 2,
+    "mode": "exact",
+    "COLD_ALLOC": {
+      "requests": 15117,
+      "requested": 3198456,
+      "retained": 1530098,
+      "peak_new": 1550634
+    },
+    "TRANSPORT_ALLOC": {
+      "requests": 8,
+      "requested": 704,
+      "retained": 704,
+      "peak_new": 704
+    },
+    "LAYOUT": {
+      "win_bytes": 296
+    },
+    "ALLOC": {
+      "requests": 1158,
+      "requested": 1320565,
+      "retained_delta": 0,
+      "peak_new": 487754
+    }
+  },
+  {
+    "variant": "control",
+    "rows": 40,
+    "fields": 4,
+    "mode": "exact",
+    "COLD_ALLOC": {
+      "requests": 15117,
+      "requested": 3198456,
+      "retained": 1530098,
+      "peak_new": 1550634
+    },
+    "TRANSPORT_ALLOC": {
+      "requests": 8,
+      "requested": 704,
+      "retained": 704,
+      "peak_new": 704
+    },
+    "LAYOUT": {
+      "win_bytes": 296
+    },
+    "ALLOC": {
+      "requests": 1194,
+      "requested": 1322409,
+      "retained_delta": 0,
+      "peak_new": 487754
+    }
+  },
+  {
+    "variant": "control",
+    "rows": 40,
+    "fields": 4,
+    "mode": "owner",
+    "COLD_ALLOC": {
+      "requests": 15154,
+      "requested": 3203724,
+      "retained": 1533412,
+      "peak_new": 1554052
+    },
+    "TRANSPORT_ALLOC": {
+      "requests": 8,
+      "requested": 704,
+      "retained": 704,
+      "peak_new": 704
+    },
+    "LAYOUT": {
+      "win_bytes": 296
+    },
+    "ALLOC": {
+      "requests": 1211,
+      "requested": 1324388,
+      "retained_delta": 0,
+      "peak_new": 487766
+    }
+  },
+  {
+    "variant": "control",
+    "rows": 40,
+    "fields": 4,
+    "mode": "opaque",
+    "COLD_ALLOC": {
+      "requests": 15117,
+      "requested": 3198456,
+      "retained": 1530098,
+      "peak_new": 1550634
+    },
+    "TRANSPORT_ALLOC": {
+      "requests": 8,
+      "requested": 704,
+      "retained": 704,
+      "peak_new": 704
+    },
+    "LAYOUT": {
+      "win_bytes": 256
+    },
+    "ALLOC": {
+      "requests": 1194,
+      "requested": 1322409,
+      "retained_delta": 0,
+      "peak_new": 487754
+    }
+  }
+]

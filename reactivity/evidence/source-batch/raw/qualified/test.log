@@ -1,0 +1,7 @@
+   Compiling gpui v0.1.0 (/home/user/gpui-source-batch-lab/reactivity/crates/gpui)
+    Finished `release` profile [optimized] target(s) in 5.23s
+     Running tests/question_futures.rs (/home/user/gpui-source-batch-target/release/build/gpui/d4c178c215586c2d/out/question_futures-d4c178c215586c2d)
+     Running tests/question_inputs.rs (/home/user/gpui-source-batch-target/release/build/gpui/bfe0ff810dbebc08/out/question_inputs-bfe0ff810dbebc08)
+     Running tests/source_batch.rs (/home/user/gpui-source-batch-target/release/build/gpui/659cfbeec4238e2e/out/source_batch-659cfbeec4238e2e)
+     Running tests/source_inbox.rs (/home/user/gpui-source-batch-target/release/build/gpui/09a7afe64ada92f0/out/source_inbox-09a7afe64ada92f0)
+error: test failed, to rerun pass `-p gpui --test source_inbox`

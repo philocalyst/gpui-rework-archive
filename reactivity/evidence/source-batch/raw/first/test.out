@@ -1,0 +1,66 @@
+
+running 17 tests
+test close_defers_a_ready_response_destructor_until_both_future_tasks_are_cancelled ... ok
+test close_requests_cancellation_before_a_freezer_destructor_unwinds_cleanup ... ok
+test cancel_before_first_poll_and_close_or_natural_drop_never_join_the_task ... ok
+test close_cancels_both_future_lanes_before_a_head_freezer_or_outer_inbox_panics ... ok
+test cancellation_during_waker_registration_is_not_lost ... ok
+test a_panicking_poll_payload_is_classified_only_after_future_teardown ... ok
+test blocked_future_destructor_holds_credit_even_after_ready_or_cancel ... ok
+test foreign_reader_is_rejected_before_executor_start ... ok
+test never_waking_pending_cancels_exact_task_and_only_latest_input_starts_after_teardown ... ok
+test domain_fault_and_refresh_preserve_previous_projection_and_reuse_existing_error_view ... ok
+test factory_panic_is_a_start_fault_and_retry_is_not_poisoned ... ok
+test dependent_input_becoming_pending_or_fault_cancels_its_future ... ok
+test ready_result_is_stale_across_a_b_a_and_handle_retires_before_next_factory ... ok
+test worker_completion_before_spawn_returns_still_waits_for_the_owner_barrier ... ok
+test poll_panic_tears_down_before_one_worker_fault_and_retry_heals ... ok
+test pending_or_ready_destructor_panic_publishes_exactly_one_worker_terminal ... ok
+test rejection_start_panic_and_broken_half_accept_never_fabricate_credit ... ok
+
+test result: ok. 17 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 0.00s
+
+
+running 11 tests
+test foreign_reader_is_rejected_before_mount ... ok
+test close_revokes_a_held_completion_and_returns_its_same_owned_payload ... ok
+test a_dependent_freeze_panic_quarantines_the_same_owner_after_counted_upstream_admission ... ok
+test nested_pairs_preserve_every_member_and_duplicate_sources_are_observed_consistently ... ok
+test a_coarse_replacement_of_either_source_supersedes_an_equal_revision_pack ... ok
+test accepted_upstream_survives_visual_failure_and_dependency_remains_coherent ... ok
+test both_sources_invalidate_but_unrelated_exact_edits_do_not_and_diagnostics_are_complete ... ok
+test same_batch_upstream_and_old_dependent_terminal_dispatch_latest_once ... ok
+test dependency_fault_and_pending_previous_values_never_freeze_fresh_work ... ok
+test synchronous_completion_waits_for_the_next_frozen_batch ... ok
+test two_reader_inputs_settle_before_their_dependent_freezes_once ... ok
+
+test result: ok. 11 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 0.00s
+
+
+running 5 tests
+test owner_dependent_source_cannot_reuse_only_its_bound_text_destinations ... FAILED
+test four_disjoint_visual_sources_publish_one_exact_cohort ... FAILED
+test failed_newer_batch_does_not_revoke_an_older_complete_candidate ... ok
+test metadata_destinations_keep_the_existing_coarse_boundary ... ok
+test fifth_distinct_source_keeps_the_existing_coarse_boundary ... ok
+
+failures:
+
+---- owner_dependent_source_cannot_reuse_only_its_bound_text_destinations stdout ----
+
+thread 'owner_dependent_source_cannot_reuse_only_its_bound_text_destinations' (504125) panicked at crates/gpui/tests/source_batch.rs:129:5:
+assertion failed: win.contains_text("owner:new0").unwrap()
+
+---- four_disjoint_visual_sources_publish_one_exact_cohort stdout ----
+
+thread 'four_disjoint_visual_sources_publish_one_exact_cohort' (504123) panicked at crates/gpui/tests/source_batch.rs:110:9:
+assertion failed: win.contains_text(&format!("new{i}")).unwrap()
+note: run with `RUST_BACKTRACE=1` environment variable to display a backtrace
+
+
+failures:
+    four_disjoint_visual_sources_publish_one_exact_cohort
+    owner_dependent_source_cannot_reuse_only_its_bound_text_destinations
+
+test result: FAILED. 3 passed; 2 failed; 0 ignored; 0 measured; 0 filtered out; finished in 0.00s
+

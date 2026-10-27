@@ -1,0 +1,7 @@
+COLD_ALLOC,requests=271,requested=71000,retained=47390,peak_new=47598
+TRANSPORT_ALLOC,requests=8,requested=704,retained=704,peak_new=704
+COLD,wall_ns=623201
+LAYOUT,win_bytes=256
+ALLOC,requests=112,requested=14628,retained_delta=0,peak_new=4000
+FINAL,pixel_hash=9833564122138393930,source_epoch=201
+COUNTERS,Counters { owner_reruns: 1, descriptions: 1, source_operations: 1, source_reads: 0, destination_compares: 7, text_promotions: 4, text_bytes_copied: 24, layout_runs: 1, measure_calls: 8, presentations: 1, paint_passes: 1, exact_updates: 0, coarse_updates: 1 }
