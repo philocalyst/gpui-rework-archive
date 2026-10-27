@@ -38,7 +38,8 @@ impl View for Page {
             text("0123456789").w(220).h(24),
             uniform_list(LIST, self, 8).w(220).h(64),
         ))
-        .w(if self.invalid { f64::NAN } else { 240. })
+        .w(240)
+        .rounded(if self.invalid { f32::NAN } else { 0. })
         .h(144)
         .bg(Color::rgb(23, 31, 47))
     }
