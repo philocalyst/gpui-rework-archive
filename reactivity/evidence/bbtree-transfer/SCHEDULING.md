@@ -356,7 +356,7 @@ the rejected base. It must charge comparisons, scratch, commands and full contro
 and preserve exact painter order, sample arithmetic, old/new support and fallback.
 
 
-## Changed-record tile repair in progress
+## Changed-record tile repair: completed, rejected qualification
 
 Protocol f720eab863; source32aae50d17 on local/gpu-text-tiles. It retains the
 previous full CSR rebuild, then identifies tiles with changed references or
@@ -373,3 +373,40 @@ fixture corrections (coordinate types; singleton seed was not a tracked run)
 remain recorded. Native composition, omitted-old-tile mutant and preregistered
 paired costs remain. Shipping37461 lines(+94), timed ELF14733192 B(+3832 over
 packet-only); no performance claim before timing.
+
+
+Completed dossier3dd29a0ebdea85ed7b4076ab51069865293e8737 adds the ordinary
+Canvas equal-word/different-membership boundary witness (final GPU suite78),
+975 default/1048 native tests, six actual native scripts, and the expected
+omitted-old-membership mutant failure. Native source32aae50d17 and final GPU
+sourceef71ae3001 differ only in GPU public tests; production inputs and timed
+ELF remain identical. Separate allocation diagnostic sourcec7fb8baf7d.
+
+Five alternating pairs across21 cells (210 processes): stream0/25/1000 ratios
+.204038/.222182/.214537; all stream pairs win. Two/four1000-label primaries
+.716769/.761192 pass, though one four-field pair is1.2403. Short one-field0/25
+controls1.099998/1.073309 fail; all five0-label pairs exceed1.05. The25-label
+two-field exact case also loses1.169136. Full-control medians pass, with wide
+ranges preserved. Separate30-process mechanism trial vs packet-only: stream
+.255704/.253400/.227724, short two/four .992901/1.077381. No general adoption.
+
+42 allocator probes show why a size-gated follow-up is worth testing: tiny
+one-field damage416 pixels remains416 composited, whereas stream66627 becomes
+9808 (median), with691200 copied in every frame. Candidate sparse retained
+delta0; all nine full controls match warm allocator distributions excluding
+run-map storage. Stream requests/requested bytes115/209739 versus full131/50121
+and packet-only107/202059. More transient bytes remains a charged loss.
+
+Next hypothesis: move the dirty-list/word comparison into a separate outlined
+pass, admitted only when certified bounding damage is at least4096 pixels
+(sixteen16x16 tiles). Smaller damage uses packet-only preparation. This is not
+implemented here; preregister the threshold and test its boundary without
+changing it after measurement. Preserve the current failed verdict and every
+small/multi-field regime.
+
+Native comparator audit: its current Lab uses opaque with_inbox(model.tick),
+so exact Source→text→GPU patch admission must not be assumed. with_inbox_for
+borrows only one registered source. A fair port must keep Workload string
+generation on the UI thread and include its cost when selecting exact source
+publication; moving that work to the producer would change the comparison.
+Line pitch, wheel, keyed overscan, async controls and matched profiles remain.
