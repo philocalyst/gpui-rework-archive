@@ -133,7 +133,8 @@ fn overflow_keeps_coarse_question_refresh() {
 }
 #[test]
 fn every_typed_member_can_invalidate_its_own_question() {
-    for affected in 0..2 {
+    let values = ["alpha", "beta", "gamma", "delta"];
+    for affected in 0..4 {
         let (send, jobs) = mpsc::channel();
         let (plan, answer) = Questions::new()
             .question(
@@ -150,20 +151,21 @@ fn every_typed_member_can_invalidate_its_own_question() {
         cap.complete(Ok("old-answer".into())).unwrap();
         win.deliver_ready(8).unwrap();
         ack(&mut win);
-        r[0].try_send("alpha".into()).unwrap();
-        r[1].try_send("beta".into()).unwrap();
+        for (remote, value) in r.iter().zip(values) {
+            remote.try_send(value.into()).unwrap();
+        }
         win.deliver_ready(8).unwrap();
         let (input, cap) = jobs
             .try_recv()
             .expect("changed member must dispatch its dependent");
-        assert_eq!(input, if affected == 0 { "alpha" } else { "beta" });
+        assert_eq!(input, values[affected]);
         assert_eq!(win.with_ready(answer, Clone::clone).unwrap(), None);
         cap.complete(Ok(input)).unwrap();
         win.deliver_ready(8).unwrap();
         ack(&mut win);
         assert_eq!(
             win.with_ready(answer, Clone::clone).unwrap(),
-            Some(if affected == 0 { "alpha" } else { "beta" }.into())
+            Some(values[affected].into())
         );
     }
 }
