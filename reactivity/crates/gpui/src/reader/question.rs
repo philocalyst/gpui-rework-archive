@@ -699,7 +699,7 @@ where
         model: &mut M,
         sources: &Sources<M>,
         applied: &mut usize,
-        exact: &mut Option<crate::FieldId>,
+        exact: &mut crate::remote::SourceEdits,
         remaining: &mut usize,
     ) -> Result<(), crate::Error> {
         self.tail.apply(model, sources, applied, exact, remaining)
@@ -851,7 +851,7 @@ impl<M, Q: LaneSet<M>, L: LaneSet<M>> LaneSet<M> for QuestionSet<Q, L> {
         model: &mut M,
         sources: &Sources<M>,
         applied: &mut usize,
-        exact: &mut Option<crate::FieldId>,
+        exact: &mut crate::remote::SourceEdits,
         remaining: &mut usize,
     ) -> Result<(), crate::Error> {
         self.lanes

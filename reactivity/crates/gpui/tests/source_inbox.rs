@@ -82,7 +82,7 @@ fn two_lanes_for_one_field_share_the_exact_grain() {
 }
 
 #[test]
-fn distinct_fields_and_unrestricted_callbacks_keep_one_conservative_barrier() {
+fn distinct_visual_fields_patch_together_and_opaque_callbacks_keep_one_conservative_barrier() {
     let (a, ai) = Remote::bounded(2);
     let (b, bi) = Remote::bounded(2);
     let mut win = Win::demo(Panel::new())
@@ -96,7 +96,7 @@ fn distinct_fields_and_unrestricted_callbacks_keep_one_conservative_barrier() {
     assert_eq!(win.deliver_ready(8).unwrap().applied, 2);
     assert!(win.contains_text("left").unwrap());
     assert!(win.contains_text("right").unwrap());
-    assert_eq!(win.counters().owner_reruns, 1);
+    assert_eq!(win.counters().owner_reruns, 0);
     assert_eq!(win.counters().source_operations, 1);
 
     let (remote, inbox) = Remote::bounded(2);

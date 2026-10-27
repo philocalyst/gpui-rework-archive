@@ -10,7 +10,7 @@ impl<M: View + 'static, L: LaneSet<M>> RuntimeMut<'_, M, L> {
             .checked_add(1)
             .ok_or(Error::EpochExhausted)?;
         let mut models = 0;
-        let mut exact = None;
+        let mut exact = crate::remote::SourceEdits::default();
         let mut remaining = budget;
         let result = match catch_unwind(AssertUnwindSafe(|| {
             self.lanes.apply(
@@ -31,7 +31,7 @@ impl<M: View + 'static, L: LaneSet<M>> RuntimeMut<'_, M, L> {
         // Ordinary callbacks stay coarse even when queue operations outline
         // apply; their static chain cannot report a declaration-bound edit.
         if !L::FIELD_EDITS {
-            exact = None;
+            exact.coarsen();
         }
         *applied = models;
         if models != 0 {
@@ -48,7 +48,7 @@ impl<M: View + 'static, L: LaneSet<M>> RuntimeMut<'_, M, L> {
                 questions_changed = self.lanes.refresh(
                     &self.runtime.model,
                     &self.runtime.sources,
-                    crate::reader::question::Change::Source(exact),
+                    crate::reader::question::Change::Source(exact.single()),
                 )?;
             }
             // An accepted prefix supersedes old answers even when a later
@@ -87,7 +87,58 @@ impl<M: View + 'static, L: LaneSet<M>> RuntimeMut<'_, M, L> {
         if *applied == 0 {
             return Ok(self.commit());
         }
-        self.after_admission(exact, questions_changed || questions != 0)
+        if !L::QUESTIONS
+            && let Some(fields) = exact.multiple()
+            && self.admits_text_batch(fields.clone())?
+        {
+            return self.after_text_batch(fields);
+        }
+        self.after_admission(exact.single(), questions_changed || questions != 0)
+    }
+    fn admits_text_batch(&self, fields: impl Iterator<Item = FieldId>) -> Result<bool, Error> {
+        if !self.logical_valid || self.has_lists() || self.inspector_enabled() {
+            return Ok(false);
+        }
+        for field in fields {
+            if self.sources.invalidates_owner(field)? {
+                return Ok(false);
+            }
+            let Some(Fanout::General { destinations, .. }) = self.fanout.get(&field) else {
+                return Ok(false);
+            };
+            if destinations.is_empty() || destinations.iter().any(|d| d.port() != Port::Visual) {
+                return Ok(false);
+            }
+        }
+        // Each visual text node has exactly one primary source. Distinct
+        // admitted fields therefore have disjoint sinks in this description.
+        Ok(true)
+    }
+    fn after_text_batch(&mut self, fields: impl Iterator<Item = FieldId>) -> Result<Commit, Error> {
+        self.runtime.reconcile_ime();
+        self.runtime.counters.exact_updates += 1;
+        let result = match catch_unwind(AssertUnwindSafe(|| {
+            for field in fields {
+                // The certificate excludes color/style/metadata transactions.
+                // Patch only logical text; publish once after normal layout.
+                self.runtime.patch(field)?;
+            }
+            Ok(())
+        })) {
+            Ok(result) => result,
+            Err(_) => {
+                self.poison();
+                Err(Error::OwnerPanicked)
+            }
+        };
+        if let Err(error) = result {
+            self.runtime.clear_editing();
+            self.runtime.logical_valid = false;
+            self.runtime.focused = None;
+            return Err(error);
+        }
+        self.runtime.reconcile_editing(EditingIntent::None)?;
+        self.present()
     }
     pub(super) fn describe(&mut self, mount: bool) -> Result<(), Error> {
         self.describe_with(mount, &[])

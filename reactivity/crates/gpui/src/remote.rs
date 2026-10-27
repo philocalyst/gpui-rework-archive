@@ -257,6 +257,48 @@ impl std::error::Error for DeliveryError {}
 pub(crate) mod sealed {
     pub trait Sealed {}
 }
+/// Transient typed edits admitted by one frozen delivery batch.
+/// Overflow and opaque callbacks retain the conservative owner boundary.
+#[doc(hidden)]
+#[derive(Default)]
+pub struct SourceEdits {
+    fields: [Option<FieldId>; 4],
+    coarse: bool,
+}
+impl SourceEdits {
+    pub(crate) fn record(&mut self, field: Option<FieldId>) {
+        if self.coarse {
+            return;
+        }
+        let Some(field) = field else {
+            self.coarsen();
+            return;
+        };
+        for slot in &mut self.fields {
+            if *slot == Some(field) {
+                return;
+            }
+            if slot.is_none() {
+                *slot = Some(field);
+                return;
+            }
+        }
+        self.coarsen();
+    }
+    pub(crate) fn coarsen(&mut self) {
+        self.coarse = true;
+    }
+    pub(crate) fn single(&self) -> Option<FieldId> {
+        if self.coarse || self.fields[1].is_some() {
+            None
+        } else {
+            self.fields[0]
+        }
+    }
+    pub(crate) fn multiple(&self) -> Option<impl Iterator<Item = FieldId> + Clone + '_> {
+        (!self.coarse && self.fields[1].is_some()).then(|| self.fields.iter().copied().flatten())
+    }
+}
 /// Internal static receiver chain. Applications infer this type through with_inbox.
 #[doc(hidden)]
 pub trait LaneSet<M>: sealed::Sealed + ReaderValues {
@@ -280,7 +322,7 @@ pub trait LaneSet<M>: sealed::Sealed + ReaderValues {
         model: &mut M,
         sources: &Sources<M>,
         applied: &mut usize,
-        exact: &mut Option<FieldId>,
+        exact: &mut SourceEdits,
         remaining: &mut usize,
     ) -> Result<(), Error>;
     fn refresh(&mut self, _: &M, _: &Sources<M>, _: Change) -> Result<bool, Error> {
@@ -335,7 +377,7 @@ impl<M> LaneSet<M> for () {
         _: &mut M,
         _: &Sources<M>,
         _: &mut usize,
-        _: &mut Option<FieldId>,
+        _: &mut SourceEdits,
         _: &mut usize,
     ) -> Result<(), Error> {
         Ok(())
@@ -471,7 +513,7 @@ impl<M, T: Send + 'static, F: InboxHandler<M, T>, L: LaneSet<M>> LaneSet<M> for 
         model: &mut M,
         sources: &Sources<M>,
         applied: &mut usize,
-        exact: &mut Option<FieldId>,
+        exact: &mut SourceEdits,
         remaining: &mut usize,
     ) -> Result<(), Error> {
         while *remaining != 0 {
@@ -480,20 +522,14 @@ impl<M, T: Send + 'static, F: InboxHandler<M, T>, L: LaneSet<M>> LaneSet<M> for 
             };
             *remaining -= 1;
             let field = self.receive.receive(model, sources, value)?;
-            // The first applied callback establishes the candidate grain.
-            // Different fields and unrestricted callbacks make it conservative.
-            if *applied == 0 {
-                *exact = field;
-            } else if *exact != field {
-                *exact = None;
-            }
+            exact.record(field);
             *applied += 1;
         }
         if *remaining != 0 && self.inbox.terminal == Terminal::Frozen {
             *remaining -= 1;
             self.inbox.terminal = Terminal::Delivered;
             self.receive.closed(model);
-            *exact = None;
+            exact.coarsen();
             *applied += 1;
         }
         self.tail.apply(model, sources, applied, exact, remaining)
@@ -594,7 +630,13 @@ mod tests {
                 }
                 let mut applied = 0;
                 lanes
-                    .apply(&mut sum, &sources, &mut applied, &mut None, &mut 8)
+                    .apply(
+                        &mut sum,
+                        &sources,
+                        &mut applied,
+                        &mut SourceEdits::default(),
+                        &mut 8,
+                    )
                     .unwrap();
                 assert_eq!(applied, 8);
             }
