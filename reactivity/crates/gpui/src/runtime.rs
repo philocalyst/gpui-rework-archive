@@ -3706,6 +3706,12 @@ impl<M: View + 'static> Runtime<M> {
             } else {
                 None
             };
+            if node.kind() == NodeKind::Image {
+                eprintln!(
+                    "LOCAL_IMAGE_ADMISSION paint={paint} use={:?} clip={clip:?} layout={layout:?}",
+                    node.content.image_use()
+                );
+            }
             if paint && let Some(image) = node.content.image_use() {
                 let resource = self.images.as_ref().unwrap().get(image);
                 scene.draw_image_with(
