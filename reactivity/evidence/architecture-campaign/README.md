@@ -20,7 +20,7 @@ isolated worktree, preregistration, freeze, oracle, mutant and evidence rules.
 
 | `local/tree-memory-lanes` / `/home/user/gpui-tree-lanes-lab` | Actual core parent walks: scalar/level/Future/prefetch/proof | Rejected: 2.48x deep level-loop gain, contiguous regression; complete six-way dossier, Miri and mutant |
 | `local/tree-parent-columns` / `/home/user/gpui-tree-columns-lab` | Compact authoritative parent routing | Rejected: selective deep 4.11x but outlined scalar fallback 6.88x slower; complete six-way dossier and code-generation evidence |
-| `local/tree-admitted-walk` / `/home/user/gpui-tree-admitted-lab` | Validate parent walk once per immutable borrow | Production `93117a2cdd`, lifecycle qualification `6801b594c1`; first four-way median gates pass; timer-floor guard qualification and broader GPUI tests in progress |
+| `local/tree-admitted-walk` / `/home/user/gpui-tree-admitted-lab` | Validate parent walk once per immutable borrow | Unadopted: deep 3.71x, longer shallow +9.86% and single-full +5.05%; complete dossier `ef335bb664`, 1,044 composed tests and native Todo pass |
 
 [BBTree transfer research](../bbtree-transfer/README.md) records the pinned
 implementation, failed historical trials, applicability and next hypotheses.

@@ -119,5 +119,13 @@ bounded-storage costs to charge.
 Current local dossiers: tree-memory-lanes (first six-way experiment, rejected
 on contiguous overhead); tree-parent-columns (deep gains, rejected outlined
 scalar fallback); tree-admitted-walk (one-time admission/inlining qualification
-in progress). Every variant is local and separate. Full-application composition,
+complete, unadopted after longer no-regression gates). Every variant is local and separate. Full-application composition,
 input latency and hardware gates still decide whether any kernel is worth keeping.
+
+Ordinary Runtime currently builds a single LayoutTree root. Deep multi-root
+filter gains therefore do not establish an ordinary frame gain. The next
+measured stage targets actual delivery: deliver_ready repeatedly resolves a
+numeric cursor through a static nested lane chain. A bounded structural sweep
+may remove repeated routing while retaining exact FIFO, frozen-before-callback
+batches, rotating fairness, backlog charging and physical cancellation credit.
+This is a new candidate, not a claim that task readiness equals memory readiness.
