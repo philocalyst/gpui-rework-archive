@@ -1,0 +1,12 @@
+diff --git a/reactivity/crates/gpui/src/runtime/sparse_text.rs b/reactivity/crates/gpui/src/runtime/sparse_text.rs
+index baba121b9a..4a892bed44 100644
+--- a/reactivity/crates/gpui/src/runtime/sparse_text.rs
++++ b/reactivity/crates/gpui/src/runtime/sparse_text.rs
+@@ -106,6 +106,7 @@ impl<M: View + 'static> Runtime<M> {
+ }
+ 
+ impl<M: View + 'static> Runtime<M> {
++    #[inline(never)]
+     fn try_sparse_text_batch(
+         &mut self,
+         shaper: &mut gpui_canvas::TextShaper<'_>,

@@ -1,0 +1,3 @@
+COLD,wall_ns=10385066
+FINAL,pixel_hash=15188321811029023333,source_epoch=4200
+COUNTERS,Counters { owner_reruns: 4000, descriptions: 4000, source_operations: 4000, source_reads: 0, destination_compares: 4188000, text_promotions: 16000, text_bytes_copied: 108804, layout_runs: 4000, measure_calls: 32000, presentations: 4000, paint_passes: 4000, exact_updates: 0, coarse_updates: 4000 }

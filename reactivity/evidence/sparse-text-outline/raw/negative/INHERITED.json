@@ -1,0 +1,5 @@
+{
+  "fresh_run": false,
+  "source_dossier": "2d55c3dff194443742736f8171422dc11b59ed48",
+  "reason": "Annotation-only change; unchanged transactional certificate. This is the inherited sequential partial-commit counterexample, not a new execution."
+}

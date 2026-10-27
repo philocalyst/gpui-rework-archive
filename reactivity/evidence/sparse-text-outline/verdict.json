@@ -1,0 +1,24 @@
+{
+  "primary": {
+    "40-2-exact": true,
+    "40-4-exact": true
+  },
+  "controls": {
+    "0-1-exact": true,
+    "0-1-owner": true,
+    "0-2-owner": true,
+    "0-4-owner": true,
+    "1-1-exact": true,
+    "1-1-owner": true,
+    "1-2-owner": true,
+    "1-4-owner": true,
+    "40-1-exact": true,
+    "40-1-owner": true,
+    "40-2-owner": true,
+    "40-4-owner": false,
+    "0-4-opaque": true,
+    "1-4-opaque": true,
+    "40-4-opaque": true
+  },
+  "numerical_pass": false
+}

@@ -1,0 +1,39 @@
+Design notes only; no production changes or preregistered timing claim.
+
+A native text packet patch must carry exact preceding complete-C token, bounded
+changed TextRunSlots, and scene epoch through GpuSurface. On stale/missed/coalesced
+predecessor, resize, atlas/resource change or unadmitted geometry, full preparation.
+Canvas canonical transaction already validates the aggregate resource-use lifetime;
+GPU must independently validate its own records, atlas entries and target/context.
+
+Public PreparedScene currently only iterates groups; positional TextRunSlot uses
+private commons index. Small low-level API can expose checked grouped text access
+and group positional slot, explicitly not namespace identity. GPU owner retains
+per-group GPU word address, original ordinal, length, compact form, and per-glyph
+old tile bounds. Charge all full-prepare walks, persistent directories and bytes.
+
+Identical per-glyph tile-membership certificate is simple but likely rejects many
+735-character proportional-font changes. A broader independent trial could use
+per-tile index capacity with slack, rather than tightly packed CSR suffix shifts.
+Keep start/capacity directory (uniform-tile range encodes address instead of start).
+All referenced GPU word addresses preserve storage/paint order after masking the
+inline tag. Masked glyph changes cannot move opaque solid cutoffs; reject any
+material conversion that would invalidate that statement. Gather union old/new
+tiles, remove changed addresses, insert admitted new addresses in painter order
+only after the tile's retained opaque cutoff. Uniform tiles newly intersected by
+text need their previous opaque draw plus the new surviving glyphs. Empty tiles
+need clear semantics. Rejection before queue writes leaves old packet replayable.
+Overflow/capacity/limits must fall back, never grow storage after partial mutation.
+
+All mask sources must already exist in unchanged atlas. No fallible allocations
+or validation after first write. Revoke packet before writes; WGPU queue ordering
+preserves previous submissions. Upload bounded record/index/range spans then one
+render/ACK; retained image damage must be union old/new bounds. A failure in a
+later member must not partly publish an earlier member. Failed newer preparation
+and older eligible ACK, target/context mismatch, clipping, banks, HDR, transforms,
+cutoff/paint-order overlap and late capacity overflow need exact public oracles.
+
+This is more substantial than the outline-only trial. It remains a hypothesis,
+not implemented and not evidence of a native ZGX gain. Compare complete public
+render plus queue completion and full prepare costs, separate software Vulkan
+from physical presentation. Do not merge shader-uniform experiments into it.

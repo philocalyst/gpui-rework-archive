@@ -1,0 +1,38 @@
+{
+  "kind": "sparse",
+  "tests": {
+    "full": 975,
+    "composed": 1048
+  },
+  "clippy": [
+    "full",
+    "composed"
+  ],
+  "clippy_failures": [],
+  "candidate_receipt": "full/cost-artifact.json",
+  "control_receipt": "control-pin/cost-artifact.json",
+  "negative_message": "later admission failure must roll back the entire batch",
+  "negative_inherited_from": "2d55c3dff194443742736f8171422dc11b59ed48",
+  "mechanism_cases": [
+    [
+      1,
+      2,
+      "owner"
+    ],
+    [
+      40,
+      1,
+      "exact"
+    ],
+    [
+      40,
+      2,
+      "exact"
+    ],
+    [
+      40,
+      4,
+      "exact"
+    ]
+  ]
+}

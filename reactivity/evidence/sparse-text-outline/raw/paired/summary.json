@@ -1,0 +1,3870 @@
+{
+  "runs": [
+    {
+      "repeat": 0,
+      "case": "0-1-exact",
+      "variant": "control",
+      "final": "FINAL,pixel_hash=3067612491809559190,source_epoch=4200",
+      "counters": "COUNTERS,Counters { owner_reruns: 0, descriptions: 0, source_operations: 4000, source_reads: 4000, destination_compares: 4000, text_promotions: 4000, text_bytes_copied: 27201, layout_runs: 4000, measure_calls: 8000, presentations: 4000, paint_passes: 4000, exact_updates: 4000, coarse_updates: 0 }",
+      "cpu": {
+        "0.5": 17965.33,
+        "0.95": 18774.64,
+        "0.99": 19586.59
+      },
+      "wall": {
+        "0.5": 17969.77,
+        "0.95": 18779.49,
+        "0.99": 19599.94
+      }
+    },
+    {
+      "repeat": 0,
+      "case": "0-1-exact",
+      "variant": "candidate",
+      "final": "FINAL,pixel_hash=3067612491809559190,source_epoch=4200",
+      "counters": "COUNTERS,Counters { owner_reruns: 0, descriptions: 0, source_operations: 4000, source_reads: 4000, destination_compares: 4000, text_promotions: 4000, text_bytes_copied: 27201, layout_runs: 4000, measure_calls: 8000, presentations: 4000, paint_passes: 4000, exact_updates: 4000, coarse_updates: 0 }",
+      "cpu": {
+        "0.5": 18038.17,
+        "0.95": 19319.58,
+        "0.99": 21049.54
+      },
+      "wall": {
+        "0.5": 18043.1,
+        "0.95": 19328.82,
+        "0.99": 21066.89
+      }
+    },
+    {
+      "repeat": 0,
+      "case": "0-2-exact",
+      "variant": "candidate",
+      "final": "FINAL,pixel_hash=8784640471098581594,source_epoch=4200",
+      "counters": "COUNTERS,Counters { owner_reruns: 0, descriptions: 0, source_operations: 4000, source_reads: 8000, destination_compares: 8000, text_promotions: 8000, text_bytes_copied: 54402, layout_runs: 4000, measure_calls: 16000, presentations: 4000, paint_passes: 4000, exact_updates: 4000, coarse_updates: 0 }",
+      "cpu": {
+        "0.5": 33209.14,
+        "0.95": 38164.46,
+        "0.99": 43524.05
+      },
+      "wall": {
+        "0.5": 33217.13,
+        "0.95": 38175.54,
+        "0.99": 43536.7
+      }
+    },
+    {
+      "repeat": 0,
+      "case": "0-2-exact",
+      "variant": "control",
+      "final": "FINAL,pixel_hash=8784640471098581594,source_epoch=4200",
+      "counters": "COUNTERS,Counters { owner_reruns: 0, descriptions: 0, source_operations: 4000, source_reads: 8000, destination_compares: 8000, text_promotions: 8000, text_bytes_copied: 54402, layout_runs: 4000, measure_calls: 16000, presentations: 4000, paint_passes: 4000, exact_updates: 4000, coarse_updates: 0 }",
+      "cpu": {
+        "0.5": 32214.16,
+        "0.95": 33676.02,
+        "0.99": 35552.14
+      },
+      "wall": {
+        "0.5": 32217.24,
+        "0.95": 33681.6,
+        "0.99": 35560.22
+      }
+    },
+    {
+      "repeat": 0,
+      "case": "0-4-exact",
+      "variant": "control",
+      "final": "FINAL,pixel_hash=14428137562740546882,source_epoch=4200",
+      "counters": "COUNTERS,Counters { owner_reruns: 0, descriptions: 0, source_operations: 4000, source_reads: 16000, destination_compares: 16000, text_promotions: 16000, text_bytes_copied: 108804, layout_runs: 4000, measure_calls: 32000, presentations: 4000, paint_passes: 4000, exact_updates: 4000, coarse_updates: 0 }",
+      "cpu": {
+        "0.5": 62308.03,
+        "0.95": 73895.95,
+        "0.99": 75348.08
+      },
+      "wall": {
+        "0.5": 62322.32,
+        "0.95": 73904.99,
+        "0.99": 75359.91
+      }
+    },
+    {
+      "repeat": 0,
+      "case": "0-4-exact",
+      "variant": "candidate",
+      "final": "FINAL,pixel_hash=14428137562740546882,source_epoch=4200",
+      "counters": "COUNTERS,Counters { owner_reruns: 0, descriptions: 0, source_operations: 4000, source_reads: 16000, destination_compares: 16000, text_promotions: 16000, text_bytes_copied: 108804, layout_runs: 4000, measure_calls: 32000, presentations: 4000, paint_passes: 4000, exact_updates: 4000, coarse_updates: 0 }",
+      "cpu": {
+        "0.5": 63384.45,
+        "0.95": 67304.33,
+        "0.99": 80536.46
+      },
+      "wall": {
+        "0.5": 63397.64,
+        "0.95": 67315.5,
+        "0.99": 80549.97
+      }
+    },
+    {
+      "repeat": 0,
+      "case": "0-1-owner",
+      "variant": "candidate",
+      "final": "FINAL,pixel_hash=1209351341388854458,source_epoch=4200",
+      "counters": "COUNTERS,Counters { owner_reruns: 4000, descriptions: 4000, source_operations: 4000, source_reads: 0, destination_compares: 32000, text_promotions: 8000, text_bytes_copied: 78402, layout_runs: 4000, measure_calls: 16000, presentations: 4000, paint_passes: 4000, exact_updates: 0, coarse_updates: 4000 }",
+      "cpu": {
+        "0.5": 27571.61,
+        "0.95": 29927.75,
+        "0.99": 37512.14
+      },
+      "wall": {
+        "0.5": 27575.51,
+        "0.95": 29936.66,
+        "0.99": 37520.51
+      }
+    },
+    {
+      "repeat": 0,
+      "case": "0-1-owner",
+      "variant": "control",
+      "final": "FINAL,pixel_hash=1209351341388854458,source_epoch=4200",
+      "counters": "COUNTERS,Counters { owner_reruns: 4000, descriptions: 4000, source_operations: 4000, source_reads: 0, destination_compares: 32000, text_promotions: 8000, text_bytes_copied: 78402, layout_runs: 4000, measure_calls: 16000, presentations: 4000, paint_passes: 4000, exact_updates: 0, coarse_updates: 4000 }",
+      "cpu": {
+        "0.5": 27985.99,
+        "0.95": 29510.87,
+        "0.99": 29911.92
+      },
+      "wall": {
+        "0.5": 27991.11,
+        "0.95": 29518.67,
+        "0.99": 29919.31
+      }
+    },
+    {
+      "repeat": 0,
+      "case": "0-2-owner",
+      "variant": "control",
+      "final": "FINAL,pixel_hash=3529418378583843142,source_epoch=4200",
+      "counters": "COUNTERS,Counters { owner_reruns: 4000, descriptions: 4000, source_operations: 4000, source_reads: 0, destination_compares: 32000, text_promotions: 12000, text_bytes_copied: 105603, layout_runs: 4000, measure_calls: 24000, presentations: 4000, paint_passes: 4000, exact_updates: 0, coarse_updates: 4000 }",
+      "cpu": {
+        "0.5": 41829.87,
+        "0.95": 45375.23,
+        "0.99": 47206.99
+      },
+      "wall": {
+        "0.5": 41839.32,
+        "0.95": 45383.99,
+        "0.99": 47221.73
+      }
+    },
+    {
+      "repeat": 0,
+      "case": "0-2-owner",
+      "variant": "candidate",
+      "final": "FINAL,pixel_hash=3529418378583843142,source_epoch=4200",
+      "counters": "COUNTERS,Counters { owner_reruns: 4000, descriptions: 4000, source_operations: 4000, source_reads: 0, destination_compares: 32000, text_promotions: 12000, text_bytes_copied: 105603, layout_runs: 4000, measure_calls: 24000, presentations: 4000, paint_passes: 4000, exact_updates: 0, coarse_updates: 4000 }",
+      "cpu": {
+        "0.5": 42971.52,
+        "0.95": 45460.0,
+        "0.99": 51460.71
+      },
+      "wall": {
+        "0.5": 42977.57,
+        "0.95": 45467.65,
+        "0.99": 51471.93
+      }
+    },
+    {
+      "repeat": 0,
+      "case": "0-4-owner",
+      "variant": "candidate",
+      "final": "FINAL,pixel_hash=17102854550306425806,source_epoch=4200",
+      "counters": "COUNTERS,Counters { owner_reruns: 4000, descriptions: 4000, source_operations: 4000, source_reads: 0, destination_compares: 32000, text_promotions: 20000, text_bytes_copied: 160005, layout_runs: 4000, measure_calls: 40000, presentations: 4000, paint_passes: 4000, exact_updates: 0, coarse_updates: 4000 }",
+      "cpu": {
+        "0.5": 70610.87,
+        "0.95": 75859.15,
+        "0.99": 95085.65
+      },
+      "wall": {
+        "0.5": 70621.31,
+        "0.95": 75875.18,
+        "0.99": 95104.64
+      }
+    },
+    {
+      "repeat": 0,
+      "case": "0-4-owner",
+      "variant": "control",
+      "final": "FINAL,pixel_hash=17102854550306425806,source_epoch=4200",
+      "counters": "COUNTERS,Counters { owner_reruns: 4000, descriptions: 4000, source_operations: 4000, source_reads: 0, destination_compares: 32000, text_promotions: 20000, text_bytes_copied: 160005, layout_runs: 4000, measure_calls: 40000, presentations: 4000, paint_passes: 4000, exact_updates: 0, coarse_updates: 4000 }",
+      "cpu": {
+        "0.5": 68886.41,
+        "0.95": 72291.42,
+        "0.99": 73949.55
+      },
+      "wall": {
+        "0.5": 68895.37,
+        "0.95": 72303.17,
+        "0.99": 73961.89
+      }
+    },
+    {
+      "repeat": 0,
+      "case": "1-1-exact",
+      "variant": "control",
+      "final": "FINAL,pixel_hash=8866289588925863500,source_epoch=4200",
+      "counters": "COUNTERS,Counters { owner_reruns: 0, descriptions: 0, source_operations: 4000, source_reads: 4000, destination_compares: 4000, text_promotions: 4000, text_bytes_copied: 27201, layout_runs: 4000, measure_calls: 8000, presentations: 4000, paint_passes: 4000, exact_updates: 4000, coarse_updates: 0 }",
+      "cpu": {
+        "0.5": 16055.33,
+        "0.95": 17971.23,
+        "0.99": 19596.9
+      },
+      "wall": {
+        "0.5": 16213.16,
+        "0.95": 17985.99,
+        "0.99": 19611.85
+      }
+    },
+    {
+      "repeat": 0,
+      "case": "1-1-exact",
+      "variant": "candidate",
+      "final": "FINAL,pixel_hash=8866289588925863500,source_epoch=4200",
+      "counters": "COUNTERS,Counters { owner_reruns: 0, descriptions: 0, source_operations: 4000, source_reads: 4000, destination_compares: 4000, text_promotions: 4000, text_bytes_copied: 27201, layout_runs: 4000, measure_calls: 8000, presentations: 4000, paint_passes: 4000, exact_updates: 4000, coarse_updates: 0 }",
+      "cpu": {
+        "0.5": 15743.64,
+        "0.95": 17372.31,
+        "0.99": 17491.44
+      },
+      "wall": {
+        "0.5": 15749.6,
+        "0.95": 17376.77,
+        "0.99": 17496.78
+      }
+    },
+    {
+      "repeat": 0,
+      "case": "1-2-exact",
+      "variant": "candidate",
+      "final": "FINAL,pixel_hash=9269140401638406208,source_epoch=4200",
+      "counters": "COUNTERS,Counters { owner_reruns: 0, descriptions: 0, source_operations: 4000, source_reads: 8000, destination_compares: 8000, text_promotions: 8000, text_bytes_copied: 54402, layout_runs: 4000, measure_calls: 16000, presentations: 4000, paint_passes: 4000, exact_updates: 4000, coarse_updates: 0 }",
+      "cpu": {
+        "0.5": 30053.9,
+        "0.95": 32424.56,
+        "0.99": 33003.84
+      },
+      "wall": {
+        "0.5": 30058.09,
+        "0.95": 32432.15,
+        "0.99": 33010.04
+      }
+    },
+    {
+      "repeat": 0,
+      "case": "1-2-exact",
+      "variant": "control",
+      "final": "FINAL,pixel_hash=9269140401638406208,source_epoch=4200",
+      "counters": "COUNTERS,Counters { owner_reruns: 0, descriptions: 0, source_operations: 4000, source_reads: 8000, destination_compares: 8000, text_promotions: 8000, text_bytes_copied: 54402, layout_runs: 4000, measure_calls: 16000, presentations: 4000, paint_passes: 4000, exact_updates: 4000, coarse_updates: 0 }",
+      "cpu": {
+        "0.5": 43431.98,
+        "0.95": 45928.78,
+        "0.99": 50689.76
+      },
+      "wall": {
+        "0.5": 43472.41,
+        "0.95": 45942.84,
+        "0.99": 50704.49
+      }
+    },
+    {
+      "repeat": 0,
+      "case": "1-4-exact",
+      "variant": "control",
+      "final": "FINAL,pixel_hash=5621740597739618968,source_epoch=4200",
+      "counters": "COUNTERS,Counters { owner_reruns: 0, descriptions: 0, source_operations: 4000, source_reads: 16000, destination_compares: 16000, text_promotions: 16000, text_bytes_copied: 108804, layout_runs: 4000, measure_calls: 32000, presentations: 4000, paint_passes: 4000, exact_updates: 4000, coarse_updates: 0 }",
+      "cpu": {
+        "0.5": 70945.59,
+        "0.95": 81163.34,
+        "0.99": 83108.3
+      },
+      "wall": {
+        "0.5": 70959.85,
+        "0.95": 81177.95,
+        "0.99": 83126.42
+      }
+    },
+    {
+      "repeat": 0,
+      "case": "1-4-exact",
+      "variant": "candidate",
+      "final": "FINAL,pixel_hash=5621740597739618968,source_epoch=4200",
+      "counters": "COUNTERS,Counters { owner_reruns: 0, descriptions: 0, source_operations: 4000, source_reads: 16000, destination_compares: 16000, text_promotions: 16000, text_bytes_copied: 108804, layout_runs: 4000, measure_calls: 32000, presentations: 4000, paint_passes: 4000, exact_updates: 4000, coarse_updates: 0 }",
+      "cpu": {
+        "0.5": 60751.3,
+        "0.95": 63068.86,
+        "0.99": 65983.64
+      },
+      "wall": {
+        "0.5": 60761.99,
+        "0.95": 63094.27,
+        "0.99": 65996.02
+      }
+    },
+    {
+      "repeat": 0,
+      "case": "1-1-owner",
+      "variant": "candidate",
+      "final": "FINAL,pixel_hash=6935651192824017056,source_epoch=4200",
+      "counters": "COUNTERS,Counters { owner_reruns: 4000, descriptions: 4000, source_operations: 4000, source_reads: 0, destination_compares: 136000, text_promotions: 8000, text_bytes_copied: 78402, layout_runs: 4000, measure_calls: 16000, presentations: 4000, paint_passes: 4000, exact_updates: 0, coarse_updates: 4000 }",
+      "cpu": {
+        "0.5": 41172.02,
+        "0.95": 42984.23,
+        "0.99": 43566.74
+      },
+      "wall": {
+        "0.5": 41181.09,
+        "0.95": 42994.59,
+        "0.99": 43572.58
+      }
+    },
+    {
+      "repeat": 0,
+      "case": "1-1-owner",
+      "variant": "control",
+      "final": "FINAL,pixel_hash=6935651192824017056,source_epoch=4200",
+      "counters": "COUNTERS,Counters { owner_reruns: 4000, descriptions: 4000, source_operations: 4000, source_reads: 0, destination_compares: 136000, text_promotions: 8000, text_bytes_copied: 78402, layout_runs: 4000, measure_calls: 16000, presentations: 4000, paint_passes: 4000, exact_updates: 0, coarse_updates: 4000 }",
+      "cpu": {
+        "0.5": 40980.26,
+        "0.95": 44734.33,
+        "0.99": 51171.85
+      },
+      "wall": {
+        "0.5": 40988.22,
+        "0.95": 44745.18,
+        "0.99": 51195.92
+      }
+    },
+    {
+      "repeat": 0,
+      "case": "1-2-owner",
+      "variant": "control",
+      "final": "FINAL,pixel_hash=7697983997524302108,source_epoch=4200",
+      "counters": "COUNTERS,Counters { owner_reruns: 4000, descriptions: 4000, source_operations: 4000, source_reads: 0, destination_compares: 136000, text_promotions: 12000, text_bytes_copied: 105603, layout_runs: 4000, measure_calls: 24000, presentations: 4000, paint_passes: 4000, exact_updates: 0, coarse_updates: 4000 }",
+      "cpu": {
+        "0.5": 55949.15,
+        "0.95": 62924.29,
+        "0.99": 65505.25
+      },
+      "wall": {
+        "0.5": 55959.57,
+        "0.95": 62935.57,
+        "0.99": 65514.73
+      }
+    },
+    {
+      "repeat": 0,
+      "case": "1-2-owner",
+      "variant": "candidate",
+      "final": "FINAL,pixel_hash=7697983997524302108,source_epoch=4200",
+      "counters": "COUNTERS,Counters { owner_reruns: 4000, descriptions: 4000, source_operations: 4000, source_reads: 0, destination_compares: 136000, text_promotions: 12000, text_bytes_copied: 105603, layout_runs: 4000, measure_calls: 24000, presentations: 4000, paint_passes: 4000, exact_updates: 0, coarse_updates: 4000 }",
+      "cpu": {
+        "0.5": 54798.49,
+        "0.95": 59229.13,
+        "0.99": 62119.28
+      },
+      "wall": {
+        "0.5": 54805.28,
+        "0.95": 59245.34,
+        "0.99": 62133.37
+      }
+    },
+    {
+      "repeat": 0,
+      "case": "1-4-owner",
+      "variant": "candidate",
+      "final": "FINAL,pixel_hash=7148476773328723988,source_epoch=4200",
+      "counters": "COUNTERS,Counters { owner_reruns: 4000, descriptions: 4000, source_operations: 4000, source_reads: 0, destination_compares: 136000, text_promotions: 20000, text_bytes_copied: 160005, layout_runs: 4000, measure_calls: 40000, presentations: 4000, paint_passes: 4000, exact_updates: 0, coarse_updates: 4000 }",
+      "cpu": {
+        "0.5": 85344.71,
+        "0.95": 91962.77,
+        "0.99": 94790.3
+      },
+      "wall": {
+        "0.5": 85378.85,
+        "0.95": 91985.26,
+        "0.99": 94961.56
+      }
+    },
+    {
+      "repeat": 0,
+      "case": "1-4-owner",
+      "variant": "control",
+      "final": "FINAL,pixel_hash=7148476773328723988,source_epoch=4200",
+      "counters": "COUNTERS,Counters { owner_reruns: 4000, descriptions: 4000, source_operations: 4000, source_reads: 0, destination_compares: 136000, text_promotions: 20000, text_bytes_copied: 160005, layout_runs: 4000, measure_calls: 40000, presentations: 4000, paint_passes: 4000, exact_updates: 0, coarse_updates: 4000 }",
+      "cpu": {
+        "0.5": 84912.09,
+        "0.95": 94519.58,
+        "0.99": 97003.56
+      },
+      "wall": {
+        "0.5": 84922.19,
+        "0.95": 94527.04,
+        "0.99": 97016.42
+      }
+    },
+    {
+      "repeat": 0,
+      "case": "40-1-exact",
+      "variant": "control",
+      "final": "FINAL,pixel_hash=10648945254885490729,source_epoch=4200",
+      "counters": "COUNTERS,Counters { owner_reruns: 0, descriptions: 0, source_operations: 4000, source_reads: 4000, destination_compares: 4000, text_promotions: 4000, text_bytes_copied: 27201, layout_runs: 4000, measure_calls: 8000, presentations: 4000, paint_passes: 4000, exact_updates: 4000, coarse_updates: 0 }",
+      "cpu": {
+        "0.5": 15243.1,
+        "0.95": 16588.23,
+        "0.99": 18692.1
+      },
+      "wall": {
+        "0.5": 15245.64,
+        "0.95": 16592.68,
+        "0.99": 18695.24
+      }
+    },
+    {
+      "repeat": 0,
+      "case": "40-1-exact",
+      "variant": "candidate",
+      "final": "FINAL,pixel_hash=10648945254885490729,source_epoch=4200",
+      "counters": "COUNTERS,Counters { owner_reruns: 0, descriptions: 0, source_operations: 4000, source_reads: 4000, destination_compares: 4000, text_promotions: 4000, text_bytes_copied: 27201, layout_runs: 4000, measure_calls: 8000, presentations: 4000, paint_passes: 4000, exact_updates: 4000, coarse_updates: 0 }",
+      "cpu": {
+        "0.5": 16378.44,
+        "0.95": 19636.77,
+        "0.99": 20756.18
+      },
+      "wall": {
+        "0.5": 16387.81,
+        "0.95": 19648.82,
+        "0.99": 20765.73
+      }
+    },
+    {
+      "repeat": 0,
+      "case": "40-2-exact",
+      "variant": "candidate",
+      "final": "FINAL,pixel_hash=9975236451948260733,source_epoch=4200",
+      "counters": "COUNTERS,Counters { owner_reruns: 0, descriptions: 0, source_operations: 4000, source_reads: 8000, destination_compares: 8000, text_promotions: 8000, text_bytes_copied: 54402, layout_runs: 4000, measure_calls: 16000, presentations: 4000, paint_passes: 4000, exact_updates: 4000, coarse_updates: 0 }",
+      "cpu": {
+        "0.5": 31275.89,
+        "0.95": 34397.57,
+        "0.99": 38580.35
+      },
+      "wall": {
+        "0.5": 31285.0,
+        "0.95": 34410.27,
+        "0.99": 38596.74
+      }
+    },
+    {
+      "repeat": 0,
+      "case": "40-2-exact",
+      "variant": "control",
+      "final": "FINAL,pixel_hash=9975236451948260733,source_epoch=4200",
+      "counters": "COUNTERS,Counters { owner_reruns: 0, descriptions: 0, source_operations: 4000, source_reads: 8000, destination_compares: 8000, text_promotions: 8000, text_bytes_copied: 54402, layout_runs: 4000, measure_calls: 16000, presentations: 4000, paint_passes: 4000, exact_updates: 4000, coarse_updates: 0 }",
+      "cpu": {
+        "0.5": 467303.84,
+        "0.95": 528572.22,
+        "0.99": 530854.41
+      },
+      "wall": {
+        "0.5": 467315.31,
+        "0.95": 528693.14,
+        "0.99": 530870.94
+      }
+    },
+    {
+      "repeat": 0,
+      "case": "40-4-exact",
+      "variant": "control",
+      "final": "FINAL,pixel_hash=15188321811029023333,source_epoch=4200",
+      "counters": "COUNTERS,Counters { owner_reruns: 0, descriptions: 0, source_operations: 4000, source_reads: 16000, destination_compares: 16000, text_promotions: 16000, text_bytes_copied: 108804, layout_runs: 4000, measure_calls: 32000, presentations: 4000, paint_passes: 4000, exact_updates: 4000, coarse_updates: 0 }",
+      "cpu": {
+        "0.5": 471117.83,
+        "0.95": 537034.95,
+        "0.99": 546066.36
+      },
+      "wall": {
+        "0.5": 471135.97,
+        "0.95": 537056.95,
+        "0.99": 546089.43
+      }
+    },
+    {
+      "repeat": 0,
+      "case": "40-4-exact",
+      "variant": "candidate",
+      "final": "FINAL,pixel_hash=15188321811029023333,source_epoch=4200",
+      "counters": "COUNTERS,Counters { owner_reruns: 0, descriptions: 0, source_operations: 4000, source_reads: 16000, destination_compares: 16000, text_promotions: 16000, text_bytes_copied: 108804, layout_runs: 4000, measure_calls: 32000, presentations: 4000, paint_passes: 4000, exact_updates: 4000, coarse_updates: 0 }",
+      "cpu": {
+        "0.5": 59781.56,
+        "0.95": 67526.65,
+        "0.99": 73748.87
+      },
+      "wall": {
+        "0.5": 59789.35,
+        "0.95": 67543.02,
+        "0.99": 73758.21
+      }
+    },
+    {
+      "repeat": 0,
+      "case": "40-1-owner",
+      "variant": "candidate",
+      "final": "FINAL,pixel_hash=3242345613451522353,source_epoch=4200",
+      "counters": "COUNTERS,Counters { owner_reruns: 4000, descriptions: 4000, source_operations: 4000, source_reads: 0, destination_compares: 4192000, text_promotions: 8000, text_bytes_copied: 78402, layout_runs: 4000, measure_calls: 16000, presentations: 4000, paint_passes: 4000, exact_updates: 0, coarse_updates: 4000 }",
+      "cpu": {
+        "0.5": 560198.76,
+        "0.95": 581666.09,
+        "0.99": 630357.58
+      },
+      "wall": {
+        "0.5": 560209.98,
+        "0.95": 581678.31,
+        "0.99": 630388.86
+      }
+    },
+    {
+      "repeat": 0,
+      "case": "40-1-owner",
+      "variant": "control",
+      "final": "FINAL,pixel_hash=3242345613451522353,source_epoch=4200",
+      "counters": "COUNTERS,Counters { owner_reruns: 4000, descriptions: 4000, source_operations: 4000, source_reads: 0, destination_compares: 4192000, text_promotions: 8000, text_bytes_copied: 78402, layout_runs: 4000, measure_calls: 16000, presentations: 4000, paint_passes: 4000, exact_updates: 0, coarse_updates: 4000 }",
+      "cpu": {
+        "0.5": 582675.59,
+        "0.95": 639537.66,
+        "0.99": 663377.47
+      },
+      "wall": {
+        "0.5": 582685.51,
+        "0.95": 639563.8,
+        "0.99": 663408.91
+      }
+    },
+    {
+      "repeat": 0,
+      "case": "40-2-owner",
+      "variant": "control",
+      "final": "FINAL,pixel_hash=13881385024434524213,source_epoch=4200",
+      "counters": "COUNTERS,Counters { owner_reruns: 4000, descriptions: 4000, source_operations: 4000, source_reads: 0, destination_compares: 4192000, text_promotions: 12000, text_bytes_copied: 105603, layout_runs: 4000, measure_calls: 24000, presentations: 4000, paint_passes: 4000, exact_updates: 0, coarse_updates: 4000 }",
+      "cpu": {
+        "0.5": 602805.8,
+        "0.95": 656671.73,
+        "0.99": 670702.76
+      },
+      "wall": {
+        "0.5": 602816.74,
+        "0.95": 656688.47,
+        "0.99": 670724.25
+      }
+    },
+    {
+      "repeat": 0,
+      "case": "40-2-owner",
+      "variant": "candidate",
+      "final": "FINAL,pixel_hash=13881385024434524213,source_epoch=4200",
+      "counters": "COUNTERS,Counters { owner_reruns: 4000, descriptions: 4000, source_operations: 4000, source_reads: 0, destination_compares: 4192000, text_promotions: 12000, text_bytes_copied: 105603, layout_runs: 4000, measure_calls: 24000, presentations: 4000, paint_passes: 4000, exact_updates: 0, coarse_updates: 4000 }",
+      "cpu": {
+        "0.5": 616752.16,
+        "0.95": 696207.69,
+        "0.99": 727861.58
+      },
+      "wall": {
+        "0.5": 616766.57,
+        "0.95": 696492.59,
+        "0.99": 728989.95
+      }
+    },
+    {
+      "repeat": 0,
+      "case": "40-4-owner",
+      "variant": "candidate",
+      "final": "FINAL,pixel_hash=4997533096679380941,source_epoch=4200",
+      "counters": "COUNTERS,Counters { owner_reruns: 4000, descriptions: 4000, source_operations: 4000, source_reads: 0, destination_compares: 4192000, text_promotions: 20000, text_bytes_copied: 160005, layout_runs: 4000, measure_calls: 40000, presentations: 4000, paint_passes: 4000, exact_updates: 0, coarse_updates: 4000 }",
+      "cpu": {
+        "0.5": 609806.38,
+        "0.95": 707918.53,
+        "0.99": 792362.94
+      },
+      "wall": {
+        "0.5": 610042.12,
+        "0.95": 707938.99,
+        "0.99": 792386.78
+      }
+    },
+    {
+      "repeat": 0,
+      "case": "40-4-owner",
+      "variant": "control",
+      "final": "FINAL,pixel_hash=4997533096679380941,source_epoch=4200",
+      "counters": "COUNTERS,Counters { owner_reruns: 4000, descriptions: 4000, source_operations: 4000, source_reads: 0, destination_compares: 4192000, text_promotions: 20000, text_bytes_copied: 160005, layout_runs: 4000, measure_calls: 40000, presentations: 4000, paint_passes: 4000, exact_updates: 0, coarse_updates: 4000 }",
+      "cpu": {
+        "0.5": 576514.28,
+        "0.95": 602097.37,
+        "0.99": 634557.99
+      },
+      "wall": {
+        "0.5": 576525.83,
+        "0.95": 602196.98,
+        "0.99": 634568.91
+      }
+    },
+    {
+      "repeat": 0,
+      "case": "0-4-opaque",
+      "variant": "control",
+      "final": "FINAL,pixel_hash=14428137562740546882,source_epoch=4200",
+      "counters": "COUNTERS,Counters { owner_reruns: 4000, descriptions: 4000, source_operations: 4000, source_reads: 0, destination_compares: 28000, text_promotions: 16000, text_bytes_copied: 108804, layout_runs: 4000, measure_calls: 32000, presentations: 4000, paint_passes: 4000, exact_updates: 0, coarse_updates: 4000 }",
+      "cpu": {
+        "0.5": 55412.44,
+        "0.95": 56560.2,
+        "0.99": 57501.28
+      },
+      "wall": {
+        "0.5": 55414.85,
+        "0.95": 56562.18,
+        "0.99": 57505.97
+      }
+    },
+    {
+      "repeat": 0,
+      "case": "0-4-opaque",
+      "variant": "candidate",
+      "final": "FINAL,pixel_hash=14428137562740546882,source_epoch=4200",
+      "counters": "COUNTERS,Counters { owner_reruns: 4000, descriptions: 4000, source_operations: 4000, source_reads: 0, destination_compares: 28000, text_promotions: 16000, text_bytes_copied: 108804, layout_runs: 4000, measure_calls: 32000, presentations: 4000, paint_passes: 4000, exact_updates: 0, coarse_updates: 4000 }",
+      "cpu": {
+        "0.5": 56948.53,
+        "0.95": 70246.18,
+        "0.99": 80052.54
+      },
+      "wall": {
+        "0.5": 56964.24,
+        "0.95": 70263.45,
+        "0.99": 80071.17
+      }
+    },
+    {
+      "repeat": 0,
+      "case": "1-4-opaque",
+      "variant": "candidate",
+      "final": "FINAL,pixel_hash=5621740597739618968,source_epoch=4200",
+      "counters": "COUNTERS,Counters { owner_reruns: 4000, descriptions: 4000, source_operations: 4000, source_reads: 0, destination_compares: 132000, text_promotions: 16000, text_bytes_copied: 108804, layout_runs: 4000, measure_calls: 32000, presentations: 4000, paint_passes: 4000, exact_updates: 0, coarse_updates: 4000 }",
+      "cpu": {
+        "0.5": 68804.07,
+        "0.95": 76216.02,
+        "0.99": 77430.8
+      },
+      "wall": {
+        "0.5": 68810.11,
+        "0.95": 76233.46,
+        "0.99": 77438.12
+      }
+    },
+    {
+      "repeat": 0,
+      "case": "1-4-opaque",
+      "variant": "control",
+      "final": "FINAL,pixel_hash=5621740597739618968,source_epoch=4200",
+      "counters": "COUNTERS,Counters { owner_reruns: 4000, descriptions: 4000, source_operations: 4000, source_reads: 0, destination_compares: 132000, text_promotions: 16000, text_bytes_copied: 108804, layout_runs: 4000, measure_calls: 32000, presentations: 4000, paint_passes: 4000, exact_updates: 0, coarse_updates: 4000 }",
+      "cpu": {
+        "0.5": 69869.57,
+        "0.95": 80398.89,
+        "0.99": 90730.75
+      },
+      "wall": {
+        "0.5": 69880.82,
+        "0.95": 80824.18,
+        "0.99": 90811.87
+      }
+    },
+    {
+      "repeat": 0,
+      "case": "40-4-opaque",
+      "variant": "control",
+      "final": "FINAL,pixel_hash=15188321811029023333,source_epoch=4200",
+      "counters": "COUNTERS,Counters { owner_reruns: 4000, descriptions: 4000, source_operations: 4000, source_reads: 0, destination_compares: 4188000, text_promotions: 16000, text_bytes_copied: 108804, layout_runs: 4000, measure_calls: 32000, presentations: 4000, paint_passes: 4000, exact_updates: 0, coarse_updates: 4000 }",
+      "cpu": {
+        "0.5": 620800.48,
+        "0.95": 655790.77,
+        "0.99": 707260.89
+      },
+      "wall": {
+        "0.5": 620812.26,
+        "0.95": 655828.46,
+        "0.99": 707278.76
+      }
+    },
+    {
+      "repeat": 0,
+      "case": "40-4-opaque",
+      "variant": "candidate",
+      "final": "FINAL,pixel_hash=15188321811029023333,source_epoch=4200",
+      "counters": "COUNTERS,Counters { owner_reruns: 4000, descriptions: 4000, source_operations: 4000, source_reads: 0, destination_compares: 4188000, text_promotions: 16000, text_bytes_copied: 108804, layout_runs: 4000, measure_calls: 32000, presentations: 4000, paint_passes: 4000, exact_updates: 0, coarse_updates: 4000 }",
+      "cpu": {
+        "0.5": 610234.89,
+        "0.95": 659251.58,
+        "0.99": 672929.45
+      },
+      "wall": {
+        "0.5": 610247.71,
+        "0.95": 659266.93,
+        "0.99": 672958.14
+      }
+    },
+    {
+      "repeat": 1,
+      "case": "0-1-exact",
+      "variant": "candidate",
+      "final": "FINAL,pixel_hash=3067612491809559190,source_epoch=4200",
+      "counters": "COUNTERS,Counters { owner_reruns: 0, descriptions: 0, source_operations: 4000, source_reads: 4000, destination_compares: 4000, text_promotions: 4000, text_bytes_copied: 27201, layout_runs: 4000, measure_calls: 8000, presentations: 4000, paint_passes: 4000, exact_updates: 4000, coarse_updates: 0 }",
+      "cpu": {
+        "0.5": 16307.61,
+        "0.95": 20885.23,
+        "0.99": 28252.9
+      },
+      "wall": {
+        "0.5": 16309.15,
+        "0.95": 20896.07,
+        "0.99": 28264.61
+      }
+    },
+    {
+      "repeat": 1,
+      "case": "0-1-exact",
+      "variant": "control",
+      "final": "FINAL,pixel_hash=3067612491809559190,source_epoch=4200",
+      "counters": "COUNTERS,Counters { owner_reruns: 0, descriptions: 0, source_operations: 4000, source_reads: 4000, destination_compares: 4000, text_promotions: 4000, text_bytes_copied: 27201, layout_runs: 4000, measure_calls: 8000, presentations: 4000, paint_passes: 4000, exact_updates: 4000, coarse_updates: 0 }",
+      "cpu": {
+        "0.5": 16965.75,
+        "0.95": 21924.39,
+        "0.99": 26411.74
+      },
+      "wall": {
+        "0.5": 16971.81,
+        "0.95": 21929.6,
+        "0.99": 26418.85
+      }
+    },
+    {
+      "repeat": 1,
+      "case": "0-2-exact",
+      "variant": "control",
+      "final": "FINAL,pixel_hash=8784640471098581594,source_epoch=4200",
+      "counters": "COUNTERS,Counters { owner_reruns: 0, descriptions: 0, source_operations: 4000, source_reads: 8000, destination_compares: 8000, text_promotions: 8000, text_bytes_copied: 54402, layout_runs: 4000, measure_calls: 16000, presentations: 4000, paint_passes: 4000, exact_updates: 4000, coarse_updates: 0 }",
+      "cpu": {
+        "0.5": 29552.44,
+        "0.95": 31359.05,
+        "0.99": 32407.62
+      },
+      "wall": {
+        "0.5": 29555.25,
+        "0.95": 31366.74,
+        "0.99": 32412.22
+      }
+    },
+    {
+      "repeat": 1,
+      "case": "0-2-exact",
+      "variant": "candidate",
+      "final": "FINAL,pixel_hash=8784640471098581594,source_epoch=4200",
+      "counters": "COUNTERS,Counters { owner_reruns: 0, descriptions: 0, source_operations: 4000, source_reads: 8000, destination_compares: 8000, text_promotions: 8000, text_bytes_copied: 54402, layout_runs: 4000, measure_calls: 16000, presentations: 4000, paint_passes: 4000, exact_updates: 4000, coarse_updates: 0 }",
+      "cpu": {
+        "0.5": 30123.82,
+        "0.95": 44898.64,
+        "0.99": 50869.08
+      },
+      "wall": {
+        "0.5": 30128.12,
+        "0.95": 44911.39,
+        "0.99": 50890.24
+      }
+    },
+    {
+      "repeat": 1,
+      "case": "0-4-exact",
+      "variant": "candidate",
+      "final": "FINAL,pixel_hash=14428137562740546882,source_epoch=4200",
+      "counters": "COUNTERS,Counters { owner_reruns: 0, descriptions: 0, source_operations: 4000, source_reads: 16000, destination_compares: 16000, text_promotions: 16000, text_bytes_copied: 108804, layout_runs: 4000, measure_calls: 32000, presentations: 4000, paint_passes: 4000, exact_updates: 4000, coarse_updates: 0 }",
+      "cpu": {
+        "0.5": 57334.47,
+        "0.95": 62336.08,
+        "0.99": 69776.89
+      },
+      "wall": {
+        "0.5": 57362.52,
+        "0.95": 62362.59,
+        "0.99": 69798.87
+      }
+    },
+    {
+      "repeat": 1,
+      "case": "0-4-exact",
+      "variant": "control",
+      "final": "FINAL,pixel_hash=14428137562740546882,source_epoch=4200",
+      "counters": "COUNTERS,Counters { owner_reruns: 0, descriptions: 0, source_operations: 4000, source_reads: 16000, destination_compares: 16000, text_promotions: 16000, text_bytes_copied: 108804, layout_runs: 4000, measure_calls: 32000, presentations: 4000, paint_passes: 4000, exact_updates: 4000, coarse_updates: 0 }",
+      "cpu": {
+        "0.5": 55217.47,
+        "0.95": 66854.19,
+        "0.99": 69227.36
+      },
+      "wall": {
+        "0.5": 55219.88,
+        "0.95": 66866.86,
+        "0.99": 69245.53
+      }
+    },
+    {
+      "repeat": 1,
+      "case": "0-1-owner",
+      "variant": "control",
+      "final": "FINAL,pixel_hash=1209351341388854458,source_epoch=4200",
+      "counters": "COUNTERS,Counters { owner_reruns: 4000, descriptions: 4000, source_operations: 4000, source_reads: 0, destination_compares: 32000, text_promotions: 8000, text_bytes_copied: 78402, layout_runs: 4000, measure_calls: 16000, presentations: 4000, paint_passes: 4000, exact_updates: 0, coarse_updates: 4000 }",
+      "cpu": {
+        "0.5": 24907.4,
+        "0.95": 29621.99,
+        "0.99": 33734.41
+      },
+      "wall": {
+        "0.5": 24909.31,
+        "0.95": 29626.77,
+        "0.99": 33740.1
+      }
+    },
+    {
+      "repeat": 1,
+      "case": "0-1-owner",
+      "variant": "candidate",
+      "final": "FINAL,pixel_hash=1209351341388854458,source_epoch=4200",
+      "counters": "COUNTERS,Counters { owner_reruns: 4000, descriptions: 4000, source_operations: 4000, source_reads: 0, destination_compares: 32000, text_promotions: 8000, text_bytes_copied: 78402, layout_runs: 4000, measure_calls: 16000, presentations: 4000, paint_passes: 4000, exact_updates: 0, coarse_updates: 4000 }",
+      "cpu": {
+        "0.5": 25024.02,
+        "0.95": 29766.05,
+        "0.99": 39709.98
+      },
+      "wall": {
+        "0.5": 25026.52,
+        "0.95": 29768.44,
+        "0.99": 39716.84
+      }
+    },
+    {
+      "repeat": 1,
+      "case": "0-2-owner",
+      "variant": "candidate",
+      "final": "FINAL,pixel_hash=3529418378583843142,source_epoch=4200",
+      "counters": "COUNTERS,Counters { owner_reruns: 4000, descriptions: 4000, source_operations: 4000, source_reads: 0, destination_compares: 32000, text_promotions: 12000, text_bytes_copied: 105603, layout_runs: 4000, measure_calls: 24000, presentations: 4000, paint_passes: 4000, exact_updates: 0, coarse_updates: 4000 }",
+      "cpu": {
+        "0.5": 38678.22,
+        "0.95": 47506.95,
+        "0.99": 51814.47
+      },
+      "wall": {
+        "0.5": 38681.29,
+        "0.95": 47517.29,
+        "0.99": 51823.29
+      }
+    },
+    {
+      "repeat": 1,
+      "case": "0-2-owner",
+      "variant": "control",
+      "final": "FINAL,pixel_hash=3529418378583843142,source_epoch=4200",
+      "counters": "COUNTERS,Counters { owner_reruns: 4000, descriptions: 4000, source_operations: 4000, source_reads: 0, destination_compares: 32000, text_promotions: 12000, text_bytes_copied: 105603, layout_runs: 4000, measure_calls: 24000, presentations: 4000, paint_passes: 4000, exact_updates: 0, coarse_updates: 4000 }",
+      "cpu": {
+        "0.5": 38825.3,
+        "0.95": 47777.17,
+        "0.99": 51280.96
+      },
+      "wall": {
+        "0.5": 38837.47,
+        "0.95": 47787.8,
+        "0.99": 51293.69
+      }
+    },
+    {
+      "repeat": 1,
+      "case": "0-4-owner",
+      "variant": "control",
+      "final": "FINAL,pixel_hash=17102854550306425806,source_epoch=4200",
+      "counters": "COUNTERS,Counters { owner_reruns: 4000, descriptions: 4000, source_operations: 4000, source_reads: 0, destination_compares: 32000, text_promotions: 20000, text_bytes_copied: 160005, layout_runs: 4000, measure_calls: 40000, presentations: 4000, paint_passes: 4000, exact_updates: 0, coarse_updates: 4000 }",
+      "cpu": {
+        "0.5": 69097.41,
+        "0.95": 79912.57,
+        "0.99": 82176.54
+      },
+      "wall": {
+        "0.5": 69119.79,
+        "0.95": 79925.8,
+        "0.99": 82195.77
+      }
+    },
+    {
+      "repeat": 1,
+      "case": "0-4-owner",
+      "variant": "candidate",
+      "final": "FINAL,pixel_hash=17102854550306425806,source_epoch=4200",
+      "counters": "COUNTERS,Counters { owner_reruns: 4000, descriptions: 4000, source_operations: 4000, source_reads: 0, destination_compares: 32000, text_promotions: 20000, text_bytes_copied: 160005, layout_runs: 4000, measure_calls: 40000, presentations: 4000, paint_passes: 4000, exact_updates: 0, coarse_updates: 4000 }",
+      "cpu": {
+        "0.5": 64627.19,
+        "0.95": 77263.79,
+        "0.99": 87806.74
+      },
+      "wall": {
+        "0.5": 64634.66,
+        "0.95": 77292.36,
+        "0.99": 87821.44
+      }
+    },
+    {
+      "repeat": 1,
+      "case": "1-1-exact",
+      "variant": "candidate",
+      "final": "FINAL,pixel_hash=8866289588925863500,source_epoch=4200",
+      "counters": "COUNTERS,Counters { owner_reruns: 0, descriptions: 0, source_operations: 4000, source_reads: 4000, destination_compares: 4000, text_promotions: 4000, text_bytes_copied: 27201, layout_runs: 4000, measure_calls: 8000, presentations: 4000, paint_passes: 4000, exact_updates: 4000, coarse_updates: 0 }",
+      "cpu": {
+        "0.5": 14508.03,
+        "0.95": 15979.99,
+        "0.99": 17133.86
+      },
+      "wall": {
+        "0.5": 14585.33,
+        "0.95": 15991.25,
+        "0.99": 17152.24
+      }
+    },
+    {
+      "repeat": 1,
+      "case": "1-1-exact",
+      "variant": "control",
+      "final": "FINAL,pixel_hash=8866289588925863500,source_epoch=4200",
+      "counters": "COUNTERS,Counters { owner_reruns: 0, descriptions: 0, source_operations: 4000, source_reads: 4000, destination_compares: 4000, text_promotions: 4000, text_bytes_copied: 27201, layout_runs: 4000, measure_calls: 8000, presentations: 4000, paint_passes: 4000, exact_updates: 4000, coarse_updates: 0 }",
+      "cpu": {
+        "0.5": 14791.15,
+        "0.95": 17977.96,
+        "0.99": 19516.15
+      },
+      "wall": {
+        "0.5": 14793.59,
+        "0.95": 17986.81,
+        "0.99": 19528.1
+      }
+    },
+    {
+      "repeat": 1,
+      "case": "1-2-exact",
+      "variant": "control",
+      "final": "FINAL,pixel_hash=9269140401638406208,source_epoch=4200",
+      "counters": "COUNTERS,Counters { owner_reruns: 0, descriptions: 0, source_operations: 4000, source_reads: 8000, destination_compares: 8000, text_promotions: 8000, text_bytes_copied: 54402, layout_runs: 4000, measure_calls: 16000, presentations: 4000, paint_passes: 4000, exact_updates: 4000, coarse_updates: 0 }",
+      "cpu": {
+        "0.5": 40049.51,
+        "0.95": 44369.95,
+        "0.99": 46978.66
+      },
+      "wall": {
+        "0.5": 40055.26,
+        "0.95": 44375.18,
+        "0.99": 46985.81
+      }
+    },
+    {
+      "repeat": 1,
+      "case": "1-2-exact",
+      "variant": "candidate",
+      "final": "FINAL,pixel_hash=9269140401638406208,source_epoch=4200",
+      "counters": "COUNTERS,Counters { owner_reruns: 0, descriptions: 0, source_operations: 4000, source_reads: 8000, destination_compares: 8000, text_promotions: 8000, text_bytes_copied: 54402, layout_runs: 4000, measure_calls: 16000, presentations: 4000, paint_passes: 4000, exact_updates: 4000, coarse_updates: 0 }",
+      "cpu": {
+        "0.5": 28685.82,
+        "0.95": 38133.72,
+        "0.99": 41248.37
+      },
+      "wall": {
+        "0.5": 28694.23,
+        "0.95": 38144.49,
+        "0.99": 41262.44
+      }
+    },
+    {
+      "repeat": 1,
+      "case": "1-4-exact",
+      "variant": "candidate",
+      "final": "FINAL,pixel_hash=5621740597739618968,source_epoch=4200",
+      "counters": "COUNTERS,Counters { owner_reruns: 0, descriptions: 0, source_operations: 4000, source_reads: 16000, destination_compares: 16000, text_promotions: 16000, text_bytes_copied: 108804, layout_runs: 4000, measure_calls: 32000, presentations: 4000, paint_passes: 4000, exact_updates: 4000, coarse_updates: 0 }",
+      "cpu": {
+        "0.5": 57409.9,
+        "0.95": 72632.07,
+        "0.99": 78920.81
+      },
+      "wall": {
+        "0.5": 57450.56,
+        "0.95": 72658.75,
+        "0.99": 78934.14
+      }
+    },
+    {
+      "repeat": 1,
+      "case": "1-4-exact",
+      "variant": "control",
+      "final": "FINAL,pixel_hash=5621740597739618968,source_epoch=4200",
+      "counters": "COUNTERS,Counters { owner_reruns: 0, descriptions: 0, source_operations: 4000, source_reads: 16000, destination_compares: 16000, text_promotions: 16000, text_bytes_copied: 108804, layout_runs: 4000, measure_calls: 32000, presentations: 4000, paint_passes: 4000, exact_updates: 4000, coarse_updates: 0 }",
+      "cpu": {
+        "0.5": 67267.67,
+        "0.95": 81867.86,
+        "0.99": 89629.58
+      },
+      "wall": {
+        "0.5": 67274.62,
+        "0.95": 81906.72,
+        "0.99": 89661.29
+      }
+    },
+    {
+      "repeat": 1,
+      "case": "1-1-owner",
+      "variant": "control",
+      "final": "FINAL,pixel_hash=6935651192824017056,source_epoch=4200",
+      "counters": "COUNTERS,Counters { owner_reruns: 4000, descriptions: 4000, source_operations: 4000, source_reads: 0, destination_compares: 136000, text_promotions: 8000, text_bytes_copied: 78402, layout_runs: 4000, measure_calls: 16000, presentations: 4000, paint_passes: 4000, exact_updates: 0, coarse_updates: 4000 }",
+      "cpu": {
+        "0.5": 40303.68,
+        "0.95": 47371.41,
+        "0.99": 52807.24
+      },
+      "wall": {
+        "0.5": 40311.35,
+        "0.95": 47380.83,
+        "0.99": 52818.05
+      }
+    },
+    {
+      "repeat": 1,
+      "case": "1-1-owner",
+      "variant": "candidate",
+      "final": "FINAL,pixel_hash=6935651192824017056,source_epoch=4200",
+      "counters": "COUNTERS,Counters { owner_reruns: 4000, descriptions: 4000, source_operations: 4000, source_reads: 0, destination_compares: 136000, text_promotions: 8000, text_bytes_copied: 78402, layout_runs: 4000, measure_calls: 16000, presentations: 4000, paint_passes: 4000, exact_updates: 0, coarse_updates: 4000 }",
+      "cpu": {
+        "0.5": 38966.88,
+        "0.95": 41626.58,
+        "0.99": 52044.9
+      },
+      "wall": {
+        "0.5": 38973.14,
+        "0.95": 41633.14,
+        "0.99": 52062.83
+      }
+    },
+    {
+      "repeat": 1,
+      "case": "1-2-owner",
+      "variant": "candidate",
+      "final": "FINAL,pixel_hash=7697983997524302108,source_epoch=4200",
+      "counters": "COUNTERS,Counters { owner_reruns: 4000, descriptions: 4000, source_operations: 4000, source_reads: 0, destination_compares: 136000, text_promotions: 12000, text_bytes_copied: 105603, layout_runs: 4000, measure_calls: 24000, presentations: 4000, paint_passes: 4000, exact_updates: 0, coarse_updates: 4000 }",
+      "cpu": {
+        "0.5": 52939.88,
+        "0.95": 62700.17,
+        "0.99": 70553.35
+      },
+      "wall": {
+        "0.5": 52952.51,
+        "0.95": 62713.76,
+        "0.99": 70570.43
+      }
+    },
+    {
+      "repeat": 1,
+      "case": "1-2-owner",
+      "variant": "control",
+      "final": "FINAL,pixel_hash=7697983997524302108,source_epoch=4200",
+      "counters": "COUNTERS,Counters { owner_reruns: 4000, descriptions: 4000, source_operations: 4000, source_reads: 0, destination_compares: 136000, text_promotions: 12000, text_bytes_copied: 105603, layout_runs: 4000, measure_calls: 24000, presentations: 4000, paint_passes: 4000, exact_updates: 0, coarse_updates: 4000 }",
+      "cpu": {
+        "0.5": 52614.08,
+        "0.95": 66942.86,
+        "0.99": 70160.42
+      },
+      "wall": {
+        "0.5": 52620.29,
+        "0.95": 66962.44,
+        "0.99": 70180.4
+      }
+    },
+    {
+      "repeat": 1,
+      "case": "1-4-owner",
+      "variant": "control",
+      "final": "FINAL,pixel_hash=7148476773328723988,source_epoch=4200",
+      "counters": "COUNTERS,Counters { owner_reruns: 4000, descriptions: 4000, source_operations: 4000, source_reads: 0, destination_compares: 136000, text_promotions: 20000, text_bytes_copied: 160005, layout_runs: 4000, measure_calls: 40000, presentations: 4000, paint_passes: 4000, exact_updates: 0, coarse_updates: 4000 }",
+      "cpu": {
+        "0.5": 89187.54,
+        "0.95": 101672.95,
+        "0.99": 109614.11
+      },
+      "wall": {
+        "0.5": 89202.13,
+        "0.95": 101688.3,
+        "0.99": 109647.05
+      }
+    },
+    {
+      "repeat": 1,
+      "case": "1-4-owner",
+      "variant": "candidate",
+      "final": "FINAL,pixel_hash=7148476773328723988,source_epoch=4200",
+      "counters": "COUNTERS,Counters { owner_reruns: 4000, descriptions: 4000, source_operations: 4000, source_reads: 0, destination_compares: 136000, text_promotions: 20000, text_bytes_copied: 160005, layout_runs: 4000, measure_calls: 40000, presentations: 4000, paint_passes: 4000, exact_updates: 0, coarse_updates: 4000 }",
+      "cpu": {
+        "0.5": 83327.0,
+        "0.95": 97466.73,
+        "0.99": 101468.07
+      },
+      "wall": {
+        "0.5": 83342.22,
+        "0.95": 97481.5,
+        "0.99": 101488.82
+      }
+    },
+    {
+      "repeat": 1,
+      "case": "40-1-exact",
+      "variant": "candidate",
+      "final": "FINAL,pixel_hash=10648945254885490729,source_epoch=4200",
+      "counters": "COUNTERS,Counters { owner_reruns: 0, descriptions: 0, source_operations: 4000, source_reads: 4000, destination_compares: 4000, text_promotions: 4000, text_bytes_copied: 27201, layout_runs: 4000, measure_calls: 8000, presentations: 4000, paint_passes: 4000, exact_updates: 4000, coarse_updates: 0 }",
+      "cpu": {
+        "0.5": 15613.7,
+        "0.95": 17054.62,
+        "0.99": 19568.25
+      },
+      "wall": {
+        "0.5": 15617.86,
+        "0.95": 17063.06,
+        "0.99": 19577.3
+      }
+    },
+    {
+      "repeat": 1,
+      "case": "40-1-exact",
+      "variant": "control",
+      "final": "FINAL,pixel_hash=10648945254885490729,source_epoch=4200",
+      "counters": "COUNTERS,Counters { owner_reruns: 0, descriptions: 0, source_operations: 4000, source_reads: 4000, destination_compares: 4000, text_promotions: 4000, text_bytes_copied: 27201, layout_runs: 4000, measure_calls: 8000, presentations: 4000, paint_passes: 4000, exact_updates: 4000, coarse_updates: 0 }",
+      "cpu": {
+        "0.5": 15026.5,
+        "0.95": 21770.9,
+        "0.99": 28162.94
+      },
+      "wall": {
+        "0.5": 15033.75,
+        "0.95": 21798.38,
+        "0.99": 28173.44
+      }
+    },
+    {
+      "repeat": 1,
+      "case": "40-2-exact",
+      "variant": "control",
+      "final": "FINAL,pixel_hash=9975236451948260733,source_epoch=4200",
+      "counters": "COUNTERS,Counters { owner_reruns: 0, descriptions: 0, source_operations: 4000, source_reads: 8000, destination_compares: 8000, text_promotions: 8000, text_bytes_copied: 54402, layout_runs: 4000, measure_calls: 16000, presentations: 4000, paint_passes: 4000, exact_updates: 4000, coarse_updates: 0 }",
+      "cpu": {
+        "0.5": 449441.01,
+        "0.95": 483217.21,
+        "0.99": 498933.3
+      },
+      "wall": {
+        "0.5": 449462.65,
+        "0.95": 483236.12,
+        "0.99": 499070.08
+      }
+    },
+    {
+      "repeat": 1,
+      "case": "40-2-exact",
+      "variant": "candidate",
+      "final": "FINAL,pixel_hash=9975236451948260733,source_epoch=4200",
+      "counters": "COUNTERS,Counters { owner_reruns: 0, descriptions: 0, source_operations: 4000, source_reads: 8000, destination_compares: 8000, text_promotions: 8000, text_bytes_copied: 54402, layout_runs: 4000, measure_calls: 16000, presentations: 4000, paint_passes: 4000, exact_updates: 4000, coarse_updates: 0 }",
+      "cpu": {
+        "0.5": 29659.24,
+        "0.95": 34651.04,
+        "0.99": 46687.81
+      },
+      "wall": {
+        "0.5": 29669.05,
+        "0.95": 34658.63,
+        "0.99": 46694.95
+      }
+    },
+    {
+      "repeat": 1,
+      "case": "40-4-exact",
+      "variant": "candidate",
+      "final": "FINAL,pixel_hash=15188321811029023333,source_epoch=4200",
+      "counters": "COUNTERS,Counters { owner_reruns: 0, descriptions: 0, source_operations: 4000, source_reads: 16000, destination_compares: 16000, text_promotions: 16000, text_bytes_copied: 108804, layout_runs: 4000, measure_calls: 32000, presentations: 4000, paint_passes: 4000, exact_updates: 4000, coarse_updates: 0 }",
+      "cpu": {
+        "0.5": 57202.3,
+        "0.95": 69541.14,
+        "0.99": 99212.23
+      },
+      "wall": {
+        "0.5": 57208.0,
+        "0.95": 69549.9,
+        "0.99": 99234.8
+      }
+    },
+    {
+      "repeat": 1,
+      "case": "40-4-exact",
+      "variant": "control",
+      "final": "FINAL,pixel_hash=15188321811029023333,source_epoch=4200",
+      "counters": "COUNTERS,Counters { owner_reruns: 0, descriptions: 0, source_operations: 4000, source_reads: 16000, destination_compares: 16000, text_promotions: 16000, text_bytes_copied: 108804, layout_runs: 4000, measure_calls: 32000, presentations: 4000, paint_passes: 4000, exact_updates: 4000, coarse_updates: 0 }",
+      "cpu": {
+        "0.5": 486981.4,
+        "0.95": 524925.75,
+        "0.99": 544410.04
+      },
+      "wall": {
+        "0.5": 486998.69,
+        "0.95": 524944.49,
+        "0.99": 544429.41
+      }
+    },
+    {
+      "repeat": 1,
+      "case": "40-1-owner",
+      "variant": "control",
+      "final": "FINAL,pixel_hash=3242345613451522353,source_epoch=4200",
+      "counters": "COUNTERS,Counters { owner_reruns: 4000, descriptions: 4000, source_operations: 4000, source_reads: 0, destination_compares: 4192000, text_promotions: 8000, text_bytes_copied: 78402, layout_runs: 4000, measure_calls: 16000, presentations: 4000, paint_passes: 4000, exact_updates: 0, coarse_updates: 4000 }",
+      "cpu": {
+        "0.5": 614851.18,
+        "0.95": 690857.09,
+        "0.99": 750895.85
+      },
+      "wall": {
+        "0.5": 615061.24,
+        "0.95": 690874.12,
+        "0.99": 750910.54
+      }
+    },
+    {
+      "repeat": 1,
+      "case": "40-1-owner",
+      "variant": "candidate",
+      "final": "FINAL,pixel_hash=3242345613451522353,source_epoch=4200",
+      "counters": "COUNTERS,Counters { owner_reruns: 4000, descriptions: 4000, source_operations: 4000, source_reads: 0, destination_compares: 4192000, text_promotions: 8000, text_bytes_copied: 78402, layout_runs: 4000, measure_calls: 16000, presentations: 4000, paint_passes: 4000, exact_updates: 0, coarse_updates: 4000 }",
+      "cpu": {
+        "0.5": 596941.25,
+        "0.95": 641765.57,
+        "0.99": 651104.24
+      },
+      "wall": {
+        "0.5": 597120.43,
+        "0.95": 642327.29,
+        "0.99": 651128.03
+      }
+    },
+    {
+      "repeat": 1,
+      "case": "40-2-owner",
+      "variant": "candidate",
+      "final": "FINAL,pixel_hash=13881385024434524213,source_epoch=4200",
+      "counters": "COUNTERS,Counters { owner_reruns: 4000, descriptions: 4000, source_operations: 4000, source_reads: 0, destination_compares: 4192000, text_promotions: 12000, text_bytes_copied: 105603, layout_runs: 4000, measure_calls: 24000, presentations: 4000, paint_passes: 4000, exact_updates: 0, coarse_updates: 4000 }",
+      "cpu": {
+        "0.5": 563504.7,
+        "0.95": 605282.16,
+        "0.99": 652997.52
+      },
+      "wall": {
+        "0.5": 563518.08,
+        "0.95": 605466.52,
+        "0.99": 653008.76
+      }
+    },
+    {
+      "repeat": 1,
+      "case": "40-2-owner",
+      "variant": "control",
+      "final": "FINAL,pixel_hash=13881385024434524213,source_epoch=4200",
+      "counters": "COUNTERS,Counters { owner_reruns: 4000, descriptions: 4000, source_operations: 4000, source_reads: 0, destination_compares: 4192000, text_promotions: 12000, text_bytes_copied: 105603, layout_runs: 4000, measure_calls: 24000, presentations: 4000, paint_passes: 4000, exact_updates: 0, coarse_updates: 4000 }",
+      "cpu": {
+        "0.5": 595938.76,
+        "0.95": 626635.17,
+        "0.99": 683834.49
+      },
+      "wall": {
+        "0.5": 596081.08,
+        "0.95": 626746.41,
+        "0.99": 684026.05
+      }
+    },
+    {
+      "repeat": 1,
+      "case": "40-4-owner",
+      "variant": "control",
+      "final": "FINAL,pixel_hash=4997533096679380941,source_epoch=4200",
+      "counters": "COUNTERS,Counters { owner_reruns: 4000, descriptions: 4000, source_operations: 4000, source_reads: 0, destination_compares: 4192000, text_promotions: 20000, text_bytes_copied: 160005, layout_runs: 4000, measure_calls: 40000, presentations: 4000, paint_passes: 4000, exact_updates: 0, coarse_updates: 4000 }",
+      "cpu": {
+        "0.5": 604679.23,
+        "0.95": 735502.47,
+        "0.99": 745688.55
+      },
+      "wall": {
+        "0.5": 604715.01,
+        "0.95": 735521.72,
+        "0.99": 745710.16
+      }
+    },
+    {
+      "repeat": 1,
+      "case": "40-4-owner",
+      "variant": "candidate",
+      "final": "FINAL,pixel_hash=4997533096679380941,source_epoch=4200",
+      "counters": "COUNTERS,Counters { owner_reruns: 4000, descriptions: 4000, source_operations: 4000, source_reads: 0, destination_compares: 4192000, text_promotions: 20000, text_bytes_copied: 160005, layout_runs: 4000, measure_calls: 40000, presentations: 4000, paint_passes: 4000, exact_updates: 0, coarse_updates: 4000 }",
+      "cpu": {
+        "0.5": 639753.98,
+        "0.95": 671832.68,
+        "0.99": 722717.19
+      },
+      "wall": {
+        "0.5": 639765.77,
+        "0.95": 671880.42,
+        "0.99": 722739.0
+      }
+    },
+    {
+      "repeat": 1,
+      "case": "0-4-opaque",
+      "variant": "candidate",
+      "final": "FINAL,pixel_hash=14428137562740546882,source_epoch=4200",
+      "counters": "COUNTERS,Counters { owner_reruns: 4000, descriptions: 4000, source_operations: 4000, source_reads: 0, destination_compares: 28000, text_promotions: 16000, text_bytes_copied: 108804, layout_runs: 4000, measure_calls: 32000, presentations: 4000, paint_passes: 4000, exact_updates: 0, coarse_updates: 4000 }",
+      "cpu": {
+        "0.5": 61979.41,
+        "0.95": 70538.92,
+        "0.99": 76267.61
+      },
+      "wall": {
+        "0.5": 62026.05,
+        "0.95": 70566.11,
+        "0.99": 76384.65
+      }
+    },
+    {
+      "repeat": 1,
+      "case": "0-4-opaque",
+      "variant": "control",
+      "final": "FINAL,pixel_hash=14428137562740546882,source_epoch=4200",
+      "counters": "COUNTERS,Counters { owner_reruns: 4000, descriptions: 4000, source_operations: 4000, source_reads: 0, destination_compares: 28000, text_promotions: 16000, text_bytes_copied: 108804, layout_runs: 4000, measure_calls: 32000, presentations: 4000, paint_passes: 4000, exact_updates: 0, coarse_updates: 4000 }",
+      "cpu": {
+        "0.5": 59090.57,
+        "0.95": 69521.31,
+        "0.99": 70469.39
+      },
+      "wall": {
+        "0.5": 59094.75,
+        "0.95": 69544.09,
+        "0.99": 70479.24
+      }
+    },
+    {
+      "repeat": 1,
+      "case": "1-4-opaque",
+      "variant": "control",
+      "final": "FINAL,pixel_hash=5621740597739618968,source_epoch=4200",
+      "counters": "COUNTERS,Counters { owner_reruns: 4000, descriptions: 4000, source_operations: 4000, source_reads: 0, destination_compares: 132000, text_promotions: 16000, text_bytes_copied: 108804, layout_runs: 4000, measure_calls: 32000, presentations: 4000, paint_passes: 4000, exact_updates: 0, coarse_updates: 4000 }",
+      "cpu": {
+        "0.5": 72470.36,
+        "0.95": 81047.22,
+        "0.99": 88157.9
+      },
+      "wall": {
+        "0.5": 72482.92,
+        "0.95": 81065.05,
+        "0.99": 88178.0
+      }
+    },
+    {
+      "repeat": 1,
+      "case": "1-4-opaque",
+      "variant": "candidate",
+      "final": "FINAL,pixel_hash=5621740597739618968,source_epoch=4200",
+      "counters": "COUNTERS,Counters { owner_reruns: 4000, descriptions: 4000, source_operations: 4000, source_reads: 0, destination_compares: 132000, text_promotions: 16000, text_bytes_copied: 108804, layout_runs: 4000, measure_calls: 32000, presentations: 4000, paint_passes: 4000, exact_updates: 0, coarse_updates: 4000 }",
+      "cpu": {
+        "0.5": 75264.73,
+        "0.95": 83789.59,
+        "0.99": 88509.96
+      },
+      "wall": {
+        "0.5": 75277.35,
+        "0.95": 83798.18,
+        "0.99": 88520.85
+      }
+    },
+    {
+      "repeat": 1,
+      "case": "40-4-opaque",
+      "variant": "candidate",
+      "final": "FINAL,pixel_hash=15188321811029023333,source_epoch=4200",
+      "counters": "COUNTERS,Counters { owner_reruns: 4000, descriptions: 4000, source_operations: 4000, source_reads: 0, destination_compares: 4188000, text_promotions: 16000, text_bytes_copied: 108804, layout_runs: 4000, measure_calls: 32000, presentations: 4000, paint_passes: 4000, exact_updates: 0, coarse_updates: 4000 }",
+      "cpu": {
+        "0.5": 628031.51,
+        "0.95": 672139.76,
+        "0.99": 711637.72
+      },
+      "wall": {
+        "0.5": 628242.62,
+        "0.95": 672171.97,
+        "0.99": 711657.48
+      }
+    },
+    {
+      "repeat": 1,
+      "case": "40-4-opaque",
+      "variant": "control",
+      "final": "FINAL,pixel_hash=15188321811029023333,source_epoch=4200",
+      "counters": "COUNTERS,Counters { owner_reruns: 4000, descriptions: 4000, source_operations: 4000, source_reads: 0, destination_compares: 4188000, text_promotions: 16000, text_bytes_copied: 108804, layout_runs: 4000, measure_calls: 32000, presentations: 4000, paint_passes: 4000, exact_updates: 0, coarse_updates: 4000 }",
+      "cpu": {
+        "0.5": 629481.32,
+        "0.95": 666796.39,
+        "0.99": 674596.18
+      },
+      "wall": {
+        "0.5": 629494.06,
+        "0.95": 667135.1,
+        "0.99": 674627.59
+      }
+    },
+    {
+      "repeat": 2,
+      "case": "0-1-exact",
+      "variant": "control",
+      "final": "FINAL,pixel_hash=3067612491809559190,source_epoch=4200",
+      "counters": "COUNTERS,Counters { owner_reruns: 0, descriptions: 0, source_operations: 4000, source_reads: 4000, destination_compares: 4000, text_promotions: 4000, text_bytes_copied: 27201, layout_runs: 4000, measure_calls: 8000, presentations: 4000, paint_passes: 4000, exact_updates: 4000, coarse_updates: 0 }",
+      "cpu": {
+        "0.5": 16805.15,
+        "0.95": 20470.74,
+        "0.99": 23048.81
+      },
+      "wall": {
+        "0.5": 16808.88,
+        "0.95": 20482.29,
+        "0.99": 23052.42
+      }
+    },
+    {
+      "repeat": 2,
+      "case": "0-1-exact",
+      "variant": "candidate",
+      "final": "FINAL,pixel_hash=3067612491809559190,source_epoch=4200",
+      "counters": "COUNTERS,Counters { owner_reruns: 0, descriptions: 0, source_operations: 4000, source_reads: 4000, destination_compares: 4000, text_promotions: 4000, text_bytes_copied: 27201, layout_runs: 4000, measure_calls: 8000, presentations: 4000, paint_passes: 4000, exact_updates: 4000, coarse_updates: 0 }",
+      "cpu": {
+        "0.5": 17489.43,
+        "0.95": 20526.25,
+        "0.99": 22809.35
+      },
+      "wall": {
+        "0.5": 17537.56,
+        "0.95": 20536.4,
+        "0.99": 22818.89
+      }
+    },
+    {
+      "repeat": 2,
+      "case": "0-2-exact",
+      "variant": "candidate",
+      "final": "FINAL,pixel_hash=8784640471098581594,source_epoch=4200",
+      "counters": "COUNTERS,Counters { owner_reruns: 0, descriptions: 0, source_operations: 4000, source_reads: 8000, destination_compares: 8000, text_promotions: 8000, text_bytes_copied: 54402, layout_runs: 4000, measure_calls: 16000, presentations: 4000, paint_passes: 4000, exact_updates: 4000, coarse_updates: 0 }",
+      "cpu": {
+        "0.5": 30334.23,
+        "0.95": 33014.56,
+        "0.99": 34215.83
+      },
+      "wall": {
+        "0.5": 30339.63,
+        "0.95": 33033.57,
+        "0.99": 34232.03
+      }
+    },
+    {
+      "repeat": 2,
+      "case": "0-2-exact",
+      "variant": "control",
+      "final": "FINAL,pixel_hash=8784640471098581594,source_epoch=4200",
+      "counters": "COUNTERS,Counters { owner_reruns: 0, descriptions: 0, source_operations: 4000, source_reads: 8000, destination_compares: 8000, text_promotions: 8000, text_bytes_copied: 54402, layout_runs: 4000, measure_calls: 16000, presentations: 4000, paint_passes: 4000, exact_updates: 4000, coarse_updates: 0 }",
+      "cpu": {
+        "0.5": 29362.19,
+        "0.95": 32990.21,
+        "0.99": 40360.49
+      },
+      "wall": {
+        "0.5": 29367.69,
+        "0.95": 32996.0,
+        "0.99": 40371.57
+      }
+    },
+    {
+      "repeat": 2,
+      "case": "0-4-exact",
+      "variant": "control",
+      "final": "FINAL,pixel_hash=14428137562740546882,source_epoch=4200",
+      "counters": "COUNTERS,Counters { owner_reruns: 0, descriptions: 0, source_operations: 4000, source_reads: 16000, destination_compares: 16000, text_promotions: 16000, text_bytes_copied: 108804, layout_runs: 4000, measure_calls: 32000, presentations: 4000, paint_passes: 4000, exact_updates: 4000, coarse_updates: 0 }",
+      "cpu": {
+        "0.5": 56429.46,
+        "0.95": 69759.06,
+        "0.99": 72092.65
+      },
+      "wall": {
+        "0.5": 56437.76,
+        "0.95": 69802.18,
+        "0.99": 72115.82
+      }
+    },
+    {
+      "repeat": 2,
+      "case": "0-4-exact",
+      "variant": "candidate",
+      "final": "FINAL,pixel_hash=14428137562740546882,source_epoch=4200",
+      "counters": "COUNTERS,Counters { owner_reruns: 0, descriptions: 0, source_operations: 4000, source_reads: 16000, destination_compares: 16000, text_promotions: 16000, text_bytes_copied: 108804, layout_runs: 4000, measure_calls: 32000, presentations: 4000, paint_passes: 4000, exact_updates: 4000, coarse_updates: 0 }",
+      "cpu": {
+        "0.5": 61479.36,
+        "0.95": 67030.01,
+        "0.99": 70084.67
+      },
+      "wall": {
+        "0.5": 61483.84,
+        "0.95": 67039.79,
+        "0.99": 70093.43
+      }
+    },
+    {
+      "repeat": 2,
+      "case": "0-1-owner",
+      "variant": "candidate",
+      "final": "FINAL,pixel_hash=1209351341388854458,source_epoch=4200",
+      "counters": "COUNTERS,Counters { owner_reruns: 4000, descriptions: 4000, source_operations: 4000, source_reads: 0, destination_compares: 32000, text_promotions: 8000, text_bytes_copied: 78402, layout_runs: 4000, measure_calls: 16000, presentations: 4000, paint_passes: 4000, exact_updates: 0, coarse_updates: 4000 }",
+      "cpu": {
+        "0.5": 26289.0,
+        "0.95": 34984.97,
+        "0.99": 39075.88
+      },
+      "wall": {
+        "0.5": 26293.41,
+        "0.95": 34993.96,
+        "0.99": 39085.06
+      }
+    },
+    {
+      "repeat": 2,
+      "case": "0-1-owner",
+      "variant": "control",
+      "final": "FINAL,pixel_hash=1209351341388854458,source_epoch=4200",
+      "counters": "COUNTERS,Counters { owner_reruns: 4000, descriptions: 4000, source_operations: 4000, source_reads: 0, destination_compares: 32000, text_promotions: 8000, text_bytes_copied: 78402, layout_runs: 4000, measure_calls: 16000, presentations: 4000, paint_passes: 4000, exact_updates: 0, coarse_updates: 4000 }",
+      "cpu": {
+        "0.5": 27003.35,
+        "0.95": 33751.75,
+        "0.99": 36122.92
+      },
+      "wall": {
+        "0.5": 27013.17,
+        "0.95": 33912.13,
+        "0.99": 36133.4
+      }
+    },
+    {
+      "repeat": 2,
+      "case": "0-2-owner",
+      "variant": "control",
+      "final": "FINAL,pixel_hash=3529418378583843142,source_epoch=4200",
+      "counters": "COUNTERS,Counters { owner_reruns: 4000, descriptions: 4000, source_operations: 4000, source_reads: 0, destination_compares: 32000, text_promotions: 12000, text_bytes_copied: 105603, layout_runs: 4000, measure_calls: 24000, presentations: 4000, paint_passes: 4000, exact_updates: 0, coarse_updates: 4000 }",
+      "cpu": {
+        "0.5": 40183.16,
+        "0.95": 47278.62,
+        "0.99": 52800.42
+      },
+      "wall": {
+        "0.5": 40191.53,
+        "0.95": 47291.88,
+        "0.99": 52819.05
+      }
+    },
+    {
+      "repeat": 2,
+      "case": "0-2-owner",
+      "variant": "candidate",
+      "final": "FINAL,pixel_hash=3529418378583843142,source_epoch=4200",
+      "counters": "COUNTERS,Counters { owner_reruns: 4000, descriptions: 4000, source_operations: 4000, source_reads: 0, destination_compares: 32000, text_promotions: 12000, text_bytes_copied: 105603, layout_runs: 4000, measure_calls: 24000, presentations: 4000, paint_passes: 4000, exact_updates: 0, coarse_updates: 4000 }",
+      "cpu": {
+        "0.5": 40331.94,
+        "0.95": 46351.89,
+        "0.99": 60381.79
+      },
+      "wall": {
+        "0.5": 40335.7,
+        "0.95": 46370.34,
+        "0.99": 60393.89
+      }
+    },
+    {
+      "repeat": 2,
+      "case": "0-4-owner",
+      "variant": "candidate",
+      "final": "FINAL,pixel_hash=17102854550306425806,source_epoch=4200",
+      "counters": "COUNTERS,Counters { owner_reruns: 4000, descriptions: 4000, source_operations: 4000, source_reads: 0, destination_compares: 32000, text_promotions: 20000, text_bytes_copied: 160005, layout_runs: 4000, measure_calls: 40000, presentations: 4000, paint_passes: 4000, exact_updates: 0, coarse_updates: 4000 }",
+      "cpu": {
+        "0.5": 66493.81,
+        "0.95": 76465.09,
+        "0.99": 92643.44
+      },
+      "wall": {
+        "0.5": 66505.68,
+        "0.95": 76601.65,
+        "0.99": 558675.19
+      }
+    },
+    {
+      "repeat": 2,
+      "case": "0-4-owner",
+      "variant": "control",
+      "final": "FINAL,pixel_hash=17102854550306425806,source_epoch=4200",
+      "counters": "COUNTERS,Counters { owner_reruns: 4000, descriptions: 4000, source_operations: 4000, source_reads: 0, destination_compares: 32000, text_promotions: 20000, text_bytes_copied: 160005, layout_runs: 4000, measure_calls: 40000, presentations: 4000, paint_passes: 4000, exact_updates: 0, coarse_updates: 4000 }",
+      "cpu": {
+        "0.5": 67331.79,
+        "0.95": 76788.49,
+        "0.99": 80690.64
+      },
+      "wall": {
+        "0.5": 67338.63,
+        "0.95": 76797.33,
+        "0.99": 80700.95
+      }
+    },
+    {
+      "repeat": 2,
+      "case": "1-1-exact",
+      "variant": "control",
+      "final": "FINAL,pixel_hash=8866289588925863500,source_epoch=4200",
+      "counters": "COUNTERS,Counters { owner_reruns: 0, descriptions: 0, source_operations: 4000, source_reads: 4000, destination_compares: 4000, text_promotions: 4000, text_bytes_copied: 27201, layout_runs: 4000, measure_calls: 8000, presentations: 4000, paint_passes: 4000, exact_updates: 4000, coarse_updates: 0 }",
+      "cpu": {
+        "0.5": 15537.07,
+        "0.95": 18174.22,
+        "0.99": 23270.92
+      },
+      "wall": {
+        "0.5": 15548.92,
+        "0.95": 18190.39,
+        "0.99": 23278.95
+      }
+    },
+    {
+      "repeat": 2,
+      "case": "1-1-exact",
+      "variant": "candidate",
+      "final": "FINAL,pixel_hash=8866289588925863500,source_epoch=4200",
+      "counters": "COUNTERS,Counters { owner_reruns: 0, descriptions: 0, source_operations: 4000, source_reads: 4000, destination_compares: 4000, text_promotions: 4000, text_bytes_copied: 27201, layout_runs: 4000, measure_calls: 8000, presentations: 4000, paint_passes: 4000, exact_updates: 4000, coarse_updates: 0 }",
+      "cpu": {
+        "0.5": 14083.72,
+        "0.95": 17673.67,
+        "0.99": 18475.39
+      },
+      "wall": {
+        "0.5": 14085.87,
+        "0.95": 17761.67,
+        "0.99": 18480.94
+      }
+    },
+    {
+      "repeat": 2,
+      "case": "1-2-exact",
+      "variant": "candidate",
+      "final": "FINAL,pixel_hash=9269140401638406208,source_epoch=4200",
+      "counters": "COUNTERS,Counters { owner_reruns: 0, descriptions: 0, source_operations: 4000, source_reads: 8000, destination_compares: 8000, text_promotions: 8000, text_bytes_copied: 54402, layout_runs: 4000, measure_calls: 16000, presentations: 4000, paint_passes: 4000, exact_updates: 4000, coarse_updates: 0 }",
+      "cpu": {
+        "0.5": 28838.5,
+        "0.95": 35320.11,
+        "0.99": 36798.59
+      },
+      "wall": {
+        "0.5": 28841.31,
+        "0.95": 35325.99,
+        "0.99": 36808.58
+      }
+    },
+    {
+      "repeat": 2,
+      "case": "1-2-exact",
+      "variant": "control",
+      "final": "FINAL,pixel_hash=9269140401638406208,source_epoch=4200",
+      "counters": "COUNTERS,Counters { owner_reruns: 0, descriptions: 0, source_operations: 4000, source_reads: 8000, destination_compares: 8000, text_promotions: 8000, text_bytes_copied: 54402, layout_runs: 4000, measure_calls: 16000, presentations: 4000, paint_passes: 4000, exact_updates: 4000, coarse_updates: 0 }",
+      "cpu": {
+        "0.5": 40439.95,
+        "0.95": 45482.84,
+        "0.99": 48764.12
+      },
+      "wall": {
+        "0.5": 40448.33,
+        "0.95": 45501.02,
+        "0.99": 48777.27
+      }
+    },
+    {
+      "repeat": 2,
+      "case": "1-4-exact",
+      "variant": "control",
+      "final": "FINAL,pixel_hash=5621740597739618968,source_epoch=4200",
+      "counters": "COUNTERS,Counters { owner_reruns: 0, descriptions: 0, source_operations: 4000, source_reads: 16000, destination_compares: 16000, text_promotions: 16000, text_bytes_copied: 108804, layout_runs: 4000, measure_calls: 32000, presentations: 4000, paint_passes: 4000, exact_updates: 4000, coarse_updates: 0 }",
+      "cpu": {
+        "0.5": 65751.21,
+        "0.95": 72135.33,
+        "0.99": 74490.86
+      },
+      "wall": {
+        "0.5": 65758.97,
+        "0.95": 72142.68,
+        "0.99": 74604.9
+      }
+    },
+    {
+      "repeat": 2,
+      "case": "1-4-exact",
+      "variant": "candidate",
+      "final": "FINAL,pixel_hash=5621740597739618968,source_epoch=4200",
+      "counters": "COUNTERS,Counters { owner_reruns: 0, descriptions: 0, source_operations: 4000, source_reads: 16000, destination_compares: 16000, text_promotions: 16000, text_bytes_copied: 108804, layout_runs: 4000, measure_calls: 32000, presentations: 4000, paint_passes: 4000, exact_updates: 4000, coarse_updates: 0 }",
+      "cpu": {
+        "0.5": 59711.14,
+        "0.95": 65327.21,
+        "0.99": 67712.51
+      },
+      "wall": {
+        "0.5": 59715.62,
+        "0.95": 65336.19,
+        "0.99": 67720.67
+      }
+    },
+    {
+      "repeat": 2,
+      "case": "1-1-owner",
+      "variant": "candidate",
+      "final": "FINAL,pixel_hash=6935651192824017056,source_epoch=4200",
+      "counters": "COUNTERS,Counters { owner_reruns: 4000, descriptions: 4000, source_operations: 4000, source_reads: 0, destination_compares: 136000, text_promotions: 8000, text_bytes_copied: 78402, layout_runs: 4000, measure_calls: 16000, presentations: 4000, paint_passes: 4000, exact_updates: 0, coarse_updates: 4000 }",
+      "cpu": {
+        "0.5": 40504.57,
+        "0.95": 49695.88,
+        "0.99": 58350.98
+      },
+      "wall": {
+        "0.5": 40509.82,
+        "0.95": 49704.61,
+        "0.99": 58358.97
+      }
+    },
+    {
+      "repeat": 2,
+      "case": "1-1-owner",
+      "variant": "control",
+      "final": "FINAL,pixel_hash=6935651192824017056,source_epoch=4200",
+      "counters": "COUNTERS,Counters { owner_reruns: 4000, descriptions: 4000, source_operations: 4000, source_reads: 0, destination_compares: 136000, text_promotions: 8000, text_bytes_copied: 78402, layout_runs: 4000, measure_calls: 16000, presentations: 4000, paint_passes: 4000, exact_updates: 0, coarse_updates: 4000 }",
+      "cpu": {
+        "0.5": 39456.79,
+        "0.95": 44324.16,
+        "0.99": 58074.16
+      },
+      "wall": {
+        "0.5": 39464.77,
+        "0.95": 44333.4,
+        "0.99": 58087.16
+      }
+    },
+    {
+      "repeat": 2,
+      "case": "1-2-owner",
+      "variant": "control",
+      "final": "FINAL,pixel_hash=7697983997524302108,source_epoch=4200",
+      "counters": "COUNTERS,Counters { owner_reruns: 4000, descriptions: 4000, source_operations: 4000, source_reads: 0, destination_compares: 136000, text_promotions: 12000, text_bytes_copied: 105603, layout_runs: 4000, measure_calls: 24000, presentations: 4000, paint_passes: 4000, exact_updates: 0, coarse_updates: 4000 }",
+      "cpu": {
+        "0.5": 52300.8,
+        "0.95": 70078.17,
+        "0.99": 70271.13
+      },
+      "wall": {
+        "0.5": 52308.0,
+        "0.95": 70084.99,
+        "0.99": 70277.37
+      }
+    },
+    {
+      "repeat": 2,
+      "case": "1-2-owner",
+      "variant": "candidate",
+      "final": "FINAL,pixel_hash=7697983997524302108,source_epoch=4200",
+      "counters": "COUNTERS,Counters { owner_reruns: 4000, descriptions: 4000, source_operations: 4000, source_reads: 0, destination_compares: 136000, text_promotions: 12000, text_bytes_copied: 105603, layout_runs: 4000, measure_calls: 24000, presentations: 4000, paint_passes: 4000, exact_updates: 0, coarse_updates: 4000 }",
+      "cpu": {
+        "0.5": 51484.24,
+        "0.95": 57172.46,
+        "0.99": 60029.24
+      },
+      "wall": {
+        "0.5": 51489.35,
+        "0.95": 57181.86,
+        "0.99": 60057.76
+      }
+    },
+    {
+      "repeat": 2,
+      "case": "1-4-owner",
+      "variant": "candidate",
+      "final": "FINAL,pixel_hash=7148476773328723988,source_epoch=4200",
+      "counters": "COUNTERS,Counters { owner_reruns: 4000, descriptions: 4000, source_operations: 4000, source_reads: 0, destination_compares: 136000, text_promotions: 20000, text_bytes_copied: 160005, layout_runs: 4000, measure_calls: 40000, presentations: 4000, paint_passes: 4000, exact_updates: 0, coarse_updates: 4000 }",
+      "cpu": {
+        "0.5": 77456.05,
+        "0.95": 80804.45,
+        "0.99": 87432.75
+      },
+      "wall": {
+        "0.5": 77463.48,
+        "0.95": 80827.8,
+        "0.99": 87442.82
+      }
+    },
+    {
+      "repeat": 2,
+      "case": "1-4-owner",
+      "variant": "control",
+      "final": "FINAL,pixel_hash=7148476773328723988,source_epoch=4200",
+      "counters": "COUNTERS,Counters { owner_reruns: 4000, descriptions: 4000, source_operations: 4000, source_reads: 0, destination_compares: 136000, text_promotions: 20000, text_bytes_copied: 160005, layout_runs: 4000, measure_calls: 40000, presentations: 4000, paint_passes: 4000, exact_updates: 0, coarse_updates: 4000 }",
+      "cpu": {
+        "0.5": 78333.11,
+        "0.95": 81006.13,
+        "0.99": 84542.79
+      },
+      "wall": {
+        "0.5": 78336.82,
+        "0.95": 81018.04,
+        "0.99": 84557.1
+      }
+    },
+    {
+      "repeat": 2,
+      "case": "40-1-exact",
+      "variant": "control",
+      "final": "FINAL,pixel_hash=10648945254885490729,source_epoch=4200",
+      "counters": "COUNTERS,Counters { owner_reruns: 0, descriptions: 0, source_operations: 4000, source_reads: 4000, destination_compares: 4000, text_promotions: 4000, text_bytes_copied: 27201, layout_runs: 4000, measure_calls: 8000, presentations: 4000, paint_passes: 4000, exact_updates: 4000, coarse_updates: 0 }",
+      "cpu": {
+        "0.5": 14813.69,
+        "0.95": 17293.46,
+        "0.99": 18072.13
+      },
+      "wall": {
+        "0.5": 14818.55,
+        "0.95": 17301.62,
+        "0.99": 18100.32
+      }
+    },
+    {
+      "repeat": 2,
+      "case": "40-1-exact",
+      "variant": "candidate",
+      "final": "FINAL,pixel_hash=10648945254885490729,source_epoch=4200",
+      "counters": "COUNTERS,Counters { owner_reruns: 0, descriptions: 0, source_operations: 4000, source_reads: 4000, destination_compares: 4000, text_promotions: 4000, text_bytes_copied: 27201, layout_runs: 4000, measure_calls: 8000, presentations: 4000, paint_passes: 4000, exact_updates: 4000, coarse_updates: 0 }",
+      "cpu": {
+        "0.5": 15691.14,
+        "0.95": 17241.26,
+        "0.99": 19148.66
+      },
+      "wall": {
+        "0.5": 15697.99,
+        "0.95": 17250.33,
+        "0.99": 19151.99
+      }
+    },
+    {
+      "repeat": 2,
+      "case": "40-2-exact",
+      "variant": "candidate",
+      "final": "FINAL,pixel_hash=9975236451948260733,source_epoch=4200",
+      "counters": "COUNTERS,Counters { owner_reruns: 0, descriptions: 0, source_operations: 4000, source_reads: 8000, destination_compares: 8000, text_promotions: 8000, text_bytes_copied: 54402, layout_runs: 4000, measure_calls: 16000, presentations: 4000, paint_passes: 4000, exact_updates: 4000, coarse_updates: 0 }",
+      "cpu": {
+        "0.5": 28689.12,
+        "0.95": 30709.43,
+        "0.99": 31480.77
+      },
+      "wall": {
+        "0.5": 28693.92,
+        "0.95": 30718.13,
+        "0.99": 31489.58
+      }
+    },
+    {
+      "repeat": 2,
+      "case": "40-2-exact",
+      "variant": "control",
+      "final": "FINAL,pixel_hash=9975236451948260733,source_epoch=4200",
+      "counters": "COUNTERS,Counters { owner_reruns: 0, descriptions: 0, source_operations: 4000, source_reads: 8000, destination_compares: 8000, text_promotions: 8000, text_bytes_copied: 54402, layout_runs: 4000, measure_calls: 16000, presentations: 4000, paint_passes: 4000, exact_updates: 4000, coarse_updates: 0 }",
+      "cpu": {
+        "0.5": 451287.28,
+        "0.95": 477727.17,
+        "0.99": 489276.22
+      },
+      "wall": {
+        "0.5": 451473.51,
+        "0.95": 477748.51,
+        "0.99": 489292.2
+      }
+    },
+    {
+      "repeat": 2,
+      "case": "40-4-exact",
+      "variant": "control",
+      "final": "FINAL,pixel_hash=15188321811029023333,source_epoch=4200",
+      "counters": "COUNTERS,Counters { owner_reruns: 0, descriptions: 0, source_operations: 4000, source_reads: 16000, destination_compares: 16000, text_promotions: 16000, text_bytes_copied: 108804, layout_runs: 4000, measure_calls: 32000, presentations: 4000, paint_passes: 4000, exact_updates: 4000, coarse_updates: 0 }",
+      "cpu": {
+        "0.5": 452573.21,
+        "0.95": 520691.97,
+        "0.99": 544899.26
+      },
+      "wall": {
+        "0.5": 452583.6,
+        "0.95": 520703.53,
+        "0.99": 544921.23
+      }
+    },
+    {
+      "repeat": 2,
+      "case": "40-4-exact",
+      "variant": "candidate",
+      "final": "FINAL,pixel_hash=15188321811029023333,source_epoch=4200",
+      "counters": "COUNTERS,Counters { owner_reruns: 0, descriptions: 0, source_operations: 4000, source_reads: 16000, destination_compares: 16000, text_promotions: 16000, text_bytes_copied: 108804, layout_runs: 4000, measure_calls: 32000, presentations: 4000, paint_passes: 4000, exact_updates: 4000, coarse_updates: 0 }",
+      "cpu": {
+        "0.5": 56246.41,
+        "0.95": 64318.81,
+        "0.99": 68206.75
+      },
+      "wall": {
+        "0.5": 56254.92,
+        "0.95": 64336.6,
+        "0.99": 68224.52
+      }
+    },
+    {
+      "repeat": 2,
+      "case": "40-1-owner",
+      "variant": "candidate",
+      "final": "FINAL,pixel_hash=3242345613451522353,source_epoch=4200",
+      "counters": "COUNTERS,Counters { owner_reruns: 4000, descriptions: 4000, source_operations: 4000, source_reads: 0, destination_compares: 4192000, text_promotions: 8000, text_bytes_copied: 78402, layout_runs: 4000, measure_calls: 16000, presentations: 4000, paint_passes: 4000, exact_updates: 0, coarse_updates: 4000 }",
+      "cpu": {
+        "0.5": 569012.45,
+        "0.95": 611003.04,
+        "0.99": 631137.35
+      },
+      "wall": {
+        "0.5": 569193.75,
+        "0.95": 611013.94,
+        "0.99": 631732.48
+      }
+    },
+    {
+      "repeat": 2,
+      "case": "40-1-owner",
+      "variant": "control",
+      "final": "FINAL,pixel_hash=3242345613451522353,source_epoch=4200",
+      "counters": "COUNTERS,Counters { owner_reruns: 4000, descriptions: 4000, source_operations: 4000, source_reads: 0, destination_compares: 4192000, text_promotions: 8000, text_bytes_copied: 78402, layout_runs: 4000, measure_calls: 16000, presentations: 4000, paint_passes: 4000, exact_updates: 0, coarse_updates: 4000 }",
+      "cpu": {
+        "0.5": 570777.79,
+        "0.95": 602011.09,
+        "0.99": 626240.42
+      },
+      "wall": {
+        "0.5": 570828.02,
+        "0.95": 602180.94,
+        "0.99": 626253.47
+      }
+    },
+    {
+      "repeat": 2,
+      "case": "40-2-owner",
+      "variant": "control",
+      "final": "FINAL,pixel_hash=13881385024434524213,source_epoch=4200",
+      "counters": "COUNTERS,Counters { owner_reruns: 4000, descriptions: 4000, source_operations: 4000, source_reads: 0, destination_compares: 4192000, text_promotions: 12000, text_bytes_copied: 105603, layout_runs: 4000, measure_calls: 24000, presentations: 4000, paint_passes: 4000, exact_updates: 0, coarse_updates: 4000 }",
+      "cpu": {
+        "0.5": 599711.88,
+        "0.95": 677158.51,
+        "0.99": 717491.35
+      },
+      "wall": {
+        "0.5": 599794.25,
+        "0.95": 677326.24,
+        "0.99": 717548.24
+      }
+    },
+    {
+      "repeat": 2,
+      "case": "40-2-owner",
+      "variant": "candidate",
+      "final": "FINAL,pixel_hash=13881385024434524213,source_epoch=4200",
+      "counters": "COUNTERS,Counters { owner_reruns: 4000, descriptions: 4000, source_operations: 4000, source_reads: 0, destination_compares: 4192000, text_promotions: 12000, text_bytes_copied: 105603, layout_runs: 4000, measure_calls: 24000, presentations: 4000, paint_passes: 4000, exact_updates: 0, coarse_updates: 4000 }",
+      "cpu": {
+        "0.5": 596384.8,
+        "0.95": 680569.03,
+        "0.99": 709582.16
+      },
+      "wall": {
+        "0.5": 596578.11,
+        "0.95": 680580.58,
+        "0.99": 709599.71
+      }
+    },
+    {
+      "repeat": 2,
+      "case": "40-4-owner",
+      "variant": "candidate",
+      "final": "FINAL,pixel_hash=4997533096679380941,source_epoch=4200",
+      "counters": "COUNTERS,Counters { owner_reruns: 4000, descriptions: 4000, source_operations: 4000, source_reads: 0, destination_compares: 4192000, text_promotions: 20000, text_bytes_copied: 160005, layout_runs: 4000, measure_calls: 40000, presentations: 4000, paint_passes: 4000, exact_updates: 0, coarse_updates: 4000 }",
+      "cpu": {
+        "0.5": 588216.63,
+        "0.95": 602576.37,
+        "0.99": 637053.38
+      },
+      "wall": {
+        "0.5": 588229.92,
+        "0.95": 602593.11,
+        "0.99": 637224.59
+      }
+    },
+    {
+      "repeat": 2,
+      "case": "40-4-owner",
+      "variant": "control",
+      "final": "FINAL,pixel_hash=4997533096679380941,source_epoch=4200",
+      "counters": "COUNTERS,Counters { owner_reruns: 4000, descriptions: 4000, source_operations: 4000, source_reads: 0, destination_compares: 4192000, text_promotions: 20000, text_bytes_copied: 160005, layout_runs: 4000, measure_calls: 40000, presentations: 4000, paint_passes: 4000, exact_updates: 0, coarse_updates: 4000 }",
+      "cpu": {
+        "0.5": 570573.71,
+        "0.95": 585500.0,
+        "0.99": 593739.82
+      },
+      "wall": {
+        "0.5": 570653.59,
+        "0.95": 585522.04,
+        "0.99": 593795.68
+      }
+    },
+    {
+      "repeat": 2,
+      "case": "0-4-opaque",
+      "variant": "control",
+      "final": "FINAL,pixel_hash=14428137562740546882,source_epoch=4200",
+      "counters": "COUNTERS,Counters { owner_reruns: 4000, descriptions: 4000, source_operations: 4000, source_reads: 0, destination_compares: 28000, text_promotions: 16000, text_bytes_copied: 108804, layout_runs: 4000, measure_calls: 32000, presentations: 4000, paint_passes: 4000, exact_updates: 0, coarse_updates: 4000 }",
+      "cpu": {
+        "0.5": 56567.02,
+        "0.95": 57679.81,
+        "0.99": 58839.8
+      },
+      "wall": {
+        "0.5": 56578.21,
+        "0.95": 57688.1,
+        "0.99": 58851.8
+      }
+    },
+    {
+      "repeat": 2,
+      "case": "0-4-opaque",
+      "variant": "candidate",
+      "final": "FINAL,pixel_hash=14428137562740546882,source_epoch=4200",
+      "counters": "COUNTERS,Counters { owner_reruns: 4000, descriptions: 4000, source_operations: 4000, source_reads: 0, destination_compares: 28000, text_promotions: 16000, text_bytes_copied: 108804, layout_runs: 4000, measure_calls: 32000, presentations: 4000, paint_passes: 4000, exact_updates: 0, coarse_updates: 4000 }",
+      "cpu": {
+        "0.5": 55680.25,
+        "0.95": 62191.8,
+        "0.99": 72883.64
+      },
+      "wall": {
+        "0.5": 55684.24,
+        "0.95": 62207.7,
+        "0.99": 72910.41
+      }
+    },
+    {
+      "repeat": 2,
+      "case": "1-4-opaque",
+      "variant": "candidate",
+      "final": "FINAL,pixel_hash=5621740597739618968,source_epoch=4200",
+      "counters": "COUNTERS,Counters { owner_reruns: 4000, descriptions: 4000, source_operations: 4000, source_reads: 0, destination_compares: 132000, text_promotions: 16000, text_bytes_copied: 108804, layout_runs: 4000, measure_calls: 32000, presentations: 4000, paint_passes: 4000, exact_updates: 0, coarse_updates: 4000 }",
+      "cpu": {
+        "0.5": 72493.1,
+        "0.95": 80553.19,
+        "0.99": 102547.3
+      },
+      "wall": {
+        "0.5": 72502.74,
+        "0.95": 80576.12,
+        "0.99": 102593.79
+      }
+    },
+    {
+      "repeat": 2,
+      "case": "1-4-opaque",
+      "variant": "control",
+      "final": "FINAL,pixel_hash=5621740597739618968,source_epoch=4200",
+      "counters": "COUNTERS,Counters { owner_reruns: 4000, descriptions: 4000, source_operations: 4000, source_reads: 0, destination_compares: 132000, text_promotions: 16000, text_bytes_copied: 108804, layout_runs: 4000, measure_calls: 32000, presentations: 4000, paint_passes: 4000, exact_updates: 0, coarse_updates: 4000 }",
+      "cpu": {
+        "0.5": 70913.23,
+        "0.95": 80467.22,
+        "0.99": 83941.26
+      },
+      "wall": {
+        "0.5": 70925.59,
+        "0.95": 80483.85,
+        "0.99": 83960.28
+      }
+    },
+    {
+      "repeat": 2,
+      "case": "40-4-opaque",
+      "variant": "control",
+      "final": "FINAL,pixel_hash=15188321811029023333,source_epoch=4200",
+      "counters": "COUNTERS,Counters { owner_reruns: 4000, descriptions: 4000, source_operations: 4000, source_reads: 0, destination_compares: 4188000, text_promotions: 16000, text_bytes_copied: 108804, layout_runs: 4000, measure_calls: 32000, presentations: 4000, paint_passes: 4000, exact_updates: 0, coarse_updates: 4000 }",
+      "cpu": {
+        "0.5": 591411.73,
+        "0.95": 625614.04,
+        "0.99": 633630.14
+      },
+      "wall": {
+        "0.5": 591425.32,
+        "0.95": 625621.99,
+        "0.99": 633803.76
+      }
+    },
+    {
+      "repeat": 2,
+      "case": "40-4-opaque",
+      "variant": "candidate",
+      "final": "FINAL,pixel_hash=15188321811029023333,source_epoch=4200",
+      "counters": "COUNTERS,Counters { owner_reruns: 4000, descriptions: 4000, source_operations: 4000, source_reads: 0, destination_compares: 4188000, text_promotions: 16000, text_bytes_copied: 108804, layout_runs: 4000, measure_calls: 32000, presentations: 4000, paint_passes: 4000, exact_updates: 0, coarse_updates: 4000 }",
+      "cpu": {
+        "0.5": 609081.31,
+        "0.95": 654744.5,
+        "0.99": 701079.35
+      },
+      "wall": {
+        "0.5": 609535.77,
+        "0.95": 654777.87,
+        "0.99": 701277.06
+      }
+    },
+    {
+      "repeat": 3,
+      "case": "0-1-exact",
+      "variant": "candidate",
+      "final": "FINAL,pixel_hash=3067612491809559190,source_epoch=4200",
+      "counters": "COUNTERS,Counters { owner_reruns: 0, descriptions: 0, source_operations: 4000, source_reads: 4000, destination_compares: 4000, text_promotions: 4000, text_bytes_copied: 27201, layout_runs: 4000, measure_calls: 8000, presentations: 4000, paint_passes: 4000, exact_updates: 4000, coarse_updates: 0 }",
+      "cpu": {
+        "0.5": 16137.69,
+        "0.95": 16464.81,
+        "0.99": 16590.74
+      },
+      "wall": {
+        "0.5": 16140.03,
+        "0.95": 16468.74,
+        "0.99": 16593.49
+      }
+    },
+    {
+      "repeat": 3,
+      "case": "0-1-exact",
+      "variant": "control",
+      "final": "FINAL,pixel_hash=3067612491809559190,source_epoch=4200",
+      "counters": "COUNTERS,Counters { owner_reruns: 0, descriptions: 0, source_operations: 4000, source_reads: 4000, destination_compares: 4000, text_promotions: 4000, text_bytes_copied: 27201, layout_runs: 4000, measure_calls: 8000, presentations: 4000, paint_passes: 4000, exact_updates: 4000, coarse_updates: 0 }",
+      "cpu": {
+        "0.5": 15901.44,
+        "0.95": 16304.7,
+        "0.99": 16539.14
+      },
+      "wall": {
+        "0.5": 15903.79,
+        "0.95": 16307.45,
+        "0.99": 16541.98
+      }
+    },
+    {
+      "repeat": 3,
+      "case": "0-2-exact",
+      "variant": "control",
+      "final": "FINAL,pixel_hash=8784640471098581594,source_epoch=4200",
+      "counters": "COUNTERS,Counters { owner_reruns: 0, descriptions: 0, source_operations: 4000, source_reads: 8000, destination_compares: 8000, text_promotions: 8000, text_bytes_copied: 54402, layout_runs: 4000, measure_calls: 16000, presentations: 4000, paint_passes: 4000, exact_updates: 4000, coarse_updates: 0 }",
+      "cpu": {
+        "0.5": 29362.9,
+        "0.95": 30321.29,
+        "0.99": 31319.57
+      },
+      "wall": {
+        "0.5": 29365.28,
+        "0.95": 30327.9,
+        "0.99": 31326.07
+      }
+    },
+    {
+      "repeat": 3,
+      "case": "0-2-exact",
+      "variant": "candidate",
+      "final": "FINAL,pixel_hash=8784640471098581594,source_epoch=4200",
+      "counters": "COUNTERS,Counters { owner_reruns: 0, descriptions: 0, source_operations: 4000, source_reads: 8000, destination_compares: 8000, text_promotions: 8000, text_bytes_copied: 54402, layout_runs: 4000, measure_calls: 16000, presentations: 4000, paint_passes: 4000, exact_updates: 4000, coarse_updates: 0 }",
+      "cpu": {
+        "0.5": 29938.57,
+        "0.95": 32391.69,
+        "0.99": 33820.79
+      },
+      "wall": {
+        "0.5": 29944.07,
+        "0.95": 32412.02,
+        "0.99": 33842.91
+      }
+    },
+    {
+      "repeat": 3,
+      "case": "0-4-exact",
+      "variant": "candidate",
+      "final": "FINAL,pixel_hash=14428137562740546882,source_epoch=4200",
+      "counters": "COUNTERS,Counters { owner_reruns: 0, descriptions: 0, source_operations: 4000, source_reads: 16000, destination_compares: 16000, text_promotions: 16000, text_bytes_copied: 108804, layout_runs: 4000, measure_calls: 32000, presentations: 4000, paint_passes: 4000, exact_updates: 4000, coarse_updates: 0 }",
+      "cpu": {
+        "0.5": 58982.67,
+        "0.95": 62016.88,
+        "0.99": 63694.93
+      },
+      "wall": {
+        "0.5": 58985.96,
+        "0.95": 62030.56,
+        "0.99": 63702.62
+      }
+    },
+    {
+      "repeat": 3,
+      "case": "0-4-exact",
+      "variant": "control",
+      "final": "FINAL,pixel_hash=14428137562740546882,source_epoch=4200",
+      "counters": "COUNTERS,Counters { owner_reruns: 0, descriptions: 0, source_operations: 4000, source_reads: 16000, destination_compares: 16000, text_promotions: 16000, text_bytes_copied: 108804, layout_runs: 4000, measure_calls: 32000, presentations: 4000, paint_passes: 4000, exact_updates: 4000, coarse_updates: 0 }",
+      "cpu": {
+        "0.5": 56446.78,
+        "0.95": 61150.85,
+        "0.99": 61900.16
+      },
+      "wall": {
+        "0.5": 56452.79,
+        "0.95": 61167.24,
+        "0.99": 61924.37
+      }
+    },
+    {
+      "repeat": 3,
+      "case": "0-1-owner",
+      "variant": "control",
+      "final": "FINAL,pixel_hash=1209351341388854458,source_epoch=4200",
+      "counters": "COUNTERS,Counters { owner_reruns: 4000, descriptions: 4000, source_operations: 4000, source_reads: 0, destination_compares: 32000, text_promotions: 8000, text_bytes_copied: 78402, layout_runs: 4000, measure_calls: 16000, presentations: 4000, paint_passes: 4000, exact_updates: 0, coarse_updates: 4000 }",
+      "cpu": {
+        "0.5": 25733.35,
+        "0.95": 28509.59,
+        "0.99": 29227.54
+      },
+      "wall": {
+        "0.5": 25739.97,
+        "0.95": 28526.31,
+        "0.99": 29281.02
+      }
+    },
+    {
+      "repeat": 3,
+      "case": "0-1-owner",
+      "variant": "candidate",
+      "final": "FINAL,pixel_hash=1209351341388854458,source_epoch=4200",
+      "counters": "COUNTERS,Counters { owner_reruns: 4000, descriptions: 4000, source_operations: 4000, source_reads: 0, destination_compares: 32000, text_promotions: 8000, text_bytes_copied: 78402, layout_runs: 4000, measure_calls: 16000, presentations: 4000, paint_passes: 4000, exact_updates: 0, coarse_updates: 4000 }",
+      "cpu": {
+        "0.5": 25754.81,
+        "0.95": 28452.78,
+        "0.99": 29213.32
+      },
+      "wall": {
+        "0.5": 25759.61,
+        "0.95": 28460.69,
+        "0.99": 29228.52
+      }
+    },
+    {
+      "repeat": 3,
+      "case": "0-2-owner",
+      "variant": "candidate",
+      "final": "FINAL,pixel_hash=3529418378583843142,source_epoch=4200",
+      "counters": "COUNTERS,Counters { owner_reruns: 4000, descriptions: 4000, source_operations: 4000, source_reads: 0, destination_compares: 32000, text_promotions: 12000, text_bytes_copied: 105603, layout_runs: 4000, measure_calls: 24000, presentations: 4000, paint_passes: 4000, exact_updates: 0, coarse_updates: 4000 }",
+      "cpu": {
+        "0.5": 38555.8,
+        "0.95": 44450.4,
+        "0.99": 48804.0
+      },
+      "wall": {
+        "0.5": 38560.57,
+        "0.95": 44458.95,
+        "0.99": 48814.13
+      }
+    },
+    {
+      "repeat": 3,
+      "case": "0-2-owner",
+      "variant": "control",
+      "final": "FINAL,pixel_hash=3529418378583843142,source_epoch=4200",
+      "counters": "COUNTERS,Counters { owner_reruns: 4000, descriptions: 4000, source_operations: 4000, source_reads: 0, destination_compares: 32000, text_promotions: 12000, text_bytes_copied: 105603, layout_runs: 4000, measure_calls: 24000, presentations: 4000, paint_passes: 4000, exact_updates: 0, coarse_updates: 4000 }",
+      "cpu": {
+        "0.5": 37250.65,
+        "0.95": 43750.99,
+        "0.99": 48740.58
+      },
+      "wall": {
+        "0.5": 37252.6,
+        "0.95": 43879.45,
+        "0.99": 48750.72
+      }
+    },
+    {
+      "repeat": 3,
+      "case": "0-4-owner",
+      "variant": "control",
+      "final": "FINAL,pixel_hash=17102854550306425806,source_epoch=4200",
+      "counters": "COUNTERS,Counters { owner_reruns: 4000, descriptions: 4000, source_operations: 4000, source_reads: 0, destination_compares: 32000, text_promotions: 20000, text_bytes_copied: 160005, layout_runs: 4000, measure_calls: 40000, presentations: 4000, paint_passes: 4000, exact_updates: 0, coarse_updates: 4000 }",
+      "cpu": {
+        "0.5": 63470.93,
+        "0.95": 66108.29,
+        "0.99": 67950.05
+      },
+      "wall": {
+        "0.5": 63476.99,
+        "0.95": 66143.29,
+        "0.99": 67964.83
+      }
+    },
+    {
+      "repeat": 3,
+      "case": "0-4-owner",
+      "variant": "candidate",
+      "final": "FINAL,pixel_hash=17102854550306425806,source_epoch=4200",
+      "counters": "COUNTERS,Counters { owner_reruns: 4000, descriptions: 4000, source_operations: 4000, source_reads: 0, destination_compares: 32000, text_promotions: 20000, text_bytes_copied: 160005, layout_runs: 4000, measure_calls: 40000, presentations: 4000, paint_passes: 4000, exact_updates: 0, coarse_updates: 4000 }",
+      "cpu": {
+        "0.5": 61726.93,
+        "0.95": 64431.32,
+        "0.99": 64903.71
+      },
+      "wall": {
+        "0.5": 61729.0,
+        "0.95": 64437.48,
+        "0.99": 64910.2
+      }
+    },
+    {
+      "repeat": 3,
+      "case": "1-1-exact",
+      "variant": "candidate",
+      "final": "FINAL,pixel_hash=8866289588925863500,source_epoch=4200",
+      "counters": "COUNTERS,Counters { owner_reruns: 0, descriptions: 0, source_operations: 4000, source_reads: 4000, destination_compares: 4000, text_promotions: 4000, text_bytes_copied: 27201, layout_runs: 4000, measure_calls: 8000, presentations: 4000, paint_passes: 4000, exact_updates: 4000, coarse_updates: 0 }",
+      "cpu": {
+        "0.5": 13543.1,
+        "0.95": 13653.41,
+        "0.99": 13675.45
+      },
+      "wall": {
+        "0.5": 13544.96,
+        "0.95": 13655.15,
+        "0.99": 13737.82
+      }
+    },
+    {
+      "repeat": 3,
+      "case": "1-1-exact",
+      "variant": "control",
+      "final": "FINAL,pixel_hash=8866289588925863500,source_epoch=4200",
+      "counters": "COUNTERS,Counters { owner_reruns: 0, descriptions: 0, source_operations: 4000, source_reads: 4000, destination_compares: 4000, text_promotions: 4000, text_bytes_copied: 27201, layout_runs: 4000, measure_calls: 8000, presentations: 4000, paint_passes: 4000, exact_updates: 4000, coarse_updates: 0 }",
+      "cpu": {
+        "0.5": 13818.33,
+        "0.95": 14505.71,
+        "0.99": 15211.14
+      },
+      "wall": {
+        "0.5": 13820.36,
+        "0.95": 14509.17,
+        "0.99": 15230.11
+      }
+    },
+    {
+      "repeat": 3,
+      "case": "1-2-exact",
+      "variant": "control",
+      "final": "FINAL,pixel_hash=9269140401638406208,source_epoch=4200",
+      "counters": "COUNTERS,Counters { owner_reruns: 0, descriptions: 0, source_operations: 4000, source_reads: 8000, destination_compares: 8000, text_promotions: 8000, text_bytes_copied: 54402, layout_runs: 4000, measure_calls: 16000, presentations: 4000, paint_passes: 4000, exact_updates: 4000, coarse_updates: 0 }",
+      "cpu": {
+        "0.5": 36962.89,
+        "0.95": 39402.79,
+        "0.99": 51463.7
+      },
+      "wall": {
+        "0.5": 36966.17,
+        "0.95": 39412.06,
+        "0.99": 51480.94
+      }
+    },
+    {
+      "repeat": 3,
+      "case": "1-2-exact",
+      "variant": "candidate",
+      "final": "FINAL,pixel_hash=9269140401638406208,source_epoch=4200",
+      "counters": "COUNTERS,Counters { owner_reruns: 0, descriptions: 0, source_operations: 4000, source_reads: 8000, destination_compares: 8000, text_promotions: 8000, text_bytes_copied: 54402, layout_runs: 4000, measure_calls: 16000, presentations: 4000, paint_passes: 4000, exact_updates: 4000, coarse_updates: 0 }",
+      "cpu": {
+        "0.5": 27497.48,
+        "0.95": 29832.28,
+        "0.99": 33052.64
+      },
+      "wall": {
+        "0.5": 27501.88,
+        "0.95": 29842.58,
+        "0.99": 33060.33
+      }
+    },
+    {
+      "repeat": 3,
+      "case": "1-4-exact",
+      "variant": "candidate",
+      "final": "FINAL,pixel_hash=5621740597739618968,source_epoch=4200",
+      "counters": "COUNTERS,Counters { owner_reruns: 0, descriptions: 0, source_operations: 4000, source_reads: 16000, destination_compares: 16000, text_promotions: 16000, text_bytes_copied: 108804, layout_runs: 4000, measure_calls: 32000, presentations: 4000, paint_passes: 4000, exact_updates: 4000, coarse_updates: 0 }",
+      "cpu": {
+        "0.5": 55425.07,
+        "0.95": 59138.46,
+        "0.99": 60865.21
+      },
+      "wall": {
+        "0.5": 55428.26,
+        "0.95": 59141.24,
+        "0.99": 60873.49
+      }
+    },
+    {
+      "repeat": 3,
+      "case": "1-4-exact",
+      "variant": "control",
+      "final": "FINAL,pixel_hash=5621740597739618968,source_epoch=4200",
+      "counters": "COUNTERS,Counters { owner_reruns: 0, descriptions: 0, source_operations: 4000, source_reads: 16000, destination_compares: 16000, text_promotions: 16000, text_bytes_copied: 108804, layout_runs: 4000, measure_calls: 32000, presentations: 4000, paint_passes: 4000, exact_updates: 4000, coarse_updates: 0 }",
+      "cpu": {
+        "0.5": 63919.25,
+        "0.95": 69937.5,
+        "0.99": 72186.43
+      },
+      "wall": {
+        "0.5": 63927.14,
+        "0.95": 69948.66,
+        "0.99": 72201.78
+      }
+    },
+    {
+      "repeat": 3,
+      "case": "1-1-owner",
+      "variant": "control",
+      "final": "FINAL,pixel_hash=6935651192824017056,source_epoch=4200",
+      "counters": "COUNTERS,Counters { owner_reruns: 4000, descriptions: 4000, source_operations: 4000, source_reads: 0, destination_compares: 136000, text_promotions: 8000, text_bytes_copied: 78402, layout_runs: 4000, measure_calls: 16000, presentations: 4000, paint_passes: 4000, exact_updates: 0, coarse_updates: 4000 }",
+      "cpu": {
+        "0.5": 36834.66,
+        "0.95": 37820.62,
+        "0.99": 41547.43
+      },
+      "wall": {
+        "0.5": 36838.03,
+        "0.95": 37824.39,
+        "0.99": 41553.59
+      }
+    },
+    {
+      "repeat": 3,
+      "case": "1-1-owner",
+      "variant": "candidate",
+      "final": "FINAL,pixel_hash=6935651192824017056,source_epoch=4200",
+      "counters": "COUNTERS,Counters { owner_reruns: 4000, descriptions: 4000, source_operations: 4000, source_reads: 0, destination_compares: 136000, text_promotions: 8000, text_bytes_copied: 78402, layout_runs: 4000, measure_calls: 16000, presentations: 4000, paint_passes: 4000, exact_updates: 0, coarse_updates: 4000 }",
+      "cpu": {
+        "0.5": 37308.95,
+        "0.95": 39673.1,
+        "0.99": 40528.92
+      },
+      "wall": {
+        "0.5": 37311.91,
+        "0.95": 39679.76,
+        "0.99": 40536.98
+      }
+    },
+    {
+      "repeat": 3,
+      "case": "1-2-owner",
+      "variant": "candidate",
+      "final": "FINAL,pixel_hash=7697983997524302108,source_epoch=4200",
+      "counters": "COUNTERS,Counters { owner_reruns: 4000, descriptions: 4000, source_operations: 4000, source_reads: 0, destination_compares: 136000, text_promotions: 12000, text_bytes_copied: 105603, layout_runs: 4000, measure_calls: 24000, presentations: 4000, paint_passes: 4000, exact_updates: 0, coarse_updates: 4000 }",
+      "cpu": {
+        "0.5": 51866.56,
+        "0.95": 55562.94,
+        "0.99": 62614.1
+      },
+      "wall": {
+        "0.5": 51871.19,
+        "0.95": 55583.26,
+        "0.99": 62659.76
+      }
+    },
+    {
+      "repeat": 3,
+      "case": "1-2-owner",
+      "variant": "control",
+      "final": "FINAL,pixel_hash=7697983997524302108,source_epoch=4200",
+      "counters": "COUNTERS,Counters { owner_reruns: 4000, descriptions: 4000, source_operations: 4000, source_reads: 0, destination_compares: 136000, text_promotions: 12000, text_bytes_copied: 105603, layout_runs: 4000, measure_calls: 24000, presentations: 4000, paint_passes: 4000, exact_updates: 0, coarse_updates: 4000 }",
+      "cpu": {
+        "0.5": 52444.35,
+        "0.95": 57373.53,
+        "0.99": 59557.55
+      },
+      "wall": {
+        "0.5": 52448.36,
+        "0.95": 57383.63,
+        "0.99": 59575.65
+      }
+    },
+    {
+      "repeat": 3,
+      "case": "1-4-owner",
+      "variant": "control",
+      "final": "FINAL,pixel_hash=7148476773328723988,source_epoch=4200",
+      "counters": "COUNTERS,Counters { owner_reruns: 4000, descriptions: 4000, source_operations: 4000, source_reads: 0, destination_compares: 136000, text_promotions: 20000, text_bytes_copied: 160005, layout_runs: 4000, measure_calls: 40000, presentations: 4000, paint_passes: 4000, exact_updates: 0, coarse_updates: 4000 }",
+      "cpu": {
+        "0.5": 79521.64,
+        "0.95": 93734.51,
+        "0.99": 109323.26
+      },
+      "wall": {
+        "0.5": 79530.25,
+        "0.95": 93772.22,
+        "0.99": 109347.81
+      }
+    },
+    {
+      "repeat": 3,
+      "case": "1-4-owner",
+      "variant": "candidate",
+      "final": "FINAL,pixel_hash=7148476773328723988,source_epoch=4200",
+      "counters": "COUNTERS,Counters { owner_reruns: 4000, descriptions: 4000, source_operations: 4000, source_reads: 0, destination_compares: 136000, text_promotions: 20000, text_bytes_copied: 160005, layout_runs: 4000, measure_calls: 40000, presentations: 4000, paint_passes: 4000, exact_updates: 0, coarse_updates: 4000 }",
+      "cpu": {
+        "0.5": 83908.7,
+        "0.95": 89386.91,
+        "0.99": 92749.95
+      },
+      "wall": {
+        "0.5": 83922.61,
+        "0.95": 89411.92,
+        "0.99": 92769.53
+      }
+    },
+    {
+      "repeat": 3,
+      "case": "40-1-exact",
+      "variant": "candidate",
+      "final": "FINAL,pixel_hash=10648945254885490729,source_epoch=4200",
+      "counters": "COUNTERS,Counters { owner_reruns: 0, descriptions: 0, source_operations: 4000, source_reads: 4000, destination_compares: 4000, text_promotions: 4000, text_bytes_copied: 27201, layout_runs: 4000, measure_calls: 8000, presentations: 4000, paint_passes: 4000, exact_updates: 4000, coarse_updates: 0 }",
+      "cpu": {
+        "0.5": 14984.22,
+        "0.95": 16282.26,
+        "0.99": 19161.28
+      },
+      "wall": {
+        "0.5": 14987.27,
+        "0.95": 16288.21,
+        "0.99": 19169.82
+      }
+    },
+    {
+      "repeat": 3,
+      "case": "40-1-exact",
+      "variant": "control",
+      "final": "FINAL,pixel_hash=10648945254885490729,source_epoch=4200",
+      "counters": "COUNTERS,Counters { owner_reruns: 0, descriptions: 0, source_operations: 4000, source_reads: 4000, destination_compares: 4000, text_promotions: 4000, text_bytes_copied: 27201, layout_runs: 4000, measure_calls: 8000, presentations: 4000, paint_passes: 4000, exact_updates: 4000, coarse_updates: 0 }",
+      "cpu": {
+        "0.5": 14731.63,
+        "0.95": 18655.73,
+        "0.99": 20584.16
+      },
+      "wall": {
+        "0.5": 14735.4,
+        "0.95": 18664.97,
+        "0.99": 20598.71
+      }
+    },
+    {
+      "repeat": 3,
+      "case": "40-2-exact",
+      "variant": "control",
+      "final": "FINAL,pixel_hash=9975236451948260733,source_epoch=4200",
+      "counters": "COUNTERS,Counters { owner_reruns: 0, descriptions: 0, source_operations: 4000, source_reads: 8000, destination_compares: 8000, text_promotions: 8000, text_bytes_copied: 54402, layout_runs: 4000, measure_calls: 16000, presentations: 4000, paint_passes: 4000, exact_updates: 4000, coarse_updates: 0 }",
+      "cpu": {
+        "0.5": 432053.17,
+        "0.95": 462236.4,
+        "0.99": 484914.0
+      },
+      "wall": {
+        "0.5": 432063.85,
+        "0.95": 462252.78,
+        "0.99": 484932.21
+      }
+    },
+    {
+      "repeat": 3,
+      "case": "40-2-exact",
+      "variant": "candidate",
+      "final": "FINAL,pixel_hash=9975236451948260733,source_epoch=4200",
+      "counters": "COUNTERS,Counters { owner_reruns: 0, descriptions: 0, source_operations: 4000, source_reads: 8000, destination_compares: 8000, text_promotions: 8000, text_bytes_copied: 54402, layout_runs: 4000, measure_calls: 16000, presentations: 4000, paint_passes: 4000, exact_updates: 4000, coarse_updates: 0 }",
+      "cpu": {
+        "0.5": 29078.15,
+        "0.95": 30353.85,
+        "0.99": 31887.94
+      },
+      "wall": {
+        "0.5": 29080.25,
+        "0.95": 30358.75,
+        "0.99": 31897.35
+      }
+    },
+    {
+      "repeat": 3,
+      "case": "40-4-exact",
+      "variant": "candidate",
+      "final": "FINAL,pixel_hash=15188321811029023333,source_epoch=4200",
+      "counters": "COUNTERS,Counters { owner_reruns: 0, descriptions: 0, source_operations: 4000, source_reads: 16000, destination_compares: 16000, text_promotions: 16000, text_bytes_copied: 108804, layout_runs: 4000, measure_calls: 32000, presentations: 4000, paint_passes: 4000, exact_updates: 4000, coarse_updates: 0 }",
+      "cpu": {
+        "0.5": 60837.66,
+        "0.95": 64017.44,
+        "0.99": 66591.39
+      },
+      "wall": {
+        "0.5": 60842.24,
+        "0.95": 64033.43,
+        "0.99": 66608.97
+      }
+    },
+    {
+      "repeat": 3,
+      "case": "40-4-exact",
+      "variant": "control",
+      "final": "FINAL,pixel_hash=15188321811029023333,source_epoch=4200",
+      "counters": "COUNTERS,Counters { owner_reruns: 0, descriptions: 0, source_operations: 4000, source_reads: 16000, destination_compares: 16000, text_promotions: 16000, text_bytes_copied: 108804, layout_runs: 4000, measure_calls: 32000, presentations: 4000, paint_passes: 4000, exact_updates: 4000, coarse_updates: 0 }",
+      "cpu": {
+        "0.5": 484336.02,
+        "0.95": 543082.54,
+        "0.99": 577708.14
+      },
+      "wall": {
+        "0.5": 484358.62,
+        "0.95": 543102.91,
+        "0.99": 577722.17
+      }
+    },
+    {
+      "repeat": 3,
+      "case": "40-1-owner",
+      "variant": "control",
+      "final": "FINAL,pixel_hash=3242345613451522353,source_epoch=4200",
+      "counters": "COUNTERS,Counters { owner_reruns: 4000, descriptions: 4000, source_operations: 4000, source_reads: 0, destination_compares: 4192000, text_promotions: 8000, text_bytes_copied: 78402, layout_runs: 4000, measure_calls: 16000, presentations: 4000, paint_passes: 4000, exact_updates: 0, coarse_updates: 4000 }",
+      "cpu": {
+        "0.5": 559816.65,
+        "0.95": 582788.31,
+        "0.99": 608756.8
+      },
+      "wall": {
+        "0.5": 559827.15,
+        "0.95": 582799.82,
+        "0.99": 608949.16
+      }
+    },
+    {
+      "repeat": 3,
+      "case": "40-1-owner",
+      "variant": "candidate",
+      "final": "FINAL,pixel_hash=3242345613451522353,source_epoch=4200",
+      "counters": "COUNTERS,Counters { owner_reruns: 4000, descriptions: 4000, source_operations: 4000, source_reads: 0, destination_compares: 4192000, text_promotions: 8000, text_bytes_copied: 78402, layout_runs: 4000, measure_calls: 16000, presentations: 4000, paint_passes: 4000, exact_updates: 0, coarse_updates: 4000 }",
+      "cpu": {
+        "0.5": 576939.19,
+        "0.95": 603622.34,
+        "0.99": 606792.3
+      },
+      "wall": {
+        "0.5": 576962.44,
+        "0.95": 603782.85,
+        "0.99": 606804.32
+      }
+    },
+    {
+      "repeat": 3,
+      "case": "40-2-owner",
+      "variant": "candidate",
+      "final": "FINAL,pixel_hash=13881385024434524213,source_epoch=4200",
+      "counters": "COUNTERS,Counters { owner_reruns: 4000, descriptions: 4000, source_operations: 4000, source_reads: 0, destination_compares: 4192000, text_promotions: 12000, text_bytes_copied: 105603, layout_runs: 4000, measure_calls: 24000, presentations: 4000, paint_passes: 4000, exact_updates: 0, coarse_updates: 4000 }",
+      "cpu": {
+        "0.5": 572615.85,
+        "0.95": 631802.71,
+        "0.99": 666205.68
+      },
+      "wall": {
+        "0.5": 572635.02,
+        "0.95": 631934.43,
+        "0.99": 666222.59
+      }
+    },
+    {
+      "repeat": 3,
+      "case": "40-2-owner",
+      "variant": "control",
+      "final": "FINAL,pixel_hash=13881385024434524213,source_epoch=4200",
+      "counters": "COUNTERS,Counters { owner_reruns: 4000, descriptions: 4000, source_operations: 4000, source_reads: 0, destination_compares: 4192000, text_promotions: 12000, text_bytes_copied: 105603, layout_runs: 4000, measure_calls: 24000, presentations: 4000, paint_passes: 4000, exact_updates: 0, coarse_updates: 4000 }",
+      "cpu": {
+        "0.5": 567621.94,
+        "0.95": 629827.58,
+        "0.99": 665585.01
+      },
+      "wall": {
+        "0.5": 567632.6,
+        "0.95": 629837.9,
+        "0.99": 665771.45
+      }
+    },
+    {
+      "repeat": 3,
+      "case": "40-4-owner",
+      "variant": "control",
+      "final": "FINAL,pixel_hash=4997533096679380941,source_epoch=4200",
+      "counters": "COUNTERS,Counters { owner_reruns: 4000, descriptions: 4000, source_operations: 4000, source_reads: 0, destination_compares: 4192000, text_promotions: 20000, text_bytes_copied: 160005, layout_runs: 4000, measure_calls: 40000, presentations: 4000, paint_passes: 4000, exact_updates: 0, coarse_updates: 4000 }",
+      "cpu": {
+        "0.5": 601051.8,
+        "0.95": 628879.29,
+        "0.99": 657719.1
+      },
+      "wall": {
+        "0.5": 601063.73,
+        "0.95": 628912.55,
+        "0.99": 657735.63
+      }
+    },
+    {
+      "repeat": 3,
+      "case": "40-4-owner",
+      "variant": "candidate",
+      "final": "FINAL,pixel_hash=4997533096679380941,source_epoch=4200",
+      "counters": "COUNTERS,Counters { owner_reruns: 4000, descriptions: 4000, source_operations: 4000, source_reads: 0, destination_compares: 4192000, text_promotions: 20000, text_bytes_copied: 160005, layout_runs: 4000, measure_calls: 40000, presentations: 4000, paint_passes: 4000, exact_updates: 0, coarse_updates: 4000 }",
+      "cpu": {
+        "0.5": 631233.23,
+        "0.95": 678812.31,
+        "0.99": 756840.15
+      },
+      "wall": {
+        "0.5": 631362.47,
+        "0.95": 679042.27,
+        "0.99": 756854.21
+      }
+    },
+    {
+      "repeat": 3,
+      "case": "0-4-opaque",
+      "variant": "candidate",
+      "final": "FINAL,pixel_hash=14428137562740546882,source_epoch=4200",
+      "counters": "COUNTERS,Counters { owner_reruns: 4000, descriptions: 4000, source_operations: 4000, source_reads: 0, destination_compares: 28000, text_promotions: 16000, text_bytes_copied: 108804, layout_runs: 4000, measure_calls: 32000, presentations: 4000, paint_passes: 4000, exact_updates: 0, coarse_updates: 4000 }",
+      "cpu": {
+        "0.5": 59173.93,
+        "0.95": 62218.56,
+        "0.99": 68819.99
+      },
+      "wall": {
+        "0.5": 59181.51,
+        "0.95": 62226.23,
+        "0.99": 68835.56
+      }
+    },
+    {
+      "repeat": 3,
+      "case": "0-4-opaque",
+      "variant": "control",
+      "final": "FINAL,pixel_hash=14428137562740546882,source_epoch=4200",
+      "counters": "COUNTERS,Counters { owner_reruns: 4000, descriptions: 4000, source_operations: 4000, source_reads: 0, destination_compares: 28000, text_promotions: 16000, text_bytes_copied: 108804, layout_runs: 4000, measure_calls: 32000, presentations: 4000, paint_passes: 4000, exact_updates: 0, coarse_updates: 4000 }",
+      "cpu": {
+        "0.5": 58407.58,
+        "0.95": 66018.41,
+        "0.99": 68443.48
+      },
+      "wall": {
+        "0.5": 58410.77,
+        "0.95": 66033.2,
+        "0.99": 68456.04
+      }
+    },
+    {
+      "repeat": 3,
+      "case": "1-4-opaque",
+      "variant": "control",
+      "final": "FINAL,pixel_hash=5621740597739618968,source_epoch=4200",
+      "counters": "COUNTERS,Counters { owner_reruns: 4000, descriptions: 4000, source_operations: 4000, source_reads: 0, destination_compares: 132000, text_promotions: 16000, text_bytes_copied: 108804, layout_runs: 4000, measure_calls: 32000, presentations: 4000, paint_passes: 4000, exact_updates: 0, coarse_updates: 4000 }",
+      "cpu": {
+        "0.5": 70114.63,
+        "0.95": 71875.34,
+        "0.99": 79901.15
+      },
+      "wall": {
+        "0.5": 70122.18,
+        "0.95": 71882.78,
+        "0.99": 79928.1
+      }
+    },
+    {
+      "repeat": 3,
+      "case": "1-4-opaque",
+      "variant": "candidate",
+      "final": "FINAL,pixel_hash=5621740597739618968,source_epoch=4200",
+      "counters": "COUNTERS,Counters { owner_reruns: 4000, descriptions: 4000, source_operations: 4000, source_reads: 0, destination_compares: 132000, text_promotions: 16000, text_bytes_copied: 108804, layout_runs: 4000, measure_calls: 32000, presentations: 4000, paint_passes: 4000, exact_updates: 0, coarse_updates: 4000 }",
+      "cpu": {
+        "0.5": 73584.57,
+        "0.95": 82572.89,
+        "0.99": 83447.43
+      },
+      "wall": {
+        "0.5": 73597.0,
+        "0.95": 82589.71,
+        "0.99": 83456.63
+      }
+    },
+    {
+      "repeat": 3,
+      "case": "40-4-opaque",
+      "variant": "candidate",
+      "final": "FINAL,pixel_hash=15188321811029023333,source_epoch=4200",
+      "counters": "COUNTERS,Counters { owner_reruns: 4000, descriptions: 4000, source_operations: 4000, source_reads: 0, destination_compares: 4188000, text_promotions: 16000, text_bytes_copied: 108804, layout_runs: 4000, measure_calls: 32000, presentations: 4000, paint_passes: 4000, exact_updates: 0, coarse_updates: 4000 }",
+      "cpu": {
+        "0.5": 636434.53,
+        "0.95": 667701.28,
+        "0.99": 688311.11
+      },
+      "wall": {
+        "0.5": 636585.59,
+        "0.95": 668820.47,
+        "0.99": 688324.51
+      }
+    },
+    {
+      "repeat": 3,
+      "case": "40-4-opaque",
+      "variant": "control",
+      "final": "FINAL,pixel_hash=15188321811029023333,source_epoch=4200",
+      "counters": "COUNTERS,Counters { owner_reruns: 4000, descriptions: 4000, source_operations: 4000, source_reads: 0, destination_compares: 4188000, text_promotions: 16000, text_bytes_copied: 108804, layout_runs: 4000, measure_calls: 32000, presentations: 4000, paint_passes: 4000, exact_updates: 0, coarse_updates: 4000 }",
+      "cpu": {
+        "0.5": 621773.11,
+        "0.95": 685663.92,
+        "0.99": 701914.83
+      },
+      "wall": {
+        "0.5": 621787.36,
+        "0.95": 685825.71,
+        "0.99": 702057.51
+      }
+    },
+    {
+      "repeat": 4,
+      "case": "0-1-exact",
+      "variant": "control",
+      "final": "FINAL,pixel_hash=3067612491809559190,source_epoch=4200",
+      "counters": "COUNTERS,Counters { owner_reruns: 0, descriptions: 0, source_operations: 4000, source_reads: 4000, destination_compares: 4000, text_promotions: 4000, text_bytes_copied: 27201, layout_runs: 4000, measure_calls: 8000, presentations: 4000, paint_passes: 4000, exact_updates: 4000, coarse_updates: 0 }",
+      "cpu": {
+        "0.5": 17006.53,
+        "0.95": 18380.72,
+        "0.99": 18642.31
+      },
+      "wall": {
+        "0.5": 17009.26,
+        "0.95": 18385.85,
+        "0.99": 18650.45
+      }
+    },
+    {
+      "repeat": 4,
+      "case": "0-1-exact",
+      "variant": "candidate",
+      "final": "FINAL,pixel_hash=3067612491809559190,source_epoch=4200",
+      "counters": "COUNTERS,Counters { owner_reruns: 0, descriptions: 0, source_operations: 4000, source_reads: 4000, destination_compares: 4000, text_promotions: 4000, text_bytes_copied: 27201, layout_runs: 4000, measure_calls: 8000, presentations: 4000, paint_passes: 4000, exact_updates: 4000, coarse_updates: 0 }",
+      "cpu": {
+        "0.5": 17458.97,
+        "0.95": 22500.77,
+        "0.99": 22758.96
+      },
+      "wall": {
+        "0.5": 17465.43,
+        "0.95": 22512.51,
+        "0.99": 23286.67
+      }
+    },
+    {
+      "repeat": 4,
+      "case": "0-2-exact",
+      "variant": "candidate",
+      "final": "FINAL,pixel_hash=8784640471098581594,source_epoch=4200",
+      "counters": "COUNTERS,Counters { owner_reruns: 0, descriptions: 0, source_operations: 4000, source_reads: 8000, destination_compares: 8000, text_promotions: 8000, text_bytes_copied: 54402, layout_runs: 4000, measure_calls: 16000, presentations: 4000, paint_passes: 4000, exact_updates: 4000, coarse_updates: 0 }",
+      "cpu": {
+        "0.5": 31941.14,
+        "0.95": 37484.49,
+        "0.99": 40251.39
+      },
+      "wall": {
+        "0.5": 31945.53,
+        "0.95": 37494.56,
+        "0.99": 40255.35
+      }
+    },
+    {
+      "repeat": 4,
+      "case": "0-2-exact",
+      "variant": "control",
+      "final": "FINAL,pixel_hash=8784640471098581594,source_epoch=4200",
+      "counters": "COUNTERS,Counters { owner_reruns: 0, descriptions: 0, source_operations: 4000, source_reads: 8000, destination_compares: 8000, text_promotions: 8000, text_bytes_copied: 54402, layout_runs: 4000, measure_calls: 16000, presentations: 4000, paint_passes: 4000, exact_updates: 4000, coarse_updates: 0 }",
+      "cpu": {
+        "0.5": 31327.19,
+        "0.95": 32761.19,
+        "0.99": 33547.87
+      },
+      "wall": {
+        "0.5": 31332.28,
+        "0.95": 32767.87,
+        "0.99": 33557.95
+      }
+    },
+    {
+      "repeat": 4,
+      "case": "0-4-exact",
+      "variant": "control",
+      "final": "FINAL,pixel_hash=14428137562740546882,source_epoch=4200",
+      "counters": "COUNTERS,Counters { owner_reruns: 0, descriptions: 0, source_operations: 4000, source_reads: 16000, destination_compares: 16000, text_promotions: 16000, text_bytes_copied: 108804, layout_runs: 4000, measure_calls: 32000, presentations: 4000, paint_passes: 4000, exact_updates: 4000, coarse_updates: 0 }",
+      "cpu": {
+        "0.5": 57185.89,
+        "0.95": 61923.3,
+        "0.99": 66399.13
+      },
+      "wall": {
+        "0.5": 57197.58,
+        "0.95": 61953.02,
+        "0.99": 66416.11
+      }
+    },
+    {
+      "repeat": 4,
+      "case": "0-4-exact",
+      "variant": "candidate",
+      "final": "FINAL,pixel_hash=14428137562740546882,source_epoch=4200",
+      "counters": "COUNTERS,Counters { owner_reruns: 0, descriptions: 0, source_operations: 4000, source_reads: 16000, destination_compares: 16000, text_promotions: 16000, text_bytes_copied: 108804, layout_runs: 4000, measure_calls: 32000, presentations: 4000, paint_passes: 4000, exact_updates: 4000, coarse_updates: 0 }",
+      "cpu": {
+        "0.5": 60838.56,
+        "0.95": 64260.01,
+        "0.99": 64863.95
+      },
+      "wall": {
+        "0.5": 60847.34,
+        "0.95": 64271.87,
+        "0.99": 64937.13
+      }
+    },
+    {
+      "repeat": 4,
+      "case": "0-1-owner",
+      "variant": "candidate",
+      "final": "FINAL,pixel_hash=1209351341388854458,source_epoch=4200",
+      "counters": "COUNTERS,Counters { owner_reruns: 4000, descriptions: 4000, source_operations: 4000, source_reads: 0, destination_compares: 32000, text_promotions: 8000, text_bytes_copied: 78402, layout_runs: 4000, measure_calls: 16000, presentations: 4000, paint_passes: 4000, exact_updates: 0, coarse_updates: 4000 }",
+      "cpu": {
+        "0.5": 27256.83,
+        "0.95": 42040.26,
+        "0.99": 42743.89
+      },
+      "wall": {
+        "0.5": 27354.41,
+        "0.95": 42059.64,
+        "0.99": 42760.75
+      }
+    },
+    {
+      "repeat": 4,
+      "case": "0-1-owner",
+      "variant": "control",
+      "final": "FINAL,pixel_hash=1209351341388854458,source_epoch=4200",
+      "counters": "COUNTERS,Counters { owner_reruns: 4000, descriptions: 4000, source_operations: 4000, source_reads: 0, destination_compares: 32000, text_promotions: 8000, text_bytes_copied: 78402, layout_runs: 4000, measure_calls: 16000, presentations: 4000, paint_passes: 4000, exact_updates: 0, coarse_updates: 4000 }",
+      "cpu": {
+        "0.5": 26629.85,
+        "0.95": 29521.39,
+        "0.99": 30958.19
+      },
+      "wall": {
+        "0.5": 26636.55,
+        "0.95": 29528.29,
+        "0.99": 30966.78
+      }
+    },
+    {
+      "repeat": 4,
+      "case": "0-2-owner",
+      "variant": "control",
+      "final": "FINAL,pixel_hash=3529418378583843142,source_epoch=4200",
+      "counters": "COUNTERS,Counters { owner_reruns: 4000, descriptions: 4000, source_operations: 4000, source_reads: 0, destination_compares: 32000, text_promotions: 12000, text_bytes_copied: 105603, layout_runs: 4000, measure_calls: 24000, presentations: 4000, paint_passes: 4000, exact_updates: 0, coarse_updates: 4000 }",
+      "cpu": {
+        "0.5": 40015.15,
+        "0.95": 42855.69,
+        "0.99": 45381.76
+      },
+      "wall": {
+        "0.5": 40022.01,
+        "0.95": 42861.25,
+        "0.99": 45388.59
+      }
+    },
+    {
+      "repeat": 4,
+      "case": "0-2-owner",
+      "variant": "candidate",
+      "final": "FINAL,pixel_hash=3529418378583843142,source_epoch=4200",
+      "counters": "COUNTERS,Counters { owner_reruns: 4000, descriptions: 4000, source_operations: 4000, source_reads: 0, destination_compares: 32000, text_promotions: 12000, text_bytes_copied: 105603, layout_runs: 4000, measure_calls: 24000, presentations: 4000, paint_passes: 4000, exact_updates: 0, coarse_updates: 4000 }",
+      "cpu": {
+        "0.5": 41377.91,
+        "0.95": 43444.01,
+        "0.99": 44632.64
+      },
+      "wall": {
+        "0.5": 41384.17,
+        "0.95": 43449.55,
+        "0.99": 44644.99
+      }
+    },
+    {
+      "repeat": 4,
+      "case": "0-4-owner",
+      "variant": "candidate",
+      "final": "FINAL,pixel_hash=17102854550306425806,source_epoch=4200",
+      "counters": "COUNTERS,Counters { owner_reruns: 4000, descriptions: 4000, source_operations: 4000, source_reads: 0, destination_compares: 32000, text_promotions: 20000, text_bytes_copied: 160005, layout_runs: 4000, measure_calls: 40000, presentations: 4000, paint_passes: 4000, exact_updates: 0, coarse_updates: 4000 }",
+      "cpu": {
+        "0.5": 68731.31,
+        "0.95": 79101.65,
+        "0.99": 85992.52
+      },
+      "wall": {
+        "0.5": 68769.94,
+        "0.95": 79141.21,
+        "0.99": 86010.62
+      }
+    },
+    {
+      "repeat": 4,
+      "case": "0-4-owner",
+      "variant": "control",
+      "final": "FINAL,pixel_hash=17102854550306425806,source_epoch=4200",
+      "counters": "COUNTERS,Counters { owner_reruns: 4000, descriptions: 4000, source_operations: 4000, source_reads: 0, destination_compares: 32000, text_promotions: 20000, text_bytes_copied: 160005, layout_runs: 4000, measure_calls: 40000, presentations: 4000, paint_passes: 4000, exact_updates: 0, coarse_updates: 4000 }",
+      "cpu": {
+        "0.5": 73561.71,
+        "0.95": 87559.97,
+        "0.99": 94462.18
+      },
+      "wall": {
+        "0.5": 73638.09,
+        "0.95": 87574.68,
+        "0.99": 94493.47
+      }
+    },
+    {
+      "repeat": 4,
+      "case": "1-1-exact",
+      "variant": "control",
+      "final": "FINAL,pixel_hash=8866289588925863500,source_epoch=4200",
+      "counters": "COUNTERS,Counters { owner_reruns: 0, descriptions: 0, source_operations: 4000, source_reads: 4000, destination_compares: 4000, text_promotions: 4000, text_bytes_copied: 27201, layout_runs: 4000, measure_calls: 8000, presentations: 4000, paint_passes: 4000, exact_updates: 4000, coarse_updates: 0 }",
+      "cpu": {
+        "0.5": 16760.66,
+        "0.95": 19493.41,
+        "0.99": 21000.14
+      },
+      "wall": {
+        "0.5": 16769.41,
+        "0.95": 19501.84,
+        "0.99": 21042.94
+      }
+    },
+    {
+      "repeat": 4,
+      "case": "1-1-exact",
+      "variant": "candidate",
+      "final": "FINAL,pixel_hash=8866289588925863500,source_epoch=4200",
+      "counters": "COUNTERS,Counters { owner_reruns: 0, descriptions: 0, source_operations: 4000, source_reads: 4000, destination_compares: 4000, text_promotions: 4000, text_bytes_copied: 27201, layout_runs: 4000, measure_calls: 8000, presentations: 4000, paint_passes: 4000, exact_updates: 4000, coarse_updates: 0 }",
+      "cpu": {
+        "0.5": 15333.87,
+        "0.95": 17599.45,
+        "0.99": 17722.47
+      },
+      "wall": {
+        "0.5": 15341.93,
+        "0.95": 17611.71,
+        "0.99": 17733.92
+      }
+    },
+    {
+      "repeat": 4,
+      "case": "1-2-exact",
+      "variant": "candidate",
+      "final": "FINAL,pixel_hash=9269140401638406208,source_epoch=4200",
+      "counters": "COUNTERS,Counters { owner_reruns: 0, descriptions: 0, source_operations: 4000, source_reads: 8000, destination_compares: 8000, text_promotions: 8000, text_bytes_copied: 54402, layout_runs: 4000, measure_calls: 16000, presentations: 4000, paint_passes: 4000, exact_updates: 4000, coarse_updates: 0 }",
+      "cpu": {
+        "0.5": 29210.4,
+        "0.95": 31902.18,
+        "0.99": 32651.79
+      },
+      "wall": {
+        "0.5": 29213.81,
+        "0.95": 31912.06,
+        "0.99": 32662.67
+      }
+    },
+    {
+      "repeat": 4,
+      "case": "1-2-exact",
+      "variant": "control",
+      "final": "FINAL,pixel_hash=9269140401638406208,source_epoch=4200",
+      "counters": "COUNTERS,Counters { owner_reruns: 0, descriptions: 0, source_operations: 4000, source_reads: 8000, destination_compares: 8000, text_promotions: 8000, text_bytes_copied: 54402, layout_runs: 4000, measure_calls: 16000, presentations: 4000, paint_passes: 4000, exact_updates: 4000, coarse_updates: 0 }",
+      "cpu": {
+        "0.5": 38693.26,
+        "0.95": 44187.4,
+        "0.99": 50754.77
+      },
+      "wall": {
+        "0.5": 38697.92,
+        "0.95": 44200.57,
+        "0.99": 50768.92
+      }
+    },
+    {
+      "repeat": 4,
+      "case": "1-4-exact",
+      "variant": "control",
+      "final": "FINAL,pixel_hash=5621740597739618968,source_epoch=4200",
+      "counters": "COUNTERS,Counters { owner_reruns: 0, descriptions: 0, source_operations: 4000, source_reads: 16000, destination_compares: 16000, text_promotions: 16000, text_bytes_copied: 108804, layout_runs: 4000, measure_calls: 32000, presentations: 4000, paint_passes: 4000, exact_updates: 4000, coarse_updates: 0 }",
+      "cpu": {
+        "0.5": 70352.67,
+        "0.95": 77222.72,
+        "0.99": 89531.79
+      },
+      "wall": {
+        "0.5": 70373.14,
+        "0.95": 77241.45,
+        "0.99": 89553.99
+      }
+    },
+    {
+      "repeat": 4,
+      "case": "1-4-exact",
+      "variant": "candidate",
+      "final": "FINAL,pixel_hash=5621740597739618968,source_epoch=4200",
+      "counters": "COUNTERS,Counters { owner_reruns: 0, descriptions: 0, source_operations: 4000, source_reads: 16000, destination_compares: 16000, text_promotions: 16000, text_bytes_copied: 108804, layout_runs: 4000, measure_calls: 32000, presentations: 4000, paint_passes: 4000, exact_updates: 4000, coarse_updates: 0 }",
+      "cpu": {
+        "0.5": 63551.16,
+        "0.95": 71575.88,
+        "0.99": 81021.47
+      },
+      "wall": {
+        "0.5": 63570.46,
+        "0.95": 71591.54,
+        "0.99": 81041.39
+      }
+    },
+    {
+      "repeat": 4,
+      "case": "1-1-owner",
+      "variant": "candidate",
+      "final": "FINAL,pixel_hash=6935651192824017056,source_epoch=4200",
+      "counters": "COUNTERS,Counters { owner_reruns: 4000, descriptions: 4000, source_operations: 4000, source_reads: 0, destination_compares: 136000, text_promotions: 8000, text_bytes_copied: 78402, layout_runs: 4000, measure_calls: 16000, presentations: 4000, paint_passes: 4000, exact_updates: 0, coarse_updates: 4000 }",
+      "cpu": {
+        "0.5": 44789.45,
+        "0.95": 52053.32,
+        "0.99": 53248.47
+      },
+      "wall": {
+        "0.5": 44802.3,
+        "0.95": 52083.37,
+        "0.99": 53264.6
+      }
+    },
+    {
+      "repeat": 4,
+      "case": "1-1-owner",
+      "variant": "control",
+      "final": "FINAL,pixel_hash=6935651192824017056,source_epoch=4200",
+      "counters": "COUNTERS,Counters { owner_reruns: 4000, descriptions: 4000, source_operations: 4000, source_reads: 0, destination_compares: 136000, text_promotions: 8000, text_bytes_copied: 78402, layout_runs: 4000, measure_calls: 16000, presentations: 4000, paint_passes: 4000, exact_updates: 0, coarse_updates: 4000 }",
+      "cpu": {
+        "0.5": 39960.84,
+        "0.95": 42986.25,
+        "0.99": 48284.92
+      },
+      "wall": {
+        "0.5": 39973.12,
+        "0.95": 43001.3,
+        "0.99": 48298.17
+      }
+    },
+    {
+      "repeat": 4,
+      "case": "1-2-owner",
+      "variant": "control",
+      "final": "FINAL,pixel_hash=7697983997524302108,source_epoch=4200",
+      "counters": "COUNTERS,Counters { owner_reruns: 4000, descriptions: 4000, source_operations: 4000, source_reads: 0, destination_compares: 136000, text_promotions: 12000, text_bytes_copied: 105603, layout_runs: 4000, measure_calls: 24000, presentations: 4000, paint_passes: 4000, exact_updates: 0, coarse_updates: 4000 }",
+      "cpu": {
+        "0.5": 57673.0,
+        "0.95": 66325.59,
+        "0.99": 67894.65
+      },
+      "wall": {
+        "0.5": 57690.31,
+        "0.95": 66366.51,
+        "0.99": 67905.2
+      }
+    },
+    {
+      "repeat": 4,
+      "case": "1-2-owner",
+      "variant": "candidate",
+      "final": "FINAL,pixel_hash=7697983997524302108,source_epoch=4200",
+      "counters": "COUNTERS,Counters { owner_reruns: 4000, descriptions: 4000, source_operations: 4000, source_reads: 0, destination_compares: 136000, text_promotions: 12000, text_bytes_copied: 105603, layout_runs: 4000, measure_calls: 24000, presentations: 4000, paint_passes: 4000, exact_updates: 0, coarse_updates: 4000 }",
+      "cpu": {
+        "0.5": 55449.01,
+        "0.95": 66736.15,
+        "0.99": 70721.37
+      },
+      "wall": {
+        "0.5": 55463.83,
+        "0.95": 66746.23,
+        "0.99": 70738.83
+      }
+    },
+    {
+      "repeat": 4,
+      "case": "1-4-owner",
+      "variant": "candidate",
+      "final": "FINAL,pixel_hash=7148476773328723988,source_epoch=4200",
+      "counters": "COUNTERS,Counters { owner_reruns: 4000, descriptions: 4000, source_operations: 4000, source_reads: 0, destination_compares: 136000, text_promotions: 20000, text_bytes_copied: 160005, layout_runs: 4000, measure_calls: 40000, presentations: 4000, paint_passes: 4000, exact_updates: 0, coarse_updates: 4000 }",
+      "cpu": {
+        "0.5": 84626.85,
+        "0.95": 92104.93,
+        "0.99": 113005.6
+      },
+      "wall": {
+        "0.5": 84647.57,
+        "0.95": 92128.74,
+        "0.99": 113025.2
+      }
+    },
+    {
+      "repeat": 4,
+      "case": "1-4-owner",
+      "variant": "control",
+      "final": "FINAL,pixel_hash=7148476773328723988,source_epoch=4200",
+      "counters": "COUNTERS,Counters { owner_reruns: 4000, descriptions: 4000, source_operations: 4000, source_reads: 0, destination_compares: 136000, text_promotions: 20000, text_bytes_copied: 160005, layout_runs: 4000, measure_calls: 40000, presentations: 4000, paint_passes: 4000, exact_updates: 0, coarse_updates: 4000 }",
+      "cpu": {
+        "0.5": 83103.28,
+        "0.95": 111323.33,
+        "0.99": 123043.4
+      },
+      "wall": {
+        "0.5": 83118.29,
+        "0.95": 111347.84,
+        "0.99": 123059.47
+      }
+    },
+    {
+      "repeat": 4,
+      "case": "40-1-exact",
+      "variant": "control",
+      "final": "FINAL,pixel_hash=10648945254885490729,source_epoch=4200",
+      "counters": "COUNTERS,Counters { owner_reruns: 0, descriptions: 0, source_operations: 4000, source_reads: 4000, destination_compares: 4000, text_promotions: 4000, text_bytes_copied: 27201, layout_runs: 4000, measure_calls: 8000, presentations: 4000, paint_passes: 4000, exact_updates: 4000, coarse_updates: 0 }",
+      "cpu": {
+        "0.5": 15609.4,
+        "0.95": 17436.84,
+        "0.99": 20345.91
+      },
+      "wall": {
+        "0.5": 15617.55,
+        "0.95": 17444.57,
+        "0.99": 20354.95
+      }
+    },
+    {
+      "repeat": 4,
+      "case": "40-1-exact",
+      "variant": "candidate",
+      "final": "FINAL,pixel_hash=10648945254885490729,source_epoch=4200",
+      "counters": "COUNTERS,Counters { owner_reruns: 0, descriptions: 0, source_operations: 4000, source_reads: 4000, destination_compares: 4000, text_promotions: 4000, text_bytes_copied: 27201, layout_runs: 4000, measure_calls: 8000, presentations: 4000, paint_passes: 4000, exact_updates: 4000, coarse_updates: 0 }",
+      "cpu": {
+        "0.5": 15734.63,
+        "0.95": 18775.36,
+        "0.99": 19441.21
+      },
+      "wall": {
+        "0.5": 15737.98,
+        "0.95": 18785.11,
+        "0.99": 19447.85
+      }
+    },
+    {
+      "repeat": 4,
+      "case": "40-2-exact",
+      "variant": "candidate",
+      "final": "FINAL,pixel_hash=9975236451948260733,source_epoch=4200",
+      "counters": "COUNTERS,Counters { owner_reruns: 0, descriptions: 0, source_operations: 4000, source_reads: 8000, destination_compares: 8000, text_promotions: 8000, text_bytes_copied: 54402, layout_runs: 4000, measure_calls: 16000, presentations: 4000, paint_passes: 4000, exact_updates: 4000, coarse_updates: 0 }",
+      "cpu": {
+        "0.5": 30564.55,
+        "0.95": 37607.52,
+        "0.99": 47521.08
+      },
+      "wall": {
+        "0.5": 30569.95,
+        "0.95": 37614.08,
+        "0.99": 47531.83
+      }
+    },
+    {
+      "repeat": 4,
+      "case": "40-2-exact",
+      "variant": "control",
+      "final": "FINAL,pixel_hash=9975236451948260733,source_epoch=4200",
+      "counters": "COUNTERS,Counters { owner_reruns: 0, descriptions: 0, source_operations: 4000, source_reads: 8000, destination_compares: 8000, text_promotions: 8000, text_bytes_copied: 54402, layout_runs: 4000, measure_calls: 16000, presentations: 4000, paint_passes: 4000, exact_updates: 4000, coarse_updates: 0 }",
+      "cpu": {
+        "0.5": 485457.33,
+        "0.95": 525404.65,
+        "0.99": 545501.89
+      },
+      "wall": {
+        "0.5": 485476.33,
+        "0.95": 525429.29,
+        "0.99": 545519.65
+      }
+    },
+    {
+      "repeat": 4,
+      "case": "40-4-exact",
+      "variant": "control",
+      "final": "FINAL,pixel_hash=15188321811029023333,source_epoch=4200",
+      "counters": "COUNTERS,Counters { owner_reruns: 0, descriptions: 0, source_operations: 4000, source_reads: 16000, destination_compares: 16000, text_promotions: 16000, text_bytes_copied: 108804, layout_runs: 4000, measure_calls: 32000, presentations: 4000, paint_passes: 4000, exact_updates: 4000, coarse_updates: 0 }",
+      "cpu": {
+        "0.5": 486696.57,
+        "0.95": 527269.55,
+        "0.99": 532421.27
+      },
+      "wall": {
+        "0.5": 486709.74,
+        "0.95": 527423.95,
+        "0.99": 532612.9
+      }
+    },
+    {
+      "repeat": 4,
+      "case": "40-4-exact",
+      "variant": "candidate",
+      "final": "FINAL,pixel_hash=15188321811029023333,source_epoch=4200",
+      "counters": "COUNTERS,Counters { owner_reruns: 0, descriptions: 0, source_operations: 4000, source_reads: 16000, destination_compares: 16000, text_promotions: 16000, text_bytes_copied: 108804, layout_runs: 4000, measure_calls: 32000, presentations: 4000, paint_passes: 4000, exact_updates: 4000, coarse_updates: 0 }",
+      "cpu": {
+        "0.5": 58828.46,
+        "0.95": 63414.21,
+        "0.99": 69446.56
+      },
+      "wall": {
+        "0.5": 58838.47,
+        "0.95": 63427.09,
+        "0.99": 69463.64
+      }
+    },
+    {
+      "repeat": 4,
+      "case": "40-1-owner",
+      "variant": "candidate",
+      "final": "FINAL,pixel_hash=3242345613451522353,source_epoch=4200",
+      "counters": "COUNTERS,Counters { owner_reruns: 4000, descriptions: 4000, source_operations: 4000, source_reads: 0, destination_compares: 4192000, text_promotions: 8000, text_bytes_copied: 78402, layout_runs: 4000, measure_calls: 16000, presentations: 4000, paint_passes: 4000, exact_updates: 0, coarse_updates: 4000 }",
+      "cpu": {
+        "0.5": 619557.04,
+        "0.95": 670612.49,
+        "0.99": 684697.3
+      },
+      "wall": {
+        "0.5": 619590.25,
+        "0.95": 670647.6,
+        "0.99": 684769.43
+      }
+    },
+    {
+      "repeat": 4,
+      "case": "40-1-owner",
+      "variant": "control",
+      "final": "FINAL,pixel_hash=3242345613451522353,source_epoch=4200",
+      "counters": "COUNTERS,Counters { owner_reruns: 4000, descriptions: 4000, source_operations: 4000, source_reads: 0, destination_compares: 4192000, text_promotions: 8000, text_bytes_copied: 78402, layout_runs: 4000, measure_calls: 16000, presentations: 4000, paint_passes: 4000, exact_updates: 0, coarse_updates: 4000 }",
+      "cpu": {
+        "0.5": 598220.06,
+        "0.95": 647865.54,
+        "0.99": 652509.2
+      },
+      "wall": {
+        "0.5": 598241.23,
+        "0.95": 647898.84,
+        "0.99": 652706.68
+      }
+    },
+    {
+      "repeat": 4,
+      "case": "40-2-owner",
+      "variant": "control",
+      "final": "FINAL,pixel_hash=13881385024434524213,source_epoch=4200",
+      "counters": "COUNTERS,Counters { owner_reruns: 4000, descriptions: 4000, source_operations: 4000, source_reads: 0, destination_compares: 4192000, text_promotions: 12000, text_bytes_copied: 105603, layout_runs: 4000, measure_calls: 24000, presentations: 4000, paint_passes: 4000, exact_updates: 0, coarse_updates: 4000 }",
+      "cpu": {
+        "0.5": 583245.46,
+        "0.95": 616023.18,
+        "0.99": 621797.47
+      },
+      "wall": {
+        "0.5": 583263.38,
+        "0.95": 616269.5,
+        "0.99": 621811.01
+      }
+    },
+    {
+      "repeat": 4,
+      "case": "40-2-owner",
+      "variant": "candidate",
+      "final": "FINAL,pixel_hash=13881385024434524213,source_epoch=4200",
+      "counters": "COUNTERS,Counters { owner_reruns: 4000, descriptions: 4000, source_operations: 4000, source_reads: 0, destination_compares: 4192000, text_promotions: 12000, text_bytes_copied: 105603, layout_runs: 4000, measure_calls: 24000, presentations: 4000, paint_passes: 4000, exact_updates: 0, coarse_updates: 4000 }",
+      "cpu": {
+        "0.5": 662297.12,
+        "0.95": 721484.27,
+        "0.99": 757877.39
+      },
+      "wall": {
+        "0.5": 662313.93,
+        "0.95": 721525.2,
+        "0.99": 758119.28
+      }
+    },
+    {
+      "repeat": 4,
+      "case": "40-4-owner",
+      "variant": "candidate",
+      "final": "FINAL,pixel_hash=4997533096679380941,source_epoch=4200",
+      "counters": "COUNTERS,Counters { owner_reruns: 4000, descriptions: 4000, source_operations: 4000, source_reads: 0, destination_compares: 4192000, text_promotions: 20000, text_bytes_copied: 160005, layout_runs: 4000, measure_calls: 40000, presentations: 4000, paint_passes: 4000, exact_updates: 0, coarse_updates: 4000 }",
+      "cpu": {
+        "0.5": 647941.99,
+        "0.95": 725942.06,
+        "0.99": 739834.82
+      },
+      "wall": {
+        "0.5": 647959.06,
+        "0.95": 725963.25,
+        "0.99": 739869.48
+      }
+    },
+    {
+      "repeat": 4,
+      "case": "40-4-owner",
+      "variant": "control",
+      "final": "FINAL,pixel_hash=4997533096679380941,source_epoch=4200",
+      "counters": "COUNTERS,Counters { owner_reruns: 4000, descriptions: 4000, source_operations: 4000, source_reads: 0, destination_compares: 4192000, text_promotions: 20000, text_bytes_copied: 160005, layout_runs: 4000, measure_calls: 40000, presentations: 4000, paint_passes: 4000, exact_updates: 0, coarse_updates: 4000 }",
+      "cpu": {
+        "0.5": 719307.67,
+        "0.95": 790355.05,
+        "0.99": 834115.56
+      },
+      "wall": {
+        "0.5": 719474.44,
+        "0.95": 790796.78,
+        "0.99": 834143.83
+      }
+    },
+    {
+      "repeat": 4,
+      "case": "0-4-opaque",
+      "variant": "control",
+      "final": "FINAL,pixel_hash=14428137562740546882,source_epoch=4200",
+      "counters": "COUNTERS,Counters { owner_reruns: 4000, descriptions: 4000, source_operations: 4000, source_reads: 0, destination_compares: 28000, text_promotions: 16000, text_bytes_copied: 108804, layout_runs: 4000, measure_calls: 32000, presentations: 4000, paint_passes: 4000, exact_updates: 0, coarse_updates: 4000 }",
+      "cpu": {
+        "0.5": 65287.64,
+        "0.95": 78939.65,
+        "0.99": 83757.71
+      },
+      "wall": {
+        "0.5": 65298.5,
+        "0.95": 78997.65,
+        "0.99": 83791.86
+      }
+    },
+    {
+      "repeat": 4,
+      "case": "0-4-opaque",
+      "variant": "candidate",
+      "final": "FINAL,pixel_hash=14428137562740546882,source_epoch=4200",
+      "counters": "COUNTERS,Counters { owner_reruns: 4000, descriptions: 4000, source_operations: 4000, source_reads: 0, destination_compares: 28000, text_promotions: 16000, text_bytes_copied: 108804, layout_runs: 4000, measure_calls: 32000, presentations: 4000, paint_passes: 4000, exact_updates: 0, coarse_updates: 4000 }",
+      "cpu": {
+        "0.5": 66727.14,
+        "0.95": 82928.76,
+        "0.99": 92823.39
+      },
+      "wall": {
+        "0.5": 66749.14,
+        "0.95": 82952.89,
+        "0.99": 92863.61
+      }
+    },
+    {
+      "repeat": 4,
+      "case": "1-4-opaque",
+      "variant": "candidate",
+      "final": "FINAL,pixel_hash=5621740597739618968,source_epoch=4200",
+      "counters": "COUNTERS,Counters { owner_reruns: 4000, descriptions: 4000, source_operations: 4000, source_reads: 0, destination_compares: 132000, text_promotions: 16000, text_bytes_copied: 108804, layout_runs: 4000, measure_calls: 32000, presentations: 4000, paint_passes: 4000, exact_updates: 0, coarse_updates: 4000 }",
+      "cpu": {
+        "0.5": 77801.9,
+        "0.95": 86325.45,
+        "0.99": 99303.39
+      },
+      "wall": {
+        "0.5": 77815.22,
+        "0.95": 86344.36,
+        "0.99": 99333.87
+      }
+    },
+    {
+      "repeat": 4,
+      "case": "1-4-opaque",
+      "variant": "control",
+      "final": "FINAL,pixel_hash=5621740597739618968,source_epoch=4200",
+      "counters": "COUNTERS,Counters { owner_reruns: 4000, descriptions: 4000, source_operations: 4000, source_reads: 0, destination_compares: 132000, text_promotions: 16000, text_bytes_copied: 108804, layout_runs: 4000, measure_calls: 32000, presentations: 4000, paint_passes: 4000, exact_updates: 0, coarse_updates: 4000 }",
+      "cpu": {
+        "0.5": 73510.22,
+        "0.95": 85270.27,
+        "0.99": 87067.24
+      },
+      "wall": {
+        "0.5": 73531.08,
+        "0.95": 85290.98,
+        "0.99": 87088.46
+      }
+    },
+    {
+      "repeat": 4,
+      "case": "40-4-opaque",
+      "variant": "control",
+      "final": "FINAL,pixel_hash=15188321811029023333,source_epoch=4200",
+      "counters": "COUNTERS,Counters { owner_reruns: 4000, descriptions: 4000, source_operations: 4000, source_reads: 0, destination_compares: 4188000, text_promotions: 16000, text_bytes_copied: 108804, layout_runs: 4000, measure_calls: 32000, presentations: 4000, paint_passes: 4000, exact_updates: 0, coarse_updates: 4000 }",
+      "cpu": {
+        "0.5": 690137.95,
+        "0.95": 750081.52,
+        "0.99": 809016.7
+      },
+      "wall": {
+        "0.5": 690152.25,
+        "0.95": 750636.11,
+        "0.99": 809399.93
+      }
+    },
+    {
+      "repeat": 4,
+      "case": "40-4-opaque",
+      "variant": "candidate",
+      "final": "FINAL,pixel_hash=15188321811029023333,source_epoch=4200",
+      "counters": "COUNTERS,Counters { owner_reruns: 4000, descriptions: 4000, source_operations: 4000, source_reads: 0, destination_compares: 4188000, text_promotions: 16000, text_bytes_copied: 108804, layout_runs: 4000, measure_calls: 32000, presentations: 4000, paint_passes: 4000, exact_updates: 0, coarse_updates: 4000 }",
+      "cpu": {
+        "0.5": 684749.0,
+        "0.95": 763730.83,
+        "0.99": 790842.87
+      },
+      "wall": {
+        "0.5": 684767.61,
+        "0.95": 763762.58,
+        "0.99": 791100.54
+      }
+    }
+  ],
+  "ratios": {
+    "0-1-exact": {
+      "paired_ratios": [
+        1.004054476038013,
+        0.9612077273330092,
+        1.0407184702308518,
+        1.0148571450132817,
+        1.0266038986201185
+      ],
+      "median": 1.0148571450132817,
+      "range": [
+        0.9612077273330092,
+        1.0407184702308518
+      ]
+    },
+    "0-2-exact": {
+      "paired_ratios": [
+        1.0308864176498782,
+        1.0193344441271177,
+        1.0331051600715069,
+        1.019605352332365,
+        1.019597991393419
+      ],
+      "median": 1.019605352332365,
+      "range": [
+        1.0193344441271177,
+        1.0331051600715069
+      ]
+    },
+    "0-4-exact": {
+      "paired_ratios": [
+        1.0172757829127321,
+        1.0383393154376686,
+        1.0894904895421647,
+        1.0449253261213483,
+        1.0638736233710797
+      ],
+      "median": 1.0449253261213483,
+      "range": [
+        1.0172757829127321,
+        1.0894904895421647
+      ]
+    },
+    "0-1-owner": {
+      "paired_ratios": [
+        0.9851933056504344,
+        1.0046821426563992,
+        0.9735458748636744,
+        1.0008339372837194,
+        1.0235442557881476
+      ],
+      "median": 1.0008339372837194,
+      "range": [
+        0.9735458748636744,
+        1.0235442557881476
+      ]
+    },
+    "0-2-owner": {
+      "paired_ratios": [
+        1.0272926977779275,
+        0.9962117485248021,
+        1.003702546041675,
+        1.0350369725092046,
+        1.034056101251651
+      ],
+      "median": 1.0272926977779275,
+      "range": [
+        0.9962117485248021,
+        1.0350369725092046
+      ]
+    },
+    "0-4-owner": {
+      "paired_ratios": [
+        1.0250333846690514,
+        0.9353055346068687,
+        0.9875544672137783,
+        0.9725228541633154,
+        0.9343354035679702
+      ],
+      "median": 0.9725228541633154,
+      "range": [
+        0.9343354035679702,
+        1.0250333846690514
+      ]
+    },
+    "1-1-exact": {
+      "paired_ratios": [
+        0.9805865092776044,
+        0.9808588243645694,
+        0.9064591972617746,
+        0.9800822530653126,
+        0.9148726840112502
+      ],
+      "median": 0.9800822530653126,
+      "range": [
+        0.9064591972617746,
+        0.9808588243645694
+      ]
+    },
+    "1-2-exact": {
+      "paired_ratios": [
+        0.69197628107215,
+        0.7162589504840383,
+        0.7131190815023264,
+        0.7439212680610201,
+        0.7549221750764862
+      ],
+      "median": 0.7162589504840383,
+      "range": [
+        0.69197628107215,
+        0.7549221750764862
+      ]
+    },
+    "1-4-exact": {
+      "paired_ratios": [
+        0.8563083343164812,
+        0.8534545644289449,
+        0.9081375080397759,
+        0.8671107686651517,
+        0.9033226457503319
+      ],
+      "median": 0.8671107686651517,
+      "range": [
+        0.8534545644289449,
+        0.9081375080397759
+      ]
+    },
+    "1-1-owner": {
+      "paired_ratios": [
+        1.0046793260950515,
+        0.9668318128766404,
+        1.0265551252395342,
+        1.012876187807896,
+        1.1208335460415748
+      ],
+      "median": 1.012876187807896,
+      "range": [
+        0.9668318128766404,
+        1.1208335460415748
+      ]
+    },
+    "1-2-owner": {
+      "paired_ratios": [
+        0.979433825178756,
+        1.0061922588022065,
+        0.98438723690651,
+        0.9889827979563098,
+        0.9614379345621001
+      ],
+      "median": 0.98438723690651,
+      "range": [
+        0.9614379345621001,
+        1.0061922588022065
+      ]
+    },
+    "1-4-owner": {
+      "paired_ratios": [
+        1.0050949164011864,
+        0.9342897001083336,
+        0.9888034574396446,
+        1.0551681278203016,
+        1.018333452061098
+      ],
+      "median": 1.0050949164011864,
+      "range": [
+        0.9342897001083336,
+        1.0551681278203016
+      ]
+    },
+    "40-1-exact": {
+      "paired_ratios": [
+        1.0744822247443107,
+        1.0390776295211792,
+        1.0592323722178605,
+        1.0171460999224118,
+        1.0080227298935256
+      ],
+      "median": 1.0390776295211792,
+      "range": [
+        1.0080227298935256,
+        1.0744822247443107
+      ]
+    },
+    "40-2-exact": {
+      "paired_ratios": [
+        0.06692838218491848,
+        0.06599139673524675,
+        0.06357174525282432,
+        0.0673022489338523,
+        0.06296032238301974
+      ],
+      "median": 0.06599139673524675,
+      "range": [
+        0.06296032238301974,
+        0.0673022489338523
+      ]
+    },
+    "40-4-exact": {
+      "paired_ratios": [
+        0.1268930110329299,
+        0.11746300782740368,
+        0.12428135107687881,
+        0.1256104388023835,
+        0.12087297019578337
+      ],
+      "median": 0.12428135107687881,
+      "range": [
+        0.11746300782740368,
+        0.1268930110329299
+      ]
+    },
+    "40-1-owner": {
+      "paired_ratios": [
+        0.9614247955710656,
+        0.9708711138848265,
+        0.9969071326338748,
+        1.0305859784627698,
+        1.0356674431813604
+      ],
+      "median": 0.9969071326338748,
+      "range": [
+        0.9614247955710656,
+        1.0356674431813604
+      ]
+    },
+    "40-2-owner": {
+      "paired_ratios": [
+        1.0231357428876762,
+        0.9455748439655107,
+        0.9944522026143622,
+        1.0087979509741996,
+        1.1355375488049235
+      ],
+      "median": 1.0087979509741996,
+      "range": [
+        0.9455748439655107,
+        1.1355375488049235
+      ]
+    },
+    "40-4-owner": {
+      "paired_ratios": [
+        1.0577472252725466,
+        1.0580055478340145,
+        1.030921368599335,
+        1.0502143575645226,
+        0.9007855984630332
+      ],
+      "median": 1.0502143575645226,
+      "range": [
+        0.9007855984630332,
+        1.0580055478340145
+      ]
+    },
+    "0-4-opaque": {
+      "paired_ratios": [
+        1.0277210315950713,
+        1.0488883420823323,
+        0.9843235510726922,
+        1.0131207285081834,
+        1.0220485837748157
+      ],
+      "median": 1.0220485837748157,
+      "range": [
+        0.9843235510726922,
+        1.0488883420823323
+      ]
+    },
+    "1-4-opaque": {
+      "paired_ratios": [
+        0.9847501566132438,
+        1.0385587983832285,
+        1.0222789174883165,
+        1.049489528790211,
+        1.0583820861915525
+      ],
+      "median": 1.0385587983832285,
+      "range": [
+        0.9847501566132438,
+        1.0583820861915525
+      ]
+    },
+    "40-4-opaque": {
+      "paired_ratios": [
+        0.9829806993705933,
+        0.9976968180723775,
+        1.0298769522207483,
+        1.0235800161895068,
+        0.9921914886726633
+      ],
+      "median": 0.9976968180723775,
+      "range": [
+        0.9829806993705933,
+        1.0298769522207483
+      ]
+    }
+  }
+}

@@ -1,0 +1,45 @@
+{
+  "binaries": {
+    "candidate": "/home/user/gpui-sparse-outline-target/release/build/gpui/7d7527a5a336fc72/out/source_batch_cost",
+    "control": "/home/user/gpui-sparse-batch-target/release/build/gpui/7d7527a5a336fc72/out/source_batch_cost"
+  },
+  "hashes": {
+    "candidate": "56adeed0cccae9f246dc4f960f0a8ab8a80f71aef22b0f8d91e6993304e5f26e",
+    "control": "a51f376f06a306f9c74abd63b6f59c51a0205f1c40ee28dd3e02434ea28f0725",
+    "font": "7da195a74c55bef988d0d48f9508bd5d849425c1770dba5d7bfc6ce9ed848954"
+  },
+  "font": "/home/user/zgx-reference-local/comparisons/fonts/DejaVuSans.ttf",
+  "sources": {
+    "control": "34e170689fbb10689d81baa3b97b95d11ba7b48a",
+    "candidate": "a476ef4330c54a83112d5e78a027373dcbcb0e4a"
+  },
+  "cases": [
+    [
+      1,
+      2,
+      "owner"
+    ],
+    [
+      40,
+      1,
+      "exact"
+    ],
+    [
+      40,
+      2,
+      "exact"
+    ],
+    [
+      40,
+      4,
+      "exact"
+    ]
+  ],
+  "warmup": 200,
+  "batches": 40,
+  "ops": 100,
+  "cpu_affinity": 2,
+  "platform": "Linux-6.8.0-117-generic-x86_64-with-glibc2.39",
+  "compiler": "rustc 1.101.0-nightly (7189d39d9 2026-10-22)\nbinary: rustc\ncommit-hash: 7189d39d9ce936881b8132c6addeaf3e295cd455\ncommit-date: 2026-10-22\nhost: x86_64-unknown-linux-gnu\nrelease: 1.101.0-nightly\nLLVM version: 23.1.4\n",
+  "started": 1793093950.2803304
+}

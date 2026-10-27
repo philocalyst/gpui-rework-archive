@@ -1,0 +1,51 @@
+[
+  {
+    "variant": "candidate",
+    "routine": "single",
+    "owner": "false",
+    "bytes": 2133,
+    "stack_reservation": 312
+  },
+  {
+    "variant": "candidate",
+    "routine": "single",
+    "owner": "true",
+    "bytes": 2133,
+    "stack_reservation": 312
+  },
+  {
+    "variant": "candidate",
+    "routine": "batch",
+    "owner": "false",
+    "bytes": 3181,
+    "stack_reservation": 520
+  },
+  {
+    "variant": "candidate",
+    "routine": "batch",
+    "owner": "true",
+    "bytes": 3181,
+    "stack_reservation": 520
+  },
+  {
+    "variant": "control",
+    "routine": "single",
+    "owner": "false",
+    "bytes": 2078,
+    "stack_reservation": 344
+  },
+  {
+    "variant": "inline",
+    "routine": "single",
+    "owner": "false",
+    "bytes": 5337,
+    "stack_reservation": 584
+  },
+  {
+    "variant": "inline",
+    "routine": "single",
+    "owner": "true",
+    "bytes": 5337,
+    "stack_reservation": 584
+  }
+]

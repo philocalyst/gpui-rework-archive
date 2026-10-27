@@ -1,0 +1,138 @@
+{
+  "1-2-owner": {
+    "control": {
+      "cold_wall_ns": {
+        "median": 1140804,
+        "range": [
+          922514,
+          1348753
+        ]
+      },
+      "max_rss_kib": {
+        "median": 18272,
+        "range": [
+          18140,
+          18400
+        ]
+      }
+    },
+    "candidate": {
+      "cold_wall_ns": {
+        "median": 1066413,
+        "range": [
+          1003675,
+          1184577
+        ]
+      },
+      "max_rss_kib": {
+        "median": 18268,
+        "range": [
+          18268,
+          18396
+        ]
+      }
+    }
+  },
+  "40-1-exact": {
+    "candidate": {
+      "cold_wall_ns": {
+        "median": 14274243,
+        "range": [
+          13806115,
+          14555413
+        ]
+      },
+      "max_rss_kib": {
+        "median": 21212,
+        "range": [
+          21212,
+          21340
+        ]
+      }
+    },
+    "control": {
+      "cold_wall_ns": {
+        "median": 15033811,
+        "range": [
+          12081424,
+          15078496
+        ]
+      },
+      "max_rss_kib": {
+        "median": 21340,
+        "range": [
+          21216,
+          21340
+        ]
+      }
+    }
+  },
+  "40-2-exact": {
+    "control": {
+      "cold_wall_ns": {
+        "median": 12588827,
+        "range": [
+          12557870,
+          14195947
+        ]
+      },
+      "max_rss_kib": {
+        "median": 21340,
+        "range": [
+          21340,
+          21472
+        ]
+      }
+    },
+    "candidate": {
+      "cold_wall_ns": {
+        "median": 13519005,
+        "range": [
+          13336101,
+          14211397
+        ]
+      },
+      "max_rss_kib": {
+        "median": 21472,
+        "range": [
+          21344,
+          21472
+        ]
+      }
+    }
+  },
+  "40-4-exact": {
+    "candidate": {
+      "cold_wall_ns": {
+        "median": 13527240,
+        "range": [
+          12600749,
+          15212558
+        ]
+      },
+      "max_rss_kib": {
+        "median": 21088,
+        "range": [
+          21084,
+          21216
+        ]
+      }
+    },
+    "control": {
+      "cold_wall_ns": {
+        "median": 14788992,
+        "range": [
+          14345719,
+          15971544
+        ]
+      },
+      "max_rss_kib": {
+        "median": 21212,
+        "range": [
+          21212,
+          21216
+        ]
+      }
+    }
+  }
+}
