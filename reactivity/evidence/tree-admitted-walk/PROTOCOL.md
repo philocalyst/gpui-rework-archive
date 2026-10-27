@@ -32,3 +32,16 @@ oracles required. Mutant bypassing arena/generation validation must fail even
 when slot indexes happen to coincide. Gate hint uses complete public IDs only.
 No application API changes. Passing core work only admits broader GPUI/native
 qualification and does not claim full display algorithm or ZGX superiority.
+
+## Predeclared timer-floor qualification after the first paired campaign
+
+First campaign candidate medians clear every numerical threshold. Shallow calls
+measure 42–52 ns with a clock read per five calls, and single-full has one pair
+10.3% slower. Preserve that campaign and mark no-regression confidence incomplete.
+Before another capture, freeze identical fixtures with an optional operations-per-
+batch argument. Pin BOTH processes to CPU2, use 200 warmups and 40 batches, 1000
+operations per shallow batch and 20 per other batch. Five AB/BA pairs against the
+original AoS control across all seven cells. The production code is unchanged.
+No trimming, dropped pairs, revised thresholds or reinterpretation of old stats.
+Keep per-campaign final hashes/stats (operation counts differ) and compare within
+that campaign only. Tiny/full no-regression gates and exact output remain required.
