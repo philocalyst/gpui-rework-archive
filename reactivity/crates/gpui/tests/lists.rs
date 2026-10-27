@@ -928,3 +928,80 @@ fn overscan_rejects_excess_before_rows_and_preserves_older_candidate_after_failu
     scroll_offset(&mut fresh, 320.);
     assert_eq!(image(&mut win), image(&mut fresh));
 }
+
+#[test]
+fn overscan_pixels_match_independently_materialized_eager_rows() {
+    struct Eager(usize);
+    impl View for Eager {
+        fn view(&self) -> El<'_> {
+            column((
+                div().h(20).w(200).bg(Color::BLACK),
+                column((self.0..self.0 + 3).map(|index| {
+                    button(format!("item {}", index + 100))
+                        .h(32)
+                        .w(200)
+                        .bg(Color::rgb(220, 230, 240))
+                }))
+                .h(96)
+                .w(200),
+                div().h(20).w(200).bg(Color::BLACK),
+            ))
+        }
+    }
+    let mut win = Win::with_size(buffered(100_000, 2), 240, 160).unwrap();
+    for index in [0, 10, 99_997] {
+        win.scroll_to_index(win.list(LIST).unwrap(), index).unwrap();
+        let mut eager = Win::with_size(Eager(index), 240, 160).unwrap();
+        let actual = image(&mut win);
+        eager
+            .with_pixels(|expected, _, _| assert_eq!(actual, expected))
+            .unwrap();
+    }
+}
+
+#[test]
+fn overscan_checks_buffered_key_coherence_before_any_row_description() {
+    struct Bad(bool);
+    impl ItemSource for Bad {
+        fn len(&self) -> usize {
+            8
+        }
+        fn key(&self, index: usize) -> ItemKey {
+            ItemKey::new(if self.0 && index == 3 {
+                0
+            } else {
+                index as u64
+            })
+        }
+        fn index_of(&self, key: ItemKey) -> Option<usize> {
+            Some(if !self.0 && key.get() == 3 {
+                999
+            } else {
+                key.get() as usize
+            })
+        }
+        fn row(&self, _: usize) -> El<'_> {
+            panic!("invalid key set must fail before descriptions")
+        }
+    }
+    impl View for Bad {
+        fn view(&self) -> El<'_> {
+            // Exercise decorations both before and after the list-only builder.
+            uniform_list(LIST, self, 32)
+                .name("list")
+                .rounded(0.)
+                .overscan(2)
+                .h(96)
+                .w(200)
+        }
+    }
+    for (bad, expected) in [
+        (true, ListError::DuplicateKey(ItemKey::new(0))),
+        (false, ListError::InvalidIndex(ItemKey::new(3))),
+    ] {
+        assert_eq!(
+            Win::with_size(Bad(bad), 240, 160).err(),
+            Some(Error::List(expected))
+        );
+    }
+}

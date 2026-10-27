@@ -1352,3 +1352,51 @@ fn ime_accesskit_uses_acknowledged_display_and_selection_without_preview_edit_au
     assert_eq!(node.value(), Some("base"));
     assert!(node.supports_action(accesskit::Action::ReplaceSelectedText));
 }
+
+#[test]
+fn overscan_native_projection_excludes_buffered_rows_and_reuses_returning_ids() {
+    let mut model = library::Library::new(250_000);
+    model.overscan = 2;
+    let mut win = Win::recording(
+        model,
+        WindowOptions {
+            size: [760, 600],
+            ..Default::default()
+        },
+    )
+    .unwrap();
+    win.presented(win.with_scene(|_, token| token).unwrap())
+        .unwrap();
+    let list = win.list(library::LIBRARY).unwrap();
+    let first = id(&win, win.list_item(list, crate::ItemKey::new(0)).unwrap());
+    let initial = projection(&win);
+    let mut tree = Tree::new(initial.clone(), true);
+    for index in [1, 0, 10] {
+        let previous = projection(&win);
+        win.scroll_to_index(list, index).unwrap();
+        assert_eq!(projection(&win), previous, "P remains frozen before ACK");
+        win.presented(win.with_scene(|_, token| token).unwrap())
+            .unwrap();
+        let current = projection(&win);
+        let positions: Vec<_> = current
+            .nodes
+            .iter()
+            .filter(|(_, n)| n.role() == accesskit::Role::ListItem)
+            .map(|(_, n)| n.position_in_set().unwrap())
+            .collect();
+        assert_eq!(positions, (index..index + 13).collect::<Vec<_>>());
+        tree.update_and_process_changes(current, &mut Changes::default());
+        assert_eq!(
+            tree.state()
+                .node_by_tree_local_id(first, TreeId::ROOT)
+                .is_some(),
+            index == 0
+        );
+        if index == 0 {
+            assert_eq!(
+                id(&win, win.list_item(list, crate::ItemKey::new(0)).unwrap()),
+                first
+            );
+        }
+    }
+}
