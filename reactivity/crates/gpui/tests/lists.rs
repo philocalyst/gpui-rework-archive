@@ -810,6 +810,10 @@ fn overscan_ranges_clamp_and_pixels_match_zero_buffer_at_fractional_offsets() {
     for offset in [0., 16.25, 320., 6_400_000.125, 8_000_000.] {
         scroll_offset(&mut win, offset);
         let state = win.list_state(list).unwrap();
+        eprintln!(
+            "overscan offset={offset} state={state:?} sheet={:?}",
+            win.snapshot().unwrap()
+        );
         assert_eq!(
             state.realized_range,
             state.visible_range.start.saturating_sub(2)
@@ -856,6 +860,7 @@ fn overscan_preserves_buffered_identity_but_not_offscreen_authority_or_departed_
     win.click(first).unwrap();
     assert_eq!(win.focused().unwrap(), Some(first));
     win.scroll_to_index(list, 1).unwrap();
+    eprintln!("buffered sheet={:?}", win.snapshot().unwrap());
     assert_eq!(
         win.list_item(list, ItemKey::new(100)),
         Err(Error::MissingElement)
