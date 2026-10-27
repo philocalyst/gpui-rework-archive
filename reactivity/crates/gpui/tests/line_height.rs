@@ -154,6 +154,9 @@ fn sparse_text_and_ime_use_the_same_explicit_pitch() {
     let before = input.ime_cursor_area(&session).unwrap().unwrap();
     input.set(Page::PITCH, 40.).unwrap();
     ack(&mut input);
+    // An ordinary source edit revokes the old IME epoch, including style sources.
+    assert!(input.ime_cursor_area(&session).unwrap().is_none());
+    input.ime_event(&mut session, ImeEvent::Enabled).unwrap();
     let after = input.ime_cursor_area(&session).unwrap().unwrap();
     assert!(after.y > before.y);
     input
