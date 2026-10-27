@@ -274,3 +274,33 @@ ordered, external tasks require real wakes, and input latency/teardown remain
 first-class gates. Neither database result qualifies GPUI's scheduler or supplies
 Solid's automatic coherent publication semantics. The locally tested loop/Future
 and source-cohort results above decide their actual usefulness here.
+
+
+## Completed outline-only qualification
+
+The one-annotation follow-up is complete at local/sparse-text-outline,
+5b670209df18941f8604bea2ee2d2bfe3597da78. Its single-run routine shrinks from
+5337 to 2133 bytes, stack reservation 584 to 312 bytes; the separate batch is
+3181/520 bytes. Total ELF grows 208 bytes versus inline; shipping inventory
+36942 lines. No semantic/storage/API change was made.
+
+All 975 default / 1048 X11 GPUI+Canvas tests, strict Clippy, six actual native
+scripts and 42 allocation probes pass. The unchanged transaction's negative
+witness is explicitly inherited, not rerun. Build-only default+simd executables
+were pinned before test feature-unification could overwrite convenience aliases.
+Full input and ELF guards pass around 210 baseline and 24 mechanism processes.
+
+The fixed numerical verdict is again rejection. Primary two/four-field
+1000-label ratios .065991/.124281 are 15.2x/8.0x improvements, but the four-field
+owner-dependent control is 1.050214, above 1.05. Keep its .90079–1.05801 paired
+range and do not round it into a pass. Separately against inline, the 25-label
+two-field owner ratio is 1.04803, 1000-label single exact .98045 and two/four
+exact .98801/.97327. A smaller routine did not establish a general control win.
+
+The next useful architectural boundary is the native GPU packet: sparse CPU
+text publication still validates/rebuilds/uploads every record and tile index.
+A bounded gather/validate/commit there must also preserve atlas leases, exact
+predecessor token, painter order and old/new tile membership. Updating glyph
+words alone is insufficient. Capacity-indexed tile lists are a separate possible
+experiment; no such implementation or performance claim exists yet. Do not
+combine it with unrelated shader experiments or silently adopt rejected slices.
