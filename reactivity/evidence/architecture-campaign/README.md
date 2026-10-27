@@ -29,6 +29,15 @@ isolated worktree, preregistration, freeze, oracle, mutant and evidence rules.
 | `local/gpu-text-tiles` / `/home/user/gpui-gpu-text-tiles-lab` | Repaint only tile spans whose admitted references or glyph/common words change; same shader | Rejected dossier3dd29a0ebd: stream ratios .2040/.2222/.2145 vs full and .2557/.2534/.2277 vs packet-only; short one-field0/25 controls1.1000/1.0733 fail.78 GPU,975 default,1048 native,6 native scripts, old-tile mutant,240 timed and42 allocation processes verified |
 | `local/gpu-text-gated` / `/home/user/gpui-gpu-text-gated-lab` | Outline tile equivalence and admit only bounding damage>=4096 pixels | Rejected dossier d9aa807a2c: full-comparison primary/control medians pass, but ungated mechanism controls fail at 25-label single 1.0815 and stream25/1000 1.0697/1.0632. 79 GPU,975 default,1048 native tests,6 native scripts;252 timed and42 allocation processes independently verified |
 
+Native parity follow-up local/native-workload-parity at
+/home/user/gpui-native-parity-lab: completed dossier3d60e5b4a8. UI-owned Workload
+publishes stream through existing with_inbox_for; no library/API change.
+Eight tests/Clippy and five actual X11 modes/routes pass qualification. Logs
+retain coalescing and repeated ACKs; no performance verdict. Typography,
+controlled wheel/keyed overscan, deferred controls and equal profiles remain.
+Next isolated slice local/text-line-height preserves old defaults and adds
+explicit pitch for the native port.
+
 [BBTree transfer research](../bbtree-transfer/README.md) records the pinned
 implementation, failed historical trials, applicability and next hypotheses.
 
