@@ -343,11 +343,11 @@ fn text_tile_repairs_skip_unchanged_paragraphs_and_bound_scissor_count() {
         let mut changed = label.clone();
         changed.replace_range(100..101, "1");
         let size = [256, 256];
-        let (initial, slots) = paragraphs(&mut text, [&label, "1"], size, [2., 230.]);
+        let (initial, slots) = paragraphs(&mut text, [&label, "11"], size, [2., 230.]);
         let target = output_texture(&gpu, &initial);
         let view = target.create_view(&Default::default());
         gpu.render(initial.prepared_scene(), &view, None).unwrap();
-        let (next, _) = paragraphs(&mut text, [&changed, "1"], size, [2., 230.]);
+        let (next, _) = paragraphs(&mut text, [&changed, "11"], size, [2., 230.]);
         let broad = rect_damage(size, Rect::new(0., 0., 256., 256.));
         gpu.patch_texts(&edits(&next, slots), &view, Some(broad))
             .unwrap();
