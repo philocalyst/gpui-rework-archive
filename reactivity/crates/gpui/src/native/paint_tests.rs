@@ -22,7 +22,7 @@ impl View for Paint {
         }
     }
 }
-fn read(gpu: &GpuSurface, texture: &wgpu::Texture) -> Vec<u8> {
+pub(super) fn read(gpu: &GpuSurface, texture: &wgpu::Texture) -> Vec<u8> {
     let bytes = texture.format().block_copy_size(None).unwrap();
     let stride = (texture.width() * bytes).next_multiple_of(256);
     let buffer = gpu
