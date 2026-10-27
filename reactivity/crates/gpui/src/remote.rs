@@ -298,14 +298,14 @@ impl SourceEdits {
     pub(crate) fn question_change<M: 'static>(
         &self,
         sources: &Sources<M>,
-    ) -> Result<Change, Error> {
+    ) -> Result<Change<'_>, Error> {
         if let Some(fields) = self.multiple() {
             for field in fields {
                 if sources.invalidates_owner(field)? {
                     return Ok(Change::Source(None));
                 }
             }
-            Ok(Change::Sources(self.fields))
+            Ok(Change::Sources(&self.fields))
         } else {
             Ok(Change::Source(self.single()))
         }
@@ -340,7 +340,7 @@ pub trait LaneSet<M>: sealed::Sealed + ReaderValues {
         exact: &mut SourceEdits,
         remaining: &mut usize,
     ) -> Result<(), Error>;
-    fn refresh(&mut self, _: &M, _: &Sources<M>, _: Change) -> Result<bool, Error> {
+    fn refresh(&mut self, _: &M, _: &Sources<M>, _: Change<'_>) -> Result<bool, Error> {
         Ok(false)
     }
     fn apply_questions(
@@ -560,7 +560,12 @@ impl<M, T: Send + 'static, F: InboxHandler<M, T>, L: LaneSet<M>> LaneSet<M> for 
         self.inbox.close();
         self.tail.clear();
     }
-    fn refresh(&mut self, model: &M, sources: &Sources<M>, change: Change) -> Result<bool, Error> {
+    fn refresh(
+        &mut self,
+        model: &M,
+        sources: &Sources<M>,
+        change: Change<'_>,
+    ) -> Result<bool, Error> {
         self.tail.refresh(model, sources, change)
     }
     fn apply_questions(

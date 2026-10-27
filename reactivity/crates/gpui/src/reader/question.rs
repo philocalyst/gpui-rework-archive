@@ -28,11 +28,11 @@ where
 
 #[doc(hidden)]
 #[derive(Clone, Copy)]
-pub enum Change {
+pub enum Change<'a> {
     Mount,
     Dependencies,
     Source(Option<FieldId>),
-    Sources([Option<FieldId>; 4]),
+    Sources(&'a [Option<FieldId>; 4]),
     Retry(ReaderKey),
 }
 
@@ -562,13 +562,13 @@ where
         &mut self,
         model: &M,
         sources: &Sources<M>,
-        change: Change,
+        change: Change<'_>,
     ) -> Result<bool, crate::Error> {
         if let Change::Sources(fields) = change
             && !A::READERS
         {
             let mut relevant = false;
-            for field in fields.into_iter().flatten() {
+            for field in fields.iter().copied().flatten() {
                 if self.inputs.contains(sources, field)? {
                     relevant = true;
                     break;
@@ -726,7 +726,7 @@ where
         &mut self,
         model: &M,
         sources: &Sources<M>,
-        change: Change,
+        change: Change<'_>,
     ) -> Result<bool, crate::Error> {
         let tail = self.tail.refresh(model, sources, change);
         let own = self.refresh_self(model, sources, change);
@@ -881,7 +881,7 @@ impl<M, Q: LaneSet<M>, L: LaneSet<M>> LaneSet<M> for QuestionSet<Q, L> {
         &mut self,
         model: &M,
         sources: &Sources<M>,
-        change: Change,
+        change: Change<'_>,
     ) -> Result<bool, crate::Error> {
         let a = self.lanes.refresh(model, sources, change)?;
         Ok(self.tail.refresh(model, sources, change)? || a)
@@ -1279,4 +1279,14 @@ mod tests {
             size_of::<QuestionInfo>()
         );
     }
+}
+
+#[cfg(test)]
+#[test]
+fn change_layout_ledger() {
+    eprintln!(
+        "CHANGE_LAYOUT,change_bytes={},source_edits_bytes={}",
+        std::mem::size_of::<Change<'_>>(),
+        std::mem::size_of::<crate::remote::SourceEdits>()
+    );
 }
