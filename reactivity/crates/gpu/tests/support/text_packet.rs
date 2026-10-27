@@ -377,3 +377,95 @@ fn text_tile_repairs_skip_unchanged_paragraphs_and_bound_scissor_count() {
         assert_eq!(read_texture(&gpu, &target), readback(&mut full, &next));
     });
 }
+
+#[test]
+fn identical_shader_words_can_have_different_conservative_memberships() {
+    pollster::block_on(async {
+        let mut text = TextSystem::bundled().unwrap();
+        // Inverse translation loses this perturbation when subtracting it from
+        //10000 in f64, while forward bounds at32 still retain it. Both are
+        // ordinary Canvas scenes; no packet or prepared geometry is forged.
+        let map = Affine {
+            a: 1.,
+            b: 1.,
+            c: 0.,
+            d: 1.,
+            tx: 10000.,
+            ty: 0.,
+        };
+        let mut positions = [
+            Point {
+                x: -9984.,
+                y: 10000.,
+            },
+            Point {
+                x: -9920.,
+                y: 9940.,
+            },
+        ];
+        let (provisional, slots) = scene(
+            &mut text,
+            ["0011", "1100"],
+            positions,
+            map,
+            ColorConfig::default(),
+            Color::BLACK,
+        );
+        let r = provisional
+            .prepared_scene()
+            .text_run(slots[0])
+            .unwrap()
+            .placements()
+            .next()
+            .unwrap()
+            .local_rect;
+        positions[0].y += 32. - (r.x + r.y + r.width + r.height);
+        let (initial, slots) = scene(
+            &mut text,
+            ["0011", "1100"],
+            positions,
+            map,
+            ColorConfig::default(),
+            Color::BLACK,
+        );
+        let (next, next_slots) = scene(
+            &mut text,
+            ["0011", "1100"],
+            positions,
+            Affine { ty: 1e-13, ..map },
+            ColorConfig::default(),
+            Color::BLACK,
+        );
+        assert_eq!(slots, next_slots);
+        let old = edits(&initial, slots);
+        let new = edits(&next, slots);
+        for ((_, a), (_, b)) in old.iter().zip(&new) {
+            assert_eq!(a.inverse.map(f64::to_bits), b.inverse.map(f64::to_bits));
+            assert_eq!(a.clip, b.clip);
+            assert_eq!(a.color.map(f32::to_bits), b.color.map(f32::to_bits));
+            for (a, b) in a.placements().zip(b.placements()) {
+                assert_eq!(a.local_rect, b.local_rect);
+                assert_eq!(a.source.mask().unwrap().key, b.source.mask().unwrap().key);
+            }
+        }
+        let a = old[0].1.bounds().next().unwrap();
+        let b = new[0].1.bounds().next().unwrap();
+        assert_eq!(a.y + a.height, 32.);
+        assert_eq!(b.y + b.height, 33.);
+        let mut gpu = RetainedRenderer::new(renderer(wgpu::TextureFormat::Rgba8UnormSrgb).await);
+        let mut full = renderer(wgpu::TextureFormat::Rgba8UnormSrgb).await;
+        let target = output_texture(&gpu, &initial);
+        let view = target.create_view(&Default::default());
+        gpu.render(initial.prepared_scene(), &view, None).unwrap();
+        let before = read_texture(&gpu, &target);
+        let damage = rect_damage([128, 96], CLIP);
+        gpu.patch_texts(&new, &view, Some(damage)).unwrap();
+        assert!(
+            gpu.retained_stats().composited_pixels > 0,
+            "changed memberships must be considered even with identical shader words"
+        );
+        let after = read_texture(&gpu, &target);
+        assert_eq!(after, before);
+        assert_eq!(after, readback(&mut full, &next));
+    });
+}
