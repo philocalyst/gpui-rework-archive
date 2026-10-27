@@ -262,7 +262,7 @@ pub(super) fn patch(
         if regions.is_some()
             && let Some(damage) = damage_bounds
         {
-            let old = if end == UNIFORM_TILE {
+            let _old = if end == UNIFORM_TILE {
                 std::slice::from_ref(&start)
             } else {
                 &state.references[start as usize..end as usize]
@@ -270,11 +270,9 @@ pub(super) fn patch(
             let next = &next_references[offset..];
             // Both memberships matter: a moved glyph can leave an empty tile.
             // Equal lists only need repaint when a referenced record changed.
-            let dirty = old != next
-                || old
-                    .iter()
-                    .chain(next)
-                    .any(|&address| patches.iter().any(|p| p.changes(address, &state.records)));
+            let dirty = next
+                .iter()
+                .any(|&address| patches.iter().any(|p| p.changes(address, &state.records)));
             if dirty {
                 append_region(
                     &mut regions,
