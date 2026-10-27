@@ -597,7 +597,7 @@ impl GpuContext {
             });
             pass.set_pipeline(&self.pipeline);
             pass.set_bind_group(0, bindings, &[]);
-            for region in regions.regions() {
+            for region in regions.regions().iter().skip(1) {
                 if let Some([l, t, r, b]) = region.bounds() {
                     pass.set_scissor_rect(l, t, r - l, b - t);
                     pass.draw(0..3, 0..1);
