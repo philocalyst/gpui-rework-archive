@@ -17,9 +17,16 @@ impl View for Page {
     }
     fn view(&self) -> El<'_> {
         column((
-            text(&self.label).h(20),
+            text(&self.label).h(20).font_size(12).fg(rgb(0xe5edf7)),
             column((0..self.rows).map(|r| {
-                row((0..25).map(move |c| text((r * 25 + c).to_string()).w(36).h(18))).gap(2)
+                row((0..25).map(move |c| {
+                    text((r * 25 + c).to_string())
+                        .w(36)
+                        .h(18)
+                        .font_size(12)
+                        .fg(rgb(0xe5edf7))
+                }))
+                .gap(2)
             }))
             .gap(2),
         ))
