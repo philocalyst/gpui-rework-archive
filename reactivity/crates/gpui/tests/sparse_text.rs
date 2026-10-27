@@ -88,3 +88,50 @@ fn pending_text_and_geometry_stay_at_acknowledged_epoch_then_survive_newer_failu
     assert!(current.contains_text("Count: 13").unwrap());
     assert_eq!(pixels(&mut current), pixels(&mut win("Count: 13")));
 }
+
+#[test]
+fn changed_layout_rejects_sparse_publication_and_moves_following_content() {
+    struct Auto {
+        label: Signal<String>,
+    }
+    impl Auto {
+        const LABEL: Source<Self, String> =
+            Source::new(FieldId::new(1), "label", |m| &m.label, |m| &mut m.label);
+    }
+    impl View for Auto {
+        fn sources() -> Sources<Self> {
+            Sources::new().direct(Self::LABEL)
+        }
+        fn view(&self) -> El<'_> {
+            row((text(&self.label), text("iiiWWW")))
+                .w(240)
+                .h(40)
+                .bg(Color::WHITE)
+        }
+    }
+    let mount = |value: &str| {
+        let mut win = Win::recording(
+            Auto {
+                label: Signal::new(value.into()),
+            },
+            WindowOptions {
+                size: [240, 40],
+                ..Default::default()
+            },
+        )
+        .unwrap();
+        win.presented(win.with_scene(|_, t| t).unwrap()).unwrap();
+        win
+    };
+    let mut current = mount("iii");
+    for value in ["WWW", "iii", "WiW"] {
+        current.set(Auto::LABEL, value.into()).unwrap();
+        current
+            .presented(current.with_scene(|_, t| t).unwrap())
+            .unwrap();
+        let mut fresh = mount(value);
+        let actual = current.with_pixels(|p, _, _| p.to_vec()).unwrap();
+        let expected = fresh.with_pixels(|p, _, _| p.to_vec()).unwrap();
+        assert_eq!(actual, expected, "changed layout {value}");
+    }
+}

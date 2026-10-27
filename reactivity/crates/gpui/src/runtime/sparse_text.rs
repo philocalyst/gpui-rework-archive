@@ -101,3 +101,56 @@ impl<M: View + 'static> Runtime<M> {
         Ok(true)
     }
 }
+
+#[cfg(test)]
+mod tests {
+    use super::*;
+    use crate::{El, Signal, column, text};
+    struct Page {
+        label: Signal<String>,
+    }
+    impl Page {
+        const LABEL: crate::Source<Self, String> =
+            crate::Source::new(FieldId::new(1), "label", |m| &m.label, |m| &mut m.label);
+    }
+    impl View for Page {
+        fn sources() -> Sources<Self> {
+            Sources::new().direct(Self::LABEL)
+        }
+        fn view(&self) -> El<'_> {
+            column((
+                text(&self.label).w(180).h(24),
+                text("Count: 0123456789").w(180).h(24),
+            ))
+            .w(192)
+            .h(80)
+        }
+    }
+    #[test]
+    fn direct_text_prepares_a_sparse_candidate_and_defers_p_mutation() {
+        let mut win = Win::recording(
+            Page {
+                label: Signal::new("Count: 10".into()),
+            },
+            WindowOptions {
+                size: [192, 80],
+                ..Default::default()
+            },
+        )
+        .unwrap();
+        win.presented(win.with_scene(|_, token| token).unwrap())
+            .unwrap();
+        win.set(Page::LABEL, "Count: 11".into()).unwrap();
+        let runtime = win.runtime().unwrap();
+        assert!(runtime.prepared.as_ref().unwrap().keeps_rows());
+        assert!(runtime.text.as_ref().unwrap().patch.is_some());
+        assert!(runtime.text.as_ref().unwrap().candidate.is_none());
+        assert!(runtime.prepared.as_ref().unwrap().nodes.is_empty());
+        assert!(
+            runtime
+                .presented
+                .iter()
+                .any(|n| n.text.as_deref() == Some("Count: 10"))
+        );
+    }
+}
