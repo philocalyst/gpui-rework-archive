@@ -86,7 +86,6 @@ impl Replay {
             .find(|(_, group)| {
                 if !group.glyphs.same_layout(layout)
                     || point_bits(group.origin) != point_bits(origin)
-                    || affine_bits(group.transform) != affine_bits(transform)
                     || group.raster_scale.to_bits() != raster_scale.to_bits()
                 {
                     return false;
