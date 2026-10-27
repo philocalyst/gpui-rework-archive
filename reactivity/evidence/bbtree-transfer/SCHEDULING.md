@@ -306,7 +306,7 @@ experiment; no such implementation or performance claim exists yet. Do not
 combine it with unrelated shader experiments or silently adopt rejected slices.
 
 
-## GPU text transaction prototype in progress
+## GPU text transaction: completed, rejected qualification
 
 Preregistration 0deed98cc8 on local/gpu-text-packet; common fixture/full-preparation
 control frozen at 64523d173a. The new low-level path gathers at most four compact
@@ -332,5 +332,25 @@ for each sparse case, including the stream, and 0/60 for full preparation. Those
 durations are excluded from performance qualification. The first native bridge
 source 4ee1af8db2 retains an exact predecessor token and passes a private bounded
 transition through with_paint_scene; public application interfaces are unchanged.
-Full/default and native composition are being qualified; actual native scripts,
-allocation/storage/code costs and the fixed paired performance gates remain.
+Completed dossier de8e4f6fea at
+`/home/user/gpui-gpu-text-packet-lab/reactivity/evidence/gpu-text-packet`.
+The verifier reconstructs 210 measured processes, 12600 measured updates, 42
+allocation processes, exact initial/final images and the fixed failed verdict.
+Default GPUI+Canvas975, native1048 and six actual native scripts pass. The native
+GPU Todo script includes predecessor/ACK/coalescing/failed-newer/new-mask tests.
+
+Large two/four-field completion ratios .690910/.547986 pass the .8 primary gate;
+tiny full two/four controls1.080780/1.076605 fail1.05. Every tiny two-field pair is
+above1.05. Stream gains only2–4%. Do not explain away these failures as noise.
+RetainedRenderer grows24 B, native TextResources16 B, map16 KiB at1000 labels.
+Sparse two-field requests drop122→97 but requested bytes rise17225→80185;
+complete-CSR scratch remains a cost. Shipping code37367(+425), ELF+34360 B,
+unchanged shader; local patch stack reservation856 B, not a total stack bound.
+
+A follow-up may compare old/new glyph words and preserve unchanged memberships,
+then derive dirty tiles from old surviving plus new admitted references. Derived
+common error-bound changes conservatively dirty the whole affected run. Multiple
+scissored tile spans can reuse the unchanged shader and one presentation copy.
+This is an unimplemented hypothesis, not an inferred speedup or an adoption of
+the rejected base. It must charge comparisons, scratch, commands and full controls,
+and preserve exact painter order, sample arithmetic, old/new support and fallback.
