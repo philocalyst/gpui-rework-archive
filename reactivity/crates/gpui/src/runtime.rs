@@ -5782,3 +5782,23 @@ mod ordinary_background_allocation_audit {
         }
     }
 }
+
+#[cfg(test)]
+mod damage_header_ledger {
+    use super::*;
+    #[test]
+    fn runtime_damage_headers() {
+        eprintln!(
+            "DAMAGE_HEADERS,RuntimeUnit={},Prepared={},TextPatch={},TextResources={}",
+            size_of::<Runtime<()>>(),
+            size_of::<Prepared>(),
+            size_of::<text_geometry::TextPatch>(),
+            size_of::<text_geometry::TextResources>()
+        );
+        #[cfg(feature = "native-core")]
+        eprintln!(
+            "DAMAGE_NATIVE_HEADERS,SceneDamage={}",
+            size_of::<paint::SceneDamage>()
+        );
+    }
+}
