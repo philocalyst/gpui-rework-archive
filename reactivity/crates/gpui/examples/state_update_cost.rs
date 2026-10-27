@@ -119,7 +119,7 @@ fn main() {
     eprintln!("counters,{:?}", win.counters());
     let label = format!("Count: {next}");
     assert!(win.contains_text(&label).unwrap());
-    let fresh = mount(rows, label, font);
+    let mut fresh = mount(rows, label, font);
     let actual = win.with_pixels(|p, _, _| p.to_vec()).unwrap();
     let expected = fresh.with_pixels(|p, _, _| p.to_vec()).unwrap();
     assert_eq!(actual, expected, "complete fresh-render pixel oracle");
