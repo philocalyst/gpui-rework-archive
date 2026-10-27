@@ -26,7 +26,10 @@ isolated worktree, preregistration, freeze, oracle, mutant and evidence rules.
 
 | `local/source-batch-publication` / `/home/user/gpui-source-batch-lab` | Preserve distinct typed text edits through one publication | Numerical gates pass: 25–27% less complete publication CPU at 1000 labels; 711 default / 1049 composed tests and six actual native scripts; complete dossier `1830d9d54f`, local application trial candidate, uncertainty/hardware limits remain |
 
-| `local/question-source-set` / `/home/user/gpui-question-source-set-lab` | Preserve exact typed source sets through one Question graph refresh | Preregistered; targeted semantics and Clippy pass, diamond/full-cost qualification in progress |
+| `local/question-source-set` / `/home/user/gpui-question-source-set-lab` | Preserve exact typed source sets through one Question graph refresh | Rejected performance variant: unrelated 1000-label 18.0x/16.6x gains, dependent25 +5.394% and owner1000 +5.134% fail controls; complete dossier `394e246b9b`, 718 default / 791 native GPUI tests and six actual native scripts |
+
+| `local/question-source-borrowed` / `/home/user/gpui-question-source-borrowed-lab` | Borrow source authority for one synchronous graph refresh | Separate preregistered ABI/code-generation hypothesis; qualification started |
+| `local/sparse-text-batch` / `/home/user/gpui-sparse-batch-lab` | Atomically prepare disjoint sparse command/geometry runs | Separate preregistered candidate `6a2cea6a5c`; collective resource-use and rollback gates started |
 
 [BBTree transfer research](../bbtree-transfer/README.md) records the pinned
 implementation, failed historical trials, applicability and next hypotheses.

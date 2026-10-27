@@ -175,3 +175,40 @@ targeted tests plus strict Clippy pass. It preserves unrelated Ready questions,
 freezes dependent tuples once from final inputs, and rejects stale A-B-A results.
 A multi-source diamond, forgetting-one-member mutant and equal settled-endpoint
 cost fixture are being qualified independently. No performance verdict yet.
+
+
+## Completed Question cohort trial and next isolated formulations
+
+The by-value source-set candidate is complete and rejected on its fixed CPU
+controls. Dossier 394e246b9b on local/question-source-set preserves 240 fresh
+processes / 960000 complete settled operations. Unrelated two/four-field
+1000-label ratios are .05558/.06011 (18.0x/16.6x), but dependent two-field 25-label
+and owner-dependent four-field 1000-label medians are 1.05394/1.05134. Narrow
+numerical failures and broad ranges are not waived. All exact final pixels and
+worker counts pass; 718 default and 791 X11 GPUI cases/doctests, strict Clippy,
+all four source positions, a diamond, the missing-member mutant and six actual
+native scripts qualify correctness. This count excludes unchanged Canvas tests;
+the earlier 1049 text-batch combined count included Canvas and is a different scope.
+
+The four-field array grows four linked delivery routines 6705→7429 bytes.
+local/question-source-borrowed tests a concrete representation change: borrow
+that set for the one synchronous refresh instead of copying it through the graph.
+No owner reference enters an external task. Footprint is a hypothesis for a new
+comparison, not an established causal explanation of the two losing controls.
+
+A separate local/sparse-text-batch candidate starts from the qualified text-only
+batch base. It keeps ordinary layout and requires zero changed layout writes,
+then validates every replacement run before changing canonical commands. Mask
+use counts and tile references must be admitted collectively: two independently
+legal replacements can remove a resource's last uses together. P text/geometry
+still changes only on ACK; duplicate slots, later failure, new resources, changed
+run lengths and unproven geometry keep conservative behavior. Its new safe
+Canvas transaction and public rollback/oracle tests are frozen at 6a2cea6a5c;
+no performance result yet.
+
+Archive follow-up: PLAN.md proposes chunked paint order and counted B+ sequences,
+but no qualified implementation was found in the inspected clean-room sources.
+The identity-order and identity-order-dense dossiers are held: lookup/memory wins
+came with mount, inspector and teardown regressions. They are not evidence to
+replace painter-order storage wholesale. Variable-length glyph spans and resource
+lifetime are promising separate questions after the bounded batch is measured.
