@@ -310,7 +310,7 @@ impl Tree {
             self.entries[parent as usize].last = index;
         }
         let e = &mut self.entries[index as usize];
-        self.parents[index as usize] = parent;
+        // Negative control: omit parent authority on attachment.
         e.prev = last;
     }
 }
