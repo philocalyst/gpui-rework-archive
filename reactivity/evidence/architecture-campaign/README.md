@@ -10,8 +10,16 @@ isolated worktree, preregistration, freeze, oracle, mutant and evidence rules.
 | `local/state-segments` / `/home/user/gpui-state-lab` | Full state-update control | Production baseline `75a9e2b06b`, identical model/font and independent final pixel oracle |
 | `local/text-witness-replay` / `/home/user/gpui-text-witness-lab` | Replay admitted unchanged text witnesses | Rejected: 15% gain misses 20% target and 10K-label regression exceeds 5%; complete dossier at `reactivity/evidence/state-segments` |
 | `local/sparse-text-publication` / `/home/user/gpui-sparse-text-lab` | Bounded text run + sparse C/P publication | Inconclusive: large wins but noisy zero-static cell; complete dossier at `reactivity/evidence/sparse-text`, commit `a91fd03b9b` |
-| `local/text-session-cache` / `/home/user/gpui-text-session-lab` | Owned font/planning scratch across passes | Unadopted; first three-way campaign clears CPU gates, broader build caught an API borrow regression; fixed at `c7194c74e6`, 1044 tests pass, performance requalification pending |
-| `local/zgx-native-comparison` / `/home/user/gpui-native-comparison-lab` | Public native workload port + capacity stress | Preregistered at `9386fc0fca`; port and output qualification in progress; no native performance result |
+| `local/text-session-cache` / `/home/user/gpui-text-session-lab` | Owned font/planning scratch across passes | CPU-qualified at compatible `c7194c74e6`; complete dossier `bc964a0c0a`; unadopted pending broader gates, 3.3 MB retained long-paragraph scratch |
+| `local/zgx-native-comparison` / `/home/user/gpui-native-comparison-lab` | Public native workload port + capacity stress | Diagnostic port `6d5e409d6b`; private X11 exercised, typography/control equivalence incomplete; no native ranking |
+
+| `local/text-cache-bounded` / `/home/user/gpui-bounded-cache-lab` | Bound paragraph scratch | Memory gate passes at 45 KB; two CPU cells exceed 5%, unadopted; dossier `e6bda77dfc` |
+| `local/gpu-draw-major` / `/home/user/gpui-draw-major-lab` | Load each draw once for sixteen samples | Rejected: exact pixels pass, text gains 7–9% miss 20%; complete `evidence/gpu-draw-major` dossier |
+| `local/gpu-pixel-uniform` / `/home/user/gpui-pixel-uniform-lab` | Certify identical per-pixel coverage | SDR-only corrected candidate; 70 GPU tests pass; paired timing in progress, no acceptance |
+| `local/text-cache-cold-trim` / `/home/user/gpui-cold-trim-lab` | BBTree-inspired cold path isolation | Preregistered `9e05ef15b8`, candidate `c8560a8e41`; qualification pending |
+
+[BBTree transfer research](../bbtree-transfer/README.md) records the pinned
+implementation, failed historical trials, applicability and next hypotheses.
 
 All later candidates start from the retained-output experiment, so their gains
 are not independent adoption evidence for that earlier GPU change. Application
