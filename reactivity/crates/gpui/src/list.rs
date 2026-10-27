@@ -105,10 +105,21 @@ pub(crate) struct ListSpec<'a> {
     pub id: ListId,
     pub source: &'a dyn ItemSource,
     pub row_height: f64,
+    pub options: Option<Box<ListOptions<'a>>>,
+}
+#[derive(Default)]
+pub(crate) struct ListOptions<'a> {
     pub map: Option<RowMap>,
     pub overscan: usize,
+    pub offset: Option<&'a crate::Signal<f64>>,
+}
+impl<'a> ListSpec<'a> {
+    pub fn options_mut(&mut self) -> &mut ListOptions<'a> {
+        self.options.get_or_insert_with(Default::default)
+    }
 }
 pub(crate) struct ListPlan {
+    pub offset_field: Option<crate::FieldId>,
     pub retain_offscreen: bool,
     pub viewport: ListViewport,
     pub keys: Vec<ItemKey>,

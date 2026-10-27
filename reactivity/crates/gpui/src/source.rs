@@ -535,6 +535,7 @@ trait Field<M> {
     fn signal<'a>(&self, model: &'a M) -> &'a dyn ErasedSignal;
     fn revision(&self, model: &M) -> Revision;
     fn validate(&self, model: &mut M) -> Result<(), BindError>;
+    fn offset(&self, model: &mut M, value: Option<f64>) -> Result<Revision, BindError>;
     fn write_text(
         &self,
         model: &mut M,
@@ -565,6 +566,20 @@ impl<M, T: 'static> Field<M> for Source<M, T> {
         } else {
             Err(BindError::ProjectionMismatch(self.id))
         }
+    }
+    fn offset(&self, model: &mut M, value: Option<f64>) -> Result<Revision, BindError> {
+        let read = (self.read)(model) as *const Signal<T>;
+        let signal = (self.write)(model);
+        if !std::ptr::eq(read, signal as *const Signal<T>) {
+            return Err(BindError::ProjectionMismatch(self.id));
+        }
+        let signal = (signal as &mut dyn Any)
+            .downcast_mut::<Signal<f64>>()
+            .ok_or(BindError::TypeMismatch(self.id))?;
+        if let Some(value) = value {
+            **signal = value;
+        }
+        Ok(signal.revision())
     }
     fn write_text(
         &self,
@@ -599,6 +614,8 @@ trait ComponentSchema<M> {
     fn signal<'a>(&self, model: &'a M, id: FieldId) -> Result<&'a dyn ErasedSignal, BindError>;
     fn invalidates_owner(&self, id: FieldId) -> Result<bool, BindError>;
     fn revision(&self, model: &M, id: FieldId) -> Result<Revision, BindError>;
+    fn offset(&self, model: &mut M, id: FieldId, value: Option<f64>)
+    -> Result<Revision, BindError>;
     fn write_text(
         &self,
         model: &mut M,
@@ -669,6 +686,15 @@ impl<M: 'static, C: 'static> ComponentSchema<M> for ComponentEntry<M, C> {
     fn revision(&self, model: &M, id: FieldId) -> Result<Revision, BindError> {
         self.sources
             .revision((self.component.read)(model), self.local(id))
+    }
+    fn offset(
+        &self,
+        model: &mut M,
+        id: FieldId,
+        value: Option<f64>,
+    ) -> Result<Revision, BindError> {
+        self.sources
+            .offset(self.component.project_mut(model)?, self.local(id), value)
     }
     fn write_text(
         &self,
@@ -996,6 +1022,21 @@ impl<M> Sources<M> {
         codec: TextCodec,
     ) -> Result<Cow<'a, str>, BindError> {
         codec.read(self.signal(model, id)?.as_any(), id)
+    }
+    // Closed numeric input operation. None validates exclusive projection/type
+    // without mutating the signal revision; Some commits one requested offset.
+    pub(crate) fn offset(
+        &self,
+        model: &mut M,
+        id: FieldId,
+        value: Option<f64>,
+    ) -> Result<Revision, BindError> {
+        self.check_schema()?;
+        if id.scope() == 0 {
+            self.get(id)?.offset(model, value)
+        } else {
+            self.component_for(id)?.offset(model, id, value)
+        }
     }
     pub(crate) fn write_text(
         &self,

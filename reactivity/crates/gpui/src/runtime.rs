@@ -2094,9 +2094,9 @@ impl<M: View + 'static> Runtime<M> {
         .flatten_lists(
             MAX_NODES,
             readers,
-            |id, style, source, row_height, overscan| {
+            |node, id, style, source, row_height, overscan, offset| {
                 if !seen.insert(id) {
-                    return Err(ListError::DuplicateList(id));
+                    return Err(ListError::DuplicateList(id).into());
                 }
                 let previous = self
                     .viewports
@@ -2107,7 +2107,19 @@ impl<M: View + 'static> Runtime<M> {
                     self.overrides.resolve(identity, style)
                 });
                 let previous = previous.map(|(_, state)| state);
-                list::plan(
+                let offset_field = offset
+                    .map(|signal| {
+                        self.sources
+                            .resolve(&self.model, signal)?
+                            .ok_or(Error::UnregisteredInput { node })
+                    })
+                    .transpose()?;
+                if offset.is_some_and(|offset| {
+                    !offset.is_finite() || offset.abs() > (1_u64 << 40) as f64
+                }) {
+                    return Err(ListError::InvalidDelta.into());
+                }
+                let mut plan = list::plan(
                     previous,
                     style,
                     source,
@@ -2116,8 +2128,11 @@ impl<M: View + 'static> Runtime<M> {
                     scroll
                         .iter()
                         .find(|request| request.id == id)
-                        .map(|request| request.position),
-                )
+                        .map(|request| request.position)
+                        .or_else(|| offset.map(|offset| list::ScrollPosition::Offset(**offset))),
+                )?;
+                plan.offset_field = offset_field;
+                Ok(plan)
             },
         )?;
         let mut scroll_drafts = Vec::new();
@@ -2637,6 +2652,7 @@ impl<M: View + 'static> Runtime<M> {
                 ViewportKey::List(draft.id),
                 ViewportState::List(ListState {
                     identity,
+                    offset_field: draft.plan.offset_field,
                     viewport: draft.plan.viewport,
                     anchor: draft.plan.anchor,
                 }),
@@ -4889,12 +4905,12 @@ mod semantic_storage_ledger {
             allocation("semantic", || crate::div()
                 .name("label")
                 .description("description")),
-            (1, 64)
+            (1, 56)
         );
         static EMPTY: Empty = Empty;
         assert_eq!(
             allocation("list", || crate::uniform_list(ListId::new(1), &EMPTY, 24)),
-            (1, 64)
+            (1, 56)
         );
         assert_eq!(
             allocation("combined", || crate::uniform_list(
@@ -4903,7 +4919,7 @@ mod semantic_storage_ledger {
                 24
             )
             .name("label")),
-            (2, 120)
+            (2, 96)
         );
         // Component boundaries retain the prior independent cold extension.
         let owner = Owner { child: Empty };
@@ -5608,7 +5624,7 @@ mod mapped_qualification {
         );
         assert_eq!(size_of::<Destination>(), 4);
         assert_eq!(size_of::<crate::style_port::Binding<'_>>(), 24);
-        assert_eq!(size_of::<crate::semantic::ElementExtra<'_>>(), 64);
+        assert_eq!(size_of::<crate::semantic::ElementExtra<'_>>(), 56);
         assert_eq!(size_of::<Fanout>(), 32);
         assert_eq!(
             fanout.destination_bytes(),

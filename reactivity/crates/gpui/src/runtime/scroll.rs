@@ -48,6 +48,16 @@ impl<M: View + 'static> Runtime<M> {
             Some((ViewportKey::List(_), _))
         )
     }
+    pub(super) fn list_offset_depends_on(&self, field: FieldId) -> bool {
+        self.viewports
+            .iter()
+            .take_while(|(key, _)| matches!(key, ViewportKey::List(_)))
+            .any(|(_, state)| {
+                state
+                    .list()
+                    .is_some_and(|list| list.offset_field == Some(field))
+            })
+    }
     pub(super) fn list_by_id(&self, id: ListId) -> Option<(u64, &ListState)> {
         self.viewports
             .get(&ViewportKey::List(id))
@@ -683,6 +693,46 @@ impl<M: View + 'static, L: LaneSet<M>> Win<M, L> {
         let mut runtime = self.runtime_mut()?;
         runtime.live()?;
         runtime.current_presentation()?;
+        // Retain no new storage on the ordinary unbound path. Controlled input
+        // gathers the same ordered viewport plan before borrowing the model mutably.
+        if runtime
+            .viewports
+            .values()
+            .any(|state| state.list().is_some_and(|list| list.offset_field.is_some()))
+        {
+            let movements = {
+                let state = &runtime.runtime;
+                let Some(metadata) = &state.metadata else {
+                    return Ok(state.commit());
+                };
+                let context = Context {
+                    nodes: &state.presented,
+                    sheet: &metadata.presented,
+                    scale: f64::from(state.presentation_scale_factor),
+                    geometry: metadata
+                        .geometry
+                        .as_deref()
+                        .map_or_else(geometry::GeometryView::empty, geometry::Geometry::view),
+                };
+                plan.iter(context).collect::<Vec<_>>()
+            };
+            let mut values: Vec<(FieldId, f64)> = Vec::new();
+            for &(_, offset, list) in &movements {
+                if let Some(field) = list
+                    .and_then(|id| runtime.list_by_id(id))
+                    .and_then(|(_, state)| state.offset_field)
+                {
+                    if let Some((_, value)) = values.iter_mut().find(|(old, _)| *old == field) {
+                        *value = offset.y;
+                    } else {
+                        values.push((field, offset.y));
+                    }
+                }
+            }
+            if !values.is_empty() {
+                return runtime.scroll_sources(&values, &movements);
+            }
+        }
         let mut requests = Vec::new(); // Allocates only when virtual rows must be materialized.
         let mut count = 0;
         {

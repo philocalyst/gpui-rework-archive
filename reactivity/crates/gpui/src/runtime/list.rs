@@ -10,6 +10,7 @@ const MAX_COORDINATE: f32 = 1_000_000.0;
 
 pub(super) struct ListState {
     pub identity: u64,
+    pub offset_field: Option<FieldId>,
     pub viewport: ListViewport,
     pub anchor: Option<(ItemKey, f64)>,
 }
@@ -121,6 +122,7 @@ pub(super) fn plan(
         .copied()
         .map(|key| (key, offset - start as f64 * row_height));
     Ok(ListPlan {
+        offset_field: None,
         retain_offscreen: overscan != 0,
         viewport: ListViewport {
             len,
@@ -340,6 +342,49 @@ impl<M: View + 'static, L: LaneSet<M>> Win<M, L> {
         let id = runtime.list_id(target)?;
         if matches!(position, ScrollPosition::Delta(0.0)) {
             return Ok(runtime.commit());
+        }
+        if let Some(field) = runtime
+            .list_by_id(id)
+            .and_then(|(_, state)| state.offset_field)
+        {
+            let viewport = runtime.list_by_id(id).unwrap().1.viewport.clone();
+            let mut previewed = false;
+            let offset = match position {
+                ScrollPosition::Delta(delta) => viewport.offset + delta,
+                ScrollPosition::Offset(offset) => offset,
+                ScrollPosition::Index(index) => {
+                    if index >= viewport.len {
+                        return Err(ListError::IndexOutOfRange.into());
+                    }
+                    index as f64 * viewport.row_height
+                }
+                ScrollPosition::Key(key) => {
+                    if let Some(index) = runtime
+                        .list_rows
+                        .values()
+                        .find(|row| row.list == id && row.key == key)
+                        .map(|row| row.index)
+                    {
+                        f64::from(index) * viewport.row_height
+                    } else {
+                        // ItemSource is borrowed only during description. Resolve
+                        // a distant key without publishing this intermediate tree;
+                        // after writeback, rebuild all sinks against the new source.
+                        runtime.validate_offsets(&[(field, 0.0)])?;
+                        runtime.describe_with(false, &[ScrollRequest { id, position }])?;
+                        previewed = true;
+                        runtime.list_by_id(id).unwrap().1.viewport.offset
+                    }
+                }
+            }
+            .clamp(0.0, (viewport.extent - viewport.viewport_height).max(0.0));
+            let result = runtime.scroll_sources(&[(field, offset)], &[]);
+            if result.is_err() && previewed {
+                runtime.logical_valid = false;
+                runtime.clear_editing();
+                runtime.focused = None;
+            }
+            return result;
         }
         runtime.changed_nodes = 0;
         runtime.describe_with(false, &[ScrollRequest { id, position }])?;

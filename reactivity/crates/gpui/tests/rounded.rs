@@ -73,7 +73,7 @@ fn alternating_scroll_and_radius_builders_reuse_one_cold_extension_allocation() 
             element = Some(pane);
         });
         assert_eq!(measured.count_total, if named { 2 } else { 1 });
-        assert_eq!(measured.bytes_total, if named { 112 } else { 64 });
+        assert_eq!(measured.bytes_total, if named { 104 } else { 56 });
         drop(element);
     }
 }

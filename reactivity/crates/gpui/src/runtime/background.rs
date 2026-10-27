@@ -749,7 +749,7 @@ mod tests {
         assert_eq!(size_of::<Node>(), 24);
         assert_eq!(size_of::<crate::property::PropertyValue>(), 28);
         assert_eq!(size_of::<crate::style_port::PropInput<'_, Color>>(), 48);
-        assert_eq!(size_of::<crate::semantic::ElementExtra<'_>>(), 64);
+        assert_eq!(size_of::<crate::semantic::ElementExtra<'_>>(), 56);
         assert_eq!(size_of::<Destination>(), 4);
         let first = gradient(Color::linear_srgb(3., -0.25, 0.5, 0.75).unwrap());
         let first_key = first.key();
@@ -843,7 +843,7 @@ mod tests {
             div()
                 .bg(&g)
                 .bg(Color::BLACK)
-                .flatten_lists(10, &(), |_, _, _, _, _| unreachable!())
+                .flatten_lists(10, &(), |_, _, _, _, _, _, _| unreachable!())
                 .unwrap()
                 .backgrounds
                 .is_empty()
@@ -852,7 +852,7 @@ mod tests {
             div()
                 .bg(Color::BLACK)
                 .bg(&g)
-                .flatten_lists(10, &(), |_, _, _, _, _| unreachable!())
+                .flatten_lists(10, &(), |_, _, _, _, _, _, _| unreachable!())
                 .unwrap()
                 .backgrounds
                 .len(),

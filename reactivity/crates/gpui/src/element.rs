@@ -512,8 +512,7 @@ impl<'a> El<'a> {
                 id,
                 source,
                 row_height,
-                map: None,
-                overscan: 0,
+                options: None,
             },
         )));
         element
@@ -525,7 +524,18 @@ impl<'a> El<'a> {
     /// rows preserve identity but remain clipped from visible queries and hits.
     pub fn overscan(mut self, rows: usize) -> Self {
         if let Some(spec) = self.extra.as_deref_mut().and_then(|extra| extra.list_mut()) {
-            spec.overscan = rows;
+            spec.options_mut().overscan = rows;
+        }
+        self
+    }
+
+    /// Control a uniform list with a registered offset source. The source is
+    /// the absolute requested position; layout clamps it to the viewport. Wheel
+    /// and public scroll operations write their clamped offset back to the same
+    /// source. Ignored on other elements; the source borrow ends with description.
+    pub fn scroll_offset(mut self, offset: &'a crate::Signal<f64>) -> Self {
+        if let Some(spec) = self.extra.as_deref_mut().and_then(|extra| extra.list_mut()) {
+            spec.options_mut().offset = Some(offset);
         }
         self
     }
@@ -836,8 +846,9 @@ impl<'a> El<'a> {
                 boundary = item.next.0.as_deref_mut();
             }
             if let Some(spec) = element.extra.as_mut().and_then(|extra| extra.list_mut()) {
-                let previous = spec.map.take();
-                spec.map = Some(Box::new(move |row: &mut El<'_>| {
+                let options = spec.options_mut();
+                let previous = options.map.take();
+                options.map = Some(Box::new(move |row: &mut El<'_>| {
                     if let Some(previous) = &previous {
                         previous(row);
                     }
@@ -877,8 +888,8 @@ impl<'a> El<'a> {
     /// borrowed operands only when the runtime promotes a changed destination.
     #[cfg(test)]
     pub(crate) fn flatten(self) -> Vec<DraftNode<'a>> {
-        self.flatten_lists(usize::MAX, &(), |_, _, _, _, _| {
-            Err(crate::ListError::MissingViewport)
+        self.flatten_lists(usize::MAX, &(), |_, _, _, _, _, _, _| {
+            Err(crate::ListError::MissingViewport.into())
         })
         .unwrap()
         .nodes
@@ -889,12 +900,14 @@ impl<'a> El<'a> {
         limit: usize,
         readers: &'a dyn crate::reader::ReaderValues,
         mut plan: impl FnMut(
+            usize,
             crate::ListId,
             Style,
             &dyn crate::ItemSource,
             f64,
             usize,
-        ) -> Result<crate::list::ListPlan, crate::ListError>,
+            Option<&crate::Signal<f64>>,
+        ) -> Result<crate::list::ListPlan, crate::Error>,
     ) -> Result<Description<'a>, crate::Error> {
         use crate::list::{ListDraft, RowDraft};
         let mut output = Vec::new();
@@ -1005,12 +1018,15 @@ impl<'a> El<'a> {
                 });
             }
             if let Some(spec) = spec {
+                let options = spec.options.as_deref();
                 let mut list_plan = plan(
+                    index as usize,
                     spec.id,
                     element.style,
                     spec.source,
                     spec.row_height,
-                    spec.overscan,
+                    options.map_or(0, |options| options.overscan),
+                    options.and_then(|options| options.offset),
                 )?;
                 let list = viewports.len();
                 let start = list_plan.viewport.realized_range.start;
@@ -1021,7 +1037,7 @@ impl<'a> El<'a> {
                     let item_index = start + offset;
                     let y = (offset as f64 * row_height - intra) as f32;
                     let mut row = spec.source.row(item_index);
-                    if let Some(map) = &spec.map {
+                    if let Some(map) = options.and_then(|options| options.map.as_ref()) {
                         map(&mut row);
                     }
                     let mut wrapper = Self::new(NodeKind::ListItem, None);

@@ -139,6 +139,96 @@ impl<M: View + 'static, L: LaneSet<M>> RuntimeMut<'_, M, L> {
         }
     }
 
+    pub(super) fn validate_offsets(&mut self, values: &[(FieldId, f64)]) -> Result<(), Error> {
+        match catch_unwind(AssertUnwindSafe(|| {
+            for &(field, _) in values {
+                self.runtime
+                    .sources
+                    .offset(&mut self.runtime.model, field, None)?;
+            }
+            Ok(())
+        })) {
+            Ok(result) => result,
+            Err(_) => {
+                self.poison();
+                Err(Error::OwnerPanicked)
+            }
+        }
+    }
+
+    // A wheel cohort can move nested ordinary/uncontrolled viewports and write
+    // registered list sources. Gather first, validate every writer, then publish
+    // the final model and viewport state through one normal source barrier.
+    pub(super) fn scroll_sources(
+        &mut self,
+        values: &[(FieldId, f64)],
+        viewports: &[(u64, crate::ScrollOffset, Option<ListId>)],
+    ) -> Result<Commit, Error> {
+        self.live()?;
+        let epoch = self
+            .source_epoch
+            .checked_add(1)
+            .ok_or(Error::EpochExhausted)?;
+        self.validate_offsets(values)?;
+        let mut applied = 0;
+        let result = catch_unwind(AssertUnwindSafe(|| -> Result<(), Error> {
+            for &(field, value) in values {
+                self.runtime
+                    .sources
+                    .offset(&mut self.runtime.model, field, Some(value))?;
+                applied += 1;
+            }
+            Ok(())
+        }));
+        if applied != 0 {
+            self.runtime.source_epoch = epoch;
+            self.runtime.counters.source_operations += 1;
+            self.runtime.changed_nodes = 0;
+        }
+        match result {
+            Err(_) => {
+                self.poison();
+                return Err(Error::OwnerPanicked);
+            }
+            Ok(Err(error)) => {
+                if applied != 0 {
+                    self.runtime.logical_valid = false;
+                    self.runtime.clear_editing();
+                    self.runtime.focused = None;
+                }
+                return Err(error);
+            }
+            Ok(Ok(())) => {}
+        }
+        for &(identity, offset, list) in viewports {
+            match list {
+                Some(id) => {
+                    if let Some(ViewportState::List(state)) =
+                        self.runtime.viewports.get_mut(&ViewportKey::List(id))
+                        && state.offset_field.is_none()
+                    {
+                        state.viewport.offset = offset.y;
+                        state.anchor = None;
+                    }
+                }
+                None => {
+                    if let Some(ViewportState::Scroll(state)) = self
+                        .runtime
+                        .viewports
+                        .get_mut(&ViewportKey::Scroll(identity))
+                    {
+                        state.offset = offset;
+                    }
+                }
+            }
+        }
+        let exact = values
+            .first()
+            .map(|&(field, _)| field)
+            .filter(|field| values.iter().all(|(other, _)| other == field));
+        self.after_source_with_editing(exact, EditingIntent::None)
+    }
+
     pub(super) fn operation(
         &mut self,
         exact: Option<FieldId>,
@@ -237,6 +327,7 @@ impl<M: View + 'static, L: LaneSet<M>> RuntimeMut<'_, M, L> {
             Some(field)
                 if self.runtime.logical_valid
                     && !questions_changed
+                    && !self.runtime.list_offset_depends_on(field)
                     && !self.runtime.sources.invalidates_owner(field)? =>
             {
                 Some(field)
