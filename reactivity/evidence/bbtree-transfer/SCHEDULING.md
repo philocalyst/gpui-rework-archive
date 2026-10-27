@@ -153,7 +153,9 @@ The first 210-process public-operation comparison met numerical gates: with
 controls remain noisy. Four-field allocation requests 1194→120, requested warm
 bytes 1322409→343672, zero retained delta; measured Win wrapper unchanged.
 Full default GPUI tests (711), strict Clippy, exact fresh-window pixel oracles
-and the mutant pass/fail as intended. Composed native qualification is pending.
+and the mutant pass/fail as intended. The composed suite passes 1049 tests and
+six actual X11 scripts cover source/remote delivery, producer shutdown, Question
+wake, Future cancellation and Todo interaction. Complete dossier 1830d9d54f.
 Source/evidence at /home/user/gpui-source-batch-lab, branch
 local/source-batch-publication. This is not a competitor or hardware victory.
 
@@ -167,3 +169,9 @@ change. Avoid refreshing separately per field if it manufactures redundant
 intermediate request stamps in dependent joins. Unknown callbacks keep coarse
 refresh. This proposal is not implemented by the current text-only trial and
 does not supply Solid's automatic multi-output transition semantics.
+
+The separate Question-source-set prototype is now frozen and its first 54
+targeted tests plus strict Clippy pass. It preserves unrelated Ready questions,
+freezes dependent tuples once from final inputs, and rejects stale A-B-A results.
+A multi-source diamond, forgetting-one-member mutant and equal settled-endpoint
+cost fixture are being qualified independently. No performance verdict yet.

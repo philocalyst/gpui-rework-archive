@@ -24,7 +24,9 @@ isolated worktree, preregistration, freeze, oracle, mutant and evidence rules.
 
 | `local/delivery-sweep` / `/home/user/gpui-delivery-sweep-lab` | Structural admission of inbox/task work | Rejected: 64 ready +2.61%, budget-one +14.2%; 707 tests/exact outputs pass, assembly proves indexed control uses jump tables |
 
-| `local/source-batch-publication` / `/home/user/gpui-source-batch-lab` | Preserve distinct typed text edits through one publication | Preregistered; bounded disjoint-text prototype and public authority tests; full qualification in progress |
+| `local/source-batch-publication` / `/home/user/gpui-source-batch-lab` | Preserve distinct typed text edits through one publication | Numerical gates pass: 25–27% less complete publication CPU at 1000 labels; 711 default / 1049 composed tests and six actual native scripts; complete dossier `1830d9d54f`, local application trial candidate, uncertainty/hardware limits remain |
+
+| `local/question-source-set` / `/home/user/gpui-question-source-set-lab` | Preserve exact typed source sets through one Question graph refresh | Preregistered; targeted semantics and Clippy pass, diamond/full-cost qualification in progress |
 
 [BBTree transfer research](../bbtree-transfer/README.md) records the pinned
 implementation, failed historical trials, applicability and next hypotheses.
