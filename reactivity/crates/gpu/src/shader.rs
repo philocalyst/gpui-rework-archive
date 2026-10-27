@@ -626,5 +626,10 @@ mod tests {
     #[test]
     fn generated_shader_validates() {
         super::ui::WGSL_SOURCE.validate().unwrap();
+        assert_eq!(
+            super::ui::WGSL_SOURCE.wgsl_source().unwrap(),
+            include_str!(concat!(env!("OUT_DIR"), "/ui.wgsl")),
+            "typed shader and emitted WGSL differ"
+        );
     }
 }
