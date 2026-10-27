@@ -191,6 +191,20 @@ is removed. Ordinary X11 already retained that sequence for accessibility; minim
 native configurations must charge the added field. Corrected 2c49fa9de6 passed
 stale-scroll and coalesced pixel witnesses before a later fixture deliberately
 poisoned its owner by using NaN literal width. cee7b76d00 changes only that fixture
-to the existing recoverable NaN radius admission error. Full qualification is
-pending. The original control is independently challenged before the same fix;
-future timing comparisons must all contain the correctness prerequisite.
+to the existing recoverable NaN radius admission error. Full qualification at cee7b76d00 passes: 1001 default tests, 1086 X11 tests,
+74 GPU tests across all three supported formats, 319 minimal-native library tests,
+strict Clippy, 10 standalone port tests, 11 actual native scripts and four minimal
+native scripts. The original control independently fails the same full-pixel
+witness at c62df431b53b and passes after the shared prerequisite at 1e46391250d8.
+A same-window/wrong-sequence mutant reaches the new witness and fails actual
+pixels; omitting one sparse region independently fails GPU pixels.
+
+The four-way cost protocol is frozen at 4a1e6f24c748: corrected original control,
+failed local-publication predecessor, precise bounding-only variant and bounded
+sparse repair. It includes the original ten native-bridge cases plus eighteen
+small-text controls (0/25/1000 unrelated labels, 1/2/4 changed fields, source/owner).
+Twenty-four balanced orders per case give 2688 fresh timing processes after
+336 correctness and 112 allocation processes. No timing verdict exists yet.
+This measures Win operation through GPU completion/ACK; it excludes event dispatch,
+active NativeHost accessibility-provider projection, WSI and display scanout.
+Current test-only fixture rebuilds do not alter the qualified production source.
