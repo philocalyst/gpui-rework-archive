@@ -1135,6 +1135,7 @@ dependencies = [
 name = "gpui_gpu"
 version = "0.1.0"
 dependencies = [
+ "allocation-counter",
  "bytemuck",
  "gpui_canvas",
  "naga",
