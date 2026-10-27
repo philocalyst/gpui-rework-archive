@@ -388,7 +388,13 @@ fn nested_sample_clips_and_unsupported_shapes_preserve_exact_publication() {
                     assert_eq!(text_state(&win), before);
                     let mut full = nested(value, map, rounded, scrolled);
                     let actual = pixels(&mut win);
-                    assert!(actual.chunks_exact(4).any(|p| p != [255, 255, 255, 255]));
+                    assert!(
+                        actual
+                            .as_chunks::<4>()
+                            .0
+                            .iter()
+                            .any(|p| *p != [255, 255, 255, 255])
+                    );
                     assert_eq!(actual, pixels(&mut full));
                     ack(&mut win);
                     ack(&mut full);
