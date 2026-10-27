@@ -61,6 +61,30 @@ impl<'a> Context<'a> {
     }
 }
 
+// Logical indexes are only hints into P: omitted virtual rows change its rank.
+// Return geometry from that same immutable sheet, never the logical tree.
+pub(super) fn retained_text_placement<M>(
+    runtime: &Runtime<M>,
+    logical: usize,
+) -> Option<(usize, crate::Affine, Rect)> {
+    let identity = runtime.nodes[logical].identity();
+    let row = if runtime
+        .presented
+        .get(logical)
+        .is_some_and(|node| node.identity == identity)
+    {
+        logical
+    } else {
+        runtime
+            .presented
+            .iter()
+            .position(|node| node.identity == identity)?
+    };
+    let context = Context::new(runtime);
+    let part = context.part(row);
+    Some((row, part.transform()?, part.text_clip()))
+}
+
 /// A checked, borrowed P. Native projection cannot fail halfway through an
 /// adapter update: this borrow freezes its already-validated context throughout
 /// conversion, with no callbacks into application code.

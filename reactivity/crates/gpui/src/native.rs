@@ -2192,4 +2192,4 @@ mod scroll_bench;
 ))]
 #[allow(dead_code)]
 #[path = "../examples/zgx_native_lab.rs"]
-mod workload_port;
+pub(crate) mod workload_port;

@@ -12,32 +12,49 @@ impl<M: View + 'static> Runtime<M> {
         if epoch != self.source_epoch
             || self.prepared.is_some()
             || !self.presentation_valid
-            || self.metadata.is_some()
-            || self.images.is_some()
-            || !self.viewports.is_empty()
             || self.presentation_size != self.requested_size
             || self.presentation_scale_factor != self.requested_scale_factor
             || self.layout_dirty.len() != 1
             || self.nodes[index].kind() != NodeKind::Text
-            || self.presented.len() != self.nodes.len()
-            || self.presented[index].identity != self.nodes[index].identity()
         {
             return Ok(false);
         }
+        let (row, transform, clip) =
+            if self.metadata.is_some() || self.images.is_some() || !self.viewports.is_empty() {
+                let Some(placement) = self.retained_text_placement(index) else {
+                    return Ok(false);
+                };
+                placement
+            } else {
+                if self.presented.len() != self.nodes.len()
+                    || self.presented[index].identity != self.nodes[index].identity()
+                {
+                    return Ok(false);
+                }
+                (
+                    index,
+                    self.presented[index]
+                        .transform(geometry::Bases::new(&[]))
+                        .ok_or(Error::Canvas(gpui_canvas::Error::InvalidGeometry))?,
+                    Rect::new(
+                        0.,
+                        0.,
+                        self.requested_size[0] as f32,
+                        self.requested_size[1] as f32,
+                    ),
+                )
+            };
         let owner = self.text.as_ref().unwrap();
         if owner.presented.len() < 2 {
             return Ok(false);
         }
-        let Some(previous) = owner.entry(index) else {
+        let Some(previous) = owner.entry(row) else {
             return Ok(false);
         };
         let Some(run) = previous.run else {
             return Ok(false);
         };
         let origin = previous.origin;
-        let transform = self.presented[index]
-            .transform(geometry::Bases::new(&[]))
-            .ok_or(Error::Canvas(gpui_canvas::Error::InvalidGeometry))?;
         let layout = self.layout.layout(self.layout_nodes[index])?;
         let style = self.styles.get(index);
         let text = self.nodes[index]
@@ -53,10 +70,10 @@ impl<M: View + 'static> Runtime<M> {
             None,
         )?;
         let patch = Box::new(text_geometry::TextPatch {
-            row: index,
+            row,
             value,
             geometry: text_geometry::Entry {
-                row: index as u32,
+                row: row as u32,
                 run: Some(run),
                 origin,
                 map: shape.retain_geometry().expect("interactive text geometry"),
@@ -75,12 +92,7 @@ impl<M: View + 'static> Runtime<M> {
             shape,
             origin,
             transform,
-            Rect::new(
-                0.,
-                0.,
-                self.requested_size[0] as f32,
-                self.requested_size[1] as f32,
-            ),
+            clip,
             style.fg,
             self.requested_scale_factor,
         )?
@@ -101,12 +113,44 @@ impl<M: View + 'static> Runtime<M> {
         self.publish_paint(Some((damage, token, next)))?;
         Ok(true)
     }
+
+    // Keep optional scene features out of the ordinary positional proof. The
+    // caller has already certified unchanged layout/topology and an acknowledged
+    // predecessor. Canvas independently verifies exact clip/material/run leases.
+    #[inline(never)]
+    fn retained_text_placement(&self, logical: usize) -> Option<(usize, Affine, Rect)> {
+        if self.inspector_enabled() || self.metadata.as_ref().is_some_and(|m| m.editing.is_some()) {
+            return None;
+        }
+        query::retained_text_placement(self, logical)
+    }
 }
 
 #[cfg(test)]
 mod tests {
     use super::*;
     use crate::{El, Signal, column, text};
+
+    #[cfg(all(any(feature = "x11", feature = "x11-minimal"), target_os = "linux"))]
+    #[test]
+    fn representative_workload_local_publication_admission() {
+        for case in ["stream", "stream-owner", "scroll", "both", "fractional"] {
+            let mut fixture = crate::native::workload_port::CostFixture::new(case);
+            let token = fixture.owner.with_scene(|_, token| token).unwrap();
+            fixture.owner.presented(token).unwrap();
+            let mut patches = 0;
+            let mut full = 0;
+            for _ in 0..80 {
+                fixture.advance(case);
+                let runtime = fixture.owner.runtime().unwrap();
+                patches += usize::from(runtime.text.as_ref().is_some_and(|t| t.patch.is_some()));
+                full += usize::from(runtime.prepared.as_ref().is_some_and(|p| !p.keeps_rows()));
+                let token = fixture.owner.with_scene(|_, token| token).unwrap();
+                fixture.owner.presented(token).unwrap();
+            }
+            println!("LOCAL_PUBLICATION,{case},updates=80,patches={patches},full={full}");
+        }
+    }
     struct Page {
         label: Signal<String>,
     }
