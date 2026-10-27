@@ -1,0 +1,11 @@
+
+running 1 test
+test controlled_source_without_any_other_sink_is_not_lost ... FAILED
+
+failures:
+
+failures:
+    controlled_source_without_any_other_sink_is_not_lost
+
+test result: FAILED. 0 passed; 1 failed; 0 ignored; 0 measured; 9 filtered out; finished in 0.00s
+

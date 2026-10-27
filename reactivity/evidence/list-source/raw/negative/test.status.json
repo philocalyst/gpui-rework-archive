@@ -1,0 +1,1 @@
+{"command": ["cargo", "+nightly-2026-10-23", "-Z", "checksum-freshness", "--config", "build.fingerprint=\"content\"", "test", "--locked", "--offline", "--release", "-p", "gpui", "--test", "list_source", "controlled_source_without_any_other_sink_is_not_lost", "--", "--exact", "--nocapture"], "exit": 101}

@@ -1,0 +1,2 @@
+list_source_alloc,mode=0,controlled=false,overscan=0,operation=mount,requests=414,bytes=159821,retained=73901,peak=74201
+list_source_alloc,mode=0,controlled=false,overscan=0,operation=scroll16,requests=1782,bytes=568939,retained=2228,peak=18582

@@ -1,0 +1,20 @@
+
+running 10 tests
+test controlled_source_without_any_other_sink_is_not_lost ... ok
+test shared_offset_updates_both_lists_in_one_source_epoch ... ok
+test rejected_writer_does_not_mutate_sources_and_rebinding_does_not_use_old_field ... FAILED
+test contained_source_resolution_and_writeback_use_component_namespace ... ok
+test controlled_offset_is_absolute_across_prepend_and_clamps_without_shared_writeback ... ok
+test unregistered_scroll_operand_rejects_mount ... ok
+test nested_wheel_commits_controlled_list_and_ordinary_residual_together ... ok
+test pending_and_failed_newer_source_keep_old_sheet_and_eligible_ack ... ok
+test wheel_offset_index_key_and_next_tick_share_one_source ... ok
+test direct_source_without_owner_dependency_realizes_and_matches_fresh_pixels ... ok
+
+failures:
+
+failures:
+    rejected_writer_does_not_mutate_sources_and_rebinding_does_not_use_old_field
+
+test result: FAILED. 9 passed; 1 failed; 0 ignored; 0 measured; 0 filtered out; finished in 0.01s
+

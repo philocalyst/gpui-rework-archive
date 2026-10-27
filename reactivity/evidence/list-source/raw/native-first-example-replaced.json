@@ -1,0 +1,6 @@
+{
+  "status": "historical build-only artifact path replaced by final source build",
+  "original_receipt": "native-first/artifact.json",
+  "execution_scope": "No timing or native example run used the former ELF; earlier native checks used separately preserved unit executables. Source, build output and old digest remain, old example bytes are not retained.",
+  "replacement": "a888b6e154786bf62c8a2f9956c3f64113a8a678baafb16081543fac69f8a06a"
+}

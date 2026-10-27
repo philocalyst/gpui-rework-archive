@@ -1,0 +1,36 @@
+/home/user/gpui-list-overscan-target/release/build/gpui/c6ca7b724b9767e5/out/zgx_native_lab  :
+section                  size       addr
+.interp                    28        736
+.note.ABI-tag              32        764
+.note.gnu.build-id         36        796
+.dynsym                  4296        832
+.gnu.version              358       5128
+.gnu.version_r            464       5488
+.gnu.hash                  28       5952
+.dynstr                  2278       5980
+.rela.dyn              557040       8264
+.rela.plt                  48     565304
+.gcc_except_table      779664     565352
+.rodata               6581856    1345024
+.eh_frame_hdr          166804    7926880
+.eh_frame             1181152    8093688
+.text                11313431    9278944
+.init                      27   20592376
+.fini                      13   20592404
+.plt                       48   20592432
+.tdata                   1000   20596576
+.tbss                     272   20597576
+.fini_array                 8   20597576
+.init_array                24   20597584
+.data.rel.ro           402480   20597608
+.dynamic                  480   21000088
+.got                    35720   21000568
+.got.plt                   40   21036288
+.relro_padding            728   21036328
+.tm_clone_table             0   21040424
+.data                   11352   21040512
+.bss                     7444   21051864
+.comment                  193          0
+Total                21047344
+
+

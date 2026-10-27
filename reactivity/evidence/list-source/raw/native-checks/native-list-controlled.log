@@ -1,0 +1,6 @@
+
+thread 'native::list_tests::native_library_250k_controlled_wheel_pointer_resize_resume' (1546465) panicked at crates/gpui/src/native/list_tests.rs:290:17:
+assertion `left == right` failed
+  left: 3
+ right: 1
+note: run with `RUST_BACKTRACE=1` environment variable to display a backtrace

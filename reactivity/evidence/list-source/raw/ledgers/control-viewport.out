@@ -1,0 +1,13 @@
+
+running 1 test
+test runtime::scroll::tests::viewport_storage_and_allocation_ledger ... scroll_sizes,Node=24,Presented=64,Prepared=40,Runtime=1824,El=184,Draft=160,Extra=64,Sheet=96,ListState=112,ViewportKey=16,ViewportState=112,ViewportInfo=96,ViewportColumn=24,ListFrozen=40,ScrollFrozen=64,ScrollViewport=72,Plan=48
+scroll_alloc,ordinary_recording,count=29,total=6724,retained=5540,peak=5708
+scroll_alloc,first_list_recording,count=39,total=9644,retained=7364,peak=7492
+scroll_alloc,scroll_recording,count=44,total=12348,retained=8996,peak=9116
+scroll_alloc,warm_scroll_0,count=3,total=272,retained=0,peak=272
+scroll_alloc,warm_scroll_1,count=3,total=272,retained=0,peak=272
+scroll_alloc,warm_scroll_2,count=3,total=272,retained=0,peak=272
+ok
+
+test result: ok. 1 passed; 0 failed; 0 ignored; 0 measured; 298 filtered out; finished in 0.00s
+
