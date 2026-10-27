@@ -419,50 +419,24 @@ fn identical_shader_words_can_have_different_conservative_memberships() {
             .next()
             .unwrap()
             .local_rect;
-        positions[0].y += 32. - (r.x + r.y + r.width + r.height);
-        // Search a fixed narrow rounding neighborhood using ordinary public
-        // scenes. At least one pair must cross a tile boundary while its exact
-        // inverse words coincide; the subsequent image oracle is independent.
-        let mut witness = None;
-        'search: for k in 1..=16 {
-            let center = -(k as f32) * 2f32.powi(-20);
-            for pair in [center.next_down(), center, center.next_up()].windows(2) {
-                let (initial, slots) = scene(
-                    &mut text,
-                    ["0011", "1100"],
-                    positions,
-                    Affine { ty: pair[0], ..map },
-                    ColorConfig::default(),
-                    Color::BLACK,
-                );
-                let (next, next_slots) = scene(
-                    &mut text,
-                    ["0011", "1100"],
-                    positions,
-                    Affine { ty: pair[1], ..map },
-                    ColorConfig::default(),
-                    Color::BLACK,
-                );
-                let a = initial.prepared_scene().text_run(slots[0]).unwrap();
-                let b = next.prepared_scene().text_run(next_slots[0]).unwrap();
-                let ab = a.bounds().next().unwrap();
-                let bb = b.bounds().next().unwrap();
-                if a.inverse.map(f64::to_bits) == b.inverse.map(f64::to_bits)
-                    && ((ab.y + ab.height) as u32).div_ceil(16)
-                        != ((bb.y + bb.height) as u32).div_ceil(16)
-                {
-                    eprintln!(
-                        "conservative-bound witness: ty bits{:08x}/{:08x}, bounds{ab:?}/{bb:?}",
-                        pair[0].to_bits(),
-                        pair[1].to_bits()
-                    );
-                    witness = Some((initial, slots, next, next_slots));
-                    break 'search;
-                }
-            }
-        }
-        let (initial, slots, next, next_slots) =
-            witness.expect("fixed rounding neighborhood contains a witness");
+        // Canvas adds a one-pixel outward guard: geometric max31 gives bound32.
+        positions[0].y += 31. - (r.x + r.y + r.width + r.height);
+        let (initial, slots) = scene(
+            &mut text,
+            ["0011", "1100"],
+            positions,
+            map,
+            ColorConfig::default(),
+            Color::BLACK,
+        );
+        let (next, next_slots) = scene(
+            &mut text,
+            ["0011", "1100"],
+            positions,
+            Affine { ty: 1e-13, ..map },
+            ColorConfig::default(),
+            Color::BLACK,
+        );
         assert_eq!(slots, next_slots);
         let old = edits(&initial, slots);
         let new = edits(&next, slots);
