@@ -1,0 +1,1 @@
+{"command": ["/usr/bin/time", "-v", "-o", "/home/user/gpui-sparse-batch-evidence/paired/0-40-4-opaque-candidate.time", "taskset", "-c", "2", "/home/user/gpui-sparse-batch-target/release/build/gpui/7d7527a5a336fc72/out/source_batch_cost", "40", "4", "opaque", "/home/user/zgx-reference-local/comparisons/fonts/DejaVuSans.ttf"], "exit": 0}

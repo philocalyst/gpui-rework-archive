@@ -1,0 +1,35 @@
+
+running 5 tests
+test failed_newer_batch_does_not_revoke_an_older_complete_candidate ... ok
+test four_disjoint_visual_sources_publish_one_exact_cohort ... ok
+test metadata_destinations_keep_the_existing_coarse_boundary ... ok
+test owner_dependent_source_cannot_reuse_only_its_bound_text_destinations ... ok
+test fifth_distinct_source_keeps_the_existing_coarse_boundary ... ok
+
+test result: ok. 5 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 0.00s
+
+
+running 3 tests
+test changed_layout_rejects_sparse_publication_and_moves_following_content ... ok
+test pending_text_and_geometry_stay_at_acknowledged_epoch_then_survive_newer_failure ... ok
+test direct_text_pixels_match_fresh_windows_through_patch_and_fallback ... ok
+
+test result: ok. 3 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 0.00s
+
+
+running 3 tests
+test older_sparse_batch_can_ack_after_a_newer_batch_fails_to_prepare ... ok
+test batched_intrinsic_size_changes_move_unchanged_following_content ... ok
+test two_and_four_row_batches_publish_exact_values_pixels_and_interaction_geometry ... ok
+
+test result: ok. 3 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 0.00s
+
+
+running 4 tests
+test zero_advance_unit_retains_visible_semantic_extent_without_a_damage_rectangle ... ok
+test physical_geometry_keeps_padding_fractional_dpi_reflection_shear_and_exact_target_hits ... ok
+test wrapped_directional_runs_cover_source_and_containing_hit_is_not_nearest_caret ... ok
+test old_p_and_eligible_c_keep_exact_geometry_after_new_l_reshapes_then_fails ... ok
+
+test result: ok. 4 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 0.00s
+

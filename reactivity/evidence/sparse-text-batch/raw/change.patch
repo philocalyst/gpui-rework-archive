@@ -1,0 +1,863 @@
+diff --git a/reactivity/crates/canvas/examples/text_cache_capacity.rs b/reactivity/crates/canvas/examples/text_cache_capacity.rs
+index e6133e6be9..0860340c14 100644
+--- a/reactivity/crates/canvas/examples/text_cache_capacity.rs
++++ b/reactivity/crates/canvas/examples/text_cache_capacity.rs
+@@ -1,6 +1,7 @@
+ //! Retained allocation ledger; scoped planning is the independent output oracle.
+ use gpui_canvas::{FontFace, TextCache, TextLayout};
+-fn fingerprint(layout: &TextLayout) -> (Vec<(u16, u32, u32, u32)>, [u32; 3]) {
++type Fingerprint = (Vec<(u16, u32, u32, u32)>, [u32; 3]);
++fn fingerprint(layout: &TextLayout) -> Fingerprint {
+     (
+         layout
+             .glyphs()
+diff --git a/reactivity/crates/canvas/src/canvas.rs b/reactivity/crates/canvas/src/canvas.rs
+index 9f8ca4ca27..9759c194cb 100644
+--- a/reactivity/crates/canvas/src/canvas.rs
++++ b/reactivity/crates/canvas/src/canvas.rs
+@@ -28,7 +28,7 @@ mod mask_kernel;
+ mod metric_scale;
+ mod text_patch;
+ use metric_scale::MetricScale;
+-pub use text_patch::TextRunSlot;
++pub use text_patch::{TextRunReplacement, TextRunSlot};
+ mod paint;
+ pub use paint::{PaintCommit, PaintEdit, PaintError, PaintErrorKind, PaintIndex};
+ mod rounded;
+diff --git a/reactivity/crates/canvas/src/canvas/text_patch.rs b/reactivity/crates/canvas/src/canvas/text_patch.rs
+index 44b12ed6c1..8300fad187 100644
+--- a/reactivity/crates/canvas/src/canvas/text_patch.rs
++++ b/reactivity/crates/canvas/src/canvas/text_patch.rs
+@@ -155,3 +155,152 @@ impl Canvas {
+         Ok(Some(damage))
+     }
+ }
++/// One replacement in an atomic, bounded text-run transaction.
++/// Slots refer to the same preceding scene and must be distinct.
++pub struct TextRunReplacement<'a> {
++    pub slot: TextRunSlot,
++    pub layout: &'a TextLayout,
++    pub origin: Point,
++    pub transform: Affine,
++    pub clip: Rect,
++    pub color: Color,
++    pub raster_scale: f32,
++}
++impl Canvas {
++    /// Prepare up to four disjoint runs against one preceding scene, then
++    /// publish all of them together. Rejection/error changes no scene command.
++    /// Resource-use and tile-reference certificates cover the whole batch.
++    pub fn try_patch_texts(
++        &mut self,
++        text: &mut TextSystem,
++        replacements: &[TextRunReplacement<'_>],
++    ) -> Result<Option<DamageRegion>, Error> {
++        if replacements.is_empty() || replacements.len() > 4 {
++            return Ok(None);
++        }
++        let mut plans = Vec::with_capacity(replacements.len());
++        let mut old_masks = Vec::new();
++        let mut new_masks = Vec::new();
++        let mut next_references = self.references;
++        let mut damage = DamageRegion::default();
++        let viewport = viewport_rect(self.width, self.height);
++        let rect_bits = |r: Rect| [r.x, r.y, r.width, r.height].map(f32::to_bits);
++        for (ordinal, replacement) in replacements.iter().enumerate() {
++            if replacements[..ordinal]
++                .iter()
++                .any(|r| r.slot == replacement.slot)
++            {
++                return Ok(None);
++            }
++            let index = replacement.slot.0.get() as usize - 1;
++            let Some(old) = self.commands.commons.get(index) else {
++                return Ok(None);
++            };
++            text.validate(replacement.layout)?;
++            let mut prepared =
++                Self::recording(self.width as u32, self.height as u32, self.color_config)?;
++            prepared.draw_text_scaled(
++                text,
++                replacement.layout,
++                replacement.origin,
++                replacement.transform,
++                replacement.clip,
++                replacement.color,
++                replacement.raster_scale,
++            )?;
++            if prepared.commands.commons.len() != 1
++                || !prepared.commands.inline.is_empty()
++                || prepared.commands.order.len() != (old.range[1] - old.range[0]) as usize
++            {
++                return Ok(None);
++            }
++            let a = self.commands.columns.resolve(old.common, viewport, false);
++            let b = prepared.commands.columns.resolve(
++                prepared.commands.commons[0].common,
++                viewport,
++                false,
++            );
++            if self.commands.clip_chain(a.clip).is_some()
++                || rect_bits(a.clip) != rect_bits(b.clip)
++                || a.map.inverse.map(f64::to_bits) != b.map.inverse.map(f64::to_bits)
++                || a.color.map(f32::to_bits) != b.color.map(f32::to_bits)
++            {
++                return Ok(None);
++            }
++            for address in &mut prepared.commands.order {
++                let key = prepared.commands.masks[usize::from(address.mask)].key;
++                let Some(&mask) = self.commands.mask_index.get(&key) else {
++                    return Ok(None);
++                };
++                address.command = index as u16;
++                address.mask = mask as u16;
++            }
++            let range = old.range[0] as usize..old.range[1] as usize;
++            let preceding = &self.commands.order[range];
++            let old_references: usize = preceding
++                .iter()
++                .map(|a| {
++                    let [l, t, r, b] = a.bounds.map(usize::from);
++                    ((r - 1) / TILE - l / TILE + 1) * ((b - 1) / TILE - t / TILE + 1)
++                })
++                .sum();
++            let Some(next) = next_references
++                .checked_sub(old_references)
++                .and_then(|n| n.checked_add(prepared.references))
++            else {
++                return Ok(None);
++            };
++            next_references = next;
++            old_masks.extend(preceding.iter().map(|a| a.mask));
++            new_masks.extend(prepared.commands.order.iter().map(|a| a.mask));
++            let mut run_damage = DamageRegion::default();
++            for address in preceding.iter().chain(&prepared.commands.order) {
++                run_damage = run_damage.union(DamageRegion::checked_canvas_bounds(
++                    address.bounds.map(usize::from),
++                ));
++            }
++            damage = damage.union(run_damage);
++            plans.push((index, prepared, run_damage));
++        }
++        if next_references > MAX_REFERENCES {
++            return Ok(None);
++        }
++        old_masks.sort_unstable();
++        new_masks.sort_unstable();
++        for &mask in &old_masks {
++            let count = |masks: &[u16]| {
++                masks.partition_point(|&m| m <= mask) - masks.partition_point(|&m| m < mask)
++            };
++            if self.commands.masks[usize::from(mask)].uses as usize + count(&new_masks)
++                == count(&old_masks)
++            {
++                return Ok(None);
++            }
++        }
++        // No remaining operation can reject a member of this cohort. Counts
++        // were validated together, so individually admissible removals cannot
++        // silently leave the preceding scene's final resource lease unused.
++        for mask in old_masks {
++            self.commands.masks[usize::from(mask)].uses -= 1;
++        }
++        for mask in new_masks {
++            self.commands.masks[usize::from(mask)].uses += 1;
++        }
++        for (index, mut prepared, run_damage) in plans {
++            let old = &self.commands.commons[index];
++            let mut group = prepared.commands.commons.pop().unwrap();
++            group.common = old.common;
++            group.range = old.range;
++            self.commands
++                .columns
++                .support(group.common.paint, run_damage, false);
++            let range = group.range[0] as usize..group.range[1] as usize;
++            self.commands.order[range].copy_from_slice(&prepared.commands.order);
++            self.commands.commons[index] = group;
++        }
++        self.references = next_references;
++        self.invalidate_bins();
++        self.dirty = true;
++        Ok(Some(damage))
++    }
++}
+diff --git a/reactivity/crates/canvas/src/lib.rs b/reactivity/crates/canvas/src/lib.rs
+index c69ddb284a..f2540866b9 100644
+--- a/reactivity/crates/canvas/src/lib.rs
++++ b/reactivity/crates/canvas/src/lib.rs
+@@ -11,7 +11,8 @@ pub use canvas::{
+     MAX_CLIP_DEPTH, MAX_CLIP_NODES, PaintColor, PaintCommit, PaintEdit, PaintError, PaintErrorKind,
+     PaintIndex, PaintSlot, PreparedClipNode, PreparedDraw, PreparedGroup, PreparedPaint,
+     PreparedPlacement, PreparedScene, PreparedSource, RenderStats, SceneStorage, SlotCommit,
+-    SlotEdit, SlotError, SlotErrorKind, TextRunSlot, rounded_rect_contains, sampled_rect_clip,
++    SlotEdit, SlotError, SlotErrorKind, TextRunReplacement, TextRunSlot, rounded_rect_contains,
++    sampled_rect_clip,
+ };
+ pub use color::gradient::{
+     Extend, Gradient, GradientGeometry, GradientKey, GradientStop, GradientView, Interpolation,
+diff --git a/reactivity/crates/canvas/tests/text_batch.rs b/reactivity/crates/canvas/tests/text_batch.rs
+new file mode 100644
+index 0000000000..13dc60acee
+--- /dev/null
++++ b/reactivity/crates/canvas/tests/text_batch.rs
+@@ -0,0 +1,149 @@
++use gpui_canvas::{
++    Affine, Canvas, Color, Point, Rect, TextLayout, TextRunReplacement, TextRunSlot, TextSystem,
++};
++const CLIP: Rect = Rect::new(0., 0., 128., 96.);
++fn origin(row: usize) -> Point {
++    Point {
++        x: 2.,
++        y: 2. + row as f32 * 24.,
++    }
++}
++fn scene(
++    text: &mut TextSystem,
++    labels: &[&str],
++    transform: Affine,
++    clip: Rect,
++) -> (Canvas, Vec<TextRunSlot>) {
++    let mut canvas = Canvas::new(128, 96).unwrap();
++    let mut slots = Vec::new();
++    let mut stage = canvas.stage();
++    for (i, label) in labels.iter().enumerate() {
++        let layout = text.shape(label, 12., None).unwrap();
++        slots.push(
++            stage
++                .draw_text_scaled_tracked(
++                    text,
++                    &layout,
++                    origin(i),
++                    transform,
++                    clip,
++                    Color::WHITE,
++                    1.,
++                )
++                .unwrap()
++                .unwrap(),
++        );
++    }
++    stage.commit();
++    (canvas, slots)
++}
++fn replacement(
++    slot: TextRunSlot,
++    layout: &TextLayout,
++    row: usize,
++    transform: Affine,
++    clip: Rect,
++) -> TextRunReplacement<'_> {
++    TextRunReplacement {
++        slot,
++        layout,
++        origin: origin(row),
++        transform,
++        clip,
++        color: Color::WHITE,
++        raster_scale: 1.,
++    }
++}
++#[test]
++fn disjoint_runs_match_full_replacement_with_exact_clips_and_transforms() {
++    for (map, clip) in [
++        (Affine::IDENTITY, CLIP),
++        (
++            Affine::translation(0.25, 0.5),
++            Rect::new(0.125, 0.375, 120.5, 90.25),
++        ),
++    ] {
++        let mut text = TextSystem::bundled().unwrap();
++        let (mut canvas, slots) = scene(&mut text, &["11", "22", "1122"], map, clip);
++        let a = text.shape("22", 12., None).unwrap();
++        let b = text.shape("11", 12., None).unwrap();
++        let edits = [
++            replacement(slots[0], &a, 0, map, clip),
++            replacement(slots[1], &b, 1, map, clip),
++        ];
++        assert!(canvas.try_patch_texts(&mut text, &edits).unwrap().is_some());
++        let (mut full, _) = scene(&mut text, &["22", "11", "1122"], map, clip);
++        assert_eq!(canvas.pixels(), full.pixels());
++        assert_eq!(
++            canvas.prepared_scene().storage().resource_entries,
++            full.prepared_scene().storage().resource_entries
++        );
++    }
++}
++#[test]
++fn aggregate_last_resource_use_rejects_the_entire_cohort() {
++    let mut text = TextSystem::bundled().unwrap();
++    let (mut canvas, slots) = scene(&mut text, &["11", "11", "22"], Affine::IDENTITY, CLIP);
++    let before = canvas.pixels().to_vec();
++    let masks: Vec<_> = canvas.prepared_scene().masks().map(|m| m.key).collect();
++    let b = text.shape("22", 12., None).unwrap();
++    let edits = [
++        replacement(slots[0], &b, 0, Affine::IDENTITY, CLIP),
++        replacement(slots[1], &b, 1, Affine::IDENTITY, CLIP),
++    ];
++    let result = canvas.try_patch_texts(&mut text, &edits).unwrap();
++    assert_eq!(
++        canvas.pixels(),
++        before,
++        "collective last-use rejection cannot publish a partial batch"
++    );
++    assert!(result.is_none());
++    assert_eq!(
++        canvas
++            .prepared_scene()
++            .masks()
++            .map(|m| m.key)
++            .collect::<Vec<_>>(),
++        masks
++    );
++}
++#[test]
++fn a_rejected_second_run_preserves_the_first_run_and_its_pixels() {
++    let mut text = TextSystem::bundled().unwrap();
++    let (mut canvas, slots) = scene(&mut text, &["11", "11", "1122"], Affine::IDENTITY, CLIP);
++    let before = canvas.pixels().to_vec();
++    let first = text.shape("22", 12., None).unwrap();
++    let longer = text.shape("222", 12., None).unwrap();
++    let edits = [
++        replacement(slots[0], &first, 0, Affine::IDENTITY, CLIP),
++        replacement(slots[1], &longer, 1, Affine::IDENTITY, CLIP),
++    ];
++    let result = canvas.try_patch_texts(&mut text, &edits).unwrap();
++    assert_eq!(
++        canvas.pixels(),
++        before,
++        "later admission failure must roll back the entire batch"
++    );
++    assert!(result.is_none());
++}
++#[test]
++fn duplicate_slot_and_late_foreign_layout_leave_the_preceding_scene_intact() {
++    let mut text = TextSystem::bundled().unwrap();
++    let (mut canvas, slots) = scene(&mut text, &["11", "11", "1122"], Affine::IDENTITY, CLIP);
++    let before = canvas.pixels().to_vec();
++    let next = text.shape("22", 12., None).unwrap();
++    let edits = [
++        replacement(slots[0], &next, 0, Affine::IDENTITY, CLIP),
++        replacement(slots[0], &next, 0, Affine::IDENTITY, CLIP),
++    ];
++    assert!(canvas.try_patch_texts(&mut text, &edits).unwrap().is_none());
++    assert_eq!(canvas.pixels(), before);
++    let foreign = TextSystem::new(include_bytes!("../assets/NotoSans.ttf")).unwrap();
++    let foreign_layout = foreign.shape("22", 12., None).unwrap();
++    let edits = [
++        replacement(slots[0], &next, 0, Affine::IDENTITY, CLIP),
++        replacement(slots[1], &foreign_layout, 1, Affine::IDENTITY, CLIP),
++    ];
++    assert!(canvas.try_patch_texts(&mut text, &edits).is_err());
++    assert_eq!(canvas.pixels(), before);
++}
+diff --git a/reactivity/crates/gpui/src/runtime.rs b/reactivity/crates/gpui/src/runtime.rs
+index ff5f9cde0f..e1aa28b53c 100644
+--- a/reactivity/crates/gpui/src/runtime.rs
++++ b/reactivity/crates/gpui/src/runtime.rs
+@@ -2904,7 +2904,8 @@ impl<M: View + 'static> Runtime<M> {
+             && self.changed_nodes == 1
+             && let Some(text) = &mut self.text
+         {
+-            text.dirty_text = last_changed.map(|index| (self.source_epoch, index));
++            text.dirty_text =
++                last_changed.map(|index| text_geometry::DirtyText::One(self.source_epoch, index));
+         }
+         Ok(if semantic && !visual_changed {
+             PatchOutcome::Metadata
+diff --git a/reactivity/crates/gpui/src/runtime/sparse_text.rs b/reactivity/crates/gpui/src/runtime/sparse_text.rs
+index 277d40889f..baba121b9a 100644
+--- a/reactivity/crates/gpui/src/runtime/sparse_text.rs
++++ b/reactivity/crates/gpui/src/runtime/sparse_text.rs
+@@ -6,8 +6,10 @@ impl<M: View + 'static> Runtime<M> {
+         &mut self,
+         shaper: &mut gpui_canvas::TextShaper<'_>,
+     ) -> Result<bool, Error> {
+-        let Some((epoch, index)) = self.text.as_ref().and_then(|t| t.dirty_text) else {
+-            return Ok(false);
++        let Some(text_geometry::DirtyText::One(epoch, index)) =
++            self.text.as_ref().and_then(|t| t.dirty_text)
++        else {
++            return self.try_sparse_text_batch(shaper);
+         };
+         if epoch != self.source_epoch
+             || self.prepared.is_some()
+@@ -51,7 +53,7 @@ impl<M: View + 'static> Runtime<M> {
+             Some(layout.content_box_width()),
+             None,
+         )?;
+-        let patch = Box::new(text_geometry::TextPatch {
++        let patch = vec![text_geometry::TextPatch {
+             row: index,
+             value,
+             geometry: text_geometry::Entry {
+@@ -60,7 +62,8 @@ impl<M: View + 'static> Runtime<M> {
+                 origin,
+                 map: shape.retain_geometry().expect("interactive text geometry"),
+             },
+-        });
++        }]
++        .into_boxed_slice();
+         let sequence = self.next_presentation;
+         let next = sequence.checked_add(1).ok_or(Error::EpochExhausted)?;
+         let token = PresentationToken {
+@@ -102,6 +105,125 @@ impl<M: View + 'static> Runtime<M> {
+     }
+ }
+ 
++impl<M: View + 'static> Runtime<M> {
++    fn try_sparse_text_batch(
++        &mut self,
++        shaper: &mut gpui_canvas::TextShaper<'_>,
++    ) -> Result<bool, Error> {
++        let Some(text_geometry::DirtyText::Batch(epoch)) =
++            self.text.as_ref().and_then(|t| t.dirty_text)
++        else {
++            return Ok(false);
++        };
++        if epoch != self.source_epoch
++            || self.prepared.is_some()
++            || !self.presentation_valid
++            || self.metadata.is_some()
++            || self.images.is_some()
++            || !self.viewports.is_empty()
++            || self.presentation_size != self.requested_size
++            || self.presentation_scale_factor != self.requested_scale_factor
++            || !(2..=4).contains(&self.layout_dirty.len())
++            || self.presented.len() != self.nodes.len()
++        {
++            return Ok(false);
++        }
++        let mut indices: Vec<_> = self
++            .layout_dirty
++            .iter()
++            .map(|&id| self.by_identity.required(id))
++            .collect();
++        indices.sort_unstable();
++        let mut shapes = Vec::with_capacity(indices.len());
++        let mut patches = Vec::with_capacity(indices.len());
++        for index in indices {
++            if self.nodes[index].kind() != NodeKind::Text
++                || self.presented[index].identity != self.nodes[index].identity()
++            {
++                return Ok(false);
++            }
++            let owner = self.text.as_ref().unwrap();
++            let Some(previous) = owner.entry(index) else {
++                return Ok(false);
++            };
++            let Some(run) = previous.run else {
++                return Ok(false);
++            };
++            let origin = previous.origin;
++            let transform = self.presented[index]
++                .transform(geometry::Bases::new(&[]))
++                .ok_or(Error::Canvas(gpui_canvas::Error::InvalidGeometry))?;
++            let layout = self.layout.layout(self.layout_nodes[index])?;
++            let style = self.styles.get(index);
++            let text = self.nodes[index]
++                .text_slot()
++                .get_mut(&mut self.texts)
++                .unwrap();
++            let value = text.value.clone();
++            let shape = text
++                .shape_text(
++                    shaper,
++                    style.font_size,
++                    Some(layout.content_box_width()),
++                    None,
++                )?
++                .clone();
++            patches.push(text_geometry::TextPatch {
++                row: index,
++                value,
++                geometry: text_geometry::Entry {
++                    row: index as u32,
++                    run: Some(run),
++                    origin,
++                    map: shape.retain_geometry().expect("interactive text geometry"),
++                },
++            });
++            shapes.push((run, shape, origin, transform, style.fg));
++        }
++        let sequence = self.next_presentation;
++        let next = sequence.checked_add(1).ok_or(Error::EpochExhausted)?;
++        let token = PresentationToken {
++            window: self.sites.namespace(),
++            sequence,
++        };
++        let replacements: Vec<_> = shapes
++            .iter()
++            .map(
++                |(slot, layout, origin, transform, color)| gpui_canvas::TextRunReplacement {
++                    slot: *slot,
++                    layout,
++                    origin: *origin,
++                    transform: *transform,
++                    clip: Rect::new(
++                        0.,
++                        0.,
++                        self.requested_size[0] as f32,
++                        self.requested_size[1] as f32,
++                    ),
++                    color: *color,
++                    raster_scale: self.requested_scale_factor,
++                },
++            )
++            .collect();
++        let service = self.text.as_mut().unwrap().system.as_mut().unwrap();
++        let Some(damage) = self.canvas.try_patch_texts(service, &replacements)? else {
++            return Ok(false);
++        };
++        let owner = self.text.as_mut().unwrap();
++        owner.patch = Some(patches.into_boxed_slice());
++        owner.dirty_text = None;
++        self.layout_dirty.clear();
++        self.styles.clear_slot_transition();
++        #[cfg(feature = "accessibility")]
++        if let Some(observer) = &mut self.accessibility {
++            observer.invalidate();
++        }
++        self.counters.paint_passes += 1;
++        self.publish_paint(Some((damage, token, next)))?;
++        Ok(true)
++    }
++}
++
+ #[cfg(test)]
+ mod tests {
+     use super::*;
+@@ -173,4 +295,69 @@ mod tests {
+                 .any(|n| n.text.as_deref() == Some("Count: 10"))
+         );
+     }
++    #[test]
++    fn batched_text_prepares_sparse_rows_before_acknowledgement() {
++        struct Pair {
++            a: Signal<String>,
++            b: Signal<String>,
++        }
++        impl Pair {
++            const A: crate::Source<Self, String> =
++                crate::Source::new(FieldId::new(1), "a", |m| &m.a, |m| &mut m.a);
++            const B: crate::Source<Self, String> =
++                crate::Source::new(FieldId::new(2), "b", |m| &m.b, |m| &mut m.b);
++        }
++        impl View for Pair {
++            fn sources() -> Sources<Self> {
++                Sources::new().direct(Self::A).direct(Self::B)
++            }
++            fn view(&self) -> El<'_> {
++                column((text(&self.a).w(180).h(24), text(&self.b).w(180).h(24)))
++                    .w(192)
++                    .h(80)
++            }
++        }
++        let win = Win::recording(
++            Pair {
++                a: Signal::new("11".into()),
++                b: Signal::new("22".into()),
++            },
++            WindowOptions {
++                size: [192, 80],
++                ..Default::default()
++            },
++        )
++        .unwrap();
++        let (a, ai) = crate::Remote::bounded(2);
++        let (b, bi) = crate::Remote::bounded(2);
++        let mut win = win
++            .with_inbox_for(ai, Pair::A, |v, n| *v = n)
++            .unwrap()
++            .with_inbox_for(bi, Pair::B, |v, n| *v = n)
++            .unwrap();
++        win.presented(win.with_scene(|_, t| t).unwrap()).unwrap();
++        a.try_send("22".into()).unwrap();
++        b.try_send("11".into()).unwrap();
++        win.deliver_ready(4).unwrap();
++        let runtime = win.runtime().unwrap();
++        assert!(runtime.prepared.as_ref().unwrap().keeps_rows());
++        assert_eq!(
++            runtime.text.as_ref().unwrap().patch.as_ref().unwrap().len(),
++            2
++        );
++        assert!(runtime.text.as_ref().unwrap().candidate.is_none());
++        assert_eq!(runtime.text.as_ref().unwrap().presented.len(), 2);
++    }
++    #[test]
++    fn sparse_batch_layout_ledger() {
++        eprintln!(
++            "SPARSE_LAYOUT,text_resources={},dirty_text={},prior_dirty_text={},patch_owner={},prior_patch_owner={},patch_row={}",
++            size_of::<text_geometry::TextResources>(),
++            size_of::<Option<text_geometry::DirtyText>>(),
++            size_of::<Option<(u64, usize)>>(),
++            size_of::<Option<Box<[text_geometry::TextPatch]>>>(),
++            size_of::<Option<Box<text_geometry::TextPatch>>>(),
++            size_of::<text_geometry::TextPatch>()
++        );
++    }
+ }
+diff --git a/reactivity/crates/gpui/src/runtime/text_geometry.rs b/reactivity/crates/gpui/src/runtime/text_geometry.rs
+index 7f7b569e32..0886ef876e 100644
+--- a/reactivity/crates/gpui/src/runtime/text_geometry.rs
++++ b/reactivity/crates/gpui/src/runtime/text_geometry.rs
+@@ -15,8 +15,13 @@ pub(super) struct TextResources {
+     pub font: Option<gpui_canvas::FontFace>,
+     pub presented: Vec<Entry>,
+     pub candidate: Option<Vec<Entry>>,
+-    pub dirty_text: Option<(u64, usize)>,
+-    pub patch: Option<Box<TextPatch>>,
++    pub dirty_text: Option<DirtyText>,
++    pub patch: Option<Box<[TextPatch]>>,
++}
++#[derive(Clone, Copy)]
++pub(super) enum DirtyText {
++    One(u64, usize),
++    Batch(u64),
+ }
+ pub(super) struct TextPatch {
+     pub row: usize,
+@@ -34,13 +39,15 @@ impl TextResources {
+         if let Some(column) = self.candidate.take() {
+             self.presented = column;
+         }
+-        if let Some(patch) = self.patch.take() {
+-            rows[patch.row].text = Some(patch.value);
+-            let index = self
+-                .presented
+-                .binary_search_by_key(&(patch.row as u32), |e| e.row)
+-                .expect("sparse C retains the P text row");
+-            self.presented[index] = patch.geometry;
++        if let Some(patches) = self.patch.take() {
++            for patch in patches.into_vec() {
++                rows[patch.row].text = Some(patch.value);
++                let index = self
++                    .presented
++                    .binary_search_by_key(&(patch.row as u32), |e| e.row)
++                    .expect("sparse C retains the P text row");
++                self.presented[index] = patch.geometry;
++            }
+         }
+     }
+     pub fn entry(&self, row: usize) -> Option<&Entry> {
+diff --git a/reactivity/crates/gpui/src/runtime/turn.rs b/reactivity/crates/gpui/src/runtime/turn.rs
+index d367144b32..b503bf18cc 100644
+--- a/reactivity/crates/gpui/src/runtime/turn.rs
++++ b/reactivity/crates/gpui/src/runtime/turn.rs
+@@ -115,6 +115,8 @@ impl<M: View + 'static, L: LaneSet<M>> RuntimeMut<'_, M, L> {
+         Ok(true)
+     }
+     fn after_text_batch(&mut self, fields: impl Iterator<Item = FieldId>) -> Result<Commit, Error> {
++        let sparse_eligible = !self.runtime.dirty
++            && self.runtime.complete_epoch.checked_add(1) == Some(self.runtime.source_epoch);
+         self.runtime.reconcile_ime();
+         self.runtime.counters.exact_updates += 1;
+         let result = match catch_unwind(AssertUnwindSafe(|| {
+@@ -137,6 +139,13 @@ impl<M: View + 'static, L: LaneSet<M>> RuntimeMut<'_, M, L> {
+             self.runtime.focused = None;
+             return Err(error);
+         }
++        if sparse_eligible
++            && (2..=4).contains(&self.runtime.changed_nodes)
++            && self.runtime.layout_dirty.len() == self.runtime.changed_nodes
++            && let Some(text) = &mut self.runtime.text
++        {
++            text.dirty_text = Some(text_geometry::DirtyText::Batch(self.runtime.source_epoch));
++        }
+         self.runtime.reconcile_editing(EditingIntent::None)?;
+         self.present()
+     }
+diff --git a/reactivity/crates/gpui/tests/sparse_text_batch.rs b/reactivity/crates/gpui/tests/sparse_text_batch.rs
+new file mode 100644
+index 0000000000..883169b1ab
+--- /dev/null
++++ b/reactivity/crates/gpui/tests/sparse_text_batch.rs
+@@ -0,0 +1,189 @@
++use gpui::{LaneSet, Remote, WindowOptions, prelude::*};
++struct Page {
++    values: [Signal<String>; 4],
++    auto: bool,
++}
++impl Page {
++    const F: [Source<Self, String>; 4] = [
++        Source::new(FieldId::new(1), "a", |m| &m.values[0], |m| &mut m.values[0]),
++        Source::new(FieldId::new(2), "b", |m| &m.values[1], |m| &mut m.values[1]),
++        Source::new(FieldId::new(3), "c", |m| &m.values[2], |m| &mut m.values[2]),
++        Source::new(FieldId::new(4), "d", |m| &m.values[3], |m| &mut m.values[3]),
++    ];
++}
++impl View for Page {
++    fn sources() -> Sources<Self> {
++        Sources::new()
++            .direct(Self::F[0])
++            .direct(Self::F[1])
++            .direct(Self::F[2])
++            .direct(Self::F[3])
++    }
++    fn view(&self) -> El<'_> {
++        if self.auto {
++            return row(self.values.iter().map(text))
++                .w(192)
++                .h(112)
++                .bg(Color::WHITE);
++        }
++        column(self.values.iter().map(|v| text(v).w(180).h(24)))
++            .w(192)
++            .h(112)
++            .bg(Color::WHITE)
++    }
++}
++fn ack<L: LaneSet<Page>>(win: &mut Win<Page, L>) {
++    win.presented(win.with_scene(|_, t| t).unwrap()).unwrap();
++}
++fn fresh(values: [&str; 4]) -> Win<Page> {
++    let mut win = Win::recording(
++        Page {
++            values: values.map(|v| Signal::new(v.to_owned())),
++            auto: false,
++        },
++        WindowOptions {
++            size: [192, 112],
++            ..Default::default()
++        },
++    )
++    .unwrap();
++    ack(&mut win);
++    win
++}
++fn open() -> (Win<Page, impl LaneSet<Page>>, [Remote<String>; 4]) {
++    let win = fresh(["11", "22", "33", "44"]);
++    let (a, ai) = Remote::bounded(4);
++    let (b, bi) = Remote::bounded(4);
++    let (c, ci) = Remote::bounded(4);
++    let (d, di) = Remote::bounded(4);
++    (
++        win.with_inbox_for(ai, Page::F[0], |v, n| *v = n)
++            .unwrap()
++            .with_inbox_for(bi, Page::F[1], |v, n| *v = n)
++            .unwrap()
++            .with_inbox_for(ci, Page::F[2], |v, n| *v = n)
++            .unwrap()
++            .with_inbox_for(di, Page::F[3], |v, n| *v = n)
++            .unwrap(),
++        [a, b, c, d],
++    )
++}
++type Geometry = Vec<(String, Vec<(usize, usize, gpui::Rect)>)>;
++fn geometry<L: LaneSet<Page>>(win: &Win<Page, L>) -> Geometry {
++    let mut result = Vec::new();
++    win.visit(|part| {
++        if let Some(value) = part.text() {
++            let g = part.text_geometry().unwrap();
++            result.push((
++                value.to_owned(),
++                g.layout()
++                    .graphemes()
++                    .map(|u| {
++                        let r = u.text_range();
++                        (r.start.byte(), r.end.byte(), g.bounds(u.bounds()).unwrap())
++                    })
++                    .collect(),
++            ));
++        }
++    })
++    .unwrap();
++    result
++}
++fn oracle<L: LaneSet<Page>>(win: &mut Win<Page, L>, values: [&str; 4]) {
++    let mut full = fresh(values);
++    assert_eq!(geometry(win), geometry(&full));
++    assert_eq!(
++        win.with_pixels(|p, _, _| p.to_vec()).unwrap(),
++        full.with_pixels(|p, _, _| p.to_vec()).unwrap()
++    );
++}
++#[test]
++fn two_and_four_row_batches_publish_exact_values_pixels_and_interaction_geometry() {
++    for count in [2, 4] {
++        let (mut win, remotes) = open();
++        let before = geometry(&win);
++        let values = if count == 2 {
++            ["22", "11", "33", "44"]
++        } else {
++            ["44", "33", "22", "11"]
++        };
++        for (r, v) in remotes.iter().zip(values).take(count) {
++            r.try_send(v.into()).unwrap();
++        }
++        win.deliver_ready(8).unwrap();
++        assert_eq!(
++            geometry(&win),
++            before,
++            "unacknowledged text geometry belongs to the preceding scene"
++        );
++        ack(&mut win);
++        oracle(&mut win, values);
++        let fallback = ["a longer label", "new glyph z", "", "4"];
++        for (r, v) in remotes.iter().zip(fallback) {
++            r.try_send(v.into()).unwrap();
++        }
++        win.deliver_ready(8).unwrap();
++        ack(&mut win);
++        oracle(&mut win, fallback);
++    }
++}
++#[test]
++fn older_sparse_batch_can_ack_after_a_newer_batch_fails_to_prepare() {
++    let (mut win, remotes) = open();
++    remotes[0].try_send("22".into()).unwrap();
++    remotes[1].try_send("11".into()).unwrap();
++    win.deliver_ready(8).unwrap();
++    let eligible = win.with_scene(|_, t| t).unwrap();
++    remotes[0].try_send("漢".into()).unwrap();
++    remotes[1].try_send("bad".into()).unwrap();
++    assert_eq!(
++        win.deliver_ready(8).unwrap_err().delivery.unwrap().applied,
++        2
++    );
++    win.presented(eligible).unwrap();
++    oracle(&mut win, ["22", "11", "33", "44"]);
++    remotes[0].try_send("33".into()).unwrap();
++    remotes[1].try_send("44".into()).unwrap();
++    win.deliver_ready(8).unwrap();
++    ack(&mut win);
++    oracle(&mut win, ["33", "44", "33", "44"]);
++}
++
++#[test]
++fn batched_intrinsic_size_changes_move_unchanged_following_content() {
++    let make = |values: [&str; 4]| {
++        let mut win = Win::recording(
++            Page {
++                values: values.map(|v| Signal::new(v.into())),
++                auto: true,
++            },
++            WindowOptions {
++                size: [192, 112],
++                ..Default::default()
++            },
++        )
++        .unwrap();
++        ack(&mut win);
++        win
++    };
++    let win = make(["ii", "ii", "iii", "WWW"]);
++    let (a, ai) = Remote::bounded(2);
++    let (b, bi) = Remote::bounded(2);
++    let mut win = win
++        .with_inbox_for(ai, Page::F[0], |v, n| *v = n)
++        .unwrap()
++        .with_inbox_for(bi, Page::F[1], |v, n| *v = n)
++        .unwrap();
++    for value in ["WW", "ii", "Wi"] {
++        a.try_send(value.into()).unwrap();
++        b.try_send(value.into()).unwrap();
++        win.deliver_ready(4).unwrap();
++        ack(&mut win);
++        let mut full = make([value, value, "iii", "WWW"]);
++        assert_eq!(geometry(&win), geometry(&full));
++        assert_eq!(
++            win.with_pixels(|p, _, _| p.to_vec()).unwrap(),
++            full.with_pixels(|p, _, _| p.to_vec()).unwrap()
++        );
++    }
++}

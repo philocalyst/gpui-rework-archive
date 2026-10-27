@@ -1,0 +1,12 @@
+{
+  "binary": "/home/user/gpui-sparse-batch-target/release/build/gpui/7d343a8859c57521/out/gpui-7d343a8859c57521",
+  "sha256": "64bd6220e1f508db0460d3efd274842dca0054dcac633496807563cbf7c4b8dc",
+  "bytes": 57699864,
+  "environment": {
+    "DISPLAY": ":94",
+    "XDG_RUNTIME_DIR": "/home/user/gpui-xdg",
+    "VK_ICD_FILENAMES": "/usr/share/vulkan/icd.d/lvp_icd.json",
+    "LP_NUM_THREADS": "4",
+    "DBUS_SESSION_BUS_ADDRESS": "unix:path=/nonexistent"
+  }
+}

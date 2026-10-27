@@ -1,0 +1,9 @@
+
+running 4 tests
+test aggregate_last_resource_use_rejects_the_entire_cohort ... ok
+test a_rejected_second_run_preserves_the_first_run_and_its_pixels ... ok
+test disjoint_runs_match_full_replacement_with_exact_clips_and_transforms ... ok
+test duplicate_slot_and_late_foreign_layout_leave_the_preceding_scene_intact ... ok
+
+test result: ok. 4 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 0.00s
+

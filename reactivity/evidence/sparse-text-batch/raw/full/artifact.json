@@ -1,0 +1,1 @@
+{"path": "/home/user/gpui-sparse-batch-target/release/examples/source_batch_cost", "sha256": "74ed2525aa19de3bbe68af07edc9b482af0e4cd8efbcde648d33604c3b463cf7", "bytes": 10245896, "note": "build/test/layout passed; later all-target Clippy rejected pre-existing unrelated capacity example, preserved"}

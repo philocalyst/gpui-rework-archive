@@ -1,0 +1,6 @@
+   Compiling gpui v0.1.0 (/home/user/gpui-sparse-batch-lab/reactivity/crates/gpui)
+    Finished `release` profile [optimized] target(s) in 14.00s
+     Running tests/source_batch.rs (/home/user/gpui-sparse-batch-target/release/build/gpui/659cfbeec4238e2e/out/source_batch-659cfbeec4238e2e)
+     Running tests/sparse_text.rs (/home/user/gpui-sparse-batch-target/release/build/gpui/f817e973d8a323a0/out/sparse_text-f817e973d8a323a0)
+     Running tests/sparse_text_batch.rs (/home/user/gpui-sparse-batch-target/release/build/gpui/a0d550452b26c76c/out/sparse_text_batch-a0d550452b26c76c)
+     Running tests/text_geometry.rs (/home/user/gpui-sparse-batch-target/release/build/gpui/053645e00a0ec363/out/text_geometry-053645e00a0ec363)

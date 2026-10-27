@@ -1,0 +1,6 @@
+{
+  "trigger": "Before any paired timing, ELF hashes differed at Cargo release/examples aliases after cargo test with x11. Original hashed build/out executables survived. Explicit build-only gate recovers the intended default+simd profiles; direct stable paths used for measurements.",
+  "sparse": "Earlier 42 allocation probes and four preflights used matching x11-feature binaries; preserve as excluded supplemental correctness. Repeat under default+simd. Earlier full/artifact.json was taken after cargo test and therefore identified the test-build feature-unification artifact, not the initial build-only artifact. artifact-pin independently binds fresh production rebuild, source guards, dependency fingerprint and direct executable. No timing samples existed.",
+  "borrowed": "48 allocations already match default build receipts exactly; retained without repetition. Cost ELF recovers exact prior hash. Prior cost machine ledger remains valid.",
+  "control": "source-batch cost and allocation default hashes match the historical qualified receipts exactly."
+}

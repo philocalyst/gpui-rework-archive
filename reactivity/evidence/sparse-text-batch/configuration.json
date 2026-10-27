@@ -1,0 +1,18 @@
+{
+  "kind": "sparse",
+  "tests": {
+    "full": 975,
+    "composed": 1048
+  },
+  "clippy": [
+    "qualified",
+    "full-clippy",
+    "composed"
+  ],
+  "clippy_failures": [
+    "first",
+    "full"
+  ],
+  "negative_message": "later admission failure must roll back the entire batch",
+  "control_receipt": "control-pin/cost-artifact.json"
+}

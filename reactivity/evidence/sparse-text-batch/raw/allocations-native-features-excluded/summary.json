@@ -1,0 +1,1319 @@
+{
+  "artifacts": {
+    "candidate": {
+      "path": "/home/user/gpui-sparse-batch-target/release/examples/source_batch_allocations",
+      "sha256": "84e38fd814e5abb633b270c13b46b2a092f192502ff27063ce74b7b220aa2a24",
+      "bytes": 11621392
+    },
+    "control": {
+      "path": "/home/user/gpui-source-batch-target/release/examples/source_batch_allocations",
+      "sha256": "c5fd7c3d35736a7272ae4f7e980f41194ff43b346896740b2aa7031bae756def",
+      "bytes": 11757112
+    }
+  },
+  "font_sha256": "7da195a74c55bef988d0d48f9508bd5d849425c1770dba5d7bfc6ce9ed848954",
+  "runs": [
+    {
+      "variant": "candidate",
+      "rows": 0,
+      "fields": 1,
+      "mode": "exact",
+      "COLD_ALLOC": {
+        "requests": 271,
+        "requested": 71024,
+        "retained": 47414,
+        "peak_new": 47622
+      },
+      "TRANSPORT_ALLOC": {
+        "requests": 8,
+        "requested": 864,
+        "retained": 864,
+        "peak_new": 864
+      },
+      "LAYOUT": {
+        "win_bytes": 296
+      },
+      "ALLOC": {
+        "requests": 33,
+        "requested": 2602,
+        "retained_delta": 0,
+        "peak_new": 1270
+      },
+      "FINAL": {
+        "pixel_hash": 772978717724025150,
+        "source_epoch": 201
+      }
+    },
+    {
+      "variant": "candidate",
+      "rows": 0,
+      "fields": 2,
+      "mode": "exact",
+      "COLD_ALLOC": {
+        "requests": 271,
+        "requested": 71024,
+        "retained": 47414,
+        "peak_new": 47622
+      },
+      "TRANSPORT_ALLOC": {
+        "requests": 8,
+        "requested": 864,
+        "retained": 864,
+        "peak_new": 864
+      },
+      "LAYOUT": {
+        "win_bytes": 296
+      },
+      "ALLOC": {
+        "requests": 63,
+        "requested": 5688,
+        "retained_delta": 0,
+        "peak_new": 3750
+      },
+      "FINAL": {
+        "pixel_hash": 1598864835848483314,
+        "source_epoch": 201
+      }
+    },
+    {
+      "variant": "candidate",
+      "rows": 0,
+      "fields": 4,
+      "mode": "exact",
+      "COLD_ALLOC": {
+        "requests": 271,
+        "requested": 71024,
+        "retained": 47414,
+        "peak_new": 47622
+      },
+      "TRANSPORT_ALLOC": {
+        "requests": 8,
+        "requested": 864,
+        "retained": 864,
+        "peak_new": 864
+      },
+      "LAYOUT": {
+        "win_bytes": 296
+      },
+      "ALLOC": {
+        "requests": 114,
+        "requested": 10628,
+        "retained_delta": 0,
+        "peak_new": 7400
+      },
+      "FINAL": {
+        "pixel_hash": 9833564122138393930,
+        "source_epoch": 201
+      }
+    },
+    {
+      "variant": "candidate",
+      "rows": 0,
+      "fields": 1,
+      "mode": "owner",
+      "COLD_ALLOC": {
+        "requests": 316,
+        "requested": 81599,
+        "retained": 53391,
+        "peak_new": 53695
+      },
+      "TRANSPORT_ALLOC": {
+        "requests": 8,
+        "requested": 864,
+        "retained": 864,
+        "peak_new": 864
+      },
+      "LAYOUT": {
+        "win_bytes": 296
+      },
+      "ALLOC": {
+        "requests": 80,
+        "requested": 15842,
+        "retained_delta": 0,
+        "peak_new": 4152
+      },
+      "FINAL": {
+        "pixel_hash": 7089351825086006792,
+        "source_epoch": 201
+      }
+    },
+    {
+      "variant": "candidate",
+      "rows": 0,
+      "fields": 2,
+      "mode": "owner",
+      "COLD_ALLOC": {
+        "requests": 316,
+        "requested": 81599,
+        "retained": 53391,
+        "peak_new": 53695
+      },
+      "TRANSPORT_ALLOC": {
+        "requests": 8,
+        "requested": 864,
+        "retained": 864,
+        "peak_new": 864
+      },
+      "LAYOUT": {
+        "win_bytes": 296
+      },
+      "ALLOC": {
+        "requests": 98,
+        "requested": 16876,
+        "retained_delta": 0,
+        "peak_new": 4634
+      },
+      "FINAL": {
+        "pixel_hash": 16629043533850181356,
+        "source_epoch": 201
+      }
+    },
+    {
+      "variant": "candidate",
+      "rows": 0,
+      "fields": 4,
+      "mode": "owner",
+      "COLD_ALLOC": {
+        "requests": 316,
+        "requested": 81599,
+        "retained": 53391,
+        "peak_new": 53695
+      },
+      "TRANSPORT_ALLOC": {
+        "requests": 8,
+        "requested": 864,
+        "retained": 864,
+        "peak_new": 864
+      },
+      "LAYOUT": {
+        "win_bytes": 296
+      },
+      "ALLOC": {
+        "requests": 134,
+        "requested": 18386,
+        "retained_delta": 0,
+        "peak_new": 5486
+      },
+      "FINAL": {
+        "pixel_hash": 13064204463469428404,
+        "source_epoch": 201
+      }
+    },
+    {
+      "variant": "candidate",
+      "rows": 1,
+      "fields": 1,
+      "mode": "exact",
+      "COLD_ALLOC": {
+        "requests": 739,
+        "requested": 175118,
+        "retained": 94366,
+        "peak_new": 95374
+      },
+      "TRANSPORT_ALLOC": {
+        "requests": 8,
+        "requested": 864,
+        "retained": 864,
+        "peak_new": 864
+      },
+      "LAYOUT": {
+        "win_bytes": 296
+      },
+      "ALLOC": {
+        "requests": 33,
+        "requested": 2602,
+        "retained_delta": 0,
+        "peak_new": 1270
+      },
+      "FINAL": {
+        "pixel_hash": 16261168099188973412,
+        "source_epoch": 201
+      }
+    },
+    {
+      "variant": "candidate",
+      "rows": 1,
+      "fields": 2,
+      "mode": "exact",
+      "COLD_ALLOC": {
+        "requests": 739,
+        "requested": 175118,
+        "retained": 94366,
+        "peak_new": 95374
+      },
+      "TRANSPORT_ALLOC": {
+        "requests": 8,
+        "requested": 864,
+        "retained": 864,
+        "peak_new": 864
+      },
+      "LAYOUT": {
+        "win_bytes": 296
+      },
+      "ALLOC": {
+        "requests": 63,
+        "requested": 5688,
+        "retained_delta": 0,
+        "peak_new": 3750
+      },
+      "FINAL": {
+        "pixel_hash": 13599488539789252008,
+        "source_epoch": 201
+      }
+    },
+    {
+      "variant": "candidate",
+      "rows": 1,
+      "fields": 4,
+      "mode": "exact",
+      "COLD_ALLOC": {
+        "requests": 739,
+        "requested": 175118,
+        "retained": 94366,
+        "peak_new": 95374
+      },
+      "TRANSPORT_ALLOC": {
+        "requests": 8,
+        "requested": 864,
+        "retained": 864,
+        "peak_new": 864
+      },
+      "LAYOUT": {
+        "win_bytes": 296
+      },
+      "ALLOC": {
+        "requests": 114,
+        "requested": 10628,
+        "retained_delta": 0,
+        "peak_new": 7400
+      },
+      "FINAL": {
+        "pixel_hash": 4849723217689556816,
+        "source_epoch": 201
+      }
+    },
+    {
+      "variant": "candidate",
+      "rows": 1,
+      "fields": 1,
+      "mode": "owner",
+      "COLD_ALLOC": {
+        "requests": 774,
+        "requested": 180090,
+        "retained": 97680,
+        "peak_new": 98440
+      },
+      "TRANSPORT_ALLOC": {
+        "requests": 8,
+        "requested": 864,
+        "retained": 864,
+        "peak_new": 864
+      },
+      "LAYOUT": {
+        "win_bytes": 296
+      },
+      "ALLOC": {
+        "requests": 121,
+        "requested": 57846,
+        "retained_delta": 0,
+        "peak_new": 20244
+      },
+      "FINAL": {
+        "pixel_hash": 10326528179151768178,
+        "source_epoch": 201
+      }
+    },
+    {
+      "variant": "candidate",
+      "rows": 1,
+      "fields": 2,
+      "mode": "owner",
+      "COLD_ALLOC": {
+        "requests": 774,
+        "requested": 180090,
+        "retained": 97680,
+        "peak_new": 98440
+      },
+      "TRANSPORT_ALLOC": {
+        "requests": 8,
+        "requested": 864,
+        "retained": 864,
+        "peak_new": 864
+      },
+      "LAYOUT": {
+        "win_bytes": 296
+      },
+      "ALLOC": {
+        "requests": 139,
+        "requested": 58880,
+        "retained_delta": 0,
+        "peak_new": 20244
+      },
+      "FINAL": {
+        "pixel_hash": 17845524188144482742,
+        "source_epoch": 201
+      }
+    },
+    {
+      "variant": "candidate",
+      "rows": 1,
+      "fields": 4,
+      "mode": "owner",
+      "COLD_ALLOC": {
+        "requests": 774,
+        "requested": 180090,
+        "retained": 97680,
+        "peak_new": 98440
+      },
+      "TRANSPORT_ALLOC": {
+        "requests": 8,
+        "requested": 864,
+        "retained": 864,
+        "peak_new": 864
+      },
+      "LAYOUT": {
+        "win_bytes": 296
+      },
+      "ALLOC": {
+        "requests": 175,
+        "requested": 60488,
+        "retained_delta": 0,
+        "peak_new": 20244
+      },
+      "FINAL": {
+        "pixel_hash": 8770175516223424526,
+        "source_epoch": 201
+      }
+    },
+    {
+      "variant": "candidate",
+      "rows": 40,
+      "fields": 1,
+      "mode": "exact",
+      "COLD_ALLOC": {
+        "requests": 15117,
+        "requested": 3198480,
+        "retained": 1530122,
+        "peak_new": 1550658
+      },
+      "TRANSPORT_ALLOC": {
+        "requests": 8,
+        "requested": 864,
+        "retained": 864,
+        "peak_new": 864
+      },
+      "LAYOUT": {
+        "win_bytes": 296
+      },
+      "ALLOC": {
+        "requests": 33,
+        "requested": 2602,
+        "retained_delta": 0,
+        "peak_new": 1270
+      },
+      "FINAL": {
+        "pixel_hash": 11550377658506184721,
+        "source_epoch": 201
+      }
+    },
+    {
+      "variant": "candidate",
+      "rows": 40,
+      "fields": 2,
+      "mode": "exact",
+      "COLD_ALLOC": {
+        "requests": 15117,
+        "requested": 3198480,
+        "retained": 1530122,
+        "peak_new": 1550658
+      },
+      "TRANSPORT_ALLOC": {
+        "requests": 8,
+        "requested": 864,
+        "retained": 864,
+        "peak_new": 864
+      },
+      "LAYOUT": {
+        "win_bytes": 296
+      },
+      "ALLOC": {
+        "requests": 63,
+        "requested": 5688,
+        "retained_delta": 0,
+        "peak_new": 3750
+      },
+      "FINAL": {
+        "pixel_hash": 323476283413975189,
+        "source_epoch": 201
+      }
+    },
+    {
+      "variant": "candidate",
+      "rows": 40,
+      "fields": 4,
+      "mode": "exact",
+      "COLD_ALLOC": {
+        "requests": 15117,
+        "requested": 3198480,
+        "retained": 1530122,
+        "peak_new": 1550658
+      },
+      "TRANSPORT_ALLOC": {
+        "requests": 8,
+        "requested": 864,
+        "retained": 864,
+        "peak_new": 864
+      },
+      "LAYOUT": {
+        "win_bytes": 296
+      },
+      "ALLOC": {
+        "requests": 114,
+        "requested": 10628,
+        "retained_delta": 0,
+        "peak_new": 7400
+      },
+      "FINAL": {
+        "pixel_hash": 11844827693975292333,
+        "source_epoch": 201
+      }
+    },
+    {
+      "variant": "candidate",
+      "rows": 40,
+      "fields": 1,
+      "mode": "owner",
+      "COLD_ALLOC": {
+        "requests": 15154,
+        "requested": 3203748,
+        "retained": 1533436,
+        "peak_new": 1554076
+      },
+      "TRANSPORT_ALLOC": {
+        "requests": 8,
+        "requested": 864,
+        "retained": 864,
+        "peak_new": 864
+      },
+      "LAYOUT": {
+        "win_bytes": 296
+      },
+      "ALLOC": {
+        "requests": 1157,
+        "requested": 1321746,
+        "retained_delta": 0,
+        "peak_new": 487766
+      },
+      "FINAL": {
+        "pixel_hash": 9732291514733809035,
+        "source_epoch": 201
+      }
+    },
+    {
+      "variant": "candidate",
+      "rows": 40,
+      "fields": 2,
+      "mode": "owner",
+      "COLD_ALLOC": {
+        "requests": 15154,
+        "requested": 3203748,
+        "retained": 1533436,
+        "peak_new": 1554076
+      },
+      "TRANSPORT_ALLOC": {
+        "requests": 8,
+        "requested": 864,
+        "retained": 864,
+        "peak_new": 864
+      },
+      "LAYOUT": {
+        "win_bytes": 296
+      },
+      "ALLOC": {
+        "requests": 1175,
+        "requested": 1322780,
+        "retained_delta": 0,
+        "peak_new": 487766
+      },
+      "FINAL": {
+        "pixel_hash": 9304569566235452839,
+        "source_epoch": 201
+      }
+    },
+    {
+      "variant": "candidate",
+      "rows": 40,
+      "fields": 4,
+      "mode": "owner",
+      "COLD_ALLOC": {
+        "requests": 15154,
+        "requested": 3203748,
+        "retained": 1533436,
+        "peak_new": 1554076
+      },
+      "TRANSPORT_ALLOC": {
+        "requests": 8,
+        "requested": 864,
+        "retained": 864,
+        "peak_new": 864
+      },
+      "LAYOUT": {
+        "win_bytes": 296
+      },
+      "ALLOC": {
+        "requests": 1211,
+        "requested": 1324388,
+        "retained_delta": 0,
+        "peak_new": 487766
+      },
+      "FINAL": {
+        "pixel_hash": 5971546100742296383,
+        "source_epoch": 201
+      }
+    },
+    {
+      "variant": "candidate",
+      "rows": 0,
+      "fields": 4,
+      "mode": "opaque",
+      "COLD_ALLOC": {
+        "requests": 271,
+        "requested": 71024,
+        "retained": 47414,
+        "peak_new": 47622
+      },
+      "TRANSPORT_ALLOC": {
+        "requests": 8,
+        "requested": 864,
+        "retained": 864,
+        "peak_new": 864
+      },
+      "LAYOUT": {
+        "win_bytes": 256
+      },
+      "ALLOC": {
+        "requests": 112,
+        "requested": 14628,
+        "retained_delta": 0,
+        "peak_new": 4000
+      },
+      "FINAL": {
+        "pixel_hash": 9833564122138393930,
+        "source_epoch": 201
+      }
+    },
+    {
+      "variant": "candidate",
+      "rows": 1,
+      "fields": 4,
+      "mode": "opaque",
+      "COLD_ALLOC": {
+        "requests": 739,
+        "requested": 175118,
+        "retained": 94366,
+        "peak_new": 95374
+      },
+      "TRANSPORT_ALLOC": {
+        "requests": 8,
+        "requested": 864,
+        "retained": 864,
+        "peak_new": 864
+      },
+      "LAYOUT": {
+        "win_bytes": 256
+      },
+      "ALLOC": {
+        "requests": 158,
+        "requested": 58509,
+        "retained_delta": 0,
+        "peak_new": 20232
+      },
+      "FINAL": {
+        "pixel_hash": 4849723217689556816,
+        "source_epoch": 201
+      }
+    },
+    {
+      "variant": "candidate",
+      "rows": 40,
+      "fields": 4,
+      "mode": "opaque",
+      "COLD_ALLOC": {
+        "requests": 15117,
+        "requested": 3198480,
+        "retained": 1530122,
+        "peak_new": 1550658
+      },
+      "TRANSPORT_ALLOC": {
+        "requests": 8,
+        "requested": 864,
+        "retained": 864,
+        "peak_new": 864
+      },
+      "LAYOUT": {
+        "win_bytes": 256
+      },
+      "ALLOC": {
+        "requests": 1194,
+        "requested": 1322409,
+        "retained_delta": 0,
+        "peak_new": 487754
+      },
+      "FINAL": {
+        "pixel_hash": 11844827693975292333,
+        "source_epoch": 201
+      }
+    },
+    {
+      "variant": "control",
+      "rows": 0,
+      "fields": 1,
+      "mode": "exact",
+      "COLD_ALLOC": {
+        "requests": 271,
+        "requested": 71016,
+        "retained": 47406,
+        "peak_new": 47614
+      },
+      "TRANSPORT_ALLOC": {
+        "requests": 8,
+        "requested": 864,
+        "retained": 864,
+        "peak_new": 864
+      },
+      "LAYOUT": {
+        "win_bytes": 296
+      },
+      "ALLOC": {
+        "requests": 33,
+        "requested": 2602,
+        "retained_delta": 0,
+        "peak_new": 1270
+      },
+      "FINAL": {
+        "pixel_hash": 772978717724025150,
+        "source_epoch": 201
+      }
+    },
+    {
+      "variant": "control",
+      "rows": 0,
+      "fields": 2,
+      "mode": "exact",
+      "COLD_ALLOC": {
+        "requests": 271,
+        "requested": 71016,
+        "retained": 47406,
+        "peak_new": 47614
+      },
+      "TRANSPORT_ALLOC": {
+        "requests": 8,
+        "requested": 864,
+        "retained": 864,
+        "peak_new": 864
+      },
+      "LAYOUT": {
+        "win_bytes": 296
+      },
+      "ALLOC": {
+        "requests": 55,
+        "requested": 4872,
+        "retained_delta": 0,
+        "peak_new": 2860
+      },
+      "FINAL": {
+        "pixel_hash": 1598864835848483314,
+        "source_epoch": 201
+      }
+    },
+    {
+      "variant": "control",
+      "rows": 0,
+      "fields": 4,
+      "mode": "exact",
+      "COLD_ALLOC": {
+        "requests": 271,
+        "requested": 71016,
+        "retained": 47406,
+        "peak_new": 47614
+      },
+      "TRANSPORT_ALLOC": {
+        "requests": 8,
+        "requested": 864,
+        "retained": 864,
+        "peak_new": 864
+      },
+      "LAYOUT": {
+        "win_bytes": 296
+      },
+      "ALLOC": {
+        "requests": 91,
+        "requested": 6716,
+        "retained_delta": 0,
+        "peak_new": 3798
+      },
+      "FINAL": {
+        "pixel_hash": 9833564122138393930,
+        "source_epoch": 201
+      }
+    },
+    {
+      "variant": "control",
+      "rows": 0,
+      "fields": 1,
+      "mode": "owner",
+      "COLD_ALLOC": {
+        "requests": 316,
+        "requested": 81591,
+        "retained": 53383,
+        "peak_new": 53687
+      },
+      "TRANSPORT_ALLOC": {
+        "requests": 8,
+        "requested": 864,
+        "retained": 864,
+        "peak_new": 864
+      },
+      "LAYOUT": {
+        "win_bytes": 296
+      },
+      "ALLOC": {
+        "requests": 80,
+        "requested": 15842,
+        "retained_delta": 0,
+        "peak_new": 4152
+      },
+      "FINAL": {
+        "pixel_hash": 7089351825086006792,
+        "source_epoch": 201
+      }
+    },
+    {
+      "variant": "control",
+      "rows": 0,
+      "fields": 2,
+      "mode": "owner",
+      "COLD_ALLOC": {
+        "requests": 316,
+        "requested": 81591,
+        "retained": 53383,
+        "peak_new": 53687
+      },
+      "TRANSPORT_ALLOC": {
+        "requests": 8,
+        "requested": 864,
+        "retained": 864,
+        "peak_new": 864
+      },
+      "LAYOUT": {
+        "win_bytes": 296
+      },
+      "ALLOC": {
+        "requests": 98,
+        "requested": 16876,
+        "retained_delta": 0,
+        "peak_new": 4634
+      },
+      "FINAL": {
+        "pixel_hash": 16629043533850181356,
+        "source_epoch": 201
+      }
+    },
+    {
+      "variant": "control",
+      "rows": 0,
+      "fields": 4,
+      "mode": "owner",
+      "COLD_ALLOC": {
+        "requests": 316,
+        "requested": 81591,
+        "retained": 53383,
+        "peak_new": 53687
+      },
+      "TRANSPORT_ALLOC": {
+        "requests": 8,
+        "requested": 864,
+        "retained": 864,
+        "peak_new": 864
+      },
+      "LAYOUT": {
+        "win_bytes": 296
+      },
+      "ALLOC": {
+        "requests": 134,
+        "requested": 18386,
+        "retained_delta": 0,
+        "peak_new": 5486
+      },
+      "FINAL": {
+        "pixel_hash": 13064204463469428404,
+        "source_epoch": 201
+      }
+    },
+    {
+      "variant": "control",
+      "rows": 1,
+      "fields": 1,
+      "mode": "exact",
+      "COLD_ALLOC": {
+        "requests": 739,
+        "requested": 175110,
+        "retained": 94358,
+        "peak_new": 95366
+      },
+      "TRANSPORT_ALLOC": {
+        "requests": 8,
+        "requested": 864,
+        "retained": 864,
+        "peak_new": 864
+      },
+      "LAYOUT": {
+        "win_bytes": 296
+      },
+      "ALLOC": {
+        "requests": 33,
+        "requested": 2602,
+        "retained_delta": 0,
+        "peak_new": 1270
+      },
+      "FINAL": {
+        "pixel_hash": 16261168099188973412,
+        "source_epoch": 201
+      }
+    },
+    {
+      "variant": "control",
+      "rows": 1,
+      "fields": 2,
+      "mode": "exact",
+      "COLD_ALLOC": {
+        "requests": 739,
+        "requested": 175110,
+        "retained": 94358,
+        "peak_new": 95366
+      },
+      "TRANSPORT_ALLOC": {
+        "requests": 8,
+        "requested": 864,
+        "retained": 864,
+        "peak_new": 864
+      },
+      "LAYOUT": {
+        "win_bytes": 296
+      },
+      "ALLOC": {
+        "requests": 68,
+        "requested": 15400,
+        "retained_delta": 0,
+        "peak_new": 9518
+      },
+      "FINAL": {
+        "pixel_hash": 13599488539789252008,
+        "source_epoch": 201
+      }
+    },
+    {
+      "variant": "control",
+      "rows": 1,
+      "fields": 4,
+      "mode": "exact",
+      "COLD_ALLOC": {
+        "requests": 739,
+        "requested": 175110,
+        "retained": 94358,
+        "peak_new": 95366
+      },
+      "TRANSPORT_ALLOC": {
+        "requests": 8,
+        "requested": 864,
+        "retained": 864,
+        "peak_new": 864
+      },
+      "LAYOUT": {
+        "win_bytes": 296
+      },
+      "ALLOC": {
+        "requests": 104,
+        "requested": 17244,
+        "retained_delta": 0,
+        "peak_new": 10482
+      },
+      "FINAL": {
+        "pixel_hash": 4849723217689556816,
+        "source_epoch": 201
+      }
+    },
+    {
+      "variant": "control",
+      "rows": 1,
+      "fields": 1,
+      "mode": "owner",
+      "COLD_ALLOC": {
+        "requests": 774,
+        "requested": 180082,
+        "retained": 97672,
+        "peak_new": 98432
+      },
+      "TRANSPORT_ALLOC": {
+        "requests": 8,
+        "requested": 864,
+        "retained": 864,
+        "peak_new": 864
+      },
+      "LAYOUT": {
+        "win_bytes": 296
+      },
+      "ALLOC": {
+        "requests": 121,
+        "requested": 57846,
+        "retained_delta": 0,
+        "peak_new": 20244
+      },
+      "FINAL": {
+        "pixel_hash": 10326528179151768178,
+        "source_epoch": 201
+      }
+    },
+    {
+      "variant": "control",
+      "rows": 1,
+      "fields": 2,
+      "mode": "owner",
+      "COLD_ALLOC": {
+        "requests": 774,
+        "requested": 180082,
+        "retained": 97672,
+        "peak_new": 98432
+      },
+      "TRANSPORT_ALLOC": {
+        "requests": 8,
+        "requested": 864,
+        "retained": 864,
+        "peak_new": 864
+      },
+      "LAYOUT": {
+        "win_bytes": 296
+      },
+      "ALLOC": {
+        "requests": 139,
+        "requested": 58880,
+        "retained_delta": 0,
+        "peak_new": 20244
+      },
+      "FINAL": {
+        "pixel_hash": 17845524188144482742,
+        "source_epoch": 201
+      }
+    },
+    {
+      "variant": "control",
+      "rows": 1,
+      "fields": 4,
+      "mode": "owner",
+      "COLD_ALLOC": {
+        "requests": 774,
+        "requested": 180082,
+        "retained": 97672,
+        "peak_new": 98432
+      },
+      "TRANSPORT_ALLOC": {
+        "requests": 8,
+        "requested": 864,
+        "retained": 864,
+        "peak_new": 864
+      },
+      "LAYOUT": {
+        "win_bytes": 296
+      },
+      "ALLOC": {
+        "requests": 175,
+        "requested": 60488,
+        "retained_delta": 0,
+        "peak_new": 20244
+      },
+      "FINAL": {
+        "pixel_hash": 8770175516223424526,
+        "source_epoch": 201
+      }
+    },
+    {
+      "variant": "control",
+      "rows": 40,
+      "fields": 1,
+      "mode": "exact",
+      "COLD_ALLOC": {
+        "requests": 15117,
+        "requested": 3198472,
+        "retained": 1530114,
+        "peak_new": 1550650
+      },
+      "TRANSPORT_ALLOC": {
+        "requests": 8,
+        "requested": 864,
+        "retained": 864,
+        "peak_new": 864
+      },
+      "LAYOUT": {
+        "win_bytes": 296
+      },
+      "ALLOC": {
+        "requests": 33,
+        "requested": 2602,
+        "retained_delta": 0,
+        "peak_new": 1270
+      },
+      "FINAL": {
+        "pixel_hash": 11550377658506184721,
+        "source_epoch": 201
+      }
+    },
+    {
+      "variant": "control",
+      "rows": 40,
+      "fields": 2,
+      "mode": "exact",
+      "COLD_ALLOC": {
+        "requests": 15117,
+        "requested": 3198472,
+        "retained": 1530114,
+        "peak_new": 1550650
+      },
+      "TRANSPORT_ALLOC": {
+        "requests": 8,
+        "requested": 864,
+        "retained": 864,
+        "peak_new": 864
+      },
+      "LAYOUT": {
+        "win_bytes": 296
+      },
+      "ALLOC": {
+        "requests": 84,
+        "requested": 341828,
+        "retained_delta": 0,
+        "peak_new": 224456
+      },
+      "FINAL": {
+        "pixel_hash": 323476283413975189,
+        "source_epoch": 201
+      }
+    },
+    {
+      "variant": "control",
+      "rows": 40,
+      "fields": 4,
+      "mode": "exact",
+      "COLD_ALLOC": {
+        "requests": 15117,
+        "requested": 3198472,
+        "retained": 1530114,
+        "peak_new": 1550650
+      },
+      "TRANSPORT_ALLOC": {
+        "requests": 8,
+        "requested": 864,
+        "retained": 864,
+        "peak_new": 864
+      },
+      "LAYOUT": {
+        "win_bytes": 296
+      },
+      "ALLOC": {
+        "requests": 120,
+        "requested": 343672,
+        "retained_delta": 0,
+        "peak_new": 225420
+      },
+      "FINAL": {
+        "pixel_hash": 11844827693975292333,
+        "source_epoch": 201
+      }
+    },
+    {
+      "variant": "control",
+      "rows": 40,
+      "fields": 1,
+      "mode": "owner",
+      "COLD_ALLOC": {
+        "requests": 15154,
+        "requested": 3203740,
+        "retained": 1533428,
+        "peak_new": 1554068
+      },
+      "TRANSPORT_ALLOC": {
+        "requests": 8,
+        "requested": 864,
+        "retained": 864,
+        "peak_new": 864
+      },
+      "LAYOUT": {
+        "win_bytes": 296
+      },
+      "ALLOC": {
+        "requests": 1157,
+        "requested": 1321746,
+        "retained_delta": 0,
+        "peak_new": 487766
+      },
+      "FINAL": {
+        "pixel_hash": 9732291514733809035,
+        "source_epoch": 201
+      }
+    },
+    {
+      "variant": "control",
+      "rows": 40,
+      "fields": 2,
+      "mode": "owner",
+      "COLD_ALLOC": {
+        "requests": 15154,
+        "requested": 3203740,
+        "retained": 1533428,
+        "peak_new": 1554068
+      },
+      "TRANSPORT_ALLOC": {
+        "requests": 8,
+        "requested": 864,
+        "retained": 864,
+        "peak_new": 864
+      },
+      "LAYOUT": {
+        "win_bytes": 296
+      },
+      "ALLOC": {
+        "requests": 1175,
+        "requested": 1322780,
+        "retained_delta": 0,
+        "peak_new": 487766
+      },
+      "FINAL": {
+        "pixel_hash": 9304569566235452839,
+        "source_epoch": 201
+      }
+    },
+    {
+      "variant": "control",
+      "rows": 40,
+      "fields": 4,
+      "mode": "owner",
+      "COLD_ALLOC": {
+        "requests": 15154,
+        "requested": 3203740,
+        "retained": 1533428,
+        "peak_new": 1554068
+      },
+      "TRANSPORT_ALLOC": {
+        "requests": 8,
+        "requested": 864,
+        "retained": 864,
+        "peak_new": 864
+      },
+      "LAYOUT": {
+        "win_bytes": 296
+      },
+      "ALLOC": {
+        "requests": 1211,
+        "requested": 1324388,
+        "retained_delta": 0,
+        "peak_new": 487766
+      },
+      "FINAL": {
+        "pixel_hash": 5971546100742296383,
+        "source_epoch": 201
+      }
+    },
+    {
+      "variant": "control",
+      "rows": 0,
+      "fields": 4,
+      "mode": "opaque",
+      "COLD_ALLOC": {
+        "requests": 271,
+        "requested": 71016,
+        "retained": 47406,
+        "peak_new": 47614
+      },
+      "TRANSPORT_ALLOC": {
+        "requests": 8,
+        "requested": 864,
+        "retained": 864,
+        "peak_new": 864
+      },
+      "LAYOUT": {
+        "win_bytes": 256
+      },
+      "ALLOC": {
+        "requests": 112,
+        "requested": 14628,
+        "retained_delta": 0,
+        "peak_new": 4000
+      },
+      "FINAL": {
+        "pixel_hash": 9833564122138393930,
+        "source_epoch": 201
+      }
+    },
+    {
+      "variant": "control",
+      "rows": 1,
+      "fields": 4,
+      "mode": "opaque",
+      "COLD_ALLOC": {
+        "requests": 739,
+        "requested": 175110,
+        "retained": 94358,
+        "peak_new": 95366
+      },
+      "TRANSPORT_ALLOC": {
+        "requests": 8,
+        "requested": 864,
+        "retained": 864,
+        "peak_new": 864
+      },
+      "LAYOUT": {
+        "win_bytes": 256
+      },
+      "ALLOC": {
+        "requests": 158,
+        "requested": 58509,
+        "retained_delta": 0,
+        "peak_new": 20232
+      },
+      "FINAL": {
+        "pixel_hash": 4849723217689556816,
+        "source_epoch": 201
+      }
+    },
+    {
+      "variant": "control",
+      "rows": 40,
+      "fields": 4,
+      "mode": "opaque",
+      "COLD_ALLOC": {
+        "requests": 15117,
+        "requested": 3198472,
+        "retained": 1530114,
+        "peak_new": 1550650
+      },
+      "TRANSPORT_ALLOC": {
+        "requests": 8,
+        "requested": 864,
+        "retained": 864,
+        "peak_new": 864
+      },
+      "LAYOUT": {
+        "win_bytes": 256
+      },
+      "ALLOC": {
+        "requests": 1194,
+        "requested": 1322409,
+        "retained_delta": 0,
+        "peak_new": 487754
+      },
+      "FINAL": {
+        "pixel_hash": 11844827693975292333,
+        "source_epoch": 201
+      }
+    }
+  ]
+}

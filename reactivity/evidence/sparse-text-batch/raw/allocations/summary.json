@@ -1,0 +1,1595 @@
+{
+  "artifacts": {
+    "candidate": {
+      "path": "/home/user/gpui-sparse-batch-target/release/build/gpui/fa3ab23b5d2107c8/out/source_batch_allocations",
+      "sha256": "7140b1752e1fd3b57e45b4464173f9de0909f661be3ec69d0f99619b5be21edd",
+      "bytes": 10305096,
+      "features": [
+        "default",
+        "simd"
+      ],
+      "fingerprint": {
+        "rustc": 13112353858380123722,
+        "features": "[\"default\", \"simd\"]",
+        "declared_features": "[\"accessibility\", \"default\", \"desktop\", \"native\", \"native-core\", \"simd\", \"wayland\", \"wayland-minimal\", \"x11\", \"x11-minimal\"]",
+        "target": 2955662468658502469,
+        "profile": 854319013279132213,
+        "path": 13032707874732540366,
+        "deps": [
+          [
+            535147103364023206,
+            "icu_segmenter",
+            false,
+            2485711984859362076
+          ],
+          [
+            1001648224152866569,
+            "arcstr",
+            false,
+            8608570567093121818
+          ],
+          [
+            2251399859588827949,
+            "pin_project_lite",
+            false,
+            15410928229466948552
+          ],
+          [
+            4295957145130622623,
+            "zbus",
+            false,
+            18379667884694257944
+          ],
+          [
+            5686200050580704112,
+            "gpui",
+            false,
+            957807289477873267
+          ],
+          [
+            6359120849577304855,
+            "x11rb",
+            false,
+            5324069912867457553
+          ],
+          [
+            6557439603276904804,
+            "serde",
+            false,
+            5707135675310011643
+          ],
+          [
+            8160210889872729633,
+            "serde_json",
+            false,
+            5272800233993643215
+          ],
+          [
+            11048071599106839258,
+            "allocation_counter",
+            false,
+            6546775363473888567
+          ],
+          [
+            11671159878170094075,
+            "gpui_reactivity_state",
+            false,
+            14114907476681891339
+          ],
+          [
+            12459942763388630573,
+            "parking_lot",
+            false,
+            4059520991161427665
+          ],
+          [
+            13316223584457521750,
+            "cephal",
+            false,
+            12816297730444936390
+          ],
+          [
+            13628746454484093079,
+            "gpui_inline_call",
+            false,
+            4148753925670550377
+          ],
+          [
+            13672653153045154758,
+            "gpui_reactivity_core",
+            false,
+            3552894578772788042
+          ],
+          [
+            14670221084672822999,
+            "triomphe",
+            false,
+            7663979559722660298
+          ],
+          [
+            17032968227276897852,
+            "gpui_canvas",
+            false,
+            4286302238453905616
+          ],
+          [
+            17400412893666519160,
+            "zruntime",
+            false,
+            15262377513529591232
+          ],
+          [
+            17719763280398284109,
+            "accesskit_consumer",
+            false,
+            11901362020866182581
+          ]
+        ],
+        "local": [
+          {
+            "CheckDepInfo": {
+              "dep_info": "release/build/gpui/fa3ab23b5d2107c8/fingerprint/dep-example-source_batch_allocations",
+              "fingerprint": "content"
+            }
+          }
+        ],
+        "rustflags": [
+          "-C",
+          "symbol-mangling-version=v0",
+          "--cfg",
+          "tokio_unstable"
+        ],
+        "config": 8362119626465528914,
+        "compile_kind": 0
+      }
+    },
+    "control": {
+      "path": "/home/user/gpui-source-batch-target/release/build/gpui/fa3ab23b5d2107c8/out/source_batch_allocations",
+      "sha256": "91755cdd74ab28cac7c6c1a809bfd732581a1bb7f73e5fc686c22c72aa621001",
+      "bytes": 10263336,
+      "features": [
+        "default",
+        "simd"
+      ],
+      "fingerprint": {
+        "rustc": 13112353858380123722,
+        "features": "[\"default\", \"simd\"]",
+        "declared_features": "[\"accessibility\", \"default\", \"desktop\", \"native\", \"native-core\", \"simd\", \"wayland\", \"wayland-minimal\", \"x11\", \"x11-minimal\"]",
+        "target": 2955662468658502469,
+        "profile": 854319013279132213,
+        "path": 13032707874732540366,
+        "deps": [
+          [
+            535147103364023206,
+            "icu_segmenter",
+            false,
+            2485711984859362076
+          ],
+          [
+            1001648224152866569,
+            "arcstr",
+            false,
+            8608570567093121818
+          ],
+          [
+            2251399859588827949,
+            "pin_project_lite",
+            false,
+            15410928229466948552
+          ],
+          [
+            4295957145130622623,
+            "zbus",
+            false,
+            18379667884694257944
+          ],
+          [
+            5686200050580704112,
+            "gpui",
+            false,
+            957807289477873267
+          ],
+          [
+            6359120849577304855,
+            "x11rb",
+            false,
+            5324069912867457553
+          ],
+          [
+            6557439603276904804,
+            "serde",
+            false,
+            5707135675310011643
+          ],
+          [
+            8160210889872729633,
+            "serde_json",
+            false,
+            5272800233993643215
+          ],
+          [
+            11048071599106839258,
+            "allocation_counter",
+            false,
+            6546775363473888567
+          ],
+          [
+            11671159878170094075,
+            "gpui_reactivity_state",
+            false,
+            14114907476681891339
+          ],
+          [
+            12459942763388630573,
+            "parking_lot",
+            false,
+            4059520991161427665
+          ],
+          [
+            13316223584457521750,
+            "cephal",
+            false,
+            12816297730444936390
+          ],
+          [
+            13628746454484093079,
+            "gpui_inline_call",
+            false,
+            4148753925670550377
+          ],
+          [
+            13672653153045154758,
+            "gpui_reactivity_core",
+            false,
+            3552894578772788042
+          ],
+          [
+            14670221084672822999,
+            "triomphe",
+            false,
+            7663979559722660298
+          ],
+          [
+            17032968227276897852,
+            "gpui_canvas",
+            false,
+            4286302238453905616
+          ],
+          [
+            17400412893666519160,
+            "zruntime",
+            false,
+            15262377513529591232
+          ],
+          [
+            17719763280398284109,
+            "accesskit_consumer",
+            false,
+            11901362020866182581
+          ]
+        ],
+        "local": [
+          {
+            "CheckDepInfo": {
+              "dep_info": "release/build/gpui/fa3ab23b5d2107c8/fingerprint/dep-example-source_batch_allocations",
+              "fingerprint": "content"
+            }
+          }
+        ],
+        "rustflags": [
+          "-C",
+          "symbol-mangling-version=v0",
+          "--cfg",
+          "tokio_unstable"
+        ],
+        "config": 8362119626465528914,
+        "compile_kind": 0
+      }
+    }
+  },
+  "font_sha256": "7da195a74c55bef988d0d48f9508bd5d849425c1770dba5d7bfc6ce9ed848954",
+  "runs": [
+    {
+      "variant": "candidate",
+      "rows": 0,
+      "fields": 1,
+      "mode": "exact",
+      "COLD_ALLOC": {
+        "requests": 271,
+        "requested": 71008,
+        "retained": 47398,
+        "peak_new": 47606
+      },
+      "TRANSPORT_ALLOC": {
+        "requests": 8,
+        "requested": 704,
+        "retained": 704,
+        "peak_new": 704
+      },
+      "LAYOUT": {
+        "win_bytes": 296
+      },
+      "ALLOC": {
+        "requests": 33,
+        "requested": 2602,
+        "retained_delta": 0,
+        "peak_new": 1270
+      },
+      "FINAL": {
+        "pixel_hash": 772978717724025150,
+        "source_epoch": 201
+      }
+    },
+    {
+      "variant": "candidate",
+      "rows": 0,
+      "fields": 2,
+      "mode": "exact",
+      "COLD_ALLOC": {
+        "requests": 271,
+        "requested": 71008,
+        "retained": 47398,
+        "peak_new": 47606
+      },
+      "TRANSPORT_ALLOC": {
+        "requests": 8,
+        "requested": 704,
+        "retained": 704,
+        "peak_new": 704
+      },
+      "LAYOUT": {
+        "win_bytes": 296
+      },
+      "ALLOC": {
+        "requests": 63,
+        "requested": 5688,
+        "retained_delta": 0,
+        "peak_new": 3750
+      },
+      "FINAL": {
+        "pixel_hash": 1598864835848483314,
+        "source_epoch": 201
+      }
+    },
+    {
+      "variant": "candidate",
+      "rows": 0,
+      "fields": 4,
+      "mode": "exact",
+      "COLD_ALLOC": {
+        "requests": 271,
+        "requested": 71008,
+        "retained": 47398,
+        "peak_new": 47606
+      },
+      "TRANSPORT_ALLOC": {
+        "requests": 8,
+        "requested": 704,
+        "retained": 704,
+        "peak_new": 704
+      },
+      "LAYOUT": {
+        "win_bytes": 296
+      },
+      "ALLOC": {
+        "requests": 114,
+        "requested": 10628,
+        "retained_delta": 0,
+        "peak_new": 7400
+      },
+      "FINAL": {
+        "pixel_hash": 9833564122138393930,
+        "source_epoch": 201
+      }
+    },
+    {
+      "variant": "candidate",
+      "rows": 0,
+      "fields": 1,
+      "mode": "owner",
+      "COLD_ALLOC": {
+        "requests": 316,
+        "requested": 81583,
+        "retained": 53375,
+        "peak_new": 53679
+      },
+      "TRANSPORT_ALLOC": {
+        "requests": 8,
+        "requested": 704,
+        "retained": 704,
+        "peak_new": 704
+      },
+      "LAYOUT": {
+        "win_bytes": 296
+      },
+      "ALLOC": {
+        "requests": 80,
+        "requested": 15842,
+        "retained_delta": 0,
+        "peak_new": 4152
+      },
+      "FINAL": {
+        "pixel_hash": 7089351825086006792,
+        "source_epoch": 201
+      }
+    },
+    {
+      "variant": "candidate",
+      "rows": 0,
+      "fields": 2,
+      "mode": "owner",
+      "COLD_ALLOC": {
+        "requests": 316,
+        "requested": 81583,
+        "retained": 53375,
+        "peak_new": 53679
+      },
+      "TRANSPORT_ALLOC": {
+        "requests": 8,
+        "requested": 704,
+        "retained": 704,
+        "peak_new": 704
+      },
+      "LAYOUT": {
+        "win_bytes": 296
+      },
+      "ALLOC": {
+        "requests": 98,
+        "requested": 16876,
+        "retained_delta": 0,
+        "peak_new": 4634
+      },
+      "FINAL": {
+        "pixel_hash": 16629043533850181356,
+        "source_epoch": 201
+      }
+    },
+    {
+      "variant": "candidate",
+      "rows": 0,
+      "fields": 4,
+      "mode": "owner",
+      "COLD_ALLOC": {
+        "requests": 316,
+        "requested": 81583,
+        "retained": 53375,
+        "peak_new": 53679
+      },
+      "TRANSPORT_ALLOC": {
+        "requests": 8,
+        "requested": 704,
+        "retained": 704,
+        "peak_new": 704
+      },
+      "LAYOUT": {
+        "win_bytes": 296
+      },
+      "ALLOC": {
+        "requests": 134,
+        "requested": 18386,
+        "retained_delta": 0,
+        "peak_new": 5486
+      },
+      "FINAL": {
+        "pixel_hash": 13064204463469428404,
+        "source_epoch": 201
+      }
+    },
+    {
+      "variant": "candidate",
+      "rows": 1,
+      "fields": 1,
+      "mode": "exact",
+      "COLD_ALLOC": {
+        "requests": 739,
+        "requested": 175102,
+        "retained": 94350,
+        "peak_new": 95358
+      },
+      "TRANSPORT_ALLOC": {
+        "requests": 8,
+        "requested": 704,
+        "retained": 704,
+        "peak_new": 704
+      },
+      "LAYOUT": {
+        "win_bytes": 296
+      },
+      "ALLOC": {
+        "requests": 33,
+        "requested": 2602,
+        "retained_delta": 0,
+        "peak_new": 1270
+      },
+      "FINAL": {
+        "pixel_hash": 16261168099188973412,
+        "source_epoch": 201
+      }
+    },
+    {
+      "variant": "candidate",
+      "rows": 1,
+      "fields": 2,
+      "mode": "exact",
+      "COLD_ALLOC": {
+        "requests": 739,
+        "requested": 175102,
+        "retained": 94350,
+        "peak_new": 95358
+      },
+      "TRANSPORT_ALLOC": {
+        "requests": 8,
+        "requested": 704,
+        "retained": 704,
+        "peak_new": 704
+      },
+      "LAYOUT": {
+        "win_bytes": 296
+      },
+      "ALLOC": {
+        "requests": 63,
+        "requested": 5688,
+        "retained_delta": 0,
+        "peak_new": 3750
+      },
+      "FINAL": {
+        "pixel_hash": 13599488539789252008,
+        "source_epoch": 201
+      }
+    },
+    {
+      "variant": "candidate",
+      "rows": 1,
+      "fields": 4,
+      "mode": "exact",
+      "COLD_ALLOC": {
+        "requests": 739,
+        "requested": 175102,
+        "retained": 94350,
+        "peak_new": 95358
+      },
+      "TRANSPORT_ALLOC": {
+        "requests": 8,
+        "requested": 704,
+        "retained": 704,
+        "peak_new": 704
+      },
+      "LAYOUT": {
+        "win_bytes": 296
+      },
+      "ALLOC": {
+        "requests": 114,
+        "requested": 10628,
+        "retained_delta": 0,
+        "peak_new": 7400
+      },
+      "FINAL": {
+        "pixel_hash": 4849723217689556816,
+        "source_epoch": 201
+      }
+    },
+    {
+      "variant": "candidate",
+      "rows": 1,
+      "fields": 1,
+      "mode": "owner",
+      "COLD_ALLOC": {
+        "requests": 774,
+        "requested": 180074,
+        "retained": 97664,
+        "peak_new": 98424
+      },
+      "TRANSPORT_ALLOC": {
+        "requests": 8,
+        "requested": 704,
+        "retained": 704,
+        "peak_new": 704
+      },
+      "LAYOUT": {
+        "win_bytes": 296
+      },
+      "ALLOC": {
+        "requests": 121,
+        "requested": 57846,
+        "retained_delta": 0,
+        "peak_new": 20244
+      },
+      "FINAL": {
+        "pixel_hash": 10326528179151768178,
+        "source_epoch": 201
+      }
+    },
+    {
+      "variant": "candidate",
+      "rows": 1,
+      "fields": 2,
+      "mode": "owner",
+      "COLD_ALLOC": {
+        "requests": 774,
+        "requested": 180074,
+        "retained": 97664,
+        "peak_new": 98424
+      },
+      "TRANSPORT_ALLOC": {
+        "requests": 8,
+        "requested": 704,
+        "retained": 704,
+        "peak_new": 704
+      },
+      "LAYOUT": {
+        "win_bytes": 296
+      },
+      "ALLOC": {
+        "requests": 139,
+        "requested": 58880,
+        "retained_delta": 0,
+        "peak_new": 20244
+      },
+      "FINAL": {
+        "pixel_hash": 17845524188144482742,
+        "source_epoch": 201
+      }
+    },
+    {
+      "variant": "candidate",
+      "rows": 1,
+      "fields": 4,
+      "mode": "owner",
+      "COLD_ALLOC": {
+        "requests": 774,
+        "requested": 180074,
+        "retained": 97664,
+        "peak_new": 98424
+      },
+      "TRANSPORT_ALLOC": {
+        "requests": 8,
+        "requested": 704,
+        "retained": 704,
+        "peak_new": 704
+      },
+      "LAYOUT": {
+        "win_bytes": 296
+      },
+      "ALLOC": {
+        "requests": 175,
+        "requested": 60488,
+        "retained_delta": 0,
+        "peak_new": 20244
+      },
+      "FINAL": {
+        "pixel_hash": 8770175516223424526,
+        "source_epoch": 201
+      }
+    },
+    {
+      "variant": "candidate",
+      "rows": 40,
+      "fields": 1,
+      "mode": "exact",
+      "COLD_ALLOC": {
+        "requests": 15117,
+        "requested": 3198464,
+        "retained": 1530106,
+        "peak_new": 1550642
+      },
+      "TRANSPORT_ALLOC": {
+        "requests": 8,
+        "requested": 704,
+        "retained": 704,
+        "peak_new": 704
+      },
+      "LAYOUT": {
+        "win_bytes": 296
+      },
+      "ALLOC": {
+        "requests": 33,
+        "requested": 2602,
+        "retained_delta": 0,
+        "peak_new": 1270
+      },
+      "FINAL": {
+        "pixel_hash": 11550377658506184721,
+        "source_epoch": 201
+      }
+    },
+    {
+      "variant": "candidate",
+      "rows": 40,
+      "fields": 2,
+      "mode": "exact",
+      "COLD_ALLOC": {
+        "requests": 15117,
+        "requested": 3198464,
+        "retained": 1530106,
+        "peak_new": 1550642
+      },
+      "TRANSPORT_ALLOC": {
+        "requests": 8,
+        "requested": 704,
+        "retained": 704,
+        "peak_new": 704
+      },
+      "LAYOUT": {
+        "win_bytes": 296
+      },
+      "ALLOC": {
+        "requests": 63,
+        "requested": 5688,
+        "retained_delta": 0,
+        "peak_new": 3750
+      },
+      "FINAL": {
+        "pixel_hash": 323476283413975189,
+        "source_epoch": 201
+      }
+    },
+    {
+      "variant": "candidate",
+      "rows": 40,
+      "fields": 4,
+      "mode": "exact",
+      "COLD_ALLOC": {
+        "requests": 15117,
+        "requested": 3198464,
+        "retained": 1530106,
+        "peak_new": 1550642
+      },
+      "TRANSPORT_ALLOC": {
+        "requests": 8,
+        "requested": 704,
+        "retained": 704,
+        "peak_new": 704
+      },
+      "LAYOUT": {
+        "win_bytes": 296
+      },
+      "ALLOC": {
+        "requests": 114,
+        "requested": 10628,
+        "retained_delta": 0,
+        "peak_new": 7400
+      },
+      "FINAL": {
+        "pixel_hash": 11844827693975292333,
+        "source_epoch": 201
+      }
+    },
+    {
+      "variant": "candidate",
+      "rows": 40,
+      "fields": 1,
+      "mode": "owner",
+      "COLD_ALLOC": {
+        "requests": 15154,
+        "requested": 3203732,
+        "retained": 1533420,
+        "peak_new": 1554060
+      },
+      "TRANSPORT_ALLOC": {
+        "requests": 8,
+        "requested": 704,
+        "retained": 704,
+        "peak_new": 704
+      },
+      "LAYOUT": {
+        "win_bytes": 296
+      },
+      "ALLOC": {
+        "requests": 1157,
+        "requested": 1321746,
+        "retained_delta": 0,
+        "peak_new": 487766
+      },
+      "FINAL": {
+        "pixel_hash": 9732291514733809035,
+        "source_epoch": 201
+      }
+    },
+    {
+      "variant": "candidate",
+      "rows": 40,
+      "fields": 2,
+      "mode": "owner",
+      "COLD_ALLOC": {
+        "requests": 15154,
+        "requested": 3203732,
+        "retained": 1533420,
+        "peak_new": 1554060
+      },
+      "TRANSPORT_ALLOC": {
+        "requests": 8,
+        "requested": 704,
+        "retained": 704,
+        "peak_new": 704
+      },
+      "LAYOUT": {
+        "win_bytes": 296
+      },
+      "ALLOC": {
+        "requests": 1175,
+        "requested": 1322780,
+        "retained_delta": 0,
+        "peak_new": 487766
+      },
+      "FINAL": {
+        "pixel_hash": 9304569566235452839,
+        "source_epoch": 201
+      }
+    },
+    {
+      "variant": "candidate",
+      "rows": 40,
+      "fields": 4,
+      "mode": "owner",
+      "COLD_ALLOC": {
+        "requests": 15154,
+        "requested": 3203732,
+        "retained": 1533420,
+        "peak_new": 1554060
+      },
+      "TRANSPORT_ALLOC": {
+        "requests": 8,
+        "requested": 704,
+        "retained": 704,
+        "peak_new": 704
+      },
+      "LAYOUT": {
+        "win_bytes": 296
+      },
+      "ALLOC": {
+        "requests": 1211,
+        "requested": 1324388,
+        "retained_delta": 0,
+        "peak_new": 487766
+      },
+      "FINAL": {
+        "pixel_hash": 5971546100742296383,
+        "source_epoch": 201
+      }
+    },
+    {
+      "variant": "candidate",
+      "rows": 0,
+      "fields": 4,
+      "mode": "opaque",
+      "COLD_ALLOC": {
+        "requests": 271,
+        "requested": 71008,
+        "retained": 47398,
+        "peak_new": 47606
+      },
+      "TRANSPORT_ALLOC": {
+        "requests": 8,
+        "requested": 704,
+        "retained": 704,
+        "peak_new": 704
+      },
+      "LAYOUT": {
+        "win_bytes": 256
+      },
+      "ALLOC": {
+        "requests": 112,
+        "requested": 14628,
+        "retained_delta": 0,
+        "peak_new": 4000
+      },
+      "FINAL": {
+        "pixel_hash": 9833564122138393930,
+        "source_epoch": 201
+      }
+    },
+    {
+      "variant": "candidate",
+      "rows": 1,
+      "fields": 4,
+      "mode": "opaque",
+      "COLD_ALLOC": {
+        "requests": 739,
+        "requested": 175102,
+        "retained": 94350,
+        "peak_new": 95358
+      },
+      "TRANSPORT_ALLOC": {
+        "requests": 8,
+        "requested": 704,
+        "retained": 704,
+        "peak_new": 704
+      },
+      "LAYOUT": {
+        "win_bytes": 256
+      },
+      "ALLOC": {
+        "requests": 158,
+        "requested": 58509,
+        "retained_delta": 0,
+        "peak_new": 20232
+      },
+      "FINAL": {
+        "pixel_hash": 4849723217689556816,
+        "source_epoch": 201
+      }
+    },
+    {
+      "variant": "candidate",
+      "rows": 40,
+      "fields": 4,
+      "mode": "opaque",
+      "COLD_ALLOC": {
+        "requests": 15117,
+        "requested": 3198464,
+        "retained": 1530106,
+        "peak_new": 1550642
+      },
+      "TRANSPORT_ALLOC": {
+        "requests": 8,
+        "requested": 704,
+        "retained": 704,
+        "peak_new": 704
+      },
+      "LAYOUT": {
+        "win_bytes": 256
+      },
+      "ALLOC": {
+        "requests": 1194,
+        "requested": 1322409,
+        "retained_delta": 0,
+        "peak_new": 487754
+      },
+      "FINAL": {
+        "pixel_hash": 11844827693975292333,
+        "source_epoch": 201
+      }
+    },
+    {
+      "variant": "control",
+      "rows": 0,
+      "fields": 1,
+      "mode": "exact",
+      "COLD_ALLOC": {
+        "requests": 271,
+        "requested": 71000,
+        "retained": 47390,
+        "peak_new": 47598
+      },
+      "TRANSPORT_ALLOC": {
+        "requests": 8,
+        "requested": 704,
+        "retained": 704,
+        "peak_new": 704
+      },
+      "LAYOUT": {
+        "win_bytes": 296
+      },
+      "ALLOC": {
+        "requests": 33,
+        "requested": 2602,
+        "retained_delta": 0,
+        "peak_new": 1270
+      },
+      "FINAL": {
+        "pixel_hash": 772978717724025150,
+        "source_epoch": 201
+      }
+    },
+    {
+      "variant": "control",
+      "rows": 0,
+      "fields": 2,
+      "mode": "exact",
+      "COLD_ALLOC": {
+        "requests": 271,
+        "requested": 71000,
+        "retained": 47390,
+        "peak_new": 47598
+      },
+      "TRANSPORT_ALLOC": {
+        "requests": 8,
+        "requested": 704,
+        "retained": 704,
+        "peak_new": 704
+      },
+      "LAYOUT": {
+        "win_bytes": 296
+      },
+      "ALLOC": {
+        "requests": 55,
+        "requested": 4872,
+        "retained_delta": 0,
+        "peak_new": 2860
+      },
+      "FINAL": {
+        "pixel_hash": 1598864835848483314,
+        "source_epoch": 201
+      }
+    },
+    {
+      "variant": "control",
+      "rows": 0,
+      "fields": 4,
+      "mode": "exact",
+      "COLD_ALLOC": {
+        "requests": 271,
+        "requested": 71000,
+        "retained": 47390,
+        "peak_new": 47598
+      },
+      "TRANSPORT_ALLOC": {
+        "requests": 8,
+        "requested": 704,
+        "retained": 704,
+        "peak_new": 704
+      },
+      "LAYOUT": {
+        "win_bytes": 296
+      },
+      "ALLOC": {
+        "requests": 91,
+        "requested": 6716,
+        "retained_delta": 0,
+        "peak_new": 3798
+      },
+      "FINAL": {
+        "pixel_hash": 9833564122138393930,
+        "source_epoch": 201
+      }
+    },
+    {
+      "variant": "control",
+      "rows": 0,
+      "fields": 1,
+      "mode": "owner",
+      "COLD_ALLOC": {
+        "requests": 316,
+        "requested": 81575,
+        "retained": 53367,
+        "peak_new": 53671
+      },
+      "TRANSPORT_ALLOC": {
+        "requests": 8,
+        "requested": 704,
+        "retained": 704,
+        "peak_new": 704
+      },
+      "LAYOUT": {
+        "win_bytes": 296
+      },
+      "ALLOC": {
+        "requests": 80,
+        "requested": 15842,
+        "retained_delta": 0,
+        "peak_new": 4152
+      },
+      "FINAL": {
+        "pixel_hash": 7089351825086006792,
+        "source_epoch": 201
+      }
+    },
+    {
+      "variant": "control",
+      "rows": 0,
+      "fields": 2,
+      "mode": "owner",
+      "COLD_ALLOC": {
+        "requests": 316,
+        "requested": 81575,
+        "retained": 53367,
+        "peak_new": 53671
+      },
+      "TRANSPORT_ALLOC": {
+        "requests": 8,
+        "requested": 704,
+        "retained": 704,
+        "peak_new": 704
+      },
+      "LAYOUT": {
+        "win_bytes": 296
+      },
+      "ALLOC": {
+        "requests": 98,
+        "requested": 16876,
+        "retained_delta": 0,
+        "peak_new": 4634
+      },
+      "FINAL": {
+        "pixel_hash": 16629043533850181356,
+        "source_epoch": 201
+      }
+    },
+    {
+      "variant": "control",
+      "rows": 0,
+      "fields": 4,
+      "mode": "owner",
+      "COLD_ALLOC": {
+        "requests": 316,
+        "requested": 81575,
+        "retained": 53367,
+        "peak_new": 53671
+      },
+      "TRANSPORT_ALLOC": {
+        "requests": 8,
+        "requested": 704,
+        "retained": 704,
+        "peak_new": 704
+      },
+      "LAYOUT": {
+        "win_bytes": 296
+      },
+      "ALLOC": {
+        "requests": 134,
+        "requested": 18386,
+        "retained_delta": 0,
+        "peak_new": 5486
+      },
+      "FINAL": {
+        "pixel_hash": 13064204463469428404,
+        "source_epoch": 201
+      }
+    },
+    {
+      "variant": "control",
+      "rows": 1,
+      "fields": 1,
+      "mode": "exact",
+      "COLD_ALLOC": {
+        "requests": 739,
+        "requested": 175094,
+        "retained": 94342,
+        "peak_new": 95350
+      },
+      "TRANSPORT_ALLOC": {
+        "requests": 8,
+        "requested": 704,
+        "retained": 704,
+        "peak_new": 704
+      },
+      "LAYOUT": {
+        "win_bytes": 296
+      },
+      "ALLOC": {
+        "requests": 33,
+        "requested": 2602,
+        "retained_delta": 0,
+        "peak_new": 1270
+      },
+      "FINAL": {
+        "pixel_hash": 16261168099188973412,
+        "source_epoch": 201
+      }
+    },
+    {
+      "variant": "control",
+      "rows": 1,
+      "fields": 2,
+      "mode": "exact",
+      "COLD_ALLOC": {
+        "requests": 739,
+        "requested": 175094,
+        "retained": 94342,
+        "peak_new": 95350
+      },
+      "TRANSPORT_ALLOC": {
+        "requests": 8,
+        "requested": 704,
+        "retained": 704,
+        "peak_new": 704
+      },
+      "LAYOUT": {
+        "win_bytes": 296
+      },
+      "ALLOC": {
+        "requests": 68,
+        "requested": 15400,
+        "retained_delta": 0,
+        "peak_new": 9518
+      },
+      "FINAL": {
+        "pixel_hash": 13599488539789252008,
+        "source_epoch": 201
+      }
+    },
+    {
+      "variant": "control",
+      "rows": 1,
+      "fields": 4,
+      "mode": "exact",
+      "COLD_ALLOC": {
+        "requests": 739,
+        "requested": 175094,
+        "retained": 94342,
+        "peak_new": 95350
+      },
+      "TRANSPORT_ALLOC": {
+        "requests": 8,
+        "requested": 704,
+        "retained": 704,
+        "peak_new": 704
+      },
+      "LAYOUT": {
+        "win_bytes": 296
+      },
+      "ALLOC": {
+        "requests": 104,
+        "requested": 17244,
+        "retained_delta": 0,
+        "peak_new": 10482
+      },
+      "FINAL": {
+        "pixel_hash": 4849723217689556816,
+        "source_epoch": 201
+      }
+    },
+    {
+      "variant": "control",
+      "rows": 1,
+      "fields": 1,
+      "mode": "owner",
+      "COLD_ALLOC": {
+        "requests": 774,
+        "requested": 180066,
+        "retained": 97656,
+        "peak_new": 98416
+      },
+      "TRANSPORT_ALLOC": {
+        "requests": 8,
+        "requested": 704,
+        "retained": 704,
+        "peak_new": 704
+      },
+      "LAYOUT": {
+        "win_bytes": 296
+      },
+      "ALLOC": {
+        "requests": 121,
+        "requested": 57846,
+        "retained_delta": 0,
+        "peak_new": 20244
+      },
+      "FINAL": {
+        "pixel_hash": 10326528179151768178,
+        "source_epoch": 201
+      }
+    },
+    {
+      "variant": "control",
+      "rows": 1,
+      "fields": 2,
+      "mode": "owner",
+      "COLD_ALLOC": {
+        "requests": 774,
+        "requested": 180066,
+        "retained": 97656,
+        "peak_new": 98416
+      },
+      "TRANSPORT_ALLOC": {
+        "requests": 8,
+        "requested": 704,
+        "retained": 704,
+        "peak_new": 704
+      },
+      "LAYOUT": {
+        "win_bytes": 296
+      },
+      "ALLOC": {
+        "requests": 139,
+        "requested": 58880,
+        "retained_delta": 0,
+        "peak_new": 20244
+      },
+      "FINAL": {
+        "pixel_hash": 17845524188144482742,
+        "source_epoch": 201
+      }
+    },
+    {
+      "variant": "control",
+      "rows": 1,
+      "fields": 4,
+      "mode": "owner",
+      "COLD_ALLOC": {
+        "requests": 774,
+        "requested": 180066,
+        "retained": 97656,
+        "peak_new": 98416
+      },
+      "TRANSPORT_ALLOC": {
+        "requests": 8,
+        "requested": 704,
+        "retained": 704,
+        "peak_new": 704
+      },
+      "LAYOUT": {
+        "win_bytes": 296
+      },
+      "ALLOC": {
+        "requests": 175,
+        "requested": 60488,
+        "retained_delta": 0,
+        "peak_new": 20244
+      },
+      "FINAL": {
+        "pixel_hash": 8770175516223424526,
+        "source_epoch": 201
+      }
+    },
+    {
+      "variant": "control",
+      "rows": 40,
+      "fields": 1,
+      "mode": "exact",
+      "COLD_ALLOC": {
+        "requests": 15117,
+        "requested": 3198456,
+        "retained": 1530098,
+        "peak_new": 1550634
+      },
+      "TRANSPORT_ALLOC": {
+        "requests": 8,
+        "requested": 704,
+        "retained": 704,
+        "peak_new": 704
+      },
+      "LAYOUT": {
+        "win_bytes": 296
+      },
+      "ALLOC": {
+        "requests": 33,
+        "requested": 2602,
+        "retained_delta": 0,
+        "peak_new": 1270
+      },
+      "FINAL": {
+        "pixel_hash": 11550377658506184721,
+        "source_epoch": 201
+      }
+    },
+    {
+      "variant": "control",
+      "rows": 40,
+      "fields": 2,
+      "mode": "exact",
+      "COLD_ALLOC": {
+        "requests": 15117,
+        "requested": 3198456,
+        "retained": 1530098,
+        "peak_new": 1550634
+      },
+      "TRANSPORT_ALLOC": {
+        "requests": 8,
+        "requested": 704,
+        "retained": 704,
+        "peak_new": 704
+      },
+      "LAYOUT": {
+        "win_bytes": 296
+      },
+      "ALLOC": {
+        "requests": 84,
+        "requested": 341828,
+        "retained_delta": 0,
+        "peak_new": 224456
+      },
+      "FINAL": {
+        "pixel_hash": 323476283413975189,
+        "source_epoch": 201
+      }
+    },
+    {
+      "variant": "control",
+      "rows": 40,
+      "fields": 4,
+      "mode": "exact",
+      "COLD_ALLOC": {
+        "requests": 15117,
+        "requested": 3198456,
+        "retained": 1530098,
+        "peak_new": 1550634
+      },
+      "TRANSPORT_ALLOC": {
+        "requests": 8,
+        "requested": 704,
+        "retained": 704,
+        "peak_new": 704
+      },
+      "LAYOUT": {
+        "win_bytes": 296
+      },
+      "ALLOC": {
+        "requests": 120,
+        "requested": 343672,
+        "retained_delta": 0,
+        "peak_new": 225420
+      },
+      "FINAL": {
+        "pixel_hash": 11844827693975292333,
+        "source_epoch": 201
+      }
+    },
+    {
+      "variant": "control",
+      "rows": 40,
+      "fields": 1,
+      "mode": "owner",
+      "COLD_ALLOC": {
+        "requests": 15154,
+        "requested": 3203724,
+        "retained": 1533412,
+        "peak_new": 1554052
+      },
+      "TRANSPORT_ALLOC": {
+        "requests": 8,
+        "requested": 704,
+        "retained": 704,
+        "peak_new": 704
+      },
+      "LAYOUT": {
+        "win_bytes": 296
+      },
+      "ALLOC": {
+        "requests": 1157,
+        "requested": 1321746,
+        "retained_delta": 0,
+        "peak_new": 487766
+      },
+      "FINAL": {
+        "pixel_hash": 9732291514733809035,
+        "source_epoch": 201
+      }
+    },
+    {
+      "variant": "control",
+      "rows": 40,
+      "fields": 2,
+      "mode": "owner",
+      "COLD_ALLOC": {
+        "requests": 15154,
+        "requested": 3203724,
+        "retained": 1533412,
+        "peak_new": 1554052
+      },
+      "TRANSPORT_ALLOC": {
+        "requests": 8,
+        "requested": 704,
+        "retained": 704,
+        "peak_new": 704
+      },
+      "LAYOUT": {
+        "win_bytes": 296
+      },
+      "ALLOC": {
+        "requests": 1175,
+        "requested": 1322780,
+        "retained_delta": 0,
+        "peak_new": 487766
+      },
+      "FINAL": {
+        "pixel_hash": 9304569566235452839,
+        "source_epoch": 201
+      }
+    },
+    {
+      "variant": "control",
+      "rows": 40,
+      "fields": 4,
+      "mode": "owner",
+      "COLD_ALLOC": {
+        "requests": 15154,
+        "requested": 3203724,
+        "retained": 1533412,
+        "peak_new": 1554052
+      },
+      "TRANSPORT_ALLOC": {
+        "requests": 8,
+        "requested": 704,
+        "retained": 704,
+        "peak_new": 704
+      },
+      "LAYOUT": {
+        "win_bytes": 296
+      },
+      "ALLOC": {
+        "requests": 1211,
+        "requested": 1324388,
+        "retained_delta": 0,
+        "peak_new": 487766
+      },
+      "FINAL": {
+        "pixel_hash": 5971546100742296383,
+        "source_epoch": 201
+      }
+    },
+    {
+      "variant": "control",
+      "rows": 0,
+      "fields": 4,
+      "mode": "opaque",
+      "COLD_ALLOC": {
+        "requests": 271,
+        "requested": 71000,
+        "retained": 47390,
+        "peak_new": 47598
+      },
+      "TRANSPORT_ALLOC": {
+        "requests": 8,
+        "requested": 704,
+        "retained": 704,
+        "peak_new": 704
+      },
+      "LAYOUT": {
+        "win_bytes": 256
+      },
+      "ALLOC": {
+        "requests": 112,
+        "requested": 14628,
+        "retained_delta": 0,
+        "peak_new": 4000
+      },
+      "FINAL": {
+        "pixel_hash": 9833564122138393930,
+        "source_epoch": 201
+      }
+    },
+    {
+      "variant": "control",
+      "rows": 1,
+      "fields": 4,
+      "mode": "opaque",
+      "COLD_ALLOC": {
+        "requests": 739,
+        "requested": 175094,
+        "retained": 94342,
+        "peak_new": 95350
+      },
+      "TRANSPORT_ALLOC": {
+        "requests": 8,
+        "requested": 704,
+        "retained": 704,
+        "peak_new": 704
+      },
+      "LAYOUT": {
+        "win_bytes": 256
+      },
+      "ALLOC": {
+        "requests": 158,
+        "requested": 58509,
+        "retained_delta": 0,
+        "peak_new": 20232
+      },
+      "FINAL": {
+        "pixel_hash": 4849723217689556816,
+        "source_epoch": 201
+      }
+    },
+    {
+      "variant": "control",
+      "rows": 40,
+      "fields": 4,
+      "mode": "opaque",
+      "COLD_ALLOC": {
+        "requests": 15117,
+        "requested": 3198456,
+        "retained": 1530098,
+        "peak_new": 1550634
+      },
+      "TRANSPORT_ALLOC": {
+        "requests": 8,
+        "requested": 704,
+        "retained": 704,
+        "peak_new": 704
+      },
+      "LAYOUT": {
+        "win_bytes": 256
+      },
+      "ALLOC": {
+        "requests": 1194,
+        "requested": 1322409,
+        "retained_delta": 0,
+        "peak_new": 487754
+      },
+      "FINAL": {
+        "pixel_hash": 11844827693975292333,
+        "source_epoch": 201
+      }
+    }
+  ]
+}
