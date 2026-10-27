@@ -1,5 +1,7 @@
 # GPUI architecture experiments against ZGX
 
+Continuation: the [active local campaign register](../evidence/architecture-campaign/README.md) records subsequent isolated experiments, including rejected witness replay, sparse text publication and owned text planning. The original retained-output findings below remain unchanged.
+
 Keep the clean-room GPUI public API and exclusive window ownership. The next gains should come from removing complete-scene work after small edits, rather than compressing already small nodes further. Start with retained GPU output, then retained text/scene segments and composition-only transforms. Preserve the existing full-rebuild paths as independent oracles.
 
 The local retained-output experiment is **unadopted**. It passes the exercised pixel and native integration checks and substantially reduces software-Vulkan work for sparse expensive scenes. Simple flat and full-damage cases regress. Neither these exploratory timings nor ZGX's published upstream-GPUI comparison establishes that this clean-room GPUI outperforms ZGX.
