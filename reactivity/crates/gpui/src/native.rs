@@ -334,12 +334,12 @@ impl GpuSurface {
         token: crate::PresentationToken,
         paint: Option<&crate::runtime::paint::SlotTransition>,
         target: &wgpu::TextureView,
-        transition: Option<crate::runtime::paint::SceneDamage>,
+        transition: Option<crate::runtime::paint::SceneDamage<'_>>,
     ) -> Result<wgpu::SubmissionIndex, gpui_gpu::Error> {
         let epoch = transition.map(|d| d.epoch);
-        let damage = transition
-            .filter(|d| d.base.is_some() && d.base == self.packet_epoch)
-            .map(|d| d.region);
+        let valid_transition =
+            transition.filter(|d| d.base.is_some() && d.base == self.packet_epoch);
+        let damage = valid_transition.map(|d| d.region);
         if self.packet_token == Some(token)
             && let Some(submitted) = self.renderer.redraw(target)?
         {
@@ -356,7 +356,15 @@ impl GpuSurface {
             self.packet_epoch = epoch;
             return Ok(submitted);
         }
-        let submitted = self.renderer.render(scene, target, damage)?;
+        let submitted = if let Some(repair) = valid_transition
+            .and_then(|d| d.repair)
+            .filter(|repair| previous == Some(repair.from) && token == repair.to)
+        {
+            self.renderer
+                .render_regions(scene, target, &repair.regions)?
+        } else {
+            self.renderer.render(scene, target, damage)?
+        };
         self.packet_token = Some(token);
         self.packet_epoch = epoch;
         Ok(submitted)

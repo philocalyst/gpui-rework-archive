@@ -528,12 +528,19 @@ impl GpuContext {
         self.format
     }
     fn submit(&self, output: Output<'_>, bindings: &wgpu::BindGroup) -> wgpu::SubmissionIndex {
+        let damage = match output.damage {
+            retained::Repair::Full => None,
+            retained::Repair::Region(region) => Some(region),
+            retained::Repair::Regions(regions) => {
+                return self.submit_regions(output, bindings, regions);
+            }
+        };
         let mut encoder = self
             .device
             .create_command_encoder(&wgpu::CommandEncoderDescriptor {
                 label: Some("GPUI frame"),
             });
-        if output.damage.is_none_or(|damage| !damage.is_empty()) {
+        if damage.is_none_or(|damage| !damage.is_empty()) {
             let mut pass = encoder.begin_render_pass(&wgpu::RenderPassDescriptor {
                 label: Some("GPUI frame"),
                 color_attachments: &[Some(wgpu::RenderPassColorAttachment {
@@ -541,7 +548,7 @@ impl GpuContext {
                     resolve_target: None,
                     depth_slice: None,
                     ops: wgpu::Operations {
-                        load: if output.damage.is_some() {
+                        load: if damage.is_some() {
                             wgpu::LoadOp::Load
                         } else {
                             wgpu::LoadOp::Clear(wgpu::Color::TRANSPARENT)
@@ -554,12 +561,55 @@ impl GpuContext {
                 occlusion_query_set: None,
                 multiview_mask: None,
             });
-            if let Some([left, top, right, bottom]) = output.damage.and_then(|d| d.bounds()) {
+            if let Some([left, top, right, bottom]) = damage.and_then(|d| d.bounds()) {
                 pass.set_scissor_rect(left, top, right - left, bottom - top);
             }
             pass.set_pipeline(&self.pipeline);
             pass.set_bind_group(0, bindings, &[]);
             pass.draw(0..3, 0..1);
+        }
+        if let Some((backing, target)) = output.present {
+            backing.copy(&mut encoder, target);
+        }
+        self.queue.submit([encoder.finish()])
+    }
+    #[inline(never)]
+    fn submit_regions(
+        &self,
+        output: Output<'_>,
+        bindings: &wgpu::BindGroup,
+        regions: &gpui_canvas::DamageRegions,
+    ) -> wgpu::SubmissionIndex {
+        let mut encoder = self
+            .device
+            .create_command_encoder(&wgpu::CommandEncoderDescriptor {
+                label: Some("GPUI sparse repair"),
+            });
+        {
+            let mut pass = encoder.begin_render_pass(&wgpu::RenderPassDescriptor {
+                label: Some("GPUI sparse repair"),
+                color_attachments: &[Some(wgpu::RenderPassColorAttachment {
+                    view: output.view,
+                    resolve_target: None,
+                    depth_slice: None,
+                    ops: wgpu::Operations {
+                        load: wgpu::LoadOp::Load,
+                        store: wgpu::StoreOp::Store,
+                    },
+                })],
+                depth_stencil_attachment: None,
+                timestamp_writes: None,
+                occlusion_query_set: None,
+                multiview_mask: None,
+            });
+            pass.set_pipeline(&self.pipeline);
+            pass.set_bind_group(0, bindings, &[]);
+            for region in regions.regions() {
+                if let Some([l, t, r, b]) = region.bounds() {
+                    pass.set_scissor_rect(l, t, r - l, b - t);
+                    pass.draw(0..3, 0..1);
+                }
+            }
         }
         if let Some((backing, target)) = output.present {
             backing.copy(&mut encoder, target);

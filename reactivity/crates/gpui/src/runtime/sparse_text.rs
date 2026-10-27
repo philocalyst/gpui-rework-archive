@@ -103,11 +103,21 @@ impl<M: View + 'static> Runtime<M> {
             Some(layout.content_box_width()),
             None,
         )?;
+        let sequence = self.next_presentation;
+        let next = sequence.checked_add(1).ok_or(Error::EpochExhausted)?;
+        let token = PresentationToken {
+            window: self.sites.namespace(),
+            sequence,
+        };
         let patch = Box::new(text_geometry::TextPatch {
             row,
             value,
-            #[cfg(test)]
-            damage_regions: Vec::new(),
+            #[cfg(feature = "native-core")]
+            repair: paint::TextRepair {
+                from: self.latest_token.expect("complete predecessor has a token"),
+                to: token,
+                regions: Default::default(),
+            },
             geometry: text_geometry::Entry {
                 row: row as u32,
                 run: Some(run),
@@ -115,14 +125,8 @@ impl<M: View + 'static> Runtime<M> {
                 map: shape.retain_geometry().expect("interactive text geometry"),
             },
         });
-        let sequence = self.next_presentation;
-        let next = sequence.checked_add(1).ok_or(Error::EpochExhausted)?;
-        let token = PresentationToken {
-            window: self.sites.namespace(),
-            sequence,
-        };
         let service = self.text.as_mut().unwrap().system.as_mut().unwrap();
-        #[cfg(test)]
+        #[cfg(feature = "native-core")]
         let mut patch = patch;
         let Some(damage) = self.canvas.try_patch_text_observed(
             run,
@@ -134,9 +138,9 @@ impl<M: View + 'static> Runtime<M> {
             style.fg,
             self.requested_scale_factor,
             |support| {
-                #[cfg(test)]
-                patch.damage_regions.push(support);
-                #[cfg(not(test))]
+                #[cfg(feature = "native-core")]
+                patch.repair.regions.include(support);
+                #[cfg(not(feature = "native-core"))]
                 let _ = support;
             },
         )?
@@ -260,7 +264,7 @@ mod tests {
                     let mut pixels = std::collections::BTreeSet::new();
                     let mut tiles = std::collections::BTreeSet::new();
                     let mut union = gpui_canvas::DamageRegion::default();
-                    for &region in &patch.damage_regions {
+                    for &region in patch.repair.regions.regions() {
                         union = union.union(region);
                         if let Some([l, t, r, b]) = region.bounds() {
                             for y in t..b {
@@ -275,7 +279,7 @@ mod tests {
                     assert_eq!(runtime.prepared.as_ref().unwrap().damage, union);
                     println!(
                         "GLYPH_DAMAGE,{case},{frame},{},{area},{},{}",
-                        patch.damage_regions.len(),
+                        patch.repair.regions.regions().len(),
                         pixels.len(),
                         tiles.len() * 256
                     );

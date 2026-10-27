@@ -160,13 +160,21 @@ impl Prepared {
 #[derive(Clone, Copy, PartialEq, Eq)]
 pub(crate) struct SceneEpoch(NonZeroU64, u64);
 
+#[cfg(feature = "native-core")]
+pub(crate) struct TextRepair {
+    pub(crate) from: PresentationToken,
+    pub(crate) to: PresentationToken,
+    pub(crate) regions: gpui_canvas::DamageRegions,
+}
+
 /// Damage relative to the acknowledged epoch, never to an arbitrary GPU packet.
 #[cfg(feature = "native-core")]
 #[derive(Clone, Copy)]
-pub(crate) struct SceneDamage {
+pub(crate) struct SceneDamage<'a> {
     pub(crate) base: Option<SceneEpoch>,
     pub(crate) epoch: SceneEpoch,
     pub(crate) region: gpui_canvas::DamageRegion,
+    pub(crate) repair: Option<&'a TextRepair>,
 }
 
 #[cfg(feature = "native-core")]
@@ -177,7 +185,7 @@ impl<M: View + 'static, L: LaneSet<M>> Win<M, L> {
             gpui_canvas::PreparedScene<'_>,
             PresentationToken,
             Option<&SlotTransition>,
-            SceneDamage,
+            SceneDamage<'_>,
         ) -> R,
     ) -> Result<R, Error> {
         let runtime = self.runtime()?;
@@ -188,6 +196,12 @@ impl<M: View + 'static, L: LaneSet<M>> Win<M, L> {
             token,
             runtime.styles.slot_transition(),
             SceneDamage {
+                repair: runtime
+                    .text
+                    .as_ref()
+                    .and_then(|text| text.patch.as_ref())
+                    .map(|patch| &patch.repair)
+                    .filter(|repair| repair.to == token),
                 base: (!runtime.automatic_presentation && runtime.presentation_valid).then_some(
                     SceneEpoch(runtime.sites.namespace(), runtime.presentation_epoch),
                 ),

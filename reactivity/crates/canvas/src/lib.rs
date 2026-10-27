@@ -21,7 +21,7 @@ pub use color::{
     Color, ColorConfig, ColorSpace, FloatRangePolicy, OutputMetadata, OutputProfile,
     OutputTransfer, PixelFormat, SdrMapping, oklch, rgb,
 };
-pub use damage::DamageRegion;
+pub use damage::{DamageRegion, DamageRegions};
 pub use image::{
     AlphaMode, Image, ImageKey, ImageOptions, ImagePixels, ImageProfile, ImageSampling, ImageView,
     MAX_IMAGE_SCENE_BYTES,
