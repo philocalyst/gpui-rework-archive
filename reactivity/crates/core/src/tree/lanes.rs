@@ -7,7 +7,7 @@ impl Tree {
     // Admission proves the start capability. The shared borrow keeps every
     // ancestor link and generation fixed until the resulting root is minted.
     pub(crate) fn root(&self, node: NodeId) -> Result<NodeId, TreeError> {
-        let mut index = self.index(node)?;
+        let mut index = node.index;
         while self.parents[index as usize] != NIL {
             index = self.parents[index as usize];
         }
