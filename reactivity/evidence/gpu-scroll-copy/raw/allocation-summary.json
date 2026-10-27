@@ -1,0 +1,702 @@
+{
+  "scroll": {
+    "control": {
+      "setup_count_bytes_net_peak": {
+        "mount": [
+          1206,
+          1321519,
+          1014955,
+          1028495
+        ],
+        "first": [
+          1074,
+          238856,
+          129504,
+          152115
+        ]
+      },
+      "first_update": [
+        0,
+        358,
+        257914,
+        3176,
+        56464,
+        2764800,
+        691200
+      ],
+      "warm_medians_frame_count_bytes_net_peak_image_copy": [
+        17.5,
+        462.5,
+        277334.0,
+        304.0,
+        54532.0,
+        2764800.0,
+        691200.0
+      ]
+    },
+    "candidate": {
+      "setup_count_bytes_net_peak": {
+        "mount": [
+          1206,
+          1321527,
+          1014963,
+          1028503
+        ],
+        "first": [
+          1074,
+          238936,
+          129584,
+          152195
+        ]
+      },
+      "first_update": [
+        0,
+        372,
+        259434,
+        3512,
+        56464,
+        4185280,
+        1401440
+      ],
+      "warm_medians_frame_count_bytes_net_peak_image_copy": [
+        17.5,
+        468.5,
+        277702.0,
+        304.0,
+        54532.0,
+        4185280.0,
+        1401440.0
+      ]
+    }
+  },
+  "both": {
+    "control": {
+      "setup_count_bytes_net_peak": {
+        "mount": [
+          1206,
+          1321519,
+          1014955,
+          1028495
+        ],
+        "first": [
+          1074,
+          238856,
+          129504,
+          152115
+        ]
+      },
+      "first_update": [
+        0,
+        439,
+        331388,
+        3176,
+        76741,
+        2764800,
+        691200
+      ],
+      "warm_medians_frame_count_bytes_net_peak_image_copy": [
+        17.5,
+        542.5,
+        350760.0,
+        304.0,
+        74789.0,
+        2764800.0,
+        691200.0
+      ]
+    },
+    "candidate": {
+      "setup_count_bytes_net_peak": {
+        "mount": [
+          1206,
+          1321527,
+          1014963,
+          1028503
+        ],
+        "first": [
+          1074,
+          238936,
+          129584,
+          152195
+        ]
+      },
+      "first_update": [
+        0,
+        454,
+        333356,
+        3512,
+        76741,
+        4185280,
+        1401440
+      ],
+      "warm_medians_frame_count_bytes_net_peak_image_copy": [
+        17.5,
+        549.5,
+        351576.0,
+        304.0,
+        74789.0,
+        4185280.0,
+        1401440.0
+      ]
+    }
+  },
+  "stream": {
+    "control": {
+      "setup_count_bytes_net_peak": {
+        "mount": [
+          1206,
+          1321519,
+          1014955,
+          1028495
+        ],
+        "first": [
+          1074,
+          238856,
+          129504,
+          152115
+        ]
+      },
+      "first_update": [
+        0,
+        256,
+        243039,
+        27840,
+        74637,
+        2764800,
+        691200
+      ],
+      "warm_medians_frame_count_bytes_net_peak_image_copy": [
+        17.5,
+        245.0,
+        188319.0,
+        304.0,
+        74381.0,
+        2764800.0,
+        691200.0
+      ]
+    },
+    "candidate": {
+      "setup_count_bytes_net_peak": {
+        "mount": [
+          1206,
+          1321527,
+          1014963,
+          1028503
+        ],
+        "first": [
+          1074,
+          238936,
+          129584,
+          152195
+        ]
+      },
+      "first_update": [
+        0,
+        256,
+        243039,
+        27840,
+        74637,
+        2764800,
+        691200
+      ],
+      "warm_medians_frame_count_bytes_net_peak_image_copy": [
+        17.5,
+        245.0,
+        188319.0,
+        304.0,
+        74381.0,
+        2764800.0,
+        691200.0
+      ]
+    }
+  },
+  "stream-owner": {
+    "control": {
+      "setup_count_bytes_net_peak": {
+        "mount": [
+          1206,
+          1321519,
+          1014955,
+          1028495
+        ],
+        "first": [
+          1074,
+          238856,
+          129504,
+          152115
+        ]
+      },
+      "first_update": [
+        0,
+        416,
+        338968,
+        27840,
+        74637,
+        2764800,
+        691200
+      ],
+      "warm_medians_frame_count_bytes_net_peak_image_copy": [
+        17.5,
+        405.0,
+        284248.0,
+        304.0,
+        74381.0,
+        2764800.0,
+        691200.0
+      ]
+    },
+    "candidate": {
+      "setup_count_bytes_net_peak": {
+        "mount": [
+          1206,
+          1321527,
+          1014963,
+          1028503
+        ],
+        "first": [
+          1074,
+          238936,
+          129584,
+          152195
+        ]
+      },
+      "first_update": [
+        0,
+        416,
+        338968,
+        27840,
+        74637,
+        2764800,
+        691200
+      ],
+      "warm_medians_frame_count_bytes_net_peak_image_copy": [
+        17.5,
+        405.0,
+        284248.0,
+        304.0,
+        74381.0,
+        2764800.0,
+        691200.0
+      ]
+    }
+  },
+  "fractional": {
+    "control": {
+      "setup_count_bytes_net_peak": {
+        "mount": [
+          1206,
+          1321519,
+          1014955,
+          1028495
+        ],
+        "first": [
+          1074,
+          238856,
+          129504,
+          152115
+        ]
+      },
+      "first_update": [
+        0,
+        358,
+        257914,
+        3176,
+        56464,
+        2764800,
+        691200
+      ],
+      "warm_medians_frame_count_bytes_net_peak_image_copy": [
+        17.5,
+        573.0,
+        338663.0,
+        304.0,
+        54838.0,
+        2764800.0,
+        691200.0
+      ]
+    },
+    "candidate": {
+      "setup_count_bytes_net_peak": {
+        "mount": [
+          1206,
+          1321527,
+          1014963,
+          1028503
+        ],
+        "first": [
+          1074,
+          238936,
+          129584,
+          152195
+        ]
+      },
+      "first_update": [
+        0,
+        358,
+        257914,
+        3176,
+        56464,
+        2764800,
+        691200
+      ],
+      "warm_medians_frame_count_bytes_net_peak_image_copy": [
+        17.5,
+        573.0,
+        338663.0,
+        304.0,
+        54838.0,
+        2764800.0,
+        691200.0
+      ]
+    }
+  },
+  "flat-tiny": {
+    "control": {
+      "setup_count_bytes_net_peak": {
+        "mount": [
+          45,
+          8420,
+          6868,
+          6972
+        ],
+        "first": [
+          778,
+          90638,
+          22256,
+          28787
+        ]
+      },
+      "first_update": [
+        0,
+        75,
+        10775,
+        352,
+        6705,
+        256,
+        64
+      ],
+      "warm_medians_frame_count_bytes_net_peak_image_copy": [
+        17.5,
+        69.0,
+        10135.0,
+        0.0,
+        6353.0,
+        256.0,
+        64.0
+      ]
+    },
+    "candidate": {
+      "setup_count_bytes_net_peak": {
+        "mount": [
+          45,
+          8420,
+          6868,
+          6972
+        ],
+        "first": [
+          778,
+          90718,
+          22336,
+          28867
+        ]
+      },
+      "first_update": [
+        0,
+        75,
+        10775,
+        352,
+        6705,
+        256,
+        64
+      ],
+      "warm_medians_frame_count_bytes_net_peak_image_copy": [
+        17.5,
+        69.0,
+        10135.0,
+        0.0,
+        6353.0,
+        256.0,
+        64.0
+      ]
+    }
+  },
+  "flat-full": {
+    "control": {
+      "setup_count_bytes_net_peak": {
+        "mount": [
+          45,
+          8420,
+          6868,
+          6972
+        ],
+        "first": [
+          785,
+          103404,
+          34511,
+          41042
+        ]
+      },
+      "first_update": [
+        0,
+        75,
+        10775,
+        352,
+        6705,
+        1048576,
+        262144
+      ],
+      "warm_medians_frame_count_bytes_net_peak_image_copy": [
+        17.5,
+        69.0,
+        10135.0,
+        0.0,
+        6353.0,
+        1048576.0,
+        262144.0
+      ]
+    },
+    "candidate": {
+      "setup_count_bytes_net_peak": {
+        "mount": [
+          45,
+          8420,
+          6868,
+          6972
+        ],
+        "first": [
+          785,
+          103484,
+          34591,
+          41122
+        ]
+      },
+      "first_update": [
+        0,
+        75,
+        10775,
+        352,
+        6705,
+        1048576,
+        262144
+      ],
+      "warm_medians_frame_count_bytes_net_peak_image_copy": [
+        17.5,
+        69.0,
+        10135.0,
+        0.0,
+        6353.0,
+        1048576.0,
+        262144.0
+      ]
+    }
+  },
+  "list-tiny": {
+    "control": {
+      "setup_count_bytes_net_peak": {
+        "mount": [
+          134,
+          53675,
+          28519,
+          29239
+        ],
+        "first": [
+          794,
+          92832,
+          22508,
+          29733
+        ]
+      },
+      "first_update": [
+        0,
+        257,
+        80772,
+        6438,
+        15147,
+        4096,
+        1024
+      ],
+      "warm_medians_frame_count_bytes_net_peak_image_copy": [
+        17.5,
+        210.0,
+        61089.0,
+        312.0,
+        12093.0,
+        4096.0,
+        1024.0
+      ]
+    },
+    "candidate": {
+      "setup_count_bytes_net_peak": {
+        "mount": [
+          134,
+          53683,
+          28527,
+          29247
+        ],
+        "first": [
+          794,
+          92912,
+          22588,
+          29813
+        ]
+      },
+      "first_update": [
+        0,
+        271,
+        82292,
+        7462,
+        16195,
+        5056,
+        1504
+      ],
+      "warm_medians_frame_count_bytes_net_peak_image_copy": [
+        17.5,
+        216.0,
+        61457.0,
+        312.0,
+        12093.0,
+        5056.0,
+        1504.0
+      ]
+    }
+  },
+  "list-flat": {
+    "control": {
+      "setup_count_bytes_net_peak": {
+        "mount": [
+          207,
+          132529,
+          60389,
+          61613
+        ],
+        "first": [
+          794,
+          137052,
+          66728,
+          73953
+        ]
+      },
+      "first_update": [
+        0,
+        219,
+        76826,
+        2904,
+        21192,
+        2764800,
+        691200
+      ],
+      "warm_medians_frame_count_bytes_net_peak_image_copy": [
+        17.5,
+        261.5,
+        107958.0,
+        304.0,
+        22104.0,
+        2764800.0,
+        691200.0
+      ]
+    },
+    "candidate": {
+      "setup_count_bytes_net_peak": {
+        "mount": [
+          207,
+          132537,
+          60397,
+          61621
+        ],
+        "first": [
+          794,
+          137132,
+          66808,
+          74033
+        ]
+      },
+      "first_update": [
+        0,
+        233,
+        78346,
+        3928,
+        21192,
+        4185280,
+        1401440
+      ],
+      "warm_medians_frame_count_bytes_net_peak_image_copy": [
+        17.5,
+        267.5,
+        108326.0,
+        304.0,
+        22104.0,
+        4185280.0,
+        1401440.0
+      ]
+    }
+  },
+  "exposure": {
+    "control": {
+      "setup_count_bytes_net_peak": {
+        "mount": [
+          1206,
+          1321519,
+          1014955,
+          1028495
+        ],
+        "first": [
+          1074,
+          238856,
+          129504,
+          152115
+        ]
+      },
+      "first_update": [
+        0,
+        44,
+        8024,
+        0,
+        5218,
+        2764800,
+        691200
+      ],
+      "warm_medians_frame_count_bytes_net_peak_image_copy": [
+        17.5,
+        44.0,
+        8024.0,
+        0.0,
+        5218.0,
+        2764800.0,
+        691200.0
+      ]
+    },
+    "candidate": {
+      "setup_count_bytes_net_peak": {
+        "mount": [
+          1206,
+          1321527,
+          1014963,
+          1028503
+        ],
+        "first": [
+          1074,
+          238936,
+          129584,
+          152195
+        ]
+      },
+      "first_update": [
+        0,
+        44,
+        8024,
+        0,
+        5218,
+        2764800,
+        691200
+      ],
+      "warm_medians_frame_count_bytes_net_peak_image_copy": [
+        17.5,
+        44.0,
+        8024.0,
+        0.0,
+        5218.0,
+        2764800.0,
+        691200.0
+      ]
+    }
+  }
+}

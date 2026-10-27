@@ -1,0 +1,82 @@
+[
+  {
+    "receipt": "native-checks/artifact.json",
+    "sha256": "2e2206b78df555912b4eff052c9318b45e5e20324fb319c43004530ae6a3562b",
+    "resolved": "/home/user/gpui-preserved-test-binaries/2e2206b78df555912b4eff052c9318b45e5e20324fb319c43004530ae6a3562b"
+  },
+  {
+    "receipt": "canvas-gradient-before/artifact.json",
+    "sha256": "d5294393656ec2781cc009b2be0572afcd6b0c7262b848273186e75b27b3396e",
+    "resolved": "/home/user/gpui-preserved-test-binaries/d5294393656ec2781cc009b2be0572afcd6b0c7262b848273186e75b27b3396e"
+  },
+  {
+    "receipt": "content-negative/artifact.json",
+    "sha256": "b9cabc105410d77550041010173ba951dc9fccf5485ae4036b17123c8e47ea79",
+    "resolved": "/home/user/gpui-preserved-test-binaries/b9cabc105410d77550041010173ba951dc9fccf5485ae4036b17123c8e47ea79"
+  },
+  {
+    "receipt": "native-workload-final/artifact.json",
+    "sha256": "3f61bf1757152a68839f93b496fbeaac901e63194c88acd732ab117271802b57",
+    "resolved": "/home/user/gpui-gpu-scroll-copy-target/release/build/gpui/7d343a8859c57521/out/gpui-7d343a8859c57521"
+  },
+  {
+    "receipt": "native-diagnostic/artifact.json",
+    "sha256": "494c0347e9c00354d7034cce9c0b04878efa17527f0e960077b1b2d649a8b88c",
+    "resolved": "/home/user/gpui-preserved-test-binaries/494c0347e9c00354d7034cce9c0b04878efa17527f0e960077b1b2d649a8b88c"
+  },
+  {
+    "receipt": "native-first/artifact.json",
+    "sha256": "78aa849ff089fe1b97501f8b6223ed1f29562e2da574e8f406bfdcc8473891ff",
+    "resolved": "/home/user/gpui-preserved-test-binaries/78aa849ff089fe1b97501f8b6223ed1f29562e2da574e8f406bfdcc8473891ff"
+  },
+  {
+    "receipt": "benchmark-control-corrected/artifact.json",
+    "sha256": "2402820be538aabfec1620a51817dc270fcce0cc2f151c661d63b09747a206d9",
+    "resolved": "/home/user/gpui-preserved-test-binaries/2402820be538aabfec1620a51817dc270fcce0cc2f151c661d63b09747a206d9"
+  },
+  {
+    "receipt": "token-negative-native/artifact.json",
+    "sha256": "423866f71cd5f0086cf3f041c5739430cb803fb5bcfaeb591ee568ec3a45081b",
+    "resolved": "/home/user/gpui-preserved-test-binaries/423866f71cd5f0086cf3f041c5739430cb803fb5bcfaeb591ee568ec3a45081b"
+  },
+  {
+    "receipt": "benchmark-native-corrected/artifact.json",
+    "sha256": "3f61bf1757152a68839f93b496fbeaac901e63194c88acd732ab117271802b57",
+    "resolved": "/home/user/gpui-preserved-test-binaries/3f61bf1757152a68839f93b496fbeaac901e63194c88acd732ab117271802b57"
+  },
+  {
+    "receipt": "gpu-first/artifact.json",
+    "sha256": "cf4b5596893f27c87f14fe09395a0570816af591a566ff4bb795740126dc5c50",
+    "resolved": "/home/user/gpui-preserved-test-binaries/cf4b5596893f27c87f14fe09395a0570816af591a566ff4bb795740126dc5c50"
+  },
+  {
+    "receipt": "native-workload-fixture/artifact.json",
+    "sha256": "b6772f788629b7f76b5b211b0147b2a2f0b4047564e39d8b6df485e427d0caff",
+    "resolved": "/home/user/gpui-preserved-test-binaries/b6772f788629b7f76b5b211b0147b2a2f0b4047564e39d8b6df485e427d0caff"
+  },
+  {
+    "receipt": "full-gpu/artifacts.json",
+    "sha256": "66c57e1754d754001521381e0b77f139cada21928ae30c3d4b644bed35623cb4",
+    "resolved": "/home/user/gpui-preserved-test-binaries/66c57e1754d754001521381e0b77f139cada21928ae30c3d4b644bed35623cb4"
+  },
+  {
+    "receipt": "full-gpu/artifacts.json",
+    "sha256": "41bfe6890ca496ecb3f5eb73e8785e9576316b9179de6499c5e49792541199c4",
+    "resolved": "/home/user/gpui-preserved-test-binaries/41bfe6890ca496ecb3f5eb73e8785e9576316b9179de6499c5e49792541199c4"
+  },
+  {
+    "receipt": "full-gpu/artifacts.json",
+    "sha256": "e1ce48734437856edb2a2e69fb0446b9da5a6629c01c0225618f0ab45162beb6",
+    "resolved": "/home/user/gpui-preserved-test-binaries/e1ce48734437856edb2a2e69fb0446b9da5a6629c01c0225618f0ab45162beb6"
+  },
+  {
+    "receipt": "full-native/artifact.json",
+    "sha256": "27e1e17f2b1d497e3eeb3110b12805b0a7e8ae7f8d9c9a6dee9837f65668e191",
+    "resolved": "/home/user/gpui-preserved-test-binaries/27e1e17f2b1d497e3eeb3110b12805b0a7e8ae7f8d9c9a6dee9837f65668e191"
+  },
+  {
+    "receipt": "native-scroll-exact-geometry/artifact.json",
+    "sha256": "8efb8e129812e0494858bc8265b3415b656d15b5698f91964fc4c940da7c8f58",
+    "resolved": "/home/user/gpui-preserved-test-binaries/8efb8e129812e0494858bc8265b3415b656d15b5698f91964fc4c940da7c8f58"
+  }
+]

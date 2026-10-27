@@ -1,0 +1,11 @@
+
+running 6 tests
+test moved_reused_gradient_falls_back_before_staged_lease_transfer ... ok
+test unsupported_materials_clips_and_maps_keep_the_full_damage_fallback ... ok
+test changed_clear_order_glyph_identity_and_color_cannot_reuse_overlap ... ok
+test changed_content_copy_would_fail_the_complete_pixel_oracle ... ok
+test exact_scroll_copy_and_other_damage_match_complete_pixels ... ok
+test changed_overlap_stationary_overlay_fractional_maps_and_bad_proposals_fall_back ... ok
+
+test result: ok. 6 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 0.01s
+

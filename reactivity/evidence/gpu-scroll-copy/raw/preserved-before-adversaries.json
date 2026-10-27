@@ -1,0 +1,26 @@
+[
+  {
+    "gate": "native-exact-geometry",
+    "log": "test.log",
+    "path": "/home/user/gpui-gpu-scroll-copy-target/release/build/gpui/d51c62efad296df0/out/gpui-d51c62efad296df0",
+    "sha256": "8efb8e129812e0494858bc8265b3415b656d15b5698f91964fc4c940da7c8f58",
+    "preserved": "/home/user/gpui-preserved-test-binaries/8efb8e129812e0494858bc8265b3415b656d15b5698f91964fc4c940da7c8f58",
+    "bytes": 57487296
+  },
+  {
+    "gate": "gpu-supported-targets",
+    "log": "test.log",
+    "path": "/home/user/gpui-gpu-scroll-copy-target/release/build/gpui_gpu/fc26bbb724122b97/out/render-fc26bbb724122b97",
+    "sha256": "d471e3b7282e3bfbe6840e718786dd44403771b2401618fe85c9026748abc4da",
+    "preserved": "/home/user/gpui-preserved-test-binaries/d471e3b7282e3bfbe6840e718786dd44403771b2401618fe85c9026748abc4da",
+    "bytes": 16756624
+  },
+  {
+    "gate": "canvas-gradient-corrected",
+    "log": "test.log",
+    "path": "/home/user/gpui-gpu-scroll-copy-target/release/build/gpui_canvas/e7169b08d3e38ae3/out/scroll_copy-e7169b08d3e38ae3",
+    "sha256": "f32aa9b19123e1b05e9470f66508b3dfa853fb7a18df1de17b8064b763685b24",
+    "preserved": "/home/user/gpui-preserved-test-binaries/f32aa9b19123e1b05e9470f66508b3dfa853fb7a18df1de17b8064b763685b24",
+    "bytes": 8597856
+  }
+]

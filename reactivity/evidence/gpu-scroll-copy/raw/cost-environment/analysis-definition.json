@@ -1,0 +1,7 @@
+{
+  "analysis_sha256": "4b7341adac84d8dcd0d34ccf2d8e26242790770fef2a00588d7415ed415716ab",
+  "run_driver_sha256": "9e0107aec37547fda6fc5dad1121acada2366e31773375386a5c0038fb9a5cca",
+  "primary_estimator": "median of the15 paired process-median ratios",
+  "timing_started": false,
+  "device_setup_scope": "Ready surface-compatible Vulkan device; cold mount, first retained image and first admitted-copy costs reported separately. Device/OS initialization and scanout excluded."
+}

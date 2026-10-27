@@ -1,0 +1,1 @@
+{"command": ["/home/user/gpui-preserved-test-binaries/2402820be538aabfec1620a51817dc270fcce0cc2f151c661d63b09747a206d9", "runtime::scroll::tests::viewport_storage_and_allocation_ledger", "--exact", "--nocapture", "--test-threads=1", "--ignored"], "exit": 0}

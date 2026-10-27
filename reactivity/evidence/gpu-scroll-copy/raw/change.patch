@@ -1,0 +1,2112 @@
+diff --git a/reactivity/crates/canvas/src/canvas.rs b/reactivity/crates/canvas/src/canvas.rs
+index 9f8ca4ca27..80427824c9 100644
+--- a/reactivity/crates/canvas/src/canvas.rs
++++ b/reactivity/crates/canvas/src/canvas.rs
+@@ -34,6 +34,8 @@ pub use paint::{PaintCommit, PaintEdit, PaintError, PaintErrorKind, PaintIndex};
+ mod rounded;
+ pub use rounded::rounded_rect_contains;
+ mod samples;
++mod scroll;
++pub use scroll::ScrollCopy;
+ #[cfg(test)]
+ mod simd_tests;
+ use glyph_axis::GlyphAxis;
+diff --git a/reactivity/crates/canvas/src/canvas/scroll.rs b/reactivity/crates/canvas/src/canvas/scroll.rs
+new file mode 100644
+index 0000000000..11d4700879
+--- /dev/null
++++ b/reactivity/crates/canvas/src/canvas/scroll.rs
+@@ -0,0 +1,233 @@
++//! Exact translated contribution proof over two complete staged scenes.
++use super::*;
++
++type Bounds = [i32; 4];
++
++/// A checked copy and repair plan for one immediately preceding canvas scene.
++/// The caller must separately prove that its backing contains that predecessor;
++/// this plan grants no authority over a foreign or stale external image.
++#[derive(Clone, Copy, Debug)]
++pub struct ScrollCopy {
++    source: [u16; 4],
++    destination: [u16; 4],
++    repairs: [DamageRegion; 4],
++}
++impl ScrollCopy {
++    pub fn source(self) -> [u32; 4] {
++        self.source.map(u32::from)
++    }
++    pub fn destination(self) -> [u32; 4] {
++        self.destination.map(u32::from)
++    }
++    pub fn repairs(&self) -> &[DamageRegion; 4] {
++        &self.repairs
++    }
++}
++
++impl CanvasScene<'_> {
++    /// Commit complete commands and optionally prove vertical pixel reuse.
++    /// `delta` moves old content in device pixels (negative means upwards).
++    /// Invalid or unsupported proposals simply return ordinary damage and no copy.
++    pub fn commit_with_scroll_damage(
++        self,
++        viewport: [u32; 4],
++        delta: i32,
++    ) -> (DamageRegion, Option<ScrollCopy>) {
++        let damage = self.pending.damage_from(self.target);
++        let copy = certify(self.target, &self.pending, viewport, delta, damage);
++        self.commit();
++        (damage, copy)
++    }
++}
++
++fn certify(
++    previous: &Canvas,
++    next: &Canvas,
++    viewport: [u32; 4],
++    delta: i32,
++    damage: DamageRegion,
++) -> Option<ScrollCopy> {
++    let [left, top, right, bottom] = viewport;
++    if previous.width != next.width
++        || previous.height != next.height
++        || previous.color_config != next.color_config
++        || previous.clear.map(f32::to_bits) != next.clear.map(f32::to_bits)
++        || left >= right
++        || top >= bottom
++        || right > next.width as u32
++        || bottom > next.height as u32
++        || delta == 0
++        || delta.unsigned_abs() >= bottom - top
++        || damage.is_empty()
++    {
++        return None;
++    }
++    let area = viewport.map(|v| v as i32);
++    let destination = intersection(area, translated(area, delta))?;
++    let source = translated(destination, -delta);
++    // Staging can borrow gradient identity before its canonical lease moves.
++    // Inspect the admission witnesses directly, rejecting unsupported materials
++    // without invoking a prepared-scene view that requires committed resources.
++    let mut old = previous
++        .commands
++        .iter(viewport_rect(previous.width, previous.height));
++    let mut new = next.commands.iter(viewport_rect(next.width, next.height));
++    loop {
++        match (
++            contribution(&mut old, source, delta).ok()?,
++            contribution(&mut new, destination, 0).ok()?,
++        ) {
++            (None, None) => break,
++            (Some(a), Some(b)) if a.equivalent(&b) => {}
++            _ => return None,
++        }
++    }
++    Some(ScrollCopy {
++        source: source.map(|v| v as u16),
++        destination: destination.map(|v| v as u16),
++        repairs: subtract(damage, destination),
++    })
++}
++
++struct Contribution<'a> {
++    area: Bounds,
++    color: [u32; 4],
++    material: Material<'a>,
++}
++enum Material<'a> {
++    Solid,
++    Mask {
++        rect: [u32; 4],
++        translation: [i32; 2],
++        mask: GlyphMask<'a>,
++    },
++}
++impl Contribution<'_> {
++    fn equivalent(&self, other: &Contribution<'_>) -> bool {
++        self.area == other.area
++            && self.color == other.color
++            && match (&self.material, &other.material) {
++                (Material::Solid, Material::Solid) => true,
++                (
++                    Material::Mask {
++                        rect: a,
++                        translation: at,
++                        mask: am,
++                    },
++                    Material::Mask {
++                        rect: b,
++                        translation: bt,
++                        mask: bm,
++                    },
++                ) => {
++                    a == b
++                        && at == bt
++                        && am.key == bm.key
++                        && am.width == bm.width
++                        && am.height == bm.height
++                        && (std::ptr::eq(am.coverage, bm.coverage) || am.coverage == bm.coverage)
++                }
++                _ => false,
++            }
++    }
++}
++
++fn contribution<'a>(
++    draws: &mut impl Iterator<Item = BorrowedCommand<'a>>,
++    query: Bounds,
++    delta: i32,
++) -> Result<Option<Contribution<'a>>, ()> {
++    for draw in draws {
++        let bounds = draw.bounds.map(|v| v as i32);
++        if intersection(bounds, query).is_none() {
++            continue;
++        }
++        // Translation by integer pixels leaves the 4x4 sample lattice exact.
++        // With |translation| <= 1e6 and canvas <= 16384, every mapped eighth
++        // remains exactly representable in f32 as well as the CPU's f64.
++        let [a, b, c, d, x, y] = draw.map.inverse;
++        if [a, b, c, d] != [1., 0., 0., 1.]
++            || [x, y]
++                .iter()
++                .any(|v| v.fract() != 0. || v.abs() > 1_000_000.)
++            || draw.clip_chain.is_some()
++        {
++            return Err(());
++        }
++        let clip = integer_rect(draw.clip).ok_or(())?;
++        let Some(mut area) = intersection(bounds, query).and_then(|a| intersection(a, clip)) else {
++            continue;
++        };
++        let material = match draw.source {
++            BorrowedSource::Rect => {
++                let local = integer_rect(draw.rect).ok_or(())?;
++                let world = [
++                    local[0] - x as i32,
++                    local[1] - y as i32,
++                    local[2] - x as i32,
++                    local[3] - y as i32,
++                ];
++                let Some(actual) = intersection(area, world) else {
++                    continue;
++                };
++                area = actual;
++                Material::Solid
++            }
++            BorrowedSource::Glyph(mask) => Material::Mask {
++                rect: [draw.rect.x, draw.rect.y, draw.rect.width, draw.rect.height]
++                    .map(f32::to_bits),
++                translation: [x as i32, y as i32 - delta],
++                mask: mask_view(mask),
++            },
++            _ => return Err(()),
++        };
++        return Ok(Some(Contribution {
++            area: translated(area, delta),
++            color: draw.color.map(f32::to_bits),
++            material,
++        }));
++    }
++    Ok(None)
++}
++
++fn integer_rect(rect: Rect) -> Option<Bounds> {
++    let values = [rect.x, rect.y, rect.width, rect.height];
++    if values
++        .iter()
++        .any(|v| !v.is_finite() || v.fract() != 0. || v.abs() > 2_097_152.)
++    {
++        return None;
++    }
++    let [x, y, w, h] = values.map(|v| v as i32);
++    Some([x, y, x + w, y + h])
++}
++fn translated([l, t, r, b]: Bounds, dy: i32) -> Bounds {
++    [l, t + dy, r, b + dy]
++}
++fn intersection(a: Bounds, b: Bounds) -> Option<Bounds> {
++    let result = [
++        a[0].max(b[0]),
++        a[1].max(b[1]),
++        a[2].min(b[2]),
++        a[3].min(b[3]),
++    ];
++    (result[0] < result[2] && result[1] < result[3]).then_some(result)
++}
++fn subtract(damage: DamageRegion, excluded: Bounds) -> [DamageRegion; 4] {
++    let d = damage.coordinates().map(i32::from);
++    let Some(i) = intersection(d, excluded) else {
++        return [
++            damage,
++            DamageRegion::default(),
++            DamageRegion::default(),
++            DamageRegion::default(),
++        ];
++    };
++    [
++        [d[0], d[1], d[2], i[1]],
++        [d[0], i[3], d[2], d[3]],
++        [d[0], i[1], i[0], i[3]],
++        [i[2], i[1], d[2], i[3]],
++    ]
++    .map(|b| DamageRegion::checked_canvas_bounds(b.map(|v| v as usize)))
++}
+diff --git a/reactivity/crates/canvas/src/lib.rs b/reactivity/crates/canvas/src/lib.rs
+index c69ddb284a..75f287e447 100644
+--- a/reactivity/crates/canvas/src/lib.rs
++++ b/reactivity/crates/canvas/src/lib.rs
+@@ -10,8 +10,9 @@ pub use canvas::{
+     Canvas, CanvasScene, Clip, ClipChain, ClipGeometry, ClipId, ClipShape, GlyphMask,
+     MAX_CLIP_DEPTH, MAX_CLIP_NODES, PaintColor, PaintCommit, PaintEdit, PaintError, PaintErrorKind,
+     PaintIndex, PaintSlot, PreparedClipNode, PreparedDraw, PreparedGroup, PreparedPaint,
+-    PreparedPlacement, PreparedScene, PreparedSource, RenderStats, SceneStorage, SlotCommit,
+-    SlotEdit, SlotError, SlotErrorKind, TextRunSlot, rounded_rect_contains, sampled_rect_clip,
++    PreparedPlacement, PreparedScene, PreparedSource, RenderStats, SceneStorage, ScrollCopy,
++    SlotCommit, SlotEdit, SlotError, SlotErrorKind, TextRunSlot, rounded_rect_contains,
++    sampled_rect_clip,
+ };
+ pub use color::gradient::{
+     Extend, Gradient, GradientGeometry, GradientKey, GradientStop, GradientView, Interpolation,
+diff --git a/reactivity/crates/canvas/tests/scroll_copy.rs b/reactivity/crates/canvas/tests/scroll_copy.rs
+new file mode 100644
+index 0000000000..ae2681f1cb
+--- /dev/null
++++ b/reactivity/crates/canvas/tests/scroll_copy.rs
+@@ -0,0 +1,360 @@
++use gpui_canvas::{Affine, Canvas, CanvasScene, Color, Point, Rect, ScrollCopy, TextSystem};
++
++const WIDTH: usize = 80;
++const HEIGHT: usize = 64;
++const VIEW: [u32; 4] = [5, 7, 65, 55];
++
++fn scene<'a>(
++    canvas: &'a mut Canvas,
++    text: &mut TextSystem,
++    offset: f32,
++    labels: bool,
++    header: u8,
++    changed_row: bool,
++    overlay: bool,
++) -> CanvasScene<'a> {
++    let mut scene = canvas.stage();
++    scene.clear(Color::BLACK);
++    scene
++        .fill_rect(
++            Rect::new(0., 0., 80., 64.),
++            Affine::IDENTITY,
++            Rect::new(0., 0., 80., 64.),
++            Color::WHITE,
++        )
++        .unwrap();
++    scene
++        .fill_rect(
++            Rect::new(1., 1., 20., 4.),
++            Affine::IDENTITY,
++            Rect::new(0., 0., 80., 64.),
++            Color::rgb(header, 40, 70),
++        )
++        .unwrap();
++    let clip = Rect::new(5., 7., 60., 48.);
++    for row in 0..20 {
++        let y = 7. + row as f32 * 12. - offset;
++        let color = if changed_row && row == 2 {
++            Color::BLACK
++        } else {
++            Color::linear_srgb(0.1 + (row % 3) as f32 * 0.2, 0.3, 0.4, 0.7).unwrap()
++        };
++        scene
++            .fill_rect(
++                Rect::new(0., 0., 60., 12.),
++                Affine::translation(5., y),
++                clip,
++                color,
++            )
++            .unwrap();
++        if labels {
++            let layout = text.shape(&format!("row {row}"), 9., None).unwrap();
++            scene
++                .draw_text(
++                    text,
++                    &layout,
++                    Point { x: 0., y: 0. },
++                    Affine::translation(7., y + 1.),
++                    clip,
++                    Color::BLACK,
++                )
++                .unwrap();
++        }
++    }
++    if overlay {
++        scene
++            .fill_rect(
++                Rect::new(20., 20., 10., 10.),
++                Affine::IDENTITY,
++                clip,
++                Color::BLACK,
++            )
++            .unwrap();
++    }
++    scene
++}
++fn full(canvas: &mut Canvas) -> Vec<u32> {
++    let mut pixels = vec![0; WIDTH * HEIGHT];
++    canvas.render_bgrx(&mut pixels).unwrap();
++    pixels
++}
++fn apply(canvas: &mut Canvas, pixels: &mut [u32], plan: ScrollCopy) {
++    let [sx, sy, sr, sb] = plan.source();
++    let [dx, dy, dr, db] = plan.destination();
++    assert_eq!((sr - sx, sb - sy), (dr - dx, db - dy));
++    let prior = pixels.to_vec();
++    for y in 0..sb - sy {
++        for x in 0..sr - sx {
++            pixels[(dy + y) as usize * WIDTH + (dx + x) as usize] =
++                prior[(sy + y) as usize * WIDTH + (sx + x) as usize];
++        }
++    }
++    for &repair in plan.repairs() {
++        canvas.render_bgrx_region(pixels, repair).unwrap();
++    }
++}
++
++#[test]
++fn exact_scroll_copy_and_other_damage_match_complete_pixels() {
++    for labels in [false, true] {
++        let mut canvas =
++            Canvas::recording(WIDTH as u32, HEIGHT as u32, Default::default()).unwrap();
++        let mut text = TextSystem::bundled().unwrap();
++        scene(&mut canvas, &mut text, 0., labels, 0, false, false).commit();
++        let mut pixels = full(&mut canvas);
++        let mut offset = 0;
++        for (tick, next) in [6, 12, 24, 18, 0, 40, 7].into_iter().enumerate() {
++            let (_, plan) = scene(
++                &mut canvas,
++                &mut text,
++                next as f32,
++                labels,
++                tick as u8 + 1,
++                false,
++                false,
++            )
++            .commit_with_scroll_damage(VIEW, offset - next);
++            let plan = plan.expect("supported translated rows must certify");
++            apply(&mut canvas, &mut pixels, plan);
++            assert!(
++                pixels == full(&mut canvas),
++                "labels={labels}, {offset}->{next}"
++            );
++            offset = next;
++        }
++    }
++}
++
++#[test]
++fn changed_overlap_stationary_overlay_fractional_maps_and_bad_proposals_fall_back() {
++    let mut text = TextSystem::bundled().unwrap();
++    for (changed, overlay, offset, bounds, delta) in [
++        (true, false, 6., VIEW, -6),
++        (false, true, 6., VIEW, -6),
++        (false, false, 6.5, VIEW, -6),
++        (false, false, 6., [5, 7, 81, 55], -6),
++        (false, false, 6., VIEW, i32::MIN),
++        (false, false, 6., VIEW, 0),
++        (false, false, 6., VIEW, -48),
++        (false, false, 6., VIEW, -5),
++    ] {
++        let mut canvas =
++            Canvas::recording(WIDTH as u32, HEIGHT as u32, Default::default()).unwrap();
++        scene(&mut canvas, &mut text, 0., true, 0, false, overlay).commit();
++        let mut pixels = full(&mut canvas);
++        let (damage, plan) = scene(&mut canvas, &mut text, offset, true, 1, changed, overlay)
++            .commit_with_scroll_damage(bounds, delta);
++        assert!(
++            plan.is_none(),
++            "changed={changed}, overlay={overlay}, offset={offset}, delta={delta}"
++        );
++        canvas.render_bgrx_region(&mut pixels, damage).unwrap();
++        assert!(pixels == full(&mut canvas));
++    }
++}
++
++#[test]
++fn moved_reused_gradient_falls_back_before_staged_lease_transfer() {
++    use gpui_canvas::{Extend, Gradient, GradientGeometry, GradientStop, Interpolation};
++    let gradient = Gradient::new(
++        GradientGeometry::Linear {
++            start: Point::default(),
++            end: Point { x: 1., y: 0. },
++        },
++        &[
++            GradientStop::new(0., Color::BLACK),
++            GradientStop::new(1., Color::WHITE),
++        ],
++        Extend::Pad,
++        Interpolation::LinearSrgb,
++    )
++    .unwrap();
++    let mut canvas = Canvas::recording(WIDTH as u32, HEIGHT as u32, Default::default()).unwrap();
++    let clip = Rect::new(0., 0., WIDTH as f32, HEIGHT as f32);
++    let mut before = canvas.stage();
++    before.clear(Color::WHITE);
++    before
++        .fill_gradient(
++            &gradient,
++            Rect::new(5., 1., 10., 4.),
++            0.,
++            Affine::IDENTITY,
++            clip,
++        )
++        .unwrap();
++    before.commit();
++    let mut pixels = full(&mut canvas);
++    let mut after = canvas.stage();
++    after.clear(Color::WHITE);
++    after
++        .fill_gradient(
++            &gradient,
++            Rect::new(5., 20., 10., 4.),
++            0.,
++            Affine::IDENTITY,
++            clip,
++        )
++        .unwrap();
++    let (damage, plan) = after.commit_with_scroll_damage(VIEW, -6);
++    assert!(plan.is_none());
++    canvas.render_bgrx_region(&mut pixels, damage).unwrap();
++    assert!(pixels == full(&mut canvas));
++}
++
++#[test]
++fn unsupported_materials_clips_and_maps_keep_the_full_damage_fallback() {
++    use gpui_canvas::{AlphaMode, Clip, ClipShape, Image, ImageProfile, ImageSampling};
++    let image = Image::rgba8(
++        1,
++        1,
++        ImageProfile::Srgb,
++        AlphaMode::Straight,
++        vec![60, 120, 180, 170].into_boxed_slice(),
++    )
++    .unwrap();
++    for case in 0..8 {
++        let mut canvas =
++            Canvas::recording(WIDTH as u32, HEIGHT as u32, Default::default()).unwrap();
++        let mut pixels = Vec::new();
++        for offset in [0., 6.] {
++            let mut scene = canvas.stage();
++            scene.clear(Color::WHITE);
++            let rect = Rect::new(0., 0., 30., 30.);
++            let mut map = Affine::translation(10., 15. - offset);
++            match case {
++                0 => map.a = 1.25,
++                1 => {
++                    map.b = 0.25;
++                    map.c = -0.25;
++                }
++                2 => map.tx += 0.5,
++                _ => {}
++            }
++            let clip = Rect::new(5., 7., 60., 48.);
++            let clip: Clip = if case == 3 {
++                scene
++                    .create_clip(
++                        None,
++                        ClipShape::RoundedRect {
++                            rect: clip,
++                            radius: 3.,
++                        },
++                        Affine::IDENTITY,
++                    )
++                    .unwrap()
++                    .into()
++            } else if case == 4 {
++                Rect::new(5.5, 7., 59.5, 48.).into()
++            } else {
++                clip.into()
++            };
++            match case {
++                5 => scene
++                    .draw_image(&image, rect, map, clip, ImageSampling::Linear)
++                    .unwrap(),
++                6 => scene
++                    .fill_rounded_rect(rect, 3., map, clip, Color::BLACK)
++                    .unwrap(),
++                7 => scene
++                    .fill_rect(Rect::new(0.5, 0., 29.5, 30.), map, clip, Color::BLACK)
++                    .unwrap(),
++                _ => scene.fill_rect(rect, map, clip, Color::BLACK).unwrap(),
++            }
++            if offset == 0. {
++                scene.commit();
++                pixels = full(&mut canvas);
++            } else {
++                let (damage, plan) = scene.commit_with_scroll_damage(VIEW, -6);
++                assert!(plan.is_none(), "unsupported case {case}");
++                canvas.render_bgrx_region(&mut pixels, damage).unwrap();
++                assert!(pixels == full(&mut canvas), "fallback case {case}");
++            }
++        }
++    }
++}
++
++#[test]
++fn changed_clear_order_glyph_identity_and_color_cannot_reuse_overlap() {
++    use gpui_canvas::FontFace;
++    for case in 0..5 {
++        let mut canvas =
++            Canvas::recording(WIDTH as u32, HEIGHT as u32, Default::default()).unwrap();
++        let mut text = TextSystem::bundled().unwrap();
++        let mut pixels = Vec::new();
++        for after in [false, true] {
++            if case == 3 && after {
++                text = TextSystem::from_font(
++                    FontFace::new(include_bytes!("../assets/NotoSans.ttf")).unwrap(),
++                );
++            }
++            let mut scene = canvas.stage();
++            scene.clear(if case == 0 && after {
++                Color::WHITE
++            } else {
++                Color::BLACK
++            });
++            let clip = Rect::new(5., 7., 60., 48.);
++            let map = Affine::translation(10., if after { 9. } else { 15. });
++            for layer in 0..2 {
++                let color = if (layer == 0) ^ (case == 1 && after) {
++                    Color::rgba(200, 50, 30, 180)
++                } else {
++                    Color::rgba(30, 50, 200, 180)
++                };
++                scene
++                    .fill_rect(Rect::new(0., 0., 30., 30.), map, clip, color)
++                    .unwrap();
++            }
++            let label = if case == 2 && after {
++                "changed"
++            } else {
++                "before"
++            };
++            let layout = text.shape(label, 9., None).unwrap();
++            scene
++                .draw_text(
++                    &mut text,
++                    &layout,
++                    Point::default(),
++                    map,
++                    clip,
++                    if case == 4 && after {
++                        Color::BLACK
++                    } else {
++                        Color::WHITE
++                    },
++                )
++                .unwrap();
++            if after {
++                let (damage, plan) = scene.commit_with_scroll_damage(VIEW, -6);
++                assert!(plan.is_none(), "changed contribution case {case}");
++                canvas.render_bgrx_region(&mut pixels, damage).unwrap();
++                assert!(pixels == full(&mut canvas), "fallback case {case}");
++            } else {
++                scene.commit();
++                pixels = full(&mut canvas);
++            }
++        }
++    }
++}
++
++#[test]
++fn changed_content_copy_would_fail_the_complete_pixel_oracle() {
++    let mut text = TextSystem::bundled().unwrap();
++    let mut canvas = Canvas::recording(WIDTH as u32, HEIGHT as u32, Default::default()).unwrap();
++    scene(&mut canvas, &mut text, 0., true, 0, false, false).commit();
++    let mut pixels = full(&mut canvas);
++    let (damage, plan) =
++        scene(&mut canvas, &mut text, 6., true, 1, true, false).commit_with_scroll_damage(VIEW, -6);
++    // Exercise the complete operation before inspecting admission. A mutant
++    // that admits the changed row must fail pixels, not only an Option assertion.
++    if let Some(plan) = plan {
++        apply(&mut canvas, &mut pixels, plan);
++    } else {
++        canvas.render_bgrx_region(&mut pixels, damage).unwrap();
++    }
++    assert!(
++        pixels == full(&mut canvas),
++        "changed overlap reused stale pixels"
++    );
++}
+diff --git a/reactivity/crates/gpu/src/renderer.rs b/reactivity/crates/gpu/src/renderer.rs
+index 2188986182..7863b97f80 100644
+--- a/reactivity/crates/gpu/src/renderer.rs
++++ b/reactivity/crates/gpu/src/renderer.rs
+@@ -533,7 +533,17 @@ impl GpuContext {
+             .create_command_encoder(&wgpu::CommandEncoderDescriptor {
+                 label: Some("GPUI frame"),
+             });
+-        if output.damage.is_none_or(|damage| !damage.is_empty()) {
++        if let Some(scroll) = output.scroll {
++            output
++                .present
++                .expect("retained scroll backing")
++                .0
++                .scroll(&mut encoder, scroll);
++        }
++        if output.scroll.map_or_else(
++            || output.damage.is_none_or(|damage| !damage.is_empty()),
++            |scroll| scroll.repairs().iter().any(|repair| !repair.is_empty()),
++        ) {
+             let mut pass = encoder.begin_render_pass(&wgpu::RenderPassDescriptor {
+                 label: Some("GPUI frame"),
+                 color_attachments: &[Some(wgpu::RenderPassColorAttachment {
+@@ -554,12 +564,21 @@ impl GpuContext {
+                 occlusion_query_set: None,
+                 multiview_mask: None,
+             });
+-            if let Some([left, top, right, bottom]) = output.damage.and_then(|d| d.bounds()) {
+-                pass.set_scissor_rect(left, top, right - left, bottom - top);
+-            }
+             pass.set_pipeline(&self.pipeline);
+             pass.set_bind_group(0, bindings, &[]);
+-            pass.draw(0..3, 0..1);
++            if let Some(scroll) = output.scroll {
++                for repair in scroll.repairs() {
++                    if let Some([l, t, r, b]) = repair.bounds() {
++                        pass.set_scissor_rect(l, t, r - l, b - t);
++                        pass.draw(0..3, 0..1);
++                    }
++                }
++            } else {
++                if let Some([left, top, right, bottom]) = output.damage.and_then(|d| d.bounds()) {
++                    pass.set_scissor_rect(left, top, right - left, bottom - top);
++                }
++                pass.draw(0..3, 0..1);
++            }
+         }
+         if let Some((backing, target)) = output.present {
+             backing.copy(&mut encoder, target);
+@@ -1508,6 +1527,12 @@ mod tests {
+ 
+     #[test]
+     fn packet_storage_ledger() {
++        eprintln!(
++            "retained_storage,Renderer={},Output={},Backing={}",
++            size_of::<RetainedRenderer>(),
++            size_of::<retained::Output>(),
++            size_of::<retained::Backing>()
++        );
+         eprintln!(
+             "ownership_storage,Renderer={},GpuContext={},RendererState={},LayoutLease={},SlotGuard={}",
+             size_of::<Renderer>(),
+diff --git a/reactivity/crates/gpu/src/renderer/retained.rs b/reactivity/crates/gpu/src/renderer/retained.rs
+index ec88397be3..92eecd3761 100644
+--- a/reactivity/crates/gpu/src/renderer/retained.rs
++++ b/reactivity/crates/gpu/src/renderer/retained.rs
+@@ -1,11 +1,12 @@
+ //! A renderer-owned image, never a preservation assumption about a swapchain.
+ use super::*;
+-use gpui_canvas::{DamageRegion, SlotEdit};
++use gpui_canvas::{DamageRegion, ScrollCopy, SlotEdit};
+ 
+ pub(super) struct Output<'a> {
+     pub(super) view: &'a wgpu::TextureView,
+     pub(super) damage: Option<DamageRegion>,
+     pub(super) present: Option<(&'a Backing, &'a wgpu::TextureView)>,
++    pub(super) scroll: Option<&'a ScrollCopy>,
+ }
+ impl<'a> From<&'a wgpu::TextureView> for Output<'a> {
+     fn from(view: &'a wgpu::TextureView) -> Self {
+@@ -13,6 +14,7 @@ impl<'a> From<&'a wgpu::TextureView> for Output<'a> {
+             view,
+             damage: None,
+             present: None,
++            scroll: None,
+         }
+     }
+ }
+@@ -29,7 +31,8 @@ pub struct RetainedStats {
+ 
+ /// Optional retained output over the unchanged full-frame renderer.
+ ///
+-/// A single owned texture costs width × height × bytes-per-pixel. Every submit
++/// The primary texture costs width × height × bytes-per-pixel. Certified scroll
++/// reuse lazily adds a bounded overlap scratch texture; ordinary frames need none. Every submit
+ /// copies it to the caller's fresh target; repair and copy use one command buffer.
+ /// `None` damage requests full compositing. `Some` is a caller certificate that
+ /// all differences from the last successful image are inside those device-pixel
+@@ -73,6 +76,18 @@ impl RetainedRenderer {
+         scene: PreparedScene<'_>,
+         target: &wgpu::TextureView,
+         damage: Option<DamageRegion>,
++    ) -> Result<wgpu::SubmissionIndex, Error> {
++        self.render_with_scroll(scene, target, damage, None)
++    }
++    /// Reuse a certified overlap from the immediately preceding backing image.
++    /// The caller must bind the plan to the exact scene in that image. Missing
++    /// image authority, first render or resize falls back to full compositing.
++    pub fn render_with_scroll(
++        &mut self,
++        scene: PreparedScene<'_>,
++        target: &wgpu::TextureView,
++        damage: Option<DamageRegion>,
++        scroll: Option<&ScrollCopy>,
+     ) -> Result<wgpu::SubmissionIndex, Error> {
+         let size = [scene.width, scene.height];
+         // Invalidate image authority even when admission fails before uploads.
+@@ -96,14 +111,25 @@ impl RetainedRenderer {
+         }
+         let backing = self.backing.as_mut().unwrap();
+         let damage = damage.filter(|_| valid && !resized);
++        let scroll = scroll.filter(|_| damage.is_some());
++        if let Some(scroll) = scroll {
++            backing.prepare_scroll(&self.inner.context, scroll)?;
++        }
++        let mut output = backing.output(target, damage);
++        output.scroll = scroll;
+         let submitted = self.inner.state.render_observed(
+             &self.inner.context,
+             scene,
+-            backing.output(target, damage),
++            output,
+             |_, _, _, _| {},
+         )?;
+         backing.valid = true;
+         self.stats = backing.stats(damage);
++        if let Some(scroll) = scroll {
++            self.stats.composited_pixels = scroll.repairs().iter().map(|r| area(*r)).sum();
++            let [l, t, r, b] = scroll.source();
++            self.stats.copied_pixels += 2 * u64::from(r - l) * u64::from(b - t);
++        }
+         Ok(submitted)
+     }
+     /// Copy the last successful image to a fresh target, without compositing.
+@@ -178,6 +204,7 @@ pub(super) struct Backing {
+     pipeline: wgpu::RenderPipeline,
+     binding: wgpu::BindGroup,
+     valid: bool,
++    scratch: Option<wgpu::Texture>,
+ }
+ impl Backing {
+     fn new(context: &GpuContext, size: [u32; 2], pipeline: Option<wgpu::RenderPipeline>) -> Self {
+@@ -224,7 +251,10 @@ impl Backing {
+             sample_count: 1,
+             dimension: wgpu::TextureDimension::D2,
+             format: context.format(),
+-            usage: wgpu::TextureUsages::RENDER_ATTACHMENT | wgpu::TextureUsages::TEXTURE_BINDING,
++            usage: wgpu::TextureUsages::RENDER_ATTACHMENT
++                | wgpu::TextureUsages::TEXTURE_BINDING
++                | wgpu::TextureUsages::COPY_SRC
++                | wgpu::TextureUsages::COPY_DST,
+             view_formats: &[],
+         });
+         let view = texture.create_view(&Default::default());
+@@ -241,6 +271,7 @@ impl Backing {
+             pipeline,
+             binding,
+             valid: false,
++            scratch: None,
+         }
+     }
+     fn size(&self) -> [u32; 2] {
+@@ -255,6 +286,7 @@ impl Backing {
+             view: &self.view,
+             damage,
+             present: Some((self, target)),
++            scroll: None,
+         }
+     }
+     fn stats(&self, damage: Option<DamageRegion>) -> RetainedStats {
+@@ -266,10 +298,75 @@ impl Backing {
+                     .map_or(0, |[l, t, r, b]| u64::from(r - l) * u64::from(b - t))
+             }),
+             copied_pixels: pixels,
+-            image_bytes: pixels
++            image_bytes: (pixels
++                + self.scratch.as_ref().map_or(0, |texture| {
++                    u64::from(texture.width()) * u64::from(texture.height())
++                }))
+                 * u64::from(self.view.texture().format().block_copy_size(None).unwrap()),
+         }
+     }
++    fn prepare_scroll(&mut self, context: &GpuContext, plan: &ScrollCopy) -> Result<(), Error> {
++        let [l, t, r, b] = plan.source();
++        let [dl, dt, dr, db] = plan.destination();
++        let [width, height] = self.size();
++        if l >= r
++            || t >= b
++            || dl >= dr
++            || dt >= db
++            || r > width
++            || b > height
++            || dr > width
++            || db > height
++            || r - l != dr - dl
++            || b - t != db - dt
++        {
++            return Err(Error::InvalidScene);
++        }
++        for &repair in plan.repairs() {
++            check_damage(Some(repair), self.size())?;
++        }
++        let requested = [r - l, b - t];
++        let previous = self
++            .scratch
++            .as_ref()
++            .map_or([0, 0], |s| [s.width(), s.height()]);
++        if requested[0] > previous[0] || requested[1] > previous[1] {
++            self.scratch = Some(context.device().create_texture(&wgpu::TextureDescriptor {
++                label: Some("GPUI scroll copy scratch"),
++                size: wgpu::Extent3d {
++                    width: requested[0].max(previous[0]),
++                    height: requested[1].max(previous[1]),
++                    depth_or_array_layers: 1,
++                },
++                mip_level_count: 1,
++                sample_count: 1,
++                dimension: wgpu::TextureDimension::D2,
++                format: context.format(),
++                usage: wgpu::TextureUsages::COPY_SRC | wgpu::TextureUsages::COPY_DST,
++                view_formats: &[],
++            }));
++        }
++        Ok(())
++    }
++    pub(super) fn scroll(&self, encoder: &mut wgpu::CommandEncoder, plan: &ScrollCopy) {
++        let [l, t, r, b] = plan.source();
++        let [dl, dt, _, _] = plan.destination();
++        let extent = wgpu::Extent3d {
++            width: r - l,
++            height: b - t,
++            depth_or_array_layers: 1,
++        };
++        let backing = self.view.texture();
++        let scratch = self.scratch.as_ref().expect("admitted scratch");
++        let copy = |texture, x, y| wgpu::TexelCopyTextureInfo {
++            texture,
++            mip_level: 0,
++            origin: wgpu::Origin3d { x, y, z: 0 },
++            aspect: wgpu::TextureAspect::All,
++        };
++        encoder.copy_texture_to_texture(copy(backing, l, t), copy(scratch, 0, 0), extent);
++        encoder.copy_texture_to_texture(copy(scratch, 0, 0), copy(backing, dl, dt), extent);
++    }
+     pub(super) fn copy(&self, encoder: &mut wgpu::CommandEncoder, target: &wgpu::TextureView) {
+         let mut pass = encoder.begin_render_pass(&wgpu::RenderPassDescriptor {
+             label: Some("GPUI retained image copy"),
+@@ -292,3 +389,8 @@ impl Backing {
+         pass.draw(0..3, 0..1);
+     }
+ }
++fn area(region: DamageRegion) -> u64 {
++    region
++        .bounds()
++        .map_or(0, |[l, t, r, b]| u64::from(r - l) * u64::from(b - t))
++}
+diff --git a/reactivity/crates/gpu/tests/render.rs b/reactivity/crates/gpu/tests/render.rs
+index efb85de5f4..b7227243ed 100644
+--- a/reactivity/crates/gpu/tests/render.rs
++++ b/reactivity/crates/gpu/tests/render.rs
+@@ -4215,6 +4215,139 @@ fn retained_text_packet_cost_probe() {
+     });
+ }
+ 
++#[test]
++fn retained_scroll_copy_matches_full_gpu_and_invalidates_after_failure_or_resize() {
++    use gpui_gpu::RetainedRenderer;
++    fn stage<'a>(
++        canvas: &'a mut Canvas,
++        text: &mut TextSystem,
++        offset: f32,
++        header: u8,
++    ) -> gpui_canvas::CanvasScene<'a> {
++        let width = canvas.width();
++        let height = canvas.height();
++        let mut stage = canvas.stage();
++        stage.clear(Color::WHITE);
++        stage
++            .fill_rect(
++                Rect::new(1., 1., 20., 4.),
++                Affine::IDENTITY,
++                Rect::new(0., 0., width as f32, height as f32),
++                Color::rgb(header, 40, 70),
++            )
++            .unwrap();
++        let clip = Rect::new(5., 7., 60., 48.);
++        for row in 0..20 {
++            let y = 7. + row as f32 * 12. - offset;
++            stage
++                .fill_rect(
++                    Rect::new(0., 0., 60., 12.),
++                    Affine::translation(5., y),
++                    clip,
++                    Color::linear_srgb(0.1 + (row % 3) as f32 * 0.2, 0.3, 0.4, 0.7).unwrap(),
++                )
++                .unwrap();
++            let layout = text.shape(&format!("row {row}"), 9., None).unwrap();
++            stage
++                .draw_text(
++                    text,
++                    &layout,
++                    Point::default(),
++                    Affine::translation(7., y + 1.),
++                    clip,
++                    Color::BLACK,
++                )
++                .unwrap();
++        }
++        stage
++    }
++    pollster::block_on(async {
++        for format in [
++            wgpu::TextureFormat::Rgba8UnormSrgb,
++            wgpu::TextureFormat::Bgra8UnormSrgb,
++            wgpu::TextureFormat::Rgba16Float,
++        ] {
++            let inner = renderer(format).await;
++            let mut oracle = Renderer::new(inner.device().clone(), inner.queue().clone(), format)
++                .await
++                .unwrap();
++            let mut gpu = RetainedRenderer::new(inner);
++            let config = if format == wgpu::TextureFormat::Rgba16Float {
++                ColorConfig::linear_hdr(gpui_canvas::OutputProfile::Srgb, 203.).unwrap()
++            } else {
++                ColorConfig::default()
++            };
++            let mut text = TextSystem::bundled().unwrap();
++            for size in [[80, 64], [96, 80], [80, 64]] {
++                let total = u64::from(size[0] * size[1]);
++                let mut canvas = Canvas::recording(size[0], size[1], config).unwrap();
++                stage(&mut canvas, &mut text, 0., 0).commit();
++                let mut offset = 0;
++                for (turn, next) in [6, 12, 24, 18, 0, 40, 7].into_iter().enumerate() {
++                    let (damage, plan) = stage(&mut canvas, &mut text, next as f32, turn as u8 + 1)
++                        .commit_with_scroll_damage([5, 7, 65, 55], offset - next);
++                    let plan = plan.unwrap();
++                    let target = output_texture(&gpu, &canvas);
++                    let view = target.create_view(&Default::default());
++                    gpu.render_with_scroll(
++                        canvas.prepared_scene(),
++                        &view,
++                        Some(damage),
++                        Some(&plan),
++                    )
++                    .unwrap();
++                    assert!(
++                        read_texture(&gpu, &target) == readback(&mut oracle, &canvas),
++                        "format={format:?}, size={size:?}, {offset}->{next}"
++                    );
++                    if turn == 0 {
++                        assert_eq!(gpu.retained_stats().composited_pixels, total);
++                        assert_eq!(
++                            gpu.retained_stats().image_bytes,
++                            total * u64::from(format.block_copy_size(None).unwrap())
++                        );
++                    } else {
++                        let [l, t, r, b] = plan.source();
++                        assert_eq!(
++                            gpu.retained_stats().copied_pixels,
++                            total + 2 * u64::from(r - l) * u64::from(b - t)
++                        );
++                        assert!(gpu.retained_stats().composited_pixels < total);
++                        assert!(
++                            gpu.retained_stats().image_bytes
++                                > total * u64::from(format.block_copy_size(None).unwrap())
++                        );
++                    }
++                    if turn == 2 {
++                        let mut bad = canvas.prepared_scene();
++                        bad.clear[0] = f32::NAN;
++                        assert!(
++                            gpu.render_with_scroll(bad, &view, Some(damage), Some(&plan))
++                                .is_err()
++                        );
++                        assert!(gpu.redraw(&view).unwrap().is_none());
++                        gpu.render_with_scroll(
++                            canvas.prepared_scene(),
++                            &view,
++                            Some(gpui_canvas::DamageRegion::default()),
++                            Some(&plan),
++                        )
++                        .unwrap();
++                        assert_eq!(gpu.retained_stats().composited_pixels, total);
++                        assert!(read_texture(&gpu, &target) == readback(&mut oracle, &canvas));
++                    }
++                    let fresh = output_texture(&gpu, &canvas);
++                    gpu.redraw(&fresh.create_view(&Default::default()))
++                        .unwrap()
++                        .unwrap();
++                    assert!(read_texture(&gpu, &fresh) == read_texture(&gpu, &target));
++                    offset = next;
++                }
++            }
++        }
++    });
++}
++
+ #[test]
+ fn retained_repair_matches_full_gpu_through_moves_removals_resize_and_failures() {
+     use gpui_canvas::DamageRegion;
+diff --git a/reactivity/crates/gpui/examples/zgx_native_lab.rs b/reactivity/crates/gpui/examples/zgx_native_lab.rs
+index ebc3dc38e8..4bfa03a3db 100644
+--- a/reactivity/crates/gpui/examples/zgx_native_lab.rs
++++ b/reactivity/crates/gpui/examples/zgx_native_lab.rs
+@@ -7,7 +7,7 @@ use std::time::{Duration, Instant};
+ mod workload;
+ use workload::{Mode, Workload};
+ 
+-struct Lab {
++pub(crate) struct Lab {
+     scroll_offset: Signal<f64>,
+     stream: Signal<String>,
+     items: Vec<i32>,
+@@ -367,13 +367,84 @@ fn main() -> Result<(), Box<dyn std::error::Error>> {
+     Ok(())
+ }
+ 
++#[cfg(test)]
++pub(crate) fn visit_scroll_frames(mut visit: impl FnMut(&mut gpui::Win<Lab>, usize)) {
++    for mode in [Mode::Scroll, Mode::Both] {
++        let work = port_tests::seeded(mode);
++        let mut window = port_tests::window(&work);
++        let (delivered, _received) = std::sync::mpsc::channel();
++        let mut driver = Driver {
++            work,
++            received: 0,
++            delivered,
++        };
++        visit(&mut window, 0);
++        for tick in 1..=4 {
++            window.update(|model| driver.owner(model, false)).unwrap();
++            visit(&mut window, tick);
++        }
++    }
++}
++
++#[cfg(test)]
++#[allow(dead_code)]
++pub(crate) struct CostFixture {
++    pub(crate) owner: gpui::Win<Lab>,
++    driver: Driver,
++    received: std::sync::mpsc::Receiver<()>,
++}
++#[cfg(test)]
++#[allow(dead_code)]
++impl CostFixture {
++    pub(crate) fn new(case: &str) -> Self {
++        let mode = match case {
++            "scroll" | "fractional" => Mode::Scroll,
++            "both" => Mode::Both,
++            "stream" | "stream-owner" | "exposure" => Mode::Stream,
++            _ => panic!("unknown complete workload case: {case}"),
++        };
++        let work = port_tests::seeded(mode);
++        let owner = port_tests::window(&work);
++        let (delivered, received) = std::sync::mpsc::channel();
++        Self {
++            owner,
++            driver: Driver {
++                work,
++                received: 0,
++                delivered,
++            },
++            received,
++        }
++    }
++    pub(crate) fn advance(&mut self, case: &str) {
++        if case == "exposure" {
++            return;
++        }
++        if case == "stream" {
++            let mut value = String::new();
++            self.driver.stream(&mut value, false);
++            self.owner.set(Lab::STREAM, value).unwrap();
++        } else {
++            self.owner
++                .update(|model| {
++                    self.driver.owner(model, false);
++                    if case == "fractional" {
++                        *model.scroll_offset += 0.5;
++                    }
++                })
++                .unwrap();
++        }
++        self.received.try_recv().unwrap();
++    }
++}
++
+ #[cfg(test)]
+ mod port_tests {
+     use super::*;
+     use gpui::{Win, WindowOptions};
+     use std::sync::mpsc;
+ 
+-    fn seeded(mode: Mode) -> Workload {
++    pub(super) fn seeded(mode: Mode) -> Workload {
+         let mut work = Workload {
+             text: String::with_capacity(8256),
+             scroll_offset: 0.,
+@@ -387,7 +458,7 @@ mod port_tests {
+         work.mode = mode;
+         work
+     }
+-    fn window(work: &Workload) -> Win<Lab> {
++    pub(super) fn window(work: &Workload) -> Win<Lab> {
+         Win::recording_with_font(
+             Lab::new(work),
+             WindowOptions {
+diff --git a/reactivity/crates/gpui/src/native.rs b/reactivity/crates/gpui/src/native.rs
+index 8041530550..ca7dd6628e 100644
+--- a/reactivity/crates/gpui/src/native.rs
++++ b/reactivity/crates/gpui/src/native.rs
+@@ -334,7 +334,7 @@ impl GpuSurface {
+         token: crate::PresentationToken,
+         paint: Option<&crate::runtime::paint::SlotTransition>,
+         target: &wgpu::TextureView,
+-        transition: Option<crate::runtime::paint::SceneDamage>,
++        transition: Option<crate::runtime::paint::SceneDamage<'_>>,
+     ) -> Result<wgpu::SubmissionIndex, gpui_gpu::Error> {
+         let epoch = transition.map(|d| d.epoch);
+         let damage = transition
+@@ -356,7 +356,13 @@ impl GpuSurface {
+             self.packet_epoch = epoch;
+             return Ok(submitted);
+         }
+-        let submitted = self.renderer.render(scene, target, damage)?;
++        let scroll = transition
++            .and_then(|d| d.scroll)
++            .filter(|s| previous == Some(s.from) && s.to == token)
++            .map(|s| &s.copy);
++        let submitted = self
++            .renderer
++            .render_with_scroll(scene, target, damage, scroll)?;
+         self.packet_token = Some(token);
+         self.packet_epoch = epoch;
+         Ok(submitted)
+@@ -2181,3 +2187,15 @@ mod inspector_tests;
+     any(feature = "x11", feature = "x11-minimal")
+ ))]
+ mod property_action_tests;
++
++#[cfg(all(test, feature = "x11", target_os = "linux"))]
++mod scroll_bench;
++
++#[cfg(all(
++    test,
++    any(feature = "x11", feature = "x11-minimal"),
++    target_os = "linux"
++))]
++#[allow(dead_code)]
++#[path = "../examples/zgx_native_lab.rs"]
++mod workload_port;
+diff --git a/reactivity/crates/gpui/src/native/paint_tests.rs b/reactivity/crates/gpui/src/native/paint_tests.rs
+index 3409a2f7d7..8482fc1207 100644
+--- a/reactivity/crates/gpui/src/native/paint_tests.rs
++++ b/reactivity/crates/gpui/src/native/paint_tests.rs
+@@ -1,6 +1,8 @@
+ //! The actual private native packet bridge, with offscreen readback oracles.
+ use super::*;
+ use crate::{Color, El, FieldId, Signal, SignalMap, Source, Sources, div, rgb};
++#[path = "scroll_copy_tests.rs"]
++mod scroll_copy_tests;
+ struct Paint {
+     color: Signal<Color>,
+     mapped: bool,
+@@ -83,10 +85,10 @@ fn read(gpu: &GpuSurface, texture: &wgpu::Texture) -> Vec<u8> {
+     }
+     output
+ }
+-fn render(
++fn render<M: View + 'static>(
+     gpu: &mut GpuSurface,
+     oracle: &mut Renderer,
+-    owner: &mut Win<Paint>,
++    owner: &mut Win<M>,
+     texture: &wgpu::Texture,
+ ) {
+     let view = texture.create_view(&Default::default());
+@@ -263,4 +265,5 @@ pub(super) fn run(gpu: &mut GpuSurface) {
+         }
+         gpu.packet_token = None;
+     }
++    scroll_copy_tests::run(gpu);
+ }
+diff --git a/reactivity/crates/gpui/src/native/scroll_bench.rs b/reactivity/crates/gpui/src/native/scroll_bench.rs
+new file mode 100644
+index 0000000000..b5abf6073f
+--- /dev/null
++++ b/reactivity/crates/gpui/src/native/scroll_bench.rs
+@@ -0,0 +1,421 @@
++//! Complete owner publication + native packet bridge + GPU completion ablation.
++//! Offscreen completion is not swapchain/scanout latency.
++use super::*;
++use crate::native::workload_port;
++use std::time::Instant;
++use winit::{application::ApplicationHandler, event::WindowEvent, window::WindowId};
++
++struct Flat {
++    color: crate::Signal<crate::Color>,
++    size: u32,
++}
++impl Flat {
++    const COLOR: crate::Source<Self, crate::Color> = crate::Source::new(
++        crate::FieldId::new(1),
++        "color",
++        |m| &m.color,
++        |m| &mut m.color,
++    );
++}
++impl View for Flat {
++    fn sources() -> crate::Sources<Self> {
++        crate::Sources::new().direct(Self::COLOR)
++    }
++    fn view(&self) -> crate::El<'_> {
++        crate::div().size(self.size).bg(&self.color)
++    }
++}
++struct SolidList {
++    offset: crate::Signal<f64>,
++    tiny: bool,
++}
++impl SolidList {
++    const OFFSET: crate::Source<Self, f64> = crate::Source::new(
++        crate::FieldId::new(1),
++        "offset",
++        |m| &m.offset,
++        |m| &mut m.offset,
++    );
++    fn width(&self) -> f64 {
++        if self.tiny { 16. } else { 920. }
++    }
++    fn row_height(&self) -> f64 {
++        if self.tiny { 4. } else { 28. }
++    }
++}
++impl crate::ItemSource for SolidList {
++    fn len(&self) -> usize {
++        100_000
++    }
++    fn key(&self, index: usize) -> crate::ItemKey {
++        crate::ItemKey::new(index as u64)
++    }
++    fn index_of(&self, key: crate::ItemKey) -> Option<usize> {
++        usize::try_from(key.get()).ok().filter(|i| *i < 100_000)
++    }
++    fn row(&self, index: usize) -> crate::El<'_> {
++        crate::div()
++            .w(self.width())
++            .h(self.row_height())
++            .bg(if index % 2 == 0 {
++                crate::Color::WHITE
++            } else {
++                crate::Color::BLACK
++            })
++    }
++}
++impl View for SolidList {
++    fn sources() -> crate::Sources<Self> {
++        crate::Sources::new().direct(Self::OFFSET)
++    }
++    fn view(&self) -> crate::El<'_> {
++        crate::div()
++            .w(if self.tiny { 32 } else { 960 })
++            .h(if self.tiny { 32 } else { 720 })
++            .bg(crate::Color::BLACK)
++            .child(
++                crate::div()
++                    .w(0)
++                    .h(0)
++                    .transform(crate::Affine::translation(
++                        if self.tiny { 0. } else { 20. },
++                        if self.tiny { 0. } else { 290. },
++                    ))
++                    .child(
++                        crate::uniform_list(crate::ListId::new(1), self, self.row_height())
++                            .overscan(2)
++                            .scroll_offset(&self.offset)
++                            .w(self.width())
++                            .h(if self.tiny { 16 } else { 400 }),
++                    ),
++            )
++    }
++}
++fn texture(gpu: &GpuSurface, size: [u32; 2]) -> wgpu::Texture {
++    gpu.renderer
++        .device()
++        .create_texture(&wgpu::TextureDescriptor {
++            label: Some("complete scroll benchmark target"),
++            size: wgpu::Extent3d {
++                width: size[0],
++                height: size[1],
++                depth_or_array_layers: 1,
++            },
++            mip_level_count: 1,
++            sample_count: 1,
++            dimension: wgpu::TextureDimension::D2,
++            format: gpu.renderer.format(),
++            usage: wgpu::TextureUsages::RENDER_ATTACHMENT | wgpu::TextureUsages::COPY_SRC,
++            view_formats: &[],
++        })
++}
++fn present<M: View + 'static>(gpu: &mut GpuSurface, owner: &mut Win<M>, view: &wgpu::TextureView) {
++    let token = owner
++        .with_paint_scene(|scene, token, paint, damage| {
++            gpu.render_damaged(scene, token, paint, view, Some(damage))
++                .unwrap();
++            token
++        })
++        .unwrap();
++    gpu.renderer
++        .device()
++        .poll(wgpu::PollType::wait_indefinitely())
++        .unwrap();
++    owner.presented(token).unwrap();
++}
++fn read(gpu: &GpuSurface, texture: &wgpu::Texture) -> Vec<u8> {
++    let stride = (texture.width() * 4).next_multiple_of(256);
++    let buffer = gpu
++        .renderer
++        .device()
++        .create_buffer(&wgpu::BufferDescriptor {
++            label: None,
++            size: u64::from(stride) * u64::from(texture.height()),
++            usage: wgpu::BufferUsages::MAP_READ | wgpu::BufferUsages::COPY_DST,
++            mapped_at_creation: false,
++        });
++    let mut encoder = gpu
++        .renderer
++        .device()
++        .create_command_encoder(&Default::default());
++    encoder.copy_texture_to_buffer(
++        wgpu::TexelCopyTextureInfo {
++            texture,
++            mip_level: 0,
++            origin: wgpu::Origin3d::ZERO,
++            aspect: wgpu::TextureAspect::All,
++        },
++        wgpu::TexelCopyBufferInfo {
++            buffer: &buffer,
++            layout: wgpu::TexelCopyBufferLayout {
++                offset: 0,
++                bytes_per_row: Some(stride),
++                rows_per_image: Some(texture.height()),
++            },
++        },
++        texture.size(),
++    );
++    gpu.renderer.queue().submit([encoder.finish()]);
++    let (send, receive) = std::sync::mpsc::channel();
++    buffer.map_async(wgpu::MapMode::Read, .., move |r| send.send(r).unwrap());
++    gpu.renderer
++        .device()
++        .poll(wgpu::PollType::wait_indefinitely())
++        .unwrap();
++    receive.recv().unwrap().unwrap();
++    let mapped = buffer.get_mapped_range(..).unwrap();
++    mapped
++        .chunks_exact(stride as usize)
++        .flat_map(|row| &row[..texture.width() as usize * 4])
++        .copied()
++        .collect()
++}
++fn check<M: View + 'static>(gpu: &GpuSurface, owner: &Win<M>, output: &wgpu::Texture) -> u64 {
++    let actual = read(gpu, output);
++    let mut oracle = pollster::block_on(Renderer::new(
++        gpu.renderer.device().clone(),
++        gpu.renderer.queue().clone(),
++        gpu.renderer.format(),
++    ))
++    .unwrap();
++    owner
++        .with_scene(|scene, _| oracle.render(scene, &output.create_view(&Default::default())))
++        .unwrap()
++        .unwrap();
++    assert!(
++        actual == read(gpu, output),
++        "complete workload differs from full GPU rendering"
++    );
++    actual.iter().fold(0xcbf29ce484222325, |hash, byte| {
++        (hash ^ u64::from(*byte)).wrapping_mul(0x100000001b3)
++    })
++}
++fn run(gpu: &mut GpuSurface) {
++    let case = std::env::var("GPUI_SCROLL_CASE").expect("explicit case");
++    let allocations = std::env::var_os("GPUI_SCROLL_ALLOC").is_some();
++    let frames: usize = std::env::var("GPUI_SCROLL_FRAMES")
++        .unwrap()
++        .parse()
++        .unwrap();
++    assert!(frames >= 4);
++    let setup = Instant::now();
++    let mut fixture = None;
++    let mut flat = None;
++    let mut list = None;
++    let tiny_list = case == "list-tiny";
++    let flat_size = if case == "flat-tiny" { 8 } else { 512 };
++    let mut mount = || {
++        if case.starts_with("list") {
++            list = Some(
++                Win::recording(
++                    SolidList {
++                        offset: crate::Signal::new(0.),
++                        tiny: tiny_list,
++                    },
++                    WindowOptions {
++                        size: if tiny_list { [32, 32] } else { [960, 720] },
++                        ..Default::default()
++                    },
++                )
++                .unwrap(),
++            );
++        } else if case.starts_with("flat") {
++            flat = Some(
++                Win::recording(
++                    Flat {
++                        color: crate::Signal::new(crate::Color::BLACK),
++                        size: flat_size,
++                    },
++                    WindowOptions {
++                        size: [flat_size, flat_size],
++                        ..Default::default()
++                    },
++                )
++                .unwrap(),
++            );
++        } else {
++            fixture = Some(workload_port::CostFixture::new(&case));
++        }
++    };
++    let mount_allocation = if allocations {
++        Some(allocation_counter::measure(mount))
++    } else {
++        mount();
++        None
++    };
++    let mount_ns = setup.elapsed().as_nanos();
++    let output = texture(
++        gpu,
++        if tiny_list {
++            [32, 32]
++        } else if fixture.is_some() || list.is_some() {
++            [960, 720]
++        } else {
++            [flat_size, flat_size]
++        },
++    );
++    let view = output.create_view(&Default::default());
++    let first = Instant::now();
++    let mut initial = || {
++        if let Some(f) = &mut fixture {
++            present(gpu, &mut f.owner, &view);
++        } else if let Some(owner) = &mut list {
++            present(gpu, owner, &view);
++        } else {
++            present(gpu, flat.as_mut().unwrap(), &view);
++        }
++    };
++    let first_allocation = if allocations {
++        Some(allocation_counter::measure(initial))
++    } else {
++        initial();
++        None
++    };
++    let first_ns = first.elapsed().as_nanos();
++    let mut samples = Vec::with_capacity(frames + 16);
++    for frame in 0..frames + 16 {
++        let start = Instant::now();
++        let mut operation = || {
++            if let Some(f) = &mut fixture {
++                f.advance(&case);
++                present(gpu, &mut f.owner, &view);
++            } else if let Some(owner) = &mut list {
++                owner
++                    .set(
++                        SolidList::OFFSET,
++                        (frame + 1) as f64 * if tiny_list { 1. } else { 14. },
++                    )
++                    .unwrap();
++                present(gpu, owner, &view);
++            } else {
++                let owner = flat.as_mut().unwrap();
++                owner
++                    .set(
++                        Flat::COLOR,
++                        if frame % 2 == 0 {
++                            crate::Color::WHITE
++                        } else {
++                            crate::Color::BLACK
++                        },
++                    )
++                    .unwrap();
++                present(gpu, owner, &view);
++            }
++        };
++        let allocation = if allocations {
++            Some(allocation_counter::measure(operation))
++        } else {
++            operation();
++            None
++        };
++        let elapsed = start.elapsed().as_nanos();
++        let stats = gpu.renderer.retained_stats();
++        samples.push((frame, elapsed, stats, allocation));
++    }
++    let (hash, epoch) = if let Some(f) = &fixture {
++        (
++            check(gpu, &f.owner, &output),
++            f.owner.snapshot().unwrap().source_epoch,
++        )
++    } else if let Some(owner) = &list {
++        (
++            check(gpu, owner, &output),
++            owner.snapshot().unwrap().source_epoch,
++        )
++    } else {
++        let owner = flat.as_ref().unwrap();
++        (
++            check(gpu, owner, &output),
++            owner.snapshot().unwrap().source_epoch,
++        )
++    };
++    println!("SETUP,{case},{mount_ns},{first_ns},{hash:016x},{epoch}");
++    for (label, allocation) in [("mount", mount_allocation), ("first", first_allocation)] {
++        if let Some(a) = allocation {
++            println!(
++                "SETUP_ALLOC,{case},{label},{},{},{},{}",
++                a.count_total, a.bytes_total, a.bytes_current, a.bytes_max
++            );
++        }
++    }
++    println!(
++        "HEADERS,SceneDamage={},RetainedRenderer={},GpuSurface={}",
++        size_of::<crate::runtime::paint::SceneDamage>(),
++        size_of::<gpui_gpu::RetainedRenderer>(),
++        size_of::<GpuSurface>()
++    );
++    for (frame, ns, stats, allocation) in samples {
++        if let Some(a) = allocation {
++            println!(
++                "ALLOC,{case},{frame},{},{},{},{},{},{}",
++                a.count_total,
++                a.bytes_total,
++                a.bytes_current,
++                a.bytes_max,
++                stats.image_bytes,
++                stats.copied_pixels
++            );
++        } else {
++            println!(
++                "FRAME,{case},{frame},{ns},{},{},{}",
++                stats.composited_pixels, stats.copied_pixels, stats.image_bytes
++            );
++        }
++    }
++}
++struct Harness {
++    complete: bool,
++}
++impl ApplicationHandler for Harness {
++    fn resumed(&mut self, event_loop: &ActiveEventLoop) {
++        let window = Arc::new(
++            event_loop
++                .create_window(NativeWindow::default_attributes().with_visible(false))
++                .unwrap(),
++        );
++        let mut descriptor =
++            wgpu::InstanceDescriptor::new_with_display_handle_from_env(Box::new(window.clone()));
++        descriptor.backends = wgpu::Backends::VULKAN;
++        let instance = wgpu::Instance::new(descriptor);
++        let handle = instance.create_surface(window).unwrap();
++        let adapter = pollster::block_on(instance.request_adapter(&wgpu::RequestAdapterOptions {
++            compatible_surface: Some(&handle),
++            force_fallback_adapter: true,
++            ..Default::default()
++        }))
++        .unwrap();
++        eprintln!("SCROLL_ADAPTER,{:?}", adapter.get_info());
++        assert_eq!(adapter.get_info().device_type, wgpu::DeviceType::Cpu);
++        let renderer = pollster::block_on(Renderer::request(
++            &adapter,
++            wgpu::TextureFormat::Bgra8UnormSrgb,
++        ))
++        .unwrap();
++        let errors = DeviceErrors::install(renderer.device(), None);
++        let mut gpu = GpuSurface {
++            handle,
++            renderer: gpui_gpu::RetainedRenderer::new(renderer),
++            errors,
++            packet_token: None,
++            packet_epoch: None,
++        };
++        run(&mut gpu);
++        assert!(gpu.errors.take().is_none(), "native GPU device fault");
++        self.complete = true;
++        event_loop.exit();
++    }
++    fn window_event(&mut self, _: &ActiveEventLoop, _: WindowId, _: WindowEvent) {}
++}
++#[test]
++#[ignore = "isolated complete-operation cost measurement; explicit software Vulkan and case required"]
++fn complete_workload_cost() {
++    use winit::platform::x11::EventLoopBuilderExtX11;
++    let event_loop = EventLoop::builder()
++        .with_x11()
++        .with_any_thread(true)
++        .build()
++        .unwrap();
++    let mut harness = Harness { complete: false };
++    event_loop.run_app(&mut harness).unwrap();
++    assert!(harness.complete);
++}
+diff --git a/reactivity/crates/gpui/src/native/scroll_copy_tests.rs b/reactivity/crates/gpui/src/native/scroll_copy_tests.rs
+new file mode 100644
+index 0000000000..0edc5d083a
+--- /dev/null
++++ b/reactivity/crates/gpui/src/native/scroll_copy_tests.rs
+@@ -0,0 +1,225 @@
++use super::*;
++use crate::{ItemKey, ItemSource, ListId, prelude::*};
++// Exercise the actual application model and UI-thread workload operation.
++use crate::native::workload_port;
++const LIST: ListId = ListId::new(1);
++struct Rows {
++    offset: Signal<f64>,
++    controlled: bool,
++    revision: u8,
++}
++impl Rows {
++    const OFFSET: Source<Self, f64> =
++        Source::new(FieldId::new(1), "offset", |m| &m.offset, |m| &mut m.offset);
++}
++impl ItemSource for Rows {
++    fn len(&self) -> usize {
++        1000
++    }
++    fn key(&self, index: usize) -> ItemKey {
++        ItemKey::new(index as u64)
++    }
++    fn index_of(&self, key: ItemKey) -> Option<usize> {
++        usize::try_from(key.get()).ok().filter(|i| *i < self.len())
++    }
++    fn row(&self, index: usize) -> El<'_> {
++        div()
++            .w(60)
++            .h(12)
++            .bg(Color::rgb((index * 31 % 255) as u8, 100, 180))
++            .child(
++                text(format!("r{index}/{}", self.revision))
++                    .font_size(9)
++                    .line_height(12)
++                    .h(12),
++            )
++    }
++}
++impl View for Rows {
++    fn sources() -> Sources<Self> {
++        Sources::new().direct(Self::OFFSET)
++    }
++    fn view(&self) -> El<'_> {
++        uniform_list(LIST, self, 12)
++            .overscan(2)
++            .w(60)
++            .h(48)
++            .bg(Color::WHITE)
++            .apply(|list| {
++                if self.controlled {
++                    list.scroll_offset(&self.offset)
++                } else {
++                    list
++                }
++            })
++    }
++}
++fn window(controlled: bool) -> Win<Rows> {
++    Win::recording(
++        Rows {
++            offset: Signal::new(0.),
++            controlled,
++            revision: 0,
++        },
++        WindowOptions {
++            size: [80, 64],
++            ..Default::default()
++        },
++    )
++    .unwrap()
++}
++fn ack(owner: &mut Win<Rows>) {
++    let token = owner.with_scene(|_, t| t).unwrap();
++    owner.presented(token).unwrap();
++}
++fn has_copy(owner: &Win<Rows>) -> bool {
++    owner
++        .with_paint_scene(|_, _, _, d| d.scroll.is_some())
++        .unwrap()
++}
++
++#[test]
++fn public_list_scroll_certifies_exact_tokens_and_discards_pending_or_fractional_proposals() {
++    eprintln!(
++        "scroll_storage,Copy={},Transition={},SceneDamage={}",
++        size_of::<gpui_canvas::ScrollCopy>(),
++        size_of::<crate::runtime::paint::ScrollTransition>(),
++        size_of::<crate::runtime::paint::SceneDamage>()
++    );
++    for controlled in [false, true] {
++        let mut owner = window(controlled);
++        assert!(!has_copy(&owner));
++        ack(&mut owner);
++        let list = owner.list(LIST).unwrap();
++        let previous = owner.with_scene(|_, t| t).unwrap();
++        owner.scroll(list, 6.).unwrap();
++        owner
++            .with_paint_scene(|_, token, _, damage| {
++                let transition = damage.scroll.expect("ordinary public scroll must certify");
++                assert_eq!((transition.from, transition.to), (previous, token));
++                assert_ne!(previous, token);
++                assert_eq!(transition.copy.source(), [0, 6, 60, 48]);
++                assert_eq!(transition.copy.destination(), [0, 0, 60, 42]);
++            })
++            .unwrap();
++        assert_eq!(
++            owner.snapshot().unwrap().source_epoch,
++            u64::from(controlled)
++        );
++        owner.update(|m| m.revision += 1).unwrap();
++        assert!(
++            !has_copy(&owner),
++            "a coalesced newer scene cannot reuse a previous plan"
++        );
++        ack(&mut owner);
++        owner.scroll(list, 0.5).unwrap();
++        assert!(!has_copy(&owner));
++    }
++}
++
++pub(super) fn run(gpu: &mut GpuSurface) {
++    let mut oracle = pollster::block_on(Renderer::new(
++        gpu.renderer.device().clone(),
++        gpu.renderer.queue().clone(),
++        gpu.renderer.format(),
++    ))
++    .unwrap();
++    let texture = gpu
++        .renderer
++        .device()
++        .create_texture(&wgpu::TextureDescriptor {
++            label: Some("native scroll copy oracle"),
++            size: wgpu::Extent3d {
++                width: 80,
++                height: 64,
++                depth_or_array_layers: 1,
++            },
++            mip_level_count: 1,
++            sample_count: 1,
++            dimension: wgpu::TextureDimension::D2,
++            format: gpu.renderer.format(),
++            usage: wgpu::TextureUsages::RENDER_ATTACHMENT | wgpu::TextureUsages::COPY_SRC,
++            view_formats: &[],
++        });
++    for controlled in [false, true] {
++        let mut owner = window(controlled);
++        render(gpu, &mut oracle, &mut owner, &texture);
++        let list = owner.list(LIST).unwrap();
++        for _ in 0..3 {
++            owner.scroll(list, 6.).unwrap();
++            assert!(has_copy(&owner));
++            render(gpu, &mut oracle, &mut owner, &texture);
++            assert_eq!(
++                gpu.renderer.retained_stats().copied_pixels,
++                80 * 64 + 2 * 60 * 42
++            );
++            assert!(gpu.renderer.retained_stats().composited_pixels < 80 * 64);
++        }
++        // Another presenter may ACK a scene that this GPU has never rendered.
++        // For an unbound list every source epoch is still zero. A token guard
++        // must reject copying this stale GPU image despite matching source epochs.
++        owner.scroll(list, 6.).unwrap();
++        ack(&mut owner);
++        owner.scroll(list, 6.).unwrap();
++        assert!(has_copy(&owner));
++        render(gpu, &mut oracle, &mut owner, &texture);
++        assert_eq!(gpu.renderer.retained_stats().copied_pixels, 80 * 64);
++        owner.scroll(list, 6.).unwrap();
++        owner.update(|m| m.revision += 1).unwrap();
++        assert!(!has_copy(&owner));
++        render(gpu, &mut oracle, &mut owner, &texture);
++        assert_eq!(gpu.renderer.retained_stats().copied_pixels, 80 * 64);
++        if controlled {
++            owner.set(Rows::OFFSET, 42.).unwrap();
++            assert!(has_copy(&owner));
++            assert!(owner.set(Rows::OFFSET, f64::NAN).is_err());
++            render(gpu, &mut oracle, &mut owner, &texture);
++            owner.set(Rows::OFFSET, 48.).unwrap();
++            render(gpu, &mut oracle, &mut owner, &texture);
++        }
++        gpu.packet_token = None;
++        gpu.packet_epoch = None;
++    }
++    let texture = gpu
++        .renderer
++        .device()
++        .create_texture(&wgpu::TextureDescriptor {
++            label: Some("native complete workload scroll oracle"),
++            size: wgpu::Extent3d {
++                width: 960,
++                height: 720,
++                depth_or_array_layers: 1,
++            },
++            mip_level_count: 1,
++            sample_count: 1,
++            dimension: wgpu::TextureDimension::D2,
++            format: gpu.renderer.format(),
++            usage: wgpu::TextureUsages::RENDER_ATTACHMENT | wgpu::TextureUsages::COPY_SRC,
++            view_formats: &[],
++        });
++    workload_port::visit_scroll_frames(|owner, tick| {
++        owner
++            .with_paint_scene(|_, _, _, damage| {
++                if tick == 0 {
++                    assert!(damage.scroll.is_none());
++                } else {
++                    let copy = damage
++                        .scroll
++                        .expect("the actual 100K-row workload must certify")
++                        .copy;
++                    assert_eq!(copy.source(), [20, 304, 940, 690]);
++                    assert_eq!(copy.destination(), [20, 290, 940, 676]);
++                }
++            })
++            .unwrap();
++        render(gpu, &mut oracle, owner, &texture);
++        if tick > 0 {
++            assert_eq!(
++                gpu.renderer.retained_stats().copied_pixels,
++                960 * 720 + 2 * 920 * 386
++            );
++        }
++    });
++    gpu.packet_token = None;
++    gpu.packet_epoch = None;
++}
+diff --git a/reactivity/crates/gpui/src/runtime.rs b/reactivity/crates/gpui/src/runtime.rs
+index 7e511339fd..4f0df552b4 100644
+--- a/reactivity/crates/gpui/src/runtime.rs
++++ b/reactivity/crates/gpui/src/runtime.rs
+@@ -3838,6 +3838,29 @@ impl<M: View + 'static> Runtime<M> {
+             );
+         }
+         let logical_indices = &self.by_identity;
++        #[cfg(feature = "native-core")]
++        let scroll_proposal = if list_mode
++            && !self.automatic_presentation
++            && self.prepared.is_none()
++            && self.presentation_valid
++            && size == self.presentation_size
++            && scale_factor == self.presentation_scale_factor
++        {
++            self.metadata.as_deref().and_then(|metadata| {
++                let old_geometry = metadata
++                    .geometry
++                    .as_deref()
++                    .map_or_else(geometry::GeometryView::empty, geometry::Geometry::view);
++                viewport_geometry.scroll_copy_proposal(
++                    &metadata.presented.viewports,
++                    (&self.presented, old_geometry.bases()),
++                    (&presented, geometry::Bases::new(&geometry_records)),
++                    |identity| logical_indices.get(identity).and_then(|i| published.get(i)),
++                )
++            })
++        } else {
++            None
++        };
+         let geometry_sheet = self
+             .metadata
+             .as_ref()
+@@ -3853,18 +3876,48 @@ impl<M: View + 'static> Runtime<M> {
+                 })
+             })
+             .or_else(|| (!geometry_records.is_empty()).then_some(geometry_records));
++        #[cfg(feature = "native-core")]
++        let mut scroll_copy = None;
+         let damage = if self.automatic_presentation {
+             // Automatic headless acknowledgement retains no external surface
+             // to repair. Do not compare commands for an unused capability.
+             scene.commit();
+             DamageRegion::default()
+         } else {
+-            scene.commit_with_damage().union(
++            #[cfg(feature = "native-core")]
++            let damage = if let Some((viewport, delta)) = scroll_proposal {
++                let (damage, copy) = scene.commit_with_scroll_damage(viewport, delta);
++                scroll_copy = copy;
++                damage
++            } else {
++                scene.commit_with_damage()
++            };
++            #[cfg(not(feature = "native-core"))]
++            let damage = scene.commit_with_damage();
++            damage.union(
+                 self.prepared
+                     .as_ref()
+                     .map_or(DamageRegion::default(), |prepared| prepared.damage),
+             )
+         };
++        #[cfg(feature = "native-core")]
++        if let Some(copy) = scroll_copy {
++            let transition = paint::ScrollTransition {
++                from: self.latest_token.expect("acknowledged predecessor"),
++                to: token,
++                copy,
++            };
++            let slot = &mut self
++                .metadata
++                .as_mut()
++                .expect("viewport metadata")
++                .scroll_copy;
++            if let Some(storage) = slot {
++                **storage = transition;
++            } else {
++                *slot = Some(Box::new(transition));
++            }
++        }
+         for (&key, state) in &mut self.viewports {
+             if let (ViewportKey::Scroll(identity), ViewportState::Scroll(state)) = (key, state)
+                 && let Some(offset) = viewport_geometry.offset(identity)
+diff --git a/reactivity/crates/gpui/src/runtime/metadata.rs b/reactivity/crates/gpui/src/runtime/metadata.rs
+index 6b4dc3ed74..536b949c8d 100644
+--- a/reactivity/crates/gpui/src/runtime/metadata.rs
++++ b/reactivity/crates/gpui/src/runtime/metadata.rs
+@@ -198,6 +198,8 @@ pub(super) struct Metadata {
+     pub presented: Sheet,
+     pub candidate: Option<Sheet>,
+     pub geometry: Option<Box<super::geometry::Geometry>>,
++    #[cfg(feature = "native-core")]
++    pub scroll_copy: Option<Box<super::paint::ScrollTransition>>,
+ }
+ impl Metadata {
+     pub fn base(&self, identity: u64) -> Option<&Declared> {
+diff --git a/reactivity/crates/gpui/src/runtime/paint.rs b/reactivity/crates/gpui/src/runtime/paint.rs
+index 7014f461ab..6652602326 100644
+--- a/reactivity/crates/gpui/src/runtime/paint.rs
++++ b/reactivity/crates/gpui/src/runtime/paint.rs
+@@ -160,13 +160,22 @@ impl Prepared {
+ #[derive(Clone, Copy, PartialEq, Eq)]
+ pub(crate) struct SceneEpoch(NonZeroU64, u64);
+ 
++/// Unlike a source epoch, these tokens distinguish successive unbound scrolls.
++#[cfg(feature = "native-core")]
++pub(crate) struct ScrollTransition {
++    pub(crate) from: PresentationToken,
++    pub(crate) to: PresentationToken,
++    pub(crate) copy: gpui_canvas::ScrollCopy,
++}
++
+ /// Damage relative to the acknowledged epoch, never to an arbitrary GPU packet.
+ #[cfg(feature = "native-core")]
+ #[derive(Clone, Copy)]
+-pub(crate) struct SceneDamage {
++pub(crate) struct SceneDamage<'a> {
+     pub(crate) base: Option<SceneEpoch>,
+     pub(crate) epoch: SceneEpoch,
+     pub(crate) region: gpui_canvas::DamageRegion,
++    pub(crate) scroll: Option<&'a ScrollTransition>,
+ }
+ 
+ #[cfg(feature = "native-core")]
+@@ -177,7 +186,7 @@ impl<M: View + 'static, L: LaneSet<M>> Win<M, L> {
+             gpui_canvas::PreparedScene<'_>,
+             PresentationToken,
+             Option<&SlotTransition>,
+-            SceneDamage,
++            SceneDamage<'_>,
+         ) -> R,
+     ) -> Result<R, Error> {
+         let runtime = self.runtime()?;
+@@ -188,6 +197,11 @@ impl<M: View + 'static, L: LaneSet<M>> Win<M, L> {
+             token,
+             runtime.styles.slot_transition(),
+             SceneDamage {
++                scroll: runtime
++                    .metadata
++                    .as_ref()
++                    .and_then(|m| m.scroll_copy.as_deref())
++                    .filter(|scroll| scroll.to == token),
+                 base: (!runtime.automatic_presentation && runtime.presentation_valid).then_some(
+                     SceneEpoch(runtime.sites.namespace(), runtime.presentation_epoch),
+                 ),
+diff --git a/reactivity/crates/gpui/src/runtime/scroll.rs b/reactivity/crates/gpui/src/runtime/scroll.rs
+index 20aa3021c3..055645374b 100644
+--- a/reactivity/crates/gpui/src/runtime/scroll.rs
++++ b/reactivity/crates/gpui/src/runtime/scroll.rs
+@@ -239,6 +239,75 @@ pub(super) struct ViewportBuild {
+     scrolls: Vec<ScrollFrozen>,
+ }
+ impl ViewportBuild {
++    #[cfg(feature = "native-core")]
++    pub fn scroll_copy_proposal(
++        &self,
++        previous: &ViewportColumn,
++        before: (&[Presented], geometry::Bases<'_>),
++        after: (&[Presented], geometry::Bases<'_>),
++        index: impl Fn(u64) -> Option<usize>,
++    ) -> Option<([u32; 4], i32)> {
++        if self.lists.len() != previous.lists().len()
++            || self.scrolls.len() != previous.scrolls().len()
++            || self
++                .scrolls
++                .iter()
++                .any(|row| previous.offset(row.identity) != Some(row.offset))
++        {
++            return None;
++        }
++        let mut proposal = None;
++        for row in &self.lists {
++            let old = find(previous.lists(), row.identity, |r| r.identity)?;
++            if old.id != row.id || old.count != row.count {
++                return None;
++            }
++            if old.offset == row.offset {
++                continue;
++            }
++            if proposal.is_some() {
++                return None;
++            }
++            let a = before
++                .0
++                .get(old.index as usize)
++                .filter(|n| n.identity == row.identity)?;
++            let b = after
++                .0
++                .get(index(row.identity)?)
++                .filter(|n| n.identity == row.identity)?;
++            let map = a.transform(before.1)?;
++            if map != b.transform(after.1)?
++                || [map.a, map.b, map.c, map.d] != [1., 0., 0., 1.]
++                || a.local_rect() != b.local_rect()
++                || a.bounds != b.bounds
++            {
++                return None;
++            }
++            let delta = old.offset - row.offset;
++            // Broad-phase bounds are deliberately expanded by interval geometry.
++            // Propose exact author geometry under this admitted identity basis;
++            // Canvas still proves every pixel over the proposed overlap.
++            let rect = a.local_rect();
++            let edges = [
++                f64::from(map.tx) + f64::from(rect.x),
++                f64::from(map.ty) + f64::from(rect.y),
++                f64::from(map.tx) + f64::from(rect.x) + f64::from(rect.width),
++                f64::from(map.ty) + f64::from(rect.y) + f64::from(rect.height),
++            ];
++            if !delta.is_finite()
++                || delta.fract() != 0.
++                || delta.abs() >= f64::from(rect.height)
++                || edges
++                    .iter()
++                    .any(|v| !v.is_finite() || v.fract() != 0. || *v < 0. || *v > 16_384.)
++            {
++                return None;
++            }
++            proposal = Some((edges.map(|v| v as u32), delta as i32));
++        }
++        proposal
++    }
+     #[cfg(feature = "accessibility")]
+     pub fn info(&self, identity: u64, size: [f64; 2]) -> Option<ViewportInfo> {
+         find(&self.lists, identity, |row| row.identity)

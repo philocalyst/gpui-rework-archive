@@ -1,0 +1,3 @@
+   Compiling gpui_canvas v0.1.0 (/home/user/gpui-gpu-scroll-copy-lab/reactivity/crates/canvas)
+    Finished `release` profile [optimized] target(s) in 2.69s
+     Running tests/scroll_copy.rs (/home/user/gpui-gpu-scroll-copy-target/release/build/gpui_canvas/e7169b08d3e38ae3/out/scroll_copy-e7169b08d3e38ae3)

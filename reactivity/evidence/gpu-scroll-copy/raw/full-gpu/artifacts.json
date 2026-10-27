@@ -1,0 +1,20 @@
+[
+  {
+    "path": "/home/user/gpui-gpu-scroll-copy-target/release/build/gpui_gpu/46b604825bacbd9a/out/gpui_gpu-46b604825bacbd9a",
+    "sha256": "66c57e1754d754001521381e0b77f139cada21928ae30c3d4b644bed35623cb4",
+    "preserved": "/home/user/gpui-preserved-test-binaries/66c57e1754d754001521381e0b77f139cada21928ae30c3d4b644bed35623cb4",
+    "bytes": 17110912
+  },
+  {
+    "path": "/home/user/gpui-gpu-scroll-copy-target/release/build/gpui_gpu/37104c559201aed5/out/presentation-37104c559201aed5",
+    "sha256": "41bfe6890ca496ecb3f5eb73e8785e9576316b9179de6499c5e49792541199c4",
+    "preserved": "/home/user/gpui-preserved-test-binaries/41bfe6890ca496ecb3f5eb73e8785e9576316b9179de6499c5e49792541199c4",
+    "bytes": 1472560
+  },
+  {
+    "path": "/home/user/gpui-gpu-scroll-copy-target/release/build/gpui_gpu/fc26bbb724122b97/out/render-fc26bbb724122b97",
+    "sha256": "e1ce48734437856edb2a2e69fb0446b9da5a6629c01c0225618f0ab45162beb6",
+    "preserved": "/home/user/gpui-preserved-test-binaries/e1ce48734437856edb2a2e69fb0446b9da5a6629c01c0225618f0ab45162beb6",
+    "bytes": 16756624
+  }
+]

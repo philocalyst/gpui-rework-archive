@@ -1,0 +1,10 @@
+{
+  "path": "/home/user/gpui-scroll-certificate-negative-target",
+  "regenerable_bytes": 1030400116,
+  "executed_artifacts": [
+    "content-negative/artifact.json",
+    "token-negative-native/artifact.json"
+  ],
+  "source": "674960d414",
+  "reason": "completed negative-control build cache; source, input guards and executed ELF bytes preserved"
+}

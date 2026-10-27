@@ -1,0 +1,11 @@
+
+running 1 test
+test retained_scroll_copy_matches_full_gpu_and_invalidates_after_failure_or_resize ... FAILED
+
+failures:
+
+failures:
+    retained_scroll_copy_matches_full_gpu_and_invalidates_after_failure_or_resize
+
+test result: FAILED. 0 passed; 1 failed; 0 ignored; 0 measured; 58 filtered out; finished in 0.08s
+

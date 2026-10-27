@@ -1,0 +1,9 @@
+{
+  "path": "/home/user/gpui-scroll-copy-cost-control-target/release/build/gpui/7d343a8859c57521/out/gpui-7d343a8859c57521",
+  "sha256": "2402820be538aabfec1620a51817dc270fcce0cc2f151c661d63b09747a206d9",
+  "preserved": "/home/user/gpui-preserved-test-binaries/2402820be538aabfec1620a51817dc270fcce0cc2f151c661d63b09747a206d9",
+  "bytes": 58955576,
+  "worktree": "/home/user/gpui-scroll-copy-cost-control-lab",
+  "source": "6269bdfafc9f9d52527d6018433739826765745a",
+  "inputs": "/home/user/gpui-gpu-scroll-copy-evidence/benchmark-control-corrected/inputs.json"
+}

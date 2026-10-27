@@ -1,0 +1,11 @@
+
+running 1 test
+test changed_content_copy_would_fail_the_complete_pixel_oracle ... FAILED
+
+failures:
+
+failures:
+    changed_content_copy_would_fail_the_complete_pixel_oracle
+
+test result: FAILED. 0 passed; 1 failed; 0 ignored; 0 measured; 5 filtered out; finished in 0.00s
+

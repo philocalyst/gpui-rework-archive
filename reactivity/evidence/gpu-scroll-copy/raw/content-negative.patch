@@ -1,0 +1,13 @@
+diff --git a/reactivity/crates/canvas/src/canvas/scroll.rs b/reactivity/crates/canvas/src/canvas/scroll.rs
+index 11d4700879..40d332b1ee 100644
+--- a/reactivity/crates/canvas/src/canvas/scroll.rs
++++ b/reactivity/crates/canvas/src/canvas/scroll.rs
+@@ -78,7 +78,7 @@ fn certify(
+             contribution(&mut new, destination, 0).ok()?,
+         ) {
+             (None, None) => break,
+-            (Some(a), Some(b)) if a.equivalent(&b) => {}
++            (Some(_a), Some(_b)) => {} // negative control: skip contribution equivalence
+             _ => return None,
+         }
+     }

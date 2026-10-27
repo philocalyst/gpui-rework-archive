@@ -1,0 +1,13 @@
+
+running 3 tests
+test moved_reused_gradient_falls_back_before_staged_lease_transfer ... FAILED
+test exact_scroll_copy_and_other_damage_match_complete_pixels ... ok
+test changed_overlap_stationary_overlay_fractional_maps_and_bad_proposals_fall_back ... ok
+
+failures:
+
+failures:
+    moved_reused_gradient_falls_back_before_staged_lease_transfer
+
+test result: FAILED. 2 passed; 1 failed; 0 ignored; 0 measured; 0 filtered out; finished in 0.01s
+

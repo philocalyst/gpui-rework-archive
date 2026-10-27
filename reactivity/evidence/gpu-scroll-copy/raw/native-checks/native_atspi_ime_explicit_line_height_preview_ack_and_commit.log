@@ -1,0 +1,4 @@
+dbus-daemon[1741100]: [session uid=1000 pid=1741100] Activating service name='org.a11y.Bus' requested by ':1.1' (uid=1000 pid=1741101 comm="/home/user/gpui-gpu-scroll-copy-target/release/bui" label="unconfined")
+dbus-daemon[1741100]: [session uid=1000 pid=1741100] Successfully activated service 'org.a11y.Bus'
+dbus-daemon[1741116]: Activating service name='org.a11y.atspi.Registry' requested by ':1.0' (uid=1000 pid=1741101 comm="/home/user/gpui-gpu-scroll-copy-target/release/bui" label="unconfined")
+dbus-daemon[1741116]: Successfully activated service 'org.a11y.atspi.Registry'
