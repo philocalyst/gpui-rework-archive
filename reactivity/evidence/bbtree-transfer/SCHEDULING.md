@@ -410,3 +410,21 @@ borrows only one registered source. A fair port must keep Workload string
 generation on the UI thread and include its cost when selecting exact source
 publication; moving that work to the producer would change the comparison.
 Line pitch, wheel, keyed overscan, async controls and matched profiles remain.
+
+
+## Size-gated tile refinement in progress
+
+Protocolcca90b4f89323413bd9bfe0608b80db45391d5aa; source
+a3ac8c5b3475b347e264929f749b71bf81b4cf5f on local/gpu-text-gated.
+The expensive comparison is now a separate read-only pass after CSR rebuild,
+called only for certified bounding damage>=4096 pixels. Common-word comparison
+also moves inside that pass. Smaller/empty/None damage retains original packet
+submission rules. No public API/header/dependency changes.79 GPU tests/Clippy
+pass, including4095/4096 boundary output/counter tests and the equal-word
+conservative-bound witness. Fresh mutant9032bc6e89 fails the moved-glyph image
+oracle. Native gates and preregistered primary/mechanism timings remain.
+
+Shipping37485 lines(+24), ELF14735568 B(+2376 over ungated). Patch body8637 B
+versus8898, local reservation888 B unchanged; new repair_regions1778 B/216 B
+local reservation. Do not describe outlining as a total-code or stack reduction.
+Shader unchanged. The fixed threshold will not be tuned after timing.
