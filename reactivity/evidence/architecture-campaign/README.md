@@ -16,13 +16,15 @@ isolated worktree, preregistration, freeze, oracle, mutant and evidence rules.
 | `local/text-cache-bounded` / `/home/user/gpui-bounded-cache-lab` | Bound paragraph scratch | Memory gate passes at 45 KB; two CPU cells exceed 5%, unadopted; dossier `e6bda77dfc` |
 | `local/gpu-draw-major` / `/home/user/gpui-draw-major-lab` | Load each draw once for sixteen samples | Rejected: exact pixels pass, text gains 7–9% miss 20%; complete `evidence/gpu-draw-major` dossier |
 | `local/gpu-pixel-uniform` / `/home/user/gpui-pixel-uniform-lab` | Certify identical per-pixel coverage | Rejected: stripes 8.33x and text-stripes 30% faster but flat +16.6%; complete dossier `173e7c1a34`, 70 GPU tests and exact pixels |
-| `local/text-cache-cold-trim` / `/home/user/gpui-cold-trim-lab` | BBTree-inspired cold path isolation | Production `c8560a8e41`, qualified fixture `606dd0f67d`; 45 KB memory bound and median CPU gates pass, paired uncertainty remains; composed/native qualification running |
+| `local/text-cache-cold-trim` / `/home/user/gpui-cold-trim-lab` | BBTree-inspired cold path isolation | Complete dossier `6b03ad48ad`: 45 KB retention, median CPU gates pass but paired uncertainty remains; 1,045 composed tests and actual native Todo pass; unadopted |
 
 | `local/tree-memory-lanes` / `/home/user/gpui-tree-lanes-lab` | Actual core parent walks: scalar/level/Future/prefetch/proof | Rejected: 2.48x deep level-loop gain, contiguous regression; complete six-way dossier, Miri and mutant |
 | `local/tree-parent-columns` / `/home/user/gpui-tree-columns-lab` | Compact authoritative parent routing | Rejected: selective deep 4.11x but outlined scalar fallback 6.88x slower; complete six-way dossier and code-generation evidence |
 | `local/tree-admitted-walk` / `/home/user/gpui-tree-admitted-lab` | Validate parent walk once per immutable borrow | Unadopted: deep 3.71x, longer shallow +9.86% and single-full +5.05%; complete dossier `ef335bb664`, 1,044 composed tests and native Todo pass |
 
 | `local/delivery-sweep` / `/home/user/gpui-delivery-sweep-lab` | Structural admission of inbox/task work | Rejected: 64 ready +2.61%, budget-one +14.2%; 707 tests/exact outputs pass, assembly proves indexed control uses jump tables |
+
+| `local/source-batch-publication` / `/home/user/gpui-source-batch-lab` | Preserve distinct typed text edits through one publication | Preregistered; bounded disjoint-text prototype and public authority tests; full qualification in progress |
 
 [BBTree transfer research](../bbtree-transfer/README.md) records the pinned
 implementation, failed historical trials, applicability and next hypotheses.
