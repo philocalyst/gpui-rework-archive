@@ -219,8 +219,29 @@ mod tests {
                     .layout
                     .stats()
                     .changed_layout_writes;
+                let old_rows = (case == "stream-owner").then(|| {
+                    fixture
+                        .owner
+                        .runtime()
+                        .unwrap()
+                        .list_rows
+                        .iter()
+                        .map(|(&id, row)| (id, row.visible))
+                        .collect::<Vec<_>>()
+                });
                 fixture.advance(case);
                 let runtime = fixture.owner.runtime().unwrap();
+                if let Some(old_rows) = old_rows {
+                    assert_eq!(
+                        runtime
+                            .list_rows
+                            .iter()
+                            .map(|(&id, row)| (id, row.visible))
+                            .collect::<Vec<_>>(),
+                        old_rows,
+                        "text publication changed retained row membership"
+                    );
+                }
                 unchanged_layout +=
                     usize::from(runtime.layout.stats().changed_layout_writes == writes);
                 patches += usize::from(runtime.text.as_ref().is_some_and(|t| t.patch.is_some()));

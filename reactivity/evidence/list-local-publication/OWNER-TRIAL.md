@@ -40,3 +40,18 @@ list changes, coalescing and failed newer descriptions; compare full pixels and
 acknowledged semantics. Falsify both wrong-P-row identity and an omitted non-text
 invalidation. Freeze every attempt and preserve failures. No cache-hit, ZGX,
 physical-GPU or scanout claim follows from software admission or CPU-only wins.
+
+First owner witness `1f75a5ec2b` passed six public regressions, the existing sparse
+unit and focused Clippy. Both bounded mutants failed actual pixels/semantics.
+Actual owner-stream admission still failed (0/80): the witness incorrectly
+required every old list row to be visible, including intentionally omitted
+overscan rows. The corrected attempt preserves old visibility while its witness
+survives; a full paint continues to recompute membership. An actual Workload
+probe checks retained row identities/visibility across all owner-stream edits.
+This is a correctness repair to the witness, not a changed admission threshold.
+
+The fixed 300-process timing manifest is PROCESS_ORDER.json, seed20261029,
+15 pairs per ten cases, alternating pair order. The control is `6895a10440`,
+production `4afe067fe3e` plus the unchanged complete-cost harness and the same
+independently qualified image correction. Timing remains unauthorized until
+both stream admission and all semantic/native/negative gates pass.

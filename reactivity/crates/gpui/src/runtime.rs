@@ -2657,7 +2657,6 @@ impl<M: View + 'static> Runtime<M> {
                             && old.index == row.item_index
                             && old.y.to_bits() == row.y.to_bits()
                             && old.height.to_bits() == row.height.to_bits()
-                            && old.visible
                             && old.retain_offscreen == draft.plan.retain_offscreen
                             && old.buffered
                                 == !draft
@@ -2674,7 +2673,9 @@ impl<M: View + 'static> Runtime<M> {
                         index: row.item_index,
                         y: row.y,
                         height: row.height,
-                        visible: true,
+                        // Complete paint recomputes membership. A surviving
+                        // text witness must preserve P's omitted buffer rows.
+                        visible: !text_only || self.list_rows[&identity].visible,
                         retain_offscreen: draft.plan.retain_offscreen,
                         buffered: !draft
                             .plan
