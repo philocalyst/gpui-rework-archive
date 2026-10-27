@@ -50,3 +50,15 @@ shader/ELF identities. Shader logic is unchanged; any shader change is out of sc
 This VM uses llvmpipe/private X11. No physical GPU/scanout or ZGX victory follows.
 Competitor equivalence, matched release profiles and two hardware classes remain
 separate mandatory gates. No automatic merge or push; keep all work local.
+
+
+## Pre-timing numerical-envelope correction
+
+The first frozen candidate a3495f600d failed both new public tests with
+ChangedCommon, before any paired timing. Full validation derives two error-bound
+lanes from glyph local origins/extents, so legitimate position/content changes
+can change those lanes even when transform/clip/color/correction identity match.
+Recompute both bounds for the complete changed run and upload those derived
+common lanes with its placements. Continue requiring all other common words to
+match exactly. Preserve the failed suite and its clean input guard. The exact
+new-tile, painter-order and late-failure tests and thresholds are unchanged.

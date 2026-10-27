@@ -119,7 +119,8 @@ pub(super) fn patch(
             return Err(TextPacketError::ChangedCommon);
         }
         let mut error = [0.0_f32; 2];
-        let mut words = Vec::with_capacity(run.count as usize * 2);
+        let mut words = Vec::with_capacity(5 + run.count as usize * 2);
+        words.resize(5, [0; 4]);
         let mut references = 0usize;
         for (index, p) in group.placements().enumerate() {
             let draw = prepared(group, p);
@@ -161,9 +162,17 @@ pub(super) fn patch(
             });
             validated += 1;
         }
-        if common_words(group, error, correction).as_slice() != &state.records[common..word] {
+        let common_words = common_words(group, error, correction);
+        let mut signature = common_words;
+        // These two lanes are derived numerical bounds, not transform/clip/
+        // color authority. Recompute them for the complete changed run exactly
+        // as full preparation does; every other common word must still match.
+        signature[0][3] = state.records[common][3];
+        signature[1][3] = state.records[common + 1][3];
+        if signature.as_slice() != &state.records[common..word] {
             return Err(TextPacketError::ChangedCommon);
         }
+        words[..5].copy_from_slice(&common_words);
         original = original
             .checked_sub(run.references as usize)
             .and_then(|n| n.checked_add(references))
@@ -229,7 +238,7 @@ pub(super) fn patch(
     // No semantic validation remains. Revoke replay before the first queue write.
     let mut packet = state.packet.take().unwrap();
     for p in patches {
-        let word = p.run.word.get() as usize;
+        let word = p.run.word.get() as usize - 5;
         state.records[word..word + p.words.len()].copy_from_slice(&p.words);
         context.queue.write_buffer(
             &state.draws.handle,
