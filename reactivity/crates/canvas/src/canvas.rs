@@ -28,7 +28,7 @@ mod mask_kernel;
 mod metric_scale;
 mod text_patch;
 use metric_scale::MetricScale;
-pub use text_patch::TextRunSlot;
+pub use text_patch::{TextRunReplacement, TextRunSlot};
 mod paint;
 pub use paint::{PaintCommit, PaintEdit, PaintError, PaintErrorKind, PaintIndex};
 mod rounded;

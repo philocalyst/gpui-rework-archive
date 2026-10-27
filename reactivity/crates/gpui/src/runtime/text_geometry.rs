@@ -15,8 +15,13 @@ pub(super) struct TextResources {
     pub font: Option<gpui_canvas::FontFace>,
     pub presented: Vec<Entry>,
     pub candidate: Option<Vec<Entry>>,
-    pub dirty_text: Option<(u64, usize)>,
-    pub patch: Option<Box<TextPatch>>,
+    pub dirty_text: Option<DirtyText>,
+    pub patch: Option<Box<[TextPatch]>>,
+}
+#[derive(Clone, Copy)]
+pub(super) enum DirtyText {
+    One(u64, usize),
+    Batch(u64),
 }
 pub(super) struct TextPatch {
     pub row: usize,
@@ -34,13 +39,15 @@ impl TextResources {
         if let Some(column) = self.candidate.take() {
             self.presented = column;
         }
-        if let Some(patch) = self.patch.take() {
-            rows[patch.row].text = Some(patch.value);
-            let index = self
-                .presented
-                .binary_search_by_key(&(patch.row as u32), |e| e.row)
-                .expect("sparse C retains the P text row");
-            self.presented[index] = patch.geometry;
+        if let Some(patches) = self.patch.take() {
+            for patch in patches.into_vec() {
+                rows[patch.row].text = Some(patch.value);
+                let index = self
+                    .presented
+                    .binary_search_by_key(&(patch.row as u32), |e| e.row)
+                    .expect("sparse C retains the P text row");
+                self.presented[index] = patch.geometry;
+            }
         }
     }
     pub fn entry(&self, row: usize) -> Option<&Entry> {

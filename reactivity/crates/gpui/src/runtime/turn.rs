@@ -115,6 +115,8 @@ impl<M: View + 'static, L: LaneSet<M>> RuntimeMut<'_, M, L> {
         Ok(true)
     }
     fn after_text_batch(&mut self, fields: impl Iterator<Item = FieldId>) -> Result<Commit, Error> {
+        let sparse_eligible = !self.runtime.dirty
+            && self.runtime.complete_epoch.checked_add(1) == Some(self.runtime.source_epoch);
         self.runtime.reconcile_ime();
         self.runtime.counters.exact_updates += 1;
         let result = match catch_unwind(AssertUnwindSafe(|| {
@@ -136,6 +138,13 @@ impl<M: View + 'static, L: LaneSet<M>> RuntimeMut<'_, M, L> {
             self.runtime.logical_valid = false;
             self.runtime.focused = None;
             return Err(error);
+        }
+        if sparse_eligible
+            && (2..=4).contains(&self.runtime.changed_nodes)
+            && self.runtime.layout_dirty.len() == self.runtime.changed_nodes
+            && let Some(text) = &mut self.runtime.text
+        {
+            text.dirty_text = Some(text_geometry::DirtyText::Batch(self.runtime.source_epoch));
         }
         self.runtime.reconcile_editing(EditingIntent::None)?;
         self.present()

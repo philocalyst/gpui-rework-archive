@@ -2904,7 +2904,8 @@ impl<M: View + 'static> Runtime<M> {
             && self.changed_nodes == 1
             && let Some(text) = &mut self.text
         {
-            text.dirty_text = last_changed.map(|index| (self.source_epoch, index));
+            text.dirty_text =
+                last_changed.map(|index| text_geometry::DirtyText::One(self.source_epoch, index));
         }
         Ok(if semantic && !visual_changed {
             PatchOutcome::Metadata
