@@ -12,24 +12,19 @@ isolated worktree, preregistration, freeze, oracle, mutant and evidence rules.
 | `local/sparse-text-publication` / `/home/user/gpui-sparse-text-lab` | Bounded text run + sparse C/P publication | Inconclusive: large wins but noisy zero-static cell; complete dossier at `reactivity/evidence/sparse-text`, commit `a91fd03b9b` |
 | `local/text-session-cache` / `/home/user/gpui-text-session-lab` | Owned font/planning scratch across passes | CPU-qualified at compatible `c7194c74e6`; complete dossier `bc964a0c0a`; unadopted pending broader gates, 3.3 MB retained long-paragraph scratch |
 | `local/zgx-native-comparison` / `/home/user/gpui-native-comparison-lab` | Public native workload port + capacity stress | Diagnostic port `6d5e409d6b`; private X11 exercised, typography/control equivalence incomplete; no native ranking |
-
 | `local/text-cache-bounded` / `/home/user/gpui-bounded-cache-lab` | Bound paragraph scratch | Memory gate passes at 45 KB; two CPU cells exceed 5%, unadopted; dossier `e6bda77dfc` |
 | `local/gpu-draw-major` / `/home/user/gpui-draw-major-lab` | Load each draw once for sixteen samples | Rejected: exact pixels pass, text gains 7–9% miss 20%; complete `evidence/gpu-draw-major` dossier |
 | `local/gpu-pixel-uniform` / `/home/user/gpui-pixel-uniform-lab` | Certify identical per-pixel coverage | Rejected: stripes 8.33x and text-stripes 30% faster but flat +16.6%; complete dossier `173e7c1a34`, 70 GPU tests and exact pixels |
 | `local/text-cache-cold-trim` / `/home/user/gpui-cold-trim-lab` | BBTree-inspired cold path isolation | Complete dossier `6b03ad48ad`: 45 KB retention, median CPU gates pass but paired uncertainty remains; 1,045 composed tests and actual native Todo pass; unadopted |
-
 | `local/tree-memory-lanes` / `/home/user/gpui-tree-lanes-lab` | Actual core parent walks: scalar/level/Future/prefetch/proof | Rejected: 2.48x deep level-loop gain, contiguous regression; complete six-way dossier, Miri and mutant |
 | `local/tree-parent-columns` / `/home/user/gpui-tree-columns-lab` | Compact authoritative parent routing | Rejected: selective deep 4.11x but outlined scalar fallback 6.88x slower; complete six-way dossier and code-generation evidence |
 | `local/tree-admitted-walk` / `/home/user/gpui-tree-admitted-lab` | Validate parent walk once per immutable borrow | Unadopted: deep 3.71x, longer shallow +9.86% and single-full +5.05%; complete dossier `ef335bb664`, 1,044 composed tests and native Todo pass |
-
 | `local/delivery-sweep` / `/home/user/gpui-delivery-sweep-lab` | Structural admission of inbox/task work | Rejected: 64 ready +2.61%, budget-one +14.2%; 707 tests/exact outputs pass, assembly proves indexed control uses jump tables |
-
 | `local/source-batch-publication` / `/home/user/gpui-source-batch-lab` | Preserve distinct typed text edits through one publication | Numerical gates pass: 25–27% less complete publication CPU at 1000 labels; 711 default / 1049 composed tests and six actual native scripts; complete dossier `1830d9d54f`, local application trial candidate, uncertainty/hardware limits remain |
-
 | `local/question-source-set` / `/home/user/gpui-question-source-set-lab` | Preserve exact typed source sets through one Question graph refresh | Rejected performance variant: unrelated 1000-label 18.0x/16.6x gains, dependent25 +5.394% and owner1000 +5.134% fail controls; complete dossier `394e246b9b`, 718 default / 791 native GPUI tests and six actual native scripts |
-
-| `local/question-source-borrowed` / `/home/user/gpui-question-source-borrowed-lab` | Borrow source authority for one synchronous graph refresh | Separate preregistered ABI/code-generation hypothesis; qualification started |
-| `local/sparse-text-batch` / `/home/user/gpui-sparse-batch-lab` | Atomically prepare disjoint sparse command/geometry runs | Separate preregistered candidate `6a2cea6a5c`; collective resource-use and rollback gates started |
+| `local/question-source-borrowed` / `/home/user/gpui-question-source-borrowed-lab` | Borrow source authority for one synchronous graph refresh | Rejected: primary 18.8x/17.4x, zero-label dependent two-field +7.65%; complete dossier `6553d9a6df`, 719 default / 792 X11 GPUI tests, six native scripts, separate owned comparison |
+| `local/sparse-text-batch` / `/home/user/gpui-sparse-batch-lab` | Atomically prepare disjoint sparse command/geometry runs | Rejected: primary 14.4x/8.1x, 25-label two-field owner +5.62%; complete dossier `2d55c3dff1`, 975 default / 1048 X11 GPUI+Canvas tests, six native scripts |
+| `local/sparse-text-outline` / `/home/user/gpui-sparse-outline-lab` | Isolate batch preparation from the single-run routine | Preregistered one-attribute candidate `a476ef4330`; linked growth 2078→5337 B and stack reservation 344→584 B motivate the hypothesis; qualification running |
 
 [BBTree transfer research](../bbtree-transfer/README.md) records the pinned
 implementation, failed historical trials, applicability and next hypotheses.
@@ -44,7 +39,7 @@ in `/home/user/zgx-reference-local`. Its unchanged `RENDER=0` microbenchmark
 performs layout/damage while GPUI's recorder additionally materializes canonical
 glyph commands. Those endpoints and initial profiles differ: no speed ranking
 may be derived from their numbers. Native equivalents must match typography,
-content, overscan, controls, timing and acknowledged output before measurement.
+content, overscan, keyed row retention, controls, timing and acknowledged output before measurement. The reference plus/equals controls explicitly yield before their batched update; the current port still performs them synchronously. Wheel routing and line pitch remain incomplete too.
 
 This VM has no `/dev/dri`. Software Vulkan is llvmpipe, not a hardware GPU.
 The documented `ssh mothership` does not resolve and no SSH keys are installed.

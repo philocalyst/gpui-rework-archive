@@ -170,11 +170,8 @@ intermediate request stamps in dependent joins. Unknown callbacks keep coarse
 refresh. This proposal is not implemented by the current text-only trial and
 does not supply Solid's automatic multi-output transition semantics.
 
-The separate Question-source-set prototype is now frozen and its first 54
-targeted tests plus strict Clippy pass. It preserves unrelated Ready questions,
-freezes dependent tuples once from final inputs, and rejects stale A-B-A results.
-A multi-source diamond, forgetting-one-member mutant and equal settled-endpoint
-cost fixture are being qualified independently. No performance verdict yet.
+The earlier Question-source-set prototype passed its initial semantic gates; its
+completed performance rejection and follow-up formulations are recorded below.
 
 
 ## Completed Question cohort trial and next isolated formulations
@@ -212,3 +209,68 @@ The identity-order and identity-order-dense dossiers are held: lookup/memory win
 came with mount, inspector and teardown regressions. They are not evidence to
 replace painter-order storage wholesale. Variable-length glyph spans and resource
 lifetime are promising separate questions after the bounded batch is measured.
+
+
+## Completed borrowed and atomic sparse-batch formulations
+
+The borrowed source cohort is also rejected: baseline primary ratios
+.05313/.05741, but zero-label two-field dependent control 1.07654, paired range
+.9508–1.1731. Complete dossier 6553d9a6df. Its 240-process main comparison and
+24-process owned comparison both preserve exact outputs and task counts;
+48 allocation probes retain zero warm bytes, 719 default / 792 X11 GPUI tests
+and six actual native scripts pass. The owned comparison is separate: dependent
+25-label median 1.00108, owner1000 .97194, primary unrelated .98759/.99809.
+There is little evidence of a general borrowing improvement. Control failures
+moving between trials do not establish a cache or ABI cause.
+
+Atomic sparse text batches also reject their numerical gate: 210 processes,
+primary .06928/.12344 but owner25 two-field 1.05617. Complete dossier 2d55c3dff1.
+With 1000 labels, two-field requested bytes fall 341828→5688, four-field
+343672→10628, with zero warm retention. Exact public pixels/geometry, late
+rejection atomicity mutant, 975 default / 1048 X11 GPUI+Canvas tests, strict
+Clippy and six actual native scripts qualify the exercised semantics. The boxed
+patch-slice owner adds 8 persistent bytes. Shipping code adds 280 lines.
+
+Artifact guards caught Cargo test replacing convenience example paths with
+other feature builds before timing. Both dossiers preserve the discovery and
+bind direct build/out executables from explicit build-only JSON receipts.
+Excluded native-feature sparse allocation probes are retained separately.
+Independent dossier verifiers recompute both failed numerical verdicts.
+
+The next isolated trial, local/sparse-text-outline at a476ef4330, adds only
+#[inline(never)] to try_sparse_text_batch. The prior compiler inlined that helper
+into try_sparse_text, growing it 2078→5337 B and stack reservation 344→584 B.
+This is a concrete code-layout hypothesis, not a causal conclusion from the
+narrow control loss. Its full matrix and separate inline comparison are fixed
+before measurement. No storage, eligibility or API change is mixed into it.
+
+The native GPU path still rebuilds and uploads the entire packet after a text
+change. Future transfer of validated text-run changes into GPU record/tile
+updates is a separate hypothesis. It requires exact scene-token matching,
+painter-order addresses, tile incidence, raster leases and failed-preparation
+replay authority. CPU sparse recording is not sparse GPU packet preparation.
+
+## Further primary research: batching without application API changes
+
+[CoroBase (VLDB 2021)](https://vldb.org/pvldb/vol14/p431-he.pdf), sections 1,
+4.3–4.4 and 5.9–5.10, studies inter-transaction coroutine batching while retaining
+single-operation application interfaces. Its two-level structure flattens engine
+operations while keeping application transactions separate. Fully nested frames
+add switching and allocation costs; excessive flattening can enlarge instruction
+footprints. Its evaluation uses a custom frame allocator, and larger batches can
+increase transaction latency. The paper also changes reclamation boundaries and
+transaction-local scratch ownership when several transactions share one thread.
+Those details prohibit treating an existing thread-local buffer as lane-local.
+
+[Psaropoulos et al. (VLDB 2017)](https://vldb.org/pvldb/vol11/p230-psaropoulos.pdf),
+sections 1–2, distinguishes static interleaving for uniform lookup control flow
+from dynamic interleaving when paths diverge. Its coroutine formulation seeks
+maintainable code comparable to hand-written AMAC, not a universal claim that
+coroutines beat tight loops.
+
+GPUI inference: existing frozen update batches and immutable scene borrows are
+plausible boundaries for internal gather work. Arbitrary mutable callbacks remain
+ordered, external tasks require real wakes, and input latency/teardown remain
+first-class gates. Neither database result qualifies GPUI's scheduler or supplies
+Solid's automatic coherent publication semantics. The locally tested loop/Future
+and source-cohort results above decide their actual usefulness here.
