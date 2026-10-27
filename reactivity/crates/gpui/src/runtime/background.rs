@@ -745,7 +745,7 @@ mod tests {
     #[test]
     fn gradient_background_typed_reflection_owner_validation_and_replacement_are_coherent() {
         assert_eq!(size_of::<Color>(), 16);
-        assert_eq!(size_of::<Style>(), 88);
+        assert_eq!(size_of::<Style>(), 96);
         assert_eq!(size_of::<Node>(), 24);
         assert_eq!(size_of::<crate::property::PropertyValue>(), 28);
         assert_eq!(size_of::<crate::style_port::PropInput<'_, Color>>(), 48);

@@ -840,7 +840,7 @@ mod tests {
             assert_eq!(std::mem::size_of::<Option<Box<Editing>>>(), 8);
             assert_eq!(std::mem::size_of::<Node>(), 24);
             // The safe packed owner makes embedded TextLayout 56B and this site 80B.
-            assert_eq!(std::mem::size_of::<TextSite>(), 80);
+            assert_eq!(std::mem::size_of::<TextSite>(), 88);
         }
     }
 

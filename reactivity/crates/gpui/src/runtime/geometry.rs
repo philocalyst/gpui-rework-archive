@@ -911,7 +911,7 @@ mod clip_layout_tests {
         }
         assert_eq!(size_of::<Node>(), 24);
         assert_eq!(size_of::<Presented>(), 64);
-        assert_eq!(size_of::<crate::Style>(), 88);
+        assert_eq!(size_of::<crate::Style>(), 96);
         assert_eq!(size_of::<Record>(), 16);
     }
 }

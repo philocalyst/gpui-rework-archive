@@ -210,10 +210,10 @@ fn partial_recipes_preserve_previous_declared_fields() {
     assert!(win.property(root, WRAP).unwrap());
     let target = win.role(Role::Button).text("child").one().unwrap();
     near(win.bounds(target).unwrap(), [80.0, 50.0, 20.0, 10.0]);
-    // New literal fields occupy the previous style padding on this ABI.
+    // Absolute line height adds eight bytes to authored style on this ABI.
     if cfg!(target_pointer_width = "64") {
-        assert_eq!(std::mem::size_of::<Style>(), 88);
-        assert_eq!(std::mem::size_of::<El<'_>>(), 176);
+        assert_eq!(std::mem::size_of::<Style>(), 96);
+        assert_eq!(std::mem::size_of::<El<'_>>(), 184);
     }
 }
 
