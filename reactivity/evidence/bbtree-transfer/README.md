@@ -96,3 +96,14 @@ independent correctness dossier `131c05c3c9` preserves baseline pixel failures
 and qualifies the two-expression correction with991 default/1065 X11 tests,
 10 native-port tests and11 actual native scripts. Both performance alternatives
 must include that correction; omitted images cannot count as faster rendering.
+
+
+Completed local-publication dossier `9725cfa267` rejects the final performance
+variant despite direct/owner admission80/80 each. In300 fixed timed processes,
+paired stream ratio1.016588093 and owner1.023470685 miss the0.8 primary gate;
+all other point controls pass. Allocation savings29 requests/64324 bytes per
+warm stream update do not establish whole-frame improvement. Qualification:
+997 default/1082 X11,10 port,11 native scripts and two actual-output mutants.
+Post-run inspection found sparse text marks the entire run dirty while full
+Canvas replacement compares draws individually. Actual damage/phase diagnosis
+is still required before attributing the regression or proposing a new variant.
