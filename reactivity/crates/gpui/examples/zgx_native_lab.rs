@@ -94,8 +94,8 @@ impl Driver {
 impl Drop for Driver {
     fn drop(&mut self) {
         eprintln!(
-            "workload_ticks={} admitted_ticks={}",
-            self.work.frames, self.received
+            "workload_ticks={} admitted_ticks={} workload_scroll_offset={}",
+            self.work.frames, self.received, self.work.scroll_offset
         );
     }
 }
