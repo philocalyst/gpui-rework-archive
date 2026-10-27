@@ -4216,6 +4216,140 @@ fn retained_text_packet_cost_probe() {
 }
 
 #[test]
+fn retained_scroll_copy_matches_full_gpu_and_invalidates_after_failure_or_resize() {
+    use gpui_gpu::RetainedRenderer;
+    fn stage<'a>(
+        canvas: &'a mut Canvas,
+        text: &mut TextSystem,
+        offset: f32,
+        header: u8,
+    ) -> gpui_canvas::CanvasScene<'a> {
+        let width = canvas.width();
+        let height = canvas.height();
+        let mut stage = canvas.stage();
+        stage.clear(Color::WHITE);
+        stage
+            .fill_rect(
+                Rect::new(1., 1., 20., 4.),
+                Affine::IDENTITY,
+                Rect::new(0., 0., width as f32, height as f32),
+                Color::rgb(header, 40, 70),
+            )
+            .unwrap();
+        let clip = Rect::new(5., 7., 60., 48.);
+        for row in 0..20 {
+            let y = 7. + row as f32 * 12. - offset;
+            stage
+                .fill_rect(
+                    Rect::new(0., 0., 60., 12.),
+                    Affine::translation(5., y),
+                    clip,
+                    Color::linear_srgb(0.1 + (row % 3) as f32 * 0.2, 0.3, 0.4, 0.7).unwrap(),
+                )
+                .unwrap();
+            let layout = text.shape(&format!("row {row}"), 9., None).unwrap();
+            stage
+                .draw_text(
+                    text,
+                    &layout,
+                    Point::default(),
+                    Affine::translation(7., y + 1.),
+                    clip,
+                    Color::BLACK,
+                )
+                .unwrap();
+        }
+        stage
+    }
+    pollster::block_on(async {
+        for format in [
+            wgpu::TextureFormat::Rgba8Unorm,
+            wgpu::TextureFormat::Rgba8UnormSrgb,
+            wgpu::TextureFormat::Bgra8UnormSrgb,
+            wgpu::TextureFormat::Rgba16Float,
+        ] {
+            let inner = renderer(format).await;
+            let mut oracle = Renderer::new(inner.device().clone(), inner.queue().clone(), format)
+                .await
+                .unwrap();
+            let mut gpu = RetainedRenderer::new(inner);
+            let config = if format == wgpu::TextureFormat::Rgba16Float {
+                ColorConfig::linear_hdr(gpui_canvas::OutputProfile::Srgb, 203.).unwrap()
+            } else {
+                ColorConfig::default()
+            };
+            let mut text = TextSystem::bundled().unwrap();
+            for size in [[80, 64], [96, 80], [80, 64]] {
+                let total = u64::from(size[0] * size[1]);
+                let mut canvas = Canvas::recording(size[0], size[1], config).unwrap();
+                stage(&mut canvas, &mut text, 0., 0).commit();
+                let mut offset = 0;
+                for (turn, next) in [6, 12, 24, 18, 0, 40, 7].into_iter().enumerate() {
+                    let (damage, plan) = stage(&mut canvas, &mut text, next as f32, turn as u8 + 1)
+                        .commit_with_scroll_damage([5, 7, 65, 55], offset - next);
+                    let plan = plan.unwrap();
+                    let target = output_texture(&gpu, &canvas);
+                    let view = target.create_view(&Default::default());
+                    gpu.render_with_scroll(
+                        canvas.prepared_scene(),
+                        &view,
+                        Some(damage),
+                        Some(&plan),
+                    )
+                    .unwrap();
+                    assert!(
+                        read_texture(&gpu, &target) == readback(&mut oracle, &canvas),
+                        "format={format:?}, size={size:?}, {offset}->{next}"
+                    );
+                    if turn == 0 {
+                        assert_eq!(gpu.retained_stats().composited_pixels, total);
+                        assert_eq!(
+                            gpu.retained_stats().image_bytes,
+                            total * u64::from(format.block_copy_size(None).unwrap())
+                        );
+                    } else {
+                        let [l, t, r, b] = plan.source();
+                        assert_eq!(
+                            gpu.retained_stats().copied_pixels,
+                            total + 2 * u64::from(r - l) * u64::from(b - t)
+                        );
+                        assert!(gpu.retained_stats().composited_pixels < total);
+                        assert!(
+                            gpu.retained_stats().image_bytes
+                                > total * u64::from(format.block_copy_size(None).unwrap())
+                        );
+                    }
+                    if turn == 2 {
+                        let mut bad = canvas.prepared_scene();
+                        bad.clear[0] = f32::NAN;
+                        assert!(
+                            gpu.render_with_scroll(bad, &view, Some(damage), Some(&plan))
+                                .is_err()
+                        );
+                        assert!(gpu.redraw(&view).unwrap().is_none());
+                        gpu.render_with_scroll(
+                            canvas.prepared_scene(),
+                            &view,
+                            Some(gpui_canvas::DamageRegion::default()),
+                            Some(&plan),
+                        )
+                        .unwrap();
+                        assert_eq!(gpu.retained_stats().composited_pixels, total);
+                        assert!(read_texture(&gpu, &target) == readback(&mut oracle, &canvas));
+                    }
+                    let fresh = output_texture(&gpu, &canvas);
+                    gpu.redraw(&fresh.create_view(&Default::default()))
+                        .unwrap()
+                        .unwrap();
+                    assert!(read_texture(&gpu, &fresh) == read_texture(&gpu, &target));
+                    offset = next;
+                }
+            }
+        }
+    });
+}
+
+#[test]
 fn retained_repair_matches_full_gpu_through_moves_removals_resize_and_failures() {
     use gpui_canvas::DamageRegion;
     use gpui_gpu::RetainedRenderer;
