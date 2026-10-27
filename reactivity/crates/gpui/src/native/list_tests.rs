@@ -287,7 +287,7 @@ impl Script {
                 {
                     panic!("X11 pixel {index}: actual {actual:#08x}, expected {expected:#08x}");
                 }
-                assert_eq!(owner.counters().source_operations, 1);
+                assert_eq!(owner.counters().source_operations, 1 + 2 * wheel_epoch);
                 self.complete = true;
                 event_loop.exit();
             }

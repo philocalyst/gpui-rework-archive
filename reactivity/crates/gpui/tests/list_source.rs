@@ -5,6 +5,7 @@ struct Rows {
     other: Signal<f64>,
     wrong_writer: bool,
     alternate: bool,
+    controlled: bool,
     len: usize,
     first: u64,
     list: bool,
@@ -30,6 +31,7 @@ impl Rows {
             other: Signal::new(0.),
             wrong_writer: false,
             alternate: false,
+            controlled: true,
             len: 100_000,
             first: 100,
             list: true,
@@ -65,10 +67,16 @@ impl View for Rows {
             if self.list {
                 uniform_list(LIST, self, 32)
                     .overscan(2)
-                    .scroll_offset(if self.alternate {
-                        &self.other
-                    } else {
-                        &self.offset
+                    .apply(|list| {
+                        if self.controlled {
+                            list.scroll_offset(if self.alternate {
+                                &self.other
+                            } else {
+                                &self.offset
+                            })
+                        } else {
+                            list
+                        }
                     })
                     .h(96)
                     .w(200)
@@ -354,4 +362,117 @@ fn nested_wheel_commits_controlled_list_and_ordinary_residual_together() {
         )
         .unwrap();
     fresh.with_pixels(|p, _, _| assert_eq!(actual, p)).unwrap();
+}
+
+#[test]
+fn optional_list_description_storage_has_exact_charged_costs() {
+    let rows = Rows::new(0.);
+    for mode in 0..5 {
+        let mut element = None;
+        let measured = allocation_counter::measure(|| {
+            let list = uniform_list(LIST, &rows, 32);
+            element = Some(match mode {
+                0 => list,
+                1 => list.overscan(0),
+                2 => list.overscan(2),
+                3 => list.scroll_offset(&rows.offset),
+                _ => list.overscan(2).scroll_offset(&rows.offset).name("list"),
+            });
+        });
+        let expected = match mode {
+            0 | 1 => (1, 56),
+            2 | 3 => (2, 88),
+            _ => (3, 128),
+        };
+        assert_eq!((measured.count_total, measured.bytes_total), expected);
+        eprintln!(
+            "list_description,mode={mode},requests={},bytes={},retained={}",
+            measured.count_total, measured.bytes_total, measured.bytes_current
+        );
+        drop(element);
+    }
+}
+
+#[test]
+fn complete_list_source_allocation_ledger() {
+    let mode = std::env::var("GPUI_LIST_SOURCE_LEDGER_MODE")
+        .unwrap_or_else(|_| "3".into())
+        .parse::<u8>()
+        .unwrap();
+    assert!(mode < 4);
+    let controlled = mode & 1 != 0;
+    let overscan = if mode & 2 != 0 { 2 } else { 0 };
+    struct Fixture {
+        rows: Rows,
+        overscan: usize,
+    }
+    impl Fixture {
+        const OFFSET: Source<Self, f64> = Source::new(
+            FieldId::new(1),
+            "offset",
+            |m| &m.rows.offset,
+            |m| &mut m.rows.offset,
+        );
+    }
+    impl View for Fixture {
+        fn sources() -> Sources<Self> {
+            Sources::new().direct(Self::OFFSET)
+        }
+        fn view(&self) -> El<'_> {
+            column((
+                text(&self.rows.offset).h(24),
+                uniform_list(LIST, &self.rows, 32)
+                    .overscan(self.overscan)
+                    .apply(|list| {
+                        if self.rows.controlled {
+                            list.scroll_offset(&self.rows.offset)
+                        } else {
+                            list
+                        }
+                    })
+                    .h(96)
+                    .w(200),
+            ))
+        }
+    }
+    let mut win = None;
+    let mount = allocation_counter::measure(|| {
+        let mut rows = Rows::new(0.);
+        rows.controlled = controlled;
+        let mut owner = Win::recording(
+            Fixture { rows, overscan },
+            WindowOptions {
+                size: [240, 160],
+                ..Default::default()
+            },
+        )
+        .unwrap();
+        let token = owner.with_scene(|_, t| t).unwrap();
+        owner.presented(token).unwrap();
+        win = Some(owner);
+    });
+    let mut win = win.unwrap();
+    let list = win.list(LIST).unwrap();
+    let scroll = allocation_counter::measure(|| {
+        for _ in 0..16 {
+            win.scroll(list, 14.).unwrap();
+            let token = win.with_scene(|_, t| t).unwrap();
+            win.presented(token).unwrap();
+        }
+    });
+    assert_eq!(win.list_state(list).unwrap().offset, 224.);
+    assert_eq!(
+        *win.read(Fixture::OFFSET).unwrap(),
+        if controlled { 224. } else { 0. }
+    );
+    assert_eq!(
+        win.snapshot().unwrap().source_epoch,
+        if controlled { 16 } else { 0 }
+    );
+    for (operation, value) in [("mount", mount), ("scroll16", scroll)] {
+        eprintln!(
+            "list_source_alloc,mode={mode},controlled={controlled},overscan={overscan},operation={operation},requests={},bytes={},retained={},peak={}",
+            value.count_total, value.bytes_total, value.bytes_current, value.bytes_max
+        );
+    }
 }
