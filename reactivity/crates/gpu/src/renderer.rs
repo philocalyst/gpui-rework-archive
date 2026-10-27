@@ -528,19 +528,12 @@ impl GpuContext {
         self.format
     }
     fn submit(&self, output: Output<'_>, bindings: &wgpu::BindGroup) -> wgpu::SubmissionIndex {
-        let damage = match output.damage {
-            retained::Repair::Full => None,
-            retained::Repair::Region(region) => Some(region),
-            retained::Repair::Regions(regions) => {
-                return self.submit_regions(output, bindings, regions);
-            }
-        };
         let mut encoder = self
             .device
             .create_command_encoder(&wgpu::CommandEncoderDescriptor {
                 label: Some("GPUI frame"),
             });
-        if damage.is_none_or(|damage| !damage.is_empty()) {
+        if output.damage.is_none_or(|damage| !damage.is_empty()) {
             let mut pass = encoder.begin_render_pass(&wgpu::RenderPassDescriptor {
                 label: Some("GPUI frame"),
                 color_attachments: &[Some(wgpu::RenderPassColorAttachment {
@@ -548,7 +541,7 @@ impl GpuContext {
                     resolve_target: None,
                     depth_slice: None,
                     ops: wgpu::Operations {
-                        load: if damage.is_some() {
+                        load: if output.damage.is_some() {
                             wgpu::LoadOp::Load
                         } else {
                             wgpu::LoadOp::Clear(wgpu::Color::TRANSPARENT)
@@ -561,7 +554,7 @@ impl GpuContext {
                 occlusion_query_set: None,
                 multiview_mask: None,
             });
-            if let Some([left, top, right, bottom]) = damage.and_then(|d| d.bounds()) {
+            if let Some([left, top, right, bottom]) = output.damage.and_then(|d| d.bounds()) {
                 pass.set_scissor_rect(left, top, right - left, bottom - top);
             }
             pass.set_pipeline(&self.pipeline);
@@ -690,16 +683,16 @@ impl RendererState {
         scene: PreparedScene<'_>,
         target: &wgpu::TextureView,
     ) -> Result<wgpu::SubmissionIndex, Error> {
-        self.render_observed(context, scene, target.into(), |_, _, _, _| {})
+        self.render_observed(context, scene, Output::from(target), |_, _, _, _| {})
     }
     fn render_observed(
         &mut self,
         context: &GpuContext,
         scene: PreparedScene<'_>,
-        output: Output<'_>,
+        output: impl retained::Submission,
         mut group_ready: impl FnMut(usize, PreparedGroup<'_>, usize, bool),
     ) -> Result<wgpu::SubmissionIndex, Error> {
-        let target = output.view;
+        let target = output.view();
         self.check_context(context)?;
         self.packet = None;
         scene
@@ -1062,7 +1055,7 @@ impl RendererState {
                     },
                 ],
             });
-        let submitted = context.submit(output, &bindings);
+        let submitted = output.submit(context, &bindings);
         self.packet = Some(Packet {
             bindings,
             size: [

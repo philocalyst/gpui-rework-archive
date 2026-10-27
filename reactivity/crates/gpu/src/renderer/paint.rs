@@ -154,7 +154,7 @@ impl PaintRenderer {
         let result = self.inner.state.render_observed(
             &self.inner.context,
             scene,
-            target.into(),
+            Output::from(target),
             |ordinal, group, word, compact| {
                 if let Some(site) = sites.get_mut(next)
                     && site.index.order() as usize == ordinal

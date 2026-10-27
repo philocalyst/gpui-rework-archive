@@ -4,28 +4,46 @@ use gpui_canvas::{DamageRegion, DamageRegions, SlotEdit};
 
 pub(super) struct Output<'a> {
     pub(super) view: &'a wgpu::TextureView,
-    pub(super) damage: Repair<'a>,
+    pub(super) damage: Option<DamageRegion>,
     pub(super) present: Option<(&'a Backing, &'a wgpu::TextureView)>,
 }
 impl<'a> From<&'a wgpu::TextureView> for Output<'a> {
     fn from(view: &'a wgpu::TextureView) -> Self {
         Self {
             view,
-            damage: Repair::Full,
+            damage: None,
             present: None,
         }
     }
 }
 
-#[derive(Clone, Copy)]
-pub(super) enum Repair<'a> {
-    Full,
-    Region(DamageRegion),
-    Regions(&'a DamageRegions),
+// Static output types keep regional submission out of ordinary render callers.
+pub(super) trait Submission {
+    fn view(&self) -> &wgpu::TextureView;
+    fn submit(self, context: &GpuContext, bindings: &wgpu::BindGroup) -> wgpu::SubmissionIndex;
 }
-impl From<Option<DamageRegion>> for Repair<'_> {
-    fn from(damage: Option<DamageRegion>) -> Self {
-        damage.map_or(Self::Full, Self::Region)
+impl Submission for Output<'_> {
+    #[inline(always)]
+    fn view(&self) -> &wgpu::TextureView {
+        self.view
+    }
+    #[inline(always)]
+    fn submit(self, context: &GpuContext, bindings: &wgpu::BindGroup) -> wgpu::SubmissionIndex {
+        context.submit(self, bindings)
+    }
+}
+struct RegionalOutput<'a> {
+    output: Output<'a>,
+    regions: &'a DamageRegions,
+}
+impl Submission for RegionalOutput<'_> {
+    #[inline(always)]
+    fn view(&self) -> &wgpu::TextureView {
+        self.output.view
+    }
+    #[inline(always)]
+    fn submit(self, context: &GpuContext, bindings: &wgpu::BindGroup) -> wgpu::SubmissionIndex {
+        context.submit_regions(self.output, bindings, self.regions)
     }
 }
 
@@ -86,27 +104,6 @@ impl RetainedRenderer {
         target: &wgpu::TextureView,
         damage: Option<DamageRegion>,
     ) -> Result<wgpu::SubmissionIndex, Error> {
-        self.render_repair(scene, target, damage.into())
-    }
-    /// Repair separated regions certified against the preceding retained image.
-    /// The same predecessor/clear/resource requirements as `render` apply.
-    pub fn render_regions(
-        &mut self,
-        scene: PreparedScene<'_>,
-        target: &wgpu::TextureView,
-        damage: &DamageRegions,
-    ) -> Result<wgpu::SubmissionIndex, Error> {
-        if let [region] = damage.regions() {
-            return self.render(scene, target, Some(*region));
-        }
-        self.render_repair(scene, target, Repair::Regions(damage))
-    }
-    fn render_repair(
-        &mut self,
-        scene: PreparedScene<'_>,
-        target: &wgpu::TextureView,
-        damage: Repair<'_>,
-    ) -> Result<wgpu::SubmissionIndex, Error> {
         let size = [scene.width, scene.height];
         // Invalidate image authority even when admission fails before uploads.
         let valid =
@@ -121,34 +118,70 @@ impl RetainedRenderer {
             return Err(Error::ResourceLimit);
         }
         check_target(target, size, self.inner.format())?;
-        match damage {
-            Repair::Full => {}
-            Repair::Region(region) => check_damage(Some(region), size)?,
-            Repair::Regions(regions) => {
-                for &region in regions.regions() {
-                    check_damage(Some(region), size)?;
-                }
-            }
-        }
+        check_damage(damage, size)?;
         let resized = self.backing.as_ref().is_none_or(|b| b.size() != size);
         if resized {
             let pipeline = self.backing.take().map(|b| b.pipeline);
             self.backing = Some(Box::new(Backing::new(&self.inner.context, size, pipeline)));
         }
         let backing = self.backing.as_mut().unwrap();
-        let damage = if valid && !resized {
-            damage
-        } else {
-            Repair::Full
-        };
+        let damage = damage.filter(|_| valid && !resized);
         let submitted = self.inner.state.render_observed(
             &self.inner.context,
             scene,
-            backing.output_repair(target, damage),
+            backing.output(target, damage),
             |_, _, _, _| {},
         )?;
         backing.valid = true;
-        self.stats = backing.stats_repair(damage);
+        self.stats = backing.stats(damage);
+        Ok(submitted)
+    }
+    /// Repair separated regions certified against the preceding retained image.
+    /// The same predecessor/clear/resource requirements as `render` apply.
+    pub fn render_regions(
+        &mut self,
+        scene: PreparedScene<'_>,
+        target: &wgpu::TextureView,
+        damage: &DamageRegions,
+    ) -> Result<wgpu::SubmissionIndex, Error> {
+        if let [region] = damage.regions() {
+            return self.render(scene, target, Some(*region));
+        }
+        let size = [scene.width, scene.height];
+        let valid =
+            self.backing.as_ref().is_some_and(|b| b.valid) && self.inner.state.packet.is_some();
+        // Revoke image authority before any fallible admission, including fallback.
+        if let Some(backing) = &mut self.backing {
+            backing.valid = false;
+        }
+        if size.contains(&0)
+            || size.iter().any(|&n| n > 16_384)
+            || u64::from(size[0]) * u64::from(size[1]) > MAX_PIXELS as u64
+        {
+            return Err(Error::ResourceLimit);
+        }
+        check_target(target, size, self.inner.format())?;
+        for &region in damage.regions() {
+            check_damage(Some(region), size)?;
+        }
+        if !valid || self.backing.as_ref().is_none_or(|b| b.size() != size) {
+            return self.render(scene, target, None);
+        }
+        let backing = self.backing.as_mut().unwrap();
+        let submitted = self.inner.state.render_observed(
+            &self.inner.context,
+            scene,
+            RegionalOutput {
+                output: backing.output(target, None),
+                regions: damage,
+            },
+            |_, _, _, _| {},
+        )?;
+        backing.valid = true;
+        self.stats = RetainedStats {
+            composited_pixels: damage.pixels(),
+            ..backing.stats(None)
+        };
         Ok(submitted)
     }
     /// Copy the last successful image to a fresh target, without compositing.
@@ -296,13 +329,6 @@ impl Backing {
         target: &'a wgpu::TextureView,
         damage: Option<DamageRegion>,
     ) -> Output<'a> {
-        self.output_repair(target, damage.into())
-    }
-    fn output_repair<'a>(
-        &'a self,
-        target: &'a wgpu::TextureView,
-        damage: Repair<'a>,
-    ) -> Output<'a> {
         Output {
             view: &self.view,
             damage,
@@ -310,19 +336,13 @@ impl Backing {
         }
     }
     fn stats(&self, damage: Option<DamageRegion>) -> RetainedStats {
-        self.stats_repair(damage.into())
-    }
-    fn stats_repair(&self, damage: Repair<'_>) -> RetainedStats {
         let [width, height] = self.size();
         let pixels = u64::from(width) * u64::from(height);
         RetainedStats {
-            composited_pixels: match damage {
-                Repair::Full => pixels,
-                Repair::Region(region) => region
-                    .bounds()
-                    .map_or(0, |[l, t, r, b]| u64::from(r - l) * u64::from(b - t)),
-                Repair::Regions(regions) => regions.pixels(),
-            },
+            composited_pixels: damage.map_or(pixels, |d| {
+                d.bounds()
+                    .map_or(0, |[l, t, r, b]| u64::from(r - l) * u64::from(b - t))
+            }),
             copied_pixels: pixels,
             image_bytes: pixels
                 * u64::from(self.view.texture().format().block_copy_size(None).unwrap()),

@@ -4419,7 +4419,7 @@ fn retained_banked_text_images_and_transforms_survive_slot_repairs() {
 
 #[test]
 fn sparse_text_regions_match_full_gpu_and_revoke_after_failure_or_resize() {
-    use gpui_canvas::DamageRegions;
+    use gpui_canvas::{DamageRegions, PaintColor, SlotEdit};
     use gpui_gpu::RetainedRenderer;
     pollster::block_on(async {
         for format in [
@@ -4437,6 +4437,35 @@ fn sparse_text_regions_match_full_gpu_and_revoke_after_failure_or_resize() {
             } else {
                 ColorConfig::default()
             };
+            // Obtain separated bounds through public slot edits, including one
+            // outside both destination sizes. Invalid multi-region admission must
+            // fail even with no image or a differently sized preceding image.
+            let mut region_canvas = Canvas::recording(512, 128, config).unwrap();
+            let mut valid_regions = DamageRegions::default();
+            let mut invalid_regions = DamageRegions::default();
+            for x in [4., 40., 450.] {
+                let slot = region_canvas
+                    .paint_slot(PaintColor::new(Color::BLACK))
+                    .unwrap();
+                region_canvas
+                    .fill_rect_slot(
+                        Rect::new(x, 4., 5., 5.),
+                        Affine::IDENTITY,
+                        Rect::new(0., 0., 512., 128.),
+                        slot,
+                    )
+                    .unwrap();
+                let region = region_canvas
+                    .prepare_slots(&[SlotEdit::new(slot, PaintColor::new(Color::WHITE))])
+                    .unwrap()
+                    .commit();
+                invalid_regions.include(region);
+                if x < 100. {
+                    valid_regions.include(region);
+                }
+            }
+            assert_eq!(valid_regions.regions().len(), 2);
+            assert_eq!(invalid_regions.regions().len(), 3);
             for size in [[320, 128], [352, 144]] {
                 let mut text = TextSystem::bundled().unwrap();
                 let initial = text
@@ -4483,7 +4512,12 @@ fn sparse_text_regions_match_full_gpu_and_revoke_after_failure_or_resize() {
                 stage.commit();
                 let target = output_texture(&gpu, &canvas);
                 let view = target.create_view(&Default::default());
-                gpu.render_regions(canvas.prepared_scene(), &view, &DamageRegions::default())
+                assert!(
+                    gpu.render_regions(canvas.prepared_scene(), &view, &invalid_regions)
+                        .is_err()
+                );
+                assert!(gpu.redraw(&view).unwrap().is_none());
+                gpu.render_regions(canvas.prepared_scene(), &view, &valid_regions)
                     .unwrap();
                 assert_eq!(
                     gpu.retained_stats().composited_pixels,
@@ -4547,7 +4581,12 @@ fn sparse_text_regions_match_full_gpu_and_revoke_after_failure_or_resize() {
                         .is_err()
                 );
                 assert!(gpu.redraw(&view).unwrap().is_none());
-                gpu.render_regions(canvas.prepared_scene(), &view, &DamageRegions::default())
+                assert!(
+                    gpu.render_regions(canvas.prepared_scene(), &view, &invalid_regions)
+                        .is_err()
+                );
+                assert!(gpu.redraw(&view).unwrap().is_none());
+                gpu.render_regions(canvas.prepared_scene(), &view, &valid_regions)
                     .unwrap();
                 assert_eq!(
                     gpu.retained_stats().composited_pixels,
