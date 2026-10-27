@@ -58,8 +58,7 @@ pub(super) struct PlannerState {
 impl PlannerState {
     pub(super) fn for_cache(mut self: Box<Self>) -> Box<Self> {
         if self.large_scratch {
-            self.context = LayoutContext::new();
-            self.layout = parley::Layout::default();
+            // Negative control: retain oversized paragraph scratch.
             self.large_scratch = false;
         }
         self
