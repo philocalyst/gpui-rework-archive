@@ -1,0 +1,6 @@
+
+running 1 test
+test native::tests::native_todo_port_presents_edits_pointer_actions_resize_and_inspection ... ok
+
+test result: ok. 1 passed; 0 failed; 0 ignored; 0 measured; 313 filtered out; finished in 3.96s
+

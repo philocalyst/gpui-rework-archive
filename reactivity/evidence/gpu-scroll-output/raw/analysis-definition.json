@@ -1,0 +1,13 @@
+{
+  "analysis_sha256": "64a3ec50d5c6d3a79232f7bebcceb0f2e2380bd881ca67f5b1c445c5fe7483b0",
+  "run_driver_sha256": "917b470cd02bcba5c15fa1f60383b3bb97aa65f0b9d3a77d510b24d0a519b67e",
+  "process_manifest_sha256": "5a889f4f0ba6c21d06c3377f076d34ec4bec759044a528de1461cff9c38e5c39",
+  "seed": 20261028,
+  "primary": [
+    "scroll",
+    "both"
+  ],
+  "primary_limit": 0.8,
+  "other_limit": 1.05,
+  "predecessor_limit_all_cases": 1.05
+}

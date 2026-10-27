@@ -1,0 +1,7 @@
+{
+  "path": "/home/user/gpui-scroll-output-negative-target",
+  "bytes": 546193390,
+  "source": "d5a18723d1b087c3ee5a1cf28e99fc57ee98c15b",
+  "preserved_artifact": "clear-negative/artifact.json",
+  "reason": "completed expected GPU pixel failure; executed ELF, source and input guards preserved"
+}

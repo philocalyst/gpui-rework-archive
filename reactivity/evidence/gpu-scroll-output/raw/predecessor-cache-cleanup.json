@@ -1,0 +1,1418 @@
+{
+  "path": "/home/user/gpui-gpu-scroll-copy-target",
+  "source_dossier": "8041b7a7fe4f21f27498110e30034d300fee5a7f",
+  "removed_regenerable_cache_bytes": 4016011296,
+  "ELFs": [
+    {
+      "path": "/home/user/gpui-gpu-scroll-copy-target/release/examples/tiles",
+      "sha256": "35682185c5ee23292f44d8bc8d6b97b69ffb6598a7d995135dc69fe830577977",
+      "preserved": "/home/user/gpui-completed-test-binaries-archive/35682185c5ee23292f44d8bc8d6b97b69ffb6598a7d995135dc69fe830577977.gz",
+      "bytes": 15212552
+    },
+    {
+      "path": "/home/user/gpui-gpu-scroll-copy-target/release/examples/damage_cost",
+      "sha256": "67f98880c36839522a42832c53ca1ff834864e6a764686d7738cd7ad2c9e955f",
+      "preserved": "/home/user/gpui-completed-test-binaries-archive/67f98880c36839522a42832c53ca1ff834864e6a764686d7738cd7ad2c9e955f.gz",
+      "bytes": 709336
+    },
+    {
+      "path": "/home/user/gpui-gpu-scroll-copy-target/release/examples/immutable_text_measure",
+      "sha256": "b9974f80440134d2398f526a1bde69d152405aa2bf73f9fd6017d225678a154b",
+      "preserved": "/home/user/gpui-completed-test-binaries-archive/b9974f80440134d2398f526a1bde69d152405aa2bf73f9fd6017d225678a154b.gz",
+      "bytes": 9958576
+    },
+    {
+      "path": "/home/user/gpui-gpu-scroll-copy-target/release/examples/component_sources",
+      "sha256": "b0861684dc459ab59ea906c739f7b20fdbbdd76df348f41af178ab322586155e",
+      "preserved": "/home/user/gpui-completed-test-binaries-archive/b0861684dc459ab59ea906c739f7b20fdbbdd76df348f41af178ab322586155e.gz",
+      "bytes": 25331472
+    },
+    {
+      "path": "/home/user/gpui-gpu-scroll-copy-target/release/examples/state_update_cost",
+      "sha256": "83da590f67cdbbc6d4aa63bf8b60b82b682134ce0105c10b54104e2751624acd",
+      "preserved": "/home/user/gpui-completed-test-binaries-archive/83da590f67cdbbc6d4aa63bf8b60b82b682134ce0105c10b54104e2751624acd.gz",
+      "bytes": 9913872
+    },
+    {
+      "path": "/home/user/gpui-gpu-scroll-copy-target/release/examples/mapped_properties",
+      "sha256": "332abc022bb273f02c87b0e39f2ba3b74a57dbc2a6c68e217ff4c479e46ffeb0",
+      "preserved": "/home/user/gpui-completed-test-binaries-archive/332abc022bb273f02c87b0e39f2ba3b74a57dbc2a6c68e217ff4c479e46ffeb0.gz",
+      "bytes": 25213184
+    },
+    {
+      "path": "/home/user/gpui-gpu-scroll-copy-target/release/examples/first_frame",
+      "sha256": "3bdda2f5e37d2a21d08554d16ad15d80055d3ed2a2a9a3a9e9cc879d0cc25fc7",
+      "preserved": "/home/user/gpui-completed-test-binaries-archive/3bdda2f5e37d2a21d08554d16ad15d80055d3ed2a2a9a3a9e9cc879d0cc25fc7.gz",
+      "bytes": 10064320
+    },
+    {
+      "path": "/home/user/gpui-gpu-scroll-copy-target/release/examples/todo_comparison_mapped",
+      "sha256": "07b7e8fa77d4defa5d13bfdb8b832ff64b844d8cf35eb671303149e5143dc222",
+      "preserved": "/home/user/gpui-completed-test-binaries-archive/07b7e8fa77d4defa5d13bfdb8b832ff64b844d8cf35eb671303149e5143dc222.gz",
+      "bytes": 25579632
+    },
+    {
+      "path": "/home/user/gpui-gpu-scroll-copy-target/release/examples/reactive_styles",
+      "sha256": "88795397541dec0a59484d0aea22914eceb67c306d835c60861a7bf12799636b",
+      "preserved": "/home/user/gpui-completed-test-binaries-archive/88795397541dec0a59484d0aea22914eceb67c306d835c60861a7bf12799636b.gz",
+      "bytes": 10119816
+    },
+    {
+      "path": "/home/user/gpui-gpu-scroll-copy-target/release/examples/unicode",
+      "sha256": "30827388ede8b0455377e52e44635c2dc95189f75426746be2ccdb32c9d4b07f",
+      "preserved": "/home/user/gpui-completed-test-binaries-archive/30827388ede8b0455377e52e44635c2dc95189f75426746be2ccdb32c9d4b07f.gz",
+      "bytes": 25183184
+    },
+    {
+      "path": "/home/user/gpui-gpu-scroll-copy-target/release/examples/color_cost",
+      "sha256": "9ab2fc92d7775f847c24db6169246730278e1cd5edea3595b29d000e84905f29",
+      "preserved": "/home/user/gpui-completed-test-binaries-archive/9ab2fc92d7775f847c24db6169246730278e1cd5edea3595b29d000e84905f29.gz",
+      "bytes": 9761840
+    },
+    {
+      "path": "/home/user/gpui-gpu-scroll-copy-target/release/examples/panes",
+      "sha256": "c40af86ffcb989f5179b4dee80af81d29779036dc988cc5e5fd401054d6cd3c6",
+      "preserved": "/home/user/gpui-completed-test-binaries-archive/c40af86ffcb989f5179b4dee80af81d29779036dc988cc5e5fd401054d6cd3c6.gz",
+      "bytes": 25170240
+    },
+    {
+      "path": "/home/user/gpui-gpu-scroll-copy-target/release/examples/retained",
+      "sha256": "b5c1f92494e95e0ef72636b1f70b21fe8167c8378aa78c4d7cabe2ec7cb116af",
+      "preserved": "/home/user/gpui-completed-test-binaries-archive/b5c1f92494e95e0ef72636b1f70b21fe8167c8378aa78c4d7cabe2ec7cb116af.gz",
+      "bytes": 15300904
+    },
+    {
+      "path": "/home/user/gpui-gpu-scroll-copy-target/release/examples/library",
+      "sha256": "f6b987f0fab71e14a9cafb92aa4d1d8e07721458fc26abd9f42dc9fe29e8133f",
+      "preserved": "/home/user/gpui-completed-test-binaries-archive/f6b987f0fab71e14a9cafb92aa4d1d8e07721458fc26abd9f42dc9fe29e8133f.gz",
+      "bytes": 25795208
+    },
+    {
+      "path": "/home/user/gpui-gpu-scroll-copy-target/release/examples/text_interaction",
+      "sha256": "576f16f0a1054bb1a34bdaedf0b83e6264c76d6137f691ccf3878323baf2f620",
+      "preserved": "/home/user/gpui-completed-test-binaries-archive/576f16f0a1054bb1a34bdaedf0b83e6264c76d6137f691ccf3878323baf2f620.gz",
+      "bytes": 6968304
+    },
+    {
+      "path": "/home/user/gpui-gpu-scroll-copy-target/release/examples/graphics",
+      "sha256": "065da3a6f7b53b642a508ac08437928e26ca8ce1f493cc663b92b84706cf1aac",
+      "preserved": "/home/user/gpui-completed-test-binaries-archive/065da3a6f7b53b642a508ac08437928e26ca8ce1f493cc663b92b84706cf1aac.gz",
+      "bytes": 25199440
+    },
+    {
+      "path": "/home/user/gpui-gpu-scroll-copy-target/release/examples/covers",
+      "sha256": "9c29aa1093c10007efcd244ec269c37cf3b404f4181ff16174856ff3c43e7231",
+      "preserved": "/home/user/gpui-completed-test-binaries-archive/9c29aa1093c10007efcd244ec269c37cf3b404f4181ff16174856ff3c43e7231.gz",
+      "bytes": 25178992
+    },
+    {
+      "path": "/home/user/gpui-gpu-scroll-copy-target/release/examples/unicode_text_measure",
+      "sha256": "b781616e71da08bbea81e6a1481b104deb367f6dfcd693e276ea0242b89049bd",
+      "preserved": "/home/user/gpui-completed-test-binaries-archive/b781616e71da08bbea81e6a1481b104deb367f6dfcd693e276ea0242b89049bd.gz",
+      "bytes": 9898536
+    },
+    {
+      "path": "/home/user/gpui-gpu-scroll-copy-target/release/examples/counter",
+      "sha256": "40a48262fa6753c1c73716fd2305a1fd06a6b0cb6e1b35c0ecd2c8a20f518f94",
+      "preserved": "/home/user/gpui-completed-test-binaries-archive/40a48262fa6753c1c73716fd2305a1fd06a6b0cb6e1b35c0ecd2c8a20f518f94.gz",
+      "bytes": 10044952
+    },
+    {
+      "path": "/home/user/gpui-gpu-scroll-copy-target/release/examples/retained_runs",
+      "sha256": "acfd985ec0fd29df394f0e4022d77e43674d2f5380e0012632b14478a4d5ef09",
+      "preserved": "/home/user/gpui-completed-test-binaries-archive/acfd985ec0fd29df394f0e4022d77e43674d2f5380e0012632b14478a4d5ef09.gz",
+      "bytes": 7886472
+    },
+    {
+      "path": "/home/user/gpui-gpu-scroll-copy-target/release/examples/empty",
+      "sha256": "d517f822987a86e0f2ed4fd06376aba6addea2feb728ad85cb371f7f7ae2a769",
+      "preserved": "/home/user/gpui-completed-test-binaries-archive/d517f822987a86e0f2ed4fd06376aba6addea2feb728ad85cb371f7f7ae2a769.gz",
+      "bytes": 25142384
+    },
+    {
+      "path": "/home/user/gpui-gpu-scroll-copy-target/release/examples/state_update_allocations",
+      "sha256": "211f10ebbdda0c78d27625ec22cb7cdb245c4a65c55896f96fb63fe415af4a58",
+      "preserved": "/home/user/gpui-completed-test-binaries-archive/211f10ebbdda0c78d27625ec22cb7cdb245c4a65c55896f96fb63fe415af4a58.gz",
+      "bytes": 9858192
+    },
+    {
+      "path": "/home/user/gpui-gpu-scroll-copy-target/release/examples/text_lease_measure",
+      "sha256": "ab89f7f7892ac2ad278869f0c5496f09d6f73f9745abff41cca1cd35edcef57a",
+      "preserved": "/home/user/gpui-completed-test-binaries-archive/ab89f7f7892ac2ad278869f0c5496f09d6f73f9745abff41cca1cd35edcef57a.gz",
+      "bytes": 493728
+    },
+    {
+      "path": "/home/user/gpui-gpu-scroll-copy-target/release/examples/text_cache_capacity",
+      "sha256": "ba29537cea31ac7927243a91c4ebdfd7aac56630848df6abacd5538730118476",
+      "preserved": "/home/user/gpui-completed-test-binaries-archive/ba29537cea31ac7927243a91c4ebdfd7aac56630848df6abacd5538730118476.gz",
+      "bytes": 7607152
+    },
+    {
+      "path": "/home/user/gpui-gpu-scroll-copy-target/release/examples/remote_delivery_measure",
+      "sha256": "78433095d5823ee7374689edda91c53266b8cbbf617ba42eef3aee051a10ee20",
+      "preserved": "/home/user/gpui-completed-test-binaries-archive/78433095d5823ee7374689edda91c53266b8cbbf617ba42eef3aee051a10ee20.gz",
+      "bytes": 9885552
+    },
+    {
+      "path": "/home/user/gpui-gpu-scroll-copy-target/release/examples/text_oracle",
+      "sha256": "1cdc227abc0d40fcb15d1883aab0c6df4d0b2a80f68f0522c55c3946a5775bef",
+      "preserved": "/home/user/gpui-completed-test-binaries-archive/1cdc227abc0d40fcb15d1883aab0c6df4d0b2a80f68f0522c55c3946a5775bef.gz",
+      "bytes": 6969672
+    },
+    {
+      "path": "/home/user/gpui-gpu-scroll-copy-target/release/examples/coverage_table",
+      "sha256": "80bb29255fa6cb42a683f428a1219ba1f2dad4de51b5d4fdefb81acbe24d9ff4",
+      "preserved": "/home/user/gpui-completed-test-binaries-archive/80bb29255fa6cb42a683f428a1219ba1f2dad4de51b5d4fdefb81acbe24d9ff4.gz",
+      "bytes": 1434632
+    },
+    {
+      "path": "/home/user/gpui-gpu-scroll-copy-target/release/examples/retained_list",
+      "sha256": "273d0132e6b5e1903ea24c617961f31e6da759dab5f0e67e5f9c5b9b99f8f591",
+      "preserved": "/home/user/gpui-completed-test-binaries-archive/273d0132e6b5e1903ea24c617961f31e6da759dab5f0e67e5f9c5b9b99f8f591.gz",
+      "bytes": 9934360
+    },
+    {
+      "path": "/home/user/gpui-gpu-scroll-copy-target/release/examples/text_lane_measure",
+      "sha256": "e280d296b08fb616bac86a8b3072a3808f6c092b9250a588915d309d9c8adfcd",
+      "preserved": "/home/user/gpui-completed-test-binaries-archive/e280d296b08fb616bac86a8b3072a3808f6c092b9250a588915d309d9c8adfcd.gz",
+      "bytes": 9952120
+    },
+    {
+      "path": "/home/user/gpui-gpu-scroll-copy-target/release/examples/images",
+      "sha256": "c098fab8b2bf188f0baadebf42a413fd82c621c92d28df3fc3b41193f21260ca",
+      "preserved": "/home/user/gpui-completed-test-binaries-archive/c098fab8b2bf188f0baadebf42a413fd82c621c92d28df3fc3b41193f21260ca.gz",
+      "bytes": 7986376
+    },
+    {
+      "path": "/home/user/gpui-gpu-scroll-copy-target/release/examples/luna_bench",
+      "sha256": "230f99185ff3850c0d8772ffba829d82e28acfb0894946007b4f945f2bac8918",
+      "preserved": "/home/user/gpui-completed-test-binaries-archive/230f99185ff3850c0d8772ffba829d82e28acfb0894946007b4f945f2bac8918.gz",
+      "bytes": 25164592
+    },
+    {
+      "path": "/home/user/gpui-gpu-scroll-copy-target/release/examples/selection_queries",
+      "sha256": "97e261897a5bbddbf356f84ff5ebbdd089a420385fbffad9c1badd09a41c32f0",
+      "preserved": "/home/user/gpui-completed-test-binaries-archive/97e261897a5bbddbf356f84ff5ebbdd089a420385fbffad9c1badd09a41c32f0.gz",
+      "bytes": 6954744
+    },
+    {
+      "path": "/home/user/gpui-gpu-scroll-copy-target/release/examples/workbench",
+      "sha256": "66b89c83ad5e63762ba3a70aa046bab9c38504231ed8aa9ffa503364c3fcae3f",
+      "preserved": "/home/user/gpui-completed-test-binaries-archive/66b89c83ad5e63762ba3a70aa046bab9c38504231ed8aa9ffa503364c3fcae3f.gz",
+      "bytes": 25212296
+    },
+    {
+      "path": "/home/user/gpui-gpu-scroll-copy-target/release/examples/group_views",
+      "sha256": "e294ad5e0e7cef045dcae9542964b10e1556ee1703f9b64c00344bcdd4721d72",
+      "preserved": "/home/user/gpui-completed-test-binaries-archive/e294ad5e0e7cef045dcae9542964b10e1556ee1703f9b64c00344bcdd4721d72.gz",
+      "bytes": 7873032
+    },
+    {
+      "path": "/home/user/gpui-gpu-scroll-copy-target/release/examples/zgx_native_lab",
+      "sha256": "f03c842babae64ac88af2d5d40651fb197f5de5570396cb4f5e336c61cda1127",
+      "preserved": "/home/user/gpui-completed-test-binaries-archive/f03c842babae64ac88af2d5d40651fb197f5de5570396cb4f5e336c61cda1127.gz",
+      "bytes": 26328584
+    },
+    {
+      "path": "/home/user/gpui-gpu-scroll-copy-target/release/examples/todo_recording_cost",
+      "sha256": "881d1fa01fee0f9bc2d0a7eb0641092652b469e1a47132696871475b4d20a811",
+      "preserved": "/home/user/gpui-completed-test-binaries-archive/881d1fa01fee0f9bc2d0a7eb0641092652b469e1a47132696871475b4d20a811.gz",
+      "bytes": 10302080
+    },
+    {
+      "path": "/home/user/gpui-gpu-scroll-copy-target/release/examples/workspace",
+      "sha256": "a50e9bf8e82e79de47031a55295605c682dc30160f1241d0846a07cb761d37ed",
+      "preserved": "/home/user/gpui-completed-test-binaries-archive/a50e9bf8e82e79de47031a55295605c682dc30160f1241d0846a07cb761d37ed.gz",
+      "bytes": 25305968
+    },
+    {
+      "path": "/home/user/gpui-gpu-scroll-copy-target/release/examples/inspector",
+      "sha256": "7dcea6119ad0027acd5b8ba8659453de5d9c14ecff702d85989ad09f33a437b4",
+      "preserved": "/home/user/gpui-completed-test-binaries-archive/7dcea6119ad0027acd5b8ba8659453de5d9c14ecff702d85989ad09f33a437b4.gz",
+      "bytes": 25187464
+    },
+    {
+      "path": "/home/user/gpui-gpu-scroll-copy-target/release/examples/todo_comparison_five",
+      "sha256": "a50d444cfe269738a298444481ac57d08ed4cdc7934501f884eb271933fc8643",
+      "preserved": "/home/user/gpui-completed-test-binaries-archive/a50d444cfe269738a298444481ac57d08ed4cdc7934501f884eb271933fc8643.gz",
+      "bytes": 25570160
+    },
+    {
+      "path": "/home/user/gpui-gpu-scroll-copy-target/release/examples/contained_owner_spike",
+      "sha256": "4e866feadbb9397a8b9d6e2e8ce36128a22df42a82ecbdb18f73b30ab9903dba",
+      "preserved": "/home/user/gpui-completed-test-binaries-archive/4e866feadbb9397a8b9d6e2e8ce36128a22df42a82ecbdb18f73b30ab9903dba.gz",
+      "bytes": 10022584
+    },
+    {
+      "path": "/home/user/gpui-gpu-scroll-copy-target/release/examples/cpu",
+      "sha256": "66a9caab88f191bf1f6d9f1bfc3b71194b131a56a911ffa7a6fcdf42055a01a5",
+      "preserved": "/home/user/gpui-completed-test-binaries-archive/66a9caab88f191bf1f6d9f1bfc3b71194b131a56a911ffa7a6fcdf42055a01a5.gz",
+      "bytes": 8031088
+    },
+    {
+      "path": "/home/user/gpui-gpu-scroll-copy-target/release/examples/ime_cursor_cost",
+      "sha256": "63886f9afab043c31b759ee209337ff953b2c3e5089d8f4a8b45b622b36e19a2",
+      "preserved": "/home/user/gpui-completed-test-binaries-archive/63886f9afab043c31b759ee209337ff953b2c3e5089d8f4a8b45b622b36e19a2.gz",
+      "bytes": 9880272
+    },
+    {
+      "path": "/home/user/gpui-gpu-scroll-copy-target/release/examples/groups",
+      "sha256": "e99ed0eca5861582cfc78b5194d14d16f13ae50157a9f9989a45105127b82e5e",
+      "preserved": "/home/user/gpui-completed-test-binaries-archive/e99ed0eca5861582cfc78b5194d14d16f13ae50157a9f9989a45105127b82e5e.gz",
+      "bytes": 15208920
+    },
+    {
+      "path": "/home/user/gpui-gpu-scroll-copy-target/release/examples/caret_pair_measure",
+      "sha256": "3c3cd1b199c22c5688da36529aca9ebc004eb3b8e800fa127b8a064c6723a7e4",
+      "preserved": "/home/user/gpui-completed-test-binaries-archive/3c3cd1b199c22c5688da36529aca9ebc004eb3b8e800fa127b8a064c6723a7e4.gz",
+      "bytes": 6954456
+    },
+    {
+      "path": "/home/user/gpui-gpu-scroll-copy-target/release/examples/text_shaping",
+      "sha256": "ae52f09bb51cec30c33ff9fed52c815cda98a97d65af477ffe71952a6f55d4e9",
+      "preserved": "/home/user/gpui-completed-test-binaries-archive/ae52f09bb51cec30c33ff9fed52c815cda98a97d65af477ffe71952a6f55d4e9.gz",
+      "bytes": 8040928
+    },
+    {
+      "path": "/home/user/gpui-gpu-scroll-copy-target/release/examples/font_memory",
+      "sha256": "24127f2637d80fb9a8a0060fbeae751559b413f6155d3bb68d4e05fbb32de941",
+      "preserved": "/home/user/gpui-completed-test-binaries-archive/24127f2637d80fb9a8a0060fbeae751559b413f6155d3bb68d4e05fbb32de941.gz",
+      "bytes": 10156896
+    },
+    {
+      "path": "/home/user/gpui-gpu-scroll-copy-target/release/examples/property_editor",
+      "sha256": "db8a913831900264e05ece42822588bebc891da0b4d87cdf6c2997c6e0db1552",
+      "preserved": "/home/user/gpui-completed-test-binaries-archive/db8a913831900264e05ece42822588bebc891da0b4d87cdf6c2997c6e0db1552.gz",
+      "bytes": 25296776
+    },
+    {
+      "path": "/home/user/gpui-gpu-scroll-copy-target/release/examples/todo_comparison",
+      "sha256": "349cd303291f9e547ea442124d28eb245232b5c3e44371b3d81dfe2b670f578d",
+      "preserved": "/home/user/gpui-completed-test-binaries-archive/349cd303291f9e547ea442124d28eb245232b5c3e44371b3d81dfe2b670f578d.gz",
+      "bytes": 25549800
+    },
+    {
+      "path": "/home/user/gpui-gpu-scroll-copy-target/release/examples/image_axis",
+      "sha256": "612d3e80f94944ca397720ad3076f377dfb901f3e21db3ef0a10d16ca340e8f0",
+      "preserved": "/home/user/gpui-completed-test-binaries-archive/612d3e80f94944ca397720ad3076f377dfb901f3e21db3ef0a10d16ca340e8f0.gz",
+      "bytes": 754832
+    },
+    {
+      "path": "/home/user/gpui-gpu-scroll-copy-target/release/examples/gradient_backgrounds",
+      "sha256": "ff6045b4f32f47e8d293d2f0911c5dfa9bac695509a7c9db6b8f1b44e963209f",
+      "preserved": "/home/user/gpui-completed-test-binaries-archive/ff6045b4f32f47e8d293d2f0911c5dfa9bac695509a7c9db6b8f1b44e963209f.gz",
+      "bytes": 9857928
+    },
+    {
+      "path": "/home/user/gpui-gpu-scroll-copy-target/release/examples/clip_cost",
+      "sha256": "51a6860084fe76f3480dff098343e5b87b7422bec0bbaf13d7a0556b72ccce24",
+      "preserved": "/home/user/gpui-completed-test-binaries-archive/51a6860084fe76f3480dff098343e5b87b7422bec0bbaf13d7a0556b72ccce24.gz",
+      "bytes": 7879712
+    },
+    {
+      "path": "/home/user/gpui-gpu-scroll-copy-target/release/examples/paint_slot_storage",
+      "sha256": "9dfdd2ea03eae1223f2bddd9d2d8e77159bdd5136651929c02640780208e5cb9",
+      "preserved": "/home/user/gpui-completed-test-binaries-archive/9dfdd2ea03eae1223f2bddd9d2d8e77159bdd5136651929c02640780208e5cb9.gz",
+      "bytes": 9787456
+    },
+    {
+      "path": "/home/user/gpui-gpu-scroll-copy-target/release/examples/sheet_access_measure",
+      "sha256": "7394b25aaf6c50f4b4d35e652942f576d18c49c69933610d39e5e304d8521ac1",
+      "preserved": "/home/user/gpui-completed-test-binaries-archive/7394b25aaf6c50f4b4d35e652942f576d18c49c69933610d39e5e304d8521ac1.gz",
+      "bytes": 9737240
+    },
+    {
+      "path": "/home/user/gpui-gpu-scroll-copy-target/release/build/enumflags2_derive/9b66556ac39f4dc8/out/libenumflags2_derive-9b66556ac39f4dc8.so",
+      "sha256": "5fbabd0ad99de405a18a39f05c27495f0129b6f0fbd7d430a5148609b353087d",
+      "preserved": "/home/user/gpui-completed-test-binaries-archive/5fbabd0ad99de405a18a39f05c27495f0129b6f0fbd7d430a5148609b353087d.gz",
+      "bytes": 3087248
+    },
+    {
+      "path": "/home/user/gpui-gpu-scroll-copy-target/release/build/icu_properties_data/2e5b192c7de630d8/out/build_script_build",
+      "sha256": "3110a5eb99251636291248d88aa172cdca4e5d1f9d655a15f87c64f28dc85af7",
+      "preserved": "/home/user/gpui-completed-test-binaries-archive/3110a5eb99251636291248d88aa172cdca4e5d1f9d655a15f87c64f28dc85af7.gz",
+      "bytes": 450520
+    },
+    {
+      "path": "/home/user/gpui-gpu-scroll-copy-target/release/build/icu_locale_fallback_data/0a3c04835bd094f3/out/build_script_build",
+      "sha256": "1bd2fd94f4098637386d8ab155bcd44d8eb1a326aacb80f6924f670442f88602",
+      "preserved": "/home/user/gpui-completed-test-binaries-archive/1bd2fd94f4098637386d8ab155bcd44d8eb1a326aacb80f6924f670442f88602.gz",
+      "bytes": 450520
+    },
+    {
+      "path": "/home/user/gpui-gpu-scroll-copy-target/release/build/icu_segmenter_data/ae71d0f54a344302/out/build_script_build",
+      "sha256": "b9a8c80f555dc350d971edb0fac6ce68c8175e2fb560c27ecc4612f8317a6408",
+      "preserved": "/home/user/gpui-completed-test-binaries-archive/b9a8c80f555dc350d971edb0fac6ce68c8175e2fb560c27ecc4612f8317a6408.gz",
+      "bytes": 450520
+    },
+    {
+      "path": "/home/user/gpui-gpu-scroll-copy-target/release/build/thiserror-impl/11cb6adf2e0064f3/out/libthiserror_impl-11cb6adf2e0064f3.so",
+      "sha256": "19d10b99c85afedaa71edac94a0205d1a159d912b4060cd92e0af6883398ea4b",
+      "preserved": "/home/user/gpui-completed-test-binaries-archive/19d10b99c85afedaa71edac94a0205d1a159d912b4060cd92e0af6883398ea4b.gz",
+      "bytes": 3980528
+    },
+    {
+      "path": "/home/user/gpui-gpu-scroll-copy-target/release/build/thiserror-impl/e498c2ab57550790/out/libthiserror_impl-e498c2ab57550790.so",
+      "sha256": "cd0ddbdd2ef4e6904bcd0418d69a29a17ad17c89871d140f6d12eb0e219fd40a",
+      "preserved": "/home/user/gpui-completed-test-binaries-archive/cd0ddbdd2ef4e6904bcd0418d69a29a17ad17c89871d140f6d12eb0e219fd40a.gz",
+      "bytes": 3883480
+    },
+    {
+      "path": "/home/user/gpui-gpu-scroll-copy-target/release/build/thiserror-impl/503f75daab1907ca/out/libthiserror_impl-503f75daab1907ca.so",
+      "sha256": "1bb72e716d0068b923461d91b0e01152769e0d18692728dab7dbb646fd348d42",
+      "preserved": "/home/user/gpui-completed-test-binaries-archive/1bb72e716d0068b923461d91b0e01152769e0d18692728dab7dbb646fd348d42.gz",
+      "bytes": 3979128
+    },
+    {
+      "path": "/home/user/gpui-gpu-scroll-copy-target/release/build/wgpu-hal/3772ca7927632144/out/build_script_build",
+      "sha256": "125ea09b6da3e40e44b2d5bd192176d1c8fbd7b227c92da63f8b857e576e4235",
+      "preserved": "/home/user/gpui-completed-test-binaries-archive/125ea09b6da3e40e44b2d5bd192176d1c8fbd7b227c92da63f8b857e576e4235.gz",
+      "bytes": 568736
+    },
+    {
+      "path": "/home/user/gpui-gpu-scroll-copy-target/release/build/fearless_simd_macros/d47f9dfeab0a53ae/out/libfearless_simd_macros-d47f9dfeab0a53ae.so",
+      "sha256": "605c794d42cc6d161e7cb24b021b6f8371b8131a73170995a780032047f88cb1",
+      "preserved": "/home/user/gpui-completed-test-binaries-archive/605c794d42cc6d161e7cb24b021b6f8371b8131a73170995a780032047f88cb1.gz",
+      "bytes": 3722808
+    },
+    {
+      "path": "/home/user/gpui-gpu-scroll-copy-target/release/build/fearless_simd_macros/13fb3b59b63a3fd9/out/libfearless_simd_macros-13fb3b59b63a3fd9.so",
+      "sha256": "9d511cb3cc521f83b56d07abdc204a27ed005130687647e966eb91489a4f7e46",
+      "preserved": "/home/user/gpui-completed-test-binaries-archive/9d511cb3cc521f83b56d07abdc204a27ed005130687647e966eb91489a4f7e46.gz",
+      "bytes": 3823840
+    },
+    {
+      "path": "/home/user/gpui-gpu-scroll-copy-target/release/build/fearless_simd_macros/e6aaabee49325326/out/libfearless_simd_macros-e6aaabee49325326.so",
+      "sha256": "37430705ac7040c0fef80c825b8b0b6c1c5cea1f8c45ff1e93d1efeb0414bc75",
+      "preserved": "/home/user/gpui-completed-test-binaries-archive/37430705ac7040c0fef80c825b8b0b6c1c5cea1f8c45ff1e93d1efeb0414bc75.gz",
+      "bytes": 3722832
+    },
+    {
+      "path": "/home/user/gpui-gpu-scroll-copy-target/release/build/fearless_simd_macros/91423a8c93fddbd0/out/libfearless_simd_macros-91423a8c93fddbd0.so",
+      "sha256": "1a986f33339301b4d99385baa08022c61441d235af3298feee432b5d8dca37ff",
+      "preserved": "/home/user/gpui-completed-test-binaries-archive/1a986f33339301b4d99385baa08022c61441d235af3298feee432b5d8dca37ff.gz",
+      "bytes": 3822544
+    },
+    {
+      "path": "/home/user/gpui-gpu-scroll-copy-target/release/build/zerovec-derive/1e678c28b10ffd33/out/libzerovec_derive-1e678c28b10ffd33.so",
+      "sha256": "5927e1b90d7035a4354e1698b2f519cb7674eea99f74ee4d04f5b70656271d2e",
+      "preserved": "/home/user/gpui-completed-test-binaries-archive/5927e1b90d7035a4354e1698b2f519cb7674eea99f74ee4d04f5b70656271d2e.gz",
+      "bytes": 3796496
+    },
+    {
+      "path": "/home/user/gpui-gpu-scroll-copy-target/release/build/zerovec-derive/f48c4e6bbf014461/out/libzerovec_derive-f48c4e6bbf014461.so",
+      "sha256": "b6e8f50f840974be1ea2698c0adb5f5f54e6e3116c19dcc6d28ac42cae6c66a2",
+      "preserved": "/home/user/gpui-completed-test-binaries-archive/b6e8f50f840974be1ea2698c0adb5f5f54e6e3116c19dcc6d28ac42cae6c66a2.gz",
+      "bytes": 3888448
+    },
+    {
+      "path": "/home/user/gpui-gpu-scroll-copy-target/release/build/zerovec-derive/0453177f0d3b4a4e/out/libzerovec_derive-0453177f0d3b4a4e.so",
+      "sha256": "8a11b7480c99dc1db38d65ac5af53877fbbc20ed53c33ea11d6434bcbbb22fd3",
+      "preserved": "/home/user/gpui-completed-test-binaries-archive/8a11b7480c99dc1db38d65ac5af53877fbbc20ed53c33ea11d6434bcbbb22fd3.gz",
+      "bytes": 3888472
+    },
+    {
+      "path": "/home/user/gpui-gpu-scroll-copy-target/release/build/zerovec-derive/c60aeac5b371979e/out/libzerovec_derive-c60aeac5b371979e.so",
+      "sha256": "0a9eb93843297613b2749f965131bc0124da9e08e24035706e2636938354f08f",
+      "preserved": "/home/user/gpui-completed-test-binaries-archive/0a9eb93843297613b2749f965131bc0124da9e08e24035706e2636938354f08f.gz",
+      "bytes": 3796416
+    },
+    {
+      "path": "/home/user/gpui-gpu-scroll-copy-target/release/build/bytemuck_derive/45d346d42384f9a1/out/libbytemuck_derive-45d346d42384f9a1.so",
+      "sha256": "2c80b3b9a0c8f3d7386e018d6e7311c8254f38ec5d6a013e1030de839d0d21cd",
+      "preserved": "/home/user/gpui-completed-test-binaries-archive/2c80b3b9a0c8f3d7386e018d6e7311c8254f38ec5d6a013e1030de839d0d21cd.gz",
+      "bytes": 3912032
+    },
+    {
+      "path": "/home/user/gpui-gpu-scroll-copy-target/release/build/bytemuck_derive/636d61494b405d44/out/libbytemuck_derive-636d61494b405d44.so",
+      "sha256": "ce4185a5d673bd913b494f1aa92ec9b07b105852f7336e17d8fa03c45a0e1355",
+      "preserved": "/home/user/gpui-completed-test-binaries-archive/ce4185a5d673bd913b494f1aa92ec9b07b105852f7336e17d8fa03c45a0e1355.gz",
+      "bytes": 3912080
+    },
+    {
+      "path": "/home/user/gpui-gpu-scroll-copy-target/release/build/bytemuck_derive/b2ff37e75f32add5/out/libbytemuck_derive-b2ff37e75f32add5.so",
+      "sha256": "fea0274a493b8fdbe03d311480f68e0036917471a95324709193b27f2f356b97",
+      "preserved": "/home/user/gpui-completed-test-binaries-archive/fea0274a493b8fdbe03d311480f68e0036917471a95324709193b27f2f356b97.gz",
+      "bytes": 3819696
+    },
+    {
+      "path": "/home/user/gpui-gpu-scroll-copy-target/release/build/bytemuck_derive/8486ab917b9e4dfb/out/libbytemuck_derive-8486ab917b9e4dfb.so",
+      "sha256": "2df22e1b3c4783841c9c21f0d80e20075ae134fab1abc4413ae3d93206b78951",
+      "preserved": "/home/user/gpui-completed-test-binaries-archive/2df22e1b3c4783841c9c21f0d80e20075ae134fab1abc4413ae3d93206b78951.gz",
+      "bytes": 3819640
+    },
+    {
+      "path": "/home/user/gpui-gpu-scroll-copy-target/release/build/serde_repr/78d53ac2f697cdc2/out/libserde_repr-78d53ac2f697cdc2.so",
+      "sha256": "61007a2f67a0124a9c107766a410b142036c408468ee0b01be54e7a8c6a6cbec",
+      "preserved": "/home/user/gpui-completed-test-binaries-archive/61007a2f67a0124a9c107766a410b142036c408468ee0b01be54e7a8c6a6cbec.gz",
+      "bytes": 2673184
+    },
+    {
+      "path": "/home/user/gpui-gpu-scroll-copy-target/release/build/serde_repr/9b371058a8c8172f/out/libserde_repr-9b371058a8c8172f.so",
+      "sha256": "61d89be733cc9a018bfa54191e64a10b9caf337a9bfa567a193a57476e4700bb",
+      "preserved": "/home/user/gpui-completed-test-binaries-archive/61d89be733cc9a018bfa54191e64a10b9caf337a9bfa567a193a57476e4700bb.gz",
+      "bytes": 2586168
+    },
+    {
+      "path": "/home/user/gpui-gpu-scroll-copy-target/release/build/paste/0ce49ccd0fbeb156/out/build_script_build",
+      "sha256": "0204ea4ca77b2815bc0393dc9b80367eeff59b6a86020816045c57c547cb3121",
+      "preserved": "/home/user/gpui-completed-test-binaries-archive/0204ea4ca77b2815bc0393dc9b80367eeff59b6a86020816045c57c547cb3121.gz",
+      "bytes": 541200
+    },
+    {
+      "path": "/home/user/gpui-gpu-scroll-copy-target/release/build/paste/ae32c2b30f5af1df/out/libpaste-ae32c2b30f5af1df.so",
+      "sha256": "0898bdc9048c67b4af54485c5a824fac19c7bceca455a75ec1130757b68e92e2",
+      "preserved": "/home/user/gpui-completed-test-binaries-archive/0898bdc9048c67b4af54485c5a824fac19c7bceca455a75ec1130757b68e92e2.gz",
+      "bytes": 723880
+    },
+    {
+      "path": "/home/user/gpui-gpu-scroll-copy-target/release/build/phf_macros/5b0d3d11042a8fc2/out/libphf_macros-5b0d3d11042a8fc2.so",
+      "sha256": "bd6496922656c6f7cb06f61239dcb93de0a26105fcab8161373ccb1252655547",
+      "preserved": "/home/user/gpui-completed-test-binaries-archive/bd6496922656c6f7cb06f61239dcb93de0a26105fcab8161373ccb1252655547.gz",
+      "bytes": 3533368
+    },
+    {
+      "path": "/home/user/gpui-gpu-scroll-copy-target/release/build/rustix/a8737e64e21c12d7/out/build_script_build",
+      "sha256": "79201ff51c879bb6fb6281f5695f1c606d2c273fdb00e1674b08102fec55aeef",
+      "preserved": "/home/user/gpui-completed-test-binaries-archive/79201ff51c879bb6fb6281f5695f1c606d2c273fdb00e1674b08102fec55aeef.gz",
+      "bytes": 599000
+    },
+    {
+      "path": "/home/user/gpui-gpu-scroll-copy-target/release/build/rustix/ae4ac05e510a2cca/out/build_script_build",
+      "sha256": "e8e676b545f3363bfe5c1c6124ecf43f8c64b9ea61860c2e1f1594040d39cda6",
+      "preserved": "/home/user/gpui-completed-test-binaries-archive/e8e676b545f3363bfe5c1c6124ecf43f8c64b9ea61860c2e1f1594040d39cda6.gz",
+      "bytes": 592824
+    },
+    {
+      "path": "/home/user/gpui-gpu-scroll-copy-target/release/build/rustix/70464e1b96fb34a3/out/build_script_build",
+      "sha256": "7278c985776634e4b2421d7f67ae98ffefd00a1a7272aaa36adb75b7496775da",
+      "preserved": "/home/user/gpui-completed-test-binaries-archive/7278c985776634e4b2421d7f67ae98ffefd00a1a7272aaa36adb75b7496775da.gz",
+      "bytes": 599000
+    },
+    {
+      "path": "/home/user/gpui-gpu-scroll-copy-target/release/build/gpui_canvas/706c3421e5d8225c/out/text_cache_capacity",
+      "sha256": "0a8ff48c61b612bcc214455825dfa1fd55f43b71e868a8373dcb3f0d0e53a979",
+      "preserved": "/home/user/gpui-completed-test-binaries-archive/0a8ff48c61b612bcc214455825dfa1fd55f43b71e868a8373dcb3f0d0e53a979.gz",
+      "bytes": 7606312
+    },
+    {
+      "path": "/home/user/gpui-gpu-scroll-copy-target/release/build/gpui_canvas/3126e60d25619be3/out/selection_queries",
+      "sha256": "97e261897a5bbddbf356f84ff5ebbdd089a420385fbffad9c1badd09a41c32f0",
+      "preserved": "/home/user/gpui-completed-test-binaries-archive/97e261897a5bbddbf356f84ff5ebbdd089a420385fbffad9c1badd09a41c32f0.gz",
+      "bytes": 6954744
+    },
+    {
+      "path": "/home/user/gpui-gpu-scroll-copy-target/release/build/gpui_canvas/df8261f9cf1049ac/out/image_axis",
+      "sha256": "612d3e80f94944ca397720ad3076f377dfb901f3e21db3ef0a10d16ca340e8f0",
+      "preserved": "/home/user/gpui-completed-test-binaries-archive/612d3e80f94944ca397720ad3076f377dfb901f3e21db3ef0a10d16ca340e8f0.gz",
+      "bytes": 754832
+    },
+    {
+      "path": "/home/user/gpui-gpu-scroll-copy-target/release/build/gpui_canvas/13eb99216a5128df/out/group_views",
+      "sha256": "ea841ab02b233a27cf1960f915963f263c5e43dcfdc00097c57b50adc71f5236",
+      "preserved": "/home/user/gpui-completed-test-binaries-archive/ea841ab02b233a27cf1960f915963f263c5e43dcfdc00097c57b50adc71f5236.gz",
+      "bytes": 7872224
+    },
+    {
+      "path": "/home/user/gpui-gpu-scroll-copy-target/release/build/gpui_canvas/fbaa1352f1fecd0d/out/text_shaping",
+      "sha256": "ae52f09bb51cec30c33ff9fed52c815cda98a97d65af477ffe71952a6f55d4e9",
+      "preserved": "/home/user/gpui-completed-test-binaries-archive/ae52f09bb51cec30c33ff9fed52c815cda98a97d65af477ffe71952a6f55d4e9.gz",
+      "bytes": 8040928
+    },
+    {
+      "path": "/home/user/gpui-gpu-scroll-copy-target/release/build/gpui_canvas/b994064e9147dc2f/out/cpu",
+      "sha256": "66a9caab88f191bf1f6d9f1bfc3b71194b131a56a911ffa7a6fcdf42055a01a5",
+      "preserved": "/home/user/gpui-completed-test-binaries-archive/66a9caab88f191bf1f6d9f1bfc3b71194b131a56a911ffa7a6fcdf42055a01a5.gz",
+      "bytes": 8031088
+    },
+    {
+      "path": "/home/user/gpui-gpu-scroll-copy-target/release/build/gpui_canvas/fc7b0dd44c8082b6/out/coverage_table",
+      "sha256": "ab18914d6c1ceb983eb5e6f0dfca412da9d98d516cbcb374487ccc30d3d6b1f6",
+      "preserved": "/home/user/gpui-completed-test-binaries-archive/ab18914d6c1ceb983eb5e6f0dfca412da9d98d516cbcb374487ccc30d3d6b1f6.gz",
+      "bytes": 1434632
+    },
+    {
+      "path": "/home/user/gpui-gpu-scroll-copy-target/release/build/gpui_canvas/3331c5fe99da3696/out/coverage_table",
+      "sha256": "80bb29255fa6cb42a683f428a1219ba1f2dad4de51b5d4fdefb81acbe24d9ff4",
+      "preserved": "/home/user/gpui-completed-test-binaries-archive/80bb29255fa6cb42a683f428a1219ba1f2dad4de51b5d4fdefb81acbe24d9ff4.gz",
+      "bytes": 1434632
+    },
+    {
+      "path": "/home/user/gpui-gpu-scroll-copy-target/release/build/gpui_canvas/6e6cb88f7f166e8e/out/text_interaction",
+      "sha256": "2124771f9f1c12c78cf45a61db9463eebdb65b4477efa85d44aa51bb74a6dc2d",
+      "preserved": "/home/user/gpui-completed-test-binaries-archive/2124771f9f1c12c78cf45a61db9463eebdb65b4477efa85d44aa51bb74a6dc2d.gz",
+      "bytes": 6967352
+    },
+    {
+      "path": "/home/user/gpui-gpu-scroll-copy-target/release/build/gpui_canvas/df8fbe0afdb04b67/out/caret_pair_measure",
+      "sha256": "3c3cd1b199c22c5688da36529aca9ebc004eb3b8e800fa127b8a064c6723a7e4",
+      "preserved": "/home/user/gpui-completed-test-binaries-archive/3c3cd1b199c22c5688da36529aca9ebc004eb3b8e800fa127b8a064c6723a7e4.gz",
+      "bytes": 6954456
+    },
+    {
+      "path": "/home/user/gpui-gpu-scroll-copy-target/release/build/gpui_canvas/1d61b0701b144f8b/out/text_shaping",
+      "sha256": "a61179a2b44f82817386c221898643ed724aac60c8c31938937e7d17158fff33",
+      "preserved": "/home/user/gpui-completed-test-binaries-archive/a61179a2b44f82817386c221898643ed724aac60c8c31938937e7d17158fff33.gz",
+      "bytes": 8039272
+    },
+    {
+      "path": "/home/user/gpui-gpu-scroll-copy-target/release/build/gpui_canvas/52684454f2eed9fd/out/text_oracle",
+      "sha256": "6b642dfe471184ea044c6531b7eb99659c1c4ba51a48cb118cde39a448a82805",
+      "preserved": "/home/user/gpui-completed-test-binaries-archive/6b642dfe471184ea044c6531b7eb99659c1c4ba51a48cb118cde39a448a82805.gz",
+      "bytes": 6968736
+    },
+    {
+      "path": "/home/user/gpui-gpu-scroll-copy-target/release/build/gpui_canvas/3c86ff37841d37fa/out/text_oracle",
+      "sha256": "1cdc227abc0d40fcb15d1883aab0c6df4d0b2a80f68f0522c55c3946a5775bef",
+      "preserved": "/home/user/gpui-completed-test-binaries-archive/1cdc227abc0d40fcb15d1883aab0c6df4d0b2a80f68f0522c55c3946a5775bef.gz",
+      "bytes": 6969672
+    },
+    {
+      "path": "/home/user/gpui-gpu-scroll-copy-target/release/build/gpui_canvas/94d8038a91489fe8/out/damage_cost",
+      "sha256": "928bbd5cf2ebae2c70541eeb9cf20d7cebbcebdd32c04a62f12b8238ecb354bb",
+      "preserved": "/home/user/gpui-completed-test-binaries-archive/928bbd5cf2ebae2c70541eeb9cf20d7cebbcebdd32c04a62f12b8238ecb354bb.gz",
+      "bytes": 708960
+    },
+    {
+      "path": "/home/user/gpui-gpu-scroll-copy-target/release/build/gpui_canvas/ea1971b907539b40/out/retained_runs",
+      "sha256": "4d798dd58e9583d78c4a62c3d32307a11b4222098e4a6338d17b8daebf1c64bf",
+      "preserved": "/home/user/gpui-completed-test-binaries-archive/4d798dd58e9583d78c4a62c3d32307a11b4222098e4a6338d17b8daebf1c64bf.gz",
+      "bytes": 7885648
+    },
+    {
+      "path": "/home/user/gpui-gpu-scroll-copy-target/release/build/gpui_canvas/68414e8845d14960/out/font_memory",
+      "sha256": "1063bfa03cfcfcca01c729ea0727cc39195519cd70724922a2a2e9a271af8179",
+      "preserved": "/home/user/gpui-completed-test-binaries-archive/1063bfa03cfcfcca01c729ea0727cc39195519cd70724922a2a2e9a271af8179.gz",
+      "bytes": 10156000
+    },
+    {
+      "path": "/home/user/gpui-gpu-scroll-copy-target/release/build/gpui_canvas/a4edc6400ad84f19/out/text_cache_capacity",
+      "sha256": "ba29537cea31ac7927243a91c4ebdfd7aac56630848df6abacd5538730118476",
+      "preserved": "/home/user/gpui-completed-test-binaries-archive/ba29537cea31ac7927243a91c4ebdfd7aac56630848df6abacd5538730118476.gz",
+      "bytes": 7607152
+    },
+    {
+      "path": "/home/user/gpui-gpu-scroll-copy-target/release/build/gpui_canvas/171ad8d3295f6cb2/out/images",
+      "sha256": "84b362618891b56fafde5db2d410b6f0bdda950712258a8e5654ee85f9189932",
+      "preserved": "/home/user/gpui-completed-test-binaries-archive/84b362618891b56fafde5db2d410b6f0bdda950712258a8e5654ee85f9189932.gz",
+      "bytes": 760512
+    },
+    {
+      "path": "/home/user/gpui-gpu-scroll-copy-target/release/build/gpui_canvas/acfc39efdaa75683/out/font_memory",
+      "sha256": "24127f2637d80fb9a8a0060fbeae751559b413f6155d3bb68d4e05fbb32de941",
+      "preserved": "/home/user/gpui-completed-test-binaries-archive/24127f2637d80fb9a8a0060fbeae751559b413f6155d3bb68d4e05fbb32de941.gz",
+      "bytes": 10156896
+    },
+    {
+      "path": "/home/user/gpui-gpu-scroll-copy-target/release/build/gpui_canvas/37942a5794d59b19/out/text_interaction",
+      "sha256": "576f16f0a1054bb1a34bdaedf0b83e6264c76d6137f691ccf3878323baf2f620",
+      "preserved": "/home/user/gpui-completed-test-binaries-archive/576f16f0a1054bb1a34bdaedf0b83e6264c76d6137f691ccf3878323baf2f620.gz",
+      "bytes": 6968304
+    },
+    {
+      "path": "/home/user/gpui-gpu-scroll-copy-target/release/build/gpui_canvas/d7a53abed6c6185f/out/cpu",
+      "sha256": "e6332739c40c78cd1e23cdc5089fd487343caad1d1edaef8100bcf57a6b29b16",
+      "preserved": "/home/user/gpui-completed-test-binaries-archive/e6332739c40c78cd1e23cdc5089fd487343caad1d1edaef8100bcf57a6b29b16.gz",
+      "bytes": 8030256
+    },
+    {
+      "path": "/home/user/gpui-gpu-scroll-copy-target/release/build/gpui_canvas/178f390fce55515f/out/retained_runs",
+      "sha256": "acfd985ec0fd29df394f0e4022d77e43674d2f5380e0012632b14478a4d5ef09",
+      "preserved": "/home/user/gpui-completed-test-binaries-archive/acfd985ec0fd29df394f0e4022d77e43674d2f5380e0012632b14478a4d5ef09.gz",
+      "bytes": 7886472
+    },
+    {
+      "path": "/home/user/gpui-gpu-scroll-copy-target/release/build/gpui_canvas/89e11f61f36cd9ed/out/caret_pair_measure",
+      "sha256": "9f50cd217dbfc262bd812a2b4e67a4e0dd18111c88f5166e21f06378bf280de1",
+      "preserved": "/home/user/gpui-completed-test-binaries-archive/9f50cd217dbfc262bd812a2b4e67a4e0dd18111c88f5166e21f06378bf280de1.gz",
+      "bytes": 6953528
+    },
+    {
+      "path": "/home/user/gpui-gpu-scroll-copy-target/release/build/gpui_canvas/3f7d5bfe3f5989d8/out/selection_queries",
+      "sha256": "69f2c5c4114690f935188ff8c942db0fd4ea1e82015c77cc87c2dfb7f1a77d37",
+      "preserved": "/home/user/gpui-completed-test-binaries-archive/69f2c5c4114690f935188ff8c942db0fd4ea1e82015c77cc87c2dfb7f1a77d37.gz",
+      "bytes": 6953792
+    },
+    {
+      "path": "/home/user/gpui-gpu-scroll-copy-target/release/build/gpui_canvas/9f7e8bb7d4bc032d/out/gpui_canvas-9f7e8bb7d4bc032d",
+      "sha256": "4b46ae24af1d78eab28d0f85667ff5d8d947e2904ba6bc47bbe83355f0d1d71c",
+      "preserved": "/home/user/gpui-preserved-test-binaries/4b46ae24af1d78eab28d0f85667ff5d8d947e2904ba6bc47bbe83355f0d1d71c",
+      "bytes": 9981360
+    },
+    {
+      "path": "/home/user/gpui-gpu-scroll-copy-target/release/build/gpui_canvas/e104e893582978c9/out/clip_cost",
+      "sha256": "51a6860084fe76f3480dff098343e5b87b7422bec0bbaf13d7a0556b72ccce24",
+      "preserved": "/home/user/gpui-completed-test-binaries-archive/51a6860084fe76f3480dff098343e5b87b7422bec0bbaf13d7a0556b72ccce24.gz",
+      "bytes": 7879712
+    },
+    {
+      "path": "/home/user/gpui-gpu-scroll-copy-target/release/build/gpui_canvas/c7eadced7b956270/out/clip_cost",
+      "sha256": "274f73c32a541d44ea2ff5bece66c33fc7e4d8ed2060b5b4e2497b493b0ab886",
+      "preserved": "/home/user/gpui-completed-test-binaries-archive/274f73c32a541d44ea2ff5bece66c33fc7e4d8ed2060b5b4e2497b493b0ab886.gz",
+      "bytes": 7878904
+    },
+    {
+      "path": "/home/user/gpui-gpu-scroll-copy-target/release/build/gpui_canvas/b452dfbc93a59955/out/image_axis",
+      "sha256": "d1e8535858a8172b5b00fe35473472820641658c8fe760a2b7ea1a58eb1cdc92",
+      "preserved": "/home/user/gpui-completed-test-binaries-archive/d1e8535858a8172b5b00fe35473472820641658c8fe760a2b7ea1a58eb1cdc92.gz",
+      "bytes": 754320
+    },
+    {
+      "path": "/home/user/gpui-gpu-scroll-copy-target/release/build/gpui_canvas/f9f09cf0d2c466f8/out/damage_cost",
+      "sha256": "67f98880c36839522a42832c53ca1ff834864e6a764686d7738cd7ad2c9e955f",
+      "preserved": "/home/user/gpui-completed-test-binaries-archive/67f98880c36839522a42832c53ca1ff834864e6a764686d7738cd7ad2c9e955f.gz",
+      "bytes": 709336
+    },
+    {
+      "path": "/home/user/gpui-gpu-scroll-copy-target/release/build/gpui_canvas/013f041d72fe4179/out/group_views",
+      "sha256": "e294ad5e0e7cef045dcae9542964b10e1556ee1703f9b64c00344bcdd4721d72",
+      "preserved": "/home/user/gpui-completed-test-binaries-archive/e294ad5e0e7cef045dcae9542964b10e1556ee1703f9b64c00344bcdd4721d72.gz",
+      "bytes": 7873032
+    },
+    {
+      "path": "/home/user/gpui-gpu-scroll-copy-target/release/build/gpui_canvas/f4b890557f134734/out/images",
+      "sha256": "acd41916c13f9092af5a5387a26ac65ffa80f0c3757df19fb547f88f429d1886",
+      "preserved": "/home/user/gpui-completed-test-binaries-archive/acd41916c13f9092af5a5387a26ac65ffa80f0c3757df19fb547f88f429d1886.gz",
+      "bytes": 760880
+    },
+    {
+      "path": "/home/user/gpui-gpu-scroll-copy-target/release/build/yoke-derive/735d941900fcb9b2/out/libyoke_derive-735d941900fcb9b2.so",
+      "sha256": "a06872718b8501cab49b2f00284b66f11a509517ae76c72f6a32301a8e8fcf92",
+      "preserved": "/home/user/gpui-completed-test-binaries-archive/a06872718b8501cab49b2f00284b66f11a509517ae76c72f6a32301a8e8fcf92.gz",
+      "bytes": 4179304
+    },
+    {
+      "path": "/home/user/gpui-gpu-scroll-copy-target/release/build/yoke-derive/b25af4ec908c7268/out/libyoke_derive-b25af4ec908c7268.so",
+      "sha256": "b50a92d171d7b6a06852f1f7b07ac95931d3d0c74f7356fcd54d5826a8ad9536",
+      "preserved": "/home/user/gpui-completed-test-binaries-archive/b50a92d171d7b6a06852f1f7b07ac95931d3d0c74f7356fcd54d5826a8ad9536.gz",
+      "bytes": 4272112
+    },
+    {
+      "path": "/home/user/gpui-gpu-scroll-copy-target/release/build/yoke-derive/a6188276d4c4b61c/out/libyoke_derive-a6188276d4c4b61c.so",
+      "sha256": "0b76ae563afe90fdb7e2ac43648b509b0b43a38a5ab86fcbd3e46dea7c86ebcb",
+      "preserved": "/home/user/gpui-completed-test-binaries-archive/0b76ae563afe90fdb7e2ac43648b509b0b43a38a5ab86fcbd3e46dea7c86ebcb.gz",
+      "bytes": 4272168
+    },
+    {
+      "path": "/home/user/gpui-gpu-scroll-copy-target/release/build/yoke-derive/9f0644f81390effd/out/libyoke_derive-9f0644f81390effd.so",
+      "sha256": "542fe452d0e6687892485ee529efbe6f23ca1bfb088de9bbc34ae24815238c09",
+      "preserved": "/home/user/gpui-completed-test-binaries-archive/542fe452d0e6687892485ee529efbe6f23ca1bfb088de9bbc34ae24815238c09.gz",
+      "bytes": 4179472
+    },
+    {
+      "path": "/home/user/gpui-gpu-scroll-copy-target/release/build/libm/a1070c6188109090/out/build_script_build",
+      "sha256": "c4f2ba04b2244fd2a79c6450936648effb1094f340599c353949cbde0e76205a",
+      "preserved": "/home/user/gpui-completed-test-binaries-archive/c4f2ba04b2244fd2a79c6450936648effb1094f340599c353949cbde0e76205a.gz",
+      "bytes": 534544
+    },
+    {
+      "path": "/home/user/gpui-gpu-scroll-copy-target/release/build/zmij/29b74d8478b00ae3/out/build_script_build",
+      "sha256": "c2e4fa14f99bc76aa03fb2ff92d803fe73ec26e7fe0bf887335d08cb4ea35fd9",
+      "preserved": "/home/user/gpui-completed-test-binaries-archive/c2e4fa14f99bc76aa03fb2ff92d803fe73ec26e7fe0bf887335d08cb4ea35fd9.gz",
+      "bytes": 545912
+    },
+    {
+      "path": "/home/user/gpui-gpu-scroll-copy-target/release/build/zbus-lockstep-macros/e62be710aa1b1fbd/out/libzbus_lockstep_macros-e62be710aa1b1fbd.so",
+      "sha256": "70eb61adc0d218254b82fd13b90892f2122a85bd19f6c2cacf432f897ac8d1f3",
+      "preserved": "/home/user/gpui-completed-test-binaries-archive/70eb61adc0d218254b82fd13b90892f2122a85bd19f6c2cacf432f897ac8d1f3.gz",
+      "bytes": 3868352
+    },
+    {
+      "path": "/home/user/gpui-gpu-scroll-copy-target/release/build/libc/1eb0edab440dc957/out/build_script_build",
+      "sha256": "275a92b6d18c0895790e6bf631e6b6c0ed0db0519d6ddaddd0510c938086f95b",
+      "preserved": "/home/user/gpui-completed-test-binaries-archive/275a92b6d18c0895790e6bf631e6b6c0ed0db0519d6ddaddd0510c938086f95b.gz",
+      "bytes": 653800
+    },
+    {
+      "path": "/home/user/gpui-gpu-scroll-copy-target/release/build/proc-macro2/204e166459ad349c/out/build_script_build",
+      "sha256": "98c886685735045c35d496bf0d6eb257e3679711231b2a6db5b85c645de1e2e8",
+      "preserved": "/home/user/gpui-completed-test-binaries-archive/98c886685735045c35d496bf0d6eb257e3679711231b2a6db5b85c645de1e2e8.gz",
+      "bytes": 598544
+    },
+    {
+      "path": "/home/user/gpui-gpu-scroll-copy-target/release/build/proc-macro2/637ca817e9ceebfc/out/build_script_build",
+      "sha256": "d2b4be36cd1335018de89edf8ad26eed8f1bb930ff777fc1701f336c737eb3f4",
+      "preserved": "/home/user/gpui-completed-test-binaries-archive/d2b4be36cd1335018de89edf8ad26eed8f1bb930ff777fc1701f336c737eb3f4.gz",
+      "bytes": 598608
+    },
+    {
+      "path": "/home/user/gpui-gpu-scroll-copy-target/release/build/snafu-derive/e927791e0350b43b/out/libsnafu_derive-e927791e0350b43b.so",
+      "sha256": "80303188e09cc91f85bbc93e0568281ea122a7eb3c6eaf863b7430ada5c0436f",
+      "preserved": "/home/user/gpui-completed-test-binaries-archive/80303188e09cc91f85bbc93e0568281ea122a7eb3c6eaf863b7430ada5c0436f.gz",
+      "bytes": 4654504
+    },
+    {
+      "path": "/home/user/gpui-gpu-scroll-copy-target/release/build/crossbeam-utils/53364f5a2091af2d/out/build_script_build",
+      "sha256": "5bcc465dd06b0924c32b6f9e7b91a738425be68e65b20db944118d71da68bf43",
+      "preserved": "/home/user/gpui-completed-test-binaries-archive/5bcc465dd06b0924c32b6f9e7b91a738425be68e65b20db944118d71da68bf43.gz",
+      "bytes": 501248
+    },
+    {
+      "path": "/home/user/gpui-gpu-scroll-copy-target/release/build/gpui/7d343a8859c57521/out/gpui-7d343a8859c57521",
+      "sha256": "3f61bf1757152a68839f93b496fbeaac901e63194c88acd732ab117271802b57",
+      "preserved": "/home/user/gpui-preserved-test-binaries/3f61bf1757152a68839f93b496fbeaac901e63194c88acd732ab117271802b57",
+      "bytes": 59298472
+    },
+    {
+      "path": "/home/user/gpui-gpu-scroll-copy-target/release/build/gpui/38c47abf9578a392/out/property_editor",
+      "sha256": "db8a913831900264e05ece42822588bebc891da0b4d87cdf6c2997c6e0db1552",
+      "preserved": "/home/user/gpui-completed-test-binaries-archive/db8a913831900264e05ece42822588bebc891da0b4d87cdf6c2997c6e0db1552.gz",
+      "bytes": 25296776
+    },
+    {
+      "path": "/home/user/gpui-gpu-scroll-copy-target/release/build/gpui/c6ca7b724b9767e5/out/zgx_native_lab",
+      "sha256": "27e1e17f2b1d497e3eeb3110b12805b0a7e8ae7f8d9c9a6dee9837f65668e191",
+      "preserved": "/home/user/gpui-preserved-test-binaries/27e1e17f2b1d497e3eeb3110b12805b0a7e8ae7f8d9c9a6dee9837f65668e191",
+      "bytes": 26329184
+    },
+    {
+      "path": "/home/user/gpui-gpu-scroll-copy-target/release/build/gpui/6049a0ca722ce598/out/ime_cursor_cost",
+      "sha256": "63886f9afab043c31b759ee209337ff953b2c3e5089d8f4a8b45b622b36e19a2",
+      "preserved": "/home/user/gpui-completed-test-binaries-archive/63886f9afab043c31b759ee209337ff953b2c3e5089d8f4a8b45b622b36e19a2.gz",
+      "bytes": 9880272
+    },
+    {
+      "path": "/home/user/gpui-gpu-scroll-copy-target/release/build/gpui/482a0c4e2954663a/out/contained_owner_spike",
+      "sha256": "50e8cc8eb24fbe01da861e12969c4779b2251becfa6b9708563b1b0d13793575",
+      "preserved": "/home/user/gpui-completed-test-binaries-archive/50e8cc8eb24fbe01da861e12969c4779b2251becfa6b9708563b1b0d13793575.gz",
+      "bytes": 11285384
+    },
+    {
+      "path": "/home/user/gpui-gpu-scroll-copy-target/release/build/gpui/991cc5eabc5df501/out/covers",
+      "sha256": "9c29aa1093c10007efcd244ec269c37cf3b404f4181ff16174856ff3c43e7231",
+      "preserved": "/home/user/gpui-completed-test-binaries-archive/9c29aa1093c10007efcd244ec269c37cf3b404f4181ff16174856ff3c43e7231.gz",
+      "bytes": 25178992
+    },
+    {
+      "path": "/home/user/gpui-gpu-scroll-copy-target/release/build/gpui/3568e77c7cb0c8e0/out/text_lease_measure",
+      "sha256": "ab89f7f7892ac2ad278869f0c5496f09d6f73f9745abff41cca1cd35edcef57a",
+      "preserved": "/home/user/gpui-completed-test-binaries-archive/ab89f7f7892ac2ad278869f0c5496f09d6f73f9745abff41cca1cd35edcef57a.gz",
+      "bytes": 493728
+    },
+    {
+      "path": "/home/user/gpui-gpu-scroll-copy-target/release/build/gpui/bf108177487c5f47/out/workspace",
+      "sha256": "a50e9bf8e82e79de47031a55295605c682dc30160f1241d0846a07cb761d37ed",
+      "preserved": "/home/user/gpui-completed-test-binaries-archive/a50e9bf8e82e79de47031a55295605c682dc30160f1241d0846a07cb761d37ed.gz",
+      "bytes": 25305968
+    },
+    {
+      "path": "/home/user/gpui-gpu-scroll-copy-target/release/build/gpui/f23d18b0a25ef922/out/unicode",
+      "sha256": "30827388ede8b0455377e52e44635c2dc95189f75426746be2ccdb32c9d4b07f",
+      "preserved": "/home/user/gpui-completed-test-binaries-archive/30827388ede8b0455377e52e44635c2dc95189f75426746be2ccdb32c9d4b07f.gz",
+      "bytes": 25183184
+    },
+    {
+      "path": "/home/user/gpui-gpu-scroll-copy-target/release/build/gpui/d28715db297fa2e8/out/component_sources",
+      "sha256": "b0861684dc459ab59ea906c739f7b20fdbbdd76df348f41af178ab322586155e",
+      "preserved": "/home/user/gpui-completed-test-binaries-archive/b0861684dc459ab59ea906c739f7b20fdbbdd76df348f41af178ab322586155e.gz",
+      "bytes": 25331472
+    },
+    {
+      "path": "/home/user/gpui-gpu-scroll-copy-target/release/build/gpui/6018581ec8350bd1/out/retained_list",
+      "sha256": "1991984cb0c2a68eb00d4454276fa497b4342169ef97a0aeb9f47112996cb0d5",
+      "preserved": "/home/user/gpui-completed-test-binaries-archive/1991984cb0c2a68eb00d4454276fa497b4342169ef97a0aeb9f47112996cb0d5.gz",
+      "bytes": 11198912
+    },
+    {
+      "path": "/home/user/gpui-gpu-scroll-copy-target/release/build/gpui/8a7afc547f960b1f/out/inspector",
+      "sha256": "7dcea6119ad0027acd5b8ba8659453de5d9c14ecff702d85989ad09f33a437b4",
+      "preserved": "/home/user/gpui-completed-test-binaries-archive/7dcea6119ad0027acd5b8ba8659453de5d9c14ecff702d85989ad09f33a437b4.gz",
+      "bytes": 25187464
+    },
+    {
+      "path": "/home/user/gpui-gpu-scroll-copy-target/release/build/gpui/a3dd2c315b8690e9/out/paint_slot_storage",
+      "sha256": "68d1bc298dc0de19f288bfd3feb553dd25205d3fc68aa2efbd185e55556db60f",
+      "preserved": "/home/user/gpui-completed-test-binaries-archive/68d1bc298dc0de19f288bfd3feb553dd25205d3fc68aa2efbd185e55556db60f.gz",
+      "bytes": 11044776
+    },
+    {
+      "path": "/home/user/gpui-gpu-scroll-copy-target/release/build/gpui/6a4f753821c95b59/out/todo_comparison",
+      "sha256": "349cd303291f9e547ea442124d28eb245232b5c3e44371b3d81dfe2b670f578d",
+      "preserved": "/home/user/gpui-completed-test-binaries-archive/349cd303291f9e547ea442124d28eb245232b5c3e44371b3d81dfe2b670f578d.gz",
+      "bytes": 25549800
+    },
+    {
+      "path": "/home/user/gpui-gpu-scroll-copy-target/release/build/gpui/a714ebd197e979b4/out/todo_comparison_five",
+      "sha256": "a50d444cfe269738a298444481ac57d08ed4cdc7934501f884eb271933fc8643",
+      "preserved": "/home/user/gpui-completed-test-binaries-archive/a50d444cfe269738a298444481ac57d08ed4cdc7934501f884eb271933fc8643.gz",
+      "bytes": 25570160
+    },
+    {
+      "path": "/home/user/gpui-gpu-scroll-copy-target/release/build/gpui/c06a5aa6bc19f81f/out/panes",
+      "sha256": "c40af86ffcb989f5179b4dee80af81d29779036dc988cc5e5fd401054d6cd3c6",
+      "preserved": "/home/user/gpui-completed-test-binaries-archive/c40af86ffcb989f5179b4dee80af81d29779036dc988cc5e5fd401054d6cd3c6.gz",
+      "bytes": 25170240
+    },
+    {
+      "path": "/home/user/gpui-gpu-scroll-copy-target/release/build/gpui/161fa22cf9a294d1/out/first_frame",
+      "sha256": "764ea07e3375280ca8c5afa5d893cb686d7dd149b0e0fbedfdf96e117e15e7e4",
+      "preserved": "/home/user/gpui-completed-test-binaries-archive/764ea07e3375280ca8c5afa5d893cb686d7dd149b0e0fbedfdf96e117e15e7e4.gz",
+      "bytes": 11323320
+    },
+    {
+      "path": "/home/user/gpui-gpu-scroll-copy-target/release/build/gpui/e9b8c773f9415c80/out/sheet_access_measure",
+      "sha256": "0431df73c4694f258d9997e06766a08ba865b7b136d262c0ea8a8f17903cff9c",
+      "preserved": "/home/user/gpui-completed-test-binaries-archive/0431df73c4694f258d9997e06766a08ba865b7b136d262c0ea8a8f17903cff9c.gz",
+      "bytes": 10999376
+    },
+    {
+      "path": "/home/user/gpui-gpu-scroll-copy-target/release/build/gpui/1f8acc57a33744b8/out/text_lane_measure",
+      "sha256": "d42c6a4167329e7e9c5d04c9d2495c83a47cbf8db088c11ec825c5ef8d432c5e",
+      "preserved": "/home/user/gpui-completed-test-binaries-archive/d42c6a4167329e7e9c5d04c9d2495c83a47cbf8db088c11ec825c5ef8d432c5e.gz",
+      "bytes": 11218520
+    },
+    {
+      "path": "/home/user/gpui-gpu-scroll-copy-target/release/build/gpui/162d5a51c65c626f/out/paint_slot_storage",
+      "sha256": "9dfdd2ea03eae1223f2bddd9d2d8e77159bdd5136651929c02640780208e5cb9",
+      "preserved": "/home/user/gpui-completed-test-binaries-archive/9dfdd2ea03eae1223f2bddd9d2d8e77159bdd5136651929c02640780208e5cb9.gz",
+      "bytes": 9787456
+    },
+    {
+      "path": "/home/user/gpui-gpu-scroll-copy-target/release/build/gpui/d51c62efad296df0/out/gpui-d51c62efad296df0",
+      "sha256": "b6772f788629b7f76b5b211b0147b2a2f0b4047564e39d8b6df485e427d0caff",
+      "preserved": "/home/user/gpui-preserved-test-binaries/b6772f788629b7f76b5b211b0147b2a2f0b4047564e39d8b6df485e427d0caff",
+      "bytes": 58854960
+    },
+    {
+      "path": "/home/user/gpui-gpu-scroll-copy-target/release/build/gpui/c7028571d687eaef/out/todo_comparison_mapped",
+      "sha256": "07b7e8fa77d4defa5d13bfdb8b832ff64b844d8cf35eb671303149e5143dc222",
+      "preserved": "/home/user/gpui-completed-test-binaries-archive/07b7e8fa77d4defa5d13bfdb8b832ff64b844d8cf35eb671303149e5143dc222.gz",
+      "bytes": 25579632
+    },
+    {
+      "path": "/home/user/gpui-gpu-scroll-copy-target/release/build/gpui/abbade1431a72921/out/text_lease_measure",
+      "sha256": "391ff0c290b57122d0676f86858328ed847b79dcc95108a64c043c4efefb1d20",
+      "preserved": "/home/user/gpui-completed-test-binaries-archive/391ff0c290b57122d0676f86858328ed847b79dcc95108a64c043c4efefb1d20.gz",
+      "bytes": 493728
+    },
+    {
+      "path": "/home/user/gpui-gpu-scroll-copy-target/release/build/gpui/4395434129024bc3/out/immutable_text_measure",
+      "sha256": "61821d289023e7f7ad4899e1592a3689646322f727f2922f3841a014d9d17a94",
+      "preserved": "/home/user/gpui-completed-test-binaries-archive/61821d289023e7f7ad4899e1592a3689646322f727f2922f3841a014d9d17a94.gz",
+      "bytes": 11226416
+    },
+    {
+      "path": "/home/user/gpui-gpu-scroll-copy-target/release/build/gpui/1169161245756934/out/mapped_properties",
+      "sha256": "332abc022bb273f02c87b0e39f2ba3b74a57dbc2a6c68e217ff4c479e46ffeb0",
+      "preserved": "/home/user/gpui-completed-test-binaries-archive/332abc022bb273f02c87b0e39f2ba3b74a57dbc2a6c68e217ff4c479e46ffeb0.gz",
+      "bytes": 25213184
+    },
+    {
+      "path": "/home/user/gpui-gpu-scroll-copy-target/release/build/gpui/c6fc1d17e326c893/out/remote_delivery_measure",
+      "sha256": "78433095d5823ee7374689edda91c53266b8cbbf617ba42eef3aee051a10ee20",
+      "preserved": "/home/user/gpui-completed-test-binaries-archive/78433095d5823ee7374689edda91c53266b8cbbf617ba42eef3aee051a10ee20.gz",
+      "bytes": 9885552
+    },
+    {
+      "path": "/home/user/gpui-gpu-scroll-copy-target/release/build/gpui/2b67107b0dc8425c/out/state_update_cost",
+      "sha256": "b7f3b39ab3f67dc2b2dd2b05ec530fba8a0aa9ea504c53e26f30e80fa208153d",
+      "preserved": "/home/user/gpui-completed-test-binaries-archive/b7f3b39ab3f67dc2b2dd2b05ec530fba8a0aa9ea504c53e26f30e80fa208153d.gz",
+      "bytes": 11180344
+    },
+    {
+      "path": "/home/user/gpui-gpu-scroll-copy-target/release/build/gpui/91cb70299684b5bb/out/empty",
+      "sha256": "d517f822987a86e0f2ed4fd06376aba6addea2feb728ad85cb371f7f7ae2a769",
+      "preserved": "/home/user/gpui-completed-test-binaries-archive/d517f822987a86e0f2ed4fd06376aba6addea2feb728ad85cb371f7f7ae2a769.gz",
+      "bytes": 25142384
+    },
+    {
+      "path": "/home/user/gpui-gpu-scroll-copy-target/release/build/gpui/094d17439faf1e62/out/reactive_styles",
+      "sha256": "88795397541dec0a59484d0aea22914eceb67c306d835c60861a7bf12799636b",
+      "preserved": "/home/user/gpui-completed-test-binaries-archive/88795397541dec0a59484d0aea22914eceb67c306d835c60861a7bf12799636b.gz",
+      "bytes": 10119816
+    },
+    {
+      "path": "/home/user/gpui-gpu-scroll-copy-target/release/build/gpui/efaf685b291d3268/out/sheet_access_measure",
+      "sha256": "7394b25aaf6c50f4b4d35e652942f576d18c49c69933610d39e5e304d8521ac1",
+      "preserved": "/home/user/gpui-completed-test-binaries-archive/7394b25aaf6c50f4b4d35e652942f576d18c49c69933610d39e5e304d8521ac1.gz",
+      "bytes": 9737240
+    },
+    {
+      "path": "/home/user/gpui-gpu-scroll-copy-target/release/build/gpui/4de949a74a3af0c8/out/state_update_cost",
+      "sha256": "83da590f67cdbbc6d4aa63bf8b60b82b682134ce0105c10b54104e2751624acd",
+      "preserved": "/home/user/gpui-completed-test-binaries-archive/83da590f67cdbbc6d4aa63bf8b60b82b682134ce0105c10b54104e2751624acd.gz",
+      "bytes": 9913872
+    },
+    {
+      "path": "/home/user/gpui-gpu-scroll-copy-target/release/build/gpui/b58c2fdffd75fa2b/out/immutable_text_measure",
+      "sha256": "b9974f80440134d2398f526a1bde69d152405aa2bf73f9fd6017d225678a154b",
+      "preserved": "/home/user/gpui-completed-test-binaries-archive/b9974f80440134d2398f526a1bde69d152405aa2bf73f9fd6017d225678a154b.gz",
+      "bytes": 9958576
+    },
+    {
+      "path": "/home/user/gpui-gpu-scroll-copy-target/release/build/gpui/28ec0596afef4533/out/remote_delivery_measure",
+      "sha256": "c1b648c9ad00307ef8163df36bc25317d87e655563272985ab0d287f20c04689",
+      "preserved": "/home/user/gpui-completed-test-binaries-archive/c1b648c9ad00307ef8163df36bc25317d87e655563272985ab0d287f20c04689.gz",
+      "bytes": 11222024
+    },
+    {
+      "path": "/home/user/gpui-gpu-scroll-copy-target/release/build/gpui/3c9e032b5bbb859f/out/zgx_native_lab",
+      "sha256": "f03c842babae64ac88af2d5d40651fb197f5de5570396cb4f5e336c61cda1127",
+      "preserved": "/home/user/gpui-completed-test-binaries-archive/f03c842babae64ac88af2d5d40651fb197f5de5570396cb4f5e336c61cda1127.gz",
+      "bytes": 26328584
+    },
+    {
+      "path": "/home/user/gpui-gpu-scroll-copy-target/release/build/gpui/9c5e35e80e6957c0/out/retained_list",
+      "sha256": "273d0132e6b5e1903ea24c617961f31e6da759dab5f0e67e5f9c5b9b99f8f591",
+      "preserved": "/home/user/gpui-completed-test-binaries-archive/273d0132e6b5e1903ea24c617961f31e6da759dab5f0e67e5f9c5b9b99f8f591.gz",
+      "bytes": 9934360
+    },
+    {
+      "path": "/home/user/gpui-gpu-scroll-copy-target/release/build/gpui/1123f8072dfd6d8b/out/first_frame",
+      "sha256": "3bdda2f5e37d2a21d08554d16ad15d80055d3ed2a2a9a3a9e9cc879d0cc25fc7",
+      "preserved": "/home/user/gpui-completed-test-binaries-archive/3bdda2f5e37d2a21d08554d16ad15d80055d3ed2a2a9a3a9e9cc879d0cc25fc7.gz",
+      "bytes": 10064320
+    },
+    {
+      "path": "/home/user/gpui-gpu-scroll-copy-target/release/build/gpui/c5442202f6108a32/out/gradient_backgrounds",
+      "sha256": "ff6045b4f32f47e8d293d2f0911c5dfa9bac695509a7c9db6b8f1b44e963209f",
+      "preserved": "/home/user/gpui-completed-test-binaries-archive/ff6045b4f32f47e8d293d2f0911c5dfa9bac695509a7c9db6b8f1b44e963209f.gz",
+      "bytes": 9857928
+    },
+    {
+      "path": "/home/user/gpui-gpu-scroll-copy-target/release/build/gpui/90653f31efc3e71e/out/todo_recording_cost",
+      "sha256": "bb18f654c0f597c755ddf0b7e3c82053f150560fab92b75f9e45a45843b7a9dc",
+      "preserved": "/home/user/gpui-completed-test-binaries-archive/bb18f654c0f597c755ddf0b7e3c82053f150560fab92b75f9e45a45843b7a9dc.gz",
+      "bytes": 11566280
+    },
+    {
+      "path": "/home/user/gpui-gpu-scroll-copy-target/release/build/gpui/b361f1a195bf26b6/out/workbench",
+      "sha256": "66b89c83ad5e63762ba3a70aa046bab9c38504231ed8aa9ffa503364c3fcae3f",
+      "preserved": "/home/user/gpui-completed-test-binaries-archive/66b89c83ad5e63762ba3a70aa046bab9c38504231ed8aa9ffa503364c3fcae3f.gz",
+      "bytes": 25212296
+    },
+    {
+      "path": "/home/user/gpui-gpu-scroll-copy-target/release/build/gpui/9e2fa26b6c0cd5dd/out/color_cost",
+      "sha256": "cd73a311e08dc6786009877f20b745796926bfd32f34c11c03e05c43e60c2bb6",
+      "preserved": "/home/user/gpui-completed-test-binaries-archive/cd73a311e08dc6786009877f20b745796926bfd32f34c11c03e05c43e60c2bb6.gz",
+      "bytes": 11024208
+    },
+    {
+      "path": "/home/user/gpui-gpu-scroll-copy-target/release/build/gpui/52a88496b452f225/out/library",
+      "sha256": "f6b987f0fab71e14a9cafb92aa4d1d8e07721458fc26abd9f42dc9fe29e8133f",
+      "preserved": "/home/user/gpui-completed-test-binaries-archive/f6b987f0fab71e14a9cafb92aa4d1d8e07721458fc26abd9f42dc9fe29e8133f.gz",
+      "bytes": 25795208
+    },
+    {
+      "path": "/home/user/gpui-gpu-scroll-copy-target/release/build/gpui/e35b0bb69b32b90c/out/contained_owner_spike",
+      "sha256": "4e866feadbb9397a8b9d6e2e8ce36128a22df42a82ecbdb18f73b30ab9903dba",
+      "preserved": "/home/user/gpui-completed-test-binaries-archive/4e866feadbb9397a8b9d6e2e8ce36128a22df42a82ecbdb18f73b30ab9903dba.gz",
+      "bytes": 10022584
+    },
+    {
+      "path": "/home/user/gpui-gpu-scroll-copy-target/release/build/gpui/fa69ccf170b01ebc/out/state_update_allocations",
+      "sha256": "037cdf26906ce85199179132be47f8d312593eea6241da3897dd6df54b0ea455",
+      "preserved": "/home/user/gpui-completed-test-binaries-archive/037cdf26906ce85199179132be47f8d312593eea6241da3897dd6df54b0ea455.gz",
+      "bytes": 11125320
+    },
+    {
+      "path": "/home/user/gpui-gpu-scroll-copy-target/release/build/gpui/eef67738bdadee03/out/luna_bench",
+      "sha256": "230f99185ff3850c0d8772ffba829d82e28acfb0894946007b4f945f2bac8918",
+      "preserved": "/home/user/gpui-completed-test-binaries-archive/230f99185ff3850c0d8772ffba829d82e28acfb0894946007b4f945f2bac8918.gz",
+      "bytes": 25164592
+    },
+    {
+      "path": "/home/user/gpui-gpu-scroll-copy-target/release/build/gpui/cd54427c35092445/out/state_update_allocations",
+      "sha256": "211f10ebbdda0c78d27625ec22cb7cdb245c4a65c55896f96fb63fe415af4a58",
+      "preserved": "/home/user/gpui-completed-test-binaries-archive/211f10ebbdda0c78d27625ec22cb7cdb245c4a65c55896f96fb63fe415af4a58.gz",
+      "bytes": 9858192
+    },
+    {
+      "path": "/home/user/gpui-gpu-scroll-copy-target/release/build/gpui/f87a302d6033f89e/out/unicode_text_measure",
+      "sha256": "b781616e71da08bbea81e6a1481b104deb367f6dfcd693e276ea0242b89049bd",
+      "preserved": "/home/user/gpui-completed-test-binaries-archive/b781616e71da08bbea81e6a1481b104deb367f6dfcd693e276ea0242b89049bd.gz",
+      "bytes": 9898536
+    },
+    {
+      "path": "/home/user/gpui-gpu-scroll-copy-target/release/build/gpui/0a5003cfb0914bde/out/reactive_styles",
+      "sha256": "8ed51ce24ae2d7cb1707c22cad342d8b4ee1ab9e4b4fe7fd3c47d21aef6ca188",
+      "preserved": "/home/user/gpui-completed-test-binaries-archive/8ed51ce24ae2d7cb1707c22cad342d8b4ee1ab9e4b4fe7fd3c47d21aef6ca188.gz",
+      "bytes": 25234040
+    },
+    {
+      "path": "/home/user/gpui-gpu-scroll-copy-target/release/build/gpui/b09fc796078f36a8/out/counter",
+      "sha256": "40a48262fa6753c1c73716fd2305a1fd06a6b0cb6e1b35c0ecd2c8a20f518f94",
+      "preserved": "/home/user/gpui-completed-test-binaries-archive/40a48262fa6753c1c73716fd2305a1fd06a6b0cb6e1b35c0ecd2c8a20f518f94.gz",
+      "bytes": 10044952
+    },
+    {
+      "path": "/home/user/gpui-gpu-scroll-copy-target/release/build/gpui/ae4e0a797c6fd8e9/out/ime_cursor_cost",
+      "sha256": "9fcd817ade4301987acbff65125ee06a153697534fd3aa528a5b6b078b0b17f0",
+      "preserved": "/home/user/gpui-completed-test-binaries-archive/9fcd817ade4301987acbff65125ee06a153697534fd3aa528a5b6b078b0b17f0.gz",
+      "bytes": 11146168
+    },
+    {
+      "path": "/home/user/gpui-gpu-scroll-copy-target/release/build/gpui/997b31099a54df36/out/color_cost",
+      "sha256": "9ab2fc92d7775f847c24db6169246730278e1cd5edea3595b29d000e84905f29",
+      "preserved": "/home/user/gpui-completed-test-binaries-archive/9ab2fc92d7775f847c24db6169246730278e1cd5edea3595b29d000e84905f29.gz",
+      "bytes": 9761840
+    },
+    {
+      "path": "/home/user/gpui-gpu-scroll-copy-target/release/build/gpui/167b6e90168c7611/out/todo_recording_cost",
+      "sha256": "881d1fa01fee0f9bc2d0a7eb0641092652b469e1a47132696871475b4d20a811",
+      "preserved": "/home/user/gpui-completed-test-binaries-archive/881d1fa01fee0f9bc2d0a7eb0641092652b469e1a47132696871475b4d20a811.gz",
+      "bytes": 10302080
+    },
+    {
+      "path": "/home/user/gpui-gpu-scroll-copy-target/release/build/gpui/f998b6d8936e5317/out/text_lane_measure",
+      "sha256": "e280d296b08fb616bac86a8b3072a3808f6c092b9250a588915d309d9c8adfcd",
+      "preserved": "/home/user/gpui-completed-test-binaries-archive/e280d296b08fb616bac86a8b3072a3808f6c092b9250a588915d309d9c8adfcd.gz",
+      "bytes": 9952120
+    },
+    {
+      "path": "/home/user/gpui-gpu-scroll-copy-target/release/build/gpui/8f3d188aea895a6f/out/graphics",
+      "sha256": "065da3a6f7b53b642a508ac08437928e26ca8ce1f493cc663b92b84706cf1aac",
+      "preserved": "/home/user/gpui-completed-test-binaries-archive/065da3a6f7b53b642a508ac08437928e26ca8ce1f493cc663b92b84706cf1aac.gz",
+      "bytes": 25199440
+    },
+    {
+      "path": "/home/user/gpui-gpu-scroll-copy-target/release/build/gpui/14c57fb3ab757005/out/gradient_backgrounds",
+      "sha256": "f11cb8c3584a1f34db88a13830e8fce47a6196560d8784ed193386ea1a982cc3",
+      "preserved": "/home/user/gpui-completed-test-binaries-archive/f11cb8c3584a1f34db88a13830e8fce47a6196560d8784ed193386ea1a982cc3.gz",
+      "bytes": 25248664
+    },
+    {
+      "path": "/home/user/gpui-gpu-scroll-copy-target/release/build/gpui/62bb6aad7e40b147/out/counter",
+      "sha256": "950f656de9263db034fc2998ab17992dd74782e191b9274403903c2f8dbb2022",
+      "preserved": "/home/user/gpui-completed-test-binaries-archive/950f656de9263db034fc2998ab17992dd74782e191b9274403903c2f8dbb2022.gz",
+      "bytes": 25177688
+    },
+    {
+      "path": "/home/user/gpui-gpu-scroll-copy-target/release/build/gpui/937604c28d1c7aaf/out/unicode_text_measure",
+      "sha256": "3b2dfbb48663f0fd03ddaa2781ac624dfaf6ec5ec29e5e927322ab54973e7f10",
+      "preserved": "/home/user/gpui-completed-test-binaries-archive/3b2dfbb48663f0fd03ddaa2781ac624dfaf6ec5ec29e5e927322ab54973e7f10.gz",
+      "bytes": 11159432
+    },
+    {
+      "path": "/home/user/gpui-gpu-scroll-copy-target/release/build/gpui_gpu/b8b6fcf8d66d539f/out/retained",
+      "sha256": "b5c1f92494e95e0ef72636b1f70b21fe8167c8378aa78c4d7cabe2ec7cb116af",
+      "preserved": "/home/user/gpui-completed-test-binaries-archive/b5c1f92494e95e0ef72636b1f70b21fe8167c8378aa78c4d7cabe2ec7cb116af.gz",
+      "bytes": 15300904
+    },
+    {
+      "path": "/home/user/gpui-gpu-scroll-copy-target/release/build/gpui_gpu/6cc55d1770954a81/out/build_script_build",
+      "sha256": "60054bc1e308b2fe40ea860028e37a7e12254e09a019203b9abc3a98774cf05e",
+      "preserved": "/home/user/gpui-completed-test-binaries-archive/60054bc1e308b2fe40ea860028e37a7e12254e09a019203b9abc3a98774cf05e.gz",
+      "bytes": 8199368
+    },
+    {
+      "path": "/home/user/gpui-gpu-scroll-copy-target/release/build/gpui_gpu/db984e7d2389ac00/out/groups",
+      "sha256": "e99ed0eca5861582cfc78b5194d14d16f13ae50157a9f9989a45105127b82e5e",
+      "preserved": "/home/user/gpui-completed-test-binaries-archive/e99ed0eca5861582cfc78b5194d14d16f13ae50157a9f9989a45105127b82e5e.gz",
+      "bytes": 15208920
+    },
+    {
+      "path": "/home/user/gpui-gpu-scroll-copy-target/release/build/gpui_gpu/d68a292137047722/out/images",
+      "sha256": "c098fab8b2bf188f0baadebf42a413fd82c621c92d28df3fc3b41193f21260ca",
+      "preserved": "/home/user/gpui-completed-test-binaries-archive/c098fab8b2bf188f0baadebf42a413fd82c621c92d28df3fc3b41193f21260ca.gz",
+      "bytes": 7986376
+    },
+    {
+      "path": "/home/user/gpui-gpu-scroll-copy-target/release/build/gpui_gpu/d512f4db10658bc9/out/tiles",
+      "sha256": "35682185c5ee23292f44d8bc8d6b97b69ffb6598a7d995135dc69fe830577977",
+      "preserved": "/home/user/gpui-completed-test-binaries-archive/35682185c5ee23292f44d8bc8d6b97b69ffb6598a7d995135dc69fe830577977.gz",
+      "bytes": 15212552
+    },
+    {
+      "path": "/home/user/gpui-gpu-scroll-copy-target/release/build/gpui_gpu/d66c2755bbc7fa5d/out/build_script_build",
+      "sha256": "4207431423c6376bdde2df33b77c639fe839d97f3855ad709fbf6f540a64dde0",
+      "preserved": "/home/user/gpui-completed-test-binaries-archive/4207431423c6376bdde2df33b77c639fe839d97f3855ad709fbf6f540a64dde0.gz",
+      "bytes": 8199208
+    },
+    {
+      "path": "/home/user/gpui-gpu-scroll-copy-target/release/build/gpui_gpu/ec6ca10d95eaa12c/out/build_script_build",
+      "sha256": "420b84d04a999fd7fa9f54a4828c6cb847d24f21b882efa0a023a983bd6a5616",
+      "preserved": "/home/user/gpui-completed-test-binaries-archive/420b84d04a999fd7fa9f54a4828c6cb847d24f21b882efa0a023a983bd6a5616.gz",
+      "bytes": 8199000
+    },
+    {
+      "path": "/home/user/gpui-gpu-scroll-copy-target/release/build/gpui_gpu/fc26bbb724122b97/out/render-fc26bbb724122b97",
+      "sha256": "e1ce48734437856edb2a2e69fb0446b9da5a6629c01c0225618f0ab45162beb6",
+      "preserved": "/home/user/gpui-preserved-test-binaries/e1ce48734437856edb2a2e69fb0446b9da5a6629c01c0225618f0ab45162beb6",
+      "bytes": 16756624
+    },
+    {
+      "path": "/home/user/gpui-gpu-scroll-copy-target/release/build/gpui_gpu/46b604825bacbd9a/out/gpui_gpu-46b604825bacbd9a",
+      "sha256": "66c57e1754d754001521381e0b77f139cada21928ae30c3d4b644bed35623cb4",
+      "preserved": "/home/user/gpui-preserved-test-binaries/66c57e1754d754001521381e0b77f139cada21928ae30c3d4b644bed35623cb4",
+      "bytes": 17110912
+    },
+    {
+      "path": "/home/user/gpui-gpu-scroll-copy-target/release/build/gpui_gpu/a7e285389186b836/out/build_script_build",
+      "sha256": "8edc5c5001223c53d6a44c226a5211b6df3d4d8bed8e608ba3651e3c29cb973e",
+      "preserved": "/home/user/gpui-completed-test-binaries-archive/8edc5c5001223c53d6a44c226a5211b6df3d4d8bed8e608ba3651e3c29cb973e.gz",
+      "bytes": 8199160
+    },
+    {
+      "path": "/home/user/gpui-gpu-scroll-copy-target/release/build/gpui_gpu/37104c559201aed5/out/presentation-37104c559201aed5",
+      "sha256": "41bfe6890ca496ecb3f5eb73e8785e9576316b9179de6499c5e49792541199c4",
+      "preserved": "/home/user/gpui-preserved-test-binaries/41bfe6890ca496ecb3f5eb73e8785e9576316b9179de6499c5e49792541199c4",
+      "bytes": 1472560
+    },
+    {
+      "path": "/home/user/gpui-gpu-scroll-copy-target/release/build/wgsl-rs-macros/511d26c5819bd257/out/build_script_build",
+      "sha256": "ce31e4bb4038ea84319c63d2c075a7f35569830b7f2a42145d9e4ddef4f2b17b",
+      "preserved": "/home/user/gpui-completed-test-binaries-archive/ce31e4bb4038ea84319c63d2c075a7f35569830b7f2a42145d9e4ddef4f2b17b.gz",
+      "bytes": 549984
+    },
+    {
+      "path": "/home/user/gpui-gpu-scroll-copy-target/release/build/wgsl-rs-macros/39ec84fddad7ee58/out/libwgsl_rs_macros-39ec84fddad7ee58.so",
+      "sha256": "380e0c30667d6c37c4b1af9d263ce132bb8e5b0fa554625abfc57ac562f0ad9c",
+      "preserved": "/home/user/gpui-completed-test-binaries-archive/380e0c30667d6c37c4b1af9d263ce132bb8e5b0fa554625abfc57ac562f0ad9c.gz",
+      "bytes": 8497136
+    },
+    {
+      "path": "/home/user/gpui-gpu-scroll-copy-target/release/build/parking_lot_core/8552d43a9d97b3ac/out/build_script_build",
+      "sha256": "8a4fd010fb9419286016c80af860b3fcb092bdf529a81ac3a643446d9fdd2966",
+      "preserved": "/home/user/gpui-completed-test-binaries-archive/8a4fd010fb9419286016c80af860b3fcb092bdf529a81ac3a643446d9fdd2966.gz",
+      "bytes": 473568
+    },
+    {
+      "path": "/home/user/gpui-gpu-scroll-copy-target/release/build/async-recursion/1d902ec430c7881d/out/libasync_recursion-1d902ec430c7881d.so",
+      "sha256": "3b4ebddb6858e5963006c1d15359c1bd0b5a107827b8cf2bd31e4d9b4d8e8577",
+      "preserved": "/home/user/gpui-completed-test-binaries-archive/3b4ebddb6858e5963006c1d15359c1bd0b5a107827b8cf2bd31e4d9b4d8e8577.gz",
+      "bytes": 3232624
+    },
+    {
+      "path": "/home/user/gpui-gpu-scroll-copy-target/release/build/wgpu-core/74454022b0d06afe/out/build_script_build",
+      "sha256": "2e3309e900bfb554f44a3b8c24ced11e2d93945a8a62b694a749d577cd062f1c",
+      "preserved": "/home/user/gpui-completed-test-binaries-archive/2e3309e900bfb554f44a3b8c24ced11e2d93945a8a62b694a749d577cd062f1c.gz",
+      "bytes": 570592
+    },
+    {
+      "path": "/home/user/gpui-gpu-scroll-copy-target/release/build/async-trait/5d5285f3f6da7d4b/out/libasync_trait-5d5285f3f6da7d4b.so",
+      "sha256": "75b1c5d2472fd0567beea97ccbf6927158e283a58fb5c88941d49c6f701f6903",
+      "preserved": "/home/user/gpui-completed-test-binaries-archive/75b1c5d2472fd0567beea97ccbf6927158e283a58fb5c88941d49c6f701f6903.gz",
+      "bytes": 4095312
+    },
+    {
+      "path": "/home/user/gpui-gpu-scroll-copy-target/release/build/async-trait/198df58b0a520edc/out/libasync_trait-198df58b0a520edc.so",
+      "sha256": "98e955508d718ba923662f24745857332a673529145a58f4eab588fc04455439",
+      "preserved": "/home/user/gpui-completed-test-binaries-archive/98e955508d718ba923662f24745857332a673529145a58f4eab588fc04455439.gz",
+      "bytes": 4001800
+    },
+    {
+      "path": "/home/user/gpui-gpu-scroll-copy-target/release/build/wayland-sys/597ec603fe2f7cb6/out/build_script_build",
+      "sha256": "213ffea452d5fc299ebeaea8f21039dbe87907afb597d6365db772f21b840a98",
+      "preserved": "/home/user/gpui-completed-test-binaries-archive/213ffea452d5fc299ebeaea8f21039dbe87907afb597d6365db772f21b840a98.gz",
+      "bytes": 868584
+    },
+    {
+      "path": "/home/user/gpui-gpu-scroll-copy-target/release/build/displaydoc/cc8ded37579c4ef3/out/libdisplaydoc-cc8ded37579c4ef3.so",
+      "sha256": "ccbfcea05cd0b100352c8a4e81d2cf984167eec2f188c377200a6f35ec5558e1",
+      "preserved": "/home/user/gpui-completed-test-binaries-archive/ccbfcea05cd0b100352c8a4e81d2cf984167eec2f188c377200a6f35ec5558e1.gz",
+      "bytes": 3504880
+    },
+    {
+      "path": "/home/user/gpui-gpu-scroll-copy-target/release/build/displaydoc/ae3b3be74d3848d9/out/libdisplaydoc-ae3b3be74d3848d9.so",
+      "sha256": "278fc296a533ef1d8e6e4570c0b666eda1aa0f7801d47ed743b16017b73f6fc1",
+      "preserved": "/home/user/gpui-completed-test-binaries-archive/278fc296a533ef1d8e6e4570c0b666eda1aa0f7801d47ed743b16017b73f6fc1.gz",
+      "bytes": 3596296
+    },
+    {
+      "path": "/home/user/gpui-gpu-scroll-copy-target/release/build/displaydoc/e1c8e5df12e75cbf/out/libdisplaydoc-e1c8e5df12e75cbf.so",
+      "sha256": "e0316dfc22aee92a308b1c2957e63f3ab94ab2a5ede84b9d6c04266dacbcbb0c",
+      "preserved": "/home/user/gpui-completed-test-binaries-archive/e0316dfc22aee92a308b1c2957e63f3ab94ab2a5ede84b9d6c04266dacbcbb0c.gz",
+      "bytes": 3504912
+    },
+    {
+      "path": "/home/user/gpui-gpu-scroll-copy-target/release/build/displaydoc/6ea497f2d7ba32f6/out/libdisplaydoc-6ea497f2d7ba32f6.so",
+      "sha256": "34ca035df5a542a73bf3854eb4cc194930eaba803aa4fbec882f61d86b35aaf0",
+      "preserved": "/home/user/gpui-completed-test-binaries-archive/34ca035df5a542a73bf3854eb4cc194930eaba803aa4fbec882f61d86b35aaf0.gz",
+      "bytes": 3596368
+    },
+    {
+      "path": "/home/user/gpui-gpu-scroll-copy-target/release/build/serde/46d2ebe4d66c126e/out/build_script_build",
+      "sha256": "f66535c1d3bc7d23224bce1a8962cded28809069be06cf7da155d7b632e7213b",
+      "preserved": "/home/user/gpui-completed-test-binaries-archive/f66535c1d3bc7d23224bce1a8962cded28809069be06cf7da155d7b632e7213b.gz",
+      "bytes": 568600
+    },
+    {
+      "path": "/home/user/gpui-gpu-scroll-copy-target/release/build/zerocopy/377141dfcba998b5/out/build_script_build",
+      "sha256": "0f7d54f513e84165c361dead997462c476310e7693b0abf040eb9dc8cd587d74",
+      "preserved": "/home/user/gpui-completed-test-binaries-archive/0f7d54f513e84165c361dead997462c476310e7693b0abf040eb9dc8cd587d74.gz",
+      "bytes": 631824
+    },
+    {
+      "path": "/home/user/gpui-gpu-scroll-copy-target/release/build/zvariant_derive/235208ea6e2662d5/out/libzvariant_derive-235208ea6e2662d5.so",
+      "sha256": "7e366785d730290008f5d2f402ba3afc283a6c5fa45b927ae2d203da0deb641d",
+      "preserved": "/home/user/gpui-completed-test-binaries-archive/7e366785d730290008f5d2f402ba3afc283a6c5fa45b927ae2d203da0deb641d.gz",
+      "bytes": 5214448
+    },
+    {
+      "path": "/home/user/gpui-gpu-scroll-copy-target/release/build/futures-macro/6a87b6d12b95cf0f/out/libfutures_macro-6a87b6d12b95cf0f.so",
+      "sha256": "4a7c47b838c4964f3c954be09853d4090d1904b7f648e3cb6bf40014520f3237",
+      "preserved": "/home/user/gpui-completed-test-binaries-archive/4a7c47b838c4964f3c954be09853d4090d1904b7f648e3cb6bf40014520f3237.gz",
+      "bytes": 3178584
+    },
+    {
+      "path": "/home/user/gpui-gpu-scroll-copy-target/release/build/thiserror/029e1311a199cff8/out/build_script_build",
+      "sha256": "bbfbdfcb43097022ff238b2786012b633e9a2c56f222ecf36359a678af37e58e",
+      "preserved": "/home/user/gpui-completed-test-binaries-archive/bbfbdfcb43097022ff238b2786012b633e9a2c56f222ecf36359a678af37e58e.gz",
+      "bytes": 618384
+    },
+    {
+      "path": "/home/user/gpui-gpu-scroll-copy-target/release/build/thiserror/037c25dda111d9d6/out/build_script_build",
+      "sha256": "8f7dcd4fa6c26c5afa59f71a23b4b56f769adbff7fbb904c0d33721b5e1f3788",
+      "preserved": "/home/user/gpui-completed-test-binaries-archive/8f7dcd4fa6c26c5afa59f71a23b4b56f769adbff7fbb904c0d33721b5e1f3788.gz",
+      "bytes": 581904
+    },
+    {
+      "path": "/home/user/gpui-gpu-scroll-copy-target/release/build/khronos-egl/be8829e30a645d59/out/build_script_build",
+      "sha256": "50684d164eeb7d65822d669b231e757ef469ab5b1d36619c1fcd56b82b212eec",
+      "preserved": "/home/user/gpui-completed-test-binaries-archive/50684d164eeb7d65822d669b231e757ef469ab5b1d36619c1fcd56b82b212eec.gz",
+      "bytes": 439120
+    },
+    {
+      "path": "/home/user/gpui-gpu-scroll-copy-target/release/build/serde_json/f7969e8baa346759/out/build_script_build",
+      "sha256": "c566a131fc74691426d8c0d46567ac5013dc9d4cbf7f1c5358171914034cbba8",
+      "preserved": "/home/user/gpui-completed-test-binaries-archive/c566a131fc74691426d8c0d46567ac5013dc9d4cbf7f1c5358171914034cbba8.gz",
+      "bytes": 450904
+    },
+    {
+      "path": "/home/user/gpui-gpu-scroll-copy-target/release/build/async-io/449dfc580551ff9a/out/build_script_build",
+      "sha256": "68ac8eb6bd24af2079aae75b4c878207ce74f823da4710bb128951da3f6b6451",
+      "preserved": "/home/user/gpui-completed-test-binaries-archive/68ac8eb6bd24af2079aae75b4c878207ce74f823da4710bb128951da3f6b6451.gz",
+      "bytes": 729560
+    },
+    {
+      "path": "/home/user/gpui-gpu-scroll-copy-target/release/build/num-traits/3ee3b2ee734435f7/out/build_script_build",
+      "sha256": "a28077c10689d7b133079e56ef809dee9421be8b39caf46f5436914b40d6d537",
+      "preserved": "/home/user/gpui-completed-test-binaries-archive/a28077c10689d7b133079e56ef809dee9421be8b39caf46f5436914b40d6d537.gz",
+      "bytes": 732360
+    },
+    {
+      "path": "/home/user/gpui-gpu-scroll-copy-target/release/build/x11-dl/6858afb49c5a8e72/out/build_script_build",
+      "sha256": "918e3b0ca5d8ff1a3a4ac268e69b5a2a17b233c81668b285d5aaac11b13b6838",
+      "preserved": "/home/user/gpui-completed-test-binaries-archive/918e3b0ca5d8ff1a3a4ac268e69b5a2a17b233c81668b285d5aaac11b13b6838.gz",
+      "bytes": 706096
+    },
+    {
+      "path": "/home/user/gpui-gpu-scroll-copy-target/release/build/tiny-xlib/906ea00c5dfbb1f3/out/build_script_build",
+      "sha256": "40bca7df60764f80b2c0f92d66b52bff2318cd66106c305f38874c927bd8fc9e",
+      "preserved": "/home/user/gpui-completed-test-binaries-archive/40bca7df60764f80b2c0f92d66b52bff2318cd66106c305f38874c927bd8fc9e.gz",
+      "bytes": 898016
+    },
+    {
+      "path": "/home/user/gpui-gpu-scroll-copy-target/release/build/naga/0b201ef015b4d9d6/out/build_script_build",
+      "sha256": "3470d4a66d97603629c732d773daefe56d5e16d528cf614a620bfef1762310f4",
+      "preserved": "/home/user/gpui-completed-test-binaries-archive/3470d4a66d97603629c732d773daefe56d5e16d528cf614a620bfef1762310f4.gz",
+      "bytes": 518208
+    },
+    {
+      "path": "/home/user/gpui-gpu-scroll-copy-target/release/build/naga/bcf7746797912142/out/build_script_build",
+      "sha256": "9a3102eb332ca0de899d02072938e3adcac1359865f8e2209db0c13afc4ecc0a",
+      "preserved": "/home/user/gpui-completed-test-binaries-archive/9a3102eb332ca0de899d02072938e3adcac1359865f8e2209db0c13afc4ecc0a.gz",
+      "bytes": 518208
+    },
+    {
+      "path": "/home/user/gpui-gpu-scroll-copy-target/release/build/wgpu/babb35d1b7a7baf8/out/build_script_build",
+      "sha256": "d9572ee4e27b319add24df350d15567c93816d9d25549bb3bdbd61b5b0dd96d4",
+      "preserved": "/home/user/gpui-completed-test-binaries-archive/d9572ee4e27b319add24df350d15567c93816d9d25549bb3bdbd61b5b0dd96d4.gz",
+      "bytes": 665416
+    },
+    {
+      "path": "/home/user/gpui-gpu-scroll-copy-target/release/build/serde_derive/f0da3669146572c5/out/libserde_derive-f0da3669146572c5.so",
+      "sha256": "ad1899453d0433f35bd60ebf668d4605828e8138bc94ae1428fa869addb47c92",
+      "preserved": "/home/user/gpui-completed-test-binaries-archive/ad1899453d0433f35bd60ebf668d4605828e8138bc94ae1428fa869addb47c92.gz",
+      "bytes": 4901928
+    },
+    {
+      "path": "/home/user/gpui-gpu-scroll-copy-target/release/build/serde_derive/ca1f631bf857e0d4/out/libserde_derive-ca1f631bf857e0d4.so",
+      "sha256": "75f714cc06c03c9cc279c249781bc3eca3607545552a6d4a9c0d1ec4cd00c78c",
+      "preserved": "/home/user/gpui-completed-test-binaries-archive/75f714cc06c03c9cc279c249781bc3eca3607545552a6d4a9c0d1ec4cd00c78c.gz",
+      "bytes": 4992560
+    },
+    {
+      "path": "/home/user/gpui-gpu-scroll-copy-target/release/build/serde_core/53097c3f11fd4ce8/out/build_script_build",
+      "sha256": "de0bd4813508406a6e9a87d31a6ae27112e13eaf2dd162826b80623b1fd05711",
+      "preserved": "/home/user/gpui-completed-test-binaries-archive/de0bd4813508406a6e9a87d31a6ae27112e13eaf2dd162826b80623b1fd05711.gz",
+      "bytes": 571272
+    },
+    {
+      "path": "/home/user/gpui-gpu-scroll-copy-target/release/build/winit/1f438a946e9e1a48/out/build_script_build",
+      "sha256": "b37ef8b575fcbfe5356d231ded8ad9e42ff4dad2d09478541b04ee95e58055ac",
+      "preserved": "/home/user/gpui-completed-test-binaries-archive/b37ef8b575fcbfe5356d231ded8ad9e42ff4dad2d09478541b04ee95e58055ac.gz",
+      "bytes": 554200
+    },
+    {
+      "path": "/home/user/gpui-gpu-scroll-copy-target/release/build/zbus_macros/50b900a0efd3f786/out/libzbus_macros-50b900a0efd3f786.so",
+      "sha256": "2232f9672c0c56e5c6868a7d87d8813642a30cef7ab722407b0996a8af18cf4b",
+      "preserved": "/home/user/gpui-completed-test-binaries-archive/2232f9672c0c56e5c6868a7d87d8813642a30cef7ab722407b0996a8af18cf4b.gz",
+      "bytes": 6585760
+    },
+    {
+      "path": "/home/user/gpui-gpu-scroll-copy-target/release/build/zbus_macros/426bec16249cb392/out/libzbus_macros-426bec16249cb392.so",
+      "sha256": "2d6757a1e92165fd7a22364ca0a3f1f282db99fe5e6e675a9581c9cb3d9cc6e7",
+      "preserved": "/home/user/gpui-completed-test-binaries-archive/2d6757a1e92165fd7a22364ca0a3f1f282db99fe5e6e675a9581c9cb3d9cc6e7.gz",
+      "bytes": 5981312
+    },
+    {
+      "path": "/home/user/gpui-gpu-scroll-copy-target/release/build/zbus_macros/7e17f05691789c81/out/libzbus_macros-7e17f05691789c81.so",
+      "sha256": "2c29da9d5263f297419d4f8d7ef5da1eae242b978cc3a2d4356a237dba9a0a31",
+      "preserved": "/home/user/gpui-completed-test-binaries-archive/2c29da9d5263f297419d4f8d7ef5da1eae242b978cc3a2d4356a237dba9a0a31.gz",
+      "bytes": 5862896
+    },
+    {
+      "path": "/home/user/gpui-gpu-scroll-copy-target/release/build/icu_normalizer_data/1b36171d079ab411/out/build_script_build",
+      "sha256": "706f9a838d3c648d8e814154a2d93c525314b8bb4aae89eb906f8fdd3b26cdf0",
+      "preserved": "/home/user/gpui-completed-test-binaries-archive/706f9a838d3c648d8e814154a2d93c525314b8bb4aae89eb906f8fdd3b26cdf0.gz",
+      "bytes": 450520
+    },
+    {
+      "path": "/home/user/gpui-gpu-scroll-copy-target/release/build/quote/abb4a0d71abaaaf8/out/build_script_build",
+      "sha256": "b33b224f163cca5afc20c3ef381fe629216a11e1e1347629a2a23620ece91591",
+      "preserved": "/home/user/gpui-completed-test-binaries-archive/b33b224f163cca5afc20c3ef381fe629216a11e1e1347629a2a23620ece91591.gz",
+      "bytes": 540768
+    },
+    {
+      "path": "/home/user/gpui-gpu-scroll-copy-target/release/build/ash/1d4def5179a5bd76/out/build_script_build",
+      "sha256": "c7610298a4b40843554ffdd9e577ccf27d335c673c84c88b1232b7acd95ebfee",
+      "preserved": "/home/user/gpui-completed-test-binaries-archive/c7610298a4b40843554ffdd9e577ccf27d335c673c84c88b1232b7acd95ebfee.gz",
+      "bytes": 439120
+    },
+    {
+      "path": "/home/user/gpui-gpu-scroll-copy-target/release/build/tracing-attributes/686b882ab798a6c6/out/libtracing_attributes-686b882ab798a6c6.so",
+      "sha256": "4f23e1cddbab0beb60cdd5f08541433d8e22ba7e7b2dec75c59f155c0f0d5d4b",
+      "preserved": "/home/user/gpui-completed-test-binaries-archive/4f23e1cddbab0beb60cdd5f08541433d8e22ba7e7b2dec75c59f155c0f0d5d4b.gz",
+      "bytes": 4356528
+    },
+    {
+      "path": "/home/user/gpui-gpu-scroll-copy-target/release/build/zerocopy-derive/bd574a823e2136ad/out/libzerocopy_derive-bd574a823e2136ad.so",
+      "sha256": "5166c032d6d13721a289996cf814b7439bf4dae20939360d9c9bac645355616f",
+      "preserved": "/home/user/gpui-completed-test-binaries-archive/5166c032d6d13721a289996cf814b7439bf4dae20939360d9c9bac645355616f.gz",
+      "bytes": 4519104
+    },
+    {
+      "path": "/home/user/gpui-gpu-scroll-copy-target/release/build/document-features/84a1ce9af45e065b/out/libdocument_features-84a1ce9af45e065b.so",
+      "sha256": "d2a811a993342ff249be661aa4d78b534521adad4409567bcecd71b664013e58",
+      "preserved": "/home/user/gpui-completed-test-binaries-archive/d2a811a993342ff249be661aa4d78b534521adad4409567bcecd71b664013e58.gz",
+      "bytes": 956856
+    },
+    {
+      "path": "/home/user/gpui-gpu-scroll-copy-target/release/build/zerofrom-derive/977efb65f38d463b/out/libzerofrom_derive-977efb65f38d463b.so",
+      "sha256": "5131ecc0910099e6be6fb90e56dd14c32e5762ff9e176e21a6cd0ff80750ec80",
+      "preserved": "/home/user/gpui-completed-test-binaries-archive/5131ecc0910099e6be6fb90e56dd14c32e5762ff9e176e21a6cd0ff80750ec80.gz",
+      "bytes": 4651960
+    },
+    {
+      "path": "/home/user/gpui-gpu-scroll-copy-target/release/build/zerofrom-derive/7ffc4abaee99a20a/out/libzerofrom_derive-7ffc4abaee99a20a.so",
+      "sha256": "e24c9e9af5df88182208367eb6de879149498dac5e751bead937a6a43141309d",
+      "preserved": "/home/user/gpui-completed-test-binaries-archive/e24c9e9af5df88182208367eb6de879149498dac5e751bead937a6a43141309d.gz",
+      "bytes": 4549096
+    },
+    {
+      "path": "/home/user/gpui-gpu-scroll-copy-target/release/build/zerofrom-derive/a834322a2b7e0153/out/libzerofrom_derive-a834322a2b7e0153.so",
+      "sha256": "9bd3d65cc181fbebc6d6fd818482ad778d0286e3ed0d8878582986b142b8ce13",
+      "preserved": "/home/user/gpui-completed-test-binaries-archive/9bd3d65cc181fbebc6d6fd818482ad778d0286e3ed0d8878582986b142b8ce13.gz",
+      "bytes": 4549008
+    },
+    {
+      "path": "/home/user/gpui-gpu-scroll-copy-target/release/build/zerofrom-derive/c5aea22dacc86f50/out/libzerofrom_derive-c5aea22dacc86f50.so",
+      "sha256": "35bc8cedc2078bbe76074196f4ca35764ae18587fd5510ec683f2ff60236b100",
+      "preserved": "/home/user/gpui-completed-test-binaries-archive/35bc8cedc2078bbe76074196f4ca35764ae18587fd5510ec683f2ff60236b100.gz",
+      "bytes": 4652008
+    }
+  ],
+  "reason": "completed sealed experiment; every remaining ELF preserved raw or losslessly compressed; sources/evidence/comparator executables remain"
+}

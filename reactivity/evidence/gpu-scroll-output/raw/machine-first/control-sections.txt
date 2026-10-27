@@ -1,0 +1,36 @@
+/home/user/gpui-native-list-parity-target/release/build/gpui/c6ca7b724b9767e5/out/zgx_native_lab  :
+section                  size       addr
+.interp                    28        736
+.note.ABI-tag              32        764
+.note.gnu.build-id         36        796
+.dynsym                  4296        832
+.gnu.version              358       5128
+.gnu.version_r            464       5488
+.gnu.hash                  28       5952
+.dynstr                  2278       5980
+.rela.dyn              557280       8264
+.rela.plt                  48     565544
+.gcc_except_table      780792     565592
+.rodata               6582240    1346432
+.eh_frame_hdr          167124    7928672
+.eh_frame             1182856    8095800
+.text                11326439    9282752
+.init                      27   20609192
+.fini                      13   20609220
+.plt                       48   20609248
+.tdata                   1000   20613392
+.tbss                     272   20614392
+.fini_array                 8   20614392
+.init_array                24   20614400
+.data.rel.ro           402576   20614424
+.dynamic                  480   21017000
+.got                    35752   21017480
+.got.plt                   40   21053232
+.relro_padding            168   21053272
+.tm_clone_table             0   21057368
+.data                   11352   21057408
+.bss                     7444   21068760
+.comment                  193          0
+Total                21063696
+
+

@@ -1,0 +1,13 @@
+diff --git a/reactivity/crates/gpu/src/renderer/scroll_output.rs b/reactivity/crates/gpu/src/renderer/scroll_output.rs
+index 818078dd73..3d4d47596f 100644
+--- a/reactivity/crates/gpu/src/renderer/scroll_output.rs
++++ b/reactivity/crates/gpu/src/renderer/scroll_output.rs
+@@ -25,7 +25,7 @@ impl GpuContext {
+                     resolve_target: None,
+                     depth_slice: None,
+                     ops: wgpu::Operations {
+-                        load: wgpu::LoadOp::Load,
++                        load: wgpu::LoadOp::Clear(wgpu::Color::TRANSPARENT), // negative: erase copied overlap
+                         store: wgpu::StoreOp::Store,
+                     },
+                 })],

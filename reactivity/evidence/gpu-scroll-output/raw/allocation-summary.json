@@ -1,0 +1,262 @@
+{
+  "scroll": {
+    "control": {
+      "requests": 462.5,
+      "requested_bytes": 277334.0,
+      "net_bytes": 304.0,
+      "peak_bytes": 54532.0,
+      "image_bytes": 2764800.0,
+      "copied_pixels": 691200.0
+    },
+    "predecessor": {
+      "requests": 468.5,
+      "requested_bytes": 277702.0,
+      "net_bytes": 304.0,
+      "peak_bytes": 54532.0,
+      "image_bytes": 4185280.0,
+      "copied_pixels": 1401440.0
+    },
+    "candidate": {
+      "requests": 468.5,
+      "requested_bytes": 277702.0,
+      "net_bytes": 304.0,
+      "peak_bytes": 54532.0,
+      "image_bytes": 4185280.0,
+      "copied_pixels": 1401440.0
+    }
+  },
+  "both": {
+    "control": {
+      "requests": 542.5,
+      "requested_bytes": 350760.0,
+      "net_bytes": 304.0,
+      "peak_bytes": 74789.0,
+      "image_bytes": 2764800.0,
+      "copied_pixels": 691200.0
+    },
+    "predecessor": {
+      "requests": 549.5,
+      "requested_bytes": 351576.0,
+      "net_bytes": 304.0,
+      "peak_bytes": 74789.0,
+      "image_bytes": 4185280.0,
+      "copied_pixels": 1401440.0
+    },
+    "candidate": {
+      "requests": 549.5,
+      "requested_bytes": 351576.0,
+      "net_bytes": 304.0,
+      "peak_bytes": 74789.0,
+      "image_bytes": 4185280.0,
+      "copied_pixels": 1401440.0
+    }
+  },
+  "stream": {
+    "control": {
+      "requests": 245.0,
+      "requested_bytes": 188319.0,
+      "net_bytes": 304.0,
+      "peak_bytes": 74381.0,
+      "image_bytes": 2764800.0,
+      "copied_pixels": 691200.0
+    },
+    "predecessor": {
+      "requests": 245.0,
+      "requested_bytes": 188319.0,
+      "net_bytes": 304.0,
+      "peak_bytes": 74381.0,
+      "image_bytes": 2764800.0,
+      "copied_pixels": 691200.0
+    },
+    "candidate": {
+      "requests": 245.0,
+      "requested_bytes": 188319.0,
+      "net_bytes": 304.0,
+      "peak_bytes": 74381.0,
+      "image_bytes": 2764800.0,
+      "copied_pixels": 691200.0
+    }
+  },
+  "stream-owner": {
+    "control": {
+      "requests": 405.0,
+      "requested_bytes": 284248.0,
+      "net_bytes": 304.0,
+      "peak_bytes": 74381.0,
+      "image_bytes": 2764800.0,
+      "copied_pixels": 691200.0
+    },
+    "predecessor": {
+      "requests": 405.0,
+      "requested_bytes": 284248.0,
+      "net_bytes": 304.0,
+      "peak_bytes": 74381.0,
+      "image_bytes": 2764800.0,
+      "copied_pixels": 691200.0
+    },
+    "candidate": {
+      "requests": 405.0,
+      "requested_bytes": 284248.0,
+      "net_bytes": 304.0,
+      "peak_bytes": 74381.0,
+      "image_bytes": 2764800.0,
+      "copied_pixels": 691200.0
+    }
+  },
+  "fractional": {
+    "control": {
+      "requests": 573.0,
+      "requested_bytes": 338663.0,
+      "net_bytes": 304.0,
+      "peak_bytes": 54838.0,
+      "image_bytes": 2764800.0,
+      "copied_pixels": 691200.0
+    },
+    "predecessor": {
+      "requests": 573.0,
+      "requested_bytes": 338663.0,
+      "net_bytes": 304.0,
+      "peak_bytes": 54838.0,
+      "image_bytes": 2764800.0,
+      "copied_pixels": 691200.0
+    },
+    "candidate": {
+      "requests": 573.0,
+      "requested_bytes": 338663.0,
+      "net_bytes": 304.0,
+      "peak_bytes": 54838.0,
+      "image_bytes": 2764800.0,
+      "copied_pixels": 691200.0
+    }
+  },
+  "flat-tiny": {
+    "control": {
+      "requests": 69.0,
+      "requested_bytes": 10135.0,
+      "net_bytes": 0.0,
+      "peak_bytes": 6353.0,
+      "image_bytes": 256.0,
+      "copied_pixels": 64.0
+    },
+    "predecessor": {
+      "requests": 69.0,
+      "requested_bytes": 10135.0,
+      "net_bytes": 0.0,
+      "peak_bytes": 6353.0,
+      "image_bytes": 256.0,
+      "copied_pixels": 64.0
+    },
+    "candidate": {
+      "requests": 69.0,
+      "requested_bytes": 10135.0,
+      "net_bytes": 0.0,
+      "peak_bytes": 6353.0,
+      "image_bytes": 256.0,
+      "copied_pixels": 64.0
+    }
+  },
+  "flat-full": {
+    "control": {
+      "requests": 69.0,
+      "requested_bytes": 10135.0,
+      "net_bytes": 0.0,
+      "peak_bytes": 6353.0,
+      "image_bytes": 1048576.0,
+      "copied_pixels": 262144.0
+    },
+    "predecessor": {
+      "requests": 69.0,
+      "requested_bytes": 10135.0,
+      "net_bytes": 0.0,
+      "peak_bytes": 6353.0,
+      "image_bytes": 1048576.0,
+      "copied_pixels": 262144.0
+    },
+    "candidate": {
+      "requests": 69.0,
+      "requested_bytes": 10135.0,
+      "net_bytes": 0.0,
+      "peak_bytes": 6353.0,
+      "image_bytes": 1048576.0,
+      "copied_pixels": 262144.0
+    }
+  },
+  "list-tiny": {
+    "control": {
+      "requests": 210.0,
+      "requested_bytes": 61089.0,
+      "net_bytes": 312.0,
+      "peak_bytes": 12093.0,
+      "image_bytes": 4096.0,
+      "copied_pixels": 1024.0
+    },
+    "predecessor": {
+      "requests": 216.0,
+      "requested_bytes": 61457.0,
+      "net_bytes": 312.0,
+      "peak_bytes": 12093.0,
+      "image_bytes": 5056.0,
+      "copied_pixels": 1504.0
+    },
+    "candidate": {
+      "requests": 216.0,
+      "requested_bytes": 61457.0,
+      "net_bytes": 312.0,
+      "peak_bytes": 12093.0,
+      "image_bytes": 5056.0,
+      "copied_pixels": 1504.0
+    }
+  },
+  "list-flat": {
+    "control": {
+      "requests": 261.5,
+      "requested_bytes": 107958.0,
+      "net_bytes": 304.0,
+      "peak_bytes": 22104.0,
+      "image_bytes": 2764800.0,
+      "copied_pixels": 691200.0
+    },
+    "predecessor": {
+      "requests": 267.5,
+      "requested_bytes": 108326.0,
+      "net_bytes": 304.0,
+      "peak_bytes": 22104.0,
+      "image_bytes": 4185280.0,
+      "copied_pixels": 1401440.0
+    },
+    "candidate": {
+      "requests": 267.5,
+      "requested_bytes": 108326.0,
+      "net_bytes": 304.0,
+      "peak_bytes": 22104.0,
+      "image_bytes": 4185280.0,
+      "copied_pixels": 1401440.0
+    }
+  },
+  "exposure": {
+    "control": {
+      "requests": 44.0,
+      "requested_bytes": 8024.0,
+      "net_bytes": 0.0,
+      "peak_bytes": 5218.0,
+      "image_bytes": 2764800.0,
+      "copied_pixels": 691200.0
+    },
+    "predecessor": {
+      "requests": 44.0,
+      "requested_bytes": 8024.0,
+      "net_bytes": 0.0,
+      "peak_bytes": 5218.0,
+      "image_bytes": 2764800.0,
+      "copied_pixels": 691200.0
+    },
+    "candidate": {
+      "requests": 44.0,
+      "requested_bytes": 8024.0,
+      "net_bytes": 0.0,
+      "peak_bytes": 5218.0,
+      "image_bytes": 2764800.0,
+      "copied_pixels": 691200.0
+    }
+  }
+}

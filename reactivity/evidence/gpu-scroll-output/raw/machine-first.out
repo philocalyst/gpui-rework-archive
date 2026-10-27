@@ -1,0 +1,418 @@
+{
+  "candidate": {
+    "ELF_bytes": 26329864,
+    "functions": [
+      {
+        "symbol": "<zeno::segment::Segment>::offset",
+        "address": "000000000123f848",
+        "bytes": 5,
+        "local_sub_rsp_prologue": []
+      },
+      {
+        "symbol": "<gpui_canvas::canvas::scroll::ScrollCopy>::destination",
+        "address": "000000000117d270",
+        "bytes": 42,
+        "local_sub_rsp_prologue": []
+      },
+      {
+        "symbol": "<gpui_canvas::canvas::scroll::ScrollCopy>::source",
+        "address": "000000000117d2a0",
+        "bytes": 42,
+        "local_sub_rsp_prologue": []
+      },
+      {
+        "symbol": "<gpui::source::Source<zgx_native_lab::Lab, alloc::string::String> as gpui::source::Field<zgx_native_lab::Lab>>::offset",
+        "address": "000000000099c7b0",
+        "bytes": 74,
+        "local_sub_rsp_prologue": []
+      },
+      {
+        "symbol": "<gpui::runtime::scroll::ViewportBuild>::offset",
+        "address": "00000000009eddd0",
+        "bytes": 105,
+        "local_sub_rsp_prologue": []
+      },
+      {
+        "symbol": "<read_fonts::offset_array::ArrayOfOffsets<read_fonts::tables::layout::CoverageTable>>::get",
+        "address": "000000000120d9a0",
+        "bytes": 106,
+        "local_sub_rsp_prologue": []
+      },
+      {
+        "symbol": "<read_fonts::offset_array::ArrayOfNullableOffsets<read_fonts::tables::gpos::AnchorTable>>::get",
+        "address": "000000000120d900",
+        "bytes": 145,
+        "local_sub_rsp_prologue": [
+          32
+        ]
+      },
+      {
+        "symbol": "<gpui::source::Source<zgx_native_lab::Lab, f64> as gpui::source::Field<zgx_native_lab::Lab>>::offset",
+        "address": "000000000099c940",
+        "bytes": 154,
+        "local_sub_rsp_prologue": [
+          16
+        ]
+      },
+      {
+        "symbol": "gpui_canvas::canvas::scroll::subtract",
+        "address": "000000000117e050",
+        "bytes": 189,
+        "local_sub_rsp_prologue": [
+          64
+        ]
+      },
+      {
+        "symbol": "gpui::runtime::list::row_style",
+        "address": "00000000009ef3d0",
+        "bytes": 284,
+        "local_sub_rsp_prologue": []
+      },
+      {
+        "symbol": "<gpui::runtime::scroll::ViewportColumn>::offset",
+        "address": "00000000009edb70",
+        "bytes": 299,
+        "local_sub_rsp_prologue": []
+      },
+      {
+        "symbol": "<font_types::offset::Offset32 as read_fonts::offset::ResolveOffset>::resolve_with_args::<read_fonts::tables::cmap::CmapSubtable>",
+        "address": "00000000012a1bd0",
+        "bytes": 336,
+        "local_sub_rsp_prologue": []
+      },
+      {
+        "symbol": "<gpui::source::Sources<zgx_native_lab::Lab>>::offset",
+        "address": "000000000099a5b0",
+        "bytes": 386,
+        "local_sub_rsp_prologue": [
+          88
+        ]
+      },
+      {
+        "symbol": "<gpui_gpu::renderer::GpuContext>::submit",
+        "address": "0000000000d67b00",
+        "bytes": 695,
+        "local_sub_rsp_prologue": [
+          1344
+        ]
+      },
+      {
+        "symbol": "<gpui_gpu::renderer::retained::Backing>::prepare_scroll",
+        "address": "0000000000d72d10",
+        "bytes": 723,
+        "local_sub_rsp_prologue": [
+          168
+        ]
+      },
+      {
+        "symbol": "<gpui_gpu::renderer::GpuContext>::submit_scroll",
+        "address": "0000000000d66d60",
+        "bytes": 945,
+        "local_sub_rsp_prologue": [
+          1320
+        ]
+      },
+      {
+        "symbol": "<accesskit_atspi_common::node::PlatformNode>::offset_at_point",
+        "address": "0000000000b939b0",
+        "bytes": 1176,
+        "local_sub_rsp_prologue": [
+          296
+        ]
+      },
+      {
+        "symbol": "gpui_canvas::canvas::scroll::certify",
+        "address": "000000000117da60",
+        "bytes": 1506,
+        "local_sub_rsp_prologue": [
+          376
+        ]
+      },
+      {
+        "symbol": "gpui::runtime::list::plan",
+        "address": "00000000009eeb40",
+        "bytes": 2189,
+        "local_sub_rsp_prologue": [
+          280
+        ]
+      },
+      {
+        "symbol": "<gpui_gpu::renderer::retained::RetainedRenderer>::render_with_scroll",
+        "address": "0000000000d722b0",
+        "bytes": 2300,
+        "local_sub_rsp_prologue": [
+          792
+        ]
+      },
+      {
+        "symbol": "<gpui::runtime::Runtime<zgx_native_lab::Lab>>::present_walk",
+        "address": "0000000000904e80",
+        "bytes": 26776,
+        "local_sub_rsp_prologue": [
+          4096,
+          248
+        ]
+      }
+    ]
+  },
+  "predecessor": {
+    "ELF_bytes": 26329184,
+    "functions": [
+      {
+        "symbol": "<zeno::segment::Segment>::offset",
+        "address": "000000000123f608",
+        "bytes": 5,
+        "local_sub_rsp_prologue": []
+      },
+      {
+        "symbol": "<gpui_canvas::canvas::scroll::ScrollCopy>::destination",
+        "address": "000000000117d030",
+        "bytes": 42,
+        "local_sub_rsp_prologue": []
+      },
+      {
+        "symbol": "<gpui_canvas::canvas::scroll::ScrollCopy>::source",
+        "address": "000000000117d060",
+        "bytes": 42,
+        "local_sub_rsp_prologue": []
+      },
+      {
+        "symbol": "<gpui::source::Source<zgx_native_lab::Lab, alloc::string::String> as gpui::source::Field<zgx_native_lab::Lab>>::offset",
+        "address": "000000000099c740",
+        "bytes": 74,
+        "local_sub_rsp_prologue": []
+      },
+      {
+        "symbol": "<gpui::runtime::scroll::ViewportBuild>::offset",
+        "address": "00000000009edd60",
+        "bytes": 105,
+        "local_sub_rsp_prologue": []
+      },
+      {
+        "symbol": "<read_fonts::offset_array::ArrayOfOffsets<read_fonts::tables::layout::CoverageTable>>::get",
+        "address": "000000000120d760",
+        "bytes": 106,
+        "local_sub_rsp_prologue": []
+      },
+      {
+        "symbol": "<read_fonts::offset_array::ArrayOfNullableOffsets<read_fonts::tables::gpos::AnchorTable>>::get",
+        "address": "000000000120d6c0",
+        "bytes": 145,
+        "local_sub_rsp_prologue": [
+          32
+        ]
+      },
+      {
+        "symbol": "<gpui::source::Source<zgx_native_lab::Lab, f64> as gpui::source::Field<zgx_native_lab::Lab>>::offset",
+        "address": "000000000099c8d0",
+        "bytes": 154,
+        "local_sub_rsp_prologue": [
+          16
+        ]
+      },
+      {
+        "symbol": "gpui_canvas::canvas::scroll::subtract",
+        "address": "000000000117de10",
+        "bytes": 189,
+        "local_sub_rsp_prologue": [
+          64
+        ]
+      },
+      {
+        "symbol": "gpui::runtime::list::row_style",
+        "address": "00000000009ef360",
+        "bytes": 284,
+        "local_sub_rsp_prologue": []
+      },
+      {
+        "symbol": "<gpui::runtime::scroll::ViewportColumn>::offset",
+        "address": "00000000009edb00",
+        "bytes": 299,
+        "local_sub_rsp_prologue": []
+      },
+      {
+        "symbol": "<font_types::offset::Offset32 as read_fonts::offset::ResolveOffset>::resolve_with_args::<read_fonts::tables::cmap::CmapSubtable>",
+        "address": "00000000012a1990",
+        "bytes": 336,
+        "local_sub_rsp_prologue": []
+      },
+      {
+        "symbol": "<gpui::source::Sources<zgx_native_lab::Lab>>::offset",
+        "address": "000000000099a540",
+        "bytes": 386,
+        "local_sub_rsp_prologue": [
+          88
+        ]
+      },
+      {
+        "symbol": "<gpui_gpu::renderer::retained::Backing>::prepare_scroll",
+        "address": "0000000000d72ad0",
+        "bytes": 723,
+        "local_sub_rsp_prologue": [
+          168
+        ]
+      },
+      {
+        "symbol": "<gpui_gpu::renderer::GpuContext>::submit",
+        "address": "0000000000d676d0",
+        "bytes": 1176,
+        "local_sub_rsp_prologue": [
+          1344
+        ]
+      },
+      {
+        "symbol": "<accesskit_atspi_common::node::PlatformNode>::offset_at_point",
+        "address": "0000000000b93940",
+        "bytes": 1176,
+        "local_sub_rsp_prologue": [
+          296
+        ]
+      },
+      {
+        "symbol": "gpui_canvas::canvas::scroll::certify",
+        "address": "000000000117d820",
+        "bytes": 1506,
+        "local_sub_rsp_prologue": [
+          376
+        ]
+      },
+      {
+        "symbol": "gpui::runtime::list::plan",
+        "address": "00000000009eead0",
+        "bytes": 2189,
+        "local_sub_rsp_prologue": [
+          280
+        ]
+      },
+      {
+        "symbol": "<gpui_gpu::renderer::retained::RetainedRenderer>::render_with_scroll",
+        "address": "0000000000d720a0",
+        "bytes": 2235,
+        "local_sub_rsp_prologue": [
+          792
+        ]
+      },
+      {
+        "symbol": "<gpui::runtime::Runtime<zgx_native_lab::Lab>>::present_walk",
+        "address": "0000000000904e10",
+        "bytes": 26776,
+        "local_sub_rsp_prologue": [
+          4096,
+          248
+        ]
+      }
+    ]
+  },
+  "control": {
+    "ELF_bytes": 26306600,
+    "functions": [
+      {
+        "symbol": "<zeno::segment::Segment>::offset",
+        "address": "000000000123acb8",
+        "bytes": 5,
+        "local_sub_rsp_prologue": []
+      },
+      {
+        "symbol": "<gpui::source::Source<zgx_native_lab::Lab, alloc::string::String> as gpui::source::Field<zgx_native_lab::Lab>>::offset",
+        "address": "00000000009ac110",
+        "bytes": 74,
+        "local_sub_rsp_prologue": []
+      },
+      {
+        "symbol": "<gpui::runtime::scroll::ViewportBuild>::offset",
+        "address": "00000000009ec970",
+        "bytes": 105,
+        "local_sub_rsp_prologue": []
+      },
+      {
+        "symbol": "<read_fonts::offset_array::ArrayOfOffsets<read_fonts::tables::layout::CoverageTable>>::get",
+        "address": "0000000001208e10",
+        "bytes": 106,
+        "local_sub_rsp_prologue": []
+      },
+      {
+        "symbol": "<read_fonts::offset_array::ArrayOfNullableOffsets<read_fonts::tables::gpos::AnchorTable>>::get",
+        "address": "0000000001208d70",
+        "bytes": 145,
+        "local_sub_rsp_prologue": [
+          32
+        ]
+      },
+      {
+        "symbol": "<gpui::source::Source<zgx_native_lab::Lab, f64> as gpui::source::Field<zgx_native_lab::Lab>>::offset",
+        "address": "00000000009ac2a0",
+        "bytes": 154,
+        "local_sub_rsp_prologue": [
+          16
+        ]
+      },
+      {
+        "symbol": "gpui::runtime::list::row_style",
+        "address": "00000000009edf70",
+        "bytes": 284,
+        "local_sub_rsp_prologue": []
+      },
+      {
+        "symbol": "<gpui::runtime::scroll::ViewportColumn>::offset",
+        "address": "00000000009ec710",
+        "bytes": 299,
+        "local_sub_rsp_prologue": []
+      },
+      {
+        "symbol": "<font_types::offset::Offset32 as read_fonts::offset::ResolveOffset>::resolve_with_args::<read_fonts::tables::cmap::CmapSubtable>",
+        "address": "000000000129d040",
+        "bytes": 336,
+        "local_sub_rsp_prologue": []
+      },
+      {
+        "symbol": "<gpui::source::Sources<zgx_native_lab::Lab>>::offset",
+        "address": "00000000009aa630",
+        "bytes": 386,
+        "local_sub_rsp_prologue": [
+          88
+        ]
+      },
+      {
+        "symbol": "<gpui_gpu::renderer::GpuContext>::submit",
+        "address": "0000000000d656f0",
+        "bytes": 636,
+        "local_sub_rsp_prologue": [
+          1344
+        ]
+      },
+      {
+        "symbol": "<accesskit_atspi_common::node::PlatformNode>::offset_at_point",
+        "address": "0000000000b91970",
+        "bytes": 1176,
+        "local_sub_rsp_prologue": [
+          296
+        ]
+      },
+      {
+        "symbol": "<gpui_gpu::renderer::retained::RetainedRenderer>::render",
+        "address": "0000000000d69870",
+        "bytes": 2117,
+        "local_sub_rsp_prologue": [
+          664
+        ]
+      },
+      {
+        "symbol": "gpui::runtime::list::plan",
+        "address": "00000000009ed6e0",
+        "bytes": 2189,
+        "local_sub_rsp_prologue": [
+          280
+        ]
+      },
+      {
+        "symbol": "<gpui::runtime::Runtime<zgx_native_lab::Lab>>::present_walk",
+        "address": "00000000009045e0",
+        "bytes": 25808,
+        "local_sub_rsp_prologue": [
+          4096,
+          216
+        ]
+      }
+    ]
+  }
+}
