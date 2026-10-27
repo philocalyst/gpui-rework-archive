@@ -2625,6 +2625,11 @@ impl<M: View + 'static> Runtime<M> {
                         height: row.height,
                         visible: true,
                         retain_offscreen: draft.plan.retain_offscreen,
+                        buffered: !draft
+                            .plan
+                            .viewport
+                            .visible_range
+                            .contains(&(row.item_index as usize)),
                     },
                 );
             }
@@ -3399,6 +3404,18 @@ impl<M: View + 'static> Runtime<M> {
             } else {
                 (viewport, viewport, false)
             };
+            // Logical slots outside the viewport are retained only as a buffer.
+            // Outward geometric envelopes can overlap at an exact slot boundary;
+            // that numerical broad phase must not publish an offscreen row.
+            if node.kind() == NodeKind::ListItem
+                && self
+                    .list_rows
+                    .get(&node.identity())
+                    .is_some_and(|row| row.buffered)
+            {
+                clip = Rect::default();
+                hit_clip = Rect::default();
+            }
             let in_scroll = node.kind() == NodeKind::Scroll || inherited.membership & 2 != 0;
             if matches!(
                 node.kind(),

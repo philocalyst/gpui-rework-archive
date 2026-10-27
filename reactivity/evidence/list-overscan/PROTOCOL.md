@@ -34,3 +34,9 @@ guards, pinned nightly2026-10-23/content fingerprints, failures preserved. Full
 default/X11 GPUI+Canvas, strict Clippy, native scripts. No timing during builds.
 Controlled offset, reference wheel28, deferred controls and matched profiles remain
 subsequent parity work before complete-path architecture performance experiments.
+
+First gate found exact-boundary rows leaking through outward hit envelopes.
+Correction: retain a logical buffered-slot flag (within existing ListRow padding)
+and give slots outside visible_range empty paint/input clips before traversal.
+The logical range is authoritative for overscan; do not epsilon-shrink shared
+geometry or change the existing collapsed-span continuous-pointer contract.

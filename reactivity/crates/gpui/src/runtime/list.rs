@@ -21,6 +21,7 @@ pub(super) struct ListRow {
     pub height: f32,
     pub visible: bool,
     pub retain_offscreen: bool,
+    pub buffered: bool,
 }
 #[derive(Clone, Copy)]
 pub(super) enum ScrollPosition {
