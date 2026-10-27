@@ -305,7 +305,9 @@ impl SourceEdits {
                     return Ok(Change::Source(None));
                 }
             }
-            Ok(Change::Sources(self.fields))
+            let mut fields = self.fields;
+            fields[0] = None;
+            Ok(Change::Sources(fields))
         } else {
             Ok(Change::Source(self.single()))
         }
