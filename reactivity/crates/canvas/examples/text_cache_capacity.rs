@@ -32,7 +32,7 @@ fn main() {
     for cached in [false, true] {
         let mut cache = TextCache::default();
         let mut total = 0;
-        for (stage, font, source) in stages {
+        for (_, font, source) in stages {
             // Oracle and owned result fingerprint are fully dropped before measuring.
             let expected = font
                 .shaper()
@@ -44,13 +44,9 @@ fn main() {
             } else {
                 font.shaper().shape_interactive(source, 16., Some(400.))
             };
-            // This preflight must not initialize or change the measured cache.
-            // Clear it, then start a fresh ledger below instead.
             assert_eq!(check.map(|l| fingerprint(&l)), expected);
-            cache.clear();
-            assert_eq!(total, 0);
-            break;
         }
+        cache.clear();
         for (stage, font, source) in stages {
             let cost = allocation_counter::measure(|| {
                 let result = if cached {
