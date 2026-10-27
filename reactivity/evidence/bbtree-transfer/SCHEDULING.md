@@ -129,3 +129,41 @@ numeric cursor through a static nested lane chain. A bounded structural sweep
 may remove repeated routing while retaining exact FIFO, frozen-before-callback
 batches, rotating fairness, backlog charging and physical cancellation credit.
 This is a new candidate, not a claim that task readiness equals memory readiness.
+
+## Actual publication experiment after the routing trials
+
+The structural delivery sweep is rejected. On the measured release binary,
+indexed staging already uses jump-table dispatch; replacing it doubled the
+64-lane routing routine (4840→9596 bytes) without meeting the complete-operation
+gate. Complete dossier: local/delivery-sweep, dbd7dbd40b. This is a concrete
+counterexample to inferring runtime pointer-chain cost from generic Rust source.
+
+The next candidate preserves existing typed destination authority rather than
+adding a lookup structure. Lane::apply formerly collapsed two distinct source
+identities to an unknown edit, forcing owner description. SourceEdits now keeps
+up to four identities in transient storage. The first certificate admits only
+disjoint visual-text sinks, no owner dependence, inspector, virtual list or
+Question plan. Existing callback order and one normal layout/paint/ACK boundary
+remain. Opaque edits, overflow and unproven destinations retain the old path.
+An owner-dependency mutant leaves visibly stale derived text and is caught.
+
+The first 210-process public-operation comparison met numerical gates: with
+1000 static labels, two-field CPU ratio .7298 (all pairs .724–.762), four-field
+.7448 (.702–.766). All one-field/fallback medians <=1.05, but some individual
+controls remain noisy. Four-field allocation requests 1194→120, requested warm
+bytes 1322409→343672, zero retained delta; measured Win wrapper unchanged.
+Full default GPUI tests (711), strict Clippy, exact fresh-window pixel oracles
+and the mutant pass/fail as intended. Composed native qualification is pending.
+Source/evidence at /home/user/gpui-source-batch-lab, branch
+local/source-batch-publication. This is not a competitor or hardware victory.
+
+A separate next hypothesis is to preserve the same complete changed-source set
+when refreshing Questions. Currently any multi-field batch uses coarse refresh,
+which can cancel unrelated work. A single earlier-first graph pass can resolve
+all final input versions under one owner borrow, skip unrelated declarations,
+and still reject stale A-B-A completions. Only after that should the text batch
+certificate be extended to windows whose Question readiness/projections did not
+change. Avoid refreshing separately per field if it manufactures redundant
+intermediate request stamps in dependent joins. Unknown callbacks keep coarse
+refresh. This proposal is not implemented by the current text-only trial and
+does not supply Solid's automatic multi-output transition semantics.
