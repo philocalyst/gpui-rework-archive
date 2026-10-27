@@ -1,0 +1,42 @@
+{
+  "variants": {
+    "original": "/home/user/gpui-columns-original-target/release/examples/tree_lane_cost",
+    "levels": "/home/user/gpui-columns-levels-target/release/examples/tree_lane_cost",
+    "aos-hint": "/home/user/gpui-columns-aos-hint-target/release/examples/tree_lane_cost",
+    "scalar": "/home/user/gpui-columns-scalar-target/release/examples/tree_lane_cost",
+    "hint": "/home/user/gpui-tree-columns-target/release/examples/tree_lane_cost",
+    "selected": "/home/user/gpui-columns-selected-target/release/examples/tree_lane_cost"
+  },
+  "hashes": {
+    "original": "bfd37cb38f25d1b04d42ea4e1c3c138a120e30658b84ae0e4e94c00381e2c3fc",
+    "levels": "ea67c9bf1c20638ed1e1946b5b305ab5f17cb65629bdab74d7b0fdd9f5cfe216",
+    "aos-hint": "20c008f726ccb000dd3b736dd87e26d140462e139e70ce3e48bf1f7f2d395c52",
+    "scalar": "9b6450551799d708b315af73af500f366883c98cc7ab76470453d466d791721d",
+    "hint": "ec80c37ffa4483d394685fa7063a621fdf76e664b1d4c5ba2ebad72d916e7bb8",
+    "selected": "909654f185ea2c7ca295c8922285fd0451827f72f68c3904bd34fe93c72e7e83"
+  },
+  "cases": [
+    "tiny",
+    "contiguous",
+    "shuffled",
+    "medium-depth",
+    "shallow",
+    "single-full",
+    "mixed-depth"
+  ],
+  "repetitions": 5,
+  "warmup": 20,
+  "batches": 40,
+  "ops_per_batch": 5,
+  "platform": "Linux-6.8.0-117-generic-x86_64-with-glibc2.39",
+  "compiler": "rustc 1.101.0-nightly (7189d39d9 2026-10-22)\nbinary: rustc\ncommit-hash: 7189d39d9ce936881b8132c6addeaf3e295cd455\ncommit-date: 2026-10-22\nhost: x86_64-unknown-linux-gnu\nrelease: 1.101.0-nightly\nLLVM version: 23.1.4\n",
+  "started": 1793076779.918916,
+  "sources": {
+    "original": "a212c63095ba10587a5ab81c88dea562f59d47e4",
+    "levels": "077239244ec239ddf27c9bec6224c9e477f21f48",
+    "aos-hint": "3c7cf881a5e4f9e96c7566b5190062449ca0c093",
+    "scalar": "8bec438c9fd15c0e00db932810ef7795dafef97b",
+    "hint": "17127ee39d20a273513878d29a2a55a410ab0d48",
+    "selected": "24a33726666d4150d3f1a92604fa5d4ab1b005b7"
+  }
+}

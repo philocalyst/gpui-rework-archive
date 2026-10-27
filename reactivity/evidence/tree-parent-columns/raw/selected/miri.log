@@ -1,0 +1,4 @@
+   Compiling cephal v0.1.1 (/home/user/gpui-columns-selected-lab/reactivity/vendor/cephal)
+   Compiling gpui_reactivity_core v0.1.0 (/home/user/gpui-columns-selected-lab/reactivity/crates/core)
+    Finished `test` profile [unoptimized + debuginfo] target(s) in 4.01s
+     Running unittests src/lib.rs (/home/user/gpui-columns-selected-miri-target/miri/x86_64-unknown-linux-gnu/debug/build/gpui_reactivity_core/fa9fd833520aa640/out/gpui_reactivity_core-fa9fd833520aa640)

@@ -1,0 +1,1 @@
+{"command": ["/usr/bin/time", "-v", "-o", "/home/user/gpui-tree-columns-evidence/paired/1-single-full-hint.time", "/home/user/gpui-tree-columns-target/release/examples/tree_lane_cost", "single-full"], "exit": 0}

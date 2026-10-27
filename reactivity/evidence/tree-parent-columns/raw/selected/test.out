@@ -1,0 +1,71 @@
+
+running 7 tests
+test layout::tests::cold_context_owner_replaces_takes_and_promotes_without_demotion ... ok
+test layout::tests::hidden_marker_uses_flags_and_revokes_on_mutation_and_rollover ... ok
+test layout::tests::generation_rollover_clears_old_cache_stamps ... ok
+test tree::lanes::tests::batches_preserve_order_lifecycle_and_full_capabilities ... ok
+test layout::tests::speculative_oof_writes_cannot_allocate_or_replace_real_records ... ok
+test tree::tests::exhausted_generation_retires_slot_without_aba ... ok
+test layout::tests::oof_records_remain_live_through_rollover_and_reused_slots ... ok
+
+test result: ok. 7 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 0.00s
+
+
+running 22 tests
+test calc_program_validation_and_parent_viewport_dependencies ... ok
+test borrowed_measurement_panic_poisoning_ends_the_service_borrow ... ok
+test explicit_measure_invalidation_and_removal_keep_cache_correct ... ok
+test measured_content_service_is_borrowed_per_compute_and_invalidates_explicitly ... ok
+test idle_identical_styles_and_bad_capabilities_do_no_compute ... ok
+test measurement_panic_poisoning_prevents_reusing_partial_layout ... ok
+test cheap_leaf_forest_has_no_cache_boxes_and_styles_are_released ... ok
+test hidden_subtrees_clear_old_caches_before_becoming_visible_again ... ok
+test new_hidden_siblings_do_not_share_subtree_zeroing_marks ... ok
+test oof::a_former_forest_root_uses_its_new_initial_containing_block ... ok
+test oof::nonparent_absolute_and_fixed_containing_blocks_match_cold ... ok
+test oof::many_cold_forest_holders_survive_removal_reuse_and_replacement ... ok
+test hidden::hidden_forest_reveal_move_remove_and_reuse_matches_cold ... ok
+test oof::out_of_flow_reparent_remove_slot_reuse_and_hidden_forests_match_cold ... ok
+test remove_queued_nodes_reuse_slots_reparent_depth_and_switch_roots ... ok
+test retained_queries_reuse_clean_sibling_caches ... ok
+test width_measurement_reuses_height_probes_and_matches_full_axis_layout ... ok
+test real_flex_block_and_grid_layout_match_cold ... ok
+test oof::randomized_oof_lifecycle_matches_new_vendor_owned_forests ... ok
+test randomized_lifecycle_and_viewport_edits_match_fresh_cephal_trees ... ok
+test oof::measurement_panic_cannot_publish_partial_oof_layout ... ok
+test oof::thousand_measured_rows_keep_off_path_answers_during_oof_and_text_edits ... ok
+
+test result: ok. 22 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 0.02s
+
+
+running 14 tests
+test coordinate_model_handles_reflection_shear_nonfinite_and_overflow ... ok
+test invalid_foreign_and_noop_mutations_do_zero_work ... ok
+test continuous_bounds_preserve_zero_area_and_wide_corner_arithmetic ... ok
+test nested_geometry_reparent_damage_clip_and_singular_transition ... ok
+test rotated_hit_uses_inverse_and_transformed_ancestor_clips ... ok
+test sparse_record_swap_remove_and_slot_reuse_preserve_survivors ... ok
+test sub_ulp_extents_at_tile_boundaries_remain_damaged_and_hittable ... ok
+test unrepresentable_forward_bounds_damage_viewport_and_tiny_inverse_stays_hittable ... ok
+test wide_ancestor_composition_does_not_erase_recoverable_geometry ... ok
+test wide_translation_cancels_before_output_narrowing ... ok
+test sparse_damage_is_bounded_and_covers_fractional_edges ... ok
+test deep_spatial_refresh_and_removal_do_not_recurse ... ok
+test deep_hit_queries_are_linear_and_rejected_clips_prune_descendants ... ok
+test randomized_spatial_mutations_match_from_scratch_coordinates_and_damage ... ok
+
+test result: ok. 14 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 0.03s
+
+
+running 3 tests
+test arena_identity_stale_ids_and_failure_atomicity ... ok
+test deep_tree_streaming_removal_and_drop ... ok
+test randomized_edits_match_independent_adjacency_oracle ... ok
+
+test result: ok. 3 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 0.01s
+
+
+running 0 tests
+
+test result: ok. 0 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 0.00s
+

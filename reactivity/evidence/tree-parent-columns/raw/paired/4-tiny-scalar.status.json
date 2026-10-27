@@ -1,0 +1,1 @@
+{"command": ["/usr/bin/time", "-v", "-o", "/home/user/gpui-tree-columns-evidence/paired/4-tiny-scalar.time", "/home/user/gpui-columns-scalar-target/release/examples/tree_lane_cost", "tiny"], "exit": 0}

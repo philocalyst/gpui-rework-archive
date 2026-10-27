@@ -1,0 +1,448 @@
+000000000004aa50 <<gpui_reactivity_core::tree::Tree>::parent>:
+   4aa50:	50                   	push   %rax
+   4aa51:	4c 8b 0a             	mov    (%rdx),%r9
+   4aa54:	4c 3b 4e 30          	cmp    0x30(%rsi),%r9
+   4aa58:	75 5a                	jne    4aab4 <<gpui_reactivity_core::tree::Tree>::parent+0x64>
+   4aa5a:	48 89 f0             	mov    %rsi,%rax
+   4aa5d:	48 8b 76 10          	mov    0x10(%rsi),%rsi
+   4aa61:	8b 4a 0c             	mov    0xc(%rdx),%ecx
+   4aa64:	48 39 ce             	cmp    %rcx,%rsi
+   4aa67:	76 4b                	jbe    4aab4 <<gpui_reactivity_core::tree::Tree>::parent+0x64>
+   4aa69:	4c 8b 50 08          	mov    0x8(%rax),%r10
+   4aa6d:	4c 8d 04 49          	lea    (%rcx,%rcx,2),%r8
+   4aa71:	43 80 7c c2 14 ff    	cmpb   $0xff,0x14(%r10,%r8,8)
+   4aa77:	74 3b                	je     4aab4 <<gpui_reactivity_core::tree::Tree>::parent+0x64>
+   4aa79:	4f 8d 04 c2          	lea    (%r10,%r8,8),%r8
+   4aa7d:	45 8b 00             	mov    (%r8),%r8d
+   4aa80:	44 3b 42 08          	cmp    0x8(%rdx),%r8d
+   4aa84:	75 2e                	jne    4aab4 <<gpui_reactivity_core::tree::Tree>::parent+0x64>
+   4aa86:	4c 8b 40 28          	mov    0x28(%rax),%r8
+   4aa8a:	49 39 c8             	cmp    %rcx,%r8
+   4aa8d:	76 49                	jbe    4aad8 <<gpui_reactivity_core::tree::Tree>::parent+0x88>
+   4aa8f:	48 8b 40 20          	mov    0x20(%rax),%rax
+   4aa93:	8b 04 88             	mov    (%rax,%rcx,4),%eax
+   4aa96:	b9 ff ff ff ff       	mov    $0xffffffff,%ecx
+   4aa9b:	48 39 c8             	cmp    %rcx,%rax
+   4aa9e:	74 24                	je     4aac4 <<gpui_reactivity_core::tree::Tree>::parent+0x74>
+   4aaa0:	48 39 c6             	cmp    %rax,%rsi
+   4aaa3:	76 46                	jbe    4aaeb <<gpui_reactivity_core::tree::Tree>::parent+0x9b>
+   4aaa5:	48 8d 0c 40          	lea    (%rax,%rax,2),%rcx
+   4aaa9:	41 8b 0c ca          	mov    (%r10,%rcx,8),%ecx
+   4aaad:	ba 01 00 00 00       	mov    $0x1,%edx
+   4aab2:	eb 12                	jmp    4aac6 <<gpui_reactivity_core::tree::Tree>::parent+0x76>
+   4aab4:	c6 47 08 00          	movb   $0x0,0x8(%rdi)
+   4aab8:	48 c7 07 02 00 00 00 	movq   $0x2,(%rdi)
+   4aabf:	48 89 f8             	mov    %rdi,%rax
+   4aac2:	59                   	pop    %rcx
+   4aac3:	c3                   	ret
+   4aac4:	31 d2                	xor    %edx,%edx
+   4aac6:	48 89 17             	mov    %rdx,(%rdi)
+   4aac9:	4c 89 4f 08          	mov    %r9,0x8(%rdi)
+   4aacd:	89 4f 10             	mov    %ecx,0x10(%rdi)
+   4aad0:	89 47 14             	mov    %eax,0x14(%rdi)
+   4aad3:	48 89 f8             	mov    %rdi,%rax
+   4aad6:	59                   	pop    %rcx
+   4aad7:	c3                   	ret
+   4aad8:	48 8d 15 e9 a3 0c 00 	lea    0xca3e9(%rip),%rdx        # 114ec8 <anon.954a5c5a41c0da8763a7fdb4438fae4d.34.llvm.6457091288300621998>
+   4aadf:	48 89 cf             	mov    %rcx,%rdi
+   4aae2:	4c 89 c6             	mov    %r8,%rsi
+   4aae5:	ff 15 cd dc 0c 00    	call   *0xcdccd(%rip)        # 1187b8 <_DYNAMIC+0x458>
+   4aaeb:	48 8d 15 5e a2 0c 00 	lea    0xca25e(%rip),%rdx        # 114d50 <anon.954a5c5a41c0da8763a7fdb4438fae4d.3.llvm.6457091288300621998>
+   4aaf2:	48 89 c7             	mov    %rax,%rdi
+   4aaf5:	ff 15 bd dc 0c 00    	call   *0xcdcbd(%rip)        # 1187b8 <_DYNAMIC+0x458>
+   4aafb:	cc                   	int3
+   4aafc:	cc                   	int3
+   4aafd:	cc                   	int3
+   4aafe:	cc                   	int3
+   4aaff:	cc                   	int3
+
+0000000000092f70 <<core::iter::adapters::take::Take<alloc::collections::btree::set::Iter<gpui_reactivity_core::tree::NodeId>> as core::iter::traits::iterator::Iterator>::try_fold::<(), core::iter::traits::iterator::Iterator::all::check<&gpui_reactivity_core::tree::NodeId, <gpui_reactivity_core::layout::LayoutTree>::compute_inner::{closure#0}>::{closure#0}, core::ops::control_flow::ControlFlow<()>>>:
+   92f70:	41 57                	push   %r15
+   92f72:	41 56                	push   %r14
+   92f74:	53                   	push   %rbx
+   92f75:	48 83 7f 48 00       	cmpq   $0x0,0x48(%rdi)
+   92f7a:	74 51                	je     92fcd <<core::iter::adapters::take::Take<alloc::collections::btree::set::Iter<gpui_reactivity_core::tree::NodeId>> as core::iter::traits::iterator::Iterator>::try_fold::<(), core::iter::traits::iterator::Iterator::all::check<&gpui_reactivity_core::tree::NodeId, <gpui_reactivity_core::layout::LayoutTree>::compute_inner::{closure#0}>::{closure#0}, core::ops::control_flow::ControlFlow<()>>+0x5d>
+   92f7c:	48 89 d3             	mov    %rdx,%rbx
+   92f7f:	49 89 f6             	mov    %rsi,%r14
+   92f82:	49 89 ff             	mov    %rdi,%r15
+   92f85:	66 66 2e 0f 1f 84 00 	data16 cs nopw 0x0(%rax,%rax,1)
+   92f8c:	00 00 00 00 
+   92f90:	4c 89 ff             	mov    %r15,%rdi
+   92f93:	e8 a8 95 fc ff       	call   5c540 <<alloc::collections::btree::set::Iter<gpui_reactivity_core::tree::NodeId> as core::iter::traits::iterator::Iterator>::next>
+   92f98:	48 85 c0             	test   %rax,%rax
+   92f9b:	74 30                	je     92fcd <<core::iter::adapters::take::Take<alloc::collections::btree::set::Iter<gpui_reactivity_core::tree::NodeId>> as core::iter::traits::iterator::Iterator>::try_fold::<(), core::iter::traits::iterator::Iterator::all::check<&gpui_reactivity_core::tree::NodeId, <gpui_reactivity_core::layout::LayoutTree>::compute_inner::{closure#0}>::{closure#0}, core::ops::control_flow::ControlFlow<()>>+0x5d>
+   92f9d:	8b 78 0c             	mov    0xc(%rax),%edi
+   92fa0:	49 8b 47 48          	mov    0x48(%r15),%rax
+   92fa4:	48 ff c8             	dec    %rax
+   92fa7:	49 89 47 48          	mov    %rax,0x48(%r15)
+   92fab:	48 39 fb             	cmp    %rdi,%rbx
+   92fae:	76 27                	jbe    92fd7 <<core::iter::adapters::take::Take<alloc::collections::btree::set::Iter<gpui_reactivity_core::tree::NodeId>> as core::iter::traits::iterator::Iterator>::try_fold::<(), core::iter::traits::iterator::Iterator::all::check<&gpui_reactivity_core::tree::NodeId, <gpui_reactivity_core::layout::LayoutTree>::compute_inner::{closure#0}>::{closure#0}, core::ops::control_flow::ControlFlow<()>>+0x67>
+   92fb0:	31 c9                	xor    %ecx,%ecx
+   92fb2:	41 83 3c be 10       	cmpl   $0x10,(%r14,%rdi,4)
+   92fb7:	0f 92 c1             	setb   %cl
+   92fba:	b2 02                	mov    $0x2,%dl
+   92fbc:	28 ca                	sub    %cl,%dl
+   92fbe:	48 85 c0             	test   %rax,%rax
+   92fc1:	0f b6 c2             	movzbl %dl,%eax
+   92fc4:	0f 44 c1             	cmove  %ecx,%eax
+   92fc7:	3c 02                	cmp    $0x2,%al
+   92fc9:	74 c5                	je     92f90 <<core::iter::adapters::take::Take<alloc::collections::btree::set::Iter<gpui_reactivity_core::tree::NodeId>> as core::iter::traits::iterator::Iterator>::try_fold::<(), core::iter::traits::iterator::Iterator::all::check<&gpui_reactivity_core::tree::NodeId, <gpui_reactivity_core::layout::LayoutTree>::compute_inner::{closure#0}>::{closure#0}, core::ops::control_flow::ControlFlow<()>>+0x20>
+   92fcb:	eb 02                	jmp    92fcf <<core::iter::adapters::take::Take<alloc::collections::btree::set::Iter<gpui_reactivity_core::tree::NodeId>> as core::iter::traits::iterator::Iterator>::try_fold::<(), core::iter::traits::iterator::Iterator::all::check<&gpui_reactivity_core::tree::NodeId, <gpui_reactivity_core::layout::LayoutTree>::compute_inner::{closure#0}>::{closure#0}, core::ops::control_flow::ControlFlow<()>>+0x5f>
+   92fcd:	31 c0                	xor    %eax,%eax
+   92fcf:	24 01                	and    $0x1,%al
+   92fd1:	5b                   	pop    %rbx
+   92fd2:	41 5e                	pop    %r14
+   92fd4:	41 5f                	pop    %r15
+   92fd6:	c3                   	ret
+   92fd7:	48 8d 15 12 26 08 00 	lea    0x82612(%rip),%rdx        # 1155f0 <anon.fc60d90f6251de95347b7065c4db424c.7.llvm.16506745576599779223+0x108>
+   92fde:	48 89 de             	mov    %rbx,%rsi
+   92fe1:	ff 15 d1 57 08 00    	call   *0x857d1(%rip)        # 1187b8 <_DYNAMIC+0x458>
+   92fe7:	cc                   	int3
+   92fe8:	cc                   	int3
+   92fe9:	cc                   	int3
+   92fea:	cc                   	int3
+   92feb:	cc                   	int3
+   92fec:	cc                   	int3
+   92fed:	cc                   	int3
+   92fee:	cc                   	int3
+   92fef:	cc                   	int3
+
+000000000009a690 <<alloc::vec::Vec<gpui_reactivity_core::tree::NodeId> as alloc::vec::spec_from_iter_nested::SpecFromIterNested<gpui_reactivity_core::tree::NodeId, core::iter::adapters::filter::Filter<core::iter::adapters::copied::Copied<alloc::collections::btree::set::Iter<gpui_reactivity_core::tree::NodeId>>, <gpui_reactivity_core::layout::LayoutTree>::compute_inner::{closure#1}>>>::from_iter>:
+   9a690:	55                   	push   %rbp
+   9a691:	41 57                	push   %r15
+   9a693:	41 56                	push   %r14
+   9a695:	41 55                	push   %r13
+   9a697:	41 54                	push   %r12
+   9a699:	53                   	push   %rbx
+   9a69a:	48 81 ec a8 00 00 00 	sub    $0xa8,%rsp
+   9a6a1:	48 89 f3             	mov    %rsi,%rbx
+   9a6a4:	48 89 7c 24 68       	mov    %rdi,0x68(%rsp)
+   9a6a9:	48 89 f7             	mov    %rsi,%rdi
+   9a6ac:	e8 8f 1e fc ff       	call   5c540 <<alloc::collections::btree::set::Iter<gpui_reactivity_core::tree::NodeId> as core::iter::traits::iterator::Iterator>::next>
+   9a6b1:	48 85 c0             	test   %rax,%rax
+   9a6b4:	0f 84 4c 01 00 00    	je     9a806 <<alloc::vec::Vec<gpui_reactivity_core::tree::NodeId> as alloc::vec::spec_from_iter_nested::SpecFromIterNested<gpui_reactivity_core::tree::NodeId, core::iter::adapters::filter::Filter<core::iter::adapters::copied::Copied<alloc::collections::btree::set::Iter<gpui_reactivity_core::tree::NodeId>>, <gpui_reactivity_core::layout::LayoutTree>::compute_inner::{closure#1}>>>::from_iter+0x176>
+   9a6ba:	49 89 c6             	mov    %rax,%r14
+   9a6bd:	4c 8d 7c 24 28       	lea    0x28(%rsp),%r15
+   9a6c2:	4c 8d 6c 24 08       	lea    0x8(%rsp),%r13
+   9a6c7:	48 89 1c 24          	mov    %rbx,(%rsp)
+   9a6cb:	eb 1b                	jmp    9a6e8 <<alloc::vec::Vec<gpui_reactivity_core::tree::NodeId> as alloc::vec::spec_from_iter_nested::SpecFromIterNested<gpui_reactivity_core::tree::NodeId, core::iter::adapters::filter::Filter<core::iter::adapters::copied::Copied<alloc::collections::btree::set::Iter<gpui_reactivity_core::tree::NodeId>>, <gpui_reactivity_core::layout::LayoutTree>::compute_inner::{closure#1}>>>::from_iter+0x58>
+   9a6cd:	0f 1f 00             	nopl   (%rax)
+   9a6d0:	48 8b 1c 24          	mov    (%rsp),%rbx
+   9a6d4:	48 89 df             	mov    %rbx,%rdi
+   9a6d7:	e8 64 1e fc ff       	call   5c540 <<alloc::collections::btree::set::Iter<gpui_reactivity_core::tree::NodeId> as core::iter::traits::iterator::Iterator>::next>
+   9a6dc:	49 89 c6             	mov    %rax,%r14
+   9a6df:	48 85 c0             	test   %rax,%rax
+   9a6e2:	0f 84 1e 01 00 00    	je     9a806 <<alloc::vec::Vec<gpui_reactivity_core::tree::NodeId> as alloc::vec::spec_from_iter_nested::SpecFromIterNested<gpui_reactivity_core::tree::NodeId, core::iter::adapters::filter::Filter<core::iter::adapters::copied::Copied<alloc::collections::btree::set::Iter<gpui_reactivity_core::tree::NodeId>>, <gpui_reactivity_core::layout::LayoutTree>::compute_inner::{closure#1}>>>::from_iter+0x176>
+   9a6e8:	49 8b 06             	mov    (%r14),%rax
+   9a6eb:	f2 41 0f 10 46 08    	movsd  0x8(%r14),%xmm0
+   9a6f1:	48 8b 6b 48          	mov    0x48(%rbx),%rbp
+   9a6f5:	4c 8b 63 50          	mov    0x50(%rbx),%r12
+   9a6f9:	0f 1f 80 00 00 00 00 	nopl   0x0(%rax)
+   9a700:	48 89 c3             	mov    %rax,%rbx
+   9a703:	48 89 44 24 08       	mov    %rax,0x8(%rsp)
+   9a708:	0f 29 44 24 40       	movaps %xmm0,0x40(%rsp)
+   9a70d:	0f 13 44 24 10       	movlps %xmm0,0x10(%rsp)
+   9a712:	4c 89 ff             	mov    %r15,%rdi
+   9a715:	48 89 ee             	mov    %rbp,%rsi
+   9a718:	4c 89 ea             	mov    %r13,%rdx
+   9a71b:	ff 15 0f e0 07 00    	call   *0x7e00f(%rip)        # 118730 <_DYNAMIC+0x3d0>
+   9a721:	48 8b 4c 24 28       	mov    0x28(%rsp),%rcx
+   9a726:	48 83 f9 02          	cmp    $0x2,%rcx
+   9a72a:	0f 84 04 01 00 00    	je     9a834 <<alloc::vec::Vec<gpui_reactivity_core::tree::NodeId> as alloc::vec::spec_from_iter_nested::SpecFromIterNested<gpui_reactivity_core::tree::NodeId, core::iter::adapters::filter::Filter<core::iter::adapters::copied::Copied<alloc::collections::btree::set::Iter<gpui_reactivity_core::tree::NodeId>>, <gpui_reactivity_core::layout::LayoutTree>::compute_inner::{closure#1}>>>::from_iter+0x1a4>
+   9a730:	48 8b 44 24 30       	mov    0x30(%rsp),%rax
+   9a735:	f3 0f 7e 44 24 38    	movq   0x38(%rsp),%xmm0
+   9a73b:	f6 c1 01             	test   $0x1,%cl
+   9a73e:	75 c0                	jne    9a700 <<alloc::vec::Vec<gpui_reactivity_core::tree::NodeId> as alloc::vec::spec_from_iter_nested::SpecFromIterNested<gpui_reactivity_core::tree::NodeId, core::iter::adapters::filter::Filter<core::iter::adapters::copied::Copied<alloc::collections::btree::set::Iter<gpui_reactivity_core::tree::NodeId>>, <gpui_reactivity_core::layout::LayoutTree>::compute_inner::{closure#1}>>>::from_iter+0x70>
+   9a740:	49 3b 1c 24          	cmp    (%r12),%rbx
+   9a744:	75 8a                	jne    9a6d0 <<alloc::vec::Vec<gpui_reactivity_core::tree::NodeId> as alloc::vec::spec_from_iter_nested::SpecFromIterNested<gpui_reactivity_core::tree::NodeId, core::iter::adapters::filter::Filter<core::iter::adapters::copied::Copied<alloc::collections::btree::set::Iter<gpui_reactivity_core::tree::NodeId>>, <gpui_reactivity_core::layout::LayoutTree>::compute_inner::{closure#1}>>>::from_iter+0x40>
+   9a746:	66 0f 6f 44 24 40    	movdqa 0x40(%rsp),%xmm0
+   9a74c:	66 0f 7e c0          	movd   %xmm0,%eax
+   9a750:	41 3b 44 24 08       	cmp    0x8(%r12),%eax
+   9a755:	0f 85 75 ff ff ff    	jne    9a6d0 <<alloc::vec::Vec<gpui_reactivity_core::tree::NodeId> as alloc::vec::spec_from_iter_nested::SpecFromIterNested<gpui_reactivity_core::tree::NodeId, core::iter::adapters::filter::Filter<core::iter::adapters::copied::Copied<alloc::collections::btree::set::Iter<gpui_reactivity_core::tree::NodeId>>, <gpui_reactivity_core::layout::LayoutTree>::compute_inner::{closure#1}>>>::from_iter+0x40>
+   9a75b:	66 0f 70 44 24 40 55 	pshufd $0x55,0x40(%rsp),%xmm0
+   9a762:	66 0f 7e c0          	movd   %xmm0,%eax
+   9a766:	41 3b 44 24 0c       	cmp    0xc(%r12),%eax
+   9a76b:	0f 85 5f ff ff ff    	jne    9a6d0 <<alloc::vec::Vec<gpui_reactivity_core::tree::NodeId> as alloc::vec::spec_from_iter_nested::SpecFromIterNested<gpui_reactivity_core::tree::NodeId, core::iter::adapters::filter::Filter<core::iter::adapters::copied::Copied<alloc::collections::btree::set::Iter<gpui_reactivity_core::tree::NodeId>>, <gpui_reactivity_core::layout::LayoutTree>::compute_inner::{closure#1}>>>::from_iter+0x40>
+   9a771:	41 0f 10 06          	movups (%r14),%xmm0
+   9a775:	0f 29 84 24 80 00 00 	movaps %xmm0,0x80(%rsp)
+   9a77c:	00 
+   9a77d:	ff 15 8d de 07 00    	call   *0x7de8d(%rip)        # 118610 <_DYNAMIC+0x2b0>
+   9a783:	bf 40 00 00 00       	mov    $0x40,%edi
+   9a788:	be 08 00 00 00       	mov    $0x8,%esi
+   9a78d:	ff 15 85 de 07 00    	call   *0x7de85(%rip)        # 118618 <_DYNAMIC+0x2b8>
+   9a793:	48 85 c0             	test   %rax,%rax
+   9a796:	48 8b 0c 24          	mov    (%rsp),%rcx
+   9a79a:	0f 84 25 04 00 00    	je     9abc5 <<alloc::vec::Vec<gpui_reactivity_core::tree::NodeId> as alloc::vec::spec_from_iter_nested::SpecFromIterNested<gpui_reactivity_core::tree::NodeId, core::iter::adapters::filter::Filter<core::iter::adapters::copied::Copied<alloc::collections::btree::set::Iter<gpui_reactivity_core::tree::NodeId>>, <gpui_reactivity_core::layout::LayoutTree>::compute_inner::{closure#1}>>>::from_iter+0x535>
+   9a7a0:	66 0f 6f 84 24 80 00 	movdqa 0x80(%rsp),%xmm0
+   9a7a7:	00 00 
+   9a7a9:	f3 0f 7f 00          	movdqu %xmm0,(%rax)
+   9a7ad:	48 c7 44 24 08 04 00 	movq   $0x4,0x8(%rsp)
+   9a7b4:	00 00 
+   9a7b6:	48 89 44 24 58       	mov    %rax,0x58(%rsp)
+   9a7bb:	48 89 44 24 10       	mov    %rax,0x10(%rsp)
+   9a7c0:	48 c7 44 24 18 01 00 	movq   $0x1,0x18(%rsp)
+   9a7c7:	00 00 
+   9a7c9:	48 8b 41 40          	mov    0x40(%rcx),%rax
+   9a7cd:	48 89 44 24 20       	mov    %rax,0x20(%rsp)
+   9a7d2:	48 85 c0             	test   %rax,%rax
+   9a7d5:	0f 84 8a 03 00 00    	je     9ab65 <<alloc::vec::Vec<gpui_reactivity_core::tree::NodeId> as alloc::vec::spec_from_iter_nested::SpecFromIterNested<gpui_reactivity_core::tree::NodeId, core::iter::adapters::filter::Filter<core::iter::adapters::copied::Copied<alloc::collections::btree::set::Iter<gpui_reactivity_core::tree::NodeId>>, <gpui_reactivity_core::layout::LayoutTree>::compute_inner::{closure#1}>>>::from_iter+0x4d5>
+   9a7db:	48 8b 01             	mov    (%rcx),%rax
+   9a7de:	4c 8b 71 08          	mov    0x8(%rcx),%r14
+   9a7e2:	4c 8b 49 10          	mov    0x10(%rcx),%r9
+   9a7e6:	4c 8b 61 18          	mov    0x18(%rcx),%r12
+   9a7ea:	4c 8b 79 48          	mov    0x48(%rcx),%r15
+   9a7ee:	4c 8b 69 50          	mov    0x50(%rcx),%r13
+   9a7f2:	b9 01 00 00 00       	mov    $0x1,%ecx
+   9a7f7:	48 89 4c 24 50       	mov    %rcx,0x50(%rsp)
+   9a7fc:	48 8d 6c 24 70       	lea    0x70(%rsp),%rbp
+   9a801:	e9 91 00 00 00       	jmp    9a897 <<alloc::vec::Vec<gpui_reactivity_core::tree::NodeId> as alloc::vec::spec_from_iter_nested::SpecFromIterNested<gpui_reactivity_core::tree::NodeId, core::iter::adapters::filter::Filter<core::iter::adapters::copied::Copied<alloc::collections::btree::set::Iter<gpui_reactivity_core::tree::NodeId>>, <gpui_reactivity_core::layout::LayoutTree>::compute_inner::{closure#1}>>>::from_iter+0x207>
+   9a806:	48 8b 44 24 68       	mov    0x68(%rsp),%rax
+   9a80b:	48 c7 00 00 00 00 00 	movq   $0x0,(%rax)
+   9a812:	48 c7 40 08 08 00 00 	movq   $0x8,0x8(%rax)
+   9a819:	00 
+   9a81a:	48 c7 40 10 00 00 00 	movq   $0x0,0x10(%rax)
+   9a821:	00 
+   9a822:	48 81 c4 a8 00 00 00 	add    $0xa8,%rsp
+   9a829:	5b                   	pop    %rbx
+   9a82a:	41 5c                	pop    %r12
+   9a82c:	41 5d                	pop    %r13
+   9a82e:	41 5e                	pop    %r14
+   9a830:	41 5f                	pop    %r15
+   9a832:	5d                   	pop    %rbp
+   9a833:	c3                   	ret
+   9a834:	8b 54 24 30          	mov    0x30(%rsp),%edx
+   9a838:	48 8d 3d 1a 7d f7 ff 	lea    -0x882e6(%rip),%rdi        # 12559 <anon.32ad25fdd296da48460e3ace5d33a171.57.llvm.13979624630434251612>
+   9a83f:	48 8d 0d 4a af 07 00 	lea    0x7af4a(%rip),%rcx        # 115790 <anon.32ad25fdd296da48460e3ace5d33a171.58.llvm.13979624630434251612>
+   9a846:	be 2a 00 00 00       	mov    $0x2a,%esi
+   9a84b:	e8 c0 81 f9 ff       	call   32a10 <core::result::unwrap_failed::<gpui_reactivity_core::tree::TreeError>>
+   9a850:	48 89 d8             	mov    %rbx,%rax
+   9a853:	48 c1 e0 04          	shl    $0x4,%rax
+   9a857:	66 0f 6f 84 24 90 00 	movdqa 0x90(%rsp),%xmm0
+   9a85e:	00 00 
+   9a860:	48 89 4c 24 58       	mov    %rcx,0x58(%rsp)
+   9a865:	f3 0f 7f 04 01       	movdqu %xmm0,(%rcx,%rax,1)
+   9a86a:	48 ff c3             	inc    %rbx
+   9a86d:	48 89 5c 24 50       	mov    %rbx,0x50(%rsp)
+   9a872:	48 89 5c 24 18       	mov    %rbx,0x18(%rsp)
+   9a877:	66 0f 1f 84 00 00 00 	nopw   0x0(%rax,%rax,1)
+   9a87e:	00 00 
+   9a880:	b0 01                	mov    $0x1,%al
+   9a882:	48 83 7c 24 20 00    	cmpq   $0x0,0x20(%rsp)
+   9a888:	4c 8b 0c 24          	mov    (%rsp),%r9
+   9a88c:	4c 8b 64 24 60       	mov    0x60(%rsp),%r12
+   9a891:	0f 84 ce 02 00 00    	je     9ab65 <<alloc::vec::Vec<gpui_reactivity_core::tree::NodeId> as alloc::vec::spec_from_iter_nested::SpecFromIterNested<gpui_reactivity_core::tree::NodeId, core::iter::adapters::filter::Filter<core::iter::adapters::copied::Copied<alloc::collections::btree::set::Iter<gpui_reactivity_core::tree::NodeId>>, <gpui_reactivity_core::layout::LayoutTree>::compute_inner::{closure#1}>>>::from_iter+0x4d5>
+   9a897:	a8 01                	test   $0x1,%al
+   9a899:	0f 84 17 03 00 00    	je     9abb6 <<alloc::vec::Vec<gpui_reactivity_core::tree::NodeId> as alloc::vec::spec_from_iter_nested::SpecFromIterNested<gpui_reactivity_core::tree::NodeId, core::iter::adapters::filter::Filter<core::iter::adapters::copied::Copied<alloc::collections::btree::set::Iter<gpui_reactivity_core::tree::NodeId>>, <gpui_reactivity_core::layout::LayoutTree>::compute_inner::{closure#1}>>>::from_iter+0x526>
+   9a89f:	4d 85 f6             	test   %r14,%r14
+   9a8a2:	74 2c                	je     9a8d0 <<alloc::vec::Vec<gpui_reactivity_core::tree::NodeId> as alloc::vec::spec_from_iter_nested::SpecFromIterNested<gpui_reactivity_core::tree::NodeId, core::iter::adapters::filter::Filter<core::iter::adapters::copied::Copied<alloc::collections::btree::set::Iter<gpui_reactivity_core::tree::NodeId>>, <gpui_reactivity_core::layout::LayoutTree>::compute_inner::{closure#1}>>>::from_iter+0x240>
+   9a8a4:	41 0f b7 86 ba 00 00 	movzwl 0xba(%r14),%eax
+   9a8ab:	00 
+   9a8ac:	49 39 c4             	cmp    %rax,%r12
+   9a8af:	0f 83 c0 00 00 00    	jae    9a975 <<alloc::vec::Vec<gpui_reactivity_core::tree::NodeId> as alloc::vec::spec_from_iter_nested::SpecFromIterNested<gpui_reactivity_core::tree::NodeId, core::iter::adapters::filter::Filter<core::iter::adapters::copied::Copied<alloc::collections::btree::set::Iter<gpui_reactivity_core::tree::NodeId>>, <gpui_reactivity_core::layout::LayoutTree>::compute_inner::{closure#1}>>>::from_iter+0x2e5>
+   9a8b5:	49 8d 4c 24 01       	lea    0x1(%r12),%rcx
+   9a8ba:	49 c1 e4 04          	shl    $0x4,%r12
+   9a8be:	4d 01 f4             	add    %r14,%r12
+   9a8c1:	e9 96 01 00 00       	jmp    9aa5c <<alloc::vec::Vec<gpui_reactivity_core::tree::NodeId> as alloc::vec::spec_from_iter_nested::SpecFromIterNested<gpui_reactivity_core::tree::NodeId, core::iter::adapters::filter::Filter<core::iter::adapters::copied::Copied<alloc::collections::btree::set::Iter<gpui_reactivity_core::tree::NodeId>>, <gpui_reactivity_core::layout::LayoutTree>::compute_inner::{closure#1}>>>::from_iter+0x3cc>
+   9a8c6:	66 2e 0f 1f 84 00 00 	cs nopw 0x0(%rax,%rax,1)
+   9a8cd:	00 00 00 
+   9a8d0:	4d 85 e4             	test   %r12,%r12
+   9a8d3:	74 38                	je     9a90d <<alloc::vec::Vec<gpui_reactivity_core::tree::NodeId> as alloc::vec::spec_from_iter_nested::SpecFromIterNested<gpui_reactivity_core::tree::NodeId, core::iter::adapters::filter::Filter<core::iter::adapters::copied::Copied<alloc::collections::btree::set::Iter<gpui_reactivity_core::tree::NodeId>>, <gpui_reactivity_core::layout::LayoutTree>::compute_inner::{closure#1}>>>::from_iter+0x27d>
+   9a8d5:	4c 89 e0             	mov    %r12,%rax
+   9a8d8:	4d 89 ce             	mov    %r9,%r14
+   9a8db:	48 83 e0 07          	and    $0x7,%rax
+   9a8df:	74 31                	je     9a912 <<alloc::vec::Vec<gpui_reactivity_core::tree::NodeId> as alloc::vec::spec_from_iter_nested::SpecFromIterNested<gpui_reactivity_core::tree::NodeId, core::iter::adapters::filter::Filter<core::iter::adapters::copied::Copied<alloc::collections::btree::set::Iter<gpui_reactivity_core::tree::NodeId>>, <gpui_reactivity_core::layout::LayoutTree>::compute_inner::{closure#1}>>>::from_iter+0x282>
+   9a8e1:	31 c9                	xor    %ecx,%ecx
+   9a8e3:	66 66 66 66 2e 0f 1f 	data16 data16 data16 cs nopw 0x0(%rax,%rax,1)
+   9a8ea:	84 00 00 00 00 00 
+   9a8f0:	4d 8b b6 c0 00 00 00 	mov    0xc0(%r14),%r14
+   9a8f7:	48 ff c1             	inc    %rcx
+   9a8fa:	48 39 c8             	cmp    %rcx,%rax
+   9a8fd:	75 f1                	jne    9a8f0 <<alloc::vec::Vec<gpui_reactivity_core::tree::NodeId> as alloc::vec::spec_from_iter_nested::SpecFromIterNested<gpui_reactivity_core::tree::NodeId, core::iter::adapters::filter::Filter<core::iter::adapters::copied::Copied<alloc::collections::btree::set::Iter<gpui_reactivity_core::tree::NodeId>>, <gpui_reactivity_core::layout::LayoutTree>::compute_inner::{closure#1}>>>::from_iter+0x260>
+   9a8ff:	4c 89 e0             	mov    %r12,%rax
+   9a902:	48 29 c8             	sub    %rcx,%rax
+   9a905:	49 83 fc 08          	cmp    $0x8,%r12
+   9a909:	73 15                	jae    9a920 <<alloc::vec::Vec<gpui_reactivity_core::tree::NodeId> as alloc::vec::spec_from_iter_nested::SpecFromIterNested<gpui_reactivity_core::tree::NodeId, core::iter::adapters::filter::Filter<core::iter::adapters::copied::Copied<alloc::collections::btree::set::Iter<gpui_reactivity_core::tree::NodeId>>, <gpui_reactivity_core::layout::LayoutTree>::compute_inner::{closure#1}>>>::from_iter+0x290>
+   9a90b:	eb 51                	jmp    9a95e <<alloc::vec::Vec<gpui_reactivity_core::tree::NodeId> as alloc::vec::spec_from_iter_nested::SpecFromIterNested<gpui_reactivity_core::tree::NodeId, core::iter::adapters::filter::Filter<core::iter::adapters::copied::Copied<alloc::collections::btree::set::Iter<gpui_reactivity_core::tree::NodeId>>, <gpui_reactivity_core::layout::LayoutTree>::compute_inner::{closure#1}>>>::from_iter+0x2ce>
+   9a90d:	4d 89 ce             	mov    %r9,%r14
+   9a910:	eb 4c                	jmp    9a95e <<alloc::vec::Vec<gpui_reactivity_core::tree::NodeId> as alloc::vec::spec_from_iter_nested::SpecFromIterNested<gpui_reactivity_core::tree::NodeId, core::iter::adapters::filter::Filter<core::iter::adapters::copied::Copied<alloc::collections::btree::set::Iter<gpui_reactivity_core::tree::NodeId>>, <gpui_reactivity_core::layout::LayoutTree>::compute_inner::{closure#1}>>>::from_iter+0x2ce>
+   9a912:	4c 89 e0             	mov    %r12,%rax
+   9a915:	49 83 fc 08          	cmp    $0x8,%r12
+   9a919:	72 43                	jb     9a95e <<alloc::vec::Vec<gpui_reactivity_core::tree::NodeId> as alloc::vec::spec_from_iter_nested::SpecFromIterNested<gpui_reactivity_core::tree::NodeId, core::iter::adapters::filter::Filter<core::iter::adapters::copied::Copied<alloc::collections::btree::set::Iter<gpui_reactivity_core::tree::NodeId>>, <gpui_reactivity_core::layout::LayoutTree>::compute_inner::{closure#1}>>>::from_iter+0x2ce>
+   9a91b:	0f 1f 44 00 00       	nopl   0x0(%rax,%rax,1)
+   9a920:	49 8b 8e c0 00 00 00 	mov    0xc0(%r14),%rcx
+   9a927:	48 8b 89 c0 00 00 00 	mov    0xc0(%rcx),%rcx
+   9a92e:	48 8b 89 c0 00 00 00 	mov    0xc0(%rcx),%rcx
+   9a935:	48 8b 89 c0 00 00 00 	mov    0xc0(%rcx),%rcx
+   9a93c:	48 8b 89 c0 00 00 00 	mov    0xc0(%rcx),%rcx
+   9a943:	48 8b 89 c0 00 00 00 	mov    0xc0(%rcx),%rcx
+   9a94a:	48 8b 89 c0 00 00 00 	mov    0xc0(%rcx),%rcx
+   9a951:	4c 8b b1 c0 00 00 00 	mov    0xc0(%rcx),%r14
+   9a958:	48 83 c0 f8          	add    $0xfffffffffffffff8,%rax
+   9a95c:	75 c2                	jne    9a920 <<alloc::vec::Vec<gpui_reactivity_core::tree::NodeId> as alloc::vec::spec_from_iter_nested::SpecFromIterNested<gpui_reactivity_core::tree::NodeId, core::iter::adapters::filter::Filter<core::iter::adapters::copied::Copied<alloc::collections::btree::set::Iter<gpui_reactivity_core::tree::NodeId>>, <gpui_reactivity_core::layout::LayoutTree>::compute_inner::{closure#1}>>>::from_iter+0x290>
+   9a95e:	45 31 e4             	xor    %r12d,%r12d
+   9a961:	45 31 c9             	xor    %r9d,%r9d
+   9a964:	41 0f b7 86 ba 00 00 	movzwl 0xba(%r14),%eax
+   9a96b:	00 
+   9a96c:	49 39 c4             	cmp    %rax,%r12
+   9a96f:	0f 82 40 ff ff ff    	jb     9a8b5 <<alloc::vec::Vec<gpui_reactivity_core::tree::NodeId> as alloc::vec::spec_from_iter_nested::SpecFromIterNested<gpui_reactivity_core::tree::NodeId, core::iter::adapters::filter::Filter<core::iter::adapters::copied::Copied<alloc::collections::btree::set::Iter<gpui_reactivity_core::tree::NodeId>>, <gpui_reactivity_core::layout::LayoutTree>::compute_inner::{closure#1}>>>::from_iter+0x225>
+   9a975:	31 d2                	xor    %edx,%edx
+   9a977:	66 0f 1f 84 00 00 00 	nopw   0x0(%rax,%rax,1)
+   9a97e:	00 00 
+   9a980:	4d 8b a6 b0 00 00 00 	mov    0xb0(%r14),%r12
+   9a987:	4d 85 e4             	test   %r12,%r12
+   9a98a:	0f 84 17 02 00 00    	je     9aba7 <<alloc::vec::Vec<gpui_reactivity_core::tree::NodeId> as alloc::vec::spec_from_iter_nested::SpecFromIterNested<gpui_reactivity_core::tree::NodeId, core::iter::adapters::filter::Filter<core::iter::adapters::copied::Copied<alloc::collections::btree::set::Iter<gpui_reactivity_core::tree::NodeId>>, <gpui_reactivity_core::layout::LayoutTree>::compute_inner::{closure#1}>>>::from_iter+0x517>
+   9a990:	48 89 d7             	mov    %rdx,%rdi
+   9a993:	41 0f b7 86 b8 00 00 	movzwl 0xb8(%r14),%eax
+   9a99a:	00 
+   9a99b:	48 ff ca             	dec    %rdx
+   9a99e:	4d 89 e6             	mov    %r12,%r14
+   9a9a1:	66 41 3b 84 24 ba 00 	cmp    0xba(%r12),%ax
+   9a9a8:	00 00 
+   9a9aa:	73 d4                	jae    9a980 <<alloc::vec::Vec<gpui_reactivity_core::tree::NodeId> as alloc::vec::spec_from_iter_nested::SpecFromIterNested<gpui_reactivity_core::tree::NodeId, core::iter::adapters::filter::Filter<core::iter::adapters::copied::Copied<alloc::collections::btree::set::Iter<gpui_reactivity_core::tree::NodeId>>, <gpui_reactivity_core::layout::LayoutTree>::compute_inner::{closure#1}>>>::from_iter+0x2f0>
+   9a9ac:	4c 89 c9             	mov    %r9,%rcx
+   9a9af:	48 29 d1             	sub    %rdx,%rcx
+   9a9b2:	75 0c                	jne    9a9c0 <<alloc::vec::Vec<gpui_reactivity_core::tree::NodeId> as alloc::vec::spec_from_iter_nested::SpecFromIterNested<gpui_reactivity_core::tree::NodeId, core::iter::adapters::filter::Filter<core::iter::adapters::copied::Copied<alloc::collections::btree::set::Iter<gpui_reactivity_core::tree::NodeId>>, <gpui_reactivity_core::layout::LayoutTree>::compute_inner::{closure#1}>>>::from_iter+0x330>
+   9a9b4:	48 8d 48 01          	lea    0x1(%rax),%rcx
+   9a9b8:	4d 89 e6             	mov    %r12,%r14
+   9a9bb:	e9 93 00 00 00       	jmp    9aa53 <<alloc::vec::Vec<gpui_reactivity_core::tree::NodeId> as alloc::vec::spec_from_iter_nested::SpecFromIterNested<gpui_reactivity_core::tree::NodeId, core::iter::adapters::filter::Filter<core::iter::adapters::copied::Copied<alloc::collections::btree::set::Iter<gpui_reactivity_core::tree::NodeId>>, <gpui_reactivity_core::layout::LayoutTree>::compute_inner::{closure#1}>>>::from_iter+0x3c3>
+   9a9c0:	49 8d 34 c4          	lea    (%r12,%rax,8),%rsi
+   9a9c4:	48 81 c6 c8 00 00 00 	add    $0xc8,%rsi
+   9a9cb:	f6 c1 07             	test   $0x7,%cl
+   9a9ce:	0f 84 7c 01 00 00    	je     9ab50 <<alloc::vec::Vec<gpui_reactivity_core::tree::NodeId> as alloc::vec::spec_from_iter_nested::SpecFromIterNested<gpui_reactivity_core::tree::NodeId, core::iter::adapters::filter::Filter<core::iter::adapters::copied::Copied<alloc::collections::btree::set::Iter<gpui_reactivity_core::tree::NodeId>>, <gpui_reactivity_core::layout::LayoutTree>::compute_inner::{closure#1}>>>::from_iter+0x4c0>
+   9a9d4:	45 89 c8             	mov    %r9d,%r8d
+   9a9d7:	41 28 f8             	sub    %dil,%r8b
+   9a9da:	41 fe c0             	inc    %r8b
+   9a9dd:	41 0f b6 f8          	movzbl %r8b,%edi
+   9a9e1:	83 e7 07             	and    $0x7,%edi
+   9a9e4:	66 66 66 2e 0f 1f 84 	data16 data16 cs nopw 0x0(%rax,%rax,1)
+   9a9eb:	00 00 00 00 00 
+   9a9f0:	48 ff c9             	dec    %rcx
+   9a9f3:	4c 8b 36             	mov    (%rsi),%r14
+   9a9f6:	49 8d b6 c0 00 00 00 	lea    0xc0(%r14),%rsi
+   9a9fd:	48 ff cf             	dec    %rdi
+   9aa00:	75 ee                	jne    9a9f0 <<alloc::vec::Vec<gpui_reactivity_core::tree::NodeId> as alloc::vec::spec_from_iter_nested::SpecFromIterNested<gpui_reactivity_core::tree::NodeId, core::iter::adapters::filter::Filter<core::iter::adapters::copied::Copied<alloc::collections::btree::set::Iter<gpui_reactivity_core::tree::NodeId>>, <gpui_reactivity_core::layout::LayoutTree>::compute_inner::{closure#1}>>>::from_iter+0x360>
+   9aa02:	48 f7 d2             	not    %rdx
+   9aa05:	4c 01 ca             	add    %r9,%rdx
+   9aa08:	48 83 fa 07          	cmp    $0x7,%rdx
+   9aa0c:	72 43                	jb     9aa51 <<alloc::vec::Vec<gpui_reactivity_core::tree::NodeId> as alloc::vec::spec_from_iter_nested::SpecFromIterNested<gpui_reactivity_core::tree::NodeId, core::iter::adapters::filter::Filter<core::iter::adapters::copied::Copied<alloc::collections::btree::set::Iter<gpui_reactivity_core::tree::NodeId>>, <gpui_reactivity_core::layout::LayoutTree>::compute_inner::{closure#1}>>>::from_iter+0x3c1>
+   9aa0e:	66 90                	xchg   %ax,%ax
+   9aa10:	48 8b 16             	mov    (%rsi),%rdx
+   9aa13:	48 8b 92 c0 00 00 00 	mov    0xc0(%rdx),%rdx
+   9aa1a:	48 8b 92 c0 00 00 00 	mov    0xc0(%rdx),%rdx
+   9aa21:	48 8b 92 c0 00 00 00 	mov    0xc0(%rdx),%rdx
+   9aa28:	48 8b 92 c0 00 00 00 	mov    0xc0(%rdx),%rdx
+   9aa2f:	48 8b 92 c0 00 00 00 	mov    0xc0(%rdx),%rdx
+   9aa36:	48 8b 92 c0 00 00 00 	mov    0xc0(%rdx),%rdx
+   9aa3d:	4c 8b b2 c0 00 00 00 	mov    0xc0(%rdx),%r14
+   9aa44:	49 8d b6 c0 00 00 00 	lea    0xc0(%r14),%rsi
+   9aa4b:	48 83 c1 f8          	add    $0xfffffffffffffff8,%rcx
+   9aa4f:	75 bf                	jne    9aa10 <<alloc::vec::Vec<gpui_reactivity_core::tree::NodeId> as alloc::vec::spec_from_iter_nested::SpecFromIterNested<gpui_reactivity_core::tree::NodeId, core::iter::adapters::filter::Filter<core::iter::adapters::copied::Copied<alloc::collections::btree::set::Iter<gpui_reactivity_core::tree::NodeId>>, <gpui_reactivity_core::layout::LayoutTree>::compute_inner::{closure#1}>>>::from_iter+0x380>
+   9aa51:	31 c9                	xor    %ecx,%ecx
+   9aa53:	c1 e0 04             	shl    $0x4,%eax
+   9aa56:	49 01 c4             	add    %rax,%r12
+   9aa59:	45 31 c9             	xor    %r9d,%r9d
+   9aa5c:	4d 85 e4             	test   %r12,%r12
+   9aa5f:	0f 84 00 01 00 00    	je     9ab65 <<alloc::vec::Vec<gpui_reactivity_core::tree::NodeId> as alloc::vec::spec_from_iter_nested::SpecFromIterNested<gpui_reactivity_core::tree::NodeId, core::iter::adapters::filter::Filter<core::iter::adapters::copied::Copied<alloc::collections::btree::set::Iter<gpui_reactivity_core::tree::NodeId>>, <gpui_reactivity_core::layout::LayoutTree>::compute_inner::{closure#1}>>>::from_iter+0x4d5>
+   9aa65:	48 89 4c 24 60       	mov    %rcx,0x60(%rsp)
+   9aa6a:	4c 89 0c 24          	mov    %r9,(%rsp)
+   9aa6e:	4c 89 eb             	mov    %r13,%rbx
+   9aa71:	48 ff 4c 24 20       	decq   0x20(%rsp)
+   9aa76:	49 8b 04 24          	mov    (%r12),%rax
+   9aa7a:	f2 41 0f 10 44 24 08 	movsd  0x8(%r12),%xmm0
+   9aa81:	66 66 66 66 66 66 2e 	data16 data16 data16 data16 data16 cs nopw 0x0(%rax,%rax,1)
+   9aa88:	0f 1f 84 00 00 00 00 
+   9aa8f:	00 
+   9aa90:	49 89 c5             	mov    %rax,%r13
+   9aa93:	48 89 44 24 70       	mov    %rax,0x70(%rsp)
+   9aa98:	0f 29 44 24 40       	movaps %xmm0,0x40(%rsp)
+   9aa9d:	0f 13 44 24 78       	movlps %xmm0,0x78(%rsp)
+   9aaa2:	48 8d 7c 24 28       	lea    0x28(%rsp),%rdi
+   9aaa7:	4c 89 fe             	mov    %r15,%rsi
+   9aaaa:	48 89 ea             	mov    %rbp,%rdx
+   9aaad:	ff 15 7d dc 07 00    	call   *0x7dc7d(%rip)        # 118730 <_DYNAMIC+0x3d0>
+   9aab3:	48 8b 4c 24 28       	mov    0x28(%rsp),%rcx
+   9aab8:	48 83 f9 02          	cmp    $0x2,%rcx
+   9aabc:	0f 84 c7 00 00 00    	je     9ab89 <<alloc::vec::Vec<gpui_reactivity_core::tree::NodeId> as alloc::vec::spec_from_iter_nested::SpecFromIterNested<gpui_reactivity_core::tree::NodeId, core::iter::adapters::filter::Filter<core::iter::adapters::copied::Copied<alloc::collections::btree::set::Iter<gpui_reactivity_core::tree::NodeId>>, <gpui_reactivity_core::layout::LayoutTree>::compute_inner::{closure#1}>>>::from_iter+0x4f9>
+   9aac2:	48 8b 44 24 30       	mov    0x30(%rsp),%rax
+   9aac7:	f3 0f 7e 44 24 38    	movq   0x38(%rsp),%xmm0
+   9aacd:	f6 c1 01             	test   $0x1,%cl
+   9aad0:	75 be                	jne    9aa90 <<alloc::vec::Vec<gpui_reactivity_core::tree::NodeId> as alloc::vec::spec_from_iter_nested::SpecFromIterNested<gpui_reactivity_core::tree::NodeId, core::iter::adapters::filter::Filter<core::iter::adapters::copied::Copied<alloc::collections::btree::set::Iter<gpui_reactivity_core::tree::NodeId>>, <gpui_reactivity_core::layout::LayoutTree>::compute_inner::{closure#1}>>>::from_iter+0x400>
+   9aad2:	4c 3b 2b             	cmp    (%rbx),%r13
+   9aad5:	49 89 dd             	mov    %rbx,%r13
+   9aad8:	0f 85 a2 fd ff ff    	jne    9a880 <<alloc::vec::Vec<gpui_reactivity_core::tree::NodeId> as alloc::vec::spec_from_iter_nested::SpecFromIterNested<gpui_reactivity_core::tree::NodeId, core::iter::adapters::filter::Filter<core::iter::adapters::copied::Copied<alloc::collections::btree::set::Iter<gpui_reactivity_core::tree::NodeId>>, <gpui_reactivity_core::layout::LayoutTree>::compute_inner::{closure#1}>>>::from_iter+0x1f0>
+   9aade:	66 0f 6f 44 24 40    	movdqa 0x40(%rsp),%xmm0
+   9aae4:	66 0f 7e c0          	movd   %xmm0,%eax
+   9aae8:	41 3b 45 08          	cmp    0x8(%r13),%eax
+   9aaec:	0f 85 8e fd ff ff    	jne    9a880 <<alloc::vec::Vec<gpui_reactivity_core::tree::NodeId> as alloc::vec::spec_from_iter_nested::SpecFromIterNested<gpui_reactivity_core::tree::NodeId, core::iter::adapters::filter::Filter<core::iter::adapters::copied::Copied<alloc::collections::btree::set::Iter<gpui_reactivity_core::tree::NodeId>>, <gpui_reactivity_core::layout::LayoutTree>::compute_inner::{closure#1}>>>::from_iter+0x1f0>
+   9aaf2:	66 0f 70 44 24 40 55 	pshufd $0x55,0x40(%rsp),%xmm0
+   9aaf9:	66 0f 7e c0          	movd   %xmm0,%eax
+   9aafd:	41 3b 45 0c          	cmp    0xc(%r13),%eax
+   9ab01:	0f 85 79 fd ff ff    	jne    9a880 <<alloc::vec::Vec<gpui_reactivity_core::tree::NodeId> as alloc::vec::spec_from_iter_nested::SpecFromIterNested<gpui_reactivity_core::tree::NodeId, core::iter::adapters::filter::Filter<core::iter::adapters::copied::Copied<alloc::collections::btree::set::Iter<gpui_reactivity_core::tree::NodeId>>, <gpui_reactivity_core::layout::LayoutTree>::compute_inner::{closure#1}>>>::from_iter+0x1f0>
+   9ab07:	41 0f 10 04 24       	movups (%r12),%xmm0
+   9ab0c:	0f 29 84 24 90 00 00 	movaps %xmm0,0x90(%rsp)
+   9ab13:	00 
+   9ab14:	48 8b 5c 24 50       	mov    0x50(%rsp),%rbx
+   9ab19:	48 3b 5c 24 08       	cmp    0x8(%rsp),%rbx
+   9ab1e:	48 8b 4c 24 58       	mov    0x58(%rsp),%rcx
+   9ab23:	0f 85 27 fd ff ff    	jne    9a850 <<alloc::vec::Vec<gpui_reactivity_core::tree::NodeId> as alloc::vec::spec_from_iter_nested::SpecFromIterNested<gpui_reactivity_core::tree::NodeId, core::iter::adapters::filter::Filter<core::iter::adapters::copied::Copied<alloc::collections::btree::set::Iter<gpui_reactivity_core::tree::NodeId>>, <gpui_reactivity_core::layout::LayoutTree>::compute_inner::{closure#1}>>>::from_iter+0x1c0>
+   9ab29:	ba 01 00 00 00       	mov    $0x1,%edx
+   9ab2e:	b9 08 00 00 00       	mov    $0x8,%ecx
+   9ab33:	41 b8 10 00 00 00    	mov    $0x10,%r8d
+   9ab39:	48 8d 7c 24 08       	lea    0x8(%rsp),%rdi
+   9ab3e:	48 89 de             	mov    %rbx,%rsi
+   9ab41:	e8 7a b1 f9 ff       	call   35cc0 <<alloc::raw_vec::RawVecInner<_>>::reserve::do_reserve_and_handle::<alloc::alloc::Global>>
+   9ab46:	48 8b 4c 24 10       	mov    0x10(%rsp),%rcx
+   9ab4b:	e9 00 fd ff ff       	jmp    9a850 <<alloc::vec::Vec<gpui_reactivity_core::tree::NodeId> as alloc::vec::spec_from_iter_nested::SpecFromIterNested<gpui_reactivity_core::tree::NodeId, core::iter::adapters::filter::Filter<core::iter::adapters::copied::Copied<alloc::collections::btree::set::Iter<gpui_reactivity_core::tree::NodeId>>, <gpui_reactivity_core::layout::LayoutTree>::compute_inner::{closure#1}>>>::from_iter+0x1c0>
+   9ab50:	48 f7 d2             	not    %rdx
+   9ab53:	4c 01 ca             	add    %r9,%rdx
+   9ab56:	48 83 fa 07          	cmp    $0x7,%rdx
+   9ab5a:	0f 83 b0 fe ff ff    	jae    9aa10 <<alloc::vec::Vec<gpui_reactivity_core::tree::NodeId> as alloc::vec::spec_from_iter_nested::SpecFromIterNested<gpui_reactivity_core::tree::NodeId, core::iter::adapters::filter::Filter<core::iter::adapters::copied::Copied<alloc::collections::btree::set::Iter<gpui_reactivity_core::tree::NodeId>>, <gpui_reactivity_core::layout::LayoutTree>::compute_inner::{closure#1}>>>::from_iter+0x380>
+   9ab60:	e9 ec fe ff ff       	jmp    9aa51 <<alloc::vec::Vec<gpui_reactivity_core::tree::NodeId> as alloc::vec::spec_from_iter_nested::SpecFromIterNested<gpui_reactivity_core::tree::NodeId, core::iter::adapters::filter::Filter<core::iter::adapters::copied::Copied<alloc::collections::btree::set::Iter<gpui_reactivity_core::tree::NodeId>>, <gpui_reactivity_core::layout::LayoutTree>::compute_inner::{closure#1}>>>::from_iter+0x3c1>
+   9ab65:	48 8b 4c 24 18       	mov    0x18(%rsp),%rcx
+   9ab6a:	48 8b 44 24 68       	mov    0x68(%rsp),%rax
+   9ab6f:	48 89 48 10          	mov    %rcx,0x10(%rax)
+   9ab73:	48 8b 4c 24 08       	mov    0x8(%rsp),%rcx
+   9ab78:	48 89 08             	mov    %rcx,(%rax)
+   9ab7b:	48 8b 4c 24 10       	mov    0x10(%rsp),%rcx
+   9ab80:	48 89 48 08          	mov    %rcx,0x8(%rax)
+   9ab84:	e9 99 fc ff ff       	jmp    9a822 <<alloc::vec::Vec<gpui_reactivity_core::tree::NodeId> as alloc::vec::spec_from_iter_nested::SpecFromIterNested<gpui_reactivity_core::tree::NodeId, core::iter::adapters::filter::Filter<core::iter::adapters::copied::Copied<alloc::collections::btree::set::Iter<gpui_reactivity_core::tree::NodeId>>, <gpui_reactivity_core::layout::LayoutTree>::compute_inner::{closure#1}>>>::from_iter+0x192>
+   9ab89:	8b 54 24 30          	mov    0x30(%rsp),%edx
+   9ab8d:	48 8d 3d c5 79 f7 ff 	lea    -0x8863b(%rip),%rdi        # 12559 <anon.32ad25fdd296da48460e3ace5d33a171.57.llvm.13979624630434251612>
+   9ab94:	48 8d 0d f5 ab 07 00 	lea    0x7abf5(%rip),%rcx        # 115790 <anon.32ad25fdd296da48460e3ace5d33a171.58.llvm.13979624630434251612>
+   9ab9b:	be 2a 00 00 00       	mov    $0x2a,%esi
+   9aba0:	e8 6b 7e f9 ff       	call   32a10 <core::result::unwrap_failed::<gpui_reactivity_core::tree::TreeError>>
+   9aba5:	eb 1c                	jmp    9abc3 <<alloc::vec::Vec<gpui_reactivity_core::tree::NodeId> as alloc::vec::spec_from_iter_nested::SpecFromIterNested<gpui_reactivity_core::tree::NodeId, core::iter::adapters::filter::Filter<core::iter::adapters::copied::Copied<alloc::collections::btree::set::Iter<gpui_reactivity_core::tree::NodeId>>, <gpui_reactivity_core::layout::LayoutTree>::compute_inner::{closure#1}>>>::from_iter+0x533>
+   9aba7:	48 8d 3d f2 a3 07 00 	lea    0x7a3f2(%rip),%rdi        # 114fa0 <anon.579a78f373449548f375949688986bb3.15.llvm.512122598511569348>
+   9abae:	ff 15 34 de 07 00    	call   *0x7de34(%rip)        # 1189e8 <_DYNAMIC+0x688>
+   9abb4:	eb 0d                	jmp    9abc3 <<alloc::vec::Vec<gpui_reactivity_core::tree::NodeId> as alloc::vec::spec_from_iter_nested::SpecFromIterNested<gpui_reactivity_core::tree::NodeId, core::iter::adapters::filter::Filter<core::iter::adapters::copied::Copied<alloc::collections::btree::set::Iter<gpui_reactivity_core::tree::NodeId>>, <gpui_reactivity_core::layout::LayoutTree>::compute_inner::{closure#1}>>>::from_iter+0x533>
+   9abb6:	48 8d 3d 2b a5 07 00 	lea    0x7a52b(%rip),%rdi        # 1150e8 <anon.0b14fd0ceb52ea14da95202e2fa25e6d.7.llvm.7956990281557411244>
+   9abbd:	ff 15 25 de 07 00    	call   *0x7de25(%rip)        # 1189e8 <_DYNAMIC+0x688>
+   9abc3:	0f 0b                	ud2
+   9abc5:	bf 08 00 00 00       	mov    $0x8,%edi
+   9abca:	be 40 00 00 00       	mov    $0x40,%esi
+   9abcf:	ff 15 c3 da 07 00    	call   *0x7dac3(%rip)        # 118698 <_DYNAMIC+0x338>
+   9abd5:	eb 04                	jmp    9abdb <<alloc::vec::Vec<gpui_reactivity_core::tree::NodeId> as alloc::vec::spec_from_iter_nested::SpecFromIterNested<gpui_reactivity_core::tree::NodeId, core::iter::adapters::filter::Filter<core::iter::adapters::copied::Copied<alloc::collections::btree::set::Iter<gpui_reactivity_core::tree::NodeId>>, <gpui_reactivity_core::layout::LayoutTree>::compute_inner::{closure#1}>>>::from_iter+0x54b>
+   9abd7:	0f 0b                	ud2
+   9abd9:	eb 00                	jmp    9abdb <<alloc::vec::Vec<gpui_reactivity_core::tree::NodeId> as alloc::vec::spec_from_iter_nested::SpecFromIterNested<gpui_reactivity_core::tree::NodeId, core::iter::adapters::filter::Filter<core::iter::adapters::copied::Copied<alloc::collections::btree::set::Iter<gpui_reactivity_core::tree::NodeId>>, <gpui_reactivity_core::layout::LayoutTree>::compute_inner::{closure#1}>>>::from_iter+0x54b>
+   9abdb:	48 89 c3             	mov    %rax,%rbx
+   9abde:	48 8b 74 24 08       	mov    0x8(%rsp),%rsi
+   9abe3:	48 85 f6             	test   %rsi,%rsi
+   9abe6:	74 14                	je     9abfc <<alloc::vec::Vec<gpui_reactivity_core::tree::NodeId> as alloc::vec::spec_from_iter_nested::SpecFromIterNested<gpui_reactivity_core::tree::NodeId, core::iter::adapters::filter::Filter<core::iter::adapters::copied::Copied<alloc::collections::btree::set::Iter<gpui_reactivity_core::tree::NodeId>>, <gpui_reactivity_core::layout::LayoutTree>::compute_inner::{closure#1}>>>::from_iter+0x56c>
+   9abe8:	48 8b 7c 24 10       	mov    0x10(%rsp),%rdi
+   9abed:	48 c1 e6 04          	shl    $0x4,%rsi
+   9abf1:	ba 08 00 00 00       	mov    $0x8,%edx
+   9abf6:	ff 15 9c d9 07 00    	call   *0x7d99c(%rip)        # 118598 <_DYNAMIC+0x238>
+   9abfc:	48 89 df             	mov    %rbx,%rdi
+   9abff:	e8 ac 85 07 00       	call   1131b0 <_Unwind_Resume@plt>
+   9ac04:	cc                   	int3
+   9ac05:	cc                   	int3
+   9ac06:	cc                   	int3
+   9ac07:	cc                   	int3
+   9ac08:	cc                   	int3
+   9ac09:	cc                   	int3
+   9ac0a:	cc                   	int3
+   9ac0b:	cc                   	int3
+   9ac0c:	cc                   	int3
+   9ac0d:	cc                   	int3
+   9ac0e:	cc                   	int3
+   9ac0f:	cc                   	int3
