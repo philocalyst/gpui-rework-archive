@@ -1,5 +1,9 @@
 use super::*;
 use crate::{ItemKey, ItemSource, ListId, prelude::*};
+// Exercise the actual application model and UI-thread workload operation.
+#[allow(dead_code)]
+#[path = "../../examples/zgx_native_lab.rs"]
+mod workload_port;
 const LIST: ListId = ListId::new(1);
 struct Rows {
     offset: Signal<f64>,
@@ -172,4 +176,46 @@ pub(super) fn run(gpu: &mut GpuSurface) {
         gpu.packet_token = None;
         gpu.packet_epoch = None;
     }
+    let texture = gpu
+        .renderer
+        .device()
+        .create_texture(&wgpu::TextureDescriptor {
+            label: Some("native complete workload scroll oracle"),
+            size: wgpu::Extent3d {
+                width: 960,
+                height: 720,
+                depth_or_array_layers: 1,
+            },
+            mip_level_count: 1,
+            sample_count: 1,
+            dimension: wgpu::TextureDimension::D2,
+            format: gpu.renderer.format(),
+            usage: wgpu::TextureUsages::RENDER_ATTACHMENT | wgpu::TextureUsages::COPY_SRC,
+            view_formats: &[],
+        });
+    workload_port::visit_scroll_frames(|owner, tick| {
+        owner
+            .with_paint_scene(|_, _, _, damage| {
+                if tick == 0 {
+                    assert!(damage.scroll.is_none());
+                } else {
+                    let copy = damage
+                        .scroll
+                        .expect("the actual 100K-row workload must certify")
+                        .copy;
+                    assert_eq!(copy.source(), [20, 304, 940, 690]);
+                    assert_eq!(copy.destination(), [20, 290, 940, 676]);
+                }
+            })
+            .unwrap();
+        render(gpu, &mut oracle, owner, &texture);
+        if tick > 0 {
+            assert_eq!(
+                gpu.renderer.retained_stats().copied_pixels,
+                960 * 720 + 2 * 920 * 386
+            );
+        }
+    });
+    gpu.packet_token = None;
+    gpu.packet_epoch = None;
 }
