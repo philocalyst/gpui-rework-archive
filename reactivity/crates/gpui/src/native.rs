@@ -335,7 +335,11 @@ impl GpuSurface {
         target: &wgpu::TextureView,
         transition: Option<crate::runtime::paint::SceneDamage<'_>>,
     ) -> Result<wgpu::SubmissionIndex, gpui_gpu::Error> {
-        let valid_transition = transition.filter(|d| d.base.is_some());
+        let valid_transition = transition.filter(|d| {
+            d.base
+                .zip(self.packet_token)
+                .is_some_and(|(a, b)| a.same_image_window(b))
+        });
         let damage = valid_transition.map(|d| d.region);
         if self.packet_token == Some(token)
             && let Some(submitted) = self.renderer.redraw(target)?

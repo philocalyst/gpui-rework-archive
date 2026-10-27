@@ -224,6 +224,11 @@ pub struct PresentationToken {
     window: NonZeroU64,
     sequence: NonZeroU64,
 }
+impl PresentationToken {
+    pub(crate) fn same_image_window(self, other: Self) -> bool {
+        self.window == other.window
+    }
+}
 
 #[derive(Clone, Copy, Debug, PartialEq, Eq, Serialize)]
 pub struct Commit {
