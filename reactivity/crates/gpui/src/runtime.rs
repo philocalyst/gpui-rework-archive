@@ -4867,11 +4867,13 @@ mod semantic_storage_ledger {
             size_of::<ListInfo>()
         );
         println!(
-            "Extra={} Annotations={} ListSpec={} AnnotationDraft={}",
+            "Extra={} Annotations={} ListSpec={} AnnotationDraft={} ListPlan={} ListDraft={}",
             size_of::<crate::semantic::ElementExtra<'_>>(),
             size_of::<crate::semantic::Annotations<'_>>(),
             size_of::<crate::list::ListSpec<'_>>(),
-            size_of::<crate::semantic::AnnotationDraft<'_>>()
+            size_of::<crate::semantic::AnnotationDraft<'_>>(),
+            size_of::<crate::list::ListPlan>(),
+            size_of::<crate::list::ListDraft>()
         );
         // Parent/transform packing and the source namespace niche are shared
         // baseline improvements; semantic columns add no hot-node fields.

@@ -1,11 +1,15 @@
 # Uniform virtual lists
 
 `uniform_list(ListId, &impl ItemSource, row_height).h(viewport_height)` describes
-only the rows intersecting a finite logical viewport. The source and deferred
+the rows intersecting a finite logical viewport by default. The source and deferred
 row builder are borrowed during description and discarded before retention.
 There is no parent-model clone, shared mutable scroll handle or giant spacer.
-The first implementation has zero prefetch; it does not claim Hummingbird's
-adaptive asynchronous row cache.
+An optional `.overscan(rows)` retains up to that many extra keyed rows on each
+side, clamped to the source bounds. This is synchronous bounded realization,
+not an adaptive asynchronous row cache. The existing 4096-row limit includes
+the buffer; even `usize::MAX` is clamped before admission. `visible_range` names
+logical viewport slots, while `realized_range` includes the buffer. The first
+visible key remains the anchor across source edits.
 
 `ItemSource` supplies `len`, `key`, `index_of` and `row`, with a default
 `is_empty`. `ItemKey` is an exact u64 data identity. The source owns indexing;
@@ -24,9 +28,15 @@ inspection can retain the older acknowledged sheet while a candidate waits.
 
 `list`, `list_state`, `list_item` and `Query::within` expose the ordinary public
 testing surface. A visible keyed row retains identity across reorder/prepend;
-an offscreen or removed row loses its capability, and returning rows receive
-fresh targets. There is no historical table of every visited key. List/item
-roles are published with clipped geometry. Count/range/key metadata are a
+with default zero overscan, an offscreen or removed row loses its capability,
+and returning rows receive fresh targets. With overscan enabled, a row still
+in the realized buffer preserves identity while offscreen queries/actions are
+rejected and focus is cleared. Returning to visibility within that buffer can
+make the same target usable again. Leaving the buffer retires identity
+permanently. There is no historical table of every visited key. List/item
+roles are published with clipped geometry. Buffered logical slots have empty
+paint/input clips, so outward numerical envelopes at touching boundaries cannot
+publish them. Count/range/key metadata are a
 foundation for an accessibility adapter; this is not a platform accessibility
 tree, focus-navigation or screen-reader implementation.
 

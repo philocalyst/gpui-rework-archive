@@ -40,3 +40,9 @@ Correction: retain a logical buffered-slot flag (within existing ListRow padding
 and give slots outside visible_range empty paint/input clips before traversal.
 The logical range is authoritative for overscan; do not epsilon-shrink shared
 geometry or change the existing collapsed-span continuous-pointer contract.
+
+Negative qualification refinement: the preregistered visible-start mutant keeps
+correct pixels but associates them with wrong keys. The independent eager-image
+oracle alone passes; preserve that limitation. The SAME mutant binary fails
+existing public buffered-authority and keyed-bounds oracles. Qualification uses
+those exact identity checks together with pixel equality, not images alone.
