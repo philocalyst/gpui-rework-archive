@@ -304,3 +304,33 @@ predecessor token, painter order and old/new tile membership. Updating glyph
 words alone is insufficient. Capacity-indexed tile lists are a separate possible
 experiment; no such implementation or performance claim exists yet. Do not
 combine it with unrelated shader experiments or silently adopt rejected slices.
+
+
+## GPU text transaction prototype in progress
+
+Preregistration 0deed98cc8 on local/gpu-text-packet; common fixture/full-preparation
+control frozen at 64523d173a. The new low-level path gathers at most four compact
+masked groups, checks atlas entries and unchanged transform/clip/color/correction
+authority, replaces glyph words, removes their old CSR references and inserts
+new memberships after existing opaque cutoffs in painter order. It still scans,
+repacks and potentially uploads the complete tile/index arrays. This is not an
+O(changed) whole-frame algorithm. Plain Renderer keeps its existing ownership;
+RetainedRenderer additionally owns a positional run directory, fully charged.
+
+The first candidate a3495f600d correctly rejected but was overly restrictive:
+its common-word comparison also froze numerical error bounds derived from glyph
+positions. Two new tests failed ChangedCommon. Corrected GPU source 11ad2fff8f
+recomputes those two bounds like full preparation while retaining every other
+common-word check. The unchanged exact tests, complete GPU suite (75) and strict
+Clippy pass; the omitted-new-membership mutant cca9f74c6d fails the exact image
+oracle. All generated/embedded WGSL bytes match the full control. No shader edit.
+
+Correctness-only preflight: 0-label/two-field, 1000-label/four-field, 25-label/
+735-character stream and full-scene control. Every initial/final image matches
+fresh reconstruction and the control exactly. Candidate packet reuse is 60/60
+for each sparse case, including the stream, and 0/60 for full preparation. Those
+durations are excluded from performance qualification. The first native bridge
+source 4ee1af8db2 retains an exact predecessor token and passes a private bounded
+transition through with_paint_scene; public application interfaces are unchanged.
+Full/default and native composition are being qualified; actual native scripts,
+allocation/storage/code costs and the fixed paired performance gates remain.
