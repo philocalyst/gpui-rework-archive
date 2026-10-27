@@ -233,6 +233,16 @@ fn image_clip_and_scroller_preserve_older_candidate_after_newer_failure() {
         for scrolled in [false, true] {
             let mut win = decorated("Count: 10", rounded, scrolled);
             ack(&mut win);
+            eprintln!(
+                "DECORATED rounded={rounded} scrolled={scrolled} images={}",
+                win.with_scene(|s, _| s.images().count()).unwrap()
+            );
+            win.visit(|p| {
+                if p.role() == Role::Image {
+                    eprintln!("IMAGE {:?}", p.bounds());
+                }
+            })
+            .unwrap();
             let before = text_state(&win);
             win.set(Decorated::LABEL, "Count: 11".into()).unwrap();
             let eligible = win.with_scene(|_, token| token).unwrap();
@@ -254,7 +264,8 @@ fn image_clip_and_scroller_preserve_older_candidate_after_newer_failure() {
             assert_eq!(text_state(&win), text_state(&full));
             assert_eq!(
                 win.with_scene(|scene, _| scene.images().count()).unwrap(),
-                1
+                1,
+                "rounded={rounded} scrolled={scrolled}"
             );
         }
     }
