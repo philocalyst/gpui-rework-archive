@@ -1,6 +1,7 @@
 use gpui::{
-    Contribution, ImeEvent, ImeSession, TextSelection, WindowOptions, prelude::*,
-    property::LINE_HEIGHT,
+    ImeEvent, ImeSession, TextSelection, WindowOptions,
+    prelude::*,
+    property::{Contribution, LINE_HEIGHT},
 };
 
 struct Page {
@@ -125,8 +126,16 @@ fn source_and_override_line_pitch_match_fresh_pixels_and_acknowledged_geometry()
 fn sparse_text_and_ime_use_the_same_explicit_pitch() {
     let mut win = window(28., false);
     win.set(Page::VALUE, "two\none\nthree".into()).unwrap();
-    let mut fresh = window(28., false);
-    fresh.set(Page::VALUE, "two\none\nthree".into()).unwrap();
+    let mut model = Page::new(28., false);
+    *model.value = "two\none\nthree".into();
+    let mut fresh = Win::recording(
+        model,
+        WindowOptions {
+            size: [200, 220],
+            ..Default::default()
+        },
+    )
+    .unwrap();
     assert_eq!(pixels(&mut win), pixels(&mut fresh));
     ack(&mut win);
     ack(&mut fresh);

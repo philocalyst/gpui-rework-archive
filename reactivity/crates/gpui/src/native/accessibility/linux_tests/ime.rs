@@ -6,6 +6,7 @@ const IME_TITLE: &str = "GPUI acknowledged IME wire proof";
 struct Form {
     value: Signal<String>,
     broken: bool,
+    line_height: Option<f32>,
 }
 impl Form {
     const VALUE: Source<Self, String> =
@@ -16,8 +17,14 @@ impl View for Form {
         Sources::new().direct(Self::VALUE)
     }
     fn view(&self) -> El<'_> {
+        let input = text_input(&self.value).name("Compose").w(240);
+        let input = if let Some(height) = self.line_height {
+            input.line_height(height)
+        } else {
+            input
+        };
         column((
-            text_input(&self.value).name("Compose").w(240),
+            input,
             div()
                 .size(2)
                 .bg(crate::Color::BLACK)
@@ -169,6 +176,12 @@ impl Script {
             .visit(|part| {
                 if part.name() == Some("Compose") {
                     let geometry = part.text_geometry().unwrap();
+                    if let Some(height) = owner.root().unwrap().line_height {
+                        assert_eq!(
+                            geometry.layout().lines().next().unwrap().bounds().height,
+                            height
+                        );
+                    }
                     let unit = geometry
                         .layout()
                         .grapheme(crate::TextOffset::new(4).unwrap())
@@ -327,6 +340,14 @@ impl Host for Script {
 #[test]
 #[ignore = "requires X11 and isolated session bus with actual AT-SPI registry"]
 fn native_atspi_ime_cjk_preview_old_candidate_ack_and_commit() {
+    run(None);
+}
+#[test]
+#[ignore = "requires X11 and isolated session bus with actual AT-SPI registry"]
+fn native_atspi_ime_explicit_line_height_preview_ack_and_commit() {
+    run(Some(40.));
+}
+fn run(line_height: Option<f32>) {
     let event_loop = EventLoop::builder()
         .with_x11()
         .with_any_thread(true)
@@ -339,6 +360,7 @@ fn native_atspi_ime_cjk_preview_old_candidate_ack_and_commit() {
             Window::document(Form {
                 value: Signal::new("base".into()),
                 broken: false,
+                line_height,
             })
             .title(IME_TITLE)
             .size(280, 100)
