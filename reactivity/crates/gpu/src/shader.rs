@@ -573,11 +573,11 @@ pub mod ui {
         exposed / (vec3f(1.0, 1.0, 1.0) + exposed)
     }
 
-    // Banked scenes decode a draw and its working paint once before the
-    // sixteen sample operations. This deliberately trades sixteen local colors
-    // for the ordinary sample-major path's repeated record/bank loads; it is
-    // not a claim of lower register pressure or universally faster shading.
-    pub fn banked_fragment(position: Vec2f, range: Vec2u, clear: Vec4f) -> Vec4f {
+    // Decode each ordered draw once before its sixteen sample operations.
+    // Per-sample painter order and final reduction order match the reference
+    // sample-major compositor. Local colors trade register/storage pressure
+    // for fewer repeated record loads, including ordinary unbanked scenes.
+    pub fn ordered_fragment(position: Vec2f, range: Vec2u, clear: Vec4f) -> Vec4f {
         let mut colors: [Vec4f; 16] = [
             clear, clear, clear, clear, clear, clear, clear, clear, clear, clear, clear, clear,
             clear, clear, clear, clear,
@@ -617,30 +617,7 @@ pub mod ui {
         if range.x == range.y {
             return output(globals.clear);
         }
-        if (globals.viewport.w & 8) != 0 {
-            return banked_fragment(position.xy(), range, globals.clear);
-        }
-        let mut anchor = vec4f(0.0, 0.0, 0.0, 0.0);
-        let mut delta = vec4f(0.0, 0.0, 0.0, 0.0);
-        for y in 0..4 {
-            for x in 0..4 {
-                let point = position.xy()
-                    + vec2f((x as f32 + 0.5) * 0.25 - 0.5, (y as f32 + 0.5) * 0.25 - 0.5);
-                let mut color = globals.clear;
-                // Host-built CSR ranges are monotone and bounded by INDICES.
-                #[wgsl_allow(non_literal_loop_bounds)]
-                for cursor in range.x..range.y {
-                    let index = get!(INDICES)[cursor as usize];
-                    let source = sample_draw(load_draw(index), point);
-                    color = source + color * (1.0 - source.w);
-                }
-                if x == 0 && y == 0 {
-                    anchor = color;
-                }
-                delta += (color - anchor) * 0.0625;
-            }
-        }
-        output(anchor + delta)
+        ordered_fragment(position.xy(), range, globals.clear)
     }
 }
 
