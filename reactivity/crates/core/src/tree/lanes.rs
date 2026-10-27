@@ -9,7 +9,7 @@ use std::{
 
 // Experiment alternatives: original=0, validated scalar=1, levels=2,
 // Future without hints=3, Future with hints=4, single-root proof=5.
-pub(crate) const STRATEGY: u8 = 4;
+pub(crate) const STRATEGY: u8 = 5;
 const WIDTH: usize = 32;
 
 impl Tree {
