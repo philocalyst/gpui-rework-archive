@@ -41,11 +41,11 @@ impl View for Page {
             .w(180)
             .h(72);
         let items = if self.after {
-            vec![list, label]
+            column((list, label))
         } else {
-            vec![label, list]
+            column((label, list))
         };
-        column(items)
+        items
             .child(text("Count: 0123456789").w(180).h(24))
             .w(192)
             .h(144)
