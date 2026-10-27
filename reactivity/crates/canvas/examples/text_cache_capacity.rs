@@ -1,6 +1,7 @@
 //! Retained allocation ledger; scoped planning is the independent output oracle.
 use gpui_canvas::{FontFace, TextCache, TextLayout};
-fn fingerprint(layout: &TextLayout) -> (Vec<(u16, u32, u32, u32)>, [u32; 3]) {
+type Fingerprint = (Vec<(u16, u32, u32, u32)>, [u32; 3]);
+fn fingerprint(layout: &TextLayout) -> Fingerprint {
     (
         layout
             .glyphs()
