@@ -1,0 +1,11 @@
+
+running 1 test
+test ordered_overlap_without_tile_proofs_preserves_exact_latest_opaque_color ... FAILED
+
+failures:
+
+failures:
+    ordered_overlap_without_tile_proofs_preserves_exact_latest_opaque_color
+
+test result: FAILED. 0 passed; 1 failed; 0 ignored; 0 measured; 58 filtered out; finished in 1.09s
+

@@ -1,0 +1,33 @@
+{
+  "binaries": {
+    "control": "/home/user/gpui-draw-major-control-target/release/examples/draw_major",
+    "candidate": "/home/user/gpui-draw-major-target/release/examples/draw_major"
+  },
+  "hashes": {
+    "control": "be78738d5427f4150ffd085e063ba55b99696e021fdaaa7446cac1a37418a5c1",
+    "candidate": "e6688c46d274f093b67e0676244bce95f93d7eafa0782b584f9c293a6e55b91f"
+  },
+  "frames": 60,
+  "warmup": 10,
+  "repetitions": 5,
+  "cases": [
+    "flat",
+    "text",
+    "overlap",
+    "transformed-text",
+    "hdr"
+  ],
+  "production_sources": {
+    "control": "032bc1b986",
+    "candidate": "d297acf16f"
+  },
+  "qualified_candidate_source": "e9124d286c",
+  "compiler": "rustc 1.101.0-nightly (7189d39d9 2026-10-22)\nbinary: rustc\ncommit-hash: 7189d39d9ce936881b8132c6addeaf3e295cd455\ncommit-date: 2026-10-22\nhost: x86_64-unknown-linux-gnu\nrelease: 1.101.0-nightly\nLLVM version: 23.1.4\n",
+  "platform": "Linux-6.8.0-117-generic-x86_64-with-glibc2.39",
+  "started": 1793074082.6283443,
+  "environment": {
+    "XDG_RUNTIME_DIR": "/home/user/gpui-xdg",
+    "VK_ICD_FILENAMES": "/usr/share/vulkan/icd.d/lvp_icd.json",
+    "LP_NUM_THREADS": "4"
+  }
+}

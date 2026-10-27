@@ -1,0 +1,1 @@
+{"command": ["/usr/bin/time", "-v", "-o", "/home/user/gpui-draw-major-evidence/paired/0-candidate.time", "/home/user/gpui-draw-major-target/release/examples/draw_major", "60"], "exit": 0}

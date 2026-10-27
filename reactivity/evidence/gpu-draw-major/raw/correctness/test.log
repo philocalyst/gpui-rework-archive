@@ -1,0 +1,4 @@
+   Compiling gpui_gpu v0.1.0 (/home/user/gpui-draw-major-lab/reactivity/crates/gpu)
+    Finished `release` profile [optimized] target(s) in 24.30s
+     Running unittests src/lib.rs (/home/user/gpui-draw-major-target/release/build/gpui_gpu/46b604825bacbd9a/out/gpui_gpu-46b604825bacbd9a)
+     Running tests/render.rs (/home/user/gpui-draw-major-target/release/build/gpui_gpu/fc26bbb724122b97/out/render-fc26bbb724122b97)

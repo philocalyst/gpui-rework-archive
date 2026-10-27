@@ -1,0 +1,9 @@
+{
+  "binary_sha256": "be78738d5427f4150ffd085e063ba55b99696e021fdaaa7446cac1a37418a5c1",
+  "binary_bytes": 15275472,
+  "wgsl_sha256": "ea6e71d3da2bdb23d4971a14f0f55db389dbb45f9b2e9c05c85d4dc6363eb4d1",
+  "wgsl_bytes": 18995,
+  "embedded_exact": true,
+  "out_dir": "/home/user/gpui-draw-major-control-target/release/build/gpui_gpu/aab4e3e5f9fc1354/out",
+  "typed_shader_sha256": "433b9760e356cb45144262aabec37d61c1d5eb1e0529b47e4103da7d69b4859c"
+}

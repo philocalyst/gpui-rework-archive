@@ -1,0 +1,1 @@
+Initial audit searched stdout for the panic payload; --nocapture writes it to stderr. Test status and failed test count were correct. Corrected audit checks test.log.

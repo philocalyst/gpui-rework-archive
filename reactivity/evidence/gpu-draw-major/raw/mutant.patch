@@ -1,0 +1,13 @@
+diff --git a/reactivity/crates/gpu/src/shader.rs b/reactivity/crates/gpu/src/shader.rs
+index 81a4b72d88..ad3fb2e078 100644
+--- a/reactivity/crates/gpu/src/shader.rs
++++ b/reactivity/crates/gpu/src/shader.rs
+@@ -584,7 +584,7 @@ pub mod ui {
+         ];
+         #[wgsl_allow(non_literal_loop_bounds)]
+         for cursor in range.x..range.y {
+-            let draw = load_banked_draw(get!(INDICES)[cursor as usize]);
++            let draw = load_banked_draw(get!(INDICES)[(range.y - 1 - (cursor - range.x)) as usize]);
+             for y in 0..4 {
+                 for x in 0..4 {
+                     let point = position
