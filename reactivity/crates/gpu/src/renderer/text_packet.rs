@@ -107,7 +107,7 @@ fn repair_regions(
         if old == next && old[1] == UNIFORM_TILE {
             continue;
         }
-        let old = if old[1] == UNIFORM_TILE {
+        let _old = if old[1] == UNIFORM_TILE {
             &old[..1]
         } else {
             &state.references[old[0] as usize..old[1] as usize]
@@ -117,13 +117,12 @@ fn repair_regions(
         } else {
             &next_references[next[0] as usize..next[1] as usize]
         };
-        let dirty = old != next
-            || old.iter().chain(next).any(|&address| {
-                patches
-                    .iter()
-                    .zip(&common_changed)
-                    .any(|(p, &common)| p.changes(address, &state.records, common))
-            });
+        let dirty = next.iter().any(|&address| {
+            patches
+                .iter()
+                .zip(&common_changed)
+                .any(|(p, &common)| p.changes(address, &state.records, common))
+        });
         if dirty {
             append_region(
                 &mut regions,
