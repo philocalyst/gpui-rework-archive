@@ -34,7 +34,6 @@ pub enum TreeError {
 // Dead entries reuse `next` as a free-list link. Exhausted generations are retired.
 struct Entry {
     generation: u32,
-    parent: u32,
     first: u32,
     last: u32,
     prev: u32,
@@ -50,6 +49,8 @@ struct Entry {
 pub struct Tree {
     arena: u64,
     entries: Vec<Entry>,
+    // Sole parent authority; dense routing is separate from sibling payload.
+    parents: Vec<u32>,
     free: u32,
     first: u32,
     last: u32,
@@ -70,6 +71,7 @@ impl Tree {
         Self {
             arena,
             entries: Vec::new(),
+            parents: Vec::new(),
             free: NIL,
             first: NIL,
             last: NIL,
@@ -89,7 +91,7 @@ impl Tree {
         Ok(self.entries[self.index(id)? as usize].kind.unwrap())
     }
     pub fn parent(&self, id: NodeId) -> Result<Option<NodeId>, TreeError> {
-        Ok(self.id_opt(self.entries[self.index(id)? as usize].parent))
+        Ok(self.id_opt(self.parents[self.index(id)? as usize]))
     }
     pub fn next_sibling(&self, id: NodeId) -> Result<Option<NodeId>, TreeError> {
         Ok(self.id_opt(self.entries[self.index(id)? as usize].next))
@@ -130,9 +132,9 @@ impl Tree {
                 return Err(TreeError::Capacity);
             }
             generation = 1;
+            self.parents.push(NIL);
             self.entries.push(Entry {
                 generation,
-                parent: NIL,
                 first: NIL,
                 last: NIL,
                 prev: NIL,
@@ -140,9 +142,9 @@ impl Tree {
                 kind: None,
             });
         }
+        self.parents[index as usize] = NIL;
         self.entries[index as usize] = Entry {
             generation,
-            parent: NIL,
             first: NIL,
             last: NIL,
             prev: NIL,
@@ -159,8 +161,7 @@ impl Tree {
         self.validate_reparent(node, parent)?;
         let index = self.index(node)?;
         let parent = self.optional_index(parent)?;
-        if self.entries[index as usize].parent == parent && self.entries[index as usize].next == NIL
-        {
+        if self.parents[index as usize] == parent && self.entries[index as usize].next == NIL {
             return Ok(());
         }
         self.detach(index);
@@ -178,7 +179,7 @@ impl Tree {
             if ancestor == index {
                 return Err(TreeError::Cycle);
             }
-            ancestor = self.entries[ancestor as usize].parent;
+            ancestor = self.parents[ancestor as usize];
         }
         Ok(())
     }
@@ -195,7 +196,7 @@ impl Tree {
                 current = child;
                 continue;
             }
-            let parent = self.entries[current as usize].parent;
+            let parent = self.parents[current as usize];
             let next = self.entries[current as usize].next;
             if current != root {
                 self.entries[parent as usize].first = next;
@@ -219,9 +220,10 @@ impl Tree {
     /// Allocated topology payload, excluding allocator bookkeeping and Tree header.
     pub fn allocated_bytes(&self) -> usize {
         self.entries.capacity() * std::mem::size_of::<Entry>()
+            + self.parents.capacity() * std::mem::size_of::<u32>()
     }
     pub fn entry_bytes() -> usize {
-        std::mem::size_of::<Entry>()
+        std::mem::size_of::<Entry>() + std::mem::size_of::<u32>()
     }
     pub(crate) fn slot_count(&self) -> usize {
         self.entries.len()
@@ -270,7 +272,7 @@ impl Tree {
     }
     fn detach(&mut self, index: u32) {
         let e = &self.entries[index as usize];
-        let (parent, prev, next) = (e.parent, e.prev, e.next);
+        let (parent, prev, next) = (self.parents[index as usize], e.prev, e.next);
         if prev != NIL {
             self.entries[prev as usize].next = next;
         } else if parent == NIL {
@@ -285,7 +287,7 @@ impl Tree {
         } else {
             self.entries[parent as usize].last = prev;
         }
-        self.entries[index as usize].parent = NIL;
+        self.parents[index as usize] = NIL;
         self.entries[index as usize].prev = NIL;
         self.entries[index as usize].next = NIL;
     }
@@ -308,7 +310,7 @@ impl Tree {
             self.entries[parent as usize].last = index;
         }
         let e = &mut self.entries[index as usize];
-        e.parent = parent;
+        self.parents[index as usize] = parent;
         e.prev = last;
     }
 }
@@ -349,11 +351,11 @@ impl Preorder<'_> {
                 self.next = entry.next;
                 return;
             }
-            if entry.parent == NIL {
+            if self.tree.parents[current as usize] == NIL {
                 self.next = NIL;
                 return;
             }
-            current = entry.parent;
+            current = self.tree.parents[current as usize];
         }
     }
 }
@@ -379,11 +381,11 @@ impl Iterator for Preorder<'_> {
                     self.next = e.next;
                     break;
                 }
-                if e.parent == NIL {
+                if self.tree.parents[current as usize] == NIL {
                     self.next = NIL;
                     break;
                 }
-                current = e.parent;
+                current = self.tree.parents[current as usize];
             }
         }
         Some(self.tree.id(index))

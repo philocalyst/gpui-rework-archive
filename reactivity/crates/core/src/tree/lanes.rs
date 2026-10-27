@@ -1,6 +1,6 @@
 //! Synchronous batches of independent, immutable parent chains.
 //! External tasks never enter this executor: Pending means one memory stage.
-use super::{Entry, NIL, NodeId, Tree, TreeError};
+use super::{NIL, NodeId, Tree, TreeError};
 use std::{
     future::Future,
     pin::Pin,
@@ -55,8 +55,8 @@ impl Tree {
                 if index == NIL {
                     return None;
                 }
-                while self.entries[index as usize].parent != NIL {
-                    index = self.entries[index as usize].parent;
+                while self.parents[index as usize] != NIL {
+                    index = self.parents[index as usize];
                 }
                 Some(self.id(index))
             }));
@@ -71,7 +71,7 @@ impl Tree {
                 while round != 0 {
                     let i = round.trailing_zeros() as usize;
                     round &= round - 1;
-                    let parent = self.entries[slots[i] as usize].parent;
+                    let parent = self.parents[slots[i] as usize];
                     if parent == NIL {
                         output[i] = Some(self.id(slots[i]));
                         live &= !(1_u64 << i);
@@ -84,7 +84,7 @@ impl Tree {
         }
         let mut lanes = slots.map(|index| {
             if index != NIL && STRATEGY == 4 {
-                hint(&self.entries[index as usize]);
+                hint(&self.parents[index as usize]);
             }
             RootLane { tree: self, index }
         });
@@ -114,13 +114,13 @@ impl Future for RootLane<'_> {
     type Output = NodeId;
     #[inline]
     fn poll(mut self: Pin<&mut Self>, _: &mut Context<'_>) -> Poll<NodeId> {
-        let parent = self.tree.entries[self.index as usize].parent;
+        let parent = self.tree.parents[self.index as usize];
         if parent == NIL {
             return Poll::Ready(self.tree.id(self.index));
         }
         self.index = parent;
         if STRATEGY == 4 {
-            hint(&self.tree.entries[parent as usize]);
+            hint(&self.tree.parents[parent as usize]);
         }
         Poll::Pending
     }
@@ -128,10 +128,10 @@ impl Future for RootLane<'_> {
 
 #[inline]
 #[allow(unsafe_code)]
-fn hint(entry: &Entry) {
+fn hint(entry: &u32) {
     #[cfg(all(target_arch = "x86_64", not(miri)))]
     // SAFETY: SSE is baseline on x86_64. This is only a non-dereferencing cache
-    // hint; the address also names a live, aligned Entry throughout the batch.
+    // hint; the address also names a live, aligned parent slot throughout the batch.
     // No mutation/reallocation can occur under the owning Tree's shared borrow.
     unsafe {
         std::arch::x86_64::_mm_prefetch(
