@@ -1,0 +1,1 @@
+{"command": ["/home/user/gpui-gpu-text-packet-target/release/build/gpui/7d343a8859c57521/out/gpui-7d343a8859c57521", "runtime::sparse_text::tests::sparse_batch_layout_ledger", "--exact", "--nocapture"], "exit": 0, "sha256": "c4ef86667512f0d7d91117cd094ab81a8b3e676976530d8024c1f811201029d8"}

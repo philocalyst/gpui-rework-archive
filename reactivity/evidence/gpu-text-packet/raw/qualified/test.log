@@ -1,0 +1,6 @@
+   Compiling gpui_gpu v0.1.0 (/home/user/gpui-gpu-text-packet-lab/reactivity/crates/gpu)
+    Finished `release` profile [optimized] target(s) in 10.55s
+     Running unittests src/lib.rs (/home/user/gpui-gpu-text-packet-target/release/build/gpui_gpu/46b604825bacbd9a/out/gpui_gpu-46b604825bacbd9a)
+     Running tests/presentation.rs (/home/user/gpui-gpu-text-packet-target/release/build/gpui_gpu/37104c559201aed5/out/presentation-37104c559201aed5)
+     Running tests/render.rs (/home/user/gpui-gpu-text-packet-target/release/build/gpui_gpu/fc26bbb724122b97/out/render-fc26bbb724122b97)
+   Doc-tests gpui_gpu

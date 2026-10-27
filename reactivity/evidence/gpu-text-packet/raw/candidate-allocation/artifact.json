@@ -1,0 +1,79 @@
+{
+  "path": "/home/user/gpui-gpu-text-packet-target/release/build/gpui_gpu/4bad759927af0031/out/text_packet_allocations",
+  "sha256": "35527a689a9e31a6acbfe098743ddf2b2b94b3102f0c26e6bd2b3523404f669c",
+  "bytes": 14748952,
+  "fingerprint": {
+    "rustc": 13112353858380123722,
+    "features": "[\"default\", \"gpu-tests\", \"simd\", \"vulkan-tests\"]",
+    "declared_features": "[\"default\", \"gpu-tests\", \"offline-shader\", \"simd\", \"vulkan-tests\"]",
+    "target": 3801029614762179490,
+    "profile": 854319013279132213,
+    "path": 5953625540562717643,
+    "deps": [
+      [
+        3750483387937644717,
+        "pollster",
+        false,
+        8289392155308658121
+      ],
+      [
+        6697289019564802635,
+        "wgpu",
+        false,
+        16510593052540140947
+      ],
+      [
+        8991190325997472044,
+        "gpui_gpu",
+        false,
+        2222522325856490019
+      ],
+      [
+        8991190325997472044,
+        "build_script_build",
+        false,
+        17099836806818717613
+      ],
+      [
+        11000357280469314662,
+        "wgsl_rs",
+        false,
+        5636540923487536018
+      ],
+      [
+        11048071599106839258,
+        "allocation_counter",
+        false,
+        6546775363473888567
+      ],
+      [
+        17032968227276897852,
+        "gpui_canvas",
+        false,
+        5295641151753295086
+      ],
+      [
+        18075512308826438882,
+        "bytemuck",
+        false,
+        13748305756524915767
+      ]
+    ],
+    "local": [
+      {
+        "CheckDepInfo": {
+          "dep_info": "release/build/gpui_gpu/4bad759927af0031/fingerprint/dep-example-text_packet_allocations",
+          "fingerprint": "content"
+        }
+      }
+    ],
+    "rustflags": [
+      "-C",
+      "symbol-mangling-version=v0",
+      "--cfg",
+      "tokio_unstable"
+    ],
+    "config": 8362119626465528914,
+    "compile_kind": 0
+  }
+}

@@ -1,0 +1,1 @@
+{"command": ["cargo", "+nightly-2026-10-23", "-Z", "checksum-freshness", "--config", "build.fingerprint=\"content\"", "test", "--locked", "--offline", "--release", "-p", "gpui_gpu", "--features", "vulkan-tests", "--test", "render", "text_packet_tests::text_packets_repair_new_tiles_in_painter_order_and_match_fresh_images", "--", "--exact", "--nocapture"], "exit": 101}

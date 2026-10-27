@@ -1,0 +1,1 @@
+Correctness-only preflight. All durations excluded from performance qualification. Other work may run concurrently.

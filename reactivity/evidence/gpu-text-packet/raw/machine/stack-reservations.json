@@ -1,0 +1,174 @@
+{
+  "control": [
+    {
+      "name": "<gpui_gpu::renderer::retained::RetainedRenderer>::render::{closure#3}",
+      "bytes": 192,
+      "address": 6326816,
+      "local_prologue_reservation": null
+    },
+    {
+      "name": "<gpui_canvas::canvas::Groups as core::iter::traits::iterator::Iterator>::try_fold::<usize, <gpui_gpu::renderer::RendererState>::render_observed<<gpui_gpu::renderer::RendererState>::render::{closure#0}>::{closure#2}, core::result::Result<usize, gpui_gpu::renderer::Error>>",
+      "bytes": 273,
+      "address": 6297472,
+      "local_prologue_reservation": 232
+    },
+    {
+      "name": "<core::slice::iter::Iter<gpui_canvas::canvas::DrawRef> as core::iter::traits::iterator::Iterator>::try_fold::<(), core::iter::adapters::map::map_try_fold<&gpui_canvas::canvas::DrawRef, gpui_canvas::canvas::PreparedSource, (), core::ops::control_flow::ControlFlow<()>, <gpui_canvas::canvas::PreparedGroup>::sources::{closure#0}, core::iter::traits::iterator::Iterator::all::check<gpui_canvas::canvas::PreparedSource, <gpui_gpu::renderer::RendererState>::render_observed<<gpui_gpu::renderer::RendererState>::render::{closure#0}>::{closure#4}>::{closure#0}>::{closure#0}, core::ops::control_flow::ControlFlow<()>>",
+      "bytes": 278,
+      "address": 6297184,
+      "local_prologue_reservation": 104
+    },
+    {
+      "name": "<core::option::Option<gpui_canvas::canvas::GlyphMask>>::map_or::<[u32; 3], <gpui_gpu::renderer::RendererState>::render_observed<<gpui_gpu::renderer::RendererState>::render::{closure#0}>::{closure#5}>",
+      "bytes": 325,
+      "address": 6281200,
+      "local_prologue_reservation": 56
+    },
+    {
+      "name": "gpui_gpu::renderer::visit::<<gpui_gpu::renderer::RendererState>::render_observed<<gpui_gpu::renderer::RendererState>::render::{closure#0}>::{closure#6}>",
+      "bytes": 515,
+      "address": 6296656,
+      "local_prologue_reservation": 24
+    },
+    {
+      "name": "<gpui_gpu::renderer::retained::RetainedRenderer>::render",
+      "bytes": 2117,
+      "address": 6327008,
+      "local_prologue_reservation": 664
+    },
+    {
+      "name": "<gpui_gpu::renderer::RendererState>::render_observed::<<gpui_gpu::renderer::retained::RetainedRenderer>::render::{closure#5}>",
+      "bytes": 11655,
+      "address": 6281536,
+      "local_prologue_reservation": 1496
+    }
+  ],
+  "candidate": [
+    {
+      "name": "<[u32]>::sort_unstable_by_key::<u32, gpui_gpu::renderer::text_packet::patch::{closure#7}>",
+      "bytes": 67,
+      "address": 6329904,
+      "local_prologue_reservation": 24
+    },
+    {
+      "name": "core::slice::sort::shared::smallsort::insertion_sort_shift_left::<u32, <[u32]>::sort_unstable_by_key<u32, gpui_gpu::renderer::text_packet::patch::{closure#7}>::{closure#0}>",
+      "bytes": 149,
+      "address": 6353264,
+      "local_prologue_reservation": null
+    },
+    {
+      "name": "core::slice::sort::shared::pivot::median3_rec::<u32, <[u32]>::sort_unstable_by_key<u32, gpui_gpu::renderer::text_packet::patch::{closure#7}>::{closure#0}>",
+      "bytes": 181,
+      "address": 6362976,
+      "local_prologue_reservation": null
+    },
+    {
+      "name": "<gpui_gpu::renderer::retained::RetainedRenderer>::render::{closure#3}",
+      "bytes": 192,
+      "address": 6376736,
+      "local_prologue_reservation": null
+    },
+    {
+      "name": "core::slice::sort::unstable::heapsort::heapsort::<u32, <[u32]>::sort_unstable_by_key<u32, gpui_gpu::renderer::text_packet::patch::{closure#7}>::{closure#0}>",
+      "bytes": 196,
+      "address": 6365536,
+      "local_prologue_reservation": null
+    },
+    {
+      "name": "<alloc::vec::Vec<u32>>::extend_desugared::<core::iter::adapters::filter::Filter<core::iter::adapters::copied::Copied<core::slice::iter::Iter<u32>>, gpui_gpu::renderer::text_packet::patch::{closure#5}>>",
+      "bytes": 219,
+      "address": 6368288,
+      "local_prologue_reservation": null
+    },
+    {
+      "name": "<gpui_canvas::canvas::Groups as core::iter::traits::iterator::Iterator>::try_fold::<usize, <gpui_gpu::renderer::RendererState>::render_observed<<gpui_gpu::renderer::RendererState>::render::{closure#0}>::{closure#2}, core::result::Result<usize, gpui_gpu::renderer::Error>>",
+      "bytes": 273,
+      "address": 6302640,
+      "local_prologue_reservation": 232
+    },
+    {
+      "name": "<core::slice::iter::Iter<gpui_canvas::canvas::DrawRef> as core::iter::traits::iterator::Iterator>::try_fold::<(), core::iter::adapters::map::map_try_fold<&gpui_canvas::canvas::DrawRef, gpui_canvas::canvas::PreparedSource, (), core::ops::control_flow::ControlFlow<()>, <gpui_canvas::canvas::PreparedGroup>::sources::{closure#0}, core::iter::traits::iterator::Iterator::all::check<gpui_canvas::canvas::PreparedSource, <gpui_gpu::renderer::RendererState>::render_observed<<gpui_gpu::renderer::RendererState>::render::{closure#0}>::{closure#4}>::{closure#0}>::{closure#0}, core::ops::control_flow::ControlFlow<()>>",
+      "bytes": 278,
+      "address": 6302352,
+      "local_prologue_reservation": 104
+    },
+    {
+      "name": "<core::option::Option<gpui_canvas::canvas::GlyphMask>>::map_or::<[u32; 3], <gpui_gpu::renderer::RendererState>::render_observed<<gpui_gpu::renderer::RendererState>::render::{closure#0}>::{closure#5}>",
+      "bytes": 325,
+      "address": 6286112,
+      "local_prologue_reservation": 56
+    },
+    {
+      "name": "core::slice::sort::unstable::ipnsort::<u32, <[u32]>::sort_unstable_by_key<u32, gpui_gpu::renderer::text_packet::patch::{closure#7}>::{closure#0}>",
+      "bytes": 419,
+      "address": 6362304,
+      "local_prologue_reservation": null
+    },
+    {
+      "name": "<gpui_gpu::renderer::retained::RetainedRenderer>::patch_texts",
+      "bytes": 439,
+      "address": 6376928,
+      "local_prologue_reservation": 88
+    },
+    {
+      "name": "<gpui_gpu::renderer::RendererState>::bindings",
+      "bytes": 461,
+      "address": 6326576,
+      "local_prologue_reservation": 288
+    },
+    {
+      "name": "gpui_gpu::renderer::visit::<<gpui_gpu::renderer::RendererState>::render_observed<<gpui_gpu::renderer::RendererState>::render::{closure#0}>::{closure#6}>",
+      "bytes": 515,
+      "address": 6301248,
+      "local_prologue_reservation": 24
+    },
+    {
+      "name": "<alloc::vec::Vec<u32>>::extend_trusted::<core::iter::adapters::map::Map<core::slice::iter::Iter<(usize, u32)>, gpui_gpu::renderer::text_packet::patch::{closure#6}>>",
+      "bytes": 519,
+      "address": 6367760,
+      "local_prologue_reservation": null
+    },
+    {
+      "name": "gpui_gpu::renderer::visit::<gpui_gpu::renderer::text_packet::patch::{closure#3}>",
+      "bytes": 575,
+      "address": 6301776,
+      "local_prologue_reservation": 88
+    },
+    {
+      "name": "core::slice::sort::unstable::quicksort::quicksort::<u32, <[u32]>::sort_unstable_by_key<u32, gpui_gpu::renderer::text_packet::patch::{closure#7}>::{closure#0}>",
+      "bytes": 892,
+      "address": 6364336,
+      "local_prologue_reservation": null
+    },
+    {
+      "name": "<gpui_gpu::renderer::retained::RetainedRenderer>::render::{closure#6}",
+      "bytes": 1117,
+      "address": 6302928,
+      "local_prologue_reservation": 24
+    },
+    {
+      "name": "<gpui_gpu::renderer::retained::RetainedRenderer>::render",
+      "bytes": 2228,
+      "address": 6377376,
+      "local_prologue_reservation": 664
+    },
+    {
+      "name": "core::slice::sort::shared::smallsort::small_sort_network::<u32, <[u32]>::sort_unstable_by_key<u32, gpui_gpu::renderer::text_packet::patch::{closure#7}>::{closure#0}>",
+      "bytes": 3051,
+      "address": 6350000,
+      "local_prologue_reservation": 200
+    },
+    {
+      "name": "gpui_gpu::renderer::text_packet::patch",
+      "bytes": 8062,
+      "address": 6330704,
+      "local_prologue_reservation": 856
+    },
+    {
+      "name": "<gpui_gpu::renderer::RendererState>::render_observed::<<gpui_gpu::renderer::retained::RetainedRenderer>::render::{closure#6}>",
+      "bytes": 11329,
+      "address": 6286448,
+      "local_prologue_reservation": 1448
+    }
+  ]
+}

@@ -1,0 +1,24 @@
+{
+  "primary": {
+    "1000-2-exact": true,
+    "1000-4-exact": true
+  },
+  "controls": {
+    "0-1-exact": true,
+    "0-1-full": true,
+    "0-2-full": false,
+    "0-4-full": false,
+    "25-1-exact": true,
+    "25-1-full": true,
+    "25-2-full": true,
+    "25-4-full": true,
+    "1000-1-exact": true,
+    "1000-1-full": true,
+    "1000-2-full": true,
+    "1000-4-full": true,
+    "0-1-stream": true,
+    "25-1-stream": true,
+    "1000-1-stream": true
+  },
+  "numerical_pass": false
+}

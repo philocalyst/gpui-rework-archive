@@ -1,0 +1,11 @@
+
+running 1 test
+test text_packet_tests::text_packets_repair_new_tiles_in_painter_order_and_match_fresh_images ... FAILED
+
+failures:
+
+failures:
+    text_packet_tests::text_packets_repair_new_tiles_in_painter_order_and_match_fresh_images
+
+test result: FAILED. 0 passed; 1 failed; 0 ignored; 0 measured; 59 filtered out; finished in 0.36s
+

@@ -1,0 +1,12 @@
+{
+  "binary": "/home/user/gpui-gpu-text-packet-target/release/build/gpui/7d343a8859c57521/out/gpui-7d343a8859c57521",
+  "sha256": "c4ef86667512f0d7d91117cd094ab81a8b3e676976530d8024c1f811201029d8",
+  "bytes": 57997824,
+  "environment": {
+    "DISPLAY": ":94",
+    "XDG_RUNTIME_DIR": "/home/user/gpui-xdg",
+    "VK_ICD_FILENAMES": "/usr/share/vulkan/icd.d/lvp_icd.json",
+    "LP_NUM_THREADS": "4",
+    "DBUS_SESSION_BUS_ADDRESS": "unix:path=/nonexistent"
+  }
+}

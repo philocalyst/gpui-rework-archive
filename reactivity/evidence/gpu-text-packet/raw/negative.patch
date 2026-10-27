@@ -1,0 +1,25 @@
+commit cca9f74c6db60fd4f71fdb63e10d804aa7620915
+Author:     Wing <44917547+wingleeio@users.noreply.github.com>
+AuthorDate: Tue Oct 27 10:02:29 2026 +0000
+Commit:     Wing <44917547+wingleeio@users.noreply.github.com>
+CommitDate: Tue Oct 27 10:02:29 2026 +0000
+
+    Negative witness: omit changed glyph tile memberships
+    
+    Co-authored-by: zeronsh[bot] <346184242+zeronsh[bot]@users.noreply.github.com>
+
+diff --git a/reactivity/crates/gpu/src/renderer/text_packet.rs b/reactivity/crates/gpu/src/renderer/text_packet.rs
+index f3343cd192..25df2cdd9b 100644
+--- a/reactivity/crates/gpu/src/renderer/text_packet.rs
++++ b/reactivity/crates/gpu/src/renderer/text_packet.rs
+@@ -157,7 +157,9 @@ pub(super) fn patch(
+             visit(p.bounds, columns, |tile| {
+                 visits += 1;
+                 if run.ordinal + index as u32 + 1 >= state.cursors[tile] {
+-                    additions.push((tile, address));
++                    if false {
++                        additions.push((tile, address));
++                    }
+                 }
+             });
+             validated += 1;

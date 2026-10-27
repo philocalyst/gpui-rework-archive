@@ -1,0 +1,32 @@
+Planning only; not implemented or validated.
+
+After GPU pixel/failure gates, propagate a private native-only text transition.
+TextResources already owns pending TextPatch rows whose geometry.run identifies
+changed slots. Retain Option<PresentationToken> patch_from under native-core,
+set from runtime.latest_token immediately before sparse publish in both one/batch.
+Clear with patch acknowledgement; full paths already clear patch and should clear
+from when convenient. Only emit a transition while patch is Some and from is Some;
+never derive predecessor by subtracting an assumed sequence. Avoid another heap
+allocation by using the existing patch rows and a fixed four-slot array on stack.
+Charge native-only TextResources size, changed code and stack separately.
+
+with_paint_scene is internal: add a fifth callback value for private text transition.
+Update its production callers and tests. Keep public with_scene unchanged.
+GpuSurface::render_damaged should try the text operation only when the previous
+packet token exactly equals transition.from. Same-token replay remains first.
+Revoke native token/epoch before any packet mutation. On a rejected GPU patch,
+fall back to full scene preparation. RetainedRenderer.patch_texts preserves its
+old packet/image on rejection; failed full preparation still invalidates them.
+Only restore native token/epoch after successful submission. Keep damage's exact
+SceneEpoch predecessor certificate independent of the positional text-run slot.
+
+Build up to four (slot, PreparedGroup) pairs via PreparedScene.text_run, sort by
+slot index, no arbitrary View callback replay or await/owner borrow. A small
+outlined helper can contain stack arrays if actual code generation warrants a
+separate later trial; do not mix speculative inline hints into first prototype.
+
+Native tests need actual gpu stats.packet_reused, exact fresh pixel equality and
+coalesced/missed predecessor fallback, old P geometry until ACK, failed newer
+candidate with older eligible ACK, resize/exposure, one/four fields and new glyph
+fallback. Run complete default GPUI/Canvas, native composition, strict Clippy and
+six actual X11 scripts. None of these tests supplies hardware presentation data.

@@ -1,0 +1,1923 @@
+diff --git a/reactivity/Cargo.lock b/reactivity/Cargo.lock
+index 2d0ebf6f7a..4b248b48ea 100644
+--- a/reactivity/Cargo.lock
++++ b/reactivity/Cargo.lock
+@@ -1135,6 +1135,7 @@ dependencies = [
+ name = "gpui_gpu"
+ version = "0.1.0"
+ dependencies = [
++ "allocation-counter",
+  "bytemuck",
+  "gpui_canvas",
+  "naga",
+diff --git a/reactivity/crates/canvas/src/canvas/text_patch.rs b/reactivity/crates/canvas/src/canvas/text_patch.rs
+index 8300fad187..2c4f67aeb3 100644
+--- a/reactivity/crates/canvas/src/canvas/text_patch.rs
++++ b/reactivity/crates/canvas/src/canvas/text_patch.rs
+@@ -6,6 +6,39 @@ use super::*;
+ #[derive(Clone, Copy, Debug, PartialEq, Eq)]
+ pub struct TextRunSlot(std::num::NonZeroU32);
+ 
++impl TextRunSlot {
++    /// Zero-based common-run position, not a scene or lifetime identity.
++    pub fn index(self) -> usize {
++        self.0.get() as usize - 1
++    }
++}
++
++impl<'a> PreparedScene<'a> {
++    /// Borrow this positional masked run. Pair the slot with the owner's exact
++    /// scene token; a replacement scene can reuse every position.
++    pub fn text_run(self, slot: TextRunSlot) -> Option<PreparedGroup<'a>> {
++        let run = self.commands.commons.get(slot.index())?;
++        let groups = Groups {
++            commands: self.commands,
++            extent: self.extent,
++            front: 0,
++            back: self.commands.order.len(),
++            remaining: 0,
++        };
++        let group = groups.view(run.range[0] as usize, run.range[1] as usize);
++        (group.text_run_slot() == Some(slot)).then_some(group)
++    }
++}
++
++impl PreparedGroup<'_> {
++    /// Positional grouped mask run, including ordinary recorded text.
++    pub fn text_run_slot(self) -> Option<TextRunSlot> {
++        let first = self.order.first()?;
++        (!first.inline() && self.sources().all(|source| source.mask().is_some()))
++            .then(|| TextRunSlot(std::num::NonZeroU32::new(u32::from(first.command) + 1).unwrap()))
++    }
++}
++
+ impl CanvasScene<'_> {
+     /// Record ordinary literal text and identify its grouped run when present.
+     /// Empty and singleton admission returns no replaceable run.
+diff --git a/reactivity/crates/gpu/Cargo.toml b/reactivity/crates/gpu/Cargo.toml
+index 03da7e2639..3b43ba35e9 100644
+--- a/reactivity/crates/gpu/Cargo.toml
++++ b/reactivity/crates/gpu/Cargo.toml
+@@ -34,6 +34,7 @@ sha2 = { version = "=0.11.1", optional = true, default-features = false }
+ wgsl-rs = { version = "=0.1.0-beta.6", default-features = false, features = ["validation"] }
+ 
+ [dev-dependencies]
++allocation-counter = "=0.8.1"
+ pollster = "=1.0.1"
+ 
+ [[example]]
+@@ -47,3 +48,11 @@ required-features = ["gpu-tests"]
+ [[example]]
+ name = "retained"
+ required-features = ["gpu-tests"]
++
++[[example]]
++name = "text_packet"
++required-features = ["gpu-tests"]
++
++[[example]]
++name = "text_packet_allocations"
++required-features = ["gpu-tests"]
+diff --git a/reactivity/crates/gpu/examples/support/text_packet_memory.rs b/reactivity/crates/gpu/examples/support/text_packet_memory.rs
+new file mode 100644
+index 0000000000..415b6d9af2
+--- /dev/null
++++ b/reactivity/crates/gpu/examples/support/text_packet_memory.rs
+@@ -0,0 +1,4 @@
++use gpui_gpu::RetainedRenderer;
++pub fn map_bytes(renderer: &RetainedRenderer) -> usize {
++    renderer.text_packet_capacity_bytes()
++}
+diff --git a/reactivity/crates/gpu/examples/support/text_packet_strategy.rs b/reactivity/crates/gpu/examples/support/text_packet_strategy.rs
+new file mode 100644
+index 0000000000..5e813e062d
+--- /dev/null
++++ b/reactivity/crates/gpu/examples/support/text_packet_strategy.rs
+@@ -0,0 +1,24 @@
++//! Candidate strategy; common workload and fresh full oracle are unchanged.
++use gpui_canvas::{DamageRegion, PreparedScene, TextRunSlot};
++use gpui_gpu::{RetainedRenderer, wgpu};
++pub fn render(
++    renderer: &mut RetainedRenderer,
++    scene: PreparedScene<'_>,
++    slots: &[TextRunSlot],
++    target: &wgpu::TextureView,
++    damage: Option<DamageRegion>,
++    sparse: bool,
++) {
++    if sparse {
++        let edits: Option<Vec<_>> = slots
++            .iter()
++            .map(|&slot| scene.text_run(slot).map(|group| (slot, group)))
++            .collect();
++        if let Some(edits) = edits
++            && renderer.patch_texts(&edits, target, damage).is_ok()
++        {
++            return;
++        }
++    }
++    renderer.render(scene, target, damage).unwrap();
++}
+diff --git a/reactivity/crates/gpu/examples/text_packet.rs b/reactivity/crates/gpu/examples/text_packet.rs
+new file mode 100644
+index 0000000000..78fe655942
+--- /dev/null
++++ b/reactivity/crates/gpu/examples/text_packet.rs
+@@ -0,0 +1,304 @@
++//! Canonical text delta plus GPU preparation/submission/completion.
++//! Shaping is outside timing; this is not native presentation or input latency.
++#[path = "support/text_packet_strategy.rs"]
++mod strategy;
++#[path = "../tests/support/adapter.rs"]
++mod test_adapter;
++#[allow(dead_code)]
++#[path = "../../gpui/examples/support/zgx_workload/src/lib.rs"]
++mod workload;
++use gpui_canvas::{
++    Affine, Canvas, Color, ColorConfig, FontFace, Point, Rect, TextLayout, TextRunReplacement,
++    TextRunSlot, TextSystem,
++};
++use gpui_gpu::{Renderer, RetainedRenderer, wgpu};
++use std::time::Instant;
++const SIZE: [u32; 2] = [960, 720];
++fn texture(renderer: &Renderer) -> wgpu::Texture {
++    renderer.device().create_texture(&wgpu::TextureDescriptor {
++        label: Some("retained benchmark output"),
++        size: wgpu::Extent3d {
++            width: SIZE[0],
++            height: SIZE[1],
++            depth_or_array_layers: 1,
++        },
++        mip_level_count: 1,
++        sample_count: 1,
++        dimension: wgpu::TextureDimension::D2,
++        format: renderer.format(),
++        usage: wgpu::TextureUsages::RENDER_ATTACHMENT | wgpu::TextureUsages::COPY_SRC,
++        view_formats: &[],
++    })
++}
++fn pixels(renderer: &Renderer, texture: &wgpu::Texture) -> Vec<u8> {
++    let bytes = u64::from(
++        SIZE[0]
++            * SIZE[1]
++            * if renderer.format() == wgpu::TextureFormat::Rgba16Float {
++                8
++            } else {
++                4
++            },
++    );
++    let device = renderer.device();
++    let buffer = device.create_buffer(&wgpu::BufferDescriptor {
++        label: None,
++        size: bytes,
++        usage: wgpu::BufferUsages::COPY_DST | wgpu::BufferUsages::MAP_READ,
++        mapped_at_creation: false,
++    });
++    let mut encoder = device.create_command_encoder(&Default::default());
++    encoder.copy_texture_to_buffer(
++        wgpu::TexelCopyTextureInfo {
++            texture,
++            mip_level: 0,
++            origin: wgpu::Origin3d::ZERO,
++            aspect: wgpu::TextureAspect::All,
++        },
++        wgpu::TexelCopyBufferInfo {
++            buffer: &buffer,
++            layout: wgpu::TexelCopyBufferLayout {
++                offset: 0,
++                bytes_per_row: Some(
++                    SIZE[0]
++                        * if renderer.format() == wgpu::TextureFormat::Rgba16Float {
++                            8
++                        } else {
++                            4
++                        },
++                ),
++                rows_per_image: Some(SIZE[1]),
++            },
++        },
++        texture.size(),
++    );
++    renderer.queue().submit([encoder.finish()]);
++    let (send, receive) = std::sync::mpsc::channel();
++    buffer.map_async(wgpu::MapMode::Read, .., move |r| send.send(r).unwrap());
++    device.poll(wgpu::PollType::wait_indefinitely()).unwrap();
++    receive.recv().unwrap().unwrap();
++    buffer.get_mapped_range(..).unwrap().to_vec()
++}
++
++const CLIP: Rect = Rect::new(0., 0., 960., 720.);
++fn origin(i: usize) -> Point {
++    Point {
++        x: 8. + i as f32 * 80.,
++        y: 8.,
++    }
++}
++fn scene(
++    text: &mut TextSystem,
++    dynamic: &[TextLayout],
++    label: &TextLayout,
++    seed: &TextLayout,
++    count: usize,
++) -> (Canvas, Vec<TextRunSlot>) {
++    let mut canvas = Canvas::recording(SIZE[0], SIZE[1], ColorConfig::default()).unwrap();
++    let mut stage = canvas.stage();
++    stage.clear(Color::WHITE);
++    let mut slots = Vec::new();
++    for (i, layout) in dynamic.iter().enumerate() {
++        slots.push(
++            stage
++                .draw_text_scaled_tracked(
++                    text,
++                    layout,
++                    origin(i),
++                    Affine::IDENTITY,
++                    CLIP,
++                    Color::BLACK,
++                    1.,
++                )
++                .unwrap()
++                .unwrap(),
++        );
++    }
++    stage
++        .draw_text(
++            text,
++            seed,
++            Point { x: 8., y: 128. },
++            Affine::IDENTITY,
++            CLIP,
++            Color::BLACK,
++        )
++        .unwrap();
++    for i in 0..count {
++        stage
++            .draw_text(
++                text,
++                label,
++                Point {
++                    x: 4. + (i % 25) as f32 * 38.,
++                    y: 152. + (i / 25) as f32 * 14.,
++                },
++                Affine::IDENTITY,
++                CLIP,
++                Color::BLACK,
++            )
++            .unwrap();
++    }
++    stage.commit();
++    (canvas, slots)
++}
++fn main() {
++    let args: Vec<_> = std::env::args().collect();
++    let count: usize = args[1].parse().unwrap();
++    let fields: usize = args[2].parse().unwrap();
++    let mode = &args[3];
++    assert!([0, 25, 1000].contains(&count) && [1, 2, 4].contains(&fields));
++    assert!(["exact", "full", "stream"].contains(&mode.as_str()));
++    assert!(mode != "stream" || fields == 1);
++    let font = std::fs::read(&args[4]).unwrap();
++    eprintln!("FONT,fnv64={:016x}", workload::fnv64(&font));
++    let face = FontFace::new(font).unwrap();
++    let mut text = TextSystem::from_font(face);
++    let label = text.shape("label", 10., None).unwrap();
++    // Keep the complete ASCII mask set leased, independently of changing runs.
++    let seed = text
++        .shape(
++            "0123456789ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz. ",
++            12.,
++            None,
++        )
++        .unwrap();
++    let mut work = workload::Workload {
++        text: String::with_capacity(8256),
++        scroll_offset: 0.,
++        frames: 0,
++        mode: workload::Mode::Stream,
++        seconds: 0.,
++    };
++    for _ in 0..100 {
++        work.tick();
++    }
++    let values: Vec<Vec<TextLayout>> = (0..71)
++        .map(|frame| {
++            if mode == "stream" {
++                work.tick();
++                vec![text.shape(&work.visible_text(), 12., Some(944.)).unwrap()]
++            } else {
++                (0..fields)
++                    .map(|i| {
++                        text.shape(
++                            if (frame + i) % 2 == 0 { "0011" } else { "1100" },
++                            12.,
++                            None,
++                        )
++                        .unwrap()
++                    })
++                    .collect()
++            }
++        })
++        .collect();
++    let cold = Instant::now();
++    pollster::block_on(async {
++        let (_, adapter) = test_adapter::request().await;
++        let mut renderer = RetainedRenderer::new(
++            Renderer::request(&adapter, wgpu::TextureFormat::Rgba8UnormSrgb)
++                .await
++                .unwrap(),
++        );
++        let target = texture(&renderer);
++        let view = target.create_view(&Default::default());
++        let (mut canvas, mut slots) = scene(&mut text, &values[0], &label, &seed, count);
++        renderer
++            .render(canvas.prepared_scene(), &view, None)
++            .unwrap();
++        renderer
++            .device()
++            .poll(wgpu::PollType::wait_indefinitely())
++            .unwrap();
++        eprintln!("COLD,wall_ns={}", cold.elapsed().as_nanos());
++        let initial = pixels(&renderer, &target);
++        std::fs::write(format!("{}.initial.rgba", args[5]), &initial).unwrap();
++        println!(
++            "frame,labels,fields,mode,host_ns,complete_ns,canonical_sparse,packet_reused,validated_draws,binning_tile_visits,upload_bytes,bind_groups,mask_upload_bytes,cpu_index_bytes,gpu_buffer_bytes,atlas_bytes"
++        );
++        for frame in 0..70 {
++            let start = Instant::now();
++            let edits: Vec<_> = slots
++                .iter()
++                .zip(&values[frame + 1])
++                .enumerate()
++                .map(|(i, (&slot, layout))| TextRunReplacement {
++                    slot,
++                    layout,
++                    origin: origin(i),
++                    transform: Affine::IDENTITY,
++                    clip: CLIP,
++                    color: Color::BLACK,
++                    raster_scale: 1.,
++                })
++                .collect();
++            let damage = if mode == "full" {
++                None
++            } else {
++                canvas.try_patch_texts(&mut text, &edits).unwrap()
++            };
++            let sparse = damage.is_some();
++            if !sparse {
++                (canvas, slots) = scene(&mut text, &values[frame + 1], &label, &seed, count);
++            }
++            strategy::render(
++                &mut renderer,
++                canvas.prepared_scene(),
++                &slots,
++                &view,
++                damage,
++                sparse,
++            );
++            let host = start.elapsed().as_nanos();
++            renderer
++                .device()
++                .poll(wgpu::PollType::wait_indefinitely())
++                .unwrap();
++            let complete = start.elapsed().as_nanos();
++            if frame >= 10 {
++                let s = renderer.stats();
++                println!(
++                    "{},{count},{fields},{mode},{host},{complete},{sparse},{},{},{},{},{},{},{},{},{}",
++                    frame - 10,
++                    s.packet_reused,
++                    s.validated_draws,
++                    s.binning_tile_visits,
++                    s.instance_upload_bytes,
++                    s.bind_group_creations,
++                    s.mask_upload_bytes,
++                    s.cpu_index_capacity_bytes,
++                    s.gpu_buffer_bytes,
++                    s.atlas_bytes
++                );
++            }
++        }
++        let final_pixels = pixels(&renderer, &target);
++        std::fs::write(format!("{}.final.rgba", args[5]), &final_pixels).unwrap();
++        // Independent complete reconstruction, never a replay of the patched packet.
++        let mut oracle = Renderer::request(&adapter, renderer.format())
++            .await
++            .unwrap();
++        let oracle_texture = texture(&oracle);
++        let oracle_view = oracle_texture.create_view(&Default::default());
++        let (fresh, _) = scene(&mut text, &values[70], &label, &seed, count);
++        oracle.render(fresh.prepared_scene(), &oracle_view).unwrap();
++        assert_eq!(
++            final_pixels,
++            pixels(&oracle, &oracle_texture),
++            "fresh final image"
++        );
++        let (fresh, _) = scene(&mut text, &values[0], &label, &seed, count);
++        oracle.render(fresh.prepared_scene(), &oracle_view).unwrap();
++        assert_eq!(
++            initial,
++            pixels(&oracle, &oracle_texture),
++            "fresh initial image"
++        );
++        assert_eq!(canvas.output_bytes(), 0);
++        eprintln!(
++            "FINAL,initial_hash={:016x},final_hash={:016x},frames=60,warmups=10,labels={count},fields={fields},mode={mode}",
++            workload::fnv64(&initial),
++            workload::fnv64(&final_pixels)
++        );
++    });
++}
+diff --git a/reactivity/crates/gpu/examples/text_packet_allocations.rs b/reactivity/crates/gpu/examples/text_packet_allocations.rs
+new file mode 100644
+index 0000000000..7c8a55e2eb
+--- /dev/null
++++ b/reactivity/crates/gpu/examples/text_packet_allocations.rs
+@@ -0,0 +1,328 @@
++//! Separate caller-thread Rust allocation probe. Durations are not performance evidence.
++//! Shaping is outside timing; this is not native presentation or input latency.
++#[path = "support/text_packet_memory.rs"]
++mod memory;
++#[path = "support/text_packet_strategy.rs"]
++mod strategy;
++#[path = "../tests/support/adapter.rs"]
++mod test_adapter;
++#[allow(dead_code)]
++#[path = "../../gpui/examples/support/zgx_workload/src/lib.rs"]
++mod workload;
++use gpui_canvas::{
++    Affine, Canvas, Color, ColorConfig, FontFace, Point, Rect, TextLayout, TextRunReplacement,
++    TextRunSlot, TextSystem,
++};
++use gpui_gpu::{Renderer, RetainedRenderer, wgpu};
++use std::time::Instant;
++const SIZE: [u32; 2] = [960, 720];
++fn texture(renderer: &Renderer) -> wgpu::Texture {
++    renderer.device().create_texture(&wgpu::TextureDescriptor {
++        label: Some("retained benchmark output"),
++        size: wgpu::Extent3d {
++            width: SIZE[0],
++            height: SIZE[1],
++            depth_or_array_layers: 1,
++        },
++        mip_level_count: 1,
++        sample_count: 1,
++        dimension: wgpu::TextureDimension::D2,
++        format: renderer.format(),
++        usage: wgpu::TextureUsages::RENDER_ATTACHMENT | wgpu::TextureUsages::COPY_SRC,
++        view_formats: &[],
++    })
++}
++fn pixels(renderer: &Renderer, texture: &wgpu::Texture) -> Vec<u8> {
++    let bytes = u64::from(
++        SIZE[0]
++            * SIZE[1]
++            * if renderer.format() == wgpu::TextureFormat::Rgba16Float {
++                8
++            } else {
++                4
++            },
++    );
++    let device = renderer.device();
++    let buffer = device.create_buffer(&wgpu::BufferDescriptor {
++        label: None,
++        size: bytes,
++        usage: wgpu::BufferUsages::COPY_DST | wgpu::BufferUsages::MAP_READ,
++        mapped_at_creation: false,
++    });
++    let mut encoder = device.create_command_encoder(&Default::default());
++    encoder.copy_texture_to_buffer(
++        wgpu::TexelCopyTextureInfo {
++            texture,
++            mip_level: 0,
++            origin: wgpu::Origin3d::ZERO,
++            aspect: wgpu::TextureAspect::All,
++        },
++        wgpu::TexelCopyBufferInfo {
++            buffer: &buffer,
++            layout: wgpu::TexelCopyBufferLayout {
++                offset: 0,
++                bytes_per_row: Some(
++                    SIZE[0]
++                        * if renderer.format() == wgpu::TextureFormat::Rgba16Float {
++                            8
++                        } else {
++                            4
++                        },
++                ),
++                rows_per_image: Some(SIZE[1]),
++            },
++        },
++        texture.size(),
++    );
++    renderer.queue().submit([encoder.finish()]);
++    let (send, receive) = std::sync::mpsc::channel();
++    buffer.map_async(wgpu::MapMode::Read, .., move |r| send.send(r).unwrap());
++    device.poll(wgpu::PollType::wait_indefinitely()).unwrap();
++    receive.recv().unwrap().unwrap();
++    buffer.get_mapped_range(..).unwrap().to_vec()
++}
++
++const CLIP: Rect = Rect::new(0., 0., 960., 720.);
++fn origin(i: usize) -> Point {
++    Point {
++        x: 8. + i as f32 * 80.,
++        y: 8.,
++    }
++}
++fn scene(
++    text: &mut TextSystem,
++    dynamic: &[TextLayout],
++    label: &TextLayout,
++    seed: &TextLayout,
++    count: usize,
++) -> (Canvas, Vec<TextRunSlot>) {
++    let mut canvas = Canvas::recording(SIZE[0], SIZE[1], ColorConfig::default()).unwrap();
++    let mut stage = canvas.stage();
++    stage.clear(Color::WHITE);
++    let mut slots = Vec::new();
++    for (i, layout) in dynamic.iter().enumerate() {
++        slots.push(
++            stage
++                .draw_text_scaled_tracked(
++                    text,
++                    layout,
++                    origin(i),
++                    Affine::IDENTITY,
++                    CLIP,
++                    Color::BLACK,
++                    1.,
++                )
++                .unwrap()
++                .unwrap(),
++        );
++    }
++    stage
++        .draw_text(
++            text,
++            seed,
++            Point { x: 8., y: 128. },
++            Affine::IDENTITY,
++            CLIP,
++            Color::BLACK,
++        )
++        .unwrap();
++    for i in 0..count {
++        stage
++            .draw_text(
++                text,
++                label,
++                Point {
++                    x: 4. + (i % 25) as f32 * 38.,
++                    y: 152. + (i / 25) as f32 * 14.,
++                },
++                Affine::IDENTITY,
++                CLIP,
++                Color::BLACK,
++            )
++            .unwrap();
++    }
++    stage.commit();
++    (canvas, slots)
++}
++fn main() {
++    let args: Vec<_> = std::env::args().collect();
++    let count: usize = args[1].parse().unwrap();
++    let fields: usize = args[2].parse().unwrap();
++    let mode = &args[3];
++    assert!([0, 25, 1000].contains(&count) && [1, 2, 4].contains(&fields));
++    assert!(["exact", "full", "stream"].contains(&mode.as_str()));
++    assert!(mode != "stream" || fields == 1);
++    let font = std::fs::read(&args[4]).unwrap();
++    eprintln!("FONT,fnv64={:016x}", workload::fnv64(&font));
++    let face = FontFace::new(font).unwrap();
++    let mut text = TextSystem::from_font(face);
++    let label = text.shape("label", 10., None).unwrap();
++    // Keep the complete ASCII mask set leased, independently of changing runs.
++    let seed = text
++        .shape(
++            "0123456789ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz. ",
++            12.,
++            None,
++        )
++        .unwrap();
++    let mut work = workload::Workload {
++        text: String::with_capacity(8256),
++        scroll_offset: 0.,
++        frames: 0,
++        mode: workload::Mode::Stream,
++        seconds: 0.,
++    };
++    for _ in 0..100 {
++        work.tick();
++    }
++    let values: Vec<Vec<TextLayout>> = (0..71)
++        .map(|frame| {
++            if mode == "stream" {
++                work.tick();
++                vec![text.shape(&work.visible_text(), 12., Some(944.)).unwrap()]
++            } else {
++                (0..fields)
++                    .map(|i| {
++                        text.shape(
++                            if (frame + i) % 2 == 0 { "0011" } else { "1100" },
++                            12.,
++                            None,
++                        )
++                        .unwrap()
++                    })
++                    .collect()
++            }
++        })
++        .collect();
++    let cold = Instant::now();
++    pollster::block_on(async {
++        let (_, adapter) = test_adapter::request().await;
++        let mut renderer = RetainedRenderer::new(
++            Renderer::request(&adapter, wgpu::TextureFormat::Rgba8UnormSrgb)
++                .await
++                .unwrap(),
++        );
++        let target = texture(&renderer);
++        let view = target.create_view(&Default::default());
++        let (mut canvas, mut slots) = scene(&mut text, &values[0], &label, &seed, count);
++        renderer
++            .render(canvas.prepared_scene(), &view, None)
++            .unwrap();
++        renderer
++            .device()
++            .poll(wgpu::PollType::wait_indefinitely())
++            .unwrap();
++        eprintln!("COLD,wall_ns={}", cold.elapsed().as_nanos());
++        let initial = pixels(&renderer, &target);
++        std::fs::write(format!("{}.initial.rgba", args[5]), &initial).unwrap();
++        println!(
++            "frame,labels,fields,mode,host_ns,complete_ns,canonical_sparse,packet_reused,validated_draws,binning_tile_visits,upload_bytes,bind_groups,mask_upload_bytes,cpu_index_bytes,gpu_buffer_bytes,atlas_bytes"
++        );
++        eprintln!(
++            "LAYOUT,renderer={},retained_renderer={},stats={},canvas={},text_map_bytes={}",
++            size_of::<Renderer>(),
++            size_of::<RetainedRenderer>(),
++            size_of::<gpui_gpu::Stats>(),
++            size_of::<Canvas>(),
++            memory::map_bytes(&renderer)
++        );
++        for frame in 0..70 {
++            let mut sample = None;
++            let allocations = allocation_counter::measure(|| {
++                let start = Instant::now();
++                let edits: Vec<_> = slots
++                    .iter()
++                    .zip(&values[frame + 1])
++                    .enumerate()
++                    .map(|(i, (&slot, layout))| TextRunReplacement {
++                        slot,
++                        layout,
++                        origin: origin(i),
++                        transform: Affine::IDENTITY,
++                        clip: CLIP,
++                        color: Color::BLACK,
++                        raster_scale: 1.,
++                    })
++                    .collect();
++                let damage = if mode == "full" {
++                    None
++                } else {
++                    canvas.try_patch_texts(&mut text, &edits).unwrap()
++                };
++                let sparse = damage.is_some();
++                if !sparse {
++                    (canvas, slots) = scene(&mut text, &values[frame + 1], &label, &seed, count);
++                }
++                strategy::render(
++                    &mut renderer,
++                    canvas.prepared_scene(),
++                    &slots,
++                    &view,
++                    damage,
++                    sparse,
++                );
++                let host = start.elapsed().as_nanos();
++                renderer
++                    .device()
++                    .poll(wgpu::PollType::wait_indefinitely())
++                    .unwrap();
++                let complete = start.elapsed().as_nanos();
++                sample = Some((host, complete, sparse));
++            });
++            let (host, complete, sparse) = sample.unwrap();
++            if frame >= 10 {
++                eprintln!(
++                    "ALLOC,frame={},requests={},requested={},retained_delta={},peak_new={},text_map_bytes={}",
++                    frame - 10,
++                    allocations.count_total,
++                    allocations.bytes_total,
++                    allocations.bytes_current,
++                    allocations.bytes_max,
++                    memory::map_bytes(&renderer)
++                );
++                let s = renderer.stats();
++                println!(
++                    "{},{count},{fields},{mode},{host},{complete},{sparse},{},{},{},{},{},{},{},{},{}",
++                    frame - 10,
++                    s.packet_reused,
++                    s.validated_draws,
++                    s.binning_tile_visits,
++                    s.instance_upload_bytes,
++                    s.bind_group_creations,
++                    s.mask_upload_bytes,
++                    s.cpu_index_capacity_bytes,
++                    s.gpu_buffer_bytes,
++                    s.atlas_bytes
++                );
++            }
++        }
++        let final_pixels = pixels(&renderer, &target);
++        std::fs::write(format!("{}.final.rgba", args[5]), &final_pixels).unwrap();
++        // Independent complete reconstruction, never a replay of the patched packet.
++        let mut oracle = Renderer::request(&adapter, renderer.format())
++            .await
++            .unwrap();
++        let oracle_texture = texture(&oracle);
++        let oracle_view = oracle_texture.create_view(&Default::default());
++        let (fresh, _) = scene(&mut text, &values[70], &label, &seed, count);
++        oracle.render(fresh.prepared_scene(), &oracle_view).unwrap();
++        assert_eq!(
++            final_pixels,
++            pixels(&oracle, &oracle_texture),
++            "fresh final image"
++        );
++        let (fresh, _) = scene(&mut text, &values[0], &label, &seed, count);
++        oracle.render(fresh.prepared_scene(), &oracle_view).unwrap();
++        assert_eq!(
++            initial,
++            pixels(&oracle, &oracle_texture),
++            "fresh initial image"
++        );
++        assert_eq!(canvas.output_bytes(), 0);
++        eprintln!(
++            "FINAL,initial_hash={:016x},final_hash={:016x},frames=60,warmups=10,labels={count},fields={fields},mode={mode}",
++            workload::fnv64(&initial),
++            workload::fnv64(&final_pixels)
++        );
++    });
++}
+diff --git a/reactivity/crates/gpu/src/lib.rs b/reactivity/crates/gpu/src/lib.rs
+index 817b352467..023c332661 100644
+--- a/reactivity/crates/gpu/src/lib.rs
++++ b/reactivity/crates/gpu/src/lib.rs
+@@ -6,7 +6,7 @@ pub mod shader;
+ pub use renderer::{
+     Error, GpuContext, GpuPaintCommit, GpuPaintEdit, GpuSlotCommit, ImageStats, PaintBinding,
+     PaintError, PaintRenderer, Renderer, RendererState, RetainedRenderer, RetainedStats, SlotError,
+-    Stats,
++    Stats, TextPacketError,
+ };
+ pub use wgpu;
+ 
+diff --git a/reactivity/crates/gpu/src/renderer.rs b/reactivity/crates/gpu/src/renderer.rs
+index 2188986182..604b19a96c 100644
+--- a/reactivity/crates/gpu/src/renderer.rs
++++ b/reactivity/crates/gpu/src/renderer.rs
+@@ -14,6 +14,8 @@ mod paint;
+ mod retained;
+ use retained::Output;
+ pub use retained::{RetainedRenderer, RetainedStats};
++mod text_packet;
++pub use text_packet::TextPacketError;
+ mod slots;
+ pub use images::ImageStats;
+ pub use paint::{GpuPaintCommit, GpuPaintEdit, PaintBinding, PaintError, PaintRenderer};
+@@ -975,43 +977,7 @@ impl RendererState {
+             &context.queue,
+             bytemuck::cast_slice(&self.residuals),
+         );
+-        let bindings = context
+-            .device
+-            .create_bind_group(&wgpu::BindGroupDescriptor {
+-                label: Some("GPUI scene"),
+-                layout: &context.layout,
+-                entries: &[
+-                    wgpu::BindGroupEntry {
+-                        binding: 0,
+-                        resource: self.globals.handle.as_entire_binding(),
+-                    },
+-                    wgpu::BindGroupEntry {
+-                        binding: 1,
+-                        resource: if self.images.is_some() {
+-                            // Packed image pixels follow the record prefix.
+-                            self.draws.handle.as_entire_binding()
+-                        } else {
+-                            self.draws.binding(&self.records)
+-                        },
+-                    },
+-                    wgpu::BindGroupEntry {
+-                        binding: 2,
+-                        resource: self.tiles.binding(&self.ranges),
+-                    },
+-                    wgpu::BindGroupEntry {
+-                        binding: 3,
+-                        resource: self.indices.binding(&self.references),
+-                    },
+-                    wgpu::BindGroupEntry {
+-                        binding: 4,
+-                        resource: wgpu::BindingResource::TextureView(&self.atlas.view),
+-                    },
+-                    wgpu::BindGroupEntry {
+-                        binding: 5,
+-                        resource: self.corrections.binding(&self.residuals),
+-                    },
+-                ],
+-            });
++        let bindings = self.bindings(context);
+         let submitted = context.submit(output, &bindings);
+         self.packet = Some(Packet {
+             bindings,
+@@ -1108,6 +1074,45 @@ impl RendererState {
+         Ok(Some(submitted))
+     }
+ 
++    fn bindings(&self, context: &GpuContext) -> wgpu::BindGroup {
++        context
++            .device
++            .create_bind_group(&wgpu::BindGroupDescriptor {
++                label: Some("GPUI scene"),
++                layout: &context.layout,
++                entries: &[
++                    wgpu::BindGroupEntry {
++                        binding: 0,
++                        resource: self.globals.handle.as_entire_binding(),
++                    },
++                    wgpu::BindGroupEntry {
++                        binding: 1,
++                        resource: if self.images.is_some() {
++                            // Packed image pixels follow the record prefix.
++                            self.draws.handle.as_entire_binding()
++                        } else {
++                            self.draws.binding(&self.records)
++                        },
++                    },
++                    wgpu::BindGroupEntry {
++                        binding: 2,
++                        resource: self.tiles.binding(&self.ranges),
++                    },
++                    wgpu::BindGroupEntry {
++                        binding: 3,
++                        resource: self.indices.binding(&self.references),
++                    },
++                    wgpu::BindGroupEntry {
++                        binding: 4,
++                        resource: wgpu::BindingResource::TextureView(&self.atlas.view),
++                    },
++                    wgpu::BindGroupEntry {
++                        binding: 5,
++                        resource: self.corrections.binding(&self.residuals),
++                    },
++                ],
++            })
++    }
+     fn correction(&mut self, inverse: [f64; 6], clip: gpui_canvas::Rect) -> u32 {
+         let low = std::array::from_fn::<_, 8, _>(|i| match i {
+             0..6 => (inverse[i] - f64::from(inverse[i] as f32)) as f32,
+diff --git a/reactivity/crates/gpu/src/renderer/retained.rs b/reactivity/crates/gpu/src/renderer/retained.rs
+index ec88397be3..f455aa2a60 100644
+--- a/reactivity/crates/gpu/src/renderer/retained.rs
++++ b/reactivity/crates/gpu/src/renderer/retained.rs
+@@ -44,6 +44,7 @@ pub struct RetainedRenderer {
+     inner: Renderer,
+     backing: Option<Box<Backing>>,
+     stats: RetainedStats,
++    text_runs: Vec<Option<text_packet::Run>>,
+ }
+ impl std::ops::Deref for RetainedRenderer {
+     type Target = Renderer;
+@@ -57,6 +58,7 @@ impl RetainedRenderer {
+             inner,
+             backing: None,
+             stats: RetainedStats::default(),
++            text_runs: Vec::new(),
+         }
+     }
+     pub fn retained_stats(&self) -> RetainedStats {
+@@ -96,11 +98,21 @@ impl RetainedRenderer {
+         }
+         let backing = self.backing.as_mut().unwrap();
+         let damage = damage.filter(|_| valid && !resized);
++        self.text_runs.clear();
++        self.text_runs
++            .try_reserve(scene.groups().len())
++            .map_err(|_| Error::ResourceLimit)?;
++        let runs = &mut self.text_runs;
+         let submitted = self.inner.state.render_observed(
+             &self.inner.context,
+             scene,
+             backing.output(target, damage),
+-            |_, _, _, _| {},
++            |ordinal, group, word, compact| {
++                if compact && let Some(slot) = group.text_run_slot() {
++                    runs.resize(runs.len().max(slot.index() + 1), None);
++                    runs[slot.index()] = Some(text_packet::Run::new(ordinal, group, word));
++                }
++            },
+         )?;
+         backing.valid = true;
+         self.stats = backing.stats(damage);
+@@ -150,6 +162,38 @@ impl RetainedRenderer {
+         self.stats = backing.stats(damage);
+         Ok(submitted)
+     }
++    /// Active positional text-run directory capacity; excludes allocator headers.
++    pub fn text_packet_capacity_bytes(&self) -> usize {
++        self.text_runs.capacity() * size_of::<Option<text_packet::Run>>()
++    }
++    /// Replace up to four masked runs in the last packet. Slots and groups are
++    /// positional edits, not a complete new scene or a scene-identity certificate.
++    /// The caller certifies all old/new image changes lie within `damage`.
++    /// Any rejected batch preserves the preceding packet and retained image.
++    pub fn patch_texts(
++        &mut self,
++        edits: &[(gpui_canvas::TextRunSlot, PreparedGroup<'_>)],
++        target: &wgpu::TextureView,
++        damage: Option<DamageRegion>,
++    ) -> Result<wgpu::SubmissionIndex, TextPacketError> {
++        let backing = self
++            .backing
++            .as_ref()
++            .filter(|b| b.valid)
++            .ok_or(TextPacketError::NoPacket)?;
++        check_target(target, backing.size(), self.inner.format())
++            .map_err(|_| TextPacketError::InvalidTarget)?;
++        check_damage(damage, backing.size()).map_err(|_| TextPacketError::InvalidTarget)?;
++        let submitted = text_packet::patch(
++            &mut self.inner.state,
++            &self.inner.context,
++            &mut self.text_runs,
++            edits,
++            backing.output(target, damage),
++        )?;
++        self.stats = backing.stats(damage);
++        Ok(submitted)
++    }
+ }
+ fn check_target(
+     view: &wgpu::TextureView,
+diff --git a/reactivity/crates/gpu/src/renderer/text_packet.rs b/reactivity/crates/gpu/src/renderer/text_packet.rs
+new file mode 100644
+index 0000000000..f3343cd192
+--- /dev/null
++++ b/reactivity/crates/gpu/src/renderer/text_packet.rs
+@@ -0,0 +1,305 @@
++//! Gather changed masked runs, validate every member, then repair one packet.
++//! The first formulation still scans and repacks the entire surviving CSR.
++use super::*;
++use gpui_canvas::TextRunSlot;
++use std::num::NonZeroU32;
++
++#[derive(Clone, Copy)]
++pub(super) struct Run {
++    word: NonZeroU32,
++    ordinal: u32,
++    count: u32,
++    references: u32,
++}
++impl Run {
++    pub(super) fn new(ordinal: usize, group: PreparedGroup<'_>, word: usize) -> Self {
++        Self {
++            word: NonZeroU32::new((word + 5) as u32).unwrap(),
++            ordinal: ordinal as u32,
++            count: group.bounds().len() as u32,
++            references: group.bounds().map(tile_count).sum::<usize>() as u32,
++        }
++    }
++    fn contains(self, address: u32) -> bool {
++        address & INLINE_RECORD == 0
++            && address >= self.word.get()
++            && address < self.word.get() + self.count * 2
++    }
++}
++
++#[derive(Clone, Copy, Debug, PartialEq, Eq)]
++pub enum TextPacketError {
++    NoPacket,
++    InvalidTarget,
++    InvalidBatch,
++    MissingRun,
++    ChangedShape,
++    ChangedCommon,
++    MissingResource,
++    Capacity,
++}
++impl std::fmt::Display for TextPacketError {
++    fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
++        write!(f, "{self:?}")
++    }
++}
++impl std::error::Error for TextPacketError {}
++
++struct Patch {
++    slot: TextRunSlot,
++    run: Run,
++    words: Vec<Word>,
++}
++fn correction_matches(state: &RendererState, group: PreparedGroup<'_>, index: u32) -> bool {
++    let Some(old) = state.residuals.get(index as usize) else {
++        return false;
++    };
++    let low = std::array::from_fn::<_, 8, _>(|i| match i {
++        0..6 => (group.inverse[i] - f64::from(group.inverse[i] as f32)) as f32,
++        6 => clip_residual(group.clip.x, group.clip.width),
++        _ => clip_residual(group.clip.y, group.clip.height),
++    });
++    // Original correction() canonicalizes all-zero residuals to index zero.
++    if low.iter().all(|v| *v == 0.) {
++        return index == 0;
++    }
++    let next = Correction {
++        x: [low[0], low[2], low[4], low[6]],
++        y: [low[1], low[3], low[5], low[7]],
++    };
++    bytemuck::bytes_of(old) == bytemuck::bytes_of(&next)
++}
++
++pub(super) fn patch(
++    state: &mut RendererState,
++    context: &GpuContext,
++    runs: &mut [Option<Run>],
++    edits: &[(TextRunSlot, PreparedGroup<'_>)],
++    output: Output<'_>,
++) -> Result<wgpu::SubmissionIndex, TextPacketError> {
++    let packet = state.packet.as_ref().ok_or(TextPacketError::NoPacket)?;
++    state
++        .check_context(context)
++        .map_err(|_| TextPacketError::InvalidTarget)?;
++    let [width, height] = packet.dimensions();
++    if output.view.texture().format() != context.format
++        || [
++            output.view.texture().width(),
++            output.view.texture().height(),
++        ] != [width, height]
++    {
++        return Err(TextPacketError::InvalidTarget);
++    }
++    if !(1..=4).contains(&edits.len()) || edits.windows(2).any(|p| p[0].0.index() >= p[1].0.index())
++    {
++        return Err(TextPacketError::InvalidBatch);
++    }
++    let columns = width.div_ceil(16) as usize;
++    let mut patches = Vec::with_capacity(edits.len());
++    let mut additions = Vec::new();
++    let mut original = state.stats.original_tile_references;
++    let mut visits = 0;
++    let mut validated = 0;
++    for &(slot, group) in edits {
++        let mut run = runs
++            .get(slot.index())
++            .copied()
++            .flatten()
++            .ok_or(TextPacketError::MissingRun)?;
++        if group.text_run_slot() != Some(slot) || group.bounds().len() != run.count as usize {
++            return Err(TextPacketError::ChangedShape);
++        }
++        if group.clip_chain().is_some() || group.paint_slot().is_some() {
++            return Err(TextPacketError::ChangedCommon);
++        }
++        let word = run.word.get() as usize;
++        let common = word - 5;
++        let correction = state.records[common + 4][0];
++        if !correction_matches(state, group, correction) {
++            return Err(TextPacketError::ChangedCommon);
++        }
++        let mut error = [0.0_f32; 2];
++        let mut words = Vec::with_capacity(5 + run.count as usize * 2);
++        words.resize(5, [0; 4]);
++        let mut references = 0usize;
++        for (index, p) in group.placements().enumerate() {
++            let draw = prepared(group, p);
++            let e = validate_draw(draw, run.ordinal as usize + index, width, height)
++                .map_err(|_| TextPacketError::ChangedShape)?;
++            error[0] = error[0].max(e[0]);
++            error[1] = error[1].max(e[1]);
++            let mask = p.source.mask().ok_or(TextPacketError::ChangedShape)?;
++            let tile = state
++                .atlas
++                .entries
++                .get(&mask.key)
++                .ok_or(TextPacketError::MissingResource)?;
++            if tile.width as usize != mask.width || tile.height as usize != mask.height {
++                return Err(TextPacketError::MissingResource);
++            }
++            let r = p.local_rect;
++            words.extend_from_slice(&[
++                float_word([r.x, r.y, r.width, r.height]),
++                [
++                    tile.x,
++                    tile.y,
++                    tile.width | (tile.height << 16),
++                    common as u32,
++                ],
++            ]);
++            references = references
++                .checked_add(tile_count(p.bounds))
++                .ok_or(TextPacketError::Capacity)?;
++            if references > MAX_REFERENCES {
++                return Err(TextPacketError::Capacity);
++            }
++            let address = (word + index * 2) as u32;
++            visit(p.bounds, columns, |tile| {
++                visits += 1;
++                if run.ordinal + index as u32 + 1 >= state.cursors[tile] {
++                    additions.push((tile, address));
++                }
++            });
++            validated += 1;
++        }
++        let common_words = common_words(group, error, correction);
++        let mut signature = common_words;
++        // These two lanes are derived numerical bounds, not transform/clip/
++        // color authority. Recompute them for the complete changed run exactly
++        // as full preparation does; every other common word must still match.
++        signature[0][3] = state.records[common][3];
++        signature[1][3] = state.records[common + 1][3];
++        if signature.as_slice() != &state.records[common..word] {
++            return Err(TextPacketError::ChangedCommon);
++        }
++        words[..5].copy_from_slice(&common_words);
++        original = original
++            .checked_sub(run.references as usize)
++            .and_then(|n| n.checked_add(references))
++            .ok_or(TextPacketError::Capacity)?;
++        run.references = references as u32;
++        patches.push(Patch { slot, run, words });
++    }
++    if original > MAX_REFERENCES {
++        return Err(TextPacketError::Capacity);
++    }
++    additions.sort_unstable();
++    let mut next_ranges = Vec::with_capacity(state.ranges.len());
++    let mut next_references = Vec::with_capacity(state.references.len());
++    let mut cursor = 0;
++    for (tile, &[start, end]) in state.ranges.iter().enumerate() {
++        let begin = cursor;
++        while cursor < additions.len() && additions[cursor].0 == tile {
++            cursor += 1;
++        }
++        if end == UNIFORM_TILE && begin == cursor {
++            next_ranges.push([start, end]);
++            continue;
++        }
++        let offset = next_references.len();
++        if end == UNIFORM_TILE {
++            next_references.push(start);
++        } else {
++            next_references.extend(
++                state.references[start as usize..end as usize]
++                    .iter()
++                    .copied()
++                    .filter(|&address| !patches.iter().any(|p| p.run.contains(address))),
++            );
++        }
++        next_references.extend(additions[begin..cursor].iter().map(|&(_, address)| address));
++        // Word positions preserve painter order across compact and inline draws.
++        if begin != cursor {
++            next_references[offset..].sort_unstable_by_key(|a| a & !INLINE_RECORD);
++        }
++        if next_references.len() > MAX_REFERENCES {
++            return Err(TextPacketError::Capacity);
++        }
++        next_ranges.push([offset as u32, next_references.len() as u32]);
++    }
++    debug_assert_eq!(cursor, additions.len());
++    if next_references.len().max(1) as u64 * 4 > state.indices.size {
++        return Err(TextPacketError::Capacity);
++    }
++    let indices_changed = next_references != state.references;
++    let ranges_changed = next_ranges != state.ranges;
++    let rebind = next_references.len() != state.references.len();
++    let uploaded = patches.iter().map(|p| p.words.len() * 16).sum::<usize>()
++        + if indices_changed {
++            next_references.len() * 4
++        } else {
++            0
++        }
++        + if ranges_changed {
++            next_ranges.len() * 8
++        } else {
++            0
++        };
++    // No semantic validation remains. Revoke replay before the first queue write.
++    let mut packet = state.packet.take().unwrap();
++    for p in patches {
++        let word = p.run.word.get() as usize - 5;
++        state.records[word..word + p.words.len()].copy_from_slice(&p.words);
++        context.queue.write_buffer(
++            &state.draws.handle,
++            (word * 16) as u64,
++            bytemuck::cast_slice(&p.words),
++        );
++        runs[p.slot.index()] = Some(p.run);
++    }
++    state.references = next_references;
++    state.ranges = next_ranges;
++    if indices_changed && !state.references.is_empty() {
++        context.queue.write_buffer(
++            &state.indices.handle,
++            0,
++            bytemuck::cast_slice(&state.references),
++        );
++    }
++    if ranges_changed {
++        context
++            .queue
++            .write_buffer(&state.tiles.handle, 0, bytemuck::cast_slice(&state.ranges));
++    }
++    if rebind {
++        packet.bindings = state.bindings(context);
++    }
++    let submitted = context.submit(output, &packet.bindings);
++    state.packet = Some(packet);
++    let mut uniform = 0;
++    let mut samples = 0;
++    let mut sample_draws = 0;
++    for (tile, &[start, end]) in state.ranges.iter().enumerate() {
++        if end == UNIFORM_TILE {
++            uniform += 1;
++        } else if start != end {
++            let [l, t, r, b] = tile_bounds(tile, columns, width, height);
++            let n = u64::from((r - l) * (b - t)) * 16;
++            samples += n;
++            sample_draws += n * u64::from(end - start);
++        }
++    }
++    let stats = &mut state.stats;
++    stats.submissions = stats.submissions.saturating_add(1);
++    stats.packet_reused = true;
++    stats.validated_draws = validated;
++    stats.binning_tile_visits = visits;
++    stats.bind_group_creations = usize::from(rebind);
++    stats.tile_references = state.references.len();
++    stats.original_tile_references = original;
++    stats.skipped_tile_references = original - state.references.len();
++    stats.uniform_tiles = uniform;
++    stats.sample_evaluations = samples;
++    stats.sample_draw_evaluations = sample_draws;
++    stats.instance_upload_bytes = uploaded;
++    stats.mask_upload_bytes = 0;
++    stats.cpu_index_capacity_bytes = state.records.capacity() * 16
++        + state.ranges.capacity() * 8
++        + state.references.capacity() * 4
++        + state.cursors.capacity() * 4
++        + state.residuals.capacity() * 32;
++    if let Some(images) = &mut state.images {
++        images.redrawn();
++    }
++    Ok(submitted)
++}
+diff --git a/reactivity/crates/gpu/tests/render.rs b/reactivity/crates/gpu/tests/render.rs
+index efb85de5f4..cdddf4bde3 100644
+--- a/reactivity/crates/gpu/tests/render.rs
++++ b/reactivity/crates/gpu/tests/render.rs
+@@ -4416,3 +4416,6 @@ fn retained_banked_text_images_and_transforms_survive_slot_repairs() {
+         }
+     });
+ }
++
++#[path = "support/text_packet.rs"]
++mod text_packet_tests;
+diff --git a/reactivity/crates/gpu/tests/support/text_packet.rs b/reactivity/crates/gpu/tests/support/text_packet.rs
+new file mode 100644
+index 0000000000..dd6835ecda
+--- /dev/null
++++ b/reactivity/crates/gpu/tests/support/text_packet.rs
+@@ -0,0 +1,203 @@
++use super::*;
++use gpui_canvas::{TextLayout, TextRunSlot};
++use gpui_gpu::{RetainedRenderer, TextPacketError};
++const CLIP: Rect = Rect::new(0., 0., 128., 96.);
++fn scene(
++    text: &mut TextSystem,
++    labels: [&str; 2],
++    positions: [Point; 2],
++    map: Affine,
++    config: ColorConfig,
++    second_color: Color,
++) -> (Canvas, [TextRunSlot; 2]) {
++    let layouts: [TextLayout; 2] = labels.map(|s| text.shape(s, 12., None).unwrap());
++    let seed = text.shape("01234567890123456789", 12., None).unwrap();
++    let mut canvas = Canvas::recording(128, 96, config).unwrap();
++    let mut stage = canvas.stage();
++    stage.clear(Color::WHITE);
++    stage
++        .fill_rect(CLIP, Affine::IDENTITY, CLIP, Color::rgb(210, 220, 230))
++        .unwrap();
++    let a = stage
++        .draw_text_scaled_tracked(text, &layouts[0], positions[0], map, CLIP, Color::BLACK, 1.)
++        .unwrap()
++        .unwrap();
++    // This opaque draw hides the earlier run, but never the later one.
++    stage
++        .fill_rect(
++            Rect::new(40., 0., 32., 48.),
++            Affine::IDENTITY,
++            CLIP,
++            Color::rgb(50, 110, 180),
++        )
++        .unwrap();
++    let b = stage
++        .draw_text_scaled_tracked(text, &layouts[1], positions[1], map, CLIP, second_color, 1.)
++        .unwrap()
++        .unwrap();
++    for y in [52., 66., 80.] {
++        stage
++            .draw_text(
++                text,
++                &seed,
++                Point { x: 2., y },
++                Affine::IDENTITY,
++                CLIP,
++                Color::BLACK,
++            )
++            .unwrap();
++    }
++    stage.commit();
++    (canvas, [a, b])
++}
++fn edits<'a>(
++    canvas: &'a Canvas,
++    slots: [TextRunSlot; 2],
++) -> [(TextRunSlot, gpui_canvas::PreparedGroup<'a>); 2] {
++    slots.map(|slot| (slot, canvas.prepared_scene().text_run(slot).unwrap()))
++}
++#[test]
++fn text_packets_repair_new_tiles_in_painter_order_and_match_fresh_images() {
++    pollster::block_on(async {
++        for (format, config) in [
++            (wgpu::TextureFormat::Rgba8UnormSrgb, ColorConfig::default()),
++            (
++                wgpu::TextureFormat::Rgba16Float,
++                ColorConfig::linear_hdr(gpui_canvas::OutputProfile::Srgb, 203.).unwrap(),
++            ),
++        ] {
++            for map in [Affine::IDENTITY, Affine::translation(0.25, 0.5)] {
++                let mut text = TextSystem::bundled().unwrap();
++                let mut gpu = RetainedRenderer::new(renderer(format).await);
++                let mut full = renderer(format).await;
++                let initial_positions = [Point { x: 2., y: 2. }, Point { x: 6., y: 24. }];
++                let (initial, slots) = scene(
++                    &mut text,
++                    ["0011", "1100"],
++                    initial_positions,
++                    map,
++                    config,
++                    Color::BLACK,
++                );
++                let target = output_texture(&gpu, &initial);
++                let view = target.create_view(&Default::default());
++                gpu.render(initial.prepared_scene(), &view, None).unwrap();
++                assert_eq!(read_texture(&gpu, &target), readback(&mut full, &initial));
++                assert!(gpu.text_packet_capacity_bytes() > 0);
++                // Cross multiple tile boundaries, including uniform background
++                // tiles and the opaque cutoff before the later text run.
++                for turn in 0..4 {
++                    let positions = if turn % 2 == 0 {
++                        [Point { x: 48., y: 2. }, Point { x: 82., y: 24. }]
++                    } else {
++                        initial_positions
++                    };
++                    let labels = if turn % 2 == 0 {
++                        ["1100", "0011"]
++                    } else {
++                        ["0011", "1100"]
++                    };
++                    let (next, next_slots) =
++                        scene(&mut text, labels, positions, map, config, Color::BLACK);
++                    assert_eq!(slots, next_slots);
++                    gpu.patch_texts(&edits(&next, slots), &view, None).unwrap();
++                    let stats = gpu.stats();
++                    assert!(stats.packet_reused);
++                    assert_eq!(stats.mask_upload_bytes, 0);
++                    assert_eq!(stats.validated_draws, 8);
++                    assert_eq!(
++                        read_texture(&gpu, &target),
++                        readback(&mut full, &next),
++                        "new tile membership / painter order"
++                    );
++                }
++            }
++        }
++    });
++}
++#[test]
++fn a_late_text_packet_rejection_keeps_the_old_image_and_replay() {
++    pollster::block_on(async {
++        let mut text = TextSystem::bundled().unwrap();
++        let mut gpu = RetainedRenderer::new(renderer(wgpu::TextureFormat::Rgba8UnormSrgb).await);
++        let positions = [Point { x: 2., y: 2. }, Point { x: 6., y: 24. }];
++        let (initial, slots) = scene(
++            &mut text,
++            ["0011", "1100"],
++            positions,
++            Affine::IDENTITY,
++            ColorConfig::default(),
++            Color::BLACK,
++        );
++        let target = output_texture(&gpu, &initial);
++        let view = target.create_view(&Default::default());
++        gpu.render(initial.prepared_scene(), &view, None).unwrap();
++        let before = read_texture(&gpu, &target);
++        for (labels, color, expected) in [
++            (
++                ["1100", "ΩΩΩΩ"],
++                Color::BLACK,
++                TextPacketError::MissingResource,
++            ),
++            (
++                ["1100", "0011"],
++                Color::rgb(220, 10, 20),
++                TextPacketError::ChangedCommon,
++            ),
++            (
++                ["1100", "001100"],
++                Color::BLACK,
++                TextPacketError::ChangedShape,
++            ),
++        ] {
++            let (next, _) = scene(
++                &mut text,
++                labels,
++                positions,
++                Affine::IDENTITY,
++                ColorConfig::default(),
++                color,
++            );
++            assert_eq!(
++                gpu.patch_texts(&edits(&next, slots), &view, None)
++                    .unwrap_err(),
++                expected
++            );
++            gpu.redraw(&view).unwrap().unwrap();
++            assert_eq!(gpu.retained_stats().composited_pixels, 0);
++            assert_eq!(
++                read_texture(&gpu, &target),
++                before,
++                "late member must not partly commit"
++            );
++        }
++        let batch = edits(&initial, slots);
++        assert_eq!(
++            gpu.patch_texts(&[batch[0], batch[0]], &view, None)
++                .unwrap_err(),
++            TextPacketError::InvalidBatch
++        );
++        assert_eq!(
++            gpu.patch_texts(&[batch[1], batch[0]], &view, None)
++                .unwrap_err(),
++            TextPacketError::InvalidBatch
++        );
++        let wrong = Canvas::recording(32, 32, ColorConfig::default()).unwrap();
++        let wrong_target = output_texture(&gpu, &wrong);
++        assert_eq!(
++            gpu.patch_texts(&batch, &wrong_target.create_view(&Default::default()), None)
++                .unwrap_err(),
++            TextPacketError::InvalidTarget
++        );
++        gpu.redraw(&view).unwrap().unwrap();
++        assert_eq!(read_texture(&gpu, &target), before);
++        gpu.set_grouped_records(false);
++        gpu.render(initial.prepared_scene(), &view, None).unwrap();
++        assert_eq!(
++            gpu.patch_texts(&batch, &view, None).unwrap_err(),
++            TextPacketError::MissingRun
++        );
++        gpu.redraw(&view).unwrap().unwrap();
++        assert_eq!(read_texture(&gpu, &target), before);
++    });
++}
+diff --git a/reactivity/crates/gpui/src/native.rs b/reactivity/crates/gpui/src/native.rs
+index 8041530550..eff743d02b 100644
+--- a/reactivity/crates/gpui/src/native.rs
++++ b/reactivity/crates/gpui/src/native.rs
+@@ -326,13 +326,14 @@ impl GpuSurface {
+         paint: Option<&crate::runtime::paint::SlotTransition>,
+         target: &wgpu::TextureView,
+     ) -> Result<wgpu::SubmissionIndex, gpui_gpu::Error> {
+-        self.render_damaged(scene, token, paint, target, None)
++        self.render_damaged(scene, token, paint, None, target, None)
+     }
+     fn render_damaged(
+         &mut self,
+         scene: gpui_canvas::PreparedScene<'_>,
+         token: crate::PresentationToken,
+         paint: Option<&crate::runtime::paint::SlotTransition>,
++        text: Option<crate::runtime::paint::TextTransition>,
+         target: &wgpu::TextureView,
+         transition: Option<crate::runtime::paint::SceneDamage>,
+     ) -> Result<wgpu::SubmissionIndex, gpui_gpu::Error> {
+@@ -356,11 +357,39 @@ impl GpuSurface {
+             self.packet_epoch = epoch;
+             return Ok(submitted);
+         }
++        if let Some(text) = text
++            && previous == Some(text.from)
++            && let Some(submitted) = self.patch_text(scene, &text, target, damage)
++        {
++            self.packet_token = Some(token);
++            self.packet_epoch = epoch;
++            return Ok(submitted);
++        }
+         let submitted = self.renderer.render(scene, target, damage)?;
+         self.packet_token = Some(token);
+         self.packet_epoch = epoch;
+         Ok(submitted)
+     }
++    fn patch_text(
++        &mut self,
++        scene: gpui_canvas::PreparedScene<'_>,
++        transition: &crate::runtime::paint::TextTransition,
++        target: &wgpu::TextureView,
++        damage: Option<gpui_canvas::DamageRegion>,
++    ) -> Option<wgpu::SubmissionIndex> {
++        let first = transition.runs[0]?;
++        let first = (first, scene.text_run(first)?);
++        let mut edits = [first; 4];
++        let mut count = 0;
++        for slot in transition.runs.into_iter().flatten() {
++            edits[count] = (slot, scene.text_run(slot)?);
++            count += 1;
++        }
++        edits[..count].sort_unstable_by_key(|&(slot, _)| slot.index());
++        self.renderer
++            .patch_texts(&edits[..count], target, damage)
++            .ok()
++    }
+ }
+ 
+ type CpuSurface = softbuffer::Surface<Arc<NativeWindow>, Arc<NativeWindow>>;
+@@ -740,11 +769,12 @@ impl<V: View + 'static, L: LaneSet<V>> NativeHost<V, L> {
+                 wgpu::CurrentSurfaceTexture::Success(frame) => {
+                     let owner = self.owner.as_mut().expect("surface has an owner");
+                     let view = frame.texture.create_view(&Default::default());
+-                    let rendered = owner.with_paint_scene(|scene, token, paint, damage| {
+-                        graphics
+-                            .render_damaged(scene, token, paint, &view, Some(damage))
+-                            .map(|_| token)
+-                    })?;
++                    let rendered =
++                        owner.with_paint_scene(|scene, token, paint, text, damage| {
++                            graphics
++                                .render_damaged(scene, token, paint, text, &view, Some(damage))
++                                .map(|_| token)
++                        })?;
+                     let token = match rendered {
+                         Ok(token) => token,
+                         Err(error)
+@@ -903,8 +933,8 @@ impl<V: View + 'static, L: LaneSet<V>> NativeHost<V, L> {
+                 _ => return Err(NativeError::SurfaceUnavailable),
+             };
+             let view = frame.texture.create_view(&Default::default());
+-            let token = owner.with_paint_scene(|scene, token, paint, damage| {
+-                gpu.render_damaged(scene, token, paint, &view, Some(damage))
++            let token = owner.with_paint_scene(|scene, token, paint, text, damage| {
++                gpu.render_damaged(scene, token, paint, text, &view, Some(damage))
+                     .map(|_| token)
+             })??;
+             window.pre_present_notify();
+@@ -1411,6 +1441,12 @@ mod paint_tests;
+     target_os = "linux"
+ ))]
+ mod solid_tests;
++#[cfg(all(
++    test,
++    any(feature = "x11", feature = "x11-minimal"),
++    target_os = "linux"
++))]
++mod text_packet_tests;
+ 
+ #[cfg(all(
+     test,
+@@ -1514,6 +1550,7 @@ mod tests {
+             .unwrap();
+         assert!(!gpu.renderer.stats().packet_reused);
+         super::paint_tests::run(gpu);
++        super::text_packet_tests::run(gpu);
+     }
+     #[test]
+     fn packet_gpu_header_ledger() {
+diff --git a/reactivity/crates/gpui/src/native/paint_tests.rs b/reactivity/crates/gpui/src/native/paint_tests.rs
+index 3409a2f7d7..fed260c7a5 100644
+--- a/reactivity/crates/gpui/src/native/paint_tests.rs
++++ b/reactivity/crates/gpui/src/native/paint_tests.rs
+@@ -22,7 +22,7 @@ impl View for Paint {
+         }
+     }
+ }
+-fn read(gpu: &GpuSurface, texture: &wgpu::Texture) -> Vec<u8> {
++pub(super) fn read(gpu: &GpuSurface, texture: &wgpu::Texture) -> Vec<u8> {
+     let bytes = texture.format().block_copy_size(None).unwrap();
+     let stride = (texture.width() * bytes).next_multiple_of(256);
+     let buffer = gpu
+@@ -91,8 +91,8 @@ fn render(
+ ) {
+     let view = texture.create_view(&Default::default());
+     let token = owner
+-        .with_paint_scene(|scene, token, state, damage| {
+-            gpu.render_damaged(scene, token, state, &view, Some(damage))
++        .with_paint_scene(|scene, token, state, text, damage| {
++            gpu.render_damaged(scene, token, state, text, &view, Some(damage))
+                 .unwrap();
+             token
+         })
+diff --git a/reactivity/crates/gpui/src/native/text_packet_tests.rs b/reactivity/crates/gpui/src/native/text_packet_tests.rs
+new file mode 100644
+index 0000000000..0b4267614b
+--- /dev/null
++++ b/reactivity/crates/gpui/src/native/text_packet_tests.rs
+@@ -0,0 +1,183 @@
++//! Ordinary source delivery through the actual native packet bridge.
++use super::paint_tests::read;
++use super::*;
++use crate::{Color, El, FieldId, LaneSet, Remote, Signal, Source, Sources, column, text};
++struct Labels([Signal<String>; 4]);
++impl Labels {
++    const F: [Source<Self, String>; 4] = [
++        Source::new(FieldId::new(1), "a", |m| &m.0[0], |m| &mut m.0[0]),
++        Source::new(FieldId::new(2), "b", |m| &m.0[1], |m| &mut m.0[1]),
++        Source::new(FieldId::new(3), "c", |m| &m.0[2], |m| &mut m.0[2]),
++        Source::new(FieldId::new(4), "d", |m| &m.0[3], |m| &mut m.0[3]),
++    ];
++}
++impl View for Labels {
++    fn sources() -> Sources<Self> {
++        Sources::new()
++            .direct(Self::F[0])
++            .direct(Self::F[1])
++            .direct(Self::F[2])
++            .direct(Self::F[3])
++    }
++    fn view(&self) -> El<'_> {
++        column((
++            column(self.0.iter().map(|v| text(v).w(180).h(20).font_size(12))),
++            text("0123456789").w(180).h(20).font_size(12),
++        ))
++        .w(192)
++        .h(128)
++        .bg(Color::WHITE)
++    }
++}
++fn fresh(values: [&str; 4]) -> Win<Labels> {
++    Win::recording(
++        Labels(values.map(|v| Signal::new(v.to_owned()))),
++        WindowOptions {
++            size: [192, 128],
++            ..Default::default()
++        },
++    )
++    .unwrap()
++}
++fn values<L: LaneSet<Labels>>(owner: &Win<Labels, L>) -> Vec<String> {
++    let mut values = Vec::new();
++    owner
++        .visit(|p| {
++            if let Some(t) = p.text() {
++                values.push(t.to_owned());
++            }
++        })
++        .unwrap();
++    values
++}
++fn draw<L: LaneSet<Labels>>(
++    gpu: &mut GpuSurface,
++    oracle: &mut Renderer,
++    owner: &mut Win<Labels, L>,
++    target: &wgpu::Texture,
++    expected: [&str; 4],
++) {
++    let view = target.create_view(&Default::default());
++    let token = owner
++        .with_paint_scene(|scene, token, paint, text, damage| {
++            gpu.render_damaged(scene, token, paint, text, &view, Some(damage))
++                .unwrap();
++            token
++        })
++        .unwrap();
++    let actual = read(gpu, target);
++    let full = fresh(expected);
++    full.with_scene(|scene, _| oracle.render(scene, &view))
++        .unwrap()
++        .unwrap();
++    assert_eq!(
++        actual,
++        read(gpu, target),
++        "native text packet vs fresh full-window GPU output"
++    );
++    owner.presented(token).unwrap();
++    assert_eq!(&values(owner)[..4], &expected.map(str::to_owned));
++}
++pub(super) fn run(gpu: &mut GpuSurface) {
++    gpu.packet_token = None;
++    gpu.packet_epoch = None;
++    let mut oracle = pollster::block_on(Renderer::new(
++        gpu.renderer.device().clone(),
++        gpu.renderer.queue().clone(),
++        gpu.renderer.format(),
++    ))
++    .unwrap();
++    let initial = ["0011", "1100", "0011", "1100"];
++    let owner = fresh(initial);
++    let (a, ai) = Remote::bounded(4);
++    let (b, bi) = Remote::bounded(4);
++    let (c, ci) = Remote::bounded(4);
++    let (d, di) = Remote::bounded(4);
++    let mut owner = owner
++        .with_inbox_for(ai, Labels::F[0], |v, n| *v = n)
++        .unwrap()
++        .with_inbox_for(bi, Labels::F[1], |v, n| *v = n)
++        .unwrap()
++        .with_inbox_for(ci, Labels::F[2], |v, n| *v = n)
++        .unwrap()
++        .with_inbox_for(di, Labels::F[3], |v, n| *v = n)
++        .unwrap();
++    let remotes = [a, b, c, d];
++    let target = gpu
++        .renderer
++        .device()
++        .create_texture(&wgpu::TextureDescriptor {
++            label: Some("native text packet oracle"),
++            size: wgpu::Extent3d {
++                width: 192,
++                height: 128,
++                depth_or_array_layers: 1,
++            },
++            mip_level_count: 1,
++            sample_count: 1,
++            dimension: wgpu::TextureDimension::D2,
++            format: gpu.renderer.format(),
++            usage: wgpu::TextureUsages::RENDER_ATTACHMENT | wgpu::TextureUsages::COPY_SRC,
++            view_formats: &[],
++        });
++    draw(gpu, &mut oracle, &mut owner, &target, initial);
++    assert!(!gpu.renderer.stats().packet_reused);
++    let mut current = initial;
++    for count in [1, 2, 4] {
++        let before = values(&owner);
++        for (i, remote) in remotes.iter().enumerate().take(count) {
++            current[i] = if current[i] == "0011" { "1100" } else { "0011" };
++            remote.try_send(current[i].to_owned()).unwrap();
++        }
++        owner.deliver_ready(8).unwrap();
++        assert_eq!(values(&owner), before, "P text must wait for ACK");
++        draw(gpu, &mut oracle, &mut owner, &target, current);
++        assert!(
++            gpu.renderer.stats().packet_reused,
++            "native bridge must use the text packet transaction"
++        );
++        assert_eq!(gpu.renderer.stats().validated_draws, count * 4);
++        assert_eq!(gpu.renderer.stats().mask_upload_bytes, 0);
++    }
++    // Missing one complete transition cannot authorize positional patching.
++    remotes[0].try_send("0011".into()).unwrap();
++    owner.deliver_ready(8).unwrap();
++    remotes[0].try_send("1100".into()).unwrap();
++    owner.deliver_ready(8).unwrap();
++    current[0] = "1100";
++    draw(gpu, &mut oracle, &mut owner, &target, current);
++    assert!(
++        !gpu.renderer.stats().packet_reused,
++        "coalesced C must rebuild"
++    );
++    // Failed newer source work must leave the older eligible C and its exact
++    // predecessor transition usable, independently of ahead-of-P source values.
++    current[0] = "0011";
++    current[1] = "0011";
++    for i in 0..2 {
++        remotes[i].try_send(current[i].to_owned()).unwrap();
++    }
++    owner.deliver_ready(8).unwrap();
++    let eligible = owner.with_scene(|_, t| t).unwrap();
++    remotes[0].try_send("漢".into()).unwrap();
++    remotes[1].try_send("bad".into()).unwrap();
++    assert!(owner.deliver_ready(8).is_err());
++    assert_eq!(owner.with_scene(|_, t| t).unwrap(), eligible);
++    draw(gpu, &mut oracle, &mut owner, &target, current);
++    assert!(gpu.renderer.stats().packet_reused);
++    // Repair through a new atlas resource takes full preparation.
++    current[0] = "ΩΩΩΩ";
++    current[1] = "0011";
++    for i in 0..2 {
++        remotes[i].try_send(current[i].to_owned()).unwrap();
++    }
++    owner.deliver_ready(8).unwrap();
++    draw(gpu, &mut oracle, &mut owner, &target, current);
++    assert!(!gpu.renderer.stats().packet_reused);
++    draw(gpu, &mut oracle, &mut owner, &target, current);
++    assert!(gpu.renderer.stats().packet_reused);
++    assert_eq!(gpu.renderer.stats().validated_draws, 0);
++    assert_eq!(gpu.renderer.retained_stats().composited_pixels, 0);
++    gpu.packet_token = None;
++    gpu.packet_epoch = None;
++}
+diff --git a/reactivity/crates/gpui/src/runtime.rs b/reactivity/crates/gpui/src/runtime.rs
+index e1aa28b53c..e5c93d72cc 100644
+--- a/reactivity/crates/gpui/src/runtime.rs
++++ b/reactivity/crates/gpui/src/runtime.rs
+@@ -3840,6 +3840,10 @@ impl<M: View + 'static> Runtime<M> {
+         if let Some(text) = &mut self.text {
+             text.candidate = Some(text_geometry);
+             text.patch = None;
++            #[cfg(feature = "native-core")]
++            {
++                text.patch_from = None;
++            }
+             text.dirty_text = None;
+         }
+         self.prepared = Some(Prepared {
+diff --git a/reactivity/crates/gpui/src/runtime/paint.rs b/reactivity/crates/gpui/src/runtime/paint.rs
+index 7014f461ab..7a7cce6e88 100644
+--- a/reactivity/crates/gpui/src/runtime/paint.rs
++++ b/reactivity/crates/gpui/src/runtime/paint.rs
+@@ -14,6 +14,13 @@ pub(crate) struct SlotTransition {
+     pub(crate) from: PresentationToken,
+     pub(crate) edits: [gpui_canvas::SlotEdit; 1],
+ }
++/// One exact text transition from the previously complete packet, never a log.
++#[cfg(feature = "native-core")]
++pub(crate) struct TextTransition {
++    pub(crate) from: PresentationToken,
++    pub(crate) runs: [Option<gpui_canvas::TextRunSlot>; 4],
++}
++
+ impl<M: View + 'static> Runtime<M> {
+     pub(super) fn finish_color_slot(
+         &mut self,
+@@ -177,6 +184,7 @@ impl<M: View + 'static, L: LaneSet<M>> Win<M, L> {
+             gpui_canvas::PreparedScene<'_>,
+             PresentationToken,
+             Option<&SlotTransition>,
++            Option<TextTransition>,
+             SceneDamage,
+         ) -> R,
+     ) -> Result<R, Error> {
+@@ -187,6 +195,14 @@ impl<M: View + 'static, L: LaneSet<M>> Win<M, L> {
+             runtime.canvas.prepared_scene(),
+             token,
+             runtime.styles.slot_transition(),
++            runtime.text.as_ref().and_then(|text| {
++                let patches = text.patch.as_ref()?;
++                let from = text.patch_from?;
++                (1..=4).contains(&patches.len()).then(|| TextTransition {
++                    from,
++                    runs: std::array::from_fn(|i| patches.get(i).and_then(|p| p.geometry.run)),
++                })
++            }),
+             SceneDamage {
+                 base: (!runtime.automatic_presentation && runtime.presentation_valid).then_some(
+                     SceneEpoch(runtime.sites.namespace(), runtime.presentation_epoch),
+diff --git a/reactivity/crates/gpui/src/runtime/sparse_text.rs b/reactivity/crates/gpui/src/runtime/sparse_text.rs
+index 4a892bed44..1ff829fb2c 100644
+--- a/reactivity/crates/gpui/src/runtime/sparse_text.rs
++++ b/reactivity/crates/gpui/src/runtime/sparse_text.rs
+@@ -89,6 +89,10 @@ impl<M: View + 'static> Runtime<M> {
+         else {
+             return Ok(false);
+         };
++        #[cfg(feature = "native-core")]
++        {
++            self.text.as_mut().unwrap().patch_from = self.latest_token;
++        }
+         self.text.as_mut().unwrap().patch = Some(patch);
+         self.text.as_mut().unwrap().dirty_text = None;
+         self.layout_dirty.clear();
+@@ -211,6 +215,10 @@ impl<M: View + 'static> Runtime<M> {
+             return Ok(false);
+         };
+         let owner = self.text.as_mut().unwrap();
++        #[cfg(feature = "native-core")]
++        {
++            owner.patch_from = self.latest_token;
++        }
+         owner.patch = Some(patches.into_boxed_slice());
+         owner.dirty_text = None;
+         self.layout_dirty.clear();
+diff --git a/reactivity/crates/gpui/src/runtime/text_geometry.rs b/reactivity/crates/gpui/src/runtime/text_geometry.rs
+index 0886ef876e..19af614b12 100644
+--- a/reactivity/crates/gpui/src/runtime/text_geometry.rs
++++ b/reactivity/crates/gpui/src/runtime/text_geometry.rs
+@@ -17,6 +17,8 @@ pub(super) struct TextResources {
+     pub candidate: Option<Vec<Entry>>,
+     pub dirty_text: Option<DirtyText>,
+     pub patch: Option<Box<[TextPatch]>>,
++    #[cfg(feature = "native-core")]
++    pub patch_from: Option<PresentationToken>,
+ }
+ #[derive(Clone, Copy)]
+ pub(super) enum DirtyText {
+@@ -39,6 +41,10 @@ impl TextResources {
+         if let Some(column) = self.candidate.take() {
+             self.presented = column;
+         }
++        #[cfg(feature = "native-core")]
++        {
++            self.patch_from = None;
++        }
+         if let Some(patches) = self.patch.take() {
+             for patch in patches.into_vec() {
+                 rows[patch.row].text = Some(patch.value);
