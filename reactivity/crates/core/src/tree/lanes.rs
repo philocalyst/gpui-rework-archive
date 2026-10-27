@@ -1,15 +1,6 @@
 //! Synchronous batches of independent, immutable parent chains.
-//! External tasks never enter this executor: Pending means one memory stage.
+//! Safe level-wise routing; no task executor or prefetch hints are needed.
 use super::{NIL, NodeId, Tree, TreeError};
-use std::{
-    future::Future,
-    pin::Pin,
-    task::{Context, Poll, Waker},
-};
-
-// Experiment alternatives: original=0, validated scalar=1, levels=2,
-// Future without hints=3, Future with hints=4, single-root proof=5.
-pub(crate) const STRATEGY: u8 = 4;
 const WIDTH: usize = 32;
 
 impl Tree {
@@ -18,11 +9,6 @@ impl Tree {
         pending: impl Iterator<Item = NodeId>,
         root: NodeId,
     ) -> Vec<NodeId> {
-        if STRATEGY == 5 && self.entries[self.first as usize].next == NIL {
-            // compute validates root as a live root. Exactly one forest root
-            // therefore proves every admitted pending node belongs to it.
-            return pending.collect();
-        }
         let mut selected = Vec::new();
         let mut pending = pending.peekable();
         while pending.peek().is_some() {
@@ -50,97 +36,30 @@ impl Tree {
                 *slot = self.index(id)?;
             }
         }
-        if STRATEGY == 1 {
-            return Ok(slots.map(|mut index| {
-                if index == NIL {
-                    return None;
-                }
-                while self.parents[index as usize] != NIL {
-                    index = self.parents[index as usize];
-                }
-                Some(self.id(index))
-            }));
-        }
         let mut output = [None; N];
         let mut live = slots.iter().enumerate().fold(0_u64, |bits, (i, slot)| {
             bits | (u64::from(*slot != NIL) << i)
         });
-        if STRATEGY == 2 {
-            while live != 0 {
-                let mut round = live;
-                while round != 0 {
-                    let i = round.trailing_zeros() as usize;
-                    round &= round - 1;
-                    let parent = self.parents[slots[i] as usize];
-                    if parent == NIL {
-                        output[i] = Some(self.id(slots[i]));
-                        live &= !(1_u64 << i);
-                    } else {
-                        slots[i] = parent;
-                    }
-                }
-            }
-            return Ok(output);
-        }
-        let mut lanes = slots.map(|index| {
-            if index != NIL && STRATEGY == 4 {
-                hint(&self.parents[index as usize]);
-            }
-            RootLane { tree: self, index }
-        });
-        let mut context = Context::from_waker(Waker::noop());
         while live != 0 {
             let mut round = live;
             while round != 0 {
                 let i = round.trailing_zeros() as usize;
                 round &= round - 1;
-                if let Poll::Ready(root) = Pin::new(&mut lanes[i]).poll(&mut context) {
-                    output[i] = Some(root);
+                let parent = self.parents[slots[i] as usize];
+                if parent == NIL {
+                    output[i] = Some(self.id(slots[i]));
                     live &= !(1_u64 << i);
+                } else {
+                    slots[i] = parent;
                 }
             }
         }
         Ok(output)
     }
-}
 
-// Explicit Unpin future: state is one immutable tree borrow and a current slot.
-// No self-reference, heap allocation, vtable or unchecked pinned projection.
-struct RootLane<'a> {
-    tree: &'a Tree,
-    index: u32,
-}
-impl Future for RootLane<'_> {
-    type Output = NodeId;
-    #[inline]
-    fn poll(mut self: Pin<&mut Self>, _: &mut Context<'_>) -> Poll<NodeId> {
-        let parent = self.tree.parents[self.index as usize];
-        if parent == NIL {
-            return Poll::Ready(self.tree.id(self.index));
-        }
-        self.index = parent;
-        if STRATEGY == 4 {
-            hint(&self.tree.parents[parent as usize]);
-        }
-        Poll::Pending
+    pub(crate) fn single_root(&self) -> bool {
+        self.first != NIL && self.entries[self.first as usize].next == NIL
     }
-}
-
-#[inline]
-#[allow(unsafe_code)]
-fn hint(entry: &u32) {
-    #[cfg(all(target_arch = "x86_64", not(miri)))]
-    // SAFETY: SSE is baseline on x86_64. This is only a non-dereferencing cache
-    // hint; the address also names a live, aligned parent slot throughout the batch.
-    // No mutation/reallocation can occur under the owning Tree's shared borrow.
-    unsafe {
-        std::arch::x86_64::_mm_prefetch(
-            std::ptr::from_ref(entry).cast(),
-            std::arch::x86_64::_MM_HINT_T0,
-        );
-    }
-    #[cfg(any(not(target_arch = "x86_64"), miri))]
-    let _ = entry;
 }
 
 #[cfg(test)]

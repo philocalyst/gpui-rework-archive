@@ -479,9 +479,16 @@ impl LayoutTree {
             }
         }
         let changed = self.viewports.get(&root) != Some(&viewport);
-        let selected: Vec<_> = if crate::tree::lanes::STRATEGY != 0
-            && self.pending.len() >= 32
+        let selected: Vec<_> = if self.tree.single_root() {
+            // root was validated above; no other root can own pending edits.
+            self.pending.iter().copied().collect()
+        } else if self.pending.len() >= 32
             && self.tree.len() >= 32768
+            && self
+                .pending
+                .iter()
+                .take(4)
+                .all(|id| self.depths[self.tree.slot(*id)] >= 16)
         {
             self.tree
                 .select_pending_root(self.pending.iter().copied(), root)

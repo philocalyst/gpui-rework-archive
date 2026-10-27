@@ -1,5 +1,5 @@
 //! Standalone retained-tree foundation. No renderer, application runtime, or platform host.
-#![deny(unsafe_code)]
+#![forbid(unsafe_code)]
 
 pub mod damage;
 pub mod geometry;
