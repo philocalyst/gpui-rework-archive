@@ -358,7 +358,7 @@ impl GpuSurface {
         }
         let scroll = transition
             .and_then(|d| d.scroll)
-            .filter(|s| previous == Some(s.from) && s.to == token)
+            .filter(|s| s.to == token) // negative control: accept a stale predecessor
             .map(|s| &s.copy);
         let submitted = self
             .renderer
