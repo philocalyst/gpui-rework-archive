@@ -1,0 +1,6 @@
+
+thread 'overscan_preserves_buffered_identity_but_not_offscreen_authority_or_departed_keys' (1446032) panicked at crates/gpui/tests/lists.rs:859:5:
+assertion `left == right` failed
+  left: Ok(Target { window: 1, identity: 4 })
+ right: Err(MissingElement)
+note: run with `RUST_BACKTRACE=1` environment variable to display a backtrace

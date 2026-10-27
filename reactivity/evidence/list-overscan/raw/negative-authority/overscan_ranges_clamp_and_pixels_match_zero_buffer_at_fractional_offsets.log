@@ -1,0 +1,6 @@
+
+thread 'overscan_ranges_clamp_and_pixels_match_zero_buffer_at_fractional_offsets' (1446034) panicked at crates/gpui/tests/lists.rs:828:13:
+assertion `left == right` failed
+  left: Rect { x: 0.0, y: 83.99999, width: 200.00003, height: 32.00002 }
+ right: Rect { x: 0.0, y: 19.999998, width: 200.00003, height: 32.00001 }
+note: run with `RUST_BACKTRACE=1` environment variable to display a backtrace

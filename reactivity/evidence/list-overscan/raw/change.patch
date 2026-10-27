@@ -1,0 +1,873 @@
+diff --git a/reactivity/crates/gpui/VIRTUAL_LIST.md b/reactivity/crates/gpui/VIRTUAL_LIST.md
+index d47b6f7f57..70256fe980 100644
+--- a/reactivity/crates/gpui/VIRTUAL_LIST.md
++++ b/reactivity/crates/gpui/VIRTUAL_LIST.md
+@@ -1,11 +1,15 @@
+ # Uniform virtual lists
+ 
+ `uniform_list(ListId, &impl ItemSource, row_height).h(viewport_height)` describes
+-only the rows intersecting a finite logical viewport. The source and deferred
++the rows intersecting a finite logical viewport by default. The source and deferred
+ row builder are borrowed during description and discarded before retention.
+ There is no parent-model clone, shared mutable scroll handle or giant spacer.
+-The first implementation has zero prefetch; it does not claim Hummingbird's
+-adaptive asynchronous row cache.
++An optional `.overscan(rows)` retains up to that many extra keyed rows on each
++side, clamped to the source bounds. This is synchronous bounded realization,
++not an adaptive asynchronous row cache. The existing 4096-row limit includes
++the buffer; even `usize::MAX` is clamped before admission. `visible_range` names
++logical viewport slots, while `realized_range` includes the buffer. The first
++visible key remains the anchor across source edits.
+ 
+ `ItemSource` supplies `len`, `key`, `index_of` and `row`, with a default
+ `is_empty`. `ItemKey` is an exact u64 data identity. The source owns indexing;
+@@ -24,9 +28,15 @@ inspection can retain the older acknowledged sheet while a candidate waits.
+ 
+ `list`, `list_state`, `list_item` and `Query::within` expose the ordinary public
+ testing surface. A visible keyed row retains identity across reorder/prepend;
+-an offscreen or removed row loses its capability, and returning rows receive
+-fresh targets. There is no historical table of every visited key. List/item
+-roles are published with clipped geometry. Count/range/key metadata are a
++with default zero overscan, an offscreen or removed row loses its capability,
++and returning rows receive fresh targets. With overscan enabled, a row still
++in the realized buffer preserves identity while offscreen queries/actions are
++rejected and focus is cleared. Returning to visibility within that buffer can
++make the same target usable again. Leaving the buffer retires identity
++permanently. There is no historical table of every visited key. List/item
++roles are published with clipped geometry. Buffered logical slots have empty
++paint/input clips, so outward numerical envelopes at touching boundaries cannot
++publish them. Count/range/key metadata are a
+ foundation for an accessibility adapter; this is not a platform accessibility
+ tree, focus-navigation or screen-reader implementation.
+ 
+diff --git a/reactivity/crates/gpui/examples/support/library.rs b/reactivity/crates/gpui/examples/support/library.rs
+index f6464e0a16..18a61240fb 100644
+--- a/reactivity/crates/gpui/examples/support/library.rs
++++ b/reactivity/crates/gpui/examples/support/library.rs
+@@ -15,6 +15,7 @@ pub struct Library {
+     pub selected: Option<TrackId>,
+     pub play_requests: u64,
+     pub viewport_height: f32,
++    pub overscan: usize,
+ }
+ 
+ impl Library {
+@@ -30,6 +31,7 @@ impl Library {
+             selected: None,
+             play_requests: 0,
+             viewport_height: 400.0,
++            overscan: 0,
+         }
+     }
+ 
+@@ -99,6 +101,7 @@ impl View for Library {
+             ))
+             .gap(12),
+             uniform_list(self.list_id, self, ROW_HEIGHT)
++                .overscan(self.overscan)
+                 .name("Library recordings")
+                 .h(self.viewport_height)
+                 .w(700),
+diff --git a/reactivity/crates/gpui/src/element.rs b/reactivity/crates/gpui/src/element.rs
+index 09948d3d61..88f0170812 100644
+--- a/reactivity/crates/gpui/src/element.rs
++++ b/reactivity/crates/gpui/src/element.rs
+@@ -513,11 +513,23 @@ impl<'a> El<'a> {
+                 source,
+                 row_height,
+                 map: None,
++                overscan: 0,
+             },
+         )));
+         element
+     }
+ 
++    /// Keep up to `rows` extra keyed rows before and after a uniform list's
++    /// visible range. Defaults to zero; ignored on other elements. The actual
++    /// realized range must fit the list's 4096-row admission limit. Buffered
++    /// rows preserve identity but remain clipped from visible queries and hits.
++    pub fn overscan(mut self, rows: usize) -> Self {
++        if let Some(spec) = self.extra.as_deref_mut().and_then(|extra| extra.list_mut()) {
++            spec.overscan = rows;
++        }
++        self
++    }
++
+     /// Uniform circular corners for this element's background, own image and
+     /// hit region. Descendants are not clipped. Invalid radii fail admission.
+     pub fn rounded(mut self, radius: impl IntoProp<'a, f32>) -> Self {
+@@ -865,7 +877,7 @@ impl<'a> El<'a> {
+     /// borrowed operands only when the runtime promotes a changed destination.
+     #[cfg(test)]
+     pub(crate) fn flatten(self) -> Vec<DraftNode<'a>> {
+-        self.flatten_lists(usize::MAX, &(), |_, _, _, _| {
++        self.flatten_lists(usize::MAX, &(), |_, _, _, _, _| {
+             Err(crate::ListError::MissingViewport)
+         })
+         .unwrap()
+@@ -881,6 +893,7 @@ impl<'a> El<'a> {
+             Style,
+             &dyn crate::ItemSource,
+             f64,
++            usize,
+         ) -> Result<crate::list::ListPlan, crate::ListError>,
+     ) -> Result<Description<'a>, crate::Error> {
+         use crate::list::{ListDraft, RowDraft};
+@@ -992,9 +1005,15 @@ impl<'a> El<'a> {
+                 });
+             }
+             if let Some(spec) = spec {
+-                let mut list_plan = plan(spec.id, element.style, spec.source, spec.row_height)?;
++                let mut list_plan = plan(
++                    spec.id,
++                    element.style,
++                    spec.source,
++                    spec.row_height,
++                    spec.overscan,
++                )?;
+                 let list = viewports.len();
+-                let start = list_plan.viewport.visible_range.start;
++                let start = list_plan.viewport.realized_range.start;
+                 let row_height = list_plan.viewport.row_height;
+                 let intra = list_plan.viewport.offset - start as f64 * row_height;
+                 let mut rows = Vec::with_capacity(list_plan.keys.len());
+diff --git a/reactivity/crates/gpui/src/list.rs b/reactivity/crates/gpui/src/list.rs
+index defdfb1db1..0d779b70e9 100644
+--- a/reactivity/crates/gpui/src/list.rs
++++ b/reactivity/crates/gpui/src/list.rs
+@@ -1,4 +1,4 @@
+-//! Borrowed fixed-height lists. Only viewport-intersecting rows are described.
++//! Borrowed fixed-height lists. Optional bounded overscan preserves nearby keyed rows.
+ use crate::{El, IntoLength};
+ use std::ops::Range;
+ 
+@@ -51,7 +51,7 @@ pub struct ListViewport {
+     /// Slots intersecting the explicit logical list viewport. Ancestor/window
+     /// clipping may suppress their semantics; `list_item` checks that visibility.
+     pub visible_range: Range<usize>,
+-    /// No prefetch: this equals the list-local visible range, before window clipping.
++    /// Visible rows plus requested overscan, clamped to the source bounds.
+     pub realized_range: Range<usize>,
+     pub realized_rows: usize,
+ }
+@@ -106,8 +106,10 @@ pub(crate) struct ListSpec<'a> {
+     pub source: &'a dyn ItemSource,
+     pub row_height: f64,
+     pub map: Option<RowMap>,
++    pub overscan: usize,
+ }
+ pub(crate) struct ListPlan {
++    pub retain_offscreen: bool,
+     pub viewport: ListViewport,
+     pub keys: Vec<ItemKey>,
+     pub anchor: Option<(ItemKey, f64)>,
+diff --git a/reactivity/crates/gpui/src/native/accessibility/tests.rs b/reactivity/crates/gpui/src/native/accessibility/tests.rs
+index 466110e218..83f14714cb 100644
+--- a/reactivity/crates/gpui/src/native/accessibility/tests.rs
++++ b/reactivity/crates/gpui/src/native/accessibility/tests.rs
+@@ -1352,3 +1352,51 @@ fn ime_accesskit_uses_acknowledged_display_and_selection_without_preview_edit_au
+     assert_eq!(node.value(), Some("base"));
+     assert!(node.supports_action(accesskit::Action::ReplaceSelectedText));
+ }
++
++#[test]
++fn overscan_native_projection_excludes_buffered_rows_and_reuses_returning_ids() {
++    let mut model = library::Library::new(250_000);
++    model.overscan = 2;
++    let mut win = Win::recording(
++        model,
++        WindowOptions {
++            size: [760, 600],
++            ..Default::default()
++        },
++    )
++    .unwrap();
++    win.presented(win.with_scene(|_, token| token).unwrap())
++        .unwrap();
++    let list = win.list(library::LIBRARY).unwrap();
++    let first = id(&win, win.list_item(list, crate::ItemKey::new(0)).unwrap());
++    let initial = projection(&win);
++    let mut tree = Tree::new(initial.clone(), true);
++    for index in [1, 0, 10] {
++        let previous = projection(&win);
++        win.scroll_to_index(list, index).unwrap();
++        assert_eq!(projection(&win), previous, "P remains frozen before ACK");
++        win.presented(win.with_scene(|_, token| token).unwrap())
++            .unwrap();
++        let current = projection(&win);
++        let positions: Vec<_> = current
++            .nodes
++            .iter()
++            .filter(|(_, n)| n.role() == accesskit::Role::ListItem)
++            .map(|(_, n)| n.position_in_set().unwrap())
++            .collect();
++        assert_eq!(positions, (index..index + 13).collect::<Vec<_>>());
++        tree.update_and_process_changes(current, &mut Changes::default());
++        assert_eq!(
++            tree.state()
++                .node_by_tree_local_id(first, TreeId::ROOT)
++                .is_some(),
++            index == 0
++        );
++        if index == 0 {
++            assert_eq!(
++                id(&win, win.list_item(list, crate::ItemKey::new(0)).unwrap()),
++                first
++            );
++        }
++    }
++}
+diff --git a/reactivity/crates/gpui/src/native/list_tests.rs b/reactivity/crates/gpui/src/native/list_tests.rs
+index db3ed6ca50..90195e52ac 100644
+--- a/reactivity/crates/gpui/src/native/list_tests.rs
++++ b/reactivity/crates/gpui/src/native/list_tests.rs
+@@ -114,6 +114,10 @@ impl Script {
+                 assert_eq!(owner.root().unwrap().catalogue.len(), 250_000);
+                 let list = owner.list(LIBRARY).unwrap();
+                 assert_eq!(owner.list_state(list).unwrap().visible_range, 0..13);
++                assert_eq!(
++                    owner.list_state(list).unwrap().realized_range,
++                    0..13 + owner.root().unwrap().overscan
++                );
+                 assert_eq!(owner.role(Role::Button).count().unwrap(), 15);
+                 self.list = Some(list);
+                 self.overlap = Some(play(owner, 2));
+@@ -300,6 +304,16 @@ impl Host for Script {
+ #[test]
+ #[ignore = "requires a real X11 display; runs the actual CPU presenter, without a GPU"]
+ fn native_library_250k_wheel_pointer_resize_resume() {
++    run_library(0);
++}
++
++#[test]
++#[ignore = "requires a real X11 display; runs the actual CPU presenter, without a GPU"]
++fn native_library_250k_overscan_wheel_pointer_resize_resume() {
++    run_library(2);
++}
++
++fn run_library(overscan: usize) {
+     let event_loop = EventLoop::builder()
+         .with_x11()
+         .with_any_thread(true)
+@@ -307,9 +321,13 @@ fn native_library_250k_wheel_pointer_resize_resume() {
+         .unwrap();
+     let script = Script {
+         host: NativeHost::new(
+-            Window::document(Library::new(250_000))
+-                .size(760, 600)
+-                .renderer(RendererPolicy::ReferenceCpu),
++            Window::document({
++                let mut model = Library::new(250_000);
++                model.overscan = overscan;
++                model
++            })
++            .size(760, 600)
++            .renderer(RendererPolicy::ReferenceCpu),
+         ),
+         deadline: Instant::now() + Duration::from_secs(30),
+         stage: 0,
+diff --git a/reactivity/crates/gpui/src/runtime.rs b/reactivity/crates/gpui/src/runtime.rs
+index d7f9a52480..04d6db03c9 100644
+--- a/reactivity/crates/gpui/src/runtime.rs
++++ b/reactivity/crates/gpui/src/runtime.rs
+@@ -2091,30 +2091,35 @@ impl<M: View + 'static> Runtime<M> {
+             self.requested_size,
+             self.requested_scale_factor,
+         )
+-        .flatten_lists(MAX_NODES, readers, |id, style, source, row_height| {
+-            if !seen.insert(id) {
+-                return Err(ListError::DuplicateList(id));
+-            }
+-            let previous = self
+-                .viewports
+-                .get(&ViewportKey::List(id))
+-                .and_then(ViewportState::list)
+-                .map(|state| (state.identity, state));
+-            let style = previous.map_or(style, |(identity, _)| {
+-                self.overrides.resolve(identity, style)
+-            });
+-            let previous = previous.map(|(_, state)| state);
+-            list::plan(
+-                previous,
+-                style,
+-                source,
+-                row_height,
+-                scroll
+-                    .iter()
+-                    .find(|request| request.id == id)
+-                    .map(|request| request.position),
+-            )
+-        })?;
++        .flatten_lists(
++            MAX_NODES,
++            readers,
++            |id, style, source, row_height, overscan| {
++                if !seen.insert(id) {
++                    return Err(ListError::DuplicateList(id));
++                }
++                let previous = self
++                    .viewports
++                    .get(&ViewportKey::List(id))
++                    .and_then(ViewportState::list)
++                    .map(|state| (state.identity, state));
++                let style = previous.map_or(style, |(identity, _)| {
++                    self.overrides.resolve(identity, style)
++                });
++                let previous = previous.map(|(_, state)| state);
++                list::plan(
++                    previous,
++                    style,
++                    source,
++                    row_height,
++                    overscan,
++                    scroll
++                        .iter()
++                        .find(|request| request.id == id)
++                        .map(|request| request.position),
++                )
++            },
++        )?;
+         let mut scroll_drafts = Vec::new();
+         let list_drafts: Vec<_> = viewport_drafts
+             .into_iter()
+@@ -2315,7 +2320,7 @@ impl<M: View + 'static> Runtime<M> {
+             if let Some(row) = self
+                 .list_rows
+                 .get(&node.identity())
+-                .filter(|row| row.visible)
++                .filter(|row| row.visible || row.retain_offscreen)
+             {
+                 keyed_rows.insert((parent, row.key, node.kind().site_kind()), index);
+             }
+@@ -2619,6 +2624,12 @@ impl<M: View + 'static> Runtime<M> {
+                         y: row.y,
+                         height: row.height,
+                         visible: true,
++                        retain_offscreen: draft.plan.retain_offscreen,
++                        buffered: !draft
++                            .plan
++                            .viewport
++                            .visible_range
++                            .contains(&(row.item_index as usize)),
+                     },
+                 );
+             }
+@@ -3393,6 +3404,18 @@ impl<M: View + 'static> Runtime<M> {
+             } else {
+                 (viewport, viewport, false)
+             };
++            // Logical slots outside the viewport are retained only as a buffer.
++            // Outward geometric envelopes can overlap at an exact slot boundary;
++            // that numerical broad phase must not publish an offscreen row.
++            if node.kind() == NodeKind::ListItem
++                && self
++                    .list_rows
++                    .get(&node.identity())
++                    .is_some_and(|row| row.buffered)
++            {
++                clip = Rect::default();
++                hit_clip = Rect::default();
++            }
+             let in_scroll = node.kind() == NodeKind::Scroll || inherited.membership & 2 != 0;
+             if matches!(
+                 node.kind(),
+@@ -4844,11 +4867,13 @@ mod semantic_storage_ledger {
+             size_of::<ListInfo>()
+         );
+         println!(
+-            "Extra={} Annotations={} ListSpec={} AnnotationDraft={}",
++            "Extra={} Annotations={} ListSpec={} AnnotationDraft={} ListPlan={} ListDraft={}",
+             size_of::<crate::semantic::ElementExtra<'_>>(),
+             size_of::<crate::semantic::Annotations<'_>>(),
+             size_of::<crate::list::ListSpec<'_>>(),
+-            size_of::<crate::semantic::AnnotationDraft<'_>>()
++            size_of::<crate::semantic::AnnotationDraft<'_>>(),
++            size_of::<crate::list::ListPlan>(),
++            size_of::<crate::list::ListDraft>()
+         );
+         // Parent/transform packing and the source namespace niche are shared
+         // baseline improvements; semantic columns add no hot-node fields.
+@@ -4864,12 +4889,12 @@ mod semantic_storage_ledger {
+             allocation("semantic", || crate::div()
+                 .name("label")
+                 .description("description")),
+-            (1, 56)
++            (1, 64)
+         );
+         static EMPTY: Empty = Empty;
+         assert_eq!(
+             allocation("list", || crate::uniform_list(ListId::new(1), &EMPTY, 24)),
+-            (1, 56)
++            (1, 64)
+         );
+         assert_eq!(
+             allocation("combined", || crate::uniform_list(
+@@ -4878,7 +4903,7 @@ mod semantic_storage_ledger {
+                 24
+             )
+             .name("label")),
+-            (2, 104)
++            (2, 120)
+         );
+         // Component boundaries retain the prior independent cold extension.
+         let owner = Owner { child: Empty };
+@@ -5583,7 +5608,7 @@ mod mapped_qualification {
+         );
+         assert_eq!(size_of::<Destination>(), 4);
+         assert_eq!(size_of::<crate::style_port::Binding<'_>>(), 24);
+-        assert_eq!(size_of::<crate::semantic::ElementExtra<'_>>(), 56);
++        assert_eq!(size_of::<crate::semantic::ElementExtra<'_>>(), 64);
+         assert_eq!(size_of::<Fanout>(), 32);
+         assert_eq!(
+             fanout.destination_bytes(),
+diff --git a/reactivity/crates/gpui/src/runtime/background.rs b/reactivity/crates/gpui/src/runtime/background.rs
+index 04ee51fefa..e1437b35c7 100644
+--- a/reactivity/crates/gpui/src/runtime/background.rs
++++ b/reactivity/crates/gpui/src/runtime/background.rs
+@@ -749,7 +749,7 @@ mod tests {
+         assert_eq!(size_of::<Node>(), 24);
+         assert_eq!(size_of::<crate::property::PropertyValue>(), 28);
+         assert_eq!(size_of::<crate::style_port::PropInput<'_, Color>>(), 48);
+-        assert_eq!(size_of::<crate::semantic::ElementExtra<'_>>(), 56);
++        assert_eq!(size_of::<crate::semantic::ElementExtra<'_>>(), 64);
+         assert_eq!(size_of::<Destination>(), 4);
+         let first = gradient(Color::linear_srgb(3., -0.25, 0.5, 0.75).unwrap());
+         let first_key = first.key();
+@@ -843,7 +843,7 @@ mod tests {
+             div()
+                 .bg(&g)
+                 .bg(Color::BLACK)
+-                .flatten_lists(10, &(), |_, _, _, _| unreachable!())
++                .flatten_lists(10, &(), |_, _, _, _, _| unreachable!())
+                 .unwrap()
+                 .backgrounds
+                 .is_empty()
+@@ -852,7 +852,7 @@ mod tests {
+             div()
+                 .bg(Color::BLACK)
+                 .bg(&g)
+-                .flatten_lists(10, &(), |_, _, _, _| unreachable!())
++                .flatten_lists(10, &(), |_, _, _, _, _| unreachable!())
+                 .unwrap()
+                 .backgrounds
+                 .len(),
+diff --git a/reactivity/crates/gpui/src/runtime/geometry.rs b/reactivity/crates/gpui/src/runtime/geometry.rs
+index ede011643d..3b22d5a1e2 100644
+--- a/reactivity/crates/gpui/src/runtime/geometry.rs
++++ b/reactivity/crates/gpui/src/runtime/geometry.rs
+@@ -459,7 +459,7 @@ mod tests {
+             size_of::<usize>()
+         );
+         assert_eq!(size_of::<crate::semantic::Annotations<'_>>(), 48);
+-        assert_eq!(size_of::<crate::semantic::ElementExtra<'_>>(), 56);
++        assert_eq!(size_of::<crate::semantic::ElementExtra<'_>>(), 64);
+         assert_eq!(size_of::<crate::image::ImageSpec<'_>>(), 16);
+         for (name, make) in [
+             ("absent", (div as fn() -> El<'static>)),
+@@ -478,8 +478,8 @@ mod tests {
+                 count.bytes_total,
+                 match name {
+                     "absent" => 0,
+-                    "rounded" | "named" => 56,
+-                    _ => 104,
++                    "rounded" | "named" => 64,
++                    _ => 112,
+                 }
+             );
+             drop(value);
+diff --git a/reactivity/crates/gpui/src/runtime/list.rs b/reactivity/crates/gpui/src/runtime/list.rs
+index d1f22408c3..5b862b0044 100644
+--- a/reactivity/crates/gpui/src/runtime/list.rs
++++ b/reactivity/crates/gpui/src/runtime/list.rs
+@@ -1,5 +1,5 @@
+ //! Cold list state and bounded borrowed materialization. No item source survives
+-//! an owner description, and historical offscreen row identities are not kept.
++//! an owner description, and rows outside the realized range are not kept.
+ use super::*;
+ use crate::{ItemKey, ItemSource, ListError, ListId, ListViewport, list::ListPlan};
+ 
+@@ -20,6 +20,8 @@ pub(super) struct ListRow {
+     pub y: f32,
+     pub height: f32,
+     pub visible: bool,
++    pub retain_offscreen: bool,
++    pub buffered: bool,
+ }
+ #[derive(Clone, Copy)]
+ pub(super) enum ScrollPosition {
+@@ -51,6 +53,7 @@ pub(super) fn plan(
+     style: Style,
+     source: &dyn ItemSource,
+     row_height: f64,
++    overscan: usize,
+     request: Option<ScrollPosition>,
+ ) -> Result<ListPlan, ListError> {
+     let viewport = f64::from(style.height.ok_or(ListError::MissingViewport)?);
+@@ -96,12 +99,14 @@ pub(super) fn plan(
+     offset = offset.clamp(0.0, (extent - viewport).max(0.0));
+     let start = ((offset / row_height).floor() as usize).min(len);
+     let end = (((offset + viewport) / row_height).ceil() as usize).min(len);
+-    if end - start > MAX_ROWS {
++    let realized_start = start.saturating_sub(overscan);
++    let realized_end = end.saturating_add(overscan).min(len);
++    if realized_end - realized_start > MAX_ROWS {
+         return Err(ListError::ResourceLimit);
+     }
+-    let mut keys = Vec::with_capacity(end - start);
++    let mut keys = Vec::with_capacity(realized_end - realized_start);
+     let mut unique = BTreeSet::new();
+-    for index in start..end {
++    for index in realized_start..realized_end {
+         let key = source.key(index);
+         if !unique.insert(key) {
+             return Err(ListError::DuplicateKey(key));
+@@ -112,10 +117,11 @@ pub(super) fn plan(
+         keys.push(key);
+     }
+     let anchor = keys
+-        .first()
++        .get(start - realized_start)
+         .copied()
+         .map(|key| (key, offset - start as f64 * row_height));
+     Ok(ListPlan {
++        retain_offscreen: overscan != 0,
+         viewport: ListViewport {
+             len,
+             offset,
+@@ -123,8 +129,8 @@ pub(super) fn plan(
+             row_height,
+             viewport_height: viewport,
+             visible_range: start..end,
+-            realized_range: start..end,
+-            realized_rows: end - start,
++            realized_range: realized_start..realized_end,
++            realized_rows: realized_end - realized_start,
+         },
+         keys,
+         anchor,
+diff --git a/reactivity/crates/gpui/src/semantic.rs b/reactivity/crates/gpui/src/semantic.rs
+index c7ce734148..ab0e2c5a93 100644
+--- a/reactivity/crates/gpui/src/semantic.rs
++++ b/reactivity/crates/gpui/src/semantic.rs
+@@ -466,8 +466,8 @@ mod decoration_tests {
+                 cost.bytes_current,
+                 match mode {
+                     0 => 0,
+-                    1 => 33 * 80,
+-                    _ => 33 * 104,
++                    1 => 33 * 88,
++                    _ => 33 * 112,
+                 }
+             );
+             drop(nodes);
+@@ -502,7 +502,7 @@ mod decoration_tests {
+             element = Some(div().bg(number.map(|_| Color::WHITE)).bg(&color));
+         });
+         assert_eq!(
+-            direct.bytes_current, 80,
++            direct.bytes_current, 88,
+             "obsolete mapper releases its vector and uses ordinary direct storage"
+         );
+         drop(element);
+@@ -515,9 +515,9 @@ mod decoration_tests {
+     }
+     #[test]
+     fn cold_headers_and_alternating_builders_have_one_nonrecursive_decoration() {
+-        assert_eq!(size_of::<ElementExtra<'_>>(), 56);
++        assert_eq!(size_of::<ElementExtra<'_>>(), 64);
+         assert_eq!(size_of::<Decorations<'_>>(), 48);
+-        assert_eq!(size_of::<LeafExtra<'_>>(), 56);
++        assert_eq!(size_of::<LeafExtra<'_>>(), 64);
+         assert_eq!(size_of::<crate::style_port::Binding<'_>>(), 24);
+         assert_eq!(size_of::<crate::style_port::Draft<'_>>(), 24);
+         let a = Signal::new(Color::BLACK);
+@@ -531,7 +531,7 @@ mod decoration_tests {
+             element = Some(el);
+         });
+         assert_eq!(count.count_total, 3);
+-        assert_eq!(count.bytes_total, 128);
++        assert_eq!(count.bytes_total, 136);
+         eprintln!(
+             "style_decorations,alternating,requests={},requested={},retained={},peak={}",
+             count.count_total, count.bytes_total, count.bytes_current, count.bytes_max
+@@ -571,9 +571,9 @@ mod decoration_tests {
+                 count.bytes_current,
+                 match ports {
+                     0 => 0,
+-                    1 => 80,
+-                    2 => 104,
+-                    8 => 248,
++                    1 => 88,
++                    2 => 112,
++                    8 => 256,
+                     _ => unreachable!(),
+                 }
+             );
+diff --git a/reactivity/crates/gpui/tests/lists.rs b/reactivity/crates/gpui/tests/lists.rs
+index 42e3e293e2..73e395226c 100644
+--- a/reactivity/crates/gpui/tests/lists.rs
++++ b/reactivity/crates/gpui/tests/lists.rs
+@@ -14,6 +14,7 @@ struct Rows {
+     height: f32,
+     calls: AtomicUsize,
+     selected: Option<ItemKey>,
++    overscan: usize,
+ }
+ impl Rows {
+     fn new(len: usize) -> Self {
+@@ -24,6 +25,7 @@ impl Rows {
+             height: 96.0,
+             calls: AtomicUsize::new(0),
+             selected: None,
++            overscan: 0,
+         }
+     }
+ }
+@@ -59,7 +61,10 @@ impl View for Rows {
+     fn view(&self) -> El<'_> {
+         column((
+             div().h(20).w(200).bg(Color::BLACK),
+-            uniform_list(LIST, self, 32).h(self.height).w(200),
++            uniform_list(LIST, self, 32)
++                .overscan(self.overscan)
++                .h(self.height)
++                .w(200),
+             div().h(20).w(200).bg(Color::BLACK),
+         ))
+     }
+@@ -781,3 +786,222 @@ fn zero_raster_samples_do_not_erase_a_continuous_pointer_action_ancestor() {
+     win.click_at(Point { x: 0.005, y: 0.005 }).unwrap();
+     assert!(win.root().unwrap().selected);
+ }
++
++fn buffered(len: usize, overscan: usize) -> Rows {
++    Rows {
++        overscan,
++        ..Rows::new(len)
++    }
++}
++fn scroll_offset(win: &mut Win<Rows>, offset: f64) {
++    let list = win.list(LIST).unwrap();
++    let previous = win.list_state(list).unwrap().offset;
++    win.scroll(list, offset - previous).unwrap();
++}
++fn image(win: &mut Win<Rows>) -> Vec<u8> {
++    win.with_pixels(|pixels, _, _| pixels.to_vec()).unwrap()
++}
++#[test]
++fn overscan_ranges_clamp_and_pixels_match_zero_buffer_at_fractional_offsets() {
++    let mut win = Win::with_size(buffered(250_000, 2), 240, 160).unwrap();
++    let list = win.list(LIST).unwrap();
++    assert_eq!(win.list_state(list).unwrap().realized_range, 0..5);
++    assert_eq!(win.root().unwrap().calls.load(Ordering::Relaxed), 5);
++    for offset in [0., 16.25, 320., 6_400_000.125, 8_000_000.] {
++        scroll_offset(&mut win, offset);
++        let state = win.list_state(list).unwrap();
++        assert_eq!(
++            state.realized_range,
++            state.visible_range.start.saturating_sub(2)
++                ..state.visible_range.end.saturating_add(2).min(state.len)
++        );
++        assert_eq!(state.realized_rows, state.realized_range.len());
++        let mut oracle = Win::with_size(Rows::new(250_000), 240, 160).unwrap();
++        scroll_offset(&mut oracle, offset);
++        assert_eq!(image(&mut win), image(&mut oracle));
++        assert_eq!(
++            win.role(Role::Button).count().unwrap(),
++            state.visible_range.len()
++        );
++        for index in state.visible_range.clone() {
++            let target = item(&win, index as u64 + 100);
++            assert_eq!(
++                win.bounds(target).unwrap(),
++                oracle.bounds(item(&oracle, index as u64 + 100)).unwrap()
++            );
++        }
++        if state.realized_range.start < state.visible_range.start {
++            assert_eq!(
++                win.list_item(list, ItemKey::new(state.realized_range.start as u64 + 100)),
++                Err(Error::MissingElement)
++            );
++        }
++    }
++    for len in [0, 1, 2, 4096] {
++        let win = Win::with_size(buffered(len, usize::MAX), 240, 160).unwrap();
++        assert_eq!(
++            win.list_state(win.list(LIST).unwrap())
++                .unwrap()
++                .realized_range,
++            0..len
++        );
++        assert_eq!(win.root().unwrap().calls.load(Ordering::Relaxed), len);
++    }
++}
++#[test]
++fn overscan_preserves_buffered_identity_but_not_offscreen_authority_or_departed_keys() {
++    let mut win = Win::with_size(buffered(100, 2), 240, 160).unwrap();
++    let list = win.list(LIST).unwrap();
++    let first = item(&win, 100);
++    win.click(first).unwrap();
++    assert_eq!(win.focused().unwrap(), Some(first));
++    win.scroll_to_index(list, 1).unwrap();
++    assert_eq!(
++        win.list_item(list, ItemKey::new(100)),
++        Err(Error::MissingElement)
++    );
++    assert_eq!(win.activate(first), Err(Error::StaleTarget));
++    assert_eq!(win.focused().unwrap(), None);
++    assert_eq!(
++        win.click_at(Point { x: 10., y: 19.875 }),
++        Err(Error::NotHittable)
++    );
++    win.scroll_to_index(list, 0).unwrap();
++    assert_eq!(item(&win, 100), first);
++    win.scroll_to_index(list, 3).unwrap();
++    win.scroll_to_index(list, 0).unwrap();
++    assert_ne!(item(&win, 100), first);
++    assert_eq!(win.activate(first), Err(Error::StaleTarget));
++}
++#[test]
++fn overscan_anchor_is_first_visible_key_across_prepend_and_reverse() {
++    let mut win = Win::with_size(buffered(100, 2), 240, 160).unwrap();
++    let list = win.list(LIST).unwrap();
++    scroll_offset(&mut win, 320.25);
++    let held = item(&win, 110);
++    win.update(|m| {
++        m.first -= 1;
++        m.len += 1;
++    })
++    .unwrap();
++    assert_eq!(win.list_state(list).unwrap().offset, 352.25);
++    assert_eq!(item(&win, 110), held);
++    win.update(|m| m.reverse = true).unwrap();
++    assert_eq!(win.list_state(list).unwrap().offset, 89. * 32. + 0.25);
++    assert_eq!(item(&win, 110), held);
++}
++#[test]
++fn overscan_rejects_excess_before_rows_and_preserves_older_candidate_after_failure() {
++    let mut win = Win::recording(
++        buffered(100, 2),
++        WindowOptions {
++            size: [240, 160],
++            ..Default::default()
++        },
++    )
++    .unwrap();
++    let initial = win.with_scene(|_, token| token).unwrap();
++    win.presented(initial).unwrap();
++    scroll_offset(&mut win, 320.);
++    let candidate = win.with_scene(|_, token| token).unwrap();
++    let old = image(&mut win);
++    let calls = win.root().unwrap().calls.load(Ordering::Relaxed);
++    assert_eq!(
++        win.update(|m| {
++            m.len = 4097;
++            m.overscan = usize::MAX;
++        })
++        .err(),
++        Some(Error::List(ListError::ResourceLimit))
++    );
++    assert_eq!(win.root().unwrap().calls.load(Ordering::Relaxed), calls);
++    win.presented(candidate).unwrap();
++    assert_eq!(image(&mut win), old);
++    win.update(|m| {
++        m.len = 100;
++        m.overscan = 2;
++    })
++    .unwrap();
++    let repaired = win.with_scene(|_, token| token).unwrap();
++    win.presented(repaired).unwrap();
++    let mut fresh = Win::with_size(buffered(100, 2), 240, 160).unwrap();
++    scroll_offset(&mut fresh, 320.);
++    assert_eq!(image(&mut win), image(&mut fresh));
++}
++
++#[test]
++fn overscan_pixels_match_independently_materialized_eager_rows() {
++    struct Eager(usize);
++    impl View for Eager {
++        fn view(&self) -> El<'_> {
++            column((
++                div().h(20).w(200).bg(Color::BLACK),
++                column((self.0..self.0 + 3).map(|index| {
++                    button(format!("item {}", index + 100))
++                        .h(32)
++                        .w(200)
++                        .bg(Color::rgb(220, 230, 240))
++                }))
++                .h(96)
++                .w(200),
++                div().h(20).w(200).bg(Color::BLACK),
++            ))
++        }
++    }
++    let mut win = Win::with_size(buffered(100_000, 2), 240, 160).unwrap();
++    for index in [0, 10, 99_997] {
++        win.scroll_to_index(win.list(LIST).unwrap(), index).unwrap();
++        let mut eager = Win::with_size(Eager(index), 240, 160).unwrap();
++        let actual = image(&mut win);
++        eager
++            .with_pixels(|expected, _, _| assert_eq!(actual, expected))
++            .unwrap();
++    }
++}
++
++#[test]
++fn overscan_checks_buffered_key_coherence_before_any_row_description() {
++    struct Bad(bool);
++    impl ItemSource for Bad {
++        fn len(&self) -> usize {
++            8
++        }
++        fn key(&self, index: usize) -> ItemKey {
++            ItemKey::new(if self.0 && index == 3 {
++                0
++            } else {
++                index as u64
++            })
++        }
++        fn index_of(&self, key: ItemKey) -> Option<usize> {
++            Some(if !self.0 && key.get() == 3 {
++                999
++            } else {
++                key.get() as usize
++            })
++        }
++        fn row(&self, _: usize) -> El<'_> {
++            panic!("invalid key set must fail before descriptions")
++        }
++    }
++    impl View for Bad {
++        fn view(&self) -> El<'_> {
++            // Exercise decorations both before and after the list-only builder.
++            uniform_list(LIST, self, 32)
++                .name("list")
++                .rounded(0.)
++                .overscan(2)
++                .h(96)
++                .w(200)
++        }
++    }
++    for (bad, expected) in [
++        (true, ListError::DuplicateKey(ItemKey::new(0))),
++        (false, ListError::InvalidIndex(ItemKey::new(3))),
++    ] {
++        assert_eq!(
++            Win::with_size(Bad(bad), 240, 160).err(),
++            Some(Error::List(expected))
++        );
++    }
++}
+diff --git a/reactivity/crates/gpui/tests/rounded.rs b/reactivity/crates/gpui/tests/rounded.rs
+index dc53f287c3..22f3fd409d 100644
+--- a/reactivity/crates/gpui/tests/rounded.rs
++++ b/reactivity/crates/gpui/tests/rounded.rs
+@@ -73,7 +73,7 @@ fn alternating_scroll_and_radius_builders_reuse_one_cold_extension_allocation()
+             element = Some(pane);
+         });
+         assert_eq!(measured.count_total, if named { 2 } else { 1 });
+-        assert_eq!(measured.bytes_total, if named { 104 } else { 56 });
++        assert_eq!(measured.bytes_total, if named { 112 } else { 64 });
+         drop(element);
+     }
+ }
