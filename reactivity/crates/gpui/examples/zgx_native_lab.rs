@@ -221,7 +221,7 @@ fn main() -> Result<(), Box<dyn std::error::Error>> {
             use std::io::Write;
             let mut out = std::fs::File::create(path).unwrap();
             write!(out, "P6\n{w} {h}\n255\n").unwrap();
-            for pixel in pixels.chunks_exact(4) {
+            for pixel in pixels.as_chunks::<4>().0 {
                 out.write_all(&pixel[..3]).unwrap();
             }
         })?;
