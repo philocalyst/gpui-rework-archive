@@ -12,7 +12,7 @@ fn fingerprint(layout: &TextLayout) -> (Vec<(u16, u32, u32, u32)>, [u32; 3]) {
 fn main() {
     let primary = FontFace::bundled().unwrap();
     let foreign = FontFace::new(include_bytes!("../assets/NotoSans-default.ttf")).unwrap();
-    let long = "office AVATAR 123456789 ".repeat(1400);
+    let long = "office AVATAR 123456789 ".repeat(1300);
     assert!(long.len() > 30_000 && long.len() <= 32768);
     let mixed = "a\u{301} שלום مرحبا office\r\n".repeat(64);
     let stages = [
