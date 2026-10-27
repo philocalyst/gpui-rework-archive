@@ -4416,3 +4416,6 @@ fn retained_banked_text_images_and_transforms_survive_slot_repairs() {
         }
     });
 }
+
+#[path = "support/text_packet.rs"]
+mod text_packet_tests;

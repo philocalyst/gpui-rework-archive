@@ -44,6 +44,7 @@ pub struct RetainedRenderer {
     inner: Renderer,
     backing: Option<Box<Backing>>,
     stats: RetainedStats,
+    text_runs: Vec<Option<text_packet::Run>>,
 }
 impl std::ops::Deref for RetainedRenderer {
     type Target = Renderer;
@@ -57,6 +58,7 @@ impl RetainedRenderer {
             inner,
             backing: None,
             stats: RetainedStats::default(),
+            text_runs: Vec::new(),
         }
     }
     pub fn retained_stats(&self) -> RetainedStats {
@@ -96,11 +98,21 @@ impl RetainedRenderer {
         }
         let backing = self.backing.as_mut().unwrap();
         let damage = damage.filter(|_| valid && !resized);
+        self.text_runs.clear();
+        self.text_runs
+            .try_reserve(scene.groups().len())
+            .map_err(|_| Error::ResourceLimit)?;
+        let runs = &mut self.text_runs;
         let submitted = self.inner.state.render_observed(
             &self.inner.context,
             scene,
             backing.output(target, damage),
-            |_, _, _, _| {},
+            |ordinal, group, word, compact| {
+                if compact && let Some(slot) = group.text_run_slot() {
+                    runs.resize(runs.len().max(slot.index() + 1), None);
+                    runs[slot.index()] = Some(text_packet::Run::new(ordinal, group, word));
+                }
+            },
         )?;
         backing.valid = true;
         self.stats = backing.stats(damage);
@@ -147,6 +159,38 @@ impl RetainedRenderer {
             .prepare_slots(&self.inner.context, edits, &backing.view)?;
         plan.output = backing.output(target, damage);
         let submitted = plan.commit();
+        self.stats = backing.stats(damage);
+        Ok(submitted)
+    }
+    /// Active positional text-run directory capacity; excludes allocator headers.
+    pub fn text_packet_capacity_bytes(&self) -> usize {
+        self.text_runs.capacity() * size_of::<Option<text_packet::Run>>()
+    }
+    /// Replace up to four masked runs in the last packet. Slots and groups are
+    /// positional edits, not a complete new scene or a scene-identity certificate.
+    /// The caller certifies all old/new image changes lie within `damage`.
+    /// Any rejected batch preserves the preceding packet and retained image.
+    pub fn patch_texts(
+        &mut self,
+        edits: &[(gpui_canvas::TextRunSlot, PreparedGroup<'_>)],
+        target: &wgpu::TextureView,
+        damage: Option<DamageRegion>,
+    ) -> Result<wgpu::SubmissionIndex, TextPacketError> {
+        let backing = self
+            .backing
+            .as_ref()
+            .filter(|b| b.valid)
+            .ok_or(TextPacketError::NoPacket)?;
+        check_target(target, backing.size(), self.inner.format())
+            .map_err(|_| TextPacketError::InvalidTarget)?;
+        check_damage(damage, backing.size()).map_err(|_| TextPacketError::InvalidTarget)?;
+        let submitted = text_packet::patch(
+            &mut self.inner.state,
+            &self.inner.context,
+            &mut self.text_runs,
+            edits,
+            backing.output(target, damage),
+        )?;
         self.stats = backing.stats(damage);
         Ok(submitted)
     }

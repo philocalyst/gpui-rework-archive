@@ -14,6 +14,8 @@ mod paint;
 mod retained;
 use retained::Output;
 pub use retained::{RetainedRenderer, RetainedStats};
+mod text_packet;
+pub use text_packet::TextPacketError;
 mod slots;
 pub use images::ImageStats;
 pub use paint::{GpuPaintCommit, GpuPaintEdit, PaintBinding, PaintError, PaintRenderer};
@@ -975,43 +977,7 @@ impl RendererState {
             &context.queue,
             bytemuck::cast_slice(&self.residuals),
         );
-        let bindings = context
-            .device
-            .create_bind_group(&wgpu::BindGroupDescriptor {
-                label: Some("GPUI scene"),
-                layout: &context.layout,
-                entries: &[
-                    wgpu::BindGroupEntry {
-                        binding: 0,
-                        resource: self.globals.handle.as_entire_binding(),
-                    },
-                    wgpu::BindGroupEntry {
-                        binding: 1,
-                        resource: if self.images.is_some() {
-                            // Packed image pixels follow the record prefix.
-                            self.draws.handle.as_entire_binding()
-                        } else {
-                            self.draws.binding(&self.records)
-                        },
-                    },
-                    wgpu::BindGroupEntry {
-                        binding: 2,
-                        resource: self.tiles.binding(&self.ranges),
-                    },
-                    wgpu::BindGroupEntry {
-                        binding: 3,
-                        resource: self.indices.binding(&self.references),
-                    },
-                    wgpu::BindGroupEntry {
-                        binding: 4,
-                        resource: wgpu::BindingResource::TextureView(&self.atlas.view),
-                    },
-                    wgpu::BindGroupEntry {
-                        binding: 5,
-                        resource: self.corrections.binding(&self.residuals),
-                    },
-                ],
-            });
+        let bindings = self.bindings(context);
         let submitted = context.submit(output, &bindings);
         self.packet = Some(Packet {
             bindings,
@@ -1108,6 +1074,45 @@ impl RendererState {
         Ok(Some(submitted))
     }
 
+    fn bindings(&self, context: &GpuContext) -> wgpu::BindGroup {
+        context
+            .device
+            .create_bind_group(&wgpu::BindGroupDescriptor {
+                label: Some("GPUI scene"),
+                layout: &context.layout,
+                entries: &[
+                    wgpu::BindGroupEntry {
+                        binding: 0,
+                        resource: self.globals.handle.as_entire_binding(),
+                    },
+                    wgpu::BindGroupEntry {
+                        binding: 1,
+                        resource: if self.images.is_some() {
+                            // Packed image pixels follow the record prefix.
+                            self.draws.handle.as_entire_binding()
+                        } else {
+                            self.draws.binding(&self.records)
+                        },
+                    },
+                    wgpu::BindGroupEntry {
+                        binding: 2,
+                        resource: self.tiles.binding(&self.ranges),
+                    },
+                    wgpu::BindGroupEntry {
+                        binding: 3,
+                        resource: self.indices.binding(&self.references),
+                    },
+                    wgpu::BindGroupEntry {
+                        binding: 4,
+                        resource: wgpu::BindingResource::TextureView(&self.atlas.view),
+                    },
+                    wgpu::BindGroupEntry {
+                        binding: 5,
+                        resource: self.corrections.binding(&self.residuals),
+                    },
+                ],
+            })
+    }
     fn correction(&mut self, inverse: [f64; 6], clip: gpui_canvas::Rect) -> u32 {
         let low = std::array::from_fn::<_, 8, _>(|i| match i {
             0..6 => (inverse[i] - f64::from(inverse[i] as f32)) as f32,

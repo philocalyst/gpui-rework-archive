@@ -1,0 +1,203 @@
+use super::*;
+use gpui_canvas::{TextLayout, TextRunSlot};
+use gpui_gpu::{RetainedRenderer, TextPacketError};
+const CLIP: Rect = Rect::new(0., 0., 128., 96.);
+fn scene(
+    text: &mut TextSystem,
+    labels: [&str; 2],
+    positions: [Point; 2],
+    map: Affine,
+    config: ColorConfig,
+    second_color: Color,
+) -> (Canvas, [TextRunSlot; 2]) {
+    let layouts: [TextLayout; 2] = labels.map(|s| text.shape(s, 12., None).unwrap());
+    let seed = text.shape("01234567890123456789", 12., None).unwrap();
+    let mut canvas = Canvas::recording(128, 96, config).unwrap();
+    let mut stage = canvas.stage();
+    stage.clear(Color::WHITE);
+    stage
+        .fill_rect(CLIP, Affine::IDENTITY, CLIP, Color::rgb(210, 220, 230))
+        .unwrap();
+    let a = stage
+        .draw_text_scaled_tracked(text, &layouts[0], positions[0], map, CLIP, Color::BLACK, 1.)
+        .unwrap()
+        .unwrap();
+    // This opaque draw hides the earlier run, but never the later one.
+    stage
+        .fill_rect(
+            Rect::new(40., 0., 32., 48.),
+            Affine::IDENTITY,
+            CLIP,
+            Color::rgb(50, 110, 180),
+        )
+        .unwrap();
+    let b = stage
+        .draw_text_scaled_tracked(text, &layouts[1], positions[1], map, CLIP, second_color, 1.)
+        .unwrap()
+        .unwrap();
+    for y in [52., 66., 80.] {
+        stage
+            .draw_text(
+                text,
+                &seed,
+                Point { x: 2., y },
+                Affine::IDENTITY,
+                CLIP,
+                Color::BLACK,
+            )
+            .unwrap();
+    }
+    stage.commit();
+    (canvas, [a, b])
+}
+fn edits<'a>(
+    canvas: &'a Canvas,
+    slots: [TextRunSlot; 2],
+) -> [(TextRunSlot, gpui_canvas::PreparedGroup<'a>); 2] {
+    slots.map(|slot| (slot, canvas.prepared_scene().text_run(slot).unwrap()))
+}
+#[test]
+fn text_packets_repair_new_tiles_in_painter_order_and_match_fresh_images() {
+    pollster::block_on(async {
+        for (format, config) in [
+            (wgpu::TextureFormat::Rgba8UnormSrgb, ColorConfig::default()),
+            (
+                wgpu::TextureFormat::Rgba16Float,
+                ColorConfig::linear_hdr(gpui_canvas::OutputProfile::Srgb, 203.).unwrap(),
+            ),
+        ] {
+            for map in [Affine::IDENTITY, Affine::translation(0.25, 0.5)] {
+                let mut text = TextSystem::bundled().unwrap();
+                let mut gpu = RetainedRenderer::new(renderer(format).await);
+                let mut full = renderer(format).await;
+                let initial_positions = [Point { x: 2., y: 2. }, Point { x: 6., y: 24. }];
+                let (initial, slots) = scene(
+                    &mut text,
+                    ["0011", "1100"],
+                    initial_positions,
+                    map,
+                    config,
+                    Color::BLACK,
+                );
+                let target = output_texture(&gpu, &initial);
+                let view = target.create_view(&Default::default());
+                gpu.render(initial.prepared_scene(), &view, None).unwrap();
+                assert_eq!(read_texture(&gpu, &target), readback(&mut full, &initial));
+                assert!(gpu.text_packet_capacity_bytes() > 0);
+                // Cross multiple tile boundaries, including uniform background
+                // tiles and the opaque cutoff before the later text run.
+                for turn in 0..4 {
+                    let positions = if turn % 2 == 0 {
+                        [Point { x: 48., y: 2. }, Point { x: 82., y: 24. }]
+                    } else {
+                        initial_positions
+                    };
+                    let labels = if turn % 2 == 0 {
+                        ["1100", "0011"]
+                    } else {
+                        ["0011", "1100"]
+                    };
+                    let (next, next_slots) =
+                        scene(&mut text, labels, positions, map, config, Color::BLACK);
+                    assert_eq!(slots, next_slots);
+                    gpu.patch_texts(&edits(&next, slots), &view, None).unwrap();
+                    let stats = gpu.stats();
+                    assert!(stats.packet_reused);
+                    assert_eq!(stats.mask_upload_bytes, 0);
+                    assert_eq!(stats.validated_draws, 8);
+                    assert_eq!(
+                        read_texture(&gpu, &target),
+                        readback(&mut full, &next),
+                        "new tile membership / painter order"
+                    );
+                }
+            }
+        }
+    });
+}
+#[test]
+fn a_late_text_packet_rejection_keeps_the_old_image_and_replay() {
+    pollster::block_on(async {
+        let mut text = TextSystem::bundled().unwrap();
+        let mut gpu = RetainedRenderer::new(renderer(wgpu::TextureFormat::Rgba8UnormSrgb).await);
+        let positions = [Point { x: 2., y: 2. }, Point { x: 6., y: 24. }];
+        let (initial, slots) = scene(
+            &mut text,
+            ["0011", "1100"],
+            positions,
+            Affine::IDENTITY,
+            ColorConfig::default(),
+            Color::BLACK,
+        );
+        let target = output_texture(&gpu, &initial);
+        let view = target.create_view(&Default::default());
+        gpu.render(initial.prepared_scene(), &view, None).unwrap();
+        let before = read_texture(&gpu, &target);
+        for (labels, color, expected) in [
+            (
+                ["1100", "ΩΩΩΩ"],
+                Color::BLACK,
+                TextPacketError::MissingResource,
+            ),
+            (
+                ["1100", "0011"],
+                Color::rgb(220, 10, 20),
+                TextPacketError::ChangedCommon,
+            ),
+            (
+                ["1100", "001100"],
+                Color::BLACK,
+                TextPacketError::ChangedShape,
+            ),
+        ] {
+            let (next, _) = scene(
+                &mut text,
+                labels,
+                positions,
+                Affine::IDENTITY,
+                ColorConfig::default(),
+                color,
+            );
+            assert_eq!(
+                gpu.patch_texts(&edits(&next, slots), &view, None)
+                    .unwrap_err(),
+                expected
+            );
+            gpu.redraw(&view).unwrap().unwrap();
+            assert_eq!(gpu.retained_stats().composited_pixels, 0);
+            assert_eq!(
+                read_texture(&gpu, &target),
+                before,
+                "late member must not partly commit"
+            );
+        }
+        let batch = edits(&initial, slots);
+        assert_eq!(
+            gpu.patch_texts(&[batch[0], batch[0]], &view, None)
+                .unwrap_err(),
+            TextPacketError::InvalidBatch
+        );
+        assert_eq!(
+            gpu.patch_texts(&[batch[1], batch[0]], &view, None)
+                .unwrap_err(),
+            TextPacketError::InvalidBatch
+        );
+        let wrong = Canvas::recording(32, 32, ColorConfig::default()).unwrap();
+        let wrong_target = output_texture(&gpu, &wrong);
+        assert_eq!(
+            gpu.patch_texts(&batch, &wrong_target.create_view(&Default::default()), None)
+                .unwrap_err(),
+            TextPacketError::InvalidTarget
+        );
+        gpu.redraw(&view).unwrap().unwrap();
+        assert_eq!(read_texture(&gpu, &target), before);
+        gpu.set_grouped_records(false);
+        gpu.render(initial.prepared_scene(), &view, None).unwrap();
+        assert_eq!(
+            gpu.patch_texts(&batch, &view, None).unwrap_err(),
+            TextPacketError::MissingRun
+        );
+        gpu.redraw(&view).unwrap().unwrap();
+        assert_eq!(read_texture(&gpu, &target), before);
+    });
+}

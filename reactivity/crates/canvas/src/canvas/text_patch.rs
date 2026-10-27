@@ -6,6 +6,39 @@ use super::*;
 #[derive(Clone, Copy, Debug, PartialEq, Eq)]
 pub struct TextRunSlot(std::num::NonZeroU32);
 
+impl TextRunSlot {
+    /// Zero-based common-run position, not a scene or lifetime identity.
+    pub fn index(self) -> usize {
+        self.0.get() as usize - 1
+    }
+}
+
+impl<'a> PreparedScene<'a> {
+    /// Borrow this positional masked run. Pair the slot with the owner's exact
+    /// scene token; a replacement scene can reuse every position.
+    pub fn text_run(self, slot: TextRunSlot) -> Option<PreparedGroup<'a>> {
+        let run = self.commands.commons.get(slot.index())?;
+        let groups = Groups {
+            commands: self.commands,
+            extent: self.extent,
+            front: 0,
+            back: self.commands.order.len(),
+            remaining: 0,
+        };
+        let group = groups.view(run.range[0] as usize, run.range[1] as usize);
+        (group.text_run_slot() == Some(slot)).then_some(group)
+    }
+}
+
+impl PreparedGroup<'_> {
+    /// Positional grouped mask run, including ordinary recorded text.
+    pub fn text_run_slot(self) -> Option<TextRunSlot> {
+        let first = self.order.first()?;
+        (!first.inline() && self.sources().all(|source| source.mask().is_some()))
+            .then(|| TextRunSlot(std::num::NonZeroU32::new(u32::from(first.command) + 1).unwrap()))
+    }
+}
+
 impl CanvasScene<'_> {
     /// Record ordinary literal text and identify its grouped run when present.
     /// Empty and singleton admission returns no replaceable run.
