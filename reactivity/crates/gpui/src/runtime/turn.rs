@@ -100,7 +100,7 @@ impl<M: View + 'static, L: LaneSet<M>> RuntimeMut<'_, M, L> {
             return Ok(false);
         }
         for field in fields {
-            if self.sources.invalidates_owner(field)? {
+            if false && self.sources.invalidates_owner(field)? {
                 return Ok(false);
             }
             let Some(Fanout::General { destinations, .. }) = self.fanout.get(&field) else {
