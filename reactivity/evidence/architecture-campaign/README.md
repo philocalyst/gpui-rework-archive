@@ -35,8 +35,11 @@ publishes stream through existing with_inbox_for; no library/API change.
 Eight tests/Clippy and five actual X11 modes/routes pass qualification. Logs
 retain coalescing and repeated ACKs; no performance verdict. Typography,
 controlled wheel/keyed overscan, deferred controls and equal profiles remain.
-Next isolated slice local/text-line-height preserves old defaults and adds
-explicit pitch for the native port.
+Completed local/text-line-height dossier49f2221f8f2: additive explicit pitch,
+old defaults preserved; 967 default/1040 X11 tests, eight native scripts and
+source-invalidation mutant. Shipping +79 lines; Style +8B. Both native images
+show seven lines at20px pitch; text edges differ, so no exact cross-framework
+quality equivalence. Next isolated slice: optional keyed list overscan.
 
 [BBTree transfer research](../bbtree-transfer/README.md) records the pinned
 implementation, failed historical trials, applicability and next hypotheses.
@@ -51,7 +54,7 @@ in `/home/user/zgx-reference-local`. Its unchanged `RENDER=0` microbenchmark
 performs layout/damage while GPUI's recorder additionally materializes canonical
 glyph commands. Those endpoints and initial profiles differ: no speed ranking
 may be derived from their numbers. Native equivalents must match typography,
-content, overscan, keyed row retention, controls, timing and acknowledged output before measurement. The reference plus/equals controls explicitly yield before their batched update; the current port still performs them synchronously. Wheel routing and line pitch remain incomplete too.
+content, overscan, keyed row retention, controls, timing and acknowledged output before measurement. The reference plus/equals controls explicitly yield before their batched update; the current port still performs them synchronously. Wheel routing remains incomplete; explicit line pitch is now qualified locally.
 
 This VM has no `/dev/dri`. Software Vulkan is llvmpipe, not a hardware GPU.
 The documented `ssh mothership` does not resolve and no SSH keys are installed.
