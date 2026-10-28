@@ -450,3 +450,55 @@ observed here. Preserving already established equality through scene publication
 is a separate algorithmic application of retained validated state. Async gather
 and coherent ready-group publication remain hypotheses for actual measured graph
 bottlenecks, with the earlier lane failures kept intact.
+
+
+## Exact unchanged suffix: qualified startup win, complete regression gate pending
+
+Production source **df8ca59f69813e7dd05711fead98ed4278f1688d** adds 12 shipping
+lines to `Canvas::damage_from`. When command counts differ, compare backward
+through the exact unchanged suffix before the existing forward comparison.
+Retain both supports at the first unequal reverse pair. The same exact command
+certificate (geometry, color, clip, material and immutable glyph lease identity)
+remains authoritative. No new retained storage, unsafe code, API or shader change.
+The test-only example visitor is excluded from the shipping count and timed path.
+
+Correctness/code-cost dossier **380db598cdbed2dd81c5a41745473c40a876f148** is
+independently verified: all five configurations and 15 actual native checks pass;
+100 cold-stream fresh-reference frame comparisons pass, including skipped ACKs.
+The bounded omission mutant fails exact changed-pixel coverage at (44, 2).
+All hot headers remain unchanged. Default-release native ELF grows 864 bytes;
+`damage_from` machine code grows 1,860 to 2,499 bytes and its local stack
+reservation 936 to 1,272 bytes. Build reserve stops occurred after passed test
+suites and preserved ELFs; separate frozen-source remainder gates completed.
+These stops and the initial rejected cleanup attempt remain in the dossier.
+
+Native startup dossier **bea6c4cf9135f494925ccd80b05f584e20fe7ff4** independently
+verifies all 32 eight-second processes, six preflights and exact artifacts.
+Every candidate run (eight exact-source and eight owner-route runs) produces
+479 updates and one ACK gap above 25 ms in the first second. Baseline produces
+445–455 updates and 17 such first-second gaps in every run. No later gaps occur.
+All 16 candidate runs pass the fixed 464–488 update and at-most-two-gap gates.
+No reruns, subsets, threshold changes or claim about historical failed trials.
+
+This intervention supports excessive damage from command-count shifts as the
+startup cause. It is not a custom async runtime or evidence of higher cache-hit
+rate. The BBTree connection remains eliminating repeated dependent work while
+preserving exact identity; Solid/Ripple distinguish speculative computation
+from publication and retained authority. None licenses weakening ACK validity
+or moving mutable owner work into independently scheduled tasks.
+
+The preregistered complete regression continuation is **64e90ba23d** on
+`local/damage-suffix-cost`: 168 qualification processes, 56 allocation probes,
+and 4,160 timing processes across all 28 cases. Every paired median process-p50
+ratio must remain at most 1.05 versus qualified pre-change composition, and all
+four warm invoking-thread allocation measures must not grow. Exact pixels,
+epochs, copy/image work and unchanged headers remain mandatory; composited
+support may shrink but cannot grow. The runner, analyzer, checker and independent
+verifier are frozen before observations. No cost results yet at this checkpoint.
+
+Remaining goal: steady-state raster workers still dominate CPU. The prior
+whole-native trial's scroll/mixed ratios 8.07/6.06 versus ZGX remain failures.
+The startup win does not establish overall superiority, hardware GPU behavior,
+scanout latency or quality parity. Any next shader/sample lowering experiment
+needs its own exact numerical certificate, failed mutant and preregistered full
+cost gates; the old pixel-uniform experiment remains rejected. All work local.

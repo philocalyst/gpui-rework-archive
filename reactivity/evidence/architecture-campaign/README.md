@@ -462,3 +462,12 @@ New local/damage-suffix is preregistered at0a7f3b822b09744e7e45a1ac9961d8aaa183a
 implementation and tests are in progress, not yet qualified. See LOCALITY.md for
 the distinction between startup diagnosis and the continuing BBTree/Solid/Ripple
 architecture hypotheses. All earlier failures and fixed gates remain unchanged.
+
+
+Exact suffix comparison is now production source **df8ca59f69813e7dd05711fead98ed4278f1688d**,
+qualified at **380db598cdbed2dd81c5a41745473c40a876f148**. Native startup screen
+**bea6c4cf9135f494925ccd80b05f584e20fe7ff4** passes all16 candidate runs:
+479 updates/8s and one first-second gap>25ms, versus baseline445–455 and17 gaps.
+Full28-case regression continuation **64e90ba23d** is preregistered; no cost
+results yet. No API/shader/storage change or overall ZGX/hardware victory.
+See [the detailed mechanism and limits](../bbtree-transfer/LOCALITY.md#exact-unchanged-suffix-qualified-startup-win-complete-regression-gate-pending).
