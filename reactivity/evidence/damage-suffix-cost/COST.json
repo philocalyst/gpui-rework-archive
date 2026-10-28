@@ -1,0 +1,208 @@
+{
+  "cases": [
+    "scroll",
+    "both",
+    "stream",
+    "stream-owner",
+    "fractional",
+    "flat-tiny",
+    "flat-full",
+    "list-tiny",
+    "list-flat",
+    "exposure",
+    "text-0-1-source",
+    "text-0-1-owner",
+    "text-0-2-source",
+    "text-0-2-owner",
+    "text-0-4-source",
+    "text-0-4-owner",
+    "text-25-1-source",
+    "text-25-1-owner",
+    "text-25-2-source",
+    "text-25-2-owner",
+    "text-25-4-source",
+    "text-25-4-owner",
+    "text-1000-1-source",
+    "text-1000-1-owner",
+    "text-1000-2-source",
+    "text-1000-2-owner",
+    "text-1000-4-source",
+    "text-1000-4-owner"
+  ],
+  "variants": [
+    "baseline",
+    "candidate"
+  ],
+  "pairs_by_case": {
+    "scroll": 20,
+    "both": 20,
+    "stream": 20,
+    "stream-owner": 20,
+    "fractional": 80,
+    "flat-tiny": 120,
+    "flat-full": 80,
+    "list-tiny": 120,
+    "list-flat": 80,
+    "exposure": 80,
+    "text-0-1-source": 80,
+    "text-0-1-owner": 80,
+    "text-0-2-source": 80,
+    "text-0-2-owner": 80,
+    "text-0-4-source": 80,
+    "text-0-4-owner": 80,
+    "text-25-1-source": 80,
+    "text-25-1-owner": 80,
+    "text-25-2-source": 80,
+    "text-25-2-owner": 80,
+    "text-25-4-source": 80,
+    "text-25-4-owner": 80,
+    "text-1000-1-source": 80,
+    "text-1000-1-owner": 80,
+    "text-1000-2-source": 80,
+    "text-1000-2-owner": 80,
+    "text-1000-4-source": 80,
+    "text-1000-4-owner": 80
+  },
+  "seed": 20261110,
+  "frames": 64,
+  "warmup": 16,
+  "timing_processes": 4160,
+  "bootstrap_resamples": 10000,
+  "thresholds": {
+    "scroll": {
+      "baseline": 1.05
+    },
+    "both": {
+      "baseline": 1.05
+    },
+    "stream": {
+      "baseline": 1.05
+    },
+    "stream-owner": {
+      "baseline": 1.05
+    },
+    "fractional": {
+      "baseline": 1.05
+    },
+    "flat-tiny": {
+      "baseline": 1.05
+    },
+    "flat-full": {
+      "baseline": 1.05
+    },
+    "list-tiny": {
+      "baseline": 1.05
+    },
+    "list-flat": {
+      "baseline": 1.05
+    },
+    "exposure": {
+      "baseline": 1.05
+    },
+    "text-0-1-source": {
+      "baseline": 1.05
+    },
+    "text-0-1-owner": {
+      "baseline": 1.05
+    },
+    "text-0-2-source": {
+      "baseline": 1.05
+    },
+    "text-0-2-owner": {
+      "baseline": 1.05
+    },
+    "text-0-4-source": {
+      "baseline": 1.05
+    },
+    "text-0-4-owner": {
+      "baseline": 1.05
+    },
+    "text-25-1-source": {
+      "baseline": 1.05
+    },
+    "text-25-1-owner": {
+      "baseline": 1.05
+    },
+    "text-25-2-source": {
+      "baseline": 1.05
+    },
+    "text-25-2-owner": {
+      "baseline": 1.05
+    },
+    "text-25-4-source": {
+      "baseline": 1.05
+    },
+    "text-25-4-owner": {
+      "baseline": 1.05
+    },
+    "text-1000-1-source": {
+      "baseline": 1.05
+    },
+    "text-1000-1-owner": {
+      "baseline": 1.05
+    },
+    "text-1000-2-source": {
+      "baseline": 1.05
+    },
+    "text-1000-2-owner": {
+      "baseline": 1.05
+    },
+    "text-1000-4-source": {
+      "baseline": 1.05
+    },
+    "text-1000-4-owner": {
+      "baseline": 1.05
+    }
+  },
+  "process_manifest_sha256": "c69b91fd561cbe16820c184541f0705f706e1c71f077ca2017868286145f3a36",
+  "qualification_processes": 168,
+  "allocation_processes": 56,
+  "header_gates": {
+    "RuntimeUnit": 1824,
+    "Prepared": 40,
+    "TextPatch_native": 96,
+    "TextResources": 168,
+    "SceneDamage": 40
+  },
+  "allocation_gates": {
+    "reference": "baseline",
+    "cases": [
+      "scroll",
+      "both",
+      "stream",
+      "stream-owner",
+      "fractional",
+      "flat-tiny",
+      "flat-full",
+      "list-tiny",
+      "list-flat",
+      "exposure",
+      "text-0-1-source",
+      "text-0-1-owner",
+      "text-0-2-source",
+      "text-0-2-owner",
+      "text-0-4-source",
+      "text-0-4-owner",
+      "text-25-1-source",
+      "text-25-1-owner",
+      "text-25-2-source",
+      "text-25-2-owner",
+      "text-25-4-source",
+      "text-25-4-owner",
+      "text-1000-1-source",
+      "text-1000-1-owner",
+      "text-1000-2-source",
+      "text-1000-2-owner",
+      "text-1000-4-source",
+      "text-1000-4-owner"
+    ],
+    "fields": [
+      "requests",
+      "requested_bytes",
+      "net_bytes",
+      "peak_bytes"
+    ],
+    "rule": "candidate warm medians no greater than baseline"
+  },
+  "work_gates": "Exact final pixels/epochs; identical copied pixels/image storage; candidate composited pixels <= baseline in every qualification frame. Support may shrink, model work may not."
+}
