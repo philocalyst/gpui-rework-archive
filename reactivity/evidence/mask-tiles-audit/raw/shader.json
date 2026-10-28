@@ -1,0 +1,8 @@
+{
+  "sha256": "d798300f08a0c14bdb32705d93d15fa30e707db630880a060d4f6ace88e5d60d",
+  "bytes": 22041,
+  "offset": 1452279,
+  "generated": [
+    "/home/user/gpui-mask-tiles-audit-target/release/build/gpui_gpu/1f2320ae5ea7e966/out/ui.wgsl"
+  ]
+}

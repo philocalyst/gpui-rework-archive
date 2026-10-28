@@ -1,0 +1,1 @@
+{"starting_free_bytes": 11079315456, "preferred_free_bytes": 12884901888, "minimum_free_bytes": 8589934592, "rationale": "Prior exact native-only profile occupies about1.1GiB; continuously enforce8GiB minimum after verified completed-cache cleanup."}

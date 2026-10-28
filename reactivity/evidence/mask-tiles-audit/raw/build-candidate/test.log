@@ -1,0 +1,13 @@
+   Compiling gpui v0.1.0 (/home/user/gpui-mask-tiles-audit-lab/reactivity/crates/gpui)
+    Finished `release` profile [optimized] target(s) in 28.23s
+     Running unittests examples/zgx_native_lab.rs (/home/user/gpui-mask-tiles-audit-target/release/build/gpui/36ce182db847da02/out/zgx_native_lab-36ce182db847da02)
+CONTROL_FIRST_POLL_COUNTERS,Counters { owner_reruns: 1, descriptions: 1, source_operations: 1, source_reads: 0, destination_compares: 103, text_promotions: 0, text_bytes_copied: 0, layout_runs: 0, measure_calls: 0, presentations: 0, paint_passes: 0, exact_updates: 0, coarse_updates: 1 }
+CONTROL_HEADERS,Lab=128,Controls=48,Task=2,Remote=8,Inbox=24
+CONTROL_STORAGE,inbox_requests=1,inbox_bytes=120,inbox_retained=120,queue_requests=5,queue_bytes=248,queue_retained=128,queue_capacity=64
+WORKLOAD_FINISHED admitted_ticks=32
+workload_ticks=222 admitted_ticks=32 workload_scroll_offset=2660
+workload_ticks=222 admitted_ticks=32 workload_scroll_offset=2660
+workload_ticks=198 admitted_ticks=8 workload_scroll_offset=2660
+workload_ticks=198 admitted_ticks=8 workload_scroll_offset=2772
+workload_ticks=198 admitted_ticks=8 workload_scroll_offset=2772
+workload_ticks=192 admitted_ticks=2 workload_scroll_offset=34566

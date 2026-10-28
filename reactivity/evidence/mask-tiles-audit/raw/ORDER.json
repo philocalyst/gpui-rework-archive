@@ -1,0 +1,34 @@
+[
+  {
+    "initial": 0,
+    "mode": "idle"
+  },
+  {
+    "initial": 0,
+    "mode": "scroll"
+  },
+  {
+    "initial": 0,
+    "mode": "stream"
+  },
+  {
+    "initial": 0,
+    "mode": "both"
+  },
+  {
+    "initial": 190,
+    "mode": "idle"
+  },
+  {
+    "initial": 190,
+    "mode": "scroll"
+  },
+  {
+    "initial": 190,
+    "mode": "stream"
+  },
+  {
+    "initial": 190,
+    "mode": "both"
+  }
+]
