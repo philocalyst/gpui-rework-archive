@@ -888,3 +888,28 @@ combined public edit-to-final-pixels trace, scene-size sweep, all metadata and
 in-flight costs, clipped/overlapping content, stale/deferred publication, real
 resource leases and uncompressed serial controls. It must report an explicit
 implemented/restricted/missing matrix. Staging is not coherent shared memory.
+
+
+Composed restricted radix checkpoint **bb21d11455b6a03d134f99377c5a16b983fac27f**
+(local/display-radix):3112 verified files,3906 CPU checks,241 exact GPU
+pixel/word/resource frames,5 GPU mutants,296 independent staged-memory replay
+frames. Ordinary public paint edits now reach exact pixels through the restricted
+offline binding, compressed chunk, old/new damage and bounded COW directory.
+This remains a prototype, not a generic production journal/backend. Detailed
+implemented/restricted/missing matrix and all failures are in its README.
+
+Fixed-edit staged candidate bytes1072/1148/1108/952/952 at1/9/32/256/1024
+records (audit adds4B); zero resource entries examined. GPU record visits still
+512/4608/16384/131072/524288. Tiny raw1-node current page/root116B vs1040B
+compressed;32-node raw loses. Actual deferred old frames preserve latest pixels
+and old resource bytes; omitting resource leases corrupts80 audited bytes while
+pixels remain correct. Pixel correctness alone does not prove lifetime safety.
+No timing or ZGX inference. The general architecture goal remains open.
+
+Next independently attributable mechanisms per user steering: A versioned hot
+parameters with unchanged traversal; B damage-directed traversal with unchanged
+record encoding; combination only after both standalone gates. Retain overlap
+adversaries, clip/transform and old/new support closure, spatial-index/COW and
+structural work, and raw/serial controls. Preregister prototype timing after
+bounded correctness: preparation, staging, GPU completion and retained memory,
+not another indefinite correctness-only series or a production performance claim.
