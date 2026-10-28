@@ -1,0 +1,50 @@
+{
+  "path": "/home/user/gpui-damage-suffix-target/release/examples/zgx_native_lab",
+  "sha256": "7a76e2fbebe3c7a07dbc6e43d61580a8036ff074b70640030bf145bf241e8a09",
+  "preserved": "/home/user/gpui-preserved-test-binaries/7a76e2fbebe3c7a07dbc6e43d61580a8036ff074b70640030bf145bf241e8a09",
+  "bytes": 26390120,
+  "executed": false,
+  "cargo": {
+    "reason": "compiler-artifact",
+    "package_id": "path+file:///home/user/gpui-damage-suffix-lab/reactivity/crates/gpui#0.1.0",
+    "manifest_path": "/home/user/gpui-damage-suffix-lab/reactivity/crates/gpui/Cargo.toml",
+    "target": {
+      "kind": [
+        "example"
+      ],
+      "crate_types": [
+        "bin"
+      ],
+      "name": "zgx_native_lab",
+      "src_path": "/home/user/gpui-damage-suffix-lab/reactivity/crates/gpui/examples/zgx_native_lab.rs",
+      "edition": "2024",
+      "required-features": [
+        "native-core"
+      ],
+      "doc": false,
+      "doctest": false,
+      "test": false
+    },
+    "profile": {
+      "opt_level": "3",
+      "debuginfo": 0,
+      "debug_assertions": false,
+      "overflow_checks": false,
+      "test": false
+    },
+    "features": [
+      "accessibility",
+      "default",
+      "native",
+      "native-core",
+      "simd",
+      "x11",
+      "x11-minimal"
+    ],
+    "filenames": [
+      "/home/user/gpui-damage-suffix-target/release/examples/zgx_native_lab"
+    ],
+    "executable": "/home/user/gpui-damage-suffix-target/release/examples/zgx_native_lab",
+    "fresh": false
+  }
+}

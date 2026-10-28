@@ -1,0 +1,68 @@
+[
+  {
+    "path": "/home/user/gpui-patch-workspace-retire-target/release/build/fearless_simd_macros/d47f9dfeab0a53ae/out/libfearless_simd_macros-d47f9dfeab0a53ae.so",
+    "bytes": 3722872,
+    "sha256": "fc38e6e1927299c0b9ce3331b6cfdd4fce407e88f3f93a3e1cdb1ad0a0060914",
+    "mode": 493
+  },
+  {
+    "path": "/home/user/gpui-patch-workspace-retire-target/release/build/zerovec-derive/c60aeac5b371979e/out/libzerovec_derive-c60aeac5b371979e.so",
+    "bytes": 3796448,
+    "sha256": "eab82a193ceabae4436a40521ae8c0c49694fdb65b2b0bdd749f8f027580a43f",
+    "mode": 493
+  },
+  {
+    "path": "/home/user/gpui-patch-workspace-retire-target/release/build/bytemuck_derive/8486ab917b9e4dfb/out/libbytemuck_derive-8486ab917b9e4dfb.so",
+    "bytes": 3819704,
+    "sha256": "9d2667f847556d60a200496e9f26062036c618ea9794e6ec3590f1b7bb31f7d0",
+    "mode": 493
+  },
+  {
+    "path": "/home/user/gpui-patch-workspace-retire-target/release/build/serde_repr/9b371058a8c8172f/out/libserde_repr-9b371058a8c8172f.so",
+    "bytes": 2586200,
+    "sha256": "e4d6f1a725eea141ca7e9360ba81c449b6aeb4b011ccd4abf8e3440598ecd07e",
+    "mode": 493
+  },
+  {
+    "path": "/home/user/gpui-patch-workspace-retire-target/release/build/yoke-derive/735d941900fcb9b2/out/libyoke_derive-735d941900fcb9b2.so",
+    "bytes": 4179408,
+    "sha256": "cf73bded3a9b57a21ac11c206f03922e8371f70a265a9182be7e4141ffa8764b",
+    "mode": 493
+  },
+  {
+    "path": "/home/user/gpui-patch-workspace-retire-target/release/build/gpui/126c48c63c561836/out/patch_workspace-126c48c63c561836",
+    "bytes": 10500880,
+    "sha256": "f8589e75533d4e97784a8f183260922b0d2fb777f0c66ea4f4fe29baa3394240",
+    "mode": 493
+  },
+  {
+    "path": "/home/user/gpui-patch-workspace-retire-target/release/build/async-trait/198df58b0a520edc/out/libasync_trait-198df58b0a520edc.so",
+    "bytes": 4001840,
+    "sha256": "badcbcec3c8732c2c63d1adbc34b9b2496a5ed97ead66b5733e163a3fb5a7968",
+    "mode": 493
+  },
+  {
+    "path": "/home/user/gpui-patch-workspace-retire-target/release/build/displaydoc/cc8ded37579c4ef3/out/libdisplaydoc-cc8ded37579c4ef3.so",
+    "bytes": 3504984,
+    "sha256": "8b0eb3b43c754c458ea03094ab0a643664956a4dfc68253682befca1951b02d1",
+    "mode": 493
+  },
+  {
+    "path": "/home/user/gpui-patch-workspace-retire-target/release/build/serde_derive/f0da3669146572c5/out/libserde_derive-f0da3669146572c5.so",
+    "bytes": 4902064,
+    "sha256": "4d50a3a366e2426cf079a1f1936a9c7a1021aea05dc3cd2f8836b4acb4d3f324",
+    "mode": 493
+  },
+  {
+    "path": "/home/user/gpui-patch-workspace-retire-target/release/build/zbus_macros/7e17f05691789c81/out/libzbus_macros-7e17f05691789c81.so",
+    "bytes": 5863032,
+    "sha256": "a4eb7f05c3d9e7e943d68144ed29cdf9af0feed81f6a78060243d0ecf1148cdd",
+    "mode": 493
+  },
+  {
+    "path": "/home/user/gpui-patch-workspace-retire-target/release/build/zerofrom-derive/7ffc4abaee99a20a/out/libzerofrom_derive-7ffc4abaee99a20a.so",
+    "bytes": 4549160,
+    "sha256": "1a93b24cf10dc745ec731607645009098292f65fd11563fce373496baabf67c8",
+    "mode": 493
+  }
+]
