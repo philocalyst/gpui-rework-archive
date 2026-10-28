@@ -1,0 +1,32 @@
+{
+  "exact-0": {
+    "name": "candidate",
+    "initial": 0,
+    "route": "exact"
+  },
+  "exact-190": {
+    "name": "candidate",
+    "initial": 190,
+    "route": "exact"
+  },
+  "owner-0": {
+    "name": "candidate",
+    "initial": 0,
+    "route": "owner"
+  },
+  "owner-190": {
+    "name": "candidate",
+    "initial": 190,
+    "route": "owner"
+  },
+  "zgx-0": {
+    "name": "zgx",
+    "initial": 0,
+    "route": null
+  },
+  "zgx-190": {
+    "name": "zgx",
+    "initial": 190,
+    "route": null
+  }
+}

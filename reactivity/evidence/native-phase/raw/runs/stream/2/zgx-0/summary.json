@@ -1,0 +1,28 @@
+{
+  "name": "zgx",
+  "mode": "stream",
+  "ticks": 359,
+  "native_acknowledgements": null,
+  "reference_or_model_final": [
+    {
+      "framework": "zgx",
+      "adapter": "components",
+      "renderer": "gpu",
+      "ticks": 359,
+      "mounted_rows": 17,
+      "elapsed_seconds": 6.001
+    }
+  ],
+  "initial_ticks": 0,
+  "route": null,
+  "visible_seconds": 0.11215257100411691,
+  "samples": 119,
+  "font_sha256": "7da195a74c55bef988d0d48f9508bd5d849425c1770dba5d7bfc6ce9ed848954",
+  "interval_start": 1.1340764519991353,
+  "interval_end": 4.091718791998574,
+  "interval_seconds": 2.9576423399994383,
+  "cpu_seconds": 0.39999999999999997,
+  "cpu_cores": 0.13524285698455207,
+  "mean_rss_bytes": 125345444.88135593,
+  "max_rss_bytes": 127414272
+}

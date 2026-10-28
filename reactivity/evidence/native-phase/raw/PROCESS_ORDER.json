@@ -1,0 +1,138 @@
+[
+  {
+    "mode": "stream",
+    "group": 2,
+    "order": [
+      "owner-0",
+      "owner-190",
+      "exact-190",
+      "zgx-0",
+      "exact-0",
+      "zgx-190"
+    ]
+  },
+  {
+    "mode": "scroll",
+    "group": 3,
+    "order": [
+      "zgx-0",
+      "exact-0"
+    ]
+  },
+  {
+    "mode": "stream",
+    "group": 1,
+    "order": [
+      "exact-190",
+      "owner-0",
+      "exact-0",
+      "owner-190",
+      "zgx-190",
+      "zgx-0"
+    ]
+  },
+  {
+    "mode": "both",
+    "group": 2,
+    "order": [
+      "exact-0",
+      "zgx-0"
+    ]
+  },
+  {
+    "mode": "both",
+    "group": 1,
+    "order": [
+      "zgx-0",
+      "exact-0"
+    ]
+  },
+  {
+    "mode": "both",
+    "group": 3,
+    "order": [
+      "zgx-0",
+      "exact-0"
+    ]
+  },
+  {
+    "mode": "both",
+    "group": 0,
+    "order": [
+      "exact-0",
+      "zgx-0"
+    ]
+  },
+  {
+    "mode": "stream",
+    "group": 0,
+    "order": [
+      "exact-0",
+      "exact-190",
+      "zgx-190",
+      "owner-0",
+      "zgx-0",
+      "owner-190"
+    ]
+  },
+  {
+    "mode": "scroll",
+    "group": 2,
+    "order": [
+      "exact-0",
+      "zgx-0"
+    ]
+  },
+  {
+    "mode": "scroll",
+    "group": 0,
+    "order": [
+      "exact-0",
+      "zgx-0"
+    ]
+  },
+  {
+    "mode": "stream",
+    "group": 4,
+    "order": [
+      "zgx-0",
+      "zgx-190",
+      "owner-190",
+      "exact-0",
+      "owner-0",
+      "exact-190"
+    ]
+  },
+  {
+    "mode": "stream",
+    "group": 3,
+    "order": [
+      "owner-190",
+      "zgx-0",
+      "owner-0",
+      "zgx-190",
+      "exact-190",
+      "exact-0"
+    ]
+  },
+  {
+    "mode": "scroll",
+    "group": 1,
+    "order": [
+      "zgx-0",
+      "exact-0"
+    ]
+  },
+  {
+    "mode": "stream",
+    "group": 5,
+    "order": [
+      "zgx-190",
+      "exact-0",
+      "zgx-0",
+      "exact-190",
+      "owner-190",
+      "owner-0"
+    ]
+  }
+]

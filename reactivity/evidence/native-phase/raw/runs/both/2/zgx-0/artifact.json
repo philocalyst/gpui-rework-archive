@@ -1,0 +1,298 @@
+{
+  "path": "/home/user/zgx-native-profile-target/release/examples/component_workload",
+  "sha256": "5f89c6a5e2f4b2b8086634043e191a2e0b544dc70718715d0545d5b79f18b738",
+  "preserved": "/home/user/gpui-preserved-test-binaries/5f89c6a5e2f4b2b8086634043e191a2e0b544dc70718715d0545d5b79f18b738",
+  "bytes": 25152256,
+  "cargo": {
+    "reason": "compiler-artifact",
+    "package_id": "path+file:///home/user/zgx-native-profile-lab/crates/zgx-desktop#0.1.2",
+    "manifest_path": "/home/user/zgx-native-profile-lab/crates/zgx-desktop/Cargo.toml",
+    "target": {
+      "kind": [
+        "example"
+      ],
+      "crate_types": [
+        "bin"
+      ],
+      "name": "component_workload",
+      "src_path": "/home/user/zgx-native-profile-lab/crates/zgx-desktop/examples/component_workload.rs",
+      "edition": "2024",
+      "doc": false,
+      "doctest": false,
+      "test": false
+    },
+    "profile": {
+      "opt_level": "3",
+      "debuginfo": 0,
+      "debug_assertions": false,
+      "overflow_checks": false,
+      "test": false
+    },
+    "features": [
+      "default",
+      "gif",
+      "jpeg",
+      "png",
+      "private-api",
+      "svg"
+    ],
+    "filenames": [
+      "/home/user/zgx-native-profile-target/release/examples/component_workload"
+    ],
+    "executable": "/home/user/zgx-native-profile-target/release/examples/component_workload",
+    "fresh": false
+  },
+  "fingerprints": [
+    {
+      "path": "/home/user/zgx-native-profile-target/release/build/zgx-desktop/3256656f5e1819f6/fingerprint/example-component_workload.json",
+      "content": {
+        "rustc": 13112353858380123722,
+        "features": "[\"default\", \"gif\", \"jpeg\", \"png\", \"private-api\", \"svg\"]",
+        "declared_features": "[\"default\", \"ghostty\", \"gif\", \"jpeg\", \"mimalloc\", \"png\", \"private-api\", \"svg\", \"terminal-bundle\", \"vulkan\", \"webview2\"]",
+        "target": 10404900727798851975,
+        "profile": 18212754037638004342,
+        "path": 2944674840513894101,
+        "deps": [
+          [
+            86246135597337767,
+            "arboard",
+            false,
+            2407295523183770954
+          ],
+          [
+            789729321552785818,
+            "zgx_run",
+            false,
+            15683190154115254878
+          ],
+          [
+            827577758521457683,
+            "vt100",
+            false,
+            10861406188995702177
+          ],
+          [
+            1725944711843314557,
+            "zgx_workload",
+            false,
+            18272822390392668946
+          ],
+          [
+            2987262961022079395,
+            "image",
+            false,
+            12348635999632949333
+          ],
+          [
+            3151685427247483087,
+            "dbus",
+            false,
+            8386601780333800964
+          ],
+          [
+            3317315565990553774,
+            "wayland_client",
+            false,
+            1240079390518671376
+          ],
+          [
+            3486048459523671587,
+            "dbus_crossroads",
+            false,
+            5610548541324421508
+          ],
+          [
+            5019070990281742224,
+            "accesskit",
+            false,
+            8893801091443731755
+          ],
+          [
+            5330460842384404171,
+            "serde_json",
+            false,
+            9723023212862556948
+          ],
+          [
+            5573101603161346839,
+            "x11_dl",
+            false,
+            1729993836326604522
+          ],
+          [
+            6093752119402931234,
+            "zgx_gpu",
+            false,
+            13077454745472666285
+          ],
+          [
+            7046211990439206556,
+            "zgx_desktop",
+            false,
+            11134104653398325760
+          ],
+          [
+            7046211990439206556,
+            "build_script_build",
+            false,
+            220691498429740332
+          ],
+          [
+            7732690117511085917,
+            "zgx_components",
+            false,
+            15256916129953281373
+          ],
+          [
+            7883780462905440460,
+            "libloading",
+            false,
+            10691324149163054796
+          ],
+          [
+            8463648438466411195,
+            "calloop",
+            false,
+            9119930588603286042
+          ],
+          [
+            9071402520034518232,
+            "zgx_script",
+            false,
+            17060097949041348817
+          ],
+          [
+            10029280503098412861,
+            "fontdue",
+            false,
+            3755728656424210352
+          ],
+          [
+            10504718112287328430,
+            "libc",
+            false,
+            11275882361497267105
+          ],
+          [
+            10877810225362942956,
+            "rfd",
+            false,
+            11292366797325112297
+          ],
+          [
+            11007642288372142365,
+            "zgx",
+            false,
+            5617620607771774546
+          ],
+          [
+            11081808211231424406,
+            "cosmic_text",
+            false,
+            16127356335103731634
+          ],
+          [
+            11099682918945173275,
+            "blocking",
+            false,
+            14761277912787719120
+          ],
+          [
+            11790660976872878024,
+            "wayland_protocols",
+            false,
+            4085887195954493785
+          ],
+          [
+            11811317489113264584,
+            "wayland_backend",
+            false,
+            7810213251389969256
+          ],
+          [
+            12180580867954830311,
+            "softbuffer",
+            false,
+            8199038733248142219
+          ],
+          [
+            13262805300423749444,
+            "accesskit_atspi_common",
+            false,
+            12248390627397786667
+          ],
+          [
+            14167262109204400564,
+            "uuid",
+            false,
+            1229428153072473984
+          ],
+          [
+            14294947260506780522,
+            "calloop_wayland_source",
+            false,
+            14462087119956276684
+          ],
+          [
+            14559908604211499110,
+            "open",
+            false,
+            7198829685247685372
+          ],
+          [
+            15803581142294733505,
+            "x11rb",
+            false,
+            11359740716343644827
+          ],
+          [
+            16198203750081063573,
+            "unicode_segmentation",
+            false,
+            7299994204606577219
+          ],
+          [
+            16452208092402456357,
+            "tungstenite",
+            false,
+            13558008866936936263
+          ],
+          [
+            17379854143083967757,
+            "winit",
+            false,
+            11445202930840880035
+          ],
+          [
+            17719763280398284109,
+            "accesskit_consumer",
+            false,
+            16125950885874614956
+          ],
+          [
+            18266834546688217199,
+            "accesskit_winit",
+            false,
+            13155145228498509908
+          ]
+        ],
+        "local": [
+          {
+            "CheckDepInfo": {
+              "dep_info": "release/build/zgx-desktop/3256656f5e1819f6/fingerprint/dep-example-component_workload",
+              "fingerprint": "content"
+            }
+          }
+        ],
+        "rustflags": [
+          "-C",
+          "symbol-mangling-version=v0",
+          "--cfg",
+          "tokio_unstable"
+        ],
+        "config": 8362119626465528914,
+        "compile_kind": 0
+      }
+    }
+  ]
+}

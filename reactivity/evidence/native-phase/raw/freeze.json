@@ -1,0 +1,93 @@
+{
+  "utc": "2026-10-28T12:26:44.553870+00:00",
+  "source_guards": {
+    "candidate": {
+      "worktree": "/home/user/gpui-native-workspace-lab",
+      "frozen_source": "03ca419868b0d538e6847e59b60424a31aa32dfa",
+      "current_source": "344c7f8ddd55326dca2c88322f67530914c97733",
+      "paths": [
+        "reactivity/crates",
+        "reactivity/vendor",
+        "reactivity/Cargo.toml",
+        "reactivity/Cargo.lock",
+        "reactivity/rust-toolchain.toml",
+        ".cargo",
+        "clippy.toml"
+      ]
+    },
+    "zgx": {
+      "worktree": "/home/user/zgx-native-profile-lab",
+      "frozen_source": "a3678578980ef239058c557338ef9c544d356b0c",
+      "current_source": "a3678578980ef239058c557338ef9c544d356b0c",
+      "paths": [
+        "."
+      ]
+    },
+    "diagnostic": {
+      "worktree": "/home/user/gpui-native-phase-lab",
+      "frozen_source": "41a67473a0177fbb17df1f7b8e2f2f36dd6940f6",
+      "current_source": "d8ca07eb04bc520c77a5c79193ee667990cf3e02",
+      "paths": [
+        "reactivity/crates",
+        "reactivity/vendor",
+        "reactivity/Cargo.toml",
+        "reactivity/Cargo.lock",
+        "reactivity/rust-toolchain.toml",
+        ".cargo",
+        "clippy.toml"
+      ]
+    }
+  },
+  "inputs": {
+    "setup.py": "50b87feec3200d9a601f1874dfea78b4987c2c558d93e6b25043411a48bc624c",
+    "guard.py": "5f0a3634acdfc4773606ea033823a8cd6f483bcd7c7b78cb4c143122fb77e795",
+    "variants.json": "82361dc41dc1e3da824111735a268edf5bd874ee9cb88a233fa85c3409c58a86",
+    "PROCESS_ORDER.json": "d7e54b0cc57cf428a21062818a6663d2803006dfbd12ee0597b381d2739ad9f2",
+    "order.json": "d7e54b0cc57cf428a21062818a6663d2803006dfbd12ee0597b381d2739ad9f2",
+    "analyze.py": "fb2aab7690abed151806654c13919b596daf8b1a3c386618c92e165981ef2f84",
+    "run.py": "e570a5008150ecf6d4548f64f83ea5fbdf7a7c1647c9faf934af4a51c71d9c8e",
+    "prior-matrix-tail-diagnostic.json": "341ecf4aca2f0e84a66c768ce3c22b78049ef910ad968ac5ddba8b44cbd5e999",
+    "PROTOCOL.md": "444ae95547024810bb6ffcaee2c0cc7060d26456a1d857a18c02910931ab05d7",
+    "package.py": "e137b8cc94e3e95def9122b1ed0e25c0ac0f45aa37db87e34ac5d1f4604f5886",
+    "artifacts.json": "c06c795f6214a391c1e2d8fc4986b34735018ba6ddf0fcdf3d50d7ec13eb35f9",
+    "verify_dossier.py": "bf2c2e7e2e0fe2592b7033385432544b966e483bcc2d8004f119c3ca73b54735",
+    "freeze.py": "a0cb061d8de2caa0bcbc5482154c47852ef0f0284eb7707292463d5e2f42bc79",
+    "qualification/cpuinfo.txt": "e3971ce600a49dc1d3f75a9eabdc8ddafa6754c95fab5d08b651e32d69198d79",
+    "qualification/candidate-ui.wgsl": "ea6e71d3da2bdb23d4971a14f0f55db389dbb45f9b2e9c05c85d4dc6363eb4d1",
+    "qualification/device.json": "18c4105d40ae850ad8a973867f38a17f890fd231bf0c3ec98b39b05a35e7d526",
+    "qualification/composition.json": "c157237ab7ba483145d4d33c8ad1c312ef60a4794f51d58c79e09aa65ce683ed",
+    "qualification/candidate/build.out": "d223465b39d42e7f02d56cb590e89e379b0192de58cbfb2be7ad101ef580ce98",
+    "qualification/candidate/source.txt": "7dffb0b4fb627b00d1fed7bb480875ab85ecfe7e43ad9184e160c50292d47de4",
+    "qualification/candidate/test-artifacts.json": "0742a5318d7d83d04d273b123173b0bb59754d44115a93cfce9843e631be5921",
+    "qualification/candidate/build-artifacts.json": "45b31b3facc748807f8f620df6e3f76ef8e1537509b99d42cc767462ff873757",
+    "qualification/candidate/test.log": "51c574066824b1382bd444c95e8b9c363896e3b3fcfb0887a23f3bf9e21952c9",
+    "qualification/candidate/build.status.json": "c71ee69d1a850e1156249ed1114bf037602433051acc50311a0da7e50c64380c",
+    "qualification/candidate/guard-after.json": "4f53cda18c2baa0c0354bb5f9a3ecbe5ed12ab4d8e11ba873c2f11161202b945",
+    "qualification/candidate/toolchain.txt": "2900025046ddf3de47f87dd3d69fbfe380cae61af5fe1ecf31bb89c5f10645c5",
+    "qualification/candidate/test.status.json": "6481a93590f1e9419b3bf6d95a5fd5b5e0d8e8779a4d6ac5797685780e73d173",
+    "qualification/candidate/inputs.json": "cfb3b6b63efe78e53de35249dc8e7af4ede8b9f74f8b32c3e1b412c7ba0d571f",
+    "qualification/candidate/environment.json": "92b7da42ac24e4ddd7c9c4492749a8ebb96ba4530047f563b16eaf5704ffbeff",
+    "qualification/candidate/test.out": "1053b8defc979cd568f7116f843c8b8cdd7c869e2848f4e1f1bfe07037ddcbce",
+    "qualification/candidate/build.log": "160ef4f3e41262799523923695e881064ea512169e092dde5c5f1f26dc7011f1",
+    "qualification/zgx/build.out": "ac299d0a5d9973bbd18c526575f33de7bff79988ebadaea0e88de303b898c30f",
+    "qualification/zgx/source.txt": "58439fa3e10d71cc171e401de3c1047739c35b9557db903cc60b708c3bb2e035",
+    "qualification/zgx/test-artifacts.json": "3f257d0998a0b22fa9a42bb3bcaee7b85dfa5b089ea33c30f09b89ae7e5c2d0f",
+    "qualification/zgx/build-artifacts.json": "483b69fa8cec299fe72427aced7ed4fc5685391d4ad52f2a3e37467942d36c12",
+    "qualification/zgx/test.log": "a50bae27255b8919dfd04b9a7fd49c52a9dfd3b0970b934c033d22ca9a39da41",
+    "qualification/zgx/build.status.json": "73deb1be10d85936ab3d45f959cb47a7966565e7ae897bfc41ec24298ffc679a",
+    "qualification/zgx/guard-after.json": "4f53cda18c2baa0c0354bb5f9a3ecbe5ed12ab4d8e11ba873c2f11161202b945",
+    "qualification/zgx/cache-cleanup-plan.json": "92f6ddcab3c288f7e627e369cc7a19fe017742246e22eb567fde623224cb2ce8",
+    "qualification/zgx/toolchain.txt": "2900025046ddf3de47f87dd3d69fbfe380cae61af5fe1ecf31bb89c5f10645c5",
+    "qualification/zgx/test.status.json": "cffaa06c397652f9c5e56cc631b7706680c72af7202452e519d8c7af2ccc81cc",
+    "qualification/zgx/cache-cleanup.json": "15fa70f2f788a1a1a94ba7d1f22cea14b338bd19f34b313522b1ff673d0c985c",
+    "qualification/zgx/inputs.json": "daff116536141171ada4c9d03e73308ed49d5f564913559760d659f7074ca7ac",
+    "qualification/zgx/environment.json": "826a2d1716c74b76ee584048267166cb8021114ec338db583a2562c265d70156",
+    "qualification/zgx/test.out": "e32bb677d5753f6be9181a8caab63e834ae6f92e10aa7f44fb65b72a7d6ef648",
+    "qualification/zgx/build.log": "68593859877fd907fe024b2951fe76fdfa823e52c7ce41176d2d4d32f7331972"
+  },
+  "driver_files": {
+    "/usr/lib/x86_64-linux-gnu/libvulkan_lvp.so": "9d69cae2004b16572acca424741109be37c4ffc759c2461af69d75f7d1c6c139",
+    "/usr/lib/x86_64-linux-gnu/libvulkan.so.1.3.275": "e833b010f814b72c6aca0300c8b5f19b6106ffa06c24ddc95a293970c7d6058e",
+    "/home/user/zgx-native-profile-lab/comparisons/fonts/DejaVuSans.ttf": "7da195a74c55bef988d0d48f9508bd5d849425c1770dba5d7bfc6ce9ed848954"
+  }
+}

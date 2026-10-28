@@ -1,0 +1,446 @@
+562b3fe8e000-562b405e2000 r--p 00000000 fd:01 2714885                    /home/user/gpui-preserved-test-binaries/04b17f084d8d46f6b09277f6d04c1b163e2d86cb465bcfcac6cd113a656a29d0
+562b405e2000-562b40f83000 r-xp 00753000 fd:01 2714885                    /home/user/gpui-preserved-test-binaries/04b17f084d8d46f6b09277f6d04c1b163e2d86cb465bcfcac6cd113a656a29d0
+562b40f83000-562b40fbc000 r--p 010f3000 fd:01 2714885                    /home/user/gpui-preserved-test-binaries/04b17f084d8d46f6b09277f6d04c1b163e2d86cb465bcfcac6cd113a656a29d0
+562b40fbc000-562b40fbf000 rw-p 0112b000 fd:01 2714885                    /home/user/gpui-preserved-test-binaries/04b17f084d8d46f6b09277f6d04c1b163e2d86cb465bcfcac6cd113a656a29d0
+562b40fbf000-562b40fc0000 rw-p 00000000 00:00 0 
+562b5c977000-562b61168000 rw-p 00000000 00:00 0                          [heap]
+775fd4000000-775fd4021000 rw-p 00000000 00:00 0 
+775fd4021000-775fd8000000 ---p 00000000 00:00 0 
+775fd8000000-775fd8021000 rw-p 00000000 00:00 0 
+775fd8021000-775fdc000000 ---p 00000000 00:00 0 
+775fdc000000-775fdc021000 rw-p 00000000 00:00 0 
+775fdc021000-775fe0000000 ---p 00000000 00:00 0 
+775fe0000000-775fe0021000 rw-p 00000000 00:00 0 
+775fe0021000-775fe4000000 ---p 00000000 00:00 0 
+775fe4000000-775fe4021000 rw-p 00000000 00:00 0 
+775fe4021000-775fe8000000 ---p 00000000 00:00 0 
+775fe8000000-775fe8021000 rw-p 00000000 00:00 0 
+775fe8021000-775fec000000 ---p 00000000 00:00 0 
+775fec000000-775fec021000 rw-p 00000000 00:00 0 
+775fec021000-775ff0000000 ---p 00000000 00:00 0 
+775ff0000000-775ff4000000 rw-s 00002000 00:01 44987                      /memfd:allocation fd (deleted)
+775ff4000000-775ff4021000 rw-p 00000000 00:00 0 
+775ff4021000-775ff8000000 ---p 00000000 00:00 0 
+775ff8400000-775ff8e00000 rwxp 00000000 00:00 0 
+775ff8ffa000-775ff8ffb000 ---p 00000000 00:00 0 
+775ff8ffb000-775ff97fb000 rw-p 00000000 00:00 0 
+775ff97fb000-775ff97fc000 ---p 00000000 00:00 0 
+775ff97fc000-775ff9ffc000 rw-p 00000000 00:00 0 
+775ff9ffc000-775ff9ffd000 ---p 00000000 00:00 0 
+775ff9ffd000-775ffa7fd000 rw-p 00000000 00:00 0 
+775ffa7fd000-775ffa7fe000 ---p 00000000 00:00 0 
+775ffa7fe000-775ffaffe000 rw-p 00000000 00:00 0 
+775ffaffe000-775ffafff000 ---p 00000000 00:00 0 
+775ffafff000-775ffb7ff000 rw-p 00000000 00:00 0 
+775ffb7ff000-775ffb800000 ---p 00000000 00:00 0 
+775ffb800000-775ffc000000 rw-p 00000000 00:00 0 
+775ffc000000-775ffc021000 rw-p 00000000 00:00 0 
+775ffc021000-776000000000 ---p 00000000 00:00 0 
+776000000000-776000021000 rw-p 00000000 00:00 0 
+776000021000-776004000000 ---p 00000000 00:00 0 
+776004000000-776004021000 rw-p 00000000 00:00 0 
+776004021000-776008000000 ---p 00000000 00:00 0 
+776008000000-776008021000 rw-p 00000000 00:00 0 
+776008021000-77600c000000 ---p 00000000 00:00 0 
+77600c000000-77600c021000 rw-p 00000000 00:00 0 
+77600c021000-776010000000 ---p 00000000 00:00 0 
+776010000000-77601016b000 rw-p 00000000 00:00 0 
+77601016b000-776014000000 ---p 00000000 00:00 0 
+776014000000-776014021000 rw-p 00000000 00:00 0 
+776014021000-776018000000 ---p 00000000 00:00 0 
+776018010000-7760182b3000 rw-s 04d32000 00:01 44987                      /memfd:allocation fd (deleted)
+7760182b3000-776018556000 rw-s 04a8f000 00:01 44987                      /memfd:allocation fd (deleted)
+776018556000-7760187f9000 rw-s 047ec000 00:01 44987                      /memfd:allocation fd (deleted)
+7760187f9000-7760187fa000 ---p 00000000 00:00 0 
+7760187fa000-776018ffa000 rw-p 00000000 00:00 0 
+776018ffa000-776018ffb000 ---p 00000000 00:00 0 
+776018ffb000-7760197fb000 rw-p 00000000 00:00 0 
+7760197fb000-7760197fc000 ---p 00000000 00:00 0 
+7760197fc000-776019ffc000 rw-p 00000000 00:00 0 
+776019ffc000-776019ffd000 ---p 00000000 00:00 0 
+776019ffd000-77601a7fd000 rw-p 00000000 00:00 0 
+77601a7fd000-77601a7fe000 ---p 00000000 00:00 0 
+77601a7fe000-77601affe000 rw-p 00000000 00:00 0 
+77601affe000-77601afff000 ---p 00000000 00:00 0 
+77601afff000-77601b7ff000 rw-p 00000000 00:00 0 
+77601b7ff000-77601b800000 ---p 00000000 00:00 0 
+77601b800000-77601c000000 rw-p 00000000 00:00 0 
+77601c000000-77601c021000 rw-p 00000000 00:00 0 
+77601c021000-776020000000 ---p 00000000 00:00 0 
+776020000000-776020021000 rw-p 00000000 00:00 0 
+776020021000-776024000000 ---p 00000000 00:00 0 
+776024000000-776024021000 rw-p 00000000 00:00 0 
+776024021000-776028000000 ---p 00000000 00:00 0 
+776028000000-776028021000 rw-p 00000000 00:00 0 
+776028021000-77602c000000 ---p 00000000 00:00 0 
+77602c000000-77602c021000 rw-p 00000000 00:00 0 
+77602c021000-776030000000 ---p 00000000 00:00 0 
+776030000000-776030021000 rw-p 00000000 00:00 0 
+776030021000-776034000000 ---p 00000000 00:00 0 
+7760347f9000-7760347fa000 ---p 00000000 00:00 0 
+7760347fa000-776034ffa000 rw-p 00000000 00:00 0 
+776034ffa000-776034ffb000 ---p 00000000 00:00 0 
+776034ffb000-7760357fb000 rw-p 00000000 00:00 0 
+7760357fb000-7760357fc000 ---p 00000000 00:00 0 
+7760357fc000-776035ffc000 rw-p 00000000 00:00 0 
+776035ffc000-776035ffd000 ---p 00000000 00:00 0 
+776035ffd000-7760367fd000 rw-p 00000000 00:00 0 
+7760367fd000-7760367fe000 ---p 00000000 00:00 0 
+7760367fe000-776036ffe000 rw-p 00000000 00:00 0 
+776036ffe000-776036fff000 ---p 00000000 00:00 0 
+776036fff000-7760377ff000 rw-p 00000000 00:00 0 
+7760377ff000-776037800000 ---p 00000000 00:00 0 
+776037800000-776038000000 rw-p 00000000 00:00 0 
+776038000000-776038021000 rw-p 00000000 00:00 0 
+776038021000-77603c000000 ---p 00000000 00:00 0 
+77603c17b000-77603c2bc000 rw-s 00000000 fd:01 1422143                    /home/user/.cache/mesa_shader_cache/index
+77603c2bc000-77603c3fd000 rw-s 00000000 fd:01 1422143                    /home/user/.cache/mesa_shader_cache/index
+77603c3fd000-77603c3fe000 ---p 00000000 00:00 0 
+77603c3fe000-77603cbfe000 rw-p 00000000 00:00 0 
+77603cbfe000-77603cbff000 ---p 00000000 00:00 0 
+77603cbff000-77603d3ff000 rw-p 00000000 00:00 0 
+77603d3ff000-77603d400000 ---p 00000000 00:00 0 
+77603d400000-77603dc00000 rw-p 00000000 00:00 0 
+77603dc00000-77603dccf000 r--p 00000000 fd:01 42163                      /usr/lib/x86_64-linux-gnu/libgallium-25.2.8-0ubuntu0.24.04.2.so
+77603dccf000-77603f4e2000 r-xp 000cf000 fd:01 42163                      /usr/lib/x86_64-linux-gnu/libgallium-25.2.8-0ubuntu0.24.04.2.so
+77603f4e2000-776040421000 r--p 018e2000 fd:01 42163                      /usr/lib/x86_64-linux-gnu/libgallium-25.2.8-0ubuntu0.24.04.2.so
+776040421000-776040547000 r--p 02821000 fd:01 42163                      /usr/lib/x86_64-linux-gnu/libgallium-25.2.8-0ubuntu0.24.04.2.so
+776040547000-776040569000 rw-p 02947000 fd:01 42163                      /usr/lib/x86_64-linux-gnu/libgallium-25.2.8-0ubuntu0.24.04.2.so
+776040569000-776040733000 rw-p 00000000 00:00 0 
+776040800000-776040801000 r--p 00000000 fd:01 15412                      /usr/lib/x86_64-linux-gnu/libicudata.so.74.2
+776040801000-776040802000 r-xp 00001000 fd:01 15412                      /usr/lib/x86_64-linux-gnu/libicudata.so.74.2
+776040802000-77604255e000 r--p 00002000 fd:01 15412                      /usr/lib/x86_64-linux-gnu/libicudata.so.74.2
+77604255e000-77604255f000 r--p 01d5d000 fd:01 15412                      /usr/lib/x86_64-linux-gnu/libicudata.so.74.2
+77604255f000-776042560000 rw-p 01d5e000 fd:01 15412                      /usr/lib/x86_64-linux-gnu/libicudata.so.74.2
+776042600000-776042668000 r--p 00000000 fd:01 15417                      /usr/lib/x86_64-linux-gnu/libicuuc.so.74.2
+776042668000-77604276d000 r-xp 00068000 fd:01 15417                      /usr/lib/x86_64-linux-gnu/libicuuc.so.74.2
+77604276d000-7760427f7000 r--p 0016d000 fd:01 15417                      /usr/lib/x86_64-linux-gnu/libicuuc.so.74.2
+7760427f7000-77604280a000 r--p 001f7000 fd:01 15417                      /usr/lib/x86_64-linux-gnu/libicuuc.so.74.2
+77604280a000-77604280b000 rw-p 0020a000 fd:01 15417                      /usr/lib/x86_64-linux-gnu/libicuuc.so.74.2
+77604280b000-77604280d000 rw-p 00000000 00:00 0 
+77604284b000-77604287d000 r-xp 00000000 00:00 0 
+77604287d000-776042948000 rw-p 00000000 00:00 0 
+776042948000-776042989000 r--p 00000000 fd:01 42373                      /usr/lib/x86_64-linux-gnu/libGLdispatch.so.0.0.0
+776042989000-7760429c8000 r-xp 00041000 fd:01 42373                      /usr/lib/x86_64-linux-gnu/libGLdispatch.so.0.0.0
+7760429c8000-7760429db000 r--p 00080000 fd:01 42373                      /usr/lib/x86_64-linux-gnu/libGLdispatch.so.0.0.0
+7760429db000-7760429f7000 r--p 00093000 fd:01 42373                      /usr/lib/x86_64-linux-gnu/libGLdispatch.so.0.0.0
+7760429f7000-7760429f8000 rw-p 000af000 fd:01 42373                      /usr/lib/x86_64-linux-gnu/libGLdispatch.so.0.0.0
+7760429f8000-776042a00000 rw-p 00000000 00:00 0 
+776042a00000-77604ac08000 r-xp 00000000 fd:01 868                        /usr/lib/x86_64-linux-gnu/libLLVM.so.20.1
+77604ac08000-77604ac09000 ---p 08208000 fd:01 868                        /usr/lib/x86_64-linux-gnu/libLLVM.so.20.1
+77604ac09000-77604b29e000 r--p 08208000 fd:01 868                        /usr/lib/x86_64-linux-gnu/libLLVM.so.20.1
+77604b29e000-77604b2e6000 rw-p 0889d000 fd:01 868                        /usr/lib/x86_64-linux-gnu/libLLVM.so.20.1
+77604b2e6000-77604b38e000 rw-p 00000000 00:00 0 
+77604b3b2000-77604b3b4000 r--p 00000000 fd:01 45406                      /usr/lib/x86_64-linux-gnu/libpciaccess.so.0.11.1
+77604b3b4000-77604b3b9000 r-xp 00002000 fd:01 45406                      /usr/lib/x86_64-linux-gnu/libpciaccess.so.0.11.1
+77604b3b9000-77604b3bb000 r--p 00007000 fd:01 45406                      /usr/lib/x86_64-linux-gnu/libpciaccess.so.0.11.1
+77604b3bb000-77604b3bc000 r--p 00008000 fd:01 45406                      /usr/lib/x86_64-linux-gnu/libpciaccess.so.0.11.1
+77604b3bc000-77604b3bd000 rw-p 00009000 fd:01 45406                      /usr/lib/x86_64-linux-gnu/libpciaccess.so.0.11.1
+77604b3bd000-77604b3c0000 r--p 00000000 fd:01 42107                      /usr/lib/x86_64-linux-gnu/libdrm_intel.so.1.125.0
+77604b3c0000-77604b3d6000 r-xp 00003000 fd:01 42107                      /usr/lib/x86_64-linux-gnu/libdrm_intel.so.1.125.0
+77604b3d6000-77604b3df000 r--p 00019000 fd:01 42107                      /usr/lib/x86_64-linux-gnu/libdrm_intel.so.1.125.0
+77604b3df000-77604b3e0000 r--p 00021000 fd:01 42107                      /usr/lib/x86_64-linux-gnu/libdrm_intel.so.1.125.0
+77604b3e0000-77604b3e1000 rw-p 00022000 fd:01 42107                      /usr/lib/x86_64-linux-gnu/libdrm_intel.so.1.125.0
+77604b3e1000-77604b3e4000 r--p 00000000 fd:01 15359                      /usr/lib/x86_64-linux-gnu/libelf-0.190.so
+77604b3e4000-77604b3fa000 r-xp 00003000 fd:01 15359                      /usr/lib/x86_64-linux-gnu/libelf-0.190.so
+77604b3fa000-77604b3fe000 r--p 00019000 fd:01 15359                      /usr/lib/x86_64-linux-gnu/libelf-0.190.so
+77604b3fe000-77604b3ff000 r--p 0001c000 fd:01 15359                      /usr/lib/x86_64-linux-gnu/libelf-0.190.so
+77604b3ff000-77604b400000 rw-p 0001d000 fd:01 15359                      /usr/lib/x86_64-linux-gnu/libelf-0.190.so
+77604b400000-77604b45b000 r--p 00000000 fd:01 54558                      /usr/lib/x86_64-linux-gnu/libvulkan_lvp.so
+77604b45b000-77604b86b000 r-xp 0005b000 fd:01 54558                      /usr/lib/x86_64-linux-gnu/libvulkan_lvp.so
+77604b86b000-77604bec6000 r--p 0046b000 fd:01 54558                      /usr/lib/x86_64-linux-gnu/libvulkan_lvp.so
+77604bec6000-77604bf5c000 r--p 00ac5000 fd:01 54558                      /usr/lib/x86_64-linux-gnu/libvulkan_lvp.so
+77604bf5c000-77604bf61000 rw-p 00b5b000 fd:01 54558                      /usr/lib/x86_64-linux-gnu/libvulkan_lvp.so
+77604bf61000-77604bf8d000 rw-p 00000000 00:00 0 
+77604bf8f000-77604bf92000 r--p 00000000 fd:01 1954                       /usr/lib/x86_64-linux-gnu/libdrm_amdgpu.so.1.125.0
+77604bf92000-77604bf98000 r-xp 00003000 fd:01 1954                       /usr/lib/x86_64-linux-gnu/libdrm_amdgpu.so.1.125.0
+77604bf98000-77604bf9a000 r--p 00009000 fd:01 1954                       /usr/lib/x86_64-linux-gnu/libdrm_amdgpu.so.1.125.0
+77604bf9a000-77604bf9b000 r--p 0000a000 fd:01 1954                       /usr/lib/x86_64-linux-gnu/libdrm_amdgpu.so.1.125.0
+77604bf9b000-77604bf9c000 rw-p 0000b000 fd:01 1954                       /usr/lib/x86_64-linux-gnu/libdrm_amdgpu.so.1.125.0
+77604bf9c000-77604bf9e000 r--p 00000000 fd:01 15536                      /usr/lib/x86_64-linux-gnu/libsensors.so.5.0.0
+77604bf9e000-77604bfa5000 r-xp 00002000 fd:01 15536                      /usr/lib/x86_64-linux-gnu/libsensors.so.5.0.0
+77604bfa5000-77604bfa9000 r--p 00009000 fd:01 15536                      /usr/lib/x86_64-linux-gnu/libsensors.so.5.0.0
+77604bfa9000-77604bfaa000 r--p 0000d000 fd:01 15536                      /usr/lib/x86_64-linux-gnu/libsensors.so.5.0.0
+77604bfaa000-77604bfab000 rw-p 0000e000 fd:01 15536                      /usr/lib/x86_64-linux-gnu/libsensors.so.5.0.0
+77604bfab000-77604bfba000 r--p 00000000 fd:01 44843                      /usr/lib/x86_64-linux-gnu/libEGL_mesa.so.0.0.0
+77604bfba000-77604bfe2000 r-xp 0000f000 fd:01 44843                      /usr/lib/x86_64-linux-gnu/libEGL_mesa.so.0.0.0
+77604bfe2000-77604bff3000 r--p 00037000 fd:01 44843                      /usr/lib/x86_64-linux-gnu/libEGL_mesa.so.0.0.0
+77604bff3000-77604bfff000 r--p 00047000 fd:01 44843                      /usr/lib/x86_64-linux-gnu/libEGL_mesa.so.0.0.0
+77604bfff000-77604c000000 rw-p 00053000 fd:01 44843                      /usr/lib/x86_64-linux-gnu/libEGL_mesa.so.0.0.0
+77604c000000-77604c021000 rw-p 00000000 00:00 0 
+77604c021000-776050000000 ---p 00000000 00:00 0 
+776050000000-776050021000 rw-p 00000000 00:00 0 
+776050021000-776054000000 ---p 00000000 00:00 0 
+776054000000-776054021000 rw-p 00000000 00:00 0 
+776054021000-776058000000 ---p 00000000 00:00 0 
+77605800f000-776058010000 r--p 00000000 00:00 0 
+776058010000-776058011000 r-xp 00000000 00:00 0 
+776058011000-776058012000 r--p 00000000 00:00 0 
+776058012000-776058013000 r-xp 00000000 00:00 0 
+776058013000-776058014000 r--p 00000000 00:00 0 
+776058014000-776058016000 r-xp 00000000 00:00 0 
+776058016000-776058017000 rw-p 00000000 00:00 0 
+776058017000-776058018000 r--p 00000000 00:00 0 
+776058018000-776058019000 r-xp 00000000 00:00 0 
+776058019000-77605801a000 r--p 00000000 00:00 0 
+77605801a000-77605801b000 r-xp 00000000 00:00 0 
+77605801b000-77605801c000 r--p 00000000 00:00 0 
+77605801c000-77605801d000 r-xp 00000000 00:00 0 
+77605801d000-77605801e000 r--p 00000000 00:00 0 
+77605801e000-77605804d000 r--p 00000000 fd:01 42115                      /usr/lib/x86_64-linux-gnu/libxml2.so.2.9.14
+77605804d000-7760581b3000 r-xp 0002f000 fd:01 42115                      /usr/lib/x86_64-linux-gnu/libxml2.so.2.9.14
+7760581b3000-7760581f5000 r--p 00195000 fd:01 42115                      /usr/lib/x86_64-linux-gnu/libxml2.so.2.9.14
+7760581f5000-7760581fe000 r--p 001d6000 fd:01 42115                      /usr/lib/x86_64-linux-gnu/libxml2.so.2.9.14
+7760581fe000-7760581ff000 rw-p 001df000 fd:01 42115                      /usr/lib/x86_64-linux-gnu/libxml2.so.2.9.14
+7760581ff000-776058200000 rw-p 00000000 00:00 0 
+776058200000-77605829d000 r--p 00000000 fd:01 14761                      /usr/lib/x86_64-linux-gnu/libstdc++.so.6.0.33
+77605829d000-7760583e5000 r-xp 0009d000 fd:01 14761                      /usr/lib/x86_64-linux-gnu/libstdc++.so.6.0.33
+7760583e5000-77605846c000 r--p 001e5000 fd:01 14761                      /usr/lib/x86_64-linux-gnu/libstdc++.so.6.0.33
+77605846c000-776058477000 r--p 0026b000 fd:01 14761                      /usr/lib/x86_64-linux-gnu/libstdc++.so.6.0.33
+776058477000-77605847a000 rw-p 00276000 fd:01 14761                      /usr/lib/x86_64-linux-gnu/libstdc++.so.6.0.33
+77605847a000-77605847f000 rw-p 00000000 00:00 0 
+77605847f000-776058480000 rw-s 04004000 00:01 44987                      /memfd:allocation fd (deleted)
+776058480000-776058481000 rw-s 04003000 00:01 44987                      /memfd:allocation fd (deleted)
+776058481000-776058482000 rw-s 04002000 00:01 44987                      /memfd:allocation fd (deleted)
+776058482000-776058483000 rw-s 00001000 00:01 44987                      /memfd:allocation fd (deleted)
+776058483000-776058484000 r--p 00000000 00:00 0 
+776058484000-776058485000 r-xp 00000000 00:00 0 
+776058485000-776058486000 r--p 00000000 00:00 0 
+776058486000-776058487000 r-xp 00000000 00:00 0 
+776058487000-77605848a000 r--p 00000000 fd:01 44845                      /usr/lib/x86_64-linux-gnu/libEGL.so.1.1.0
+77605848a000-776058494000 r-xp 00003000 fd:01 44845                      /usr/lib/x86_64-linux-gnu/libEGL.so.1.1.0
+776058494000-776058497000 r--p 0000d000 fd:01 44845                      /usr/lib/x86_64-linux-gnu/libEGL.so.1.1.0
+776058497000-776058498000 r--p 00010000 fd:01 44845                      /usr/lib/x86_64-linux-gnu/libEGL.so.1.1.0
+776058498000-776058499000 rw-p 00011000 fd:01 44845                      /usr/lib/x86_64-linux-gnu/libEGL.so.1.1.0
+776058499000-77605849c000 r--p 00000000 fd:01 54552                      /usr/lib/x86_64-linux-gnu/libVkLayer_MESA_device_select.so
+77605849c000-7760584ab000 r-xp 00003000 fd:01 54552                      /usr/lib/x86_64-linux-gnu/libVkLayer_MESA_device_select.so
+7760584ab000-7760584af000 r--p 00012000 fd:01 54552                      /usr/lib/x86_64-linux-gnu/libVkLayer_MESA_device_select.so
+7760584af000-7760584b0000 r--p 00016000 fd:01 54552                      /usr/lib/x86_64-linux-gnu/libVkLayer_MESA_device_select.so
+7760584b0000-7760584b1000 rw-p 00017000 fd:01 54552                      /usr/lib/x86_64-linux-gnu/libVkLayer_MESA_device_select.so
+7760584b1000-7760584b3000 rw-p 00000000 00:00 0 
+7760584b3000-7760584b6000 r--p 00000000 fd:01 447                        /usr/lib/x86_64-linux-gnu/liblzma.so.5.4.5
+7760584b6000-7760584d8000 r-xp 00003000 fd:01 447                        /usr/lib/x86_64-linux-gnu/liblzma.so.5.4.5
+7760584d8000-7760584e3000 r--p 00025000 fd:01 447                        /usr/lib/x86_64-linux-gnu/liblzma.so.5.4.5
+7760584e3000-7760584e4000 r--p 00030000 fd:01 447                        /usr/lib/x86_64-linux-gnu/liblzma.so.5.4.5
+7760584e4000-7760584e5000 rw-p 00031000 fd:01 447                        /usr/lib/x86_64-linux-gnu/liblzma.so.5.4.5
+7760584e5000-7760584f3000 r--p 00000000 fd:01 1840                       /usr/lib/x86_64-linux-gnu/libtinfo.so.6.4
+7760584f3000-776058506000 r-xp 0000e000 fd:01 1840                       /usr/lib/x86_64-linux-gnu/libtinfo.so.6.4
+776058506000-776058514000 r--p 00021000 fd:01 1840                       /usr/lib/x86_64-linux-gnu/libtinfo.so.6.4
+776058514000-776058518000 r--p 0002e000 fd:01 1840                       /usr/lib/x86_64-linux-gnu/libtinfo.so.6.4
+776058518000-776058519000 rw-p 00032000 fd:01 1840                       /usr/lib/x86_64-linux-gnu/libtinfo.so.6.4
+776058519000-776058521000 r--p 00000000 fd:01 15357                      /usr/lib/x86_64-linux-gnu/libedit.so.2.0.72
+776058521000-776058540000 r-xp 00008000 fd:01 15357                      /usr/lib/x86_64-linux-gnu/libedit.so.2.0.72
+776058540000-77605854c000 r--p 00027000 fd:01 15357                      /usr/lib/x86_64-linux-gnu/libedit.so.2.0.72
+77605854c000-77605854e000 r--p 00033000 fd:01 15357                      /usr/lib/x86_64-linux-gnu/libedit.so.2.0.72
+77605854e000-77605854f000 rw-p 00035000 fd:01 15357                      /usr/lib/x86_64-linux-gnu/libedit.so.2.0.72
+77605854f000-776058553000 rw-p 00000000 00:00 0 
+776058553000-776058555000 r--p 00000000 fd:01 15369                      /usr/lib/x86_64-linux-gnu/libffi.so.8.1.4
+776058555000-77605855c000 r-xp 00002000 fd:01 15369                      /usr/lib/x86_64-linux-gnu/libffi.so.8.1.4
+77605855c000-77605855d000 r--p 00009000 fd:01 15369                      /usr/lib/x86_64-linux-gnu/libffi.so.8.1.4
+77605855d000-77605855e000 r--p 0000a000 fd:01 15369                      /usr/lib/x86_64-linux-gnu/libffi.so.8.1.4
+77605855e000-77605855f000 rw-p 0000b000 fd:01 15369                      /usr/lib/x86_64-linux-gnu/libffi.so.8.1.4
+77605855f000-776058564000 r--p 00000000 fd:01 42307                      /usr/lib/x86_64-linux-gnu/libwayland-client.so.0.22.0
+776058564000-77605856a000 r-xp 00005000 fd:01 42307                      /usr/lib/x86_64-linux-gnu/libwayland-client.so.0.22.0
+77605856a000-77605856c000 r--p 0000b000 fd:01 42307                      /usr/lib/x86_64-linux-gnu/libwayland-client.so.0.22.0
+77605856c000-77605856e000 r--p 0000d000 fd:01 42307                      /usr/lib/x86_64-linux-gnu/libwayland-client.so.0.22.0
+77605856e000-77605856f000 rw-p 0000f000 fd:01 42307                      /usr/lib/x86_64-linux-gnu/libwayland-client.so.0.22.0
+77605856f000-776058570000 r--p 00000000 fd:01 42159                      /usr/lib/x86_64-linux-gnu/libxshmfence.so.1.0.0
+776058570000-776058571000 r-xp 00001000 fd:01 42159                      /usr/lib/x86_64-linux-gnu/libxshmfence.so.1.0.0
+776058571000-776058572000 r--p 00002000 fd:01 42159                      /usr/lib/x86_64-linux-gnu/libxshmfence.so.1.0.0
+776058572000-776058573000 r--p 00002000 fd:01 42159                      /usr/lib/x86_64-linux-gnu/libxshmfence.so.1.0.0
+776058573000-776058574000 rw-p 00003000 fd:01 42159                      /usr/lib/x86_64-linux-gnu/libxshmfence.so.1.0.0
+776058574000-776058575000 r--p 00000000 fd:01 42067                      /usr/lib/x86_64-linux-gnu/libxcb-shm.so.0.0.0
+776058575000-776058576000 r-xp 00001000 fd:01 42067                      /usr/lib/x86_64-linux-gnu/libxcb-shm.so.0.0.0
+776058576000-776058577000 r--p 00002000 fd:01 42067                      /usr/lib/x86_64-linux-gnu/libxcb-shm.so.0.0.0
+776058577000-776058578000 r--p 00002000 fd:01 42067                      /usr/lib/x86_64-linux-gnu/libxcb-shm.so.0.0.0
+776058578000-776058579000 rw-p 00003000 fd:01 42067                      /usr/lib/x86_64-linux-gnu/libxcb-shm.so.0.0.0
+776058579000-77605857c000 r--p 00000000 fd:01 42151                      /usr/lib/x86_64-linux-gnu/libxcb-sync.so.1.0.0
+77605857c000-77605857f000 r-xp 00003000 fd:01 42151                      /usr/lib/x86_64-linux-gnu/libxcb-sync.so.1.0.0
+77605857f000-776058580000 r--p 00006000 fd:01 42151                      /usr/lib/x86_64-linux-gnu/libxcb-sync.so.1.0.0
+776058580000-776058581000 r--p 00007000 fd:01 42151                      /usr/lib/x86_64-linux-gnu/libxcb-sync.so.1.0.0
+776058581000-776058582000 rw-p 00008000 fd:01 42151                      /usr/lib/x86_64-linux-gnu/libxcb-sync.so.1.0.0
+776058582000-776058585000 r--p 00000000 fd:01 42155                      /usr/lib/x86_64-linux-gnu/libxcb-xfixes.so.0.0.0
+776058585000-776058588000 r-xp 00003000 fd:01 42155                      /usr/lib/x86_64-linux-gnu/libxcb-xfixes.so.0.0.0
+776058588000-77605858a000 r--p 00006000 fd:01 42155                      /usr/lib/x86_64-linux-gnu/libxcb-xfixes.so.0.0.0
+77605858a000-77605858b000 r--p 00007000 fd:01 42155                      /usr/lib/x86_64-linux-gnu/libxcb-xfixes.so.0.0.0
+77605858b000-77605858c000 rw-p 00008000 fd:01 42155                      /usr/lib/x86_64-linux-gnu/libxcb-xfixes.so.0.0.0
+77605858c000-776058590000 r--p 00000000 fd:01 118                        /usr/lib/x86_64-linux-gnu/libexpat.so.1.9.1
+776058590000-7760585ad000 r-xp 00004000 fd:01 118                        /usr/lib/x86_64-linux-gnu/libexpat.so.1.9.1
+7760585ad000-7760585b5000 r--p 00021000 fd:01 118                        /usr/lib/x86_64-linux-gnu/libexpat.so.1.9.1
+7760585b5000-7760585b7000 r--p 00028000 fd:01 118                        /usr/lib/x86_64-linux-gnu/libexpat.so.1.9.1
+7760585b7000-7760585b8000 rw-p 0002a000 fd:01 118                        /usr/lib/x86_64-linux-gnu/libexpat.so.1.9.1
+7760585b8000-7760585bd000 r--p 00000000 fd:01 1218                       /usr/lib/x86_64-linux-gnu/libdrm.so.2.125.0
+7760585bd000-7760585c9000 r-xp 00005000 fd:01 1218                       /usr/lib/x86_64-linux-gnu/libdrm.so.2.125.0
+7760585c9000-7760585cd000 r--p 00011000 fd:01 1218                       /usr/lib/x86_64-linux-gnu/libdrm.so.2.125.0
+7760585cd000-7760585ce000 r--p 00015000 fd:01 1218                       /usr/lib/x86_64-linux-gnu/libdrm.so.2.125.0
+7760585ce000-7760585cf000 rw-p 00016000 fd:01 1218                       /usr/lib/x86_64-linux-gnu/libdrm.so.2.125.0
+7760585cf000-7760585d3000 r--p 00000000 fd:01 15604                      /usr/lib/x86_64-linux-gnu/libzstd.so.1.5.5
+7760585d3000-77605867a000 r-xp 00004000 fd:01 15604                      /usr/lib/x86_64-linux-gnu/libzstd.so.1.5.5
+77605867a000-776058687000 r--p 000ab000 fd:01 15604                      /usr/lib/x86_64-linux-gnu/libzstd.so.1.5.5
+776058687000-776058688000 r--p 000b7000 fd:01 15604                      /usr/lib/x86_64-linux-gnu/libzstd.so.1.5.5
+776058688000-776058689000 rw-p 000b8000 fd:01 15604                      /usr/lib/x86_64-linux-gnu/libzstd.so.1.5.5
+776058689000-77605868b000 r--p 00000000 fd:01 15603                      /usr/lib/x86_64-linux-gnu/libz.so.1.3
+77605868b000-77605869d000 r-xp 00002000 fd:01 15603                      /usr/lib/x86_64-linux-gnu/libz.so.1.3
+77605869d000-7760586a3000 r--p 00014000 fd:01 15603                      /usr/lib/x86_64-linux-gnu/libz.so.1.3
+7760586a3000-7760586a4000 r--p 0001a000 fd:01 15603                      /usr/lib/x86_64-linux-gnu/libz.so.1.3
+7760586a4000-7760586a5000 rw-p 0001b000 fd:01 15603                      /usr/lib/x86_64-linux-gnu/libz.so.1.3
+7760586a5000-7760586a6000 r--p 00000000 00:00 0 
+7760586a6000-7760586a7000 r-xp 00000000 00:00 0 
+7760586a7000-7760586a8000 r--p 00000000 00:00 0 
+7760586a8000-7760586a9000 r-xp 00000000 00:00 0 
+7760586a9000-7760586aa000 r--p 00000000 00:00 0 
+7760586aa000-7760586ab000 r-xp 00000000 00:00 0 
+7760586ab000-7760586ad000 r--p 00000000 fd:01 42167                      /usr/lib/x86_64-linux-gnu/libgbm.so.1.0.0
+7760586ad000-7760586af000 r-xp 00002000 fd:01 42167                      /usr/lib/x86_64-linux-gnu/libgbm.so.1.0.0
+7760586af000-7760586b0000 r--p 00004000 fd:01 42167                      /usr/lib/x86_64-linux-gnu/libgbm.so.1.0.0
+7760586b0000-7760586b1000 r--p 00004000 fd:01 42167                      /usr/lib/x86_64-linux-gnu/libgbm.so.1.0.0
+7760586b1000-7760586b2000 rw-p 00005000 fd:01 42167                      /usr/lib/x86_64-linux-gnu/libgbm.so.1.0.0
+7760586b2000-7760586b9000 r--s 00000000 fd:01 37937                      /usr/lib/x86_64-linux-gnu/gconv/gconv-modules.cache
+7760586b9000-7760586ba000 ---p 00000000 00:00 0 
+7760586ba000-7760588ba000 rw-p 00000000 00:00 0 
+7760588ba000-7760588c0000 r--p 00000000 fd:01 42369                      /usr/lib/x86_64-linux-gnu/libvulkan.so.1.3.275
+7760588c0000-77605890c000 r-xp 00006000 fd:01 42369                      /usr/lib/x86_64-linux-gnu/libvulkan.so.1.3.275
+77605890c000-776058936000 r--p 00052000 fd:01 42369                      /usr/lib/x86_64-linux-gnu/libvulkan.so.1.3.275
+776058936000-776058937000 r--p 0007b000 fd:01 42369                      /usr/lib/x86_64-linux-gnu/libvulkan.so.1.3.275
+776058937000-776058938000 rw-p 0007c000 fd:01 42369                      /usr/lib/x86_64-linux-gnu/libvulkan.so.1.3.275
+776058938000-776058939000 ---p 00000000 00:00 0 
+776058939000-776058b39000 rw-p 00000000 00:00 0 
+776058b39000-776058b86000 rw-p 00000000 00:00 0 
+776058b86000-776058b87000 r--p 00000000 00:00 0 
+776058b87000-776058b88000 r-xp 00000000 00:00 0 
+776058b88000-776058b89000 r--p 00000000 00:00 0 
+776058b89000-776058b8a000 r-xp 00000000 00:00 0 
+776058b8a000-776058b8b000 r--p 00000000 fd:01 42141                      /usr/lib/x86_64-linux-gnu/libxcb-present.so.0.0.0
+776058b8b000-776058b8c000 r-xp 00001000 fd:01 42141                      /usr/lib/x86_64-linux-gnu/libxcb-present.so.0.0.0
+776058b8c000-776058b8d000 r--p 00002000 fd:01 42141                      /usr/lib/x86_64-linux-gnu/libxcb-present.so.0.0.0
+776058b8d000-776058b8e000 r--p 00002000 fd:01 42141                      /usr/lib/x86_64-linux-gnu/libxcb-present.so.0.0.0
+776058b8e000-776058b8f000 rw-p 00003000 fd:01 42141                      /usr/lib/x86_64-linux-gnu/libxcb-present.so.0.0.0
+776058b8f000-776058b99000 r--p 00000000 fd:01 45113                      /usr/lib/x86_64-linux-gnu/libxcb-xkb.so.1.0.0
+776058b99000-776058ba6000 r-xp 0000a000 fd:01 45113                      /usr/lib/x86_64-linux-gnu/libxcb-xkb.so.1.0.0
+776058ba6000-776058bab000 r--p 00017000 fd:01 45113                      /usr/lib/x86_64-linux-gnu/libxcb-xkb.so.1.0.0
+776058bab000-776058bac000 r--p 0001b000 fd:01 45113                      /usr/lib/x86_64-linux-gnu/libxcb-xkb.so.1.0.0
+776058bac000-776058bad000 rw-p 0001c000 fd:01 45113                      /usr/lib/x86_64-linux-gnu/libxcb-xkb.so.1.0.0
+776058bad000-776058bb2000 r--p 00000000 fd:01 15594                      /usr/lib/x86_64-linux-gnu/libxkbcommon.so.0.0.0
+776058bb2000-776058bd2000 r-xp 00005000 fd:01 15594                      /usr/lib/x86_64-linux-gnu/libxkbcommon.so.0.0.0
+776058bd2000-776058bf3000 r--p 00025000 fd:01 15594                      /usr/lib/x86_64-linux-gnu/libxkbcommon.so.0.0.0
+776058bf3000-776058bf5000 r--p 00045000 fd:01 15594                      /usr/lib/x86_64-linux-gnu/libxkbcommon.so.0.0.0
+776058bf5000-776058bf6000 rw-p 00047000 fd:01 15594                      /usr/lib/x86_64-linux-gnu/libxkbcommon.so.0.0.0
+776058bf6000-776058bf9000 r--p 00000000 fd:01 45115                      /usr/lib/x86_64-linux-gnu/libxkbcommon-x11.so.0.0.0
+776058bf9000-776058bfd000 r-xp 00003000 fd:01 45115                      /usr/lib/x86_64-linux-gnu/libxkbcommon-x11.so.0.0.0
+776058bfd000-776058bfe000 r--p 00007000 fd:01 45115                      /usr/lib/x86_64-linux-gnu/libxkbcommon-x11.so.0.0.0
+776058bfe000-776058bff000 r--p 00008000 fd:01 45115                      /usr/lib/x86_64-linux-gnu/libxkbcommon-x11.so.0.0.0
+776058bff000-776058c00000 rw-p 00009000 fd:01 45115                      /usr/lib/x86_64-linux-gnu/libxkbcommon-x11.so.0.0.0
+776058c00000-776058eeb000 r--p 00000000 fd:01 94                         /usr/lib/locale/locale-archive
+776058eeb000-776058eed000 r--p 00000000 fd:01 2348                       /usr/lib/x86_64-linux-gnu/libxcb-dri3.so.0.1.0
+776058eed000-776058eef000 r-xp 00002000 fd:01 2348                       /usr/lib/x86_64-linux-gnu/libxcb-dri3.so.0.1.0
+776058eef000-776058ef0000 r--p 00004000 fd:01 2348                       /usr/lib/x86_64-linux-gnu/libxcb-dri3.so.0.1.0
+776058ef0000-776058ef1000 r--p 00004000 fd:01 2348                       /usr/lib/x86_64-linux-gnu/libxcb-dri3.so.0.1.0
+776058ef1000-776058ef2000 rw-p 00005000 fd:01 2348                       /usr/lib/x86_64-linux-gnu/libxcb-dri3.so.0.1.0
+776058ef2000-776058ef6000 r--p 00000000 fd:01 41771                      /usr/lib/x86_64-linux-gnu/libXext.so.6.4.0
+776058ef6000-776058f01000 r-xp 00004000 fd:01 41771                      /usr/lib/x86_64-linux-gnu/libXext.so.6.4.0
+776058f01000-776058f04000 r--p 0000f000 fd:01 41771                      /usr/lib/x86_64-linux-gnu/libXext.so.6.4.0
+776058f04000-776058f05000 r--p 00011000 fd:01 41771                      /usr/lib/x86_64-linux-gnu/libXext.so.6.4.0
+776058f05000-776058f06000 rw-p 00012000 fd:01 41771                      /usr/lib/x86_64-linux-gnu/libXext.so.6.4.0
+776058f06000-776058f09000 r--p 00000000 fd:01 41787                      /usr/lib/x86_64-linux-gnu/libXi.so.6.1.0
+776058f09000-776058f15000 r-xp 00003000 fd:01 41787                      /usr/lib/x86_64-linux-gnu/libXi.so.6.1.0
+776058f15000-776058f17000 r--p 0000f000 fd:01 41787                      /usr/lib/x86_64-linux-gnu/libXi.so.6.1.0
+776058f17000-776058f18000 r--p 00011000 fd:01 41787                      /usr/lib/x86_64-linux-gnu/libXi.so.6.1.0
+776058f18000-776058f19000 rw-p 00012000 fd:01 41787                      /usr/lib/x86_64-linux-gnu/libXi.so.6.1.0
+776058f19000-776058f1b000 r--p 00000000 fd:01 42323                      /usr/lib/x86_64-linux-gnu/libXfixes.so.3.1.0
+776058f1b000-776058f1e000 r-xp 00002000 fd:01 42323                      /usr/lib/x86_64-linux-gnu/libXfixes.so.3.1.0
+776058f1e000-776058f1f000 r--p 00005000 fd:01 42323                      /usr/lib/x86_64-linux-gnu/libXfixes.so.3.1.0
+776058f1f000-776058f20000 r--p 00005000 fd:01 42323                      /usr/lib/x86_64-linux-gnu/libXfixes.so.3.1.0
+776058f20000-776058f21000 rw-p 00006000 fd:01 42323                      /usr/lib/x86_64-linux-gnu/libXfixes.so.3.1.0
+776058f21000-776058f23000 r--p 00000000 fd:01 42075                      /usr/lib/x86_64-linux-gnu/libXrender.so.1.3.0
+776058f23000-776058f2a000 r-xp 00002000 fd:01 42075                      /usr/lib/x86_64-linux-gnu/libXrender.so.1.3.0
+776058f2a000-776058f2b000 r--p 00009000 fd:01 42075                      /usr/lib/x86_64-linux-gnu/libXrender.so.1.3.0
+776058f2b000-776058f2c000 r--p 00009000 fd:01 42075                      /usr/lib/x86_64-linux-gnu/libXrender.so.1.3.0
+776058f2c000-776058f2d000 rw-p 0000a000 fd:01 42075                      /usr/lib/x86_64-linux-gnu/libXrender.so.1.3.0
+776058f2d000-776058f34000 r--p 00000000 fd:01 42147                      /usr/lib/x86_64-linux-gnu/libxcb-randr.so.0.1.0
+776058f34000-776058f39000 r-xp 00007000 fd:01 42147                      /usr/lib/x86_64-linux-gnu/libxcb-randr.so.0.1.0
+776058f39000-776058f3c000 r--p 0000c000 fd:01 42147                      /usr/lib/x86_64-linux-gnu/libxcb-randr.so.0.1.0
+776058f3c000-776058f3d000 r--p 0000f000 fd:01 42147                      /usr/lib/x86_64-linux-gnu/libxcb-randr.so.0.1.0
+776058f3d000-776058f3e000 rw-p 00010000 fd:01 42147                      /usr/lib/x86_64-linux-gnu/libxcb-randr.so.0.1.0
+776058f3e000-776058f3f000 ---p 00000000 00:00 0 
+776058f3f000-776058f41000 rw-p 00000000 00:00 0 
+776058f41000-776058f42000 ---p 00000000 00:00 0 
+776058f42000-776059142000 rw-p 00000000 00:00 0 
+776059142000-7760592b4000 rw-p 00000000 00:00 0 
+7760592b4000-7760592b6000 r--p 00000000 fd:01 15450                      /usr/lib/x86_64-linux-gnu/libmd.so.0.1.0
+7760592b6000-7760592bf000 r-xp 00002000 fd:01 15450                      /usr/lib/x86_64-linux-gnu/libmd.so.0.1.0
+7760592bf000-7760592c1000 r--p 0000b000 fd:01 15450                      /usr/lib/x86_64-linux-gnu/libmd.so.0.1.0
+7760592c1000-7760592c2000 r--p 0000c000 fd:01 15450                      /usr/lib/x86_64-linux-gnu/libmd.so.0.1.0
+7760592c2000-7760592c3000 rw-p 0000d000 fd:01 15450                      /usr/lib/x86_64-linux-gnu/libmd.so.0.1.0
+7760592c3000-7760592dc000 r--p 00000000 fd:01 41747                      /usr/lib/x86_64-linux-gnu/libX11.so.6.4.0
+7760592dc000-77605936c000 r-xp 00019000 fd:01 41747                      /usr/lib/x86_64-linux-gnu/libX11.so.6.4.0
+77605936c000-7760593fb000 r--p 000a9000 fd:01 41747                      /usr/lib/x86_64-linux-gnu/libX11.so.6.4.0
+7760593fb000-7760593fc000 r--p 00138000 fd:01 41747                      /usr/lib/x86_64-linux-gnu/libX11.so.6.4.0
+7760593fc000-776059400000 rw-p 00139000 fd:01 41747                      /usr/lib/x86_64-linux-gnu/libX11.so.6.4.0
+776059400000-776059428000 r--p 00000000 fd:01 37948                      /usr/lib/x86_64-linux-gnu/libc.so.6
+776059428000-7760595b0000 r-xp 00028000 fd:01 37948                      /usr/lib/x86_64-linux-gnu/libc.so.6
+7760595b0000-7760595ff000 r--p 001b0000 fd:01 37948                      /usr/lib/x86_64-linux-gnu/libc.so.6
+7760595ff000-776059603000 r--p 001fe000 fd:01 37948                      /usr/lib/x86_64-linux-gnu/libc.so.6
+776059603000-776059605000 rw-p 00202000 fd:01 37948                      /usr/lib/x86_64-linux-gnu/libc.so.6
+776059605000-776059612000 rw-p 00000000 00:00 0 
+776059612000-776059613000 r--p 00000000 00:00 0 
+776059613000-776059614000 r-xp 00000000 00:00 0 
+776059614000-776059615000 r--p 00000000 00:00 0 
+776059615000-776059616000 r-xp 00000000 00:00 0 
+776059616000-776059617000 r--p 00000000 fd:01 1600                       /usr/lib/x86_64-linux-gnu/libX11-xcb.so.1.0.0
+776059617000-776059618000 r-xp 00001000 fd:01 1600                       /usr/lib/x86_64-linux-gnu/libX11-xcb.so.1.0.0
+776059618000-776059619000 r--p 00002000 fd:01 1600                       /usr/lib/x86_64-linux-gnu/libX11-xcb.so.1.0.0
+776059619000-77605961a000 r--p 00002000 fd:01 1600                       /usr/lib/x86_64-linux-gnu/libX11-xcb.so.1.0.0
+77605961a000-77605961b000 rw-p 00003000 fd:01 1600                       /usr/lib/x86_64-linux-gnu/libX11-xcb.so.1.0.0
+77605961b000-77605961f000 r--p 00000000 fd:01 15329                      /usr/lib/x86_64-linux-gnu/libbsd.so.0.12.1
+77605961f000-77605962b000 r-xp 00004000 fd:01 15329                      /usr/lib/x86_64-linux-gnu/libbsd.so.0.12.1
+77605962b000-77605962e000 r--p 00010000 fd:01 15329                      /usr/lib/x86_64-linux-gnu/libbsd.so.0.12.1
+77605962e000-77605962f000 r--p 00012000 fd:01 15329                      /usr/lib/x86_64-linux-gnu/libbsd.so.0.12.1
+77605962f000-776059630000 rw-p 00013000 fd:01 15329                      /usr/lib/x86_64-linux-gnu/libbsd.so.0.12.1
+776059630000-776059631000 rw-p 00000000 00:00 0 
+776059631000-776059633000 r--p 00000000 fd:01 41691                      /usr/lib/x86_64-linux-gnu/libXdmcp.so.6.0.0
+776059633000-776059635000 r-xp 00002000 fd:01 41691                      /usr/lib/x86_64-linux-gnu/libXdmcp.so.6.0.0
+776059635000-776059637000 r--p 00004000 fd:01 41691                      /usr/lib/x86_64-linux-gnu/libXdmcp.so.6.0.0
+776059637000-776059638000 r--p 00005000 fd:01 41691                      /usr/lib/x86_64-linux-gnu/libXdmcp.so.6.0.0
+776059638000-776059639000 rw-p 00006000 fd:01 41691                      /usr/lib/x86_64-linux-gnu/libXdmcp.so.6.0.0
+776059639000-77605963a000 r--p 00000000 fd:01 41675                      /usr/lib/x86_64-linux-gnu/libXau.so.6.0.0
+77605963a000-77605963c000 r-xp 00001000 fd:01 41675                      /usr/lib/x86_64-linux-gnu/libXau.so.6.0.0
+77605963c000-77605963d000 r--p 00003000 fd:01 41675                      /usr/lib/x86_64-linux-gnu/libXau.so.6.0.0
+77605963d000-77605963e000 r--p 00003000 fd:01 41675                      /usr/lib/x86_64-linux-gnu/libXau.so.6.0.0
+77605963e000-77605963f000 rw-p 00004000 fd:01 41675                      /usr/lib/x86_64-linux-gnu/libXau.so.6.0.0
+77605963f000-77605964a000 r--p 00000000 fd:01 41707                      /usr/lib/x86_64-linux-gnu/libxcb.so.1.1.0
+77605964a000-77605965d000 r-xp 0000b000 fd:01 41707                      /usr/lib/x86_64-linux-gnu/libxcb.so.1.1.0
+77605965d000-776059666000 r--p 0001e000 fd:01 41707                      /usr/lib/x86_64-linux-gnu/libxcb.so.1.1.0
+776059666000-776059667000 r--p 00026000 fd:01 41707                      /usr/lib/x86_64-linux-gnu/libxcb.so.1.1.0
+776059667000-776059668000 rw-p 00027000 fd:01 41707                      /usr/lib/x86_64-linux-gnu/libxcb.so.1.1.0
+776059668000-77605966a000 rw-p 00000000 00:00 0 
+77605966a000-77605967a000 r--p 00000000 fd:01 37951                      /usr/lib/x86_64-linux-gnu/libm.so.6
+77605967a000-7760596f9000 r-xp 00010000 fd:01 37951                      /usr/lib/x86_64-linux-gnu/libm.so.6
+7760596f9000-776059751000 r--p 0008f000 fd:01 37951                      /usr/lib/x86_64-linux-gnu/libm.so.6
+776059751000-776059752000 r--p 000e7000 fd:01 37951                      /usr/lib/x86_64-linux-gnu/libm.so.6
+776059752000-776059753000 rw-p 000e8000 fd:01 37951                      /usr/lib/x86_64-linux-gnu/libm.so.6
+776059753000-776059757000 r--p 00000000 fd:01 14759                      /usr/lib/x86_64-linux-gnu/libgcc_s.so.1
+776059757000-77605977b000 r-xp 00004000 fd:01 14759                      /usr/lib/x86_64-linux-gnu/libgcc_s.so.1
+77605977b000-77605977f000 r--p 00028000 fd:01 14759                      /usr/lib/x86_64-linux-gnu/libgcc_s.so.1
+77605977f000-776059780000 r--p 0002b000 fd:01 14759                      /usr/lib/x86_64-linux-gnu/libgcc_s.so.1
+776059780000-776059781000 rw-p 0002c000 fd:01 14759                      /usr/lib/x86_64-linux-gnu/libgcc_s.so.1
+776059781000-776059782000 r--p 00000000 00:00 0 
+776059782000-776059783000 r-xp 00000000 00:00 0 
+776059783000-776059785000 r--p 00000000 fd:01 42327                      /usr/lib/x86_64-linux-gnu/libXcursor.so.1.0.2
+776059785000-77605978b000 r-xp 00002000 fd:01 42327                      /usr/lib/x86_64-linux-gnu/libXcursor.so.1.0.2
+77605978b000-77605978d000 r--p 00008000 fd:01 42327                      /usr/lib/x86_64-linux-gnu/libXcursor.so.1.0.2
+77605978d000-77605978e000 r--p 00009000 fd:01 42327                      /usr/lib/x86_64-linux-gnu/libXcursor.so.1.0.2
+77605978e000-77605978f000 rw-p 0000a000 fd:01 42327                      /usr/lib/x86_64-linux-gnu/libXcursor.so.1.0.2
+77605978f000-776059790000 ---p 00000000 00:00 0 
+776059790000-776059792000 rw-p 00000000 00:00 0 
+776059792000-776059793000 ---p 00000000 00:00 0 
+776059793000-776059795000 rw-p 00000000 00:00 0 
+776059795000-776059797000 rw-p 00000000 00:00 0 
+776059797000-776059798000 r--p 00000000 fd:01 37945                      /usr/lib/x86_64-linux-gnu/ld-linux-x86-64.so.2
+776059798000-7760597c3000 r-xp 00001000 fd:01 37945                      /usr/lib/x86_64-linux-gnu/ld-linux-x86-64.so.2
+7760597c3000-7760597cd000 r--p 0002c000 fd:01 37945                      /usr/lib/x86_64-linux-gnu/ld-linux-x86-64.so.2
+7760597cd000-7760597cf000 r--p 00036000 fd:01 37945                      /usr/lib/x86_64-linux-gnu/ld-linux-x86-64.so.2
+7760597cf000-7760597d1000 rw-p 00038000 fd:01 37945                      /usr/lib/x86_64-linux-gnu/ld-linux-x86-64.so.2
+7ffdc96c8000-7ffdc96e9000 rw-p 00000000 00:00 0                          [stack]
+7ffdc97c2000-7ffdc97c6000 r--p 00000000 00:00 0                          [vvar]
+7ffdc97c6000-7ffdc97c8000 r-xp 00000000 00:00 0                          [vdso]
+ffffffffff600000-ffffffffff601000 --xp 00000000 00:00 0                  [vsyscall]
