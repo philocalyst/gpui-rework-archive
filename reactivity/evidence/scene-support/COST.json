@@ -1,0 +1,217 @@
+{
+  "cases": [
+    "scroll",
+    "both",
+    "stream",
+    "stream-owner",
+    "fractional",
+    "flat-tiny",
+    "flat-full",
+    "list-tiny",
+    "list-flat",
+    "exposure",
+    "text-0-1-source",
+    "text-0-1-owner",
+    "text-0-2-source",
+    "text-0-2-owner",
+    "text-0-4-source",
+    "text-0-4-owner",
+    "text-25-1-source",
+    "text-25-1-owner",
+    "text-25-2-source",
+    "text-25-2-owner",
+    "text-25-4-source",
+    "text-25-4-owner",
+    "text-1000-1-source",
+    "text-1000-1-owner",
+    "text-1000-2-source",
+    "text-1000-2-owner",
+    "text-1000-4-source",
+    "text-1000-4-owner"
+  ],
+  "variants": [
+    "control",
+    "bounds",
+    "predecessor",
+    "scroll_precise",
+    "candidate"
+  ],
+  "pairs": 20,
+  "seed": 20261105,
+  "process_manifest_sha256": "56e1c36ec26c2020bdda64fa2f80cbaefd1230ea1b66854edb3e9a0bf3902e90",
+  "thresholds": {
+    "scroll": {
+      "control": 0.8,
+      "bounds": 0.8,
+      "predecessor": 0.8,
+      "scroll_precise": 1.05
+    },
+    "both": {
+      "control": 0.8,
+      "bounds": 0.8,
+      "predecessor": 0.8,
+      "scroll_precise": 1.05
+    },
+    "stream": {
+      "control": 0.8,
+      "bounds": 0.8,
+      "predecessor": 1.05,
+      "scroll_precise": 1.05
+    },
+    "stream-owner": {
+      "control": 0.8,
+      "bounds": 0.8,
+      "predecessor": 1.05,
+      "scroll_precise": 1.05
+    },
+    "fractional": {
+      "control": 1.05,
+      "bounds": 1.05,
+      "predecessor": 1.05,
+      "scroll_precise": 1.05
+    },
+    "flat-tiny": {
+      "control": 1.05,
+      "bounds": 1.05,
+      "predecessor": 1.05,
+      "scroll_precise": 1.05
+    },
+    "flat-full": {
+      "control": 1.05,
+      "bounds": 1.05,
+      "predecessor": 1.05,
+      "scroll_precise": 1.05
+    },
+    "list-tiny": {
+      "control": 1.05,
+      "bounds": 1.05,
+      "predecessor": 1.05,
+      "scroll_precise": 1.05
+    },
+    "list-flat": {
+      "control": 1.05,
+      "bounds": 1.05,
+      "predecessor": 1.05,
+      "scroll_precise": 1.05
+    },
+    "exposure": {
+      "control": 1.05,
+      "bounds": 1.05,
+      "predecessor": 1.05,
+      "scroll_precise": 1.05
+    },
+    "text-0-1-source": {
+      "control": 1.05,
+      "bounds": 1.05,
+      "predecessor": 1.05,
+      "scroll_precise": 1.05
+    },
+    "text-0-1-owner": {
+      "control": 1.05,
+      "bounds": 1.05,
+      "predecessor": 1.05,
+      "scroll_precise": 1.05
+    },
+    "text-0-2-source": {
+      "control": 0.8,
+      "bounds": 0.8,
+      "predecessor": 0.8,
+      "scroll_precise": 0.8
+    },
+    "text-0-2-owner": {
+      "control": 0.8,
+      "bounds": 0.8,
+      "predecessor": 0.8,
+      "scroll_precise": 0.8
+    },
+    "text-0-4-source": {
+      "control": 0.8,
+      "bounds": 0.8,
+      "predecessor": 0.8,
+      "scroll_precise": 0.8
+    },
+    "text-0-4-owner": {
+      "control": 0.8,
+      "bounds": 0.8,
+      "predecessor": 0.8,
+      "scroll_precise": 0.8
+    },
+    "text-25-1-source": {
+      "control": 1.05,
+      "bounds": 1.05,
+      "predecessor": 1.05,
+      "scroll_precise": 1.05
+    },
+    "text-25-1-owner": {
+      "control": 1.05,
+      "bounds": 1.05,
+      "predecessor": 1.05,
+      "scroll_precise": 1.05
+    },
+    "text-25-2-source": {
+      "control": 1.05,
+      "bounds": 1.05,
+      "predecessor": 1.05,
+      "scroll_precise": 1.05
+    },
+    "text-25-2-owner": {
+      "control": 1.05,
+      "bounds": 1.05,
+      "predecessor": 1.05,
+      "scroll_precise": 1.05
+    },
+    "text-25-4-source": {
+      "control": 1.05,
+      "bounds": 1.05,
+      "predecessor": 1.05,
+      "scroll_precise": 1.05
+    },
+    "text-25-4-owner": {
+      "control": 1.05,
+      "bounds": 1.05,
+      "predecessor": 1.05,
+      "scroll_precise": 1.05
+    },
+    "text-1000-1-source": {
+      "control": 1.05,
+      "bounds": 1.05,
+      "predecessor": 1.05,
+      "scroll_precise": 1.05
+    },
+    "text-1000-1-owner": {
+      "control": 1.05,
+      "bounds": 1.05,
+      "predecessor": 1.05,
+      "scroll_precise": 1.05
+    },
+    "text-1000-2-source": {
+      "control": 1.05,
+      "bounds": 1.05,
+      "predecessor": 1.05,
+      "scroll_precise": 1.05
+    },
+    "text-1000-2-owner": {
+      "control": 1.05,
+      "bounds": 1.05,
+      "predecessor": 1.05,
+      "scroll_precise": 1.05
+    },
+    "text-1000-4-source": {
+      "control": 1.05,
+      "bounds": 1.05,
+      "predecessor": 1.05,
+      "scroll_precise": 1.05
+    },
+    "text-1000-4-owner": {
+      "control": 1.05,
+      "bounds": 1.05,
+      "predecessor": 1.05,
+      "scroll_precise": 1.05
+    }
+  },
+  "protocol_source": "372d3960dbebc85d02ed6526d88250b6b0977cab",
+  "order": "Two cycles of five-treatment Williams design; rotate sequences by case then shuffle groups; base [0,1,4,2,3] with label rotations and reversals",
+  "qualification_processes": 420,
+  "allocation_processes": 140,
+  "timing_processes": 2800
+}
