@@ -1118,7 +1118,72 @@ impl RendererState {
                 + self.cursors.capacity() * 4
                 + self.residuals.capacity() * 32,
         };
+        if std::env::var_os("GPUI_MASK_DIAGNOSTIC").is_some() {
+            self.trace_mask_packet(scene, bank_count, columns);
+        }
         Ok(submitted)
+    }
+    fn trace_mask_packet(&self, scene: PreparedScene<'_>, bank_count: usize, columns: usize) {
+        let mut masks = 0;
+        let mut unit_axes = 0;
+        let mut unit_dimensions = 0;
+        for draw in scene.draws() {
+            if let Some(mask) = draw.source.mask() {
+                masks += 1;
+                unit_axes += usize::from(draw.inverse[..4] == [1.0, 0.0, 0.0, 1.0]);
+                unit_dimensions += usize::from(
+                    draw.local_rect.width as f64 == mask.width as f64
+                        && draw.local_rect.height as f64 == mask.height as f64,
+                );
+            }
+        }
+        let mut references = 0_u64;
+        let mut mask_references = 0_u64;
+        let mut lowered_references = 0_u64;
+        let mut samples = 0_u64;
+        let mut mask_samples = 0_u64;
+        let mut lowered_samples = 0_u64;
+        for (tile, range) in self.ranges.iter().enumerate() {
+            if range[1] == UNIFORM_TILE {
+                continue;
+            }
+            let [left, top, right, bottom] = tile_bounds(tile, columns, scene.width, scene.height);
+            let weight = u64::from((right - left) * (bottom - top)) * 16;
+            for cursor in range[0]..range[1] {
+                let address = self.references[cursor as usize];
+                let base = (address & !INLINE_RECORD) as usize;
+                let material =
+                    self.records[base + if address & INLINE_RECORD != 0 { 5 } else { 1 }][0];
+                references += 1;
+                samples += weight;
+                if material & 0xe0000000 == 0 {
+                    mask_references += 1;
+                    mask_samples += weight;
+                    if material & LOWERED_MASK != 0 {
+                        lowered_references += 1;
+                        lowered_samples += weight;
+                    }
+                }
+            }
+        }
+        assert_eq!(samples, self.stats.sample_draw_evaluations);
+        eprintln!(
+            "MASK_PACKET,{},{},{},{},{},{},{},{},{},{},{},{},{},{}",
+            self.stats.submissions,
+            bank_count,
+            self.packet.as_ref().unwrap().banked(),
+            self.stats.draws,
+            masks,
+            unit_axes,
+            unit_dimensions,
+            references,
+            mask_references,
+            lowered_references,
+            samples,
+            mask_samples,
+            lowered_samples,
+            self.stats.uniform_tiles
+        );
     }
     /// Submit the last successfully prepared packet to a fresh target.
     ///
