@@ -310,3 +310,35 @@ independent-operation batching to the measured rendering path, with pipeline,
 vertex-upload, retained storage and full unaffected controls charged. It is not
 yet implemented and does not solve mixed scroll+text certification. No general
 async executor or application API change is proposed.
+
+
+## Region batching: complete rejected trial
+
+Sealed local dossier `b165ec9b62a8cf308c0b693f8a92fe819c30a5e4`, implementation
+`1f16b73c56f10044a4186c90fb69ffe3d4047ac6`, worktree
+`/home/user/gpui-region-batch-lab`, evidence `reactivity/evidence/region-batch`.
+The separately frozen cost protocol is `6f1cf9e1ae170bcffef62665b3b3f91c22e880ab`.
+All2688 timed/336 correctness/112 allocation processes pass their work/pixel gates,
+but the candidate fails both incremental stream primaries: /static sparse
+1.083811621 [1.074792118,1.095054375], owner1.071761149 [1.037367527,1.087372095],
+against a<=0.8 requirement. All78 unaffected comparisons pass. Preserve the
+older static sparse trial's failure; this does not reverse its earlier verdict.
+
+First regional update is99.4/99.9ms versus2.59/2.77ms; first stream allocations
+3010902B versus186035B. Shipping code+241 lines, Backing+8B, lazy40B host object
+and1024B instance buffer; native ELF+66712B. Canonical fragment and ordinary
+method texts remain identical, but fewer draws are not an end-to-end win here.
+No native comparison follows a failed cost gate. The dossier verifier checks
+10019 files,636 preserved ELFs and888 archived cache identities, and independently
+reconstructs the process order, frame/work records, paired ratios and intervals.
+
+Next investigation: compose the existing exact scroll-copy proof with sparse
+repair *outside* the copied destination, retaining ordinary scissor submission.
+The older scroll-output trial already admitted mixed work and reduced its cost;
+its tiny-list failure remains sealed. Its `list_mode` is simply the presence of
+viewports, not a prohibition on mixed owner edits. The concrete lost locality is
+`subtract(damage_bounding_box, copied_destination)`: a changed header glyph and
+scroll can force a large intervening strip to redraw. A separately registered
+candidate must compare complete staged scenes outside the proved copy, preserve
+exact GPU predecessor tokens, and keep all cold, unaffected and full-copy costs.
+No new implementation or victory is implied by this observation.

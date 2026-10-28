@@ -242,3 +242,17 @@ weakening image authority or introducing new shaders/resources. The current shar
 repair enum changes ordinary render/submit code; that is a concrete difference to
 test, not an established cause of the six failed comparisons. A new preregistered
 trial must retain original, bounding-only and failed sparse-repair controls.
+
+
+## Completed region batching result
+
+Dossier b165ec9b62a8cf308c0b693f8a92fe819c30a5e4 rejects instanced repair rectangles.
+The complete fixed matrix finds streaming8.4% and owner-stream7.2% slower than
+static sparse repair, with about100ms first regional use. All unaffected controls
+pass. Draw-count reduction alone did not reduce the measured complete work.
+This is not an async-runtime/cache-hit result; the original fragment math remains
+unchanged. The next locality question is the existing scroll copy's coarse repair
+bounding box outside an already proved copied rectangle. Solid/Ripple's precise
+publication and BBTree's preservation of unaffected facts motivate composing these
+proofs, while exact image-token authority remains mandatory. Old scroll-copy
+mixed gains and tiny-control failures are both retained, not relabeled adoption.
