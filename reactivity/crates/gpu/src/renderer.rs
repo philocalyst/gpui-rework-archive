@@ -11,6 +11,8 @@ mod clips;
 mod images;
 mod owned;
 mod paint;
+#[cfg(not(feature = "offline-shader"))]
+mod regions;
 mod retained;
 use retained::Output;
 pub use retained::{RetainedRenderer, RetainedStats};
@@ -452,13 +454,14 @@ impl GpuContext {
             Some((module, fragment, layout, pipeline_layout)) => {
                 (module, Some((fragment, layout, pipeline_layout)))
             }
-            None => (
-                device.create_shader_module(wgpu::ShaderModuleDescriptor {
+            None => {
+                let module = device.create_shader_module(wgpu::ShaderModuleDescriptor {
                     label: Some("GPUI tile compositor"),
                     source: wgpu::ShaderSource::Wgsl(Cow::Borrowed(SHADER_SOURCE)),
-                }),
-                None,
-            ),
+                });
+                let (layout, pipeline_layout) = scene_layout(&device);
+                (module.clone(), Some((module, layout, pipeline_layout)))
+            }
         };
         let pipeline = device.create_render_pipeline(&wgpu::RenderPipelineDescriptor {
             label: Some("GPUI tile compositor"),
@@ -490,11 +493,10 @@ impl GpuContext {
             multiview_mask: None,
             cache: None,
         });
-        // A destroyed device can yield an invalid pipeline. Keep inferred
-        // layout validation in the same scope instead of panicking afterward.
-        // Each context must mint a fresh layout handle, including if this ever
-        // uses explicit layouts. Sharing a BGL across contexts/formats would
-        // invalidate the state/context identity certificate.
+        // A destroyed device can yield an invalid pipeline. Keep the checked
+        // layout lookup in the same scope instead of returning a dead owner.
+        // Every context mints a fresh layout; only its own pipelines share it.
+        // Sharing across contexts/formats would invalidate state identity.
         // Keep this checked pipeline lookup on the explicit route too: after
         // device loss creation errors can be ignored by WGPU's scopes, while
         // this rejects the invalid pipeline instead of returning a dead owner.
@@ -566,6 +568,7 @@ impl GpuContext {
         }
         self.queue.submit([encoder.finish()])
     }
+    #[cfg(feature = "offline-shader")]
     #[inline(never)]
     fn submit_regions(
         &self,
@@ -609,6 +612,51 @@ impl GpuContext {
         }
         self.queue.submit([encoder.finish()])
     }
+}
+
+// Fresh per context, with the exact typed shader ABI. Explicit layouts can be
+// shared by its ordinary and regional pipelines without changing packet bindings.
+fn scene_layout(device: &wgpu::Device) -> (wgpu::BindGroupLayout, wgpu::PipelineLayout) {
+    let buffer = |binding, size, uniform| wgpu::BindGroupLayoutEntry {
+        binding,
+        visibility: wgpu::ShaderStages::FRAGMENT,
+        ty: wgpu::BindingType::Buffer {
+            ty: if uniform {
+                wgpu::BufferBindingType::Uniform
+            } else {
+                wgpu::BufferBindingType::Storage { read_only: true }
+            },
+            has_dynamic_offset: false,
+            min_binding_size: wgpu::BufferSize::new(size),
+        },
+        count: None,
+    };
+    let layout = device.create_bind_group_layout(&wgpu::BindGroupLayoutDescriptor {
+        label: Some("GPUI scene"),
+        entries: &[
+            buffer(0, 48, true),
+            buffer(1, 16, false),
+            buffer(2, 8, false),
+            buffer(3, 4, false),
+            wgpu::BindGroupLayoutEntry {
+                binding: 4,
+                visibility: wgpu::ShaderStages::FRAGMENT,
+                ty: wgpu::BindingType::Texture {
+                    sample_type: wgpu::TextureSampleType::Float { filterable: false },
+                    view_dimension: wgpu::TextureViewDimension::D2,
+                    multisampled: false,
+                },
+                count: None,
+            },
+            buffer(5, 32, false),
+        ],
+    });
+    let pipeline_layout = device.create_pipeline_layout(&wgpu::PipelineLayoutDescriptor {
+        label: Some("GPUI scene"),
+        bind_group_layouts: &[Some(&layout)],
+        immediate_size: 0,
+    });
+    (layout, pipeline_layout)
 }
 impl RendererState {
     /// Create independent resources on a live context. Device health remains
@@ -1551,6 +1599,11 @@ mod tests {
 
     #[test]
     fn packet_storage_ledger() {
+        #[cfg(not(feature = "offline-shader"))]
+        eprintln!(
+            "region_storage,ColdBatch={},VertexBufferBytes=1024,MaxInstances=64",
+            size_of::<regions::RegionBatch>()
+        );
         eprintln!(
             "retained_storage,Renderer={},Output={},Backing={}",
             size_of::<RetainedRenderer>(),

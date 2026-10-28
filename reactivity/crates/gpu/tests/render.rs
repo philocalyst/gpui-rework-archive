@@ -4597,3 +4597,141 @@ fn sparse_text_regions_match_full_gpu_and_revoke_after_failure_or_resize() {
         }
     });
 }
+
+#[test]
+fn region_batches_cover_edges_and_holes_then_allow_ordinary_packet_repairs() {
+    use gpui_canvas::{AlphaMode, DamageRegions, Image, ImageSampling, PaintColor, SlotEdit};
+    use gpui_gpu::RetainedRenderer;
+    pollster::block_on(async {
+        for format in [
+            wgpu::TextureFormat::Rgba8UnormSrgb,
+            wgpu::TextureFormat::Bgra8UnormSrgb,
+            wgpu::TextureFormat::Rgba16Float,
+        ] {
+            let (_, adapter) = test_adapter::request().await;
+            let maximum = adapter.limits().max_texture_dimension_2d.min(16_384);
+            assert!(maximum >= 257);
+            let (device, queue) = adapter
+                .request_device(&wgpu::DeviceDescriptor {
+                    required_limits: wgpu::Limits {
+                        max_texture_dimension_2d: maximum,
+                        ..Default::default()
+                    },
+                    ..Default::default()
+                })
+                .await
+                .unwrap();
+            let inner = Renderer::new(device.clone(), queue.clone(), format)
+                .await
+                .unwrap();
+            let mut oracle = Renderer::new(device, queue, format).await.unwrap();
+            let mut gpu = RetainedRenderer::new(inner);
+            let config = if format == wgpu::TextureFormat::Rgba16Float {
+                ColorConfig::linear_hdr(gpui_canvas::OutputProfile::Srgb, 203.).unwrap()
+            } else {
+                ColorConfig::default()
+            };
+            for [width, height] in [[67, 53], [257, 1], [1, 257], [maximum, 1], [1, maximum]] {
+                let mut canvas =
+                    Canvas::recording(width as usize, height as usize, config).unwrap();
+                canvas.clear(Color::rgb(19, 31, 53));
+                let clip = Rect::new(0., 0., width as f32, height as f32);
+                if width > 1 && height > 1 {
+                    let image = Image::rgba8(
+                        1,
+                        1,
+                        gpui_canvas::ImageProfile::Srgb,
+                        AlphaMode::Straight,
+                        vec![61, 99, 143, 137].into_boxed_slice(),
+                    )
+                    .unwrap();
+                    canvas
+                        .draw_image(&image, clip, Affine::IDENTITY, clip, ImageSampling::Nearest)
+                        .unwrap();
+                }
+                let positions: Vec<_> = if width > 1 && height > 1 {
+                    (0..64)
+                        .map(|i| ((i % 8) * (width - 1) / 7, (i / 8) * (height - 1) / 7))
+                        .chain([(4, 4)])
+                        .collect()
+                } else {
+                    (0..63)
+                        .map(|i| i * 4)
+                        .chain([width.max(height) - 1, 252])
+                        .map(|at| if width == 1 { (0, at) } else { (at, 0) })
+                        .collect()
+                };
+                assert_eq!(positions.len(), 65);
+                let slots: Vec<_> = positions
+                    .into_iter()
+                    .map(|(x, y)| {
+                        let slot = canvas.paint_slot(PaintColor::new(Color::BLACK)).unwrap();
+                        canvas
+                            .fill_rect_slot(
+                                Rect::new(x as f32, y as f32, 1., 1.),
+                                Affine::IDENTITY,
+                                clip,
+                                slot,
+                            )
+                            .unwrap();
+                        slot
+                    })
+                    .collect();
+                if width > 1 && height > 1 {
+                    canvas
+                        .fill_rect(
+                            Rect::new(0.25, 0.5, width as f32 - 0.5, height as f32 - 0.75),
+                            Affine::IDENTITY,
+                            clip,
+                            Color::rgba(127, 43, 211, 79),
+                        )
+                        .unwrap();
+                }
+                let target = output_texture(&gpu, &canvas);
+                let view = target.create_view(&Default::default());
+                gpu.render(canvas.prepared_scene(), &view, None).unwrap();
+                assert_eq!(read_texture(&gpu, &target), readback(&mut oracle, &canvas));
+                for (count, color, expected_regions) in
+                    [(64, Color::WHITE, 64), (65, Color::rgb(17, 91, 203), 1)]
+                {
+                    let mut regions = DamageRegions::default();
+                    for &slot in &slots[..count] {
+                        regions.include(
+                            canvas
+                                .prepare_slots(&[SlotEdit::new(slot, PaintColor::new(color))])
+                                .unwrap()
+                                .commit(),
+                        );
+                    }
+                    assert_eq!(regions.regions().len(), expected_regions);
+                    gpu.render_regions(canvas.prepared_scene(), &view, &regions)
+                        .unwrap();
+                    assert_eq!(gpu.retained_stats().composited_pixels, regions.pixels());
+                    assert_eq!(
+                        read_texture(&gpu, &target),
+                        readback(&mut oracle, &canvas),
+                        "region coverage {format:?}/{width}x{height}/{count}"
+                    );
+                    // The canonical packet must remain compatible with ordinary
+                    // replay and slot patch pipelines after a regional draw.
+                    let fresh = output_texture(&gpu, &canvas);
+                    gpu.redraw(&fresh.create_view(&Default::default()))
+                        .unwrap()
+                        .unwrap();
+                    assert_eq!(read_texture(&gpu, &fresh), read_texture(&gpu, &target));
+                    let edits = [SlotEdit::new(
+                        slots[0],
+                        PaintColor::new(Color::rgb(193, 37, 59)),
+                    )];
+                    let damage = canvas.prepare_slots(&edits).unwrap().commit();
+                    gpu.patch_slots(&edits, &view, Some(damage)).unwrap();
+                    assert_eq!(
+                        read_texture(&gpu, &target),
+                        readback(&mut oracle, &canvas),
+                        "ordinary repair after regions"
+                    );
+                }
+            }
+        }
+    });
+}

@@ -34,7 +34,12 @@ impl Submission for Output<'_> {
 }
 struct RegionalOutput<'a> {
     output: Output<'a>,
+    #[cfg(feature = "offline-shader")]
     regions: &'a DamageRegions,
+    #[cfg(not(feature = "offline-shader"))]
+    batch: &'a regions::RegionBatch,
+    #[cfg(not(feature = "offline-shader"))]
+    count: u32,
 }
 impl Submission for RegionalOutput<'_> {
     #[inline(always)]
@@ -43,7 +48,11 @@ impl Submission for RegionalOutput<'_> {
     }
     #[inline(always)]
     fn submit(self, context: &GpuContext, bindings: &wgpu::BindGroup) -> wgpu::SubmissionIndex {
-        context.submit_regions(self.output, bindings, self.regions)
+        #[cfg(feature = "offline-shader")]
+        return context.submit_regions(self.output, bindings, self.regions);
+        #[cfg(not(feature = "offline-shader"))]
+        self.batch
+            .submit(context, self.output, bindings, self.count)
     }
 }
 
@@ -168,12 +177,22 @@ impl RetainedRenderer {
             return self.render(scene, target, None);
         }
         let backing = self.backing.as_mut().unwrap();
+        #[cfg(not(feature = "offline-shader"))]
+        let count = backing
+            .region_batch
+            .get_or_insert_with(|| Box::new(regions::RegionBatch::new(&self.inner.context)))
+            .write(&self.inner.context, damage, size)?;
         let submitted = self.inner.state.render_observed(
             &self.inner.context,
             scene,
             RegionalOutput {
                 output: backing.output(target, None),
+                #[cfg(feature = "offline-shader")]
                 regions: damage,
+                #[cfg(not(feature = "offline-shader"))]
+                batch: backing.region_batch.as_deref().unwrap(),
+                #[cfg(not(feature = "offline-shader"))]
+                count,
             },
             |_, _, _, _| {},
         )?;
@@ -255,6 +274,8 @@ pub(super) struct Backing {
     view: wgpu::TextureView,
     pipeline: wgpu::RenderPipeline,
     binding: wgpu::BindGroup,
+    #[cfg(not(feature = "offline-shader"))]
+    region_batch: Option<Box<regions::RegionBatch>>,
     valid: bool,
 }
 impl Backing {
@@ -318,6 +339,8 @@ impl Backing {
             view,
             pipeline,
             binding,
+            #[cfg(not(feature = "offline-shader"))]
+            region_batch: None,
             valid: false,
         }
     }

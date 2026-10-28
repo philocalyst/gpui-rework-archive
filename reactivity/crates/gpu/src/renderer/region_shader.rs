@@ -1,0 +1,24 @@
+//! Integer repair bounds select coverage; the ordinary fragment stays unchanged.
+#[wgsl_rs::wgsl]
+pub mod region {
+    use wgsl_rs::std::*;
+
+    #[vertex]
+    pub fn vertex(#[builtin(vertex_index)] index: u32, #[location(0)] edges: Vec4f) -> Vec4f {
+        const CORNERS: [Vec2u; 6] = [
+            vec2u(0, 0),
+            vec2u(1, 0),
+            vec2u(0, 1),
+            vec2u(0, 1),
+            vec2u(1, 0),
+            vec2u(1, 1),
+        ];
+        let corner = CORNERS[index as usize];
+        vec4f(
+            select(edges.x, edges.z, corner.x != 0),
+            select(edges.y, edges.w, corner.y != 0),
+            0.0,
+            1.0,
+        )
+    }
+}
