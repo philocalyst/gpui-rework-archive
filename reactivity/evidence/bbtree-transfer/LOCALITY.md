@@ -755,3 +755,15 @@ Fine planning adds a bounds pass and potentially4x tile words/cursors; cost
 must include these. Resource limits and full pixel sample arithmetic remain.
 New budget/partial-bin/alternating-replay tests; existing public mask fixture
 unchanged. Fresh GPU gate is running. No performance or adoption claim.
+
+
+Fine-grid early admission **dbc8777eb0f70a6c3fbcc543b95ad2a364a20aba** verifies
+1073 files,64 executable identities,356 tests,Clippy and336 exact reference
+frames. Initial02d46fee failed typed WGSL validation (signed inferred edge versus
+unsigned coordinate); corrected39efefe5 uses explicitu32 and fresh GPU rebuild.
+Mutantd992ae45 ignores fine addressing: internal test/replay/proof comparisons
+pass but independent oracle rejects all336 frames. The harness's erroneous
+expectedexit101 failure is retained; external rejection supplies the witness.
+Shipping38262 lines (+55 parent,+234 suffix),WGSL22953 bytes. Actual-native
+instrumented audit7cc9497c is building; uninstrumented screene117ad4b is frozen
+with seed20261119,not started. No full qualification/performance/adoption claim.

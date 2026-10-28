@@ -537,3 +537,9 @@ Mask-miss native **c8a65525** rejects despite all work gates passing:stream
 .89604,mixed .91516 versusrequired .8. New mask-grid1c225400/02d46fee uses
 budget-preserving8x8 bins for mask scenes,16x16otherwise. GPU qualification
 started; larger index/CPU/upload costs remain charged. Overall goal open.
+
+
+Fine-grid admission **dbc8777e** passes356 tests,Clippy,336 exact images;
+coarse-address mutant fails336 independent images despite internal self-parity.
+Initial shader type failure retained; correctedsource39efefe5. Nativeaudit
+7cc9497c building; fixed screene117ad4b pending. No performance claim.
