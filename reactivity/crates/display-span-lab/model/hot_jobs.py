@@ -7,7 +7,7 @@ from radix_jobs import Series,admit,words,deep_size
 class HotSeries(Series):
     def __init__(self,path,draws,mode,target,mutant=False):
         super().__init__(path,draws,mode)
-        self.hot=Hot(self.pub.namespace,1);self.mutant=mutant
+        self.hot=Hot(self.pub.namespace,1);self.hot_mutant=mutant
         color=next(d[4] for d in draws if d[0]==target);self.key=self.hot.register(color,1)
         self.store.set(target,{9:self.key.index,10:5});self.store.commit();self.store.acknowledge()
         self.target=target;self.support=self.store.read(target);self.store.c.clear();self.hot.counts();self.extra=[]
@@ -17,7 +17,7 @@ class HotSeries(Series):
             if v is not None:seq.add(v.sequence)
         return [(p.namespace,s) for s in seq]
     def edit(self,color):
-        self.hot.update(self.key,color,self.pub.sequence+1,self.epochs(),unsafe_round_robin=self.mutant)
+        self.hot.update(self.key,color,self.pub.sequence+1,self.epochs(),unsafe_round_robin=self.hot_mutant)
         self.store.damage(self.support,self.support)
         return self.store.commit()
     def frame(self,*args,**kwargs):
@@ -36,7 +36,7 @@ class HotSeries(Series):
         frame=self.frames[-1];deferred=frame['submit_deferred'];assert len(deferred)==1;frame['submit_deferred']=[]
         p=self.pub;s=self.store
         for turn in range(7):
-            seq=p.sequence+1;self.hot.update(self.key,0xff000000|seq,seq,self.epochs(),unsafe_round_robin=self.mutant)
+            seq=p.sequence+1;self.hot.update(self.key,0xff000000|seq,seq,self.epochs(),unsafe_round_robin=self.hot_mutant)
             raw=self.mode in ['overlap-raw','serial-uncompressed'] and len(s.pages)==1
             v=p.prepare({},count=len(s.index),slots=s.next_page*32,first=s.first*32,raw=raw);assert not p.submit(v)
             writes=[dict(offset=o,words=words(b+bytes((-len(b))%4)),payload_bytes=len(b)) for o,b in p.heap.drain_writes()]
@@ -49,7 +49,7 @@ class HotSeries(Series):
     def finish(self):
         report=super().finish();path=self.path/'jobs.json';jobs=json.loads(path.read_text());jobs['hot_capacity_bytes']=48;path.write_text(json.dumps(jobs,separators=(',',':')))
         path=self.path/'ledger.json';ledger=json.loads(path.read_text());ledger['unsubmitted_hot_candidates']=self.extra;ledger['scope']='A only, restricted public binding, unchanged full traversal, six version slots/key; staged memory; no timing or generic production claim';path.write_text(json.dumps(ledger,indent=2))
-        report['submitted_frames']=sum(not f.get('publication_only',False) for f in jobs['frames']);report['mutant']=self.mutant;return report
+        report['submitted_frames']=sum(not f.get('publication_only',False) for f in jobs['frames']);report['mutant']=self.hot_mutant;return report
 
 def point(source,out,n,mode,stress=False,mutant=False):
     public,draws=admit(source/str(n));name=f'hot-{n}-{mode}'+('-stress' if stress else '')+('-mutant' if mutant else '')
