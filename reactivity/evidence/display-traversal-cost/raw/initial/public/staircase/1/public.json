@@ -1,0 +1,495 @@
+{
+  "events": [
+    {
+      "candidate_draw_enumerations": 0,
+      "candidate_property_reads": 1,
+      "candidate_snapshot_reads": 0,
+      "color": 4294967295,
+      "commit": {
+        "changed_nodes": 1,
+        "prepared_epoch": 1,
+        "presentation_epoch": 0,
+        "presentation_valid": true,
+        "source_epoch": 1
+      },
+      "counters": {
+        "coarse_updates": 0,
+        "descriptions": 0,
+        "destination_compares": 0,
+        "exact_updates": 1,
+        "layout_runs": 0,
+        "measure_calls": 0,
+        "owner_reruns": 0,
+        "paint_passes": 0,
+        "presentations": 0,
+        "source_operations": 1,
+        "source_reads": 1,
+        "text_bytes_copied": 0,
+        "text_promotions": 0
+      },
+      "index": 0,
+      "pixels": "paint-0.rgba",
+      "rejected_invalid_request": false,
+      "target": {
+        "identity": 1,
+        "window": 131
+      }
+    },
+    {
+      "candidate_draw_enumerations": 0,
+      "candidate_property_reads": 1,
+      "candidate_snapshot_reads": 0,
+      "color": 4278190335,
+      "commit": {
+        "changed_nodes": 1,
+        "prepared_epoch": 2,
+        "presentation_epoch": 0,
+        "presentation_valid": true,
+        "source_epoch": 2
+      },
+      "counters": {
+        "coarse_updates": 0,
+        "descriptions": 0,
+        "destination_compares": 0,
+        "exact_updates": 1,
+        "layout_runs": 0,
+        "measure_calls": 0,
+        "owner_reruns": 0,
+        "paint_passes": 0,
+        "presentations": 0,
+        "source_operations": 1,
+        "source_reads": 1,
+        "text_bytes_copied": 0,
+        "text_promotions": 0
+      },
+      "index": 1,
+      "pixels": "paint-1.rgba",
+      "rejected_invalid_request": false,
+      "target": {
+        "identity": 1,
+        "window": 131
+      }
+    },
+    {
+      "candidate_draw_enumerations": 0,
+      "candidate_property_reads": 1,
+      "candidate_snapshot_reads": 0,
+      "color": 4294901760,
+      "commit": {
+        "changed_nodes": 1,
+        "prepared_epoch": 3,
+        "presentation_epoch": 2,
+        "presentation_valid": true,
+        "source_epoch": 3
+      },
+      "counters": {
+        "coarse_updates": 0,
+        "descriptions": 0,
+        "destination_compares": 0,
+        "exact_updates": 1,
+        "layout_runs": 0,
+        "measure_calls": 0,
+        "owner_reruns": 0,
+        "paint_passes": 0,
+        "presentations": 0,
+        "source_operations": 1,
+        "source_reads": 1,
+        "text_bytes_copied": 0,
+        "text_promotions": 0
+      },
+      "index": 2,
+      "pixels": "paint-2.rgba",
+      "rejected_invalid_request": false,
+      "target": {
+        "identity": 1,
+        "window": 131
+      }
+    },
+    {
+      "candidate_draw_enumerations": 0,
+      "candidate_property_reads": 1,
+      "candidate_snapshot_reads": 0,
+      "color": 4278190080,
+      "commit": {
+        "changed_nodes": 1,
+        "prepared_epoch": 4,
+        "presentation_epoch": 3,
+        "presentation_valid": true,
+        "source_epoch": 4
+      },
+      "counters": {
+        "coarse_updates": 0,
+        "descriptions": 0,
+        "destination_compares": 0,
+        "exact_updates": 1,
+        "layout_runs": 0,
+        "measure_calls": 0,
+        "owner_reruns": 0,
+        "paint_passes": 0,
+        "presentations": 0,
+        "source_operations": 1,
+        "source_reads": 1,
+        "text_bytes_copied": 0,
+        "text_promotions": 0
+      },
+      "index": 3,
+      "pixels": "paint-3.rgba",
+      "rejected_invalid_request": false,
+      "target": {
+        "identity": 1,
+        "window": 131
+      }
+    },
+    {
+      "candidate_draw_enumerations": 0,
+      "candidate_property_reads": 1,
+      "candidate_snapshot_reads": 0,
+      "color": 4294967295,
+      "commit": {
+        "changed_nodes": 1,
+        "prepared_epoch": 5,
+        "presentation_epoch": 3,
+        "presentation_valid": true,
+        "source_epoch": 5
+      },
+      "counters": {
+        "coarse_updates": 0,
+        "descriptions": 0,
+        "destination_compares": 0,
+        "exact_updates": 1,
+        "layout_runs": 0,
+        "measure_calls": 0,
+        "owner_reruns": 0,
+        "paint_passes": 0,
+        "presentations": 0,
+        "source_operations": 1,
+        "source_reads": 1,
+        "text_bytes_copied": 0,
+        "text_promotions": 0
+      },
+      "index": 4,
+      "pixels": "paint-4.rgba",
+      "rejected_invalid_request": false,
+      "target": {
+        "identity": 1,
+        "window": 131
+      }
+    },
+    {
+      "candidate_draw_enumerations": 0,
+      "candidate_property_reads": 1,
+      "candidate_snapshot_reads": 0,
+      "color": 4278190335,
+      "commit": {
+        "changed_nodes": 1,
+        "prepared_epoch": 6,
+        "presentation_epoch": 5,
+        "presentation_valid": true,
+        "source_epoch": 6
+      },
+      "counters": {
+        "coarse_updates": 0,
+        "descriptions": 0,
+        "destination_compares": 0,
+        "exact_updates": 1,
+        "layout_runs": 0,
+        "measure_calls": 0,
+        "owner_reruns": 0,
+        "paint_passes": 0,
+        "presentations": 0,
+        "source_operations": 1,
+        "source_reads": 1,
+        "text_bytes_copied": 0,
+        "text_promotions": 0
+      },
+      "index": 5,
+      "pixels": "paint-5.rgba",
+      "rejected_invalid_request": false,
+      "target": {
+        "identity": 1,
+        "window": 131
+      }
+    },
+    {
+      "candidate_draw_enumerations": 0,
+      "candidate_property_reads": 1,
+      "candidate_snapshot_reads": 0,
+      "color": 4294901760,
+      "commit": {
+        "changed_nodes": 1,
+        "prepared_epoch": 7,
+        "presentation_epoch": 6,
+        "presentation_valid": true,
+        "source_epoch": 7
+      },
+      "counters": {
+        "coarse_updates": 0,
+        "descriptions": 0,
+        "destination_compares": 0,
+        "exact_updates": 1,
+        "layout_runs": 0,
+        "measure_calls": 0,
+        "owner_reruns": 0,
+        "paint_passes": 0,
+        "presentations": 0,
+        "source_operations": 1,
+        "source_reads": 1,
+        "text_bytes_copied": 0,
+        "text_promotions": 0
+      },
+      "index": 6,
+      "pixels": "paint-6.rgba",
+      "rejected_invalid_request": false,
+      "target": {
+        "identity": 1,
+        "window": 131
+      }
+    },
+    {
+      "candidate_draw_enumerations": 0,
+      "candidate_property_reads": 1,
+      "candidate_snapshot_reads": 0,
+      "color": 4278190080,
+      "commit": {
+        "changed_nodes": 1,
+        "prepared_epoch": 8,
+        "presentation_epoch": 6,
+        "presentation_valid": true,
+        "source_epoch": 8
+      },
+      "counters": {
+        "coarse_updates": 0,
+        "descriptions": 0,
+        "destination_compares": 0,
+        "exact_updates": 1,
+        "layout_runs": 0,
+        "measure_calls": 0,
+        "owner_reruns": 0,
+        "paint_passes": 0,
+        "presentations": 0,
+        "source_operations": 1,
+        "source_reads": 1,
+        "text_bytes_copied": 0,
+        "text_promotions": 0
+      },
+      "index": 7,
+      "pixels": "paint-7.rgba",
+      "rejected_invalid_request": false,
+      "target": {
+        "identity": 1,
+        "window": 131
+      }
+    },
+    {
+      "candidate_draw_enumerations": 0,
+      "candidate_property_reads": 1,
+      "candidate_snapshot_reads": 0,
+      "color": 4294967295,
+      "commit": {
+        "changed_nodes": 1,
+        "prepared_epoch": 9,
+        "presentation_epoch": 8,
+        "presentation_valid": true,
+        "source_epoch": 9
+      },
+      "counters": {
+        "coarse_updates": 0,
+        "descriptions": 0,
+        "destination_compares": 0,
+        "exact_updates": 1,
+        "layout_runs": 0,
+        "measure_calls": 0,
+        "owner_reruns": 0,
+        "paint_passes": 0,
+        "presentations": 0,
+        "source_operations": 1,
+        "source_reads": 1,
+        "text_bytes_copied": 0,
+        "text_promotions": 0
+      },
+      "index": 8,
+      "pixels": "paint-8.rgba",
+      "rejected_invalid_request": false,
+      "target": {
+        "identity": 1,
+        "window": 131
+      }
+    },
+    {
+      "candidate_draw_enumerations": 0,
+      "candidate_property_reads": 1,
+      "candidate_snapshot_reads": 0,
+      "color": 4278190335,
+      "commit": {
+        "changed_nodes": 1,
+        "prepared_epoch": 10,
+        "presentation_epoch": 9,
+        "presentation_valid": true,
+        "source_epoch": 10
+      },
+      "counters": {
+        "coarse_updates": 0,
+        "descriptions": 0,
+        "destination_compares": 0,
+        "exact_updates": 1,
+        "layout_runs": 0,
+        "measure_calls": 0,
+        "owner_reruns": 0,
+        "paint_passes": 0,
+        "presentations": 0,
+        "source_operations": 1,
+        "source_reads": 1,
+        "text_bytes_copied": 0,
+        "text_promotions": 0
+      },
+      "index": 9,
+      "pixels": "paint-9.rgba",
+      "rejected_invalid_request": false,
+      "target": {
+        "identity": 1,
+        "window": 131
+      }
+    },
+    {
+      "candidate_draw_enumerations": 0,
+      "candidate_property_reads": 1,
+      "candidate_snapshot_reads": 0,
+      "color": 4294901760,
+      "commit": {
+        "changed_nodes": 1,
+        "prepared_epoch": 11,
+        "presentation_epoch": 9,
+        "presentation_valid": true,
+        "source_epoch": 11
+      },
+      "counters": {
+        "coarse_updates": 0,
+        "descriptions": 0,
+        "destination_compares": 0,
+        "exact_updates": 1,
+        "layout_runs": 0,
+        "measure_calls": 0,
+        "owner_reruns": 0,
+        "paint_passes": 0,
+        "presentations": 0,
+        "source_operations": 1,
+        "source_reads": 1,
+        "text_bytes_copied": 0,
+        "text_promotions": 0
+      },
+      "index": 10,
+      "pixels": "paint-10.rgba",
+      "rejected_invalid_request": false,
+      "target": {
+        "identity": 1,
+        "window": 131
+      }
+    },
+    {
+      "candidate_draw_enumerations": 0,
+      "candidate_property_reads": 1,
+      "candidate_snapshot_reads": 0,
+      "color": 4278190080,
+      "commit": {
+        "changed_nodes": 1,
+        "prepared_epoch": 12,
+        "presentation_epoch": 11,
+        "presentation_valid": true,
+        "source_epoch": 12
+      },
+      "counters": {
+        "coarse_updates": 0,
+        "descriptions": 0,
+        "destination_compares": 0,
+        "exact_updates": 1,
+        "layout_runs": 0,
+        "measure_calls": 0,
+        "owner_reruns": 0,
+        "paint_passes": 0,
+        "presentations": 0,
+        "source_operations": 1,
+        "source_reads": 1,
+        "text_bytes_copied": 0,
+        "text_promotions": 0
+      },
+      "index": 11,
+      "pixels": "paint-11.rgba",
+      "rejected_invalid_request": true,
+      "target": {
+        "identity": 1,
+        "window": 131
+      }
+    }
+  ],
+  "initial_draws": [
+    {
+      "clip": [
+        0.0,
+        0.0,
+        64.0,
+        64.0
+      ],
+      "color": [
+        0.0,
+        0.0,
+        0.0,
+        1.0
+      ],
+      "rect": [
+        0.0,
+        0.0,
+        64.0,
+        64.0
+      ]
+    }
+  ],
+  "initial_snapshot": {
+    "nodes": [
+      {
+        "bounds": [
+          0.0,
+          0.0,
+          64.0,
+          64.0
+        ],
+        "identity": 1,
+        "parent": null,
+        "role": "Generic",
+        "target": {
+          "identity": 1,
+          "window": 131
+        },
+        "text": null,
+        "transform": [
+          1.0,
+          0.0,
+          0.0,
+          1.0,
+          0.0,
+          0.0
+        ]
+      }
+    ],
+    "poisoned": false,
+    "prepared_epoch": null,
+    "presentation_epoch": 0,
+    "presentation_valid": true,
+    "requested_scale_factor": 1.0,
+    "requested_size": [
+      64,
+      64
+    ],
+    "scale_factor": 1.0,
+    "size": [
+      64,
+      64
+    ],
+    "source_epoch": 0
+  },
+  "n": 1,
+  "scope": "one initial registered binding; no generic production journal integration; full CPU and fresh Win oracles charged separately",
+  "target": {
+    "identity": 1,
+    "window": 131
+  }
+}

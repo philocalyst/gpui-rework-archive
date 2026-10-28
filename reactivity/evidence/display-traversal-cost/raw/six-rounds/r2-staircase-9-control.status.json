@@ -1,0 +1,16 @@
+{
+  "args": [
+    "python3",
+    "/home/user/gpui-display-traversal-cost-lab/reactivity/crates/display-span-lab/model/cost_owner.py",
+    "/home/user/gpui-preserved-test-binaries/e0dda5802aa9a3b3b18d12ea1b018988854efe7f4f27f23d38c7477e320161d6",
+    "/home/user/gpui-display-traversal-cost-evidence/initial/public/staircase/9",
+    "control",
+    "/home/user/gpui-display-traversal-cost-evidence/six-rounds/r2-staircase-9-control",
+    "timing"
+  ],
+  "exit": 0,
+  "started_unix_seconds": 1793228967.8051705,
+  "elapsed_seconds": 0.7158708572387695,
+  "load_before": "2.04 1.35 0.74 5/730 831365",
+  "free_disk_after": 9090093056
+}

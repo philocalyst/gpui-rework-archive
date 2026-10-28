@@ -1,0 +1,12 @@
+{
+  "cost_worker": {
+    "preserved": "/home/user/gpui-preserved-test-binaries/e0dda5802aa9a3b3b18d12ea1b018988854efe7f4f27f23d38c7477e320161d6",
+    "sha256": "e0dda5802aa9a3b3b18d12ea1b018988854efe7f4f27f23d38c7477e320161d6",
+    "bytes": 6951368
+  },
+  "traversal_public": {
+    "preserved": "/home/user/gpui-preserved-test-binaries/87aea43e5b9f6ca796605198473d8ebc0308fd4791a97ab489876eb143c31222",
+    "sha256": "87aea43e5b9f6ca796605198473d8ebc0308fd4791a97ab489876eb143c31222",
+    "bytes": 10052200
+  }
+}

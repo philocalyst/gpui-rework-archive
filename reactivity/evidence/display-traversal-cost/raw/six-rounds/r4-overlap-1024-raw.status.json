@@ -1,0 +1,16 @@
+{
+  "args": [
+    "python3",
+    "/home/user/gpui-display-traversal-cost-lab/reactivity/crates/display-span-lab/model/cost_owner.py",
+    "/home/user/gpui-preserved-test-binaries/e0dda5802aa9a3b3b18d12ea1b018988854efe7f4f27f23d38c7477e320161d6",
+    "/home/user/gpui-display-traversal-cost-evidence/initial/public/overlap/1024",
+    "raw",
+    "/home/user/gpui-display-traversal-cost-evidence/six-rounds/r4-overlap-1024-raw",
+    "timing"
+  ],
+  "exit": 0,
+  "started_unix_seconds": 1793229202.9508047,
+  "elapsed_seconds": 4.572824239730835,
+  "load_before": "1.72 1.64 1.02 5/745 836038",
+  "free_disk_after": 9040441344
+}

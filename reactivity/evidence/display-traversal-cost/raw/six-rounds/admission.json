@@ -1,0 +1,8 @@
+{
+  "ready": true,
+  "prior_exact_endpoint_preflights": 45,
+  "source": "e5720235ea0952c160eb803de99f4ee15faac795",
+  "worker_sha": "e0dda5802aa9a3b3b18d12ea1b018988854efe7f4f27f23d38c7477e320161d6",
+  "dataset_count": 224,
+  "aggregation": "median of six paired per-round p95 ratios for ALL gain and regression clauses"
+}

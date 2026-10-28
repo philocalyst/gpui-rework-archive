@@ -1,0 +1,1147 @@
+[
+  {
+    "path": "/home/user/gpui-display-traversal-cost-target/release/build/icu_properties_data/18225bc914b96d92/out/libicu_properties_data-18225bc914b96d92.rmeta",
+    "bytes": 1860116,
+    "sha256": "95c32e15af81ff04383bfbf495eb45978827e29804bd2574961e015f5db33caf"
+  },
+  {
+    "path": "/home/user/gpui-display-traversal-cost-target/release/build/icu_properties_data/f6b62411c57a0b14/out/libicu_properties_data-f6b62411c57a0b14.rmeta",
+    "bytes": 1864842,
+    "sha256": "606f9f3610f0f783170a7b2df290544ddadf21310e975a5ad1c625235aba4dde"
+  },
+  {
+    "path": "/home/user/gpui-display-traversal-cost-target/release/build/icu_locale_fallback_data/d8d89af2a23072b8/out/libicu_locale_fallback_data-d8d89af2a23072b8.rmeta",
+    "bytes": 27405,
+    "sha256": "d0cfea56edcd36fd7190e5b1c5f948c74d512c7a93056d17d5773448c1439313"
+  },
+  {
+    "path": "/home/user/gpui-display-traversal-cost-target/release/build/icu_locale_fallback_data/10c3d6d8535f5201/out/libicu_locale_fallback_data-10c3d6d8535f5201.rmeta",
+    "bytes": 27541,
+    "sha256": "a492663285e50e394d1566a5f40371acbb12283732098453f6a4da96dbd519e8"
+  },
+  {
+    "path": "/home/user/gpui-display-traversal-cost-target/release/build/icu_segmenter_data/38854cc77828cecd/out/libicu_segmenter_data-38854cc77828cecd.rmeta",
+    "bytes": 12360821,
+    "sha256": "cdd03376bdffbc356f9253df8ee84c7ed5198fadf9077f51195c2f0c7783a129"
+  },
+  {
+    "path": "/home/user/gpui-display-traversal-cost-target/release/build/icu_segmenter_data/e85961f7d1f676b4/out/libicu_segmenter_data-e85961f7d1f676b4.rmeta",
+    "bytes": 12361467,
+    "sha256": "198b045bf481c8bef8ab127843c23c961ce355fd524d7d798aebb90b803ea537"
+  },
+  {
+    "path": "/home/user/gpui-display-traversal-cost-target/release/build/indexmap/9639351d01eaf386/out/libindexmap-9639351d01eaf386.rmeta",
+    "bytes": 1782787,
+    "sha256": "42012a25d739bb10961a15185ca0d03221e3a5b7f469d40654b700871474e54c"
+  },
+  {
+    "path": "/home/user/gpui-display-traversal-cost-target/release/build/indexmap/c2f9a300f645630f/out/libindexmap-c2f9a300f645630f.rmeta",
+    "bytes": 923881,
+    "sha256": "e10f5850dab00cd34ab83d954f6625169ac44cfa6fb823634e9afd492ae21669"
+  },
+  {
+    "path": "/home/user/gpui-display-traversal-cost-target/release/build/libloading/c84ce4b5b1ab761a/out/liblibloading-c84ce4b5b1ab761a.rmeta",
+    "bytes": 103429,
+    "sha256": "a75de8416b827bd308079c0f20a3336dfa9cc83f25f819d15e3f094a46285762"
+  },
+  {
+    "path": "/home/user/gpui-display-traversal-cost-target/release/build/libloading/bc719e75286d2fe9/out/liblibloading-bc719e75286d2fe9.rmeta",
+    "bytes": 156540,
+    "sha256": "5ca39034c9bae0e6ec5bde37eeb5a6760cb5e1d5121c256e48bba39602340c17"
+  },
+  {
+    "path": "/home/user/gpui-display-traversal-cost-target/release/build/unicode-width/b3b9897e25c0808b/out/libunicode_width-b3b9897e25c0808b.rmeta",
+    "bytes": 815746,
+    "sha256": "40ed1fcd55058c3c2015672c8f3591aa713e27b0fbf3514a23dc5d0ba39ed28c"
+  },
+  {
+    "path": "/home/user/gpui-display-traversal-cost-target/release/build/unicode-width/d77ac50d4ef432ad/out/libunicode_width-d77ac50d4ef432ad.rmeta",
+    "bytes": 870318,
+    "sha256": "a173e1eb1ef513f9bef033ff66d4ffdfc498ce4c76918712075757a83887fe32"
+  },
+  {
+    "path": "/home/user/gpui-display-traversal-cost-target/release/build/wgpu-hal/0082383b0e27ae19/out/libwgpu_hal-0082383b0e27ae19.rmeta",
+    "bytes": 3254422,
+    "sha256": "57dc0c22079410e07150c3c07a224b0d60a1f783252e0f4592562119043b5c63"
+  },
+  {
+    "path": "/home/user/gpui-display-traversal-cost-target/release/build/wgpu-hal/3880a0e52968c88c/out/libwgpu_hal-3880a0e52968c88c.rmeta",
+    "bytes": 2276840,
+    "sha256": "584557c422b658a9b20ddf9eb5b13894b9eca2d95f8e1079f96cba1ef2dac18b"
+  },
+  {
+    "path": "/home/user/gpui-display-traversal-cost-target/release/build/equivalent/daef721e4435340f/out/libequivalent-daef721e4435340f.rmeta",
+    "bytes": 8016,
+    "sha256": "b2c87dea55739582cc5965c65093da0471efc1d4ac32bad050d51be3c419f87c"
+  },
+  {
+    "path": "/home/user/gpui-display-traversal-cost-target/release/build/equivalent/e921210bf9934426/out/libequivalent-e921210bf9934426.rmeta",
+    "bytes": 8690,
+    "sha256": "9bf318bb7838ba95e7e1484f0436534f013828ead039eb237346c831295a52d1"
+  },
+  {
+    "path": "/home/user/gpui-display-traversal-cost-target/release/build/writeable/21a49729ec9532f7/out/libwriteable-21a49729ec9532f7.rmeta",
+    "bytes": 393360,
+    "sha256": "a7523f1199b79b21e9b0b9143c2497d90404d7e1373f5a311da0c140db0bef3d"
+  },
+  {
+    "path": "/home/user/gpui-display-traversal-cost-target/release/build/writeable/e62c9de981a0fbd6/out/libwriteable-e62c9de981a0fbd6.rmeta",
+    "bytes": 236348,
+    "sha256": "29373c48de6e194dcc4c68fdcd5a306b3bc55993b9e2e415971468ef212d548b"
+  },
+  {
+    "path": "/home/user/gpui-display-traversal-cost-target/release/build/font-types/5f97b5f1ddb715fb/out/libfont_types-5f97b5f1ddb715fb.rmeta",
+    "bytes": 804305,
+    "sha256": "be039721a2ba778a0da9974d13ad73dec55bf8c3e68e08c41a9c562a27de6c06"
+  },
+  {
+    "path": "/home/user/gpui-display-traversal-cost-target/release/build/font-types/34e8773e8b3b2a30/out/libfont_types-34e8773e8b3b2a30.rmeta",
+    "bytes": 606303,
+    "sha256": "99cfca93680983dc15a57ed8112c95f38c38a21ddb93d52bc6db3049695bce9f"
+  },
+  {
+    "path": "/home/user/gpui-display-traversal-cost-target/release/build/parley_emoji/2989278c86b9b60c/out/libparley_emoji-2989278c86b9b60c.rmeta",
+    "bytes": 59251,
+    "sha256": "ecfd6825f5e2a4c07268e3d225bfb1b474b0045b58cb50fae28cfb971297a42e"
+  },
+  {
+    "path": "/home/user/gpui-display-traversal-cost-target/release/build/parley_emoji/18d1d9cc5f1f755c/out/libparley_emoji-18d1d9cc5f1f755c.rmeta",
+    "bytes": 46108,
+    "sha256": "df547db9a4342687abfe22727d108c16af487910733dbfddcb83417e2cbbf651"
+  },
+  {
+    "path": "/home/user/gpui-display-traversal-cost-target/release/build/bit-vec/ac1ac90c607c2510/out/libbit_vec-ac1ac90c607c2510.rmeta",
+    "bytes": 99780,
+    "sha256": "2618f59d63987f27d0ba8b2ff71e428686c9e6bfe9a9f9201e657bf07faa1ccd"
+  },
+  {
+    "path": "/home/user/gpui-display-traversal-cost-target/release/build/bit-vec/fbbc83ab4a8094ab/out/libbit_vec-fbbc83ab4a8094ab.rmeta",
+    "bytes": 289930,
+    "sha256": "2a99cb7dce6aef849a2f22f0bf05bf0c484ce24883bfc94129743eea53f6fe17"
+  },
+  {
+    "path": "/home/user/gpui-display-traversal-cost-target/release/build/renderdoc-sys/55085bff80759734/out/librenderdoc_sys-55085bff80759734.rmeta",
+    "bytes": 48858,
+    "sha256": "2a48ebf65ef39d882753d18554f71a8eff2191fd67bc3e39812f72848816ecf3"
+  },
+  {
+    "path": "/home/user/gpui-display-traversal-cost-target/release/build/renderdoc-sys/5880c9de017d639d/out/librenderdoc_sys-5880c9de017d639d.rmeta",
+    "bytes": 45812,
+    "sha256": "28ec4492ef9f223b72f0ed1339eda93525a11a1e262f7ded918b824d6a771559"
+  },
+  {
+    "path": "/home/user/gpui-display-traversal-cost-target/release/build/gpui_display_span_lab/56f87cca57f24b97/out/libtraversal_public-56f87cca57f24b97.rmeta",
+    "bytes": 0,
+    "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+  },
+  {
+    "path": "/home/user/gpui-display-traversal-cost-target/release/build/gpui_display_span_lab/14ea1771cbd48a07/out/libradix_gpu-14ea1771cbd48a07.rmeta",
+    "bytes": 0,
+    "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+  },
+  {
+    "path": "/home/user/gpui-display-traversal-cost-target/release/build/gpui_display_span_lab/741bba7bedbc072d/out/libconsume-741bba7bedbc072d.rmeta",
+    "bytes": 0,
+    "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+  },
+  {
+    "path": "/home/user/gpui-display-traversal-cost-target/release/build/gpui_display_span_lab/6ef04685b1a2fddc/out/libtraversal_gpu-6ef04685b1a2fddc.rmeta",
+    "bytes": 0,
+    "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+  },
+  {
+    "path": "/home/user/gpui-display-traversal-cost-target/release/build/gpui_display_span_lab/e0916476d01b0857/out/libpublic_trace-e0916476d01b0857.rmeta",
+    "bytes": 0,
+    "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+  },
+  {
+    "path": "/home/user/gpui-display-traversal-cost-target/release/build/gpui_display_span_lab/baaf86ea9f615111/out/libtraversal_gpu-baaf86ea9f615111.rmeta",
+    "bytes": 0,
+    "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+  },
+  {
+    "path": "/home/user/gpui-display-traversal-cost-target/release/build/gpui_display_span_lab/666c7ddc4afcc720/out/libpublic_trace-666c7ddc4afcc720.rmeta",
+    "bytes": 0,
+    "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+  },
+  {
+    "path": "/home/user/gpui-display-traversal-cost-target/release/build/gpui_display_span_lab/455f9048beae1ab1/out/libradix_public-455f9048beae1ab1.rmeta",
+    "bytes": 0,
+    "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+  },
+  {
+    "path": "/home/user/gpui-display-traversal-cost-target/release/build/gpui_display_span_lab/ab38ebb6f5f4235c/out/libconsume-ab38ebb6f5f4235c.rmeta",
+    "bytes": 0,
+    "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+  },
+  {
+    "path": "/home/user/gpui-display-traversal-cost-target/release/build/gpui_display_span_lab/47a515c318cff2c6/out/libradix_gpu-47a515c318cff2c6.rmeta",
+    "bytes": 0,
+    "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+  },
+  {
+    "path": "/home/user/gpui-display-traversal-cost-target/release/build/gpui_display_span_lab/b05193518a689b56/out/libradix_public-b05193518a689b56.rmeta",
+    "bytes": 0,
+    "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+  },
+  {
+    "path": "/home/user/gpui-display-traversal-cost-target/release/build/gpui_display_span_lab/102c827609e44209/out/libdirect_resources-102c827609e44209.rmeta",
+    "bytes": 0,
+    "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+  },
+  {
+    "path": "/home/user/gpui-display-traversal-cost-target/release/build/gpui_display_span_lab/f77255b0cfb119c6/out/libheap_audit-f77255b0cfb119c6.rmeta",
+    "bytes": 0,
+    "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+  },
+  {
+    "path": "/home/user/gpui-display-traversal-cost-target/release/build/gpui_display_span_lab/cb8e2477a188498c/out/libtraversal_public-cb8e2477a188498c.rmeta",
+    "bytes": 0,
+    "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+  },
+  {
+    "path": "/home/user/gpui-display-traversal-cost-target/release/build/gpui_display_span_lab/cc142cfeda0ecece/out/libcost_worker-cc142cfeda0ecece.rmeta",
+    "bytes": 0,
+    "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+  },
+  {
+    "path": "/home/user/gpui-display-traversal-cost-target/release/build/gpui_display_span_lab/e7701c86b2eb7ff6/out/libheap_audit-e7701c86b2eb7ff6.rmeta",
+    "bytes": 0,
+    "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+  },
+  {
+    "path": "/home/user/gpui-display-traversal-cost-target/release/build/gpui_display_span_lab/f0516d41dd0f6217/out/libcost_worker-f0516d41dd0f6217.rmeta",
+    "bytes": 0,
+    "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+  },
+  {
+    "path": "/home/user/gpui-display-traversal-cost-target/release/build/gpui_display_span_lab/acb0df1888d29466/out/libdirect_resources-acb0df1888d29466.rmeta",
+    "bytes": 0,
+    "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+  },
+  {
+    "path": "/home/user/gpui-display-traversal-cost-target/release/build/rustc-hash/4373e92ef06c3ce5/out/librustc_hash-4373e92ef06c3ce5.rmeta",
+    "bytes": 6863,
+    "sha256": "5ccc75c69cacc8a43b69b615a0691ed49ea80a427f8ce87b59f33a6ec10cb885"
+  },
+  {
+    "path": "/home/user/gpui-display-traversal-cost-target/release/build/rustc-hash/d6847206cffa6bfe/out/librustc_hash-d6847206cffa6bfe.rmeta",
+    "bytes": 19231,
+    "sha256": "728c47ccf3d2522fac70f4a3bbbb277796c1e82dee99831403332f6e0cb0d7d3"
+  },
+  {
+    "path": "/home/user/gpui-display-traversal-cost-target/release/build/bit-set/421abef0ea667f08/out/libbit_set-421abef0ea667f08.rmeta",
+    "bytes": 65087,
+    "sha256": "8d96eb6517838c9c3bde4a5c5be7cc9f0e5131b8d02c9e5cb643117032e5738f"
+  },
+  {
+    "path": "/home/user/gpui-display-traversal-cost-target/release/build/bit-set/f7ab3564ecff637c/out/libbit_set-f7ab3564ecff637c.rmeta",
+    "bytes": 147435,
+    "sha256": "74cdab2e2bae3569aaaa8fcf088b5297a70e92fe0f8e3e6ab7b3f7af2236c673"
+  },
+  {
+    "path": "/home/user/gpui-display-traversal-cost-target/release/build/spirv/f6d73bde5b6b1154/out/libspirv-f6d73bde5b6b1154.rmeta",
+    "bytes": 3265367,
+    "sha256": "19d9810457162d7e16901cdd5f26a6bc43dd24ab89f6bfb95164289e82b8e412"
+  },
+  {
+    "path": "/home/user/gpui-display-traversal-cost-target/release/build/spirv/58298c1af9d5d361/out/libspirv-58298c1af9d5d361.rmeta",
+    "bytes": 4318293,
+    "sha256": "74d84f2f0c4ce7201f40cd24ad997bcb07051c7499fea902cecfc4685ef8b060"
+  },
+  {
+    "path": "/home/user/gpui-display-traversal-cost-target/release/build/allocator-api2/16fb647c07389266/out/liballocator_api2-16fb647c07389266.rmeta",
+    "bytes": 851645,
+    "sha256": "1a0d5c0428389c9ee979bc41ae0b38fe2ad766e49a2b5939b080ace26a9682ea"
+  },
+  {
+    "path": "/home/user/gpui-display-traversal-cost-target/release/build/allocator-api2/77dc204c492830bc/out/liballocator_api2-77dc204c492830bc.rmeta",
+    "bytes": 487261,
+    "sha256": "e6d7393459dce8da15b5cf0a14636b5ee377a791b41924fa3d3e971e0edf3ed0"
+  },
+  {
+    "path": "/home/user/gpui-display-traversal-cost-target/release/build/cfg_aliases/7addfbbf4bb3a16a/out/libcfg_aliases-7addfbbf4bb3a16a.rmeta",
+    "bytes": 18015,
+    "sha256": "9083b0bcd77f0ff289bd74db7f94bacb502ad83c1aa2083d9fe45da610898b82"
+  },
+  {
+    "path": "/home/user/gpui-display-traversal-cost-target/release/build/zeno/1ffef1806445d7b1/out/libzeno-1ffef1806445d7b1.rmeta",
+    "bytes": 847367,
+    "sha256": "8abf7a259c03671828e9cd08a75d42dff45de8b49be0c4a2de05b4246763b69f"
+  },
+  {
+    "path": "/home/user/gpui-display-traversal-cost-target/release/build/zeno/2b5ad39abf111852/out/libzeno-2b5ad39abf111852.rmeta",
+    "bytes": 447273,
+    "sha256": "ec868637155a4e981e6aab9978f6bca9059373a9ba3b0192e5dffe2f5e117f4e"
+  },
+  {
+    "path": "/home/user/gpui-display-traversal-cost-target/release/build/parley/4bd418e978900b4d/out/libparley-4bd418e978900b4d.rmeta",
+    "bytes": 2132923,
+    "sha256": "1fbd7cb24424b14f6038fcf4fc34dede95dcc2f1fd6ed233d0f110cbc6f1c321"
+  },
+  {
+    "path": "/home/user/gpui-display-traversal-cost-target/release/build/parley/c81e6a93d2e9e259/out/libparley-c81e6a93d2e9e259.rmeta",
+    "bytes": 961845,
+    "sha256": "442d7d4c9b312ae25b54ce3df809482c8fb932a1732e7b94639a8678a9bffb7f"
+  },
+  {
+    "path": "/home/user/gpui-display-traversal-cost-target/release/build/profiling/9155fec30bcc0eab/out/libprofiling-9155fec30bcc0eab.rmeta",
+    "bytes": 5363,
+    "sha256": "7523914fa2b5587d2c855bf904e5b36f7f56190b49c60d9b68993e79dbd332c7"
+  },
+  {
+    "path": "/home/user/gpui-display-traversal-cost-target/release/build/profiling/93e7ec224530a740/out/libprofiling-93e7ec224530a740.rmeta",
+    "bytes": 5431,
+    "sha256": "2c245f7e0597b05e69850207fd5b11c04a3dec53ef00d80b0bf3f9c87b36e724"
+  },
+  {
+    "path": "/home/user/gpui-display-traversal-cost-target/release/build/gpui_canvas/4468cf24605ba14a/out/libgpui_canvas-4468cf24605ba14a.rmeta",
+    "bytes": 2047009,
+    "sha256": "52583f52a1644b93a01bcb41ad60ab4cb4b259a2a7415730afc0f7d6e803611e"
+  },
+  {
+    "path": "/home/user/gpui-display-traversal-cost-target/release/build/gpui_canvas/669e99d258663ad0/out/libgpui_canvas-669e99d258663ad0.rmeta",
+    "bytes": 2553897,
+    "sha256": "66a723cd70691fe9974eabc237cfb0cbd1b1e7a9da4ce8d59960d7d3ff5166c4"
+  },
+  {
+    "path": "/home/user/gpui-display-traversal-cost-target/release/build/linebender_resource_handle/3b659219bf4b1bfb/out/liblinebender_resource_handle-3b659219bf4b1bfb.rmeta",
+    "bytes": 31087,
+    "sha256": "ad5ed3a370a24a3abccbdc4ff4d4c079ce1ab1bd1064b2f7bb1d55053cd9c02c"
+  },
+  {
+    "path": "/home/user/gpui-display-traversal-cost-target/release/build/linebender_resource_handle/778bc99df3862ddf/out/liblinebender_resource_handle-778bc99df3862ddf.rmeta",
+    "bytes": 17534,
+    "sha256": "3efaaf294fbb209e84a2c43f63bedc7e85eb601fe752f63694914677c9162ba3"
+  },
+  {
+    "path": "/home/user/gpui-display-traversal-cost-target/release/build/utf8_iter/5e16059a19b5432d/out/libutf8_iter-5e16059a19b5432d.rmeta",
+    "bytes": 62747,
+    "sha256": "3be840674f6dd640fa0c6d14ce6c3b35accbaa61eb145c57df372f32192ed129"
+  },
+  {
+    "path": "/home/user/gpui-display-traversal-cost-target/release/build/utf8_iter/53b5ede390658d3d/out/libutf8_iter-53b5ede390658d3d.rmeta",
+    "bytes": 27288,
+    "sha256": "aad4a948277c746f8cb708056706b2c1d913c463e35679ee721ccd163908b9fc"
+  },
+  {
+    "path": "/home/user/gpui-display-traversal-cost-target/release/build/wgpu-core-deps-windows-linux-android/a2f3be4c0443b5fd/out/libwgpu_core_deps_windows_linux_android-a2f3be4c0443b5fd.rmeta",
+    "bytes": 2605,
+    "sha256": "1c72850f1581bf8db3dcc222240f5e4628a95bd9028cdce8d07e44c3fc422d66"
+  },
+  {
+    "path": "/home/user/gpui-display-traversal-cost-target/release/build/wgpu-core-deps-windows-linux-android/5e84aaef8f1e79ba/out/libwgpu_core_deps_windows_linux_android-5e84aaef8f1e79ba.rmeta",
+    "bytes": 2639,
+    "sha256": "49b1e116c3c953f4d88f56771e8dcd501f6c44467ecc10d97f5d20dd987b2ec7"
+  },
+  {
+    "path": "/home/user/gpui-display-traversal-cost-target/release/build/static_assertions/832e7f656fa72136/out/libstatic_assertions-832e7f656fa72136.rmeta",
+    "bytes": 52781,
+    "sha256": "0b98fc5d9182e31db958d57f21987fe83766856655774098269103433d4b0dcd"
+  },
+  {
+    "path": "/home/user/gpui-display-traversal-cost-target/release/build/static_assertions/1881d062f8cc0af1/out/libstatic_assertions-1881d062f8cc0af1.rmeta",
+    "bytes": 52441,
+    "sha256": "6f715f3ae82cf520efe526998683f8c0a6971509ed2e9864f49e84ab6e5d78ac"
+  },
+  {
+    "path": "/home/user/gpui-display-traversal-cost-target/release/build/libm/f92521180f2d4a16/out/liblibm-f92521180f2d4a16.rmeta",
+    "bytes": 1441443,
+    "sha256": "bc077a467d09d33f82679b3b7fe568f14f16c70ab37af6d99107eac184686f4d"
+  },
+  {
+    "path": "/home/user/gpui-display-traversal-cost-target/release/build/libm/dac8214a528dfdbf/out/liblibm-dac8214a528dfdbf.rmeta",
+    "bytes": 1063229,
+    "sha256": "75d71550c562435696f2b76e7cc051fb5e481057c900ae2003baaab1a1ff1eaa"
+  },
+  {
+    "path": "/home/user/gpui-display-traversal-cost-target/release/build/raw-window-handle/f72ef7a42143e29c/out/libraw_window_handle-f72ef7a42143e29c.rmeta",
+    "bytes": 269022,
+    "sha256": "7db1eae1c969a6adcd38fb4487c72d77c878e19efb87d38f281a77a3415f9921"
+  },
+  {
+    "path": "/home/user/gpui-display-traversal-cost-target/release/build/raw-window-handle/57f51d71d883be06/out/libraw_window_handle-57f51d71d883be06.rmeta",
+    "bytes": 367015,
+    "sha256": "cf474fc74244a5da6a4757f34ac94681a4601ee894d0c25c61b3bc13f151b525"
+  },
+  {
+    "path": "/home/user/gpui-display-traversal-cost-target/release/build/ttf-parser/cd28c5d4deb347d2/out/libttf_parser-cd28c5d4deb347d2.rmeta",
+    "bytes": 2261498,
+    "sha256": "ef57f474700c397bb51004bb32dcbc54b7efd8c1294052a11ac103e53dca00b8"
+  },
+  {
+    "path": "/home/user/gpui-display-traversal-cost-target/release/build/ttf-parser/c3946c46fc37f24d/out/libttf_parser-c3946c46fc37f24d.rmeta",
+    "bytes": 3537989,
+    "sha256": "310af1e3a117f41d71e148ca3ee653b7fec0b060fad946ef6313a4699997b930"
+  },
+  {
+    "path": "/home/user/gpui-display-traversal-cost-target/release/build/presser/1c87c997cc3c11f3/out/libpresser-1c87c997cc3c11f3.rmeta",
+    "bytes": 41313,
+    "sha256": "629fcc1f63564ef48ba1f600de0513f658cfd79299a82e73b1e00b64f54a6ca9"
+  },
+  {
+    "path": "/home/user/gpui-display-traversal-cost-target/release/build/presser/3969617017971f07/out/libpresser-3969617017971f07.rmeta",
+    "bytes": 73604,
+    "sha256": "9a06f917df862395a9bfb4db91d3ec8b29444be03ed09bd2b3b00869d3c2b227"
+  },
+  {
+    "path": "/home/user/gpui-display-traversal-cost-target/release/build/icu_normalizer/d1d801d8b53b5dec/out/libicu_normalizer-d1d801d8b53b5dec.rmeta",
+    "bytes": 443900,
+    "sha256": "6a1cce390bcc9b492c735e7b7e7972afd2968553fa147c6b07ecb4fb6d287d43"
+  },
+  {
+    "path": "/home/user/gpui-display-traversal-cost-target/release/build/icu_normalizer/3c8e72ce3c2d3007/out/libicu_normalizer-3c8e72ce3c2d3007.rmeta",
+    "bytes": 716818,
+    "sha256": "1728ddafbe60a1ae206edfeecec0889f66d7442cb4a51e7d552599f82a88b4eb"
+  },
+  {
+    "path": "/home/user/gpui-display-traversal-cost-target/release/build/zmij/06c8c7a44eb83347/out/libzmij-06c8c7a44eb83347.rmeta",
+    "bytes": 474495,
+    "sha256": "83cc51d3d049cc28131165152eb9c62b79c052984d09539dbfe1a11e6be58ab5"
+  },
+  {
+    "path": "/home/user/gpui-display-traversal-cost-target/release/build/zmij/892440c2ca77118a/out/libzmij-892440c2ca77118a.rmeta",
+    "bytes": 491538,
+    "sha256": "dc34be6c99f48d53ec6e9266fe0ff7f92ec41631081e09eda63793b527c22221"
+  },
+  {
+    "path": "/home/user/gpui-display-traversal-cost-target/release/build/icu_segmenter/bb61a7740dd26446/out/libicu_segmenter-bb61a7740dd26446.rmeta",
+    "bytes": 4420375,
+    "sha256": "cb719c2b7b95eb863bfa2303e23b16621925dd57fa9061bf0d2c3fe957fa6a89"
+  },
+  {
+    "path": "/home/user/gpui-display-traversal-cost-target/release/build/icu_segmenter/b02a5e59c02d014a/out/libicu_segmenter-b02a5e59c02d014a.rmeta",
+    "bytes": 4719922,
+    "sha256": "e6b06e679ccd45202ad92c020efd5d36ae9616ba999ff9e85a1cf55029d80e7e"
+  },
+  {
+    "path": "/home/user/gpui-display-traversal-cost-target/release/build/libc/f6b43f7e041f3881/out/liblibc-f6b43f7e041f3881.rmeta",
+    "bytes": 4513712,
+    "sha256": "7033dc0d9af7e6dfaf698691b97e8bca7bb978cf27f1bbbeb53d45b3d8b1233c"
+  },
+  {
+    "path": "/home/user/gpui-display-traversal-cost-target/release/build/libc/6a8ea014a5ac7d0f/out/liblibc-6a8ea014a5ac7d0f.rmeta",
+    "bytes": 3917395,
+    "sha256": "bbe0ab4e880e851292d6dfb03350ac7e4e39776eb83ebfbb44c161cb2aa273dc"
+  },
+  {
+    "path": "/home/user/gpui-display-traversal-cost-target/release/build/triomphe/67fb87dedd2912ec/out/libtriomphe-67fb87dedd2912ec.rmeta",
+    "bytes": 258378,
+    "sha256": "031913add3d4f3107a498d8862bc0e4a7f67b38ad7d26c482d09fe30b90d86eb"
+  },
+  {
+    "path": "/home/user/gpui-display-traversal-cost-target/release/build/triomphe/d90dd794f085d2ed/out/libtriomphe-d90dd794f085d2ed.rmeta",
+    "bytes": 458364,
+    "sha256": "6ea1996fb4bead67106a7cc944749618f758308cfc6dd6c735f190a6a2f061e0"
+  },
+  {
+    "path": "/home/user/gpui-display-traversal-cost-target/release/build/potential_utf/b3bed955f298bebf/out/libpotential_utf-b3bed955f298bebf.rmeta",
+    "bytes": 49532,
+    "sha256": "a60041f290af80fb73222bb878814f75335435f1986ddab350df20ffbf978ace"
+  },
+  {
+    "path": "/home/user/gpui-display-traversal-cost-target/release/build/potential_utf/1de745df1b71bf12/out/libpotential_utf-1de745df1b71bf12.rmeta",
+    "bytes": 85312,
+    "sha256": "2fad61fe8e4cf28d694be5c52bd3a7dfb46ed7fea2a08c19cabb9857d65dd601"
+  },
+  {
+    "path": "/home/user/gpui-display-traversal-cost-target/release/build/skrifa/f50117be69ec0cf0/out/libskrifa-f50117be69ec0cf0.rmeta",
+    "bytes": 2968156,
+    "sha256": "e10c92544b635c239732c7d65b2f065f140d8c3d64b2765b102b0d12b2c8c097"
+  },
+  {
+    "path": "/home/user/gpui-display-traversal-cost-target/release/build/skrifa/5f7f034560475158/out/libskrifa-5f7f034560475158.rmeta",
+    "bytes": 2311855,
+    "sha256": "433b9d230ee7ca78a67a3e431020d3ace0c9541baec91396036c8163dcd2ba8f"
+  },
+  {
+    "path": "/home/user/gpui-display-traversal-cost-target/release/build/read-fonts/a1e2d243a7a78c93/out/libread_fonts-a1e2d243a7a78c93.rmeta",
+    "bytes": 21966507,
+    "sha256": "206b4922ca903d0b7db6ef78d79d83cf3e705ad34cce1c61162d1ac798ebd74b"
+  },
+  {
+    "path": "/home/user/gpui-display-traversal-cost-target/release/build/read-fonts/b73146bcbb74b5d4/out/libread_fonts-b73146bcbb74b5d4.rmeta",
+    "bytes": 8440421,
+    "sha256": "bceb9732cbb209501116bd848760b6f027b183c84086aca5c4c91ecc4a9072fb"
+  },
+  {
+    "path": "/home/user/gpui-display-traversal-cost-target/release/build/read-fonts/624727c0dd9ace6f/out/libread_fonts-624727c0dd9ace6f.rmeta",
+    "bytes": 14989182,
+    "sha256": "7d725bde4cd4aca241d5712d3040e5eff655aa6b562614fe936c09dfe7acf169"
+  },
+  {
+    "path": "/home/user/gpui-display-traversal-cost-target/release/build/read-fonts/220ea37ad7b46a56/out/libread_fonts-220ea37ad7b46a56.rmeta",
+    "bytes": 11821595,
+    "sha256": "1e971657683851c6af21b3cdaf0262a7dcf88d767e8d0796a41038c75dc62a4f"
+  },
+  {
+    "path": "/home/user/gpui-display-traversal-cost-target/release/build/zerofrom/4bc5425f392e07f7/out/libzerofrom-4bc5425f392e07f7.rmeta",
+    "bytes": 56356,
+    "sha256": "39319bb63bc4b6e7da089b27df4e531b557daa4c3a888832b6f9bd94505562df"
+  },
+  {
+    "path": "/home/user/gpui-display-traversal-cost-target/release/build/zerofrom/b5a5ed4af0c016ee/out/libzerofrom-b5a5ed4af0c016ee.rmeta",
+    "bytes": 90731,
+    "sha256": "ed6da86f0abfcd95481e827ccd8dda3653a1a4b99dfb69b68c86b4cdb4f9bcb0"
+  },
+  {
+    "path": "/home/user/gpui-display-traversal-cost-target/release/build/proc-macro2/d85cc25570dee680/out/libproc_macro2-d85cc25570dee680.rmeta",
+    "bytes": 357275,
+    "sha256": "21e0844f29487e603b0c3c2587ab16bc7968225c65a614dbef5a7b4cee5c9f2c"
+  },
+  {
+    "path": "/home/user/gpui-display-traversal-cost-target/release/build/gpui/a8a4927536fad3e8/out/libgpui-a8a4927536fad3e8.rmeta",
+    "bytes": 5628381,
+    "sha256": "4b4b4b2acaec92f4888c37cce2c5381e42590ee13f316bc12ba24a2460800b98"
+  },
+  {
+    "path": "/home/user/gpui-display-traversal-cost-target/release/build/gpui/157247fd6395a2f1/out/libgpui-157247fd6395a2f1.rmeta",
+    "bytes": 2552298,
+    "sha256": "d2d208f1fcd28abc423e13b3331a9284da2138dbb690d6020393f7e7e7386bcf"
+  },
+  {
+    "path": "/home/user/gpui-display-traversal-cost-target/release/build/icu_locale_core/1cb12342f694591b/out/libicu_locale_core-1cb12342f694591b.rmeta",
+    "bytes": 1503128,
+    "sha256": "83aa885563a3c7ebbbb33f2d23071016771a5bdaebd6f50cc4d8e09a67c98124"
+  },
+  {
+    "path": "/home/user/gpui-display-traversal-cost-target/release/build/icu_locale_core/1fa46250764276ae/out/libicu_locale_core-1fa46250764276ae.rmeta",
+    "bytes": 2077144,
+    "sha256": "a856aa07ba6b690b96be654074337f7baa5425b74d6635a3e84b3d5706f8e5a4"
+  },
+  {
+    "path": "/home/user/gpui-display-traversal-cost-target/release/build/ordered-float/a7d1fe517c3688ca/out/libordered_float-a7d1fe517c3688ca.rmeta",
+    "bytes": 474161,
+    "sha256": "fa7b6bfafdae211e940cf633baaeec28865692091290195535b2ec160227889e"
+  },
+  {
+    "path": "/home/user/gpui-display-traversal-cost-target/release/build/ordered-float/baa253b7d889ae06/out/libordered_float-baa253b7d889ae06.rmeta",
+    "bytes": 328835,
+    "sha256": "2aff97d71cb71742cee384555731f61b316a8cdd348532cbedb5f8aead5caf05"
+  },
+  {
+    "path": "/home/user/gpui-display-traversal-cost-target/release/build/wgpu-types/e56d78920299e652/out/libwgpu_types-e56d78920299e652.rmeta",
+    "bytes": 5648361,
+    "sha256": "94c7304e301c0ce75bc9ad26d80aa953fed18421761bb978822939bcb7e34f10"
+  },
+  {
+    "path": "/home/user/gpui-display-traversal-cost-target/release/build/wgpu-types/1574369b7c7b7ce7/out/libwgpu_types-1574369b7c7b7ce7.rmeta",
+    "bytes": 4246788,
+    "sha256": "b1f8f060140f3cb5554ac77e84574b2923627fc39c48b842a88cc28bd32395ed"
+  },
+  {
+    "path": "/home/user/gpui-display-traversal-cost-target/release/build/foldhash/a395b58a2568c74d/out/libfoldhash-a395b58a2568c74d.rmeta",
+    "bytes": 66959,
+    "sha256": "574ea08c17d23b43051d96c308414332e7f400a3f1d84778dbbe6ee5b491901f"
+  },
+  {
+    "path": "/home/user/gpui-display-traversal-cost-target/release/build/foldhash/5bfdc0ba99d8a79c/out/libfoldhash-5bfdc0ba99d8a79c.rmeta",
+    "bytes": 97009,
+    "sha256": "f995bac3042c6954ef552d811dac8922564dbbddef01ca9f1d7e1a0f908701bc"
+  },
+  {
+    "path": "/home/user/gpui-display-traversal-cost-target/release/build/hashbrown/c35626f7d36e4e8e/out/libhashbrown-c35626f7d36e4e8e.rmeta",
+    "bytes": 1008155,
+    "sha256": "7ac3981e0aa858ab57db1c41a7e1f6b46cfdb5ab8127ee192b5011afdbcfc6d0"
+  },
+  {
+    "path": "/home/user/gpui-display-traversal-cost-target/release/build/hashbrown/0af21cef97cb2b36/out/libhashbrown-0af21cef97cb2b36.rmeta",
+    "bytes": 1707744,
+    "sha256": "baa6d818c1f0db7f7c52be31f6923bb9d23e526d2172fc055ecbaa78f9f0be39"
+  },
+  {
+    "path": "/home/user/gpui-display-traversal-cost-target/release/build/hashbrown/a9a2a4aa6162ae52/out/libhashbrown-a9a2a4aa6162ae52.rmeta",
+    "bytes": 1068223,
+    "sha256": "4c804152f36c2dec9b4ea60696678cd2eef131312bada7765ff1ca5ea481782e"
+  },
+  {
+    "path": "/home/user/gpui-display-traversal-cost-target/release/build/hashbrown/fedf7765c5fd50db/out/libhashbrown-fedf7765c5fd50db.rmeta",
+    "bytes": 1629035,
+    "sha256": "9efc0b3410cb69f0a92e9dd50ad70bc96e3729f7c49c5141ee7ac165b57879eb"
+  },
+  {
+    "path": "/home/user/gpui-display-traversal-cost-target/release/build/itoa/077e4ca44202d889/out/libitoa-077e4ca44202d889.rmeta",
+    "bytes": 79211,
+    "sha256": "03729ade365a6563d64f7bd07ec7156d51868f2bd063bdf098e8209bc43955e4"
+  },
+  {
+    "path": "/home/user/gpui-display-traversal-cost-target/release/build/itoa/a7d6b296ff7468a3/out/libitoa-a7d6b296ff7468a3.rmeta",
+    "bytes": 50638,
+    "sha256": "40fd0cf16ed6a38bebf13e1ef6cdd995cc8579aad788b2dfd1290ed57c0e7681"
+  },
+  {
+    "path": "/home/user/gpui-display-traversal-cost-target/release/build/bitflags/0ad9081b13adae26/out/libbitflags-0ad9081b13adae26.rmeta",
+    "bytes": 250549,
+    "sha256": "fa79c8ccfd59b95ba6a47f232d3184149aab99d5535572340a47c8e1a3ef202a"
+  },
+  {
+    "path": "/home/user/gpui-display-traversal-cost-target/release/build/bitflags/9bbad2688d590ca8/out/libbitflags-9bbad2688d590ca8.rmeta",
+    "bytes": 177799,
+    "sha256": "50e99ae9a6bc9d502f65624299556f53b07b91ea2f2101ed559ec4300c37a277"
+  },
+  {
+    "path": "/home/user/gpui-display-traversal-cost-target/release/build/once_cell/a0db08c2913ef073/out/libonce_cell-a0db08c2913ef073.rmeta",
+    "bytes": 241720,
+    "sha256": "535851da22291f2e382fe7014ca01ea07c6a6a33e5138d667d4cd763202cebb1"
+  },
+  {
+    "path": "/home/user/gpui-display-traversal-cost-target/release/build/once_cell/75f02a470565682c/out/libonce_cell-75f02a470565682c.rmeta",
+    "bytes": 141844,
+    "sha256": "c87af7b5e23c0b0bc14b8a7cb7355b7270d727e0eac5e8596c2b385a9fc5a7e3"
+  },
+  {
+    "path": "/home/user/gpui-display-traversal-cost-target/release/build/icu_locale_fallback/e31a8ab427174a73/out/libicu_locale_fallback-e31a8ab427174a73.rmeta",
+    "bytes": 92518,
+    "sha256": "f028a7ef9a013ae83db6e36998e9509a7e7c097a9b27796931e09428dc833955"
+  },
+  {
+    "path": "/home/user/gpui-display-traversal-cost-target/release/build/icu_locale_fallback/7388ec59eb8b00e8/out/libicu_locale_fallback-7388ec59eb8b00e8.rmeta",
+    "bytes": 125412,
+    "sha256": "291b14addc25295d086398294ae945e775af19bf290d8ddbad8fcca0b037d5b6"
+  },
+  {
+    "path": "/home/user/gpui-display-traversal-cost-target/release/build/cfg-if/6e7442e8c3e76eae/out/libcfg_if-6e7442e8c3e76eae.rmeta",
+    "bytes": 5930,
+    "sha256": "c9f951e8f272859c11b5a701fc3d39d23c7a87b821e107f99c3910cafa9b80a6"
+  },
+  {
+    "path": "/home/user/gpui-display-traversal-cost-target/release/build/cfg-if/978e8edfb09ae4a4/out/libcfg_if-978e8edfb09ae4a4.rmeta",
+    "bytes": 5896,
+    "sha256": "485ca3d555b8360efe88dff4b15e59c0e363c84516c68515307a4f69e7288922"
+  },
+  {
+    "path": "/home/user/gpui-display-traversal-cost-target/release/build/litrs/37e80e44d7120c5a/out/liblitrs-37e80e44d7120c5a.rmeta",
+    "bytes": 414537,
+    "sha256": "efdef15a4dd2bd5544cd2f535681116ac2ff528b3bc6b2d23597c1273de9e5ef"
+  },
+  {
+    "path": "/home/user/gpui-display-traversal-cost-target/release/build/parking_lot_core/2b05a1d3fde0d414/out/libparking_lot_core-2b05a1d3fde0d414.rmeta",
+    "bytes": 90297,
+    "sha256": "1a96b471f321ab6d2926f81c53b79417d5f08e9815a8e37c42789fb702920bdb"
+  },
+  {
+    "path": "/home/user/gpui-display-traversal-cost-target/release/build/parking_lot_core/4c0565b5ea42a1cb/out/libparking_lot_core-4c0565b5ea42a1cb.rmeta",
+    "bytes": 205133,
+    "sha256": "6cb14bb3f22d993255d31852360223e04c851f47ef2071ad651785513f3fac90"
+  },
+  {
+    "path": "/home/user/gpui-display-traversal-cost-target/release/build/tinystr/8b81b16d1c3c3309/out/libtinystr-8b81b16d1c3c3309.rmeta",
+    "bytes": 365182,
+    "sha256": "9e2aca2e32385d296b3632dbc2568ad4865d96f11d1b0964dd21bddb80957ff9"
+  },
+  {
+    "path": "/home/user/gpui-display-traversal-cost-target/release/build/tinystr/a67d5330cacd3272/out/libtinystr-a67d5330cacd3272.rmeta",
+    "bytes": 255757,
+    "sha256": "879039d16e3f4d91db5df6549393a6721bfc50b184b19fce360b51e7c98a1154"
+  },
+  {
+    "path": "/home/user/gpui-display-traversal-cost-target/release/build/parking_lot/db2e990eb6bb02e4/out/libparking_lot-db2e990eb6bb02e4.rmeta",
+    "bytes": 220377,
+    "sha256": "4344d87e0e9a4d88fc96e933451fdad3e8fcc689473b87e3e1fc06a8976f9708"
+  },
+  {
+    "path": "/home/user/gpui-display-traversal-cost-target/release/build/parking_lot/61735a6b067aa014/out/libparking_lot-61735a6b067aa014.rmeta",
+    "bytes": 159563,
+    "sha256": "3b0d4bd23df4f495aa2d2cd20697c6df217fcb9a5f2eb4b24739b6b57c9d7b68"
+  },
+  {
+    "path": "/home/user/gpui-display-traversal-cost-target/release/build/wgpu-core/f714ffc327a08f66/out/libwgpu_core-f714ffc327a08f66.rmeta",
+    "bytes": 5654097,
+    "sha256": "f6605f0272c3213ed7cf621a36b2cf5e5ab13dacff29de4632c3f2fcdfd5b4f6"
+  },
+  {
+    "path": "/home/user/gpui-display-traversal-cost-target/release/build/wgpu-core/867c4ddd99e11b58/out/libwgpu_core-867c4ddd99e11b58.rmeta",
+    "bytes": 4259638,
+    "sha256": "ef71ba16e61590ba09c16e8d39486ebf2dda683fe9ab00a5f89fb1e84954c9e7"
+  },
+  {
+    "path": "/home/user/gpui-display-traversal-cost-target/release/build/icu_provider/d586227644b89ada/out/libicu_provider-d586227644b89ada.rmeta",
+    "bytes": 460924,
+    "sha256": "2c5a0a28123474abcf97c8fb35518fe06a554793bcbee7c01a24ac25a8398f11"
+  },
+  {
+    "path": "/home/user/gpui-display-traversal-cost-target/release/build/icu_provider/ba76882879581669/out/libicu_provider-ba76882879581669.rmeta",
+    "bytes": 609734,
+    "sha256": "c972d5529962081ee3550e7105dd0540ff031902cd15fd3bb892922e2dea6e04"
+  },
+  {
+    "path": "/home/user/gpui-display-traversal-cost-target/release/build/ecow/74c357c01fc16530/out/libecow-74c357c01fc16530.rmeta",
+    "bytes": 501026,
+    "sha256": "9da392a036490bc7051496bf89c481ba8d5430e002bfe55519fdc1c3e9daefda"
+  },
+  {
+    "path": "/home/user/gpui-display-traversal-cost-target/release/build/ecow/44e775daae5c3c38/out/libecow-44e775daae5c3c38.rmeta",
+    "bytes": 237925,
+    "sha256": "c66cbc1bdf5649d569bae0318544ea8898e4abbba929fa15264fb4a759352819"
+  },
+  {
+    "path": "/home/user/gpui-display-traversal-cost-target/release/build/wgpu-naga-bridge/71f5ef5b17534372/out/libwgpu_naga_bridge-71f5ef5b17534372.rmeta",
+    "bytes": 14083,
+    "sha256": "5e6de198bd7c3898042e347a1ffc716658d851879a5cf587367e161890ea41c8"
+  },
+  {
+    "path": "/home/user/gpui-display-traversal-cost-target/release/build/wgpu-naga-bridge/ceabc8fb67e78a41/out/libwgpu_naga_bridge-ceabc8fb67e78a41.rmeta",
+    "bytes": 10259,
+    "sha256": "ff9c80c018eb6f4454ee7301af4f0b34d577cdcb40daeaa61d6007687b4b737a"
+  },
+  {
+    "path": "/home/user/gpui-display-traversal-cost-target/release/build/stable_deref_trait/dcf4b6f58574dbdb/out/libstable_deref_trait-dcf4b6f58574dbdb.rmeta",
+    "bytes": 13604,
+    "sha256": "563938379339890d10ca06fc8b6e91a5b859d86ac0d7b30f6da7c993fb1274ab"
+  },
+  {
+    "path": "/home/user/gpui-display-traversal-cost-target/release/build/stable_deref_trait/9f3a2663dcd3845b/out/libstable_deref_trait-9f3a2663dcd3845b.rmeta",
+    "bytes": 13570,
+    "sha256": "636660290d44be68b3da754e78cedde674fbecb630489532b3a1f0883851f459"
+  },
+  {
+    "path": "/home/user/gpui-display-traversal-cost-target/release/build/naga-types/dce0416de8aa0594/out/libnaga_types-dce0416de8aa0594.rmeta",
+    "bytes": 97915,
+    "sha256": "98dc46a518c962adfe07bd54b0189c317fc914d6ec35f251bb20d4c68c5b76b0"
+  },
+  {
+    "path": "/home/user/gpui-display-traversal-cost-target/release/build/naga-types/e3b3fcdc274858a5/out/libnaga_types-e3b3fcdc274858a5.rmeta",
+    "bytes": 154056,
+    "sha256": "2524637b631a4f06a7d2fa69c7ac4bbf9aef61355f7fe31c4a1f64e46131372c"
+  },
+  {
+    "path": "/home/user/gpui-display-traversal-cost-target/release/build/serde/9c6ab99484c294f5/out/libserde-9c6ab99484c294f5.rmeta",
+    "bytes": 977682,
+    "sha256": "f5c26bce2647414dba6da5dbcfabea09480972d7baeeef5579ae906ff854af23"
+  },
+  {
+    "path": "/home/user/gpui-display-traversal-cost-target/release/build/serde/44cd980846b3f420/out/libserde-44cd980846b3f420.rmeta",
+    "bytes": 528846,
+    "sha256": "5fc619a929be2eb814a1606185f6e53604cbe7ae56df12bd40d8e7272d33e41d"
+  },
+  {
+    "path": "/home/user/gpui-display-traversal-cost-target/release/build/cephal/0e56af82e549e41a/out/libcephal-0e56af82e549e41a.rmeta",
+    "bytes": 2133153,
+    "sha256": "18957ff95097377d7c13884b08e2b266c248d399262251708c2c8f8404853ac4"
+  },
+  {
+    "path": "/home/user/gpui-display-traversal-cost-target/release/build/cephal/c9ed0ad8ff111ec7/out/libcephal-c9ed0ad8ff111ec7.rmeta",
+    "bytes": 5147485,
+    "sha256": "f7a0b532c0849f19db4296b7f391f9050ab746db680c6568f62252084f441676"
+  },
+  {
+    "path": "/home/user/gpui-display-traversal-cost-target/release/build/zerocopy/ebb913d23cb655db/out/libzerocopy-ebb913d23cb655db.rmeta",
+    "bytes": 13671276,
+    "sha256": "60fc858c8f2ce1700515e3ddd57ef599c3abf85c8bfa1479e17d19dedfc11ad5"
+  },
+  {
+    "path": "/home/user/gpui-display-traversal-cost-target/release/build/zerocopy/5a1c1f6f983fc20e/out/libzerocopy-5a1c1f6f983fc20e.rmeta",
+    "bytes": 16415060,
+    "sha256": "59c27b29b6e818626dfd9706d14a9ac7a077137e6f4791d1598302f1f08f35db"
+  },
+  {
+    "path": "/home/user/gpui-display-traversal-cost-target/release/build/fearless_simd/15bd13f98503f417/out/libfearless_simd-15bd13f98503f417.rmeta",
+    "bytes": 23584837,
+    "sha256": "6958ab170f947bd952b356720dda3fb560cb93c8f51aaa996d18a99b434cdb10"
+  },
+  {
+    "path": "/home/user/gpui-display-traversal-cost-target/release/build/fearless_simd/426b16f4bd9a4b60/out/libfearless_simd-426b16f4bd9a4b60.rmeta",
+    "bytes": 11611583,
+    "sha256": "7bcfc1b9316f24d96e41a9fc6a01a17cbb36e54b55a4e47b43be948167f8d58a"
+  },
+  {
+    "path": "/home/user/gpui-display-traversal-cost-target/release/build/memmap2/f8b467c3755e7e76/out/libmemmap2-f8b467c3755e7e76.rmeta",
+    "bytes": 146990,
+    "sha256": "39bd99872dde01fc10ca494185d025c3f8e7e621744f1be8c26b8d625d32b3dc"
+  },
+  {
+    "path": "/home/user/gpui-display-traversal-cost-target/release/build/memmap2/e0baf64ad5a2d422/out/libmemmap2-e0baf64ad5a2d422.rmeta",
+    "bytes": 189813,
+    "sha256": "82bbb06da3e7842ce4cc56943ec3db867eb0223cefa5594f91555d7f2fdfbd35"
+  },
+  {
+    "path": "/home/user/gpui-display-traversal-cost-target/release/build/parley_engine/73f9c163c867037a/out/libparley_engine-73f9c163c867037a.rmeta",
+    "bytes": 734393,
+    "sha256": "444fa8b6b9d99cf31da23c6792a0f609fbedb877e3263adb7887f275c1730e4e"
+  },
+  {
+    "path": "/home/user/gpui-display-traversal-cost-target/release/build/parley_engine/1df576315573030c/out/libparley_engine-1df576315573030c.rmeta",
+    "bytes": 444834,
+    "sha256": "3e3ebc366a7f6dfccd391a98e6f09b073be4463f949eed83f8be9ff0bd43e73d"
+  },
+  {
+    "path": "/home/user/gpui-display-traversal-cost-target/release/build/smallvec/21a775147ff92946/out/libsmallvec-21a775147ff92946.rmeta",
+    "bytes": 275646,
+    "sha256": "4a8e0c2591f1b20651a7ead644cf69d15f670633d4a9c92f84beef307eb6959f"
+  },
+  {
+    "path": "/home/user/gpui-display-traversal-cost-target/release/build/smallvec/f7d3b53d3b0d721a/out/libsmallvec-f7d3b53d3b0d721a.rmeta",
+    "bytes": 113565,
+    "sha256": "7e2485e3b6dded75f1a6d1c80701f70de56174077190a45b2cbc47438d36484f"
+  },
+  {
+    "path": "/home/user/gpui-display-traversal-cost-target/release/build/syn/732c7c61e23ec8c9/out/libsyn-732c7c61e23ec8c9.rmeta",
+    "bytes": 4844153,
+    "sha256": "9c1963c8574d7ef70e66d03bfe54fd50433a7c9a10fa01e9bc1fa15876fdf526"
+  },
+  {
+    "path": "/home/user/gpui-display-traversal-cost-target/release/build/syn/7ae5337a675f2d61/out/libsyn-7ae5337a675f2d61.rmeta",
+    "bytes": 2823243,
+    "sha256": "cc5d9e090a3c1338e57d26483af70e0ee66d07865444bd1e4217f02afc85a5f7"
+  },
+  {
+    "path": "/home/user/gpui-display-traversal-cost-target/release/build/zerotrie/0fb26efd46c54afa/out/libzerotrie-0fb26efd46c54afa.rmeta",
+    "bytes": 440599,
+    "sha256": "81e8aa67beec018575449966c8f607fdc407c27828675cc60466e766a47e59b5"
+  },
+  {
+    "path": "/home/user/gpui-display-traversal-cost-target/release/build/zerotrie/5cafa73eb4dacd95/out/libzerotrie-5cafa73eb4dacd95.rmeta",
+    "bytes": 699425,
+    "sha256": "49924b5a6116008add0b141b1e839f313c79b899308d6f73358b23f9a39c96ed"
+  },
+  {
+    "path": "/home/user/gpui-display-traversal-cost-target/release/build/arcstr/880bfc0d7cb40ad2/out/libarcstr-880bfc0d7cb40ad2.rmeta",
+    "bytes": 124172,
+    "sha256": "3e9ed501efb6f85c7a9d4540ce38fd221277e2f9a92ba2463267f827c0a46408"
+  },
+  {
+    "path": "/home/user/gpui-display-traversal-cost-target/release/build/arcstr/699783607a26d05d/out/libarcstr-699783607a26d05d.rmeta",
+    "bytes": 295824,
+    "sha256": "6d73db7fa69ac1bf3814d60238c16f4086be9ead37f5ac2d716650f2a351063b"
+  },
+  {
+    "path": "/home/user/gpui-display-traversal-cost-target/release/build/thiserror/e9f7e727d24ddbb0/out/libthiserror-e9f7e727d24ddbb0.rmeta",
+    "bytes": 34891,
+    "sha256": "9a0e089222a65ecb6e0ac7282a357d59607fd8f8b88c7a0bc994e4198152d245"
+  },
+  {
+    "path": "/home/user/gpui-display-traversal-cost-target/release/build/thiserror/8dc10af38eecccf8/out/libthiserror-8dc10af38eecccf8.rmeta",
+    "bytes": 32657,
+    "sha256": "e375f9289da75bffaa3f947e89e1f17440cf967de34ebe85453a2f10061a256d"
+  },
+  {
+    "path": "/home/user/gpui-display-traversal-cost-target/release/build/parley_data/b610d174d94fecc0/out/libparley_data-b610d174d94fecc0.rmeta",
+    "bytes": 76587,
+    "sha256": "418e900c13f89bad3f28648a1e76d50ff5d44f49fbe89b2915dfd6b299cf6c22"
+  },
+  {
+    "path": "/home/user/gpui-display-traversal-cost-target/release/build/parley_data/bbbe9bf2a9006dbf/out/libparley_data-bbbe9bf2a9006dbf.rmeta",
+    "bytes": 63560,
+    "sha256": "e9a0cbfe915f6ec17f196c95f9c88b7759fc82eee3da29078a7479b086735042"
+  },
+  {
+    "path": "/home/user/gpui-display-traversal-cost-target/release/build/fontique/5be30a8cfcea8df2/out/libfontique-5be30a8cfcea8df2.rmeta",
+    "bytes": 581650,
+    "sha256": "0a096fa96bc747841196ff0039378c106a77d415eede3e61189e3295bf43119c"
+  },
+  {
+    "path": "/home/user/gpui-display-traversal-cost-target/release/build/fontique/5049c026ad0af37d/out/libfontique-5049c026ad0af37d.rmeta",
+    "bytes": 401535,
+    "sha256": "7bf8fd2288d03d00cb117a2e71195996b68eeb04946ad68c16157b7a0be4b9f4"
+  },
+  {
+    "path": "/home/user/gpui-display-traversal-cost-target/release/build/yoke/840c5aef21e94823/out/libyoke-840c5aef21e94823.rmeta",
+    "bytes": 221546,
+    "sha256": "f67260d328310dec4e68bd51ddd0cd71b0b471498b0c17076f5cdb1ed6a8beb2"
+  },
+  {
+    "path": "/home/user/gpui-display-traversal-cost-target/release/build/yoke/723e132164b80f4c/out/libyoke-723e132164b80f4c.rmeta",
+    "bytes": 299794,
+    "sha256": "7b3c75291227fa23a3905105df941b1550f60e9a393639bb5f8b6819dfb017de"
+  },
+  {
+    "path": "/home/user/gpui-display-traversal-cost-target/release/build/serde_json/b608eef26a1d547b/out/libserde_json-b608eef26a1d547b.rmeta",
+    "bytes": 1731938,
+    "sha256": "58e4086ccca3ac0c11e6f9a3a5f77cc421ea0df3cb494faaecee07ce26a76f36"
+  },
+  {
+    "path": "/home/user/gpui-display-traversal-cost-target/release/build/serde_json/0a435ef7323a1eb5/out/libserde_json-0a435ef7323a1eb5.rmeta",
+    "bytes": 973305,
+    "sha256": "b1a9d1b55ae3d999ddaea692036e5801652e257e6ac4b70d5b6b1678a8d26f43"
+  },
+  {
+    "path": "/home/user/gpui-display-traversal-cost-target/release/build/half/23444a6fccadbf9c/out/libhalf-23444a6fccadbf9c.rmeta",
+    "bytes": 915043,
+    "sha256": "7a0e74ce5bb164c1af7ec606de50fb5fb0ac8f320de37eb0aea0f1ff3437c855"
+  },
+  {
+    "path": "/home/user/gpui-display-traversal-cost-target/release/build/half/efe9fb665a508e16/out/libhalf-efe9fb665a508e16.rmeta",
+    "bytes": 550706,
+    "sha256": "a464f4b198334af64d123a681d526d50f3283b629367a2c24ed01c3bdde302b8"
+  },
+  {
+    "path": "/home/user/gpui-display-traversal-cost-target/release/build/synstructure/06b4dbf584a13f16/out/libsynstructure-06b4dbf584a13f16.rmeta",
+    "bytes": 239372,
+    "sha256": "3a4404a829866f38bb687bc67ec675698af81d693d8cdced25acb366c7934127"
+  },
+  {
+    "path": "/home/user/gpui-display-traversal-cost-target/release/build/litemap/b9901942f551d5e4/out/liblitemap-b9901942f551d5e4.rmeta",
+    "bytes": 363469,
+    "sha256": "11f412137964e391f014a7bc64d58c22f0929c5fb1cd6dac4e7b5ab2dcd31460"
+  },
+  {
+    "path": "/home/user/gpui-display-traversal-cost-target/release/build/litemap/d2d51c886116850b/out/liblitemap-d2d51c886116850b.rmeta",
+    "bytes": 240546,
+    "sha256": "4db17cdef8c5e0e99eadbf78b182176ae32a056171862a5d7462227251134238"
+  },
+  {
+    "path": "/home/user/gpui-display-traversal-cost-target/release/build/gpui_inline_call/793c45603dff8993/out/libgpui_inline_call-793c45603dff8993.rmeta",
+    "bytes": 15587,
+    "sha256": "83df6e9f99ddad247288e414f706d61b6389ab124165cf9fc3e9558fc531c7b0"
+  },
+  {
+    "path": "/home/user/gpui-display-traversal-cost-target/release/build/gpui_inline_call/81c25a8389d46691/out/libgpui_inline_call-81c25a8389d46691.rmeta",
+    "bytes": 11912,
+    "sha256": "e659cf9c64787e768469548ab8a47552ba8234d0ade542a989e1fa6953a83ab8"
+  },
+  {
+    "path": "/home/user/gpui-display-traversal-cost-target/release/build/num-traits/fdf72c15ea0321ac/out/libnum_traits-fdf72c15ea0321ac.rmeta",
+    "bytes": 2050219,
+    "sha256": "1607efca4a573542e3e3ef8b9777e9e730d0f780f0de6c6e37e9cda2557d1cb9"
+  },
+  {
+    "path": "/home/user/gpui-display-traversal-cost-target/release/build/num-traits/84dcf10e2ee52499/out/libnum_traits-84dcf10e2ee52499.rmeta",
+    "bytes": 1292802,
+    "sha256": "6b05feee4a1506f7dc0424ca1f76e212625f9183cd681dd58901bac966185f4e"
+  },
+  {
+    "path": "/home/user/gpui-display-traversal-cost-target/release/build/scopeguard/ce7e47a51884dfe1/out/libscopeguard-ce7e47a51884dfe1.rmeta",
+    "bytes": 22206,
+    "sha256": "71a271646bddf05b9e1de14e9bf7b7fcf359507907269b2fe889b211d6f31706"
+  },
+  {
+    "path": "/home/user/gpui-display-traversal-cost-target/release/build/scopeguard/47ee75205343fb64/out/libscopeguard-47ee75205343fb64.rmeta",
+    "bytes": 26056,
+    "sha256": "574d573f4516f2c1f53a352033adfe320f938dec04ba95e3c37ca3f3c7cb534e"
+  },
+  {
+    "path": "/home/user/gpui-display-traversal-cost-target/release/build/parlance/e8730d9474a982b6/out/libparlance-e8730d9474a982b6.rmeta",
+    "bytes": 336270,
+    "sha256": "a27fc6117b2b4a166453f3d67f1ae00222322f77553fb4d616d333a5d2cb272e"
+  },
+  {
+    "path": "/home/user/gpui-display-traversal-cost-target/release/build/parlance/18ad182f132d693e/out/libparlance-18ad182f132d693e.rmeta",
+    "bytes": 251799,
+    "sha256": "1bad9dad11e93e08910483cd24849fc43301863f43fa20a445e67e077c8e9dc9"
+  },
+  {
+    "path": "/home/user/gpui-display-traversal-cost-target/release/build/codespan-reporting/75c0c649b132bf43/out/libcodespan_reporting-75c0c649b132bf43.rmeta",
+    "bytes": 177154,
+    "sha256": "82837ae42e774dad28c215fdce0de93cf29e5c9880f3dfeac91daec997a753f5"
+  },
+  {
+    "path": "/home/user/gpui-display-traversal-cost-target/release/build/codespan-reporting/d2d8b1cc97fb65ed/out/libcodespan_reporting-d2d8b1cc97fb65ed.rmeta",
+    "bytes": 348300,
+    "sha256": "4b5be8ad95bcc74ce95863e7db0c9c846b20d54bd2aec8d014d494c8583d28f1"
+  },
+  {
+    "path": "/home/user/gpui-display-traversal-cost-target/release/build/naga/d10e28a9a39aff8a/out/libnaga-d10e28a9a39aff8a.rmeta",
+    "bytes": 8714017,
+    "sha256": "cf78e4d8f8c52b3ca02cfe91c41def1fa288fe37ecafcd9bc6f1dcce425ab48e"
+  },
+  {
+    "path": "/home/user/gpui-display-traversal-cost-target/release/build/naga/709dc209dc04d009/out/libnaga-709dc209dc04d009.rmeta",
+    "bytes": 6498754,
+    "sha256": "1b11217dae37a0d3cecb538a2e767f3db5b96dba17debdc4661e31eaa823f542"
+  },
+  {
+    "path": "/home/user/gpui-display-traversal-cost-target/release/build/wgpu/a13da6e1988259e9/out/libwgpu-a13da6e1988259e9.rmeta",
+    "bytes": 2290294,
+    "sha256": "3c350de330e66392331c6d5aa274464607fad7b2847f8ed8eec4e70d27257ba4"
+  },
+  {
+    "path": "/home/user/gpui-display-traversal-cost-target/release/build/wgpu/65ab0f09cada2e67/out/libwgpu-65ab0f09cada2e67.rmeta",
+    "bytes": 2993477,
+    "sha256": "0587a3339ab2069f177fde2b3a5605ed4ebb4216fce5306fdffb7f451c67e8c5"
+  },
+  {
+    "path": "/home/user/gpui-display-traversal-cost-target/release/build/memchr/65ae151b8cc68cbb/out/libmemchr-65ae151b8cc68cbb.rmeta",
+    "bytes": 1535265,
+    "sha256": "1810964f9735cbde3e835022f7c606288ab9fde782a699dd0303ddbd93744989"
+  },
+  {
+    "path": "/home/user/gpui-display-traversal-cost-target/release/build/memchr/cf3a34f71083dece/out/libmemchr-cf3a34f71083dece.rmeta",
+    "bytes": 1128284,
+    "sha256": "d7416d2c47ec809c169bff43340442b6edffb0237bc82c786323a389785737c3"
+  },
+  {
+    "path": "/home/user/gpui-display-traversal-cost-target/release/build/harfrust/59883d4ef9e278ce/out/libharfrust-59883d4ef9e278ce.rmeta",
+    "bytes": 3082861,
+    "sha256": "f8dfa752f05bab6a60533f58a5fb6c8d63b890f34b0a5efdf38194eeabbc77d9"
+  },
+  {
+    "path": "/home/user/gpui-display-traversal-cost-target/release/build/harfrust/de8ed28e9a7526e3/out/libharfrust-de8ed28e9a7526e3.rmeta",
+    "bytes": 2515006,
+    "sha256": "9a02d712e1ac7a91cca73c7ba4da5abd4f589c9c2d3b6030d7f83ade62182825"
+  },
+  {
+    "path": "/home/user/gpui-display-traversal-cost-target/release/build/lock_api/7a2af7ec611ff707/out/liblock_api-7a2af7ec611ff707.rmeta",
+    "bytes": 404381,
+    "sha256": "d16710f0776bead33c7be4e6b3bc6784dbb4bb8e9087b1226d260b6e6b8f7374"
+  },
+  {
+    "path": "/home/user/gpui-display-traversal-cost-target/release/build/lock_api/ce3f41309f9f651e/out/liblock_api-ce3f41309f9f651e.rmeta",
+    "bytes": 295558,
+    "sha256": "a29e9e35208d828c41a05b8b4e5eff98f901b6ac85426d091ab266ddeb2b3107"
+  },
+  {
+    "path": "/home/user/gpui-display-traversal-cost-target/release/build/gpui_reactivity_core/1faf9c67dd8a4332/out/libgpui_reactivity_core-1faf9c67dd8a4332.rmeta",
+    "bytes": 273156,
+    "sha256": "7b5ec324a39838405c709f8e153c258a19823fd0b6d8fd919208b8f40b59f78b"
+  },
+  {
+    "path": "/home/user/gpui-display-traversal-cost-target/release/build/gpui_reactivity_core/cf9ff79222f5eb6e/out/libgpui_reactivity_core-cf9ff79222f5eb6e.rmeta",
+    "bytes": 190028,
+    "sha256": "c1e84df62828c5a9dc5071a36b6f0a08b60cfc0e37370b0c76825f192fc1434d"
+  },
+  {
+    "path": "/home/user/gpui-display-traversal-cost-target/release/build/gpu-allocator/444bd8eff194ce7c/out/libgpu_allocator-444bd8eff194ce7c.rmeta",
+    "bytes": 171245,
+    "sha256": "7926f7c16b01be1664db9fc0bc174badfce767acfb6f54d48f83083fdbda7cbd"
+  },
+  {
+    "path": "/home/user/gpui-display-traversal-cost-target/release/build/gpu-allocator/a178641edd277077/out/libgpu_allocator-a178641edd277077.rmeta",
+    "bytes": 126453,
+    "sha256": "ad8b896661a223065c71e2f77c0def731d35be2aebd2d56166f5bbdd7e4bcd0c"
+  },
+  {
+    "path": "/home/user/gpui-display-traversal-cost-target/release/build/serde_core/ca983fcc5e5b4dd5/out/libserde_core-ca983fcc5e5b4dd5.rmeta",
+    "bytes": 5448852,
+    "sha256": "2d7fad7befedf992a423fbedb8e4d1905b020a5207cba8d382fba6dd77baca5b"
+  },
+  {
+    "path": "/home/user/gpui-display-traversal-cost-target/release/build/serde_core/498c8e251808896e/out/libserde_core-498c8e251808896e.rmeta",
+    "bytes": 2741253,
+    "sha256": "ba78b65f88369bc59852f92aa0b66e94b31f2345cd3d12145c206230d8160da2"
+  },
+  {
+    "path": "/home/user/gpui-display-traversal-cost-target/release/build/zerovec/d2bba82eb2b253d9/out/libzerovec-d2bba82eb2b253d9.rmeta",
+    "bytes": 1320274,
+    "sha256": "212590fee4fc18649c0dfa53ff23f9bc7d1ed07e37effaa62dd245ff21bd1a91"
+  },
+  {
+    "path": "/home/user/gpui-display-traversal-cost-target/release/build/zerovec/38da2fe204e494c4/out/libzerovec-38da2fe204e494c4.rmeta",
+    "bytes": 2230938,
+    "sha256": "c70d5c0e540cbb1ac7c6dfad05ae43cb8d060be6c51109bcf9e9758451907066"
+  },
+  {
+    "path": "/home/user/gpui-display-traversal-cost-target/release/build/icu_collections/4adb2db132dcec6c/out/libicu_collections-4adb2db132dcec6c.rmeta",
+    "bytes": 304055,
+    "sha256": "c1415ee3623aee46d0700d10063a9812cd252274be8fca6d058894e3a99c71ba"
+  },
+  {
+    "path": "/home/user/gpui-display-traversal-cost-target/release/build/icu_collections/228153ff86f5a044/out/libicu_collections-228153ff86f5a044.rmeta",
+    "bytes": 492966,
+    "sha256": "ca788866486cfeb9b37e719d1becaaaece90b9260d7ae4684354fa0a716cd0ee"
+  },
+  {
+    "path": "/home/user/gpui-display-traversal-cost-target/release/build/gpui_reactivity_state/06526996b16ac6c7/out/libgpui_reactivity_state-06526996b16ac6c7.rmeta",
+    "bytes": 71320,
+    "sha256": "995b1aff98cc1a6d65e8cc382c3836c666cdd16f36c9e2c427e3d14263e346aa"
+  },
+  {
+    "path": "/home/user/gpui-display-traversal-cost-target/release/build/gpui_reactivity_state/e53d2086145e47cd/out/libgpui_reactivity_state-e53d2086145e47cd.rmeta",
+    "bytes": 104713,
+    "sha256": "d8abf8df579db75be177ac9ec3396520aa237c49b59d70906e9e5d9447d69529"
+  },
+  {
+    "path": "/home/user/gpui-display-traversal-cost-target/release/build/unicode-ident/382042c71f87e76b/out/libunicode_ident-382042c71f87e76b.rmeta",
+    "bytes": 34746,
+    "sha256": "46d2777cd9dcfea81cf4ffe11abab950f149e6bf640fd068a4f6988ff3da2588"
+  },
+  {
+    "path": "/home/user/gpui-display-traversal-cost-target/release/build/unicode-ident/804e36973c4a1596/out/libunicode_ident-804e36973c4a1596.rmeta",
+    "bytes": 39436,
+    "sha256": "580595ff58d39921e98f2225407dda1478dd236c428d5b89d0447ee545bf1f8a"
+  },
+  {
+    "path": "/home/user/gpui-display-traversal-cost-target/release/build/unicode-ident/3413402402579220/out/libunicode_ident-3413402402579220.rmeta",
+    "bytes": 34661,
+    "sha256": "b282661b09bb63a6807b21702d2c7442662a78692456a35912bb3f4f2c5c0bf7"
+  },
+  {
+    "path": "/home/user/gpui-display-traversal-cost-target/release/build/icu_normalizer_data/7b95b2cd7e2f276d/out/libicu_normalizer_data-7b95b2cd7e2f276d.rmeta",
+    "bytes": 436711,
+    "sha256": "3a0c1727d2bb46c52200934b687c18af9ecb68b7aae6776191a631a707d00885"
+  },
+  {
+    "path": "/home/user/gpui-display-traversal-cost-target/release/build/icu_normalizer_data/37e9908c7703eba6/out/libicu_normalizer_data-37e9908c7703eba6.rmeta",
+    "bytes": 436405,
+    "sha256": "3e2dce16a8cba87235761c247897341a4a4e0438c01e66f2e0967eafe017de22"
+  },
+  {
+    "path": "/home/user/gpui-display-traversal-cost-target/release/build/arrayvec/fa4ff9cfcad47f27/out/libarrayvec-fa4ff9cfcad47f27.rmeta",
+    "bytes": 163816,
+    "sha256": "3f152e2ef2a4d046242427152ca0f2f8eaff75be83c475a26fdd812e2f11610c"
+  },
+  {
+    "path": "/home/user/gpui-display-traversal-cost-target/release/build/arrayvec/b2ff9cdfef142a2d/out/libarrayvec-b2ff9cdfef142a2d.rmeta",
+    "bytes": 355088,
+    "sha256": "3654d60bac40de0c93ef98e20e5f5bf18b89e63800951e4c90d11cbddc1e1b5d"
+  },
+  {
+    "path": "/home/user/gpui-display-traversal-cost-target/release/build/icu_properties/1b863581e668f0c6/out/libicu_properties-1b863581e668f0c6.rmeta",
+    "bytes": 2542339,
+    "sha256": "d9d11de641dc0a0c9ee3d61f8d1fc95f1793e551eb78a807ab76c0717aa7e2bd"
+  },
+  {
+    "path": "/home/user/gpui-display-traversal-cost-target/release/build/icu_properties/971d6a35f3bea188/out/libicu_properties-971d6a35f3bea188.rmeta",
+    "bytes": 2851369,
+    "sha256": "0fe31cb08e3b40384848cfdd893c182d04a18b4a517e9206011aad6d1496d65e"
+  },
+  {
+    "path": "/home/user/gpui-display-traversal-cost-target/release/build/bytemuck/c0966c360a82302a/out/libbytemuck-c0966c360a82302a.rmeta",
+    "bytes": 607118,
+    "sha256": "155f3ca74be459c64b268f30cff4333c42187a24147be56ede89cfbe765e8ebc"
+  },
+  {
+    "path": "/home/user/gpui-display-traversal-cost-target/release/build/bytemuck/21c5381289faadfe/out/libbytemuck-21c5381289faadfe.rmeta",
+    "bytes": 431566,
+    "sha256": "fe904868a881dd077d5d6f8244088a1b48178ac860c867f104f31409ece7b61b"
+  },
+  {
+    "path": "/home/user/gpui-display-traversal-cost-target/release/build/autocfg/42471c90d1378b6a/out/libautocfg-42471c90d1378b6a.rmeta",
+    "bytes": 82514,
+    "sha256": "e861bab9de933dfa47529b696c2eca9590db5b69ac73d69303858c9d763adaef"
+  },
+  {
+    "path": "/home/user/gpui-display-traversal-cost-target/release/build/quote/0cbd981f6583e8c6/out/libquote-0cbd981f6583e8c6.rmeta",
+    "bytes": 275908,
+    "sha256": "a6602777adc58d9521cdf34dc9f52da3d9419615cc16b73822ab9d8bd7bb61ad"
+  },
+  {
+    "path": "/home/user/gpui-display-traversal-cost-target/release/build/ash/d71dff6963fa62eb/out/libash-d71dff6963fa62eb.rmeta",
+    "bytes": 63730464,
+    "sha256": "be2afa797fb5778337b26dbb93f3175adc8cb1d471f8824039d5ad27b89fcd2f"
+  },
+  {
+    "path": "/home/user/gpui-display-traversal-cost-target/release/build/ash/8923c6176dcb97c7/out/libash-8923c6176dcb97c7.rmeta",
+    "bytes": 69596410,
+    "sha256": "d51d96eec9c270f1f3a59f6ae888d2810cbf3a79d3db987ba29d160f54c48fad"
+  },
+  {
+    "path": "/home/user/gpui-display-traversal-cost-target/release/build/pollster/3140a811dc6d6a06/out/libpollster-3140a811dc6d6a06.rmeta",
+    "bytes": 20522,
+    "sha256": "f05da0ba4ecad4d9a482c6abfc71257ef9d06a497537893c31c55dd87d4dc75d"
+  },
+  {
+    "path": "/home/user/gpui-display-traversal-cost-target/release/build/pollster/81df20f522c45681/out/libpollster-81df20f522c45681.rmeta",
+    "bytes": 14062,
+    "sha256": "6e6e93cdf1dcd1da4046da6c9c895c75cd50d77c44364b18cc65756e95df8035"
+  },
+  {
+    "path": "/home/user/gpui-display-traversal-cost-target/release/build/log/16133717b8abe739/out/liblog-16133717b8abe739.rmeta",
+    "bytes": 210750,
+    "sha256": "ebcb85b8b3e132deab5da0138844e99e483c1a942a45b27b256413cdc7cd3c16"
+  },
+  {
+    "path": "/home/user/gpui-display-traversal-cost-target/release/build/log/5523b42b971c6a3d/out/liblog-5523b42b971c6a3d.rmeta",
+    "bytes": 166227,
+    "sha256": "df88e9926f6c9fdc087efa3246dde0716e845f43d4b3b7055a805783340d9edc"
+  },
+  {
+    "path": "/home/user/gpui-display-traversal-cost-target/release/build/pin-project-lite/16a8d324ce150d0a/out/libpin_project_lite-16a8d324ce150d0a.rmeta",
+    "bytes": 95113,
+    "sha256": "df8f5f628895195749f77d087ab1063b19d3a1b1d862e84e8a2165a2f333b96d"
+  },
+  {
+    "path": "/home/user/gpui-display-traversal-cost-target/release/build/pin-project-lite/41af8269068eaced/out/libpin_project_lite-41af8269068eaced.rmeta",
+    "bytes": 93597,
+    "sha256": "3c45afd963b97bba6326a8eda53e6a0f16f2d2022b6005ee864f6924100503f2"
+  }
+]

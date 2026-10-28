@@ -1,0 +1,1622 @@
+[
+  {
+    "round": 0,
+    "n": 1,
+    "scene": "sparse",
+    "role": "control"
+  },
+  {
+    "round": 0,
+    "n": 1,
+    "scene": "sparse",
+    "role": "indexed"
+  },
+  {
+    "round": 0,
+    "n": 1,
+    "scene": "sparse",
+    "role": "raw"
+  },
+  {
+    "round": 0,
+    "n": 1,
+    "scene": "overlap",
+    "role": "control"
+  },
+  {
+    "round": 0,
+    "n": 1,
+    "scene": "overlap",
+    "role": "indexed"
+  },
+  {
+    "round": 0,
+    "n": 1,
+    "scene": "overlap",
+    "role": "raw"
+  },
+  {
+    "round": 0,
+    "n": 1,
+    "scene": "staircase",
+    "role": "control"
+  },
+  {
+    "round": 0,
+    "n": 1,
+    "scene": "staircase",
+    "role": "indexed"
+  },
+  {
+    "round": 0,
+    "n": 1,
+    "scene": "staircase",
+    "role": "raw"
+  },
+  {
+    "round": 0,
+    "n": 9,
+    "scene": "sparse",
+    "role": "control"
+  },
+  {
+    "round": 0,
+    "n": 9,
+    "scene": "sparse",
+    "role": "indexed"
+  },
+  {
+    "round": 0,
+    "n": 9,
+    "scene": "sparse",
+    "role": "raw"
+  },
+  {
+    "round": 0,
+    "n": 9,
+    "scene": "overlap",
+    "role": "control"
+  },
+  {
+    "round": 0,
+    "n": 9,
+    "scene": "overlap",
+    "role": "indexed"
+  },
+  {
+    "round": 0,
+    "n": 9,
+    "scene": "overlap",
+    "role": "raw"
+  },
+  {
+    "round": 0,
+    "n": 9,
+    "scene": "staircase",
+    "role": "control"
+  },
+  {
+    "round": 0,
+    "n": 9,
+    "scene": "staircase",
+    "role": "indexed"
+  },
+  {
+    "round": 0,
+    "n": 9,
+    "scene": "staircase",
+    "role": "raw"
+  },
+  {
+    "round": 0,
+    "n": 32,
+    "scene": "sparse",
+    "role": "control"
+  },
+  {
+    "round": 0,
+    "n": 32,
+    "scene": "sparse",
+    "role": "indexed"
+  },
+  {
+    "round": 0,
+    "n": 32,
+    "scene": "sparse",
+    "role": "raw"
+  },
+  {
+    "round": 0,
+    "n": 32,
+    "scene": "overlap",
+    "role": "control"
+  },
+  {
+    "round": 0,
+    "n": 32,
+    "scene": "overlap",
+    "role": "indexed"
+  },
+  {
+    "round": 0,
+    "n": 32,
+    "scene": "overlap",
+    "role": "raw"
+  },
+  {
+    "round": 0,
+    "n": 32,
+    "scene": "staircase",
+    "role": "control"
+  },
+  {
+    "round": 0,
+    "n": 32,
+    "scene": "staircase",
+    "role": "indexed"
+  },
+  {
+    "round": 0,
+    "n": 32,
+    "scene": "staircase",
+    "role": "raw"
+  },
+  {
+    "round": 0,
+    "n": 256,
+    "scene": "sparse",
+    "role": "control"
+  },
+  {
+    "round": 0,
+    "n": 256,
+    "scene": "sparse",
+    "role": "indexed"
+  },
+  {
+    "round": 0,
+    "n": 256,
+    "scene": "sparse",
+    "role": "raw"
+  },
+  {
+    "round": 0,
+    "n": 256,
+    "scene": "overlap",
+    "role": "control"
+  },
+  {
+    "round": 0,
+    "n": 256,
+    "scene": "overlap",
+    "role": "indexed"
+  },
+  {
+    "round": 0,
+    "n": 256,
+    "scene": "overlap",
+    "role": "raw"
+  },
+  {
+    "round": 0,
+    "n": 256,
+    "scene": "staircase",
+    "role": "control"
+  },
+  {
+    "round": 0,
+    "n": 256,
+    "scene": "staircase",
+    "role": "indexed"
+  },
+  {
+    "round": 0,
+    "n": 256,
+    "scene": "staircase",
+    "role": "raw"
+  },
+  {
+    "round": 0,
+    "n": 1024,
+    "scene": "sparse",
+    "role": "control"
+  },
+  {
+    "round": 0,
+    "n": 1024,
+    "scene": "sparse",
+    "role": "indexed"
+  },
+  {
+    "round": 0,
+    "n": 1024,
+    "scene": "sparse",
+    "role": "raw"
+  },
+  {
+    "round": 0,
+    "n": 1024,
+    "scene": "overlap",
+    "role": "control"
+  },
+  {
+    "round": 0,
+    "n": 1024,
+    "scene": "overlap",
+    "role": "indexed"
+  },
+  {
+    "round": 0,
+    "n": 1024,
+    "scene": "overlap",
+    "role": "raw"
+  },
+  {
+    "round": 0,
+    "n": 1024,
+    "scene": "staircase",
+    "role": "control"
+  },
+  {
+    "round": 0,
+    "n": 1024,
+    "scene": "staircase",
+    "role": "indexed"
+  },
+  {
+    "round": 0,
+    "n": 1024,
+    "scene": "staircase",
+    "role": "raw"
+  },
+  {
+    "round": 1,
+    "n": 1,
+    "scene": "sparse",
+    "role": "indexed"
+  },
+  {
+    "round": 1,
+    "n": 1,
+    "scene": "sparse",
+    "role": "control"
+  },
+  {
+    "round": 1,
+    "n": 1,
+    "scene": "sparse",
+    "role": "raw"
+  },
+  {
+    "round": 1,
+    "n": 1,
+    "scene": "overlap",
+    "role": "indexed"
+  },
+  {
+    "round": 1,
+    "n": 1,
+    "scene": "overlap",
+    "role": "control"
+  },
+  {
+    "round": 1,
+    "n": 1,
+    "scene": "overlap",
+    "role": "raw"
+  },
+  {
+    "round": 1,
+    "n": 1,
+    "scene": "staircase",
+    "role": "indexed"
+  },
+  {
+    "round": 1,
+    "n": 1,
+    "scene": "staircase",
+    "role": "control"
+  },
+  {
+    "round": 1,
+    "n": 1,
+    "scene": "staircase",
+    "role": "raw"
+  },
+  {
+    "round": 1,
+    "n": 9,
+    "scene": "sparse",
+    "role": "indexed"
+  },
+  {
+    "round": 1,
+    "n": 9,
+    "scene": "sparse",
+    "role": "control"
+  },
+  {
+    "round": 1,
+    "n": 9,
+    "scene": "sparse",
+    "role": "raw"
+  },
+  {
+    "round": 1,
+    "n": 9,
+    "scene": "overlap",
+    "role": "indexed"
+  },
+  {
+    "round": 1,
+    "n": 9,
+    "scene": "overlap",
+    "role": "control"
+  },
+  {
+    "round": 1,
+    "n": 9,
+    "scene": "overlap",
+    "role": "raw"
+  },
+  {
+    "round": 1,
+    "n": 9,
+    "scene": "staircase",
+    "role": "indexed"
+  },
+  {
+    "round": 1,
+    "n": 9,
+    "scene": "staircase",
+    "role": "control"
+  },
+  {
+    "round": 1,
+    "n": 9,
+    "scene": "staircase",
+    "role": "raw"
+  },
+  {
+    "round": 1,
+    "n": 32,
+    "scene": "sparse",
+    "role": "indexed"
+  },
+  {
+    "round": 1,
+    "n": 32,
+    "scene": "sparse",
+    "role": "control"
+  },
+  {
+    "round": 1,
+    "n": 32,
+    "scene": "sparse",
+    "role": "raw"
+  },
+  {
+    "round": 1,
+    "n": 32,
+    "scene": "overlap",
+    "role": "indexed"
+  },
+  {
+    "round": 1,
+    "n": 32,
+    "scene": "overlap",
+    "role": "control"
+  },
+  {
+    "round": 1,
+    "n": 32,
+    "scene": "overlap",
+    "role": "raw"
+  },
+  {
+    "round": 1,
+    "n": 32,
+    "scene": "staircase",
+    "role": "indexed"
+  },
+  {
+    "round": 1,
+    "n": 32,
+    "scene": "staircase",
+    "role": "control"
+  },
+  {
+    "round": 1,
+    "n": 32,
+    "scene": "staircase",
+    "role": "raw"
+  },
+  {
+    "round": 1,
+    "n": 256,
+    "scene": "sparse",
+    "role": "indexed"
+  },
+  {
+    "round": 1,
+    "n": 256,
+    "scene": "sparse",
+    "role": "control"
+  },
+  {
+    "round": 1,
+    "n": 256,
+    "scene": "sparse",
+    "role": "raw"
+  },
+  {
+    "round": 1,
+    "n": 256,
+    "scene": "overlap",
+    "role": "indexed"
+  },
+  {
+    "round": 1,
+    "n": 256,
+    "scene": "overlap",
+    "role": "control"
+  },
+  {
+    "round": 1,
+    "n": 256,
+    "scene": "overlap",
+    "role": "raw"
+  },
+  {
+    "round": 1,
+    "n": 256,
+    "scene": "staircase",
+    "role": "indexed"
+  },
+  {
+    "round": 1,
+    "n": 256,
+    "scene": "staircase",
+    "role": "control"
+  },
+  {
+    "round": 1,
+    "n": 256,
+    "scene": "staircase",
+    "role": "raw"
+  },
+  {
+    "round": 1,
+    "n": 1024,
+    "scene": "sparse",
+    "role": "indexed"
+  },
+  {
+    "round": 1,
+    "n": 1024,
+    "scene": "sparse",
+    "role": "control"
+  },
+  {
+    "round": 1,
+    "n": 1024,
+    "scene": "sparse",
+    "role": "raw"
+  },
+  {
+    "round": 1,
+    "n": 1024,
+    "scene": "overlap",
+    "role": "indexed"
+  },
+  {
+    "round": 1,
+    "n": 1024,
+    "scene": "overlap",
+    "role": "control"
+  },
+  {
+    "round": 1,
+    "n": 1024,
+    "scene": "overlap",
+    "role": "raw"
+  },
+  {
+    "round": 1,
+    "n": 1024,
+    "scene": "staircase",
+    "role": "indexed"
+  },
+  {
+    "round": 1,
+    "n": 1024,
+    "scene": "staircase",
+    "role": "control"
+  },
+  {
+    "round": 1,
+    "n": 1024,
+    "scene": "staircase",
+    "role": "raw"
+  },
+  {
+    "round": 2,
+    "n": 1,
+    "scene": "sparse",
+    "role": "indexed"
+  },
+  {
+    "round": 2,
+    "n": 1,
+    "scene": "sparse",
+    "role": "control"
+  },
+  {
+    "round": 2,
+    "n": 1,
+    "scene": "sparse",
+    "role": "raw"
+  },
+  {
+    "round": 2,
+    "n": 1,
+    "scene": "overlap",
+    "role": "indexed"
+  },
+  {
+    "round": 2,
+    "n": 1,
+    "scene": "overlap",
+    "role": "control"
+  },
+  {
+    "round": 2,
+    "n": 1,
+    "scene": "overlap",
+    "role": "raw"
+  },
+  {
+    "round": 2,
+    "n": 1,
+    "scene": "staircase",
+    "role": "indexed"
+  },
+  {
+    "round": 2,
+    "n": 1,
+    "scene": "staircase",
+    "role": "control"
+  },
+  {
+    "round": 2,
+    "n": 1,
+    "scene": "staircase",
+    "role": "raw"
+  },
+  {
+    "round": 2,
+    "n": 9,
+    "scene": "sparse",
+    "role": "indexed"
+  },
+  {
+    "round": 2,
+    "n": 9,
+    "scene": "sparse",
+    "role": "control"
+  },
+  {
+    "round": 2,
+    "n": 9,
+    "scene": "sparse",
+    "role": "raw"
+  },
+  {
+    "round": 2,
+    "n": 9,
+    "scene": "overlap",
+    "role": "indexed"
+  },
+  {
+    "round": 2,
+    "n": 9,
+    "scene": "overlap",
+    "role": "control"
+  },
+  {
+    "round": 2,
+    "n": 9,
+    "scene": "overlap",
+    "role": "raw"
+  },
+  {
+    "round": 2,
+    "n": 9,
+    "scene": "staircase",
+    "role": "indexed"
+  },
+  {
+    "round": 2,
+    "n": 9,
+    "scene": "staircase",
+    "role": "control"
+  },
+  {
+    "round": 2,
+    "n": 9,
+    "scene": "staircase",
+    "role": "raw"
+  },
+  {
+    "round": 2,
+    "n": 32,
+    "scene": "sparse",
+    "role": "indexed"
+  },
+  {
+    "round": 2,
+    "n": 32,
+    "scene": "sparse",
+    "role": "control"
+  },
+  {
+    "round": 2,
+    "n": 32,
+    "scene": "sparse",
+    "role": "raw"
+  },
+  {
+    "round": 2,
+    "n": 32,
+    "scene": "overlap",
+    "role": "indexed"
+  },
+  {
+    "round": 2,
+    "n": 32,
+    "scene": "overlap",
+    "role": "control"
+  },
+  {
+    "round": 2,
+    "n": 32,
+    "scene": "overlap",
+    "role": "raw"
+  },
+  {
+    "round": 2,
+    "n": 32,
+    "scene": "staircase",
+    "role": "indexed"
+  },
+  {
+    "round": 2,
+    "n": 32,
+    "scene": "staircase",
+    "role": "control"
+  },
+  {
+    "round": 2,
+    "n": 32,
+    "scene": "staircase",
+    "role": "raw"
+  },
+  {
+    "round": 2,
+    "n": 256,
+    "scene": "sparse",
+    "role": "indexed"
+  },
+  {
+    "round": 2,
+    "n": 256,
+    "scene": "sparse",
+    "role": "control"
+  },
+  {
+    "round": 2,
+    "n": 256,
+    "scene": "sparse",
+    "role": "raw"
+  },
+  {
+    "round": 2,
+    "n": 256,
+    "scene": "overlap",
+    "role": "indexed"
+  },
+  {
+    "round": 2,
+    "n": 256,
+    "scene": "overlap",
+    "role": "control"
+  },
+  {
+    "round": 2,
+    "n": 256,
+    "scene": "overlap",
+    "role": "raw"
+  },
+  {
+    "round": 2,
+    "n": 256,
+    "scene": "staircase",
+    "role": "indexed"
+  },
+  {
+    "round": 2,
+    "n": 256,
+    "scene": "staircase",
+    "role": "control"
+  },
+  {
+    "round": 2,
+    "n": 256,
+    "scene": "staircase",
+    "role": "raw"
+  },
+  {
+    "round": 2,
+    "n": 1024,
+    "scene": "sparse",
+    "role": "indexed"
+  },
+  {
+    "round": 2,
+    "n": 1024,
+    "scene": "sparse",
+    "role": "control"
+  },
+  {
+    "round": 2,
+    "n": 1024,
+    "scene": "sparse",
+    "role": "raw"
+  },
+  {
+    "round": 2,
+    "n": 1024,
+    "scene": "overlap",
+    "role": "indexed"
+  },
+  {
+    "round": 2,
+    "n": 1024,
+    "scene": "overlap",
+    "role": "control"
+  },
+  {
+    "round": 2,
+    "n": 1024,
+    "scene": "overlap",
+    "role": "raw"
+  },
+  {
+    "round": 2,
+    "n": 1024,
+    "scene": "staircase",
+    "role": "indexed"
+  },
+  {
+    "round": 2,
+    "n": 1024,
+    "scene": "staircase",
+    "role": "control"
+  },
+  {
+    "round": 2,
+    "n": 1024,
+    "scene": "staircase",
+    "role": "raw"
+  },
+  {
+    "round": 3,
+    "n": 1,
+    "scene": "sparse",
+    "role": "control"
+  },
+  {
+    "round": 3,
+    "n": 1,
+    "scene": "sparse",
+    "role": "indexed"
+  },
+  {
+    "round": 3,
+    "n": 1,
+    "scene": "sparse",
+    "role": "raw"
+  },
+  {
+    "round": 3,
+    "n": 1,
+    "scene": "overlap",
+    "role": "control"
+  },
+  {
+    "round": 3,
+    "n": 1,
+    "scene": "overlap",
+    "role": "indexed"
+  },
+  {
+    "round": 3,
+    "n": 1,
+    "scene": "overlap",
+    "role": "raw"
+  },
+  {
+    "round": 3,
+    "n": 1,
+    "scene": "staircase",
+    "role": "control"
+  },
+  {
+    "round": 3,
+    "n": 1,
+    "scene": "staircase",
+    "role": "indexed"
+  },
+  {
+    "round": 3,
+    "n": 1,
+    "scene": "staircase",
+    "role": "raw"
+  },
+  {
+    "round": 3,
+    "n": 9,
+    "scene": "sparse",
+    "role": "control"
+  },
+  {
+    "round": 3,
+    "n": 9,
+    "scene": "sparse",
+    "role": "indexed"
+  },
+  {
+    "round": 3,
+    "n": 9,
+    "scene": "sparse",
+    "role": "raw"
+  },
+  {
+    "round": 3,
+    "n": 9,
+    "scene": "overlap",
+    "role": "control"
+  },
+  {
+    "round": 3,
+    "n": 9,
+    "scene": "overlap",
+    "role": "indexed"
+  },
+  {
+    "round": 3,
+    "n": 9,
+    "scene": "overlap",
+    "role": "raw"
+  },
+  {
+    "round": 3,
+    "n": 9,
+    "scene": "staircase",
+    "role": "control"
+  },
+  {
+    "round": 3,
+    "n": 9,
+    "scene": "staircase",
+    "role": "indexed"
+  },
+  {
+    "round": 3,
+    "n": 9,
+    "scene": "staircase",
+    "role": "raw"
+  },
+  {
+    "round": 3,
+    "n": 32,
+    "scene": "sparse",
+    "role": "control"
+  },
+  {
+    "round": 3,
+    "n": 32,
+    "scene": "sparse",
+    "role": "indexed"
+  },
+  {
+    "round": 3,
+    "n": 32,
+    "scene": "sparse",
+    "role": "raw"
+  },
+  {
+    "round": 3,
+    "n": 32,
+    "scene": "overlap",
+    "role": "control"
+  },
+  {
+    "round": 3,
+    "n": 32,
+    "scene": "overlap",
+    "role": "indexed"
+  },
+  {
+    "round": 3,
+    "n": 32,
+    "scene": "overlap",
+    "role": "raw"
+  },
+  {
+    "round": 3,
+    "n": 32,
+    "scene": "staircase",
+    "role": "control"
+  },
+  {
+    "round": 3,
+    "n": 32,
+    "scene": "staircase",
+    "role": "indexed"
+  },
+  {
+    "round": 3,
+    "n": 32,
+    "scene": "staircase",
+    "role": "raw"
+  },
+  {
+    "round": 3,
+    "n": 256,
+    "scene": "sparse",
+    "role": "control"
+  },
+  {
+    "round": 3,
+    "n": 256,
+    "scene": "sparse",
+    "role": "indexed"
+  },
+  {
+    "round": 3,
+    "n": 256,
+    "scene": "sparse",
+    "role": "raw"
+  },
+  {
+    "round": 3,
+    "n": 256,
+    "scene": "overlap",
+    "role": "control"
+  },
+  {
+    "round": 3,
+    "n": 256,
+    "scene": "overlap",
+    "role": "indexed"
+  },
+  {
+    "round": 3,
+    "n": 256,
+    "scene": "overlap",
+    "role": "raw"
+  },
+  {
+    "round": 3,
+    "n": 256,
+    "scene": "staircase",
+    "role": "control"
+  },
+  {
+    "round": 3,
+    "n": 256,
+    "scene": "staircase",
+    "role": "indexed"
+  },
+  {
+    "round": 3,
+    "n": 256,
+    "scene": "staircase",
+    "role": "raw"
+  },
+  {
+    "round": 3,
+    "n": 1024,
+    "scene": "sparse",
+    "role": "control"
+  },
+  {
+    "round": 3,
+    "n": 1024,
+    "scene": "sparse",
+    "role": "indexed"
+  },
+  {
+    "round": 3,
+    "n": 1024,
+    "scene": "sparse",
+    "role": "raw"
+  },
+  {
+    "round": 3,
+    "n": 1024,
+    "scene": "overlap",
+    "role": "control"
+  },
+  {
+    "round": 3,
+    "n": 1024,
+    "scene": "overlap",
+    "role": "indexed"
+  },
+  {
+    "round": 3,
+    "n": 1024,
+    "scene": "overlap",
+    "role": "raw"
+  },
+  {
+    "round": 3,
+    "n": 1024,
+    "scene": "staircase",
+    "role": "control"
+  },
+  {
+    "round": 3,
+    "n": 1024,
+    "scene": "staircase",
+    "role": "indexed"
+  },
+  {
+    "round": 3,
+    "n": 1024,
+    "scene": "staircase",
+    "role": "raw"
+  },
+  {
+    "round": 4,
+    "n": 1,
+    "scene": "sparse",
+    "role": "control"
+  },
+  {
+    "round": 4,
+    "n": 1,
+    "scene": "sparse",
+    "role": "indexed"
+  },
+  {
+    "round": 4,
+    "n": 1,
+    "scene": "sparse",
+    "role": "raw"
+  },
+  {
+    "round": 4,
+    "n": 1,
+    "scene": "overlap",
+    "role": "control"
+  },
+  {
+    "round": 4,
+    "n": 1,
+    "scene": "overlap",
+    "role": "indexed"
+  },
+  {
+    "round": 4,
+    "n": 1,
+    "scene": "overlap",
+    "role": "raw"
+  },
+  {
+    "round": 4,
+    "n": 1,
+    "scene": "staircase",
+    "role": "control"
+  },
+  {
+    "round": 4,
+    "n": 1,
+    "scene": "staircase",
+    "role": "indexed"
+  },
+  {
+    "round": 4,
+    "n": 1,
+    "scene": "staircase",
+    "role": "raw"
+  },
+  {
+    "round": 4,
+    "n": 9,
+    "scene": "sparse",
+    "role": "control"
+  },
+  {
+    "round": 4,
+    "n": 9,
+    "scene": "sparse",
+    "role": "indexed"
+  },
+  {
+    "round": 4,
+    "n": 9,
+    "scene": "sparse",
+    "role": "raw"
+  },
+  {
+    "round": 4,
+    "n": 9,
+    "scene": "overlap",
+    "role": "control"
+  },
+  {
+    "round": 4,
+    "n": 9,
+    "scene": "overlap",
+    "role": "indexed"
+  },
+  {
+    "round": 4,
+    "n": 9,
+    "scene": "overlap",
+    "role": "raw"
+  },
+  {
+    "round": 4,
+    "n": 9,
+    "scene": "staircase",
+    "role": "control"
+  },
+  {
+    "round": 4,
+    "n": 9,
+    "scene": "staircase",
+    "role": "indexed"
+  },
+  {
+    "round": 4,
+    "n": 9,
+    "scene": "staircase",
+    "role": "raw"
+  },
+  {
+    "round": 4,
+    "n": 32,
+    "scene": "sparse",
+    "role": "control"
+  },
+  {
+    "round": 4,
+    "n": 32,
+    "scene": "sparse",
+    "role": "indexed"
+  },
+  {
+    "round": 4,
+    "n": 32,
+    "scene": "sparse",
+    "role": "raw"
+  },
+  {
+    "round": 4,
+    "n": 32,
+    "scene": "overlap",
+    "role": "control"
+  },
+  {
+    "round": 4,
+    "n": 32,
+    "scene": "overlap",
+    "role": "indexed"
+  },
+  {
+    "round": 4,
+    "n": 32,
+    "scene": "overlap",
+    "role": "raw"
+  },
+  {
+    "round": 4,
+    "n": 32,
+    "scene": "staircase",
+    "role": "control"
+  },
+  {
+    "round": 4,
+    "n": 32,
+    "scene": "staircase",
+    "role": "indexed"
+  },
+  {
+    "round": 4,
+    "n": 32,
+    "scene": "staircase",
+    "role": "raw"
+  },
+  {
+    "round": 4,
+    "n": 256,
+    "scene": "sparse",
+    "role": "control"
+  },
+  {
+    "round": 4,
+    "n": 256,
+    "scene": "sparse",
+    "role": "indexed"
+  },
+  {
+    "round": 4,
+    "n": 256,
+    "scene": "sparse",
+    "role": "raw"
+  },
+  {
+    "round": 4,
+    "n": 256,
+    "scene": "overlap",
+    "role": "control"
+  },
+  {
+    "round": 4,
+    "n": 256,
+    "scene": "overlap",
+    "role": "indexed"
+  },
+  {
+    "round": 4,
+    "n": 256,
+    "scene": "overlap",
+    "role": "raw"
+  },
+  {
+    "round": 4,
+    "n": 256,
+    "scene": "staircase",
+    "role": "control"
+  },
+  {
+    "round": 4,
+    "n": 256,
+    "scene": "staircase",
+    "role": "indexed"
+  },
+  {
+    "round": 4,
+    "n": 256,
+    "scene": "staircase",
+    "role": "raw"
+  },
+  {
+    "round": 4,
+    "n": 1024,
+    "scene": "sparse",
+    "role": "control"
+  },
+  {
+    "round": 4,
+    "n": 1024,
+    "scene": "sparse",
+    "role": "indexed"
+  },
+  {
+    "round": 4,
+    "n": 1024,
+    "scene": "sparse",
+    "role": "raw"
+  },
+  {
+    "round": 4,
+    "n": 1024,
+    "scene": "overlap",
+    "role": "control"
+  },
+  {
+    "round": 4,
+    "n": 1024,
+    "scene": "overlap",
+    "role": "indexed"
+  },
+  {
+    "round": 4,
+    "n": 1024,
+    "scene": "overlap",
+    "role": "raw"
+  },
+  {
+    "round": 4,
+    "n": 1024,
+    "scene": "staircase",
+    "role": "control"
+  },
+  {
+    "round": 4,
+    "n": 1024,
+    "scene": "staircase",
+    "role": "indexed"
+  },
+  {
+    "round": 4,
+    "n": 1024,
+    "scene": "staircase",
+    "role": "raw"
+  },
+  {
+    "round": 5,
+    "n": 1,
+    "scene": "sparse",
+    "role": "indexed"
+  },
+  {
+    "round": 5,
+    "n": 1,
+    "scene": "sparse",
+    "role": "control"
+  },
+  {
+    "round": 5,
+    "n": 1,
+    "scene": "sparse",
+    "role": "raw"
+  },
+  {
+    "round": 5,
+    "n": 1,
+    "scene": "overlap",
+    "role": "indexed"
+  },
+  {
+    "round": 5,
+    "n": 1,
+    "scene": "overlap",
+    "role": "control"
+  },
+  {
+    "round": 5,
+    "n": 1,
+    "scene": "overlap",
+    "role": "raw"
+  },
+  {
+    "round": 5,
+    "n": 1,
+    "scene": "staircase",
+    "role": "indexed"
+  },
+  {
+    "round": 5,
+    "n": 1,
+    "scene": "staircase",
+    "role": "control"
+  },
+  {
+    "round": 5,
+    "n": 1,
+    "scene": "staircase",
+    "role": "raw"
+  },
+  {
+    "round": 5,
+    "n": 9,
+    "scene": "sparse",
+    "role": "indexed"
+  },
+  {
+    "round": 5,
+    "n": 9,
+    "scene": "sparse",
+    "role": "control"
+  },
+  {
+    "round": 5,
+    "n": 9,
+    "scene": "sparse",
+    "role": "raw"
+  },
+  {
+    "round": 5,
+    "n": 9,
+    "scene": "overlap",
+    "role": "indexed"
+  },
+  {
+    "round": 5,
+    "n": 9,
+    "scene": "overlap",
+    "role": "control"
+  },
+  {
+    "round": 5,
+    "n": 9,
+    "scene": "overlap",
+    "role": "raw"
+  },
+  {
+    "round": 5,
+    "n": 9,
+    "scene": "staircase",
+    "role": "indexed"
+  },
+  {
+    "round": 5,
+    "n": 9,
+    "scene": "staircase",
+    "role": "control"
+  },
+  {
+    "round": 5,
+    "n": 9,
+    "scene": "staircase",
+    "role": "raw"
+  },
+  {
+    "round": 5,
+    "n": 32,
+    "scene": "sparse",
+    "role": "indexed"
+  },
+  {
+    "round": 5,
+    "n": 32,
+    "scene": "sparse",
+    "role": "control"
+  },
+  {
+    "round": 5,
+    "n": 32,
+    "scene": "sparse",
+    "role": "raw"
+  },
+  {
+    "round": 5,
+    "n": 32,
+    "scene": "overlap",
+    "role": "indexed"
+  },
+  {
+    "round": 5,
+    "n": 32,
+    "scene": "overlap",
+    "role": "control"
+  },
+  {
+    "round": 5,
+    "n": 32,
+    "scene": "overlap",
+    "role": "raw"
+  },
+  {
+    "round": 5,
+    "n": 32,
+    "scene": "staircase",
+    "role": "indexed"
+  },
+  {
+    "round": 5,
+    "n": 32,
+    "scene": "staircase",
+    "role": "control"
+  },
+  {
+    "round": 5,
+    "n": 32,
+    "scene": "staircase",
+    "role": "raw"
+  },
+  {
+    "round": 5,
+    "n": 256,
+    "scene": "sparse",
+    "role": "indexed"
+  },
+  {
+    "round": 5,
+    "n": 256,
+    "scene": "sparse",
+    "role": "control"
+  },
+  {
+    "round": 5,
+    "n": 256,
+    "scene": "sparse",
+    "role": "raw"
+  },
+  {
+    "round": 5,
+    "n": 256,
+    "scene": "overlap",
+    "role": "indexed"
+  },
+  {
+    "round": 5,
+    "n": 256,
+    "scene": "overlap",
+    "role": "control"
+  },
+  {
+    "round": 5,
+    "n": 256,
+    "scene": "overlap",
+    "role": "raw"
+  },
+  {
+    "round": 5,
+    "n": 256,
+    "scene": "staircase",
+    "role": "indexed"
+  },
+  {
+    "round": 5,
+    "n": 256,
+    "scene": "staircase",
+    "role": "control"
+  },
+  {
+    "round": 5,
+    "n": 256,
+    "scene": "staircase",
+    "role": "raw"
+  },
+  {
+    "round": 5,
+    "n": 1024,
+    "scene": "sparse",
+    "role": "indexed"
+  },
+  {
+    "round": 5,
+    "n": 1024,
+    "scene": "sparse",
+    "role": "control"
+  },
+  {
+    "round": 5,
+    "n": 1024,
+    "scene": "sparse",
+    "role": "raw"
+  },
+  {
+    "round": 5,
+    "n": 1024,
+    "scene": "overlap",
+    "role": "indexed"
+  },
+  {
+    "round": 5,
+    "n": 1024,
+    "scene": "overlap",
+    "role": "control"
+  },
+  {
+    "round": 5,
+    "n": 1024,
+    "scene": "overlap",
+    "role": "raw"
+  },
+  {
+    "round": 5,
+    "n": 1024,
+    "scene": "staircase",
+    "role": "indexed"
+  },
+  {
+    "round": 5,
+    "n": 1024,
+    "scene": "staircase",
+    "role": "control"
+  },
+  {
+    "round": 5,
+    "n": 1024,
+    "scene": "staircase",
+    "role": "raw"
+  }
+]
