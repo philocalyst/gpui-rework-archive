@@ -1,0 +1,15 @@
+{
+  "reason": "Static review found overly broad field-list replacement also changed dictionary indexing. Corrected before freeze or native observations; preserved original scripts. No production source, fixture or gate change.",
+  "files": [
+    {
+      "file": "analyze.py",
+      "before_sha256": "f1ccb3ec4bde9e341c68a71159da54940a01b3ca722ba9572c7aa09a108d605f",
+      "after_sha256": "1aa9b091a1aceac16f72bd60a56088b9d16f426264694bc61b6316774473fe40"
+    },
+    {
+      "file": "verify_dossier.py",
+      "before_sha256": "a5d266b3506c857d2863d55a77b0f89fa0ef74efc5dae1c0f3a5d7f8f0d3e563",
+      "after_sha256": "3e11821be64a3ca237e9275fa344761cd5ced989c0c36df3ae40f3fdd812f4ea"
+    }
+  ]
+}

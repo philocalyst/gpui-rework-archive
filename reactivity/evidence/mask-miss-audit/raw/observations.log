@@ -1,0 +1,12 @@
+Traceback (most recent call last):
+  File "/home/user/gpui-mask-miss-audit-evidence/native.py", line 99, in <module>
+    run('candidate',mode,3,R/'observations'/str(initial)/mode,initial=initial,capture=mode=='idle')
+  File "/home/user/gpui-mask-miss-audit-evidence/native.py", line 46, in run
+    assert window is not None;cmd(['xdotool','windowactivate','--sync',window]);cmd(['xdotool','key','--clearmodifiers','alt+F4']);closing=True
+                              ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/home/user/gpui-mask-miss-audit-evidence/native.py", line 21, in cmd
+    if check:assert p.returncode==0,p.stderr
+                    ^^^^^^^^^^^^^^^
+AssertionError: Your windowmanager claims not to support _NET_ACTIVE_WINDOW, so the attempt to activate the window was aborted.
+xdo_activate_window on window:4194306 reported an error
+

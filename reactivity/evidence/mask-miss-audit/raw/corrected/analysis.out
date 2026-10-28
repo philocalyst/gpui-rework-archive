@@ -1,0 +1,13 @@
+{
+  "processes": 8,
+  "packets": 1082,
+  "bank_counts": [
+    0
+  ],
+  "banked_packets": 0,
+  "total_mask_references": 2779389,
+  "total_lowered_references": 2587037,
+  "selected_packets": 1082,
+  "selected_tiles": 916140,
+  "scope": "Instrumented native tile selection, planned full-packet references; no performance ratio, GPU instruction count or damage-cropped-work claim."
+}

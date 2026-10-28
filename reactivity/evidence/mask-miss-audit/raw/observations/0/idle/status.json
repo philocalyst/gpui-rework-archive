@@ -1,0 +1,1 @@
+{"exit": -15, "failure": "AssertionError('Your windowmanager claims not to support _NET_ACTIVE_WINDOW, so the attempt to activate the window was aborted.\\nxdo_activate_window on window:4194306 reported an error\\n')", "seconds": 3.568504335009493, "timed": false}

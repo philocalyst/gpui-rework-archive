@@ -1,0 +1,60 @@
+{
+  "files": {
+    "build.out": "a020ea6e000854c303904bae6954c1460bdd2c635fc2552968a1ad97a3c33c61",
+    "completed-cleanup-plan.json": "9d69c860a461dc02e25c090685deea947255c3206104d599edd2088a16a60bc7",
+    "guard.py": "f5606caad541f4d27e0d537b8a7cbd304d38f2b1f63d6efc5028239ebc73b1cd",
+    "candidate-current-inputs.json": "93838a830f47b5ddc0b697fd30f105d0fa9fb496cf1f1907739fd03eff7e53c7",
+    "completed-cleanup.out": "b74bc94e6285b2a945a700721b83c554d5ac48f392180412f8ec8df42ff7f3e5",
+    "analyze.py.pre-observation": "f1ccb3ec4bde9e341c68a71159da54940a01b3ca722ba9572c7aa09a108d605f",
+    "build-gates.json": "f3feb113a86aafacfe401a65eb4158919abf72237e504f3c08a8ecc3f63550af",
+    "completed-cleanup.log": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+    "shader-admission-reverification.json": "2bb1c0ec48c49608ea6538584a16f543a3f5c3894e036f212cb40d2b05684ae9",
+    "oracle-190.png": "fb504b213d823a787b3d7ed43c38d008c519c800c7716f0a33a13cc69f597aba",
+    "analyze.py": "1aa9b091a1aceac16f72bd60a56088b9d16f426264694bc61b6316774473fe40",
+    "PROTOCOL.md": "3ccc3a39e927c3048d36d008f852512381e9ffb2828b554de32d02a469964642",
+    "reclaim_completed.py": "38679be5f9569c1149778b8aafe59676c3a069e66fc5678ccad46a0a169e0ae1",
+    "native.py": "f1919254e7f8607c51bd1a34bd21c54084ad8c61860a2a0ebb6465bcbe12f0f2",
+    "oracle-0.png": "626b541b01329869e60159381cada9fdaaa8f37f675da0f9dfc6a9bb3f73ac46",
+    "package.py": "0f4db878a16214308ef3afbc1bbbc63a47f05fcf8a1725d819c80a6f1d25515a",
+    "artifacts.json": "73a1808d627ea9d8231ba42c1770757043c60245ac16a7dc2a18eac58f83d281",
+    "verify_dossier.py": "3e11821be64a3ca237e9275fa344761cd5ced989c0c36df3ae40f3fdd812f4ea",
+    "ORDER.json": "564f2e30d991604122bf450ad1c54398c129d2228f5785ee0fcbef4b8c3c5cad",
+    "pre-observation-correction.json": "2b9b41d9cf89c9fb891d5848aeddb25038a2cb0f6584664f98cea7cf0eefb50b",
+    "environment.json": "dca1dd79d8920775f6036d14bc5930f89096914fbd2e2a7a5c36ab66d5911898",
+    "verify_dossier.py.pre-observation": "a5d266b3506c857d2863d55a77b0f89fa0ef74efc5dae1c0f3a5d7f8f0d3e563",
+    "completed-cleanup-receipt.json": "0a3e0bad07308fea74aa8644114fb89a5f4fa8a9cbc6c00f6b691ba16f6c215f",
+    "freeze.py": "6e9876bc7b9a382cf096ba762a4b1958819c54fd52eaebd524f792ba0e1fea02",
+    "shader.json": "6aeaf05e3d098229b27363e80639eddc5bc768458d7c96e8ab89fb5183c941b5",
+    "build.log": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+    "ui.wgsl": "2df8c6754318e54df054be3f438a4eeba0c433034f75470816d0600986e8a52e",
+    "build.py": "76cc94531ad38f19232efc43dee3da3fd2aba942f093f17007248e17f8da60b1",
+    "build-candidate/build.out": "6aa9e00d1f444b573b0b196d82d6a8e003caa735762231f3153dc87f583aaa62",
+    "build-candidate/source.txt": "e185fd1eab3f050c35a63f9bb227a41bd8a62d3dee21205a04a64331c2051563",
+    "build-candidate/test-artifacts.json": "e56ee94be64626cb0933144342c778c6ef2d5433d3fba246edea01f4eea5e813",
+    "build-candidate/build-artifacts.json": "f88a11bc5a355e5c945d2df2f30032153a30d5f7780f6318b8e15a2bf2eedf81",
+    "build-candidate/test.log": "e4c6732e667370a85c14c7681b2770dfe7b1eb0e0c12e2725e0d7a7b83687df8",
+    "build-candidate/build.status.json": "0fc34e38b0669fe15712b03440baf133ae83d86db7ba01972933ba40a90c8acb",
+    "build-candidate/guard-after.json": "4f53cda18c2baa0c0354bb5f9a3ecbe5ed12ab4d8e11ba873c2f11161202b945",
+    "build-candidate/reserve.json": "32a714150e4447a2f3aa8df99abadb45d959a9c57206d7d70f516e0ac78f7368",
+    "build-candidate/toolchain.txt": "2900025046ddf3de47f87dd3d69fbfe380cae61af5fe1ecf31bb89c5f10645c5",
+    "build-candidate/test.status.json": "f17fd608c2de1bed6f9db21f41f1cc48d6407ff254f6e9257e7c0aab2ca10132",
+    "build-candidate/inputs.json": "6aea7de1393703fc16b1094eb6f3a3451c46dc2bc6777ea33bcc8d98f306f003",
+    "build-candidate/environment.json": "e69dc92af1df956c8c69a28c46c53ae4650204fec83ae8e754252927e9e270a9",
+    "build-candidate/test.out": "52ff602bf0410b3ec2cd81b8269e03dc29c94d64940118aedd5536af5fd52243",
+    "build-candidate/build.log": "015099464d8360bdefbac5ea5b71d543fe94a4ef929aadb2441fefda490ba0a2"
+  },
+  "sources": {
+    "candidate": {
+      "worktree": "/home/user/gpui-mask-miss-audit-lab",
+      "compiled_source": "70b75c8c73f0c9b31545c473f190787aabfb1f98",
+      "current_source": "70b75c8c73f0c9b31545c473f190787aabfb1f98"
+    }
+  },
+  "environment_files": {
+    "/usr/lib/x86_64-linux-gnu/libvulkan_lvp.so": "9d69cae2004b16572acca424741109be37c4ffc759c2461af69d75f7d1c6c139",
+    "/usr/lib/x86_64-linux-gnu/libvulkan.so.1.3.275": "e833b010f814b72c6aca0300c8b5f19b6106ffa06c24ddc95a293970c7d6058e",
+    "/usr/share/vulkan/icd.d/lvp_icd.json": "70d49f7fd41a7593a4e283543ed4855c139c700e5c1b31792f56e9576ede2398",
+    "/home/user/zgx-native-profile-lab/comparisons/fonts/DejaVuSans.ttf": "7da195a74c55bef988d0d48f9508bd5d849425c1770dba5d7bfc6ce9ed848954"
+  },
+  "frozen_utc": "2026-10-28T18:16:49.862156+00:00"
+}

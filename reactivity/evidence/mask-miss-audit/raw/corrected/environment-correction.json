@@ -1,0 +1,4 @@
+{
+  "reason": "Initial diagnostic stopped after one idle process: private display :94 had no window manager and xdotool windowactivate failed, process reaped via SIGTERM. This is an execution/environment failure, not a numerical result. Restore owned openbox and run all8 diagnostic processes in a separately frozen cohort; retain original sources, images, logs and guards. No shader, workload, threshold, timing protocol or fixture change. No performance observations have begun.",
+  "window_manager": "_NET_SUPPORTING_WM_CHECK(WINDOW): window id # 0x20011f\n"
+}

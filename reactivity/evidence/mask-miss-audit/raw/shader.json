@@ -1,0 +1,8 @@
+{
+  "sha256": "2df8c6754318e54df054be3f438a4eeba0c433034f75470816d0600986e8a52e",
+  "bytes": 22857,
+  "offset": 1452335,
+  "generated": [
+    "/home/user/gpui-mask-miss-audit-target/release/build/gpui_gpu/1f2320ae5ea7e966/out/ui.wgsl"
+  ]
+}
