@@ -10,30 +10,39 @@ fn copied_overlap_and_outside_insert_remove_material_order_and_overflow_are_exac
         let mut canvas = Canvas::recording(SIZE[0], SIZE[1], Default::default()).unwrap();
         let mut text = TextSystem::bundled().unwrap();
         stage(&mut canvas, &mut text, case, 0).commit();
-        let mut pixels = vec![0; (SIZE[0] * SIZE[1]) as usize];
-        canvas.render_bgrx(&mut pixels).unwrap();
+        let mut pixels = canvas.pixels().to_vec();
         for tick in 1..6 {
             let (damage, plan) = stage(&mut canvas, &mut text, case, tick)
                 .commit_with_scroll_damage(VIEW, offset(tick - 1) - offset(tick));
+            let expected = canvas.pixels().to_vec();
             if let Some(plan) = &plan {
                 let [l, t, r, b] = plan.source();
                 let [x, y, _, _] = plan.destination();
                 let old = pixels.clone();
                 for dy in 0..b - t {
                     for dx in 0..r - l {
-                        pixels[((y + dy) * SIZE[0] + x + dx) as usize] =
-                            old[((t + dy) * SIZE[0] + l + dx) as usize];
+                        let from = (((t + dy) * SIZE[0] + l + dx) * 4) as usize;
+                        let to = (((y + dy) * SIZE[0] + x + dx) * 4) as usize;
+                        pixels[to..to + 4].copy_from_slice(&old[from..from + 4]);
                     }
                 }
                 assert!(plan.repairs().count() <= 256);
-                for repair in plan.repairs() {
-                    canvas.render_bgrx_region(&mut pixels, repair).unwrap();
-                }
-            } else {
-                canvas.render_bgrx_region(&mut pixels, damage).unwrap();
             }
-            let mut expected = vec![0; pixels.len()];
-            canvas.render_bgrx(&mut expected).unwrap();
+            // Copy precisely the certified repairs from the complete CPU
+            // oracle. Unlike the BGRX tile API, this accepts transparent pixels
+            // and cannot hide missing repair pixels through tile expansion.
+            let repairs: Vec<_> = plan
+                .as_ref()
+                .map_or_else(|| vec![damage], |p| p.repairs().collect());
+            for repair in repairs {
+                if let Some([l, t, r, b]) = repair.bounds() {
+                    for y in t..b {
+                        let from = ((y * SIZE[0] + l) * 4) as usize;
+                        let to = ((y * SIZE[0] + r) * 4) as usize;
+                        pixels[from..to].copy_from_slice(&expected[from..to]);
+                    }
+                }
+            }
             assert!(pixels == expected, "outside case={case}, tick={tick}");
             if ![6, 8, 9].contains(&case) {
                 assert!(plan.is_some(), "supported outside case={case}, tick={tick}");
