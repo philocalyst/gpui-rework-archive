@@ -1,0 +1,32 @@
+{
+  "measured_processes": 180,
+  "measured_samples": 92160,
+  "warmups": 11520,
+  "quantile": "nearest rank ceil(p*n)-1",
+  "primary_sparse_median_gate_pass": true,
+  "median_regression_reading_pass": true,
+  "per_round_regression_reading_pass": false,
+  "regression_violations": [
+    {
+      "scene": "sparse",
+      "n": 1,
+      "round": 3,
+      "p95_ratio": 1.1113827349121468
+    },
+    {
+      "scene": "sparse",
+      "n": 9,
+      "round": 0,
+      "p95_ratio": 1.2463716606943498
+    },
+    {
+      "scene": "overlap",
+      "n": 1,
+      "round": 3,
+      "p95_ratio": 1.0861208696094904
+    }
+  ],
+  "verdict": "not admitted under conservative per-round regression reading",
+  "aggregation_note": "Prereg explicitly assigns median per-round ratios to sparse target limits, but not explicitly to regression clauses. Median-only reading passes; three individual tiny pairs exceed1.05. Both are retained; no post-result choice of the lenient interpretation, no rerun or sample removal.",
+  "scope": "serialized model binding patch through JSON/IPC/Vulkan completion and owner acknowledgement; software Vulkan; not production GPUI, scanout, hardware or ZGX latency"
+}

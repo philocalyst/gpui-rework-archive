@@ -1,0 +1,9 @@
+{
+  "args": [
+    "/home/user/gpui-preserved-test-binaries/97bb3d73f5c1ec124aea21125a318e36564843646aa90c54a51e29a944e03370",
+    "/home/user/gpui-display-hot-cost-evidence/initial/public"
+  ],
+  "exit": 0,
+  "expected": 0,
+  "elapsed_seconds": 0.11589956283569336
+}

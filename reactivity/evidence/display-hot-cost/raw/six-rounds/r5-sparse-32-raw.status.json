@@ -1,0 +1,16 @@
+{
+  "args": [
+    "python3",
+    "/home/user/gpui-display-hot-cost-lab/reactivity/crates/display-span-lab/model/cost_owner.py",
+    "/home/user/gpui-preserved-test-binaries/eb785e3fa083130aa1d4dd056ccc606d611b5e533ad1bbe783116fc7e4a97cb2",
+    "/home/user/gpui-display-hot-cost-evidence/initial/public/sparse/32",
+    "raw",
+    "/home/user/gpui-display-hot-cost-evidence/six-rounds/r5-sparse-32-raw",
+    "timing"
+  ],
+  "exit": 0,
+  "started_unix_seconds": 1793225099.8584661,
+  "elapsed_seconds": 0.7157564163208008,
+  "load_before": "1.34 0.97 0.70 2/755 760899",
+  "free_disk_after": 8990085120
+}

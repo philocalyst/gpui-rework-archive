@@ -1,0 +1,6 @@
+{
+  "VK_ICD_FILENAMES": "/usr/share/vulkan/icd.d/lvp_icd.json",
+  "LP_NUM_THREADS": "4",
+  "XDG_RUNTIME_DIR": "/home/user/gpui-xdg",
+  "PYTHONDONTWRITEBYTECODE": "1"
+}

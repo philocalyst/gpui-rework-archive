@@ -1,0 +1,10 @@
+{
+  "source": "64240a0ad892d99e5f0a5604a73b1042a953b116",
+  "worker": {
+    "preserved": "/home/user/gpui-preserved-test-binaries/eb785e3fa083130aa1d4dd056ccc606d611b5e533ad1bbe783116fc7e4a97cb2",
+    "sha256": "eb785e3fa083130aa1d4dd056ccc606d611b5e533ad1bbe783116fc7e4a97cb2",
+    "bytes": 6945240
+  },
+  "build_source": "66182d8bcf7f6858686b554dd7c42da97a304692",
+  "timing_script_sha": "17504bdaa1c055693f2c71a4637dc4d29d2350dba51e0d588fb6b28ecc9879fc"
+}

@@ -1,0 +1,7 @@
+{
+  "ready": true,
+  "prior_exact_endpoint_preflights": 30,
+  "logging_preflights": 3,
+  "source": "64240a0ad892d99e5f0a5604a73b1042a953b116",
+  "worker_sha": "eb785e3fa083130aa1d4dd056ccc606d611b5e533ad1bbe783116fc7e4a97cb2"
+}

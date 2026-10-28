@@ -1,0 +1,16 @@
+{
+  "args": [
+    "python3",
+    "/home/user/gpui-display-hot-cost-lab/reactivity/crates/display-span-lab/model/cost_owner.py",
+    "/home/user/gpui-preserved-test-binaries/eb785e3fa083130aa1d4dd056ccc606d611b5e533ad1bbe783116fc7e4a97cb2",
+    "/home/user/gpui-display-hot-cost-evidence/initial/public/overlap/1",
+    "control",
+    "/home/user/gpui-display-hot-cost-evidence/six-rounds/r3-overlap-1-control",
+    "timing"
+  ],
+  "exit": 0,
+  "started_unix_seconds": 1793224990.8357842,
+  "elapsed_seconds": 0.6155517101287842,
+  "load_before": "0.92 0.76 0.60 3/716 758255",
+  "free_disk_after": 9020641280
+}
