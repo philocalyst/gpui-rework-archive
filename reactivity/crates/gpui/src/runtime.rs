@@ -3960,7 +3960,7 @@ impl<M: View + 'static> Runtime<M> {
                     window: self.sites.namespace(),
                     sequence: self.presented_sequence.expect("valid presented image"),
                 };
-                if let Some(prepared) = &self.prepared {
+                if let Some(prepared) = self.prepared.as_ref().filter(|_| false) {
                     // The canvas is C while the external image is still P.
                     // Preserve D(P,C) before replacing it with D(P,N).
                     let prior = self
