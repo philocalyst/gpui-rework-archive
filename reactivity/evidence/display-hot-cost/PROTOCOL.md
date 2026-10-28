@@ -37,3 +37,10 @@ sparse cases; no>1.05 p95 regression for tiny1/9/32 with the selected fallback o
 trimming, workload reduction, concurrent helpers or post-result fallback changes.
 A failure is a cost rejection under this endpoint. B remains a separate next
 branch with original record encoding; do not combine yet.
+
+Completed warmup/measured/preflight rows are line-buffered to events.jsonl after
+the timed interval; partial-case observations survive a later failure. Logging
+I/O between intervals is explicit harness overhead, not subtracted from any
+sample. The worker is reaped on normal owner exit or Python exception. This
+logging correction precedes all measured runs; preflight numerical/worker code
+and the qualified A/radix implementations are unchanged.
