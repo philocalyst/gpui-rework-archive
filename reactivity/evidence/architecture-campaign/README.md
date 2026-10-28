@@ -559,3 +559,9 @@ GPU qualification underway; no adoption or ZGX claim.
 Sample-partitions positive checkpoint **a4204460** verifies354 tests,Clippy,
 336 independent exact images and96-frame public refinement/replay checks.
 Horizontal-cut negative control building; native admission still pending.
+
+
+Sample-partitions admission **a0086d6d** adds a3855-byte horizontal-refinement
+counterexample to354 tests,Clippy,336 independent and96 scalar-oracle frames.
+Host code unchanged; inherited selection audit explicitly scoped. Native
+0b60a963 building; performance remains unmeasured.

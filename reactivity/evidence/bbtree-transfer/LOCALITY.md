@@ -811,3 +811,14 @@ ELFs and generated shader bytes to maintain8GiB reserve. Horizontal-cut mutant
 is building separately. Dynamic representative indexing and extra control may
 change LLVM/GPU register spilling; no claim that fewer logical blends guarantee
 faster execution.
+
+
+Sample-partitions early admission **a0086d6dd1ae8cd4e4869e88851885b03c73989b**
+verifies734 files,64 canonicalELF identities,354 tests,Clippy and336 independent
+exact frames plus96-frame scalar-oracle adversary. Horizontal-cut mutant
+**7bcd9c311a093776cc7b588a2e49e211be01a1f1** fails publicproof-toggle:
+3855 bytes differ,first432 expected76actual88. Disabled-proof bytes independently
+equal originaloracle and candidate. All host/workload bytes matchb817; inherited
+selection audit2520aeec is reverified without relabeling its old shader/counts
+as new execution counters. Uninstrumented native **0b60a96399b381c6fda0a4706b05e08f85dd9396**
+is building,seed20261121. No timing/full-cost/adoption claim.
