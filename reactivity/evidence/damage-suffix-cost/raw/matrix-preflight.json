@@ -1,0 +1,796 @@
+{
+  "artifacts": {
+    "baseline": {
+      "compiled_source": "41a67473a0177fbb17df1f7b8e2f2f36dd6940f6",
+      "current_source": "a34b61c86fbbc6906d834e071bdb7c4fb70aac8d",
+      "sha256": "3383fe53b623097932793af4defc0b47412f59e868a85c61d57fb470fd1bfef4"
+    },
+    "candidate": {
+      "compiled_source": "df8ca59f69813e7dd05711fead98ed4278f1688d",
+      "current_source": "380db598cdbed2dd81c5a41745473c40a876f148",
+      "sha256": "a430b0749c495084c0be04e22bfac23881cac9fdd825248faea63e4d5ba6c07c"
+    }
+  },
+  "compiler_environment": {
+    "baseline": {
+      "RUSTUP_HOME": "/usr/local/rustup"
+    },
+    "candidate": {
+      "RUSTUP_HOME": "/usr/local/rustup"
+    }
+  },
+  "allocation_gate": {
+    "all_pass": true,
+    "gates": {
+      "scroll": {
+        "requests": {
+          "reference": 468.5,
+          "candidate": 468.5,
+          "passed": true
+        },
+        "requested_bytes": {
+          "reference": 277702.0,
+          "candidate": 277702.0,
+          "passed": true
+        },
+        "net_bytes": {
+          "reference": 304.0,
+          "candidate": 304.0,
+          "passed": true
+        },
+        "peak_bytes": {
+          "reference": 54532.0,
+          "candidate": 54532.0,
+          "passed": true
+        }
+      },
+      "both": {
+        "requests": {
+          "reference": 553.5,
+          "candidate": 553.5,
+          "passed": true
+        },
+        "requested_bytes": {
+          "reference": 358360.0,
+          "candidate": 358360.0,
+          "passed": true
+        },
+        "net_bytes": {
+          "reference": 304.0,
+          "candidate": 304.0,
+          "passed": true
+        },
+        "peak_bytes": {
+          "reference": 74789.0,
+          "candidate": 74789.0,
+          "passed": true
+        }
+      },
+      "stream": {
+        "requests": {
+          "reference": 219.0,
+          "candidate": 219.0,
+          "passed": true
+        },
+        "requested_bytes": {
+          "reference": 130707.0,
+          "candidate": 130707.0,
+          "passed": true
+        },
+        "net_bytes": {
+          "reference": 304.0,
+          "candidate": 304.0,
+          "passed": true
+        },
+        "peak_bytes": {
+          "reference": 43501.0,
+          "candidate": 43501.0,
+          "passed": true
+        }
+      },
+      "stream-owner": {
+        "requests": {
+          "reference": 379.0,
+          "candidate": 379.0,
+          "passed": true
+        },
+        "requested_bytes": {
+          "reference": 226636.0,
+          "candidate": 226636.0,
+          "passed": true
+        },
+        "net_bytes": {
+          "reference": 304.0,
+          "candidate": 304.0,
+          "passed": true
+        },
+        "peak_bytes": {
+          "reference": 43501.0,
+          "candidate": 43501.0,
+          "passed": true
+        }
+      },
+      "fractional": {
+        "requests": {
+          "reference": 573.0,
+          "candidate": 573.0,
+          "passed": true
+        },
+        "requested_bytes": {
+          "reference": 338663.0,
+          "candidate": 338663.0,
+          "passed": true
+        },
+        "net_bytes": {
+          "reference": 304.0,
+          "candidate": 304.0,
+          "passed": true
+        },
+        "peak_bytes": {
+          "reference": 54838.0,
+          "candidate": 54838.0,
+          "passed": true
+        }
+      },
+      "flat-tiny": {
+        "requests": {
+          "reference": 69.0,
+          "candidate": 69.0,
+          "passed": true
+        },
+        "requested_bytes": {
+          "reference": 10135.0,
+          "candidate": 10135.0,
+          "passed": true
+        },
+        "net_bytes": {
+          "reference": 0.0,
+          "candidate": 0.0,
+          "passed": true
+        },
+        "peak_bytes": {
+          "reference": 6353.0,
+          "candidate": 6353.0,
+          "passed": true
+        }
+      },
+      "flat-full": {
+        "requests": {
+          "reference": 69.0,
+          "candidate": 69.0,
+          "passed": true
+        },
+        "requested_bytes": {
+          "reference": 10135.0,
+          "candidate": 10135.0,
+          "passed": true
+        },
+        "net_bytes": {
+          "reference": 0.0,
+          "candidate": 0.0,
+          "passed": true
+        },
+        "peak_bytes": {
+          "reference": 6353.0,
+          "candidate": 6353.0,
+          "passed": true
+        }
+      },
+      "list-tiny": {
+        "requests": {
+          "reference": 216.0,
+          "candidate": 216.0,
+          "passed": true
+        },
+        "requested_bytes": {
+          "reference": 61457.0,
+          "candidate": 61457.0,
+          "passed": true
+        },
+        "net_bytes": {
+          "reference": 312.0,
+          "candidate": 312.0,
+          "passed": true
+        },
+        "peak_bytes": {
+          "reference": 12093.0,
+          "candidate": 12093.0,
+          "passed": true
+        }
+      },
+      "list-flat": {
+        "requests": {
+          "reference": 267.5,
+          "candidate": 267.5,
+          "passed": true
+        },
+        "requested_bytes": {
+          "reference": 108326.0,
+          "candidate": 108326.0,
+          "passed": true
+        },
+        "net_bytes": {
+          "reference": 304.0,
+          "candidate": 304.0,
+          "passed": true
+        },
+        "peak_bytes": {
+          "reference": 22104.0,
+          "candidate": 22104.0,
+          "passed": true
+        }
+      },
+      "exposure": {
+        "requests": {
+          "reference": 44.0,
+          "candidate": 44.0,
+          "passed": true
+        },
+        "requested_bytes": {
+          "reference": 8024.0,
+          "candidate": 8024.0,
+          "passed": true
+        },
+        "net_bytes": {
+          "reference": 0.0,
+          "candidate": 0.0,
+          "passed": true
+        },
+        "peak_bytes": {
+          "reference": 5218.0,
+          "candidate": 5218.0,
+          "passed": true
+        }
+      },
+      "text-0-1-source": {
+        "requests": {
+          "reference": 131.0,
+          "candidate": 131.0,
+          "passed": true
+        },
+        "requested_bytes": {
+          "reference": 17153.0,
+          "candidate": 17153.0,
+          "passed": true
+        },
+        "net_bytes": {
+          "reference": 304.0,
+          "candidate": 304.0,
+          "passed": true
+        },
+        "peak_bytes": {
+          "reference": 8237.0,
+          "candidate": 8237.0,
+          "passed": true
+        }
+      },
+      "text-0-1-owner": {
+        "requests": {
+          "reference": 149.0,
+          "candidate": 149.0,
+          "passed": true
+        },
+        "requested_bytes": {
+          "reference": 22657.0,
+          "candidate": 22657.0,
+          "passed": true
+        },
+        "net_bytes": {
+          "reference": 304.0,
+          "candidate": 304.0,
+          "passed": true
+        },
+        "peak_bytes": {
+          "reference": 8237.0,
+          "candidate": 8237.0,
+          "passed": true
+        }
+      },
+      "text-0-2-source": {
+        "requests": {
+          "reference": 170.0,
+          "candidate": 170.0,
+          "passed": true
+        },
+        "requested_bytes": {
+          "reference": 29759.0,
+          "candidate": 29759.0,
+          "passed": true
+        },
+        "net_bytes": {
+          "reference": 304.0,
+          "candidate": 304.0,
+          "passed": true
+        },
+        "peak_bytes": {
+          "reference": 9149.0,
+          "candidate": 9149.0,
+          "passed": true
+        }
+      },
+      "text-0-2-owner": {
+        "requests": {
+          "reference": 178.0,
+          "candidate": 178.0,
+          "passed": true
+        },
+        "requested_bytes": {
+          "reference": 34659.0,
+          "candidate": 34659.0,
+          "passed": true
+        },
+        "net_bytes": {
+          "reference": 304.0,
+          "candidate": 304.0,
+          "passed": true
+        },
+        "peak_bytes": {
+          "reference": 9149.0,
+          "candidate": 9149.0,
+          "passed": true
+        }
+      },
+      "text-0-4-source": {
+        "requests": {
+          "reference": 254.0,
+          "candidate": 254.0,
+          "passed": true
+        },
+        "requested_bytes": {
+          "reference": 57851.0,
+          "candidate": 57851.0,
+          "passed": true
+        },
+        "net_bytes": {
+          "reference": 304.0,
+          "candidate": 304.0,
+          "passed": true
+        },
+        "peak_bytes": {
+          "reference": 10237.0,
+          "candidate": 10237.0,
+          "passed": true
+        }
+      },
+      "text-0-4-owner": {
+        "requests": {
+          "reference": 209.0,
+          "candidate": 209.0,
+          "passed": true
+        },
+        "requested_bytes": {
+          "reference": 44030.0,
+          "candidate": 44030.0,
+          "passed": true
+        },
+        "net_bytes": {
+          "reference": 304.0,
+          "candidate": 304.0,
+          "passed": true
+        },
+        "peak_bytes": {
+          "reference": 10237.0,
+          "candidate": 10237.0,
+          "passed": true
+        }
+      },
+      "text-25-1-source": {
+        "requests": {
+          "reference": 131.0,
+          "candidate": 131.0,
+          "passed": true
+        },
+        "requested_bytes": {
+          "reference": 17153.0,
+          "candidate": 17153.0,
+          "passed": true
+        },
+        "net_bytes": {
+          "reference": 304.0,
+          "candidate": 304.0,
+          "passed": true
+        },
+        "peak_bytes": {
+          "reference": 8237.0,
+          "candidate": 8237.0,
+          "passed": true
+        }
+      },
+      "text-25-1-owner": {
+        "requests": {
+          "reference": 179.0,
+          "candidate": 179.0,
+          "passed": true
+        },
+        "requested_bytes": {
+          "reference": 65536.0,
+          "candidate": 65536.0,
+          "passed": true
+        },
+        "net_bytes": {
+          "reference": 304.0,
+          "candidate": 304.0,
+          "passed": true
+        },
+        "peak_bytes": {
+          "reference": 23648.0,
+          "candidate": 23648.0,
+          "passed": true
+        }
+      },
+      "text-25-2-source": {
+        "requests": {
+          "reference": 179.0,
+          "candidate": 179.0,
+          "passed": true
+        },
+        "requested_bytes": {
+          "reference": 46683.0,
+          "candidate": 46683.0,
+          "passed": true
+        },
+        "net_bytes": {
+          "reference": 304.0,
+          "candidate": 304.0,
+          "passed": true
+        },
+        "peak_bytes": {
+          "reference": 18588.0,
+          "candidate": 18588.0,
+          "passed": true
+        }
+      },
+      "text-25-2-owner": {
+        "requests": {
+          "reference": 216.0,
+          "candidate": 216.0,
+          "passed": true
+        },
+        "requested_bytes": {
+          "reference": 91528.0,
+          "candidate": 91528.0,
+          "passed": true
+        },
+        "net_bytes": {
+          "reference": 304.0,
+          "candidate": 304.0,
+          "passed": true
+        },
+        "peak_bytes": {
+          "reference": 24064.0,
+          "candidate": 24064.0,
+          "passed": true
+        }
+      },
+      "text-25-4-source": {
+        "requests": {
+          "reference": 275.0,
+          "candidate": 275.0,
+          "passed": true
+        },
+        "requested_bytes": {
+          "reference": 106511.0,
+          "candidate": 106511.0,
+          "passed": true
+        },
+        "net_bytes": {
+          "reference": 304.0,
+          "candidate": 304.0,
+          "passed": true
+        },
+        "peak_bytes": {
+          "reference": 24252.0,
+          "candidate": 24252.0,
+          "passed": true
+        }
+      },
+      "text-25-4-owner": {
+        "requests": {
+          "reference": 243.0,
+          "candidate": 243.0,
+          "passed": true
+        },
+        "requested_bytes": {
+          "reference": 100548.0,
+          "candidate": 100548.0,
+          "passed": true
+        },
+        "net_bytes": {
+          "reference": 304.0,
+          "candidate": 304.0,
+          "passed": true
+        },
+        "peak_bytes": {
+          "reference": 25949.0,
+          "candidate": 25949.0,
+          "passed": true
+        }
+      },
+      "text-1000-1-source": {
+        "requests": {
+          "reference": 131.0,
+          "candidate": 131.0,
+          "passed": true
+        },
+        "requested_bytes": {
+          "reference": 17153.0,
+          "candidate": 17153.0,
+          "passed": true
+        },
+        "net_bytes": {
+          "reference": 304.0,
+          "candidate": 304.0,
+          "passed": true
+        },
+        "peak_bytes": {
+          "reference": 8237.0,
+          "candidate": 8237.0,
+          "passed": true
+        }
+      },
+      "text-1000-1-owner": {
+        "requests": {
+          "reference": 1159.0,
+          "candidate": 1159.0,
+          "passed": true
+        },
+        "requested_bytes": {
+          "reference": 1664070.0,
+          "candidate": 1664070.0,
+          "passed": true
+        },
+        "net_bytes": {
+          "reference": 304.0,
+          "candidate": 304.0,
+          "passed": true
+        },
+        "peak_bytes": {
+          "reference": 814144.0,
+          "candidate": 814144.0,
+          "passed": true
+        }
+      },
+      "text-1000-2-source": {
+        "requests": {
+          "reference": 193.0,
+          "candidate": 193.0,
+          "passed": true
+        },
+        "requested_bytes": {
+          "reference": 480531.0,
+          "candidate": 480531.0,
+          "passed": true
+        },
+        "net_bytes": {
+          "reference": 304.0,
+          "candidate": 304.0,
+          "passed": true
+        },
+        "peak_bytes": {
+          "reference": 316110.0,
+          "candidate": 316110.0,
+          "passed": true
+        }
+      },
+      "text-1000-2-owner": {
+        "requests": {
+          "reference": 1211.0,
+          "candidate": 1211.0,
+          "passed": true
+        },
+        "requested_bytes": {
+          "reference": 2127078.0,
+          "candidate": 2127078.0,
+          "passed": true
+        },
+        "net_bytes": {
+          "reference": 304.0,
+          "candidate": 304.0,
+          "passed": true
+        },
+        "peak_bytes": {
+          "reference": 814560.0,
+          "candidate": 814560.0,
+          "passed": true
+        }
+      },
+      "text-1000-4-source": {
+        "requests": {
+          "reference": 317.0,
+          "candidate": 317.0,
+          "passed": true
+        },
+        "requested_bytes": {
+          "reference": 1408055.0,
+          "candidate": 1408055.0,
+          "passed": true
+        },
+        "net_bytes": {
+          "reference": 304.0,
+          "candidate": 304.0,
+          "passed": true
+        },
+        "peak_bytes": {
+          "reference": 470382.0,
+          "candidate": 470382.0,
+          "passed": true
+        }
+      },
+      "text-1000-4-owner": {
+        "requests": {
+          "reference": 1237.0,
+          "candidate": 1237.0,
+          "passed": true
+        },
+        "requested_bytes": {
+          "reference": 2130626.0,
+          "candidate": 2130626.0,
+          "passed": true
+        },
+        "net_bytes": {
+          "reference": 304.0,
+          "candidate": 304.0,
+          "passed": true
+        },
+        "peak_bytes": {
+          "reference": 815392.0,
+          "candidate": 815392.0,
+          "passed": true
+        }
+      }
+    },
+    "source_sha256": "6891f397bb45a205c04afa717e747fac678f80c956d8313991e782fbcfc2c161",
+    "scope": "Invoking-thread requests/requested/net/peak bytes: four warm updates after16 warmups. Not process/driver/GPU allocations. Cold costs separately retained."
+  },
+  "headers": {
+    "baseline": {
+      "RuntimeUnit": 1824,
+      "Prepared": 40,
+      "TextPatch": 96,
+      "TextResources": 168,
+      "SceneDamage": 40,
+      "Node": 24,
+      "Presented": 64,
+      "El": 184,
+      "Draft": 160,
+      "Text": 24,
+      "ListRow": 32,
+      "Fanout": 32,
+      "Dest": 4,
+      "destination_capacity": 4,
+      "destination_capacity_bytes": 16,
+      "Metadata": 272,
+      "Declared": 24,
+      "TextSlot": 16,
+      "Sheet": 96,
+      "Row": 24,
+      "ListInfo": 16,
+      "Extra": 56,
+      "Annotations": 48,
+      "ListSpec": 40,
+      "AnnotationDraft": 56,
+      "ListPlan": 144,
+      "ListDraft": 184,
+      "allocations": 4,
+      "bytes": 144,
+      "Renderer": 888,
+      "Stats": 200,
+      "GpuSurface": 1040,
+      "NativeHost": 768,
+      "Canvas": 464,
+      "PreparedScene": 56
+    },
+    "candidate": {
+      "RuntimeUnit": 1824,
+      "Prepared": 40,
+      "TextPatch": 96,
+      "TextResources": 168,
+      "SceneDamage": 40,
+      "Node": 24,
+      "Presented": 64,
+      "El": 184,
+      "Draft": 160,
+      "Text": 24,
+      "ListRow": 32,
+      "Fanout": 32,
+      "Dest": 4,
+      "destination_capacity": 4,
+      "destination_capacity_bytes": 16,
+      "Metadata": 272,
+      "Declared": 24,
+      "TextSlot": 16,
+      "Sheet": 96,
+      "Row": 24,
+      "ListInfo": 16,
+      "Extra": 56,
+      "Annotations": 48,
+      "ListSpec": 40,
+      "AnnotationDraft": 56,
+      "ListPlan": 144,
+      "ListDraft": 184,
+      "allocations": 4,
+      "bytes": 144,
+      "Renderer": 888,
+      "Stats": 200,
+      "GpuSurface": 1040,
+      "NativeHost": 768,
+      "Canvas": 464,
+      "PreparedScene": 56
+    }
+  },
+  "free_bytes": 9812508672,
+  "processes": "    PID     ELAPSED %CPU COMMAND\n      1  1-12:12:11  0.0 systemd\n      2  1-12:12:11  0.0 kthreadd\n      3  1-12:12:11  0.0 pool_workqueue_release\n      4  1-12:12:11  0.0 kworker/R-rcu_g\n      5  1-12:12:11  0.0 kworker/R-rcu_p\n      6  1-12:12:11  0.0 kworker/R-slub_\n      7  1-12:12:11  0.0 kworker/R-netns\n      9  1-12:12:11  0.0 kworker/0:0H-events_highpri\n     12  1-12:12:11  0.0 kworker/R-mm_pe\n     13  1-12:12:11  0.0 rcu_tasks_kthread\n     14  1-12:12:11  0.0 rcu_tasks_rude_kthread\n     15  1-12:12:11  0.0 rcu_tasks_trace_kthread\n     16  1-12:12:11  0.0 ksoftirqd/0\n     17  1-12:12:11  0.0 rcu_preempt\n     18  1-12:12:11  0.0 migration/0\n     19  1-12:12:11  0.0 idle_inject/0\n     20  1-12:12:11  0.0 cpuhp/0\n     21  1-12:12:11  0.0 cpuhp/1\n     22  1-12:12:11  0.0 idle_inject/1\n     23  1-12:12:11  0.0 migration/1\n     24  1-12:12:11  0.0 ksoftirqd/1\n     26  1-12:12:11  0.0 kworker/1:0H-kblockd\n     27  1-12:12:11  0.0 cpuhp/2\n     28  1-12:12:11  0.0 idle_inject/2\n     29  1-12:12:11  0.0 migration/2\n     30  1-12:12:11  0.0 ksoftirqd/2\n     32  1-12:12:11  0.0 kworker/2:0H-events_highpri\n     33  1-12:12:11  0.0 cpuhp/3\n     34  1-12:12:11  0.0 idle_inject/3\n     35  1-12:12:11  0.0 migration/3\n     36  1-12:12:11  0.0 ksoftirqd/3\n     38  1-12:12:11  0.0 kworker/3:0H-events_highpri\n     39  1-12:12:11  0.0 cpuhp/4\n     40  1-12:12:11  0.0 idle_inject/4\n     41  1-12:12:11  0.0 migration/4\n     42  1-12:12:11  0.0 ksoftirqd/4\n     44  1-12:12:11  0.0 kworker/4:0H-events_highpri\n     45  1-12:12:11  0.0 cpuhp/5\n     46  1-12:12:11  0.0 idle_inject/5\n     47  1-12:12:11  0.0 migration/5\n     48  1-12:12:11  0.0 ksoftirqd/5\n     50  1-12:12:11  0.0 kworker/5:0H-events_highpri\n     51  1-12:12:11  0.0 cpuhp/6\n     52  1-12:12:11  0.0 idle_inject/6\n     53  1-12:12:11  0.0 migration/6\n     54  1-12:12:11  0.0 ksoftirqd/6\n     56  1-12:12:11  0.0 kworker/6:0H-events_highpri\n     57  1-12:12:11  0.0 cpuhp/7\n     58  1-12:12:11  0.0 idle_inject/7\n     59  1-12:12:11  0.0 migration/7\n     60  1-12:12:11  0.0 ksoftirqd/7\n     62  1-12:12:11  0.0 kworker/7:0H-events_highpri\n     63  1-12:12:11  0.0 kdevtmpfs\n     64  1-12:12:11  0.0 kworker/R-inet_\n     65  1-12:12:11  0.0 kauditd\n     66  1-12:12:11  0.0 khungtaskd\n     67  1-12:12:11  0.0 oom_reaper\n     69  1-12:12:11  0.0 kworker/R-write\n     71  1-12:12:11  0.8 kcompactd0\n     72  1-12:12:11  0.0 ksmd\n     73  1-12:12:11  0.0 khugepaged\n     74  1-12:12:11  0.0 kworker/R-kinte\n     75  1-12:12:11  0.0 kworker/R-kbloc\n     76  1-12:12:11  0.0 kworker/R-blkcg\n     79  1-12:12:11  0.0 kworker/R-tpm_d\n     80  1-12:12:11  0.0 kworker/R-ata_s\n     81  1-12:12:11  0.0 kworker/R-md\n     82  1-12:12:11  0.0 kworker/R-md_bi\n     83  1-12:12:11  0.0 kworker/R-edac-\n     84  1-12:12:11  0.0 kworker/R-devfr\n     85  1-12:12:11  0.0 watchdogd\n     87  1-12:12:11  0.0 kworker/R-quota\n     88  1-12:12:11  0.0 kworker/0:1H-kblockd\n     89  1-12:12:11  0.4 kswapd0\n     90  1-12:12:11  0.0 ecryptfs-kthread\n     91  1-12:12:11  0.0 kworker/R-kthro\n     92  1-12:12:11  0.0 irq/48-ACPI:Ged\n     93  1-12:12:11  0.0 kworker/R-acpi_\n     94  1-12:12:11  0.0 kworker/R-mld\n     95  1-12:12:11  0.0 kworker/R-ipv6_\n    102  1-12:12:11  0.0 kworker/R-kstrp\n    106  1-12:12:11  0.0 kworker/u17:0\n    111  1-12:12:11  0.0 kworker/R-crypt\n    121  1-12:12:11  0.0 kworker/R-charg\n    147  1-12:12:11  0.0 kworker/3:1H-kblockd\n    150  1-12:12:11  0.0 kworker/5:1H-kblockd\n    152  1-12:12:11  0.0 kworker/1:1H\n    168  1-12:12:11  0.0 kworker/4:1H-kblockd\n    169  1-12:12:11  0.0 kworker/6:1H-kblockd\n    170  1-12:12:11  0.0 kworker/2:1H-kblockd\n    171  1-12:12:11  0.0 kworker/7:1H-kblockd\n    196  1-12:12:11  0.0 hwrng\n    239  1-12:12:10  0.0 kworker/R-raid5\n    278  1-12:12:09  0.0 jbd2/vda1-8\n    279  1-12:12:09  0.0 kworker/R-ext4-\n    352  1-12:12:09  0.0 systemd-journal\n    388  1-12:12:09  0.0 kworker/R-kmpat\n    389  1-12:12:09  0.0 kworker/R-kmpat\n    391  1-12:12:09  0.0 multipathd\n    438  1-12:12:09  0.0 systemd-udevd\n    439  1-12:12:09  0.0 psimon\n    660  1-12:12:09  0.0 systemd-timesyn\n    809  1-12:12:08  0.0 systemd-network\n    814  1-12:12:08  0.0 kworker/R-cfg80\n    910  1-12:12:04  0.0 accounts-daemon\n    913  1-12:12:04  0.0 avahi-daemon\n    914  1-12:12:04  0.0 dbus-daemon\n    918  1-12:12:04  0.0 gnome-remote-de\n    939  1-12:12:04  0.0 polkitd\n    944  1-12:12:04  0.0 power-profiles-\n    970  1-12:12:04  0.0 switcheroo-cont\n    975  1-12:12:04  0.0 systemd-logind\n    976  1-12:12:04  0.0 udisksd\n   1011  1-12:12:04  0.0 avahi-daemon\n   1053  1-12:12:04  0.0 rsyslogd\n   1061  1-12:12:04  0.0 NetworkManager\n   1063  1-12:12:04  0.0 wpa_supplicant\n   1102  1-12:12:04  0.0 ModemManager\n   1278  1-12:12:04  0.0 epmd\n   1285  1-12:12:04  0.1 containerd\n   1291  1-12:12:04  0.0 cron\n   1293  1-12:12:04  0.0 atd\n   1306  1-12:12:04  0.0 agetty\n   1312  1-12:12:04  0.0 agetty\n   1352  1-12:12:04  0.0 sshd\n   1357  1-12:12:04  0.0 dockerd\n   1436  1-12:12:03  0.0 systemd\n   1437  1-12:12:03  0.0 (sd-pam)\n   1448  1-12:12:03  0.0 pipewire\n   1449  1-12:12:03  0.0 pipewire\n   1450  1-12:12:03  0.0 wireplumber\n   1451  1-12:12:03  0.0 pipewire-pulse\n   1466  1-12:12:03  0.0 dbus-daemon\n   1536  1-12:12:03  0.0 rtkit-daemon\n   2156  1-12:12:01  0.0 upowerd\n   2158  1-12:12:01  0.0 kworker/R-tls-s\n   2400  1-12:12:01  0.0 gvfsd\n   2408  1-12:12:01  0.0 gvfsd-fuse\n   2412  1-12:12:01  0.0 at-spi-bus-laun\n   2424  1-12:12:01  0.0 dbus-daemon\n   2612  1-12:12:01  0.0 gnome-keyring-d\n   3067  1-12:11:59  0.0 colord\n   3124  1-12:11:59  0.0 dconf-service\n   3133  1-12:11:59  0.0 kworker/R-wg-cr\n   3159  1-12:11:59  0.0 napi/wg0-0\n   3168  1-12:11:59  0.0 uuidd\n   3274  1-12:11:59  0.0 obexd\n   3360  1-12:11:59  0.0 gvfs-udisks2-vo\n   3378  1-12:11:59  0.0 gvfs-gphoto2-vo\n   3446  1-12:11:59  0.0 gvfs-afc-volume\n   3503  1-12:11:58  0.0 gvfs-goa-volume\n   3508  1-12:11:58  0.0 goa-daemon\n   3517  1-12:11:58  0.0 goa-identity-se\n   3524  1-12:11:58  0.0 gvfs-mtp-volume\n   3533  1-12:11:58  0.0 gvfsd-trash\n   3544  1-12:11:58  0.0 evolution-sourc\n   3554  1-12:11:58  0.0 gvfsd-metadata\n   3678  1-12:11:57  0.0 evolution-calen\n   3692  1-12:11:57  0.0 evolution-addre\n  12030  1-12:10:51  0.0 systemd-resolve\n  12947  1-12:10:50  0.0 pulseaudio\n  13569  1-12:10:49  0.0 xdg-desktop-por\n  13578  1-12:10:49  0.0 xdg-document-po\n  13582  1-12:10:49  0.0 xdg-permission-\n  13590  1-12:10:49  0.0 fusermount3\n  14575  1-12:10:46  0.0 socat\n  17295  1-12:10:18  0.9 ascii-lazyfs\n  18893  1-12:10:13  2.2 zeron\n  19024  1-12:10:13  0.0 lightdm\n  19036  1-12:10:13  0.0 Xorg\n  19234  1-12:10:11  0.0 lightdm\n  19291  1-12:10:11  0.0 dbus-run-sessio\n  19301  1-12:10:11  0.0 cua-driver\n  19316  1-12:10:11  0.0 at-spi2-registr\n  19344  1-12:10:11  0.0 sunshine\n  19603  1-12:10:10  0.0 ibus-daemon\n  19604  1-12:10:10  0.0 dbus-daemon\n  19621  1-12:10:10  0.0 ibus-memconf\n  19622  1-12:10:10  0.0 ibus-ui-gtk3\n  19623  1-12:10:10  0.0 ibus-extension-\n  19625  1-12:10:10  0.0 ibus-x11\n  19627  1-12:10:10  0.0 ibus-portal\n  19635  1-12:10:10  0.0 ascii-desktop\n  19639  1-12:10:10  0.0 openbox\n  19641  1-12:10:10  0.0 dbus-launch\n  19642  1-12:10:10  0.0 dbus-daemon\n  19654  1-12:10:10  0.0 at-spi-bus-laun\n  19662  1-12:10:10  0.0 dbus-daemon\n  19676  1-12:10:10  0.0 at-spi2-registr\n  19685  1-12:10:10  0.0 ibus-engine-sim\n 112788  1-11:49:46  0.0 MainThread\n 112817  1-11:49:45  0.5 codex\n 112939  1-11:49:43  0.0 python3\n 112940  1-11:49:43  0.0 zeron\n 115830  1-11:46:53  0.0 codex-code-mode\n 264096  1-10:25:44  0.0 bash\n 264101  1-10:25:44  0.0 Xvfb\n 264811  1-10:25:35  0.0 openbox\n2659948    13:59:36  0.0 cupsd\n2659950    13:59:36  0.0 cups-browsed\n2826639    12:01:47  0.3 ariana-fswatch\n2826703    12:01:47  0.2 ariana-fswatch\n2826772    12:01:47  0.2 ariana-fswatch\n3535246    06:08:18  0.0 kworker/u16:2-flush-253:0\n3536844    06:07:42  0.0 ascii-agent-sup\n3536846    06:07:42  1.7 ascii-agents-se\n3536893    06:07:41  0.0 sudo\n3536894    06:07:41  0.1 ascii-proclog\n3538063    06:07:41  0.0 web-server\n3538328    06:07:39  0.0 psimon\n3889644    03:08:56  0.0 kworker/u16:10-flush-253:0\n3956755    02:31:57  0.0 kworker/u16:4-flush-253:0\n4069173    01:07:55  0.0 kworker/u16:8-flush-253:0\n4098591       52:54  0.0 kworker/u16:1-ext4-rsv-conversion\n4098592       52:54  0.0 kworker/u16:3-flush-253:0\n4109537       48:08  0.0 kworker/4:2-cgroup_release\n4115116       45:47  0.0 kworker/6:1-events\n4135199       32:41  0.0 kworker/3:0-wg-crypt-wg0\n4135894       31:55  0.0 kworker/u16:6-flush-253:0\n4140031       30:45  0.0 kworker/7:0-cgroup_free\n4142821       28:24  0.0 kworker/1:1-wg-crypt-wg0\n4143568       27:46  0.0 kworker/2:0-wg-crypt-wg0\n4155464       16:53  0.0 kworker/5:1-cgroup_free\n4155951       16:44  0.0 kworker/0:2-cgroup_free\n4156361       15:52  0.0 kworker/3:1-cgroup_free\n4156644       15:51  0.0 kworker/u16:5-ext4-rsv-conversion\n4156645       15:51  0.0 kworker/u16:7-flush-253:0\n4158062       13:51  0.0 kworker/2:2-events\n4158944       12:52  0.0 kworker/7:1-events\n4159522       12:36  0.0 kworker/1:0-cgroup_free\n4160818       10:52  0.0 kworker/6:2-cgroup_free\n4162360       09:46  0.0 kworker/0:0-events\n4162413       09:36  0.0 kworker/5:3-mm_percpu_wq\n4163342       08:44  0.0 kworker/3:2-events\n4165253       06:42  0.0 kworker/4:0-events\n4165429       06:17  0.0 kworker/1:2-wg-crypt-wg0\n4167108       04:50  0.0 kworker/u16:0-flush-253:0\n4167109       04:50  0.0 kworker/u16:9-ext4-rsv-conversion\n4167315       04:44  0.0 kworker/2:1-cgroup_free\n4167336       04:42  0.0 kworker/7:2-wg-crypt-wg0\n4168513       03:20  0.0 kworker/0:1-events\n4169104       02:50  0.0 kworker/u16:11\n4169418       02:31  0.0 kworker/6:0-cgroup_free\n4169738       01:55  0.0 kworker/5:0-events\n4171825       01:06  0.0 kworker/1:3-wg-crypt-wg0\n4172468       00:50  0.0 bash\n4173999       00:19  0.0 kworker/4:1-events\n4174640       00:00  0.0 bash\n4174648       00:00 93.9 python3\n4174695       00:00  0.0 ps\n",
+  "runner": {
+    "files": {
+      "matrix-fixture-equality.json": "c1c23dec7c0cddfaa9a83fcb102565a0d484cb0cdeb5f38df1302350268bde45",
+      "driver_probe.py": "7f2dc64de52868af7131e210c6df9107aac8b1bca51d80097c2edca3411e9aef",
+      "matrix_preflight.py": "00da21a2ccbc5fbd4c035f9ea802be5363022c2398527e4e1ff9953723a95a51",
+      "setup.py": "26142239e2d7d438282f85ac5951fb363bd72e9f11a94814946d2c001d115e66",
+      "guard.py": "b744c950fa14a2f368f3e0e8c7b23a833d1119693d8b52702e8908724614f382",
+      "candidate-current-inputs.json": "600c8ed1b7c7fe2a7244ba276ab31511f32a58ca56ab6ff7e90555c9b185c22b",
+      "prepare_scripts.py": "d34a9d91c697bddc56c1afc8cc5206523415c0d920afb94288e28d98779a4976",
+      "allocation_gate.py": "7bd5f5d616447ecbc55f1bc6f81851fd3f8e9a4b165c2dec1dee9c040d779453",
+      "freeze_runner.py": "0284ddbf756df776dedf008dad76cb684e25f0785329fe76cc5114f0843d27a9",
+      "matrix_runs.py": "7b1db4f3ebadf1876b8dfc954ff8153c90c766df8caa775ab3ad7ce290faff09",
+      "matrix-artifacts.json": "db5093a31e2e8daeac22a98fd86468e8c5c7cd0370a20ba7e6abd457f1d07387",
+      "baseline-current-inputs.json": "6b67c074d0c92fd461270b87b3377b8dc904616d8e830dff7dce7b23e227b0a0",
+      "compiled-build-inputs.json": "1ea5af327b37249b23764d796b2d4ea49d221f802162feb292dc3130f67b1ae9",
+      "headers.py": "ad622153499e053a5b683bc5babb731a565de24f6fc04f50e58cb6b21e2d4624",
+      "cleanup_native_libraries.py": "856ff781a174657125aab882c6028fd7357f68f54ba794883feeb6d07dc61f44",
+      "freeze_matrix.initial.py": "32539b1c0197d854d429900ba309238a8825d16817d9b1b5b1b35903e8d9e336",
+      "qualified-library-cleanup-plan.json": "af1ed36fdc67826743f88f99ca9abcaeae6e90e38d5066b17a4884a88297edca",
+      "cold-visitor-test-only.rs": "21471a3f72bb078413bd65d32d863a6020e1bf1523bf00dbb9ef68e473b7da15",
+      "process-order.json": "c69b91fd561cbe16820c184541f0705f706e1c71f077ca2017868286145f3a36",
+      "freeze_matrix.py": "8267c98021ee86f81feb1101f8737e899f6e9d69c8c928ca93b3360d33882d9b",
+      "verify_dossier.py": "9d9a8b9dc0a0f108d7950dc3ccf21d1571b5684418304d0b0481b9b2832032fc",
+      "matrix-shader-receipt.json": "3e33b01944e21e9a58ed3acddd58e97e1cd961dfbab88884cbbeedf51dc2c6f8",
+      "analyze_matrix.py": "172ebf8cc927cc87ca466af13ee35a25133171841abddb76d25da3cd831debe8",
+      "cost-definition.json": "fb0ccfc012590b7db9908df5ee091481f2379e2328951000ce4e3cc1b7b9cb2c",
+      "qualified-library-cleanup.json": "dd4d1cda319d1b0f3ec3e546d1193d4bef65cb396f0a6fdc34348df28e24ddc4",
+      "reference/baseline/source.txt": "783908de8d05cde482966907f4955256bf2d606257c9b02db2f02e60a269ea22",
+      "reference/baseline/source-production-diff.txt": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "reference/baseline/zgx_native_lab.rs": "b2b4f71dc9af30b4d67341fc42be7dbc19ec1075ef0401a791e9dfface14530f",
+      "reference/baseline/build.status.json": "f0c39802a0abca09e186936c1c91b8e394dc1bc3b5d243b5363ea1a736ebd170",
+      "reference/baseline/guard-after.json": "4f53cda18c2baa0c0354bb5f9a3ecbe5ed12ab4d8e11ba873c2f11161202b945",
+      "reference/baseline/test.status.json": "c188327913ac93f9883ce2f02634cfc3e63dd06771d6eee5f3cac819d1849af4",
+      "reference/baseline/artifact.json": "2722eb92d1944c7e6de2e0c530c852f5e9e967d8e0c1f1a943a12a790ca73780",
+      "reference/baseline/inputs.json": "ba944e24d242ca55a142290c7f8cf787e5645ccf966fe5e83ac439dca32347f9",
+      "reference/baseline/environment.json": "6b6dd6ef56268cb1d546f29abd2b667aa52b6b6d7ee75bbd4ca41c3449d214f4",
+      "reference/baseline/unit-artifact.json": "878b8b7489e4f5158d58d0c90ea89a4568b9b27f8402e2d800d6eef8a21e97c7",
+      "reference/candidate/source.txt": "3fc5fd36dce19dd171e9e3ea53cc605454c2d17383f9f843f858e86c6a9119c0",
+      "reference/candidate/source-production-diff.txt": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "reference/candidate/zgx_native_lab.rs": "48d131b61c2caeebdc7d48215cd57740a4ec12a90328b685491315434b7a8263",
+      "reference/candidate/build.status.json": "5b4450a2942121e094344a42bda62796d1c5d1eff8ae117a5a85e054e2de7f18",
+      "reference/candidate/guard-after.json": "4f53cda18c2baa0c0354bb5f9a3ecbe5ed12ab4d8e11ba873c2f11161202b945",
+      "reference/candidate/test.status.json": "64b80fcb203f66f7b4f54db1706d36a4d322874c6a9ab9f3c7664d5a5ba134d4",
+      "reference/candidate/artifact.json": "78a65d416bbb5d2df780a2023325c65a3fb96ac1c529e1a658be8776fb21e7ca",
+      "reference/candidate/inputs.json": "861a3c07a2d4358e65269f050292cc705328b6453918e9411c5651d6776d4402",
+      "reference/candidate/environment.json": "60c92ccd7aed9e5d99316641c551a287cdc83ad668f187745f5da17ae6832973",
+      "reference/candidate/unit-artifact.json": "4f686a5d454ad981d7e1e351a4d429b887b8a1a14684e2ba76f7a7a9523bcc52"
+    },
+    "preregistered_commit": "64e90ba23d",
+    "qualification_seal": "380db598cdbed2dd81c5a41745473c40a876f148",
+    "startup_seal": "bea6c4cf9135f494925ccd80b05f584e20fe7ff4",
+    "before_any_cost_observations": true
+  },
+  "driver": {
+    "vulkan_physical_devices": [
+      {
+        "name": "llvmpipe (LLVM 20.1.2, 256 bits)",
+        "type": 4,
+        "vendor_id": 65541,
+        "device_id": 0,
+        "api_version": 4211006,
+        "driver_version": 104865800,
+        "pipeline_cache_uuid": "32352e322e382d307562756e7475302e"
+      }
+    ],
+    "query": "Vulkan 1.0 loader, same VK_ICD_FILENAMES as native observations"
+  },
+  "cache_environment": {
+    "MESA_SHADER_CACHE_DISABLE": null,
+    "MESA_SHADER_CACHE_DIR": null,
+    "XDG_CACHE_HOME": null
+  },
+  "limits": "Complete owner through native bridge/GPU completion/ACK; fresh objects, warm disk shader cache. Invoking-thread allocations. Private X11/software Vulkan. No hardware/scanout/ZGX victory."
+}

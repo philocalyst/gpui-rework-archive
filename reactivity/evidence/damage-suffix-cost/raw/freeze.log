@@ -1,0 +1,5 @@
+Traceback (most recent call last):
+  File "/home/user/gpui-damage-suffix-cost-evidence/freeze_matrix.py", line 31, in <module>
+    assert files,(target,a['path'])
+           ^^^^^
+AssertionError: (PosixPath('/home/user/gpui-patch-workspace-target/release'), '/home/user/gpui-patch-workspace-target/release/build/gpui/7d343a8859c57521/out/gpui-7d343a8859c57521')

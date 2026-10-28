@@ -1,0 +1,623 @@
+{
+  "all_pass": true,
+  "gates": {
+    "scroll": {
+      "requests": {
+        "reference": 468.5,
+        "candidate": 468.5,
+        "passed": true
+      },
+      "requested_bytes": {
+        "reference": 277702.0,
+        "candidate": 277702.0,
+        "passed": true
+      },
+      "net_bytes": {
+        "reference": 304.0,
+        "candidate": 304.0,
+        "passed": true
+      },
+      "peak_bytes": {
+        "reference": 54532.0,
+        "candidate": 54532.0,
+        "passed": true
+      }
+    },
+    "both": {
+      "requests": {
+        "reference": 553.5,
+        "candidate": 553.5,
+        "passed": true
+      },
+      "requested_bytes": {
+        "reference": 358360.0,
+        "candidate": 358360.0,
+        "passed": true
+      },
+      "net_bytes": {
+        "reference": 304.0,
+        "candidate": 304.0,
+        "passed": true
+      },
+      "peak_bytes": {
+        "reference": 74789.0,
+        "candidate": 74789.0,
+        "passed": true
+      }
+    },
+    "stream": {
+      "requests": {
+        "reference": 219.0,
+        "candidate": 219.0,
+        "passed": true
+      },
+      "requested_bytes": {
+        "reference": 130707.0,
+        "candidate": 130707.0,
+        "passed": true
+      },
+      "net_bytes": {
+        "reference": 304.0,
+        "candidate": 304.0,
+        "passed": true
+      },
+      "peak_bytes": {
+        "reference": 43501.0,
+        "candidate": 43501.0,
+        "passed": true
+      }
+    },
+    "stream-owner": {
+      "requests": {
+        "reference": 379.0,
+        "candidate": 379.0,
+        "passed": true
+      },
+      "requested_bytes": {
+        "reference": 226636.0,
+        "candidate": 226636.0,
+        "passed": true
+      },
+      "net_bytes": {
+        "reference": 304.0,
+        "candidate": 304.0,
+        "passed": true
+      },
+      "peak_bytes": {
+        "reference": 43501.0,
+        "candidate": 43501.0,
+        "passed": true
+      }
+    },
+    "fractional": {
+      "requests": {
+        "reference": 573.0,
+        "candidate": 573.0,
+        "passed": true
+      },
+      "requested_bytes": {
+        "reference": 338663.0,
+        "candidate": 338663.0,
+        "passed": true
+      },
+      "net_bytes": {
+        "reference": 304.0,
+        "candidate": 304.0,
+        "passed": true
+      },
+      "peak_bytes": {
+        "reference": 54838.0,
+        "candidate": 54838.0,
+        "passed": true
+      }
+    },
+    "flat-tiny": {
+      "requests": {
+        "reference": 69.0,
+        "candidate": 69.0,
+        "passed": true
+      },
+      "requested_bytes": {
+        "reference": 10135.0,
+        "candidate": 10135.0,
+        "passed": true
+      },
+      "net_bytes": {
+        "reference": 0.0,
+        "candidate": 0.0,
+        "passed": true
+      },
+      "peak_bytes": {
+        "reference": 6353.0,
+        "candidate": 6353.0,
+        "passed": true
+      }
+    },
+    "flat-full": {
+      "requests": {
+        "reference": 69.0,
+        "candidate": 69.0,
+        "passed": true
+      },
+      "requested_bytes": {
+        "reference": 10135.0,
+        "candidate": 10135.0,
+        "passed": true
+      },
+      "net_bytes": {
+        "reference": 0.0,
+        "candidate": 0.0,
+        "passed": true
+      },
+      "peak_bytes": {
+        "reference": 6353.0,
+        "candidate": 6353.0,
+        "passed": true
+      }
+    },
+    "list-tiny": {
+      "requests": {
+        "reference": 216.0,
+        "candidate": 216.0,
+        "passed": true
+      },
+      "requested_bytes": {
+        "reference": 61457.0,
+        "candidate": 61457.0,
+        "passed": true
+      },
+      "net_bytes": {
+        "reference": 312.0,
+        "candidate": 312.0,
+        "passed": true
+      },
+      "peak_bytes": {
+        "reference": 12093.0,
+        "candidate": 12093.0,
+        "passed": true
+      }
+    },
+    "list-flat": {
+      "requests": {
+        "reference": 267.5,
+        "candidate": 267.5,
+        "passed": true
+      },
+      "requested_bytes": {
+        "reference": 108326.0,
+        "candidate": 108326.0,
+        "passed": true
+      },
+      "net_bytes": {
+        "reference": 304.0,
+        "candidate": 304.0,
+        "passed": true
+      },
+      "peak_bytes": {
+        "reference": 22104.0,
+        "candidate": 22104.0,
+        "passed": true
+      }
+    },
+    "exposure": {
+      "requests": {
+        "reference": 44.0,
+        "candidate": 44.0,
+        "passed": true
+      },
+      "requested_bytes": {
+        "reference": 8024.0,
+        "candidate": 8024.0,
+        "passed": true
+      },
+      "net_bytes": {
+        "reference": 0.0,
+        "candidate": 0.0,
+        "passed": true
+      },
+      "peak_bytes": {
+        "reference": 5218.0,
+        "candidate": 5218.0,
+        "passed": true
+      }
+    },
+    "text-0-1-source": {
+      "requests": {
+        "reference": 131.0,
+        "candidate": 131.0,
+        "passed": true
+      },
+      "requested_bytes": {
+        "reference": 17153.0,
+        "candidate": 17153.0,
+        "passed": true
+      },
+      "net_bytes": {
+        "reference": 304.0,
+        "candidate": 304.0,
+        "passed": true
+      },
+      "peak_bytes": {
+        "reference": 8237.0,
+        "candidate": 8237.0,
+        "passed": true
+      }
+    },
+    "text-0-1-owner": {
+      "requests": {
+        "reference": 149.0,
+        "candidate": 149.0,
+        "passed": true
+      },
+      "requested_bytes": {
+        "reference": 22657.0,
+        "candidate": 22657.0,
+        "passed": true
+      },
+      "net_bytes": {
+        "reference": 304.0,
+        "candidate": 304.0,
+        "passed": true
+      },
+      "peak_bytes": {
+        "reference": 8237.0,
+        "candidate": 8237.0,
+        "passed": true
+      }
+    },
+    "text-0-2-source": {
+      "requests": {
+        "reference": 170.0,
+        "candidate": 170.0,
+        "passed": true
+      },
+      "requested_bytes": {
+        "reference": 29759.0,
+        "candidate": 29759.0,
+        "passed": true
+      },
+      "net_bytes": {
+        "reference": 304.0,
+        "candidate": 304.0,
+        "passed": true
+      },
+      "peak_bytes": {
+        "reference": 9149.0,
+        "candidate": 9149.0,
+        "passed": true
+      }
+    },
+    "text-0-2-owner": {
+      "requests": {
+        "reference": 178.0,
+        "candidate": 178.0,
+        "passed": true
+      },
+      "requested_bytes": {
+        "reference": 34659.0,
+        "candidate": 34659.0,
+        "passed": true
+      },
+      "net_bytes": {
+        "reference": 304.0,
+        "candidate": 304.0,
+        "passed": true
+      },
+      "peak_bytes": {
+        "reference": 9149.0,
+        "candidate": 9149.0,
+        "passed": true
+      }
+    },
+    "text-0-4-source": {
+      "requests": {
+        "reference": 254.0,
+        "candidate": 254.0,
+        "passed": true
+      },
+      "requested_bytes": {
+        "reference": 57851.0,
+        "candidate": 57851.0,
+        "passed": true
+      },
+      "net_bytes": {
+        "reference": 304.0,
+        "candidate": 304.0,
+        "passed": true
+      },
+      "peak_bytes": {
+        "reference": 10237.0,
+        "candidate": 10237.0,
+        "passed": true
+      }
+    },
+    "text-0-4-owner": {
+      "requests": {
+        "reference": 209.0,
+        "candidate": 209.0,
+        "passed": true
+      },
+      "requested_bytes": {
+        "reference": 44030.0,
+        "candidate": 44030.0,
+        "passed": true
+      },
+      "net_bytes": {
+        "reference": 304.0,
+        "candidate": 304.0,
+        "passed": true
+      },
+      "peak_bytes": {
+        "reference": 10237.0,
+        "candidate": 10237.0,
+        "passed": true
+      }
+    },
+    "text-25-1-source": {
+      "requests": {
+        "reference": 131.0,
+        "candidate": 131.0,
+        "passed": true
+      },
+      "requested_bytes": {
+        "reference": 17153.0,
+        "candidate": 17153.0,
+        "passed": true
+      },
+      "net_bytes": {
+        "reference": 304.0,
+        "candidate": 304.0,
+        "passed": true
+      },
+      "peak_bytes": {
+        "reference": 8237.0,
+        "candidate": 8237.0,
+        "passed": true
+      }
+    },
+    "text-25-1-owner": {
+      "requests": {
+        "reference": 179.0,
+        "candidate": 179.0,
+        "passed": true
+      },
+      "requested_bytes": {
+        "reference": 65536.0,
+        "candidate": 65536.0,
+        "passed": true
+      },
+      "net_bytes": {
+        "reference": 304.0,
+        "candidate": 304.0,
+        "passed": true
+      },
+      "peak_bytes": {
+        "reference": 23648.0,
+        "candidate": 23648.0,
+        "passed": true
+      }
+    },
+    "text-25-2-source": {
+      "requests": {
+        "reference": 179.0,
+        "candidate": 179.0,
+        "passed": true
+      },
+      "requested_bytes": {
+        "reference": 46683.0,
+        "candidate": 46683.0,
+        "passed": true
+      },
+      "net_bytes": {
+        "reference": 304.0,
+        "candidate": 304.0,
+        "passed": true
+      },
+      "peak_bytes": {
+        "reference": 18588.0,
+        "candidate": 18588.0,
+        "passed": true
+      }
+    },
+    "text-25-2-owner": {
+      "requests": {
+        "reference": 216.0,
+        "candidate": 216.0,
+        "passed": true
+      },
+      "requested_bytes": {
+        "reference": 91528.0,
+        "candidate": 91528.0,
+        "passed": true
+      },
+      "net_bytes": {
+        "reference": 304.0,
+        "candidate": 304.0,
+        "passed": true
+      },
+      "peak_bytes": {
+        "reference": 24064.0,
+        "candidate": 24064.0,
+        "passed": true
+      }
+    },
+    "text-25-4-source": {
+      "requests": {
+        "reference": 275.0,
+        "candidate": 275.0,
+        "passed": true
+      },
+      "requested_bytes": {
+        "reference": 106511.0,
+        "candidate": 106511.0,
+        "passed": true
+      },
+      "net_bytes": {
+        "reference": 304.0,
+        "candidate": 304.0,
+        "passed": true
+      },
+      "peak_bytes": {
+        "reference": 24252.0,
+        "candidate": 24252.0,
+        "passed": true
+      }
+    },
+    "text-25-4-owner": {
+      "requests": {
+        "reference": 243.0,
+        "candidate": 243.0,
+        "passed": true
+      },
+      "requested_bytes": {
+        "reference": 100548.0,
+        "candidate": 100548.0,
+        "passed": true
+      },
+      "net_bytes": {
+        "reference": 304.0,
+        "candidate": 304.0,
+        "passed": true
+      },
+      "peak_bytes": {
+        "reference": 25949.0,
+        "candidate": 25949.0,
+        "passed": true
+      }
+    },
+    "text-1000-1-source": {
+      "requests": {
+        "reference": 131.0,
+        "candidate": 131.0,
+        "passed": true
+      },
+      "requested_bytes": {
+        "reference": 17153.0,
+        "candidate": 17153.0,
+        "passed": true
+      },
+      "net_bytes": {
+        "reference": 304.0,
+        "candidate": 304.0,
+        "passed": true
+      },
+      "peak_bytes": {
+        "reference": 8237.0,
+        "candidate": 8237.0,
+        "passed": true
+      }
+    },
+    "text-1000-1-owner": {
+      "requests": {
+        "reference": 1159.0,
+        "candidate": 1159.0,
+        "passed": true
+      },
+      "requested_bytes": {
+        "reference": 1664070.0,
+        "candidate": 1664070.0,
+        "passed": true
+      },
+      "net_bytes": {
+        "reference": 304.0,
+        "candidate": 304.0,
+        "passed": true
+      },
+      "peak_bytes": {
+        "reference": 814144.0,
+        "candidate": 814144.0,
+        "passed": true
+      }
+    },
+    "text-1000-2-source": {
+      "requests": {
+        "reference": 193.0,
+        "candidate": 193.0,
+        "passed": true
+      },
+      "requested_bytes": {
+        "reference": 480531.0,
+        "candidate": 480531.0,
+        "passed": true
+      },
+      "net_bytes": {
+        "reference": 304.0,
+        "candidate": 304.0,
+        "passed": true
+      },
+      "peak_bytes": {
+        "reference": 316110.0,
+        "candidate": 316110.0,
+        "passed": true
+      }
+    },
+    "text-1000-2-owner": {
+      "requests": {
+        "reference": 1211.0,
+        "candidate": 1211.0,
+        "passed": true
+      },
+      "requested_bytes": {
+        "reference": 2127078.0,
+        "candidate": 2127078.0,
+        "passed": true
+      },
+      "net_bytes": {
+        "reference": 304.0,
+        "candidate": 304.0,
+        "passed": true
+      },
+      "peak_bytes": {
+        "reference": 814560.0,
+        "candidate": 814560.0,
+        "passed": true
+      }
+    },
+    "text-1000-4-source": {
+      "requests": {
+        "reference": 317.0,
+        "candidate": 317.0,
+        "passed": true
+      },
+      "requested_bytes": {
+        "reference": 1408055.0,
+        "candidate": 1408055.0,
+        "passed": true
+      },
+      "net_bytes": {
+        "reference": 304.0,
+        "candidate": 304.0,
+        "passed": true
+      },
+      "peak_bytes": {
+        "reference": 470382.0,
+        "candidate": 470382.0,
+        "passed": true
+      }
+    },
+    "text-1000-4-owner": {
+      "requests": {
+        "reference": 1237.0,
+        "candidate": 1237.0,
+        "passed": true
+      },
+      "requested_bytes": {
+        "reference": 2130626.0,
+        "candidate": 2130626.0,
+        "passed": true
+      },
+      "net_bytes": {
+        "reference": 304.0,
+        "candidate": 304.0,
+        "passed": true
+      },
+      "peak_bytes": {
+        "reference": 815392.0,
+        "candidate": 815392.0,
+        "passed": true
+      }
+    }
+  },
+  "source_sha256": "6891f397bb45a205c04afa717e747fac678f80c956d8313991e782fbcfc2c161",
+  "scope": "Invoking-thread requests/requested/net/peak bytes: four warm updates after16 warmups. Not process/driver/GPU allocations. Cold costs separately retained."
+}

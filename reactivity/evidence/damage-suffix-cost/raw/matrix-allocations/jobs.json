@@ -1,0 +1,338 @@
+[
+  {
+    "case": "scroll",
+    "pair": 0,
+    "variant": "baseline",
+    "frames": 4
+  },
+  {
+    "case": "scroll",
+    "pair": 0,
+    "variant": "candidate",
+    "frames": 4
+  },
+  {
+    "case": "both",
+    "pair": 0,
+    "variant": "baseline",
+    "frames": 4
+  },
+  {
+    "case": "both",
+    "pair": 0,
+    "variant": "candidate",
+    "frames": 4
+  },
+  {
+    "case": "stream",
+    "pair": 0,
+    "variant": "baseline",
+    "frames": 4
+  },
+  {
+    "case": "stream",
+    "pair": 0,
+    "variant": "candidate",
+    "frames": 4
+  },
+  {
+    "case": "stream-owner",
+    "pair": 0,
+    "variant": "baseline",
+    "frames": 4
+  },
+  {
+    "case": "stream-owner",
+    "pair": 0,
+    "variant": "candidate",
+    "frames": 4
+  },
+  {
+    "case": "fractional",
+    "pair": 0,
+    "variant": "baseline",
+    "frames": 4
+  },
+  {
+    "case": "fractional",
+    "pair": 0,
+    "variant": "candidate",
+    "frames": 4
+  },
+  {
+    "case": "flat-tiny",
+    "pair": 0,
+    "variant": "baseline",
+    "frames": 4
+  },
+  {
+    "case": "flat-tiny",
+    "pair": 0,
+    "variant": "candidate",
+    "frames": 4
+  },
+  {
+    "case": "flat-full",
+    "pair": 0,
+    "variant": "baseline",
+    "frames": 4
+  },
+  {
+    "case": "flat-full",
+    "pair": 0,
+    "variant": "candidate",
+    "frames": 4
+  },
+  {
+    "case": "list-tiny",
+    "pair": 0,
+    "variant": "baseline",
+    "frames": 4
+  },
+  {
+    "case": "list-tiny",
+    "pair": 0,
+    "variant": "candidate",
+    "frames": 4
+  },
+  {
+    "case": "list-flat",
+    "pair": 0,
+    "variant": "baseline",
+    "frames": 4
+  },
+  {
+    "case": "list-flat",
+    "pair": 0,
+    "variant": "candidate",
+    "frames": 4
+  },
+  {
+    "case": "exposure",
+    "pair": 0,
+    "variant": "baseline",
+    "frames": 4
+  },
+  {
+    "case": "exposure",
+    "pair": 0,
+    "variant": "candidate",
+    "frames": 4
+  },
+  {
+    "case": "text-0-1-source",
+    "pair": 0,
+    "variant": "baseline",
+    "frames": 4
+  },
+  {
+    "case": "text-0-1-source",
+    "pair": 0,
+    "variant": "candidate",
+    "frames": 4
+  },
+  {
+    "case": "text-0-1-owner",
+    "pair": 0,
+    "variant": "baseline",
+    "frames": 4
+  },
+  {
+    "case": "text-0-1-owner",
+    "pair": 0,
+    "variant": "candidate",
+    "frames": 4
+  },
+  {
+    "case": "text-0-2-source",
+    "pair": 0,
+    "variant": "baseline",
+    "frames": 4
+  },
+  {
+    "case": "text-0-2-source",
+    "pair": 0,
+    "variant": "candidate",
+    "frames": 4
+  },
+  {
+    "case": "text-0-2-owner",
+    "pair": 0,
+    "variant": "baseline",
+    "frames": 4
+  },
+  {
+    "case": "text-0-2-owner",
+    "pair": 0,
+    "variant": "candidate",
+    "frames": 4
+  },
+  {
+    "case": "text-0-4-source",
+    "pair": 0,
+    "variant": "baseline",
+    "frames": 4
+  },
+  {
+    "case": "text-0-4-source",
+    "pair": 0,
+    "variant": "candidate",
+    "frames": 4
+  },
+  {
+    "case": "text-0-4-owner",
+    "pair": 0,
+    "variant": "baseline",
+    "frames": 4
+  },
+  {
+    "case": "text-0-4-owner",
+    "pair": 0,
+    "variant": "candidate",
+    "frames": 4
+  },
+  {
+    "case": "text-25-1-source",
+    "pair": 0,
+    "variant": "baseline",
+    "frames": 4
+  },
+  {
+    "case": "text-25-1-source",
+    "pair": 0,
+    "variant": "candidate",
+    "frames": 4
+  },
+  {
+    "case": "text-25-1-owner",
+    "pair": 0,
+    "variant": "baseline",
+    "frames": 4
+  },
+  {
+    "case": "text-25-1-owner",
+    "pair": 0,
+    "variant": "candidate",
+    "frames": 4
+  },
+  {
+    "case": "text-25-2-source",
+    "pair": 0,
+    "variant": "baseline",
+    "frames": 4
+  },
+  {
+    "case": "text-25-2-source",
+    "pair": 0,
+    "variant": "candidate",
+    "frames": 4
+  },
+  {
+    "case": "text-25-2-owner",
+    "pair": 0,
+    "variant": "baseline",
+    "frames": 4
+  },
+  {
+    "case": "text-25-2-owner",
+    "pair": 0,
+    "variant": "candidate",
+    "frames": 4
+  },
+  {
+    "case": "text-25-4-source",
+    "pair": 0,
+    "variant": "baseline",
+    "frames": 4
+  },
+  {
+    "case": "text-25-4-source",
+    "pair": 0,
+    "variant": "candidate",
+    "frames": 4
+  },
+  {
+    "case": "text-25-4-owner",
+    "pair": 0,
+    "variant": "baseline",
+    "frames": 4
+  },
+  {
+    "case": "text-25-4-owner",
+    "pair": 0,
+    "variant": "candidate",
+    "frames": 4
+  },
+  {
+    "case": "text-1000-1-source",
+    "pair": 0,
+    "variant": "baseline",
+    "frames": 4
+  },
+  {
+    "case": "text-1000-1-source",
+    "pair": 0,
+    "variant": "candidate",
+    "frames": 4
+  },
+  {
+    "case": "text-1000-1-owner",
+    "pair": 0,
+    "variant": "baseline",
+    "frames": 4
+  },
+  {
+    "case": "text-1000-1-owner",
+    "pair": 0,
+    "variant": "candidate",
+    "frames": 4
+  },
+  {
+    "case": "text-1000-2-source",
+    "pair": 0,
+    "variant": "baseline",
+    "frames": 4
+  },
+  {
+    "case": "text-1000-2-source",
+    "pair": 0,
+    "variant": "candidate",
+    "frames": 4
+  },
+  {
+    "case": "text-1000-2-owner",
+    "pair": 0,
+    "variant": "baseline",
+    "frames": 4
+  },
+  {
+    "case": "text-1000-2-owner",
+    "pair": 0,
+    "variant": "candidate",
+    "frames": 4
+  },
+  {
+    "case": "text-1000-4-source",
+    "pair": 0,
+    "variant": "baseline",
+    "frames": 4
+  },
+  {
+    "case": "text-1000-4-source",
+    "pair": 0,
+    "variant": "candidate",
+    "frames": 4
+  },
+  {
+    "case": "text-1000-4-owner",
+    "pair": 0,
+    "variant": "baseline",
+    "frames": 4
+  },
+  {
+    "case": "text-1000-4-owner",
+    "pair": 0,
+    "variant": "candidate",
+    "frames": 4
+  }
+]

@@ -1,0 +1,1 @@
+{"command": ["/home/user/gpui-preserved-test-binaries/a430b0749c495084c0be04e22bfac23881cac9fdd825248faea63e4d5ba6c07c", "runtime::patch_workspace_tests::workspace_reuses_allocation_retires_payload_and_is_reclaimed_with_text", "--exact", "--nocapture", "--test-threads=1"], "exit": 0, "sha256": "a430b0749c495084c0be04e22bfac23881cac9fdd825248faea63e4d5ba6c07c"}
