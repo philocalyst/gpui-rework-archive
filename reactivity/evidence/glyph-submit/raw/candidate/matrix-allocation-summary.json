@@ -1,0 +1,3642 @@
+{
+  "scroll": {
+    "control": {
+      "warm": {
+        "count_total": 462.5,
+        "bytes_total": 277334.0,
+        "bytes_current": 304.0,
+        "bytes_max": 54532.0,
+        "image_bytes": 2764800.0,
+        "copied_pixels": 691200.0
+      },
+      "cold": {
+        "mount": {
+          "count_total": 1206,
+          "bytes_total": 1321519,
+          "bytes_current": 1014955,
+          "bytes_max": 1028495
+        },
+        "first": {
+          "count_total": 1074,
+          "bytes_total": 238856,
+          "bytes_current": 129504,
+          "bytes_max": 152115
+        }
+      },
+      "first_update": {
+        "count_total": 358,
+        "bytes_total": 257914,
+        "bytes_current": 3176,
+        "bytes_max": 56464,
+        "image_bytes": 2764800,
+        "copied_pixels": 691200
+      }
+    },
+    "predecessor": {
+      "warm": {
+        "count_total": 462.5,
+        "bytes_total": 277334.0,
+        "bytes_current": 304.0,
+        "bytes_max": 54532.0,
+        "image_bytes": 2764800.0,
+        "copied_pixels": 691200.0
+      },
+      "cold": {
+        "mount": {
+          "count_total": 1206,
+          "bytes_total": 1321519,
+          "bytes_current": 1014955,
+          "bytes_max": 1028495
+        },
+        "first": {
+          "count_total": 1074,
+          "bytes_total": 238856,
+          "bytes_current": 129504,
+          "bytes_max": 152115
+        }
+      },
+      "first_update": {
+        "count_total": 358,
+        "bytes_total": 257914,
+        "bytes_current": 3176,
+        "bytes_max": 56464,
+        "image_bytes": 2764800,
+        "copied_pixels": 691200
+      }
+    },
+    "bounds": {
+      "warm": {
+        "count_total": 462.5,
+        "bytes_total": 277334.0,
+        "bytes_current": 304.0,
+        "bytes_max": 54532.0,
+        "image_bytes": 2764800.0,
+        "copied_pixels": 691200.0
+      },
+      "cold": {
+        "mount": {
+          "count_total": 1206,
+          "bytes_total": 1321519,
+          "bytes_current": 1014955,
+          "bytes_max": 1028495
+        },
+        "first": {
+          "count_total": 1074,
+          "bytes_total": 238856,
+          "bytes_current": 129504,
+          "bytes_max": 152115
+        }
+      },
+      "first_update": {
+        "count_total": 358,
+        "bytes_total": 257914,
+        "bytes_current": 3176,
+        "bytes_max": 56464,
+        "image_bytes": 2764800,
+        "copied_pixels": 691200
+      }
+    },
+    "candidate": {
+      "warm": {
+        "count_total": 462.5,
+        "bytes_total": 277334.0,
+        "bytes_current": 304.0,
+        "bytes_max": 54532.0,
+        "image_bytes": 2764800.0,
+        "copied_pixels": 691200.0
+      },
+      "cold": {
+        "mount": {
+          "count_total": 1206,
+          "bytes_total": 1321519,
+          "bytes_current": 1014955,
+          "bytes_max": 1028495
+        },
+        "first": {
+          "count_total": 1074,
+          "bytes_total": 238856,
+          "bytes_current": 129504,
+          "bytes_max": 152115
+        }
+      },
+      "first_update": {
+        "count_total": 358,
+        "bytes_total": 257914,
+        "bytes_current": 3176,
+        "bytes_max": 56464,
+        "image_bytes": 2764800,
+        "copied_pixels": 691200
+      }
+    }
+  },
+  "both": {
+    "control": {
+      "warm": {
+        "count_total": 542.5,
+        "bytes_total": 350760.0,
+        "bytes_current": 304.0,
+        "bytes_max": 74789.0,
+        "image_bytes": 2764800.0,
+        "copied_pixels": 691200.0
+      },
+      "cold": {
+        "mount": {
+          "count_total": 1206,
+          "bytes_total": 1321519,
+          "bytes_current": 1014955,
+          "bytes_max": 1028495
+        },
+        "first": {
+          "count_total": 1074,
+          "bytes_total": 238856,
+          "bytes_current": 129504,
+          "bytes_max": 152115
+        }
+      },
+      "first_update": {
+        "count_total": 439,
+        "bytes_total": 331388,
+        "bytes_current": 3176,
+        "bytes_max": 76741,
+        "image_bytes": 2764800,
+        "copied_pixels": 691200
+      }
+    },
+    "predecessor": {
+      "warm": {
+        "count_total": 542.5,
+        "bytes_total": 350760.0,
+        "bytes_current": 304.0,
+        "bytes_max": 74789.0,
+        "image_bytes": 2764800.0,
+        "copied_pixels": 691200.0
+      },
+      "cold": {
+        "mount": {
+          "count_total": 1206,
+          "bytes_total": 1321519,
+          "bytes_current": 1014955,
+          "bytes_max": 1028495
+        },
+        "first": {
+          "count_total": 1074,
+          "bytes_total": 238856,
+          "bytes_current": 129504,
+          "bytes_max": 152115
+        }
+      },
+      "first_update": {
+        "count_total": 439,
+        "bytes_total": 331388,
+        "bytes_current": 3176,
+        "bytes_max": 76741,
+        "image_bytes": 2764800,
+        "copied_pixels": 691200
+      }
+    },
+    "bounds": {
+      "warm": {
+        "count_total": 542.5,
+        "bytes_total": 350760.0,
+        "bytes_current": 304.0,
+        "bytes_max": 74789.0,
+        "image_bytes": 2764800.0,
+        "copied_pixels": 691200.0
+      },
+      "cold": {
+        "mount": {
+          "count_total": 1206,
+          "bytes_total": 1321519,
+          "bytes_current": 1014955,
+          "bytes_max": 1028495
+        },
+        "first": {
+          "count_total": 1074,
+          "bytes_total": 238856,
+          "bytes_current": 129504,
+          "bytes_max": 152115
+        }
+      },
+      "first_update": {
+        "count_total": 439,
+        "bytes_total": 331388,
+        "bytes_current": 3176,
+        "bytes_max": 76741,
+        "image_bytes": 2764800,
+        "copied_pixels": 691200
+      }
+    },
+    "candidate": {
+      "warm": {
+        "count_total": 542.5,
+        "bytes_total": 350760.0,
+        "bytes_current": 304.0,
+        "bytes_max": 74789.0,
+        "image_bytes": 2764800.0,
+        "copied_pixels": 691200.0
+      },
+      "cold": {
+        "mount": {
+          "count_total": 1206,
+          "bytes_total": 1321519,
+          "bytes_current": 1014955,
+          "bytes_max": 1028495
+        },
+        "first": {
+          "count_total": 1074,
+          "bytes_total": 238856,
+          "bytes_current": 129504,
+          "bytes_max": 152115
+        }
+      },
+      "first_update": {
+        "count_total": 439,
+        "bytes_total": 331388,
+        "bytes_current": 3176,
+        "bytes_max": 76741,
+        "image_bytes": 2764800,
+        "copied_pixels": 691200
+      }
+    }
+  },
+  "stream": {
+    "control": {
+      "warm": {
+        "count_total": 245.0,
+        "bytes_total": 188319.0,
+        "bytes_current": 304.0,
+        "bytes_max": 74381.0,
+        "image_bytes": 2764800.0,
+        "copied_pixels": 691200.0
+      },
+      "cold": {
+        "mount": {
+          "count_total": 1206,
+          "bytes_total": 1321519,
+          "bytes_current": 1014955,
+          "bytes_max": 1028495
+        },
+        "first": {
+          "count_total": 1074,
+          "bytes_total": 238856,
+          "bytes_current": 129504,
+          "bytes_max": 152115
+        }
+      },
+      "first_update": {
+        "count_total": 256,
+        "bytes_total": 243039,
+        "bytes_current": 27840,
+        "bytes_max": 74637,
+        "image_bytes": 2764800,
+        "copied_pixels": 691200
+      }
+    },
+    "predecessor": {
+      "warm": {
+        "count_total": 221.0,
+        "bytes_total": 131315.0,
+        "bytes_current": 304.0,
+        "bytes_max": 43597.0,
+        "image_bytes": 2764800.0,
+        "copied_pixels": 691200.0
+      },
+      "cold": {
+        "mount": {
+          "count_total": 1206,
+          "bytes_total": 1321519,
+          "bytes_current": 1014955,
+          "bytes_max": 1028495
+        },
+        "first": {
+          "count_total": 1074,
+          "bytes_total": 238856,
+          "bytes_current": 129504,
+          "bytes_max": 152115
+        }
+      },
+      "first_update": {
+        "count_total": 232,
+        "bytes_total": 186035,
+        "bytes_current": 27840,
+        "bytes_max": 64251,
+        "image_bytes": 2764800,
+        "copied_pixels": 691200
+      }
+    },
+    "bounds": {
+      "warm": {
+        "count_total": 216.0,
+        "bytes_total": 123995.0,
+        "bytes_current": 304.0,
+        "bytes_max": 43541.0,
+        "image_bytes": 2764800.0,
+        "copied_pixels": 691200.0
+      },
+      "cold": {
+        "mount": {
+          "count_total": 1206,
+          "bytes_total": 1321519,
+          "bytes_current": 1014955,
+          "bytes_max": 1028495
+        },
+        "first": {
+          "count_total": 1074,
+          "bytes_total": 238856,
+          "bytes_current": 129504,
+          "bytes_max": 152115
+        }
+      },
+      "first_update": {
+        "count_total": 227,
+        "bytes_total": 178715,
+        "bytes_current": 27840,
+        "bytes_max": 63683,
+        "image_bytes": 2764800,
+        "copied_pixels": 691200
+      }
+    },
+    "candidate": {
+      "warm": {
+        "count_total": 221.0,
+        "bytes_total": 131315.0,
+        "bytes_current": 304.0,
+        "bytes_max": 43597.0,
+        "image_bytes": 2764800.0,
+        "copied_pixels": 691200.0
+      },
+      "cold": {
+        "mount": {
+          "count_total": 1206,
+          "bytes_total": 1321519,
+          "bytes_current": 1014955,
+          "bytes_max": 1028495
+        },
+        "first": {
+          "count_total": 1074,
+          "bytes_total": 238856,
+          "bytes_current": 129504,
+          "bytes_max": 152115
+        }
+      },
+      "first_update": {
+        "count_total": 232,
+        "bytes_total": 186035,
+        "bytes_current": 27840,
+        "bytes_max": 64251,
+        "image_bytes": 2764800,
+        "copied_pixels": 691200
+      }
+    }
+  },
+  "stream-owner": {
+    "control": {
+      "warm": {
+        "count_total": 405.0,
+        "bytes_total": 284248.0,
+        "bytes_current": 304.0,
+        "bytes_max": 74381.0,
+        "image_bytes": 2764800.0,
+        "copied_pixels": 691200.0
+      },
+      "cold": {
+        "mount": {
+          "count_total": 1206,
+          "bytes_total": 1321519,
+          "bytes_current": 1014955,
+          "bytes_max": 1028495
+        },
+        "first": {
+          "count_total": 1074,
+          "bytes_total": 238856,
+          "bytes_current": 129504,
+          "bytes_max": 152115
+        }
+      },
+      "first_update": {
+        "count_total": 416,
+        "bytes_total": 338968,
+        "bytes_current": 27840,
+        "bytes_max": 74637,
+        "image_bytes": 2764800,
+        "copied_pixels": 691200
+      }
+    },
+    "predecessor": {
+      "warm": {
+        "count_total": 381.0,
+        "bytes_total": 227244.0,
+        "bytes_current": 304.0,
+        "bytes_max": 43597.0,
+        "image_bytes": 2764800.0,
+        "copied_pixels": 691200.0
+      },
+      "cold": {
+        "mount": {
+          "count_total": 1206,
+          "bytes_total": 1321519,
+          "bytes_current": 1014955,
+          "bytes_max": 1028495
+        },
+        "first": {
+          "count_total": 1074,
+          "bytes_total": 238856,
+          "bytes_current": 129504,
+          "bytes_max": 152115
+        }
+      },
+      "first_update": {
+        "count_total": 392,
+        "bytes_total": 281964,
+        "bytes_current": 27840,
+        "bytes_max": 64251,
+        "image_bytes": 2764800,
+        "copied_pixels": 691200
+      }
+    },
+    "bounds": {
+      "warm": {
+        "count_total": 376.0,
+        "bytes_total": 219924.0,
+        "bytes_current": 304.0,
+        "bytes_max": 43541.0,
+        "image_bytes": 2764800.0,
+        "copied_pixels": 691200.0
+      },
+      "cold": {
+        "mount": {
+          "count_total": 1206,
+          "bytes_total": 1321519,
+          "bytes_current": 1014955,
+          "bytes_max": 1028495
+        },
+        "first": {
+          "count_total": 1074,
+          "bytes_total": 238856,
+          "bytes_current": 129504,
+          "bytes_max": 152115
+        }
+      },
+      "first_update": {
+        "count_total": 387,
+        "bytes_total": 274644,
+        "bytes_current": 27840,
+        "bytes_max": 63683,
+        "image_bytes": 2764800,
+        "copied_pixels": 691200
+      }
+    },
+    "candidate": {
+      "warm": {
+        "count_total": 381.0,
+        "bytes_total": 227244.0,
+        "bytes_current": 304.0,
+        "bytes_max": 43597.0,
+        "image_bytes": 2764800.0,
+        "copied_pixels": 691200.0
+      },
+      "cold": {
+        "mount": {
+          "count_total": 1206,
+          "bytes_total": 1321519,
+          "bytes_current": 1014955,
+          "bytes_max": 1028495
+        },
+        "first": {
+          "count_total": 1074,
+          "bytes_total": 238856,
+          "bytes_current": 129504,
+          "bytes_max": 152115
+        }
+      },
+      "first_update": {
+        "count_total": 392,
+        "bytes_total": 281964,
+        "bytes_current": 27840,
+        "bytes_max": 64251,
+        "image_bytes": 2764800,
+        "copied_pixels": 691200
+      }
+    }
+  },
+  "fractional": {
+    "control": {
+      "warm": {
+        "count_total": 573.0,
+        "bytes_total": 338663.0,
+        "bytes_current": 304.0,
+        "bytes_max": 54838.0,
+        "image_bytes": 2764800.0,
+        "copied_pixels": 691200.0
+      },
+      "cold": {
+        "mount": {
+          "count_total": 1206,
+          "bytes_total": 1321519,
+          "bytes_current": 1014955,
+          "bytes_max": 1028495
+        },
+        "first": {
+          "count_total": 1074,
+          "bytes_total": 238856,
+          "bytes_current": 129504,
+          "bytes_max": 152115
+        }
+      },
+      "first_update": {
+        "count_total": 358,
+        "bytes_total": 257914,
+        "bytes_current": 3176,
+        "bytes_max": 56464,
+        "image_bytes": 2764800,
+        "copied_pixels": 691200
+      }
+    },
+    "predecessor": {
+      "warm": {
+        "count_total": 573.0,
+        "bytes_total": 338663.0,
+        "bytes_current": 304.0,
+        "bytes_max": 54838.0,
+        "image_bytes": 2764800.0,
+        "copied_pixels": 691200.0
+      },
+      "cold": {
+        "mount": {
+          "count_total": 1206,
+          "bytes_total": 1321519,
+          "bytes_current": 1014955,
+          "bytes_max": 1028495
+        },
+        "first": {
+          "count_total": 1074,
+          "bytes_total": 238856,
+          "bytes_current": 129504,
+          "bytes_max": 152115
+        }
+      },
+      "first_update": {
+        "count_total": 358,
+        "bytes_total": 257914,
+        "bytes_current": 3176,
+        "bytes_max": 56464,
+        "image_bytes": 2764800,
+        "copied_pixels": 691200
+      }
+    },
+    "bounds": {
+      "warm": {
+        "count_total": 573.0,
+        "bytes_total": 338663.0,
+        "bytes_current": 304.0,
+        "bytes_max": 54838.0,
+        "image_bytes": 2764800.0,
+        "copied_pixels": 691200.0
+      },
+      "cold": {
+        "mount": {
+          "count_total": 1206,
+          "bytes_total": 1321519,
+          "bytes_current": 1014955,
+          "bytes_max": 1028495
+        },
+        "first": {
+          "count_total": 1074,
+          "bytes_total": 238856,
+          "bytes_current": 129504,
+          "bytes_max": 152115
+        }
+      },
+      "first_update": {
+        "count_total": 358,
+        "bytes_total": 257914,
+        "bytes_current": 3176,
+        "bytes_max": 56464,
+        "image_bytes": 2764800,
+        "copied_pixels": 691200
+      }
+    },
+    "candidate": {
+      "warm": {
+        "count_total": 573.0,
+        "bytes_total": 338663.0,
+        "bytes_current": 304.0,
+        "bytes_max": 54838.0,
+        "image_bytes": 2764800.0,
+        "copied_pixels": 691200.0
+      },
+      "cold": {
+        "mount": {
+          "count_total": 1206,
+          "bytes_total": 1321519,
+          "bytes_current": 1014955,
+          "bytes_max": 1028495
+        },
+        "first": {
+          "count_total": 1074,
+          "bytes_total": 238856,
+          "bytes_current": 129504,
+          "bytes_max": 152115
+        }
+      },
+      "first_update": {
+        "count_total": 358,
+        "bytes_total": 257914,
+        "bytes_current": 3176,
+        "bytes_max": 56464,
+        "image_bytes": 2764800,
+        "copied_pixels": 691200
+      }
+    }
+  },
+  "flat-tiny": {
+    "control": {
+      "warm": {
+        "count_total": 69.0,
+        "bytes_total": 10135.0,
+        "bytes_current": 0.0,
+        "bytes_max": 6353.0,
+        "image_bytes": 256.0,
+        "copied_pixels": 64.0
+      },
+      "cold": {
+        "mount": {
+          "count_total": 45,
+          "bytes_total": 8420,
+          "bytes_current": 6868,
+          "bytes_max": 6972
+        },
+        "first": {
+          "count_total": 778,
+          "bytes_total": 90638,
+          "bytes_current": 22256,
+          "bytes_max": 28787
+        }
+      },
+      "first_update": {
+        "count_total": 75,
+        "bytes_total": 10775,
+        "bytes_current": 352,
+        "bytes_max": 6705,
+        "image_bytes": 256,
+        "copied_pixels": 64
+      }
+    },
+    "predecessor": {
+      "warm": {
+        "count_total": 69.0,
+        "bytes_total": 10135.0,
+        "bytes_current": 0.0,
+        "bytes_max": 6353.0,
+        "image_bytes": 256.0,
+        "copied_pixels": 64.0
+      },
+      "cold": {
+        "mount": {
+          "count_total": 45,
+          "bytes_total": 8420,
+          "bytes_current": 6868,
+          "bytes_max": 6972
+        },
+        "first": {
+          "count_total": 778,
+          "bytes_total": 90638,
+          "bytes_current": 22256,
+          "bytes_max": 28787
+        }
+      },
+      "first_update": {
+        "count_total": 75,
+        "bytes_total": 10775,
+        "bytes_current": 352,
+        "bytes_max": 6705,
+        "image_bytes": 256,
+        "copied_pixels": 64
+      }
+    },
+    "bounds": {
+      "warm": {
+        "count_total": 69.0,
+        "bytes_total": 10135.0,
+        "bytes_current": 0.0,
+        "bytes_max": 6353.0,
+        "image_bytes": 256.0,
+        "copied_pixels": 64.0
+      },
+      "cold": {
+        "mount": {
+          "count_total": 45,
+          "bytes_total": 8420,
+          "bytes_current": 6868,
+          "bytes_max": 6972
+        },
+        "first": {
+          "count_total": 778,
+          "bytes_total": 90638,
+          "bytes_current": 22256,
+          "bytes_max": 28787
+        }
+      },
+      "first_update": {
+        "count_total": 75,
+        "bytes_total": 10775,
+        "bytes_current": 352,
+        "bytes_max": 6705,
+        "image_bytes": 256,
+        "copied_pixels": 64
+      }
+    },
+    "candidate": {
+      "warm": {
+        "count_total": 69.0,
+        "bytes_total": 10135.0,
+        "bytes_current": 0.0,
+        "bytes_max": 6353.0,
+        "image_bytes": 256.0,
+        "copied_pixels": 64.0
+      },
+      "cold": {
+        "mount": {
+          "count_total": 45,
+          "bytes_total": 8420,
+          "bytes_current": 6868,
+          "bytes_max": 6972
+        },
+        "first": {
+          "count_total": 778,
+          "bytes_total": 90638,
+          "bytes_current": 22256,
+          "bytes_max": 28787
+        }
+      },
+      "first_update": {
+        "count_total": 75,
+        "bytes_total": 10775,
+        "bytes_current": 352,
+        "bytes_max": 6705,
+        "image_bytes": 256,
+        "copied_pixels": 64
+      }
+    }
+  },
+  "flat-full": {
+    "control": {
+      "warm": {
+        "count_total": 69.0,
+        "bytes_total": 10135.0,
+        "bytes_current": 0.0,
+        "bytes_max": 6353.0,
+        "image_bytes": 1048576.0,
+        "copied_pixels": 262144.0
+      },
+      "cold": {
+        "mount": {
+          "count_total": 45,
+          "bytes_total": 8420,
+          "bytes_current": 6868,
+          "bytes_max": 6972
+        },
+        "first": {
+          "count_total": 785,
+          "bytes_total": 103404,
+          "bytes_current": 34511,
+          "bytes_max": 41042
+        }
+      },
+      "first_update": {
+        "count_total": 75,
+        "bytes_total": 10775,
+        "bytes_current": 352,
+        "bytes_max": 6705,
+        "image_bytes": 1048576,
+        "copied_pixels": 262144
+      }
+    },
+    "predecessor": {
+      "warm": {
+        "count_total": 69.0,
+        "bytes_total": 10135.0,
+        "bytes_current": 0.0,
+        "bytes_max": 6353.0,
+        "image_bytes": 1048576.0,
+        "copied_pixels": 262144.0
+      },
+      "cold": {
+        "mount": {
+          "count_total": 45,
+          "bytes_total": 8420,
+          "bytes_current": 6868,
+          "bytes_max": 6972
+        },
+        "first": {
+          "count_total": 785,
+          "bytes_total": 103404,
+          "bytes_current": 34511,
+          "bytes_max": 41042
+        }
+      },
+      "first_update": {
+        "count_total": 75,
+        "bytes_total": 10775,
+        "bytes_current": 352,
+        "bytes_max": 6705,
+        "image_bytes": 1048576,
+        "copied_pixels": 262144
+      }
+    },
+    "bounds": {
+      "warm": {
+        "count_total": 69.0,
+        "bytes_total": 10135.0,
+        "bytes_current": 0.0,
+        "bytes_max": 6353.0,
+        "image_bytes": 1048576.0,
+        "copied_pixels": 262144.0
+      },
+      "cold": {
+        "mount": {
+          "count_total": 45,
+          "bytes_total": 8420,
+          "bytes_current": 6868,
+          "bytes_max": 6972
+        },
+        "first": {
+          "count_total": 785,
+          "bytes_total": 103404,
+          "bytes_current": 34511,
+          "bytes_max": 41042
+        }
+      },
+      "first_update": {
+        "count_total": 75,
+        "bytes_total": 10775,
+        "bytes_current": 352,
+        "bytes_max": 6705,
+        "image_bytes": 1048576,
+        "copied_pixels": 262144
+      }
+    },
+    "candidate": {
+      "warm": {
+        "count_total": 69.0,
+        "bytes_total": 10135.0,
+        "bytes_current": 0.0,
+        "bytes_max": 6353.0,
+        "image_bytes": 1048576.0,
+        "copied_pixels": 262144.0
+      },
+      "cold": {
+        "mount": {
+          "count_total": 45,
+          "bytes_total": 8420,
+          "bytes_current": 6868,
+          "bytes_max": 6972
+        },
+        "first": {
+          "count_total": 785,
+          "bytes_total": 103404,
+          "bytes_current": 34511,
+          "bytes_max": 41042
+        }
+      },
+      "first_update": {
+        "count_total": 75,
+        "bytes_total": 10775,
+        "bytes_current": 352,
+        "bytes_max": 6705,
+        "image_bytes": 1048576,
+        "copied_pixels": 262144
+      }
+    }
+  },
+  "list-tiny": {
+    "control": {
+      "warm": {
+        "count_total": 210.0,
+        "bytes_total": 61089.0,
+        "bytes_current": 312.0,
+        "bytes_max": 12093.0,
+        "image_bytes": 4096.0,
+        "copied_pixels": 1024.0
+      },
+      "cold": {
+        "mount": {
+          "count_total": 134,
+          "bytes_total": 53675,
+          "bytes_current": 28519,
+          "bytes_max": 29239
+        },
+        "first": {
+          "count_total": 794,
+          "bytes_total": 92832,
+          "bytes_current": 22508,
+          "bytes_max": 29733
+        }
+      },
+      "first_update": {
+        "count_total": 257,
+        "bytes_total": 80772,
+        "bytes_current": 6438,
+        "bytes_max": 15147,
+        "image_bytes": 4096,
+        "copied_pixels": 1024
+      }
+    },
+    "predecessor": {
+      "warm": {
+        "count_total": 210.0,
+        "bytes_total": 61089.0,
+        "bytes_current": 312.0,
+        "bytes_max": 12093.0,
+        "image_bytes": 4096.0,
+        "copied_pixels": 1024.0
+      },
+      "cold": {
+        "mount": {
+          "count_total": 134,
+          "bytes_total": 53675,
+          "bytes_current": 28519,
+          "bytes_max": 29239
+        },
+        "first": {
+          "count_total": 794,
+          "bytes_total": 92832,
+          "bytes_current": 22508,
+          "bytes_max": 29733
+        }
+      },
+      "first_update": {
+        "count_total": 257,
+        "bytes_total": 80772,
+        "bytes_current": 6438,
+        "bytes_max": 15147,
+        "image_bytes": 4096,
+        "copied_pixels": 1024
+      }
+    },
+    "bounds": {
+      "warm": {
+        "count_total": 210.0,
+        "bytes_total": 61089.0,
+        "bytes_current": 312.0,
+        "bytes_max": 12093.0,
+        "image_bytes": 4096.0,
+        "copied_pixels": 1024.0
+      },
+      "cold": {
+        "mount": {
+          "count_total": 134,
+          "bytes_total": 53675,
+          "bytes_current": 28519,
+          "bytes_max": 29239
+        },
+        "first": {
+          "count_total": 794,
+          "bytes_total": 92832,
+          "bytes_current": 22508,
+          "bytes_max": 29733
+        }
+      },
+      "first_update": {
+        "count_total": 257,
+        "bytes_total": 80772,
+        "bytes_current": 6438,
+        "bytes_max": 15147,
+        "image_bytes": 4096,
+        "copied_pixels": 1024
+      }
+    },
+    "candidate": {
+      "warm": {
+        "count_total": 210.0,
+        "bytes_total": 61089.0,
+        "bytes_current": 312.0,
+        "bytes_max": 12093.0,
+        "image_bytes": 4096.0,
+        "copied_pixels": 1024.0
+      },
+      "cold": {
+        "mount": {
+          "count_total": 134,
+          "bytes_total": 53675,
+          "bytes_current": 28519,
+          "bytes_max": 29239
+        },
+        "first": {
+          "count_total": 794,
+          "bytes_total": 92832,
+          "bytes_current": 22508,
+          "bytes_max": 29733
+        }
+      },
+      "first_update": {
+        "count_total": 257,
+        "bytes_total": 80772,
+        "bytes_current": 6438,
+        "bytes_max": 15147,
+        "image_bytes": 4096,
+        "copied_pixels": 1024
+      }
+    }
+  },
+  "list-flat": {
+    "control": {
+      "warm": {
+        "count_total": 261.5,
+        "bytes_total": 107958.0,
+        "bytes_current": 304.0,
+        "bytes_max": 22104.0,
+        "image_bytes": 2764800.0,
+        "copied_pixels": 691200.0
+      },
+      "cold": {
+        "mount": {
+          "count_total": 207,
+          "bytes_total": 132529,
+          "bytes_current": 60389,
+          "bytes_max": 61613
+        },
+        "first": {
+          "count_total": 794,
+          "bytes_total": 137052,
+          "bytes_current": 66728,
+          "bytes_max": 73953
+        }
+      },
+      "first_update": {
+        "count_total": 219,
+        "bytes_total": 76826,
+        "bytes_current": 2904,
+        "bytes_max": 21192,
+        "image_bytes": 2764800,
+        "copied_pixels": 691200
+      }
+    },
+    "predecessor": {
+      "warm": {
+        "count_total": 261.5,
+        "bytes_total": 107958.0,
+        "bytes_current": 304.0,
+        "bytes_max": 22104.0,
+        "image_bytes": 2764800.0,
+        "copied_pixels": 691200.0
+      },
+      "cold": {
+        "mount": {
+          "count_total": 207,
+          "bytes_total": 132529,
+          "bytes_current": 60389,
+          "bytes_max": 61613
+        },
+        "first": {
+          "count_total": 794,
+          "bytes_total": 137052,
+          "bytes_current": 66728,
+          "bytes_max": 73953
+        }
+      },
+      "first_update": {
+        "count_total": 219,
+        "bytes_total": 76826,
+        "bytes_current": 2904,
+        "bytes_max": 21192,
+        "image_bytes": 2764800,
+        "copied_pixels": 691200
+      }
+    },
+    "bounds": {
+      "warm": {
+        "count_total": 261.5,
+        "bytes_total": 107958.0,
+        "bytes_current": 304.0,
+        "bytes_max": 22104.0,
+        "image_bytes": 2764800.0,
+        "copied_pixels": 691200.0
+      },
+      "cold": {
+        "mount": {
+          "count_total": 207,
+          "bytes_total": 132529,
+          "bytes_current": 60389,
+          "bytes_max": 61613
+        },
+        "first": {
+          "count_total": 794,
+          "bytes_total": 137052,
+          "bytes_current": 66728,
+          "bytes_max": 73953
+        }
+      },
+      "first_update": {
+        "count_total": 219,
+        "bytes_total": 76826,
+        "bytes_current": 2904,
+        "bytes_max": 21192,
+        "image_bytes": 2764800,
+        "copied_pixels": 691200
+      }
+    },
+    "candidate": {
+      "warm": {
+        "count_total": 261.5,
+        "bytes_total": 107958.0,
+        "bytes_current": 304.0,
+        "bytes_max": 22104.0,
+        "image_bytes": 2764800.0,
+        "copied_pixels": 691200.0
+      },
+      "cold": {
+        "mount": {
+          "count_total": 207,
+          "bytes_total": 132529,
+          "bytes_current": 60389,
+          "bytes_max": 61613
+        },
+        "first": {
+          "count_total": 794,
+          "bytes_total": 137052,
+          "bytes_current": 66728,
+          "bytes_max": 73953
+        }
+      },
+      "first_update": {
+        "count_total": 219,
+        "bytes_total": 76826,
+        "bytes_current": 2904,
+        "bytes_max": 21192,
+        "image_bytes": 2764800,
+        "copied_pixels": 691200
+      }
+    }
+  },
+  "exposure": {
+    "control": {
+      "warm": {
+        "count_total": 44.0,
+        "bytes_total": 8024.0,
+        "bytes_current": 0.0,
+        "bytes_max": 5218.0,
+        "image_bytes": 2764800.0,
+        "copied_pixels": 691200.0
+      },
+      "cold": {
+        "mount": {
+          "count_total": 1206,
+          "bytes_total": 1321519,
+          "bytes_current": 1014955,
+          "bytes_max": 1028495
+        },
+        "first": {
+          "count_total": 1074,
+          "bytes_total": 238856,
+          "bytes_current": 129504,
+          "bytes_max": 152115
+        }
+      },
+      "first_update": {
+        "count_total": 44,
+        "bytes_total": 8024,
+        "bytes_current": 0,
+        "bytes_max": 5218,
+        "image_bytes": 2764800,
+        "copied_pixels": 691200
+      }
+    },
+    "predecessor": {
+      "warm": {
+        "count_total": 44.0,
+        "bytes_total": 8024.0,
+        "bytes_current": 0.0,
+        "bytes_max": 5218.0,
+        "image_bytes": 2764800.0,
+        "copied_pixels": 691200.0
+      },
+      "cold": {
+        "mount": {
+          "count_total": 1206,
+          "bytes_total": 1321519,
+          "bytes_current": 1014955,
+          "bytes_max": 1028495
+        },
+        "first": {
+          "count_total": 1074,
+          "bytes_total": 238856,
+          "bytes_current": 129504,
+          "bytes_max": 152115
+        }
+      },
+      "first_update": {
+        "count_total": 44,
+        "bytes_total": 8024,
+        "bytes_current": 0,
+        "bytes_max": 5218,
+        "image_bytes": 2764800,
+        "copied_pixels": 691200
+      }
+    },
+    "bounds": {
+      "warm": {
+        "count_total": 44.0,
+        "bytes_total": 8024.0,
+        "bytes_current": 0.0,
+        "bytes_max": 5218.0,
+        "image_bytes": 2764800.0,
+        "copied_pixels": 691200.0
+      },
+      "cold": {
+        "mount": {
+          "count_total": 1206,
+          "bytes_total": 1321519,
+          "bytes_current": 1014955,
+          "bytes_max": 1028495
+        },
+        "first": {
+          "count_total": 1074,
+          "bytes_total": 238856,
+          "bytes_current": 129504,
+          "bytes_max": 152115
+        }
+      },
+      "first_update": {
+        "count_total": 44,
+        "bytes_total": 8024,
+        "bytes_current": 0,
+        "bytes_max": 5218,
+        "image_bytes": 2764800,
+        "copied_pixels": 691200
+      }
+    },
+    "candidate": {
+      "warm": {
+        "count_total": 44.0,
+        "bytes_total": 8024.0,
+        "bytes_current": 0.0,
+        "bytes_max": 5218.0,
+        "image_bytes": 2764800.0,
+        "copied_pixels": 691200.0
+      },
+      "cold": {
+        "mount": {
+          "count_total": 1206,
+          "bytes_total": 1321519,
+          "bytes_current": 1014955,
+          "bytes_max": 1028495
+        },
+        "first": {
+          "count_total": 1074,
+          "bytes_total": 238856,
+          "bytes_current": 129504,
+          "bytes_max": 152115
+        }
+      },
+      "first_update": {
+        "count_total": 44,
+        "bytes_total": 8024,
+        "bytes_current": 0,
+        "bytes_max": 5218,
+        "image_bytes": 2764800,
+        "copied_pixels": 691200
+      }
+    }
+  },
+  "text-0-1-source": {
+    "control": {
+      "warm": {
+        "count_total": 132.0,
+        "bytes_total": 17193.0,
+        "bytes_current": 304.0,
+        "bytes_max": 8277.0,
+        "image_bytes": 2764800.0,
+        "copied_pixels": 691200.0
+      },
+      "cold": {
+        "mount": {
+          "count_total": 482,
+          "bytes_total": 171607,
+          "bytes_current": 85819,
+          "bytes_max": 86582
+        },
+        "first": {
+          "count_total": 1136,
+          "bytes_total": 202504,
+          "bytes_current": 70472,
+          "bytes_max": 103587
+        }
+      },
+      "first_update": {
+        "count_total": 141,
+        "bytes_total": 18041,
+        "bytes_current": 776,
+        "bytes_max": 8677,
+        "image_bytes": 2764800,
+        "copied_pixels": 691200
+      }
+    },
+    "predecessor": {
+      "warm": {
+        "count_total": 132.0,
+        "bytes_total": 17249.0,
+        "bytes_current": 304.0,
+        "bytes_max": 8333.0,
+        "image_bytes": 2764800.0,
+        "copied_pixels": 691200.0
+      },
+      "cold": {
+        "mount": {
+          "count_total": 482,
+          "bytes_total": 171607,
+          "bytes_current": 85819,
+          "bytes_max": 86582
+        },
+        "first": {
+          "count_total": 1136,
+          "bytes_total": 202504,
+          "bytes_current": 70472,
+          "bytes_max": 103587
+        }
+      },
+      "first_update": {
+        "count_total": 141,
+        "bytes_total": 18097,
+        "bytes_current": 776,
+        "bytes_max": 8733,
+        "image_bytes": 2764800,
+        "copied_pixels": 691200
+      }
+    },
+    "bounds": {
+      "warm": {
+        "count_total": 132.0,
+        "bytes_total": 17193.0,
+        "bytes_current": 304.0,
+        "bytes_max": 8277.0,
+        "image_bytes": 2764800.0,
+        "copied_pixels": 691200.0
+      },
+      "cold": {
+        "mount": {
+          "count_total": 482,
+          "bytes_total": 171607,
+          "bytes_current": 85819,
+          "bytes_max": 86582
+        },
+        "first": {
+          "count_total": 1136,
+          "bytes_total": 202504,
+          "bytes_current": 70472,
+          "bytes_max": 103587
+        }
+      },
+      "first_update": {
+        "count_total": 141,
+        "bytes_total": 18041,
+        "bytes_current": 776,
+        "bytes_max": 8677,
+        "image_bytes": 2764800,
+        "copied_pixels": 691200
+      }
+    },
+    "candidate": {
+      "warm": {
+        "count_total": 132.0,
+        "bytes_total": 17249.0,
+        "bytes_current": 304.0,
+        "bytes_max": 8333.0,
+        "image_bytes": 2764800.0,
+        "copied_pixels": 691200.0
+      },
+      "cold": {
+        "mount": {
+          "count_total": 482,
+          "bytes_total": 171607,
+          "bytes_current": 85819,
+          "bytes_max": 86582
+        },
+        "first": {
+          "count_total": 1136,
+          "bytes_total": 202504,
+          "bytes_current": 70472,
+          "bytes_max": 103587
+        }
+      },
+      "first_update": {
+        "count_total": 141,
+        "bytes_total": 18097,
+        "bytes_current": 776,
+        "bytes_max": 8733,
+        "image_bytes": 2764800,
+        "copied_pixels": 691200
+      }
+    }
+  },
+  "text-0-1-owner": {
+    "control": {
+      "warm": {
+        "count_total": 165.0,
+        "bytes_total": 33119.0,
+        "bytes_current": 304.0,
+        "bytes_max": 8653.0,
+        "image_bytes": 2764800.0,
+        "copied_pixels": 691200.0
+      },
+      "cold": {
+        "mount": {
+          "count_total": 482,
+          "bytes_total": 171607,
+          "bytes_current": 85819,
+          "bytes_max": 86582
+        },
+        "first": {
+          "count_total": 1136,
+          "bytes_total": 202504,
+          "bytes_current": 70472,
+          "bytes_max": 103587
+        }
+      },
+      "first_update": {
+        "count_total": 174,
+        "bytes_total": 33967,
+        "bytes_current": 776,
+        "bytes_max": 9053,
+        "image_bytes": 2764800,
+        "copied_pixels": 691200
+      }
+    },
+    "predecessor": {
+      "warm": {
+        "count_total": 150.0,
+        "bytes_total": 22753.0,
+        "bytes_current": 304.0,
+        "bytes_max": 8333.0,
+        "image_bytes": 2764800.0,
+        "copied_pixels": 691200.0
+      },
+      "cold": {
+        "mount": {
+          "count_total": 482,
+          "bytes_total": 171607,
+          "bytes_current": 85819,
+          "bytes_max": 86582
+        },
+        "first": {
+          "count_total": 1136,
+          "bytes_total": 202504,
+          "bytes_current": 70472,
+          "bytes_max": 103587
+        }
+      },
+      "first_update": {
+        "count_total": 159,
+        "bytes_total": 23601,
+        "bytes_current": 776,
+        "bytes_max": 8733,
+        "image_bytes": 2764800,
+        "copied_pixels": 691200
+      }
+    },
+    "bounds": {
+      "warm": {
+        "count_total": 150.0,
+        "bytes_total": 22697.0,
+        "bytes_current": 304.0,
+        "bytes_max": 8277.0,
+        "image_bytes": 2764800.0,
+        "copied_pixels": 691200.0
+      },
+      "cold": {
+        "mount": {
+          "count_total": 482,
+          "bytes_total": 171607,
+          "bytes_current": 85819,
+          "bytes_max": 86582
+        },
+        "first": {
+          "count_total": 1136,
+          "bytes_total": 202504,
+          "bytes_current": 70472,
+          "bytes_max": 103587
+        }
+      },
+      "first_update": {
+        "count_total": 159,
+        "bytes_total": 23545,
+        "bytes_current": 776,
+        "bytes_max": 8677,
+        "image_bytes": 2764800,
+        "copied_pixels": 691200
+      }
+    },
+    "candidate": {
+      "warm": {
+        "count_total": 150.0,
+        "bytes_total": 22753.0,
+        "bytes_current": 304.0,
+        "bytes_max": 8333.0,
+        "image_bytes": 2764800.0,
+        "copied_pixels": 691200.0
+      },
+      "cold": {
+        "mount": {
+          "count_total": 482,
+          "bytes_total": 171607,
+          "bytes_current": 85819,
+          "bytes_max": 86582
+        },
+        "first": {
+          "count_total": 1136,
+          "bytes_total": 202504,
+          "bytes_current": 70472,
+          "bytes_max": 103587
+        }
+      },
+      "first_update": {
+        "count_total": 159,
+        "bytes_total": 23601,
+        "bytes_current": 776,
+        "bytes_max": 8733,
+        "image_bytes": 2764800,
+        "copied_pixels": 691200
+      }
+    }
+  },
+  "text-0-2-source": {
+    "control": {
+      "warm": {
+        "count_total": 171.0,
+        "bytes_total": 29799.0,
+        "bytes_current": 304.0,
+        "bytes_max": 9149.0,
+        "image_bytes": 2764800.0,
+        "copied_pixels": 691200.0
+      },
+      "cold": {
+        "mount": {
+          "count_total": 496,
+          "bytes_total": 173839,
+          "bytes_current": 87451,
+          "bytes_max": 87656
+        },
+        "first": {
+          "count_total": 1136,
+          "bytes_total": 202784,
+          "bytes_current": 70752,
+          "bytes_max": 103867
+        }
+      },
+      "first_update": {
+        "count_total": 180,
+        "bytes_total": 30647,
+        "bytes_current": 776,
+        "bytes_max": 9549,
+        "image_bytes": 2764800,
+        "copied_pixels": 691200
+      }
+    },
+    "predecessor": {
+      "warm": {
+        "count_total": 171.0,
+        "bytes_total": 29855.0,
+        "bytes_current": 304.0,
+        "bytes_max": 9149.0,
+        "image_bytes": 2764800.0,
+        "copied_pixels": 691200.0
+      },
+      "cold": {
+        "mount": {
+          "count_total": 496,
+          "bytes_total": 173839,
+          "bytes_current": 87451,
+          "bytes_max": 87656
+        },
+        "first": {
+          "count_total": 1136,
+          "bytes_total": 202784,
+          "bytes_current": 70752,
+          "bytes_max": 103867
+        }
+      },
+      "first_update": {
+        "count_total": 180,
+        "bytes_total": 30703,
+        "bytes_current": 776,
+        "bytes_max": 9549,
+        "image_bytes": 2764800,
+        "copied_pixels": 691200
+      }
+    },
+    "bounds": {
+      "warm": {
+        "count_total": 171.0,
+        "bytes_total": 29799.0,
+        "bytes_current": 304.0,
+        "bytes_max": 9149.0,
+        "image_bytes": 2764800.0,
+        "copied_pixels": 691200.0
+      },
+      "cold": {
+        "mount": {
+          "count_total": 496,
+          "bytes_total": 173839,
+          "bytes_current": 87451,
+          "bytes_max": 87656
+        },
+        "first": {
+          "count_total": 1136,
+          "bytes_total": 202784,
+          "bytes_current": 70752,
+          "bytes_max": 103867
+        }
+      },
+      "first_update": {
+        "count_total": 180,
+        "bytes_total": 30647,
+        "bytes_current": 776,
+        "bytes_max": 9549,
+        "image_bytes": 2764800,
+        "copied_pixels": 691200
+      }
+    },
+    "candidate": {
+      "warm": {
+        "count_total": 171.0,
+        "bytes_total": 29855.0,
+        "bytes_current": 304.0,
+        "bytes_max": 9149.0,
+        "image_bytes": 2764800.0,
+        "copied_pixels": 691200.0
+      },
+      "cold": {
+        "mount": {
+          "count_total": 496,
+          "bytes_total": 173839,
+          "bytes_current": 87451,
+          "bytes_max": 87656
+        },
+        "first": {
+          "count_total": 1136,
+          "bytes_total": 202784,
+          "bytes_current": 70752,
+          "bytes_max": 103867
+        }
+      },
+      "first_update": {
+        "count_total": 180,
+        "bytes_total": 30703,
+        "bytes_current": 776,
+        "bytes_max": 9549,
+        "image_bytes": 2764800,
+        "copied_pixels": 691200
+      }
+    }
+  },
+  "text-0-2-owner": {
+    "control": {
+      "warm": {
+        "count_total": 178.0,
+        "bytes_total": 34659.0,
+        "bytes_current": 304.0,
+        "bytes_max": 9149.0,
+        "image_bytes": 2764800.0,
+        "copied_pixels": 691200.0
+      },
+      "cold": {
+        "mount": {
+          "count_total": 496,
+          "bytes_total": 173839,
+          "bytes_current": 87451,
+          "bytes_max": 87656
+        },
+        "first": {
+          "count_total": 1136,
+          "bytes_total": 202784,
+          "bytes_current": 70752,
+          "bytes_max": 103867
+        }
+      },
+      "first_update": {
+        "count_total": 187,
+        "bytes_total": 35507,
+        "bytes_current": 776,
+        "bytes_max": 9549,
+        "image_bytes": 2764800,
+        "copied_pixels": 691200
+      }
+    },
+    "predecessor": {
+      "warm": {
+        "count_total": 178.0,
+        "bytes_total": 34659.0,
+        "bytes_current": 304.0,
+        "bytes_max": 9149.0,
+        "image_bytes": 2764800.0,
+        "copied_pixels": 691200.0
+      },
+      "cold": {
+        "mount": {
+          "count_total": 496,
+          "bytes_total": 173839,
+          "bytes_current": 87451,
+          "bytes_max": 87656
+        },
+        "first": {
+          "count_total": 1136,
+          "bytes_total": 202784,
+          "bytes_current": 70752,
+          "bytes_max": 103867
+        }
+      },
+      "first_update": {
+        "count_total": 187,
+        "bytes_total": 35507,
+        "bytes_current": 776,
+        "bytes_max": 9549,
+        "image_bytes": 2764800,
+        "copied_pixels": 691200
+      }
+    },
+    "bounds": {
+      "warm": {
+        "count_total": 178.0,
+        "bytes_total": 34659.0,
+        "bytes_current": 304.0,
+        "bytes_max": 9149.0,
+        "image_bytes": 2764800.0,
+        "copied_pixels": 691200.0
+      },
+      "cold": {
+        "mount": {
+          "count_total": 496,
+          "bytes_total": 173839,
+          "bytes_current": 87451,
+          "bytes_max": 87656
+        },
+        "first": {
+          "count_total": 1136,
+          "bytes_total": 202784,
+          "bytes_current": 70752,
+          "bytes_max": 103867
+        }
+      },
+      "first_update": {
+        "count_total": 187,
+        "bytes_total": 35507,
+        "bytes_current": 776,
+        "bytes_max": 9549,
+        "image_bytes": 2764800,
+        "copied_pixels": 691200
+      }
+    },
+    "candidate": {
+      "warm": {
+        "count_total": 178.0,
+        "bytes_total": 34659.0,
+        "bytes_current": 304.0,
+        "bytes_max": 9149.0,
+        "image_bytes": 2764800.0,
+        "copied_pixels": 691200.0
+      },
+      "cold": {
+        "mount": {
+          "count_total": 496,
+          "bytes_total": 173839,
+          "bytes_current": 87451,
+          "bytes_max": 87656
+        },
+        "first": {
+          "count_total": 1136,
+          "bytes_total": 202784,
+          "bytes_current": 70752,
+          "bytes_max": 103867
+        }
+      },
+      "first_update": {
+        "count_total": 187,
+        "bytes_total": 35507,
+        "bytes_current": 776,
+        "bytes_max": 9549,
+        "image_bytes": 2764800,
+        "copied_pixels": 691200
+      }
+    }
+  },
+  "text-0-4-source": {
+    "control": {
+      "warm": {
+        "count_total": 255.0,
+        "bytes_total": 57891.0,
+        "bytes_current": 304.0,
+        "bytes_max": 10237.0,
+        "image_bytes": 2764800.0,
+        "copied_pixels": 691200.0
+      },
+      "cold": {
+        "mount": {
+          "count_total": 540,
+          "bytes_total": 187658,
+          "bytes_current": 92214,
+          "bytes_max": 92518
+        },
+        "first": {
+          "count_total": 1136,
+          "bytes_total": 203344,
+          "bytes_current": 71312,
+          "bytes_max": 104427
+        }
+      },
+      "first_update": {
+        "count_total": 264,
+        "bytes_total": 58739,
+        "bytes_current": 776,
+        "bytes_max": 10637,
+        "image_bytes": 2764800,
+        "copied_pixels": 691200
+      }
+    },
+    "predecessor": {
+      "warm": {
+        "count_total": 255.0,
+        "bytes_total": 57947.0,
+        "bytes_current": 304.0,
+        "bytes_max": 10237.0,
+        "image_bytes": 2764800.0,
+        "copied_pixels": 691200.0
+      },
+      "cold": {
+        "mount": {
+          "count_total": 540,
+          "bytes_total": 187658,
+          "bytes_current": 92214,
+          "bytes_max": 92518
+        },
+        "first": {
+          "count_total": 1136,
+          "bytes_total": 203344,
+          "bytes_current": 71312,
+          "bytes_max": 104427
+        }
+      },
+      "first_update": {
+        "count_total": 264,
+        "bytes_total": 58795,
+        "bytes_current": 776,
+        "bytes_max": 10637,
+        "image_bytes": 2764800,
+        "copied_pixels": 691200
+      }
+    },
+    "bounds": {
+      "warm": {
+        "count_total": 255.0,
+        "bytes_total": 57891.0,
+        "bytes_current": 304.0,
+        "bytes_max": 10237.0,
+        "image_bytes": 2764800.0,
+        "copied_pixels": 691200.0
+      },
+      "cold": {
+        "mount": {
+          "count_total": 540,
+          "bytes_total": 187658,
+          "bytes_current": 92214,
+          "bytes_max": 92518
+        },
+        "first": {
+          "count_total": 1136,
+          "bytes_total": 203344,
+          "bytes_current": 71312,
+          "bytes_max": 104427
+        }
+      },
+      "first_update": {
+        "count_total": 264,
+        "bytes_total": 58739,
+        "bytes_current": 776,
+        "bytes_max": 10637,
+        "image_bytes": 2764800,
+        "copied_pixels": 691200
+      }
+    },
+    "candidate": {
+      "warm": {
+        "count_total": 255.0,
+        "bytes_total": 57947.0,
+        "bytes_current": 304.0,
+        "bytes_max": 10237.0,
+        "image_bytes": 2764800.0,
+        "copied_pixels": 691200.0
+      },
+      "cold": {
+        "mount": {
+          "count_total": 540,
+          "bytes_total": 187658,
+          "bytes_current": 92214,
+          "bytes_max": 92518
+        },
+        "first": {
+          "count_total": 1136,
+          "bytes_total": 203344,
+          "bytes_current": 71312,
+          "bytes_max": 104427
+        }
+      },
+      "first_update": {
+        "count_total": 264,
+        "bytes_total": 58795,
+        "bytes_current": 776,
+        "bytes_max": 10637,
+        "image_bytes": 2764800,
+        "copied_pixels": 691200
+      }
+    }
+  },
+  "text-0-4-owner": {
+    "control": {
+      "warm": {
+        "count_total": 209.0,
+        "bytes_total": 44030.0,
+        "bytes_current": 304.0,
+        "bytes_max": 10237.0,
+        "image_bytes": 2764800.0,
+        "copied_pixels": 691200.0
+      },
+      "cold": {
+        "mount": {
+          "count_total": 540,
+          "bytes_total": 187658,
+          "bytes_current": 92214,
+          "bytes_max": 92518
+        },
+        "first": {
+          "count_total": 1136,
+          "bytes_total": 203344,
+          "bytes_current": 71312,
+          "bytes_max": 104427
+        }
+      },
+      "first_update": {
+        "count_total": 218,
+        "bytes_total": 44878,
+        "bytes_current": 776,
+        "bytes_max": 10637,
+        "image_bytes": 2764800,
+        "copied_pixels": 691200
+      }
+    },
+    "predecessor": {
+      "warm": {
+        "count_total": 209.0,
+        "bytes_total": 44030.0,
+        "bytes_current": 304.0,
+        "bytes_max": 10237.0,
+        "image_bytes": 2764800.0,
+        "copied_pixels": 691200.0
+      },
+      "cold": {
+        "mount": {
+          "count_total": 540,
+          "bytes_total": 187658,
+          "bytes_current": 92214,
+          "bytes_max": 92518
+        },
+        "first": {
+          "count_total": 1136,
+          "bytes_total": 203344,
+          "bytes_current": 71312,
+          "bytes_max": 104427
+        }
+      },
+      "first_update": {
+        "count_total": 218,
+        "bytes_total": 44878,
+        "bytes_current": 776,
+        "bytes_max": 10637,
+        "image_bytes": 2764800,
+        "copied_pixels": 691200
+      }
+    },
+    "bounds": {
+      "warm": {
+        "count_total": 209.0,
+        "bytes_total": 44030.0,
+        "bytes_current": 304.0,
+        "bytes_max": 10237.0,
+        "image_bytes": 2764800.0,
+        "copied_pixels": 691200.0
+      },
+      "cold": {
+        "mount": {
+          "count_total": 540,
+          "bytes_total": 187658,
+          "bytes_current": 92214,
+          "bytes_max": 92518
+        },
+        "first": {
+          "count_total": 1136,
+          "bytes_total": 203344,
+          "bytes_current": 71312,
+          "bytes_max": 104427
+        }
+      },
+      "first_update": {
+        "count_total": 218,
+        "bytes_total": 44878,
+        "bytes_current": 776,
+        "bytes_max": 10637,
+        "image_bytes": 2764800,
+        "copied_pixels": 691200
+      }
+    },
+    "candidate": {
+      "warm": {
+        "count_total": 209.0,
+        "bytes_total": 44030.0,
+        "bytes_current": 304.0,
+        "bytes_max": 10237.0,
+        "image_bytes": 2764800.0,
+        "copied_pixels": 691200.0
+      },
+      "cold": {
+        "mount": {
+          "count_total": 540,
+          "bytes_total": 187658,
+          "bytes_current": 92214,
+          "bytes_max": 92518
+        },
+        "first": {
+          "count_total": 1136,
+          "bytes_total": 203344,
+          "bytes_current": 71312,
+          "bytes_max": 104427
+        }
+      },
+      "first_update": {
+        "count_total": 218,
+        "bytes_total": 44878,
+        "bytes_current": 776,
+        "bytes_max": 10637,
+        "image_bytes": 2764800,
+        "copied_pixels": 691200
+      }
+    }
+  },
+  "text-25-1-source": {
+    "control": {
+      "warm": {
+        "count_total": 132.0,
+        "bytes_total": 17193.0,
+        "bytes_current": 304.0,
+        "bytes_max": 8277.0,
+        "image_bytes": 2764800.0,
+        "copied_pixels": 691200.0
+      },
+      "cold": {
+        "mount": {
+          "count_total": 887,
+          "bytes_total": 298486,
+          "bytes_current": 147446,
+          "bytes_max": 150772
+        },
+        "first": {
+          "count_total": 1156,
+          "bytes_total": 211380,
+          "bytes_current": 78300,
+          "bytes_max": 112015
+        }
+      },
+      "first_update": {
+        "count_total": 141,
+        "bytes_total": 18041,
+        "bytes_current": 776,
+        "bytes_max": 8677,
+        "image_bytes": 2764800,
+        "copied_pixels": 691200
+      }
+    },
+    "predecessor": {
+      "warm": {
+        "count_total": 132.0,
+        "bytes_total": 17249.0,
+        "bytes_current": 304.0,
+        "bytes_max": 8333.0,
+        "image_bytes": 2764800.0,
+        "copied_pixels": 691200.0
+      },
+      "cold": {
+        "mount": {
+          "count_total": 887,
+          "bytes_total": 298486,
+          "bytes_current": 147446,
+          "bytes_max": 150772
+        },
+        "first": {
+          "count_total": 1156,
+          "bytes_total": 211380,
+          "bytes_current": 78300,
+          "bytes_max": 112015
+        }
+      },
+      "first_update": {
+        "count_total": 141,
+        "bytes_total": 18097,
+        "bytes_current": 776,
+        "bytes_max": 8733,
+        "image_bytes": 2764800,
+        "copied_pixels": 691200
+      }
+    },
+    "bounds": {
+      "warm": {
+        "count_total": 132.0,
+        "bytes_total": 17193.0,
+        "bytes_current": 304.0,
+        "bytes_max": 8277.0,
+        "image_bytes": 2764800.0,
+        "copied_pixels": 691200.0
+      },
+      "cold": {
+        "mount": {
+          "count_total": 887,
+          "bytes_total": 298486,
+          "bytes_current": 147446,
+          "bytes_max": 150772
+        },
+        "first": {
+          "count_total": 1156,
+          "bytes_total": 211380,
+          "bytes_current": 78300,
+          "bytes_max": 112015
+        }
+      },
+      "first_update": {
+        "count_total": 141,
+        "bytes_total": 18041,
+        "bytes_current": 776,
+        "bytes_max": 8677,
+        "image_bytes": 2764800,
+        "copied_pixels": 691200
+      }
+    },
+    "candidate": {
+      "warm": {
+        "count_total": 132.0,
+        "bytes_total": 17249.0,
+        "bytes_current": 304.0,
+        "bytes_max": 8333.0,
+        "image_bytes": 2764800.0,
+        "copied_pixels": 691200.0
+      },
+      "cold": {
+        "mount": {
+          "count_total": 887,
+          "bytes_total": 298486,
+          "bytes_current": 147446,
+          "bytes_max": 150772
+        },
+        "first": {
+          "count_total": 1156,
+          "bytes_total": 211380,
+          "bytes_current": 78300,
+          "bytes_max": 112015
+        }
+      },
+      "first_update": {
+        "count_total": 141,
+        "bytes_total": 18097,
+        "bytes_current": 776,
+        "bytes_max": 8733,
+        "image_bytes": 2764800,
+        "copied_pixels": 691200
+      }
+    }
+  },
+  "text-25-1-owner": {
+    "control": {
+      "warm": {
+        "count_total": 204.0,
+        "bytes_total": 92922.0,
+        "bytes_current": 304.0,
+        "bytes_max": 23648.0,
+        "image_bytes": 2764800.0,
+        "copied_pixels": 691200.0
+      },
+      "cold": {
+        "mount": {
+          "count_total": 887,
+          "bytes_total": 298486,
+          "bytes_current": 147446,
+          "bytes_max": 150772
+        },
+        "first": {
+          "count_total": 1156,
+          "bytes_total": 211380,
+          "bytes_current": 78300,
+          "bytes_max": 112015
+        }
+      },
+      "first_update": {
+        "count_total": 213,
+        "bytes_total": 93770,
+        "bytes_current": 776,
+        "bytes_max": 23648,
+        "image_bytes": 2764800,
+        "copied_pixels": 691200
+      }
+    },
+    "predecessor": {
+      "warm": {
+        "count_total": 180.0,
+        "bytes_total": 65632.0,
+        "bytes_current": 304.0,
+        "bytes_max": 23648.0,
+        "image_bytes": 2764800.0,
+        "copied_pixels": 691200.0
+      },
+      "cold": {
+        "mount": {
+          "count_total": 887,
+          "bytes_total": 298486,
+          "bytes_current": 147446,
+          "bytes_max": 150772
+        },
+        "first": {
+          "count_total": 1156,
+          "bytes_total": 211380,
+          "bytes_current": 78300,
+          "bytes_max": 112015
+        }
+      },
+      "first_update": {
+        "count_total": 189,
+        "bytes_total": 66480,
+        "bytes_current": 776,
+        "bytes_max": 23648,
+        "image_bytes": 2764800,
+        "copied_pixels": 691200
+      }
+    },
+    "bounds": {
+      "warm": {
+        "count_total": 180.0,
+        "bytes_total": 65576.0,
+        "bytes_current": 304.0,
+        "bytes_max": 23648.0,
+        "image_bytes": 2764800.0,
+        "copied_pixels": 691200.0
+      },
+      "cold": {
+        "mount": {
+          "count_total": 887,
+          "bytes_total": 298486,
+          "bytes_current": 147446,
+          "bytes_max": 150772
+        },
+        "first": {
+          "count_total": 1156,
+          "bytes_total": 211380,
+          "bytes_current": 78300,
+          "bytes_max": 112015
+        }
+      },
+      "first_update": {
+        "count_total": 189,
+        "bytes_total": 66424,
+        "bytes_current": 776,
+        "bytes_max": 23648,
+        "image_bytes": 2764800,
+        "copied_pixels": 691200
+      }
+    },
+    "candidate": {
+      "warm": {
+        "count_total": 180.0,
+        "bytes_total": 65632.0,
+        "bytes_current": 304.0,
+        "bytes_max": 23648.0,
+        "image_bytes": 2764800.0,
+        "copied_pixels": 691200.0
+      },
+      "cold": {
+        "mount": {
+          "count_total": 887,
+          "bytes_total": 298486,
+          "bytes_current": 147446,
+          "bytes_max": 150772
+        },
+        "first": {
+          "count_total": 1156,
+          "bytes_total": 211380,
+          "bytes_current": 78300,
+          "bytes_max": 112015
+        }
+      },
+      "first_update": {
+        "count_total": 189,
+        "bytes_total": 66480,
+        "bytes_current": 776,
+        "bytes_max": 23648,
+        "image_bytes": 2764800,
+        "copied_pixels": 691200
+      }
+    }
+  },
+  "text-25-2-source": {
+    "control": {
+      "warm": {
+        "count_total": 180.0,
+        "bytes_total": 46723.0,
+        "bytes_current": 304.0,
+        "bytes_max": 18628.0,
+        "image_bytes": 2764800.0,
+        "copied_pixels": 691200.0
+      },
+      "cold": {
+        "mount": {
+          "count_total": 900,
+          "bytes_total": 297952,
+          "bytes_current": 149152,
+          "bytes_max": 152478
+        },
+        "first": {
+          "count_total": 1156,
+          "bytes_total": 211660,
+          "bytes_current": 78580,
+          "bytes_max": 112295
+        }
+      },
+      "first_update": {
+        "count_total": 189,
+        "bytes_total": 47571,
+        "bytes_current": 776,
+        "bytes_max": 18628,
+        "image_bytes": 2764800,
+        "copied_pixels": 691200
+      }
+    },
+    "predecessor": {
+      "warm": {
+        "count_total": 180.0,
+        "bytes_total": 46779.0,
+        "bytes_current": 304.0,
+        "bytes_max": 18684.0,
+        "image_bytes": 2764800.0,
+        "copied_pixels": 691200.0
+      },
+      "cold": {
+        "mount": {
+          "count_total": 900,
+          "bytes_total": 297952,
+          "bytes_current": 149152,
+          "bytes_max": 152478
+        },
+        "first": {
+          "count_total": 1156,
+          "bytes_total": 211660,
+          "bytes_current": 78580,
+          "bytes_max": 112295
+        }
+      },
+      "first_update": {
+        "count_total": 189,
+        "bytes_total": 47627,
+        "bytes_current": 776,
+        "bytes_max": 18684,
+        "image_bytes": 2764800,
+        "copied_pixels": 691200
+      }
+    },
+    "bounds": {
+      "warm": {
+        "count_total": 180.0,
+        "bytes_total": 46723.0,
+        "bytes_current": 304.0,
+        "bytes_max": 18628.0,
+        "image_bytes": 2764800.0,
+        "copied_pixels": 691200.0
+      },
+      "cold": {
+        "mount": {
+          "count_total": 900,
+          "bytes_total": 297952,
+          "bytes_current": 149152,
+          "bytes_max": 152478
+        },
+        "first": {
+          "count_total": 1156,
+          "bytes_total": 211660,
+          "bytes_current": 78580,
+          "bytes_max": 112295
+        }
+      },
+      "first_update": {
+        "count_total": 189,
+        "bytes_total": 47571,
+        "bytes_current": 776,
+        "bytes_max": 18628,
+        "image_bytes": 2764800,
+        "copied_pixels": 691200
+      }
+    },
+    "candidate": {
+      "warm": {
+        "count_total": 180.0,
+        "bytes_total": 46779.0,
+        "bytes_current": 304.0,
+        "bytes_max": 18684.0,
+        "image_bytes": 2764800.0,
+        "copied_pixels": 691200.0
+      },
+      "cold": {
+        "mount": {
+          "count_total": 900,
+          "bytes_total": 297952,
+          "bytes_current": 149152,
+          "bytes_max": 152478
+        },
+        "first": {
+          "count_total": 1156,
+          "bytes_total": 211660,
+          "bytes_current": 78580,
+          "bytes_max": 112295
+        }
+      },
+      "first_update": {
+        "count_total": 189,
+        "bytes_total": 47627,
+        "bytes_current": 776,
+        "bytes_max": 18684,
+        "image_bytes": 2764800,
+        "copied_pixels": 691200
+      }
+    }
+  },
+  "text-25-2-owner": {
+    "control": {
+      "warm": {
+        "count_total": 216.0,
+        "bytes_total": 91528.0,
+        "bytes_current": 304.0,
+        "bytes_max": 24064.0,
+        "image_bytes": 2764800.0,
+        "copied_pixels": 691200.0
+      },
+      "cold": {
+        "mount": {
+          "count_total": 900,
+          "bytes_total": 297952,
+          "bytes_current": 149152,
+          "bytes_max": 152478
+        },
+        "first": {
+          "count_total": 1156,
+          "bytes_total": 211660,
+          "bytes_current": 78580,
+          "bytes_max": 112295
+        }
+      },
+      "first_update": {
+        "count_total": 225,
+        "bytes_total": 92376,
+        "bytes_current": 776,
+        "bytes_max": 24064,
+        "image_bytes": 2764800,
+        "copied_pixels": 691200
+      }
+    },
+    "predecessor": {
+      "warm": {
+        "count_total": 216.0,
+        "bytes_total": 91528.0,
+        "bytes_current": 304.0,
+        "bytes_max": 24064.0,
+        "image_bytes": 2764800.0,
+        "copied_pixels": 691200.0
+      },
+      "cold": {
+        "mount": {
+          "count_total": 900,
+          "bytes_total": 297952,
+          "bytes_current": 149152,
+          "bytes_max": 152478
+        },
+        "first": {
+          "count_total": 1156,
+          "bytes_total": 211660,
+          "bytes_current": 78580,
+          "bytes_max": 112295
+        }
+      },
+      "first_update": {
+        "count_total": 225,
+        "bytes_total": 92376,
+        "bytes_current": 776,
+        "bytes_max": 24064,
+        "image_bytes": 2764800,
+        "copied_pixels": 691200
+      }
+    },
+    "bounds": {
+      "warm": {
+        "count_total": 216.0,
+        "bytes_total": 91528.0,
+        "bytes_current": 304.0,
+        "bytes_max": 24064.0,
+        "image_bytes": 2764800.0,
+        "copied_pixels": 691200.0
+      },
+      "cold": {
+        "mount": {
+          "count_total": 900,
+          "bytes_total": 297952,
+          "bytes_current": 149152,
+          "bytes_max": 152478
+        },
+        "first": {
+          "count_total": 1156,
+          "bytes_total": 211660,
+          "bytes_current": 78580,
+          "bytes_max": 112295
+        }
+      },
+      "first_update": {
+        "count_total": 225,
+        "bytes_total": 92376,
+        "bytes_current": 776,
+        "bytes_max": 24064,
+        "image_bytes": 2764800,
+        "copied_pixels": 691200
+      }
+    },
+    "candidate": {
+      "warm": {
+        "count_total": 216.0,
+        "bytes_total": 91528.0,
+        "bytes_current": 304.0,
+        "bytes_max": 24064.0,
+        "image_bytes": 2764800.0,
+        "copied_pixels": 691200.0
+      },
+      "cold": {
+        "mount": {
+          "count_total": 900,
+          "bytes_total": 297952,
+          "bytes_current": 149152,
+          "bytes_max": 152478
+        },
+        "first": {
+          "count_total": 1156,
+          "bytes_total": 211660,
+          "bytes_current": 78580,
+          "bytes_max": 112295
+        }
+      },
+      "first_update": {
+        "count_total": 225,
+        "bytes_total": 92376,
+        "bytes_current": 776,
+        "bytes_max": 24064,
+        "image_bytes": 2764800,
+        "copied_pixels": 691200
+      }
+    }
+  },
+  "text-25-4-source": {
+    "control": {
+      "warm": {
+        "count_total": 276.0,
+        "bytes_total": 106551.0,
+        "bytes_current": 304.0,
+        "bytes_max": 24252.0,
+        "image_bytes": 2764800.0,
+        "copied_pixels": 691200.0
+      },
+      "cold": {
+        "mount": {
+          "count_total": 931,
+          "bytes_total": 308988,
+          "bytes_current": 155095,
+          "bytes_max": 158525
+        },
+        "first": {
+          "count_total": 1156,
+          "bytes_total": 212220,
+          "bytes_current": 79140,
+          "bytes_max": 112855
+        }
+      },
+      "first_update": {
+        "count_total": 285,
+        "bytes_total": 107399,
+        "bytes_current": 776,
+        "bytes_max": 24252,
+        "image_bytes": 2764800,
+        "copied_pixels": 691200
+      }
+    },
+    "predecessor": {
+      "warm": {
+        "count_total": 276.0,
+        "bytes_total": 106607.0,
+        "bytes_current": 304.0,
+        "bytes_max": 24252.0,
+        "image_bytes": 2764800.0,
+        "copied_pixels": 691200.0
+      },
+      "cold": {
+        "mount": {
+          "count_total": 931,
+          "bytes_total": 308988,
+          "bytes_current": 155095,
+          "bytes_max": 158525
+        },
+        "first": {
+          "count_total": 1156,
+          "bytes_total": 212220,
+          "bytes_current": 79140,
+          "bytes_max": 112855
+        }
+      },
+      "first_update": {
+        "count_total": 285,
+        "bytes_total": 107455,
+        "bytes_current": 776,
+        "bytes_max": 24252,
+        "image_bytes": 2764800,
+        "copied_pixels": 691200
+      }
+    },
+    "bounds": {
+      "warm": {
+        "count_total": 276.0,
+        "bytes_total": 106551.0,
+        "bytes_current": 304.0,
+        "bytes_max": 24252.0,
+        "image_bytes": 2764800.0,
+        "copied_pixels": 691200.0
+      },
+      "cold": {
+        "mount": {
+          "count_total": 931,
+          "bytes_total": 308988,
+          "bytes_current": 155095,
+          "bytes_max": 158525
+        },
+        "first": {
+          "count_total": 1156,
+          "bytes_total": 212220,
+          "bytes_current": 79140,
+          "bytes_max": 112855
+        }
+      },
+      "first_update": {
+        "count_total": 285,
+        "bytes_total": 107399,
+        "bytes_current": 776,
+        "bytes_max": 24252,
+        "image_bytes": 2764800,
+        "copied_pixels": 691200
+      }
+    },
+    "candidate": {
+      "warm": {
+        "count_total": 276.0,
+        "bytes_total": 106607.0,
+        "bytes_current": 304.0,
+        "bytes_max": 24252.0,
+        "image_bytes": 2764800.0,
+        "copied_pixels": 691200.0
+      },
+      "cold": {
+        "mount": {
+          "count_total": 931,
+          "bytes_total": 308988,
+          "bytes_current": 155095,
+          "bytes_max": 158525
+        },
+        "first": {
+          "count_total": 1156,
+          "bytes_total": 212220,
+          "bytes_current": 79140,
+          "bytes_max": 112855
+        }
+      },
+      "first_update": {
+        "count_total": 285,
+        "bytes_total": 107455,
+        "bytes_current": 776,
+        "bytes_max": 24252,
+        "image_bytes": 2764800,
+        "copied_pixels": 691200
+      }
+    }
+  },
+  "text-25-4-owner": {
+    "control": {
+      "warm": {
+        "count_total": 243.0,
+        "bytes_total": 100548.0,
+        "bytes_current": 304.0,
+        "bytes_max": 25949.0,
+        "image_bytes": 2764800.0,
+        "copied_pixels": 691200.0
+      },
+      "cold": {
+        "mount": {
+          "count_total": 931,
+          "bytes_total": 308988,
+          "bytes_current": 155095,
+          "bytes_max": 158525
+        },
+        "first": {
+          "count_total": 1156,
+          "bytes_total": 212220,
+          "bytes_current": 79140,
+          "bytes_max": 112855
+        }
+      },
+      "first_update": {
+        "count_total": 252,
+        "bytes_total": 101396,
+        "bytes_current": 776,
+        "bytes_max": 25949,
+        "image_bytes": 2764800,
+        "copied_pixels": 691200
+      }
+    },
+    "predecessor": {
+      "warm": {
+        "count_total": 243.0,
+        "bytes_total": 100548.0,
+        "bytes_current": 304.0,
+        "bytes_max": 25949.0,
+        "image_bytes": 2764800.0,
+        "copied_pixels": 691200.0
+      },
+      "cold": {
+        "mount": {
+          "count_total": 931,
+          "bytes_total": 308988,
+          "bytes_current": 155095,
+          "bytes_max": 158525
+        },
+        "first": {
+          "count_total": 1156,
+          "bytes_total": 212220,
+          "bytes_current": 79140,
+          "bytes_max": 112855
+        }
+      },
+      "first_update": {
+        "count_total": 252,
+        "bytes_total": 101396,
+        "bytes_current": 776,
+        "bytes_max": 25949,
+        "image_bytes": 2764800,
+        "copied_pixels": 691200
+      }
+    },
+    "bounds": {
+      "warm": {
+        "count_total": 243.0,
+        "bytes_total": 100548.0,
+        "bytes_current": 304.0,
+        "bytes_max": 25949.0,
+        "image_bytes": 2764800.0,
+        "copied_pixels": 691200.0
+      },
+      "cold": {
+        "mount": {
+          "count_total": 931,
+          "bytes_total": 308988,
+          "bytes_current": 155095,
+          "bytes_max": 158525
+        },
+        "first": {
+          "count_total": 1156,
+          "bytes_total": 212220,
+          "bytes_current": 79140,
+          "bytes_max": 112855
+        }
+      },
+      "first_update": {
+        "count_total": 252,
+        "bytes_total": 101396,
+        "bytes_current": 776,
+        "bytes_max": 25949,
+        "image_bytes": 2764800,
+        "copied_pixels": 691200
+      }
+    },
+    "candidate": {
+      "warm": {
+        "count_total": 243.0,
+        "bytes_total": 100548.0,
+        "bytes_current": 304.0,
+        "bytes_max": 25949.0,
+        "image_bytes": 2764800.0,
+        "copied_pixels": 691200.0
+      },
+      "cold": {
+        "mount": {
+          "count_total": 931,
+          "bytes_total": 308988,
+          "bytes_current": 155095,
+          "bytes_max": 158525
+        },
+        "first": {
+          "count_total": 1156,
+          "bytes_total": 212220,
+          "bytes_current": 79140,
+          "bytes_max": 112855
+        }
+      },
+      "first_update": {
+        "count_total": 252,
+        "bytes_total": 101396,
+        "bytes_current": 776,
+        "bytes_max": 25949,
+        "image_bytes": 2764800,
+        "copied_pixels": 691200
+      }
+    }
+  },
+  "text-1000-1-source": {
+    "control": {
+      "warm": {
+        "count_total": 132.0,
+        "bytes_total": 17193.0,
+        "bytes_current": 304.0,
+        "bytes_max": 8277.0,
+        "image_bytes": 2764800.0,
+        "copied_pixels": 691200.0
+      },
+      "cold": {
+        "mount": {
+          "count_total": 14448,
+          "bytes_total": 4692643,
+          "bytes_current": 2427022,
+          "bytes_max": 2486886
+        },
+        "first": {
+          "count_total": 1156,
+          "bytes_total": 498012,
+          "bytes_current": 364932,
+          "bytes_max": 398647
+        }
+      },
+      "first_update": {
+        "count_total": 141,
+        "bytes_total": 18041,
+        "bytes_current": 776,
+        "bytes_max": 8677,
+        "image_bytes": 2764800,
+        "copied_pixels": 691200
+      }
+    },
+    "predecessor": {
+      "warm": {
+        "count_total": 132.0,
+        "bytes_total": 17249.0,
+        "bytes_current": 304.0,
+        "bytes_max": 8333.0,
+        "image_bytes": 2764800.0,
+        "copied_pixels": 691200.0
+      },
+      "cold": {
+        "mount": {
+          "count_total": 14448,
+          "bytes_total": 4692643,
+          "bytes_current": 2427022,
+          "bytes_max": 2486886
+        },
+        "first": {
+          "count_total": 1156,
+          "bytes_total": 498012,
+          "bytes_current": 364932,
+          "bytes_max": 398647
+        }
+      },
+      "first_update": {
+        "count_total": 141,
+        "bytes_total": 18097,
+        "bytes_current": 776,
+        "bytes_max": 8733,
+        "image_bytes": 2764800,
+        "copied_pixels": 691200
+      }
+    },
+    "bounds": {
+      "warm": {
+        "count_total": 132.0,
+        "bytes_total": 17193.0,
+        "bytes_current": 304.0,
+        "bytes_max": 8277.0,
+        "image_bytes": 2764800.0,
+        "copied_pixels": 691200.0
+      },
+      "cold": {
+        "mount": {
+          "count_total": 14448,
+          "bytes_total": 4692643,
+          "bytes_current": 2427022,
+          "bytes_max": 2486886
+        },
+        "first": {
+          "count_total": 1156,
+          "bytes_total": 498012,
+          "bytes_current": 364932,
+          "bytes_max": 398647
+        }
+      },
+      "first_update": {
+        "count_total": 141,
+        "bytes_total": 18041,
+        "bytes_current": 776,
+        "bytes_max": 8677,
+        "image_bytes": 2764800,
+        "copied_pixels": 691200
+      }
+    },
+    "candidate": {
+      "warm": {
+        "count_total": 132.0,
+        "bytes_total": 17249.0,
+        "bytes_current": 304.0,
+        "bytes_max": 8333.0,
+        "image_bytes": 2764800.0,
+        "copied_pixels": 691200.0
+      },
+      "cold": {
+        "mount": {
+          "count_total": 14448,
+          "bytes_total": 4692643,
+          "bytes_current": 2427022,
+          "bytes_max": 2486886
+        },
+        "first": {
+          "count_total": 1156,
+          "bytes_total": 498012,
+          "bytes_current": 364932,
+          "bytes_max": 398647
+        }
+      },
+      "first_update": {
+        "count_total": 141,
+        "bytes_total": 18097,
+        "bytes_current": 776,
+        "bytes_max": 8733,
+        "image_bytes": 2764800,
+        "copied_pixels": 691200
+      }
+    }
+  },
+  "text-1000-1-owner": {
+    "control": {
+      "warm": {
+        "count_total": 1198.0,
+        "bytes_total": 2125304.0,
+        "bytes_current": 304.0,
+        "bytes_max": 814144.0,
+        "image_bytes": 2764800.0,
+        "copied_pixels": 691200.0
+      },
+      "cold": {
+        "mount": {
+          "count_total": 14448,
+          "bytes_total": 4692643,
+          "bytes_current": 2427022,
+          "bytes_max": 2486886
+        },
+        "first": {
+          "count_total": 1156,
+          "bytes_total": 498012,
+          "bytes_current": 364932,
+          "bytes_max": 398647
+        }
+      },
+      "first_update": {
+        "count_total": 1207,
+        "bytes_total": 2126152,
+        "bytes_current": 776,
+        "bytes_max": 814144,
+        "image_bytes": 2764800,
+        "copied_pixels": 691200
+      }
+    },
+    "predecessor": {
+      "warm": {
+        "count_total": 1160.0,
+        "bytes_total": 1664166.0,
+        "bytes_current": 304.0,
+        "bytes_max": 814144.0,
+        "image_bytes": 2764800.0,
+        "copied_pixels": 691200.0
+      },
+      "cold": {
+        "mount": {
+          "count_total": 14448,
+          "bytes_total": 4692643,
+          "bytes_current": 2427022,
+          "bytes_max": 2486886
+        },
+        "first": {
+          "count_total": 1156,
+          "bytes_total": 498012,
+          "bytes_current": 364932,
+          "bytes_max": 398647
+        }
+      },
+      "first_update": {
+        "count_total": 1169,
+        "bytes_total": 1665014,
+        "bytes_current": 776,
+        "bytes_max": 814144,
+        "image_bytes": 2764800,
+        "copied_pixels": 691200
+      }
+    },
+    "bounds": {
+      "warm": {
+        "count_total": 1160.0,
+        "bytes_total": 1664110.0,
+        "bytes_current": 304.0,
+        "bytes_max": 814144.0,
+        "image_bytes": 2764800.0,
+        "copied_pixels": 691200.0
+      },
+      "cold": {
+        "mount": {
+          "count_total": 14448,
+          "bytes_total": 4692643,
+          "bytes_current": 2427022,
+          "bytes_max": 2486886
+        },
+        "first": {
+          "count_total": 1156,
+          "bytes_total": 498012,
+          "bytes_current": 364932,
+          "bytes_max": 398647
+        }
+      },
+      "first_update": {
+        "count_total": 1169,
+        "bytes_total": 1664958,
+        "bytes_current": 776,
+        "bytes_max": 814144,
+        "image_bytes": 2764800,
+        "copied_pixels": 691200
+      }
+    },
+    "candidate": {
+      "warm": {
+        "count_total": 1160.0,
+        "bytes_total": 1664166.0,
+        "bytes_current": 304.0,
+        "bytes_max": 814144.0,
+        "image_bytes": 2764800.0,
+        "copied_pixels": 691200.0
+      },
+      "cold": {
+        "mount": {
+          "count_total": 14448,
+          "bytes_total": 4692643,
+          "bytes_current": 2427022,
+          "bytes_max": 2486886
+        },
+        "first": {
+          "count_total": 1156,
+          "bytes_total": 498012,
+          "bytes_current": 364932,
+          "bytes_max": 398647
+        }
+      },
+      "first_update": {
+        "count_total": 1169,
+        "bytes_total": 1665014,
+        "bytes_current": 776,
+        "bytes_max": 814144,
+        "image_bytes": 2764800,
+        "copied_pixels": 691200
+      }
+    }
+  },
+  "text-1000-2-source": {
+    "control": {
+      "warm": {
+        "count_total": 194.0,
+        "bytes_total": 480571.0,
+        "bytes_current": 304.0,
+        "bytes_max": 316150.0,
+        "image_bytes": 2764800.0,
+        "copied_pixels": 691200.0
+      },
+      "cold": {
+        "mount": {
+          "count_total": 14464,
+          "bytes_total": 4695573,
+          "bytes_current": 2428822,
+          "bytes_max": 2488790
+        },
+        "first": {
+          "count_total": 1156,
+          "bytes_total": 498292,
+          "bytes_current": 365212,
+          "bytes_max": 398927
+        }
+      },
+      "first_update": {
+        "count_total": 203,
+        "bytes_total": 481419,
+        "bytes_current": 776,
+        "bytes_max": 316150,
+        "image_bytes": 2764800,
+        "copied_pixels": 691200
+      }
+    },
+    "predecessor": {
+      "warm": {
+        "count_total": 194.0,
+        "bytes_total": 480627.0,
+        "bytes_current": 304.0,
+        "bytes_max": 316206.0,
+        "image_bytes": 2764800.0,
+        "copied_pixels": 691200.0
+      },
+      "cold": {
+        "mount": {
+          "count_total": 14464,
+          "bytes_total": 4695573,
+          "bytes_current": 2428822,
+          "bytes_max": 2488790
+        },
+        "first": {
+          "count_total": 1156,
+          "bytes_total": 498292,
+          "bytes_current": 365212,
+          "bytes_max": 398927
+        }
+      },
+      "first_update": {
+        "count_total": 203,
+        "bytes_total": 481475,
+        "bytes_current": 776,
+        "bytes_max": 316206,
+        "image_bytes": 2764800,
+        "copied_pixels": 691200
+      }
+    },
+    "bounds": {
+      "warm": {
+        "count_total": 194.0,
+        "bytes_total": 480571.0,
+        "bytes_current": 304.0,
+        "bytes_max": 316150.0,
+        "image_bytes": 2764800.0,
+        "copied_pixels": 691200.0
+      },
+      "cold": {
+        "mount": {
+          "count_total": 14464,
+          "bytes_total": 4695573,
+          "bytes_current": 2428822,
+          "bytes_max": 2488790
+        },
+        "first": {
+          "count_total": 1156,
+          "bytes_total": 498292,
+          "bytes_current": 365212,
+          "bytes_max": 398927
+        }
+      },
+      "first_update": {
+        "count_total": 203,
+        "bytes_total": 481419,
+        "bytes_current": 776,
+        "bytes_max": 316150,
+        "image_bytes": 2764800,
+        "copied_pixels": 691200
+      }
+    },
+    "candidate": {
+      "warm": {
+        "count_total": 194.0,
+        "bytes_total": 480627.0,
+        "bytes_current": 304.0,
+        "bytes_max": 316206.0,
+        "image_bytes": 2764800.0,
+        "copied_pixels": 691200.0
+      },
+      "cold": {
+        "mount": {
+          "count_total": 14464,
+          "bytes_total": 4695573,
+          "bytes_current": 2428822,
+          "bytes_max": 2488790
+        },
+        "first": {
+          "count_total": 1156,
+          "bytes_total": 498292,
+          "bytes_current": 365212,
+          "bytes_max": 398927
+        }
+      },
+      "first_update": {
+        "count_total": 203,
+        "bytes_total": 481475,
+        "bytes_current": 776,
+        "bytes_max": 316206,
+        "image_bytes": 2764800,
+        "copied_pixels": 691200
+      }
+    }
+  },
+  "text-1000-2-owner": {
+    "control": {
+      "warm": {
+        "count_total": 1211.0,
+        "bytes_total": 2127078.0,
+        "bytes_current": 304.0,
+        "bytes_max": 814560.0,
+        "image_bytes": 2764800.0,
+        "copied_pixels": 691200.0
+      },
+      "cold": {
+        "mount": {
+          "count_total": 14464,
+          "bytes_total": 4695573,
+          "bytes_current": 2428822,
+          "bytes_max": 2488790
+        },
+        "first": {
+          "count_total": 1156,
+          "bytes_total": 498292,
+          "bytes_current": 365212,
+          "bytes_max": 398927
+        }
+      },
+      "first_update": {
+        "count_total": 1220,
+        "bytes_total": 2127926,
+        "bytes_current": 776,
+        "bytes_max": 814560,
+        "image_bytes": 2764800,
+        "copied_pixels": 691200
+      }
+    },
+    "predecessor": {
+      "warm": {
+        "count_total": 1211.0,
+        "bytes_total": 2127078.0,
+        "bytes_current": 304.0,
+        "bytes_max": 814560.0,
+        "image_bytes": 2764800.0,
+        "copied_pixels": 691200.0
+      },
+      "cold": {
+        "mount": {
+          "count_total": 14464,
+          "bytes_total": 4695573,
+          "bytes_current": 2428822,
+          "bytes_max": 2488790
+        },
+        "first": {
+          "count_total": 1156,
+          "bytes_total": 498292,
+          "bytes_current": 365212,
+          "bytes_max": 398927
+        }
+      },
+      "first_update": {
+        "count_total": 1220,
+        "bytes_total": 2127926,
+        "bytes_current": 776,
+        "bytes_max": 814560,
+        "image_bytes": 2764800,
+        "copied_pixels": 691200
+      }
+    },
+    "bounds": {
+      "warm": {
+        "count_total": 1211.0,
+        "bytes_total": 2127078.0,
+        "bytes_current": 304.0,
+        "bytes_max": 814560.0,
+        "image_bytes": 2764800.0,
+        "copied_pixels": 691200.0
+      },
+      "cold": {
+        "mount": {
+          "count_total": 14464,
+          "bytes_total": 4695573,
+          "bytes_current": 2428822,
+          "bytes_max": 2488790
+        },
+        "first": {
+          "count_total": 1156,
+          "bytes_total": 498292,
+          "bytes_current": 365212,
+          "bytes_max": 398927
+        }
+      },
+      "first_update": {
+        "count_total": 1220,
+        "bytes_total": 2127926,
+        "bytes_current": 776,
+        "bytes_max": 814560,
+        "image_bytes": 2764800,
+        "copied_pixels": 691200
+      }
+    },
+    "candidate": {
+      "warm": {
+        "count_total": 1211.0,
+        "bytes_total": 2127078.0,
+        "bytes_current": 304.0,
+        "bytes_max": 814560.0,
+        "image_bytes": 2764800.0,
+        "copied_pixels": 691200.0
+      },
+      "cold": {
+        "mount": {
+          "count_total": 14464,
+          "bytes_total": 4695573,
+          "bytes_current": 2428822,
+          "bytes_max": 2488790
+        },
+        "first": {
+          "count_total": 1156,
+          "bytes_total": 498292,
+          "bytes_current": 365212,
+          "bytes_max": 398927
+        }
+      },
+      "first_update": {
+        "count_total": 1220,
+        "bytes_total": 2127926,
+        "bytes_current": 776,
+        "bytes_max": 814560,
+        "image_bytes": 2764800,
+        "copied_pixels": 691200
+      }
+    }
+  },
+  "text-1000-4-source": {
+    "control": {
+      "warm": {
+        "count_total": 318.0,
+        "bytes_total": 1408095.0,
+        "bytes_current": 304.0,
+        "bytes_max": 470382.0,
+        "image_bytes": 2764800.0,
+        "copied_pixels": 691200.0
+      },
+      "cold": {
+        "mount": {
+          "count_total": 14492,
+          "bytes_total": 4700841,
+          "bytes_current": 2432422,
+          "bytes_max": 2492390
+        },
+        "first": {
+          "count_total": 1156,
+          "bytes_total": 498852,
+          "bytes_current": 365772,
+          "bytes_max": 399487
+        }
+      },
+      "first_update": {
+        "count_total": 327,
+        "bytes_total": 1408943,
+        "bytes_current": 776,
+        "bytes_max": 470382,
+        "image_bytes": 2764800,
+        "copied_pixels": 691200
+      }
+    },
+    "predecessor": {
+      "warm": {
+        "count_total": 318.0,
+        "bytes_total": 1408151.0,
+        "bytes_current": 304.0,
+        "bytes_max": 470382.0,
+        "image_bytes": 2764800.0,
+        "copied_pixels": 691200.0
+      },
+      "cold": {
+        "mount": {
+          "count_total": 14492,
+          "bytes_total": 4700841,
+          "bytes_current": 2432422,
+          "bytes_max": 2492390
+        },
+        "first": {
+          "count_total": 1156,
+          "bytes_total": 498852,
+          "bytes_current": 365772,
+          "bytes_max": 399487
+        }
+      },
+      "first_update": {
+        "count_total": 327,
+        "bytes_total": 1408999,
+        "bytes_current": 776,
+        "bytes_max": 470382,
+        "image_bytes": 2764800,
+        "copied_pixels": 691200
+      }
+    },
+    "bounds": {
+      "warm": {
+        "count_total": 318.0,
+        "bytes_total": 1408095.0,
+        "bytes_current": 304.0,
+        "bytes_max": 470382.0,
+        "image_bytes": 2764800.0,
+        "copied_pixels": 691200.0
+      },
+      "cold": {
+        "mount": {
+          "count_total": 14492,
+          "bytes_total": 4700841,
+          "bytes_current": 2432422,
+          "bytes_max": 2492390
+        },
+        "first": {
+          "count_total": 1156,
+          "bytes_total": 498852,
+          "bytes_current": 365772,
+          "bytes_max": 399487
+        }
+      },
+      "first_update": {
+        "count_total": 327,
+        "bytes_total": 1408943,
+        "bytes_current": 776,
+        "bytes_max": 470382,
+        "image_bytes": 2764800,
+        "copied_pixels": 691200
+      }
+    },
+    "candidate": {
+      "warm": {
+        "count_total": 318.0,
+        "bytes_total": 1408151.0,
+        "bytes_current": 304.0,
+        "bytes_max": 470382.0,
+        "image_bytes": 2764800.0,
+        "copied_pixels": 691200.0
+      },
+      "cold": {
+        "mount": {
+          "count_total": 14492,
+          "bytes_total": 4700841,
+          "bytes_current": 2432422,
+          "bytes_max": 2492390
+        },
+        "first": {
+          "count_total": 1156,
+          "bytes_total": 498852,
+          "bytes_current": 365772,
+          "bytes_max": 399487
+        }
+      },
+      "first_update": {
+        "count_total": 327,
+        "bytes_total": 1408999,
+        "bytes_current": 776,
+        "bytes_max": 470382,
+        "image_bytes": 2764800,
+        "copied_pixels": 691200
+      }
+    }
+  },
+  "text-1000-4-owner": {
+    "control": {
+      "warm": {
+        "count_total": 1237.0,
+        "bytes_total": 2130626.0,
+        "bytes_current": 304.0,
+        "bytes_max": 815392.0,
+        "image_bytes": 2764800.0,
+        "copied_pixels": 691200.0
+      },
+      "cold": {
+        "mount": {
+          "count_total": 14492,
+          "bytes_total": 4700841,
+          "bytes_current": 2432422,
+          "bytes_max": 2492390
+        },
+        "first": {
+          "count_total": 1156,
+          "bytes_total": 498852,
+          "bytes_current": 365772,
+          "bytes_max": 399487
+        }
+      },
+      "first_update": {
+        "count_total": 1246,
+        "bytes_total": 2131474,
+        "bytes_current": 776,
+        "bytes_max": 815392,
+        "image_bytes": 2764800,
+        "copied_pixels": 691200
+      }
+    },
+    "predecessor": {
+      "warm": {
+        "count_total": 1237.0,
+        "bytes_total": 2130626.0,
+        "bytes_current": 304.0,
+        "bytes_max": 815392.0,
+        "image_bytes": 2764800.0,
+        "copied_pixels": 691200.0
+      },
+      "cold": {
+        "mount": {
+          "count_total": 14492,
+          "bytes_total": 4700841,
+          "bytes_current": 2432422,
+          "bytes_max": 2492390
+        },
+        "first": {
+          "count_total": 1156,
+          "bytes_total": 498852,
+          "bytes_current": 365772,
+          "bytes_max": 399487
+        }
+      },
+      "first_update": {
+        "count_total": 1246,
+        "bytes_total": 2131474,
+        "bytes_current": 776,
+        "bytes_max": 815392,
+        "image_bytes": 2764800,
+        "copied_pixels": 691200
+      }
+    },
+    "bounds": {
+      "warm": {
+        "count_total": 1237.0,
+        "bytes_total": 2130626.0,
+        "bytes_current": 304.0,
+        "bytes_max": 815392.0,
+        "image_bytes": 2764800.0,
+        "copied_pixels": 691200.0
+      },
+      "cold": {
+        "mount": {
+          "count_total": 14492,
+          "bytes_total": 4700841,
+          "bytes_current": 2432422,
+          "bytes_max": 2492390
+        },
+        "first": {
+          "count_total": 1156,
+          "bytes_total": 498852,
+          "bytes_current": 365772,
+          "bytes_max": 399487
+        }
+      },
+      "first_update": {
+        "count_total": 1246,
+        "bytes_total": 2131474,
+        "bytes_current": 776,
+        "bytes_max": 815392,
+        "image_bytes": 2764800,
+        "copied_pixels": 691200
+      }
+    },
+    "candidate": {
+      "warm": {
+        "count_total": 1237.0,
+        "bytes_total": 2130626.0,
+        "bytes_current": 304.0,
+        "bytes_max": 815392.0,
+        "image_bytes": 2764800.0,
+        "copied_pixels": 691200.0
+      },
+      "cold": {
+        "mount": {
+          "count_total": 14492,
+          "bytes_total": 4700841,
+          "bytes_current": 2432422,
+          "bytes_max": 2492390
+        },
+        "first": {
+          "count_total": 1156,
+          "bytes_total": 498852,
+          "bytes_current": 365772,
+          "bytes_max": 399487
+        }
+      },
+      "first_update": {
+        "count_total": 1246,
+        "bytes_total": 2131474,
+        "bytes_current": 776,
+        "bytes_max": 815392,
+        "image_bytes": 2764800,
+        "copied_pixels": 691200
+      }
+    }
+  }
+}

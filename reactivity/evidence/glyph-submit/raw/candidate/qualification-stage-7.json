@@ -1,0 +1,8 @@
+{
+  "command": [
+    "python3",
+    "/home/user/gpui-glyph-submit-evidence/cost_fixture_gate.py",
+    "cost-fixture"
+  ],
+  "exit": 0
+}

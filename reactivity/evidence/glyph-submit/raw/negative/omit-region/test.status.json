@@ -1,0 +1,1 @@
+{"command": ["cargo", "+nightly-2026-10-23", "-Z", "checksum-freshness", "--config", "build.fingerprint=\"content\"", "test", "--locked", "--offline", "--release", "-p", "gpui_gpu", "--features", "vulkan-tests", "--test", "render", "sparse_text_regions_match_full_gpu_and_revoke_after_failure_or_resize", "--", "--exact", "--nocapture", "--test-threads=1"], "exit": 101}

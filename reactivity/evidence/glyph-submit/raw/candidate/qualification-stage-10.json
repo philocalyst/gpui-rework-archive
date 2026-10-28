@@ -1,0 +1,8 @@
+{
+  "command": [
+    "python3",
+    "/home/user/gpui-glyph-submit-evidence/matrix_runs.py",
+    "qualification"
+  ],
+  "exit": 0
+}

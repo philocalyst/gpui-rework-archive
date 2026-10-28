@@ -1,0 +1,6 @@
+{
+  "all_point_gates_pass": false,
+  "source": "matrix-timing/results.json",
+  "source_sha256": "5d1388f380a63399f6479e6b2514999799181f124ab1853a8aeb56545fd7a67e",
+  "estimator": "median of twenty-four paired process-median ratios; type-7 quantiles; paired median bootstrap seed20261031/10000 resamples"
+}

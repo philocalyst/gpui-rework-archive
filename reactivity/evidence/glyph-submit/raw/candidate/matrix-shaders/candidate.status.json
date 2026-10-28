@@ -1,0 +1,1 @@
+{"command": ["/home/user/gpui-preserved-test-binaries/803f0d68e7f6f58ef82ea85598976d9dba5c801528fba934ad4faa74ce533955", "renderer::tests::storage_records_match_shader_stride_and_offsets", "--exact", "--nocapture"], "exit": 0}
