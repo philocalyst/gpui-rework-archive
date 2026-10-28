@@ -383,6 +383,7 @@ mod chain_tests {
         let latest = token(&win);
         assert!(chain(&win).unwrap().connects(Some(base), latest));
         assert!(!chain(&win).unwrap().connects(Some(middle), latest));
+        assert!(!chain(&win).unwrap().connects(Some(base), middle));
         assert!(matches!(
             win.presented(middle),
             Err(Error::StalePresentation)
@@ -468,5 +469,47 @@ mod chain_tests {
             assert!(!summary.connects(Some(base), token(&win)));
             assert!(!summary.connects(Some(foreign_token), token(&win)));
         }
+    }
+}
+
+#[cfg(all(test, feature = "native-core"))]
+mod chain_borrow_failure_test {
+    use super::*;
+    use crate::prelude::*;
+    struct Paint(Signal<Color>);
+    impl Paint {
+        const COLOR: Source<Self, Color> =
+            Source::new(FieldId::new(1), "color", |m| &m.0, |m| &mut m.0);
+    }
+    impl View for Paint {
+        fn sources() -> Sources<Self> {
+            Sources::new().direct(Self::COLOR)
+        }
+        fn view(&self) -> El<'_> {
+            div().size(16).bg(&self.0)
+        }
+    }
+    #[test]
+    fn early_incomplete_borrow_revokes_summary_without_revoking_complete_pixels() {
+        let mut win = Win::recording(
+            Paint(Signal::new(Color::BLACK)),
+            WindowOptions {
+                size: [32, 32],
+                ..Default::default()
+            },
+        )
+        .unwrap();
+        win.set(Paint::COLOR, Color::WHITE).unwrap();
+        let eligible = win.with_scene(|_, t| t).unwrap();
+        assert!(win.runtime().unwrap().styles.slot_transition().is_some());
+        // Model an admitted source followed by an early preparation error. The
+        // exclusive borrow guard must revoke the summary on every return path.
+        {
+            let mut borrow = win.runtime_mut().unwrap();
+            borrow.source_epoch += 1;
+        }
+        assert!(win.runtime().unwrap().styles.slot_transition().is_none());
+        assert_eq!(win.with_scene(|_, t| t).unwrap(), eligible);
+        win.presented(eligible).unwrap();
     }
 }

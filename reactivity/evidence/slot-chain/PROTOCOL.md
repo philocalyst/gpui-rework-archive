@@ -64,3 +64,10 @@ the display-tree representation. After this bounded gate/cost decision, return
 to those structural/dependency and storage requirements instead of extending an
 indefinite family of paint-only paths. Cold compression remains separate and must
 charge expanded mirrors, directories, scratch, raw compatibility and GPU decode.
+
+The first frozen cohort b83fb91e passes chain/storage/live GPU/Clippy gates and
+is preserved. Before sealing, strengthen revocation at RuntimeMut::drop whenever
+source epoch is ahead of complete epoch, dirty or logically invalid, covering
+early error returns independently of individual preparation helpers. Add an
+explicit stale-final-token rejection and bounded early-error borrow witness.
+No new publication class, relaxed oracle or performance inference.

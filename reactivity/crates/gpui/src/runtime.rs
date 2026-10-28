@@ -1277,6 +1277,13 @@ impl<M: View + 'static, L: LaneSet<M>> std::ops::DerefMut for RuntimeMut<'_, M, 
 }
 impl<M: View + 'static, L: LaneSet<M>> Drop for RuntimeMut<'_, M, L> {
     fn drop(&mut self) {
+        #[cfg(feature = "native-core")]
+        if self.runtime.source_epoch != self.runtime.complete_epoch
+            || self.runtime.dirty
+            || !self.runtime.logical_valid
+        {
+            self.runtime.styles.clear_slot_transition();
+        }
         if !L::EMPTY && (self.runtime.poisoned || self.runtime.source_epoch == u64::MAX) {
             self.lanes.close();
         }
