@@ -868,3 +868,23 @@ real text/image payload leases precede any resource-completeness claim.
 Historical469.5x is CPU recording versus old GPUI, not ZGX; older native workspace
 mixed CPU remains6.06x ZGX. New representations have no competitor timing claim.
 All new work stays local.
+
+
+Incremental chunk checkpoint **57ccf254851e12839da4b5deedd5c7047b686c80** on
+local/display-chunks separately seals Stage A2834 deterministic checks and
+B1/C1:16 public paint edits,51 exact actual GPU byte readbacks,3 overlapping
+submitted roots, and a267-byte real glyph/image resource-lease mutant failure.
+A visible1024-node point edit uses1 identity lookup/32 decoded rows/564 encoded
+bytes/2 damage records.97-node movement enumerates194 records and examines2231
+index entries. Raw tiny fallback reduces the actual overlap heap6144->4096B.
+Upload-log and completion-history leaks were found and fixed; original cohorts
+remain. This is a restricted offline binding plus a byte-lifetime audit, not a
+renderer consuming the new chunk tree or generic production journal integration.
+Flat publication/resource table rebuilding remains linear; no timing claim.
+
+Next local/display-radix at /home/user/gpui-display-radix-lab preregisters
+**f1e9d54bf8906f0aa169bd2769cdc0d74272a922**: bounded COW directory plus one
+combined public edit-to-final-pixels trace, scene-size sweep, all metadata and
+in-flight costs, clipped/overlapping content, stale/deferred publication, real
+resource leases and uncompressed serial controls. It must report an explicit
+implemented/restricted/missing matrix. Staging is not coherent shared memory.
