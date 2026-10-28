@@ -4,6 +4,16 @@ Written 2026-10-24. Source host: **Nudox Prod** (`ilo-prod`, `root@87.99.136.215
 
 This repo is the preserved state of the GPUI clean-room rework as it stood on prod: every worktree's commit, every worktree's uncommitted/untracked work, the three stashes, and all local branches and tags. It is a git archive, not a working checkout. Nothing on prod was modified or deleted.
 
+## Research continuation — 2026-10-28
+
+The architecture/performance investigation is preserved on **141 additional `local/*` branches**, including implementations, baselines, negative controls, qualification checkpoints, and rejected experiments. The `local/` prefix is retained as part of their original names.
+
+- **[Research branch index](RESEARCH_BRANCHES.md)** — direct links to the main investigations and every captured branch, including BBTree-inspired tree traversal, text/state publication, native lists, retained rendering, and GPU damage repair.
+- **[Research manifest](RESEARCH_MANIFEST.tsv)** — exact commit SHAs, commit timestamps, original worktree paths, and latest commit subjects for all 141 branches.
+- Publication preserves the research; it does **not** declare every candidate adopted or establish an overall performance win over ZGX. Each dossier retains its own acceptance gates, failures, and limitations. External binaries and non-Git evidence are not included.
+
+The numbered sections and appendices below describe the **original October 24 archive**. Their counts and host/storage observations are historical; the research index above records the later additions separately.
+
 ## 1. Status at a glance
 
 | Item | State |
