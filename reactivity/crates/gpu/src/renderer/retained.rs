@@ -1,6 +1,6 @@
 //! A renderer-owned image, never a preservation assumption about a swapchain.
 use super::*;
-use gpui_canvas::{DamageRegion, DamageRegions, SlotEdit};
+use gpui_canvas::{DamageRegion, DamageRegions, ScrollCopy, SlotEdit};
 
 pub(super) struct Output<'a> {
     pub(super) view: &'a wgpu::TextureView,
@@ -44,6 +44,21 @@ impl Submission for RegionalOutput<'_> {
     #[inline(always)]
     fn submit(self, context: &GpuContext, bindings: &wgpu::BindGroup) -> wgpu::SubmissionIndex {
         context.submit_regions(self.output, bindings, self.regions)
+    }
+}
+
+struct ScrollOutput<'a> {
+    output: Output<'a>,
+    scroll: &'a ScrollCopy,
+}
+impl Submission for ScrollOutput<'_> {
+    #[inline(always)]
+    fn view(&self) -> &wgpu::TextureView {
+        self.output.view
+    }
+    #[inline(always)]
+    fn submit(self, context: &GpuContext, bindings: &wgpu::BindGroup) -> wgpu::SubmissionIndex {
+        context.submit_scroll(self.output, bindings, self.scroll)
     }
 }
 
@@ -134,6 +149,64 @@ impl RetainedRenderer {
         )?;
         backing.valid = true;
         self.stats = backing.stats(damage);
+        Ok(submitted)
+    }
+    /// Copy a proved overlap from the exact preceding image and repair the rest.
+    /// The caller must bind the plan to that image. First use/resize/missing image
+    /// authority falls back to full rendering, after validating the proposed bounds.
+    pub fn render_with_scroll(
+        &mut self,
+        scene: PreparedScene<'_>,
+        target: &wgpu::TextureView,
+        damage: Option<DamageRegion>,
+        scroll: Option<&ScrollCopy>,
+    ) -> Result<wgpu::SubmissionIndex, Error> {
+        let Some(scroll) = scroll else {
+            return self.render(scene, target, damage);
+        };
+        let size = [scene.width, scene.height];
+        let valid =
+            self.backing.as_ref().is_some_and(|b| b.valid) && self.inner.state.packet.is_some();
+        if let Some(backing) = &mut self.backing {
+            backing.valid = false;
+        }
+        if size.contains(&0)
+            || size.iter().any(|&n| n > 16_384)
+            || u64::from(size[0]) * u64::from(size[1]) > MAX_PIXELS as u64
+        {
+            return Err(Error::ResourceLimit);
+        }
+        check_target(target, size, self.inner.format())?;
+        check_damage(damage, size)?;
+        check_scroll(scroll, size)?;
+        if !valid || self.backing.as_ref().is_none_or(|b| b.size() != size) {
+            return self.render(scene, target, None);
+        }
+        let backing = self.backing.as_mut().unwrap();
+        backing.prepare_scroll(&self.inner.context, scroll);
+        let submitted = self.inner.state.render_observed(
+            &self.inner.context,
+            scene,
+            ScrollOutput {
+                output: backing.output(target, None),
+                scroll,
+            },
+            |_, _, _, _| {},
+        )?;
+        backing.valid = true;
+        let [l, t, r, b] = scroll.source();
+        self.stats = RetainedStats {
+            composited_pixels: scroll
+                .repairs()
+                .iter()
+                .map(|r| {
+                    r.bounds()
+                        .map_or(0, |[l, t, r, b]| u64::from(r - l) * u64::from(b - t))
+                })
+                .sum(),
+            ..backing.stats(None)
+        };
+        self.stats.copied_pixels += 2 * u64::from(r - l) * u64::from(b - t);
         Ok(submitted)
     }
     /// Repair separated regions certified against the preceding retained image.
@@ -251,11 +324,34 @@ fn check_damage(damage: Option<DamageRegion>, size: [u32; 2]) -> Result<(), Erro
     Ok(())
 }
 
+fn check_scroll(plan: &ScrollCopy, size: [u32; 2]) -> Result<(), Error> {
+    let [l, t, r, b] = plan.source();
+    let [dl, dt, dr, db] = plan.destination();
+    if l >= r
+        || t >= b
+        || dl >= dr
+        || dt >= db
+        || r > size[0]
+        || b > size[1]
+        || dr > size[0]
+        || db > size[1]
+        || r - l != dr - dl
+        || b - t != db - dt
+    {
+        return Err(Error::InvalidScene);
+    }
+    for &repair in plan.repairs() {
+        check_damage(Some(repair), size)?;
+    }
+    Ok(())
+}
+
 pub(super) struct Backing {
     view: wgpu::TextureView,
     pipeline: wgpu::RenderPipeline,
     binding: wgpu::BindGroup,
     valid: bool,
+    scratch: Option<Box<wgpu::Texture>>,
 }
 impl Backing {
     fn new(context: &GpuContext, size: [u32; 2], pipeline: Option<wgpu::RenderPipeline>) -> Self {
@@ -302,7 +398,10 @@ impl Backing {
             sample_count: 1,
             dimension: wgpu::TextureDimension::D2,
             format: context.format(),
-            usage: wgpu::TextureUsages::RENDER_ATTACHMENT | wgpu::TextureUsages::TEXTURE_BINDING,
+            usage: wgpu::TextureUsages::RENDER_ATTACHMENT
+                | wgpu::TextureUsages::TEXTURE_BINDING
+                | wgpu::TextureUsages::COPY_SRC
+                | wgpu::TextureUsages::COPY_DST,
             view_formats: &[],
         });
         let view = texture.create_view(&Default::default());
@@ -319,6 +418,7 @@ impl Backing {
             pipeline,
             binding,
             valid: false,
+            scratch: None,
         }
     }
     fn size(&self) -> [u32; 2] {
@@ -344,9 +444,58 @@ impl Backing {
                     .map_or(0, |[l, t, r, b]| u64::from(r - l) * u64::from(b - t))
             }),
             copied_pixels: pixels,
-            image_bytes: pixels
+            image_bytes: (pixels
+                + self
+                    .scratch
+                    .as_ref()
+                    .map_or(0, |s| u64::from(s.width()) * u64::from(s.height())))
                 * u64::from(self.view.texture().format().block_copy_size(None).unwrap()),
         }
+    }
+    fn prepare_scroll(&mut self, context: &GpuContext, plan: &ScrollCopy) {
+        let [l, t, r, b] = plan.source();
+        let requested = [r - l, b - t];
+        let previous = self
+            .scratch
+            .as_ref()
+            .map_or([0, 0], |s| [s.width(), s.height()]);
+        if requested[0] > previous[0] || requested[1] > previous[1] {
+            self.scratch = Some(Box::new(context.device().create_texture(
+                &wgpu::TextureDescriptor {
+                    label: Some("GPUI scroll copy scratch"),
+                    size: wgpu::Extent3d {
+                        width: requested[0].max(previous[0]),
+                        height: requested[1].max(previous[1]),
+                        depth_or_array_layers: 1,
+                    },
+                    mip_level_count: 1,
+                    sample_count: 1,
+                    dimension: wgpu::TextureDimension::D2,
+                    format: context.format(),
+                    usage: wgpu::TextureUsages::COPY_SRC | wgpu::TextureUsages::COPY_DST,
+                    view_formats: &[],
+                },
+            )));
+        }
+    }
+    pub(super) fn scroll(&self, encoder: &mut wgpu::CommandEncoder, plan: &ScrollCopy) {
+        let [l, t, r, b] = plan.source();
+        let [dl, dt, _, _] = plan.destination();
+        let extent = wgpu::Extent3d {
+            width: r - l,
+            height: b - t,
+            depth_or_array_layers: 1,
+        };
+        let backing = self.view.texture();
+        let scratch = self.scratch.as_ref().expect("admitted scratch");
+        let copy = |texture, x, y| wgpu::TexelCopyTextureInfo {
+            texture,
+            mip_level: 0,
+            origin: wgpu::Origin3d { x, y, z: 0 },
+            aspect: wgpu::TextureAspect::All,
+        };
+        encoder.copy_texture_to_texture(copy(backing, l, t), copy(scratch, 0, 0), extent);
+        encoder.copy_texture_to_texture(copy(scratch, 0, 0), copy(backing, dl, dt), extent);
     }
     pub(super) fn copy(&self, encoder: &mut wgpu::CommandEncoder, target: &wgpu::TextureView) {
         let mut pass = encoder.begin_render_pass(&wgpu::RenderPassDescriptor {

@@ -12,6 +12,7 @@ mod images;
 mod owned;
 mod paint;
 mod retained;
+mod scroll_output;
 use retained::Output;
 pub use retained::{RetainedRenderer, RetainedStats};
 mod slots;

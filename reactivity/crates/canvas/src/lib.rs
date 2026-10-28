@@ -10,8 +10,9 @@ pub use canvas::{
     Canvas, CanvasScene, Clip, ClipChain, ClipGeometry, ClipId, ClipShape, GlyphMask,
     MAX_CLIP_DEPTH, MAX_CLIP_NODES, PaintColor, PaintCommit, PaintEdit, PaintError, PaintErrorKind,
     PaintIndex, PaintSlot, PreparedClipNode, PreparedDraw, PreparedGroup, PreparedPaint,
-    PreparedPlacement, PreparedScene, PreparedSource, RenderStats, SceneStorage, SlotCommit,
-    SlotEdit, SlotError, SlotErrorKind, TextRunSlot, rounded_rect_contains, sampled_rect_clip,
+    PreparedPlacement, PreparedScene, PreparedSource, RenderStats, SceneStorage, ScrollCopy,
+    SlotCommit, SlotEdit, SlotError, SlotErrorKind, TextRunSlot, rounded_rect_contains,
+    sampled_rect_clip,
 };
 pub use color::gradient::{
     Extend, Gradient, GradientGeometry, GradientKey, GradientStop, GradientView, Interpolation,
