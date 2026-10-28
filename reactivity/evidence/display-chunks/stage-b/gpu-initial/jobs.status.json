@@ -1,0 +1,11 @@
+{
+  "args": [
+    "python3",
+    "/home/user/gpui-display-chunks-lab/reactivity/crates/display-span-lab/model/lifetime_gpu.py",
+    "/home/user/gpui-display-chunks-evidence/gpu-initial/assets",
+    "/home/user/gpui-display-chunks-evidence/gpu-initial/jobs"
+  ],
+  "exit": 0,
+  "expected": 0,
+  "elapsed_seconds": 0.05818486213684082
+}

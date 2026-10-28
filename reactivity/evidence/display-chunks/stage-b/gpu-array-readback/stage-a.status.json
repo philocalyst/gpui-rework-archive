@@ -1,0 +1,10 @@
+{
+  "args": [
+    "python3",
+    "/home/user/gpui-display-chunks-lab/reactivity/crates/display-span-lab/model/chunks.py",
+    "/home/user/gpui-display-chunks-evidence/gpu-array-readback/stage-a"
+  ],
+  "exit": 0,
+  "expected": 0,
+  "elapsed_seconds": 11.994017124176025
+}

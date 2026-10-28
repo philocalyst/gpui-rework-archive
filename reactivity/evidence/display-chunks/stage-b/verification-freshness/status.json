@@ -1,0 +1,1 @@
+{"exit": 1, "reason": "verifier assumed unchanged binary would be Cargo-fresh; package rebuild also rebuilt identical direct_resources ELF"}

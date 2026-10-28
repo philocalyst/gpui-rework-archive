@@ -1,0 +1,12 @@
+{
+  "direct_resources": {
+    "preserved": "/home/user/gpui-preserved-test-binaries/643298dc102ab4add9ea8ecff651cece0f3c418be2d86868fa27999ee0bda154",
+    "sha256": "643298dc102ab4add9ea8ecff651cece0f3c418be2d86868fa27999ee0bda154",
+    "bytes": 10202672
+  },
+  "heap_audit": {
+    "preserved": "/home/user/gpui-preserved-test-binaries/412cf31b94e562207c54e1bca846f9c63e95983715b1ec679cc7af69263ffcfb",
+    "sha256": "412cf31b94e562207c54e1bca846f9c63e95983715b1ec679cc7af69263ffcfb",
+    "bytes": 6960152
+  }
+}

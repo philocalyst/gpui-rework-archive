@@ -1,0 +1,5 @@
+Traceback (most recent call last):
+  File "/home/user/gpui-display-chunks-lab/reactivity/evidence/display-chunks/verify_stage_b.py", line 23, in <module>
+    assert fresh==dict(heap_audit=False,direct_resources=True)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+AssertionError

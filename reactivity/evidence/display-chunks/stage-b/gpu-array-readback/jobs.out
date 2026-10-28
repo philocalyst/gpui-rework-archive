@@ -1,0 +1,1 @@
+[{"mode": "serial", "frames": 17, "arena_bytes": 3264, "mutant": false}, {"mode": "overlap", "frames": 17, "arena_bytes": 6144, "mutant": false}, {"mode": "overlap-raw", "frames": 17, "arena_bytes": 4096, "mutant": false}, {"mode": "missing-resource-lease", "frames": 17, "arena_bytes": 5120, "mutant": true}]

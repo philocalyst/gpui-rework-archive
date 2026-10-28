@@ -1,0 +1,9 @@
+{
+  "args": [
+    "/home/user/gpui-preserved-test-binaries/ef9cf7df1ac15f5db68fea252db9f8b47ad8c8f1ba857a22f55a21967e7d66a8",
+    "/home/user/gpui-display-chunks-evidence/gpu-initial/jobs/serial/jobs.json"
+  ],
+  "exit": 0,
+  "expected": 0,
+  "elapsed_seconds": 0.26867032051086426
+}

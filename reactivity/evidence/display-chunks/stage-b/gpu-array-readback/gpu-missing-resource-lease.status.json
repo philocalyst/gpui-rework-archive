@@ -1,0 +1,9 @@
+{
+  "args": [
+    "/home/user/gpui-preserved-test-binaries/412cf31b94e562207c54e1bca846f9c63e95983715b1ec679cc7af69263ffcfb",
+    "/home/user/gpui-display-chunks-evidence/gpu-array-readback/jobs/missing-resource-lease/jobs.json"
+  ],
+  "exit": 101,
+  "expected": 101,
+  "elapsed_seconds": 0.01909494400024414
+}

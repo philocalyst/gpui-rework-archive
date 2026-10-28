@@ -1,0 +1,9 @@
+{
+  "args": [
+    "/home/user/gpui-preserved-test-binaries/643298dc102ab4add9ea8ecff651cece0f3c418be2d86868fa27999ee0bda154",
+    "/home/user/gpui-display-chunks-evidence/gpu-array-readback/assets"
+  ],
+  "exit": 0,
+  "expected": 0,
+  "elapsed_seconds": 0.003901243209838867
+}
