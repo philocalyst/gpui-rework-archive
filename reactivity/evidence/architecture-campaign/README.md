@@ -548,3 +548,9 @@ Initial shader type failure retained; correctedsource39efefe5. Nativeaudit
 Fine-grid native audit **74144bfc** passes exact images and unchanged scene
 counts; planned first-packet samples fall to54.3%/55.4% of16x16parent while
 references increase. Uninstrumented screene117ad4b building. No speed claim.
+
+
+Fine-grid native **0d48eb1d** rejects:stream .86580,mixed .87037 fail .8 despite
+all work/cadence checks passing. New sample-partitionsf9c3f300/ddf9f4b6 keeps
+16x16 host bins and shares exact identical sample states, refining before blends.
+GPU qualification underway; no adoption or ZGX claim.

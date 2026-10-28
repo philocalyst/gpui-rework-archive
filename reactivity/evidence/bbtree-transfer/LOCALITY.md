@@ -777,3 +777,25 @@ match16x16parent2520aeec. Planned sample work initial0:10307584/18989056
 10066 and14840 respectively. This is planned complete-packet work, not timing,
 repair-cropped loads or cache counters. Native screene117ad4b is now building;
 unchanged20% targets and all resource/complete-cost/hardware gates remain.
+
+
+Fine-grid screen **0d48eb1dacc4768a29fb3eaf531f4b75c6c7196b** verifies828 files,
+64 normal processes,10 preflights,34 workload tests and all work/cadence gates.
+Ratios:scroll .875697727 (95%[.847234207,.927114238]);stream .865797657
+([.800268375,.920098988]);mixed .870368870 ([.742981928,.943701227]);idle0/0.
+Stream/mixed fail .8. Planned-work reduction did not establish the target end-to-
+end improvement. No full-cost admission; no retuning this grid experiment.
+
+New sample-partitions preregistration **f9c3f300e7c3052d6b574b49d3df4b154320a30d**,
+production **ddf9f4b6c6adf625b2b839c9d4ffe52c4a01574c**, starts from16x16
+mask-missb817. Two cut bitsets encode rectangular groups of samples that have
+executed identical source-over operations. Each new source unions cuts; new
+representatives inherit their old color before any blend. No merging based on
+float equality, averaging or skipped zero arithmetic. Masks use exact cells
+only with full clip proof; lowered solids use exact axis membership; unknown
+cases split fully. Final16 anchor/delta operations remain in original order.
+16vec4 storage remains, extra masks/control/code-generation costs charged.
+This tests BBTree's shared homogeneous-stage decisions in a compiled operation
+kernel, not an async runtime. Existing publication/task authority is untouched.
+GPU suite plus new public96-frame refinement/fallback/replay adversary is starting.
+Existing336 independent reference images remain unchanged. No performance claim.
