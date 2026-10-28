@@ -543,3 +543,8 @@ Fine-grid admission **dbc8777e** passes356 tests,Clippy,336 exact images;
 coarse-address mutant fails336 independent images despite internal self-parity.
 Initial shader type failure retained; correctedsource39efefe5. Nativeaudit
 7cc9497c building; fixed screene117ad4b pending. No performance claim.
+
+
+Fine-grid native audit **74144bfc** passes exact images and unchanged scene
+counts; planned first-packet samples fall to54.3%/55.4% of16x16parent while
+references increase. Uninstrumented screene117ad4b building. No speed claim.

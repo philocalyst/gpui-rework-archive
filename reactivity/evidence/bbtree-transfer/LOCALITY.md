@@ -767,3 +767,13 @@ expectedexit101 failure is retained; external rejection supplies the witness.
 Shipping38262 lines (+55 parent,+234 suffix),WGSL22953 bytes. Actual-native
 instrumented audit7cc9497c is building; uninstrumented screene117ad4b is frozen
 with seed20261119,not started. No full qualification/performance/adoption claim.
+
+
+Fine-grid native audit **74144bfcca964141654cf6641dda2f1ffa14f53b** verifies
+141 files,17 workload tests,8 normal processes and1082 literal8x8 preparations.
+Both native images exact; first-packet draw/mask/unit-axis/dimension counts
+match16x16parent2520aeec. Planned sample work initial0:10307584/18989056
+(.542817084),initial190:15196160/27451392 (.553566100). Reference counts increase:
+10066 and14840 respectively. This is planned complete-packet work, not timing,
+repair-cropped loads or cache counters. Native screene117ad4b is now building;
+unchanged20% targets and all resource/complete-cost/hardware gates remain.
