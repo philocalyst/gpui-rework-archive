@@ -440,3 +440,12 @@ and implemented at 41a67473a017. The new lifetime mutant fails public acknowledg
 text exactly; qualification and fixed allocation gates are in progress. See
 [the detailed research checkpoint](../bbtree-transfer/LOCALITY.md#publication-workspace-experiment-implemented-qualification-in-progress).
 No timing, adoption or ZGX advantage is claimed at this checkpoint.
+
+
+Publication-workspace dossier **f7b3f60c70faf6d548fffda530d4de83b2570e34** now
+passes independent verification and all 112 fixed local performance comparisons,
+plus all six deterministic allocation and functional/storage/work gates. The
+combined candidate is admitted to preregistered native trial 03ca419868b0d538e6847e59b60424a31aa32dfa.
+See [the exact results and limitations](../bbtree-transfer/LOCALITY.md#publication-workspace-complete-local-gate-passes-native-comparison-admitted).
+The incremental reuse speedup is small/uncertain; no ZGX or hardware victory is
+claimed, and all earlier failed verdicts remain unchanged.

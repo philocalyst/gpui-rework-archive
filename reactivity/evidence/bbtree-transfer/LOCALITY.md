@@ -379,3 +379,36 @@ nor speed. Six mandatory warm-allocation reductions precede timing. The fixed
 all other cases. Thresholds and all earlier verdicts remain unchanged. No timing
 has run at this checkpoint. BBTree continuation ownership and Solid/Ripple staged
 publication motivate the lifetime split; cache-hit rates remain unmeasured.
+
+## Publication workspace: complete local gate passes; native comparison admitted
+
+Dossier **f7b3f60c70faf6d548fffda530d4de83b2570e34** independently verifies 33,600
+files, 10,400 timing / 420 qualification / 140 allocation processes, all 112 fixed
+point comparisons, 930 preserved ELFs and 867 archived cache identities. Measured
+source remains 41a67473a0177fbb17df1f7b8e2f2f36dd6940f6. All six allocation gates
+pass: stream and owner-stream save two requests/608 requested bytes per warm
+update; the four required small source-edit cases save one request/96 bytes.
+Every qualification frame retains exactly the same composited/copy/image work
+as precise scroll, and all exact output/epoch checks pass. All full/default/
+minimal/offline/native/Clippy, lifetime-fault, shader and header gates pass.
+
+Paired candidate/original p50 ratios are scroll .085834647, mixed .067493327,
+stream .102916904 and owner-stream .104567052. Versus precise scroll they are
+1.032461123, 1.013385064, .985136374 and 1.002756599. The large original-control
+gains are inherited from the combined earlier work; reuse's incremental timing
+benefit is small and uncertain. Its deterministic allocation reduction is real.
+The largest unaffected-case point regression is 1.020708454 (1000-label two-field
+owner versus precise scroll), within the fixed 1.05 limit. Some confidence
+intervals cross 1.05; acceptance was explicitly based on fixed point gates.
+No sampling rule/threshold changed, no observation was selected or repeated,
+and no earlier failed cohort is reclassified. There is still no cache-hit claim.
+
+Native experiment **03ca419868b0d538e6847e59b60424a31aa32dfa** is preregistered
+at /home/user/gpui-native-workspace-lab/reactivity/evidence/native-workspace.
+It compares original/static-sparse/candidate/ZGX with matched fat-LTO/CGU1
+profiles and exact preserved control ELFs. Four modes, eight balanced groups,
+128 eight-second observations; all active candidate/ZGX cadence checks precede
+CPU-ratio inference. Candidate/ZGX <=.8 CPU-rate ratios are required in each
+active mode; idle has a fixed zero-update/.01-core gate. It carries no production
+or workload edit. Hardware, scanout, input-policy and AA/quality gates stay open.
+This native trial has not been measured at this checkpoint.
