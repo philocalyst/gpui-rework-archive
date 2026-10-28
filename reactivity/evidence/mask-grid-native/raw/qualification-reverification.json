@@ -1,0 +1,5 @@
+{
+  "exit": 0,
+  "stdout": "{\"files\": 1073, \"executable_identities\": 64, \"gpu_canvas_tests\": 356, \"ignored_tests\": 3, \"exact_frames\": 336, \"mutant_mismatched_frames\": 336, \"admission_correctness_passes\": true, \"scope\": \"Early grid admission only; actual native selection/full configurations/offline/performance remain pending.\"}\n",
+  "stderr": ""
+}

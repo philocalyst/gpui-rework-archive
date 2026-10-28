@@ -1,0 +1,9 @@
+font_family=DejaVu Sans font_file_fnv64=ce252980ec1255ff
+font_file_fnv64=ce252980ec1255ff
+source_ingress=owner
+libEGL warning: DRI3 error: Could not get DRI3 device
+libEGL warning: Ensure your X server supports DRI3 to get accelerated rendering
+GPUI_ACK,0,0,3656
+WORKLOAD_FINISHED admitted_ticks=0
+workload_ticks=190 admitted_ticks=0 workload_scroll_offset=2660
+native_acknowledgements=1 native_elapsed_seconds=4.047192

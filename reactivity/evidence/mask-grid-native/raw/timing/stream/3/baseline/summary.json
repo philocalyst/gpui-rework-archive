@@ -1,0 +1,27 @@
+{
+  "name": "baseline",
+  "mode": "stream",
+  "route": "exact",
+  "initial": 0,
+  "ticks": 479,
+  "native_acknowledgements": 480,
+  "reference_or_model_final": {
+    "total_ticks": 479,
+    "scroll_offset": 0.0
+  },
+  "visible_seconds": 0.21480914400308393,
+  "samples": 404,
+  "font_sha256": "7da195a74c55bef988d0d48f9508bd5d849425c1770dba5d7bfc6ce9ed848954",
+  "interval_start": 1.2344005519989878,
+  "interval_end": 6.197344556014286,
+  "interval_seconds": 4.962944004015299,
+  "cpu_seconds": 3.1899999999999995,
+  "cpu_cores": 0.6427636494425711,
+  "mean_rss_bytes": 150745088,
+  "max_rss_bytes": 150745088,
+  "cadence_pass": true,
+  "first_second_gaps_over25ms": 1,
+  "gap_gate_pass": true,
+  "later_gaps_over25ms": 0,
+  "total_gaps_over25ms": 1
+}
