@@ -1,0 +1,8 @@
+{
+  "checkpoint": "342e9495b10d7ab41ec9200b2d6a28acbb2af956",
+  "files": 181,
+  "bytes": 1744267688,
+  "free_before": 7260700672,
+  "free_after": 8747851776,
+  "scope": "Only completed ELF cache copies already verified in canonical raw storage. No new archive allocation below reserve; source/evidence/libraries/shaders/fingerprints and all canonical bytes retained. No build/test/timing overlaps cleanup."
+}

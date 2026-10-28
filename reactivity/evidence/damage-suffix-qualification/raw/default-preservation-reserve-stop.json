@@ -1,0 +1,5 @@
+{
+  "gate": "default-initial",
+  "test_exit": 0,
+  "stop": "All default tests completed and152 executable artifacts were preserved. The next-stage8GiB reserve precheck stopped Clippy before launch; no source changed and all processes were reaped. Missing Clippy will run separately after cache reclamation."
+}

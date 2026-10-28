@@ -1,0 +1,702 @@
+[
+  {
+    "path": "/home/user/gpui-damage-suffix-omit-target/release/build/swash/a02621463598942c/out/libswash-a02621463598942c.rlib",
+    "bytes": 2278970,
+    "sha256": "73ec0ea67938e9141a46500c29c9ed1898d68d37b902ee1a34a47de33fdcdfcf"
+  },
+  {
+    "path": "/home/user/gpui-damage-suffix-omit-target/release/build/swash/a02621463598942c/out/libswash-a02621463598942c.rmeta",
+    "bytes": 6264949,
+    "sha256": "9b2629f48768388042e60abc7553440bd46d312b29426b006f46494ddd920453"
+  },
+  {
+    "path": "/home/user/gpui-damage-suffix-omit-target/release/build/icu_properties_data/f6b62411c57a0b14/out/libicu_properties_data-f6b62411c57a0b14.rmeta",
+    "bytes": 1864842,
+    "sha256": "606f9f3610f0f783170a7b2df290544ddadf21310e975a5ad1c625235aba4dde"
+  },
+  {
+    "path": "/home/user/gpui-damage-suffix-omit-target/release/build/icu_properties_data/f6b62411c57a0b14/out/libicu_properties_data-f6b62411c57a0b14.rlib",
+    "bytes": 2436,
+    "sha256": "db8e960d3f5996bcba56ea9b32d55db77f910e46d44ec170ee4329770e7ae95c"
+  },
+  {
+    "path": "/home/user/gpui-damage-suffix-omit-target/release/build/icu_locale_fallback_data/10c3d6d8535f5201/out/libicu_locale_fallback_data-10c3d6d8535f5201.rlib",
+    "bytes": 2470,
+    "sha256": "08745710d68c2f6ff4c72165b08ac2c1a9913dc6eb1b76acb16d66a2af454d3e"
+  },
+  {
+    "path": "/home/user/gpui-damage-suffix-omit-target/release/build/icu_locale_fallback_data/10c3d6d8535f5201/out/libicu_locale_fallback_data-10c3d6d8535f5201.rmeta",
+    "bytes": 27541,
+    "sha256": "a492663285e50e394d1566a5f40371acbb12283732098453f6a4da96dbd519e8"
+  },
+  {
+    "path": "/home/user/gpui-damage-suffix-omit-target/release/build/icu_segmenter_data/e85961f7d1f676b4/out/libicu_segmenter_data-e85961f7d1f676b4.rmeta",
+    "bytes": 12361467,
+    "sha256": "198b045bf481c8bef8ab127843c23c961ce355fd524d7d798aebb90b803ea537"
+  },
+  {
+    "path": "/home/user/gpui-damage-suffix-omit-target/release/build/icu_segmenter_data/e85961f7d1f676b4/out/libicu_segmenter_data-e85961f7d1f676b4.rlib",
+    "bytes": 2434,
+    "sha256": "51dc029f3daa8f1b6ec687c6f2548304989def1521da4c30bcc2effb6cefd1ae"
+  },
+  {
+    "path": "/home/user/gpui-damage-suffix-omit-target/release/build/equivalent/e921210bf9934426/out/libequivalent-e921210bf9934426.rmeta",
+    "bytes": 8690,
+    "sha256": "9bf318bb7838ba95e7e1484f0436534f013828ead039eb237346c831295a52d1"
+  },
+  {
+    "path": "/home/user/gpui-damage-suffix-omit-target/release/build/equivalent/e921210bf9934426/out/libequivalent-e921210bf9934426.rlib",
+    "bytes": 2386,
+    "sha256": "a46b522887aaf5f1b29b475110c0c3f4a748af94a9b51f99b4eede7436598ecd"
+  },
+  {
+    "path": "/home/user/gpui-damage-suffix-omit-target/release/build/unicode-properties/17c70661265ca7de/out/libunicode_properties-17c70661265ca7de.rlib",
+    "bytes": 45070,
+    "sha256": "6541563397ca8ac0648e5abae3bc2a270668e0aba515b4fc5fa3f25356df2fad"
+  },
+  {
+    "path": "/home/user/gpui-damage-suffix-omit-target/release/build/unicode-properties/17c70661265ca7de/out/libunicode_properties-17c70661265ca7de.rmeta",
+    "bytes": 414258,
+    "sha256": "508e98ff7b816eca6b51ee637b5aeb023f2d738e0b59119a643e3a6aa5426888"
+  },
+  {
+    "path": "/home/user/gpui-damage-suffix-omit-target/release/build/writeable/21a49729ec9532f7/out/libwriteable-21a49729ec9532f7.rlib",
+    "bytes": 21272,
+    "sha256": "6b3ab2dd2213417368a3f03a128fbd345c4fcf3176f18a0356ff1df6b1a4df93"
+  },
+  {
+    "path": "/home/user/gpui-damage-suffix-omit-target/release/build/writeable/21a49729ec9532f7/out/libwriteable-21a49729ec9532f7.rmeta",
+    "bytes": 393360,
+    "sha256": "a7523f1199b79b21e9b0b9143c2497d90404d7e1373f5a311da0c140db0bef3d"
+  },
+  {
+    "path": "/home/user/gpui-damage-suffix-omit-target/release/build/font-types/5f97b5f1ddb715fb/out/libfont_types-5f97b5f1ddb715fb.rlib",
+    "bytes": 40298,
+    "sha256": "4960564185fcfb4dd57055d869a2d677430f051a66f88c65df89f812b31527af"
+  },
+  {
+    "path": "/home/user/gpui-damage-suffix-omit-target/release/build/font-types/5f97b5f1ddb715fb/out/libfont_types-5f97b5f1ddb715fb.rmeta",
+    "bytes": 804305,
+    "sha256": "be039721a2ba778a0da9974d13ad73dec55bf8c3e68e08c41a9c562a27de6c06"
+  },
+  {
+    "path": "/home/user/gpui-damage-suffix-omit-target/release/build/parley_emoji/2989278c86b9b60c/out/libparley_emoji-2989278c86b9b60c.rlib",
+    "bytes": 2776,
+    "sha256": "be82d98c2cea5f367c8a779eefceefbf899e7813994472946cd624102c255afa"
+  },
+  {
+    "path": "/home/user/gpui-damage-suffix-omit-target/release/build/parley_emoji/2989278c86b9b60c/out/libparley_emoji-2989278c86b9b60c.rmeta",
+    "bytes": 59251,
+    "sha256": "ecfd6825f5e2a4c07268e3d225bfb1b474b0045b58cb50fae28cfb971297a42e"
+  },
+  {
+    "path": "/home/user/gpui-damage-suffix-omit-target/release/build/allocator-api2/16fb647c07389266/out/liballocator_api2-16fb647c07389266.rmeta",
+    "bytes": 851645,
+    "sha256": "1a0d5c0428389c9ee979bc41ae0b38fe2ad766e49a2b5939b080ace26a9682ea"
+  },
+  {
+    "path": "/home/user/gpui-damage-suffix-omit-target/release/build/allocator-api2/16fb647c07389266/out/liballocator_api2-16fb647c07389266.rlib",
+    "bytes": 9554,
+    "sha256": "61fdae71f3dc1bf86d0036bf05c274ad3216b268d44677d2cc3c634b83c13fd0"
+  },
+  {
+    "path": "/home/user/gpui-damage-suffix-omit-target/release/build/zeno/1ffef1806445d7b1/out/libzeno-1ffef1806445d7b1.rlib",
+    "bytes": 65040,
+    "sha256": "c4a689d03a80150163785ce4ce8beec06aaeadab467283d77eed55eb3c742adb"
+  },
+  {
+    "path": "/home/user/gpui-damage-suffix-omit-target/release/build/zeno/1ffef1806445d7b1/out/libzeno-1ffef1806445d7b1.rmeta",
+    "bytes": 847367,
+    "sha256": "8abf7a259c03671828e9cd08a75d42dff45de8b49be0c4a2de05b4246763b69f"
+  },
+  {
+    "path": "/home/user/gpui-damage-suffix-omit-target/release/build/parley/3ca9c3956cb78a4e/out/libparley-3ca9c3956cb78a4e.rmeta",
+    "bytes": 2130583,
+    "sha256": "0c26dddc14dd91bcfc803f8df78c17e02d4d98922a4e5e597e992ac8ca686578"
+  },
+  {
+    "path": "/home/user/gpui-damage-suffix-omit-target/release/build/parley/3ca9c3956cb78a4e/out/libparley-3ca9c3956cb78a4e.rlib",
+    "bytes": 144626,
+    "sha256": "41bbc6d253d209c4000ac4161c578bc068b63d368e19596ab4c70643edc8b253"
+  },
+  {
+    "path": "/home/user/gpui-damage-suffix-omit-target/release/build/gpui_canvas/b7a893f297c96388/out/libgpui_canvas-b7a893f297c96388.rmeta",
+    "bytes": 2603166,
+    "sha256": "f4773ede07d1791eef4b0047532af9d35423a0a050c48f8ec8cbaa8dbc75f6de"
+  },
+  {
+    "path": "/home/user/gpui-damage-suffix-omit-target/release/build/gpui_canvas/b7a893f297c96388/out/libgpui_canvas-b7a893f297c96388.rlib",
+    "bytes": 2853692,
+    "sha256": "e10ac8e2d15cbda3732437f8f1cb3b5f0ed79ae9282bdf5680a757fec705c711"
+  },
+  {
+    "path": "/home/user/gpui-damage-suffix-omit-target/release/build/linebender_resource_handle/3b659219bf4b1bfb/out/liblinebender_resource_handle-3b659219bf4b1bfb.rmeta",
+    "bytes": 31087,
+    "sha256": "ad5ed3a370a24a3abccbdc4ff4d4c079ce1ab1bd1064b2f7bb1d55053cd9c02c"
+  },
+  {
+    "path": "/home/user/gpui-damage-suffix-omit-target/release/build/linebender_resource_handle/3b659219bf4b1bfb/out/liblinebender_resource_handle-3b659219bf4b1bfb.rlib",
+    "bytes": 2708,
+    "sha256": "1c80fe16c7c9eac4f3a9f83e313a4057d76176839f1a3b1de5caa154f4541b10"
+  },
+  {
+    "path": "/home/user/gpui-damage-suffix-omit-target/release/build/utf8_iter/5e16059a19b5432d/out/libutf8_iter-5e16059a19b5432d.rmeta",
+    "bytes": 62747,
+    "sha256": "3be840674f6dd640fa0c6d14ce6c3b35accbaa61eb145c57df372f32192ed129"
+  },
+  {
+    "path": "/home/user/gpui-damage-suffix-omit-target/release/build/utf8_iter/5e16059a19b5432d/out/libutf8_iter-5e16059a19b5432d.rlib",
+    "bytes": 5680,
+    "sha256": "a9295927d399a147d1741930d3396e1b501d33475fbda5d05dd333f102524a19"
+  },
+  {
+    "path": "/home/user/gpui-damage-suffix-omit-target/release/build/libm/f92521180f2d4a16/out/liblibm-f92521180f2d4a16.rmeta",
+    "bytes": 1441443,
+    "sha256": "bc077a467d09d33f82679b3b7fe568f14f16c70ab37af6d99107eac184686f4d"
+  },
+  {
+    "path": "/home/user/gpui-damage-suffix-omit-target/release/build/libm/f92521180f2d4a16/out/liblibm-f92521180f2d4a16.rlib",
+    "bytes": 308866,
+    "sha256": "af1436bd54427bb0dbbfa27ffec103ffd207f709b29e38579e61fbf3b7591559"
+  },
+  {
+    "path": "/home/user/gpui-damage-suffix-omit-target/release/build/ttf-parser/f2611fc1f982c494/out/libttf_parser-f2611fc1f982c494.rlib",
+    "bytes": 626976,
+    "sha256": "07ef0eae586a3d57d19e8ea56a75a3713a1808ce8a5772c4607c747478be6910"
+  },
+  {
+    "path": "/home/user/gpui-damage-suffix-omit-target/release/build/ttf-parser/f2611fc1f982c494/out/libttf_parser-f2611fc1f982c494.rmeta",
+    "bytes": 3537989,
+    "sha256": "85559df570662eb551b0f75b0e7b927e3479d91fbd82e7b4c00448a777a5d8ae"
+  },
+  {
+    "path": "/home/user/gpui-damage-suffix-omit-target/release/build/icu_normalizer/3c8e72ce3c2d3007/out/libicu_normalizer-3c8e72ce3c2d3007.rmeta",
+    "bytes": 716818,
+    "sha256": "1728ddafbe60a1ae206edfeecec0889f66d7442cb4a51e7d552599f82a88b4eb"
+  },
+  {
+    "path": "/home/user/gpui-damage-suffix-omit-target/release/build/icu_normalizer/3c8e72ce3c2d3007/out/libicu_normalizer-3c8e72ce3c2d3007.rlib",
+    "bytes": 349582,
+    "sha256": "327a1a80fa6de0f814bd4eb84c1629220bf52a77f040ee25b57aa37b4c2682cb"
+  },
+  {
+    "path": "/home/user/gpui-damage-suffix-omit-target/release/build/icu_segmenter/b02a5e59c02d014a/out/libicu_segmenter-b02a5e59c02d014a.rmeta",
+    "bytes": 4719922,
+    "sha256": "e6b06e679ccd45202ad92c020efd5d36ae9616ba999ff9e85a1cf55029d80e7e"
+  },
+  {
+    "path": "/home/user/gpui-damage-suffix-omit-target/release/build/icu_segmenter/b02a5e59c02d014a/out/libicu_segmenter-b02a5e59c02d014a.rlib",
+    "bytes": 3958466,
+    "sha256": "bfed14fceb34febce2b316da6b119c661120694d3db7752a8cd46cd6d22d496c"
+  },
+  {
+    "path": "/home/user/gpui-damage-suffix-omit-target/release/build/libc/f6b43f7e041f3881/out/liblibc-f6b43f7e041f3881.rlib",
+    "bytes": 14432,
+    "sha256": "367a2d0e5375e63a517db2dc399a9ab03cd55f72c0249d76765c2374c24ea05f"
+  },
+  {
+    "path": "/home/user/gpui-damage-suffix-omit-target/release/build/libc/f6b43f7e041f3881/out/liblibc-f6b43f7e041f3881.rmeta",
+    "bytes": 4513712,
+    "sha256": "7033dc0d9af7e6dfaf698691b97e8bca7bb978cf27f1bbbeb53d45b3d8b1233c"
+  },
+  {
+    "path": "/home/user/gpui-damage-suffix-omit-target/release/build/triomphe/d90dd794f085d2ed/out/libtriomphe-d90dd794f085d2ed.rmeta",
+    "bytes": 458364,
+    "sha256": "6ea1996fb4bead67106a7cc944749618f758308cfc6dd6c735f190a6a2f061e0"
+  },
+  {
+    "path": "/home/user/gpui-damage-suffix-omit-target/release/build/triomphe/d90dd794f085d2ed/out/libtriomphe-d90dd794f085d2ed.rlib",
+    "bytes": 10258,
+    "sha256": "82333a2a9a68f59165fe67aad89bb2ee9c1abdf4acd341d41644395a77769dc3"
+  },
+  {
+    "path": "/home/user/gpui-damage-suffix-omit-target/release/build/potential_utf/1de745df1b71bf12/out/libpotential_utf-1de745df1b71bf12.rmeta",
+    "bytes": 85312,
+    "sha256": "2fad61fe8e4cf28d694be5c52bd3a7dfb46ed7fea2a08c19cabb9857d65dd601"
+  },
+  {
+    "path": "/home/user/gpui-damage-suffix-omit-target/release/build/potential_utf/1de745df1b71bf12/out/libpotential_utf-1de745df1b71bf12.rlib",
+    "bytes": 7342,
+    "sha256": "3a06a0e6cc18a803efe46648c1722cff4ef9350d3bd8bb85e97acb570f679b6c"
+  },
+  {
+    "path": "/home/user/gpui-damage-suffix-omit-target/release/build/skrifa/29aa06c62f94f666/out/libskrifa-29aa06c62f94f666.rlib",
+    "bytes": 2112660,
+    "sha256": "20e35d0c9f1d101aa7feca47fb289231d9e92b00e70485dee2376f9983bcbca5"
+  },
+  {
+    "path": "/home/user/gpui-damage-suffix-omit-target/release/build/skrifa/29aa06c62f94f666/out/libskrifa-29aa06c62f94f666.rmeta",
+    "bytes": 2937744,
+    "sha256": "1a749ee1fd2c2a29370943ad49e015b454d28202bec37b52a9ec8925c5f764fd"
+  },
+  {
+    "path": "/home/user/gpui-damage-suffix-omit-target/release/build/skrifa/2e5cd5a5a6203452/out/libskrifa-2e5cd5a5a6203452.rlib",
+    "bytes": 2108894,
+    "sha256": "22c1a1630d5c9af07de413aa831235f0a493535f9076c34bf2cff51f1215bacc"
+  },
+  {
+    "path": "/home/user/gpui-damage-suffix-omit-target/release/build/skrifa/2e5cd5a5a6203452/out/libskrifa-2e5cd5a5a6203452.rmeta",
+    "bytes": 2968156,
+    "sha256": "b0d4ac4642d2b5f62abd087819c6cfa478c615059346705dde19779984f6d021"
+  },
+  {
+    "path": "/home/user/gpui-damage-suffix-omit-target/release/build/read-fonts/782fc67f7c9bdd68/out/libread_fonts-782fc67f7c9bdd68.rlib",
+    "bytes": 4319408,
+    "sha256": "e021df14290a85704d5edc1ddb43656fed5dbb0afcf665ed4671767389420aeb"
+  },
+  {
+    "path": "/home/user/gpui-damage-suffix-omit-target/release/build/read-fonts/782fc67f7c9bdd68/out/libread_fonts-782fc67f7c9bdd68.rmeta",
+    "bytes": 21966348,
+    "sha256": "9a2ada421bf8f33b236cf0eaccc35a6773b93a75464ba4efe67479046eacfaf7"
+  },
+  {
+    "path": "/home/user/gpui-damage-suffix-omit-target/release/build/read-fonts/fedc9507bd88fa7f/out/libread_fonts-fedc9507bd88fa7f.rlib",
+    "bytes": 3270786,
+    "sha256": "be5ad89fc780232374763358d96bc90613b2b93e4ceee65de479f1123835bb31"
+  },
+  {
+    "path": "/home/user/gpui-damage-suffix-omit-target/release/build/read-fonts/fedc9507bd88fa7f/out/libread_fonts-fedc9507bd88fa7f.rmeta",
+    "bytes": 11821690,
+    "sha256": "966fcafdbda9bba0894b06f593838cdc2c1cc3f6c4d9e64f4b23f8c5dd741079"
+  },
+  {
+    "path": "/home/user/gpui-damage-suffix-omit-target/release/build/zerofrom/b5a5ed4af0c016ee/out/libzerofrom-b5a5ed4af0c016ee.rmeta",
+    "bytes": 90731,
+    "sha256": "ed6da86f0abfcd95481e827ccd8dda3653a1a4b99dfb69b68c86b4cdb4f9bcb0"
+  },
+  {
+    "path": "/home/user/gpui-damage-suffix-omit-target/release/build/zerofrom/b5a5ed4af0c016ee/out/libzerofrom-b5a5ed4af0c016ee.rlib",
+    "bytes": 2374,
+    "sha256": "bebbaad8a0001f43f53c5d368485a29b036338e4b2a3e3317a3208f6d0a15283"
+  },
+  {
+    "path": "/home/user/gpui-damage-suffix-omit-target/release/build/proc-macro2/d85cc25570dee680/out/libproc_macro2-d85cc25570dee680.rlib",
+    "bytes": 830546,
+    "sha256": "d9a81ef608e251e05a503dc796eb8095fa1c5cb0abc54f04e990c34d70e26538"
+  },
+  {
+    "path": "/home/user/gpui-damage-suffix-omit-target/release/build/proc-macro2/d85cc25570dee680/out/libproc_macro2-d85cc25570dee680.rmeta",
+    "bytes": 357683,
+    "sha256": "7efea201d0ecb399750927439ce540d228d8cf52a7f5a370fbe307d2f39d4bad"
+  },
+  {
+    "path": "/home/user/gpui-damage-suffix-omit-target/release/build/yazi/096d89583b34257a/out/libyazi-096d89583b34257a.rlib",
+    "bytes": 120860,
+    "sha256": "cdc0adf407a8131186426b3930141707f1b786596ebb74edcc746bafc6634ba3"
+  },
+  {
+    "path": "/home/user/gpui-damage-suffix-omit-target/release/build/yazi/096d89583b34257a/out/libyazi-096d89583b34257a.rmeta",
+    "bytes": 491916,
+    "sha256": "632b358fa94eeb3a776d615c3af0d125db2128fb48846b7e9d48de86c8c19f72"
+  },
+  {
+    "path": "/home/user/gpui-damage-suffix-omit-target/release/build/icu_locale_core/1fa46250764276ae/out/libicu_locale_core-1fa46250764276ae.rmeta",
+    "bytes": 2077144,
+    "sha256": "a856aa07ba6b690b96be654074337f7baa5425b74d6635a3e84b3d5706f8e5a4"
+  },
+  {
+    "path": "/home/user/gpui-damage-suffix-omit-target/release/build/icu_locale_core/1fa46250764276ae/out/libicu_locale_core-1fa46250764276ae.rlib",
+    "bytes": 639954,
+    "sha256": "e11698c578d5fd0963937d89bdca47d3dd16641951d38fbf6fe444e7126e0867"
+  },
+  {
+    "path": "/home/user/gpui-damage-suffix-omit-target/release/build/unicode-bidi-mirroring/52f2608b14e3478f/out/libunicode_bidi_mirroring-52f2608b14e3478f.rmeta",
+    "bytes": 19877,
+    "sha256": "87acd90a557b8e2a47d4772bbb10d737e7e497dbbd953c6705b572c580137e92"
+  },
+  {
+    "path": "/home/user/gpui-damage-suffix-omit-target/release/build/unicode-bidi-mirroring/52f2608b14e3478f/out/libunicode_bidi_mirroring-52f2608b14e3478f.rlib",
+    "bytes": 7472,
+    "sha256": "7c25bf1fc6c0ff84bc45b57e744fdc8a7f9e70fda824247b59980e7ef20bc5c5"
+  },
+  {
+    "path": "/home/user/gpui-damage-suffix-omit-target/release/build/foldhash/5bfdc0ba99d8a79c/out/libfoldhash-5bfdc0ba99d8a79c.rlib",
+    "bytes": 5932,
+    "sha256": "2d96585fdab28610f262d2cc3e098cc9da18b90e557afe49630dd7cc8675c318"
+  },
+  {
+    "path": "/home/user/gpui-damage-suffix-omit-target/release/build/foldhash/5bfdc0ba99d8a79c/out/libfoldhash-5bfdc0ba99d8a79c.rmeta",
+    "bytes": 97009,
+    "sha256": "f995bac3042c6954ef552d811dac8922564dbbddef01ca9f1d7e1a0f908701bc"
+  },
+  {
+    "path": "/home/user/gpui-damage-suffix-omit-target/release/build/foldhash/d81ca3bd077be190/out/libfoldhash-d81ca3bd077be190.rmeta",
+    "bytes": 99364,
+    "sha256": "5d9ff9ee73a3f670da7038f8efaf06e55a69456543ffa7e0c3ce931eb9eeb5c2"
+  },
+  {
+    "path": "/home/user/gpui-damage-suffix-omit-target/release/build/foldhash/d81ca3bd077be190/out/libfoldhash-d81ca3bd077be190.rlib",
+    "bytes": 6382,
+    "sha256": "532fae325dc59ac13fec6ea82ecf4d447bcb78bad4f39d23be4e39da319c1b36"
+  },
+  {
+    "path": "/home/user/gpui-damage-suffix-omit-target/release/build/hashbrown/6bb7be5ea6347f86/out/libhashbrown-6bb7be5ea6347f86.rlib",
+    "bytes": 10256,
+    "sha256": "7ab60d5dddaa5d2a1c3b98540bd9fc45bc6ad0e60bcd8012a8f6ad43f6bb65a5"
+  },
+  {
+    "path": "/home/user/gpui-damage-suffix-omit-target/release/build/hashbrown/6bb7be5ea6347f86/out/libhashbrown-6bb7be5ea6347f86.rmeta",
+    "bytes": 1714927,
+    "sha256": "14f8ed844a83181f1c205859121298c6ba36937fe96e83044c0e30bbbb21dbaf"
+  },
+  {
+    "path": "/home/user/gpui-damage-suffix-omit-target/release/build/hashbrown/a79a25e7fbe2694d/out/libhashbrown-a79a25e7fbe2694d.rlib",
+    "bytes": 5630,
+    "sha256": "d52d1245ec2c1499b1701d9edadb03a32ffdfc29714dda322b55ea2ebd63e389"
+  },
+  {
+    "path": "/home/user/gpui-damage-suffix-omit-target/release/build/hashbrown/a79a25e7fbe2694d/out/libhashbrown-a79a25e7fbe2694d.rmeta",
+    "bytes": 1473212,
+    "sha256": "5b115bc3112cfd860e3ff920b8f2209a967ce43ee4afb938153116bee42d514c"
+  },
+  {
+    "path": "/home/user/gpui-damage-suffix-omit-target/release/build/bitflags/0ad9081b13adae26/out/libbitflags-0ad9081b13adae26.rmeta",
+    "bytes": 250549,
+    "sha256": "fa79c8ccfd59b95ba6a47f232d3184149aab99d5535572340a47c8e1a3ef202a"
+  },
+  {
+    "path": "/home/user/gpui-damage-suffix-omit-target/release/build/bitflags/0ad9081b13adae26/out/libbitflags-0ad9081b13adae26.rlib",
+    "bytes": 11638,
+    "sha256": "7eb7daa970aeeeb4d8a811af5dee83d09aaac781113d5bbb6e4ddf5dda8057cc"
+  },
+  {
+    "path": "/home/user/gpui-damage-suffix-omit-target/release/build/once_cell/3e9c1f2480cac875/out/libonce_cell-3e9c1f2480cac875.rmeta",
+    "bytes": 154069,
+    "sha256": "7e3aedfdc9bf9995d078582eaf9e1d9f90f4fd6cbbd3e931bd22ab503e52ad6f"
+  },
+  {
+    "path": "/home/user/gpui-damage-suffix-omit-target/release/build/once_cell/3e9c1f2480cac875/out/libonce_cell-3e9c1f2480cac875.rlib",
+    "bytes": 2384,
+    "sha256": "59cf66a074db319b833126f5b524679a489370c3659759f4d9a70dfe0125a97f"
+  },
+  {
+    "path": "/home/user/gpui-damage-suffix-omit-target/release/build/icu_locale_fallback/7388ec59eb8b00e8/out/libicu_locale_fallback-7388ec59eb8b00e8.rlib",
+    "bytes": 20708,
+    "sha256": "a2ac54fccf00ddf2466274c0d9516927c1afdb55cfb4bba701b8f1f285d74d88"
+  },
+  {
+    "path": "/home/user/gpui-damage-suffix-omit-target/release/build/icu_locale_fallback/7388ec59eb8b00e8/out/libicu_locale_fallback-7388ec59eb8b00e8.rmeta",
+    "bytes": 125412,
+    "sha256": "291b14addc25295d086398294ae945e775af19bf290d8ddbad8fcca0b037d5b6"
+  },
+  {
+    "path": "/home/user/gpui-damage-suffix-omit-target/release/build/tinystr/8b81b16d1c3c3309/out/libtinystr-8b81b16d1c3c3309.rlib",
+    "bytes": 4342,
+    "sha256": "cecff17cc8ed309dd7fcc3342c845d38a41fa55141f3bd9549c30cf915bac0c1"
+  },
+  {
+    "path": "/home/user/gpui-damage-suffix-omit-target/release/build/tinystr/8b81b16d1c3c3309/out/libtinystr-8b81b16d1c3c3309.rmeta",
+    "bytes": 365182,
+    "sha256": "9e2aca2e32385d296b3632dbc2568ad4865d96f11d1b0964dd21bddb80957ff9"
+  },
+  {
+    "path": "/home/user/gpui-damage-suffix-omit-target/release/build/icu_provider/ba76882879581669/out/libicu_provider-ba76882879581669.rlib",
+    "bytes": 182712,
+    "sha256": "c31a85e2bc67c7949e972ec385838f1b10d7506f158c36f2b131650233877483"
+  },
+  {
+    "path": "/home/user/gpui-damage-suffix-omit-target/release/build/icu_provider/ba76882879581669/out/libicu_provider-ba76882879581669.rmeta",
+    "bytes": 609734,
+    "sha256": "c972d5529962081ee3550e7105dd0540ff031902cd15fd3bb892922e2dea6e04"
+  },
+  {
+    "path": "/home/user/gpui-damage-suffix-omit-target/release/build/ecow/74c357c01fc16530/out/libecow-74c357c01fc16530.rlib",
+    "bytes": 53602,
+    "sha256": "8f3381792cf81c118c530f791ea65cffda7a0271fce293787c5e571beb2d2f69"
+  },
+  {
+    "path": "/home/user/gpui-damage-suffix-omit-target/release/build/ecow/74c357c01fc16530/out/libecow-74c357c01fc16530.rmeta",
+    "bytes": 501026,
+    "sha256": "9da392a036490bc7051496bf89c481ba8d5430e002bfe55519fdc1c3e9daefda"
+  },
+  {
+    "path": "/home/user/gpui-damage-suffix-omit-target/release/build/stable_deref_trait/dcf4b6f58574dbdb/out/libstable_deref_trait-dcf4b6f58574dbdb.rlib",
+    "bytes": 2434,
+    "sha256": "2166aefb2820c47d2495fb0f73071c18fca2883afc09cc921d0774bddb5c1218"
+  },
+  {
+    "path": "/home/user/gpui-damage-suffix-omit-target/release/build/stable_deref_trait/dcf4b6f58574dbdb/out/libstable_deref_trait-dcf4b6f58574dbdb.rmeta",
+    "bytes": 13604,
+    "sha256": "563938379339890d10ca06fc8b6e91a5b859d86ac0d7b30f6da7c993fb1274ab"
+  },
+  {
+    "path": "/home/user/gpui-damage-suffix-omit-target/release/build/fearless_simd/15bd13f98503f417/out/libfearless_simd-15bd13f98503f417.rmeta",
+    "bytes": 23584837,
+    "sha256": "6958ab170f947bd952b356720dda3fb560cb93c8f51aaa996d18a99b434cdb10"
+  },
+  {
+    "path": "/home/user/gpui-damage-suffix-omit-target/release/build/fearless_simd/15bd13f98503f417/out/libfearless_simd-15bd13f98503f417.rlib",
+    "bytes": 25412,
+    "sha256": "94edeff42379cb9c02c11cae14f5a25e8de6486ceb2a1878ba32efb9f1a48633"
+  },
+  {
+    "path": "/home/user/gpui-damage-suffix-omit-target/release/build/memmap2/e0baf64ad5a2d422/out/libmemmap2-e0baf64ad5a2d422.rlib",
+    "bytes": 53404,
+    "sha256": "64f5a4041714926237eed9761282a580ced54d8224c73d3a87da734a6eacedbf"
+  },
+  {
+    "path": "/home/user/gpui-damage-suffix-omit-target/release/build/memmap2/e0baf64ad5a2d422/out/libmemmap2-e0baf64ad5a2d422.rmeta",
+    "bytes": 189813,
+    "sha256": "82bbb06da3e7842ce4cc56943ec3db867eb0223cefa5594f91555d7f2fdfbd35"
+  },
+  {
+    "path": "/home/user/gpui-damage-suffix-omit-target/release/build/parley_engine/537f8459e651b173/out/libparley_engine-537f8459e651b173.rlib",
+    "bytes": 379314,
+    "sha256": "bbd4f0df784a6a2d51a8d9311ef1eed9e66a4274dd7bf62eb03a8505a187a2ae"
+  },
+  {
+    "path": "/home/user/gpui-damage-suffix-omit-target/release/build/parley_engine/537f8459e651b173/out/libparley_engine-537f8459e651b173.rmeta",
+    "bytes": 734273,
+    "sha256": "15a46c5f357c443cbc58b1ea494bfc0224624e3788cadddee685407ee76e58de"
+  },
+  {
+    "path": "/home/user/gpui-damage-suffix-omit-target/release/build/rustybuzz/eed9aeb701ffbd8e/out/librustybuzz-eed9aeb701ffbd8e.rlib",
+    "bytes": 1537284,
+    "sha256": "5b0d6deb7fdb8230300bcf4c65d41a59c53c6984238f11ae9f021a9a7418bdc7"
+  },
+  {
+    "path": "/home/user/gpui-damage-suffix-omit-target/release/build/rustybuzz/eed9aeb701ffbd8e/out/librustybuzz-eed9aeb701ffbd8e.rmeta",
+    "bytes": 3085317,
+    "sha256": "c4400833e5801a8e71e444c0656aeac60e46ce6f75ebabc31accbc4719161f85"
+  },
+  {
+    "path": "/home/user/gpui-damage-suffix-omit-target/release/build/smallvec/21a775147ff92946/out/libsmallvec-21a775147ff92946.rlib",
+    "bytes": 7686,
+    "sha256": "30303afb61cf3fd90dbdb07c9814b205214d1cc9c90342a68050ba3bbb09ccea"
+  },
+  {
+    "path": "/home/user/gpui-damage-suffix-omit-target/release/build/smallvec/21a775147ff92946/out/libsmallvec-21a775147ff92946.rmeta",
+    "bytes": 275646,
+    "sha256": "4a8e0c2591f1b20651a7ead644cf69d15f670633d4a9c92f84beef307eb6959f"
+  },
+  {
+    "path": "/home/user/gpui-damage-suffix-omit-target/release/build/syn/732c7c61e23ec8c9/out/libsyn-732c7c61e23ec8c9.rlib",
+    "bytes": 7482450,
+    "sha256": "f2b30e0e68dee18dfed4570db165a7970f8d10aba6b11f833b8455370ebb2bb9"
+  },
+  {
+    "path": "/home/user/gpui-damage-suffix-omit-target/release/build/syn/732c7c61e23ec8c9/out/libsyn-732c7c61e23ec8c9.rmeta",
+    "bytes": 4845955,
+    "sha256": "fd4a42eff2777cd1c6f0b4756ee749d823257d1564610f1fd21249b6f0c2dce0"
+  },
+  {
+    "path": "/home/user/gpui-damage-suffix-omit-target/release/build/zerotrie/5cafa73eb4dacd95/out/libzerotrie-5cafa73eb4dacd95.rmeta",
+    "bytes": 699425,
+    "sha256": "49924b5a6116008add0b141b1e839f313c79b899308d6f73358b23f9a39c96ed"
+  },
+  {
+    "path": "/home/user/gpui-damage-suffix-omit-target/release/build/zerotrie/5cafa73eb4dacd95/out/libzerotrie-5cafa73eb4dacd95.rlib",
+    "bytes": 203532,
+    "sha256": "c5035e0fb1650c1bc2bf5ce0ff64c7704d420615378b83c32b3c4f3bb98af956"
+  },
+  {
+    "path": "/home/user/gpui-damage-suffix-omit-target/release/build/parley_data/b610d174d94fecc0/out/libparley_data-b610d174d94fecc0.rmeta",
+    "bytes": 76587,
+    "sha256": "418e900c13f89bad3f28648a1e76d50ff5d44f49fbe89b2915dfd6b299cf6c22"
+  },
+  {
+    "path": "/home/user/gpui-damage-suffix-omit-target/release/build/parley_data/b610d174d94fecc0/out/libparley_data-b610d174d94fecc0.rlib",
+    "bytes": 43556,
+    "sha256": "91caa697a31eedf8eb2dfa8663ce5129f4dcb95115f17c0cb7e0b69977a3457d"
+  },
+  {
+    "path": "/home/user/gpui-damage-suffix-omit-target/release/build/fontique/78a7d4c3aff566b7/out/libfontique-78a7d4c3aff566b7.rmeta",
+    "bytes": 581641,
+    "sha256": "d7efff4a17d1621d039421e94fbf40c7f4dc61e603f3c3fd6d1166ebe74b2836"
+  },
+  {
+    "path": "/home/user/gpui-damage-suffix-omit-target/release/build/fontique/78a7d4c3aff566b7/out/libfontique-78a7d4c3aff566b7.rlib",
+    "bytes": 454544,
+    "sha256": "c702d907c1707517fe7ccaf855f83e722777ac486c4285b21eb7f17b50b41661"
+  },
+  {
+    "path": "/home/user/gpui-damage-suffix-omit-target/release/build/fontdue/519b7b60132341f3/out/libfontdue-519b7b60132341f3.rlib",
+    "bytes": 68430,
+    "sha256": "7e69c976a3c0a0403ccef213dd803d1b1d0e759bc9de98598f1dbae93b92379c"
+  },
+  {
+    "path": "/home/user/gpui-damage-suffix-omit-target/release/build/fontdue/519b7b60132341f3/out/libfontdue-519b7b60132341f3.rmeta",
+    "bytes": 1187476,
+    "sha256": "31ce0cbae1288dfa6750eba92655ac49d801fe18e33a20f67405299ad665d2a0"
+  },
+  {
+    "path": "/home/user/gpui-damage-suffix-omit-target/release/build/yoke/723e132164b80f4c/out/libyoke-723e132164b80f4c.rmeta",
+    "bytes": 299794,
+    "sha256": "7b3c75291227fa23a3905105df941b1550f60e9a393639bb5f8b6819dfb017de"
+  },
+  {
+    "path": "/home/user/gpui-damage-suffix-omit-target/release/build/yoke/723e132164b80f4c/out/libyoke-723e132164b80f4c.rlib",
+    "bytes": 2824,
+    "sha256": "c87854b4b58b9b9242a109980ff9bdecbd47d5aae4d14be69eef3a9b20f1d186"
+  },
+  {
+    "path": "/home/user/gpui-damage-suffix-omit-target/release/build/synstructure/06b4dbf584a13f16/out/libsynstructure-06b4dbf584a13f16.rlib",
+    "bytes": 1233214,
+    "sha256": "d28625b4aaddb87de50eabab987baf7e155e34b3c26412a36b00189c7256a00e"
+  },
+  {
+    "path": "/home/user/gpui-damage-suffix-omit-target/release/build/synstructure/06b4dbf584a13f16/out/libsynstructure-06b4dbf584a13f16.rmeta",
+    "bytes": 239440,
+    "sha256": "8eb16dabf82bd8c33719df6d192e5d30cdf5a10f4f6cb20c647c19f7159e7f40"
+  },
+  {
+    "path": "/home/user/gpui-damage-suffix-omit-target/release/build/litemap/b9901942f551d5e4/out/liblitemap-b9901942f551d5e4.rlib",
+    "bytes": 2364,
+    "sha256": "8a0efd6dc0865c001fb0a119018c638b1217c7e688d5a901c4a676c1e637aa6c"
+  },
+  {
+    "path": "/home/user/gpui-damage-suffix-omit-target/release/build/litemap/b9901942f551d5e4/out/liblitemap-b9901942f551d5e4.rmeta",
+    "bytes": 363469,
+    "sha256": "11f412137964e391f014a7bc64d58c22f0929c5fb1cd6dac4e7b5ab2dcd31460"
+  },
+  {
+    "path": "/home/user/gpui-damage-suffix-omit-target/release/build/core_maths/6202352e48b7ec52/out/libcore_maths-6202352e48b7ec52.rlib",
+    "bytes": 2386,
+    "sha256": "91fe6f8516abd6b6f9d3a106fbd8c5b4cb3101896e1b9a827cddc8cba86d535a"
+  },
+  {
+    "path": "/home/user/gpui-damage-suffix-omit-target/release/build/core_maths/6202352e48b7ec52/out/libcore_maths-6202352e48b7ec52.rmeta",
+    "bytes": 59638,
+    "sha256": "f5c1af947fd2247da9cc37558fcf3b8903ae078693fd8934234ee1ae0bf00d11"
+  },
+  {
+    "path": "/home/user/gpui-damage-suffix-omit-target/release/build/parlance/e8730d9474a982b6/out/libparlance-e8730d9474a982b6.rlib",
+    "bytes": 69362,
+    "sha256": "145d53d095684691d8459ef4e7bdf0336c7acde492a670f3169295dc77dd0efa"
+  },
+  {
+    "path": "/home/user/gpui-damage-suffix-omit-target/release/build/parlance/e8730d9474a982b6/out/libparlance-e8730d9474a982b6.rmeta",
+    "bytes": 336270,
+    "sha256": "a27fc6117b2b4a166453f3d67f1ae00222322f77553fb4d616d333a5d2cb272e"
+  },
+  {
+    "path": "/home/user/gpui-damage-suffix-omit-target/release/build/harfrust/8042a72ee8d905ee/out/libharfrust-8042a72ee8d905ee.rmeta",
+    "bytes": 3082861,
+    "sha256": "fee85a0082985480a32d945ffa119dae5260825738d276de2e03d762485fecd0"
+  },
+  {
+    "path": "/home/user/gpui-damage-suffix-omit-target/release/build/harfrust/8042a72ee8d905ee/out/libharfrust-8042a72ee8d905ee.rlib",
+    "bytes": 1711742,
+    "sha256": "85dc89f2490cb2668a6c3d4544bfcf0164403eed77a44f2d035a44a20b6546e6"
+  },
+  {
+    "path": "/home/user/gpui-damage-suffix-omit-target/release/build/gpui_reactivity_core/6e543c146beceff1/out/libgpui_reactivity_core-6e543c146beceff1.rlib",
+    "bytes": 78254,
+    "sha256": "2356a080f2eccc7945e9aaa8ca66f6748bbdf5a7d7ba375be8d05ae5641d0e91"
+  },
+  {
+    "path": "/home/user/gpui-damage-suffix-omit-target/release/build/gpui_reactivity_core/6e543c146beceff1/out/libgpui_reactivity_core-6e543c146beceff1.rmeta",
+    "bytes": 164857,
+    "sha256": "def73b101f3cfff2b8caea42c3ead575acc4a10b06fddc93e24938fe83a4edf6"
+  },
+  {
+    "path": "/home/user/gpui-damage-suffix-omit-target/release/build/allocation-counter/dbab3a6fb5cd8c7e/out/liballocation_counter-dbab3a6fb5cd8c7e.rlib",
+    "bytes": 10962,
+    "sha256": "d1df91dd5773522632b1c7c797b8bb8185f60007bb0e75df1b9129b5d67c6110"
+  },
+  {
+    "path": "/home/user/gpui-damage-suffix-omit-target/release/build/allocation-counter/dbab3a6fb5cd8c7e/out/liballocation_counter-dbab3a6fb5cd8c7e.rmeta",
+    "bytes": 43362,
+    "sha256": "515ee14f56e50cb1cc0ab25858d3274750e4c2b4b98a0238605d279b7e50f1c6"
+  },
+  {
+    "path": "/home/user/gpui-damage-suffix-omit-target/release/build/zerovec/38da2fe204e494c4/out/libzerovec-38da2fe204e494c4.rlib",
+    "bytes": 7300,
+    "sha256": "207577ccce694044a2559b19b3e05124c9a7b39b8d97d7979aad2d4ef403de5a"
+  },
+  {
+    "path": "/home/user/gpui-damage-suffix-omit-target/release/build/zerovec/38da2fe204e494c4/out/libzerovec-38da2fe204e494c4.rmeta",
+    "bytes": 2230938,
+    "sha256": "c70d5c0e540cbb1ac7c6dfad05ae43cb8d060be6c51109bcf9e9758451907066"
+  },
+  {
+    "path": "/home/user/gpui-damage-suffix-omit-target/release/build/icu_collections/228153ff86f5a044/out/libicu_collections-228153ff86f5a044.rlib",
+    "bytes": 73434,
+    "sha256": "ea6896932fd5191eac5251639a3a09d1b30496027819a3a25d290d398eb52194"
+  },
+  {
+    "path": "/home/user/gpui-damage-suffix-omit-target/release/build/icu_collections/228153ff86f5a044/out/libicu_collections-228153ff86f5a044.rmeta",
+    "bytes": 492966,
+    "sha256": "ca788866486cfeb9b37e719d1becaaaece90b9260d7ae4684354fa0a716cd0ee"
+  },
+  {
+    "path": "/home/user/gpui-damage-suffix-omit-target/release/build/unicode-ident/382042c71f87e76b/out/libunicode_ident-382042c71f87e76b.rlib",
+    "bytes": 18150,
+    "sha256": "e46ced94e53667c15cb60cfbbb90e5073f43f3ccd8877ce2dc6e8ecd32511e64"
+  },
+  {
+    "path": "/home/user/gpui-damage-suffix-omit-target/release/build/unicode-ident/382042c71f87e76b/out/libunicode_ident-382042c71f87e76b.rmeta",
+    "bytes": 34814,
+    "sha256": "2d3686fe2611bff8342d806b7de7c55f9c7d835152bd2de864fc8ca312986de5"
+  },
+  {
+    "path": "/home/user/gpui-damage-suffix-omit-target/release/build/icu_normalizer_data/7b95b2cd7e2f276d/out/libicu_normalizer_data-7b95b2cd7e2f276d.rmeta",
+    "bytes": 436711,
+    "sha256": "3a0c1727d2bb46c52200934b687c18af9ecb68b7aae6776191a631a707d00885"
+  },
+  {
+    "path": "/home/user/gpui-damage-suffix-omit-target/release/build/icu_normalizer_data/7b95b2cd7e2f276d/out/libicu_normalizer_data-7b95b2cd7e2f276d.rlib",
+    "bytes": 2436,
+    "sha256": "3b3d3bc2a81317ca58a0c43b7fce2c3ad3c4d8a97ef06b9be7a7200eb3d27919"
+  },
+  {
+    "path": "/home/user/gpui-damage-suffix-omit-target/release/build/icu_properties/971d6a35f3bea188/out/libicu_properties-971d6a35f3bea188.rmeta",
+    "bytes": 2851369,
+    "sha256": "0fe31cb08e3b40384848cfdd893c182d04a18b4a517e9206011aad6d1496d65e"
+  },
+  {
+    "path": "/home/user/gpui-damage-suffix-omit-target/release/build/icu_properties/971d6a35f3bea188/out/libicu_properties-971d6a35f3bea188.rlib",
+    "bytes": 541820,
+    "sha256": "35428d94514423b371678986c7f2f78e5475b95049fdc7e3631eddec53ccd450"
+  },
+  {
+    "path": "/home/user/gpui-damage-suffix-omit-target/release/build/bytemuck/c0966c360a82302a/out/libbytemuck-c0966c360a82302a.rlib",
+    "bytes": 7438,
+    "sha256": "4f5ecc356b37b029cc9f4cf43f1e181741a31495eae9aa78cde675b67d39af9a"
+  },
+  {
+    "path": "/home/user/gpui-damage-suffix-omit-target/release/build/bytemuck/c0966c360a82302a/out/libbytemuck-c0966c360a82302a.rmeta",
+    "bytes": 607118,
+    "sha256": "155f3ca74be459c64b268f30cff4333c42187a24147be56ede89cfbe765e8ebc"
+  },
+  {
+    "path": "/home/user/gpui-damage-suffix-omit-target/release/build/quote/0cbd981f6583e8c6/out/libquote-0cbd981f6583e8c6.rmeta",
+    "bytes": 276146,
+    "sha256": "287446b6ff6e60c8999a9bc34d3350431b95150dd1cc61be56396b97ad79e946"
+  },
+  {
+    "path": "/home/user/gpui-damage-suffix-omit-target/release/build/quote/0cbd981f6583e8c6/out/libquote-0cbd981f6583e8c6.rlib",
+    "bytes": 231448,
+    "sha256": "da108bbb56bb8d8eb441be757efab6a790bad5c530ae12d231385a3585993991"
+  },
+  {
+    "path": "/home/user/gpui-damage-suffix-omit-target/release/build/unicode-ccc/bd239ae9decd7e99/out/libunicode_ccc-bd239ae9decd7e99.rlib",
+    "bytes": 34740,
+    "sha256": "f6549e5eb20f3e38aba0119c739493f8b3f38de5601ac81d3122656752c62f14"
+  },
+  {
+    "path": "/home/user/gpui-damage-suffix-omit-target/release/build/unicode-ccc/bd239ae9decd7e99/out/libunicode_ccc-bd239ae9decd7e99.rmeta",
+    "bytes": 32714,
+    "sha256": "2bcfa249f8993dca0e2c1306d73a911bd273474865c077abdee9bc606996f577"
+  },
+  {
+    "path": "/home/user/gpui-damage-suffix-omit-target/release/build/unicode-script/8c91ee8fd7ee6236/out/libunicode_script-8c91ee8fd7ee6236.rmeta",
+    "bytes": 654472,
+    "sha256": "edfed4ac96a06ae8b0195dc5954fd39d340e50b4b8529225587a57dc8cc8e7a2"
+  },
+  {
+    "path": "/home/user/gpui-damage-suffix-omit-target/release/build/unicode-script/8c91ee8fd7ee6236/out/libunicode_script-8c91ee8fd7ee6236.rlib",
+    "bytes": 97366,
+    "sha256": "863fc805180f81a6ef64d38f2b73ecbf76b6750dba06e0ee43b9eb7f895dfee9"
+  },
+  {
+    "path": "/home/user/gpui-damage-suffix-omit-target/release/build/log/16133717b8abe739/out/liblog-16133717b8abe739.rmeta",
+    "bytes": 210750,
+    "sha256": "ebcb85b8b3e132deab5da0138844e99e483c1a942a45b27b256413cdc7cd3c16"
+  },
+  {
+    "path": "/home/user/gpui-damage-suffix-omit-target/release/build/log/16133717b8abe739/out/liblog-16133717b8abe739.rlib",
+    "bytes": 14720,
+    "sha256": "b707e3d802ed8a07dfef0ce5c94469ec3270b7817872fcd0f96ebbf73c797a90"
+  }
+]

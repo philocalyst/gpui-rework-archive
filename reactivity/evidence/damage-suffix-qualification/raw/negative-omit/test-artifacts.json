@@ -1,0 +1,43 @@
+[
+  {
+    "path": "/home/user/gpui-damage-suffix-omit-target/release/build/gpui_canvas/9f46f4c50724c99a/out/damage_suffix-9f46f4c50724c99a",
+    "sha256": "c82b8f387c437e8883c0369b83ffa48bf2d457a00139621e25e6fe90382ca10e",
+    "preserved": "/home/user/gpui-preserved-test-binaries/c82b8f387c437e8883c0369b83ffa48bf2d457a00139621e25e6fe90382ca10e",
+    "bytes": 8570160,
+    "cargo": {
+      "reason": "compiler-artifact",
+      "package_id": "path+file:///home/user/gpui-damage-suffix-omit-lab/reactivity/crates/canvas#gpui_canvas@0.1.0",
+      "manifest_path": "/home/user/gpui-damage-suffix-omit-lab/reactivity/crates/canvas/Cargo.toml",
+      "target": {
+        "kind": [
+          "test"
+        ],
+        "crate_types": [
+          "bin"
+        ],
+        "name": "damage_suffix",
+        "src_path": "/home/user/gpui-damage-suffix-omit-lab/reactivity/crates/canvas/tests/damage_suffix.rs",
+        "edition": "2024",
+        "doc": false,
+        "doctest": false,
+        "test": true
+      },
+      "profile": {
+        "opt_level": "3",
+        "debuginfo": 0,
+        "debug_assertions": false,
+        "overflow_checks": false,
+        "test": true
+      },
+      "features": [
+        "default",
+        "simd"
+      ],
+      "filenames": [
+        "/home/user/gpui-damage-suffix-omit-target/release/build/gpui_canvas/9f46f4c50724c99a/out/damage_suffix-9f46f4c50724c99a"
+      ],
+      "executable": "/home/user/gpui-damage-suffix-omit-target/release/build/gpui_canvas/9f46f4c50724c99a/out/damage_suffix-9f46f4c50724c99a",
+      "fresh": false
+    }
+  }
+]

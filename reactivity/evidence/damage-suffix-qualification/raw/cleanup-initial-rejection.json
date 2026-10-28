@@ -1,0 +1,6 @@
+{
+  "stage": "Completed native target cache cleanup, initial invocation",
+  "outcome": "Read-only process guard rejected the launching shell because its here-document command text included both the target path and compiler marker strings. No library or executable cache file was removed by that attempt.",
+  "evidence": "archive-native.log preserves the same guard rejection and complete offending command. Subsequent standalone invocation passed the unchanged guard.",
+  "retry": "cleanup-completed.out and archive-native-retry.out; exact cache hashes and preserved locations are recorded separately."
+}

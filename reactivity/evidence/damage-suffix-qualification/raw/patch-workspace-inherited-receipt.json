@@ -1,0 +1,10 @@
+{
+  "source": "f7b3f60c70faf6d548fffda530d4de83b2570e34",
+  "removed_files": 67,
+  "retained_own_dossier_files": 33601,
+  "shared_archive": "/home/user/gpui-completed-source-archives/41a67473a0177fbb17df1f7b8e2f2f36dd6940f6-inherited-evidence.tar.gz",
+  "shared_sha256": "37c946d5b222b4c409d42def16924e50c00bc8e5ef3168aa7fe3f8fb31a44c40",
+  "free_before": 10440011776,
+  "free_after": 10298032128,
+  "scope": "Only duplicate ancestor evidence checkout files omitted. All exact bytes verified in shared committed-source archive; own full patch-workspace dossier and every production/vendor input remain in place. Restore inherited paths before historical full-checkout input checks."
+}

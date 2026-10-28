@@ -1,0 +1,3 @@
+   Compiling gpui v0.1.0 (/home/user/gpui-damage-suffix-lab/reactivity/crates/gpui)
+    Finished `release` profile [optimized] target(s) in 3.83s
+     Running unittests examples/zgx_native_lab.rs (/home/user/gpui-damage-suffix-target/release/build/gpui/307c1e8aa21fa2c6/out/zgx_native_lab-307c1e8aa21fa2c6)

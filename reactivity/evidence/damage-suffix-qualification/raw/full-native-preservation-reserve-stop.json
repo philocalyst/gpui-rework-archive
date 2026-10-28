@@ -1,0 +1,10 @@
+{
+  "gate": "full-native-initial",
+  "completed": [
+    "build",
+    "test"
+  ],
+  "test_exit": 0,
+  "stop": "After preserving169 test artifacts, the next-stage8GiB reserve precheck aborted before port or clippy. All binaries preserved and before/after source guards pass. No process remains running.",
+  "followup": "Seal partial qualification evidence, then reclaim exact cached executables already preserved and regenerable library artifacts; resume missing stages separately."
+}

@@ -1,0 +1,14 @@
+[
+  {
+    "worktree": "/home/user/gpui-local-publication-control-lab",
+    "source": "6895a10440abb8496e5e6eabbf16cf01877e68f0",
+    "qualification_dossier": "9725cfa2679d68e014f1587c506c83b1dde6d71c",
+    "guard": "Clean source was checked before and after cache archival; cache receipts preserve every removed ELF."
+  },
+  {
+    "worktree": "/home/user/gpui-gpu-text-packet-control-lab",
+    "source": "83743fe1e9aa6d91860089b528fbe60c4bdd2844",
+    "qualification_dossier": "de8e4f6feaffe6a47f8f75cfc79d4f75aeadc066",
+    "guard": "Clean source was checked before and after cache archival; cache receipts preserve every removed ELF."
+  }
+]
