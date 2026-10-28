@@ -661,3 +661,26 @@ complete configurations,offline/native/cost(seed20261116),ZGX and hardware
 gates. Generic draw-majord35d2335 and pixel-uniform173e7c1a remain rejected.
 This is a private scheduling choice over compiled operations,not evidence of
 a BBTree async executor or higher cache-hit rate in GPUI.
+
+
+Mask-tiles early GPU admission is sealed
+**6d4d44a31de30c418167a97cf977e5634d453a8f**:729 files,64 canonical ELF
+identities,353 tests,strict Clippy,336 exact public reference frames and the
+wrong-Y mutantfb4bb250's actual proof-toggle test failure. Its1,836 differing
+bytes are retained; the disabled-proof bytes independently equal the original
+oracle. A first stderr-only witness parser failure is preserved; corrected
+parser reads the same captured stdout too,with no test retry. Shipping38181
+lines (+18 four-cell,+153 suffix),WGSL22041 bytes.
+
+Actual-native audit **68682a99b03e0f33bf0c7fc438a067a8cea78953** independently
+verifies130 files and all8 normal processes. All1,082 literal packets now select
+marked mask tiles; all lowered planned references lie in selected tiles.
+916,140 cumulative tile selections,exact initial0/190 native images and the
+unchanged shader/workload. These instrumented counts establish path selection,
+not speed or hardware cache behavior.
+
+The uninstrumented native screen is frozen at
+**f21f5dab4247fc98860a10a655ba625a4790a681**,seed20261115. Matched build is
+complete; workload tests/preflights/timing remain pending. Both independent
+admission receipts are mandatory before observations. Prior failures retain
+their verdicts; no full-cost/ZGX/hardware admission or victory yet.

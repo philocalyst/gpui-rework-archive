@@ -510,3 +510,10 @@ use literal shading,so the banked-only cache never executes; corrected planned
 mask references are93.1% lowered. Initial classifier error is retained. New
 mask-tiles5d37f245/d63782dd separates traversal choice from paint-bank format
 with an existing tile-word bit. Correctness pending,no performance result.
+
+
+Mask-tiles GPU admission **6d4d44a3** verifies353 tests,Clippy,336 exact frames
+and a proof-toggle wrong-row failure. Native audit **68682a99** confirms all
+1,082 literal packets now select marked mask tiles with exact initial images.
+Native screenf21f5dab is frozen; build complete,tests/preflights/timing pending.
+No performance result or adoption.
