@@ -433,3 +433,10 @@ marginal failures. The previous text-session and cold-trim trials concern shapin
 scratch, not this publication box. Do not carry the rejected global comparison
 or assume the promising 72-byte enum itself improves execution. No next candidate
 has been implemented or measured at this checkpoint.
+
+
+The next local trial is publication-workspace reuse, preregistered at bc6d01564477
+and implemented at 41a67473a017. The new lifetime mutant fails public acknowledged
+text exactly; qualification and fixed allocation gates are in progress. See
+[the detailed research checkpoint](../bbtree-transfer/LOCALITY.md#publication-workspace-experiment-implemented-qualification-in-progress).
+No timing, adoption or ZGX advantage is claimed at this checkpoint.

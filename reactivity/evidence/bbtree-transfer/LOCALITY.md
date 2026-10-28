@@ -347,3 +347,35 @@ marginal failures. The previous text-session and cold-trim trials concern shapin
 scratch, not this publication box. Do not carry the rejected global comparison
 or assume the promising 72-byte enum itself improves execution. No next candidate
 has been implemented or measured at this checkpoint.
+
+## Publication workspace experiment: implemented, qualification in progress
+
+Preregistration bc6d01564477a0c8b5710b338a29119d991fadaf and candidate
+41a67473a0177fbb17df1f7b8e2f2f36dd6940f6 are isolated at
+/home/user/gpui-patch-workspace-lab/reactivity/evidence/patch-workspace.
+Base remains 5a07d7c28ffe500a5d24e25fdf1f31ce4857811f; the rejected global scene
+comparison is absent. An Option<TextUpdate> separates live payload from reusable
+Box<TextPatch>. ACK takes the payload, full supersession retires it after successful
+preparation, and repair exposure requires live content and the original exact token.
+DamageRegions::clear retains bounded capacity with the same canonical empty view.
+Unused text resources still reclaim the box and vector. No application API, GPU
+submission, shader, dependency or unsafe change.
+
+The initial Canvas test omitted the established one-pixel conservative slot fringe
+and expected 12 pixels instead of 44. That failing run remains preserved; the
+correction changes only the test. Canvas/GPU 347 tests and full-native 1,106 tests
+pass (3 and 45 intentionally ignored), as do strict Clippy, 17 example tests and
+all 11 actual native scripts. A bounded mutant, 5d24115d28, omits full-supersession
+retirement and fails the exact public acknowledged-text oracle: stale "1111" versus
+required "2222", with the other row intact. Two reserve-precheck aborts are also
+preserved; neither compiled or ran the mutant. Qualification is not yet complete.
+
+Measured headers remain Runtime 1824, Prepared 40, TextResources 168, TextPatch 96
+and SceneDamage 40 bytes in the native build. Shipping code is 38,016 lines (+39)
+and native ELF 26,389,256 bytes (+936). This establishes neither an allocation win
+nor speed. Six mandatory warm-allocation reductions precede timing. The fixed
+10400-process schedule expands short-control sampling before implementation:
+20 paired groups for the four primary workloads, 120 for tiny flat/list, 80 for
+all other cases. Thresholds and all earlier verdicts remain unchanged. No timing
+has run at this checkpoint. BBTree continuation ownership and Solid/Ripple staged
+publication motivate the lifetime split; cache-hit rates remain unmeasured.
