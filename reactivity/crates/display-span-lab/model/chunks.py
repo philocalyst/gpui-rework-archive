@@ -259,7 +259,8 @@ class Version:
 
 class Publication:
     next_namespace=1
-    def __init__(self):
+    def __init__(self,resource_leases=True):
+        self.resource_leases=resource_leases
         self.namespace=Publication.next_namespace;Publication.next_namespace+=1
         self.heap=Heap();self.eligible=None;self.visible=None;self.submitted={};self.sequence=0;self.current_pages={};self.current_resources={};self.eligible_complete=False
     def prepare(self,journal,deleted=(),resources=None):
@@ -285,7 +286,7 @@ class Publication:
         # Charged O(page count + resources); bounded COW radix follows in Stage B.
         children=tuple(self.current_pages.values())+tuple(self.current_resources.values())
         descriptor=pack([len(self.current_pages),len(self.current_resources)]+[x[0] for x in children])
-        root=h.alloc(descriptor,children);self.sequence+=1
+        root=h.alloc(descriptor,children if self.resource_leases else tuple(self.current_pages.values()));self.sequence+=1
         if self.eligible is not None:h.release(self.eligible[1])
         self.eligible=Version(self.namespace,self.sequence,root);self.eligible_complete=False
         return self.eligible
