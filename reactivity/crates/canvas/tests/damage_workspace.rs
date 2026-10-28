@@ -22,6 +22,10 @@ fn supports() -> Vec<DamageRegion> {
 #[test]
 fn reset_reuses_bounded_capacity_and_restores_empty_one_many_and_overflow() {
     let support = supports();
+    // Slot edits include the one-pixel conservative raster fringe, clipped at x=0.
+    assert_eq!(support[0].bounds(), Some([0, 1, 3, 5]));
+    assert_eq!(support[1].bounds(), Some([5, 1, 9, 5]));
+    assert_eq!(support[2].bounds(), Some([11, 1, 15, 5]));
     let mut regions = DamageRegions::default();
     regions.clear();
     assert_eq!(regions.regions(), DamageRegions::default().regions());
@@ -42,7 +46,7 @@ fn reset_reuses_bounded_capacity_and_restores_empty_one_many_and_overflow() {
             }
             assert_eq!(regions.regions().as_ptr(), address);
             assert_eq!(regions.regions().len(), 3);
-            assert_eq!(regions.pixels(), 12);
+            assert_eq!(regions.pixels(), 44);
         }
     });
     assert_eq!(cost.count_total, 0);
@@ -60,5 +64,5 @@ fn reset_reuses_bounded_capacity_and_restores_empty_one_many_and_overflow() {
         2,
         "overflow must not poison a new operation"
     );
-    assert_eq!(regions.pixels(), 8);
+    assert_eq!(regions.pixels(), 28);
 }
