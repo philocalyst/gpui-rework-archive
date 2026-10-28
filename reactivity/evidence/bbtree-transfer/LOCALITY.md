@@ -605,3 +605,21 @@ The full64-process screen retains20% stream/mixed CPU targets; unchanged complet
 configuration/cost/hardware gates follow a screen pass. Old pixel-uniform flat
 regression warns that added shader/register costs may erase gains even on paths
 with no new cache hits; no passing subset or tolerance will waive those gates.
+
+
+Four-cell early correctness admission is sealed
+**e00f436fbfef57bdc0379df6e46c6888d7855097**, production
+**7565d788dcdf62f87c43a2d4910764a3ff2be764**. Independent verification covers
+1,421 files,70 ELF identities,353 GPU/canvas tests,strict Clippy,336 exact
+pre-change-oracle frames and96 external pixel rejections for the corrected
+wrong-row mutant849ea944. The mutant's own replay test passes; only independent
+reference pixels expose its mistake. Initialsource4af395b9's overwritten-local
+Clippy failure is retained; corrected source was rebuilt after release GPU clean.
+Generated WGSL21978 bytes is verified inside the freshly executed render ELF.
+Shipping38163 lines (+74 parent,+135 qualified suffix).
+
+This admits only the preregistered early native screen, frozen
+**fdff0f361c60af149a2b81509548f987490fbf1d**, seed20261113. Native build pending;
+no timing result. Full configuration,offline,native,cost and competitor gates
+remain open. No changed public fixture, threshold, sample order or publication
+authority. All previous rejections remain rejected.

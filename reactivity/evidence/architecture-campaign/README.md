@@ -496,3 +496,9 @@ the candidate: stream CPU.96068 versus required.8; mixed cadence failure
 suppresses its ratio. All64 processes normal; no cost-matrix admission. Separate
 mask-quad experiment631a132f/4af395b tests bounded independent mask fetch reuse
 while preserving16 blends. Qualification pending, no performance claim.
+
+
+Four-cell correctness admission **e00f436fbfef57bdc0379df6e46c6888d7855097**
+passes353 GPU/canvas tests,Clippy,336 exact reference frames and a96-frame
+wrong-row external-oracle witness. The initial Clippy failure is preserved.
+Native screenfdff0f36 is frozen; build pending, no performance result.
