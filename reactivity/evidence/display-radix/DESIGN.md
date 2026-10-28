@@ -61,8 +61,11 @@ pixels. The failed source value is committed even though preparation fails.
 Second attemptc2f7eab184 exposed an incorrect fixture assumption: a failed
 NaN transform leaves the invalid source value committed. A later color setter
 therefore fails preparation again. The failure occurs after the source commit
-(Error::Committed), while the old eligible scene stays valid. The corrected
+(SetError::Committed), while the old eligible scene stays valid. The corrected
 fixture places this failure after the final color assignment, checks the exact
 Committed error variant and prior eligible token/pixels, and avoids pretending
 that failed preparation rolled back application state. No recovery or rollback
 semantics are inferred from that retained-scene witness.
+
+Attempt00acedf751 used the wrong public error type in that assertion; compilation
+rejected Error::Committed. The variant belongs to gpui::SetError. Build log kept.

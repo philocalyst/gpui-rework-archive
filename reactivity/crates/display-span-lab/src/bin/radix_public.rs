@@ -125,7 +125,7 @@ fn sweep(root: &Path, n: usize) {
             let failure = win
                 .set(Paint::TRANSFORM, Affine::translation(f32::NAN, 0.))
                 .unwrap_err();
-            assert!(matches!(failure, Error::Committed { .. }));
+            assert!(matches!(failure, gpui::SetError::Committed { .. }));
             assert_eq!(win.with_scene(|_, t| t).unwrap(), token);
         }
         if let Some(old) = held.take() {
