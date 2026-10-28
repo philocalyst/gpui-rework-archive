@@ -1,0 +1,3496 @@
+{
+  "qualification": [
+    {
+      "verifier": "/home/user/gpui-mask-partitions-lab/reactivity/evidence/mask-partitions-positive/verify.py",
+      "exit": 0,
+      "stdout": "{\"files\": 707, \"executable_identities\": 63, \"gpu_canvas_tests\": 354, \"ignored_tests\": 3, \"exact_frames\": 336, \"negative_control_pending\": true, \"positive_correctness_passes\": true, \"scope\": \"Positive checks only; negative control and native/full qualification remain pending.\"}\n",
+      "stderr": ""
+    }
+  ],
+  "files": [
+    {
+      "path": "/home/user/gpui-mask-partitions-target/release/examples/tiles",
+      "bytes": 15212288,
+      "sha256": "f5a82a4976dbd07f83968b8a3adca7576de9d59a207e9c59745b0a474b92de0c",
+      "kind": "exact-canonical-executable-copy",
+      "preserved": "/home/user/gpui-preserved-test-binaries/f5a82a4976dbd07f83968b8a3adca7576de9d59a207e9c59745b0a474b92de0c"
+    },
+    {
+      "path": "/home/user/gpui-mask-partitions-target/release/examples/damage_cost",
+      "bytes": 684888,
+      "sha256": "949cc275817d19db952f7fc52b7be1b60af52487315a5ce1c9fb6454a1e39538",
+      "kind": "exact-canonical-executable-copy",
+      "preserved": "/home/user/gpui-preserved-test-binaries/949cc275817d19db952f7fc52b7be1b60af52487315a5ce1c9fb6454a1e39538"
+    },
+    {
+      "path": "/home/user/gpui-mask-partitions-target/release/examples/retained",
+      "bytes": 15301344,
+      "sha256": "1317a2897271a68f4e2571efc9c82003e890742e2595ef815c83a225c2fe93b1",
+      "kind": "exact-canonical-executable-copy",
+      "preserved": "/home/user/gpui-preserved-test-binaries/1317a2897271a68f4e2571efc9c82003e890742e2595ef815c83a225c2fe93b1"
+    },
+    {
+      "path": "/home/user/gpui-mask-partitions-target/release/examples/text_interaction",
+      "bytes": 6937600,
+      "sha256": "ca52dde914f6495137c09688580eed1dad58e26837491353aa3e83959c9c7681",
+      "kind": "exact-canonical-executable-copy",
+      "preserved": "/home/user/gpui-preserved-test-binaries/ca52dde914f6495137c09688580eed1dad58e26837491353aa3e83959c9c7681"
+    },
+    {
+      "path": "/home/user/gpui-mask-partitions-target/release/examples/retained_runs",
+      "bytes": 7854328,
+      "sha256": "b643933d364ce9cfe4ba001f7559876828951d95d43021d84c618d2166837675",
+      "kind": "exact-canonical-executable-copy",
+      "preserved": "/home/user/gpui-preserved-test-binaries/b643933d364ce9cfe4ba001f7559876828951d95d43021d84c618d2166837675"
+    },
+    {
+      "path": "/home/user/gpui-mask-partitions-target/release/examples/text_cache_capacity",
+      "bytes": 7576544,
+      "sha256": "fc6b5f6025d4799d7a6769cdf56d71896382e2701a88c0137be8691c78d98c50",
+      "kind": "exact-canonical-executable-copy",
+      "preserved": "/home/user/gpui-preserved-test-binaries/fc6b5f6025d4799d7a6769cdf56d71896382e2701a88c0137be8691c78d98c50"
+    },
+    {
+      "path": "/home/user/gpui-mask-partitions-target/release/examples/text_oracle",
+      "bytes": 6939000,
+      "sha256": "890d962456da8a4c5610599f60b619bac53e3877dd4bd0a8149da29bab6563ed",
+      "kind": "exact-canonical-executable-copy",
+      "preserved": "/home/user/gpui-preserved-test-binaries/890d962456da8a4c5610599f60b619bac53e3877dd4bd0a8149da29bab6563ed"
+    },
+    {
+      "path": "/home/user/gpui-mask-partitions-target/release/examples/coverage_table",
+      "bytes": 1434632,
+      "sha256": "70941cdad8e2114b0375ba35efcdfc1e3a76604e32db82eddf178597861939b6",
+      "kind": "exact-canonical-executable-copy",
+      "preserved": "/home/user/gpui-preserved-test-binaries/70941cdad8e2114b0375ba35efcdfc1e3a76604e32db82eddf178597861939b6"
+    },
+    {
+      "path": "/home/user/gpui-mask-partitions-target/release/examples/images",
+      "bytes": 7987960,
+      "sha256": "6812d30c5f046fc12697ce5f12f11bc95f7d9700dd0eca6366319d30430b1276",
+      "kind": "exact-canonical-executable-copy",
+      "preserved": "/home/user/gpui-preserved-test-binaries/6812d30c5f046fc12697ce5f12f11bc95f7d9700dd0eca6366319d30430b1276"
+    },
+    {
+      "path": "/home/user/gpui-mask-partitions-target/release/examples/selection_queries",
+      "bytes": 6924032,
+      "sha256": "63e5fc6ed9542a851e23839839ce182f434d686e409373b832c647771fa046be",
+      "kind": "exact-canonical-executable-copy",
+      "preserved": "/home/user/gpui-preserved-test-binaries/63e5fc6ed9542a851e23839839ce182f434d686e409373b832c647771fa046be"
+    },
+    {
+      "path": "/home/user/gpui-mask-partitions-target/release/examples/group_views",
+      "bytes": 7840896,
+      "sha256": "c7bc8b33e113ae1ebe2d514778dc6bf67e59ae1d6c7ecb53568d773b4c4eff9d",
+      "kind": "exact-canonical-executable-copy",
+      "preserved": "/home/user/gpui-preserved-test-binaries/c7bc8b33e113ae1ebe2d514778dc6bf67e59ae1d6c7ecb53568d773b4c4eff9d"
+    },
+    {
+      "path": "/home/user/gpui-mask-partitions-target/release/examples/cpu",
+      "bytes": 7998936,
+      "sha256": "491d80c0eebeed5ef0a66e3d99bfa32a2f937aef3a88dbf6658084eace13763b",
+      "kind": "exact-canonical-executable-copy",
+      "preserved": "/home/user/gpui-preserved-test-binaries/491d80c0eebeed5ef0a66e3d99bfa32a2f937aef3a88dbf6658084eace13763b"
+    },
+    {
+      "path": "/home/user/gpui-mask-partitions-target/release/examples/groups",
+      "bytes": 15208544,
+      "sha256": "b8f37e7a4f8ed811cb890b4ca1c2d805ddc83cf08e00cd12c98a9e8a6042c706",
+      "kind": "exact-canonical-executable-copy",
+      "preserved": "/home/user/gpui-preserved-test-binaries/b8f37e7a4f8ed811cb890b4ca1c2d805ddc83cf08e00cd12c98a9e8a6042c706"
+    },
+    {
+      "path": "/home/user/gpui-mask-partitions-target/release/examples/caret_pair_measure",
+      "bytes": 6923792,
+      "sha256": "dd40ecf5a56db8336729a02a5e598251244b3092f9f0749f18a3978584cbccb2",
+      "kind": "exact-canonical-executable-copy",
+      "preserved": "/home/user/gpui-preserved-test-binaries/dd40ecf5a56db8336729a02a5e598251244b3092f9f0749f18a3978584cbccb2"
+    },
+    {
+      "path": "/home/user/gpui-mask-partitions-target/release/examples/text_shaping",
+      "bytes": 8009072,
+      "sha256": "36976667a184a8f02faa26e7fa3c05fa324ee025d78c4abd3857d2f4d97c27a7",
+      "kind": "exact-canonical-executable-copy",
+      "preserved": "/home/user/gpui-preserved-test-binaries/36976667a184a8f02faa26e7fa3c05fa324ee025d78c4abd3857d2f4d97c27a7"
+    },
+    {
+      "path": "/home/user/gpui-mask-partitions-target/release/examples/font_memory",
+      "bytes": 10124696,
+      "sha256": "1348b2a14b5e9b73cf5674cf7af78dd2aab529fc096f5f7f12ae2e2c3ab3494c",
+      "kind": "exact-canonical-executable-copy",
+      "preserved": "/home/user/gpui-preserved-test-binaries/1348b2a14b5e9b73cf5674cf7af78dd2aab529fc096f5f7f12ae2e2c3ab3494c"
+    },
+    {
+      "path": "/home/user/gpui-mask-partitions-target/release/examples/image_axis",
+      "bytes": 728856,
+      "sha256": "5d9372a9aaad6ef35cf075df49258e43b19525126e778ee8046ac776f0006fc5",
+      "kind": "exact-canonical-executable-copy",
+      "preserved": "/home/user/gpui-preserved-test-binaries/5d9372a9aaad6ef35cf075df49258e43b19525126e778ee8046ac776f0006fc5"
+    },
+    {
+      "path": "/home/user/gpui-mask-partitions-target/release/examples/clip_cost",
+      "bytes": 7847560,
+      "sha256": "827024133f5f22a5b75b36fed5fb5a531115c9ddfd84d33f57971feb0797d476",
+      "kind": "exact-canonical-executable-copy",
+      "preserved": "/home/user/gpui-preserved-test-binaries/827024133f5f22a5b75b36fed5fb5a531115c9ddfd84d33f57971feb0797d476"
+    },
+    {
+      "path": "/home/user/gpui-mask-partitions-target/release/build/pkg-config/bcc4bf9b5c8a9f3a/out/libpkg_config-bcc4bf9b5c8a9f3a.rmeta",
+      "bytes": 71553,
+      "sha256": "195199b0c6b43c844c43cf127b9f1fbac01f9954958c73088dd8f58b140f1331",
+      "kind": "regenerable-compiled-library"
+    },
+    {
+      "path": "/home/user/gpui-mask-partitions-target/release/build/pkg-config/bcc4bf9b5c8a9f3a/out/libpkg_config-bcc4bf9b5c8a9f3a.rlib",
+      "bytes": 846290,
+      "sha256": "f88043bf6891953c7d25ec428f3f8dde568b0d9f28de2b6810478a427415a431",
+      "kind": "regenerable-compiled-library"
+    },
+    {
+      "path": "/home/user/gpui-mask-partitions-target/release/build/swash/857ad347bb8c4842/out/libswash-857ad347bb8c4842.rmeta",
+      "bytes": 6264949,
+      "sha256": "79bceec9cc98639c673323b93340d0f63bcbf30895f9e395eaa4dac1812d057a",
+      "kind": "regenerable-compiled-library"
+    },
+    {
+      "path": "/home/user/gpui-mask-partitions-target/release/build/swash/857ad347bb8c4842/out/libswash-857ad347bb8c4842.rlib",
+      "bytes": 2277798,
+      "sha256": "a8c22bd044b40c0966a2bf4fce6b8ff28b8f3740de33c85f52bb010ce2825490",
+      "kind": "regenerable-compiled-library"
+    },
+    {
+      "path": "/home/user/gpui-mask-partitions-target/release/build/swash/2f7892458e522820/out/libswash-2f7892458e522820.rmeta",
+      "bytes": 5283129,
+      "sha256": "2fb27bb2edeaee6f39d5d31bbb6a392e8db58eaa387fd905f71c5cedd7a83c60",
+      "kind": "regenerable-compiled-library"
+    },
+    {
+      "path": "/home/user/gpui-mask-partitions-target/release/build/icu_properties_data/18225bc914b96d92/out/libicu_properties_data-18225bc914b96d92.rmeta",
+      "bytes": 1860116,
+      "sha256": "95c32e15af81ff04383bfbf495eb45978827e29804bd2574961e015f5db33caf",
+      "kind": "regenerable-compiled-library"
+    },
+    {
+      "path": "/home/user/gpui-mask-partitions-target/release/build/icu_properties_data/f6b62411c57a0b14/out/libicu_properties_data-f6b62411c57a0b14.rmeta",
+      "bytes": 1864842,
+      "sha256": "606f9f3610f0f783170a7b2df290544ddadf21310e975a5ad1c625235aba4dde",
+      "kind": "regenerable-compiled-library"
+    },
+    {
+      "path": "/home/user/gpui-mask-partitions-target/release/build/icu_properties_data/f6b62411c57a0b14/out/libicu_properties_data-f6b62411c57a0b14.rlib",
+      "bytes": 2436,
+      "sha256": "db8e960d3f5996bcba56ea9b32d55db77f910e46d44ec170ee4329770e7ae95c",
+      "kind": "regenerable-compiled-library"
+    },
+    {
+      "path": "/home/user/gpui-mask-partitions-target/release/build/icu_locale_fallback_data/d8d89af2a23072b8/out/libicu_locale_fallback_data-d8d89af2a23072b8.rmeta",
+      "bytes": 27405,
+      "sha256": "d0cfea56edcd36fd7190e5b1c5f948c74d512c7a93056d17d5773448c1439313",
+      "kind": "regenerable-compiled-library"
+    },
+    {
+      "path": "/home/user/gpui-mask-partitions-target/release/build/icu_locale_fallback_data/10c3d6d8535f5201/out/libicu_locale_fallback_data-10c3d6d8535f5201.rlib",
+      "bytes": 2470,
+      "sha256": "08745710d68c2f6ff4c72165b08ac2c1a9913dc6eb1b76acb16d66a2af454d3e",
+      "kind": "regenerable-compiled-library"
+    },
+    {
+      "path": "/home/user/gpui-mask-partitions-target/release/build/icu_locale_fallback_data/10c3d6d8535f5201/out/libicu_locale_fallback_data-10c3d6d8535f5201.rmeta",
+      "bytes": 27541,
+      "sha256": "a492663285e50e394d1566a5f40371acbb12283732098453f6a4da96dbd519e8",
+      "kind": "regenerable-compiled-library"
+    },
+    {
+      "path": "/home/user/gpui-mask-partitions-target/release/build/icu_segmenter_data/38854cc77828cecd/out/libicu_segmenter_data-38854cc77828cecd.rmeta",
+      "bytes": 12360821,
+      "sha256": "cdd03376bdffbc356f9253df8ee84c7ed5198fadf9077f51195c2f0c7783a129",
+      "kind": "regenerable-compiled-library"
+    },
+    {
+      "path": "/home/user/gpui-mask-partitions-target/release/build/icu_segmenter_data/e85961f7d1f676b4/out/libicu_segmenter_data-e85961f7d1f676b4.rmeta",
+      "bytes": 12361467,
+      "sha256": "198b045bf481c8bef8ab127843c23c961ce355fd524d7d798aebb90b803ea537",
+      "kind": "regenerable-compiled-library"
+    },
+    {
+      "path": "/home/user/gpui-mask-partitions-target/release/build/icu_segmenter_data/e85961f7d1f676b4/out/libicu_segmenter_data-e85961f7d1f676b4.rlib",
+      "bytes": 2434,
+      "sha256": "51dc029f3daa8f1b6ec687c6f2548304989def1521da4c30bcc2effb6cefd1ae",
+      "kind": "regenerable-compiled-library"
+    },
+    {
+      "path": "/home/user/gpui-mask-partitions-target/release/build/indexmap/9639351d01eaf386/out/libindexmap-9639351d01eaf386.rlib",
+      "bytes": 4992,
+      "sha256": "2540267963f3a13f630ba958d3e525dde45faaf85d92b6ef0f24a3097bed1ee4",
+      "kind": "regenerable-compiled-library"
+    },
+    {
+      "path": "/home/user/gpui-mask-partitions-target/release/build/indexmap/9639351d01eaf386/out/libindexmap-9639351d01eaf386.rmeta",
+      "bytes": 1782787,
+      "sha256": "42012a25d739bb10961a15185ca0d03221e3a5b7f469d40654b700871474e54c",
+      "kind": "regenerable-compiled-library"
+    },
+    {
+      "path": "/home/user/gpui-mask-partitions-target/release/build/indexmap/c2f9a300f645630f/out/libindexmap-c2f9a300f645630f.rmeta",
+      "bytes": 923881,
+      "sha256": "e10f5850dab00cd34ab83d954f6625169ac44cfa6fb823634e9afd492ae21669",
+      "kind": "regenerable-compiled-library"
+    },
+    {
+      "path": "/home/user/gpui-mask-partitions-target/release/build/indexmap/e582fe1e02b051f4/out/libindexmap-e582fe1e02b051f4.rlib",
+      "bytes": 6784,
+      "sha256": "84c59d7d243aa520abc980213bf3579cf1bb96fe6b79028a25ed9087182b5189",
+      "kind": "regenerable-compiled-library"
+    },
+    {
+      "path": "/home/user/gpui-mask-partitions-target/release/build/indexmap/e582fe1e02b051f4/out/libindexmap-e582fe1e02b051f4.rmeta",
+      "bytes": 1283018,
+      "sha256": "a52c244a3db915edaf83d6072203f433f0711b6a2ddb20cd0f3aba7899bf4d6c",
+      "kind": "regenerable-compiled-library"
+    },
+    {
+      "path": "/home/user/gpui-mask-partitions-target/release/build/libloading/c84ce4b5b1ab761a/out/liblibloading-c84ce4b5b1ab761a.rmeta",
+      "bytes": 103429,
+      "sha256": "a75de8416b827bd308079c0f20a3336dfa9cc83f25f819d15e3f094a46285762",
+      "kind": "regenerable-compiled-library"
+    },
+    {
+      "path": "/home/user/gpui-mask-partitions-target/release/build/libloading/bc719e75286d2fe9/out/liblibloading-bc719e75286d2fe9.rmeta",
+      "bytes": 156540,
+      "sha256": "5ca39034c9bae0e6ec5bde37eeb5a6760cb5e1d5121c256e48bba39602340c17",
+      "kind": "regenerable-compiled-library"
+    },
+    {
+      "path": "/home/user/gpui-mask-partitions-target/release/build/libloading/bc719e75286d2fe9/out/liblibloading-bc719e75286d2fe9.rlib",
+      "bytes": 17546,
+      "sha256": "a0272364634415d4781c34a5ad33c25f3fef52b75c9687a192847ac68bae64cd",
+      "kind": "regenerable-compiled-library"
+    },
+    {
+      "path": "/home/user/gpui-mask-partitions-target/release/build/unicode-width/ee39f82b2052c65b/out/libunicode_width-ee39f82b2052c65b.rmeta",
+      "bytes": 856534,
+      "sha256": "fae16ca2180b1cbf2bd880a50dd439769eb43c31386dfe6816fc2772b4c870db",
+      "kind": "regenerable-compiled-library"
+    },
+    {
+      "path": "/home/user/gpui-mask-partitions-target/release/build/unicode-width/ee39f82b2052c65b/out/libunicode_width-ee39f82b2052c65b.rlib",
+      "bytes": 34516,
+      "sha256": "e10ad158cf0e73aa5cba7da4dde051698e192b31465aa910806236589b933b14",
+      "kind": "regenerable-compiled-library"
+    },
+    {
+      "path": "/home/user/gpui-mask-partitions-target/release/build/unicode-width/b3b9897e25c0808b/out/libunicode_width-b3b9897e25c0808b.rmeta",
+      "bytes": 815746,
+      "sha256": "40ed1fcd55058c3c2015672c8f3591aa713e27b0fbf3514a23dc5d0ba39ed28c",
+      "kind": "regenerable-compiled-library"
+    },
+    {
+      "path": "/home/user/gpui-mask-partitions-target/release/build/unicode-width/d77ac50d4ef432ad/out/libunicode_width-d77ac50d4ef432ad.rmeta",
+      "bytes": 870318,
+      "sha256": "a173e1eb1ef513f9bef033ff66d4ffdfc498ce4c76918712075757a83887fe32",
+      "kind": "regenerable-compiled-library"
+    },
+    {
+      "path": "/home/user/gpui-mask-partitions-target/release/build/unicode-width/d77ac50d4ef432ad/out/libunicode_width-d77ac50d4ef432ad.rlib",
+      "bytes": 21366,
+      "sha256": "a0a1be3d5203f87c4b47c4785e05ab87591a542bda62f7529164f857ce62a220",
+      "kind": "regenerable-compiled-library"
+    },
+    {
+      "path": "/home/user/gpui-mask-partitions-target/release/build/thiserror-impl/11cb6adf2e0064f3/out/libthiserror_impl-11cb6adf2e0064f3.so",
+      "bytes": 3980528,
+      "sha256": "19d10b99c85afedaa71edac94a0205d1a159d912b4060cd92e0af6883398ea4b",
+      "kind": "regenerable-compiled-library"
+    },
+    {
+      "path": "/home/user/gpui-mask-partitions-target/release/build/wgpu-hal/ebac8ee2d4488d31/out/libwgpu_hal-ebac8ee2d4488d31.rmeta",
+      "bytes": 4149575,
+      "sha256": "3803f8b77293d8ece35078453cd105c2280b3bbf8fa7f7ddbd8a451a6b0b676f",
+      "kind": "regenerable-compiled-library"
+    },
+    {
+      "path": "/home/user/gpui-mask-partitions-target/release/build/wgpu-hal/ebac8ee2d4488d31/out/libwgpu_hal-ebac8ee2d4488d31.rlib",
+      "bytes": 3097354,
+      "sha256": "2988d7af31eee0743262ebc5f5520d86313fc64930b50b88f92923e7495f0a4a",
+      "kind": "regenerable-compiled-library"
+    },
+    {
+      "path": "/home/user/gpui-mask-partitions-target/release/build/wgpu-hal/151a285e597b17f2/out/libwgpu_hal-151a285e597b17f2.rmeta",
+      "bytes": 2959996,
+      "sha256": "1e488937e46af1a9f90bfdb2a4f429b5270e47a0985819fa41ed1dba08f0f3bf",
+      "kind": "regenerable-compiled-library"
+    },
+    {
+      "path": "/home/user/gpui-mask-partitions-target/release/build/fearless_simd_macros/13fb3b59b63a3fd9/out/libfearless_simd_macros-13fb3b59b63a3fd9.so",
+      "bytes": 3823840,
+      "sha256": "9d511cb3cc521f83b56d07abdc204a27ed005130687647e966eb91489a4f7e46",
+      "kind": "regenerable-compiled-library"
+    },
+    {
+      "path": "/home/user/gpui-mask-partitions-target/release/build/equivalent/cd3a841315efa049/out/libequivalent-cd3a841315efa049.rmeta",
+      "bytes": 8570,
+      "sha256": "e5191cde478910b80967f65d7b8319c6669abbc99c86a660e25deaeeab750505",
+      "kind": "regenerable-compiled-library"
+    },
+    {
+      "path": "/home/user/gpui-mask-partitions-target/release/build/equivalent/cd3a841315efa049/out/libequivalent-cd3a841315efa049.rlib",
+      "bytes": 2386,
+      "sha256": "3b842bb2043ab0a989876de1e7743b822e7bbb1b4ec22d2d733b44a7238e22fd",
+      "kind": "regenerable-compiled-library"
+    },
+    {
+      "path": "/home/user/gpui-mask-partitions-target/release/build/equivalent/daef721e4435340f/out/libequivalent-daef721e4435340f.rmeta",
+      "bytes": 8016,
+      "sha256": "b2c87dea55739582cc5965c65093da0471efc1d4ac32bad050d51be3c419f87c",
+      "kind": "regenerable-compiled-library"
+    },
+    {
+      "path": "/home/user/gpui-mask-partitions-target/release/build/equivalent/e921210bf9934426/out/libequivalent-e921210bf9934426.rmeta",
+      "bytes": 8690,
+      "sha256": "9bf318bb7838ba95e7e1484f0436534f013828ead039eb237346c831295a52d1",
+      "kind": "regenerable-compiled-library"
+    },
+    {
+      "path": "/home/user/gpui-mask-partitions-target/release/build/equivalent/e921210bf9934426/out/libequivalent-e921210bf9934426.rlib",
+      "bytes": 2386,
+      "sha256": "a46b522887aaf5f1b29b475110c0c3f4a748af94a9b51f99b4eede7436598ecd",
+      "kind": "regenerable-compiled-library"
+    },
+    {
+      "path": "/home/user/gpui-mask-partitions-target/release/build/unicode-properties/f40ff0cd79d8e34a/out/libunicode_properties-f40ff0cd79d8e34a.rmeta",
+      "bytes": 405219,
+      "sha256": "6b6245beae21bf6b9e44195a390456814621d3fb9c654f8ccbd85d8c84cf6950",
+      "kind": "regenerable-compiled-library"
+    },
+    {
+      "path": "/home/user/gpui-mask-partitions-target/release/build/unicode-properties/17c70661265ca7de/out/libunicode_properties-17c70661265ca7de.rlib",
+      "bytes": 45070,
+      "sha256": "6541563397ca8ac0648e5abae3bc2a270668e0aba515b4fc5fa3f25356df2fad",
+      "kind": "regenerable-compiled-library"
+    },
+    {
+      "path": "/home/user/gpui-mask-partitions-target/release/build/unicode-properties/17c70661265ca7de/out/libunicode_properties-17c70661265ca7de.rmeta",
+      "bytes": 414258,
+      "sha256": "508e98ff7b816eca6b51ee637b5aeb023f2d738e0b59119a643e3a6aa5426888",
+      "kind": "regenerable-compiled-library"
+    },
+    {
+      "path": "/home/user/gpui-mask-partitions-target/release/build/zerovec-derive/0453177f0d3b4a4e/out/libzerovec_derive-0453177f0d3b4a4e.so",
+      "bytes": 3888472,
+      "sha256": "8a11b7480c99dc1db38d65ac5af53877fbbc20ed53c33ea11d6434bcbbb22fd3",
+      "kind": "regenerable-compiled-library"
+    },
+    {
+      "path": "/home/user/gpui-mask-partitions-target/release/build/writeable/21a49729ec9532f7/out/libwriteable-21a49729ec9532f7.rlib",
+      "bytes": 21272,
+      "sha256": "6b3ab2dd2213417368a3f03a128fbd345c4fcf3176f18a0356ff1df6b1a4df93",
+      "kind": "regenerable-compiled-library"
+    },
+    {
+      "path": "/home/user/gpui-mask-partitions-target/release/build/writeable/21a49729ec9532f7/out/libwriteable-21a49729ec9532f7.rmeta",
+      "bytes": 393360,
+      "sha256": "a7523f1199b79b21e9b0b9143c2497d90404d7e1373f5a311da0c140db0bef3d",
+      "kind": "regenerable-compiled-library"
+    },
+    {
+      "path": "/home/user/gpui-mask-partitions-target/release/build/writeable/e62c9de981a0fbd6/out/libwriteable-e62c9de981a0fbd6.rmeta",
+      "bytes": 236348,
+      "sha256": "29373c48de6e194dcc4c68fdcd5a306b3bc55993b9e2e415971468ef212d548b",
+      "kind": "regenerable-compiled-library"
+    },
+    {
+      "path": "/home/user/gpui-mask-partitions-target/release/build/font-types/006e5628fb2e2d88/out/libfont_types-006e5628fb2e2d88.rlib",
+      "bytes": 40298,
+      "sha256": "7dcdca6492d0bc5a1108080f3949c33192834eb8e21c2d8681354e891325f7bd",
+      "kind": "regenerable-compiled-library"
+    },
+    {
+      "path": "/home/user/gpui-mask-partitions-target/release/build/font-types/006e5628fb2e2d88/out/libfont_types-006e5628fb2e2d88.rmeta",
+      "bytes": 804305,
+      "sha256": "b2ca778711795764f5ec4b4bf2c1633da5ac5238fdfe5e19ab5d4294a042eee7",
+      "kind": "regenerable-compiled-library"
+    },
+    {
+      "path": "/home/user/gpui-mask-partitions-target/release/build/font-types/a0bef1d352904184/out/libfont_types-a0bef1d352904184.rmeta",
+      "bytes": 606303,
+      "sha256": "417f5dbd8480576e0c3e79f5b28b64cda8f6a9d2216ba3223c0dd0f8b7b223e2",
+      "kind": "regenerable-compiled-library"
+    },
+    {
+      "path": "/home/user/gpui-mask-partitions-target/release/build/parley_emoji/2989278c86b9b60c/out/libparley_emoji-2989278c86b9b60c.rlib",
+      "bytes": 2776,
+      "sha256": "be82d98c2cea5f367c8a779eefceefbf899e7813994472946cd624102c255afa",
+      "kind": "regenerable-compiled-library"
+    },
+    {
+      "path": "/home/user/gpui-mask-partitions-target/release/build/parley_emoji/2989278c86b9b60c/out/libparley_emoji-2989278c86b9b60c.rmeta",
+      "bytes": 59251,
+      "sha256": "ecfd6825f5e2a4c07268e3d225bfb1b474b0045b58cb50fae28cfb971297a42e",
+      "kind": "regenerable-compiled-library"
+    },
+    {
+      "path": "/home/user/gpui-mask-partitions-target/release/build/parley_emoji/18d1d9cc5f1f755c/out/libparley_emoji-18d1d9cc5f1f755c.rmeta",
+      "bytes": 46108,
+      "sha256": "df547db9a4342687abfe22727d108c16af487910733dbfddcb83417e2cbbf651",
+      "kind": "regenerable-compiled-library"
+    },
+    {
+      "path": "/home/user/gpui-mask-partitions-target/release/build/bytemuck_derive/45d346d42384f9a1/out/libbytemuck_derive-45d346d42384f9a1.so",
+      "bytes": 3912032,
+      "sha256": "2c80b3b9a0c8f3d7386e018d6e7311c8254f38ec5d6a013e1030de839d0d21cd",
+      "kind": "regenerable-compiled-library"
+    },
+    {
+      "path": "/home/user/gpui-mask-partitions-target/release/build/bit-vec/ac1ac90c607c2510/out/libbit_vec-ac1ac90c607c2510.rmeta",
+      "bytes": 99780,
+      "sha256": "2618f59d63987f27d0ba8b2ff71e428686c9e6bfe9a9f9201e657bf07faa1ccd",
+      "kind": "regenerable-compiled-library"
+    },
+    {
+      "path": "/home/user/gpui-mask-partitions-target/release/build/bit-vec/95cf81375a0cfad6/out/libbit_vec-95cf81375a0cfad6.rlib",
+      "bytes": 35958,
+      "sha256": "641091d72a90f028725d5ad4f11a6d0d0ff305df7a5ca73eaba9169e4d54aff7",
+      "kind": "regenerable-compiled-library"
+    },
+    {
+      "path": "/home/user/gpui-mask-partitions-target/release/build/bit-vec/95cf81375a0cfad6/out/libbit_vec-95cf81375a0cfad6.rmeta",
+      "bytes": 198055,
+      "sha256": "c0591e0c9be85ce4b4228b0af3a0584d948ca2a8431fead4fd4509236e52a418",
+      "kind": "regenerable-compiled-library"
+    },
+    {
+      "path": "/home/user/gpui-mask-partitions-target/release/build/bit-vec/fbbc83ab4a8094ab/out/libbit_vec-fbbc83ab4a8094ab.rlib",
+      "bytes": 8932,
+      "sha256": "dd96f461acd9fd004413d012f4325c05224895e0180dd348e733a6b81bee8275",
+      "kind": "regenerable-compiled-library"
+    },
+    {
+      "path": "/home/user/gpui-mask-partitions-target/release/build/bit-vec/fbbc83ab4a8094ab/out/libbit_vec-fbbc83ab4a8094ab.rmeta",
+      "bytes": 289930,
+      "sha256": "2a99cb7dce6aef849a2f22f0bf05bf0c484ce24883bfc94129743eea53f6fe17",
+      "kind": "regenerable-compiled-library"
+    },
+    {
+      "path": "/home/user/gpui-mask-partitions-target/release/build/wgsl-rs/7e12fda5ce42a867/out/libwgsl_rs-7e12fda5ce42a867.rmeta",
+      "bytes": 4618730,
+      "sha256": "31d56a585a0bfa3defb2950dd3ebc311b450b4331011307dc9d2da0a4605ef78",
+      "kind": "regenerable-compiled-library"
+    },
+    {
+      "path": "/home/user/gpui-mask-partitions-target/release/build/wgsl-rs/7e12fda5ce42a867/out/libwgsl_rs-7e12fda5ce42a867.rlib",
+      "bytes": 5832712,
+      "sha256": "69362dd3976ff2b90d686aa26e47493594a050051a36da6b9043bce5aeda4acb",
+      "kind": "regenerable-compiled-library"
+    },
+    {
+      "path": "/home/user/gpui-mask-partitions-target/release/build/wgsl-rs/fdd6edd23d251937/out/libwgsl_rs-fdd6edd23d251937.rmeta",
+      "bytes": 4269856,
+      "sha256": "49cbf1c56cac8e4ce419c0733b5921b6312755974308d666187492ca656d141d",
+      "kind": "regenerable-compiled-library"
+    },
+    {
+      "path": "/home/user/gpui-mask-partitions-target/release/build/wgsl-rs/e36f13b481d01e5f/out/libwgsl_rs-e36f13b481d01e5f.rlib",
+      "bytes": 1918036,
+      "sha256": "f26fc823695fb984ca2af3c1942f8de8f4d5220bc7864e2ef01a6b3c6c1c8e05",
+      "kind": "regenerable-compiled-library"
+    },
+    {
+      "path": "/home/user/gpui-mask-partitions-target/release/build/wgsl-rs/e36f13b481d01e5f/out/libwgsl_rs-e36f13b481d01e5f.rmeta",
+      "bytes": 6042069,
+      "sha256": "a6b8134bdf7324500d2e841f3838bb41625ddf26e47059d824ff456d8aca2ed1",
+      "kind": "regenerable-compiled-library"
+    },
+    {
+      "path": "/home/user/gpui-mask-partitions-target/release/build/renderdoc-sys/55085bff80759734/out/librenderdoc_sys-55085bff80759734.rlib",
+      "bytes": 21750,
+      "sha256": "72e1eb833834e9fa71af4affa79578776efbe6c5a68aceb7d65ef47aef146695",
+      "kind": "regenerable-compiled-library"
+    },
+    {
+      "path": "/home/user/gpui-mask-partitions-target/release/build/renderdoc-sys/55085bff80759734/out/librenderdoc_sys-55085bff80759734.rmeta",
+      "bytes": 48858,
+      "sha256": "2a48ebf65ef39d882753d18554f71a8eff2191fd67bc3e39812f72848816ecf3",
+      "kind": "regenerable-compiled-library"
+    },
+    {
+      "path": "/home/user/gpui-mask-partitions-target/release/build/renderdoc-sys/5880c9de017d639d/out/librenderdoc_sys-5880c9de017d639d.rmeta",
+      "bytes": 45812,
+      "sha256": "28ec4492ef9f223b72f0ed1339eda93525a11a1e262f7ded918b824d6a771559",
+      "kind": "regenerable-compiled-library"
+    },
+    {
+      "path": "/home/user/gpui-mask-partitions-target/release/build/rustc-hash/4ec107d2de00dfd2/out/librustc_hash-4ec107d2de00dfd2.rmeta",
+      "bytes": 12801,
+      "sha256": "1a20533ce8630f972276828ff92cafa0485f4cbaea94abd4cd873966561aa038",
+      "kind": "regenerable-compiled-library"
+    },
+    {
+      "path": "/home/user/gpui-mask-partitions-target/release/build/rustc-hash/4ec107d2de00dfd2/out/librustc_hash-4ec107d2de00dfd2.rlib",
+      "bytes": 2386,
+      "sha256": "5b865b401207b0ff864cb81e2f967f3080a3d7137c055c0ef7ee305550601930",
+      "kind": "regenerable-compiled-library"
+    },
+    {
+      "path": "/home/user/gpui-mask-partitions-target/release/build/rustc-hash/4373e92ef06c3ce5/out/librustc_hash-4373e92ef06c3ce5.rmeta",
+      "bytes": 6863,
+      "sha256": "5ccc75c69cacc8a43b69b615a0691ed49ea80a427f8ce87b59f33a6ec10cb885",
+      "kind": "regenerable-compiled-library"
+    },
+    {
+      "path": "/home/user/gpui-mask-partitions-target/release/build/rustc-hash/d6847206cffa6bfe/out/librustc_hash-d6847206cffa6bfe.rlib",
+      "bytes": 2386,
+      "sha256": "a187742c55b58337b826f142ad9ee2fa66178ca3642c489e11478ca8898bb168",
+      "kind": "regenerable-compiled-library"
+    },
+    {
+      "path": "/home/user/gpui-mask-partitions-target/release/build/rustc-hash/d6847206cffa6bfe/out/librustc_hash-d6847206cffa6bfe.rmeta",
+      "bytes": 19231,
+      "sha256": "728c47ccf3d2522fac70f4a3bbbb277796c1e82dee99831403332f6e0cb0d7d3",
+      "kind": "regenerable-compiled-library"
+    },
+    {
+      "path": "/home/user/gpui-mask-partitions-target/release/build/paste/ae32c2b30f5af1df/out/libpaste-ae32c2b30f5af1df.so",
+      "bytes": 723880,
+      "sha256": "0898bdc9048c67b4af54485c5a824fac19c7bceca455a75ec1130757b68e92e2",
+      "kind": "regenerable-compiled-library"
+    },
+    {
+      "path": "/home/user/gpui-mask-partitions-target/release/build/bit-set/a34a6118d0f6e1c6/out/libbit_set-a34a6118d0f6e1c6.rmeta",
+      "bytes": 105673,
+      "sha256": "54aa24b7b82b675f38d3b937afcf854efa1e3ef0438a1cc9cb57b129a8e8520e",
+      "kind": "regenerable-compiled-library"
+    },
+    {
+      "path": "/home/user/gpui-mask-partitions-target/release/build/bit-set/a34a6118d0f6e1c6/out/libbit_set-a34a6118d0f6e1c6.rlib",
+      "bytes": 3060,
+      "sha256": "8cdc3e5cfeca2af00c28f69f4a5cee0b84303fe9a60639dcb9cbc1ea8295d4a7",
+      "kind": "regenerable-compiled-library"
+    },
+    {
+      "path": "/home/user/gpui-mask-partitions-target/release/build/bit-set/421abef0ea667f08/out/libbit_set-421abef0ea667f08.rmeta",
+      "bytes": 65087,
+      "sha256": "8d96eb6517838c9c3bde4a5c5be7cc9f0e5131b8d02c9e5cb643117032e5738f",
+      "kind": "regenerable-compiled-library"
+    },
+    {
+      "path": "/home/user/gpui-mask-partitions-target/release/build/bit-set/f7ab3564ecff637c/out/libbit_set-f7ab3564ecff637c.rlib",
+      "bytes": 2988,
+      "sha256": "3d13ef3a185d97bd806c551ec9e7c719e02ea68ec1dcca0272fac991f9698fef",
+      "kind": "regenerable-compiled-library"
+    },
+    {
+      "path": "/home/user/gpui-mask-partitions-target/release/build/bit-set/f7ab3564ecff637c/out/libbit_set-f7ab3564ecff637c.rmeta",
+      "bytes": 147435,
+      "sha256": "74cdab2e2bae3569aaaa8fcf088b5297a70e92fe0f8e3e6ab7b3f7af2236c673",
+      "kind": "regenerable-compiled-library"
+    },
+    {
+      "path": "/home/user/gpui-mask-partitions-target/release/build/spirv/f6d73bde5b6b1154/out/libspirv-f6d73bde5b6b1154.rmeta",
+      "bytes": 3265367,
+      "sha256": "19d9810457162d7e16901cdd5f26a6bc43dd24ab89f6bfb95164289e82b8e412",
+      "kind": "regenerable-compiled-library"
+    },
+    {
+      "path": "/home/user/gpui-mask-partitions-target/release/build/spirv/58298c1af9d5d361/out/libspirv-58298c1af9d5d361.rmeta",
+      "bytes": 4318293,
+      "sha256": "74d84f2f0c4ce7201f40cd24ad997bcb07051c7499fea902cecfc4685ef8b060",
+      "kind": "regenerable-compiled-library"
+    },
+    {
+      "path": "/home/user/gpui-mask-partitions-target/release/build/spirv/58298c1af9d5d361/out/libspirv-58298c1af9d5d361.rlib",
+      "bytes": 462418,
+      "sha256": "cd8962e7751a2657deef780cf6eba01627c1b22fc51108d234eb3f10d71fd613",
+      "kind": "regenerable-compiled-library"
+    },
+    {
+      "path": "/home/user/gpui-mask-partitions-target/release/build/allocator-api2/16fb647c07389266/out/liballocator_api2-16fb647c07389266.rmeta",
+      "bytes": 851645,
+      "sha256": "1a0d5c0428389c9ee979bc41ae0b38fe2ad766e49a2b5939b080ace26a9682ea",
+      "kind": "regenerable-compiled-library"
+    },
+    {
+      "path": "/home/user/gpui-mask-partitions-target/release/build/allocator-api2/16fb647c07389266/out/liballocator_api2-16fb647c07389266.rlib",
+      "bytes": 9554,
+      "sha256": "61fdae71f3dc1bf86d0036bf05c274ad3216b268d44677d2cc3c634b83c13fd0",
+      "kind": "regenerable-compiled-library"
+    },
+    {
+      "path": "/home/user/gpui-mask-partitions-target/release/build/allocator-api2/77dc204c492830bc/out/liballocator_api2-77dc204c492830bc.rmeta",
+      "bytes": 487261,
+      "sha256": "e6d7393459dce8da15b5cf0a14636b5ee377a791b41924fa3d3e971e0edf3ed0",
+      "kind": "regenerable-compiled-library"
+    },
+    {
+      "path": "/home/user/gpui-mask-partitions-target/release/build/cfg_aliases/7addfbbf4bb3a16a/out/libcfg_aliases-7addfbbf4bb3a16a.rlib",
+      "bytes": 2388,
+      "sha256": "8cdc3ac75af83d156ad44a67781d23d1be3456f0ac8731aa9fffc514ecdd5c99",
+      "kind": "regenerable-compiled-library"
+    },
+    {
+      "path": "/home/user/gpui-mask-partitions-target/release/build/cfg_aliases/7addfbbf4bb3a16a/out/libcfg_aliases-7addfbbf4bb3a16a.rmeta",
+      "bytes": 18015,
+      "sha256": "9083b0bcd77f0ff289bd74db7f94bacb502ad83c1aa2083d9fe45da610898b82",
+      "kind": "regenerable-compiled-library"
+    },
+    {
+      "path": "/home/user/gpui-mask-partitions-target/release/build/zeno/1ffef1806445d7b1/out/libzeno-1ffef1806445d7b1.rlib",
+      "bytes": 65040,
+      "sha256": "c4a689d03a80150163785ce4ce8beec06aaeadab467283d77eed55eb3c742adb",
+      "kind": "regenerable-compiled-library"
+    },
+    {
+      "path": "/home/user/gpui-mask-partitions-target/release/build/zeno/1ffef1806445d7b1/out/libzeno-1ffef1806445d7b1.rmeta",
+      "bytes": 847367,
+      "sha256": "8abf7a259c03671828e9cd08a75d42dff45de8b49be0c4a2de05b4246763b69f",
+      "kind": "regenerable-compiled-library"
+    },
+    {
+      "path": "/home/user/gpui-mask-partitions-target/release/build/zeno/2b5ad39abf111852/out/libzeno-2b5ad39abf111852.rmeta",
+      "bytes": 447273,
+      "sha256": "ec868637155a4e981e6aab9978f6bca9059373a9ba3b0192e5dffe2f5e117f4e",
+      "kind": "regenerable-compiled-library"
+    },
+    {
+      "path": "/home/user/gpui-mask-partitions-target/release/build/parley/f46c6334f0a4cba1/out/libparley-f46c6334f0a4cba1.rmeta",
+      "bytes": 961397,
+      "sha256": "a9419b4a1baf33f14cdd10b4d893fde9d80edf84afc507a6c0eba76662266ef5",
+      "kind": "regenerable-compiled-library"
+    },
+    {
+      "path": "/home/user/gpui-mask-partitions-target/release/build/parley/a3f63bd8898347ba/out/libparley-a3f63bd8898347ba.rlib",
+      "bytes": 139828,
+      "sha256": "f7a89f5cde5117ad4d539c4865705ea67d665f74f15e0667981d5b82f1cf1647",
+      "kind": "regenerable-compiled-library"
+    },
+    {
+      "path": "/home/user/gpui-mask-partitions-target/release/build/parley/a3f63bd8898347ba/out/libparley-a3f63bd8898347ba.rmeta",
+      "bytes": 2132475,
+      "sha256": "25895942adaf6992ff68408f3b4bb2a3082c8dbf90ebe86107ae58f3e0ec7e81",
+      "kind": "regenerable-compiled-library"
+    },
+    {
+      "path": "/home/user/gpui-mask-partitions-target/release/build/profiling/9155fec30bcc0eab/out/libprofiling-9155fec30bcc0eab.rmeta",
+      "bytes": 5363,
+      "sha256": "7523914fa2b5587d2c855bf904e5b36f7f56190b49c60d9b68993e79dbd332c7",
+      "kind": "regenerable-compiled-library"
+    },
+    {
+      "path": "/home/user/gpui-mask-partitions-target/release/build/profiling/93e7ec224530a740/out/libprofiling-93e7ec224530a740.rlib",
+      "bytes": 2384,
+      "sha256": "ad9f2dcf6928ac8e92aa0357544ccd0be8e7db4b5c9162d0265e8e321b446f5b",
+      "kind": "regenerable-compiled-library"
+    },
+    {
+      "path": "/home/user/gpui-mask-partitions-target/release/build/profiling/93e7ec224530a740/out/libprofiling-93e7ec224530a740.rmeta",
+      "bytes": 5431,
+      "sha256": "2c245f7e0597b05e69850207fd5b11c04a3dec53ef00d80b0bf3f9c87b36e724",
+      "kind": "regenerable-compiled-library"
+    },
+    {
+      "path": "/home/user/gpui-mask-partitions-target/release/build/gpui_canvas/b6ae2ca160e29380/out/sample_clip-b6ae2ca160e29380",
+      "bytes": 1313080,
+      "sha256": "b97b869003034f7a41e40a5740fc7b42e12ccfbe33b4df046b6ed9718235feaf",
+      "kind": "exact-canonical-executable-copy",
+      "preserved": "/home/user/gpui-preserved-test-binaries/b97b869003034f7a41e40a5740fc7b42e12ccfbe33b4df046b6ed9718235feaf"
+    },
+    {
+      "path": "/home/user/gpui-mask-partitions-target/release/build/gpui_canvas/c627d1dc1ab61790/out/parallel-c627d1dc1ab61790",
+      "bytes": 1075560,
+      "sha256": "909e5daf2caa609985fbc4af4600ade411a610d1b2e243ddd83ed48c6982db84",
+      "kind": "exact-canonical-executable-copy",
+      "preserved": "/home/user/gpui-preserved-test-binaries/909e5daf2caa609985fbc4af4600ade411a610d1b2e243ddd83ed48c6982db84"
+    },
+    {
+      "path": "/home/user/gpui-mask-partitions-target/release/build/gpui_canvas/3d3a879371ca2e11/out/libclip_cost-3d3a879371ca2e11.rmeta",
+      "bytes": 0,
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "kind": "regenerable-compiled-library"
+    },
+    {
+      "path": "/home/user/gpui-mask-partitions-target/release/build/gpui_canvas/4d92d2ffb8c4eafd/out/libfont_memory-4d92d2ffb8c4eafd.rmeta",
+      "bytes": 0,
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "kind": "regenerable-compiled-library"
+    },
+    {
+      "path": "/home/user/gpui-mask-partitions-target/release/build/gpui_canvas/260eabc61cd841a2/out/text_shaping",
+      "bytes": 8009072,
+      "sha256": "36976667a184a8f02faa26e7fa3c05fa324ee025d78c4abd3857d2f4d97c27a7",
+      "kind": "exact-canonical-executable-copy",
+      "preserved": "/home/user/gpui-preserved-test-binaries/36976667a184a8f02faa26e7fa3c05fa324ee025d78c4abd3857d2f4d97c27a7"
+    },
+    {
+      "path": "/home/user/gpui-mask-partitions-target/release/build/gpui_canvas/ea1e4dddc2085252/out/sample_storage-ea1e4dddc2085252",
+      "bytes": 8558904,
+      "sha256": "b6788bb946904ec569756e6d431fc75aed5eca46b821f8df6cdf0d8941a66aa2",
+      "kind": "exact-canonical-executable-copy",
+      "preserved": "/home/user/gpui-preserved-test-binaries/b6788bb946904ec569756e6d431fc75aed5eca46b821f8df6cdf0d8941a66aa2"
+    },
+    {
+      "path": "/home/user/gpui-mask-partitions-target/release/build/gpui_canvas/d784d82f7acde832/out/libbins-d784d82f7acde832.rmeta",
+      "bytes": 0,
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "kind": "regenerable-compiled-library"
+    },
+    {
+      "path": "/home/user/gpui-mask-partitions-target/release/build/gpui_canvas/3b0e5e59632df0c9/out/bins-3b0e5e59632df0c9",
+      "bytes": 8626392,
+      "sha256": "6dc5f3405fd858a2232ead0045d8b7ca824dc7274cfbbabb89226654630e078c",
+      "kind": "exact-canonical-executable-copy",
+      "preserved": "/home/user/gpui-preserved-test-binaries/6dc5f3405fd858a2232ead0045d8b7ca824dc7274cfbbabb89226654630e078c"
+    },
+    {
+      "path": "/home/user/gpui-mask-partitions-target/release/build/gpui_canvas/30dbe79b6ae2e2cb/out/libslots-30dbe79b6ae2e2cb.rmeta",
+      "bytes": 0,
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "kind": "regenerable-compiled-library"
+    },
+    {
+      "path": "/home/user/gpui-mask-partitions-target/release/build/gpui_canvas/0ed22afe7dd374cd/out/libimages-0ed22afe7dd374cd.rmeta",
+      "bytes": 0,
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "kind": "regenerable-compiled-library"
+    },
+    {
+      "path": "/home/user/gpui-mask-partitions-target/release/build/gpui_canvas/8186e0677567ebea/out/librender-8186e0677567ebea.rmeta",
+      "bytes": 0,
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "kind": "regenerable-compiled-library"
+    },
+    {
+      "path": "/home/user/gpui-mask-partitions-target/release/build/gpui_canvas/31fe598ddc726695/out/libtext_transaction-31fe598ddc726695.rmeta",
+      "bytes": 0,
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "kind": "regenerable-compiled-library"
+    },
+    {
+      "path": "/home/user/gpui-mask-partitions-target/release/build/gpui_canvas/e2d64c4001f3f739/out/slots-e2d64c4001f3f739",
+      "bytes": 8595920,
+      "sha256": "440f7485893ecb358da4e3c6a07607636bd7e57d693da9e4848dcd4e94ab44d6",
+      "kind": "exact-canonical-executable-copy",
+      "preserved": "/home/user/gpui-preserved-test-binaries/440f7485893ecb358da4e3c6a07607636bd7e57d693da9e4848dcd4e94ab44d6"
+    },
+    {
+      "path": "/home/user/gpui-mask-partitions-target/release/build/gpui_canvas/becea5b1862f8876/out/libshaping-becea5b1862f8876.rmeta",
+      "bytes": 0,
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "kind": "regenerable-compiled-library"
+    },
+    {
+      "path": "/home/user/gpui-mask-partitions-target/release/build/gpui_canvas/2cbcaed612df6e98/out/libprepared_scene-2cbcaed612df6e98.rmeta",
+      "bytes": 0,
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "kind": "regenerable-compiled-library"
+    },
+    {
+      "path": "/home/user/gpui-mask-partitions-target/release/build/gpui_canvas/aee86921c50f2ce0/out/libtext_capacity-aee86921c50f2ce0.rmeta",
+      "bytes": 0,
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "kind": "regenerable-compiled-library"
+    },
+    {
+      "path": "/home/user/gpui-mask-partitions-target/release/build/gpui_canvas/f3d0c2658434596c/out/libdamage_suffix-f3d0c2658434596c.rmeta",
+      "bytes": 0,
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "kind": "regenerable-compiled-library"
+    },
+    {
+      "path": "/home/user/gpui-mask-partitions-target/release/build/gpui_canvas/fd38d492da519a92/out/libsample_clip-fd38d492da519a92.rmeta",
+      "bytes": 0,
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "kind": "regenerable-compiled-library"
+    },
+    {
+      "path": "/home/user/gpui-mask-partitions-target/release/build/gpui_canvas/66052e5dfad09408/out/text_patch_damage-66052e5dfad09408",
+      "bytes": 8608256,
+      "sha256": "628e55b618f667f94486b67db5cf78eff6431d2a24401c027c213927f04b9873",
+      "kind": "exact-canonical-executable-copy",
+      "preserved": "/home/user/gpui-preserved-test-binaries/628e55b618f667f94486b67db5cf78eff6431d2a24401c027c213927f04b9873"
+    },
+    {
+      "path": "/home/user/gpui-mask-partitions-target/release/build/gpui_canvas/af679c1228a78324/out/libdamage_cost-af679c1228a78324.rmeta",
+      "bytes": 0,
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "kind": "regenerable-compiled-library"
+    },
+    {
+      "path": "/home/user/gpui-mask-partitions-target/release/build/gpui_canvas/fce9830b3f1b933b/out/libcpu-fce9830b3f1b933b.rmeta",
+      "bytes": 0,
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "kind": "regenerable-compiled-library"
+    },
+    {
+      "path": "/home/user/gpui-mask-partitions-target/release/build/gpui_canvas/a59ff47379d46cb6/out/text_oracle",
+      "bytes": 6939000,
+      "sha256": "890d962456da8a4c5610599f60b619bac53e3877dd4bd0a8149da29bab6563ed",
+      "kind": "exact-canonical-executable-copy",
+      "preserved": "/home/user/gpui-preserved-test-binaries/890d962456da8a4c5610599f60b619bac53e3877dd4bd0a8149da29bab6563ed"
+    },
+    {
+      "path": "/home/user/gpui-mask-partitions-target/release/build/gpui_canvas/71a94908c7103afd/out/libgrouped-71a94908c7103afd.rmeta",
+      "bytes": 0,
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "kind": "regenerable-compiled-library"
+    },
+    {
+      "path": "/home/user/gpui-mask-partitions-target/release/build/gpui_canvas/3a6016c5f0504a27/out/libgpui_canvas-3a6016c5f0504a27.rmeta",
+      "bytes": 0,
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "kind": "regenerable-compiled-library"
+    },
+    {
+      "path": "/home/user/gpui-mask-partitions-target/release/build/gpui_canvas/1be0b3d0e3235788/out/selection-1be0b3d0e3235788",
+      "bytes": 10114864,
+      "sha256": "a2b548d8b1a66ddf3426d4c015b47820c4eb571e10e795ea3f946c72d7b0f6c2",
+      "kind": "exact-canonical-executable-copy",
+      "preserved": "/home/user/gpui-preserved-test-binaries/a2b548d8b1a66ddf3426d4c015b47820c4eb571e10e795ea3f946c72d7b0f6c2"
+    },
+    {
+      "path": "/home/user/gpui-mask-partitions-target/release/build/gpui_canvas/74572a23cb90bd6a/out/text_cache_capacity",
+      "bytes": 7576544,
+      "sha256": "fc6b5f6025d4799d7a6769cdf56d71896382e2701a88c0137be8691c78d98c50",
+      "kind": "exact-canonical-executable-copy",
+      "preserved": "/home/user/gpui-preserved-test-binaries/fc6b5f6025d4799d7a6769cdf56d71896382e2701a88c0137be8691c78d98c50"
+    },
+    {
+      "path": "/home/user/gpui-mask-partitions-target/release/build/gpui_canvas/803b30cc4bdd1ebd/out/color-803b30cc4bdd1ebd",
+      "bytes": 1320336,
+      "sha256": "9cda8dbf75cd9210b7179f915272fa39602ba8d8d6eefef842cde96d9cd943c7",
+      "kind": "exact-canonical-executable-copy",
+      "preserved": "/home/user/gpui-preserved-test-binaries/9cda8dbf75cd9210b7179f915272fa39602ba8d8d6eefef842cde96d9cd943c7"
+    },
+    {
+      "path": "/home/user/gpui-mask-partitions-target/release/build/gpui_canvas/eb8641b9cb370948/out/librounded-eb8641b9cb370948.rmeta",
+      "bytes": 0,
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "kind": "regenerable-compiled-library"
+    },
+    {
+      "path": "/home/user/gpui-mask-partitions-target/release/build/gpui_canvas/34e5fcba4fa4888b/out/damage_cost",
+      "bytes": 684888,
+      "sha256": "949cc275817d19db952f7fc52b7be1b60af52487315a5ce1c9fb6454a1e39538",
+      "kind": "exact-canonical-executable-copy",
+      "preserved": "/home/user/gpui-preserved-test-binaries/949cc275817d19db952f7fc52b7be1b60af52487315a5ce1c9fb6454a1e39538"
+    },
+    {
+      "path": "/home/user/gpui-mask-partitions-target/release/build/gpui_canvas/5423f225aaab5c39/out/grouped-5423f225aaab5c39",
+      "bytes": 10556032,
+      "sha256": "6b32856e3395c9ac1b205742cefa34ffbef704167d1a2a668885282d6fb968bc",
+      "kind": "exact-canonical-executable-copy",
+      "preserved": "/home/user/gpui-preserved-test-binaries/6b32856e3395c9ac1b205742cefa34ffbef704167d1a2a668885282d6fb968bc"
+    },
+    {
+      "path": "/home/user/gpui-mask-partitions-target/release/build/gpui_canvas/347e4b2fcdbda41b/out/libtext_shaping-347e4b2fcdbda41b.rmeta",
+      "bytes": 0,
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "kind": "regenerable-compiled-library"
+    },
+    {
+      "path": "/home/user/gpui-mask-partitions-target/release/build/gpui_canvas/bee114d78e237e61/out/libtext_cache_capacity-bee114d78e237e61.rmeta",
+      "bytes": 0,
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "kind": "regenerable-compiled-library"
+    },
+    {
+      "path": "/home/user/gpui-mask-partitions-target/release/build/gpui_canvas/dc7489c6ce975b1f/out/literal_cow-dc7489c6ce975b1f",
+      "bytes": 1312744,
+      "sha256": "171e5a73b6a626e7300eac1ddfa2f8599f82edab4ab9d7db859dc23c3da0252a",
+      "kind": "exact-canonical-executable-copy",
+      "preserved": "/home/user/gpui-preserved-test-binaries/171e5a73b6a626e7300eac1ddfa2f8599f82edab4ab9d7db859dc23c3da0252a"
+    },
+    {
+      "path": "/home/user/gpui-mask-partitions-target/release/build/gpui_canvas/065d37d4e67d7586/out/libdefault_font-065d37d4e67d7586.rmeta",
+      "bytes": 0,
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "kind": "regenerable-compiled-library"
+    },
+    {
+      "path": "/home/user/gpui-mask-partitions-target/release/build/gpui_canvas/33f42e861ed377ca/out/libcaret_pair_measure-33f42e861ed377ca.rmeta",
+      "bytes": 0,
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "kind": "regenerable-compiled-library"
+    },
+    {
+      "path": "/home/user/gpui-mask-partitions-target/release/build/gpui_canvas/7b04012a0b1837b5/out/libimages-7b04012a0b1837b5.rmeta",
+      "bytes": 0,
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "kind": "regenerable-compiled-library"
+    },
+    {
+      "path": "/home/user/gpui-mask-partitions-target/release/build/gpui_canvas/61f483e2fcaafc83/out/libselection-61f483e2fcaafc83.rmeta",
+      "bytes": 0,
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "kind": "regenerable-compiled-library"
+    },
+    {
+      "path": "/home/user/gpui-mask-partitions-target/release/build/gpui_canvas/7d88e365fb8520d3/out/caret_pair_measure",
+      "bytes": 6923792,
+      "sha256": "dd40ecf5a56db8336729a02a5e598251244b3092f9f0749f18a3978584cbccb2",
+      "kind": "exact-canonical-executable-copy",
+      "preserved": "/home/user/gpui-preserved-test-binaries/dd40ecf5a56db8336729a02a5e598251244b3092f9f0749f18a3978584cbccb2"
+    },
+    {
+      "path": "/home/user/gpui-mask-partitions-target/release/build/gpui_canvas/d3c2882074eb0607/out/render-d3c2882074eb0607",
+      "bytes": 12048520,
+      "sha256": "9aa64955dd1b60693a20f9417c7da71b07cb9888648b119e90e1b9901016f30f",
+      "kind": "exact-canonical-executable-copy",
+      "preserved": "/home/user/gpui-preserved-test-binaries/9aa64955dd1b60693a20f9417c7da71b07cb9888648b119e90e1b9901016f30f"
+    },
+    {
+      "path": "/home/user/gpui-mask-partitions-target/release/build/gpui_canvas/4ca75d5643febe6d/out/default_font-4ca75d5643febe6d",
+      "bytes": 12907856,
+      "sha256": "b20e24ae20554de8731e88dccdbee0fa3440982506e4856a6927b871b3f482d6",
+      "kind": "exact-canonical-executable-copy",
+      "preserved": "/home/user/gpui-preserved-test-binaries/b20e24ae20554de8731e88dccdbee0fa3440982506e4856a6927b871b3f482d6"
+    },
+    {
+      "path": "/home/user/gpui-mask-partitions-target/release/build/gpui_canvas/b30100c4f3186c7e/out/gradients-b30100c4f3186c7e",
+      "bytes": 1336968,
+      "sha256": "8772c02badcc83be8c3dcb77074e2193c78d0831b3544e967feb4ad7fa71b683",
+      "kind": "exact-canonical-executable-copy",
+      "preserved": "/home/user/gpui-preserved-test-binaries/8772c02badcc83be8c3dcb77074e2193c78d0831b3544e967feb4ad7fa71b683"
+    },
+    {
+      "path": "/home/user/gpui-mask-partitions-target/release/build/gpui_canvas/df94f3b5799eeba9/out/clip_cost",
+      "bytes": 7847560,
+      "sha256": "827024133f5f22a5b75b36fed5fb5a531115c9ddfd84d33f57971feb0797d476",
+      "kind": "exact-canonical-executable-copy",
+      "preserved": "/home/user/gpui-preserved-test-binaries/827024133f5f22a5b75b36fed5fb5a531115c9ddfd84d33f57971feb0797d476"
+    },
+    {
+      "path": "/home/user/gpui-mask-partitions-target/release/build/gpui_canvas/3eee272fb23f9d81/out/cpu",
+      "bytes": 7998936,
+      "sha256": "491d80c0eebeed5ef0a66e3d99bfa32a2f937aef3a88dbf6658084eace13763b",
+      "kind": "exact-canonical-executable-copy",
+      "preserved": "/home/user/gpui-preserved-test-binaries/491d80c0eebeed5ef0a66e3d99bfa32a2f937aef3a88dbf6658084eace13763b"
+    },
+    {
+      "path": "/home/user/gpui-mask-partitions-target/release/build/gpui_canvas/59dcf378ba47c43c/out/libdamage-59dcf378ba47c43c.rmeta",
+      "bytes": 0,
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "kind": "regenerable-compiled-library"
+    },
+    {
+      "path": "/home/user/gpui-mask-partitions-target/release/build/gpui_canvas/f04e70e509498e79/out/rounded-f04e70e509498e79",
+      "bytes": 1333360,
+      "sha256": "dd72fcad1e0d311b3cf50bb16f6bc8b8d5d7ea27837ae06cec791e232ce15988",
+      "kind": "exact-canonical-executable-copy",
+      "preserved": "/home/user/gpui-preserved-test-binaries/dd72fcad1e0d311b3cf50bb16f6bc8b8d5d7ea27837ae06cec791e232ce15988"
+    },
+    {
+      "path": "/home/user/gpui-mask-partitions-target/release/build/gpui_canvas/2a530e8f6638e7bf/out/images-2a530e8f6638e7bf",
+      "bytes": 1327912,
+      "sha256": "2ac2da5a978469514cf270a41445babb4b638a7e14c1127290d9a96a2ed13903",
+      "kind": "exact-canonical-executable-copy",
+      "preserved": "/home/user/gpui-preserved-test-binaries/2ac2da5a978469514cf270a41445babb4b638a7e14c1127290d9a96a2ed13903"
+    },
+    {
+      "path": "/home/user/gpui-mask-partitions-target/release/build/gpui_canvas/37847f08d090de12/out/libscroll_copy-37847f08d090de12.rmeta",
+      "bytes": 0,
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "kind": "regenerable-compiled-library"
+    },
+    {
+      "path": "/home/user/gpui-mask-partitions-target/release/build/gpui_canvas/beabb3956913143c/out/libpaint-beabb3956913143c.rmeta",
+      "bytes": 0,
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "kind": "regenerable-compiled-library"
+    },
+    {
+      "path": "/home/user/gpui-mask-partitions-target/release/build/gpui_canvas/e4daf880f8f3142f/out/prepared_scene-e4daf880f8f3142f",
+      "bytes": 10632752,
+      "sha256": "8cb4eb26ee45109d6654ee1dd3c1eb0a35d5090188bc3a37da7b86cba4d3cf2f",
+      "kind": "exact-canonical-executable-copy",
+      "preserved": "/home/user/gpui-preserved-test-binaries/8cb4eb26ee45109d6654ee1dd3c1eb0a35d5090188bc3a37da7b86cba4d3cf2f"
+    },
+    {
+      "path": "/home/user/gpui-mask-partitions-target/release/build/gpui_canvas/e7f7f926e56c8080/out/gpui_canvas-e7f7f926e56c8080",
+      "bytes": 9949576,
+      "sha256": "c4bc79f294ea6a1c7d2106e999192e1371397bd67d65aef2e59da6a7166ec4b9",
+      "kind": "exact-canonical-executable-copy",
+      "preserved": "/home/user/gpui-preserved-test-binaries/c4bc79f294ea6a1c7d2106e999192e1371397bd67d65aef2e59da6a7166ec4b9"
+    },
+    {
+      "path": "/home/user/gpui-mask-partitions-target/release/build/gpui_canvas/0ce5c7756bca6592/out/paint-0ce5c7756bca6592",
+      "bytes": 8595232,
+      "sha256": "7ee0022f90fae806160d7c86d5b1d1bdf0563cdecfe4e0f384d36d7e873d6daa",
+      "kind": "exact-canonical-executable-copy",
+      "preserved": "/home/user/gpui-preserved-test-binaries/7ee0022f90fae806160d7c86d5b1d1bdf0563cdecfe4e0f384d36d7e873d6daa"
+    },
+    {
+      "path": "/home/user/gpui-mask-partitions-target/release/build/gpui_canvas/9262a58460b0eb6b/out/libgroup_views-9262a58460b0eb6b.rmeta",
+      "bytes": 0,
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "kind": "regenerable-compiled-library"
+    },
+    {
+      "path": "/home/user/gpui-mask-partitions-target/release/build/gpui_canvas/3c586a8a10bd35ad/out/damage-3c586a8a10bd35ad",
+      "bytes": 8606496,
+      "sha256": "fdb413b1eb1e000135d6dc0e4477027989b02730fd614ed56957f47f7c527bbf",
+      "kind": "exact-canonical-executable-copy",
+      "preserved": "/home/user/gpui-preserved-test-binaries/fdb413b1eb1e000135d6dc0e4477027989b02730fd614ed56957f47f7c527bbf"
+    },
+    {
+      "path": "/home/user/gpui-mask-partitions-target/release/build/gpui_canvas/eefcf9f4f44f0fb7/out/libimage_axis-eefcf9f4f44f0fb7.rmeta",
+      "bytes": 0,
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "kind": "regenerable-compiled-library"
+    },
+    {
+      "path": "/home/user/gpui-mask-partitions-target/release/build/gpui_canvas/7f11cd62cab7a182/out/font_sharing-7f11cd62cab7a182",
+      "bytes": 10625952,
+      "sha256": "a0f26185eeffae00456084b63959d225e827fd1bf670ecaa1d961eda77a49057",
+      "kind": "exact-canonical-executable-copy",
+      "preserved": "/home/user/gpui-preserved-test-binaries/a0f26185eeffae00456084b63959d225e827fd1bf670ecaa1d961eda77a49057"
+    },
+    {
+      "path": "/home/user/gpui-mask-partitions-target/release/build/gpui_canvas/27953aaa13b286fa/out/libclipping-27953aaa13b286fa.rmeta",
+      "bytes": 0,
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "kind": "regenerable-compiled-library"
+    },
+    {
+      "path": "/home/user/gpui-mask-partitions-target/release/build/gpui_canvas/8d55f8bca946137e/out/text_metric_scale_probe-8d55f8bca946137e",
+      "bytes": 8617144,
+      "sha256": "c7d08175e39170ebd9c05232e03e2eb4e30c16e5e5799586133b57b57b15a159",
+      "kind": "exact-canonical-executable-copy",
+      "preserved": "/home/user/gpui-preserved-test-binaries/c7d08175e39170ebd9c05232e03e2eb4e30c16e5e5799586133b57b57b15a159"
+    },
+    {
+      "path": "/home/user/gpui-mask-partitions-target/release/build/gpui_canvas/cb217f51f66152fb/out/dpi-cb217f51f66152fb",
+      "bytes": 8570352,
+      "sha256": "33f117aff22cdfa1d246fcd34d601fed9e12374f0ddf4253a553bcec3da2a595",
+      "kind": "exact-canonical-executable-copy",
+      "preserved": "/home/user/gpui-preserved-test-binaries/33f117aff22cdfa1d246fcd34d601fed9e12374f0ddf4253a553bcec3da2a595"
+    },
+    {
+      "path": "/home/user/gpui-mask-partitions-target/release/build/gpui_canvas/8e8c4e2ce2f93ba3/out/damage_regions-8e8c4e2ce2f93ba3",
+      "bytes": 1207584,
+      "sha256": "e1b726c6231e3a9602e839b65ae0b1e3fdc0c19d95c566d23d732e6a29aec233",
+      "kind": "exact-canonical-executable-copy",
+      "preserved": "/home/user/gpui-preserved-test-binaries/e1b726c6231e3a9602e839b65ae0b1e3fdc0c19d95c566d23d732e6a29aec233"
+    },
+    {
+      "path": "/home/user/gpui-mask-partitions-target/release/build/gpui_canvas/c8ec054f403f1b99/out/libliteral_cow-c8ec054f403f1b99.rmeta",
+      "bytes": 0,
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "kind": "regenerable-compiled-library"
+    },
+    {
+      "path": "/home/user/gpui-mask-partitions-target/release/build/gpui_canvas/bd07e4ec6659b2af/out/solid-bd07e4ec6659b2af",
+      "bytes": 1298792,
+      "sha256": "3da386f8ffcf48e0466675f5cf7bb84e5a75bc2c35618359252f0261e816ea07",
+      "kind": "exact-canonical-executable-copy",
+      "preserved": "/home/user/gpui-preserved-test-binaries/3da386f8ffcf48e0466675f5cf7bb84e5a75bc2c35618359252f0261e816ea07"
+    },
+    {
+      "path": "/home/user/gpui-mask-partitions-target/release/build/gpui_canvas/3d349e54613ab355/out/font_memory",
+      "bytes": 10124696,
+      "sha256": "1348b2a14b5e9b73cf5674cf7af78dd2aab529fc096f5f7f12ae2e2c3ab3494c",
+      "kind": "exact-canonical-executable-copy",
+      "preserved": "/home/user/gpui-preserved-test-binaries/1348b2a14b5e9b73cf5674cf7af78dd2aab529fc096f5f7f12ae2e2c3ab3494c"
+    },
+    {
+      "path": "/home/user/gpui-mask-partitions-target/release/build/gpui_canvas/8d8d323333f848c4/out/coverage_table",
+      "bytes": 1434632,
+      "sha256": "70941cdad8e2114b0375ba35efcdfc1e3a76604e32db82eddf178597861939b6",
+      "kind": "exact-canonical-executable-copy",
+      "preserved": "/home/user/gpui-preserved-test-binaries/70941cdad8e2114b0375ba35efcdfc1e3a76604e32db82eddf178597861939b6"
+    },
+    {
+      "path": "/home/user/gpui-mask-partitions-target/release/build/gpui_canvas/d0ba751385e75a1f/out/unicode-d0ba751385e75a1f",
+      "bytes": 11797864,
+      "sha256": "05027bec6484b41f130124d32f25daef31e7fc320f2087d8e4a162a6c3bdc9c4",
+      "kind": "exact-canonical-executable-copy",
+      "preserved": "/home/user/gpui-preserved-test-binaries/05027bec6484b41f130124d32f25daef31e7fc320f2087d8e4a162a6c3bdc9c4"
+    },
+    {
+      "path": "/home/user/gpui-mask-partitions-target/release/build/gpui_canvas/a5e70801374eee2d/out/libcolor_authoring-a5e70801374eee2d.rmeta",
+      "bytes": 0,
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "kind": "regenerable-compiled-library"
+    },
+    {
+      "path": "/home/user/gpui-mask-partitions-target/release/build/gpui_canvas/6ec719408d05a65a/out/libcoverage_table-6ec719408d05a65a.rmeta",
+      "bytes": 0,
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "kind": "regenerable-compiled-library"
+    },
+    {
+      "path": "/home/user/gpui-mask-partitions-target/release/build/gpui_canvas/6b78544e418a748d/out/libgradients-6b78544e418a748d.rmeta",
+      "bytes": 0,
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "kind": "regenerable-compiled-library"
+    },
+    {
+      "path": "/home/user/gpui-mask-partitions-target/release/build/gpui_canvas/fff7c87c97e64676/out/libselection_queries-fff7c87c97e64676.rmeta",
+      "bytes": 0,
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "kind": "regenerable-compiled-library"
+    },
+    {
+      "path": "/home/user/gpui-mask-partitions-target/release/build/gpui_canvas/125fe8aa1d9fdb12/out/external-125fe8aa1d9fdb12",
+      "bytes": 8574488,
+      "sha256": "364d4b713977c016fa733d93f4b1d91385c78fe967dd3f1fe60e7c2f020976b5",
+      "kind": "exact-canonical-executable-copy",
+      "preserved": "/home/user/gpui-preserved-test-binaries/364d4b713977c016fa733d93f4b1d91385c78fe967dd3f1fe60e7c2f020976b5"
+    },
+    {
+      "path": "/home/user/gpui-mask-partitions-target/release/build/gpui_canvas/a66a56010281ed60/out/group_views",
+      "bytes": 7840896,
+      "sha256": "c7bc8b33e113ae1ebe2d514778dc6bf67e59ae1d6c7ecb53568d773b4c4eff9d",
+      "kind": "exact-canonical-executable-copy",
+      "preserved": "/home/user/gpui-preserved-test-binaries/c7bc8b33e113ae1ebe2d514778dc6bf67e59ae1d6c7ecb53568d773b4c4eff9d"
+    },
+    {
+      "path": "/home/user/gpui-mask-partitions-target/release/build/gpui_canvas/c7dce9854bdb2193/out/libdamage_workspace-c7dce9854bdb2193.rmeta",
+      "bytes": 0,
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "kind": "regenerable-compiled-library"
+    },
+    {
+      "path": "/home/user/gpui-mask-partitions-target/release/build/gpui_canvas/8251485e6fdd9848/out/libfont_sharing-8251485e6fdd9848.rmeta",
+      "bytes": 0,
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "kind": "regenerable-compiled-library"
+    },
+    {
+      "path": "/home/user/gpui-mask-partitions-target/release/build/gpui_canvas/fd69d49c5340bb17/out/libretained_runs-fd69d49c5340bb17.rmeta",
+      "bytes": 0,
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "kind": "regenerable-compiled-library"
+    },
+    {
+      "path": "/home/user/gpui-mask-partitions-target/release/build/gpui_canvas/e9eb27a37e6dd6e0/out/color_packing-e9eb27a37e6dd6e0",
+      "bytes": 1331528,
+      "sha256": "e436fecb0e082ee4164e80b7cb5b4c959a53b34e4032d716ad2ff1ef0facc7e8",
+      "kind": "exact-canonical-executable-copy",
+      "preserved": "/home/user/gpui-preserved-test-binaries/e436fecb0e082ee4164e80b7cb5b4c959a53b34e4032d716ad2ff1ef0facc7e8"
+    },
+    {
+      "path": "/home/user/gpui-mask-partitions-target/release/build/gpui_canvas/065be7fbdf5a91d8/out/selection_queries",
+      "bytes": 6924032,
+      "sha256": "63e5fc6ed9542a851e23839839ce182f434d686e409373b832c647771fa046be",
+      "kind": "exact-canonical-executable-copy",
+      "preserved": "/home/user/gpui-preserved-test-binaries/63e5fc6ed9542a851e23839839ce182f434d686e409373b832c647771fa046be"
+    },
+    {
+      "path": "/home/user/gpui-mask-partitions-target/release/build/gpui_canvas/6e0206172b11000c/out/color_authoring-6e0206172b11000c",
+      "bytes": 1171344,
+      "sha256": "1db192efc1621589d085fd1c9c04fa7ff5cef44daf7fdb87bd7ca69279262b87",
+      "kind": "exact-canonical-executable-copy",
+      "preserved": "/home/user/gpui-preserved-test-binaries/1db192efc1621589d085fd1c9c04fa7ff5cef44daf7fdb87bd7ca69279262b87"
+    },
+    {
+      "path": "/home/user/gpui-mask-partitions-target/release/build/gpui_canvas/43f2c91832c83c26/out/libtext_metric_scale_probe-43f2c91832c83c26.rmeta",
+      "bytes": 0,
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "kind": "regenerable-compiled-library"
+    },
+    {
+      "path": "/home/user/gpui-mask-partitions-target/release/build/gpui_canvas/4a2db0a211b797e3/out/text_run_probe-4a2db0a211b797e3",
+      "bytes": 8613280,
+      "sha256": "6c5dcfafc180f03f9768ed11497ce3c4b10748a4e1cca189b130a3987dcf996a",
+      "kind": "exact-canonical-executable-copy",
+      "preserved": "/home/user/gpui-preserved-test-binaries/6c5dcfafc180f03f9768ed11497ce3c4b10748a4e1cca189b130a3987dcf996a"
+    },
+    {
+      "path": "/home/user/gpui-mask-partitions-target/release/build/gpui_canvas/11f8ef7a91cd341d/out/damage_workspace-11f8ef7a91cd341d",
+      "bytes": 1195608,
+      "sha256": "e801d6ca5fb061bb04b54f25d90718a66df2d1bd55777dd5f65b4b60f0cbfe0e",
+      "kind": "exact-canonical-executable-copy",
+      "preserved": "/home/user/gpui-preserved-test-binaries/e801d6ca5fb061bb04b54f25d90718a66df2d1bd55777dd5f65b4b60f0cbfe0e"
+    },
+    {
+      "path": "/home/user/gpui-mask-partitions-target/release/build/gpui_canvas/6b381682c3f7776e/out/oklch-6b381682c3f7776e",
+      "bytes": 1186608,
+      "sha256": "698b6a4bc345e60ffe2a7b1e13942b92a243dca9fc30d4adeafc2cf3f54906e5",
+      "kind": "exact-canonical-executable-copy",
+      "preserved": "/home/user/gpui-preserved-test-binaries/698b6a4bc345e60ffe2a7b1e13942b92a243dca9fc30d4adeafc2cf3f54906e5"
+    },
+    {
+      "path": "/home/user/gpui-mask-partitions-target/release/build/gpui_canvas/66469fa68f278aa1/out/damage_suffix-66469fa68f278aa1",
+      "bytes": 8568176,
+      "sha256": "1d5a60db4346c82686029ad8b2f98d94029923feaef6294376f5d2b1c5c3fc37",
+      "kind": "exact-canonical-executable-copy",
+      "preserved": "/home/user/gpui-preserved-test-binaries/1d5a60db4346c82686029ad8b2f98d94029923feaef6294376f5d2b1c5c3fc37"
+    },
+    {
+      "path": "/home/user/gpui-mask-partitions-target/release/build/gpui_canvas/54628b9d2d5b46d8/out/libsolid-54628b9d2d5b46d8.rmeta",
+      "bytes": 0,
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "kind": "regenerable-compiled-library"
+    },
+    {
+      "path": "/home/user/gpui-mask-partitions-target/release/build/gpui_canvas/309c83eeb8316fab/out/scroll_copy-309c83eeb8316fab",
+      "bytes": 10703120,
+      "sha256": "591f3f282085e01b6a341c4fdaca2211cd66b08b1dc0e2609dd0876dee26d656",
+      "kind": "exact-canonical-executable-copy",
+      "preserved": "/home/user/gpui-preserved-test-binaries/591f3f282085e01b6a341c4fdaca2211cd66b08b1dc0e2609dd0876dee26d656"
+    },
+    {
+      "path": "/home/user/gpui-mask-partitions-target/release/build/gpui_canvas/643c4468120f623d/out/clipping-643c4468120f623d",
+      "bytes": 1342160,
+      "sha256": "319ac7cf25f2e69c8a70331272e043a9dbb50f7b5e54117674a3df9c23e0567c",
+      "kind": "exact-canonical-executable-copy",
+      "preserved": "/home/user/gpui-preserved-test-binaries/319ac7cf25f2e69c8a70331272e043a9dbb50f7b5e54117674a3df9c23e0567c"
+    },
+    {
+      "path": "/home/user/gpui-mask-partitions-target/release/build/gpui_canvas/809376fac925cb1a/out/libexternal-809376fac925cb1a.rmeta",
+      "bytes": 0,
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "kind": "regenerable-compiled-library"
+    },
+    {
+      "path": "/home/user/gpui-mask-partitions-target/release/build/gpui_canvas/9aebe22e92cfb0a7/out/libdamage_regions-9aebe22e92cfb0a7.rmeta",
+      "bytes": 0,
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "kind": "regenerable-compiled-library"
+    },
+    {
+      "path": "/home/user/gpui-mask-partitions-target/release/build/gpui_canvas/c78a70091e54785c/out/hdr-c78a70091e54785c",
+      "bytes": 8586616,
+      "sha256": "c3c786753e9e7dbe9c3811306628c36e99535276296c5bf9b690339362835253",
+      "kind": "exact-canonical-executable-copy",
+      "preserved": "/home/user/gpui-preserved-test-binaries/c3c786753e9e7dbe9c3811306628c36e99535276296c5bf9b690339362835253"
+    },
+    {
+      "path": "/home/user/gpui-mask-partitions-target/release/build/gpui_canvas/6b45a3648b71d565/out/libparallel-6b45a3648b71d565.rmeta",
+      "bytes": 0,
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "kind": "regenerable-compiled-library"
+    },
+    {
+      "path": "/home/user/gpui-mask-partitions-target/release/build/gpui_canvas/495e15b2696029f3/out/libtext_patch_damage-495e15b2696029f3.rmeta",
+      "bytes": 0,
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "kind": "regenerable-compiled-library"
+    },
+    {
+      "path": "/home/user/gpui-mask-partitions-target/release/build/gpui_canvas/aedbcdddc79c5cf6/out/retained_runs",
+      "bytes": 7854328,
+      "sha256": "b643933d364ce9cfe4ba001f7559876828951d95d43021d84c618d2166837675",
+      "kind": "exact-canonical-executable-copy",
+      "preserved": "/home/user/gpui-preserved-test-binaries/b643933d364ce9cfe4ba001f7559876828951d95d43021d84c618d2166837675"
+    },
+    {
+      "path": "/home/user/gpui-mask-partitions-target/release/build/gpui_canvas/3b74ae33a7157731/out/liboklch-3b74ae33a7157731.rmeta",
+      "bytes": 0,
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "kind": "regenerable-compiled-library"
+    },
+    {
+      "path": "/home/user/gpui-mask-partitions-target/release/build/gpui_canvas/80bfde96444141e1/out/line_height-80bfde96444141e1",
+      "bytes": 7558312,
+      "sha256": "25b99c9dc2249a2a2836692df8c9ef08b2a0160112278b9221f1aa2bc0ba98a8",
+      "kind": "exact-canonical-executable-copy",
+      "preserved": "/home/user/gpui-preserved-test-binaries/25b99c9dc2249a2a2836692df8c9ef08b2a0160112278b9221f1aa2bc0ba98a8"
+    },
+    {
+      "path": "/home/user/gpui-mask-partitions-target/release/build/gpui_canvas/91b265a24716633c/out/libsample_storage-91b265a24716633c.rmeta",
+      "bytes": 0,
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "kind": "regenerable-compiled-library"
+    },
+    {
+      "path": "/home/user/gpui-mask-partitions-target/release/build/gpui_canvas/f7f22f66e65b9041/out/libunicode-f7f22f66e65b9041.rmeta",
+      "bytes": 0,
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "kind": "regenerable-compiled-library"
+    },
+    {
+      "path": "/home/user/gpui-mask-partitions-target/release/build/gpui_canvas/a83e3ef8c7928d55/out/libtext_cache-a83e3ef8c7928d55.rmeta",
+      "bytes": 0,
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "kind": "regenerable-compiled-library"
+    },
+    {
+      "path": "/home/user/gpui-mask-partitions-target/release/build/gpui_canvas/04597d1f036e0b48/out/libcolor_packing-04597d1f036e0b48.rmeta",
+      "bytes": 0,
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "kind": "regenerable-compiled-library"
+    },
+    {
+      "path": "/home/user/gpui-mask-partitions-target/release/build/gpui_canvas/d028304dc8247322/out/libgpui_canvas-d028304dc8247322.rlib",
+      "bytes": 2850056,
+      "sha256": "c5d43b363d5b63eaf053b42c4a5f2493863a41bddee752df6701d38a22458343",
+      "kind": "regenerable-compiled-library"
+    },
+    {
+      "path": "/home/user/gpui-mask-partitions-target/release/build/gpui_canvas/d028304dc8247322/out/libgpui_canvas-d028304dc8247322.rmeta",
+      "bytes": 2603000,
+      "sha256": "fea35ee072511aa5129fc18edbcad3f2e2329d4f52696a8689b81b899858a3c2",
+      "kind": "regenerable-compiled-library"
+    },
+    {
+      "path": "/home/user/gpui-mask-partitions-target/release/build/gpui_canvas/3e7493a8ec22d669/out/text_cache-3e7493a8ec22d669",
+      "bytes": 9157128,
+      "sha256": "4016a4cbe3e46b21d6fefe02a06a1a2487e617f008b29d232176b25d937799c5",
+      "kind": "exact-canonical-executable-copy",
+      "preserved": "/home/user/gpui-preserved-test-binaries/4016a4cbe3e46b21d6fefe02a06a1a2487e617f008b29d232176b25d937799c5"
+    },
+    {
+      "path": "/home/user/gpui-mask-partitions-target/release/build/gpui_canvas/71a6aa6d2b133f62/out/libtext_composition-71a6aa6d2b133f62.rmeta",
+      "bytes": 0,
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "kind": "regenerable-compiled-library"
+    },
+    {
+      "path": "/home/user/gpui-mask-partitions-target/release/build/gpui_canvas/07490a6037f87bbb/out/libgpui_canvas-07490a6037f87bbb.rmeta",
+      "bytes": 2088591,
+      "sha256": "1badf7622469a441f049b6af7318ff6ca7c2ecb16ec69d18e12485e439c40e3d",
+      "kind": "regenerable-compiled-library"
+    },
+    {
+      "path": "/home/user/gpui-mask-partitions-target/release/build/gpui_canvas/ef225879f6bd48ef/out/libtext_run_probe-ef225879f6bd48ef.rmeta",
+      "bytes": 0,
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "kind": "regenerable-compiled-library"
+    },
+    {
+      "path": "/home/user/gpui-mask-partitions-target/release/build/gpui_canvas/25c0093941ddd759/out/libline_height-25c0093941ddd759.rmeta",
+      "bytes": 0,
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "kind": "regenerable-compiled-library"
+    },
+    {
+      "path": "/home/user/gpui-mask-partitions-target/release/build/gpui_canvas/aef8b08d67145dd5/out/text_composition-aef8b08d67145dd5",
+      "bytes": 8620128,
+      "sha256": "7dceb0c38a0f4e3322d4b5e159bf33d983e92d8c8faa8c88446c4ff1350d246f",
+      "kind": "exact-canonical-executable-copy",
+      "preserved": "/home/user/gpui-preserved-test-binaries/7dceb0c38a0f4e3322d4b5e159bf33d983e92d8c8faa8c88446c4ff1350d246f"
+    },
+    {
+      "path": "/home/user/gpui-mask-partitions-target/release/build/gpui_canvas/dc7cf4aa5f384368/out/libfont_quality-dc7cf4aa5f384368.rmeta",
+      "bytes": 0,
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "kind": "regenerable-compiled-library"
+    },
+    {
+      "path": "/home/user/gpui-mask-partitions-target/release/build/gpui_canvas/7a3640f7d1081a17/out/image_axis",
+      "bytes": 728856,
+      "sha256": "5d9372a9aaad6ef35cf075df49258e43b19525126e778ee8046ac776f0006fc5",
+      "kind": "exact-canonical-executable-copy",
+      "preserved": "/home/user/gpui-preserved-test-binaries/5d9372a9aaad6ef35cf075df49258e43b19525126e778ee8046ac776f0006fc5"
+    },
+    {
+      "path": "/home/user/gpui-mask-partitions-target/release/build/gpui_canvas/01083c98466ae3fa/out/images",
+      "bytes": 735048,
+      "sha256": "c665cc539adc5cf7fd95f544dbddedce1ea26a094698e7bd7c507cb403c8e63b",
+      "kind": "exact-canonical-executable-copy",
+      "preserved": "/home/user/gpui-preserved-test-binaries/c665cc539adc5cf7fd95f544dbddedce1ea26a094698e7bd7c507cb403c8e63b"
+    },
+    {
+      "path": "/home/user/gpui-mask-partitions-target/release/build/gpui_canvas/5e889805cb647025/out/text_transaction-5e889805cb647025",
+      "bytes": 10673736,
+      "sha256": "826d2c6c9f95a9c3515aec22ebbaeadcbe1359138f83d0efb874cf4adb79a349",
+      "kind": "exact-canonical-executable-copy",
+      "preserved": "/home/user/gpui-preserved-test-binaries/826d2c6c9f95a9c3515aec22ebbaeadcbe1359138f83d0efb874cf4adb79a349"
+    },
+    {
+      "path": "/home/user/gpui-mask-partitions-target/release/build/gpui_canvas/c097422819079da6/out/libtext_interaction-c097422819079da6.rmeta",
+      "bytes": 0,
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "kind": "regenerable-compiled-library"
+    },
+    {
+      "path": "/home/user/gpui-mask-partitions-target/release/build/gpui_canvas/133dacf13fb09070/out/libcolor-133dacf13fb09070.rmeta",
+      "bytes": 0,
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "kind": "regenerable-compiled-library"
+    },
+    {
+      "path": "/home/user/gpui-mask-partitions-target/release/build/gpui_canvas/0ed3181fcc461005/out/shaping-0ed3181fcc461005",
+      "bytes": 8208328,
+      "sha256": "bc6c6c3ec565aee095cd0d14a8c2dc66818e97ad3ec0930b0d1297c7b2802511",
+      "kind": "exact-canonical-executable-copy",
+      "preserved": "/home/user/gpui-preserved-test-binaries/bc6c6c3ec565aee095cd0d14a8c2dc66818e97ad3ec0930b0d1297c7b2802511"
+    },
+    {
+      "path": "/home/user/gpui-mask-partitions-target/release/build/gpui_canvas/966b652f1a6d437e/out/font_quality-966b652f1a6d437e",
+      "bytes": 10745040,
+      "sha256": "49a88fd32fa6ca507bed7a65f74db1596670db703b755b91b81d5da2c919dd43",
+      "kind": "exact-canonical-executable-copy",
+      "preserved": "/home/user/gpui-preserved-test-binaries/49a88fd32fa6ca507bed7a65f74db1596670db703b755b91b81d5da2c919dd43"
+    },
+    {
+      "path": "/home/user/gpui-mask-partitions-target/release/build/gpui_canvas/82210282371fce2b/out/text_interaction",
+      "bytes": 6937600,
+      "sha256": "ca52dde914f6495137c09688580eed1dad58e26837491353aa3e83959c9c7681",
+      "kind": "exact-canonical-executable-copy",
+      "preserved": "/home/user/gpui-preserved-test-binaries/ca52dde914f6495137c09688580eed1dad58e26837491353aa3e83959c9c7681"
+    },
+    {
+      "path": "/home/user/gpui-mask-partitions-target/release/build/gpui_canvas/329e513ced510dd0/out/libhdr-329e513ced510dd0.rmeta",
+      "bytes": 0,
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "kind": "regenerable-compiled-library"
+    },
+    {
+      "path": "/home/user/gpui-mask-partitions-target/release/build/gpui_canvas/2be7c156d84c46bb/out/libtext_oracle-2be7c156d84c46bb.rmeta",
+      "bytes": 0,
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "kind": "regenerable-compiled-library"
+    },
+    {
+      "path": "/home/user/gpui-mask-partitions-target/release/build/gpui_canvas/1409624c675a2863/out/text_capacity-1409624c675a2863",
+      "bytes": 8447816,
+      "sha256": "3e79febcab122f9e6fc999db9ba6a2b221d3ddcd8fe49f55d3482ef8f4935237",
+      "kind": "exact-canonical-executable-copy",
+      "preserved": "/home/user/gpui-preserved-test-binaries/3e79febcab122f9e6fc999db9ba6a2b221d3ddcd8fe49f55d3482ef8f4935237"
+    },
+    {
+      "path": "/home/user/gpui-mask-partitions-target/release/build/gpui_canvas/8360d082d465f79e/out/libdpi-8360d082d465f79e.rmeta",
+      "bytes": 0,
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "kind": "regenerable-compiled-library"
+    },
+    {
+      "path": "/home/user/gpui-mask-partitions-target/release/build/linebender_resource_handle/3b659219bf4b1bfb/out/liblinebender_resource_handle-3b659219bf4b1bfb.rmeta",
+      "bytes": 31087,
+      "sha256": "ad5ed3a370a24a3abccbdc4ff4d4c079ce1ab1bd1064b2f7bb1d55053cd9c02c",
+      "kind": "regenerable-compiled-library"
+    },
+    {
+      "path": "/home/user/gpui-mask-partitions-target/release/build/linebender_resource_handle/3b659219bf4b1bfb/out/liblinebender_resource_handle-3b659219bf4b1bfb.rlib",
+      "bytes": 2708,
+      "sha256": "1c80fe16c7c9eac4f3a9f83e313a4057d76176839f1a3b1de5caa154f4541b10",
+      "kind": "regenerable-compiled-library"
+    },
+    {
+      "path": "/home/user/gpui-mask-partitions-target/release/build/linebender_resource_handle/778bc99df3862ddf/out/liblinebender_resource_handle-778bc99df3862ddf.rmeta",
+      "bytes": 17534,
+      "sha256": "3efaaf294fbb209e84a2c43f63bedc7e85eb601fe752f63694914677c9162ba3",
+      "kind": "regenerable-compiled-library"
+    },
+    {
+      "path": "/home/user/gpui-mask-partitions-target/release/build/utf8_iter/5e16059a19b5432d/out/libutf8_iter-5e16059a19b5432d.rmeta",
+      "bytes": 62747,
+      "sha256": "3be840674f6dd640fa0c6d14ce6c3b35accbaa61eb145c57df372f32192ed129",
+      "kind": "regenerable-compiled-library"
+    },
+    {
+      "path": "/home/user/gpui-mask-partitions-target/release/build/utf8_iter/5e16059a19b5432d/out/libutf8_iter-5e16059a19b5432d.rlib",
+      "bytes": 5680,
+      "sha256": "a9295927d399a147d1741930d3396e1b501d33475fbda5d05dd333f102524a19",
+      "kind": "regenerable-compiled-library"
+    },
+    {
+      "path": "/home/user/gpui-mask-partitions-target/release/build/utf8_iter/53b5ede390658d3d/out/libutf8_iter-53b5ede390658d3d.rmeta",
+      "bytes": 27288,
+      "sha256": "aad4a948277c746f8cb708056706b2c1d913c463e35679ee721ccd163908b9fc",
+      "kind": "regenerable-compiled-library"
+    },
+    {
+      "path": "/home/user/gpui-mask-partitions-target/release/build/wgpu-core-deps-windows-linux-android/ace5aaf796378b58/out/libwgpu_core_deps_windows_linux_android-ace5aaf796378b58.rmeta",
+      "bytes": 2605,
+      "sha256": "f5e900980bcaf88989e8ecf52f83ed0a55a27058ba59246900b519370e553751",
+      "kind": "regenerable-compiled-library"
+    },
+    {
+      "path": "/home/user/gpui-mask-partitions-target/release/build/wgpu-core-deps-windows-linux-android/af373855d4be2203/out/libwgpu_core_deps_windows_linux_android-af373855d4be2203.rmeta",
+      "bytes": 2639,
+      "sha256": "f9ac16df7a5313f2240544f19aac45d8607d42fce9e44627c2b625c60c495e0e",
+      "kind": "regenerable-compiled-library"
+    },
+    {
+      "path": "/home/user/gpui-mask-partitions-target/release/build/wgpu-core-deps-windows-linux-android/af373855d4be2203/out/libwgpu_core_deps_windows_linux_android-af373855d4be2203.rlib",
+      "bytes": 2542,
+      "sha256": "6ed78dc8bdddb809c22b3d30301d7e349c33171d6e2d8068f0dfa01e5a5f1c62",
+      "kind": "regenerable-compiled-library"
+    },
+    {
+      "path": "/home/user/gpui-mask-partitions-target/release/build/static_assertions/832e7f656fa72136/out/libstatic_assertions-832e7f656fa72136.rmeta",
+      "bytes": 52781,
+      "sha256": "0b98fc5d9182e31db958d57f21987fe83766856655774098269103433d4b0dcd",
+      "kind": "regenerable-compiled-library"
+    },
+    {
+      "path": "/home/user/gpui-mask-partitions-target/release/build/static_assertions/832e7f656fa72136/out/libstatic_assertions-832e7f656fa72136.rlib",
+      "bytes": 2432,
+      "sha256": "3f11fce47decec6acbc35fd9ab187b6c662f15c38ce35778d880b797c98ac56e",
+      "kind": "regenerable-compiled-library"
+    },
+    {
+      "path": "/home/user/gpui-mask-partitions-target/release/build/static_assertions/1881d062f8cc0af1/out/libstatic_assertions-1881d062f8cc0af1.rmeta",
+      "bytes": 52441,
+      "sha256": "6f715f3ae82cf520efe526998683f8c0a6971509ed2e9864f49e84ab6e5d78ac",
+      "kind": "regenerable-compiled-library"
+    },
+    {
+      "path": "/home/user/gpui-mask-partitions-target/release/build/yoke-derive/b25af4ec908c7268/out/libyoke_derive-b25af4ec908c7268.so",
+      "bytes": 4272112,
+      "sha256": "b50a92d171d7b6a06852f1f7b07ac95931d3d0c74f7356fcd54d5826a8ad9536",
+      "kind": "regenerable-compiled-library"
+    },
+    {
+      "path": "/home/user/gpui-mask-partitions-target/release/build/libm/8631ca07c35c8eef/out/liblibm-8631ca07c35c8eef.rlib",
+      "bytes": 893626,
+      "sha256": "6f44a087fcee7d4668d72627f200cceae2e43c3f0127108afd3b2b053c857da2",
+      "kind": "regenerable-compiled-library"
+    },
+    {
+      "path": "/home/user/gpui-mask-partitions-target/release/build/libm/8631ca07c35c8eef/out/liblibm-8631ca07c35c8eef.rmeta",
+      "bytes": 1124546,
+      "sha256": "4e4810bb40803a763ce4a4723b19161347adf318d1d4d25654248e166d039f8e",
+      "kind": "regenerable-compiled-library"
+    },
+    {
+      "path": "/home/user/gpui-mask-partitions-target/release/build/libm/f92521180f2d4a16/out/liblibm-f92521180f2d4a16.rmeta",
+      "bytes": 1441443,
+      "sha256": "bc077a467d09d33f82679b3b7fe568f14f16c70ab37af6d99107eac184686f4d",
+      "kind": "regenerable-compiled-library"
+    },
+    {
+      "path": "/home/user/gpui-mask-partitions-target/release/build/libm/f92521180f2d4a16/out/liblibm-f92521180f2d4a16.rlib",
+      "bytes": 308866,
+      "sha256": "af1436bd54427bb0dbbfa27ffec103ffd207f709b29e38579e61fbf3b7591559",
+      "kind": "regenerable-compiled-library"
+    },
+    {
+      "path": "/home/user/gpui-mask-partitions-target/release/build/libm/dac8214a528dfdbf/out/liblibm-dac8214a528dfdbf.rmeta",
+      "bytes": 1063229,
+      "sha256": "75d71550c562435696f2b76e7cc051fb5e481057c900ae2003baaab1a1ff1eaa",
+      "kind": "regenerable-compiled-library"
+    },
+    {
+      "path": "/home/user/gpui-mask-partitions-target/release/build/raw-window-handle/f72ef7a42143e29c/out/libraw_window_handle-f72ef7a42143e29c.rmeta",
+      "bytes": 269022,
+      "sha256": "7db1eae1c969a6adcd38fb4487c72d77c878e19efb87d38f281a77a3415f9921",
+      "kind": "regenerable-compiled-library"
+    },
+    {
+      "path": "/home/user/gpui-mask-partitions-target/release/build/raw-window-handle/57f51d71d883be06/out/libraw_window_handle-57f51d71d883be06.rlib",
+      "bytes": 56414,
+      "sha256": "1d7b961def78ea2758833f24123b4c3f715fc7e0c96fe31b71f5eacc983cc149",
+      "kind": "regenerable-compiled-library"
+    },
+    {
+      "path": "/home/user/gpui-mask-partitions-target/release/build/raw-window-handle/57f51d71d883be06/out/libraw_window_handle-57f51d71d883be06.rmeta",
+      "bytes": 367015,
+      "sha256": "cf474fc74244a5da6a4757f34ac94681a4601ee894d0c25c61b3bc13f151b525",
+      "kind": "regenerable-compiled-library"
+    },
+    {
+      "path": "/home/user/gpui-mask-partitions-target/release/build/ttf-parser/74aae1c35da7d0dc/out/libttf_parser-74aae1c35da7d0dc.rmeta",
+      "bytes": 2261498,
+      "sha256": "2455612ea714532f67500f8a7d46d1ee9929c7a0f9467b2431826c348a07925e",
+      "kind": "regenerable-compiled-library"
+    },
+    {
+      "path": "/home/user/gpui-mask-partitions-target/release/build/ttf-parser/f2611fc1f982c494/out/libttf_parser-f2611fc1f982c494.rlib",
+      "bytes": 626976,
+      "sha256": "07ef0eae586a3d57d19e8ea56a75a3713a1808ce8a5772c4607c747478be6910",
+      "kind": "regenerable-compiled-library"
+    },
+    {
+      "path": "/home/user/gpui-mask-partitions-target/release/build/ttf-parser/f2611fc1f982c494/out/libttf_parser-f2611fc1f982c494.rmeta",
+      "bytes": 3537989,
+      "sha256": "85559df570662eb551b0f75b0e7b927e3479d91fbd82e7b4c00448a777a5d8ae",
+      "kind": "regenerable-compiled-library"
+    },
+    {
+      "path": "/home/user/gpui-mask-partitions-target/release/build/presser/1c87c997cc3c11f3/out/libpresser-1c87c997cc3c11f3.rmeta",
+      "bytes": 41313,
+      "sha256": "629fcc1f63564ef48ba1f600de0513f658cfd79299a82e73b1e00b64f54a6ca9",
+      "kind": "regenerable-compiled-library"
+    },
+    {
+      "path": "/home/user/gpui-mask-partitions-target/release/build/presser/3969617017971f07/out/libpresser-3969617017971f07.rmeta",
+      "bytes": 73604,
+      "sha256": "9a06f917df862395a9bfb4db91d3ec8b29444be03ed09bd2b3b00869d3c2b227",
+      "kind": "regenerable-compiled-library"
+    },
+    {
+      "path": "/home/user/gpui-mask-partitions-target/release/build/presser/3969617017971f07/out/libpresser-3969617017971f07.rlib",
+      "bytes": 4962,
+      "sha256": "28e515ba4831e650db0780e3812459fded6dfa35f77c72d45426fee56c8f2ec0",
+      "kind": "regenerable-compiled-library"
+    },
+    {
+      "path": "/home/user/gpui-mask-partitions-target/release/build/icu_normalizer/96c8e3aac1e07f00/out/libicu_normalizer-96c8e3aac1e07f00.rmeta",
+      "bytes": 716818,
+      "sha256": "2777720f8cd30b7d89a6ea2fd4b30ed2b502f6939b444e9b877d250a0eded97a",
+      "kind": "regenerable-compiled-library"
+    },
+    {
+      "path": "/home/user/gpui-mask-partitions-target/release/build/icu_normalizer/96c8e3aac1e07f00/out/libicu_normalizer-96c8e3aac1e07f00.rlib",
+      "bytes": 349612,
+      "sha256": "21aa3bf8e0947639a6e2e48c98ed6abac39eb8995f7ac53946d1cd135c6e140a",
+      "kind": "regenerable-compiled-library"
+    },
+    {
+      "path": "/home/user/gpui-mask-partitions-target/release/build/icu_normalizer/e655658d2a00f678/out/libicu_normalizer-e655658d2a00f678.rmeta",
+      "bytes": 443900,
+      "sha256": "59d37e13dff80ffc7da48f771d28b774b92daf33ff6464259e4a97a12278c06c",
+      "kind": "regenerable-compiled-library"
+    },
+    {
+      "path": "/home/user/gpui-mask-partitions-target/release/build/icu_segmenter/2b99da718f187205/out/libicu_segmenter-2b99da718f187205.rmeta",
+      "bytes": 4420375,
+      "sha256": "3534ef3126d93bff6e21474eb4af814ba204daa4768f3894dac04630e46cfc8c",
+      "kind": "regenerable-compiled-library"
+    },
+    {
+      "path": "/home/user/gpui-mask-partitions-target/release/build/icu_segmenter/9066d00d9bb724f4/out/libicu_segmenter-9066d00d9bb724f4.rlib",
+      "bytes": 3958466,
+      "sha256": "b31a191959b43d6939e50b0c87eaecd966d352832795807d6121dc6ff707e214",
+      "kind": "regenerable-compiled-library"
+    },
+    {
+      "path": "/home/user/gpui-mask-partitions-target/release/build/icu_segmenter/9066d00d9bb724f4/out/libicu_segmenter-9066d00d9bb724f4.rmeta",
+      "bytes": 4719922,
+      "sha256": "f3f81f02c65f6cd735fc06d5ee25d9d4275a5852bda17e5f6a72e574d8d631a7",
+      "kind": "regenerable-compiled-library"
+    },
+    {
+      "path": "/home/user/gpui-mask-partitions-target/release/build/libc/f6b43f7e041f3881/out/liblibc-f6b43f7e041f3881.rlib",
+      "bytes": 14432,
+      "sha256": "367a2d0e5375e63a517db2dc399a9ab03cd55f72c0249d76765c2374c24ea05f",
+      "kind": "regenerable-compiled-library"
+    },
+    {
+      "path": "/home/user/gpui-mask-partitions-target/release/build/libc/f6b43f7e041f3881/out/liblibc-f6b43f7e041f3881.rmeta",
+      "bytes": 4513712,
+      "sha256": "7033dc0d9af7e6dfaf698691b97e8bca7bb978cf27f1bbbeb53d45b3d8b1233c",
+      "kind": "regenerable-compiled-library"
+    },
+    {
+      "path": "/home/user/gpui-mask-partitions-target/release/build/libc/6a8ea014a5ac7d0f/out/liblibc-6a8ea014a5ac7d0f.rmeta",
+      "bytes": 3917395,
+      "sha256": "bbe0ab4e880e851292d6dfb03350ac7e4e39776eb83ebfbb44c161cb2aa273dc",
+      "kind": "regenerable-compiled-library"
+    },
+    {
+      "path": "/home/user/gpui-mask-partitions-target/release/build/triomphe/67fb87dedd2912ec/out/libtriomphe-67fb87dedd2912ec.rmeta",
+      "bytes": 258378,
+      "sha256": "031913add3d4f3107a498d8862bc0e4a7f67b38ad7d26c482d09fe30b90d86eb",
+      "kind": "regenerable-compiled-library"
+    },
+    {
+      "path": "/home/user/gpui-mask-partitions-target/release/build/triomphe/d90dd794f085d2ed/out/libtriomphe-d90dd794f085d2ed.rmeta",
+      "bytes": 458364,
+      "sha256": "6ea1996fb4bead67106a7cc944749618f758308cfc6dd6c735f190a6a2f061e0",
+      "kind": "regenerable-compiled-library"
+    },
+    {
+      "path": "/home/user/gpui-mask-partitions-target/release/build/triomphe/d90dd794f085d2ed/out/libtriomphe-d90dd794f085d2ed.rlib",
+      "bytes": 10258,
+      "sha256": "82333a2a9a68f59165fe67aad89bb2ee9c1abdf4acd341d41644395a77769dc3",
+      "kind": "regenerable-compiled-library"
+    },
+    {
+      "path": "/home/user/gpui-mask-partitions-target/release/build/potential_utf/2ec46b00426b1d5c/out/libpotential_utf-2ec46b00426b1d5c.rmeta",
+      "bytes": 49532,
+      "sha256": "fcbb08d6b34ed484682e586b3c7911604b79abcdea07c14de0dc0bcf152efa15",
+      "kind": "regenerable-compiled-library"
+    },
+    {
+      "path": "/home/user/gpui-mask-partitions-target/release/build/potential_utf/aedc44fd0ce6d4ab/out/libpotential_utf-aedc44fd0ce6d4ab.rmeta",
+      "bytes": 85312,
+      "sha256": "82a7ac84a2a1e029719e75d5f94c092443863e5544e60eeb90331066969871e5",
+      "kind": "regenerable-compiled-library"
+    },
+    {
+      "path": "/home/user/gpui-mask-partitions-target/release/build/potential_utf/aedc44fd0ce6d4ab/out/libpotential_utf-aedc44fd0ce6d4ab.rlib",
+      "bytes": 7342,
+      "sha256": "9968264ebc88ddc38de7dfc6c79d92b8bfedc78eb0fbf7a6851c62625854fe1f",
+      "kind": "regenerable-compiled-library"
+    },
+    {
+      "path": "/home/user/gpui-mask-partitions-target/release/build/skrifa/74a7075833c47822/out/libskrifa-74a7075833c47822.rlib",
+      "bytes": 2112954,
+      "sha256": "f6cdf5318ca1c5d4a44704af0d642fcbe5d705c6384595dc9683602acd65aaa6",
+      "kind": "regenerable-compiled-library"
+    },
+    {
+      "path": "/home/user/gpui-mask-partitions-target/release/build/skrifa/74a7075833c47822/out/libskrifa-74a7075833c47822.rmeta",
+      "bytes": 2937744,
+      "sha256": "cf7966f33f8aa6a629269a289bf013abf4d7695ead9debc3c878781c49e89c9d",
+      "kind": "regenerable-compiled-library"
+    },
+    {
+      "path": "/home/user/gpui-mask-partitions-target/release/build/skrifa/5ac2a00b42eb13a1/out/libskrifa-5ac2a00b42eb13a1.rmeta",
+      "bytes": 2190404,
+      "sha256": "782014239e4f1d653aa6e8fa0763fdf1bba7554a20afdb4400bdb0ed8d4caf7f",
+      "kind": "regenerable-compiled-library"
+    },
+    {
+      "path": "/home/user/gpui-mask-partitions-target/release/build/skrifa/5ae703a22171f7ca/out/libskrifa-5ae703a22171f7ca.rmeta",
+      "bytes": 2311855,
+      "sha256": "2dfab9e41796b950872e7a08e421e1db401430ead30110f49b3d010dfb4a40cf",
+      "kind": "regenerable-compiled-library"
+    },
+    {
+      "path": "/home/user/gpui-mask-partitions-target/release/build/skrifa/4890854ef5855030/out/libskrifa-4890854ef5855030.rmeta",
+      "bytes": 2968156,
+      "sha256": "4a40b51bd9d73b6f853d2a8e7f5768830af1b09d6352b488657d0b52a3cf869a",
+      "kind": "regenerable-compiled-library"
+    },
+    {
+      "path": "/home/user/gpui-mask-partitions-target/release/build/skrifa/4890854ef5855030/out/libskrifa-4890854ef5855030.rlib",
+      "bytes": 2108070,
+      "sha256": "8e513663d2d2c5fb81d9828e853e9fa93242fbf3a49d5331b0c7d08c32004eab",
+      "kind": "regenerable-compiled-library"
+    },
+    {
+      "path": "/home/user/gpui-mask-partitions-target/release/build/read-fonts/e3c37047ae860d69/out/libread_fonts-e3c37047ae860d69.rmeta",
+      "bytes": 8440373,
+      "sha256": "10aa9655319769312dd8261df8080b6caf4bc2063df246ef777fc5f2f4221ed3",
+      "kind": "regenerable-compiled-library"
+    },
+    {
+      "path": "/home/user/gpui-mask-partitions-target/release/build/read-fonts/c54a5fc85ac77fd2/out/libread_fonts-c54a5fc85ac77fd2.rlib",
+      "bytes": 4318282,
+      "sha256": "5f91e21d093fb28e885e6453793300c5fed902f867bb48e9876e874db070a479",
+      "kind": "regenerable-compiled-library"
+    },
+    {
+      "path": "/home/user/gpui-mask-partitions-target/release/build/read-fonts/c54a5fc85ac77fd2/out/libread_fonts-c54a5fc85ac77fd2.rmeta",
+      "bytes": 21966492,
+      "sha256": "84450352c0c8ae856461e8c4262b84e9b6245f12dcd3ea0c915b8dcc18484b02",
+      "kind": "regenerable-compiled-library"
+    },
+    {
+      "path": "/home/user/gpui-mask-partitions-target/release/build/read-fonts/93037120ac66bc7d/out/libread_fonts-93037120ac66bc7d.rmeta",
+      "bytes": 11821858,
+      "sha256": "45c1c42fb06bd9d87d6e6901e689edbbfd92f8988f432dbb73c0ce6b8a843279",
+      "kind": "regenerable-compiled-library"
+    },
+    {
+      "path": "/home/user/gpui-mask-partitions-target/release/build/read-fonts/93037120ac66bc7d/out/libread_fonts-93037120ac66bc7d.rlib",
+      "bytes": 3270622,
+      "sha256": "c602e88ff714562883b977ff222d41e576ab231876da4afecccc56f48e420e95",
+      "kind": "regenerable-compiled-library"
+    },
+    {
+      "path": "/home/user/gpui-mask-partitions-target/release/build/read-fonts/7dc7d4cb051059ba/out/libread_fonts-7dc7d4cb051059ba.rmeta",
+      "bytes": 14989206,
+      "sha256": "954fd21455557f195a067fba26573bbc7b360273e59a2c860c56e3a93e662746",
+      "kind": "regenerable-compiled-library"
+    },
+    {
+      "path": "/home/user/gpui-mask-partitions-target/release/build/zerofrom/c187034fc37e64c9/out/libzerofrom-c187034fc37e64c9.rlib",
+      "bytes": 2374,
+      "sha256": "211d867996821faf31bfefe2b24fff7034fef23e82cae1e4e30e97cc6ed3355d",
+      "kind": "regenerable-compiled-library"
+    },
+    {
+      "path": "/home/user/gpui-mask-partitions-target/release/build/zerofrom/c187034fc37e64c9/out/libzerofrom-c187034fc37e64c9.rmeta",
+      "bytes": 90731,
+      "sha256": "989b38ba76d1100a9810c131e3e06f1e7f11f32b11793e0ef26c918ff627da50",
+      "kind": "regenerable-compiled-library"
+    },
+    {
+      "path": "/home/user/gpui-mask-partitions-target/release/build/zerofrom/1140996afb1e1ab8/out/libzerofrom-1140996afb1e1ab8.rmeta",
+      "bytes": 56356,
+      "sha256": "32813dd3aaa5ab4663def3162517829123ed93595a26ac43f5cc324f9b447c8c",
+      "kind": "regenerable-compiled-library"
+    },
+    {
+      "path": "/home/user/gpui-mask-partitions-target/release/build/proc-macro2/9c634d122c045555/out/libproc_macro2-9c634d122c045555.rmeta",
+      "bytes": 413514,
+      "sha256": "09ca3055de9b744554d299771aed380b6ad28d9d93d24b43933785a7d19de349",
+      "kind": "regenerable-compiled-library"
+    },
+    {
+      "path": "/home/user/gpui-mask-partitions-target/release/build/proc-macro2/9c634d122c045555/out/libproc_macro2-9c634d122c045555.rlib",
+      "bytes": 1107988,
+      "sha256": "16eac3474fa8df22b1d1f78e9c46565776ebba7a5e5c05e2756b1abd5049d583",
+      "kind": "regenerable-compiled-library"
+    },
+    {
+      "path": "/home/user/gpui-mask-partitions-target/release/build/snafu-derive/e927791e0350b43b/out/libsnafu_derive-e927791e0350b43b.so",
+      "bytes": 4654504,
+      "sha256": "80303188e09cc91f85bbc93e0568281ea122a7eb3c6eaf863b7430ada5c0436f",
+      "kind": "regenerable-compiled-library"
+    },
+    {
+      "path": "/home/user/gpui-mask-partitions-target/release/build/yazi/86cce85df15b97b4/out/libyazi-86cce85df15b97b4.rmeta",
+      "bytes": 258175,
+      "sha256": "ddc1bc551f24e49089528de9bb3ba0a69d896038860dc9805a4e27b7d931f90a",
+      "kind": "regenerable-compiled-library"
+    },
+    {
+      "path": "/home/user/gpui-mask-partitions-target/release/build/yazi/096d89583b34257a/out/libyazi-096d89583b34257a.rlib",
+      "bytes": 120860,
+      "sha256": "cdc0adf407a8131186426b3930141707f1b786596ebb74edcc746bafc6634ba3",
+      "kind": "regenerable-compiled-library"
+    },
+    {
+      "path": "/home/user/gpui-mask-partitions-target/release/build/yazi/096d89583b34257a/out/libyazi-096d89583b34257a.rmeta",
+      "bytes": 491916,
+      "sha256": "632b358fa94eeb3a776d615c3af0d125db2128fb48846b7e9d48de86c8c19f72",
+      "kind": "regenerable-compiled-library"
+    },
+    {
+      "path": "/home/user/gpui-mask-partitions-target/release/build/gpui_gpu/6d87e90441af2929/out/libretained-6d87e90441af2929.rmeta",
+      "bytes": 0,
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "kind": "regenerable-compiled-library"
+    },
+    {
+      "path": "/home/user/gpui-mask-partitions-target/release/build/gpui_gpu/c5516fd01340c3d6/out/libpresentation-c5516fd01340c3d6.rmeta",
+      "bytes": 0,
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "kind": "regenerable-compiled-library"
+    },
+    {
+      "path": "/home/user/gpui-mask-partitions-target/release/build/gpui_gpu/5eb8255352d33eb6/out/images",
+      "bytes": 7987960,
+      "sha256": "6812d30c5f046fc12697ce5f12f11bc95f7d9700dd0eca6366319d30430b1276",
+      "kind": "exact-canonical-executable-copy",
+      "preserved": "/home/user/gpui-preserved-test-binaries/6812d30c5f046fc12697ce5f12f11bc95f7d9700dd0eca6366319d30430b1276"
+    },
+    {
+      "path": "/home/user/gpui-mask-partitions-target/release/build/gpui_gpu/946bb5fca5ec4156/out/libimages-946bb5fca5ec4156.rmeta",
+      "bytes": 0,
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "kind": "regenerable-compiled-library"
+    },
+    {
+      "path": "/home/user/gpui-mask-partitions-target/release/build/gpui_gpu/8e4933dc35703950/out/gpui_gpu-8e4933dc35703950",
+      "bytes": 17379808,
+      "sha256": "5232a123966b739d324c776284ae6ff67c25d1f11831e2882d3234e94620769d",
+      "kind": "exact-canonical-executable-copy",
+      "preserved": "/home/user/gpui-preserved-test-binaries/5232a123966b739d324c776284ae6ff67c25d1f11831e2882d3234e94620769d"
+    },
+    {
+      "path": "/home/user/gpui-mask-partitions-target/release/build/gpui_gpu/f3188f1101e1b4d0/out/render-f3188f1101e1b4d0",
+      "bytes": 16894136,
+      "sha256": "cb1a78c091dc5f6889c43b7f82a59ccb64e4193270c1062747057325cbc546c5",
+      "kind": "exact-canonical-executable-copy",
+      "preserved": "/home/user/gpui-preserved-test-binaries/cb1a78c091dc5f6889c43b7f82a59ccb64e4193270c1062747057325cbc546c5"
+    },
+    {
+      "path": "/home/user/gpui-mask-partitions-target/release/build/gpui_gpu/4b5035a6a615ec17/out/tiles",
+      "bytes": 15212288,
+      "sha256": "f5a82a4976dbd07f83968b8a3adca7576de9d59a207e9c59745b0a474b92de0c",
+      "kind": "exact-canonical-executable-copy",
+      "preserved": "/home/user/gpui-preserved-test-binaries/f5a82a4976dbd07f83968b8a3adca7576de9d59a207e9c59745b0a474b92de0c"
+    },
+    {
+      "path": "/home/user/gpui-mask-partitions-target/release/build/gpui_gpu/0a3d3e656e78cf4f/out/librender-0a3d3e656e78cf4f.rmeta",
+      "bytes": 0,
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "kind": "regenerable-compiled-library"
+    },
+    {
+      "path": "/home/user/gpui-mask-partitions-target/release/build/gpui_gpu/b4adb100f8feb864/out/libgpui_gpu-b4adb100f8feb864.rmeta",
+      "bytes": 448916,
+      "sha256": "b5cfa41f636c686e84dbb97b5ccb783b1f50d7a16250ffc8722b8251c45fb194",
+      "kind": "regenerable-compiled-library"
+    },
+    {
+      "path": "/home/user/gpui-mask-partitions-target/release/build/gpui_gpu/f3bea1658b4ad6b1/out/libtiles-f3bea1658b4ad6b1.rmeta",
+      "bytes": 0,
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "kind": "regenerable-compiled-library"
+    },
+    {
+      "path": "/home/user/gpui-mask-partitions-target/release/build/gpui_gpu/84f9d7fda4ba4715/out/presentation-84f9d7fda4ba4715",
+      "bytes": 1472560,
+      "sha256": "d01c40882465c1ca7d2cfb38abf0f0317d2d3e424110d4edc5053f469abba977",
+      "kind": "exact-canonical-executable-copy",
+      "preserved": "/home/user/gpui-preserved-test-binaries/d01c40882465c1ca7d2cfb38abf0f0317d2d3e424110d4edc5053f469abba977"
+    },
+    {
+      "path": "/home/user/gpui-mask-partitions-target/release/build/gpui_gpu/71288451b09de83d/out/libgpui_gpu-71288451b09de83d.rmeta",
+      "bytes": 516513,
+      "sha256": "a40821a02c8b027e7c536f01f330fe158fa39dd6898ae4b45f84e9cf8f82fb42",
+      "kind": "regenerable-compiled-library"
+    },
+    {
+      "path": "/home/user/gpui-mask-partitions-target/release/build/gpui_gpu/71288451b09de83d/out/libgpui_gpu-71288451b09de83d.rlib",
+      "bytes": 2124814,
+      "sha256": "5e1a4666f6b95d1be781618a7e54866abc9ba3eacd08c06494e95775ac6c956f",
+      "kind": "regenerable-compiled-library"
+    },
+    {
+      "path": "/home/user/gpui-mask-partitions-target/release/build/gpui_gpu/61e90e2a0f130778/out/groups",
+      "bytes": 15208544,
+      "sha256": "b8f37e7a4f8ed811cb890b4ca1c2d805ddc83cf08e00cd12c98a9e8a6042c706",
+      "kind": "exact-canonical-executable-copy",
+      "preserved": "/home/user/gpui-preserved-test-binaries/b8f37e7a4f8ed811cb890b4ca1c2d805ddc83cf08e00cd12c98a9e8a6042c706"
+    },
+    {
+      "path": "/home/user/gpui-mask-partitions-target/release/build/gpui_gpu/efb7c5a21eba989c/out/retained",
+      "bytes": 15301344,
+      "sha256": "1317a2897271a68f4e2571efc9c82003e890742e2595ef815c83a225c2fe93b1",
+      "kind": "exact-canonical-executable-copy",
+      "preserved": "/home/user/gpui-preserved-test-binaries/1317a2897271a68f4e2571efc9c82003e890742e2595ef815c83a225c2fe93b1"
+    },
+    {
+      "path": "/home/user/gpui-mask-partitions-target/release/build/gpui_gpu/290b0b5f45ec2215/out/libgpui_gpu-290b0b5f45ec2215.rmeta",
+      "bytes": 0,
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "kind": "regenerable-compiled-library"
+    },
+    {
+      "path": "/home/user/gpui-mask-partitions-target/release/build/gpui_gpu/05945f44d3320cf1/out/libgroups-05945f44d3320cf1.rmeta",
+      "bytes": 0,
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "kind": "regenerable-compiled-library"
+    },
+    {
+      "path": "/home/user/gpui-mask-partitions-target/release/build/heck/abdfc856062ce785/out/libheck-abdfc856062ce785.rlib",
+      "bytes": 201980,
+      "sha256": "0369efc28097dd89420cb1a8ed8491af9d556a5b8b653f0102c8218a6fdfb378",
+      "kind": "regenerable-compiled-library"
+    },
+    {
+      "path": "/home/user/gpui-mask-partitions-target/release/build/heck/abdfc856062ce785/out/libheck-abdfc856062ce785.rmeta",
+      "bytes": 79612,
+      "sha256": "560eab7cd1b4955aade58a92a7dfd919e270d7bcea77f0d03065b03a7572505b",
+      "kind": "regenerable-compiled-library"
+    },
+    {
+      "path": "/home/user/gpui-mask-partitions-target/release/build/icu_locale_core/65f0be777e31f3b7/out/libicu_locale_core-65f0be777e31f3b7.rmeta",
+      "bytes": 1503128,
+      "sha256": "685f8dde0193043ce3e18ff4b72d95963d3fa5039b2ba3e5613a2f1d045da9bb",
+      "kind": "regenerable-compiled-library"
+    },
+    {
+      "path": "/home/user/gpui-mask-partitions-target/release/build/icu_locale_core/3efad6e2f2bc18f0/out/libicu_locale_core-3efad6e2f2bc18f0.rlib",
+      "bytes": 639944,
+      "sha256": "ee15042e3772353deabaaa08aa6b202a3a56e6300bce37c449757132eae5de2f",
+      "kind": "regenerable-compiled-library"
+    },
+    {
+      "path": "/home/user/gpui-mask-partitions-target/release/build/icu_locale_core/3efad6e2f2bc18f0/out/libicu_locale_core-3efad6e2f2bc18f0.rmeta",
+      "bytes": 2077144,
+      "sha256": "f182e028f64a84fbe22d95bad29797b960d00bf71cdce29d03a55066d68daf60",
+      "kind": "regenerable-compiled-library"
+    },
+    {
+      "path": "/home/user/gpui-mask-partitions-target/release/build/snafu/9dc1d0d741dfb85e/out/libsnafu-9dc1d0d741dfb85e.rmeta",
+      "bytes": 180527,
+      "sha256": "a4ee378a5557b655d2d02f4f00bcfaf735653fb5d494e26802c561903cd4b294",
+      "kind": "regenerable-compiled-library"
+    },
+    {
+      "path": "/home/user/gpui-mask-partitions-target/release/build/snafu/c3645d6689985b48/out/libsnafu-c3645d6689985b48.rmeta",
+      "bytes": 210097,
+      "sha256": "866115f01653bf17bdb3a56e27f4bda89eda07f2044178b3862b1bead45ddde6",
+      "kind": "regenerable-compiled-library"
+    },
+    {
+      "path": "/home/user/gpui-mask-partitions-target/release/build/snafu/c3645d6689985b48/out/libsnafu-c3645d6689985b48.rlib",
+      "bytes": 42378,
+      "sha256": "776f9accf44907735759e968dd79e7807c990c0963aaa5d661222395cf72c1a9",
+      "kind": "regenerable-compiled-library"
+    },
+    {
+      "path": "/home/user/gpui-mask-partitions-target/release/build/snafu/2907557596ba228d/out/libsnafu-2907557596ba228d.rlib",
+      "bytes": 176564,
+      "sha256": "7a1c9140476249f66c3851ee05c2bd1cfd68cc5bd4272a6ee88436c0aee15447",
+      "kind": "regenerable-compiled-library"
+    },
+    {
+      "path": "/home/user/gpui-mask-partitions-target/release/build/snafu/2907557596ba228d/out/libsnafu-2907557596ba228d.rmeta",
+      "bytes": 200229,
+      "sha256": "a96ee2bee7ddbf3b3659f5c389c3860df0ef0f4864c8fd899cc250f78bcbfaac",
+      "kind": "regenerable-compiled-library"
+    },
+    {
+      "path": "/home/user/gpui-mask-partitions-target/release/build/ordered-float/a7d1fe517c3688ca/out/libordered_float-a7d1fe517c3688ca.rlib",
+      "bytes": 3200,
+      "sha256": "935f8c3665a5023f7b5a575012d7b827e185f84dc80dcd8d44a151ab039b1d95",
+      "kind": "regenerable-compiled-library"
+    },
+    {
+      "path": "/home/user/gpui-mask-partitions-target/release/build/ordered-float/a7d1fe517c3688ca/out/libordered_float-a7d1fe517c3688ca.rmeta",
+      "bytes": 474161,
+      "sha256": "fa7b6bfafdae211e940cf633baaeec28865692091290195535b2ec160227889e",
+      "kind": "regenerable-compiled-library"
+    },
+    {
+      "path": "/home/user/gpui-mask-partitions-target/release/build/ordered-float/baa253b7d889ae06/out/libordered_float-baa253b7d889ae06.rmeta",
+      "bytes": 328835,
+      "sha256": "2aff97d71cb71742cee384555731f61b316a8cdd348532cbedb5f8aead5caf05",
+      "kind": "regenerable-compiled-library"
+    },
+    {
+      "path": "/home/user/gpui-mask-partitions-target/release/build/wgsl-rs-macros/39ec84fddad7ee58/out/libwgsl_rs_macros-39ec84fddad7ee58.so",
+      "bytes": 8497136,
+      "sha256": "380e0c30667d6c37c4b1af9d263ce132bb8e5b0fa554625abfc57ac562f0ad9c",
+      "kind": "regenerable-compiled-library"
+    },
+    {
+      "path": "/home/user/gpui-mask-partitions-target/release/build/glow/a5c2c39d3732cba0/out/libglow-a5c2c39d3732cba0.rmeta",
+      "bytes": 2878927,
+      "sha256": "b3b87025f9443559529c40b8e1b2bd2b45626d3b5a82e9f89fa3f9780f05d42f",
+      "kind": "regenerable-compiled-library"
+    },
+    {
+      "path": "/home/user/gpui-mask-partitions-target/release/build/glow/794d15e8282b9222/out/libglow-794d15e8282b9222.rlib",
+      "bytes": 752788,
+      "sha256": "93ca82be3e803cd900f7a13f47e48f3b159c0d278630a8b03e7c4e2bcb175d4e",
+      "kind": "regenerable-compiled-library"
+    },
+    {
+      "path": "/home/user/gpui-mask-partitions-target/release/build/glow/794d15e8282b9222/out/libglow-794d15e8282b9222.rmeta",
+      "bytes": 3048677,
+      "sha256": "79be62571542e650121740935e26041dd043121fc58111666d8871a3b070ffbb",
+      "kind": "regenerable-compiled-library"
+    },
+    {
+      "path": "/home/user/gpui-mask-partitions-target/release/build/unicode-bidi-mirroring/52f2608b14e3478f/out/libunicode_bidi_mirroring-52f2608b14e3478f.rmeta",
+      "bytes": 19877,
+      "sha256": "87acd90a557b8e2a47d4772bbb10d737e7e497dbbd953c6705b572c580137e92",
+      "kind": "regenerable-compiled-library"
+    },
+    {
+      "path": "/home/user/gpui-mask-partitions-target/release/build/unicode-bidi-mirroring/52f2608b14e3478f/out/libunicode_bidi_mirroring-52f2608b14e3478f.rlib",
+      "bytes": 7472,
+      "sha256": "7c25bf1fc6c0ff84bc45b57e744fdc8a7f9e70fda824247b59980e7ef20bc5c5",
+      "kind": "regenerable-compiled-library"
+    },
+    {
+      "path": "/home/user/gpui-mask-partitions-target/release/build/unicode-bidi-mirroring/2262962cbbaf72c4/out/libunicode_bidi_mirroring-2262962cbbaf72c4.rmeta",
+      "bytes": 19796,
+      "sha256": "4ea3c7d6b2ec94dfb84f2923432b6f47eb04e0915f689c8e57d7dfc07902277c",
+      "kind": "regenerable-compiled-library"
+    },
+    {
+      "path": "/home/user/gpui-mask-partitions-target/release/build/wgpu-types/7b509db96da626d4/out/libwgpu_types-7b509db96da626d4.rmeta",
+      "bytes": 4246788,
+      "sha256": "5e4f268bb1c86b94b1dda0694f58b00798e03d2b2986b7864cbb553ca7673403",
+      "kind": "regenerable-compiled-library"
+    },
+    {
+      "path": "/home/user/gpui-mask-partitions-target/release/build/wgpu-types/709f4039f2f690e1/out/libwgpu_types-709f4039f2f690e1.rlib",
+      "bytes": 647726,
+      "sha256": "83e5839e2150bbe18db093df5b2edab672bf46319027046472163df4e7db9bfe",
+      "kind": "regenerable-compiled-library"
+    },
+    {
+      "path": "/home/user/gpui-mask-partitions-target/release/build/wgpu-types/709f4039f2f690e1/out/libwgpu_types-709f4039f2f690e1.rmeta",
+      "bytes": 5648361,
+      "sha256": "ff17bca5748d93201a5fd73c6e77c2e50fdcda2d54cf289be6dacc5e23c8ea45",
+      "kind": "regenerable-compiled-library"
+    },
+    {
+      "path": "/home/user/gpui-mask-partitions-target/release/build/foldhash/330a280a6243abca/out/libfoldhash-330a280a6243abca.rmeta",
+      "bytes": 64209,
+      "sha256": "570bc68076db4e041985b76aa67f3b9262f5ad71ab2a987a67696a1d248a1f97",
+      "kind": "regenerable-compiled-library"
+    },
+    {
+      "path": "/home/user/gpui-mask-partitions-target/release/build/foldhash/a4d5ac17d4adb8d0/out/libfoldhash-a4d5ac17d4adb8d0.rmeta",
+      "bytes": 87049,
+      "sha256": "cb06724e97b280fed3f5f6b1f4ea7163535eeea47e065d59602f885ed10da629",
+      "kind": "regenerable-compiled-library"
+    },
+    {
+      "path": "/home/user/gpui-mask-partitions-target/release/build/foldhash/a4d5ac17d4adb8d0/out/libfoldhash-a4d5ac17d4adb8d0.rlib",
+      "bytes": 20042,
+      "sha256": "c8105d7ad8e1fe6579896f792c27c985490e9798648250e94d9f797a8e4a44c5",
+      "kind": "regenerable-compiled-library"
+    },
+    {
+      "path": "/home/user/gpui-mask-partitions-target/release/build/foldhash/a395b58a2568c74d/out/libfoldhash-a395b58a2568c74d.rmeta",
+      "bytes": 66959,
+      "sha256": "574ea08c17d23b43051d96c308414332e7f400a3f1d84778dbbe6ee5b491901f",
+      "kind": "regenerable-compiled-library"
+    },
+    {
+      "path": "/home/user/gpui-mask-partitions-target/release/build/foldhash/5bfdc0ba99d8a79c/out/libfoldhash-5bfdc0ba99d8a79c.rlib",
+      "bytes": 5932,
+      "sha256": "2d96585fdab28610f262d2cc3e098cc9da18b90e557afe49630dd7cc8675c318",
+      "kind": "regenerable-compiled-library"
+    },
+    {
+      "path": "/home/user/gpui-mask-partitions-target/release/build/foldhash/5bfdc0ba99d8a79c/out/libfoldhash-5bfdc0ba99d8a79c.rmeta",
+      "bytes": 97009,
+      "sha256": "f995bac3042c6954ef552d811dac8922564dbbddef01ca9f1d7e1a0f908701bc",
+      "kind": "regenerable-compiled-library"
+    },
+    {
+      "path": "/home/user/gpui-mask-partitions-target/release/build/foldhash/d81ca3bd077be190/out/libfoldhash-d81ca3bd077be190.rmeta",
+      "bytes": 99364,
+      "sha256": "5d9ff9ee73a3f670da7038f8efaf06e55a69456543ffa7e0c3ce931eb9eeb5c2",
+      "kind": "regenerable-compiled-library"
+    },
+    {
+      "path": "/home/user/gpui-mask-partitions-target/release/build/foldhash/d81ca3bd077be190/out/libfoldhash-d81ca3bd077be190.rlib",
+      "bytes": 6382,
+      "sha256": "532fae325dc59ac13fec6ea82ecf4d447bcb78bad4f39d23be4e39da319c1b36",
+      "kind": "regenerable-compiled-library"
+    },
+    {
+      "path": "/home/user/gpui-mask-partitions-target/release/build/hashbrown/c35626f7d36e4e8e/out/libhashbrown-c35626f7d36e4e8e.rmeta",
+      "bytes": 1008155,
+      "sha256": "7ac3981e0aa858ab57db1c41a7e1f6b46cfdb5ab8127ee192b5011afdbcfc6d0",
+      "kind": "regenerable-compiled-library"
+    },
+    {
+      "path": "/home/user/gpui-mask-partitions-target/release/build/hashbrown/a79a25e7fbe2694d/out/libhashbrown-a79a25e7fbe2694d.rlib",
+      "bytes": 5630,
+      "sha256": "d52d1245ec2c1499b1701d9edadb03a32ffdfc29714dda322b55ea2ebd63e389",
+      "kind": "regenerable-compiled-library"
+    },
+    {
+      "path": "/home/user/gpui-mask-partitions-target/release/build/hashbrown/a79a25e7fbe2694d/out/libhashbrown-a79a25e7fbe2694d.rmeta",
+      "bytes": 1473212,
+      "sha256": "5b115bc3112cfd860e3ff920b8f2209a967ce43ee4afb938153116bee42d514c",
+      "kind": "regenerable-compiled-library"
+    },
+    {
+      "path": "/home/user/gpui-mask-partitions-target/release/build/hashbrown/0af21cef97cb2b36/out/libhashbrown-0af21cef97cb2b36.rlib",
+      "bytes": 6946,
+      "sha256": "89ba2293e9ac50917e4c3485b83e9519a8c08f99cefbdb3ffd3f774b3b457f3a",
+      "kind": "regenerable-compiled-library"
+    },
+    {
+      "path": "/home/user/gpui-mask-partitions-target/release/build/hashbrown/0af21cef97cb2b36/out/libhashbrown-0af21cef97cb2b36.rmeta",
+      "bytes": 1707744,
+      "sha256": "baa6d818c1f0db7f7c52be31f6923bb9d23e526d2172fc055ecbaa78f9f0be39",
+      "kind": "regenerable-compiled-library"
+    },
+    {
+      "path": "/home/user/gpui-mask-partitions-target/release/build/hashbrown/a9a2a4aa6162ae52/out/libhashbrown-a9a2a4aa6162ae52.rmeta",
+      "bytes": 1068223,
+      "sha256": "4c804152f36c2dec9b4ea60696678cd2eef131312bada7765ff1ca5ea481782e",
+      "kind": "regenerable-compiled-library"
+    },
+    {
+      "path": "/home/user/gpui-mask-partitions-target/release/build/hashbrown/10fb1787667c02ac/out/libhashbrown-10fb1787667c02ac.rlib",
+      "bytes": 20100,
+      "sha256": "5116875eeb7ded32893883717295286348dcaf3fd135c7617be838a3d2788127",
+      "kind": "regenerable-compiled-library"
+    },
+    {
+      "path": "/home/user/gpui-mask-partitions-target/release/build/hashbrown/10fb1787667c02ac/out/libhashbrown-10fb1787667c02ac.rmeta",
+      "bytes": 1256464,
+      "sha256": "4f2186416c698ed492df0184e95c07562dd9890b97ee6aaa716da8429ac6eb8e",
+      "kind": "regenerable-compiled-library"
+    },
+    {
+      "path": "/home/user/gpui-mask-partitions-target/release/build/hashbrown/6f68fa5cea592acb/out/libhashbrown-6f68fa5cea592acb.rmeta",
+      "bytes": 899862,
+      "sha256": "bfd6f6115f655997438415c8b23d3689757e19563b48f6c692f180fb61b48238",
+      "kind": "regenerable-compiled-library"
+    },
+    {
+      "path": "/home/user/gpui-mask-partitions-target/release/build/hashbrown/fedf7765c5fd50db/out/libhashbrown-fedf7765c5fd50db.rlib",
+      "bytes": 5632,
+      "sha256": "a383b2a546f7ffc39c3f968dcbf17cacb275cbc405c46fc3653ca803efc860cc",
+      "kind": "regenerable-compiled-library"
+    },
+    {
+      "path": "/home/user/gpui-mask-partitions-target/release/build/hashbrown/fedf7765c5fd50db/out/libhashbrown-fedf7765c5fd50db.rmeta",
+      "bytes": 1629035,
+      "sha256": "9efc0b3410cb69f0a92e9dd50ad70bc96e3729f7c49c5141ee7ac165b57879eb",
+      "kind": "regenerable-compiled-library"
+    },
+    {
+      "path": "/home/user/gpui-mask-partitions-target/release/build/bitflags/5e2d0e295fa77be0/out/libbitflags-5e2d0e295fa77be0.rmeta",
+      "bytes": 224147,
+      "sha256": "0edb230e22ab2b99ae1c3e2ff34539d9708aa23d0f9d15ca12f0e099e44f110b",
+      "kind": "regenerable-compiled-library"
+    },
+    {
+      "path": "/home/user/gpui-mask-partitions-target/release/build/bitflags/5e2d0e295fa77be0/out/libbitflags-5e2d0e295fa77be0.rlib",
+      "bytes": 62720,
+      "sha256": "712cd2cee9800f2d4b5075d65b811cc6bd53142fd763f4af7dc717134f7507f3",
+      "kind": "regenerable-compiled-library"
+    },
+    {
+      "path": "/home/user/gpui-mask-partitions-target/release/build/bitflags/0ad9081b13adae26/out/libbitflags-0ad9081b13adae26.rmeta",
+      "bytes": 250549,
+      "sha256": "fa79c8ccfd59b95ba6a47f232d3184149aab99d5535572340a47c8e1a3ef202a",
+      "kind": "regenerable-compiled-library"
+    },
+    {
+      "path": "/home/user/gpui-mask-partitions-target/release/build/bitflags/0ad9081b13adae26/out/libbitflags-0ad9081b13adae26.rlib",
+      "bytes": 11638,
+      "sha256": "7eb7daa970aeeeb4d8a811af5dee83d09aaac781113d5bbb6e4ddf5dda8057cc",
+      "kind": "regenerable-compiled-library"
+    },
+    {
+      "path": "/home/user/gpui-mask-partitions-target/release/build/bitflags/9bbad2688d590ca8/out/libbitflags-9bbad2688d590ca8.rmeta",
+      "bytes": 177799,
+      "sha256": "50e99ae9a6bc9d502f65624299556f53b07b91ea2f2101ed559ec4300c37a277",
+      "kind": "regenerable-compiled-library"
+    },
+    {
+      "path": "/home/user/gpui-mask-partitions-target/release/build/once_cell/d5c469dd573ac46c/out/libonce_cell-d5c469dd573ac46c.rmeta",
+      "bytes": 121434,
+      "sha256": "d483571b2ee464ae913c097b7e4c40b0afd8f08ea6fc9cb7436cd18c22c7b5cf",
+      "kind": "regenerable-compiled-library"
+    },
+    {
+      "path": "/home/user/gpui-mask-partitions-target/release/build/once_cell/d5c469dd573ac46c/out/libonce_cell-d5c469dd573ac46c.rlib",
+      "bytes": 5080,
+      "sha256": "3b7b81ab1bdd41fe3e02dfd82f21c150be4df9e7e8220f736d2f08a1cd6c1ce8",
+      "kind": "regenerable-compiled-library"
+    },
+    {
+      "path": "/home/user/gpui-mask-partitions-target/release/build/once_cell/8ec7ee6f53b62518/out/libonce_cell-8ec7ee6f53b62518.rmeta",
+      "bytes": 141844,
+      "sha256": "997020b67ac495cd0ca319d350f64d4b290a8f53f32a61ef9eb0c70d68e69962",
+      "kind": "regenerable-compiled-library"
+    },
+    {
+      "path": "/home/user/gpui-mask-partitions-target/release/build/once_cell/2c5ab036515ee31b/out/libonce_cell-2c5ab036515ee31b.rlib",
+      "bytes": 7174,
+      "sha256": "546ef38e7f647165f95c7752f02beaa8a3657a98d272a1106494a61816aa9bb7",
+      "kind": "regenerable-compiled-library"
+    },
+    {
+      "path": "/home/user/gpui-mask-partitions-target/release/build/once_cell/2c5ab036515ee31b/out/libonce_cell-2c5ab036515ee31b.rmeta",
+      "bytes": 241720,
+      "sha256": "355d868a181c98168e50f6d07c1789c601974c50a7521b96ad4462ee4ef730f0",
+      "kind": "regenerable-compiled-library"
+    },
+    {
+      "path": "/home/user/gpui-mask-partitions-target/release/build/icu_locale_fallback/6859366bd1b2f75e/out/libicu_locale_fallback-6859366bd1b2f75e.rlib",
+      "bytes": 20708,
+      "sha256": "760dfe681d4503ad71e5522c01de9beedc8d27e56fbfda0c603e35c70028fe67",
+      "kind": "regenerable-compiled-library"
+    },
+    {
+      "path": "/home/user/gpui-mask-partitions-target/release/build/icu_locale_fallback/6859366bd1b2f75e/out/libicu_locale_fallback-6859366bd1b2f75e.rmeta",
+      "bytes": 125412,
+      "sha256": "14da92f1d0ada7594e792e4ac06b8a8979c80c6bd049debd70bc9692bde92320",
+      "kind": "regenerable-compiled-library"
+    },
+    {
+      "path": "/home/user/gpui-mask-partitions-target/release/build/icu_locale_fallback/d0feea7ff6261132/out/libicu_locale_fallback-d0feea7ff6261132.rmeta",
+      "bytes": 92518,
+      "sha256": "af86e375782e1d0f0669d106db961b5b8366b10cc98b87c3bd90e127c0b1cb90",
+      "kind": "regenerable-compiled-library"
+    },
+    {
+      "path": "/home/user/gpui-mask-partitions-target/release/build/cfg-if/fc7cc8b2ed6ffc63/out/libcfg_if-fc7cc8b2ed6ffc63.rlib",
+      "bytes": 2362,
+      "sha256": "0f917c4447a26eacc59db74b9e2fa29cd68bd9babc91e5db16f887af3b217e48",
+      "kind": "regenerable-compiled-library"
+    },
+    {
+      "path": "/home/user/gpui-mask-partitions-target/release/build/cfg-if/fc7cc8b2ed6ffc63/out/libcfg_if-fc7cc8b2ed6ffc63.rmeta",
+      "bytes": 5896,
+      "sha256": "61877b2170bcb0bbf4942b9a152bad8a2187a4d1f7150f695cf934f0d52d8a53",
+      "kind": "regenerable-compiled-library"
+    },
+    {
+      "path": "/home/user/gpui-mask-partitions-target/release/build/cfg-if/6e7442e8c3e76eae/out/libcfg_if-6e7442e8c3e76eae.rlib",
+      "bytes": 2362,
+      "sha256": "8d0dbc236f475e9298890a7dba1c1ba15cc86f5c8daaa570c549ab14fe7ed847",
+      "kind": "regenerable-compiled-library"
+    },
+    {
+      "path": "/home/user/gpui-mask-partitions-target/release/build/cfg-if/6e7442e8c3e76eae/out/libcfg_if-6e7442e8c3e76eae.rmeta",
+      "bytes": 5930,
+      "sha256": "c9f951e8f272859c11b5a701fc3d39d23c7a87b821e107f99c3910cafa9b80a6",
+      "kind": "regenerable-compiled-library"
+    },
+    {
+      "path": "/home/user/gpui-mask-partitions-target/release/build/cfg-if/978e8edfb09ae4a4/out/libcfg_if-978e8edfb09ae4a4.rmeta",
+      "bytes": 5896,
+      "sha256": "485ca3d555b8360efe88dff4b15e59c0e363c84516c68515307a4f69e7288922",
+      "kind": "regenerable-compiled-library"
+    },
+    {
+      "path": "/home/user/gpui-mask-partitions-target/release/build/litrs/37e80e44d7120c5a/out/liblitrs-37e80e44d7120c5a.rmeta",
+      "bytes": 414537,
+      "sha256": "efdef15a4dd2bd5544cd2f535681116ac2ff528b3bc6b2d23597c1273de9e5ef",
+      "kind": "regenerable-compiled-library"
+    },
+    {
+      "path": "/home/user/gpui-mask-partitions-target/release/build/litrs/37e80e44d7120c5a/out/liblitrs-37e80e44d7120c5a.rlib",
+      "bytes": 586158,
+      "sha256": "fc69328d06065102736343cb09c24983d018944ec291729f3cb029a73497e334",
+      "kind": "regenerable-compiled-library"
+    },
+    {
+      "path": "/home/user/gpui-mask-partitions-target/release/build/parking_lot_core/2b05a1d3fde0d414/out/libparking_lot_core-2b05a1d3fde0d414.rmeta",
+      "bytes": 90297,
+      "sha256": "1a96b471f321ab6d2926f81c53b79417d5f08e9815a8e37c42789fb702920bdb",
+      "kind": "regenerable-compiled-library"
+    },
+    {
+      "path": "/home/user/gpui-mask-partitions-target/release/build/parking_lot_core/4c0565b5ea42a1cb/out/libparking_lot_core-4c0565b5ea42a1cb.rlib",
+      "bytes": 13202,
+      "sha256": "2345658881081ce9e0691f47c61da0e2ab9e4d2c397ecd8c60a96e85cbd0bdd0",
+      "kind": "regenerable-compiled-library"
+    },
+    {
+      "path": "/home/user/gpui-mask-partitions-target/release/build/parking_lot_core/4c0565b5ea42a1cb/out/libparking_lot_core-4c0565b5ea42a1cb.rmeta",
+      "bytes": 205133,
+      "sha256": "6cb14bb3f22d993255d31852360223e04c851f47ef2071ad651785513f3fac90",
+      "kind": "regenerable-compiled-library"
+    },
+    {
+      "path": "/home/user/gpui-mask-partitions-target/release/build/tinystr/c7a93787871f4ae8/out/libtinystr-c7a93787871f4ae8.rlib",
+      "bytes": 4342,
+      "sha256": "6174b7424fe1ddfe527496a5c8364da652a00d686df170f4e4905bed26ee9c39",
+      "kind": "regenerable-compiled-library"
+    },
+    {
+      "path": "/home/user/gpui-mask-partitions-target/release/build/tinystr/c7a93787871f4ae8/out/libtinystr-c7a93787871f4ae8.rmeta",
+      "bytes": 365182,
+      "sha256": "7914cc534ac9a4a57c9410c0849788cb56874269eff82ebd74f892695376ecdf",
+      "kind": "regenerable-compiled-library"
+    },
+    {
+      "path": "/home/user/gpui-mask-partitions-target/release/build/tinystr/579b7e427c77cd83/out/libtinystr-579b7e427c77cd83.rmeta",
+      "bytes": 255757,
+      "sha256": "84230925e1331d8ad4cabf8bcde5bdddc3a43db8fc05a59656d7c892c7c10da5",
+      "kind": "regenerable-compiled-library"
+    },
+    {
+      "path": "/home/user/gpui-mask-partitions-target/release/build/parking_lot/db2e990eb6bb02e4/out/libparking_lot-db2e990eb6bb02e4.rlib",
+      "bytes": 99964,
+      "sha256": "c16382e790ce322344af8cf0169ef7b5a892b2e681c7bd82420e9c68e00b70b8",
+      "kind": "regenerable-compiled-library"
+    },
+    {
+      "path": "/home/user/gpui-mask-partitions-target/release/build/parking_lot/db2e990eb6bb02e4/out/libparking_lot-db2e990eb6bb02e4.rmeta",
+      "bytes": 220377,
+      "sha256": "4344d87e0e9a4d88fc96e933451fdad3e8fcc689473b87e3e1fc06a8976f9708",
+      "kind": "regenerable-compiled-library"
+    },
+    {
+      "path": "/home/user/gpui-mask-partitions-target/release/build/parking_lot/61735a6b067aa014/out/libparking_lot-61735a6b067aa014.rmeta",
+      "bytes": 159563,
+      "sha256": "3b0d4bd23df4f495aa2d2cd20697c6df217fcb9a5f2eb4b24739b6b57c9d7b68",
+      "kind": "regenerable-compiled-library"
+    },
+    {
+      "path": "/home/user/gpui-mask-partitions-target/release/build/wgpu-core/1cc81cbf98a4b19c/out/libwgpu_core-1cc81cbf98a4b19c.rmeta",
+      "bytes": 4258872,
+      "sha256": "9f7c53e2648b03ebad04659527adead004dbb0e5bd6f0fb6efe5514a2f968a25",
+      "kind": "regenerable-compiled-library"
+    },
+    {
+      "path": "/home/user/gpui-mask-partitions-target/release/build/wgpu-core/865c51e43566ecd3/out/libwgpu_core-865c51e43566ecd3.rlib",
+      "bytes": 8342930,
+      "sha256": "a02e6472bd59b069b0377755df720e9fe90a1091a97e46fd00ba2861b5d607f5",
+      "kind": "regenerable-compiled-library"
+    },
+    {
+      "path": "/home/user/gpui-mask-partitions-target/release/build/wgpu-core/865c51e43566ecd3/out/libwgpu_core-865c51e43566ecd3.rmeta",
+      "bytes": 5653315,
+      "sha256": "f626cbdec90a988bc3f78e21f8978ea27927f9c3f212416d6c507f47a9557474",
+      "kind": "regenerable-compiled-library"
+    },
+    {
+      "path": "/home/user/gpui-mask-partitions-target/release/build/icu_provider/2a2545609f42a545/out/libicu_provider-2a2545609f42a545.rmeta",
+      "bytes": 609734,
+      "sha256": "02f93a5ffacc656a221b53c312c2d3aed2c77c7e7f5768dc59f31cff41587ee8",
+      "kind": "regenerable-compiled-library"
+    },
+    {
+      "path": "/home/user/gpui-mask-partitions-target/release/build/icu_provider/2a2545609f42a545/out/libicu_provider-2a2545609f42a545.rlib",
+      "bytes": 182702,
+      "sha256": "72aefa4e97b011d3050b7ead1cefd499557eee5e06b6c2f194a1d1e643185080",
+      "kind": "regenerable-compiled-library"
+    },
+    {
+      "path": "/home/user/gpui-mask-partitions-target/release/build/icu_provider/0e74cb26528986da/out/libicu_provider-0e74cb26528986da.rmeta",
+      "bytes": 460924,
+      "sha256": "c97520121e40ccc79e3abcaa811bca97a338c315cdb6ef67b8fd00aa5a2337db",
+      "kind": "regenerable-compiled-library"
+    },
+    {
+      "path": "/home/user/gpui-mask-partitions-target/release/build/ecow/74c357c01fc16530/out/libecow-74c357c01fc16530.rlib",
+      "bytes": 53602,
+      "sha256": "8f3381792cf81c118c530f791ea65cffda7a0271fce293787c5e571beb2d2f69",
+      "kind": "regenerable-compiled-library"
+    },
+    {
+      "path": "/home/user/gpui-mask-partitions-target/release/build/ecow/74c357c01fc16530/out/libecow-74c357c01fc16530.rmeta",
+      "bytes": 501026,
+      "sha256": "9da392a036490bc7051496bf89c481ba8d5430e002bfe55519fdc1c3e9daefda",
+      "kind": "regenerable-compiled-library"
+    },
+    {
+      "path": "/home/user/gpui-mask-partitions-target/release/build/ecow/44e775daae5c3c38/out/libecow-44e775daae5c3c38.rmeta",
+      "bytes": 237925,
+      "sha256": "c66cbc1bdf5649d569bae0318544ea8898e4abbba929fa15264fb4a759352819",
+      "kind": "regenerable-compiled-library"
+    },
+    {
+      "path": "/home/user/gpui-mask-partitions-target/release/build/wgpu-naga-bridge/cc26e85373570ccd/out/libwgpu_naga_bridge-cc26e85373570ccd.rlib",
+      "bytes": 4238,
+      "sha256": "c800c40c350dc7b6549dbadf9a06c0ac893529a426053f08b1bcf88f8a065d6c",
+      "kind": "regenerable-compiled-library"
+    },
+    {
+      "path": "/home/user/gpui-mask-partitions-target/release/build/wgpu-naga-bridge/cc26e85373570ccd/out/libwgpu_naga_bridge-cc26e85373570ccd.rmeta",
+      "bytes": 14113,
+      "sha256": "2464f8031da9800179ca7881f1ac01b4020ef4b72ee651cde4ba356e788346fb",
+      "kind": "regenerable-compiled-library"
+    },
+    {
+      "path": "/home/user/gpui-mask-partitions-target/release/build/wgpu-naga-bridge/94076491c28317c8/out/libwgpu_naga_bridge-94076491c28317c8.rmeta",
+      "bytes": 10289,
+      "sha256": "c53ef8ef24584f6981b44b0fbe2160cd54ba71fc862b97c19d6a9c4d5e397b44",
+      "kind": "regenerable-compiled-library"
+    },
+    {
+      "path": "/home/user/gpui-mask-partitions-target/release/build/stable_deref_trait/dcf4b6f58574dbdb/out/libstable_deref_trait-dcf4b6f58574dbdb.rlib",
+      "bytes": 2434,
+      "sha256": "2166aefb2820c47d2495fb0f73071c18fca2883afc09cc921d0774bddb5c1218",
+      "kind": "regenerable-compiled-library"
+    },
+    {
+      "path": "/home/user/gpui-mask-partitions-target/release/build/stable_deref_trait/dcf4b6f58574dbdb/out/libstable_deref_trait-dcf4b6f58574dbdb.rmeta",
+      "bytes": 13604,
+      "sha256": "563938379339890d10ca06fc8b6e91a5b859d86ac0d7b30f6da7c993fb1274ab",
+      "kind": "regenerable-compiled-library"
+    },
+    {
+      "path": "/home/user/gpui-mask-partitions-target/release/build/stable_deref_trait/9f3a2663dcd3845b/out/libstable_deref_trait-9f3a2663dcd3845b.rmeta",
+      "bytes": 13570,
+      "sha256": "636660290d44be68b3da754e78cedde674fbecb630489532b3a1f0883851f459",
+      "kind": "regenerable-compiled-library"
+    },
+    {
+      "path": "/home/user/gpui-mask-partitions-target/release/build/wayland-sys/5be68e19ce1c742b/out/libwayland_sys-5be68e19ce1c742b.rlib",
+      "bytes": 85872,
+      "sha256": "7166278e6b3c9e2a65764eca19f64a8b95458221554513d5ce3afcd0affc9f89",
+      "kind": "regenerable-compiled-library"
+    },
+    {
+      "path": "/home/user/gpui-mask-partitions-target/release/build/wayland-sys/5be68e19ce1c742b/out/libwayland_sys-5be68e19ce1c742b.rmeta",
+      "bytes": 40116,
+      "sha256": "7a0b7920e2c81b03864f314d11fa2756c1ea914cf383b6efff3fb6aa078efa9c",
+      "kind": "regenerable-compiled-library"
+    },
+    {
+      "path": "/home/user/gpui-mask-partitions-target/release/build/wayland-sys/208f062b0cf81e07/out/libwayland_sys-208f062b0cf81e07.rmeta",
+      "bytes": 38291,
+      "sha256": "bb47dba3dc106d12dbe722eb2e6111c7c4ebb3e956b8d319356fa5ffa9de477a",
+      "kind": "regenerable-compiled-library"
+    },
+    {
+      "path": "/home/user/gpui-mask-partitions-target/release/build/naga-types/a54a787b49496a87/out/libnaga_types-a54a787b49496a87.rlib",
+      "bytes": 31554,
+      "sha256": "2090c97a585ea0356c2d201bc65872a1d2ac91ba40986ab729e6338e85e53c34",
+      "kind": "regenerable-compiled-library"
+    },
+    {
+      "path": "/home/user/gpui-mask-partitions-target/release/build/naga-types/a54a787b49496a87/out/libnaga_types-a54a787b49496a87.rmeta",
+      "bytes": 118361,
+      "sha256": "77769fb5c7e70d01fca92c6189592a03b1f734ec74e798bca98425ebaec8e21e",
+      "kind": "regenerable-compiled-library"
+    },
+    {
+      "path": "/home/user/gpui-mask-partitions-target/release/build/naga-types/85f394fdaef17e6e/out/libnaga_types-85f394fdaef17e6e.rmeta",
+      "bytes": 97915,
+      "sha256": "fb208894542b56cbfb7c65d0735360acdff780042e3fa84dafff59b250b801b3",
+      "kind": "regenerable-compiled-library"
+    },
+    {
+      "path": "/home/user/gpui-mask-partitions-target/release/build/naga-types/3d15ea34856939d2/out/libnaga_types-3d15ea34856939d2.rlib",
+      "bytes": 6460,
+      "sha256": "ec0f02607c8cc7c72231ebe4f0833317564aa5402a17a14a4ac1959f8dbc6123",
+      "kind": "regenerable-compiled-library"
+    },
+    {
+      "path": "/home/user/gpui-mask-partitions-target/release/build/naga-types/3d15ea34856939d2/out/libnaga_types-3d15ea34856939d2.rmeta",
+      "bytes": 154056,
+      "sha256": "c5452fb29da0a1cbcd86194b868092bf12cc069bf0560a4bb4bf12bf81716c30",
+      "kind": "regenerable-compiled-library"
+    },
+    {
+      "path": "/home/user/gpui-mask-partitions-target/release/build/displaydoc/ae3b3be74d3848d9/out/libdisplaydoc-ae3b3be74d3848d9.so",
+      "bytes": 3596296,
+      "sha256": "278fc296a533ef1d8e6e4570c0b666eda1aa0f7801d47ed743b16017b73f6fc1",
+      "kind": "regenerable-compiled-library"
+    },
+    {
+      "path": "/home/user/gpui-mask-partitions-target/release/build/zerocopy/410e2736451cded2/out/libzerocopy-410e2736451cded2.rmeta",
+      "bytes": 15180702,
+      "sha256": "e9383f5b0ae82fc39cb991fff6aeb46439cdc35758973ad65994ab7ab89690a7",
+      "kind": "regenerable-compiled-library"
+    },
+    {
+      "path": "/home/user/gpui-mask-partitions-target/release/build/zerocopy/410e2736451cded2/out/libzerocopy-410e2736451cded2.rlib",
+      "bytes": 163514,
+      "sha256": "9794ed31ecd45962bb71690bf08aeb3f78824fe7394e2e00895162a76fc07e25",
+      "kind": "regenerable-compiled-library"
+    },
+    {
+      "path": "/home/user/gpui-mask-partitions-target/release/build/zerocopy/1db817fe39342029/out/libzerocopy-1db817fe39342029.rlib",
+      "bytes": 2374,
+      "sha256": "59135e9da3878bb88d3e64dd455a08c8e711c7a08f7b78527a007383159c0329",
+      "kind": "regenerable-compiled-library"
+    },
+    {
+      "path": "/home/user/gpui-mask-partitions-target/release/build/zerocopy/1db817fe39342029/out/libzerocopy-1db817fe39342029.rmeta",
+      "bytes": 16415060,
+      "sha256": "c5b53bfc5b085e4c73c2265a65f2a70dbdaed0f82dd67a763cbee6ebc8bcf319",
+      "kind": "regenerable-compiled-library"
+    },
+    {
+      "path": "/home/user/gpui-mask-partitions-target/release/build/zerocopy/5fbc8f7a0be8ad17/out/libzerocopy-5fbc8f7a0be8ad17.rmeta",
+      "bytes": 13671276,
+      "sha256": "80176a599a78e5fe1b5d7a94a8179332ba1c0647c7775690d3a0c5800f4353e5",
+      "kind": "regenerable-compiled-library"
+    },
+    {
+      "path": "/home/user/gpui-mask-partitions-target/release/build/fearless_simd/15bd13f98503f417/out/libfearless_simd-15bd13f98503f417.rmeta",
+      "bytes": 23584837,
+      "sha256": "6958ab170f947bd952b356720dda3fb560cb93c8f51aaa996d18a99b434cdb10",
+      "kind": "regenerable-compiled-library"
+    },
+    {
+      "path": "/home/user/gpui-mask-partitions-target/release/build/fearless_simd/15bd13f98503f417/out/libfearless_simd-15bd13f98503f417.rlib",
+      "bytes": 25412,
+      "sha256": "94edeff42379cb9c02c11cae14f5a25e8de6486ceb2a1878ba32efb9f1a48633",
+      "kind": "regenerable-compiled-library"
+    },
+    {
+      "path": "/home/user/gpui-mask-partitions-target/release/build/fearless_simd/426b16f4bd9a4b60/out/libfearless_simd-426b16f4bd9a4b60.rmeta",
+      "bytes": 11611583,
+      "sha256": "7bcfc1b9316f24d96e41a9fc6a01a17cbb36e54b55a4e47b43be948167f8d58a",
+      "kind": "regenerable-compiled-library"
+    },
+    {
+      "path": "/home/user/gpui-mask-partitions-target/release/build/memmap2/f8b467c3755e7e76/out/libmemmap2-f8b467c3755e7e76.rmeta",
+      "bytes": 146990,
+      "sha256": "39bd99872dde01fc10ca494185d025c3f8e7e621744f1be8c26b8d625d32b3dc",
+      "kind": "regenerable-compiled-library"
+    },
+    {
+      "path": "/home/user/gpui-mask-partitions-target/release/build/memmap2/e0baf64ad5a2d422/out/libmemmap2-e0baf64ad5a2d422.rlib",
+      "bytes": 53404,
+      "sha256": "64f5a4041714926237eed9761282a580ced54d8224c73d3a87da734a6eacedbf",
+      "kind": "regenerable-compiled-library"
+    },
+    {
+      "path": "/home/user/gpui-mask-partitions-target/release/build/memmap2/e0baf64ad5a2d422/out/libmemmap2-e0baf64ad5a2d422.rmeta",
+      "bytes": 189813,
+      "sha256": "82bbb06da3e7842ce4cc56943ec3db867eb0223cefa5594f91555d7f2fdfbd35",
+      "kind": "regenerable-compiled-library"
+    },
+    {
+      "path": "/home/user/gpui-mask-partitions-target/release/build/wgsl-rs-ir/2f2e4222b9ff0136/out/libwgsl_rs_ir-2f2e4222b9ff0136.rlib",
+      "bytes": 2189418,
+      "sha256": "79fd13ddadc07dddebb64f0069027d0505e86085da6dae84618b0da0a28e79c6",
+      "kind": "regenerable-compiled-library"
+    },
+    {
+      "path": "/home/user/gpui-mask-partitions-target/release/build/wgsl-rs-ir/2f2e4222b9ff0136/out/libwgsl_rs_ir-2f2e4222b9ff0136.rmeta",
+      "bytes": 927355,
+      "sha256": "f5157a806578a2136fafd855862cf807175d852137c0a3a2ab09896ad1223539",
+      "kind": "regenerable-compiled-library"
+    },
+    {
+      "path": "/home/user/gpui-mask-partitions-target/release/build/wgsl-rs-ir/951e74a5a099bb39/out/libwgsl_rs_ir-951e74a5a099bb39.rmeta",
+      "bytes": 632738,
+      "sha256": "19079f24256e4eaa09522cf7bb454d0074e65161b92cb7c19690588b7fa6c03c",
+      "kind": "regenerable-compiled-library"
+    },
+    {
+      "path": "/home/user/gpui-mask-partitions-target/release/build/wgsl-rs-ir/a0802974cf8f15c7/out/libwgsl_rs_ir-a0802974cf8f15c7.rmeta",
+      "bytes": 1056946,
+      "sha256": "591d1c485766187bb0b7032e16e074c500cffd5940d08fb0cbbee18b7e80ac03",
+      "kind": "regenerable-compiled-library"
+    },
+    {
+      "path": "/home/user/gpui-mask-partitions-target/release/build/wgsl-rs-ir/a0802974cf8f15c7/out/libwgsl_rs_ir-a0802974cf8f15c7.rlib",
+      "bytes": 941238,
+      "sha256": "abc0a38283ef5c896b6a980fe5e8fe550aef6c282587e99997c12a982b58cd4d",
+      "kind": "regenerable-compiled-library"
+    },
+    {
+      "path": "/home/user/gpui-mask-partitions-target/release/build/parley_engine/0e54b318f6bc5946/out/libparley_engine-0e54b318f6bc5946.rmeta",
+      "bytes": 444624,
+      "sha256": "1061aa8739b90a8354874daca50b81d79ab67dba849400073eb8e2d124840da7",
+      "kind": "regenerable-compiled-library"
+    },
+    {
+      "path": "/home/user/gpui-mask-partitions-target/release/build/parley_engine/dfc4d7726836c1f4/out/libparley_engine-dfc4d7726836c1f4.rlib",
+      "bytes": 379316,
+      "sha256": "29f380633022a217880c0c40012f7220cbeb7e210ed265a6440a9ef26972a176",
+      "kind": "regenerable-compiled-library"
+    },
+    {
+      "path": "/home/user/gpui-mask-partitions-target/release/build/parley_engine/dfc4d7726836c1f4/out/libparley_engine-dfc4d7726836c1f4.rmeta",
+      "bytes": 734183,
+      "sha256": "9c8c4e2bf03a06dcd372477897ba06326f6ab2dd9954af93b499870c87719be4",
+      "kind": "regenerable-compiled-library"
+    },
+    {
+      "path": "/home/user/gpui-mask-partitions-target/release/build/rustybuzz/13d57e7c10d3cbf9/out/librustybuzz-13d57e7c10d3cbf9.rmeta",
+      "bytes": 2782782,
+      "sha256": "3aaa549a4262bf76e4132cebd2d6bbaae70a30517d1d88614b0194a8328a8129",
+      "kind": "regenerable-compiled-library"
+    },
+    {
+      "path": "/home/user/gpui-mask-partitions-target/release/build/rustybuzz/e695b092a495eac8/out/librustybuzz-e695b092a495eac8.rmeta",
+      "bytes": 3085317,
+      "sha256": "32702610a38d7fc6896fddbb255d5545295814c54cb9055f09c8dc4eb2b1fcce",
+      "kind": "regenerable-compiled-library"
+    },
+    {
+      "path": "/home/user/gpui-mask-partitions-target/release/build/rustybuzz/e695b092a495eac8/out/librustybuzz-e695b092a495eac8.rlib",
+      "bytes": 1537170,
+      "sha256": "c9d86697203fa3155782dd1622878bec7a560eba4cdd99b0fa5a23fe319010a5",
+      "kind": "regenerable-compiled-library"
+    },
+    {
+      "path": "/home/user/gpui-mask-partitions-target/release/build/smallvec/21a775147ff92946/out/libsmallvec-21a775147ff92946.rlib",
+      "bytes": 7686,
+      "sha256": "30303afb61cf3fd90dbdb07c9814b205214d1cc9c90342a68050ba3bbb09ccea",
+      "kind": "regenerable-compiled-library"
+    },
+    {
+      "path": "/home/user/gpui-mask-partitions-target/release/build/smallvec/21a775147ff92946/out/libsmallvec-21a775147ff92946.rmeta",
+      "bytes": 275646,
+      "sha256": "4a8e0c2591f1b20651a7ead644cf69d15f670633d4a9c92f84beef307eb6959f",
+      "kind": "regenerable-compiled-library"
+    },
+    {
+      "path": "/home/user/gpui-mask-partitions-target/release/build/smallvec/f7d3b53d3b0d721a/out/libsmallvec-f7d3b53d3b0d721a.rmeta",
+      "bytes": 113565,
+      "sha256": "7e2485e3b6dded75f1a6d1c80701f70de56174077190a45b2cbc47438d36484f",
+      "kind": "regenerable-compiled-library"
+    },
+    {
+      "path": "/home/user/gpui-mask-partitions-target/release/build/syn/0e0154b2942a385a/out/libsyn-0e0154b2942a385a.rmeta",
+      "bytes": 4844117,
+      "sha256": "c3e26c10357d234f53925b5b8bf16660dc3e2cb8146be1ce1479192676036b1d",
+      "kind": "regenerable-compiled-library"
+    },
+    {
+      "path": "/home/user/gpui-mask-partitions-target/release/build/syn/0e0154b2942a385a/out/libsyn-0e0154b2942a385a.rlib",
+      "bytes": 7541492,
+      "sha256": "cbcc82cdf7d5cd7e3f9a890abd28a8c4c121e4a8898733e4df36ba112e028f0d",
+      "kind": "regenerable-compiled-library"
+    },
+    {
+      "path": "/home/user/gpui-mask-partitions-target/release/build/syn/decf3251277690f6/out/libsyn-decf3251277690f6.rlib",
+      "bytes": 7555036,
+      "sha256": "16330cb2e7564a169905db5b5dd59aed4732572ac74acdf77b26091c4cf835b2",
+      "kind": "regenerable-compiled-library"
+    },
+    {
+      "path": "/home/user/gpui-mask-partitions-target/release/build/syn/decf3251277690f6/out/libsyn-decf3251277690f6.rmeta",
+      "bytes": 4361950,
+      "sha256": "278e77bd572cde5d0616aa468c1f867f7de02b164033e30e2eb627fcf59c0849",
+      "kind": "regenerable-compiled-library"
+    },
+    {
+      "path": "/home/user/gpui-mask-partitions-target/release/build/zerotrie/0bc8444c29532117/out/libzerotrie-0bc8444c29532117.rmeta",
+      "bytes": 440599,
+      "sha256": "7057f2e844ee62c5492566780781b4516c9050004a884d45b95ca309baa87ad6",
+      "kind": "regenerable-compiled-library"
+    },
+    {
+      "path": "/home/user/gpui-mask-partitions-target/release/build/zerotrie/503992c9fb1b008b/out/libzerotrie-503992c9fb1b008b.rmeta",
+      "bytes": 699425,
+      "sha256": "7e8584483ad8d909b9dc2cb99084baf3d75f97641900a260a8af11792f649e45",
+      "kind": "regenerable-compiled-library"
+    },
+    {
+      "path": "/home/user/gpui-mask-partitions-target/release/build/zerotrie/503992c9fb1b008b/out/libzerotrie-503992c9fb1b008b.rlib",
+      "bytes": 203902,
+      "sha256": "2aaeb7cda3a242018e40381541f55e980d506a66022ce638d50117faacc7da95",
+      "kind": "regenerable-compiled-library"
+    },
+    {
+      "path": "/home/user/gpui-mask-partitions-target/release/build/thiserror/116f7ae3f6f42b6e/out/libthiserror-116f7ae3f6f42b6e.rmeta",
+      "bytes": 32643,
+      "sha256": "a84a5195c466faa1314b4b13d0cc38fd21b0d67d12305191773a3c164a979a20",
+      "kind": "regenerable-compiled-library"
+    },
+    {
+      "path": "/home/user/gpui-mask-partitions-target/release/build/thiserror/df8f9003d1c89693/out/libthiserror-df8f9003d1c89693.rmeta",
+      "bytes": 34877,
+      "sha256": "4b3ecefb8ba6e266c66480ddf425b6bbd7338b002af56394240562be3ed3e2b9",
+      "kind": "regenerable-compiled-library"
+    },
+    {
+      "path": "/home/user/gpui-mask-partitions-target/release/build/thiserror/df8f9003d1c89693/out/libthiserror-df8f9003d1c89693.rlib",
+      "bytes": 3826,
+      "sha256": "9bb814756ae3ad19bcabc508938086e35880757602d8943c14dfa8752855d336",
+      "kind": "regenerable-compiled-library"
+    },
+    {
+      "path": "/home/user/gpui-mask-partitions-target/release/build/thiserror/d637b4a6bf8cb84e/out/libthiserror-d637b4a6bf8cb84e.rmeta",
+      "bytes": 34346,
+      "sha256": "7cf2253def9462edbb2fcb76a1cdee9d8e26651a75fea9a6218bd3bc17d3d05f",
+      "kind": "regenerable-compiled-library"
+    },
+    {
+      "path": "/home/user/gpui-mask-partitions-target/release/build/thiserror/d637b4a6bf8cb84e/out/libthiserror-d637b4a6bf8cb84e.rlib",
+      "bytes": 3818,
+      "sha256": "3214e00c3dab7120c3a7794fbd6869ae1020fbe25467e89f91cedab0e152b40c",
+      "kind": "regenerable-compiled-library"
+    },
+    {
+      "path": "/home/user/gpui-mask-partitions-target/release/build/parley_data/5ff7b18371612ce4/out/libparley_data-5ff7b18371612ce4.rmeta",
+      "bytes": 63560,
+      "sha256": "c209939df23c8a0a72b6fff339a735ab4e0313872c6dc43aedb7476b159196d8",
+      "kind": "regenerable-compiled-library"
+    },
+    {
+      "path": "/home/user/gpui-mask-partitions-target/release/build/parley_data/99a66fae4752dedd/out/libparley_data-99a66fae4752dedd.rlib",
+      "bytes": 43556,
+      "sha256": "ba7c9b771a83850deffdc0917e3edb68c52bd7e065a426d4e608259f2577a3cd",
+      "kind": "regenerable-compiled-library"
+    },
+    {
+      "path": "/home/user/gpui-mask-partitions-target/release/build/parley_data/99a66fae4752dedd/out/libparley_data-99a66fae4752dedd.rmeta",
+      "bytes": 76587,
+      "sha256": "7fc469e589fb143811a304a563f8525b181eb49e797a61ff17708bae9b592ace",
+      "kind": "regenerable-compiled-library"
+    },
+    {
+      "path": "/home/user/gpui-mask-partitions-target/release/build/fontique/0183b08f5b4f72e7/out/libfontique-0183b08f5b4f72e7.rlib",
+      "bytes": 423142,
+      "sha256": "97c347c3d1d5b187cbe6fbc7d1c669c6879d87ba23ae86c0b1a77116313c6332",
+      "kind": "regenerable-compiled-library"
+    },
+    {
+      "path": "/home/user/gpui-mask-partitions-target/release/build/fontique/0183b08f5b4f72e7/out/libfontique-0183b08f5b4f72e7.rmeta",
+      "bytes": 581650,
+      "sha256": "3acae0a6e750ca9d7330a927c1557df3963cba4e598c7dd42bfc2a42d368b431",
+      "kind": "regenerable-compiled-library"
+    },
+    {
+      "path": "/home/user/gpui-mask-partitions-target/release/build/fontique/c13ee5638ff94ca4/out/libfontique-c13ee5638ff94ca4.rmeta",
+      "bytes": 401535,
+      "sha256": "202f24e993ea4c154068a4d9c800263e4c8abe2dc1985b12b103c3c6439ac3df",
+      "kind": "regenerable-compiled-library"
+    },
+    {
+      "path": "/home/user/gpui-mask-partitions-target/release/build/khronos-egl/657e4de449f2edd3/out/libkhronos_egl-657e4de449f2edd3.rmeta",
+      "bytes": 489308,
+      "sha256": "eae1c026272008d0665c75cb5891f4f32ba3243a588ace7a22ddaec420718fb3",
+      "kind": "regenerable-compiled-library"
+    },
+    {
+      "path": "/home/user/gpui-mask-partitions-target/release/build/khronos-egl/9bf3b0596c16511f/out/libkhronos_egl-9bf3b0596c16511f.rmeta",
+      "bytes": 901105,
+      "sha256": "5676c1e11751e3f80dd408d2686f30d938fd213302d0d5b952d08d4d74aab18e",
+      "kind": "regenerable-compiled-library"
+    },
+    {
+      "path": "/home/user/gpui-mask-partitions-target/release/build/khronos-egl/9bf3b0596c16511f/out/libkhronos_egl-9bf3b0596c16511f.rlib",
+      "bytes": 8920,
+      "sha256": "727d59a774b732f3f48c48d7e1d177ea89552c3bc77078d63128d0488b2d2c49",
+      "kind": "regenerable-compiled-library"
+    },
+    {
+      "path": "/home/user/gpui-mask-partitions-target/release/build/fontdue/519b7b60132341f3/out/libfontdue-519b7b60132341f3.rlib",
+      "bytes": 68430,
+      "sha256": "7e69c976a3c0a0403ccef213dd803d1b1d0e759bc9de98598f1dbae93b92379c",
+      "kind": "regenerable-compiled-library"
+    },
+    {
+      "path": "/home/user/gpui-mask-partitions-target/release/build/fontdue/519b7b60132341f3/out/libfontdue-519b7b60132341f3.rmeta",
+      "bytes": 1187476,
+      "sha256": "31ce0cbae1288dfa6750eba92655ac49d801fe18e33a20f67405299ad665d2a0",
+      "kind": "regenerable-compiled-library"
+    },
+    {
+      "path": "/home/user/gpui-mask-partitions-target/release/build/fontdue/cb0c60c199f6130a/out/libfontdue-cb0c60c199f6130a.rmeta",
+      "bytes": 1054395,
+      "sha256": "030afba8376c273b874ad73b0ecf0c037d70da79729cc2a3913c73da51a445a2",
+      "kind": "regenerable-compiled-library"
+    },
+    {
+      "path": "/home/user/gpui-mask-partitions-target/release/build/yoke/ba05ffd89247d408/out/libyoke-ba05ffd89247d408.rmeta",
+      "bytes": 221546,
+      "sha256": "cf720fd948002b843c7f4e426132f501d621afacaac4e45f3112e35d882ce475",
+      "kind": "regenerable-compiled-library"
+    },
+    {
+      "path": "/home/user/gpui-mask-partitions-target/release/build/yoke/cab68cfb565d1e72/out/libyoke-cab68cfb565d1e72.rlib",
+      "bytes": 2824,
+      "sha256": "1d633bdcd97bbe310f021c2016826b76437cd85ca1c035caf1934bce31c0d6a6",
+      "kind": "regenerable-compiled-library"
+    },
+    {
+      "path": "/home/user/gpui-mask-partitions-target/release/build/yoke/cab68cfb565d1e72/out/libyoke-cab68cfb565d1e72.rmeta",
+      "bytes": 299794,
+      "sha256": "c3dcb8cf15f75a9a3ec1c0744675b76753e32993f7539c3f61a9de3563611b16",
+      "kind": "regenerable-compiled-library"
+    },
+    {
+      "path": "/home/user/gpui-mask-partitions-target/release/build/half/37d814223df6047c/out/libhalf-37d814223df6047c.rmeta",
+      "bytes": 571841,
+      "sha256": "c41cedfe94c7b558a4d85e50f235e706b29bb010e45283d59e5f916fb2564011",
+      "kind": "regenerable-compiled-library"
+    },
+    {
+      "path": "/home/user/gpui-mask-partitions-target/release/build/half/2b42c3bf050d9dfb/out/libhalf-2b42c3bf050d9dfb.rlib",
+      "bytes": 194708,
+      "sha256": "55b51307744cc85755b7eb8d76e544fca8ce53bf3552a94c65a31fe293b366fa",
+      "kind": "regenerable-compiled-library"
+    },
+    {
+      "path": "/home/user/gpui-mask-partitions-target/release/build/half/2b42c3bf050d9dfb/out/libhalf-2b42c3bf050d9dfb.rmeta",
+      "bytes": 739546,
+      "sha256": "229161f9e4a02e162990ad4827573caea2d5b63e2b8b885d27126525572d82af",
+      "kind": "regenerable-compiled-library"
+    },
+    {
+      "path": "/home/user/gpui-mask-partitions-target/release/build/half/8e691fd124fc3fcf/out/libhalf-8e691fd124fc3fcf.rlib",
+      "bytes": 26210,
+      "sha256": "53f02f6b5fe49e4e1ed39ebd7bc85afbe684db6c61813094fc7309ec4682cb8c",
+      "kind": "regenerable-compiled-library"
+    },
+    {
+      "path": "/home/user/gpui-mask-partitions-target/release/build/half/8e691fd124fc3fcf/out/libhalf-8e691fd124fc3fcf.rmeta",
+      "bytes": 998044,
+      "sha256": "e49feaacf6a98a5ad35e20f92f65dadbc0dc8537042d472c541eeffa311c2b07",
+      "kind": "regenerable-compiled-library"
+    },
+    {
+      "path": "/home/user/gpui-mask-partitions-target/release/build/synstructure/2a68e1847cd3c3b2/out/libsynstructure-2a68e1847cd3c3b2.rmeta",
+      "bytes": 238473,
+      "sha256": "b945520c140369d5fdc6d1525a4e6f720306d33d94f2182c90f7048a0735f177",
+      "kind": "regenerable-compiled-library"
+    },
+    {
+      "path": "/home/user/gpui-mask-partitions-target/release/build/synstructure/2a68e1847cd3c3b2/out/libsynstructure-2a68e1847cd3c3b2.rlib",
+      "bytes": 1210610,
+      "sha256": "848127c171c68091a229062545fae254e03bdac4de25227d72282a2d73268bd8",
+      "kind": "regenerable-compiled-library"
+    },
+    {
+      "path": "/home/user/gpui-mask-partitions-target/release/build/litemap/b9901942f551d5e4/out/liblitemap-b9901942f551d5e4.rlib",
+      "bytes": 2364,
+      "sha256": "8a0efd6dc0865c001fb0a119018c638b1217c7e688d5a901c4a676c1e637aa6c",
+      "kind": "regenerable-compiled-library"
+    },
+    {
+      "path": "/home/user/gpui-mask-partitions-target/release/build/litemap/b9901942f551d5e4/out/liblitemap-b9901942f551d5e4.rmeta",
+      "bytes": 363469,
+      "sha256": "11f412137964e391f014a7bc64d58c22f0929c5fb1cd6dac4e7b5ab2dcd31460",
+      "kind": "regenerable-compiled-library"
+    },
+    {
+      "path": "/home/user/gpui-mask-partitions-target/release/build/litemap/d2d51c886116850b/out/liblitemap-d2d51c886116850b.rmeta",
+      "bytes": 240546,
+      "sha256": "4db17cdef8c5e0e99eadbf78b182176ae32a056171862a5d7462227251134238",
+      "kind": "regenerable-compiled-library"
+    },
+    {
+      "path": "/home/user/gpui-mask-partitions-target/release/build/num-traits/fdf72c15ea0321ac/out/libnum_traits-fdf72c15ea0321ac.rlib",
+      "bytes": 14572,
+      "sha256": "011e0fd4bfbad0702696d619d7b93b8acccba1107348de1f0197cc03bc192c4b",
+      "kind": "regenerable-compiled-library"
+    },
+    {
+      "path": "/home/user/gpui-mask-partitions-target/release/build/num-traits/fdf72c15ea0321ac/out/libnum_traits-fdf72c15ea0321ac.rmeta",
+      "bytes": 2050219,
+      "sha256": "1607efca4a573542e3e3ef8b9777e9e730d0f780f0de6c6e37e9cda2557d1cb9",
+      "kind": "regenerable-compiled-library"
+    },
+    {
+      "path": "/home/user/gpui-mask-partitions-target/release/build/num-traits/b9bd30f7cb875760/out/libnum_traits-b9bd30f7cb875760.rlib",
+      "bytes": 52838,
+      "sha256": "a14f2002a613de53e8c60eaac573b91a8ddd4ee2df629a58ab51e0e154d7e2c4",
+      "kind": "regenerable-compiled-library"
+    },
+    {
+      "path": "/home/user/gpui-mask-partitions-target/release/build/num-traits/b9bd30f7cb875760/out/libnum_traits-b9bd30f7cb875760.rmeta",
+      "bytes": 1822971,
+      "sha256": "69da20003130850569adb20ba9b7b04e358c0d885a08304ca3ba4196897be6c4",
+      "kind": "regenerable-compiled-library"
+    },
+    {
+      "path": "/home/user/gpui-mask-partitions-target/release/build/num-traits/84dcf10e2ee52499/out/libnum_traits-84dcf10e2ee52499.rmeta",
+      "bytes": 1292802,
+      "sha256": "6b05feee4a1506f7dc0424ca1f76e212625f9183cd681dd58901bac966185f4e",
+      "kind": "regenerable-compiled-library"
+    },
+    {
+      "path": "/home/user/gpui-mask-partitions-target/release/build/core_maths/9aa511168f530adf/out/libcore_maths-9aa511168f530adf.rmeta",
+      "bytes": 40676,
+      "sha256": "63d4c024d9074b028953e20c82565e1af42710ef592e471feb026bb3b2335014",
+      "kind": "regenerable-compiled-library"
+    },
+    {
+      "path": "/home/user/gpui-mask-partitions-target/release/build/core_maths/6202352e48b7ec52/out/libcore_maths-6202352e48b7ec52.rlib",
+      "bytes": 2386,
+      "sha256": "91fe6f8516abd6b6f9d3a106fbd8c5b4cb3101896e1b9a827cddc8cba86d535a",
+      "kind": "regenerable-compiled-library"
+    },
+    {
+      "path": "/home/user/gpui-mask-partitions-target/release/build/core_maths/6202352e48b7ec52/out/libcore_maths-6202352e48b7ec52.rmeta",
+      "bytes": 59638,
+      "sha256": "f5c1af947fd2247da9cc37558fcf3b8903ae078693fd8934234ee1ae0bf00d11",
+      "kind": "regenerable-compiled-library"
+    },
+    {
+      "path": "/home/user/gpui-mask-partitions-target/release/build/scopeguard/ce7e47a51884dfe1/out/libscopeguard-ce7e47a51884dfe1.rmeta",
+      "bytes": 22206,
+      "sha256": "71a271646bddf05b9e1de14e9bf7b7fcf359507907269b2fe889b211d6f31706",
+      "kind": "regenerable-compiled-library"
+    },
+    {
+      "path": "/home/user/gpui-mask-partitions-target/release/build/scopeguard/47ee75205343fb64/out/libscopeguard-47ee75205343fb64.rmeta",
+      "bytes": 26056,
+      "sha256": "574d573f4516f2c1f53a352033adfe320f938dec04ba95e3c37ca3f3c7cb534e",
+      "kind": "regenerable-compiled-library"
+    },
+    {
+      "path": "/home/user/gpui-mask-partitions-target/release/build/scopeguard/47ee75205343fb64/out/libscopeguard-47ee75205343fb64.rlib",
+      "bytes": 2386,
+      "sha256": "fcc3d722ae26f5eceeec7c67698a3700547945273ab9dbbc7462eb0c18aea635",
+      "kind": "regenerable-compiled-library"
+    },
+    {
+      "path": "/home/user/gpui-mask-partitions-target/release/build/parlance/e8730d9474a982b6/out/libparlance-e8730d9474a982b6.rlib",
+      "bytes": 69362,
+      "sha256": "145d53d095684691d8459ef4e7bdf0336c7acde492a670f3169295dc77dd0efa",
+      "kind": "regenerable-compiled-library"
+    },
+    {
+      "path": "/home/user/gpui-mask-partitions-target/release/build/parlance/e8730d9474a982b6/out/libparlance-e8730d9474a982b6.rmeta",
+      "bytes": 336270,
+      "sha256": "a27fc6117b2b4a166453f3d67f1ae00222322f77553fb4d616d333a5d2cb272e",
+      "kind": "regenerable-compiled-library"
+    },
+    {
+      "path": "/home/user/gpui-mask-partitions-target/release/build/parlance/18ad182f132d693e/out/libparlance-18ad182f132d693e.rmeta",
+      "bytes": 251799,
+      "sha256": "1bad9dad11e93e08910483cd24849fc43301863f43fa20a445e67e077c8e9dc9",
+      "kind": "regenerable-compiled-library"
+    },
+    {
+      "path": "/home/user/gpui-mask-partitions-target/release/build/codespan-reporting/75c0c649b132bf43/out/libcodespan_reporting-75c0c649b132bf43.rmeta",
+      "bytes": 177154,
+      "sha256": "82837ae42e774dad28c215fdce0de93cf29e5c9880f3dfeac91daec997a753f5",
+      "kind": "regenerable-compiled-library"
+    },
+    {
+      "path": "/home/user/gpui-mask-partitions-target/release/build/codespan-reporting/d2d8b1cc97fb65ed/out/libcodespan_reporting-d2d8b1cc97fb65ed.rmeta",
+      "bytes": 348300,
+      "sha256": "4b5be8ad95bcc74ce95863e7db0c9c846b20d54bd2aec8d014d494c8583d28f1",
+      "kind": "regenerable-compiled-library"
+    },
+    {
+      "path": "/home/user/gpui-mask-partitions-target/release/build/codespan-reporting/d2d8b1cc97fb65ed/out/libcodespan_reporting-d2d8b1cc97fb65ed.rlib",
+      "bytes": 64094,
+      "sha256": "85dd91b46c40d3c0af0b2c9771088777acac4c578a887c2691ea7280b8adf4ca",
+      "kind": "regenerable-compiled-library"
+    },
+    {
+      "path": "/home/user/gpui-mask-partitions-target/release/build/codespan-reporting/378720af5c4d63fd/out/libcodespan_reporting-378720af5c4d63fd.rmeta",
+      "bytes": 272630,
+      "sha256": "aec9aeb5d180b60477760988aa94977df5ea2b693a975b7acea7c4891092e797",
+      "kind": "regenerable-compiled-library"
+    },
+    {
+      "path": "/home/user/gpui-mask-partitions-target/release/build/codespan-reporting/378720af5c4d63fd/out/libcodespan_reporting-378720af5c4d63fd.rlib",
+      "bytes": 508772,
+      "sha256": "d14879742dd5d017437303bd2a507d2487c6e9bcd447fda936c7dc0212126c4a",
+      "kind": "regenerable-compiled-library"
+    },
+    {
+      "path": "/home/user/gpui-mask-partitions-target/release/build/naga/0b4708b3d32d9688/out/libnaga-0b4708b3d32d9688.rmeta",
+      "bytes": 7951705,
+      "sha256": "beea723a94ef7f941f2e20bfa5cf9abf577f09d19ba9d6220ad63bf108c4fdb4",
+      "kind": "regenerable-compiled-library"
+    },
+    {
+      "path": "/home/user/gpui-mask-partitions-target/release/build/naga/6fbf2efdc7f3e322/out/libnaga-6fbf2efdc7f3e322.rmeta",
+      "bytes": 7736983,
+      "sha256": "f10f00527da284fceded21373bbb9d90058b29e23110a4cab6c133bde47b9dec",
+      "kind": "regenerable-compiled-library"
+    },
+    {
+      "path": "/home/user/gpui-mask-partitions-target/release/build/naga/6fbf2efdc7f3e322/out/libnaga-6fbf2efdc7f3e322.rlib",
+      "bytes": 16231330,
+      "sha256": "eac9c7bde54325b73949a5165f982f75a8fb7ff546c8e43dfd30e48ffc419e0a",
+      "kind": "regenerable-compiled-library"
+    },
+    {
+      "path": "/home/user/gpui-mask-partitions-target/release/build/naga/d10a7a3af6858816/out/libnaga-d10a7a3af6858816.rlib",
+      "bytes": 7245344,
+      "sha256": "5201c105c325bc511a1ace58c634bd1a6330711a0ed9888f6234fd3591902f47",
+      "kind": "regenerable-compiled-library"
+    },
+    {
+      "path": "/home/user/gpui-mask-partitions-target/release/build/naga/d10a7a3af6858816/out/libnaga-d10a7a3af6858816.rmeta",
+      "bytes": 16254022,
+      "sha256": "9d159d3583f6ea35f41aaa79671f88637daa5eb0df4279dd7bbafd612a4ae7f7",
+      "kind": "regenerable-compiled-library"
+    },
+    {
+      "path": "/home/user/gpui-mask-partitions-target/release/build/wgpu/a04d8c4b8ae18c63/out/libwgpu-a04d8c4b8ae18c63.rmeta",
+      "bytes": 2994504,
+      "sha256": "f415ec33c5061adffdff8b025de1d9ee0e7a8cd28d3c95712aedc537c544c80f",
+      "kind": "regenerable-compiled-library"
+    },
+    {
+      "path": "/home/user/gpui-mask-partitions-target/release/build/wgpu/a04d8c4b8ae18c63/out/libwgpu-a04d8c4b8ae18c63.rlib",
+      "bytes": 3216100,
+      "sha256": "02e53c1158265ed50c16ea6c09f7421ae059b75ee9e95d503e060c7b9064f9a6",
+      "kind": "regenerable-compiled-library"
+    },
+    {
+      "path": "/home/user/gpui-mask-partitions-target/release/build/wgpu/e7afcce30605923d/out/libwgpu-e7afcce30605923d.rmeta",
+      "bytes": 2290964,
+      "sha256": "b083a8711e513abd5c848fb70e5bde0c5f34c92e99d71ef69a10f6e24f518cfb",
+      "kind": "regenerable-compiled-library"
+    },
+    {
+      "path": "/home/user/gpui-mask-partitions-target/release/build/itertools/d80c2e7a3723d8f3/out/libitertools-d80c2e7a3723d8f3.rlib",
+      "bytes": 52490,
+      "sha256": "110ba85e7c569f95a116e5e281b84f4b9b9d9cdc223d4ec9a447059183bc45eb",
+      "kind": "regenerable-compiled-library"
+    },
+    {
+      "path": "/home/user/gpui-mask-partitions-target/release/build/itertools/d80c2e7a3723d8f3/out/libitertools-d80c2e7a3723d8f3.rmeta",
+      "bytes": 2718305,
+      "sha256": "b31d6916aa630431da485531296cc38fbb3592ca973322cf8624bca2def6647d",
+      "kind": "regenerable-compiled-library"
+    },
+    {
+      "path": "/home/user/gpui-mask-partitions-target/release/build/harfrust/bb25dd67397fbce4/out/libharfrust-bb25dd67397fbce4.rmeta",
+      "bytes": 2515006,
+      "sha256": "a219baae7f0ee189a0ac84d300a03c816804699e6878ab931e407b335752705b",
+      "kind": "regenerable-compiled-library"
+    },
+    {
+      "path": "/home/user/gpui-mask-partitions-target/release/build/harfrust/922717abd31e26b5/out/libharfrust-922717abd31e26b5.rlib",
+      "bytes": 1710982,
+      "sha256": "c801e269e968178cbdfe1c25c3a4c7bf0fc61fe12aa9f6a8faa868d57a21bdfd",
+      "kind": "regenerable-compiled-library"
+    },
+    {
+      "path": "/home/user/gpui-mask-partitions-target/release/build/harfrust/922717abd31e26b5/out/libharfrust-922717abd31e26b5.rmeta",
+      "bytes": 3082861,
+      "sha256": "4f09596db19182b808f5e6e0e3421a9972d270e27285848756e30bfb786a7af6",
+      "kind": "regenerable-compiled-library"
+    },
+    {
+      "path": "/home/user/gpui-mask-partitions-target/release/build/lock_api/7a2af7ec611ff707/out/liblock_api-7a2af7ec611ff707.rlib",
+      "bytes": 3644,
+      "sha256": "3014541c9d3a3a669179653072ed89749fcacffc8f3b9295df1289ebc68cfafe",
+      "kind": "regenerable-compiled-library"
+    },
+    {
+      "path": "/home/user/gpui-mask-partitions-target/release/build/lock_api/7a2af7ec611ff707/out/liblock_api-7a2af7ec611ff707.rmeta",
+      "bytes": 404381,
+      "sha256": "d16710f0776bead33c7be4e6b3bc6784dbb4bb8e9087b1226d260b6e6b8f7374",
+      "kind": "regenerable-compiled-library"
+    },
+    {
+      "path": "/home/user/gpui-mask-partitions-target/release/build/lock_api/ce3f41309f9f651e/out/liblock_api-ce3f41309f9f651e.rmeta",
+      "bytes": 295558,
+      "sha256": "a29e9e35208d828c41a05b8b4e5eff98f901b6ac85426d091ab266ddeb2b3107",
+      "kind": "regenerable-compiled-library"
+    },
+    {
+      "path": "/home/user/gpui-mask-partitions-target/release/build/gpui_reactivity_core/7587c00ddae546dc/out/libgpui_reactivity_core-7587c00ddae546dc.rmeta",
+      "bytes": 97853,
+      "sha256": "bb3d09ac6ffa75d3ecca2d11d2e976f23d4f5b026c63558114c3c99a4f25508c",
+      "kind": "regenerable-compiled-library"
+    },
+    {
+      "path": "/home/user/gpui-mask-partitions-target/release/build/gpui_reactivity_core/6e543c146beceff1/out/libgpui_reactivity_core-6e543c146beceff1.rlib",
+      "bytes": 78254,
+      "sha256": "46beee28a6e0bd5ff0997e19a9602fbedb05559d80747c4ab85d016599437fab",
+      "kind": "regenerable-compiled-library"
+    },
+    {
+      "path": "/home/user/gpui-mask-partitions-target/release/build/gpui_reactivity_core/6e543c146beceff1/out/libgpui_reactivity_core-6e543c146beceff1.rmeta",
+      "bytes": 164821,
+      "sha256": "19e480fb6e828eccf13ba440ff85da6c9f1e7badc157a6312fd40471991538e2",
+      "kind": "regenerable-compiled-library"
+    },
+    {
+      "path": "/home/user/gpui-mask-partitions-target/release/build/gpu-allocator/bc7a34ce230e0fd5/out/libgpu_allocator-bc7a34ce230e0fd5.rmeta",
+      "bytes": 126453,
+      "sha256": "2d224a2cb8fed5a45507a5445b1f08ac136bb42f7cb8e95643d237b4f5c43b66",
+      "kind": "regenerable-compiled-library"
+    },
+    {
+      "path": "/home/user/gpui-mask-partitions-target/release/build/gpu-allocator/bb8318727665012e/out/libgpu_allocator-bb8318727665012e.rlib",
+      "bytes": 199150,
+      "sha256": "336c12d42d7baf49efce853784d6a2fcfa47f62440d9595dcb42925616dc71df",
+      "kind": "regenerable-compiled-library"
+    },
+    {
+      "path": "/home/user/gpui-mask-partitions-target/release/build/gpu-allocator/bb8318727665012e/out/libgpu_allocator-bb8318727665012e.rmeta",
+      "bytes": 171245,
+      "sha256": "967d91f176b3b689f8fe2657427ccd80f028f686cea3271f5daca7a6b47a20ae",
+      "kind": "regenerable-compiled-library"
+    },
+    {
+      "path": "/home/user/gpui-mask-partitions-target/release/build/dlib/9ee3c8c9d87db010/out/libdlib-9ee3c8c9d87db010.rlib",
+      "bytes": 4478,
+      "sha256": "cc33f73421a17c4e831e8b428da688237f28f3b4b18ad56e20096ca89f7fb077",
+      "kind": "regenerable-compiled-library"
+    },
+    {
+      "path": "/home/user/gpui-mask-partitions-target/release/build/dlib/9ee3c8c9d87db010/out/libdlib-9ee3c8c9d87db010.rmeta",
+      "bytes": 36055,
+      "sha256": "b023926b09175946c26ba4a6ab86c58729220dd66051f71c0ef170b929bd39c7",
+      "kind": "regenerable-compiled-library"
+    },
+    {
+      "path": "/home/user/gpui-mask-partitions-target/release/build/dlib/efa88f9877a01af5/out/libdlib-efa88f9877a01af5.rmeta",
+      "bytes": 34669,
+      "sha256": "25fcd46a538f15f0f9407fd4bad96f95ce1fafc38c552675232f3299fb1050be",
+      "kind": "regenerable-compiled-library"
+    },
+    {
+      "path": "/home/user/gpui-mask-partitions-target/release/build/allocation-counter/3ac7b0d128ea0bb6/out/liballocation_counter-3ac7b0d128ea0bb6.rmeta",
+      "bytes": 25179,
+      "sha256": "7ce3a62cfc0e6cd77395009d91ada6ef0981c51ec39ab664afc241437ef10538",
+      "kind": "regenerable-compiled-library"
+    },
+    {
+      "path": "/home/user/gpui-mask-partitions-target/release/build/allocation-counter/dbab3a6fb5cd8c7e/out/liballocation_counter-dbab3a6fb5cd8c7e.rlib",
+      "bytes": 10962,
+      "sha256": "d1df91dd5773522632b1c7c797b8bb8185f60007bb0e75df1b9129b5d67c6110",
+      "kind": "regenerable-compiled-library"
+    },
+    {
+      "path": "/home/user/gpui-mask-partitions-target/release/build/allocation-counter/dbab3a6fb5cd8c7e/out/liballocation_counter-dbab3a6fb5cd8c7e.rmeta",
+      "bytes": 43362,
+      "sha256": "515ee14f56e50cb1cc0ab25858d3274750e4c2b4b98a0238605d279b7e50f1c6",
+      "kind": "regenerable-compiled-library"
+    },
+    {
+      "path": "/home/user/gpui-mask-partitions-target/release/build/zerovec/dee7cafd4d9ea5e1/out/libzerovec-dee7cafd4d9ea5e1.rmeta",
+      "bytes": 1320274,
+      "sha256": "3591969748975fd81ed1f826112fc79e772331787a2fd65ed59e6f7a4d18bd88",
+      "kind": "regenerable-compiled-library"
+    },
+    {
+      "path": "/home/user/gpui-mask-partitions-target/release/build/zerovec/1224ab95333ab8c2/out/libzerovec-1224ab95333ab8c2.rlib",
+      "bytes": 7300,
+      "sha256": "286667f6c9f8afd0ad5fffe0da79167ac216f528651efb41ced80ce999817b8a",
+      "kind": "regenerable-compiled-library"
+    },
+    {
+      "path": "/home/user/gpui-mask-partitions-target/release/build/zerovec/1224ab95333ab8c2/out/libzerovec-1224ab95333ab8c2.rmeta",
+      "bytes": 2230938,
+      "sha256": "c9659af310ec691b93329edf9a4b3da5f25eeaa73b20523f0a3696a314a97e15",
+      "kind": "regenerable-compiled-library"
+    },
+    {
+      "path": "/home/user/gpui-mask-partitions-target/release/build/icu_collections/53c9e5dabd134aeb/out/libicu_collections-53c9e5dabd134aeb.rmeta",
+      "bytes": 304055,
+      "sha256": "0497f2a81db30e771abcd14b59539b02ebd19ae904a008300ad2742ab926f983",
+      "kind": "regenerable-compiled-library"
+    },
+    {
+      "path": "/home/user/gpui-mask-partitions-target/release/build/icu_collections/55c2dde417db45bd/out/libicu_collections-55c2dde417db45bd.rmeta",
+      "bytes": 492966,
+      "sha256": "5270d64e51d1f50cf4769240c13967afa179d9f758fad1a8557693627e31dac1",
+      "kind": "regenerable-compiled-library"
+    },
+    {
+      "path": "/home/user/gpui-mask-partitions-target/release/build/icu_collections/55c2dde417db45bd/out/libicu_collections-55c2dde417db45bd.rlib",
+      "bytes": 73434,
+      "sha256": "995be060b2126c5106534651ce8b27d61691c1bbd62479c90f3260c6b69c11a2",
+      "kind": "regenerable-compiled-library"
+    },
+    {
+      "path": "/home/user/gpui-mask-partitions-target/release/build/unicode-ident/382042c71f87e76b/out/libunicode_ident-382042c71f87e76b.rlib",
+      "bytes": 18150,
+      "sha256": "5f2482c51c7beab9bb905281f94cd375dc442869d0d34f5f89a14b8e5ad3397b",
+      "kind": "regenerable-compiled-library"
+    },
+    {
+      "path": "/home/user/gpui-mask-partitions-target/release/build/unicode-ident/382042c71f87e76b/out/libunicode_ident-382042c71f87e76b.rmeta",
+      "bytes": 34746,
+      "sha256": "46d2777cd9dcfea81cf4ffe11abab950f149e6bf640fd068a4f6988ff3da2588",
+      "kind": "regenerable-compiled-library"
+    },
+    {
+      "path": "/home/user/gpui-mask-partitions-target/release/build/unicode-ident/804e36973c4a1596/out/libunicode_ident-804e36973c4a1596.rlib",
+      "bytes": 13450,
+      "sha256": "1de18bffb66c0e379c4f7923815884ff2c27296963401c977ea6cb1ea1863e9b",
+      "kind": "regenerable-compiled-library"
+    },
+    {
+      "path": "/home/user/gpui-mask-partitions-target/release/build/unicode-ident/804e36973c4a1596/out/libunicode_ident-804e36973c4a1596.rmeta",
+      "bytes": 39436,
+      "sha256": "580595ff58d39921e98f2225407dda1478dd236c428d5b89d0447ee545bf1f8a",
+      "kind": "regenerable-compiled-library"
+    },
+    {
+      "path": "/home/user/gpui-mask-partitions-target/release/build/unicode-ident/3413402402579220/out/libunicode_ident-3413402402579220.rmeta",
+      "bytes": 34661,
+      "sha256": "b282661b09bb63a6807b21702d2c7442662a78692456a35912bb3f4f2c5c0bf7",
+      "kind": "regenerable-compiled-library"
+    },
+    {
+      "path": "/home/user/gpui-mask-partitions-target/release/build/icu_normalizer_data/7b95b2cd7e2f276d/out/libicu_normalizer_data-7b95b2cd7e2f276d.rmeta",
+      "bytes": 436711,
+      "sha256": "3a0c1727d2bb46c52200934b687c18af9ecb68b7aae6776191a631a707d00885",
+      "kind": "regenerable-compiled-library"
+    },
+    {
+      "path": "/home/user/gpui-mask-partitions-target/release/build/icu_normalizer_data/7b95b2cd7e2f276d/out/libicu_normalizer_data-7b95b2cd7e2f276d.rlib",
+      "bytes": 2436,
+      "sha256": "3b3d3bc2a81317ca58a0c43b7fce2c3ad3c4d8a97ef06b9be7a7200eb3d27919",
+      "kind": "regenerable-compiled-library"
+    },
+    {
+      "path": "/home/user/gpui-mask-partitions-target/release/build/icu_normalizer_data/37e9908c7703eba6/out/libicu_normalizer_data-37e9908c7703eba6.rmeta",
+      "bytes": 436405,
+      "sha256": "3e2dce16a8cba87235761c247897341a4a4e0438c01e66f2e0967eafe017de22",
+      "kind": "regenerable-compiled-library"
+    },
+    {
+      "path": "/home/user/gpui-mask-partitions-target/release/build/arrayvec/20cb255a1f1bc43b/out/libarrayvec-20cb255a1f1bc43b.rlib",
+      "bytes": 3204,
+      "sha256": "a63815b3e5f28929b6954c7ef96f9a99ec772e6eadca56531ef128dd1141e602",
+      "kind": "regenerable-compiled-library"
+    },
+    {
+      "path": "/home/user/gpui-mask-partitions-target/release/build/arrayvec/20cb255a1f1bc43b/out/libarrayvec-20cb255a1f1bc43b.rmeta",
+      "bytes": 243045,
+      "sha256": "72e9afd696d619e875e564ea52ed6c5deee6456f85d36a0dc1f22861c7897293",
+      "kind": "regenerable-compiled-library"
+    },
+    {
+      "path": "/home/user/gpui-mask-partitions-target/release/build/arrayvec/fa4ff9cfcad47f27/out/libarrayvec-fa4ff9cfcad47f27.rmeta",
+      "bytes": 163816,
+      "sha256": "3f152e2ef2a4d046242427152ca0f2f8eaff75be83c475a26fdd812e2f11610c",
+      "kind": "regenerable-compiled-library"
+    },
+    {
+      "path": "/home/user/gpui-mask-partitions-target/release/build/arrayvec/b2ff9cdfef142a2d/out/libarrayvec-b2ff9cdfef142a2d.rlib",
+      "bytes": 3220,
+      "sha256": "fbf08c52f086481860a17c22caaf131d8c40a070d5b45982087a783f6d2246b3",
+      "kind": "regenerable-compiled-library"
+    },
+    {
+      "path": "/home/user/gpui-mask-partitions-target/release/build/arrayvec/b2ff9cdfef142a2d/out/libarrayvec-b2ff9cdfef142a2d.rmeta",
+      "bytes": 355088,
+      "sha256": "3654d60bac40de0c93ef98e20e5f5bf18b89e63800951e4c90d11cbddc1e1b5d",
+      "kind": "regenerable-compiled-library"
+    },
+    {
+      "path": "/home/user/gpui-mask-partitions-target/release/build/icu_properties/7874c5bd7080b2a5/out/libicu_properties-7874c5bd7080b2a5.rlib",
+      "bytes": 541820,
+      "sha256": "a83e6b8c428846ad0a95308cebf1ad79552dfa21eb88f1798a1945dd187d51f8",
+      "kind": "regenerable-compiled-library"
+    },
+    {
+      "path": "/home/user/gpui-mask-partitions-target/release/build/icu_properties/7874c5bd7080b2a5/out/libicu_properties-7874c5bd7080b2a5.rmeta",
+      "bytes": 2851369,
+      "sha256": "7e791f0eee1083effc229afcdead4bcae22c03b34eb05c764a7d20d0610cd74e",
+      "kind": "regenerable-compiled-library"
+    },
+    {
+      "path": "/home/user/gpui-mask-partitions-target/release/build/icu_properties/c3308c21fa29e262/out/libicu_properties-c3308c21fa29e262.rmeta",
+      "bytes": 2542339,
+      "sha256": "e72b3cd48a2df6a4df41ce8165a2b5f259eaeba19437e01f15738d2cd49e3fb0",
+      "kind": "regenerable-compiled-library"
+    },
+    {
+      "path": "/home/user/gpui-mask-partitions-target/release/build/bytemuck/4a9243fd698a22eb/out/libbytemuck-4a9243fd698a22eb.rmeta",
+      "bytes": 607118,
+      "sha256": "436b4c311a7b968e4bceae61ccd467166d291ba108634654ddfcc9fe54b8a980",
+      "kind": "regenerable-compiled-library"
+    },
+    {
+      "path": "/home/user/gpui-mask-partitions-target/release/build/bytemuck/4a9243fd698a22eb/out/libbytemuck-4a9243fd698a22eb.rlib",
+      "bytes": 7438,
+      "sha256": "f026c9117c783ae6b579ed232b5b1d7eb9d38c2646d46cf51425cce8faa30478",
+      "kind": "regenerable-compiled-library"
+    },
+    {
+      "path": "/home/user/gpui-mask-partitions-target/release/build/bytemuck/6ce5e6cd74fdaebb/out/libbytemuck-6ce5e6cd74fdaebb.rmeta",
+      "bytes": 431566,
+      "sha256": "e94182949ec365e963c0188e294c693d27cafbb39563fa38664026899af32083",
+      "kind": "regenerable-compiled-library"
+    },
+    {
+      "path": "/home/user/gpui-mask-partitions-target/release/build/either/8dda1808b9442cc7/out/libeither-8dda1808b9442cc7.rmeta",
+      "bytes": 262904,
+      "sha256": "13db6fdfc8979a2e282c9b8e9d4075df17533bb57322cd607eaec0d2e359e097",
+      "kind": "regenerable-compiled-library"
+    },
+    {
+      "path": "/home/user/gpui-mask-partitions-target/release/build/either/8dda1808b9442cc7/out/libeither-8dda1808b9442cc7.rlib",
+      "bytes": 2362,
+      "sha256": "fa3cc151a9c529c1a8f6affb723cbb0d39bc03c6d377cf9bd8ff8f34e3283650",
+      "kind": "regenerable-compiled-library"
+    },
+    {
+      "path": "/home/user/gpui-mask-partitions-target/release/build/autocfg/42471c90d1378b6a/out/libautocfg-42471c90d1378b6a.rlib",
+      "bytes": 561930,
+      "sha256": "d5b4e80817f318849eb78f082b32c78bec828117e91d554744b073c8849f2d84",
+      "kind": "regenerable-compiled-library"
+    },
+    {
+      "path": "/home/user/gpui-mask-partitions-target/release/build/autocfg/42471c90d1378b6a/out/libautocfg-42471c90d1378b6a.rmeta",
+      "bytes": 82514,
+      "sha256": "e861bab9de933dfa47529b696c2eca9590db5b69ac73d69303858c9d763adaef",
+      "kind": "regenerable-compiled-library"
+    },
+    {
+      "path": "/home/user/gpui-mask-partitions-target/release/build/quote/83201bf8d2e092b0/out/libquote-83201bf8d2e092b0.rmeta",
+      "bytes": 275908,
+      "sha256": "bda18265a37520f8734cff3483458c80d722bb7dabcc5605a3e4ddfd0de39ff9",
+      "kind": "regenerable-compiled-library"
+    },
+    {
+      "path": "/home/user/gpui-mask-partitions-target/release/build/quote/83201bf8d2e092b0/out/libquote-83201bf8d2e092b0.rlib",
+      "bytes": 235920,
+      "sha256": "499fbd1c25b161b110bbec56bad4c212c9d975f52bee7072c0bbec3752c7e3cf",
+      "kind": "regenerable-compiled-library"
+    },
+    {
+      "path": "/home/user/gpui-mask-partitions-target/release/build/ash/d71dff6963fa62eb/out/libash-d71dff6963fa62eb.rmeta",
+      "bytes": 63730464,
+      "sha256": "be2afa797fb5778337b26dbb93f3175adc8cb1d471f8824039d5ad27b89fcd2f",
+      "kind": "regenerable-compiled-library"
+    },
+    {
+      "path": "/home/user/gpui-mask-partitions-target/release/build/ash/8923c6176dcb97c7/out/libash-8923c6176dcb97c7.rlib",
+      "bytes": 2427138,
+      "sha256": "d999d4c65f7573340ef8a16ea38bb0c6ba6e452d2e280adbe4e6df5dabc32df7",
+      "kind": "regenerable-compiled-library"
+    },
+    {
+      "path": "/home/user/gpui-mask-partitions-target/release/build/ash/8923c6176dcb97c7/out/libash-8923c6176dcb97c7.rmeta",
+      "bytes": 69596410,
+      "sha256": "d51d96eec9c270f1f3a59f6ae888d2810cbf3a79d3db987ba29d160f54c48fad",
+      "kind": "regenerable-compiled-library"
+    },
+    {
+      "path": "/home/user/gpui-mask-partitions-target/release/build/unicode-ccc/dea5e542b7784b49/out/libunicode_ccc-dea5e542b7784b49.rmeta",
+      "bytes": 27365,
+      "sha256": "4f928249ccb728b187e4f9e834a4942e932fc2030aebbdfee4974ed94e51bb6e",
+      "kind": "regenerable-compiled-library"
+    },
+    {
+      "path": "/home/user/gpui-mask-partitions-target/release/build/unicode-ccc/bd239ae9decd7e99/out/libunicode_ccc-bd239ae9decd7e99.rlib",
+      "bytes": 34740,
+      "sha256": "f6549e5eb20f3e38aba0119c739493f8b3f38de5601ac81d3122656752c62f14",
+      "kind": "regenerable-compiled-library"
+    },
+    {
+      "path": "/home/user/gpui-mask-partitions-target/release/build/unicode-ccc/bd239ae9decd7e99/out/libunicode_ccc-bd239ae9decd7e99.rmeta",
+      "bytes": 32714,
+      "sha256": "2bcfa249f8993dca0e2c1306d73a911bd273474865c077abdee9bc606996f577",
+      "kind": "regenerable-compiled-library"
+    },
+    {
+      "path": "/home/user/gpui-mask-partitions-target/release/build/unicode-script/e9812ce138776369/out/libunicode_script-e9812ce138776369.rmeta",
+      "bytes": 619733,
+      "sha256": "97a2f59b6d522cdde4c17c89c73fa74e82c77e512a5378330565699852c0b9b7",
+      "kind": "regenerable-compiled-library"
+    },
+    {
+      "path": "/home/user/gpui-mask-partitions-target/release/build/unicode-script/8c91ee8fd7ee6236/out/libunicode_script-8c91ee8fd7ee6236.rmeta",
+      "bytes": 654472,
+      "sha256": "edfed4ac96a06ae8b0195dc5954fd39d340e50b4b8529225587a57dc8cc8e7a2",
+      "kind": "regenerable-compiled-library"
+    },
+    {
+      "path": "/home/user/gpui-mask-partitions-target/release/build/unicode-script/8c91ee8fd7ee6236/out/libunicode_script-8c91ee8fd7ee6236.rlib",
+      "bytes": 97366,
+      "sha256": "863fc805180f81a6ef64d38f2b73ecbf76b6750dba06e0ee43b9eb7f895dfee9",
+      "kind": "regenerable-compiled-library"
+    },
+    {
+      "path": "/home/user/gpui-mask-partitions-target/release/build/zerocopy-derive/bd574a823e2136ad/out/libzerocopy_derive-bd574a823e2136ad.so",
+      "bytes": 4519104,
+      "sha256": "5166c032d6d13721a289996cf814b7439bf4dae20939360d9c9bac645355616f",
+      "kind": "regenerable-compiled-library"
+    },
+    {
+      "path": "/home/user/gpui-mask-partitions-target/release/build/pollster/3140a811dc6d6a06/out/libpollster-3140a811dc6d6a06.rlib",
+      "bytes": 6070,
+      "sha256": "70206db4dcb435455bf847b90596aee73508e0fea9305611eb2ed7103ab65ba2",
+      "kind": "regenerable-compiled-library"
+    },
+    {
+      "path": "/home/user/gpui-mask-partitions-target/release/build/pollster/3140a811dc6d6a06/out/libpollster-3140a811dc6d6a06.rmeta",
+      "bytes": 20522,
+      "sha256": "f05da0ba4ecad4d9a482c6abfc71257ef9d06a497537893c31c55dd87d4dc75d",
+      "kind": "regenerable-compiled-library"
+    },
+    {
+      "path": "/home/user/gpui-mask-partitions-target/release/build/pollster/81df20f522c45681/out/libpollster-81df20f522c45681.rmeta",
+      "bytes": 14062,
+      "sha256": "6e6e93cdf1dcd1da4046da6c9c895c75cd50d77c44364b18cc65756e95df8035",
+      "kind": "regenerable-compiled-library"
+    },
+    {
+      "path": "/home/user/gpui-mask-partitions-target/release/build/document-features/84a1ce9af45e065b/out/libdocument_features-84a1ce9af45e065b.so",
+      "bytes": 956856,
+      "sha256": "d2a811a993342ff249be661aa4d78b534521adad4409567bcecd71b664013e58",
+      "kind": "regenerable-compiled-library"
+    },
+    {
+      "path": "/home/user/gpui-mask-partitions-target/release/build/zerofrom-derive/977efb65f38d463b/out/libzerofrom_derive-977efb65f38d463b.so",
+      "bytes": 4651960,
+      "sha256": "5131ecc0910099e6be6fb90e56dd14c32e5762ff9e176e21a6cd0ff80750ec80",
+      "kind": "regenerable-compiled-library"
+    },
+    {
+      "path": "/home/user/gpui-mask-partitions-target/release/build/log/61d55b9cffd94552/out/liblog-61d55b9cffd94552.rlib",
+      "bytes": 49680,
+      "sha256": "703718e13862e62a4edcb3e2538facb7db9393edb3df87e444103a97b392a155",
+      "kind": "regenerable-compiled-library"
+    },
+    {
+      "path": "/home/user/gpui-mask-partitions-target/release/build/log/61d55b9cffd94552/out/liblog-61d55b9cffd94552.rmeta",
+      "bytes": 192363,
+      "sha256": "2fd4f97e33579946368e14567fdc1dbbb663259c1c2e429eef09cddc5ed9395e",
+      "kind": "regenerable-compiled-library"
+    },
+    {
+      "path": "/home/user/gpui-mask-partitions-target/release/build/log/16133717b8abe739/out/liblog-16133717b8abe739.rmeta",
+      "bytes": 210750,
+      "sha256": "ebcb85b8b3e132deab5da0138844e99e483c1a942a45b27b256413cdc7cd3c16",
+      "kind": "regenerable-compiled-library"
+    },
+    {
+      "path": "/home/user/gpui-mask-partitions-target/release/build/log/16133717b8abe739/out/liblog-16133717b8abe739.rlib",
+      "bytes": 14720,
+      "sha256": "b707e3d802ed8a07dfef0ce5c94469ec3270b7817872fcd0f96ebbf73c797a90",
+      "kind": "regenerable-compiled-library"
+    },
+    {
+      "path": "/home/user/gpui-mask-partitions-target/release/build/log/5523b42b971c6a3d/out/liblog-5523b42b971c6a3d.rmeta",
+      "bytes": 166227,
+      "sha256": "df88e9926f6c9fdc087efa3246dde0716e845f43d4b3b7055a805783340d9edc",
+      "kind": "regenerable-compiled-library"
+    },
+    {
+      "path": "/home/user/gpui-mask-partitions-target/release/build/glam/b168c7727f890ef9/out/libglam-b168c7727f890ef9.rlib",
+      "bytes": 319076,
+      "sha256": "cb9669d69913b37b7c14d99b8f09bcf0c96064388e5cccb01e6cebb7c9db6a86",
+      "kind": "regenerable-compiled-library"
+    },
+    {
+      "path": "/home/user/gpui-mask-partitions-target/release/build/glam/b168c7727f890ef9/out/libglam-b168c7727f890ef9.rmeta",
+      "bytes": 19730039,
+      "sha256": "8f01b143d1c4731b738eb7dfa4b17b56a68d8154793d8d73b0050298c22c67b4",
+      "kind": "regenerable-compiled-library"
+    },
+    {
+      "path": "/home/user/gpui-mask-partitions-target/release/build/glam/4f8868e4801aaeca/out/libglam-4f8868e4801aaeca.rmeta",
+      "bytes": 14236272,
+      "sha256": "0376e0b03d9834a46002950aa262053a5ff6d81ee1590f40dbd6551a0b256975",
+      "kind": "regenerable-compiled-library"
+    },
+    {
+      "path": "/home/user/gpui-mask-partitions-target/release/build/glam/6e6835c441d591e8/out/libglam-6e6835c441d591e8.rlib",
+      "bytes": 153180,
+      "sha256": "dc033591faff9d0ce2a77fed61121dd0eead6898ce8a378204c71badcf5d1118",
+      "kind": "regenerable-compiled-library"
+    },
+    {
+      "path": "/home/user/gpui-mask-partitions-target/release/build/glam/6e6835c441d591e8/out/libglam-6e6835c441d591e8.rmeta",
+      "bytes": 22029868,
+      "sha256": "8b3554c9d4a1137f8008c30b7ea58105442dd91ae25e70c8145c4058dcfca546",
+      "kind": "regenerable-compiled-library"
+    }
+  ]
+}

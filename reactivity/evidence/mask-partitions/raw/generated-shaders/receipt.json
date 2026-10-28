@@ -1,0 +1,68 @@
+{
+  "generated": [
+    {
+      "path": "/home/user/gpui-mask-partitions-target/release/build/gpui_gpu/0b12888bfbf6a76e/out/ui.wgsl",
+      "sha256": "bfb0d6a0642550d2162481ffc88a3a9684a8bf054081dc0bc656e952e4371345",
+      "bytes": 25602
+    },
+    {
+      "path": "/home/user/gpui-mask-partitions-target/release/build/gpui_gpu/aab4e3e5f9fc1354/out/ui.wgsl",
+      "sha256": "bfb0d6a0642550d2162481ffc88a3a9684a8bf054081dc0bc656e952e4371345",
+      "bytes": 25602
+    }
+  ],
+  "executed_render": {
+    "path": "/home/user/gpui-mask-partitions-target/release/build/gpui_gpu/f3188f1101e1b4d0/out/render-f3188f1101e1b4d0",
+    "sha256": "cb1a78c091dc5f6889c43b7f82a59ccb64e4193270c1062747057325cbc546c5",
+    "preserved": "/home/user/gpui-preserved-test-binaries/cb1a78c091dc5f6889c43b7f82a59ccb64e4193270c1062747057325cbc546c5",
+    "bytes": 16894136,
+    "executed": true,
+    "cargo": {
+      "reason": "compiler-artifact",
+      "package_id": "path+file:///home/user/gpui-mask-partitions-lab/reactivity/crates/gpu#gpui_gpu@0.1.0",
+      "manifest_path": "/home/user/gpui-mask-partitions-lab/reactivity/crates/gpu/Cargo.toml",
+      "target": {
+        "kind": [
+          "test"
+        ],
+        "crate_types": [
+          "bin"
+        ],
+        "name": "render",
+        "src_path": "/home/user/gpui-mask-partitions-lab/reactivity/crates/gpu/tests/render.rs",
+        "edition": "2024",
+        "required-features": [
+          "gpu-tests"
+        ],
+        "doc": false,
+        "doctest": false,
+        "test": true
+      },
+      "profile": {
+        "opt_level": "3",
+        "debuginfo": 0,
+        "debug_assertions": false,
+        "overflow_checks": false,
+        "test": true
+      },
+      "features": [
+        "default",
+        "gpu-tests",
+        "simd",
+        "vulkan-tests"
+      ],
+      "filenames": [
+        "/home/user/gpui-mask-partitions-target/release/build/gpui_gpu/f3188f1101e1b4d0/out/render-f3188f1101e1b4d0"
+      ],
+      "executable": "/home/user/gpui-mask-partitions-target/release/build/gpui_gpu/f3188f1101e1b4d0/out/render-f3188f1101e1b4d0",
+      "fresh": false
+    }
+  },
+  "embedded": {
+    "sha256": "bfb0d6a0642550d2162481ffc88a3a9684a8bf054081dc0bc656e952e4371345",
+    "bytes": 25602,
+    "offset": 615437
+  },
+  "fixture_sha256": "c5c029e5774e3941478279bf645772b6bf7e80f729a96c69be8a5581336cd46a",
+  "scope": "Fresh corrected GPU package and executed GPU render ELF; native profile/offline modules not yet qualified."
+}

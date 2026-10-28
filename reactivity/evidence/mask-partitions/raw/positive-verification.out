@@ -1,0 +1,1 @@
+{"files": 707, "executable_identities": 63, "gpu_canvas_tests": 354, "ignored_tests": 3, "exact_frames": 336, "negative_control_pending": true, "positive_correctness_passes": true, "scope": "Positive checks only; negative control and native/full qualification remain pending."}
