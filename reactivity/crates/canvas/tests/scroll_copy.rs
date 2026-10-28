@@ -1,5 +1,47 @@
 use gpui_canvas::{Affine, Canvas, CanvasScene, Color, Point, Rect, ScrollCopy, TextSystem};
 
+#[path = "support/scroll_outside.rs"]
+mod scroll_outside;
+
+#[test]
+fn copied_overlap_and_outside_insert_remove_material_order_and_overflow_are_exact() {
+    use scroll_outside::{CASES, SIZE, VIEW, offset, stage};
+    for case in 0..CASES {
+        let mut canvas = Canvas::recording(SIZE[0], SIZE[1], Default::default()).unwrap();
+        let mut text = TextSystem::bundled().unwrap();
+        stage(&mut canvas, &mut text, case, 0).commit();
+        let mut pixels = vec![0; (SIZE[0] * SIZE[1]) as usize];
+        canvas.render_bgrx(&mut pixels).unwrap();
+        for tick in 1..6 {
+            let (damage, plan) = stage(&mut canvas, &mut text, case, tick)
+                .commit_with_scroll_damage(VIEW, offset(tick - 1) - offset(tick));
+            if let Some(plan) = &plan {
+                let [l, t, r, b] = plan.source();
+                let [x, y, _, _] = plan.destination();
+                let old = pixels.clone();
+                for dy in 0..b - t {
+                    for dx in 0..r - l {
+                        pixels[((y + dy) * SIZE[0] + x + dx) as usize] =
+                            old[((t + dy) * SIZE[0] + l + dx) as usize];
+                    }
+                }
+                assert!(plan.repairs().count() <= 256);
+                for repair in plan.repairs() {
+                    canvas.render_bgrx_region(&mut pixels, repair).unwrap();
+                }
+            } else {
+                canvas.render_bgrx_region(&mut pixels, damage).unwrap();
+            }
+            let mut expected = vec![0; pixels.len()];
+            canvas.render_bgrx(&mut expected).unwrap();
+            assert!(pixels == expected, "outside case={case}, tick={tick}");
+            if ![6, 8, 9].contains(&case) {
+                assert!(plan.is_some(), "supported outside case={case}, tick={tick}");
+            }
+        }
+    }
+}
+
 const WIDTH: usize = 80;
 const HEIGHT: usize = 64;
 const VIEW: [u32; 4] = [5, 7, 65, 55];
@@ -89,7 +131,7 @@ fn apply(canvas: &mut Canvas, pixels: &mut [u32], plan: ScrollCopy) {
                 prior[(sy + y) as usize * WIDTH + (sx + x) as usize];
         }
     }
-    for &repair in plan.repairs() {
+    for repair in plan.repairs() {
         canvas.render_bgrx_region(pixels, repair).unwrap();
     }
 }

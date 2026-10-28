@@ -198,7 +198,6 @@ impl RetainedRenderer {
         self.stats = RetainedStats {
             composited_pixels: scroll
                 .repairs()
-                .iter()
                 .map(|r| {
                     r.bounds()
                         .map_or(0, |[l, t, r, b]| u64::from(r - l) * u64::from(b - t))
@@ -340,7 +339,7 @@ fn check_scroll(plan: &ScrollCopy, size: [u32; 2]) -> Result<(), Error> {
     {
         return Err(Error::InvalidScene);
     }
-    for &repair in plan.repairs() {
+    for repair in plan.repairs() {
         check_damage(Some(repair), size)?;
     }
     Ok(())

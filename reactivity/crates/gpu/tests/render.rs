@@ -3,6 +3,74 @@ mod test_adapter;
 use gpui_canvas::{Affine, Canvas, Color, ColorConfig, Point, Rect, TextSystem};
 use gpui_gpu::{Renderer, Stats, wgpu};
 
+#[path = "../../canvas/tests/support/scroll_outside.rs"]
+mod scroll_outside;
+
+#[test]
+fn retained_scroll_outside_changes_match_full_gpu_in_all_formats() {
+    use gpui_gpu::RetainedRenderer;
+    use scroll_outside::{CASES, SIZE, VIEW, offset, stage};
+    pollster::block_on(async {
+        for format in [
+            wgpu::TextureFormat::Rgba8UnormSrgb,
+            wgpu::TextureFormat::Bgra8UnormSrgb,
+            wgpu::TextureFormat::Rgba16Float,
+        ] {
+            let inner = renderer(format).await;
+            let mut oracle = Renderer::new(inner.device().clone(), inner.queue().clone(), format)
+                .await
+                .unwrap();
+            let mut gpu = RetainedRenderer::new(inner);
+            let config = if format == wgpu::TextureFormat::Rgba16Float {
+                ColorConfig::linear_hdr(gpui_canvas::OutputProfile::Srgb, 203.).unwrap()
+            } else {
+                ColorConfig::default()
+            };
+            for case in 0..CASES {
+                let mut canvas = Canvas::recording(SIZE[0], SIZE[1], config).unwrap();
+                let mut text = TextSystem::bundled().unwrap();
+                stage(&mut canvas, &mut text, case, 0).commit();
+                let target = output_texture(&gpu, &canvas);
+                let view = target.create_view(&Default::default());
+                gpu.render(canvas.prepared_scene(), &view, None).unwrap();
+                for tick in 1..6 {
+                    let (damage, plan) = stage(&mut canvas, &mut text, case, tick)
+                        .commit_with_scroll_damage(VIEW, offset(tick - 1) - offset(tick));
+                    gpu.render_with_scroll(
+                        canvas.prepared_scene(),
+                        &view,
+                        Some(damage),
+                        plan.as_ref(),
+                    )
+                    .unwrap();
+                    let actual = read_texture(&gpu, &target);
+                    let expected = readback(&mut oracle, &canvas);
+                    assert!(
+                        actual == expected,
+                        "outside case={case}, tick={tick}, format={format:?}"
+                    );
+                    if let Some(plan) = &plan {
+                        let [l, t, r, b] = plan.source();
+                        assert_eq!(
+                            gpu.retained_stats().copied_pixels,
+                            u64::from(SIZE[0] * SIZE[1] + 2 * (r - l) * (b - t))
+                        );
+                        let repaired: u64 = plan
+                            .repairs()
+                            .filter_map(|r| r.bounds())
+                            .map(|[l, t, r, b]| u64::from(r - l) * u64::from(b - t))
+                            .sum();
+                        assert_eq!(gpu.retained_stats().composited_pixels, repaired);
+                    }
+                    if ![6, 8, 9].contains(&case) {
+                        assert!(plan.is_some(), "supported outside case={case}, tick={tick}");
+                    }
+                }
+            }
+        }
+    });
+}
+
 #[test]
 fn gradient_clip_masks_remain_correlated_when_material_tails_relocate() {
     use gpui_canvas::{ClipShape, Extend, Gradient, GradientGeometry, GradientStop, Interpolation};

@@ -85,10 +85,10 @@ pub(super) fn read(gpu: &GpuSurface, texture: &wgpu::Texture) -> Vec<u8> {
     }
     output
 }
-fn render(
+fn render<M: View + 'static>(
     gpu: &mut GpuSurface,
     oracle: &mut Renderer,
-    owner: &mut Win<Paint>,
+    owner: &mut Win<M>,
     texture: &wgpu::Texture,
 ) {
     let view = texture.create_view(&Default::default());

@@ -17,7 +17,7 @@ impl GpuContext {
                 label: Some("GPUI frame"),
             });
         backing.scroll(&mut encoder, scroll);
-        if scroll.repairs().iter().any(|repair| !repair.is_empty()) {
+        if scroll.repairs().next().is_some() {
             let mut pass = encoder.begin_render_pass(&wgpu::RenderPassDescriptor {
                 label: Some("GPUI frame"),
                 color_attachments: &[Some(wgpu::RenderPassColorAttachment {

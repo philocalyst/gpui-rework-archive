@@ -202,7 +202,7 @@ pub(super) fn run(gpu: &mut GpuSurface) {
                 if tick == 0 {
                     assert!(damage.scroll.is_none());
                 } else {
-                    let copy = damage
+                    let copy = &damage
                         .scroll
                         .expect("the actual 100K-row workload must certify")
                         .copy;

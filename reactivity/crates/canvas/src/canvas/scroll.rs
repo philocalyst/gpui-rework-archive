@@ -6,21 +6,28 @@ type Bounds = [i32; 4];
 /// A checked copy and repair plan for one immediately preceding canvas scene.
 /// The caller must separately prove that its backing contains that predecessor;
 /// this plan grants no authority over a foreign or stale external image.
-#[derive(Clone, Copy, Debug)]
+#[derive(Debug)]
 pub struct ScrollCopy {
     source: [u16; 4],
     destination: [u16; 4],
-    repairs: [DamageRegion; 4],
+    repairs: crate::DamageRegions,
 }
 impl ScrollCopy {
-    pub fn source(self) -> [u32; 4] {
+    pub fn source(&self) -> [u32; 4] {
         self.source.map(u32::from)
     }
-    pub fn destination(self) -> [u32; 4] {
+    pub fn destination(&self) -> [u32; 4] {
         self.destination.map(u32::from)
     }
-    pub fn repairs(&self) -> &[DamageRegion; 4] {
-        &self.repairs
+    /// At most four pieces per bounded repair region. No returned rectangle
+    /// intersects the copied destination, and no extra collection is allocated.
+    pub fn repairs(&self) -> impl Iterator<Item = DamageRegion> + '_ {
+        let destination = self.destination.map(i32::from);
+        self.repairs
+            .regions()
+            .iter()
+            .flat_map(move |&region| subtract(region, destination))
+            .filter(|region| !region.is_empty())
     }
 }
 
@@ -85,8 +92,21 @@ fn certify(
     Some(ScrollCopy {
         source: source.map(|v| v as u16),
         destination: destination.map(|v| v as u16),
-        repairs: subtract(damage, destination),
+        repairs: outside_damage(previous, next, destination, damage),
     })
+}
+
+// The bounding-repair ablation shares representation, iteration and submission
+// with the precise variant; only this derivation differs between alternatives.
+fn outside_damage(
+    _previous: &Canvas,
+    _next: &Canvas,
+    _destination: Bounds,
+    damage: DamageRegion,
+) -> crate::DamageRegions {
+    let mut regions = crate::DamageRegions::default();
+    regions.include(damage);
+    regions
 }
 
 struct Contribution<'a> {
