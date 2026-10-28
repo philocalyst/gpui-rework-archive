@@ -4694,7 +4694,16 @@ fn region_batches_cover_edges_and_holes_then_allow_ordinary_packet_repairs() {
                 }
                 let target = output_texture(&gpu, &canvas);
                 let view = target.create_view(&Default::default());
-                let initial = readback(&mut oracle, &canvas);
+                let oracle_target = output_texture(&oracle, &canvas);
+                oracle
+                    .render(
+                        canvas.prepared_scene(),
+                        &oracle_target.create_view(&Default::default()),
+                    )
+                    .unwrap_or_else(|error| {
+                        panic!("initial ordinary oracle {format:?}/{width}x{height}: {error:?}")
+                    });
+                let initial = read_texture(&oracle, &oracle_target);
                 gpu.render(canvas.prepared_scene(), &view, None).unwrap();
                 assert_eq!(read_texture(&gpu, &target), initial);
                 for (count, color, expected_regions) in
