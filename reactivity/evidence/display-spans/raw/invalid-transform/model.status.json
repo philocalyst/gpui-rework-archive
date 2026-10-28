@@ -1,0 +1,10 @@
+{
+  "args": [
+    "python3",
+    "/home/user/gpui-display-spans-lab/reactivity/crates/display-span-lab/model/experiment.py",
+    "/home/user/gpui-display-spans-evidence/invalid-transform/model",
+    "/home/user/gpui-display-spans-evidence/invalid-transform/public/public-trace.json"
+  ],
+  "exit": 1,
+  "elapsed_seconds": 4.954769611358643
+}

@@ -1,0 +1,38 @@
+[
+  {
+    "name": "span",
+    "exit": 101,
+    "elapsed_seconds": 0.02838444709777832,
+    "job_sha256": "91d9146c26064053cfa1245846db69cc414684276373b47aa7a7db7719fa3ce9",
+    "pixel_diff_bytes": 384,
+    "canonical_diff_bytes": 0,
+    "executable_sha256": "cbb9351af47525bf70c80e4200c23e25faf3ce0ccb3692cc9ab339381a3091b3"
+  },
+  {
+    "name": "old-damage",
+    "exit": 101,
+    "elapsed_seconds": 0.026477813720703125,
+    "job_sha256": "b67d06ee31ddebba5b0ca77cc05be27c4aa0c72793f6f5f927c0fb509b580eb7",
+    "pixel_diff_bytes": 44,
+    "canonical_diff_bytes": 0,
+    "executable_sha256": "cbb9351af47525bf70c80e4200c23e25faf3ce0ccb3692cc9ab339381a3091b3"
+  },
+  {
+    "name": "stale",
+    "exit": 101,
+    "elapsed_seconds": 0.028071880340576172,
+    "job_sha256": "ec34157fb9b56be516f13076f9420205444c63f34d500f4094d64dca33f5de9f",
+    "pixel_diff_bytes": 672,
+    "canonical_diff_bytes": 0,
+    "executable_sha256": "cbb9351af47525bf70c80e4200c23e25faf3ce0ccb3692cc9ab339381a3091b3"
+  },
+  {
+    "name": "codec-width",
+    "exit": 101,
+    "elapsed_seconds": 0.02687358856201172,
+    "job_sha256": "ca0a5bdfb801335bbfe23ca55f4cf2ca141458365531b7efb63f12e88004d82a",
+    "pixel_diff_bytes": 0,
+    "canonical_diff_bytes": 8,
+    "executable_sha256": "cbb9351af47525bf70c80e4200c23e25faf3ce0ccb3692cc9ab339381a3091b3"
+  }
+]

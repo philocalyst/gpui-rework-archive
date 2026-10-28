@@ -1,0 +1,11 @@
+Traceback (most recent call last):
+  File "/home/user/gpui-display-spans-lab/reactivity/crates/display-span-lab/model/experiment.py", line 321, in <module>
+    if __name__=='__main__':main()
+                            ^^^^^^
+  File "/home/user/gpui-display-spans-lab/reactivity/crates/display-span-lab/model/experiment.py", line 316, in main
+    public,rows=public_models(Path(sys.argv[2]),out);series+=public;metrics+=rows
+                ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/home/user/gpui-display-spans-lab/reactivity/crates/display-span-lab/model/experiment.py", line 299, in public_models
+    assert len(candidates)==1,('ambiguous public identity',frame['name'],rect,candidates)
+           ^^^^^^^^^^^^^^^^^^
+AssertionError: ('ambiguous public identity', 'initial', (0, 4, 32, 8), [])

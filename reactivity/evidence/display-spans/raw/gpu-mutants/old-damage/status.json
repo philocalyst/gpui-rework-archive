@@ -1,0 +1,9 @@
+{
+  "name": "old-damage",
+  "exit": 101,
+  "elapsed_seconds": 0.026477813720703125,
+  "job_sha256": "b67d06ee31ddebba5b0ca77cc05be27c4aa0c72793f6f5f927c0fb509b580eb7",
+  "pixel_diff_bytes": 44,
+  "canonical_diff_bytes": 0,
+  "executable_sha256": "cbb9351af47525bf70c80e4200c23e25faf3ce0ccb3692cc9ab339381a3091b3"
+}

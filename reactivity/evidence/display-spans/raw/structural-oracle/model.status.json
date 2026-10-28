@@ -1,0 +1,10 @@
+{
+  "args": [
+    "python3",
+    "/home/user/gpui-display-spans-lab/reactivity/crates/display-span-lab/model/experiment.py",
+    "/home/user/gpui-display-spans-evidence/structural-oracle/model",
+    "/home/user/gpui-display-spans-evidence/structural-oracle/public/public-trace.json"
+  ],
+  "exit": 0,
+  "elapsed_seconds": 5.005295038223267
+}

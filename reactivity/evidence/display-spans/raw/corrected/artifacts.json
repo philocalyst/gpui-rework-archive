@@ -1,0 +1,14 @@
+{
+  "consume": {
+    "path": "/home/user/gpui-display-spans-target/release/consume",
+    "sha256": "0e9db29c274f209ac672cdf6198ff95a7cdcd869df56f27f8a0a7d78dd497f83",
+    "bytes": 6935544,
+    "preserved": "/home/user/gpui-preserved-test-binaries/0e9db29c274f209ac672cdf6198ff95a7cdcd869df56f27f8a0a7d78dd497f83"
+  },
+  "public_trace": {
+    "path": "/home/user/gpui-display-spans-target/release/public_trace",
+    "sha256": "aafe1a91a9a0c036eca16834da32c4b30a8c619221c6717894d25937393205be",
+    "bytes": 10038856,
+    "preserved": "/home/user/gpui-preserved-test-binaries/aafe1a91a9a0c036eca16834da32c4b30a8c619221c6717894d25937393205be"
+  }
+}

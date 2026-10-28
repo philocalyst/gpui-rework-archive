@@ -1,0 +1,27 @@
+{
+  "/home/user/bbtree-reference-local": {
+    "commit": "1b0201087102f81189da0c4cd5054a91c8d97d62",
+    "files": {
+      "design/04-inline-key.md": "ec037b91337a9c514801a4305ccf7a73c4cc9ef9101fe63f8798ed7c4b08f003",
+      "design/05-fence-key.md": "ef49ff893b98d3a6869e2f5d5f96e6cfa3947944b25f0b8bbd86ad6fcf0d0782",
+      "design/07-node-plan.md": "4f1dac3ea2c544f14e0d9861862eb670c78f70366d10b711a7dda525b130290e",
+      "design/12-batch-api.md": "53fab1c7852a02048a2671bd4e873767d57ff8456a3ca56c102e4db90e26e70d",
+      "design/15-index-file.md": "f51ba35ea56f0236760e72f65546ae769ea73820d631d8cf6e05bff43a316e9b"
+    }
+  },
+  "/home/user/ripple-architecture-reference": {
+    "commit": "fed124465d162ce17ce009936ef50061719d9882",
+    "files": {
+      "packages/ripple/src/runtime/internal/client/track-async.js": "65f1c65bc045b557ec68fea5e1069a25302617dc8ec07eafe5b60015b07e51f9",
+      "packages/tsrx-ripple/src/transform/client/index.js": "d55544de0cd7ed5dae3e2c4e44e850ebd27c8caf308fb399dbc3a3cfa591da06"
+    }
+  },
+  "/home/user/solid-architecture-reference": {
+    "commit": "ff4d3c4479163fbdd3327f5b22d0c3ea7bd1a2c5",
+    "files": {
+      "packages/solid-signals/INTERNALS-ASYNC-STATE.md": "433b8f080a8ba81f567e0f07d026cd7d4725eea35328e73d5a0770a1f3b14ba1",
+      "packages/solid-signals/src/core/graph.ts": "2f9d67cc455b30f00ec3d4ff0946c6fcf3a69a1a78651b2f6815cd56650a5b79",
+      "packages/solid-signals/src/core/heap.ts": "59d4d1bdb8787bec51122f39865c3986ca14a59591414a78b45ca46d6e3bd346"
+    }
+  }
+}

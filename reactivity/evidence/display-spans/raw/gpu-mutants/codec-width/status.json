@@ -1,0 +1,9 @@
+{
+  "name": "codec-width",
+  "exit": 101,
+  "elapsed_seconds": 0.02687358856201172,
+  "job_sha256": "ca0a5bdfb801335bbfe23ca55f4cf2ca141458365531b7efb63f12e88004d82a",
+  "pixel_diff_bytes": 0,
+  "canonical_diff_bytes": 8,
+  "executable_sha256": "cbb9351af47525bf70c80e4200c23e25faf3ce0ccb3692cc9ab339381a3091b3"
+}

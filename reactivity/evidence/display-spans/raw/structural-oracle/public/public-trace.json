@@ -1,0 +1,3183 @@
+{
+  "failed_newer_keeps_prior": true,
+  "frames": [
+    {
+      "accepted": true,
+      "adapter_snapshot_nodes": 9,
+      "clear": [
+        1.0,
+        1.0,
+        1.0,
+        1.0
+      ],
+      "counters": {
+        "coarse_updates": 0,
+        "descriptions": 1,
+        "destination_compares": 10,
+        "exact_updates": 0,
+        "layout_runs": 1,
+        "measure_calls": 0,
+        "owner_reruns": 0,
+        "paint_passes": 1,
+        "presentations": 1,
+        "source_operations": 0,
+        "source_reads": 0,
+        "text_bytes_copied": 7,
+        "text_promotions": 1
+      },
+      "draws": [
+        {
+          "color": [
+            1.0,
+            1.0,
+            1.0,
+            1.0
+          ],
+          "rect": [
+            0.0,
+            0.0,
+            64.0,
+            64.0
+          ]
+        },
+        {
+          "color": [
+            0.0,
+            0.0,
+            0.0,
+            1.0
+          ],
+          "rect": [
+            0.0,
+            0.0,
+            32.0,
+            4.0
+          ]
+        },
+        {
+          "color": [
+            0.0,
+            0.0,
+            0.0,
+            1.0
+          ],
+          "rect": [
+            0.0,
+            4.0,
+            32.0,
+            8.0
+          ]
+        },
+        {
+          "color": [
+            0.0,
+            0.0,
+            0.0,
+            1.0
+          ],
+          "rect": [
+            0.0,
+            8.0,
+            32.0,
+            12.0
+          ]
+        },
+        {
+          "color": [
+            0.0,
+            0.0,
+            0.0,
+            1.0
+          ],
+          "rect": [
+            0.0,
+            12.0,
+            32.0,
+            16.0
+          ]
+        },
+        {
+          "color": [
+            0.0,
+            0.0,
+            0.0,
+            1.0
+          ],
+          "rect": [
+            0.0,
+            16.0,
+            32.0,
+            20.0
+          ]
+        },
+        {
+          "color": [
+            0.0,
+            0.0,
+            0.0,
+            1.0
+          ],
+          "rect": [
+            0.0,
+            20.0,
+            32.0,
+            24.0
+          ]
+        },
+        {
+          "color": [
+            0.0,
+            0.0,
+            0.0,
+            1.0
+          ],
+          "rect": [
+            0.0,
+            24.0,
+            32.0,
+            28.0
+          ]
+        },
+        {
+          "color": [
+            0.0,
+            0.0,
+            0.0,
+            1.0
+          ],
+          "rect": [
+            0.0,
+            28.0,
+            32.0,
+            32.0
+          ]
+        }
+      ],
+      "name": "initial",
+      "pixels": "public-initial.rgba",
+      "snapshot": {
+        "nodes": [
+          {
+            "bounds": [
+              0.0,
+              0.0,
+              64.0,
+              64.0
+            ],
+            "identity": 1,
+            "parent": null,
+            "role": "Generic",
+            "target": {
+              "identity": 1,
+              "window": 1
+            },
+            "text": null,
+            "transform": [
+              1.0,
+              0.0,
+              0.0,
+              1.0,
+              0.0,
+              0.0
+            ]
+          },
+          {
+            "bounds": [
+              0.0,
+              0.0,
+              32.00000762939453,
+              4.000000953674316
+            ],
+            "identity": 2,
+            "parent": 0,
+            "role": "Generic",
+            "target": {
+              "identity": 2,
+              "window": 1
+            },
+            "text": null,
+            "transform": [
+              1.0,
+              0.0,
+              0.0,
+              1.0,
+              0.0,
+              0.0
+            ]
+          },
+          {
+            "bounds": [
+              0.0,
+              3.999999761581421,
+              32.00000762939453,
+              4.000001430511475
+            ],
+            "identity": 3,
+            "parent": 0,
+            "role": "Generic",
+            "target": {
+              "identity": 3,
+              "window": 1
+            },
+            "text": null,
+            "transform": [
+              1.0,
+              0.0,
+              0.0,
+              1.0,
+              0.0,
+              4.0
+            ]
+          },
+          {
+            "bounds": [
+              0.0,
+              7.999999523162842,
+              32.00000762939453,
+              4.000001907348633
+            ],
+            "identity": 4,
+            "parent": 0,
+            "role": "Generic",
+            "target": {
+              "identity": 4,
+              "window": 1
+            },
+            "text": null,
+            "transform": [
+              1.0,
+              0.0,
+              0.0,
+              1.0,
+              0.0,
+              8.0
+            ]
+          },
+          {
+            "bounds": [
+              0.0,
+              11.999999046325684,
+              32.00000762939453,
+              4.000003337860107
+            ],
+            "identity": 5,
+            "parent": 0,
+            "role": "Generic",
+            "target": {
+              "identity": 5,
+              "window": 1
+            },
+            "text": null,
+            "transform": [
+              1.0,
+              0.0,
+              0.0,
+              1.0,
+              0.0,
+              12.0
+            ]
+          },
+          {
+            "bounds": [
+              0.0,
+              15.999999046325684,
+              32.00000762939453,
+              4.000003337860107
+            ],
+            "identity": 6,
+            "parent": 0,
+            "role": "Generic",
+            "target": {
+              "identity": 6,
+              "window": 1
+            },
+            "text": null,
+            "transform": [
+              1.0,
+              0.0,
+              0.0,
+              1.0,
+              0.0,
+              16.0
+            ]
+          },
+          {
+            "bounds": [
+              0.0,
+              19.999998092651367,
+              32.00000762939453,
+              4.000004291534424
+            ],
+            "identity": 7,
+            "parent": 0,
+            "role": "Generic",
+            "target": {
+              "identity": 7,
+              "window": 1
+            },
+            "text": null,
+            "transform": [
+              1.0,
+              0.0,
+              0.0,
+              1.0,
+              0.0,
+              20.0
+            ]
+          },
+          {
+            "bounds": [
+              0.0,
+              23.999998092651367,
+              32.00000762939453,
+              4.000004291534424
+            ],
+            "identity": 8,
+            "parent": 0,
+            "role": "Generic",
+            "target": {
+              "identity": 8,
+              "window": 1
+            },
+            "text": null,
+            "transform": [
+              1.0,
+              0.0,
+              0.0,
+              1.0,
+              0.0,
+              24.0
+            ]
+          },
+          {
+            "bounds": [
+              0.0,
+              27.999998092651367,
+              32.00000762939453,
+              4.000006198883057
+            ],
+            "identity": 9,
+            "parent": 0,
+            "role": "Generic",
+            "target": {
+              "identity": 9,
+              "window": 1
+            },
+            "text": null,
+            "transform": [
+              1.0,
+              0.0,
+              0.0,
+              1.0,
+              0.0,
+              28.0
+            ]
+          }
+        ],
+        "poisoned": false,
+        "prepared_epoch": null,
+        "presentation_epoch": 0,
+        "presentation_valid": true,
+        "requested_scale_factor": 1.0,
+        "requested_size": [
+          64,
+          64
+        ],
+        "scale_factor": 1.0,
+        "size": [
+          64,
+          64
+        ],
+        "source_epoch": 0
+      }
+    },
+    {
+      "accepted": true,
+      "adapter_snapshot_nodes": 9,
+      "clear": [
+        1.0,
+        1.0,
+        1.0,
+        1.0
+      ],
+      "counters": {
+        "coarse_updates": 0,
+        "descriptions": 0,
+        "destination_compares": 0,
+        "exact_updates": 1,
+        "layout_runs": 0,
+        "measure_calls": 0,
+        "owner_reruns": 0,
+        "paint_passes": 0,
+        "presentations": 1,
+        "source_operations": 1,
+        "source_reads": 1,
+        "text_bytes_copied": 0,
+        "text_promotions": 0
+      },
+      "draws": [
+        {
+          "color": [
+            1.0,
+            1.0,
+            1.0,
+            1.0
+          ],
+          "rect": [
+            0.0,
+            0.0,
+            64.0,
+            64.0
+          ]
+        },
+        {
+          "color": [
+            1.0,
+            1.0,
+            1.0,
+            1.0
+          ],
+          "rect": [
+            0.0,
+            0.0,
+            32.0,
+            4.0
+          ]
+        },
+        {
+          "color": [
+            0.0,
+            0.0,
+            0.0,
+            1.0
+          ],
+          "rect": [
+            0.0,
+            4.0,
+            32.0,
+            8.0
+          ]
+        },
+        {
+          "color": [
+            0.0,
+            0.0,
+            0.0,
+            1.0
+          ],
+          "rect": [
+            0.0,
+            8.0,
+            32.0,
+            12.0
+          ]
+        },
+        {
+          "color": [
+            0.0,
+            0.0,
+            0.0,
+            1.0
+          ],
+          "rect": [
+            0.0,
+            12.0,
+            32.0,
+            16.0
+          ]
+        },
+        {
+          "color": [
+            0.0,
+            0.0,
+            0.0,
+            1.0
+          ],
+          "rect": [
+            0.0,
+            16.0,
+            32.0,
+            20.0
+          ]
+        },
+        {
+          "color": [
+            0.0,
+            0.0,
+            0.0,
+            1.0
+          ],
+          "rect": [
+            0.0,
+            20.0,
+            32.0,
+            24.0
+          ]
+        },
+        {
+          "color": [
+            0.0,
+            0.0,
+            0.0,
+            1.0
+          ],
+          "rect": [
+            0.0,
+            24.0,
+            32.0,
+            28.0
+          ]
+        },
+        {
+          "color": [
+            0.0,
+            0.0,
+            0.0,
+            1.0
+          ],
+          "rect": [
+            0.0,
+            28.0,
+            32.0,
+            32.0
+          ]
+        }
+      ],
+      "name": "property",
+      "pixels": "public-property.rgba",
+      "snapshot": {
+        "nodes": [
+          {
+            "bounds": [
+              0.0,
+              0.0,
+              64.0,
+              64.0
+            ],
+            "identity": 1,
+            "parent": null,
+            "role": "Generic",
+            "target": {
+              "identity": 1,
+              "window": 1
+            },
+            "text": null,
+            "transform": [
+              1.0,
+              0.0,
+              0.0,
+              1.0,
+              0.0,
+              0.0
+            ]
+          },
+          {
+            "bounds": [
+              0.0,
+              0.0,
+              32.00000762939453,
+              4.000000953674316
+            ],
+            "identity": 2,
+            "parent": 0,
+            "role": "Generic",
+            "target": {
+              "identity": 2,
+              "window": 1
+            },
+            "text": null,
+            "transform": [
+              1.0,
+              0.0,
+              0.0,
+              1.0,
+              0.0,
+              0.0
+            ]
+          },
+          {
+            "bounds": [
+              0.0,
+              3.999999761581421,
+              32.00000762939453,
+              4.000001430511475
+            ],
+            "identity": 3,
+            "parent": 0,
+            "role": "Generic",
+            "target": {
+              "identity": 3,
+              "window": 1
+            },
+            "text": null,
+            "transform": [
+              1.0,
+              0.0,
+              0.0,
+              1.0,
+              0.0,
+              4.0
+            ]
+          },
+          {
+            "bounds": [
+              0.0,
+              7.999999523162842,
+              32.00000762939453,
+              4.000001907348633
+            ],
+            "identity": 4,
+            "parent": 0,
+            "role": "Generic",
+            "target": {
+              "identity": 4,
+              "window": 1
+            },
+            "text": null,
+            "transform": [
+              1.0,
+              0.0,
+              0.0,
+              1.0,
+              0.0,
+              8.0
+            ]
+          },
+          {
+            "bounds": [
+              0.0,
+              11.999999046325684,
+              32.00000762939453,
+              4.000003337860107
+            ],
+            "identity": 5,
+            "parent": 0,
+            "role": "Generic",
+            "target": {
+              "identity": 5,
+              "window": 1
+            },
+            "text": null,
+            "transform": [
+              1.0,
+              0.0,
+              0.0,
+              1.0,
+              0.0,
+              12.0
+            ]
+          },
+          {
+            "bounds": [
+              0.0,
+              15.999999046325684,
+              32.00000762939453,
+              4.000003337860107
+            ],
+            "identity": 6,
+            "parent": 0,
+            "role": "Generic",
+            "target": {
+              "identity": 6,
+              "window": 1
+            },
+            "text": null,
+            "transform": [
+              1.0,
+              0.0,
+              0.0,
+              1.0,
+              0.0,
+              16.0
+            ]
+          },
+          {
+            "bounds": [
+              0.0,
+              19.999998092651367,
+              32.00000762939453,
+              4.000004291534424
+            ],
+            "identity": 7,
+            "parent": 0,
+            "role": "Generic",
+            "target": {
+              "identity": 7,
+              "window": 1
+            },
+            "text": null,
+            "transform": [
+              1.0,
+              0.0,
+              0.0,
+              1.0,
+              0.0,
+              20.0
+            ]
+          },
+          {
+            "bounds": [
+              0.0,
+              23.999998092651367,
+              32.00000762939453,
+              4.000004291534424
+            ],
+            "identity": 8,
+            "parent": 0,
+            "role": "Generic",
+            "target": {
+              "identity": 8,
+              "window": 1
+            },
+            "text": null,
+            "transform": [
+              1.0,
+              0.0,
+              0.0,
+              1.0,
+              0.0,
+              24.0
+            ]
+          },
+          {
+            "bounds": [
+              0.0,
+              27.999998092651367,
+              32.00000762939453,
+              4.000006198883057
+            ],
+            "identity": 9,
+            "parent": 0,
+            "role": "Generic",
+            "target": {
+              "identity": 9,
+              "window": 1
+            },
+            "text": null,
+            "transform": [
+              1.0,
+              0.0,
+              0.0,
+              1.0,
+              0.0,
+              28.0
+            ]
+          }
+        ],
+        "poisoned": false,
+        "prepared_epoch": null,
+        "presentation_epoch": 1,
+        "presentation_valid": true,
+        "requested_scale_factor": 1.0,
+        "requested_size": [
+          64,
+          64
+        ],
+        "scale_factor": 1.0,
+        "size": [
+          64,
+          64
+        ],
+        "source_epoch": 1
+      }
+    },
+    {
+      "accepted": true,
+      "adapter_snapshot_nodes": 10,
+      "clear": [
+        1.0,
+        1.0,
+        1.0,
+        1.0
+      ],
+      "counters": {
+        "coarse_updates": 1,
+        "descriptions": 1,
+        "destination_compares": 12,
+        "exact_updates": 0,
+        "layout_runs": 1,
+        "measure_calls": 0,
+        "owner_reruns": 1,
+        "paint_passes": 1,
+        "presentations": 1,
+        "source_operations": 1,
+        "source_reads": 0,
+        "text_bytes_copied": 15,
+        "text_promotions": 2
+      },
+      "draws": [
+        {
+          "color": [
+            1.0,
+            1.0,
+            1.0,
+            1.0
+          ],
+          "rect": [
+            0.0,
+            0.0,
+            64.0,
+            64.0
+          ]
+        },
+        {
+          "color": [
+            1.0,
+            1.0,
+            1.0,
+            1.0
+          ],
+          "rect": [
+            0.0,
+            0.0,
+            32.0,
+            4.0
+          ]
+        },
+        {
+          "color": [
+            0.0,
+            0.0,
+            0.0,
+            1.0
+          ],
+          "rect": [
+            0.0,
+            4.0,
+            24.0,
+            7.0
+          ]
+        },
+        {
+          "color": [
+            0.0,
+            0.0,
+            0.0,
+            1.0
+          ],
+          "rect": [
+            0.0,
+            7.0,
+            32.0,
+            11.0
+          ]
+        },
+        {
+          "color": [
+            0.0,
+            0.0,
+            0.0,
+            1.0
+          ],
+          "rect": [
+            0.0,
+            11.0,
+            32.0,
+            15.0
+          ]
+        },
+        {
+          "color": [
+            0.0,
+            0.0,
+            0.0,
+            1.0
+          ],
+          "rect": [
+            0.0,
+            15.0,
+            32.0,
+            19.0
+          ]
+        },
+        {
+          "color": [
+            0.0,
+            0.0,
+            0.0,
+            1.0
+          ],
+          "rect": [
+            0.0,
+            19.0,
+            32.0,
+            23.0
+          ]
+        },
+        {
+          "color": [
+            0.0,
+            0.0,
+            0.0,
+            1.0
+          ],
+          "rect": [
+            0.0,
+            23.0,
+            32.0,
+            27.0
+          ]
+        },
+        {
+          "color": [
+            0.0,
+            0.0,
+            0.0,
+            1.0
+          ],
+          "rect": [
+            0.0,
+            27.0,
+            32.0,
+            31.0
+          ]
+        },
+        {
+          "color": [
+            0.0,
+            0.0,
+            0.0,
+            1.0
+          ],
+          "rect": [
+            0.0,
+            31.0,
+            32.0,
+            35.0
+          ]
+        }
+      ],
+      "name": "insertion",
+      "pixels": "public-insertion.rgba",
+      "snapshot": {
+        "nodes": [
+          {
+            "bounds": [
+              0.0,
+              0.0,
+              64.0,
+              64.0
+            ],
+            "identity": 1,
+            "parent": null,
+            "role": "Generic",
+            "target": {
+              "identity": 1,
+              "window": 1
+            },
+            "text": null,
+            "transform": [
+              1.0,
+              0.0,
+              0.0,
+              1.0,
+              0.0,
+              0.0
+            ]
+          },
+          {
+            "bounds": [
+              0.0,
+              0.0,
+              32.00000762939453,
+              4.000000953674316
+            ],
+            "identity": 10,
+            "parent": 0,
+            "role": "Generic",
+            "target": {
+              "identity": 10,
+              "window": 1
+            },
+            "text": null,
+            "transform": [
+              1.0,
+              0.0,
+              0.0,
+              1.0,
+              0.0,
+              0.0
+            ]
+          },
+          {
+            "bounds": [
+              0.0,
+              3.999999761581421,
+              24.000003814697266,
+              3.0000009536743164
+            ],
+            "identity": 11,
+            "parent": 0,
+            "role": "Generic",
+            "target": {
+              "identity": 11,
+              "window": 1
+            },
+            "text": null,
+            "transform": [
+              1.0,
+              0.0,
+              0.0,
+              1.0,
+              0.0,
+              4.0
+            ]
+          },
+          {
+            "bounds": [
+              0.0,
+              6.999999523162842,
+              32.00000762939453,
+              4.000001907348633
+            ],
+            "identity": 12,
+            "parent": 0,
+            "role": "Generic",
+            "target": {
+              "identity": 12,
+              "window": 1
+            },
+            "text": null,
+            "transform": [
+              1.0,
+              0.0,
+              0.0,
+              1.0,
+              0.0,
+              7.0
+            ]
+          },
+          {
+            "bounds": [
+              0.0,
+              10.999999046325684,
+              32.00000762939453,
+              4.000002384185791
+            ],
+            "identity": 13,
+            "parent": 0,
+            "role": "Generic",
+            "target": {
+              "identity": 13,
+              "window": 1
+            },
+            "text": null,
+            "transform": [
+              1.0,
+              0.0,
+              0.0,
+              1.0,
+              0.0,
+              11.0
+            ]
+          },
+          {
+            "bounds": [
+              0.0,
+              14.999999046325684,
+              32.00000762939453,
+              4.000003337860107
+            ],
+            "identity": 14,
+            "parent": 0,
+            "role": "Generic",
+            "target": {
+              "identity": 14,
+              "window": 1
+            },
+            "text": null,
+            "transform": [
+              1.0,
+              0.0,
+              0.0,
+              1.0,
+              0.0,
+              15.0
+            ]
+          },
+          {
+            "bounds": [
+              0.0,
+              18.999998092651367,
+              32.00000762939453,
+              4.000004291534424
+            ],
+            "identity": 15,
+            "parent": 0,
+            "role": "Generic",
+            "target": {
+              "identity": 15,
+              "window": 1
+            },
+            "text": null,
+            "transform": [
+              1.0,
+              0.0,
+              0.0,
+              1.0,
+              0.0,
+              19.0
+            ]
+          },
+          {
+            "bounds": [
+              0.0,
+              22.999998092651367,
+              32.00000762939453,
+              4.000004291534424
+            ],
+            "identity": 16,
+            "parent": 0,
+            "role": "Generic",
+            "target": {
+              "identity": 16,
+              "window": 1
+            },
+            "text": null,
+            "transform": [
+              1.0,
+              0.0,
+              0.0,
+              1.0,
+              0.0,
+              23.0
+            ]
+          },
+          {
+            "bounds": [
+              0.0,
+              26.999998092651367,
+              32.00000762939453,
+              4.000004291534424
+            ],
+            "identity": 17,
+            "parent": 0,
+            "role": "Generic",
+            "target": {
+              "identity": 17,
+              "window": 1
+            },
+            "text": null,
+            "transform": [
+              1.0,
+              0.0,
+              0.0,
+              1.0,
+              0.0,
+              27.0
+            ]
+          },
+          {
+            "bounds": [
+              0.0,
+              30.999998092651367,
+              32.00000762939453,
+              4.000006198883057
+            ],
+            "identity": 18,
+            "parent": 0,
+            "role": "Generic",
+            "target": {
+              "identity": 18,
+              "window": 1
+            },
+            "text": null,
+            "transform": [
+              1.0,
+              0.0,
+              0.0,
+              1.0,
+              0.0,
+              31.0
+            ]
+          }
+        ],
+        "poisoned": false,
+        "prepared_epoch": null,
+        "presentation_epoch": 2,
+        "presentation_valid": true,
+        "requested_scale_factor": 1.0,
+        "requested_size": [
+          64,
+          64
+        ],
+        "scale_factor": 1.0,
+        "size": [
+          64,
+          64
+        ],
+        "source_epoch": 2
+      }
+    },
+    {
+      "accepted": true,
+      "adapter_snapshot_nodes": 10,
+      "clear": [
+        1.0,
+        1.0,
+        1.0,
+        1.0
+      ],
+      "counters": {
+        "coarse_updates": 0,
+        "descriptions": 0,
+        "destination_compares": 1,
+        "exact_updates": 1,
+        "layout_runs": 1,
+        "measure_calls": 0,
+        "owner_reruns": 0,
+        "paint_passes": 1,
+        "presentations": 1,
+        "source_operations": 1,
+        "source_reads": 1,
+        "text_bytes_copied": 0,
+        "text_promotions": 0
+      },
+      "draws": [
+        {
+          "color": [
+            1.0,
+            1.0,
+            1.0,
+            1.0
+          ],
+          "rect": [
+            0.0,
+            0.0,
+            64.0,
+            64.0
+          ]
+        },
+        {
+          "color": [
+            1.0,
+            1.0,
+            1.0,
+            1.0
+          ],
+          "rect": [
+            0.0,
+            0.0,
+            32.0,
+            7.0
+          ]
+        },
+        {
+          "color": [
+            0.0,
+            0.0,
+            0.0,
+            1.0
+          ],
+          "rect": [
+            0.0,
+            7.0,
+            24.0,
+            10.0
+          ]
+        },
+        {
+          "color": [
+            0.0,
+            0.0,
+            0.0,
+            1.0
+          ],
+          "rect": [
+            0.0,
+            10.0,
+            32.0,
+            14.0
+          ]
+        },
+        {
+          "color": [
+            0.0,
+            0.0,
+            0.0,
+            1.0
+          ],
+          "rect": [
+            0.0,
+            14.0,
+            32.0,
+            18.0
+          ]
+        },
+        {
+          "color": [
+            0.0,
+            0.0,
+            0.0,
+            1.0
+          ],
+          "rect": [
+            0.0,
+            18.0,
+            32.0,
+            22.0
+          ]
+        },
+        {
+          "color": [
+            0.0,
+            0.0,
+            0.0,
+            1.0
+          ],
+          "rect": [
+            0.0,
+            22.0,
+            32.0,
+            26.0
+          ]
+        },
+        {
+          "color": [
+            0.0,
+            0.0,
+            0.0,
+            1.0
+          ],
+          "rect": [
+            0.0,
+            26.0,
+            32.0,
+            30.0
+          ]
+        },
+        {
+          "color": [
+            0.0,
+            0.0,
+            0.0,
+            1.0
+          ],
+          "rect": [
+            0.0,
+            30.0,
+            32.0,
+            34.0
+          ]
+        },
+        {
+          "color": [
+            0.0,
+            0.0,
+            0.0,
+            1.0
+          ],
+          "rect": [
+            0.0,
+            34.0,
+            32.0,
+            38.0
+          ]
+        }
+      ],
+      "name": "layout",
+      "pixels": "public-layout.rgba",
+      "snapshot": {
+        "nodes": [
+          {
+            "bounds": [
+              0.0,
+              0.0,
+              64.0,
+              64.0
+            ],
+            "identity": 1,
+            "parent": null,
+            "role": "Generic",
+            "target": {
+              "identity": 1,
+              "window": 1
+            },
+            "text": null,
+            "transform": [
+              1.0,
+              0.0,
+              0.0,
+              1.0,
+              0.0,
+              0.0
+            ]
+          },
+          {
+            "bounds": [
+              0.0,
+              0.0,
+              32.00000762939453,
+              7.000000953674316
+            ],
+            "identity": 10,
+            "parent": 0,
+            "role": "Generic",
+            "target": {
+              "identity": 10,
+              "window": 1
+            },
+            "text": null,
+            "transform": [
+              1.0,
+              0.0,
+              0.0,
+              1.0,
+              0.0,
+              0.0
+            ]
+          },
+          {
+            "bounds": [
+              0.0,
+              6.999999523162842,
+              24.000003814697266,
+              3.0000016689300537
+            ],
+            "identity": 11,
+            "parent": 0,
+            "role": "Generic",
+            "target": {
+              "identity": 11,
+              "window": 1
+            },
+            "text": null,
+            "transform": [
+              1.0,
+              0.0,
+              0.0,
+              1.0,
+              0.0,
+              7.0
+            ]
+          },
+          {
+            "bounds": [
+              0.0,
+              9.999999046325684,
+              32.00000762939453,
+              4.000002384185791
+            ],
+            "identity": 12,
+            "parent": 0,
+            "role": "Generic",
+            "target": {
+              "identity": 12,
+              "window": 1
+            },
+            "text": null,
+            "transform": [
+              1.0,
+              0.0,
+              0.0,
+              1.0,
+              0.0,
+              10.0
+            ]
+          },
+          {
+            "bounds": [
+              0.0,
+              13.999999046325684,
+              32.00000762939453,
+              4.000003337860107
+            ],
+            "identity": 13,
+            "parent": 0,
+            "role": "Generic",
+            "target": {
+              "identity": 13,
+              "window": 1
+            },
+            "text": null,
+            "transform": [
+              1.0,
+              0.0,
+              0.0,
+              1.0,
+              0.0,
+              14.0
+            ]
+          },
+          {
+            "bounds": [
+              0.0,
+              17.999998092651367,
+              32.00000762939453,
+              4.000004291534424
+            ],
+            "identity": 14,
+            "parent": 0,
+            "role": "Generic",
+            "target": {
+              "identity": 14,
+              "window": 1
+            },
+            "text": null,
+            "transform": [
+              1.0,
+              0.0,
+              0.0,
+              1.0,
+              0.0,
+              18.0
+            ]
+          },
+          {
+            "bounds": [
+              0.0,
+              21.999998092651367,
+              32.00000762939453,
+              4.000004291534424
+            ],
+            "identity": 15,
+            "parent": 0,
+            "role": "Generic",
+            "target": {
+              "identity": 15,
+              "window": 1
+            },
+            "text": null,
+            "transform": [
+              1.0,
+              0.0,
+              0.0,
+              1.0,
+              0.0,
+              22.0
+            ]
+          },
+          {
+            "bounds": [
+              0.0,
+              25.999998092651367,
+              32.00000762939453,
+              4.000004291534424
+            ],
+            "identity": 16,
+            "parent": 0,
+            "role": "Generic",
+            "target": {
+              "identity": 16,
+              "window": 1
+            },
+            "text": null,
+            "transform": [
+              1.0,
+              0.0,
+              0.0,
+              1.0,
+              0.0,
+              26.0
+            ]
+          },
+          {
+            "bounds": [
+              0.0,
+              29.999998092651367,
+              32.00000762939453,
+              4.000006198883057
+            ],
+            "identity": 17,
+            "parent": 0,
+            "role": "Generic",
+            "target": {
+              "identity": 17,
+              "window": 1
+            },
+            "text": null,
+            "transform": [
+              1.0,
+              0.0,
+              0.0,
+              1.0,
+              0.0,
+              30.0
+            ]
+          },
+          {
+            "bounds": [
+              0.0,
+              33.999996185302734,
+              32.00000762939453,
+              4.0000081062316895
+            ],
+            "identity": 18,
+            "parent": 0,
+            "role": "Generic",
+            "target": {
+              "identity": 18,
+              "window": 1
+            },
+            "text": null,
+            "transform": [
+              1.0,
+              0.0,
+              0.0,
+              1.0,
+              0.0,
+              34.0
+            ]
+          }
+        ],
+        "poisoned": false,
+        "prepared_epoch": null,
+        "presentation_epoch": 3,
+        "presentation_valid": true,
+        "requested_scale_factor": 1.0,
+        "requested_size": [
+          64,
+          64
+        ],
+        "scale_factor": 1.0,
+        "size": [
+          64,
+          64
+        ],
+        "source_epoch": 3
+      }
+    },
+    {
+      "accepted": true,
+      "adapter_snapshot_nodes": 9,
+      "clear": [
+        1.0,
+        1.0,
+        1.0,
+        1.0
+      ],
+      "counters": {
+        "coarse_updates": 1,
+        "descriptions": 1,
+        "destination_compares": 10,
+        "exact_updates": 0,
+        "layout_runs": 1,
+        "measure_calls": 0,
+        "owner_reruns": 1,
+        "paint_passes": 1,
+        "presentations": 1,
+        "source_operations": 1,
+        "source_reads": 0,
+        "text_bytes_copied": 7,
+        "text_promotions": 1
+      },
+      "draws": [
+        {
+          "color": [
+            1.0,
+            1.0,
+            1.0,
+            1.0
+          ],
+          "rect": [
+            0.0,
+            0.0,
+            64.0,
+            64.0
+          ]
+        },
+        {
+          "color": [
+            1.0,
+            1.0,
+            1.0,
+            1.0
+          ],
+          "rect": [
+            0.0,
+            0.0,
+            32.0,
+            7.0
+          ]
+        },
+        {
+          "color": [
+            0.0,
+            0.0,
+            0.0,
+            1.0
+          ],
+          "rect": [
+            0.0,
+            7.0,
+            32.0,
+            11.0
+          ]
+        },
+        {
+          "color": [
+            0.0,
+            0.0,
+            0.0,
+            1.0
+          ],
+          "rect": [
+            0.0,
+            11.0,
+            32.0,
+            15.0
+          ]
+        },
+        {
+          "color": [
+            0.0,
+            0.0,
+            0.0,
+            1.0
+          ],
+          "rect": [
+            0.0,
+            15.0,
+            32.0,
+            19.0
+          ]
+        },
+        {
+          "color": [
+            0.0,
+            0.0,
+            0.0,
+            1.0
+          ],
+          "rect": [
+            0.0,
+            19.0,
+            32.0,
+            23.0
+          ]
+        },
+        {
+          "color": [
+            0.0,
+            0.0,
+            0.0,
+            1.0
+          ],
+          "rect": [
+            0.0,
+            23.0,
+            32.0,
+            27.0
+          ]
+        },
+        {
+          "color": [
+            0.0,
+            0.0,
+            0.0,
+            1.0
+          ],
+          "rect": [
+            0.0,
+            27.0,
+            32.0,
+            31.0
+          ]
+        },
+        {
+          "color": [
+            0.0,
+            0.0,
+            0.0,
+            1.0
+          ],
+          "rect": [
+            0.0,
+            31.0,
+            32.0,
+            35.0
+          ]
+        }
+      ],
+      "name": "removal",
+      "pixels": "public-removal.rgba",
+      "snapshot": {
+        "nodes": [
+          {
+            "bounds": [
+              0.0,
+              0.0,
+              64.0,
+              64.0
+            ],
+            "identity": 1,
+            "parent": null,
+            "role": "Generic",
+            "target": {
+              "identity": 1,
+              "window": 1
+            },
+            "text": null,
+            "transform": [
+              1.0,
+              0.0,
+              0.0,
+              1.0,
+              0.0,
+              0.0
+            ]
+          },
+          {
+            "bounds": [
+              0.0,
+              0.0,
+              32.00000762939453,
+              7.000000953674316
+            ],
+            "identity": 19,
+            "parent": 0,
+            "role": "Generic",
+            "target": {
+              "identity": 19,
+              "window": 1
+            },
+            "text": null,
+            "transform": [
+              1.0,
+              0.0,
+              0.0,
+              1.0,
+              0.0,
+              0.0
+            ]
+          },
+          {
+            "bounds": [
+              0.0,
+              6.999999523162842,
+              32.00000762939453,
+              4.000001907348633
+            ],
+            "identity": 20,
+            "parent": 0,
+            "role": "Generic",
+            "target": {
+              "identity": 20,
+              "window": 1
+            },
+            "text": null,
+            "transform": [
+              1.0,
+              0.0,
+              0.0,
+              1.0,
+              0.0,
+              7.0
+            ]
+          },
+          {
+            "bounds": [
+              0.0,
+              10.999999046325684,
+              32.00000762939453,
+              4.000002384185791
+            ],
+            "identity": 21,
+            "parent": 0,
+            "role": "Generic",
+            "target": {
+              "identity": 21,
+              "window": 1
+            },
+            "text": null,
+            "transform": [
+              1.0,
+              0.0,
+              0.0,
+              1.0,
+              0.0,
+              11.0
+            ]
+          },
+          {
+            "bounds": [
+              0.0,
+              14.999999046325684,
+              32.00000762939453,
+              4.000003337860107
+            ],
+            "identity": 22,
+            "parent": 0,
+            "role": "Generic",
+            "target": {
+              "identity": 22,
+              "window": 1
+            },
+            "text": null,
+            "transform": [
+              1.0,
+              0.0,
+              0.0,
+              1.0,
+              0.0,
+              15.0
+            ]
+          },
+          {
+            "bounds": [
+              0.0,
+              18.999998092651367,
+              32.00000762939453,
+              4.000004291534424
+            ],
+            "identity": 23,
+            "parent": 0,
+            "role": "Generic",
+            "target": {
+              "identity": 23,
+              "window": 1
+            },
+            "text": null,
+            "transform": [
+              1.0,
+              0.0,
+              0.0,
+              1.0,
+              0.0,
+              19.0
+            ]
+          },
+          {
+            "bounds": [
+              0.0,
+              22.999998092651367,
+              32.00000762939453,
+              4.000004291534424
+            ],
+            "identity": 24,
+            "parent": 0,
+            "role": "Generic",
+            "target": {
+              "identity": 24,
+              "window": 1
+            },
+            "text": null,
+            "transform": [
+              1.0,
+              0.0,
+              0.0,
+              1.0,
+              0.0,
+              23.0
+            ]
+          },
+          {
+            "bounds": [
+              0.0,
+              26.999998092651367,
+              32.00000762939453,
+              4.000004291534424
+            ],
+            "identity": 25,
+            "parent": 0,
+            "role": "Generic",
+            "target": {
+              "identity": 25,
+              "window": 1
+            },
+            "text": null,
+            "transform": [
+              1.0,
+              0.0,
+              0.0,
+              1.0,
+              0.0,
+              27.0
+            ]
+          },
+          {
+            "bounds": [
+              0.0,
+              30.999998092651367,
+              32.00000762939453,
+              4.000006198883057
+            ],
+            "identity": 26,
+            "parent": 0,
+            "role": "Generic",
+            "target": {
+              "identity": 26,
+              "window": 1
+            },
+            "text": null,
+            "transform": [
+              1.0,
+              0.0,
+              0.0,
+              1.0,
+              0.0,
+              31.0
+            ]
+          }
+        ],
+        "poisoned": false,
+        "prepared_epoch": null,
+        "presentation_epoch": 4,
+        "presentation_valid": true,
+        "requested_scale_factor": 1.0,
+        "requested_size": [
+          64,
+          64
+        ],
+        "scale_factor": 1.0,
+        "size": [
+          64,
+          64
+        ],
+        "source_epoch": 4
+      }
+    },
+    {
+      "accepted": false,
+      "adapter_snapshot_nodes": 9,
+      "clear": [
+        1.0,
+        1.0,
+        1.0,
+        1.0
+      ],
+      "counters": {
+        "coarse_updates": 0,
+        "descriptions": 0,
+        "destination_compares": 0,
+        "exact_updates": 1,
+        "layout_runs": 0,
+        "measure_calls": 0,
+        "owner_reruns": 0,
+        "paint_passes": 0,
+        "presentations": 0,
+        "source_operations": 1,
+        "source_reads": 1,
+        "text_bytes_copied": 0,
+        "text_promotions": 0
+      },
+      "draws": [
+        {
+          "color": [
+            1.0,
+            1.0,
+            1.0,
+            1.0
+          ],
+          "rect": [
+            0.0,
+            0.0,
+            64.0,
+            64.0
+          ]
+        },
+        {
+          "color": [
+            0.0,
+            0.0,
+            0.0,
+            1.0
+          ],
+          "rect": [
+            0.0,
+            0.0,
+            32.0,
+            7.0
+          ]
+        },
+        {
+          "color": [
+            0.0,
+            0.0,
+            0.0,
+            1.0
+          ],
+          "rect": [
+            0.0,
+            7.0,
+            32.0,
+            11.0
+          ]
+        },
+        {
+          "color": [
+            0.0,
+            0.0,
+            0.0,
+            1.0
+          ],
+          "rect": [
+            0.0,
+            11.0,
+            32.0,
+            15.0
+          ]
+        },
+        {
+          "color": [
+            0.0,
+            0.0,
+            0.0,
+            1.0
+          ],
+          "rect": [
+            0.0,
+            15.0,
+            32.0,
+            19.0
+          ]
+        },
+        {
+          "color": [
+            0.0,
+            0.0,
+            0.0,
+            1.0
+          ],
+          "rect": [
+            0.0,
+            19.0,
+            32.0,
+            23.0
+          ]
+        },
+        {
+          "color": [
+            0.0,
+            0.0,
+            0.0,
+            1.0
+          ],
+          "rect": [
+            0.0,
+            23.0,
+            32.0,
+            27.0
+          ]
+        },
+        {
+          "color": [
+            0.0,
+            0.0,
+            0.0,
+            1.0
+          ],
+          "rect": [
+            0.0,
+            27.0,
+            32.0,
+            31.0
+          ]
+        },
+        {
+          "color": [
+            0.0,
+            0.0,
+            0.0,
+            1.0
+          ],
+          "rect": [
+            0.0,
+            31.0,
+            32.0,
+            35.0
+          ]
+        }
+      ],
+      "name": "invalidated",
+      "pixels": "public-invalidated.rgba",
+      "snapshot": {
+        "nodes": [
+          {
+            "bounds": [
+              0.0,
+              0.0,
+              64.0,
+              64.0
+            ],
+            "identity": 1,
+            "parent": null,
+            "role": "Generic",
+            "target": {
+              "identity": 1,
+              "window": 1
+            },
+            "text": null,
+            "transform": [
+              1.0,
+              0.0,
+              0.0,
+              1.0,
+              0.0,
+              0.0
+            ]
+          },
+          {
+            "bounds": [
+              0.0,
+              0.0,
+              32.00000762939453,
+              7.000000953674316
+            ],
+            "identity": 19,
+            "parent": 0,
+            "role": "Generic",
+            "target": {
+              "identity": 19,
+              "window": 1
+            },
+            "text": null,
+            "transform": [
+              1.0,
+              0.0,
+              0.0,
+              1.0,
+              0.0,
+              0.0
+            ]
+          },
+          {
+            "bounds": [
+              0.0,
+              6.999999523162842,
+              32.00000762939453,
+              4.000001907348633
+            ],
+            "identity": 20,
+            "parent": 0,
+            "role": "Generic",
+            "target": {
+              "identity": 20,
+              "window": 1
+            },
+            "text": null,
+            "transform": [
+              1.0,
+              0.0,
+              0.0,
+              1.0,
+              0.0,
+              7.0
+            ]
+          },
+          {
+            "bounds": [
+              0.0,
+              10.999999046325684,
+              32.00000762939453,
+              4.000002384185791
+            ],
+            "identity": 21,
+            "parent": 0,
+            "role": "Generic",
+            "target": {
+              "identity": 21,
+              "window": 1
+            },
+            "text": null,
+            "transform": [
+              1.0,
+              0.0,
+              0.0,
+              1.0,
+              0.0,
+              11.0
+            ]
+          },
+          {
+            "bounds": [
+              0.0,
+              14.999999046325684,
+              32.00000762939453,
+              4.000003337860107
+            ],
+            "identity": 22,
+            "parent": 0,
+            "role": "Generic",
+            "target": {
+              "identity": 22,
+              "window": 1
+            },
+            "text": null,
+            "transform": [
+              1.0,
+              0.0,
+              0.0,
+              1.0,
+              0.0,
+              15.0
+            ]
+          },
+          {
+            "bounds": [
+              0.0,
+              18.999998092651367,
+              32.00000762939453,
+              4.000004291534424
+            ],
+            "identity": 23,
+            "parent": 0,
+            "role": "Generic",
+            "target": {
+              "identity": 23,
+              "window": 1
+            },
+            "text": null,
+            "transform": [
+              1.0,
+              0.0,
+              0.0,
+              1.0,
+              0.0,
+              19.0
+            ]
+          },
+          {
+            "bounds": [
+              0.0,
+              22.999998092651367,
+              32.00000762939453,
+              4.000004291534424
+            ],
+            "identity": 24,
+            "parent": 0,
+            "role": "Generic",
+            "target": {
+              "identity": 24,
+              "window": 1
+            },
+            "text": null,
+            "transform": [
+              1.0,
+              0.0,
+              0.0,
+              1.0,
+              0.0,
+              23.0
+            ]
+          },
+          {
+            "bounds": [
+              0.0,
+              26.999998092651367,
+              32.00000762939453,
+              4.000004291534424
+            ],
+            "identity": 25,
+            "parent": 0,
+            "role": "Generic",
+            "target": {
+              "identity": 25,
+              "window": 1
+            },
+            "text": null,
+            "transform": [
+              1.0,
+              0.0,
+              0.0,
+              1.0,
+              0.0,
+              27.0
+            ]
+          },
+          {
+            "bounds": [
+              0.0,
+              30.999998092651367,
+              32.00000762939453,
+              4.000006198883057
+            ],
+            "identity": 26,
+            "parent": 0,
+            "role": "Generic",
+            "target": {
+              "identity": 26,
+              "window": 1
+            },
+            "text": null,
+            "transform": [
+              1.0,
+              0.0,
+              0.0,
+              1.0,
+              0.0,
+              31.0
+            ]
+          }
+        ],
+        "poisoned": false,
+        "prepared_epoch": 5,
+        "presentation_epoch": 4,
+        "presentation_valid": true,
+        "requested_scale_factor": 1.0,
+        "requested_size": [
+          64,
+          64
+        ],
+        "scale_factor": 1.0,
+        "size": [
+          64,
+          64
+        ],
+        "source_epoch": 5
+      }
+    },
+    {
+      "accepted": true,
+      "adapter_snapshot_nodes": 9,
+      "clear": [
+        1.0,
+        1.0,
+        1.0,
+        1.0
+      ],
+      "counters": {
+        "coarse_updates": 0,
+        "descriptions": 0,
+        "destination_compares": 0,
+        "exact_updates": 2,
+        "layout_runs": 0,
+        "measure_calls": 0,
+        "owner_reruns": 0,
+        "paint_passes": 0,
+        "presentations": 1,
+        "source_operations": 2,
+        "source_reads": 2,
+        "text_bytes_copied": 0,
+        "text_promotions": 0
+      },
+      "draws": [
+        {
+          "color": [
+            1.0,
+            1.0,
+            1.0,
+            1.0
+          ],
+          "rect": [
+            0.0,
+            0.0,
+            64.0,
+            64.0
+          ]
+        },
+        {
+          "color": [
+            1.0,
+            1.0,
+            1.0,
+            1.0
+          ],
+          "rect": [
+            0.0,
+            0.0,
+            32.0,
+            7.0
+          ]
+        },
+        {
+          "color": [
+            0.0,
+            0.0,
+            0.0,
+            1.0
+          ],
+          "rect": [
+            0.0,
+            7.0,
+            32.0,
+            11.0
+          ]
+        },
+        {
+          "color": [
+            0.0,
+            0.0,
+            0.0,
+            1.0
+          ],
+          "rect": [
+            0.0,
+            11.0,
+            32.0,
+            15.0
+          ]
+        },
+        {
+          "color": [
+            0.0,
+            0.0,
+            0.0,
+            1.0
+          ],
+          "rect": [
+            0.0,
+            15.0,
+            32.0,
+            19.0
+          ]
+        },
+        {
+          "color": [
+            0.0,
+            0.0,
+            0.0,
+            1.0
+          ],
+          "rect": [
+            0.0,
+            19.0,
+            32.0,
+            23.0
+          ]
+        },
+        {
+          "color": [
+            0.0,
+            0.0,
+            0.0,
+            1.0
+          ],
+          "rect": [
+            0.0,
+            23.0,
+            32.0,
+            27.0
+          ]
+        },
+        {
+          "color": [
+            0.0,
+            0.0,
+            0.0,
+            1.0
+          ],
+          "rect": [
+            0.0,
+            27.0,
+            32.0,
+            31.0
+          ]
+        },
+        {
+          "color": [
+            0.0,
+            0.0,
+            0.0,
+            1.0
+          ],
+          "rect": [
+            0.0,
+            31.0,
+            32.0,
+            35.0
+          ]
+        }
+      ],
+      "name": "latest",
+      "pixels": "public-latest.rgba",
+      "snapshot": {
+        "nodes": [
+          {
+            "bounds": [
+              0.0,
+              0.0,
+              64.0,
+              64.0
+            ],
+            "identity": 1,
+            "parent": null,
+            "role": "Generic",
+            "target": {
+              "identity": 1,
+              "window": 1
+            },
+            "text": null,
+            "transform": [
+              1.0,
+              0.0,
+              0.0,
+              1.0,
+              0.0,
+              0.0
+            ]
+          },
+          {
+            "bounds": [
+              0.0,
+              0.0,
+              32.00000762939453,
+              7.000000953674316
+            ],
+            "identity": 19,
+            "parent": 0,
+            "role": "Generic",
+            "target": {
+              "identity": 19,
+              "window": 1
+            },
+            "text": null,
+            "transform": [
+              1.0,
+              0.0,
+              0.0,
+              1.0,
+              0.0,
+              0.0
+            ]
+          },
+          {
+            "bounds": [
+              0.0,
+              6.999999523162842,
+              32.00000762939453,
+              4.000001907348633
+            ],
+            "identity": 20,
+            "parent": 0,
+            "role": "Generic",
+            "target": {
+              "identity": 20,
+              "window": 1
+            },
+            "text": null,
+            "transform": [
+              1.0,
+              0.0,
+              0.0,
+              1.0,
+              0.0,
+              7.0
+            ]
+          },
+          {
+            "bounds": [
+              0.0,
+              10.999999046325684,
+              32.00000762939453,
+              4.000002384185791
+            ],
+            "identity": 21,
+            "parent": 0,
+            "role": "Generic",
+            "target": {
+              "identity": 21,
+              "window": 1
+            },
+            "text": null,
+            "transform": [
+              1.0,
+              0.0,
+              0.0,
+              1.0,
+              0.0,
+              11.0
+            ]
+          },
+          {
+            "bounds": [
+              0.0,
+              14.999999046325684,
+              32.00000762939453,
+              4.000003337860107
+            ],
+            "identity": 22,
+            "parent": 0,
+            "role": "Generic",
+            "target": {
+              "identity": 22,
+              "window": 1
+            },
+            "text": null,
+            "transform": [
+              1.0,
+              0.0,
+              0.0,
+              1.0,
+              0.0,
+              15.0
+            ]
+          },
+          {
+            "bounds": [
+              0.0,
+              18.999998092651367,
+              32.00000762939453,
+              4.000004291534424
+            ],
+            "identity": 23,
+            "parent": 0,
+            "role": "Generic",
+            "target": {
+              "identity": 23,
+              "window": 1
+            },
+            "text": null,
+            "transform": [
+              1.0,
+              0.0,
+              0.0,
+              1.0,
+              0.0,
+              19.0
+            ]
+          },
+          {
+            "bounds": [
+              0.0,
+              22.999998092651367,
+              32.00000762939453,
+              4.000004291534424
+            ],
+            "identity": 24,
+            "parent": 0,
+            "role": "Generic",
+            "target": {
+              "identity": 24,
+              "window": 1
+            },
+            "text": null,
+            "transform": [
+              1.0,
+              0.0,
+              0.0,
+              1.0,
+              0.0,
+              23.0
+            ]
+          },
+          {
+            "bounds": [
+              0.0,
+              26.999998092651367,
+              32.00000762939453,
+              4.000004291534424
+            ],
+            "identity": 25,
+            "parent": 0,
+            "role": "Generic",
+            "target": {
+              "identity": 25,
+              "window": 1
+            },
+            "text": null,
+            "transform": [
+              1.0,
+              0.0,
+              0.0,
+              1.0,
+              0.0,
+              27.0
+            ]
+          },
+          {
+            "bounds": [
+              0.0,
+              30.999998092651367,
+              32.00000762939453,
+              4.000006198883057
+            ],
+            "identity": 26,
+            "parent": 0,
+            "role": "Generic",
+            "target": {
+              "identity": 26,
+              "window": 1
+            },
+            "text": null,
+            "transform": [
+              1.0,
+              0.0,
+              0.0,
+              1.0,
+              0.0,
+              31.0
+            ]
+          }
+        ],
+        "poisoned": false,
+        "prepared_epoch": null,
+        "presentation_epoch": 6,
+        "presentation_valid": true,
+        "requested_scale_factor": 1.0,
+        "requested_size": [
+          64,
+          64
+        ],
+        "scale_factor": 1.0,
+        "size": [
+          64,
+          64
+        ],
+        "source_epoch": 6
+      }
+    },
+    {
+      "accepted": true,
+      "adapter_snapshot_nodes": 9,
+      "clear": [
+        1.0,
+        1.0,
+        1.0,
+        1.0
+      ],
+      "counters": {
+        "coarse_updates": 0,
+        "descriptions": 0,
+        "destination_compares": 0,
+        "exact_updates": 4,
+        "layout_runs": 0,
+        "measure_calls": 0,
+        "owner_reruns": 0,
+        "paint_passes": 0,
+        "presentations": 2,
+        "source_operations": 4,
+        "source_reads": 4,
+        "text_bytes_copied": 0,
+        "text_promotions": 0
+      },
+      "draws": [
+        {
+          "color": [
+            1.0,
+            1.0,
+            1.0,
+            1.0
+          ],
+          "rect": [
+            0.0,
+            0.0,
+            64.0,
+            64.0
+          ]
+        },
+        {
+          "color": [
+            0.0,
+            0.0,
+            0.0,
+            1.0
+          ],
+          "rect": [
+            0.0,
+            0.0,
+            32.0,
+            7.0
+          ]
+        },
+        {
+          "color": [
+            0.0,
+            0.0,
+            0.0,
+            1.0
+          ],
+          "rect": [
+            0.0,
+            7.0,
+            32.0,
+            11.0
+          ]
+        },
+        {
+          "color": [
+            0.0,
+            0.0,
+            0.0,
+            1.0
+          ],
+          "rect": [
+            0.0,
+            11.0,
+            32.0,
+            15.0
+          ]
+        },
+        {
+          "color": [
+            0.0,
+            0.0,
+            0.0,
+            1.0
+          ],
+          "rect": [
+            0.0,
+            15.0,
+            32.0,
+            19.0
+          ]
+        },
+        {
+          "color": [
+            0.0,
+            0.0,
+            0.0,
+            1.0
+          ],
+          "rect": [
+            0.0,
+            19.0,
+            32.0,
+            23.0
+          ]
+        },
+        {
+          "color": [
+            0.0,
+            0.0,
+            0.0,
+            1.0
+          ],
+          "rect": [
+            0.0,
+            23.0,
+            32.0,
+            27.0
+          ]
+        },
+        {
+          "color": [
+            0.0,
+            0.0,
+            0.0,
+            1.0
+          ],
+          "rect": [
+            0.0,
+            27.0,
+            32.0,
+            31.0
+          ]
+        },
+        {
+          "color": [
+            0.0,
+            0.0,
+            0.0,
+            1.0
+          ],
+          "rect": [
+            0.0,
+            31.0,
+            32.0,
+            35.0
+          ]
+        }
+      ],
+      "name": "failed-newer-eligible",
+      "pixels": "public-failed-newer-eligible.rgba",
+      "snapshot": {
+        "nodes": [
+          {
+            "bounds": [
+              0.0,
+              0.0,
+              64.0,
+              64.0
+            ],
+            "identity": 1,
+            "parent": null,
+            "role": "Generic",
+            "target": null,
+            "text": null,
+            "transform": [
+              1.0,
+              0.0,
+              0.0,
+              1.0,
+              0.0,
+              0.0
+            ]
+          },
+          {
+            "bounds": [
+              0.0,
+              0.0,
+              32.00000762939453,
+              7.000000953674316
+            ],
+            "identity": 19,
+            "parent": 0,
+            "role": "Generic",
+            "target": null,
+            "text": null,
+            "transform": [
+              1.0,
+              0.0,
+              0.0,
+              1.0,
+              0.0,
+              0.0
+            ]
+          },
+          {
+            "bounds": [
+              0.0,
+              6.999999523162842,
+              32.00000762939453,
+              4.000001907348633
+            ],
+            "identity": 20,
+            "parent": 0,
+            "role": "Generic",
+            "target": null,
+            "text": null,
+            "transform": [
+              1.0,
+              0.0,
+              0.0,
+              1.0,
+              0.0,
+              7.0
+            ]
+          },
+          {
+            "bounds": [
+              0.0,
+              10.999999046325684,
+              32.00000762939453,
+              4.000002384185791
+            ],
+            "identity": 21,
+            "parent": 0,
+            "role": "Generic",
+            "target": null,
+            "text": null,
+            "transform": [
+              1.0,
+              0.0,
+              0.0,
+              1.0,
+              0.0,
+              11.0
+            ]
+          },
+          {
+            "bounds": [
+              0.0,
+              14.999999046325684,
+              32.00000762939453,
+              4.000003337860107
+            ],
+            "identity": 22,
+            "parent": 0,
+            "role": "Generic",
+            "target": null,
+            "text": null,
+            "transform": [
+              1.0,
+              0.0,
+              0.0,
+              1.0,
+              0.0,
+              15.0
+            ]
+          },
+          {
+            "bounds": [
+              0.0,
+              18.999998092651367,
+              32.00000762939453,
+              4.000004291534424
+            ],
+            "identity": 23,
+            "parent": 0,
+            "role": "Generic",
+            "target": null,
+            "text": null,
+            "transform": [
+              1.0,
+              0.0,
+              0.0,
+              1.0,
+              0.0,
+              19.0
+            ]
+          },
+          {
+            "bounds": [
+              0.0,
+              22.999998092651367,
+              32.00000762939453,
+              4.000004291534424
+            ],
+            "identity": 24,
+            "parent": 0,
+            "role": "Generic",
+            "target": null,
+            "text": null,
+            "transform": [
+              1.0,
+              0.0,
+              0.0,
+              1.0,
+              0.0,
+              23.0
+            ]
+          },
+          {
+            "bounds": [
+              0.0,
+              26.999998092651367,
+              32.00000762939453,
+              4.000004291534424
+            ],
+            "identity": 25,
+            "parent": 0,
+            "role": "Generic",
+            "target": null,
+            "text": null,
+            "transform": [
+              1.0,
+              0.0,
+              0.0,
+              1.0,
+              0.0,
+              27.0
+            ]
+          },
+          {
+            "bounds": [
+              0.0,
+              30.999998092651367,
+              32.00000762939453,
+              4.000006198883057
+            ],
+            "identity": 26,
+            "parent": 0,
+            "role": "Generic",
+            "target": null,
+            "text": null,
+            "transform": [
+              1.0,
+              0.0,
+              0.0,
+              1.0,
+              0.0,
+              31.0
+            ]
+          }
+        ],
+        "poisoned": false,
+        "prepared_epoch": null,
+        "presentation_epoch": 7,
+        "presentation_valid": true,
+        "requested_scale_factor": 1.0,
+        "requested_size": [
+          64,
+          64
+        ],
+        "scale_factor": 1.0,
+        "size": [
+          64,
+          64
+        ],
+        "source_epoch": 8
+      }
+    }
+  ],
+  "scope": "rect-only CPU diagnostic acknowledgement; not native presentation; full snapshot adapter",
+  "source_property_commit": {
+    "changed_nodes": 1,
+    "prepared_epoch": 1,
+    "presentation_epoch": 0,
+    "presentation_valid": true,
+    "source_epoch": 1
+  },
+  "stale_rejected": true
+}

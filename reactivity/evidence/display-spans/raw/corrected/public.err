@@ -1,0 +1,4 @@
+
+thread 'main' (599119) panicked at crates/display-span-lab/src/bin/public_trace.rs:126:5:
+assertion failed: win.set(Panel::TRANSFORM, Affine::scale(0., 1.)).is_err()
+note: run with `RUST_BACKTRACE=1` environment variable to display a backtrace

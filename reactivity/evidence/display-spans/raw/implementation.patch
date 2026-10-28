@@ -1,0 +1,804 @@
+diff --git a/reactivity/Cargo.lock b/reactivity/Cargo.lock
+index 2d0ebf6f7a..fb67fd1ae1 100644
+--- a/reactivity/Cargo.lock
++++ b/reactivity/Cargo.lock
+@@ -1131,6 +1131,16 @@ dependencies = [
+  "zeno",
+ ]
+ 
++[[package]]
++name = "gpui_display_span_lab"
++version = "0.1.0"
++dependencies = [
++ "gpui",
++ "pollster",
++ "serde_json",
++ "wgpu",
++]
++
+ [[package]]
+ name = "gpui_gpu"
+ version = "0.1.0"
+diff --git a/reactivity/crates/display-span-lab/Cargo.toml b/reactivity/crates/display-span-lab/Cargo.toml
+new file mode 100644
+index 0000000000..8950b84303
+--- /dev/null
++++ b/reactivity/crates/display-span-lab/Cargo.toml
+@@ -0,0 +1,12 @@
++[package]
++name = "gpui_display_span_lab"
++version = "0.1.0"
++edition.workspace = true
++license.workspace = true
++publish = false
++
++[dependencies]
++gpui = { path = "../gpui", default-features = false }
++wgpu = { version = "=30.0.1", default-features = false, features = ["std", "wgsl", "vulkan"] }
++pollster = "=1.0.1"
++serde_json = "1"
+diff --git a/reactivity/crates/display-span-lab/model/experiment.py b/reactivity/crates/display-span-lab/model/experiment.py
+new file mode 100644
+index 0000000000..6046826568
+--- /dev/null
++++ b/reactivity/crates/display-span-lab/model/experiment.py
+@@ -0,0 +1,331 @@
++"""Executable storage/publication alternatives. No Python timing or allocation claims.
++CPU language-object overhead is deliberately separate from wire-format ledgers.
++"""
++from dataclasses import dataclass, field
++from pathlib import Path
++import copy, hashlib, json, random, struct, sys
++NIL=0xffffffff
++WIDTH=64
++COLS=12
++PAGE=32
++ZERO=(0,)*COLS
++
++def pack(words): return struct.pack('<'+'I'*len(words),*words)
++def encode(rows):
++    assert len(rows)==32 and all(len(r)==12 for r in rows)
++    raw=[0]+[v for row in rows for v in row]
++    out=[1]+[0]*36
++    for c in range(12):
++        values=[r[c] for r in rows];base=min(values);bits=(max(values)-base).bit_length()
++        at=len(out);out[1+c*3:4+c*3]=[base,bits,at]
++        if bits:
++            out += [0]*bits # 32 records * bits / 32
++            for i,v in enumerate(values):
++                bit=i*bits;w=at+bit//32;s=bit%32;delta=v-base
++                out[w] |= (delta<<s)&NIL
++                if s+bits>32:out[w+1] |= delta>>(32-s)
++    return out if len(out)<len(raw) else raw
++
++def decode(block,i,c):
++    if block[0]==0:return block[1+i*12+c]
++    base,bits,at=block[1+c*3:4+c*3]
++    if not bits:return base
++    bit=i*bits;w=at+bit//32;s=bit%32;v=block[w]>>s
++    if s+bits>32:v |= block[w+1]<<(32-s)
++    return base+(v&((1<<bits)-1))
++
++def bound(rect):
++    l,t,r,b=rect;return (max(0,min(64,l)),max(0,min(64,t)),max(0,min(64,r)),max(0,min(64,b)))
++def intersect(a,b):return (max(a[0],b[0]),max(a[1],b[1]),min(a[2],b[2]),min(a[3],b[3]))
++def damage_union(rects):
++    rects=[r for r in rects if r[2]>r[0] and r[3]>r[1]]
++    return (min(r[0] for r in rects),min(r[1] for r in rects),max(r[2] for r in rects),max(r[3] for r in rects)) if rects else (0,0,0,0)
++
++def raster(draws,clear=0xffffffff):
++    # Independent full painter, with no compressed addressing or damage use.
++    p=[clear]*4096
++    for _,_,_,rect,color,_ in draws:
++        if color>>24!=255:continue
++        l,t,r,b=bound(rect)
++        for y in range(t,b):
++            for x in range(l,r):p[y*64+x]=color
++    return p
++
++@dataclass
++class Node:
++    id:int
++    parent:int|None
++    x:int=0
++    y:int=0
++    w:int=4
++    h:int=4
++    color:int=0xff000000
++    clip:bool=False
++    flow:bool=False
++    generation:int=1
++    resource:int=0
++    children:list=field(default_factory=list)
++
++class Tree:
++    def __init__(self,n,unique):
++        self.nodes={1:Node(1,None,w=64,h=64,color=0xffffffff)};self.next_id=2
++        rng=random.Random(20261028+n)
++        while len(self.nodes)<n:
++            group=self.add(1,x=(len(self.nodes)//17%8)*8,y=(len(self.nodes)//137%8)*8,w=8,h=8,color=0,clip=True)
++            for i in range(min(15,n-len(self.nodes))):
++                self.add(group,x=i%2*4,y=(i//2)*2,w=4,h=2,color=(0xff000000|rng.getrandbits(24)) if unique else 0xff000000)
++        self.cache={};self.recompute(1)
++    def add(self,parent,at=None,**kw):
++        i=self.next_id;self.next_id+=1;self.nodes[i]=Node(i,parent,**kw)
++        cs=self.nodes[parent].children;cs.insert(len(cs) if at is None else at,i);return i
++    def subtree(self,i):
++        out=[];stack=[i]
++        while stack:
++            a=stack.pop();out.append(a);stack.extend(reversed(self.nodes[a].children))
++        return out
++    def context(self,i):
++        p=self.nodes[i].parent
++        if p is None:return (0,0,(0,0,64,64),0)
++        px,py,clip,_,_=self.cache[p];par=self.nodes[p]
++        shift=sum(self.nodes[c].h for c in par.children[:par.children.index(i)]) if par.flow else 0
++        return px,py,clip,shift
++    def recompute(self,i):
++        px,py,clip,shift=self.context(i);visited=[]
++        stack=[(i,px,py,clip,shift)]
++        while stack:
++            j,px,py,clip,shift=stack.pop();n=self.nodes[j];x=px+n.x;y=py+n.y+shift
++            own=intersect((x,y,x+n.w,y+n.h),clip);childclip=intersect(clip,(x,y,x+n.w,y+n.h)) if n.clip else clip
++            self.cache[j]=(x,y,childclip,bound(own),n.color);visited.append(j)
++            off=0;tasks=[]
++            for c in n.children:
++                tasks.append((c,x,y,childclip,off));off += self.nodes[c].h if n.flow else 0
++            stack.extend(reversed(tasks))
++        return visited
++    def oracle(self):
++        # Full independent recursive traversal. Small fixture depths, no cache.
++        out=[]
++        def go(i,px,py,clip):
++            n=self.nodes[i];x=px+n.x;y=py+n.y;rect=bound(intersect((x,y,x+n.w,y+n.h),clip));at=len(out)
++            out.append([i,n.generation,n.parent,rect,n.color,n.resource]);off=0
++            cc=intersect(clip,(x,y,x+n.w,y+n.h)) if n.clip else clip
++            for c in n.children:
++                go(c,x,y+off,cc);off+=self.nodes[c].h if n.flow else 0
++        go(1,0,0,(0,0,64,64));return out
++    def draws(self):
++        order=self.subtree(1)
++        return [(i,self.nodes[i].generation,self.nodes[i].parent,self.cache[i][3],self.nodes[i].color,self.nodes[i].resource) for i in order]
++    def change(self,op):
++        kind=op[0];i=op[1];removed=[];lookup=1;ancestors=0
++        if kind=='paint':self.nodes[i].color=op[2];self.cache[i]=(*self.cache[i][:4],op[2]);visited=[i]
++        elif kind in ('translate','clip','flow','height'):
++            n=self.nodes[i]
++            if kind=='translate':n.x+=op[2]
++            elif kind=='clip':n.w=op[2];n.clip=True
++            elif kind=='flow':n.flow=True
++            else:n.h=op[2]
++            root=n.parent if kind=='height' and n.parent and self.nodes[n.parent].flow else i
++            visited=self.recompute(root)
++        elif kind=='insert':
++            self.add(i,at=op[2],color=0xffff0000,w=3,h=3);visited=self.recompute(i)
++        elif kind=='remove':
++            parent=self.nodes[i].parent;removed=self.subtree(i);self.nodes[parent].children.remove(i)
++            for j in removed:del self.nodes[j];del self.cache[j]
++            visited=self.recompute(parent)
++        elif kind=='move':
++            parent=self.nodes[i].parent;dest=op[2];assert dest not in self.subtree(i)
++            self.nodes[parent].children.remove(i);self.nodes[dest].children.insert(0,i);self.nodes[i].parent=dest
++            visited=list(dict.fromkeys(self.recompute(parent)+self.recompute(dest)))
++        elif kind=='reuse':
++            # Explicit slot-generation reuse; no stale id alone is actionable.
++            parent=self.nodes[i].parent;old=self.nodes[i];assert not old.children
++            self.nodes[i]=Node(i,parent,x=old.x,y=old.y,w=old.w,h=old.h,color=op[2],generation=old.generation+1)
++            visited=self.recompute(i)
++        else:raise AssertionError(kind)
++        node=i if i in self.nodes else parent
++        while self.nodes[node].parent is not None:ancestors+=1;node=self.nodes[node].parent
++        draws=self.draws();oracle=self.oracle();assert draws==[tuple(x) for x in oracle]
++        return draws,dict(identity_lookup=lookup,dependency_nodes=len(visited),removed_nodes=len(removed),ancestor_visits=ancestors,producer_order_scan_nodes=len(draws),oracle_nodes=len(oracle))
++
++class Arena:
++    """Immutable append-only pages: no overwrite before completion, no free claim.
++    Every version's referenced bytes and resources survive until experiment end.
++    Directory depth 2 covers <=32768 slots. A growing unbounded log is a known
++    counterexample; a production design needs fenced reclamation/compaction.
++    """
++    def __init__(self):self.words=[0];self.blocks={};self.leaves={};self.root=[0]*32;self.root_at=0;self.versions=[]
++    def alloc(self,data,writes):
++        off=len(self.words);self.words.extend(data);writes.append(dict(offset=off,words=data));return off
++    def publish(self,blocks):
++        writes=[];dirty={};encoded=0;reencoded=0
++        for b,rows in blocks.items():
++            data=encode(rows);reencoded+=32
++            if b in self.blocks and self.blocks[b][1]==data:continue
++            at=self.alloc(data,writes);self.blocks[b]=(at,data);encoded+=len(data)*4
++            leaf=b//32
++            if leaf not in dirty:dirty[leaf]=self.leaves.get(leaf,[0]*32).copy()
++            dirty[leaf][b%32]=at
++        for l,data in dirty.items():self.root[l]=self.alloc(data,writes);self.leaves[l]=data
++        if dirty or not self.root_at:self.root_at=self.alloc(self.root.copy(),writes)
++        self.versions.append(self.root_at)
++        live=sum(len(v[1])*4 for v in self.blocks.values())+128*(len(self.leaves)+1)
++        return writes,dict(encoded_payload_bytes=encoded,directory_bytes=128*(len(dirty)+(bool(dirty) or len(self.versions)==1)),codec_rows_reencoded=reencoded,live_compressed_and_directory_bytes=live,retained_arena_bytes=len(self.words)*4)
++    def read(self,root,slot,col):
++        b=slot//32;leaf=self.words[root+b//32];at=self.words[leaf+b%32]
++        # Block decoding has known bounded size; slicing is reference-only.
++        return decode(self.words[at:at+385],slot%32,col)
++
++class Layout:
++    def __init__(self,kind):
++        self.kind=kind;self.rows=[];self.loc={};self.arena=Arena();self.presented=[];self.pixels=[0xffffffff]*4096;self.jobs=[];self.metrics=[];self.root=0;self.sequence=0
++    def resolve(self,identity,generation):
++        slot=self.loc.get(identity)
++        return slot if slot is not None and self.rows[slot][1]==generation else None
++    def update(self,name,draws,producer,accepted=True,mutant=None):
++        ids=[d[0] for d in draws];assert len(ids)==len(set(ids));oldloc=self.loc.copy();oldrows=self.rows
++        if self.kind=='packed':loc={i:j for j,i in enumerate(ids)};slots=len(ids)
++        else:loc={i:i-1 for i in ids};slots=max([len(oldrows),*(x+1 for x in loc.values())])
++        assert slots<=32768
++        rows=[ZERO]*slots;spans={i:1 for i in ids};parents={d[0]:d[2] for d in draws}
++        for i in reversed(ids):
++            if parents[i] is not None:spans[parents[i]]+=spans[i]
++        for k,(i,g,parent,rect,color,resource) in enumerate(draws):
++            nxt=loc[ids[k+1]] if k+1<len(ids) else NIL
++            rows[loc[i]]=(i,g,loc[parent] if parent is not None else NIL,nxt,spans[i],*rect,color,1,resource)
++        touched=[j for j,row in enumerate(rows) if j>=len(oldrows) or oldrows[j]!=row]
++        # Removed trailing packed records require no payload access under new count.
++        blocks={b:[rows[j] if j<len(rows) else ZERO for j in range(b*32,(b+1)*32)] for b in sorted({j//32 for j in touched})}
++        writes,cost=self.arena.publish(blocks);root=self.arena.root_at
++        decoded_rows=[tuple(self.arena.read(root,j,c) for c in range(12)) for j in range(len(rows))]
++        assert decoded_rows==rows
++        # Stable handles carry generation; rank is never exposed as identity.
++        for i,old in oldloc.items():
++            if i in loc and self.kind=='paged':assert old==loc[i]
++        new_by={d[0]:d for d in draws};old_by={d[0]:d for d in self.presented}
++        changed={i for i in new_by.keys()|old_by.keys() if new_by.get(i)!=old_by.get(i)}
++        if [d[0] for d in draws]!=[d[0] for d in self.presented]:
++            # Conservative reorder closure: all surviving paint support, charged.
++            changed.update(new_by);changed.update(old_by)
++        rects=[d[3] for i in changed for d in ([new_by[i]] if i in new_by else [])]
++        if mutant!='old-damage':rects += [old_by[i][3] for i in changed if i in old_by]
++        damage=damage_union(rects)
++        if not self.presented:damage=(0,0,64,64)
++        if mutant=='span' and len(rows)>1:count=len(draws)-1
++        else:count=len(draws)
++        self.sequence+=1;epoch=self.sequence;current=epoch if accepted else epoch+1
++        if mutant=='stale':current=epoch
++        desc=[root,loc[ids[0]],count,0 if self.kind=='packed' else 1,slots,epoch,current,0,*damage,0xffffffff,0,0,0]
++        candidate=self.pixels.copy();l,t,r,b=damage
++        if epoch==current:
++            for y in range(t,b):
++                for x in range(l,r):
++                    color=0xffffffff;slot=desc[1]
++                    for _ in range(count):
++                        row=decoded_rows[slot]
++                        if row[10] and row[5]<=x<row[7] and row[6]<=y<row[8] and row[9]>>24==255:color=row[9]
++                        slot=slot+1 if self.kind=='packed' else row[3]
++                    candidate[y*64+x]=color
++        expected=raster(draws) if accepted else self.pixels
++        assert candidate==expected,(self.kind,name,'pixel mismatch')
++        previous_roots=self.arena.versions[:-1]
++        # Root directory snapshots are immutable even after newer uploads.
++        assert all(self.arena.words[r:r+32] for r in previous_roots)
++        if accepted:self.presented=copy.deepcopy(draws);self.pixels=candidate
++        relocated=sum(i in oldloc and oldloc[i]!=p for i,p in loc.items())
++        metric=dict(name=name,layout=self.kind,nodes=len(draws),slots=slots,accepted=accepted,**producer,**cost,
++            layout_index_scan_nodes=len(draws)*6,cpu_canonical_rows_materialized=len(draws),cpu_canonical_wire_bytes_materialized=len(draws)*48,damage_compare_nodes=len(draws)+len(old_by),
++            logical_rows_rewritten=len(touched),logical_bytes_rewritten=len(touched)*48,
++            relocated_records=relocated,logical_bytes_moved=relocated*48,
++            identity_index_entries_rewritten=sum(oldloc.get(i)!=p for i,p in loc.items())+len(oldloc.keys()-loc.keys()),
++            identity_directory_wire_bytes=len(loc)*12,canonical_wire_bytes=slots*48,
++            cpu_canonical_mirror_bytes=slots*48,damage=list(damage),damage_pixels=max(0,r-l)*max(0,b-t),
++            descriptor_bytes=64,uploaded_bytes=sum(len(w['words'])*4 for w in writes)+64,
++            queue_writes=len(writes)+1,render_record_visits=max(0,r-l)*max(0,b-t)*count if accepted else 0,
++            retained_version_count=len(self.arena.versions),resource_tokens_retained=len({d[5] for d in draws if d[5]}),
++            subtree_lookup_loads=1,contiguous_subtree=self.kind=='packed',decode_max_payload_loads_per_field=2)
++        self.rows=rows;self.loc=loc;self.root=root;self.metrics.append(metric)
++        for i,g,*_ in draws:assert self.resolve(i,g)==loc[i] and self.resolve(i,g+1) is None
++        for old in oldrows:
++            if old[10] and old[0] in loc and old[1]!=rows[loc[old[0]]][1]:assert self.resolve(old[0],old[1]) is None
++        self.jobs.append(dict(name=name,writes=writes,descriptor=desc,canonical=[v for row in rows for v in row],expected=expected))
++    def series(self,name,out):
++        jobs=[]
++        for j,job in enumerate(self.jobs):
++            job=job.copy();p=f'{name}-{j}.rgba';(out/p).write_bytes(pack(job.pop('expected')));job['pixels']=p;jobs.append(job)
++        return dict(name=name,arena_words=len(self.arena.words),slots=max(j['descriptor'][4] for j in jobs),jobs=jobs)
++
++def codec_adversaries():
++    rng=random.Random(20261028);tests=0;escapes=0
++    for bits in range(33):
++        for offset in [0,1,0x80000000,0xffffffff]:
++            rows=[tuple((offset+rng.getrandbits(bits))&NIL for _ in range(12)) for _ in range(32)]
++            data=encode(rows);assert [[decode(data,i,c) for c in range(12)] for i in range(32)]==[list(r) for r in rows];tests+=1;escapes+=data[0]==0
++    # Wrong-width mutant must be witnessed using the same decoder.
++    rows=[tuple(i for _ in range(12)) for i in range(32)];data=encode(rows);data[2]-=1
++    assert any(decode(data,i,c)!=rows[i][c] for i in range(32) for c in range(12))
++    return dict(roundtrips=tests,raw_escapes=escapes,width_mutant_rejected=True)
++
++def run_models(out):
++    series=[];metrics=[];negative=[]
++    for n in [32,256,1024]:
++        for unique in [False,True]:
++            tree=Tree(n,unique);layouts=[Layout('packed'),Layout('paged')]
++            initial=tree.draws();producer=dict(identity_lookup=0,dependency_nodes=n,removed_nodes=0,ancestor_visits=0,producer_order_scan_nodes=n,oracle_nodes=n)
++            for l in layouts:l.update('initial',initial,producer)
++            leaf=3;group=2;other=18
++            ops=[('paint',leaf,0xff00ff00),('translate',group,2),('clip',group,5),('flow',group),('height',leaf,5),('insert',group,0),('remove',4),('insert',group,1),('move',leaf,other),('reuse',5,0xffff00ff),('paint',5,0xff123456),('paint',5,0xff654321)]
++            for j,op in enumerate(ops):
++                draws,producer=tree.change(op)
++                accepted=j!=10
++                for l in layouts:l.update(f'{j}-{op[0]}',draws,producer,accepted)
++            for l in layouts:
++                name=f'{n}-'+('unique' if unique else 'repeated')+'-'+l.kind
++                series.append(l.series(name,out));metrics.extend(dict(series=name,**m) for m in l.metrics)
++    # Isolated, small certificates deliberately falsified; no retries/relaxations.
++    for mutant in ['span','old-damage','stale']:
++        tree=Tree(32,False);l=Layout('packed');l.update('initial',tree.draws(),{})
++        if mutant=='span':
++            # Last visible leaf has unique paint so omitting it changes pixels.
++            last=tree.subtree(1)[-1];tree.nodes[last].y=0;tree.nodes[last].color=0xffff0000;tree.recompute(1);draws=tree.draws();accepted=True
++        elif mutant=='old-damage':draws,_=tree.change(('translate',2,32));accepted=True
++        else:draws,_=tree.change(('paint',3,0xffff0000));accepted=False
++        try:l.update('mutant',draws,{},accepted,mutant)
++        except AssertionError as error:negative.append(dict(mutant=mutant,rejected=True,error=str(error)))
++        else:raise AssertionError('surviving mutant '+mutant)
++    return series,metrics,negative
++
++def public_models(path,out):
++    report=json.loads(path.read_text());series=[];metrics=[]
++    for kind in ['packed','paged']:
++        layout=Layout(kind);identities={};nextid=1
++        for frame in report['frames']:
++            snapshot=frame['snapshot']['nodes'];draws=[];used=set()
++            # Fixture contract: one opaque rectangular paint per snapshot node,
++            # same preorder; semantic bounds are outward conservative, not pixels.
++            assert len(frame['draws'])==len(snapshot)
++            for d,node in zip(frame['draws'],snapshot,strict=True):
++                rect=tuple(int(x) for x in d['rect']);assert list(rect)==d['rect']
++                x,y,w,h=node['bounds']
++                assert x<=rect[0] and y<=rect[1] and x+w>=rect[2] and y+h>=rect[3]
++                assert node['transform']==[1.,0.,0.,1.,float(rect[0]),float(rect[1])]
++                identity=node['identity'];assert identity not in used;used.add(identity)
++                if identity not in identities:identities[identity]=nextid;nextid+=1
++                channels=[int(x*255) for x in d['color']];color=int.from_bytes(bytes(channels),'little')
++                parent=None if node['parent'] is None else identities[snapshot[node['parent']]['identity']]
++                draws.append((identities[identity],1,parent,rect,color,0))
++            actual=list(struct.unpack('<4096I',(path.parent/frame['pixels']).read_bytes()))
++            assert raster(draws)==actual,('public full renderer',frame['name'])
++            producer=dict(identity_lookup=1,dependency_nodes=None,removed_nodes=None,ancestor_visits=None,producer_order_scan_nodes=len(draws),oracle_nodes=len(draws),adapter_snapshot_nodes=frame['adapter_snapshot_nodes'],gpui_counters=frame['counters'])
++            layout.update(frame['name'],draws,producer,frame['accepted'])
++        name='public-'+kind;series.append(layout.series(name,out));metrics.extend(dict(series=name,**m) for m in layout.metrics)
++    return series,metrics
++
++def main():
++    out=Path(sys.argv[1]);out.mkdir(parents=True,exist_ok=True)
++    codec=codec_adversaries();series,metrics,negative=run_models(out)
++    if len(sys.argv)>2:
++        public,rows=public_models(Path(sys.argv[2]),out);series+=public;metrics+=rows
++    (out/'jobs.json').write_text(json.dumps(series,separators=(',',':')))
++    (out/'metrics.json').write_text(json.dumps(metrics,indent=2))
++    (out/'checks.json').write_text(json.dumps(dict(codec=codec,mutants=negative,frames=len(metrics),seed=20261028,scope='representation model, no production integration or performance verdict'),indent=2))
++    print(json.dumps(dict(series=len(series),frames=len(metrics),codec=codec,mutants=negative)))
++if __name__=='__main__':main()
+diff --git a/reactivity/crates/display-span-lab/src/bin/consume.rs b/reactivity/crates/display-span-lab/src/bin/consume.rs
+new file mode 100644
+index 0000000000..55e16d2822
+--- /dev/null
++++ b/reactivity/crates/display-span-lab/src/bin/consume.rs
+@@ -0,0 +1,205 @@
++//! Execute exact compressed-word decoding and retained rect rendering on Vulkan.
++//! Portable staging writes, serialized completion; no shared-memory claim.
++use serde_json::{Value, json};
++use std::{fs, path::Path};
++fn bytes(words: &[u32]) -> Vec<u8> {
++    words.iter().flat_map(|w| w.to_le_bytes()).collect()
++}
++fn words(v: &Value) -> Vec<u32> {
++    v.as_array()
++        .unwrap()
++        .iter()
++        .map(|x| x.as_u64().unwrap().try_into().unwrap())
++        .collect()
++}
++fn buffer(device: &wgpu::Device, size: u64, usage: wgpu::BufferUsages) -> wgpu::Buffer {
++    device.create_buffer(&wgpu::BufferDescriptor {
++        label: None,
++        size: size.max(4),
++        usage,
++        mapped_at_creation: false,
++    })
++}
++fn read(device: &wgpu::Device, b: &wgpu::Buffer) -> Vec<u8> {
++    let (tx, rx) = std::sync::mpsc::channel();
++    b.map_async(wgpu::MapMode::Read, .., move |r| tx.send(r).unwrap());
++    device.poll(wgpu::PollType::wait_indefinitely()).unwrap();
++    rx.recv().unwrap().unwrap();
++    let result = b.get_mapped_range(..).unwrap().to_vec();
++    b.unmap();
++    result
++}
++fn main() {
++    let path = std::env::args().nth(1).expect("jobs.json path");
++    let jobs: Value = serde_json::from_slice(&fs::read(&path).unwrap()).unwrap();
++    pollster::block_on(async {
++        let mut desc = wgpu::InstanceDescriptor::new_without_display_handle();
++        desc.backends = wgpu::Backends::VULKAN;
++        let instance = wgpu::Instance::new(desc);
++        let adapter = instance
++            .request_adapter(&wgpu::RequestAdapterOptions {
++                force_fallback_adapter: true,
++                ..Default::default()
++            })
++            .await
++            .unwrap();
++        let info = adapter.get_info();
++        eprintln!("adapter={info:?}");
++        let (device, queue) = adapter
++            .request_device(&wgpu::DeviceDescriptor::default())
++            .await
++            .unwrap();
++        let shader = device.create_shader_module(wgpu::ShaderModuleDescriptor {
++            label: Some("compressed display model"),
++            source: wgpu::ShaderSource::Wgsl(include_str!("../consume.wgsl").into()),
++        });
++        // Explicit common layout keeps decode-only unused bindings compatible.
++        let entries: Vec<_> = (0..4)
++            .map(|i| wgpu::BindGroupLayoutEntry {
++                binding: i,
++                visibility: wgpu::ShaderStages::COMPUTE,
++                ty: wgpu::BindingType::Buffer {
++                    ty: wgpu::BufferBindingType::Storage { read_only: i < 2 },
++                    has_dynamic_offset: false,
++                    min_binding_size: None,
++                },
++                count: None,
++            })
++            .collect();
++        let layout = device.create_bind_group_layout(&wgpu::BindGroupLayoutDescriptor {
++            label: None,
++            entries: &entries,
++        });
++        let pl = device.create_pipeline_layout(&wgpu::PipelineLayoutDescriptor {
++            label: None,
++            bind_group_layouts: &[Some(&layout)],
++            immediate_size: 0,
++        });
++        let pipeline = |entry| {
++            device.create_compute_pipeline(&wgpu::ComputePipelineDescriptor {
++                label: None,
++                layout: Some(&pl),
++                module: &shader,
++                entry_point: Some(entry),
++                compilation_options: Default::default(),
++                cache: None,
++            })
++        };
++        let decode = pipeline("decode");
++        let render = pipeline("render");
++        let mut reports = Vec::new();
++        for series in jobs.as_array().unwrap() {
++            let arena_bytes = series["arena_words"].as_u64().unwrap() * 4;
++            let capacity = series["slots"].as_u64().unwrap() * 48;
++            let arena = buffer(
++                &device,
++                arena_bytes,
++                wgpu::BufferUsages::STORAGE | wgpu::BufferUsages::COPY_DST,
++            );
++            let descriptor = buffer(
++                &device,
++                64,
++                wgpu::BufferUsages::STORAGE | wgpu::BufferUsages::COPY_DST,
++            );
++            let pixels = buffer(
++                &device,
++                16384,
++                wgpu::BufferUsages::STORAGE | wgpu::BufferUsages::COPY_SRC,
++            );
++            let decoded = buffer(
++                &device,
++                capacity,
++                wgpu::BufferUsages::STORAGE | wgpu::BufferUsages::COPY_SRC,
++            );
++            let pixel_read = buffer(
++                &device,
++                16384,
++                wgpu::BufferUsages::COPY_DST | wgpu::BufferUsages::MAP_READ,
++            );
++            let decode_read = buffer(
++                &device,
++                capacity,
++                wgpu::BufferUsages::COPY_DST | wgpu::BufferUsages::MAP_READ,
++            );
++            let bindings = [&arena, &descriptor, &pixels, &decoded];
++            let entries: Vec<_> = bindings
++                .iter()
++                .enumerate()
++                .map(|(i, b)| wgpu::BindGroupEntry {
++                    binding: i as u32,
++                    resource: b.as_entire_binding(),
++                })
++                .collect();
++            let group = device.create_bind_group(&wgpu::BindGroupDescriptor {
++                label: None,
++                layout: &layout,
++                entries: &entries,
++            });
++            for job in series["jobs"].as_array().unwrap() {
++                let mut payload_bytes = 0usize;
++                let mut calls = 0;
++                for write in job["writes"].as_array().unwrap() {
++                    let data = bytes(&words(&write["words"]));
++                    queue.write_buffer(&arena, write["offset"].as_u64().unwrap() * 4, &data);
++                    payload_bytes += data.len();
++                    calls += 1;
++                }
++                let d = words(&job["descriptor"]);
++                queue.write_buffer(&descriptor, 0, &bytes(&d));
++                let mut encoder = device.create_command_encoder(&Default::default());
++                {
++                    let mut pass = encoder.begin_compute_pass(&Default::default());
++                    pass.set_bind_group(0, &group, &[]);
++                    pass.set_pipeline(&decode);
++                    pass.dispatch_workgroups((d[4] * 12).div_ceil(64), 1, 1);
++                    pass.set_pipeline(&render);
++                    pass.dispatch_workgroups(64, 1, 1);
++                }
++                encoder.copy_buffer_to_buffer(&pixels, 0, &pixel_read, 0, 16384);
++                encoder.copy_buffer_to_buffer(&decoded, 0, &decode_read, 0, capacity);
++                queue.submit([encoder.finish()]);
++                let actual_pixels = read(&device, &pixel_read);
++                let actual_words = read(&device, &decode_read);
++                let expected_pixels = fs::read(
++                    Path::new(&path)
++                        .parent()
++                        .unwrap()
++                        .join(job["pixels"].as_str().unwrap()),
++                )
++                .unwrap();
++                let expected_words = bytes(&words(&job["canonical"]));
++                let output = Path::new(&path).parent().unwrap().join("gpu-readback");
++                fs::create_dir_all(&output).unwrap();
++                let stem = format!(
++                    "{}-{}",
++                    series["name"].as_str().unwrap(),
++                    job["name"].as_str().unwrap()
++                );
++                fs::write(output.join(format!("{stem}.rgba")), &actual_pixels).unwrap();
++                fs::write(
++                    output.join(format!("{stem}.words")),
++                    &actual_words[..expected_words.len()],
++                )
++                .unwrap();
++                assert_eq!(
++                    actual_pixels, expected_pixels,
++                    "pixels {} {}",
++                    series["name"], job["name"]
++                );
++                assert_eq!(
++                    &actual_words[..expected_words.len()],
++                    expected_words,
++                    "decode {} {}",
++                    series["name"],
++                    job["name"]
++                );
++                reports.push(json!({"series":series["name"],"job":job["name"],"payload_bytes":payload_bytes,"descriptor_bytes":64,"queue_writes":calls+1,"submissions":1,"completion_waits":2,"gpu_arena_bytes":arena_bytes,"decode_output_bytes":capacity,"readback_bytes":capacity+16384,"pixels_exact":true,"words_exact":true}));
++            }
++        }
++        println!(
++            "{}",
++            serde_json::to_string_pretty(&json!({"adapter":format!("{info:?}"),"frames":reports}))
++                .unwrap()
++        );
++    });
++}
+diff --git a/reactivity/crates/display-span-lab/src/bin/public_trace.rs b/reactivity/crates/display-span-lab/src/bin/public_trace.rs
+new file mode 100644
+index 0000000000..40b87a0f26
+--- /dev/null
++++ b/reactivity/crates/display-span-lab/src/bin/public_trace.rs
+@@ -0,0 +1,158 @@
++//! Ordinary existing GPUI APIs; diagnostic extraction is charged as a full scan.
++use gpui::{Error, WindowOptions, prelude::*};
++use serde_json::{Value, json};
++use std::{fs, path::Path};
++struct Panel {
++    color: Signal<Color>,
++    extra: Signal<bool>,
++    height: Signal<f64>,
++    transform: Signal<Affine>,
++}
++impl Panel {
++    const COLOR: Source<Self, Color> =
++        Source::new(FieldId::new(1), "color", |m| &m.color, |m| &mut m.color);
++    const EXTRA: Source<Self, bool> =
++        Source::new(FieldId::new(2), "extra", |m| &m.extra, |m| &mut m.extra);
++    const HEIGHT: Source<Self, f64> =
++        Source::new(FieldId::new(3), "height", |m| &m.height, |m| &mut m.height);
++    const TRANSFORM: Source<Self, Affine> = Source::new(
++        FieldId::new(4),
++        "transform",
++        |m| &m.transform,
++        |m| &mut m.transform,
++    );
++    fn new() -> Self {
++        Self {
++            color: Signal::new(Color::BLACK),
++            extra: Signal::new(false),
++            height: Signal::new(4.),
++            transform: Signal::new(Affine::IDENTITY),
++        }
++    }
++}
++impl View for Panel {
++    fn sources() -> Sources<Self> {
++        Sources::new()
++            .direct(Self::COLOR)
++            .field(Self::EXTRA)
++            .direct(Self::HEIGHT)
++            .direct(Self::TRANSFORM)
++    }
++    fn view(&self) -> El<'_> {
++        column((
++            div()
++                .name("surface")
++                .w(32)
++                .h(&self.height)
++                .bg(&self.color)
++                .transform(&self.transform),
++            (*self.extra).then(|| div().name("inserted").w(24).h(3).bg(Color::BLACK)),
++            (0..7).map(|_| div().w(32).h(4).bg(Color::BLACK)),
++        ))
++        .size(64)
++        .bg(Color::WHITE)
++        .clip()
++    }
++}
++fn capture(win: &mut Win<Panel>, root: &Path, name: &str, ack: bool) -> Value {
++    let (draws, token, clear) = win
++        .with_scene(|s, t| {
++            let draws: Vec<_> = s
++                .draws()
++                .map(|d| {
++                    assert!(d.clip_chain.is_none());
++                    assert!(d.color.iter().all(|c| *c == 0. || *c == 1.));
++                    let r = d.sampled_rect_clip([64, 64]).unwrap();
++                    assert!(
++                        [r.x, r.y, r.width, r.height]
++                            .iter()
++                            .all(|x| x.fract() == 0.)
++                    );
++                    json!({"rect":[r.x,r.y,r.x+r.width,r.y+r.height],"color":d.color})
++                })
++                .collect();
++            (draws, t, s.clear)
++        })
++        .unwrap();
++    let pixels = win.with_pixels(|p, _, _| p.to_vec()).unwrap();
++    fs::write(root.join(format!("public-{name}.rgba")), &pixels).unwrap();
++    // Independent full View reconstruction from the requested valid state.
++    // TRANSFORM intentionally remains identity after the rejected NaN request.
++    let mut oracle = Win::with_size(
++        Panel {
++            color: Signal::new(*win.read(Panel::COLOR).unwrap()),
++            extra: Signal::new(*win.read(Panel::EXTRA).unwrap()),
++            height: Signal::new(*win.read(Panel::HEIGHT).unwrap()),
++            transform: Signal::new(Affine::IDENTITY),
++        },
++        64,
++        64,
++    )
++    .unwrap();
++    let expected = oracle.with_pixels(|p, _, _| p.to_vec()).unwrap();
++    fs::write(root.join(format!("public-{name}-oracle.rgba")), &expected).unwrap();
++    assert_eq!(pixels, expected, "full public reconstruction {name}");
++    if ack {
++        win.presented(token).unwrap();
++    }
++    let snapshot = win.inspect().unwrap();
++    json!({"name":name,"accepted":ack,"snapshot":snapshot,"draws":draws,"clear":clear,"pixels":format!("public-{name}.rgba"),"counters":win.counters(),"adapter_snapshot_nodes":snapshot.nodes.len()})
++}
++fn main() {
++    let dir = std::env::args().nth(1).unwrap();
++    let root = Path::new(&dir);
++    fs::create_dir_all(root).unwrap();
++    let mut win = Win::recording(
++        Panel::new(),
++        WindowOptions {
++            size: [64, 64],
++            ..Default::default()
++        },
++    )
++    .unwrap();
++    let mut frames = vec![capture(&mut win, root, "initial", true)];
++    win.reset_counters().unwrap();
++    let target = win.query().name("surface").one().unwrap();
++    let commit = win.set(Panel::COLOR, Color::WHITE).unwrap();
++    assert_eq!(win.counters().owner_reruns, 0);
++    assert_eq!(win.counters().layout_runs, 0);
++    frames.push(capture(&mut win, root, "property", true));
++    assert_eq!(win.query().name("surface").one().unwrap(), target);
++    win.reset_counters().unwrap();
++    win.set(Panel::EXTRA, true).unwrap();
++    frames.push(capture(&mut win, root, "insertion", true));
++    assert_eq!(win.snapshot().unwrap().nodes.len(), 10);
++    assert_eq!(win.counters().owner_reruns, 1);
++    win.reset_counters().unwrap();
++    win.set(Panel::HEIGHT, 7.).unwrap();
++    frames.push(capture(&mut win, root, "layout", true));
++    win.reset_counters().unwrap();
++    win.set(Panel::EXTRA, false).unwrap();
++    frames.push(capture(&mut win, root, "removal", true));
++    assert_eq!(win.snapshot().unwrap().nodes.len(), 9);
++    assert_eq!(win.counters().owner_reruns, 1);
++    win.reset_counters().unwrap();
++    win.set(Panel::COLOR, Color::BLACK).unwrap();
++    let stale = win.with_scene(|_, t| t).unwrap();
++    frames.push(capture(&mut win, root, "invalidated", false));
++    win.set(Panel::COLOR, Color::WHITE).unwrap();
++    assert!(matches!(
++        win.presented(stale),
++        Err(Error::StalePresentation)
++    ));
++    frames.push(capture(&mut win, root, "latest", true));
++    win.set(Panel::COLOR, Color::BLACK).unwrap();
++    let eligible = win.with_scene(|_, t| t).unwrap();
++    assert!(
++        win.set(Panel::TRANSFORM, Affine::translation(f32::NAN, 0.))
++            .is_err()
++    );
++    assert_eq!(win.with_scene(|_, t| t).unwrap(), eligible);
++    frames.push(capture(&mut win, root, "failed-newer-eligible", true));
++    let report = json!({"source_property_commit":commit,"stale_rejected":true,"failed_newer_keeps_prior":true,"frames":frames,"scope":"rect-only CPU diagnostic acknowledgement; not native presentation; full snapshot adapter"});
++    fs::write(
++        root.join("public-trace.json"),
++        serde_json::to_vec_pretty(&report).unwrap(),
++    )
++    .unwrap();
++}
+diff --git a/reactivity/crates/display-span-lab/src/consume.wgsl b/reactivity/crates/display-span-lab/src/consume.wgsl
+new file mode 100644
+index 0000000000..fc8674a26d
+--- /dev/null
++++ b/reactivity/crates/display-span-lab/src/consume.wgsl
+@@ -0,0 +1,47 @@
++// Fixed two-level 32-way directory. Each compressed block contains 32 records.
++// All addressing is in u32 words. Every field decodes in at most two data loads.
++@group(0) @binding(0) var<storage, read> arena: array<u32>;
++@group(0) @binding(1) var<storage, read> descriptor: array<u32>;
++@group(0) @binding(2) var<storage, read_write> pixels: array<u32>;
++@group(0) @binding(3) var<storage, read_write> decoded: array<u32>;
++fn field(slot: u32, col: u32) -> u32 {
++    let block = slot >> 5u;
++    let leaf = arena[descriptor[0] + (block >> 5u)];
++    let base = arena[leaf + (block & 31u)];
++    let row = slot & 31u;
++    if arena[base] == 0u { return arena[base + 1u + row * 12u + col]; }
++    let h = base + 1u + col * 3u;
++    let origin = arena[h];
++    let bits = arena[h + 1u];
++    if bits == 0u { return origin; }
++    let bit = row * bits;
++    let start = base + arena[h + 2u] + bit / 32u;
++    let shift = bit & 31u;
++    var value = arena[start] >> shift;
++    if shift + bits > 32u { value |= arena[start + 1u] << (32u - shift); }
++    if bits < 32u { value &= (1u << bits) - 1u; }
++    return origin + value;
++}
++@compute @workgroup_size(64)
++fn decode(@builtin(global_invocation_id) tid: vec3<u32>) {
++    let i = tid.x;
++    if i < descriptor[4] * 12u { decoded[i] = field(i / 12u, i % 12u); }
++}
++@compute @workgroup_size(64)
++fn render(@builtin(global_invocation_id) tid: vec3<u32>) {
++    let i = tid.x;
++    if i >= 4096u || descriptor[5] != descriptor[6] { return; }
++    let x = i & 63u;
++    let y = i >> 6u;
++    if x < descriptor[8] || y < descriptor[9] || x >= descriptor[10] || y >= descriptor[11] { return; }
++    var color = descriptor[12];
++    var slot = descriptor[1];
++    for (var n = 0u; n < descriptor[2]; n++) {
++        if field(slot, 10u) != 0u && x >= field(slot, 5u) && y >= field(slot, 6u) && x < field(slot, 7u) && y < field(slot, 8u) {
++            let paint = field(slot, 9u);
++            if (paint >> 24u) == 255u { color = paint; }
++        }
++        if descriptor[3] == 0u { slot += 1u; } else { slot = field(slot, 3u); }
++    }
++    pixels[i] = color;
++}
