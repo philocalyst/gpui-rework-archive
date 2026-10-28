@@ -45,3 +45,8 @@ Strengthen property cases to an actually visible leaf, independently verify
 old/new pixel damage coverage, and compare every high-entropy input word with
 its decoded output. Clip/translation/flow/height cases charge their full-oracle
 diff extraction explicitly; only the direct property path currently avoids it.
+
+47f52614 passes2834 checks. Before the Stage A checkpoint, strengthen the
+namespace witness to two roots with identical sequence/offset/generation and
+add a bounded omitted-local-index-repair mutant. Existing generic old-damage,
+root-span and codec mutants remain preserved in the first-pair baseline.

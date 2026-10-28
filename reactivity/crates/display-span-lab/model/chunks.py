@@ -430,6 +430,13 @@ def main(out):
     assert witness[-1]['arena_high_water']==witness[-2]['arena_high_water']
     # Namespace authority is independent from coincident numeric offsets/epochs.
     foreign=Publication();v=foreign.prepare({0:b'foreign'});foreign.heap.drain_writes();foreign.submit(v);foreign.signal(v[0]);assert foreign.present(v)
+    twin=Publication();twin_version=twin.prepare({0:b'foreign'});twin.heap.drain_writes();twin.submit(twin_version);twin.signal(twin_version[0]);assert twin.present(twin_version)
+    assert list(v)==list(twin_version) # identical numeric sequence/root/generation
+    assert not foreign.present(twin_version)
+    try:foreign.submit(twin_version)
+    except AssertionError:pass
+    else:raise AssertionError('coincident foreign publication admitted')
+    twin.close()
     assert not foreign.present(pub.eligible)
     try:foreign.submit(pub.eligible)
     except AssertionError:pass
@@ -442,6 +449,14 @@ def main(out):
     try:mutant.heap.get(a[1])
     except (KeyError,AssertionError):lease_mutant=True
     else:raise AssertionError('missing lease mutant survived')
-    summary=dict(tests=tests,rows=reports,lifetime=witness,backpressure=denied,lease_mutant_rejected=lease_mutant,scope='Stage A only; synthetic resource bytes; flat directory cost retained; no GPU overlap or general public binding qualification')
+    # One omitted shifted index repair must falsify the incremental certificate.
+    tree=Tree(64,False);broken=Chunks(tree.draws());anchor=tree.nodes[1].children[0];old_address=broken.index[anchor]
+    new_id=tree.add(1,at=0,color=0xffff0000);tree.recompute(1)
+    broken.insert(anchor,new_id,1,tree.cache[new_id][3],0xffff0000);broken.commit();broken.index[anchor]=old_address
+    broken.set(anchor,{9:0xff00ff00});broken.commit()
+    try:verify(broken,tree.draws())
+    except AssertionError:index_mutant=True
+    else:raise AssertionError('omitted local index repair survived')
+    summary=dict(index_mutant_rejected=index_mutant,tests=tests,rows=reports,lifetime=witness,backpressure=denied,lease_mutant_rejected=lease_mutant,scope='Stage A only; synthetic resource bytes; flat directory cost retained; no GPU overlap or general public binding qualification')
     (out/'results.json').write_text(json.dumps(summary,indent=2));print(json.dumps({k:v for k,v in summary.items() if k not in ['rows','lifetime','backpressure']}))
 if __name__=='__main__':main(Path(sys.argv[1]))
