@@ -608,6 +608,19 @@ pub mod ui {
         )
         .x
     }
+    // A lowered mask has exact, monotone quarter-grid local positions. An
+    // axis with no sample in its half-open extent makes every source zero.
+    pub fn mask_pixel_misses(draw: Draw, position: Vec2f) -> bool {
+        let first = position - vec2f(0.375, 0.375) - draw.local.xy();
+        let last = position + vec2f(0.375, 0.375) - draw.local.xy();
+        last.x < 0.0 || last.y < 0.0 || first.x >= draw.local.z || first.y >= draw.local.w
+    }
+    pub fn first_missed_sample(draw: Draw, position: Vec2f, missed: bool) -> Vec4f {
+        if missed {
+            return sample_draw(draw, position - vec2f(0.375, 0.375));
+        }
+        vec4f(0.0, 0.0, 0.0, 0.0)
+    }
     pub fn mask_pixel_inside_clip(draw: Draw, position: Vec2f) -> bool {
         if bitcast_u32(draw.clip.x) == 0x7fc00003 {
             return false;
@@ -654,7 +667,12 @@ pub mod ui {
         first: Vec2f,
         coverage: Vec4f,
         cached: bool,
+        missed: bool,
+        first_source: Vec4f,
     ) -> Vec4f {
+        if missed {
+            return first_source;
+        }
         if cached {
             return cached_mask_sample(draw, point, first, coverage);
         }
@@ -673,8 +691,10 @@ pub mod ui {
         #[wgsl_allow(non_literal_loop_bounds)]
         for cursor in range.x..range.y {
             let draw = load_banked_draw(get!(INDICES)[cursor as usize]);
-            let cached =
-                (draw.atlas.x & 0xf0000000) == 0x10000000 && mask_pixel_inside_clip(draw, position);
+            let lowered = (draw.atlas.x & 0xf0000000) == 0x10000000;
+            let missed = lowered && mask_pixel_misses(draw, position);
+            let first_source = first_missed_sample(draw, position, missed);
+            let cached = lowered && !missed && mask_pixel_inside_clip(draw, position);
             let mut first = vec2f(0.0, 0.0);
             let mut coverage = vec4f(0.0, 0.0, 0.0, 0.0);
             if cached {
@@ -686,7 +706,15 @@ pub mod ui {
                 for x in 0..4 {
                     let point = position
                         + vec2f((x as f32 + 0.5) * 0.25 - 0.5, (y as f32 + 0.5) * 0.25 - 0.5);
-                    let source = sample_cached_or_draw(draw, point, first, coverage, cached);
+                    let source = sample_cached_or_draw(
+                        draw,
+                        point,
+                        first,
+                        coverage,
+                        cached,
+                        missed,
+                        first_source,
+                    );
                     let index = (y * 4 + x) as usize;
                     colors[index] = source + colors[index] * (1.0 - source.w);
                 }
