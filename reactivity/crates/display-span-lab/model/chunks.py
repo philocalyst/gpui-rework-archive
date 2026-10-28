@@ -5,7 +5,7 @@ from collections import Counter
 from dataclasses import dataclass
 import copy, json, struct, sys
 from pathlib import Path
-from experiment import encode, decode, pack, ZERO, NIL, damage_union, Tree
+from experiment import encode, decode, pack, ZERO, NIL, damage_union, Tree, raster
 
 @dataclass
 class Page:
@@ -249,9 +249,21 @@ class Heap:
     def ledger(self):
         return dict(pending_upload_bytes=sum(len(data) for _,data in self.writes),heap_bookkeeping_entries=len(self.live),heap_child_edges=sum(len(a.children) for a in self.live.values()),slot_generation_entries=len(self.generations),free_bin_entries=sum(len(v) for v in self.free.values()),arena_high_water=self.end,live_payload=sum(len(a.data) for a in self.live.values()),live_allocated=sum(a.size for a in self.live.values()),fragmentation=sum(a.size-len(a.data) for a in self.live.values()),free_bytes=sum(size*len(slots) for size,slots in self.free.items()),live_allocations=len(self.live),**dict(self.c))
 
+@dataclass(frozen=True)
+class Version:
+    namespace:int
+    sequence:int
+    root:tuple
+    def __iter__(self):return iter((self.sequence,self.root))
+    def __getitem__(self,index):return (self.sequence,self.root)[index]
+
 class Publication:
-    def __init__(self):self.heap=Heap();self.eligible=None;self.visible=None;self.submitted={};self.sequence=0;self.current_pages={};self.current_resources={};self.completed=set()
+    next_namespace=1
+    def __init__(self):
+        self.namespace=Publication.next_namespace;Publication.next_namespace+=1
+        self.heap=Heap();self.eligible=None;self.visible=None;self.submitted={};self.sequence=0;self.current_pages={};self.current_resources={};self.eligible_complete=False
     def prepare(self,journal,deleted=(),resources=None):
+        if self.sequence==NIL:raise OverflowError('publication sequence exhausted')
         h=self.heap;changed=[]
         for page in deleted:
             if page in self.current_pages:h.release(self.current_pages.pop(page))
@@ -275,16 +287,18 @@ class Publication:
         descriptor=pack([len(self.current_pages),len(self.current_resources)]+[x[0] for x in children])
         root=h.alloc(descriptor,children);self.sequence+=1
         if self.eligible is not None:h.release(self.eligible[1])
-        self.eligible=(self.sequence,root)
+        self.eligible=Version(self.namespace,self.sequence,root);self.eligible_complete=False
         return self.eligible
     def submit(self,version):
+        assert version.namespace==self.namespace
         sequence,root=version;assert sequence not in self.submitted
         if len(self.submitted)>=3:return False
         self.heap.retain(root);self.submitted[sequence]=root;return True
     def signal(self,sequence):
-        root=self.submitted.pop(sequence);self.completed.add(sequence);self.heap.release(root)
+        root=self.submitted.pop(sequence);self.heap.release(root)
+        if self.eligible is not None and sequence==self.eligible.sequence:self.eligible_complete=True
     def present(self,version):
-        if version!=self.eligible or version[0] not in self.completed:return False
+        if version!=self.eligible or not self.eligible_complete:return False
         if self.visible is not None:self.heap.release(self.visible[1])
         self.visible=version;self.heap.retain(version[1]);return True
     def failed_request(self):return self.eligible
@@ -307,11 +321,14 @@ def main(out):
                 reports.append(dict(n=n,unique=unique,raw_fallback=fallback,operation='initial',ledger=s.ledger()))
                 # Property update follows one stable handle; no snapshot, rank,
                 # whole-list metadata pass or expanded retained record mirror.
-                leaf=tree.subtree(1)[-1];expected=copy.deepcopy(draws)
+                leaf=next(i for i in tree.subtree(1) if not tree.nodes[i].children);expected=copy.deepcopy(draws)
                 for turn in range(64):
+                    old_pixels=raster(expected)
                     color=0xff000000|((turn*7919)&0xffffff);s.set(leaf,{9:color});result=s.commit()
                     expected=[(i,g,parent,rect,color if i==leaf else old,res) for i,g,parent,rect,old,res in expected]
                     verify(s,expected);tests+=1
+                    new_pixels=raster(expected);l,t,r,b=result['damage']
+                    assert all(a==z or l<=i%64<r and t<=i//64<b for i,(a,z) in enumerate(zip(old_pixels,new_pixels)))
                     assert result['counts']['identity_lookups']==1
                     assert result['counts']['dirty_pages']<=1 and result['counts'].get('rows_decoded',0)<=32
                     if turn in [0,1,63]:reports.append(dict(n=n,unique=unique,raw_fallback=fallback,operation=f'paint-{turn}',counts=result['counts'],ledger=s.ledger(),damage=result['damage']))
@@ -356,11 +373,29 @@ def main(out):
     for fallback in [False,True]:
         for n in [1,9,32,256]:
             tree=Tree(n,False);s=Chunks(tree.draws(),small_raw=fallback)
-            for i in tree.subtree(1):s.set(i,{c:rng.getrandbits(32) for c in [5,6,7,8,9,11]})
+            values={}
+            for i in tree.subtree(1):
+                values[i]={c:rng.getrandbits(32) for c in [5,6,7,8,9,11]};s.set(i,values[i])
             result=s.commit();before=s.inspect()
-            assert len(before)==n and all(len(r)==12 for r in before)
+            assert len(before)==n and all(len(r)==12 and all(r[c]==v for c,v in values[r[0]].items()) for r in before)
             reports.append(dict(n=n,unique=True,raw_fallback=fallback,operation='high-entropy-exact-words',counts=result['counts'],ledger=s.ledger()));tests+=1
+    # Actual dependency closures: clipping, translation and parent flow layout.
+    tree=Tree(256,False);s=Chunks(tree.draws());s.acknowledge()
+    for op in [('clip',2,3),('translate',2,2),('flow',2),('height',3,5)]:
+        old=raster(tree.draws());draws,producer=tree.change(op)
+        # The producer's dependency list is explicit. Diffing the full oracle
+        # here selects the fixture event; charge it as diagnostic extraction.
+        expected={r[0]:r for r in canonical(draws)}
+        current=s.inspect();changed=[]
+        for r in current:
+            new=expected[r[0]]
+            if r[5:9]!=new[4:8]:changed.append((r[0],{c:new[c-1] for c in range(5,9)}))
+        for i,fields in changed:s.set(i,fields)
+        result=s.commit();verify(s,draws);new=raster(draws);l,t,r,b=result['damage']
+        assert all(a==z or l<=i%64<r and t<=i//64<b for i,(a,z) in enumerate(zip(old,new)))
+        reports.append(dict(n=256,unique=False,raw_fallback=False,operation='dependency-'+op[0],counts=result['counts'],producer=producer,oracle_diff_scan=256,ledger=s.ledger()));tests+=1;s.acknowledge()
     # Independent submitted/visible/eligible ownership. Three overlapping roots.
+
     shadow=bytearray()
     def upload(publication):
         for offset,data in publication.heap.drain_writes():
@@ -393,7 +428,15 @@ def main(out):
         upload(pub);assert pub.submit(version);pub.signal(version[0]);assert pub.present(version)
         if i in [0,9,999]:witness.append(pub.heap.ledger())
     assert witness[-1]['arena_high_water']==witness[-2]['arena_high_water']
+    # Namespace authority is independent from coincident numeric offsets/epochs.
+    foreign=Publication();v=foreign.prepare({0:b'foreign'});foreign.heap.drain_writes();foreign.submit(v);foreign.signal(v[0]);assert foreign.present(v)
+    assert not foreign.present(pub.eligible)
+    try:foreign.submit(pub.eligible)
+    except AssertionError:pass
+    else:raise AssertionError('foreign publication admitted')
+    foreign.close()
     pub.close();assert pub.heap.ledger()['live_allocated']==0
+    assert not hasattr(pub,'completed') # no unbounded completion-history set
     # Missing submission lease is falsified: old root freed before completion.
     mutant=Publication();a=mutant.prepare({0:b'old'});mutant.submit(a);mutant.heap.release(a[1]);mutant.prepare({0:b'new'})
     try:mutant.heap.get(a[1])

@@ -37,3 +37,11 @@ checks old bytes there across overlaps. It caps submitted roots at3 and tests
 directly rather than unpacking a whole encoded page; exact word loads count.
 Add true97-node cross-chunk move/removal and high-entropy exact-word cases.
 This remains Stage A, not actual Vulkan resource qualification.
+
+1985c802 bounded-journal checks pass. A second lifetime audit finds the completed
+sequence set also retained all history; replace it with eligible-complete state
+(one boolean), and add namespace rejection before submission/presentation.
+Strengthen property cases to an actually visible leaf, independently verify
+old/new pixel damage coverage, and compare every high-entropy input word with
+its decoded output. Clip/translation/flow/height cases charge their full-oracle
+diff extraction explicitly; only the direct property path currently avoids it.
