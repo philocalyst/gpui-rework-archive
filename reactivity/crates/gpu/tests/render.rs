@@ -4812,3 +4812,6 @@ fn retained_scroll_copy_matches_full_gpu_and_invalidates_after_failure_or_resize
         }
     });
 }
+
+#[path = "support/mask_lattice.rs"]
+mod mask_lattice;
