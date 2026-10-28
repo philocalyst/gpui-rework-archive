@@ -1,0 +1,1 @@
+{"command": ["dbus-run-session", "--", "/home/user/gpui-preserved-test-binaries/3383fe53b623097932793af4defc0b47412f59e868a85c61d57fb470fd1bfef4", "native::accessibility::linux_tests::ime::native_atspi_ime_cjk_preview_old_candidate_ack_and_commit", "--ignored", "--exact", "--nocapture", "--test-threads=1"], "exit": 0}

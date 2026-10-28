@@ -1,0 +1,23 @@
+{
+  "actual": [
+    [
+      "1111",
+      4
+    ],
+    [
+      "01234567890",
+      11
+    ]
+  ],
+  "expected": [
+    [
+      "2222",
+      4
+    ],
+    [
+      "01234567890",
+      11
+    ]
+  ],
+  "scope": "Public acknowledged text and text geometry after sparse-to-full supersession. Exact stale value witness; no reduced work or count-only oracle."
+}

@@ -1,0 +1,8 @@
+{
+  "files": 272,
+  "bytes": 459588173,
+  "free_before": 12276981760,
+  "free_after": 12737126400,
+  "qualified_dossier": "7494c10970d3dc46e7611d4abe93ab8476682a6e",
+  "scope": "Only completed inactive regenerable rlib/rmeta caches. Source, evidence, generated shaders and all executed ELF copies retained."
+}

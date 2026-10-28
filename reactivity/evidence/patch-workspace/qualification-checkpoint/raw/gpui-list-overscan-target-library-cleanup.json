@@ -1,0 +1,9 @@
+{
+  "source": "41acc60740f4fef358ee4b8a8a1f0fa6caacc307",
+  "worktree": "/home/user/gpui-list-overscan-lab",
+  "files": 0,
+  "bytes": 0,
+  "free_before": 11328270336,
+  "free_after": 11328270336,
+  "scope": "Completed inactive regenerable library caches only; all sources, evidence, ELF files, generated shaders and canonical raw/archive stores retained."
+}

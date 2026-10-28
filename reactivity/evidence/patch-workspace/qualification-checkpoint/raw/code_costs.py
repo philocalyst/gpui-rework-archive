@@ -1,0 +1,10 @@
+from pathlib import Path
+import json,subprocess
+r=Path(__file__).parent;w=Path('/home/user/gpui-patch-workspace-lab');a=json.loads((r/'matrix-artifacts.json').read_text());source=a['candidate']['source'];base=a['scroll_precise']['source']
+assert subprocess.check_output(['git','rev-parse','HEAD'],cwd=w,text=True).strip()==source
+paths=subprocess.check_output(['git','diff','--name-only',base,source,'--','reactivity/crates','reactivity/vendor','reactivity/Cargo.toml','reactivity/Cargo.lock','.cargo'],cwd=w,text=True).splitlines()
+assert not any(p.startswith('reactivity/vendor/') or p.endswith(('Cargo.toml','Cargo.lock')) or p.startswith('.cargo/') for p in paths)
+shipping=json.loads((r/'shipping-lines-candidate.json').read_text());old=json.loads(Path('/home/user/gpui-scroll-sparse-evidence/shipping-lines-candidate.json').read_text());assert old['source_commit']==base
+machine=json.loads((r/'machine-five-way-complete/summary.json').read_text())
+summary=dict(source=source,base=base,changed_first_party_files=paths,dependencies_and_vendors_changed=False,application_and_benchmark_fixtures='byte identical across all five alternatives; matrix-fixture-equality.json',shipping_lines=dict(candidate=shipping['core_non_test_code_lines'],reference=old['core_non_test_code_lines'],delta=shipping['core_non_test_code_lines']-old['core_non_test_code_lines']),native_elf={k:a[k]['native_artifact']['bytes'] for k in a},unit_elf={k:a[k]['bytes'] for k in a},headers=json.loads((r/'headers/summary.json').read_text()),retention=dict(native_workspace_header=96,without_native_workspace_header=40,maximum_requested_region_capacity_bytes=512,maximum_regions=64,scope='One owned workspace per live text service; vacant after ACK/full supersession; existing unused() reclaims it. Header and requested vector capacity exclude allocator bookkeeping. Actual address reuse and reclamation are covered by the frozen workspace test.'),local_stack_scope='Observed sub-rsp prologue reservations only, excluding callees, GPU/driver stacks and register saves.',machine=machine)
+(r/'code-layout-costs.json').write_text(json.dumps(summary,indent=2));print(summary['shipping_lines'])

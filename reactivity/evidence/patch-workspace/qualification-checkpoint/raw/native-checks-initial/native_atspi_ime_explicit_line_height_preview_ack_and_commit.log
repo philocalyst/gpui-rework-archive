@@ -1,0 +1,4 @@
+dbus-daemon[3629689]: [session uid=1000 pid=3629689] Activating service name='org.a11y.Bus' requested by ':1.1' (uid=1000 pid=3629690 comm="/home/user/gpui-preserved-test-binaries/3383fe53b6" label="unconfined")
+dbus-daemon[3629689]: [session uid=1000 pid=3629689] Successfully activated service 'org.a11y.Bus'
+dbus-daemon[3629703]: Activating service name='org.a11y.atspi.Registry' requested by ':1.0' (uid=1000 pid=3629690 comm="/home/user/gpui-preserved-test-binaries/3383fe53b6" label="unconfined")
+dbus-daemon[3629703]: Successfully activated service 'org.a11y.atspi.Registry'

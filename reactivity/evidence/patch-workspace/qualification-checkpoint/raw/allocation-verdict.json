@@ -1,0 +1,49 @@
+{
+  "all_pass": true,
+  "gates": {
+    "stream": {
+      "reference": 221.0,
+      "candidate": 219.0,
+      "reduction": 2.0,
+      "minimum": 1,
+      "passed": true
+    },
+    "stream-owner": {
+      "reference": 381.0,
+      "candidate": 379.0,
+      "reduction": 2.0,
+      "minimum": 1,
+      "passed": true
+    },
+    "text-0-1-source": {
+      "reference": 132.0,
+      "candidate": 131.0,
+      "reduction": 1.0,
+      "minimum": 1,
+      "passed": true
+    },
+    "text-1000-1-source": {
+      "reference": 132.0,
+      "candidate": 131.0,
+      "reduction": 1.0,
+      "minimum": 1,
+      "passed": true
+    },
+    "text-0-2-source": {
+      "reference": 171.0,
+      "candidate": 170.0,
+      "reduction": 1.0,
+      "minimum": 1,
+      "passed": true
+    },
+    "text-0-4-source": {
+      "reference": 255.0,
+      "candidate": 254.0,
+      "reduction": 1.0,
+      "minimum": 1,
+      "passed": true
+    }
+  },
+  "source_sha256": "45a58c65bca995f3998e60446fc0f66f62ec7393d8455ef6fbca9e5fe064648f",
+  "scope": "Invoking-thread allocator requests/bytes; four warm updates after 16 warmups, not total process or GPU allocations. First-use and retained image costs reported separately."
+}

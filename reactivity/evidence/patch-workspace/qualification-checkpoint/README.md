@@ -1,0 +1,7 @@
+# Publication workspace: completed qualification checkpoint
+
+Candidate 41a67473a0177fbb17df1f7b8e2f2f36dd6940f6, preregistration bc6d01564477a0c8b5710b338a29119d991fadaf. No timing has run. Source stays frozen in its separate worktree. This checkpoint preserves qualification evidence before reclaiming completed target-cache copies. Every actual test/native ELF is independently preserved by hash; generated shaders, fingerprints and source remain intact.
+
+Canvas/GPU 347/3 ignored; full native 1106/45; minimal library 329/25; default 1013/13; offline 79/0, plus 17 example tests in both native modes, 11 full-native and four minimal-native scripts. Strict Clippy passes all modes. New payload-retirement fault gives exact public stale text 1111 instead of 2222. Initial support-fixture failure and two pre-compilation storage-reserve aborts are preserved.
+
+All 420 correctness and 140 allocation processes pass. All six fixed allocation gates pass (two requests/608 bytes saved in stream and owner-stream, one request/96 bytes in each required small source case). Candidate/prior-precise composited, copy and retained-image work is identical for every qualification frame. Headers unchanged. Shipping +39 lines, native ELF +936 bytes. 28 generated shader files, three executed binaries and five validated SPIR-V variants are recorded. These are correctness/work gates, not a performance win or adoption. The full fixed 10400-process gate remains pending; no ZGX/hardware victory is claimed.

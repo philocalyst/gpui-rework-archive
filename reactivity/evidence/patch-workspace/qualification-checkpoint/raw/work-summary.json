@@ -1,0 +1,762 @@
+{
+  "exact_candidate_precise_work_equal": true,
+  "qualification_source_sha256": "19e871c4c2077dba9f5f201d43312f925403984d0d9f6447d08bbb40c98f398a",
+  "cases": {
+    "scroll": {
+      "control": {
+        "composited_pixels": 368000.0,
+        "copied_pixels": 691200.0,
+        "image_bytes": 2764800.0
+      },
+      "bounds": {
+        "composited_pixels": 368000.0,
+        "copied_pixels": 691200.0,
+        "image_bytes": 2764800.0
+      },
+      "predecessor": {
+        "composited_pixels": 368000.0,
+        "copied_pixels": 691200.0,
+        "image_bytes": 2764800.0
+      },
+      "scroll_precise": {
+        "composited_pixels": 12880.0,
+        "copied_pixels": 1401440.0,
+        "image_bytes": 4185280.0
+      },
+      "candidate": {
+        "composited_pixels": 12880.0,
+        "copied_pixels": 1401440.0,
+        "image_bytes": 4185280.0
+      }
+    },
+    "both": {
+      "control": {
+        "composited_pixels": 524400.0,
+        "copied_pixels": 691200.0,
+        "image_bytes": 2764800.0
+      },
+      "bounds": {
+        "composited_pixels": 524400.0,
+        "copied_pixels": 691200.0,
+        "image_bytes": 2764800.0
+      },
+      "predecessor": {
+        "composited_pixels": 524400.0,
+        "copied_pixels": 691200.0,
+        "image_bytes": 2764800.0
+      },
+      "scroll_precise": {
+        "composited_pixels": 15840.0,
+        "copied_pixels": 1401440.0,
+        "image_bytes": 4185280.0
+      },
+      "candidate": {
+        "composited_pixels": 15840.0,
+        "copied_pixels": 1401440.0,
+        "image_bytes": 4185280.0
+      }
+    },
+    "stream": {
+      "control": {
+        "composited_pixels": 99630.0,
+        "copied_pixels": 691200.0,
+        "image_bytes": 2764800.0
+      },
+      "bounds": {
+        "composited_pixels": 99630.0,
+        "copied_pixels": 691200.0,
+        "image_bytes": 2764800.0
+      },
+      "predecessor": {
+        "composited_pixels": 2960.0,
+        "copied_pixels": 691200.0,
+        "image_bytes": 2764800.0
+      },
+      "scroll_precise": {
+        "composited_pixels": 2960.0,
+        "copied_pixels": 691200.0,
+        "image_bytes": 2764800.0
+      },
+      "candidate": {
+        "composited_pixels": 2960.0,
+        "copied_pixels": 691200.0,
+        "image_bytes": 2764800.0
+      }
+    },
+    "stream-owner": {
+      "control": {
+        "composited_pixels": 99630.0,
+        "copied_pixels": 691200.0,
+        "image_bytes": 2764800.0
+      },
+      "bounds": {
+        "composited_pixels": 99630.0,
+        "copied_pixels": 691200.0,
+        "image_bytes": 2764800.0
+      },
+      "predecessor": {
+        "composited_pixels": 2960.0,
+        "copied_pixels": 691200.0,
+        "image_bytes": 2764800.0
+      },
+      "scroll_precise": {
+        "composited_pixels": 2960.0,
+        "copied_pixels": 691200.0,
+        "image_bytes": 2764800.0
+      },
+      "candidate": {
+        "composited_pixels": 2960.0,
+        "copied_pixels": 691200.0,
+        "image_bytes": 2764800.0
+      }
+    },
+    "fractional": {
+      "control": {
+        "composited_pixels": 368000.0,
+        "copied_pixels": 691200.0,
+        "image_bytes": 2764800.0
+      },
+      "bounds": {
+        "composited_pixels": 368000.0,
+        "copied_pixels": 691200.0,
+        "image_bytes": 2764800.0
+      },
+      "predecessor": {
+        "composited_pixels": 368000.0,
+        "copied_pixels": 691200.0,
+        "image_bytes": 2764800.0
+      },
+      "scroll_precise": {
+        "composited_pixels": 368000.0,
+        "copied_pixels": 691200.0,
+        "image_bytes": 2764800.0
+      },
+      "candidate": {
+        "composited_pixels": 368000.0,
+        "copied_pixels": 691200.0,
+        "image_bytes": 2764800.0
+      }
+    },
+    "flat-tiny": {
+      "control": {
+        "composited_pixels": 64.0,
+        "copied_pixels": 64.0,
+        "image_bytes": 256.0
+      },
+      "bounds": {
+        "composited_pixels": 64.0,
+        "copied_pixels": 64.0,
+        "image_bytes": 256.0
+      },
+      "predecessor": {
+        "composited_pixels": 64.0,
+        "copied_pixels": 64.0,
+        "image_bytes": 256.0
+      },
+      "scroll_precise": {
+        "composited_pixels": 64.0,
+        "copied_pixels": 64.0,
+        "image_bytes": 256.0
+      },
+      "candidate": {
+        "composited_pixels": 64.0,
+        "copied_pixels": 64.0,
+        "image_bytes": 256.0
+      }
+    },
+    "flat-full": {
+      "control": {
+        "composited_pixels": 262144.0,
+        "copied_pixels": 262144.0,
+        "image_bytes": 1048576.0
+      },
+      "bounds": {
+        "composited_pixels": 262144.0,
+        "copied_pixels": 262144.0,
+        "image_bytes": 1048576.0
+      },
+      "predecessor": {
+        "composited_pixels": 262144.0,
+        "copied_pixels": 262144.0,
+        "image_bytes": 1048576.0
+      },
+      "scroll_precise": {
+        "composited_pixels": 262144.0,
+        "copied_pixels": 262144.0,
+        "image_bytes": 1048576.0
+      },
+      "candidate": {
+        "composited_pixels": 262144.0,
+        "copied_pixels": 262144.0,
+        "image_bytes": 1048576.0
+      }
+    },
+    "list-tiny": {
+      "control": {
+        "composited_pixels": 256.0,
+        "copied_pixels": 1024.0,
+        "image_bytes": 4096.0
+      },
+      "bounds": {
+        "composited_pixels": 256.0,
+        "copied_pixels": 1024.0,
+        "image_bytes": 4096.0
+      },
+      "predecessor": {
+        "composited_pixels": 256.0,
+        "copied_pixels": 1024.0,
+        "image_bytes": 4096.0
+      },
+      "scroll_precise": {
+        "composited_pixels": 16.0,
+        "copied_pixels": 1504.0,
+        "image_bytes": 5056.0
+      },
+      "candidate": {
+        "composited_pixels": 16.0,
+        "copied_pixels": 1504.0,
+        "image_bytes": 5056.0
+      }
+    },
+    "list-flat": {
+      "control": {
+        "composited_pixels": 368000.0,
+        "copied_pixels": 691200.0,
+        "image_bytes": 2764800.0
+      },
+      "bounds": {
+        "composited_pixels": 368000.0,
+        "copied_pixels": 691200.0,
+        "image_bytes": 2764800.0
+      },
+      "predecessor": {
+        "composited_pixels": 368000.0,
+        "copied_pixels": 691200.0,
+        "image_bytes": 2764800.0
+      },
+      "scroll_precise": {
+        "composited_pixels": 12880.0,
+        "copied_pixels": 1401440.0,
+        "image_bytes": 4185280.0
+      },
+      "candidate": {
+        "composited_pixels": 12880.0,
+        "copied_pixels": 1401440.0,
+        "image_bytes": 4185280.0
+      }
+    },
+    "exposure": {
+      "control": {
+        "composited_pixels": 0.0,
+        "copied_pixels": 691200.0,
+        "image_bytes": 2764800.0
+      },
+      "bounds": {
+        "composited_pixels": 0.0,
+        "copied_pixels": 691200.0,
+        "image_bytes": 2764800.0
+      },
+      "predecessor": {
+        "composited_pixels": 0.0,
+        "copied_pixels": 691200.0,
+        "image_bytes": 2764800.0
+      },
+      "scroll_precise": {
+        "composited_pixels": 0.0,
+        "copied_pixels": 691200.0,
+        "image_bytes": 2764800.0
+      },
+      "candidate": {
+        "composited_pixels": 0.0,
+        "copied_pixels": 691200.0,
+        "image_bytes": 2764800.0
+      }
+    },
+    "text-0-1-source": {
+      "control": {
+        "composited_pixels": 390.0,
+        "copied_pixels": 691200.0,
+        "image_bytes": 2764800.0
+      },
+      "bounds": {
+        "composited_pixels": 390.0,
+        "copied_pixels": 691200.0,
+        "image_bytes": 2764800.0
+      },
+      "predecessor": {
+        "composited_pixels": 390.0,
+        "copied_pixels": 691200.0,
+        "image_bytes": 2764800.0
+      },
+      "scroll_precise": {
+        "composited_pixels": 390.0,
+        "copied_pixels": 691200.0,
+        "image_bytes": 2764800.0
+      },
+      "candidate": {
+        "composited_pixels": 390.0,
+        "copied_pixels": 691200.0,
+        "image_bytes": 2764800.0
+      }
+    },
+    "text-0-1-owner": {
+      "control": {
+        "composited_pixels": 390.0,
+        "copied_pixels": 691200.0,
+        "image_bytes": 2764800.0
+      },
+      "bounds": {
+        "composited_pixels": 390.0,
+        "copied_pixels": 691200.0,
+        "image_bytes": 2764800.0
+      },
+      "predecessor": {
+        "composited_pixels": 390.0,
+        "copied_pixels": 691200.0,
+        "image_bytes": 2764800.0
+      },
+      "scroll_precise": {
+        "composited_pixels": 390.0,
+        "copied_pixels": 691200.0,
+        "image_bytes": 2764800.0
+      },
+      "candidate": {
+        "composited_pixels": 390.0,
+        "copied_pixels": 691200.0,
+        "image_bytes": 2764800.0
+      }
+    },
+    "text-0-2-source": {
+      "control": {
+        "composited_pixels": 1430.0,
+        "copied_pixels": 691200.0,
+        "image_bytes": 2764800.0
+      },
+      "bounds": {
+        "composited_pixels": 1430.0,
+        "copied_pixels": 691200.0,
+        "image_bytes": 2764800.0
+      },
+      "predecessor": {
+        "composited_pixels": 1430.0,
+        "copied_pixels": 691200.0,
+        "image_bytes": 2764800.0
+      },
+      "scroll_precise": {
+        "composited_pixels": 1430.0,
+        "copied_pixels": 691200.0,
+        "image_bytes": 2764800.0
+      },
+      "candidate": {
+        "composited_pixels": 1430.0,
+        "copied_pixels": 691200.0,
+        "image_bytes": 2764800.0
+      }
+    },
+    "text-0-2-owner": {
+      "control": {
+        "composited_pixels": 1430.0,
+        "copied_pixels": 691200.0,
+        "image_bytes": 2764800.0
+      },
+      "bounds": {
+        "composited_pixels": 1430.0,
+        "copied_pixels": 691200.0,
+        "image_bytes": 2764800.0
+      },
+      "predecessor": {
+        "composited_pixels": 1430.0,
+        "copied_pixels": 691200.0,
+        "image_bytes": 2764800.0
+      },
+      "scroll_precise": {
+        "composited_pixels": 1430.0,
+        "copied_pixels": 691200.0,
+        "image_bytes": 2764800.0
+      },
+      "candidate": {
+        "composited_pixels": 1430.0,
+        "copied_pixels": 691200.0,
+        "image_bytes": 2764800.0
+      }
+    },
+    "text-0-4-source": {
+      "control": {
+        "composited_pixels": 3510.0,
+        "copied_pixels": 691200.0,
+        "image_bytes": 2764800.0
+      },
+      "bounds": {
+        "composited_pixels": 3510.0,
+        "copied_pixels": 691200.0,
+        "image_bytes": 2764800.0
+      },
+      "predecessor": {
+        "composited_pixels": 3510.0,
+        "copied_pixels": 691200.0,
+        "image_bytes": 2764800.0
+      },
+      "scroll_precise": {
+        "composited_pixels": 3510.0,
+        "copied_pixels": 691200.0,
+        "image_bytes": 2764800.0
+      },
+      "candidate": {
+        "composited_pixels": 3510.0,
+        "copied_pixels": 691200.0,
+        "image_bytes": 2764800.0
+      }
+    },
+    "text-0-4-owner": {
+      "control": {
+        "composited_pixels": 3510.0,
+        "copied_pixels": 691200.0,
+        "image_bytes": 2764800.0
+      },
+      "bounds": {
+        "composited_pixels": 3510.0,
+        "copied_pixels": 691200.0,
+        "image_bytes": 2764800.0
+      },
+      "predecessor": {
+        "composited_pixels": 3510.0,
+        "copied_pixels": 691200.0,
+        "image_bytes": 2764800.0
+      },
+      "scroll_precise": {
+        "composited_pixels": 3510.0,
+        "copied_pixels": 691200.0,
+        "image_bytes": 2764800.0
+      },
+      "candidate": {
+        "composited_pixels": 3510.0,
+        "copied_pixels": 691200.0,
+        "image_bytes": 2764800.0
+      }
+    },
+    "text-25-1-source": {
+      "control": {
+        "composited_pixels": 390.0,
+        "copied_pixels": 691200.0,
+        "image_bytes": 2764800.0
+      },
+      "bounds": {
+        "composited_pixels": 390.0,
+        "copied_pixels": 691200.0,
+        "image_bytes": 2764800.0
+      },
+      "predecessor": {
+        "composited_pixels": 390.0,
+        "copied_pixels": 691200.0,
+        "image_bytes": 2764800.0
+      },
+      "scroll_precise": {
+        "composited_pixels": 390.0,
+        "copied_pixels": 691200.0,
+        "image_bytes": 2764800.0
+      },
+      "candidate": {
+        "composited_pixels": 390.0,
+        "copied_pixels": 691200.0,
+        "image_bytes": 2764800.0
+      }
+    },
+    "text-25-1-owner": {
+      "control": {
+        "composited_pixels": 390.0,
+        "copied_pixels": 691200.0,
+        "image_bytes": 2764800.0
+      },
+      "bounds": {
+        "composited_pixels": 390.0,
+        "copied_pixels": 691200.0,
+        "image_bytes": 2764800.0
+      },
+      "predecessor": {
+        "composited_pixels": 390.0,
+        "copied_pixels": 691200.0,
+        "image_bytes": 2764800.0
+      },
+      "scroll_precise": {
+        "composited_pixels": 390.0,
+        "copied_pixels": 691200.0,
+        "image_bytes": 2764800.0
+      },
+      "candidate": {
+        "composited_pixels": 390.0,
+        "copied_pixels": 691200.0,
+        "image_bytes": 2764800.0
+      }
+    },
+    "text-25-2-source": {
+      "control": {
+        "composited_pixels": 1430.0,
+        "copied_pixels": 691200.0,
+        "image_bytes": 2764800.0
+      },
+      "bounds": {
+        "composited_pixels": 1430.0,
+        "copied_pixels": 691200.0,
+        "image_bytes": 2764800.0
+      },
+      "predecessor": {
+        "composited_pixels": 1430.0,
+        "copied_pixels": 691200.0,
+        "image_bytes": 2764800.0
+      },
+      "scroll_precise": {
+        "composited_pixels": 1430.0,
+        "copied_pixels": 691200.0,
+        "image_bytes": 2764800.0
+      },
+      "candidate": {
+        "composited_pixels": 1430.0,
+        "copied_pixels": 691200.0,
+        "image_bytes": 2764800.0
+      }
+    },
+    "text-25-2-owner": {
+      "control": {
+        "composited_pixels": 1430.0,
+        "copied_pixels": 691200.0,
+        "image_bytes": 2764800.0
+      },
+      "bounds": {
+        "composited_pixels": 1430.0,
+        "copied_pixels": 691200.0,
+        "image_bytes": 2764800.0
+      },
+      "predecessor": {
+        "composited_pixels": 1430.0,
+        "copied_pixels": 691200.0,
+        "image_bytes": 2764800.0
+      },
+      "scroll_precise": {
+        "composited_pixels": 1430.0,
+        "copied_pixels": 691200.0,
+        "image_bytes": 2764800.0
+      },
+      "candidate": {
+        "composited_pixels": 1430.0,
+        "copied_pixels": 691200.0,
+        "image_bytes": 2764800.0
+      }
+    },
+    "text-25-4-source": {
+      "control": {
+        "composited_pixels": 3510.0,
+        "copied_pixels": 691200.0,
+        "image_bytes": 2764800.0
+      },
+      "bounds": {
+        "composited_pixels": 3510.0,
+        "copied_pixels": 691200.0,
+        "image_bytes": 2764800.0
+      },
+      "predecessor": {
+        "composited_pixels": 3510.0,
+        "copied_pixels": 691200.0,
+        "image_bytes": 2764800.0
+      },
+      "scroll_precise": {
+        "composited_pixels": 3510.0,
+        "copied_pixels": 691200.0,
+        "image_bytes": 2764800.0
+      },
+      "candidate": {
+        "composited_pixels": 3510.0,
+        "copied_pixels": 691200.0,
+        "image_bytes": 2764800.0
+      }
+    },
+    "text-25-4-owner": {
+      "control": {
+        "composited_pixels": 3510.0,
+        "copied_pixels": 691200.0,
+        "image_bytes": 2764800.0
+      },
+      "bounds": {
+        "composited_pixels": 3510.0,
+        "copied_pixels": 691200.0,
+        "image_bytes": 2764800.0
+      },
+      "predecessor": {
+        "composited_pixels": 3510.0,
+        "copied_pixels": 691200.0,
+        "image_bytes": 2764800.0
+      },
+      "scroll_precise": {
+        "composited_pixels": 3510.0,
+        "copied_pixels": 691200.0,
+        "image_bytes": 2764800.0
+      },
+      "candidate": {
+        "composited_pixels": 3510.0,
+        "copied_pixels": 691200.0,
+        "image_bytes": 2764800.0
+      }
+    },
+    "text-1000-1-source": {
+      "control": {
+        "composited_pixels": 390.0,
+        "copied_pixels": 691200.0,
+        "image_bytes": 2764800.0
+      },
+      "bounds": {
+        "composited_pixels": 390.0,
+        "copied_pixels": 691200.0,
+        "image_bytes": 2764800.0
+      },
+      "predecessor": {
+        "composited_pixels": 390.0,
+        "copied_pixels": 691200.0,
+        "image_bytes": 2764800.0
+      },
+      "scroll_precise": {
+        "composited_pixels": 390.0,
+        "copied_pixels": 691200.0,
+        "image_bytes": 2764800.0
+      },
+      "candidate": {
+        "composited_pixels": 390.0,
+        "copied_pixels": 691200.0,
+        "image_bytes": 2764800.0
+      }
+    },
+    "text-1000-1-owner": {
+      "control": {
+        "composited_pixels": 390.0,
+        "copied_pixels": 691200.0,
+        "image_bytes": 2764800.0
+      },
+      "bounds": {
+        "composited_pixels": 390.0,
+        "copied_pixels": 691200.0,
+        "image_bytes": 2764800.0
+      },
+      "predecessor": {
+        "composited_pixels": 390.0,
+        "copied_pixels": 691200.0,
+        "image_bytes": 2764800.0
+      },
+      "scroll_precise": {
+        "composited_pixels": 390.0,
+        "copied_pixels": 691200.0,
+        "image_bytes": 2764800.0
+      },
+      "candidate": {
+        "composited_pixels": 390.0,
+        "copied_pixels": 691200.0,
+        "image_bytes": 2764800.0
+      }
+    },
+    "text-1000-2-source": {
+      "control": {
+        "composited_pixels": 1430.0,
+        "copied_pixels": 691200.0,
+        "image_bytes": 2764800.0
+      },
+      "bounds": {
+        "composited_pixels": 1430.0,
+        "copied_pixels": 691200.0,
+        "image_bytes": 2764800.0
+      },
+      "predecessor": {
+        "composited_pixels": 1430.0,
+        "copied_pixels": 691200.0,
+        "image_bytes": 2764800.0
+      },
+      "scroll_precise": {
+        "composited_pixels": 1430.0,
+        "copied_pixels": 691200.0,
+        "image_bytes": 2764800.0
+      },
+      "candidate": {
+        "composited_pixels": 1430.0,
+        "copied_pixels": 691200.0,
+        "image_bytes": 2764800.0
+      }
+    },
+    "text-1000-2-owner": {
+      "control": {
+        "composited_pixels": 1430.0,
+        "copied_pixels": 691200.0,
+        "image_bytes": 2764800.0
+      },
+      "bounds": {
+        "composited_pixels": 1430.0,
+        "copied_pixels": 691200.0,
+        "image_bytes": 2764800.0
+      },
+      "predecessor": {
+        "composited_pixels": 1430.0,
+        "copied_pixels": 691200.0,
+        "image_bytes": 2764800.0
+      },
+      "scroll_precise": {
+        "composited_pixels": 1430.0,
+        "copied_pixels": 691200.0,
+        "image_bytes": 2764800.0
+      },
+      "candidate": {
+        "composited_pixels": 1430.0,
+        "copied_pixels": 691200.0,
+        "image_bytes": 2764800.0
+      }
+    },
+    "text-1000-4-source": {
+      "control": {
+        "composited_pixels": 3510.0,
+        "copied_pixels": 691200.0,
+        "image_bytes": 2764800.0
+      },
+      "bounds": {
+        "composited_pixels": 3510.0,
+        "copied_pixels": 691200.0,
+        "image_bytes": 2764800.0
+      },
+      "predecessor": {
+        "composited_pixels": 3510.0,
+        "copied_pixels": 691200.0,
+        "image_bytes": 2764800.0
+      },
+      "scroll_precise": {
+        "composited_pixels": 3510.0,
+        "copied_pixels": 691200.0,
+        "image_bytes": 2764800.0
+      },
+      "candidate": {
+        "composited_pixels": 3510.0,
+        "copied_pixels": 691200.0,
+        "image_bytes": 2764800.0
+      }
+    },
+    "text-1000-4-owner": {
+      "control": {
+        "composited_pixels": 3510.0,
+        "copied_pixels": 691200.0,
+        "image_bytes": 2764800.0
+      },
+      "bounds": {
+        "composited_pixels": 3510.0,
+        "copied_pixels": 691200.0,
+        "image_bytes": 2764800.0
+      },
+      "predecessor": {
+        "composited_pixels": 3510.0,
+        "copied_pixels": 691200.0,
+        "image_bytes": 2764800.0
+      },
+      "scroll_precise": {
+        "composited_pixels": 3510.0,
+        "copied_pixels": 691200.0,
+        "image_bytes": 2764800.0
+      },
+      "candidate": {
+        "composited_pixels": 3510.0,
+        "copied_pixels": 691200.0,
+        "image_bytes": 2764800.0
+      }
+    }
+  }
+}

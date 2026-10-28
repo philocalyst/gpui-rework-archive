@@ -1,0 +1,4258 @@
+{
+  "scroll": {
+    "control": {
+      "warm": {
+        "requests": 462.5,
+        "requested_bytes": 277334.0,
+        "net_bytes": 304.0,
+        "peak_bytes": 54532.0,
+        "image_bytes": 2764800.0,
+        "copied_pixels": 691200.0
+      },
+      "first_update": {
+        "requests": 358,
+        "requested_bytes": 257914,
+        "net_bytes": 3176,
+        "peak_bytes": 56464,
+        "image_bytes": 2764800,
+        "copied_pixels": 691200
+      },
+      "mount": {
+        "requests": 1206,
+        "requested_bytes": 1321567,
+        "net_bytes": 1015003,
+        "peak_bytes": 1028543
+      },
+      "first_presentation": {
+        "requests": 1074,
+        "requested_bytes": 238856,
+        "net_bytes": 129504,
+        "peak_bytes": 152115
+      }
+    },
+    "bounds": {
+      "warm": {
+        "requests": 462.5,
+        "requested_bytes": 277334.0,
+        "net_bytes": 304.0,
+        "peak_bytes": 54532.0,
+        "image_bytes": 2764800.0,
+        "copied_pixels": 691200.0
+      },
+      "first_update": {
+        "requests": 358,
+        "requested_bytes": 257914,
+        "net_bytes": 3176,
+        "peak_bytes": 56464,
+        "image_bytes": 2764800,
+        "copied_pixels": 691200
+      },
+      "mount": {
+        "requests": 1206,
+        "requested_bytes": 1321567,
+        "net_bytes": 1015003,
+        "peak_bytes": 1028543
+      },
+      "first_presentation": {
+        "requests": 1074,
+        "requested_bytes": 238856,
+        "net_bytes": 129504,
+        "peak_bytes": 152115
+      }
+    },
+    "predecessor": {
+      "warm": {
+        "requests": 462.5,
+        "requested_bytes": 277334.0,
+        "net_bytes": 304.0,
+        "peak_bytes": 54532.0,
+        "image_bytes": 2764800.0,
+        "copied_pixels": 691200.0
+      },
+      "first_update": {
+        "requests": 358,
+        "requested_bytes": 257914,
+        "net_bytes": 3176,
+        "peak_bytes": 56464,
+        "image_bytes": 2764800,
+        "copied_pixels": 691200
+      },
+      "mount": {
+        "requests": 1206,
+        "requested_bytes": 1321567,
+        "net_bytes": 1015003,
+        "peak_bytes": 1028543
+      },
+      "first_presentation": {
+        "requests": 1074,
+        "requested_bytes": 238856,
+        "net_bytes": 129504,
+        "peak_bytes": 152115
+      }
+    },
+    "scroll_precise": {
+      "warm": {
+        "requests": 468.5,
+        "requested_bytes": 277702.0,
+        "net_bytes": 304.0,
+        "peak_bytes": 54532.0,
+        "image_bytes": 4185280.0,
+        "copied_pixels": 1401440.0
+      },
+      "first_update": {
+        "requests": 373,
+        "requested_bytes": 259506,
+        "net_bytes": 3584,
+        "peak_bytes": 56464,
+        "image_bytes": 4185280,
+        "copied_pixels": 1401440
+      },
+      "mount": {
+        "requests": 1206,
+        "requested_bytes": 1321575,
+        "net_bytes": 1015011,
+        "peak_bytes": 1028551
+      },
+      "first_presentation": {
+        "requests": 1074,
+        "requested_bytes": 238864,
+        "net_bytes": 129512,
+        "peak_bytes": 152123
+      }
+    },
+    "candidate": {
+      "warm": {
+        "requests": 468.5,
+        "requested_bytes": 277702.0,
+        "net_bytes": 304.0,
+        "peak_bytes": 54532.0,
+        "image_bytes": 4185280.0,
+        "copied_pixels": 1401440.0
+      },
+      "first_update": {
+        "requests": 373,
+        "requested_bytes": 259506,
+        "net_bytes": 3584,
+        "peak_bytes": 56464,
+        "image_bytes": 4185280,
+        "copied_pixels": 1401440
+      },
+      "mount": {
+        "requests": 1206,
+        "requested_bytes": 1321575,
+        "net_bytes": 1015011,
+        "peak_bytes": 1028551
+      },
+      "first_presentation": {
+        "requests": 1074,
+        "requested_bytes": 238864,
+        "net_bytes": 129512,
+        "peak_bytes": 152123
+      }
+    }
+  },
+  "both": {
+    "control": {
+      "warm": {
+        "requests": 542.5,
+        "requested_bytes": 350760.0,
+        "net_bytes": 304.0,
+        "peak_bytes": 74789.0,
+        "image_bytes": 2764800.0,
+        "copied_pixels": 691200.0
+      },
+      "first_update": {
+        "requests": 439,
+        "requested_bytes": 331388,
+        "net_bytes": 3176,
+        "peak_bytes": 76741,
+        "image_bytes": 2764800,
+        "copied_pixels": 691200
+      },
+      "mount": {
+        "requests": 1206,
+        "requested_bytes": 1321567,
+        "net_bytes": 1015003,
+        "peak_bytes": 1028543
+      },
+      "first_presentation": {
+        "requests": 1074,
+        "requested_bytes": 238856,
+        "net_bytes": 129504,
+        "peak_bytes": 152115
+      }
+    },
+    "bounds": {
+      "warm": {
+        "requests": 542.5,
+        "requested_bytes": 350760.0,
+        "net_bytes": 304.0,
+        "peak_bytes": 74789.0,
+        "image_bytes": 2764800.0,
+        "copied_pixels": 691200.0
+      },
+      "first_update": {
+        "requests": 439,
+        "requested_bytes": 331388,
+        "net_bytes": 3176,
+        "peak_bytes": 76741,
+        "image_bytes": 2764800,
+        "copied_pixels": 691200
+      },
+      "mount": {
+        "requests": 1206,
+        "requested_bytes": 1321567,
+        "net_bytes": 1015003,
+        "peak_bytes": 1028543
+      },
+      "first_presentation": {
+        "requests": 1074,
+        "requested_bytes": 238856,
+        "net_bytes": 129504,
+        "peak_bytes": 152115
+      }
+    },
+    "predecessor": {
+      "warm": {
+        "requests": 542.5,
+        "requested_bytes": 350760.0,
+        "net_bytes": 304.0,
+        "peak_bytes": 74789.0,
+        "image_bytes": 2764800.0,
+        "copied_pixels": 691200.0
+      },
+      "first_update": {
+        "requests": 439,
+        "requested_bytes": 331388,
+        "net_bytes": 3176,
+        "peak_bytes": 76741,
+        "image_bytes": 2764800,
+        "copied_pixels": 691200
+      },
+      "mount": {
+        "requests": 1206,
+        "requested_bytes": 1321567,
+        "net_bytes": 1015003,
+        "peak_bytes": 1028543
+      },
+      "first_presentation": {
+        "requests": 1074,
+        "requested_bytes": 238856,
+        "net_bytes": 129504,
+        "peak_bytes": 152115
+      }
+    },
+    "scroll_precise": {
+      "warm": {
+        "requests": 553.5,
+        "requested_bytes": 358360.0,
+        "net_bytes": 304.0,
+        "peak_bytes": 74789.0,
+        "image_bytes": 4185280.0,
+        "copied_pixels": 1401440.0
+      },
+      "first_update": {
+        "requests": 459,
+        "requested_bytes": 340212,
+        "net_bytes": 4096,
+        "peak_bytes": 76741,
+        "image_bytes": 4185280,
+        "copied_pixels": 1401440
+      },
+      "mount": {
+        "requests": 1206,
+        "requested_bytes": 1321575,
+        "net_bytes": 1015011,
+        "peak_bytes": 1028551
+      },
+      "first_presentation": {
+        "requests": 1074,
+        "requested_bytes": 238864,
+        "net_bytes": 129512,
+        "peak_bytes": 152123
+      }
+    },
+    "candidate": {
+      "warm": {
+        "requests": 553.5,
+        "requested_bytes": 358360.0,
+        "net_bytes": 304.0,
+        "peak_bytes": 74789.0,
+        "image_bytes": 4185280.0,
+        "copied_pixels": 1401440.0
+      },
+      "first_update": {
+        "requests": 459,
+        "requested_bytes": 340212,
+        "net_bytes": 4096,
+        "peak_bytes": 76741,
+        "image_bytes": 4185280,
+        "copied_pixels": 1401440
+      },
+      "mount": {
+        "requests": 1206,
+        "requested_bytes": 1321575,
+        "net_bytes": 1015011,
+        "peak_bytes": 1028551
+      },
+      "first_presentation": {
+        "requests": 1074,
+        "requested_bytes": 238864,
+        "net_bytes": 129512,
+        "peak_bytes": 152123
+      }
+    }
+  },
+  "stream": {
+    "control": {
+      "warm": {
+        "requests": 245.0,
+        "requested_bytes": 188319.0,
+        "net_bytes": 304.0,
+        "peak_bytes": 74381.0,
+        "image_bytes": 2764800.0,
+        "copied_pixels": 691200.0
+      },
+      "first_update": {
+        "requests": 256,
+        "requested_bytes": 243039,
+        "net_bytes": 27840,
+        "peak_bytes": 74637,
+        "image_bytes": 2764800,
+        "copied_pixels": 691200
+      },
+      "mount": {
+        "requests": 1206,
+        "requested_bytes": 1321567,
+        "net_bytes": 1015003,
+        "peak_bytes": 1028543
+      },
+      "first_presentation": {
+        "requests": 1074,
+        "requested_bytes": 238856,
+        "net_bytes": 129504,
+        "peak_bytes": 152115
+      }
+    },
+    "bounds": {
+      "warm": {
+        "requests": 216.0,
+        "requested_bytes": 123995.0,
+        "net_bytes": 304.0,
+        "peak_bytes": 43541.0,
+        "image_bytes": 2764800.0,
+        "copied_pixels": 691200.0
+      },
+      "first_update": {
+        "requests": 227,
+        "requested_bytes": 178715,
+        "net_bytes": 27840,
+        "peak_bytes": 63683,
+        "image_bytes": 2764800,
+        "copied_pixels": 691200
+      },
+      "mount": {
+        "requests": 1206,
+        "requested_bytes": 1321567,
+        "net_bytes": 1015003,
+        "peak_bytes": 1028543
+      },
+      "first_presentation": {
+        "requests": 1074,
+        "requested_bytes": 238856,
+        "net_bytes": 129504,
+        "peak_bytes": 152115
+      }
+    },
+    "predecessor": {
+      "warm": {
+        "requests": 221.0,
+        "requested_bytes": 131315.0,
+        "net_bytes": 304.0,
+        "peak_bytes": 43597.0,
+        "image_bytes": 2764800.0,
+        "copied_pixels": 691200.0
+      },
+      "first_update": {
+        "requests": 232,
+        "requested_bytes": 186035,
+        "net_bytes": 27840,
+        "peak_bytes": 64251,
+        "image_bytes": 2764800,
+        "copied_pixels": 691200
+      },
+      "mount": {
+        "requests": 1206,
+        "requested_bytes": 1321567,
+        "net_bytes": 1015003,
+        "peak_bytes": 1028543
+      },
+      "first_presentation": {
+        "requests": 1074,
+        "requested_bytes": 238856,
+        "net_bytes": 129504,
+        "peak_bytes": 152115
+      }
+    },
+    "scroll_precise": {
+      "warm": {
+        "requests": 221.0,
+        "requested_bytes": 131315.0,
+        "net_bytes": 304.0,
+        "peak_bytes": 43597.0,
+        "image_bytes": 2764800.0,
+        "copied_pixels": 691200.0
+      },
+      "first_update": {
+        "requests": 232,
+        "requested_bytes": 186035,
+        "net_bytes": 27840,
+        "peak_bytes": 64251,
+        "image_bytes": 2764800,
+        "copied_pixels": 691200
+      },
+      "mount": {
+        "requests": 1206,
+        "requested_bytes": 1321575,
+        "net_bytes": 1015011,
+        "peak_bytes": 1028551
+      },
+      "first_presentation": {
+        "requests": 1074,
+        "requested_bytes": 238864,
+        "net_bytes": 129512,
+        "peak_bytes": 152123
+      }
+    },
+    "candidate": {
+      "warm": {
+        "requests": 219.0,
+        "requested_bytes": 130707.0,
+        "net_bytes": 304.0,
+        "peak_bytes": 43501.0,
+        "image_bytes": 2764800.0,
+        "copied_pixels": 691200.0
+      },
+      "first_update": {
+        "requests": 232,
+        "requested_bytes": 186035,
+        "net_bytes": 28448,
+        "peak_bytes": 64251,
+        "image_bytes": 2764800,
+        "copied_pixels": 691200
+      },
+      "mount": {
+        "requests": 1206,
+        "requested_bytes": 1321575,
+        "net_bytes": 1015011,
+        "peak_bytes": 1028551
+      },
+      "first_presentation": {
+        "requests": 1074,
+        "requested_bytes": 238864,
+        "net_bytes": 129512,
+        "peak_bytes": 152123
+      }
+    }
+  },
+  "stream-owner": {
+    "control": {
+      "warm": {
+        "requests": 405.0,
+        "requested_bytes": 284248.0,
+        "net_bytes": 304.0,
+        "peak_bytes": 74381.0,
+        "image_bytes": 2764800.0,
+        "copied_pixels": 691200.0
+      },
+      "first_update": {
+        "requests": 416,
+        "requested_bytes": 338968,
+        "net_bytes": 27840,
+        "peak_bytes": 74637,
+        "image_bytes": 2764800,
+        "copied_pixels": 691200
+      },
+      "mount": {
+        "requests": 1206,
+        "requested_bytes": 1321567,
+        "net_bytes": 1015003,
+        "peak_bytes": 1028543
+      },
+      "first_presentation": {
+        "requests": 1074,
+        "requested_bytes": 238856,
+        "net_bytes": 129504,
+        "peak_bytes": 152115
+      }
+    },
+    "bounds": {
+      "warm": {
+        "requests": 376.0,
+        "requested_bytes": 219924.0,
+        "net_bytes": 304.0,
+        "peak_bytes": 43541.0,
+        "image_bytes": 2764800.0,
+        "copied_pixels": 691200.0
+      },
+      "first_update": {
+        "requests": 387,
+        "requested_bytes": 274644,
+        "net_bytes": 27840,
+        "peak_bytes": 63683,
+        "image_bytes": 2764800,
+        "copied_pixels": 691200
+      },
+      "mount": {
+        "requests": 1206,
+        "requested_bytes": 1321567,
+        "net_bytes": 1015003,
+        "peak_bytes": 1028543
+      },
+      "first_presentation": {
+        "requests": 1074,
+        "requested_bytes": 238856,
+        "net_bytes": 129504,
+        "peak_bytes": 152115
+      }
+    },
+    "predecessor": {
+      "warm": {
+        "requests": 381.0,
+        "requested_bytes": 227244.0,
+        "net_bytes": 304.0,
+        "peak_bytes": 43597.0,
+        "image_bytes": 2764800.0,
+        "copied_pixels": 691200.0
+      },
+      "first_update": {
+        "requests": 392,
+        "requested_bytes": 281964,
+        "net_bytes": 27840,
+        "peak_bytes": 64251,
+        "image_bytes": 2764800,
+        "copied_pixels": 691200
+      },
+      "mount": {
+        "requests": 1206,
+        "requested_bytes": 1321567,
+        "net_bytes": 1015003,
+        "peak_bytes": 1028543
+      },
+      "first_presentation": {
+        "requests": 1074,
+        "requested_bytes": 238856,
+        "net_bytes": 129504,
+        "peak_bytes": 152115
+      }
+    },
+    "scroll_precise": {
+      "warm": {
+        "requests": 381.0,
+        "requested_bytes": 227244.0,
+        "net_bytes": 304.0,
+        "peak_bytes": 43597.0,
+        "image_bytes": 2764800.0,
+        "copied_pixels": 691200.0
+      },
+      "first_update": {
+        "requests": 392,
+        "requested_bytes": 281964,
+        "net_bytes": 27840,
+        "peak_bytes": 64251,
+        "image_bytes": 2764800,
+        "copied_pixels": 691200
+      },
+      "mount": {
+        "requests": 1206,
+        "requested_bytes": 1321575,
+        "net_bytes": 1015011,
+        "peak_bytes": 1028551
+      },
+      "first_presentation": {
+        "requests": 1074,
+        "requested_bytes": 238864,
+        "net_bytes": 129512,
+        "peak_bytes": 152123
+      }
+    },
+    "candidate": {
+      "warm": {
+        "requests": 379.0,
+        "requested_bytes": 226636.0,
+        "net_bytes": 304.0,
+        "peak_bytes": 43501.0,
+        "image_bytes": 2764800.0,
+        "copied_pixels": 691200.0
+      },
+      "first_update": {
+        "requests": 392,
+        "requested_bytes": 281964,
+        "net_bytes": 28448,
+        "peak_bytes": 64251,
+        "image_bytes": 2764800,
+        "copied_pixels": 691200
+      },
+      "mount": {
+        "requests": 1206,
+        "requested_bytes": 1321575,
+        "net_bytes": 1015011,
+        "peak_bytes": 1028551
+      },
+      "first_presentation": {
+        "requests": 1074,
+        "requested_bytes": 238864,
+        "net_bytes": 129512,
+        "peak_bytes": 152123
+      }
+    }
+  },
+  "fractional": {
+    "control": {
+      "warm": {
+        "requests": 573.0,
+        "requested_bytes": 338663.0,
+        "net_bytes": 304.0,
+        "peak_bytes": 54838.0,
+        "image_bytes": 2764800.0,
+        "copied_pixels": 691200.0
+      },
+      "first_update": {
+        "requests": 358,
+        "requested_bytes": 257914,
+        "net_bytes": 3176,
+        "peak_bytes": 56464,
+        "image_bytes": 2764800,
+        "copied_pixels": 691200
+      },
+      "mount": {
+        "requests": 1206,
+        "requested_bytes": 1321567,
+        "net_bytes": 1015003,
+        "peak_bytes": 1028543
+      },
+      "first_presentation": {
+        "requests": 1074,
+        "requested_bytes": 238856,
+        "net_bytes": 129504,
+        "peak_bytes": 152115
+      }
+    },
+    "bounds": {
+      "warm": {
+        "requests": 573.0,
+        "requested_bytes": 338663.0,
+        "net_bytes": 304.0,
+        "peak_bytes": 54838.0,
+        "image_bytes": 2764800.0,
+        "copied_pixels": 691200.0
+      },
+      "first_update": {
+        "requests": 358,
+        "requested_bytes": 257914,
+        "net_bytes": 3176,
+        "peak_bytes": 56464,
+        "image_bytes": 2764800,
+        "copied_pixels": 691200
+      },
+      "mount": {
+        "requests": 1206,
+        "requested_bytes": 1321567,
+        "net_bytes": 1015003,
+        "peak_bytes": 1028543
+      },
+      "first_presentation": {
+        "requests": 1074,
+        "requested_bytes": 238856,
+        "net_bytes": 129504,
+        "peak_bytes": 152115
+      }
+    },
+    "predecessor": {
+      "warm": {
+        "requests": 573.0,
+        "requested_bytes": 338663.0,
+        "net_bytes": 304.0,
+        "peak_bytes": 54838.0,
+        "image_bytes": 2764800.0,
+        "copied_pixels": 691200.0
+      },
+      "first_update": {
+        "requests": 358,
+        "requested_bytes": 257914,
+        "net_bytes": 3176,
+        "peak_bytes": 56464,
+        "image_bytes": 2764800,
+        "copied_pixels": 691200
+      },
+      "mount": {
+        "requests": 1206,
+        "requested_bytes": 1321567,
+        "net_bytes": 1015003,
+        "peak_bytes": 1028543
+      },
+      "first_presentation": {
+        "requests": 1074,
+        "requested_bytes": 238856,
+        "net_bytes": 129504,
+        "peak_bytes": 152115
+      }
+    },
+    "scroll_precise": {
+      "warm": {
+        "requests": 573.0,
+        "requested_bytes": 338663.0,
+        "net_bytes": 304.0,
+        "peak_bytes": 54838.0,
+        "image_bytes": 2764800.0,
+        "copied_pixels": 691200.0
+      },
+      "first_update": {
+        "requests": 358,
+        "requested_bytes": 257914,
+        "net_bytes": 3176,
+        "peak_bytes": 56464,
+        "image_bytes": 2764800,
+        "copied_pixels": 691200
+      },
+      "mount": {
+        "requests": 1206,
+        "requested_bytes": 1321575,
+        "net_bytes": 1015011,
+        "peak_bytes": 1028551
+      },
+      "first_presentation": {
+        "requests": 1074,
+        "requested_bytes": 238864,
+        "net_bytes": 129512,
+        "peak_bytes": 152123
+      }
+    },
+    "candidate": {
+      "warm": {
+        "requests": 573.0,
+        "requested_bytes": 338663.0,
+        "net_bytes": 304.0,
+        "peak_bytes": 54838.0,
+        "image_bytes": 2764800.0,
+        "copied_pixels": 691200.0
+      },
+      "first_update": {
+        "requests": 358,
+        "requested_bytes": 257914,
+        "net_bytes": 3176,
+        "peak_bytes": 56464,
+        "image_bytes": 2764800,
+        "copied_pixels": 691200
+      },
+      "mount": {
+        "requests": 1206,
+        "requested_bytes": 1321575,
+        "net_bytes": 1015011,
+        "peak_bytes": 1028551
+      },
+      "first_presentation": {
+        "requests": 1074,
+        "requested_bytes": 238864,
+        "net_bytes": 129512,
+        "peak_bytes": 152123
+      }
+    }
+  },
+  "flat-tiny": {
+    "control": {
+      "warm": {
+        "requests": 69.0,
+        "requested_bytes": 10135.0,
+        "net_bytes": 0.0,
+        "peak_bytes": 6353.0,
+        "image_bytes": 256.0,
+        "copied_pixels": 64.0
+      },
+      "first_update": {
+        "requests": 75,
+        "requested_bytes": 10775,
+        "net_bytes": 352,
+        "peak_bytes": 6705,
+        "image_bytes": 256,
+        "copied_pixels": 64
+      },
+      "mount": {
+        "requests": 45,
+        "requested_bytes": 8420,
+        "net_bytes": 6868,
+        "peak_bytes": 6972
+      },
+      "first_presentation": {
+        "requests": 778,
+        "requested_bytes": 90638,
+        "net_bytes": 22256,
+        "peak_bytes": 28787
+      }
+    },
+    "bounds": {
+      "warm": {
+        "requests": 69.0,
+        "requested_bytes": 10135.0,
+        "net_bytes": 0.0,
+        "peak_bytes": 6353.0,
+        "image_bytes": 256.0,
+        "copied_pixels": 64.0
+      },
+      "first_update": {
+        "requests": 75,
+        "requested_bytes": 10775,
+        "net_bytes": 352,
+        "peak_bytes": 6705,
+        "image_bytes": 256,
+        "copied_pixels": 64
+      },
+      "mount": {
+        "requests": 45,
+        "requested_bytes": 8420,
+        "net_bytes": 6868,
+        "peak_bytes": 6972
+      },
+      "first_presentation": {
+        "requests": 778,
+        "requested_bytes": 90638,
+        "net_bytes": 22256,
+        "peak_bytes": 28787
+      }
+    },
+    "predecessor": {
+      "warm": {
+        "requests": 69.0,
+        "requested_bytes": 10135.0,
+        "net_bytes": 0.0,
+        "peak_bytes": 6353.0,
+        "image_bytes": 256.0,
+        "copied_pixels": 64.0
+      },
+      "first_update": {
+        "requests": 75,
+        "requested_bytes": 10775,
+        "net_bytes": 352,
+        "peak_bytes": 6705,
+        "image_bytes": 256,
+        "copied_pixels": 64
+      },
+      "mount": {
+        "requests": 45,
+        "requested_bytes": 8420,
+        "net_bytes": 6868,
+        "peak_bytes": 6972
+      },
+      "first_presentation": {
+        "requests": 778,
+        "requested_bytes": 90638,
+        "net_bytes": 22256,
+        "peak_bytes": 28787
+      }
+    },
+    "scroll_precise": {
+      "warm": {
+        "requests": 69.0,
+        "requested_bytes": 10135.0,
+        "net_bytes": 0.0,
+        "peak_bytes": 6353.0,
+        "image_bytes": 256.0,
+        "copied_pixels": 64.0
+      },
+      "first_update": {
+        "requests": 75,
+        "requested_bytes": 10775,
+        "net_bytes": 352,
+        "peak_bytes": 6705,
+        "image_bytes": 256,
+        "copied_pixels": 64
+      },
+      "mount": {
+        "requests": 45,
+        "requested_bytes": 8420,
+        "net_bytes": 6868,
+        "peak_bytes": 6972
+      },
+      "first_presentation": {
+        "requests": 778,
+        "requested_bytes": 90646,
+        "net_bytes": 22264,
+        "peak_bytes": 28795
+      }
+    },
+    "candidate": {
+      "warm": {
+        "requests": 69.0,
+        "requested_bytes": 10135.0,
+        "net_bytes": 0.0,
+        "peak_bytes": 6353.0,
+        "image_bytes": 256.0,
+        "copied_pixels": 64.0
+      },
+      "first_update": {
+        "requests": 75,
+        "requested_bytes": 10775,
+        "net_bytes": 352,
+        "peak_bytes": 6705,
+        "image_bytes": 256,
+        "copied_pixels": 64
+      },
+      "mount": {
+        "requests": 45,
+        "requested_bytes": 8420,
+        "net_bytes": 6868,
+        "peak_bytes": 6972
+      },
+      "first_presentation": {
+        "requests": 778,
+        "requested_bytes": 90646,
+        "net_bytes": 22264,
+        "peak_bytes": 28795
+      }
+    }
+  },
+  "flat-full": {
+    "control": {
+      "warm": {
+        "requests": 69.0,
+        "requested_bytes": 10135.0,
+        "net_bytes": 0.0,
+        "peak_bytes": 6353.0,
+        "image_bytes": 1048576.0,
+        "copied_pixels": 262144.0
+      },
+      "first_update": {
+        "requests": 75,
+        "requested_bytes": 10775,
+        "net_bytes": 352,
+        "peak_bytes": 6705,
+        "image_bytes": 1048576,
+        "copied_pixels": 262144
+      },
+      "mount": {
+        "requests": 45,
+        "requested_bytes": 8420,
+        "net_bytes": 6868,
+        "peak_bytes": 6972
+      },
+      "first_presentation": {
+        "requests": 785,
+        "requested_bytes": 103404,
+        "net_bytes": 34511,
+        "peak_bytes": 41042
+      }
+    },
+    "bounds": {
+      "warm": {
+        "requests": 69.0,
+        "requested_bytes": 10135.0,
+        "net_bytes": 0.0,
+        "peak_bytes": 6353.0,
+        "image_bytes": 1048576.0,
+        "copied_pixels": 262144.0
+      },
+      "first_update": {
+        "requests": 75,
+        "requested_bytes": 10775,
+        "net_bytes": 352,
+        "peak_bytes": 6705,
+        "image_bytes": 1048576,
+        "copied_pixels": 262144
+      },
+      "mount": {
+        "requests": 45,
+        "requested_bytes": 8420,
+        "net_bytes": 6868,
+        "peak_bytes": 6972
+      },
+      "first_presentation": {
+        "requests": 785,
+        "requested_bytes": 103404,
+        "net_bytes": 34511,
+        "peak_bytes": 41042
+      }
+    },
+    "predecessor": {
+      "warm": {
+        "requests": 69.0,
+        "requested_bytes": 10135.0,
+        "net_bytes": 0.0,
+        "peak_bytes": 6353.0,
+        "image_bytes": 1048576.0,
+        "copied_pixels": 262144.0
+      },
+      "first_update": {
+        "requests": 75,
+        "requested_bytes": 10775,
+        "net_bytes": 352,
+        "peak_bytes": 6705,
+        "image_bytes": 1048576,
+        "copied_pixels": 262144
+      },
+      "mount": {
+        "requests": 45,
+        "requested_bytes": 8420,
+        "net_bytes": 6868,
+        "peak_bytes": 6972
+      },
+      "first_presentation": {
+        "requests": 785,
+        "requested_bytes": 103404,
+        "net_bytes": 34511,
+        "peak_bytes": 41042
+      }
+    },
+    "scroll_precise": {
+      "warm": {
+        "requests": 69.0,
+        "requested_bytes": 10135.0,
+        "net_bytes": 0.0,
+        "peak_bytes": 6353.0,
+        "image_bytes": 1048576.0,
+        "copied_pixels": 262144.0
+      },
+      "first_update": {
+        "requests": 75,
+        "requested_bytes": 10775,
+        "net_bytes": 352,
+        "peak_bytes": 6705,
+        "image_bytes": 1048576,
+        "copied_pixels": 262144
+      },
+      "mount": {
+        "requests": 45,
+        "requested_bytes": 8420,
+        "net_bytes": 6868,
+        "peak_bytes": 6972
+      },
+      "first_presentation": {
+        "requests": 785,
+        "requested_bytes": 103412,
+        "net_bytes": 34519,
+        "peak_bytes": 41050
+      }
+    },
+    "candidate": {
+      "warm": {
+        "requests": 69.0,
+        "requested_bytes": 10135.0,
+        "net_bytes": 0.0,
+        "peak_bytes": 6353.0,
+        "image_bytes": 1048576.0,
+        "copied_pixels": 262144.0
+      },
+      "first_update": {
+        "requests": 75,
+        "requested_bytes": 10775,
+        "net_bytes": 352,
+        "peak_bytes": 6705,
+        "image_bytes": 1048576,
+        "copied_pixels": 262144
+      },
+      "mount": {
+        "requests": 45,
+        "requested_bytes": 8420,
+        "net_bytes": 6868,
+        "peak_bytes": 6972
+      },
+      "first_presentation": {
+        "requests": 785,
+        "requested_bytes": 103412,
+        "net_bytes": 34519,
+        "peak_bytes": 41050
+      }
+    }
+  },
+  "list-tiny": {
+    "control": {
+      "warm": {
+        "requests": 210.0,
+        "requested_bytes": 61089.0,
+        "net_bytes": 312.0,
+        "peak_bytes": 12093.0,
+        "image_bytes": 4096.0,
+        "copied_pixels": 1024.0
+      },
+      "first_update": {
+        "requests": 257,
+        "requested_bytes": 80772,
+        "net_bytes": 6438,
+        "peak_bytes": 15147,
+        "image_bytes": 4096,
+        "copied_pixels": 1024
+      },
+      "mount": {
+        "requests": 134,
+        "requested_bytes": 53675,
+        "net_bytes": 28519,
+        "peak_bytes": 29239
+      },
+      "first_presentation": {
+        "requests": 794,
+        "requested_bytes": 92832,
+        "net_bytes": 22508,
+        "peak_bytes": 29733
+      }
+    },
+    "bounds": {
+      "warm": {
+        "requests": 210.0,
+        "requested_bytes": 61089.0,
+        "net_bytes": 312.0,
+        "peak_bytes": 12093.0,
+        "image_bytes": 4096.0,
+        "copied_pixels": 1024.0
+      },
+      "first_update": {
+        "requests": 257,
+        "requested_bytes": 80772,
+        "net_bytes": 6438,
+        "peak_bytes": 15147,
+        "image_bytes": 4096,
+        "copied_pixels": 1024
+      },
+      "mount": {
+        "requests": 134,
+        "requested_bytes": 53675,
+        "net_bytes": 28519,
+        "peak_bytes": 29239
+      },
+      "first_presentation": {
+        "requests": 794,
+        "requested_bytes": 92832,
+        "net_bytes": 22508,
+        "peak_bytes": 29733
+      }
+    },
+    "predecessor": {
+      "warm": {
+        "requests": 210.0,
+        "requested_bytes": 61089.0,
+        "net_bytes": 312.0,
+        "peak_bytes": 12093.0,
+        "image_bytes": 4096.0,
+        "copied_pixels": 1024.0
+      },
+      "first_update": {
+        "requests": 257,
+        "requested_bytes": 80772,
+        "net_bytes": 6438,
+        "peak_bytes": 15147,
+        "image_bytes": 4096,
+        "copied_pixels": 1024
+      },
+      "mount": {
+        "requests": 134,
+        "requested_bytes": 53675,
+        "net_bytes": 28519,
+        "peak_bytes": 29239
+      },
+      "first_presentation": {
+        "requests": 794,
+        "requested_bytes": 92832,
+        "net_bytes": 22508,
+        "peak_bytes": 29733
+      }
+    },
+    "scroll_precise": {
+      "warm": {
+        "requests": 216.0,
+        "requested_bytes": 61457.0,
+        "net_bytes": 312.0,
+        "peak_bytes": 12093.0,
+        "image_bytes": 5056.0,
+        "copied_pixels": 1504.0
+      },
+      "first_update": {
+        "requests": 272,
+        "requested_bytes": 82364,
+        "net_bytes": 7534,
+        "peak_bytes": 16267,
+        "image_bytes": 5056,
+        "copied_pixels": 1504
+      },
+      "mount": {
+        "requests": 134,
+        "requested_bytes": 53683,
+        "net_bytes": 28527,
+        "peak_bytes": 29247
+      },
+      "first_presentation": {
+        "requests": 794,
+        "requested_bytes": 92840,
+        "net_bytes": 22516,
+        "peak_bytes": 29741
+      }
+    },
+    "candidate": {
+      "warm": {
+        "requests": 216.0,
+        "requested_bytes": 61457.0,
+        "net_bytes": 312.0,
+        "peak_bytes": 12093.0,
+        "image_bytes": 5056.0,
+        "copied_pixels": 1504.0
+      },
+      "first_update": {
+        "requests": 272,
+        "requested_bytes": 82364,
+        "net_bytes": 7534,
+        "peak_bytes": 16267,
+        "image_bytes": 5056,
+        "copied_pixels": 1504
+      },
+      "mount": {
+        "requests": 134,
+        "requested_bytes": 53683,
+        "net_bytes": 28527,
+        "peak_bytes": 29247
+      },
+      "first_presentation": {
+        "requests": 794,
+        "requested_bytes": 92840,
+        "net_bytes": 22516,
+        "peak_bytes": 29741
+      }
+    }
+  },
+  "list-flat": {
+    "control": {
+      "warm": {
+        "requests": 261.5,
+        "requested_bytes": 107958.0,
+        "net_bytes": 304.0,
+        "peak_bytes": 22104.0,
+        "image_bytes": 2764800.0,
+        "copied_pixels": 691200.0
+      },
+      "first_update": {
+        "requests": 219,
+        "requested_bytes": 76826,
+        "net_bytes": 2904,
+        "peak_bytes": 21192,
+        "image_bytes": 2764800,
+        "copied_pixels": 691200
+      },
+      "mount": {
+        "requests": 207,
+        "requested_bytes": 132529,
+        "net_bytes": 60389,
+        "peak_bytes": 61613
+      },
+      "first_presentation": {
+        "requests": 794,
+        "requested_bytes": 137052,
+        "net_bytes": 66728,
+        "peak_bytes": 73953
+      }
+    },
+    "bounds": {
+      "warm": {
+        "requests": 261.5,
+        "requested_bytes": 107958.0,
+        "net_bytes": 304.0,
+        "peak_bytes": 22104.0,
+        "image_bytes": 2764800.0,
+        "copied_pixels": 691200.0
+      },
+      "first_update": {
+        "requests": 219,
+        "requested_bytes": 76826,
+        "net_bytes": 2904,
+        "peak_bytes": 21192,
+        "image_bytes": 2764800,
+        "copied_pixels": 691200
+      },
+      "mount": {
+        "requests": 207,
+        "requested_bytes": 132529,
+        "net_bytes": 60389,
+        "peak_bytes": 61613
+      },
+      "first_presentation": {
+        "requests": 794,
+        "requested_bytes": 137052,
+        "net_bytes": 66728,
+        "peak_bytes": 73953
+      }
+    },
+    "predecessor": {
+      "warm": {
+        "requests": 261.5,
+        "requested_bytes": 107958.0,
+        "net_bytes": 304.0,
+        "peak_bytes": 22104.0,
+        "image_bytes": 2764800.0,
+        "copied_pixels": 691200.0
+      },
+      "first_update": {
+        "requests": 219,
+        "requested_bytes": 76826,
+        "net_bytes": 2904,
+        "peak_bytes": 21192,
+        "image_bytes": 2764800,
+        "copied_pixels": 691200
+      },
+      "mount": {
+        "requests": 207,
+        "requested_bytes": 132529,
+        "net_bytes": 60389,
+        "peak_bytes": 61613
+      },
+      "first_presentation": {
+        "requests": 794,
+        "requested_bytes": 137052,
+        "net_bytes": 66728,
+        "peak_bytes": 73953
+      }
+    },
+    "scroll_precise": {
+      "warm": {
+        "requests": 267.5,
+        "requested_bytes": 108326.0,
+        "net_bytes": 304.0,
+        "peak_bytes": 22104.0,
+        "image_bytes": 4185280.0,
+        "copied_pixels": 1401440.0
+      },
+      "first_update": {
+        "requests": 234,
+        "requested_bytes": 78418,
+        "net_bytes": 4000,
+        "peak_bytes": 21192,
+        "image_bytes": 4185280,
+        "copied_pixels": 1401440
+      },
+      "mount": {
+        "requests": 207,
+        "requested_bytes": 132537,
+        "net_bytes": 60397,
+        "peak_bytes": 61621
+      },
+      "first_presentation": {
+        "requests": 794,
+        "requested_bytes": 137060,
+        "net_bytes": 66736,
+        "peak_bytes": 73961
+      }
+    },
+    "candidate": {
+      "warm": {
+        "requests": 267.5,
+        "requested_bytes": 108326.0,
+        "net_bytes": 304.0,
+        "peak_bytes": 22104.0,
+        "image_bytes": 4185280.0,
+        "copied_pixels": 1401440.0
+      },
+      "first_update": {
+        "requests": 234,
+        "requested_bytes": 78418,
+        "net_bytes": 4000,
+        "peak_bytes": 21192,
+        "image_bytes": 4185280,
+        "copied_pixels": 1401440
+      },
+      "mount": {
+        "requests": 207,
+        "requested_bytes": 132537,
+        "net_bytes": 60397,
+        "peak_bytes": 61621
+      },
+      "first_presentation": {
+        "requests": 794,
+        "requested_bytes": 137060,
+        "net_bytes": 66736,
+        "peak_bytes": 73961
+      }
+    }
+  },
+  "exposure": {
+    "control": {
+      "warm": {
+        "requests": 44.0,
+        "requested_bytes": 8024.0,
+        "net_bytes": 0.0,
+        "peak_bytes": 5218.0,
+        "image_bytes": 2764800.0,
+        "copied_pixels": 691200.0
+      },
+      "first_update": {
+        "requests": 44,
+        "requested_bytes": 8024,
+        "net_bytes": 0,
+        "peak_bytes": 5218,
+        "image_bytes": 2764800,
+        "copied_pixels": 691200
+      },
+      "mount": {
+        "requests": 1206,
+        "requested_bytes": 1321567,
+        "net_bytes": 1015003,
+        "peak_bytes": 1028543
+      },
+      "first_presentation": {
+        "requests": 1074,
+        "requested_bytes": 238856,
+        "net_bytes": 129504,
+        "peak_bytes": 152115
+      }
+    },
+    "bounds": {
+      "warm": {
+        "requests": 44.0,
+        "requested_bytes": 8024.0,
+        "net_bytes": 0.0,
+        "peak_bytes": 5218.0,
+        "image_bytes": 2764800.0,
+        "copied_pixels": 691200.0
+      },
+      "first_update": {
+        "requests": 44,
+        "requested_bytes": 8024,
+        "net_bytes": 0,
+        "peak_bytes": 5218,
+        "image_bytes": 2764800,
+        "copied_pixels": 691200
+      },
+      "mount": {
+        "requests": 1206,
+        "requested_bytes": 1321567,
+        "net_bytes": 1015003,
+        "peak_bytes": 1028543
+      },
+      "first_presentation": {
+        "requests": 1074,
+        "requested_bytes": 238856,
+        "net_bytes": 129504,
+        "peak_bytes": 152115
+      }
+    },
+    "predecessor": {
+      "warm": {
+        "requests": 44.0,
+        "requested_bytes": 8024.0,
+        "net_bytes": 0.0,
+        "peak_bytes": 5218.0,
+        "image_bytes": 2764800.0,
+        "copied_pixels": 691200.0
+      },
+      "first_update": {
+        "requests": 44,
+        "requested_bytes": 8024,
+        "net_bytes": 0,
+        "peak_bytes": 5218,
+        "image_bytes": 2764800,
+        "copied_pixels": 691200
+      },
+      "mount": {
+        "requests": 1206,
+        "requested_bytes": 1321567,
+        "net_bytes": 1015003,
+        "peak_bytes": 1028543
+      },
+      "first_presentation": {
+        "requests": 1074,
+        "requested_bytes": 238856,
+        "net_bytes": 129504,
+        "peak_bytes": 152115
+      }
+    },
+    "scroll_precise": {
+      "warm": {
+        "requests": 44.0,
+        "requested_bytes": 8024.0,
+        "net_bytes": 0.0,
+        "peak_bytes": 5218.0,
+        "image_bytes": 2764800.0,
+        "copied_pixels": 691200.0
+      },
+      "first_update": {
+        "requests": 44,
+        "requested_bytes": 8024,
+        "net_bytes": 0,
+        "peak_bytes": 5218,
+        "image_bytes": 2764800,
+        "copied_pixels": 691200
+      },
+      "mount": {
+        "requests": 1206,
+        "requested_bytes": 1321575,
+        "net_bytes": 1015011,
+        "peak_bytes": 1028551
+      },
+      "first_presentation": {
+        "requests": 1074,
+        "requested_bytes": 238864,
+        "net_bytes": 129512,
+        "peak_bytes": 152123
+      }
+    },
+    "candidate": {
+      "warm": {
+        "requests": 44.0,
+        "requested_bytes": 8024.0,
+        "net_bytes": 0.0,
+        "peak_bytes": 5218.0,
+        "image_bytes": 2764800.0,
+        "copied_pixels": 691200.0
+      },
+      "first_update": {
+        "requests": 44,
+        "requested_bytes": 8024,
+        "net_bytes": 0,
+        "peak_bytes": 5218,
+        "image_bytes": 2764800,
+        "copied_pixels": 691200
+      },
+      "mount": {
+        "requests": 1206,
+        "requested_bytes": 1321575,
+        "net_bytes": 1015011,
+        "peak_bytes": 1028551
+      },
+      "first_presentation": {
+        "requests": 1074,
+        "requested_bytes": 238864,
+        "net_bytes": 129512,
+        "peak_bytes": 152123
+      }
+    }
+  },
+  "text-0-1-source": {
+    "control": {
+      "warm": {
+        "requests": 132.0,
+        "requested_bytes": 17193.0,
+        "net_bytes": 304.0,
+        "peak_bytes": 8277.0,
+        "image_bytes": 2764800.0,
+        "copied_pixels": 691200.0
+      },
+      "first_update": {
+        "requests": 141,
+        "requested_bytes": 18041,
+        "net_bytes": 776,
+        "peak_bytes": 8677,
+        "image_bytes": 2764800,
+        "copied_pixels": 691200
+      },
+      "mount": {
+        "requests": 482,
+        "requested_bytes": 171607,
+        "net_bytes": 85819,
+        "peak_bytes": 86582
+      },
+      "first_presentation": {
+        "requests": 1136,
+        "requested_bytes": 202504,
+        "net_bytes": 70472,
+        "peak_bytes": 103587
+      }
+    },
+    "bounds": {
+      "warm": {
+        "requests": 132.0,
+        "requested_bytes": 17193.0,
+        "net_bytes": 304.0,
+        "peak_bytes": 8277.0,
+        "image_bytes": 2764800.0,
+        "copied_pixels": 691200.0
+      },
+      "first_update": {
+        "requests": 141,
+        "requested_bytes": 18041,
+        "net_bytes": 776,
+        "peak_bytes": 8677,
+        "image_bytes": 2764800,
+        "copied_pixels": 691200
+      },
+      "mount": {
+        "requests": 482,
+        "requested_bytes": 171607,
+        "net_bytes": 85819,
+        "peak_bytes": 86582
+      },
+      "first_presentation": {
+        "requests": 1136,
+        "requested_bytes": 202504,
+        "net_bytes": 70472,
+        "peak_bytes": 103587
+      }
+    },
+    "predecessor": {
+      "warm": {
+        "requests": 132.0,
+        "requested_bytes": 17249.0,
+        "net_bytes": 304.0,
+        "peak_bytes": 8333.0,
+        "image_bytes": 2764800.0,
+        "copied_pixels": 691200.0
+      },
+      "first_update": {
+        "requests": 141,
+        "requested_bytes": 18097,
+        "net_bytes": 776,
+        "peak_bytes": 8733,
+        "image_bytes": 2764800,
+        "copied_pixels": 691200
+      },
+      "mount": {
+        "requests": 482,
+        "requested_bytes": 171607,
+        "net_bytes": 85819,
+        "peak_bytes": 86582
+      },
+      "first_presentation": {
+        "requests": 1136,
+        "requested_bytes": 202504,
+        "net_bytes": 70472,
+        "peak_bytes": 103587
+      }
+    },
+    "scroll_precise": {
+      "warm": {
+        "requests": 132.0,
+        "requested_bytes": 17249.0,
+        "net_bytes": 304.0,
+        "peak_bytes": 8333.0,
+        "image_bytes": 2764800.0,
+        "copied_pixels": 691200.0
+      },
+      "first_update": {
+        "requests": 141,
+        "requested_bytes": 18097,
+        "net_bytes": 776,
+        "peak_bytes": 8733,
+        "image_bytes": 2764800,
+        "copied_pixels": 691200
+      },
+      "mount": {
+        "requests": 482,
+        "requested_bytes": 171607,
+        "net_bytes": 85819,
+        "peak_bytes": 86582
+      },
+      "first_presentation": {
+        "requests": 1136,
+        "requested_bytes": 202512,
+        "net_bytes": 70480,
+        "peak_bytes": 103595
+      }
+    },
+    "candidate": {
+      "warm": {
+        "requests": 131.0,
+        "requested_bytes": 17153.0,
+        "net_bytes": 304.0,
+        "peak_bytes": 8237.0,
+        "image_bytes": 2764800.0,
+        "copied_pixels": 691200.0
+      },
+      "first_update": {
+        "requests": 141,
+        "requested_bytes": 18097,
+        "net_bytes": 872,
+        "peak_bytes": 8733,
+        "image_bytes": 2764800,
+        "copied_pixels": 691200
+      },
+      "mount": {
+        "requests": 482,
+        "requested_bytes": 171607,
+        "net_bytes": 85819,
+        "peak_bytes": 86582
+      },
+      "first_presentation": {
+        "requests": 1136,
+        "requested_bytes": 202512,
+        "net_bytes": 70480,
+        "peak_bytes": 103595
+      }
+    }
+  },
+  "text-0-1-owner": {
+    "control": {
+      "warm": {
+        "requests": 165.0,
+        "requested_bytes": 33119.0,
+        "net_bytes": 304.0,
+        "peak_bytes": 8653.0,
+        "image_bytes": 2764800.0,
+        "copied_pixels": 691200.0
+      },
+      "first_update": {
+        "requests": 174,
+        "requested_bytes": 33967,
+        "net_bytes": 776,
+        "peak_bytes": 9053,
+        "image_bytes": 2764800,
+        "copied_pixels": 691200
+      },
+      "mount": {
+        "requests": 482,
+        "requested_bytes": 171607,
+        "net_bytes": 85819,
+        "peak_bytes": 86582
+      },
+      "first_presentation": {
+        "requests": 1136,
+        "requested_bytes": 202504,
+        "net_bytes": 70472,
+        "peak_bytes": 103587
+      }
+    },
+    "bounds": {
+      "warm": {
+        "requests": 150.0,
+        "requested_bytes": 22697.0,
+        "net_bytes": 304.0,
+        "peak_bytes": 8277.0,
+        "image_bytes": 2764800.0,
+        "copied_pixels": 691200.0
+      },
+      "first_update": {
+        "requests": 159,
+        "requested_bytes": 23545,
+        "net_bytes": 776,
+        "peak_bytes": 8677,
+        "image_bytes": 2764800,
+        "copied_pixels": 691200
+      },
+      "mount": {
+        "requests": 482,
+        "requested_bytes": 171607,
+        "net_bytes": 85819,
+        "peak_bytes": 86582
+      },
+      "first_presentation": {
+        "requests": 1136,
+        "requested_bytes": 202504,
+        "net_bytes": 70472,
+        "peak_bytes": 103587
+      }
+    },
+    "predecessor": {
+      "warm": {
+        "requests": 150.0,
+        "requested_bytes": 22753.0,
+        "net_bytes": 304.0,
+        "peak_bytes": 8333.0,
+        "image_bytes": 2764800.0,
+        "copied_pixels": 691200.0
+      },
+      "first_update": {
+        "requests": 159,
+        "requested_bytes": 23601,
+        "net_bytes": 776,
+        "peak_bytes": 8733,
+        "image_bytes": 2764800,
+        "copied_pixels": 691200
+      },
+      "mount": {
+        "requests": 482,
+        "requested_bytes": 171607,
+        "net_bytes": 85819,
+        "peak_bytes": 86582
+      },
+      "first_presentation": {
+        "requests": 1136,
+        "requested_bytes": 202504,
+        "net_bytes": 70472,
+        "peak_bytes": 103587
+      }
+    },
+    "scroll_precise": {
+      "warm": {
+        "requests": 150.0,
+        "requested_bytes": 22753.0,
+        "net_bytes": 304.0,
+        "peak_bytes": 8333.0,
+        "image_bytes": 2764800.0,
+        "copied_pixels": 691200.0
+      },
+      "first_update": {
+        "requests": 159,
+        "requested_bytes": 23601,
+        "net_bytes": 776,
+        "peak_bytes": 8733,
+        "image_bytes": 2764800,
+        "copied_pixels": 691200
+      },
+      "mount": {
+        "requests": 482,
+        "requested_bytes": 171607,
+        "net_bytes": 85819,
+        "peak_bytes": 86582
+      },
+      "first_presentation": {
+        "requests": 1136,
+        "requested_bytes": 202512,
+        "net_bytes": 70480,
+        "peak_bytes": 103595
+      }
+    },
+    "candidate": {
+      "warm": {
+        "requests": 149.0,
+        "requested_bytes": 22657.0,
+        "net_bytes": 304.0,
+        "peak_bytes": 8237.0,
+        "image_bytes": 2764800.0,
+        "copied_pixels": 691200.0
+      },
+      "first_update": {
+        "requests": 159,
+        "requested_bytes": 23601,
+        "net_bytes": 872,
+        "peak_bytes": 8733,
+        "image_bytes": 2764800,
+        "copied_pixels": 691200
+      },
+      "mount": {
+        "requests": 482,
+        "requested_bytes": 171607,
+        "net_bytes": 85819,
+        "peak_bytes": 86582
+      },
+      "first_presentation": {
+        "requests": 1136,
+        "requested_bytes": 202512,
+        "net_bytes": 70480,
+        "peak_bytes": 103595
+      }
+    }
+  },
+  "text-0-2-source": {
+    "control": {
+      "warm": {
+        "requests": 171.0,
+        "requested_bytes": 29799.0,
+        "net_bytes": 304.0,
+        "peak_bytes": 9149.0,
+        "image_bytes": 2764800.0,
+        "copied_pixels": 691200.0
+      },
+      "first_update": {
+        "requests": 180,
+        "requested_bytes": 30647,
+        "net_bytes": 776,
+        "peak_bytes": 9549,
+        "image_bytes": 2764800,
+        "copied_pixels": 691200
+      },
+      "mount": {
+        "requests": 496,
+        "requested_bytes": 173839,
+        "net_bytes": 87451,
+        "peak_bytes": 87656
+      },
+      "first_presentation": {
+        "requests": 1136,
+        "requested_bytes": 202784,
+        "net_bytes": 70752,
+        "peak_bytes": 103867
+      }
+    },
+    "bounds": {
+      "warm": {
+        "requests": 171.0,
+        "requested_bytes": 29799.0,
+        "net_bytes": 304.0,
+        "peak_bytes": 9149.0,
+        "image_bytes": 2764800.0,
+        "copied_pixels": 691200.0
+      },
+      "first_update": {
+        "requests": 180,
+        "requested_bytes": 30647,
+        "net_bytes": 776,
+        "peak_bytes": 9549,
+        "image_bytes": 2764800,
+        "copied_pixels": 691200
+      },
+      "mount": {
+        "requests": 496,
+        "requested_bytes": 173839,
+        "net_bytes": 87451,
+        "peak_bytes": 87656
+      },
+      "first_presentation": {
+        "requests": 1136,
+        "requested_bytes": 202784,
+        "net_bytes": 70752,
+        "peak_bytes": 103867
+      }
+    },
+    "predecessor": {
+      "warm": {
+        "requests": 171.0,
+        "requested_bytes": 29855.0,
+        "net_bytes": 304.0,
+        "peak_bytes": 9149.0,
+        "image_bytes": 2764800.0,
+        "copied_pixels": 691200.0
+      },
+      "first_update": {
+        "requests": 180,
+        "requested_bytes": 30703,
+        "net_bytes": 776,
+        "peak_bytes": 9549,
+        "image_bytes": 2764800,
+        "copied_pixels": 691200
+      },
+      "mount": {
+        "requests": 496,
+        "requested_bytes": 173839,
+        "net_bytes": 87451,
+        "peak_bytes": 87656
+      },
+      "first_presentation": {
+        "requests": 1136,
+        "requested_bytes": 202784,
+        "net_bytes": 70752,
+        "peak_bytes": 103867
+      }
+    },
+    "scroll_precise": {
+      "warm": {
+        "requests": 171.0,
+        "requested_bytes": 29855.0,
+        "net_bytes": 304.0,
+        "peak_bytes": 9149.0,
+        "image_bytes": 2764800.0,
+        "copied_pixels": 691200.0
+      },
+      "first_update": {
+        "requests": 180,
+        "requested_bytes": 30703,
+        "net_bytes": 776,
+        "peak_bytes": 9549,
+        "image_bytes": 2764800,
+        "copied_pixels": 691200
+      },
+      "mount": {
+        "requests": 496,
+        "requested_bytes": 173839,
+        "net_bytes": 87451,
+        "peak_bytes": 87656
+      },
+      "first_presentation": {
+        "requests": 1136,
+        "requested_bytes": 202792,
+        "net_bytes": 70760,
+        "peak_bytes": 103875
+      }
+    },
+    "candidate": {
+      "warm": {
+        "requests": 170.0,
+        "requested_bytes": 29759.0,
+        "net_bytes": 304.0,
+        "peak_bytes": 9149.0,
+        "image_bytes": 2764800.0,
+        "copied_pixels": 691200.0
+      },
+      "first_update": {
+        "requests": 180,
+        "requested_bytes": 30703,
+        "net_bytes": 872,
+        "peak_bytes": 9645,
+        "image_bytes": 2764800,
+        "copied_pixels": 691200
+      },
+      "mount": {
+        "requests": 496,
+        "requested_bytes": 173839,
+        "net_bytes": 87451,
+        "peak_bytes": 87656
+      },
+      "first_presentation": {
+        "requests": 1136,
+        "requested_bytes": 202792,
+        "net_bytes": 70760,
+        "peak_bytes": 103875
+      }
+    }
+  },
+  "text-0-2-owner": {
+    "control": {
+      "warm": {
+        "requests": 178.0,
+        "requested_bytes": 34659.0,
+        "net_bytes": 304.0,
+        "peak_bytes": 9149.0,
+        "image_bytes": 2764800.0,
+        "copied_pixels": 691200.0
+      },
+      "first_update": {
+        "requests": 187,
+        "requested_bytes": 35507,
+        "net_bytes": 776,
+        "peak_bytes": 9549,
+        "image_bytes": 2764800,
+        "copied_pixels": 691200
+      },
+      "mount": {
+        "requests": 496,
+        "requested_bytes": 173839,
+        "net_bytes": 87451,
+        "peak_bytes": 87656
+      },
+      "first_presentation": {
+        "requests": 1136,
+        "requested_bytes": 202784,
+        "net_bytes": 70752,
+        "peak_bytes": 103867
+      }
+    },
+    "bounds": {
+      "warm": {
+        "requests": 178.0,
+        "requested_bytes": 34659.0,
+        "net_bytes": 304.0,
+        "peak_bytes": 9149.0,
+        "image_bytes": 2764800.0,
+        "copied_pixels": 691200.0
+      },
+      "first_update": {
+        "requests": 187,
+        "requested_bytes": 35507,
+        "net_bytes": 776,
+        "peak_bytes": 9549,
+        "image_bytes": 2764800,
+        "copied_pixels": 691200
+      },
+      "mount": {
+        "requests": 496,
+        "requested_bytes": 173839,
+        "net_bytes": 87451,
+        "peak_bytes": 87656
+      },
+      "first_presentation": {
+        "requests": 1136,
+        "requested_bytes": 202784,
+        "net_bytes": 70752,
+        "peak_bytes": 103867
+      }
+    },
+    "predecessor": {
+      "warm": {
+        "requests": 178.0,
+        "requested_bytes": 34659.0,
+        "net_bytes": 304.0,
+        "peak_bytes": 9149.0,
+        "image_bytes": 2764800.0,
+        "copied_pixels": 691200.0
+      },
+      "first_update": {
+        "requests": 187,
+        "requested_bytes": 35507,
+        "net_bytes": 776,
+        "peak_bytes": 9549,
+        "image_bytes": 2764800,
+        "copied_pixels": 691200
+      },
+      "mount": {
+        "requests": 496,
+        "requested_bytes": 173839,
+        "net_bytes": 87451,
+        "peak_bytes": 87656
+      },
+      "first_presentation": {
+        "requests": 1136,
+        "requested_bytes": 202784,
+        "net_bytes": 70752,
+        "peak_bytes": 103867
+      }
+    },
+    "scroll_precise": {
+      "warm": {
+        "requests": 178.0,
+        "requested_bytes": 34659.0,
+        "net_bytes": 304.0,
+        "peak_bytes": 9149.0,
+        "image_bytes": 2764800.0,
+        "copied_pixels": 691200.0
+      },
+      "first_update": {
+        "requests": 187,
+        "requested_bytes": 35507,
+        "net_bytes": 776,
+        "peak_bytes": 9549,
+        "image_bytes": 2764800,
+        "copied_pixels": 691200
+      },
+      "mount": {
+        "requests": 496,
+        "requested_bytes": 173839,
+        "net_bytes": 87451,
+        "peak_bytes": 87656
+      },
+      "first_presentation": {
+        "requests": 1136,
+        "requested_bytes": 202792,
+        "net_bytes": 70760,
+        "peak_bytes": 103875
+      }
+    },
+    "candidate": {
+      "warm": {
+        "requests": 178.0,
+        "requested_bytes": 34659.0,
+        "net_bytes": 304.0,
+        "peak_bytes": 9149.0,
+        "image_bytes": 2764800.0,
+        "copied_pixels": 691200.0
+      },
+      "first_update": {
+        "requests": 187,
+        "requested_bytes": 35507,
+        "net_bytes": 776,
+        "peak_bytes": 9549,
+        "image_bytes": 2764800,
+        "copied_pixels": 691200
+      },
+      "mount": {
+        "requests": 496,
+        "requested_bytes": 173839,
+        "net_bytes": 87451,
+        "peak_bytes": 87656
+      },
+      "first_presentation": {
+        "requests": 1136,
+        "requested_bytes": 202792,
+        "net_bytes": 70760,
+        "peak_bytes": 103875
+      }
+    }
+  },
+  "text-0-4-source": {
+    "control": {
+      "warm": {
+        "requests": 255.0,
+        "requested_bytes": 57891.0,
+        "net_bytes": 304.0,
+        "peak_bytes": 10237.0,
+        "image_bytes": 2764800.0,
+        "copied_pixels": 691200.0
+      },
+      "first_update": {
+        "requests": 264,
+        "requested_bytes": 58739,
+        "net_bytes": 776,
+        "peak_bytes": 10637,
+        "image_bytes": 2764800,
+        "copied_pixels": 691200
+      },
+      "mount": {
+        "requests": 540,
+        "requested_bytes": 187658,
+        "net_bytes": 92214,
+        "peak_bytes": 92518
+      },
+      "first_presentation": {
+        "requests": 1136,
+        "requested_bytes": 203344,
+        "net_bytes": 71312,
+        "peak_bytes": 104427
+      }
+    },
+    "bounds": {
+      "warm": {
+        "requests": 255.0,
+        "requested_bytes": 57891.0,
+        "net_bytes": 304.0,
+        "peak_bytes": 10237.0,
+        "image_bytes": 2764800.0,
+        "copied_pixels": 691200.0
+      },
+      "first_update": {
+        "requests": 264,
+        "requested_bytes": 58739,
+        "net_bytes": 776,
+        "peak_bytes": 10637,
+        "image_bytes": 2764800,
+        "copied_pixels": 691200
+      },
+      "mount": {
+        "requests": 540,
+        "requested_bytes": 187658,
+        "net_bytes": 92214,
+        "peak_bytes": 92518
+      },
+      "first_presentation": {
+        "requests": 1136,
+        "requested_bytes": 203344,
+        "net_bytes": 71312,
+        "peak_bytes": 104427
+      }
+    },
+    "predecessor": {
+      "warm": {
+        "requests": 255.0,
+        "requested_bytes": 57947.0,
+        "net_bytes": 304.0,
+        "peak_bytes": 10237.0,
+        "image_bytes": 2764800.0,
+        "copied_pixels": 691200.0
+      },
+      "first_update": {
+        "requests": 264,
+        "requested_bytes": 58795,
+        "net_bytes": 776,
+        "peak_bytes": 10637,
+        "image_bytes": 2764800,
+        "copied_pixels": 691200
+      },
+      "mount": {
+        "requests": 540,
+        "requested_bytes": 187658,
+        "net_bytes": 92214,
+        "peak_bytes": 92518
+      },
+      "first_presentation": {
+        "requests": 1136,
+        "requested_bytes": 203344,
+        "net_bytes": 71312,
+        "peak_bytes": 104427
+      }
+    },
+    "scroll_precise": {
+      "warm": {
+        "requests": 255.0,
+        "requested_bytes": 57947.0,
+        "net_bytes": 304.0,
+        "peak_bytes": 10237.0,
+        "image_bytes": 2764800.0,
+        "copied_pixels": 691200.0
+      },
+      "first_update": {
+        "requests": 264,
+        "requested_bytes": 58795,
+        "net_bytes": 776,
+        "peak_bytes": 10637,
+        "image_bytes": 2764800,
+        "copied_pixels": 691200
+      },
+      "mount": {
+        "requests": 540,
+        "requested_bytes": 187658,
+        "net_bytes": 92214,
+        "peak_bytes": 92518
+      },
+      "first_presentation": {
+        "requests": 1136,
+        "requested_bytes": 203352,
+        "net_bytes": 71320,
+        "peak_bytes": 104435
+      }
+    },
+    "candidate": {
+      "warm": {
+        "requests": 254.0,
+        "requested_bytes": 57851.0,
+        "net_bytes": 304.0,
+        "peak_bytes": 10237.0,
+        "image_bytes": 2764800.0,
+        "copied_pixels": 691200.0
+      },
+      "first_update": {
+        "requests": 264,
+        "requested_bytes": 58795,
+        "net_bytes": 872,
+        "peak_bytes": 10733,
+        "image_bytes": 2764800,
+        "copied_pixels": 691200
+      },
+      "mount": {
+        "requests": 540,
+        "requested_bytes": 187658,
+        "net_bytes": 92214,
+        "peak_bytes": 92518
+      },
+      "first_presentation": {
+        "requests": 1136,
+        "requested_bytes": 203352,
+        "net_bytes": 71320,
+        "peak_bytes": 104435
+      }
+    }
+  },
+  "text-0-4-owner": {
+    "control": {
+      "warm": {
+        "requests": 209.0,
+        "requested_bytes": 44030.0,
+        "net_bytes": 304.0,
+        "peak_bytes": 10237.0,
+        "image_bytes": 2764800.0,
+        "copied_pixels": 691200.0
+      },
+      "first_update": {
+        "requests": 218,
+        "requested_bytes": 44878,
+        "net_bytes": 776,
+        "peak_bytes": 10637,
+        "image_bytes": 2764800,
+        "copied_pixels": 691200
+      },
+      "mount": {
+        "requests": 540,
+        "requested_bytes": 187658,
+        "net_bytes": 92214,
+        "peak_bytes": 92518
+      },
+      "first_presentation": {
+        "requests": 1136,
+        "requested_bytes": 203344,
+        "net_bytes": 71312,
+        "peak_bytes": 104427
+      }
+    },
+    "bounds": {
+      "warm": {
+        "requests": 209.0,
+        "requested_bytes": 44030.0,
+        "net_bytes": 304.0,
+        "peak_bytes": 10237.0,
+        "image_bytes": 2764800.0,
+        "copied_pixels": 691200.0
+      },
+      "first_update": {
+        "requests": 218,
+        "requested_bytes": 44878,
+        "net_bytes": 776,
+        "peak_bytes": 10637,
+        "image_bytes": 2764800,
+        "copied_pixels": 691200
+      },
+      "mount": {
+        "requests": 540,
+        "requested_bytes": 187658,
+        "net_bytes": 92214,
+        "peak_bytes": 92518
+      },
+      "first_presentation": {
+        "requests": 1136,
+        "requested_bytes": 203344,
+        "net_bytes": 71312,
+        "peak_bytes": 104427
+      }
+    },
+    "predecessor": {
+      "warm": {
+        "requests": 209.0,
+        "requested_bytes": 44030.0,
+        "net_bytes": 304.0,
+        "peak_bytes": 10237.0,
+        "image_bytes": 2764800.0,
+        "copied_pixels": 691200.0
+      },
+      "first_update": {
+        "requests": 218,
+        "requested_bytes": 44878,
+        "net_bytes": 776,
+        "peak_bytes": 10637,
+        "image_bytes": 2764800,
+        "copied_pixels": 691200
+      },
+      "mount": {
+        "requests": 540,
+        "requested_bytes": 187658,
+        "net_bytes": 92214,
+        "peak_bytes": 92518
+      },
+      "first_presentation": {
+        "requests": 1136,
+        "requested_bytes": 203344,
+        "net_bytes": 71312,
+        "peak_bytes": 104427
+      }
+    },
+    "scroll_precise": {
+      "warm": {
+        "requests": 209.0,
+        "requested_bytes": 44030.0,
+        "net_bytes": 304.0,
+        "peak_bytes": 10237.0,
+        "image_bytes": 2764800.0,
+        "copied_pixels": 691200.0
+      },
+      "first_update": {
+        "requests": 218,
+        "requested_bytes": 44878,
+        "net_bytes": 776,
+        "peak_bytes": 10637,
+        "image_bytes": 2764800,
+        "copied_pixels": 691200
+      },
+      "mount": {
+        "requests": 540,
+        "requested_bytes": 187658,
+        "net_bytes": 92214,
+        "peak_bytes": 92518
+      },
+      "first_presentation": {
+        "requests": 1136,
+        "requested_bytes": 203352,
+        "net_bytes": 71320,
+        "peak_bytes": 104435
+      }
+    },
+    "candidate": {
+      "warm": {
+        "requests": 209.0,
+        "requested_bytes": 44030.0,
+        "net_bytes": 304.0,
+        "peak_bytes": 10237.0,
+        "image_bytes": 2764800.0,
+        "copied_pixels": 691200.0
+      },
+      "first_update": {
+        "requests": 218,
+        "requested_bytes": 44878,
+        "net_bytes": 776,
+        "peak_bytes": 10637,
+        "image_bytes": 2764800,
+        "copied_pixels": 691200
+      },
+      "mount": {
+        "requests": 540,
+        "requested_bytes": 187658,
+        "net_bytes": 92214,
+        "peak_bytes": 92518
+      },
+      "first_presentation": {
+        "requests": 1136,
+        "requested_bytes": 203352,
+        "net_bytes": 71320,
+        "peak_bytes": 104435
+      }
+    }
+  },
+  "text-25-1-source": {
+    "control": {
+      "warm": {
+        "requests": 132.0,
+        "requested_bytes": 17193.0,
+        "net_bytes": 304.0,
+        "peak_bytes": 8277.0,
+        "image_bytes": 2764800.0,
+        "copied_pixels": 691200.0
+      },
+      "first_update": {
+        "requests": 141,
+        "requested_bytes": 18041,
+        "net_bytes": 776,
+        "peak_bytes": 8677,
+        "image_bytes": 2764800,
+        "copied_pixels": 691200
+      },
+      "mount": {
+        "requests": 887,
+        "requested_bytes": 298486,
+        "net_bytes": 147446,
+        "peak_bytes": 150772
+      },
+      "first_presentation": {
+        "requests": 1156,
+        "requested_bytes": 211380,
+        "net_bytes": 78300,
+        "peak_bytes": 112015
+      }
+    },
+    "bounds": {
+      "warm": {
+        "requests": 132.0,
+        "requested_bytes": 17193.0,
+        "net_bytes": 304.0,
+        "peak_bytes": 8277.0,
+        "image_bytes": 2764800.0,
+        "copied_pixels": 691200.0
+      },
+      "first_update": {
+        "requests": 141,
+        "requested_bytes": 18041,
+        "net_bytes": 776,
+        "peak_bytes": 8677,
+        "image_bytes": 2764800,
+        "copied_pixels": 691200
+      },
+      "mount": {
+        "requests": 887,
+        "requested_bytes": 298486,
+        "net_bytes": 147446,
+        "peak_bytes": 150772
+      },
+      "first_presentation": {
+        "requests": 1156,
+        "requested_bytes": 211380,
+        "net_bytes": 78300,
+        "peak_bytes": 112015
+      }
+    },
+    "predecessor": {
+      "warm": {
+        "requests": 132.0,
+        "requested_bytes": 17249.0,
+        "net_bytes": 304.0,
+        "peak_bytes": 8333.0,
+        "image_bytes": 2764800.0,
+        "copied_pixels": 691200.0
+      },
+      "first_update": {
+        "requests": 141,
+        "requested_bytes": 18097,
+        "net_bytes": 776,
+        "peak_bytes": 8733,
+        "image_bytes": 2764800,
+        "copied_pixels": 691200
+      },
+      "mount": {
+        "requests": 887,
+        "requested_bytes": 298486,
+        "net_bytes": 147446,
+        "peak_bytes": 150772
+      },
+      "first_presentation": {
+        "requests": 1156,
+        "requested_bytes": 211380,
+        "net_bytes": 78300,
+        "peak_bytes": 112015
+      }
+    },
+    "scroll_precise": {
+      "warm": {
+        "requests": 132.0,
+        "requested_bytes": 17249.0,
+        "net_bytes": 304.0,
+        "peak_bytes": 8333.0,
+        "image_bytes": 2764800.0,
+        "copied_pixels": 691200.0
+      },
+      "first_update": {
+        "requests": 141,
+        "requested_bytes": 18097,
+        "net_bytes": 776,
+        "peak_bytes": 8733,
+        "image_bytes": 2764800,
+        "copied_pixels": 691200
+      },
+      "mount": {
+        "requests": 887,
+        "requested_bytes": 298486,
+        "net_bytes": 147446,
+        "peak_bytes": 150772
+      },
+      "first_presentation": {
+        "requests": 1156,
+        "requested_bytes": 211388,
+        "net_bytes": 78308,
+        "peak_bytes": 112023
+      }
+    },
+    "candidate": {
+      "warm": {
+        "requests": 131.0,
+        "requested_bytes": 17153.0,
+        "net_bytes": 304.0,
+        "peak_bytes": 8237.0,
+        "image_bytes": 2764800.0,
+        "copied_pixels": 691200.0
+      },
+      "first_update": {
+        "requests": 141,
+        "requested_bytes": 18097,
+        "net_bytes": 872,
+        "peak_bytes": 8733,
+        "image_bytes": 2764800,
+        "copied_pixels": 691200
+      },
+      "mount": {
+        "requests": 887,
+        "requested_bytes": 298486,
+        "net_bytes": 147446,
+        "peak_bytes": 150772
+      },
+      "first_presentation": {
+        "requests": 1156,
+        "requested_bytes": 211388,
+        "net_bytes": 78308,
+        "peak_bytes": 112023
+      }
+    }
+  },
+  "text-25-1-owner": {
+    "control": {
+      "warm": {
+        "requests": 204.0,
+        "requested_bytes": 92922.0,
+        "net_bytes": 304.0,
+        "peak_bytes": 23648.0,
+        "image_bytes": 2764800.0,
+        "copied_pixels": 691200.0
+      },
+      "first_update": {
+        "requests": 213,
+        "requested_bytes": 93770,
+        "net_bytes": 776,
+        "peak_bytes": 23648,
+        "image_bytes": 2764800,
+        "copied_pixels": 691200
+      },
+      "mount": {
+        "requests": 887,
+        "requested_bytes": 298486,
+        "net_bytes": 147446,
+        "peak_bytes": 150772
+      },
+      "first_presentation": {
+        "requests": 1156,
+        "requested_bytes": 211380,
+        "net_bytes": 78300,
+        "peak_bytes": 112015
+      }
+    },
+    "bounds": {
+      "warm": {
+        "requests": 180.0,
+        "requested_bytes": 65576.0,
+        "net_bytes": 304.0,
+        "peak_bytes": 23648.0,
+        "image_bytes": 2764800.0,
+        "copied_pixels": 691200.0
+      },
+      "first_update": {
+        "requests": 189,
+        "requested_bytes": 66424,
+        "net_bytes": 776,
+        "peak_bytes": 23648,
+        "image_bytes": 2764800,
+        "copied_pixels": 691200
+      },
+      "mount": {
+        "requests": 887,
+        "requested_bytes": 298486,
+        "net_bytes": 147446,
+        "peak_bytes": 150772
+      },
+      "first_presentation": {
+        "requests": 1156,
+        "requested_bytes": 211380,
+        "net_bytes": 78300,
+        "peak_bytes": 112015
+      }
+    },
+    "predecessor": {
+      "warm": {
+        "requests": 180.0,
+        "requested_bytes": 65632.0,
+        "net_bytes": 304.0,
+        "peak_bytes": 23648.0,
+        "image_bytes": 2764800.0,
+        "copied_pixels": 691200.0
+      },
+      "first_update": {
+        "requests": 189,
+        "requested_bytes": 66480,
+        "net_bytes": 776,
+        "peak_bytes": 23648,
+        "image_bytes": 2764800,
+        "copied_pixels": 691200
+      },
+      "mount": {
+        "requests": 887,
+        "requested_bytes": 298486,
+        "net_bytes": 147446,
+        "peak_bytes": 150772
+      },
+      "first_presentation": {
+        "requests": 1156,
+        "requested_bytes": 211380,
+        "net_bytes": 78300,
+        "peak_bytes": 112015
+      }
+    },
+    "scroll_precise": {
+      "warm": {
+        "requests": 180.0,
+        "requested_bytes": 65632.0,
+        "net_bytes": 304.0,
+        "peak_bytes": 23648.0,
+        "image_bytes": 2764800.0,
+        "copied_pixels": 691200.0
+      },
+      "first_update": {
+        "requests": 189,
+        "requested_bytes": 66480,
+        "net_bytes": 776,
+        "peak_bytes": 23648,
+        "image_bytes": 2764800,
+        "copied_pixels": 691200
+      },
+      "mount": {
+        "requests": 887,
+        "requested_bytes": 298486,
+        "net_bytes": 147446,
+        "peak_bytes": 150772
+      },
+      "first_presentation": {
+        "requests": 1156,
+        "requested_bytes": 211388,
+        "net_bytes": 78308,
+        "peak_bytes": 112023
+      }
+    },
+    "candidate": {
+      "warm": {
+        "requests": 179.0,
+        "requested_bytes": 65536.0,
+        "net_bytes": 304.0,
+        "peak_bytes": 23648.0,
+        "image_bytes": 2764800.0,
+        "copied_pixels": 691200.0
+      },
+      "first_update": {
+        "requests": 189,
+        "requested_bytes": 66480,
+        "net_bytes": 872,
+        "peak_bytes": 23648,
+        "image_bytes": 2764800,
+        "copied_pixels": 691200
+      },
+      "mount": {
+        "requests": 887,
+        "requested_bytes": 298486,
+        "net_bytes": 147446,
+        "peak_bytes": 150772
+      },
+      "first_presentation": {
+        "requests": 1156,
+        "requested_bytes": 211388,
+        "net_bytes": 78308,
+        "peak_bytes": 112023
+      }
+    }
+  },
+  "text-25-2-source": {
+    "control": {
+      "warm": {
+        "requests": 180.0,
+        "requested_bytes": 46723.0,
+        "net_bytes": 304.0,
+        "peak_bytes": 18628.0,
+        "image_bytes": 2764800.0,
+        "copied_pixels": 691200.0
+      },
+      "first_update": {
+        "requests": 189,
+        "requested_bytes": 47571,
+        "net_bytes": 776,
+        "peak_bytes": 18628,
+        "image_bytes": 2764800,
+        "copied_pixels": 691200
+      },
+      "mount": {
+        "requests": 900,
+        "requested_bytes": 297952,
+        "net_bytes": 149152,
+        "peak_bytes": 152478
+      },
+      "first_presentation": {
+        "requests": 1156,
+        "requested_bytes": 211660,
+        "net_bytes": 78580,
+        "peak_bytes": 112295
+      }
+    },
+    "bounds": {
+      "warm": {
+        "requests": 180.0,
+        "requested_bytes": 46723.0,
+        "net_bytes": 304.0,
+        "peak_bytes": 18628.0,
+        "image_bytes": 2764800.0,
+        "copied_pixels": 691200.0
+      },
+      "first_update": {
+        "requests": 189,
+        "requested_bytes": 47571,
+        "net_bytes": 776,
+        "peak_bytes": 18628,
+        "image_bytes": 2764800,
+        "copied_pixels": 691200
+      },
+      "mount": {
+        "requests": 900,
+        "requested_bytes": 297952,
+        "net_bytes": 149152,
+        "peak_bytes": 152478
+      },
+      "first_presentation": {
+        "requests": 1156,
+        "requested_bytes": 211660,
+        "net_bytes": 78580,
+        "peak_bytes": 112295
+      }
+    },
+    "predecessor": {
+      "warm": {
+        "requests": 180.0,
+        "requested_bytes": 46779.0,
+        "net_bytes": 304.0,
+        "peak_bytes": 18684.0,
+        "image_bytes": 2764800.0,
+        "copied_pixels": 691200.0
+      },
+      "first_update": {
+        "requests": 189,
+        "requested_bytes": 47627,
+        "net_bytes": 776,
+        "peak_bytes": 18684,
+        "image_bytes": 2764800,
+        "copied_pixels": 691200
+      },
+      "mount": {
+        "requests": 900,
+        "requested_bytes": 297952,
+        "net_bytes": 149152,
+        "peak_bytes": 152478
+      },
+      "first_presentation": {
+        "requests": 1156,
+        "requested_bytes": 211660,
+        "net_bytes": 78580,
+        "peak_bytes": 112295
+      }
+    },
+    "scroll_precise": {
+      "warm": {
+        "requests": 180.0,
+        "requested_bytes": 46779.0,
+        "net_bytes": 304.0,
+        "peak_bytes": 18684.0,
+        "image_bytes": 2764800.0,
+        "copied_pixels": 691200.0
+      },
+      "first_update": {
+        "requests": 189,
+        "requested_bytes": 47627,
+        "net_bytes": 776,
+        "peak_bytes": 18684,
+        "image_bytes": 2764800,
+        "copied_pixels": 691200
+      },
+      "mount": {
+        "requests": 900,
+        "requested_bytes": 297952,
+        "net_bytes": 149152,
+        "peak_bytes": 152478
+      },
+      "first_presentation": {
+        "requests": 1156,
+        "requested_bytes": 211668,
+        "net_bytes": 78588,
+        "peak_bytes": 112303
+      }
+    },
+    "candidate": {
+      "warm": {
+        "requests": 179.0,
+        "requested_bytes": 46683.0,
+        "net_bytes": 304.0,
+        "peak_bytes": 18588.0,
+        "image_bytes": 2764800.0,
+        "copied_pixels": 691200.0
+      },
+      "first_update": {
+        "requests": 189,
+        "requested_bytes": 47627,
+        "net_bytes": 872,
+        "peak_bytes": 18684,
+        "image_bytes": 2764800,
+        "copied_pixels": 691200
+      },
+      "mount": {
+        "requests": 900,
+        "requested_bytes": 297952,
+        "net_bytes": 149152,
+        "peak_bytes": 152478
+      },
+      "first_presentation": {
+        "requests": 1156,
+        "requested_bytes": 211668,
+        "net_bytes": 78588,
+        "peak_bytes": 112303
+      }
+    }
+  },
+  "text-25-2-owner": {
+    "control": {
+      "warm": {
+        "requests": 216.0,
+        "requested_bytes": 91528.0,
+        "net_bytes": 304.0,
+        "peak_bytes": 24064.0,
+        "image_bytes": 2764800.0,
+        "copied_pixels": 691200.0
+      },
+      "first_update": {
+        "requests": 225,
+        "requested_bytes": 92376,
+        "net_bytes": 776,
+        "peak_bytes": 24064,
+        "image_bytes": 2764800,
+        "copied_pixels": 691200
+      },
+      "mount": {
+        "requests": 900,
+        "requested_bytes": 297952,
+        "net_bytes": 149152,
+        "peak_bytes": 152478
+      },
+      "first_presentation": {
+        "requests": 1156,
+        "requested_bytes": 211660,
+        "net_bytes": 78580,
+        "peak_bytes": 112295
+      }
+    },
+    "bounds": {
+      "warm": {
+        "requests": 216.0,
+        "requested_bytes": 91528.0,
+        "net_bytes": 304.0,
+        "peak_bytes": 24064.0,
+        "image_bytes": 2764800.0,
+        "copied_pixels": 691200.0
+      },
+      "first_update": {
+        "requests": 225,
+        "requested_bytes": 92376,
+        "net_bytes": 776,
+        "peak_bytes": 24064,
+        "image_bytes": 2764800,
+        "copied_pixels": 691200
+      },
+      "mount": {
+        "requests": 900,
+        "requested_bytes": 297952,
+        "net_bytes": 149152,
+        "peak_bytes": 152478
+      },
+      "first_presentation": {
+        "requests": 1156,
+        "requested_bytes": 211660,
+        "net_bytes": 78580,
+        "peak_bytes": 112295
+      }
+    },
+    "predecessor": {
+      "warm": {
+        "requests": 216.0,
+        "requested_bytes": 91528.0,
+        "net_bytes": 304.0,
+        "peak_bytes": 24064.0,
+        "image_bytes": 2764800.0,
+        "copied_pixels": 691200.0
+      },
+      "first_update": {
+        "requests": 225,
+        "requested_bytes": 92376,
+        "net_bytes": 776,
+        "peak_bytes": 24064,
+        "image_bytes": 2764800,
+        "copied_pixels": 691200
+      },
+      "mount": {
+        "requests": 900,
+        "requested_bytes": 297952,
+        "net_bytes": 149152,
+        "peak_bytes": 152478
+      },
+      "first_presentation": {
+        "requests": 1156,
+        "requested_bytes": 211660,
+        "net_bytes": 78580,
+        "peak_bytes": 112295
+      }
+    },
+    "scroll_precise": {
+      "warm": {
+        "requests": 216.0,
+        "requested_bytes": 91528.0,
+        "net_bytes": 304.0,
+        "peak_bytes": 24064.0,
+        "image_bytes": 2764800.0,
+        "copied_pixels": 691200.0
+      },
+      "first_update": {
+        "requests": 225,
+        "requested_bytes": 92376,
+        "net_bytes": 776,
+        "peak_bytes": 24064,
+        "image_bytes": 2764800,
+        "copied_pixels": 691200
+      },
+      "mount": {
+        "requests": 900,
+        "requested_bytes": 297952,
+        "net_bytes": 149152,
+        "peak_bytes": 152478
+      },
+      "first_presentation": {
+        "requests": 1156,
+        "requested_bytes": 211668,
+        "net_bytes": 78588,
+        "peak_bytes": 112303
+      }
+    },
+    "candidate": {
+      "warm": {
+        "requests": 216.0,
+        "requested_bytes": 91528.0,
+        "net_bytes": 304.0,
+        "peak_bytes": 24064.0,
+        "image_bytes": 2764800.0,
+        "copied_pixels": 691200.0
+      },
+      "first_update": {
+        "requests": 225,
+        "requested_bytes": 92376,
+        "net_bytes": 776,
+        "peak_bytes": 24064,
+        "image_bytes": 2764800,
+        "copied_pixels": 691200
+      },
+      "mount": {
+        "requests": 900,
+        "requested_bytes": 297952,
+        "net_bytes": 149152,
+        "peak_bytes": 152478
+      },
+      "first_presentation": {
+        "requests": 1156,
+        "requested_bytes": 211668,
+        "net_bytes": 78588,
+        "peak_bytes": 112303
+      }
+    }
+  },
+  "text-25-4-source": {
+    "control": {
+      "warm": {
+        "requests": 276.0,
+        "requested_bytes": 106551.0,
+        "net_bytes": 304.0,
+        "peak_bytes": 24252.0,
+        "image_bytes": 2764800.0,
+        "copied_pixels": 691200.0
+      },
+      "first_update": {
+        "requests": 285,
+        "requested_bytes": 107399,
+        "net_bytes": 776,
+        "peak_bytes": 24252,
+        "image_bytes": 2764800,
+        "copied_pixels": 691200
+      },
+      "mount": {
+        "requests": 931,
+        "requested_bytes": 308988,
+        "net_bytes": 155095,
+        "peak_bytes": 158525
+      },
+      "first_presentation": {
+        "requests": 1156,
+        "requested_bytes": 212220,
+        "net_bytes": 79140,
+        "peak_bytes": 112855
+      }
+    },
+    "bounds": {
+      "warm": {
+        "requests": 276.0,
+        "requested_bytes": 106551.0,
+        "net_bytes": 304.0,
+        "peak_bytes": 24252.0,
+        "image_bytes": 2764800.0,
+        "copied_pixels": 691200.0
+      },
+      "first_update": {
+        "requests": 285,
+        "requested_bytes": 107399,
+        "net_bytes": 776,
+        "peak_bytes": 24252,
+        "image_bytes": 2764800,
+        "copied_pixels": 691200
+      },
+      "mount": {
+        "requests": 931,
+        "requested_bytes": 308988,
+        "net_bytes": 155095,
+        "peak_bytes": 158525
+      },
+      "first_presentation": {
+        "requests": 1156,
+        "requested_bytes": 212220,
+        "net_bytes": 79140,
+        "peak_bytes": 112855
+      }
+    },
+    "predecessor": {
+      "warm": {
+        "requests": 276.0,
+        "requested_bytes": 106607.0,
+        "net_bytes": 304.0,
+        "peak_bytes": 24252.0,
+        "image_bytes": 2764800.0,
+        "copied_pixels": 691200.0
+      },
+      "first_update": {
+        "requests": 285,
+        "requested_bytes": 107455,
+        "net_bytes": 776,
+        "peak_bytes": 24252,
+        "image_bytes": 2764800,
+        "copied_pixels": 691200
+      },
+      "mount": {
+        "requests": 931,
+        "requested_bytes": 308988,
+        "net_bytes": 155095,
+        "peak_bytes": 158525
+      },
+      "first_presentation": {
+        "requests": 1156,
+        "requested_bytes": 212220,
+        "net_bytes": 79140,
+        "peak_bytes": 112855
+      }
+    },
+    "scroll_precise": {
+      "warm": {
+        "requests": 276.0,
+        "requested_bytes": 106607.0,
+        "net_bytes": 304.0,
+        "peak_bytes": 24252.0,
+        "image_bytes": 2764800.0,
+        "copied_pixels": 691200.0
+      },
+      "first_update": {
+        "requests": 285,
+        "requested_bytes": 107455,
+        "net_bytes": 776,
+        "peak_bytes": 24252,
+        "image_bytes": 2764800,
+        "copied_pixels": 691200
+      },
+      "mount": {
+        "requests": 931,
+        "requested_bytes": 308988,
+        "net_bytes": 155095,
+        "peak_bytes": 158525
+      },
+      "first_presentation": {
+        "requests": 1156,
+        "requested_bytes": 212228,
+        "net_bytes": 79148,
+        "peak_bytes": 112863
+      }
+    },
+    "candidate": {
+      "warm": {
+        "requests": 275.0,
+        "requested_bytes": 106511.0,
+        "net_bytes": 304.0,
+        "peak_bytes": 24252.0,
+        "image_bytes": 2764800.0,
+        "copied_pixels": 691200.0
+      },
+      "first_update": {
+        "requests": 285,
+        "requested_bytes": 107455,
+        "net_bytes": 872,
+        "peak_bytes": 24348,
+        "image_bytes": 2764800,
+        "copied_pixels": 691200
+      },
+      "mount": {
+        "requests": 931,
+        "requested_bytes": 308988,
+        "net_bytes": 155095,
+        "peak_bytes": 158525
+      },
+      "first_presentation": {
+        "requests": 1156,
+        "requested_bytes": 212228,
+        "net_bytes": 79148,
+        "peak_bytes": 112863
+      }
+    }
+  },
+  "text-25-4-owner": {
+    "control": {
+      "warm": {
+        "requests": 243.0,
+        "requested_bytes": 100548.0,
+        "net_bytes": 304.0,
+        "peak_bytes": 25949.0,
+        "image_bytes": 2764800.0,
+        "copied_pixels": 691200.0
+      },
+      "first_update": {
+        "requests": 252,
+        "requested_bytes": 101396,
+        "net_bytes": 776,
+        "peak_bytes": 25949,
+        "image_bytes": 2764800,
+        "copied_pixels": 691200
+      },
+      "mount": {
+        "requests": 931,
+        "requested_bytes": 308988,
+        "net_bytes": 155095,
+        "peak_bytes": 158525
+      },
+      "first_presentation": {
+        "requests": 1156,
+        "requested_bytes": 212220,
+        "net_bytes": 79140,
+        "peak_bytes": 112855
+      }
+    },
+    "bounds": {
+      "warm": {
+        "requests": 243.0,
+        "requested_bytes": 100548.0,
+        "net_bytes": 304.0,
+        "peak_bytes": 25949.0,
+        "image_bytes": 2764800.0,
+        "copied_pixels": 691200.0
+      },
+      "first_update": {
+        "requests": 252,
+        "requested_bytes": 101396,
+        "net_bytes": 776,
+        "peak_bytes": 25949,
+        "image_bytes": 2764800,
+        "copied_pixels": 691200
+      },
+      "mount": {
+        "requests": 931,
+        "requested_bytes": 308988,
+        "net_bytes": 155095,
+        "peak_bytes": 158525
+      },
+      "first_presentation": {
+        "requests": 1156,
+        "requested_bytes": 212220,
+        "net_bytes": 79140,
+        "peak_bytes": 112855
+      }
+    },
+    "predecessor": {
+      "warm": {
+        "requests": 243.0,
+        "requested_bytes": 100548.0,
+        "net_bytes": 304.0,
+        "peak_bytes": 25949.0,
+        "image_bytes": 2764800.0,
+        "copied_pixels": 691200.0
+      },
+      "first_update": {
+        "requests": 252,
+        "requested_bytes": 101396,
+        "net_bytes": 776,
+        "peak_bytes": 25949,
+        "image_bytes": 2764800,
+        "copied_pixels": 691200
+      },
+      "mount": {
+        "requests": 931,
+        "requested_bytes": 308988,
+        "net_bytes": 155095,
+        "peak_bytes": 158525
+      },
+      "first_presentation": {
+        "requests": 1156,
+        "requested_bytes": 212220,
+        "net_bytes": 79140,
+        "peak_bytes": 112855
+      }
+    },
+    "scroll_precise": {
+      "warm": {
+        "requests": 243.0,
+        "requested_bytes": 100548.0,
+        "net_bytes": 304.0,
+        "peak_bytes": 25949.0,
+        "image_bytes": 2764800.0,
+        "copied_pixels": 691200.0
+      },
+      "first_update": {
+        "requests": 252,
+        "requested_bytes": 101396,
+        "net_bytes": 776,
+        "peak_bytes": 25949,
+        "image_bytes": 2764800,
+        "copied_pixels": 691200
+      },
+      "mount": {
+        "requests": 931,
+        "requested_bytes": 308988,
+        "net_bytes": 155095,
+        "peak_bytes": 158525
+      },
+      "first_presentation": {
+        "requests": 1156,
+        "requested_bytes": 212228,
+        "net_bytes": 79148,
+        "peak_bytes": 112863
+      }
+    },
+    "candidate": {
+      "warm": {
+        "requests": 243.0,
+        "requested_bytes": 100548.0,
+        "net_bytes": 304.0,
+        "peak_bytes": 25949.0,
+        "image_bytes": 2764800.0,
+        "copied_pixels": 691200.0
+      },
+      "first_update": {
+        "requests": 252,
+        "requested_bytes": 101396,
+        "net_bytes": 776,
+        "peak_bytes": 25949,
+        "image_bytes": 2764800,
+        "copied_pixels": 691200
+      },
+      "mount": {
+        "requests": 931,
+        "requested_bytes": 308988,
+        "net_bytes": 155095,
+        "peak_bytes": 158525
+      },
+      "first_presentation": {
+        "requests": 1156,
+        "requested_bytes": 212228,
+        "net_bytes": 79148,
+        "peak_bytes": 112863
+      }
+    }
+  },
+  "text-1000-1-source": {
+    "control": {
+      "warm": {
+        "requests": 132.0,
+        "requested_bytes": 17193.0,
+        "net_bytes": 304.0,
+        "peak_bytes": 8277.0,
+        "image_bytes": 2764800.0,
+        "copied_pixels": 691200.0
+      },
+      "first_update": {
+        "requests": 141,
+        "requested_bytes": 18041,
+        "net_bytes": 776,
+        "peak_bytes": 8677,
+        "image_bytes": 2764800,
+        "copied_pixels": 691200
+      },
+      "mount": {
+        "requests": 14448,
+        "requested_bytes": 4692643,
+        "net_bytes": 2427022,
+        "peak_bytes": 2486886
+      },
+      "first_presentation": {
+        "requests": 1156,
+        "requested_bytes": 498012,
+        "net_bytes": 364932,
+        "peak_bytes": 398647
+      }
+    },
+    "bounds": {
+      "warm": {
+        "requests": 132.0,
+        "requested_bytes": 17193.0,
+        "net_bytes": 304.0,
+        "peak_bytes": 8277.0,
+        "image_bytes": 2764800.0,
+        "copied_pixels": 691200.0
+      },
+      "first_update": {
+        "requests": 141,
+        "requested_bytes": 18041,
+        "net_bytes": 776,
+        "peak_bytes": 8677,
+        "image_bytes": 2764800,
+        "copied_pixels": 691200
+      },
+      "mount": {
+        "requests": 14448,
+        "requested_bytes": 4692643,
+        "net_bytes": 2427022,
+        "peak_bytes": 2486886
+      },
+      "first_presentation": {
+        "requests": 1156,
+        "requested_bytes": 498012,
+        "net_bytes": 364932,
+        "peak_bytes": 398647
+      }
+    },
+    "predecessor": {
+      "warm": {
+        "requests": 132.0,
+        "requested_bytes": 17249.0,
+        "net_bytes": 304.0,
+        "peak_bytes": 8333.0,
+        "image_bytes": 2764800.0,
+        "copied_pixels": 691200.0
+      },
+      "first_update": {
+        "requests": 141,
+        "requested_bytes": 18097,
+        "net_bytes": 776,
+        "peak_bytes": 8733,
+        "image_bytes": 2764800,
+        "copied_pixels": 691200
+      },
+      "mount": {
+        "requests": 14448,
+        "requested_bytes": 4692643,
+        "net_bytes": 2427022,
+        "peak_bytes": 2486886
+      },
+      "first_presentation": {
+        "requests": 1156,
+        "requested_bytes": 498012,
+        "net_bytes": 364932,
+        "peak_bytes": 398647
+      }
+    },
+    "scroll_precise": {
+      "warm": {
+        "requests": 132.0,
+        "requested_bytes": 17249.0,
+        "net_bytes": 304.0,
+        "peak_bytes": 8333.0,
+        "image_bytes": 2764800.0,
+        "copied_pixels": 691200.0
+      },
+      "first_update": {
+        "requests": 141,
+        "requested_bytes": 18097,
+        "net_bytes": 776,
+        "peak_bytes": 8733,
+        "image_bytes": 2764800,
+        "copied_pixels": 691200
+      },
+      "mount": {
+        "requests": 14448,
+        "requested_bytes": 4692643,
+        "net_bytes": 2427022,
+        "peak_bytes": 2486886
+      },
+      "first_presentation": {
+        "requests": 1156,
+        "requested_bytes": 498020,
+        "net_bytes": 364940,
+        "peak_bytes": 398655
+      }
+    },
+    "candidate": {
+      "warm": {
+        "requests": 131.0,
+        "requested_bytes": 17153.0,
+        "net_bytes": 304.0,
+        "peak_bytes": 8237.0,
+        "image_bytes": 2764800.0,
+        "copied_pixels": 691200.0
+      },
+      "first_update": {
+        "requests": 141,
+        "requested_bytes": 18097,
+        "net_bytes": 872,
+        "peak_bytes": 8733,
+        "image_bytes": 2764800,
+        "copied_pixels": 691200
+      },
+      "mount": {
+        "requests": 14448,
+        "requested_bytes": 4692643,
+        "net_bytes": 2427022,
+        "peak_bytes": 2486886
+      },
+      "first_presentation": {
+        "requests": 1156,
+        "requested_bytes": 498020,
+        "net_bytes": 364940,
+        "peak_bytes": 398655
+      }
+    }
+  },
+  "text-1000-1-owner": {
+    "control": {
+      "warm": {
+        "requests": 1198.0,
+        "requested_bytes": 2125304.0,
+        "net_bytes": 304.0,
+        "peak_bytes": 814144.0,
+        "image_bytes": 2764800.0,
+        "copied_pixels": 691200.0
+      },
+      "first_update": {
+        "requests": 1207,
+        "requested_bytes": 2126152,
+        "net_bytes": 776,
+        "peak_bytes": 814144,
+        "image_bytes": 2764800,
+        "copied_pixels": 691200
+      },
+      "mount": {
+        "requests": 14448,
+        "requested_bytes": 4692643,
+        "net_bytes": 2427022,
+        "peak_bytes": 2486886
+      },
+      "first_presentation": {
+        "requests": 1156,
+        "requested_bytes": 498012,
+        "net_bytes": 364932,
+        "peak_bytes": 398647
+      }
+    },
+    "bounds": {
+      "warm": {
+        "requests": 1160.0,
+        "requested_bytes": 1664110.0,
+        "net_bytes": 304.0,
+        "peak_bytes": 814144.0,
+        "image_bytes": 2764800.0,
+        "copied_pixels": 691200.0
+      },
+      "first_update": {
+        "requests": 1169,
+        "requested_bytes": 1664958,
+        "net_bytes": 776,
+        "peak_bytes": 814144,
+        "image_bytes": 2764800,
+        "copied_pixels": 691200
+      },
+      "mount": {
+        "requests": 14448,
+        "requested_bytes": 4692643,
+        "net_bytes": 2427022,
+        "peak_bytes": 2486886
+      },
+      "first_presentation": {
+        "requests": 1156,
+        "requested_bytes": 498012,
+        "net_bytes": 364932,
+        "peak_bytes": 398647
+      }
+    },
+    "predecessor": {
+      "warm": {
+        "requests": 1160.0,
+        "requested_bytes": 1664166.0,
+        "net_bytes": 304.0,
+        "peak_bytes": 814144.0,
+        "image_bytes": 2764800.0,
+        "copied_pixels": 691200.0
+      },
+      "first_update": {
+        "requests": 1169,
+        "requested_bytes": 1665014,
+        "net_bytes": 776,
+        "peak_bytes": 814144,
+        "image_bytes": 2764800,
+        "copied_pixels": 691200
+      },
+      "mount": {
+        "requests": 14448,
+        "requested_bytes": 4692643,
+        "net_bytes": 2427022,
+        "peak_bytes": 2486886
+      },
+      "first_presentation": {
+        "requests": 1156,
+        "requested_bytes": 498012,
+        "net_bytes": 364932,
+        "peak_bytes": 398647
+      }
+    },
+    "scroll_precise": {
+      "warm": {
+        "requests": 1160.0,
+        "requested_bytes": 1664166.0,
+        "net_bytes": 304.0,
+        "peak_bytes": 814144.0,
+        "image_bytes": 2764800.0,
+        "copied_pixels": 691200.0
+      },
+      "first_update": {
+        "requests": 1169,
+        "requested_bytes": 1665014,
+        "net_bytes": 776,
+        "peak_bytes": 814144,
+        "image_bytes": 2764800,
+        "copied_pixels": 691200
+      },
+      "mount": {
+        "requests": 14448,
+        "requested_bytes": 4692643,
+        "net_bytes": 2427022,
+        "peak_bytes": 2486886
+      },
+      "first_presentation": {
+        "requests": 1156,
+        "requested_bytes": 498020,
+        "net_bytes": 364940,
+        "peak_bytes": 398655
+      }
+    },
+    "candidate": {
+      "warm": {
+        "requests": 1159.0,
+        "requested_bytes": 1664070.0,
+        "net_bytes": 304.0,
+        "peak_bytes": 814144.0,
+        "image_bytes": 2764800.0,
+        "copied_pixels": 691200.0
+      },
+      "first_update": {
+        "requests": 1169,
+        "requested_bytes": 1665014,
+        "net_bytes": 872,
+        "peak_bytes": 814144,
+        "image_bytes": 2764800,
+        "copied_pixels": 691200
+      },
+      "mount": {
+        "requests": 14448,
+        "requested_bytes": 4692643,
+        "net_bytes": 2427022,
+        "peak_bytes": 2486886
+      },
+      "first_presentation": {
+        "requests": 1156,
+        "requested_bytes": 498020,
+        "net_bytes": 364940,
+        "peak_bytes": 398655
+      }
+    }
+  },
+  "text-1000-2-source": {
+    "control": {
+      "warm": {
+        "requests": 194.0,
+        "requested_bytes": 480571.0,
+        "net_bytes": 304.0,
+        "peak_bytes": 316150.0,
+        "image_bytes": 2764800.0,
+        "copied_pixels": 691200.0
+      },
+      "first_update": {
+        "requests": 203,
+        "requested_bytes": 481419,
+        "net_bytes": 776,
+        "peak_bytes": 316150,
+        "image_bytes": 2764800,
+        "copied_pixels": 691200
+      },
+      "mount": {
+        "requests": 14464,
+        "requested_bytes": 4695573,
+        "net_bytes": 2428822,
+        "peak_bytes": 2488790
+      },
+      "first_presentation": {
+        "requests": 1156,
+        "requested_bytes": 498292,
+        "net_bytes": 365212,
+        "peak_bytes": 398927
+      }
+    },
+    "bounds": {
+      "warm": {
+        "requests": 194.0,
+        "requested_bytes": 480571.0,
+        "net_bytes": 304.0,
+        "peak_bytes": 316150.0,
+        "image_bytes": 2764800.0,
+        "copied_pixels": 691200.0
+      },
+      "first_update": {
+        "requests": 203,
+        "requested_bytes": 481419,
+        "net_bytes": 776,
+        "peak_bytes": 316150,
+        "image_bytes": 2764800,
+        "copied_pixels": 691200
+      },
+      "mount": {
+        "requests": 14464,
+        "requested_bytes": 4695573,
+        "net_bytes": 2428822,
+        "peak_bytes": 2488790
+      },
+      "first_presentation": {
+        "requests": 1156,
+        "requested_bytes": 498292,
+        "net_bytes": 365212,
+        "peak_bytes": 398927
+      }
+    },
+    "predecessor": {
+      "warm": {
+        "requests": 194.0,
+        "requested_bytes": 480627.0,
+        "net_bytes": 304.0,
+        "peak_bytes": 316206.0,
+        "image_bytes": 2764800.0,
+        "copied_pixels": 691200.0
+      },
+      "first_update": {
+        "requests": 203,
+        "requested_bytes": 481475,
+        "net_bytes": 776,
+        "peak_bytes": 316206,
+        "image_bytes": 2764800,
+        "copied_pixels": 691200
+      },
+      "mount": {
+        "requests": 14464,
+        "requested_bytes": 4695573,
+        "net_bytes": 2428822,
+        "peak_bytes": 2488790
+      },
+      "first_presentation": {
+        "requests": 1156,
+        "requested_bytes": 498292,
+        "net_bytes": 365212,
+        "peak_bytes": 398927
+      }
+    },
+    "scroll_precise": {
+      "warm": {
+        "requests": 194.0,
+        "requested_bytes": 480627.0,
+        "net_bytes": 304.0,
+        "peak_bytes": 316206.0,
+        "image_bytes": 2764800.0,
+        "copied_pixels": 691200.0
+      },
+      "first_update": {
+        "requests": 203,
+        "requested_bytes": 481475,
+        "net_bytes": 776,
+        "peak_bytes": 316206,
+        "image_bytes": 2764800,
+        "copied_pixels": 691200
+      },
+      "mount": {
+        "requests": 14464,
+        "requested_bytes": 4695573,
+        "net_bytes": 2428822,
+        "peak_bytes": 2488790
+      },
+      "first_presentation": {
+        "requests": 1156,
+        "requested_bytes": 498300,
+        "net_bytes": 365220,
+        "peak_bytes": 398935
+      }
+    },
+    "candidate": {
+      "warm": {
+        "requests": 193.0,
+        "requested_bytes": 480531.0,
+        "net_bytes": 304.0,
+        "peak_bytes": 316110.0,
+        "image_bytes": 2764800.0,
+        "copied_pixels": 691200.0
+      },
+      "first_update": {
+        "requests": 203,
+        "requested_bytes": 481475,
+        "net_bytes": 872,
+        "peak_bytes": 316206,
+        "image_bytes": 2764800,
+        "copied_pixels": 691200
+      },
+      "mount": {
+        "requests": 14464,
+        "requested_bytes": 4695573,
+        "net_bytes": 2428822,
+        "peak_bytes": 2488790
+      },
+      "first_presentation": {
+        "requests": 1156,
+        "requested_bytes": 498300,
+        "net_bytes": 365220,
+        "peak_bytes": 398935
+      }
+    }
+  },
+  "text-1000-2-owner": {
+    "control": {
+      "warm": {
+        "requests": 1211.0,
+        "requested_bytes": 2127078.0,
+        "net_bytes": 304.0,
+        "peak_bytes": 814560.0,
+        "image_bytes": 2764800.0,
+        "copied_pixels": 691200.0
+      },
+      "first_update": {
+        "requests": 1220,
+        "requested_bytes": 2127926,
+        "net_bytes": 776,
+        "peak_bytes": 814560,
+        "image_bytes": 2764800,
+        "copied_pixels": 691200
+      },
+      "mount": {
+        "requests": 14464,
+        "requested_bytes": 4695573,
+        "net_bytes": 2428822,
+        "peak_bytes": 2488790
+      },
+      "first_presentation": {
+        "requests": 1156,
+        "requested_bytes": 498292,
+        "net_bytes": 365212,
+        "peak_bytes": 398927
+      }
+    },
+    "bounds": {
+      "warm": {
+        "requests": 1211.0,
+        "requested_bytes": 2127078.0,
+        "net_bytes": 304.0,
+        "peak_bytes": 814560.0,
+        "image_bytes": 2764800.0,
+        "copied_pixels": 691200.0
+      },
+      "first_update": {
+        "requests": 1220,
+        "requested_bytes": 2127926,
+        "net_bytes": 776,
+        "peak_bytes": 814560,
+        "image_bytes": 2764800,
+        "copied_pixels": 691200
+      },
+      "mount": {
+        "requests": 14464,
+        "requested_bytes": 4695573,
+        "net_bytes": 2428822,
+        "peak_bytes": 2488790
+      },
+      "first_presentation": {
+        "requests": 1156,
+        "requested_bytes": 498292,
+        "net_bytes": 365212,
+        "peak_bytes": 398927
+      }
+    },
+    "predecessor": {
+      "warm": {
+        "requests": 1211.0,
+        "requested_bytes": 2127078.0,
+        "net_bytes": 304.0,
+        "peak_bytes": 814560.0,
+        "image_bytes": 2764800.0,
+        "copied_pixels": 691200.0
+      },
+      "first_update": {
+        "requests": 1220,
+        "requested_bytes": 2127926,
+        "net_bytes": 776,
+        "peak_bytes": 814560,
+        "image_bytes": 2764800,
+        "copied_pixels": 691200
+      },
+      "mount": {
+        "requests": 14464,
+        "requested_bytes": 4695573,
+        "net_bytes": 2428822,
+        "peak_bytes": 2488790
+      },
+      "first_presentation": {
+        "requests": 1156,
+        "requested_bytes": 498292,
+        "net_bytes": 365212,
+        "peak_bytes": 398927
+      }
+    },
+    "scroll_precise": {
+      "warm": {
+        "requests": 1211.0,
+        "requested_bytes": 2127078.0,
+        "net_bytes": 304.0,
+        "peak_bytes": 814560.0,
+        "image_bytes": 2764800.0,
+        "copied_pixels": 691200.0
+      },
+      "first_update": {
+        "requests": 1220,
+        "requested_bytes": 2127926,
+        "net_bytes": 776,
+        "peak_bytes": 814560,
+        "image_bytes": 2764800,
+        "copied_pixels": 691200
+      },
+      "mount": {
+        "requests": 14464,
+        "requested_bytes": 4695573,
+        "net_bytes": 2428822,
+        "peak_bytes": 2488790
+      },
+      "first_presentation": {
+        "requests": 1156,
+        "requested_bytes": 498300,
+        "net_bytes": 365220,
+        "peak_bytes": 398935
+      }
+    },
+    "candidate": {
+      "warm": {
+        "requests": 1211.0,
+        "requested_bytes": 2127078.0,
+        "net_bytes": 304.0,
+        "peak_bytes": 814560.0,
+        "image_bytes": 2764800.0,
+        "copied_pixels": 691200.0
+      },
+      "first_update": {
+        "requests": 1220,
+        "requested_bytes": 2127926,
+        "net_bytes": 776,
+        "peak_bytes": 814560,
+        "image_bytes": 2764800,
+        "copied_pixels": 691200
+      },
+      "mount": {
+        "requests": 14464,
+        "requested_bytes": 4695573,
+        "net_bytes": 2428822,
+        "peak_bytes": 2488790
+      },
+      "first_presentation": {
+        "requests": 1156,
+        "requested_bytes": 498300,
+        "net_bytes": 365220,
+        "peak_bytes": 398935
+      }
+    }
+  },
+  "text-1000-4-source": {
+    "control": {
+      "warm": {
+        "requests": 318.0,
+        "requested_bytes": 1408095.0,
+        "net_bytes": 304.0,
+        "peak_bytes": 470382.0,
+        "image_bytes": 2764800.0,
+        "copied_pixels": 691200.0
+      },
+      "first_update": {
+        "requests": 327,
+        "requested_bytes": 1408943,
+        "net_bytes": 776,
+        "peak_bytes": 470382,
+        "image_bytes": 2764800,
+        "copied_pixels": 691200
+      },
+      "mount": {
+        "requests": 14492,
+        "requested_bytes": 4700841,
+        "net_bytes": 2432422,
+        "peak_bytes": 2492390
+      },
+      "first_presentation": {
+        "requests": 1156,
+        "requested_bytes": 498852,
+        "net_bytes": 365772,
+        "peak_bytes": 399487
+      }
+    },
+    "bounds": {
+      "warm": {
+        "requests": 318.0,
+        "requested_bytes": 1408095.0,
+        "net_bytes": 304.0,
+        "peak_bytes": 470382.0,
+        "image_bytes": 2764800.0,
+        "copied_pixels": 691200.0
+      },
+      "first_update": {
+        "requests": 327,
+        "requested_bytes": 1408943,
+        "net_bytes": 776,
+        "peak_bytes": 470382,
+        "image_bytes": 2764800,
+        "copied_pixels": 691200
+      },
+      "mount": {
+        "requests": 14492,
+        "requested_bytes": 4700841,
+        "net_bytes": 2432422,
+        "peak_bytes": 2492390
+      },
+      "first_presentation": {
+        "requests": 1156,
+        "requested_bytes": 498852,
+        "net_bytes": 365772,
+        "peak_bytes": 399487
+      }
+    },
+    "predecessor": {
+      "warm": {
+        "requests": 318.0,
+        "requested_bytes": 1408151.0,
+        "net_bytes": 304.0,
+        "peak_bytes": 470382.0,
+        "image_bytes": 2764800.0,
+        "copied_pixels": 691200.0
+      },
+      "first_update": {
+        "requests": 327,
+        "requested_bytes": 1408999,
+        "net_bytes": 776,
+        "peak_bytes": 470382,
+        "image_bytes": 2764800,
+        "copied_pixels": 691200
+      },
+      "mount": {
+        "requests": 14492,
+        "requested_bytes": 4700841,
+        "net_bytes": 2432422,
+        "peak_bytes": 2492390
+      },
+      "first_presentation": {
+        "requests": 1156,
+        "requested_bytes": 498852,
+        "net_bytes": 365772,
+        "peak_bytes": 399487
+      }
+    },
+    "scroll_precise": {
+      "warm": {
+        "requests": 318.0,
+        "requested_bytes": 1408151.0,
+        "net_bytes": 304.0,
+        "peak_bytes": 470382.0,
+        "image_bytes": 2764800.0,
+        "copied_pixels": 691200.0
+      },
+      "first_update": {
+        "requests": 327,
+        "requested_bytes": 1408999,
+        "net_bytes": 776,
+        "peak_bytes": 470382,
+        "image_bytes": 2764800,
+        "copied_pixels": 691200
+      },
+      "mount": {
+        "requests": 14492,
+        "requested_bytes": 4700841,
+        "net_bytes": 2432422,
+        "peak_bytes": 2492390
+      },
+      "first_presentation": {
+        "requests": 1156,
+        "requested_bytes": 498860,
+        "net_bytes": 365780,
+        "peak_bytes": 399495
+      }
+    },
+    "candidate": {
+      "warm": {
+        "requests": 317.0,
+        "requested_bytes": 1408055.0,
+        "net_bytes": 304.0,
+        "peak_bytes": 470382.0,
+        "image_bytes": 2764800.0,
+        "copied_pixels": 691200.0
+      },
+      "first_update": {
+        "requests": 327,
+        "requested_bytes": 1408999,
+        "net_bytes": 872,
+        "peak_bytes": 470478,
+        "image_bytes": 2764800,
+        "copied_pixels": 691200
+      },
+      "mount": {
+        "requests": 14492,
+        "requested_bytes": 4700841,
+        "net_bytes": 2432422,
+        "peak_bytes": 2492390
+      },
+      "first_presentation": {
+        "requests": 1156,
+        "requested_bytes": 498860,
+        "net_bytes": 365780,
+        "peak_bytes": 399495
+      }
+    }
+  },
+  "text-1000-4-owner": {
+    "control": {
+      "warm": {
+        "requests": 1237.0,
+        "requested_bytes": 2130626.0,
+        "net_bytes": 304.0,
+        "peak_bytes": 815392.0,
+        "image_bytes": 2764800.0,
+        "copied_pixels": 691200.0
+      },
+      "first_update": {
+        "requests": 1246,
+        "requested_bytes": 2131474,
+        "net_bytes": 776,
+        "peak_bytes": 815392,
+        "image_bytes": 2764800,
+        "copied_pixels": 691200
+      },
+      "mount": {
+        "requests": 14492,
+        "requested_bytes": 4700841,
+        "net_bytes": 2432422,
+        "peak_bytes": 2492390
+      },
+      "first_presentation": {
+        "requests": 1156,
+        "requested_bytes": 498852,
+        "net_bytes": 365772,
+        "peak_bytes": 399487
+      }
+    },
+    "bounds": {
+      "warm": {
+        "requests": 1237.0,
+        "requested_bytes": 2130626.0,
+        "net_bytes": 304.0,
+        "peak_bytes": 815392.0,
+        "image_bytes": 2764800.0,
+        "copied_pixels": 691200.0
+      },
+      "first_update": {
+        "requests": 1246,
+        "requested_bytes": 2131474,
+        "net_bytes": 776,
+        "peak_bytes": 815392,
+        "image_bytes": 2764800,
+        "copied_pixels": 691200
+      },
+      "mount": {
+        "requests": 14492,
+        "requested_bytes": 4700841,
+        "net_bytes": 2432422,
+        "peak_bytes": 2492390
+      },
+      "first_presentation": {
+        "requests": 1156,
+        "requested_bytes": 498852,
+        "net_bytes": 365772,
+        "peak_bytes": 399487
+      }
+    },
+    "predecessor": {
+      "warm": {
+        "requests": 1237.0,
+        "requested_bytes": 2130626.0,
+        "net_bytes": 304.0,
+        "peak_bytes": 815392.0,
+        "image_bytes": 2764800.0,
+        "copied_pixels": 691200.0
+      },
+      "first_update": {
+        "requests": 1246,
+        "requested_bytes": 2131474,
+        "net_bytes": 776,
+        "peak_bytes": 815392,
+        "image_bytes": 2764800,
+        "copied_pixels": 691200
+      },
+      "mount": {
+        "requests": 14492,
+        "requested_bytes": 4700841,
+        "net_bytes": 2432422,
+        "peak_bytes": 2492390
+      },
+      "first_presentation": {
+        "requests": 1156,
+        "requested_bytes": 498852,
+        "net_bytes": 365772,
+        "peak_bytes": 399487
+      }
+    },
+    "scroll_precise": {
+      "warm": {
+        "requests": 1237.0,
+        "requested_bytes": 2130626.0,
+        "net_bytes": 304.0,
+        "peak_bytes": 815392.0,
+        "image_bytes": 2764800.0,
+        "copied_pixels": 691200.0
+      },
+      "first_update": {
+        "requests": 1246,
+        "requested_bytes": 2131474,
+        "net_bytes": 776,
+        "peak_bytes": 815392,
+        "image_bytes": 2764800,
+        "copied_pixels": 691200
+      },
+      "mount": {
+        "requests": 14492,
+        "requested_bytes": 4700841,
+        "net_bytes": 2432422,
+        "peak_bytes": 2492390
+      },
+      "first_presentation": {
+        "requests": 1156,
+        "requested_bytes": 498860,
+        "net_bytes": 365780,
+        "peak_bytes": 399495
+      }
+    },
+    "candidate": {
+      "warm": {
+        "requests": 1237.0,
+        "requested_bytes": 2130626.0,
+        "net_bytes": 304.0,
+        "peak_bytes": 815392.0,
+        "image_bytes": 2764800.0,
+        "copied_pixels": 691200.0
+      },
+      "first_update": {
+        "requests": 1246,
+        "requested_bytes": 2131474,
+        "net_bytes": 776,
+        "peak_bytes": 815392,
+        "image_bytes": 2764800,
+        "copied_pixels": 691200
+      },
+      "mount": {
+        "requests": 14492,
+        "requested_bytes": 4700841,
+        "net_bytes": 2432422,
+        "peak_bytes": 2492390
+      },
+      "first_presentation": {
+        "requests": 1156,
+        "requested_bytes": 498860,
+        "net_bytes": 365780,
+        "peak_bytes": 399495
+      }
+    }
+  }
+}
