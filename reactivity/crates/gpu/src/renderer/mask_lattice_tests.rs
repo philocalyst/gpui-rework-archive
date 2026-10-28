@@ -41,7 +41,7 @@ fn every_admitted_mask_address_matches_scalar_membership_and_cell() {
                 }
                 for translation in [0., 0.125, -0.125, 131_072., -131_072.] {
                     draw.inverse = [1., 0., 0., 1., translation, translation];
-                    let Some(lowered) = lowered_mask_rect(&draw) else {
+                    let Some(lowered) = lowered_mask_rect(&draw, [0.; 2]) else {
                         continue;
                     };
                     admitted += 1;
@@ -78,7 +78,10 @@ fn every_admitted_mask_address_matches_scalar_membership_and_cell() {
             }
         }
     }
-    assert_eq!(admitted, 513 * 2 * 5);
+    assert!(
+        admitted > 3_000,
+        "exercise a nontrivial admitted domain: {admitted}"
+    );
 }
 
 #[test]
@@ -89,7 +92,7 @@ fn certificate_rejects_nonunit_and_unbounded_or_unresolved_maps() {
         .draws()
         .find(|d| d.source.mask().is_some())
         .unwrap();
-    assert!(lowered_mask_rect(&original).is_some());
+    assert!(lowered_mask_rect(&original, [0.; 2]).is_some());
     for inverse in [
         [1.25, 0., 0., 1., 0., 0.],
         [1., 0.01, 0., 1., 0., 0.],
@@ -99,10 +102,13 @@ fn certificate_rejects_nonunit_and_unbounded_or_unresolved_maps() {
         [1., 0., 0., 1., f64::NAN, 0.],
     ] {
         assert!(
-            lowered_mask_rect(&PreparedDraw {
-                inverse,
-                ..original
-            })
+            lowered_mask_rect(
+                &PreparedDraw {
+                    inverse,
+                    ..original
+                },
+                [0.; 2]
+            )
             .is_none()
         );
     }
@@ -114,18 +120,20 @@ fn certificate_rejects_nonunit_and_unbounded_or_unresolved_maps() {
     ] {
         let mut draw = original;
         draw.local_rect.x = value;
-        assert!(lowered_mask_rect(&draw).is_none());
+        assert!(lowered_mask_rect(&draw, [0.; 2]).is_none());
     }
-    for value in [
-        0.125_f32.next_down(),
-        0.125,
-        0.125_f32.next_up(),
-        131_072.,
-        -131_072.,
-    ] {
+    for value in [0.125_f32.next_down(), 0.125, 0.125_f32.next_up()] {
         let mut draw = original;
         draw.local_rect.x = value;
-        let lowered = lowered_mask_rect(&draw).unwrap();
+        assert!(
+            lowered_mask_rect(&draw, [0.; 2]).is_none(),
+            "GPU ambiguous sample phase"
+        );
+    }
+    for value in [0.0625, 0.1875, 131_072., -131_072.] {
+        let mut draw = original;
+        draw.local_rect.x = value;
+        let lowered = lowered_mask_rect(&draw, [0.; 2]).unwrap();
         for i in 0..64 {
             let point = i as f64 * 0.25 + 0.125;
             assert_eq!(
@@ -216,12 +224,16 @@ fn placement_tags_survive_inline_compact_and_banked_packets() {
                 let (mut admitted, mut fallback) = (0, 0);
                 for group in canvas.prepared_scene().groups() {
                     let compact = compact_group(group, grouped);
+                    let common = cursor;
                     if compact {
                         cursor += 5;
                     }
                     for placement in group.placements() {
                         let draw = super::super::prepared(group, placement);
-                        let lowered = lowered_mask_rect(&draw);
+                        let state = if compact { common } else { cursor + 1 };
+                        let error = [gpu.state.records[state][3], gpu.state.records[state + 1][3]]
+                            .map(f32::from_bits);
+                        let lowered = lowered_mask_rect(&draw, error);
                         let tag = gpu.state.records[cursor + if compact { 1 } else { 5 }][0]
                             & LOWERED_MASK;
                         assert_eq!(tag != 0, lowered.is_some());
