@@ -36,7 +36,7 @@ impl GpuContext {
             });
             pass.set_pipeline(&self.pipeline);
             pass.set_bind_group(0, bindings, &[]);
-            for repair in scroll.repairs() {
+            for repair in scroll.repairs().skip(1) {
                 if let Some([l, t, r, b]) = repair.bounds() {
                     pass.set_scissor_rect(l, t, r - l, b - t);
                     pass.draw(0..3, 0..1);
