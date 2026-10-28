@@ -1,0 +1,14 @@
+{
+  "vulkan_physical_devices": [
+    {
+      "name": "llvmpipe (LLVM 20.1.2, 256 bits)",
+      "type": 4,
+      "vendor_id": 65541,
+      "device_id": 0,
+      "api_version": 4211006,
+      "driver_version": 104865800,
+      "pipeline_cache_uuid": "32352e322e382d307562756e7475302e"
+    }
+  ],
+  "query": "Vulkan 1.0 loader, same VK_ICD_FILENAMES as native observations"
+}

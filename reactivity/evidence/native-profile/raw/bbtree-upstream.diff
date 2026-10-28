@@ -1,0 +1,1498 @@
+diff --git a/.github/actions/version-change/action.yml b/.github/actions/version-change/action.yml
+index 6c59d78..6afc186 100644
+--- a/.github/actions/version-change/action.yml
++++ b/.github/actions/version-change/action.yml
+@@ -38,7 +38,7 @@ runs:
+         base_version=$(version_at "$BASE")
+         # The crates released with bbtree are at its version (publish.yml
+         # publishes them at it), checked here, before a release merges.
+-        for crate in bbtree-mmap bbtree-store; do
++        for crate in bbtree-mmap; do
+           crate_version=$(git show "HEAD:$crate/Cargo.toml" | python3 -c \
+             'import sys, tomllib; print(tomllib.load(sys.stdin.buffer)["package"]["version"])')
+           if [ "$crate_version" != "$version" ]; then
+diff --git a/.github/workflows/ci.yml b/.github/workflows/ci.yml
+index bf26e45..4543568 100644
+--- a/.github/workflows/ci.yml
++++ b/.github/workflows/ci.yml
+@@ -301,7 +301,7 @@ jobs:
+       # and the crates released with it, each built against the others'
+       # packages.
+       - name: Package
+-        run: cargo publish --dry-run --locked -p bbtree -p bbtree-mmap -p bbtree-store
++        run: cargo publish --dry-run --locked -p bbtree -p bbtree-mmap
+ 
+   # This workflow's one required check (.github/rulesets/main.json), so the
+   # jobs above can change without touching the ruleset. It always runs: a
+diff --git a/.github/workflows/prepare-release.yml b/.github/workflows/prepare-release.yml
+index 524eeef..60cc8c1 100644
+--- a/.github/workflows/prepare-release.yml
++++ b/.github/workflows/prepare-release.yml
+@@ -52,7 +52,7 @@ jobs:
+           CUSTOM_VERSION: ${{ inputs.custom_version }}
+         run: |
+           # bbtree and the crates released with it, at its version.
+-          crates="bbtree bbtree-mmap bbtree-store"
++          crates="bbtree bbtree-mmap"
+           package_version() {
+             cargo metadata --no-deps --format-version 1 \
+               | jq -r --arg name "$1" '.packages[] | select(.name == $name) | .version'
+@@ -111,7 +111,7 @@ jobs:
+             ---
+ 
+             **Once the merge gate passes**, this PR merges itself, and the `publish.yml` workflow will:
+-            1. Publish bbtree, bbtree-mmap and bbtree-store to crates.io
++            1. Publish bbtree and bbtree-mmap to crates.io
+             2. Create a GitHub Release with tag `v${{ steps.bump.outputs.version }}`
+           commit-message: "chore: release v${{ steps.bump.outputs.version }}"
+           labels: release
+diff --git a/.github/workflows/publish.yml b/.github/workflows/publish.yml
+index dff18b1..522f099 100644
+--- a/.github/workflows/publish.yml
++++ b/.github/workflows/publish.yml
+@@ -64,7 +64,7 @@ jobs:
+         env:
+           CARGO_REGISTRY_TOKEN: ${{ secrets.CARGO_REGISTRY_TOKEN }}
+         run: |
+-          for crate in bbtree bbtree-mmap bbtree-store; do
++          for crate in bbtree bbtree-mmap; do
+             # crates.io asks API clients to name themselves.
+             if curl --silent --fail --output /dev/null \
+                 --user-agent "bbtree publish workflow (github.com/$GITHUB_REPOSITORY)" \
+diff --git a/Cargo.lock b/Cargo.lock
+index 1044109..394fba0 100644
+--- a/Cargo.lock
++++ b/Cargo.lock
+@@ -16,7 +16,7 @@ checksum = "f2032f911046de80f0a198e0901378627c33f59ea0ac00e363d481118bd70a53"
+ 
+ [[package]]
+ name = "bbtree"
+-version = "0.1.5"
++version = "0.1.6"
+ dependencies = [
+  "shuttle",
+  "vstd",
+@@ -24,7 +24,7 @@ dependencies = [
+ 
+ [[package]]
+ name = "bbtree-mmap"
+-version = "0.1.5"
++version = "0.1.6"
+ dependencies = [
+  "bbtree",
+  "libc",
+diff --git a/bbtree-mmap/Cargo.toml b/bbtree-mmap/Cargo.toml
+index cc9400a..0583bb6 100644
+--- a/bbtree-mmap/Cargo.toml
++++ b/bbtree-mmap/Cargo.toml
+@@ -1,6 +1,6 @@
+ [package]
+ name = "bbtree-mmap"
+-version = "0.1.5"
++version = "0.1.6"
+ edition = "2024"
+ description = "bbtree on disk: a compact, read-only map written to a file and looked up where it lies, mapped into memory, at a map's speed."
+ license = "MIT OR Apache-2.0"
+@@ -8,7 +8,7 @@ repository = "https://github.com/XiangpengHao/bbtree"
+ 
+ [dependencies]
+ # Released with bbtree, at its version.
+-bbtree = { path = "../bbtree", version = "0.1.5", features = ["file"] }
++bbtree = { path = "../bbtree", version = "0.1.6", features = ["file"] }
+ memmap2 = "0.9.11"
+ 
+ [dev-dependencies]
+diff --git a/bbtree-store/Cargo.toml b/bbtree-store/Cargo.toml
+index fb4cb68..c234a6c 100644
+--- a/bbtree-store/Cargo.toml
++++ b/bbtree-store/Cargo.toml
+@@ -7,7 +7,7 @@ license = "MIT OR Apache-2.0"
+ repository = "https://github.com/XiangpengHao/bbtree"
+ 
+ [dependencies]
+-# Released with bbtree, at its version.
++# Released on its own, not with bbtree.
+ bbtree = { path = "../bbtree", version = "0.1.5" }
+ crc32c = "0.6"
+ # Verus's specs and proofs of the WAL, purely ghost, gone after compilation;
+diff --git a/bbtree/Cargo.toml b/bbtree/Cargo.toml
+index 414a8f3..3699ec6 100644
+--- a/bbtree/Cargo.toml
++++ b/bbtree/Cargo.toml
+@@ -1,6 +1,6 @@
+ [package]
+ name = "bbtree"
+-version = "0.1.5"
++version = "0.1.6"
+ edition = "2024"
+ description = "Fastest B-tree."
+ license = "MIT OR Apache-2.0"
+diff --git a/bbtree/bench/Cargo.lock b/bbtree/bench/Cargo.lock
+index 2fd7601..5a6b3ba 100644
+--- a/bbtree/bench/Cargo.lock
++++ b/bbtree/bench/Cargo.lock
+@@ -10,7 +10,7 @@ checksum = "683d7910e743518b0e34f1186f92494becacb047c7b6bf616c96772180fef923"
+ 
+ [[package]]
+ name = "bbtree"
+-version = "0.1.5"
++version = "0.1.6"
+ dependencies = [
+  "vstd",
+ ]
+diff --git a/bbtree/fuzz/Cargo.lock b/bbtree/fuzz/Cargo.lock
+index 10f38ff..dfb896e 100644
+--- a/bbtree/fuzz/Cargo.lock
++++ b/bbtree/fuzz/Cargo.lock
+@@ -13,7 +13,7 @@ dependencies = [
+ 
+ [[package]]
+ name = "bbtree"
+-version = "0.1.5"
++version = "0.1.6"
+ dependencies = [
+  "vstd",
+ ]
+diff --git a/bbtree/racing-reads/Cargo.lock b/bbtree/racing-reads/Cargo.lock
+index 35bdaf4..9680d0a 100644
+--- a/bbtree/racing-reads/Cargo.lock
++++ b/bbtree/racing-reads/Cargo.lock
+@@ -4,7 +4,7 @@ version = 4
+ 
+ [[package]]
+ name = "bbtree"
+-version = "0.1.5"
++version = "0.1.6"
+ dependencies = [
+  "vstd",
+ ]
+diff --git a/bbtree/src/map/mod.rs b/bbtree/src/map/mod.rs
+index 9ffe7b0..ad95184 100644
+--- a/bbtree/src/map/mod.rs
++++ b/bbtree/src/map/mod.rs
+@@ -250,6 +250,29 @@ impl<K, V, S: InlineKeyStrategy<K>, A: Allocator> BBTreeMap<K, V, S, A> {
+             .scan_rev(start, end, None, |key, value, _| f(key, value))
+     }
+ 
++    /// A copy of the first entry whose key lies in `range`: a seek, the
++    /// entry a [`Self::scan`] of `range` visits first. `None` if no key lies
++    /// in `range`.
++    ///
++    /// Mostly without a latch, as [`Self::get_copied`]: it copies the entries
++    /// of one leaf that may be the first, then checks that no thread changed
++    /// the leaf meanwhile. It looks again, latched, if one did, if the first
++    /// entry is in the next leaf, or if `range` is unbounded below.
++    ///
++    /// # Panics
++    ///
++    /// As [`Self::scan`].
++    #[inline]
++    pub fn first_copied<Q>(&self, range: impl RangeBounds<Q>) -> Option<(K, V)>
++    where
++        K: Borrow<Q> + Copy,
++        V: Copy,
++        Q: Ord + ?Sized,
++    {
++        let (start, end) = Self::checked_bounds(&range);
++        self.tree.first_copied(start, end)
++    }
++
+     /// An iterator over clones of the entries whose keys lie in `range`: in
+     /// key order, and in reverse from its back ([`DoubleEndedIterator`]).
+     ///
+diff --git a/bbtree/src/map/shuttle_tests.rs b/bbtree/src/map/shuttle_tests.rs
+index 8b8888c..6a95e16 100644
+--- a/bbtree/src/map/shuttle_tests.rs
++++ b/bbtree/src/map/shuttle_tests.rs
+@@ -280,6 +280,55 @@ fn assert_visited_in_order<K: Ord + fmt::Debug>(visited: &[K], steady: &[K]) {
+     }
+ }
+ 
++/// A map of plain `u64` values, each its key, for copied firsts, which
++/// take copies of `Copy` values: `len` keys.
++fn plain_map_of(len: u64) -> BBTreeMap<u64, u64> {
++    let map = BBTreeMap::new();
++    for index in 0..len {
++        map.insert(key(index), key(index)).unwrap();
++    }
++    map
++}
++
++/// [`Shapes`] for a plain map, whose leaves hold more entries than a
++/// [`TrackedMap`]'s: the root leaf's capacity, and the length at which a
++/// tree of two levels is one removal from lowering.
++struct PlainShapes {
++    capacity: u64,
++    lowering_len: u64,
++}
++
++impl PlainShapes {
++    fn probe() -> Self {
++        let mut map = BBTreeMap::<u64, u64>::new();
++        let mut len = 0;
++        while map.node_lengths().len() <= 1 {
++            map.insert(key(len), key(len)).unwrap();
++            len += 1;
++        }
++        let capacity = len - 1;
++        while map.node_lengths().len() > 1 {
++            len -= 1;
++            map.remove(&key(len));
++        }
++        Self {
++            capacity,
++            lowering_len: len + 1,
++        }
++    }
++
++    /// A tree of two levels, which a removal of its last key lowers to its
++    /// root leaf. Returns how many keys it holds.
++    fn one_removal_from_lowering(&self) -> (BBTreeMap<u64, u64>, u64) {
++        let raised = self.capacity + 1;
++        let map = plain_map_of(raised);
++        for index in self.lowering_len..raised {
++            assert!(map.remove(&key(index)).is_some());
++        }
++        (map, self.lowering_len)
++    }
++}
++
+ /// The number of a `u64` key, its value's.
+ fn same(key: &u64) -> u64 {
+     *key
+@@ -567,6 +616,182 @@ fn scans_from_outside_the_shared_prefix_race_a_shrink() {
+     });
+ }
+ 
++/// Copied firsts while the tree lowers from two leaves into its root leaf:
++/// a first read at the root as internal must not take the leaf's bytes for
++/// edges, and a copy out of the leaf that merged away must not be used.
++#[test]
++fn copied_firsts_race_the_root_lowering_to_a_leaf() {
++    let shapes = PlainShapes::probe();
++    Exploration {
++        random: 20_000,
++        pct: 20_000,
++    }
++    .run(move || {
++        let (mut map, len) = shapes.one_removal_from_lowering();
++        thread::scope(|scope| {
++            scope.spawn(|| assert!(map.remove(&key(len - 1)).is_some()));
++            scope.spawn(|| {
++                assert_eq!(map.first_copied(..), Some((key(0), key(0))));
++                for index in [0, 1, len / 2, len - 3] {
++                    assert_eq!(
++                        map.first_copied(key(index)..),
++                        Some((key(index), key(index)))
++                    );
++                    assert_eq!(
++                        map.first_copied((key(index) + 1)..),
++                        Some((key(index + 1), key(index + 1))),
++                        "past {}",
++                        key(index)
++                    );
++                }
++                // The last key may be gone or not.
++                for from in [key(len - 2) + 1, key(len - 1)] {
++                    assert!(
++                        map.first_copied(from..)
++                            .is_none_or(|entry| entry == (key(len - 1), key(len - 1))),
++                        "from {from}"
++                    );
++                }
++            });
++        });
++        assert_eq!(map.node_lengths().len(), 1, "the root lowered to a leaf");
++        map.check_invariants(len as usize - 1);
++    });
++}
++
++/// Copied firsts while appends split the root leaf, raising the tree, and
++/// then the last leaf: every steady key is found from itself and from just
++/// before it, whether the first read its leaf before or after a split.
++#[test]
++fn copied_firsts_race_splits_of_the_last_leaf() {
++    let shapes = PlainShapes::probe();
++    Exploration {
++        random: 20_000,
++        pct: 20_000,
++    }
++    .run(move || {
++        let len = shapes.capacity;
++        let mut map = plain_map_of(len);
++        let appended: Vec<u64> = (len..len + 3).map(key).collect();
++        thread::scope(|scope| {
++            scope.spawn(|| {
++                for &key in &appended {
++                    assert!(map.insert(key, key).unwrap().is_none());
++                }
++            });
++            scope.spawn(|| {
++                for index in [0, 1, len / 2, len - 2, len - 1] {
++                    assert_eq!(
++                        map.first_copied(key(index)..),
++                        Some((key(index), key(index)))
++                    );
++                    assert_eq!(
++                        map.first_copied((key(index) - 1)..),
++                        Some((key(index), key(index)))
++                    );
++                }
++                // Past the steady keys: the first appended key, once there.
++                assert!(
++                    map.first_copied((key(len - 1) + 1)..)
++                        .is_none_or(|entry| entry == (key(len), key(len)))
++                );
++            });
++        });
++        assert_eq!(map.node_lengths().len(), 2, "the root was raised");
++        map.check_invariants(len as usize + appended.len());
++    });
++}
++
++/// Copied firsts from bounds that lack what every key shares, just outside
++/// the keys, while another thread inserts a key past each bound, the first
++/// shrinking the shared prefix: a first that read its bound as before every
++/// key must not return a key the shrink put before the bound.
++#[test]
++fn copied_firsts_from_outside_the_shared_prefix_race_a_shrink() {
++    let shapes = PlainShapes::probe();
++    Exploration {
++        random: 20_000,
++        pct: 20_000,
++    }
++    .run(move || {
++        for len in [4, 2 * shapes.capacity] {
++            let base = 0xAB << 40;
++            let mut map = BBTreeMap::<u64, u64>::new();
++            for index in 0..len {
++                map.insert(base + key(index), base + key(index)).unwrap();
++            }
++            assert!(map.shared_prefix_len() >= 3);
++            let (first, last) = (base + key(0), base + key(len - 1));
++            // Each differs from every key in the shared third byte.
++            let (below, above) = (0xAA << 40, 0xAC << 40);
++            let mut outside = [0xA9 << 40, 0xAD << 40];
++            if thread_rng().gen_range(0..2) == 1 {
++                outside.reverse();
++            }
++            thread::scope(|scope| {
++                scope.spawn(|| {
++                    for key in outside {
++                        assert!(map.insert(key, key).unwrap().is_none());
++                    }
++                });
++                scope.spawn(|| {
++                    assert_eq!(map.first_copied(below..), Some((first, first)));
++                    assert_eq!(map.first_copied(below..=above), Some((first, first)));
++                    assert_eq!(map.first_copied(first..), Some((first, first)));
++                    assert_eq!(map.first_copied(last..), Some((last, last)));
++                    // Past every steady key: the key inserted above, once
++                    // there, and nothing else.
++                    for from in [(last + 1)..u64::MAX, above..u64::MAX] {
++                        assert!(
++                            map.first_copied(from.clone())
++                                .is_none_or(|entry| entry == (0xAD << 40, 0xAD << 40)),
++                            "{from:?}"
++                        );
++                    }
++                });
++            });
++            assert!(map.shared_prefix_len() < 3);
++            map.check_invariants(len as usize + 2);
++        }
++    });
++}
++
++/// Copied firsts from a separator key while the key is removed and its
++/// successor becomes the leaf's head: a first whose bound matched the
++/// separator confirms the head it reads, and one that excludes the bound
++/// must not skip the new head, which is present throughout.
++#[test]
++fn copied_firsts_at_a_separator_race_its_removal() {
++    let shapes = PlainShapes::probe();
++    Exploration {
++        random: 20_000,
++        pct: 20_000,
++    }
++    .run(move || {
++        let len = 2 * shapes.capacity;
++        let mut map = plain_map_of(len);
++        let leaf = map.leaf_keys()[1].clone();
++        assert!(leaf.len() >= 3, "a second leaf of a few keys");
++        let (separator, next) = (leaf[0], leaf[1]);
++        thread::scope(|scope| {
++            scope.spawn(|| assert!(map.remove(&separator).is_some()));
++            scope.spawn(|| {
++                assert_eq!(
++                    map.first_copied((Bound::Excluded(separator), Bound::Unbounded)),
++                    Some((next, next))
++                );
++                let found = map.first_copied(separator..);
++                assert!(
++                    found == Some((separator, separator)) || found == Some((next, next)),
++                    "{found:?} from {separator}"
++                );
++                assert_eq!(map.first_copied(next..), Some((next, next)));
++            });
++        });
++        map.check_invariants(len as usize - 1);
++    });
++}
++
+ /// Appends while a removal merges the last leaf into its sibling, frees it,
+ /// and lowers the tree into the root leaf: an append that read the pointer
+ /// to the last leaf before must not insert into the freed page.
+diff --git a/bbtree/src/map/tests.rs b/bbtree/src/map/tests.rs
+index 171d443..d98d50f 100644
+--- a/bbtree/src/map/tests.rs
++++ b/bbtree/src/map/tests.rs
+@@ -905,6 +905,140 @@ fn scans_match_std() {
+     }
+ }
+ 
++/// Copied firsts match std's first entry of a range, for every kind of
++/// bound, bounds on keys the map holds included (ties, heads, separators),
++/// and work on a map whose root is a leaf, an empty map, and byte-array
++/// keys.
++#[test]
++fn copied_firsts_match_std() {
++    let rng = TestRng::new(113);
++    let map = BBTreeMap::<u64, u64>::new();
++    let mut std_map = BTreeMap::new();
++    let numbers = random_numbers(&rng, 20_000, 1 << 20);
++    for &number in &numbers {
++        map.insert(number, number * 3).unwrap();
++        std_map.insert(number, number * 3);
++    }
++    let first_in =
++        |range: (Bound<u64>, Bound<u64>)| std_map.range(range).next().map(|(&k, &v)| (k, v));
++    for _ in 0..3_000 {
++        // Half the bounds are keys the map holds.
++        let pick = || {
++            if rng.below(2) == 0 {
++                numbers[rng.below(numbers.len())]
++            } else {
++                rng.below_u64(1 << 20)
++            }
++        };
++        let (a, b) = (pick(), pick());
++        let (low, high) = (a.min(b), a.max(b));
++        let bound = |key: u64, kind: usize| match kind {
++            0 => Bound::Included(key),
++            1 if low != high => Bound::Excluded(key),
++            1 => Bound::Included(key),
++            _ => Bound::Unbounded,
++        };
++        let range = (bound(low, rng.below(3)), bound(high, rng.below(3)));
++        assert_eq!(map.first_copied(range), first_in(range), "{range:?}");
++    }
++    assert_eq!(
++        map.first_copied(..),
++        first_in((Bound::Unbounded, Bound::Unbounded))
++    );
++    assert_eq!(map.first_copied((1_u64 << 20)..), None);
++
++    let small = BBTreeMap::<u64, u64>::new();
++    assert_eq!(small.first_copied(..), None);
++    for key in [5, 1, 3] {
++        small.insert(key, key).unwrap();
++    }
++    assert_eq!(small.first_copied(..), Some((1, 1)));
++    assert_eq!(small.first_copied(2..), Some((3, 3)));
++    assert_eq!(small.first_copied(3..), Some((3, 3)));
++    assert_eq!(
++        small.first_copied((Bound::Excluded(3), Bound::Unbounded)),
++        Some((5, 5))
++    );
++    assert_eq!(small.first_copied(6..), None);
++    assert_eq!(small.first_copied(..=0), None);
++    assert_eq!(small.first_copied(2..3), None);
++
++    let arrays = BBTreeMap::<[u8; 16], u32>::new();
++    let mut std_arrays = BTreeMap::new();
++    for (index, number) in random_numbers(&rng, 5_000, 1 << 30).into_iter().enumerate() {
++        let key = (u128::from(number) << 64 | u128::from(number % 7)).to_be_bytes();
++        arrays.insert(key, index as u32).unwrap();
++        std_arrays.insert(key, index as u32);
++    }
++    for _ in 0..500 {
++        let start = (u128::from(rng.below_u64(1 << 30)) << 64).to_be_bytes();
++        assert_eq!(
++            arrays.first_copied(start..),
++            std_arrays.range(start..).next().map(|(&k, &v)| (k, v))
++        );
++    }
++    for (&key, &value) in std_arrays.iter().take(300) {
++        assert_eq!(arrays.first_copied(key..), Some((key, value)));
++        let after = (Bound::Excluded(key), Bound::Unbounded);
++        assert_eq!(
++            arrays.first_copied(after),
++            std_arrays.range(after).next().map(|(&k, &v)| (k, v))
++        );
++    }
++}
++
++/// Copied firsts, while other threads insert and remove: the entry found
++/// is at or after the bound, never past the first key that is present
++/// throughout, and its value is its key's.
++#[test]
++#[cfg_attr(target_family = "wasm", ignore = "needs threads")]
++fn copied_firsts_hold_while_others_change_the_map() {
++    let (writers, seekers, steady) = (3, 3, 30_000_u64);
++    let map = BBTreeMap::<u64, u64>::new();
++    // Even keys stay for the whole test; odd ones come and go.
++    for number in 0..steady {
++        map.insert(number * 2, number).unwrap();
++    }
++    let barrier = Barrier::new(writers + seekers);
++    thread::scope(|scope| {
++        for writer in 0..writers {
++            let (map, barrier) = (&map, &barrier);
++            scope.spawn(move || {
++                let rng = TestRng::new(900 + writer as u64);
++                barrier.wait();
++                for _ in 0..100_000 {
++                    let key = rng.below_u64(steady) * 2 + 1;
++                    if rng.below(2) == 0 {
++                        map.insert(key, key).unwrap();
++                    } else {
++                        map.remove(&key);
++                    }
++                }
++            });
++        }
++        for seeker in 0..seekers {
++            let (map, barrier) = (&map, &barrier);
++            scope.spawn(move || {
++                let rng = TestRng::new(1000 + seeker as u64);
++                barrier.wait();
++                for _ in 0..200_000 {
++                    let start = rng.below_u64(steady * 2);
++                    let first_even = start.div_ceil(2) * 2;
++                    let found = map.first_copied(start..);
++                    match found {
++                        Some((key, value)) => {
++                            assert!(key >= start && key <= first_even, "{found:?} from {start}");
++                            let expected = if key % 2 == 0 { key / 2 } else { key };
++                            assert_eq!(value, expected, "the value of {key}");
++                        }
++                        None => assert!(first_even >= steady * 2, "nothing from {start}"),
++                    }
++                }
++            });
++        }
++    });
++}
++
+ /// Scans, in both orders, while other threads insert and remove: every key
+ /// present for the whole scan is visited exactly once, in the scan's order.
+ #[test]
+diff --git a/bbtree/src/tree/invariants.rs b/bbtree/src/tree/invariants.rs
+index 8bc4e78..4a87ed3 100644
+--- a/bbtree/src/tree/invariants.rs
++++ b/bbtree/src/tree/invariants.rs
+@@ -15,6 +15,7 @@ use super::node::inline_keys::KeyInliner;
+ use super::node::internal::Internal;
+ use super::node::page::NodePtr;
+ use super::node::{Child, Node};
++use super::node_stack::LastEdge;
+ use super::root::Tree;
+ use super::shared_prefix::SharedPrefix;
+ 
+@@ -37,6 +38,24 @@ impl<K: Ord, V, S: InlineKeyStrategy<K>> Tree<K, V, S> {
+         }
+     }
+ 
++    /// Panics unless the leaf remembered for the next append (D45) is the
++    /// tree's physically last leaf.
++    fn check_rightmost_leaf(&self) {
++        let Some(remembered) = self.remembered_rightmost_leaf() else {
++            return;
++        };
++        let last = self
++            .root_page()
++            .expect("a remembered leaf without a tree")
++            .node()
++            .border_leaf::<LastEdge>();
++        assert_eq!(
++            remembered.tagged(),
++            last.node_ptr().tagged(),
++            "the remembered leaf is not the tree's last leaf"
++        );
++    }
++
+     /// Panics unless this is a well-formed B+-tree of `length` entries
+     /// (D17):
+     ///
+@@ -55,6 +74,8 @@ impl<K: Ord, V, S: InlineKeyStrategy<K>> Tree<K, V, S> {
+     ///   reads as the separator's;
+     /// - `length` is the number of entries, each counted once: leaf entries
+     ///   and separators, whose values are the heads;
++    /// - if a leaf is remembered for the next append (D45), it is the tree's
++    ///   physically last leaf;
+     /// - if the strategy gives the keys inline keys, every node holds its
+     ///   keys' windows at its prefix length, in order (D18). The prefix is
+     ///   what its fences share, or along the tree's borders, what every key
+@@ -66,6 +87,7 @@ impl<K: Ord, V, S: InlineKeyStrategy<K>> Tree<K, V, S> {
+     /// Calls `Ord` and the strategy's inline-key encoding: a tree whose keys
+     /// break their contracts fails it.
+     pub(crate) fn check_invariants(&self, length: usize) {
++        self.check_rightmost_leaf();
+         let Some(root_page) = self.root_page() else {
+             assert_eq!(length, 0, "a map without a tree has entries");
+             return;
+diff --git a/bbtree/src/tree/latched/first_copied.rs b/bbtree/src/tree/latched/first_copied.rs
+new file mode 100644
+index 0000000..f61d195
+--- /dev/null
++++ b/bbtree/src/tree/latched/first_copied.rs
+@@ -0,0 +1,157 @@
++//! The first entry of a range of a latched tree, read without latching its
++//! leaf, for keys and values that are copies of their bytes: `Copy`, and
++//! owning nothing. A seek: what a versioned read does many times a query,
++//! "the first entry at or after this key", into the leaves every thread is
++//! reading. As a lookup copies one value unlatched (`lookup.rs`, D57), a
++//! copied first places the range's start among a leaf's keys, reads the few
++//! entries that may be the first, one at a time with the version checked
++//! after each, and settles among the copies.
++//!
++//! - **Placed by the inline keys**, as a latched search is (D18): the keys
++//!   whose inline keys sort below the bound's are before it, those above are
++//!   past it, and the few that tie are compared in full, on copies.
++//! - **One leaf.** The descent's leaf holds the first entry unless the bound
++//!   sorts past every key in it, when the next leaf's head does. That, more
++//!   ties than [`READ`] reads settle, a range unbounded below or starting
++//!   before every key, or a leaf that changed meanwhile, sends the read the
++//!   latched way (`scan.rs`).
++//!
++//! No latch is taken on this path, so seekers write nothing to the leaves
++//! they read (`design/09-concurrency.md`, principle 3).
++
++use core::borrow::Borrow;
++use core::cmp::Ordering as KeyOrdering;
++use core::ops::{Bound, ControlFlow, RangeBounds};
++
++use super::super::node::inline_keys::SearchKey;
++use super::LatchedTree;
++use super::descent::Optimistic;
++use crate::inline_key::InlineKeyStrategy;
++
++/// How many entries are read at most, one at a time: the keys whose inline
++/// keys tie with the bound's, and the one after them. Ties are rare and
++/// short (D18); a longer run goes the latched way.
++const READ: usize = 3;
++
++impl<K: Copy, V: Copy, S: InlineKeyStrategy<K>> LatchedTree<K, V, S> {
++    /// A copy of the first entry whose key lies between `start` and `end`,
++    /// in key order, without latching its leaf where its version holds
++    /// (module documentation). `None` if no key does.
++    pub(crate) fn first_copied<Q>(&self, start: Bound<&Q>, end: Bound<&Q>) -> Option<(K, V)>
++    where
++        K: Borrow<Q>,
++        Q: Ord + ?Sized,
++    {
++        self.root_page()?;
++        let key = match start {
++            Bound::Unbounded => return self.first_latched(start, end),
++            Bound::Included(key) | Bound::Excluded(key) => SearchKey::new(key),
++        };
++        let (held, at_separator) = match self.descend::<Q, Optimistic, ()>(&key, &mut ()) {
++            Ok(at) => at,
++            // The bound lacks what every key shares and sorts before them
++            // all: the first entry is the tree's first, found the latched way.
++            Err(KeyOrdering::Less) => return self.first_latched(start, end),
++            // The bound sorts after every key.
++            Err(_) => return None,
++        };
++        let leaf = held.leaf();
++        if at_separator {
++            // The bound matched the separator left of the leaf: the head's
++            // key, unless the head went since (`descend`), so the head is
++            // confirmed on a copy. A head at the bound is the first entry if
++            // the bound includes it, and before the range otherwise; a head
++            // past the bound is the first entry, every other key of the leaf
++            // being past the head.
++            let Some(head) = leaf.load_racing_head_entry() else {
++                return self.first_latched(start, end);
++            };
++            if !held.is_unchanged() {
++                return self.first_latched(start, end);
++            }
++            // SAFETY: the leaf stayed at the version the descent read, with
++            // no thread holding it exclusively, from before the read to
++            // after it, and it had a head as read. A `Copy` key and value
++            // own nothing.
++            let (stored, value) = unsafe { head.assume_read() };
++            match key.cmp_full(&stored) {
++                KeyOrdering::Equal if matches!(start, Bound::Excluded(_)) => {}
++                KeyOrdering::Equal | KeyOrdering::Less => {
++                    return Self::within_end(*stored, *value, end);
++                }
++                // A head before the bound: not the leaf the bound belongs
++                // to any more; the latched way finds it.
++                KeyOrdering::Greater => return self.first_latched(start, end),
++            }
++        }
++        let Some(placed) = leaf.racing_place(&key) else {
++            return self.first_latched(start, end);
++        };
++        let (ties, len) = (placed.ties.clone(), placed.len);
++        if ties.start >= len {
++            // Every key sorts before the bound: the first entry is the next
++            // leaf's head, if any.
++            return self.first_latched(start, end);
++        }
++        // The ties, compared in full, and the key after them, which is the
++        // first if no tie is: ties are rare and short (D18), so `READ` reads
++        // settle nearly every seek. Each reads one entry in place (a copy
++        // sized at run time would be a call) and checks the version, so a
++        // seek holds one entry however large the entries are; a longer run
++        // goes the latched way.
++        let after = (ties.end + 1).min(len);
++        if after - ties.start > READ {
++            return self.first_latched(start, end);
++        }
++        for index in ties.start..after {
++            let entry = leaf.load_racing_entry(index);
++            if !held.is_unchanged() {
++                return self.first_latched(start, end);
++            }
++            // SAFETY: the index is below the length as read, and the leaf
++            // stayed at the version the descent read, with no thread holding
++            // it exclusively, from before the read to after it (checked just
++            // above). `Copy` keys and values own nothing.
++            let (stored, value) = unsafe { entry.assume_read() };
++            // A tie compares from past the bytes it shares with the bound;
++            // the key after the ties is past the bound.
++            if index < ties.end {
++                let before = match placed.cmp_tied(&key, &stored) {
++                    KeyOrdering::Greater => true,
++                    KeyOrdering::Equal => matches!(start, Bound::Excluded(_)),
++                    KeyOrdering::Less => false,
++                };
++                if before {
++                    continue;
++                }
++            }
++            return Self::within_end(*stored, *value, end);
++        }
++        // Every tie sorts before the bound, and no key follows them here.
++        self.first_latched(start, end)
++    }
++
++    /// The entry, if its key is not past `end`.
++    fn within_end<Q>(key: K, value: V, end: Bound<&Q>) -> Option<(K, V)>
++    where
++        K: Borrow<Q>,
++        Q: Ord + ?Sized,
++    {
++        (Bound::Unbounded, end)
++            .contains::<Q>(key.borrow())
++            .then_some((key, value))
++    }
++
++    /// The first entry the latched way (`scan.rs`).
++    #[cold]
++    #[inline(never)]
++    fn first_latched<Q>(&self, start: Bound<&Q>, end: Bound<&Q>) -> Option<(K, V)>
++    where
++        K: Borrow<Q>,
++        Q: Ord + ?Sized,
++    {
++        self.scan(start, end, None, |key, value, _| {
++            ControlFlow::Break((*key, *value))
++        })
++    }
++}
+diff --git a/bbtree/src/tree/latched/mod.rs b/bbtree/src/tree/latched/mod.rs
+index b03db9c..fd73d0c 100644
+--- a/bbtree/src/tree/latched/mod.rs
++++ b/bbtree/src/tree/latched/mod.rs
+@@ -46,6 +46,7 @@
+ mod append;
+ mod batch;
+ mod descent;
++mod first_copied;
+ mod held;
+ mod insert;
+ mod lookup;
+diff --git a/bbtree/src/tree/node/optimistic.rs b/bbtree/src/tree/node/optimistic.rs
+index 29ed3db..cff3518 100644
+--- a/bbtree/src/tree/node/optimistic.rs
++++ b/bbtree/src/tree/node/optimistic.rs
+@@ -36,6 +36,7 @@
+ 
+ use core::borrow::Borrow;
+ use core::cmp::Ordering;
++use core::marker::PhantomData;
+ use core::mem::{ManuallyDrop, MaybeUninit};
+ use core::ops::Range;
+ use core::ptr::NonNull;
+@@ -178,6 +179,39 @@ impl<K, V, S: InlineKeyStrategy<K>> Leaf<K, V, S> {
+         })
+     }
+ 
++    /// Where a bound lies among this leaf's keys, as its inline keys say,
++    /// read in place while writers may change them ([`Placed`]). `None` if
++    /// the inline keys can't place the bound. Holds only if the leaf's
++    /// version is unchanged after.
++    ///
++    /// The bound shares the leaf's prefix if it routed here through nodes
++    /// whose versions held.
++    #[inline(always)]
++    pub(in crate::tree) fn racing_place<Q>(
++        self,
++        key: &SearchKey<'_, K, S, Q>,
++    ) -> Option<Placed<K, V, S>>
++    where
++        K: Borrow<Q>,
++        Q: Ord + ?Sized,
++    {
++        let _reads = RacingReads::begin();
++        // SAFETY: the page is a leaf's, allocated while threads share the
++        // tree.
++        let (len, prefix_len, inline_keys) =
++            unsafe { self.node_ptr().load_racing_inline_keys::<Self>() };
++        let target = key.inline_target(prefix_len)?;
++        let ties = inline_keys.equal_range(target.inline_key());
++        Some(Placed {
++            // The range is cut at `len` already; cut again against a torn
++            // read.
++            ties: ties.start.min(len)..ties.end.min(len),
++            len,
++            target,
++            leaf: PhantomData,
++        })
++    }
++
+     /// A copy of key `index` and its value, read in place while writers may
+     /// change them: an entry of the leaf only if its version is unchanged
+     /// after ([`RacingEntry`]).
+@@ -535,6 +569,34 @@ impl<K, V, S: InlineKeyStrategy<K>> NodePtr<K, V, S> {
+     }
+ }
+ 
++/// Where a bound lies among a leaf's keys, as the leaf's inline keys said
++/// when read in place ([`Leaf::racing_place`]): the keys whose inline keys
++/// equal the bound's, and the leaf's length as read. The keys before the
++/// range sort before the bound, those after it after; those in it compare
++/// in full ([`Self::cmp_tied`]).
++pub(in crate::tree) struct Placed<K, V, S> {
++    pub(in crate::tree) ties: Range<usize>,
++    pub(in crate::tree) len: usize,
++    /// The bound's window at the leaf's prefix length, which the comparison
++    /// of a tie starts past.
++    target: Window,
++    leaf: PhantomData<Leaf<K, V, S>>,
++}
++
++impl<K, V, S: InlineKeyStrategy<K>> Placed<K, V, S> {
++    /// How `key`, the bound placed, orders against `stored`, a key of the
++    /// leaf among the ties, compared from past the bytes they are known to
++    /// share, as a latched search compares its candidates.
++    #[inline(always)]
++    pub(in crate::tree) fn cmp_tied<Q>(&self, key: &SearchKey<'_, K, S, Q>, stored: &K) -> Ordering
++    where
++        K: Borrow<Q>,
++        Q: Ord + ?Sized,
++    {
++        key.cmp_tied::<Leaf<K, V, S>>(self.target, stored)
++    }
++}
++
+ /// A copy of a leaf's entry, its key and value, read in place while writers
+ /// may change them. It may be torn, or of slots no entry fills; it is an
+ /// entry the leaf held only if the leaf's version is unchanged after the
+diff --git a/bbtree/src/tree/remove.rs b/bbtree/src/tree/remove.rs
+index a701dc8..42fa505 100644
+--- a/bbtree/src/tree/remove.rs
++++ b/bbtree/src/tree/remove.rs
+@@ -144,6 +144,18 @@ impl<K, V, S: InlineKeyStrategy<K>> NodeStackMut<'_, K, V, S> {
+         alloc: &impl PageAllocator,
+         length: &mut usize,
+     ) -> (K, V) {
++        // A leaf that needs no fixing keeps the path to its successor. Its
++        // next key shifts into this index; past its end, the next slot leads
++        // to the separator on its right, or detaches past the tree's last.
++        if let Node::Leaf(leaf) = self.node()
++            && (leaf.keeps_its_minimum() || self.is_at_root())
++        {
++            let index = self.index();
++            let entry = leaf.remove(index);
++            *length -= 1;
++            self.go_to_entry_at_slot(index + 1);
++            return entry;
++        }
+         let (entry, mut changed) = self.take_out(alloc, length);
+         // The way down to the next entry: as the node stack leads above the
+         // nodes the fixing changed, and as the fixing tracked it from there.
+diff --git a/bbtree/src/tree/root.rs b/bbtree/src/tree/root.rs
+index 8e823e5..74c448c 100644
+--- a/bbtree/src/tree/root.rs
++++ b/bbtree/src/tree/root.rs
+@@ -43,9 +43,10 @@ use crate::inline_key::InlineKeyStrategy;
+ /// route, never to stay in bounds.
+ ///
+ /// If present, `rightmost_leaf` points to the tree's physically last leaf.
+-/// Every exclusive use of the tree except the owner's fitting append clears
+-/// it first ([`Self::root_mut`]). It holds no reference to a key, no cached
+-/// length, and no assumption about how `Ord` behaves.
++/// Every exclusive use of the tree that can move or free a node clears it
++/// first ([`Self::root_mut`]); the owner's fitting append and its value
++/// updates (`Tree::find_mut`, `search.rs`) keep it. It holds no reference to
++/// a key, no cached length, and no assumption about how `Ord` behaves.
+ pub(crate) struct Tree<K, V, S> {
+     root_page: Option<RootPage<K, V, S>>,
+     rightmost_leaf: Option<NodePtr<K, V, S>>,
+@@ -182,9 +183,17 @@ impl<K, V, S: InlineKeyStrategy<K>> Tree<K, V, S> {
+         }
+     }
+ 
++    /// The leaf the tree remembers for the next append, if any (D45): for
++    /// the check that it is the tree's physically last leaf
++    /// (`tree/invariants.rs`).
++    #[cfg(any(test, fuzzing))]
++    pub(in crate::tree) fn remembered_rightmost_leaf(&self) -> Option<NodePtr<K, V, S>> {
++        self.rightmost_leaf
++    }
++
+     #[cfg(test)]
+     pub(crate) fn remembers_rightmost_leaf(&self) -> bool {
+-        self.rightmost_leaf.is_some()
++        self.remembered_rightmost_leaf().is_some()
+     }
+ 
+     /// A new tree, on a root page from `alloc`: an empty root leaf, without
+diff --git a/bbtree/src/tree/search.rs b/bbtree/src/tree/search.rs
+index 8a05255..907a552 100644
+--- a/bbtree/src/tree/search.rs
++++ b/bbtree/src/tree/search.rs
+@@ -192,13 +192,16 @@ impl<K, V, S: InlineKeyStrategy<K>> Tree<K, V, S> {
+     }
+ 
+     /// The value of the entry whose key equals `key`, exclusive; see
+-    /// [`Self::find`].
++    /// [`Self::find`]. Reads the root page shared, as the shared map's owner
++    /// does: a value update moves and frees no node, so the tree keeps its
++    /// remembered rightmost leaf for the next append (D45). The caller's
++    /// exclusive borrow is what makes handing out `&mut V` sound.
+     pub(crate) fn find_mut<Q>(&mut self, key: &Q) -> Option<&mut V>
+     where
+         K: Borrow<Q>,
+         Q: Ord + ?Sized,
+     {
+-        let root_page = self.root_page_mut()?;
++        let root_page = self.root_page()?;
+         let key = SearchKey::new(key);
+         if root_page.shared_prefix().place_outside(&key).is_some() {
+             return None;
+diff --git a/bbtree/src/unsync/map/tests/extract_if.rs b/bbtree/src/unsync/map/tests/extract_if.rs
+new file mode 100644
+index 0000000..8b67fcb
+--- /dev/null
++++ b/bbtree/src/unsync/map/tests/extract_if.rs
+@@ -0,0 +1,252 @@
++//! Extraction's local successor positioning at leaf ends and across repairs.
++
++#![forbid(unsafe_code)]
++
++use core::fmt::Debug;
++use core::ops::Bound::{Excluded, Included};
++use core::ops::Range;
++use core::panic::AssertUnwindSafe;
++use std::panic::catch_unwind;
++use std::vec::Vec;
++
++use crate::inline_key::Auto;
++use crate::tree::node::Node;
++use crate::tree::node::leaf::Leaf;
++use crate::unsync::BBTreeMap;
++
++/// Consecutive integer keys and values: `u64` gets inline keys under Auto,
++/// `u32` does not. Insert individually so the boundary fixtures use splits.
++struct ExtractionFixture<K> {
++    map: BBTreeMap<K, u32>,
++    count: u32,
++}
++
++impl<K: Ord + From<u32> + Debug> ExtractionFixture<K> {
++    fn new(count: u32) -> Self {
++        let mut map = BBTreeMap::new();
++        for number in 0..count {
++            map.insert(K::from(number), number);
++        }
++        Self { map, count }
++    }
++
++    fn two_leaves() -> Self {
++        let fixture = Self::new(Leaf::<K, u32, Auto>::capacity() as u32 + 1);
++        assert_eq!(fixture.map.leaf_depth(), 1);
++        let Node::Internal(root) = fixture.map.tree.root() else {
++            panic!("the root leaf split");
++        };
++        assert_eq!(root.len(), 1);
++        fixture
++    }
++
++    fn left_leaf_len(&self) -> u32 {
++        let Node::Internal(root) = self.map.tree.root() else {
++            panic!("the fixture has two leaves");
++        };
++        root.child(0).expect_leaf().len() as u32
++    }
++
++    /// Assert the walk neither repeats nor skips a key, including the key
++    /// after a removal that changes the tree's shape.
++    fn extract_and_check(&mut self, removed: Range<u32>) {
++        let mut visited = Vec::new();
++        let entries: Vec<_> = self
++            .map
++            .extract_if(
++                K::from(removed.start)..K::from(removed.end),
++                |key, value| {
++                    assert_eq!(key, &K::from(*value));
++                    visited.push(*value);
++                    true
++                },
++            )
++            .map(|(key, value)| {
++                assert_eq!(key, K::from(value));
++                value
++            })
++            .collect();
++        assert!(entries.iter().copied().eq(removed.clone()));
++        assert_eq!(visited, entries);
++        assert_eq!(self.map.len(), (self.count - removed.len() as u32) as usize);
++        assert!(
++            self.map
++                .iter()
++                .map(|(key, &value)| {
++                    assert_eq!(key, &K::from(value));
++                    value
++                })
++                .eq((0..self.count).filter(|number| !removed.contains(number)))
++        );
++        self.map.check_invariants();
++    }
++
++    fn consecutive_inside_leaf(mut self) {
++        self.extract_and_check(3..7);
++        assert_eq!(self.map.leaf_depth(), 1);
++    }
++
++    fn across_leaf_end_and_separator(mut self) {
++        let separator = self.left_leaf_len();
++        self.extract_and_check(separator - 1..separator + 2);
++        assert_eq!(self.map.leaf_depth(), 1);
++    }
++
++    fn last_entry(mut self) {
++        self.extract_and_check(self.count - 1..self.count);
++        let mut extraction = self.map.extract_if(.., |_, _| false);
++        assert_eq!(extraction.next(), None);
++        assert_eq!(extraction.next(), None);
++    }
++
++    fn merge_and_lower_root(mut self) {
++        let minimum = (Leaf::<K, u32, Auto>::capacity() / 8).max(4) as u32;
++        self.extract_and_check(0..self.left_leaf_len() - minimum + 1);
++        assert_eq!(self.map.leaf_depth(), 0, "the underfull leaf merged");
++    }
++
++    fn borrow_from_right(mut self) {
++        let capacity = Leaf::<K, u32, Auto>::capacity() as u32;
++        let left_len = self.left_leaf_len();
++        while self.count < left_len + 1 + capacity {
++            self.map.insert(K::from(self.count), self.count);
++            self.count += 1;
++        }
++        let minimum = (capacity / 8).max(4);
++        self.extract_and_check(0..left_len - minimum + 1);
++        let Node::Internal(root) = self.map.tree.root() else {
++            panic!("borrowing must not lower the root");
++        };
++        assert_eq!(root.len(), 1);
++        assert_eq!(root.child(0).expect_leaf().len(), minimum as usize);
++        assert_eq!(root.child(1).expect_leaf().len(), (capacity - 1) as usize);
++    }
++
++    fn empty_root_leaf(mut self) {
++        assert_eq!(self.map.leaf_depth(), 0);
++        self.extract_and_check(0..self.count);
++        assert!(self.map.is_empty());
++        let mut extraction = self.map.extract_if(.., |_, _| panic!("empty map"));
++        assert_eq!(extraction.next(), None);
++        assert_eq!(extraction.next(), None);
++        drop(extraction);
++        self.map.insert(K::from(0), 0);
++        assert_eq!(self.map.get(&K::from(0)), Some(&0));
++        self.map.check_invariants();
++    }
++}
++
++#[test]
++fn extract_if_consecutive_entries_stay_at_the_successor() {
++    ExtractionFixture::<u64>::two_leaves().consecutive_inside_leaf();
++    ExtractionFixture::<u32>::two_leaves().consecutive_inside_leaf();
++}
++
++#[test]
++fn extract_if_leaf_end_visits_separator_and_next_leaf_once() {
++    ExtractionFixture::<u64>::two_leaves().across_leaf_end_and_separator();
++    ExtractionFixture::<u32>::two_leaves().across_leaf_end_and_separator();
++}
++
++#[test]
++fn extract_if_last_leaf_entry_exhausts_the_walk() {
++    ExtractionFixture::<u64>::two_leaves().last_entry();
++    ExtractionFixture::<u32>::two_leaves().last_entry();
++}
++
++#[test]
++fn extract_if_merge_lowers_root_and_keeps_the_successor() {
++    ExtractionFixture::<u64>::two_leaves().merge_and_lower_root();
++    ExtractionFixture::<u32>::two_leaves().merge_and_lower_root();
++}
++
++#[test]
++fn extract_if_borrow_keeps_the_successor() {
++    ExtractionFixture::<u64>::two_leaves().borrow_from_right();
++    ExtractionFixture::<u32>::two_leaves().borrow_from_right();
++}
++
++#[test]
++fn extract_if_root_leaf_can_be_emptied_and_reused() {
++    for count in [0, 1, 16] {
++        ExtractionFixture::<u64>::new(count).empty_root_leaf();
++        ExtractionFixture::<u32>::new(count).empty_root_leaf();
++    }
++}
++
++#[test]
++fn extract_if_is_lazy_and_early_drop_leaves_unvisited_values_untouched() {
++    let mut map = ExtractionFixture::<u64>::new(32).map;
++    drop(map.extract_if(.., |_, _| panic!("unconsumed iterator")));
++    assert_eq!(map.len(), 32);
++    let mut visited = Vec::new();
++    let entries: Vec<_> = map
++        .extract_if(.., |&key, value| {
++            visited.push(key);
++            *value += 100;
++            key % 2 == 1
++        })
++        .take(3)
++        .collect();
++    assert_eq!(entries, [(1, 101), (3, 103), (5, 105)]);
++    assert_eq!(visited, [0, 1, 2, 3, 4, 5]);
++    assert_eq!(map.len(), 29);
++    assert!(
++        map.iter()
++            .map(|(&key, &value)| (key, value))
++            .eq([(0, 100), (2, 102), (4, 104)]
++                .into_iter()
++                .chain((6..32).map(|key| (key, key as u32))))
++    );
++    map.check_invariants();
++}
++
++#[test]
++fn extract_if_does_not_call_predicate_past_range_end() {
++    let mut map = ExtractionFixture::<u64>::new(32).map;
++    let mut visited = Vec::new();
++    let entries: Vec<_> = map
++        .extract_if((Excluded(2), Included(6)), |&key, value| {
++            visited.push(key);
++            *value += 10;
++            true
++        })
++        .collect();
++    assert_eq!(entries, [(3, 13), (4, 14), (5, 15), (6, 16)]);
++    assert_eq!(visited, [3, 4, 5, 6]);
++    assert_eq!(map.len(), 28);
++    assert!(
++        map.iter()
++            .all(|(&key, &value)| !(3..=6).contains(&key) && value == key as u32)
++    );
++    map.check_invariants();
++}
++
++#[test]
++#[cfg_attr(panic = "abort", ignore = "needs unwinding")]
++fn extract_if_predicate_panic_keeps_current_and_unvisited_entries() {
++    let mut map = ExtractionFixture::<u64>::new(32).map;
++    let mut visited = Vec::new();
++    assert!(
++        catch_unwind(AssertUnwindSafe(|| {
++            map.extract_if(.., |&key, value| {
++                visited.push(key);
++                *value += 10;
++                assert_ne!(key, 4, "predicate panics before selecting this entry");
++                key % 2 == 0
++            })
++            .for_each(drop);
++        }))
++        .is_err()
++    );
++    assert_eq!(visited, [0, 1, 2, 3, 4]);
++    assert_eq!(map.len(), 30);
++    assert!(
++        map.iter()
++            .map(|(&key, &value)| (key, value))
++            .eq([(1, 11), (3, 13), (4, 14)]
++                .into_iter()
++                .chain((5..32).map(|key| (key, key as u32))))
++    );
++    map.check_invariants();
++}
+diff --git a/bbtree/src/unsync/map/tests/insert.rs b/bbtree/src/unsync/map/tests/insert.rs
+index ce4f66e..5209ab2 100644
+--- a/bbtree/src/unsync/map/tests/insert.rs
++++ b/bbtree/src/unsync/map/tests/insert.rs
+@@ -319,21 +319,30 @@ fn a_dropped_rightmost_append_forgets_the_leaf_and_changes_nothing() {
+     inserts.map.check_invariants();
+ }
+ 
++/// Every exclusive access that can move or free the remembered leaf forgets
++/// it: the value walks, the entry handle (which may remove), removals, a cut
++/// that frees the leaf, and clearing. A value update through `get_mut` moves
++/// nothing and keeps it ([`value_updates_keep_the_rightmost_leaf`], D45).
+ #[test]
+ fn mutable_access_forgets_the_rightmost_leaf() {
+     for operation in 0..7 {
+         let mut inserts = AscendingInserts::new();
+         inserts.insert_until_rightmost_leaf_remembered();
+         match operation {
+-            0 => *inserts.map.get_mut(&0).unwrap() += 1,
+-            1 => *inserts.map.iter_mut().next_back().unwrap().1 += 1,
+-            2 => *inserts.map.range_mut(0..).next().unwrap().1 += 1,
+-            3 => {
++            0 => *inserts.map.iter_mut().next_back().unwrap().1 += 1,
++            1 => *inserts.map.range_mut(0..).next().unwrap().1 += 1,
++            2 => {
+                 inserts.map.entry(0).and_modify(|value| *value += 1);
+             }
+-            4 => {
++            3 => {
+                 assert_eq!(inserts.map.last_entry().unwrap().remove(), inserts.next - 1);
+             }
++            4 => {
++                assert_eq!(
++                    inserts.map.pop_last(),
++                    Some((inserts.next - 1, inserts.next - 1))
++                );
++            }
+             // The remembered leaf goes with the part cut off, and is freed.
+             5 => drop(inserts.map.split_off(&(inserts.next / 2))),
+             6 => inserts.map.clear(),
+@@ -345,6 +354,93 @@ fn mutable_access_forgets_the_rightmost_leaf() {
+     }
+ }
+ 
++/// A value update changes no key, count or node, so `get_mut` keeps the
++/// remembered rightmost leaf (D45): on a hit in a leaf, on a hit at a
++/// separator, on a miss that shares what every key shares, and on a query
++/// outside it. Ascending inserts still append meanwhile, and the tree stays
++/// valid.
++#[test]
++fn value_updates_keep_the_rightmost_leaf() {
++    let mut inserts = AscendingInserts::new();
++    inserts.insert_until_rightmost_leaf_remembered();
++    // The tree's shared prefix starts with the first byte of every key, 0.
++    assert!(inserts.next < 256, "every key is below the second byte");
++    let separator = *inserts.map.separator_keys()[0];
++
++    // A hit in a leaf.
++    *inserts.map.get_mut(&0).expect("key 0 is there") += 1;
++    assert_eq!(inserts.map.get(&0), Some(&1));
++    assert!(inserts.remembers_rightmost_leaf());
++    inserts.insert_next();
++    assert!(inserts.remembers_rightmost_leaf());
++    inserts.map.check_invariants();
++
++    // A hit at a separator, whose value is its right child's head.
++    *inserts
++        .map
++        .get_mut(&separator)
++        .expect("a separator key is there") += 1;
++    assert_eq!(inserts.map.get(&separator), Some(&(separator + 1)));
++    assert!(inserts.remembers_rightmost_leaf());
++    inserts.insert_next();
++    assert!(inserts.remembers_rightmost_leaf());
++    inserts.map.check_invariants();
++
++    // A miss inside the shared prefix: absent, and still below the byte.
++    assert_eq!(inserts.map.get_mut(&(inserts.next + 1)), None);
++    assert!(inserts.remembers_rightmost_leaf());
++    inserts.insert_next();
++    assert!(inserts.remembers_rightmost_leaf());
++    inserts.map.check_invariants();
++
++    // A miss outside the shared prefix: `u64::MAX` starts with another byte.
++    assert_eq!(inserts.map.get_mut(&u64::MAX), None);
++    assert!(inserts.remembers_rightmost_leaf());
++    inserts.insert_next();
++    assert!(inserts.remembers_rightmost_leaf());
++    inserts.map.check_invariants();
++
++    assert_eq!(inserts.map.get(&0), Some(&1));
++    assert_eq!(inserts.map.get(&separator), Some(&(separator + 1)));
++
++    // The first split after those updates still remembers its new leaf.
++    while !inserts.is_rightmost_leaf_full() {
++        inserts.insert_next();
++    }
++    inserts.insert_next();
++    assert!(inserts.remembers_rightmost_leaf());
++    inserts.map.check_invariants();
++}
++
++/// A value update changes no node, so the ascending inserts around it compare
++/// exactly as often as they do without it, counting `Ord`: the update costs
++/// no descent (D45).
++#[test]
++fn value_updates_add_no_descent_to_ascending_inserts() {
++    fn comparisons_with_updates(update: bool) -> usize {
++        let budget = Cell::new(usize::MAX);
++        let mut map = BBTreeMap::new();
++        let mut comparisons = 0;
++        for number in 0..4096 {
++            let before = budget.get();
++            map.insert(BudgetedKey::new(number, &budget), number);
++            comparisons += before - budget.get();
++            if update {
++                let updated = BudgetedKey::new(number / 2, &budget);
++                assert!(map.get_mut(&updated).is_some());
++            }
++        }
++        map.check_invariants();
++        comparisons
++    }
++
++    assert_eq!(
++        comparisons_with_updates(true),
++        comparisons_with_updates(false),
++        "an update between ascending inserts adds no comparison"
++    );
++}
++
+ #[test]
+ fn an_insert_through_an_entry_never_remembers_the_rightmost_leaf() {
+     let mut inserts = AscendingInserts::new();
+diff --git a/bbtree/src/unsync/map/tests/mod.rs b/bbtree/src/unsync/map/tests/mod.rs
+index 3457c29..ad6edff 100644
+--- a/bbtree/src/unsync/map/tests/mod.rs
++++ b/bbtree/src/unsync/map/tests/mod.rs
+@@ -12,6 +12,7 @@ mod allocator;
+ mod batch;
+ mod differential;
+ mod drops;
++mod extract_if;
+ mod hash_tag;
+ mod inline_key;
+ mod insert;
+diff --git a/bbtree/vis/Cargo.lock b/bbtree/vis/Cargo.lock
+index 172ba1c..8e613cf 100644
+--- a/bbtree/vis/Cargo.lock
++++ b/bbtree/vis/Cargo.lock
+@@ -140,7 +140,7 @@ checksum = "ac07cdecf99051d9a5238b80f35af32cdeba5b336e55d957b318b50137e18da5"
+ 
+ [[package]]
+ name = "bbtree"
+-version = "0.1.5"
++version = "0.1.6"
+ dependencies = [
+  "vstd",
+ ]
+diff --git a/bbtree/vis/figures/Cargo.lock b/bbtree/vis/figures/Cargo.lock
+index 1fc4992..5d0d6c7 100644
+--- a/bbtree/vis/figures/Cargo.lock
++++ b/bbtree/vis/figures/Cargo.lock
+@@ -4,7 +4,7 @@ version = 4
+ 
+ [[package]]
+ name = "bbtree"
+-version = "0.1.5"
++version = "0.1.6"
+ dependencies = [
+  "vstd",
+ ]
+diff --git a/design/03-decisions.md b/design/03-decisions.md
+index 4e122b7..6ae46f3 100644
+--- a/design/03-decisions.md
++++ b/design/03-decisions.md
+@@ -955,6 +955,13 @@ The experiments behind D32–D45 are in [06-cost-model.md](06-cost-model.md).
+     or any `&mut` access that can change the tree's structure. The next
+     qualifying split sets it again. `Entry` handles never set it; clones,
+     `split_off` outputs and new maps start without it.
++  - **Kept by a value update.** `get_mut` changes a value in place, which
++    moves, frees and reorders no node, so the next greater key still
++    appends. The value walks (`iter_mut`, `range_mut`) and `Entry`
++    handles keep forgetting it, as before: they hold node handles past
++    the lookup, and an entry may remove. So do removals, cuts and
++    `clear`. The shared map's owner already kept it this way
++    (`tree/latched/owner.rs`).
+ - **Safety:** the check hands back a private token, and only consuming it
+   moves the key and value in.
+ - **Why not D30's check:** it ran in every node of every insert
+@@ -968,6 +975,24 @@ The experiments behind D32–D45 are in [06-cost-model.md](06-cost-model.md).
+   shortcut.
+ - **Measured,** 10M ordered inserts: `u64` 31.1 → 5.3 ns (std 39.5), JSON
+   121.7 → 45.3 (std 198.9), paths 185.9 → 63.1 (std 256.0).
++- **Measured,** a value update between ascending inserts used to clear it
++  and force a full descent on every insert (2026-10-26, Ryzen AI 9 HX 370,
++  release, LTO, one run each): 10M `u64` inserts, each followed by
++  `*map.get_mut(&(key / 2)) += 1`. The pair took about 103 ns per
++  insert+update before, 54 after; ascending inserts alone took about 18
++  both times. Counted through a key type whose `Ord` increments a counter,
++  comparisons per insert over 1M inserts: 23.55 before, 2.41 after — the
++  same 2.41 as ascending inserts alone, so the updates add no descent. A
++  hit in a leaf, a hit at a separator, a miss inside the shared prefix and
++  a query outside it all keep the leaf
++  (`value_updates_keep_the_rightmost_leaf`).
++- **No other workload pays:** instruction counts (callgrind, 200k `u64`
++  operations, release) of the change: hits through `get_mut` on a 200k map
++  −1.0 per lookup, random inserts unchanged, random inserts each followed
++  by a `get_mut` −2.0 per pair, ascending inserts each followed by a
++  `get_mut` −454 per pair. A later insert either appends (cheaper) or pays
++  one failed append check, which clears the leaf, so at most one such
++  check per split. No other operation reads the leaf.
+ 
+ **D46. No software prefetch.** (2026-10-10)
+ 
+diff --git a/design/06-cost-model.md b/design/06-cost-model.md
+index adff300..a2e9aa8 100644
+--- a/design/06-cost-model.md
++++ b/design/06-cost-model.md
+@@ -196,6 +196,7 @@ suite.
+ | Exact guard bytes inside the node | deferred (model) | |
+ | Re-splitting summary loads at cache lines | rejected (codegen) | |
+ | Last-leaf append cache | accepted | D45 |
++| Value updates keep the last-leaf cache | accepted | D45 |
+ | Another short-range boundary shortcut | deferred (model) | |
+ | 2 KiB upper levels only | deferred (model) | |
+ | Sign-biased portable summaries | rejected (codegen) | |
+@@ -449,6 +450,23 @@ returns a token that moves the key only on success. Baseline x86-64:
+ ordered `u64` 43.5 → 5.5, JSON 143.7 → 47.9; random +0.9% / +0.2%.
+ Accepted (D45); D30's per-node check stays rejected.
+ 
++**Value updates keep the last-leaf append cache (D45).** A `get_mut`
++cleared the remembered leaf, so ascending inserts alternating with value
++updates descended the tree every time. Keeping the leaf: 10M `u64`
++inserts each followed by `*map.get_mut(&(key / 2)) += 1` took about 103 →
++54 ns per insert+update pair, while ascending inserts alone stayed at
++about 18 ns; comparisons per insert, counted through `Ord`, went 23.55 →
++2.41, the same as ascending inserts alone. A test asserts that equality,
++so a regression in the cache shows as a test failure, not just a timing
++change. Accepted (D45).
++
++Nothing else pays: callgrind instruction counts of the same change over
++200k `u64` operations changed by −1.0 instructions per `get_mut` hit,
++0 for random inserts, −2.0 per random insert+`get_mut` pair, and −454 per
++ascending insert+`get_mut` pair. An insert after a kept leaf either
++appends, or fails the append check once and clears it, so no insert pays
++more than it did with the leaf forgotten.
++
+ ### Scans
+ 
+ **Cached range leaf run (D33).** `range(start..).take(64)` steps with

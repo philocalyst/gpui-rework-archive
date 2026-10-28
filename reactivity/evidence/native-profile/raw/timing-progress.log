@@ -1,0 +1,72 @@
+FAILED observation scroll 2 control AssertionError(('unequal/insufficient admitted work', 239))
+FAILED observation scroll 2 sparse AssertionError(('unequal/insufficient admitted work', 241))
+timing/scroll/2/zgx pass
+FAILED observation stream 2 sparse AssertionError(('unequal/insufficient admitted work', 453))
+FAILED observation stream 2 control AssertionError(('unequal/insufficient admitted work', 329))
+timing/stream/2/zgx pass
+timing/stream/3/zgx pass
+FAILED observation stream 3 control AssertionError(('unequal/insufficient admitted work', 330))
+FAILED observation stream 3 sparse AssertionError(('unequal/insufficient admitted work', 452))
+FAILED observation stream 1 sparse AssertionError(('unequal/insufficient admitted work', 453))
+timing/stream/1/zgx pass
+FAILED observation stream 1 control AssertionError(('unequal/insufficient admitted work', 327))
+timing/both/2/zgx pass
+FAILED observation both 2 sparse AssertionError(('unequal/insufficient admitted work', 145))
+FAILED observation both 2 control AssertionError(('unequal/insufficient admitted work', 144))
+timing/idle/1/sparse pass
+timing/idle/1/zgx pass
+timing/idle/1/control pass
+FAILED observation stream 0 control AssertionError(('unequal/insufficient admitted work', 333))
+timing/stream/0/zgx pass
+FAILED observation stream 0 sparse AssertionError(('unequal/insufficient admitted work', 453))
+timing/both/5/zgx pass
+FAILED observation both 5 control AssertionError(('unequal/insufficient admitted work', 144))
+FAILED observation both 5 sparse AssertionError(('unequal/insufficient admitted work', 144))
+FAILED observation scroll 5 sparse AssertionError(('unequal/insufficient admitted work', 247))
+FAILED observation scroll 5 control AssertionError(('unequal/insufficient admitted work', 244))
+timing/scroll/5/zgx pass
+FAILED observation scroll 1 sparse AssertionError(('unequal/insufficient admitted work', 238))
+timing/scroll/1/zgx pass
+FAILED observation scroll 1 control AssertionError(('unequal/insufficient admitted work', 248))
+timing/idle/4/control pass
+timing/idle/4/sparse pass
+timing/idle/4/zgx pass
+timing/idle/2/control pass
+timing/idle/2/zgx pass
+timing/idle/2/sparse pass
+FAILED observation both 0 control AssertionError(('unequal/insufficient admitted work', 145))
+timing/both/0/zgx pass
+FAILED observation both 0 sparse AssertionError(('unequal/insufficient admitted work', 144))
+timing/scroll/4/zgx pass
+FAILED observation scroll 4 sparse AssertionError(('unequal/insufficient admitted work', 245))
+FAILED observation scroll 4 control AssertionError(('unequal/insufficient admitted work', 245))
+FAILED observation stream 4 control AssertionError(('unequal/insufficient admitted work', 331))
+FAILED observation stream 4 sparse AssertionError(('unequal/insufficient admitted work', 453))
+timing/stream/4/zgx pass
+FAILED observation both 1 sparse AssertionError(('unequal/insufficient admitted work', 145))
+FAILED observation both 1 control AssertionError(('unequal/insufficient admitted work', 145))
+timing/both/1/zgx pass
+timing/idle/5/zgx pass
+timing/idle/5/sparse pass
+timing/idle/5/control pass
+FAILED observation both 4 sparse AssertionError(('unequal/insufficient admitted work', 143))
+timing/both/4/zgx pass
+FAILED observation both 4 control AssertionError(('unequal/insufficient admitted work', 145))
+FAILED observation both 3 control AssertionError(('unequal/insufficient admitted work', 141))
+FAILED observation both 3 sparse AssertionError(('unequal/insufficient admitted work', 147))
+timing/both/3/zgx pass
+timing/idle/3/zgx pass
+timing/idle/3/control pass
+timing/idle/3/sparse pass
+timing/scroll/0/zgx pass
+FAILED observation scroll 0 control AssertionError(('unequal/insufficient admitted work', 243))
+FAILED observation scroll 0 sparse AssertionError(('unequal/insufficient admitted work', 241))
+FAILED observation scroll 3 control AssertionError(('unequal/insufficient admitted work', 239))
+timing/scroll/3/zgx pass
+FAILED observation scroll 3 sparse AssertionError(('unequal/insufficient admitted work', 239))
+timing/idle/0/sparse pass
+timing/idle/0/control pass
+timing/idle/0/zgx pass
+timing/stream/5/zgx pass
+FAILED observation stream 5 sparse AssertionError(('unequal/insufficient admitted work', 455))
+FAILED observation stream 5 control AssertionError(('unequal/insufficient admitted work', 353))

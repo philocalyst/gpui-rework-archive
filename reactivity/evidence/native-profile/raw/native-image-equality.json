@@ -1,0 +1,24 @@
+{
+  "command": [
+    "compare",
+    "-metric",
+    "AE",
+    "/home/user/gpui-native-profile-evidence/preflight/control/capture/native.png",
+    "/home/user/gpui-native-profile-evidence/preflight/sparse/capture/native.png",
+    "null:"
+  ],
+  "exit": 0,
+  "stdout": "",
+  "stderr": "0",
+  "files": [
+    {
+      "path": "/home/user/gpui-native-profile-evidence/preflight/control/capture/native.png",
+      "sha256": "fb504b213d823a787b3d7ed43c38d008c519c800c7716f0a33a13cc69f597aba"
+    },
+    {
+      "path": "/home/user/gpui-native-profile-evidence/preflight/sparse/capture/native.png",
+      "sha256": "fb504b213d823a787b3d7ed43c38d008c519c800c7716f0a33a13cc69f597aba"
+    }
+  ],
+  "note": "Pillow unavailable; using installed ImageMagick exact absolute-error pixel comparison"
+}

@@ -1,0 +1,6 @@
+{
+  "before_free": 9990504448,
+  "after_free": 12934045696,
+  "files": 2383,
+  "kind": "regenerable rlib/rmeta only; no executable, source or evidence deletion"
+}

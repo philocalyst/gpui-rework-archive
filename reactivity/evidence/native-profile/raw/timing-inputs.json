@@ -1,0 +1,13 @@
+{
+  "utc": "2026-10-28T01:08:00.577027+00:00",
+  "scripts": {
+    "driver_probe.py": "7f2dc64de52868af7131e210c6df9107aac8b1bca51d80097c2edca3411e9aef",
+    "analyze.py": "567bd00f93456849c744ac4ff2c4b273663cd7fedaa1628159292f9f237c5a02",
+    "native.py": "bedac71c14435f09146e557fa364e59d0b7ffce586bba82641ca59f6b074fcbb",
+    "freeze.py": "d8925f0c89bafbd2c40d600259574c7dbd1d17ba686e497a0d5ae9c5687454e5",
+    "freeze-first.py": "e9f8609c9aa9c3bbf28faf1efd8e9f214e88182591c4e8ebc153b5a64bc881a7",
+    "build.py": "487ebccdea47d1796403a416ffc3aaddc5b7e411cfb5d6cca7ebf34fbeb99fc1"
+  },
+  "python": "3.12.3 (main, Jun 19 2026, 12:46:00) [GCC 13.3.0]",
+  "note": "GPUI untimed preflight overlapped reference build; all builds/tests/native probes now reaped. No timing yet. Native images match GPUI exactly; cross-renderer glyph appearance differs."
+}

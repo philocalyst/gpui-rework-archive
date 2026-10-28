@@ -1,0 +1,218 @@
+[
+  {
+    "mode": "scroll",
+    "group": 2,
+    "order": [
+      "control",
+      "sparse",
+      "zgx"
+    ]
+  },
+  {
+    "mode": "stream",
+    "group": 2,
+    "order": [
+      "sparse",
+      "control",
+      "zgx"
+    ]
+  },
+  {
+    "mode": "stream",
+    "group": 3,
+    "order": [
+      "zgx",
+      "control",
+      "sparse"
+    ]
+  },
+  {
+    "mode": "stream",
+    "group": 1,
+    "order": [
+      "sparse",
+      "zgx",
+      "control"
+    ]
+  },
+  {
+    "mode": "both",
+    "group": 2,
+    "order": [
+      "zgx",
+      "sparse",
+      "control"
+    ]
+  },
+  {
+    "mode": "idle",
+    "group": 1,
+    "order": [
+      "sparse",
+      "zgx",
+      "control"
+    ]
+  },
+  {
+    "mode": "stream",
+    "group": 0,
+    "order": [
+      "control",
+      "zgx",
+      "sparse"
+    ]
+  },
+  {
+    "mode": "both",
+    "group": 5,
+    "order": [
+      "zgx",
+      "control",
+      "sparse"
+    ]
+  },
+  {
+    "mode": "scroll",
+    "group": 5,
+    "order": [
+      "sparse",
+      "control",
+      "zgx"
+    ]
+  },
+  {
+    "mode": "scroll",
+    "group": 1,
+    "order": [
+      "sparse",
+      "zgx",
+      "control"
+    ]
+  },
+  {
+    "mode": "idle",
+    "group": 4,
+    "order": [
+      "control",
+      "sparse",
+      "zgx"
+    ]
+  },
+  {
+    "mode": "idle",
+    "group": 2,
+    "order": [
+      "control",
+      "zgx",
+      "sparse"
+    ]
+  },
+  {
+    "mode": "both",
+    "group": 0,
+    "order": [
+      "control",
+      "zgx",
+      "sparse"
+    ]
+  },
+  {
+    "mode": "scroll",
+    "group": 4,
+    "order": [
+      "zgx",
+      "sparse",
+      "control"
+    ]
+  },
+  {
+    "mode": "stream",
+    "group": 4,
+    "order": [
+      "control",
+      "sparse",
+      "zgx"
+    ]
+  },
+  {
+    "mode": "both",
+    "group": 1,
+    "order": [
+      "sparse",
+      "control",
+      "zgx"
+    ]
+  },
+  {
+    "mode": "idle",
+    "group": 5,
+    "order": [
+      "zgx",
+      "sparse",
+      "control"
+    ]
+  },
+  {
+    "mode": "both",
+    "group": 4,
+    "order": [
+      "sparse",
+      "zgx",
+      "control"
+    ]
+  },
+  {
+    "mode": "both",
+    "group": 3,
+    "order": [
+      "control",
+      "sparse",
+      "zgx"
+    ]
+  },
+  {
+    "mode": "idle",
+    "group": 3,
+    "order": [
+      "zgx",
+      "control",
+      "sparse"
+    ]
+  },
+  {
+    "mode": "scroll",
+    "group": 0,
+    "order": [
+      "zgx",
+      "control",
+      "sparse"
+    ]
+  },
+  {
+    "mode": "scroll",
+    "group": 3,
+    "order": [
+      "control",
+      "zgx",
+      "sparse"
+    ]
+  },
+  {
+    "mode": "idle",
+    "group": 0,
+    "order": [
+      "sparse",
+      "control",
+      "zgx"
+    ]
+  },
+  {
+    "mode": "stream",
+    "group": 5,
+    "order": [
+      "zgx",
+      "sparse",
+      "control"
+    ]
+  }
+]

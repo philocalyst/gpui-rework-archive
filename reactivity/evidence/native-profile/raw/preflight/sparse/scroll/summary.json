@@ -1,0 +1,13 @@
+{
+  "name": "sparse",
+  "mode": "scroll",
+  "ticks": 78,
+  "native_acknowledgements": 79,
+  "reference_or_model_final": {
+    "total_ticks": 78,
+    "scroll_offset": 1092.0
+  },
+  "visible_seconds": 0.22216895100427791,
+  "samples": 159,
+  "font_sha256": "7da195a74c55bef988d0d48f9508bd5d849425c1770dba5d7bfc6ce9ed848954"
+}

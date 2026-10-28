@@ -1,0 +1,16 @@
+{
+  "control": {
+    "source": "20919cb160f6fcc5ab85eca607b97d4173739409",
+    "base": "6a3ae55a05a25fd12b53304d795fc1e0136af73f",
+    "changed_crate_files": [],
+    "example_sha256": "b2b4f71dc9af30b4d67341fc42be7dbc19ec1075ef0401a791e9dfface14530f"
+  },
+  "sparse": {
+    "source": "c965a893364b46f965c83d10e2cf94a46dac1304",
+    "base": "5cec749179f43f50abc18d7512b7e90ae402bb0a",
+    "changed_crate_files": [
+      "reactivity/crates/gpui/examples/zgx_native_lab.rs"
+    ],
+    "example_sha256": "b2b4f71dc9af30b4d67341fc42be7dbc19ec1075ef0401a791e9dfface14530f"
+  }
+}

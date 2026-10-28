@@ -1,0 +1,5 @@
+{
+  "failure": "FileNotFoundError: vulkaninfo is not installed",
+  "effect": "source/artifact/shader checks passed; environment receipt incomplete; no timing started",
+  "correction": "query the installed Vulkan loader directly with a standalone read-only diagnostic; retain first files"
+}
