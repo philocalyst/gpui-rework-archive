@@ -545,3 +545,34 @@ measured bottleneck is repeated raster arithmetic, so address lowering applies
 the internal-operation/cost-accounting lesson without claiming an async-runtime
 or cache-hit breakthrough. Solid/Ripple publication/retention semantics still
 constrain which prepared data and immutable resources a visible update may use.
+
+
+## Mask lattice narrowed after exact GPU rejection; qualification complete
+
+The first scalar certificate was insufficient: source837a23d44e produced12/336
+independent GPU frame mismatches near an odd-eighth sample boundary, despite
+passing scalar-address tests. All rejected bytes and attempts are preserved.
+Production9e4ef386f193a17d74bda63867b0ca4c86e0e59e adds a separation guard
+using the uploaded error bound; ambiguous boundaries retain generic sampling.
+No tolerance, sample reduction or publication change was introduced.
+
+Qualification seal **677b1fb7a51a7bab12dbad0bf4e8815fcd254b74** independently
+verifies2,026 files,411 executable identities,five configurations and15 actual
+native checks. All336 frames agree exactly across unchanged oracle,revised WGSL
+and offline builds. The bounded width-guard mutant still fails at its exact
+texel-address witness. Shipping code grows61 lines; default native ELF grows
+1,232 bytes; hot headers are unchanged. These are correctness and cost receipts,
+not a performance result.
+
+Native screen **ca5a289640b8cd60525fbe599a0a19c3e184a503** uses the exact
+suffix baseline and a matched opt3/fatLTO/CGU1 profile. Both build and17 workload
+tests pass. The fixed64-process idle/scroll/stream/both screen remains pending,
+with20% stream/mixed CPU and5% scroll regression limits; failing work/cadence
+suppresses a whole mode's ratio. A pass admits the separate28-case cost matrix,
+then a fresh ZGX trial. Physical hardware,scanout and quality gates remain open.
+
+This experiment tests whether immutable placement preparation can remove repeated
+raster address work without disturbing Solid/Ripple publication semantics. It
+does not establish a BBTree-style latency-hiding runtime or increased cache hits.
+The pinned BBTree design's independent memory lanes remain a separate hypothesis
+whose usefulness must follow measured dependent-load stalls and complete costs.

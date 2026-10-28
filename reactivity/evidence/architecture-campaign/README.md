@@ -481,3 +481,11 @@ exact per-placement mask sample-address lowering, preserving16 samples and
 publication authority. Correctness and independent GPU oracle qualification
 are in progress. See LOCALITY.md for the mechanism, numerical certificate,
 pre-observation setup correction and unchanged acceptance limits.
+
+
+Mask-lattice qualification is sealed **677b1fb7a51a7bab12dbad0bf4e8815fcd254b74**:
+five configurations,15 actual native checks and336 exact independent frames.
+The first12-frame GPU rejection is retained; revised production9e4ef386 narrows
+the certificate around ambiguous sample boundaries. Matched native build/tests
+pass; fixed64-process screenca5a2896 is pending. No performance/ZGX claim.
+See LOCALITY.md for numerical scope,costs and the unchanged research distinction.
