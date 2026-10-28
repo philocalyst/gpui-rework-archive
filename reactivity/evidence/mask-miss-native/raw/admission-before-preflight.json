@@ -1,0 +1,17 @@
+{
+  "passed": true,
+  "checks": [
+    {
+      "kind": "qualification",
+      "exit": 0,
+      "stdout": "{\"files\": 727, \"executable_identities\": 64, \"gpu_canvas_tests\": 353, \"ignored_tests\": 3, \"exact_frames\": 336, \"mutant_differing_bytes\": 3718, \"admission_correctness_passes\": true, \"scope\": \"Early tile-shader admission only; actual native selection/full configurations/offline/performance remain pending.\"}\n",
+      "stderr": ""
+    },
+    {
+      "kind": "audit",
+      "exit": 0,
+      "stdout": "{\"files\": 189, \"processes\": 8, \"packets\": 1082, \"bank_counts\": [0], \"banked_packets\": 0, \"selected_packets\": 1082, \"verified\": true, \"scope\": \"Actual native packet selection audit; planned counts only; no performance claim.\"}\n",
+      "stderr": ""
+    }
+  ]
+}

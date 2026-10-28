@@ -1,0 +1,36 @@
+{
+  "seed": 20261117,
+  "modes": [
+    "idle",
+    "scroll",
+    "stream",
+    "both"
+  ],
+  "pairs": 8,
+  "processes": 64,
+  "seconds": 8,
+  "initial": 0,
+  "trace": true,
+  "cpu_window": [
+    1,
+    6
+  ],
+  "minimum_cpu_window_seconds": 4.8,
+  "cadence": [
+    464,
+    488
+  ],
+  "first_second_gaps_over25ms_max": 2,
+  "later_gaps_over25ms_max": 0,
+  "limits": {
+    "stream": 0.8,
+    "both": 0.8,
+    "scroll": 1.05
+  },
+  "idle_rule": "zero updates and median observed CPU no greater than baseline; no ratio at zero",
+  "bootstrap_resamples": 10000,
+  "profile": "opt3/fatLTO/CGU1/debug0/stripnone/unwind/incrementalfalse",
+  "candidate_production": "b817779c5609a038edd8f7d22f46863416c9e17e",
+  "baseline_production": "df8ca59f69813e7dd05711fead98ed4278f1688d",
+  "order_sha256": "26c1be3d0540a14d6e78b6f75d1196b9d7749c6d3a670336151b5b5589b669e7"
+}

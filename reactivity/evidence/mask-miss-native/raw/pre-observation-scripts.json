@@ -1,0 +1,11 @@
+{
+  "native.py": "aa14996ac39495ddc55a9643315da9aee628fe8a0e1afd24b7b2591b0343ded2",
+  "analyze.py": "f3765ca5c0d623eb2eae5a46dbcfb5fcd4c8727c934910bee0244732dbdce3b1",
+  "verify_dossier.py": "34a9bb3dd723382e5b0dd6f0f39f9e91d0f481b00cd31cc101111ce5da5e7c09",
+  "freeze.py": "0ae52fdf16e757c2915c369185786ad0124c632bed13901bda4feb75cfe92fe6",
+  "check_admission.py": "660ee8092b4b6add1d4c7761f236631ef43c76c50b2ddc62ce0965143ce80c15",
+  "guard.py": "f5606caad541f4d27e0d537b8a7cbd304d38f2b1f63d6efc5028239ebc73b1cd",
+  "SPEC.json": "50d338f091e85e762b5b816ef47b153a6d6d18e13f31d0da1c78c8ece1061662",
+  "PROCESS_ORDER.json": "26c1be3d0540a14d6e78b6f75d1196b9d7749c6d3a670336151b5b5589b669e7",
+  "PROTOCOL.md": "bc6c99a5cbc994dc2937fc81a765d0cc2bb22f17c4545b93b062493666bb8b35"
+}

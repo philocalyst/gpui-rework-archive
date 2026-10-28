@@ -1,0 +1,5 @@
+{
+  "exit": 0,
+  "stdout": "{\"files\": 189, \"processes\": 8, \"packets\": 1082, \"bank_counts\": [0], \"banked_packets\": 0, \"selected_packets\": 1082, \"verified\": true, \"scope\": \"Actual native packet selection audit; planned counts only; no performance claim.\"}\n",
+  "stderr": ""
+}
