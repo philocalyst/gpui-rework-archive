@@ -180,3 +180,40 @@ weakening image authority or introducing new shaders/resources. The current shar
 repair enum changes ordinary render/submit code; that is a concrete difference to
 test, not an established cause of the six failed comparisons. A new preregistered
 trial must retain original, bounding-only and failed sparse-repair controls.
+
+
+## Static regional submission: complete failed follow-up
+
+Local dossier5cec749179f43f50abc18d7512b7e90ae402bb0a (local/glyph-submit)
+independently verifies9877 evidence files,627 preserved ELFs,2688 timing/336
+qualification/112 allocation processes. Production/measured source669487c35d;
+preregistration7d62be8d3f. No application API, native admission, shader, dependency,
+retained field or image/copy change. Ordinary Output/render/backing/submit source
+bodies exactly match the bounds control; static output types split preparation.
+
+The full fixed verdict is FAILED. Source-stream/control0.108943940 (95% interval
+[0.104224052,0.111295456]) and owner-stream/control0.106217773
+([0.103804908,0.110667075]) retain the large streaming gain. Tiny-flat versus the
+sparse predecessor is1.066663744 ([0.871492962,1.147115333]);25-label single-field
+owner versus bounds is1.053730811 ([1.008951212,1.083360896]). All other point
+comparisons pass, including the previously failed flat-full and25-label four-field
+source cells. Wide intervals and different failed cells do not waive rejection,
+establish a causal code-layout diagnosis, or authorize selecting successful runs.
+
+Fresh qualification1087 composed/75 GPU/320 minimal-library tests,10 port tests,
+11 native/4 minimal scripts and strict Clippy passes. Default non-native production
+and exact-sequence native mutant are explicitly inherited with1008-file source
+equality. A fresh omitted-region static-path mutant fails actual pixels.
+Shipping37372 lines (+11 sparse predecessor), native example26319560 bytes
+(+12832). Ordinary submit636/1344 and retained render2117/664 machine/local-stack
+bytes match bounds. Two preparation bodies11656/11672 bytes each reserve1496
+local bytes; predecessor has one11656/1496. All headers and observed allocation
+mechanisms remain unchanged from sparse repair; detailed per-case/cold data remain.
+
+Do not start another dispatch/layout variation merely to obtain passing noisy
+point gates. Preserve both failed complete trials. The next work closes the actual
+native ZGX task/interaction equivalence gaps, starting with deferred control work
+and its observable scheduling/close/capacity semantics. This follows SCHEDULING.md's
+requirement to stop microbenchmark refinement until a representative native
+comparison can test complete application work. Hardware, wheel resampling, render
+quality and equal-profile gates remain open; no ZGX or cache-hit claim follows.
