@@ -3,6 +3,7 @@ use gpui_canvas::{Affine, Canvas, Color, Point, TextSystem};
 
 fn scene() -> Canvas {
     let mut canvas = Canvas::new(96, 72).unwrap();
+    canvas.clear(Color::WHITE);
     let mut text = TextSystem::bundled().unwrap();
     let layout = text.shape("HgW", 18., None).unwrap();
     canvas
