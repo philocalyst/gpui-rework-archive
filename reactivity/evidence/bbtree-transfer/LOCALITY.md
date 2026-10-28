@@ -737,3 +737,21 @@ pending dependencies and retires boundary requests separately. These mechanisms
 preserve meaning when scheduling moves work; they do not turn a pending I/O task
 into BBTree's immediately repollable memory-yield lane. Re-read source supports
 the existing scheduling constraints, not a newly measured asynchronous win.
+
+
+Mask-miss screen **c8a65525e8798fd522eb91ef19ff4bd0e4e2ba9a** independently
+verifies828 files,64 normal processes,10 preflights,34 workload tests and all
+work/cadence gates. Ratios:scroll .961561475 (95%[.938169310,1.011688005]);
+stream .896043156 ([.873979826,.954716972]);mixed .915155878
+([.892158435,.941034601]);idle0/0. Stream/mixed miss .8:rejected,no full-cost
+admission. Matched native ELF22530144 versusbaseline22523464.
+
+New mask-grid preregistration **1c225400e838a761e43a4c33607c0292247d82e7**,
+production **02d46fee9533d1b8c8b551337d3ccec5b84c0a0b**, tests8x8 bins only
+for mask scenes with unpruned fine references within the existing4Mi cap.
+Other scenes use16x16. Existing mode bit16 communicates selection,private
+bin/count/visit/coverage functions receive the edge; no new buffers/headers/API.
+Fine planning adds a bounds pass and potentially4x tile words/cursors; cost
+must include these. Resource limits and full pixel sample arithmetic remain.
+New budget/partial-bin/alternating-replay tests; existing public mask fixture
+unchanged. Fresh GPU gate is running. No performance or adoption claim.
