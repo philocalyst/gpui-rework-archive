@@ -731,7 +731,11 @@ pub mod ui {
     #[fragment]
     pub fn fragment(#[builtin(position)] position: Vec4f) -> Vec4f {
         let globals = get!(GLOBALS);
-        let tile = position.x as u32 / 16 + position.y as u32 / 16 * globals.viewport.z;
+        let mut edge = 16;
+        if (globals.viewport.w & 16) != 0 {
+            edge = 8;
+        }
+        let tile = position.x as u32 / edge + position.y as u32 / edge * globals.viewport.z;
         let range = get!(TILES)[tile as usize];
         if (range.y & 0x80000000) != 0 {
             if (globals.viewport.w & 8) != 0 {

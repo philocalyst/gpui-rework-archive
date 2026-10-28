@@ -742,9 +742,10 @@ impl RendererState {
         if !hdr && scene.clear[3] != 1.0 {
             return Err(Error::InvalidScene);
         }
+        let edge = tile_edge(scene);
         let (columns, rows) = (
-            scene.width.div_ceil(16) as usize,
-            scene.height.div_ceil(16) as usize,
+            scene.width.div_ceil(edge as u32) as usize,
+            scene.height.div_ceil(edge as u32) as usize,
         );
         self.ranges.clear();
         self.ranges.resize(columns * rows, [0, 0]);
@@ -839,6 +840,7 @@ impl RendererState {
                         scene.width,
                         scene.height,
                         original_references,
+                        edge,
                     )?;
                     ordinal += 1;
                 }
@@ -876,6 +878,7 @@ impl RendererState {
                         scene.width,
                         scene.height,
                         original_references,
+                        edge,
                     )?;
                     ordinal += 1;
                 }
@@ -964,7 +967,7 @@ impl RendererState {
                 word -= if compact { 2 } else { 6 };
                 reverse_ordinal -= 1;
                 let address = word as u32 | if compact { 0 } else { INLINE_RECORD };
-                visit(bounds, columns, |tile| {
+                visit(bounds, columns, edge, |tile| {
                     let range = &mut self.ranges[tile];
                     if range[1] != UNIFORM_TILE && reverse_ordinal as u32 + 1 >= self.cursors[tile]
                     {
@@ -986,7 +989,7 @@ impl RendererState {
                 uniform_tiles += 1;
             } else if range[0] != range[1] {
                 let [left, top, right, bottom] =
-                    tile_bounds(tile, columns, scene.width, scene.height);
+                    tile_bounds(tile, columns, scene.width, scene.height, edge);
                 let samples = u64::from((right - left) * (bottom - top)) * 16;
                 sample_evaluations += samples;
                 sample_draw_evaluations += samples * u64::from(range[1] - range[0]);
@@ -1021,7 +1024,7 @@ impl RendererState {
                 scene.width,
                 scene.height,
                 columns as u32,
-                mode | if bank_count != 0 { 8 } else { 0 },
+                mode | if bank_count != 0 { 8 } else { 0 } | if edge == 8 { 16 } else { 0 },
             ],
             clear: scene.clear,
             mapping: [exposure, 0.0, 0.0, 0.0],
@@ -1212,15 +1215,16 @@ impl RendererState {
         width: u32,
         height: u32,
         previous: usize,
+        edge: usize,
     ) -> Result<usize, Error> {
         let total = previous
-            .checked_add(tile_count(draw.bounds))
+            .checked_add(tile_count(draw.bounds, edge))
             .ok_or(Error::ResourceLimit)?;
         if total > MAX_REFERENCES {
             return Err(Error::ResourceLimit);
         }
-        visit(draw.bounds, columns, |tile| {
-            if self.tile_proofs && full_tile(draw, error, tile, columns, width, height) {
+        visit(draw.bounds, columns, edge, |tile| {
+            if self.tile_proofs && full_tile(draw, error, tile, columns, width, height, edge) {
                 self.ranges[tile] = [address, 1];
                 self.cursors[tile] = ordinal as u32 + 1;
             } else {
@@ -1275,9 +1279,51 @@ impl RendererState {
     }
 }
 
-fn tile_count(r: gpui_canvas::Rect) -> usize {
-    ((r.x as usize + r.width as usize - 1) / 16 - r.x as usize / 16 + 1)
-        * ((r.y as usize + r.height as usize - 1) / 16 - r.y as usize / 16 + 1)
+// Fine bins reduce glyph traversal, but never shrink the admitted reference
+// budget. Scenes without masks and over-budget fine plans keep the coarse grid.
+fn tile_edge(scene: PreparedScene<'_>) -> usize {
+    if scene.masks().len() != 0
+        && fine_tile_budget(
+            scene.groups().flat_map(|group| group.bounds()),
+            scene.width,
+            scene.height,
+        )
+    {
+        8
+    } else {
+        16
+    }
+}
+fn fine_tile_budget(
+    bounds: impl Iterator<Item = gpui_canvas::Rect>,
+    width: u32,
+    height: u32,
+) -> bool {
+    let mut total = 0usize;
+    for bounds in bounds {
+        if !bounds.is_valid()
+            || bounds.width < 1.0
+            || bounds.height < 1.0
+            || bounds.x < 0.0
+            || bounds.y < 0.0
+            || bounds.x + bounds.width > width as f32
+            || bounds.y + bounds.height > height as f32
+        {
+            return false;
+        }
+        let Some(next) = total.checked_add(tile_count(bounds, 8)) else {
+            return false;
+        };
+        if next > MAX_REFERENCES {
+            return false;
+        }
+        total = next;
+    }
+    true
+}
+fn tile_count(r: gpui_canvas::Rect, edge: usize) -> usize {
+    ((r.x as usize + r.width as usize - 1) / edge - r.x as usize / edge + 1)
+        * ((r.y as usize + r.height as usize - 1) / edge - r.y as usize / edge + 1)
 }
 fn clip_residual(start: f32, extent: f32) -> f32 {
     let rounded = start + extent;
@@ -1288,10 +1334,16 @@ fn clip_residual(start: f32, extent: f32) -> f32 {
         0.0
     }
 }
-fn tile_bounds(tile: usize, columns: usize, width: u32, height: u32) -> [u32; 4] {
-    let left = (tile % columns) as u32 * 16;
-    let top = (tile / columns) as u32 * 16;
-    [left, top, (left + 16).min(width), (top + 16).min(height)]
+fn tile_bounds(tile: usize, columns: usize, width: u32, height: u32, edge: usize) -> [u32; 4] {
+    let edge = edge as u32;
+    let left = (tile % columns) as u32 * edge;
+    let top = (tile / columns) as u32 * edge;
+    [
+        left,
+        top,
+        (left + edge).min(width),
+        (top + edge).min(height),
+    ]
 }
 
 // A certificate covers every lattice sample, independently in canonical f64
@@ -1303,6 +1355,7 @@ fn full_tile(
     columns: usize,
     width: u32,
     height: u32,
+    edge: usize,
 ) -> bool {
     if draw.clip_chain.is_some() || !draw.source.is_solid()
         || draw.color[3] != 1.0
@@ -1313,7 +1366,7 @@ fn full_tile(
     {
         return false;
     }
-    let [left, top, right, bottom] = tile_bounds(tile, columns, width, height);
+    let [left, top, right, bottom] = tile_bounds(tile, columns, width, height, edge);
     let clip = draw.clip;
     // The continuous tile is contained. Actual samples stay 1/8 pixel inside
     // its max edges, so the clip's rounded endpoint is never ambiguous here.
@@ -1365,9 +1418,9 @@ fn full_tile(
     }
     true
 }
-fn visit(r: gpui_canvas::Rect, columns: usize, mut visit: impl FnMut(usize)) {
-    for y in r.y as usize / 16..=(r.y as usize + r.height as usize - 1) / 16 {
-        for x in r.x as usize / 16..=(r.x as usize + r.width as usize - 1) / 16 {
+fn visit(r: gpui_canvas::Rect, columns: usize, edge: usize, mut visit: impl FnMut(usize)) {
+    for y in r.y as usize / edge..=(r.y as usize + r.height as usize - 1) / edge {
+        for x in r.x as usize / edge..=(r.x as usize + r.width as usize - 1) / edge {
             visit(y * columns + x);
         }
     }
@@ -1726,6 +1779,68 @@ mod tests {
     }
 
     #[test]
+    fn fine_grid_budget_boundary_and_partial_bins() {
+        let full = Rect::new(0., 0., 4096., 4096.);
+        assert!(fine_tile_budget(std::iter::repeat_n(full, 16), 4096, 4096));
+        assert!(!fine_tile_budget(std::iter::repeat_n(full, 17), 4096, 4096));
+        assert_eq!(17 * tile_count(full, 16), 1_114_112);
+        assert!(17 * tile_count(full, 16) < MAX_REFERENCES);
+        for bad in [
+            Rect::new(-1., 0., 2., 2.),
+            Rect::new(0., 0., 0., 2.),
+            Rect::new(4095., 0., 2., 2.),
+        ] {
+            assert!(!fine_tile_budget(std::iter::once(bad), 4096, 4096));
+        }
+        let partial = Rect::new(7., 7., 10., 12.);
+        let mut visited = Vec::new();
+        visit(partial, 3, 8, |tile| visited.push(tile));
+        assert_eq!(visited, (0..9).collect::<Vec<_>>());
+        assert_eq!(tile_count(partial, 8), 9);
+        assert_eq!(tile_bounds(8, 3, 17, 19, 8), [16, 16, 17, 19]);
+    }
+
+    #[test]
+    fn mask_grid_selection_preserves_coarse_budget_fallback() {
+        let mut canvas = gpui_canvas::Canvas::recording(4096, 4096, Default::default()).unwrap();
+        assert_eq!(tile_edge(canvas.prepared_scene()), 16);
+        let mut text = gpui_canvas::TextSystem::bundled().unwrap();
+        let run = text.shape("X", 18., None).unwrap();
+        let clip = Rect::new(0., 0., 4096., 4096.);
+        canvas
+            .draw_text(
+                &mut text,
+                &run,
+                gpui_canvas::Point { x: 8., y: 8. },
+                gpui_canvas::Affine::IDENTITY,
+                clip,
+                gpui_canvas::Color::BLACK,
+            )
+            .unwrap();
+        assert_eq!(tile_edge(canvas.prepared_scene()), 8);
+        for _ in 0..15 {
+            canvas
+                .fill_rect(
+                    clip,
+                    gpui_canvas::Affine::IDENTITY,
+                    clip,
+                    gpui_canvas::Color::WHITE,
+                )
+                .unwrap();
+        }
+        assert_eq!(tile_edge(canvas.prepared_scene()), 8);
+        canvas
+            .fill_rect(
+                clip,
+                gpui_canvas::Affine::IDENTITY,
+                clip,
+                gpui_canvas::Color::WHITE,
+            )
+            .unwrap();
+        assert_eq!(tile_edge(canvas.prepared_scene()), 16);
+    }
+
+    #[test]
     fn certificates_imply_sample_membership_in_both_numeric_domains() {
         let mut accepted = 0;
         for n in 0..64 {
@@ -1739,7 +1854,7 @@ mod tests {
                 source: gpui_canvas::PreparedSource::Solid,
             };
             let error = validate_draw(draw, 0, 16, 16).unwrap();
-            if !full_tile(draw, error, 0, 1, 16, 16) {
+            if !full_tile(draw, error, 0, 1, 16, 16, 16) {
                 continue;
             }
             accepted += 1;
@@ -1791,20 +1906,30 @@ mod tests {
             };
             assert_eq!(
                 state
-                    .bin_draw(draw, [0.; 2], 0, MAX_DRAWS - 1, 1, 1, 1, MAX_REFERENCES - 1)
+                    .bin_draw(
+                        draw,
+                        [0.; 2],
+                        0,
+                        MAX_DRAWS - 1,
+                        1,
+                        1,
+                        1,
+                        MAX_REFERENCES - 1,
+                        16
+                    )
                     .unwrap(),
                 MAX_REFERENCES
             );
             let before = (state.ranges.clone(), state.cursors.clone());
             for previous in [MAX_REFERENCES, usize::MAX] {
                 assert!(matches!(
-                    state.bin_draw(draw, [0.; 2], 0, 0, 1, 1, 1, previous),
+                    state.bin_draw(draw, [0.; 2], 0, 0, 1, 1, 1, previous, 16),
                     Err(Error::ResourceLimit)
                 ));
                 assert_eq!((&state.ranges, &state.cursors), (&before.0, &before.1));
             }
             assert_eq!(
-                tile_bounds(65_535, 1024, 16_384, 1024),
+                tile_bounds(65_535, 1024, 16_384, 1024, 16),
                 [16_368, 1008, 16_384, 1024]
             );
             let mut fonts = gpui_canvas::TextSystem::bundled().unwrap();

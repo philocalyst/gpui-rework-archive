@@ -302,6 +302,48 @@ async fn renderer(format: wgpu::TextureFormat) -> Renderer {
 }
 
 #[test]
+fn alternating_mask_and_solid_grids_preserve_exact_packet_replay() {
+    pollster::block_on(async {
+        let mut gpu = renderer(wgpu::TextureFormat::Rgba8UnormSrgb).await;
+        let mut text = TextSystem::bundled().unwrap();
+        let run = text.shape("Grid", 14., None).unwrap();
+        for with_mask in [false, true, false, true] {
+            let mut canvas = Canvas::recording(35, 19, ColorConfig::default()).unwrap();
+            canvas.clear(Color::WHITE);
+            let clip = Rect::new(0., 0., 35., 19.);
+            if with_mask {
+                canvas
+                    .draw_text(
+                        &mut text,
+                        &run,
+                        Point { x: 1.125, y: 1.25 },
+                        Affine::IDENTITY,
+                        clip,
+                        Color::BLACK,
+                    )
+                    .unwrap();
+            }
+            canvas
+                .fill_rect(clip, Affine::IDENTITY, clip, Color::rgb(17, 71, 131))
+                .unwrap();
+            gpu.set_tile_proofs(false);
+            let reference = readback(&mut gpu, &canvas);
+            gpu.set_tile_proofs(true);
+            let actual = readback(&mut gpu, &canvas);
+            assert_eq!(actual, reference);
+            assert_eq!(gpu.stats().uniform_tiles, if with_mask { 15 } else { 6 });
+            let before = gpu.stats();
+            let target = output_texture(&gpu, &canvas);
+            gpu.redraw(&target.create_view(&Default::default()))
+                .unwrap()
+                .unwrap();
+            assert_eq!(read_texture(&gpu, &target), reference);
+            assert_packet_replay(before, gpu.stats());
+        }
+    });
+}
+
+#[test]
 fn scene_buffer_growth_and_shrinking_prefixes_preserve_pixels_and_replay() {
     pollster::block_on(async {
         let mut renderer = renderer(wgpu::TextureFormat::Rgba8UnormSrgb).await;
@@ -1119,7 +1161,7 @@ fn grouped_and_inline_packets_match_every_pixel_in_mixed_scenes() {
             let expanded = readback(&mut renderer, &canvas);
             renderer.set_grouped_records(true);
             assert_eq!(readback(&mut renderer, &canvas), expanded);
-            assert_eq!(renderer.stats().uniform_tiles, 60);
+            assert_eq!(renderer.stats().uniform_tiles, 220);
             assert_eq!(renderer.stats().sample_draw_evaluations, 0);
             assert_eq!(renderer.stats().shared_groups, 4);
         }

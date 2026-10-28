@@ -261,7 +261,7 @@ fn placement_tags_survive_inline_compact_and_banked_packets() {
                     }
                     let end = range[1] & !MASK_TILE;
                     assert!(range[0] <= end && end as usize <= gpu.state.references.len());
-                    let [left, top, right, bottom] = tile_bounds(tile, 6, 96, 72);
+                    let [left, top, right, bottom] = tile_bounds(tile, 12, 96, 72, 8);
                     planned +=
                         u64::from((right - left) * (bottom - top)) * 16 * u64::from(end - range[0]);
                     if range[1] & MASK_TILE != 0 {
