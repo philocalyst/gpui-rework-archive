@@ -1,0 +1,22 @@
+
+running 17 tests
+test deferred_control_tests::close_cancels_before_either_poll_and_cannot_reach_replacement_owner ... ok
+test deferred_control_tests::coalesced_wake_keeps_fifo_operations_and_partial_capacity_failure ... ok
+test deferred_control_tests::controls_yield_before_effects_and_keep_immediate_control_visible ... ok
+test deferred_control_tests::deferred_control_storage_and_wake_allocation_ledger ... ok
+test deferred_control_tests::deferred_controls_coexist_with_exact_stream_lane ... ok
+test deferred_control_tests::empty_rewrite_reports_error_only_after_yield ... ok
+test deferred_control_tests::newly_queued_control_yields_while_older_ready_control_applies ... ok
+test port_tests::exact_stream_ingress_keeps_ui_work_and_matches_full_publication ... ok
+test port_tests::keyed_list_matches_frozen_positional_pixels_and_reference_range ... ok
+test port_tests::owner_modes_keep_reference_rows_offsets_and_text ... ok
+test port_tests::wheel_and_programmatic_scroll_feed_next_ui_tick_and_keep_keys ... ok
+test workload::heavy::tests::geometry_fits_the_window_and_the_series_is_bounded ... ok
+test workload::heavy::tests::modes_advance_only_their_parts ... ok
+test workload::tests::bounded_and_deterministic ... ok
+test workload::tests::visible_range_uses_two_rows_of_overscan_on_each_side ... ok
+test workload::vlist::tests::modes_move_as_described ... ok
+test workload::vlist::tests::rows_are_deterministic_and_varied ... ok
+
+test result: ok. 17 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 0.38s
+

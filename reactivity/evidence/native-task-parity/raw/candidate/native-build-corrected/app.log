@@ -1,0 +1,24 @@
+font_file_fnv64=ce252980ec1255ff
+source_ingress=owner
+libEGL warning: DRI3 error: Could not get DRI3 device
+libEGL warning: Ensure your X server supports DRI3 to get accelerated rendering
+GPUI_ACK,0,0,7164
+GPUI_CONTROL,queued,Rewrite,0,0
+GPUI_CONTROL,yielded,Rewrite,0,0
+GPUI_CONTROL,applied,Rewrite,0,-1
+GPUI_ACK,3,3,115831386
+GPUI_CONTROL,queued,Append,0,-1
+GPUI_CONTROL,yielded,Append,0,-1
+GPUI_CONTROL,applied,Append,3,0
+GPUI_ACK,6,6,245823210
+GPUI_CONTROL,queued,Rewrite,3,0
+GPUI_CONTROL,yielded,Rewrite,3,0
+GPUI_CONTROL,applied,Rewrite,3,0
+GPUI_CONTROL,queued,Append,3,0
+GPUI_CONTROL,yielded,Append,3,0
+GPUI_CONTROL,applied,Append,4,-1
+GPUI_ACK,12,12,446958736
+GPUI_CONTROL,immediate,999,4,999
+GPUI_ACK,13,13,543396804
+workload_ticks=0 admitted_ticks=0 workload_scroll_offset=0
+native_acknowledgements=5 native_elapsed_seconds=0.618655

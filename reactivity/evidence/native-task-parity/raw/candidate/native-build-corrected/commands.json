@@ -1,0 +1,173 @@
+[
+  {
+    "command": [
+      "xdotool",
+      "keyup",
+      "Alt_L",
+      "F4"
+    ],
+    "exit": 0,
+    "stdout": "",
+    "stderr": ""
+  },
+  {
+    "command": [
+      "xdotool",
+      "search",
+      "--onlyvisible",
+      "--name",
+      "^GPUI ZGX lab$"
+    ],
+    "exit": 0,
+    "stdout": "6291458\n",
+    "stderr": ""
+  },
+  {
+    "command": [
+      "xdotool",
+      "windowactivate",
+      "--sync",
+      "6291458"
+    ],
+    "exit": 0,
+    "stdout": "",
+    "stderr": ""
+  },
+  {
+    "command": [
+      "xdotool",
+      "mousemove",
+      "--window",
+      "6291458",
+      "90",
+      "65"
+    ],
+    "exit": 0,
+    "stdout": "",
+    "stderr": ""
+  },
+  {
+    "command": [
+      "xdotool",
+      "click",
+      "1"
+    ],
+    "exit": 0,
+    "stdout": "",
+    "stderr": ""
+  },
+  {
+    "command": [
+      "xdotool",
+      "mousemove",
+      "--window",
+      "6291458",
+      "30",
+      "65"
+    ],
+    "exit": 0,
+    "stdout": "",
+    "stderr": ""
+  },
+  {
+    "command": [
+      "xdotool",
+      "click",
+      "1"
+    ],
+    "exit": 0,
+    "stdout": "",
+    "stderr": ""
+  },
+  {
+    "command": [
+      "xdotool",
+      "mousemove",
+      "--window",
+      "6291458",
+      "90",
+      "65"
+    ],
+    "exit": 0,
+    "stdout": "",
+    "stderr": ""
+  },
+  {
+    "command": [
+      "xdotool",
+      "click",
+      "1"
+    ],
+    "exit": 0,
+    "stdout": "",
+    "stderr": ""
+  },
+  {
+    "command": [
+      "xdotool",
+      "mousemove",
+      "--window",
+      "6291458",
+      "30",
+      "65"
+    ],
+    "exit": 0,
+    "stdout": "",
+    "stderr": ""
+  },
+  {
+    "command": [
+      "xdotool",
+      "click",
+      "1"
+    ],
+    "exit": 0,
+    "stdout": "",
+    "stderr": ""
+  },
+  {
+    "command": [
+      "xdotool",
+      "mousemove",
+      "--window",
+      "6291458",
+      "150",
+      "65"
+    ],
+    "exit": 0,
+    "stdout": "",
+    "stderr": ""
+  },
+  {
+    "command": [
+      "xdotool",
+      "click",
+      "1"
+    ],
+    "exit": 0,
+    "stdout": "",
+    "stderr": ""
+  },
+  {
+    "command": [
+      "xdotool",
+      "windowactivate",
+      "--sync",
+      "6291458"
+    ],
+    "exit": 0,
+    "stdout": "",
+    "stderr": ""
+  },
+  {
+    "command": [
+      "xdotool",
+      "key",
+      "--clearmodifiers",
+      "alt+F4"
+    ],
+    "exit": 0,
+    "stdout": "",
+    "stderr": ""
+  }
+]

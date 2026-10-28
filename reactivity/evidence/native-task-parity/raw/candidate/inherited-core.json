@@ -1,0 +1,9 @@
+{
+  "base": "bb83c5d8f3da446d4cc1c259141f335797b1b60d",
+  "candidate": "8de61164f7b163eda62843206e56b2a4ab50c3c9",
+  "changed_files": [
+    "reactivity/crates/gpui/examples/zgx_native_lab.rs"
+  ],
+  "qualified_core_evidence": "/home/user/gpui-glyph-damage-control-evidence/full-native",
+  "note": "Only the standalone workload port changes. Core library production, manifests, dependencies and shaders are identical to qualified corrected original. Port tests and actual native scripts run fresh."
+}

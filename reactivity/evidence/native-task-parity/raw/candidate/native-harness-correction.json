@@ -1,0 +1,4 @@
+{
+  "reason": "Preserved first full native trace reaches all13 expected operations but target-specific Alt+F4 reports BadWindow after closing. Minimal first attempt sees ACK before visible-window search succeeds. Retry same frozen ELFs using bounded visibility polling and global XTest key release on private :94; wait for final ACK after control trace. No production/source/input/oracle changes.",
+  "positive_source": "8de61164f7b163eda62843206e56b2a4ab50c3c9"
+}

@@ -1,0 +1,13 @@
+{
+  "exit": 0,
+  "environment": {
+    "DISPLAY": ":94",
+    "XDG_RUNTIME_DIR": "/home/user/gpui-xdg",
+    "VK_ICD_FILENAMES": "/usr/share/vulkan/icd.d/lvp_icd.json",
+    "LP_NUM_THREADS": "4",
+    "ZGX_MODE": "idle",
+    "ZGX_SECONDS": "0",
+    "GPUI_LAB_TRACE": "1",
+    "GPUI_LAB_RENDERER": "gpu"
+  }
+}

@@ -1,0 +1,26 @@
+{
+  "build": {
+    "sha256": "ea6e71d3da2bdb23d4971a14f0f55db389dbb45f9b2e9c05c85d4dc6363eb4d1",
+    "bytes": 18995,
+    "elf_sha256": "fd8a6db5ad3444ef569747f6234349241a85caffc8b0e9ba270e6c91e3652835",
+    "offset": 1568255,
+    "paths": [
+      "/home/user/gpui-native-task-parity-target/release/build/gpui_gpu/74f283b45b2110f7/out/ui.wgsl",
+      "/home/user/gpui-native-task-parity-target/release/build/gpui_gpu/937a2bc493b6d283/out/ui.wgsl",
+      "/home/user/gpui-native-task-parity-target/release/build/gpui_gpu/5e5ec4fa7dc68373/out/ui.wgsl",
+      "/home/user/gpui-native-task-parity-target/release/build/gpui_gpu/a21c63868d7ff026/out/ui.wgsl"
+    ]
+  },
+  "minimal-build": {
+    "sha256": "ea6e71d3da2bdb23d4971a14f0f55db389dbb45f9b2e9c05c85d4dc6363eb4d1",
+    "bytes": 18995,
+    "elf_sha256": "e55d73618c641d20dfc5e15ec4d62f80ef6587a3ce0611381673151c7b95d783",
+    "offset": 990437,
+    "paths": [
+      "/home/user/gpui-native-task-parity-target/release/build/gpui_gpu/74f283b45b2110f7/out/ui.wgsl",
+      "/home/user/gpui-native-task-parity-target/release/build/gpui_gpu/937a2bc493b6d283/out/ui.wgsl",
+      "/home/user/gpui-native-task-parity-target/release/build/gpui_gpu/5e5ec4fa7dc68373/out/ui.wgsl",
+      "/home/user/gpui-native-task-parity-target/release/build/gpui_gpu/a21c63868d7ff026/out/ui.wgsl"
+    ]
+  }
+}

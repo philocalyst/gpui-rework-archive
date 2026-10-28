@@ -1,0 +1,9 @@
+{
+  "commit": "a3678578980ef239058c557338ef9c544d356b0c",
+  "files": {
+    "crates/zgx-desktop/examples/component_workload.rs": "3cc84619bb870926d1f42806a119bcfe6e4bbf0e0a3512c8baaa26621fe1aa2e",
+    "crates/zgx/src/task.rs": "d8707a61436d82632009153eb246a332843fcb8e414cefa1a1bd05a9ce9e2855",
+    "crates/zgx-desktop/src/application.rs": "37309d7f4fe157667ea68abcdefa0f6dd2ece6180cdd5d70d30c27c6228dd23b",
+    "docs/scoped-tasks.md": "deaab7c8d2f24b6b68aee8c1c8da23871d7be0d69ccb1d83a973c9f863135cb0"
+  }
+}

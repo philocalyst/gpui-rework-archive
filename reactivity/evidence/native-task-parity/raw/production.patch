@@ -1,0 +1,391 @@
+diff --git a/reactivity/crates/gpui/examples/zgx_native_lab.rs b/reactivity/crates/gpui/examples/zgx_native_lab.rs
+index 4bfa03a3db..326418cdf1 100644
+--- a/reactivity/crates/gpui/examples/zgx_native_lab.rs
++++ b/reactivity/crates/gpui/examples/zgx_native_lab.rs
+@@ -1,7 +1,10 @@
+ //! Public-API port of ZGX's component_workload at a3678578980e.
+ //! Shared workload is copied verbatim under its adjacent MIT license.
+ use gpui::{Affine, Application, Remote, RendererPolicy, SendError, Window, prelude::*};
+-use std::time::{Duration, Instant};
++use std::{
++    collections::VecDeque,
++    time::{Duration, Instant},
++};
+ #[allow(dead_code)]
+ #[path = "support/zgx_workload/src/lib.rs"]
+ mod workload;
+@@ -12,6 +15,34 @@ pub(crate) struct Lab {
+     stream: Signal<String>,
+     items: Vec<i32>,
+     done: i32,
++    controls: Controls,
++}
++// Match the reference's spawn + yield_now: one poll yields, the next applies.
++// Only the wake is coalesced; every queued operation remains UI-owned and FIFO.
++#[derive(Clone, Copy, Debug)]
++enum Control {
++    Append,
++    Rewrite,
++}
++struct ControlTask {
++    operation: Control,
++    yielded: bool,
++}
++#[derive(Default)]
++struct Controls {
++    pending: VecDeque<ControlTask>,
++    wake: Option<Remote<()>>,
++    trace: bool,
++}
++impl Controls {
++    fn schedule(&mut self) {
++        if let Some(wake) = &self.wake {
++            match wake.try_send(()) {
++                Ok(()) | Err(SendError::Full(())) => {}
++                Err(SendError::Closed(())) => self.pending.clear(),
++            }
++        }
++    }
+ }
+ impl Lab {
+     const STREAM: Source<Self, String> =
+@@ -28,11 +59,74 @@ impl Lab {
+             scroll_offset: Signal::new(f64::from(work.scroll_offset)),
+             items: Vec::new(),
+             done: 0,
++            controls: Controls::default(),
+         }
+     }
+     fn control(&mut self, id: usize) {
+-        self.done = match id {
+-            0 => {
++        let operation = match id {
++            0 => Control::Append,
++            1 => Control::Rewrite,
++            _ => {
++                self.done = 999;
++                if self.controls.trace {
++                    eprintln!(
++                        "GPUI_CONTROL,immediate,999,{},{}",
++                        self.items.len(),
++                        self.done
++                    );
++                }
++                return;
++            }
++        };
++        self.controls.pending.push_back(ControlTask {
++            operation,
++            yielded: false,
++        });
++        if self.controls.trace {
++            eprintln!(
++                "GPUI_CONTROL,queued,{operation:?},{},{}",
++                self.items.len(),
++                self.done
++            );
++        }
++        self.controls.schedule();
++    }
++    fn poll_controls(&mut self, (): ()) {
++        // deliver_ready freezes the inbox before callbacks. A self-wake here
++        // belongs to a later delivery, even when that caller has a large budget.
++        let ready = self.controls.pending.len();
++        for _ in 0..ready {
++            let mut task = self.controls.pending.pop_front().unwrap();
++            if task.yielded {
++                self.apply_control(task.operation);
++                if self.controls.trace {
++                    eprintln!(
++                        "GPUI_CONTROL,applied,{:?},{},{}",
++                        task.operation,
++                        self.items.len(),
++                        self.done
++                    );
++                }
++            } else {
++                task.yielded = true;
++                if self.controls.trace {
++                    eprintln!(
++                        "GPUI_CONTROL,yielded,{:?},{},{}",
++                        task.operation,
++                        self.items.len(),
++                        self.done
++                    );
++                }
++                self.controls.pending.push_back(task);
++            }
++        }
++        if !self.controls.pending.is_empty() {
++            self.controls.schedule();
++        }
++    }
++    fn apply_control(&mut self, operation: Control) {
++        self.done = match operation {
++            Control::Append => {
+                 let mut result = 0;
+                 for value in [1, 2, 3] {
+                     if self.items.len() == 4 {
+@@ -43,7 +137,7 @@ impl Lab {
+                 }
+                 result
+             }
+-            1 => match self.items.first_mut() {
++            Control::Rewrite => match self.items.first_mut() {
+                 Some(first) => {
+                     *first = 99;
+                     *first = 99;
+@@ -51,7 +145,6 @@ impl Lab {
+                 }
+                 None => -1,
+             },
+-            _ => 999,
+         };
+     }
+ }
+@@ -224,7 +317,7 @@ impl Drop for Presents {
+ }
+ fn main() -> Result<(), Box<dyn std::error::Error>> {
+     let work = Workload::from_env();
+-    let model = Lab::new(&work);
++    let mut model = Lab::new(&work);
+     let font_bytes = workload::font_file().unwrap_or_else(|| workload::FONT_BYTES.to_vec());
+     eprintln!("font_file_fnv64={:016x}", workload::fnv64(&font_bytes));
+     let font = gpui_canvas::FontFace::new(&font_bytes)?;
+@@ -309,6 +402,9 @@ fn main() -> Result<(), Box<dyn std::error::Error>> {
+         }
+     });
+     let trace = std::env::var_os("GPUI_LAB_TRACE").is_some();
++    let (control_wake, control_inbox) = Remote::bounded(1);
++    model.controls.wake = Some(control_wake);
++    model.controls.trace = trace;
+     let mut start_send = Some(start_send);
+     let mut presents = Presents {
+         count: 0,
+@@ -320,6 +416,7 @@ fn main() -> Result<(), Box<dyn std::error::Error>> {
+         RendererPolicy::Gpu
+     };
+     let window = Window::document(model)
++        .with_inbox(control_inbox, Lab::poll_controls)
+         .title("GPUI ZGX lab")
+         .size(960, 720)
+         .text_font(font)
+@@ -771,3 +868,218 @@ mod port_tests {
+         }
+     }
+ }
++
++#[cfg(test)]
++mod deferred_control_tests {
++    use super::*;
++    use gpui::{LaneSet, Win};
++
++    fn window() -> (Win<Lab, impl LaneSet<Lab>>, Remote<()>) {
++        let work = port_tests::seeded(Mode::Idle);
++        let (wake, inbox) = Remote::bounded(1);
++        let mut model = Lab::new(&work);
++        model.controls.wake = Some(wake.clone());
++        let ui = std::thread::current().id();
++        let mut win = Win::recording_with_font(
++            model,
++            gpui::WindowOptions {
++                size: [960, 720],
++                ..Default::default()
++            },
++            gpui_canvas::FontFace::new(workload::FONT_BYTES).unwrap(),
++        )
++        .unwrap()
++        .with_inbox(inbox, move |m: &mut Lab, event| {
++            assert_eq!(std::thread::current().id(), ui);
++            m.poll_controls(event);
++        })
++        .unwrap();
++        acknowledge(&mut win);
++        (win, wake)
++    }
++    fn acknowledge<L: LaneSet<Lab>>(win: &mut Win<Lab, L>) {
++        let token = win.with_scene(|_, token| token).unwrap();
++        win.presented(token).unwrap();
++    }
++    fn click<L: LaneSet<Lab>>(win: &mut Win<Lab, L>, control: usize) {
++        win.click_at(Point {
++            x: 30. + control as f32 * 60.,
++            y: 65.,
++        })
++        .unwrap();
++        acknowledge(win);
++    }
++    fn deliver<L: LaneSet<Lab>>(win: &mut Win<Lab, L>) -> gpui::Delivery {
++        let result = win.deliver_ready(usize::MAX).unwrap();
++        acknowledge(win);
++        result
++    }
++    fn pixels<L: LaneSet<Lab>>(
++        win: &mut Win<Lab, L>,
++        items: &[i32],
++        done: i32,
++        focused: usize,
++        work: &Workload,
++    ) {
++        // Independent expected model; only reproduce focus, never run its tasks.
++        let mut expected = port_tests::window(work);
++        acknowledge(&mut expected);
++        click(&mut expected, focused);
++        expected
++            .update(|m| {
++                m.items = items.to_vec();
++                m.done = done;
++            })
++            .unwrap();
++        assert_eq!(
++            win.with_pixels(|p, _, _| p.to_vec()).unwrap(),
++            expected.with_pixels(|p, _, _| p.to_vec()).unwrap()
++        );
++    }
++    #[test]
++    fn controls_yield_before_effects_and_keep_immediate_control_visible() {
++        let (mut win, _wake) = window();
++        let work = port_tests::seeded(Mode::Idle);
++        click(&mut win, 0);
++        assert!(
++            win.root().unwrap().items.is_empty(),
++            "click must only enqueue"
++        );
++        pixels(&mut win, &[], 0, 0, &work);
++        win.reset_counters().unwrap();
++        let first = deliver(&mut win);
++        assert_eq!((first.received, first.applied), (1, 1));
++        assert!(
++            win.root().unwrap().items.is_empty(),
++            "first poll must yield"
++        );
++        eprintln!("CONTROL_FIRST_POLL_COUNTERS,{:?}", win.counters());
++        pixels(&mut win, &[], 0, 0, &work);
++        click(&mut win, 2);
++        assert_eq!(win.root().unwrap().done, 999);
++        pixels(&mut win, &[], 999, 2, &work);
++        assert_eq!(deliver(&mut win).applied, 1);
++        assert_eq!(win.root().unwrap().items, [1, 2, 3]);
++        assert_eq!(win.root().unwrap().done, 0);
++        pixels(&mut win, &[1, 2, 3], 0, 2, &work);
++        assert_eq!(deliver(&mut win).received, 0);
++    }
++    #[test]
++    fn coalesced_wake_keeps_fifo_operations_and_partial_capacity_failure() {
++        let (mut win, _wake) = window();
++        for id in [0, 1, 0] {
++            click(&mut win, id);
++        }
++        assert!(win.root().unwrap().items.is_empty());
++        assert_eq!(deliver(&mut win).received, 1);
++        assert!(win.root().unwrap().items.is_empty());
++        assert_eq!(deliver(&mut win).received, 1);
++        assert_eq!(win.root().unwrap().items, [99, 2, 3, 1]);
++        assert_eq!(win.root().unwrap().done, -1);
++        assert!(win.root().unwrap().controls.pending.is_empty());
++        pixels(
++            &mut win,
++            &[99, 2, 3, 1],
++            -1,
++            0,
++            &port_tests::seeded(Mode::Idle),
++        );
++        assert_eq!(deliver(&mut win).received, 0);
++    }
++    #[test]
++    fn newly_queued_control_yields_while_older_ready_control_applies() {
++        let (mut win, _wake) = window();
++        click(&mut win, 0);
++        deliver(&mut win);
++        click(&mut win, 1);
++        deliver(&mut win);
++        assert_eq!(win.root().unwrap().items, [1, 2, 3]);
++        deliver(&mut win);
++        assert_eq!(win.root().unwrap().items, [99, 2, 3]);
++        assert_eq!(win.root().unwrap().done, 0);
++        assert_eq!(deliver(&mut win).received, 0);
++    }
++    #[test]
++    fn empty_rewrite_reports_error_only_after_yield() {
++        let (mut win, _wake) = window();
++        click(&mut win, 1);
++        assert_eq!(win.root().unwrap().done, 0);
++        deliver(&mut win);
++        assert_eq!(win.root().unwrap().done, 0);
++        deliver(&mut win);
++        assert!(win.root().unwrap().items.is_empty());
++        assert_eq!(win.root().unwrap().done, -1);
++    }
++    #[test]
++    fn close_cancels_before_either_poll_and_cannot_reach_replacement_owner() {
++        for polls in [0, 1] {
++            let (mut win, wake) = window();
++            click(&mut win, 0);
++            for _ in 0..polls {
++                deliver(&mut win);
++            }
++            win.close();
++            assert!(win.is_closed());
++            assert!(matches!(wake.try_send(()), Err(SendError::Closed(()))));
++            assert!(win.deliver_ready(usize::MAX).is_err());
++            let (mut replacement, _new_wake) = window();
++            assert_eq!(deliver(&mut replacement).received, 0);
++            assert!(replacement.root().unwrap().items.is_empty());
++            assert_eq!(replacement.root().unwrap().done, 0);
++        }
++    }
++    #[test]
++    fn deferred_controls_coexist_with_exact_stream_lane() {
++        let (win, _wake) = window();
++        let (remote, inbox) = Remote::bounded(1);
++        let mut win = win
++            .with_inbox_for(inbox, Lab::STREAM, |value, next| *value = next)
++            .unwrap();
++        let mut work = port_tests::seeded(Mode::Stream);
++        work.tick();
++        click(&mut win, 0);
++        remote.try_send(work.visible_text()).unwrap();
++        let first = deliver(&mut win);
++        assert_eq!(first.received, 2);
++        assert!(win.root().unwrap().items.is_empty());
++        assert_eq!(&**win.read(Lab::STREAM).unwrap(), work.visible_text());
++        pixels(&mut win, &[], 0, 0, &work);
++        assert_eq!(deliver(&mut win).received, 1);
++        assert_eq!(win.root().unwrap().items, [1, 2, 3]);
++        assert_eq!(&**win.read(Lab::STREAM).unwrap(), work.visible_text());
++        pixels(&mut win, &[1, 2, 3], 0, 0, &work);
++    }
++    #[test]
++    fn deferred_control_storage_and_wake_allocation_ledger() {
++        let mut lane = None;
++        let inbox = allocation_counter::measure(|| lane = Some(Remote::<()>::bounded(1)));
++        let mut controls = Controls::default();
++        let queue = allocation_counter::measure(|| {
++            for _ in 0..64 {
++                controls.pending.push_back(ControlTask {
++                    operation: Control::Append,
++                    yielded: false,
++                });
++            }
++        });
++        eprintln!(
++            "CONTROL_HEADERS,Lab={},Controls={},Task={},Remote={},Inbox={}",
++            size_of::<Lab>(),
++            size_of::<Controls>(),
++            size_of::<ControlTask>(),
++            size_of::<Remote<()>>(),
++            size_of::<gpui::Inbox<()>>()
++        );
++        eprintln!(
++            "CONTROL_STORAGE,inbox_requests={},inbox_bytes={},inbox_retained={},queue_requests={},queue_bytes={},queue_retained={},queue_capacity={}",
++            inbox.count_total,
++            inbox.bytes_total,
++            inbox.bytes_current,
++            queue.count_total,
++            queue.bytes_total,
++            queue.bytes_current,
++            controls.pending.capacity()
++        );
++        drop(lane);
++    }
++}

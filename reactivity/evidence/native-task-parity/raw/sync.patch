@@ -1,0 +1,16 @@
+diff --git a/reactivity/crates/gpui/examples/zgx_native_lab.rs b/reactivity/crates/gpui/examples/zgx_native_lab.rs
+index 326418cdf1..5e7155a74c 100644
+--- a/reactivity/crates/gpui/examples/zgx_native_lab.rs
++++ b/reactivity/crates/gpui/examples/zgx_native_lab.rs
+@@ -78,10 +78,7 @@ impl Lab {
+                 return;
+             }
+         };
+-        self.controls.pending.push_back(ControlTask {
+-            operation,
+-            yielded: false,
+-        });
++        self.apply_control(operation);
+         if self.controls.trace {
+             eprintln!(
+                 "GPUI_CONTROL,queued,{operation:?},{},{}",

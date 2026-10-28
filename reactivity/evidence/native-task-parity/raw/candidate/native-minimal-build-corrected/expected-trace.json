@@ -1,0 +1,15 @@
+[
+  "GPUI_CONTROL,queued,Rewrite,0,0",
+  "GPUI_CONTROL,yielded,Rewrite,0,0",
+  "GPUI_CONTROL,applied,Rewrite,0,-1",
+  "GPUI_CONTROL,queued,Append,0,-1",
+  "GPUI_CONTROL,yielded,Append,0,-1",
+  "GPUI_CONTROL,applied,Append,3,0",
+  "GPUI_CONTROL,queued,Rewrite,3,0",
+  "GPUI_CONTROL,yielded,Rewrite,3,0",
+  "GPUI_CONTROL,applied,Rewrite,3,0",
+  "GPUI_CONTROL,queued,Append,3,0",
+  "GPUI_CONTROL,yielded,Append,3,0",
+  "GPUI_CONTROL,applied,Append,4,-1",
+  "GPUI_CONTROL,immediate,999,4,999"
+]

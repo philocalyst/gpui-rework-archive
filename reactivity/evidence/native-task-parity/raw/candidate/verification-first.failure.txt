@@ -1,0 +1,5 @@
+Traceback (most recent call last):
+  File "/home/user/gpui-native-task-parity-lab/reactivity/evidence/native-task-parity/verify.py", line 32, in <module>
+    source=(g/'source.txt').read_text().strip();base=json.loads((r/'inherited-core.json').read_text())['base'];changed=subprocess.check_output(['git','diff','--name-only',base,source,'--','reactivity/crates','.cargo','clippy.toml'],cwd=root,text=True).splitlines();assert changed==['reactivity/crates/gpui/examples/zgx_native_lab.rs']
+                                                                                                                                                                                                                                                                                ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+AssertionError

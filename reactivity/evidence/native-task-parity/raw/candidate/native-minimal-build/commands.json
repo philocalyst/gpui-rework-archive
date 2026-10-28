@@ -1,0 +1,14 @@
+[
+  {
+    "command": [
+      "xdotool",
+      "search",
+      "--onlyvisible",
+      "--name",
+      "^GPUI ZGX lab$"
+    ],
+    "exit": 1,
+    "stdout": "",
+    "stderr": ""
+  }
+]

@@ -1,0 +1,152 @@
+[
+  {
+    "command": [
+      "xdotool",
+      "search",
+      "--onlyvisible",
+      "--name",
+      "^GPUI ZGX lab$"
+    ],
+    "exit": 0,
+    "stdout": "4194306\n",
+    "stderr": ""
+  },
+  {
+    "command": [
+      "xdotool",
+      "windowactivate",
+      "--sync",
+      "4194306"
+    ],
+    "exit": 0,
+    "stdout": "",
+    "stderr": ""
+  },
+  {
+    "command": [
+      "xdotool",
+      "mousemove",
+      "--window",
+      "4194306",
+      "90",
+      "65"
+    ],
+    "exit": 0,
+    "stdout": "",
+    "stderr": ""
+  },
+  {
+    "command": [
+      "xdotool",
+      "click",
+      "1"
+    ],
+    "exit": 0,
+    "stdout": "",
+    "stderr": ""
+  },
+  {
+    "command": [
+      "xdotool",
+      "mousemove",
+      "--window",
+      "4194306",
+      "30",
+      "65"
+    ],
+    "exit": 0,
+    "stdout": "",
+    "stderr": ""
+  },
+  {
+    "command": [
+      "xdotool",
+      "click",
+      "1"
+    ],
+    "exit": 0,
+    "stdout": "",
+    "stderr": ""
+  },
+  {
+    "command": [
+      "xdotool",
+      "mousemove",
+      "--window",
+      "4194306",
+      "90",
+      "65"
+    ],
+    "exit": 0,
+    "stdout": "",
+    "stderr": ""
+  },
+  {
+    "command": [
+      "xdotool",
+      "click",
+      "1"
+    ],
+    "exit": 0,
+    "stdout": "",
+    "stderr": ""
+  },
+  {
+    "command": [
+      "xdotool",
+      "mousemove",
+      "--window",
+      "4194306",
+      "30",
+      "65"
+    ],
+    "exit": 0,
+    "stdout": "",
+    "stderr": ""
+  },
+  {
+    "command": [
+      "xdotool",
+      "click",
+      "1"
+    ],
+    "exit": 0,
+    "stdout": "",
+    "stderr": ""
+  },
+  {
+    "command": [
+      "xdotool",
+      "mousemove",
+      "--window",
+      "4194306",
+      "150",
+      "65"
+    ],
+    "exit": 0,
+    "stdout": "",
+    "stderr": ""
+  },
+  {
+    "command": [
+      "xdotool",
+      "click",
+      "1"
+    ],
+    "exit": 0,
+    "stdout": "",
+    "stderr": ""
+  },
+  {
+    "command": [
+      "xdotool",
+      "key",
+      "--window",
+      "4194306",
+      "alt+F4"
+    ],
+    "exit": 1,
+    "stdout": "",
+    "stderr": "X Error of failed request:  BadWindow (invalid Window parameter)\n  Major opcode of failed request:  25 (X_SendEvent)\n  Resource id in failed request:  0x400002\n  Serial number of failed request:  39\n  Current serial number in output stream:  40\n"
+  }
+]

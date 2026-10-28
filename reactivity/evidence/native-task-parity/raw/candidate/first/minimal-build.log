@@ -1,0 +1,13 @@
+   Compiling indexmap v2.14.2
+   Compiling tracing-core v0.1.36
+   Compiling tracing v0.1.44
+   Compiling tiny-xlib v0.2.5
+   Compiling winit v0.30.13 (/home/user/gpui-native-task-parity-lab/reactivity/vendor/winit)
+   Compiling naga-types v30.0.1
+   Compiling softbuffer v0.4.8 (/home/user/gpui-native-task-parity-lab/reactivity/vendor/softbuffer)
+   Compiling naga v30.0.1
+   Compiling gpui_reactivity_host v0.1.0 (/home/user/gpui-native-task-parity-lab/reactivity/crates/host)
+   Compiling wgsl-rs v0.1.0-beta.6
+   Compiling gpui_gpu v0.1.0 (/home/user/gpui-native-task-parity-lab/reactivity/crates/gpu)
+   Compiling gpui v0.1.0 (/home/user/gpui-native-task-parity-lab/reactivity/crates/gpui)
+    Finished `release` profile [optimized] target(s) in 35.78s

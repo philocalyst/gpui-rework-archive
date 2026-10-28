@@ -1,0 +1,4 @@
+
+thread 'deferred_control_tests::controls_yield_before_effects_and_keep_immediate_control_visible' (2713006) panicked at crates/gpui/examples/zgx_native_lab.rs:941:9:
+click must only enqueue
+note: run with `RUST_BACKTRACE=1` environment variable to display a backtrace
