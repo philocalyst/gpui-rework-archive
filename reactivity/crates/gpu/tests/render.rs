@@ -4632,8 +4632,7 @@ fn region_batches_cover_edges_and_holes_then_allow_ordinary_packet_repairs() {
                 ColorConfig::default()
             };
             for [width, height] in [[67, 53], [257, 1], [1, 257], [maximum, 1], [1, maximum]] {
-                let mut canvas =
-                    Canvas::recording(width as usize, height as usize, config).unwrap();
+                let mut canvas = Canvas::recording(width, height, config).unwrap();
                 canvas.clear(Color::rgb(19, 31, 53));
                 let clip = Rect::new(0., 0., width as f32, height as f32);
                 if width > 1 && height > 1 {
