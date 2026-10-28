@@ -525,3 +525,9 @@ New mask-miss662707d7/b817779c preserves16 blends but reuses a proven-identical
 source sample. Early GPU seal **e97729cb** passes353 tests,Clippy,336 exact
 frames and a3718-byte invalid-certificate witness. Native first-packet audit
 70b75c8c is building; no performance, adoption or ZGX claim.
+
+
+Mask-miss native audit **2520aeec** verifies8 corrected processes,exact initial
+images and about88% planned first-packet lowered-mask pixel misses. The initial
+private-window-manager failure remains retained/rejected. Uninstrumented native
+screen423a0cd0 is building; no timing result or adoption.

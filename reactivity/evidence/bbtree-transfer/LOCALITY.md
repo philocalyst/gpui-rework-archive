@@ -708,3 +708,32 @@ The BBTree transfer remains explicit: reduce repeated work within bounded,
 independent operation lanes while charging lane state and compilation costs.
 It does not justify changing Solid/Ripple dependency authority or task wakeups,
 and neither planned mask reuse nor software rendering establishes cache hits.
+
+
+Mask-miss native selection audit **2520aeece9359124d0d8f4d450b04f03f5685d55**
+verifies189 files,17 workload tests,8 normal corrected processes and1082 selected
+literal packets. Initial0:262087/296960 lowered pixel references miss; initial190:
+600100/683264. Only first submissions enumerated; planned complete packets,
+not damage-cropped GPU work. Exact images0/190 and unchanged shader/workload.
+The initial diagnostic failed window activation after the private display lost
+its window manager; retained one SIGTERM process and guards. Restored owned
+openbox and separately froze a complete diagnostic cohort, without shader or
+gate changes. Native screen423a0cd0 is building in its own uninstrumented target.
+
+Research implications, not new experiments/adoptions: BBTree's documented
+level-by-level scheduler shares decisions across homogeneous lanes and exceeds
+its generic coroutine scheduler. The new support counts also make spatial
+bin granularity a concrete question:16x16 bins send most glyph references to
+pixels outside that glyph. Smaller or subdivided bins might reject these before
+shader traversal, but charge more CSR entries, tile words, upload and CPU repair
+work. No bin-size change or performance claim has been made. A future proposal
+must fix its representation and selection rule before observations, preserve
+all exact images and test flat/dense/cold/mutation cases as complete alternatives.
+
+Solid's pinned fetch-high/block-low article still distinguishes starting work
+from the reads/boundaries that delay visible publication. Ripple track-async.js
+at fed1244 checks request versions in both fulfillment and rejection, propagates
+pending dependencies and retires boundary requests separately. These mechanisms
+preserve meaning when scheduling moves work; they do not turn a pending I/O task
+into BBTree's immediately repollable memory-yield lane. Re-read source supports
+the existing scheduling constraints, not a newly measured asynchronous win.
