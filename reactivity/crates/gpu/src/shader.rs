@@ -679,6 +679,43 @@ pub mod ui {
         sample_draw(draw, point)
     }
 
+    // A class names identical source operations, never approximate colors.
+    pub fn partition_key(point: f32, origin: f32, extent: f32, mask: bool) -> f32 {
+        if mask {
+            return floor(point - origin);
+        }
+        if point >= origin && point < origin + extent {
+            return 1.0;
+        }
+        0.0
+    }
+    pub fn partition_axis(first: f32, origin: f32, extent: f32, mask: bool) -> u32 {
+        let mut cuts: u32 = 1;
+        let mut previous = partition_key(first, origin, extent, mask);
+        for index in 1..4 {
+            let key = partition_key(first + index as f32 * 0.25, origin, extent, mask);
+            if key != previous {
+                cuts |= 1u32 << index as u32;
+            }
+            previous = key;
+        }
+        cuts
+    }
+    pub fn source_partitions(draw: Draw, position: Vec2f, missed: bool, cached: bool) -> Vec2u {
+        if missed {
+            return vec2u(1, 1);
+        }
+        let solid = (draw.atlas.w & 0x40000000) != 0;
+        if cached || solid {
+            let first = position - vec2f(0.375, 0.375);
+            return vec2u(
+                partition_axis(first.x, draw.local.x, draw.local.z, !solid),
+                partition_axis(first.y, draw.local.y, draw.local.w, !solid),
+            );
+        }
+        vec2u(15, 15)
+    }
+
     // Banked scenes and certified literal mask tiles decode each draw once
     // before the sixteen sample operations. This deliberately trades sixteen local colors
     // for the ordinary sample-major path's repeated record/bank loads; it is
@@ -688,6 +725,7 @@ pub mod ui {
             clear, clear, clear, clear, clear, clear, clear, clear, clear, clear, clear, clear,
             clear, clear, clear, clear,
         ];
+        let mut groups = vec2u(1, 1);
         #[wgsl_allow(non_literal_loop_bounds)]
         for cursor in range.x..range.y {
             let draw = load_banked_draw(get!(INDICES)[cursor as usize]);
@@ -702,28 +740,70 @@ pub mod ui {
                 let last = floor(position + vec2f(0.375, 0.375) - draw.local.xy());
                 coverage = mask_pixel_coverage(draw, first, last);
             }
+            if groups.x != 15 || groups.y != 15 {
+                let previous = groups;
+                let cuts = source_partitions(draw, position, missed, cached);
+                groups = vec2u(groups.x | cuts.x, groups.y | cuts.y);
+                if groups.x != previous.x || groups.y != previous.y {
+                    let mut old_y: u32 = 0;
+                    for y in 0..4 {
+                        let y_bit = 1u32 << y as u32;
+                        if (previous.y & y_bit) != 0 {
+                            old_y = y as u32;
+                        }
+                        let mut old_x: u32 = 0;
+                        for x in 0..4 {
+                            let x_bit = 1u32 << x as u32;
+                            if (previous.x & x_bit) != 0 {
+                                old_x = x as u32;
+                            }
+                            // Preserve old representatives until all new groups inherit.
+                            if (groups.x & x_bit) != 0
+                                && (groups.y & y_bit) != 0
+                                && ((previous.x & x_bit) == 0 || (previous.y & y_bit) == 0)
+                            {
+                                colors[(y * 4 + x) as usize] = colors[(old_y * 4 + old_x) as usize];
+                            }
+                        }
+                    }
+                }
+            }
             for y in 0..4 {
                 for x in 0..4 {
-                    let point = position
-                        + vec2f((x as f32 + 0.5) * 0.25 - 0.5, (y as f32 + 0.5) * 0.25 - 0.5);
-                    let source = sample_cached_or_draw(
-                        draw,
-                        point,
-                        first,
-                        coverage,
-                        cached,
-                        missed,
-                        first_source,
-                    );
-                    let index = (y * 4 + x) as usize;
-                    colors[index] = source + colors[index] * (1.0 - source.w);
+                    if (groups.x & (1u32 << x as u32)) != 0 && (groups.y & (1u32 << y as u32)) != 0
+                    {
+                        let point = position
+                            + vec2f((x as f32 + 0.5) * 0.25 - 0.5, (y as f32 + 0.5) * 0.25 - 0.5);
+                        let source = sample_cached_or_draw(
+                            draw,
+                            point,
+                            first,
+                            coverage,
+                            cached,
+                            missed,
+                            first_source,
+                        );
+                        let index = (y * 4 + x) as usize;
+                        colors[index] = source + colors[index] * (1.0 - source.w);
+                    }
                 }
             }
         }
         let anchor = colors[0];
         let mut delta = vec4f(0.0, 0.0, 0.0, 0.0);
-        for index in 0..16 {
-            delta += (colors[index as usize] - anchor) * 0.0625;
+        // Expand only the reads: retain every original reduction operation/order.
+        let mut row: u32 = 0;
+        for y in 0..4 {
+            if (groups.y & (1u32 << y as u32)) != 0 {
+                row = y as u32;
+            }
+            let mut column: u32 = 0;
+            for x in 0..4 {
+                if (groups.x & (1u32 << x as u32)) != 0 {
+                    column = x as u32;
+                }
+                delta += (colors[(row * 4 + column) as usize] - anchor) * 0.0625;
+            }
         }
         output(anchor + delta)
     }
