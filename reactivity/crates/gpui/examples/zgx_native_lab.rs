@@ -78,10 +78,7 @@ impl Lab {
                 return;
             }
         };
-        self.controls.pending.push_back(ControlTask {
-            operation,
-            yielded: false,
-        });
+        self.apply_control(operation);
         if self.controls.trace {
             eprintln!(
                 "GPUI_CONTROL,queued,{operation:?},{},{}",
