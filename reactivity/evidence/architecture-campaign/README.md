@@ -384,3 +384,52 @@ older edits. A new trial will test bounded support accumulation with exact
 P-to-C token authority, preserving existing scroll and single-text paths.
 This transfers preservation of unaffected facts and coherent publication from
 BBTree/Solid/Ripple; it is not a cache-hit or custom-runtime claim.
+
+
+## Complete scene support: rejected, with publication lifetime follow-up
+
+Dossier 7494c10970d3dc46e7611d4abe93ab8476682a6e at
+/home/user/gpui-scene-support-lab/reactivity/evidence/scene-support independently
+verifies 10,746 files, all 2,800 timing / 420 qualification / 140 allocation
+processes, 930 preserved ELFs and 1,178 archived cache identities. Source
+92bfac4445c8b518b945c384fe6ff83ed772ae4f follows preregistration c025341544b45f5b27e405ad8372c332aa333498
+and identity correction b4188e7cedc008f6d8b48f03da6173af54c7458d.
+
+The complete fixed gate rejects the candidate: 93 of 112 comparisons pass.
+All sixteen new primary comparisons miss <=0.8. Candidate/prior-precise ratios
+for zero-label two/four-field source/owner cases are 0.957668610, 0.978111523,
+0.982732532 and 0.955903594. Repair areas shrink from 1,430 to 780 and 3,510 to
+1,560 pixels, but complete operations improve only modestly. Three regression
+failures remain: flat-tiny/static 1.059724779, 1000-label four-field source/original
+1.052945383 and /prior-precise 1.051235628. No threshold change, selective rerun,
+adoption or native ZGX comparison. Earlier failed trials remain failed.
+
+All functional, native, minimal/default/offline and strict Clippy gates pass.
+The omission fault fails GPU pixels at case 0/tick 3; a review script's incorrect
+tick-1 expectation is preserved and corrected without rerunning. Dropping prior
+pending damage fails the existing coalesced scroll+owner Rows fixture, with
+2,540 of 20,480 image bytes wrong. The intact candidate also passes the new
+multi-source Page fixtures; do not claim the negative run reached them.
+
+Shipping code grows by 116 lines, native ELF by 7,912 bytes, and present_walk's
+observed local stack reservation by 64 bytes. Header sizes stay unchanged, and
+the shared SceneRepair enum fits the existing 72-byte allocation. The global
+scene comparison is rejected. Do not infer its few-pixel savings remove the
+fixed packet preparation, submission and complete presentation-copy costs.
+
+Inspection before choosing another representation change found a more direct
+repeated cost: try_sparse_text allocates TextPatch on every accepted update;
+acknowledge consumes that box, and a coalesced full candidate drops it too.
+DamageRegions may allocate another bounded vector each time. The allocation
+lifetime need not equal the candidate's authority lifetime. A next isolated
+hypothesis can retain an owned workspace while an Option payload marks whether
+it contains a live candidate, clear region contents while retaining bounded
+capacity, and keep full token checks. ACK must move text/geometry exactly once;
+failed preparation and full supersession must retire active content without
+publishing cached state. Reclaim the workspace with its text resources.
+
+This is a concrete reuse question, not an assertion that heap work caused the
+marginal failures. The previous text-session and cold-trim trials concern shaping
+scratch, not this publication box. Do not carry the rejected global comparison
+or assume the promising 72-byte enum itself improves execution. No next candidate
+has been implemented or measured at this checkpoint.
