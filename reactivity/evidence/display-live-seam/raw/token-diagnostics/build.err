@@ -1,0 +1,2 @@
+   Compiling gpui v0.1.0 (/home/user/gpui-display-live-seam-lab/reactivity/crates/gpui)
+error: could not compile `gpui` (lib test) due to 3 previous errors

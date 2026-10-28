@@ -1,0 +1,12 @@
+{
+  "args": [
+    "/home/user/gpui-preserved-test-binaries/ca95ad752f5c7a9632d90921d3528dd067f2657026727e23ca7562a2c70cd4c7",
+    "native::live_seam_tests::live_slot_transition_to_retained_pixels",
+    "--exact",
+    "--ignored",
+    "--nocapture",
+    "--test-threads=1"
+  ],
+  "exit": 0,
+  "elapsed_seconds": 2.830664873123169
+}

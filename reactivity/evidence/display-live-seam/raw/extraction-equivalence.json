@@ -1,0 +1,7 @@
+{
+  "original": "2f357586bf213e2daf1043c80f5e02ad7177890d",
+  "candidate": "64862c8fc8fa665fb85d398f3ea15b7d363ca621",
+  "private_function_body_identical_after_receiver_substitution": true,
+  "public_api_changes": 0,
+  "metadata_fields_added": 0
+}
