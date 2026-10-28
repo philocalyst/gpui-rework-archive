@@ -576,3 +576,32 @@ raster address work without disturbing Solid/Ripple publication semantics. It
 does not establish a BBTree-style latency-hiding runtime or increased cache hits.
 The pinned BBTree design's independent memory lanes remain a separate hypothesis
 whose usefulness must follow measured dependent-load stalls and complete costs.
+
+
+## Mask lattice native rejected; bounded fetch reuse isolated
+
+Native seal **b8e6667b3f93130e80776f46a3b7cb7ac1fafadd** independently verifies
+824 files,64 normal processes,10 preflights and34 workload tests. All active
+runs produce479 updates. Stream paired CPU ratio.960680128 (95% paired
+bootstrap[.884411214,.995055403]) fails the<=.8 target; scroll1.009169198
+passes its<=1.05 point gate but CI extends to1.0856. One candidate mixed run
+(group2) has a late>25ms ACK gap, so the whole mixed ratio is suppressed. Idle
+observed CPU/updates remain0. The candidate is rejected without cost-matrix
+admission; numerical qualification does not change that result.
+
+A separate **local/mask-quad** experiment is preregistered631a132f5528f70ac426d40d5a7865347524ccb9,
+implemented4af395b9664b724720ece82d8ce624d18a3b1bcc. It tests the combined
+mask certificate plus at most four distinct texture fetches per banked mask
+pixel. All16 original color products/blends and anchor/delta reduction remain.
+Only full rectangular clip membership admits caching; chains/edge pixels retain
+generic sampling. No adjacent atlas reads, new pipeline, retained storage or API.
+The bounded Y-selection mutant0a508aba22064461b53db62225ce5d1cce24c07e must
+falsify independent exact public pixels. Qualification is in progress; no result.
+
+This separates independent address/fetch work from dependent consumption, a
+limited transfer of BBTree's batching lesson. It does not transplant its unsafe
+prefetcher or memory-only noop-waker into real tasks, nor assert cache-hit gains.
+The full64-process screen retains20% stream/mixed CPU targets; unchanged complete
+configuration/cost/hardware gates follow a screen pass. Old pixel-uniform flat
+regression warns that added shader/register costs may erase gains even on paths
+with no new cache hits; no passing subset or tolerance will waive those gates.

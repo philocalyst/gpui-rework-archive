@@ -489,3 +489,10 @@ The first12-frame GPU rejection is retained; revised production9e4ef386 narrows
 the certificate around ambiguous sample boundaries. Matched native build/tests
 pass; fixed64-process screenca5a2896 is pending. No performance/ZGX claim.
 See LOCALITY.md for numerical scope,costs and the unchanged research distinction.
+
+
+Mask-lattice native screen **b8e6667b3f93130e80776f46a3b7cb7ac1fafadd** rejects
+the candidate: stream CPU.96068 versus required.8; mixed cadence failure
+suppresses its ratio. All64 processes normal; no cost-matrix admission. Separate
+mask-quad experiment631a132f/4af395b tests bounded independent mask fetch reuse
+while preserving16 blends. Qualification pending, no performance claim.
