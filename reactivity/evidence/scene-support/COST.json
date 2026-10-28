@@ -209,7 +209,7 @@
       "scroll_precise": 1.05
     }
   },
-  "protocol_source": "372d3960dbebc85d02ed6526d88250b6b0977cab",
+  "protocol_source": "c025341544b45f5b27e405ad8372c332aa333498",
   "order": "Two cycles of five-treatment Williams design; rotate sequences by case then shuffle groups; base [0,1,4,2,3] with label rotations and reversals",
   "qualification_processes": 420,
   "allocation_processes": 140,

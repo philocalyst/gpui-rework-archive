@@ -77,3 +77,8 @@ allocation, rendering/copy work and retained storage observations are reported.
 No builds/tests/source edits/analysis/cleanup overlap timing. Full artifact,
 fixture, profile, shader and source guards before/after; independent verifier.
 No native ZGX comparison follows a failed complete cost gate.
+
+Pre-implementation correction: COST.json inherited the prior trial protocol_source
+label. Point it to this preregistration c025341544b45f5b27e405ad8372c332aa333498.
+All thresholds, ordering and cases remain unchanged. No implementation or new
+measurement preceded this correction.
