@@ -413,6 +413,23 @@ pub mod ui {
         {
             return vec4f(0.0, 0.0, 0.0, 0.0);
         }
+        // The host certified this placement's exact sample-to-texel mapping.
+        // Clip/correction handling above remains the canonical generic path.
+        if (draw.atlas.x & 0xf0000000) == 0x10000000 {
+            let position = point - draw.local.xy();
+            if position.x < 0.0
+                || position.y < 0.0
+                || position.x >= draw.local.z
+                || position.y >= draw.local.w
+            {
+                return vec4f(0.0, 0.0, 0.0, 0.0);
+            }
+            let texel = vec2i(
+                (draw.atlas.x & 0x0fffffff) as i32 + floor(position.x) as i32,
+                draw.atlas.y as i32 + floor(position.y) as i32,
+            );
+            return draw.color * texture_load(MASKS, texel, 0).x;
+        }
         if (draw.atlas.x & 0x20000000) != 0 && (draw.atlas.x & 0x80000000) == 0 {
             if !rounded_contains(
                 draw,

@@ -130,6 +130,13 @@ const INLINE_RECORD: u32 = 1 << 31;
 // Correction metadata: bit 31 selects a paint-bank color; bit 30 certifies
 // quarter-grid solid coverage. Generic correction indices never reach either.
 const LOWERED_SOLID: u32 = 1 << 30;
+// Mask atlas x coordinates occupy low bits; source bits 29..31 name other
+// materials. Bit 28 certifies sample-address lowering for this placement only.
+const LOWERED_MASK: u32 = 1 << 28;
+const _: () = assert!(MAX_ATLAS_SIDE < LOWERED_MASK);
+mod mask_lattice;
+use mask_lattice::lowered_mask_rect;
+
 const _: () = assert!(MAX_DRAWS + 1 < LOWERED_SOLID as usize);
 // Inline draws use six words. For compact groups n >= 2, 5 + 2n <= 6n.
 const _: () = assert!(MAX_DRAWS * 6 < INLINE_RECORD as usize);
@@ -809,15 +816,16 @@ impl RendererState {
                 for p in group.placements() {
                     let draw = prepared(group, p);
                     has_masks |= draw.source.mask().is_some();
+                    let mask_rect = lowered_mask_rect(&draw);
                     let r = if lower_solid {
                         sampled_solid_rect(&draw, [scene.width, scene.height])?
                     } else {
-                        draw.local_rect
+                        mask_rect.unwrap_or(draw.local_rect)
                     };
                     let address = self.records.len() as u32;
                     self.records.extend_from_slice(&[
                         float_word([r.x, r.y, r.width, r.height]),
-                        [0, 0, 0, common],
+                        [u32::from(mask_rect.is_some()) * LOWERED_MASK, 0, 0, common],
                     ]);
                     original_references = self.bin_draw(
                         draw,
@@ -838,11 +846,16 @@ impl RendererState {
                     has_masks |= draw.source.mask().is_some();
                     let address = INLINE_RECORD | self.records.len() as u32;
                     let mut packet_draw = draw;
+                    let mask_rect = lowered_mask_rect(&draw);
+                    if let Some(rect) = mask_rect {
+                        packet_draw.local_rect = rect;
+                    }
                     if lower_solid {
                         packet_draw.local_rect =
                             sampled_solid_rect(&draw, [scene.width, scene.height])?;
                     }
                     let mut words = inline_words(packet_draw, error, correction);
+                    words[5][0] = u32::from(mask_rect.is_some()) * LOWERED_MASK;
                     if let Some(chain) = group.clip_chain() {
                         words[3] = clips::reference(word_count + bank_words, chain.index())?;
                     }
@@ -885,7 +898,7 @@ impl RendererState {
                 word += 5;
             }
             for (index, source) in group.sources().enumerate() {
-                let atlas = if let Some((gradient, radius)) = source.gradient() {
+                let mut atlas = if let Some((gradient, radius)) = source.gradient() {
                     let rect = group.placements().nth(index).unwrap().local_rect;
                     let r = radius.min(rect.width * 0.5).min(rect.height * 0.5);
                     let scale = if r == 0.0 {
@@ -918,7 +931,9 @@ impl RendererState {
                         [t.x, t.y, t.width | (t.height << 16)]
                     })
                 };
-                self.records[word + if compact { 1 } else { 5 }][..3].copy_from_slice(&atlas);
+                let material = &mut self.records[word + if compact { 1 } else { 5 }];
+                atlas[0] |= material[0] & LOWERED_MASK;
+                material[..3].copy_from_slice(&atlas);
                 word += if compact { 2 } else { 6 };
             }
         }
