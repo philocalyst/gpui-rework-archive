@@ -984,3 +984,20 @@ unassigned driver/compiler memory cannot be called index payload. B remains an
 unadopted candidate. Indexed text/images and generic live production journal are
 still missing. Next investigate that live integration boundary, keeping raw and
 existing production precise slot updates as complete alternatives.
+
+
+Live production seam qualified **b2d48370d75482e300befd81d4f0bcbbedd560c7**
+(executed64862c8fc8fa665fb85d398f3ea15b7d363ca621). Existing native private
+packet decision extracted without changed body/public API/metadata; +16 shipping
+lines, observability only.38 actual frames match four pixel oracles, actual
+foreign-slot authority mutant2048 wrong bytes. Live Source single-slot updates
+at1/9/32/256/1024 and shared64 stage16B with zero full GPU validation/bin work.
+Two coalesced same-slot edits currently force exact-predecessor fallback:1024
+validations,8220 bin visits,114960 staged bytes at1024 nodes. This identifies a
+live publication cost before choosing a compressed representation. Raw packet
+records98352B, GPUbuffers164048B, CPUpacket/index115120B, retainedimage16384B;
+whole Window/Canvas/driver memory remains separate. Semantic subtree addressing
+and structural/dependency journal remain absent. Consider narrowly bounded
+same-slot chain coalescence under existing authority; no new registry, A encoding,
+shipping adoption or performance claim. Compression remains a conditional
+hypothesis, not a chosen win; the broad goal is still active.
