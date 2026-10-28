@@ -5,24 +5,40 @@ use std::{fs, path::Path};
 struct Paint {
     n: usize,
     color: Signal<Color>,
+    transform: Signal<Affine>,
 }
 impl Paint {
     const COLOR: Source<Self, Color> =
         Source::new(FieldId::new(1), "color", |m| &m.color, |m| &mut m.color);
+    const TRANSFORM: Source<Self, Affine> = Source::new(
+        FieldId::new(2),
+        "transform",
+        |m| &m.transform,
+        |m| &mut m.transform,
+    );
     fn new(n: usize, color: Color) -> Self {
         Self {
             n,
             color: Signal::new(color),
+            transform: Signal::new(Affine::translation(
+                0.,
+                if n == 1 { 0. } else { -16. * (n - 2) as f32 },
+            )),
         }
     }
 }
 impl View for Paint {
     fn sources() -> Sources<Self> {
-        Sources::new().direct(Self::COLOR)
+        Sources::new().direct(Self::COLOR).direct(Self::TRANSFORM)
     }
     fn view(&self) -> El<'_> {
         if self.n == 1 {
-            return div().name("surface").w(32).h(16).bg(&self.color);
+            return div()
+                .name("surface")
+                .w(32)
+                .h(16)
+                .bg(&self.color)
+                .transform(&self.transform);
         }
         column((
             (0..self.n - 2).map(|j| {
@@ -44,7 +60,7 @@ impl View for Paint {
                 .w(32)
                 .h(16)
                 .bg(&self.color)
-                .transform(Affine::translation(0., -16. * (self.n - 2) as f32)),
+                .transform(&self.transform),
         ))
         .size(64)
         .bg(Color::WHITE)
@@ -105,6 +121,13 @@ fn sweep(root: &Path, n: usize) {
         assert_eq!(counters.descriptions, 0);
         assert_eq!(counters.paint_passes, 0);
         let token = win.with_scene(|_, t| t).unwrap();
+        if i == 5 {
+            assert!(
+                win.set(Paint::TRANSFORM, Affine::translation(f32::NAN, 0.))
+                    .is_err()
+            );
+            assert_eq!(win.with_scene(|_, t| t).unwrap(), token);
+        }
         if let Some(old) = held.take() {
             assert!(matches!(win.presented(old), Err(Error::StalePresentation)));
         }
@@ -118,7 +141,7 @@ fn sweep(root: &Path, n: usize) {
         } else {
             win.presented(token).unwrap();
         }
-        events.push(json!({"index":i,"target":target,"color":bits,"commit":commit,"counters":counters,"candidate_property_reads":1,"candidate_snapshot_reads":0,"candidate_draw_enumerations":0,"pixels":name}));
+        events.push(json!({"index":i,"target":target,"color":bits,"commit":commit,"counters":counters,"candidate_property_reads":1,"candidate_snapshot_reads":0,"candidate_draw_enumerations":0,"rejected_invalid_request":i==5,"pixels":name}));
     }
     fs::write(dir.join("public.json"),serde_json::to_vec_pretty(&json!({"n":n,"target":target,"initial_draws":draws,"initial_snapshot":snapshot,"events":events,"scope":"one initial registered binding; no generic production journal integration; full CPU and fresh Win oracles charged separately"})).unwrap()).unwrap();
 }

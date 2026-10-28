@@ -41,3 +41,19 @@ is one ordered queue with overlapping lifetimes, not concurrent hardware queues.
 GPU audit outputs/list arguments and full oracles are diagnostic cost categories;
 production publication/root paths never enumerate those lists. Pixel scanning
 still visits every live record for each damaged pixel and is charged O(N*area).
+
+First frozen attempt2a4018ecf2:3906 CPU checks and all195 property GPU frames
+passed; first resource frame had zero decode-byte mismatches but96 pixel-byte
+mismatches. Default GPUI images use Linear sampling across16 samples; integer
+1:1 image geometry does not make this nearest-neighbor. The correction retains
+the exact same image fixture and implements its16x4 bilinear texel loads. For
+this explicit opaque endpoint-RGB domain, all sums are exact dyadic fractions;
+a1025-entry sRGB quantization table handles their exact final bytes. Its4100
+constant bytes and64 texel loads per image-covered pixel are additional costs.
+No arbitrary-color/scaling/alpha image or general glyph renderer is admitted.
+Also found during review: raw-root decode must reject physical page numbers
+other than its admitted page after a structural collapse leaves address holes.
+The correction adds that guard before the retained structural case executes.
+The public fixture now also exercises an actual rejected NaN-transform setter,
+checking it preserves the previously eligible token and independently rendered
+pixels; this is request validation, not a later committed preparation failure.

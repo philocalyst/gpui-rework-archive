@@ -105,7 +105,7 @@ def point(source,out,n,mode,mutant=0):
             assert event['candidate_snapshot_reads']==event['candidate_draw_enumerations']==0
             s.set(public['target']['identity'],{9:event['color']},generation=1);change=s.commit()
             assert change['counts']['identity_lookups']==1 and change['counts']['dirty_pages']==1
-        series.frame(i,change,pixels,initial=i==0,rejected=i==6)
+        series.frame(i,change,pixels,initial=i==0,rejected=event is not None and event['rejected_invalid_request'])
     return series.finish()
 
 def resource(source,glyphs,out,mode,mutant=0):
@@ -118,7 +118,7 @@ def resource(source,glyphs,out,mode,mutant=0):
     for i in range(13):
         series.before(i);case=cases[i%4];glyph_case=glyph_cases[i%3];mask=next(r for r in glyph_case['resources'] if r['kind']=='text-mask');glyph=(glyphs/mask['file']).read_bytes()
         pixels=(source/'images'/case['pixels']).read_bytes()
-        bitmap=(source/'images'/case['resource']).read_bytes();delta={3:pack([8,8])+bitmap,7:glyph};tracemalloc.start()
+        bitmap=(source/'images'/case['resource']).read_bytes();assert all(b in (0,255) for b in bitmap) and all(b==255 for b in bitmap[3::4]);delta={3:pack([8,8])+bitmap,7:glyph};tracemalloc.start()
         if i==0:change=dict(journal={p:r.data for p,r in s.pages.items()},deleted=(),counts=dict(initial_admission_nodes=len(draws)),damage=(0,0,64,64))
         else:
             # Registered resource->support binding; neither resource nor node
