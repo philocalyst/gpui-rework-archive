@@ -1,0 +1,21 @@
+{
+  "source": "9e4ef386f193a17d74bda63867b0ca4c86e0e59e",
+  "seal": "677b1fb7a51a7bab12dbad0bf4e8815fcd254b74",
+  "worktree": "/home/user/gpui-mask-lattice-lab",
+  "dossier": "/home/user/gpui-mask-lattice-lab/reactivity/evidence/mask-lattice",
+  "manifest_sha256": "9a505c09331d606c7ced2bcfbbd78129332d9914ec7f96303d10655bc3b3cfde",
+  "verifier_sha256": "5231af5b790ab88ef82257c63a0e407421b9a2cb392caf6ee3e2a10419d03dd4",
+  "verification": {
+    "files": 2026,
+    "qualified_elf_identities": 411,
+    "configurations": 5,
+    "actual_native_processes": 15,
+    "exact_frames_per_variant": 336,
+    "independent_pixel_variants": 3,
+    "preserved_prior_pixel_failures": 12,
+    "shipping_lines": 38089,
+    "native_elf_bytes": 26391352,
+    "qualification_passes": true,
+    "timing_observations": 0
+  }
+}

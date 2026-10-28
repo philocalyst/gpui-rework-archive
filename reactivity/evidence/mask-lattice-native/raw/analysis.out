@@ -1,0 +1,138 @@
+{
+  "candidate_passes": false,
+  "comparisons": {
+    "idle": {
+      "eligible": true,
+      "baseline_cpu": 0.0,
+      "candidate_cpu": 0.0,
+      "passed": true,
+      "ratio": null,
+      "rule": "zero updates and median observed CPU no greater than baseline; no ratio at zero"
+    },
+    "scroll": {
+      "eligible": true,
+      "pairs": [
+        {
+          "group": 0,
+          "baseline_cpu": 0.5751074399597429,
+          "candidate_cpu": 0.5691231738248743,
+          "ratio": 0.989594524919922
+        },
+        {
+          "group": 1,
+          "baseline_cpu": 0.5897760231765163,
+          "candidate_cpu": 0.6067284690917804,
+          "ratio": 1.0287438709765762
+        },
+        {
+          "group": 2,
+          "baseline_cpu": 0.5810043965096786,
+          "candidate_cpu": 0.5732188568350367,
+          "ratio": 0.9865998609969
+        },
+        {
+          "group": 3,
+          "baseline_cpu": 0.5789180305429878,
+          "candidate_cpu": 0.628474550036815,
+          "ratio": 1.0856019624183173
+        },
+        {
+          "group": 4,
+          "baseline_cpu": 0.800075879518455,
+          "candidate_cpu": 0.6824319174648802,
+          "ratio": 0.8529589941839245
+        },
+        {
+          "group": 5,
+          "baseline_cpu": 0.7509602454828549,
+          "candidate_cpu": 0.8507919404532474,
+          "ratio": 1.1329387215513684
+        },
+        {
+          "group": 6,
+          "baseline_cpu": 0.5727403241906152,
+          "candidate_cpu": 0.5633504597067002,
+          "ratio": 0.9836053721253439
+        },
+        {
+          "group": 7,
+          "baseline_cpu": 0.7406495133835941,
+          "candidate_cpu": 0.7620522455832351,
+          "ratio": 1.0288972473658484
+        }
+      ],
+      "median_paired_cpu_ratio": 1.009169197948249,
+      "paired_bootstrap_95": [
+        0.9836053721253439,
+        1.0856019624183173
+      ],
+      "limit": 1.05,
+      "passed": true
+    },
+    "stream": {
+      "eligible": true,
+      "pairs": [
+        {
+          "group": 0,
+          "baseline_cpu": 0.4851211422284096,
+          "candidate_cpu": 0.4772340447757352,
+          "ratio": 0.9837420042827965
+        },
+        {
+          "group": 1,
+          "baseline_cpu": 0.7285618295803777,
+          "candidate_cpu": 0.6443482523478048,
+          "ratio": 0.8844112142395978
+        },
+        {
+          "group": 2,
+          "baseline_cpu": 0.4749460469215204,
+          "candidate_cpu": 0.4703380535684982,
+          "ratio": 0.9902978593402555
+        },
+        {
+          "group": 3,
+          "baseline_cpu": 0.5877953062414619,
+          "candidate_cpu": 0.4991814924085162,
+          "ratio": 0.8492437539190831
+        },
+        {
+          "group": 4,
+          "baseline_cpu": 0.4970020923318872,
+          "candidate_cpu": 0.49454461731159877,
+          "ratio": 0.9950554030693147
+        },
+        {
+          "group": 5,
+          "baseline_cpu": 0.7080894939723354,
+          "candidate_cpu": 0.6639176330857282,
+          "ratio": 0.9376182512766769
+        },
+        {
+          "group": 6,
+          "baseline_cpu": 0.6225734875737191,
+          "candidate_cpu": 0.5573809840927009,
+          "ratio": 0.8952854485739745
+        },
+        {
+          "group": 7,
+          "baseline_cpu": 0.6213612799408199,
+          "candidate_cpu": 0.6447672575831184,
+          "ratio": 1.0376688705877002
+        }
+      ],
+      "median_paired_cpu_ratio": 0.9606801277797367,
+      "paired_bootstrap_95": [
+        0.8844112142395978,
+        0.9950554030693147
+      ],
+      "limit": 0.8,
+      "passed": false
+    },
+    "both": {
+      "eligible": false,
+      "passed": false,
+      "reason": "Execution/work/cadence gate failed; comparative CPU ratio suppressed."
+    }
+  }
+}

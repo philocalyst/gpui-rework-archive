@@ -1,0 +1,5 @@
+{
+  "exit": 0,
+  "stdout": "{\n  \"files\": 2026,\n  \"qualified_elf_identities\": 411,\n  \"configurations\": 5,\n  \"actual_native_processes\": 15,\n  \"exact_frames_per_variant\": 336,\n  \"independent_pixel_variants\": 3,\n  \"preserved_prior_pixel_failures\": 12,\n  \"shipping_lines\": 38089,\n  \"native_elf_bytes\": 26391352,\n  \"qualification_passes\": true,\n  \"timing_observations\": 0\n}\n",
+  "stderr": ""
+}

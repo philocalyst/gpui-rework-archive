@@ -1,0 +1,8 @@
+{
+  "seal": "677b1fb7a51a7bab12dbad0bf4e8815fcd254b74",
+  "libraries": 1600,
+  "cached_executables": 123,
+  "free_before": 9572872192,
+  "free_after": 12554989568,
+  "scope": "Only regenerable inactive libraries and completed executable cache copies after verified full qualification seal. Every canonical executed ELF, generated shader/fingerprint, source and evidence retained."
+}

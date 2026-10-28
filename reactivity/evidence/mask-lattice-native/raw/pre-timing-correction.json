@@ -1,0 +1,6 @@
+{
+  "utc": "2026-10-28T16:23:43.213300+00:00",
+  "reason": "The unchanged workload selects exact ingress only for Mode::Stream; idle/scroll/both use owner ingress. The route summary field records requested knob, not effective routing. Correct independent verifier expectation; preserve original script. No runner/workload/source/threshold changes and no timing observations.",
+  "old_sha256": "dc359d4662b4832ae07e8e2c0aed3d56612972a529755bbccea0c85c6899a303",
+  "new_sha256": "491fad6a3d543d9cb553f70f29a7101bdc56d636a0390205a69ef3c57096d1a4"
+}
