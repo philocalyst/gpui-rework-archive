@@ -743,7 +743,7 @@ pub mod ui {
             if groups.x != 15 || groups.y != 15 {
                 let previous = groups;
                 let cuts = source_partitions(draw, position, missed, cached);
-                groups = vec2u(groups.x | cuts.x, groups.y | cuts.y);
+                groups = vec2u(groups.x | 1, groups.y | cuts.y);
                 if groups.x != previous.x || groups.y != previous.y {
                     let mut old_y: u32 = 0;
                     for y in 0..4 {
