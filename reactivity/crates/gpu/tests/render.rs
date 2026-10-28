@@ -4645,7 +4645,13 @@ fn region_batches_cover_edges_and_holes_then_allow_ordinary_packet_repairs() {
                     )
                     .unwrap();
                     canvas
-                        .draw_image(&image, clip, Affine::IDENTITY, clip, ImageSampling::Nearest)
+                        .draw_image(
+                            &image,
+                            Rect::new(1., 1., 1., 1.),
+                            Affine::IDENTITY,
+                            clip,
+                            ImageSampling::Nearest,
+                        )
                         .unwrap();
                 }
                 let positions: Vec<_> = if width > 1 && height > 1 {
@@ -4688,8 +4694,9 @@ fn region_batches_cover_edges_and_holes_then_allow_ordinary_packet_repairs() {
                 }
                 let target = output_texture(&gpu, &canvas);
                 let view = target.create_view(&Default::default());
+                let initial = readback(&mut oracle, &canvas);
                 gpu.render(canvas.prepared_scene(), &view, None).unwrap();
-                assert_eq!(read_texture(&gpu, &target), readback(&mut oracle, &canvas));
+                assert_eq!(read_texture(&gpu, &target), initial);
                 for (count, color, expected_regions) in
                     [(64, Color::WHITE, 64), (65, Color::rgb(17, 91, 203), 1)]
                 {
