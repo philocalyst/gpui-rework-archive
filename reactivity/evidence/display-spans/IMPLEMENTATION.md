@@ -43,3 +43,5 @@ version authority and retained old output, not permission to discard dependency
 closure or to acknowledge unpresented candidates.
 
 Initial frozen2c4b9207 build failed E0308: wgpu30 pipeline layout expects optional group entries. Corrected to Some(&layout); no model or protocol change. Initial logs and empty source guard retained externally.
+
+Corrected053f0fa8 public trace rejected a test assumption: a singular axis-aligned rectangle is accepted as empty, rather than producing the rounded-shape error seen in the earlier paint fixture. Preserve that failure; use an explicitly nonfinite transform for the failed-newer-request witness. This proves rejection preserves the prior eligible token; it does not claim a committed preparation failure.

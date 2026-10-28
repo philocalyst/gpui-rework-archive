@@ -123,7 +123,10 @@ fn main() {
     frames.push(capture(&mut win, root, "latest", true));
     win.set(Panel::COLOR, Color::BLACK).unwrap();
     let eligible = win.with_scene(|_, t| t).unwrap();
-    assert!(win.set(Panel::TRANSFORM, Affine::scale(0., 1.)).is_err());
+    assert!(
+        win.set(Panel::TRANSFORM, Affine::translation(f32::NAN, 0.))
+            .is_err()
+    );
     assert_eq!(win.with_scene(|_, t| t).unwrap(), eligible);
     frames.push(capture(&mut win, root, "failed-newer-eligible", true));
     let report = json!({"source_property_commit":commit,"stale_rejected":true,"failed_newer_keeps_prior":true,"frames":frames,"scope":"rect-only CPU diagnostic acknowledgement; not native presentation; full snapshot adapter"});
