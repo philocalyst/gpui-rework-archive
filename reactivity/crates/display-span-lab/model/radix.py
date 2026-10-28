@@ -48,7 +48,7 @@ class RadixPublication(Publication):
         super().__init__();self.heap.end=16 # offset0 is a null directory pointer
         self.nodes=Directory(self.heap);self.resources=Directory(self.heap,resource_leases);self.c=Counter()
         self.current_pages={};self.current_resources={};self.raw=False
-    def prepare(self,journal,deleted=(),resource_changes=None,resource_deleted=(),*,count,slots,first,raw=False,clear=0xffffffff):
+    def prepare(self,journal,deleted=(),resource_changes=None,resource_deleted=(),*,count,slots,first,raw=False,clear=0xffffffff,spatial_root=None):
         if self.sequence==NIL:raise OverflowError('publication sequence exhausted')
         assert 1<=count<=32768 and count<=slots<=32768 and 0<=first<slots
         resource_changes={} if resource_changes is None else resource_changes
@@ -84,8 +84,9 @@ class RadixPublication(Publication):
         resources=self.resources.update(res_changes)
         self.raw=raw;self.sequence+=1
         # Exactly16 words; damage/current authority are submission arguments.
-        words=[pointer[0],resources[0] if resources else 0,count,slots,first,int(raw),self.sequence,self.namespace,clear,raw_count,len(self.current_resources),64,64,0,0,0]
-        root=h.alloc(pack(words),(pointer,resources) if resources else (pointer,));self.c['fixed_root_bytes_written']+=64
+        words=[pointer[0],resources[0] if resources else 0,count,slots,first,int(raw),self.sequence,self.namespace,clear,raw_count,len(self.current_resources),64,64,spatial_root[0] if spatial_root else 0,0,0]
+        children=((pointer,resources) if resources else (pointer,))+((spatial_root,) if spatial_root else ())
+        root=h.alloc(pack(words),children);self.c['fixed_root_bytes_written']+=64
         if self.eligible:h.release(self.eligible.root)
         self.eligible=Version(self.namespace,self.sequence,root);self.eligible_complete=False
         return self.eligible
