@@ -1,0 +1,157 @@
+{
+  "aggregates": {
+    "exact": {
+      "baseline": {
+        "observations": 8,
+        "execution_passes": 8,
+        "gate_passes": 0,
+        "ticks": [
+          455,
+          454,
+          452,
+          454,
+          453,
+          448,
+          445,
+          452
+        ],
+        "first_second_gaps_over25ms": [
+          17,
+          17,
+          17,
+          17,
+          17,
+          17,
+          17,
+          17
+        ],
+        "total_gaps_over25ms": [
+          17,
+          17,
+          17,
+          17,
+          17,
+          17,
+          17,
+          17
+        ],
+        "cpu_cores_median": 0.61283803634491,
+        "mean_rss_bytes_median": 148766720.0
+      },
+      "candidate": {
+        "observations": 8,
+        "execution_passes": 8,
+        "gate_passes": 8,
+        "ticks": [
+          479,
+          479,
+          479,
+          479,
+          479,
+          479,
+          479,
+          479
+        ],
+        "first_second_gaps_over25ms": [
+          1,
+          1,
+          1,
+          1,
+          1,
+          1,
+          1,
+          1
+        ],
+        "total_gaps_over25ms": [
+          1,
+          1,
+          1,
+          1,
+          1,
+          1,
+          1,
+          1
+        ],
+        "cpu_cores_median": 0.5980490159676592,
+        "mean_rss_bytes_median": 148793344.0
+      }
+    },
+    "owner": {
+      "baseline": {
+        "observations": 8,
+        "execution_passes": 8,
+        "gate_passes": 0,
+        "ticks": [
+          455,
+          455,
+          455,
+          455,
+          455,
+          455,
+          453,
+          454
+        ],
+        "first_second_gaps_over25ms": [
+          17,
+          17,
+          17,
+          17,
+          17,
+          17,
+          17,
+          17
+        ],
+        "total_gaps_over25ms": [
+          17,
+          17,
+          17,
+          17,
+          17,
+          17,
+          17,
+          17
+        ],
+        "cpu_cores_median": 0.5125861820881086,
+        "mean_rss_bytes_median": 148652032.0
+      },
+      "candidate": {
+        "observations": 8,
+        "execution_passes": 8,
+        "gate_passes": 8,
+        "ticks": [
+          479,
+          479,
+          479,
+          479,
+          479,
+          479,
+          479,
+          479
+        ],
+        "first_second_gaps_over25ms": [
+          1,
+          1,
+          1,
+          1,
+          1,
+          1,
+          1,
+          1
+        ],
+        "total_gaps_over25ms": [
+          1,
+          1,
+          1,
+          1,
+          1,
+          1,
+          1,
+          1
+        ],
+        "cpu_cores_median": 0.5176609689645277,
+        "mean_rss_bytes_median": 148715520.0
+      }
+    }
+  },
+  "candidate_passes": true
+}

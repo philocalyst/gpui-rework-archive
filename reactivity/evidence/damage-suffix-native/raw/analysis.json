@@ -1,0 +1,1409 @@
+{
+  "rows": [
+    {
+      "route": "owner",
+      "group": 5,
+      "name": "candidate",
+      "status": {
+        "exit": 0,
+        "failure": null,
+        "seconds": 8.30962346799788,
+        "timed": true
+      },
+      "summary": {
+        "name": "candidate",
+        "mode": "stream",
+        "route": "owner",
+        "initial": 0,
+        "ticks": 479,
+        "native_acknowledgements": 480,
+        "reference_or_model_final": {
+          "total_ticks": 479,
+          "scroll_offset": 0.0
+        },
+        "visible_seconds": 0.21209062599518802,
+        "samples": 405,
+        "font_sha256": "7da195a74c55bef988d0d48f9508bd5d849425c1770dba5d7bfc6ce9ed848954",
+        "interval_start": 1.223521559004439,
+        "interval_end": 6.207924043003004,
+        "interval_seconds": 4.984402483998565,
+        "cpu_seconds": 2.6500000000000004,
+        "cpu_cores": 0.5316585104247298,
+        "mean_rss_bytes": 148676608,
+        "max_rss_bytes": 148676608,
+        "cadence_pass": true,
+        "first_second_gaps_over25ms": 1,
+        "gap_gate_pass": true,
+        "total_gaps_over25ms": 1
+      },
+      "execution_pass": true,
+      "gate_pass": true
+    },
+    {
+      "route": "owner",
+      "group": 5,
+      "name": "baseline",
+      "status": {
+        "exit": 0,
+        "failure": null,
+        "seconds": 8.305345686996588,
+        "timed": true
+      },
+      "summary": {
+        "name": "baseline",
+        "mode": "stream",
+        "route": "owner",
+        "initial": 0,
+        "ticks": 455,
+        "native_acknowledgements": 456,
+        "reference_or_model_final": {
+          "total_ticks": 455,
+          "scroll_offset": 0.0
+        },
+        "visible_seconds": 0.21142611700634006,
+        "samples": 406,
+        "font_sha256": "7da195a74c55bef988d0d48f9508bd5d849425c1770dba5d7bfc6ce9ed848954",
+        "interval_start": 1.2213460200000554,
+        "interval_end": 6.208643670004676,
+        "interval_seconds": 4.987297650004621,
+        "cpu_seconds": 2.52,
+        "cpu_cores": 0.5052836579741066,
+        "mean_rss_bytes": 148312064,
+        "max_rss_bytes": 148312064,
+        "cadence_pass": false,
+        "first_second_gaps_over25ms": 17,
+        "gap_gate_pass": false,
+        "total_gaps_over25ms": 17
+      },
+      "execution_pass": true,
+      "gate_pass": false
+    },
+    {
+      "route": "owner",
+      "group": 4,
+      "name": "baseline",
+      "status": {
+        "exit": 0,
+        "failure": null,
+        "seconds": 8.314017694006907,
+        "timed": true
+      },
+      "summary": {
+        "name": "baseline",
+        "mode": "stream",
+        "route": "owner",
+        "initial": 0,
+        "ticks": 455,
+        "native_acknowledgements": 456,
+        "reference_or_model_final": {
+          "total_ticks": 455,
+          "scroll_offset": 0.0
+        },
+        "visible_seconds": 0.21024425599898677,
+        "samples": 406,
+        "font_sha256": "7da195a74c55bef988d0d48f9508bd5d849425c1770dba5d7bfc6ce9ed848954",
+        "interval_start": 1.2210632280039135,
+        "interval_end": 6.196049428006518,
+        "interval_seconds": 4.974986200002604,
+        "cpu_seconds": 2.55,
+        "cpu_cores": 0.5125642358563055,
+        "mean_rss_bytes": 148647936,
+        "max_rss_bytes": 148647936,
+        "cadence_pass": false,
+        "first_second_gaps_over25ms": 17,
+        "gap_gate_pass": false,
+        "total_gaps_over25ms": 17
+      },
+      "execution_pass": true,
+      "gate_pass": false
+    },
+    {
+      "route": "owner",
+      "group": 4,
+      "name": "candidate",
+      "status": {
+        "exit": 0,
+        "failure": null,
+        "seconds": 8.314285664993804,
+        "timed": true
+      },
+      "summary": {
+        "name": "candidate",
+        "mode": "stream",
+        "route": "owner",
+        "initial": 0,
+        "ticks": 479,
+        "native_acknowledgements": 480,
+        "reference_or_model_final": {
+          "total_ticks": 479,
+          "scroll_offset": 0.0
+        },
+        "visible_seconds": 0.21103361899440642,
+        "samples": 406,
+        "font_sha256": "7da195a74c55bef988d0d48f9508bd5d849425c1770dba5d7bfc6ce9ed848954",
+        "interval_start": 1.226281512004789,
+        "interval_end": 6.19692390000273,
+        "interval_seconds": 4.970642387997941,
+        "cpu_seconds": 2.55,
+        "cpu_cores": 0.5130121624032342,
+        "mean_rss_bytes": 148549632,
+        "max_rss_bytes": 148549632,
+        "cadence_pass": true,
+        "first_second_gaps_over25ms": 1,
+        "gap_gate_pass": true,
+        "total_gaps_over25ms": 1
+      },
+      "execution_pass": true,
+      "gate_pass": true
+    },
+    {
+      "route": "owner",
+      "group": 0,
+      "name": "baseline",
+      "status": {
+        "exit": 0,
+        "failure": null,
+        "seconds": 8.31044859001122,
+        "timed": true
+      },
+      "summary": {
+        "name": "baseline",
+        "mode": "stream",
+        "route": "owner",
+        "initial": 0,
+        "ticks": 455,
+        "native_acknowledgements": 456,
+        "reference_or_model_final": {
+          "total_ticks": 455,
+          "scroll_offset": 0.0
+        },
+        "visible_seconds": 0.21052565400896128,
+        "samples": 406,
+        "font_sha256": "7da195a74c55bef988d0d48f9508bd5d849425c1770dba5d7bfc6ce9ed848954",
+        "interval_start": 1.2197245730058057,
+        "interval_end": 6.191341398007353,
+        "interval_seconds": 4.971616825001547,
+        "cpu_seconds": 2.4899999999999998,
+        "cpu_cores": 0.5008431034906285,
+        "mean_rss_bytes": 148963328,
+        "max_rss_bytes": 148963328,
+        "cadence_pass": false,
+        "first_second_gaps_over25ms": 17,
+        "gap_gate_pass": false,
+        "total_gaps_over25ms": 17
+      },
+      "execution_pass": true,
+      "gate_pass": false
+    },
+    {
+      "route": "owner",
+      "group": 0,
+      "name": "candidate",
+      "status": {
+        "exit": 0,
+        "failure": null,
+        "seconds": 8.298345492003136,
+        "timed": true
+      },
+      "summary": {
+        "name": "candidate",
+        "mode": "stream",
+        "route": "owner",
+        "initial": 0,
+        "ticks": 479,
+        "native_acknowledgements": 480,
+        "reference_or_model_final": {
+          "total_ticks": 479,
+          "scroll_offset": 0.0
+        },
+        "visible_seconds": 0.2102542960055871,
+        "samples": 405,
+        "font_sha256": "7da195a74c55bef988d0d48f9508bd5d849425c1770dba5d7bfc6ce9ed848954",
+        "interval_start": 1.222346919006668,
+        "interval_end": 6.2002357540040975,
+        "interval_seconds": 4.9778888349974295,
+        "cpu_seconds": 2.6,
+        "cpu_cores": 0.5223097755258214,
+        "mean_rss_bytes": 148922368,
+        "max_rss_bytes": 148922368,
+        "cadence_pass": true,
+        "first_second_gaps_over25ms": 1,
+        "gap_gate_pass": true,
+        "total_gaps_over25ms": 1
+      },
+      "execution_pass": true,
+      "gate_pass": true
+    },
+    {
+      "route": "exact",
+      "group": 1,
+      "name": "candidate",
+      "status": {
+        "exit": 0,
+        "failure": null,
+        "seconds": 8.30212963699887,
+        "timed": true
+      },
+      "summary": {
+        "name": "candidate",
+        "mode": "stream",
+        "route": "exact",
+        "initial": 0,
+        "ticks": 479,
+        "native_acknowledgements": 480,
+        "reference_or_model_final": {
+          "total_ticks": 479,
+          "scroll_offset": 0.0
+        },
+        "visible_seconds": 0.20972307700139936,
+        "samples": 405,
+        "font_sha256": "7da195a74c55bef988d0d48f9508bd5d849425c1770dba5d7bfc6ce9ed848954",
+        "interval_start": 1.2218573980062502,
+        "interval_end": 6.201061401996412,
+        "interval_seconds": 4.979204003990162,
+        "cpu_seconds": 2.7199999999999998,
+        "cpu_cores": 0.5462720542922695,
+        "mean_rss_bytes": 149045248,
+        "max_rss_bytes": 149045248,
+        "cadence_pass": true,
+        "first_second_gaps_over25ms": 1,
+        "gap_gate_pass": true,
+        "total_gaps_over25ms": 1
+      },
+      "execution_pass": true,
+      "gate_pass": true
+    },
+    {
+      "route": "exact",
+      "group": 1,
+      "name": "baseline",
+      "status": {
+        "exit": 0,
+        "failure": null,
+        "seconds": 8.316743906005286,
+        "timed": true
+      },
+      "summary": {
+        "name": "baseline",
+        "mode": "stream",
+        "route": "exact",
+        "initial": 0,
+        "ticks": 455,
+        "native_acknowledgements": 456,
+        "reference_or_model_final": {
+          "total_ticks": 455,
+          "scroll_offset": 0.0
+        },
+        "visible_seconds": 0.21045444101036992,
+        "samples": 406,
+        "font_sha256": "7da195a74c55bef988d0d48f9508bd5d849425c1770dba5d7bfc6ce9ed848954",
+        "interval_start": 1.2209531880071154,
+        "interval_end": 6.199671848997241,
+        "interval_seconds": 4.9787186609901255,
+        "cpu_seconds": 2.7299999999999995,
+        "cpu_cores": 0.5483338557348971,
+        "mean_rss_bytes": 148770816,
+        "max_rss_bytes": 148770816,
+        "cadence_pass": false,
+        "first_second_gaps_over25ms": 17,
+        "gap_gate_pass": false,
+        "total_gaps_over25ms": 17
+      },
+      "execution_pass": true,
+      "gate_pass": false
+    },
+    {
+      "route": "owner",
+      "group": 3,
+      "name": "candidate",
+      "status": {
+        "exit": 0,
+        "failure": null,
+        "seconds": 8.316855452998425,
+        "timed": true
+      },
+      "summary": {
+        "name": "candidate",
+        "mode": "stream",
+        "route": "owner",
+        "initial": 0,
+        "ticks": 479,
+        "native_acknowledgements": 480,
+        "reference_or_model_final": {
+          "total_ticks": 479,
+          "scroll_offset": 0.0
+        },
+        "visible_seconds": 0.21102499100379646,
+        "samples": 406,
+        "font_sha256": "7da195a74c55bef988d0d48f9508bd5d849425c1770dba5d7bfc6ce9ed848954",
+        "interval_start": 1.2236987759970361,
+        "interval_end": 6.2006074730015825,
+        "interval_seconds": 4.976908697004546,
+        "cpu_seconds": 2.51,
+        "cpu_cores": 0.504329123319199,
+        "mean_rss_bytes": 148942848,
+        "max_rss_bytes": 148942848,
+        "cadence_pass": true,
+        "first_second_gaps_over25ms": 1,
+        "gap_gate_pass": true,
+        "total_gaps_over25ms": 1
+      },
+      "execution_pass": true,
+      "gate_pass": true
+    },
+    {
+      "route": "owner",
+      "group": 3,
+      "name": "baseline",
+      "status": {
+        "exit": 0,
+        "failure": null,
+        "seconds": 8.314179480992607,
+        "timed": true
+      },
+      "summary": {
+        "name": "baseline",
+        "mode": "stream",
+        "route": "owner",
+        "initial": 0,
+        "ticks": 455,
+        "native_acknowledgements": 456,
+        "reference_or_model_final": {
+          "total_ticks": 455,
+          "scroll_offset": 0.0
+        },
+        "visible_seconds": 0.20998243299254682,
+        "samples": 406,
+        "font_sha256": "7da195a74c55bef988d0d48f9508bd5d849425c1770dba5d7bfc6ce9ed848954",
+        "interval_start": 1.2224508109939052,
+        "interval_end": 6.192468180001015,
+        "interval_seconds": 4.97001736900711,
+        "cpu_seconds": 2.3999999999999995,
+        "cpu_cores": 0.4828956966964206,
+        "mean_rss_bytes": 148488192,
+        "max_rss_bytes": 148488192,
+        "cadence_pass": false,
+        "first_second_gaps_over25ms": 17,
+        "gap_gate_pass": false,
+        "total_gaps_over25ms": 17
+      },
+      "execution_pass": true,
+      "gate_pass": false
+    },
+    {
+      "route": "exact",
+      "group": 3,
+      "name": "candidate",
+      "status": {
+        "exit": 0,
+        "failure": null,
+        "seconds": 8.320654302006005,
+        "timed": true
+      },
+      "summary": {
+        "name": "candidate",
+        "mode": "stream",
+        "route": "exact",
+        "initial": 0,
+        "ticks": 479,
+        "native_acknowledgements": 480,
+        "reference_or_model_final": {
+          "total_ticks": 479,
+          "scroll_offset": 0.0
+        },
+        "visible_seconds": 0.21447424100188073,
+        "samples": 405,
+        "font_sha256": "7da195a74c55bef988d0d48f9508bd5d849425c1770dba5d7bfc6ce9ed848954",
+        "interval_start": 1.2300748720008414,
+        "interval_end": 6.203999862002092,
+        "interval_seconds": 4.973924990001251,
+        "cpu_seconds": 2.97,
+        "cpu_cores": 0.5971139504456526,
+        "mean_rss_bytes": 148541440,
+        "max_rss_bytes": 148541440,
+        "cadence_pass": true,
+        "first_second_gaps_over25ms": 1,
+        "gap_gate_pass": true,
+        "total_gaps_over25ms": 1
+      },
+      "execution_pass": true,
+      "gate_pass": true
+    },
+    {
+      "route": "exact",
+      "group": 3,
+      "name": "baseline",
+      "status": {
+        "exit": 0,
+        "failure": null,
+        "seconds": 8.312549702997785,
+        "timed": true
+      },
+      "summary": {
+        "name": "baseline",
+        "mode": "stream",
+        "route": "exact",
+        "initial": 0,
+        "ticks": 454,
+        "native_acknowledgements": 455,
+        "reference_or_model_final": {
+          "total_ticks": 454,
+          "scroll_offset": 0.0
+        },
+        "visible_seconds": 0.2101764569961233,
+        "samples": 406,
+        "font_sha256": "7da195a74c55bef988d0d48f9508bd5d849425c1770dba5d7bfc6ce9ed848954",
+        "interval_start": 1.222150635003345,
+        "interval_end": 6.192785412000376,
+        "interval_seconds": 4.970634776997031,
+        "cpu_seconds": 2.4299999999999997,
+        "cpu_cores": 0.4888711621391875,
+        "mean_rss_bytes": 148762624,
+        "max_rss_bytes": 148762624,
+        "cadence_pass": false,
+        "first_second_gaps_over25ms": 17,
+        "gap_gate_pass": false,
+        "total_gaps_over25ms": 17
+      },
+      "execution_pass": true,
+      "gate_pass": false
+    },
+    {
+      "route": "owner",
+      "group": 6,
+      "name": "baseline",
+      "status": {
+        "exit": 0,
+        "failure": null,
+        "seconds": 8.31400510299136,
+        "timed": true
+      },
+      "summary": {
+        "name": "baseline",
+        "mode": "stream",
+        "route": "owner",
+        "initial": 0,
+        "ticks": 455,
+        "native_acknowledgements": 456,
+        "reference_or_model_final": {
+          "total_ticks": 455,
+          "scroll_offset": 0.0
+        },
+        "visible_seconds": 0.210350915993331,
+        "samples": 406,
+        "font_sha256": "7da195a74c55bef988d0d48f9508bd5d849425c1770dba5d7bfc6ce9ed848954",
+        "interval_start": 1.2213147259899415,
+        "interval_end": 6.199572619996616,
+        "interval_seconds": 4.978257894006674,
+        "cpu_seconds": 2.58,
+        "cpu_cores": 0.5182535848747536,
+        "mean_rss_bytes": 148656128,
+        "max_rss_bytes": 148656128,
+        "cadence_pass": false,
+        "first_second_gaps_over25ms": 17,
+        "gap_gate_pass": false,
+        "total_gaps_over25ms": 17
+      },
+      "execution_pass": true,
+      "gate_pass": false
+    },
+    {
+      "route": "owner",
+      "group": 6,
+      "name": "candidate",
+      "status": {
+        "exit": 0,
+        "failure": null,
+        "seconds": 8.30227204899711,
+        "timed": true
+      },
+      "summary": {
+        "name": "candidate",
+        "mode": "stream",
+        "route": "owner",
+        "initial": 0,
+        "ticks": 479,
+        "native_acknowledgements": 480,
+        "reference_or_model_final": {
+          "total_ticks": 479,
+          "scroll_offset": 0.0
+        },
+        "visible_seconds": 0.20981562900124118,
+        "samples": 405,
+        "font_sha256": "7da195a74c55bef988d0d48f9508bd5d849425c1770dba5d7bfc6ce9ed848954",
+        "interval_start": 1.2208606110070832,
+        "interval_end": 6.195477385001141,
+        "interval_seconds": 4.974616773994057,
+        "cpu_seconds": 2.46,
+        "cpu_cores": 0.49451045412386546,
+        "mean_rss_bytes": 148746240,
+        "max_rss_bytes": 148746240,
+        "cadence_pass": true,
+        "first_second_gaps_over25ms": 1,
+        "gap_gate_pass": true,
+        "total_gaps_over25ms": 1
+      },
+      "execution_pass": true,
+      "gate_pass": true
+    },
+    {
+      "route": "owner",
+      "group": 2,
+      "name": "baseline",
+      "status": {
+        "exit": 0,
+        "failure": null,
+        "seconds": 8.316967028993531,
+        "timed": true
+      },
+      "summary": {
+        "name": "baseline",
+        "mode": "stream",
+        "route": "owner",
+        "initial": 0,
+        "ticks": 455,
+        "native_acknowledgements": 456,
+        "reference_or_model_final": {
+          "total_ticks": 455,
+          "scroll_offset": 0.0
+        },
+        "visible_seconds": 0.21198517498851288,
+        "samples": 406,
+        "font_sha256": "7da195a74c55bef988d0d48f9508bd5d849425c1770dba5d7bfc6ce9ed848954",
+        "interval_start": 1.22355238799355,
+        "interval_end": 6.198112600992317,
+        "interval_seconds": 4.974560212998767,
+        "cpu_seconds": 2.55,
+        "cpu_cores": 0.5126081283199118,
+        "mean_rss_bytes": 148832355.4979757,
+        "max_rss_bytes": 148873216,
+        "cadence_pass": false,
+        "first_second_gaps_over25ms": 17,
+        "gap_gate_pass": false,
+        "total_gaps_over25ms": 17
+      },
+      "execution_pass": true,
+      "gate_pass": false
+    },
+    {
+      "route": "owner",
+      "group": 2,
+      "name": "candidate",
+      "status": {
+        "exit": 0,
+        "failure": null,
+        "seconds": 8.320435282003018,
+        "timed": true
+      },
+      "summary": {
+        "name": "candidate",
+        "mode": "stream",
+        "route": "owner",
+        "initial": 0,
+        "ticks": 479,
+        "native_acknowledgements": 480,
+        "reference_or_model_final": {
+          "total_ticks": 479,
+          "scroll_offset": 0.0
+        },
+        "visible_seconds": 0.21167228699778207,
+        "samples": 406,
+        "font_sha256": "7da195a74c55bef988d0d48f9508bd5d849425c1770dba5d7bfc6ce9ed848954",
+        "interval_start": 1.2236841739941156,
+        "interval_end": 6.203377287994954,
+        "interval_seconds": 4.979693114000838,
+        "cpu_seconds": 2.5200000000000005,
+        "cpu_cores": 0.5060552813816583,
+        "mean_rss_bytes": 148783104,
+        "max_rss_bytes": 148783104,
+        "cadence_pass": true,
+        "first_second_gaps_over25ms": 1,
+        "gap_gate_pass": true,
+        "total_gaps_over25ms": 1
+      },
+      "execution_pass": true,
+      "gate_pass": true
+    },
+    {
+      "route": "owner",
+      "group": 7,
+      "name": "candidate",
+      "status": {
+        "exit": 0,
+        "failure": null,
+        "seconds": 8.321346843993524,
+        "timed": true
+      },
+      "summary": {
+        "name": "candidate",
+        "mode": "stream",
+        "route": "owner",
+        "initial": 0,
+        "ticks": 479,
+        "native_acknowledgements": 480,
+        "reference_or_model_final": {
+          "total_ticks": 479,
+          "scroll_offset": 0.0
+        },
+        "visible_seconds": 0.2112241059949156,
+        "samples": 406,
+        "font_sha256": "7da195a74c55bef988d0d48f9508bd5d849425c1770dba5d7bfc6ce9ed848954",
+        "interval_start": 1.2217564339953242,
+        "interval_end": 6.192811560002156,
+        "interval_seconds": 4.971055126006831,
+        "cpu_seconds": 2.63,
+        "cpu_cores": 0.5290627308155877,
+        "mean_rss_bytes": 148684800,
+        "max_rss_bytes": 148684800,
+        "cadence_pass": true,
+        "first_second_gaps_over25ms": 1,
+        "gap_gate_pass": true,
+        "total_gaps_over25ms": 1
+      },
+      "execution_pass": true,
+      "gate_pass": true
+    },
+    {
+      "route": "owner",
+      "group": 7,
+      "name": "baseline",
+      "status": {
+        "exit": 0,
+        "failure": null,
+        "seconds": 8.323699109008885,
+        "timed": true
+      },
+      "summary": {
+        "name": "baseline",
+        "mode": "stream",
+        "route": "owner",
+        "initial": 0,
+        "ticks": 453,
+        "native_acknowledgements": 454,
+        "reference_or_model_final": {
+          "total_ticks": 453,
+          "scroll_offset": 0.0
+        },
+        "visible_seconds": 0.2130655440123519,
+        "samples": 405,
+        "font_sha256": "7da195a74c55bef988d0d48f9508bd5d849425c1770dba5d7bfc6ce9ed848954",
+        "interval_start": 1.2295672350010136,
+        "interval_end": 6.199313800010714,
+        "interval_seconds": 4.9697465650097,
+        "cpu_seconds": 2.92,
+        "cpu_cores": 0.5875551120772897,
+        "mean_rss_bytes": 148639744,
+        "max_rss_bytes": 148639744,
+        "cadence_pass": false,
+        "first_second_gaps_over25ms": 17,
+        "gap_gate_pass": false,
+        "total_gaps_over25ms": 17
+      },
+      "execution_pass": true,
+      "gate_pass": false
+    },
+    {
+      "route": "exact",
+      "group": 6,
+      "name": "baseline",
+      "status": {
+        "exit": 0,
+        "failure": null,
+        "seconds": 8.330161235993728,
+        "timed": true
+      },
+      "summary": {
+        "name": "baseline",
+        "mode": "stream",
+        "route": "exact",
+        "initial": 0,
+        "ticks": 452,
+        "native_acknowledgements": 453,
+        "reference_or_model_final": {
+          "total_ticks": 452,
+          "scroll_offset": 0.0
+        },
+        "visible_seconds": 0.21134045399958268,
+        "samples": 405,
+        "font_sha256": "7da195a74c55bef988d0d48f9508bd5d849425c1770dba5d7bfc6ce9ed848954",
+        "interval_start": 1.228749229994719,
+        "interval_end": 6.203062510991003,
+        "interval_seconds": 4.9743132809962844,
+        "cpu_seconds": 2.9699999999999998,
+        "cpu_cores": 0.5970673401987964,
+        "mean_rss_bytes": 148582400,
+        "max_rss_bytes": 148582400,
+        "cadence_pass": false,
+        "first_second_gaps_over25ms": 17,
+        "gap_gate_pass": false,
+        "total_gaps_over25ms": 17
+      },
+      "execution_pass": true,
+      "gate_pass": false
+    },
+    {
+      "route": "exact",
+      "group": 6,
+      "name": "candidate",
+      "status": {
+        "exit": 0,
+        "failure": null,
+        "seconds": 8.323491144008585,
+        "timed": true
+      },
+      "summary": {
+        "name": "candidate",
+        "mode": "stream",
+        "route": "exact",
+        "initial": 0,
+        "ticks": 479,
+        "native_acknowledgements": 480,
+        "reference_or_model_final": {
+          "total_ticks": 479,
+          "scroll_offset": 0.0
+        },
+        "visible_seconds": 0.21356297901365906,
+        "samples": 405,
+        "font_sha256": "7da195a74c55bef988d0d48f9508bd5d849425c1770dba5d7bfc6ce9ed848954",
+        "interval_start": 1.2289842910104198,
+        "interval_end": 6.199720794000314,
+        "interval_seconds": 4.970736502989894,
+        "cpu_seconds": 2.9199999999999995,
+        "cpu_cores": 0.5874380986084501,
+        "mean_rss_bytes": 148852736,
+        "max_rss_bytes": 148852736,
+        "cadence_pass": true,
+        "first_second_gaps_over25ms": 1,
+        "gap_gate_pass": true,
+        "total_gaps_over25ms": 1
+      },
+      "execution_pass": true,
+      "gate_pass": true
+    },
+    {
+      "route": "exact",
+      "group": 2,
+      "name": "baseline",
+      "status": {
+        "exit": 0,
+        "failure": null,
+        "seconds": 8.327665621996857,
+        "timed": true
+      },
+      "summary": {
+        "name": "baseline",
+        "mode": "stream",
+        "route": "exact",
+        "initial": 0,
+        "ticks": 454,
+        "native_acknowledgements": 455,
+        "reference_or_model_final": {
+          "total_ticks": 454,
+          "scroll_offset": 0.0
+        },
+        "visible_seconds": 0.21222202999342699,
+        "samples": 404,
+        "font_sha256": "7da195a74c55bef988d0d48f9508bd5d849425c1770dba5d7bfc6ce9ed848954",
+        "interval_start": 1.2303420289972564,
+        "interval_end": 6.206563995001488,
+        "interval_seconds": 4.976221966004232,
+        "cpu_seconds": 3.05,
+        "cpu_cores": 0.6129147817031693,
+        "mean_rss_bytes": 148975616,
+        "max_rss_bytes": 148975616,
+        "cadence_pass": false,
+        "first_second_gaps_over25ms": 17,
+        "gap_gate_pass": false,
+        "total_gaps_over25ms": 17
+      },
+      "execution_pass": true,
+      "gate_pass": false
+    },
+    {
+      "route": "exact",
+      "group": 2,
+      "name": "candidate",
+      "status": {
+        "exit": 0,
+        "failure": null,
+        "seconds": 8.369750097001088,
+        "timed": true
+      },
+      "summary": {
+        "name": "candidate",
+        "mode": "stream",
+        "route": "exact",
+        "initial": 0,
+        "ticks": 479,
+        "native_acknowledgements": 480,
+        "reference_or_model_final": {
+          "total_ticks": 479,
+          "scroll_offset": 0.0
+        },
+        "visible_seconds": 0.2174123389995657,
+        "samples": 407,
+        "font_sha256": "7da195a74c55bef988d0d48f9508bd5d849425c1770dba5d7bfc6ce9ed848954",
+        "interval_start": 1.2177591810032027,
+        "interval_end": 6.209544593002647,
+        "interval_seconds": 4.9917854119994445,
+        "cpu_seconds": 2.9899999999999998,
+        "cpu_cores": 0.5989840814896658,
+        "mean_rss_bytes": 148283392,
+        "max_rss_bytes": 148283392,
+        "cadence_pass": true,
+        "first_second_gaps_over25ms": 1,
+        "gap_gate_pass": true,
+        "total_gaps_over25ms": 1
+      },
+      "execution_pass": true,
+      "gate_pass": true
+    },
+    {
+      "route": "owner",
+      "group": 1,
+      "name": "candidate",
+      "status": {
+        "exit": 0,
+        "failure": null,
+        "seconds": 8.319526455001323,
+        "timed": true
+      },
+      "summary": {
+        "name": "candidate",
+        "mode": "stream",
+        "route": "owner",
+        "initial": 0,
+        "ticks": 479,
+        "native_acknowledgements": 480,
+        "reference_or_model_final": {
+          "total_ticks": 479,
+          "scroll_offset": 0.0
+        },
+        "visible_seconds": 0.21400348599127028,
+        "samples": 404,
+        "font_sha256": "7da195a74c55bef988d0d48f9508bd5d849425c1770dba5d7bfc6ce9ed848954",
+        "interval_start": 1.2343535450054333,
+        "interval_end": 6.211993649994838,
+        "interval_seconds": 4.977640104989405,
+        "cpu_seconds": 2.9800000000000004,
+        "cpu_cores": 0.5986772721902809,
+        "mean_rss_bytes": 148496384,
+        "max_rss_bytes": 148496384,
+        "cadence_pass": true,
+        "first_second_gaps_over25ms": 1,
+        "gap_gate_pass": true,
+        "total_gaps_over25ms": 1
+      },
+      "execution_pass": true,
+      "gate_pass": true
+    },
+    {
+      "route": "owner",
+      "group": 1,
+      "name": "baseline",
+      "status": {
+        "exit": 0,
+        "failure": null,
+        "seconds": 8.306804847001331,
+        "timed": true
+      },
+      "summary": {
+        "name": "baseline",
+        "mode": "stream",
+        "route": "owner",
+        "initial": 0,
+        "ticks": 454,
+        "native_acknowledgements": 455,
+        "reference_or_model_final": {
+          "total_ticks": 454,
+          "scroll_offset": 0.0
+        },
+        "visible_seconds": 0.21156035699823406,
+        "samples": 404,
+        "font_sha256": "7da195a74c55bef988d0d48f9508bd5d849425c1770dba5d7bfc6ce9ed848954",
+        "interval_start": 1.2274099909991492,
+        "interval_end": 6.201275847008219,
+        "interval_seconds": 4.97386585600907,
+        "cpu_seconds": 3.02,
+        "cpu_cores": 0.6071735924183503,
+        "mean_rss_bytes": 148692992,
+        "max_rss_bytes": 148692992,
+        "cadence_pass": false,
+        "first_second_gaps_over25ms": 17,
+        "gap_gate_pass": false,
+        "total_gaps_over25ms": 17
+      },
+      "execution_pass": true,
+      "gate_pass": false
+    },
+    {
+      "route": "exact",
+      "group": 4,
+      "name": "baseline",
+      "status": {
+        "exit": 0,
+        "failure": null,
+        "seconds": 8.31972717899771,
+        "timed": true
+      },
+      "summary": {
+        "name": "baseline",
+        "mode": "stream",
+        "route": "exact",
+        "initial": 0,
+        "ticks": 453,
+        "native_acknowledgements": 454,
+        "reference_or_model_final": {
+          "total_ticks": 453,
+          "scroll_offset": 0.0
+        },
+        "visible_seconds": 0.21178111899644136,
+        "samples": 404,
+        "font_sha256": "7da195a74c55bef988d0d48f9508bd5d849425c1770dba5d7bfc6ce9ed848954",
+        "interval_start": 1.2293096920038806,
+        "interval_end": 6.208286148990737,
+        "interval_seconds": 4.978976456986857,
+        "cpu_seconds": 3.15,
+        "cpu_cores": 0.6326601515818967,
+        "mean_rss_bytes": 148443136,
+        "max_rss_bytes": 148443136,
+        "cadence_pass": false,
+        "first_second_gaps_over25ms": 17,
+        "gap_gate_pass": false,
+        "total_gaps_over25ms": 17
+      },
+      "execution_pass": true,
+      "gate_pass": false
+    },
+    {
+      "route": "exact",
+      "group": 4,
+      "name": "candidate",
+      "status": {
+        "exit": 0,
+        "failure": null,
+        "seconds": 8.318193458995665,
+        "timed": true
+      },
+      "summary": {
+        "name": "candidate",
+        "mode": "stream",
+        "route": "exact",
+        "initial": 0,
+        "ticks": 479,
+        "native_acknowledgements": 480,
+        "reference_or_model_final": {
+          "total_ticks": 479,
+          "scroll_offset": 0.0
+        },
+        "visible_seconds": 0.21195454598637298,
+        "samples": 404,
+        "font_sha256": "7da195a74c55bef988d0d48f9508bd5d849425c1770dba5d7bfc6ce9ed848954",
+        "interval_start": 1.2308562959951814,
+        "interval_end": 6.208537533995695,
+        "interval_seconds": 4.977681238000514,
+        "cpu_seconds": 3.1100000000000003,
+        "cpu_cores": 0.6247889029650394,
+        "mean_rss_bytes": 149139456,
+        "max_rss_bytes": 149139456,
+        "cadence_pass": true,
+        "first_second_gaps_over25ms": 1,
+        "gap_gate_pass": true,
+        "total_gaps_over25ms": 1
+      },
+      "execution_pass": true,
+      "gate_pass": true
+    },
+    {
+      "route": "exact",
+      "group": 7,
+      "name": "candidate",
+      "status": {
+        "exit": 0,
+        "failure": null,
+        "seconds": 8.322495122003602,
+        "timed": true
+      },
+      "summary": {
+        "name": "candidate",
+        "mode": "stream",
+        "route": "exact",
+        "initial": 0,
+        "ticks": 479,
+        "native_acknowledgements": 480,
+        "reference_or_model_final": {
+          "total_ticks": 479,
+          "scroll_offset": 0.0
+        },
+        "visible_seconds": 0.21090210101101547,
+        "samples": 404,
+        "font_sha256": "7da195a74c55bef988d0d48f9508bd5d849425c1770dba5d7bfc6ce9ed848954",
+        "interval_start": 1.2284588150068885,
+        "interval_end": 6.210324423998827,
+        "interval_seconds": 4.981865608991939,
+        "cpu_seconds": 3.1100000000000003,
+        "cpu_cores": 0.6242641299650187,
+        "mean_rss_bytes": 148914176,
+        "max_rss_bytes": 148914176,
+        "cadence_pass": true,
+        "first_second_gaps_over25ms": 1,
+        "gap_gate_pass": true,
+        "total_gaps_over25ms": 1
+      },
+      "execution_pass": true,
+      "gate_pass": true
+    },
+    {
+      "route": "exact",
+      "group": 7,
+      "name": "baseline",
+      "status": {
+        "exit": 0,
+        "failure": null,
+        "seconds": 8.318715300003532,
+        "timed": true
+      },
+      "summary": {
+        "name": "baseline",
+        "mode": "stream",
+        "route": "exact",
+        "initial": 0,
+        "ticks": 448,
+        "native_acknowledgements": 449,
+        "reference_or_model_final": {
+          "total_ticks": 448,
+          "scroll_offset": 0.0
+        },
+        "visible_seconds": 0.21279083999979775,
+        "samples": 402,
+        "font_sha256": "7da195a74c55bef988d0d48f9508bd5d849425c1770dba5d7bfc6ce9ed848954",
+        "interval_start": 1.2166383599978872,
+        "interval_end": 6.2006943080050405,
+        "interval_seconds": 4.984055948007153,
+        "cpu_seconds": 3.85,
+        "cpu_cores": 0.7724632388084248,
+        "mean_rss_bytes": 148819968,
+        "max_rss_bytes": 148819968,
+        "cadence_pass": false,
+        "first_second_gaps_over25ms": 17,
+        "gap_gate_pass": false,
+        "total_gaps_over25ms": 17
+      },
+      "execution_pass": true,
+      "gate_pass": false
+    },
+    {
+      "route": "exact",
+      "group": 0,
+      "name": "baseline",
+      "status": {
+        "exit": 0,
+        "failure": null,
+        "seconds": 8.358089779998409,
+        "timed": true
+      },
+      "summary": {
+        "name": "baseline",
+        "mode": "stream",
+        "route": "exact",
+        "initial": 0,
+        "ticks": 445,
+        "native_acknowledgements": 446,
+        "reference_or_model_final": {
+          "total_ticks": 445,
+          "scroll_offset": 0.0
+        },
+        "visible_seconds": 0.21553686998959165,
+        "samples": 405,
+        "font_sha256": "7da195a74c55bef988d0d48f9508bd5d849425c1770dba5d7bfc6ce9ed848954",
+        "interval_start": 1.2185231689945795,
+        "interval_end": 6.2016437069978565,
+        "interval_seconds": 4.983120538003277,
+        "cpu_seconds": 3.2799999999999994,
+        "cpu_cores": 0.6582220869403826,
+        "mean_rss_bytes": 148963328,
+        "max_rss_bytes": 148963328,
+        "cadence_pass": false,
+        "first_second_gaps_over25ms": 17,
+        "gap_gate_pass": false,
+        "total_gaps_over25ms": 17
+      },
+      "execution_pass": true,
+      "gate_pass": false
+    },
+    {
+      "route": "exact",
+      "group": 0,
+      "name": "candidate",
+      "status": {
+        "exit": 0,
+        "failure": null,
+        "seconds": 8.336230387998512,
+        "timed": true
+      },
+      "summary": {
+        "name": "candidate",
+        "mode": "stream",
+        "route": "exact",
+        "initial": 0,
+        "ticks": 479,
+        "native_acknowledgements": 480,
+        "reference_or_model_final": {
+          "total_ticks": 479,
+          "scroll_offset": 0.0
+        },
+        "visible_seconds": 0.21387650399992708,
+        "samples": 404,
+        "font_sha256": "7da195a74c55bef988d0d48f9508bd5d849425c1770dba5d7bfc6ce9ed848954",
+        "interval_start": 1.2340194629941834,
+        "interval_end": 6.194851277992711,
+        "interval_seconds": 4.960831814998528,
+        "cpu_seconds": 3.3,
+        "cpu_cores": 0.6652110216723763,
+        "mean_rss_bytes": 148733952,
+        "max_rss_bytes": 148733952,
+        "cadence_pass": true,
+        "first_second_gaps_over25ms": 1,
+        "gap_gate_pass": true,
+        "total_gaps_over25ms": 1
+      },
+      "execution_pass": true,
+      "gate_pass": true
+    },
+    {
+      "route": "exact",
+      "group": 5,
+      "name": "candidate",
+      "status": {
+        "exit": 0,
+        "failure": null,
+        "seconds": 8.332213217989192,
+        "timed": true
+      },
+      "summary": {
+        "name": "candidate",
+        "mode": "stream",
+        "route": "exact",
+        "initial": 0,
+        "ticks": 479,
+        "native_acknowledgements": 480,
+        "reference_or_model_final": {
+          "total_ticks": 479,
+          "scroll_offset": 0.0
+        },
+        "visible_seconds": 0.2142967440013308,
+        "samples": 405,
+        "font_sha256": "7da195a74c55bef988d0d48f9508bd5d849425c1770dba5d7bfc6ce9ed848954",
+        "interval_start": 1.2317601760005346,
+        "interval_end": 6.201348937000148,
+        "interval_seconds": 4.969588760999613,
+        "cpu_seconds": 2.9400000000000004,
+        "cpu_cores": 0.5915982471371798,
+        "mean_rss_bytes": 148709376,
+        "max_rss_bytes": 148709376,
+        "cadence_pass": true,
+        "first_second_gaps_over25ms": 1,
+        "gap_gate_pass": true,
+        "total_gaps_over25ms": 1
+      },
+      "execution_pass": true,
+      "gate_pass": true
+    },
+    {
+      "route": "exact",
+      "group": 5,
+      "name": "baseline",
+      "status": {
+        "exit": 0,
+        "failure": null,
+        "seconds": 8.32220863099792,
+        "timed": true
+      },
+      "summary": {
+        "name": "baseline",
+        "mode": "stream",
+        "route": "exact",
+        "initial": 0,
+        "ticks": 452,
+        "native_acknowledgements": 453,
+        "reference_or_model_final": {
+          "total_ticks": 452,
+          "scroll_offset": 0.0
+        },
+        "visible_seconds": 0.21450242098944727,
+        "samples": 404,
+        "font_sha256": "7da195a74c55bef988d0d48f9508bd5d849425c1770dba5d7bfc6ce9ed848954",
+        "interval_start": 1.2335949719999917,
+        "interval_end": 6.21106343298743,
+        "interval_seconds": 4.9774684609874384,
+        "cpu_seconds": 3.05,
+        "cpu_cores": 0.6127612909866507,
+        "mean_rss_bytes": 148738048,
+        "max_rss_bytes": 148738048,
+        "cadence_pass": false,
+        "first_second_gaps_over25ms": 17,
+        "gap_gate_pass": false,
+        "total_gaps_over25ms": 17
+      },
+      "execution_pass": true,
+      "gate_pass": false
+    }
+  ],
+  "failures": [],
+  "aggregates": {
+    "exact": {
+      "baseline": {
+        "observations": 8,
+        "execution_passes": 8,
+        "gate_passes": 0,
+        "ticks": [
+          455,
+          454,
+          452,
+          454,
+          453,
+          448,
+          445,
+          452
+        ],
+        "first_second_gaps_over25ms": [
+          17,
+          17,
+          17,
+          17,
+          17,
+          17,
+          17,
+          17
+        ],
+        "total_gaps_over25ms": [
+          17,
+          17,
+          17,
+          17,
+          17,
+          17,
+          17,
+          17
+        ],
+        "cpu_cores_median": 0.61283803634491,
+        "mean_rss_bytes_median": 148766720.0
+      },
+      "candidate": {
+        "observations": 8,
+        "execution_passes": 8,
+        "gate_passes": 8,
+        "ticks": [
+          479,
+          479,
+          479,
+          479,
+          479,
+          479,
+          479,
+          479
+        ],
+        "first_second_gaps_over25ms": [
+          1,
+          1,
+          1,
+          1,
+          1,
+          1,
+          1,
+          1
+        ],
+        "total_gaps_over25ms": [
+          1,
+          1,
+          1,
+          1,
+          1,
+          1,
+          1,
+          1
+        ],
+        "cpu_cores_median": 0.5980490159676592,
+        "mean_rss_bytes_median": 148793344.0
+      }
+    },
+    "owner": {
+      "baseline": {
+        "observations": 8,
+        "execution_passes": 8,
+        "gate_passes": 0,
+        "ticks": [
+          455,
+          455,
+          455,
+          455,
+          455,
+          455,
+          453,
+          454
+        ],
+        "first_second_gaps_over25ms": [
+          17,
+          17,
+          17,
+          17,
+          17,
+          17,
+          17,
+          17
+        ],
+        "total_gaps_over25ms": [
+          17,
+          17,
+          17,
+          17,
+          17,
+          17,
+          17,
+          17
+        ],
+        "cpu_cores_median": 0.5125861820881086,
+        "mean_rss_bytes_median": 148652032.0
+      },
+      "candidate": {
+        "observations": 8,
+        "execution_passes": 8,
+        "gate_passes": 8,
+        "ticks": [
+          479,
+          479,
+          479,
+          479,
+          479,
+          479,
+          479,
+          479
+        ],
+        "first_second_gaps_over25ms": [
+          1,
+          1,
+          1,
+          1,
+          1,
+          1,
+          1,
+          1
+        ],
+        "total_gaps_over25ms": [
+          1,
+          1,
+          1,
+          1,
+          1,
+          1,
+          1,
+          1
+        ],
+        "cpu_cores_median": 0.5176609689645277,
+        "mean_rss_bytes_median": 148715520.0
+      }
+    }
+  },
+  "candidate_passes": true,
+  "limits": "Startup cadence mechanism screen only; no CPU superiority ratio, warm-regression acceptance, ZGX or hardware result."
+}

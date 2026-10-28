@@ -1,0 +1,8 @@
+{
+  "seal": "380db598cdbed2dd81c5a41745473c40a876f148",
+  "files": 1600,
+  "bytes": 1781614705,
+  "free_before": 8573079552,
+  "free_after": 10357075968,
+  "scope": "Only inactive regenerable library caches after independent qualification verification and seal. Source, evidence, every executable and generated shader/fingerprint remain preserved."
+}
