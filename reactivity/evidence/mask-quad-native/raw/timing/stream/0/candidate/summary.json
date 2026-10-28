@@ -1,0 +1,27 @@
+{
+  "name": "candidate",
+  "mode": "stream",
+  "route": "exact",
+  "initial": 0,
+  "ticks": 479,
+  "native_acknowledgements": 481,
+  "reference_or_model_final": {
+    "total_ticks": 479,
+    "scroll_offset": 0.0
+  },
+  "visible_seconds": 0.21093573499820195,
+  "samples": 406,
+  "font_sha256": "7da195a74c55bef988d0d48f9508bd5d849425c1770dba5d7bfc6ce9ed848954",
+  "interval_start": 1.2217687759839464,
+  "interval_end": 6.199673084978713,
+  "interval_seconds": 4.977904308994766,
+  "cpu_seconds": 2.5,
+  "cpu_cores": 0.5022193768334706,
+  "mean_rss_bytes": 153587712,
+  "max_rss_bytes": 153587712,
+  "cadence_pass": true,
+  "first_second_gaps_over25ms": 1,
+  "gap_gate_pass": true,
+  "later_gaps_over25ms": 0,
+  "total_gaps_over25ms": 1
+}

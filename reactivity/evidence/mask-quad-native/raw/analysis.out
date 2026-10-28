@@ -1,0 +1,138 @@
+{
+  "candidate_passes": false,
+  "comparisons": {
+    "idle": {
+      "eligible": true,
+      "baseline_cpu": 0.0,
+      "candidate_cpu": 0.0,
+      "passed": true,
+      "ratio": null,
+      "rule": "zero updates and median observed CPU no greater than baseline; no ratio at zero"
+    },
+    "scroll": {
+      "eligible": true,
+      "pairs": [
+        {
+          "group": 0,
+          "baseline_cpu": 0.5853230675292278,
+          "candidate_cpu": 0.6042826069664169,
+          "ratio": 1.0323915808020712
+        },
+        {
+          "group": 1,
+          "baseline_cpu": 0.6271176233296908,
+          "candidate_cpu": 0.6126252934644706,
+          "ratio": 0.9768905715194656
+        },
+        {
+          "group": 2,
+          "baseline_cpu": 0.5712223405200456,
+          "candidate_cpu": 0.6221740945440312,
+          "ratio": 1.0891977613788681
+        },
+        {
+          "group": 3,
+          "baseline_cpu": 0.6287188658173716,
+          "candidate_cpu": 0.6921253544824241,
+          "ratio": 1.1008503038677238
+        },
+        {
+          "group": 4,
+          "baseline_cpu": 0.5753773350332405,
+          "candidate_cpu": 0.5753107996251131,
+          "ratio": 0.9998843621323326
+        },
+        {
+          "group": 5,
+          "baseline_cpu": 0.5793518161794393,
+          "candidate_cpu": 0.6212902720168617,
+          "ratio": 1.0723885809385865
+        },
+        {
+          "group": 6,
+          "baseline_cpu": 0.6179033432465465,
+          "candidate_cpu": 0.5850375218316973,
+          "ratio": 0.94681074026535
+        },
+        {
+          "group": 7,
+          "baseline_cpu": 0.5817219632126347,
+          "candidate_cpu": 0.5868861993988407,
+          "ratio": 1.0088774990679152
+        }
+      ],
+      "median_paired_cpu_ratio": 1.0206345399349932,
+      "paired_bootstrap_95": [
+        0.9768905715194656,
+        1.0891977613788681
+      ],
+      "limit": 1.05,
+      "passed": true
+    },
+    "stream": {
+      "eligible": true,
+      "pairs": [
+        {
+          "group": 0,
+          "baseline_cpu": 0.5220032052546106,
+          "candidate_cpu": 0.5022193768334706,
+          "ratio": 0.9621001782709546
+        },
+        {
+          "group": 1,
+          "baseline_cpu": 0.5024693320677597,
+          "candidate_cpu": 0.4789457673410216,
+          "ratio": 0.9531840786582259
+        },
+        {
+          "group": 2,
+          "baseline_cpu": 0.5220919311069093,
+          "candidate_cpu": 0.49835227896978024,
+          "ratio": 0.9545297471140808
+        },
+        {
+          "group": 3,
+          "baseline_cpu": 0.5248277937765674,
+          "candidate_cpu": 0.4728144812494473,
+          "ratio": 0.9008945159842974
+        },
+        {
+          "group": 4,
+          "baseline_cpu": 0.5898351077526961,
+          "candidate_cpu": 0.563762694944333,
+          "ratio": 0.9557971160657078
+        },
+        {
+          "group": 5,
+          "baseline_cpu": 0.5130316775874506,
+          "candidate_cpu": 0.5450817296630872,
+          "ratio": 1.0624718774215913
+        },
+        {
+          "group": 6,
+          "baseline_cpu": 0.5217085270849754,
+          "candidate_cpu": 0.4747228331004784,
+          "ratio": 0.909938803862326
+        },
+        {
+          "group": 7,
+          "baseline_cpu": 0.48901412482201156,
+          "candidate_cpu": 0.4830384345390874,
+          "ratio": 0.9877801274449912
+        }
+      ],
+      "median_paired_cpu_ratio": 0.9551634315898943,
+      "paired_bootstrap_95": [
+        0.909938803862326,
+        0.9877801274449912
+      ],
+      "limit": 0.8,
+      "passed": false
+    },
+    "both": {
+      "eligible": false,
+      "passed": false,
+      "reason": "Execution/work/cadence gate failed; comparative CPU ratio suppressed."
+    }
+  }
+}

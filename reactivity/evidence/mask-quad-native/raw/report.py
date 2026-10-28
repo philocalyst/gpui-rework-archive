@@ -1,0 +1,19 @@
+from pathlib import Path
+import json
+r=Path(__file__).parent;d=Path('/home/user/gpui-mask-quad-native-lab/reactivity/evidence/mask-quad-native');a=json.loads((r/'analysis.json').read_text());art=json.loads((r/'artifacts.json').read_text());q=json.loads((r/'qualification-reference.json').read_text());f=json.loads((r/'timing-inputs.json').read_text());bad=[dict(mode=x['mode'],group=x['group'],name=x['name'],summary=x['summary'],status=x['status']) for x in a['rows'] if not x['work_pass']]
+verdict='passes early screen; full qualification pending' if a['candidate_passes'] else 'rejected by early screen'
+text=f'# Four-cell mask reuse: {verdict}\n\n'
+text+='This is the preregistered combined certificate/fetch-reuse comparison against\nthe qualified suffix baseline. The earlier mask-address-only native rejection\nb8e6667b remains unchanged. No application API, dependency, unsafe, new pipeline\nor persistent cache additions. All64 fixed observations remain, with no retries\nor threshold changes. Normal default ingress is exact for stream and owner for\nidle/scroll/both; the summary route field denotes the requested knob.\n\n'
+text+='| Mode | Paired median CPU ratio | Bootstrap95% | Gate | Verdict |\n| --- | --- | --- | --- | --- |\n'
+for mode in ['idle','scroll','stream','both']:
+ c=a['comparisons'][mode]
+ if mode=='idle':text+=f"| idle | {c.get('candidate_cpu')} vs {c.get('baseline_cpu')} observed cores; ratio undefined | — | no added CPU/updates | {'pass' if c['passed'] else 'fail'} |\n"
+ elif not c['eligible']:text+=f'| {mode} | suppressed | — | work/cadence | fail |\n'
+ else:text+=f"| {mode} | {c['median_paired_cpu_ratio']:.9f} | [{c['paired_bootstrap_95'][0]:.9f}, {c['paired_bootstrap_95'][1]:.9f}] | <= {c['limit']} | {'pass' if c['passed'] else 'fail'} |\n"
+text+='\nCPU uses visible+1..6s process samples with>=4.8s coverage. Whole-run qualified\nupdate counts do not prove identical work within that interval. Raw CPU/RSS,\ncold visibility, every acknowledgement and all failures are retained. A failed\nwork/cadence cell suppresses the whole mode\'s ratio. Intervals describe uncertainty\nand do not waive fixed point gates.\n\n'
+text+=f"All execution gates: {a['all_execution_pass']}. Failed work cells: "+json.dumps([dict(mode=x['mode'],group=x['group'],name=x['name']) for x in bad])+'.\n\n'
+text+='Baseline compiled '+f['sources']['baseline']['compiled_source']+'; candidate compiled '+f['sources']['candidate']['compiled_source']+'. Matched nightly2026-10-23,opt3,fatLTO,CGU1,debug0,stripnone,unwind,incrementalfalse. All34 workload tests and10 preflights pass; initial0/190 native images match exactly. Source/artifact/profile/driver/embeddedshader checks pass.\n\n'
+text+='Early GPU admission seal '+q['seal']+' verifies353 tests,strict Clippy,336 independent exact frames and96 mismatched frames from the bounded wrong-row mutant. This is not full native/minimal/default/offline qualification. Production7565d788 adds74 shipping lines over mask-address parent (+135 over suffix). Matched-profile native ELF bytes: baseline '+str(art['baseline']['bytes'])+', candidate '+str(art['candidate']['bytes'])+'. GPU JIT register pressure is not measured.\n\n'
+text+=('The pass admits the preregistered complete configuration/native/offline gates, then the28-case4160-process cost matrix(seed20261114), then a new matched ZGX comparison. No adoption until all required gates pass.\n\n' if a['candidate_passes'] else 'The candidate is rejected; no cost-matrix admission. Preserve its exact correctness result separately from this performance failure.\n\n')
+text+='Run `python3 verify_dossier.py` to independently rederive the fixed64 observations, work gates, CPU intervals/bootstrap and source/shader/executable receipts. This software-Vulkan result establishes no ZGX advantage, physical GPU performance, scanout latency or quality parity. All changes local; the overall goal remains open.\n'
+(d/'README.md').write_text(text)

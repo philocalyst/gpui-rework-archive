@@ -1,0 +1,18 @@
+{
+  "source": "7565d788dcdf62f87c43a2d4910764a3ff2be764",
+  "seal": "e00f436fbfef57bdc0379df6e46c6888d7855097",
+  "worktree": "/home/user/gpui-mask-quad-lab",
+  "dossier": "/home/user/gpui-mask-quad-lab/reactivity/evidence/mask-quad",
+  "manifest_sha256": "b8fa105845cfbc77aa7a4b10c97d8f42cddf943dd2e058814cc25ae2e0d6c2d0",
+  "verifier_sha256": "af54c8cc5e00b661818382249eb64256f6c18fded8739d236a3a13cc88e004ea",
+  "verification": {
+    "files": 1421,
+    "executable_identities": 70,
+    "gpu_canvas_tests": 353,
+    "ignored_tests": 3,
+    "exact_frames": 336,
+    "negative_frames": 96,
+    "admission_correctness_passes": true,
+    "scope": "Early shader-screen admission only; full configurations/offline/native/performance remain pending."
+  }
+}
