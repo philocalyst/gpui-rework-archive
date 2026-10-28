@@ -144,13 +144,26 @@ impl Styles {
     pub(super) fn record_slot_transition(
         &mut self,
         from: super::PresentationToken,
+        to: super::PresentationToken,
         edit: gpui_canvas::SlotEdit,
     ) {
         let Self::Colors(values) = self else {
             unreachable!("bound source has slot owner")
         };
+        let anchor = values
+            .transition
+            .as_ref()
+            .filter(|old| {
+                old.through == from.sequence
+                    && old.from.window == from.window
+                    && old.edits[0].slot() == edit.slot()
+                    && to.window == from.window
+                    && from.sequence.checked_add(1) == Some(to.sequence)
+            })
+            .map_or(from, |old| old.from);
         values.transition = Some(super::paint::SlotTransition {
-            from,
+            from: anchor,
+            through: to.sequence,
             edits: [edit],
         });
     }

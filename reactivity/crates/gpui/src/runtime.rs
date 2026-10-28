@@ -3061,6 +3061,8 @@ impl<M: View + 'static> Runtime<M> {
             }
             return Ok(self.commit());
         }
+        // A full/possibly failing preparation cannot extend a paint-only chain.
+        self.styles.clear_slot_transition();
         match catch_unwind(AssertUnwindSafe(|| self.present_inner())) {
             Ok(Ok(())) => Ok(self.commit()),
             Ok(Err(error)) => {
@@ -3144,6 +3146,7 @@ impl<M: View + 'static> Runtime<M> {
         #[cfg(feature = "native-core")]
         {
             self.presented_sequence = Some(token.sequence);
+            self.styles.clear_slot_transition();
         }
         #[cfg(feature = "accessibility")]
         {

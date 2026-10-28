@@ -6,13 +6,21 @@ pub(super) enum PatchOutcome {
     Metadata,
     Complete,
 }
-/// Exactly one transition, never an accumulated change log. A coalesced native
-/// packet that does not match from rebuilds from the latest complete C bank.
+/// One bounded same-slot chain, not an accumulated change log. Both endpoints
+/// certify the positional edit; unsupported changes retain full preparation.
 #[cfg(any(feature = "native-core", test))]
 #[cfg_attr(not(feature = "native-core"), allow(dead_code))]
+#[derive(Clone, Copy)]
 pub(crate) struct SlotTransition {
     pub(crate) from: PresentationToken,
+    pub(super) through: NonZeroU64,
     pub(crate) edits: [gpui_canvas::SlotEdit; 1],
+}
+#[cfg(feature = "native-core")]
+impl SlotTransition {
+    pub(crate) fn connects(&self, from: Option<PresentationToken>, to: PresentationToken) -> bool {
+        from == Some(self.from) && to.window == self.from.window && to.sequence == self.through
+    }
 }
 impl<M: View + 'static> Runtime<M> {
     pub(super) fn finish_color_slot(
@@ -54,6 +62,7 @@ impl<M: View + 'static> Runtime<M> {
         #[cfg(feature = "native-core")]
         self.styles.record_slot_transition(
             self.latest_token.expect("complete predecessor has a token"),
+            token,
             edits[0],
         );
         self.publish_paint(Some((damage, token, next)))?;
@@ -306,6 +315,158 @@ mod tests {
                 "paint_mount,bound={bound},allocations={},retained={},peak={}",
                 mount.count_total, mount.bytes_current, mount.bytes_max
             );
+        }
+    }
+}
+
+#[cfg(all(test, feature = "native-core"))]
+mod chain_tests {
+    use super::*;
+    use crate::prelude::*;
+    struct Pair {
+        a: Signal<Color>,
+        b: Signal<Color>,
+        shift: Signal<Affine>,
+        swapped: bool,
+    }
+    impl Pair {
+        const A: Source<Self, Color> = Source::new(FieldId::new(1), "a", |m| &m.a, |m| &mut m.a);
+        const B: Source<Self, Color> = Source::new(FieldId::new(2), "b", |m| &m.b, |m| &mut m.b);
+        const SHIFT: Source<Self, Affine> =
+            Source::new(FieldId::new(3), "shift", |m| &m.shift, |m| &mut m.shift);
+    }
+    impl View for Pair {
+        fn sources() -> Sources<Self> {
+            Sources::new()
+                .direct(Self::A)
+                .direct(Self::B)
+                .direct(Self::SHIFT)
+        }
+        fn view(&self) -> El<'_> {
+            let a = div().size(16).bg(&self.a);
+            let b = div().size(16).bg(&self.b);
+            column(if self.swapped { (b, a) } else { (a, b) })
+                .size(64)
+                .transform(&self.shift)
+        }
+    }
+    fn mount() -> Win<Pair> {
+        Win::recording(
+            Pair {
+                a: Signal::new(Color::BLACK),
+                b: Signal::new(Color::WHITE),
+                shift: Signal::new(Affine::IDENTITY),
+                swapped: false,
+            },
+            WindowOptions {
+                size: [64, 64],
+                ..Default::default()
+            },
+        )
+        .unwrap()
+    }
+    fn token(win: &Win<Pair>) -> PresentationToken {
+        win.with_scene(|_, t| t).unwrap()
+    }
+    fn chain(win: &Win<Pair>) -> Option<SlotTransition> {
+        win.runtime().unwrap().styles.slot_transition().copied()
+    }
+    #[test]
+    fn bounded_chain_preserves_exact_endpoints_and_acknowledgement() {
+        let mut win = mount();
+        let base = token(&win);
+        win.presented(base).unwrap();
+        win.set(Pair::A, Color::WHITE).unwrap();
+        let middle = token(&win);
+        assert!(chain(&win).unwrap().connects(Some(base), middle));
+        win.set(Pair::A, Color::BLACK).unwrap();
+        let latest = token(&win);
+        assert!(chain(&win).unwrap().connects(Some(base), latest));
+        assert!(!chain(&win).unwrap().connects(Some(middle), latest));
+        assert!(matches!(
+            win.presented(middle),
+            Err(Error::StalePresentation)
+        ));
+        assert!(chain(&win).unwrap().connects(Some(base), latest));
+        let allocation = allocation_counter::measure(|| {
+            for i in 0..1000 {
+                win.set(
+                    Pair::A,
+                    if i % 2 == 0 {
+                        Color::WHITE
+                    } else {
+                        Color::BLACK
+                    },
+                )
+                .unwrap();
+            }
+        });
+        assert_eq!(allocation.count_total, 0);
+        assert!(chain(&win).unwrap().connects(Some(base), token(&win)));
+        eprintln!(
+            "chain_header_bytes={},long_chain_allocations={},long_chain_retained_bytes={}",
+            size_of::<SlotTransition>(),
+            allocation.count_total,
+            allocation.bytes_current
+        );
+        win.presented(token(&win)).unwrap();
+        assert!(chain(&win).is_none());
+        let base = token(&win);
+        win.set(Pair::A, Color::WHITE).unwrap();
+        assert!(chain(&win).unwrap().connects(Some(base), token(&win)));
+    }
+    #[test]
+    fn chain_rejects_distinct_slots_geometry_replacement_and_failed_preparation() {
+        let mut win = mount();
+        let base = token(&win);
+        win.presented(base).unwrap();
+        win.set(Pair::A, Color::WHITE).unwrap();
+        win.set(Pair::B, Color::BLACK).unwrap();
+        assert!(!chain(&win).unwrap().connects(Some(base), token(&win)));
+        win.set(Pair::SHIFT, Affine::translation(8., 0.)).unwrap();
+        assert!(chain(&win).is_none());
+        win.set(Pair::A, Color::BLACK).unwrap();
+        assert!(!chain(&win).unwrap().connects(Some(base), token(&win)));
+        win.update(|model| model.swapped = true).unwrap();
+        assert!(chain(&win).is_none());
+        win.set(Pair::A, Color::WHITE).unwrap();
+        let eligible = token(&win);
+        let pixels = win.with_pixels(|p, _, _| p.to_vec()).unwrap();
+        assert!(matches!(
+            win.set(Pair::SHIFT, Affine::translation(f32::NAN, 0.)),
+            Err(crate::SetError::Committed { .. })
+        ));
+        assert_eq!(token(&win), eligible);
+        assert!(chain(&win).is_none());
+        assert_eq!(win.with_pixels(|p, _, _| p.to_vec()).unwrap(), pixels);
+        win.presented(eligible).unwrap();
+    }
+    #[test]
+    fn chain_cannot_extend_a_missing_tail_or_foreign_namespace() {
+        for foreign in [false, true] {
+            let mut win = mount();
+            let base = token(&win);
+            win.presented(base).unwrap();
+            win.set(Pair::A, Color::WHITE).unwrap();
+            let immediate = token(&win);
+            let other = mount();
+            let foreign_token = token(&other);
+            let mut runtime = win.runtime_mut().unwrap();
+            let styles::Styles::Colors(values) = &mut runtime.styles else {
+                panic!("bound styles")
+            };
+            let summary = values.transition.as_mut().unwrap();
+            if foreign {
+                summary.from = foreign_token;
+            } else {
+                summary.through = base.sequence;
+            }
+            drop(runtime);
+            win.set(Pair::A, Color::BLACK).unwrap();
+            let summary = chain(&win).unwrap();
+            assert_eq!(summary.from, immediate);
+            assert!(!summary.connects(Some(base), token(&win)));
+            assert!(!summary.connects(Some(foreign_token), token(&win)));
         }
     }
 }

@@ -256,7 +256,9 @@ fn live_slot_transition_to_retained_pixels() {
                 Err(Error::StalePresentation)
             ));
             let (red, row) = submit(&owner, &mut renderer, &mut packet, &image);
-            assert!(row["validated_draws"].as_u64().unwrap() > 0);
+            assert_eq!(row["validated_draws"], 0);
+            assert_eq!(row["binning_tile_visits"], 0);
+            assert_eq!(row["upload_bytes"], 16);
             compare(
                 &mut owner,
                 &renderer,
@@ -265,7 +267,7 @@ fn live_slot_transition_to_retained_pixels() {
                 &mut Win::with_size(Paint::new(n, shared, Color::rgb(255, 0, 0), 0.), 64, 64)
                     .unwrap(),
             );
-            rows.push(json!({"case":"coalesced-full","n":n,"shared":shared,"work":row}));
+            rows.push(json!({"case":"coalesced-chain","n":n,"shared":shared,"work":row}));
             owner.presented(red).unwrap();
             owner
                 .set(
@@ -372,7 +374,6 @@ fn live_slot_transition_to_retained_pixels() {
             &mut Win::with_size(Paint::new(9, false, Color::rgb(0, 0, 255), 32.), 64, 64).unwrap(),
         );
         rows.push(json!({"case":"foreign-full","work":row}));
-        other.presented(other_token).unwrap();
         // Bounded mutant: deliberately authorize a foreign positional edit over
         // the old packet, omitting both namespace and predecessor certificate.
         packet = None;
@@ -389,9 +390,135 @@ fn live_slot_transition_to_retained_pixels() {
             })
             .unwrap();
         let wrong = read(&renderer, &second);
+        other.presented(other_token).unwrap();
         let errors = wrong.iter().zip(&exact).filter(|(a, b)| a != b).count();
         assert!(errors > 0, "authority mutant must alter pixels");
-        let report = json!({"adapter":format!("{:?}",adapter.get_info()),"rows":rows,"authority_mutant_wrong_bytes":errors,"scope":"actual native private decision and retained renderer, offscreen software Vulkan; no compression or timing claim"});
+        let negatives = std::path::PathBuf::from(std::env::var("GPUI_LIVE_SEAM_OUTPUT").unwrap())
+            .with_extension("negative");
+        std::fs::create_dir_all(&negatives).unwrap();
+        std::fs::write(negatives.join("foreign-actual.rgba"), &wrong).unwrap();
+        std::fs::write(negatives.join("foreign-expected.rgba"), &exact).unwrap();
+        let mut long = Win::recording(
+            Paint::new(1024, false, Color::BLACK, 0.),
+            WindowOptions {
+                size: [64, 64],
+                ..Default::default()
+            },
+        )
+        .unwrap();
+        let (base, row) = submit(&long, &mut renderer, &mut packet, &first);
+        compare(
+            &mut long,
+            &renderer,
+            &mut oracle,
+            &first,
+            &mut Win::with_size(Paint::new(1024, false, Color::BLACK, 0.), 64, 64).unwrap(),
+        );
+        rows.push(json!({"case":"long-initial","work":row}));
+        long.presented(base).unwrap();
+        for i in 0..1000 {
+            long.set(
+                Paint::COLOR,
+                if i % 2 == 0 {
+                    Color::rgb(255, 0, 0)
+                } else {
+                    Color::WHITE
+                },
+            )
+            .unwrap();
+        }
+        let (latest, row) = submit(&long, &mut renderer, &mut packet, &first);
+        assert_eq!(row["upload_bytes"], 16);
+        assert_eq!(row["validated_draws"], 0);
+        assert_eq!(row["binning_tile_visits"], 0);
+        compare(
+            &mut long,
+            &renderer,
+            &mut oracle,
+            &first,
+            &mut Win::with_size(Paint::new(1024, false, Color::WHITE, 0.), 64, 64).unwrap(),
+        );
+        rows.push(json!({"case":"long-chain","work":row}));
+        long.presented(latest).unwrap();
+        long.set(Paint::COLOR, Color::BLACK).unwrap();
+        long.set(Paint::COLOR, Color::WHITE).unwrap();
+        let (same, row) = submit(&long, &mut renderer, &mut packet, &first);
+        assert_eq!(row["upload_bytes"], 0);
+        assert_eq!(row["validated_draws"], 0);
+        compare(
+            &mut long,
+            &renderer,
+            &mut oracle,
+            &first,
+            &mut Win::with_size(Paint::new(1024, false, Color::WHITE, 0.), 64, 64).unwrap(),
+        );
+        rows.push(json!({"case":"return-to-acknowledged-color","work":row}));
+        long.presented(same).unwrap();
+        let mut moved = Win::recording(
+            Paint::new(9, false, Color::BLACK, 0.),
+            WindowOptions {
+                size: [64, 64],
+                ..Default::default()
+            },
+        )
+        .unwrap();
+        let (anchor, row) = submit(&moved, &mut renderer, &mut packet, &first);
+        compare(
+            &mut moved,
+            &renderer,
+            &mut oracle,
+            &first,
+            &mut Win::with_size(Paint::new(9, false, Color::BLACK, 0.), 64, 64).unwrap(),
+        );
+        rows.push(json!({"case":"geometry-anchor","work":row}));
+        moved.presented(anchor).unwrap();
+        moved.set(Paint::COLOR, Color::WHITE).unwrap();
+        moved
+            .set(Paint::SHIFT, Affine::translation(32., -112.))
+            .unwrap();
+        moved.set(Paint::COLOR, Color::rgb(255, 0, 0)).unwrap();
+        moved
+            .with_paint_scene(|scene, token, edit, damage| {
+                let mut forged = *edit.unwrap();
+                assert_ne!(forged.from, anchor);
+                forged.from = anchor;
+                render_packet(
+                    &mut renderer,
+                    &mut packet,
+                    scene,
+                    token,
+                    Some(&forged),
+                    &second.create_view(&Default::default()),
+                    Some(damage),
+                )
+                .unwrap();
+            })
+            .unwrap();
+        let bad = read(&renderer, &second);
+        let good = Win::with_size(Paint::new(9, false, Color::rgb(255, 0, 0), 32.), 64, 64)
+            .unwrap()
+            .with_pixels(|p, _, _| p.to_vec())
+            .unwrap();
+        let chain_errors = bad.iter().zip(&good).filter(|(a, b)| a != b).count();
+        assert!(
+            chain_errors > 0,
+            "forged chain crossing geometry must change pixels"
+        );
+        std::fs::write(negatives.join("geometry-actual.rgba"), &bad).unwrap();
+        std::fs::write(negatives.join("geometry-expected.rgba"), &good).unwrap();
+        packet = None;
+        let (valid, row) = submit(&moved, &mut renderer, &mut packet, &second);
+        assert!(row["validated_draws"].as_u64().unwrap() > 0);
+        compare(
+            &mut moved,
+            &renderer,
+            &mut oracle,
+            &second,
+            &mut Win::with_size(Paint::new(9, false, Color::rgb(255, 0, 0), 32.), 64, 64).unwrap(),
+        );
+        rows.push(json!({"case":"geometry-real-full-fallback","work":row}));
+        moved.presented(valid).unwrap();
+        let report = json!({"adapter":format!("{:?}",adapter.get_info()),"rows":rows,"authority_mutant_wrong_bytes":errors,"forged_chain_wrong_bytes":chain_errors,"scope":"actual native private decision and retained renderer, offscreen software Vulkan; no compression or timing claim"});
         let path = std::env::var("GPUI_LIVE_SEAM_OUTPUT").expect("capture path");
         std::fs::write(path, serde_json::to_vec_pretty(&report).unwrap()).unwrap();
     });

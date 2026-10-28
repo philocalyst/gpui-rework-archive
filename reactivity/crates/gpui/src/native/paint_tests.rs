@@ -213,10 +213,12 @@ pub(super) fn run(gpu: &mut GpuSurface) {
         owner.set(Paint::COLOR, rgb(0x102030)).unwrap();
         owner.set(Paint::COLOR, rgb(0x405060)).unwrap();
         render(gpu, &mut oracle, &mut owner, &texture);
-        assert!(
-            gpu.renderer.stats().validated_draws > 0,
-            "coalesced token gap rebuilds latest C"
+        assert_eq!(
+            gpu.renderer.stats().validated_draws,
+            0,
+            "same-slot chain preserves its predecessor"
         );
+        assert_eq!(gpu.renderer.stats().instance_upload_bytes, 16);
         for color in [
             Color::linear_srgb(3.0, -0.5, 0.25, 1.0).unwrap(),
             Color::linear_srgb(-f32::from_bits(1), 0.5, 2.0, 1.0).unwrap(),

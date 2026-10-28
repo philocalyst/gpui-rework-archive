@@ -105,6 +105,7 @@ impl<M: View + 'static, L: LaneSet<M>> RuntimeMut<'_, M, L> {
         scroll: &[ScrollRequest],
         property_changed: Option<NonZeroU64>,
     ) -> Result<(), Error> {
+        self.styles.clear_slot_transition();
         let was_valid = self.logical_valid;
         match catch_unwind(AssertUnwindSafe(|| {
             self.runtime.sources.validate(&mut self.runtime.model)?;
@@ -370,6 +371,7 @@ impl<M: View + 'static, L: LaneSet<M>> RuntimeMut<'_, M, L> {
             }
         };
         if let Err(error) = result {
+            self.runtime.styles.clear_slot_transition();
             self.runtime.clear_editing();
             self.runtime.logical_valid = false;
             self.runtime.focused = None;

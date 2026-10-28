@@ -367,7 +367,7 @@ fn render_packet(
     // Revoke image authority before any packet or image mutation.
     let previous = packet_token.take();
     if let Some(paint) = paint
-        && previous == Some(paint.from)
+        && paint.connects(previous, token)
         && let Ok(submitted) = renderer.patch_slots(&paint.edits, target, damage)
     {
         *packet_token = Some(token);
