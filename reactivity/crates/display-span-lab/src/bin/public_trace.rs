@@ -34,7 +34,7 @@ impl View for Panel {
     fn sources() -> Sources<Self> {
         Sources::new()
             .direct(Self::COLOR)
-            .direct(Self::EXTRA)
+            .field(Self::EXTRA)
             .direct(Self::HEIGHT)
             .direct(Self::TRANSFORM)
     }
@@ -76,6 +76,22 @@ fn capture(win: &mut Win<Panel>, root: &Path, name: &str, ack: bool) -> Value {
         .unwrap();
     let pixels = win.with_pixels(|p, _, _| p.to_vec()).unwrap();
     fs::write(root.join(format!("public-{name}.rgba")), &pixels).unwrap();
+    // Independent full View reconstruction from the requested valid state.
+    // TRANSFORM intentionally remains identity after the rejected NaN request.
+    let mut oracle = Win::with_size(
+        Panel {
+            color: Signal::new(*win.read(Panel::COLOR).unwrap()),
+            extra: Signal::new(*win.read(Panel::EXTRA).unwrap()),
+            height: Signal::new(*win.read(Panel::HEIGHT).unwrap()),
+            transform: Signal::new(Affine::IDENTITY),
+        },
+        64,
+        64,
+    )
+    .unwrap();
+    let expected = oracle.with_pixels(|p, _, _| p.to_vec()).unwrap();
+    fs::write(root.join(format!("public-{name}-oracle.rgba")), &expected).unwrap();
+    assert_eq!(pixels, expected, "full public reconstruction {name}");
     if ack {
         win.presented(token).unwrap();
     }
@@ -105,12 +121,16 @@ fn main() {
     win.reset_counters().unwrap();
     win.set(Panel::EXTRA, true).unwrap();
     frames.push(capture(&mut win, root, "insertion", true));
+    assert_eq!(win.snapshot().unwrap().nodes.len(), 10);
+    assert_eq!(win.counters().owner_reruns, 1);
     win.reset_counters().unwrap();
     win.set(Panel::HEIGHT, 7.).unwrap();
     frames.push(capture(&mut win, root, "layout", true));
     win.reset_counters().unwrap();
     win.set(Panel::EXTRA, false).unwrap();
     frames.push(capture(&mut win, root, "removal", true));
+    assert_eq!(win.snapshot().unwrap().nodes.len(), 9);
+    assert_eq!(win.counters().owner_reruns, 1);
     win.reset_counters().unwrap();
     win.set(Panel::COLOR, Color::BLACK).unwrap();
     let stale = win.with_scene(|_, t| t).unwrap();

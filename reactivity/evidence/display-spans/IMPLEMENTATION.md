@@ -53,3 +53,15 @@ adapter uses this fixture's explicit one-opaque-rect-per-node preorder contract,
 validates exact translation and enclosure by semantic bounds, and retains the
 exact sampled rectangle plus independent GPUI pixels. This is fixture-specific
 association, not a general stable draw identity API. Original failure preserved.
+
+9737af6b passes172 exact GPU frames/132 codec cases/Clippy, but ledger review
+rejects its public structural coverage: EXTRA was incorrectly declared direct
+despite an ordinary Rust conditional read, so insertion/removal were no-ops.
+Correct to existing Sources::field, assert9->10->9 nodes plus owner reruns,
+and compare every public candidate to a fresh full View reconstruction.
+The original passing numerical cohort remains with this limitation.
+Also preserve actual GPU readback bytes, explicitly charge all six full
+metadata construction passes and the entire expanded CPU canonical mirror
+materialization (previous changed-row count described wire differences only),
+and validate generational handle rejection. No fixed workload or pixel gate
+is weakened; public structural work is strengthened.

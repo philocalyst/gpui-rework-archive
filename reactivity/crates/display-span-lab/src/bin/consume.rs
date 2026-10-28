@@ -168,6 +168,19 @@ fn main() {
                 )
                 .unwrap();
                 let expected_words = bytes(&words(&job["canonical"]));
+                let output = Path::new(&path).parent().unwrap().join("gpu-readback");
+                fs::create_dir_all(&output).unwrap();
+                let stem = format!(
+                    "{}-{}",
+                    series["name"].as_str().unwrap(),
+                    job["name"].as_str().unwrap()
+                );
+                fs::write(output.join(format!("{stem}.rgba")), &actual_pixels).unwrap();
+                fs::write(
+                    output.join(format!("{stem}.words")),
+                    &actual_words[..expected_words.len()],
+                )
+                .unwrap();
                 assert_eq!(
                     actual_pixels, expected_pixels,
                     "pixels {} {}",

@@ -177,6 +177,9 @@ class Arena:
 class Layout:
     def __init__(self,kind):
         self.kind=kind;self.rows=[];self.loc={};self.arena=Arena();self.presented=[];self.pixels=[0xffffffff]*4096;self.jobs=[];self.metrics=[];self.root=0;self.sequence=0
+    def resolve(self,identity,generation):
+        slot=self.loc.get(identity)
+        return slot if slot is not None and self.rows[slot][1]==generation else None
     def update(self,name,draws,producer,accepted=True,mutant=None):
         ids=[d[0] for d in draws];assert len(ids)==len(set(ids));oldloc=self.loc.copy();oldrows=self.rows
         if self.kind=='packed':loc={i:j for j,i in enumerate(ids)};slots=len(ids)
@@ -229,7 +232,7 @@ class Layout:
         if accepted:self.presented=copy.deepcopy(draws);self.pixels=candidate
         relocated=sum(i in oldloc and oldloc[i]!=p for i,p in loc.items())
         metric=dict(name=name,layout=self.kind,nodes=len(draws),slots=slots,accepted=accepted,**producer,**cost,
-            layout_index_scan_nodes=len(draws)*2,damage_compare_nodes=len(draws)+len(old_by),
+            layout_index_scan_nodes=len(draws)*6,cpu_canonical_rows_materialized=len(draws),cpu_canonical_wire_bytes_materialized=len(draws)*48,damage_compare_nodes=len(draws)+len(old_by),
             logical_rows_rewritten=len(touched),logical_bytes_rewritten=len(touched)*48,
             relocated_records=relocated,logical_bytes_moved=relocated*48,
             identity_index_entries_rewritten=sum(oldloc.get(i)!=p for i,p in loc.items())+len(oldloc.keys()-loc.keys()),
@@ -240,6 +243,9 @@ class Layout:
             retained_version_count=len(self.arena.versions),resource_tokens_retained=len({d[5] for d in draws if d[5]}),
             subtree_lookup_loads=1,contiguous_subtree=self.kind=='packed',decode_max_payload_loads_per_field=2)
         self.rows=rows;self.loc=loc;self.root=root;self.metrics.append(metric)
+        for i,g,*_ in draws:assert self.resolve(i,g)==loc[i] and self.resolve(i,g+1) is None
+        for old in oldrows:
+            if old[10] and old[0] in loc and old[1]!=rows[loc[old[0]]][1]:assert self.resolve(old[0],old[1]) is None
         self.jobs.append(dict(name=name,writes=writes,descriptor=desc,canonical=[v for row in rows for v in row],expected=expected))
     def series(self,name,out):
         jobs=[]
