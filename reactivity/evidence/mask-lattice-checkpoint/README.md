@@ -19,3 +19,14 @@ This checkpoint permits reclamation of only inactive oracle/mutant library
 caches after verifying the manifest and exact preserved executables. No
 production source, test executable, shader, fingerprint or evidence is removed.
 All changes local; overall ZGX/hardware/quality goals remain open.
+
+
+## Revised certificate checkpoint
+
+Source9e4ef386 now passes353 GPU/canvas tests, strict Clippy and all336 exact
+independent GPU readbacks. Revised width mutant4c53d8d9 fails texel authority
+exactly. Full-native build,1108 tests,17 port tests and strict Clippy pass.
+Actual native/minimal/default/offline gates are pending and not claimed here.
+Shipping lines38089 (+61), default-release native ELF26391352 (+1232).
+This extension preserves the successful revised observations alongside every
+previous failure. It permits only completed verified cache-copy/library cleanup.

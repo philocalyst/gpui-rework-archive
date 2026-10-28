@@ -1,0 +1,4 @@
+{
+  "scope": "Mask sample uses texel1 instead of2 after only logical/mask width equality is omitted.",
+  "panic": "assertion `left == right` failed: mask cell axis=0 phase=-256 scale=0.5 translation=0 point=0.125"
+}

@@ -1,0 +1,23 @@
+[
+  {
+    "worktree": "/home/user/gpui-sparse-text-lab",
+    "source": "a91fd03b9b1623efbde68dfd8c00cadf79e7508e",
+    "removed_files": 9340,
+    "retained_files": 4487,
+    "bytes": 735686552
+  },
+  {
+    "worktree": "/home/user/gpui-bounded-cache-lab",
+    "source": "e6bda77dfc6784533cbc2b769f05b55fdc701c61",
+    "removed_files": 9343,
+    "retained_files": 4691,
+    "bytes": 735693066
+  },
+  {
+    "worktree": "/home/user/gpui-state-lab",
+    "source": "bed967a3c20e605ad4636b749bb6ce9348731d57",
+    "removed_files": 9340,
+    "retained_files": 4250,
+    "bytes": 735686552
+  }
+]
