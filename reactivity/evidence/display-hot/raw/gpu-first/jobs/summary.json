@@ -1,0 +1,121 @@
+[
+  {
+    "name": "hot-1-overlap-compressed",
+    "frames": 13,
+    "arena_bytes": 1168,
+    "mutant": false,
+    "submitted_frames": 13
+  },
+  {
+    "name": "hot-1-overlap-raw",
+    "frames": 13,
+    "arena_bytes": 336,
+    "mutant": false,
+    "submitted_frames": 13
+  },
+  {
+    "name": "hot-1-serial-uncompressed",
+    "frames": 13,
+    "arena_bytes": 208,
+    "mutant": false,
+    "submitted_frames": 13
+  },
+  {
+    "name": "hot-9-overlap-compressed",
+    "frames": 13,
+    "arena_bytes": 1680,
+    "mutant": false,
+    "submitted_frames": 13
+  },
+  {
+    "name": "hot-9-overlap-raw",
+    "frames": 13,
+    "arena_bytes": 784,
+    "mutant": false,
+    "submitted_frames": 13
+  },
+  {
+    "name": "hot-9-serial-uncompressed",
+    "frames": 13,
+    "arena_bytes": 656,
+    "mutant": false,
+    "submitted_frames": 13
+  },
+  {
+    "name": "hot-32-overlap-compressed",
+    "frames": 13,
+    "arena_bytes": 1680,
+    "mutant": false,
+    "submitted_frames": 13
+  },
+  {
+    "name": "hot-32-overlap-raw",
+    "frames": 13,
+    "arena_bytes": 2320,
+    "mutant": false,
+    "submitted_frames": 13
+  },
+  {
+    "name": "hot-32-serial-uncompressed",
+    "frames": 13,
+    "arena_bytes": 2192,
+    "mutant": false,
+    "submitted_frames": 13
+  },
+  {
+    "name": "hot-256-overlap-compressed",
+    "frames": 13,
+    "arena_bytes": 5776,
+    "mutant": false,
+    "submitted_frames": 13
+  },
+  {
+    "name": "hot-256-overlap-raw",
+    "frames": 13,
+    "arena_bytes": 5776,
+    "mutant": false,
+    "submitted_frames": 13
+  },
+  {
+    "name": "hot-256-serial-uncompressed",
+    "frames": 13,
+    "arena_bytes": 16912,
+    "mutant": false,
+    "submitted_frames": 13
+  },
+  {
+    "name": "hot-1024-overlap-compressed",
+    "frames": 13,
+    "arena_bytes": 18064,
+    "mutant": false,
+    "submitted_frames": 13
+  },
+  {
+    "name": "hot-1024-overlap-raw",
+    "frames": 13,
+    "arena_bytes": 18064,
+    "mutant": false,
+    "submitted_frames": 13
+  },
+  {
+    "name": "hot-1024-serial-uncompressed",
+    "frames": 13,
+    "arena_bytes": 66064,
+    "mutant": false,
+    "submitted_frames": 13
+  },
+  {
+    "name": "hot-9-overlap-compressed-stress",
+    "frames": 20,
+    "arena_bytes": 1808,
+    "mutant": false,
+    "submitted_frames": 13
+  },
+  {
+    "name": "hot-9-overlap-compressed-stress-mutant",
+    "frames": 20,
+    "arena_bytes": 1808,
+    "mutant": true,
+    "submitted_frames": 13
+  }
+]

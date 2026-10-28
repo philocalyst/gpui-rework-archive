@@ -1,0 +1,18 @@
+{
+  "independently_simulated_frames": 254,
+  "positive_hot_gpu_frames": 208,
+  "positive_cold_control_frames": 33,
+  "gpu_mutants": [
+    {
+      "case": "hot-9-overlap-compressed-stress-mutant",
+      "errors": [
+        {
+          "fence": 1,
+          "audit_byte_errors": 4,
+          "pixel_byte_errors": 0
+        }
+      ]
+    }
+  ],
+  "cpu_checks": 5749
+}

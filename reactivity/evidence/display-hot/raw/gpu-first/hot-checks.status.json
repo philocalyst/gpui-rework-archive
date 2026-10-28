@@ -1,0 +1,10 @@
+{
+  "args": [
+    "python3",
+    "/home/user/gpui-display-hot-lab/reactivity/crates/display-span-lab/model/hot_checks.py",
+    "/home/user/gpui-display-hot-evidence/gpu-first/checks"
+  ],
+  "exit": 0,
+  "expected": 0,
+  "elapsed_seconds": 0.07415413856506348
+}

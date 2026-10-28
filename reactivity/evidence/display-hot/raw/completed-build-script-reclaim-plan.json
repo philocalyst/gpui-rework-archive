@@ -1,0 +1,374 @@
+{
+  "checked": [
+    {
+      "dossier": "/home/user/gpui-mask-partitions-native-lab/reactivity/evidence/mask-partitions-native",
+      "verified_files": 828
+    },
+    {
+      "dossier": "/home/user/gpui-mask-miss-native-lab/reactivity/evidence/mask-miss-native",
+      "verified_files": 828
+    }
+  ],
+  "files": [
+    {
+      "path": "/home/user/gpui-mask-partitions-native-target/release/build/icu_properties_data/75b22308f52f5895/out/build_script_build",
+      "bytes": 4593296,
+      "sha256": "722565e6b996862385aa363af7080f6f084007cfc747b757d2750cd16a98c797"
+    },
+    {
+      "path": "/home/user/gpui-mask-partitions-native-target/release/build/icu_locale_fallback_data/a4e43010739dc19c/out/build_script_build",
+      "bytes": 4593296,
+      "sha256": "c60caa1a764a0df7573f3671bb93d89ce0e69ac52af68da6c1979e9419e9d732"
+    },
+    {
+      "path": "/home/user/gpui-mask-partitions-native-target/release/build/icu_segmenter_data/28f877b7d0c720e0/out/build_script_build",
+      "bytes": 4593296,
+      "sha256": "2def55007b345db9bb5db6f1cad76b0bfd6b8873a38fe146b6fab2830de29933"
+    },
+    {
+      "path": "/home/user/gpui-mask-partitions-native-target/release/build/wgpu-hal/0cb531952e81d370/out/build_script_build",
+      "bytes": 4711520,
+      "sha256": "d198fc8be789a2744f9d85cdcbb9023ea5504c6b66a0f2aac9a87b60c4742a3c"
+    },
+    {
+      "path": "/home/user/gpui-mask-partitions-native-target/release/build/paste/22e1f9d01e7a81e0/out/build_script_build",
+      "bytes": 4683976,
+      "sha256": "89484c22be3ea8fbfa1303414361d1421192673850ebb0ad3de7cfb47cbb19ba"
+    },
+    {
+      "path": "/home/user/gpui-mask-partitions-native-target/release/build/rustix/6e1bf825e3750a4a/out/build_script_build",
+      "bytes": 4741784,
+      "sha256": "8e82e68689e1264f9adac60fa351917e842abcb295c603a4d1b2818b348ac375"
+    },
+    {
+      "path": "/home/user/gpui-mask-partitions-native-target/release/build/rustix/39efc3ea0c928d74/out/build_script_build",
+      "bytes": 4735600,
+      "sha256": "2f690b543712002c8d9001e0267c976c6d2beb3b37b2564a01630d7f0a0e9a7d"
+    },
+    {
+      "path": "/home/user/gpui-mask-partitions-native-target/release/build/libm/9056c6182f41a53d/out/build_script_build",
+      "bytes": 4677328,
+      "sha256": "f6f8ef41d0e7f75c232d67c8b22cab23450f7beed992bddf33be8fab51246638"
+    },
+    {
+      "path": "/home/user/gpui-mask-partitions-native-target/release/build/zmij/4856e1ccf1716a77/out/build_script_build",
+      "bytes": 4688696,
+      "sha256": "a04a1159d00f384f0ac415642f7ba3f0ae4a9db15c483979c19db567e6cf7ad0"
+    },
+    {
+      "path": "/home/user/gpui-mask-partitions-native-target/release/build/libc/5e09b6f638c2d287/out/build_script_build",
+      "bytes": 4796576,
+      "sha256": "c5e5fd889674b890ce451138ceb0957e4768bdc555f6687e3f62a7bebfc9e383"
+    },
+    {
+      "path": "/home/user/gpui-mask-partitions-native-target/release/build/proc-macro2/575cc0664d0e648c/out/build_script_build",
+      "bytes": 4741320,
+      "sha256": "1b1a067f1ccf946b74d1faed1cc256d568c63485582081a083a6eda939536cfa"
+    },
+    {
+      "path": "/home/user/gpui-mask-partitions-native-target/release/build/proc-macro2/b295dfa55dbaddc8/out/build_script_build",
+      "bytes": 4741384,
+      "sha256": "6a97164c2ff4ecb75c2e4fab9f82f02c95db47525344b2b6212fff3683f4729d"
+    },
+    {
+      "path": "/home/user/gpui-mask-partitions-native-target/release/build/crossbeam-utils/fd52a6d03f18867a/out/build_script_build",
+      "bytes": 4644032,
+      "sha256": "d4a0e49eabe97e727d2c745445eb994757b2839dac3431b911a60711b6be9fca"
+    },
+    {
+      "path": "/home/user/gpui-mask-partitions-native-target/release/build/gpui_gpu/96ef14bd842bcd7a/out/build_script_build",
+      "bytes": 12776448,
+      "sha256": "e4e7515b11df71ae2624f8d2203c35f6e9a26e5c3bb91e68ea5275702be1e0a2"
+    },
+    {
+      "path": "/home/user/gpui-mask-partitions-native-target/release/build/wgsl-rs-macros/af3d68ed8328bdc5/out/build_script_build",
+      "bytes": 4692768,
+      "sha256": "d12715ac37fe4065f44382fc3f3b1683c65b8c3f3a18e9bfd5648736efbbe2a6"
+    },
+    {
+      "path": "/home/user/gpui-mask-partitions-native-target/release/build/parking_lot_core/3ce56588acccf5ad/out/build_script_build",
+      "bytes": 4616352,
+      "sha256": "7a9bdf41951c2654f9113ffcf88c7db8aa232bfcaf56daab82ed2382f9d2b26d"
+    },
+    {
+      "path": "/home/user/gpui-mask-partitions-native-target/release/build/wgpu-core/026a746a58d0d2f3/out/build_script_build",
+      "bytes": 4713368,
+      "sha256": "9e8d91c71daf617098458f4a9f6d9680e9c56028ca6e26403f4c59a4c23de61c"
+    },
+    {
+      "path": "/home/user/gpui-mask-partitions-native-target/release/build/wayland-sys/c3594817c5881833/out/build_script_build",
+      "bytes": 5017488,
+      "sha256": "0ad4f3bf4dc6cc9949c7e7120fcedb40ad6517b3a88be73a67600e6819afa317"
+    },
+    {
+      "path": "/home/user/gpui-mask-partitions-native-target/release/build/serde/bcddbdabdd6d14d1/out/build_script_build",
+      "bytes": 4711384,
+      "sha256": "309e888a50cd60c404e77b08b9a45b709f142e3aed9368c15be7735944135f3a"
+    },
+    {
+      "path": "/home/user/gpui-mask-partitions-native-target/release/build/zerocopy/7c378fc123275292/out/build_script_build",
+      "bytes": 4774912,
+      "sha256": "dfada090d718954d65819d0bee3866c11948f11f4f40986f2fa208090a3a307e"
+    },
+    {
+      "path": "/home/user/gpui-mask-partitions-native-target/release/build/thiserror/6b2976d49dc4ff44/out/build_script_build",
+      "bytes": 4761160,
+      "sha256": "9ab7b08db15027a0177279c9574dbd25d0050edbe53589fa4f02c299bf35a89c"
+    },
+    {
+      "path": "/home/user/gpui-mask-partitions-native-target/release/build/thiserror/60bcb0ac7ab7c878/out/build_script_build",
+      "bytes": 4724688,
+      "sha256": "ac8e44f9a49895084b41bc17766d05e04699bb45a609206cd924aa81a3a1f1c5"
+    },
+    {
+      "path": "/home/user/gpui-mask-partitions-native-target/release/build/khronos-egl/b2d4d18ab7c9d54c/out/build_script_build",
+      "bytes": 4581904,
+      "sha256": "dc3d4a167db75b3d1606bd0feb0065748f36efbf268c425f35ce20479125dce2"
+    },
+    {
+      "path": "/home/user/gpui-mask-partitions-native-target/release/build/serde_json/2ad38469a1e03ff7/out/build_script_build",
+      "bytes": 4593680,
+      "sha256": "972f5b4a751184886cae1aa2e1c9b59c57721c3dcc41d1f60c751a13fcff8a47"
+    },
+    {
+      "path": "/home/user/gpui-mask-partitions-native-target/release/build/async-io/952a993209841211/out/build_script_build",
+      "bytes": 4878456,
+      "sha256": "efafe1f98cce63504194e94f417770a6aa527a654b28826fa7846d2bd11c76c4"
+    },
+    {
+      "path": "/home/user/gpui-mask-partitions-native-target/release/build/num-traits/a0f247d5d83beef8/out/build_script_build",
+      "bytes": 4881264,
+      "sha256": "48c45df815c87c5449b7da080b158af13df0e728acb4941f3012339f9bc98e30"
+    },
+    {
+      "path": "/home/user/gpui-mask-partitions-native-target/release/build/x11-dl/a733bfc2a2af516c/out/build_script_build",
+      "bytes": 4854984,
+      "sha256": "d65f54e254dffa06918f8282db4938cf5bb71cbc4a9d5b91594ff61fc3e61607"
+    },
+    {
+      "path": "/home/user/gpui-mask-partitions-native-target/release/build/tiny-xlib/9fe2627270d36ab9/out/build_script_build",
+      "bytes": 5046928,
+      "sha256": "efbb5442d30ae88ad39966ecea45d2608955e1f35eff2cdc74fe171d0741490a"
+    },
+    {
+      "path": "/home/user/gpui-mask-partitions-native-target/release/build/naga/edad517e5a1fd89d/out/build_script_build",
+      "bytes": 4660992,
+      "sha256": "e3012c0a73003de47ddf15255cb5b47c98a66830d6827ed0497400615e57abf2"
+    },
+    {
+      "path": "/home/user/gpui-mask-partitions-native-target/release/build/naga/86d138e528751ca9/out/build_script_build",
+      "bytes": 4660992,
+      "sha256": "0766b3e8a2e65c92a82298bf9553e25f5c0aec8c78caa61f75f8842c3f762c2f"
+    },
+    {
+      "path": "/home/user/gpui-mask-partitions-native-target/release/build/wgpu/f0fe40a4303f4a91/out/build_script_build",
+      "bytes": 4808200,
+      "sha256": "e108f78d509563ab0f335a1b644595088577f5cf7ecaa24ff43b20a97b86b187"
+    },
+    {
+      "path": "/home/user/gpui-mask-partitions-native-target/release/build/serde_core/dfe0935f4147d2e8/out/build_script_build",
+      "bytes": 4713888,
+      "sha256": "138c05627c7cd8ffad8fe47196ceb458f3abe8af860a40f7ca8e633f5c8c16c4"
+    },
+    {
+      "path": "/home/user/gpui-mask-partitions-native-target/release/build/winit/3067bae8f2172870/out/build_script_build",
+      "bytes": 4696984,
+      "sha256": "8ab5732463e73c2c16b71423a120b7291848e82ee49824c35a477ba2d4353a1b"
+    },
+    {
+      "path": "/home/user/gpui-mask-partitions-native-target/release/build/icu_normalizer_data/584ed1dac2d650fe/out/build_script_build",
+      "bytes": 4593296,
+      "sha256": "e9a432f10535f66032acaf3c4b6fa3095b4e4d9b87305243644db5ca0864cf3c"
+    },
+    {
+      "path": "/home/user/gpui-mask-partitions-native-target/release/build/quote/fb972271841d05a0/out/build_script_build",
+      "bytes": 4683552,
+      "sha256": "45bfef69cdc4cccd09c1df2a3a34cf74e31d21d8fd80309e8050c5e335958a6b"
+    },
+    {
+      "path": "/home/user/gpui-mask-partitions-native-target/release/build/ash/b60eca9179e4f448/out/build_script_build",
+      "bytes": 4581904,
+      "sha256": "1c18265b114aed24e0d4b3f497f6ac6344f526799d050fd669e795125d17bb64"
+    },
+    {
+      "path": "/home/user/gpui-mask-miss-native-target/release/build/icu_properties_data/75b22308f52f5895/out/build_script_build",
+      "bytes": 4593296,
+      "sha256": "722565e6b996862385aa363af7080f6f084007cfc747b757d2750cd16a98c797"
+    },
+    {
+      "path": "/home/user/gpui-mask-miss-native-target/release/build/icu_locale_fallback_data/a4e43010739dc19c/out/build_script_build",
+      "bytes": 4593296,
+      "sha256": "c60caa1a764a0df7573f3671bb93d89ce0e69ac52af68da6c1979e9419e9d732"
+    },
+    {
+      "path": "/home/user/gpui-mask-miss-native-target/release/build/icu_segmenter_data/28f877b7d0c720e0/out/build_script_build",
+      "bytes": 4593296,
+      "sha256": "2def55007b345db9bb5db6f1cad76b0bfd6b8873a38fe146b6fab2830de29933"
+    },
+    {
+      "path": "/home/user/gpui-mask-miss-native-target/release/build/wgpu-hal/0cb531952e81d370/out/build_script_build",
+      "bytes": 4711520,
+      "sha256": "d198fc8be789a2744f9d85cdcbb9023ea5504c6b66a0f2aac9a87b60c4742a3c"
+    },
+    {
+      "path": "/home/user/gpui-mask-miss-native-target/release/build/paste/22e1f9d01e7a81e0/out/build_script_build",
+      "bytes": 4683976,
+      "sha256": "89484c22be3ea8fbfa1303414361d1421192673850ebb0ad3de7cfb47cbb19ba"
+    },
+    {
+      "path": "/home/user/gpui-mask-miss-native-target/release/build/rustix/6e1bf825e3750a4a/out/build_script_build",
+      "bytes": 4741784,
+      "sha256": "8e82e68689e1264f9adac60fa351917e842abcb295c603a4d1b2818b348ac375"
+    },
+    {
+      "path": "/home/user/gpui-mask-miss-native-target/release/build/rustix/39efc3ea0c928d74/out/build_script_build",
+      "bytes": 4735600,
+      "sha256": "2f690b543712002c8d9001e0267c976c6d2beb3b37b2564a01630d7f0a0e9a7d"
+    },
+    {
+      "path": "/home/user/gpui-mask-miss-native-target/release/build/libm/9056c6182f41a53d/out/build_script_build",
+      "bytes": 4677328,
+      "sha256": "f6f8ef41d0e7f75c232d67c8b22cab23450f7beed992bddf33be8fab51246638"
+    },
+    {
+      "path": "/home/user/gpui-mask-miss-native-target/release/build/zmij/4856e1ccf1716a77/out/build_script_build",
+      "bytes": 4688696,
+      "sha256": "a04a1159d00f384f0ac415642f7ba3f0ae4a9db15c483979c19db567e6cf7ad0"
+    },
+    {
+      "path": "/home/user/gpui-mask-miss-native-target/release/build/libc/5e09b6f638c2d287/out/build_script_build",
+      "bytes": 4796576,
+      "sha256": "c5e5fd889674b890ce451138ceb0957e4768bdc555f6687e3f62a7bebfc9e383"
+    },
+    {
+      "path": "/home/user/gpui-mask-miss-native-target/release/build/proc-macro2/575cc0664d0e648c/out/build_script_build",
+      "bytes": 4741320,
+      "sha256": "1b1a067f1ccf946b74d1faed1cc256d568c63485582081a083a6eda939536cfa"
+    },
+    {
+      "path": "/home/user/gpui-mask-miss-native-target/release/build/proc-macro2/b295dfa55dbaddc8/out/build_script_build",
+      "bytes": 4741384,
+      "sha256": "6a97164c2ff4ecb75c2e4fab9f82f02c95db47525344b2b6212fff3683f4729d"
+    },
+    {
+      "path": "/home/user/gpui-mask-miss-native-target/release/build/crossbeam-utils/fd52a6d03f18867a/out/build_script_build",
+      "bytes": 4644032,
+      "sha256": "d4a0e49eabe97e727d2c745445eb994757b2839dac3431b911a60711b6be9fca"
+    },
+    {
+      "path": "/home/user/gpui-mask-miss-native-target/release/build/gpui_gpu/96ef14bd842bcd7a/out/build_script_build",
+      "bytes": 12666184,
+      "sha256": "7029337178d7dcf26af1e86f964d869b00f39050f2fd03251d535734e126fcb8"
+    },
+    {
+      "path": "/home/user/gpui-mask-miss-native-target/release/build/wgsl-rs-macros/af3d68ed8328bdc5/out/build_script_build",
+      "bytes": 4692768,
+      "sha256": "d12715ac37fe4065f44382fc3f3b1683c65b8c3f3a18e9bfd5648736efbbe2a6"
+    },
+    {
+      "path": "/home/user/gpui-mask-miss-native-target/release/build/parking_lot_core/3ce56588acccf5ad/out/build_script_build",
+      "bytes": 4616352,
+      "sha256": "7a9bdf41951c2654f9113ffcf88c7db8aa232bfcaf56daab82ed2382f9d2b26d"
+    },
+    {
+      "path": "/home/user/gpui-mask-miss-native-target/release/build/wgpu-core/026a746a58d0d2f3/out/build_script_build",
+      "bytes": 4713368,
+      "sha256": "9e8d91c71daf617098458f4a9f6d9680e9c56028ca6e26403f4c59a4c23de61c"
+    },
+    {
+      "path": "/home/user/gpui-mask-miss-native-target/release/build/wayland-sys/c3594817c5881833/out/build_script_build",
+      "bytes": 5017488,
+      "sha256": "0ad4f3bf4dc6cc9949c7e7120fcedb40ad6517b3a88be73a67600e6819afa317"
+    },
+    {
+      "path": "/home/user/gpui-mask-miss-native-target/release/build/serde/bcddbdabdd6d14d1/out/build_script_build",
+      "bytes": 4711384,
+      "sha256": "309e888a50cd60c404e77b08b9a45b709f142e3aed9368c15be7735944135f3a"
+    },
+    {
+      "path": "/home/user/gpui-mask-miss-native-target/release/build/zerocopy/7c378fc123275292/out/build_script_build",
+      "bytes": 4774912,
+      "sha256": "dfada090d718954d65819d0bee3866c11948f11f4f40986f2fa208090a3a307e"
+    },
+    {
+      "path": "/home/user/gpui-mask-miss-native-target/release/build/thiserror/6b2976d49dc4ff44/out/build_script_build",
+      "bytes": 4761160,
+      "sha256": "9ab7b08db15027a0177279c9574dbd25d0050edbe53589fa4f02c299bf35a89c"
+    },
+    {
+      "path": "/home/user/gpui-mask-miss-native-target/release/build/thiserror/60bcb0ac7ab7c878/out/build_script_build",
+      "bytes": 4724688,
+      "sha256": "ac8e44f9a49895084b41bc17766d05e04699bb45a609206cd924aa81a3a1f1c5"
+    },
+    {
+      "path": "/home/user/gpui-mask-miss-native-target/release/build/khronos-egl/b2d4d18ab7c9d54c/out/build_script_build",
+      "bytes": 4581904,
+      "sha256": "dc3d4a167db75b3d1606bd0feb0065748f36efbf268c425f35ce20479125dce2"
+    },
+    {
+      "path": "/home/user/gpui-mask-miss-native-target/release/build/serde_json/2ad38469a1e03ff7/out/build_script_build",
+      "bytes": 4593680,
+      "sha256": "972f5b4a751184886cae1aa2e1c9b59c57721c3dcc41d1f60c751a13fcff8a47"
+    },
+    {
+      "path": "/home/user/gpui-mask-miss-native-target/release/build/async-io/952a993209841211/out/build_script_build",
+      "bytes": 4878456,
+      "sha256": "efafe1f98cce63504194e94f417770a6aa527a654b28826fa7846d2bd11c76c4"
+    },
+    {
+      "path": "/home/user/gpui-mask-miss-native-target/release/build/num-traits/a0f247d5d83beef8/out/build_script_build",
+      "bytes": 4881264,
+      "sha256": "48c45df815c87c5449b7da080b158af13df0e728acb4941f3012339f9bc98e30"
+    },
+    {
+      "path": "/home/user/gpui-mask-miss-native-target/release/build/x11-dl/a733bfc2a2af516c/out/build_script_build",
+      "bytes": 4854984,
+      "sha256": "d65f54e254dffa06918f8282db4938cf5bb71cbc4a9d5b91594ff61fc3e61607"
+    },
+    {
+      "path": "/home/user/gpui-mask-miss-native-target/release/build/tiny-xlib/9fe2627270d36ab9/out/build_script_build",
+      "bytes": 5046928,
+      "sha256": "efbb5442d30ae88ad39966ecea45d2608955e1f35eff2cdc74fe171d0741490a"
+    },
+    {
+      "path": "/home/user/gpui-mask-miss-native-target/release/build/naga/edad517e5a1fd89d/out/build_script_build",
+      "bytes": 4660992,
+      "sha256": "e3012c0a73003de47ddf15255cb5b47c98a66830d6827ed0497400615e57abf2"
+    },
+    {
+      "path": "/home/user/gpui-mask-miss-native-target/release/build/naga/86d138e528751ca9/out/build_script_build",
+      "bytes": 4660992,
+      "sha256": "0766b3e8a2e65c92a82298bf9553e25f5c0aec8c78caa61f75f8842c3f762c2f"
+    },
+    {
+      "path": "/home/user/gpui-mask-miss-native-target/release/build/wgpu/f0fe40a4303f4a91/out/build_script_build",
+      "bytes": 4808200,
+      "sha256": "e108f78d509563ab0f335a1b644595088577f5cf7ecaa24ff43b20a97b86b187"
+    },
+    {
+      "path": "/home/user/gpui-mask-miss-native-target/release/build/serde_core/dfe0935f4147d2e8/out/build_script_build",
+      "bytes": 4713888,
+      "sha256": "138c05627c7cd8ffad8fe47196ceb458f3abe8af860a40f7ca8e633f5c8c16c4"
+    },
+    {
+      "path": "/home/user/gpui-mask-miss-native-target/release/build/winit/3067bae8f2172870/out/build_script_build",
+      "bytes": 4696984,
+      "sha256": "8ab5732463e73c2c16b71423a120b7291848e82ee49824c35a477ba2d4353a1b"
+    },
+    {
+      "path": "/home/user/gpui-mask-miss-native-target/release/build/icu_normalizer_data/584ed1dac2d650fe/out/build_script_build",
+      "bytes": 4593296,
+      "sha256": "e9a432f10535f66032acaf3c4b6fa3095b4e4d9b87305243644db5ca0864cf3c"
+    },
+    {
+      "path": "/home/user/gpui-mask-miss-native-target/release/build/quote/fb972271841d05a0/out/build_script_build",
+      "bytes": 4683552,
+      "sha256": "45bfef69cdc4cccd09c1df2a3a34cf74e31d21d8fd80309e8050c5e335958a6b"
+    },
+    {
+      "path": "/home/user/gpui-mask-miss-native-target/release/build/ash/b60eca9179e4f448/out/build_script_build",
+      "bytes": 4581904,
+      "sha256": "1c18265b114aed24e0d4b3f497f6ac6344f526799d050fd669e795125d17bb64"
+    }
+  ]
+}

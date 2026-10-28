@@ -1,0 +1,189 @@
+{
+  "checks": 5749,
+  "rows": [
+    {
+      "sequence": 5,
+      "ledger": {
+        "capacity_keys": 1,
+        "gpu_capacity_bytes": 48,
+        "live_keys": 1,
+        "live_version_slots": 6,
+        "live_payload_bytes": 48,
+        "pending_upload_bytes": 0,
+        "key_generation_entries": 1,
+        "free_key_entries": 0
+      },
+      "counts": {
+        "registered_keys": 1,
+        "key_lookups": 4,
+        "authority_entries_examined": 10,
+        "latest_entries_examined": 24,
+        "version_entries_examined": 90,
+        "victim_entries_examined": 24,
+        "updated_keys": 4,
+        "payload_bytes_written": 32
+      }
+    },
+    {
+      "sequence": 104,
+      "ledger": {
+        "capacity_keys": 1,
+        "gpu_capacity_bytes": 48,
+        "live_keys": 1,
+        "live_version_slots": 6,
+        "live_payload_bytes": 48,
+        "pending_upload_bytes": 0,
+        "key_generation_entries": 1,
+        "free_key_entries": 0
+      },
+      "counts": {
+        "key_lookups": 99,
+        "authority_entries_examined": 495,
+        "latest_entries_examined": 594,
+        "version_entries_examined": 5940,
+        "victim_entries_examined": 594,
+        "updated_keys": 99,
+        "payload_bytes_written": 792
+      }
+    },
+    {
+      "sequence": 1004,
+      "ledger": {
+        "capacity_keys": 1,
+        "gpu_capacity_bytes": 48,
+        "live_keys": 1,
+        "live_version_slots": 6,
+        "live_payload_bytes": 48,
+        "pending_upload_bytes": 0,
+        "key_generation_entries": 1,
+        "free_key_entries": 0
+      },
+      "counts": {
+        "key_lookups": 900,
+        "authority_entries_examined": 4500,
+        "latest_entries_examined": 5400,
+        "version_entries_examined": 54000,
+        "victim_entries_examined": 5400,
+        "updated_keys": 900,
+        "payload_bytes_written": 7200
+      }
+    },
+    {
+      "dense_keys": 1,
+      "ledger": {
+        "capacity_keys": 1,
+        "gpu_capacity_bytes": 48,
+        "live_keys": 1,
+        "live_version_slots": 6,
+        "live_payload_bytes": 48,
+        "pending_upload_bytes": 0,
+        "key_generation_entries": 1,
+        "free_key_entries": 0
+      },
+      "counts": {
+        "registered_keys": 1,
+        "key_lookups": 64,
+        "authority_entries_examined": 64,
+        "latest_entries_examined": 384,
+        "version_entries_examined": 384,
+        "victim_entries_examined": 384,
+        "updated_keys": 64,
+        "payload_bytes_written": 512
+      }
+    },
+    {
+      "dense_keys": 9,
+      "ledger": {
+        "capacity_keys": 9,
+        "gpu_capacity_bytes": 432,
+        "live_keys": 9,
+        "live_version_slots": 54,
+        "live_payload_bytes": 432,
+        "pending_upload_bytes": 0,
+        "key_generation_entries": 9,
+        "free_key_entries": 0
+      },
+      "counts": {
+        "registered_keys": 9,
+        "key_lookups": 64,
+        "authority_entries_examined": 64,
+        "latest_entries_examined": 384,
+        "version_entries_examined": 384,
+        "victim_entries_examined": 384,
+        "updated_keys": 64,
+        "payload_bytes_written": 512
+      }
+    },
+    {
+      "dense_keys": 32,
+      "ledger": {
+        "capacity_keys": 32,
+        "gpu_capacity_bytes": 1536,
+        "live_keys": 32,
+        "live_version_slots": 192,
+        "live_payload_bytes": 1536,
+        "pending_upload_bytes": 0,
+        "key_generation_entries": 32,
+        "free_key_entries": 0
+      },
+      "counts": {
+        "registered_keys": 32,
+        "key_lookups": 64,
+        "authority_entries_examined": 64,
+        "latest_entries_examined": 384,
+        "version_entries_examined": 384,
+        "victim_entries_examined": 384,
+        "updated_keys": 64,
+        "payload_bytes_written": 512
+      }
+    },
+    {
+      "dense_keys": 256,
+      "ledger": {
+        "capacity_keys": 256,
+        "gpu_capacity_bytes": 12288,
+        "live_keys": 256,
+        "live_version_slots": 1536,
+        "live_payload_bytes": 12288,
+        "pending_upload_bytes": 0,
+        "key_generation_entries": 256,
+        "free_key_entries": 0
+      },
+      "counts": {
+        "registered_keys": 256,
+        "key_lookups": 64,
+        "authority_entries_examined": 64,
+        "latest_entries_examined": 384,
+        "version_entries_examined": 384,
+        "victim_entries_examined": 384,
+        "updated_keys": 64,
+        "payload_bytes_written": 512
+      }
+    },
+    {
+      "dense_keys": 1024,
+      "ledger": {
+        "capacity_keys": 1024,
+        "gpu_capacity_bytes": 49152,
+        "live_keys": 1024,
+        "live_version_slots": 6144,
+        "live_payload_bytes": 49152,
+        "pending_upload_bytes": 0,
+        "key_generation_entries": 1024,
+        "free_key_entries": 0
+      },
+      "counts": {
+        "registered_keys": 1024,
+        "key_lookups": 64,
+        "authority_entries_examined": 64,
+        "latest_entries_examined": 384,
+        "version_entries_examined": 384,
+        "victim_entries_examined": 384,
+        "updated_keys": 64,
+        "payload_bytes_written": 512
+      }
+    }
+  ],
+  "round_robin_mutant_failed_at": 7,
+  "scope": "CPU hot-slot lifetime only; actual Vulkan integration and timing still pending"
+}

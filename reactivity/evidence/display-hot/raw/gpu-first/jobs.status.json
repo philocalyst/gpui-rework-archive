@@ -1,0 +1,11 @@
+{
+  "args": [
+    "python3",
+    "/home/user/gpui-display-hot-lab/reactivity/crates/display-span-lab/model/hot_jobs.py",
+    "/home/user/gpui-display-hot-evidence/gpu-first/public",
+    "/home/user/gpui-display-hot-evidence/gpu-first/jobs"
+  ],
+  "exit": 0,
+  "expected": 0,
+  "elapsed_seconds": 0.6577568054199219
+}

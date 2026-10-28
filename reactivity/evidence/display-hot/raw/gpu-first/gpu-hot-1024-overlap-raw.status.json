@@ -1,0 +1,9 @@
+{
+  "args": [
+    "/home/user/gpui-preserved-test-binaries/fd65c8b9d729bf3341fb8fd7592863a6a3deda010b209cb1ad53164940721ef5",
+    "/home/user/gpui-display-hot-evidence/gpu-first/jobs/hot-1024-overlap-raw/jobs.json"
+  ],
+  "exit": 0,
+  "expected": 0,
+  "elapsed_seconds": 0.5815391540527344
+}
