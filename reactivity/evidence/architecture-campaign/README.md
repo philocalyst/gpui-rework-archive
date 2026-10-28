@@ -502,3 +502,11 @@ Four-cell correctness admission **e00f436fbfef57bdc0379df6e46c6888d7855097**
 passes353 GPU/canvas tests,Clippy,336 exact reference frames and a96-frame
 wrong-row external-oracle witness. The initial Clippy failure is preserved.
 Native screenfdff0f36 is frozen; build pending, no performance result.
+
+
+Four-cell native **58da795d** rejects the candidate (stream.95516 versus.8;
+mixed late-gap failure). Diagnostic **6d63fbf4** finds all1,082 native packets
+use literal shading,so the banked-only cache never executes; corrected planned
+mask references are93.1% lowered. Initial classifier error is retained. New
+mask-tiles5d37f245/d63782dd separates traversal choice from paint-bank format
+with an existing tile-word bit. Correctness pending,no performance result.

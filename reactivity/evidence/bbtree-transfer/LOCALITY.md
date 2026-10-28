@@ -623,3 +623,41 @@ This admits only the preregistered early native screen, frozen
 no timing result. Full configuration,offline,native,cost and competitor gates
 remain open. No changed public fixture, threshold, sample order or publication
 authority. All previous rejections remain rejected.
+
+
+## Four-cell screen rejected; actual native dispatch explains missing mechanism
+
+Four-cell native seal **58da795dad73d181269ed59b5cca05c4bca80b51** verifies
+816 files and all64 normal processes. Stream paired CPU.955163432
+(95%[.909938804,.987780127]) fails.8; scroll1.020634540 passes1.05 point
+but CI reaches1.0892. Mixed group2 candidate has one late>25ms gap,so its whole
+ratio is suppressed. Idle0. No full-cost admission or adoption.
+
+Native path diagnostic **6d63fbf47c2751825ea9623aa5ff7918b801becb** verifies
+260 files and8 corrected instrumented processes,1,082 preparations. Every
+paint-bank count is0 and actual banked packet tagfalse: the four-cell shader
+path was never selected. Corrected full-packet counts:2,779,389 mask references,
+2,587,037 lowered (93.079%). All mask placements have unit axes/dimensions.
+These are planned references,not repair-cropped work or cache/hardware counters.
+Initial classifier3d06af57 mislabeled untextured solids; all8 original processes
+are retained,mask-reference totals rejected. Corrected09bd0c1f adds nonzero
+packed dimensions. Both corrected frozen images match uninstrumented output.
+No performance claim from logging.
+
+The architectural coupling is between paint-bank representation and traversal
+choice. New **local/mask-tiles**, preregistered
+**5d37f245e0cda910bb9a554f836964284f06fdbc**, production
+**d63782dd4c528860c21c6cc45caa177adce2cd08**, isolates this choice: bit30
+of an existing tile range marks only nonuniform literal tiles containing a
+surviving lowered-mask reference. It selects ordered draw evaluation with bounded
+mask fetch reuse. Other literal tiles retain sample-major traversal; uniform
+tilebit31 retains priority; existing tile-proofs disable clears new selection.
+No new records,pipeline,retained state,API,dependency or unsafe. Added CSR search
+and shader register/code-generation costs remain charged.
+
+Qualification,wrong-row mutant and an actual-native selected-path audit must
+precede the64-process20% admission screen(seed20261115). A pass still requires
+complete configurations,offline/native/cost(seed20261116),ZGX and hardware
+gates. Generic draw-majord35d2335 and pixel-uniform173e7c1a remain rejected.
+This is a private scheduling choice over compiled operations,not evidence of
+a BBTree async executor or higher cache-hit rate in GPUI.
