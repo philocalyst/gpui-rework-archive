@@ -45,3 +45,11 @@ closure or to acknowledge unpresented candidates.
 Initial frozen2c4b9207 build failed E0308: wgpu30 pipeline layout expects optional group entries. Corrected to Some(&layout); no model or protocol change. Initial logs and empty source guard retained externally.
 
 Corrected053f0fa8 public trace rejected a test assumption: a singular axis-aligned rectangle is accepted as empty, rather than producing the rounded-shape error seen in the earlier paint fixture. Preserve that failure; use an explicitly nonfinite transform for the failed-newer-request witness. This proves rejection preserves the prior eligible token; it does not claim a committed preparation failure.
+
+3187587c public trace passed, then model extraction failed because semantic
+snapshot bounds conservatively expand exact raster bounds (e.g. y3.99999976
+for a y4 pixel edge). Do not round or weaken the pixel oracle. The corrected
+adapter uses this fixture's explicit one-opaque-rect-per-node preorder contract,
+validates exact translation and enclosure by semantic bounds, and retains the
+exact sampled rectangle plus independent GPUI pixels. This is fixture-specific
+association, not a general stable draw identity API. Original failure preserved.

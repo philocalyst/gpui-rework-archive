@@ -293,11 +293,15 @@ def public_models(path,out):
         layout=Layout(kind);identities={};nextid=1
         for frame in report['frames']:
             snapshot=frame['snapshot']['nodes'];draws=[];used=set()
-            for d in frame['draws']:
+            # Fixture contract: one opaque rectangular paint per snapshot node,
+            # same preorder; semantic bounds are outward conservative, not pixels.
+            assert len(frame['draws'])==len(snapshot)
+            for d,node in zip(frame['draws'],snapshot,strict=True):
                 rect=tuple(int(x) for x in d['rect']);assert list(rect)==d['rect']
-                candidates=[n for n in snapshot if tuple(int(x) for x in [n['bounds'][0],n['bounds'][1],n['bounds'][0]+n['bounds'][2],n['bounds'][1]+n['bounds'][3]])==rect and n['identity'] not in used]
-                assert len(candidates)==1,('ambiguous public identity',frame['name'],rect,candidates)
-                node=candidates[0];identity=node['identity'];used.add(identity)
+                x,y,w,h=node['bounds']
+                assert x<=rect[0] and y<=rect[1] and x+w>=rect[2] and y+h>=rect[3]
+                assert node['transform']==[1.,0.,0.,1.,float(rect[0]),float(rect[1])]
+                identity=node['identity'];assert identity not in used;used.add(identity)
                 if identity not in identities:identities[identity]=nextid;nextid+=1
                 channels=[int(x*255) for x in d['color']];color=int.from_bytes(bytes(channels),'little')
                 parent=None if node['parent'] is None else identities[snapshot[node['parent']]['identity']]
