@@ -692,7 +692,7 @@ pub mod ui {
         for cursor in range.x..range.y {
             let draw = load_banked_draw(get!(INDICES)[cursor as usize]);
             let lowered = (draw.atlas.x & 0xf0000000) == 0x10000000;
-            let missed = lowered && mask_pixel_misses(draw, position);
+            let missed = lowered;
             let first_source = first_missed_sample(draw, position, missed);
             let cached = lowered && !missed && mask_pixel_inside_clip(draw, position);
             let mut first = vec2f(0.0, 0.0);
