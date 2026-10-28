@@ -139,5 +139,59 @@ pub(super) fn run(gpu: &mut GpuSurface) {
     assert!(owner.update(|m| m.invalid = true).is_err());
     assert_eq!(owner.with_scene(|_, token| token).unwrap(), older);
     render(gpu, &mut owner);
+    cold_stream(gpu);
     eprintln!("NATIVE_TEXT_REPAIR,stale-predecessor/coalescing/failed-newer/full-pixels=pass");
+}
+
+fn cold_stream(gpu: &mut GpuSurface) {
+    let texture = gpu
+        .renderer
+        .device()
+        .create_texture(&wgpu::TextureDescriptor {
+            label: Some("native growing stream oracle"),
+            size: wgpu::Extent3d {
+                width: 960,
+                height: 720,
+                depth_or_array_layers: 1,
+            },
+            mip_level_count: 1,
+            sample_count: 1,
+            dimension: wgpu::TextureDimension::D2,
+            format: gpu.renderer.format(),
+            usage: wgpu::TextureUsages::RENDER_ATTACHMENT | wgpu::TextureUsages::COPY_SRC,
+            view_formats: &[],
+        });
+    let view = texture.create_view(&Default::default());
+    let mut full = pollster::block_on(Renderer::new(
+        gpu.renderer.device().clone(),
+        gpu.renderer.queue().clone(),
+        gpu.renderer.format(),
+    ))
+    .unwrap();
+    super::workload_port::visit_cold_stream_frames(|owner, fresh, owner_route, tick| {
+        let token = owner
+            .with_paint_scene(|scene, token, paint, damage| {
+                gpu.render_damaged(scene, token, paint, &view, Some(damage))
+                    .unwrap();
+                token
+            })
+            .unwrap();
+        let actual = super::paint_tests::read(gpu, &texture);
+        fresh
+            .with_scene(|scene, _| full.render(scene, &view))
+            .unwrap()
+            .unwrap();
+        assert!(
+            actual == super::paint_tests::read(gpu, &texture),
+            "growing stream differs from fresh full scene: owner={owner_route} tick={tick}"
+        );
+        println!(
+            "COLD_STREAM_SUPPORT,{owner_route},{tick},{}",
+            gpu.renderer.retained_stats().composited_pixels
+        );
+        // Skip two adjacent ACKs to exercise damage relative to an older P.
+        if !matches!(tick, 4 | 5) {
+            owner.presented(token).unwrap();
+        }
+    });
 }

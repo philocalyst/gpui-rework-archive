@@ -1266,6 +1266,22 @@ impl Canvas {
             .commands
             .iter(viewport_rect(previous.width, previous.height));
         let mut next = self.commands.iter(viewport_rect(self.width, self.height));
+        // A variable-length edit shifts following painter addresses. Remove
+        // only a suffix with exactly equal contributions before pairing the
+        // remaining prefix. The first unequal reverse pair was consumed too:
+        // both supports must be retained, even if one stream is now empty.
+        if previous.len() != next.len() {
+            while previous.len().min(next.len()) != 0 {
+                let old = previous.next_back().unwrap();
+                let new = next.next_back().unwrap();
+                if !old.unchanged(new) {
+                    damage = damage
+                        .union(DamageRegion::checked_canvas_bounds(old.bounds))
+                        .union(DamageRegion::checked_canvas_bounds(new.bounds));
+                    break;
+                }
+            }
+        }
         // Zip may consume an unmatched item from its first iterator. Bound the
         // shared prefix explicitly so removals retain their old support.
         for _ in 0..previous.len().min(next.len()) {
