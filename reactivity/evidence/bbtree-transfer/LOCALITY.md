@@ -256,3 +256,45 @@ bounding box outside an already proved copied rectangle. Solid/Ripple's precise
 publication and BBTree's preservation of unaffected facts motivate composing these
 proofs, while exact image-token authority remains mandatory. Old scroll-copy
 mixed gains and tiny-control failures are both retained, not relabeled adoption.
+
+
+## Precise scroll repair: complete rejected trial
+
+Sealed dossier `53165424be4665a9874b6f3f5f31aa0d301e57ed`, measured source
+`5a07d7c28ffe500a5d24e25fdf1f31ce4857811f`, is local at
+`/home/user/gpui-scroll-sparse-lab/reactivity/evidence/scroll-sparse`.
+Independent verification covers 11,054 files, 2,800 timing / 420 correctness /
+140 allocation processes, 1,066 preserved ELFs and 1,190 archived cache identities.
+The initial packaging manifest accidentally skipped two nested manifest.json files;
+its preserved copy and corrected exact-path coverage check document the repair.
+
+110 of 112 fixed comparisons pass. Text-0-2-source/static is 1.050606079
+(95% paired interval [1.014711041, 1.080154960]); text-1000-1-source/glyph-bounds
+is 1.052126970 ([0.993000873, 1.072074686]). Both exceed the fixed 1.05 point
+limit. The trial is rejected; intervals do not waive either failure. No native
+ZGX comparison or selective rerun follows this result.
+
+Scroll/original is 0.083086662; mixed/original 0.066503121 and mixed/copy-bounds
+0.150539480. Precise repair reduces mixed repaired pixels from 169,280 to 15,770;
+both copy variants charge 1,401,440 copied pixels and 4,185,280 retained image
+bytes per ordinary workload update. All tiny-list comparisons pass in this
+cohort without revising older failures. Candidate first updates have no new
+pipeline spike. Full/minimal/default/offline GPU gates and strict Clippy pass;
+omitting a repair and bypassing the exact predecessor each fail actual pixels.
+
+Runtime/Output/Renderer/RetainedRenderer headers are unchanged. Backing grows
+112 to 120 bytes; Metadata 264 to 272; SceneDamage 32 to 40. Shipping code is
+37,977 versus static sparse 37,372, and native ELF grows 42,888 bytes. Ordinary
+render source is unchanged but its machine code grows 36 bytes. These are
+observations, not proof that the two marginal failures are caused by ABI size.
+In particular text-1000-1-source/static is 1.003176, while the failure compares
+to an older glyph-bounds control. Do not assign a cause from this timing alone.
+
+The next investigation found another concrete lost fact: complete scene commit
+collapses all changed command support to one bounding rectangle. Successive
+public source edits before ACK also require the union of all preceding candidate
+damage; simply applying precise damage from the latest candidate would omit
+older edits. A new trial will test bounded support accumulation with exact
+P-to-C token authority, preserving existing scroll and single-text paths.
+This transfers preservation of unaffected facts and coherent publication from
+BBTree/Solid/Ripple; it is not a cache-hit or custom-runtime claim.
