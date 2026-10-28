@@ -131,7 +131,7 @@ impl RegionBatch {
             pass.set_pipeline(&self.pipeline);
             pass.set_bind_group(0, bindings, &[]);
             pass.set_vertex_buffer(0, self.vertices.slice(..u64::from(count) * INSTANCE_BYTES));
-            pass.draw(0..6, 0..count);
+            pass.draw(0..6, 1..count);
         }
         if let Some((backing, target)) = output.present {
             backing.copy(&mut encoder, target);
