@@ -1,0 +1,52 @@
+{
+  "files": {
+    "build.out": "a020ea6e000854c303904bae6954c1460bdd2c635fc2552968a1ad97a3c33c61",
+    "guard.py": "f5606caad541f4d27e0d537b8a7cbd304d38f2b1f63d6efc5028239ebc73b1cd",
+    "candidate-current-inputs.json": "712bef520607336c0b1ed254318cb78085f390a1a6907ec5e426faf93f08e1ff",
+    "build-gates.json": "1908c0897320277b934561b95f1453a7bf56b918a21d5191d235810d049a8c27",
+    "shader-admission-reverification.json": "0e548aecd1ba6349d1b5f800a1dcfe760b8b0bf100ab7a24330dfc13fc7e591f",
+    "oracle-190.png": "fb504b213d823a787b3d7ed43c38d008c519c800c7716f0a33a13cc69f597aba",
+    "analyze.py": "ce8272f676d4a25cb421079c847a8a6f41aee45098c7484291c53b9ac2b41e01",
+    "PROTOCOL.md": "134966eca20cd38e2dab87b8ce1a3c66b3ea7285f0358a8e96aa72fc5b5ba5be",
+    "native.py": "f1919254e7f8607c51bd1a34bd21c54084ad8c61860a2a0ebb6465bcbe12f0f2",
+    "oracle-0.png": "626b541b01329869e60159381cada9fdaaa8f37f675da0f9dfc6a9bb3f73ac46",
+    "package.py": "a6e45ccfb25606e2f9313841e94dedbdeb0933c9604d2d619e2e174ae5320afd",
+    "artifacts.json": "0840bd96f7a57ca98baa6fcf3b08223d9f6e790991643f8459332b9fe4042ea0",
+    "verify_dossier.py": "462f6eaba6dfdcbb1bc359df665ac3c75a25a5615fa3480dcd17b92d19a89abf",
+    "ORDER.json": "564f2e30d991604122bf450ad1c54398c129d2228f5785ee0fcbef4b8c3c5cad",
+    "environment.json": "35fd1955a2c003ab75de411e9c01ecd3c0816674a3c6ceff833f4ba2ccb6c647",
+    "freeze.py": "89804fe2d0c349eea895e754aab76646ca65dc75b36d2aab80e28055c5e520c7",
+    "shader.json": "4add91d8dc08afca277f3d7874829937cc1bba2eaf3d077f98b78c3bc8225ef0",
+    "build.log": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+    "ui.wgsl": "d1a06065c06f9b9f4296b23442e19519e9c3d00e99e06f30b8e5a64f631e3697",
+    "build.py": "78af58637aaf275c8a796bd815b9d44c4b223350e25a6a0b14eabc105a0e962b",
+    "build-candidate/build.out": "ecebac140d1ff3ae400dcdfb7602779eadfb8da1df33afbfea3ed40adea5856f",
+    "build-candidate/source.txt": "227011216a065c53859b3ac34f009639d00824b98f05a58d63319061270db873",
+    "build-candidate/test-artifacts.json": "a56e254a46793645f0b62633e03fd7f9238c05f565d2ae6dffb8a5ed516e4263",
+    "build-candidate/build-artifacts.json": "b3e70f358f9e8a25a815ed15f61c9cff8553bb78913322af1ed3d7e172a66647",
+    "build-candidate/test.log": "a742e8ad48b740ef2607b234efd06757c4d7676a93f0e427ef2ed6ece65e3f1e",
+    "build-candidate/build.status.json": "7898c1b9d746a5bc3f286e2dceedd03f212089e4d5915c13ed6a75efcbca4418",
+    "build-candidate/guard-after.json": "4f53cda18c2baa0c0354bb5f9a3ecbe5ed12ab4d8e11ba873c2f11161202b945",
+    "build-candidate/reserve.json": "7844e4736dc6ba23197d4090a1310cd62bac21e7e57cdf9117b3e2205e991c03",
+    "build-candidate/toolchain.txt": "2900025046ddf3de47f87dd3d69fbfe380cae61af5fe1ecf31bb89c5f10645c5",
+    "build-candidate/test.status.json": "23d33d5e521faf3150391a8f41bbcf0200e21537a7733ccfde6ba6a2ae89e9b0",
+    "build-candidate/inputs.json": "4a661f7c73b359701533d1d6f9b4787e1f6a7d38c4f061be5ae3ee21c5ffe680",
+    "build-candidate/environment.json": "4c49e4b246e78e66e6f197f81e94b8401ec30ad5f5c5bdcc0a898c16b2209f97",
+    "build-candidate/test.out": "73a71bc43ce86c2c3c5df2417a1870799401262416b0d20593aff3429073387a",
+    "build-candidate/build.log": "a337b39a5ffa24255c259b9a2198d415bd8cdced64580ba5a8959a2a83342e5f"
+  },
+  "sources": {
+    "candidate": {
+      "worktree": "/home/user/gpui-mask-coverage-lab",
+      "compiled_source": "3d06af571613aabc9c9bdb155082f4c8b5177635",
+      "current_source": "3d06af571613aabc9c9bdb155082f4c8b5177635"
+    }
+  },
+  "environment_files": {
+    "/usr/lib/x86_64-linux-gnu/libvulkan_lvp.so": "9d69cae2004b16572acca424741109be37c4ffc759c2461af69d75f7d1c6c139",
+    "/usr/lib/x86_64-linux-gnu/libvulkan.so.1.3.275": "e833b010f814b72c6aca0300c8b5f19b6106ffa06c24ddc95a293970c7d6058e",
+    "/usr/share/vulkan/icd.d/lvp_icd.json": "70d49f7fd41a7593a4e283543ed4855c139c700e5c1b31792f56e9576ede2398",
+    "/home/user/zgx-native-profile-lab/comparisons/fonts/DejaVuSans.ttf": "7da195a74c55bef988d0d48f9508bd5d849425c1770dba5d7bfc6ce9ed848954"
+  },
+  "frozen_utc": "2026-10-28T17:11:54.149249+00:00"
+}

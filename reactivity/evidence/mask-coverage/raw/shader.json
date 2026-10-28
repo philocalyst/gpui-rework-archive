@@ -1,0 +1,8 @@
+{
+  "sha256": "d1a06065c06f9b9f4296b23442e19519e9c3d00e99e06f30b8e5a64f631e3697",
+  "bytes": 21978,
+  "offset": 1452271,
+  "generated": [
+    "/home/user/gpui-mask-coverage-target/release/build/gpui_gpu/1f2320ae5ea7e966/out/ui.wgsl"
+  ]
+}

@@ -1,0 +1,11 @@
+{
+  "processes": 8,
+  "packets": 1082,
+  "bank_counts": [
+    0
+  ],
+  "banked_packets": 0,
+  "total_mask_references": 6620990,
+  "total_lowered_references": 2587037,
+  "scope": "Instrumented native path coverage, planned full-packet references; no performance ratio, GPU instruction count or damage-cropped-work claim."
+}

@@ -1,0 +1,5 @@
+{
+  "exit": 0,
+  "stdout": "{\"files\": 1421, \"executable_identities\": 70, \"gpu_canvas_tests\": 353, \"ignored_tests\": 3, \"exact_frames\": 336, \"negative_frames\": 96, \"admission_correctness_passes\": true, \"scope\": \"Early shader-screen admission only; full configurations/offline/native/performance remain pending.\"}\n",
+  "stderr": ""
+}

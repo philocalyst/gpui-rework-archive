@@ -1,0 +1,16 @@
+{
+  "DISPLAY": ":94",
+  "XDG_RUNTIME_DIR": "/home/user/gpui-xdg",
+  "VK_ICD_FILENAMES": "/usr/share/vulkan/icd.d/lvp_icd.json",
+  "LP_NUM_THREADS": "4",
+  "DBUS_SESSION_BUS_ADDRESS": "unix:path=/nonexistent",
+  "ZGX_MODE": "both",
+  "ZGX_SECONDS": "3",
+  "ZGX_INITIAL_TICKS": "0",
+  "ZGX_FONT_FILE": "/home/user/zgx-native-profile-lab/comparisons/fonts/DejaVuSans.ttf",
+  "GPUI_LAB_RENDERER": "gpu",
+  "WINIT_UNIX_BACKEND": "x11",
+  "WINIT_X11_SCALE_FACTOR": "1",
+  "GPUI_LAB_TRACE": "1",
+  "GPUI_MASK_DIAGNOSTIC": "1"
+}
