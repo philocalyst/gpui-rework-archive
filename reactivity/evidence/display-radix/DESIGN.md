@@ -54,6 +54,15 @@ No arbitrary-color/scaling/alpha image or general glyph renderer is admitted.
 Also found during review: raw-root decode must reject physical page numbers
 other than its admitted page after a structural collapse leaves address holes.
 The correction adds that guard before the retained structural case executes.
-The public fixture now also exercises an actual rejected NaN-transform setter,
+The public fixture now also exercises an actual failed NaN-transform preparation,
 checking it preserves the previously eligible token and independently rendered
-pixels; this is request validation, not a later committed preparation failure.
+pixels. The failed source value is committed even though preparation fails.
+
+Second attemptc2f7eab184 exposed an incorrect fixture assumption: a failed
+NaN transform leaves the invalid source value committed. A later color setter
+therefore fails preparation again. The failure occurs after the source commit
+(Error::Committed), while the old eligible scene stays valid. The corrected
+fixture places this failure after the final color assignment, checks the exact
+Committed error variant and prior eligible token/pixels, and avoids pretending
+that failed preparation rolled back application state. No recovery or rollback
+semantics are inferred from that retained-scene witness.

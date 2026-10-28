@@ -121,11 +121,11 @@ fn sweep(root: &Path, n: usize) {
         assert_eq!(counters.descriptions, 0);
         assert_eq!(counters.paint_passes, 0);
         let token = win.with_scene(|_, t| t).unwrap();
-        if i == 5 {
-            assert!(
-                win.set(Paint::TRANSFORM, Affine::translation(f32::NAN, 0.))
-                    .is_err()
-            );
+        if i == 11 {
+            let failure = win
+                .set(Paint::TRANSFORM, Affine::translation(f32::NAN, 0.))
+                .unwrap_err();
+            assert!(matches!(failure, Error::Committed { .. }));
             assert_eq!(win.with_scene(|_, t| t).unwrap(), token);
         }
         if let Some(old) = held.take() {
@@ -141,7 +141,7 @@ fn sweep(root: &Path, n: usize) {
         } else {
             win.presented(token).unwrap();
         }
-        events.push(json!({"index":i,"target":target,"color":bits,"commit":commit,"counters":counters,"candidate_property_reads":1,"candidate_snapshot_reads":0,"candidate_draw_enumerations":0,"rejected_invalid_request":i==5,"pixels":name}));
+        events.push(json!({"index":i,"target":target,"color":bits,"commit":commit,"counters":counters,"candidate_property_reads":1,"candidate_snapshot_reads":0,"candidate_draw_enumerations":0,"rejected_invalid_request":i==11,"pixels":name}));
     }
     fs::write(dir.join("public.json"),serde_json::to_vec_pretty(&json!({"n":n,"target":target,"initial_draws":draws,"initial_snapshot":snapshot,"events":events,"scope":"one initial registered binding; no generic production journal integration; full CPU and fresh Win oracles charged separately"})).unwrap()).unwrap();
 }
