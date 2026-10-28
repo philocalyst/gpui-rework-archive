@@ -4631,7 +4631,15 @@ fn region_batches_cover_edges_and_holes_then_allow_ordinary_packet_repairs() {
             } else {
                 ColorConfig::default()
             };
-            for [width, height] in [[67, 53], [257, 1], [1, 257], [maximum, 1], [1, maximum]] {
+            for [width, height] in [
+                [67, 53],
+                [257, 1],
+                [1, 257],
+                [maximum.min(8191), 1],
+                [1, maximum.min(8191)],
+                [maximum, 1],
+                [1, maximum],
+            ] {
                 let mut canvas = Canvas::recording(width, height, config).unwrap();
                 canvas.clear(Color::rgb(19, 31, 53));
                 let clip = Rect::new(0., 0., width as f32, height as f32);
@@ -4695,6 +4703,47 @@ fn region_batches_cover_edges_and_holes_then_allow_ordinary_packet_repairs() {
                 let target = output_texture(&gpu, &canvas);
                 let view = target.create_view(&Default::default());
                 let oracle_target = output_texture(&oracle, &canvas);
+                if width == 16_384 || height == 16_384 {
+                    // The ordinary precision contract rejects geometry here.
+                    // Keep that rejection, then exercise maximum-axis packet,
+                    // vertex and copy addressing with an admitted clear packet.
+                    // These conservative regions change no pixels; the smaller
+                    // admitted extents above witness actual edge/hole coverage.
+                    assert!(matches!(
+                        oracle.render(
+                            canvas.prepared_scene(),
+                            &oracle_target.create_view(&Default::default())
+                        ),
+                        Err(gpui_gpu::Error::Precision { .. })
+                    ));
+                    let mut clear = Canvas::recording(width, height, config).unwrap();
+                    clear.clear(Color::rgb(19, 31, 53));
+                    let expected = readback(&mut oracle, &clear);
+                    gpu.render(clear.prepared_scene(), &view, None).unwrap();
+                    for (count, color, expected_regions) in
+                        [(64, Color::WHITE, 64), (65, Color::rgb(17, 91, 203), 1)]
+                    {
+                        let mut regions = DamageRegions::default();
+                        for &slot in &slots[..count] {
+                            regions.include(
+                                canvas
+                                    .prepare_slots(&[SlotEdit::new(slot, PaintColor::new(color))])
+                                    .unwrap()
+                                    .commit(),
+                            );
+                        }
+                        assert_eq!(regions.regions().len(), expected_regions);
+                        gpu.render_regions(clear.prepared_scene(), &view, &regions)
+                            .unwrap();
+                        assert_eq!(gpu.retained_stats().composited_pixels, regions.pixels());
+                        assert_eq!(
+                            read_texture(&gpu, &target),
+                            expected,
+                            "maximum-axis clear {format:?}/{width}x{height}/{count}"
+                        );
+                    }
+                    continue;
+                }
                 oracle
                     .render(
                         canvas.prepared_scene(),
