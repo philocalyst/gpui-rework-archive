@@ -1,0 +1,48 @@
+[
+  {
+    "path": "/home/user/gpui-scroll-sparse-omit-target/release/build/gpui_gpu/fc26bbb724122b97/out/render-fc26bbb724122b97",
+    "sha256": "1ccf99532ac21f6c46da748bfe65b8684fdc771e1d598372755a96407c1dea4e",
+    "preserved": "/home/user/gpui-preserved-test-binaries/1ccf99532ac21f6c46da748bfe65b8684fdc771e1d598372755a96407c1dea4e",
+    "bytes": 16852456,
+    "cargo": {
+      "reason": "compiler-artifact",
+      "package_id": "path+file:///home/user/gpui-scroll-sparse-omit-lab/reactivity/crates/gpu#gpui_gpu@0.1.0",
+      "manifest_path": "/home/user/gpui-scroll-sparse-omit-lab/reactivity/crates/gpu/Cargo.toml",
+      "target": {
+        "kind": [
+          "test"
+        ],
+        "crate_types": [
+          "bin"
+        ],
+        "name": "render",
+        "src_path": "/home/user/gpui-scroll-sparse-omit-lab/reactivity/crates/gpu/tests/render.rs",
+        "edition": "2024",
+        "required-features": [
+          "gpu-tests"
+        ],
+        "doc": false,
+        "doctest": false,
+        "test": true
+      },
+      "profile": {
+        "opt_level": "3",
+        "debuginfo": 0,
+        "debug_assertions": false,
+        "overflow_checks": false,
+        "test": true
+      },
+      "features": [
+        "default",
+        "gpu-tests",
+        "simd",
+        "vulkan-tests"
+      ],
+      "filenames": [
+        "/home/user/gpui-scroll-sparse-omit-target/release/build/gpui_gpu/fc26bbb724122b97/out/render-fc26bbb724122b97"
+      ],
+      "executable": "/home/user/gpui-scroll-sparse-omit-target/release/build/gpui_gpu/fc26bbb724122b97/out/render-fc26bbb724122b97",
+      "fresh": false
+    }
+  }
+]

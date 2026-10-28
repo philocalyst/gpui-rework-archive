@@ -1,0 +1,891 @@
+{
+  "scroll": {
+    "control": {
+      "median_composited_pixels": 368000.0,
+      "copied_pixels": [
+        691200
+      ],
+      "image_bytes": [
+        2764800
+      ],
+      "warm_allocations": {
+        "count_total": 462.5,
+        "bytes_total": 277334.0,
+        "bytes_current": 304.0,
+        "bytes_max": 54532.0,
+        "image_bytes": 2764800.0,
+        "copied_pixels": 691200.0
+      },
+      "first_update_allocations": {
+        "count_total": 358,
+        "bytes_total": 257914,
+        "bytes_current": 3176,
+        "bytes_max": 56464,
+        "image_bytes": 2764800,
+        "copied_pixels": 691200
+      }
+    },
+    "bounds": {
+      "median_composited_pixels": 368000.0,
+      "copied_pixels": [
+        691200
+      ],
+      "image_bytes": [
+        2764800
+      ],
+      "warm_allocations": {
+        "count_total": 462.5,
+        "bytes_total": 277334.0,
+        "bytes_current": 304.0,
+        "bytes_max": 54532.0,
+        "image_bytes": 2764800.0,
+        "copied_pixels": 691200.0
+      },
+      "first_update_allocations": {
+        "count_total": 358,
+        "bytes_total": 257914,
+        "bytes_current": 3176,
+        "bytes_max": 56464,
+        "image_bytes": 2764800,
+        "copied_pixels": 691200
+      }
+    },
+    "predecessor": {
+      "median_composited_pixels": 368000.0,
+      "copied_pixels": [
+        691200
+      ],
+      "image_bytes": [
+        2764800
+      ],
+      "warm_allocations": {
+        "count_total": 462.5,
+        "bytes_total": 277334.0,
+        "bytes_current": 304.0,
+        "bytes_max": 54532.0,
+        "image_bytes": 2764800.0,
+        "copied_pixels": 691200.0
+      },
+      "first_update_allocations": {
+        "count_total": 358,
+        "bytes_total": 257914,
+        "bytes_current": 3176,
+        "bytes_max": 56464,
+        "image_bytes": 2764800,
+        "copied_pixels": 691200
+      }
+    },
+    "copy_bounds": {
+      "median_composited_pixels": 12880.0,
+      "copied_pixels": [
+        1401440
+      ],
+      "image_bytes": [
+        4185280
+      ],
+      "warm_allocations": {
+        "count_total": 468.5,
+        "bytes_total": 277702.0,
+        "bytes_current": 304.0,
+        "bytes_max": 54532.0,
+        "image_bytes": 4185280.0,
+        "copied_pixels": 1401440.0
+      },
+      "first_update_allocations": {
+        "count_total": 373,
+        "bytes_total": 259506,
+        "bytes_current": 3584,
+        "bytes_max": 56464,
+        "image_bytes": 4185280,
+        "copied_pixels": 1401440
+      }
+    },
+    "candidate": {
+      "median_composited_pixels": 12880.0,
+      "copied_pixels": [
+        1401440
+      ],
+      "image_bytes": [
+        4185280
+      ],
+      "warm_allocations": {
+        "count_total": 468.5,
+        "bytes_total": 277702.0,
+        "bytes_current": 304.0,
+        "bytes_max": 54532.0,
+        "image_bytes": 4185280.0,
+        "copied_pixels": 1401440.0
+      },
+      "first_update_allocations": {
+        "count_total": 373,
+        "bytes_total": 259506,
+        "bytes_current": 3584,
+        "bytes_max": 56464,
+        "image_bytes": 4185280,
+        "copied_pixels": 1401440
+      }
+    }
+  },
+  "both": {
+    "control": {
+      "median_composited_pixels": 524400.0,
+      "copied_pixels": [
+        691200
+      ],
+      "image_bytes": [
+        2764800
+      ],
+      "warm_allocations": {
+        "count_total": 542.5,
+        "bytes_total": 350760.0,
+        "bytes_current": 304.0,
+        "bytes_max": 74789.0,
+        "image_bytes": 2764800.0,
+        "copied_pixels": 691200.0
+      },
+      "first_update_allocations": {
+        "count_total": 439,
+        "bytes_total": 331388,
+        "bytes_current": 3176,
+        "bytes_max": 76741,
+        "image_bytes": 2764800,
+        "copied_pixels": 691200
+      }
+    },
+    "bounds": {
+      "median_composited_pixels": 524400.0,
+      "copied_pixels": [
+        691200
+      ],
+      "image_bytes": [
+        2764800
+      ],
+      "warm_allocations": {
+        "count_total": 542.5,
+        "bytes_total": 350760.0,
+        "bytes_current": 304.0,
+        "bytes_max": 74789.0,
+        "image_bytes": 2764800.0,
+        "copied_pixels": 691200.0
+      },
+      "first_update_allocations": {
+        "count_total": 439,
+        "bytes_total": 331388,
+        "bytes_current": 3176,
+        "bytes_max": 76741,
+        "image_bytes": 2764800,
+        "copied_pixels": 691200
+      }
+    },
+    "predecessor": {
+      "median_composited_pixels": 524400.0,
+      "copied_pixels": [
+        691200
+      ],
+      "image_bytes": [
+        2764800
+      ],
+      "warm_allocations": {
+        "count_total": 542.5,
+        "bytes_total": 350760.0,
+        "bytes_current": 304.0,
+        "bytes_max": 74789.0,
+        "image_bytes": 2764800.0,
+        "copied_pixels": 691200.0
+      },
+      "first_update_allocations": {
+        "count_total": 439,
+        "bytes_total": 331388,
+        "bytes_current": 3176,
+        "bytes_max": 76741,
+        "image_bytes": 2764800,
+        "copied_pixels": 691200
+      }
+    },
+    "copy_bounds": {
+      "median_composited_pixels": 169280.0,
+      "copied_pixels": [
+        1401440
+      ],
+      "image_bytes": [
+        4185280
+      ],
+      "warm_allocations": {
+        "count_total": 549.5,
+        "bytes_total": 351576.0,
+        "bytes_current": 304.0,
+        "bytes_max": 74789.0,
+        "image_bytes": 4185280.0,
+        "copied_pixels": 1401440.0
+      },
+      "first_update_allocations": {
+        "count_total": 455,
+        "bytes_total": 333428,
+        "bytes_current": 3584,
+        "bytes_max": 76741,
+        "image_bytes": 4185280,
+        "copied_pixels": 1401440
+      }
+    },
+    "candidate": {
+      "median_composited_pixels": 15770.0,
+      "copied_pixels": [
+        1401440
+      ],
+      "image_bytes": [
+        4185280
+      ],
+      "warm_allocations": {
+        "count_total": 553.5,
+        "bytes_total": 358360.0,
+        "bytes_current": 304.0,
+        "bytes_max": 74789.0,
+        "image_bytes": 4185280.0,
+        "copied_pixels": 1401440.0
+      },
+      "first_update_allocations": {
+        "count_total": 459,
+        "bytes_total": 340212,
+        "bytes_current": 4096,
+        "bytes_max": 76741,
+        "image_bytes": 4185280,
+        "copied_pixels": 1401440
+      }
+    }
+  },
+  "stream": {
+    "control": {
+      "median_composited_pixels": 99495.0,
+      "copied_pixels": [
+        691200
+      ],
+      "image_bytes": [
+        2764800
+      ],
+      "warm_allocations": {
+        "count_total": 245.0,
+        "bytes_total": 188319.0,
+        "bytes_current": 304.0,
+        "bytes_max": 74381.0,
+        "image_bytes": 2764800.0,
+        "copied_pixels": 691200.0
+      },
+      "first_update_allocations": {
+        "count_total": 256,
+        "bytes_total": 243039,
+        "bytes_current": 27840,
+        "bytes_max": 74637,
+        "image_bytes": 2764800,
+        "copied_pixels": 691200
+      }
+    },
+    "bounds": {
+      "median_composited_pixels": 99495.0,
+      "copied_pixels": [
+        691200
+      ],
+      "image_bytes": [
+        2764800
+      ],
+      "warm_allocations": {
+        "count_total": 216.0,
+        "bytes_total": 123995.0,
+        "bytes_current": 304.0,
+        "bytes_max": 43541.0,
+        "image_bytes": 2764800.0,
+        "copied_pixels": 691200.0
+      },
+      "first_update_allocations": {
+        "count_total": 227,
+        "bytes_total": 178715,
+        "bytes_current": 27840,
+        "bytes_max": 63683,
+        "image_bytes": 2764800,
+        "copied_pixels": 691200
+      }
+    },
+    "predecessor": {
+      "median_composited_pixels": 2890.0,
+      "copied_pixels": [
+        691200
+      ],
+      "image_bytes": [
+        2764800
+      ],
+      "warm_allocations": {
+        "count_total": 221.0,
+        "bytes_total": 131315.0,
+        "bytes_current": 304.0,
+        "bytes_max": 43597.0,
+        "image_bytes": 2764800.0,
+        "copied_pixels": 691200.0
+      },
+      "first_update_allocations": {
+        "count_total": 232,
+        "bytes_total": 186035,
+        "bytes_current": 27840,
+        "bytes_max": 64251,
+        "image_bytes": 2764800,
+        "copied_pixels": 691200
+      }
+    },
+    "copy_bounds": {
+      "median_composited_pixels": 2890.0,
+      "copied_pixels": [
+        691200
+      ],
+      "image_bytes": [
+        2764800
+      ],
+      "warm_allocations": {
+        "count_total": 221.0,
+        "bytes_total": 131315.0,
+        "bytes_current": 304.0,
+        "bytes_max": 43597.0,
+        "image_bytes": 2764800.0,
+        "copied_pixels": 691200.0
+      },
+      "first_update_allocations": {
+        "count_total": 232,
+        "bytes_total": 186035,
+        "bytes_current": 27840,
+        "bytes_max": 64251,
+        "image_bytes": 2764800,
+        "copied_pixels": 691200
+      }
+    },
+    "candidate": {
+      "median_composited_pixels": 2890.0,
+      "copied_pixels": [
+        691200
+      ],
+      "image_bytes": [
+        2764800
+      ],
+      "warm_allocations": {
+        "count_total": 221.0,
+        "bytes_total": 131315.0,
+        "bytes_current": 304.0,
+        "bytes_max": 43597.0,
+        "image_bytes": 2764800.0,
+        "copied_pixels": 691200.0
+      },
+      "first_update_allocations": {
+        "count_total": 232,
+        "bytes_total": 186035,
+        "bytes_current": 27840,
+        "bytes_max": 64251,
+        "image_bytes": 2764800,
+        "copied_pixels": 691200
+      }
+    }
+  },
+  "stream-owner": {
+    "control": {
+      "median_composited_pixels": 99495.0,
+      "copied_pixels": [
+        691200
+      ],
+      "image_bytes": [
+        2764800
+      ],
+      "warm_allocations": {
+        "count_total": 405.0,
+        "bytes_total": 284248.0,
+        "bytes_current": 304.0,
+        "bytes_max": 74381.0,
+        "image_bytes": 2764800.0,
+        "copied_pixels": 691200.0
+      },
+      "first_update_allocations": {
+        "count_total": 416,
+        "bytes_total": 338968,
+        "bytes_current": 27840,
+        "bytes_max": 74637,
+        "image_bytes": 2764800,
+        "copied_pixels": 691200
+      }
+    },
+    "bounds": {
+      "median_composited_pixels": 99495.0,
+      "copied_pixels": [
+        691200
+      ],
+      "image_bytes": [
+        2764800
+      ],
+      "warm_allocations": {
+        "count_total": 376.0,
+        "bytes_total": 219924.0,
+        "bytes_current": 304.0,
+        "bytes_max": 43541.0,
+        "image_bytes": 2764800.0,
+        "copied_pixels": 691200.0
+      },
+      "first_update_allocations": {
+        "count_total": 387,
+        "bytes_total": 274644,
+        "bytes_current": 27840,
+        "bytes_max": 63683,
+        "image_bytes": 2764800,
+        "copied_pixels": 691200
+      }
+    },
+    "predecessor": {
+      "median_composited_pixels": 2890.0,
+      "copied_pixels": [
+        691200
+      ],
+      "image_bytes": [
+        2764800
+      ],
+      "warm_allocations": {
+        "count_total": 381.0,
+        "bytes_total": 227244.0,
+        "bytes_current": 304.0,
+        "bytes_max": 43597.0,
+        "image_bytes": 2764800.0,
+        "copied_pixels": 691200.0
+      },
+      "first_update_allocations": {
+        "count_total": 392,
+        "bytes_total": 281964,
+        "bytes_current": 27840,
+        "bytes_max": 64251,
+        "image_bytes": 2764800,
+        "copied_pixels": 691200
+      }
+    },
+    "copy_bounds": {
+      "median_composited_pixels": 2890.0,
+      "copied_pixels": [
+        691200
+      ],
+      "image_bytes": [
+        2764800
+      ],
+      "warm_allocations": {
+        "count_total": 381.0,
+        "bytes_total": 227244.0,
+        "bytes_current": 304.0,
+        "bytes_max": 43597.0,
+        "image_bytes": 2764800.0,
+        "copied_pixels": 691200.0
+      },
+      "first_update_allocations": {
+        "count_total": 392,
+        "bytes_total": 281964,
+        "bytes_current": 27840,
+        "bytes_max": 64251,
+        "image_bytes": 2764800,
+        "copied_pixels": 691200
+      }
+    },
+    "candidate": {
+      "median_composited_pixels": 2890.0,
+      "copied_pixels": [
+        691200
+      ],
+      "image_bytes": [
+        2764800
+      ],
+      "warm_allocations": {
+        "count_total": 381.0,
+        "bytes_total": 227244.0,
+        "bytes_current": 304.0,
+        "bytes_max": 43597.0,
+        "image_bytes": 2764800.0,
+        "copied_pixels": 691200.0
+      },
+      "first_update_allocations": {
+        "count_total": 392,
+        "bytes_total": 281964,
+        "bytes_current": 27840,
+        "bytes_max": 64251,
+        "image_bytes": 2764800,
+        "copied_pixels": 691200
+      }
+    }
+  },
+  "list-tiny": {
+    "control": {
+      "median_composited_pixels": 256.0,
+      "copied_pixels": [
+        1024
+      ],
+      "image_bytes": [
+        4096
+      ],
+      "warm_allocations": {
+        "count_total": 210.0,
+        "bytes_total": 61089.0,
+        "bytes_current": 312.0,
+        "bytes_max": 12093.0,
+        "image_bytes": 4096.0,
+        "copied_pixels": 1024.0
+      },
+      "first_update_allocations": {
+        "count_total": 257,
+        "bytes_total": 80772,
+        "bytes_current": 6438,
+        "bytes_max": 15147,
+        "image_bytes": 4096,
+        "copied_pixels": 1024
+      }
+    },
+    "bounds": {
+      "median_composited_pixels": 256.0,
+      "copied_pixels": [
+        1024
+      ],
+      "image_bytes": [
+        4096
+      ],
+      "warm_allocations": {
+        "count_total": 210.0,
+        "bytes_total": 61089.0,
+        "bytes_current": 312.0,
+        "bytes_max": 12093.0,
+        "image_bytes": 4096.0,
+        "copied_pixels": 1024.0
+      },
+      "first_update_allocations": {
+        "count_total": 257,
+        "bytes_total": 80772,
+        "bytes_current": 6438,
+        "bytes_max": 15147,
+        "image_bytes": 4096,
+        "copied_pixels": 1024
+      }
+    },
+    "predecessor": {
+      "median_composited_pixels": 256.0,
+      "copied_pixels": [
+        1024
+      ],
+      "image_bytes": [
+        4096
+      ],
+      "warm_allocations": {
+        "count_total": 210.0,
+        "bytes_total": 61089.0,
+        "bytes_current": 312.0,
+        "bytes_max": 12093.0,
+        "image_bytes": 4096.0,
+        "copied_pixels": 1024.0
+      },
+      "first_update_allocations": {
+        "count_total": 257,
+        "bytes_total": 80772,
+        "bytes_current": 6438,
+        "bytes_max": 15147,
+        "image_bytes": 4096,
+        "copied_pixels": 1024
+      }
+    },
+    "copy_bounds": {
+      "median_composited_pixels": 16.0,
+      "copied_pixels": [
+        1504
+      ],
+      "image_bytes": [
+        5056
+      ],
+      "warm_allocations": {
+        "count_total": 216.0,
+        "bytes_total": 61457.0,
+        "bytes_current": 312.0,
+        "bytes_max": 12093.0,
+        "image_bytes": 5056.0,
+        "copied_pixels": 1504.0
+      },
+      "first_update_allocations": {
+        "count_total": 272,
+        "bytes_total": 82364,
+        "bytes_current": 7534,
+        "bytes_max": 16267,
+        "image_bytes": 5056,
+        "copied_pixels": 1504
+      }
+    },
+    "candidate": {
+      "median_composited_pixels": 16.0,
+      "copied_pixels": [
+        1504
+      ],
+      "image_bytes": [
+        5056
+      ],
+      "warm_allocations": {
+        "count_total": 216.0,
+        "bytes_total": 61457.0,
+        "bytes_current": 312.0,
+        "bytes_max": 12093.0,
+        "image_bytes": 5056.0,
+        "copied_pixels": 1504.0
+      },
+      "first_update_allocations": {
+        "count_total": 272,
+        "bytes_total": 82364,
+        "bytes_current": 7534,
+        "bytes_max": 16267,
+        "image_bytes": 5056,
+        "copied_pixels": 1504
+      }
+    }
+  },
+  "text-0-2-source": {
+    "control": {
+      "median_composited_pixels": 1430.0,
+      "copied_pixels": [
+        691200
+      ],
+      "image_bytes": [
+        2764800
+      ],
+      "warm_allocations": {
+        "count_total": 171.0,
+        "bytes_total": 29799.0,
+        "bytes_current": 304.0,
+        "bytes_max": 9149.0,
+        "image_bytes": 2764800.0,
+        "copied_pixels": 691200.0
+      },
+      "first_update_allocations": {
+        "count_total": 180,
+        "bytes_total": 30647,
+        "bytes_current": 776,
+        "bytes_max": 9549,
+        "image_bytes": 2764800,
+        "copied_pixels": 691200
+      }
+    },
+    "bounds": {
+      "median_composited_pixels": 1430.0,
+      "copied_pixels": [
+        691200
+      ],
+      "image_bytes": [
+        2764800
+      ],
+      "warm_allocations": {
+        "count_total": 171.0,
+        "bytes_total": 29799.0,
+        "bytes_current": 304.0,
+        "bytes_max": 9149.0,
+        "image_bytes": 2764800.0,
+        "copied_pixels": 691200.0
+      },
+      "first_update_allocations": {
+        "count_total": 180,
+        "bytes_total": 30647,
+        "bytes_current": 776,
+        "bytes_max": 9549,
+        "image_bytes": 2764800,
+        "copied_pixels": 691200
+      }
+    },
+    "predecessor": {
+      "median_composited_pixels": 1430.0,
+      "copied_pixels": [
+        691200
+      ],
+      "image_bytes": [
+        2764800
+      ],
+      "warm_allocations": {
+        "count_total": 171.0,
+        "bytes_total": 29855.0,
+        "bytes_current": 304.0,
+        "bytes_max": 9149.0,
+        "image_bytes": 2764800.0,
+        "copied_pixels": 691200.0
+      },
+      "first_update_allocations": {
+        "count_total": 180,
+        "bytes_total": 30703,
+        "bytes_current": 776,
+        "bytes_max": 9549,
+        "image_bytes": 2764800,
+        "copied_pixels": 691200
+      }
+    },
+    "copy_bounds": {
+      "median_composited_pixels": 1430.0,
+      "copied_pixels": [
+        691200
+      ],
+      "image_bytes": [
+        2764800
+      ],
+      "warm_allocations": {
+        "count_total": 171.0,
+        "bytes_total": 29855.0,
+        "bytes_current": 304.0,
+        "bytes_max": 9149.0,
+        "image_bytes": 2764800.0,
+        "copied_pixels": 691200.0
+      },
+      "first_update_allocations": {
+        "count_total": 180,
+        "bytes_total": 30703,
+        "bytes_current": 776,
+        "bytes_max": 9549,
+        "image_bytes": 2764800,
+        "copied_pixels": 691200
+      }
+    },
+    "candidate": {
+      "median_composited_pixels": 1430.0,
+      "copied_pixels": [
+        691200
+      ],
+      "image_bytes": [
+        2764800
+      ],
+      "warm_allocations": {
+        "count_total": 171.0,
+        "bytes_total": 29855.0,
+        "bytes_current": 304.0,
+        "bytes_max": 9149.0,
+        "image_bytes": 2764800.0,
+        "copied_pixels": 691200.0
+      },
+      "first_update_allocations": {
+        "count_total": 180,
+        "bytes_total": 30703,
+        "bytes_current": 776,
+        "bytes_max": 9549,
+        "image_bytes": 2764800,
+        "copied_pixels": 691200
+      }
+    }
+  },
+  "text-1000-1-source": {
+    "control": {
+      "median_composited_pixels": 390.0,
+      "copied_pixels": [
+        691200
+      ],
+      "image_bytes": [
+        2764800
+      ],
+      "warm_allocations": {
+        "count_total": 132.0,
+        "bytes_total": 17193.0,
+        "bytes_current": 304.0,
+        "bytes_max": 8277.0,
+        "image_bytes": 2764800.0,
+        "copied_pixels": 691200.0
+      },
+      "first_update_allocations": {
+        "count_total": 141,
+        "bytes_total": 18041,
+        "bytes_current": 776,
+        "bytes_max": 8677,
+        "image_bytes": 2764800,
+        "copied_pixels": 691200
+      }
+    },
+    "bounds": {
+      "median_composited_pixels": 390.0,
+      "copied_pixels": [
+        691200
+      ],
+      "image_bytes": [
+        2764800
+      ],
+      "warm_allocations": {
+        "count_total": 132.0,
+        "bytes_total": 17193.0,
+        "bytes_current": 304.0,
+        "bytes_max": 8277.0,
+        "image_bytes": 2764800.0,
+        "copied_pixels": 691200.0
+      },
+      "first_update_allocations": {
+        "count_total": 141,
+        "bytes_total": 18041,
+        "bytes_current": 776,
+        "bytes_max": 8677,
+        "image_bytes": 2764800,
+        "copied_pixels": 691200
+      }
+    },
+    "predecessor": {
+      "median_composited_pixels": 390.0,
+      "copied_pixels": [
+        691200
+      ],
+      "image_bytes": [
+        2764800
+      ],
+      "warm_allocations": {
+        "count_total": 132.0,
+        "bytes_total": 17249.0,
+        "bytes_current": 304.0,
+        "bytes_max": 8333.0,
+        "image_bytes": 2764800.0,
+        "copied_pixels": 691200.0
+      },
+      "first_update_allocations": {
+        "count_total": 141,
+        "bytes_total": 18097,
+        "bytes_current": 776,
+        "bytes_max": 8733,
+        "image_bytes": 2764800,
+        "copied_pixels": 691200
+      }
+    },
+    "copy_bounds": {
+      "median_composited_pixels": 390.0,
+      "copied_pixels": [
+        691200
+      ],
+      "image_bytes": [
+        2764800
+      ],
+      "warm_allocations": {
+        "count_total": 132.0,
+        "bytes_total": 17249.0,
+        "bytes_current": 304.0,
+        "bytes_max": 8333.0,
+        "image_bytes": 2764800.0,
+        "copied_pixels": 691200.0
+      },
+      "first_update_allocations": {
+        "count_total": 141,
+        "bytes_total": 18097,
+        "bytes_current": 776,
+        "bytes_max": 8733,
+        "image_bytes": 2764800,
+        "copied_pixels": 691200
+      }
+    },
+    "candidate": {
+      "median_composited_pixels": 390.0,
+      "copied_pixels": [
+        691200
+      ],
+      "image_bytes": [
+        2764800
+      ],
+      "warm_allocations": {
+        "count_total": 132.0,
+        "bytes_total": 17249.0,
+        "bytes_current": 304.0,
+        "bytes_max": 8333.0,
+        "image_bytes": 2764800.0,
+        "copied_pixels": 691200.0
+      },
+      "first_update_allocations": {
+        "count_total": 141,
+        "bytes_total": 18097,
+        "bytes_current": 776,
+        "bytes_max": 8733,
+        "image_bytes": 2764800,
+        "copied_pixels": 691200
+      }
+    }
+  }
+}

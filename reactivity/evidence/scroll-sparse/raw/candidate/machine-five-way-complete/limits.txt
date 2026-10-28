@@ -1,0 +1,1 @@
+Local prologue reservations only; not whole call-chain, driver or GPU stack. Inlined work need not appear as a separate symbol. Native repository-default release ELFs, not the later matched fat-LTO native profile.

@@ -1,0 +1,6 @@
+{
+  "status": "recorded helper failure",
+  "problem": "Old gpui_gpu-* directory glob matches no package under pinned Cargo artifact layout; manifest has zero files. Clean ran before this was noticed.",
+  "scope": "Stage A original generated outputs and build-script executable were not separately copied by this helper. Actual prior executed test/native ELFs remain preserved by SHA256. No performance observations exist.",
+  "required_correction": "Use release/build/gpui_gpu recursive layout for future snapshots; verify nonempty ui.wgsl and build-script executable entries, check canonical shader bytes in prior and current preserved executed ELFs. Do not claim recovery of the original deleted build-script executable from a rebuild."
+}

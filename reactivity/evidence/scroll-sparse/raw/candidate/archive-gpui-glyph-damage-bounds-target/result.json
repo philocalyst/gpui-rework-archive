@@ -1,0 +1,7 @@
+{
+  "files": 96,
+  "logical_bytes": 1533175328,
+  "free_before": 12816904192,
+  "free_after": 13294800896,
+  "scope": "Only completed target ELF cache copies; every exact binary remains verified in the canonical raw or compressed store. No source or evidence removed."
+}

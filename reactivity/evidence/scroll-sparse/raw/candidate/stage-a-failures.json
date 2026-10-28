@@ -1,0 +1,20 @@
+[
+  {
+    "gate": "full-native",
+    "source": "f561f296f2",
+    "failure": "Native scroll fixture used a Paint-specific helper for Rows/Lab; compile error E0308. Native example build succeeded.",
+    "correction": "Generic test-only render helper in da49b6fecc80396aeb992dc678939cb6f2742b89; production unchanged by correction."
+  },
+  {
+    "gate": "gpu-bounds-shared",
+    "source": "da49b6fecc80396aeb992dc678939cb6f2742b89",
+    "failure": "New CPU fixture called opaque BGRX renderer with transparent clear: NonOpaqueOutput.",
+    "correction": "Exact RGBA CPU copy/repair simulation at07dd87a6d3ff96a6794fc9d67861507ac8c89e7a avoids tile expansion and accepts transparency."
+  },
+  {
+    "gate": "gpu-bounds-shared-transparent",
+    "source": "07dd87a6d3ff96a6794fc9d67861507ac8c89e7a",
+    "failure": "New ordinary GPU baseline rejected transparent clear for SDR: InvalidScene. Existing renderer requires opaque SDR clear at renderer.rs render_observed; HDR accepts alpha. CPU tests passed.",
+    "correction": "599e36c149ea252f96056f3d8e827da137f71197 keeps transparent CPU/HDR fixtures and opaque-clear SDR with translucent overlapping paint. No production admission change."
+  }
+]

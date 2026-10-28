@@ -1,0 +1,578 @@
+[
+  {
+    "path": "/home/user/gpui-glyph-damage-bounds-target/release/build/gpui_canvas/706c3421e5d8225c/out/text_cache_capacity",
+    "bytes": 7607736,
+    "sha256": "c62527c4d05c92dcd0db69aa8cafc31c28336554ee7ab7649459a7397004dbd4",
+    "mode": 493
+  },
+  {
+    "path": "/home/user/gpui-glyph-damage-bounds-target/release/build/gpui_canvas/13eb99216a5128df/out/group_views",
+    "bytes": 7873392,
+    "sha256": "ccb088a5ff0a04a1087ff881b4be48e9bfdecd97788d8bc45bab79b2c5fcd2be",
+    "mode": 493
+  },
+  {
+    "path": "/home/user/gpui-glyph-damage-bounds-target/release/build/gpui_canvas/fc7b0dd44c8082b6/out/coverage_table",
+    "bytes": 1434632,
+    "sha256": "ab18914d6c1ceb983eb5e6f0dfca412da9d98d516cbcb374487ccc30d3d6b1f6",
+    "mode": 493
+  },
+  {
+    "path": "/home/user/gpui-glyph-damage-bounds-target/release/build/gpui_canvas/6e6cb88f7f166e8e/out/text_interaction",
+    "bytes": 6968808,
+    "sha256": "28576c96dba04e4e8813cbb9e26d4efd56831cb0da1ee7e0596ffb6cd5ebc6f0",
+    "mode": 493
+  },
+  {
+    "path": "/home/user/gpui-glyph-damage-bounds-target/release/build/gpui_canvas/1d61b0701b144f8b/out/text_shaping",
+    "bytes": 8040464,
+    "sha256": "5b1997f5cdf92808a8f4ef308d05c4620b9a1a30cedc4450f54efde1af82eade",
+    "mode": 493
+  },
+  {
+    "path": "/home/user/gpui-glyph-damage-bounds-target/release/build/gpui_canvas/52684454f2eed9fd/out/text_oracle",
+    "bytes": 6970192,
+    "sha256": "6df139fc1bb9b54aeb5175f0a6378658c2b07ff90c8c4b198525c2df1749abee",
+    "mode": 493
+  },
+  {
+    "path": "/home/user/gpui-glyph-damage-bounds-target/release/build/gpui_canvas/ea1971b907539b40/out/retained_runs",
+    "bytes": 7886800,
+    "sha256": "80f442fb9f3cf73c38ff8de14d042007a0439db4ec5f6f5e7ac95a1ad1e8ea06",
+    "mode": 493
+  },
+  {
+    "path": "/home/user/gpui-glyph-damage-bounds-target/release/build/gpui_canvas/68414e8845d14960/out/font_memory",
+    "bytes": 10157208,
+    "sha256": "5877aaff0c080bda450ec306493eb63dabaa612df8b11d517af7df54252b380c",
+    "mode": 493
+  },
+  {
+    "path": "/home/user/gpui-glyph-damage-bounds-target/release/build/gpui_canvas/d7a53abed6c6185f/out/cpu",
+    "bytes": 8031416,
+    "sha256": "651dc765d62f50b2a406ee54eaafd5cd99bbfd532f4abf197c1e3e82313f6a7a",
+    "mode": 493
+  },
+  {
+    "path": "/home/user/gpui-glyph-damage-bounds-target/release/build/gpui_canvas/89e11f61f36cd9ed/out/caret_pair_measure",
+    "bytes": 6954952,
+    "sha256": "85ac9afb3ffc7a5c7e141a3b50b433cb952c5066e060d23e3d4acd0ec46bb0f2",
+    "mode": 493
+  },
+  {
+    "path": "/home/user/gpui-glyph-damage-bounds-target/release/build/gpui_canvas/3f7d5bfe3f5989d8/out/selection_queries",
+    "bytes": 6955240,
+    "sha256": "33d3d493364f69254358ff2d837417e21727d277ef053d5f9d6468323252fbd2",
+    "mode": 493
+  },
+  {
+    "path": "/home/user/gpui-glyph-damage-bounds-target/release/build/gpui_canvas/c7eadced7b956270/out/clip_cost",
+    "bytes": 7880056,
+    "sha256": "61af6e5e6f219d003089060f5146030587389b2d02cec7359078e907a94577d6",
+    "mode": 493
+  },
+  {
+    "path": "/home/user/gpui-glyph-damage-bounds-target/release/build/gpui/38c47abf9578a392/out/property_editor",
+    "bytes": 25279240,
+    "sha256": "24b05e3687de103f5b39b50a49617a1204ef3dd4284ed85c0ea593f897d2d977",
+    "mode": 493
+  },
+  {
+    "path": "/home/user/gpui-glyph-damage-bounds-target/release/build/gpui/482a0c4e2954663a/out/contained_owner_spike",
+    "bytes": 11280040,
+    "sha256": "65c0373514543cd67d639a3eb98d4eef97b9a684b1f6fc22a1ccb5e5c918abaf",
+    "mode": 493
+  },
+  {
+    "path": "/home/user/gpui-glyph-damage-bounds-target/release/build/gpui/991cc5eabc5df501/out/covers",
+    "bytes": 25166408,
+    "sha256": "c854c8bebefda73454b4b03b0fc60f85c4bef33c8c1d82973d4cfb2a8baae1ad",
+    "mode": 493
+  },
+  {
+    "path": "/home/user/gpui-glyph-damage-bounds-target/release/build/gpui/bf108177487c5f47/out/workspace",
+    "bytes": 25291160,
+    "sha256": "3eec09cb8bfe42edd75cf70c8f861020e84083dc84fbcbd5523fdf1d19175f96",
+    "mode": 493
+  },
+  {
+    "path": "/home/user/gpui-glyph-damage-bounds-target/release/build/gpui/f23d18b0a25ef922/out/unicode",
+    "bytes": 25174696,
+    "sha256": "c81131c9e44a349856f9d43137178ac1eeb3e25b704666dc0e2ddb8e02d51fc1",
+    "mode": 493
+  },
+  {
+    "path": "/home/user/gpui-glyph-damage-bounds-target/release/build/gpui/d28715db297fa2e8/out/component_sources",
+    "bytes": 25319592,
+    "sha256": "79781cffc6215797ce222c0bc17f1e32f1518979599161776c5adec97357d08b",
+    "mode": 493
+  },
+  {
+    "path": "/home/user/gpui-glyph-damage-bounds-target/release/build/gpui/6018581ec8350bd1/out/retained_list",
+    "bytes": 11193792,
+    "sha256": "cb59f0b5e5d916d357ea79c590ed608cb7921f6acf98ec46370a4c413abaa871",
+    "mode": 493
+  },
+  {
+    "path": "/home/user/gpui-glyph-damage-bounds-target/release/build/gpui/8a7afc547f960b1f/out/inspector",
+    "bytes": 25176640,
+    "sha256": "1ebcd5f841e500871d198d50dc0069d681be9b7151ea3d4b323e69cb52183475",
+    "mode": 493
+  },
+  {
+    "path": "/home/user/gpui-glyph-damage-bounds-target/release/build/gpui/a3dd2c315b8690e9/out/paint_slot_storage",
+    "bytes": 11037848,
+    "sha256": "615ac2588c0c3021d4c21032a66820dd39529bc4f31f7df9e4163462ef3944a1",
+    "mode": 493
+  },
+  {
+    "path": "/home/user/gpui-glyph-damage-bounds-target/release/build/gpui/6a4f753821c95b59/out/todo_comparison",
+    "bytes": 25536592,
+    "sha256": "9a26330d4e1b517389cce53d49fa54987b14a955af7bf2a2915fb1dfcd1d5a5f",
+    "mode": 493
+  },
+  {
+    "path": "/home/user/gpui-glyph-damage-bounds-target/release/build/gpui/a714ebd197e979b4/out/todo_comparison_five",
+    "bytes": 25556520,
+    "sha256": "9508c8481fa06cdb89aff29d8189588762c788cf64781687423366796bcb5112",
+    "mode": 493
+  },
+  {
+    "path": "/home/user/gpui-glyph-damage-bounds-target/release/build/gpui/c06a5aa6bc19f81f/out/panes",
+    "bytes": 25158032,
+    "sha256": "c162b0617bc985f556df8d3d469f86d74debd3eb8becaba0ee214c93eb1c7c8c",
+    "mode": 493
+  },
+  {
+    "path": "/home/user/gpui-glyph-damage-bounds-target/release/build/gpui/161fa22cf9a294d1/out/first_frame",
+    "bytes": 11320624,
+    "sha256": "91852823e806b0f877e3321c8a66a5fbe18b57424166aea5b7e0ebe8a926f258",
+    "mode": 493
+  },
+  {
+    "path": "/home/user/gpui-glyph-damage-bounds-target/release/build/gpui/e9b8c773f9415c80/out/sheet_access_measure",
+    "bytes": 10989160,
+    "sha256": "91f78eafac8f05e7576b25d05d833f6b6ed023c2854f186bf032739b0ec2d962",
+    "mode": 493
+  },
+  {
+    "path": "/home/user/gpui-glyph-damage-bounds-target/release/build/gpui/1f8acc57a33744b8/out/text_lane_measure",
+    "bytes": 11211352,
+    "sha256": "901e65bbdd76ce323860ca73e806d94eed1b1b33093229dfbcc5baf6e8655203",
+    "mode": 493
+  },
+  {
+    "path": "/home/user/gpui-glyph-damage-bounds-target/release/build/gpui/c7028571d687eaef/out/todo_comparison_mapped",
+    "bytes": 25566592,
+    "sha256": "7b6f90620ba1f8b0723e6de26f624a1909999cfc5926ad79baf84e69f0fcf7ed",
+    "mode": 493
+  },
+  {
+    "path": "/home/user/gpui-glyph-damage-bounds-target/release/build/gpui/4395434129024bc3/out/immutable_text_measure",
+    "bytes": 11219792,
+    "sha256": "3bb4e7ef014f573897d55fc7004b962052c781d1bb584872adf2684a651e4c27",
+    "mode": 493
+  },
+  {
+    "path": "/home/user/gpui-glyph-damage-bounds-target/release/build/gpui/1169161245756934/out/mapped_properties",
+    "bytes": 25200136,
+    "sha256": "a83b2ae183b413d34915e152af3444b340e4a6ed831d1a7332d9fafcc591fe81",
+    "mode": 493
+  },
+  {
+    "path": "/home/user/gpui-glyph-damage-bounds-target/release/build/gpui/2b67107b0dc8425c/out/state_update_cost",
+    "bytes": 11173832,
+    "sha256": "beaa43e3a33cc4c7ebeb00ae1f1f701f36e397fecdc35795b5dd62181f4d16a9",
+    "mode": 493
+  },
+  {
+    "path": "/home/user/gpui-glyph-damage-bounds-target/release/build/gpui/91cb70299684b5bb/out/empty",
+    "bytes": 25139272,
+    "sha256": "902b4c9eb5e5d5b7ee7c66ec32f129ef266ca81e1e120ad8018dd986d53bd2ee",
+    "mode": 493
+  },
+  {
+    "path": "/home/user/gpui-glyph-damage-bounds-target/release/build/gpui/28ec0596afef4533/out/remote_delivery_measure",
+    "bytes": 11215152,
+    "sha256": "2a46129e7c69dd5062a83ac1c79d6708f68a280ae2e4e556b6cf7a49ce80153f",
+    "mode": 493
+  },
+  {
+    "path": "/home/user/gpui-glyph-damage-bounds-target/release/build/gpui/3c9e032b5bbb859f/out/zgx_native_lab",
+    "bytes": 26310608,
+    "sha256": "b7b3c1669ddfaf2be52f09613688340487e3d183bdcedaa66e212e4fcc4b8181",
+    "mode": 493
+  },
+  {
+    "path": "/home/user/gpui-glyph-damage-bounds-target/release/build/gpui/90653f31efc3e71e/out/todo_recording_cost",
+    "bytes": 11559736,
+    "sha256": "b265bbfb9c7191cab8b0375ca3756701a9be63afea407e787f743c0351771777",
+    "mode": 493
+  },
+  {
+    "path": "/home/user/gpui-glyph-damage-bounds-target/release/build/gpui/b361f1a195bf26b6/out/workbench",
+    "bytes": 25199456,
+    "sha256": "709361f89c8e463d41870fe2bdc9d5ca4e67166d9f10f20e267c108321466e6f",
+    "mode": 493
+  },
+  {
+    "path": "/home/user/gpui-glyph-damage-bounds-target/release/build/gpui/9e2fa26b6c0cd5dd/out/color_cost",
+    "bytes": 11014344,
+    "sha256": "27e9fcc1a2ec71dbec761ec6d277bd3c9ff55a132b42282c06ca51f414044390",
+    "mode": 493
+  },
+  {
+    "path": "/home/user/gpui-glyph-damage-bounds-target/release/build/gpui/52a88496b452f225/out/library",
+    "bytes": 25766936,
+    "sha256": "a78dfdebd94f695f8e6763ca8c0ca6a3635f625d11f712f6cee6fa2eb24f2184",
+    "mode": 493
+  },
+  {
+    "path": "/home/user/gpui-glyph-damage-bounds-target/release/build/gpui/fa69ccf170b01ebc/out/state_update_allocations",
+    "bytes": 11118544,
+    "sha256": "d03eb6cb5f66b0f3b3033023faeb735eae2023025598e0825aeabd3f9f957133",
+    "mode": 493
+  },
+  {
+    "path": "/home/user/gpui-glyph-damage-bounds-target/release/build/gpui/eef67738bdadee03/out/luna_bench",
+    "bytes": 25153640,
+    "sha256": "e47cea866ccaf7510c9bbee779d69f88fb5845ef86b3f0828baa069c2a5666e5",
+    "mode": 493
+  },
+  {
+    "path": "/home/user/gpui-glyph-damage-bounds-target/release/build/gpui/0a5003cfb0914bde/out/reactive_styles",
+    "bytes": 25220360,
+    "sha256": "0fa92f1c09904bfe822e178cccabf17e824d45723b5a54e1cd8e8c4ffb8f6612",
+    "mode": 493
+  },
+  {
+    "path": "/home/user/gpui-glyph-damage-bounds-target/release/build/gpui/ae4e0a797c6fd8e9/out/ime_cursor_cost",
+    "bytes": 11138824,
+    "sha256": "f797d35f275e5dd9f7bef1e772834cb025185f848b5937173052f650df1b3306",
+    "mode": 493
+  },
+  {
+    "path": "/home/user/gpui-glyph-damage-bounds-target/release/build/gpui/8f3d188aea895a6f/out/graphics",
+    "bytes": 25188408,
+    "sha256": "bd7d06fdb5b785853f5a982fe6c8b0977f1b48080d3826e78c3814ec4b2d576e",
+    "mode": 493
+  },
+  {
+    "path": "/home/user/gpui-glyph-damage-bounds-target/release/build/gpui/14c57fb3ab757005/out/gradient_backgrounds",
+    "bytes": 25232840,
+    "sha256": "2b91c40221a77b2d0bdfda81aa25557758e6e73e00eb4d25abdf5422a677b9d4",
+    "mode": 493
+  },
+  {
+    "path": "/home/user/gpui-glyph-damage-bounds-target/release/build/gpui/62bb6aad7e40b147/out/counter",
+    "bytes": 25163168,
+    "sha256": "2a08af913055c64fabfab9c42332858e3686e5dfd0e559d84b13e72f7de07288",
+    "mode": 493
+  },
+  {
+    "path": "/home/user/gpui-glyph-damage-bounds-target/release/build/gpui/937604c28d1c7aaf/out/unicode_text_measure",
+    "bytes": 11155064,
+    "sha256": "c671c0ad5d5a8cac5c290d6ffb82c0d0661f70cc00d4282c26880cf728ee50bf",
+    "mode": 493
+  },
+  {
+    "path": "/home/user/gpui-glyph-damage-bounds-target/release/build/gpui_gpu/6cc55d1770954a81/out/build_script_build",
+    "bytes": 8199368,
+    "sha256": "60054bc1e308b2fe40ea860028e37a7e12254e09a019203b9abc3a98774cf05e",
+    "mode": 493
+  },
+  {
+    "path": "/home/user/gpui-glyph-damage-bounds-target/release/build/gpui_gpu/2e47dd952f358897/out/build_script_build",
+    "bytes": 8199160,
+    "sha256": "ff46656f8f07d6ccdc6c0f07010f49a2fae7d1b619280b3248dba276c3f785a8",
+    "mode": 493
+  },
+  {
+    "path": "/home/user/gpui-glyph-damage-bounds-target/release/build/gpui_gpu/d66c2755bbc7fa5d/out/build_script_build",
+    "bytes": 8199208,
+    "sha256": "4207431423c6376bdde2df33b77c639fe839d97f3855ad709fbf6f540a64dde0",
+    "mode": 493
+  },
+  {
+    "path": "/home/user/gpui-glyph-damage-bounds-target/release/build/gpui_gpu/ec6ca10d95eaa12c/out/build_script_build",
+    "bytes": 8199000,
+    "sha256": "420b84d04a999fd7fa9f54a4828c6cb847d24f21b882efa0a023a983bd6a5616",
+    "mode": 493
+  },
+  {
+    "path": "/home/user/gpui-glyph-damage-bounds-target/release/examples/immutable_text_measure",
+    "bytes": 11219792,
+    "sha256": "3bb4e7ef014f573897d55fc7004b962052c781d1bb584872adf2684a651e4c27",
+    "mode": 493
+  },
+  {
+    "path": "/home/user/gpui-glyph-damage-bounds-target/release/examples/component_sources",
+    "bytes": 25319592,
+    "sha256": "79781cffc6215797ce222c0bc17f1e32f1518979599161776c5adec97357d08b",
+    "mode": 493
+  },
+  {
+    "path": "/home/user/gpui-glyph-damage-bounds-target/release/examples/state_update_cost",
+    "bytes": 11173832,
+    "sha256": "beaa43e3a33cc4c7ebeb00ae1f1f701f36e397fecdc35795b5dd62181f4d16a9",
+    "mode": 493
+  },
+  {
+    "path": "/home/user/gpui-glyph-damage-bounds-target/release/examples/mapped_properties",
+    "bytes": 25200136,
+    "sha256": "a83b2ae183b413d34915e152af3444b340e4a6ed831d1a7332d9fafcc591fe81",
+    "mode": 493
+  },
+  {
+    "path": "/home/user/gpui-glyph-damage-bounds-target/release/examples/first_frame",
+    "bytes": 11320624,
+    "sha256": "91852823e806b0f877e3321c8a66a5fbe18b57424166aea5b7e0ebe8a926f258",
+    "mode": 493
+  },
+  {
+    "path": "/home/user/gpui-glyph-damage-bounds-target/release/examples/todo_comparison_mapped",
+    "bytes": 25566592,
+    "sha256": "7b6f90620ba1f8b0723e6de26f624a1909999cfc5926ad79baf84e69f0fcf7ed",
+    "mode": 493
+  },
+  {
+    "path": "/home/user/gpui-glyph-damage-bounds-target/release/examples/reactive_styles",
+    "bytes": 25220360,
+    "sha256": "0fa92f1c09904bfe822e178cccabf17e824d45723b5a54e1cd8e8c4ffb8f6612",
+    "mode": 493
+  },
+  {
+    "path": "/home/user/gpui-glyph-damage-bounds-target/release/examples/unicode",
+    "bytes": 25174696,
+    "sha256": "c81131c9e44a349856f9d43137178ac1eeb3e25b704666dc0e2ddb8e02d51fc1",
+    "mode": 493
+  },
+  {
+    "path": "/home/user/gpui-glyph-damage-bounds-target/release/examples/color_cost",
+    "bytes": 11014344,
+    "sha256": "27e9fcc1a2ec71dbec761ec6d277bd3c9ff55a132b42282c06ca51f414044390",
+    "mode": 493
+  },
+  {
+    "path": "/home/user/gpui-glyph-damage-bounds-target/release/examples/panes",
+    "bytes": 25158032,
+    "sha256": "c162b0617bc985f556df8d3d469f86d74debd3eb8becaba0ee214c93eb1c7c8c",
+    "mode": 493
+  },
+  {
+    "path": "/home/user/gpui-glyph-damage-bounds-target/release/examples/library",
+    "bytes": 25766936,
+    "sha256": "a78dfdebd94f695f8e6763ca8c0ca6a3635f625d11f712f6cee6fa2eb24f2184",
+    "mode": 493
+  },
+  {
+    "path": "/home/user/gpui-glyph-damage-bounds-target/release/examples/text_interaction",
+    "bytes": 6968808,
+    "sha256": "28576c96dba04e4e8813cbb9e26d4efd56831cb0da1ee7e0596ffb6cd5ebc6f0",
+    "mode": 493
+  },
+  {
+    "path": "/home/user/gpui-glyph-damage-bounds-target/release/examples/graphics",
+    "bytes": 25188408,
+    "sha256": "bd7d06fdb5b785853f5a982fe6c8b0977f1b48080d3826e78c3814ec4b2d576e",
+    "mode": 493
+  },
+  {
+    "path": "/home/user/gpui-glyph-damage-bounds-target/release/examples/covers",
+    "bytes": 25166408,
+    "sha256": "c854c8bebefda73454b4b03b0fc60f85c4bef33c8c1d82973d4cfb2a8baae1ad",
+    "mode": 493
+  },
+  {
+    "path": "/home/user/gpui-glyph-damage-bounds-target/release/examples/unicode_text_measure",
+    "bytes": 11155064,
+    "sha256": "c671c0ad5d5a8cac5c290d6ffb82c0d0661f70cc00d4282c26880cf728ee50bf",
+    "mode": 493
+  },
+  {
+    "path": "/home/user/gpui-glyph-damage-bounds-target/release/examples/counter",
+    "bytes": 25163168,
+    "sha256": "2a08af913055c64fabfab9c42332858e3686e5dfd0e559d84b13e72f7de07288",
+    "mode": 493
+  },
+  {
+    "path": "/home/user/gpui-glyph-damage-bounds-target/release/examples/retained_runs",
+    "bytes": 7886800,
+    "sha256": "80f442fb9f3cf73c38ff8de14d042007a0439db4ec5f6f5e7ac95a1ad1e8ea06",
+    "mode": 493
+  },
+  {
+    "path": "/home/user/gpui-glyph-damage-bounds-target/release/examples/empty",
+    "bytes": 25139272,
+    "sha256": "902b4c9eb5e5d5b7ee7c66ec32f129ef266ca81e1e120ad8018dd986d53bd2ee",
+    "mode": 493
+  },
+  {
+    "path": "/home/user/gpui-glyph-damage-bounds-target/release/examples/state_update_allocations",
+    "bytes": 11118544,
+    "sha256": "d03eb6cb5f66b0f3b3033023faeb735eae2023025598e0825aeabd3f9f957133",
+    "mode": 493
+  },
+  {
+    "path": "/home/user/gpui-glyph-damage-bounds-target/release/examples/text_cache_capacity",
+    "bytes": 7607736,
+    "sha256": "c62527c4d05c92dcd0db69aa8cafc31c28336554ee7ab7649459a7397004dbd4",
+    "mode": 493
+  },
+  {
+    "path": "/home/user/gpui-glyph-damage-bounds-target/release/examples/remote_delivery_measure",
+    "bytes": 11215152,
+    "sha256": "2a46129e7c69dd5062a83ac1c79d6708f68a280ae2e4e556b6cf7a49ce80153f",
+    "mode": 493
+  },
+  {
+    "path": "/home/user/gpui-glyph-damage-bounds-target/release/examples/text_oracle",
+    "bytes": 6970192,
+    "sha256": "6df139fc1bb9b54aeb5175f0a6378658c2b07ff90c8c4b198525c2df1749abee",
+    "mode": 493
+  },
+  {
+    "path": "/home/user/gpui-glyph-damage-bounds-target/release/examples/coverage_table",
+    "bytes": 1434632,
+    "sha256": "ab18914d6c1ceb983eb5e6f0dfca412da9d98d516cbcb374487ccc30d3d6b1f6",
+    "mode": 493
+  },
+  {
+    "path": "/home/user/gpui-glyph-damage-bounds-target/release/examples/retained_list",
+    "bytes": 11193792,
+    "sha256": "cb59f0b5e5d916d357ea79c590ed608cb7921f6acf98ec46370a4c413abaa871",
+    "mode": 493
+  },
+  {
+    "path": "/home/user/gpui-glyph-damage-bounds-target/release/examples/text_lane_measure",
+    "bytes": 11211352,
+    "sha256": "901e65bbdd76ce323860ca73e806d94eed1b1b33093229dfbcc5baf6e8655203",
+    "mode": 493
+  },
+  {
+    "path": "/home/user/gpui-glyph-damage-bounds-target/release/examples/luna_bench",
+    "bytes": 25153640,
+    "sha256": "e47cea866ccaf7510c9bbee779d69f88fb5845ef86b3f0828baa069c2a5666e5",
+    "mode": 493
+  },
+  {
+    "path": "/home/user/gpui-glyph-damage-bounds-target/release/examples/selection_queries",
+    "bytes": 6955240,
+    "sha256": "33d3d493364f69254358ff2d837417e21727d277ef053d5f9d6468323252fbd2",
+    "mode": 493
+  },
+  {
+    "path": "/home/user/gpui-glyph-damage-bounds-target/release/examples/workbench",
+    "bytes": 25199456,
+    "sha256": "709361f89c8e463d41870fe2bdc9d5ca4e67166d9f10f20e267c108321466e6f",
+    "mode": 493
+  },
+  {
+    "path": "/home/user/gpui-glyph-damage-bounds-target/release/examples/group_views",
+    "bytes": 7873392,
+    "sha256": "ccb088a5ff0a04a1087ff881b4be48e9bfdecd97788d8bc45bab79b2c5fcd2be",
+    "mode": 493
+  },
+  {
+    "path": "/home/user/gpui-glyph-damage-bounds-target/release/examples/zgx_native_lab",
+    "bytes": 26310608,
+    "sha256": "b7b3c1669ddfaf2be52f09613688340487e3d183bdcedaa66e212e4fcc4b8181",
+    "mode": 493
+  },
+  {
+    "path": "/home/user/gpui-glyph-damage-bounds-target/release/examples/todo_recording_cost",
+    "bytes": 11559736,
+    "sha256": "b265bbfb9c7191cab8b0375ca3756701a9be63afea407e787f743c0351771777",
+    "mode": 493
+  },
+  {
+    "path": "/home/user/gpui-glyph-damage-bounds-target/release/examples/workspace",
+    "bytes": 25291160,
+    "sha256": "3eec09cb8bfe42edd75cf70c8f861020e84083dc84fbcbd5523fdf1d19175f96",
+    "mode": 493
+  },
+  {
+    "path": "/home/user/gpui-glyph-damage-bounds-target/release/examples/inspector",
+    "bytes": 25176640,
+    "sha256": "1ebcd5f841e500871d198d50dc0069d681be9b7151ea3d4b323e69cb52183475",
+    "mode": 493
+  },
+  {
+    "path": "/home/user/gpui-glyph-damage-bounds-target/release/examples/todo_comparison_five",
+    "bytes": 25556520,
+    "sha256": "9508c8481fa06cdb89aff29d8189588762c788cf64781687423366796bcb5112",
+    "mode": 493
+  },
+  {
+    "path": "/home/user/gpui-glyph-damage-bounds-target/release/examples/contained_owner_spike",
+    "bytes": 11280040,
+    "sha256": "65c0373514543cd67d639a3eb98d4eef97b9a684b1f6fc22a1ccb5e5c918abaf",
+    "mode": 493
+  },
+  {
+    "path": "/home/user/gpui-glyph-damage-bounds-target/release/examples/cpu",
+    "bytes": 8031416,
+    "sha256": "651dc765d62f50b2a406ee54eaafd5cd99bbfd532f4abf197c1e3e82313f6a7a",
+    "mode": 493
+  },
+  {
+    "path": "/home/user/gpui-glyph-damage-bounds-target/release/examples/ime_cursor_cost",
+    "bytes": 11138824,
+    "sha256": "f797d35f275e5dd9f7bef1e772834cb025185f848b5937173052f650df1b3306",
+    "mode": 493
+  },
+  {
+    "path": "/home/user/gpui-glyph-damage-bounds-target/release/examples/caret_pair_measure",
+    "bytes": 6954952,
+    "sha256": "85ac9afb3ffc7a5c7e141a3b50b433cb952c5066e060d23e3d4acd0ec46bb0f2",
+    "mode": 493
+  },
+  {
+    "path": "/home/user/gpui-glyph-damage-bounds-target/release/examples/text_shaping",
+    "bytes": 8040464,
+    "sha256": "5b1997f5cdf92808a8f4ef308d05c4620b9a1a30cedc4450f54efde1af82eade",
+    "mode": 493
+  },
+  {
+    "path": "/home/user/gpui-glyph-damage-bounds-target/release/examples/font_memory",
+    "bytes": 10157208,
+    "sha256": "5877aaff0c080bda450ec306493eb63dabaa612df8b11d517af7df54252b380c",
+    "mode": 493
+  },
+  {
+    "path": "/home/user/gpui-glyph-damage-bounds-target/release/examples/property_editor",
+    "bytes": 25279240,
+    "sha256": "24b05e3687de103f5b39b50a49617a1204ef3dd4284ed85c0ea593f897d2d977",
+    "mode": 493
+  },
+  {
+    "path": "/home/user/gpui-glyph-damage-bounds-target/release/examples/todo_comparison",
+    "bytes": 25536592,
+    "sha256": "9a26330d4e1b517389cce53d49fa54987b14a955af7bf2a2915fb1dfcd1d5a5f",
+    "mode": 493
+  },
+  {
+    "path": "/home/user/gpui-glyph-damage-bounds-target/release/examples/gradient_backgrounds",
+    "bytes": 25232840,
+    "sha256": "2b91c40221a77b2d0bdfda81aa25557758e6e73e00eb4d25abdf5422a677b9d4",
+    "mode": 493
+  },
+  {
+    "path": "/home/user/gpui-glyph-damage-bounds-target/release/examples/clip_cost",
+    "bytes": 7880056,
+    "sha256": "61af6e5e6f219d003089060f5146030587389b2d02cec7359078e907a94577d6",
+    "mode": 493
+  },
+  {
+    "path": "/home/user/gpui-glyph-damage-bounds-target/release/examples/paint_slot_storage",
+    "bytes": 11037848,
+    "sha256": "615ac2588c0c3021d4c21032a66820dd39529bc4f31f7df9e4163462ef3944a1",
+    "mode": 493
+  },
+  {
+    "path": "/home/user/gpui-glyph-damage-bounds-target/release/examples/sheet_access_measure",
+    "bytes": 10989160,
+    "sha256": "91f78eafac8f05e7576b25d05d833f6b6ed023c2854f186bf032739b0ec2d962",
+    "mode": 493
+  }
+]

@@ -1,0 +1,830 @@
+{
+  "gpu-precise-first": {
+    "test": {
+      "status": {
+        "command": [
+          "cargo",
+          "+nightly-2026-10-23",
+          "-Z",
+          "checksum-freshness",
+          "--config",
+          "build.fingerprint=\"content\"",
+          "test",
+          "--locked",
+          "--offline",
+          "--release",
+          "-p",
+          "gpui_gpu",
+          "-p",
+          "gpui_canvas",
+          "--features",
+          "gpui_gpu/vulkan-tests",
+          "--message-format=json",
+          "--",
+          "--test-threads=1"
+        ],
+        "exit": 0,
+        "minimum_free_bytes": 11416158208,
+        "storage_stop": false,
+        "seconds": 84.00935537200712
+      },
+      "passed": 346,
+      "ignored": 3
+    },
+    "clippy": {
+      "status": {
+        "command": [
+          "cargo",
+          "+nightly-2026-10-23",
+          "-Z",
+          "checksum-freshness",
+          "--config",
+          "build.fingerprint=\"content\"",
+          "clippy",
+          "--locked",
+          "--offline",
+          "--release",
+          "-p",
+          "gpui_gpu",
+          "-p",
+          "gpui_canvas",
+          "--features",
+          "gpui_gpu/vulkan-tests",
+          "--message-format=json",
+          "--all-targets",
+          "--",
+          "-D",
+          "warnings"
+        ],
+        "exit": 0,
+        "minimum_free_bytes": 12476874752,
+        "storage_stop": false,
+        "seconds": 22.003456196005573
+      },
+      "passed": 0,
+      "ignored": 0
+    }
+  },
+  "offline-precise": {
+    "test": {
+      "status": {
+        "command": [
+          "cargo",
+          "+nightly-2026-10-23",
+          "-Z",
+          "checksum-freshness",
+          "--config",
+          "build.fingerprint=\"content\"",
+          "test",
+          "--locked",
+          "--offline",
+          "--release",
+          "-p",
+          "gpui_gpu",
+          "--features",
+          "vulkan-tests,offline-shader",
+          "--message-format=json",
+          "--",
+          "--test-threads=1"
+        ],
+        "exit": 0,
+        "minimum_free_bytes": 10420850688,
+        "storage_stop": false,
+        "seconds": 66.00704384200799
+      },
+      "passed": 79,
+      "ignored": 0
+    },
+    "clippy": {
+      "status": {
+        "command": [
+          "cargo",
+          "+nightly-2026-10-23",
+          "-Z",
+          "checksum-freshness",
+          "--config",
+          "build.fingerprint=\"content\"",
+          "clippy",
+          "--locked",
+          "--offline",
+          "--release",
+          "-p",
+          "gpui_gpu",
+          "--features",
+          "vulkan-tests,offline-shader",
+          "--message-format=json",
+          "--all-targets",
+          "--",
+          "-D",
+          "warnings"
+        ],
+        "exit": 0,
+        "minimum_free_bytes": 10321661952,
+        "storage_stop": false,
+        "seconds": 18.00176406299579
+      },
+      "passed": 0,
+      "ignored": 0
+    }
+  },
+  "full-native-precise": {
+    "build": {
+      "status": {
+        "command": [
+          "cargo",
+          "+nightly-2026-10-23",
+          "-Z",
+          "checksum-freshness",
+          "--config",
+          "build.fingerprint=\"content\"",
+          "build",
+          "--locked",
+          "--offline",
+          "--release",
+          "--message-format=json",
+          "-p",
+          "gpui",
+          "--features",
+          "x11",
+          "--example",
+          "zgx_native_lab"
+        ],
+        "exit": 0,
+        "minimum_free_bytes": 12248444928,
+        "storage_stop": false,
+        "seconds": 82.0164602700097
+      },
+      "passed": 0,
+      "ignored": 0
+    },
+    "test": {
+      "status": {
+        "command": [
+          "cargo",
+          "+nightly-2026-10-23",
+          "-Z",
+          "checksum-freshness",
+          "--config",
+          "build.fingerprint=\"content\"",
+          "test",
+          "--locked",
+          "--offline",
+          "--release",
+          "--message-format=json",
+          "-p",
+          "gpui",
+          "-p",
+          "gpui_canvas",
+          "--features",
+          "gpui/x11"
+        ],
+        "exit": 0,
+        "minimum_free_bytes": 12611256320,
+        "storage_stop": false,
+        "seconds": 406.06284062699706
+      },
+      "passed": 1102,
+      "ignored": 45
+    },
+    "port": {
+      "status": {
+        "command": [
+          "cargo",
+          "+nightly-2026-10-23",
+          "-Z",
+          "checksum-freshness",
+          "--config",
+          "build.fingerprint=\"content\"",
+          "test",
+          "--locked",
+          "--offline",
+          "--release",
+          "--message-format=json",
+          "-p",
+          "gpui",
+          "--features",
+          "x11",
+          "--example",
+          "zgx_native_lab"
+        ],
+        "exit": 0,
+        "minimum_free_bytes": 11503751168,
+        "storage_stop": false,
+        "seconds": 6.001990374992602
+      },
+      "passed": 17,
+      "ignored": 0
+    },
+    "clippy": {
+      "status": {
+        "command": [
+          "cargo",
+          "+nightly-2026-10-23",
+          "-Z",
+          "checksum-freshness",
+          "--config",
+          "build.fingerprint=\"content\"",
+          "clippy",
+          "--locked",
+          "--offline",
+          "--release",
+          "--message-format=json",
+          "-p",
+          "gpui",
+          "-p",
+          "gpui_canvas",
+          "--features",
+          "gpui/x11",
+          "--all-targets",
+          "--",
+          "-D",
+          "warnings"
+        ],
+        "exit": 0,
+        "minimum_free_bytes": 11481415680,
+        "storage_stop": false,
+        "seconds": 36.00353862499469
+      },
+      "passed": 0,
+      "ignored": 0
+    }
+  },
+  "minimal-library-precise": {
+    "unit-build": {
+      "status": {
+        "command": [
+          "cargo",
+          "+nightly-2026-10-23",
+          "-Z",
+          "checksum-freshness",
+          "--config",
+          "build.fingerprint=\"content\"",
+          "test",
+          "--locked",
+          "--offline",
+          "--release",
+          "--message-format=json",
+          "-p",
+          "gpui",
+          "-p",
+          "gpui_canvas",
+          "--features",
+          "gpui/x11-minimal",
+          "--lib"
+        ],
+        "exit": 0,
+        "minimum_free_bytes": 12536643584,
+        "storage_stop": false,
+        "seconds": 166.01871948401094
+      },
+      "passed": 328,
+      "ignored": 25
+    },
+    "port": {
+      "status": {
+        "command": [
+          "cargo",
+          "+nightly-2026-10-23",
+          "-Z",
+          "checksum-freshness",
+          "--config",
+          "build.fingerprint=\"content\"",
+          "test",
+          "--locked",
+          "--offline",
+          "--release",
+          "--message-format=json",
+          "-p",
+          "gpui",
+          "--features",
+          "x11-minimal",
+          "--example",
+          "zgx_native_lab"
+        ],
+        "exit": 0,
+        "minimum_free_bytes": 14284070912,
+        "storage_stop": false,
+        "seconds": 12.001442905006115
+      },
+      "passed": 17,
+      "ignored": 0
+    },
+    "clippy": {
+      "status": {
+        "command": [
+          "cargo",
+          "+nightly-2026-10-23",
+          "-Z",
+          "checksum-freshness",
+          "--config",
+          "build.fingerprint=\"content\"",
+          "clippy",
+          "--locked",
+          "--offline",
+          "--release",
+          "--message-format=json",
+          "-p",
+          "gpui",
+          "-p",
+          "gpui_canvas",
+          "--features",
+          "gpui/x11-minimal",
+          "--all-targets",
+          "--",
+          "-D",
+          "warnings"
+        ],
+        "exit": 0,
+        "minimum_free_bytes": 14239039488,
+        "storage_stop": false,
+        "seconds": 28.002305440008058
+      },
+      "passed": 0,
+      "ignored": 0
+    }
+  },
+  "default-precise": {
+    "test": {
+      "status": {
+        "command": [
+          "cargo",
+          "+nightly-2026-10-23",
+          "-Z",
+          "checksum-freshness",
+          "--config",
+          "build.fingerprint=\"content\"",
+          "test",
+          "--locked",
+          "--offline",
+          "--release",
+          "--message-format=json",
+          "-p",
+          "gpui",
+          "-p",
+          "gpui_canvas"
+        ],
+        "exit": 0,
+        "minimum_free_bytes": 12185038848,
+        "storage_stop": false,
+        "seconds": 298.0312899529963
+      },
+      "passed": 1009,
+      "ignored": 13
+    },
+    "clippy": {
+      "status": {
+        "command": [
+          "cargo",
+          "+nightly-2026-10-23",
+          "-Z",
+          "checksum-freshness",
+          "--config",
+          "build.fingerprint=\"content\"",
+          "clippy",
+          "--locked",
+          "--offline",
+          "--release",
+          "--message-format=json",
+          "-p",
+          "gpui",
+          "-p",
+          "gpui_canvas",
+          "--all-targets",
+          "--",
+          "-D",
+          "warnings"
+        ],
+        "exit": 0,
+        "minimum_free_bytes": 10714476544,
+        "storage_stop": false,
+        "seconds": 16.00307931700081
+      },
+      "passed": 0,
+      "ignored": 0
+    }
+  },
+  "native-checks-precise": {
+    "native-0": {
+      "status": {
+        "command": [
+          "/home/user/gpui-preserved-test-binaries/cdc8811324153f68408374e258ba99f860e893733645ecaa0560520f2bde44ff",
+          "--ignored",
+          "--exact",
+          "native::remote_tests::native_source_inbox_patches_and_rearms_without_describing_the_owner",
+          "--nocapture"
+        ],
+        "exit": 0
+      },
+      "passed": 1,
+      "ignored": 0
+    },
+    "native-1": {
+      "status": {
+        "command": [
+          "/home/user/gpui-preserved-test-binaries/cdc8811324153f68408374e258ba99f860e893733645ecaa0560520f2bde44ff",
+          "--ignored",
+          "--exact",
+          "native::remote_tests::native_remote_results_wake_bounded_owner_turns_without_polling",
+          "--nocapture"
+        ],
+        "exit": 0
+      },
+      "passed": 1,
+      "ignored": 0
+    },
+    "native-2": {
+      "status": {
+        "command": [
+          "/home/user/gpui-preserved-test-binaries/cdc8811324153f68408374e258ba99f860e893733645ecaa0560520f2bde44ff",
+          "--ignored",
+          "--exact",
+          "native::remote_tests::native_final_producer_drop_drains_saturated_and_quiescent_status_lanes",
+          "--nocapture"
+        ],
+        "exit": 0
+      },
+      "passed": 1,
+      "ignored": 0
+    },
+    "native-3": {
+      "status": {
+        "command": [
+          "/home/user/gpui-preserved-test-binaries/cdc8811324153f68408374e258ba99f860e893733645ecaa0560520f2bde44ff",
+          "--ignored",
+          "--exact",
+          "native::question_tests::native_question_result_and_credit_wake_without_unrelated_input",
+          "--nocapture"
+        ],
+        "exit": 0
+      },
+      "passed": 1,
+      "ignored": 0
+    },
+    "native-4": {
+      "status": {
+        "command": [
+          "/home/user/gpui-preserved-test-binaries/cdc8811324153f68408374e258ba99f860e893733645ecaa0560520f2bde44ff",
+          "--ignored",
+          "--exact",
+          "native::question_tests::native_future_cancellation_and_result_wake_without_unrelated_input",
+          "--nocapture"
+        ],
+        "exit": 0
+      },
+      "passed": 1,
+      "ignored": 0
+    },
+    "native-5": {
+      "status": {
+        "command": [
+          "/home/user/gpui-preserved-test-binaries/cdc8811324153f68408374e258ba99f860e893733645ecaa0560520f2bde44ff",
+          "--ignored",
+          "--exact",
+          "native::tests::native_todo_port_presents_edits_pointer_actions_resize_and_inspection",
+          "--nocapture"
+        ],
+        "exit": 0
+      },
+      "passed": 1,
+      "ignored": 0
+    },
+    "native-list-default": {
+      "status": {
+        "command": [
+          "/home/user/gpui-preserved-test-binaries/cdc8811324153f68408374e258ba99f860e893733645ecaa0560520f2bde44ff",
+          "native::list_tests::native_library_250k_wheel_pointer_resize_resume",
+          "--ignored",
+          "--exact",
+          "--nocapture",
+          "--test-threads=1"
+        ],
+        "exit": 0
+      },
+      "passed": 1,
+      "ignored": 0
+    },
+    "native-overscan": {
+      "status": {
+        "command": [
+          "/home/user/gpui-preserved-test-binaries/cdc8811324153f68408374e258ba99f860e893733645ecaa0560520f2bde44ff",
+          "native::list_tests::native_library_250k_overscan_wheel_pointer_resize_resume",
+          "--ignored",
+          "--exact",
+          "--nocapture",
+          "--test-threads=1"
+        ],
+        "exit": 0
+      },
+      "passed": 1,
+      "ignored": 0
+    },
+    "native-list-controlled": {
+      "status": {
+        "command": [
+          "/home/user/gpui-preserved-test-binaries/cdc8811324153f68408374e258ba99f860e893733645ecaa0560520f2bde44ff",
+          "native::list_tests::native_library_250k_controlled_wheel_pointer_resize_resume",
+          "--ignored",
+          "--exact",
+          "--nocapture",
+          "--test-threads=1"
+        ],
+        "exit": 0
+      },
+      "passed": 1,
+      "ignored": 0
+    },
+    "native_atspi_ime_cjk_preview_old_candidate_ack_and_commit": {
+      "status": {
+        "command": [
+          "dbus-run-session",
+          "--",
+          "/home/user/gpui-preserved-test-binaries/cdc8811324153f68408374e258ba99f860e893733645ecaa0560520f2bde44ff",
+          "native::accessibility::linux_tests::ime::native_atspi_ime_cjk_preview_old_candidate_ack_and_commit",
+          "--ignored",
+          "--exact",
+          "--nocapture",
+          "--test-threads=1"
+        ],
+        "exit": 0
+      },
+      "passed": 1,
+      "ignored": 0
+    },
+    "native_atspi_ime_explicit_line_height_preview_ack_and_commit": {
+      "status": {
+        "command": [
+          "dbus-run-session",
+          "--",
+          "/home/user/gpui-preserved-test-binaries/cdc8811324153f68408374e258ba99f860e893733645ecaa0560520f2bde44ff",
+          "native::accessibility::linux_tests::ime::native_atspi_ime_explicit_line_height_preview_ack_and_commit",
+          "--ignored",
+          "--exact",
+          "--nocapture",
+          "--test-threads=1"
+        ],
+        "exit": 0
+      },
+      "passed": 1,
+      "ignored": 0
+    }
+  },
+  "minimal-native-checks-precise": {
+    "native-todo": {
+      "status": {
+        "command": [
+          "/home/user/gpui-preserved-test-binaries/262a8c52babf98985f63555605e6a39852f8dbdc4bf50401fb31e09636be2de0",
+          "native::tests::native_todo_port_presents_edits_pointer_actions_resize_and_inspection",
+          "--ignored",
+          "--exact",
+          "--nocapture",
+          "--test-threads=1"
+        ],
+        "exit": 0
+      },
+      "passed": 1,
+      "ignored": 0
+    },
+    "native-list-default": {
+      "status": {
+        "command": [
+          "/home/user/gpui-preserved-test-binaries/262a8c52babf98985f63555605e6a39852f8dbdc4bf50401fb31e09636be2de0",
+          "native::list_tests::native_library_250k_wheel_pointer_resize_resume",
+          "--ignored",
+          "--exact",
+          "--nocapture",
+          "--test-threads=1"
+        ],
+        "exit": 0
+      },
+      "passed": 1,
+      "ignored": 0
+    },
+    "native-overscan": {
+      "status": {
+        "command": [
+          "/home/user/gpui-preserved-test-binaries/262a8c52babf98985f63555605e6a39852f8dbdc4bf50401fb31e09636be2de0",
+          "native::list_tests::native_library_250k_overscan_wheel_pointer_resize_resume",
+          "--ignored",
+          "--exact",
+          "--nocapture",
+          "--test-threads=1"
+        ],
+        "exit": 0
+      },
+      "passed": 1,
+      "ignored": 0
+    },
+    "native-list-controlled": {
+      "status": {
+        "command": [
+          "/home/user/gpui-preserved-test-binaries/262a8c52babf98985f63555605e6a39852f8dbdc4bf50401fb31e09636be2de0",
+          "native::list_tests::native_library_250k_controlled_wheel_pointer_resize_resume",
+          "--ignored",
+          "--exact",
+          "--nocapture",
+          "--test-threads=1"
+        ],
+        "exit": 0
+      },
+      "passed": 1,
+      "ignored": 0
+    }
+  },
+  "source": "5a07d7c28ffe500a5d24e25fdf1f31ce4857811f",
+  "negative": {
+    "omit": {
+      "source": "d6c1efceff015d68c7deff1367c0bcb532c3f268",
+      "status": {
+        "command": [
+          "cargo",
+          "+nightly-2026-10-23",
+          "-Z",
+          "checksum-freshness",
+          "--config",
+          "build.fingerprint=\"content\"",
+          "test",
+          "--locked",
+          "--offline",
+          "--release",
+          "--message-format=json",
+          "-p",
+          "gpui_gpu",
+          "--features",
+          "vulkan-tests",
+          "--test",
+          "render",
+          "retained_scroll_outside_changes_match_full_gpu_in_all_formats",
+          "--",
+          "--exact",
+          "--nocapture",
+          "--test-threads=1"
+        ],
+        "exit": 101,
+        "minimum_free_bytes": 13794566144,
+        "stopped": false,
+        "seconds": 62.01375768400612
+      },
+      "pixel_failure": "outside case=0, tick=1, format=Rgba8UnormSrgb",
+      "artifacts": [
+        {
+          "path": "/home/user/gpui-scroll-sparse-omit-target/release/build/gpui_gpu/fc26bbb724122b97/out/render-fc26bbb724122b97",
+          "sha256": "1ccf99532ac21f6c46da748bfe65b8684fdc771e1d598372755a96407c1dea4e",
+          "preserved": "/home/user/gpui-preserved-test-binaries/1ccf99532ac21f6c46da748bfe65b8684fdc771e1d598372755a96407c1dea4e",
+          "bytes": 16852456,
+          "cargo": {
+            "reason": "compiler-artifact",
+            "package_id": "path+file:///home/user/gpui-scroll-sparse-omit-lab/reactivity/crates/gpu#gpui_gpu@0.1.0",
+            "manifest_path": "/home/user/gpui-scroll-sparse-omit-lab/reactivity/crates/gpu/Cargo.toml",
+            "target": {
+              "kind": [
+                "test"
+              ],
+              "crate_types": [
+                "bin"
+              ],
+              "name": "render",
+              "src_path": "/home/user/gpui-scroll-sparse-omit-lab/reactivity/crates/gpu/tests/render.rs",
+              "edition": "2024",
+              "required-features": [
+                "gpu-tests"
+              ],
+              "doc": false,
+              "doctest": false,
+              "test": true
+            },
+            "profile": {
+              "opt_level": "3",
+              "debuginfo": 0,
+              "debug_assertions": false,
+              "overflow_checks": false,
+              "test": true
+            },
+            "features": [
+              "default",
+              "gpu-tests",
+              "simd",
+              "vulkan-tests"
+            ],
+            "filenames": [
+              "/home/user/gpui-scroll-sparse-omit-target/release/build/gpui_gpu/fc26bbb724122b97/out/render-fc26bbb724122b97"
+            ],
+            "executable": "/home/user/gpui-scroll-sparse-omit-target/release/build/gpui_gpu/fc26bbb724122b97/out/render-fc26bbb724122b97",
+            "fresh": false
+          }
+        }
+      ]
+    },
+    "authority": {
+      "source": "0a0a496e4640e80797bfc89f3a82731ffd3d7043",
+      "status": {
+        "command": [
+          "/home/user/gpui-preserved-test-binaries/e8b30dfbf5b40f17f1631c043de54d6acdae45a8f252b4ea265a2d8368efb841",
+          "native::tests::native_todo_port_presents_edits_pointer_actions_resize_and_inspection",
+          "--ignored",
+          "--exact",
+          "--nocapture",
+          "--test-threads=1"
+        ],
+        "exit": 101,
+        "minimum_free_bytes": 10627497984,
+        "stopped": false,
+        "seconds": 2.000677874995745
+      },
+      "pixel_failure": "native patch vs independent full GPU renderer",
+      "artifacts": [
+        {
+          "path": "/home/user/gpui-scroll-sparse-authority-target/release/build/gpui/d51c62efad296df0/out/gpui-d51c62efad296df0",
+          "sha256": "e8b30dfbf5b40f17f1631c043de54d6acdae45a8f252b4ea265a2d8368efb841",
+          "preserved": "/home/user/gpui-preserved-test-binaries/e8b30dfbf5b40f17f1631c043de54d6acdae45a8f252b4ea265a2d8368efb841",
+          "bytes": 61311968,
+          "cargo": {
+            "reason": "compiler-artifact",
+            "package_id": "path+file:///home/user/gpui-scroll-sparse-authority-lab/reactivity/crates/gpui#0.1.0",
+            "manifest_path": "/home/user/gpui-scroll-sparse-authority-lab/reactivity/crates/gpui/Cargo.toml",
+            "target": {
+              "kind": [
+                "lib"
+              ],
+              "crate_types": [
+                "lib"
+              ],
+              "name": "gpui",
+              "src_path": "/home/user/gpui-scroll-sparse-authority-lab/reactivity/crates/gpui/src/lib.rs",
+              "edition": "2024",
+              "doc": true,
+              "doctest": true,
+              "test": true
+            },
+            "profile": {
+              "opt_level": "3",
+              "debuginfo": 0,
+              "debug_assertions": false,
+              "overflow_checks": false,
+              "test": true
+            },
+            "features": [
+              "accessibility",
+              "default",
+              "native",
+              "native-core",
+              "simd",
+              "x11",
+              "x11-minimal"
+            ],
+            "filenames": [
+              "/home/user/gpui-scroll-sparse-authority-target/release/build/gpui/d51c62efad296df0/out/gpui-d51c62efad296df0"
+            ],
+            "executable": "/home/user/gpui-scroll-sparse-authority-target/release/build/gpui/d51c62efad296df0/out/gpui-d51c62efad296df0",
+            "fresh": false
+          }
+        }
+      ]
+    }
+  },
+  "copy_bounds": {
+    "source": "599e36c149ea252f96056f3d8e827da137f71197",
+    "same_paths_except": "outside_damage derivation",
+    "qualified_composition": [
+      "full-native-bounds-shared",
+      "native-checks-bounds-shared",
+      "gpu-bounds-shared-admitted"
+    ],
+    "fresh_target_build": "cost-build-copy_bounds-retry"
+  },
+  "inherited_controls": [
+    {
+      "variant": "control",
+      "qualified_core_source": "bb83c5d8f3da446d4cc1c259141f335797b1b60d",
+      "current_source": "20919cb160f6fcc5ab85eca607b97d4173739409",
+      "only_changed_build_input": [
+        "reactivity/crates/gpui/examples/zgx_native_lab.rs"
+      ],
+      "prior_full_native_gate": "/home/user/gpui-glyph-damage-control-evidence/full-native",
+      "prior_native_checks": "/home/user/gpui-glyph-damage-control-evidence/native-checks",
+      "fresh_gates": "Current native unit tests, 17 deferred-control example tests, GPU suite, strict Clippy, native executable build and all per-regime public owner/GPU oracle processes. No unchanged standalone integration tests are rerun solely for a new target directory."
+    },
+    {
+      "variant": "bounds",
+      "qualified_core_source": "be8300c1e3eafacedfa20c062bf2e31ed1ada9ca",
+      "current_source": "d67a538b9502fb778460d9c59e726d5bb502ce28",
+      "only_changed_build_input": [
+        "reactivity/crates/gpui/examples/zgx_native_lab.rs"
+      ],
+      "prior_full_native_gate": "/home/user/gpui-glyph-damage-bounds-evidence/full-native",
+      "prior_native_checks": "/home/user/gpui-glyph-damage-bounds-evidence/native-checks",
+      "fresh_gates": "Current native unit tests, 17 deferred-control example tests, GPU suite, strict Clippy, native executable build and all per-regime public owner/GPU oracle processes. No unchanged standalone integration tests are rerun solely for a new target directory."
+    },
+    {
+      "variant": "predecessor",
+      "qualified_core_source": "669487c35d557d4cb480cfd519bb7476a07c4459",
+      "current_source": "c965a893364b46f965c83d10e2cf94a46dac1304",
+      "only_changed_build_input": [
+        "reactivity/crates/gpui/examples/zgx_native_lab.rs"
+      ],
+      "prior_full_native_gate": "/home/user/gpui-glyph-submit-evidence/full-native",
+      "prior_native_checks": "/home/user/gpui-glyph-submit-evidence/native-checks",
+      "fresh_gates": "Current native unit tests, 17 deferred-control example tests, GPU suite, strict Clippy, native executable build and all per-regime public owner/GPU oracle processes. No unchanged standalone integration tests are rerun solely for a new target directory."
+    }
+  ],
+  "limits": "Exact correctness on software Vulkan/private X11. Full five-way fixed cost gate still required; no hardware, scanout or ZGX victory."
+}

@@ -1,0 +1,9 @@
+{
+  "reason": "Preferred 12GiB reserve assertion failed; missing set -e let the following command launch. Stopped this owned build immediately and preserved the failed attempt. Retry must fail-fast and use new output directory.",
+  "stopped": [
+    {
+      "gate_pid": 3145078,
+      "cargo_pid": 3145121
+    }
+  ]
+}

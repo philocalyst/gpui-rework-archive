@@ -1,0 +1,2635 @@
+[
+  {
+    "path": "/home/user/gpui-scroll-sparse-target/release/build/gpui_canvas/643c4468120f623d/out/clipping-643c4468120f623d",
+    "sha256": "ee65042fadfba77d0487c84a1327e07a136906f80bd3a7eff075d7de52846262",
+    "preserved": "/home/user/gpui-preserved-test-binaries/ee65042fadfba77d0487c84a1327e07a136906f80bd3a7eff075d7de52846262",
+    "bytes": 1342160,
+    "executed": true,
+    "cargo": {
+      "reason": "compiler-artifact",
+      "package_id": "path+file:///home/user/gpui-scroll-sparse-lab/reactivity/crates/canvas#gpui_canvas@0.1.0",
+      "manifest_path": "/home/user/gpui-scroll-sparse-lab/reactivity/crates/canvas/Cargo.toml",
+      "target": {
+        "kind": [
+          "test"
+        ],
+        "crate_types": [
+          "bin"
+        ],
+        "name": "clipping",
+        "src_path": "/home/user/gpui-scroll-sparse-lab/reactivity/crates/canvas/tests/clipping.rs",
+        "edition": "2024",
+        "doc": false,
+        "doctest": false,
+        "test": true
+      },
+      "profile": {
+        "opt_level": "3",
+        "debuginfo": 0,
+        "debug_assertions": false,
+        "overflow_checks": false,
+        "test": true
+      },
+      "features": [
+        "default",
+        "simd"
+      ],
+      "filenames": [
+        "/home/user/gpui-scroll-sparse-target/release/build/gpui_canvas/643c4468120f623d/out/clipping-643c4468120f623d"
+      ],
+      "executable": "/home/user/gpui-scroll-sparse-target/release/build/gpui_canvas/643c4468120f623d/out/clipping-643c4468120f623d",
+      "fresh": false
+    }
+  },
+  {
+    "path": "/home/user/gpui-scroll-sparse-target/release/build/gpui_canvas/c627d1dc1ab61790/out/parallel-c627d1dc1ab61790",
+    "sha256": "909e5daf2caa609985fbc4af4600ade411a610d1b2e243ddd83ed48c6982db84",
+    "preserved": "/home/user/gpui-preserved-test-binaries/909e5daf2caa609985fbc4af4600ade411a610d1b2e243ddd83ed48c6982db84",
+    "bytes": 1075560,
+    "executed": true,
+    "cargo": {
+      "reason": "compiler-artifact",
+      "package_id": "path+file:///home/user/gpui-scroll-sparse-lab/reactivity/crates/canvas#gpui_canvas@0.1.0",
+      "manifest_path": "/home/user/gpui-scroll-sparse-lab/reactivity/crates/canvas/Cargo.toml",
+      "target": {
+        "kind": [
+          "test"
+        ],
+        "crate_types": [
+          "bin"
+        ],
+        "name": "parallel",
+        "src_path": "/home/user/gpui-scroll-sparse-lab/reactivity/crates/canvas/tests/parallel.rs",
+        "edition": "2024",
+        "doc": false,
+        "doctest": false,
+        "test": true
+      },
+      "profile": {
+        "opt_level": "3",
+        "debuginfo": 0,
+        "debug_assertions": false,
+        "overflow_checks": false,
+        "test": true
+      },
+      "features": [
+        "default",
+        "simd"
+      ],
+      "filenames": [
+        "/home/user/gpui-scroll-sparse-target/release/build/gpui_canvas/c627d1dc1ab61790/out/parallel-c627d1dc1ab61790"
+      ],
+      "executable": "/home/user/gpui-scroll-sparse-target/release/build/gpui_canvas/c627d1dc1ab61790/out/parallel-c627d1dc1ab61790",
+      "fresh": false
+    }
+  },
+  {
+    "path": "/home/user/gpui-scroll-sparse-target/release/examples/damage_cost",
+    "sha256": "ec49df39876bafe1443903ef7c26a61c1f321f1ad00a4e5765fcedce488b11ba",
+    "preserved": "/home/user/gpui-preserved-test-binaries/ec49df39876bafe1443903ef7c26a61c1f321f1ad00a4e5765fcedce488b11ba",
+    "bytes": 683504,
+    "executed": false,
+    "cargo": {
+      "reason": "compiler-artifact",
+      "package_id": "path+file:///home/user/gpui-scroll-sparse-lab/reactivity/crates/canvas#gpui_canvas@0.1.0",
+      "manifest_path": "/home/user/gpui-scroll-sparse-lab/reactivity/crates/canvas/Cargo.toml",
+      "target": {
+        "kind": [
+          "example"
+        ],
+        "crate_types": [
+          "bin"
+        ],
+        "name": "damage_cost",
+        "src_path": "/home/user/gpui-scroll-sparse-lab/reactivity/crates/canvas/examples/damage_cost.rs",
+        "edition": "2024",
+        "doc": false,
+        "doctest": false,
+        "test": false
+      },
+      "profile": {
+        "opt_level": "3",
+        "debuginfo": 0,
+        "debug_assertions": false,
+        "overflow_checks": false,
+        "test": false
+      },
+      "features": [
+        "default",
+        "simd"
+      ],
+      "filenames": [
+        "/home/user/gpui-scroll-sparse-target/release/examples/damage_cost"
+      ],
+      "executable": "/home/user/gpui-scroll-sparse-target/release/examples/damage_cost",
+      "fresh": false
+    }
+  },
+  {
+    "path": "/home/user/gpui-scroll-sparse-target/release/build/gpui_canvas/cb217f51f66152fb/out/dpi-cb217f51f66152fb",
+    "sha256": "48a16f576a6868c6cc75498563dc62d3ecbc8abe3227a009ff9c259c76d41ead",
+    "preserved": "/home/user/gpui-preserved-test-binaries/48a16f576a6868c6cc75498563dc62d3ecbc8abe3227a009ff9c259c76d41ead",
+    "bytes": 8570344,
+    "executed": true,
+    "cargo": {
+      "reason": "compiler-artifact",
+      "package_id": "path+file:///home/user/gpui-scroll-sparse-lab/reactivity/crates/canvas#gpui_canvas@0.1.0",
+      "manifest_path": "/home/user/gpui-scroll-sparse-lab/reactivity/crates/canvas/Cargo.toml",
+      "target": {
+        "kind": [
+          "test"
+        ],
+        "crate_types": [
+          "bin"
+        ],
+        "name": "dpi",
+        "src_path": "/home/user/gpui-scroll-sparse-lab/reactivity/crates/canvas/tests/dpi.rs",
+        "edition": "2024",
+        "doc": false,
+        "doctest": false,
+        "test": true
+      },
+      "profile": {
+        "opt_level": "3",
+        "debuginfo": 0,
+        "debug_assertions": false,
+        "overflow_checks": false,
+        "test": true
+      },
+      "features": [
+        "default",
+        "simd"
+      ],
+      "filenames": [
+        "/home/user/gpui-scroll-sparse-target/release/build/gpui_canvas/cb217f51f66152fb/out/dpi-cb217f51f66152fb"
+      ],
+      "executable": "/home/user/gpui-scroll-sparse-target/release/build/gpui_canvas/cb217f51f66152fb/out/dpi-cb217f51f66152fb",
+      "fresh": false
+    }
+  },
+  {
+    "path": "/home/user/gpui-scroll-sparse-target/release/examples/text_cache_capacity",
+    "sha256": "4cddd2e191b6d577c5598aca935162580e1ec9c9ed25b97a2bcbe42310c083f7",
+    "preserved": "/home/user/gpui-preserved-test-binaries/4cddd2e191b6d577c5598aca935162580e1ec9c9ed25b97a2bcbe42310c083f7",
+    "bytes": 7576544,
+    "executed": false,
+    "cargo": {
+      "reason": "compiler-artifact",
+      "package_id": "path+file:///home/user/gpui-scroll-sparse-lab/reactivity/crates/canvas#gpui_canvas@0.1.0",
+      "manifest_path": "/home/user/gpui-scroll-sparse-lab/reactivity/crates/canvas/Cargo.toml",
+      "target": {
+        "kind": [
+          "example"
+        ],
+        "crate_types": [
+          "bin"
+        ],
+        "name": "text_cache_capacity",
+        "src_path": "/home/user/gpui-scroll-sparse-lab/reactivity/crates/canvas/examples/text_cache_capacity.rs",
+        "edition": "2024",
+        "doc": false,
+        "doctest": false,
+        "test": false
+      },
+      "profile": {
+        "opt_level": "3",
+        "debuginfo": 0,
+        "debug_assertions": false,
+        "overflow_checks": false,
+        "test": false
+      },
+      "features": [
+        "default",
+        "simd"
+      ],
+      "filenames": [
+        "/home/user/gpui-scroll-sparse-target/release/examples/text_cache_capacity"
+      ],
+      "executable": "/home/user/gpui-scroll-sparse-target/release/examples/text_cache_capacity",
+      "fresh": false
+    }
+  },
+  {
+    "path": "/home/user/gpui-scroll-sparse-target/release/build/gpui_canvas/2a530e8f6638e7bf/out/images-2a530e8f6638e7bf",
+    "sha256": "5e94593d310b605d1d4ae793945b35ff2555e0d299b17e55ee2ea359359b0600",
+    "preserved": "/home/user/gpui-preserved-test-binaries/5e94593d310b605d1d4ae793945b35ff2555e0d299b17e55ee2ea359359b0600",
+    "bytes": 1326528,
+    "executed": true,
+    "cargo": {
+      "reason": "compiler-artifact",
+      "package_id": "path+file:///home/user/gpui-scroll-sparse-lab/reactivity/crates/canvas#gpui_canvas@0.1.0",
+      "manifest_path": "/home/user/gpui-scroll-sparse-lab/reactivity/crates/canvas/Cargo.toml",
+      "target": {
+        "kind": [
+          "test"
+        ],
+        "crate_types": [
+          "bin"
+        ],
+        "name": "images",
+        "src_path": "/home/user/gpui-scroll-sparse-lab/reactivity/crates/canvas/tests/images.rs",
+        "edition": "2024",
+        "doc": false,
+        "doctest": false,
+        "test": true
+      },
+      "profile": {
+        "opt_level": "3",
+        "debuginfo": 0,
+        "debug_assertions": false,
+        "overflow_checks": false,
+        "test": true
+      },
+      "features": [
+        "default",
+        "simd"
+      ],
+      "filenames": [
+        "/home/user/gpui-scroll-sparse-target/release/build/gpui_canvas/2a530e8f6638e7bf/out/images-2a530e8f6638e7bf"
+      ],
+      "executable": "/home/user/gpui-scroll-sparse-target/release/build/gpui_canvas/2a530e8f6638e7bf/out/images-2a530e8f6638e7bf",
+      "fresh": false
+    }
+  },
+  {
+    "path": "/home/user/gpui-scroll-sparse-target/release/build/gpui_canvas/1be0b3d0e3235788/out/selection-1be0b3d0e3235788",
+    "sha256": "5b3373550bd1b3541b9e7d0e1005a6ea9bdc84699d8ac217e8705c5dcc684d35",
+    "preserved": "/home/user/gpui-preserved-test-binaries/5b3373550bd1b3541b9e7d0e1005a6ea9bdc84699d8ac217e8705c5dcc684d35",
+    "bytes": 10114856,
+    "executed": true,
+    "cargo": {
+      "reason": "compiler-artifact",
+      "package_id": "path+file:///home/user/gpui-scroll-sparse-lab/reactivity/crates/canvas#gpui_canvas@0.1.0",
+      "manifest_path": "/home/user/gpui-scroll-sparse-lab/reactivity/crates/canvas/Cargo.toml",
+      "target": {
+        "kind": [
+          "test"
+        ],
+        "crate_types": [
+          "bin"
+        ],
+        "name": "selection",
+        "src_path": "/home/user/gpui-scroll-sparse-lab/reactivity/crates/canvas/tests/selection.rs",
+        "edition": "2024",
+        "doc": false,
+        "doctest": false,
+        "test": true
+      },
+      "profile": {
+        "opt_level": "3",
+        "debuginfo": 0,
+        "debug_assertions": false,
+        "overflow_checks": false,
+        "test": true
+      },
+      "features": [
+        "default",
+        "simd"
+      ],
+      "filenames": [
+        "/home/user/gpui-scroll-sparse-target/release/build/gpui_canvas/1be0b3d0e3235788/out/selection-1be0b3d0e3235788"
+      ],
+      "executable": "/home/user/gpui-scroll-sparse-target/release/build/gpui_canvas/1be0b3d0e3235788/out/selection-1be0b3d0e3235788",
+      "fresh": false
+    }
+  },
+  {
+    "path": "/home/user/gpui-scroll-sparse-target/release/examples/coverage_table",
+    "sha256": "70941cdad8e2114b0375ba35efcdfc1e3a76604e32db82eddf178597861939b6",
+    "preserved": "/home/user/gpui-preserved-test-binaries/70941cdad8e2114b0375ba35efcdfc1e3a76604e32db82eddf178597861939b6",
+    "bytes": 1434632,
+    "executed": false,
+    "cargo": {
+      "reason": "compiler-artifact",
+      "package_id": "path+file:///home/user/gpui-scroll-sparse-lab/reactivity/crates/canvas#gpui_canvas@0.1.0",
+      "manifest_path": "/home/user/gpui-scroll-sparse-lab/reactivity/crates/canvas/Cargo.toml",
+      "target": {
+        "kind": [
+          "example"
+        ],
+        "crate_types": [
+          "bin"
+        ],
+        "name": "coverage_table",
+        "src_path": "/home/user/gpui-scroll-sparse-lab/reactivity/crates/canvas/examples/coverage_table.rs",
+        "edition": "2024",
+        "doc": false,
+        "doctest": false,
+        "test": false
+      },
+      "profile": {
+        "opt_level": "3",
+        "debuginfo": 0,
+        "debug_assertions": false,
+        "overflow_checks": false,
+        "test": false
+      },
+      "features": [
+        "default",
+        "simd"
+      ],
+      "filenames": [
+        "/home/user/gpui-scroll-sparse-target/release/examples/coverage_table"
+      ],
+      "executable": "/home/user/gpui-scroll-sparse-target/release/examples/coverage_table",
+      "fresh": false
+    }
+  },
+  {
+    "path": "/home/user/gpui-scroll-sparse-target/release/build/gpui_canvas/8e8c4e2ce2f93ba3/out/damage_regions-8e8c4e2ce2f93ba3",
+    "sha256": "8d1f927d0e09af13f3696dc1b459d70b6d6dae146af1ac6215e5b68801d43638",
+    "preserved": "/home/user/gpui-preserved-test-binaries/8d1f927d0e09af13f3696dc1b459d70b6d6dae146af1ac6215e5b68801d43638",
+    "bytes": 1206184,
+    "executed": true,
+    "cargo": {
+      "reason": "compiler-artifact",
+      "package_id": "path+file:///home/user/gpui-scroll-sparse-lab/reactivity/crates/canvas#gpui_canvas@0.1.0",
+      "manifest_path": "/home/user/gpui-scroll-sparse-lab/reactivity/crates/canvas/Cargo.toml",
+      "target": {
+        "kind": [
+          "test"
+        ],
+        "crate_types": [
+          "bin"
+        ],
+        "name": "damage_regions",
+        "src_path": "/home/user/gpui-scroll-sparse-lab/reactivity/crates/canvas/tests/damage_regions.rs",
+        "edition": "2024",
+        "doc": false,
+        "doctest": false,
+        "test": true
+      },
+      "profile": {
+        "opt_level": "3",
+        "debuginfo": 0,
+        "debug_assertions": false,
+        "overflow_checks": false,
+        "test": true
+      },
+      "features": [
+        "default",
+        "simd"
+      ],
+      "filenames": [
+        "/home/user/gpui-scroll-sparse-target/release/build/gpui_canvas/8e8c4e2ce2f93ba3/out/damage_regions-8e8c4e2ce2f93ba3"
+      ],
+      "executable": "/home/user/gpui-scroll-sparse-target/release/build/gpui_canvas/8e8c4e2ce2f93ba3/out/damage_regions-8e8c4e2ce2f93ba3",
+      "fresh": false
+    }
+  },
+  {
+    "path": "/home/user/gpui-scroll-sparse-target/release/build/gpui_canvas/8d55f8bca946137e/out/text_metric_scale_probe-8d55f8bca946137e",
+    "sha256": "9245b78093c9a417002f1154f8b6b9f750754e0d4bc5e06af9b052096bdf6ef5",
+    "preserved": "/home/user/gpui-preserved-test-binaries/9245b78093c9a417002f1154f8b6b9f750754e0d4bc5e06af9b052096bdf6ef5",
+    "bytes": 8617136,
+    "executed": true,
+    "cargo": {
+      "reason": "compiler-artifact",
+      "package_id": "path+file:///home/user/gpui-scroll-sparse-lab/reactivity/crates/canvas#gpui_canvas@0.1.0",
+      "manifest_path": "/home/user/gpui-scroll-sparse-lab/reactivity/crates/canvas/Cargo.toml",
+      "target": {
+        "kind": [
+          "test"
+        ],
+        "crate_types": [
+          "bin"
+        ],
+        "name": "text_metric_scale_probe",
+        "src_path": "/home/user/gpui-scroll-sparse-lab/reactivity/crates/canvas/tests/text_metric_scale_probe.rs",
+        "edition": "2024",
+        "doc": false,
+        "doctest": false,
+        "test": true
+      },
+      "profile": {
+        "opt_level": "3",
+        "debuginfo": 0,
+        "debug_assertions": false,
+        "overflow_checks": false,
+        "test": true
+      },
+      "features": [
+        "default",
+        "simd"
+      ],
+      "filenames": [
+        "/home/user/gpui-scroll-sparse-target/release/build/gpui_canvas/8d55f8bca946137e/out/text_metric_scale_probe-8d55f8bca946137e"
+      ],
+      "executable": "/home/user/gpui-scroll-sparse-target/release/build/gpui_canvas/8d55f8bca946137e/out/text_metric_scale_probe-8d55f8bca946137e",
+      "fresh": false
+    }
+  },
+  {
+    "path": "/home/user/gpui-scroll-sparse-target/release/build/gpui_canvas/ea1e4dddc2085252/out/sample_storage-ea1e4dddc2085252",
+    "sha256": "42edfdfdfef9eecf7f912016d3d81ae252787f9f4feb3d3ee26281ec24aeb8ed",
+    "preserved": "/home/user/gpui-preserved-test-binaries/42edfdfdfef9eecf7f912016d3d81ae252787f9f4feb3d3ee26281ec24aeb8ed",
+    "bytes": 8558904,
+    "executed": true,
+    "cargo": {
+      "reason": "compiler-artifact",
+      "package_id": "path+file:///home/user/gpui-scroll-sparse-lab/reactivity/crates/canvas#gpui_canvas@0.1.0",
+      "manifest_path": "/home/user/gpui-scroll-sparse-lab/reactivity/crates/canvas/Cargo.toml",
+      "target": {
+        "kind": [
+          "test"
+        ],
+        "crate_types": [
+          "bin"
+        ],
+        "name": "sample_storage",
+        "src_path": "/home/user/gpui-scroll-sparse-lab/reactivity/crates/canvas/tests/sample_storage.rs",
+        "edition": "2024",
+        "doc": false,
+        "doctest": false,
+        "test": true
+      },
+      "profile": {
+        "opt_level": "3",
+        "debuginfo": 0,
+        "debug_assertions": false,
+        "overflow_checks": false,
+        "test": true
+      },
+      "features": [
+        "default",
+        "simd"
+      ],
+      "filenames": [
+        "/home/user/gpui-scroll-sparse-target/release/build/gpui_canvas/ea1e4dddc2085252/out/sample_storage-ea1e4dddc2085252"
+      ],
+      "executable": "/home/user/gpui-scroll-sparse-target/release/build/gpui_canvas/ea1e4dddc2085252/out/sample_storage-ea1e4dddc2085252",
+      "fresh": false
+    }
+  },
+  {
+    "path": "/home/user/gpui-scroll-sparse-target/release/examples/retained_runs",
+    "sha256": "2ced6e523f2ee4ee5a2afbbeb6582d5fb0f4444cc8652b08deb311fc65e8bd37",
+    "preserved": "/home/user/gpui-preserved-test-binaries/2ced6e523f2ee4ee5a2afbbeb6582d5fb0f4444cc8652b08deb311fc65e8bd37",
+    "bytes": 7854328,
+    "executed": false,
+    "cargo": {
+      "reason": "compiler-artifact",
+      "package_id": "path+file:///home/user/gpui-scroll-sparse-lab/reactivity/crates/canvas#gpui_canvas@0.1.0",
+      "manifest_path": "/home/user/gpui-scroll-sparse-lab/reactivity/crates/canvas/Cargo.toml",
+      "target": {
+        "kind": [
+          "example"
+        ],
+        "crate_types": [
+          "bin"
+        ],
+        "name": "retained_runs",
+        "src_path": "/home/user/gpui-scroll-sparse-lab/reactivity/crates/canvas/examples/retained_runs.rs",
+        "edition": "2024",
+        "doc": false,
+        "doctest": false,
+        "test": false
+      },
+      "profile": {
+        "opt_level": "3",
+        "debuginfo": 0,
+        "debug_assertions": false,
+        "overflow_checks": false,
+        "test": false
+      },
+      "features": [
+        "default",
+        "simd"
+      ],
+      "filenames": [
+        "/home/user/gpui-scroll-sparse-target/release/examples/retained_runs"
+      ],
+      "executable": "/home/user/gpui-scroll-sparse-target/release/examples/retained_runs",
+      "fresh": false
+    }
+  },
+  {
+    "path": "/home/user/gpui-scroll-sparse-target/release/build/gpui_canvas/1409624c675a2863/out/text_capacity-1409624c675a2863",
+    "sha256": "4fb1ffae9c5b0fd44adb37e24bf4be9fdaf3f5c10832b785e8757d0907cb447f",
+    "preserved": "/home/user/gpui-preserved-test-binaries/4fb1ffae9c5b0fd44adb37e24bf4be9fdaf3f5c10832b785e8757d0907cb447f",
+    "bytes": 8447808,
+    "executed": true,
+    "cargo": {
+      "reason": "compiler-artifact",
+      "package_id": "path+file:///home/user/gpui-scroll-sparse-lab/reactivity/crates/canvas#gpui_canvas@0.1.0",
+      "manifest_path": "/home/user/gpui-scroll-sparse-lab/reactivity/crates/canvas/Cargo.toml",
+      "target": {
+        "kind": [
+          "test"
+        ],
+        "crate_types": [
+          "bin"
+        ],
+        "name": "text_capacity",
+        "src_path": "/home/user/gpui-scroll-sparse-lab/reactivity/crates/canvas/tests/text_capacity.rs",
+        "edition": "2024",
+        "doc": false,
+        "doctest": false,
+        "test": true
+      },
+      "profile": {
+        "opt_level": "3",
+        "debuginfo": 0,
+        "debug_assertions": false,
+        "overflow_checks": false,
+        "test": true
+      },
+      "features": [
+        "default",
+        "simd"
+      ],
+      "filenames": [
+        "/home/user/gpui-scroll-sparse-target/release/build/gpui_canvas/1409624c675a2863/out/text_capacity-1409624c675a2863"
+      ],
+      "executable": "/home/user/gpui-scroll-sparse-target/release/build/gpui_canvas/1409624c675a2863/out/text_capacity-1409624c675a2863",
+      "fresh": false
+    }
+  },
+  {
+    "path": "/home/user/gpui-scroll-sparse-target/release/build/gpui_canvas/0ce5c7756bca6592/out/paint-0ce5c7756bca6592",
+    "sha256": "3ef62b56ed8478311e827faa96c7466ba7b7ccd5f136915292c860c2e369f05a",
+    "preserved": "/home/user/gpui-preserved-test-binaries/3ef62b56ed8478311e827faa96c7466ba7b7ccd5f136915292c860c2e369f05a",
+    "bytes": 8595224,
+    "executed": true,
+    "cargo": {
+      "reason": "compiler-artifact",
+      "package_id": "path+file:///home/user/gpui-scroll-sparse-lab/reactivity/crates/canvas#gpui_canvas@0.1.0",
+      "manifest_path": "/home/user/gpui-scroll-sparse-lab/reactivity/crates/canvas/Cargo.toml",
+      "target": {
+        "kind": [
+          "test"
+        ],
+        "crate_types": [
+          "bin"
+        ],
+        "name": "paint",
+        "src_path": "/home/user/gpui-scroll-sparse-lab/reactivity/crates/canvas/tests/paint.rs",
+        "edition": "2024",
+        "doc": false,
+        "doctest": false,
+        "test": true
+      },
+      "profile": {
+        "opt_level": "3",
+        "debuginfo": 0,
+        "debug_assertions": false,
+        "overflow_checks": false,
+        "test": true
+      },
+      "features": [
+        "default",
+        "simd"
+      ],
+      "filenames": [
+        "/home/user/gpui-scroll-sparse-target/release/build/gpui_canvas/0ce5c7756bca6592/out/paint-0ce5c7756bca6592"
+      ],
+      "executable": "/home/user/gpui-scroll-sparse-target/release/build/gpui_canvas/0ce5c7756bca6592/out/paint-0ce5c7756bca6592",
+      "fresh": false
+    }
+  },
+  {
+    "path": "/home/user/gpui-scroll-sparse-target/release/build/gpui_canvas/5423f225aaab5c39/out/grouped-5423f225aaab5c39",
+    "sha256": "6c32011bc34b9aadd5f90189d3a1cde7ce5e0d397d694c5ce9488440818f3072",
+    "preserved": "/home/user/gpui-preserved-test-binaries/6c32011bc34b9aadd5f90189d3a1cde7ce5e0d397d694c5ce9488440818f3072",
+    "bytes": 10556024,
+    "executed": true,
+    "cargo": {
+      "reason": "compiler-artifact",
+      "package_id": "path+file:///home/user/gpui-scroll-sparse-lab/reactivity/crates/canvas#gpui_canvas@0.1.0",
+      "manifest_path": "/home/user/gpui-scroll-sparse-lab/reactivity/crates/canvas/Cargo.toml",
+      "target": {
+        "kind": [
+          "test"
+        ],
+        "crate_types": [
+          "bin"
+        ],
+        "name": "grouped",
+        "src_path": "/home/user/gpui-scroll-sparse-lab/reactivity/crates/canvas/tests/grouped.rs",
+        "edition": "2024",
+        "doc": false,
+        "doctest": false,
+        "test": true
+      },
+      "profile": {
+        "opt_level": "3",
+        "debuginfo": 0,
+        "debug_assertions": false,
+        "overflow_checks": false,
+        "test": true
+      },
+      "features": [
+        "default",
+        "simd"
+      ],
+      "filenames": [
+        "/home/user/gpui-scroll-sparse-target/release/build/gpui_canvas/5423f225aaab5c39/out/grouped-5423f225aaab5c39"
+      ],
+      "executable": "/home/user/gpui-scroll-sparse-target/release/build/gpui_canvas/5423f225aaab5c39/out/grouped-5423f225aaab5c39",
+      "fresh": false
+    }
+  },
+  {
+    "path": "/home/user/gpui-scroll-sparse-target/release/build/gpui_canvas/e9eb27a37e6dd6e0/out/color_packing-e9eb27a37e6dd6e0",
+    "sha256": "af355802ed1520bc890c2089185416af71e6706f95c860fb4e965bf243419c2f",
+    "preserved": "/home/user/gpui-preserved-test-binaries/af355802ed1520bc890c2089185416af71e6706f95c860fb4e965bf243419c2f",
+    "bytes": 1331528,
+    "executed": true,
+    "cargo": {
+      "reason": "compiler-artifact",
+      "package_id": "path+file:///home/user/gpui-scroll-sparse-lab/reactivity/crates/canvas#gpui_canvas@0.1.0",
+      "manifest_path": "/home/user/gpui-scroll-sparse-lab/reactivity/crates/canvas/Cargo.toml",
+      "target": {
+        "kind": [
+          "test"
+        ],
+        "crate_types": [
+          "bin"
+        ],
+        "name": "color_packing",
+        "src_path": "/home/user/gpui-scroll-sparse-lab/reactivity/crates/canvas/tests/color_packing.rs",
+        "edition": "2024",
+        "doc": false,
+        "doctest": false,
+        "test": true
+      },
+      "profile": {
+        "opt_level": "3",
+        "debuginfo": 0,
+        "debug_assertions": false,
+        "overflow_checks": false,
+        "test": true
+      },
+      "features": [
+        "default",
+        "simd"
+      ],
+      "filenames": [
+        "/home/user/gpui-scroll-sparse-target/release/build/gpui_canvas/e9eb27a37e6dd6e0/out/color_packing-e9eb27a37e6dd6e0"
+      ],
+      "executable": "/home/user/gpui-scroll-sparse-target/release/build/gpui_canvas/e9eb27a37e6dd6e0/out/color_packing-e9eb27a37e6dd6e0",
+      "fresh": false
+    }
+  },
+  {
+    "path": "/home/user/gpui-scroll-sparse-target/release/examples/caret_pair_measure",
+    "sha256": "e21482b26324892c6d9495ec4999818be83ecbbefb8f33fe7d0acbc50405ec97",
+    "preserved": "/home/user/gpui-preserved-test-binaries/e21482b26324892c6d9495ec4999818be83ecbbefb8f33fe7d0acbc50405ec97",
+    "bytes": 6923784,
+    "executed": false,
+    "cargo": {
+      "reason": "compiler-artifact",
+      "package_id": "path+file:///home/user/gpui-scroll-sparse-lab/reactivity/crates/canvas#gpui_canvas@0.1.0",
+      "manifest_path": "/home/user/gpui-scroll-sparse-lab/reactivity/crates/canvas/Cargo.toml",
+      "target": {
+        "kind": [
+          "example"
+        ],
+        "crate_types": [
+          "bin"
+        ],
+        "name": "caret_pair_measure",
+        "src_path": "/home/user/gpui-scroll-sparse-lab/reactivity/crates/canvas/examples/caret_pair_measure.rs",
+        "edition": "2024",
+        "doc": false,
+        "doctest": false,
+        "test": false
+      },
+      "profile": {
+        "opt_level": "3",
+        "debuginfo": 0,
+        "debug_assertions": false,
+        "overflow_checks": false,
+        "test": false
+      },
+      "features": [
+        "default",
+        "simd"
+      ],
+      "filenames": [
+        "/home/user/gpui-scroll-sparse-target/release/examples/caret_pair_measure"
+      ],
+      "executable": "/home/user/gpui-scroll-sparse-target/release/examples/caret_pair_measure",
+      "fresh": false
+    }
+  },
+  {
+    "path": "/home/user/gpui-scroll-sparse-target/release/examples/image_axis",
+    "sha256": "58367c1a98a220671bd526962d776b100069031f8d2ef9ad905a679ba8222689",
+    "preserved": "/home/user/gpui-preserved-test-binaries/58367c1a98a220671bd526962d776b100069031f8d2ef9ad905a679ba8222689",
+    "bytes": 728856,
+    "executed": false,
+    "cargo": {
+      "reason": "compiler-artifact",
+      "package_id": "path+file:///home/user/gpui-scroll-sparse-lab/reactivity/crates/canvas#gpui_canvas@0.1.0",
+      "manifest_path": "/home/user/gpui-scroll-sparse-lab/reactivity/crates/canvas/Cargo.toml",
+      "target": {
+        "kind": [
+          "example"
+        ],
+        "crate_types": [
+          "bin"
+        ],
+        "name": "image_axis",
+        "src_path": "/home/user/gpui-scroll-sparse-lab/reactivity/crates/canvas/examples/image_axis.rs",
+        "edition": "2024",
+        "doc": false,
+        "doctest": false,
+        "test": false
+      },
+      "profile": {
+        "opt_level": "3",
+        "debuginfo": 0,
+        "debug_assertions": false,
+        "overflow_checks": false,
+        "test": false
+      },
+      "features": [
+        "default",
+        "simd"
+      ],
+      "filenames": [
+        "/home/user/gpui-scroll-sparse-target/release/examples/image_axis"
+      ],
+      "executable": "/home/user/gpui-scroll-sparse-target/release/examples/image_axis",
+      "fresh": false
+    }
+  },
+  {
+    "path": "/home/user/gpui-scroll-sparse-target/release/build/gpui_canvas/f04e70e509498e79/out/rounded-f04e70e509498e79",
+    "sha256": "6908e99847dc71787a24a502bbc09ef75bf1ce7bad286e14c41af4aa15f5f75c",
+    "preserved": "/home/user/gpui-preserved-test-binaries/6908e99847dc71787a24a502bbc09ef75bf1ce7bad286e14c41af4aa15f5f75c",
+    "bytes": 1333360,
+    "executed": true,
+    "cargo": {
+      "reason": "compiler-artifact",
+      "package_id": "path+file:///home/user/gpui-scroll-sparse-lab/reactivity/crates/canvas#gpui_canvas@0.1.0",
+      "manifest_path": "/home/user/gpui-scroll-sparse-lab/reactivity/crates/canvas/Cargo.toml",
+      "target": {
+        "kind": [
+          "test"
+        ],
+        "crate_types": [
+          "bin"
+        ],
+        "name": "rounded",
+        "src_path": "/home/user/gpui-scroll-sparse-lab/reactivity/crates/canvas/tests/rounded.rs",
+        "edition": "2024",
+        "doc": false,
+        "doctest": false,
+        "test": true
+      },
+      "profile": {
+        "opt_level": "3",
+        "debuginfo": 0,
+        "debug_assertions": false,
+        "overflow_checks": false,
+        "test": true
+      },
+      "features": [
+        "default",
+        "simd"
+      ],
+      "filenames": [
+        "/home/user/gpui-scroll-sparse-target/release/build/gpui_canvas/f04e70e509498e79/out/rounded-f04e70e509498e79"
+      ],
+      "executable": "/home/user/gpui-scroll-sparse-target/release/build/gpui_canvas/f04e70e509498e79/out/rounded-f04e70e509498e79",
+      "fresh": false
+    }
+  },
+  {
+    "path": "/home/user/gpui-scroll-sparse-target/release/build/gpui_canvas/bd07e4ec6659b2af/out/solid-bd07e4ec6659b2af",
+    "sha256": "927dd9d6d6dc5f27a87e93b1e46600b7047ba4ec3163a349c9e7f8fbbac1f073",
+    "preserved": "/home/user/gpui-preserved-test-binaries/927dd9d6d6dc5f27a87e93b1e46600b7047ba4ec3163a349c9e7f8fbbac1f073",
+    "bytes": 1298792,
+    "executed": true,
+    "cargo": {
+      "reason": "compiler-artifact",
+      "package_id": "path+file:///home/user/gpui-scroll-sparse-lab/reactivity/crates/canvas#gpui_canvas@0.1.0",
+      "manifest_path": "/home/user/gpui-scroll-sparse-lab/reactivity/crates/canvas/Cargo.toml",
+      "target": {
+        "kind": [
+          "test"
+        ],
+        "crate_types": [
+          "bin"
+        ],
+        "name": "solid",
+        "src_path": "/home/user/gpui-scroll-sparse-lab/reactivity/crates/canvas/tests/solid.rs",
+        "edition": "2024",
+        "doc": false,
+        "doctest": false,
+        "test": true
+      },
+      "profile": {
+        "opt_level": "3",
+        "debuginfo": 0,
+        "debug_assertions": false,
+        "overflow_checks": false,
+        "test": true
+      },
+      "features": [
+        "default",
+        "simd"
+      ],
+      "filenames": [
+        "/home/user/gpui-scroll-sparse-target/release/build/gpui_canvas/bd07e4ec6659b2af/out/solid-bd07e4ec6659b2af"
+      ],
+      "executable": "/home/user/gpui-scroll-sparse-target/release/build/gpui_canvas/bd07e4ec6659b2af/out/solid-bd07e4ec6659b2af",
+      "fresh": false
+    }
+  },
+  {
+    "path": "/home/user/gpui-scroll-sparse-target/release/build/gpui_canvas/7f11cd62cab7a182/out/font_sharing-7f11cd62cab7a182",
+    "sha256": "91a836ddb2214b8473c0aa8130a525fb4d23a02f6c50649011c9544b77005185",
+    "preserved": "/home/user/gpui-preserved-test-binaries/91a836ddb2214b8473c0aa8130a525fb4d23a02f6c50649011c9544b77005185",
+    "bytes": 10625944,
+    "executed": true,
+    "cargo": {
+      "reason": "compiler-artifact",
+      "package_id": "path+file:///home/user/gpui-scroll-sparse-lab/reactivity/crates/canvas#gpui_canvas@0.1.0",
+      "manifest_path": "/home/user/gpui-scroll-sparse-lab/reactivity/crates/canvas/Cargo.toml",
+      "target": {
+        "kind": [
+          "test"
+        ],
+        "crate_types": [
+          "bin"
+        ],
+        "name": "font_sharing",
+        "src_path": "/home/user/gpui-scroll-sparse-lab/reactivity/crates/canvas/tests/font_sharing.rs",
+        "edition": "2024",
+        "doc": false,
+        "doctest": false,
+        "test": true
+      },
+      "profile": {
+        "opt_level": "3",
+        "debuginfo": 0,
+        "debug_assertions": false,
+        "overflow_checks": false,
+        "test": true
+      },
+      "features": [
+        "default",
+        "simd"
+      ],
+      "filenames": [
+        "/home/user/gpui-scroll-sparse-target/release/build/gpui_canvas/7f11cd62cab7a182/out/font_sharing-7f11cd62cab7a182"
+      ],
+      "executable": "/home/user/gpui-scroll-sparse-target/release/build/gpui_canvas/7f11cd62cab7a182/out/font_sharing-7f11cd62cab7a182",
+      "fresh": false
+    }
+  },
+  {
+    "path": "/home/user/gpui-scroll-sparse-target/release/examples/text_shaping",
+    "sha256": "d0f88b5a8d6b58db6423cee00c392f7f9d6183b8927c4e8f5bedb535e6dcb9f3",
+    "preserved": "/home/user/gpui-preserved-test-binaries/d0f88b5a8d6b58db6423cee00c392f7f9d6183b8927c4e8f5bedb535e6dcb9f3",
+    "bytes": 8009072,
+    "executed": false,
+    "cargo": {
+      "reason": "compiler-artifact",
+      "package_id": "path+file:///home/user/gpui-scroll-sparse-lab/reactivity/crates/canvas#gpui_canvas@0.1.0",
+      "manifest_path": "/home/user/gpui-scroll-sparse-lab/reactivity/crates/canvas/Cargo.toml",
+      "target": {
+        "kind": [
+          "example"
+        ],
+        "crate_types": [
+          "bin"
+        ],
+        "name": "text_shaping",
+        "src_path": "/home/user/gpui-scroll-sparse-lab/reactivity/crates/canvas/examples/text_shaping.rs",
+        "edition": "2024",
+        "doc": false,
+        "doctest": false,
+        "test": false
+      },
+      "profile": {
+        "opt_level": "3",
+        "debuginfo": 0,
+        "debug_assertions": false,
+        "overflow_checks": false,
+        "test": false
+      },
+      "features": [
+        "default",
+        "simd"
+      ],
+      "filenames": [
+        "/home/user/gpui-scroll-sparse-target/release/examples/text_shaping"
+      ],
+      "executable": "/home/user/gpui-scroll-sparse-target/release/examples/text_shaping",
+      "fresh": false
+    }
+  },
+  {
+    "path": "/home/user/gpui-scroll-sparse-target/release/build/gpui_canvas/6b381682c3f7776e/out/oklch-6b381682c3f7776e",
+    "sha256": "192d63f7efce783bee2f3257929a38d93f42c27adf2559371f25d87f1af388af",
+    "preserved": "/home/user/gpui-preserved-test-binaries/192d63f7efce783bee2f3257929a38d93f42c27adf2559371f25d87f1af388af",
+    "bytes": 1186608,
+    "executed": true,
+    "cargo": {
+      "reason": "compiler-artifact",
+      "package_id": "path+file:///home/user/gpui-scroll-sparse-lab/reactivity/crates/canvas#gpui_canvas@0.1.0",
+      "manifest_path": "/home/user/gpui-scroll-sparse-lab/reactivity/crates/canvas/Cargo.toml",
+      "target": {
+        "kind": [
+          "test"
+        ],
+        "crate_types": [
+          "bin"
+        ],
+        "name": "oklch",
+        "src_path": "/home/user/gpui-scroll-sparse-lab/reactivity/crates/canvas/tests/oklch.rs",
+        "edition": "2024",
+        "doc": false,
+        "doctest": false,
+        "test": true
+      },
+      "profile": {
+        "opt_level": "3",
+        "debuginfo": 0,
+        "debug_assertions": false,
+        "overflow_checks": false,
+        "test": true
+      },
+      "features": [
+        "default",
+        "simd"
+      ],
+      "filenames": [
+        "/home/user/gpui-scroll-sparse-target/release/build/gpui_canvas/6b381682c3f7776e/out/oklch-6b381682c3f7776e"
+      ],
+      "executable": "/home/user/gpui-scroll-sparse-target/release/build/gpui_canvas/6b381682c3f7776e/out/oklch-6b381682c3f7776e",
+      "fresh": false
+    }
+  },
+  {
+    "path": "/home/user/gpui-scroll-sparse-target/release/build/gpui_canvas/803b30cc4bdd1ebd/out/color-803b30cc4bdd1ebd",
+    "sha256": "9967836e5f530dcca8ea35026c24e496e9ae1412a1db9e6ce49dbd3355fd6764",
+    "preserved": "/home/user/gpui-preserved-test-binaries/9967836e5f530dcca8ea35026c24e496e9ae1412a1db9e6ce49dbd3355fd6764",
+    "bytes": 1320328,
+    "executed": true,
+    "cargo": {
+      "reason": "compiler-artifact",
+      "package_id": "path+file:///home/user/gpui-scroll-sparse-lab/reactivity/crates/canvas#gpui_canvas@0.1.0",
+      "manifest_path": "/home/user/gpui-scroll-sparse-lab/reactivity/crates/canvas/Cargo.toml",
+      "target": {
+        "kind": [
+          "test"
+        ],
+        "crate_types": [
+          "bin"
+        ],
+        "name": "color",
+        "src_path": "/home/user/gpui-scroll-sparse-lab/reactivity/crates/canvas/tests/color.rs",
+        "edition": "2024",
+        "doc": false,
+        "doctest": false,
+        "test": true
+      },
+      "profile": {
+        "opt_level": "3",
+        "debuginfo": 0,
+        "debug_assertions": false,
+        "overflow_checks": false,
+        "test": true
+      },
+      "features": [
+        "default",
+        "simd"
+      ],
+      "filenames": [
+        "/home/user/gpui-scroll-sparse-target/release/build/gpui_canvas/803b30cc4bdd1ebd/out/color-803b30cc4bdd1ebd"
+      ],
+      "executable": "/home/user/gpui-scroll-sparse-target/release/build/gpui_canvas/803b30cc4bdd1ebd/out/color-803b30cc4bdd1ebd",
+      "fresh": false
+    }
+  },
+  {
+    "path": "/home/user/gpui-scroll-sparse-target/release/build/gpui_canvas/5e889805cb647025/out/text_transaction-5e889805cb647025",
+    "sha256": "889343dfb2278bf6a5f37a2fc2b9f2052b882dff21fdb6f1a43b958b6100e6c7",
+    "preserved": "/home/user/gpui-preserved-test-binaries/889343dfb2278bf6a5f37a2fc2b9f2052b882dff21fdb6f1a43b958b6100e6c7",
+    "bytes": 10673736,
+    "executed": true,
+    "cargo": {
+      "reason": "compiler-artifact",
+      "package_id": "path+file:///home/user/gpui-scroll-sparse-lab/reactivity/crates/canvas#gpui_canvas@0.1.0",
+      "manifest_path": "/home/user/gpui-scroll-sparse-lab/reactivity/crates/canvas/Cargo.toml",
+      "target": {
+        "kind": [
+          "test"
+        ],
+        "crate_types": [
+          "bin"
+        ],
+        "name": "text_transaction",
+        "src_path": "/home/user/gpui-scroll-sparse-lab/reactivity/crates/canvas/tests/text_transaction.rs",
+        "edition": "2024",
+        "doc": false,
+        "doctest": false,
+        "test": true
+      },
+      "profile": {
+        "opt_level": "3",
+        "debuginfo": 0,
+        "debug_assertions": false,
+        "overflow_checks": false,
+        "test": true
+      },
+      "features": [
+        "default",
+        "simd"
+      ],
+      "filenames": [
+        "/home/user/gpui-scroll-sparse-target/release/build/gpui_canvas/5e889805cb647025/out/text_transaction-5e889805cb647025"
+      ],
+      "executable": "/home/user/gpui-scroll-sparse-target/release/build/gpui_canvas/5e889805cb647025/out/text_transaction-5e889805cb647025",
+      "fresh": false
+    }
+  },
+  {
+    "path": "/home/user/gpui-scroll-sparse-target/release/build/gpui_canvas/e4daf880f8f3142f/out/prepared_scene-e4daf880f8f3142f",
+    "sha256": "57ec73fc4f31d829cd89858e87615e2ea866a97c33a6af1593dc61e44344fe7e",
+    "preserved": "/home/user/gpui-preserved-test-binaries/57ec73fc4f31d829cd89858e87615e2ea866a97c33a6af1593dc61e44344fe7e",
+    "bytes": 10632744,
+    "executed": true,
+    "cargo": {
+      "reason": "compiler-artifact",
+      "package_id": "path+file:///home/user/gpui-scroll-sparse-lab/reactivity/crates/canvas#gpui_canvas@0.1.0",
+      "manifest_path": "/home/user/gpui-scroll-sparse-lab/reactivity/crates/canvas/Cargo.toml",
+      "target": {
+        "kind": [
+          "test"
+        ],
+        "crate_types": [
+          "bin"
+        ],
+        "name": "prepared_scene",
+        "src_path": "/home/user/gpui-scroll-sparse-lab/reactivity/crates/canvas/tests/prepared_scene.rs",
+        "edition": "2024",
+        "doc": false,
+        "doctest": false,
+        "test": true
+      },
+      "profile": {
+        "opt_level": "3",
+        "debuginfo": 0,
+        "debug_assertions": false,
+        "overflow_checks": false,
+        "test": true
+      },
+      "features": [
+        "default",
+        "simd"
+      ],
+      "filenames": [
+        "/home/user/gpui-scroll-sparse-target/release/build/gpui_canvas/e4daf880f8f3142f/out/prepared_scene-e4daf880f8f3142f"
+      ],
+      "executable": "/home/user/gpui-scroll-sparse-target/release/build/gpui_canvas/e4daf880f8f3142f/out/prepared_scene-e4daf880f8f3142f",
+      "fresh": false
+    }
+  },
+  {
+    "path": "/home/user/gpui-scroll-sparse-target/release/build/gpui_canvas/125fe8aa1d9fdb12/out/external-125fe8aa1d9fdb12",
+    "sha256": "3b36d40b3f66b0c0ba732a583020d243effd2da2596e92dbd1ab256ae09306a3",
+    "preserved": "/home/user/gpui-preserved-test-binaries/3b36d40b3f66b0c0ba732a583020d243effd2da2596e92dbd1ab256ae09306a3",
+    "bytes": 8574480,
+    "executed": true,
+    "cargo": {
+      "reason": "compiler-artifact",
+      "package_id": "path+file:///home/user/gpui-scroll-sparse-lab/reactivity/crates/canvas#gpui_canvas@0.1.0",
+      "manifest_path": "/home/user/gpui-scroll-sparse-lab/reactivity/crates/canvas/Cargo.toml",
+      "target": {
+        "kind": [
+          "test"
+        ],
+        "crate_types": [
+          "bin"
+        ],
+        "name": "external",
+        "src_path": "/home/user/gpui-scroll-sparse-lab/reactivity/crates/canvas/tests/external.rs",
+        "edition": "2024",
+        "doc": false,
+        "doctest": false,
+        "test": true
+      },
+      "profile": {
+        "opt_level": "3",
+        "debuginfo": 0,
+        "debug_assertions": false,
+        "overflow_checks": false,
+        "test": true
+      },
+      "features": [
+        "default",
+        "simd"
+      ],
+      "filenames": [
+        "/home/user/gpui-scroll-sparse-target/release/build/gpui_canvas/125fe8aa1d9fdb12/out/external-125fe8aa1d9fdb12"
+      ],
+      "executable": "/home/user/gpui-scroll-sparse-target/release/build/gpui_canvas/125fe8aa1d9fdb12/out/external-125fe8aa1d9fdb12",
+      "fresh": false
+    }
+  },
+  {
+    "path": "/home/user/gpui-scroll-sparse-target/release/examples/font_memory",
+    "sha256": "3657917ca144c8049edfb2cbe1cc55d3b740093733271f892e98f2494bd9e8b9",
+    "preserved": "/home/user/gpui-preserved-test-binaries/3657917ca144c8049edfb2cbe1cc55d3b740093733271f892e98f2494bd9e8b9",
+    "bytes": 10124696,
+    "executed": false,
+    "cargo": {
+      "reason": "compiler-artifact",
+      "package_id": "path+file:///home/user/gpui-scroll-sparse-lab/reactivity/crates/canvas#gpui_canvas@0.1.0",
+      "manifest_path": "/home/user/gpui-scroll-sparse-lab/reactivity/crates/canvas/Cargo.toml",
+      "target": {
+        "kind": [
+          "example"
+        ],
+        "crate_types": [
+          "bin"
+        ],
+        "name": "font_memory",
+        "src_path": "/home/user/gpui-scroll-sparse-lab/reactivity/crates/canvas/examples/font_memory.rs",
+        "edition": "2024",
+        "doc": false,
+        "doctest": false,
+        "test": false
+      },
+      "profile": {
+        "opt_level": "3",
+        "debuginfo": 0,
+        "debug_assertions": false,
+        "overflow_checks": false,
+        "test": false
+      },
+      "features": [
+        "default",
+        "simd"
+      ],
+      "filenames": [
+        "/home/user/gpui-scroll-sparse-target/release/examples/font_memory"
+      ],
+      "executable": "/home/user/gpui-scroll-sparse-target/release/examples/font_memory",
+      "fresh": false
+    }
+  },
+  {
+    "path": "/home/user/gpui-scroll-sparse-target/release/build/gpui_canvas/0ed3181fcc461005/out/shaping-0ed3181fcc461005",
+    "sha256": "f032d7a2dbee548846322c5f9671fd944948ba0dc9dbe5c6f1da13d4928c7971",
+    "preserved": "/home/user/gpui-preserved-test-binaries/f032d7a2dbee548846322c5f9671fd944948ba0dc9dbe5c6f1da13d4928c7971",
+    "bytes": 8208328,
+    "executed": true,
+    "cargo": {
+      "reason": "compiler-artifact",
+      "package_id": "path+file:///home/user/gpui-scroll-sparse-lab/reactivity/crates/canvas#gpui_canvas@0.1.0",
+      "manifest_path": "/home/user/gpui-scroll-sparse-lab/reactivity/crates/canvas/Cargo.toml",
+      "target": {
+        "kind": [
+          "test"
+        ],
+        "crate_types": [
+          "bin"
+        ],
+        "name": "shaping",
+        "src_path": "/home/user/gpui-scroll-sparse-lab/reactivity/crates/canvas/tests/shaping.rs",
+        "edition": "2024",
+        "doc": false,
+        "doctest": false,
+        "test": true
+      },
+      "profile": {
+        "opt_level": "3",
+        "debuginfo": 0,
+        "debug_assertions": false,
+        "overflow_checks": false,
+        "test": true
+      },
+      "features": [
+        "default",
+        "simd"
+      ],
+      "filenames": [
+        "/home/user/gpui-scroll-sparse-target/release/build/gpui_canvas/0ed3181fcc461005/out/shaping-0ed3181fcc461005"
+      ],
+      "executable": "/home/user/gpui-scroll-sparse-target/release/build/gpui_canvas/0ed3181fcc461005/out/shaping-0ed3181fcc461005",
+      "fresh": false
+    }
+  },
+  {
+    "path": "/home/user/gpui-scroll-sparse-target/release/examples/text_interaction",
+    "sha256": "89937fc9592ca88f374427ba897ce2687fe92c17fe1d74ab83deb886e4c487b6",
+    "preserved": "/home/user/gpui-preserved-test-binaries/89937fc9592ca88f374427ba897ce2687fe92c17fe1d74ab83deb886e4c487b6",
+    "bytes": 6937592,
+    "executed": false,
+    "cargo": {
+      "reason": "compiler-artifact",
+      "package_id": "path+file:///home/user/gpui-scroll-sparse-lab/reactivity/crates/canvas#gpui_canvas@0.1.0",
+      "manifest_path": "/home/user/gpui-scroll-sparse-lab/reactivity/crates/canvas/Cargo.toml",
+      "target": {
+        "kind": [
+          "example"
+        ],
+        "crate_types": [
+          "bin"
+        ],
+        "name": "text_interaction",
+        "src_path": "/home/user/gpui-scroll-sparse-lab/reactivity/crates/canvas/examples/text_interaction.rs",
+        "edition": "2024",
+        "doc": false,
+        "doctest": false,
+        "test": false
+      },
+      "profile": {
+        "opt_level": "3",
+        "debuginfo": 0,
+        "debug_assertions": false,
+        "overflow_checks": false,
+        "test": false
+      },
+      "features": [
+        "default",
+        "simd"
+      ],
+      "filenames": [
+        "/home/user/gpui-scroll-sparse-target/release/examples/text_interaction"
+      ],
+      "executable": "/home/user/gpui-scroll-sparse-target/release/examples/text_interaction",
+      "fresh": false
+    }
+  },
+  {
+    "path": "/home/user/gpui-scroll-sparse-target/release/build/gpui_canvas/80bfde96444141e1/out/line_height-80bfde96444141e1",
+    "sha256": "8023dd916e42f4881ee34f3c9436fa4e1733196f828e54b0d1448511bdf5c469",
+    "preserved": "/home/user/gpui-preserved-test-binaries/8023dd916e42f4881ee34f3c9436fa4e1733196f828e54b0d1448511bdf5c469",
+    "bytes": 7558304,
+    "executed": true,
+    "cargo": {
+      "reason": "compiler-artifact",
+      "package_id": "path+file:///home/user/gpui-scroll-sparse-lab/reactivity/crates/canvas#gpui_canvas@0.1.0",
+      "manifest_path": "/home/user/gpui-scroll-sparse-lab/reactivity/crates/canvas/Cargo.toml",
+      "target": {
+        "kind": [
+          "test"
+        ],
+        "crate_types": [
+          "bin"
+        ],
+        "name": "line_height",
+        "src_path": "/home/user/gpui-scroll-sparse-lab/reactivity/crates/canvas/tests/line_height.rs",
+        "edition": "2024",
+        "doc": false,
+        "doctest": false,
+        "test": true
+      },
+      "profile": {
+        "opt_level": "3",
+        "debuginfo": 0,
+        "debug_assertions": false,
+        "overflow_checks": false,
+        "test": true
+      },
+      "features": [
+        "default",
+        "simd"
+      ],
+      "filenames": [
+        "/home/user/gpui-scroll-sparse-target/release/build/gpui_canvas/80bfde96444141e1/out/line_height-80bfde96444141e1"
+      ],
+      "executable": "/home/user/gpui-scroll-sparse-target/release/build/gpui_canvas/80bfde96444141e1/out/line_height-80bfde96444141e1",
+      "fresh": false
+    }
+  },
+  {
+    "path": "/home/user/gpui-scroll-sparse-target/release/build/gpui_canvas/66052e5dfad09408/out/text_patch_damage-66052e5dfad09408",
+    "sha256": "6c7712535f91a790287b1b688a40cd4b87d6df0b3f9510314986b85501eb9c49",
+    "preserved": "/home/user/gpui-preserved-test-binaries/6c7712535f91a790287b1b688a40cd4b87d6df0b3f9510314986b85501eb9c49",
+    "bytes": 8608248,
+    "executed": true,
+    "cargo": {
+      "reason": "compiler-artifact",
+      "package_id": "path+file:///home/user/gpui-scroll-sparse-lab/reactivity/crates/canvas#gpui_canvas@0.1.0",
+      "manifest_path": "/home/user/gpui-scroll-sparse-lab/reactivity/crates/canvas/Cargo.toml",
+      "target": {
+        "kind": [
+          "test"
+        ],
+        "crate_types": [
+          "bin"
+        ],
+        "name": "text_patch_damage",
+        "src_path": "/home/user/gpui-scroll-sparse-lab/reactivity/crates/canvas/tests/text_patch_damage.rs",
+        "edition": "2024",
+        "doc": false,
+        "doctest": false,
+        "test": true
+      },
+      "profile": {
+        "opt_level": "3",
+        "debuginfo": 0,
+        "debug_assertions": false,
+        "overflow_checks": false,
+        "test": true
+      },
+      "features": [
+        "default",
+        "simd"
+      ],
+      "filenames": [
+        "/home/user/gpui-scroll-sparse-target/release/build/gpui_canvas/66052e5dfad09408/out/text_patch_damage-66052e5dfad09408"
+      ],
+      "executable": "/home/user/gpui-scroll-sparse-target/release/build/gpui_canvas/66052e5dfad09408/out/text_patch_damage-66052e5dfad09408",
+      "fresh": false
+    }
+  },
+  {
+    "path": "/home/user/gpui-scroll-sparse-target/release/build/gpui_canvas/3b0e5e59632df0c9/out/bins-3b0e5e59632df0c9",
+    "sha256": "af116a41e9466451e274815d72e5ee13b15a74b0952376d3a04203793df683c4",
+    "preserved": "/home/user/gpui-preserved-test-binaries/af116a41e9466451e274815d72e5ee13b15a74b0952376d3a04203793df683c4",
+    "bytes": 8625000,
+    "executed": true,
+    "cargo": {
+      "reason": "compiler-artifact",
+      "package_id": "path+file:///home/user/gpui-scroll-sparse-lab/reactivity/crates/canvas#gpui_canvas@0.1.0",
+      "manifest_path": "/home/user/gpui-scroll-sparse-lab/reactivity/crates/canvas/Cargo.toml",
+      "target": {
+        "kind": [
+          "test"
+        ],
+        "crate_types": [
+          "bin"
+        ],
+        "name": "bins",
+        "src_path": "/home/user/gpui-scroll-sparse-lab/reactivity/crates/canvas/tests/bins.rs",
+        "edition": "2024",
+        "doc": false,
+        "doctest": false,
+        "test": true
+      },
+      "profile": {
+        "opt_level": "3",
+        "debuginfo": 0,
+        "debug_assertions": false,
+        "overflow_checks": false,
+        "test": true
+      },
+      "features": [
+        "default",
+        "simd"
+      ],
+      "filenames": [
+        "/home/user/gpui-scroll-sparse-target/release/build/gpui_canvas/3b0e5e59632df0c9/out/bins-3b0e5e59632df0c9"
+      ],
+      "executable": "/home/user/gpui-scroll-sparse-target/release/build/gpui_canvas/3b0e5e59632df0c9/out/bins-3b0e5e59632df0c9",
+      "fresh": false
+    }
+  },
+  {
+    "path": "/home/user/gpui-scroll-sparse-target/release/examples/cpu",
+    "sha256": "9a17d668684d442f3d035654406e52ca347c24c0b1de3ef9419d441550bacc74",
+    "preserved": "/home/user/gpui-preserved-test-binaries/9a17d668684d442f3d035654406e52ca347c24c0b1de3ef9419d441550bacc74",
+    "bytes": 7998928,
+    "executed": false,
+    "cargo": {
+      "reason": "compiler-artifact",
+      "package_id": "path+file:///home/user/gpui-scroll-sparse-lab/reactivity/crates/canvas#gpui_canvas@0.1.0",
+      "manifest_path": "/home/user/gpui-scroll-sparse-lab/reactivity/crates/canvas/Cargo.toml",
+      "target": {
+        "kind": [
+          "example"
+        ],
+        "crate_types": [
+          "bin"
+        ],
+        "name": "cpu",
+        "src_path": "/home/user/gpui-scroll-sparse-lab/reactivity/crates/canvas/examples/cpu.rs",
+        "edition": "2024",
+        "doc": false,
+        "doctest": false,
+        "test": false
+      },
+      "profile": {
+        "opt_level": "3",
+        "debuginfo": 0,
+        "debug_assertions": false,
+        "overflow_checks": false,
+        "test": false
+      },
+      "features": [
+        "default",
+        "simd"
+      ],
+      "filenames": [
+        "/home/user/gpui-scroll-sparse-target/release/examples/cpu"
+      ],
+      "executable": "/home/user/gpui-scroll-sparse-target/release/examples/cpu",
+      "fresh": false
+    }
+  },
+  {
+    "path": "/home/user/gpui-scroll-sparse-target/release/build/gpui_canvas/309c83eeb8316fab/out/scroll_copy-309c83eeb8316fab",
+    "sha256": "c17b9f9f378f8a2255e5002780e2a9ccc4320df16008beedf7415ab52c46a092",
+    "preserved": "/home/user/gpui-preserved-test-binaries/c17b9f9f378f8a2255e5002780e2a9ccc4320df16008beedf7415ab52c46a092",
+    "bytes": 10701728,
+    "executed": true,
+    "cargo": {
+      "reason": "compiler-artifact",
+      "package_id": "path+file:///home/user/gpui-scroll-sparse-lab/reactivity/crates/canvas#gpui_canvas@0.1.0",
+      "manifest_path": "/home/user/gpui-scroll-sparse-lab/reactivity/crates/canvas/Cargo.toml",
+      "target": {
+        "kind": [
+          "test"
+        ],
+        "crate_types": [
+          "bin"
+        ],
+        "name": "scroll_copy",
+        "src_path": "/home/user/gpui-scroll-sparse-lab/reactivity/crates/canvas/tests/scroll_copy.rs",
+        "edition": "2024",
+        "doc": false,
+        "doctest": false,
+        "test": true
+      },
+      "profile": {
+        "opt_level": "3",
+        "debuginfo": 0,
+        "debug_assertions": false,
+        "overflow_checks": false,
+        "test": true
+      },
+      "features": [
+        "default",
+        "simd"
+      ],
+      "filenames": [
+        "/home/user/gpui-scroll-sparse-target/release/build/gpui_canvas/309c83eeb8316fab/out/scroll_copy-309c83eeb8316fab"
+      ],
+      "executable": "/home/user/gpui-scroll-sparse-target/release/build/gpui_canvas/309c83eeb8316fab/out/scroll_copy-309c83eeb8316fab",
+      "fresh": false
+    }
+  },
+  {
+    "path": "/home/user/gpui-scroll-sparse-target/release/build/gpui_canvas/4ca75d5643febe6d/out/default_font-4ca75d5643febe6d",
+    "sha256": "f161545852df46eca3de4113aa641e7c45cd1a5c08d531c5c3f3b082a7773b0f",
+    "preserved": "/home/user/gpui-preserved-test-binaries/f161545852df46eca3de4113aa641e7c45cd1a5c08d531c5c3f3b082a7773b0f",
+    "bytes": 12907848,
+    "executed": true,
+    "cargo": {
+      "reason": "compiler-artifact",
+      "package_id": "path+file:///home/user/gpui-scroll-sparse-lab/reactivity/crates/canvas#gpui_canvas@0.1.0",
+      "manifest_path": "/home/user/gpui-scroll-sparse-lab/reactivity/crates/canvas/Cargo.toml",
+      "target": {
+        "kind": [
+          "test"
+        ],
+        "crate_types": [
+          "bin"
+        ],
+        "name": "default_font",
+        "src_path": "/home/user/gpui-scroll-sparse-lab/reactivity/crates/canvas/tests/default_font.rs",
+        "edition": "2024",
+        "doc": false,
+        "doctest": false,
+        "test": true
+      },
+      "profile": {
+        "opt_level": "3",
+        "debuginfo": 0,
+        "debug_assertions": false,
+        "overflow_checks": false,
+        "test": true
+      },
+      "features": [
+        "default",
+        "simd"
+      ],
+      "filenames": [
+        "/home/user/gpui-scroll-sparse-target/release/build/gpui_canvas/4ca75d5643febe6d/out/default_font-4ca75d5643febe6d"
+      ],
+      "executable": "/home/user/gpui-scroll-sparse-target/release/build/gpui_canvas/4ca75d5643febe6d/out/default_font-4ca75d5643febe6d",
+      "fresh": false
+    }
+  },
+  {
+    "path": "/home/user/gpui-scroll-sparse-target/release/examples/retained",
+    "sha256": "98cd5521a87cf7d2440152434091c88a3bf424f8c902c3fcad6bc3dc1b04f540",
+    "preserved": "/home/user/gpui-preserved-test-binaries/98cd5521a87cf7d2440152434091c88a3bf424f8c902c3fcad6bc3dc1b04f540",
+    "bytes": 15294280,
+    "executed": false,
+    "cargo": {
+      "reason": "compiler-artifact",
+      "package_id": "path+file:///home/user/gpui-scroll-sparse-lab/reactivity/crates/gpu#gpui_gpu@0.1.0",
+      "manifest_path": "/home/user/gpui-scroll-sparse-lab/reactivity/crates/gpu/Cargo.toml",
+      "target": {
+        "kind": [
+          "example"
+        ],
+        "crate_types": [
+          "bin"
+        ],
+        "name": "retained",
+        "src_path": "/home/user/gpui-scroll-sparse-lab/reactivity/crates/gpu/examples/retained.rs",
+        "edition": "2024",
+        "required-features": [
+          "gpu-tests"
+        ],
+        "doc": false,
+        "doctest": false,
+        "test": false
+      },
+      "profile": {
+        "opt_level": "3",
+        "debuginfo": 0,
+        "debug_assertions": false,
+        "overflow_checks": false,
+        "test": false
+      },
+      "features": [
+        "default",
+        "gpu-tests",
+        "simd",
+        "vulkan-tests"
+      ],
+      "filenames": [
+        "/home/user/gpui-scroll-sparse-target/release/examples/retained"
+      ],
+      "executable": "/home/user/gpui-scroll-sparse-target/release/examples/retained",
+      "fresh": false
+    }
+  },
+  {
+    "path": "/home/user/gpui-scroll-sparse-target/release/build/gpui_gpu/84f9d7fda4ba4715/out/presentation-84f9d7fda4ba4715",
+    "sha256": "d01c40882465c1ca7d2cfb38abf0f0317d2d3e424110d4edc5053f469abba977",
+    "preserved": "/home/user/gpui-preserved-test-binaries/d01c40882465c1ca7d2cfb38abf0f0317d2d3e424110d4edc5053f469abba977",
+    "bytes": 1472560,
+    "executed": true,
+    "cargo": {
+      "reason": "compiler-artifact",
+      "package_id": "path+file:///home/user/gpui-scroll-sparse-lab/reactivity/crates/gpu#gpui_gpu@0.1.0",
+      "manifest_path": "/home/user/gpui-scroll-sparse-lab/reactivity/crates/gpu/Cargo.toml",
+      "target": {
+        "kind": [
+          "test"
+        ],
+        "crate_types": [
+          "bin"
+        ],
+        "name": "presentation",
+        "src_path": "/home/user/gpui-scroll-sparse-lab/reactivity/crates/gpu/tests/presentation.rs",
+        "edition": "2024",
+        "doc": false,
+        "doctest": false,
+        "test": true
+      },
+      "profile": {
+        "opt_level": "3",
+        "debuginfo": 0,
+        "debug_assertions": false,
+        "overflow_checks": false,
+        "test": true
+      },
+      "features": [
+        "default",
+        "gpu-tests",
+        "simd",
+        "vulkan-tests"
+      ],
+      "filenames": [
+        "/home/user/gpui-scroll-sparse-target/release/build/gpui_gpu/84f9d7fda4ba4715/out/presentation-84f9d7fda4ba4715"
+      ],
+      "executable": "/home/user/gpui-scroll-sparse-target/release/build/gpui_gpu/84f9d7fda4ba4715/out/presentation-84f9d7fda4ba4715",
+      "fresh": false
+    }
+  },
+  {
+    "path": "/home/user/gpui-scroll-sparse-target/release/examples/images",
+    "sha256": "e73c3ab904024c53bca681189df9e16609fdb936c1c971bda386177a65601d87",
+    "preserved": "/home/user/gpui-preserved-test-binaries/e73c3ab904024c53bca681189df9e16609fdb936c1c971bda386177a65601d87",
+    "bytes": 735048,
+    "executed": true,
+    "cargo": {
+      "reason": "compiler-artifact",
+      "package_id": "path+file:///home/user/gpui-scroll-sparse-lab/reactivity/crates/gpu#gpui_gpu@0.1.0",
+      "manifest_path": "/home/user/gpui-scroll-sparse-lab/reactivity/crates/gpu/Cargo.toml",
+      "target": {
+        "kind": [
+          "example"
+        ],
+        "crate_types": [
+          "bin"
+        ],
+        "name": "images",
+        "src_path": "/home/user/gpui-scroll-sparse-lab/reactivity/crates/gpu/examples/images.rs",
+        "edition": "2024",
+        "required-features": [
+          "gpu-tests"
+        ],
+        "doc": false,
+        "doctest": false,
+        "test": false
+      },
+      "profile": {
+        "opt_level": "3",
+        "debuginfo": 0,
+        "debug_assertions": false,
+        "overflow_checks": false,
+        "test": false
+      },
+      "features": [
+        "default",
+        "gpu-tests",
+        "simd",
+        "vulkan-tests"
+      ],
+      "filenames": [
+        "/home/user/gpui-scroll-sparse-target/release/examples/images"
+      ],
+      "executable": "/home/user/gpui-scroll-sparse-target/release/examples/images",
+      "fresh": false
+    }
+  },
+  {
+    "path": "/home/user/gpui-scroll-sparse-target/release/examples/groups",
+    "sha256": "8066f684af9330d4941a524673a843cbfa25db126a93bc81b03ff866568c90d8",
+    "preserved": "/home/user/gpui-preserved-test-binaries/8066f684af9330d4941a524673a843cbfa25db126a93bc81b03ff866568c90d8",
+    "bytes": 15201872,
+    "executed": false,
+    "cargo": {
+      "reason": "compiler-artifact",
+      "package_id": "path+file:///home/user/gpui-scroll-sparse-lab/reactivity/crates/gpu#gpui_gpu@0.1.0",
+      "manifest_path": "/home/user/gpui-scroll-sparse-lab/reactivity/crates/gpu/Cargo.toml",
+      "target": {
+        "kind": [
+          "example"
+        ],
+        "crate_types": [
+          "bin"
+        ],
+        "name": "groups",
+        "src_path": "/home/user/gpui-scroll-sparse-lab/reactivity/crates/gpu/examples/groups.rs",
+        "edition": "2024",
+        "required-features": [
+          "gpu-tests"
+        ],
+        "doc": false,
+        "doctest": false,
+        "test": false
+      },
+      "profile": {
+        "opt_level": "3",
+        "debuginfo": 0,
+        "debug_assertions": false,
+        "overflow_checks": false,
+        "test": false
+      },
+      "features": [
+        "default",
+        "gpu-tests",
+        "simd",
+        "vulkan-tests"
+      ],
+      "filenames": [
+        "/home/user/gpui-scroll-sparse-target/release/examples/groups"
+      ],
+      "executable": "/home/user/gpui-scroll-sparse-target/release/examples/groups",
+      "fresh": false
+    }
+  },
+  {
+    "path": "/home/user/gpui-scroll-sparse-target/release/examples/tiles",
+    "sha256": "632b2ab8cde2b8f7416aa5d570d643e8853922a34afe10292a97f7a2b8cb834f",
+    "preserved": "/home/user/gpui-preserved-test-binaries/632b2ab8cde2b8f7416aa5d570d643e8853922a34afe10292a97f7a2b8cb834f",
+    "bytes": 15205520,
+    "executed": false,
+    "cargo": {
+      "reason": "compiler-artifact",
+      "package_id": "path+file:///home/user/gpui-scroll-sparse-lab/reactivity/crates/gpu#gpui_gpu@0.1.0",
+      "manifest_path": "/home/user/gpui-scroll-sparse-lab/reactivity/crates/gpu/Cargo.toml",
+      "target": {
+        "kind": [
+          "example"
+        ],
+        "crate_types": [
+          "bin"
+        ],
+        "name": "tiles",
+        "src_path": "/home/user/gpui-scroll-sparse-lab/reactivity/crates/gpu/examples/tiles.rs",
+        "edition": "2024",
+        "required-features": [
+          "gpu-tests"
+        ],
+        "doc": false,
+        "doctest": false,
+        "test": false
+      },
+      "profile": {
+        "opt_level": "3",
+        "debuginfo": 0,
+        "debug_assertions": false,
+        "overflow_checks": false,
+        "test": false
+      },
+      "features": [
+        "default",
+        "gpu-tests",
+        "simd",
+        "vulkan-tests"
+      ],
+      "filenames": [
+        "/home/user/gpui-scroll-sparse-target/release/examples/tiles"
+      ],
+      "executable": "/home/user/gpui-scroll-sparse-target/release/examples/tiles",
+      "fresh": false
+    }
+  },
+  {
+    "path": "/home/user/gpui-scroll-sparse-target/release/examples/selection_queries",
+    "sha256": "96d22c1c2364e928f747cd4f4f495439ba1b8cf8c56beec2ede798e7e875f94b",
+    "preserved": "/home/user/gpui-preserved-test-binaries/96d22c1c2364e928f747cd4f4f495439ba1b8cf8c56beec2ede798e7e875f94b",
+    "bytes": 6924024,
+    "executed": false,
+    "cargo": {
+      "reason": "compiler-artifact",
+      "package_id": "path+file:///home/user/gpui-scroll-sparse-lab/reactivity/crates/canvas#gpui_canvas@0.1.0",
+      "manifest_path": "/home/user/gpui-scroll-sparse-lab/reactivity/crates/canvas/Cargo.toml",
+      "target": {
+        "kind": [
+          "example"
+        ],
+        "crate_types": [
+          "bin"
+        ],
+        "name": "selection_queries",
+        "src_path": "/home/user/gpui-scroll-sparse-lab/reactivity/crates/canvas/examples/selection_queries.rs",
+        "edition": "2024",
+        "doc": false,
+        "doctest": false,
+        "test": false
+      },
+      "profile": {
+        "opt_level": "3",
+        "debuginfo": 0,
+        "debug_assertions": false,
+        "overflow_checks": false,
+        "test": false
+      },
+      "features": [
+        "default",
+        "simd"
+      ],
+      "filenames": [
+        "/home/user/gpui-scroll-sparse-target/release/examples/selection_queries"
+      ],
+      "executable": "/home/user/gpui-scroll-sparse-target/release/examples/selection_queries",
+      "fresh": false
+    }
+  },
+  {
+    "path": "/home/user/gpui-scroll-sparse-target/release/build/gpui_canvas/c78a70091e54785c/out/hdr-c78a70091e54785c",
+    "sha256": "b02dc5ce8ac617346eba7e8ed3be2a6d2727032bf7b4f7f4925f5de290bb0ae0",
+    "preserved": "/home/user/gpui-preserved-test-binaries/b02dc5ce8ac617346eba7e8ed3be2a6d2727032bf7b4f7f4925f5de290bb0ae0",
+    "bytes": 8586608,
+    "executed": true,
+    "cargo": {
+      "reason": "compiler-artifact",
+      "package_id": "path+file:///home/user/gpui-scroll-sparse-lab/reactivity/crates/canvas#gpui_canvas@0.1.0",
+      "manifest_path": "/home/user/gpui-scroll-sparse-lab/reactivity/crates/canvas/Cargo.toml",
+      "target": {
+        "kind": [
+          "test"
+        ],
+        "crate_types": [
+          "bin"
+        ],
+        "name": "hdr",
+        "src_path": "/home/user/gpui-scroll-sparse-lab/reactivity/crates/canvas/tests/hdr.rs",
+        "edition": "2024",
+        "doc": false,
+        "doctest": false,
+        "test": true
+      },
+      "profile": {
+        "opt_level": "3",
+        "debuginfo": 0,
+        "debug_assertions": false,
+        "overflow_checks": false,
+        "test": true
+      },
+      "features": [
+        "default",
+        "simd"
+      ],
+      "filenames": [
+        "/home/user/gpui-scroll-sparse-target/release/build/gpui_canvas/c78a70091e54785c/out/hdr-c78a70091e54785c"
+      ],
+      "executable": "/home/user/gpui-scroll-sparse-target/release/build/gpui_canvas/c78a70091e54785c/out/hdr-c78a70091e54785c",
+      "fresh": false
+    }
+  },
+  {
+    "path": "/home/user/gpui-scroll-sparse-target/release/build/gpui_canvas/aef8b08d67145dd5/out/text_composition-aef8b08d67145dd5",
+    "sha256": "a516a08f69ca3253783980807d255779c13a1f32d7580d6139af67913c9123db",
+    "preserved": "/home/user/gpui-preserved-test-binaries/a516a08f69ca3253783980807d255779c13a1f32d7580d6139af67913c9123db",
+    "bytes": 8618736,
+    "executed": true,
+    "cargo": {
+      "reason": "compiler-artifact",
+      "package_id": "path+file:///home/user/gpui-scroll-sparse-lab/reactivity/crates/canvas#gpui_canvas@0.1.0",
+      "manifest_path": "/home/user/gpui-scroll-sparse-lab/reactivity/crates/canvas/Cargo.toml",
+      "target": {
+        "kind": [
+          "test"
+        ],
+        "crate_types": [
+          "bin"
+        ],
+        "name": "text_composition",
+        "src_path": "/home/user/gpui-scroll-sparse-lab/reactivity/crates/canvas/tests/text_composition.rs",
+        "edition": "2024",
+        "doc": false,
+        "doctest": false,
+        "test": true
+      },
+      "profile": {
+        "opt_level": "3",
+        "debuginfo": 0,
+        "debug_assertions": false,
+        "overflow_checks": false,
+        "test": true
+      },
+      "features": [
+        "default",
+        "simd"
+      ],
+      "filenames": [
+        "/home/user/gpui-scroll-sparse-target/release/build/gpui_canvas/aef8b08d67145dd5/out/text_composition-aef8b08d67145dd5"
+      ],
+      "executable": "/home/user/gpui-scroll-sparse-target/release/build/gpui_canvas/aef8b08d67145dd5/out/text_composition-aef8b08d67145dd5",
+      "fresh": false
+    }
+  },
+  {
+    "path": "/home/user/gpui-scroll-sparse-target/release/examples/clip_cost",
+    "sha256": "78809767cea472a320383eb0357f24321a9567fb4c2c9a54d8e67b32fa7fab86",
+    "preserved": "/home/user/gpui-preserved-test-binaries/78809767cea472a320383eb0357f24321a9567fb4c2c9a54d8e67b32fa7fab86",
+    "bytes": 7847560,
+    "executed": false,
+    "cargo": {
+      "reason": "compiler-artifact",
+      "package_id": "path+file:///home/user/gpui-scroll-sparse-lab/reactivity/crates/canvas#gpui_canvas@0.1.0",
+      "manifest_path": "/home/user/gpui-scroll-sparse-lab/reactivity/crates/canvas/Cargo.toml",
+      "target": {
+        "kind": [
+          "example"
+        ],
+        "crate_types": [
+          "bin"
+        ],
+        "name": "clip_cost",
+        "src_path": "/home/user/gpui-scroll-sparse-lab/reactivity/crates/canvas/examples/clip_cost.rs",
+        "edition": "2024",
+        "doc": false,
+        "doctest": false,
+        "test": false
+      },
+      "profile": {
+        "opt_level": "3",
+        "debuginfo": 0,
+        "debug_assertions": false,
+        "overflow_checks": false,
+        "test": false
+      },
+      "features": [
+        "default",
+        "simd"
+      ],
+      "filenames": [
+        "/home/user/gpui-scroll-sparse-target/release/examples/clip_cost"
+      ],
+      "executable": "/home/user/gpui-scroll-sparse-target/release/examples/clip_cost",
+      "fresh": false
+    }
+  },
+  {
+    "path": "/home/user/gpui-scroll-sparse-target/release/build/gpui_canvas/3c586a8a10bd35ad/out/damage-3c586a8a10bd35ad",
+    "sha256": "d19bfd2a40e31eb3bb8eeba5318f87b9d345d4113e93375860bd532b7aa8af8b",
+    "preserved": "/home/user/gpui-preserved-test-binaries/d19bfd2a40e31eb3bb8eeba5318f87b9d345d4113e93375860bd532b7aa8af8b",
+    "bytes": 8605112,
+    "executed": true,
+    "cargo": {
+      "reason": "compiler-artifact",
+      "package_id": "path+file:///home/user/gpui-scroll-sparse-lab/reactivity/crates/canvas#gpui_canvas@0.1.0",
+      "manifest_path": "/home/user/gpui-scroll-sparse-lab/reactivity/crates/canvas/Cargo.toml",
+      "target": {
+        "kind": [
+          "test"
+        ],
+        "crate_types": [
+          "bin"
+        ],
+        "name": "damage",
+        "src_path": "/home/user/gpui-scroll-sparse-lab/reactivity/crates/canvas/tests/damage.rs",
+        "edition": "2024",
+        "doc": false,
+        "doctest": false,
+        "test": true
+      },
+      "profile": {
+        "opt_level": "3",
+        "debuginfo": 0,
+        "debug_assertions": false,
+        "overflow_checks": false,
+        "test": true
+      },
+      "features": [
+        "default",
+        "simd"
+      ],
+      "filenames": [
+        "/home/user/gpui-scroll-sparse-target/release/build/gpui_canvas/3c586a8a10bd35ad/out/damage-3c586a8a10bd35ad"
+      ],
+      "executable": "/home/user/gpui-scroll-sparse-target/release/build/gpui_canvas/3c586a8a10bd35ad/out/damage-3c586a8a10bd35ad",
+      "fresh": false
+    }
+  },
+  {
+    "path": "/home/user/gpui-scroll-sparse-target/release/build/gpui_canvas/b6ae2ca160e29380/out/sample_clip-b6ae2ca160e29380",
+    "sha256": "807b8c3e17fdd6ed0ea4f64061c1d4197a495ed27fb4155ed13c6697dd1fa1da",
+    "preserved": "/home/user/gpui-preserved-test-binaries/807b8c3e17fdd6ed0ea4f64061c1d4197a495ed27fb4155ed13c6697dd1fa1da",
+    "bytes": 1313080,
+    "executed": true,
+    "cargo": {
+      "reason": "compiler-artifact",
+      "package_id": "path+file:///home/user/gpui-scroll-sparse-lab/reactivity/crates/canvas#gpui_canvas@0.1.0",
+      "manifest_path": "/home/user/gpui-scroll-sparse-lab/reactivity/crates/canvas/Cargo.toml",
+      "target": {
+        "kind": [
+          "test"
+        ],
+        "crate_types": [
+          "bin"
+        ],
+        "name": "sample_clip",
+        "src_path": "/home/user/gpui-scroll-sparse-lab/reactivity/crates/canvas/tests/sample_clip.rs",
+        "edition": "2024",
+        "doc": false,
+        "doctest": false,
+        "test": true
+      },
+      "profile": {
+        "opt_level": "3",
+        "debuginfo": 0,
+        "debug_assertions": false,
+        "overflow_checks": false,
+        "test": true
+      },
+      "features": [
+        "default",
+        "simd"
+      ],
+      "filenames": [
+        "/home/user/gpui-scroll-sparse-target/release/build/gpui_canvas/b6ae2ca160e29380/out/sample_clip-b6ae2ca160e29380"
+      ],
+      "executable": "/home/user/gpui-scroll-sparse-target/release/build/gpui_canvas/b6ae2ca160e29380/out/sample_clip-b6ae2ca160e29380",
+      "fresh": false
+    }
+  },
+  {
+    "path": "/home/user/gpui-scroll-sparse-target/release/build/gpui_gpu/f3188f1101e1b4d0/out/render-f3188f1101e1b4d0",
+    "sha256": "1afb721af301e94606b904346d3bdbb4e8506a791a8dd039704ab613e0ce5e0d",
+    "preserved": "/home/user/gpui-preserved-test-binaries/1afb721af301e94606b904346d3bdbb4e8506a791a8dd039704ab613e0ce5e0d",
+    "bytes": 16851448,
+    "executed": true,
+    "cargo": {
+      "reason": "compiler-artifact",
+      "package_id": "path+file:///home/user/gpui-scroll-sparse-lab/reactivity/crates/gpu#gpui_gpu@0.1.0",
+      "manifest_path": "/home/user/gpui-scroll-sparse-lab/reactivity/crates/gpu/Cargo.toml",
+      "target": {
+        "kind": [
+          "test"
+        ],
+        "crate_types": [
+          "bin"
+        ],
+        "name": "render",
+        "src_path": "/home/user/gpui-scroll-sparse-lab/reactivity/crates/gpu/tests/render.rs",
+        "edition": "2024",
+        "required-features": [
+          "gpu-tests"
+        ],
+        "doc": false,
+        "doctest": false,
+        "test": true
+      },
+      "profile": {
+        "opt_level": "3",
+        "debuginfo": 0,
+        "debug_assertions": false,
+        "overflow_checks": false,
+        "test": true
+      },
+      "features": [
+        "default",
+        "gpu-tests",
+        "simd",
+        "vulkan-tests"
+      ],
+      "filenames": [
+        "/home/user/gpui-scroll-sparse-target/release/build/gpui_gpu/f3188f1101e1b4d0/out/render-f3188f1101e1b4d0"
+      ],
+      "executable": "/home/user/gpui-scroll-sparse-target/release/build/gpui_gpu/f3188f1101e1b4d0/out/render-f3188f1101e1b4d0",
+      "fresh": false
+    }
+  },
+  {
+    "path": "/home/user/gpui-scroll-sparse-target/release/examples/images",
+    "sha256": "e73c3ab904024c53bca681189df9e16609fdb936c1c971bda386177a65601d87",
+    "preserved": "/home/user/gpui-preserved-test-binaries/e73c3ab904024c53bca681189df9e16609fdb936c1c971bda386177a65601d87",
+    "bytes": 735048,
+    "executed": true,
+    "cargo": {
+      "reason": "compiler-artifact",
+      "package_id": "path+file:///home/user/gpui-scroll-sparse-lab/reactivity/crates/canvas#gpui_canvas@0.1.0",
+      "manifest_path": "/home/user/gpui-scroll-sparse-lab/reactivity/crates/canvas/Cargo.toml",
+      "target": {
+        "kind": [
+          "example"
+        ],
+        "crate_types": [
+          "bin"
+        ],
+        "name": "images",
+        "src_path": "/home/user/gpui-scroll-sparse-lab/reactivity/crates/canvas/examples/images.rs",
+        "edition": "2024",
+        "doc": false,
+        "doctest": false,
+        "test": false
+      },
+      "profile": {
+        "opt_level": "3",
+        "debuginfo": 0,
+        "debug_assertions": false,
+        "overflow_checks": false,
+        "test": false
+      },
+      "features": [
+        "default",
+        "simd"
+      ],
+      "filenames": [
+        "/home/user/gpui-scroll-sparse-target/release/examples/images"
+      ],
+      "executable": "/home/user/gpui-scroll-sparse-target/release/examples/images",
+      "fresh": false
+    }
+  },
+  {
+    "path": "/home/user/gpui-scroll-sparse-target/release/build/gpui_canvas/b30100c4f3186c7e/out/gradients-b30100c4f3186c7e",
+    "sha256": "6db15780b2d4f571a120a246f2114afc7a4622b8e96e67ba57c43054c6c5879e",
+    "preserved": "/home/user/gpui-preserved-test-binaries/6db15780b2d4f571a120a246f2114afc7a4622b8e96e67ba57c43054c6c5879e",
+    "bytes": 1336968,
+    "executed": true,
+    "cargo": {
+      "reason": "compiler-artifact",
+      "package_id": "path+file:///home/user/gpui-scroll-sparse-lab/reactivity/crates/canvas#gpui_canvas@0.1.0",
+      "manifest_path": "/home/user/gpui-scroll-sparse-lab/reactivity/crates/canvas/Cargo.toml",
+      "target": {
+        "kind": [
+          "test"
+        ],
+        "crate_types": [
+          "bin"
+        ],
+        "name": "gradients",
+        "src_path": "/home/user/gpui-scroll-sparse-lab/reactivity/crates/canvas/tests/gradients.rs",
+        "edition": "2024",
+        "doc": false,
+        "doctest": false,
+        "test": true
+      },
+      "profile": {
+        "opt_level": "3",
+        "debuginfo": 0,
+        "debug_assertions": false,
+        "overflow_checks": false,
+        "test": true
+      },
+      "features": [
+        "default",
+        "simd"
+      ],
+      "filenames": [
+        "/home/user/gpui-scroll-sparse-target/release/build/gpui_canvas/b30100c4f3186c7e/out/gradients-b30100c4f3186c7e"
+      ],
+      "executable": "/home/user/gpui-scroll-sparse-target/release/build/gpui_canvas/b30100c4f3186c7e/out/gradients-b30100c4f3186c7e",
+      "fresh": false
+    }
+  },
+  {
+    "path": "/home/user/gpui-scroll-sparse-target/release/build/gpui_canvas/3e7493a8ec22d669/out/text_cache-3e7493a8ec22d669",
+    "sha256": "d07f19b550cea3fc18323365913bd1f9b1fe6042a444723ed05c94f5356ebc4f",
+    "preserved": "/home/user/gpui-preserved-test-binaries/d07f19b550cea3fc18323365913bd1f9b1fe6042a444723ed05c94f5356ebc4f",
+    "bytes": 9157120,
+    "executed": true,
+    "cargo": {
+      "reason": "compiler-artifact",
+      "package_id": "path+file:///home/user/gpui-scroll-sparse-lab/reactivity/crates/canvas#gpui_canvas@0.1.0",
+      "manifest_path": "/home/user/gpui-scroll-sparse-lab/reactivity/crates/canvas/Cargo.toml",
+      "target": {
+        "kind": [
+          "test"
+        ],
+        "crate_types": [
+          "bin"
+        ],
+        "name": "text_cache",
+        "src_path": "/home/user/gpui-scroll-sparse-lab/reactivity/crates/canvas/tests/text_cache.rs",
+        "edition": "2024",
+        "doc": false,
+        "doctest": false,
+        "test": true
+      },
+      "profile": {
+        "opt_level": "3",
+        "debuginfo": 0,
+        "debug_assertions": false,
+        "overflow_checks": false,
+        "test": true
+      },
+      "features": [
+        "default",
+        "simd"
+      ],
+      "filenames": [
+        "/home/user/gpui-scroll-sparse-target/release/build/gpui_canvas/3e7493a8ec22d669/out/text_cache-3e7493a8ec22d669"
+      ],
+      "executable": "/home/user/gpui-scroll-sparse-target/release/build/gpui_canvas/3e7493a8ec22d669/out/text_cache-3e7493a8ec22d669",
+      "fresh": false
+    }
+  },
+  {
+    "path": "/home/user/gpui-scroll-sparse-target/release/build/gpui_canvas/6e0206172b11000c/out/color_authoring-6e0206172b11000c",
+    "sha256": "ad79cf0843db0ad389c29135c02a05c3e2d314160b7b0b6734d3688aa73614e6",
+    "preserved": "/home/user/gpui-preserved-test-binaries/ad79cf0843db0ad389c29135c02a05c3e2d314160b7b0b6734d3688aa73614e6",
+    "bytes": 1171344,
+    "executed": true,
+    "cargo": {
+      "reason": "compiler-artifact",
+      "package_id": "path+file:///home/user/gpui-scroll-sparse-lab/reactivity/crates/canvas#gpui_canvas@0.1.0",
+      "manifest_path": "/home/user/gpui-scroll-sparse-lab/reactivity/crates/canvas/Cargo.toml",
+      "target": {
+        "kind": [
+          "test"
+        ],
+        "crate_types": [
+          "bin"
+        ],
+        "name": "color_authoring",
+        "src_path": "/home/user/gpui-scroll-sparse-lab/reactivity/crates/canvas/tests/color_authoring.rs",
+        "edition": "2024",
+        "doc": false,
+        "doctest": false,
+        "test": true
+      },
+      "profile": {
+        "opt_level": "3",
+        "debuginfo": 0,
+        "debug_assertions": false,
+        "overflow_checks": false,
+        "test": true
+      },
+      "features": [
+        "default",
+        "simd"
+      ],
+      "filenames": [
+        "/home/user/gpui-scroll-sparse-target/release/build/gpui_canvas/6e0206172b11000c/out/color_authoring-6e0206172b11000c"
+      ],
+      "executable": "/home/user/gpui-scroll-sparse-target/release/build/gpui_canvas/6e0206172b11000c/out/color_authoring-6e0206172b11000c",
+      "fresh": false
+    }
+  },
+  {
+    "path": "/home/user/gpui-scroll-sparse-target/release/build/gpui_canvas/d3c2882074eb0607/out/render-d3c2882074eb0607",
+    "sha256": "3bf874e3bbef3b968c85e68a320339c8ac4413e1849c52e969547156bea07302",
+    "preserved": "/home/user/gpui-preserved-test-binaries/3bf874e3bbef3b968c85e68a320339c8ac4413e1849c52e969547156bea07302",
+    "bytes": 12048512,
+    "executed": true,
+    "cargo": {
+      "reason": "compiler-artifact",
+      "package_id": "path+file:///home/user/gpui-scroll-sparse-lab/reactivity/crates/canvas#gpui_canvas@0.1.0",
+      "manifest_path": "/home/user/gpui-scroll-sparse-lab/reactivity/crates/canvas/Cargo.toml",
+      "target": {
+        "kind": [
+          "test"
+        ],
+        "crate_types": [
+          "bin"
+        ],
+        "name": "render",
+        "src_path": "/home/user/gpui-scroll-sparse-lab/reactivity/crates/canvas/tests/render.rs",
+        "edition": "2024",
+        "doc": false,
+        "doctest": false,
+        "test": true
+      },
+      "profile": {
+        "opt_level": "3",
+        "debuginfo": 0,
+        "debug_assertions": false,
+        "overflow_checks": false,
+        "test": true
+      },
+      "features": [
+        "default",
+        "simd"
+      ],
+      "filenames": [
+        "/home/user/gpui-scroll-sparse-target/release/build/gpui_canvas/d3c2882074eb0607/out/render-d3c2882074eb0607"
+      ],
+      "executable": "/home/user/gpui-scroll-sparse-target/release/build/gpui_canvas/d3c2882074eb0607/out/render-d3c2882074eb0607",
+      "fresh": false
+    }
+  },
+  {
+    "path": "/home/user/gpui-scroll-sparse-target/release/examples/group_views",
+    "sha256": "496cf866b6690264c9f74de92889141ca16c342b4d6035a3f4b499369075df11",
+    "preserved": "/home/user/gpui-preserved-test-binaries/496cf866b6690264c9f74de92889141ca16c342b4d6035a3f4b499369075df11",
+    "bytes": 7840888,
+    "executed": false,
+    "cargo": {
+      "reason": "compiler-artifact",
+      "package_id": "path+file:///home/user/gpui-scroll-sparse-lab/reactivity/crates/canvas#gpui_canvas@0.1.0",
+      "manifest_path": "/home/user/gpui-scroll-sparse-lab/reactivity/crates/canvas/Cargo.toml",
+      "target": {
+        "kind": [
+          "example"
+        ],
+        "crate_types": [
+          "bin"
+        ],
+        "name": "group_views",
+        "src_path": "/home/user/gpui-scroll-sparse-lab/reactivity/crates/canvas/examples/group_views.rs",
+        "edition": "2024",
+        "doc": false,
+        "doctest": false,
+        "test": false
+      },
+      "profile": {
+        "opt_level": "3",
+        "debuginfo": 0,
+        "debug_assertions": false,
+        "overflow_checks": false,
+        "test": false
+      },
+      "features": [
+        "default",
+        "simd"
+      ],
+      "filenames": [
+        "/home/user/gpui-scroll-sparse-target/release/examples/group_views"
+      ],
+      "executable": "/home/user/gpui-scroll-sparse-target/release/examples/group_views",
+      "fresh": false
+    }
+  },
+  {
+    "path": "/home/user/gpui-scroll-sparse-target/release/build/gpui_canvas/d0ba751385e75a1f/out/unicode-d0ba751385e75a1f",
+    "sha256": "c1f651500391ce12bf763f4cb5c50936b7fce8d574f36daa59e90920712dcf31",
+    "preserved": "/home/user/gpui-preserved-test-binaries/c1f651500391ce12bf763f4cb5c50936b7fce8d574f36daa59e90920712dcf31",
+    "bytes": 11797856,
+    "executed": true,
+    "cargo": {
+      "reason": "compiler-artifact",
+      "package_id": "path+file:///home/user/gpui-scroll-sparse-lab/reactivity/crates/canvas#gpui_canvas@0.1.0",
+      "manifest_path": "/home/user/gpui-scroll-sparse-lab/reactivity/crates/canvas/Cargo.toml",
+      "target": {
+        "kind": [
+          "test"
+        ],
+        "crate_types": [
+          "bin"
+        ],
+        "name": "unicode",
+        "src_path": "/home/user/gpui-scroll-sparse-lab/reactivity/crates/canvas/tests/unicode.rs",
+        "edition": "2024",
+        "doc": false,
+        "doctest": false,
+        "test": true
+      },
+      "profile": {
+        "opt_level": "3",
+        "debuginfo": 0,
+        "debug_assertions": false,
+        "overflow_checks": false,
+        "test": true
+      },
+      "features": [
+        "default",
+        "simd"
+      ],
+      "filenames": [
+        "/home/user/gpui-scroll-sparse-target/release/build/gpui_canvas/d0ba751385e75a1f/out/unicode-d0ba751385e75a1f"
+      ],
+      "executable": "/home/user/gpui-scroll-sparse-target/release/build/gpui_canvas/d0ba751385e75a1f/out/unicode-d0ba751385e75a1f",
+      "fresh": false
+    }
+  },
+  {
+    "path": "/home/user/gpui-scroll-sparse-target/release/build/gpui_canvas/e2d64c4001f3f739/out/slots-e2d64c4001f3f739",
+    "sha256": "72798c2d68ecec1c272975e9368c6e8fbd89b4de8cb14208be857f832e36f58a",
+    "preserved": "/home/user/gpui-preserved-test-binaries/72798c2d68ecec1c272975e9368c6e8fbd89b4de8cb14208be857f832e36f58a",
+    "bytes": 8595912,
+    "executed": true,
+    "cargo": {
+      "reason": "compiler-artifact",
+      "package_id": "path+file:///home/user/gpui-scroll-sparse-lab/reactivity/crates/canvas#gpui_canvas@0.1.0",
+      "manifest_path": "/home/user/gpui-scroll-sparse-lab/reactivity/crates/canvas/Cargo.toml",
+      "target": {
+        "kind": [
+          "test"
+        ],
+        "crate_types": [
+          "bin"
+        ],
+        "name": "slots",
+        "src_path": "/home/user/gpui-scroll-sparse-lab/reactivity/crates/canvas/tests/slots.rs",
+        "edition": "2024",
+        "doc": false,
+        "doctest": false,
+        "test": true
+      },
+      "profile": {
+        "opt_level": "3",
+        "debuginfo": 0,
+        "debug_assertions": false,
+        "overflow_checks": false,
+        "test": true
+      },
+      "features": [
+        "default",
+        "simd"
+      ],
+      "filenames": [
+        "/home/user/gpui-scroll-sparse-target/release/build/gpui_canvas/e2d64c4001f3f739/out/slots-e2d64c4001f3f739"
+      ],
+      "executable": "/home/user/gpui-scroll-sparse-target/release/build/gpui_canvas/e2d64c4001f3f739/out/slots-e2d64c4001f3f739",
+      "fresh": false
+    }
+  },
+  {
+    "path": "/home/user/gpui-scroll-sparse-target/release/build/gpui_canvas/966b652f1a6d437e/out/font_quality-966b652f1a6d437e",
+    "sha256": "c72b859c1f51df4b76b365d3269d99e472e6e40309001f886480831328d18d35",
+    "preserved": "/home/user/gpui-preserved-test-binaries/c72b859c1f51df4b76b365d3269d99e472e6e40309001f886480831328d18d35",
+    "bytes": 10745032,
+    "executed": true,
+    "cargo": {
+      "reason": "compiler-artifact",
+      "package_id": "path+file:///home/user/gpui-scroll-sparse-lab/reactivity/crates/canvas#gpui_canvas@0.1.0",
+      "manifest_path": "/home/user/gpui-scroll-sparse-lab/reactivity/crates/canvas/Cargo.toml",
+      "target": {
+        "kind": [
+          "test"
+        ],
+        "crate_types": [
+          "bin"
+        ],
+        "name": "font_quality",
+        "src_path": "/home/user/gpui-scroll-sparse-lab/reactivity/crates/canvas/tests/font_quality.rs",
+        "edition": "2024",
+        "doc": false,
+        "doctest": false,
+        "test": true
+      },
+      "profile": {
+        "opt_level": "3",
+        "debuginfo": 0,
+        "debug_assertions": false,
+        "overflow_checks": false,
+        "test": true
+      },
+      "features": [
+        "default",
+        "simd"
+      ],
+      "filenames": [
+        "/home/user/gpui-scroll-sparse-target/release/build/gpui_canvas/966b652f1a6d437e/out/font_quality-966b652f1a6d437e"
+      ],
+      "executable": "/home/user/gpui-scroll-sparse-target/release/build/gpui_canvas/966b652f1a6d437e/out/font_quality-966b652f1a6d437e",
+      "fresh": false
+    }
+  },
+  {
+    "path": "/home/user/gpui-scroll-sparse-target/release/examples/text_oracle",
+    "sha256": "3b21ad9feadd2f44330e19774bd2600803577967cec6995b30d07ca5e3a48824",
+    "preserved": "/home/user/gpui-preserved-test-binaries/3b21ad9feadd2f44330e19774bd2600803577967cec6995b30d07ca5e3a48824",
+    "bytes": 6938992,
+    "executed": false,
+    "cargo": {
+      "reason": "compiler-artifact",
+      "package_id": "path+file:///home/user/gpui-scroll-sparse-lab/reactivity/crates/canvas#gpui_canvas@0.1.0",
+      "manifest_path": "/home/user/gpui-scroll-sparse-lab/reactivity/crates/canvas/Cargo.toml",
+      "target": {
+        "kind": [
+          "example"
+        ],
+        "crate_types": [
+          "bin"
+        ],
+        "name": "text_oracle",
+        "src_path": "/home/user/gpui-scroll-sparse-lab/reactivity/crates/canvas/examples/text_oracle.rs",
+        "edition": "2024",
+        "doc": false,
+        "doctest": false,
+        "test": false
+      },
+      "profile": {
+        "opt_level": "3",
+        "debuginfo": 0,
+        "debug_assertions": false,
+        "overflow_checks": false,
+        "test": false
+      },
+      "features": [
+        "default",
+        "simd"
+      ],
+      "filenames": [
+        "/home/user/gpui-scroll-sparse-target/release/examples/text_oracle"
+      ],
+      "executable": "/home/user/gpui-scroll-sparse-target/release/examples/text_oracle",
+      "fresh": false
+    }
+  },
+  {
+    "path": "/home/user/gpui-scroll-sparse-target/release/build/gpui_canvas/dc7489c6ce975b1f/out/literal_cow-dc7489c6ce975b1f",
+    "sha256": "547be4fba600ab37d597ca7ba557fbcb4cb2bc4c95fb9e1d9821f5122eb2d9b9",
+    "preserved": "/home/user/gpui-preserved-test-binaries/547be4fba600ab37d597ca7ba557fbcb4cb2bc4c95fb9e1d9821f5122eb2d9b9",
+    "bytes": 1312744,
+    "executed": true,
+    "cargo": {
+      "reason": "compiler-artifact",
+      "package_id": "path+file:///home/user/gpui-scroll-sparse-lab/reactivity/crates/canvas#gpui_canvas@0.1.0",
+      "manifest_path": "/home/user/gpui-scroll-sparse-lab/reactivity/crates/canvas/Cargo.toml",
+      "target": {
+        "kind": [
+          "test"
+        ],
+        "crate_types": [
+          "bin"
+        ],
+        "name": "literal_cow",
+        "src_path": "/home/user/gpui-scroll-sparse-lab/reactivity/crates/canvas/tests/literal_cow.rs",
+        "edition": "2024",
+        "doc": false,
+        "doctest": false,
+        "test": true
+      },
+      "profile": {
+        "opt_level": "3",
+        "debuginfo": 0,
+        "debug_assertions": false,
+        "overflow_checks": false,
+        "test": true
+      },
+      "features": [
+        "default",
+        "simd"
+      ],
+      "filenames": [
+        "/home/user/gpui-scroll-sparse-target/release/build/gpui_canvas/dc7489c6ce975b1f/out/literal_cow-dc7489c6ce975b1f"
+      ],
+      "executable": "/home/user/gpui-scroll-sparse-target/release/build/gpui_canvas/dc7489c6ce975b1f/out/literal_cow-dc7489c6ce975b1f",
+      "fresh": false
+    }
+  },
+  {
+    "path": "/home/user/gpui-scroll-sparse-target/release/build/gpui_canvas/4a2db0a211b797e3/out/text_run_probe-4a2db0a211b797e3",
+    "sha256": "4a1015ff66fe821c233eb9485eb2c64cd65a52a4ad7d39e5bb2c0a1d168a68e4",
+    "preserved": "/home/user/gpui-preserved-test-binaries/4a1015ff66fe821c233eb9485eb2c64cd65a52a4ad7d39e5bb2c0a1d168a68e4",
+    "bytes": 8613272,
+    "executed": true,
+    "cargo": {
+      "reason": "compiler-artifact",
+      "package_id": "path+file:///home/user/gpui-scroll-sparse-lab/reactivity/crates/canvas#gpui_canvas@0.1.0",
+      "manifest_path": "/home/user/gpui-scroll-sparse-lab/reactivity/crates/canvas/Cargo.toml",
+      "target": {
+        "kind": [
+          "test"
+        ],
+        "crate_types": [
+          "bin"
+        ],
+        "name": "text_run_probe",
+        "src_path": "/home/user/gpui-scroll-sparse-lab/reactivity/crates/canvas/tests/text_run_probe.rs",
+        "edition": "2024",
+        "doc": false,
+        "doctest": false,
+        "test": true
+      },
+      "profile": {
+        "opt_level": "3",
+        "debuginfo": 0,
+        "debug_assertions": false,
+        "overflow_checks": false,
+        "test": true
+      },
+      "features": [
+        "default",
+        "simd"
+      ],
+      "filenames": [
+        "/home/user/gpui-scroll-sparse-target/release/build/gpui_canvas/4a2db0a211b797e3/out/text_run_probe-4a2db0a211b797e3"
+      ],
+      "executable": "/home/user/gpui-scroll-sparse-target/release/build/gpui_canvas/4a2db0a211b797e3/out/text_run_probe-4a2db0a211b797e3",
+      "fresh": false
+    }
+  },
+  {
+    "path": "/home/user/gpui-scroll-sparse-target/release/build/gpui_gpu/8e4933dc35703950/out/gpui_gpu-8e4933dc35703950",
+    "sha256": "7f9c89dc23ade90ed1f2570f167dc4bf6680015375d716de507cecc9c719e78b",
+    "preserved": "/home/user/gpui-preserved-test-binaries/7f9c89dc23ade90ed1f2570f167dc4bf6680015375d716de507cecc9c719e78b",
+    "bytes": 17104312,
+    "executed": true,
+    "cargo": {
+      "reason": "compiler-artifact",
+      "package_id": "path+file:///home/user/gpui-scroll-sparse-lab/reactivity/crates/gpu#gpui_gpu@0.1.0",
+      "manifest_path": "/home/user/gpui-scroll-sparse-lab/reactivity/crates/gpu/Cargo.toml",
+      "target": {
+        "kind": [
+          "lib"
+        ],
+        "crate_types": [
+          "lib"
+        ],
+        "name": "gpui_gpu",
+        "src_path": "/home/user/gpui-scroll-sparse-lab/reactivity/crates/gpu/src/lib.rs",
+        "edition": "2024",
+        "doc": true,
+        "doctest": true,
+        "test": true
+      },
+      "profile": {
+        "opt_level": "3",
+        "debuginfo": 0,
+        "debug_assertions": false,
+        "overflow_checks": false,
+        "test": true
+      },
+      "features": [
+        "default",
+        "gpu-tests",
+        "simd",
+        "vulkan-tests"
+      ],
+      "filenames": [
+        "/home/user/gpui-scroll-sparse-target/release/build/gpui_gpu/8e4933dc35703950/out/gpui_gpu-8e4933dc35703950"
+      ],
+      "executable": "/home/user/gpui-scroll-sparse-target/release/build/gpui_gpu/8e4933dc35703950/out/gpui_gpu-8e4933dc35703950",
+      "fresh": false
+    }
+  },
+  {
+    "path": "/home/user/gpui-scroll-sparse-target/release/build/gpui_canvas/e7f7f926e56c8080/out/gpui_canvas-e7f7f926e56c8080",
+    "sha256": "28f120f32b012fbf3678e78a3576204980461cfb932ffd4726152a2d1a00cd8d",
+    "preserved": "/home/user/gpui-preserved-test-binaries/28f120f32b012fbf3678e78a3576204980461cfb932ffd4726152a2d1a00cd8d",
+    "bytes": 9948296,
+    "executed": true,
+    "cargo": {
+      "reason": "compiler-artifact",
+      "package_id": "path+file:///home/user/gpui-scroll-sparse-lab/reactivity/crates/canvas#gpui_canvas@0.1.0",
+      "manifest_path": "/home/user/gpui-scroll-sparse-lab/reactivity/crates/canvas/Cargo.toml",
+      "target": {
+        "kind": [
+          "lib"
+        ],
+        "crate_types": [
+          "lib"
+        ],
+        "name": "gpui_canvas",
+        "src_path": "/home/user/gpui-scroll-sparse-lab/reactivity/crates/canvas/src/lib.rs",
+        "edition": "2024",
+        "doc": true,
+        "doctest": true,
+        "test": true
+      },
+      "profile": {
+        "opt_level": "3",
+        "debuginfo": 0,
+        "debug_assertions": false,
+        "overflow_checks": false,
+        "test": true
+      },
+      "features": [
+        "default",
+        "simd"
+      ],
+      "filenames": [
+        "/home/user/gpui-scroll-sparse-target/release/build/gpui_canvas/e7f7f926e56c8080/out/gpui_canvas-e7f7f926e56c8080"
+      ],
+      "executable": "/home/user/gpui-scroll-sparse-target/release/build/gpui_canvas/e7f7f926e56c8080/out/gpui_canvas-e7f7f926e56c8080",
+      "fresh": false
+    }
+  }
+]

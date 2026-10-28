@@ -1,0 +1,119 @@
+   Compiling naga v30.0.1
+   Compiling zbus v5.19.0
+   Compiling read-fonts v0.41.0
+   Compiling wgsl-rs-ir v0.1.0-beta.6
+   Compiling rustix v0.38.44
+   Compiling cfg-if v1.0.5
+   Compiling as-raw-xcb-connection v1.0.1
+   Compiling rustc-hash v1.1.0
+   Compiling fastrand v2.5.0
+   Compiling unicode-width v0.2.2
+   Compiling bit-vec v0.9.1
+   Compiling presser v0.3.1
+   Compiling gpu-allocator v0.28.0
+   Compiling bit-set v0.10.0
+   Compiling codespan-reporting v0.13.1
+   Compiling phf_generator v0.14.0
+   Compiling naga-types v30.0.1
+   Compiling half v2.7.1
+   Compiling wgsl-rs-macros v0.1.0-beta.6
+   Compiling atspi-common v0.13.0
+   Compiling wgpu-naga-bridge v30.0.1
+   Compiling thiserror v1.0.69
+   Compiling wgpu-hal v30.0.1 (/home/user/gpui-scroll-sparse-bounds-lab/reactivity/vendor/wgpu-hal)
+   Compiling icu_properties v2.3.0
+   Compiling icu_locale_fallback v2.3.0
+   Compiling parking_lot v0.12.5
+   Compiling wayland-sys v0.31.11
+   Compiling icu_segmenter_data v2.3.0
+   Compiling khronos-egl v6.0.0
+   Compiling paste v1.0.15
+   Compiling icu_normalizer_data v2.3.0
+   Compiling read-fonts v0.46.0
+   Compiling ordered-float v5.5.0
+   Compiling x11-dl v2.21.0
+   Compiling thiserror-impl v1.0.69
+   Compiling memmap2 v0.9.12
+   Compiling siphasher v1.0.4
+   Compiling x11rb-protocol v0.13.2
+   Compiling arrayvec v0.7.8
+   Compiling once_cell v1.21.4
+   Compiling renderdoc-sys v1.1.0
+   Compiling bitflags v2.13.2
+   Compiling glow v0.17.0
+   Compiling linebender_resource_handle v0.1.1
+   Compiling linux-raw-sys v0.4.15
+   Compiling log v0.4.34
+   Compiling parlance v0.1.1
+   Compiling profiling v1.0.18
+   Compiling skrifa v0.49.0
+   Compiling x11rb v0.13.2
+   Compiling fontique v0.12.0
+   Compiling phf_shared v0.14.0
+   Compiling icu_normalizer v2.3.0
+   Compiling icu_segmenter v2.3.0
+   Compiling parley_data v0.12.0
+   Compiling harfrust v0.12.0
+   Compiling phf_macros v0.14.0
+   Compiling accesskit v0.25.1 (/home/user/gpui-scroll-sparse-bounds-lab/reactivity/vendor/accesskit)
+   Compiling wgpu-core v30.0.1 (/home/user/gpui-scroll-sparse-bounds-lab/reactivity/vendor/wgpu-core)
+   Compiling winit v0.30.13 (/home/user/gpui-scroll-sparse-bounds-lab/reactivity/vendor/winit)
+   Compiling litrs v1.0.1
+   Compiling glam v0.30.10
+   Compiling parley_emoji v0.12.0
+   Compiling xkeysym v0.2.1
+   Compiling document-features v0.2.12
+   Compiling xkbcommon-dl v0.4.2
+   Compiling parley_engine v0.12.0 (/home/user/gpui-scroll-sparse-bounds-lab/reactivity/vendor/parley_engine)
+   Compiling accesskit_consumer v0.39.1 (/home/user/gpui-scroll-sparse-bounds-lab/reactivity/vendor/accesskit_consumer)
+   Compiling phf v0.14.0
+   Compiling calloop v0.13.0
+   Compiling wgsl-rs v0.1.0-beta.6
+   Compiling wgpu-core-deps-windows-linux-android v30.0.1
+   Compiling atspi-proxies v0.13.0
+   Compiling tiny-xlib v0.2.5
+   Compiling wgpu v30.0.1 (/home/user/gpui-scroll-sparse-bounds-lab/reactivity/vendor/wgpu)
+   Compiling futures-macro v0.3.34
+   Compiling futures-task v0.3.34
+   Compiling percent-encoding v2.3.2
+   Compiling zmij v1.0.23
+   Compiling cursor-icon v1.2.0
+   Compiling cephal v0.1.1 (/home/user/gpui-scroll-sparse-bounds-lab/reactivity/vendor/cephal)
+   Compiling smol_str v0.2.2
+   Compiling dpi v0.1.2
+   Compiling futures-util v0.3.34
+   Compiling gpui_gpu v0.1.0 (/home/user/gpui-scroll-sparse-bounds-lab/reactivity/crates/gpu)
+   Compiling gpui_reactivity_core v0.1.0 (/home/user/gpui-scroll-sparse-bounds-lab/reactivity/crates/core)
+   Compiling atspi v0.29.0
+   Compiling accesskit_atspi_common v0.21.0 (/home/user/gpui-scroll-sparse-bounds-lab/reactivity/vendor/accesskit_atspi_common)
+   Compiling parley v0.12.0 (/home/user/gpui-scroll-sparse-bounds-lab/reactivity/vendor/parley)
+   Compiling snafu v0.8.9
+   Compiling fearless_simd_macros v0.1.0
+   Compiling ttf-parser v0.25.1
+   Compiling triomphe v0.1.17
+   Compiling serde_json v1.0.154
+   Compiling zeno v0.3.3
+   Compiling ctor v0.10.1
+   Compiling fearless_simd v1.1.0
+   Compiling ecow v0.3.1
+   Compiling gpui_canvas v0.1.0 (/home/user/gpui-scroll-sparse-bounds-lab/reactivity/crates/canvas)
+   Compiling accesskit_unix v0.24.0 (/home/user/gpui-scroll-sparse-bounds-lab/reactivity/vendor/accesskit_unix)
+   Compiling zbus_utils v6.0.0
+   Compiling socket2 v0.6.5
+   Compiling itoa v1.0.18
+   Compiling memchr v2.8.3
+   Compiling zruntime v0.2.0
+   Compiling zbus_macros v6.0.0
+   Compiling accesskit_winit v0.34.1
+   Compiling softbuffer v0.4.8 (/home/user/gpui-scroll-sparse-bounds-lab/reactivity/vendor/softbuffer)
+   Compiling gpui_reactivity_host v0.1.0 (/home/user/gpui-scroll-sparse-bounds-lab/reactivity/crates/host)
+   Compiling gpui_reactivity_state v0.1.0 (/home/user/gpui-scroll-sparse-bounds-lab/reactivity/crates/state)
+   Compiling pollster v1.0.1
+   Compiling arcstr v1.2.0
+   Compiling gpui_inline_call v0.1.0 (/home/user/gpui-scroll-sparse-bounds-lab/reactivity/crates/inline-call)
+   Compiling x11rb-protocol v0.14.0
+   Compiling x11rb v0.14.0
+   Compiling gpui v0.1.0 (/home/user/gpui-scroll-sparse-bounds-lab/reactivity/crates/gpui)
+   Compiling zbus v6.0.0
+   Compiling allocation-counter v0.8.1
+    Finished `release` profile [optimized] target(s) in 1m 25s

@@ -1,0 +1,89 @@
+warning: output filename collision at /home/user/gpui-scroll-sparse-target/release/examples/images
+  |
+  = note: the example target `images` in package `gpui_gpu v0.1.0 (/home/user/gpui-scroll-sparse-lab/reactivity/crates/gpu)` has the same output filename as the example target `images` in package `gpui_canvas v0.1.0 (/home/user/gpui-scroll-sparse-lab/reactivity/crates/canvas)`
+  = note: this may become a hard error in the future; see <https://github.com/rust-lang/cargo/issues/6313>
+  = help: consider changing their names to be unique or compiling them separately
+warning: output filename collision at /home/user/gpui-scroll-sparse-target/release/examples/images.dwp
+  |
+  = note: the example target `images` in package `gpui_gpu v0.1.0 (/home/user/gpui-scroll-sparse-lab/reactivity/crates/gpu)` has the same output filename as the example target `images` in package `gpui_canvas v0.1.0 (/home/user/gpui-scroll-sparse-lab/reactivity/crates/canvas)`
+  = note: this may become a hard error in the future; see <https://github.com/rust-lang/cargo/issues/6313>
+  = help: consider changing their names to be unique or compiling them separately
+   Compiling syn v3.0.9
+   Compiling indexmap v2.14.2
+   Compiling synstructure v0.14.0
+   Compiling zerofrom-derive v0.1.8
+   Compiling bytemuck_derive v1.12.1
+   Compiling yoke-derive v0.8.4
+   Compiling zerovec-derive v0.11.6
+   Compiling displaydoc v0.2.7
+   Compiling fearless_simd_macros v0.1.0
+   Compiling zerofrom v0.1.8
+   Compiling bytemuck v1.25.2
+   Compiling yoke v0.8.3
+   Compiling zerovec v0.11.8
+   Compiling font-types v0.12.7
+   Compiling zerotrie v0.2.5
+   Compiling rustybuzz v0.20.1
+   Compiling read-fonts v0.41.0
+   Compiling tinystr v0.8.4
+   Compiling icu_locale_core v2.3.0
+   Compiling potential_utf v0.1.6
+   Compiling icu_collections v2.3.0
+   Compiling icu_provider v2.3.1
+   Compiling icu_properties v2.3.0
+   Compiling icu_locale_fallback v2.3.0
+   Compiling read-fonts v0.46.0
+   Compiling icu_segmenter v2.3.0
+   Compiling harfrust v0.12.0
+   Compiling fontique v0.12.0
+   Compiling parley_data v0.12.0
+   Compiling icu_normalizer v2.3.0
+   Compiling skrifa v0.44.0
+   Compiling skrifa v0.49.0
+   Compiling swash v0.2.10
+   Compiling parley_engine v0.12.0 (/home/user/gpui-scroll-sparse-lab/reactivity/vendor/parley_engine)
+   Compiling parley v0.12.0 (/home/user/gpui-scroll-sparse-lab/reactivity/vendor/parley)
+   Compiling gpui_canvas v0.1.0 (/home/user/gpui-scroll-sparse-lab/reactivity/crates/canvas)
+   Compiling thiserror-impl v2.0.21
+   Compiling thiserror v2.0.21
+   Compiling naga-types v30.0.1
+   Compiling naga v30.0.1
+   Compiling wgpu-types v30.0.1
+   Compiling gpu-allocator v0.28.0
+   Compiling wgpu-naga-bridge v30.0.1
+   Compiling wgpu-hal v30.0.1 (/home/user/gpui-scroll-sparse-lab/reactivity/vendor/wgpu-hal)
+   Compiling wgsl-rs v0.1.0-beta.6
+   Compiling wgpu-core-deps-windows-linux-android v30.0.1
+   Compiling wgpu-core v30.0.1 (/home/user/gpui-scroll-sparse-lab/reactivity/vendor/wgpu-core)
+   Compiling gpui_gpu v0.1.0 (/home/user/gpui-scroll-sparse-lab/reactivity/crates/gpu)
+   Compiling wgpu v30.0.1 (/home/user/gpui-scroll-sparse-lab/reactivity/vendor/wgpu)
+    Finished `release` profile [optimized] target(s) in 53.63s
+     Running unittests src/lib.rs (/home/user/gpui-scroll-sparse-target/release/build/gpui_canvas/e7f7f926e56c8080/out/gpui_canvas-e7f7f926e56c8080)
+     Running tests/bins.rs (/home/user/gpui-scroll-sparse-target/release/build/gpui_canvas/3b0e5e59632df0c9/out/bins-3b0e5e59632df0c9)
+     Running tests/clipping.rs (/home/user/gpui-scroll-sparse-target/release/build/gpui_canvas/643c4468120f623d/out/clipping-643c4468120f623d)
+     Running tests/color.rs (/home/user/gpui-scroll-sparse-target/release/build/gpui_canvas/803b30cc4bdd1ebd/out/color-803b30cc4bdd1ebd)
+     Running tests/color_authoring.rs (/home/user/gpui-scroll-sparse-target/release/build/gpui_canvas/6e0206172b11000c/out/color_authoring-6e0206172b11000c)
+     Running tests/color_packing.rs (/home/user/gpui-scroll-sparse-target/release/build/gpui_canvas/e9eb27a37e6dd6e0/out/color_packing-e9eb27a37e6dd6e0)
+     Running tests/damage.rs (/home/user/gpui-scroll-sparse-target/release/build/gpui_canvas/3c586a8a10bd35ad/out/damage-3c586a8a10bd35ad)
+     Running tests/damage_regions.rs (/home/user/gpui-scroll-sparse-target/release/build/gpui_canvas/8e8c4e2ce2f93ba3/out/damage_regions-8e8c4e2ce2f93ba3)
+     Running tests/default_font.rs (/home/user/gpui-scroll-sparse-target/release/build/gpui_canvas/4ca75d5643febe6d/out/default_font-4ca75d5643febe6d)
+     Running tests/dpi.rs (/home/user/gpui-scroll-sparse-target/release/build/gpui_canvas/cb217f51f66152fb/out/dpi-cb217f51f66152fb)
+     Running tests/external.rs (/home/user/gpui-scroll-sparse-target/release/build/gpui_canvas/125fe8aa1d9fdb12/out/external-125fe8aa1d9fdb12)
+     Running tests/font_quality.rs (/home/user/gpui-scroll-sparse-target/release/build/gpui_canvas/966b652f1a6d437e/out/font_quality-966b652f1a6d437e)
+     Running tests/font_sharing.rs (/home/user/gpui-scroll-sparse-target/release/build/gpui_canvas/7f11cd62cab7a182/out/font_sharing-7f11cd62cab7a182)
+     Running tests/gradients.rs (/home/user/gpui-scroll-sparse-target/release/build/gpui_canvas/b30100c4f3186c7e/out/gradients-b30100c4f3186c7e)
+     Running tests/grouped.rs (/home/user/gpui-scroll-sparse-target/release/build/gpui_canvas/5423f225aaab5c39/out/grouped-5423f225aaab5c39)
+     Running tests/hdr.rs (/home/user/gpui-scroll-sparse-target/release/build/gpui_canvas/c78a70091e54785c/out/hdr-c78a70091e54785c)
+     Running tests/images.rs (/home/user/gpui-scroll-sparse-target/release/build/gpui_canvas/2a530e8f6638e7bf/out/images-2a530e8f6638e7bf)
+     Running tests/line_height.rs (/home/user/gpui-scroll-sparse-target/release/build/gpui_canvas/80bfde96444141e1/out/line_height-80bfde96444141e1)
+     Running tests/literal_cow.rs (/home/user/gpui-scroll-sparse-target/release/build/gpui_canvas/dc7489c6ce975b1f/out/literal_cow-dc7489c6ce975b1f)
+     Running tests/oklch.rs (/home/user/gpui-scroll-sparse-target/release/build/gpui_canvas/6b381682c3f7776e/out/oklch-6b381682c3f7776e)
+     Running tests/paint.rs (/home/user/gpui-scroll-sparse-target/release/build/gpui_canvas/0ce5c7756bca6592/out/paint-0ce5c7756bca6592)
+     Running tests/parallel.rs (/home/user/gpui-scroll-sparse-target/release/build/gpui_canvas/c627d1dc1ab61790/out/parallel-c627d1dc1ab61790)
+     Running tests/prepared_scene.rs (/home/user/gpui-scroll-sparse-target/release/build/gpui_canvas/e4daf880f8f3142f/out/prepared_scene-e4daf880f8f3142f)
+     Running tests/render.rs (/home/user/gpui-scroll-sparse-target/release/build/gpui_canvas/d3c2882074eb0607/out/render-d3c2882074eb0607)
+     Running tests/rounded.rs (/home/user/gpui-scroll-sparse-target/release/build/gpui_canvas/f04e70e509498e79/out/rounded-f04e70e509498e79)
+     Running tests/sample_clip.rs (/home/user/gpui-scroll-sparse-target/release/build/gpui_canvas/b6ae2ca160e29380/out/sample_clip-b6ae2ca160e29380)
+     Running tests/sample_storage.rs (/home/user/gpui-scroll-sparse-target/release/build/gpui_canvas/ea1e4dddc2085252/out/sample_storage-ea1e4dddc2085252)
+     Running tests/scroll_copy.rs (/home/user/gpui-scroll-sparse-target/release/build/gpui_canvas/309c83eeb8316fab/out/scroll_copy-309c83eeb8316fab)
+error: test failed, to rerun pass `-p gpui_canvas --test scroll_copy`

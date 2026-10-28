@@ -1,0 +1,36 @@
+/home/user/gpui-preserved-test-binaries/21bb0c9597844e39bd184eddfbd2371cb43c093508b5e6d8c03531b8259014d7  :
+section                  size       addr
+.interp                    28        736
+.note.ABI-tag              32        764
+.note.gnu.build-id         36        796
+.dynsym                  4296        832
+.gnu.version              358       5128
+.gnu.version_r            464       5488
+.gnu.hash                  28       5952
+.dynstr                  2278       5980
+.rela.dyn              557616       8264
+.rela.plt                  48     565880
+.gcc_except_table      781740     565928
+.rodata               6582376    1347712
+.eh_frame_hdr          167276    7930088
+.eh_frame             1184664    8097368
+.text                11335751    9286128
+.init                      27   20621880
+.fini                      13   20621908
+.plt                       48   20621936
+.tdata                   1000   20626080
+.tbss                     272   20627080
+.fini_array                 8   20627080
+.init_array                24   20627088
+.data.rel.ro           402664   20627112
+.dynamic                  480   21029776
+.got                    35768   21030256
+.got.plt                   40   21066024
+.relro_padding           3760   21066064
+.tm_clone_table             0   21070160
+.data                   11352   21070208
+.bss                     7444   21081560
+.comment                  193          0
+Total                21080084
+
+

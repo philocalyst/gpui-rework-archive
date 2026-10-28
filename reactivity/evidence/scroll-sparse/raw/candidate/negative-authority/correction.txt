@@ -1,0 +1,1 @@
+Initial same-window fault did not compile: PresentationToken.window is private to runtime. No negative pixel witness was obtained from this attempt. Corrected fault accepts any existing GPU predecessor for the scroll branch while preserving the target token; the actual test supplies the same window with a stale sequence. Production code is unchanged.

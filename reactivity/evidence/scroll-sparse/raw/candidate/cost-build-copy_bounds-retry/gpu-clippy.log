@@ -1,0 +1,51 @@
+   Compiling syn v3.0.9
+    Checking bitflags v2.13.2
+   Compiling indexmap v2.14.2
+    Checking ttf-parser v0.25.1
+    Checking spirv v0.4.0+sdk-1.4.341.0
+    Checking gpui_reactivity_core v0.1.0 (/home/user/gpui-scroll-sparse-bounds-lab/reactivity/crates/core)
+   Compiling synstructure v0.14.0
+   Compiling zerofrom-derive v0.1.8
+   Compiling yoke-derive v0.8.4
+   Compiling thiserror-impl v2.0.21
+   Compiling bytemuck_derive v1.12.1
+   Compiling zerovec-derive v0.11.6
+    Checking bytemuck v1.25.2
+    Checking zerofrom v0.1.8
+    Checking yoke v0.8.3
+   Compiling displaydoc v0.2.7
+    Checking thiserror v2.0.21
+    Checking font-types v0.12.7
+    Checking naga-types v30.0.1
+    Checking naga v30.0.1
+    Checking read-fonts v0.41.0
+    Checking zerotrie v0.2.5
+    Checking zerovec v0.11.8
+    Checking wgpu-types v30.0.1
+    Checking tinystr v0.8.4
+    Checking icu_locale_core v2.3.0
+    Checking potential_utf v0.1.6
+    Checking icu_provider v2.3.1
+    Checking icu_collections v2.3.0
+    Checking icu_properties v2.3.0
+    Checking icu_locale_fallback v2.3.0
+    Checking read-fonts v0.46.0
+    Checking gpu-allocator v0.28.0
+    Checking parley_data v0.12.0
+    Checking icu_segmenter v2.3.0
+    Checking fontique v0.12.0
+    Checking harfrust v0.12.0
+    Checking wgpu-naga-bridge v30.0.1
+    Checking wgpu-hal v30.0.1 (/home/user/gpui-scroll-sparse-bounds-lab/reactivity/vendor/wgpu-hal)
+    Checking icu_normalizer v2.3.0
+   Compiling fearless_simd_macros v0.1.0
+   Compiling wgsl-rs v0.1.0-beta.6
+    Checking wgpu-core-deps-windows-linux-android v30.0.1
+    Checking wgpu-core v30.0.1 (/home/user/gpui-scroll-sparse-bounds-lab/reactivity/vendor/wgpu-core)
+   Compiling gpui_gpu v0.1.0 (/home/user/gpui-scroll-sparse-bounds-lab/reactivity/crates/gpu)
+    Checking skrifa v0.49.0
+    Checking parley_engine v0.12.0 (/home/user/gpui-scroll-sparse-bounds-lab/reactivity/vendor/parley_engine)
+    Checking wgpu v30.0.1 (/home/user/gpui-scroll-sparse-bounds-lab/reactivity/vendor/wgpu)
+    Checking parley v0.12.0 (/home/user/gpui-scroll-sparse-bounds-lab/reactivity/vendor/parley)
+    Checking gpui_canvas v0.1.0 (/home/user/gpui-scroll-sparse-bounds-lab/reactivity/crates/canvas)
+    Finished `release` profile [optimized] target(s) in 13.67s

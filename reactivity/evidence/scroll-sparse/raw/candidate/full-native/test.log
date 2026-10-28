@@ -1,0 +1,11 @@
+   Compiling core_maths v0.1.1
+   Compiling skrifa v0.44.0
+   Compiling ttf-parser v0.25.1
+   Compiling gpui_canvas v0.1.0 (/home/user/gpui-scroll-sparse-lab/reactivity/crates/canvas)
+   Compiling fontdue v0.9.5
+   Compiling swash v0.2.10
+   Compiling gpui_gpu v0.1.0 (/home/user/gpui-scroll-sparse-lab/reactivity/crates/gpu)
+   Compiling gpui v0.1.0 (/home/user/gpui-scroll-sparse-lab/reactivity/crates/gpui)
+   Compiling rustybuzz v0.20.1
+error: could not compile `gpui` (lib test) due to 7 previous errors
+warning: build failed, waiting for other jobs to finish...

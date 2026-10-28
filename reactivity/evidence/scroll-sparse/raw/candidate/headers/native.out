@@ -1,0 +1,6 @@
+
+running 1 test
+test native::paint_tests::scroll_copy_tests::public_list_scroll_certifies_exact_tokens_and_discards_pending_or_fractional_proposals ... ok
+
+test result: ok. 1 passed; 0 failed; 0 ignored; 0 measured; 322 filtered out; finished in 0.02s
+

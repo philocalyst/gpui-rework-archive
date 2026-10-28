@@ -1,0 +1,4 @@
+{
+  "failure": "Verifier extension helper matched seen=set() inside archive_seen=set() too; assertion stopped before editing the verifier or starting timing.",
+  "correction": "Match the complete standalone line. No workload observations or thresholds changed."
+}

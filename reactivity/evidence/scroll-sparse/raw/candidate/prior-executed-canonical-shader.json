@@ -1,0 +1,20 @@
+{
+  "shader_sha256": "ea6e71d3da2bdb23d4971a14f0f55db389dbb45f9b2e9c05c85d4dc6363eb4d1",
+  "shader_bytes": 18995,
+  "executables": [
+    {
+      "gate": "gpu-bounds-first",
+      "elf": "/home/user/gpui-preserved-test-binaries/f7656d1736f7e504ce710a047e45c3dc9fbdd4851aec3cfb911890a86942b268",
+      "sha256": "f7656d1736f7e504ce710a047e45c3dc9fbdd4851aec3cfb911890a86942b268",
+      "canonical_wgsl_offset": 611901
+    },
+    {
+      "gate": "gpu-bounds-shared-admitted",
+      "elf": "/home/user/gpui-preserved-test-binaries/64dab251372d5b16413d0f29c22b66886b4ea1c2241c0f4c78d05a09f1a7aa5d",
+      "sha256": "64dab251372d5b16413d0f29c22b66886b4ea1c2241c0f4c78d05a09f1a7aa5d",
+      "canonical_wgsl_offset": 613013
+    }
+  ],
+  "first_attempt": "Receipt selector initially assumed Cargo package_id contained gpui_gpu#; it contains crates/gpu#. Rejected before writing receipt, then corrected to exact manifest_path suffix.",
+  "limitation": "Confirms identical canonical WGSL in actual preserved prior GPU test ELFs. Does not recover the build-script executable missed by the earlier empty preclean snapshot."
+}

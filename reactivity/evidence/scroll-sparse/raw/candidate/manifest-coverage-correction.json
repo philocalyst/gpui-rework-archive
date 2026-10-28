@@ -1,0 +1,8 @@
+{
+  "problem": "Packager excluded every file named manifest.json rather than only the root self-manifest. First verification passed its listed files but two nested preservation manifests were not covered.",
+  "missing_from_first_manifest": [
+    "raw/candidate/before-precise-gpu-clean/manifest.json",
+    "raw/candidate/before-shared-repair-gpu-clean/manifest.json"
+  ],
+  "correction": "Include every file except the exact root manifest; separately verify complete manifest coverage. Frozen statistical verifier and all observations remain unchanged."
+}

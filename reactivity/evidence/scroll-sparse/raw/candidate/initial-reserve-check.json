@@ -1,0 +1,5 @@
+{
+  "free_bytes": 12743548928,
+  "preferred_fresh_build_reserve": 12884901888,
+  "result": "stopped before any compiler/test launched; source frozen at 2e69655cc0391d97a5891078883fafd949a29d0e"
+}

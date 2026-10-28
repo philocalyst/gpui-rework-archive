@@ -1,0 +1,88 @@
+[
+  {
+    "path": "/home/user/gpui-scroll-sparse-target/release/build/gpui_canvas/9f7e8bb7d4bc032d/out/gpui_canvas-9f7e8bb7d4bc032d",
+    "sha256": "b2d622da3b966e8f3924654b2d0a4fe38cd3a585fefe48ee6df1b56d52fb8b94",
+    "preserved": "/home/user/gpui-preserved-test-binaries/b2d622da3b966e8f3924654b2d0a4fe38cd3a585fefe48ee6df1b56d52fb8b94",
+    "bytes": 9981304,
+    "executed": true,
+    "cargo": {
+      "reason": "compiler-artifact",
+      "package_id": "path+file:///home/user/gpui-scroll-sparse-lab/reactivity/crates/canvas#gpui_canvas@0.1.0",
+      "manifest_path": "/home/user/gpui-scroll-sparse-lab/reactivity/crates/canvas/Cargo.toml",
+      "target": {
+        "kind": [
+          "lib"
+        ],
+        "crate_types": [
+          "lib"
+        ],
+        "name": "gpui_canvas",
+        "src_path": "/home/user/gpui-scroll-sparse-lab/reactivity/crates/canvas/src/lib.rs",
+        "edition": "2024",
+        "doc": true,
+        "doctest": true,
+        "test": true
+      },
+      "profile": {
+        "opt_level": "3",
+        "debuginfo": 0,
+        "debug_assertions": false,
+        "overflow_checks": false,
+        "test": true
+      },
+      "features": [
+        "default",
+        "simd"
+      ],
+      "filenames": [
+        "/home/user/gpui-scroll-sparse-target/release/build/gpui_canvas/9f7e8bb7d4bc032d/out/gpui_canvas-9f7e8bb7d4bc032d"
+      ],
+      "executable": "/home/user/gpui-scroll-sparse-target/release/build/gpui_canvas/9f7e8bb7d4bc032d/out/gpui_canvas-9f7e8bb7d4bc032d",
+      "fresh": false
+    }
+  },
+  {
+    "path": "/home/user/gpui-scroll-sparse-target/release/build/gpui/e0c8b8dd3837edc3/out/gpui-e0c8b8dd3837edc3",
+    "sha256": "262a8c52babf98985f63555605e6a39852f8dbdc4bf50401fb31e09636be2de0",
+    "preserved": "/home/user/gpui-preserved-test-binaries/262a8c52babf98985f63555605e6a39852f8dbdc4bf50401fb31e09636be2de0",
+    "bytes": 42087072,
+    "executed": true,
+    "cargo": {
+      "reason": "compiler-artifact",
+      "package_id": "path+file:///home/user/gpui-scroll-sparse-lab/reactivity/crates/gpui#0.1.0",
+      "manifest_path": "/home/user/gpui-scroll-sparse-lab/reactivity/crates/gpui/Cargo.toml",
+      "target": {
+        "kind": [
+          "lib"
+        ],
+        "crate_types": [
+          "lib"
+        ],
+        "name": "gpui",
+        "src_path": "/home/user/gpui-scroll-sparse-lab/reactivity/crates/gpui/src/lib.rs",
+        "edition": "2024",
+        "doc": true,
+        "doctest": true,
+        "test": true
+      },
+      "profile": {
+        "opt_level": "3",
+        "debuginfo": 0,
+        "debug_assertions": false,
+        "overflow_checks": false,
+        "test": true
+      },
+      "features": [
+        "default",
+        "native-core",
+        "simd",
+        "x11-minimal"
+      ],
+      "filenames": [
+        "/home/user/gpui-scroll-sparse-target/release/build/gpui/e0c8b8dd3837edc3/out/gpui-e0c8b8dd3837edc3"
+      ],
+      "executable": "/home/user/gpui-scroll-sparse-target/release/build/gpui/e0c8b8dd3837edc3/out/gpui-e0c8b8dd3837edc3",
+      "fresh": false
+    }
+  }
+]

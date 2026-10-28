@@ -1,0 +1,27 @@
+{
+  "command": [
+    "cargo",
+    "+nightly-2026-10-23",
+    "-Z",
+    "checksum-freshness",
+    "--config",
+    "build.fingerprint=\"content\"",
+    "clippy",
+    "--locked",
+    "--offline",
+    "--release",
+    "--message-format=json",
+    "-p",
+    "gpui_gpu",
+    "--features",
+    "vulkan-tests",
+    "--all-targets",
+    "--",
+    "-D",
+    "warnings"
+  ],
+  "exit": 0,
+  "minimum_free_bytes": 13559631872,
+  "storage_stop": false,
+  "seconds": 14.0042334220052
+}

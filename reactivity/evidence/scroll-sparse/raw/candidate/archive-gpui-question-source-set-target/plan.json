@@ -1,0 +1,926 @@
+[
+  {
+    "path": "/home/user/gpui-question-source-set-target/release/build/gpui/d0d01affab0807a7/out/unicode_text-d0d01affab0807a7",
+    "bytes": 10482336,
+    "sha256": "b376a63dd9da0ce12c1d064f9a62f8c6cadc36a761b1d9b9aa72dd2b3d13a7ac",
+    "mode": 493
+  },
+  {
+    "path": "/home/user/gpui-question-source-set-target/release/build/gpui/79660614651faca9/out/images-79660614651faca9",
+    "bytes": 12162888,
+    "sha256": "130c337dc7a24117f2ce98cbac2ff7f29d1f5338a342eacf0e61f58c4ecc2bbf",
+    "mode": 493
+  },
+  {
+    "path": "/home/user/gpui-question-source-set-target/release/build/gpui/09ffec1e4df7b13d/out/question_storage-09ffec1e4df7b13d",
+    "bytes": 10996096,
+    "sha256": "ffedae50c66076a15e8ad5eabb32806b02964e753a98a2be299e7da6a9d881ad",
+    "mode": 493
+  },
+  {
+    "path": "/home/user/gpui-question-source-set-target/release/build/gpui/45e4261f073ca333/out/inspector-45e4261f073ca333",
+    "bytes": 12019472,
+    "sha256": "29846280674828b375bee7c3d5febb0da17143aaebf5405a6251745d240be000",
+    "mode": 493
+  },
+  {
+    "path": "/home/user/gpui-question-source-set-target/release/build/gpui/ff05902b999a9169/out/semantic_metadata-ff05902b999a9169",
+    "bytes": 13529112,
+    "sha256": "e0dcf32c994a7cd7b0802741673b1e53b0cc1aaccbb4efe9d7faeadb25fc524f",
+    "mode": 493
+  },
+  {
+    "path": "/home/user/gpui-question-source-set-target/release/build/gpui/879df62babf71a81/out/style_ports-879df62babf71a81",
+    "bytes": 13071664,
+    "sha256": "ebf82e8cb4b070624593a78ab053516085cd613b1d98431def41b5eef6f28f45",
+    "mode": 493
+  },
+  {
+    "path": "/home/user/gpui-question-source-set-target/release/build/gpui/e2c0bb2fcdfbc9a8/out/intrinsic_text-e2c0bb2fcdfbc9a8",
+    "bytes": 11758200,
+    "sha256": "86741ba06d25dbd982b1a95dfc49685256c606af9901b0c1dcce3cdab332cf01",
+    "mode": 493
+  },
+  {
+    "path": "/home/user/gpui-question-source-set-target/release/build/gpui/e7a0a9415f1fb2ba/out/semantic_metadata-e7a0a9415f1fb2ba",
+    "bytes": 12198136,
+    "sha256": "759a4b9e1020225fe7e69a1ad42e6e98be4e9f868e37c1d6c21d1035a6767611",
+    "mode": 493
+  },
+  {
+    "path": "/home/user/gpui-question-source-set-target/release/build/gpui/f8d89c6d742a8b11/out/child_capacity-f8d89c6d742a8b11",
+    "bytes": 11593168,
+    "sha256": "465efdd159b963fb83f261f706b472e61bcf0e34e45dacd0934086388c8ff898",
+    "mode": 493
+  },
+  {
+    "path": "/home/user/gpui-question-source-set-target/release/build/gpui/ea96f330e8f3505c/out/immutable_text-ea96f330e8f3505c",
+    "bytes": 10365192,
+    "sha256": "8d1d0492f52fb14ee5ca712a6f912a3db703436939ad715cc291e1007b489b6a",
+    "mode": 493
+  },
+  {
+    "path": "/home/user/gpui-question-source-set-target/release/build/gpui/ab9d33ffcb225773/out/flex-ab9d33ffcb225773",
+    "bytes": 12900128,
+    "sha256": "b5ace606ef9b5019feba3efc48fe5d8c6c31c44904cc5f7d97f5cf53d5f36a93",
+    "mode": 493
+  },
+  {
+    "path": "/home/user/gpui-question-source-set-target/release/build/gpui/4df3bf9d325366d7/out/flex-4df3bf9d325366d7",
+    "bytes": 11638072,
+    "sha256": "2015ed96704704e1f01055ebc341d050653218771a4275b5eb267051ce49805c",
+    "mode": 493
+  },
+  {
+    "path": "/home/user/gpui-question-source-set-target/release/build/gpui/206ff037b0248d5f/out/sparse_text-206ff037b0248d5f",
+    "bytes": 11927728,
+    "sha256": "362ada913b5ea6ddf608a7d54aaa31716cf48bfb169e5abde4843111c8d34a25",
+    "mode": 493
+  },
+  {
+    "path": "/home/user/gpui-question-source-set-target/release/build/gpui/b60ff17f618b4ec9/out/unit_action_cost-b60ff17f618b4ec9",
+    "bytes": 11749304,
+    "sha256": "ee6c131bca904288ffd2f9c2da843c0f66d16a7126280687576615b131a7898a",
+    "mode": 493
+  },
+  {
+    "path": "/home/user/gpui-question-source-set-target/release/build/gpui/5ed5487538527b29/out/pointer_focus-5ed5487538527b29",
+    "bytes": 11812712,
+    "sha256": "e7084f9869955586eb7b171042ff5af66252f49213e5d2d0432d044ca28b1486",
+    "mode": 493
+  },
+  {
+    "path": "/home/user/gpui-question-source-set-target/release/build/gpui/ca79d0ca3aceeacd/out/question_cost-ca79d0ca3aceeacd",
+    "bytes": 11940656,
+    "sha256": "c82b6412b5798b1fd7462bea0257b6d6a0005ddea56fe7a283ba6d6b5233a52a",
+    "mode": 493
+  },
+  {
+    "path": "/home/user/gpui-question-source-set-target/release/build/gpui/419d616761e7f749/out/text_selection-419d616761e7f749",
+    "bytes": 12537112,
+    "sha256": "53fe9625735292cd06d04fb37e90b2e810284ef8bb76d05360b198fc9f07e9f9",
+    "mode": 493
+  },
+  {
+    "path": "/home/user/gpui-question-source-set-target/release/build/gpui/3f6e498e7963c74e/out/question_futures-3f6e498e7963c74e",
+    "bytes": 12713784,
+    "sha256": "8affdf064a3b29470211adc7637eabd21234ff628b99f6f635ba78ab6e55851b",
+    "mode": 493
+  },
+  {
+    "path": "/home/user/gpui-question-source-set-target/release/build/gpui/ae1265e7bce2c02a/out/gpui-ae1265e7bce2c02a",
+    "bytes": 22530760,
+    "sha256": "297ec0988ea0a43ffc602f8de931fee4a6dbdf648aad9f835e8b40b069d0aaea",
+    "mode": 493
+  },
+  {
+    "path": "/home/user/gpui-question-source-set-target/release/build/gpui/44a21a9930f1fc1c/out/text_geometry-44a21a9930f1fc1c",
+    "bytes": 11864696,
+    "sha256": "f65b4ed347bf11a842a6bd144a3ab1a8cd016aac1aa2c8199f36bac0be0e6c37",
+    "mode": 493
+  },
+  {
+    "path": "/home/user/gpui-question-source-set-target/release/build/gpui/6581793994054727/out/library-6581793994054727",
+    "bytes": 10772792,
+    "sha256": "096eed0889c17232437f39fb884910c3e94122ccefd42927b7eb845f57f8b9b9",
+    "mode": 493
+  },
+  {
+    "path": "/home/user/gpui-question-source-set-target/release/build/gpui/a378259f512151c8/out/routes-a378259f512151c8",
+    "bytes": 12132376,
+    "sha256": "86127c7e566cdf6716da9363778e764ddd5a05701ec84e2463d3f749dd102bef",
+    "mode": 493
+  },
+  {
+    "path": "/home/user/gpui-question-source-set-target/release/build/gpui/b8c9afc9f840e583/out/question_source_cost",
+    "bytes": 10371032,
+    "sha256": "2bfcb26f2d4046aa62aca57e9660b8bdde9e0e8795dbe06ec1edccb27ed90f38",
+    "mode": 493
+  },
+  {
+    "path": "/home/user/gpui-question-source-set-target/release/build/gpui/4ccfcdfa39a9d8c4/out/unit_action_cost_two-4ccfcdfa39a9d8c4",
+    "bytes": 11983056,
+    "sha256": "83e9ad38a718dc6c41fd054f99d3aa466fe905027d6aee4583126b1c4cff250a",
+    "mode": 493
+  },
+  {
+    "path": "/home/user/gpui-question-source-set-target/release/build/gpui/c0538b60054fbbf2/out/question_source_set-c0538b60054fbbf2",
+    "bytes": 11110688,
+    "sha256": "64bba93ee0dc0e4e0baa48c88cdaa5297d7b3ebc8c0670153a6dc07c1e025e3e",
+    "mode": 493
+  },
+  {
+    "path": "/home/user/gpui-question-source-set-target/release/build/gpui/d4c178c215586c2d/out/question_futures-d4c178c215586c2d",
+    "bytes": 11425648,
+    "sha256": "46526ae2ebce7149518189bd3e967e3f94d1c45d1b81bf70ed7ebe9b8a59dced",
+    "mode": 493
+  },
+  {
+    "path": "/home/user/gpui-question-source-set-target/release/build/gpui/15923484a36e7b0c/out/question_input_cost-15923484a36e7b0c",
+    "bytes": 10405832,
+    "sha256": "0f76f0be8c23c7ae77c7f53d42d1d21242d2343a709b270746fa3b9d82d5b7cc",
+    "mode": 493
+  },
+  {
+    "path": "/home/user/gpui-question-source-set-target/release/build/gpui/cd2c3870900c34a3/out/routes-cd2c3870900c34a3",
+    "bytes": 10879552,
+    "sha256": "b777df8f57f341a49faaf303c3e74bdb0ec6ed980b3ad3daa287cb819ee97ee1",
+    "mode": 493
+  },
+  {
+    "path": "/home/user/gpui-question-source-set-target/release/build/gpui/968da09467eb6491/out/semantics-968da09467eb6491",
+    "bytes": 12154400,
+    "sha256": "83190c79158c9a3750f7d0c7ceba8591a1f0b00170f7cec8210d565fee1b9c02",
+    "mode": 493
+  },
+  {
+    "path": "/home/user/gpui-question-source-set-target/release/build/gpui/053645e00a0ec363/out/text_geometry-053645e00a0ec363",
+    "bytes": 10619280,
+    "sha256": "ca5853d2deba2174b2394256cd553926474930a131a817cc333f15dd7cb1b7a8",
+    "mode": 493
+  },
+  {
+    "path": "/home/user/gpui-question-source-set-target/release/build/gpui/e410996fb0258e0c/out/question_mailbox-e410996fb0258e0c",
+    "bytes": 10507968,
+    "sha256": "0bbd7e0a6193690fab172c0047fbcfdd5ac9e5681f1f8577cf6b5463c0cdc84e",
+    "mode": 493
+  },
+  {
+    "path": "/home/user/gpui-question-source-set-target/release/build/gpui/553c56afd2b4bb53/out/inbox_storage-553c56afd2b4bb53",
+    "bytes": 12101728,
+    "sha256": "98e79682e6dbdb9e7f349302d4dd112736b4e13713a4f40c06a2fe94992d5500",
+    "mode": 493
+  },
+  {
+    "path": "/home/user/gpui-question-source-set-target/release/build/gpui/e80642e84fdb2f77/out/question_storage-e80642e84fdb2f77",
+    "bytes": 12310792,
+    "sha256": "e44a3f153fc15f3f4212ca327b0cae105e8a7b7ba1de2e4426e3517d173a2650",
+    "mode": 493
+  },
+  {
+    "path": "/home/user/gpui-question-source-set-target/release/build/gpui/d51c62efad296df0/out/gpui-d51c62efad296df0",
+    "bytes": 56508248,
+    "sha256": "6e25aa85d832467e7af6853a80a50e96f0a82add1dfe1a5afd08313cbd4defab",
+    "mode": 493
+  },
+  {
+    "path": "/home/user/gpui-question-source-set-target/release/build/gpui/8e1a8d270ce37ec0/out/paint_patch-8e1a8d270ce37ec0",
+    "bytes": 10767792,
+    "sha256": "56039913fef16abb9ce0224c2c5301385eac1f8bfe33d271e4a068dcf8a55511",
+    "mode": 493
+  },
+  {
+    "path": "/home/user/gpui-question-source-set-target/release/build/gpui/6418d9bb5de18e1e/out/projected_sources-6418d9bb5de18e1e",
+    "bytes": 11299232,
+    "sha256": "ac868f28743968f5d1e57bd77d99f16ec6fa3a8ca805ec2dbe3a390a149bdecc",
+    "mode": 493
+  },
+  {
+    "path": "/home/user/gpui-question-source-set-target/release/build/gpui/716cbead3ff2f3fa/out/style_ports-716cbead3ff2f3fa",
+    "bytes": 14364920,
+    "sha256": "72328aee6df8cb23c24c5652f92d625d2e506a0b3a12a0035e425cb6e8d56e5e",
+    "mode": 493
+  },
+  {
+    "path": "/home/user/gpui-question-source-set-target/release/build/gpui/7d210e697a689843/out/identity_recovery-7d210e697a689843",
+    "bytes": 11713080,
+    "sha256": "f15cfc5046902291eacc0216c632ce4478e100cb98f56254f3136b4b1ff40ed6",
+    "mode": 493
+  },
+  {
+    "path": "/home/user/gpui-question-source-set-target/release/build/gpui/0b5c1c30675eb642/out/question_cost-0b5c1c30675eb642",
+    "bytes": 10632536,
+    "sha256": "7db19fa7687d52afa7b2f0f5702ec687875670eeb8c56f095fe921ba4d9b3125",
+    "mode": 493
+  },
+  {
+    "path": "/home/user/gpui-question-source-set-target/release/build/gpui/0fe157f633617f1f/out/pointer-0fe157f633617f1f",
+    "bytes": 11009472,
+    "sha256": "5465ee02abc9570a14d1fdbf5cf1f16c46b7c2b490144caea85b8c1526336771",
+    "mode": 493
+  },
+  {
+    "path": "/home/user/gpui-question-source-set-target/release/build/gpui/6c40fa3e2d339f64/out/source_values-6c40fa3e2d339f64",
+    "bytes": 11997944,
+    "sha256": "ec1f3f9f7601a1a125439e3d435e04c09b45f3e7843f3edd1fd27e73a5f71dc3",
+    "mode": 493
+  },
+  {
+    "path": "/home/user/gpui-question-source-set-target/release/build/gpui/f411fa7cd269150a/out/inbox_storage-f411fa7cd269150a",
+    "bytes": 10794800,
+    "sha256": "35c19272bff3fc95b9fad41a3732eefe3270dbc0cb7c8d3f7371dbe899918e45",
+    "mode": 493
+  },
+  {
+    "path": "/home/user/gpui-question-source-set-target/release/build/gpui/ee7c0f91461efd11/out/retained_styles-ee7c0f91461efd11",
+    "bytes": 11934432,
+    "sha256": "497842b0c8ac06631783a168b6a83f01911e5caa275ccd5cec1d07955a405a64",
+    "mode": 493
+  },
+  {
+    "path": "/home/user/gpui-question-source-set-target/release/build/gpui/0aa5f833cd1a76ab/out/property_actions-0aa5f833cd1a76ab",
+    "bytes": 11173504,
+    "sha256": "5aef0dc08822e53fa879d8105f9ec0550dd5e7cf159f8923db0179f8af75cae7",
+    "mode": 493
+  },
+  {
+    "path": "/home/user/gpui-question-source-set-target/release/build/gpui/e38ae65e2efca84c/out/checkbox-e38ae65e2efca84c",
+    "bytes": 11358616,
+    "sha256": "e421a2dc60e6201f54e51c32c80bda1d827f320fe711b19b79a53d9d7a996a84",
+    "mode": 493
+  },
+  {
+    "path": "/home/user/gpui-question-source-set-target/release/build/gpui/b09cc5982754a0b5/out/property_selection-b09cc5982754a0b5",
+    "bytes": 12790328,
+    "sha256": "c1a21af801db836aae9466bfc407bc6c693a5286a4d53c710c64ff6b251a43de",
+    "mode": 493
+  },
+  {
+    "path": "/home/user/gpui-question-source-set-target/release/build/gpui/d810f22bfa2451f7/out/unit_action_cost-d810f22bfa2451f7",
+    "bytes": 10500688,
+    "sha256": "2dbea6b5bf272401a44b8d7219f0b5089c513cfee368e5eec38c88c31d7088bb",
+    "mode": 493
+  },
+  {
+    "path": "/home/user/gpui-question-source-set-target/release/build/gpui/b0fd605175489384/out/search_library-b0fd605175489384",
+    "bytes": 11064584,
+    "sha256": "de6becd0f72ebf00a95b23f8239455f58e0bc680f59426f55f40ae2b7f9472a2",
+    "mode": 493
+  },
+  {
+    "path": "/home/user/gpui-question-source-set-target/release/build/gpui/7c147196c544c4a0/out/ports-7c147196c544c4a0",
+    "bytes": 11240992,
+    "sha256": "e477ccc4d5d9c6a2065ade4d50d197ab8bb261b8daddc1f0988d4a1719e01d06",
+    "mode": 493
+  },
+  {
+    "path": "/home/user/gpui-question-source-set-target/release/build/gpui/3c314327eac6190f/out/inspector-3c314327eac6190f",
+    "bytes": 13283728,
+    "sha256": "8c63e6ac47fdc783654dd54de53d59ea00f98b12ecb686c2613fb8863011da6f",
+    "mode": 493
+  },
+  {
+    "path": "/home/user/gpui-question-source-set-target/release/build/gpui/106bc5ec4ebf175c/out/handler_storage-106bc5ec4ebf175c",
+    "bytes": 13393696,
+    "sha256": "e6b4cf5e46a47610e5464babac549764d8ec521d94e11750a92c62695d9354a1",
+    "mode": 493
+  },
+  {
+    "path": "/home/user/gpui-question-source-set-target/release/build/gpui/4854eccfc7d9f73d/out/remote-4854eccfc7d9f73d",
+    "bytes": 11343456,
+    "sha256": "59bb195bd33e07161f9c8bac15b3c47331f88cad0965f0699e85ff6ae70d4485",
+    "mode": 493
+  },
+  {
+    "path": "/home/user/gpui-question-source-set-target/release/build/gpui/cb93c9ec9d10ba73/out/mapped_paint-cb93c9ec9d10ba73",
+    "bytes": 10487216,
+    "sha256": "f648378ba0c922f08ebaa5bcd6cdc654f712901d213d8443f1c1eb6ec13f63bc",
+    "mode": 493
+  },
+  {
+    "path": "/home/user/gpui-question-source-set-target/release/build/gpui/fb7194557cec490e/out/questions-fb7194557cec490e",
+    "bytes": 12423584,
+    "sha256": "7a5affa4106f2f3d31727a19663521a1b87b0499bb927bc34c92bace2b308e87",
+    "mode": 493
+  },
+  {
+    "path": "/home/user/gpui-question-source-set-target/release/build/gpui/9c2c86b182f7cb10/out/scroll-9c2c86b182f7cb10",
+    "bytes": 14419672,
+    "sha256": "ca68d5a092e21d561d848cc46303aaa54e0ce1256272202b646885cf474a1a6e",
+    "mode": 493
+  },
+  {
+    "path": "/home/user/gpui-question-source-set-target/release/build/gpui/354c017ae9dfbf28/out/child_capacity-354c017ae9dfbf28",
+    "bytes": 10347848,
+    "sha256": "fa46afc270b9fb896edb72959767e45cc985158ac91c1922535acd58f66b3c51",
+    "mode": 493
+  },
+  {
+    "path": "/home/user/gpui-question-source-set-target/release/build/gpui/708dbe281072e65f/out/source_batch-708dbe281072e65f",
+    "bytes": 12248040,
+    "sha256": "3a6e8fa98310ef59901aa077a961c44b3a13a2a3ff1d9355308e33b007f4dc68",
+    "mode": 493
+  },
+  {
+    "path": "/home/user/gpui-question-source-set-target/release/build/gpui/626b20e5578148fd/out/questions-626b20e5578148fd",
+    "bytes": 11124280,
+    "sha256": "48a8c42520674533b548734bbb22f43dc066fc661e9e40600c8e567a18204da0",
+    "mode": 493
+  },
+  {
+    "path": "/home/user/gpui-question-source-set-target/release/build/gpui/128507fce53a4cdb/out/clipping-128507fce53a4cdb",
+    "bytes": 12652416,
+    "sha256": "3f4438b675b01c87d2bf28efc7059fd7f804b450592742f5eac94b1003b107ba",
+    "mode": 493
+  },
+  {
+    "path": "/home/user/gpui-question-source-set-target/release/build/gpui/9e0b0320a4db49e8/out/color_packing-9e0b0320a4db49e8",
+    "bytes": 10518808,
+    "sha256": "e674a347288bfa38faa808079a35c7fb1680689a295eb297dc0c8c4933bc5bef",
+    "mode": 493
+  },
+  {
+    "path": "/home/user/gpui-question-source-set-target/release/build/gpui/db4367f837055eec/out/remote-db4367f837055eec",
+    "bytes": 12663864,
+    "sha256": "6b1e1c2bee7e7ffb1c8e67fc05c216501a09ce1d171f733237a08fdc6569aca1",
+    "mode": 493
+  },
+  {
+    "path": "/home/user/gpui-question-source-set-target/release/build/gpui/5f66885bebd04cd6/out/sibling_reconciliation_cost-5f66885bebd04cd6",
+    "bytes": 11566384,
+    "sha256": "cbced24d2b346f9508c02e7b61ea58fe435c63d7fb9aabec3e4af3920c96fcf9",
+    "mode": 493
+  },
+  {
+    "path": "/home/user/gpui-question-source-set-target/release/build/gpui/fe963d7013efe0a4/out/color_packing-fe963d7013efe0a4",
+    "bytes": 11767408,
+    "sha256": "59f83961c4c6b85582ca8b4cfb667a401cfa2dc9ff192a38e108f6cab411b21e",
+    "mode": 493
+  },
+  {
+    "path": "/home/user/gpui-question-source-set-target/release/build/gpui/09a7afe64ada92f0/out/source_inbox-09a7afe64ada92f0",
+    "bytes": 11685808,
+    "sha256": "467864c17cc658e1f30e6d5b36f9d91f9875ca7eac8e51938bb1c670ef4675a2",
+    "mode": 493
+  },
+  {
+    "path": "/home/user/gpui-question-source-set-target/release/build/gpui/70867f1eed91e6a5/out/source_value_isolation-70867f1eed91e6a5",
+    "bytes": 10907376,
+    "sha256": "2cb68ef72871d98e50ecf904d27f7b954beca408ba19432cfe5d18b59c231b63",
+    "mode": 493
+  },
+  {
+    "path": "/home/user/gpui-question-source-set-target/release/build/gpui/1e4c435b4f009ae2/out/lists-1e4c435b4f009ae2",
+    "bytes": 13058024,
+    "sha256": "3aac7a6d52507f847677fdf9e68e30feffcd44c5d10e08eedd9216a6f358745d",
+    "mode": 493
+  },
+  {
+    "path": "/home/user/gpui-question-source-set-target/release/build/gpui/870c29c7e50c61fa/out/components-870c29c7e50c61fa",
+    "bytes": 11825936,
+    "sha256": "26940d4a14f827be6e3a0f9890d8448c039b67adf044fae42e87177c25ff119d",
+    "mode": 493
+  },
+  {
+    "path": "/home/user/gpui-question-source-set-target/release/build/gpui/eb4eba500ce8921b/out/runtime-eb4eba500ce8921b",
+    "bytes": 14202808,
+    "sha256": "a86f1ed396d638534ea925ab75744e5953e50318dda3dfdc805b3086dff059f5",
+    "mode": 493
+  },
+  {
+    "path": "/home/user/gpui-question-source-set-target/release/build/gpui/291056ba62ba3c5a/out/property_state_shell-291056ba62ba3c5a",
+    "bytes": 11678960,
+    "sha256": "8ce91c18d0270975e285496603c1d66123f8dea5ad269f704d174ba05dff2640",
+    "mode": 493
+  },
+  {
+    "path": "/home/user/gpui-question-source-set-target/release/build/gpui/326401c6d19e5a0c/out/sibling_reconciliation_cost-326401c6d19e5a0c",
+    "bytes": 10319872,
+    "sha256": "b017d075459a68438b1370149c597f7020b792b73d2f16751ab92efa0b9e6fd7",
+    "mode": 493
+  },
+  {
+    "path": "/home/user/gpui-question-source-set-target/release/build/gpui/0c0a418a7eceb691/out/queries-0c0a418a7eceb691",
+    "bytes": 11841920,
+    "sha256": "820859816bfc4d3ae2a20bfeafcfdbde798bd0ade85db3faac0c588a6472c355",
+    "mode": 493
+  },
+  {
+    "path": "/home/user/gpui-question-source-set-target/release/build/gpui/75c595de79c5478c/out/semantic_serialization-75c595de79c5478c",
+    "bytes": 11168904,
+    "sha256": "88e79b35b2a08debdf5b2631f20fb8528dcda466b9455bfc1c1951aec19e0223",
+    "mode": 493
+  },
+  {
+    "path": "/home/user/gpui-question-source-set-target/release/build/gpui/1fb0d15f854a565d/out/question_source_set-1fb0d15f854a565d",
+    "bytes": 12396912,
+    "sha256": "f10e06163d48805dc7d0a41d3d55e1627b6106c78995be8cf88f82e2fc54bbd7",
+    "mode": 493
+  },
+  {
+    "path": "/home/user/gpui-question-source-set-target/release/build/gpui/772b08f49f355dd0/out/literal_dispatch-772b08f49f355dd0",
+    "bytes": 11804488,
+    "sha256": "9c8780478aea1b9224e84bbf27c01479a9d67584c808bd5b216a593329dc3a9f",
+    "mode": 493
+  },
+  {
+    "path": "/home/user/gpui-question-source-set-target/release/build/gpui/3cdb4e10e6c549b0/out/field_identity-3cdb4e10e6c549b0",
+    "bytes": 10376976,
+    "sha256": "eb79614c401ff39aa4dbb3443ab10441c158263bc81bae15cf65e0816490b187",
+    "mode": 493
+  },
+  {
+    "path": "/home/user/gpui-question-source-set-target/release/build/gpui/f817e973d8a323a0/out/sparse_text-f817e973d8a323a0",
+    "bytes": 10674688,
+    "sha256": "90fecb6feaa7d08c7bddeae36ffb412af1d6e9d0a748ee59f187c38ab18dc4b4",
+    "mode": 493
+  },
+  {
+    "path": "/home/user/gpui-question-source-set-target/release/build/gpui/07dadeef15b7a4a9/out/focus-07dadeef15b7a4a9",
+    "bytes": 11580864,
+    "sha256": "5565b229aeb0998c5e2e01828820cba213be6e4f6e50cca00856dc871d2c1d06",
+    "mode": 493
+  },
+  {
+    "path": "/home/user/gpui-question-source-set-target/release/build/gpui/d2c4a351b43dec31/out/property_outline_allocations-d2c4a351b43dec31",
+    "bytes": 11718656,
+    "sha256": "f28a09bd2258d72ea733771f461d2e7fa3ce00544f741798f7a58ad95a255083",
+    "mode": 493
+  },
+  {
+    "path": "/home/user/gpui-question-source-set-target/release/build/gpui/3f4c23bd14a73035/out/scroll-3f4c23bd14a73035",
+    "bytes": 13138720,
+    "sha256": "fb8af7878c583e9d110c59ebd022b8527b4773ec924c1483fe84982fe5e238d0",
+    "mode": 493
+  },
+  {
+    "path": "/home/user/gpui-question-source-set-target/release/build/gpui/cb150e153db40b66/out/property_state_shell-cb150e153db40b66",
+    "bytes": 10429248,
+    "sha256": "66d98694d58fc5b15931ea8b987ed2cdc8607734425ce513ad2b510875a3585c",
+    "mode": 493
+  },
+  {
+    "path": "/home/user/gpui-question-source-set-target/release/build/gpui/6bd49af4690ab327/out/question_mailbox-6bd49af4690ab327",
+    "bytes": 11812872,
+    "sha256": "acd9497a305ca2885a39dd69d73731d378296b449a786db3a62787fb3d7e6f06",
+    "mode": 493
+  },
+  {
+    "path": "/home/user/gpui-question-source-set-target/release/build/gpui/a8b7baddc0b73eb4/out/intrinsic_text-a8b7baddc0b73eb4",
+    "bytes": 10508456,
+    "sha256": "8f53e9777fd54970da0e2eb0f6c4182252868b7132b7c8f9221f89ba70ac329c",
+    "mode": 493
+  },
+  {
+    "path": "/home/user/gpui-question-source-set-target/release/build/gpui/ba1611093951650f/out/text_selection-ba1611093951650f",
+    "bytes": 11286552,
+    "sha256": "6362c043a65227c4b06e27777060cd35b35c82c77b902219943685e694688901",
+    "mode": 493
+  },
+  {
+    "path": "/home/user/gpui-question-source-set-target/release/build/gpui/7a9bc79c87bc75df/out/source_inbox_reader_gate-7a9bc79c87bc75df",
+    "bytes": 10476328,
+    "sha256": "66eb8bc287d4d967f2380f6ccfa99d21cfe3ad28f478da42033bd15482ad360a",
+    "mode": 493
+  },
+  {
+    "path": "/home/user/gpui-question-source-set-target/release/build/gpui/c60a8004f07c3eb2/out/dpi-c60a8004f07c3eb2",
+    "bytes": 12019464,
+    "sha256": "3f47da193e757f0297e89515b74b6762b46eb5e5ef4b611ea40363a0359f72c0",
+    "mode": 493
+  },
+  {
+    "path": "/home/user/gpui-question-source-set-target/release/build/gpui/2b22866ad3bcec35/out/checkbox-2b22866ad3bcec35",
+    "bytes": 12601688,
+    "sha256": "37b033956d01ed9d28464a9f986fbf8aa2a01b96183bb8e8d8c40373ee0c7857",
+    "mode": 493
+  },
+  {
+    "path": "/home/user/gpui-question-source-set-target/release/build/gpui/50ba07c1adf9fb66/out/paint_slot_rebind-50ba07c1adf9fb66",
+    "bytes": 11716256,
+    "sha256": "1aeb1a440932438db0bdc66111d77a34549a0f90c48a48bd3ac200921f074c82",
+    "mode": 493
+  },
+  {
+    "path": "/home/user/gpui-question-source-set-target/release/build/gpui/8450f433e6d4adfa/out/mapped_properties-8450f433e6d4adfa",
+    "bytes": 11560808,
+    "sha256": "88c9015fedc3ca40af8a7b68842af4d926ef29981d9a3d7d08c3bc692ab92a26",
+    "mode": 493
+  },
+  {
+    "path": "/home/user/gpui-question-source-set-target/release/build/gpui/e074d3d7b43d3750/out/paint_slot_rebind-e074d3d7b43d3750",
+    "bytes": 10468376,
+    "sha256": "d401fca2f90dffba00c91314d26c996665fe49fb02232f39b964d72acedd2aad",
+    "mode": 493
+  },
+  {
+    "path": "/home/user/gpui-question-source-set-target/release/build/gpui/90978366a57c54f6/out/identity_recovery-90978366a57c54f6",
+    "bytes": 10466232,
+    "sha256": "2149e3f8f4d6df7f49806d12068825645d5f43ea4ddcdb752b9e2f9d6a8b5fa5",
+    "mode": 493
+  },
+  {
+    "path": "/home/user/gpui-question-source-set-target/release/build/gpui/65ab10b21facbc9d/out/paint_slots-65ab10b21facbc9d",
+    "bytes": 12170960,
+    "sha256": "3a393fed4071d2d32d74306672412b1319e28fa5182537ebc229e10faac8b19b",
+    "mode": 493
+  },
+  {
+    "path": "/home/user/gpui-question-source-set-target/release/build/gpui/e61d96d9585239a9/out/immutable_text-e61d96d9585239a9",
+    "bytes": 11613944,
+    "sha256": "bc41b43b16205c2b813523ba3581fcf729619476bbd75a4975b537833202f0d1",
+    "mode": 493
+  },
+  {
+    "path": "/home/user/gpui-question-source-set-target/release/build/gpui/905097f5ba75385f/out/source_value_isolation-905097f5ba75385f",
+    "bytes": 12232232,
+    "sha256": "40946f2ed81eaecc59f92eb4797fe09d500c5e63c7ff83baf1e12e502b380be2",
+    "mode": 493
+  },
+  {
+    "path": "/home/user/gpui-question-source-set-target/release/build/gpui/57ac32f7687547ba/out/acceptance-57ac32f7687547ba",
+    "bytes": 11504288,
+    "sha256": "435d000729ac4aa5fb05cafbc8a05cec9f8830794c27f25a6af07bb1232ee208",
+    "mode": 493
+  },
+  {
+    "path": "/home/user/gpui-question-source-set-target/release/build/gpui/b82519921643c79b/out/mapped_paint-b82519921643c79b",
+    "bytes": 11737432,
+    "sha256": "44b5f8ebafa736c8be8774192294d6559f80dc8ea9d43c3cde0ed88cd4361b7c",
+    "mode": 493
+  },
+  {
+    "path": "/home/user/gpui-question-source-set-target/release/build/gpui/907cee360d2cbb1c/out/frontier-907cee360d2cbb1c",
+    "bytes": 11025272,
+    "sha256": "84e4784ce8056acb68b2c551284acf33cbad58f441a7eb73a6f71063b84a5c31",
+    "mode": 493
+  },
+  {
+    "path": "/home/user/gpui-question-source-set-target/release/build/gpui/0727ac8c77fbf51d/out/source_inbox_reader_gate-0727ac8c77fbf51d",
+    "bytes": 11784728,
+    "sha256": "4049293a0d94e2609d49e5875a5afe484e426a1bf3a7b73871fdd35cf42c63f3",
+    "mode": 493
+  },
+  {
+    "path": "/home/user/gpui-question-source-set-target/release/build/gpui/e675da242ce9689f/out/lists-e675da242ce9689f",
+    "bytes": 14343448,
+    "sha256": "10c246964d9bb83372902d619d700030a31382234ae02be6c0ad27427bd9a1ca",
+    "mode": 493
+  },
+  {
+    "path": "/home/user/gpui-question-source-set-target/release/build/gpui/7f387cba6a942416/out/field_identity-7f387cba6a942416",
+    "bytes": 11627688,
+    "sha256": "a0f5f1b403590bb2d11ca718d69485a78774e676b2af62410319d2945df8d6a0",
+    "mode": 493
+  },
+  {
+    "path": "/home/user/gpui-question-source-set-target/release/build/gpui/c22cdb5183dad81a/out/text_selection_compound-c22cdb5183dad81a",
+    "bytes": 10615088,
+    "sha256": "2eb92523fbbc7ce0f11e15d9219415c8ce565ea6c4f084fda002d93f91840eb9",
+    "mode": 493
+  },
+  {
+    "path": "/home/user/gpui-question-source-set-target/release/build/gpui/ecf0fecac47d3d84/out/ime-ecf0fecac47d3d84",
+    "bytes": 11263416,
+    "sha256": "f2ee7b34d81d05923f72bb56d14532e923ffdad067b77c9e2438e8330d52fdbc",
+    "mode": 493
+  },
+  {
+    "path": "/home/user/gpui-question-source-set-target/release/build/gpui/99726e6301cc61e6/out/property_selection-99726e6301cc61e6",
+    "bytes": 11524816,
+    "sha256": "31961d60eb5a25df56e4ac89ee007b5043f0a698ba129091db4eac991aef5226",
+    "mode": 493
+  },
+  {
+    "path": "/home/user/gpui-question-source-set-target/release/build/gpui/ca77794f4f987bda/out/application-ca77794f4f987bda",
+    "bytes": 10993984,
+    "sha256": "5ef036121c7981e6e30382756611bd851b9442268c561693a9b3f87619ecf762",
+    "mode": 493
+  },
+  {
+    "path": "/home/user/gpui-question-source-set-target/release/build/gpui/8011b316c707968e/out/rounded-8011b316c707968e",
+    "bytes": 11388064,
+    "sha256": "e2dd27db56e6cee793842f559db59242c2081ddf1ffb38b7a228a4d03f6ed81a",
+    "mode": 493
+  },
+  {
+    "path": "/home/user/gpui-question-source-set-target/release/build/gpui/e2072d6c396c0df5/out/ports-e2072d6c396c0df5",
+    "bytes": 12496400,
+    "sha256": "6cd47511a38ab93b5e10bac62b001cb50d03af97aa13068aa62aa2c7c8994b8d",
+    "mode": 493
+  },
+  {
+    "path": "/home/user/gpui-question-source-set-target/release/build/gpui/f033557fbeaf1a9a/out/retained_styles-f033557fbeaf1a9a",
+    "bytes": 10686392,
+    "sha256": "5833472ba79a57d1ffe334495e2af0a676ee06c39f8fe0d71c021dc6245e36b8",
+    "mode": 493
+  },
+  {
+    "path": "/home/user/gpui-question-source-set-target/release/build/gpui/659cfbeec4238e2e/out/source_batch-659cfbeec4238e2e",
+    "bytes": 10929264,
+    "sha256": "4ca7ed000c5034d799e4a0c41d0b01b6db23d7d967d37f565c9d46ad15ca75f6",
+    "mode": 493
+  },
+  {
+    "path": "/home/user/gpui-question-source-set-target/release/build/gpui/e39b6b258f9b84bc/out/images-e39b6b258f9b84bc",
+    "bytes": 10907144,
+    "sha256": "180b7ee2d1f6d080ad0c45c06d2200405a2626e4cfea5030942506df78236c9c",
+    "mode": 493
+  },
+  {
+    "path": "/home/user/gpui-question-source-set-target/release/build/gpui/446f92b584536cfb/out/text_selection_compound-446f92b584536cfb",
+    "bytes": 11862304,
+    "sha256": "aa36201ec0331371af4df41d1f4b258cf595631b8bf483a575a39feca9edcb90",
+    "mode": 493
+  },
+  {
+    "path": "/home/user/gpui-question-source-set-target/release/build/gpui/866a312ab519c593/out/ime-866a312ab519c593",
+    "bytes": 12514120,
+    "sha256": "8c95d9c5d4a4d03cf7775e18a75cfc2a025d8d4a9ba9090c382230211899bdbe",
+    "mode": 493
+  },
+  {
+    "path": "/home/user/gpui-question-source-set-target/release/build/gpui/46740929e7eb31d5/out/question_input_cost-46740929e7eb31d5",
+    "bytes": 11707800,
+    "sha256": "c236dff5415dd20353a0a64f0fbe4095320ad81bb7d621162a4747879c126952",
+    "mode": 493
+  },
+  {
+    "path": "/home/user/gpui-question-source-set-target/release/build/gpui/2134b8d71b953443/out/handler_storage-2134b8d71b953443",
+    "bytes": 12125408,
+    "sha256": "c28f9b5ae1d0860d5ec2bbd7ac28a5f8a6344d69faf0348ce8a5d61d60b91d97",
+    "mode": 493
+  },
+  {
+    "path": "/home/user/gpui-question-source-set-target/release/build/gpui/f2f3d1ba2c503deb/out/property_outline_allocations-f2f3d1ba2c503deb",
+    "bytes": 10468744,
+    "sha256": "97bc1525655c0100f93926923ff9ab6a37acb6e06e111ce6e3112f5fd8c1e271",
+    "mode": 493
+  },
+  {
+    "path": "/home/user/gpui-question-source-set-target/release/build/gpui/cad26498171cad2b/out/projected_sources-cad26498171cad2b",
+    "bytes": 12613688,
+    "sha256": "89575661d5e0d983a7b47f752280bdc6c141bfa5c22a1c31ae3ac46e79c58a27",
+    "mode": 493
+  },
+  {
+    "path": "/home/user/gpui-question-source-set-target/release/build/gpui/0037263f8aee7712/out/property_change_union-0037263f8aee7712",
+    "bytes": 12175472,
+    "sha256": "7d8d583338db332a6b9190938ed7d7be7140abd45d21c82558c55ec15e2deb25",
+    "mode": 493
+  },
+  {
+    "path": "/home/user/gpui-question-source-set-target/release/build/gpui/e6366e73b8a01800/out/question_inputs-e6366e73b8a01800",
+    "bytes": 12093880,
+    "sha256": "54855cbeeec65a5b090c0ffbc6054d72844a331cf0e1c3ec02e5f5dee441661a",
+    "mode": 493
+  },
+  {
+    "path": "/home/user/gpui-question-source-set-target/release/build/gpui/4913090c5c5dc99e/out/mapped_properties-4913090c5c5dc99e",
+    "bytes": 12876480,
+    "sha256": "5d6e3f020e7c7280431c3c78425c580cc25358d1f86b8b2be66ba58194b47367",
+    "mode": 493
+  },
+  {
+    "path": "/home/user/gpui-question-source-set-target/release/build/gpui/880925a38ec68213/out/text_cache-880925a38ec68213",
+    "bytes": 12021592,
+    "sha256": "b1d504c18bb24f955ed179e87885d85a735a0a1b5cca15c799105a76c9793d5a",
+    "mode": 493
+  },
+  {
+    "path": "/home/user/gpui-question-source-set-target/release/build/gpui/6997ba1510a1dc9f/out/literal_dispatch-6997ba1510a1dc9f",
+    "bytes": 10557136,
+    "sha256": "26814f682146f77a418696fde49e431681dcf3db1fadaf36557ac321531cae45",
+    "mode": 493
+  },
+  {
+    "path": "/home/user/gpui-question-source-set-target/release/build/gpui/f8e2db4347385ebd/out/question_source_allocations",
+    "bytes": 10431032,
+    "sha256": "b5cab95e91cc005982bcc66a23445ab7575d88a6615b9a1251333ce8bdfb4d34",
+    "mode": 493
+  },
+  {
+    "path": "/home/user/gpui-question-source-set-target/release/build/gpui/b06ff00e3b3491fa/out/pointer_focus-b06ff00e3b3491fa",
+    "bytes": 10566400,
+    "sha256": "6139a8bd1b37e596ee696ff79e29aeea5b04fc4cc990d00d70f4c51ed1493f92",
+    "mode": 493
+  },
+  {
+    "path": "/home/user/gpui-question-source-set-target/release/build/gpui/79102a7ed510bb80/out/unicode_text-79102a7ed510bb80",
+    "bytes": 11731480,
+    "sha256": "6130f9f97276177ed7cd26c84668e880204d953b730768a42022f1406a4d6799",
+    "mode": 493
+  },
+  {
+    "path": "/home/user/gpui-question-source-set-target/release/build/gpui/23ab84456b4cf1ec/out/todo_comparison-23ab84456b4cf1ec",
+    "bytes": 10867712,
+    "sha256": "37c13b731674e9740752909392e3ac139793f94d5d474bc9cbe21d36d03cf73e",
+    "mode": 493
+  },
+  {
+    "path": "/home/user/gpui-question-source-set-target/release/build/gpui/1916672c147528db/out/property_actions-1916672c147528db",
+    "bytes": 12428928,
+    "sha256": "b553cfdb550ba2c4a3c0b60a482e78200e9525c5a5a85673ea7565da656fd7de",
+    "mode": 493
+  },
+  {
+    "path": "/home/user/gpui-question-source-set-target/release/build/gpui/649892c69ac22a2b/out/presentation-649892c69ac22a2b",
+    "bytes": 11869080,
+    "sha256": "9ff0bd5954d124c1a90b79c10b011a4fa279d3cf79e88eeeeb269beb563db1b5",
+    "mode": 493
+  },
+  {
+    "path": "/home/user/gpui-question-source-set-target/release/build/gpui/83c513739e1424ae/out/search_library-83c513739e1424ae",
+    "bytes": 12350904,
+    "sha256": "9863e3bf2f965a1e0bedf8d00498e5325bbe155df826d88fdcef7202137ef5a3",
+    "mode": 493
+  },
+  {
+    "path": "/home/user/gpui-question-source-set-target/release/build/gpui/7b5ab8aa84737b92/out/property_change_union-7b5ab8aa84737b92",
+    "bytes": 10920496,
+    "sha256": "466b8c86e3931485ce3ba1b369d2c2e99d5e93c1f373e8d8ca02a08bd0751f0c",
+    "mode": 493
+  },
+  {
+    "path": "/home/user/gpui-question-source-set-target/release/build/gpui/bdd130c1a7485058/out/todo_comparison-bdd130c1a7485058",
+    "bytes": 12176880,
+    "sha256": "3545a702167a9fe827aba2387bf3ee8f07570243329d8b6d7983bd45b133273e",
+    "mode": 493
+  },
+  {
+    "path": "/home/user/gpui-question-source-set-target/release/build/gpui/c3f120b90c3648c3/out/clipping-c3f120b90c3648c3",
+    "bytes": 11341264,
+    "sha256": "cbe513b781421e23afd7e95271128c6a3e6c313df49ec6e45bc0a5a193027ad7",
+    "mode": 493
+  },
+  {
+    "path": "/home/user/gpui-question-source-set-target/release/build/gpui/c492008117951966/out/components-c492008117951966",
+    "bytes": 13093456,
+    "sha256": "065189114a5347911cb54ee7b16c509852cb82a04f41852133ced020e0932ae7",
+    "mode": 493
+  },
+  {
+    "path": "/home/user/gpui-question-source-set-target/release/build/gpui/0361cc87005d93e3/out/semantics-0361cc87005d93e3",
+    "bytes": 10903784,
+    "sha256": "a76be41cf940c0a19331acf0525b41cc85ea060c41ef3967fe1efa8188965d97",
+    "mode": 493
+  },
+  {
+    "path": "/home/user/gpui-question-source-set-target/release/build/gpui/2f18a2fff0897ff0/out/rounded-2f18a2fff0897ff0",
+    "bytes": 12640144,
+    "sha256": "92d15016d2acd0cdf3b3edc9c5fad3a98ad55dc9cc8ff6f57919f615393f2df9",
+    "mode": 493
+  },
+  {
+    "path": "/home/user/gpui-question-source-set-target/release/build/gpui/835d2e4b02dfc666/out/pointer-835d2e4b02dfc666",
+    "bytes": 12258144,
+    "sha256": "7374f9af8e07b747e76903b059315758ab9b2fee11f94577e8c02d35593e419e",
+    "mode": 493
+  },
+  {
+    "path": "/home/user/gpui-question-source-set-target/release/build/gpui/853b725782ef2fcd/out/focus-853b725782ef2fcd",
+    "bytes": 12839920,
+    "sha256": "488a03730b9644d15c25c36bb6a5957010680039ed30a0edccce9af0d8f9a0a6",
+    "mode": 493
+  },
+  {
+    "path": "/home/user/gpui-question-source-set-target/release/build/gpui/df6cb4eaf3ff826d/out/application-df6cb4eaf3ff826d",
+    "bytes": 12247952,
+    "sha256": "5f8355a1fa3a62143a28a9b7119c0b2e459bb7e224abde37ea4e41f853d16a34",
+    "mode": 493
+  },
+  {
+    "path": "/home/user/gpui-question-source-set-target/release/build/gpui/d3f845fbce846eb0/out/semantic_serialization-d3f845fbce846eb0",
+    "bytes": 12419064,
+    "sha256": "46bb637eeea0b31d65b3aaf69147a839f5beab9cd5fedadffab887dc2da09449",
+    "mode": 493
+  },
+  {
+    "path": "/home/user/gpui-question-source-set-target/release/build/gpui/0755e12d756385e1/out/dpi-0755e12d756385e1",
+    "bytes": 10771000,
+    "sha256": "c8e813f933a1d8391b3e4ec95e63510d047d1a0b05414d648080a457ec18550c",
+    "mode": 493
+  },
+  {
+    "path": "/home/user/gpui-question-source-set-target/release/build/gpui/f85458735ae6adc9/out/paint_slots-f85458735ae6adc9",
+    "bytes": 10914360,
+    "sha256": "a23682909c10e362b902452ee5a4c8ad9c877c7b9b3f740602f97ae907a3ee10",
+    "mode": 493
+  },
+  {
+    "path": "/home/user/gpui-question-source-set-target/release/build/gpui/9f8f1c76236e13b9/out/frontier-9f8f1c76236e13b9",
+    "bytes": 12264384,
+    "sha256": "52de2cff9ad623641389de6fd2acbaa3cdb5f36fb79a47261d6e01b88c2e3bf9",
+    "mode": 493
+  },
+  {
+    "path": "/home/user/gpui-question-source-set-target/release/build/gpui/bfe0ff810dbebc08/out/question_inputs-bfe0ff810dbebc08",
+    "bytes": 10793728,
+    "sha256": "cdf2504b20595261926ffd3b538f4947ab8bf3253b2b84cc7ef0f0046c807683",
+    "mode": 493
+  },
+  {
+    "path": "/home/user/gpui-question-source-set-target/release/build/gpui/e8109db8d6d56b99/out/runtime-e8109db8d6d56b99",
+    "bytes": 12915216,
+    "sha256": "200aa3994c911cd02d715277b970bfdf06b4e34a1b54b1aef065d25d2cf22b4e",
+    "mode": 493
+  },
+  {
+    "path": "/home/user/gpui-question-source-set-target/release/build/gpui/86d24d27c68aefc6/out/queries-86d24d27c68aefc6",
+    "bytes": 10591728,
+    "sha256": "4df19d2e2ce445bd67b567f4952cafc8b68bcdde113d807bb6a650af37a30277",
+    "mode": 493
+  },
+  {
+    "path": "/home/user/gpui-question-source-set-target/release/build/gpui/de5b6906a8208748/out/unit_action_cost_two-de5b6906a8208748",
+    "bytes": 10729560,
+    "sha256": "e5f1f54b65f5e1a5621d97839511b6ae47a086d3b8d3be1dc74e1b44d03e6f25",
+    "mode": 493
+  },
+  {
+    "path": "/home/user/gpui-question-source-set-target/release/build/gpui/ab9519cc8f1140a3/out/source_values-ab9519cc8f1140a3",
+    "bytes": 10686608,
+    "sha256": "2ab4fa47e6df5539d8c6274719dbff88d3229af397876283bb45a78c2c62de8d",
+    "mode": 493
+  },
+  {
+    "path": "/home/user/gpui-question-source-set-target/release/build/gpui/0a9fe33fc35b7ea1/out/source_inbox-0a9fe33fc35b7ea1",
+    "bytes": 13008232,
+    "sha256": "0ab831ddb029f75bcba589dfe04aa74828622d1d25473eae6fc337b46cda88ca",
+    "mode": 493
+  },
+  {
+    "path": "/home/user/gpui-question-source-set-target/release/build/gpui/95750308cc84d754/out/library-95750308cc84d754",
+    "bytes": 12023008,
+    "sha256": "0e4d0549caf09ce33a47562b7c2ab4d2f61ea724a3c37f280e617b703ce775b1",
+    "mode": 493
+  },
+  {
+    "path": "/home/user/gpui-question-source-set-target/release/build/gpui/457fb26b52a477d6/out/acceptance-457fb26b52a477d6",
+    "bytes": 12765296,
+    "sha256": "ff674739c63754564010752d30f7eb3b15576f9ed83acc6ac0545e4f20483f4a",
+    "mode": 493
+  },
+  {
+    "path": "/home/user/gpui-question-source-set-target/release/build/gpui/03f6357a1b748b16/out/text_cache-03f6357a1b748b16",
+    "bytes": 10771280,
+    "sha256": "9d7b4461c9df67812bd9ad5fe6af19a0c40e1e5e25f2d3e7ac934a8324ca2e0b",
+    "mode": 493
+  },
+  {
+    "path": "/home/user/gpui-question-source-set-target/release/build/gpui/6a57f5d22d1d1288/out/presentation-6a57f5d22d1d1288",
+    "bytes": 10622072,
+    "sha256": "905ae4f0c54a189c325b5e86c4812dc0455cf162829583981d1ef5101332823e",
+    "mode": 493
+  },
+  {
+    "path": "/home/user/gpui-question-source-set-target/release/build/gpui/58411c0fde3517d0/out/paint_patch-58411c0fde3517d0",
+    "bytes": 12019648,
+    "sha256": "6a4d56b6826d54164e6efe86ab25afbb94ac5af157e70063260acec31f1c72f2",
+    "mode": 493
+  },
+  {
+    "path": "/home/user/gpui-question-source-set-target/release/build/gpui_gpu/6cc55d1770954a81/out/build_script_build",
+    "bytes": 8199368,
+    "sha256": "60054bc1e308b2fe40ea860028e37a7e12254e09a019203b9abc3a98774cf05e",
+    "mode": 493
+  },
+  {
+    "path": "/home/user/gpui-question-source-set-target/release/build/gpui_gpu/d66c2755bbc7fa5d/out/build_script_build",
+    "bytes": 8199208,
+    "sha256": "4207431423c6376bdde2df33b77c639fe839d97f3855ad709fbf6f540a64dde0",
+    "mode": 493
+  },
+  {
+    "path": "/home/user/gpui-question-source-set-target/release/examples/question_source_cost",
+    "bytes": 10371032,
+    "sha256": "2bfcb26f2d4046aa62aca57e9660b8bdde9e0e8795dbe06ec1edccb27ed90f38",
+    "mode": 493
+  },
+  {
+    "path": "/home/user/gpui-question-source-set-target/release/examples/question_source_allocations",
+    "bytes": 10431032,
+    "sha256": "b5cab95e91cc005982bcc66a23445ab7575d88a6615b9a1251333ce8bdfb4d34",
+    "mode": 493
+  }
+]

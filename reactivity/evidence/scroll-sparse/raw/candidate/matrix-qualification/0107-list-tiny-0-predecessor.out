@@ -1,0 +1,28 @@
+
+running 1 test
+test native::scroll_bench::complete_workload_cost ... SETUP,list-tiny,257113,6858662,b42928120371e925,20
+HEADERS,SceneDamage=32,RetainedRenderer=920,GpuSurface=1040
+FRAME,list-tiny,0,563981,256,1024,4096
+FRAME,list-tiny,1,342694,256,1024,4096
+FRAME,list-tiny,2,302038,256,1024,4096
+FRAME,list-tiny,3,290406,256,1024,4096
+FRAME,list-tiny,4,303120,256,1024,4096
+FRAME,list-tiny,5,299403,256,1024,4096
+FRAME,list-tiny,6,305053,256,1024,4096
+FRAME,list-tiny,7,286547,256,1024,4096
+FRAME,list-tiny,8,293992,256,1024,4096
+FRAME,list-tiny,9,287319,256,1024,4096
+FRAME,list-tiny,10,284054,256,1024,4096
+FRAME,list-tiny,11,259067,256,1024,4096
+FRAME,list-tiny,12,283173,256,1024,4096
+FRAME,list-tiny,13,282150,256,1024,4096
+FRAME,list-tiny,14,287390,256,1024,4096
+FRAME,list-tiny,15,255459,256,1024,4096
+FRAME,list-tiny,16,293882,256,1024,4096
+FRAME,list-tiny,17,321774,256,1024,4096
+FRAME,list-tiny,18,288393,256,1024,4096
+FRAME,list-tiny,19,265178,256,1024,4096
+ok
+
+test result: ok. 1 passed; 0 failed; 0 ignored; 0 measured; 321 filtered out; finished in 0.23s
+

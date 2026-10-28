@@ -1,0 +1,9 @@
+{
+  "bytes": 20480,
+  "differing_bytes": 2893,
+  "first_differing_byte": 0,
+  "actual": 62,
+  "full_renderer": 54,
+  "witness": "gpui::native::paint_tests::render::<gpui::native::paint_tests::scroll_copy_tests::Rows>",
+  "note": "Byte comparison of actual left/right image arrays in preserved native assertion; no tolerance."
+}

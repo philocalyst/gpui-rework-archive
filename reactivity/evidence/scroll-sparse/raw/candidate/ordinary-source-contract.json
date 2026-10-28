@@ -1,0 +1,42 @@
+{
+  "base": "c965a893364b46f965c83d10e2cf94a46dac1304",
+  "source": "599e36c149ea252f96056f3d8e827da137f71197",
+  "files": {
+    "reactivity/crates/gpu/src/renderer.rs": {
+      "base_sha256": "f55c5e51e16fded6d70f9ab5bfa10cda19738e73335d636b61285703be1d10e1",
+      "current_sha256": "5918d3957c901654ef2e41ad7893abe0e4a7ea59d9a5b9f17270e42627032ca7",
+      "change": "private module declaration only"
+    },
+    "reactivity/crates/gpu/src/shader.rs": {
+      "base_sha256": "433b9760e356cb45144262aabec37d61c1d5eb1e0529b47e4103da7d69b4859c",
+      "current_sha256": "433b9760e356cb45144262aabec37d61c1d5eb1e0529b47e4103da7d69b4859c",
+      "change": "identical"
+    },
+    "reactivity/crates/gpui/examples/zgx_native_lab.rs": {
+      "base_sha256": "b2b4f71dc9af30b4d67341fc42be7dbc19ec1075ef0401a791e9dfface14530f",
+      "current_sha256": "b2b4f71dc9af30b4d67341fc42be7dbc19ec1075ef0401a791e9dfface14530f",
+      "change": "identical"
+    },
+    "reactivity/crates/gpui/src/native/scroll_bench.rs": {
+      "base_sha256": "07e9b4c52920321511bdeaaae5fb351098f9062a67f9ccfa2fe11d01f99b4138",
+      "current_sha256": "07e9b4c52920321511bdeaaae5fb351098f9062a67f9ccfa2fe11d01f99b4138",
+      "change": "identical"
+    },
+    "reactivity/crates/gpui/src/native/text_cost.rs": {
+      "base_sha256": "da15a18cb7f2012ba747621e1ecf517ee3aeb59435d66db7caadadae5deae40d",
+      "current_sha256": "da15a18cb7f2012ba747621e1ecf517ee3aeb59435d66db7caadadae5deae40d",
+      "change": "identical"
+    },
+    "reactivity/Cargo.toml": {
+      "base_sha256": "d03d32db802e06ee9d17bd33f59733be7d74109e7bf918635e3e9b00cdc330f4",
+      "current_sha256": "d03d32db802e06ee9d17bd33f59733be7d74109e7bf918635e3e9b00cdc330f4",
+      "change": "identical"
+    },
+    "reactivity/Cargo.lock": {
+      "base_sha256": "0a21b1c39093d7217a0e0f720b8e3a49760b837b5d3be7051ad6d60aa9845c4b",
+      "current_sha256": "0a21b1c39093d7217a0e0f720b8e3a49760b837b5d3be7051ad6d60aa9845c4b",
+      "change": "identical"
+    }
+  },
+  "ordinary_retained_render_sha256": "ba7214e56f0ddac823d912c4a583ecb37becd5bcd575d2063d167bf8ada0aa78"
+}
