@@ -565,3 +565,26 @@ Sample-partitions admission **a0086d6d** adds a3855-byte horizontal-refinement
 counterexample to354 tests,Clippy,336 independent and96 scalar-oracle frames.
 Host code unchanged; inherited selection audit explicitly scoped. Native
 0b60a963 building; performance remains unmeasured.
+
+
+## Representation redirection from the user
+
+Sample-partitions native rejection is sealed at ceed2bd852d576a0b2aec08a728e8f0c92075a06:
+828 files,64 normal processes,10 exact preflights,34 workload tests; scroll
+.877526746 passes1.05,stream .882167801 fails.8,mixed suppressed for baseline
+work/cadence failure. No full-cost admission. The shader sequence stops here.
+
+The user's clarified objective is an integrated contiguous/addressable display
+tree, directly addressed subtree damage/update storage, bounded random-access
+lossless compression, and CPU/GPU publication/consumption. **It does not exist
+in the current implementation.** Compact nodes, parent columns, source patches
+and retained pixels do not establish it. BBTree terminology on shader work did
+not satisfy this architecture. Future changes remain local; the separately
+authorized snapshot publication does not authorize further pushes.
+
+Next isolated experiment: local/display-spans, based on qualified suffix core
+df8ca59f. Compare packed preorder spans with stable paged handles, explicit
+compression/index costs, structural relocation, dependency closure, old/new
+damage and stale-frame/resource authority. Fixed-size publication descriptors
+are separated from payload copies, CPU scans, GPU decoding and rendering.
+Executable models are research, not a completed integration or a ZGX victory.
