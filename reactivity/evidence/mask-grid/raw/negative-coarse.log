@@ -1,0 +1,5 @@
+Traceback (most recent call last):
+  File "/home/user/gpui-mask-grid-evidence/negative_gate.py", line 29, in <module>
+    (out/(name+'-artifacts.json')).write_text(json.dumps(artifacts,indent=2));print(name,code,'artifacts',len(artifacts),flush=True);assert code==101
+                                                                                                                                            ^^^^^^^^^
+AssertionError

@@ -1,0 +1,9 @@
+{
+  "RUSTUP_HOME": "/usr/local/rustup",
+  "CARGO_TARGET_DIR": "/home/user/gpui-mask-grid-coarse-target",
+  "CARGO_BUILD_JOBS": "4",
+  "VK_ICD_FILENAMES": "/usr/share/vulkan/icd.d/lvp_icd.json",
+  "LP_NUM_THREADS": "4",
+  "XDG_RUNTIME_DIR": "/home/user/gpui-xdg",
+  "GPUI_MASK_LATTICE_CAPTURE": "/home/user/gpui-mask-grid-evidence/negative-coarse/pixels"
+}
