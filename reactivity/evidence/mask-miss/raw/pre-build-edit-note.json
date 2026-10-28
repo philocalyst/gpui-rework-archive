@@ -1,0 +1,4 @@
+{
+  "event": "Initial exact text replacement did not match rustfmt-wrapped cached declaration and asserted before writing. Worktree remained clean at prereg662707d7; no build/test observation. Corrected replacement produced b817779c.",
+  "source": "b817779c5609a038edd8f7d22f46863416c9e17e"
+}

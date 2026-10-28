@@ -1,0 +1,13 @@
+{
+  "source": "6afe48ddddf5ddb406d43671a3037335072f2978",
+  "test_exit": 101,
+  "bytes": 35840,
+  "differing_bytes": 3718,
+  "first_difference": 3098,
+  "expected": 126,
+  "actual": 125,
+  "expected_sha256": "0ed0cba4d412b5fcf6b7b97e617fc3531abe32171c5f35eb1dd54e5a1d399872",
+  "actual_sha256": "5fa4ad72e5d75da39b5370d9e21a11c9cd5ce51dbfb5cccaa17ac1f75a75e256",
+  "oracle_file": "0-false-0-0-false.rgba",
+  "scope": "The unchanged public fixture rejects overbroad first-sample reuse in proof-enabled literal output against its proof-disabled fallback; right-hand bytes also equal the independently compiled pre-change oracle and real candidate."
+}

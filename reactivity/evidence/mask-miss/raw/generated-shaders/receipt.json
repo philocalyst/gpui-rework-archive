@@ -1,0 +1,68 @@
+{
+  "generated": [
+    {
+      "path": "/home/user/gpui-mask-miss-target/release/build/gpui_gpu/0b12888bfbf6a76e/out/ui.wgsl",
+      "sha256": "2df8c6754318e54df054be3f438a4eeba0c433034f75470816d0600986e8a52e",
+      "bytes": 22857
+    },
+    {
+      "path": "/home/user/gpui-mask-miss-target/release/build/gpui_gpu/aab4e3e5f9fc1354/out/ui.wgsl",
+      "sha256": "2df8c6754318e54df054be3f438a4eeba0c433034f75470816d0600986e8a52e",
+      "bytes": 22857
+    }
+  ],
+  "executed_render": {
+    "path": "/home/user/gpui-mask-miss-target/release/build/gpui_gpu/f3188f1101e1b4d0/out/render-f3188f1101e1b4d0",
+    "sha256": "6fa4e4e9c4af862509ec62f888f85445c78125a85f105b16ab9a25b9f16ebc1f",
+    "preserved": "/home/user/gpui-preserved-test-binaries/6fa4e4e9c4af862509ec62f888f85445c78125a85f105b16ab9a25b9f16ebc1f",
+    "bytes": 16880160,
+    "executed": true,
+    "cargo": {
+      "reason": "compiler-artifact",
+      "package_id": "path+file:///home/user/gpui-mask-miss-lab/reactivity/crates/gpu#gpui_gpu@0.1.0",
+      "manifest_path": "/home/user/gpui-mask-miss-lab/reactivity/crates/gpu/Cargo.toml",
+      "target": {
+        "kind": [
+          "test"
+        ],
+        "crate_types": [
+          "bin"
+        ],
+        "name": "render",
+        "src_path": "/home/user/gpui-mask-miss-lab/reactivity/crates/gpu/tests/render.rs",
+        "edition": "2024",
+        "required-features": [
+          "gpu-tests"
+        ],
+        "doc": false,
+        "doctest": false,
+        "test": true
+      },
+      "profile": {
+        "opt_level": "3",
+        "debuginfo": 0,
+        "debug_assertions": false,
+        "overflow_checks": false,
+        "test": true
+      },
+      "features": [
+        "default",
+        "gpu-tests",
+        "simd",
+        "vulkan-tests"
+      ],
+      "filenames": [
+        "/home/user/gpui-mask-miss-target/release/build/gpui_gpu/f3188f1101e1b4d0/out/render-f3188f1101e1b4d0"
+      ],
+      "executable": "/home/user/gpui-mask-miss-target/release/build/gpui_gpu/f3188f1101e1b4d0/out/render-f3188f1101e1b4d0",
+      "fresh": false
+    }
+  },
+  "embedded": {
+    "sha256": "2df8c6754318e54df054be3f438a4eeba0c433034f75470816d0600986e8a52e",
+    "bytes": 22857,
+    "offset": 614621
+  },
+  "fixture_sha256": "c5c029e5774e3941478279bf645772b6bf7e80f729a96c69be8a5581336cd46a",
+  "scope": "Fresh corrected GPU package and executed GPU render ELF; native profile/offline modules not yet qualified."
+}
