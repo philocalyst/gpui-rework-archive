@@ -799,3 +799,15 @@ This tests BBTree's shared homogeneous-stage decisions in a compiled operation
 kernel, not an async runtime. Existing publication/task authority is untouched.
 GPU suite plus new public96-frame refinement/fallback/replay adversary is starting.
 Existing336 independent reference images remain unchanged. No performance claim.
+
+
+Sample-partitions positive checkpoint **a4204460d9288ccd5c222bc69c87ef6b29084117**
+verifies707 files,63 ELF identities,354 tests,Clippy,336 independent exact images
+and the new96-frame scalar-literal-oracle refinement/replay adversary. Shipping
+38283 lines (+76 mask-miss,+255 suffix),WGSL25602 bytes. Negative control remains
+pending; this is not native/performance admission. Completed main build caches
+were reclaimed only after this independent checkpoint, preserving all canonical
+ELFs and generated shader bytes to maintain8GiB reserve. Horizontal-cut mutant
+is building separately. Dynamic representative indexing and extra control may
+change LLVM/GPU register spilling; no claim that fewer logical blends guarantee
+faster execution.

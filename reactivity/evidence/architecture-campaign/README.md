@@ -554,3 +554,8 @@ Fine-grid native **0d48eb1d** rejects:stream .86580,mixed .87037 fail .8 despite
 all work/cadence checks passing. New sample-partitionsf9c3f300/ddf9f4b6 keeps
 16x16 host bins and shares exact identical sample states, refining before blends.
 GPU qualification underway; no adoption or ZGX claim.
+
+
+Sample-partitions positive checkpoint **a4204460** verifies354 tests,Clippy,
+336 independent exact images and96-frame public refinement/replay checks.
+Horizontal-cut negative control building; native admission still pending.
