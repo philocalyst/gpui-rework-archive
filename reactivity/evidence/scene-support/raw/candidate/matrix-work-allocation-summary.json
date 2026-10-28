@@ -1,0 +1,2578 @@
+{
+  "scroll": {
+    "control": {
+      "warm_allocations": 462.5,
+      "warm_requested_bytes": 277334.0,
+      "warm_net_bytes": 304.0,
+      "warm_peak_bytes": 54532.0,
+      "retained_image_bytes": 2764800.0,
+      "copied_pixels": 691200.0,
+      "composited_pixels": 368000.0,
+      "first_update": [
+        0,
+        358,
+        257914,
+        3176,
+        56464,
+        2764800,
+        691200
+      ]
+    },
+    "bounds": {
+      "warm_allocations": 462.5,
+      "warm_requested_bytes": 277334.0,
+      "warm_net_bytes": 304.0,
+      "warm_peak_bytes": 54532.0,
+      "retained_image_bytes": 2764800.0,
+      "copied_pixels": 691200.0,
+      "composited_pixels": 368000.0,
+      "first_update": [
+        0,
+        358,
+        257914,
+        3176,
+        56464,
+        2764800,
+        691200
+      ]
+    },
+    "predecessor": {
+      "warm_allocations": 462.5,
+      "warm_requested_bytes": 277334.0,
+      "warm_net_bytes": 304.0,
+      "warm_peak_bytes": 54532.0,
+      "retained_image_bytes": 2764800.0,
+      "copied_pixels": 691200.0,
+      "composited_pixels": 368000.0,
+      "first_update": [
+        0,
+        358,
+        257914,
+        3176,
+        56464,
+        2764800,
+        691200
+      ]
+    },
+    "scroll_precise": {
+      "warm_allocations": 468.5,
+      "warm_requested_bytes": 277702.0,
+      "warm_net_bytes": 304.0,
+      "warm_peak_bytes": 54532.0,
+      "retained_image_bytes": 4185280.0,
+      "copied_pixels": 1401440.0,
+      "composited_pixels": 12880.0,
+      "first_update": [
+        0,
+        373,
+        259506,
+        3584,
+        56464,
+        4185280,
+        1401440
+      ]
+    },
+    "candidate": {
+      "warm_allocations": 468.5,
+      "warm_requested_bytes": 277702.0,
+      "warm_net_bytes": 304.0,
+      "warm_peak_bytes": 54532.0,
+      "retained_image_bytes": 4185280.0,
+      "copied_pixels": 1401440.0,
+      "composited_pixels": 12880.0,
+      "first_update": [
+        0,
+        373,
+        259506,
+        3584,
+        56464,
+        4185280,
+        1401440
+      ]
+    }
+  },
+  "both": {
+    "control": {
+      "warm_allocations": 542.5,
+      "warm_requested_bytes": 350760.0,
+      "warm_net_bytes": 304.0,
+      "warm_peak_bytes": 74789.0,
+      "retained_image_bytes": 2764800.0,
+      "copied_pixels": 691200.0,
+      "composited_pixels": 524400.0,
+      "first_update": [
+        0,
+        439,
+        331388,
+        3176,
+        76741,
+        2764800,
+        691200
+      ]
+    },
+    "bounds": {
+      "warm_allocations": 542.5,
+      "warm_requested_bytes": 350760.0,
+      "warm_net_bytes": 304.0,
+      "warm_peak_bytes": 74789.0,
+      "retained_image_bytes": 2764800.0,
+      "copied_pixels": 691200.0,
+      "composited_pixels": 524400.0,
+      "first_update": [
+        0,
+        439,
+        331388,
+        3176,
+        76741,
+        2764800,
+        691200
+      ]
+    },
+    "predecessor": {
+      "warm_allocations": 542.5,
+      "warm_requested_bytes": 350760.0,
+      "warm_net_bytes": 304.0,
+      "warm_peak_bytes": 74789.0,
+      "retained_image_bytes": 2764800.0,
+      "copied_pixels": 691200.0,
+      "composited_pixels": 524400.0,
+      "first_update": [
+        0,
+        439,
+        331388,
+        3176,
+        76741,
+        2764800,
+        691200
+      ]
+    },
+    "scroll_precise": {
+      "warm_allocations": 553.5,
+      "warm_requested_bytes": 358360.0,
+      "warm_net_bytes": 304.0,
+      "warm_peak_bytes": 74789.0,
+      "retained_image_bytes": 4185280.0,
+      "copied_pixels": 1401440.0,
+      "composited_pixels": 15840.0,
+      "first_update": [
+        0,
+        459,
+        340212,
+        4096,
+        76741,
+        4185280,
+        1401440
+      ]
+    },
+    "candidate": {
+      "warm_allocations": 553.5,
+      "warm_requested_bytes": 358360.0,
+      "warm_net_bytes": 304.0,
+      "warm_peak_bytes": 74789.0,
+      "retained_image_bytes": 4185280.0,
+      "copied_pixels": 1401440.0,
+      "composited_pixels": 15840.0,
+      "first_update": [
+        0,
+        459,
+        340212,
+        4096,
+        76741,
+        4185280,
+        1401440
+      ]
+    }
+  },
+  "stream": {
+    "control": {
+      "warm_allocations": 245.0,
+      "warm_requested_bytes": 188319.0,
+      "warm_net_bytes": 304.0,
+      "warm_peak_bytes": 74381.0,
+      "retained_image_bytes": 2764800.0,
+      "copied_pixels": 691200.0,
+      "composited_pixels": 99630.0,
+      "first_update": [
+        0,
+        256,
+        243039,
+        27840,
+        74637,
+        2764800,
+        691200
+      ]
+    },
+    "bounds": {
+      "warm_allocations": 216.0,
+      "warm_requested_bytes": 123995.0,
+      "warm_net_bytes": 304.0,
+      "warm_peak_bytes": 43541.0,
+      "retained_image_bytes": 2764800.0,
+      "copied_pixels": 691200.0,
+      "composited_pixels": 99630.0,
+      "first_update": [
+        0,
+        227,
+        178715,
+        27840,
+        63683,
+        2764800,
+        691200
+      ]
+    },
+    "predecessor": {
+      "warm_allocations": 221.0,
+      "warm_requested_bytes": 131315.0,
+      "warm_net_bytes": 304.0,
+      "warm_peak_bytes": 43597.0,
+      "retained_image_bytes": 2764800.0,
+      "copied_pixels": 691200.0,
+      "composited_pixels": 2960.0,
+      "first_update": [
+        0,
+        232,
+        186035,
+        27840,
+        64251,
+        2764800,
+        691200
+      ]
+    },
+    "scroll_precise": {
+      "warm_allocations": 221.0,
+      "warm_requested_bytes": 131315.0,
+      "warm_net_bytes": 304.0,
+      "warm_peak_bytes": 43597.0,
+      "retained_image_bytes": 2764800.0,
+      "copied_pixels": 691200.0,
+      "composited_pixels": 2960.0,
+      "first_update": [
+        0,
+        232,
+        186035,
+        27840,
+        64251,
+        2764800,
+        691200
+      ]
+    },
+    "candidate": {
+      "warm_allocations": 221.0,
+      "warm_requested_bytes": 131315.0,
+      "warm_net_bytes": 304.0,
+      "warm_peak_bytes": 43597.0,
+      "retained_image_bytes": 2764800.0,
+      "copied_pixels": 691200.0,
+      "composited_pixels": 2960.0,
+      "first_update": [
+        0,
+        232,
+        186035,
+        27840,
+        64251,
+        2764800,
+        691200
+      ]
+    }
+  },
+  "stream-owner": {
+    "control": {
+      "warm_allocations": 405.0,
+      "warm_requested_bytes": 284248.0,
+      "warm_net_bytes": 304.0,
+      "warm_peak_bytes": 74381.0,
+      "retained_image_bytes": 2764800.0,
+      "copied_pixels": 691200.0,
+      "composited_pixels": 99630.0,
+      "first_update": [
+        0,
+        416,
+        338968,
+        27840,
+        74637,
+        2764800,
+        691200
+      ]
+    },
+    "bounds": {
+      "warm_allocations": 376.0,
+      "warm_requested_bytes": 219924.0,
+      "warm_net_bytes": 304.0,
+      "warm_peak_bytes": 43541.0,
+      "retained_image_bytes": 2764800.0,
+      "copied_pixels": 691200.0,
+      "composited_pixels": 99630.0,
+      "first_update": [
+        0,
+        387,
+        274644,
+        27840,
+        63683,
+        2764800,
+        691200
+      ]
+    },
+    "predecessor": {
+      "warm_allocations": 381.0,
+      "warm_requested_bytes": 227244.0,
+      "warm_net_bytes": 304.0,
+      "warm_peak_bytes": 43597.0,
+      "retained_image_bytes": 2764800.0,
+      "copied_pixels": 691200.0,
+      "composited_pixels": 2960.0,
+      "first_update": [
+        0,
+        392,
+        281964,
+        27840,
+        64251,
+        2764800,
+        691200
+      ]
+    },
+    "scroll_precise": {
+      "warm_allocations": 381.0,
+      "warm_requested_bytes": 227244.0,
+      "warm_net_bytes": 304.0,
+      "warm_peak_bytes": 43597.0,
+      "retained_image_bytes": 2764800.0,
+      "copied_pixels": 691200.0,
+      "composited_pixels": 2960.0,
+      "first_update": [
+        0,
+        392,
+        281964,
+        27840,
+        64251,
+        2764800,
+        691200
+      ]
+    },
+    "candidate": {
+      "warm_allocations": 381.0,
+      "warm_requested_bytes": 227244.0,
+      "warm_net_bytes": 304.0,
+      "warm_peak_bytes": 43597.0,
+      "retained_image_bytes": 2764800.0,
+      "copied_pixels": 691200.0,
+      "composited_pixels": 2960.0,
+      "first_update": [
+        0,
+        392,
+        281964,
+        27840,
+        64251,
+        2764800,
+        691200
+      ]
+    }
+  },
+  "fractional": {
+    "control": {
+      "warm_allocations": 573.0,
+      "warm_requested_bytes": 338663.0,
+      "warm_net_bytes": 304.0,
+      "warm_peak_bytes": 54838.0,
+      "retained_image_bytes": 2764800.0,
+      "copied_pixels": 691200.0,
+      "composited_pixels": 368000.0,
+      "first_update": [
+        0,
+        358,
+        257914,
+        3176,
+        56464,
+        2764800,
+        691200
+      ]
+    },
+    "bounds": {
+      "warm_allocations": 573.0,
+      "warm_requested_bytes": 338663.0,
+      "warm_net_bytes": 304.0,
+      "warm_peak_bytes": 54838.0,
+      "retained_image_bytes": 2764800.0,
+      "copied_pixels": 691200.0,
+      "composited_pixels": 368000.0,
+      "first_update": [
+        0,
+        358,
+        257914,
+        3176,
+        56464,
+        2764800,
+        691200
+      ]
+    },
+    "predecessor": {
+      "warm_allocations": 573.0,
+      "warm_requested_bytes": 338663.0,
+      "warm_net_bytes": 304.0,
+      "warm_peak_bytes": 54838.0,
+      "retained_image_bytes": 2764800.0,
+      "copied_pixels": 691200.0,
+      "composited_pixels": 368000.0,
+      "first_update": [
+        0,
+        358,
+        257914,
+        3176,
+        56464,
+        2764800,
+        691200
+      ]
+    },
+    "scroll_precise": {
+      "warm_allocations": 573.0,
+      "warm_requested_bytes": 338663.0,
+      "warm_net_bytes": 304.0,
+      "warm_peak_bytes": 54838.0,
+      "retained_image_bytes": 2764800.0,
+      "copied_pixels": 691200.0,
+      "composited_pixels": 368000.0,
+      "first_update": [
+        0,
+        358,
+        257914,
+        3176,
+        56464,
+        2764800,
+        691200
+      ]
+    },
+    "candidate": {
+      "warm_allocations": 573.0,
+      "warm_requested_bytes": 338663.0,
+      "warm_net_bytes": 304.0,
+      "warm_peak_bytes": 54838.0,
+      "retained_image_bytes": 2764800.0,
+      "copied_pixels": 691200.0,
+      "composited_pixels": 368000.0,
+      "first_update": [
+        0,
+        358,
+        257914,
+        3176,
+        56464,
+        2764800,
+        691200
+      ]
+    }
+  },
+  "flat-tiny": {
+    "control": {
+      "warm_allocations": 69.0,
+      "warm_requested_bytes": 10135.0,
+      "warm_net_bytes": 0.0,
+      "warm_peak_bytes": 6353.0,
+      "retained_image_bytes": 256.0,
+      "copied_pixels": 64.0,
+      "composited_pixels": 64.0,
+      "first_update": [
+        0,
+        75,
+        10775,
+        352,
+        6705,
+        256,
+        64
+      ]
+    },
+    "bounds": {
+      "warm_allocations": 69.0,
+      "warm_requested_bytes": 10135.0,
+      "warm_net_bytes": 0.0,
+      "warm_peak_bytes": 6353.0,
+      "retained_image_bytes": 256.0,
+      "copied_pixels": 64.0,
+      "composited_pixels": 64.0,
+      "first_update": [
+        0,
+        75,
+        10775,
+        352,
+        6705,
+        256,
+        64
+      ]
+    },
+    "predecessor": {
+      "warm_allocations": 69.0,
+      "warm_requested_bytes": 10135.0,
+      "warm_net_bytes": 0.0,
+      "warm_peak_bytes": 6353.0,
+      "retained_image_bytes": 256.0,
+      "copied_pixels": 64.0,
+      "composited_pixels": 64.0,
+      "first_update": [
+        0,
+        75,
+        10775,
+        352,
+        6705,
+        256,
+        64
+      ]
+    },
+    "scroll_precise": {
+      "warm_allocations": 69.0,
+      "warm_requested_bytes": 10135.0,
+      "warm_net_bytes": 0.0,
+      "warm_peak_bytes": 6353.0,
+      "retained_image_bytes": 256.0,
+      "copied_pixels": 64.0,
+      "composited_pixels": 64.0,
+      "first_update": [
+        0,
+        75,
+        10775,
+        352,
+        6705,
+        256,
+        64
+      ]
+    },
+    "candidate": {
+      "warm_allocations": 69.0,
+      "warm_requested_bytes": 10135.0,
+      "warm_net_bytes": 0.0,
+      "warm_peak_bytes": 6353.0,
+      "retained_image_bytes": 256.0,
+      "copied_pixels": 64.0,
+      "composited_pixels": 64.0,
+      "first_update": [
+        0,
+        75,
+        10775,
+        352,
+        6705,
+        256,
+        64
+      ]
+    }
+  },
+  "flat-full": {
+    "control": {
+      "warm_allocations": 69.0,
+      "warm_requested_bytes": 10135.0,
+      "warm_net_bytes": 0.0,
+      "warm_peak_bytes": 6353.0,
+      "retained_image_bytes": 1048576.0,
+      "copied_pixels": 262144.0,
+      "composited_pixels": 262144.0,
+      "first_update": [
+        0,
+        75,
+        10775,
+        352,
+        6705,
+        1048576,
+        262144
+      ]
+    },
+    "bounds": {
+      "warm_allocations": 69.0,
+      "warm_requested_bytes": 10135.0,
+      "warm_net_bytes": 0.0,
+      "warm_peak_bytes": 6353.0,
+      "retained_image_bytes": 1048576.0,
+      "copied_pixels": 262144.0,
+      "composited_pixels": 262144.0,
+      "first_update": [
+        0,
+        75,
+        10775,
+        352,
+        6705,
+        1048576,
+        262144
+      ]
+    },
+    "predecessor": {
+      "warm_allocations": 69.0,
+      "warm_requested_bytes": 10135.0,
+      "warm_net_bytes": 0.0,
+      "warm_peak_bytes": 6353.0,
+      "retained_image_bytes": 1048576.0,
+      "copied_pixels": 262144.0,
+      "composited_pixels": 262144.0,
+      "first_update": [
+        0,
+        75,
+        10775,
+        352,
+        6705,
+        1048576,
+        262144
+      ]
+    },
+    "scroll_precise": {
+      "warm_allocations": 69.0,
+      "warm_requested_bytes": 10135.0,
+      "warm_net_bytes": 0.0,
+      "warm_peak_bytes": 6353.0,
+      "retained_image_bytes": 1048576.0,
+      "copied_pixels": 262144.0,
+      "composited_pixels": 262144.0,
+      "first_update": [
+        0,
+        75,
+        10775,
+        352,
+        6705,
+        1048576,
+        262144
+      ]
+    },
+    "candidate": {
+      "warm_allocations": 69.0,
+      "warm_requested_bytes": 10135.0,
+      "warm_net_bytes": 0.0,
+      "warm_peak_bytes": 6353.0,
+      "retained_image_bytes": 1048576.0,
+      "copied_pixels": 262144.0,
+      "composited_pixels": 262144.0,
+      "first_update": [
+        0,
+        75,
+        10775,
+        352,
+        6705,
+        1048576,
+        262144
+      ]
+    }
+  },
+  "list-tiny": {
+    "control": {
+      "warm_allocations": 210.0,
+      "warm_requested_bytes": 61089.0,
+      "warm_net_bytes": 312.0,
+      "warm_peak_bytes": 12093.0,
+      "retained_image_bytes": 4096.0,
+      "copied_pixels": 1024.0,
+      "composited_pixels": 256.0,
+      "first_update": [
+        0,
+        257,
+        80772,
+        6438,
+        15147,
+        4096,
+        1024
+      ]
+    },
+    "bounds": {
+      "warm_allocations": 210.0,
+      "warm_requested_bytes": 61089.0,
+      "warm_net_bytes": 312.0,
+      "warm_peak_bytes": 12093.0,
+      "retained_image_bytes": 4096.0,
+      "copied_pixels": 1024.0,
+      "composited_pixels": 256.0,
+      "first_update": [
+        0,
+        257,
+        80772,
+        6438,
+        15147,
+        4096,
+        1024
+      ]
+    },
+    "predecessor": {
+      "warm_allocations": 210.0,
+      "warm_requested_bytes": 61089.0,
+      "warm_net_bytes": 312.0,
+      "warm_peak_bytes": 12093.0,
+      "retained_image_bytes": 4096.0,
+      "copied_pixels": 1024.0,
+      "composited_pixels": 256.0,
+      "first_update": [
+        0,
+        257,
+        80772,
+        6438,
+        15147,
+        4096,
+        1024
+      ]
+    },
+    "scroll_precise": {
+      "warm_allocations": 216.0,
+      "warm_requested_bytes": 61457.0,
+      "warm_net_bytes": 312.0,
+      "warm_peak_bytes": 12093.0,
+      "retained_image_bytes": 5056.0,
+      "copied_pixels": 1504.0,
+      "composited_pixels": 16.0,
+      "first_update": [
+        0,
+        272,
+        82364,
+        7534,
+        16267,
+        5056,
+        1504
+      ]
+    },
+    "candidate": {
+      "warm_allocations": 216.0,
+      "warm_requested_bytes": 61457.0,
+      "warm_net_bytes": 312.0,
+      "warm_peak_bytes": 12093.0,
+      "retained_image_bytes": 5056.0,
+      "copied_pixels": 1504.0,
+      "composited_pixels": 16.0,
+      "first_update": [
+        0,
+        272,
+        82364,
+        7534,
+        16267,
+        5056,
+        1504
+      ]
+    }
+  },
+  "list-flat": {
+    "control": {
+      "warm_allocations": 261.5,
+      "warm_requested_bytes": 107958.0,
+      "warm_net_bytes": 304.0,
+      "warm_peak_bytes": 22104.0,
+      "retained_image_bytes": 2764800.0,
+      "copied_pixels": 691200.0,
+      "composited_pixels": 368000.0,
+      "first_update": [
+        0,
+        219,
+        76826,
+        2904,
+        21192,
+        2764800,
+        691200
+      ]
+    },
+    "bounds": {
+      "warm_allocations": 261.5,
+      "warm_requested_bytes": 107958.0,
+      "warm_net_bytes": 304.0,
+      "warm_peak_bytes": 22104.0,
+      "retained_image_bytes": 2764800.0,
+      "copied_pixels": 691200.0,
+      "composited_pixels": 368000.0,
+      "first_update": [
+        0,
+        219,
+        76826,
+        2904,
+        21192,
+        2764800,
+        691200
+      ]
+    },
+    "predecessor": {
+      "warm_allocations": 261.5,
+      "warm_requested_bytes": 107958.0,
+      "warm_net_bytes": 304.0,
+      "warm_peak_bytes": 22104.0,
+      "retained_image_bytes": 2764800.0,
+      "copied_pixels": 691200.0,
+      "composited_pixels": 368000.0,
+      "first_update": [
+        0,
+        219,
+        76826,
+        2904,
+        21192,
+        2764800,
+        691200
+      ]
+    },
+    "scroll_precise": {
+      "warm_allocations": 267.5,
+      "warm_requested_bytes": 108326.0,
+      "warm_net_bytes": 304.0,
+      "warm_peak_bytes": 22104.0,
+      "retained_image_bytes": 4185280.0,
+      "copied_pixels": 1401440.0,
+      "composited_pixels": 12880.0,
+      "first_update": [
+        0,
+        234,
+        78418,
+        4000,
+        21192,
+        4185280,
+        1401440
+      ]
+    },
+    "candidate": {
+      "warm_allocations": 267.5,
+      "warm_requested_bytes": 108326.0,
+      "warm_net_bytes": 304.0,
+      "warm_peak_bytes": 22104.0,
+      "retained_image_bytes": 4185280.0,
+      "copied_pixels": 1401440.0,
+      "composited_pixels": 12880.0,
+      "first_update": [
+        0,
+        234,
+        78418,
+        4000,
+        21192,
+        4185280,
+        1401440
+      ]
+    }
+  },
+  "exposure": {
+    "control": {
+      "warm_allocations": 44.0,
+      "warm_requested_bytes": 8024.0,
+      "warm_net_bytes": 0.0,
+      "warm_peak_bytes": 5218.0,
+      "retained_image_bytes": 2764800.0,
+      "copied_pixels": 691200.0,
+      "composited_pixels": 0.0,
+      "first_update": [
+        0,
+        44,
+        8024,
+        0,
+        5218,
+        2764800,
+        691200
+      ]
+    },
+    "bounds": {
+      "warm_allocations": 44.0,
+      "warm_requested_bytes": 8024.0,
+      "warm_net_bytes": 0.0,
+      "warm_peak_bytes": 5218.0,
+      "retained_image_bytes": 2764800.0,
+      "copied_pixels": 691200.0,
+      "composited_pixels": 0.0,
+      "first_update": [
+        0,
+        44,
+        8024,
+        0,
+        5218,
+        2764800,
+        691200
+      ]
+    },
+    "predecessor": {
+      "warm_allocations": 44.0,
+      "warm_requested_bytes": 8024.0,
+      "warm_net_bytes": 0.0,
+      "warm_peak_bytes": 5218.0,
+      "retained_image_bytes": 2764800.0,
+      "copied_pixels": 691200.0,
+      "composited_pixels": 0.0,
+      "first_update": [
+        0,
+        44,
+        8024,
+        0,
+        5218,
+        2764800,
+        691200
+      ]
+    },
+    "scroll_precise": {
+      "warm_allocations": 44.0,
+      "warm_requested_bytes": 8024.0,
+      "warm_net_bytes": 0.0,
+      "warm_peak_bytes": 5218.0,
+      "retained_image_bytes": 2764800.0,
+      "copied_pixels": 691200.0,
+      "composited_pixels": 0.0,
+      "first_update": [
+        0,
+        44,
+        8024,
+        0,
+        5218,
+        2764800,
+        691200
+      ]
+    },
+    "candidate": {
+      "warm_allocations": 44.0,
+      "warm_requested_bytes": 8024.0,
+      "warm_net_bytes": 0.0,
+      "warm_peak_bytes": 5218.0,
+      "retained_image_bytes": 2764800.0,
+      "copied_pixels": 691200.0,
+      "composited_pixels": 0.0,
+      "first_update": [
+        0,
+        44,
+        8024,
+        0,
+        5218,
+        2764800,
+        691200
+      ]
+    }
+  },
+  "text-0-1-source": {
+    "control": {
+      "warm_allocations": 132.0,
+      "warm_requested_bytes": 17193.0,
+      "warm_net_bytes": 304.0,
+      "warm_peak_bytes": 8277.0,
+      "retained_image_bytes": 2764800.0,
+      "copied_pixels": 691200.0,
+      "composited_pixels": 390.0,
+      "first_update": [
+        0,
+        141,
+        18041,
+        776,
+        8677,
+        2764800,
+        691200
+      ]
+    },
+    "bounds": {
+      "warm_allocations": 132.0,
+      "warm_requested_bytes": 17193.0,
+      "warm_net_bytes": 304.0,
+      "warm_peak_bytes": 8277.0,
+      "retained_image_bytes": 2764800.0,
+      "copied_pixels": 691200.0,
+      "composited_pixels": 390.0,
+      "first_update": [
+        0,
+        141,
+        18041,
+        776,
+        8677,
+        2764800,
+        691200
+      ]
+    },
+    "predecessor": {
+      "warm_allocations": 132.0,
+      "warm_requested_bytes": 17249.0,
+      "warm_net_bytes": 304.0,
+      "warm_peak_bytes": 8333.0,
+      "retained_image_bytes": 2764800.0,
+      "copied_pixels": 691200.0,
+      "composited_pixels": 390.0,
+      "first_update": [
+        0,
+        141,
+        18097,
+        776,
+        8733,
+        2764800,
+        691200
+      ]
+    },
+    "scroll_precise": {
+      "warm_allocations": 132.0,
+      "warm_requested_bytes": 17249.0,
+      "warm_net_bytes": 304.0,
+      "warm_peak_bytes": 8333.0,
+      "retained_image_bytes": 2764800.0,
+      "copied_pixels": 691200.0,
+      "composited_pixels": 390.0,
+      "first_update": [
+        0,
+        141,
+        18097,
+        776,
+        8733,
+        2764800,
+        691200
+      ]
+    },
+    "candidate": {
+      "warm_allocations": 132.0,
+      "warm_requested_bytes": 17249.0,
+      "warm_net_bytes": 304.0,
+      "warm_peak_bytes": 8333.0,
+      "retained_image_bytes": 2764800.0,
+      "copied_pixels": 691200.0,
+      "composited_pixels": 390.0,
+      "first_update": [
+        0,
+        141,
+        18097,
+        776,
+        8733,
+        2764800,
+        691200
+      ]
+    }
+  },
+  "text-0-1-owner": {
+    "control": {
+      "warm_allocations": 165.0,
+      "warm_requested_bytes": 33119.0,
+      "warm_net_bytes": 304.0,
+      "warm_peak_bytes": 8653.0,
+      "retained_image_bytes": 2764800.0,
+      "copied_pixels": 691200.0,
+      "composited_pixels": 390.0,
+      "first_update": [
+        0,
+        174,
+        33967,
+        776,
+        9053,
+        2764800,
+        691200
+      ]
+    },
+    "bounds": {
+      "warm_allocations": 150.0,
+      "warm_requested_bytes": 22697.0,
+      "warm_net_bytes": 304.0,
+      "warm_peak_bytes": 8277.0,
+      "retained_image_bytes": 2764800.0,
+      "copied_pixels": 691200.0,
+      "composited_pixels": 390.0,
+      "first_update": [
+        0,
+        159,
+        23545,
+        776,
+        8677,
+        2764800,
+        691200
+      ]
+    },
+    "predecessor": {
+      "warm_allocations": 150.0,
+      "warm_requested_bytes": 22753.0,
+      "warm_net_bytes": 304.0,
+      "warm_peak_bytes": 8333.0,
+      "retained_image_bytes": 2764800.0,
+      "copied_pixels": 691200.0,
+      "composited_pixels": 390.0,
+      "first_update": [
+        0,
+        159,
+        23601,
+        776,
+        8733,
+        2764800,
+        691200
+      ]
+    },
+    "scroll_precise": {
+      "warm_allocations": 150.0,
+      "warm_requested_bytes": 22753.0,
+      "warm_net_bytes": 304.0,
+      "warm_peak_bytes": 8333.0,
+      "retained_image_bytes": 2764800.0,
+      "copied_pixels": 691200.0,
+      "composited_pixels": 390.0,
+      "first_update": [
+        0,
+        159,
+        23601,
+        776,
+        8733,
+        2764800,
+        691200
+      ]
+    },
+    "candidate": {
+      "warm_allocations": 150.0,
+      "warm_requested_bytes": 22753.0,
+      "warm_net_bytes": 304.0,
+      "warm_peak_bytes": 8333.0,
+      "retained_image_bytes": 2764800.0,
+      "copied_pixels": 691200.0,
+      "composited_pixels": 390.0,
+      "first_update": [
+        0,
+        159,
+        23601,
+        776,
+        8733,
+        2764800,
+        691200
+      ]
+    }
+  },
+  "text-0-2-source": {
+    "control": {
+      "warm_allocations": 171.0,
+      "warm_requested_bytes": 29799.0,
+      "warm_net_bytes": 304.0,
+      "warm_peak_bytes": 9149.0,
+      "retained_image_bytes": 2764800.0,
+      "copied_pixels": 691200.0,
+      "composited_pixels": 1430.0,
+      "first_update": [
+        0,
+        180,
+        30647,
+        776,
+        9549,
+        2764800,
+        691200
+      ]
+    },
+    "bounds": {
+      "warm_allocations": 171.0,
+      "warm_requested_bytes": 29799.0,
+      "warm_net_bytes": 304.0,
+      "warm_peak_bytes": 9149.0,
+      "retained_image_bytes": 2764800.0,
+      "copied_pixels": 691200.0,
+      "composited_pixels": 1430.0,
+      "first_update": [
+        0,
+        180,
+        30647,
+        776,
+        9549,
+        2764800,
+        691200
+      ]
+    },
+    "predecessor": {
+      "warm_allocations": 171.0,
+      "warm_requested_bytes": 29855.0,
+      "warm_net_bytes": 304.0,
+      "warm_peak_bytes": 9149.0,
+      "retained_image_bytes": 2764800.0,
+      "copied_pixels": 691200.0,
+      "composited_pixels": 1430.0,
+      "first_update": [
+        0,
+        180,
+        30703,
+        776,
+        9549,
+        2764800,
+        691200
+      ]
+    },
+    "scroll_precise": {
+      "warm_allocations": 171.0,
+      "warm_requested_bytes": 29855.0,
+      "warm_net_bytes": 304.0,
+      "warm_peak_bytes": 9149.0,
+      "retained_image_bytes": 2764800.0,
+      "copied_pixels": 691200.0,
+      "composited_pixels": 1430.0,
+      "first_update": [
+        0,
+        180,
+        30703,
+        776,
+        9549,
+        2764800,
+        691200
+      ]
+    },
+    "candidate": {
+      "warm_allocations": 175.0,
+      "warm_requested_bytes": 31191.0,
+      "warm_net_bytes": 304.0,
+      "warm_peak_bytes": 10013.0,
+      "retained_image_bytes": 2764800.0,
+      "copied_pixels": 691200.0,
+      "composited_pixels": 780.0,
+      "first_update": [
+        0,
+        184,
+        32039,
+        776,
+        10413,
+        2764800,
+        691200
+      ]
+    }
+  },
+  "text-0-2-owner": {
+    "control": {
+      "warm_allocations": 178.0,
+      "warm_requested_bytes": 34659.0,
+      "warm_net_bytes": 304.0,
+      "warm_peak_bytes": 9149.0,
+      "retained_image_bytes": 2764800.0,
+      "copied_pixels": 691200.0,
+      "composited_pixels": 1430.0,
+      "first_update": [
+        0,
+        187,
+        35507,
+        776,
+        9549,
+        2764800,
+        691200
+      ]
+    },
+    "bounds": {
+      "warm_allocations": 178.0,
+      "warm_requested_bytes": 34659.0,
+      "warm_net_bytes": 304.0,
+      "warm_peak_bytes": 9149.0,
+      "retained_image_bytes": 2764800.0,
+      "copied_pixels": 691200.0,
+      "composited_pixels": 1430.0,
+      "first_update": [
+        0,
+        187,
+        35507,
+        776,
+        9549,
+        2764800,
+        691200
+      ]
+    },
+    "predecessor": {
+      "warm_allocations": 178.0,
+      "warm_requested_bytes": 34659.0,
+      "warm_net_bytes": 304.0,
+      "warm_peak_bytes": 9149.0,
+      "retained_image_bytes": 2764800.0,
+      "copied_pixels": 691200.0,
+      "composited_pixels": 1430.0,
+      "first_update": [
+        0,
+        187,
+        35507,
+        776,
+        9549,
+        2764800,
+        691200
+      ]
+    },
+    "scroll_precise": {
+      "warm_allocations": 178.0,
+      "warm_requested_bytes": 34659.0,
+      "warm_net_bytes": 304.0,
+      "warm_peak_bytes": 9149.0,
+      "retained_image_bytes": 2764800.0,
+      "copied_pixels": 691200.0,
+      "composited_pixels": 1430.0,
+      "first_update": [
+        0,
+        187,
+        35507,
+        776,
+        9549,
+        2764800,
+        691200
+      ]
+    },
+    "candidate": {
+      "warm_allocations": 182.0,
+      "warm_requested_bytes": 35995.0,
+      "warm_net_bytes": 304.0,
+      "warm_peak_bytes": 10013.0,
+      "retained_image_bytes": 2764800.0,
+      "copied_pixels": 691200.0,
+      "composited_pixels": 780.0,
+      "first_update": [
+        0,
+        191,
+        36843,
+        776,
+        10413,
+        2764800,
+        691200
+      ]
+    }
+  },
+  "text-0-4-source": {
+    "control": {
+      "warm_allocations": 255.0,
+      "warm_requested_bytes": 57891.0,
+      "warm_net_bytes": 304.0,
+      "warm_peak_bytes": 10237.0,
+      "retained_image_bytes": 2764800.0,
+      "copied_pixels": 691200.0,
+      "composited_pixels": 3510.0,
+      "first_update": [
+        0,
+        264,
+        58739,
+        776,
+        10637,
+        2764800,
+        691200
+      ]
+    },
+    "bounds": {
+      "warm_allocations": 255.0,
+      "warm_requested_bytes": 57891.0,
+      "warm_net_bytes": 304.0,
+      "warm_peak_bytes": 10237.0,
+      "retained_image_bytes": 2764800.0,
+      "copied_pixels": 691200.0,
+      "composited_pixels": 3510.0,
+      "first_update": [
+        0,
+        264,
+        58739,
+        776,
+        10637,
+        2764800,
+        691200
+      ]
+    },
+    "predecessor": {
+      "warm_allocations": 255.0,
+      "warm_requested_bytes": 57947.0,
+      "warm_net_bytes": 304.0,
+      "warm_peak_bytes": 10237.0,
+      "retained_image_bytes": 2764800.0,
+      "copied_pixels": 691200.0,
+      "composited_pixels": 3510.0,
+      "first_update": [
+        0,
+        264,
+        58795,
+        776,
+        10637,
+        2764800,
+        691200
+      ]
+    },
+    "scroll_precise": {
+      "warm_allocations": 255.0,
+      "warm_requested_bytes": 57947.0,
+      "warm_net_bytes": 304.0,
+      "warm_peak_bytes": 10237.0,
+      "retained_image_bytes": 2764800.0,
+      "copied_pixels": 691200.0,
+      "composited_pixels": 3510.0,
+      "first_update": [
+        0,
+        264,
+        58795,
+        776,
+        10637,
+        2764800,
+        691200
+      ]
+    },
+    "candidate": {
+      "warm_allocations": 262.0,
+      "warm_requested_bytes": 61203.0,
+      "warm_net_bytes": 304.0,
+      "warm_peak_bytes": 11101.0,
+      "retained_image_bytes": 2764800.0,
+      "copied_pixels": 691200.0,
+      "composited_pixels": 1560.0,
+      "first_update": [
+        0,
+        271,
+        62051,
+        776,
+        11501,
+        2764800,
+        691200
+      ]
+    }
+  },
+  "text-0-4-owner": {
+    "control": {
+      "warm_allocations": 209.0,
+      "warm_requested_bytes": 44030.0,
+      "warm_net_bytes": 304.0,
+      "warm_peak_bytes": 10237.0,
+      "retained_image_bytes": 2764800.0,
+      "copied_pixels": 691200.0,
+      "composited_pixels": 3510.0,
+      "first_update": [
+        0,
+        218,
+        44878,
+        776,
+        10637,
+        2764800,
+        691200
+      ]
+    },
+    "bounds": {
+      "warm_allocations": 209.0,
+      "warm_requested_bytes": 44030.0,
+      "warm_net_bytes": 304.0,
+      "warm_peak_bytes": 10237.0,
+      "retained_image_bytes": 2764800.0,
+      "copied_pixels": 691200.0,
+      "composited_pixels": 3510.0,
+      "first_update": [
+        0,
+        218,
+        44878,
+        776,
+        10637,
+        2764800,
+        691200
+      ]
+    },
+    "predecessor": {
+      "warm_allocations": 209.0,
+      "warm_requested_bytes": 44030.0,
+      "warm_net_bytes": 304.0,
+      "warm_peak_bytes": 10237.0,
+      "retained_image_bytes": 2764800.0,
+      "copied_pixels": 691200.0,
+      "composited_pixels": 3510.0,
+      "first_update": [
+        0,
+        218,
+        44878,
+        776,
+        10637,
+        2764800,
+        691200
+      ]
+    },
+    "scroll_precise": {
+      "warm_allocations": 209.0,
+      "warm_requested_bytes": 44030.0,
+      "warm_net_bytes": 304.0,
+      "warm_peak_bytes": 10237.0,
+      "retained_image_bytes": 2764800.0,
+      "copied_pixels": 691200.0,
+      "composited_pixels": 3510.0,
+      "first_update": [
+        0,
+        218,
+        44878,
+        776,
+        10637,
+        2764800,
+        691200
+      ]
+    },
+    "candidate": {
+      "warm_allocations": 214.0,
+      "warm_requested_bytes": 46262.0,
+      "warm_net_bytes": 304.0,
+      "warm_peak_bytes": 11101.0,
+      "retained_image_bytes": 2764800.0,
+      "copied_pixels": 691200.0,
+      "composited_pixels": 1560.0,
+      "first_update": [
+        0,
+        223,
+        47110,
+        776,
+        11501,
+        2764800,
+        691200
+      ]
+    }
+  },
+  "text-25-1-source": {
+    "control": {
+      "warm_allocations": 132.0,
+      "warm_requested_bytes": 17193.0,
+      "warm_net_bytes": 304.0,
+      "warm_peak_bytes": 8277.0,
+      "retained_image_bytes": 2764800.0,
+      "copied_pixels": 691200.0,
+      "composited_pixels": 390.0,
+      "first_update": [
+        0,
+        141,
+        18041,
+        776,
+        8677,
+        2764800,
+        691200
+      ]
+    },
+    "bounds": {
+      "warm_allocations": 132.0,
+      "warm_requested_bytes": 17193.0,
+      "warm_net_bytes": 304.0,
+      "warm_peak_bytes": 8277.0,
+      "retained_image_bytes": 2764800.0,
+      "copied_pixels": 691200.0,
+      "composited_pixels": 390.0,
+      "first_update": [
+        0,
+        141,
+        18041,
+        776,
+        8677,
+        2764800,
+        691200
+      ]
+    },
+    "predecessor": {
+      "warm_allocations": 132.0,
+      "warm_requested_bytes": 17249.0,
+      "warm_net_bytes": 304.0,
+      "warm_peak_bytes": 8333.0,
+      "retained_image_bytes": 2764800.0,
+      "copied_pixels": 691200.0,
+      "composited_pixels": 390.0,
+      "first_update": [
+        0,
+        141,
+        18097,
+        776,
+        8733,
+        2764800,
+        691200
+      ]
+    },
+    "scroll_precise": {
+      "warm_allocations": 132.0,
+      "warm_requested_bytes": 17249.0,
+      "warm_net_bytes": 304.0,
+      "warm_peak_bytes": 8333.0,
+      "retained_image_bytes": 2764800.0,
+      "copied_pixels": 691200.0,
+      "composited_pixels": 390.0,
+      "first_update": [
+        0,
+        141,
+        18097,
+        776,
+        8733,
+        2764800,
+        691200
+      ]
+    },
+    "candidate": {
+      "warm_allocations": 132.0,
+      "warm_requested_bytes": 17249.0,
+      "warm_net_bytes": 304.0,
+      "warm_peak_bytes": 8333.0,
+      "retained_image_bytes": 2764800.0,
+      "copied_pixels": 691200.0,
+      "composited_pixels": 390.0,
+      "first_update": [
+        0,
+        141,
+        18097,
+        776,
+        8733,
+        2764800,
+        691200
+      ]
+    }
+  },
+  "text-25-1-owner": {
+    "control": {
+      "warm_allocations": 204.0,
+      "warm_requested_bytes": 92922.0,
+      "warm_net_bytes": 304.0,
+      "warm_peak_bytes": 23648.0,
+      "retained_image_bytes": 2764800.0,
+      "copied_pixels": 691200.0,
+      "composited_pixels": 390.0,
+      "first_update": [
+        0,
+        213,
+        93770,
+        776,
+        23648,
+        2764800,
+        691200
+      ]
+    },
+    "bounds": {
+      "warm_allocations": 180.0,
+      "warm_requested_bytes": 65576.0,
+      "warm_net_bytes": 304.0,
+      "warm_peak_bytes": 23648.0,
+      "retained_image_bytes": 2764800.0,
+      "copied_pixels": 691200.0,
+      "composited_pixels": 390.0,
+      "first_update": [
+        0,
+        189,
+        66424,
+        776,
+        23648,
+        2764800,
+        691200
+      ]
+    },
+    "predecessor": {
+      "warm_allocations": 180.0,
+      "warm_requested_bytes": 65632.0,
+      "warm_net_bytes": 304.0,
+      "warm_peak_bytes": 23648.0,
+      "retained_image_bytes": 2764800.0,
+      "copied_pixels": 691200.0,
+      "composited_pixels": 390.0,
+      "first_update": [
+        0,
+        189,
+        66480,
+        776,
+        23648,
+        2764800,
+        691200
+      ]
+    },
+    "scroll_precise": {
+      "warm_allocations": 180.0,
+      "warm_requested_bytes": 65632.0,
+      "warm_net_bytes": 304.0,
+      "warm_peak_bytes": 23648.0,
+      "retained_image_bytes": 2764800.0,
+      "copied_pixels": 691200.0,
+      "composited_pixels": 390.0,
+      "first_update": [
+        0,
+        189,
+        66480,
+        776,
+        23648,
+        2764800,
+        691200
+      ]
+    },
+    "candidate": {
+      "warm_allocations": 180.0,
+      "warm_requested_bytes": 65632.0,
+      "warm_net_bytes": 304.0,
+      "warm_peak_bytes": 23648.0,
+      "retained_image_bytes": 2764800.0,
+      "copied_pixels": 691200.0,
+      "composited_pixels": 390.0,
+      "first_update": [
+        0,
+        189,
+        66480,
+        776,
+        23648,
+        2764800,
+        691200
+      ]
+    }
+  },
+  "text-25-2-source": {
+    "control": {
+      "warm_allocations": 180.0,
+      "warm_requested_bytes": 46723.0,
+      "warm_net_bytes": 304.0,
+      "warm_peak_bytes": 18628.0,
+      "retained_image_bytes": 2764800.0,
+      "copied_pixels": 691200.0,
+      "composited_pixels": 1430.0,
+      "first_update": [
+        0,
+        189,
+        47571,
+        776,
+        18628,
+        2764800,
+        691200
+      ]
+    },
+    "bounds": {
+      "warm_allocations": 180.0,
+      "warm_requested_bytes": 46723.0,
+      "warm_net_bytes": 304.0,
+      "warm_peak_bytes": 18628.0,
+      "retained_image_bytes": 2764800.0,
+      "copied_pixels": 691200.0,
+      "composited_pixels": 1430.0,
+      "first_update": [
+        0,
+        189,
+        47571,
+        776,
+        18628,
+        2764800,
+        691200
+      ]
+    },
+    "predecessor": {
+      "warm_allocations": 180.0,
+      "warm_requested_bytes": 46779.0,
+      "warm_net_bytes": 304.0,
+      "warm_peak_bytes": 18684.0,
+      "retained_image_bytes": 2764800.0,
+      "copied_pixels": 691200.0,
+      "composited_pixels": 1430.0,
+      "first_update": [
+        0,
+        189,
+        47627,
+        776,
+        18684,
+        2764800,
+        691200
+      ]
+    },
+    "scroll_precise": {
+      "warm_allocations": 180.0,
+      "warm_requested_bytes": 46779.0,
+      "warm_net_bytes": 304.0,
+      "warm_peak_bytes": 18684.0,
+      "retained_image_bytes": 2764800.0,
+      "copied_pixels": 691200.0,
+      "composited_pixels": 1430.0,
+      "first_update": [
+        0,
+        189,
+        47627,
+        776,
+        18684,
+        2764800,
+        691200
+      ]
+    },
+    "candidate": {
+      "warm_allocations": 184.0,
+      "warm_requested_bytes": 48115.0,
+      "warm_net_bytes": 304.0,
+      "warm_peak_bytes": 18684.0,
+      "retained_image_bytes": 2764800.0,
+      "copied_pixels": 691200.0,
+      "composited_pixels": 780.0,
+      "first_update": [
+        0,
+        193,
+        48963,
+        776,
+        18684,
+        2764800,
+        691200
+      ]
+    }
+  },
+  "text-25-2-owner": {
+    "control": {
+      "warm_allocations": 216.0,
+      "warm_requested_bytes": 91528.0,
+      "warm_net_bytes": 304.0,
+      "warm_peak_bytes": 24064.0,
+      "retained_image_bytes": 2764800.0,
+      "copied_pixels": 691200.0,
+      "composited_pixels": 1430.0,
+      "first_update": [
+        0,
+        225,
+        92376,
+        776,
+        24064,
+        2764800,
+        691200
+      ]
+    },
+    "bounds": {
+      "warm_allocations": 216.0,
+      "warm_requested_bytes": 91528.0,
+      "warm_net_bytes": 304.0,
+      "warm_peak_bytes": 24064.0,
+      "retained_image_bytes": 2764800.0,
+      "copied_pixels": 691200.0,
+      "composited_pixels": 1430.0,
+      "first_update": [
+        0,
+        225,
+        92376,
+        776,
+        24064,
+        2764800,
+        691200
+      ]
+    },
+    "predecessor": {
+      "warm_allocations": 216.0,
+      "warm_requested_bytes": 91528.0,
+      "warm_net_bytes": 304.0,
+      "warm_peak_bytes": 24064.0,
+      "retained_image_bytes": 2764800.0,
+      "copied_pixels": 691200.0,
+      "composited_pixels": 1430.0,
+      "first_update": [
+        0,
+        225,
+        92376,
+        776,
+        24064,
+        2764800,
+        691200
+      ]
+    },
+    "scroll_precise": {
+      "warm_allocations": 216.0,
+      "warm_requested_bytes": 91528.0,
+      "warm_net_bytes": 304.0,
+      "warm_peak_bytes": 24064.0,
+      "retained_image_bytes": 2764800.0,
+      "copied_pixels": 691200.0,
+      "composited_pixels": 1430.0,
+      "first_update": [
+        0,
+        225,
+        92376,
+        776,
+        24064,
+        2764800,
+        691200
+      ]
+    },
+    "candidate": {
+      "warm_allocations": 220.0,
+      "warm_requested_bytes": 92864.0,
+      "warm_net_bytes": 304.0,
+      "warm_peak_bytes": 24064.0,
+      "retained_image_bytes": 2764800.0,
+      "copied_pixels": 691200.0,
+      "composited_pixels": 780.0,
+      "first_update": [
+        0,
+        229,
+        93712,
+        776,
+        24064,
+        2764800,
+        691200
+      ]
+    }
+  },
+  "text-25-4-source": {
+    "control": {
+      "warm_allocations": 276.0,
+      "warm_requested_bytes": 106551.0,
+      "warm_net_bytes": 304.0,
+      "warm_peak_bytes": 24252.0,
+      "retained_image_bytes": 2764800.0,
+      "copied_pixels": 691200.0,
+      "composited_pixels": 3510.0,
+      "first_update": [
+        0,
+        285,
+        107399,
+        776,
+        24252,
+        2764800,
+        691200
+      ]
+    },
+    "bounds": {
+      "warm_allocations": 276.0,
+      "warm_requested_bytes": 106551.0,
+      "warm_net_bytes": 304.0,
+      "warm_peak_bytes": 24252.0,
+      "retained_image_bytes": 2764800.0,
+      "copied_pixels": 691200.0,
+      "composited_pixels": 3510.0,
+      "first_update": [
+        0,
+        285,
+        107399,
+        776,
+        24252,
+        2764800,
+        691200
+      ]
+    },
+    "predecessor": {
+      "warm_allocations": 276.0,
+      "warm_requested_bytes": 106607.0,
+      "warm_net_bytes": 304.0,
+      "warm_peak_bytes": 24252.0,
+      "retained_image_bytes": 2764800.0,
+      "copied_pixels": 691200.0,
+      "composited_pixels": 3510.0,
+      "first_update": [
+        0,
+        285,
+        107455,
+        776,
+        24252,
+        2764800,
+        691200
+      ]
+    },
+    "scroll_precise": {
+      "warm_allocations": 276.0,
+      "warm_requested_bytes": 106607.0,
+      "warm_net_bytes": 304.0,
+      "warm_peak_bytes": 24252.0,
+      "retained_image_bytes": 2764800.0,
+      "copied_pixels": 691200.0,
+      "composited_pixels": 3510.0,
+      "first_update": [
+        0,
+        285,
+        107455,
+        776,
+        24252,
+        2764800,
+        691200
+      ]
+    },
+    "candidate": {
+      "warm_allocations": 283.0,
+      "warm_requested_bytes": 109863.0,
+      "warm_net_bytes": 304.0,
+      "warm_peak_bytes": 25108.0,
+      "retained_image_bytes": 2764800.0,
+      "copied_pixels": 691200.0,
+      "composited_pixels": 1560.0,
+      "first_update": [
+        0,
+        292,
+        110711,
+        776,
+        25108,
+        2764800,
+        691200
+      ]
+    }
+  },
+  "text-25-4-owner": {
+    "control": {
+      "warm_allocations": 243.0,
+      "warm_requested_bytes": 100548.0,
+      "warm_net_bytes": 304.0,
+      "warm_peak_bytes": 25949.0,
+      "retained_image_bytes": 2764800.0,
+      "copied_pixels": 691200.0,
+      "composited_pixels": 3510.0,
+      "first_update": [
+        0,
+        252,
+        101396,
+        776,
+        25949,
+        2764800,
+        691200
+      ]
+    },
+    "bounds": {
+      "warm_allocations": 243.0,
+      "warm_requested_bytes": 100548.0,
+      "warm_net_bytes": 304.0,
+      "warm_peak_bytes": 25949.0,
+      "retained_image_bytes": 2764800.0,
+      "copied_pixels": 691200.0,
+      "composited_pixels": 3510.0,
+      "first_update": [
+        0,
+        252,
+        101396,
+        776,
+        25949,
+        2764800,
+        691200
+      ]
+    },
+    "predecessor": {
+      "warm_allocations": 243.0,
+      "warm_requested_bytes": 100548.0,
+      "warm_net_bytes": 304.0,
+      "warm_peak_bytes": 25949.0,
+      "retained_image_bytes": 2764800.0,
+      "copied_pixels": 691200.0,
+      "composited_pixels": 3510.0,
+      "first_update": [
+        0,
+        252,
+        101396,
+        776,
+        25949,
+        2764800,
+        691200
+      ]
+    },
+    "scroll_precise": {
+      "warm_allocations": 243.0,
+      "warm_requested_bytes": 100548.0,
+      "warm_net_bytes": 304.0,
+      "warm_peak_bytes": 25949.0,
+      "retained_image_bytes": 2764800.0,
+      "copied_pixels": 691200.0,
+      "composited_pixels": 3510.0,
+      "first_update": [
+        0,
+        252,
+        101396,
+        776,
+        25949,
+        2764800,
+        691200
+      ]
+    },
+    "candidate": {
+      "warm_allocations": 248.0,
+      "warm_requested_bytes": 102780.0,
+      "warm_net_bytes": 304.0,
+      "warm_peak_bytes": 25949.0,
+      "retained_image_bytes": 2764800.0,
+      "copied_pixels": 691200.0,
+      "composited_pixels": 1560.0,
+      "first_update": [
+        0,
+        257,
+        103628,
+        776,
+        25949,
+        2764800,
+        691200
+      ]
+    }
+  },
+  "text-1000-1-source": {
+    "control": {
+      "warm_allocations": 132.0,
+      "warm_requested_bytes": 17193.0,
+      "warm_net_bytes": 304.0,
+      "warm_peak_bytes": 8277.0,
+      "retained_image_bytes": 2764800.0,
+      "copied_pixels": 691200.0,
+      "composited_pixels": 390.0,
+      "first_update": [
+        0,
+        141,
+        18041,
+        776,
+        8677,
+        2764800,
+        691200
+      ]
+    },
+    "bounds": {
+      "warm_allocations": 132.0,
+      "warm_requested_bytes": 17193.0,
+      "warm_net_bytes": 304.0,
+      "warm_peak_bytes": 8277.0,
+      "retained_image_bytes": 2764800.0,
+      "copied_pixels": 691200.0,
+      "composited_pixels": 390.0,
+      "first_update": [
+        0,
+        141,
+        18041,
+        776,
+        8677,
+        2764800,
+        691200
+      ]
+    },
+    "predecessor": {
+      "warm_allocations": 132.0,
+      "warm_requested_bytes": 17249.0,
+      "warm_net_bytes": 304.0,
+      "warm_peak_bytes": 8333.0,
+      "retained_image_bytes": 2764800.0,
+      "copied_pixels": 691200.0,
+      "composited_pixels": 390.0,
+      "first_update": [
+        0,
+        141,
+        18097,
+        776,
+        8733,
+        2764800,
+        691200
+      ]
+    },
+    "scroll_precise": {
+      "warm_allocations": 132.0,
+      "warm_requested_bytes": 17249.0,
+      "warm_net_bytes": 304.0,
+      "warm_peak_bytes": 8333.0,
+      "retained_image_bytes": 2764800.0,
+      "copied_pixels": 691200.0,
+      "composited_pixels": 390.0,
+      "first_update": [
+        0,
+        141,
+        18097,
+        776,
+        8733,
+        2764800,
+        691200
+      ]
+    },
+    "candidate": {
+      "warm_allocations": 132.0,
+      "warm_requested_bytes": 17249.0,
+      "warm_net_bytes": 304.0,
+      "warm_peak_bytes": 8333.0,
+      "retained_image_bytes": 2764800.0,
+      "copied_pixels": 691200.0,
+      "composited_pixels": 390.0,
+      "first_update": [
+        0,
+        141,
+        18097,
+        776,
+        8733,
+        2764800,
+        691200
+      ]
+    }
+  },
+  "text-1000-1-owner": {
+    "control": {
+      "warm_allocations": 1198.0,
+      "warm_requested_bytes": 2125304.0,
+      "warm_net_bytes": 304.0,
+      "warm_peak_bytes": 814144.0,
+      "retained_image_bytes": 2764800.0,
+      "copied_pixels": 691200.0,
+      "composited_pixels": 390.0,
+      "first_update": [
+        0,
+        1207,
+        2126152,
+        776,
+        814144,
+        2764800,
+        691200
+      ]
+    },
+    "bounds": {
+      "warm_allocations": 1160.0,
+      "warm_requested_bytes": 1664110.0,
+      "warm_net_bytes": 304.0,
+      "warm_peak_bytes": 814144.0,
+      "retained_image_bytes": 2764800.0,
+      "copied_pixels": 691200.0,
+      "composited_pixels": 390.0,
+      "first_update": [
+        0,
+        1169,
+        1664958,
+        776,
+        814144,
+        2764800,
+        691200
+      ]
+    },
+    "predecessor": {
+      "warm_allocations": 1160.0,
+      "warm_requested_bytes": 1664166.0,
+      "warm_net_bytes": 304.0,
+      "warm_peak_bytes": 814144.0,
+      "retained_image_bytes": 2764800.0,
+      "copied_pixels": 691200.0,
+      "composited_pixels": 390.0,
+      "first_update": [
+        0,
+        1169,
+        1665014,
+        776,
+        814144,
+        2764800,
+        691200
+      ]
+    },
+    "scroll_precise": {
+      "warm_allocations": 1160.0,
+      "warm_requested_bytes": 1664166.0,
+      "warm_net_bytes": 304.0,
+      "warm_peak_bytes": 814144.0,
+      "retained_image_bytes": 2764800.0,
+      "copied_pixels": 691200.0,
+      "composited_pixels": 390.0,
+      "first_update": [
+        0,
+        1169,
+        1665014,
+        776,
+        814144,
+        2764800,
+        691200
+      ]
+    },
+    "candidate": {
+      "warm_allocations": 1160.0,
+      "warm_requested_bytes": 1664166.0,
+      "warm_net_bytes": 304.0,
+      "warm_peak_bytes": 814144.0,
+      "retained_image_bytes": 2764800.0,
+      "copied_pixels": 691200.0,
+      "composited_pixels": 390.0,
+      "first_update": [
+        0,
+        1169,
+        1665014,
+        776,
+        814144,
+        2764800,
+        691200
+      ]
+    }
+  },
+  "text-1000-2-source": {
+    "control": {
+      "warm_allocations": 194.0,
+      "warm_requested_bytes": 480571.0,
+      "warm_net_bytes": 304.0,
+      "warm_peak_bytes": 316150.0,
+      "retained_image_bytes": 2764800.0,
+      "copied_pixels": 691200.0,
+      "composited_pixels": 1430.0,
+      "first_update": [
+        0,
+        203,
+        481419,
+        776,
+        316150,
+        2764800,
+        691200
+      ]
+    },
+    "bounds": {
+      "warm_allocations": 194.0,
+      "warm_requested_bytes": 480571.0,
+      "warm_net_bytes": 304.0,
+      "warm_peak_bytes": 316150.0,
+      "retained_image_bytes": 2764800.0,
+      "copied_pixels": 691200.0,
+      "composited_pixels": 1430.0,
+      "first_update": [
+        0,
+        203,
+        481419,
+        776,
+        316150,
+        2764800,
+        691200
+      ]
+    },
+    "predecessor": {
+      "warm_allocations": 194.0,
+      "warm_requested_bytes": 480627.0,
+      "warm_net_bytes": 304.0,
+      "warm_peak_bytes": 316206.0,
+      "retained_image_bytes": 2764800.0,
+      "copied_pixels": 691200.0,
+      "composited_pixels": 1430.0,
+      "first_update": [
+        0,
+        203,
+        481475,
+        776,
+        316206,
+        2764800,
+        691200
+      ]
+    },
+    "scroll_precise": {
+      "warm_allocations": 194.0,
+      "warm_requested_bytes": 480627.0,
+      "warm_net_bytes": 304.0,
+      "warm_peak_bytes": 316206.0,
+      "retained_image_bytes": 2764800.0,
+      "copied_pixels": 691200.0,
+      "composited_pixels": 1430.0,
+      "first_update": [
+        0,
+        203,
+        481475,
+        776,
+        316206,
+        2764800,
+        691200
+      ]
+    },
+    "candidate": {
+      "warm_allocations": 198.0,
+      "warm_requested_bytes": 481963.0,
+      "warm_net_bytes": 304.0,
+      "warm_peak_bytes": 316206.0,
+      "retained_image_bytes": 2764800.0,
+      "copied_pixels": 691200.0,
+      "composited_pixels": 780.0,
+      "first_update": [
+        0,
+        207,
+        482811,
+        776,
+        316206,
+        2764800,
+        691200
+      ]
+    }
+  },
+  "text-1000-2-owner": {
+    "control": {
+      "warm_allocations": 1211.0,
+      "warm_requested_bytes": 2127078.0,
+      "warm_net_bytes": 304.0,
+      "warm_peak_bytes": 814560.0,
+      "retained_image_bytes": 2764800.0,
+      "copied_pixels": 691200.0,
+      "composited_pixels": 1430.0,
+      "first_update": [
+        0,
+        1220,
+        2127926,
+        776,
+        814560,
+        2764800,
+        691200
+      ]
+    },
+    "bounds": {
+      "warm_allocations": 1211.0,
+      "warm_requested_bytes": 2127078.0,
+      "warm_net_bytes": 304.0,
+      "warm_peak_bytes": 814560.0,
+      "retained_image_bytes": 2764800.0,
+      "copied_pixels": 691200.0,
+      "composited_pixels": 1430.0,
+      "first_update": [
+        0,
+        1220,
+        2127926,
+        776,
+        814560,
+        2764800,
+        691200
+      ]
+    },
+    "predecessor": {
+      "warm_allocations": 1211.0,
+      "warm_requested_bytes": 2127078.0,
+      "warm_net_bytes": 304.0,
+      "warm_peak_bytes": 814560.0,
+      "retained_image_bytes": 2764800.0,
+      "copied_pixels": 691200.0,
+      "composited_pixels": 1430.0,
+      "first_update": [
+        0,
+        1220,
+        2127926,
+        776,
+        814560,
+        2764800,
+        691200
+      ]
+    },
+    "scroll_precise": {
+      "warm_allocations": 1211.0,
+      "warm_requested_bytes": 2127078.0,
+      "warm_net_bytes": 304.0,
+      "warm_peak_bytes": 814560.0,
+      "retained_image_bytes": 2764800.0,
+      "copied_pixels": 691200.0,
+      "composited_pixels": 1430.0,
+      "first_update": [
+        0,
+        1220,
+        2127926,
+        776,
+        814560,
+        2764800,
+        691200
+      ]
+    },
+    "candidate": {
+      "warm_allocations": 1215.0,
+      "warm_requested_bytes": 2128414.0,
+      "warm_net_bytes": 304.0,
+      "warm_peak_bytes": 814560.0,
+      "retained_image_bytes": 2764800.0,
+      "copied_pixels": 691200.0,
+      "composited_pixels": 780.0,
+      "first_update": [
+        0,
+        1224,
+        2129262,
+        776,
+        814560,
+        2764800,
+        691200
+      ]
+    }
+  },
+  "text-1000-4-source": {
+    "control": {
+      "warm_allocations": 318.0,
+      "warm_requested_bytes": 1408095.0,
+      "warm_net_bytes": 304.0,
+      "warm_peak_bytes": 470382.0,
+      "retained_image_bytes": 2764800.0,
+      "copied_pixels": 691200.0,
+      "composited_pixels": 3510.0,
+      "first_update": [
+        0,
+        327,
+        1408943,
+        776,
+        470382,
+        2764800,
+        691200
+      ]
+    },
+    "bounds": {
+      "warm_allocations": 318.0,
+      "warm_requested_bytes": 1408095.0,
+      "warm_net_bytes": 304.0,
+      "warm_peak_bytes": 470382.0,
+      "retained_image_bytes": 2764800.0,
+      "copied_pixels": 691200.0,
+      "composited_pixels": 3510.0,
+      "first_update": [
+        0,
+        327,
+        1408943,
+        776,
+        470382,
+        2764800,
+        691200
+      ]
+    },
+    "predecessor": {
+      "warm_allocations": 318.0,
+      "warm_requested_bytes": 1408151.0,
+      "warm_net_bytes": 304.0,
+      "warm_peak_bytes": 470382.0,
+      "retained_image_bytes": 2764800.0,
+      "copied_pixels": 691200.0,
+      "composited_pixels": 3510.0,
+      "first_update": [
+        0,
+        327,
+        1408999,
+        776,
+        470382,
+        2764800,
+        691200
+      ]
+    },
+    "scroll_precise": {
+      "warm_allocations": 318.0,
+      "warm_requested_bytes": 1408151.0,
+      "warm_net_bytes": 304.0,
+      "warm_peak_bytes": 470382.0,
+      "retained_image_bytes": 2764800.0,
+      "copied_pixels": 691200.0,
+      "composited_pixels": 3510.0,
+      "first_update": [
+        0,
+        327,
+        1408999,
+        776,
+        470382,
+        2764800,
+        691200
+      ]
+    },
+    "candidate": {
+      "warm_allocations": 325.0,
+      "warm_requested_bytes": 1411407.0,
+      "warm_net_bytes": 304.0,
+      "warm_peak_bytes": 471238.0,
+      "retained_image_bytes": 2764800.0,
+      "copied_pixels": 691200.0,
+      "composited_pixels": 1560.0,
+      "first_update": [
+        0,
+        334,
+        1412255,
+        776,
+        471238,
+        2764800,
+        691200
+      ]
+    }
+  },
+  "text-1000-4-owner": {
+    "control": {
+      "warm_allocations": 1237.0,
+      "warm_requested_bytes": 2130626.0,
+      "warm_net_bytes": 304.0,
+      "warm_peak_bytes": 815392.0,
+      "retained_image_bytes": 2764800.0,
+      "copied_pixels": 691200.0,
+      "composited_pixels": 3510.0,
+      "first_update": [
+        0,
+        1246,
+        2131474,
+        776,
+        815392,
+        2764800,
+        691200
+      ]
+    },
+    "bounds": {
+      "warm_allocations": 1237.0,
+      "warm_requested_bytes": 2130626.0,
+      "warm_net_bytes": 304.0,
+      "warm_peak_bytes": 815392.0,
+      "retained_image_bytes": 2764800.0,
+      "copied_pixels": 691200.0,
+      "composited_pixels": 3510.0,
+      "first_update": [
+        0,
+        1246,
+        2131474,
+        776,
+        815392,
+        2764800,
+        691200
+      ]
+    },
+    "predecessor": {
+      "warm_allocations": 1237.0,
+      "warm_requested_bytes": 2130626.0,
+      "warm_net_bytes": 304.0,
+      "warm_peak_bytes": 815392.0,
+      "retained_image_bytes": 2764800.0,
+      "copied_pixels": 691200.0,
+      "composited_pixels": 3510.0,
+      "first_update": [
+        0,
+        1246,
+        2131474,
+        776,
+        815392,
+        2764800,
+        691200
+      ]
+    },
+    "scroll_precise": {
+      "warm_allocations": 1237.0,
+      "warm_requested_bytes": 2130626.0,
+      "warm_net_bytes": 304.0,
+      "warm_peak_bytes": 815392.0,
+      "retained_image_bytes": 2764800.0,
+      "copied_pixels": 691200.0,
+      "composited_pixels": 3510.0,
+      "first_update": [
+        0,
+        1246,
+        2131474,
+        776,
+        815392,
+        2764800,
+        691200
+      ]
+    },
+    "candidate": {
+      "warm_allocations": 1242.0,
+      "warm_requested_bytes": 2132858.0,
+      "warm_net_bytes": 304.0,
+      "warm_peak_bytes": 815392.0,
+      "retained_image_bytes": 2764800.0,
+      "copied_pixels": 691200.0,
+      "composited_pixels": 1560.0,
+      "first_update": [
+        0,
+        1251,
+        2133706,
+        776,
+        815392,
+        2764800,
+        691200
+      ]
+    }
+  }
+}

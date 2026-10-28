@@ -1,0 +1,64 @@
+{
+  "control": {
+    "unit_elf_bytes": 60302928,
+    "native_elf_bytes": 26339472,
+    "headers": [
+      "DAMAGE_HEADERS,RuntimeUnit=1824,Prepared=40,TextPatch=40,TextResources=168",
+      "DAMAGE_NATIVE_HEADERS,SceneDamage=24",
+      "test runtime::semantic_storage_ledger::sparse_metadata_storage_and_cold_allocation_ledger ... Node=24 Presented=64 El=184 Draft=160 Text=24 ListRow=32 Fanout=32 Dest=4 destination_capacity=4 destination_capacity_bytes=16 Metadata=264 Declared=24 TextSlot=16 Sheet=96 Row=24 ListInfo=16",
+      "packet_gpu_layout,Renderer=888,Stats=200,GpuSurface=1040,NativeHost=768,Canvas=464,PreparedScene=56"
+    ]
+  },
+  "bounds": {
+    "unit_elf_bytes": 60863824,
+    "native_elf_bytes": 26334096,
+    "headers": [
+      "DAMAGE_HEADERS,RuntimeUnit=1824,Prepared=40,TextPatch=40,TextResources=168",
+      "DAMAGE_NATIVE_HEADERS,SceneDamage=24",
+      "test runtime::semantic_storage_ledger::sparse_metadata_storage_and_cold_allocation_ledger ... Node=24 Presented=64 El=184 Draft=160 Text=24 ListRow=32 Fanout=32 Dest=4 destination_capacity=4 destination_capacity_bytes=16 Metadata=264 Declared=24 TextSlot=16 Sheet=96 Row=24 ListInfo=16",
+      "packet_gpu_layout,Renderer=888,Stats=200,GpuSurface=1040,NativeHost=768,Canvas=464,PreparedScene=56"
+    ]
+  },
+  "predecessor": {
+    "unit_elf_bytes": 61349728,
+    "native_elf_bytes": 26345432,
+    "headers": [
+      "DAMAGE_HEADERS,RuntimeUnit=1824,Prepared=40,TextPatch=96,TextResources=168",
+      "DAMAGE_NATIVE_HEADERS,SceneDamage=32",
+      "test runtime::semantic_storage_ledger::sparse_metadata_storage_and_cold_allocation_ledger ... Node=24 Presented=64 El=184 Draft=160 Text=24 ListRow=32 Fanout=32 Dest=4 destination_capacity=4 destination_capacity_bytes=16 Metadata=264 Declared=24 TextSlot=16 Sheet=96 Row=24 ListInfo=16",
+      "packet_gpu_layout,Renderer=888,Stats=200,GpuSurface=1040,NativeHost=768,Canvas=464,PreparedScene=56"
+    ]
+  },
+  "scroll_precise": {
+    "unit_elf_bytes": 61312240,
+    "native_elf_bytes": 26388320,
+    "headers": [
+      "DAMAGE_HEADERS,RuntimeUnit=1824,Prepared=40,TextPatch=96,TextResources=168",
+      "DAMAGE_NATIVE_HEADERS,SceneDamage=40",
+      "test runtime::semantic_storage_ledger::sparse_metadata_storage_and_cold_allocation_ledger ... Node=24 Presented=64 El=184 Draft=160 Text=24 ListRow=32 Fanout=32 Dest=4 destination_capacity=4 destination_capacity_bytes=16 Metadata=272 Declared=24 TextSlot=16 Sheet=96 Row=24 ListInfo=16",
+      "packet_gpu_layout,Renderer=888,Stats=200,GpuSurface=1040,NativeHost=768,Canvas=464,PreparedScene=56"
+    ]
+  },
+  "candidate": {
+    "unit_elf_bytes": 60951336,
+    "native_elf_bytes": 26396232,
+    "headers": [
+      "DAMAGE_HEADERS,RuntimeUnit=1824,Prepared=40,TextPatch=96,TextResources=168",
+      "DAMAGE_NATIVE_HEADERS,SceneDamage=40",
+      "test runtime::semantic_storage_ledger::sparse_metadata_storage_and_cold_allocation_ledger ... Node=24 Presented=64 El=184 Draft=160 Text=24 ListRow=32 Fanout=32 Dest=4 destination_capacity=4 destination_capacity_bytes=16 Metadata=272 Declared=24 TextSlot=16 Sheet=96 Row=24 ListInfo=16",
+      "packet_gpu_layout,Renderer=888,Stats=200,GpuSurface=1040,NativeHost=768,Canvas=464,PreparedScene=56",
+      "SUPPORT_HEADERS,SceneDamage=40,SceneRepair=72"
+    ]
+  },
+  "cost_notes": {
+    "shipping_lines": 38093,
+    "shipping_lines_prior": 37977,
+    "native_elf_delta_from_scroll_precise": 7912,
+    "new_scene_repair_header_bytes": 72,
+    "prior_scroll_transition_header_bytes": 72,
+    "region_vector_bound_bytes_each": 512,
+    "ordinary_gpu_submission": "same source, measured symbol sizes and local stack prologues",
+    "stack_scope": "Local prologue sub rsp observations; not complete call chain or driver/GPU stack",
+    "allocations": "Fixed 140-process invoking-thread allocation matrix pending; no full driver/process/GPU allocation inference"
+  }
+}

@@ -1,0 +1,1 @@
+{"command": ["/home/user/gpui-preserved-test-binaries/b3e984734969d945d0debf1719b51f2ae48da70fb52ecfd53e7991e9f5085cc2", "--ignored", "--exact", "native::question_tests::native_question_result_and_credit_wake_without_unrelated_input", "--nocapture"], "exit": 0}

@@ -1,0 +1,9 @@
+{
+  "left_bytes": 20480,
+  "right_bytes": 20480,
+  "changed_bytes": 2540,
+  "first_changed_byte": 0,
+  "actual_first": 54,
+  "expected_first": 93,
+  "witness": "Existing coalesced scroll+owner Rows fixture; first exact image failure before the new Page fixture is reached in the mutant. The intact candidate passes both fixtures."
+}

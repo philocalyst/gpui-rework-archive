@@ -1,0 +1,84 @@
+{
+  "source": "8cb6281f6cec7d93bee1792bd0bd85a8603ef935",
+  "test_status": {
+    "command": [
+      "cargo",
+      "+nightly-2026-10-23",
+      "-Z",
+      "checksum-freshness",
+      "--config",
+      "build.fingerprint=\"content\"",
+      "test",
+      "--locked",
+      "--offline",
+      "--release",
+      "--message-format=json",
+      "-p",
+      "gpui_gpu",
+      "--features",
+      "vulkan-tests",
+      "--test",
+      "render",
+      "complete_scene_regions_match_full_gpu_for_all_formats_and_materials",
+      "--",
+      "--exact",
+      "--nocapture",
+      "--test-threads=1"
+    ],
+    "exit": 101,
+    "minimum_free_bytes": 15071809536,
+    "stopped": false,
+    "seconds": 58.00497209200694
+  },
+  "pixel_failure": "complete support case=0, tick=3, format=Rgba8UnormSrgb",
+  "original_runner_failure": "Expected first mismatch on tick 1; actual exact image mismatch is tick 3. Test and mutant ran once. No pixel criterion changed; preserve runner assertion failure.",
+  "positive_fixture": "gpu-fixture-lint/test.out",
+  "artifacts": [
+    {
+      "path": "/home/user/gpui-scene-support-omit-target/release/build/gpui_gpu/fc26bbb724122b97/out/render-fc26bbb724122b97",
+      "sha256": "cda106a5dc69b856a190ce7b0eb0dae2388c5192e5733dc4281a316b75813467",
+      "preserved": "/home/user/gpui-preserved-test-binaries/cda106a5dc69b856a190ce7b0eb0dae2388c5192e5733dc4281a316b75813467",
+      "bytes": 16863248,
+      "cargo": {
+        "reason": "compiler-artifact",
+        "package_id": "path+file:///home/user/gpui-scene-support-omit-lab/reactivity/crates/gpu#gpui_gpu@0.1.0",
+        "manifest_path": "/home/user/gpui-scene-support-omit-lab/reactivity/crates/gpu/Cargo.toml",
+        "target": {
+          "kind": [
+            "test"
+          ],
+          "crate_types": [
+            "bin"
+          ],
+          "name": "render",
+          "src_path": "/home/user/gpui-scene-support-omit-lab/reactivity/crates/gpu/tests/render.rs",
+          "edition": "2024",
+          "required-features": [
+            "gpu-tests"
+          ],
+          "doc": false,
+          "doctest": false,
+          "test": true
+        },
+        "profile": {
+          "opt_level": "3",
+          "debuginfo": 0,
+          "debug_assertions": false,
+          "overflow_checks": false,
+          "test": true
+        },
+        "features": [
+          "default",
+          "gpu-tests",
+          "simd",
+          "vulkan-tests"
+        ],
+        "filenames": [
+          "/home/user/gpui-scene-support-omit-target/release/build/gpui_gpu/fc26bbb724122b97/out/render-fc26bbb724122b97"
+        ],
+        "executable": "/home/user/gpui-scene-support-omit-target/release/build/gpui_gpu/fc26bbb724122b97/out/render-fc26bbb724122b97",
+        "fresh": false
+      }
+    }
+  ]
+}

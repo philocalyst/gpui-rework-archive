@@ -1,0 +1,25 @@
+{
+  "case": "text-0-4-owner",
+  "pair": 8,
+  "variant": "candidate",
+  "frames": 64,
+  "command": [
+    "/home/user/gpui-preserved-test-binaries/b3e984734969d945d0debf1719b51f2ae48da70fb52ecfd53e7991e9f5085cc2",
+    "native::scroll_bench::complete_workload_cost",
+    "--ignored",
+    "--exact",
+    "--nocapture",
+    "--test-threads=1"
+  ],
+  "exit": 0,
+  "wall_seconds": 0.41504836082458496,
+  "environment": {
+    "DISPLAY": ":94",
+    "XDG_RUNTIME_DIR": "/home/user/gpui-xdg",
+    "VK_ICD_FILENAMES": "/usr/share/vulkan/icd.d/lvp_icd.json",
+    "LP_NUM_THREADS": "4",
+    "DBUS_SESSION_BUS_ADDRESS": "unix:path=/nonexistent",
+    "GPUI_SCROLL_CASE": "text-0-4-owner",
+    "GPUI_SCROLL_FRAMES": "64"
+  }
+}

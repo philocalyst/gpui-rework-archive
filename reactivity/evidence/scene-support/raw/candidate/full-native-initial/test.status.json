@@ -1,0 +1,25 @@
+{
+  "command": [
+    "cargo",
+    "+nightly-2026-10-23",
+    "-Z",
+    "checksum-freshness",
+    "--config",
+    "build.fingerprint=\"content\"",
+    "test",
+    "--locked",
+    "--offline",
+    "--release",
+    "--message-format=json",
+    "-p",
+    "gpui",
+    "-p",
+    "gpui_canvas",
+    "--features",
+    "gpui/x11"
+  ],
+  "exit": 0,
+  "minimum_free_bytes": 11797368832,
+  "storage_stop": false,
+  "seconds": 364.03341665699554
+}

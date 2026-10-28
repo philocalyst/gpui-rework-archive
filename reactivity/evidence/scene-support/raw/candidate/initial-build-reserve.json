@@ -1,0 +1,7 @@
+{
+  "free_bytes": 12268732416,
+  "preferred_bytes": 12884901888,
+  "hard_floor_bytes": 8589934592,
+  "decision": "Fresh GPU-only gate has over 11 GiB; owned runner monitors hard 8 GiB floor and stops its own process group. Reassess before native build.",
+  "timestamp": 1793168821.2474253
+}

@@ -1,0 +1,13 @@
+diff --git a/reactivity/crates/gpui/src/runtime.rs b/reactivity/crates/gpui/src/runtime.rs
+index 82ad29cab3..3ff55dc157 100644
+--- a/reactivity/crates/gpui/src/runtime.rs
++++ b/reactivity/crates/gpui/src/runtime.rs
+@@ -3960,7 +3960,7 @@ impl<M: View + 'static> Runtime<M> {
+                     window: self.sites.namespace(),
+                     sequence: self.presented_sequence.expect("valid presented image"),
+                 };
+-                if let Some(prepared) = &self.prepared {
++                if let Some(prepared) = self.prepared.as_ref().filter(|_| false) {
+                     // The canvas is C while the external image is still P.
+                     // Preserve D(P,C) before replacing it with D(P,N).
+                     let prior = self

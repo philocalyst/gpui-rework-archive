@@ -1,0 +1,5 @@
+Traceback (most recent call last):
+  File "/home/user/gpui-scene-support-evidence/gpu_gate.py", line 28, in <module>
+    (out/(name+'-artifacts.json')).write_text(json.dumps(artifacts,indent=2));print(name,code,'artifacts',len(artifacts),flush=True);assert code==0
+                                                                                                                                            ^^^^^^^
+AssertionError

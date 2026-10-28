@@ -1,0 +1,5 @@
+   Compiling gpui_canvas v0.1.0 (/home/user/gpui-scene-support-lab/reactivity/crates/canvas)
+   Compiling gpui_gpu v0.1.0 (/home/user/gpui-scene-support-lab/reactivity/crates/gpu)
+   Compiling gpui v0.1.0 (/home/user/gpui-scene-support-lab/reactivity/crates/gpui)
+    Finished `release` profile [optimized] target(s) in 12.44s
+     Running unittests examples/zgx_native_lab.rs (/home/user/gpui-scene-support-target/release/build/gpui/0bc3a3be0e651757/out/zgx_native_lab-0bc3a3be0e651757)

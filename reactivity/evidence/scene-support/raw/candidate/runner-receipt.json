@@ -1,0 +1,9 @@
+{
+  "source": "92bfac4445c8b518b945c384fe6ff83ed772ae4f",
+  "protocol": "b4188e7cedc008f6d8b48f03da6173af54c7458d",
+  "note": "Frozen before correctness/allocation/timing matrices. Point thresholds, all 2800 process positions and independent verifier retained.",
+  "timing_sha256": "91061f261ee91b294741127f9d4c205c6e72a2aad33d8923abb0be0a3cdb08af",
+  "analysis_sha256": "554dc81c2e72b50726868c4e2725b418cda5cb65c04e52c4885a16854a6419c2",
+  "verifier_sha256": "b906ca46e0017ae73c475352a43349ba98d74c2551e8f0a957ea3ad63c188030",
+  "process_manifest_sha256": "56e1c36ec26c2020bdda64fa2f80cbaefd1230ea1b66854edb3e9a0bf3902e90"
+}

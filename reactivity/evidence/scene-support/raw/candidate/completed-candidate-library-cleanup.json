@@ -1,0 +1,7 @@
+{
+  "files": 1594,
+  "bytes": 1781743039,
+  "free_before": 9521635328,
+  "free_after": 11305758720,
+  "scope": "Only regenerable rlib/rmeta caches after all candidate compilation/qualification. Executed ELFs, generated shaders, source and evidence preserved."
+}

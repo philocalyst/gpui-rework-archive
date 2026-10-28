@@ -1,0 +1,661 @@
+diff --git a/reactivity/crates/canvas/src/canvas.rs b/reactivity/crates/canvas/src/canvas.rs
+index 80427824c9..e8863b4416 100644
+--- a/reactivity/crates/canvas/src/canvas.rs
++++ b/reactivity/crates/canvas/src/canvas.rs
+@@ -35,6 +35,7 @@ mod rounded;
+ pub use rounded::rounded_rect_contains;
+ mod samples;
+ mod scroll;
++mod support;
+ pub use scroll::ScrollCopy;
+ #[cfg(test)]
+ mod simd_tests;
+diff --git a/reactivity/crates/canvas/src/canvas/scroll.rs b/reactivity/crates/canvas/src/canvas/scroll.rs
+index ffb5106c1c..f315574e03 100644
+--- a/reactivity/crates/canvas/src/canvas/scroll.rs
++++ b/reactivity/crates/canvas/src/canvas/scroll.rs
+@@ -104,31 +104,6 @@ fn outside_damage(
+     destination: Bounds,
+     _damage: DamageRegion,
+ ) -> crate::DamageRegions {
+-    fn unchanged(old: BorrowedCommand<'_>, new: BorrowedCommand<'_>) -> bool {
+-        // Staged immutable masks can have distinct lease addresses. Keep every
+-        // canonical geometry/material predicate, substituting identity only
+-        // after proving equal glyph dimensions, key and exact coverage bytes.
+-        let old = match (old.source, new.source) {
+-            (BorrowedSource::Glyph(a), BorrowedSource::Glyph(b)) => {
+-                let a = mask_view(a);
+-                let b = mask_view(b);
+-                if a.key == b.key
+-                    && a.width == b.width
+-                    && a.height == b.height
+-                    && (std::ptr::eq(a.coverage, b.coverage) || a.coverage == b.coverage)
+-                {
+-                    BorrowedCommand {
+-                        source: new.source,
+-                        ..old
+-                    }
+-                } else {
+-                    old
+-                }
+-            }
+-            _ => old,
+-        };
+-        old.unchanged(new)
+-    }
+     let outside = |draw: &BorrowedCommand<'_>| {
+         let [l, t, r, b] = draw.bounds.map(|v| v as i32);
+         l < destination[0] || t < destination[1] || r > destination[2] || b > destination[3]
+@@ -148,7 +123,7 @@ fn outside_damage(
+     loop {
+         match (old.next(), new.next()) {
+             (None, None) => break,
+-            (Some(a), Some(b)) if unchanged(a, b) => {}
++            (Some(a), Some(b)) if super::support::unchanged(a, b) => {}
+             (a, b) => {
+                 for draw in [a, b].into_iter().flatten() {
+                     regions.include(DamageRegion::checked_canvas_bounds(draw.bounds));
+diff --git a/reactivity/crates/canvas/src/canvas/support.rs b/reactivity/crates/canvas/src/canvas/support.rs
+new file mode 100644
+index 0000000000..b6648ba9f9
+--- /dev/null
++++ b/reactivity/crates/canvas/src/canvas/support.rs
+@@ -0,0 +1,74 @@
++//! Conservative changed support over complete ordered command streams.
++use super::*;
++
++impl CanvasScene<'_> {
++    /// Commit complete commands and retain bounded separated changed support.
++    /// The caller must independently certify the external image predecessor.
++    /// When candidates coalesce, their earlier damage must also be repaired.
++    pub fn commit_with_damage_regions(self) -> crate::DamageRegions {
++        let regions = damage_regions(self.target, &self.pending);
++        self.commit();
++        regions
++    }
++}
++
++fn damage_regions(previous: &Canvas, next: &Canvas) -> crate::DamageRegions {
++    let mut regions = crate::DamageRegions::default();
++    let full = DamageRegion::checked_canvas_bounds([0, 0, next.width, next.height]);
++    if previous.width != next.width
++        || previous.height != next.height
++        || previous.color_config != next.color_config
++        || previous.clear.map(f32::to_bits) != next.clear.map(f32::to_bits)
++    {
++        regions.include(full);
++        return regions;
++    }
++    let mut old = previous
++        .commands
++        .iter(viewport_rect(previous.width, previous.height));
++    let mut new = next.commands.iter(viewport_rect(next.width, next.height));
++    loop {
++        match (old.next(), new.next()) {
++            (None, None) => break,
++            (Some(a), Some(b)) if unchanged(a, b) => {}
++            (a, b) => {
++                for draw in [a, b].into_iter().flatten() {
++                    let support = DamageRegion::checked_canvas_bounds(draw.bounds);
++                    if support == full {
++                        let mut complete = crate::DamageRegions::default();
++                        complete.include(full);
++                        return complete;
++                    }
++                    regions.include(support);
++                }
++            }
++        }
++    }
++    regions
++}
++
++pub(super) fn unchanged(old: BorrowedCommand<'_>, new: BorrowedCommand<'_>) -> bool {
++    // Staged immutable masks can have distinct lease addresses. Keep every
++    // canonical geometry/material predicate, substituting identity only
++    // after proving equal glyph dimensions, key and exact coverage bytes.
++    let old = match (old.source, new.source) {
++        (BorrowedSource::Glyph(a), BorrowedSource::Glyph(b)) => {
++            let a = mask_view(a);
++            let b = mask_view(b);
++            if a.key == b.key
++                && a.width == b.width
++                && a.height == b.height
++                && (std::ptr::eq(a.coverage, b.coverage) || a.coverage == b.coverage)
++            {
++                BorrowedCommand {
++                    source: new.source,
++                    ..old
++                }
++            } else {
++                old
++            }
++        }
++        _ => old,
++    };
++    old.unchanged(new)
++}
+diff --git a/reactivity/crates/canvas/tests/scene_support.rs b/reactivity/crates/canvas/tests/scene_support.rs
+new file mode 100644
+index 0000000000..64a553c079
+--- /dev/null
++++ b/reactivity/crates/canvas/tests/scene_support.rs
+@@ -0,0 +1,109 @@
++use gpui_canvas::{Affine, Canvas, Color, ColorConfig, Rect, TextSystem};
++#[expect(
++    dead_code,
++    reason = "Shared fixture also exports a viewport for scroll-only tests."
++)]
++#[path = "support/scroll_outside.rs"]
++mod scroll_outside;
++
++#[test]
++fn complete_support_repairs_exact_cpu_pixels_with_order_material_and_tail_changes() {
++    use scroll_outside::{CASES, SIZE, stage};
++    for config in [
++        ColorConfig::default(),
++        ColorConfig::linear_hdr(gpui_canvas::OutputProfile::Srgb, 203.).unwrap(),
++    ] {
++        let bytes = if config == ColorConfig::default() {
++            4
++        } else {
++            8
++        };
++        for case in 0..CASES {
++            let mut canvas = Canvas::recording(SIZE[0], SIZE[1], config).unwrap();
++            let mut text = TextSystem::bundled().unwrap();
++            stage(&mut canvas, &mut text, case, 0, true).commit();
++            let mut pixels = canvas.pixels().to_vec();
++            for tick in 1..6 {
++                let support =
++                    stage(&mut canvas, &mut text, case, tick, true).commit_with_damage_regions();
++                assert!(support.regions().len() <= 64);
++                let expected = canvas.pixels();
++                for repair in support.regions() {
++                    if let Some([l, t, r, b]) = repair.bounds() {
++                        for y in t..b {
++                            let start = ((y * SIZE[0] + l) * bytes) as usize;
++                            let end = ((y * SIZE[0] + r) * bytes) as usize;
++                            pixels[start..end].copy_from_slice(&expected[start..end]);
++                        }
++                    }
++                }
++                assert!(
++                    pixels == expected,
++                    "case={case}, tick={tick}, bytes={bytes}"
++                );
++            }
++        }
++    }
++}
++
++#[test]
++fn separated_support_stays_bounded_and_aborted_scene_preserves_its_predecessor() {
++    let mut canvas = Canvas::recording(512, 64, Default::default()).unwrap();
++    let clip = Rect::new(0., 0., 512., 64.);
++    for count in [2, 64, 65, 80] {
++        let mut initial = canvas.stage();
++        initial.clear(Color::TRANSPARENT);
++        for i in 0..count {
++            initial
++                .fill_rect(
++                    Rect::new(i as f32 * 6., 2., 2., 2.),
++                    Affine::IDENTITY,
++                    clip,
++                    Color::BLACK,
++                )
++                .unwrap();
++        }
++        initial.commit();
++        let old = canvas.pixels().to_vec();
++        {
++            let mut aborted = canvas.stage();
++            aborted.clear(Color::WHITE);
++            assert!(
++                aborted
++                    .fill_rect(
++                        Rect::new(f32::NAN, 0., 2., 2.),
++                        Affine::IDENTITY,
++                        clip,
++                        Color::BLACK
++                    )
++                    .is_err()
++            );
++        }
++        assert_eq!(canvas.pixels(), old);
++        let mut next = canvas.stage();
++        next.clear(Color::TRANSPARENT);
++        for i in 0..count {
++            next.fill_rect(
++                Rect::new(i as f32 * 6., 2., 2., 2.),
++                Affine::IDENTITY,
++                clip,
++                Color::WHITE,
++            )
++            .unwrap();
++        }
++        let support = next.commit_with_damage_regions();
++        assert_eq!(support.regions().len(), if count > 64 { 1 } else { count });
++        let expected = canvas.pixels().to_vec();
++        let mut repaired = old;
++        for region in support.regions() {
++            if let Some([l, t, r, b]) = region.bounds() {
++                for y in t..b {
++                    let start = ((y * 512 + l) * 4) as usize;
++                    let end = ((y * 512 + r) * 4) as usize;
++                    repaired[start..end].copy_from_slice(&expected[start..end]);
++                }
++            }
++        }
++        assert_eq!(repaired, expected);
++    }
++}
+diff --git a/reactivity/crates/gpu/tests/render.rs b/reactivity/crates/gpu/tests/render.rs
+index 023cf195e8..cf994e843a 100644
+--- a/reactivity/crates/gpu/tests/render.rs
++++ b/reactivity/crates/gpu/tests/render.rs
+@@ -6,6 +6,50 @@ use gpui_gpu::{Renderer, Stats, wgpu};
+ #[path = "../../canvas/tests/support/scroll_outside.rs"]
+ mod scroll_outside;
+ 
++#[test]
++fn complete_scene_regions_match_full_gpu_for_all_formats_and_materials() {
++    use gpui_gpu::RetainedRenderer;
++    use scroll_outside::{CASES, SIZE, stage};
++    pollster::block_on(async {
++        for format in [
++            wgpu::TextureFormat::Rgba8UnormSrgb,
++            wgpu::TextureFormat::Bgra8UnormSrgb,
++            wgpu::TextureFormat::Rgba16Float,
++        ] {
++            let inner = renderer(format).await;
++            let mut oracle = Renderer::new(inner.device().clone(), inner.queue().clone(), format)
++                .await
++                .unwrap();
++            let mut gpu = RetainedRenderer::new(inner);
++            let hdr = format == wgpu::TextureFormat::Rgba16Float;
++            let config = if hdr {
++                ColorConfig::linear_hdr(gpui_canvas::OutputProfile::Srgb, 203.).unwrap()
++            } else {
++                ColorConfig::default()
++            };
++            for case in 0..CASES {
++                let mut canvas = Canvas::recording(SIZE[0], SIZE[1], config).unwrap();
++                let mut text = TextSystem::bundled().unwrap();
++                stage(&mut canvas, &mut text, case, 0, hdr).commit();
++                let target = output_texture(&gpu, &canvas);
++                let view = target.create_view(&Default::default());
++                gpu.render(canvas.prepared_scene(), &view, None).unwrap();
++                for tick in 1..6 {
++                    let regions =
++                        stage(&mut canvas, &mut text, case, tick, hdr).commit_with_damage_regions();
++                    gpu.render_regions(canvas.prepared_scene(), &view, &regions)
++                        .unwrap();
++                    assert!(
++                        read_texture(&gpu, &target) == readback(&mut oracle, &canvas),
++                        "complete support case={case}, tick={tick}, format={format:?}"
++                    );
++                    assert_eq!(gpu.retained_stats().composited_pixels, regions.pixels());
++                }
++            }
++        }
++    });
++}
++
+ #[test]
+ fn retained_scroll_outside_changes_match_full_gpu_in_all_formats() {
+     use gpui_gpu::RetainedRenderer;
+diff --git a/reactivity/crates/gpui/src/native/paint_tests.rs b/reactivity/crates/gpui/src/native/paint_tests.rs
+index 1bbc823177..7f68b2b0eb 100644
+--- a/reactivity/crates/gpui/src/native/paint_tests.rs
++++ b/reactivity/crates/gpui/src/native/paint_tests.rs
+@@ -1,5 +1,7 @@
+ //! The actual private native packet bridge, with offscreen readback oracles.
+ use super::*;
++#[path = "scene_support_tests.rs"]
++mod scene_support_tests;
+ #[path = "scroll_copy_tests.rs"]
+ mod scroll_copy_tests;
+ use crate::{Color, El, FieldId, Signal, SignalMap, Source, Sources, div, rgb};
+@@ -266,4 +268,5 @@ pub(super) fn run(gpu: &mut GpuSurface) {
+         gpu.packet_token = None;
+     }
+     scroll_copy_tests::run(gpu);
++    scene_support_tests::run(gpu);
+ }
+diff --git a/reactivity/crates/gpui/src/native/scene_support_tests.rs b/reactivity/crates/gpui/src/native/scene_support_tests.rs
+new file mode 100644
+index 0000000000..91115178a4
+--- /dev/null
++++ b/reactivity/crates/gpui/src/native/scene_support_tests.rs
+@@ -0,0 +1,154 @@
++//! Full-image witnesses for support accumulated before an external ACK.
++use super::*;
++use crate::prelude::*;
++struct Page {
++    values: [Signal<String>; 3],
++    invalid: bool,
++    shifted: bool,
++}
++impl Page {
++    const F: [Source<Self, String>; 3] = [
++        Source::new(FieldId::new(1), "a", |m| &m.values[0], |m| &mut m.values[0]),
++        Source::new(FieldId::new(2), "b", |m| &m.values[1], |m| &mut m.values[1]),
++        Source::new(FieldId::new(3), "c", |m| &m.values[2], |m| &mut m.values[2]),
++    ];
++}
++impl View for Page {
++    fn sources() -> Sources<Self> {
++        Sources::new()
++            .direct(Self::F[0])
++            .direct(Self::F[1])
++            .direct(Self::F[2])
++    }
++    fn view(&self) -> El<'_> {
++        column(self.values.iter().enumerate().map(|(i, value)| {
++            div()
++                .w(0)
++                .h(0)
++                .transform(Affine::translation(
++                    8. + i as f32 * 72.,
++                    if self.shifted { 20. } else { 8. },
++                ))
++                .child(text(value).font_size(12).w(64).h(20))
++        }))
++        .w(240)
++        .h(64)
++        .bg(Color::WHITE)
++        .fg(Color::BLACK)
++        .rounded(if self.invalid { f32::NAN } else { 0. })
++    }
++}
++fn window() -> Win<Page> {
++    Win::recording(
++        Page {
++            values: std::array::from_fn(|_| Signal::new("0000".into())),
++            invalid: false,
++            shifted: false,
++        },
++        WindowOptions {
++            size: [240, 64],
++            ..Default::default()
++        },
++    )
++    .unwrap()
++}
++fn repair(owner: &Win<Page>) -> (crate::PresentationToken, crate::PresentationToken, usize) {
++    owner
++        .with_paint_scene(|_, token, _, damage| {
++            let repair = damage
++                .repair
++                .expect("separated changes retain complete support");
++            assert_eq!(repair.to, token);
++            assert_eq!(Some(repair.from), damage.base);
++            (repair.from, repair.to, repair.regions.regions().len())
++        })
++        .unwrap()
++}
++#[test]
++fn sequential_source_candidates_keep_the_original_acknowledged_base() {
++    let mut owner = window();
++    let base = owner.with_scene(|_, t| t).unwrap();
++    owner.presented(base).unwrap();
++    for i in 0..3 {
++        owner.set(Page::F[i], "1111".into()).unwrap();
++    }
++    let (from, to, count) = repair(&owner);
++    assert_eq!(from, base);
++    assert_ne!(from, to);
++    assert!(count >= 3);
++    eprintln!(
++        "SUPPORT_HEADERS,SceneDamage={},SceneRepair={}",
++        size_of::<crate::runtime::paint::SceneDamage>(),
++        size_of::<crate::runtime::paint::SceneRepair>()
++    );
++}
++pub(super) fn run(gpu: &mut GpuSurface) {
++    let mut oracle = pollster::block_on(Renderer::new(
++        gpu.renderer.device().clone(),
++        gpu.renderer.queue().clone(),
++        gpu.renderer.format(),
++    ))
++    .unwrap();
++    let texture = gpu
++        .renderer
++        .device()
++        .create_texture(&wgpu::TextureDescriptor {
++            label: Some("coalesced scene support oracle"),
++            size: wgpu::Extent3d {
++                width: 240,
++                height: 64,
++                depth_or_array_layers: 1,
++            },
++            mip_level_count: 1,
++            sample_count: 1,
++            dimension: wgpu::TextureDimension::D2,
++            format: gpu.renderer.format(),
++            usage: wgpu::TextureUsages::RENDER_ATTACHMENT | wgpu::TextureUsages::COPY_SRC,
++            view_formats: &[],
++        });
++    for owner_route in [false, true] {
++        let mut owner = window();
++        render(gpu, &mut oracle, &mut owner, &texture);
++        for tick in 0..4 {
++            let value = if tick % 2 == 0 { "1111" } else { "0000" };
++            if owner_route {
++                owner
++                    .update(|m| {
++                        for slot in &mut m.values {
++                            **slot = value.into()
++                        }
++                    })
++                    .unwrap();
++            } else {
++                for field in Page::F {
++                    owner.set(field, value.into()).unwrap();
++                }
++            }
++            assert!(repair(&owner).2 >= 3);
++            render(gpu, &mut oracle, &mut owner, &texture);
++            assert!(gpu.renderer.retained_stats().composited_pixels < 240 * 64);
++        }
++        // This change is ACKed by a different presenter. The GPU must refuse
++        // the next precise transition, even though its from/to are valid in Win.
++        owner.update(|m| m.shifted = true).unwrap();
++        owner
++            .presented(owner.with_scene(|_, t| t).unwrap())
++            .unwrap();
++        for field in Page::F {
++            owner.set(field, "2222".into()).unwrap();
++        }
++        repair(&owner);
++        render(gpu, &mut oracle, &mut owner, &texture);
++        assert_eq!(gpu.renderer.retained_stats().composited_pixels, 240 * 64);
++        // Preserve an older eligible candidate after a newer admission fails.
++        for field in Page::F {
++            owner.set(field, "3333".into()).unwrap();
++        }
++        let older = repair(&owner);
++        assert!(owner.update(|m| m.invalid = true).is_err());
++        assert_eq!(repair(&owner), older);
++        render(gpu, &mut oracle, &mut owner, &texture);
++        gpu.packet_token = None;
++    }
++    eprintln!("NATIVE_SCENE_SUPPORT,coalescing/owner/source/stale/failed-newer/full-pixels=pass");
++}
+diff --git a/reactivity/crates/gpui/src/runtime.rs b/reactivity/crates/gpui/src/runtime.rs
+index 2424f01468..82ad29cab3 100644
+--- a/reactivity/crates/gpui/src/runtime.rs
++++ b/reactivity/crates/gpui/src/runtime.rs
+@@ -3933,7 +3933,7 @@ impl<M: View + 'static> Runtime<M> {
+             })
+             .or_else(|| (!geometry_records.is_empty()).then_some(geometry_records));
+         #[cfg(feature = "native-core")]
+-        let mut scroll_copy = None;
++        let mut scene_repair = None;
+         let damage = if self.automatic_presentation {
+             // Automatic headless acknowledgement retains no external surface
+             // to repair. Do not compare commands for an unused capability.
+@@ -3943,7 +3943,61 @@ impl<M: View + 'static> Runtime<M> {
+             #[cfg(feature = "native-core")]
+             let damage = if let Some((viewport, delta)) = scroll_proposal {
+                 let (damage, copy) = scene.commit_with_scroll_damage(viewport, delta);
+-                scroll_copy = copy;
++                scene_repair = copy.map(|copy| {
++                    paint::SceneRepair::Scroll(paint::ScrollTransition {
++                        from: self.latest_token.expect("acknowledged predecessor"),
++                        to: token,
++                        copy,
++                    })
++                });
++                damage
++            } else if self.presentation_valid
++                && size == self.presentation_size
++                && scale_factor == self.presentation_scale_factor
++            {
++                let mut regions = scene.commit_with_damage_regions();
++                let from = PresentationToken {
++                    window: self.sites.namespace(),
++                    sequence: self.presented_sequence.expect("valid presented image"),
++                };
++                if let Some(prepared) = &self.prepared {
++                    // The canvas is C while the external image is still P.
++                    // Preserve D(P,C) before replacing it with D(P,N).
++                    let prior = self
++                        .text
++                        .as_ref()
++                        .and_then(|text| text.patch.as_ref())
++                        .map(|patch| &patch.repair)
++                        .filter(|repair| {
++                            repair.from == from && Some(repair.to) == self.latest_token
++                        })
++                        .or_else(|| {
++                            self.metadata
++                                .as_ref()
++                                .and_then(|metadata| metadata.scene_repair.as_deref())
++                                .and_then(paint::SceneRepair::regions)
++                                .filter(|repair| {
++                                    repair.from == from && Some(repair.to) == self.latest_token
++                                })
++                        });
++                    if let Some(prior) = prior {
++                        for &support in prior.regions.regions() {
++                            regions.include(support);
++                        }
++                    } else {
++                        // A prior scroll/paint/full scene still has complete
++                        // conservative support, even without sparse regions.
++                        regions.include(prepared.damage);
++                    }
++                }
++                let damage = regions.bounds();
++                if regions.regions().len() > 1 {
++                    scene_repair = Some(paint::SceneRepair::Regions(paint::TextRepair {
++                        from,
++                        to: token,
++                        regions,
++                    }));
++                }
+                 damage
+             } else {
+                 scene.commit_with_damage()
+@@ -3957,21 +4011,15 @@ impl<M: View + 'static> Runtime<M> {
+             )
+         };
+         #[cfg(feature = "native-core")]
+-        if let Some(copy) = scroll_copy {
+-            let transition = paint::ScrollTransition {
+-                from: self.latest_token.expect("acknowledged predecessor"),
+-                to: token,
+-                copy,
+-            };
++        if let Some(repair) = scene_repair {
+             let slot = &mut self
+                 .metadata
+-                .as_mut()
+-                .expect("viewport metadata")
+-                .scroll_copy;
++                .get_or_insert_with(Default::default)
++                .scene_repair;
+             if let Some(storage) = slot {
+-                **storage = transition;
++                **storage = repair;
+             } else {
+-                *slot = Some(Box::new(transition));
++                *slot = Some(Box::new(repair));
+             }
+         }
+         for (&key, state) in &mut self.viewports {
+diff --git a/reactivity/crates/gpui/src/runtime/metadata.rs b/reactivity/crates/gpui/src/runtime/metadata.rs
+index 536b949c8d..476bd0d0a3 100644
+--- a/reactivity/crates/gpui/src/runtime/metadata.rs
++++ b/reactivity/crates/gpui/src/runtime/metadata.rs
+@@ -199,7 +199,7 @@ pub(super) struct Metadata {
+     pub candidate: Option<Sheet>,
+     pub geometry: Option<Box<super::geometry::Geometry>>,
+     #[cfg(feature = "native-core")]
+-    pub scroll_copy: Option<Box<super::paint::ScrollTransition>>,
++    pub scene_repair: Option<Box<super::paint::SceneRepair>>,
+ }
+ impl Metadata {
+     pub fn base(&self, identity: u64) -> Option<&Declared> {
+diff --git a/reactivity/crates/gpui/src/runtime/paint.rs b/reactivity/crates/gpui/src/runtime/paint.rs
+index 7b4af5c040..512d4e9fd8 100644
+--- a/reactivity/crates/gpui/src/runtime/paint.rs
++++ b/reactivity/crates/gpui/src/runtime/paint.rs
+@@ -170,6 +170,29 @@ pub(crate) struct ScrollTransition {
+     pub(crate) copy: gpui_canvas::ScrollCopy,
+ }
+ 
++/// Cold optional complete-scene repair; one slot serves both alternatives.
++#[cfg(feature = "native-core")]
++pub(crate) enum SceneRepair {
++    Regions(TextRepair),
++    Scroll(ScrollTransition),
++}
++
++#[cfg(feature = "native-core")]
++impl SceneRepair {
++    pub(super) fn regions(&self) -> Option<&TextRepair> {
++        match self {
++            Self::Regions(repair) => Some(repair),
++            Self::Scroll(_) => None,
++        }
++    }
++    pub(super) fn scroll(&self) -> Option<&ScrollTransition> {
++        match self {
++            Self::Scroll(scroll) => Some(scroll),
++            Self::Regions(_) => None,
++        }
++    }
++}
++
+ /// Damage relative to the exact acknowledged image, including unbound changes.
+ #[cfg(feature = "native-core")]
+ #[derive(Clone, Copy)]
+@@ -202,14 +225,23 @@ impl<M: View + 'static, L: LaneSet<M>> Win<M, L> {
+                 scroll: runtime
+                     .metadata
+                     .as_ref()
+-                    .and_then(|metadata| metadata.scroll_copy.as_deref())
++                    .and_then(|metadata| metadata.scene_repair.as_deref())
++                    .and_then(SceneRepair::scroll)
+                     .filter(|scroll| scroll.to == token),
+                 repair: runtime
+                     .text
+                     .as_ref()
+                     .and_then(|text| text.patch.as_ref())
+                     .map(|patch| &patch.repair)
+-                    .filter(|repair| repair.to == token),
++                    .filter(|repair| repair.to == token)
++                    .or_else(|| {
++                        runtime
++                            .metadata
++                            .as_ref()
++                            .and_then(|metadata| metadata.scene_repair.as_deref())
++                            .and_then(SceneRepair::regions)
++                            .filter(|repair| repair.to == token)
++                    }),
+                 base: (!runtime.automatic_presentation && runtime.presentation_valid)
+                     .then_some(runtime.presented_sequence)
+                     .flatten()

@@ -1,0 +1,3826 @@
+[
+  {
+    "path": "/home/user/gpui-scene-support-target/release/build/enumflags2_derive/9b66556ac39f4dc8/out/libenumflags2_derive-9b66556ac39f4dc8.so",
+    "bytes": 3087248,
+    "sha256": "5fbabd0ad99de405a18a39f05c27495f0129b6f0fbd7d430a5148609b353087d",
+    "mode": 493,
+    "archive": "/home/user/gpui-completed-test-binaries-archive/5fbabd0ad99de405a18a39f05c27495f0129b6f0fbd7d430a5148609b353087d.gz",
+    "archive_kind": "gzip"
+  },
+  {
+    "path": "/home/user/gpui-scene-support-target/release/build/thiserror-impl/11cb6adf2e0064f3/out/libthiserror_impl-11cb6adf2e0064f3.so",
+    "bytes": 3980528,
+    "sha256": "19d10b99c85afedaa71edac94a0205d1a159d912b4060cd92e0af6883398ea4b",
+    "mode": 493,
+    "archive": "/home/user/gpui-completed-test-binaries-archive/19d10b99c85afedaa71edac94a0205d1a159d912b4060cd92e0af6883398ea4b.gz",
+    "archive_kind": "gzip"
+  },
+  {
+    "path": "/home/user/gpui-scene-support-target/release/build/thiserror-impl/e498c2ab57550790/out/libthiserror_impl-e498c2ab57550790.so",
+    "bytes": 3883480,
+    "sha256": "cd0ddbdd2ef4e6904bcd0418d69a29a17ad17c89871d140f6d12eb0e219fd40a",
+    "mode": 493,
+    "archive": "/home/user/gpui-completed-test-binaries-archive/cd0ddbdd2ef4e6904bcd0418d69a29a17ad17c89871d140f6d12eb0e219fd40a.gz",
+    "archive_kind": "gzip"
+  },
+  {
+    "path": "/home/user/gpui-scene-support-target/release/build/thiserror-impl/503f75daab1907ca/out/libthiserror_impl-503f75daab1907ca.so",
+    "bytes": 3979128,
+    "sha256": "1bb72e716d0068b923461d91b0e01152769e0d18692728dab7dbb646fd348d42",
+    "mode": 493,
+    "archive": "/home/user/gpui-completed-test-binaries-archive/1bb72e716d0068b923461d91b0e01152769e0d18692728dab7dbb646fd348d42.gz",
+    "archive_kind": "gzip"
+  },
+  {
+    "path": "/home/user/gpui-scene-support-target/release/build/fearless_simd_macros/d47f9dfeab0a53ae/out/libfearless_simd_macros-d47f9dfeab0a53ae.so",
+    "bytes": 3722808,
+    "sha256": "605c794d42cc6d161e7cb24b021b6f8371b8131a73170995a780032047f88cb1",
+    "mode": 493,
+    "archive": "/home/user/gpui-completed-test-binaries-archive/605c794d42cc6d161e7cb24b021b6f8371b8131a73170995a780032047f88cb1.gz",
+    "archive_kind": "gzip"
+  },
+  {
+    "path": "/home/user/gpui-scene-support-target/release/build/fearless_simd_macros/13fb3b59b63a3fd9/out/libfearless_simd_macros-13fb3b59b63a3fd9.so",
+    "bytes": 3823840,
+    "sha256": "9d511cb3cc521f83b56d07abdc204a27ed005130687647e966eb91489a4f7e46",
+    "mode": 493,
+    "archive": "/home/user/gpui-completed-test-binaries-archive/9d511cb3cc521f83b56d07abdc204a27ed005130687647e966eb91489a4f7e46.gz",
+    "archive_kind": "gzip"
+  },
+  {
+    "path": "/home/user/gpui-scene-support-target/release/build/fearless_simd_macros/91423a8c93fddbd0/out/libfearless_simd_macros-91423a8c93fddbd0.so",
+    "bytes": 3822544,
+    "sha256": "1a986f33339301b4d99385baa08022c61441d235af3298feee432b5d8dca37ff",
+    "mode": 493,
+    "archive": "/home/user/gpui-completed-test-binaries-archive/1a986f33339301b4d99385baa08022c61441d235af3298feee432b5d8dca37ff.gz",
+    "archive_kind": "gzip"
+  },
+  {
+    "path": "/home/user/gpui-scene-support-target/release/build/zerovec-derive/f48c4e6bbf014461/out/libzerovec_derive-f48c4e6bbf014461.so",
+    "bytes": 3888448,
+    "sha256": "b6e8f50f840974be1ea2698c0adb5f5f54e6e3116c19dcc6d28ac42cae6c66a2",
+    "mode": 493,
+    "archive": "/home/user/gpui-completed-test-binaries-archive/b6e8f50f840974be1ea2698c0adb5f5f54e6e3116c19dcc6d28ac42cae6c66a2.gz",
+    "archive_kind": "gzip"
+  },
+  {
+    "path": "/home/user/gpui-scene-support-target/release/build/zerovec-derive/0453177f0d3b4a4e/out/libzerovec_derive-0453177f0d3b4a4e.so",
+    "bytes": 3888472,
+    "sha256": "8a11b7480c99dc1db38d65ac5af53877fbbc20ed53c33ea11d6434bcbbb22fd3",
+    "mode": 493,
+    "archive": "/home/user/gpui-completed-test-binaries-archive/8a11b7480c99dc1db38d65ac5af53877fbbc20ed53c33ea11d6434bcbbb22fd3.gz",
+    "archive_kind": "gzip"
+  },
+  {
+    "path": "/home/user/gpui-scene-support-target/release/build/zerovec-derive/c60aeac5b371979e/out/libzerovec_derive-c60aeac5b371979e.so",
+    "bytes": 3796416,
+    "sha256": "0a9eb93843297613b2749f965131bc0124da9e08e24035706e2636938354f08f",
+    "mode": 493,
+    "archive": "/home/user/gpui-completed-test-binaries-archive/0a9eb93843297613b2749f965131bc0124da9e08e24035706e2636938354f08f.gz",
+    "archive_kind": "gzip"
+  },
+  {
+    "path": "/home/user/gpui-scene-support-target/release/build/bytemuck_derive/45d346d42384f9a1/out/libbytemuck_derive-45d346d42384f9a1.so",
+    "bytes": 3912032,
+    "sha256": "2c80b3b9a0c8f3d7386e018d6e7311c8254f38ec5d6a013e1030de839d0d21cd",
+    "mode": 493,
+    "archive": "/home/user/gpui-completed-test-binaries-archive/2c80b3b9a0c8f3d7386e018d6e7311c8254f38ec5d6a013e1030de839d0d21cd.gz",
+    "archive_kind": "gzip"
+  },
+  {
+    "path": "/home/user/gpui-scene-support-target/release/build/bytemuck_derive/636d61494b405d44/out/libbytemuck_derive-636d61494b405d44.so",
+    "bytes": 3912080,
+    "sha256": "ce4185a5d673bd913b494f1aa92ec9b07b105852f7336e17d8fa03c45a0e1355",
+    "mode": 493,
+    "archive": "/home/user/gpui-completed-test-binaries-archive/ce4185a5d673bd913b494f1aa92ec9b07b105852f7336e17d8fa03c45a0e1355.gz",
+    "archive_kind": "gzip"
+  },
+  {
+    "path": "/home/user/gpui-scene-support-target/release/build/bytemuck_derive/8486ab917b9e4dfb/out/libbytemuck_derive-8486ab917b9e4dfb.so",
+    "bytes": 3819640,
+    "sha256": "2df22e1b3c4783841c9c21f0d80e20075ae134fab1abc4413ae3d93206b78951",
+    "mode": 493,
+    "archive": "/home/user/gpui-completed-test-binaries-archive/2df22e1b3c4783841c9c21f0d80e20075ae134fab1abc4413ae3d93206b78951.gz",
+    "archive_kind": "gzip"
+  },
+  {
+    "path": "/home/user/gpui-scene-support-target/release/build/serde_repr/78d53ac2f697cdc2/out/libserde_repr-78d53ac2f697cdc2.so",
+    "bytes": 2673184,
+    "sha256": "61007a2f67a0124a9c107766a410b142036c408468ee0b01be54e7a8c6a6cbec",
+    "mode": 493,
+    "archive": "/home/user/gpui-completed-test-binaries-archive/61007a2f67a0124a9c107766a410b142036c408468ee0b01be54e7a8c6a6cbec.gz",
+    "archive_kind": "gzip"
+  },
+  {
+    "path": "/home/user/gpui-scene-support-target/release/build/serde_repr/9b371058a8c8172f/out/libserde_repr-9b371058a8c8172f.so",
+    "bytes": 2586168,
+    "sha256": "61d89be733cc9a018bfa54191e64a10b9caf337a9bfa567a193a57476e4700bb",
+    "mode": 493,
+    "archive": "/home/user/gpui-completed-test-binaries-archive/61d89be733cc9a018bfa54191e64a10b9caf337a9bfa567a193a57476e4700bb.gz",
+    "archive_kind": "gzip"
+  },
+  {
+    "path": "/home/user/gpui-scene-support-target/release/build/phf_macros/5b0d3d11042a8fc2/out/libphf_macros-5b0d3d11042a8fc2.so",
+    "bytes": 3533368,
+    "sha256": "bd6496922656c6f7cb06f61239dcb93de0a26105fcab8161373ccb1252655547",
+    "mode": 493,
+    "archive": "/home/user/gpui-completed-test-binaries-archive/bd6496922656c6f7cb06f61239dcb93de0a26105fcab8161373ccb1252655547.gz",
+    "archive_kind": "gzip"
+  },
+  {
+    "path": "/home/user/gpui-scene-support-target/release/build/gpui_canvas/09f39b25cc138ec9/out/grouped-09f39b25cc138ec9",
+    "bytes": 10585984,
+    "sha256": "f3a0f8d961f4ddfb59fc34e4769f2ae06fc467d56aa917a8dd8c73b509f037fd",
+    "mode": 493,
+    "archive": "/home/user/gpui-preserved-test-binaries/f3a0f8d961f4ddfb59fc34e4769f2ae06fc467d56aa917a8dd8c73b509f037fd",
+    "archive_kind": "raw"
+  },
+  {
+    "path": "/home/user/gpui-scene-support-target/release/build/gpui_canvas/b6ae2ca160e29380/out/sample_clip-b6ae2ca160e29380",
+    "bytes": 1313304,
+    "sha256": "3f6d0c1bb34eda04cdab1d4678c3d06481e7a2100497f43b276ee4187bdb6f13",
+    "mode": 493,
+    "archive": "/home/user/gpui-preserved-test-binaries/3f6d0c1bb34eda04cdab1d4678c3d06481e7a2100497f43b276ee4187bdb6f13",
+    "archive_kind": "raw"
+  },
+  {
+    "path": "/home/user/gpui-scene-support-target/release/build/gpui_canvas/971b8608d86b06bd/out/font_sharing-971b8608d86b06bd",
+    "bytes": 10657768,
+    "sha256": "c198b5df9752a0cc90e8fbd38a73527565c47f24bf2a3927e03d8166efbb52da",
+    "mode": 493,
+    "archive": "/home/user/gpui-preserved-test-binaries/c198b5df9752a0cc90e8fbd38a73527565c47f24bf2a3927e03d8166efbb52da",
+    "archive_kind": "raw"
+  },
+  {
+    "path": "/home/user/gpui-scene-support-target/release/build/gpui_canvas/706c3421e5d8225c/out/text_cache_capacity",
+    "bytes": 7605920,
+    "sha256": "ccac13c76a89baa9a2d21d5198a37adbf8cf785f020c2dae193df201d3618bbb",
+    "mode": 493,
+    "archive": "/home/user/gpui-preserved-test-binaries/ccac13c76a89baa9a2d21d5198a37adbf8cf785f020c2dae193df201d3618bbb",
+    "archive_kind": "raw"
+  },
+  {
+    "path": "/home/user/gpui-scene-support-target/release/build/gpui_canvas/c627d1dc1ab61790/out/parallel-c627d1dc1ab61790",
+    "bytes": 1075560,
+    "sha256": "909e5daf2caa609985fbc4af4600ade411a610d1b2e243ddd83ed48c6982db84",
+    "mode": 493,
+    "archive": "/home/user/gpui-preserved-test-binaries/909e5daf2caa609985fbc4af4600ade411a610d1b2e243ddd83ed48c6982db84",
+    "archive_kind": "raw"
+  },
+  {
+    "path": "/home/user/gpui-scene-support-target/release/build/gpui_canvas/260eabc61cd841a2/out/text_shaping",
+    "bytes": 8010056,
+    "sha256": "3874d8c0fe61bc5435ffc9799683190e1c4545f377f2e01006bc793d2d0ce0b2",
+    "mode": 493,
+    "archive": "/home/user/gpui-preserved-test-binaries/3874d8c0fe61bc5435ffc9799683190e1c4545f377f2e01006bc793d2d0ce0b2",
+    "archive_kind": "raw"
+  },
+  {
+    "path": "/home/user/gpui-scene-support-target/release/build/gpui_canvas/ea1e4dddc2085252/out/sample_storage-ea1e4dddc2085252",
+    "bytes": 8559920,
+    "sha256": "c132c81ba261eef452c146dbeffdb6a220609ba444c5857fc5d9123e60839194",
+    "mode": 493,
+    "archive": "/home/user/gpui-preserved-test-binaries/c132c81ba261eef452c146dbeffdb6a220609ba444c5857fc5d9123e60839194",
+    "archive_kind": "raw"
+  },
+  {
+    "path": "/home/user/gpui-scene-support-target/release/build/gpui_canvas/226f23ac93a92960/out/parallel-226f23ac93a92960",
+    "bytes": 1075560,
+    "sha256": "a639cee1fc0fc7cf8a351b52a0c026f375b4aba01811b08dd5f225224cd68551",
+    "mode": 493,
+    "archive": "/home/user/gpui-preserved-test-binaries/a639cee1fc0fc7cf8a351b52a0c026f375b4aba01811b08dd5f225224cd68551",
+    "archive_kind": "raw"
+  },
+  {
+    "path": "/home/user/gpui-scene-support-target/release/build/gpui_canvas/34a0861752be1a48/out/font_quality-34a0861752be1a48",
+    "bytes": 10776896,
+    "sha256": "6e4670cd0c374b819ce39902989ee324a8c388d973a075fe983c7f882391c30c",
+    "mode": 493,
+    "archive": "/home/user/gpui-preserved-test-binaries/6e4670cd0c374b819ce39902989ee324a8c388d973a075fe983c7f882391c30c",
+    "archive_kind": "raw"
+  },
+  {
+    "path": "/home/user/gpui-scene-support-target/release/build/gpui_canvas/3b0e5e59632df0c9/out/bins-3b0e5e59632df0c9",
+    "bytes": 8626008,
+    "sha256": "c3783c3d71ef514a86c5e516fa03fb622135ccb274ef6a653620ce92f3fb8632",
+    "mode": 493,
+    "archive": "/home/user/gpui-preserved-test-binaries/c3783c3d71ef514a86c5e516fa03fb622135ccb274ef6a653620ce92f3fb8632",
+    "archive_kind": "raw"
+  },
+  {
+    "path": "/home/user/gpui-scene-support-target/release/build/gpui_canvas/3126e60d25619be3/out/selection_queries",
+    "bytes": 6955440,
+    "sha256": "6993796831d9597101cfc1c334145dceed6df50d0a44099a33cca3ac97a3394e",
+    "mode": 493,
+    "archive": "/home/user/gpui-preserved-test-binaries/6993796831d9597101cfc1c334145dceed6df50d0a44099a33cca3ac97a3394e",
+    "archive_kind": "raw"
+  },
+  {
+    "path": "/home/user/gpui-scene-support-target/release/build/gpui_canvas/540cf57f0cec65d2/out/dpi-540cf57f0cec65d2",
+    "bytes": 8602160,
+    "sha256": "989943f7204a4ac782a4624540a92ebde4fa2cd04a7f2315574a08b54edba929",
+    "mode": 493,
+    "archive": "/home/user/gpui-preserved-test-binaries/989943f7204a4ac782a4624540a92ebde4fa2cd04a7f2315574a08b54edba929",
+    "archive_kind": "raw"
+  },
+  {
+    "path": "/home/user/gpui-scene-support-target/release/build/gpui_canvas/48be0049acebbd55/out/color_authoring-48be0049acebbd55",
+    "bytes": 1197024,
+    "sha256": "449a2db114fbeafaa0d9e36cd7c319607dfbeff584b8fa9901b9abdd5e110d92",
+    "mode": 493,
+    "archive": "/home/user/gpui-preserved-test-binaries/449a2db114fbeafaa0d9e36cd7c319607dfbeff584b8fa9901b9abdd5e110d92",
+    "archive_kind": "raw"
+  },
+  {
+    "path": "/home/user/gpui-scene-support-target/release/build/gpui_canvas/5ae5ce7c27366cb3/out/slots-5ae5ce7c27366cb3",
+    "bytes": 8625888,
+    "sha256": "ce7d4d300903472e7370796b7a49ba15970635ee702867c954ab154b63b75f99",
+    "mode": 493,
+    "archive": "/home/user/gpui-preserved-test-binaries/ce7d4d300903472e7370796b7a49ba15970635ee702867c954ab154b63b75f99",
+    "archive_kind": "raw"
+  },
+  {
+    "path": "/home/user/gpui-scene-support-target/release/build/gpui_canvas/13eb99216a5128df/out/group_views",
+    "bytes": 7870840,
+    "sha256": "6c6955e0cb84b53b8185d5022d5bb7039595bc78d16815956f33c3c87b1d0076",
+    "mode": 493,
+    "archive": "/home/user/gpui-preserved-test-binaries/6c6955e0cb84b53b8185d5022d5bb7039595bc78d16815956f33c3c87b1d0076",
+    "archive_kind": "raw"
+  },
+  {
+    "path": "/home/user/gpui-scene-support-target/release/build/gpui_canvas/fbaa1352f1fecd0d/out/text_shaping",
+    "bytes": 8040600,
+    "sha256": "ea6515796f96de0d9f3a2f81016a810bf339f5fa35a89c8fb9e7797023f3ae89",
+    "mode": 493,
+    "archive": "/home/user/gpui-preserved-test-binaries/ea6515796f96de0d9f3a2f81016a810bf339f5fa35a89c8fb9e7797023f3ae89",
+    "archive_kind": "raw"
+  },
+  {
+    "path": "/home/user/gpui-scene-support-target/release/build/gpui_canvas/e2d64c4001f3f739/out/slots-e2d64c4001f3f739",
+    "bytes": 8596920,
+    "sha256": "0d6cb6f3a018d519b031d6d701b1522312e23f95283f01e6817068fa0213b764",
+    "mode": 493,
+    "archive": "/home/user/gpui-preserved-test-binaries/0d6cb6f3a018d519b031d6d701b1522312e23f95283f01e6817068fa0213b764",
+    "archive_kind": "raw"
+  },
+  {
+    "path": "/home/user/gpui-scene-support-target/release/build/gpui_canvas/21e6679cdd2bede3/out/dpi-21e6679cdd2bede3",
+    "bytes": 8600280,
+    "sha256": "b9e0b52f34e1a00338ed31eec0a8e4fc29143fbf407602f69b872744169d30f3",
+    "mode": 493,
+    "archive": "/home/user/gpui-preserved-test-binaries/b9e0b52f34e1a00338ed31eec0a8e4fc29143fbf407602f69b872744169d30f3",
+    "archive_kind": "raw"
+  },
+  {
+    "path": "/home/user/gpui-scene-support-target/release/build/gpui_canvas/b994064e9147dc2f/out/cpu",
+    "bytes": 8030744,
+    "sha256": "06cbbbb533115a885ae564c15456cdaea94e001a0ee390289786b684d579d3a9",
+    "mode": 493,
+    "archive": "/home/user/gpui-preserved-test-binaries/06cbbbb533115a885ae564c15456cdaea94e001a0ee390289786b684d579d3a9",
+    "archive_kind": "raw"
+  },
+  {
+    "path": "/home/user/gpui-scene-support-target/release/build/gpui_canvas/fc7b0dd44c8082b6/out/coverage_table",
+    "bytes": 1434632,
+    "sha256": "ab18914d6c1ceb983eb5e6f0dfca412da9d98d516cbcb374487ccc30d3d6b1f6",
+    "mode": 493,
+    "archive": "/home/user/gpui-preserved-test-binaries/ab18914d6c1ceb983eb5e6f0dfca412da9d98d516cbcb374487ccc30d3d6b1f6",
+    "archive_kind": "raw"
+  },
+  {
+    "path": "/home/user/gpui-scene-support-target/release/build/gpui_canvas/1ffc32f43a1e3cac/out/color_authoring-1ffc32f43a1e3cac",
+    "bytes": 1197384,
+    "sha256": "f9fe92ee43fa35632529e54ce98b27133a5045224cc4c442c9cdf4b7dcafe829",
+    "mode": 493,
+    "archive": "/home/user/gpui-preserved-test-binaries/f9fe92ee43fa35632529e54ce98b27133a5045224cc4c442c9cdf4b7dcafe829",
+    "archive_kind": "raw"
+  },
+  {
+    "path": "/home/user/gpui-scene-support-target/release/build/gpui_canvas/97b6b2a7d6700272/out/color_packing-97b6b2a7d6700272",
+    "bytes": 1357520,
+    "sha256": "e6077a97b2431d1c1014bb0f9369d70726270a7d9579f40930ac0e66c667fe72",
+    "mode": 493,
+    "archive": "/home/user/gpui-preserved-test-binaries/e6077a97b2431d1c1014bb0f9369d70726270a7d9579f40930ac0e66c667fe72",
+    "archive_kind": "raw"
+  },
+  {
+    "path": "/home/user/gpui-scene-support-target/release/build/gpui_canvas/66052e5dfad09408/out/text_patch_damage-66052e5dfad09408",
+    "bytes": 8609272,
+    "sha256": "a43fe249c2c6fb18c877ca3333fd3673f7e35b80188018ace6d94f4a91001e62",
+    "mode": 493,
+    "archive": "/home/user/gpui-preserved-test-binaries/a43fe249c2c6fb18c877ca3333fd3673f7e35b80188018ace6d94f4a91001e62",
+    "archive_kind": "raw"
+  },
+  {
+    "path": "/home/user/gpui-scene-support-target/release/build/gpui_canvas/d3ab4a7cc2af9f7a/out/text_capacity-d3ab4a7cc2af9f7a",
+    "bytes": 8479648,
+    "sha256": "bf2d0a33dc25f3a098cd67a3bdd160a2164bb3adf8f4f65d0a067b8251817a94",
+    "mode": 493,
+    "archive": "/home/user/gpui-preserved-test-binaries/bf2d0a33dc25f3a098cd67a3bdd160a2164bb3adf8f4f65d0a067b8251817a94",
+    "archive_kind": "raw"
+  },
+  {
+    "path": "/home/user/gpui-scene-support-target/release/build/gpui_canvas/a59ff47379d46cb6/out/text_oracle",
+    "bytes": 6939896,
+    "sha256": "7fa72df36a2dfb44f6ca1d1c7964c74410be9e46d5316513252540f91cf795fd",
+    "mode": 493,
+    "archive": "/home/user/gpui-preserved-test-binaries/7fa72df36a2dfb44f6ca1d1c7964c74410be9e46d5316513252540f91cf795fd",
+    "archive_kind": "raw"
+  },
+  {
+    "path": "/home/user/gpui-scene-support-target/release/build/gpui_canvas/61d42182c4b8f629/out/scene_support-61d42182c4b8f629",
+    "bytes": 8640648,
+    "sha256": "b790a6207367e5be78cd24e2819e55720bfdf95eb04999f0a6b888d0f0b7b6c8",
+    "mode": 493,
+    "archive": "/home/user/gpui-preserved-test-binaries/b790a6207367e5be78cd24e2819e55720bfdf95eb04999f0a6b888d0f0b7b6c8",
+    "archive_kind": "raw"
+  },
+  {
+    "path": "/home/user/gpui-scene-support-target/release/build/gpui_canvas/3331c5fe99da3696/out/coverage_table",
+    "bytes": 1434632,
+    "sha256": "80bb29255fa6cb42a683f428a1219ba1f2dad4de51b5d4fdefb81acbe24d9ff4",
+    "mode": 493,
+    "archive": "/home/user/gpui-preserved-test-binaries/80bb29255fa6cb42a683f428a1219ba1f2dad4de51b5d4fdefb81acbe24d9ff4",
+    "archive_kind": "raw"
+  },
+  {
+    "path": "/home/user/gpui-scene-support-target/release/build/gpui_canvas/2fa24cddb112cfdd/out/unicode-2fa24cddb112cfdd",
+    "bytes": 11829040,
+    "sha256": "92c82c1a37550b374942bd46621f3b7f026e6a62db105e13de776e5de2131499",
+    "mode": 493,
+    "archive": "/home/user/gpui-preserved-test-binaries/92c82c1a37550b374942bd46621f3b7f026e6a62db105e13de776e5de2131499",
+    "archive_kind": "raw"
+  },
+  {
+    "path": "/home/user/gpui-scene-support-target/release/build/gpui_canvas/09d44fbbd8a57083/out/literal_cow-09d44fbbd8a57083",
+    "bytes": 1338424,
+    "sha256": "1fd16b895e90985dd8543e24e26ad8cc33f7cb47acd68a81f0325a2d10d8388f",
+    "mode": 493,
+    "archive": "/home/user/gpui-preserved-test-binaries/1fd16b895e90985dd8543e24e26ad8cc33f7cb47acd68a81f0325a2d10d8388f",
+    "archive_kind": "raw"
+  },
+  {
+    "path": "/home/user/gpui-scene-support-target/release/build/gpui_canvas/1be0b3d0e3235788/out/selection-1be0b3d0e3235788",
+    "bytes": 10115752,
+    "sha256": "93e23808512c38cddb7ce4d4c02c2571c3038234ea7a5f5a69dbc1a7de6ec174",
+    "mode": 493,
+    "archive": "/home/user/gpui-preserved-test-binaries/93e23808512c38cddb7ce4d4c02c2571c3038234ea7a5f5a69dbc1a7de6ec174",
+    "archive_kind": "raw"
+  },
+  {
+    "path": "/home/user/gpui-scene-support-target/release/build/gpui_canvas/a14e747b611b1edb/out/paint-a14e747b611b1edb",
+    "bytes": 8627040,
+    "sha256": "73f1242847323f00117510aaa7dc4b8cc3f04cfed363a7f84d8fd1691340e893",
+    "mode": 493,
+    "archive": "/home/user/gpui-preserved-test-binaries/73f1242847323f00117510aaa7dc4b8cc3f04cfed363a7f84d8fd1691340e893",
+    "archive_kind": "raw"
+  },
+  {
+    "path": "/home/user/gpui-scene-support-target/release/build/gpui_canvas/4190eb0452ec7d67/out/scroll_copy-4190eb0452ec7d67",
+    "bytes": 10733624,
+    "sha256": "22ad3151fdabf96eafed2c1a76794417f2474e2878fcc4009acc837b74676279",
+    "mode": 493,
+    "archive": "/home/user/gpui-preserved-test-binaries/22ad3151fdabf96eafed2c1a76794417f2474e2878fcc4009acc837b74676279",
+    "archive_kind": "raw"
+  },
+  {
+    "path": "/home/user/gpui-scene-support-target/release/build/gpui_canvas/74572a23cb90bd6a/out/text_cache_capacity",
+    "bytes": 7577440,
+    "sha256": "ff6a780125c6ac872635e6d60306873dad11ed51c3e4a7f0a13c1aeceae38474",
+    "mode": 493,
+    "archive": "/home/user/gpui-preserved-test-binaries/ff6a780125c6ac872635e6d60306873dad11ed51c3e4a7f0a13c1aeceae38474",
+    "archive_kind": "raw"
+  },
+  {
+    "path": "/home/user/gpui-scene-support-target/release/build/gpui_canvas/803b30cc4bdd1ebd/out/color-803b30cc4bdd1ebd",
+    "bytes": 1320520,
+    "sha256": "aa4f2f7a023bed22b70b7849ccf1798b31a393a554b6ac8cb56c7ac5c6e038d2",
+    "mode": 493,
+    "archive": "/home/user/gpui-preserved-test-binaries/aa4f2f7a023bed22b70b7849ccf1798b31a393a554b6ac8cb56c7ac5c6e038d2",
+    "archive_kind": "raw"
+  },
+  {
+    "path": "/home/user/gpui-scene-support-target/release/build/gpui_canvas/5423f225aaab5c39/out/grouped-5423f225aaab5c39",
+    "bytes": 10557024,
+    "sha256": "9fb8ce0790f6ede1d7ea93ff86ee791981cc2458a26476524d34b144ca8dd127",
+    "mode": 493,
+    "archive": "/home/user/gpui-preserved-test-binaries/9fb8ce0790f6ede1d7ea93ff86ee791981cc2458a26476524d34b144ca8dd127",
+    "archive_kind": "raw"
+  },
+  {
+    "path": "/home/user/gpui-scene-support-target/release/build/gpui_canvas/ea5bcc72b93e25e0/out/render-ea5bcc72b93e25e0",
+    "bytes": 12078024,
+    "sha256": "1a6d06e8c17a5b6aad7653ba05d452bbd5367d894f7a78f89c8c34a2a98b9b00",
+    "mode": 493,
+    "archive": "/home/user/gpui-preserved-test-binaries/1a6d06e8c17a5b6aad7653ba05d452bbd5367d894f7a78f89c8c34a2a98b9b00",
+    "archive_kind": "raw"
+  },
+  {
+    "path": "/home/user/gpui-scene-support-target/release/build/gpui_canvas/01a4c1c35ff04425/out/clipping-01a4c1c35ff04425",
+    "bytes": 1368168,
+    "sha256": "ca2560fdf594cd47982eae8de39668da23d32dc8366600d5ec60fb99d77806d2",
+    "mode": 493,
+    "archive": "/home/user/gpui-preserved-test-binaries/ca2560fdf594cd47982eae8de39668da23d32dc8366600d5ec60fb99d77806d2",
+    "archive_kind": "raw"
+  },
+  {
+    "path": "/home/user/gpui-scene-support-target/release/build/gpui_canvas/6e6cb88f7f166e8e/out/text_interaction",
+    "bytes": 6966976,
+    "sha256": "e789c8eb65fa50a49e0b808468fdb315ff05fb65ab330d3f5bea14dafd5d070f",
+    "mode": 493,
+    "archive": "/home/user/gpui-preserved-test-binaries/e789c8eb65fa50a49e0b808468fdb315ff05fb65ab330d3f5bea14dafd5d070f",
+    "archive_kind": "raw"
+  },
+  {
+    "path": "/home/user/gpui-scene-support-target/release/build/gpui_canvas/dc7489c6ce975b1f/out/literal_cow-dc7489c6ce975b1f",
+    "bytes": 1312968,
+    "sha256": "36093132600659880a554de98093e8a3def1f7a807e2f4f4ff5dc34fb80610be",
+    "mode": 493,
+    "archive": "/home/user/gpui-preserved-test-binaries/36093132600659880a554de98093e8a3def1f7a807e2f4f4ff5dc34fb80610be",
+    "archive_kind": "raw"
+  },
+  {
+    "path": "/home/user/gpui-scene-support-target/release/build/gpui_canvas/9daf6ecc7081fef3/out/oklch-9daf6ecc7081fef3",
+    "bytes": 1212272,
+    "sha256": "a51711d814ff153e74406e11588c43047c9d6490f4382ff201c41f2d4551dc9e",
+    "mode": 493,
+    "archive": "/home/user/gpui-preserved-test-binaries/a51711d814ff153e74406e11588c43047c9d6490f4382ff201c41f2d4551dc9e",
+    "archive_kind": "raw"
+  },
+  {
+    "path": "/home/user/gpui-scene-support-target/release/build/gpui_canvas/04fe2e89784ddd77/out/images-04fe2e89784ddd77",
+    "bytes": 1352208,
+    "sha256": "2da8c09fcb8036083ddce0bfc19219a1711f44a293fda4afdbab35bce0a94d03",
+    "mode": 493,
+    "archive": "/home/user/gpui-preserved-test-binaries/2da8c09fcb8036083ddce0bfc19219a1711f44a293fda4afdbab35bce0a94d03",
+    "archive_kind": "raw"
+  },
+  {
+    "path": "/home/user/gpui-scene-support-target/release/build/gpui_canvas/7d88e365fb8520d3/out/caret_pair_measure",
+    "bytes": 6924704,
+    "sha256": "7c12034bdb8ba58aef75dfda78adfce1d4745e0477ad5613de5051c0327fd734",
+    "mode": 493,
+    "archive": "/home/user/gpui-preserved-test-binaries/7c12034bdb8ba58aef75dfda78adfce1d4745e0477ad5613de5051c0327fd734",
+    "archive_kind": "raw"
+  },
+  {
+    "path": "/home/user/gpui-scene-support-target/release/build/gpui_canvas/d3c2882074eb0607/out/render-d3c2882074eb0607",
+    "bytes": 12049520,
+    "sha256": "7935f5b9941b48b6e4de78540c1aa6c617d8d7f271045c25aaf991fba6386bd3",
+    "mode": 493,
+    "archive": "/home/user/gpui-preserved-test-binaries/7935f5b9941b48b6e4de78540c1aa6c617d8d7f271045c25aaf991fba6386bd3",
+    "archive_kind": "raw"
+  },
+  {
+    "path": "/home/user/gpui-scene-support-target/release/build/gpui_canvas/df8fbe0afdb04b67/out/caret_pair_measure",
+    "bytes": 6955152,
+    "sha256": "a006de55c56c1aa9d04a0cd1d485782229cb0439dee55e44a5c501deee9daa6f",
+    "mode": 493,
+    "archive": "/home/user/gpui-preserved-test-binaries/a006de55c56c1aa9d04a0cd1d485782229cb0439dee55e44a5c501deee9daa6f",
+    "archive_kind": "raw"
+  },
+  {
+    "path": "/home/user/gpui-scene-support-target/release/build/gpui_canvas/1d61b0701b144f8b/out/text_shaping",
+    "bytes": 8037920,
+    "sha256": "a0eaa0cf8c2e500b699ef9c55f93d2521601c00968ab0ddee38c54b8878ee89b",
+    "mode": 493,
+    "archive": "/home/user/gpui-preserved-test-binaries/a0eaa0cf8c2e500b699ef9c55f93d2521601c00968ab0ddee38c54b8878ee89b",
+    "archive_kind": "raw"
+  },
+  {
+    "path": "/home/user/gpui-scene-support-target/release/build/gpui_canvas/4ca75d5643febe6d/out/default_font-4ca75d5643febe6d",
+    "bytes": 12908856,
+    "sha256": "d38bde0315f099d60043b30bea842f7aa83d1eaa23608278d5f030c85381e583",
+    "mode": 493,
+    "archive": "/home/user/gpui-preserved-test-binaries/d38bde0315f099d60043b30bea842f7aa83d1eaa23608278d5f030c85381e583",
+    "archive_kind": "raw"
+  },
+  {
+    "path": "/home/user/gpui-scene-support-target/release/build/gpui_canvas/b30100c4f3186c7e/out/gradients-b30100c4f3186c7e",
+    "bytes": 1337192,
+    "sha256": "ceccc4a444a33f04d38ba9e7aa1599228ab3b5365454bfa7c95477623cebe179",
+    "mode": 493,
+    "archive": "/home/user/gpui-preserved-test-binaries/ceccc4a444a33f04d38ba9e7aa1599228ab3b5365454bfa7c95477623cebe179",
+    "archive_kind": "raw"
+  },
+  {
+    "path": "/home/user/gpui-scene-support-target/release/build/gpui_canvas/dc5086bcbc4ab0ff/out/color-dc5086bcbc4ab0ff",
+    "bytes": 1346336,
+    "sha256": "98ceb27e78f02eff289e1a33734888b40a8a758bb45f01e8b323c29bdfecaba1",
+    "mode": 493,
+    "archive": "/home/user/gpui-preserved-test-binaries/98ceb27e78f02eff289e1a33734888b40a8a758bb45f01e8b323c29bdfecaba1",
+    "archive_kind": "raw"
+  },
+  {
+    "path": "/home/user/gpui-scene-support-target/release/build/gpui_canvas/df94f3b5799eeba9/out/clip_cost",
+    "bytes": 7848544,
+    "sha256": "585c2b78fb832d60b3e1234925ee4e9bf7a410a0a5b8da36ee2e8dcfe148ea1f",
+    "mode": 493,
+    "archive": "/home/user/gpui-preserved-test-binaries/585c2b78fb832d60b3e1234925ee4e9bf7a410a0a5b8da36ee2e8dcfe148ea1f",
+    "archive_kind": "raw"
+  },
+  {
+    "path": "/home/user/gpui-scene-support-target/release/build/gpui_canvas/3eee272fb23f9d81/out/cpu",
+    "bytes": 7999912,
+    "sha256": "164e07daffdf8a90c07d9225e92267c25c4ec1ada0de2dcc22d9d2e6b049e74a",
+    "mode": 493,
+    "archive": "/home/user/gpui-preserved-test-binaries/164e07daffdf8a90c07d9225e92267c25c4ec1ada0de2dcc22d9d2e6b049e74a",
+    "archive_kind": "raw"
+  },
+  {
+    "path": "/home/user/gpui-scene-support-target/release/build/gpui_canvas/aa1e94a7d0b94507/out/text_cache-aa1e94a7d0b94507",
+    "bytes": 9187040,
+    "sha256": "8e79121fdff9aa86d0ac1d3cc0a590866771909ba3cf480c4b2f95a8a3523716",
+    "mode": 493,
+    "archive": "/home/user/gpui-preserved-test-binaries/8e79121fdff9aa86d0ac1d3cc0a590866771909ba3cf480c4b2f95a8a3523716",
+    "archive_kind": "raw"
+  },
+  {
+    "path": "/home/user/gpui-scene-support-target/release/build/gpui_canvas/48286f9c4c441df1/out/scroll_copy-48286f9c4c441df1",
+    "bytes": 10731752,
+    "sha256": "dd9afc2d942f80767f7b6012d4f6d71be84c2c07b82c82e77bd46581e3b4a7fa",
+    "mode": 493,
+    "archive": "/home/user/gpui-preserved-test-binaries/dd9afc2d942f80767f7b6012d4f6d71be84c2c07b82c82e77bd46581e3b4a7fa",
+    "archive_kind": "raw"
+  },
+  {
+    "path": "/home/user/gpui-scene-support-target/release/build/gpui_canvas/7b4981f002c284aa/out/literal_cow-7b4981f002c284aa",
+    "bytes": 1338776,
+    "sha256": "a47fa06e7cec8874fabb3fed222a01f6d2de65299c9d23015ef3462ec063146c",
+    "mode": 493,
+    "archive": "/home/user/gpui-preserved-test-binaries/a47fa06e7cec8874fabb3fed222a01f6d2de65299c9d23015ef3462ec063146c",
+    "archive_kind": "raw"
+  },
+  {
+    "path": "/home/user/gpui-scene-support-target/release/build/gpui_canvas/1ed8d800b803a128/out/solid-1ed8d800b803a128",
+    "bytes": 1324416,
+    "sha256": "adca61c218820fea33e654bdca27290b87b58142d3e794717b8b8f909e8accd2",
+    "mode": 493,
+    "archive": "/home/user/gpui-preserved-test-binaries/adca61c218820fea33e654bdca27290b87b58142d3e794717b8b8f909e8accd2",
+    "archive_kind": "raw"
+  },
+  {
+    "path": "/home/user/gpui-scene-support-target/release/build/gpui_canvas/f04e70e509498e79/out/rounded-f04e70e509498e79",
+    "bytes": 1333568,
+    "sha256": "6e2ea5eb01e804e272d3f4ea4614b96d1a91fbb34488d12348e44332c77ff131",
+    "mode": 493,
+    "archive": "/home/user/gpui-preserved-test-binaries/6e2ea5eb01e804e272d3f4ea4614b96d1a91fbb34488d12348e44332c77ff131",
+    "archive_kind": "raw"
+  },
+  {
+    "path": "/home/user/gpui-scene-support-target/release/build/gpui_canvas/52684454f2eed9fd/out/text_oracle",
+    "bytes": 6968360,
+    "sha256": "f5eefa8f21257dadde828e4838f9b5283db4c24fd976fc1a0af5662b41a2c4f4",
+    "mode": 493,
+    "archive": "/home/user/gpui-preserved-test-binaries/f5eefa8f21257dadde828e4838f9b5283db4c24fd976fc1a0af5662b41a2c4f4",
+    "archive_kind": "raw"
+  },
+  {
+    "path": "/home/user/gpui-scene-support-target/release/build/gpui_canvas/2a530e8f6638e7bf/out/images-2a530e8f6638e7bf",
+    "bytes": 1326752,
+    "sha256": "f4c29195d6bdb554a613983769230ab2b1b3f5e9984f44275068880d127ad76f",
+    "mode": 493,
+    "archive": "/home/user/gpui-preserved-test-binaries/f4c29195d6bdb554a613983769230ab2b1b3f5e9984f44275068880d127ad76f",
+    "archive_kind": "raw"
+  },
+  {
+    "path": "/home/user/gpui-scene-support-target/release/build/gpui_canvas/ac20a16148385938/out/render-ac20a16148385938",
+    "bytes": 12080352,
+    "sha256": "5cbafeb5ab9bc12bd40c7732f01aad9fbfdd5b22738cd43dbed45ae36788cc64",
+    "mode": 493,
+    "archive": "/home/user/gpui-preserved-test-binaries/5cbafeb5ab9bc12bd40c7732f01aad9fbfdd5b22738cd43dbed45ae36788cc64",
+    "archive_kind": "raw"
+  },
+  {
+    "path": "/home/user/gpui-scene-support-target/release/build/gpui_canvas/ffefd78ac769fd9f/out/paint-ffefd78ac769fd9f",
+    "bytes": 8625160,
+    "sha256": "6f647939a61f9d3ad273886c98d6f5d1853413b162b24157158e3be8200fbf97",
+    "mode": 493,
+    "archive": "/home/user/gpui-preserved-test-binaries/6f647939a61f9d3ad273886c98d6f5d1853413b162b24157158e3be8200fbf97",
+    "archive_kind": "raw"
+  },
+  {
+    "path": "/home/user/gpui-scene-support-target/release/build/gpui_canvas/de5d428c2d402045/out/sample_storage-de5d428c2d402045",
+    "bytes": 8590736,
+    "sha256": "7b8b646591525c5cf0cb1e678fef74d41761aafad513f6ae60f5ec8f49f0e7f2",
+    "mode": 493,
+    "archive": "/home/user/gpui-preserved-test-binaries/7b8b646591525c5cf0cb1e678fef74d41761aafad513f6ae60f5ec8f49f0e7f2",
+    "archive_kind": "raw"
+  },
+  {
+    "path": "/home/user/gpui-scene-support-target/release/build/gpui_canvas/3c86ff37841d37fa/out/text_oracle",
+    "bytes": 6970368,
+    "sha256": "2cc3bda09326eaabd18cbe402ec37deebd1f3259f56362350ab0e2a4f069e1e3",
+    "mode": 493,
+    "archive": "/home/user/gpui-preserved-test-binaries/2cc3bda09326eaabd18cbe402ec37deebd1f3259f56362350ab0e2a4f069e1e3",
+    "archive_kind": "raw"
+  },
+  {
+    "path": "/home/user/gpui-scene-support-target/release/build/gpui_canvas/f1bdf6204dea9b1a/out/unicode-f1bdf6204dea9b1a",
+    "bytes": 11827424,
+    "sha256": "f052a63afa860bab8964953252b95fd977412bad9e29b0253ce838b9e650dc45",
+    "mode": 493,
+    "archive": "/home/user/gpui-preserved-test-binaries/f052a63afa860bab8964953252b95fd977412bad9e29b0253ce838b9e650dc45",
+    "archive_kind": "raw"
+  },
+  {
+    "path": "/home/user/gpui-scene-support-target/release/build/gpui_canvas/544c8d150bbd2667/out/prepared_scene-544c8d150bbd2667",
+    "bytes": 10662696,
+    "sha256": "44440541270dbab4cb180287a461b4fec8dfdee96f52b44e5e4a8a8c2a76d5f4",
+    "mode": 493,
+    "archive": "/home/user/gpui-preserved-test-binaries/44440541270dbab4cb180287a461b4fec8dfdee96f52b44e5e4a8a8c2a76d5f4",
+    "archive_kind": "raw"
+  },
+  {
+    "path": "/home/user/gpui-scene-support-target/release/build/gpui_canvas/06bdece435b5986b/out/font_quality-06bdece435b5986b",
+    "bytes": 10774952,
+    "sha256": "95224653b78cff06a0b84c1b221f415bd42bdf99ac4dbae14cbf03e30a7bb7fa",
+    "mode": 493,
+    "archive": "/home/user/gpui-preserved-test-binaries/95224653b78cff06a0b84c1b221f415bd42bdf99ac4dbae14cbf03e30a7bb7fa",
+    "archive_kind": "raw"
+  },
+  {
+    "path": "/home/user/gpui-scene-support-target/release/build/gpui_canvas/e4daf880f8f3142f/out/prepared_scene-e4daf880f8f3142f",
+    "bytes": 10633768,
+    "sha256": "b2ae8054b75d9d56d26e1db396fab3eb0384e605a8cfd1a955c6f428e39d1328",
+    "mode": 493,
+    "archive": "/home/user/gpui-preserved-test-binaries/b2ae8054b75d9d56d26e1db396fab3eb0384e605a8cfd1a955c6f428e39d1328",
+    "archive_kind": "raw"
+  },
+  {
+    "path": "/home/user/gpui-scene-support-target/release/build/gpui_canvas/e7f7f926e56c8080/out/gpui_canvas-e7f7f926e56c8080",
+    "bytes": 9948192,
+    "sha256": "df9ce14bc13308651dc9d57fd607bd8bbe659a86fc90ce77b18436898d8b8145",
+    "mode": 493,
+    "archive": "/home/user/gpui-preserved-test-binaries/df9ce14bc13308651dc9d57fd607bd8bbe659a86fc90ce77b18436898d8b8145",
+    "archive_kind": "raw"
+  },
+  {
+    "path": "/home/user/gpui-scene-support-target/release/build/gpui_canvas/04b7c6d39b1f1f06/out/default_font-04b7c6d39b1f1f06",
+    "bytes": 12939232,
+    "sha256": "f2f1193bcd9ed1373015cdc692585dc155b65e62cd6f372d24828548be8bf391",
+    "mode": 493,
+    "archive": "/home/user/gpui-preserved-test-binaries/f2f1193bcd9ed1373015cdc692585dc155b65e62cd6f372d24828548be8bf391",
+    "archive_kind": "raw"
+  },
+  {
+    "path": "/home/user/gpui-scene-support-target/release/build/gpui_canvas/0ce5c7756bca6592/out/paint-0ce5c7756bca6592",
+    "bytes": 8596200,
+    "sha256": "165ab8e0131715d29f9fcb878713cc0905664d5854b7d445dd7d1faac2941261",
+    "mode": 493,
+    "archive": "/home/user/gpui-preserved-test-binaries/165ab8e0131715d29f9fcb878713cc0905664d5854b7d445dd7d1faac2941261",
+    "archive_kind": "raw"
+  },
+  {
+    "path": "/home/user/gpui-scene-support-target/release/build/gpui_canvas/ea1971b907539b40/out/retained_runs",
+    "bytes": 7884288,
+    "sha256": "967616bf837d746ae1e6bece2de6880022f5f636b86231bb2381776b78c214d7",
+    "mode": 493,
+    "archive": "/home/user/gpui-preserved-test-binaries/967616bf837d746ae1e6bece2de6880022f5f636b86231bb2381776b78c214d7",
+    "archive_kind": "raw"
+  },
+  {
+    "path": "/home/user/gpui-scene-support-target/release/build/gpui_canvas/879021c36e791478/out/line_height-879021c36e791478",
+    "bytes": 7587680,
+    "sha256": "9f22c8e0c2c2260d1e2586e963b0a1c16b6adc196d7f4475776608ec12d8cbe5",
+    "mode": 493,
+    "archive": "/home/user/gpui-preserved-test-binaries/9f22c8e0c2c2260d1e2586e963b0a1c16b6adc196d7f4475776608ec12d8cbe5",
+    "archive_kind": "raw"
+  },
+  {
+    "path": "/home/user/gpui-scene-support-target/release/build/gpui_canvas/68414e8845d14960/out/font_memory",
+    "bytes": 10154640,
+    "sha256": "ff195abe76a2637a9edac0b0ccb33f6a0693fd3951582b728401d6ca54bdd570",
+    "mode": 493,
+    "archive": "/home/user/gpui-preserved-test-binaries/ff195abe76a2637a9edac0b0ccb33f6a0693fd3951582b728401d6ca54bdd570",
+    "archive_kind": "raw"
+  },
+  {
+    "path": "/home/user/gpui-scene-support-target/release/build/gpui_canvas/a4edc6400ad84f19/out/text_cache_capacity",
+    "bytes": 7607864,
+    "sha256": "5a05be4e082c57d148fe0bf84418dff976d30dc53cae80bc9c1ae32f373cd024",
+    "mode": 493,
+    "archive": "/home/user/gpui-preserved-test-binaries/5a05be4e082c57d148fe0bf84418dff976d30dc53cae80bc9c1ae32f373cd024",
+    "archive_kind": "raw"
+  },
+  {
+    "path": "/home/user/gpui-scene-support-target/release/build/gpui_canvas/17d7e2f30b976f5f/out/shaping-17d7e2f30b976f5f",
+    "bytes": 8239976,
+    "sha256": "ba766d379b22fe059ca115a0d5c0fd69d7656257c26032a607d0af00071297b0",
+    "mode": 493,
+    "archive": "/home/user/gpui-preserved-test-binaries/ba766d379b22fe059ca115a0d5c0fd69d7656257c26032a607d0af00071297b0",
+    "archive_kind": "raw"
+  },
+  {
+    "path": "/home/user/gpui-scene-support-target/release/build/gpui_canvas/b6a41ebf72f99cc0/out/damage_regions-b6a41ebf72f99cc0",
+    "bytes": 1231856,
+    "sha256": "928be3fefc4c54a62e9cedcf977e0fd3f8c3ca852c2aeb17da2d1a6bd03e3143",
+    "mode": 493,
+    "archive": "/home/user/gpui-preserved-test-binaries/928be3fefc4c54a62e9cedcf977e0fd3f8c3ca852c2aeb17da2d1a6bd03e3143",
+    "archive_kind": "raw"
+  },
+  {
+    "path": "/home/user/gpui-scene-support-target/release/build/gpui_canvas/b647a5b046a8a488/out/text_cache-b647a5b046a8a488",
+    "bytes": 9187176,
+    "sha256": "7bcc12444a2ffc5e8f450069955c737b8b16bff7249d0ec8e13a615cab38edb5",
+    "mode": 493,
+    "archive": "/home/user/gpui-preserved-test-binaries/7bcc12444a2ffc5e8f450069955c737b8b16bff7249d0ec8e13a615cab38edb5",
+    "archive_kind": "raw"
+  },
+  {
+    "path": "/home/user/gpui-scene-support-target/release/build/gpui_canvas/3c586a8a10bd35ad/out/damage-3c586a8a10bd35ad",
+    "bytes": 8606136,
+    "sha256": "feb730e98dd617cd26e50a78da66672e10d083d4451a285d2bdc8ad088f8172d",
+    "mode": 493,
+    "archive": "/home/user/gpui-preserved-test-binaries/feb730e98dd617cd26e50a78da66672e10d083d4451a285d2bdc8ad088f8172d",
+    "archive_kind": "raw"
+  },
+  {
+    "path": "/home/user/gpui-scene-support-target/release/build/gpui_canvas/7f11cd62cab7a182/out/font_sharing-7f11cd62cab7a182",
+    "bytes": 10626952,
+    "sha256": "1561d2693579125ae259c9bd8fb1ce8b17145760e1c5ae522f7f3cc399f2d6ff",
+    "mode": 493,
+    "archive": "/home/user/gpui-preserved-test-binaries/1561d2693579125ae259c9bd8fb1ce8b17145760e1c5ae522f7f3cc399f2d6ff",
+    "archive_kind": "raw"
+  },
+  {
+    "path": "/home/user/gpui-scene-support-target/release/build/gpui_canvas/8d55f8bca946137e/out/text_metric_scale_probe-8d55f8bca946137e",
+    "bytes": 8618152,
+    "sha256": "7ae78358fafdf5d8c1005032c696dbf121489725b2c16d59fa73353986ede8f2",
+    "mode": 493,
+    "archive": "/home/user/gpui-preserved-test-binaries/7ae78358fafdf5d8c1005032c696dbf121489725b2c16d59fa73353986ede8f2",
+    "archive_kind": "raw"
+  },
+  {
+    "path": "/home/user/gpui-scene-support-target/release/build/gpui_canvas/70f4e27fbd0390d4/out/damage-70f4e27fbd0390d4",
+    "bytes": 8636976,
+    "sha256": "4ff439652640e9a81573000f2449227b3cc6fd47e232a358f7eb1259536c9882",
+    "mode": 493,
+    "archive": "/home/user/gpui-preserved-test-binaries/4ff439652640e9a81573000f2449227b3cc6fd47e232a358f7eb1259536c9882",
+    "archive_kind": "raw"
+  },
+  {
+    "path": "/home/user/gpui-scene-support-target/release/build/gpui_canvas/3fd9f2d02876b933/out/line_height-3fd9f2d02876b933",
+    "bytes": 7589680,
+    "sha256": "655bebed0fa70b30a6a7648a7dd8e0ed864294b23d156550555a202351823861",
+    "mode": 493,
+    "archive": "/home/user/gpui-preserved-test-binaries/655bebed0fa70b30a6a7648a7dd8e0ed864294b23d156550555a202351823861",
+    "archive_kind": "raw"
+  },
+  {
+    "path": "/home/user/gpui-scene-support-target/release/build/gpui_canvas/cb217f51f66152fb/out/dpi-cb217f51f66152fb",
+    "bytes": 8571320,
+    "sha256": "f7a35e205e3f9956f1b249c13032a2ced6528320df619323d4bebd1712f346d2",
+    "mode": 493,
+    "archive": "/home/user/gpui-preserved-test-binaries/f7a35e205e3f9956f1b249c13032a2ced6528320df619323d4bebd1712f346d2",
+    "archive_kind": "raw"
+  },
+  {
+    "path": "/home/user/gpui-scene-support-target/release/build/gpui_canvas/8e8c4e2ce2f93ba3/out/damage_regions-8e8c4e2ce2f93ba3",
+    "bytes": 1206400,
+    "sha256": "c30989e3744022a59124f4072772c1fdf629c5d9d4afb7c5e804b55b532f9618",
+    "mode": 493,
+    "archive": "/home/user/gpui-preserved-test-binaries/c30989e3744022a59124f4072772c1fdf629c5d9d4afb7c5e804b55b532f9618",
+    "archive_kind": "raw"
+  },
+  {
+    "path": "/home/user/gpui-scene-support-target/release/build/gpui_canvas/bd07e4ec6659b2af/out/solid-bd07e4ec6659b2af",
+    "bytes": 1299016,
+    "sha256": "b6e34e65f6e625cb1f92438c527e8b4d83dc91e030075955e94a8b398bef9ff0",
+    "mode": 493,
+    "archive": "/home/user/gpui-preserved-test-binaries/b6e34e65f6e625cb1f92438c527e8b4d83dc91e030075955e94a8b398bef9ff0",
+    "archive_kind": "raw"
+  },
+  {
+    "path": "/home/user/gpui-scene-support-target/release/build/gpui_canvas/3d349e54613ab355/out/font_memory",
+    "bytes": 10125696,
+    "sha256": "df8bad0ea8fbac8c1810141843202a5378acf1ba8e67bc586c791809be54a671",
+    "mode": 493,
+    "archive": "/home/user/gpui-preserved-test-binaries/df8bad0ea8fbac8c1810141843202a5378acf1ba8e67bc586c791809be54a671",
+    "archive_kind": "raw"
+  },
+  {
+    "path": "/home/user/gpui-scene-support-target/release/build/gpui_canvas/8d8d323333f848c4/out/coverage_table",
+    "bytes": 1434632,
+    "sha256": "70941cdad8e2114b0375ba35efcdfc1e3a76604e32db82eddf178597861939b6",
+    "mode": 493,
+    "archive": "/home/user/gpui-preserved-test-binaries/70941cdad8e2114b0375ba35efcdfc1e3a76604e32db82eddf178597861939b6",
+    "archive_kind": "raw"
+  },
+  {
+    "path": "/home/user/gpui-scene-support-target/release/build/gpui_canvas/77fe4fccfe1b613c/out/sample_storage-77fe4fccfe1b613c",
+    "bytes": 8588848,
+    "sha256": "75db36587a488e4df569c9284ada057985028ee27bfbb08dc79a143a483069ff",
+    "mode": 493,
+    "archive": "/home/user/gpui-preserved-test-binaries/75db36587a488e4df569c9284ada057985028ee27bfbb08dc79a143a483069ff",
+    "archive_kind": "raw"
+  },
+  {
+    "path": "/home/user/gpui-scene-support-target/release/build/gpui_canvas/acfc39efdaa75683/out/font_memory",
+    "bytes": 10156584,
+    "sha256": "017a8de1acb43918aee138206d7678da135fcea2eb519d7382713a18520a74cc",
+    "mode": 493,
+    "archive": "/home/user/gpui-preserved-test-binaries/017a8de1acb43918aee138206d7678da135fcea2eb519d7382713a18520a74cc",
+    "archive_kind": "raw"
+  },
+  {
+    "path": "/home/user/gpui-scene-support-target/release/build/gpui_canvas/d0ba751385e75a1f/out/unicode-d0ba751385e75a1f",
+    "bytes": 11798824,
+    "sha256": "bc5358493779909cd1b10ed3d92d649a49642f407ad10c3469daf94f90e0554b",
+    "mode": 493,
+    "archive": "/home/user/gpui-preserved-test-binaries/bc5358493779909cd1b10ed3d92d649a49642f407ad10c3469daf94f90e0554b",
+    "archive_kind": "raw"
+  },
+  {
+    "path": "/home/user/gpui-scene-support-target/release/build/gpui_canvas/a512159eb6612c0c/out/external-a512159eb6612c0c",
+    "bytes": 8604368,
+    "sha256": "673efb6913881232922e8197b59acfbca64bf3a780b3bb4025fdb282188315b3",
+    "mode": 493,
+    "archive": "/home/user/gpui-preserved-test-binaries/673efb6913881232922e8197b59acfbca64bf3a780b3bb4025fdb282188315b3",
+    "archive_kind": "raw"
+  },
+  {
+    "path": "/home/user/gpui-scene-support-target/release/build/gpui_canvas/4cdb957e696616c4/out/text_metric_scale_probe-4cdb957e696616c4",
+    "bytes": 8647088,
+    "sha256": "5aaa21942cbb28f8b433b1a9b54b6fdd75d85aed81c943a61109aba61ac3bf9a",
+    "mode": 493,
+    "archive": "/home/user/gpui-preserved-test-binaries/5aaa21942cbb28f8b433b1a9b54b6fdd75d85aed81c943a61109aba61ac3bf9a",
+    "archive_kind": "raw"
+  },
+  {
+    "path": "/home/user/gpui-scene-support-target/release/build/gpui_canvas/37942a5794d59b19/out/text_interaction",
+    "bytes": 6968992,
+    "sha256": "b6354551c845b748d7c103cfda47c9a63ffead2558d63edf25aa0071fa28673c",
+    "mode": 493,
+    "archive": "/home/user/gpui-preserved-test-binaries/b6354551c845b748d7c103cfda47c9a63ffead2558d63edf25aa0071fa28673c",
+    "archive_kind": "raw"
+  },
+  {
+    "path": "/home/user/gpui-scene-support-target/release/build/gpui_canvas/2b70914e16bf7f16/out/text_patch_damage-2b70914e16bf7f16",
+    "bytes": 8640072,
+    "sha256": "b482af860fc6696457587b63a87795c189e1f09cfab9e78a5872bebc676be22c",
+    "mode": 493,
+    "archive": "/home/user/gpui-preserved-test-binaries/b482af860fc6696457587b63a87795c189e1f09cfab9e78a5872bebc676be22c",
+    "archive_kind": "raw"
+  },
+  {
+    "path": "/home/user/gpui-scene-support-target/release/build/gpui_canvas/9e1cf6e1ce02959d/out/text_composition-9e1cf6e1ce02959d",
+    "bytes": 8648680,
+    "sha256": "2af43fca6d27c28a7c0e771588165cde2c093c273d747a2a3aba67a0da69077e",
+    "mode": 493,
+    "archive": "/home/user/gpui-preserved-test-binaries/2af43fca6d27c28a7c0e771588165cde2c093c273d747a2a3aba67a0da69077e",
+    "archive_kind": "raw"
+  },
+  {
+    "path": "/home/user/gpui-scene-support-target/release/build/gpui_canvas/3923d801533a9244/out/damage-3923d801533a9244",
+    "bytes": 8635080,
+    "sha256": "339d6f6cf6b10dd6a106c77f5ae8881883d47949ac8875c4777251f6b7b22a91",
+    "mode": 493,
+    "archive": "/home/user/gpui-preserved-test-binaries/339d6f6cf6b10dd6a106c77f5ae8881883d47949ac8875c4777251f6b7b22a91",
+    "archive_kind": "raw"
+  },
+  {
+    "path": "/home/user/gpui-scene-support-target/release/build/gpui_canvas/125fe8aa1d9fdb12/out/external-125fe8aa1d9fdb12",
+    "bytes": 8575448,
+    "sha256": "f6a6a3ed635afa7a718fca78bf4cc8efc7a0f554c572b15552057f8776e42eb5",
+    "mode": 493,
+    "archive": "/home/user/gpui-preserved-test-binaries/f6a6a3ed635afa7a718fca78bf4cc8efc7a0f554c572b15552057f8776e42eb5",
+    "archive_kind": "raw"
+  },
+  {
+    "path": "/home/user/gpui-scene-support-target/release/build/gpui_canvas/a66a56010281ed60/out/group_views",
+    "bytes": 7841880,
+    "sha256": "d7c0c3d8893598ccbf53f3f2c643cf65cbe8465f7ffb057a430e0ccc86394d03",
+    "mode": 493,
+    "archive": "/home/user/gpui-preserved-test-binaries/d7c0c3d8893598ccbf53f3f2c643cf65cbe8465f7ffb057a430e0ccc86394d03",
+    "archive_kind": "raw"
+  },
+  {
+    "path": "/home/user/gpui-scene-support-target/release/build/gpui_canvas/0cf2e62b3c2a16cb/out/solid-0cf2e62b3c2a16cb",
+    "bytes": 1324792,
+    "sha256": "b1db2fb43e263494cc88465d71f5249d94de490f94c00177836464bc725b669c",
+    "mode": 493,
+    "archive": "/home/user/gpui-preserved-test-binaries/b1db2fb43e263494cc88465d71f5249d94de490f94c00177836464bc725b669c",
+    "archive_kind": "raw"
+  },
+  {
+    "path": "/home/user/gpui-scene-support-target/release/build/gpui_canvas/17d32df86ca9c9b9/out/bins-17d32df86ca9c9b9",
+    "bytes": 8656856,
+    "sha256": "e497af4f4435f2539c90c393301ccd3f40f14e07afcf5332b951e969a7cd81a8",
+    "mode": 493,
+    "archive": "/home/user/gpui-preserved-test-binaries/e497af4f4435f2539c90c393301ccd3f40f14e07afcf5332b951e969a7cd81a8",
+    "archive_kind": "raw"
+  },
+  {
+    "path": "/home/user/gpui-scene-support-target/release/build/gpui_canvas/d30af859ad4a3017/out/rounded-d30af859ad4a3017",
+    "bytes": 1359016,
+    "sha256": "7f71530f70f9e188ae1de5dc026299a990ea0efb123a2838a58d0cf08084ba6f",
+    "mode": 493,
+    "archive": "/home/user/gpui-preserved-test-binaries/7f71530f70f9e188ae1de5dc026299a990ea0efb123a2838a58d0cf08084ba6f",
+    "archive_kind": "raw"
+  },
+  {
+    "path": "/home/user/gpui-scene-support-target/release/build/gpui_canvas/e9eb27a37e6dd6e0/out/color_packing-e9eb27a37e6dd6e0",
+    "bytes": 1331736,
+    "sha256": "48c3dc7c241f9906f0ade8fb7def61b4f2a3851f44d9201ebf0d6aa21843c936",
+    "mode": 493,
+    "archive": "/home/user/gpui-preserved-test-binaries/48c3dc7c241f9906f0ade8fb7def61b4f2a3851f44d9201ebf0d6aa21843c936",
+    "archive_kind": "raw"
+  },
+  {
+    "path": "/home/user/gpui-scene-support-target/release/build/gpui_canvas/065be7fbdf5a91d8/out/selection_queries",
+    "bytes": 6924928,
+    "sha256": "d1dea41ee27ec05da2c23f6758f8498282ecc558195116cd3b3a7caa1d7e687f",
+    "mode": 493,
+    "archive": "/home/user/gpui-preserved-test-binaries/d1dea41ee27ec05da2c23f6758f8498282ecc558195116cd3b3a7caa1d7e687f",
+    "archive_kind": "raw"
+  },
+  {
+    "path": "/home/user/gpui-scene-support-target/release/build/gpui_canvas/5b15ecc36801cc65/out/color_packing-5b15ecc36801cc65",
+    "bytes": 1357176,
+    "sha256": "db0d9a92619838dfad58bf467550562cc8241403c7ddae3e955fc10955490e11",
+    "mode": 493,
+    "archive": "/home/user/gpui-preserved-test-binaries/db0d9a92619838dfad58bf467550562cc8241403c7ddae3e955fc10955490e11",
+    "archive_kind": "raw"
+  },
+  {
+    "path": "/home/user/gpui-scene-support-target/release/build/gpui_canvas/5c6934811c777283/out/text_metric_scale_probe-5c6934811c777283",
+    "bytes": 8648720,
+    "sha256": "4cc77145a741dd8d249eb651832483f5f4d2358849c85d728a7432f25cb56ea9",
+    "mode": 493,
+    "archive": "/home/user/gpui-preserved-test-binaries/4cc77145a741dd8d249eb651832483f5f4d2358849c85d728a7432f25cb56ea9",
+    "archive_kind": "raw"
+  },
+  {
+    "path": "/home/user/gpui-scene-support-target/release/build/gpui_canvas/d0ced4af83707f1a/out/oklch-d0ced4af83707f1a",
+    "bytes": 1212632,
+    "sha256": "61402fdd4515e9c9b994dcf503525309d0587195d94b91dc53266dc5cb4ce200",
+    "mode": 493,
+    "archive": "/home/user/gpui-preserved-test-binaries/61402fdd4515e9c9b994dcf503525309d0587195d94b91dc53266dc5cb4ce200",
+    "archive_kind": "raw"
+  },
+  {
+    "path": "/home/user/gpui-scene-support-target/release/build/gpui_canvas/d7a53abed6c6185f/out/cpu",
+    "bytes": 8028872,
+    "sha256": "d8f4126134ab22bdf586a017c352116f63a182a6946ca304957b6829e24f058c",
+    "mode": 493,
+    "archive": "/home/user/gpui-preserved-test-binaries/d8f4126134ab22bdf586a017c352116f63a182a6946ca304957b6829e24f058c",
+    "archive_kind": "raw"
+  },
+  {
+    "path": "/home/user/gpui-scene-support-target/release/build/gpui_canvas/6e0206172b11000c/out/color_authoring-6e0206172b11000c",
+    "bytes": 1171552,
+    "sha256": "42adfea9e56cb3afc16535bea59aafb3dbc99674baee1ce093afafe2f359ae7e",
+    "mode": 493,
+    "archive": "/home/user/gpui-preserved-test-binaries/42adfea9e56cb3afc16535bea59aafb3dbc99674baee1ce093afafe2f359ae7e",
+    "archive_kind": "raw"
+  },
+  {
+    "path": "/home/user/gpui-scene-support-target/release/build/gpui_canvas/178f390fce55515f/out/retained_runs",
+    "bytes": 7886152,
+    "sha256": "717e7c50d6b4bb14bbd7933bad33114353e0919ed8810568db508523561660e2",
+    "mode": 493,
+    "archive": "/home/user/gpui-preserved-test-binaries/717e7c50d6b4bb14bbd7933bad33114353e0919ed8810568db508523561660e2",
+    "archive_kind": "raw"
+  },
+  {
+    "path": "/home/user/gpui-scene-support-target/release/build/gpui_canvas/0df7d341745f4401/out/sample_clip-0df7d341745f4401",
+    "bytes": 1338760,
+    "sha256": "8f4ffe376b521b95f54fa204b46d7ab6720540f16f2eb70e3e47ada96a8a4d7c",
+    "mode": 493,
+    "archive": "/home/user/gpui-preserved-test-binaries/8f4ffe376b521b95f54fa204b46d7ab6720540f16f2eb70e3e47ada96a8a4d7c",
+    "archive_kind": "raw"
+  },
+  {
+    "path": "/home/user/gpui-scene-support-target/release/build/gpui_canvas/625f4007908fee82/out/damage_regions-625f4007908fee82",
+    "bytes": 1232208,
+    "sha256": "42545d3eb12d26dd2cc1b91d2a179d512e5be17f26038028fd7a2f54b045c281",
+    "mode": 493,
+    "archive": "/home/user/gpui-preserved-test-binaries/42545d3eb12d26dd2cc1b91d2a179d512e5be17f26038028fd7a2f54b045c281",
+    "archive_kind": "raw"
+  },
+  {
+    "path": "/home/user/gpui-scene-support-target/release/build/gpui_canvas/96f8cdc778d02d70/out/slots-96f8cdc778d02d70",
+    "bytes": 8627760,
+    "sha256": "771bb8cc219b66787d5126a073d430dd16abda1781d9557a03929beffdf28394",
+    "mode": 493,
+    "archive": "/home/user/gpui-preserved-test-binaries/771bb8cc219b66787d5126a073d430dd16abda1781d9557a03929beffdf28394",
+    "archive_kind": "raw"
+  },
+  {
+    "path": "/home/user/gpui-scene-support-target/release/build/gpui_canvas/89e11f61f36cd9ed/out/caret_pair_measure",
+    "bytes": 6953152,
+    "sha256": "2046e2c876721571d2550faf271b1267482ede1d11789841d4e12b2b2820443b",
+    "mode": 493,
+    "archive": "/home/user/gpui-preserved-test-binaries/2046e2c876721571d2550faf271b1267482ede1d11789841d4e12b2b2820443b",
+    "archive_kind": "raw"
+  },
+  {
+    "path": "/home/user/gpui-scene-support-target/release/build/gpui_canvas/4a2db0a211b797e3/out/text_run_probe-4a2db0a211b797e3",
+    "bytes": 8614280,
+    "sha256": "fd2f39a02b715f3c2029ae1433002299b489859547cfa175d7a629dce318f610",
+    "mode": 493,
+    "archive": "/home/user/gpui-preserved-test-binaries/fd2f39a02b715f3c2029ae1433002299b489859547cfa175d7a629dce318f610",
+    "archive_kind": "raw"
+  },
+  {
+    "path": "/home/user/gpui-scene-support-target/release/build/gpui_canvas/6b381682c3f7776e/out/oklch-6b381682c3f7776e",
+    "bytes": 1186816,
+    "sha256": "59318b92923c8c2f94bfc0fbc7deb4be2cc916e106fe696f59560bababf32703",
+    "mode": 493,
+    "archive": "/home/user/gpui-preserved-test-binaries/59318b92923c8c2f94bfc0fbc7deb4be2cc916e106fe696f59560bababf32703",
+    "archive_kind": "raw"
+  },
+  {
+    "path": "/home/user/gpui-scene-support-target/release/build/gpui_canvas/309c83eeb8316fab/out/scroll_copy-309c83eeb8316fab",
+    "bytes": 10702800,
+    "sha256": "65123203f87164ea17b2e7e4834114a3cfdfa8a431eb769de219072a07079774",
+    "mode": 493,
+    "archive": "/home/user/gpui-preserved-test-binaries/65123203f87164ea17b2e7e4834114a3cfdfa8a431eb769de219072a07079774",
+    "archive_kind": "raw"
+  },
+  {
+    "path": "/home/user/gpui-scene-support-target/release/build/gpui_canvas/cbb615c1a368e445/out/scene_support-cbb615c1a368e445",
+    "bytes": 8611752,
+    "sha256": "095e6b284fc42508aa221f4939cb1afaf75eb57b23ecc9bc7129924f29a1ed42",
+    "mode": 493,
+    "archive": "/home/user/gpui-preserved-test-binaries/095e6b284fc42508aa221f4939cb1afaf75eb57b23ecc9bc7129924f29a1ed42",
+    "archive_kind": "raw"
+  },
+  {
+    "path": "/home/user/gpui-scene-support-target/release/build/gpui_canvas/643c4468120f623d/out/clipping-643c4468120f623d",
+    "bytes": 1342384,
+    "sha256": "dc309e8376b1a13dc3dc20e868347a91b3345b45a01412a7b28c339a0628d48c",
+    "mode": 493,
+    "archive": "/home/user/gpui-preserved-test-binaries/dc309e8376b1a13dc3dc20e868347a91b3345b45a01412a7b28c339a0628d48c",
+    "archive_kind": "raw"
+  },
+  {
+    "path": "/home/user/gpui-scene-support-target/release/build/gpui_canvas/d90c80377125583a/out/bins-d90c80377125583a",
+    "bytes": 8654968,
+    "sha256": "87b9f689d76f6359747d0c55d0070250bfd5d46216027cb8abdf37f27be94cf9",
+    "mode": 493,
+    "archive": "/home/user/gpui-preserved-test-binaries/87b9f689d76f6359747d0c55d0070250bfd5d46216027cb8abdf37f27be94cf9",
+    "archive_kind": "raw"
+  },
+  {
+    "path": "/home/user/gpui-scene-support-target/release/build/gpui_canvas/3f7d5bfe3f5989d8/out/selection_queries",
+    "bytes": 6953424,
+    "sha256": "30df26099f4b15fcb691f101988661d854e17f9905cafa91f381c0f866783ca2",
+    "mode": 493,
+    "archive": "/home/user/gpui-preserved-test-binaries/30df26099f4b15fcb691f101988661d854e17f9905cafa91f381c0f866783ca2",
+    "archive_kind": "raw"
+  },
+  {
+    "path": "/home/user/gpui-scene-support-target/release/build/gpui_canvas/bc7cb9aa0e5283a5/out/external-bc7cb9aa0e5283a5",
+    "bytes": 8606296,
+    "sha256": "46e8b0e144887301c6102550190a1662e105f6e742c4547f18fee2f9e4d96cc1",
+    "mode": 493,
+    "archive": "/home/user/gpui-preserved-test-binaries/46e8b0e144887301c6102550190a1662e105f6e742c4547f18fee2f9e4d96cc1",
+    "archive_kind": "raw"
+  },
+  {
+    "path": "/home/user/gpui-scene-support-target/release/build/gpui_canvas/1bb3750b8009d1e5/out/hdr-1bb3750b8009d1e5",
+    "bytes": 8618424,
+    "sha256": "8000b68641251766bc86509cc8e2d7434d365bbeea7ee9d12783c863f2af0f0a",
+    "mode": 493,
+    "archive": "/home/user/gpui-preserved-test-binaries/8000b68641251766bc86509cc8e2d7434d365bbeea7ee9d12783c863f2af0f0a",
+    "archive_kind": "raw"
+  },
+  {
+    "path": "/home/user/gpui-scene-support-target/release/build/gpui_canvas/9ddd94c58151c6cb/out/rounded-9ddd94c58151c6cb",
+    "bytes": 1359368,
+    "sha256": "7adcd3f2073b6f7386b639cb09c6c7cedc47d199d512f6c5c756bca6a66de2f0",
+    "mode": 493,
+    "archive": "/home/user/gpui-preserved-test-binaries/7adcd3f2073b6f7386b639cb09c6c7cedc47d199d512f6c5c756bca6a66de2f0",
+    "archive_kind": "raw"
+  },
+  {
+    "path": "/home/user/gpui-scene-support-target/release/build/gpui_canvas/d7b5685890d15b51/out/gpui_canvas-d7b5685890d15b51",
+    "bytes": 9979352,
+    "sha256": "7065f830960ac3794614861dc640f13e093ac6d53fa49711044bd69e45cf121b",
+    "mode": 493,
+    "archive": "/home/user/gpui-preserved-test-binaries/7065f830960ac3794614861dc640f13e093ac6d53fa49711044bd69e45cf121b",
+    "archive_kind": "raw"
+  },
+  {
+    "path": "/home/user/gpui-scene-support-target/release/build/gpui_canvas/c78a70091e54785c/out/hdr-c78a70091e54785c",
+    "bytes": 8587616,
+    "sha256": "fff45208d101d3960b4e608ae1467a363fad6479d24051e4271fabffb24f1652",
+    "mode": 493,
+    "archive": "/home/user/gpui-preserved-test-binaries/fff45208d101d3960b4e608ae1467a363fad6479d24051e4271fabffb24f1652",
+    "archive_kind": "raw"
+  },
+  {
+    "path": "/home/user/gpui-scene-support-target/release/build/gpui_canvas/17f5cc96571f2615/out/text_transaction-17f5cc96571f2615",
+    "bytes": 10705320,
+    "sha256": "f3c577288e6d3a1d5d2ada9df72b8308a7e42527ac9f9a76135122820ddbbfd3",
+    "mode": 493,
+    "archive": "/home/user/gpui-preserved-test-binaries/f3c577288e6d3a1d5d2ada9df72b8308a7e42527ac9f9a76135122820ddbbfd3",
+    "archive_kind": "raw"
+  },
+  {
+    "path": "/home/user/gpui-scene-support-target/release/build/gpui_canvas/4df74dd4ada5755b/out/images-4df74dd4ada5755b",
+    "bytes": 1352552,
+    "sha256": "a0c04af42a1795cee0e866e459ad226605792473728733b0fccc4de4b311b7ba",
+    "mode": 493,
+    "archive": "/home/user/gpui-preserved-test-binaries/a0c04af42a1795cee0e866e459ad226605792473728733b0fccc4de4b311b7ba",
+    "archive_kind": "raw"
+  },
+  {
+    "path": "/home/user/gpui-scene-support-target/release/build/gpui_canvas/aedbcdddc79c5cf6/out/retained_runs",
+    "bytes": 7855296,
+    "sha256": "97376754fa4a68b6c3ccc30d34a4bb86bafa7651a128eeb7b68ec33fef18ddc0",
+    "mode": 493,
+    "archive": "/home/user/gpui-preserved-test-binaries/97376754fa4a68b6c3ccc30d34a4bb86bafa7651a128eeb7b68ec33fef18ddc0",
+    "archive_kind": "raw"
+  },
+  {
+    "path": "/home/user/gpui-scene-support-target/release/build/gpui_canvas/e435347c265ff680/out/color-e435347c265ff680",
+    "bytes": 1345984,
+    "sha256": "2db3f00a08477658bbccb0c61a6d428d2613e98929d2d9b67a68766ad38f4621",
+    "mode": 493,
+    "archive": "/home/user/gpui-preserved-test-binaries/2db3f00a08477658bbccb0c61a6d428d2613e98929d2d9b67a68766ad38f4621",
+    "archive_kind": "raw"
+  },
+  {
+    "path": "/home/user/gpui-scene-support-target/release/build/gpui_canvas/9f7e8bb7d4bc032d/out/gpui_canvas-9f7e8bb7d4bc032d",
+    "bytes": 9981304,
+    "sha256": "a483f340a15805c9ba787bd25d1f481540fe788453d02a742ce437ac85a4d5aa",
+    "mode": 493,
+    "archive": "/home/user/gpui-preserved-test-binaries/a483f340a15805c9ba787bd25d1f481540fe788453d02a742ce437ac85a4d5aa",
+    "archive_kind": "raw"
+  },
+  {
+    "path": "/home/user/gpui-scene-support-target/release/build/gpui_canvas/1aaa1655a279b57d/out/text_patch_damage-1aaa1655a279b57d",
+    "bytes": 8638184,
+    "sha256": "329f97f7e5a080f9cee11611d92353d0baff6e70646691eaea3b25eb481cde86",
+    "mode": 493,
+    "archive": "/home/user/gpui-preserved-test-binaries/329f97f7e5a080f9cee11611d92353d0baff6e70646691eaea3b25eb481cde86",
+    "archive_kind": "raw"
+  },
+  {
+    "path": "/home/user/gpui-scene-support-target/release/build/gpui_canvas/1d04b27148650b17/out/gradients-1d04b27148650b17",
+    "bytes": 1362488,
+    "sha256": "15df5dafda4d4d47f82048584a3b35437c4c36925544c7f411b99f2de5f4d2b7",
+    "mode": 493,
+    "archive": "/home/user/gpui-preserved-test-binaries/15df5dafda4d4d47f82048584a3b35437c4c36925544c7f411b99f2de5f4d2b7",
+    "archive_kind": "raw"
+  },
+  {
+    "path": "/home/user/gpui-scene-support-target/release/build/gpui_canvas/80bfde96444141e1/out/line_height-80bfde96444141e1",
+    "bytes": 7559176,
+    "sha256": "6f7aa41dc2124fcd757f5639e14a410dca3137349cd19474ee7cc1275510f6bc",
+    "mode": 493,
+    "archive": "/home/user/gpui-preserved-test-binaries/6f7aa41dc2124fcd757f5639e14a410dca3137349cd19474ee7cc1275510f6bc",
+    "archive_kind": "raw"
+  },
+  {
+    "path": "/home/user/gpui-scene-support-target/release/build/gpui_canvas/e104e893582978c9/out/clip_cost",
+    "bytes": 7879408,
+    "sha256": "c60c2477716aefb3803266e60d3979bb55ba4860d965cfb213e4ac11f46c4532",
+    "mode": 493,
+    "archive": "/home/user/gpui-preserved-test-binaries/c60c2477716aefb3803266e60d3979bb55ba4860d965cfb213e4ac11f46c4532",
+    "archive_kind": "raw"
+  },
+  {
+    "path": "/home/user/gpui-scene-support-target/release/build/gpui_canvas/ebad0e4c90d15b6f/out/selection-ebad0e4c90d15b6f",
+    "bytes": 10146296,
+    "sha256": "407e25890d499e7c1d8d3725151deeda0fbf38c73548fe2c5ca2737b731e1ac1",
+    "mode": 493,
+    "archive": "/home/user/gpui-preserved-test-binaries/407e25890d499e7c1d8d3725151deeda0fbf38c73548fe2c5ca2737b731e1ac1",
+    "archive_kind": "raw"
+  },
+  {
+    "path": "/home/user/gpui-scene-support-target/release/build/gpui_canvas/6b33f43619313b70/out/text_capacity-6b33f43619313b70",
+    "bytes": 8477760,
+    "sha256": "b55c9c11cff377952636b2676be6b6962fba414e018f61240a855dcfba467504",
+    "mode": 493,
+    "archive": "/home/user/gpui-preserved-test-binaries/b55c9c11cff377952636b2676be6b6962fba414e018f61240a855dcfba467504",
+    "archive_kind": "raw"
+  },
+  {
+    "path": "/home/user/gpui-scene-support-target/release/build/gpui_canvas/738fc609e37c02b5/out/clipping-738fc609e37c02b5",
+    "bytes": 1367808,
+    "sha256": "9619c3b3d249197a911d99ec3f9ab7ddab510999c8d45a575e9c8202330a6247",
+    "mode": 493,
+    "archive": "/home/user/gpui-preserved-test-binaries/9619c3b3d249197a911d99ec3f9ab7ddab510999c8d45a575e9c8202330a6247",
+    "archive_kind": "raw"
+  },
+  {
+    "path": "/home/user/gpui-scene-support-target/release/build/gpui_canvas/74ccfcd13486a55d/out/text_run_probe-74ccfcd13486a55d",
+    "bytes": 8644840,
+    "sha256": "d3c5c6c3e66649d14f02480098e24a659e79ae304bae7731a3b4928c303867c3",
+    "mode": 493,
+    "archive": "/home/user/gpui-preserved-test-binaries/d3c5c6c3e66649d14f02480098e24a659e79ae304bae7731a3b4928c303867c3",
+    "archive_kind": "raw"
+  },
+  {
+    "path": "/home/user/gpui-scene-support-target/release/build/gpui_canvas/0e4314433126726c/out/gradients-0e4314433126726c",
+    "bytes": 1362824,
+    "sha256": "851486b9733cb65fef707a756e2449b816be16a1c431aee0b731c5f6a43e1a60",
+    "mode": 493,
+    "archive": "/home/user/gpui-preserved-test-binaries/851486b9733cb65fef707a756e2449b816be16a1c431aee0b731c5f6a43e1a60",
+    "archive_kind": "raw"
+  },
+  {
+    "path": "/home/user/gpui-scene-support-target/release/build/gpui_canvas/3e7493a8ec22d669/out/text_cache-3e7493a8ec22d669",
+    "bytes": 9158064,
+    "sha256": "7844486cf4536598bce838108e134372fdc37d43b491d42ba87b9ffc3d8ccda4",
+    "mode": 493,
+    "archive": "/home/user/gpui-preserved-test-binaries/7844486cf4536598bce838108e134372fdc37d43b491d42ba87b9ffc3d8ccda4",
+    "archive_kind": "raw"
+  },
+  {
+    "path": "/home/user/gpui-scene-support-target/release/build/gpui_canvas/e4b844e38d499dde/out/text_transaction-e4b844e38d499dde",
+    "bytes": 10703640,
+    "sha256": "852056c4cf698587aadca5fad9c38353755f2692fd9f42f2d9af18e392257403",
+    "mode": 493,
+    "archive": "/home/user/gpui-preserved-test-binaries/852056c4cf698587aadca5fad9c38353755f2692fd9f42f2d9af18e392257403",
+    "archive_kind": "raw"
+  },
+  {
+    "path": "/home/user/gpui-scene-support-target/release/build/gpui_canvas/99a40fdcc8c45d96/out/prepared_scene-99a40fdcc8c45d96",
+    "bytes": 10664568,
+    "sha256": "1f365220bd10b6e543abdbcbd870a39e7df4ec6e14f8e59422804ed3edf1815e",
+    "mode": 493,
+    "archive": "/home/user/gpui-preserved-test-binaries/1f365220bd10b6e543abdbcbd870a39e7df4ec6e14f8e59422804ed3edf1815e",
+    "archive_kind": "raw"
+  },
+  {
+    "path": "/home/user/gpui-scene-support-target/release/build/gpui_canvas/c7eadced7b956270/out/clip_cost",
+    "bytes": 7877504,
+    "sha256": "5e0474d0e1773440ae9f5e6534c8627701122326c2240a481959fd783487687a",
+    "mode": 493,
+    "archive": "/home/user/gpui-preserved-test-binaries/5e0474d0e1773440ae9f5e6534c8627701122326c2240a481959fd783487687a",
+    "archive_kind": "raw"
+  },
+  {
+    "path": "/home/user/gpui-scene-support-target/release/build/gpui_canvas/7afdbbc1c60aeb44/out/sample_clip-7afdbbc1c60aeb44",
+    "bytes": 1339120,
+    "sha256": "a219dce288e5899bd82b4387342d345f181ce9676c04034e5b53f36b74ec9d42",
+    "mode": 493,
+    "archive": "/home/user/gpui-preserved-test-binaries/a219dce288e5899bd82b4387342d345f181ce9676c04034e5b53f36b74ec9d42",
+    "archive_kind": "raw"
+  },
+  {
+    "path": "/home/user/gpui-scene-support-target/release/build/gpui_canvas/206cd6ebb91dd0c1/out/grouped-206cd6ebb91dd0c1",
+    "bytes": 10587872,
+    "sha256": "24b00ec632ee67983b3919364c374a91c6b4e70e72a2dce3330dcd7ef63479f4",
+    "mode": 493,
+    "archive": "/home/user/gpui-preserved-test-binaries/24b00ec632ee67983b3919364c374a91c6b4e70e72a2dce3330dcd7ef63479f4",
+    "archive_kind": "raw"
+  },
+  {
+    "path": "/home/user/gpui-scene-support-target/release/build/gpui_canvas/f5e18d7f0e28468c/out/selection-f5e18d7f0e28468c",
+    "bytes": 10144224,
+    "sha256": "f86fffbbfa88a0b9229ccb8e83a6df0cdb4c40ff9f7c5a8799aa8facbecbd921",
+    "mode": 493,
+    "archive": "/home/user/gpui-preserved-test-binaries/f86fffbbfa88a0b9229ccb8e83a6df0cdb4c40ff9f7c5a8799aa8facbecbd921",
+    "archive_kind": "raw"
+  },
+  {
+    "path": "/home/user/gpui-scene-support-target/release/build/gpui_canvas/0478649b05f086b4/out/shaping-0478649b05f086b4",
+    "bytes": 8238288,
+    "sha256": "786d6effa043fc62cb2e71d7770e00d25272cebaefe33a57abdba6d29cbe49a1",
+    "mode": 493,
+    "archive": "/home/user/gpui-preserved-test-binaries/786d6effa043fc62cb2e71d7770e00d25272cebaefe33a57abdba6d29cbe49a1",
+    "archive_kind": "raw"
+  },
+  {
+    "path": "/home/user/gpui-scene-support-target/release/build/gpui_canvas/aef8b08d67145dd5/out/text_composition-aef8b08d67145dd5",
+    "bytes": 8619744,
+    "sha256": "61c75135d9d4020f2c78f477af9ae1d9b192e96f3ca05d5ada5b1a146baaf2e5",
+    "mode": 493,
+    "archive": "/home/user/gpui-preserved-test-binaries/61c75135d9d4020f2c78f477af9ae1d9b192e96f3ca05d5ada5b1a146baaf2e5",
+    "archive_kind": "raw"
+  },
+  {
+    "path": "/home/user/gpui-scene-support-target/release/build/gpui_canvas/185af9af25042b7d/out/default_font-185af9af25042b7d",
+    "bytes": 12936928,
+    "sha256": "cc35e151c9cd29c47474e8fa4774bb4388b9e7577a22d58ebd400c0d6cab2f3b",
+    "mode": 493,
+    "archive": "/home/user/gpui-preserved-test-binaries/cc35e151c9cd29c47474e8fa4774bb4388b9e7577a22d58ebd400c0d6cab2f3b",
+    "archive_kind": "raw"
+  },
+  {
+    "path": "/home/user/gpui-scene-support-target/release/build/gpui_canvas/ebf551a963013452/out/scene_support-ebf551a963013452",
+    "bytes": 8642544,
+    "sha256": "53ab29c81006605354be82baa8928661a00eca4f730730e91ea8d7d65468dfc4",
+    "mode": 493,
+    "archive": "/home/user/gpui-preserved-test-binaries/53ab29c81006605354be82baa8928661a00eca4f730730e91ea8d7d65468dfc4",
+    "archive_kind": "raw"
+  },
+  {
+    "path": "/home/user/gpui-scene-support-target/release/build/gpui_canvas/30b28007dcb33290/out/font_sharing-30b28007dcb33290",
+    "bytes": 10655888,
+    "sha256": "bbbf88f345f028e8c6eb10148496d4348e01e0c5535c1a2b735407be93836be7",
+    "mode": 493,
+    "archive": "/home/user/gpui-preserved-test-binaries/bbbf88f345f028e8c6eb10148496d4348e01e0c5535c1a2b735407be93836be7",
+    "archive_kind": "raw"
+  },
+  {
+    "path": "/home/user/gpui-scene-support-target/release/build/gpui_canvas/013f041d72fe4179/out/group_views",
+    "bytes": 7872728,
+    "sha256": "32bcdc138af8c9f38a3927ec0ab04c6e14f004c3d612567c200372d5ace11070",
+    "mode": 493,
+    "archive": "/home/user/gpui-preserved-test-binaries/32bcdc138af8c9f38a3927ec0ab04c6e14f004c3d612567c200372d5ace11070",
+    "archive_kind": "raw"
+  },
+  {
+    "path": "/home/user/gpui-scene-support-target/release/build/gpui_canvas/5e889805cb647025/out/text_transaction-5e889805cb647025",
+    "bytes": 10674728,
+    "sha256": "7c8228d7785e9a35ea20e4627b3ad32966724a1d4bc5512a2fe55f6ca70a72a2",
+    "mode": 493,
+    "archive": "/home/user/gpui-preserved-test-binaries/7c8228d7785e9a35ea20e4627b3ad32966724a1d4bc5512a2fe55f6ca70a72a2",
+    "archive_kind": "raw"
+  },
+  {
+    "path": "/home/user/gpui-scene-support-target/release/build/gpui_canvas/fc3f401ad24f5844/out/hdr-fc3f401ad24f5844",
+    "bytes": 8616544,
+    "sha256": "48fa36b9f2de297f38c1255cc7e8b8f5be8375312263331785f3e8a91206bcc0",
+    "mode": 493,
+    "archive": "/home/user/gpui-preserved-test-binaries/48fa36b9f2de297f38c1255cc7e8b8f5be8375312263331785f3e8a91206bcc0",
+    "archive_kind": "raw"
+  },
+  {
+    "path": "/home/user/gpui-scene-support-target/release/build/gpui_canvas/0ed3181fcc461005/out/shaping-0ed3181fcc461005",
+    "bytes": 8209312,
+    "sha256": "6ddfa91aeed0c8f110548699f57d72c8e39d5c2b26857b3568b8e7116e44f28d",
+    "mode": 493,
+    "archive": "/home/user/gpui-preserved-test-binaries/6ddfa91aeed0c8f110548699f57d72c8e39d5c2b26857b3568b8e7116e44f28d",
+    "archive_kind": "raw"
+  },
+  {
+    "path": "/home/user/gpui-scene-support-target/release/build/gpui_canvas/d6851de84cd33556/out/parallel-d6851de84cd33556",
+    "bytes": 1075560,
+    "sha256": "1d002fc8163f675dda406a505717f903781a751d28b17c6e864dd245f814f810",
+    "mode": 493,
+    "archive": "/home/user/gpui-preserved-test-binaries/1d002fc8163f675dda406a505717f903781a751d28b17c6e864dd245f814f810",
+    "archive_kind": "raw"
+  },
+  {
+    "path": "/home/user/gpui-scene-support-target/release/build/gpui_canvas/966b652f1a6d437e/out/font_quality-966b652f1a6d437e",
+    "bytes": 10746016,
+    "sha256": "b5d48047348c98897f70ef64c424455f279e2d844814eae54e38ca997b65697a",
+    "mode": 493,
+    "archive": "/home/user/gpui-preserved-test-binaries/b5d48047348c98897f70ef64c424455f279e2d844814eae54e38ca997b65697a",
+    "archive_kind": "raw"
+  },
+  {
+    "path": "/home/user/gpui-scene-support-target/release/build/gpui_canvas/82210282371fce2b/out/text_interaction",
+    "bytes": 6938496,
+    "sha256": "3f4924d5f7fc5f047c59053932354228bb3cd9375071ea34c30452a7acc9992c",
+    "mode": 493,
+    "archive": "/home/user/gpui-preserved-test-binaries/3f4924d5f7fc5f047c59053932354228bb3cd9375071ea34c30452a7acc9992c",
+    "archive_kind": "raw"
+  },
+  {
+    "path": "/home/user/gpui-scene-support-target/release/build/gpui_canvas/de6343e5fbdfe8d6/out/text_composition-de6343e5fbdfe8d6",
+    "bytes": 8650576,
+    "sha256": "f4cd59566500b460337a244c5fd6b118097ee35c8a3edfb7189d90a614167316",
+    "mode": 493,
+    "archive": "/home/user/gpui-preserved-test-binaries/f4cd59566500b460337a244c5fd6b118097ee35c8a3edfb7189d90a614167316",
+    "archive_kind": "raw"
+  },
+  {
+    "path": "/home/user/gpui-scene-support-target/release/build/gpui_canvas/1409624c675a2863/out/text_capacity-1409624c675a2863",
+    "bytes": 8448800,
+    "sha256": "551607b16702d156a921131d0d8077030829b4bb9ac33869dcdd20ec00be1e07",
+    "mode": 493,
+    "archive": "/home/user/gpui-preserved-test-binaries/551607b16702d156a921131d0d8077030829b4bb9ac33869dcdd20ec00be1e07",
+    "archive_kind": "raw"
+  },
+  {
+    "path": "/home/user/gpui-scene-support-target/release/build/gpui_canvas/b9c33c87fe0eedd7/out/text_run_probe-b9c33c87fe0eedd7",
+    "bytes": 8643216,
+    "sha256": "f4006fd9baf00354ac0467dc99b2103952027dbfb8b5f19ef0a2f58828414c3e",
+    "mode": 493,
+    "archive": "/home/user/gpui-preserved-test-binaries/f4006fd9baf00354ac0467dc99b2103952027dbfb8b5f19ef0a2f58828414c3e",
+    "archive_kind": "raw"
+  },
+  {
+    "path": "/home/user/gpui-scene-support-target/release/build/yoke-derive/735d941900fcb9b2/out/libyoke_derive-735d941900fcb9b2.so",
+    "bytes": 4179304,
+    "sha256": "a06872718b8501cab49b2f00284b66f11a509517ae76c72f6a32301a8e8fcf92",
+    "mode": 493,
+    "archive": "/home/user/gpui-completed-test-binaries-archive/a06872718b8501cab49b2f00284b66f11a509517ae76c72f6a32301a8e8fcf92.gz",
+    "archive_kind": "gzip"
+  },
+  {
+    "path": "/home/user/gpui-scene-support-target/release/build/yoke-derive/b25af4ec908c7268/out/libyoke_derive-b25af4ec908c7268.so",
+    "bytes": 4272112,
+    "sha256": "b50a92d171d7b6a06852f1f7b07ac95931d3d0c74f7356fcd54d5826a8ad9536",
+    "mode": 493,
+    "archive": "/home/user/gpui-completed-test-binaries-archive/b50a92d171d7b6a06852f1f7b07ac95931d3d0c74f7356fcd54d5826a8ad9536.gz",
+    "archive_kind": "gzip"
+  },
+  {
+    "path": "/home/user/gpui-scene-support-target/release/build/yoke-derive/a6188276d4c4b61c/out/libyoke_derive-a6188276d4c4b61c.so",
+    "bytes": 4272168,
+    "sha256": "0b76ae563afe90fdb7e2ac43648b509b0b43a38a5ab86fcbd3e46dea7c86ebcb",
+    "mode": 493,
+    "archive": "/home/user/gpui-completed-test-binaries-archive/0b76ae563afe90fdb7e2ac43648b509b0b43a38a5ab86fcbd3e46dea7c86ebcb.gz",
+    "archive_kind": "gzip"
+  },
+  {
+    "path": "/home/user/gpui-scene-support-target/release/build/zbus-lockstep-macros/e62be710aa1b1fbd/out/libzbus_lockstep_macros-e62be710aa1b1fbd.so",
+    "bytes": 3868352,
+    "sha256": "70eb61adc0d218254b82fd13b90892f2122a85bd19f6c2cacf432f897ac8d1f3",
+    "mode": 493,
+    "archive": "/home/user/gpui-completed-test-binaries-archive/70eb61adc0d218254b82fd13b90892f2122a85bd19f6c2cacf432f897ac8d1f3.gz",
+    "archive_kind": "gzip"
+  },
+  {
+    "path": "/home/user/gpui-scene-support-target/release/build/snafu-derive/e927791e0350b43b/out/libsnafu_derive-e927791e0350b43b.so",
+    "bytes": 4654504,
+    "sha256": "80303188e09cc91f85bbc93e0568281ea122a7eb3c6eaf863b7430ada5c0436f",
+    "mode": 493,
+    "archive": "/home/user/gpui-completed-test-binaries-archive/80303188e09cc91f85bbc93e0568281ea122a7eb3c6eaf863b7430ada5c0436f.gz",
+    "archive_kind": "gzip"
+  },
+  {
+    "path": "/home/user/gpui-scene-support-target/release/build/gpui/0d5f81483f9514fe/out/image_placement-0d5f81483f9514fe",
+    "bytes": 10669992,
+    "sha256": "139f71b18f00ed114344b14323fe64e4e28d3ba40654e3f060ac080eb0c8785f",
+    "mode": 493,
+    "archive": "/home/user/gpui-preserved-test-binaries/139f71b18f00ed114344b14323fe64e4e28d3ba40654e3f060ac080eb0c8785f",
+    "archive_kind": "raw"
+  },
+  {
+    "path": "/home/user/gpui-scene-support-target/release/build/gpui/7d343a8859c57521/out/gpui-7d343a8859c57521",
+    "bytes": 60951336,
+    "sha256": "b3e984734969d945d0debf1719b51f2ae48da70fb52ecfd53e7991e9f5085cc2",
+    "mode": 493,
+    "archive": "/home/user/gpui-preserved-test-binaries/b3e984734969d945d0debf1719b51f2ae48da70fb52ecfd53e7991e9f5085cc2",
+    "archive_kind": "raw"
+  },
+  {
+    "path": "/home/user/gpui-scene-support-target/release/build/gpui/6a56eb2df78d3d63/out/inspector-6a56eb2df78d3d63",
+    "bytes": 13423840,
+    "sha256": "cb9068f57c10f9da70186b9f2d8d6f68264fa8c21f663d6c6e7dc70d9c81eed3",
+    "mode": 493,
+    "archive": "/home/user/gpui-preserved-test-binaries/cb9068f57c10f9da70186b9f2d8d6f68264fa8c21f663d6c6e7dc70d9c81eed3",
+    "archive_kind": "raw"
+  },
+  {
+    "path": "/home/user/gpui-scene-support-target/release/build/gpui/3c2cbc1cda7bd7d2/out/semantic_metadata-3c2cbc1cda7bd7d2",
+    "bytes": 12323624,
+    "sha256": "0764487ea7169a19934704b5da9339ac694c68af1775ba46f61da30ac7ce20f9",
+    "mode": 493,
+    "archive": "/home/user/gpui-preserved-test-binaries/0764487ea7169a19934704b5da9339ac694c68af1775ba46f61da30ac7ce20f9",
+    "archive_kind": "raw"
+  },
+  {
+    "path": "/home/user/gpui-scene-support-target/release/build/gpui/38c47abf9578a392/out/property_editor",
+    "bytes": 25350384,
+    "sha256": "8aa30dc4cdf52d3660c8b07eb22e9ec747f2b9ed10dd57f72131c81f048a7ad3",
+    "mode": 493,
+    "archive": "/home/user/gpui-preserved-test-binaries/8aa30dc4cdf52d3660c8b07eb22e9ec747f2b9ed10dd57f72131c81f048a7ad3",
+    "archive_kind": "raw"
+  },
+  {
+    "path": "/home/user/gpui-scene-support-target/release/build/gpui/c6ca7b724b9767e5/out/zgx_native_lab",
+    "bytes": 26396232,
+    "sha256": "d3f5f8bc524587b5ec5a4577627eacce99a4df88111baeff9e45e2225c48c414",
+    "mode": 493,
+    "archive": "/home/user/gpui-preserved-test-binaries/d3f5f8bc524587b5ec5a4577627eacce99a4df88111baeff9e45e2225c48c414",
+    "archive_kind": "raw"
+  },
+  {
+    "path": "/home/user/gpui-scene-support-target/release/build/gpui/fe52cfb471e3601b/out/handler_storage-fe52cfb471e3601b",
+    "bytes": 13544248,
+    "sha256": "bcff886395889f77c1aef465a4dac2724d3b058452c56e33d462c9df36deed59",
+    "mode": 493,
+    "archive": "/home/user/gpui-preserved-test-binaries/bcff886395889f77c1aef465a4dac2724d3b058452c56e33d462c9df36deed59",
+    "archive_kind": "raw"
+  },
+  {
+    "path": "/home/user/gpui-scene-support-target/release/build/gpui/71d46b9228103568/out/sparse_text-71d46b9228103568",
+    "bytes": 11985584,
+    "sha256": "77f1c3fb8afce7f7c581e8fe0a968d561dad892f3e4ceb47e3a51b00650d9687",
+    "mode": 493,
+    "archive": "/home/user/gpui-preserved-test-binaries/77f1c3fb8afce7f7c581e8fe0a968d561dad892f3e4ceb47e3a51b00650d9687",
+    "archive_kind": "raw"
+  },
+  {
+    "path": "/home/user/gpui-scene-support-target/release/build/gpui/2a70ccf754472ae7/out/property_actions-2a70ccf754472ae7",
+    "bytes": 11226872,
+    "sha256": "eeed890cb7acdac39b2a7a50fbf3f921d0d3bfcc2fbe17ea3dddfd08aeb8ef1e",
+    "mode": 493,
+    "archive": "/home/user/gpui-preserved-test-binaries/eeed890cb7acdac39b2a7a50fbf3f921d0d3bfcc2fbe17ea3dddfd08aeb8ef1e",
+    "archive_kind": "raw"
+  },
+  {
+    "path": "/home/user/gpui-scene-support-target/release/build/gpui/7521fba0ca5b8b52/out/queries-7521fba0ca5b8b52",
+    "bytes": 11896112,
+    "sha256": "0cb381c5e9102a3ddd27566142268322d2b0b32151ce74fadd935333a8026b67",
+    "mode": 493,
+    "archive": "/home/user/gpui-preserved-test-binaries/0cb381c5e9102a3ddd27566142268322d2b0b32151ce74fadd935333a8026b67",
+    "archive_kind": "raw"
+  },
+  {
+    "path": "/home/user/gpui-scene-support-target/release/build/gpui/6049a0ca722ce598/out/ime_cursor_cost",
+    "bytes": 9892848,
+    "sha256": "b58e011fd3b0e9fbca542d88cd336b2dfb7ccb945ced271a553a6687e1432939",
+    "mode": 493,
+    "archive": "/home/user/gpui-preserved-test-binaries/b58e011fd3b0e9fbca542d88cd336b2dfb7ccb945ced271a553a6687e1432939",
+    "archive_kind": "raw"
+  },
+  {
+    "path": "/home/user/gpui-scene-support-target/release/build/gpui/3b2275b487a0606e/out/components-3b2275b487a0606e",
+    "bytes": 11898368,
+    "sha256": "4591bb9c30b88159adf0c0c9fdf5f83ee66c43b24a1cd88874062ec7143b48f0",
+    "mode": 493,
+    "archive": "/home/user/gpui-preserved-test-binaries/4591bb9c30b88159adf0c0c9fdf5f83ee66c43b24a1cd88874062ec7143b48f0",
+    "archive_kind": "raw"
+  },
+  {
+    "path": "/home/user/gpui-scene-support-target/release/build/gpui/482a0c4e2954663a/out/contained_owner_spike",
+    "bytes": 11315824,
+    "sha256": "95d43fcef7a38c652cd44bf4e11b1bd9927d4a0bb97873b7569fcc32528376c1",
+    "mode": 493,
+    "archive": "/home/user/gpui-preserved-test-binaries/95d43fcef7a38c652cd44bf4e11b1bd9927d4a0bb97873b7569fcc32528376c1",
+    "archive_kind": "raw"
+  },
+  {
+    "path": "/home/user/gpui-scene-support-target/release/build/gpui/32358c155c3b4436/out/child_capacity-32358c155c3b4436",
+    "bytes": 11641264,
+    "sha256": "3fbf608e586e0f148f3707b8ead8022c4f9b2a2b324727761fb22013cf651366",
+    "mode": 493,
+    "archive": "/home/user/gpui-preserved-test-binaries/3fbf608e586e0f148f3707b8ead8022c4f9b2a2b324727761fb22013cf651366",
+    "archive_kind": "raw"
+  },
+  {
+    "path": "/home/user/gpui-scene-support-target/release/build/gpui/991cc5eabc5df501/out/covers",
+    "bytes": 25237176,
+    "sha256": "9a4a19a91a1e5cda07a35900a86fb6be14f05f8baa57e24cf99b9433f960066d",
+    "mode": 493,
+    "archive": "/home/user/gpui-preserved-test-binaries/9a4a19a91a1e5cda07a35900a86fb6be14f05f8baa57e24cf99b9433f960066d",
+    "archive_kind": "raw"
+  },
+  {
+    "path": "/home/user/gpui-scene-support-target/release/build/gpui/ba59208fe85d2370/out/unit_action_cost-ba59208fe85d2370",
+    "bytes": 10523736,
+    "sha256": "41fb26c3ad41e3cd4e340fd761919c9f9586dfd17e53611067df4af5f5354e00",
+    "mode": 493,
+    "archive": "/home/user/gpui-preserved-test-binaries/41fb26c3ad41e3cd4e340fd761919c9f9586dfd17e53611067df4af5f5354e00",
+    "archive_kind": "raw"
+  },
+  {
+    "path": "/home/user/gpui-scene-support-target/release/build/gpui/596ec3deaa5df321/out/presentation-596ec3deaa5df321",
+    "bytes": 11924992,
+    "sha256": "9f19954f1339736140452287af527d900a8e868f490602d9d8f9b3a58225617c",
+    "mode": 493,
+    "archive": "/home/user/gpui-preserved-test-binaries/9f19954f1339736140452287af527d900a8e868f490602d9d8f9b3a58225617c",
+    "archive_kind": "raw"
+  },
+  {
+    "path": "/home/user/gpui-scene-support-target/release/build/gpui/3c29264f7344f4ab/out/immutable_text-3c29264f7344f4ab",
+    "bytes": 11664360,
+    "sha256": "619300674970946cae62da12e6f54769fb797797af87d31380cf314ba764ea36",
+    "mode": 493,
+    "archive": "/home/user/gpui-preserved-test-binaries/619300674970946cae62da12e6f54769fb797797af87d31380cf314ba764ea36",
+    "archive_kind": "raw"
+  },
+  {
+    "path": "/home/user/gpui-scene-support-target/release/build/gpui/fc3261afa7f1a06f/out/text_cache-fc3261afa7f1a06f",
+    "bytes": 12077616,
+    "sha256": "13e4d636d353c2e9ab90b3d6084b5eced4ec0a8b2e0a7f124e1c231248d92ca5",
+    "mode": 493,
+    "archive": "/home/user/gpui-preserved-test-binaries/13e4d636d353c2e9ab90b3d6084b5eced4ec0a8b2e0a7f124e1c231248d92ca5",
+    "archive_kind": "raw"
+  },
+  {
+    "path": "/home/user/gpui-scene-support-target/release/build/gpui/bf108177487c5f47/out/workspace",
+    "bytes": 25353840,
+    "sha256": "5f48f016324b69c43503d439a57a88d26e7c51015e5bcf2d5a50aaa183af7b07",
+    "mode": 493,
+    "archive": "/home/user/gpui-preserved-test-binaries/5f48f016324b69c43503d439a57a88d26e7c51015e5bcf2d5a50aaa183af7b07",
+    "archive_kind": "raw"
+  },
+  {
+    "path": "/home/user/gpui-scene-support-target/release/build/gpui/47e50edb3c4ba12d/out/queries-47e50edb3c4ba12d",
+    "bytes": 10615656,
+    "sha256": "2fc7f10a354e36959b1ad8ae57af28385094ab1c34505d53125d1ef4ccc82405",
+    "mode": 493,
+    "archive": "/home/user/gpui-preserved-test-binaries/2fc7f10a354e36959b1ad8ae57af28385094ab1c34505d53125d1ef4ccc82405",
+    "archive_kind": "raw"
+  },
+  {
+    "path": "/home/user/gpui-scene-support-target/release/build/gpui/77807c94dfd7a485/out/source_inbox-77807c94dfd7a485",
+    "bytes": 13079896,
+    "sha256": "2c0151eced7b462c87fc9794a6c80b0b87d55618c86f8891405867e3aac0d214",
+    "mode": 493,
+    "archive": "/home/user/gpui-preserved-test-binaries/2c0151eced7b462c87fc9794a6c80b0b87d55618c86f8891405867e3aac0d214",
+    "archive_kind": "raw"
+  },
+  {
+    "path": "/home/user/gpui-scene-support-target/release/build/gpui/f23d18b0a25ef922/out/unicode",
+    "bytes": 25242728,
+    "sha256": "f016280c0aa3b4b91f00de2944ae9b5ff1eeda6d81dc41154cc77e5efbd54281",
+    "mode": 493,
+    "archive": "/home/user/gpui-preserved-test-binaries/f016280c0aa3b4b91f00de2944ae9b5ff1eeda6d81dc41154cc77e5efbd54281",
+    "archive_kind": "raw"
+  },
+  {
+    "path": "/home/user/gpui-scene-support-target/release/build/gpui/b23ac8bfdb17f6d4/out/text_selection_compound-b23ac8bfdb17f6d4",
+    "bytes": 10645760,
+    "sha256": "f5e6aa734842e815376532273e558fb00cc79b65be5cb68731948bddcee80762",
+    "mode": 493,
+    "archive": "/home/user/gpui-preserved-test-binaries/f5e6aa734842e815376532273e558fb00cc79b65be5cb68731948bddcee80762",
+    "archive_kind": "raw"
+  },
+  {
+    "path": "/home/user/gpui-scene-support-target/release/build/gpui/c8e21b96cf06b594/out/images-c8e21b96cf06b594",
+    "bytes": 12227600,
+    "sha256": "11e84fe465dd0505dc17a9ba9161de070ca8c46e10c685847809a62526a0f171",
+    "mode": 493,
+    "archive": "/home/user/gpui-preserved-test-binaries/11e84fe465dd0505dc17a9ba9161de070ca8c46e10c685847809a62526a0f171",
+    "archive_kind": "raw"
+  },
+  {
+    "path": "/home/user/gpui-scene-support-target/release/build/gpui/c421775e9c15f6d3/out/mapped_paint-c421775e9c15f6d3",
+    "bytes": 10518560,
+    "sha256": "d3b705d7f5f897434b7e77008546bdbefdfe4d6ed104c3f7ed4b545ba161b646",
+    "mode": 493,
+    "archive": "/home/user/gpui-preserved-test-binaries/d3b705d7f5f897434b7e77008546bdbefdfe4d6ed104c3f7ed4b545ba161b646",
+    "archive_kind": "raw"
+  },
+  {
+    "path": "/home/user/gpui-scene-support-target/release/build/gpui/f368f9e328de61a9/out/presentation-f368f9e328de61a9",
+    "bytes": 10650400,
+    "sha256": "734a5dd2aba3acbb8d07db3b7a12360679f35d20a59e1d480fb048d1435d6920",
+    "mode": 493,
+    "archive": "/home/user/gpui-preserved-test-binaries/734a5dd2aba3acbb8d07db3b7a12360679f35d20a59e1d480fb048d1435d6920",
+    "archive_kind": "raw"
+  },
+  {
+    "path": "/home/user/gpui-scene-support-target/release/build/gpui/153199f576e63f06/out/local_publication-153199f576e63f06",
+    "bytes": 11212592,
+    "sha256": "e90a94af9f49af91480016b82e289635e1308f5b88c2a03aa5f50d390ac32a9e",
+    "mode": 493,
+    "archive": "/home/user/gpui-preserved-test-binaries/e90a94af9f49af91480016b82e289635e1308f5b88c2a03aa5f50d390ac32a9e",
+    "archive_kind": "raw"
+  },
+  {
+    "path": "/home/user/gpui-scene-support-target/release/build/gpui/76e0b36cf0b71ed8/out/pointer-76e0b36cf0b71ed8",
+    "bytes": 12358784,
+    "sha256": "dac89e6a0b77f159f7cdfb5237181d622258fc67e7a656546ecc834b1daf2566",
+    "mode": 493,
+    "archive": "/home/user/gpui-preserved-test-binaries/dac89e6a0b77f159f7cdfb5237181d622258fc67e7a656546ecc834b1daf2566",
+    "archive_kind": "raw"
+  },
+  {
+    "path": "/home/user/gpui-scene-support-target/release/build/gpui/4ceb8ae38b2d7c29/out/clipping-4ceb8ae38b2d7c29",
+    "bytes": 11419456,
+    "sha256": "c63d70a24f4aaf44d062aeb8cb31c44a3cd76db7bda50b222aaa7bf7cf76bdf2",
+    "mode": 493,
+    "archive": "/home/user/gpui-preserved-test-binaries/c63d70a24f4aaf44d062aeb8cb31c44a3cd76db7bda50b222aaa7bf7cf76bdf2",
+    "archive_kind": "raw"
+  },
+  {
+    "path": "/home/user/gpui-scene-support-target/release/build/gpui/25cf736ee8065a75/out/library-25cf736ee8065a75",
+    "bytes": 12090728,
+    "sha256": "563f0c8ad54b73dd76c605c44ef8e3aca4887962d7026dc47f86f8e5403bd1ef",
+    "mode": 493,
+    "archive": "/home/user/gpui-preserved-test-binaries/563f0c8ad54b73dd76c605c44ef8e3aca4887962d7026dc47f86f8e5403bd1ef",
+    "archive_kind": "raw"
+  },
+  {
+    "path": "/home/user/gpui-scene-support-target/release/build/gpui/1e0f5cef6f980cfa/out/paint_slot_rebind-1e0f5cef6f980cfa",
+    "bytes": 10498000,
+    "sha256": "6841817f1835d8c4643e05745fc7bfd7635366f5da9cfe24a9c574ed9d32f153",
+    "mode": 493,
+    "archive": "/home/user/gpui-preserved-test-binaries/6841817f1835d8c4643e05745fc7bfd7635366f5da9cfe24a9c574ed9d32f153",
+    "archive_kind": "raw"
+  },
+  {
+    "path": "/home/user/gpui-scene-support-target/release/build/gpui/00ae86c2d370fe13/out/unicode_text-00ae86c2d370fe13",
+    "bytes": 11781536,
+    "sha256": "938e5688aa147eb8b31ac9db315d1edd333d998047e3c76b020afd7b186df7dd",
+    "mode": 493,
+    "archive": "/home/user/gpui-preserved-test-binaries/938e5688aa147eb8b31ac9db315d1edd333d998047e3c76b020afd7b186df7dd",
+    "archive_kind": "raw"
+  },
+  {
+    "path": "/home/user/gpui-scene-support-target/release/build/gpui/49c5286c64be263e/out/text_selection-49c5286c64be263e",
+    "bytes": 11329728,
+    "sha256": "77e36c7478f854d440df331696ca4816552da77e95f14d5a56484062d5680450",
+    "mode": 493,
+    "archive": "/home/user/gpui-preserved-test-binaries/77e36c7478f854d440df331696ca4816552da77e95f14d5a56484062d5680450",
+    "archive_kind": "raw"
+  },
+  {
+    "path": "/home/user/gpui-scene-support-target/release/build/gpui/acd3f26cb8b6b48f/out/projected_sources-acd3f26cb8b6b48f",
+    "bytes": 12673640,
+    "sha256": "7a9a36c0c8502ad7a84dec3a54a1ffb062dd102b9918e242fee3af6a37cffe84",
+    "mode": 493,
+    "archive": "/home/user/gpui-preserved-test-binaries/7a9a36c0c8502ad7a84dec3a54a1ffb062dd102b9918e242fee3af6a37cffe84",
+    "archive_kind": "raw"
+  },
+  {
+    "path": "/home/user/gpui-scene-support-target/release/build/gpui/d28715db297fa2e8/out/component_sources",
+    "bytes": 25393080,
+    "sha256": "f671b2ffab194709af7e034ba01dcda685cbd76f3692a00847bbd93f6ceb0d54",
+    "mode": 493,
+    "archive": "/home/user/gpui-preserved-test-binaries/f671b2ffab194709af7e034ba01dcda685cbd76f3692a00847bbd93f6ceb0d54",
+    "archive_kind": "raw"
+  },
+  {
+    "path": "/home/user/gpui-scene-support-target/release/build/gpui/6cdf16e5f3673c9c/out/inspector-6cdf16e5f3673c9c",
+    "bytes": 12106808,
+    "sha256": "a32a6d40b808c544ff74f828efe48ca3df73fddd7ad2c54293216db07b328834",
+    "mode": 493,
+    "archive": "/home/user/gpui-preserved-test-binaries/a32a6d40b808c544ff74f828efe48ca3df73fddd7ad2c54293216db07b328834",
+    "archive_kind": "raw"
+  },
+  {
+    "path": "/home/user/gpui-scene-support-target/release/build/gpui/881cab0cccf50df2/out/text_selection_compound-881cab0cccf50df2",
+    "bytes": 11920400,
+    "sha256": "20d9fa9f0f31a2c1ae71e29bd4e5af9b716b2e9c65cdbbd07695a2761e3cddd3",
+    "mode": 493,
+    "archive": "/home/user/gpui-preserved-test-binaries/20d9fa9f0f31a2c1ae71e29bd4e5af9b716b2e9c65cdbbd07695a2761e3cddd3",
+    "archive_kind": "raw"
+  },
+  {
+    "path": "/home/user/gpui-scene-support-target/release/build/gpui/e0261b0ff00b7896/out/unit_action_cost_two-e0261b0ff00b7896",
+    "bytes": 10757320,
+    "sha256": "f0cd79adf6a7e7205bbb3d7d44957f8eee7e476d90cbf898608b4fb30c844dec",
+    "mode": 493,
+    "archive": "/home/user/gpui-preserved-test-binaries/f0cd79adf6a7e7205bbb3d7d44957f8eee7e476d90cbf898608b4fb30c844dec",
+    "archive_kind": "raw"
+  },
+  {
+    "path": "/home/user/gpui-scene-support-target/release/build/gpui/6018581ec8350bd1/out/retained_list",
+    "bytes": 11219200,
+    "sha256": "92baa2d94f649a683eabebe03a4f7bef5434ddaf7a81eb8befe25c64228bb172",
+    "mode": 493,
+    "archive": "/home/user/gpui-preserved-test-binaries/92baa2d94f649a683eabebe03a4f7bef5434ddaf7a81eb8befe25c64228bb172",
+    "archive_kind": "raw"
+  },
+  {
+    "path": "/home/user/gpui-scene-support-target/release/build/gpui/8a7afc547f960b1f/out/inspector",
+    "bytes": 25242256,
+    "sha256": "4e5e3cb52ea0dcfacc51f53d9c9db18027b6eaa4f1b86755827c9bdd2fe18a9b",
+    "mode": 493,
+    "archive": "/home/user/gpui-preserved-test-binaries/4e5e3cb52ea0dcfacc51f53d9c9db18027b6eaa4f1b86755827c9bdd2fe18a9b",
+    "archive_kind": "raw"
+  },
+  {
+    "path": "/home/user/gpui-scene-support-target/release/build/gpui/f62811c55e9a21bc/out/dpi-f62811c55e9a21bc",
+    "bytes": 12087128,
+    "sha256": "5b3698c0c554b7c639a2ce85a5a37ffac7d3bf64b9ec62f842a50b1c69275939",
+    "mode": 493,
+    "archive": "/home/user/gpui-preserved-test-binaries/5b3698c0c554b7c639a2ce85a5a37ffac7d3bf64b9ec62f842a50b1c69275939",
+    "archive_kind": "raw"
+  },
+  {
+    "path": "/home/user/gpui-scene-support-target/release/build/gpui/62a074e2fe4edeeb/out/routes-62a074e2fe4edeeb",
+    "bytes": 10918032,
+    "sha256": "a443f9faf15a339a3a975c58eb04a759c36a101c9f2d52e9ab6d9f5af2fdff2b",
+    "mode": 493,
+    "archive": "/home/user/gpui-preserved-test-binaries/a443f9faf15a339a3a975c58eb04a759c36a101c9f2d52e9ab6d9f5af2fdff2b",
+    "archive_kind": "raw"
+  },
+  {
+    "path": "/home/user/gpui-scene-support-target/release/build/gpui/a3dd2c315b8690e9/out/paint_slot_storage",
+    "bytes": 11067216,
+    "sha256": "5f3f84a6a993bf3824e65520a9d2852dab9013b2a3fbf53a7235aefb77901435",
+    "mode": 493,
+    "archive": "/home/user/gpui-preserved-test-binaries/5f3f84a6a993bf3824e65520a9d2852dab9013b2a3fbf53a7235aefb77901435",
+    "archive_kind": "raw"
+  },
+  {
+    "path": "/home/user/gpui-scene-support-target/release/build/gpui/1d41104bd620b05b/out/focus-1d41104bd620b05b",
+    "bytes": 11665968,
+    "sha256": "ffcf73565ec070d995bc19d281de3d14fbd6aa5b1aa9e750274f99165b15db47",
+    "mode": 493,
+    "archive": "/home/user/gpui-preserved-test-binaries/ffcf73565ec070d995bc19d281de3d14fbd6aa5b1aa9e750274f99165b15db47",
+    "archive_kind": "raw"
+  },
+  {
+    "path": "/home/user/gpui-scene-support-target/release/build/gpui/d32128f191e42486/out/flex-d32128f191e42486",
+    "bytes": 11717464,
+    "sha256": "aa1e4e443ebb8a1258d78998ffb6838b3d8e2b6e659d6507b84a43c11d5d3776",
+    "mode": 493,
+    "archive": "/home/user/gpui-preserved-test-binaries/aa1e4e443ebb8a1258d78998ffb6838b3d8e2b6e659d6507b84a43c11d5d3776",
+    "archive_kind": "raw"
+  },
+  {
+    "path": "/home/user/gpui-scene-support-target/release/build/gpui/6a4f753821c95b59/out/todo_comparison",
+    "bytes": 25596336,
+    "sha256": "828e0fcb744bf136d2e59b52daaafba57d6d358f18ea8434a84a8823be1757d0",
+    "mode": 493,
+    "archive": "/home/user/gpui-preserved-test-binaries/828e0fcb744bf136d2e59b52daaafba57d6d358f18ea8434a84a8823be1757d0",
+    "archive_kind": "raw"
+  },
+  {
+    "path": "/home/user/gpui-scene-support-target/release/build/gpui/3b0e8a39945c4dcc/out/question_input_cost-3b0e8a39945c4dcc",
+    "bytes": 11752968,
+    "sha256": "89750412bccd09a57841ce64b0d75a10f5fc63a387f9da65bcb15861063a9b25",
+    "mode": 493,
+    "archive": "/home/user/gpui-preserved-test-binaries/89750412bccd09a57841ce64b0d75a10f5fc63a387f9da65bcb15861063a9b25",
+    "archive_kind": "raw"
+  },
+  {
+    "path": "/home/user/gpui-scene-support-target/release/build/gpui/a714ebd197e979b4/out/todo_comparison_five",
+    "bytes": 25620192,
+    "sha256": "389780f8708e24f53e139f3df1895b1a6916780f65b8fe98c5490bfbda447cb1",
+    "mode": 493,
+    "archive": "/home/user/gpui-preserved-test-binaries/389780f8708e24f53e139f3df1895b1a6916780f65b8fe98c5490bfbda447cb1",
+    "archive_kind": "raw"
+  },
+  {
+    "path": "/home/user/gpui-scene-support-target/release/build/gpui/da2acfce58b23a73/out/identity_recovery-da2acfce58b23a73",
+    "bytes": 10489016,
+    "sha256": "59428ce2a7cd4e180d69075730cfe325bee68756224e9729564fab998e5de33d",
+    "mode": 493,
+    "archive": "/home/user/gpui-preserved-test-binaries/59428ce2a7cd4e180d69075730cfe325bee68756224e9729564fab998e5de33d",
+    "archive_kind": "raw"
+  },
+  {
+    "path": "/home/user/gpui-scene-support-target/release/build/gpui/0f2f8675a679d476/out/literal_dispatch-0f2f8675a679d476",
+    "bytes": 11862032,
+    "sha256": "30dd31398bcd83ed87b21d3a87c8cb4bdef450672832c0b07f31f6b2be9f500d",
+    "mode": 493,
+    "archive": "/home/user/gpui-preserved-test-binaries/30dd31398bcd83ed87b21d3a87c8cb4bdef450672832c0b07f31f6b2be9f500d",
+    "archive_kind": "raw"
+  },
+  {
+    "path": "/home/user/gpui-scene-support-target/release/build/gpui/c06a5aa6bc19f81f/out/panes",
+    "bytes": 25224056,
+    "sha256": "7eaa2dd38c23a9e3f42c9fc811bb5f399e5bda83daa0796371c7d27d1cc6bc13",
+    "mode": 493,
+    "archive": "/home/user/gpui-preserved-test-binaries/7eaa2dd38c23a9e3f42c9fc811bb5f399e5bda83daa0796371c7d27d1cc6bc13",
+    "archive_kind": "raw"
+  },
+  {
+    "path": "/home/user/gpui-scene-support-target/release/build/gpui/161fa22cf9a294d1/out/first_frame",
+    "bytes": 11353168,
+    "sha256": "2f0783d3b56985f3f5a39c1cb6fcef1d00784880e491c2d65c9de4a7c79b6dc7",
+    "mode": 493,
+    "archive": "/home/user/gpui-preserved-test-binaries/2f0783d3b56985f3f5a39c1cb6fcef1d00784880e491c2d65c9de4a7c79b6dc7",
+    "archive_kind": "raw"
+  },
+  {
+    "path": "/home/user/gpui-scene-support-target/release/build/gpui/9104117e771f90dd/out/property_selection-9104117e771f90dd",
+    "bytes": 12904792,
+    "sha256": "ecd58957d2154fd053ae8edc4d1bf0772ffb63815f88dc134cd463d1e3d5d0ad",
+    "mode": 493,
+    "archive": "/home/user/gpui-preserved-test-binaries/ecd58957d2154fd053ae8edc4d1bf0772ffb63815f88dc134cd463d1e3d5d0ad",
+    "archive_kind": "raw"
+  },
+  {
+    "path": "/home/user/gpui-scene-support-target/release/build/gpui/e9b8c773f9415c80/out/sheet_access_measure",
+    "bytes": 11015568,
+    "sha256": "b5b566a0960eb9c025325be215783764ab9d0f143b2d65bab7a56a0f8c454fb2",
+    "mode": 493,
+    "archive": "/home/user/gpui-preserved-test-binaries/b5b566a0960eb9c025325be215783764ab9d0f143b2d65bab7a56a0f8c454fb2",
+    "archive_kind": "raw"
+  },
+  {
+    "path": "/home/user/gpui-scene-support-target/release/build/gpui/fbc81403c798a805/out/todo_comparison-fbc81403c798a805",
+    "bytes": 10897256,
+    "sha256": "525cc9723f172d1b6a27e488a517efefd63a82da2cdeb2c113973b7a5597d559",
+    "mode": 493,
+    "archive": "/home/user/gpui-preserved-test-binaries/525cc9723f172d1b6a27e488a517efefd63a82da2cdeb2c113973b7a5597d559",
+    "archive_kind": "raw"
+  },
+  {
+    "path": "/home/user/gpui-scene-support-target/release/build/gpui/72244371117462be/out/child_capacity-72244371117462be",
+    "bytes": 10368184,
+    "sha256": "02d9ec6cd93c53c65fb15986830821241b417b05077c10cac873adb356888274",
+    "mode": 493,
+    "archive": "/home/user/gpui-preserved-test-binaries/02d9ec6cd93c53c65fb15986830821241b417b05077c10cac873adb356888274",
+    "archive_kind": "raw"
+  },
+  {
+    "path": "/home/user/gpui-scene-support-target/release/build/gpui/4d4f873e56a5d4d5/out/unit_action_cost_two-4d4f873e56a5d4d5",
+    "bytes": 12041568,
+    "sha256": "afb2fb24c97c63f2f9abc695cdc3f1f03612421e7538789f7e94d5de9eeb3d0c",
+    "mode": 493,
+    "archive": "/home/user/gpui-preserved-test-binaries/afb2fb24c97c63f2f9abc695cdc3f1f03612421e7538789f7e94d5de9eeb3d0c",
+    "archive_kind": "raw"
+  },
+  {
+    "path": "/home/user/gpui-scene-support-target/release/build/gpui/1f8acc57a33744b8/out/text_lane_measure",
+    "bytes": 11237016,
+    "sha256": "f756307feeb9a7b2432d3dec0aa12931dbf7648a70a89364f6214acdc7c4ba66",
+    "mode": 493,
+    "archive": "/home/user/gpui-preserved-test-binaries/f756307feeb9a7b2432d3dec0aa12931dbf7648a70a89364f6214acdc7c4ba66",
+    "archive_kind": "raw"
+  },
+  {
+    "path": "/home/user/gpui-scene-support-target/release/build/gpui/0bc3a3be0e651757/out/zgx_native_lab-0bc3a3be0e651757",
+    "bytes": 13268488,
+    "sha256": "e47b2518ea418c87087b36db70d3dc174852fbbf1918dc9023fa9cce36091b59",
+    "mode": 493,
+    "archive": "/home/user/gpui-preserved-test-binaries/e47b2518ea418c87087b36db70d3dc174852fbbf1918dc9023fa9cce36091b59",
+    "archive_kind": "raw"
+  },
+  {
+    "path": "/home/user/gpui-scene-support-target/release/build/gpui/0f7f89c96b5802e1/out/paint_patch-0f7f89c96b5802e1",
+    "bytes": 10797680,
+    "sha256": "2f43e3da56a09c242c2132be1d527438806ba2d2e84ebac11ee905842a087f8f",
+    "mode": 493,
+    "archive": "/home/user/gpui-preserved-test-binaries/2f43e3da56a09c242c2132be1d527438806ba2d2e84ebac11ee905842a087f8f",
+    "archive_kind": "raw"
+  },
+  {
+    "path": "/home/user/gpui-scene-support-target/release/build/gpui/162d5a51c65c626f/out/paint_slot_storage",
+    "bytes": 9792992,
+    "sha256": "17c48601f7e8d3893d4bb11719cbf291d7e128140a58cdc4bcbeecd0c85de0eb",
+    "mode": 493,
+    "archive": "/home/user/gpui-preserved-test-binaries/17c48601f7e8d3893d4bb11719cbf291d7e128140a58cdc4bcbeecd0c85de0eb",
+    "archive_kind": "raw"
+  },
+  {
+    "path": "/home/user/gpui-scene-support-target/release/build/gpui/0284aa51c6024501/out/source_inbox_reader_gate-0284aa51c6024501",
+    "bytes": 11828792,
+    "sha256": "1a33e0e156c094bb04c39718fb399020c9b2bc2cb7b04864a8e07e748ea49d96",
+    "mode": 493,
+    "archive": "/home/user/gpui-preserved-test-binaries/1a33e0e156c094bb04c39718fb399020c9b2bc2cb7b04864a8e07e748ea49d96",
+    "archive_kind": "raw"
+  },
+  {
+    "path": "/home/user/gpui-scene-support-target/release/build/gpui/28c2a85e159e0a89/out/checkbox-28c2a85e159e0a89",
+    "bytes": 11398536,
+    "sha256": "71b92082f0577708abc5efa907227789659290d9450c6e5de02eec0d46cce683",
+    "mode": 493,
+    "archive": "/home/user/gpui-preserved-test-binaries/71b92082f0577708abc5efa907227789659290d9450c6e5de02eec0d46cce683",
+    "archive_kind": "raw"
+  },
+  {
+    "path": "/home/user/gpui-scene-support-target/release/build/gpui/24a50e9fd443fcb7/out/local_publication-24a50e9fd443fcb7",
+    "bytes": 12502880,
+    "sha256": "086f57f985689a12b60ac692809d366456de9632dea768711a0282144b182270",
+    "mode": 493,
+    "archive": "/home/user/gpui-preserved-test-binaries/086f57f985689a12b60ac692809d366456de9632dea768711a0282144b182270",
+    "archive_kind": "raw"
+  },
+  {
+    "path": "/home/user/gpui-scene-support-target/release/build/gpui/727ab5cd23552c01/out/unicode_text-727ab5cd23552c01",
+    "bytes": 10505880,
+    "sha256": "5d686a53efb6f8d5f0f76204a19ec83e7dcd3136d83485af9f4a4cc606ce9b86",
+    "mode": 493,
+    "archive": "/home/user/gpui-preserved-test-binaries/5d686a53efb6f8d5f0f76204a19ec83e7dcd3136d83485af9f4a4cc606ce9b86",
+    "archive_kind": "raw"
+  },
+  {
+    "path": "/home/user/gpui-scene-support-target/release/build/gpui/91639c0bfb59a7d2/out/runtime-91639c0bfb59a7d2",
+    "bytes": 13052984,
+    "sha256": "eb814857dbbaa14b3f17db11d34941d2824f346d0cd6186fe2085816fe804e76",
+    "mode": 493,
+    "archive": "/home/user/gpui-preserved-test-binaries/eb814857dbbaa14b3f17db11d34941d2824f346d0cd6186fe2085816fe804e76",
+    "archive_kind": "raw"
+  },
+  {
+    "path": "/home/user/gpui-scene-support-target/release/build/gpui/c7028571d687eaef/out/todo_comparison_mapped",
+    "bytes": 25635080,
+    "sha256": "40c9db42f807a2bd4206a0c89948bd83b27c974019d54297f0e7f35239ca2568",
+    "mode": 493,
+    "archive": "/home/user/gpui-preserved-test-binaries/40c9db42f807a2bd4206a0c89948bd83b27c974019d54297f0e7f35239ca2568",
+    "archive_kind": "raw"
+  },
+  {
+    "path": "/home/user/gpui-scene-support-target/release/build/gpui/4395434129024bc3/out/immutable_text_measure",
+    "bytes": 11252664,
+    "sha256": "1b6603fe9c59960ae5b7222a259225675ceabd768fc789382208e0bde57a3f08",
+    "mode": 493,
+    "archive": "/home/user/gpui-preserved-test-binaries/1b6603fe9c59960ae5b7222a259225675ceabd768fc789382208e0bde57a3f08",
+    "archive_kind": "raw"
+  },
+  {
+    "path": "/home/user/gpui-scene-support-target/release/build/gpui/1169161245756934/out/mapped_properties",
+    "bytes": 25289896,
+    "sha256": "2127116dff6e983195ad2bf26a94b80478c85fc05c1cc4eb8a8ade2bf77793ad",
+    "mode": 493,
+    "archive": "/home/user/gpui-preserved-test-binaries/2127116dff6e983195ad2bf26a94b80478c85fc05c1cc4eb8a8ade2bf77793ad",
+    "archive_kind": "raw"
+  },
+  {
+    "path": "/home/user/gpui-scene-support-target/release/build/gpui/3aa5d815723c9375/out/ports-3aa5d815723c9375",
+    "bytes": 11284720,
+    "sha256": "ffeb54b553ee542566483358bc9f6a8df24f1e8950dc733947051bc1d72f1f36",
+    "mode": 493,
+    "archive": "/home/user/gpui-preserved-test-binaries/ffeb54b553ee542566483358bc9f6a8df24f1e8950dc733947051bc1d72f1f36",
+    "archive_kind": "raw"
+  },
+  {
+    "path": "/home/user/gpui-scene-support-target/release/build/gpui/082973e623b3b310/out/semantics-082973e623b3b310",
+    "bytes": 10944616,
+    "sha256": "d7102a6867559ff9c445e253dc8e5e8c219eeae8a2fce91663a3268c04b51246",
+    "mode": 493,
+    "archive": "/home/user/gpui-preserved-test-binaries/d7102a6867559ff9c445e253dc8e5e8c219eeae8a2fce91663a3268c04b51246",
+    "archive_kind": "raw"
+  },
+  {
+    "path": "/home/user/gpui-scene-support-target/release/build/gpui/c6fc1d17e326c893/out/remote_delivery_measure",
+    "bytes": 9904808,
+    "sha256": "f6deb97876615c5086f05d6800642a6321e6fc47d8e7e7e6470c1ae16cf2fe92",
+    "mode": 493,
+    "archive": "/home/user/gpui-preserved-test-binaries/f6deb97876615c5086f05d6800642a6321e6fc47d8e7e7e6470c1ae16cf2fe92",
+    "archive_kind": "raw"
+  },
+  {
+    "path": "/home/user/gpui-scene-support-target/release/build/gpui/d313a00f90425080/out/pointer_focus-d313a00f90425080",
+    "bytes": 10594528,
+    "sha256": "5ec9c374d99c349a8e582ccddebc793fb490a4f2a89eefeaec41a8c71d53775a",
+    "mode": 493,
+    "archive": "/home/user/gpui-preserved-test-binaries/5ec9c374d99c349a8e582ccddebc793fb490a4f2a89eefeaec41a8c71d53775a",
+    "archive_kind": "raw"
+  },
+  {
+    "path": "/home/user/gpui-scene-support-target/release/build/gpui/9d86b43e11032505/out/application-9d86b43e11032505",
+    "bytes": 12315888,
+    "sha256": "f1a95390cc3ed58fae29f2e8eb60f640309f47265ddeadf3a637294227d07615",
+    "mode": 493,
+    "archive": "/home/user/gpui-preserved-test-binaries/f1a95390cc3ed58fae29f2e8eb60f640309f47265ddeadf3a637294227d07615",
+    "archive_kind": "raw"
+  },
+  {
+    "path": "/home/user/gpui-scene-support-target/release/build/gpui/875c86739aeabbb2/out/source_value_isolation-875c86739aeabbb2",
+    "bytes": 10961032,
+    "sha256": "51907a354a0aab2ba11a944f55ea6fc5b7c71be13fa2016338062c5821cdcd6e",
+    "mode": 493,
+    "archive": "/home/user/gpui-preserved-test-binaries/51907a354a0aab2ba11a944f55ea6fc5b7c71be13fa2016338062c5821cdcd6e",
+    "archive_kind": "raw"
+  },
+  {
+    "path": "/home/user/gpui-scene-support-target/release/build/gpui/397a52a6825a7205/out/rounded-397a52a6825a7205",
+    "bytes": 11451352,
+    "sha256": "ea5e1d30b82ac0d8f62a26a2be52626367202ec592c063e3e2ecf06765f938ed",
+    "mode": 493,
+    "archive": "/home/user/gpui-preserved-test-binaries/ea5e1d30b82ac0d8f62a26a2be52626367202ec592c063e3e2ecf06765f938ed",
+    "archive_kind": "raw"
+  },
+  {
+    "path": "/home/user/gpui-scene-support-target/release/build/gpui/2b67107b0dc8425c/out/state_update_cost",
+    "bytes": 11202944,
+    "sha256": "67620a82fa0fcb924bf4d507190c8b509fab554a27587a1caf9a2fd30862b051",
+    "mode": 493,
+    "archive": "/home/user/gpui-preserved-test-binaries/67620a82fa0fcb924bf4d507190c8b509fab554a27587a1caf9a2fd30862b051",
+    "archive_kind": "raw"
+  },
+  {
+    "path": "/home/user/gpui-scene-support-target/release/build/gpui/425a4ed6f5af56e8/out/ime-425a4ed6f5af56e8",
+    "bytes": 12597280,
+    "sha256": "bbd506ba3eb016fa5028434f09aa8eb3046cb8c759866a06a6a088a570576b75",
+    "mode": 493,
+    "archive": "/home/user/gpui-preserved-test-binaries/bbd506ba3eb016fa5028434f09aa8eb3046cb8c759866a06a6a088a570576b75",
+    "archive_kind": "raw"
+  },
+  {
+    "path": "/home/user/gpui-scene-support-target/release/build/gpui/e7e0519243b95972/out/acceptance-e7e0519243b95972",
+    "bytes": 12866360,
+    "sha256": "5aea35a179804fed1903807d9aeb0982e9758768fd8b8cc471cd3e1ffe17db7d",
+    "mode": 493,
+    "archive": "/home/user/gpui-preserved-test-binaries/5aea35a179804fed1903807d9aeb0982e9758768fd8b8cc471cd3e1ffe17db7d",
+    "archive_kind": "raw"
+  },
+  {
+    "path": "/home/user/gpui-scene-support-target/release/build/gpui/a5da4683b6ec948c/out/question_futures-a5da4683b6ec948c",
+    "bytes": 11430504,
+    "sha256": "1d7803b64f8a1f633bcfe4ea5573022cb713e6e1ee19982fb899aaf4b8400f29",
+    "mode": 493,
+    "archive": "/home/user/gpui-preserved-test-binaries/1d7803b64f8a1f633bcfe4ea5573022cb713e6e1ee19982fb899aaf4b8400f29",
+    "archive_kind": "raw"
+  },
+  {
+    "path": "/home/user/gpui-scene-support-target/release/build/gpui/91cb70299684b5bb/out/empty",
+    "bytes": 25207608,
+    "sha256": "e2564a19ae25ca2ecd4f4bdf458dd616faec672604244dbe8cd770e6a47bfeef",
+    "mode": 493,
+    "archive": "/home/user/gpui-preserved-test-binaries/e2564a19ae25ca2ecd4f4bdf458dd616faec672604244dbe8cd770e6a47bfeef",
+    "archive_kind": "raw"
+  },
+  {
+    "path": "/home/user/gpui-scene-support-target/release/build/gpui/094d17439faf1e62/out/reactive_styles",
+    "bytes": 10137696,
+    "sha256": "3ea5a0b1523ad4274cbff62efae54aa70633ec108d4d2dfdc4c090348922eef9",
+    "mode": 493,
+    "archive": "/home/user/gpui-preserved-test-binaries/3ea5a0b1523ad4274cbff62efae54aa70633ec108d4d2dfdc4c090348922eef9",
+    "archive_kind": "raw"
+  },
+  {
+    "path": "/home/user/gpui-scene-support-target/release/build/gpui/7dd2b77bc38d0249/out/mapped_properties-7dd2b77bc38d0249",
+    "bytes": 11615008,
+    "sha256": "b70826bc96ee51c110f4ac0210584500173a5b30e583e7f6c4c31de439df12e7",
+    "mode": 493,
+    "archive": "/home/user/gpui-preserved-test-binaries/b70826bc96ee51c110f4ac0210584500173a5b30e583e7f6c4c31de439df12e7",
+    "archive_kind": "raw"
+  },
+  {
+    "path": "/home/user/gpui-scene-support-target/release/build/gpui/4b994ca0b288c549/out/retained_styles-4b994ca0b288c549",
+    "bytes": 10710816,
+    "sha256": "41f432e121d8e9d7f949673ca1e0b8428417c63757a754273e655b87e4bdbc96",
+    "mode": 493,
+    "archive": "/home/user/gpui-preserved-test-binaries/41f432e121d8e9d7f949673ca1e0b8428417c63757a754273e655b87e4bdbc96",
+    "archive_kind": "raw"
+  },
+  {
+    "path": "/home/user/gpui-scene-support-target/release/build/gpui/84282494aae85cac/out/style_ports-84282494aae85cac",
+    "bytes": 13213144,
+    "sha256": "c90d72e33f698bf31bc61b1ed9943e5ac96f0bcd0163d94d1eef99b36f9799d2",
+    "mode": 493,
+    "archive": "/home/user/gpui-preserved-test-binaries/c90d72e33f698bf31bc61b1ed9943e5ac96f0bcd0163d94d1eef99b36f9799d2",
+    "archive_kind": "raw"
+  },
+  {
+    "path": "/home/user/gpui-scene-support-target/release/build/gpui/efaf685b291d3268/out/sheet_access_measure",
+    "bytes": 9744064,
+    "sha256": "c79fbd8f97f8aaaa11cc811a905c451d4d6ff63caae124d2b7ac9fca53ca9543",
+    "mode": 493,
+    "archive": "/home/user/gpui-preserved-test-binaries/c79fbd8f97f8aaaa11cc811a905c451d4d6ff63caae124d2b7ac9fca53ca9543",
+    "archive_kind": "raw"
+  },
+  {
+    "path": "/home/user/gpui-scene-support-target/release/build/gpui/4de949a74a3af0c8/out/state_update_cost",
+    "bytes": 9926720,
+    "sha256": "7bac6a137e407cbc6a2c2af504c6ccf42a6516effc3190aeef0b5bc0178f61f1",
+    "mode": 493,
+    "archive": "/home/user/gpui-preserved-test-binaries/7bac6a137e407cbc6a2c2af504c6ccf42a6516effc3190aeef0b5bc0178f61f1",
+    "archive_kind": "raw"
+  },
+  {
+    "path": "/home/user/gpui-scene-support-target/release/build/gpui/ebacc24cbd443849/out/text_geometry-ebacc24cbd443849",
+    "bytes": 10643608,
+    "sha256": "97aac4af51bdd551708a76237596a6c7abbd219f93a435f1534aff13f40d778a",
+    "mode": 493,
+    "archive": "/home/user/gpui-preserved-test-binaries/97aac4af51bdd551708a76237596a6c7abbd219f93a435f1534aff13f40d778a",
+    "archive_kind": "raw"
+  },
+  {
+    "path": "/home/user/gpui-scene-support-target/release/build/gpui/0a19bea4c7e03934/out/sparse_text-0a19bea4c7e03934",
+    "bytes": 10704184,
+    "sha256": "7ad0b6b3a79140415c9b9638e74daacce64c856453e5b992a2e758cd407a8502",
+    "mode": 493,
+    "archive": "/home/user/gpui-preserved-test-binaries/7ad0b6b3a79140415c9b9638e74daacce64c856453e5b992a2e758cd407a8502",
+    "archive_kind": "raw"
+  },
+  {
+    "path": "/home/user/gpui-scene-support-target/release/build/gpui/00e2ebb65ffdd56a/out/intrinsic_text-00e2ebb65ffdd56a",
+    "bytes": 10536608,
+    "sha256": "3c999d9fff8c23458a46854dd87df2c2ce52c71a6b31f00fbc08b78b6b42aebd",
+    "mode": 493,
+    "archive": "/home/user/gpui-preserved-test-binaries/3c999d9fff8c23458a46854dd87df2c2ce52c71a6b31f00fbc08b78b6b42aebd",
+    "archive_kind": "raw"
+  },
+  {
+    "path": "/home/user/gpui-scene-support-target/release/build/gpui/fc88cf01631561ba/out/handler_storage-fc88cf01631561ba",
+    "bytes": 12227104,
+    "sha256": "1e455a7d95ba103a663033502dbb331ce1b88e5dc897ac3a06216fe45a47c327",
+    "mode": 493,
+    "archive": "/home/user/gpui-preserved-test-binaries/1e455a7d95ba103a663033502dbb331ce1b88e5dc897ac3a06216fe45a47c327",
+    "archive_kind": "raw"
+  },
+  {
+    "path": "/home/user/gpui-scene-support-target/release/build/gpui/b58c2fdffd75fa2b/out/immutable_text_measure",
+    "bytes": 9978112,
+    "sha256": "5f8d1888ed03121373cf8aadc6c77b3b2753e7a14a853b434c1eb05d8f481727",
+    "mode": 493,
+    "archive": "/home/user/gpui-preserved-test-binaries/5f8d1888ed03121373cf8aadc6c77b3b2753e7a14a853b434c1eb05d8f481727",
+    "archive_kind": "raw"
+  },
+  {
+    "path": "/home/user/gpui-scene-support-target/release/build/gpui/4c6f5066a2f59e2c/out/sibling_reconciliation_cost-4c6f5066a2f59e2c",
+    "bytes": 10344216,
+    "sha256": "096a6daeb25af33fa0eb7a13f31da5fbdb642e0745812a9f181aedef1008806f",
+    "mode": 493,
+    "archive": "/home/user/gpui-preserved-test-binaries/096a6daeb25af33fa0eb7a13f31da5fbdb642e0745812a9f181aedef1008806f",
+    "archive_kind": "raw"
+  },
+  {
+    "path": "/home/user/gpui-scene-support-target/release/build/gpui/1e2d2117f6eebdce/out/list_source-1e2d2117f6eebdce",
+    "bytes": 11806560,
+    "sha256": "13a606d93969e4388b0e652b027b96c0ef30992066b519ae92e4ab9926a15b37",
+    "mode": 493,
+    "archive": "/home/user/gpui-preserved-test-binaries/13a606d93969e4388b0e652b027b96c0ef30992066b519ae92e4ab9926a15b37",
+    "archive_kind": "raw"
+  },
+  {
+    "path": "/home/user/gpui-scene-support-target/release/build/gpui/f163ab94d5c07933/out/projected_sources-f163ab94d5c07933",
+    "bytes": 11347488,
+    "sha256": "fc94098e2262f5bef34d5f77d18d7185181999f4c0076a5daecb1015306f4d32",
+    "mode": 493,
+    "archive": "/home/user/gpui-preserved-test-binaries/fc94098e2262f5bef34d5f77d18d7185181999f4c0076a5daecb1015306f4d32",
+    "archive_kind": "raw"
+  },
+  {
+    "path": "/home/user/gpui-scene-support-target/release/build/gpui/4a876268c9230fe9/out/property_outline_allocations-4a876268c9230fe9",
+    "bytes": 11769080,
+    "sha256": "1086819babd13a9cda23b524da3d8c08e553d5d9936621c361caaf758933b2a2",
+    "mode": 493,
+    "archive": "/home/user/gpui-preserved-test-binaries/1086819babd13a9cda23b524da3d8c08e553d5d9936621c361caaf758933b2a2",
+    "archive_kind": "raw"
+  },
+  {
+    "path": "/home/user/gpui-scene-support-target/release/build/gpui/28ec0596afef4533/out/remote_delivery_measure",
+    "bytes": 11251368,
+    "sha256": "89a57eab739f6ec3e911810562e228e27bd4555e5c5e85e3fb7f0c3bd223c0d8",
+    "mode": 493,
+    "archive": "/home/user/gpui-preserved-test-binaries/89a57eab739f6ec3e911810562e228e27bd4555e5c5e85e3fb7f0c3bd223c0d8",
+    "archive_kind": "raw"
+  },
+  {
+    "path": "/home/user/gpui-scene-support-target/release/build/gpui/3c9e032b5bbb859f/out/zgx_native_lab",
+    "bytes": 26396144,
+    "sha256": "0957fe65b13d500a8d045182f5ba2c8635c1ecf89e721d99dad60c3b2ad45172",
+    "mode": 493,
+    "archive": "/home/user/gpui-preserved-test-binaries/0957fe65b13d500a8d045182f5ba2c8635c1ecf89e721d99dad60c3b2ad45172",
+    "archive_kind": "raw"
+  },
+  {
+    "path": "/home/user/gpui-scene-support-target/release/build/gpui/5cadf958b488b487/out/semantic_metadata-5cadf958b488b487",
+    "bytes": 13706736,
+    "sha256": "f10dd03f5484a17621ef370bcdb9d4e08e3932162aef061cbc1af7ec68561dae",
+    "mode": 493,
+    "archive": "/home/user/gpui-preserved-test-binaries/f10dd03f5484a17621ef370bcdb9d4e08e3932162aef061cbc1af7ec68561dae",
+    "archive_kind": "raw"
+  },
+  {
+    "path": "/home/user/gpui-scene-support-target/release/build/gpui/50651dbf96a5a1f6/out/text_cache-50651dbf96a5a1f6",
+    "bytes": 10796384,
+    "sha256": "18703d6902d2226891184418e81863b073a950799f4f3465189d23e60634114c",
+    "mode": 493,
+    "archive": "/home/user/gpui-preserved-test-binaries/18703d6902d2226891184418e81863b073a950799f4f3465189d23e60634114c",
+    "archive_kind": "raw"
+  },
+  {
+    "path": "/home/user/gpui-scene-support-target/release/build/gpui/eb27aad74a158d03/out/source_inbox_reader_gate-eb27aad74a158d03",
+    "bytes": 10496168,
+    "sha256": "3c807e756930502c42fce6fa3992fccce6cd06c746009cec777310f6bb257be0",
+    "mode": 493,
+    "archive": "/home/user/gpui-preserved-test-binaries/3c807e756930502c42fce6fa3992fccce6cd06c746009cec777310f6bb257be0",
+    "archive_kind": "raw"
+  },
+  {
+    "path": "/home/user/gpui-scene-support-target/release/build/gpui/9c5e35e80e6957c0/out/retained_list",
+    "bytes": 9942496,
+    "sha256": "33126f35df093552b311d094359611e51e4746cab02c37e1311cc678d2364ebb",
+    "mode": 493,
+    "archive": "/home/user/gpui-preserved-test-binaries/33126f35df093552b311d094359611e51e4746cab02c37e1311cc678d2364ebb",
+    "archive_kind": "raw"
+  },
+  {
+    "path": "/home/user/gpui-scene-support-target/release/build/gpui/5317cf4813bea987/out/question_cost-5317cf4813bea987",
+    "bytes": 10675088,
+    "sha256": "eb659c7558e12082246029f0b50a5034cfe21d77f5fd23bca1c66a5dd03297eb",
+    "mode": 493,
+    "archive": "/home/user/gpui-preserved-test-binaries/eb659c7558e12082246029f0b50a5034cfe21d77f5fd23bca1c66a5dd03297eb",
+    "archive_kind": "raw"
+  },
+  {
+    "path": "/home/user/gpui-scene-support-target/release/build/gpui/1123f8072dfd6d8b/out/first_frame",
+    "bytes": 10080200,
+    "sha256": "fdf5cbfc068fa361c9e86e391ad43f65b7831bb91eeb19c87b75fe1e21cf6885",
+    "mode": 493,
+    "archive": "/home/user/gpui-preserved-test-binaries/fdf5cbfc068fa361c9e86e391ad43f65b7831bb91eeb19c87b75fe1e21cf6885",
+    "archive_kind": "raw"
+  },
+  {
+    "path": "/home/user/gpui-scene-support-target/release/build/gpui/c5442202f6108a32/out/gradient_backgrounds",
+    "bytes": 9870320,
+    "sha256": "d8cae0ae569d9b8ea6a68b072c6cbb17fdd4ffe67cc187ffe5ec181f6a1e4701",
+    "mode": 493,
+    "archive": "/home/user/gpui-preserved-test-binaries/d8cae0ae569d9b8ea6a68b072c6cbb17fdd4ffe67cc187ffe5ec181f6a1e4701",
+    "archive_kind": "raw"
+  },
+  {
+    "path": "/home/user/gpui-scene-support-target/release/build/gpui/35da27f71a9f6858/out/lists-35da27f71a9f6858",
+    "bytes": 14998736,
+    "sha256": "9b847e1c82714984a1530027faf7c1649f00731eff40bae2af18fe373a6fe90f",
+    "mode": 493,
+    "archive": "/home/user/gpui-preserved-test-binaries/9b847e1c82714984a1530027faf7c1649f00731eff40bae2af18fe373a6fe90f",
+    "archive_kind": "raw"
+  },
+  {
+    "path": "/home/user/gpui-scene-support-target/release/build/gpui/781df80dd9b88197/out/paint_slot_rebind-781df80dd9b88197",
+    "bytes": 11772408,
+    "sha256": "270d9e8816469ba304557214983484bc94ddfbecbfd2d35831e6f42abff9aaf0",
+    "mode": 493,
+    "archive": "/home/user/gpui-preserved-test-binaries/270d9e8816469ba304557214983484bc94ddfbecbfd2d35831e6f42abff9aaf0",
+    "archive_kind": "raw"
+  },
+  {
+    "path": "/home/user/gpui-scene-support-target/release/build/gpui/b01a19ea112bf043/out/source_values-b01a19ea112bf043",
+    "bytes": 10714176,
+    "sha256": "beb01795cd69e29c29d368f4a764587c0a621d74aee0e5432456cbdd5369f804",
+    "mode": 493,
+    "archive": "/home/user/gpui-preserved-test-binaries/beb01795cd69e29c29d368f4a764587c0a621d74aee0e5432456cbdd5369f804",
+    "archive_kind": "raw"
+  },
+  {
+    "path": "/home/user/gpui-scene-support-target/release/build/gpui/27a2a348ac1c24bb/out/property_selection-27a2a348ac1c24bb",
+    "bytes": 11590544,
+    "sha256": "b05c1ab161a006c8635021fcc74332211870ad477eb5815d9b6a6d4cb663ad66",
+    "mode": 493,
+    "archive": "/home/user/gpui-preserved-test-binaries/b05c1ab161a006c8635021fcc74332211870ad477eb5815d9b6a6d4cb663ad66",
+    "archive_kind": "raw"
+  },
+  {
+    "path": "/home/user/gpui-scene-support-target/release/build/gpui/90653f31efc3e71e/out/todo_recording_cost",
+    "bytes": 11584544,
+    "sha256": "90a9e1115cdd3bf40b5dc6be9b069737cf9c864749c6ab863d0733fb30da28e3",
+    "mode": 493,
+    "archive": "/home/user/gpui-preserved-test-binaries/90a9e1115cdd3bf40b5dc6be9b069737cf9c864749c6ab863d0733fb30da28e3",
+    "archive_kind": "raw"
+  },
+  {
+    "path": "/home/user/gpui-scene-support-target/release/build/gpui/b6cf5aae9ab11d1a/out/clipping-b6cf5aae9ab11d1a",
+    "bytes": 12774816,
+    "sha256": "7a7e8c82353383d29865c7c7add16d8a741be94e43b61f35ddc789700659eea3",
+    "mode": 493,
+    "archive": "/home/user/gpui-preserved-test-binaries/7a7e8c82353383d29865c7c7add16d8a741be94e43b61f35ddc789700659eea3",
+    "archive_kind": "raw"
+  },
+  {
+    "path": "/home/user/gpui-scene-support-target/release/build/gpui/abf4557d4519714b/out/scroll-abf4557d4519714b",
+    "bytes": 13397752,
+    "sha256": "27090ce4307d5233d5940e0bc22cd60c98ba908a88ed48a19d5c6d9dbc8d706e",
+    "mode": 493,
+    "archive": "/home/user/gpui-preserved-test-binaries/27090ce4307d5233d5940e0bc22cd60c98ba908a88ed48a19d5c6d9dbc8d706e",
+    "archive_kind": "raw"
+  },
+  {
+    "path": "/home/user/gpui-scene-support-target/release/build/gpui/9da783d82655d556/out/identity_recovery-9da783d82655d556",
+    "bytes": 11762984,
+    "sha256": "3bb217ee2593cea94c67072f23b7d77cebfe6706e82742c0cdf075d3cb3adb3c",
+    "mode": 493,
+    "archive": "/home/user/gpui-preserved-test-binaries/3bb217ee2593cea94c67072f23b7d77cebfe6706e82742c0cdf075d3cb3adb3c",
+    "archive_kind": "raw"
+  },
+  {
+    "path": "/home/user/gpui-scene-support-target/release/build/gpui/4f905e1a8d9bbf7d/out/sibling_reconciliation_cost-4f905e1a8d9bbf7d",
+    "bytes": 11616376,
+    "sha256": "5167fa6dbf7d9ce6fcc9f637f7e6472c207cb4540abbe1eef15c9e4b6ab97f0a",
+    "mode": 493,
+    "archive": "/home/user/gpui-preserved-test-binaries/5167fa6dbf7d9ce6fcc9f637f7e6472c207cb4540abbe1eef15c9e4b6ab97f0a",
+    "archive_kind": "raw"
+  },
+  {
+    "path": "/home/user/gpui-scene-support-target/release/build/gpui/b361f1a195bf26b6/out/workbench",
+    "bytes": 25259840,
+    "sha256": "60bc5e7c7e9d20cd9a6353385264571428a17148345b19a97daccf42b08f4dc8",
+    "mode": 493,
+    "archive": "/home/user/gpui-preserved-test-binaries/60bc5e7c7e9d20cd9a6353385264571428a17148345b19a97daccf42b08f4dc8",
+    "archive_kind": "raw"
+  },
+  {
+    "path": "/home/user/gpui-scene-support-target/release/build/gpui/9071ccbe7c556bcd/out/paint_slots-9071ccbe7c556bcd",
+    "bytes": 10954592,
+    "sha256": "540c1a13a874715a47f8ac190c4bd6c7b50fb4a354e3343c42611e96dda820c2",
+    "mode": 493,
+    "archive": "/home/user/gpui-preserved-test-binaries/540c1a13a874715a47f8ac190c4bd6c7b50fb4a354e3343c42611e96dda820c2",
+    "archive_kind": "raw"
+  },
+  {
+    "path": "/home/user/gpui-scene-support-target/release/build/gpui/bdbb1658fa2a0355/out/questions-bdbb1658fa2a0355",
+    "bytes": 12485472,
+    "sha256": "ff7c7170ce10a3359b45bbd0175e53f71c7278541e0ab9150d3eca07d27d4c3a",
+    "mode": 493,
+    "archive": "/home/user/gpui-preserved-test-binaries/ff7c7170ce10a3359b45bbd0175e53f71c7278541e0ab9150d3eca07d27d4c3a",
+    "archive_kind": "raw"
+  },
+  {
+    "path": "/home/user/gpui-scene-support-target/release/build/gpui/6899c20dfded3251/out/unit_action_cost-6899c20dfded3251",
+    "bytes": 11799128,
+    "sha256": "6933367adb7d47beccdecf23de28440c9027fa4f4332725d0e94edd563028901",
+    "mode": 493,
+    "archive": "/home/user/gpui-preserved-test-binaries/6933367adb7d47beccdecf23de28440c9027fa4f4332725d0e94edd563028901",
+    "archive_kind": "raw"
+  },
+  {
+    "path": "/home/user/gpui-scene-support-target/release/build/gpui/d08da48bea53ec16/out/question_futures-d08da48bea53ec16",
+    "bytes": 12775024,
+    "sha256": "ae5356221319d9839526240e73447d61acf9d50396de8d7e8768e1c48c0d4dc3",
+    "mode": 493,
+    "archive": "/home/user/gpui-preserved-test-binaries/ae5356221319d9839526240e73447d61acf9d50396de8d7e8768e1c48c0d4dc3",
+    "archive_kind": "raw"
+  },
+  {
+    "path": "/home/user/gpui-scene-support-target/release/build/gpui/1d2880ed6a310b92/out/pointer-1d2880ed6a310b92",
+    "bytes": 11073816,
+    "sha256": "f2e38efb4b3db1c2dc9d9351981acbaebe421c87c39bd41fe49858f41340ff70",
+    "mode": 493,
+    "archive": "/home/user/gpui-preserved-test-binaries/f2e38efb4b3db1c2dc9d9351981acbaebe421c87c39bd41fe49858f41340ff70",
+    "archive_kind": "raw"
+  },
+  {
+    "path": "/home/user/gpui-scene-support-target/release/build/gpui/c522b5456588469a/out/remote-c522b5456588469a",
+    "bytes": 12747672,
+    "sha256": "9b2d840343c678ca811ca5a65cc47c19e14c916c94b1fd385198eb6451e218f2",
+    "mode": 493,
+    "archive": "/home/user/gpui-preserved-test-binaries/9b2d840343c678ca811ca5a65cc47c19e14c916c94b1fd385198eb6451e218f2",
+    "archive_kind": "raw"
+  },
+  {
+    "path": "/home/user/gpui-scene-support-target/release/build/gpui/b679951ce70ea73d/out/rounded-b679951ce70ea73d",
+    "bytes": 12737624,
+    "sha256": "beaea676ed2a6dd08d0d0ebf586485e1ed633473177fedcf43c9f268cddcb15a",
+    "mode": 493,
+    "archive": "/home/user/gpui-preserved-test-binaries/beaea676ed2a6dd08d0d0ebf586485e1ed633473177fedcf43c9f268cddcb15a",
+    "archive_kind": "raw"
+  },
+  {
+    "path": "/home/user/gpui-scene-support-target/release/build/gpui/2f1683949d1a10eb/out/property_change_union-2f1683949d1a10eb",
+    "bytes": 12246288,
+    "sha256": "c5d96e524772cbe8e7f8793c7f306f3ef660d01ca65f02f5a78355c64a38fce2",
+    "mode": 493,
+    "archive": "/home/user/gpui-preserved-test-binaries/c5d96e524772cbe8e7f8793c7f306f3ef660d01ca65f02f5a78355c64a38fce2",
+    "archive_kind": "raw"
+  },
+  {
+    "path": "/home/user/gpui-scene-support-target/release/build/gpui/b4e45d0f2cdbd700/out/question_storage-b4e45d0f2cdbd700",
+    "bytes": 11059376,
+    "sha256": "a54b9f7156e7a4aade3b50f24caac3550ff1364f960f4f977940c3c2be43dc91",
+    "mode": 493,
+    "archive": "/home/user/gpui-preserved-test-binaries/a54b9f7156e7a4aade3b50f24caac3550ff1364f960f4f977940c3c2be43dc91",
+    "archive_kind": "raw"
+  },
+  {
+    "path": "/home/user/gpui-scene-support-target/release/build/gpui/42d089f4500c8f7b/out/field_identity-42d089f4500c8f7b",
+    "bytes": 10401752,
+    "sha256": "111d47c1dd0f0a6a49034e41d34f33e2de7c21a8063e1d0e26ac21d6a9d6b802",
+    "mode": 493,
+    "archive": "/home/user/gpui-preserved-test-binaries/111d47c1dd0f0a6a49034e41d34f33e2de7c21a8063e1d0e26ac21d6a9d6b802",
+    "archive_kind": "raw"
+  },
+  {
+    "path": "/home/user/gpui-scene-support-target/release/build/gpui/08162f31ce83cde7/out/property_state_shell-08162f31ce83cde7",
+    "bytes": 11728152,
+    "sha256": "dc73f78f89342693b8b72031175ccfcda0a86805b49ad0567b9a8b1516485121",
+    "mode": 493,
+    "archive": "/home/user/gpui-preserved-test-binaries/dc73f78f89342693b8b72031175ccfcda0a86805b49ad0567b9a8b1516485121",
+    "archive_kind": "raw"
+  },
+  {
+    "path": "/home/user/gpui-scene-support-target/release/build/gpui/e0c8b8dd3837edc3/out/gpui-e0c8b8dd3837edc3",
+    "bytes": 42328080,
+    "sha256": "63ea75af8ad9c226417f6732a9564c9e4f30cf841909e95522923e11df877da0",
+    "mode": 493,
+    "archive": "/home/user/gpui-preserved-test-binaries/63ea75af8ad9c226417f6732a9564c9e4f30cf841909e95522923e11df877da0",
+    "archive_kind": "raw"
+  },
+  {
+    "path": "/home/user/gpui-scene-support-target/release/build/gpui/9e2fa26b6c0cd5dd/out/color_cost",
+    "bytes": 11049400,
+    "sha256": "90bed8fdd60eec31e18dcce64ffd16db3e38417c4b85566bbea3c006a62a5432",
+    "mode": 493,
+    "archive": "/home/user/gpui-preserved-test-binaries/90bed8fdd60eec31e18dcce64ffd16db3e38417c4b85566bbea3c006a62a5432",
+    "archive_kind": "raw"
+  },
+  {
+    "path": "/home/user/gpui-scene-support-target/release/build/gpui/cf3131d0887d02ed/out/pointer_focus-cf3131d0887d02ed",
+    "bytes": 11869712,
+    "sha256": "e6549723c1725eb67daa4426d5e25913cadd8f9a61a74b329f9623d45c84f483",
+    "mode": 493,
+    "archive": "/home/user/gpui-preserved-test-binaries/e6549723c1725eb67daa4426d5e25913cadd8f9a61a74b329f9623d45c84f483",
+    "archive_kind": "raw"
+  },
+  {
+    "path": "/home/user/gpui-scene-support-target/release/build/gpui/8590f5709781423c/out/color_packing-8590f5709781423c",
+    "bytes": 10548440,
+    "sha256": "b4f484cc32689da3f6158f64fbfd73fc3e27b87c9744cdeac4a91954521d4ad6",
+    "mode": 493,
+    "archive": "/home/user/gpui-preserved-test-binaries/b4f484cc32689da3f6158f64fbfd73fc3e27b87c9744cdeac4a91954521d4ad6",
+    "archive_kind": "raw"
+  },
+  {
+    "path": "/home/user/gpui-scene-support-target/release/build/gpui/294bb55adebf8642/out/checkbox-294bb55adebf8642",
+    "bytes": 12689000,
+    "sha256": "ce99958ebc684a794ebe1a8e3a574105cc1079275099d07985d6f90e1a202cf5",
+    "mode": 493,
+    "archive": "/home/user/gpui-preserved-test-binaries/ce99958ebc684a794ebe1a8e3a574105cc1079275099d07985d6f90e1a202cf5",
+    "archive_kind": "raw"
+  },
+  {
+    "path": "/home/user/gpui-scene-support-target/release/build/gpui/52a88496b452f225/out/library",
+    "bytes": 25857792,
+    "sha256": "012f9367b19912d27b9689d32f402bde8fcaf3fa896ad133c96e08ed062e9e18",
+    "mode": 493,
+    "archive": "/home/user/gpui-preserved-test-binaries/012f9367b19912d27b9689d32f402bde8fcaf3fa896ad133c96e08ed062e9e18",
+    "archive_kind": "raw"
+  },
+  {
+    "path": "/home/user/gpui-scene-support-target/release/build/gpui/bd860d0800f686ae/out/flex-bd860d0800f686ae",
+    "bytes": 13026216,
+    "sha256": "b011ac69dce6537fe39bc094eee8fc4eeb8e5a9d8e67849e9cc63cae151ed6be",
+    "mode": 493,
+    "archive": "/home/user/gpui-preserved-test-binaries/b011ac69dce6537fe39bc094eee8fc4eeb8e5a9d8e67849e9cc63cae151ed6be",
+    "archive_kind": "raw"
+  },
+  {
+    "path": "/home/user/gpui-scene-support-target/release/build/gpui/83f70a8c59d409a0/out/field_identity-83f70a8c59d409a0",
+    "bytes": 11677616,
+    "sha256": "9e76c56317bbdae3fc647998bc2316e248ec0cbcd3aa398c32c8ab61dcfbb66e",
+    "mode": 493,
+    "archive": "/home/user/gpui-preserved-test-binaries/9e76c56317bbdae3fc647998bc2316e248ec0cbcd3aa398c32c8ab61dcfbb66e",
+    "archive_kind": "raw"
+  },
+  {
+    "path": "/home/user/gpui-scene-support-target/release/build/gpui/b829c525f1a2c81d/out/retained_styles-b829c525f1a2c81d",
+    "bytes": 11989784,
+    "sha256": "6139e2627878c3a91e1de4affe435c992a92c6a41c5cda5f4e0bfff0f61856be",
+    "mode": 493,
+    "archive": "/home/user/gpui-preserved-test-binaries/6139e2627878c3a91e1de4affe435c992a92c6a41c5cda5f4e0bfff0f61856be",
+    "archive_kind": "raw"
+  },
+  {
+    "path": "/home/user/gpui-scene-support-target/release/build/gpui/bda25668dba5654e/out/remote-bda25668dba5654e",
+    "bytes": 11395760,
+    "sha256": "00a9faf823694553624f05afe79e686bb32b852767e8fbc6abd42802cebd5adb",
+    "mode": 493,
+    "archive": "/home/user/gpui-preserved-test-binaries/00a9faf823694553624f05afe79e686bb32b852767e8fbc6abd42802cebd5adb",
+    "archive_kind": "raw"
+  },
+  {
+    "path": "/home/user/gpui-scene-support-target/release/build/gpui/e35b0bb69b32b90c/out/contained_owner_spike",
+    "bytes": 10041208,
+    "sha256": "12664b9a6007318a998e258d9dd62ac8c9f462f5204963da7d4b8714b7807d05",
+    "mode": 493,
+    "archive": "/home/user/gpui-preserved-test-binaries/12664b9a6007318a998e258d9dd62ac8c9f462f5204963da7d4b8714b7807d05",
+    "archive_kind": "raw"
+  },
+  {
+    "path": "/home/user/gpui-scene-support-target/release/build/gpui/c0d46962e72e94c3/out/source_values-c0d46962e72e94c3",
+    "bytes": 12046816,
+    "sha256": "4deb5eafb5ee5aa421a674efc3858d1c583c395c3d5840009c395be365ebf00d",
+    "mode": 493,
+    "archive": "/home/user/gpui-preserved-test-binaries/4deb5eafb5ee5aa421a674efc3858d1c583c395c3d5840009c395be365ebf00d",
+    "archive_kind": "raw"
+  },
+  {
+    "path": "/home/user/gpui-scene-support-target/release/build/gpui/fa69ccf170b01ebc/out/state_update_allocations",
+    "bytes": 11148168,
+    "sha256": "e4b3befc3edf77a2842a06d57bb2ec51a3e352bc8c4e4d84363a13658ee3e14c",
+    "mode": 493,
+    "archive": "/home/user/gpui-preserved-test-binaries/e4b3befc3edf77a2842a06d57bb2ec51a3e352bc8c4e4d84363a13658ee3e14c",
+    "archive_kind": "raw"
+  },
+  {
+    "path": "/home/user/gpui-scene-support-target/release/build/gpui/fb7a7ad5360a0799/out/frontier-fb7a7ad5360a0799",
+    "bytes": 11077720,
+    "sha256": "d6e60540e992ffef8e5a5de644f228eab0221f442158d9325901a8992812c4ff",
+    "mode": 493,
+    "archive": "/home/user/gpui-preserved-test-binaries/d6e60540e992ffef8e5a5de644f228eab0221f442158d9325901a8992812c4ff",
+    "archive_kind": "raw"
+  },
+  {
+    "path": "/home/user/gpui-scene-support-target/release/build/gpui/99fa3aed56977a64/out/question_input_cost-99fa3aed56977a64",
+    "bytes": 10425136,
+    "sha256": "6ecedf317c5a81ac88aa45a52ebd8b03c3acc862467e32d8c63b6142a80fe900",
+    "mode": 493,
+    "archive": "/home/user/gpui-preserved-test-binaries/6ecedf317c5a81ac88aa45a52ebd8b03c3acc862467e32d8c63b6142a80fe900",
+    "archive_kind": "raw"
+  },
+  {
+    "path": "/home/user/gpui-scene-support-target/release/build/gpui/1021025fbd317f73/out/color_packing-1021025fbd317f73",
+    "bytes": 11823808,
+    "sha256": "a45a1a4412a70f992fb56b11b1532d4aa95d730cb60e3cc2c75fa0de3d89e93e",
+    "mode": 493,
+    "archive": "/home/user/gpui-preserved-test-binaries/a45a1a4412a70f992fb56b11b1532d4aa95d730cb60e3cc2c75fa0de3d89e93e",
+    "archive_kind": "raw"
+  },
+  {
+    "path": "/home/user/gpui-scene-support-target/release/build/gpui/5bc09cb6d9b84a06/out/intrinsic_text-5bc09cb6d9b84a06",
+    "bytes": 11815624,
+    "sha256": "98ade8edd8ae6981635d57368f744102894c84130ca83bb845ba2be412cb025f",
+    "mode": 493,
+    "archive": "/home/user/gpui-preserved-test-binaries/98ade8edd8ae6981635d57368f744102894c84130ca83bb845ba2be412cb025f",
+    "archive_kind": "raw"
+  },
+  {
+    "path": "/home/user/gpui-scene-support-target/release/build/gpui/7754c2ef4ddb7ffe/out/question_inputs-7754c2ef4ddb7ffe",
+    "bytes": 10822088,
+    "sha256": "cc38c1bd5d26e0a2537230c84d92a577085ed770fed3604b95b77a841ded2684",
+    "mode": 493,
+    "archive": "/home/user/gpui-preserved-test-binaries/cc38c1bd5d26e0a2537230c84d92a577085ed770fed3604b95b77a841ded2684",
+    "archive_kind": "raw"
+  },
+  {
+    "path": "/home/user/gpui-scene-support-target/release/build/gpui/a4b7c3db3325f2ce/out/dpi-a4b7c3db3325f2ce",
+    "bytes": 10803568,
+    "sha256": "afd38bee394b5641980c32d6b3dd8c741aabd8cbbdd8d3e64866081ee4b10e69",
+    "mode": 493,
+    "archive": "/home/user/gpui-preserved-test-binaries/afd38bee394b5641980c32d6b3dd8c741aabd8cbbdd8d3e64866081ee4b10e69",
+    "archive_kind": "raw"
+  },
+  {
+    "path": "/home/user/gpui-scene-support-target/release/build/gpui/eef67738bdadee03/out/luna_bench",
+    "bytes": 25232400,
+    "sha256": "ef2a6b9b64f761e2d91064ffa8e3e2f9c2c75caf858ab2deb9d969cdedf19225",
+    "mode": 493,
+    "archive": "/home/user/gpui-preserved-test-binaries/ef2a6b9b64f761e2d91064ffa8e3e2f9c2c75caf858ab2deb9d969cdedf19225",
+    "archive_kind": "raw"
+  },
+  {
+    "path": "/home/user/gpui-scene-support-target/release/build/gpui/a1e0b719f6083c12/out/style_ports-a1e0b719f6083c12",
+    "bytes": 14567608,
+    "sha256": "9490830ee1740da9a2ec6a012d28c96d9e29861a2ef31989f7e90c5d3220d16a",
+    "mode": 493,
+    "archive": "/home/user/gpui-preserved-test-binaries/9490830ee1740da9a2ec6a012d28c96d9e29861a2ef31989f7e90c5d3220d16a",
+    "archive_kind": "raw"
+  },
+  {
+    "path": "/home/user/gpui-scene-support-target/release/build/gpui/7a5005b4be8fb41f/out/mapped_paint-7a5005b4be8fb41f",
+    "bytes": 11793288,
+    "sha256": "68184e34e635796f3063ae89b4229549b6c6d834c75386a2dc01cb778e9db94a",
+    "mode": 493,
+    "archive": "/home/user/gpui-preserved-test-binaries/68184e34e635796f3063ae89b4229549b6c6d834c75386a2dc01cb778e9db94a",
+    "archive_kind": "raw"
+  },
+  {
+    "path": "/home/user/gpui-scene-support-target/release/build/gpui/ac45737c8525d234/out/search_library-ac45737c8525d234",
+    "bytes": 12397264,
+    "sha256": "21549510b3af778bb7dc548432ab345acfeaba7c2da2be1a64e7814e9996c94a",
+    "mode": 493,
+    "archive": "/home/user/gpui-preserved-test-binaries/21549510b3af778bb7dc548432ab345acfeaba7c2da2be1a64e7814e9996c94a",
+    "archive_kind": "raw"
+  },
+  {
+    "path": "/home/user/gpui-scene-support-target/release/build/gpui/007344fa2ac73cf3/out/line_height-007344fa2ac73cf3",
+    "bytes": 10652264,
+    "sha256": "c2af08727629339a4448977cb6002cba18ecbff7dd06aee587aee92fe2e4c727",
+    "mode": 493,
+    "archive": "/home/user/gpui-preserved-test-binaries/c2af08727629339a4448977cb6002cba18ecbff7dd06aee587aee92fe2e4c727",
+    "archive_kind": "raw"
+  },
+  {
+    "path": "/home/user/gpui-scene-support-target/release/build/gpui/97abd88ec60c2195/out/scroll-97abd88ec60c2195",
+    "bytes": 14764576,
+    "sha256": "4040a7de1caefdb4bbbeed7b42ef30a98c0a8e4c8f31cf79dfc309047bdec6ec",
+    "mode": 493,
+    "archive": "/home/user/gpui-preserved-test-binaries/4040a7de1caefdb4bbbeed7b42ef30a98c0a8e4c8f31cf79dfc309047bdec6ec",
+    "archive_kind": "raw"
+  },
+  {
+    "path": "/home/user/gpui-scene-support-target/release/build/gpui/cd54427c35092445/out/state_update_allocations",
+    "bytes": 9870736,
+    "sha256": "a566b9d0ed7493f0f56e1780b2e2ea8b2a637efb87cb7d4d1dde44fbff488f45",
+    "mode": 493,
+    "archive": "/home/user/gpui-preserved-test-binaries/a566b9d0ed7493f0f56e1780b2e2ea8b2a637efb87cb7d4d1dde44fbff488f45",
+    "archive_kind": "raw"
+  },
+  {
+    "path": "/home/user/gpui-scene-support-target/release/build/gpui/d15f0715e8cf05a6/out/source_value_isolation-d15f0715e8cf05a6",
+    "bytes": 12308712,
+    "sha256": "8193ee519328ed336ff692cc886f9b1ffebf01eb6ce12e6e333a1acbfe3e915c",
+    "mode": 493,
+    "archive": "/home/user/gpui-preserved-test-binaries/8193ee519328ed336ff692cc886f9b1ffebf01eb6ce12e6e333a1acbfe3e915c",
+    "archive_kind": "raw"
+  },
+  {
+    "path": "/home/user/gpui-scene-support-target/release/build/gpui/3f62f61af5738340/out/ime-3f62f61af5738340",
+    "bytes": 11318488,
+    "sha256": "543e7bd559b45300f0bda90b69a42e7dec1bc28e23d81fdc659144fcf13ce3a7",
+    "mode": 493,
+    "archive": "/home/user/gpui-preserved-test-binaries/543e7bd559b45300f0bda90b69a42e7dec1bc28e23d81fdc659144fcf13ce3a7",
+    "archive_kind": "raw"
+  },
+  {
+    "path": "/home/user/gpui-scene-support-target/release/build/gpui/1f5a8d9295f96434/out/semantic_serialization-1f5a8d9295f96434",
+    "bytes": 11247472,
+    "sha256": "2a7c6611e7329801b1bef5595a48a8c2a3ec8c02d78b298ced81221cc4fd1751",
+    "mode": 493,
+    "archive": "/home/user/gpui-preserved-test-binaries/2a7c6611e7329801b1bef5595a48a8c2a3ec8c02d78b298ced81221cc4fd1751",
+    "archive_kind": "raw"
+  },
+  {
+    "path": "/home/user/gpui-scene-support-target/release/build/gpui/35408f61549e6322/out/question_cost-35408f61549e6322",
+    "bytes": 11990400,
+    "sha256": "654d68e91f3327317c4c29581f3cbbd16db2c6fe954b30cef33578c686f9473b",
+    "mode": 493,
+    "archive": "/home/user/gpui-preserved-test-binaries/654d68e91f3327317c4c29581f3cbbd16db2c6fe954b30cef33578c686f9473b",
+    "archive_kind": "raw"
+  },
+  {
+    "path": "/home/user/gpui-scene-support-target/release/build/gpui/d1eb068bc7dfb01f/out/property_state_shell-d1eb068bc7dfb01f",
+    "bytes": 10453224,
+    "sha256": "3566e796516256d979ab937b6060c953bb51a81d502b1c6717d2bdb7a9057ed8",
+    "mode": 493,
+    "archive": "/home/user/gpui-preserved-test-binaries/3566e796516256d979ab937b6060c953bb51a81d502b1c6717d2bdb7a9057ed8",
+    "archive_kind": "raw"
+  },
+  {
+    "path": "/home/user/gpui-scene-support-target/release/build/gpui/f87a302d6033f89e/out/unicode_text_measure",
+    "bytes": 9917008,
+    "sha256": "f3e03de42eaf146efbcd39c1cce2610e318cc16cb1df4a997fd63ca95d40daa7",
+    "mode": 493,
+    "archive": "/home/user/gpui-preserved-test-binaries/f3e03de42eaf146efbcd39c1cce2610e318cc16cb1df4a997fd63ca95d40daa7",
+    "archive_kind": "raw"
+  },
+  {
+    "path": "/home/user/gpui-scene-support-target/release/build/gpui/0a5003cfb0914bde/out/reactive_styles",
+    "bytes": 25284928,
+    "sha256": "e4b2d06bf4ab6435447c7f07ecd048fe9f055e3004341ab54c9014ce4ef335ba",
+    "mode": 493,
+    "archive": "/home/user/gpui-preserved-test-binaries/e4b2d06bf4ab6435447c7f07ecd048fe9f055e3004341ab54c9014ce4ef335ba",
+    "archive_kind": "raw"
+  },
+  {
+    "path": "/home/user/gpui-scene-support-target/release/build/gpui/f9ace2238d99f16c/out/runtime-f9ace2238d99f16c",
+    "bytes": 14407472,
+    "sha256": "d810a8130b28fb2122e0afb234cee70eef24c5379112ca400904cd0955e085b1",
+    "mode": 493,
+    "archive": "/home/user/gpui-preserved-test-binaries/d810a8130b28fb2122e0afb234cee70eef24c5379112ca400904cd0955e085b1",
+    "archive_kind": "raw"
+  },
+  {
+    "path": "/home/user/gpui-scene-support-target/release/build/gpui/1842e4171f6ac085/out/property_change_union-1842e4171f6ac085",
+    "bytes": 10958456,
+    "sha256": "ab4069d7b19afba1f5662a8f0802c5b80e35e8711e49f2a481417f4cf4c121e8",
+    "mode": 493,
+    "archive": "/home/user/gpui-preserved-test-binaries/ab4069d7b19afba1f5662a8f0802c5b80e35e8711e49f2a481417f4cf4c121e8",
+    "archive_kind": "raw"
+  },
+  {
+    "path": "/home/user/gpui-scene-support-target/release/build/gpui/b09fc796078f36a8/out/counter",
+    "bytes": 10061440,
+    "sha256": "726b52ddc24f3e4bbcdc352095ad7ff7b7b69acad3c110538490066190d63322",
+    "mode": 493,
+    "archive": "/home/user/gpui-preserved-test-binaries/726b52ddc24f3e4bbcdc352095ad7ff7b7b69acad3c110538490066190d63322",
+    "archive_kind": "raw"
+  },
+  {
+    "path": "/home/user/gpui-scene-support-target/release/build/gpui/990d465b64b302ab/out/mapped_properties-990d465b64b302ab",
+    "bytes": 12962104,
+    "sha256": "2cd2d85c99123711ec4eca195437999a99051cbb4d999b2393a09c2e86ef57ab",
+    "mode": 493,
+    "archive": "/home/user/gpui-preserved-test-binaries/2cd2d85c99123711ec4eca195437999a99051cbb4d999b2393a09c2e86ef57ab",
+    "archive_kind": "raw"
+  },
+  {
+    "path": "/home/user/gpui-scene-support-target/release/build/gpui/8339d896fb9316bf/out/text_selection-8339d896fb9316bf",
+    "bytes": 12617360,
+    "sha256": "b7572e41759ec0a0bca1d82e46d90aa9b0b2fc5991172072b2f80e2dbad8db22",
+    "mode": 493,
+    "archive": "/home/user/gpui-preserved-test-binaries/b7572e41759ec0a0bca1d82e46d90aa9b0b2fc5991172072b2f80e2dbad8db22",
+    "archive_kind": "raw"
+  },
+  {
+    "path": "/home/user/gpui-scene-support-target/release/build/gpui/5262375a6eb42115/out/search_library-5262375a6eb42115",
+    "bytes": 11083680,
+    "sha256": "d911555a22e850f8dbda9319edbded729092bc2b5285c9916f723319d0e26eee",
+    "mode": 493,
+    "archive": "/home/user/gpui-preserved-test-binaries/d911555a22e850f8dbda9319edbded729092bc2b5285c9916f723319d0e26eee",
+    "archive_kind": "raw"
+  },
+  {
+    "path": "/home/user/gpui-scene-support-target/release/build/gpui/c38a34faf451a9e3/out/inbox_storage-c38a34faf451a9e3",
+    "bytes": 12167968,
+    "sha256": "2ce00f5ba329bb83d708190ac830bf0b5750a80459288d2bd3d83341043aada5",
+    "mode": 493,
+    "archive": "/home/user/gpui-preserved-test-binaries/2ce00f5ba329bb83d708190ac830bf0b5750a80459288d2bd3d83341043aada5",
+    "archive_kind": "raw"
+  },
+  {
+    "path": "/home/user/gpui-scene-support-target/release/build/gpui/ae4e0a797c6fd8e9/out/ime_cursor_cost",
+    "bytes": 11167720,
+    "sha256": "737b1148264db0fba0046574533fde1e10d47097d7bde9fee4fb959b65d84ef7",
+    "mode": 493,
+    "archive": "/home/user/gpui-preserved-test-binaries/737b1148264db0fba0046574533fde1e10d47097d7bde9fee4fb959b65d84ef7",
+    "archive_kind": "raw"
+  },
+  {
+    "path": "/home/user/gpui-scene-support-target/release/build/gpui/2293829421503d63/out/inbox_storage-2293829421503d63",
+    "bytes": 10830080,
+    "sha256": "de22395c8365bd800f9d403ca214d2ef9cbbe4c4670159678e708809457b72a8",
+    "mode": 493,
+    "archive": "/home/user/gpui-preserved-test-binaries/de22395c8365bd800f9d403ca214d2ef9cbbe4c4670159678e708809457b72a8",
+    "archive_kind": "raw"
+  },
+  {
+    "path": "/home/user/gpui-scene-support-target/release/build/gpui/c8994679d452e5f7/out/property_outline_allocations-c8994679d452e5f7",
+    "bytes": 10493480,
+    "sha256": "72b5e6314c9122861b277c70e5e84d75b28598960519e17e2e36ddca361f44c5",
+    "mode": 493,
+    "archive": "/home/user/gpui-preserved-test-binaries/72b5e6314c9122861b277c70e5e84d75b28598960519e17e2e36ddca361f44c5",
+    "archive_kind": "raw"
+  },
+  {
+    "path": "/home/user/gpui-scene-support-target/release/build/gpui/997b31099a54df36/out/color_cost",
+    "bytes": 9775552,
+    "sha256": "49ec88c71448f9d30dc851a502252457f7f975a4b825aee7353ea3f44297cd64",
+    "mode": 493,
+    "archive": "/home/user/gpui-preserved-test-binaries/49ec88c71448f9d30dc851a502252457f7f975a4b825aee7353ea3f44297cd64",
+    "archive_kind": "raw"
+  },
+  {
+    "path": "/home/user/gpui-scene-support-target/release/build/gpui/680ace63029476ca/out/list_source-680ace63029476ca",
+    "bytes": 13114040,
+    "sha256": "ada7bee68672edaeef255795b75de972a91ca17a4216f4edf4f6b43335f7ff2e",
+    "mode": 493,
+    "archive": "/home/user/gpui-preserved-test-binaries/ada7bee68672edaeef255795b75de972a91ca17a4216f4edf4f6b43335f7ff2e",
+    "archive_kind": "raw"
+  },
+  {
+    "path": "/home/user/gpui-scene-support-target/release/build/gpui/773a39663a7e26e4/out/paint_patch-773a39663a7e26e4",
+    "bytes": 12078624,
+    "sha256": "d4f63ace4ce9cc40b384c4d434bef523a5164b04d6675fe0ed676b378cc4d5b0",
+    "mode": 493,
+    "archive": "/home/user/gpui-preserved-test-binaries/d4f63ace4ce9cc40b384c4d434bef523a5164b04d6675fe0ed676b378cc4d5b0",
+    "archive_kind": "raw"
+  },
+  {
+    "path": "/home/user/gpui-scene-support-target/release/build/gpui/7430519933ffc7ad/out/routes-7430519933ffc7ad",
+    "bytes": 12204048,
+    "sha256": "8f3a1b69af144fc185b9e0b0bd110007c5f920eeb09140a8f9d813a66ce79271",
+    "mode": 493,
+    "archive": "/home/user/gpui-preserved-test-binaries/8f3a1b69af144fc185b9e0b0bd110007c5f920eeb09140a8f9d813a66ce79271",
+    "archive_kind": "raw"
+  },
+  {
+    "path": "/home/user/gpui-scene-support-target/release/build/gpui/b3306ec02d579123/out/question_inputs-b3306ec02d579123",
+    "bytes": 12141272,
+    "sha256": "7059b3e2b578392b8191b0f722244121f446d16f5d8a3c84e7f01de003d323b6",
+    "mode": 493,
+    "archive": "/home/user/gpui-preserved-test-binaries/7059b3e2b578392b8191b0f722244121f446d16f5d8a3c84e7f01de003d323b6",
+    "archive_kind": "raw"
+  },
+  {
+    "path": "/home/user/gpui-scene-support-target/release/build/gpui/dac8483f6351d3ce/out/paint_slots-dac8483f6351d3ce",
+    "bytes": 12243384,
+    "sha256": "534bb631917cbec09ed42970f0f279ef38745f85b4e428afb03831f827dbe664",
+    "mode": 493,
+    "archive": "/home/user/gpui-preserved-test-binaries/534bb631917cbec09ed42970f0f279ef38745f85b4e428afb03831f827dbe664",
+    "archive_kind": "raw"
+  },
+  {
+    "path": "/home/user/gpui-scene-support-target/release/build/gpui/795a4834b499c000/out/images-795a4834b499c000",
+    "bytes": 10938184,
+    "sha256": "dd3604ff65f121599028bd891808e30456180123f3afbb3ee5321fc906cf2b99",
+    "mode": 493,
+    "archive": "/home/user/gpui-preserved-test-binaries/dd3604ff65f121599028bd891808e30456180123f3afbb3ee5321fc906cf2b99",
+    "archive_kind": "raw"
+  },
+  {
+    "path": "/home/user/gpui-scene-support-target/release/build/gpui/167b6e90168c7611/out/todo_recording_cost",
+    "bytes": 10308680,
+    "sha256": "de97615822e275fff8c11f6493379c3aae903f25172b0cdae749b37d1865ad6a",
+    "mode": 493,
+    "archive": "/home/user/gpui-preserved-test-binaries/de97615822e275fff8c11f6493379c3aae903f25172b0cdae749b37d1865ad6a",
+    "archive_kind": "raw"
+  },
+  {
+    "path": "/home/user/gpui-scene-support-target/release/build/gpui/d0e307232fb7c8be/out/todo_comparison-d0e307232fb7c8be",
+    "bytes": 12219856,
+    "sha256": "3701ce3ac7c1d600904fff096b4d779da17af5b03bb00d9129648f92a42f660f",
+    "mode": 493,
+    "archive": "/home/user/gpui-preserved-test-binaries/3701ce3ac7c1d600904fff096b4d779da17af5b03bb00d9129648f92a42f660f",
+    "archive_kind": "raw"
+  },
+  {
+    "path": "/home/user/gpui-scene-support-target/release/build/gpui/f998b6d8936e5317/out/text_lane_measure",
+    "bytes": 9963216,
+    "sha256": "22b63866ff16107ede59a8b4e9b4359f3fc14e743617f8515c5eeb613aa71f85",
+    "mode": 493,
+    "archive": "/home/user/gpui-preserved-test-binaries/22b63866ff16107ede59a8b4e9b4359f3fc14e743617f8515c5eeb613aa71f85",
+    "archive_kind": "raw"
+  },
+  {
+    "path": "/home/user/gpui-scene-support-target/release/build/gpui/e7a777b6e981b6ca/out/frontier-e7a777b6e981b6ca",
+    "bytes": 12368216,
+    "sha256": "91b75f5089fc36c7f495d7c9ee29a63b6b1d8218ae56b71010fe91177714813a",
+    "mode": 493,
+    "archive": "/home/user/gpui-preserved-test-binaries/91b75f5089fc36c7f495d7c9ee29a63b6b1d8218ae56b71010fe91177714813a",
+    "archive_kind": "raw"
+  },
+  {
+    "path": "/home/user/gpui-scene-support-target/release/build/gpui/8f3d188aea895a6f/out/graphics",
+    "bytes": 25256080,
+    "sha256": "0e968bc9dfe5a70383089f9b2905aceb8c396dd497c104ef55721dc52d802eb5",
+    "mode": 493,
+    "archive": "/home/user/gpui-preserved-test-binaries/0e968bc9dfe5a70383089f9b2905aceb8c396dd497c104ef55721dc52d802eb5",
+    "archive_kind": "raw"
+  },
+  {
+    "path": "/home/user/gpui-scene-support-target/release/build/gpui/fa0b66ab8c1105a8/out/question_mailbox-fa0b66ab8c1105a8",
+    "bytes": 11851672,
+    "sha256": "282836005467772e148d60273660a92524387dab3b20ce6612d1799ea60cf9cf",
+    "mode": 493,
+    "archive": "/home/user/gpui-preserved-test-binaries/282836005467772e148d60273660a92524387dab3b20ce6612d1799ea60cf9cf",
+    "archive_kind": "raw"
+  },
+  {
+    "path": "/home/user/gpui-scene-support-target/release/build/gpui/77d7cc39b29df63d/out/property_actions-77d7cc39b29df63d",
+    "bytes": 12512040,
+    "sha256": "ba039d2ebc920c70538a65be44b16ac29bfeb094513b50c7e7068016bfa64e9d",
+    "mode": 493,
+    "archive": "/home/user/gpui-preserved-test-binaries/ba039d2ebc920c70538a65be44b16ac29bfeb094513b50c7e7068016bfa64e9d",
+    "archive_kind": "raw"
+  },
+  {
+    "path": "/home/user/gpui-scene-support-target/release/build/gpui/e58039c86bb27a3d/out/lists-e58039c86bb27a3d",
+    "bytes": 13629464,
+    "sha256": "5d585f63ff7341f4cefe41dd025d8d06fbcc550b159cce612f518f6b64826579",
+    "mode": 493,
+    "archive": "/home/user/gpui-preserved-test-binaries/5d585f63ff7341f4cefe41dd025d8d06fbcc550b159cce612f518f6b64826579",
+    "archive_kind": "raw"
+  },
+  {
+    "path": "/home/user/gpui-scene-support-target/release/build/gpui/ee57e14be5d6cb97/out/acceptance-ee57e14be5d6cb97",
+    "bytes": 11559664,
+    "sha256": "9d23a45193f6cebe1d915e6612bff86e2867e15acb2c5312db595b2a00f7b5bd",
+    "mode": 493,
+    "archive": "/home/user/gpui-preserved-test-binaries/9d23a45193f6cebe1d915e6612bff86e2867e15acb2c5312db595b2a00f7b5bd",
+    "archive_kind": "raw"
+  },
+  {
+    "path": "/home/user/gpui-scene-support-target/release/build/gpui/1b0151eadcf3311a/out/literal_dispatch-1b0151eadcf3311a",
+    "bytes": 10586992,
+    "sha256": "20c40de67bb6bb1968117d844a0c1cfe8b3256535014d538aa72747e48b267b7",
+    "mode": 493,
+    "archive": "/home/user/gpui-preserved-test-binaries/20c40de67bb6bb1968117d844a0c1cfe8b3256535014d538aa72747e48b267b7",
+    "archive_kind": "raw"
+  },
+  {
+    "path": "/home/user/gpui-scene-support-target/release/build/gpui/14c57fb3ab757005/out/gradient_backgrounds",
+    "bytes": 25300184,
+    "sha256": "a92f1bc81626bb70620caa84f4daf7afb7aa90b6452f4e4ec5b7e7c191e87db0",
+    "mode": 493,
+    "archive": "/home/user/gpui-preserved-test-binaries/a92f1bc81626bb70620caa84f4daf7afb7aa90b6452f4e4ec5b7e7c191e87db0",
+    "archive_kind": "raw"
+  },
+  {
+    "path": "/home/user/gpui-scene-support-target/release/build/gpui/91cd306ca0667996/out/library-91cd306ca0667996",
+    "bytes": 10811744,
+    "sha256": "f7d73505a332a2ccce82ea5422f3087a4fa51cc30437f514280f4d2015b0502b",
+    "mode": 493,
+    "archive": "/home/user/gpui-preserved-test-binaries/f7d73505a332a2ccce82ea5422f3087a4fa51cc30437f514280f4d2015b0502b",
+    "archive_kind": "raw"
+  },
+  {
+    "path": "/home/user/gpui-scene-support-target/release/build/gpui/7d48d6dd92859e55/out/application-7d48d6dd92859e55",
+    "bytes": 11040952,
+    "sha256": "2a20f14186e0504057d3a9c73a34a2f4f6dbba407ebf68195acbfbb10cb9ee6c",
+    "mode": 493,
+    "archive": "/home/user/gpui-preserved-test-binaries/2a20f14186e0504057d3a9c73a34a2f4f6dbba407ebf68195acbfbb10cb9ee6c",
+    "archive_kind": "raw"
+  },
+  {
+    "path": "/home/user/gpui-scene-support-target/release/build/gpui/6784f0c15fc2b051/out/components-6784f0c15fc2b051",
+    "bytes": 13209712,
+    "sha256": "dccc7c76889db5c1e6ce6b80b2efb4c1c01b00d4dd178f9ac9b3f59c233fe1d8",
+    "mode": 493,
+    "archive": "/home/user/gpui-preserved-test-binaries/dccc7c76889db5c1e6ce6b80b2efb4c1c01b00d4dd178f9ac9b3f59c233fe1d8",
+    "archive_kind": "raw"
+  },
+  {
+    "path": "/home/user/gpui-scene-support-target/release/build/gpui/2929cede69b83001/out/text_geometry-2929cede69b83001",
+    "bytes": 11921216,
+    "sha256": "8de6b8573c823a2ed83586ec58b93380797801384b948b011477fc3710dfdecf",
+    "mode": 493,
+    "archive": "/home/user/gpui-preserved-test-binaries/8de6b8573c823a2ed83586ec58b93380797801384b948b011477fc3710dfdecf",
+    "archive_kind": "raw"
+  },
+  {
+    "path": "/home/user/gpui-scene-support-target/release/build/gpui/8e2a6b49283c86f0/out/semantic_serialization-8e2a6b49283c86f0",
+    "bytes": 12535496,
+    "sha256": "e9616ff1805367a8388865a8d6197dd69b4fab5a4751cde38b8d000c167d14ee",
+    "mode": 493,
+    "archive": "/home/user/gpui-preserved-test-binaries/e9616ff1805367a8388865a8d6197dd69b4fab5a4751cde38b8d000c167d14ee",
+    "archive_kind": "raw"
+  },
+  {
+    "path": "/home/user/gpui-scene-support-target/release/build/gpui/86e1e6e9714f119f/out/ports-86e1e6e9714f119f",
+    "bytes": 12570048,
+    "sha256": "e4570c7c8a344636095a0697e5ce569b5527b16aa906cc076af245686415684d",
+    "mode": 493,
+    "archive": "/home/user/gpui-preserved-test-binaries/e4570c7c8a344636095a0697e5ce569b5527b16aa906cc076af245686415684d",
+    "archive_kind": "raw"
+  },
+  {
+    "path": "/home/user/gpui-scene-support-target/release/build/gpui/307c1e8aa21fa2c6/out/zgx_native_lab-307c1e8aa21fa2c6",
+    "bytes": 14022120,
+    "sha256": "aac6cecc77961d281754b722ea7688da6b52ac5249bdc384fad744ab6b7129cf",
+    "mode": 493,
+    "archive": "/home/user/gpui-preserved-test-binaries/aac6cecc77961d281754b722ea7688da6b52ac5249bdc384fad744ab6b7129cf",
+    "archive_kind": "raw"
+  },
+  {
+    "path": "/home/user/gpui-scene-support-target/release/build/gpui/62bb6aad7e40b147/out/counter",
+    "bytes": 25235912,
+    "sha256": "f56edb5dff4e6058d59b225463c3d961f538748ba0fbbb43f05e9ddca0814df8",
+    "mode": 493,
+    "archive": "/home/user/gpui-preserved-test-binaries/f56edb5dff4e6058d59b225463c3d961f538748ba0fbbb43f05e9ddca0814df8",
+    "archive_kind": "raw"
+  },
+  {
+    "path": "/home/user/gpui-scene-support-target/release/build/gpui/937604c28d1c7aaf/out/unicode_text_measure",
+    "bytes": 11189872,
+    "sha256": "b7ae4a1841646805db49c270bee393aeded418b3f4708c427b1991f76384298d",
+    "mode": 493,
+    "archive": "/home/user/gpui-preserved-test-binaries/b7ae4a1841646805db49c270bee393aeded418b3f4708c427b1991f76384298d",
+    "archive_kind": "raw"
+  },
+  {
+    "path": "/home/user/gpui-scene-support-target/release/build/gpui/2c8886562b0fe027/out/semantics-2c8886562b0fe027",
+    "bytes": 12228976,
+    "sha256": "95e636dc297522053366f2837816cfd1cc3057c8db044b27dce1be388c5b98bc",
+    "mode": 493,
+    "archive": "/home/user/gpui-preserved-test-binaries/95e636dc297522053366f2837816cfd1cc3057c8db044b27dce1be388c5b98bc",
+    "archive_kind": "raw"
+  },
+  {
+    "path": "/home/user/gpui-scene-support-target/release/build/gpui/03465d1254d7c9f0/out/immutable_text-03465d1254d7c9f0",
+    "bytes": 10389168,
+    "sha256": "f254f6b6ce0e5da662399e433db21a39e3cff0092a2c996a7ff360d6936450cd",
+    "mode": 493,
+    "archive": "/home/user/gpui-preserved-test-binaries/f254f6b6ce0e5da662399e433db21a39e3cff0092a2c996a7ff360d6936450cd",
+    "archive_kind": "raw"
+  },
+  {
+    "path": "/home/user/gpui-scene-support-target/release/build/gpui/d1e27bd8bef2163a/out/question_storage-d1e27bd8bef2163a",
+    "bytes": 12421496,
+    "sha256": "e03a8310a4c8e0bb127691c7a4da227e958907cdd4061a16709b1ccea50d9ae7",
+    "mode": 493,
+    "archive": "/home/user/gpui-preserved-test-binaries/e03a8310a4c8e0bb127691c7a4da227e958907cdd4061a16709b1ccea50d9ae7",
+    "archive_kind": "raw"
+  },
+  {
+    "path": "/home/user/gpui-scene-support-target/release/build/gpui/cc781fd087fa61f1/out/questions-cc781fd087fa61f1",
+    "bytes": 11153920,
+    "sha256": "a5aaae0208a8c0a8766515f014dae1df50713b2fb44a926d4289f47d479edcee",
+    "mode": 493,
+    "archive": "/home/user/gpui-preserved-test-binaries/a5aaae0208a8c0a8766515f014dae1df50713b2fb44a926d4289f47d479edcee",
+    "archive_kind": "raw"
+  },
+  {
+    "path": "/home/user/gpui-scene-support-target/release/build/gpui/7e6598937b2fe273/out/focus-7e6598937b2fe273",
+    "bytes": 12962368,
+    "sha256": "dd036458cc8b825a6d722ce8ad68423be0c7ea8c828bbe99fe5558fa684abe21",
+    "mode": 493,
+    "archive": "/home/user/gpui-preserved-test-binaries/dd036458cc8b825a6d722ce8ad68423be0c7ea8c828bbe99fe5558fa684abe21",
+    "archive_kind": "raw"
+  },
+  {
+    "path": "/home/user/gpui-scene-support-target/release/build/gpui/db0678e9a0ba0465/out/gpui-db0678e9a0ba0465",
+    "bytes": 23447096,
+    "sha256": "835670b6cbcb690ce171c88e1ffe30a5e27f641e30d39b7b10b0bcd880cf78c6",
+    "mode": 493,
+    "archive": "/home/user/gpui-preserved-test-binaries/835670b6cbcb690ce171c88e1ffe30a5e27f641e30d39b7b10b0bcd880cf78c6",
+    "archive_kind": "raw"
+  },
+  {
+    "path": "/home/user/gpui-scene-support-target/release/build/gpui/5ec78bb80a8272a5/out/source_inbox-5ec78bb80a8272a5",
+    "bytes": 11723128,
+    "sha256": "076eca35dd357f5bcfb48990f20b9de6f1b8fbfdfacd838be69a11d369bcf633",
+    "mode": 493,
+    "archive": "/home/user/gpui-preserved-test-binaries/076eca35dd357f5bcfb48990f20b9de6f1b8fbfdfacd838be69a11d369bcf633",
+    "archive_kind": "raw"
+  },
+  {
+    "path": "/home/user/gpui-scene-support-target/release/build/gpui/6e3cc75fef76709d/out/question_mailbox-6e3cc75fef76709d",
+    "bytes": 10522976,
+    "sha256": "b333aeefff73469513a4898846f4b068d876727403f9dd827deeff85a99680cd",
+    "mode": 493,
+    "archive": "/home/user/gpui-preserved-test-binaries/b333aeefff73469513a4898846f4b068d876727403f9dd827deeff85a99680cd",
+    "archive_kind": "raw"
+  },
+  {
+    "path": "/home/user/gpui-scene-support-target/release/build/gpui/6c876ad3b287ac82/out/line_height-6c876ad3b287ac82",
+    "bytes": 11925928,
+    "sha256": "166e78050065a24d92d9d70af5c1fdea0306680af78a5d933fc3b9b6154c57da",
+    "mode": 493,
+    "archive": "/home/user/gpui-preserved-test-binaries/166e78050065a24d92d9d70af5c1fdea0306680af78a5d933fc3b9b6154c57da",
+    "archive_kind": "raw"
+  },
+  {
+    "path": "/home/user/gpui-scene-support-target/release/build/gpui/7cdc550dbfca6dcb/out/image_placement-7cdc550dbfca6dcb",
+    "bytes": 11953976,
+    "sha256": "3c88e3539e15dda9d6a1a24e1bc2e2a66b221326940d4784810ec73442e4671e",
+    "mode": 493,
+    "archive": "/home/user/gpui-preserved-test-binaries/3c88e3539e15dda9d6a1a24e1bc2e2a66b221326940d4784810ec73442e4671e",
+    "archive_kind": "raw"
+  },
+  {
+    "path": "/home/user/gpui-scene-support-target/release/build/gpui_gpu/8d28cb085757f051/out/gpui_gpu-8d28cb085757f051",
+    "bytes": 17345016,
+    "sha256": "b4232cda8b7bfadbdb290f41cc6bbcdfa13158854045e83bfddec40bdac28c33",
+    "mode": 493,
+    "archive": "/home/user/gpui-preserved-test-binaries/b4232cda8b7bfadbdb290f41cc6bbcdfa13158854045e83bfddec40bdac28c33",
+    "archive_kind": "raw"
+  },
+  {
+    "path": "/home/user/gpui-scene-support-target/release/build/gpui_gpu/e5714bf407155627/out/build_script_build",
+    "bytes": 8199248,
+    "sha256": "3b893a6924bb63ae4ad0ddba61e581ea2cf91b9faaac230ae4dc6df113671c47",
+    "mode": 493,
+    "archive": "/home/user/gpui-completed-test-binaries-archive/3b893a6924bb63ae4ad0ddba61e581ea2cf91b9faaac230ae4dc6df113671c47.gz",
+    "archive_kind": "gzip"
+  },
+  {
+    "path": "/home/user/gpui-scene-support-target/release/build/gpui_gpu/6cc55d1770954a81/out/build_script_build",
+    "bytes": 8199368,
+    "sha256": "60054bc1e308b2fe40ea860028e37a7e12254e09a019203b9abc3a98774cf05e",
+    "mode": 493,
+    "archive": "/home/user/gpui-completed-test-binaries-archive/60054bc1e308b2fe40ea860028e37a7e12254e09a019203b9abc3a98774cf05e.gz",
+    "archive_kind": "gzip"
+  },
+  {
+    "path": "/home/user/gpui-scene-support-target/release/build/gpui_gpu/5eb8255352d33eb6/out/images",
+    "bytes": 7981424,
+    "sha256": "81cc837e8c3a188aa140658ec870d2799218cc1b7bff145ed9a2c73271a870f1",
+    "mode": 493,
+    "archive": "/home/user/gpui-preserved-test-binaries/81cc837e8c3a188aa140658ec870d2799218cc1b7bff145ed9a2c73271a870f1",
+    "archive_kind": "raw"
+  },
+  {
+    "path": "/home/user/gpui-scene-support-target/release/build/gpui_gpu/8e4933dc35703950/out/gpui_gpu-8e4933dc35703950",
+    "bytes": 17105312,
+    "sha256": "c87ae94428b8c9e41a12518f218c8d13bbd8cd97fdabb331f505475a3de58d4b",
+    "mode": 493,
+    "archive": "/home/user/gpui-preserved-test-binaries/c87ae94428b8c9e41a12518f218c8d13bbd8cd97fdabb331f505475a3de58d4b",
+    "archive_kind": "raw"
+  },
+  {
+    "path": "/home/user/gpui-scene-support-target/release/build/gpui_gpu/87adcc02d297289a/out/build_script_build",
+    "bytes": 11781896,
+    "sha256": "6b44bb3a397bf691f659956bce6551053da49608c624bdd91d2979aa3c5d1468",
+    "mode": 493,
+    "archive": "/home/user/gpui-completed-test-binaries-archive/6b44bb3a397bf691f659956bce6551053da49608c624bdd91d2979aa3c5d1468.gz",
+    "archive_kind": "gzip"
+  },
+  {
+    "path": "/home/user/gpui-scene-support-target/release/build/gpui_gpu/f3188f1101e1b4d0/out/render-f3188f1101e1b4d0",
+    "bytes": 16863856,
+    "sha256": "fec15f2dc4dbd49711d2245ea11fba60140b4f95457f77a546c8c6d88660de7b",
+    "mode": 493,
+    "archive": "/home/user/gpui-preserved-test-binaries/fec15f2dc4dbd49711d2245ea11fba60140b4f95457f77a546c8c6d88660de7b",
+    "archive_kind": "raw"
+  },
+  {
+    "path": "/home/user/gpui-scene-support-target/release/build/gpui_gpu/127c56e0680b27d0/out/build_script_build",
+    "bytes": 11781176,
+    "sha256": "eeff0acb7753266a9ddd7c5834d67f67581134d9d8b36c0709d9c1941cb049a6",
+    "mode": 493,
+    "archive": "/home/user/gpui-completed-test-binaries-archive/eeff0acb7753266a9ddd7c5834d67f67581134d9d8b36c0709d9c1941cb049a6.gz",
+    "archive_kind": "gzip"
+  },
+  {
+    "path": "/home/user/gpui-scene-support-target/release/build/gpui_gpu/4b5035a6a615ec17/out/tiles",
+    "bytes": 15206512,
+    "sha256": "2371e6c12a6818b5ca70ad91a5f3d675996f6541fd4c0d40f1a12f7defb69ba0",
+    "mode": 493,
+    "archive": "/home/user/gpui-preserved-test-binaries/2371e6c12a6818b5ca70ad91a5f3d675996f6541fd4c0d40f1a12f7defb69ba0",
+    "archive_kind": "raw"
+  },
+  {
+    "path": "/home/user/gpui-scene-support-target/release/build/gpui_gpu/df133191a45f40c0/out/images",
+    "bytes": 8219800,
+    "sha256": "3bd93ab36b6d08b3641e512d6fa2cb41430fb16abeca711315bb52de3adb3443",
+    "mode": 493,
+    "archive": "/home/user/gpui-preserved-test-binaries/3bd93ab36b6d08b3641e512d6fa2cb41430fb16abeca711315bb52de3adb3443",
+    "archive_kind": "raw"
+  },
+  {
+    "path": "/home/user/gpui-scene-support-target/release/build/gpui_gpu/d66c2755bbc7fa5d/out/build_script_build",
+    "bytes": 8199208,
+    "sha256": "4207431423c6376bdde2df33b77c639fe839d97f3855ad709fbf6f540a64dde0",
+    "mode": 493,
+    "archive": "/home/user/gpui-completed-test-binaries-archive/4207431423c6376bdde2df33b77c639fe839d97f3855ad709fbf6f540a64dde0.gz",
+    "archive_kind": "gzip"
+  },
+  {
+    "path": "/home/user/gpui-scene-support-target/release/build/gpui_gpu/ec6ca10d95eaa12c/out/build_script_build",
+    "bytes": 8199000,
+    "sha256": "420b84d04a999fd7fa9f54a4828c6cb847d24f21b882efa0a023a983bd6a5616",
+    "mode": 493,
+    "archive": "/home/user/gpui-completed-test-binaries-archive/420b84d04a999fd7fa9f54a4828c6cb847d24f21b882efa0a023a983bd6a5616.gz",
+    "archive_kind": "gzip"
+  },
+  {
+    "path": "/home/user/gpui-scene-support-target/release/build/gpui_gpu/58ea720b9d42b54c/out/render-58ea720b9d42b54c",
+    "bytes": 17087392,
+    "sha256": "e64ca9c9066f65a019f0890b5e5d5eff3576568cbc4a1867e68451b081375582",
+    "mode": 493,
+    "archive": "/home/user/gpui-preserved-test-binaries/e64ca9c9066f65a019f0890b5e5d5eff3576568cbc4a1867e68451b081375582",
+    "archive_kind": "raw"
+  },
+  {
+    "path": "/home/user/gpui-scene-support-target/release/build/gpui_gpu/37e56359c66dc042/out/build_script_build",
+    "bytes": 8199408,
+    "sha256": "82abc8ad3e4d5b3bc96542b84ea4a3d59f71c8d2ab01c5f444fe4bbdc15dbd7f",
+    "mode": 493,
+    "archive": "/home/user/gpui-completed-test-binaries-archive/82abc8ad3e4d5b3bc96542b84ea4a3d59f71c8d2ab01c5f444fe4bbdc15dbd7f.gz",
+    "archive_kind": "gzip"
+  },
+  {
+    "path": "/home/user/gpui-scene-support-target/release/build/gpui_gpu/84f9d7fda4ba4715/out/presentation-84f9d7fda4ba4715",
+    "bytes": 1472560,
+    "sha256": "d01c40882465c1ca7d2cfb38abf0f0317d2d3e424110d4edc5053f469abba977",
+    "mode": 493,
+    "archive": "/home/user/gpui-preserved-test-binaries/d01c40882465c1ca7d2cfb38abf0f0317d2d3e424110d4edc5053f469abba977",
+    "archive_kind": "raw"
+  },
+  {
+    "path": "/home/user/gpui-scene-support-target/release/build/gpui_gpu/a7e285389186b836/out/build_script_build",
+    "bytes": 8199160,
+    "sha256": "8edc5c5001223c53d6a44c226a5211b6df3d4d8bed8e608ba3651e3c29cb973e",
+    "mode": 493,
+    "archive": "/home/user/gpui-completed-test-binaries-archive/8edc5c5001223c53d6a44c226a5211b6df3d4d8bed8e608ba3651e3c29cb973e.gz",
+    "archive_kind": "gzip"
+  },
+  {
+    "path": "/home/user/gpui-scene-support-target/release/build/gpui_gpu/a611e7a2a5a95c98/out/presentation-a611e7a2a5a95c98",
+    "bytes": 1473336,
+    "sha256": "60120f584dc8fd4a90062b9caabcd091d65bcf8105fa7ba29e5927ad72574ffe",
+    "mode": 493,
+    "archive": "/home/user/gpui-preserved-test-binaries/60120f584dc8fd4a90062b9caabcd091d65bcf8105fa7ba29e5927ad72574ffe",
+    "archive_kind": "raw"
+  },
+  {
+    "path": "/home/user/gpui-scene-support-target/release/build/gpui_gpu/a921ebb1ae215beb/out/retained",
+    "bytes": 15533312,
+    "sha256": "0a06bac804d381a71f365b7acfff88460a52cd3c38018d669de91409167b4578",
+    "mode": 493,
+    "archive": "/home/user/gpui-preserved-test-binaries/0a06bac804d381a71f365b7acfff88460a52cd3c38018d669de91409167b4578",
+    "archive_kind": "raw"
+  },
+  {
+    "path": "/home/user/gpui-scene-support-target/release/build/gpui_gpu/61e90e2a0f130778/out/groups",
+    "bytes": 15202920,
+    "sha256": "3fcd18f47c6c0767bc7d1f88e5f1569f2d996ba4d514c3ad3ff07cddf257b5e3",
+    "mode": 493,
+    "archive": "/home/user/gpui-preserved-test-binaries/3fcd18f47c6c0767bc7d1f88e5f1569f2d996ba4d514c3ad3ff07cddf257b5e3",
+    "archive_kind": "raw"
+  },
+  {
+    "path": "/home/user/gpui-scene-support-target/release/build/gpui_gpu/319c8e7fcd007d5f/out/tiles",
+    "bytes": 15444144,
+    "sha256": "233ceca804a0be3ef350664536009c3b1bfbe66d8194578f91706d8688674589",
+    "mode": 493,
+    "archive": "/home/user/gpui-preserved-test-binaries/233ceca804a0be3ef350664536009c3b1bfbe66d8194578f91706d8688674589",
+    "archive_kind": "raw"
+  },
+  {
+    "path": "/home/user/gpui-scene-support-target/release/build/gpui_gpu/efb7c5a21eba989c/out/retained",
+    "bytes": 15295192,
+    "sha256": "162435fadc7b0a7067b5e331b84a3d6e301c928448bc518eb9c28ff35f27680f",
+    "mode": 493,
+    "archive": "/home/user/gpui-preserved-test-binaries/162435fadc7b0a7067b5e331b84a3d6e301c928448bc518eb9c28ff35f27680f",
+    "archive_kind": "raw"
+  },
+  {
+    "path": "/home/user/gpui-scene-support-target/release/build/gpui_gpu/886201065ed8d3a7/out/groups",
+    "bytes": 15440104,
+    "sha256": "e43b44abd31d5543de97cdfb7995e95c4c91baff214dbe16dbefca6a6c31398a",
+    "mode": 493,
+    "archive": "/home/user/gpui-preserved-test-binaries/e43b44abd31d5543de97cdfb7995e95c4c91baff214dbe16dbefca6a6c31398a",
+    "archive_kind": "raw"
+  },
+  {
+    "path": "/home/user/gpui-scene-support-target/release/build/wgsl-rs-macros/39ec84fddad7ee58/out/libwgsl_rs_macros-39ec84fddad7ee58.so",
+    "bytes": 8497136,
+    "sha256": "380e0c30667d6c37c4b1af9d263ce132bb8e5b0fa554625abfc57ac562f0ad9c",
+    "mode": 493,
+    "archive": "/home/user/gpui-completed-test-binaries-archive/380e0c30667d6c37c4b1af9d263ce132bb8e5b0fa554625abfc57ac562f0ad9c.gz",
+    "archive_kind": "gzip"
+  },
+  {
+    "path": "/home/user/gpui-scene-support-target/release/build/async-recursion/1d902ec430c7881d/out/libasync_recursion-1d902ec430c7881d.so",
+    "bytes": 3232624,
+    "sha256": "3b4ebddb6858e5963006c1d15359c1bd0b5a107827b8cf2bd31e4d9b4d8e8577",
+    "mode": 493,
+    "archive": "/home/user/gpui-completed-test-binaries-archive/3b4ebddb6858e5963006c1d15359c1bd0b5a107827b8cf2bd31e4d9b4d8e8577.gz",
+    "archive_kind": "gzip"
+  },
+  {
+    "path": "/home/user/gpui-scene-support-target/release/build/async-trait/5d5285f3f6da7d4b/out/libasync_trait-5d5285f3f6da7d4b.so",
+    "bytes": 4095312,
+    "sha256": "75b1c5d2472fd0567beea97ccbf6927158e283a58fb5c88941d49c6f701f6903",
+    "mode": 493,
+    "archive": "/home/user/gpui-completed-test-binaries-archive/75b1c5d2472fd0567beea97ccbf6927158e283a58fb5c88941d49c6f701f6903.gz",
+    "archive_kind": "gzip"
+  },
+  {
+    "path": "/home/user/gpui-scene-support-target/release/build/async-trait/198df58b0a520edc/out/libasync_trait-198df58b0a520edc.so",
+    "bytes": 4001800,
+    "sha256": "98e955508d718ba923662f24745857332a673529145a58f4eab588fc04455439",
+    "mode": 493,
+    "archive": "/home/user/gpui-completed-test-binaries-archive/98e955508d718ba923662f24745857332a673529145a58f4eab588fc04455439.gz",
+    "archive_kind": "gzip"
+  },
+  {
+    "path": "/home/user/gpui-scene-support-target/release/build/displaydoc/cc8ded37579c4ef3/out/libdisplaydoc-cc8ded37579c4ef3.so",
+    "bytes": 3504880,
+    "sha256": "ccbfcea05cd0b100352c8a4e81d2cf984167eec2f188c377200a6f35ec5558e1",
+    "mode": 493,
+    "archive": "/home/user/gpui-completed-test-binaries-archive/ccbfcea05cd0b100352c8a4e81d2cf984167eec2f188c377200a6f35ec5558e1.gz",
+    "archive_kind": "gzip"
+  },
+  {
+    "path": "/home/user/gpui-scene-support-target/release/build/displaydoc/ae3b3be74d3848d9/out/libdisplaydoc-ae3b3be74d3848d9.so",
+    "bytes": 3596296,
+    "sha256": "278fc296a533ef1d8e6e4570c0b666eda1aa0f7801d47ed743b16017b73f6fc1",
+    "mode": 493,
+    "archive": "/home/user/gpui-completed-test-binaries-archive/278fc296a533ef1d8e6e4570c0b666eda1aa0f7801d47ed743b16017b73f6fc1.gz",
+    "archive_kind": "gzip"
+  },
+  {
+    "path": "/home/user/gpui-scene-support-target/release/build/displaydoc/6ea497f2d7ba32f6/out/libdisplaydoc-6ea497f2d7ba32f6.so",
+    "bytes": 3596368,
+    "sha256": "34ca035df5a542a73bf3854eb4cc194930eaba803aa4fbec882f61d86b35aaf0",
+    "mode": 493,
+    "archive": "/home/user/gpui-completed-test-binaries-archive/34ca035df5a542a73bf3854eb4cc194930eaba803aa4fbec882f61d86b35aaf0.gz",
+    "archive_kind": "gzip"
+  },
+  {
+    "path": "/home/user/gpui-scene-support-target/release/build/zvariant_derive/235208ea6e2662d5/out/libzvariant_derive-235208ea6e2662d5.so",
+    "bytes": 5214448,
+    "sha256": "7e366785d730290008f5d2f402ba3afc283a6c5fa45b927ae2d203da0deb641d",
+    "mode": 493,
+    "archive": "/home/user/gpui-completed-test-binaries-archive/7e366785d730290008f5d2f402ba3afc283a6c5fa45b927ae2d203da0deb641d.gz",
+    "archive_kind": "gzip"
+  },
+  {
+    "path": "/home/user/gpui-scene-support-target/release/build/futures-macro/6a87b6d12b95cf0f/out/libfutures_macro-6a87b6d12b95cf0f.so",
+    "bytes": 3178584,
+    "sha256": "4a7c47b838c4964f3c954be09853d4090d1904b7f648e3cb6bf40014520f3237",
+    "mode": 493,
+    "archive": "/home/user/gpui-completed-test-binaries-archive/4a7c47b838c4964f3c954be09853d4090d1904b7f648e3cb6bf40014520f3237.gz",
+    "archive_kind": "gzip"
+  },
+  {
+    "path": "/home/user/gpui-scene-support-target/release/build/serde_derive/f0da3669146572c5/out/libserde_derive-f0da3669146572c5.so",
+    "bytes": 4901928,
+    "sha256": "ad1899453d0433f35bd60ebf668d4605828e8138bc94ae1428fa869addb47c92",
+    "mode": 493,
+    "archive": "/home/user/gpui-completed-test-binaries-archive/ad1899453d0433f35bd60ebf668d4605828e8138bc94ae1428fa869addb47c92.gz",
+    "archive_kind": "gzip"
+  },
+  {
+    "path": "/home/user/gpui-scene-support-target/release/build/serde_derive/ca1f631bf857e0d4/out/libserde_derive-ca1f631bf857e0d4.so",
+    "bytes": 4992560,
+    "sha256": "75f714cc06c03c9cc279c249781bc3eca3607545552a6d4a9c0d1ec4cd00c78c",
+    "mode": 493,
+    "archive": "/home/user/gpui-completed-test-binaries-archive/75f714cc06c03c9cc279c249781bc3eca3607545552a6d4a9c0d1ec4cd00c78c.gz",
+    "archive_kind": "gzip"
+  },
+  {
+    "path": "/home/user/gpui-scene-support-target/release/build/zbus_macros/50b900a0efd3f786/out/libzbus_macros-50b900a0efd3f786.so",
+    "bytes": 6585760,
+    "sha256": "2232f9672c0c56e5c6868a7d87d8813642a30cef7ab722407b0996a8af18cf4b",
+    "mode": 493,
+    "archive": "/home/user/gpui-completed-test-binaries-archive/2232f9672c0c56e5c6868a7d87d8813642a30cef7ab722407b0996a8af18cf4b.gz",
+    "archive_kind": "gzip"
+  },
+  {
+    "path": "/home/user/gpui-scene-support-target/release/build/zbus_macros/426bec16249cb392/out/libzbus_macros-426bec16249cb392.so",
+    "bytes": 5981312,
+    "sha256": "2d6757a1e92165fd7a22364ca0a3f1f282db99fe5e6e675a9581c9cb3d9cc6e7",
+    "mode": 493,
+    "archive": "/home/user/gpui-completed-test-binaries-archive/2d6757a1e92165fd7a22364ca0a3f1f282db99fe5e6e675a9581c9cb3d9cc6e7.gz",
+    "archive_kind": "gzip"
+  },
+  {
+    "path": "/home/user/gpui-scene-support-target/release/build/zbus_macros/7e17f05691789c81/out/libzbus_macros-7e17f05691789c81.so",
+    "bytes": 5862896,
+    "sha256": "2c29da9d5263f297419d4f8d7ef5da1eae242b978cc3a2d4356a237dba9a0a31",
+    "mode": 493,
+    "archive": "/home/user/gpui-completed-test-binaries-archive/2c29da9d5263f297419d4f8d7ef5da1eae242b978cc3a2d4356a237dba9a0a31.gz",
+    "archive_kind": "gzip"
+  },
+  {
+    "path": "/home/user/gpui-scene-support-target/release/build/tracing-attributes/686b882ab798a6c6/out/libtracing_attributes-686b882ab798a6c6.so",
+    "bytes": 4356528,
+    "sha256": "4f23e1cddbab0beb60cdd5f08541433d8e22ba7e7b2dec75c59f155c0f0d5d4b",
+    "mode": 493,
+    "archive": "/home/user/gpui-completed-test-binaries-archive/4f23e1cddbab0beb60cdd5f08541433d8e22ba7e7b2dec75c59f155c0f0d5d4b.gz",
+    "archive_kind": "gzip"
+  },
+  {
+    "path": "/home/user/gpui-scene-support-target/release/build/zerocopy-derive/bd574a823e2136ad/out/libzerocopy_derive-bd574a823e2136ad.so",
+    "bytes": 4519104,
+    "sha256": "5166c032d6d13721a289996cf814b7439bf4dae20939360d9c9bac645355616f",
+    "mode": 493,
+    "archive": "/home/user/gpui-completed-test-binaries-archive/5166c032d6d13721a289996cf814b7439bf4dae20939360d9c9bac645355616f.gz",
+    "archive_kind": "gzip"
+  },
+  {
+    "path": "/home/user/gpui-scene-support-target/release/build/zerofrom-derive/977efb65f38d463b/out/libzerofrom_derive-977efb65f38d463b.so",
+    "bytes": 4651960,
+    "sha256": "5131ecc0910099e6be6fb90e56dd14c32e5762ff9e176e21a6cd0ff80750ec80",
+    "mode": 493,
+    "archive": "/home/user/gpui-completed-test-binaries-archive/5131ecc0910099e6be6fb90e56dd14c32e5762ff9e176e21a6cd0ff80750ec80.gz",
+    "archive_kind": "gzip"
+  },
+  {
+    "path": "/home/user/gpui-scene-support-target/release/build/zerofrom-derive/7ffc4abaee99a20a/out/libzerofrom_derive-7ffc4abaee99a20a.so",
+    "bytes": 4549096,
+    "sha256": "e24c9e9af5df88182208367eb6de879149498dac5e751bead937a6a43141309d",
+    "mode": 493,
+    "archive": "/home/user/gpui-completed-test-binaries-archive/e24c9e9af5df88182208367eb6de879149498dac5e751bead937a6a43141309d.gz",
+    "archive_kind": "gzip"
+  },
+  {
+    "path": "/home/user/gpui-scene-support-target/release/build/zerofrom-derive/c5aea22dacc86f50/out/libzerofrom_derive-c5aea22dacc86f50.so",
+    "bytes": 4652008,
+    "sha256": "35bc8cedc2078bbe76074196f4ca35764ae18587fd5510ec683f2ff60236b100",
+    "mode": 493,
+    "archive": "/home/user/gpui-completed-test-binaries-archive/35bc8cedc2078bbe76074196f4ca35764ae18587fd5510ec683f2ff60236b100.gz",
+    "archive_kind": "gzip"
+  },
+  {
+    "path": "/home/user/gpui-scene-support-target/release/examples/tiles",
+    "bytes": 15444144,
+    "sha256": "233ceca804a0be3ef350664536009c3b1bfbe66d8194578f91706d8688674589",
+    "mode": 493,
+    "archive": "/home/user/gpui-preserved-test-binaries/233ceca804a0be3ef350664536009c3b1bfbe66d8194578f91706d8688674589",
+    "archive_kind": "raw"
+  },
+  {
+    "path": "/home/user/gpui-scene-support-target/release/examples/immutable_text_measure",
+    "bytes": 9978112,
+    "sha256": "5f8d1888ed03121373cf8aadc6c77b3b2753e7a14a853b434c1eb05d8f481727",
+    "mode": 493,
+    "archive": "/home/user/gpui-preserved-test-binaries/5f8d1888ed03121373cf8aadc6c77b3b2753e7a14a853b434c1eb05d8f481727",
+    "archive_kind": "raw"
+  },
+  {
+    "path": "/home/user/gpui-scene-support-target/release/examples/component_sources",
+    "bytes": 25393080,
+    "sha256": "f671b2ffab194709af7e034ba01dcda685cbd76f3692a00847bbd93f6ceb0d54",
+    "mode": 493,
+    "archive": "/home/user/gpui-preserved-test-binaries/f671b2ffab194709af7e034ba01dcda685cbd76f3692a00847bbd93f6ceb0d54",
+    "archive_kind": "raw"
+  },
+  {
+    "path": "/home/user/gpui-scene-support-target/release/examples/state_update_cost",
+    "bytes": 9926720,
+    "sha256": "7bac6a137e407cbc6a2c2af504c6ccf42a6516effc3190aeef0b5bc0178f61f1",
+    "mode": 493,
+    "archive": "/home/user/gpui-preserved-test-binaries/7bac6a137e407cbc6a2c2af504c6ccf42a6516effc3190aeef0b5bc0178f61f1",
+    "archive_kind": "raw"
+  },
+  {
+    "path": "/home/user/gpui-scene-support-target/release/examples/mapped_properties",
+    "bytes": 25289896,
+    "sha256": "2127116dff6e983195ad2bf26a94b80478c85fc05c1cc4eb8a8ade2bf77793ad",
+    "mode": 493,
+    "archive": "/home/user/gpui-preserved-test-binaries/2127116dff6e983195ad2bf26a94b80478c85fc05c1cc4eb8a8ade2bf77793ad",
+    "archive_kind": "raw"
+  },
+  {
+    "path": "/home/user/gpui-scene-support-target/release/examples/first_frame",
+    "bytes": 10080200,
+    "sha256": "fdf5cbfc068fa361c9e86e391ad43f65b7831bb91eeb19c87b75fe1e21cf6885",
+    "mode": 493,
+    "archive": "/home/user/gpui-preserved-test-binaries/fdf5cbfc068fa361c9e86e391ad43f65b7831bb91eeb19c87b75fe1e21cf6885",
+    "archive_kind": "raw"
+  },
+  {
+    "path": "/home/user/gpui-scene-support-target/release/examples/todo_comparison_mapped",
+    "bytes": 25635080,
+    "sha256": "40c9db42f807a2bd4206a0c89948bd83b27c974019d54297f0e7f35239ca2568",
+    "mode": 493,
+    "archive": "/home/user/gpui-preserved-test-binaries/40c9db42f807a2bd4206a0c89948bd83b27c974019d54297f0e7f35239ca2568",
+    "archive_kind": "raw"
+  },
+  {
+    "path": "/home/user/gpui-scene-support-target/release/examples/reactive_styles",
+    "bytes": 10137696,
+    "sha256": "3ea5a0b1523ad4274cbff62efae54aa70633ec108d4d2dfdc4c090348922eef9",
+    "mode": 493,
+    "archive": "/home/user/gpui-preserved-test-binaries/3ea5a0b1523ad4274cbff62efae54aa70633ec108d4d2dfdc4c090348922eef9",
+    "archive_kind": "raw"
+  },
+  {
+    "path": "/home/user/gpui-scene-support-target/release/examples/unicode",
+    "bytes": 25242728,
+    "sha256": "f016280c0aa3b4b91f00de2944ae9b5ff1eeda6d81dc41154cc77e5efbd54281",
+    "mode": 493,
+    "archive": "/home/user/gpui-preserved-test-binaries/f016280c0aa3b4b91f00de2944ae9b5ff1eeda6d81dc41154cc77e5efbd54281",
+    "archive_kind": "raw"
+  },
+  {
+    "path": "/home/user/gpui-scene-support-target/release/examples/color_cost",
+    "bytes": 9775552,
+    "sha256": "49ec88c71448f9d30dc851a502252457f7f975a4b825aee7353ea3f44297cd64",
+    "mode": 493,
+    "archive": "/home/user/gpui-preserved-test-binaries/49ec88c71448f9d30dc851a502252457f7f975a4b825aee7353ea3f44297cd64",
+    "archive_kind": "raw"
+  },
+  {
+    "path": "/home/user/gpui-scene-support-target/release/examples/panes",
+    "bytes": 25224056,
+    "sha256": "7eaa2dd38c23a9e3f42c9fc811bb5f399e5bda83daa0796371c7d27d1cc6bc13",
+    "mode": 493,
+    "archive": "/home/user/gpui-preserved-test-binaries/7eaa2dd38c23a9e3f42c9fc811bb5f399e5bda83daa0796371c7d27d1cc6bc13",
+    "archive_kind": "raw"
+  },
+  {
+    "path": "/home/user/gpui-scene-support-target/release/examples/retained",
+    "bytes": 15533312,
+    "sha256": "0a06bac804d381a71f365b7acfff88460a52cd3c38018d669de91409167b4578",
+    "mode": 493,
+    "archive": "/home/user/gpui-preserved-test-binaries/0a06bac804d381a71f365b7acfff88460a52cd3c38018d669de91409167b4578",
+    "archive_kind": "raw"
+  },
+  {
+    "path": "/home/user/gpui-scene-support-target/release/examples/library",
+    "bytes": 25857792,
+    "sha256": "012f9367b19912d27b9689d32f402bde8fcaf3fa896ad133c96e08ed062e9e18",
+    "mode": 493,
+    "archive": "/home/user/gpui-preserved-test-binaries/012f9367b19912d27b9689d32f402bde8fcaf3fa896ad133c96e08ed062e9e18",
+    "archive_kind": "raw"
+  },
+  {
+    "path": "/home/user/gpui-scene-support-target/release/examples/text_interaction",
+    "bytes": 6968992,
+    "sha256": "b6354551c845b748d7c103cfda47c9a63ffead2558d63edf25aa0071fa28673c",
+    "mode": 493,
+    "archive": "/home/user/gpui-preserved-test-binaries/b6354551c845b748d7c103cfda47c9a63ffead2558d63edf25aa0071fa28673c",
+    "archive_kind": "raw"
+  },
+  {
+    "path": "/home/user/gpui-scene-support-target/release/examples/graphics",
+    "bytes": 25256080,
+    "sha256": "0e968bc9dfe5a70383089f9b2905aceb8c396dd497c104ef55721dc52d802eb5",
+    "mode": 493,
+    "archive": "/home/user/gpui-preserved-test-binaries/0e968bc9dfe5a70383089f9b2905aceb8c396dd497c104ef55721dc52d802eb5",
+    "archive_kind": "raw"
+  },
+  {
+    "path": "/home/user/gpui-scene-support-target/release/examples/covers",
+    "bytes": 25237176,
+    "sha256": "9a4a19a91a1e5cda07a35900a86fb6be14f05f8baa57e24cf99b9433f960066d",
+    "mode": 493,
+    "archive": "/home/user/gpui-preserved-test-binaries/9a4a19a91a1e5cda07a35900a86fb6be14f05f8baa57e24cf99b9433f960066d",
+    "archive_kind": "raw"
+  },
+  {
+    "path": "/home/user/gpui-scene-support-target/release/examples/unicode_text_measure",
+    "bytes": 9917008,
+    "sha256": "f3e03de42eaf146efbcd39c1cce2610e318cc16cb1df4a997fd63ca95d40daa7",
+    "mode": 493,
+    "archive": "/home/user/gpui-preserved-test-binaries/f3e03de42eaf146efbcd39c1cce2610e318cc16cb1df4a997fd63ca95d40daa7",
+    "archive_kind": "raw"
+  },
+  {
+    "path": "/home/user/gpui-scene-support-target/release/examples/counter",
+    "bytes": 10061440,
+    "sha256": "726b52ddc24f3e4bbcdc352095ad7ff7b7b69acad3c110538490066190d63322",
+    "mode": 493,
+    "archive": "/home/user/gpui-preserved-test-binaries/726b52ddc24f3e4bbcdc352095ad7ff7b7b69acad3c110538490066190d63322",
+    "archive_kind": "raw"
+  },
+  {
+    "path": "/home/user/gpui-scene-support-target/release/examples/retained_runs",
+    "bytes": 7886152,
+    "sha256": "717e7c50d6b4bb14bbd7933bad33114353e0919ed8810568db508523561660e2",
+    "mode": 493,
+    "archive": "/home/user/gpui-preserved-test-binaries/717e7c50d6b4bb14bbd7933bad33114353e0919ed8810568db508523561660e2",
+    "archive_kind": "raw"
+  },
+  {
+    "path": "/home/user/gpui-scene-support-target/release/examples/empty",
+    "bytes": 25207608,
+    "sha256": "e2564a19ae25ca2ecd4f4bdf458dd616faec672604244dbe8cd770e6a47bfeef",
+    "mode": 493,
+    "archive": "/home/user/gpui-preserved-test-binaries/e2564a19ae25ca2ecd4f4bdf458dd616faec672604244dbe8cd770e6a47bfeef",
+    "archive_kind": "raw"
+  },
+  {
+    "path": "/home/user/gpui-scene-support-target/release/examples/state_update_allocations",
+    "bytes": 9870736,
+    "sha256": "a566b9d0ed7493f0f56e1780b2e2ea8b2a637efb87cb7d4d1dde44fbff488f45",
+    "mode": 493,
+    "archive": "/home/user/gpui-preserved-test-binaries/a566b9d0ed7493f0f56e1780b2e2ea8b2a637efb87cb7d4d1dde44fbff488f45",
+    "archive_kind": "raw"
+  },
+  {
+    "path": "/home/user/gpui-scene-support-target/release/examples/text_cache_capacity",
+    "bytes": 7607864,
+    "sha256": "5a05be4e082c57d148fe0bf84418dff976d30dc53cae80bc9c1ae32f373cd024",
+    "mode": 493,
+    "archive": "/home/user/gpui-preserved-test-binaries/5a05be4e082c57d148fe0bf84418dff976d30dc53cae80bc9c1ae32f373cd024",
+    "archive_kind": "raw"
+  },
+  {
+    "path": "/home/user/gpui-scene-support-target/release/examples/remote_delivery_measure",
+    "bytes": 9904808,
+    "sha256": "f6deb97876615c5086f05d6800642a6321e6fc47d8e7e7e6470c1ae16cf2fe92",
+    "mode": 493,
+    "archive": "/home/user/gpui-preserved-test-binaries/f6deb97876615c5086f05d6800642a6321e6fc47d8e7e7e6470c1ae16cf2fe92",
+    "archive_kind": "raw"
+  },
+  {
+    "path": "/home/user/gpui-scene-support-target/release/examples/text_oracle",
+    "bytes": 6970368,
+    "sha256": "2cc3bda09326eaabd18cbe402ec37deebd1f3259f56362350ab0e2a4f069e1e3",
+    "mode": 493,
+    "archive": "/home/user/gpui-preserved-test-binaries/2cc3bda09326eaabd18cbe402ec37deebd1f3259f56362350ab0e2a4f069e1e3",
+    "archive_kind": "raw"
+  },
+  {
+    "path": "/home/user/gpui-scene-support-target/release/examples/coverage_table",
+    "bytes": 1434632,
+    "sha256": "80bb29255fa6cb42a683f428a1219ba1f2dad4de51b5d4fdefb81acbe24d9ff4",
+    "mode": 493,
+    "archive": "/home/user/gpui-preserved-test-binaries/80bb29255fa6cb42a683f428a1219ba1f2dad4de51b5d4fdefb81acbe24d9ff4",
+    "archive_kind": "raw"
+  },
+  {
+    "path": "/home/user/gpui-scene-support-target/release/examples/retained_list",
+    "bytes": 9942496,
+    "sha256": "33126f35df093552b311d094359611e51e4746cab02c37e1311cc678d2364ebb",
+    "mode": 493,
+    "archive": "/home/user/gpui-preserved-test-binaries/33126f35df093552b311d094359611e51e4746cab02c37e1311cc678d2364ebb",
+    "archive_kind": "raw"
+  },
+  {
+    "path": "/home/user/gpui-scene-support-target/release/examples/text_lane_measure",
+    "bytes": 9963216,
+    "sha256": "22b63866ff16107ede59a8b4e9b4359f3fc14e743617f8515c5eeb613aa71f85",
+    "mode": 493,
+    "archive": "/home/user/gpui-preserved-test-binaries/22b63866ff16107ede59a8b4e9b4359f3fc14e743617f8515c5eeb613aa71f85",
+    "archive_kind": "raw"
+  },
+  {
+    "path": "/home/user/gpui-scene-support-target/release/examples/images",
+    "bytes": 8219800,
+    "sha256": "3bd93ab36b6d08b3641e512d6fa2cb41430fb16abeca711315bb52de3adb3443",
+    "mode": 493,
+    "archive": "/home/user/gpui-preserved-test-binaries/3bd93ab36b6d08b3641e512d6fa2cb41430fb16abeca711315bb52de3adb3443",
+    "archive_kind": "raw"
+  },
+  {
+    "path": "/home/user/gpui-scene-support-target/release/examples/luna_bench",
+    "bytes": 25232400,
+    "sha256": "ef2a6b9b64f761e2d91064ffa8e3e2f9c2c75caf858ab2deb9d969cdedf19225",
+    "mode": 493,
+    "archive": "/home/user/gpui-preserved-test-binaries/ef2a6b9b64f761e2d91064ffa8e3e2f9c2c75caf858ab2deb9d969cdedf19225",
+    "archive_kind": "raw"
+  },
+  {
+    "path": "/home/user/gpui-scene-support-target/release/examples/selection_queries",
+    "bytes": 6955440,
+    "sha256": "6993796831d9597101cfc1c334145dceed6df50d0a44099a33cca3ac97a3394e",
+    "mode": 493,
+    "archive": "/home/user/gpui-preserved-test-binaries/6993796831d9597101cfc1c334145dceed6df50d0a44099a33cca3ac97a3394e",
+    "archive_kind": "raw"
+  },
+  {
+    "path": "/home/user/gpui-scene-support-target/release/examples/workbench",
+    "bytes": 25259840,
+    "sha256": "60bc5e7c7e9d20cd9a6353385264571428a17148345b19a97daccf42b08f4dc8",
+    "mode": 493,
+    "archive": "/home/user/gpui-preserved-test-binaries/60bc5e7c7e9d20cd9a6353385264571428a17148345b19a97daccf42b08f4dc8",
+    "archive_kind": "raw"
+  },
+  {
+    "path": "/home/user/gpui-scene-support-target/release/examples/group_views",
+    "bytes": 7872728,
+    "sha256": "32bcdc138af8c9f38a3927ec0ab04c6e14f004c3d612567c200372d5ace11070",
+    "mode": 493,
+    "archive": "/home/user/gpui-preserved-test-binaries/32bcdc138af8c9f38a3927ec0ab04c6e14f004c3d612567c200372d5ace11070",
+    "archive_kind": "raw"
+  },
+  {
+    "path": "/home/user/gpui-scene-support-target/release/examples/zgx_native_lab",
+    "bytes": 26396144,
+    "sha256": "0957fe65b13d500a8d045182f5ba2c8635c1ecf89e721d99dad60c3b2ad45172",
+    "mode": 493,
+    "archive": "/home/user/gpui-preserved-test-binaries/0957fe65b13d500a8d045182f5ba2c8635c1ecf89e721d99dad60c3b2ad45172",
+    "archive_kind": "raw"
+  },
+  {
+    "path": "/home/user/gpui-scene-support-target/release/examples/todo_recording_cost",
+    "bytes": 10308680,
+    "sha256": "de97615822e275fff8c11f6493379c3aae903f25172b0cdae749b37d1865ad6a",
+    "mode": 493,
+    "archive": "/home/user/gpui-preserved-test-binaries/de97615822e275fff8c11f6493379c3aae903f25172b0cdae749b37d1865ad6a",
+    "archive_kind": "raw"
+  },
+  {
+    "path": "/home/user/gpui-scene-support-target/release/examples/workspace",
+    "bytes": 25353840,
+    "sha256": "5f48f016324b69c43503d439a57a88d26e7c51015e5bcf2d5a50aaa183af7b07",
+    "mode": 493,
+    "archive": "/home/user/gpui-preserved-test-binaries/5f48f016324b69c43503d439a57a88d26e7c51015e5bcf2d5a50aaa183af7b07",
+    "archive_kind": "raw"
+  },
+  {
+    "path": "/home/user/gpui-scene-support-target/release/examples/inspector",
+    "bytes": 25242256,
+    "sha256": "4e5e3cb52ea0dcfacc51f53d9c9db18027b6eaa4f1b86755827c9bdd2fe18a9b",
+    "mode": 493,
+    "archive": "/home/user/gpui-preserved-test-binaries/4e5e3cb52ea0dcfacc51f53d9c9db18027b6eaa4f1b86755827c9bdd2fe18a9b",
+    "archive_kind": "raw"
+  },
+  {
+    "path": "/home/user/gpui-scene-support-target/release/examples/todo_comparison_five",
+    "bytes": 25620192,
+    "sha256": "389780f8708e24f53e139f3df1895b1a6916780f65b8fe98c5490bfbda447cb1",
+    "mode": 493,
+    "archive": "/home/user/gpui-preserved-test-binaries/389780f8708e24f53e139f3df1895b1a6916780f65b8fe98c5490bfbda447cb1",
+    "archive_kind": "raw"
+  },
+  {
+    "path": "/home/user/gpui-scene-support-target/release/examples/contained_owner_spike",
+    "bytes": 10041208,
+    "sha256": "12664b9a6007318a998e258d9dd62ac8c9f462f5204963da7d4b8714b7807d05",
+    "mode": 493,
+    "archive": "/home/user/gpui-preserved-test-binaries/12664b9a6007318a998e258d9dd62ac8c9f462f5204963da7d4b8714b7807d05",
+    "archive_kind": "raw"
+  },
+  {
+    "path": "/home/user/gpui-scene-support-target/release/examples/cpu",
+    "bytes": 8030744,
+    "sha256": "06cbbbb533115a885ae564c15456cdaea94e001a0ee390289786b684d579d3a9",
+    "mode": 493,
+    "archive": "/home/user/gpui-preserved-test-binaries/06cbbbb533115a885ae564c15456cdaea94e001a0ee390289786b684d579d3a9",
+    "archive_kind": "raw"
+  },
+  {
+    "path": "/home/user/gpui-scene-support-target/release/examples/ime_cursor_cost",
+    "bytes": 9892848,
+    "sha256": "b58e011fd3b0e9fbca542d88cd336b2dfb7ccb945ced271a553a6687e1432939",
+    "mode": 493,
+    "archive": "/home/user/gpui-preserved-test-binaries/b58e011fd3b0e9fbca542d88cd336b2dfb7ccb945ced271a553a6687e1432939",
+    "archive_kind": "raw"
+  },
+  {
+    "path": "/home/user/gpui-scene-support-target/release/examples/groups",
+    "bytes": 15440104,
+    "sha256": "e43b44abd31d5543de97cdfb7995e95c4c91baff214dbe16dbefca6a6c31398a",
+    "mode": 493,
+    "archive": "/home/user/gpui-preserved-test-binaries/e43b44abd31d5543de97cdfb7995e95c4c91baff214dbe16dbefca6a6c31398a",
+    "archive_kind": "raw"
+  },
+  {
+    "path": "/home/user/gpui-scene-support-target/release/examples/caret_pair_measure",
+    "bytes": 6955152,
+    "sha256": "a006de55c56c1aa9d04a0cd1d485782229cb0439dee55e44a5c501deee9daa6f",
+    "mode": 493,
+    "archive": "/home/user/gpui-preserved-test-binaries/a006de55c56c1aa9d04a0cd1d485782229cb0439dee55e44a5c501deee9daa6f",
+    "archive_kind": "raw"
+  },
+  {
+    "path": "/home/user/gpui-scene-support-target/release/examples/text_shaping",
+    "bytes": 8040600,
+    "sha256": "ea6515796f96de0d9f3a2f81016a810bf339f5fa35a89c8fb9e7797023f3ae89",
+    "mode": 493,
+    "archive": "/home/user/gpui-preserved-test-binaries/ea6515796f96de0d9f3a2f81016a810bf339f5fa35a89c8fb9e7797023f3ae89",
+    "archive_kind": "raw"
+  },
+  {
+    "path": "/home/user/gpui-scene-support-target/release/examples/font_memory",
+    "bytes": 10156584,
+    "sha256": "017a8de1acb43918aee138206d7678da135fcea2eb519d7382713a18520a74cc",
+    "mode": 493,
+    "archive": "/home/user/gpui-preserved-test-binaries/017a8de1acb43918aee138206d7678da135fcea2eb519d7382713a18520a74cc",
+    "archive_kind": "raw"
+  },
+  {
+    "path": "/home/user/gpui-scene-support-target/release/examples/property_editor",
+    "bytes": 25350384,
+    "sha256": "8aa30dc4cdf52d3660c8b07eb22e9ec747f2b9ed10dd57f72131c81f048a7ad3",
+    "mode": 493,
+    "archive": "/home/user/gpui-preserved-test-binaries/8aa30dc4cdf52d3660c8b07eb22e9ec747f2b9ed10dd57f72131c81f048a7ad3",
+    "archive_kind": "raw"
+  },
+  {
+    "path": "/home/user/gpui-scene-support-target/release/examples/todo_comparison",
+    "bytes": 25596336,
+    "sha256": "828e0fcb744bf136d2e59b52daaafba57d6d358f18ea8434a84a8823be1757d0",
+    "mode": 493,
+    "archive": "/home/user/gpui-preserved-test-binaries/828e0fcb744bf136d2e59b52daaafba57d6d358f18ea8434a84a8823be1757d0",
+    "archive_kind": "raw"
+  },
+  {
+    "path": "/home/user/gpui-scene-support-target/release/examples/gradient_backgrounds",
+    "bytes": 9870320,
+    "sha256": "d8cae0ae569d9b8ea6a68b072c6cbb17fdd4ffe67cc187ffe5ec181f6a1e4701",
+    "mode": 493,
+    "archive": "/home/user/gpui-preserved-test-binaries/d8cae0ae569d9b8ea6a68b072c6cbb17fdd4ffe67cc187ffe5ec181f6a1e4701",
+    "archive_kind": "raw"
+  },
+  {
+    "path": "/home/user/gpui-scene-support-target/release/examples/clip_cost",
+    "bytes": 7879408,
+    "sha256": "c60c2477716aefb3803266e60d3979bb55ba4860d965cfb213e4ac11f46c4532",
+    "mode": 493,
+    "archive": "/home/user/gpui-preserved-test-binaries/c60c2477716aefb3803266e60d3979bb55ba4860d965cfb213e4ac11f46c4532",
+    "archive_kind": "raw"
+  },
+  {
+    "path": "/home/user/gpui-scene-support-target/release/examples/paint_slot_storage",
+    "bytes": 9792992,
+    "sha256": "17c48601f7e8d3893d4bb11719cbf291d7e128140a58cdc4bcbeecd0c85de0eb",
+    "mode": 493,
+    "archive": "/home/user/gpui-preserved-test-binaries/17c48601f7e8d3893d4bb11719cbf291d7e128140a58cdc4bcbeecd0c85de0eb",
+    "archive_kind": "raw"
+  },
+  {
+    "path": "/home/user/gpui-scene-support-target/release/examples/sheet_access_measure",
+    "bytes": 9744064,
+    "sha256": "c79fbd8f97f8aaaa11cc811a905c451d4d6ff63caae124d2b7ac9fca53ca9543",
+    "mode": 493,
+    "archive": "/home/user/gpui-preserved-test-binaries/c79fbd8f97f8aaaa11cc811a905c451d4d6ff63caae124d2b7ac9fca53ca9543",
+    "archive_kind": "raw"
+  }
+]

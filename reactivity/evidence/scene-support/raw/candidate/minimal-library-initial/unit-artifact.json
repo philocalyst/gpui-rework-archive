@@ -1,0 +1,44 @@
+{
+  "path": "/home/user/gpui-scene-support-target/release/build/gpui/e0c8b8dd3837edc3/out/gpui-e0c8b8dd3837edc3",
+  "sha256": "63ea75af8ad9c226417f6732a9564c9e4f30cf841909e95522923e11df877da0",
+  "preserved": "/home/user/gpui-preserved-test-binaries/63ea75af8ad9c226417f6732a9564c9e4f30cf841909e95522923e11df877da0",
+  "bytes": 42328080,
+  "executed": true,
+  "cargo": {
+    "reason": "compiler-artifact",
+    "package_id": "path+file:///home/user/gpui-scene-support-lab/reactivity/crates/gpui#0.1.0",
+    "manifest_path": "/home/user/gpui-scene-support-lab/reactivity/crates/gpui/Cargo.toml",
+    "target": {
+      "kind": [
+        "lib"
+      ],
+      "crate_types": [
+        "lib"
+      ],
+      "name": "gpui",
+      "src_path": "/home/user/gpui-scene-support-lab/reactivity/crates/gpui/src/lib.rs",
+      "edition": "2024",
+      "doc": true,
+      "doctest": true,
+      "test": true
+    },
+    "profile": {
+      "opt_level": "3",
+      "debuginfo": 0,
+      "debug_assertions": false,
+      "overflow_checks": false,
+      "test": true
+    },
+    "features": [
+      "default",
+      "native-core",
+      "simd",
+      "x11-minimal"
+    ],
+    "filenames": [
+      "/home/user/gpui-scene-support-target/release/build/gpui/e0c8b8dd3837edc3/out/gpui-e0c8b8dd3837edc3"
+    ],
+    "executable": "/home/user/gpui-scene-support-target/release/build/gpui/e0c8b8dd3837edc3/out/gpui-e0c8b8dd3837edc3",
+    "fresh": false
+  }
+}
