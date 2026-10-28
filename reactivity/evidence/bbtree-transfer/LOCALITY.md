@@ -502,3 +502,46 @@ The startup win does not establish overall superiority, hardware GPU behavior,
 scanout latency or quality parity. Any next shader/sample lowering experiment
 needs its own exact numerical certificate, failed mutant and preregistered full
 cost gates; the old pixel-uniform experiment remains rejected. All work local.
+
+
+## Exact suffix complete regression passes; mask-address lowering begins
+
+Regression dossier **f90ca6b10844b9c7c828e37e310021d0e270df6c** independently
+verifies13,274 raw files:4,160 timing processes,168 qualification processes and56
+allocation probes. All28 fixed point gates pass; paired median ratios range
+0.973507727–1.019494719, all<=1.05. Some bootstrap intervals cross1.05: this is
+not a statistical upper-bound claim. All112 warm allocation comparisons pass,
+exact pixels/epochs and copy/image charges match, damage never grows, and hot
+headers remain unchanged. No failed/retried timing processes or passing subset.
+The source/API/shader/unsafe/storage limitations of the startup win are unchanged.
+
+The next isolated hypothesis is **local/mask-lattice**, preregistered at
+**d3b1c9c49b6fd4ee4585c3977e9b6352b9716020**, implementation
+**7798bfd650dfe571d8edf391886a46e245df913d**, with independent pre-change oracle
+**6faae98aa7391ede8f07f9325e63f044f1de9adf** containing the identical public GPU
+fixtures. No correctness or performance result yet. New-checkout index setup
+faultc9fc88fa29 is preserved before the corrected production-identical prereg;
+no build/test observation was made from the bad checkout.
+
+For unit inverse axes and equal mask/logical dimensions, bounded dyadic origins
+and translations permit exact f64 scalar mapping. Quantizing only the uploaded
+sampling origin to ceil((origin-1/8)*4)/4 preserves every texel address and
+half-open edge at the fixed odd-eighth sample lattice. Canonical geometry,
+clipping/corrections, CSR bounds, atlas leases and publication identities stay
+unchanged. A per-placement material bit in existing records allows the shader
+to skip repeated inverse/normalization/error arithmetic. All16 correlated samples,
+blend operations and anchor/delta reduction remain. This is distinct from the
+rejected pixel-uniform sample collapse and has no new pipeline or retained index.
+
+A full independent exact pixel oracle, numerical-boundary tests, bounded mutant,
+configuration/native gates and matched end-to-end screen are required. The
+screen's stream/mixed CPU improvement target is20%; scroll must not regress5%.
+Only a passing screen admits the28-case full cost matrix, followed by a new
+matched ZGX comparison. The dyadic proof and implementation are hypotheses until
+validated; software Vulkan cannot close the physical hardware/quality gates.
+
+BBTree's memory lanes overlap independent dependent-load chains. Here the
+measured bottleneck is repeated raster arithmetic, so address lowering applies
+the internal-operation/cost-accounting lesson without claiming an async-runtime
+or cache-hit breakthrough. Solid/Ripple publication/retention semantics still
+constrain which prepared data and immutable resources a visible update may use.

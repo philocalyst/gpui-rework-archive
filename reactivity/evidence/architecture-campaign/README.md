@@ -471,3 +471,13 @@ qualified at **380db598cdbed2dd81c5a41745473c40a876f148**. Native startup screen
 Full28-case regression continuation **64e90ba23d** is preregistered; no cost
 results yet. No API/shader/storage change or overall ZGX/hardware victory.
 See [the detailed mechanism and limits](../bbtree-transfer/LOCALITY.md#exact-unchanged-suffix-qualified-startup-win-complete-regression-gate-pending).
+
+
+Exact suffix full regression dossier **f90ca6b10844b9c7c828e37e310021d0e270df6c**
+now passes all28 fixed point gates,112 allocation comparisons and independent
+verification of13,274 files. No ZGX victory. Next local/mask-lattice is frozen at
+**7798bfd650dfe571d8edf391886a46e245df913d**, preregistered at**d3b1c9c49b6fd4ee4585c3977e9b6352b9716020**:
+exact per-placement mask sample-address lowering, preserving16 samples and
+publication authority. Correctness and independent GPU oracle qualification
+are in progress. See LOCALITY.md for the mechanism, numerical certificate,
+pre-observation setup correction and unchanged acceptance limits.
