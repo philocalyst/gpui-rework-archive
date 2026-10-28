@@ -5,7 +5,6 @@ use gpui_canvas::{PreparedDraw, Rect};
 pub(super) fn lowered_mask_rect(draw: &PreparedDraw<'_>) -> Option<Rect> {
     let mask = draw.source.mask()?;
     if draw.inverse[..4] != [1.0, 0.0, 0.0, 1.0]
-        || draw.local_rect.width as f64 != mask.width as f64
         || draw.local_rect.height as f64 != mask.height as f64
     {
         return None;
