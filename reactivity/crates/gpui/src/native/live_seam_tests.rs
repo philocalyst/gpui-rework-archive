@@ -125,10 +125,10 @@ fn submit(
     let r = renderer.retained_stats();
     (
         token,
-        json!({"token":token,"from":from,"damage_base":base,"damage":damage,
+        json!({"token":format!("{token:?}"),"from":format!("{from:?}"),"damage_base":format!("{base:?}"),"damage":damage,
         "source_counters":counters,"validated_draws":s.validated_draws,
         "binning_tile_visits":s.binning_tile_visits,"upload_bytes":s.instance_upload_bytes,
-        "gpu_buffer_bytes":s.gpu_buffer_bytes,"cpu_index_capacity_bytes":s.cpu_index_capacity_bytes,
+        "draw_record_bytes":s.draw_record_bytes,"tile_references":s.tile_references,"gpu_buffer_bytes":s.gpu_buffer_bytes,"cpu_index_capacity_bytes":s.cpu_index_capacity_bytes,
         "atlas_bytes":s.atlas_bytes,"retained_image_bytes":r.image_bytes,
         "composited_pixels":r.composited_pixels,"copied_pixels":r.copied_pixels}),
     )
@@ -143,17 +143,30 @@ fn compare(
     let actual = read(renderer, image);
     let cpu = owner.with_pixels(|p, _, _| p.to_vec()).unwrap();
     assert_eq!(actual, cpu, "live retained versus current full CPU");
-    assert_eq!(
-        actual,
-        expected.with_pixels(|p, _, _| p.to_vec()).unwrap(),
-        "fresh Window oracle"
-    );
+    let fresh = expected.with_pixels(|p, _, _| p.to_vec()).unwrap();
+    assert_eq!(actual, fresh, "fresh Window oracle");
     let full = texture(renderer.device());
     owner
         .with_scene(|scene, _| oracle.render(scene, &full.create_view(&Default::default())))
         .unwrap()
         .unwrap();
-    assert_eq!(actual, read(renderer, &full), "independent full GPU route");
+    let gpu = read(renderer, &full);
+    assert_eq!(actual, gpu, "independent full GPU route");
+    let dir = std::path::PathBuf::from(std::env::var("GPUI_LIVE_SEAM_OUTPUT").unwrap())
+        .with_extension("pixels");
+    std::fs::create_dir_all(&dir).unwrap();
+    for (kind, bytes) in [
+        ("actual", &actual),
+        ("cpu", &cpu),
+        ("fresh", &fresh),
+        ("full", &gpu),
+    ] {
+        std::fs::write(
+            dir.join(format!("{}-{kind}.rgba", renderer.stats().submissions)),
+            bytes,
+        )
+        .unwrap();
+    }
     actual
 }
 #[test]

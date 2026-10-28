@@ -94,3 +94,10 @@ B's index payload/CPU directories and retained textures are inherent explicit
 allocations. Its46MiB worker RSS and cold pipeline increase are still unassigned
 software driver/compiler/process costs; this experiment must not subtract or
 attribute them speculatively. No shipping adoption or performance gate here.
+
+First build28536b7 failed because diagnostic JSON tried to serialize opaque
+PresentationToken. An unsuccessful edit script changed no source and its
+automatically continued build repeated that compiler failure; preserve both
+captures and empty guards. Correct only token diagnostics to Debug text,
+retaining its type/API unchanged. Preserve all four pixel oracles in corrected
+execution. No gate weakened.
