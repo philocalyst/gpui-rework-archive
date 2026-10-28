@@ -1,0 +1,2228 @@
+{
+  "qualification": [
+    {
+      "verifier": "/home/user/gpui-mask-lattice-lab/reactivity/evidence/mask-lattice/verify.py",
+      "exit": 0,
+      "stdout": "{\n  \"files\": 2026,\n  \"qualified_elf_identities\": 411,\n  \"configurations\": 5,\n  \"actual_native_processes\": 15,\n  \"exact_frames_per_variant\": 336,\n  \"independent_pixel_variants\": 3,\n  \"preserved_prior_pixel_failures\": 12,\n  \"shipping_lines\": 38089,\n  \"native_elf_bytes\": 26391352,\n  \"qualification_passes\": true,\n  \"timing_observations\": 0\n}\n",
+      "stderr": ""
+    },
+    {
+      "verifier": "/home/user/gpui-mask-lattice-native-lab/reactivity/evidence/mask-lattice-native/verify_dossier.py",
+      "exit": 0,
+      "stdout": "{\"files\": 824, \"fixed_processes\": 64, \"preflights\": 10, \"workload_tests\": 34, \"qualification_reverified\": true, \"candidate_passes\": false, \"scope\": \"Software Vulkan; no ZGX/hardware/scanout or quality victory.\"}\n",
+      "stderr": ""
+    }
+  ],
+  "files": [
+    {
+      "path": "/home/user/gpui-mask-lattice-target/release/examples/tiles",
+      "bytes": 15452600,
+      "sha256": "81a0bb65fb96a8f5291bb663091ee2675a4dfcf18da319cbd88e93c77f146924",
+      "kind": "exact-canonical-executable-copy",
+      "preserved": "/home/user/gpui-preserved-test-binaries/81a0bb65fb96a8f5291bb663091ee2675a4dfcf18da319cbd88e93c77f146924"
+    },
+    {
+      "path": "/home/user/gpui-mask-lattice-target/release/examples/damage_cost",
+      "bytes": 710712,
+      "sha256": "32c1cd9667fe00b9ce94f9040b3f7d2d1ef0c156e01d3170b02f7ca9692bd5da",
+      "kind": "exact-canonical-executable-copy",
+      "preserved": "/home/user/gpui-preserved-test-binaries/32c1cd9667fe00b9ce94f9040b3f7d2d1ef0c156e01d3170b02f7ca9692bd5da"
+    },
+    {
+      "path": "/home/user/gpui-mask-lattice-target/release/examples/immutable_text_measure",
+      "bytes": 9979688,
+      "sha256": "2c8983576756b744d855a13dbe40717ae32cd2c587fe406791152a8144a25dc3",
+      "kind": "exact-canonical-executable-copy",
+      "preserved": "/home/user/gpui-preserved-test-binaries/2c8983576756b744d855a13dbe40717ae32cd2c587fe406791152a8144a25dc3"
+    },
+    {
+      "path": "/home/user/gpui-mask-lattice-target/release/examples/component_sources",
+      "bytes": 25388296,
+      "sha256": "d4d39b843162aeced3226ce17ec1b00293c7f07e82f87fdac17e672f62b9c0df",
+      "kind": "exact-canonical-executable-copy",
+      "preserved": "/home/user/gpui-preserved-test-binaries/d4d39b843162aeced3226ce17ec1b00293c7f07e82f87fdac17e672f62b9c0df"
+    },
+    {
+      "path": "/home/user/gpui-mask-lattice-target/release/examples/state_update_cost",
+      "bytes": 9928296,
+      "sha256": "a3ac86f1049711ff7327c1d6cf113ee41d4f998e1dc295167c086ff554803066",
+      "kind": "exact-canonical-executable-copy",
+      "preserved": "/home/user/gpui-preserved-test-binaries/a3ac86f1049711ff7327c1d6cf113ee41d4f998e1dc295167c086ff554803066"
+    },
+    {
+      "path": "/home/user/gpui-mask-lattice-target/release/examples/mapped_properties",
+      "bytes": 25285288,
+      "sha256": "2eabcf81aa0aadc891aed0214cf57cbfa32673da0d71b394dab26d6655fd5779",
+      "kind": "exact-canonical-executable-copy",
+      "preserved": "/home/user/gpui-preserved-test-binaries/2eabcf81aa0aadc891aed0214cf57cbfa32673da0d71b394dab26d6655fd5779"
+    },
+    {
+      "path": "/home/user/gpui-mask-lattice-target/release/examples/first_frame",
+      "bytes": 10081968,
+      "sha256": "1f594a5bd943f4b9e529567abf845699d1eb0ebf4528fdc21a8b66cfc09b4f6d",
+      "kind": "exact-canonical-executable-copy",
+      "preserved": "/home/user/gpui-preserved-test-binaries/1f594a5bd943f4b9e529567abf845699d1eb0ebf4528fdc21a8b66cfc09b4f6d"
+    },
+    {
+      "path": "/home/user/gpui-mask-lattice-target/release/examples/todo_comparison_mapped",
+      "bytes": 25630712,
+      "sha256": "6dadfe2c2e809a3ae09c9707d4431e80e30b52710c8623ebec7affaa8e45d081",
+      "kind": "exact-canonical-executable-copy",
+      "preserved": "/home/user/gpui-preserved-test-binaries/6dadfe2c2e809a3ae09c9707d4431e80e30b52710c8623ebec7affaa8e45d081"
+    },
+    {
+      "path": "/home/user/gpui-mask-lattice-target/release/examples/reactive_styles",
+      "bytes": 10139176,
+      "sha256": "67e56f1c93e3576fb3d2b6e0fb074356c72cac9f51abb9bc1de79e46d90b0479",
+      "kind": "exact-canonical-executable-copy",
+      "preserved": "/home/user/gpui-preserved-test-binaries/67e56f1c93e3576fb3d2b6e0fb074356c72cac9f51abb9bc1de79e46d90b0479"
+    },
+    {
+      "path": "/home/user/gpui-mask-lattice-target/release/examples/unicode",
+      "bytes": 25238296,
+      "sha256": "a817addbca048b73d3bb663e3b79e50adcf54b1e89b694a5c2b41ee6bc613227",
+      "kind": "exact-canonical-executable-copy",
+      "preserved": "/home/user/gpui-preserved-test-binaries/a817addbca048b73d3bb663e3b79e50adcf54b1e89b694a5c2b41ee6bc613227"
+    },
+    {
+      "path": "/home/user/gpui-mask-lattice-target/release/examples/color_cost",
+      "bytes": 9777128,
+      "sha256": "bac1f3996e71c9090686258afb29cdcdd716c7013410f5bc07cd164fcb657751",
+      "kind": "exact-canonical-executable-copy",
+      "preserved": "/home/user/gpui-preserved-test-binaries/bac1f3996e71c9090686258afb29cdcdd716c7013410f5bc07cd164fcb657751"
+    },
+    {
+      "path": "/home/user/gpui-mask-lattice-target/release/examples/panes",
+      "bytes": 25219888,
+      "sha256": "e071e9656fab44a03319584c89efe936c8ecb9614d095f1edbadf39b57cb1f02",
+      "kind": "exact-canonical-executable-copy",
+      "preserved": "/home/user/gpui-preserved-test-binaries/e071e9656fab44a03319584c89efe936c8ecb9614d095f1edbadf39b57cb1f02"
+    },
+    {
+      "path": "/home/user/gpui-mask-lattice-target/release/examples/retained",
+      "bytes": 15541832,
+      "sha256": "b1466f60474160f6f0e85c799491a4f6649a9e3f13aa252397b19d1c212e9940",
+      "kind": "exact-canonical-executable-copy",
+      "preserved": "/home/user/gpui-preserved-test-binaries/b1466f60474160f6f0e85c799491a4f6649a9e3f13aa252397b19d1c212e9940"
+    },
+    {
+      "path": "/home/user/gpui-mask-lattice-target/release/examples/library",
+      "bytes": 25852352,
+      "sha256": "ce99deef853f1583609126e1e91b2cc3ab95c7b2700b042bfecddd8099796a14",
+      "kind": "exact-canonical-executable-copy",
+      "preserved": "/home/user/gpui-preserved-test-binaries/ce99deef853f1583609126e1e91b2cc3ab95c7b2700b042bfecddd8099796a14"
+    },
+    {
+      "path": "/home/user/gpui-mask-lattice-target/release/examples/text_interaction",
+      "bytes": 6968656,
+      "sha256": "8d3f42fbda0b0ca4c09be8c4b13b6714d4e4f9c7b54ad43c407ba1fdae9d7f4c",
+      "kind": "exact-canonical-executable-copy",
+      "preserved": "/home/user/gpui-preserved-test-binaries/8d3f42fbda0b0ca4c09be8c4b13b6714d4e4f9c7b54ad43c407ba1fdae9d7f4c"
+    },
+    {
+      "path": "/home/user/gpui-mask-lattice-target/release/examples/graphics",
+      "bytes": 25251768,
+      "sha256": "78c26aad09cea40e365f8f3c072666112f7ed5537b93672cb10b7ab95f1802e8",
+      "kind": "exact-canonical-executable-copy",
+      "preserved": "/home/user/gpui-preserved-test-binaries/78c26aad09cea40e365f8f3c072666112f7ed5537b93672cb10b7ab95f1802e8"
+    },
+    {
+      "path": "/home/user/gpui-mask-lattice-target/release/examples/covers",
+      "bytes": 25232704,
+      "sha256": "852e72ac40848fb301adbefc33c576e290503506438f2eb86ba88468d2b87d37",
+      "kind": "exact-canonical-executable-copy",
+      "preserved": "/home/user/gpui-preserved-test-binaries/852e72ac40848fb301adbefc33c576e290503506438f2eb86ba88468d2b87d37"
+    },
+    {
+      "path": "/home/user/gpui-mask-lattice-target/release/examples/unicode_text_measure",
+      "bytes": 9918600,
+      "sha256": "c2e076d52042dd6a4c23078edd624071242c7fd77b4150728388041fc341b44e",
+      "kind": "exact-canonical-executable-copy",
+      "preserved": "/home/user/gpui-preserved-test-binaries/c2e076d52042dd6a4c23078edd624071242c7fd77b4150728388041fc341b44e"
+    },
+    {
+      "path": "/home/user/gpui-mask-lattice-target/release/examples/counter",
+      "bytes": 10062936,
+      "sha256": "8cbd4b43e8a359e1b755e6fbf97129a5f8df47ebafc660753b5cf99a412684d5",
+      "kind": "exact-canonical-executable-copy",
+      "preserved": "/home/user/gpui-preserved-test-binaries/8cbd4b43e8a359e1b755e6fbf97129a5f8df47ebafc660753b5cf99a412684d5"
+    },
+    {
+      "path": "/home/user/gpui-mask-lattice-target/release/examples/retained_runs",
+      "bytes": 7885800,
+      "sha256": "051ec6a378cd034a79360480dec9691d5226f50f19062d5788db18fadc2206c0",
+      "kind": "exact-canonical-executable-copy",
+      "preserved": "/home/user/gpui-preserved-test-binaries/051ec6a378cd034a79360480dec9691d5226f50f19062d5788db18fadc2206c0"
+    },
+    {
+      "path": "/home/user/gpui-mask-lattice-target/release/examples/empty",
+      "bytes": 25200048,
+      "sha256": "99ed1b27ef7b96a3e7adc5df5a7a5d644d746e3ffd365d754bafc5c70abe50da",
+      "kind": "exact-canonical-executable-copy",
+      "preserved": "/home/user/gpui-preserved-test-binaries/99ed1b27ef7b96a3e7adc5df5a7a5d644d746e3ffd365d754bafc5c70abe50da"
+    },
+    {
+      "path": "/home/user/gpui-mask-lattice-target/release/examples/state_update_allocations",
+      "bytes": 9872264,
+      "sha256": "96fb9dbe04cfea81f35de6b4417326a64cbc0e5c6039ba6e3a6f768c0c86d6b9",
+      "kind": "exact-canonical-executable-copy",
+      "preserved": "/home/user/gpui-preserved-test-binaries/96fb9dbe04cfea81f35de6b4417326a64cbc0e5c6039ba6e3a6f768c0c86d6b9"
+    },
+    {
+      "path": "/home/user/gpui-mask-lattice-target/release/examples/text_lease_measure",
+      "bytes": 493728,
+      "sha256": "ab89f7f7892ac2ad278869f0c5496f09d6f73f9745abff41cca1cd35edcef57a",
+      "kind": "exact-canonical-executable-copy",
+      "preserved": "/home/user/gpui-preserved-test-binaries/ab89f7f7892ac2ad278869f0c5496f09d6f73f9745abff41cca1cd35edcef57a"
+    },
+    {
+      "path": "/home/user/gpui-mask-lattice-target/release/examples/text_cache_capacity",
+      "bytes": 7607512,
+      "sha256": "ea5f0cde101b310bb848ff34e3a66b05c6eea66d90b85e74bc1a075bc3c4c598",
+      "kind": "exact-canonical-executable-copy",
+      "preserved": "/home/user/gpui-preserved-test-binaries/ea5f0cde101b310bb848ff34e3a66b05c6eea66d90b85e74bc1a075bc3c4c598"
+    },
+    {
+      "path": "/home/user/gpui-mask-lattice-target/release/examples/remote_delivery_measure",
+      "bytes": 9906312,
+      "sha256": "211af3332339aa753f9267190a5bbc4eb7fe307e4a9975f0b351c49a57057a42",
+      "kind": "exact-canonical-executable-copy",
+      "preserved": "/home/user/gpui-preserved-test-binaries/211af3332339aa753f9267190a5bbc4eb7fe307e4a9975f0b351c49a57057a42"
+    },
+    {
+      "path": "/home/user/gpui-mask-lattice-target/release/examples/text_oracle",
+      "bytes": 6970024,
+      "sha256": "22c230ce9aba17ec6cb0a897cccb4fdf19c25b2ec23ef4dab2526dbf82cd6602",
+      "kind": "exact-canonical-executable-copy",
+      "preserved": "/home/user/gpui-preserved-test-binaries/22c230ce9aba17ec6cb0a897cccb4fdf19c25b2ec23ef4dab2526dbf82cd6602"
+    },
+    {
+      "path": "/home/user/gpui-mask-lattice-target/release/examples/coverage_table",
+      "bytes": 1434632,
+      "sha256": "80bb29255fa6cb42a683f428a1219ba1f2dad4de51b5d4fdefb81acbe24d9ff4",
+      "kind": "exact-canonical-executable-copy",
+      "preserved": "/home/user/gpui-preserved-test-binaries/80bb29255fa6cb42a683f428a1219ba1f2dad4de51b5d4fdefb81acbe24d9ff4"
+    },
+    {
+      "path": "/home/user/gpui-mask-lattice-target/release/examples/retained_list",
+      "bytes": 9944040,
+      "sha256": "42bca004b3e28be4e10281347c86461d5b72599b2920a9ea4a80612518fab3ea",
+      "kind": "exact-canonical-executable-copy",
+      "preserved": "/home/user/gpui-preserved-test-binaries/42bca004b3e28be4e10281347c86461d5b72599b2920a9ea4a80612518fab3ea"
+    },
+    {
+      "path": "/home/user/gpui-mask-lattice-target/release/examples/text_lane_measure",
+      "bytes": 9964928,
+      "sha256": "9b1466d0c67e4cc639cb257347920768723f3a285c53137e38e8724ecc2d9cfe",
+      "kind": "exact-canonical-executable-copy",
+      "preserved": "/home/user/gpui-preserved-test-binaries/9b1466d0c67e4cc639cb257347920768723f3a285c53137e38e8724ecc2d9cfe"
+    },
+    {
+      "path": "/home/user/gpui-mask-lattice-target/release/examples/images",
+      "bytes": 8229008,
+      "sha256": "aae81309f43a59139c74fbe86f58e517eefe67a2e4fca0744b028aa29ac6539c",
+      "kind": "exact-canonical-executable-copy",
+      "preserved": "/home/user/gpui-preserved-test-binaries/aae81309f43a59139c74fbe86f58e517eefe67a2e4fca0744b028aa29ac6539c"
+    },
+    {
+      "path": "/home/user/gpui-mask-lattice-target/release/examples/luna_bench",
+      "bytes": 25228024,
+      "sha256": "d0bc2380bee56d83de9bee33a0f424467e7819194eb053f161b1ba6cf9ef9237",
+      "kind": "exact-canonical-executable-copy",
+      "preserved": "/home/user/gpui-preserved-test-binaries/d0bc2380bee56d83de9bee33a0f424467e7819194eb053f161b1ba6cf9ef9237"
+    },
+    {
+      "path": "/home/user/gpui-mask-lattice-target/release/examples/selection_queries",
+      "bytes": 6955088,
+      "sha256": "f2e04fb8324f83bdd389792d035dad33537fe0b2e5fae76a8d8d1e7c7df40197",
+      "kind": "exact-canonical-executable-copy",
+      "preserved": "/home/user/gpui-preserved-test-binaries/f2e04fb8324f83bdd389792d035dad33537fe0b2e5fae76a8d8d1e7c7df40197"
+    },
+    {
+      "path": "/home/user/gpui-mask-lattice-target/release/examples/workbench",
+      "bytes": 25255488,
+      "sha256": "60e367cc30c4c8de26f32d8f4c648f30cd194c1dd1b3d66639e85a812450f282",
+      "kind": "exact-canonical-executable-copy",
+      "preserved": "/home/user/gpui-preserved-test-binaries/60e367cc30c4c8de26f32d8f4c648f30cd194c1dd1b3d66639e85a812450f282"
+    },
+    {
+      "path": "/home/user/gpui-mask-lattice-target/release/examples/group_views",
+      "bytes": 7872368,
+      "sha256": "54061ff0426531cecad93f39d85e0758a66a69c655d6954b7988e6725c9d011d",
+      "kind": "exact-canonical-executable-copy",
+      "preserved": "/home/user/gpui-preserved-test-binaries/54061ff0426531cecad93f39d85e0758a66a69c655d6954b7988e6725c9d011d"
+    },
+    {
+      "path": "/home/user/gpui-mask-lattice-target/release/examples/zgx_native_lab",
+      "bytes": 26391208,
+      "sha256": "c208e6446984a33198d310ba0ae579af0ea19a6a87ac8217467dbe35ed5ce014",
+      "kind": "exact-canonical-executable-copy",
+      "preserved": "/home/user/gpui-preserved-test-binaries/c208e6446984a33198d310ba0ae579af0ea19a6a87ac8217467dbe35ed5ce014"
+    },
+    {
+      "path": "/home/user/gpui-mask-lattice-target/release/examples/todo_recording_cost",
+      "bytes": 10310200,
+      "sha256": "b7c9043883e0e9bff024df86c71e02e787f217964c9bd880a8d1c56360f411a9",
+      "kind": "exact-canonical-executable-copy",
+      "preserved": "/home/user/gpui-preserved-test-binaries/b7c9043883e0e9bff024df86c71e02e787f217964c9bd880a8d1c56360f411a9"
+    },
+    {
+      "path": "/home/user/gpui-mask-lattice-target/release/examples/workspace",
+      "bytes": 25350928,
+      "sha256": "23b3c4ed2016968158c56a57804f7596ad9fb6b0b1dbcba93b8bf4383ee1824f",
+      "kind": "exact-canonical-executable-copy",
+      "preserved": "/home/user/gpui-preserved-test-binaries/23b3c4ed2016968158c56a57804f7596ad9fb6b0b1dbcba93b8bf4383ee1824f"
+    },
+    {
+      "path": "/home/user/gpui-mask-lattice-target/release/examples/inspector",
+      "bytes": 25237904,
+      "sha256": "419b2f47408a6e8ee250a5a0c85af5582875872bf3cfee6c253f21206c38d245",
+      "kind": "exact-canonical-executable-copy",
+      "preserved": "/home/user/gpui-preserved-test-binaries/419b2f47408a6e8ee250a5a0c85af5582875872bf3cfee6c253f21206c38d245"
+    },
+    {
+      "path": "/home/user/gpui-mask-lattice-target/release/examples/todo_comparison_five",
+      "bytes": 25615696,
+      "sha256": "2636dcd05b9e23bce36e3ece1b9b09eefbb037f312b0084226963f817e765e5c",
+      "kind": "exact-canonical-executable-copy",
+      "preserved": "/home/user/gpui-preserved-test-binaries/2636dcd05b9e23bce36e3ece1b9b09eefbb037f312b0084226963f817e765e5c"
+    },
+    {
+      "path": "/home/user/gpui-mask-lattice-target/release/examples/contained_owner_spike",
+      "bytes": 10042776,
+      "sha256": "4bed570f92be2171b7a1d9bafb795a2924769a8c16e8eb321e6ace42ed98f96d",
+      "kind": "exact-canonical-executable-copy",
+      "preserved": "/home/user/gpui-preserved-test-binaries/4bed570f92be2171b7a1d9bafb795a2924769a8c16e8eb321e6ace42ed98f96d"
+    },
+    {
+      "path": "/home/user/gpui-mask-lattice-target/release/examples/cpu",
+      "bytes": 8030384,
+      "sha256": "e8a286c8e17baa8343b83d2034740768e085166f2ddf2f970272c85f2db2085a",
+      "kind": "exact-canonical-executable-copy",
+      "preserved": "/home/user/gpui-preserved-test-binaries/e8a286c8e17baa8343b83d2034740768e085166f2ddf2f970272c85f2db2085a"
+    },
+    {
+      "path": "/home/user/gpui-mask-lattice-target/release/examples/ime_cursor_cost",
+      "bytes": 9894376,
+      "sha256": "0857d0c2b4bac8872cf89dccf65d185441635915c04adf7ad76ac183e1712bb3",
+      "kind": "exact-canonical-executable-copy",
+      "preserved": "/home/user/gpui-preserved-test-binaries/0857d0c2b4bac8872cf89dccf65d185441635915c04adf7ad76ac183e1712bb3"
+    },
+    {
+      "path": "/home/user/gpui-mask-lattice-target/release/examples/groups",
+      "bytes": 15448688,
+      "sha256": "401a2ef936170ad330fe6d6eba2438ad48d27faca05cb48c20e91ce704dffbf6",
+      "kind": "exact-canonical-executable-copy",
+      "preserved": "/home/user/gpui-preserved-test-binaries/401a2ef936170ad330fe6d6eba2438ad48d27faca05cb48c20e91ce704dffbf6"
+    },
+    {
+      "path": "/home/user/gpui-mask-lattice-target/release/examples/caret_pair_measure",
+      "bytes": 6954800,
+      "sha256": "2b8165120421160b16596ed3627ee98617a1eddeedf99d82bd2760a28034a7e3",
+      "kind": "exact-canonical-executable-copy",
+      "preserved": "/home/user/gpui-preserved-test-binaries/2b8165120421160b16596ed3627ee98617a1eddeedf99d82bd2760a28034a7e3"
+    },
+    {
+      "path": "/home/user/gpui-mask-lattice-target/release/examples/text_shaping",
+      "bytes": 8040240,
+      "sha256": "8be657edd5770a7538c0b551ad74b58d4152e81ae30b5b21e9ceefcf26feefd4",
+      "kind": "exact-canonical-executable-copy",
+      "preserved": "/home/user/gpui-preserved-test-binaries/8be657edd5770a7538c0b551ad74b58d4152e81ae30b5b21e9ceefcf26feefd4"
+    },
+    {
+      "path": "/home/user/gpui-mask-lattice-target/release/examples/font_memory",
+      "bytes": 10156224,
+      "sha256": "5789729786e9e86debb32ae412097fc76f08f52912cf0a0408844ed89b8e8595",
+      "kind": "exact-canonical-executable-copy",
+      "preserved": "/home/user/gpui-preserved-test-binaries/5789729786e9e86debb32ae412097fc76f08f52912cf0a0408844ed89b8e8595"
+    },
+    {
+      "path": "/home/user/gpui-mask-lattice-target/release/examples/property_editor",
+      "bytes": 25345264,
+      "sha256": "f59d455fb3e6ea6519010c6fa64034dfad65a4312c16fa82d016a66e5cc73aab",
+      "kind": "exact-canonical-executable-copy",
+      "preserved": "/home/user/gpui-preserved-test-binaries/f59d455fb3e6ea6519010c6fa64034dfad65a4312c16fa82d016a66e5cc73aab"
+    },
+    {
+      "path": "/home/user/gpui-mask-lattice-target/release/examples/todo_comparison",
+      "bytes": 25591992,
+      "sha256": "c04ec81837ea693d4f144798bb020e7ee671b29b82e70ae396d38863f5df7c4b",
+      "kind": "exact-canonical-executable-copy",
+      "preserved": "/home/user/gpui-preserved-test-binaries/c04ec81837ea693d4f144798bb020e7ee671b29b82e70ae396d38863f5df7c4b"
+    },
+    {
+      "path": "/home/user/gpui-mask-lattice-target/release/examples/image_axis",
+      "bytes": 754792,
+      "sha256": "c634defc3829f4d10a0d2672b448edb3cbe7183ee800bc18cb62a78b251843ee",
+      "kind": "exact-canonical-executable-copy",
+      "preserved": "/home/user/gpui-preserved-test-binaries/c634defc3829f4d10a0d2672b448edb3cbe7183ee800bc18cb62a78b251843ee"
+    },
+    {
+      "path": "/home/user/gpui-mask-lattice-target/release/examples/gradient_backgrounds",
+      "bytes": 9871832,
+      "sha256": "daabdccfac5529c4a0ff144dab62f665f8efd37d2caf1291da0ff9f52c014f85",
+      "kind": "exact-canonical-executable-copy",
+      "preserved": "/home/user/gpui-preserved-test-binaries/daabdccfac5529c4a0ff144dab62f665f8efd37d2caf1291da0ff9f52c014f85"
+    },
+    {
+      "path": "/home/user/gpui-mask-lattice-target/release/examples/clip_cost",
+      "bytes": 7879072,
+      "sha256": "3b47fb9cff6fdb6ac848ca48b255c293f2ee19219ec2740785972c30ea9abbd2",
+      "kind": "exact-canonical-executable-copy",
+      "preserved": "/home/user/gpui-preserved-test-binaries/3b47fb9cff6fdb6ac848ca48b255c293f2ee19219ec2740785972c30ea9abbd2"
+    },
+    {
+      "path": "/home/user/gpui-mask-lattice-target/release/examples/paint_slot_storage",
+      "bytes": 9794472,
+      "sha256": "3c465b7cae50d35d8fe8d9890a49ceef3b287304e39125d5bf18a11d5125ad20",
+      "kind": "exact-canonical-executable-copy",
+      "preserved": "/home/user/gpui-preserved-test-binaries/3c465b7cae50d35d8fe8d9890a49ceef3b287304e39125d5bf18a11d5125ad20"
+    },
+    {
+      "path": "/home/user/gpui-mask-lattice-target/release/examples/sheet_access_measure",
+      "bytes": 9745584,
+      "sha256": "ff1a1c155263b2a9635bb99c6238b89f84421f3b5ed4f57c818bca1e167ef5f6",
+      "kind": "exact-canonical-executable-copy",
+      "preserved": "/home/user/gpui-preserved-test-binaries/ff1a1c155263b2a9635bb99c6238b89f84421f3b5ed4f57c818bca1e167ef5f6"
+    },
+    {
+      "path": "/home/user/gpui-mask-lattice-target/release/build/enumflags2_derive/9b66556ac39f4dc8/out/libenumflags2_derive-9b66556ac39f4dc8.so",
+      "bytes": 3087248,
+      "sha256": "5fbabd0ad99de405a18a39f05c27495f0129b6f0fbd7d430a5148609b353087d",
+      "kind": "regenerable-procedural-macro-library"
+    },
+    {
+      "path": "/home/user/gpui-mask-lattice-target/release/build/thiserror-impl/11cb6adf2e0064f3/out/libthiserror_impl-11cb6adf2e0064f3.so",
+      "bytes": 3980528,
+      "sha256": "19d10b99c85afedaa71edac94a0205d1a159d912b4060cd92e0af6883398ea4b",
+      "kind": "regenerable-procedural-macro-library"
+    },
+    {
+      "path": "/home/user/gpui-mask-lattice-target/release/build/thiserror-impl/e498c2ab57550790/out/libthiserror_impl-e498c2ab57550790.so",
+      "bytes": 3883480,
+      "sha256": "cd0ddbdd2ef4e6904bcd0418d69a29a17ad17c89871d140f6d12eb0e219fd40a",
+      "kind": "regenerable-procedural-macro-library"
+    },
+    {
+      "path": "/home/user/gpui-mask-lattice-target/release/build/thiserror-impl/503f75daab1907ca/out/libthiserror_impl-503f75daab1907ca.so",
+      "bytes": 3979128,
+      "sha256": "1bb72e716d0068b923461d91b0e01152769e0d18692728dab7dbb646fd348d42",
+      "kind": "regenerable-procedural-macro-library"
+    },
+    {
+      "path": "/home/user/gpui-mask-lattice-target/release/build/fearless_simd_macros/d47f9dfeab0a53ae/out/libfearless_simd_macros-d47f9dfeab0a53ae.so",
+      "bytes": 3722808,
+      "sha256": "605c794d42cc6d161e7cb24b021b6f8371b8131a73170995a780032047f88cb1",
+      "kind": "regenerable-procedural-macro-library"
+    },
+    {
+      "path": "/home/user/gpui-mask-lattice-target/release/build/fearless_simd_macros/13fb3b59b63a3fd9/out/libfearless_simd_macros-13fb3b59b63a3fd9.so",
+      "bytes": 3823840,
+      "sha256": "9d511cb3cc521f83b56d07abdc204a27ed005130687647e966eb91489a4f7e46",
+      "kind": "regenerable-procedural-macro-library"
+    },
+    {
+      "path": "/home/user/gpui-mask-lattice-target/release/build/fearless_simd_macros/91423a8c93fddbd0/out/libfearless_simd_macros-91423a8c93fddbd0.so",
+      "bytes": 3822544,
+      "sha256": "1a986f33339301b4d99385baa08022c61441d235af3298feee432b5d8dca37ff",
+      "kind": "regenerable-procedural-macro-library"
+    },
+    {
+      "path": "/home/user/gpui-mask-lattice-target/release/build/zerovec-derive/f48c4e6bbf014461/out/libzerovec_derive-f48c4e6bbf014461.so",
+      "bytes": 3888448,
+      "sha256": "b6e8f50f840974be1ea2698c0adb5f5f54e6e3116c19dcc6d28ac42cae6c66a2",
+      "kind": "regenerable-procedural-macro-library"
+    },
+    {
+      "path": "/home/user/gpui-mask-lattice-target/release/build/zerovec-derive/0453177f0d3b4a4e/out/libzerovec_derive-0453177f0d3b4a4e.so",
+      "bytes": 3888472,
+      "sha256": "8a11b7480c99dc1db38d65ac5af53877fbbc20ed53c33ea11d6434bcbbb22fd3",
+      "kind": "regenerable-procedural-macro-library"
+    },
+    {
+      "path": "/home/user/gpui-mask-lattice-target/release/build/zerovec-derive/c60aeac5b371979e/out/libzerovec_derive-c60aeac5b371979e.so",
+      "bytes": 3796416,
+      "sha256": "0a9eb93843297613b2749f965131bc0124da9e08e24035706e2636938354f08f",
+      "kind": "regenerable-procedural-macro-library"
+    },
+    {
+      "path": "/home/user/gpui-mask-lattice-target/release/build/bytemuck_derive/45d346d42384f9a1/out/libbytemuck_derive-45d346d42384f9a1.so",
+      "bytes": 3912032,
+      "sha256": "2c80b3b9a0c8f3d7386e018d6e7311c8254f38ec5d6a013e1030de839d0d21cd",
+      "kind": "regenerable-procedural-macro-library"
+    },
+    {
+      "path": "/home/user/gpui-mask-lattice-target/release/build/bytemuck_derive/636d61494b405d44/out/libbytemuck_derive-636d61494b405d44.so",
+      "bytes": 3912080,
+      "sha256": "ce4185a5d673bd913b494f1aa92ec9b07b105852f7336e17d8fa03c45a0e1355",
+      "kind": "regenerable-procedural-macro-library"
+    },
+    {
+      "path": "/home/user/gpui-mask-lattice-target/release/build/bytemuck_derive/8486ab917b9e4dfb/out/libbytemuck_derive-8486ab917b9e4dfb.so",
+      "bytes": 3819640,
+      "sha256": "2df22e1b3c4783841c9c21f0d80e20075ae134fab1abc4413ae3d93206b78951",
+      "kind": "regenerable-procedural-macro-library"
+    },
+    {
+      "path": "/home/user/gpui-mask-lattice-target/release/build/serde_repr/78d53ac2f697cdc2/out/libserde_repr-78d53ac2f697cdc2.so",
+      "bytes": 2673184,
+      "sha256": "61007a2f67a0124a9c107766a410b142036c408468ee0b01be54e7a8c6a6cbec",
+      "kind": "regenerable-procedural-macro-library"
+    },
+    {
+      "path": "/home/user/gpui-mask-lattice-target/release/build/serde_repr/9b371058a8c8172f/out/libserde_repr-9b371058a8c8172f.so",
+      "bytes": 2586168,
+      "sha256": "61d89be733cc9a018bfa54191e64a10b9caf337a9bfa567a193a57476e4700bb",
+      "kind": "regenerable-procedural-macro-library"
+    },
+    {
+      "path": "/home/user/gpui-mask-lattice-target/release/build/paste/ae32c2b30f5af1df/out/libpaste-ae32c2b30f5af1df.so",
+      "bytes": 723880,
+      "sha256": "0898bdc9048c67b4af54485c5a824fac19c7bceca455a75ec1130757b68e92e2",
+      "kind": "regenerable-procedural-macro-library"
+    },
+    {
+      "path": "/home/user/gpui-mask-lattice-target/release/build/phf_macros/5b0d3d11042a8fc2/out/libphf_macros-5b0d3d11042a8fc2.so",
+      "bytes": 3533368,
+      "sha256": "bd6496922656c6f7cb06f61239dcb93de0a26105fcab8161373ccb1252655547",
+      "kind": "regenerable-procedural-macro-library"
+    },
+    {
+      "path": "/home/user/gpui-mask-lattice-target/release/build/gpui_canvas/706c3421e5d8225c/out/text_cache_capacity",
+      "bytes": 7605056,
+      "sha256": "4594152b1020dfc8c52ddb1370656b549c09e239ab5c0bd1e5cc389039864264",
+      "kind": "exact-canonical-executable-copy",
+      "preserved": "/home/user/gpui-preserved-test-binaries/4594152b1020dfc8c52ddb1370656b549c09e239ab5c0bd1e5cc389039864264"
+    },
+    {
+      "path": "/home/user/gpui-mask-lattice-target/release/build/gpui_canvas/260eabc61cd841a2/out/text_shaping",
+      "bytes": 8009072,
+      "sha256": "36976667a184a8f02faa26e7fa3c05fa324ee025d78c4abd3857d2f4d97c27a7",
+      "kind": "exact-canonical-executable-copy",
+      "preserved": "/home/user/gpui-preserved-test-binaries/36976667a184a8f02faa26e7fa3c05fa324ee025d78c4abd3857d2f4d97c27a7"
+    },
+    {
+      "path": "/home/user/gpui-mask-lattice-target/release/build/gpui_canvas/3126e60d25619be3/out/selection_queries",
+      "bytes": 6955088,
+      "sha256": "f2e04fb8324f83bdd389792d035dad33537fe0b2e5fae76a8d8d1e7c7df40197",
+      "kind": "exact-canonical-executable-copy",
+      "preserved": "/home/user/gpui-preserved-test-binaries/f2e04fb8324f83bdd389792d035dad33537fe0b2e5fae76a8d8d1e7c7df40197"
+    },
+    {
+      "path": "/home/user/gpui-mask-lattice-target/release/build/gpui_canvas/df8261f9cf1049ac/out/image_axis",
+      "bytes": 754792,
+      "sha256": "c634defc3829f4d10a0d2672b448edb3cbe7183ee800bc18cb62a78b251843ee",
+      "kind": "exact-canonical-executable-copy",
+      "preserved": "/home/user/gpui-preserved-test-binaries/c634defc3829f4d10a0d2672b448edb3cbe7183ee800bc18cb62a78b251843ee"
+    },
+    {
+      "path": "/home/user/gpui-mask-lattice-target/release/build/gpui_canvas/13eb99216a5128df/out/group_views",
+      "bytes": 7869976,
+      "sha256": "ab7094efed9a0395795b09b31ace78ceee2db259ac1e9ab4792de3c4d58c326e",
+      "kind": "exact-canonical-executable-copy",
+      "preserved": "/home/user/gpui-preserved-test-binaries/ab7094efed9a0395795b09b31ace78ceee2db259ac1e9ab4792de3c4d58c326e"
+    },
+    {
+      "path": "/home/user/gpui-mask-lattice-target/release/build/gpui_canvas/fbaa1352f1fecd0d/out/text_shaping",
+      "bytes": 8040240,
+      "sha256": "8be657edd5770a7538c0b551ad74b58d4152e81ae30b5b21e9ceefcf26feefd4",
+      "kind": "exact-canonical-executable-copy",
+      "preserved": "/home/user/gpui-preserved-test-binaries/8be657edd5770a7538c0b551ad74b58d4152e81ae30b5b21e9ceefcf26feefd4"
+    },
+    {
+      "path": "/home/user/gpui-mask-lattice-target/release/build/gpui_canvas/b994064e9147dc2f/out/cpu",
+      "bytes": 8030384,
+      "sha256": "e8a286c8e17baa8343b83d2034740768e085166f2ddf2f970272c85f2db2085a",
+      "kind": "exact-canonical-executable-copy",
+      "preserved": "/home/user/gpui-preserved-test-binaries/e8a286c8e17baa8343b83d2034740768e085166f2ddf2f970272c85f2db2085a"
+    },
+    {
+      "path": "/home/user/gpui-mask-lattice-target/release/build/gpui_canvas/fc7b0dd44c8082b6/out/coverage_table",
+      "bytes": 1434632,
+      "sha256": "ab18914d6c1ceb983eb5e6f0dfca412da9d98d516cbcb374487ccc30d3d6b1f6",
+      "kind": "exact-canonical-executable-copy",
+      "preserved": "/home/user/gpui-preserved-test-binaries/ab18914d6c1ceb983eb5e6f0dfca412da9d98d516cbcb374487ccc30d3d6b1f6"
+    },
+    {
+      "path": "/home/user/gpui-mask-lattice-target/release/build/gpui_canvas/a59ff47379d46cb6/out/text_oracle",
+      "bytes": 6939000,
+      "sha256": "890d962456da8a4c5610599f60b619bac53e3877dd4bd0a8149da29bab6563ed",
+      "kind": "exact-canonical-executable-copy",
+      "preserved": "/home/user/gpui-preserved-test-binaries/890d962456da8a4c5610599f60b619bac53e3877dd4bd0a8149da29bab6563ed"
+    },
+    {
+      "path": "/home/user/gpui-mask-lattice-target/release/build/gpui_canvas/3331c5fe99da3696/out/coverage_table",
+      "bytes": 1434632,
+      "sha256": "80bb29255fa6cb42a683f428a1219ba1f2dad4de51b5d4fdefb81acbe24d9ff4",
+      "kind": "exact-canonical-executable-copy",
+      "preserved": "/home/user/gpui-preserved-test-binaries/80bb29255fa6cb42a683f428a1219ba1f2dad4de51b5d4fdefb81acbe24d9ff4"
+    },
+    {
+      "path": "/home/user/gpui-mask-lattice-target/release/build/gpui_canvas/74572a23cb90bd6a/out/text_cache_capacity",
+      "bytes": 7576544,
+      "sha256": "fc6b5f6025d4799d7a6769cdf56d71896382e2701a88c0137be8691c78d98c50",
+      "kind": "exact-canonical-executable-copy",
+      "preserved": "/home/user/gpui-preserved-test-binaries/fc6b5f6025d4799d7a6769cdf56d71896382e2701a88c0137be8691c78d98c50"
+    },
+    {
+      "path": "/home/user/gpui-mask-lattice-target/release/build/gpui_canvas/34e5fcba4fa4888b/out/damage_cost",
+      "bytes": 684888,
+      "sha256": "949cc275817d19db952f7fc52b7be1b60af52487315a5ce1c9fb6454a1e39538",
+      "kind": "exact-canonical-executable-copy",
+      "preserved": "/home/user/gpui-preserved-test-binaries/949cc275817d19db952f7fc52b7be1b60af52487315a5ce1c9fb6454a1e39538"
+    },
+    {
+      "path": "/home/user/gpui-mask-lattice-target/release/build/gpui_canvas/6e6cb88f7f166e8e/out/text_interaction",
+      "bytes": 6966112,
+      "sha256": "0790a08c09cc037ca6f683d93d46a1135749814a76f4f6fc30a7a4628ed8e06c",
+      "kind": "exact-canonical-executable-copy",
+      "preserved": "/home/user/gpui-preserved-test-binaries/0790a08c09cc037ca6f683d93d46a1135749814a76f4f6fc30a7a4628ed8e06c"
+    },
+    {
+      "path": "/home/user/gpui-mask-lattice-target/release/build/gpui_canvas/7d88e365fb8520d3/out/caret_pair_measure",
+      "bytes": 6923792,
+      "sha256": "dd40ecf5a56db8336729a02a5e598251244b3092f9f0749f18a3978584cbccb2",
+      "kind": "exact-canonical-executable-copy",
+      "preserved": "/home/user/gpui-preserved-test-binaries/dd40ecf5a56db8336729a02a5e598251244b3092f9f0749f18a3978584cbccb2"
+    },
+    {
+      "path": "/home/user/gpui-mask-lattice-target/release/build/gpui_canvas/df8fbe0afdb04b67/out/caret_pair_measure",
+      "bytes": 6954800,
+      "sha256": "2b8165120421160b16596ed3627ee98617a1eddeedf99d82bd2760a28034a7e3",
+      "kind": "exact-canonical-executable-copy",
+      "preserved": "/home/user/gpui-preserved-test-binaries/2b8165120421160b16596ed3627ee98617a1eddeedf99d82bd2760a28034a7e3"
+    },
+    {
+      "path": "/home/user/gpui-mask-lattice-target/release/build/gpui_canvas/1d61b0701b144f8b/out/text_shaping",
+      "bytes": 8037024,
+      "sha256": "da7d3e1cf7a2339c7f945e3a72b2a5c05906c377ca612ae2b3402859fa396bb3",
+      "kind": "exact-canonical-executable-copy",
+      "preserved": "/home/user/gpui-preserved-test-binaries/da7d3e1cf7a2339c7f945e3a72b2a5c05906c377ca612ae2b3402859fa396bb3"
+    },
+    {
+      "path": "/home/user/gpui-mask-lattice-target/release/build/gpui_canvas/df94f3b5799eeba9/out/clip_cost",
+      "bytes": 7847560,
+      "sha256": "827024133f5f22a5b75b36fed5fb5a531115c9ddfd84d33f57971feb0797d476",
+      "kind": "exact-canonical-executable-copy",
+      "preserved": "/home/user/gpui-preserved-test-binaries/827024133f5f22a5b75b36fed5fb5a531115c9ddfd84d33f57971feb0797d476"
+    },
+    {
+      "path": "/home/user/gpui-mask-lattice-target/release/build/gpui_canvas/3eee272fb23f9d81/out/cpu",
+      "bytes": 7998936,
+      "sha256": "491d80c0eebeed5ef0a66e3d99bfa32a2f937aef3a88dbf6658084eace13763b",
+      "kind": "exact-canonical-executable-copy",
+      "preserved": "/home/user/gpui-preserved-test-binaries/491d80c0eebeed5ef0a66e3d99bfa32a2f937aef3a88dbf6658084eace13763b"
+    },
+    {
+      "path": "/home/user/gpui-mask-lattice-target/release/build/gpui_canvas/52684454f2eed9fd/out/text_oracle",
+      "bytes": 6967496,
+      "sha256": "0afd7090a36263babbc8bb36eda72baeb854a9764f865a49fbf117e149f359cb",
+      "kind": "exact-canonical-executable-copy",
+      "preserved": "/home/user/gpui-preserved-test-binaries/0afd7090a36263babbc8bb36eda72baeb854a9764f865a49fbf117e149f359cb"
+    },
+    {
+      "path": "/home/user/gpui-mask-lattice-target/release/build/gpui_canvas/3c86ff37841d37fa/out/text_oracle",
+      "bytes": 6970024,
+      "sha256": "22c230ce9aba17ec6cb0a897cccb4fdf19c25b2ec23ef4dab2526dbf82cd6602",
+      "kind": "exact-canonical-executable-copy",
+      "preserved": "/home/user/gpui-preserved-test-binaries/22c230ce9aba17ec6cb0a897cccb4fdf19c25b2ec23ef4dab2526dbf82cd6602"
+    },
+    {
+      "path": "/home/user/gpui-mask-lattice-target/release/build/gpui_canvas/94d8038a91489fe8/out/damage_cost",
+      "bytes": 710344,
+      "sha256": "8a1460ef2ae22d704efba9a9f84f8937928da494c9ef8175730d5f1282b7095f",
+      "kind": "exact-canonical-executable-copy",
+      "preserved": "/home/user/gpui-preserved-test-binaries/8a1460ef2ae22d704efba9a9f84f8937928da494c9ef8175730d5f1282b7095f"
+    },
+    {
+      "path": "/home/user/gpui-mask-lattice-target/release/build/gpui_canvas/ea1971b907539b40/out/retained_runs",
+      "bytes": 7883408,
+      "sha256": "bdc613ae0286c2f1968cee99b39202185ab613cf0fa848e78c31e31c74ee620d",
+      "kind": "exact-canonical-executable-copy",
+      "preserved": "/home/user/gpui-preserved-test-binaries/bdc613ae0286c2f1968cee99b39202185ab613cf0fa848e78c31e31c74ee620d"
+    },
+    {
+      "path": "/home/user/gpui-mask-lattice-target/release/build/gpui_canvas/68414e8845d14960/out/font_memory",
+      "bytes": 10153768,
+      "sha256": "e4eb1b4cf00e2b17828c961f0215230ee09216484411a6970a31c5a02a4d1bbb",
+      "kind": "exact-canonical-executable-copy",
+      "preserved": "/home/user/gpui-preserved-test-binaries/e4eb1b4cf00e2b17828c961f0215230ee09216484411a6970a31c5a02a4d1bbb"
+    },
+    {
+      "path": "/home/user/gpui-mask-lattice-target/release/build/gpui_canvas/a4edc6400ad84f19/out/text_cache_capacity",
+      "bytes": 7607512,
+      "sha256": "ea5f0cde101b310bb848ff34e3a66b05c6eea66d90b85e74bc1a075bc3c4c598",
+      "kind": "exact-canonical-executable-copy",
+      "preserved": "/home/user/gpui-preserved-test-binaries/ea5f0cde101b310bb848ff34e3a66b05c6eea66d90b85e74bc1a075bc3c4c598"
+    },
+    {
+      "path": "/home/user/gpui-mask-lattice-target/release/build/gpui_canvas/171ad8d3295f6cb2/out/images",
+      "bytes": 760464,
+      "sha256": "a9b5bbc93c79bb2a9fd4a53fdceb80de22668bb967a958a160297efc2cc81e14",
+      "kind": "exact-canonical-executable-copy",
+      "preserved": "/home/user/gpui-preserved-test-binaries/a9b5bbc93c79bb2a9fd4a53fdceb80de22668bb967a958a160297efc2cc81e14"
+    },
+    {
+      "path": "/home/user/gpui-mask-lattice-target/release/build/gpui_canvas/3d349e54613ab355/out/font_memory",
+      "bytes": 10124696,
+      "sha256": "1348b2a14b5e9b73cf5674cf7af78dd2aab529fc096f5f7f12ae2e2c3ab3494c",
+      "kind": "exact-canonical-executable-copy",
+      "preserved": "/home/user/gpui-preserved-test-binaries/1348b2a14b5e9b73cf5674cf7af78dd2aab529fc096f5f7f12ae2e2c3ab3494c"
+    },
+    {
+      "path": "/home/user/gpui-mask-lattice-target/release/build/gpui_canvas/8d8d323333f848c4/out/coverage_table",
+      "bytes": 1434632,
+      "sha256": "70941cdad8e2114b0375ba35efcdfc1e3a76604e32db82eddf178597861939b6",
+      "kind": "exact-canonical-executable-copy",
+      "preserved": "/home/user/gpui-preserved-test-binaries/70941cdad8e2114b0375ba35efcdfc1e3a76604e32db82eddf178597861939b6"
+    },
+    {
+      "path": "/home/user/gpui-mask-lattice-target/release/build/gpui_canvas/acfc39efdaa75683/out/font_memory",
+      "bytes": 10156224,
+      "sha256": "5789729786e9e86debb32ae412097fc76f08f52912cf0a0408844ed89b8e8595",
+      "kind": "exact-canonical-executable-copy",
+      "preserved": "/home/user/gpui-preserved-test-binaries/5789729786e9e86debb32ae412097fc76f08f52912cf0a0408844ed89b8e8595"
+    },
+    {
+      "path": "/home/user/gpui-mask-lattice-target/release/build/gpui_canvas/37942a5794d59b19/out/text_interaction",
+      "bytes": 6968656,
+      "sha256": "8d3f42fbda0b0ca4c09be8c4b13b6714d4e4f9c7b54ad43c407ba1fdae9d7f4c",
+      "kind": "exact-canonical-executable-copy",
+      "preserved": "/home/user/gpui-preserved-test-binaries/8d3f42fbda0b0ca4c09be8c4b13b6714d4e4f9c7b54ad43c407ba1fdae9d7f4c"
+    },
+    {
+      "path": "/home/user/gpui-mask-lattice-target/release/build/gpui_canvas/a66a56010281ed60/out/group_views",
+      "bytes": 7840896,
+      "sha256": "c7bc8b33e113ae1ebe2d514778dc6bf67e59ae1d6c7ecb53568d773b4c4eff9d",
+      "kind": "exact-canonical-executable-copy",
+      "preserved": "/home/user/gpui-preserved-test-binaries/c7bc8b33e113ae1ebe2d514778dc6bf67e59ae1d6c7ecb53568d773b4c4eff9d"
+    },
+    {
+      "path": "/home/user/gpui-mask-lattice-target/release/build/gpui_canvas/065be7fbdf5a91d8/out/selection_queries",
+      "bytes": 6924032,
+      "sha256": "63e5fc6ed9542a851e23839839ce182f434d686e409373b832c647771fa046be",
+      "kind": "exact-canonical-executable-copy",
+      "preserved": "/home/user/gpui-preserved-test-binaries/63e5fc6ed9542a851e23839839ce182f434d686e409373b832c647771fa046be"
+    },
+    {
+      "path": "/home/user/gpui-mask-lattice-target/release/build/gpui_canvas/d7a53abed6c6185f/out/cpu",
+      "bytes": 8027992,
+      "sha256": "970aa88646bc2e17f5f8e239eaf95f7f6fe10eeddbe3a4aa1798fc69f74b3efb",
+      "kind": "exact-canonical-executable-copy",
+      "preserved": "/home/user/gpui-preserved-test-binaries/970aa88646bc2e17f5f8e239eaf95f7f6fe10eeddbe3a4aa1798fc69f74b3efb"
+    },
+    {
+      "path": "/home/user/gpui-mask-lattice-target/release/build/gpui_canvas/178f390fce55515f/out/retained_runs",
+      "bytes": 7885800,
+      "sha256": "051ec6a378cd034a79360480dec9691d5226f50f19062d5788db18fadc2206c0",
+      "kind": "exact-canonical-executable-copy",
+      "preserved": "/home/user/gpui-preserved-test-binaries/051ec6a378cd034a79360480dec9691d5226f50f19062d5788db18fadc2206c0"
+    },
+    {
+      "path": "/home/user/gpui-mask-lattice-target/release/build/gpui_canvas/89e11f61f36cd9ed/out/caret_pair_measure",
+      "bytes": 6952288,
+      "sha256": "494d034afff69004ac1877221291a82fbb5bc6c342e79d5422ae61a493d1b444",
+      "kind": "exact-canonical-executable-copy",
+      "preserved": "/home/user/gpui-preserved-test-binaries/494d034afff69004ac1877221291a82fbb5bc6c342e79d5422ae61a493d1b444"
+    },
+    {
+      "path": "/home/user/gpui-mask-lattice-target/release/build/gpui_canvas/3f7d5bfe3f5989d8/out/selection_queries",
+      "bytes": 6952560,
+      "sha256": "9cdaf3c15fae020831da6deadc7792d5ec838a0e926a6a3101d3da8adc3fd865",
+      "kind": "exact-canonical-executable-copy",
+      "preserved": "/home/user/gpui-preserved-test-binaries/9cdaf3c15fae020831da6deadc7792d5ec838a0e926a6a3101d3da8adc3fd865"
+    },
+    {
+      "path": "/home/user/gpui-mask-lattice-target/release/build/gpui_canvas/aedbcdddc79c5cf6/out/retained_runs",
+      "bytes": 7854328,
+      "sha256": "b643933d364ce9cfe4ba001f7559876828951d95d43021d84c618d2166837675",
+      "kind": "exact-canonical-executable-copy",
+      "preserved": "/home/user/gpui-preserved-test-binaries/b643933d364ce9cfe4ba001f7559876828951d95d43021d84c618d2166837675"
+    },
+    {
+      "path": "/home/user/gpui-mask-lattice-target/release/build/gpui_canvas/e104e893582978c9/out/clip_cost",
+      "bytes": 7879072,
+      "sha256": "3b47fb9cff6fdb6ac848ca48b255c293f2ee19219ec2740785972c30ea9abbd2",
+      "kind": "exact-canonical-executable-copy",
+      "preserved": "/home/user/gpui-preserved-test-binaries/3b47fb9cff6fdb6ac848ca48b255c293f2ee19219ec2740785972c30ea9abbd2"
+    },
+    {
+      "path": "/home/user/gpui-mask-lattice-target/release/build/gpui_canvas/c7eadced7b956270/out/clip_cost",
+      "bytes": 7876640,
+      "sha256": "82a99218ba4a336e1b337de0d5be805c72c220431bc22b5b410ea724630bf814",
+      "kind": "exact-canonical-executable-copy",
+      "preserved": "/home/user/gpui-preserved-test-binaries/82a99218ba4a336e1b337de0d5be805c72c220431bc22b5b410ea724630bf814"
+    },
+    {
+      "path": "/home/user/gpui-mask-lattice-target/release/build/gpui_canvas/b452dfbc93a59955/out/image_axis",
+      "bytes": 754280,
+      "sha256": "5835cf9de62ecd1c0602c39a4f387692f7b557fdb2a60db66d48ce05fb1bc7d6",
+      "kind": "exact-canonical-executable-copy",
+      "preserved": "/home/user/gpui-preserved-test-binaries/5835cf9de62ecd1c0602c39a4f387692f7b557fdb2a60db66d48ce05fb1bc7d6"
+    },
+    {
+      "path": "/home/user/gpui-mask-lattice-target/release/build/gpui_canvas/f9f09cf0d2c466f8/out/damage_cost",
+      "bytes": 710712,
+      "sha256": "32c1cd9667fe00b9ce94f9040b3f7d2d1ef0c156e01d3170b02f7ca9692bd5da",
+      "kind": "exact-canonical-executable-copy",
+      "preserved": "/home/user/gpui-preserved-test-binaries/32c1cd9667fe00b9ce94f9040b3f7d2d1ef0c156e01d3170b02f7ca9692bd5da"
+    },
+    {
+      "path": "/home/user/gpui-mask-lattice-target/release/build/gpui_canvas/7a3640f7d1081a17/out/image_axis",
+      "bytes": 728856,
+      "sha256": "5d9372a9aaad6ef35cf075df49258e43b19525126e778ee8046ac776f0006fc5",
+      "kind": "exact-canonical-executable-copy",
+      "preserved": "/home/user/gpui-preserved-test-binaries/5d9372a9aaad6ef35cf075df49258e43b19525126e778ee8046ac776f0006fc5"
+    },
+    {
+      "path": "/home/user/gpui-mask-lattice-target/release/build/gpui_canvas/01083c98466ae3fa/out/images",
+      "bytes": 735048,
+      "sha256": "c665cc539adc5cf7fd95f544dbddedce1ea26a094698e7bd7c507cb403c8e63b",
+      "kind": "exact-canonical-executable-copy",
+      "preserved": "/home/user/gpui-preserved-test-binaries/c665cc539adc5cf7fd95f544dbddedce1ea26a094698e7bd7c507cb403c8e63b"
+    },
+    {
+      "path": "/home/user/gpui-mask-lattice-target/release/build/gpui_canvas/013f041d72fe4179/out/group_views",
+      "bytes": 7872368,
+      "sha256": "54061ff0426531cecad93f39d85e0758a66a69c655d6954b7988e6725c9d011d",
+      "kind": "exact-canonical-executable-copy",
+      "preserved": "/home/user/gpui-preserved-test-binaries/54061ff0426531cecad93f39d85e0758a66a69c655d6954b7988e6725c9d011d"
+    },
+    {
+      "path": "/home/user/gpui-mask-lattice-target/release/build/gpui_canvas/f4b890557f134734/out/images",
+      "bytes": 760864,
+      "sha256": "081b6cb8c131639fe3d7cebf5a403300d2ec6e376b81bf2b0fe34ad5c4fd481b",
+      "kind": "exact-canonical-executable-copy",
+      "preserved": "/home/user/gpui-preserved-test-binaries/081b6cb8c131639fe3d7cebf5a403300d2ec6e376b81bf2b0fe34ad5c4fd481b"
+    },
+    {
+      "path": "/home/user/gpui-mask-lattice-target/release/build/gpui_canvas/82210282371fce2b/out/text_interaction",
+      "bytes": 6937600,
+      "sha256": "ca52dde914f6495137c09688580eed1dad58e26837491353aa3e83959c9c7681",
+      "kind": "exact-canonical-executable-copy",
+      "preserved": "/home/user/gpui-preserved-test-binaries/ca52dde914f6495137c09688580eed1dad58e26837491353aa3e83959c9c7681"
+    },
+    {
+      "path": "/home/user/gpui-mask-lattice-target/release/build/yoke-derive/735d941900fcb9b2/out/libyoke_derive-735d941900fcb9b2.so",
+      "bytes": 4179304,
+      "sha256": "a06872718b8501cab49b2f00284b66f11a509517ae76c72f6a32301a8e8fcf92",
+      "kind": "regenerable-procedural-macro-library"
+    },
+    {
+      "path": "/home/user/gpui-mask-lattice-target/release/build/yoke-derive/b25af4ec908c7268/out/libyoke_derive-b25af4ec908c7268.so",
+      "bytes": 4272112,
+      "sha256": "b50a92d171d7b6a06852f1f7b07ac95931d3d0c74f7356fcd54d5826a8ad9536",
+      "kind": "regenerable-procedural-macro-library"
+    },
+    {
+      "path": "/home/user/gpui-mask-lattice-target/release/build/yoke-derive/a6188276d4c4b61c/out/libyoke_derive-a6188276d4c4b61c.so",
+      "bytes": 4272168,
+      "sha256": "0b76ae563afe90fdb7e2ac43648b509b0b43a38a5ab86fcbd3e46dea7c86ebcb",
+      "kind": "regenerable-procedural-macro-library"
+    },
+    {
+      "path": "/home/user/gpui-mask-lattice-target/release/build/zbus-lockstep-macros/e62be710aa1b1fbd/out/libzbus_lockstep_macros-e62be710aa1b1fbd.so",
+      "bytes": 3868352,
+      "sha256": "70eb61adc0d218254b82fd13b90892f2122a85bd19f6c2cacf432f897ac8d1f3",
+      "kind": "regenerable-procedural-macro-library"
+    },
+    {
+      "path": "/home/user/gpui-mask-lattice-target/release/build/snafu-derive/e927791e0350b43b/out/libsnafu_derive-e927791e0350b43b.so",
+      "bytes": 4654504,
+      "sha256": "80303188e09cc91f85bbc93e0568281ea122a7eb3c6eaf863b7430ada5c0436f",
+      "kind": "regenerable-procedural-macro-library"
+    },
+    {
+      "path": "/home/user/gpui-mask-lattice-target/release/build/gpui/38c47abf9578a392/out/property_editor",
+      "bytes": 25345264,
+      "sha256": "f59d455fb3e6ea6519010c6fa64034dfad65a4312c16fa82d016a66e5cc73aab",
+      "kind": "exact-canonical-executable-copy",
+      "preserved": "/home/user/gpui-preserved-test-binaries/f59d455fb3e6ea6519010c6fa64034dfad65a4312c16fa82d016a66e5cc73aab"
+    },
+    {
+      "path": "/home/user/gpui-mask-lattice-target/release/build/gpui/c6ca7b724b9767e5/out/zgx_native_lab",
+      "bytes": 26391352,
+      "sha256": "0047ca77f2b7a694fc148612f4b1c03e03eec801b0382dd0939d5756d08c8d29",
+      "kind": "exact-canonical-executable-copy",
+      "preserved": "/home/user/gpui-preserved-test-binaries/0047ca77f2b7a694fc148612f4b1c03e03eec801b0382dd0939d5756d08c8d29"
+    },
+    {
+      "path": "/home/user/gpui-mask-lattice-target/release/build/gpui/6049a0ca722ce598/out/ime_cursor_cost",
+      "bytes": 9894376,
+      "sha256": "0857d0c2b4bac8872cf89dccf65d185441635915c04adf7ad76ac183e1712bb3",
+      "kind": "exact-canonical-executable-copy",
+      "preserved": "/home/user/gpui-preserved-test-binaries/0857d0c2b4bac8872cf89dccf65d185441635915c04adf7ad76ac183e1712bb3"
+    },
+    {
+      "path": "/home/user/gpui-mask-lattice-target/release/build/gpui/482a0c4e2954663a/out/contained_owner_spike",
+      "bytes": 11309608,
+      "sha256": "ab02c2db041ab3580e0e93d69e9a7c175726b69e0ea12846a5d2406c5b96e8e4",
+      "kind": "exact-canonical-executable-copy",
+      "preserved": "/home/user/gpui-preserved-test-binaries/ab02c2db041ab3580e0e93d69e9a7c175726b69e0ea12846a5d2406c5b96e8e4"
+    },
+    {
+      "path": "/home/user/gpui-mask-lattice-target/release/build/gpui/991cc5eabc5df501/out/covers",
+      "bytes": 25232704,
+      "sha256": "852e72ac40848fb301adbefc33c576e290503506438f2eb86ba88468d2b87d37",
+      "kind": "exact-canonical-executable-copy",
+      "preserved": "/home/user/gpui-preserved-test-binaries/852e72ac40848fb301adbefc33c576e290503506438f2eb86ba88468d2b87d37"
+    },
+    {
+      "path": "/home/user/gpui-mask-lattice-target/release/build/gpui/3568e77c7cb0c8e0/out/text_lease_measure",
+      "bytes": 493728,
+      "sha256": "ab89f7f7892ac2ad278869f0c5496f09d6f73f9745abff41cca1cd35edcef57a",
+      "kind": "exact-canonical-executable-copy",
+      "preserved": "/home/user/gpui-preserved-test-binaries/ab89f7f7892ac2ad278869f0c5496f09d6f73f9745abff41cca1cd35edcef57a"
+    },
+    {
+      "path": "/home/user/gpui-mask-lattice-target/release/build/gpui/bf108177487c5f47/out/workspace",
+      "bytes": 25350928,
+      "sha256": "23b3c4ed2016968158c56a57804f7596ad9fb6b0b1dbcba93b8bf4383ee1824f",
+      "kind": "exact-canonical-executable-copy",
+      "preserved": "/home/user/gpui-preserved-test-binaries/23b3c4ed2016968158c56a57804f7596ad9fb6b0b1dbcba93b8bf4383ee1824f"
+    },
+    {
+      "path": "/home/user/gpui-mask-lattice-target/release/build/gpui/f23d18b0a25ef922/out/unicode",
+      "bytes": 25238296,
+      "sha256": "a817addbca048b73d3bb663e3b79e50adcf54b1e89b694a5c2b41ee6bc613227",
+      "kind": "exact-canonical-executable-copy",
+      "preserved": "/home/user/gpui-preserved-test-binaries/a817addbca048b73d3bb663e3b79e50adcf54b1e89b694a5c2b41ee6bc613227"
+    },
+    {
+      "path": "/home/user/gpui-mask-lattice-target/release/build/gpui/d28715db297fa2e8/out/component_sources",
+      "bytes": 25388296,
+      "sha256": "d4d39b843162aeced3226ce17ec1b00293c7f07e82f87fdac17e672f62b9c0df",
+      "kind": "exact-canonical-executable-copy",
+      "preserved": "/home/user/gpui-preserved-test-binaries/d4d39b843162aeced3226ce17ec1b00293c7f07e82f87fdac17e672f62b9c0df"
+    },
+    {
+      "path": "/home/user/gpui-mask-lattice-target/release/build/gpui/6018581ec8350bd1/out/retained_list",
+      "bytes": 11213112,
+      "sha256": "e7336e9cc4a7724c17b70f13643ed1bb48e676b206a317aba2e3473f8c237da6",
+      "kind": "exact-canonical-executable-copy",
+      "preserved": "/home/user/gpui-preserved-test-binaries/e7336e9cc4a7724c17b70f13643ed1bb48e676b206a317aba2e3473f8c237da6"
+    },
+    {
+      "path": "/home/user/gpui-mask-lattice-target/release/build/gpui/8a7afc547f960b1f/out/inspector",
+      "bytes": 25237904,
+      "sha256": "419b2f47408a6e8ee250a5a0c85af5582875872bf3cfee6c253f21206c38d245",
+      "kind": "exact-canonical-executable-copy",
+      "preserved": "/home/user/gpui-preserved-test-binaries/419b2f47408a6e8ee250a5a0c85af5582875872bf3cfee6c253f21206c38d245"
+    },
+    {
+      "path": "/home/user/gpui-mask-lattice-target/release/build/gpui/a3dd2c315b8690e9/out/paint_slot_storage",
+      "bytes": 11061056,
+      "sha256": "f3adc8176e7de4951071db68b45db7c9cb8824fc9fdb40bc5eb627f47e7229f1",
+      "kind": "exact-canonical-executable-copy",
+      "preserved": "/home/user/gpui-preserved-test-binaries/f3adc8176e7de4951071db68b45db7c9cb8824fc9fdb40bc5eb627f47e7229f1"
+    },
+    {
+      "path": "/home/user/gpui-mask-lattice-target/release/build/gpui/6a4f753821c95b59/out/todo_comparison",
+      "bytes": 25591992,
+      "sha256": "c04ec81837ea693d4f144798bb020e7ee671b29b82e70ae396d38863f5df7c4b",
+      "kind": "exact-canonical-executable-copy",
+      "preserved": "/home/user/gpui-preserved-test-binaries/c04ec81837ea693d4f144798bb020e7ee671b29b82e70ae396d38863f5df7c4b"
+    },
+    {
+      "path": "/home/user/gpui-mask-lattice-target/release/build/gpui/a714ebd197e979b4/out/todo_comparison_five",
+      "bytes": 25615696,
+      "sha256": "2636dcd05b9e23bce36e3ece1b9b09eefbb037f312b0084226963f817e765e5c",
+      "kind": "exact-canonical-executable-copy",
+      "preserved": "/home/user/gpui-preserved-test-binaries/2636dcd05b9e23bce36e3ece1b9b09eefbb037f312b0084226963f817e765e5c"
+    },
+    {
+      "path": "/home/user/gpui-mask-lattice-target/release/build/gpui/c06a5aa6bc19f81f/out/panes",
+      "bytes": 25219888,
+      "sha256": "e071e9656fab44a03319584c89efe936c8ecb9614d095f1edbadf39b57cb1f02",
+      "kind": "exact-canonical-executable-copy",
+      "preserved": "/home/user/gpui-preserved-test-binaries/e071e9656fab44a03319584c89efe936c8ecb9614d095f1edbadf39b57cb1f02"
+    },
+    {
+      "path": "/home/user/gpui-mask-lattice-target/release/build/gpui/161fa22cf9a294d1/out/first_frame",
+      "bytes": 11346208,
+      "sha256": "145d59ffbc77f42755102f48d06e066c1d886b3bf8754136f2321eeec97e75fb",
+      "kind": "exact-canonical-executable-copy",
+      "preserved": "/home/user/gpui-preserved-test-binaries/145d59ffbc77f42755102f48d06e066c1d886b3bf8754136f2321eeec97e75fb"
+    },
+    {
+      "path": "/home/user/gpui-mask-lattice-target/release/build/gpui/e9b8c773f9415c80/out/sheet_access_measure",
+      "bytes": 11009496,
+      "sha256": "109b3e0a4422c5d537dc0cca3f59a4fef6d6490229faaeea023735fcb4d26892",
+      "kind": "exact-canonical-executable-copy",
+      "preserved": "/home/user/gpui-preserved-test-binaries/109b3e0a4422c5d537dc0cca3f59a4fef6d6490229faaeea023735fcb4d26892"
+    },
+    {
+      "path": "/home/user/gpui-mask-lattice-target/release/build/gpui/1f8acc57a33744b8/out/text_lane_measure",
+      "bytes": 11230888,
+      "sha256": "f12d5c2a2c6acd2a74c51fda8a5933746615418553614a3d8c42e97a645fb183",
+      "kind": "exact-canonical-executable-copy",
+      "preserved": "/home/user/gpui-preserved-test-binaries/f12d5c2a2c6acd2a74c51fda8a5933746615418553614a3d8c42e97a645fb183"
+    },
+    {
+      "path": "/home/user/gpui-mask-lattice-target/release/build/gpui/0bc3a3be0e651757/out/zgx_native_lab-0bc3a3be0e651757",
+      "bytes": 13262288,
+      "sha256": "0d1db8037068ff173c0b90b7999b3efaf4096720aff9f06a8dda50b830b053d1",
+      "kind": "exact-canonical-executable-copy",
+      "preserved": "/home/user/gpui-preserved-test-binaries/0d1db8037068ff173c0b90b7999b3efaf4096720aff9f06a8dda50b830b053d1"
+    },
+    {
+      "path": "/home/user/gpui-mask-lattice-target/release/build/gpui/162d5a51c65c626f/out/paint_slot_storage",
+      "bytes": 9794472,
+      "sha256": "3c465b7cae50d35d8fe8d9890a49ceef3b287304e39125d5bf18a11d5125ad20",
+      "kind": "exact-canonical-executable-copy",
+      "preserved": "/home/user/gpui-preserved-test-binaries/3c465b7cae50d35d8fe8d9890a49ceef3b287304e39125d5bf18a11d5125ad20"
+    },
+    {
+      "path": "/home/user/gpui-mask-lattice-target/release/build/gpui/c7028571d687eaef/out/todo_comparison_mapped",
+      "bytes": 25630712,
+      "sha256": "6dadfe2c2e809a3ae09c9707d4431e80e30b52710c8623ebec7affaa8e45d081",
+      "kind": "exact-canonical-executable-copy",
+      "preserved": "/home/user/gpui-preserved-test-binaries/6dadfe2c2e809a3ae09c9707d4431e80e30b52710c8623ebec7affaa8e45d081"
+    },
+    {
+      "path": "/home/user/gpui-mask-lattice-target/release/build/gpui/abbade1431a72921/out/text_lease_measure",
+      "bytes": 493728,
+      "sha256": "391ff0c290b57122d0676f86858328ed847b79dcc95108a64c043c4efefb1d20",
+      "kind": "exact-canonical-executable-copy",
+      "preserved": "/home/user/gpui-preserved-test-binaries/391ff0c290b57122d0676f86858328ed847b79dcc95108a64c043c4efefb1d20"
+    },
+    {
+      "path": "/home/user/gpui-mask-lattice-target/release/build/gpui/4395434129024bc3/out/immutable_text_measure",
+      "bytes": 11246504,
+      "sha256": "ab581a633efabccfd26b14520b85759a7883c7a56364bd113de9865b0277ce56",
+      "kind": "exact-canonical-executable-copy",
+      "preserved": "/home/user/gpui-preserved-test-binaries/ab581a633efabccfd26b14520b85759a7883c7a56364bd113de9865b0277ce56"
+    },
+    {
+      "path": "/home/user/gpui-mask-lattice-target/release/build/gpui/1169161245756934/out/mapped_properties",
+      "bytes": 25285288,
+      "sha256": "2eabcf81aa0aadc891aed0214cf57cbfa32673da0d71b394dab26d6655fd5779",
+      "kind": "exact-canonical-executable-copy",
+      "preserved": "/home/user/gpui-preserved-test-binaries/2eabcf81aa0aadc891aed0214cf57cbfa32673da0d71b394dab26d6655fd5779"
+    },
+    {
+      "path": "/home/user/gpui-mask-lattice-target/release/build/gpui/c6fc1d17e326c893/out/remote_delivery_measure",
+      "bytes": 9906312,
+      "sha256": "211af3332339aa753f9267190a5bbc4eb7fe307e4a9975f0b351c49a57057a42",
+      "kind": "exact-canonical-executable-copy",
+      "preserved": "/home/user/gpui-preserved-test-binaries/211af3332339aa753f9267190a5bbc4eb7fe307e4a9975f0b351c49a57057a42"
+    },
+    {
+      "path": "/home/user/gpui-mask-lattice-target/release/build/gpui/2b67107b0dc8425c/out/state_update_cost",
+      "bytes": 11196960,
+      "sha256": "0bdb96c302de2478cbaaa3542f7122f9f3edf254ea32af1c09630444759ebc64",
+      "kind": "exact-canonical-executable-copy",
+      "preserved": "/home/user/gpui-preserved-test-binaries/0bdb96c302de2478cbaaa3542f7122f9f3edf254ea32af1c09630444759ebc64"
+    },
+    {
+      "path": "/home/user/gpui-mask-lattice-target/release/build/gpui/91cb70299684b5bb/out/empty",
+      "bytes": 25200048,
+      "sha256": "99ed1b27ef7b96a3e7adc5df5a7a5d644d746e3ffd365d754bafc5c70abe50da",
+      "kind": "exact-canonical-executable-copy",
+      "preserved": "/home/user/gpui-preserved-test-binaries/99ed1b27ef7b96a3e7adc5df5a7a5d644d746e3ffd365d754bafc5c70abe50da"
+    },
+    {
+      "path": "/home/user/gpui-mask-lattice-target/release/build/gpui/094d17439faf1e62/out/reactive_styles",
+      "bytes": 10139176,
+      "sha256": "67e56f1c93e3576fb3d2b6e0fb074356c72cac9f51abb9bc1de79e46d90b0479",
+      "kind": "exact-canonical-executable-copy",
+      "preserved": "/home/user/gpui-preserved-test-binaries/67e56f1c93e3576fb3d2b6e0fb074356c72cac9f51abb9bc1de79e46d90b0479"
+    },
+    {
+      "path": "/home/user/gpui-mask-lattice-target/release/build/gpui/efaf685b291d3268/out/sheet_access_measure",
+      "bytes": 9745584,
+      "sha256": "ff1a1c155263b2a9635bb99c6238b89f84421f3b5ed4f57c818bca1e167ef5f6",
+      "kind": "exact-canonical-executable-copy",
+      "preserved": "/home/user/gpui-preserved-test-binaries/ff1a1c155263b2a9635bb99c6238b89f84421f3b5ed4f57c818bca1e167ef5f6"
+    },
+    {
+      "path": "/home/user/gpui-mask-lattice-target/release/build/gpui/4de949a74a3af0c8/out/state_update_cost",
+      "bytes": 9928296,
+      "sha256": "a3ac86f1049711ff7327c1d6cf113ee41d4f998e1dc295167c086ff554803066",
+      "kind": "exact-canonical-executable-copy",
+      "preserved": "/home/user/gpui-preserved-test-binaries/a3ac86f1049711ff7327c1d6cf113ee41d4f998e1dc295167c086ff554803066"
+    },
+    {
+      "path": "/home/user/gpui-mask-lattice-target/release/build/gpui/b58c2fdffd75fa2b/out/immutable_text_measure",
+      "bytes": 9979688,
+      "sha256": "2c8983576756b744d855a13dbe40717ae32cd2c587fe406791152a8144a25dc3",
+      "kind": "exact-canonical-executable-copy",
+      "preserved": "/home/user/gpui-preserved-test-binaries/2c8983576756b744d855a13dbe40717ae32cd2c587fe406791152a8144a25dc3"
+    },
+    {
+      "path": "/home/user/gpui-mask-lattice-target/release/build/gpui/28ec0596afef4533/out/remote_delivery_measure",
+      "bytes": 11245304,
+      "sha256": "090edeedd44afd68bc282108eccec431971f37e510fab9125a68c15bb27ec7e7",
+      "kind": "exact-canonical-executable-copy",
+      "preserved": "/home/user/gpui-preserved-test-binaries/090edeedd44afd68bc282108eccec431971f37e510fab9125a68c15bb27ec7e7"
+    },
+    {
+      "path": "/home/user/gpui-mask-lattice-target/release/build/gpui/3c9e032b5bbb859f/out/zgx_native_lab",
+      "bytes": 26391208,
+      "sha256": "c208e6446984a33198d310ba0ae579af0ea19a6a87ac8217467dbe35ed5ce014",
+      "kind": "exact-canonical-executable-copy",
+      "preserved": "/home/user/gpui-preserved-test-binaries/c208e6446984a33198d310ba0ae579af0ea19a6a87ac8217467dbe35ed5ce014"
+    },
+    {
+      "path": "/home/user/gpui-mask-lattice-target/release/build/gpui/9c5e35e80e6957c0/out/retained_list",
+      "bytes": 9944040,
+      "sha256": "42bca004b3e28be4e10281347c86461d5b72599b2920a9ea4a80612518fab3ea",
+      "kind": "exact-canonical-executable-copy",
+      "preserved": "/home/user/gpui-preserved-test-binaries/42bca004b3e28be4e10281347c86461d5b72599b2920a9ea4a80612518fab3ea"
+    },
+    {
+      "path": "/home/user/gpui-mask-lattice-target/release/build/gpui/1123f8072dfd6d8b/out/first_frame",
+      "bytes": 10081968,
+      "sha256": "1f594a5bd943f4b9e529567abf845699d1eb0ebf4528fdc21a8b66cfc09b4f6d",
+      "kind": "exact-canonical-executable-copy",
+      "preserved": "/home/user/gpui-preserved-test-binaries/1f594a5bd943f4b9e529567abf845699d1eb0ebf4528fdc21a8b66cfc09b4f6d"
+    },
+    {
+      "path": "/home/user/gpui-mask-lattice-target/release/build/gpui/c5442202f6108a32/out/gradient_backgrounds",
+      "bytes": 9871832,
+      "sha256": "daabdccfac5529c4a0ff144dab62f665f8efd37d2caf1291da0ff9f52c014f85",
+      "kind": "exact-canonical-executable-copy",
+      "preserved": "/home/user/gpui-preserved-test-binaries/daabdccfac5529c4a0ff144dab62f665f8efd37d2caf1291da0ff9f52c014f85"
+    },
+    {
+      "path": "/home/user/gpui-mask-lattice-target/release/build/gpui/90653f31efc3e71e/out/todo_recording_cost",
+      "bytes": 11578424,
+      "sha256": "b994df174d369080c624f8935b244a197b1c304c406e661a546fbbb2bc2818e2",
+      "kind": "exact-canonical-executable-copy",
+      "preserved": "/home/user/gpui-preserved-test-binaries/b994df174d369080c624f8935b244a197b1c304c406e661a546fbbb2bc2818e2"
+    },
+    {
+      "path": "/home/user/gpui-mask-lattice-target/release/build/gpui/b361f1a195bf26b6/out/workbench",
+      "bytes": 25255488,
+      "sha256": "60e367cc30c4c8de26f32d8f4c648f30cd194c1dd1b3d66639e85a812450f282",
+      "kind": "exact-canonical-executable-copy",
+      "preserved": "/home/user/gpui-preserved-test-binaries/60e367cc30c4c8de26f32d8f4c648f30cd194c1dd1b3d66639e85a812450f282"
+    },
+    {
+      "path": "/home/user/gpui-mask-lattice-target/release/build/gpui/e0c8b8dd3837edc3/out/gpui-e0c8b8dd3837edc3",
+      "bytes": 42164632,
+      "sha256": "0c365f140082af517ec448c7ad986414277a235cdab5a9800feadf0dc49e9082",
+      "kind": "exact-canonical-executable-copy",
+      "preserved": "/home/user/gpui-preserved-test-binaries/0c365f140082af517ec448c7ad986414277a235cdab5a9800feadf0dc49e9082"
+    },
+    {
+      "path": "/home/user/gpui-mask-lattice-target/release/build/gpui/9e2fa26b6c0cd5dd/out/color_cost",
+      "bytes": 11043328,
+      "sha256": "71ad2576cd343d754b1b09b2dd37dac034658cd423c41593d9a692381d54c7e0",
+      "kind": "exact-canonical-executable-copy",
+      "preserved": "/home/user/gpui-preserved-test-binaries/71ad2576cd343d754b1b09b2dd37dac034658cd423c41593d9a692381d54c7e0"
+    },
+    {
+      "path": "/home/user/gpui-mask-lattice-target/release/build/gpui/52a88496b452f225/out/library",
+      "bytes": 25852352,
+      "sha256": "ce99deef853f1583609126e1e91b2cc3ab95c7b2700b042bfecddd8099796a14",
+      "kind": "exact-canonical-executable-copy",
+      "preserved": "/home/user/gpui-preserved-test-binaries/ce99deef853f1583609126e1e91b2cc3ab95c7b2700b042bfecddd8099796a14"
+    },
+    {
+      "path": "/home/user/gpui-mask-lattice-target/release/build/gpui/e35b0bb69b32b90c/out/contained_owner_spike",
+      "bytes": 10042776,
+      "sha256": "4bed570f92be2171b7a1d9bafb795a2924769a8c16e8eb321e6ace42ed98f96d",
+      "kind": "exact-canonical-executable-copy",
+      "preserved": "/home/user/gpui-preserved-test-binaries/4bed570f92be2171b7a1d9bafb795a2924769a8c16e8eb321e6ace42ed98f96d"
+    },
+    {
+      "path": "/home/user/gpui-mask-lattice-target/release/build/gpui/fa69ccf170b01ebc/out/state_update_allocations",
+      "bytes": 11142016,
+      "sha256": "2dddd9b4b8ed12e7273ce91c249c2d7a3a19be24b1df660640c149ce12d33d37",
+      "kind": "exact-canonical-executable-copy",
+      "preserved": "/home/user/gpui-preserved-test-binaries/2dddd9b4b8ed12e7273ce91c249c2d7a3a19be24b1df660640c149ce12d33d37"
+    },
+    {
+      "path": "/home/user/gpui-mask-lattice-target/release/build/gpui/eef67738bdadee03/out/luna_bench",
+      "bytes": 25228024,
+      "sha256": "d0bc2380bee56d83de9bee33a0f424467e7819194eb053f161b1ba6cf9ef9237",
+      "kind": "exact-canonical-executable-copy",
+      "preserved": "/home/user/gpui-preserved-test-binaries/d0bc2380bee56d83de9bee33a0f424467e7819194eb053f161b1ba6cf9ef9237"
+    },
+    {
+      "path": "/home/user/gpui-mask-lattice-target/release/build/gpui/cd54427c35092445/out/state_update_allocations",
+      "bytes": 9872264,
+      "sha256": "96fb9dbe04cfea81f35de6b4417326a64cbc0e5c6039ba6e3a6f768c0c86d6b9",
+      "kind": "exact-canonical-executable-copy",
+      "preserved": "/home/user/gpui-preserved-test-binaries/96fb9dbe04cfea81f35de6b4417326a64cbc0e5c6039ba6e3a6f768c0c86d6b9"
+    },
+    {
+      "path": "/home/user/gpui-mask-lattice-target/release/build/gpui/f87a302d6033f89e/out/unicode_text_measure",
+      "bytes": 9918600,
+      "sha256": "c2e076d52042dd6a4c23078edd624071242c7fd77b4150728388041fc341b44e",
+      "kind": "exact-canonical-executable-copy",
+      "preserved": "/home/user/gpui-preserved-test-binaries/c2e076d52042dd6a4c23078edd624071242c7fd77b4150728388041fc341b44e"
+    },
+    {
+      "path": "/home/user/gpui-mask-lattice-target/release/build/gpui/0a5003cfb0914bde/out/reactive_styles",
+      "bytes": 25281168,
+      "sha256": "5d1e41568d967ffac5d170ea36dde0560cef6129206b6612e417f3ec9c0569fd",
+      "kind": "exact-canonical-executable-copy",
+      "preserved": "/home/user/gpui-preserved-test-binaries/5d1e41568d967ffac5d170ea36dde0560cef6129206b6612e417f3ec9c0569fd"
+    },
+    {
+      "path": "/home/user/gpui-mask-lattice-target/release/build/gpui/b09fc796078f36a8/out/counter",
+      "bytes": 10062936,
+      "sha256": "8cbd4b43e8a359e1b755e6fbf97129a5f8df47ebafc660753b5cf99a412684d5",
+      "kind": "exact-canonical-executable-copy",
+      "preserved": "/home/user/gpui-preserved-test-binaries/8cbd4b43e8a359e1b755e6fbf97129a5f8df47ebafc660753b5cf99a412684d5"
+    },
+    {
+      "path": "/home/user/gpui-mask-lattice-target/release/build/gpui/ae4e0a797c6fd8e9/out/ime_cursor_cost",
+      "bytes": 11161720,
+      "sha256": "cd0aad0836dfb5d10013533d9b25f855e69fa330873b099e6d91c54a6c9cfb20",
+      "kind": "exact-canonical-executable-copy",
+      "preserved": "/home/user/gpui-preserved-test-binaries/cd0aad0836dfb5d10013533d9b25f855e69fa330873b099e6d91c54a6c9cfb20"
+    },
+    {
+      "path": "/home/user/gpui-mask-lattice-target/release/build/gpui/997b31099a54df36/out/color_cost",
+      "bytes": 9777128,
+      "sha256": "bac1f3996e71c9090686258afb29cdcdd716c7013410f5bc07cd164fcb657751",
+      "kind": "exact-canonical-executable-copy",
+      "preserved": "/home/user/gpui-preserved-test-binaries/bac1f3996e71c9090686258afb29cdcdd716c7013410f5bc07cd164fcb657751"
+    },
+    {
+      "path": "/home/user/gpui-mask-lattice-target/release/build/gpui/167b6e90168c7611/out/todo_recording_cost",
+      "bytes": 10310200,
+      "sha256": "b7c9043883e0e9bff024df86c71e02e787f217964c9bd880a8d1c56360f411a9",
+      "kind": "exact-canonical-executable-copy",
+      "preserved": "/home/user/gpui-preserved-test-binaries/b7c9043883e0e9bff024df86c71e02e787f217964c9bd880a8d1c56360f411a9"
+    },
+    {
+      "path": "/home/user/gpui-mask-lattice-target/release/build/gpui/f998b6d8936e5317/out/text_lane_measure",
+      "bytes": 9964928,
+      "sha256": "9b1466d0c67e4cc639cb257347920768723f3a285c53137e38e8724ecc2d9cfe",
+      "kind": "exact-canonical-executable-copy",
+      "preserved": "/home/user/gpui-preserved-test-binaries/9b1466d0c67e4cc639cb257347920768723f3a285c53137e38e8724ecc2d9cfe"
+    },
+    {
+      "path": "/home/user/gpui-mask-lattice-target/release/build/gpui/8f3d188aea895a6f/out/graphics",
+      "bytes": 25251768,
+      "sha256": "78c26aad09cea40e365f8f3c072666112f7ed5537b93672cb10b7ab95f1802e8",
+      "kind": "exact-canonical-executable-copy",
+      "preserved": "/home/user/gpui-preserved-test-binaries/78c26aad09cea40e365f8f3c072666112f7ed5537b93672cb10b7ab95f1802e8"
+    },
+    {
+      "path": "/home/user/gpui-mask-lattice-target/release/build/gpui/14c57fb3ab757005/out/gradient_backgrounds",
+      "bytes": 25295888,
+      "sha256": "2c4dfb6eb3baede8987926b956b3aed96d088e11b9ad369c3ecbafcae60d5522",
+      "kind": "exact-canonical-executable-copy",
+      "preserved": "/home/user/gpui-preserved-test-binaries/2c4dfb6eb3baede8987926b956b3aed96d088e11b9ad369c3ecbafcae60d5522"
+    },
+    {
+      "path": "/home/user/gpui-mask-lattice-target/release/build/gpui/307c1e8aa21fa2c6/out/zgx_native_lab-307c1e8aa21fa2c6",
+      "bytes": 14015304,
+      "sha256": "c50f9f14b62343329d14abfc3e9ade22d2138bb0b5776e51a6409b47033795e3",
+      "kind": "exact-canonical-executable-copy",
+      "preserved": "/home/user/gpui-preserved-test-binaries/c50f9f14b62343329d14abfc3e9ade22d2138bb0b5776e51a6409b47033795e3"
+    },
+    {
+      "path": "/home/user/gpui-mask-lattice-target/release/build/gpui/62bb6aad7e40b147/out/counter",
+      "bytes": 25229248,
+      "sha256": "9cac0f3a8f49dab12282f893a796339fbdc28b6f153344736771173e2d2a5ba0",
+      "kind": "exact-canonical-executable-copy",
+      "preserved": "/home/user/gpui-preserved-test-binaries/9cac0f3a8f49dab12282f893a796339fbdc28b6f153344736771173e2d2a5ba0"
+    },
+    {
+      "path": "/home/user/gpui-mask-lattice-target/release/build/gpui/937604c28d1c7aaf/out/unicode_text_measure",
+      "bytes": 11183704,
+      "sha256": "b6b809a57fcb7586e6ca623f69ff6644d2c4917d5e40f827242dcccea426f7eb",
+      "kind": "exact-canonical-executable-copy",
+      "preserved": "/home/user/gpui-preserved-test-binaries/b6b809a57fcb7586e6ca623f69ff6644d2c4917d5e40f827242dcccea426f7eb"
+    },
+    {
+      "path": "/home/user/gpui-mask-lattice-target/release/build/gpui_gpu/5eb8255352d33eb6/out/images",
+      "bytes": 7981976,
+      "sha256": "c16ea9894fd0a1879f98d47855a48e8630631b4d8fa5050de7444db6c2611f9f",
+      "kind": "exact-canonical-executable-copy",
+      "preserved": "/home/user/gpui-preserved-test-binaries/c16ea9894fd0a1879f98d47855a48e8630631b4d8fa5050de7444db6c2611f9f"
+    },
+    {
+      "path": "/home/user/gpui-mask-lattice-target/release/build/gpui_gpu/4b5035a6a615ec17/out/tiles",
+      "bytes": 15206112,
+      "sha256": "78a9dde4d5dda2082e7c814eb09a19a2f58e34207dc39397697722600fad66ad",
+      "kind": "exact-canonical-executable-copy",
+      "preserved": "/home/user/gpui-preserved-test-binaries/78a9dde4d5dda2082e7c814eb09a19a2f58e34207dc39397697722600fad66ad"
+    },
+    {
+      "path": "/home/user/gpui-mask-lattice-target/release/build/gpui_gpu/df133191a45f40c0/out/images",
+      "bytes": 8229008,
+      "sha256": "aae81309f43a59139c74fbe86f58e517eefe67a2e4fca0744b028aa29ac6539c",
+      "kind": "exact-canonical-executable-copy",
+      "preserved": "/home/user/gpui-preserved-test-binaries/aae81309f43a59139c74fbe86f58e517eefe67a2e4fca0744b028aa29ac6539c"
+    },
+    {
+      "path": "/home/user/gpui-mask-lattice-target/release/build/gpui_gpu/a921ebb1ae215beb/out/retained",
+      "bytes": 15541832,
+      "sha256": "b1466f60474160f6f0e85c799491a4f6649a9e3f13aa252397b19d1c212e9940",
+      "kind": "exact-canonical-executable-copy",
+      "preserved": "/home/user/gpui-preserved-test-binaries/b1466f60474160f6f0e85c799491a4f6649a9e3f13aa252397b19d1c212e9940"
+    },
+    {
+      "path": "/home/user/gpui-mask-lattice-target/release/build/gpui_gpu/61e90e2a0f130778/out/groups",
+      "bytes": 15202432,
+      "sha256": "3c89d19829b855bc447a6fb663f015ff2026ccecf214d37d9405ac7f57e76c4f",
+      "kind": "exact-canonical-executable-copy",
+      "preserved": "/home/user/gpui-preserved-test-binaries/3c89d19829b855bc447a6fb663f015ff2026ccecf214d37d9405ac7f57e76c4f"
+    },
+    {
+      "path": "/home/user/gpui-mask-lattice-target/release/build/gpui_gpu/319c8e7fcd007d5f/out/tiles",
+      "bytes": 15452600,
+      "sha256": "81a0bb65fb96a8f5291bb663091ee2675a4dfcf18da319cbd88e93c77f146924",
+      "kind": "exact-canonical-executable-copy",
+      "preserved": "/home/user/gpui-preserved-test-binaries/81a0bb65fb96a8f5291bb663091ee2675a4dfcf18da319cbd88e93c77f146924"
+    },
+    {
+      "path": "/home/user/gpui-mask-lattice-target/release/build/gpui_gpu/efb7c5a21eba989c/out/retained",
+      "bytes": 15295032,
+      "sha256": "cd7db22c8dd20539247ec721b010c19542f440fb225d7c01a4a5e271916fd52b",
+      "kind": "exact-canonical-executable-copy",
+      "preserved": "/home/user/gpui-preserved-test-binaries/cd7db22c8dd20539247ec721b010c19542f440fb225d7c01a4a5e271916fd52b"
+    },
+    {
+      "path": "/home/user/gpui-mask-lattice-target/release/build/gpui_gpu/886201065ed8d3a7/out/groups",
+      "bytes": 15448688,
+      "sha256": "401a2ef936170ad330fe6d6eba2438ad48d27faca05cb48c20e91ce704dffbf6",
+      "kind": "exact-canonical-executable-copy",
+      "preserved": "/home/user/gpui-preserved-test-binaries/401a2ef936170ad330fe6d6eba2438ad48d27faca05cb48c20e91ce704dffbf6"
+    },
+    {
+      "path": "/home/user/gpui-mask-lattice-target/release/build/wgsl-rs-macros/39ec84fddad7ee58/out/libwgsl_rs_macros-39ec84fddad7ee58.so",
+      "bytes": 8497136,
+      "sha256": "380e0c30667d6c37c4b1af9d263ce132bb8e5b0fa554625abfc57ac562f0ad9c",
+      "kind": "regenerable-procedural-macro-library"
+    },
+    {
+      "path": "/home/user/gpui-mask-lattice-target/release/build/async-recursion/1d902ec430c7881d/out/libasync_recursion-1d902ec430c7881d.so",
+      "bytes": 3232624,
+      "sha256": "3b4ebddb6858e5963006c1d15359c1bd0b5a107827b8cf2bd31e4d9b4d8e8577",
+      "kind": "regenerable-procedural-macro-library"
+    },
+    {
+      "path": "/home/user/gpui-mask-lattice-target/release/build/async-trait/5d5285f3f6da7d4b/out/libasync_trait-5d5285f3f6da7d4b.so",
+      "bytes": 4095312,
+      "sha256": "75b1c5d2472fd0567beea97ccbf6927158e283a58fb5c88941d49c6f701f6903",
+      "kind": "regenerable-procedural-macro-library"
+    },
+    {
+      "path": "/home/user/gpui-mask-lattice-target/release/build/async-trait/198df58b0a520edc/out/libasync_trait-198df58b0a520edc.so",
+      "bytes": 4001800,
+      "sha256": "98e955508d718ba923662f24745857332a673529145a58f4eab588fc04455439",
+      "kind": "regenerable-procedural-macro-library"
+    },
+    {
+      "path": "/home/user/gpui-mask-lattice-target/release/build/displaydoc/cc8ded37579c4ef3/out/libdisplaydoc-cc8ded37579c4ef3.so",
+      "bytes": 3504880,
+      "sha256": "ccbfcea05cd0b100352c8a4e81d2cf984167eec2f188c377200a6f35ec5558e1",
+      "kind": "regenerable-procedural-macro-library"
+    },
+    {
+      "path": "/home/user/gpui-mask-lattice-target/release/build/displaydoc/ae3b3be74d3848d9/out/libdisplaydoc-ae3b3be74d3848d9.so",
+      "bytes": 3596296,
+      "sha256": "278fc296a533ef1d8e6e4570c0b666eda1aa0f7801d47ed743b16017b73f6fc1",
+      "kind": "regenerable-procedural-macro-library"
+    },
+    {
+      "path": "/home/user/gpui-mask-lattice-target/release/build/displaydoc/6ea497f2d7ba32f6/out/libdisplaydoc-6ea497f2d7ba32f6.so",
+      "bytes": 3596368,
+      "sha256": "34ca035df5a542a73bf3854eb4cc194930eaba803aa4fbec882f61d86b35aaf0",
+      "kind": "regenerable-procedural-macro-library"
+    },
+    {
+      "path": "/home/user/gpui-mask-lattice-target/release/build/zvariant_derive/235208ea6e2662d5/out/libzvariant_derive-235208ea6e2662d5.so",
+      "bytes": 5214448,
+      "sha256": "7e366785d730290008f5d2f402ba3afc283a6c5fa45b927ae2d203da0deb641d",
+      "kind": "regenerable-procedural-macro-library"
+    },
+    {
+      "path": "/home/user/gpui-mask-lattice-target/release/build/futures-macro/6a87b6d12b95cf0f/out/libfutures_macro-6a87b6d12b95cf0f.so",
+      "bytes": 3178584,
+      "sha256": "4a7c47b838c4964f3c954be09853d4090d1904b7f648e3cb6bf40014520f3237",
+      "kind": "regenerable-procedural-macro-library"
+    },
+    {
+      "path": "/home/user/gpui-mask-lattice-target/release/build/serde_derive/f0da3669146572c5/out/libserde_derive-f0da3669146572c5.so",
+      "bytes": 4901928,
+      "sha256": "ad1899453d0433f35bd60ebf668d4605828e8138bc94ae1428fa869addb47c92",
+      "kind": "regenerable-procedural-macro-library"
+    },
+    {
+      "path": "/home/user/gpui-mask-lattice-target/release/build/serde_derive/ca1f631bf857e0d4/out/libserde_derive-ca1f631bf857e0d4.so",
+      "bytes": 4992560,
+      "sha256": "75f714cc06c03c9cc279c249781bc3eca3607545552a6d4a9c0d1ec4cd00c78c",
+      "kind": "regenerable-procedural-macro-library"
+    },
+    {
+      "path": "/home/user/gpui-mask-lattice-target/release/build/zbus_macros/50b900a0efd3f786/out/libzbus_macros-50b900a0efd3f786.so",
+      "bytes": 6585760,
+      "sha256": "2232f9672c0c56e5c6868a7d87d8813642a30cef7ab722407b0996a8af18cf4b",
+      "kind": "regenerable-procedural-macro-library"
+    },
+    {
+      "path": "/home/user/gpui-mask-lattice-target/release/build/zbus_macros/426bec16249cb392/out/libzbus_macros-426bec16249cb392.so",
+      "bytes": 5981312,
+      "sha256": "2d6757a1e92165fd7a22364ca0a3f1f282db99fe5e6e675a9581c9cb3d9cc6e7",
+      "kind": "regenerable-procedural-macro-library"
+    },
+    {
+      "path": "/home/user/gpui-mask-lattice-target/release/build/zbus_macros/7e17f05691789c81/out/libzbus_macros-7e17f05691789c81.so",
+      "bytes": 5862896,
+      "sha256": "2c29da9d5263f297419d4f8d7ef5da1eae242b978cc3a2d4356a237dba9a0a31",
+      "kind": "regenerable-procedural-macro-library"
+    },
+    {
+      "path": "/home/user/gpui-mask-lattice-target/release/build/tracing-attributes/686b882ab798a6c6/out/libtracing_attributes-686b882ab798a6c6.so",
+      "bytes": 4356528,
+      "sha256": "4f23e1cddbab0beb60cdd5f08541433d8e22ba7e7b2dec75c59f155c0f0d5d4b",
+      "kind": "regenerable-procedural-macro-library"
+    },
+    {
+      "path": "/home/user/gpui-mask-lattice-target/release/build/zerocopy-derive/bd574a823e2136ad/out/libzerocopy_derive-bd574a823e2136ad.so",
+      "bytes": 4519104,
+      "sha256": "5166c032d6d13721a289996cf814b7439bf4dae20939360d9c9bac645355616f",
+      "kind": "regenerable-procedural-macro-library"
+    },
+    {
+      "path": "/home/user/gpui-mask-lattice-target/release/build/document-features/84a1ce9af45e065b/out/libdocument_features-84a1ce9af45e065b.so",
+      "bytes": 956856,
+      "sha256": "d2a811a993342ff249be661aa4d78b534521adad4409567bcecd71b664013e58",
+      "kind": "regenerable-procedural-macro-library"
+    },
+    {
+      "path": "/home/user/gpui-mask-lattice-target/release/build/zerofrom-derive/977efb65f38d463b/out/libzerofrom_derive-977efb65f38d463b.so",
+      "bytes": 4651960,
+      "sha256": "5131ecc0910099e6be6fb90e56dd14c32e5762ff9e176e21a6cd0ff80750ec80",
+      "kind": "regenerable-procedural-macro-library"
+    },
+    {
+      "path": "/home/user/gpui-mask-lattice-target/release/build/zerofrom-derive/7ffc4abaee99a20a/out/libzerofrom_derive-7ffc4abaee99a20a.so",
+      "bytes": 4549096,
+      "sha256": "e24c9e9af5df88182208367eb6de879149498dac5e751bead937a6a43141309d",
+      "kind": "regenerable-procedural-macro-library"
+    },
+    {
+      "path": "/home/user/gpui-mask-lattice-target/release/build/zerofrom-derive/c5aea22dacc86f50/out/libzerofrom_derive-c5aea22dacc86f50.so",
+      "bytes": 4652008,
+      "sha256": "35bc8cedc2078bbe76074196f4ca35764ae18587fd5510ec683f2ff60236b100",
+      "kind": "regenerable-procedural-macro-library"
+    },
+    {
+      "path": "/home/user/gpui-mask-lattice-native-target/release/examples/zgx_native_lab",
+      "bytes": 22525608,
+      "sha256": "e22e1135411db3c9de63311f02ca378ea076bd5aea48e0056de74aeaef56d04c",
+      "kind": "exact-canonical-executable-copy",
+      "preserved": "/home/user/gpui-preserved-test-binaries/e22e1135411db3c9de63311f02ca378ea076bd5aea48e0056de74aeaef56d04c"
+    },
+    {
+      "path": "/home/user/gpui-mask-lattice-native-target/release/build/enumflags2_derive/8a2fd83d7bbd2c1e/out/libenumflags2_derive-8a2fd83d7bbd2c1e.so",
+      "bytes": 8417384,
+      "sha256": "a84b9caba6b78f5a13d9a7553693a32313ef2d7d5ce4e366421ceb85bdfbc3a4",
+      "kind": "regenerable-procedural-macro-library"
+    },
+    {
+      "path": "/home/user/gpui-mask-lattice-native-target/release/build/thiserror-impl/0c9c0f11eb42eb34/out/libthiserror_impl-0c9c0f11eb42eb34.so",
+      "bytes": 9213600,
+      "sha256": "42a5f0177e6964afb72e7630f05544ebc239463de95200b9710664e9122f0dbf",
+      "kind": "regenerable-procedural-macro-library"
+    },
+    {
+      "path": "/home/user/gpui-mask-lattice-native-target/release/build/thiserror-impl/cb2c45307a25f95a/out/libthiserror_impl-cb2c45307a25f95a.so",
+      "bytes": 9310640,
+      "sha256": "1f09b8e5ad1dcc9f2707b7d78963611459f0c1fcd1e0ccbbe296f9967efa12b6",
+      "kind": "regenerable-procedural-macro-library"
+    },
+    {
+      "path": "/home/user/gpui-mask-lattice-native-target/release/build/fearless_simd_macros/0ebc7d4f884c3669/out/libfearless_simd_macros-0ebc7d4f884c3669.so",
+      "bytes": 9154024,
+      "sha256": "98b527ad8815607b7812ab1c4939ea30363a8dded25aa820ff40e15aba858ea5",
+      "kind": "regenerable-procedural-macro-library"
+    },
+    {
+      "path": "/home/user/gpui-mask-lattice-native-target/release/build/zerovec-derive/fde8b517462863f4/out/libzerovec_derive-fde8b517462863f4.so",
+      "bytes": 9218584,
+      "sha256": "7026ca5d3cd96f5606711e44a15ddb199263e6cde46c84da04faceadb1251630",
+      "kind": "regenerable-procedural-macro-library"
+    },
+    {
+      "path": "/home/user/gpui-mask-lattice-native-target/release/build/bytemuck_derive/1f561acf9fffa216/out/libbytemuck_derive-1f561acf9fffa216.so",
+      "bytes": 9242152,
+      "sha256": "492b802afcf7a19e744aa678e7979b96e17d80a682bedd0c52059dd945e04e69",
+      "kind": "regenerable-procedural-macro-library"
+    },
+    {
+      "path": "/home/user/gpui-mask-lattice-native-target/release/build/serde_repr/6f4eb710c11d82c7/out/libserde_repr-6f4eb710c11d82c7.so",
+      "bytes": 8003248,
+      "sha256": "3d0bc7a26a8bb7b9b078bced21bf57a868c4e13e20838b17ad4023e5f9f9b782",
+      "kind": "regenerable-procedural-macro-library"
+    },
+    {
+      "path": "/home/user/gpui-mask-lattice-native-target/release/build/paste/a260c2d210c1a007/out/libpaste-a260c2d210c1a007.so",
+      "bytes": 6053944,
+      "sha256": "aa03c669200aadd9db887f36404d5ec53eb9d819051bdbdd471d720eb6577c40",
+      "kind": "regenerable-procedural-macro-library"
+    },
+    {
+      "path": "/home/user/gpui-mask-lattice-native-target/release/build/phf_macros/794167e00afa5338/out/libphf_macros-794167e00afa5338.so",
+      "bytes": 8863432,
+      "sha256": "552cbd9997114be9fcc1a2ba069de6936d86f2b5e4be9b8149f97cd748349a06",
+      "kind": "regenerable-procedural-macro-library"
+    },
+    {
+      "path": "/home/user/gpui-mask-lattice-native-target/release/build/yoke-derive/d57e66c024e643f7/out/libyoke_derive-d57e66c024e643f7.so",
+      "bytes": 9602336,
+      "sha256": "52ef69fe013a17d6f9f801890a9e43ea56f6f1b6394071d6d3a8a003c976dbee",
+      "kind": "regenerable-procedural-macro-library"
+    },
+    {
+      "path": "/home/user/gpui-mask-lattice-native-target/release/build/zbus-lockstep-macros/dc985eca58c087e9/out/libzbus_lockstep_macros-dc985eca58c087e9.so",
+      "bytes": 9203120,
+      "sha256": "b9142b1db82d5b4c40e3984ec0d8fc04be78be1463402524d4aef8776d07ff53",
+      "kind": "regenerable-procedural-macro-library"
+    },
+    {
+      "path": "/home/user/gpui-mask-lattice-native-target/release/build/snafu-derive/1276c0e548a0605a/out/libsnafu_derive-1276c0e548a0605a.so",
+      "bytes": 9984624,
+      "sha256": "211350fdcd23c4a77a0ec15f722bb5b4c84a76a8b97d46d9fbd933ab59437e08",
+      "kind": "regenerable-procedural-macro-library"
+    },
+    {
+      "path": "/home/user/gpui-mask-lattice-native-target/release/build/gpui/746d9ec805ac2334/out/zgx_native_lab",
+      "bytes": 22525608,
+      "sha256": "e22e1135411db3c9de63311f02ca378ea076bd5aea48e0056de74aeaef56d04c",
+      "kind": "exact-canonical-executable-copy",
+      "preserved": "/home/user/gpui-preserved-test-binaries/e22e1135411db3c9de63311f02ca378ea076bd5aea48e0056de74aeaef56d04c"
+    },
+    {
+      "path": "/home/user/gpui-mask-lattice-native-target/release/build/gpui/36ce182db847da02/out/zgx_native_lab-36ce182db847da02",
+      "bytes": 15103440,
+      "sha256": "8dba3155ff98703671349e44addc664b9bcfb719bd8ec88d383c13dfa0c9a149",
+      "kind": "exact-canonical-executable-copy",
+      "preserved": "/home/user/gpui-preserved-test-binaries/8dba3155ff98703671349e44addc664b9bcfb719bd8ec88d383c13dfa0c9a149"
+    },
+    {
+      "path": "/home/user/gpui-mask-lattice-native-target/release/build/wgsl-rs-macros/8af8749aece8151f/out/libwgsl_rs_macros-8af8749aece8151f.so",
+      "bytes": 13838440,
+      "sha256": "74d40884cd8dd570498bbcfe9d11fad058e6efb4870477a2e3e9553add838917",
+      "kind": "regenerable-procedural-macro-library"
+    },
+    {
+      "path": "/home/user/gpui-mask-lattice-native-target/release/build/async-recursion/c21851c5bb315887/out/libasync_recursion-c21851c5bb315887.so",
+      "bytes": 8562672,
+      "sha256": "15da16c699dacee6d4078bc3626dac86f8b9b362be158b498e4e3c03b929597b",
+      "kind": "regenerable-procedural-macro-library"
+    },
+    {
+      "path": "/home/user/gpui-mask-lattice-native-target/release/build/async-trait/0775b4382e1b3126/out/libasync_trait-0775b4382e1b3126.so",
+      "bytes": 9425424,
+      "sha256": "f7dc3b190a7d8d715cf0f2f58154c9a4037f951ce05ae030269072827c93051c",
+      "kind": "regenerable-procedural-macro-library"
+    },
+    {
+      "path": "/home/user/gpui-mask-lattice-native-target/release/build/displaydoc/610bc40ee7396a18/out/libdisplaydoc-610bc40ee7396a18.so",
+      "bytes": 8926568,
+      "sha256": "d33271beeb72a6b624492f0f2a6d93b2c8606af00b41a1e427f8cf2f3f476597",
+      "kind": "regenerable-procedural-macro-library"
+    },
+    {
+      "path": "/home/user/gpui-mask-lattice-native-target/release/build/zvariant_derive/f5581eed563807c1/out/libzvariant_derive-f5581eed563807c1.so",
+      "bytes": 10539776,
+      "sha256": "18866a35a595c7866d7c599fdd171ab2488f7ad71cdb921c6c01a714795b2b73",
+      "kind": "regenerable-procedural-macro-library"
+    },
+    {
+      "path": "/home/user/gpui-mask-lattice-native-target/release/build/futures-macro/05bcb76e1d05e986/out/libfutures_macro-05bcb76e1d05e986.so",
+      "bytes": 8508696,
+      "sha256": "a9b9d79957e5bed5aa5c4c650782e31904bb82effa7da99e11b7497997b49f16",
+      "kind": "regenerable-procedural-macro-library"
+    },
+    {
+      "path": "/home/user/gpui-mask-lattice-native-target/release/build/serde_derive/89639fe0f3cf5172/out/libserde_derive-89639fe0f3cf5172.so",
+      "bytes": 10322656,
+      "sha256": "ad9438f92fca0b70db93677f07c57af5cd5bb31b34a0d9d25a904a962f0ecfed",
+      "kind": "regenerable-procedural-macro-library"
+    },
+    {
+      "path": "/home/user/gpui-mask-lattice-native-target/release/build/zbus_macros/868b63b66fe85c86/out/libzbus_macros-868b63b66fe85c86.so",
+      "bytes": 11304208,
+      "sha256": "96a16226bfbca8ce7194d4025346d1f80699249ccd64b2cadca3c5dbb7d4f90c",
+      "kind": "regenerable-procedural-macro-library"
+    },
+    {
+      "path": "/home/user/gpui-mask-lattice-native-target/release/build/zbus_macros/b960fcbdbc0198dc/out/libzbus_macros-b960fcbdbc0198dc.so",
+      "bytes": 11912656,
+      "sha256": "ba785bf85e080839464807e6589f0a31a87a70e9b6cb299ecdb16730704c972d",
+      "kind": "regenerable-procedural-macro-library"
+    },
+    {
+      "path": "/home/user/gpui-mask-lattice-native-target/release/build/tracing-attributes/0163f8e44ab0772f/out/libtracing_attributes-0163f8e44ab0772f.so",
+      "bytes": 9686720,
+      "sha256": "a28a9e028e9ef5e8025f138e33c12f05516aa3a49270043db0948b85bdfc9d25",
+      "kind": "regenerable-procedural-macro-library"
+    },
+    {
+      "path": "/home/user/gpui-mask-lattice-native-target/release/build/zerocopy-derive/9bf8b3166e0ef36f/out/libzerocopy_derive-9bf8b3166e0ef36f.so",
+      "bytes": 9849256,
+      "sha256": "7e2076026e43c670cbc166f9ee2058db3b18a9bd2062b8e04d81e5875dbf0a86",
+      "kind": "regenerable-procedural-macro-library"
+    },
+    {
+      "path": "/home/user/gpui-mask-lattice-native-target/release/build/document-features/41605ec23c61e17e/out/libdocument_features-41605ec23c61e17e.so",
+      "bytes": 6286912,
+      "sha256": "df3ce82db1c79e564f8ead2d29ef76c41d00b9c01a09005aa55401c1d95bd908",
+      "kind": "regenerable-procedural-macro-library"
+    },
+    {
+      "path": "/home/user/gpui-mask-lattice-native-target/release/build/zerofrom-derive/2c3daee5cf1244e5/out/libzerofrom_derive-2c3daee5cf1244e5.so",
+      "bytes": 9982080,
+      "sha256": "dd99f5de77bf8b1f56ed3a46198e8910a5a918ce6a8912da174b5bd8b9ee97d4",
+      "kind": "regenerable-procedural-macro-library"
+    },
+    {
+      "path": "/home/user/gpui-mask-lattice-oracle-target/release/examples/tiles",
+      "bytes": 15205520,
+      "sha256": "2f6449f8647f1ce047048bf4e39addb524c6f085d43af479e8cb8e2187e9d78c",
+      "kind": "exact-canonical-executable-copy",
+      "preserved": "/home/user/gpui-preserved-test-binaries/2f6449f8647f1ce047048bf4e39addb524c6f085d43af479e8cb8e2187e9d78c"
+    },
+    {
+      "path": "/home/user/gpui-mask-lattice-oracle-target/release/examples/damage_cost",
+      "bytes": 684888,
+      "sha256": "949cc275817d19db952f7fc52b7be1b60af52487315a5ce1c9fb6454a1e39538",
+      "kind": "exact-canonical-executable-copy",
+      "preserved": "/home/user/gpui-preserved-test-binaries/949cc275817d19db952f7fc52b7be1b60af52487315a5ce1c9fb6454a1e39538"
+    },
+    {
+      "path": "/home/user/gpui-mask-lattice-oracle-target/release/examples/retained",
+      "bytes": 15294280,
+      "sha256": "1a101ac07defa5811bd2cf56615a81e38704f26684a3ddfeb21f87798641d7f6",
+      "kind": "exact-canonical-executable-copy",
+      "preserved": "/home/user/gpui-preserved-test-binaries/1a101ac07defa5811bd2cf56615a81e38704f26684a3ddfeb21f87798641d7f6"
+    },
+    {
+      "path": "/home/user/gpui-mask-lattice-oracle-target/release/examples/text_interaction",
+      "bytes": 6937600,
+      "sha256": "ca52dde914f6495137c09688580eed1dad58e26837491353aa3e83959c9c7681",
+      "kind": "exact-canonical-executable-copy",
+      "preserved": "/home/user/gpui-preserved-test-binaries/ca52dde914f6495137c09688580eed1dad58e26837491353aa3e83959c9c7681"
+    },
+    {
+      "path": "/home/user/gpui-mask-lattice-oracle-target/release/examples/retained_runs",
+      "bytes": 7854328,
+      "sha256": "b643933d364ce9cfe4ba001f7559876828951d95d43021d84c618d2166837675",
+      "kind": "exact-canonical-executable-copy",
+      "preserved": "/home/user/gpui-preserved-test-binaries/b643933d364ce9cfe4ba001f7559876828951d95d43021d84c618d2166837675"
+    },
+    {
+      "path": "/home/user/gpui-mask-lattice-oracle-target/release/examples/text_cache_capacity",
+      "bytes": 7576544,
+      "sha256": "fc6b5f6025d4799d7a6769cdf56d71896382e2701a88c0137be8691c78d98c50",
+      "kind": "exact-canonical-executable-copy",
+      "preserved": "/home/user/gpui-preserved-test-binaries/fc6b5f6025d4799d7a6769cdf56d71896382e2701a88c0137be8691c78d98c50"
+    },
+    {
+      "path": "/home/user/gpui-mask-lattice-oracle-target/release/examples/text_oracle",
+      "bytes": 6939000,
+      "sha256": "890d962456da8a4c5610599f60b619bac53e3877dd4bd0a8149da29bab6563ed",
+      "kind": "exact-canonical-executable-copy",
+      "preserved": "/home/user/gpui-preserved-test-binaries/890d962456da8a4c5610599f60b619bac53e3877dd4bd0a8149da29bab6563ed"
+    },
+    {
+      "path": "/home/user/gpui-mask-lattice-oracle-target/release/examples/coverage_table",
+      "bytes": 1434632,
+      "sha256": "70941cdad8e2114b0375ba35efcdfc1e3a76604e32db82eddf178597861939b6",
+      "kind": "exact-canonical-executable-copy",
+      "preserved": "/home/user/gpui-preserved-test-binaries/70941cdad8e2114b0375ba35efcdfc1e3a76604e32db82eddf178597861939b6"
+    },
+    {
+      "path": "/home/user/gpui-mask-lattice-oracle-target/release/examples/images",
+      "bytes": 7981288,
+      "sha256": "a6b4885ca9d0cb29af0bf6ebc0dfe48df3af4082bce40f0f052a1dcfa256d068",
+      "kind": "exact-canonical-executable-copy",
+      "preserved": "/home/user/gpui-preserved-test-binaries/a6b4885ca9d0cb29af0bf6ebc0dfe48df3af4082bce40f0f052a1dcfa256d068"
+    },
+    {
+      "path": "/home/user/gpui-mask-lattice-oracle-target/release/examples/selection_queries",
+      "bytes": 6924032,
+      "sha256": "63e5fc6ed9542a851e23839839ce182f434d686e409373b832c647771fa046be",
+      "kind": "exact-canonical-executable-copy",
+      "preserved": "/home/user/gpui-preserved-test-binaries/63e5fc6ed9542a851e23839839ce182f434d686e409373b832c647771fa046be"
+    },
+    {
+      "path": "/home/user/gpui-mask-lattice-oracle-target/release/examples/group_views",
+      "bytes": 7840896,
+      "sha256": "c7bc8b33e113ae1ebe2d514778dc6bf67e59ae1d6c7ecb53568d773b4c4eff9d",
+      "kind": "exact-canonical-executable-copy",
+      "preserved": "/home/user/gpui-preserved-test-binaries/c7bc8b33e113ae1ebe2d514778dc6bf67e59ae1d6c7ecb53568d773b4c4eff9d"
+    },
+    {
+      "path": "/home/user/gpui-mask-lattice-oracle-target/release/examples/cpu",
+      "bytes": 7998936,
+      "sha256": "491d80c0eebeed5ef0a66e3d99bfa32a2f937aef3a88dbf6658084eace13763b",
+      "kind": "exact-canonical-executable-copy",
+      "preserved": "/home/user/gpui-preserved-test-binaries/491d80c0eebeed5ef0a66e3d99bfa32a2f937aef3a88dbf6658084eace13763b"
+    },
+    {
+      "path": "/home/user/gpui-mask-lattice-oracle-target/release/examples/groups",
+      "bytes": 15201880,
+      "sha256": "f4dd617403be1c255d1ba9bff42df63fd436d9b8aba3fd494828818cbb1d3846",
+      "kind": "exact-canonical-executable-copy",
+      "preserved": "/home/user/gpui-preserved-test-binaries/f4dd617403be1c255d1ba9bff42df63fd436d9b8aba3fd494828818cbb1d3846"
+    },
+    {
+      "path": "/home/user/gpui-mask-lattice-oracle-target/release/examples/caret_pair_measure",
+      "bytes": 6923792,
+      "sha256": "dd40ecf5a56db8336729a02a5e598251244b3092f9f0749f18a3978584cbccb2",
+      "kind": "exact-canonical-executable-copy",
+      "preserved": "/home/user/gpui-preserved-test-binaries/dd40ecf5a56db8336729a02a5e598251244b3092f9f0749f18a3978584cbccb2"
+    },
+    {
+      "path": "/home/user/gpui-mask-lattice-oracle-target/release/examples/text_shaping",
+      "bytes": 8009072,
+      "sha256": "36976667a184a8f02faa26e7fa3c05fa324ee025d78c4abd3857d2f4d97c27a7",
+      "kind": "exact-canonical-executable-copy",
+      "preserved": "/home/user/gpui-preserved-test-binaries/36976667a184a8f02faa26e7fa3c05fa324ee025d78c4abd3857d2f4d97c27a7"
+    },
+    {
+      "path": "/home/user/gpui-mask-lattice-oracle-target/release/examples/font_memory",
+      "bytes": 10124696,
+      "sha256": "1348b2a14b5e9b73cf5674cf7af78dd2aab529fc096f5f7f12ae2e2c3ab3494c",
+      "kind": "exact-canonical-executable-copy",
+      "preserved": "/home/user/gpui-preserved-test-binaries/1348b2a14b5e9b73cf5674cf7af78dd2aab529fc096f5f7f12ae2e2c3ab3494c"
+    },
+    {
+      "path": "/home/user/gpui-mask-lattice-oracle-target/release/examples/image_axis",
+      "bytes": 728856,
+      "sha256": "5d9372a9aaad6ef35cf075df49258e43b19525126e778ee8046ac776f0006fc5",
+      "kind": "exact-canonical-executable-copy",
+      "preserved": "/home/user/gpui-preserved-test-binaries/5d9372a9aaad6ef35cf075df49258e43b19525126e778ee8046ac776f0006fc5"
+    },
+    {
+      "path": "/home/user/gpui-mask-lattice-oracle-target/release/examples/clip_cost",
+      "bytes": 7847560,
+      "sha256": "827024133f5f22a5b75b36fed5fb5a531115c9ddfd84d33f57971feb0797d476",
+      "kind": "exact-canonical-executable-copy",
+      "preserved": "/home/user/gpui-preserved-test-binaries/827024133f5f22a5b75b36fed5fb5a531115c9ddfd84d33f57971feb0797d476"
+    },
+    {
+      "path": "/home/user/gpui-mask-lattice-oracle-target/release/build/thiserror-impl/11cb6adf2e0064f3/out/libthiserror_impl-11cb6adf2e0064f3.so",
+      "bytes": 3980528,
+      "sha256": "19d10b99c85afedaa71edac94a0205d1a159d912b4060cd92e0af6883398ea4b",
+      "kind": "regenerable-procedural-macro-library"
+    },
+    {
+      "path": "/home/user/gpui-mask-lattice-oracle-target/release/build/fearless_simd_macros/13fb3b59b63a3fd9/out/libfearless_simd_macros-13fb3b59b63a3fd9.so",
+      "bytes": 3823840,
+      "sha256": "9d511cb3cc521f83b56d07abdc204a27ed005130687647e966eb91489a4f7e46",
+      "kind": "regenerable-procedural-macro-library"
+    },
+    {
+      "path": "/home/user/gpui-mask-lattice-oracle-target/release/build/zerovec-derive/0453177f0d3b4a4e/out/libzerovec_derive-0453177f0d3b4a4e.so",
+      "bytes": 3888472,
+      "sha256": "8a11b7480c99dc1db38d65ac5af53877fbbc20ed53c33ea11d6434bcbbb22fd3",
+      "kind": "regenerable-procedural-macro-library"
+    },
+    {
+      "path": "/home/user/gpui-mask-lattice-oracle-target/release/build/bytemuck_derive/45d346d42384f9a1/out/libbytemuck_derive-45d346d42384f9a1.so",
+      "bytes": 3912032,
+      "sha256": "2c80b3b9a0c8f3d7386e018d6e7311c8254f38ec5d6a013e1030de839d0d21cd",
+      "kind": "regenerable-procedural-macro-library"
+    },
+    {
+      "path": "/home/user/gpui-mask-lattice-oracle-target/release/build/paste/ae32c2b30f5af1df/out/libpaste-ae32c2b30f5af1df.so",
+      "bytes": 723880,
+      "sha256": "0898bdc9048c67b4af54485c5a824fac19c7bceca455a75ec1130757b68e92e2",
+      "kind": "regenerable-procedural-macro-library"
+    },
+    {
+      "path": "/home/user/gpui-mask-lattice-oracle-target/release/build/gpui_canvas/b6ae2ca160e29380/out/sample_clip-b6ae2ca160e29380",
+      "bytes": 1313080,
+      "sha256": "b97b869003034f7a41e40a5740fc7b42e12ccfbe33b4df046b6ed9718235feaf",
+      "kind": "exact-canonical-executable-copy",
+      "preserved": "/home/user/gpui-preserved-test-binaries/b97b869003034f7a41e40a5740fc7b42e12ccfbe33b4df046b6ed9718235feaf"
+    },
+    {
+      "path": "/home/user/gpui-mask-lattice-oracle-target/release/build/gpui_canvas/c627d1dc1ab61790/out/parallel-c627d1dc1ab61790",
+      "bytes": 1075560,
+      "sha256": "909e5daf2caa609985fbc4af4600ade411a610d1b2e243ddd83ed48c6982db84",
+      "kind": "exact-canonical-executable-copy",
+      "preserved": "/home/user/gpui-preserved-test-binaries/909e5daf2caa609985fbc4af4600ade411a610d1b2e243ddd83ed48c6982db84"
+    },
+    {
+      "path": "/home/user/gpui-mask-lattice-oracle-target/release/build/gpui_canvas/260eabc61cd841a2/out/text_shaping",
+      "bytes": 8009072,
+      "sha256": "36976667a184a8f02faa26e7fa3c05fa324ee025d78c4abd3857d2f4d97c27a7",
+      "kind": "exact-canonical-executable-copy",
+      "preserved": "/home/user/gpui-preserved-test-binaries/36976667a184a8f02faa26e7fa3c05fa324ee025d78c4abd3857d2f4d97c27a7"
+    },
+    {
+      "path": "/home/user/gpui-mask-lattice-oracle-target/release/build/gpui_canvas/ea1e4dddc2085252/out/sample_storage-ea1e4dddc2085252",
+      "bytes": 8558904,
+      "sha256": "b6788bb946904ec569756e6d431fc75aed5eca46b821f8df6cdf0d8941a66aa2",
+      "kind": "exact-canonical-executable-copy",
+      "preserved": "/home/user/gpui-preserved-test-binaries/b6788bb946904ec569756e6d431fc75aed5eca46b821f8df6cdf0d8941a66aa2"
+    },
+    {
+      "path": "/home/user/gpui-mask-lattice-oracle-target/release/build/gpui_canvas/3b0e5e59632df0c9/out/bins-3b0e5e59632df0c9",
+      "bytes": 8626392,
+      "sha256": "6dc5f3405fd858a2232ead0045d8b7ca824dc7274cfbbabb89226654630e078c",
+      "kind": "exact-canonical-executable-copy",
+      "preserved": "/home/user/gpui-preserved-test-binaries/6dc5f3405fd858a2232ead0045d8b7ca824dc7274cfbbabb89226654630e078c"
+    },
+    {
+      "path": "/home/user/gpui-mask-lattice-oracle-target/release/build/gpui_canvas/e2d64c4001f3f739/out/slots-e2d64c4001f3f739",
+      "bytes": 8595920,
+      "sha256": "440f7485893ecb358da4e3c6a07607636bd7e57d693da9e4848dcd4e94ab44d6",
+      "kind": "exact-canonical-executable-copy",
+      "preserved": "/home/user/gpui-preserved-test-binaries/440f7485893ecb358da4e3c6a07607636bd7e57d693da9e4848dcd4e94ab44d6"
+    },
+    {
+      "path": "/home/user/gpui-mask-lattice-oracle-target/release/build/gpui_canvas/66052e5dfad09408/out/text_patch_damage-66052e5dfad09408",
+      "bytes": 8608256,
+      "sha256": "628e55b618f667f94486b67db5cf78eff6431d2a24401c027c213927f04b9873",
+      "kind": "exact-canonical-executable-copy",
+      "preserved": "/home/user/gpui-preserved-test-binaries/628e55b618f667f94486b67db5cf78eff6431d2a24401c027c213927f04b9873"
+    },
+    {
+      "path": "/home/user/gpui-mask-lattice-oracle-target/release/build/gpui_canvas/a59ff47379d46cb6/out/text_oracle",
+      "bytes": 6939000,
+      "sha256": "890d962456da8a4c5610599f60b619bac53e3877dd4bd0a8149da29bab6563ed",
+      "kind": "exact-canonical-executable-copy",
+      "preserved": "/home/user/gpui-preserved-test-binaries/890d962456da8a4c5610599f60b619bac53e3877dd4bd0a8149da29bab6563ed"
+    },
+    {
+      "path": "/home/user/gpui-mask-lattice-oracle-target/release/build/gpui_canvas/1be0b3d0e3235788/out/selection-1be0b3d0e3235788",
+      "bytes": 10114864,
+      "sha256": "a2b548d8b1a66ddf3426d4c015b47820c4eb571e10e795ea3f946c72d7b0f6c2",
+      "kind": "exact-canonical-executable-copy",
+      "preserved": "/home/user/gpui-preserved-test-binaries/a2b548d8b1a66ddf3426d4c015b47820c4eb571e10e795ea3f946c72d7b0f6c2"
+    },
+    {
+      "path": "/home/user/gpui-mask-lattice-oracle-target/release/build/gpui_canvas/74572a23cb90bd6a/out/text_cache_capacity",
+      "bytes": 7576544,
+      "sha256": "fc6b5f6025d4799d7a6769cdf56d71896382e2701a88c0137be8691c78d98c50",
+      "kind": "exact-canonical-executable-copy",
+      "preserved": "/home/user/gpui-preserved-test-binaries/fc6b5f6025d4799d7a6769cdf56d71896382e2701a88c0137be8691c78d98c50"
+    },
+    {
+      "path": "/home/user/gpui-mask-lattice-oracle-target/release/build/gpui_canvas/803b30cc4bdd1ebd/out/color-803b30cc4bdd1ebd",
+      "bytes": 1320336,
+      "sha256": "9cda8dbf75cd9210b7179f915272fa39602ba8d8d6eefef842cde96d9cd943c7",
+      "kind": "exact-canonical-executable-copy",
+      "preserved": "/home/user/gpui-preserved-test-binaries/9cda8dbf75cd9210b7179f915272fa39602ba8d8d6eefef842cde96d9cd943c7"
+    },
+    {
+      "path": "/home/user/gpui-mask-lattice-oracle-target/release/build/gpui_canvas/34e5fcba4fa4888b/out/damage_cost",
+      "bytes": 684888,
+      "sha256": "949cc275817d19db952f7fc52b7be1b60af52487315a5ce1c9fb6454a1e39538",
+      "kind": "exact-canonical-executable-copy",
+      "preserved": "/home/user/gpui-preserved-test-binaries/949cc275817d19db952f7fc52b7be1b60af52487315a5ce1c9fb6454a1e39538"
+    },
+    {
+      "path": "/home/user/gpui-mask-lattice-oracle-target/release/build/gpui_canvas/5423f225aaab5c39/out/grouped-5423f225aaab5c39",
+      "bytes": 10556032,
+      "sha256": "6b32856e3395c9ac1b205742cefa34ffbef704167d1a2a668885282d6fb968bc",
+      "kind": "exact-canonical-executable-copy",
+      "preserved": "/home/user/gpui-preserved-test-binaries/6b32856e3395c9ac1b205742cefa34ffbef704167d1a2a668885282d6fb968bc"
+    },
+    {
+      "path": "/home/user/gpui-mask-lattice-oracle-target/release/build/gpui_canvas/dc7489c6ce975b1f/out/literal_cow-dc7489c6ce975b1f",
+      "bytes": 1312744,
+      "sha256": "171e5a73b6a626e7300eac1ddfa2f8599f82edab4ab9d7db859dc23c3da0252a",
+      "kind": "exact-canonical-executable-copy",
+      "preserved": "/home/user/gpui-preserved-test-binaries/171e5a73b6a626e7300eac1ddfa2f8599f82edab4ab9d7db859dc23c3da0252a"
+    },
+    {
+      "path": "/home/user/gpui-mask-lattice-oracle-target/release/build/gpui_canvas/7d88e365fb8520d3/out/caret_pair_measure",
+      "bytes": 6923792,
+      "sha256": "dd40ecf5a56db8336729a02a5e598251244b3092f9f0749f18a3978584cbccb2",
+      "kind": "exact-canonical-executable-copy",
+      "preserved": "/home/user/gpui-preserved-test-binaries/dd40ecf5a56db8336729a02a5e598251244b3092f9f0749f18a3978584cbccb2"
+    },
+    {
+      "path": "/home/user/gpui-mask-lattice-oracle-target/release/build/gpui_canvas/d3c2882074eb0607/out/render-d3c2882074eb0607",
+      "bytes": 12048520,
+      "sha256": "9aa64955dd1b60693a20f9417c7da71b07cb9888648b119e90e1b9901016f30f",
+      "kind": "exact-canonical-executable-copy",
+      "preserved": "/home/user/gpui-preserved-test-binaries/9aa64955dd1b60693a20f9417c7da71b07cb9888648b119e90e1b9901016f30f"
+    },
+    {
+      "path": "/home/user/gpui-mask-lattice-oracle-target/release/build/gpui_canvas/4ca75d5643febe6d/out/default_font-4ca75d5643febe6d",
+      "bytes": 12907856,
+      "sha256": "b20e24ae20554de8731e88dccdbee0fa3440982506e4856a6927b871b3f482d6",
+      "kind": "exact-canonical-executable-copy",
+      "preserved": "/home/user/gpui-preserved-test-binaries/b20e24ae20554de8731e88dccdbee0fa3440982506e4856a6927b871b3f482d6"
+    },
+    {
+      "path": "/home/user/gpui-mask-lattice-oracle-target/release/build/gpui_canvas/b30100c4f3186c7e/out/gradients-b30100c4f3186c7e",
+      "bytes": 1336968,
+      "sha256": "8772c02badcc83be8c3dcb77074e2193c78d0831b3544e967feb4ad7fa71b683",
+      "kind": "exact-canonical-executable-copy",
+      "preserved": "/home/user/gpui-preserved-test-binaries/8772c02badcc83be8c3dcb77074e2193c78d0831b3544e967feb4ad7fa71b683"
+    },
+    {
+      "path": "/home/user/gpui-mask-lattice-oracle-target/release/build/gpui_canvas/df94f3b5799eeba9/out/clip_cost",
+      "bytes": 7847560,
+      "sha256": "827024133f5f22a5b75b36fed5fb5a531115c9ddfd84d33f57971feb0797d476",
+      "kind": "exact-canonical-executable-copy",
+      "preserved": "/home/user/gpui-preserved-test-binaries/827024133f5f22a5b75b36fed5fb5a531115c9ddfd84d33f57971feb0797d476"
+    },
+    {
+      "path": "/home/user/gpui-mask-lattice-oracle-target/release/build/gpui_canvas/3eee272fb23f9d81/out/cpu",
+      "bytes": 7998936,
+      "sha256": "491d80c0eebeed5ef0a66e3d99bfa32a2f937aef3a88dbf6658084eace13763b",
+      "kind": "exact-canonical-executable-copy",
+      "preserved": "/home/user/gpui-preserved-test-binaries/491d80c0eebeed5ef0a66e3d99bfa32a2f937aef3a88dbf6658084eace13763b"
+    },
+    {
+      "path": "/home/user/gpui-mask-lattice-oracle-target/release/build/gpui_canvas/f04e70e509498e79/out/rounded-f04e70e509498e79",
+      "bytes": 1333360,
+      "sha256": "dd72fcad1e0d311b3cf50bb16f6bc8b8d5d7ea27837ae06cec791e232ce15988",
+      "kind": "exact-canonical-executable-copy",
+      "preserved": "/home/user/gpui-preserved-test-binaries/dd72fcad1e0d311b3cf50bb16f6bc8b8d5d7ea27837ae06cec791e232ce15988"
+    },
+    {
+      "path": "/home/user/gpui-mask-lattice-oracle-target/release/build/gpui_canvas/2a530e8f6638e7bf/out/images-2a530e8f6638e7bf",
+      "bytes": 1327912,
+      "sha256": "2ac2da5a978469514cf270a41445babb4b638a7e14c1127290d9a96a2ed13903",
+      "kind": "exact-canonical-executable-copy",
+      "preserved": "/home/user/gpui-preserved-test-binaries/2ac2da5a978469514cf270a41445babb4b638a7e14c1127290d9a96a2ed13903"
+    },
+    {
+      "path": "/home/user/gpui-mask-lattice-oracle-target/release/build/gpui_canvas/e4daf880f8f3142f/out/prepared_scene-e4daf880f8f3142f",
+      "bytes": 10632752,
+      "sha256": "8cb4eb26ee45109d6654ee1dd3c1eb0a35d5090188bc3a37da7b86cba4d3cf2f",
+      "kind": "exact-canonical-executable-copy",
+      "preserved": "/home/user/gpui-preserved-test-binaries/8cb4eb26ee45109d6654ee1dd3c1eb0a35d5090188bc3a37da7b86cba4d3cf2f"
+    },
+    {
+      "path": "/home/user/gpui-mask-lattice-oracle-target/release/build/gpui_canvas/e7f7f926e56c8080/out/gpui_canvas-e7f7f926e56c8080",
+      "bytes": 9949576,
+      "sha256": "c4bc79f294ea6a1c7d2106e999192e1371397bd67d65aef2e59da6a7166ec4b9",
+      "kind": "exact-canonical-executable-copy",
+      "preserved": "/home/user/gpui-preserved-test-binaries/c4bc79f294ea6a1c7d2106e999192e1371397bd67d65aef2e59da6a7166ec4b9"
+    },
+    {
+      "path": "/home/user/gpui-mask-lattice-oracle-target/release/build/gpui_canvas/0ce5c7756bca6592/out/paint-0ce5c7756bca6592",
+      "bytes": 8595232,
+      "sha256": "7ee0022f90fae806160d7c86d5b1d1bdf0563cdecfe4e0f384d36d7e873d6daa",
+      "kind": "exact-canonical-executable-copy",
+      "preserved": "/home/user/gpui-preserved-test-binaries/7ee0022f90fae806160d7c86d5b1d1bdf0563cdecfe4e0f384d36d7e873d6daa"
+    },
+    {
+      "path": "/home/user/gpui-mask-lattice-oracle-target/release/build/gpui_canvas/3c586a8a10bd35ad/out/damage-3c586a8a10bd35ad",
+      "bytes": 8606496,
+      "sha256": "fdb413b1eb1e000135d6dc0e4477027989b02730fd614ed56957f47f7c527bbf",
+      "kind": "exact-canonical-executable-copy",
+      "preserved": "/home/user/gpui-preserved-test-binaries/fdb413b1eb1e000135d6dc0e4477027989b02730fd614ed56957f47f7c527bbf"
+    },
+    {
+      "path": "/home/user/gpui-mask-lattice-oracle-target/release/build/gpui_canvas/7f11cd62cab7a182/out/font_sharing-7f11cd62cab7a182",
+      "bytes": 10625952,
+      "sha256": "a0f26185eeffae00456084b63959d225e827fd1bf670ecaa1d961eda77a49057",
+      "kind": "exact-canonical-executable-copy",
+      "preserved": "/home/user/gpui-preserved-test-binaries/a0f26185eeffae00456084b63959d225e827fd1bf670ecaa1d961eda77a49057"
+    },
+    {
+      "path": "/home/user/gpui-mask-lattice-oracle-target/release/build/gpui_canvas/8d55f8bca946137e/out/text_metric_scale_probe-8d55f8bca946137e",
+      "bytes": 8617144,
+      "sha256": "c7d08175e39170ebd9c05232e03e2eb4e30c16e5e5799586133b57b57b15a159",
+      "kind": "exact-canonical-executable-copy",
+      "preserved": "/home/user/gpui-preserved-test-binaries/c7d08175e39170ebd9c05232e03e2eb4e30c16e5e5799586133b57b57b15a159"
+    },
+    {
+      "path": "/home/user/gpui-mask-lattice-oracle-target/release/build/gpui_canvas/cb217f51f66152fb/out/dpi-cb217f51f66152fb",
+      "bytes": 8570352,
+      "sha256": "33f117aff22cdfa1d246fcd34d601fed9e12374f0ddf4253a553bcec3da2a595",
+      "kind": "exact-canonical-executable-copy",
+      "preserved": "/home/user/gpui-preserved-test-binaries/33f117aff22cdfa1d246fcd34d601fed9e12374f0ddf4253a553bcec3da2a595"
+    },
+    {
+      "path": "/home/user/gpui-mask-lattice-oracle-target/release/build/gpui_canvas/8e8c4e2ce2f93ba3/out/damage_regions-8e8c4e2ce2f93ba3",
+      "bytes": 1207584,
+      "sha256": "e1b726c6231e3a9602e839b65ae0b1e3fdc0c19d95c566d23d732e6a29aec233",
+      "kind": "exact-canonical-executable-copy",
+      "preserved": "/home/user/gpui-preserved-test-binaries/e1b726c6231e3a9602e839b65ae0b1e3fdc0c19d95c566d23d732e6a29aec233"
+    },
+    {
+      "path": "/home/user/gpui-mask-lattice-oracle-target/release/build/gpui_canvas/bd07e4ec6659b2af/out/solid-bd07e4ec6659b2af",
+      "bytes": 1298792,
+      "sha256": "3da386f8ffcf48e0466675f5cf7bb84e5a75bc2c35618359252f0261e816ea07",
+      "kind": "exact-canonical-executable-copy",
+      "preserved": "/home/user/gpui-preserved-test-binaries/3da386f8ffcf48e0466675f5cf7bb84e5a75bc2c35618359252f0261e816ea07"
+    },
+    {
+      "path": "/home/user/gpui-mask-lattice-oracle-target/release/build/gpui_canvas/3d349e54613ab355/out/font_memory",
+      "bytes": 10124696,
+      "sha256": "1348b2a14b5e9b73cf5674cf7af78dd2aab529fc096f5f7f12ae2e2c3ab3494c",
+      "kind": "exact-canonical-executable-copy",
+      "preserved": "/home/user/gpui-preserved-test-binaries/1348b2a14b5e9b73cf5674cf7af78dd2aab529fc096f5f7f12ae2e2c3ab3494c"
+    },
+    {
+      "path": "/home/user/gpui-mask-lattice-oracle-target/release/build/gpui_canvas/8d8d323333f848c4/out/coverage_table",
+      "bytes": 1434632,
+      "sha256": "70941cdad8e2114b0375ba35efcdfc1e3a76604e32db82eddf178597861939b6",
+      "kind": "exact-canonical-executable-copy",
+      "preserved": "/home/user/gpui-preserved-test-binaries/70941cdad8e2114b0375ba35efcdfc1e3a76604e32db82eddf178597861939b6"
+    },
+    {
+      "path": "/home/user/gpui-mask-lattice-oracle-target/release/build/gpui_canvas/d0ba751385e75a1f/out/unicode-d0ba751385e75a1f",
+      "bytes": 11797864,
+      "sha256": "05027bec6484b41f130124d32f25daef31e7fc320f2087d8e4a162a6c3bdc9c4",
+      "kind": "exact-canonical-executable-copy",
+      "preserved": "/home/user/gpui-preserved-test-binaries/05027bec6484b41f130124d32f25daef31e7fc320f2087d8e4a162a6c3bdc9c4"
+    },
+    {
+      "path": "/home/user/gpui-mask-lattice-oracle-target/release/build/gpui_canvas/125fe8aa1d9fdb12/out/external-125fe8aa1d9fdb12",
+      "bytes": 8574488,
+      "sha256": "364d4b713977c016fa733d93f4b1d91385c78fe967dd3f1fe60e7c2f020976b5",
+      "kind": "exact-canonical-executable-copy",
+      "preserved": "/home/user/gpui-preserved-test-binaries/364d4b713977c016fa733d93f4b1d91385c78fe967dd3f1fe60e7c2f020976b5"
+    },
+    {
+      "path": "/home/user/gpui-mask-lattice-oracle-target/release/build/gpui_canvas/a66a56010281ed60/out/group_views",
+      "bytes": 7840896,
+      "sha256": "c7bc8b33e113ae1ebe2d514778dc6bf67e59ae1d6c7ecb53568d773b4c4eff9d",
+      "kind": "exact-canonical-executable-copy",
+      "preserved": "/home/user/gpui-preserved-test-binaries/c7bc8b33e113ae1ebe2d514778dc6bf67e59ae1d6c7ecb53568d773b4c4eff9d"
+    },
+    {
+      "path": "/home/user/gpui-mask-lattice-oracle-target/release/build/gpui_canvas/e9eb27a37e6dd6e0/out/color_packing-e9eb27a37e6dd6e0",
+      "bytes": 1331528,
+      "sha256": "e436fecb0e082ee4164e80b7cb5b4c959a53b34e4032d716ad2ff1ef0facc7e8",
+      "kind": "exact-canonical-executable-copy",
+      "preserved": "/home/user/gpui-preserved-test-binaries/e436fecb0e082ee4164e80b7cb5b4c959a53b34e4032d716ad2ff1ef0facc7e8"
+    },
+    {
+      "path": "/home/user/gpui-mask-lattice-oracle-target/release/build/gpui_canvas/065be7fbdf5a91d8/out/selection_queries",
+      "bytes": 6924032,
+      "sha256": "63e5fc6ed9542a851e23839839ce182f434d686e409373b832c647771fa046be",
+      "kind": "exact-canonical-executable-copy",
+      "preserved": "/home/user/gpui-preserved-test-binaries/63e5fc6ed9542a851e23839839ce182f434d686e409373b832c647771fa046be"
+    },
+    {
+      "path": "/home/user/gpui-mask-lattice-oracle-target/release/build/gpui_canvas/6e0206172b11000c/out/color_authoring-6e0206172b11000c",
+      "bytes": 1171344,
+      "sha256": "1db192efc1621589d085fd1c9c04fa7ff5cef44daf7fdb87bd7ca69279262b87",
+      "kind": "exact-canonical-executable-copy",
+      "preserved": "/home/user/gpui-preserved-test-binaries/1db192efc1621589d085fd1c9c04fa7ff5cef44daf7fdb87bd7ca69279262b87"
+    },
+    {
+      "path": "/home/user/gpui-mask-lattice-oracle-target/release/build/gpui_canvas/4a2db0a211b797e3/out/text_run_probe-4a2db0a211b797e3",
+      "bytes": 8613280,
+      "sha256": "6c5dcfafc180f03f9768ed11497ce3c4b10748a4e1cca189b130a3987dcf996a",
+      "kind": "exact-canonical-executable-copy",
+      "preserved": "/home/user/gpui-preserved-test-binaries/6c5dcfafc180f03f9768ed11497ce3c4b10748a4e1cca189b130a3987dcf996a"
+    },
+    {
+      "path": "/home/user/gpui-mask-lattice-oracle-target/release/build/gpui_canvas/11f8ef7a91cd341d/out/damage_workspace-11f8ef7a91cd341d",
+      "bytes": 1195608,
+      "sha256": "e801d6ca5fb061bb04b54f25d90718a66df2d1bd55777dd5f65b4b60f0cbfe0e",
+      "kind": "exact-canonical-executable-copy",
+      "preserved": "/home/user/gpui-preserved-test-binaries/e801d6ca5fb061bb04b54f25d90718a66df2d1bd55777dd5f65b4b60f0cbfe0e"
+    },
+    {
+      "path": "/home/user/gpui-mask-lattice-oracle-target/release/build/gpui_canvas/6b381682c3f7776e/out/oklch-6b381682c3f7776e",
+      "bytes": 1186608,
+      "sha256": "698b6a4bc345e60ffe2a7b1e13942b92a243dca9fc30d4adeafc2cf3f54906e5",
+      "kind": "exact-canonical-executable-copy",
+      "preserved": "/home/user/gpui-preserved-test-binaries/698b6a4bc345e60ffe2a7b1e13942b92a243dca9fc30d4adeafc2cf3f54906e5"
+    },
+    {
+      "path": "/home/user/gpui-mask-lattice-oracle-target/release/build/gpui_canvas/66469fa68f278aa1/out/damage_suffix-66469fa68f278aa1",
+      "bytes": 8568176,
+      "sha256": "1d5a60db4346c82686029ad8b2f98d94029923feaef6294376f5d2b1c5c3fc37",
+      "kind": "exact-canonical-executable-copy",
+      "preserved": "/home/user/gpui-preserved-test-binaries/1d5a60db4346c82686029ad8b2f98d94029923feaef6294376f5d2b1c5c3fc37"
+    },
+    {
+      "path": "/home/user/gpui-mask-lattice-oracle-target/release/build/gpui_canvas/309c83eeb8316fab/out/scroll_copy-309c83eeb8316fab",
+      "bytes": 10703120,
+      "sha256": "591f3f282085e01b6a341c4fdaca2211cd66b08b1dc0e2609dd0876dee26d656",
+      "kind": "exact-canonical-executable-copy",
+      "preserved": "/home/user/gpui-preserved-test-binaries/591f3f282085e01b6a341c4fdaca2211cd66b08b1dc0e2609dd0876dee26d656"
+    },
+    {
+      "path": "/home/user/gpui-mask-lattice-oracle-target/release/build/gpui_canvas/643c4468120f623d/out/clipping-643c4468120f623d",
+      "bytes": 1342160,
+      "sha256": "319ac7cf25f2e69c8a70331272e043a9dbb50f7b5e54117674a3df9c23e0567c",
+      "kind": "exact-canonical-executable-copy",
+      "preserved": "/home/user/gpui-preserved-test-binaries/319ac7cf25f2e69c8a70331272e043a9dbb50f7b5e54117674a3df9c23e0567c"
+    },
+    {
+      "path": "/home/user/gpui-mask-lattice-oracle-target/release/build/gpui_canvas/c78a70091e54785c/out/hdr-c78a70091e54785c",
+      "bytes": 8586616,
+      "sha256": "c3c786753e9e7dbe9c3811306628c36e99535276296c5bf9b690339362835253",
+      "kind": "exact-canonical-executable-copy",
+      "preserved": "/home/user/gpui-preserved-test-binaries/c3c786753e9e7dbe9c3811306628c36e99535276296c5bf9b690339362835253"
+    },
+    {
+      "path": "/home/user/gpui-mask-lattice-oracle-target/release/build/gpui_canvas/aedbcdddc79c5cf6/out/retained_runs",
+      "bytes": 7854328,
+      "sha256": "b643933d364ce9cfe4ba001f7559876828951d95d43021d84c618d2166837675",
+      "kind": "exact-canonical-executable-copy",
+      "preserved": "/home/user/gpui-preserved-test-binaries/b643933d364ce9cfe4ba001f7559876828951d95d43021d84c618d2166837675"
+    },
+    {
+      "path": "/home/user/gpui-mask-lattice-oracle-target/release/build/gpui_canvas/80bfde96444141e1/out/line_height-80bfde96444141e1",
+      "bytes": 7558312,
+      "sha256": "25b99c9dc2249a2a2836692df8c9ef08b2a0160112278b9221f1aa2bc0ba98a8",
+      "kind": "exact-canonical-executable-copy",
+      "preserved": "/home/user/gpui-preserved-test-binaries/25b99c9dc2249a2a2836692df8c9ef08b2a0160112278b9221f1aa2bc0ba98a8"
+    },
+    {
+      "path": "/home/user/gpui-mask-lattice-oracle-target/release/build/gpui_canvas/3e7493a8ec22d669/out/text_cache-3e7493a8ec22d669",
+      "bytes": 9157128,
+      "sha256": "4016a4cbe3e46b21d6fefe02a06a1a2487e617f008b29d232176b25d937799c5",
+      "kind": "exact-canonical-executable-copy",
+      "preserved": "/home/user/gpui-preserved-test-binaries/4016a4cbe3e46b21d6fefe02a06a1a2487e617f008b29d232176b25d937799c5"
+    },
+    {
+      "path": "/home/user/gpui-mask-lattice-oracle-target/release/build/gpui_canvas/aef8b08d67145dd5/out/text_composition-aef8b08d67145dd5",
+      "bytes": 8620128,
+      "sha256": "7dceb0c38a0f4e3322d4b5e159bf33d983e92d8c8faa8c88446c4ff1350d246f",
+      "kind": "exact-canonical-executable-copy",
+      "preserved": "/home/user/gpui-preserved-test-binaries/7dceb0c38a0f4e3322d4b5e159bf33d983e92d8c8faa8c88446c4ff1350d246f"
+    },
+    {
+      "path": "/home/user/gpui-mask-lattice-oracle-target/release/build/gpui_canvas/7a3640f7d1081a17/out/image_axis",
+      "bytes": 728856,
+      "sha256": "5d9372a9aaad6ef35cf075df49258e43b19525126e778ee8046ac776f0006fc5",
+      "kind": "exact-canonical-executable-copy",
+      "preserved": "/home/user/gpui-preserved-test-binaries/5d9372a9aaad6ef35cf075df49258e43b19525126e778ee8046ac776f0006fc5"
+    },
+    {
+      "path": "/home/user/gpui-mask-lattice-oracle-target/release/build/gpui_canvas/01083c98466ae3fa/out/images",
+      "bytes": 735048,
+      "sha256": "c665cc539adc5cf7fd95f544dbddedce1ea26a094698e7bd7c507cb403c8e63b",
+      "kind": "exact-canonical-executable-copy",
+      "preserved": "/home/user/gpui-preserved-test-binaries/c665cc539adc5cf7fd95f544dbddedce1ea26a094698e7bd7c507cb403c8e63b"
+    },
+    {
+      "path": "/home/user/gpui-mask-lattice-oracle-target/release/build/gpui_canvas/5e889805cb647025/out/text_transaction-5e889805cb647025",
+      "bytes": 10673736,
+      "sha256": "826d2c6c9f95a9c3515aec22ebbaeadcbe1359138f83d0efb874cf4adb79a349",
+      "kind": "exact-canonical-executable-copy",
+      "preserved": "/home/user/gpui-preserved-test-binaries/826d2c6c9f95a9c3515aec22ebbaeadcbe1359138f83d0efb874cf4adb79a349"
+    },
+    {
+      "path": "/home/user/gpui-mask-lattice-oracle-target/release/build/gpui_canvas/0ed3181fcc461005/out/shaping-0ed3181fcc461005",
+      "bytes": 8208328,
+      "sha256": "bc6c6c3ec565aee095cd0d14a8c2dc66818e97ad3ec0930b0d1297c7b2802511",
+      "kind": "exact-canonical-executable-copy",
+      "preserved": "/home/user/gpui-preserved-test-binaries/bc6c6c3ec565aee095cd0d14a8c2dc66818e97ad3ec0930b0d1297c7b2802511"
+    },
+    {
+      "path": "/home/user/gpui-mask-lattice-oracle-target/release/build/gpui_canvas/966b652f1a6d437e/out/font_quality-966b652f1a6d437e",
+      "bytes": 10745040,
+      "sha256": "49a88fd32fa6ca507bed7a65f74db1596670db703b755b91b81d5da2c919dd43",
+      "kind": "exact-canonical-executable-copy",
+      "preserved": "/home/user/gpui-preserved-test-binaries/49a88fd32fa6ca507bed7a65f74db1596670db703b755b91b81d5da2c919dd43"
+    },
+    {
+      "path": "/home/user/gpui-mask-lattice-oracle-target/release/build/gpui_canvas/82210282371fce2b/out/text_interaction",
+      "bytes": 6937600,
+      "sha256": "ca52dde914f6495137c09688580eed1dad58e26837491353aa3e83959c9c7681",
+      "kind": "exact-canonical-executable-copy",
+      "preserved": "/home/user/gpui-preserved-test-binaries/ca52dde914f6495137c09688580eed1dad58e26837491353aa3e83959c9c7681"
+    },
+    {
+      "path": "/home/user/gpui-mask-lattice-oracle-target/release/build/gpui_canvas/1409624c675a2863/out/text_capacity-1409624c675a2863",
+      "bytes": 8447816,
+      "sha256": "3e79febcab122f9e6fc999db9ba6a2b221d3ddcd8fe49f55d3482ef8f4935237",
+      "kind": "exact-canonical-executable-copy",
+      "preserved": "/home/user/gpui-preserved-test-binaries/3e79febcab122f9e6fc999db9ba6a2b221d3ddcd8fe49f55d3482ef8f4935237"
+    },
+    {
+      "path": "/home/user/gpui-mask-lattice-oracle-target/release/build/yoke-derive/b25af4ec908c7268/out/libyoke_derive-b25af4ec908c7268.so",
+      "bytes": 4272112,
+      "sha256": "b50a92d171d7b6a06852f1f7b07ac95931d3d0c74f7356fcd54d5826a8ad9536",
+      "kind": "regenerable-procedural-macro-library"
+    },
+    {
+      "path": "/home/user/gpui-mask-lattice-oracle-target/release/build/snafu-derive/e927791e0350b43b/out/libsnafu_derive-e927791e0350b43b.so",
+      "bytes": 4654504,
+      "sha256": "80303188e09cc91f85bbc93e0568281ea122a7eb3c6eaf863b7430ada5c0436f",
+      "kind": "regenerable-procedural-macro-library"
+    },
+    {
+      "path": "/home/user/gpui-mask-lattice-oracle-target/release/build/gpui_gpu/5eb8255352d33eb6/out/images",
+      "bytes": 7981288,
+      "sha256": "a6b4885ca9d0cb29af0bf6ebc0dfe48df3af4082bce40f0f052a1dcfa256d068",
+      "kind": "exact-canonical-executable-copy",
+      "preserved": "/home/user/gpui-preserved-test-binaries/a6b4885ca9d0cb29af0bf6ebc0dfe48df3af4082bce40f0f052a1dcfa256d068"
+    },
+    {
+      "path": "/home/user/gpui-mask-lattice-oracle-target/release/build/gpui_gpu/8e4933dc35703950/out/gpui_gpu-8e4933dc35703950",
+      "bytes": 17104312,
+      "sha256": "0faf1bf9d57e3b3f92d7f220a816fa2cd354a1f19b60ff6c016078f3b622c1b5",
+      "kind": "exact-canonical-executable-copy",
+      "preserved": "/home/user/gpui-preserved-test-binaries/0faf1bf9d57e3b3f92d7f220a816fa2cd354a1f19b60ff6c016078f3b622c1b5"
+    },
+    {
+      "path": "/home/user/gpui-mask-lattice-oracle-target/release/build/gpui_gpu/f3188f1101e1b4d0/out/render-f3188f1101e1b4d0",
+      "bytes": 16874040,
+      "sha256": "7d20d4741b19a5c1acb13d423b81a0f9aace313d8c2f563d053041b49d7b6c44",
+      "kind": "exact-canonical-executable-copy",
+      "preserved": "/home/user/gpui-preserved-test-binaries/7d20d4741b19a5c1acb13d423b81a0f9aace313d8c2f563d053041b49d7b6c44"
+    },
+    {
+      "path": "/home/user/gpui-mask-lattice-oracle-target/release/build/gpui_gpu/4b5035a6a615ec17/out/tiles",
+      "bytes": 15205520,
+      "sha256": "2f6449f8647f1ce047048bf4e39addb524c6f085d43af479e8cb8e2187e9d78c",
+      "kind": "exact-canonical-executable-copy",
+      "preserved": "/home/user/gpui-preserved-test-binaries/2f6449f8647f1ce047048bf4e39addb524c6f085d43af479e8cb8e2187e9d78c"
+    },
+    {
+      "path": "/home/user/gpui-mask-lattice-oracle-target/release/build/gpui_gpu/84f9d7fda4ba4715/out/presentation-84f9d7fda4ba4715",
+      "bytes": 1472560,
+      "sha256": "d01c40882465c1ca7d2cfb38abf0f0317d2d3e424110d4edc5053f469abba977",
+      "kind": "exact-canonical-executable-copy",
+      "preserved": "/home/user/gpui-preserved-test-binaries/d01c40882465c1ca7d2cfb38abf0f0317d2d3e424110d4edc5053f469abba977"
+    },
+    {
+      "path": "/home/user/gpui-mask-lattice-oracle-target/release/build/gpui_gpu/61e90e2a0f130778/out/groups",
+      "bytes": 15201880,
+      "sha256": "f4dd617403be1c255d1ba9bff42df63fd436d9b8aba3fd494828818cbb1d3846",
+      "kind": "exact-canonical-executable-copy",
+      "preserved": "/home/user/gpui-preserved-test-binaries/f4dd617403be1c255d1ba9bff42df63fd436d9b8aba3fd494828818cbb1d3846"
+    },
+    {
+      "path": "/home/user/gpui-mask-lattice-oracle-target/release/build/gpui_gpu/efb7c5a21eba989c/out/retained",
+      "bytes": 15294280,
+      "sha256": "1a101ac07defa5811bd2cf56615a81e38704f26684a3ddfeb21f87798641d7f6",
+      "kind": "exact-canonical-executable-copy",
+      "preserved": "/home/user/gpui-preserved-test-binaries/1a101ac07defa5811bd2cf56615a81e38704f26684a3ddfeb21f87798641d7f6"
+    },
+    {
+      "path": "/home/user/gpui-mask-lattice-oracle-target/release/build/wgsl-rs-macros/39ec84fddad7ee58/out/libwgsl_rs_macros-39ec84fddad7ee58.so",
+      "bytes": 8497136,
+      "sha256": "380e0c30667d6c37c4b1af9d263ce132bb8e5b0fa554625abfc57ac562f0ad9c",
+      "kind": "regenerable-procedural-macro-library"
+    },
+    {
+      "path": "/home/user/gpui-mask-lattice-oracle-target/release/build/displaydoc/ae3b3be74d3848d9/out/libdisplaydoc-ae3b3be74d3848d9.so",
+      "bytes": 3596296,
+      "sha256": "278fc296a533ef1d8e6e4570c0b666eda1aa0f7801d47ed743b16017b73f6fc1",
+      "kind": "regenerable-procedural-macro-library"
+    },
+    {
+      "path": "/home/user/gpui-mask-lattice-oracle-target/release/build/zerocopy-derive/bd574a823e2136ad/out/libzerocopy_derive-bd574a823e2136ad.so",
+      "bytes": 4519104,
+      "sha256": "5166c032d6d13721a289996cf814b7439bf4dae20939360d9c9bac645355616f",
+      "kind": "regenerable-procedural-macro-library"
+    },
+    {
+      "path": "/home/user/gpui-mask-lattice-oracle-target/release/build/document-features/84a1ce9af45e065b/out/libdocument_features-84a1ce9af45e065b.so",
+      "bytes": 956856,
+      "sha256": "d2a811a993342ff249be661aa4d78b534521adad4409567bcecd71b664013e58",
+      "kind": "regenerable-procedural-macro-library"
+    },
+    {
+      "path": "/home/user/gpui-mask-lattice-oracle-target/release/build/zerofrom-derive/977efb65f38d463b/out/libzerofrom_derive-977efb65f38d463b.so",
+      "bytes": 4651960,
+      "sha256": "5131ecc0910099e6be6fb90e56dd14c32e5762ff9e176e21a6cd0ff80750ec80",
+      "kind": "regenerable-procedural-macro-library"
+    }
+  ]
+}

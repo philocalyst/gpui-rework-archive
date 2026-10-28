@@ -1,0 +1,9 @@
+{
+  "authority": "b8e6667b3f93130e80776f46a3b7cb7ac1fafadd",
+  "verification": "Independent verifier returned0 before cleanup",
+  "files": 504,
+  "logical_bytes": 691837139,
+  "free_before": 11292889088,
+  "free_after": 11985809408,
+  "canonical_executables_untouched": true
+}
