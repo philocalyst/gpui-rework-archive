@@ -41,3 +41,5 @@ latency currently warrants adding runtime state. Shared cold metadata and
 bounded decode are the first testable mechanisms. Solid/Ripple inform explicit
 version authority and retained old output, not permission to discard dependency
 closure or to acknowledge unpresented candidates.
+
+Initial frozen2c4b9207 build failed E0308: wgpu30 pipeline layout expects optional group entries. Corrected to Some(&layout); no model or protocol change. Initial logs and empty source guard retained externally.
