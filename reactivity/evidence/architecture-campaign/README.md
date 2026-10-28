@@ -687,3 +687,29 @@ does not prove all underlying rectangles are inherently required. Full structura
 index rebuild cost is explicit. Future timing aggregation is prospectively
 specified as median paired per-round p95 for every gain/regression cell, with
 raw controls and before/after generated-input digests. A+B remains uncombined.
+
+
+Independent B correctness sealed **23b533e8fe829bd88ed38d817689f95e6aa4c719**:
+303 actual GPU frames,368 independent simulated frames,82 CPU checks,five GPU
+mutants. Sparse fixed-edit visits stay32,768 at256/1,024 nodes; visible-sibling
+staircase and geometry preserve painter order/old-new support. Spatial lease
+mutant corrupts76 audit bytes despite correct final pixels. Structural indexing
+still rebuilds globally. Original encoding; no A combination; restricted binding.
+
+B cost sealed **2f357586bf213e2daf1043c80f5e02ad7177890d** with measured source
+**e5720235ea0952c160eb803de99f4ee15faac795**. **Overall fixed p95 gate failed**:
+sparse gain ratios0.49565/0.15477 at256/1,024 pass, but median paired regression
+cells sparse9=1.09194,overlap9=1.09149,overlap32=1.07654,staircase1=1.17671
+exceed1.05. Tiny cells execute identical bypass code; this does not prove a
+causal spatial-index regression. No rerun, trimming or reinterpretation.
+270 processes/138,240 samples/45 exact endpoint preflights; all pixel,source,
+executable/shader and dataset-before/after guards pass. Paired raw/B p95 at1,024
+sparse=5.36686,overlap=1.05500,staircase=1.46439; B loses every32-node raw comparison
+and overlap256(raw/B=.86404). This is the prototype Python preparation/JSON/IPC/
+staging/GPU-completion/reply/ack endpoint, not production GPUI/scanout/ZGX.
+Sparse1,024 reserved arena control/B/raw25,552/28,272/74,192B; CPU graph
+175,303→217,743B; cold init403.3→790.5ms; worker RSS123,122→169,860KiB. Significant
+unassigned driver/compiler memory cannot be called index payload. B remains an
+unadopted candidate. Indexed text/images and generic live production journal are
+still missing. Next investigate that live integration boundary, keeping raw and
+existing production precise slot updates as complete alternatives.
