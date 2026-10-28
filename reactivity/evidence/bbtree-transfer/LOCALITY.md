@@ -412,3 +412,41 @@ CPU-ratio inference. Candidate/ZGX <=.8 CPU-rate ratios are required in each
 active mode; idle has a fixed zero-update/.01-core gate. It carries no production
 or workload edit. Hardware, scanout, input-policy and AA/quality gates stay open.
 This native trial has not been measured at this checkpoint.
+
+
+## Native outcome and startup diagnosis
+
+The workspace native trial is sealed at344c7f8ddd55326dca2c88322f67530914c97733:
+all128 processes exit normally, but56 cadence observations fail, including all8
+candidate stream runs (450–455 updates versus required464–488). Scroll/mixed
+candidate cadence passes; paired candidate/ZGX CPU-rate medians8.068852596 and
+6.055584861 fail the .8 gate. Idle passes. Independent verifier reconstructs1474
+files,128 observations,20 preflights and52 app tests. No adoption or ZGX claim.
+
+Diagnostic d8ca07eb04bc520c77a5c79193ee667990cf3e02, sealed
+**a34b61c86fbbc6906d834e071bdb7c4fb70aac8d**, reuses the exact two native ELFs.
+All52 observations and639 manifest entries verify. Empty-start stream has exactly17
+ACK gaps>25ms in the first second in all12 exact/owner runs, none later; all12
+prefilled candidate runs admit359/6seconds with no such gaps. Initial190 changes
+both text and scroll state, so this supports startup dependence, not unique causal
+identification of glyph growth. Warm offscreen fixtures seed190. Main thread
+medians .071–.130cores are much smaller than named llvmpipe .557–.992cores;
+thread names do not establish source stacks or cache misses. Instrumented CPU
+rates are not interchangeable with the earlier uninstrumented trial.
+
+New **local/damage-suffix** preregistration0a7f3b822b09744e7e45a1ac9961d8aaa183a416
+at /home/user/gpui-damage-suffix-lab proposes trimming only exactly equal suffix
+contributions when display-stream lengths differ. Existing forward pairing shifts
+unrelated retained draws after inserted glyphs. The first unequal reverse pair
+must retain both supports; a bounded omission mutant will test this. No new
+publication representation, storage, API, shader or executor. This competes with,
+and does not reclassify, the earlier rejected global scene-support experiment.
+Startup cadence must pass before a fixed complete warm regression matrix.
+
+The BBTree batch document was re-read at1c72bd27994ed0a38694b029618e80115e22644f
+alongside the pinned Solid/Ripple research. Its benefit overlaps independent
+memory-miss chains; it cannot by itself remove the dominant repeated raster work
+observed here. Preserving already established equality through scene publication
+is a separate algorithmic application of retained validated state. Async gather
+and coherent ready-group publication remain hypotheses for actual measured graph
+bottlenecks, with the earlier lane failures kept intact.

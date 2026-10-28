@@ -449,3 +449,16 @@ combined candidate is admitted to preregistered native trial 03ca419868b0d538e68
 See [the exact results and limitations](../bbtree-transfer/LOCALITY.md#publication-workspace-complete-local-gate-passes-native-comparison-admitted).
 The incremental reuse speedup is small/uncertain; no ZGX or hardware victory is
 claimed, and all earlier failed verdicts remain unchanged.
+
+
+Native-workspace is now sealed **344c7f8ddd55326dca2c88322f67530914c97733** and
+fails: candidate stream misses cadence in8/8; qualified scroll/mixed CPU ratios
+8.068852596/6.055584861 versus ZGX exceed .8. Idle passes. Follow-up native-phase
+**a34b61c86fbbc6906d834e071bdb7c4fb70aac8d** verifies52 diagnostic processes with
+no execution failure: all empty-start stream gaps>25ms concentrate in the first
+second, while prefilled runs achieve359 updates/6s through both routes; raster
+workers dominate remaining CPU. No performance or hardware victory.
+New local/damage-suffix is preregistered at0a7f3b822b09744e7e45a1ac9961d8aaa183a416;
+implementation and tests are in progress, not yet qualified. See LOCALITY.md for
+the distinction between startup diagnosis and the continuing BBTree/Solid/Ripple
+architecture hypotheses. All earlier failures and fixed gates remain unchanged.
