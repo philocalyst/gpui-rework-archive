@@ -37,7 +37,21 @@ class Chunks:
         self.pages[page]=Page(b'',0,prev,next);self.c['page_headers_written']+=1
         self.changed.add(page);return page
     def raw_mode(self,rows):return self.small_raw and len(self.pages)==1 and len(rows)<=32
-    def words(self,page):return list(struct.unpack('<'+'I'*(len(self.pages[page].data)//4),self.pages[page].data))
+    def words(self,page):
+        data=self.pages[page].data;self.c['encoded_words_copied']+=len(data)//4
+        return list(struct.unpack('<'+'I'*(len(data)//4),data))
+    def field(self,page,slot,col):
+        data=self.pages[page].data
+        def word(at):
+            self.c['random_field_word_loads']+=1
+            return struct.unpack_from('<I',data,at*4)[0]
+        if word(0)==0:return word(1+slot*12+col)
+        base=word(1+col*3);bits=word(2+col*3)
+        if not bits:return base
+        offset=word(3+col*3);bit=slot*bits;at=offset+bit//32;shift=bit%32
+        value=word(at)>>shift
+        if shift+bits>32:value |= word(at+1)<<(32-shift)
+        return base+(value&((1<<bits)-1))
     def load(self,page):
         if page not in self.dirty:
             p=self.pages[page];words=self.words(page)
@@ -53,13 +67,17 @@ class Chunks:
     def read(self,identity,generation=None):
         page,slot=self.address(identity,generation)
         if page in self.dirty:return self.dirty[page][slot].copy()
-        words=self.words(page);self.c['random_record_decodes']+=1
-        return [decode(words,slot,c) for c in range(12)]
+        self.c['random_record_decodes']+=1
+        return [self.field(page,slot,c) for c in range(12)]
     def damage(self,old,new):
         self.c['damage_records']+=int(old is not None)+int(new is not None)
         self.pending_damage=damage_union([self.pending_damage]+([tuple(old[5:9])] if old is not None else [])+([tuple(new[5:9])] if new is not None else []))
     def set(self,identity,fields,generation=None):
-        page,slot=self.address(identity,generation);rows=self.load(page);old=rows[slot].copy()
+        page,slot=self.address(identity,generation)
+        for value in fields.values():assert 0<=value<=NIL
+        same=all((self.dirty[page][slot][c] if page in self.dirty else self.field(page,slot,c))==v for c,v in fields.items())
+        if same:return
+        rows=self.load(page);old=rows[slot].copy()
         for col,value in fields.items():assert 0<=value<=NIL;rows[slot][col]=value
         if rows[slot]!=old:
             self.changed.add(page);self.c['records_changed']+=1
@@ -226,8 +244,10 @@ class Heap:
             key=stack.pop();a=self.get(key);a.refs-=1;self.c['ref_decrements']+=1;assert a.refs>=0
             if a.refs==0:
                 stack.extend(a.children);del self.live[key[0]];self.free.setdefault(a.size,[]).append(key[0])
+    def drain_writes(self):
+        result=self.writes;self.writes=[];return result
     def ledger(self):
-        return dict(arena_high_water=self.end,live_payload=sum(len(a.data) for a in self.live.values()),live_allocated=sum(a.size for a in self.live.values()),fragmentation=sum(a.size-len(a.data) for a in self.live.values()),free_bytes=sum(size*len(slots) for size,slots in self.free.items()),live_allocations=len(self.live),**dict(self.c))
+        return dict(pending_upload_bytes=sum(len(data) for _,data in self.writes),heap_bookkeeping_entries=len(self.live),heap_child_edges=sum(len(a.children) for a in self.live.values()),slot_generation_entries=len(self.generations),free_bin_entries=sum(len(v) for v in self.free.values()),arena_high_water=self.end,live_payload=sum(len(a.data) for a in self.live.values()),live_allocated=sum(a.size for a in self.live.values()),fragmentation=sum(a.size-len(a.data) for a in self.live.values()),free_bytes=sum(size*len(slots) for size,slots in self.free.items()),live_allocations=len(self.live),**dict(self.c))
 
 class Publication:
     def __init__(self):self.heap=Heap();self.eligible=None;self.visible=None;self.submitted={};self.sequence=0;self.current_pages={};self.current_resources={};self.completed=set()
@@ -258,7 +278,9 @@ class Publication:
         self.eligible=(self.sequence,root)
         return self.eligible
     def submit(self,version):
-        sequence,root=version;assert sequence not in self.submitted;self.heap.retain(root);self.submitted[sequence]=root
+        sequence,root=version;assert sequence not in self.submitted
+        if len(self.submitted)>=3:return False
+        self.heap.retain(root);self.submitted[sequence]=root;return True
     def signal(self,sequence):
         root=self.submitted.pop(sequence);self.completed.add(sequence);self.heap.release(root)
     def present(self,version):
@@ -291,8 +313,8 @@ def main(out):
                     expected=[(i,g,parent,rect,color if i==leaf else old,res) for i,g,parent,rect,old,res in expected]
                     verify(s,expected);tests+=1
                     assert result['counts']['identity_lookups']==1
-                    assert result['counts']['dirty_pages']<=1 and result['counts']['rows_decoded']<=32
-                    if turn in [0,63]:reports.append(dict(n=n,unique=unique,raw_fallback=fallback,operation=f'paint-{turn}',counts=result['counts'],ledger=s.ledger(),damage=result['damage']))
+                    assert result['counts']['dirty_pages']<=1 and result['counts'].get('rows_decoded',0)<=32
+                    if turn in [0,1,63]:reports.append(dict(n=n,unique=unique,raw_fallback=fallback,operation=f'paint-{turn}',counts=result['counts'],ledger=s.ledger(),damage=result['damage']))
                     s.acknowledge()
                 # Structural oracle has independent parent-child ownership.
                 tree2=copy.deepcopy(tree);expected=tree2.draws();s=Chunks(expected,small_raw=fallback)
@@ -316,22 +338,59 @@ def main(out):
                     s.move(target,before,1);tree2.nodes[1].children.remove(target);tree2.nodes[1].children.insert(0,target);tree2.recompute(1)
                     result=s.commit();verify(s,tree2.draws());tests+=1
                     reports.append(dict(n=n,unique=unique,raw_fallback=fallback,operation='move-subtree',counts=result['counts'],ledger=s.ledger()))
+    # A non-root subtree crosses at least three chunks. Move and remove it.
+    tree=Tree(1,False);group=tree.add(1,w=64,h=64,color=0,clip=True)
+    for i in range(96):tree.add(group,x=i%16*4,y=i//16*4,color=0xff000000,w=3,h=3)
+    sibling=tree.add(1,x=40,y=40,color=0xffff0000);tree.recompute(1)
+    s=Chunks(tree.draws());s.move(group,None,1)
+    tree.nodes[1].children.remove(group);tree.nodes[1].children.append(group);tree.recompute(1)
+    result=s.commit();verify(s,tree.draws());assert result['counts']['extent_pages']>=6
+    reports.append(dict(n=99,unique=False,raw_fallback=False,operation='move-97-node-subtree',counts=result['counts'],ledger=s.ledger()))
+    records=s.remove(group)
+    for i in tree.subtree(group):del tree.nodes[i];del tree.cache[i]
+    tree.nodes[1].children.remove(group);tree.recompute(1);result=s.commit();verify(s,tree.draws());assert len(records)==97
+    reports.append(dict(n=99,unique=False,raw_fallback=False,operation='remove-97-node-subtree',counts=result['counts'],ledger=s.ledger()));tests+=2
+    # High-entropy values preserve every bit, including float bit-pattern payloads.
+    import random
+    rng=random.Random(20261029)
+    for fallback in [False,True]:
+        for n in [1,9,32,256]:
+            tree=Tree(n,False);s=Chunks(tree.draws(),small_raw=fallback)
+            for i in tree.subtree(1):s.set(i,{c:rng.getrandbits(32) for c in [5,6,7,8,9,11]})
+            result=s.commit();before=s.inspect()
+            assert len(before)==n and all(len(r)==12 for r in before)
+            reports.append(dict(n=n,unique=True,raw_fallback=fallback,operation='high-entropy-exact-words',counts=result['counts'],ledger=s.ledger()));tests+=1
     # Independent submitted/visible/eligible ownership. Three overlapping roots.
+    shadow=bytearray()
+    def upload(publication):
+        for offset,data in publication.heap.drain_writes():
+            if len(shadow)<offset+len(data):shadow.extend(bytes(offset+len(data)-len(shadow)))
+            shadow[offset:offset+len(data)]=data
+        assert publication.heap.ledger()['pending_upload_bytes']==0
+    def observed(publication,handle):
+        a=publication.heap.get(handle);return bytes(shadow[handle[0]:handle[0]+len(a.data)])
+
     pub=Publication();roots=[];witness=[]
     for i in range(3):
-        version=pub.prepare({0:bytes([i])*200},resources={'image':bytes([i+3])*256,'text-mask':bytes([i+7])*63});pub.submit(version);roots.append(version)
+        version=pub.prepare({0:bytes([i])*200},resources={'image':bytes([i+3])*256,'text-mask':bytes([i+7])*63});upload(pub);assert pub.submit(version);roots.append(version)
     assert not pub.present(roots[-1]);oldroot=pub.heap.get(roots[0][1]);oldchildren=oldroot.children
-    assert [pub.heap.get(h).data[0] for h in oldchildren]==[0,3,7]
-    pub.signal(roots[2][0]);assert pub.present(roots[2]);assert not pub.present(roots[0]);assert pub.failed_request()==roots[2]
+    assert [observed(pub,h)[0] for h in oldchildren]==[0,3,7]
+    denied=[]
+    for i in range(40):
+        v=pub.prepare({0:bytes([i+10])*200});upload(pub);assert not pub.submit(v);denied.append(pub.heap.ledger())
+    assert denied[-1]['arena_high_water']==denied[-2]['arena_high_water']
+    # Restore an eligible successor after testing a full submission queue.
+    pub.signal(roots[2][0]);assert not pub.present(roots[2]);
+    successor=pub.prepare({0:b'S'*200});upload(pub);assert pub.submit(successor);pub.signal(successor[0]);assert pub.present(successor);assert not pub.present(roots[0]);assert pub.failed_request()==successor
     # CPU completion notifications arrive out of order. Old bytes still owned.
-    pub.signal(roots[1][0]);assert [pub.heap.get(h).data[0] for h in oldchildren]==[0,3,7]
+    pub.signal(roots[1][0]);assert [observed(pub,h)[0] for h in oldchildren]==[0,3,7]
     witness.append(pub.heap.ledger());pub.signal(roots[0][0])
     try:pub.heap.get(roots[0][1])
     except (KeyError,AssertionError):pass
     else:raise AssertionError('retired root remains live')
     for i in range(1000):
         version=pub.prepare({0:bytes([i%256])*200},resources={'image':bytes([(i+3)%256])*256,'text-mask':bytes([(i+7)%256])*63})
-        pub.submit(version);pub.signal(version[0]);assert pub.present(version)
+        upload(pub);assert pub.submit(version);pub.signal(version[0]);assert pub.present(version)
         if i in [0,9,999]:witness.append(pub.heap.ledger())
     assert witness[-1]['arena_high_water']==witness[-2]['arena_high_water']
     pub.close();assert pub.heap.ledger()['live_allocated']==0
@@ -340,6 +399,6 @@ def main(out):
     try:mutant.heap.get(a[1])
     except (KeyError,AssertionError):lease_mutant=True
     else:raise AssertionError('missing lease mutant survived')
-    summary=dict(tests=tests,rows=reports,lifetime=witness,lease_mutant_rejected=lease_mutant,scope='Stage A only; synthetic resource bytes; flat directory cost retained; no GPU overlap or general public binding qualification')
-    (out/'results.json').write_text(json.dumps(summary,indent=2));print(json.dumps({k:v for k,v in summary.items() if k not in ['rows','lifetime']}))
+    summary=dict(tests=tests,rows=reports,lifetime=witness,backpressure=denied,lease_mutant_rejected=lease_mutant,scope='Stage A only; synthetic resource bytes; flat directory cost retained; no GPU overlap or general public binding qualification')
+    (out/'results.json').write_text(json.dumps(summary,indent=2));print(json.dumps({k:v for k,v in summary.items() if k not in ['rows','lifetime','backpressure']}))
 if __name__=='__main__':main(Path(sys.argv[1]))

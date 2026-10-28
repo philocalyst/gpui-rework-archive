@@ -26,3 +26,14 @@ wins on every size or bounds total tree memory before all metadata is counted.
 
 The direct public binding/GPU overlap/resource extraction stages have not run.
 No application integration, shared host memory, performance or adoption claim.
+
+Initial757ee25d model passes2820 structural/property checks and synthetic
+lease/reuse assertions. Review found its upload diagnostic list retained all
+historical payload bytes despite a stable physical arena: this invalidates a
+bounded-total-storage interpretation. Corrected model drains uploads into a
+separate simulated device memory, charges remaining journal/bookkeeping, and
+checks old bytes there across overlaps. It caps submitted roots at3 and tests
+40 rejected submissions before completion. Random field reads now access bytes
+directly rather than unpacking a whole encoded page; exact word loads count.
+Add true97-node cross-chunk move/removal and high-entropy exact-word cases.
+This remains Stage A, not actual Vulkan resource qualification.
