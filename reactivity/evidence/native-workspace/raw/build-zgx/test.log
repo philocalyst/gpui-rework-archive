@@ -1,0 +1,3 @@
+   Compiling zgx-desktop v0.1.2 (/home/user/zgx-native-profile-lab/crates/zgx-desktop)
+    Finished `release` profile [optimized] target(s) in 19.26s
+     Running unittests examples/component_workload.rs (/home/user/zgx-native-profile-target/release/build/zgx-desktop/6d9925c23a013c9a/out/component_workload-6d9925c23a013c9a)

@@ -1,0 +1,12 @@
+{
+  "inspected": [
+    "preflight/candidate/capture/native.png",
+    "preflight/zgx/capture/native.png"
+  ],
+  "font_sha256": "7da195a74c55bef988d0d48f9508bd5d849425c1770dba5d7bfc6ce9ed848954",
+  "observations": [
+    "Both captures show the same controls, token content/line wrapping, row95 onward, client dimensions and panel placement.",
+    "GPUI glyph strokes appear heavier/softer than ZGX with the same font bytes. This visible difference was present in the earlier comparison and remains unresolved."
+  ],
+  "cross_renderer_pixel_or_quality_equivalence": false
+}

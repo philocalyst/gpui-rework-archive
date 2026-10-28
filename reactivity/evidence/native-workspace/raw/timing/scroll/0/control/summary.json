@@ -1,0 +1,20 @@
+{
+  "name": "control",
+  "mode": "scroll",
+  "ticks": 234,
+  "native_acknowledgements": 226,
+  "reference_or_model_final": {
+    "total_ticks": 234,
+    "scroll_offset": 3276.0
+  },
+  "visible_seconds": 0.21061853499850258,
+  "samples": 405,
+  "font_sha256": "7da195a74c55bef988d0d48f9508bd5d849425c1770dba5d7bfc6ce9ed848954",
+  "interval_start": 1.2229300519975368,
+  "interval_end": 6.199447312988923,
+  "interval_seconds": 4.976517260991386,
+  "cpu_seconds": 19.07,
+  "cpu_cores": 3.831997157827804,
+  "mean_rss_bytes": 149505265.43089432,
+  "max_rss_bytes": 149512192
+}

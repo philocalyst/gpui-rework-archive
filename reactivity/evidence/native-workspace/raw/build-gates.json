@@ -1,0 +1,6 @@
+{
+  "control": "build-control",
+  "sparse": "build-sparse",
+  "candidate": "build-candidate-qualified",
+  "zgx": "build-zgx"
+}

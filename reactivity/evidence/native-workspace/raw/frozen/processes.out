@@ -1,0 +1,248 @@
+    PID     ELAPSED %CPU COMMAND
+      1  1-09:50:05  0.0 systemd
+      2  1-09:50:05  0.0 kthreadd
+      3  1-09:50:05  0.0 pool_workqueue_release
+      4  1-09:50:05  0.0 kworker/R-rcu_g
+      5  1-09:50:05  0.0 kworker/R-rcu_p
+      6  1-09:50:05  0.0 kworker/R-slub_
+      7  1-09:50:05  0.0 kworker/R-netns
+      9  1-09:50:05  0.0 kworker/0:0H-events_highpri
+     12  1-09:50:05  0.0 kworker/R-mm_pe
+     13  1-09:50:05  0.0 rcu_tasks_kthread
+     14  1-09:50:05  0.0 rcu_tasks_rude_kthread
+     15  1-09:50:05  0.0 rcu_tasks_trace_kthread
+     16  1-09:50:05  0.0 ksoftirqd/0
+     17  1-09:50:05  0.0 rcu_preempt
+     18  1-09:50:05  0.0 migration/0
+     19  1-09:50:05  0.0 idle_inject/0
+     20  1-09:50:05  0.0 cpuhp/0
+     21  1-09:50:05  0.0 cpuhp/1
+     22  1-09:50:05  0.0 idle_inject/1
+     23  1-09:50:05  0.0 migration/1
+     24  1-09:50:05  0.0 ksoftirqd/1
+     26  1-09:50:05  0.0 kworker/1:0H-kblockd
+     27  1-09:50:05  0.0 cpuhp/2
+     28  1-09:50:05  0.0 idle_inject/2
+     29  1-09:50:05  0.0 migration/2
+     30  1-09:50:05  0.0 ksoftirqd/2
+     32  1-09:50:05  0.0 kworker/2:0H-events_highpri
+     33  1-09:50:05  0.0 cpuhp/3
+     34  1-09:50:05  0.0 idle_inject/3
+     35  1-09:50:05  0.0 migration/3
+     36  1-09:50:05  0.0 ksoftirqd/3
+     38  1-09:50:05  0.0 kworker/3:0H-events_highpri
+     39  1-09:50:05  0.0 cpuhp/4
+     40  1-09:50:05  0.0 idle_inject/4
+     41  1-09:50:05  0.0 migration/4
+     42  1-09:50:05  0.0 ksoftirqd/4
+     44  1-09:50:05  0.0 kworker/4:0H-events_highpri
+     45  1-09:50:05  0.0 cpuhp/5
+     46  1-09:50:05  0.0 idle_inject/5
+     47  1-09:50:05  0.0 migration/5
+     48  1-09:50:05  0.0 ksoftirqd/5
+     50  1-09:50:05  0.0 kworker/5:0H-events_highpri
+     51  1-09:50:05  0.0 cpuhp/6
+     52  1-09:50:05  0.0 idle_inject/6
+     53  1-09:50:05  0.0 migration/6
+     54  1-09:50:05  0.0 ksoftirqd/6
+     56  1-09:50:05  0.0 kworker/6:0H-events_highpri
+     57  1-09:50:05  0.0 cpuhp/7
+     58  1-09:50:05  0.0 idle_inject/7
+     59  1-09:50:05  0.0 migration/7
+     60  1-09:50:05  0.0 ksoftirqd/7
+     62  1-09:50:05  0.0 kworker/7:0H-events_highpri
+     63  1-09:50:05  0.0 kdevtmpfs
+     64  1-09:50:05  0.0 kworker/R-inet_
+     65  1-09:50:05  0.0 kauditd
+     66  1-09:50:05  0.0 khungtaskd
+     67  1-09:50:05  0.0 oom_reaper
+     69  1-09:50:05  0.0 kworker/R-write
+     71  1-09:50:05  0.8 kcompactd0
+     72  1-09:50:05  0.0 ksmd
+     73  1-09:50:05  0.0 khugepaged
+     74  1-09:50:05  0.0 kworker/R-kinte
+     75  1-09:50:05  0.0 kworker/R-kbloc
+     76  1-09:50:05  0.0 kworker/R-blkcg
+     79  1-09:50:05  0.0 kworker/R-tpm_d
+     80  1-09:50:05  0.0 kworker/R-ata_s
+     81  1-09:50:05  0.0 kworker/R-md
+     82  1-09:50:05  0.0 kworker/R-md_bi
+     83  1-09:50:05  0.0 kworker/R-edac-
+     84  1-09:50:05  0.0 kworker/R-devfr
+     85  1-09:50:05  0.0 watchdogd
+     87  1-09:50:05  0.0 kworker/R-quota
+     88  1-09:50:05  0.0 kworker/0:1H-kblockd
+     89  1-09:50:05  0.5 kswapd0
+     90  1-09:50:05  0.0 ecryptfs-kthread
+     91  1-09:50:05  0.0 kworker/R-kthro
+     92  1-09:50:05  0.0 irq/48-ACPI:Ged
+     93  1-09:50:05  0.0 kworker/R-acpi_
+     94  1-09:50:04  0.0 kworker/R-mld
+     95  1-09:50:04  0.0 kworker/R-ipv6_
+    102  1-09:50:04  0.0 kworker/R-kstrp
+    106  1-09:50:04  0.0 kworker/u17:0
+    111  1-09:50:04  0.0 kworker/R-crypt
+    121  1-09:50:04  0.0 kworker/R-charg
+    147  1-09:50:04  0.0 kworker/3:1H-kblockd
+    150  1-09:50:04  0.0 kworker/5:1H-kblockd
+    152  1-09:50:04  0.0 kworker/1:1H
+    168  1-09:50:04  0.0 kworker/4:1H-kblockd
+    169  1-09:50:04  0.0 kworker/6:1H-kblockd
+    170  1-09:50:04  0.0 kworker/2:1H-kblockd
+    171  1-09:50:04  0.0 kworker/7:1H-kblockd
+    196  1-09:50:04  0.0 hwrng
+    239  1-09:50:03  0.0 kworker/R-raid5
+    278  1-09:50:03  0.0 jbd2/vda1-8
+    279  1-09:50:03  0.0 kworker/R-ext4-
+    352  1-09:50:03  0.0 systemd-journal
+    388  1-09:50:03  0.0 kworker/R-kmpat
+    389  1-09:50:03  0.0 kworker/R-kmpat
+    391  1-09:50:03  0.0 multipathd
+    438  1-09:50:02  0.0 systemd-udevd
+    439  1-09:50:02  0.0 psimon
+    660  1-09:50:02  0.0 systemd-timesyn
+    809  1-09:50:01  0.0 systemd-network
+    814  1-09:50:01  0.0 kworker/R-cfg80
+    910  1-09:49:58  0.0 accounts-daemon
+    913  1-09:49:58  0.0 avahi-daemon
+    914  1-09:49:58  0.0 dbus-daemon
+    918  1-09:49:58  0.0 gnome-remote-de
+    939  1-09:49:58  0.0 polkitd
+    944  1-09:49:58  0.0 power-profiles-
+    970  1-09:49:58  0.0 switcheroo-cont
+    975  1-09:49:58  0.0 systemd-logind
+    976  1-09:49:58  0.0 udisksd
+   1011  1-09:49:58  0.0 avahi-daemon
+   1053  1-09:49:58  0.0 rsyslogd
+   1061  1-09:49:58  0.0 NetworkManager
+   1063  1-09:49:58  0.0 wpa_supplicant
+   1102  1-09:49:58  0.0 ModemManager
+   1278  1-09:49:57  0.0 epmd
+   1285  1-09:49:57  0.1 containerd
+   1291  1-09:49:57  0.0 cron
+   1293  1-09:49:57  0.0 atd
+   1306  1-09:49:57  0.0 agetty
+   1312  1-09:49:57  0.0 agetty
+   1352  1-09:49:57  0.0 sshd
+   1357  1-09:49:57  0.0 dockerd
+   1436  1-09:49:56  0.0 systemd
+   1437  1-09:49:56  0.0 (sd-pam)
+   1448  1-09:49:56  0.0 pipewire
+   1449  1-09:49:56  0.0 pipewire
+   1450  1-09:49:56  0.0 wireplumber
+   1451  1-09:49:56  0.0 pipewire-pulse
+   1466  1-09:49:56  0.0 dbus-daemon
+   1536  1-09:49:56  0.0 rtkit-daemon
+   2156  1-09:49:55  0.0 upowerd
+   2158  1-09:49:55  0.0 kworker/R-tls-s
+   2400  1-09:49:55  0.0 gvfsd
+   2408  1-09:49:55  0.0 gvfsd-fuse
+   2412  1-09:49:55  0.0 at-spi-bus-laun
+   2424  1-09:49:55  0.0 dbus-daemon
+   2612  1-09:49:54  0.0 gnome-keyring-d
+   3067  1-09:49:53  0.0 colord
+   3124  1-09:49:53  0.0 dconf-service
+   3133  1-09:49:53  0.0 kworker/R-wg-cr
+   3159  1-09:49:53  0.0 napi/wg0-0
+   3168  1-09:49:53  0.0 uuidd
+   3274  1-09:49:53  0.0 obexd
+   3360  1-09:49:52  0.0 gvfs-udisks2-vo
+   3378  1-09:49:52  0.0 gvfs-gphoto2-vo
+   3446  1-09:49:52  0.0 gvfs-afc-volume
+   3503  1-09:49:52  0.0 gvfs-goa-volume
+   3508  1-09:49:52  0.0 goa-daemon
+   3517  1-09:49:52  0.0 goa-identity-se
+   3524  1-09:49:52  0.0 gvfs-mtp-volume
+   3533  1-09:49:52  0.0 gvfsd-trash
+   3544  1-09:49:52  0.0 evolution-sourc
+   3554  1-09:49:52  0.0 gvfsd-metadata
+   3678  1-09:49:51  0.0 evolution-calen
+   3692  1-09:49:51  0.0 evolution-addre
+  12030  1-09:48:45  0.0 systemd-resolve
+  12947  1-09:48:43  0.0 pulseaudio
+  13569  1-09:48:43  0.0 xdg-desktop-por
+  13578  1-09:48:43  0.0 xdg-document-po
+  13582  1-09:48:43  0.0 xdg-permission-
+  13590  1-09:48:43  0.0 fusermount3
+  14575  1-09:48:40  0.0 socat
+  17295  1-09:48:11  0.9 ascii-lazyfs
+  18893  1-09:48:07  2.2 zeron
+  19024  1-09:48:07  0.0 lightdm
+  19036  1-09:48:07  0.0 Xorg
+  19234  1-09:48:05  0.0 lightdm
+  19291  1-09:48:04  0.0 dbus-run-sessio
+  19301  1-09:48:04  0.0 cua-driver
+  19316  1-09:48:04  0.0 at-spi2-registr
+  19344  1-09:48:04  0.0 sunshine
+  19603  1-09:48:04  0.0 ibus-daemon
+  19604  1-09:48:04  0.0 dbus-daemon
+  19621  1-09:48:04  0.0 ibus-memconf
+  19622  1-09:48:04  0.0 ibus-ui-gtk3
+  19623  1-09:48:04  0.0 ibus-extension-
+  19625  1-09:48:04  0.0 ibus-x11
+  19627  1-09:48:04  0.0 ibus-portal
+  19635  1-09:48:04  0.0 ascii-desktop
+  19639  1-09:48:04  0.0 openbox
+  19641  1-09:48:04  0.0 dbus-launch
+  19642  1-09:48:04  0.0 dbus-daemon
+  19654  1-09:48:04  0.0 at-spi-bus-laun
+  19662  1-09:48:04  0.0 dbus-daemon
+  19676  1-09:48:04  0.0 at-spi2-registr
+  19685  1-09:48:03  0.0 ibus-engine-sim
+ 112788  1-09:27:39  0.0 MainThread
+ 112817  1-09:27:39  0.5 codex
+ 112939  1-09:27:37  0.0 python3
+ 112940  1-09:27:37  0.0 zeron
+ 115830  1-09:24:46  0.0 codex-code-mode
+ 264096  1-08:03:37  0.0 bash
+ 264101  1-08:03:37  0.0 Xvfb
+ 264811  1-08:03:28  0.0 openbox
+2659948    11:37:30  0.0 cupsd
+2659950    11:37:30  0.0 cups-browsed
+2826639    09:39:41  0.3 ariana-fswatch
+2826703    09:39:41  0.2 ariana-fswatch
+2826772    09:39:41  0.2 ariana-fswatch
+3535246    03:46:12  0.0 kworker/u16:2-ext4-rsv-conversion
+3536844    03:45:35  0.0 ascii-agent-sup
+3536846    03:45:35  1.8 ascii-agents-se
+3536893    03:45:35  0.0 sudo
+3536894    03:45:35  0.1 ascii-proclog
+3538063    03:45:34  0.0 web-server
+3538328    03:45:33  0.0 psimon
+3614015    02:51:17  0.0 kworker/u16:3-flush-253:0
+3769359    01:45:17  0.0 kworker/u16:6-events_power_efficient
+3820874    01:21:16  0.0 kworker/u16:8-events_power_efficient
+3863326       59:50  0.0 kworker/u16:5-flush-253:0
+3889642       46:50  0.0 kworker/u16:7-events_power_efficient
+3889644       46:50  0.0 kworker/u16:10-flush-253:0
+3918374       33:20  0.0 kworker/7:1-events
+3922760       31:15  0.0 kworker/3:2-wg-crypt-wg0
+3935728       25:41  0.0 kworker/0:1-cgroup_free
+3938800       23:53  0.0 kworker/6:1-cgroup_free
+3939390       23:42  0.0 kworker/2:0-events
+3944821       20:51  0.0 kworker/3:0-wg-crypt-wg0
+3948618       17:46  0.0 kworker/1:1-wg-crypt-wg0
+3950394       15:49  0.0 kworker/u16:0-writeback
+3950644       15:41  0.0 kworker/5:1-cgroup_free
+3951889       14:19  0.0 kworker/4:2-mm_percpu_wq
+3953060       13:02  0.0 kworker/6:2-cgroup_free
+3955530       10:51  0.0 kworker/0:0-events
+3956103       10:31  0.0 kworker/2:1-wg-crypt-wg0
+3956205       10:18  0.0 kworker/7:0-cgroup_free
+3956754       09:50  0.0 kworker/u16:1-flush-253:0
+3956755       09:50  0.0 kworker/u16:4-flush-253:0
+3956928       09:43  0.0 kworker/5:0-mm_percpu_wq
+3957074       09:27  0.0 kworker/1:0-wg-crypt-wg0
+3959410       07:21  0.0 kworker/4:3-cgroup_free
+3960710       06:05  0.0 kworker/3:1-events
+3961762       05:00  0.0 kworker/6:0-events
+3964782       04:06  0.0 kworker/1:2-wg-crypt-wg0
+3966454       03:42  0.0 kworker/5:2
+3967982       02:20  0.0 kworker/0:2-cgroup_free
+3968805       01:43  0.0 kworker/4:0
+3968943       01:26  0.0 kworker/1:3-events
+3969236       00:51  0.0 bash
+3969270       00:51  0.0 kworker/7:2-cgroup_free
+3970064       00:06  0.0 bash
+3970066       00:06 53.1 python3
+3970204       00:00  0.0 ps

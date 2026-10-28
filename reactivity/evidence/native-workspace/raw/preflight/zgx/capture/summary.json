@@ -1,0 +1,19 @@
+{
+  "name": "zgx",
+  "mode": "idle",
+  "ticks": 0,
+  "native_acknowledgements": null,
+  "reference_or_model_final": [
+    {
+      "framework": "zgx",
+      "adapter": "components",
+      "renderer": "gpu",
+      "ticks": 190,
+      "mounted_rows": 19,
+      "elapsed_seconds": 4.0
+    }
+  ],
+  "visible_seconds": 0.10709747800137848,
+  "samples": 201,
+  "font_sha256": "7da195a74c55bef988d0d48f9508bd5d849425c1770dba5d7bfc6ce9ed848954"
+}

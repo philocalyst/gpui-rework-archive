@@ -1,0 +1,47 @@
+{
+  "artifacts": {
+    "control": {
+      "source": "20919cb160f6fcc5ab85eca607b97d4173739409",
+      "ELF_bytes": 22462304,
+      "sha256": "19fddf48f6e8fa2b128d121ed8fbf2e366d2c9458ded4af2c3656b60da28760f",
+      "sections_command": [
+        "size",
+        "-A",
+        "/home/user/gpui-preserved-test-binaries/19fddf48f6e8fa2b128d121ed8fbf2e366d2c9458ded4af2c3656b60da28760f"
+      ]
+    },
+    "sparse": {
+      "source": "c965a893364b46f965c83d10e2cf94a46dac1304",
+      "ELF_bytes": 22486408,
+      "sha256": "1c4c52ba4b820006a95d678bb6bb2b97696c42db041874642bb5e128a0ad24ec",
+      "sections_command": [
+        "size",
+        "-A",
+        "/home/user/gpui-preserved-test-binaries/1c4c52ba4b820006a95d678bb6bb2b97696c42db041874642bb5e128a0ad24ec"
+      ]
+    },
+    "candidate": {
+      "source": "03ca419868b0d538e6847e59b60424a31aa32dfa",
+      "ELF_bytes": 22522696,
+      "sha256": "04b17f084d8d46f6b09277f6d04c1b163e2d86cb465bcfcac6cd113a656a29d0",
+      "sections_command": [
+        "size",
+        "-A",
+        "/home/user/gpui-preserved-test-binaries/04b17f084d8d46f6b09277f6d04c1b163e2d86cb465bcfcac6cd113a656a29d0"
+      ]
+    },
+    "zgx": {
+      "source": "a3678578980ef239058c557338ef9c544d356b0c",
+      "ELF_bytes": 25152256,
+      "sha256": "5f89c6a5e2f4b2b8086634043e191a2e0b544dc70718715d0545d5b79f18b738",
+      "sections_command": [
+        "size",
+        "-A",
+        "/home/user/gpui-preserved-test-binaries/5f89c6a5e2f4b2b8086634043e191a2e0b544dc70718715d0545d5b79f18b738"
+      ]
+    }
+  },
+  "candidate_shipping_lines": 38016,
+  "candidate_shipping_ledger_inherited_from": "f7b3f60c70faf6d548fffda530d4de83b2570e34",
+  "scope": "Whole native ELFs under matched fat-LTO profile; shipping/header/retained-capacity ledger inherited only by verified exact source equality. No new library/build-script/dependency/shader code."
+}

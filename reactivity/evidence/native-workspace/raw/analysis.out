@@ -1,0 +1,25 @@
+{
+  "idle": {
+    "pass_gate": true,
+    "limit_cpu_cores": 0.01
+  },
+  "stream": {
+    "candidate_and_zgx_all_qualified": false,
+    "median_ratio": null,
+    "limit": 0.8,
+    "pass_gate": false
+  },
+  "scroll": {
+    "candidate_and_zgx_all_qualified": true,
+    "median_ratio": 8.068852596363772,
+    "limit": 0.8,
+    "pass_gate": false
+  },
+  "both": {
+    "candidate_and_zgx_all_qualified": true,
+    "median_ratio": 6.0555848607741005,
+    "limit": 0.8,
+    "pass_gate": false
+  }
+}
+LOCAL_NATIVE_GATES_PASS False

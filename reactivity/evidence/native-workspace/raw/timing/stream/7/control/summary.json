@@ -1,0 +1,20 @@
+{
+  "name": "control",
+  "mode": "stream",
+  "ticks": 327,
+  "native_acknowledgements": 325,
+  "reference_or_model_final": {
+    "total_ticks": 327,
+    "scroll_offset": 0.0
+  },
+  "visible_seconds": 0.21055678799166344,
+  "samples": 406,
+  "font_sha256": "7da195a74c55bef988d0d48f9508bd5d849425c1770dba5d7bfc6ce9ed848954",
+  "interval_start": 1.224963458997081,
+  "interval_end": 6.205414430995006,
+  "interval_seconds": 4.980450971997925,
+  "cpu_seconds": 18.38,
+  "cpu_cores": 3.690428859422503,
+  "mean_rss_bytes": 149995520,
+  "max_rss_bytes": 149995520
+}

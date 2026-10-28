@@ -1,0 +1,39 @@
+{
+  "comparisons": [
+    {
+      "variant": "sparse",
+      "command": [
+        "compare",
+        "-metric",
+        "AE",
+        "/home/user/gpui-native-workspace-evidence/preflight/control/capture/native.png",
+        "/home/user/gpui-native-workspace-evidence/preflight/sparse/capture/native.png",
+        "null:"
+      ],
+      "exit": 0,
+      "stdout": "",
+      "stderr": "0"
+    },
+    {
+      "variant": "candidate",
+      "command": [
+        "compare",
+        "-metric",
+        "AE",
+        "/home/user/gpui-native-workspace-evidence/preflight/control/capture/native.png",
+        "/home/user/gpui-native-workspace-evidence/preflight/candidate/capture/native.png",
+        "null:"
+      ],
+      "exit": 0,
+      "stdout": "",
+      "stderr": "0"
+    }
+  ],
+  "images": {
+    "control": "fb504b213d823a787b3d7ed43c38d008c519c800c7716f0a33a13cc69f597aba",
+    "sparse": "fb504b213d823a787b3d7ed43c38d008c519c800c7716f0a33a13cc69f597aba",
+    "candidate": "fb504b213d823a787b3d7ed43c38d008c519c800c7716f0a33a13cc69f597aba",
+    "zgx": "06a96a0a94f0e22c1179d02a92fcc2ea227ffdaec45e6cc8714126fabe7622b6"
+  },
+  "scope": "Exact GPUI internal pixel equality; reference glyph quality is separately inspected and remains open."
+}

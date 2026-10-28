@@ -1,0 +1,7 @@
+{
+  "files": 1775,
+  "bytes": 519577110,
+  "free_before": 13525295104,
+  "free_after": 14048690176,
+  "scope": "Only completed inactive Cargo incremental compilation caches. Sources, evidence, generated shaders/fingerprints and exact preserved/archived executable stores retained. Prior executable-cache preservation is sealed in scene-support 7494c10970d3 and patch-workspace f7b3f60c70fa."
+}

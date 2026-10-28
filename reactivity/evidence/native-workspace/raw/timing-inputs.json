@@ -1,0 +1,16 @@
+{
+  "scripts": {
+    "native.py": "201ed99e99ddfbd070e561d0d6b7b2cb4664aa6bf43fbb238ed71198716d91a9",
+    "analyze.py": "86b49b6a1ae450c5f732a0ec02d54f77f8f42caf74d3fc7ebd9e37b5af58ea38",
+    "verify_dossier.py": "3184602aca57b91f2e04bc8ab8680c944ac9d898d0b90cddd78ef04e6edeb58a",
+    "freeze.py": "63d66352465144652a6148bb95b25fedf1aae190a13ed6c681c7f49d0a8aa188",
+    "prepare_timing.py": "501fc26988d5c6e1fb3c56359db26b83461f169afdad73d9eb878b2002deb6cf",
+    "COST.json": "cf3cdfa996eef983876a2770f5a632daf0f87887eff4e7d1777819fe2cf7f43f",
+    "PROCESS_ORDER.json": "4554cbca8ed88d5cfce46b81c4d9b93f3a3d6bf180b79ded4a0b90dd0f191c21",
+    "build-gates.json": "825f17fe09fb94c219ef95640ddf7b099d80800258f6e6ee0475382d4ea9d611",
+    "source-worktrees.json": "3ef6eb72a89a70444343ea3199f428d678b87211f2688a19f519d371f3448a9f"
+  },
+  "artifacts_sha256": "1ef8e6a014f16233e3952d07d7e869c653ceda9d97208102030a9511dec74ec2",
+  "source": "03ca419868b0d538e6847e59b60424a31aa32dfa",
+  "frozen_before_timing": true
+}

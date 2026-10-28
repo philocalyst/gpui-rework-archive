@@ -1,0 +1,42 @@
+/home/user/gpui-preserved-test-binaries/04b17f084d8d46f6b09277f6d04c1b163e2d86cb465bcfcac6cd113a656a29d0  :
+section                  size       addr
+.interp                    28        736
+.note.ABI-tag              32        764
+.note.gnu.build-id         36        796
+.dynsym                  4272        832
+.gnu.version              356       5104
+.gnu.version_r            432       5460
+.gnu.hash                  28       5896
+.dynstr                  2242       5924
+.rela.dyn              280800       8168
+.rela.plt                  48     288968
+.rodata               6301458     289024
+.gcc_except_table      304256    6590484
+.eh_frame_hdr           88228    6894740
+.eh_frame              699344    6982968
+.text                10093991    7686416
+.init                      27   17780408
+.fini                      13   17780436
+.plt                       48   17780464
+.tdata                    929   17784608
+.tbss                     272   17785544
+.fini_array                 8   17785544
+.init_array                24   17785552
+.data.rel.ro           223040   17785576
+.dynamic                  464   18008616
+.got                     1528   18009080
+.got.plt                   40   18010608
+.relro_padding           3560   18010648
+.tm_clone_table             0   18014744
+.data                    8376   18014848
+.bss                     7352   18023224
+.comment                  193          0
+.debug_abbrev            7361          0
+.debug_info            651999          0
+.debug_aranges          11408          0
+.debug_ranges          244336          0
+.debug_str            1234484          0
+.debug_line            261486          0
+Total                20432499
+
+

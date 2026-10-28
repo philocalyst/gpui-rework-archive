@@ -1,0 +1,322 @@
+[
+  {
+    "mode": "stream",
+    "group": 5,
+    "order": [
+      "zgx",
+      "control",
+      "candidate",
+      "sparse"
+    ]
+  },
+  {
+    "mode": "idle",
+    "group": 0,
+    "order": [
+      "control",
+      "sparse",
+      "zgx",
+      "candidate"
+    ]
+  },
+  {
+    "mode": "scroll",
+    "group": 0,
+    "order": [
+      "sparse",
+      "candidate",
+      "control",
+      "zgx"
+    ]
+  },
+  {
+    "mode": "both",
+    "group": 2,
+    "order": [
+      "control",
+      "sparse",
+      "zgx",
+      "candidate"
+    ]
+  },
+  {
+    "mode": "both",
+    "group": 6,
+    "order": [
+      "candidate",
+      "zgx",
+      "sparse",
+      "control"
+    ]
+  },
+  {
+    "mode": "stream",
+    "group": 2,
+    "order": [
+      "zgx",
+      "control",
+      "candidate",
+      "sparse"
+    ]
+  },
+  {
+    "mode": "both",
+    "group": 5,
+    "order": [
+      "control",
+      "sparse",
+      "zgx",
+      "candidate"
+    ]
+  },
+  {
+    "mode": "idle",
+    "group": 3,
+    "order": [
+      "zgx",
+      "control",
+      "candidate",
+      "sparse"
+    ]
+  },
+  {
+    "mode": "stream",
+    "group": 0,
+    "order": [
+      "candidate",
+      "zgx",
+      "sparse",
+      "control"
+    ]
+  },
+  {
+    "mode": "stream",
+    "group": 3,
+    "order": [
+      "candidate",
+      "zgx",
+      "sparse",
+      "control"
+    ]
+  },
+  {
+    "mode": "idle",
+    "group": 5,
+    "order": [
+      "control",
+      "sparse",
+      "zgx",
+      "candidate"
+    ]
+  },
+  {
+    "mode": "scroll",
+    "group": 2,
+    "order": [
+      "candidate",
+      "zgx",
+      "sparse",
+      "control"
+    ]
+  },
+  {
+    "mode": "stream",
+    "group": 7,
+    "order": [
+      "control",
+      "sparse",
+      "zgx",
+      "candidate"
+    ]
+  },
+  {
+    "mode": "scroll",
+    "group": 4,
+    "order": [
+      "zgx",
+      "control",
+      "candidate",
+      "sparse"
+    ]
+  },
+  {
+    "mode": "both",
+    "group": 4,
+    "order": [
+      "sparse",
+      "candidate",
+      "control",
+      "zgx"
+    ]
+  },
+  {
+    "mode": "stream",
+    "group": 4,
+    "order": [
+      "control",
+      "sparse",
+      "zgx",
+      "candidate"
+    ]
+  },
+  {
+    "mode": "scroll",
+    "group": 6,
+    "order": [
+      "control",
+      "sparse",
+      "zgx",
+      "candidate"
+    ]
+  },
+  {
+    "mode": "both",
+    "group": 3,
+    "order": [
+      "zgx",
+      "control",
+      "candidate",
+      "sparse"
+    ]
+  },
+  {
+    "mode": "scroll",
+    "group": 5,
+    "order": [
+      "sparse",
+      "candidate",
+      "control",
+      "zgx"
+    ]
+  },
+  {
+    "mode": "both",
+    "group": 7,
+    "order": [
+      "sparse",
+      "candidate",
+      "control",
+      "zgx"
+    ]
+  },
+  {
+    "mode": "scroll",
+    "group": 1,
+    "order": [
+      "zgx",
+      "control",
+      "candidate",
+      "sparse"
+    ]
+  },
+  {
+    "mode": "idle",
+    "group": 2,
+    "order": [
+      "sparse",
+      "candidate",
+      "control",
+      "zgx"
+    ]
+  },
+  {
+    "mode": "idle",
+    "group": 6,
+    "order": [
+      "zgx",
+      "control",
+      "candidate",
+      "sparse"
+    ]
+  },
+  {
+    "mode": "idle",
+    "group": 7,
+    "order": [
+      "sparse",
+      "candidate",
+      "control",
+      "zgx"
+    ]
+  },
+  {
+    "mode": "stream",
+    "group": 1,
+    "order": [
+      "sparse",
+      "candidate",
+      "control",
+      "zgx"
+    ]
+  },
+  {
+    "mode": "scroll",
+    "group": 3,
+    "order": [
+      "control",
+      "sparse",
+      "zgx",
+      "candidate"
+    ]
+  },
+  {
+    "mode": "scroll",
+    "group": 7,
+    "order": [
+      "candidate",
+      "zgx",
+      "sparse",
+      "control"
+    ]
+  },
+  {
+    "mode": "idle",
+    "group": 4,
+    "order": [
+      "candidate",
+      "zgx",
+      "sparse",
+      "control"
+    ]
+  },
+  {
+    "mode": "idle",
+    "group": 1,
+    "order": [
+      "candidate",
+      "zgx",
+      "sparse",
+      "control"
+    ]
+  },
+  {
+    "mode": "both",
+    "group": 1,
+    "order": [
+      "candidate",
+      "zgx",
+      "sparse",
+      "control"
+    ]
+  },
+  {
+    "mode": "stream",
+    "group": 6,
+    "order": [
+      "sparse",
+      "candidate",
+      "control",
+      "zgx"
+    ]
+  },
+  {
+    "mode": "both",
+    "group": 0,
+    "order": [
+      "zgx",
+      "control",
+      "candidate",
+      "sparse"
+    ]
+  }
+]

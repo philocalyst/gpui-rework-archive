@@ -1,0 +1,1571 @@
+{
+  "local_native_gates_pass": false,
+  "processes": 128,
+  "rows": {
+    "idle": {
+      "control": {
+        "processes": 8,
+        "complete_summaries": 8,
+        "qualified": [
+          true,
+          true,
+          true,
+          true,
+          true,
+          true,
+          true,
+          true
+        ],
+        "failures": [
+          null,
+          null,
+          null,
+          null,
+          null,
+          null,
+          null,
+          null
+        ],
+        "cpu_cores_all": [
+          0.0,
+          0.0,
+          0.0,
+          0.0,
+          0.0,
+          0.0,
+          0.0,
+          0.0
+        ],
+        "cpu_cores_median": 0.0,
+        "ticks_all": [
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0
+        ],
+        "interval_seconds_all": [
+          4.984205568005564,
+          4.972164820996113,
+          4.980783072009217,
+          4.987524837008095,
+          4.974275480999495,
+          4.97004127499531,
+          4.976482650003163,
+          4.976109907991486
+        ],
+        "median_mean_rss_bytes": 144398336.0,
+        "maximum_sampled_rss_bytes": 144691200,
+        "native_acknowledgements_all": [
+          1,
+          1,
+          1,
+          1,
+          1,
+          1,
+          1,
+          1
+        ],
+        "visible_seconds_all": [
+          0.2119897639931878,
+          0.21247769700130448,
+          0.21027781801240053,
+          0.21038287300325464,
+          0.21236703099566512,
+          0.21148634499695618,
+          0.211107452007127,
+          0.21267712100234348
+        ]
+      },
+      "sparse": {
+        "processes": 8,
+        "complete_summaries": 8,
+        "qualified": [
+          true,
+          true,
+          true,
+          true,
+          true,
+          true,
+          true,
+          true
+        ],
+        "failures": [
+          null,
+          null,
+          null,
+          null,
+          null,
+          null,
+          null,
+          null
+        ],
+        "cpu_cores_all": [
+          0.0,
+          0.0,
+          0.0,
+          0.0,
+          0.0,
+          0.0,
+          0.0,
+          0.0
+        ],
+        "cpu_cores_median": 0.0,
+        "ticks_all": [
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0
+        ],
+        "interval_seconds_all": [
+          4.985874628997408,
+          4.966194334003376,
+          4.980968723000842,
+          4.982756263008923,
+          4.978038850997109,
+          4.9758518599992385,
+          4.98483371900511,
+          4.98454960800882
+        ],
+        "median_mean_rss_bytes": 144312320.0,
+        "maximum_sampled_rss_bytes": 147365888,
+        "native_acknowledgements_all": [
+          2,
+          1,
+          1,
+          1,
+          1,
+          1,
+          1,
+          1
+        ],
+        "visible_seconds_all": [
+          0.2126398839900503,
+          0.2156069120101165,
+          0.20985320600448176,
+          0.2135344720009016,
+          0.2144256660103565,
+          0.21248495100007858,
+          0.2122836860071402,
+          0.21021832100814208
+        ]
+      },
+      "candidate": {
+        "processes": 8,
+        "complete_summaries": 8,
+        "qualified": [
+          true,
+          true,
+          true,
+          true,
+          true,
+          true,
+          true,
+          true
+        ],
+        "failures": [
+          null,
+          null,
+          null,
+          null,
+          null,
+          null,
+          null,
+          null
+        ],
+        "cpu_cores_all": [
+          0.0,
+          0.0,
+          0.0,
+          0.0,
+          0.0,
+          0.0,
+          0.0,
+          0.0
+        ],
+        "cpu_cores_median": 0.0,
+        "ticks_all": [
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0
+        ],
+        "interval_seconds_all": [
+          4.9823255889932625,
+          4.976987108995672,
+          4.966987137988326,
+          4.983812200007378,
+          4.976400375002413,
+          4.974144499996328,
+          4.978552460001083,
+          4.979834904996096
+        ],
+        "median_mean_rss_bytes": 144351232.0,
+        "maximum_sampled_rss_bytes": 144596992,
+        "native_acknowledgements_all": [
+          1,
+          1,
+          1,
+          1,
+          1,
+          1,
+          1,
+          1
+        ],
+        "visible_seconds_all": [
+          0.21221741999033839,
+          0.2125831779994769,
+          0.2100652260123752,
+          0.21149665499979164,
+          0.21258784200472292,
+          0.2129673180024838,
+          0.21234606100188103,
+          0.2133433009876171
+        ]
+      },
+      "zgx": {
+        "processes": 8,
+        "complete_summaries": 8,
+        "qualified": [
+          true,
+          true,
+          true,
+          true,
+          true,
+          true,
+          true,
+          true
+        ],
+        "failures": [
+          null,
+          null,
+          null,
+          null,
+          null,
+          null,
+          null,
+          null
+        ],
+        "cpu_cores_all": [
+          0.0,
+          0.0,
+          0.0,
+          0.0,
+          0.0,
+          0.0,
+          0.0,
+          0.0
+        ],
+        "cpu_cores_median": 0.0,
+        "ticks_all": [
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0
+        ],
+        "interval_seconds_all": [
+          4.971857244003331,
+          4.982144734996837,
+          4.974557695997646,
+          4.974367221002467,
+          4.979433500993764,
+          4.980324310992728,
+          4.981411981003475,
+          4.99062111999956
+        ],
+        "median_mean_rss_bytes": 119007744.0,
+        "maximum_sampled_rss_bytes": 119664640,
+        "native_acknowledgements_all": [
+          null,
+          null,
+          null,
+          null,
+          null,
+          null,
+          null,
+          null
+        ],
+        "visible_seconds_all": [
+          0.1075955489941407,
+          0.1076253990031546,
+          0.1068290480034193,
+          0.10725079200346954,
+          0.10820575599791482,
+          0.11035138499573804,
+          0.10764955999911763,
+          0.10820934000366833
+        ]
+      }
+    },
+    "stream": {
+      "control": {
+        "processes": 8,
+        "complete_summaries": 8,
+        "qualified": [
+          false,
+          false,
+          false,
+          false,
+          false,
+          false,
+          false,
+          false
+        ],
+        "failures": [
+          "AssertionError(('unequal/insufficient admitted work', 348))",
+          "AssertionError(('unequal/insufficient admitted work', 341))",
+          "AssertionError(('unequal/insufficient admitted work', 358))",
+          "AssertionError(('unequal/insufficient admitted work', 347))",
+          "AssertionError(('unequal/insufficient admitted work', 301))",
+          "AssertionError(('unequal/insufficient admitted work', 346))",
+          "AssertionError(('unequal/insufficient admitted work', 344))",
+          "AssertionError(('unequal/insufficient admitted work', 327))"
+        ],
+        "cpu_cores_all": [
+          3.707558581875514,
+          3.683189049183653,
+          3.711730822075829,
+          3.719459034297444,
+          3.638151932234544,
+          3.712148252388488,
+          3.7116490743790163,
+          3.690428859422503
+        ],
+        "cpu_cores_median": 3.709603828127265,
+        "ticks_all": [
+          348,
+          341,
+          358,
+          347,
+          301,
+          346,
+          344,
+          327
+        ],
+        "interval_seconds_all": [
+          4.989806524012238,
+          4.976665535010397,
+          4.98419763900165,
+          4.9684644539956935,
+          4.980550658001448,
+          4.983637166995322,
+          4.970836312990286,
+          4.980450971997925
+        ],
+        "median_mean_rss_bytes": 149987328.0,
+        "maximum_sampled_rss_bytes": 150257664,
+        "native_acknowledgements_all": [
+          342,
+          338,
+          349,
+          342,
+          293,
+          340,
+          342,
+          325
+        ],
+        "visible_seconds_all": [
+          0.21093766498961486,
+          0.21134732199425343,
+          0.21016981200955343,
+          0.2115206189919263,
+          0.2139204170089215,
+          0.21169061100226827,
+          0.21178724800120108,
+          0.21055678799166344
+        ]
+      },
+      "sparse": {
+        "processes": 8,
+        "complete_summaries": 8,
+        "qualified": [
+          false,
+          false,
+          false,
+          false,
+          false,
+          false,
+          false,
+          false
+        ],
+        "failures": [
+          "AssertionError(('unequal/insufficient admitted work', 455))",
+          "AssertionError(('unequal/insufficient admitted work', 454))",
+          "AssertionError(('unequal/insufficient admitted work', 455))",
+          "AssertionError(('unequal/insufficient admitted work', 452))",
+          "AssertionError(('unequal/insufficient admitted work', 450))",
+          "AssertionError(('unequal/insufficient admitted work', 455))",
+          "AssertionError(('unequal/insufficient admitted work', 453))",
+          "AssertionError(('unequal/insufficient admitted work', 452))"
+        ],
+        "cpu_cores_all": [
+          0.48067212962284034,
+          0.5149196822380087,
+          0.5341100579713484,
+          0.5536314957687308,
+          0.6016731971802883,
+          0.49892679919956445,
+          0.5423681443072701,
+          0.6449473861108306
+        ],
+        "cpu_cores_median": 0.5382391011393093,
+        "ticks_all": [
+          455,
+          454,
+          455,
+          452,
+          450,
+          455,
+          453,
+          452
+        ],
+        "interval_seconds_all": [
+          4.972204238001723,
+          4.971649148996221,
+          4.980246974009788,
+          4.985265508003067,
+          4.9694751469942275,
+          4.970669052010635,
+          4.978168478992302,
+          4.961645040995791
+        ],
+        "median_mean_rss_bytes": 150079488.0,
+        "maximum_sampled_rss_bytes": 150413312,
+        "native_acknowledgements_all": [
+          456,
+          455,
+          456,
+          453,
+          451,
+          456,
+          454,
+          453
+        ],
+        "visible_seconds_all": [
+          0.21241418899444398,
+          0.21345636900514364,
+          0.2108480570022948,
+          0.21194612998806406,
+          0.21623567599453963,
+          0.2116921650012955,
+          0.21096159399894532,
+          0.21564577899698634
+        ]
+      },
+      "candidate": {
+        "processes": 8,
+        "complete_summaries": 8,
+        "qualified": [
+          false,
+          false,
+          false,
+          false,
+          false,
+          false,
+          false,
+          false
+        ],
+        "failures": [
+          "AssertionError(('unequal/insufficient admitted work', 455))",
+          "AssertionError(('unequal/insufficient admitted work', 454))",
+          "AssertionError(('unequal/insufficient admitted work', 453))",
+          "AssertionError(('unequal/insufficient admitted work', 454))",
+          "AssertionError(('unequal/insufficient admitted work', 450))",
+          "AssertionError(('unequal/insufficient admitted work', 454))",
+          "AssertionError(('unequal/insufficient admitted work', 453))",
+          "AssertionError(('unequal/insufficient admitted work', 451))"
+        ],
+        "cpu_cores_all": [
+          0.49027076533540137,
+          0.4870827102426621,
+          0.4955403002046587,
+          0.5496189991658385,
+          0.622693382637419,
+          0.5362803940152484,
+          0.48095692209902896,
+          0.6826056181955922
+        ],
+        "cpu_cores_median": 0.5159103471099535,
+        "ticks_all": [
+          455,
+          454,
+          453,
+          454,
+          450,
+          454,
+          453,
+          451
+        ],
+        "interval_seconds_all": [
+          4.976841722003883,
+          4.988885766011663,
+          4.984458375998656,
+          4.985271622994333,
+          4.978373123012716,
+          4.978738789999625,
+          4.969260010999278,
+          4.966264428003342
+        ],
+        "median_mean_rss_bytes": 150136832.0,
+        "maximum_sampled_rss_bytes": 150409216,
+        "native_acknowledgements_all": [
+          456,
+          455,
+          454,
+          455,
+          451,
+          455,
+          454,
+          452
+        ],
+        "visible_seconds_all": [
+          0.2107314269960625,
+          0.20994384500954766,
+          0.21402177900017705,
+          0.21149897899886128,
+          0.2134828540001763,
+          0.21261486699222587,
+          0.21421961599844508,
+          0.21383233099186327
+        ]
+      },
+      "zgx": {
+        "processes": 8,
+        "complete_summaries": 8,
+        "qualified": [
+          true,
+          true,
+          true,
+          true,
+          true,
+          true,
+          true,
+          true
+        ],
+        "failures": [
+          null,
+          null,
+          null,
+          null,
+          null,
+          null,
+          null,
+          null
+        ],
+        "cpu_cores_all": [
+          0.1144123445151586,
+          0.10863930152795703,
+          0.11229121545420233,
+          0.11867234765558891,
+          0.1464596494912642,
+          0.11270033046989099,
+          0.11235642043033071,
+          0.16119871085076973
+        ],
+        "cpu_cores_median": 0.11355633749252479,
+        "ticks_all": [
+          479,
+          479,
+          479,
+          479,
+          479,
+          479,
+          479,
+          479
+        ],
+        "interval_seconds_all": [
+          4.981979894000688,
+          4.970576876003179,
+          4.987033026001882,
+          4.971672101004515,
+          4.984307981998427,
+          4.968929529000889,
+          4.984138848987641,
+          4.962818845000584
+        ],
+        "median_mean_rss_bytes": 124985063.22580644,
+        "maximum_sampled_rss_bytes": 128995328,
+        "native_acknowledgements_all": [
+          null,
+          null,
+          null,
+          null,
+          null,
+          null,
+          null,
+          null
+        ],
+        "visible_seconds_all": [
+          0.10701626900117844,
+          0.10886920300254133,
+          0.10667761300283018,
+          0.10797504900256172,
+          0.11055658000987023,
+          0.10761623800499365,
+          0.10822783700132277,
+          0.11125632500625215
+        ]
+      }
+    },
+    "scroll": {
+      "control": {
+        "processes": 8,
+        "complete_summaries": 8,
+        "qualified": [
+          false,
+          false,
+          false,
+          false,
+          false,
+          false,
+          false,
+          false
+        ],
+        "failures": [
+          "AssertionError(('unequal/insufficient admitted work', 234))",
+          "AssertionError(('unequal/insufficient admitted work', 251))",
+          "AssertionError(('unequal/insufficient admitted work', 253))",
+          "AssertionError(('unequal/insufficient admitted work', 236))",
+          "AssertionError(('unequal/insufficient admitted work', 202))",
+          "AssertionError(('unequal/insufficient admitted work', 227))",
+          "AssertionError(('unequal/insufficient admitted work', 240))",
+          "AssertionError(('unequal/insufficient admitted work', 236))"
+        ],
+        "cpu_cores_all": [
+          3.831997157827804,
+          3.8558798202805757,
+          3.8430232873212065,
+          3.8562861412175873,
+          3.8022037796140715,
+          3.8409827543954767,
+          3.847873332159502,
+          3.87074963175016
+        ],
+        "cpu_cores_median": 3.8454483097403545,
+        "ticks_all": [
+          234,
+          251,
+          253,
+          236,
+          202,
+          227,
+          240,
+          236
+        ],
+        "interval_seconds_all": [
+          4.976517260991386,
+          4.963847653998528,
+          4.975249580995296,
+          4.96851097101171,
+          4.994471917001647,
+          4.975289196008816,
+          4.971577374992194,
+          4.975780360997305
+        ],
+        "median_mean_rss_bytes": 149889024.0,
+        "maximum_sampled_rss_bytes": 150081536,
+        "native_acknowledgements_all": [
+          226,
+          230,
+          227,
+          230,
+          202,
+          218,
+          221,
+          234
+        ],
+        "visible_seconds_all": [
+          0.21061853499850258,
+          0.2135024000017438,
+          0.21389400699990802,
+          0.21345066699723247,
+          0.2199071050126804,
+          0.21577686999808066,
+          0.21219974399718922,
+          0.2116338970081415
+        ]
+      },
+      "sparse": {
+        "processes": 8,
+        "complete_summaries": 8,
+        "qualified": [
+          false,
+          false,
+          false,
+          false,
+          false,
+          false,
+          false,
+          false
+        ],
+        "failures": [
+          "AssertionError(('unequal/insufficient admitted work', 239))",
+          "AssertionError(('unequal/insufficient admitted work', 242))",
+          "AssertionError(('unequal/insufficient admitted work', 242))",
+          "AssertionError(('unequal/insufficient admitted work', 245))",
+          "AssertionError(('unequal/insufficient admitted work', 199))",
+          "AssertionError(('unequal/insufficient admitted work', 241))",
+          "AssertionError(('unequal/insufficient admitted work', 229))",
+          "AssertionError(('unequal/insufficient admitted work', 242))"
+        ],
+        "cpu_cores_all": [
+          3.8834334190974635,
+          3.882231924213519,
+          3.843429466064873,
+          3.8398909713076934,
+          3.813838095626131,
+          3.823435925154381,
+          3.827099489509081,
+          3.8535089318112066
+        ],
+        "cpu_cores_median": 3.8416602186862834,
+        "ticks_all": [
+          239,
+          242,
+          242,
+          245,
+          199,
+          241,
+          229,
+          242
+        ],
+        "interval_seconds_all": [
+          4.982704198002466,
+          4.968791246006731,
+          4.972121947008418,
+          4.976703802996781,
+          4.994968198006973,
+          4.985044962988468,
+          4.961982319000526,
+          4.982471908006119
+        ],
+        "median_mean_rss_bytes": 149897316.72131148,
+        "maximum_sampled_rss_bytes": 150347776,
+        "native_acknowledgements_all": [
+          239,
+          239,
+          227,
+          228,
+          200,
+          221,
+          217,
+          231
+        ],
+        "visible_seconds_all": [
+          0.21122181900136638,
+          0.21055110399902333,
+          0.21230585299781524,
+          0.21757428199634887,
+          0.2137935579958139,
+          0.21389015299791936,
+          0.2132735600025626,
+          0.21463191500515677
+        ]
+      },
+      "candidate": {
+        "processes": 8,
+        "complete_summaries": 8,
+        "qualified": [
+          true,
+          true,
+          true,
+          true,
+          true,
+          true,
+          true,
+          true
+        ],
+        "failures": [
+          null,
+          null,
+          null,
+          null,
+          null,
+          null,
+          null,
+          null
+        ],
+        "cpu_cores_all": [
+          0.6403418808994927,
+          0.6056465552719841,
+          0.6873615479741279,
+          0.7185682412193379,
+          0.8494302630313674,
+          0.6839190633219865,
+          0.710119501890555,
+          0.6244554882849588
+        ],
+        "cpu_cores_median": 0.6856403056480571,
+        "ticks_all": [
+          479,
+          479,
+          479,
+          479,
+          479,
+          479,
+          479,
+          479
+        ],
+        "interval_seconds_all": [
+          4.966097165990504,
+          4.969895351998275,
+          4.975547453999752,
+          4.982129454991082,
+          4.991581045003841,
+          4.971348486011266,
+          4.999158579012146,
+          4.964325013002963
+        ],
+        "median_mean_rss_bytes": 151284194.86178863,
+        "maximum_sampled_rss_bytes": 151392256,
+        "native_acknowledgements_all": [
+          481,
+          480,
+          481,
+          480,
+          480,
+          481,
+          481,
+          480
+        ],
+        "visible_seconds_all": [
+          0.21303840199834667,
+          0.21049330099776853,
+          0.21616130700567737,
+          0.2165269989927765,
+          0.21456971600127872,
+          0.2173132629977772,
+          0.21640386499348097,
+          0.21389335600542836
+        ]
+      },
+      "zgx": {
+        "processes": 8,
+        "complete_summaries": 8,
+        "qualified": [
+          true,
+          true,
+          true,
+          true,
+          true,
+          true,
+          true,
+          true
+        ],
+        "failures": [
+          null,
+          null,
+          null,
+          null,
+          null,
+          null,
+          null,
+          null
+        ],
+        "cpu_cores_all": [
+          0.08829738685266116,
+          0.06216909671034131,
+          0.09034871739053675,
+          0.09429771179440816,
+          0.15033878433140302,
+          0.08029578429571306,
+          0.07830177120506361,
+          0.06833291995402527
+        ],
+        "cpu_cores_median": 0.08429658557418711,
+        "ticks_all": [
+          479,
+          479,
+          479,
+          479,
+          479,
+          479,
+          479,
+          479
+        ],
+        "interval_seconds_all": [
+          4.983159929004614,
+          4.986400259993388,
+          4.980701585998759,
+          4.984214262003661,
+          4.988732636993518,
+          4.981581580010243,
+          4.9807302440021886,
+          4.975639855998452
+        ],
+        "median_mean_rss_bytes": 125907025.76432289,
+        "maximum_sampled_rss_bytes": 128778240,
+        "native_acknowledgements_all": [
+          null,
+          null,
+          null,
+          null,
+          null,
+          null,
+          null,
+          null
+        ],
+        "visible_seconds_all": [
+          0.10771147599734832,
+          0.10857526899781078,
+          0.10912878799717873,
+          0.10792792800930329,
+          0.11342097099986859,
+          0.10979127600148786,
+          0.1082526109967148,
+          0.10649432899663225
+        ]
+      }
+    },
+    "both": {
+      "control": {
+        "processes": 8,
+        "complete_summaries": 8,
+        "qualified": [
+          false,
+          false,
+          false,
+          false,
+          false,
+          false,
+          false,
+          false
+        ],
+        "failures": [
+          "AssertionError(('unequal/insufficient admitted work', 149))",
+          "AssertionError(('unequal/insufficient admitted work', 146))",
+          "AssertionError(('unequal/insufficient admitted work', 148))",
+          "AssertionError(('unequal/insufficient admitted work', 139))",
+          "AssertionError(('unequal/insufficient admitted work', 131))",
+          "AssertionError(('unequal/insufficient admitted work', 148))",
+          "AssertionError(('unequal/insufficient admitted work', 151))",
+          "AssertionError(('unequal/insufficient admitted work', 145))"
+        ],
+        "cpu_cores_all": [
+          3.911732693002254,
+          3.902510263188292,
+          3.904069832004478,
+          3.893306531381343,
+          3.8834045560623975,
+          3.9042803242225954,
+          3.916607862419023,
+          3.8899133705608713
+        ],
+        "cpu_cores_median": 3.9032900475963848,
+        "ticks_all": [
+          149,
+          146,
+          148,
+          139,
+          131,
+          148,
+          151,
+          145
+        ],
+        "interval_seconds_all": [
+          4.985003202004009,
+          4.973721704998752,
+          4.969173410005169,
+          4.982911015002173,
+          4.964715811001952,
+          4.968905506000738,
+          4.981351385009475,
+          4.982116092010983
+        ],
+        "median_mean_rss_bytes": 149958656.0,
+        "maximum_sampled_rss_bytes": 150323200,
+        "native_acknowledgements_all": [
+          150,
+          147,
+          149,
+          140,
+          132,
+          149,
+          151,
+          146
+        ],
+        "visible_seconds_all": [
+          0.21263807099603582,
+          0.21228398798848502,
+          0.21226594000472687,
+          0.21344664999924134,
+          0.2149317150033312,
+          0.20971244300017133,
+          0.2125821260124212,
+          0.21367639800882898
+        ]
+      },
+      "sparse": {
+        "processes": 8,
+        "complete_summaries": 8,
+        "qualified": [
+          false,
+          false,
+          false,
+          false,
+          false,
+          false,
+          false,
+          false
+        ],
+        "failures": [
+          "AssertionError(('unequal/insufficient admitted work', 149))",
+          "AssertionError(('unequal/insufficient admitted work', 146))",
+          "AssertionError(('unequal/insufficient admitted work', 148))",
+          "AssertionError(('unequal/insufficient admitted work', 140))",
+          "AssertionError(('unequal/insufficient admitted work', 123))",
+          "AssertionError(('unequal/insufficient admitted work', 149))",
+          "AssertionError(('unequal/insufficient admitted work', 149))",
+          "AssertionError(('unequal/insufficient admitted work', 143))"
+        ],
+        "cpu_cores_all": [
+          3.905074420069097,
+          3.8948478772453226,
+          3.907726651875209,
+          3.8899165962300497,
+          3.8649678439171016,
+          3.9016118826703923,
+          3.9028444343263087,
+          3.885854781145143
+        ],
+        "cpu_cores_median": 3.8982298799578574,
+        "ticks_all": [
+          149,
+          146,
+          148,
+          140,
+          123,
+          149,
+          149,
+          143
+        ],
+        "interval_seconds_all": [
+          4.985820475005312,
+          4.9783715850062435,
+          4.982436524995137,
+          4.961545967002166,
+          4.988398553003208,
+          4.9825560780009255,
+          4.983544777991483,
+          4.966732183005661
+        ],
+        "median_mean_rss_bytes": 150104064.0,
+        "maximum_sampled_rss_bytes": 150454272,
+        "native_acknowledgements_all": [
+          150,
+          148,
+          149,
+          141,
+          124,
+          150,
+          150,
+          144
+        ],
+        "visible_seconds_all": [
+          0.211505966988625,
+          0.21030501899076626,
+          0.21415170399995986,
+          0.224023386996123,
+          0.21709158399607986,
+          0.2114365919987904,
+          0.2114969249960268,
+          0.21547087299404666
+        ]
+      },
+      "candidate": {
+        "processes": 8,
+        "complete_summaries": 8,
+        "qualified": [
+          true,
+          true,
+          true,
+          true,
+          true,
+          true,
+          true,
+          true
+        ],
+        "failures": [
+          null,
+          null,
+          null,
+          null,
+          null,
+          null,
+          null,
+          null
+        ],
+        "cpu_cores_all": [
+          0.7621040040832202,
+          0.8563770921558144,
+          0.772291559632475,
+          0.8876261171313956,
+          1.1339836707693502,
+          0.7799358084764305,
+          0.8367679856500263,
+          0.8452422780396758
+        ],
+        "cpu_cores_median": 0.841005131844851,
+        "ticks_all": [
+          479,
+          479,
+          479,
+          479,
+          479,
+          479,
+          479,
+          479
+        ],
+        "interval_seconds_all": [
+          4.986196083002142,
+          4.974444131003111,
+          4.972215418005362,
+          4.968308069001068,
+          4.973616592003964,
+          4.974768382002367,
+          4.971509512004559,
+          4.98082042200258
+        ],
+        "median_mean_rss_bytes": 151547904.0,
+        "maximum_sampled_rss_bytes": 151941120,
+        "native_acknowledgements_all": [
+          480,
+          480,
+          480,
+          480,
+          480,
+          480,
+          480,
+          480
+        ],
+        "visible_seconds_all": [
+          0.21070001099724323,
+          0.21764466998865828,
+          0.21274055298999883,
+          0.2141998379956931,
+          0.2219410839898046,
+          0.21139959199354053,
+          0.21097338300023694,
+          0.2150186950020725
+        ]
+      },
+      "zgx": {
+        "processes": 8,
+        "complete_summaries": 8,
+        "qualified": [
+          true,
+          true,
+          true,
+          true,
+          true,
+          true,
+          true,
+          true
+        ],
+        "failures": [
+          null,
+          null,
+          null,
+          null,
+          null,
+          null,
+          null,
+          null
+        ],
+        "cpu_cores_all": [
+          0.1406643123093113,
+          0.15059098528611692,
+          0.12438617386791084,
+          0.15448327760718195,
+          0.19121714597102307,
+          0.11628073800428494,
+          0.1288235760262221,
+          0.13675234846053944
+        ],
+        "cpu_cores_median": 0.13870833038492536,
+        "ticks_all": [
+          479,
+          479,
+          479,
+          479,
+          477,
+          479,
+          479,
+          479
+        ],
+        "interval_seconds_all": [
+          4.97638660800294,
+          4.980377800005954,
+          4.984476817000541,
+          4.984358254994731,
+          4.968173722998472,
+          4.987928439004463,
+          4.968034732009983,
+          4.972492301996681
+        ],
+        "median_mean_rss_bytes": 127671449.08562003,
+        "maximum_sampled_rss_bytes": 129974272,
+        "native_acknowledgements_all": [
+          null,
+          null,
+          null,
+          null,
+          null,
+          null,
+          null,
+          null
+        ],
+        "visible_seconds_all": [
+          0.10842818599485327,
+          0.11055594800563995,
+          0.10733909699774813,
+          0.10944949199620169,
+          0.11174339900026098,
+          0.10661765999975614,
+          0.10777996500837617,
+          0.10825341301097069
+        ]
+      }
+    }
+  },
+  "comparisons": {
+    "idle": {
+      "candidate/zgx": {
+        "paired_cpu_rate_ratios": [
+          null,
+          null,
+          null,
+          null,
+          null,
+          null,
+          null,
+          null
+        ],
+        "equal_total_ticks_each_pair": [
+          true,
+          true,
+          true,
+          true,
+          true,
+          true,
+          true,
+          true
+        ],
+        "note": "Incomplete/failed observation or zero denominator; no passing-subset or complete eight-pair CPU ratio inferred."
+      },
+      "candidate/control": {
+        "paired_cpu_rate_ratios": [
+          null,
+          null,
+          null,
+          null,
+          null,
+          null,
+          null,
+          null
+        ],
+        "equal_total_ticks_each_pair": [
+          true,
+          true,
+          true,
+          true,
+          true,
+          true,
+          true,
+          true
+        ],
+        "note": "Incomplete/failed observation or zero denominator; no passing-subset or complete eight-pair CPU ratio inferred."
+      },
+      "candidate/sparse": {
+        "paired_cpu_rate_ratios": [
+          null,
+          null,
+          null,
+          null,
+          null,
+          null,
+          null,
+          null
+        ],
+        "equal_total_ticks_each_pair": [
+          true,
+          true,
+          true,
+          true,
+          true,
+          true,
+          true,
+          true
+        ],
+        "note": "Incomplete/failed observation or zero denominator; no passing-subset or complete eight-pair CPU ratio inferred."
+      }
+    },
+    "stream": {
+      "candidate/zgx": {
+        "paired_cpu_rate_ratios": [
+          null,
+          null,
+          null,
+          null,
+          null,
+          null,
+          null,
+          null
+        ],
+        "equal_total_ticks_each_pair": [
+          false,
+          false,
+          false,
+          false,
+          false,
+          false,
+          false,
+          false
+        ],
+        "note": "Incomplete/failed observation or zero denominator; no passing-subset or complete eight-pair CPU ratio inferred."
+      },
+      "candidate/control": {
+        "paired_cpu_rate_ratios": [
+          null,
+          null,
+          null,
+          null,
+          null,
+          null,
+          null,
+          null
+        ],
+        "equal_total_ticks_each_pair": [
+          false,
+          false,
+          false,
+          false,
+          false,
+          false,
+          false,
+          false
+        ],
+        "note": "Incomplete/failed observation or zero denominator; no passing-subset or complete eight-pair CPU ratio inferred."
+      },
+      "candidate/sparse": {
+        "paired_cpu_rate_ratios": [
+          null,
+          null,
+          null,
+          null,
+          null,
+          null,
+          null,
+          null
+        ],
+        "equal_total_ticks_each_pair": [
+          true,
+          true,
+          false,
+          false,
+          true,
+          false,
+          true,
+          false
+        ],
+        "note": "Incomplete/failed observation or zero denominator; no passing-subset or complete eight-pair CPU ratio inferred."
+      }
+    },
+    "scroll": {
+      "candidate/zgx": {
+        "paired_cpu_rate_ratios": [
+          7.252104549458632,
+          9.741923034426843,
+          7.607872782554001,
+          7.620208672570875,
+          5.650107301379428,
+          8.51749652015667,
+          9.06900943569758,
+          9.138428281787103
+        ],
+        "equal_total_ticks_each_pair": [
+          true,
+          true,
+          true,
+          true,
+          true,
+          true,
+          true,
+          true
+        ],
+        "median_ratio": 8.068852596363772,
+        "bootstrap_95_type7": [
+          7.252104549458632,
+          9.138428281787103
+        ]
+      },
+      "candidate/control": {
+        "paired_cpu_rate_ratios": [
+          null,
+          null,
+          null,
+          null,
+          null,
+          null,
+          null,
+          null
+        ],
+        "equal_total_ticks_each_pair": [
+          false,
+          false,
+          false,
+          false,
+          false,
+          false,
+          false,
+          false
+        ],
+        "note": "Incomplete/failed observation or zero denominator; no passing-subset or complete eight-pair CPU ratio inferred."
+      },
+      "candidate/sparse": {
+        "paired_cpu_rate_ratios": [
+          null,
+          null,
+          null,
+          null,
+          null,
+          null,
+          null,
+          null
+        ],
+        "equal_total_ticks_each_pair": [
+          false,
+          false,
+          false,
+          false,
+          false,
+          false,
+          false,
+          false
+        ],
+        "note": "Incomplete/failed observation or zero denominator; no passing-subset or complete eight-pair CPU ratio inferred."
+      }
+    },
+    "both": {
+      "candidate/zgx": {
+        "paired_cpu_rate_ratios": [
+          5.4178916568930795,
+          5.686775277608628,
+          6.2088215725052605,
+          5.745774758795833,
+          5.930345132026986,
+          6.707351723616425,
+          6.495456898974003,
+          6.180824589521214
+        ],
+        "equal_total_ticks_each_pair": [
+          true,
+          true,
+          true,
+          true,
+          false,
+          true,
+          true,
+          true
+        ],
+        "median_ratio": 6.0555848607741005,
+        "bootstrap_95_type7": [
+          5.686775277608628,
+          6.495456898974003
+        ]
+      },
+      "candidate/control": {
+        "paired_cpu_rate_ratios": [
+          null,
+          null,
+          null,
+          null,
+          null,
+          null,
+          null,
+          null
+        ],
+        "equal_total_ticks_each_pair": [
+          false,
+          false,
+          false,
+          false,
+          false,
+          false,
+          false,
+          false
+        ],
+        "note": "Incomplete/failed observation or zero denominator; no passing-subset or complete eight-pair CPU ratio inferred."
+      },
+      "candidate/sparse": {
+        "paired_cpu_rate_ratios": [
+          null,
+          null,
+          null,
+          null,
+          null,
+          null,
+          null,
+          null
+        ],
+        "equal_total_ticks_each_pair": [
+          false,
+          false,
+          false,
+          false,
+          false,
+          false,
+          false,
+          false
+        ],
+        "note": "Incomplete/failed observation or zero denominator; no passing-subset or complete eight-pair CPU ratio inferred."
+      }
+    }
+  },
+  "gates": {
+    "idle": {
+      "pass_gate": true,
+      "limit_cpu_cores": 0.01
+    },
+    "stream": {
+      "candidate_and_zgx_all_qualified": false,
+      "median_ratio": null,
+      "limit": 0.8,
+      "pass_gate": false
+    },
+    "scroll": {
+      "candidate_and_zgx_all_qualified": true,
+      "median_ratio": 8.068852596363772,
+      "limit": 0.8,
+      "pass_gate": false
+    },
+    "both": {
+      "candidate_and_zgx_all_qualified": true,
+      "median_ratio": 6.0555848607741005,
+      "limit": 0.8,
+      "pass_gate": false
+    }
+  },
+  "order_sha256": "4554cbca8ed88d5cfce46b81c4d9b93f3a3d6bf180b79ded4a0b90dd0f191c21",
+  "limits": [
+    "Software Vulkan/process CPU includes raster workers.",
+    "Whole-run admitted ticks and sampled CPU have different boundaries; no per-update normalization.",
+    "Hardware/two-class, scanout, wheel/input-policy and render-quality gates remain open.",
+    "No global ZGX/framework victory is inferred from this local trial."
+  ]
+}

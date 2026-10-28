@@ -1,0 +1,2 @@
+128-process native schedule and verifier frozen; 20 preflights and exact GPUI image checks pass
+{'control': 22462304, 'sparse': 22486408, 'candidate': 22522696, 'zgx': 25152256}

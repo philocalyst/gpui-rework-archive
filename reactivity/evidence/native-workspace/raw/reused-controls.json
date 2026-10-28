@@ -1,0 +1,17 @@
+{
+  "control": {
+    "source": "20919cb160f6fcc5ab85eca607b97d4173739409",
+    "source_worktree": "/home/user/gpui-native-workspace-control-lab",
+    "identical_inputs": 14466
+  },
+  "sparse": {
+    "source": "c965a893364b46f965c83d10e2cf94a46dac1304",
+    "source_worktree": "/home/user/gpui-native-profile-sparse-lab",
+    "identical_inputs": 24453
+  },
+  "zgx": {
+    "source": "a3678578980ef239058c557338ef9c544d356b0c",
+    "source_worktree": "/home/user/zgx-native-profile-lab",
+    "identical_inputs": 12373
+  }
+}
