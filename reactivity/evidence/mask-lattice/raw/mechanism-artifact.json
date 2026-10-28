@@ -1,0 +1,44 @@
+{
+  "path": "/home/user/gpui-mask-lattice-target/release/build/gpui_gpu/8e4933dc35703950/out/gpui_gpu-8e4933dc35703950",
+  "sha256": "a5893567c50ee78b123d932f82833c0d756ebb647b1a51ddd6e2844e89081c1c",
+  "preserved": "/home/user/gpui-preserved-test-binaries/a5893567c50ee78b123d932f82833c0d756ebb647b1a51ddd6e2844e89081c1c",
+  "bytes": 17164136,
+  "executed": true,
+  "cargo": {
+    "reason": "compiler-artifact",
+    "package_id": "path+file:///home/user/gpui-mask-lattice-lab/reactivity/crates/gpu#gpui_gpu@0.1.0",
+    "manifest_path": "/home/user/gpui-mask-lattice-lab/reactivity/crates/gpu/Cargo.toml",
+    "target": {
+      "kind": [
+        "lib"
+      ],
+      "crate_types": [
+        "lib"
+      ],
+      "name": "gpui_gpu",
+      "src_path": "/home/user/gpui-mask-lattice-lab/reactivity/crates/gpu/src/lib.rs",
+      "edition": "2024",
+      "doc": true,
+      "doctest": true,
+      "test": true
+    },
+    "profile": {
+      "opt_level": "3",
+      "debuginfo": 0,
+      "debug_assertions": false,
+      "overflow_checks": false,
+      "test": true
+    },
+    "features": [
+      "default",
+      "gpu-tests",
+      "simd",
+      "vulkan-tests"
+    ],
+    "filenames": [
+      "/home/user/gpui-mask-lattice-target/release/build/gpui_gpu/8e4933dc35703950/out/gpui_gpu-8e4933dc35703950"
+    ],
+    "executable": "/home/user/gpui-mask-lattice-target/release/build/gpui_gpu/8e4933dc35703950/out/gpui_gpu-8e4933dc35703950",
+    "fresh": false
+  }
+}

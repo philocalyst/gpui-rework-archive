@@ -1,0 +1,5 @@
+{
+  "cause": "First completed checkout had no differing evidence subdirectory to retain; cone omitted evidence-root files as well. The retained-file afterguard caught this immediately.",
+  "correction": "Include a nonexisting child cone to retain evidence-root files without restoring duplicate subdirectories. Preserve initial failure and plan. Restore and revalidate all retained hashes before continuing.",
+  "no_build_or_timing_observation": true
+}

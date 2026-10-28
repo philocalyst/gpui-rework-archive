@@ -1,0 +1,30 @@
+{
+  "shared_archive": "/home/user/gpui-completed-source-archives/41a67473a0177fbb17df1f7b8e2f2f36dd6940f6-inherited-evidence.tar.gz",
+  "shared_sha256": "37c946d5b222b4c409d42def16924e50c00bc8e5ef3168aa7fe3f8fb31a44c40",
+  "records": [
+    {
+      "worktree": "/home/user/gpui-sparse-text-lab",
+      "source": "a91fd03b9b1623efbde68dfd8c00cadf79e7508e",
+      "removed_files": 9340,
+      "retained_files": 4487,
+      "bytes": 735686552
+    },
+    {
+      "worktree": "/home/user/gpui-bounded-cache-lab",
+      "source": "e6bda77dfc6784533cbc2b769f05b55fdc701c61",
+      "removed_files": 9343,
+      "retained_files": 4691,
+      "bytes": 735693066
+    },
+    {
+      "worktree": "/home/user/gpui-state-lab",
+      "source": "bed967a3c20e605ad4636b749bb6ce9348731d57",
+      "removed_files": 9340,
+      "retained_files": 4250,
+      "bytes": 735686552
+    }
+  ],
+  "free_before": 10371801088,
+  "free_after": 12667592704,
+  "scope": "Only completed duplicate inherited evidence checkout copies omitted. Every byte verified against shared immutable source archive and clean Git. All differing/own evidence and every production/vendor/build input retained. No canonical executable deleted. Restore old cone or archive before historical full-checkout guards."
+}

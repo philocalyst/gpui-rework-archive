@@ -1,0 +1,73 @@
+{
+  "gpu-near-ties": {
+    "source": "9e4ef386f193a17d74bda63867b0ca4c86e0e59e",
+    "counts": [
+      353,
+      0,
+      3
+    ],
+    "stages": {
+      "test": 0,
+      "clippy": 0
+    }
+  },
+  "full-native-initial": {
+    "source": "9e4ef386f193a17d74bda63867b0ca4c86e0e59e",
+    "counts": [
+      1108,
+      0,
+      45
+    ],
+    "stages": {
+      "build": 0,
+      "test": 0,
+      "port": 0,
+      "clippy": 0
+    }
+  },
+  "minimal-library-initial": {
+    "source": "9e4ef386f193a17d74bda63867b0ca4c86e0e59e",
+    "counts": [
+      329,
+      0,
+      25
+    ],
+    "stages": {
+      "unit-build": 0,
+      "port": 0,
+      "clippy": 0
+    }
+  },
+  "default-initial": {
+    "source": "9e4ef386f193a17d74bda63867b0ca4c86e0e59e",
+    "counts": [
+      1015,
+      0,
+      13
+    ],
+    "stages": {
+      "test": 0,
+      "clippy": 0
+    }
+  },
+  "offline-initial": {
+    "source": "9e4ef386f193a17d74bda63867b0ca4c86e0e59e",
+    "counts": [
+      83,
+      0,
+      0
+    ],
+    "stages": {
+      "test": 0,
+      "clippy": 0
+    }
+  },
+  "native-checks-initial": {
+    "processes": 11,
+    "all_pass": true
+  },
+  "minimal-native-checks-initial": {
+    "processes": 4,
+    "all_pass": true
+  }
+}

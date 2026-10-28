@@ -1,0 +1,8 @@
+{
+  "checkpoint": "c505416efdbb5a94e471a6c8d5ab08a8b932a05f",
+  "files": 473,
+  "bytes": 711901769,
+  "free_before": 11849740288,
+  "free_after": 12562440192,
+  "scope": "Only inactive regenerable oracle libraries after verified evidence checkpoint. All executed ELF bytes, source, inputs, shaders, fingerprints and readbacks preserved."
+}

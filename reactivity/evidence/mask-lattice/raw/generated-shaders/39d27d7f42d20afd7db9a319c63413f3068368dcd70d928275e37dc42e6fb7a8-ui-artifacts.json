@@ -1,0 +1,18 @@
+{
+  "revision":2, "naga":"30.0.1", "target_env":"vulkan1.0", "spirv_version":"1.0",
+  "typed_rust_sha256":"9b9306e59f9aa6ddce5dc4a3a4a26a5bd83360ea02cc391131fe1c02174e9a4c", "wgsl_sha256":"12a4fbdc36ad0e04a9903c8cfa1e55af9ecda8b19afbe439a31c0aca0bebe41d", "layout_sha256":"5a50daf69cbbb7dc5a87f38473369590aae49dff91fa84c0468bf4a15b7fff85",
+  "spirv_val":"SPIRV-Tools v2025.1 unknown hash, 2026-05-13T06:03:38+00:00", "layout":[{"binding":0,"min_size":48,"kind":"uniform","visibility":"fragment"},{"binding":1,"min_size":16,"kind":"storage","visibility":"fragment"},{"binding":2,"min_size":8,"kind":"storage","visibility":"fragment"},{"binding":3,"min_size":4,"kind":"storage","visibility":"fragment"},{"binding":4,"min_size":0,"kind":"texture","visibility":"fragment"},{"binding":5,"min_size":32,"kind":"storage","visibility":"fragment"}],
+  "entry_points":["vertex","fragment"], "entry_strategy":"separate-single-entry-modules",
+  "index":"Restrict", "binding_array":"Unchecked", "force_loop_bounding":true,
+  "emit_int_div_checks":true, "adjust_coordinate_space":false, "force_point_size":true,
+  "allowed_extensions":["SPV_KHR_storage_buffer_storage_class"],
+  "workgroup_init":"Polyfill", "fake_missing_bindings":false, "allowed_capabilities":["Shader", "Matrix", "Sampled1D", "Image1D", "ImageQuery", "DerivativeControl", "StorageImageExtendedFormats"],
+  "artifacts":[{"variant":0,"entry":"vertex","buffer_restrict":false,"image_restrict":false,"bytes":880,"sha256":"562bb388d843aee9fdc843071123e4f268862be3a3c2205dbdc530d6ba94b0a3"},
+{"variant":0,"entry":"fragment","buffer_restrict":false,"image_restrict":false,"bytes":43108,"sha256":"d72bd8493e3b15af6ae1c2af760245d83a2e19075ae5ad7d9e38e0f3e182d2d1"},
+{"variant":1,"entry":"vertex","buffer_restrict":false,"image_restrict":true,"bytes":880,"sha256":"562bb388d843aee9fdc843071123e4f268862be3a3c2205dbdc530d6ba94b0a3"},
+{"variant":1,"entry":"fragment","buffer_restrict":false,"image_restrict":true,"bytes":43420,"sha256":"1356e378a6060b9606817d92c0bac903aa845dcbb9d2af94a787cbe5c8c29a22"},
+{"variant":2,"entry":"vertex","buffer_restrict":true,"image_restrict":false,"bytes":880,"sha256":"562bb388d843aee9fdc843071123e4f268862be3a3c2205dbdc530d6ba94b0a3"},
+{"variant":2,"entry":"fragment","buffer_restrict":true,"image_restrict":false,"bytes":46372,"sha256":"92f865694a185edaf7687b6708774d1b229cf7146448edf0ac0dcafa0da49a72"},
+{"variant":3,"entry":"vertex","buffer_restrict":true,"image_restrict":true,"bytes":880,"sha256":"562bb388d843aee9fdc843071123e4f268862be3a3c2205dbdc530d6ba94b0a3"},
+{"variant":3,"entry":"fragment","buffer_restrict":true,"image_restrict":true,"bytes":46684,"sha256":"f73f574f930461ca23d7931a77c02087359985b436767f8609b61b41f38a4b81"}]
+}

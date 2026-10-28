@@ -1,0 +1,27 @@
+{
+  "command": [
+    "cargo",
+    "+nightly-2026-10-23",
+    "-Z",
+    "checksum-freshness",
+    "--config",
+    "build.fingerprint=\"content\"",
+    "test",
+    "--locked",
+    "--offline",
+    "--release",
+    "--message-format=json",
+    "-p",
+    "gpui_gpu",
+    "--lib",
+    "renderer::mask_lattice::tests::every_admitted_mask_address_matches_scalar_membership_and_cell",
+    "--",
+    "--exact",
+    "--nocapture",
+    "--test-threads=1"
+  ],
+  "exit": 101,
+  "minimum_free_bytes": 9779306496,
+  "stopped": false,
+  "seconds": 68.01620274898596
+}

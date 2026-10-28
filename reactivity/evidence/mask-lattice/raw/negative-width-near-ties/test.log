@@ -1,0 +1,16 @@
+   Compiling gpui_gpu v0.1.0 (/home/user/gpui-mask-lattice-width-lab/reactivity/crates/gpu)
+    Finished `release` profile [optimized] target(s) in 8.71s
+     Running unittests src/lib.rs (/home/user/gpui-mask-lattice-width-target/release/build/gpui_gpu/e02b747f77180ba1/out/gpui_gpu-e02b747f77180ba1)
+
+thread 'renderer::mask_lattice::tests::every_admitted_mask_address_matches_scalar_membership_and_cell' (164906) panicked at crates/gpu/src/renderer/mask_lattice_tests.rs:72:25:
+assertion `left == right` failed: mask cell axis=0 phase=-256 scale=0.5 translation=0 point=0.125
+  left: Some(1)
+ right: Some(2)
+stack backtrace:
+   0: __rustc::rust_begin_unwind
+   1: core::panicking::panic_fmt
+   2: core::panicking::assert_failed_inner
+   3: core::panicking::assert_failed::<core::option::Option<i64>, core::option::Option<i64>>
+   4: <gpui_gpu::renderer::mask_lattice::tests::every_admitted_mask_address_matches_scalar_membership_and_cell::{closure#0} as core::ops::function::FnOnce<()>>::call_once
+note: Some details are omitted, run with `RUST_BACKTRACE=full` for a verbose backtrace.
+error: test failed, to rerun pass `-p gpui_gpu --lib`

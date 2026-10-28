@@ -1,0 +1,305 @@
+{
+  "source": "837a23d44e72d3893cbbcf92e17434b1076b8d1a",
+  "oracle_source": "6faae98aa7391ede8f07f9325e63f044f1de9adf",
+  "failed_exact_frames": 12,
+  "total_frames": 336,
+  "rows": [
+    {
+      "file": "0-false-2-0-true.rgba",
+      "different_bytes": 275,
+      "different_pixels": 99,
+      "first_byte": 3164,
+      "first_pixel": [
+        7,
+        7
+      ],
+      "oracle": [
+        123,
+        88,
+        130,
+        255
+      ],
+      "candidate": [
+        124,
+        88,
+        129,
+        255
+      ]
+    },
+    {
+      "file": "2-true-2-0-false.rgba",
+      "different_bytes": 505,
+      "different_pixels": 106,
+      "first_byte": 6328,
+      "first_pixel": [
+        7,
+        7
+      ],
+      "oracle": [
+        91,
+        50,
+        244,
+        45,
+        208,
+        51,
+        0,
+        60
+      ],
+      "candidate": [
+        100,
+        50,
+        252,
+        45,
+        151,
+        51,
+        0,
+        60
+      ]
+    },
+    {
+      "file": "2-true-2-0-true.rgba",
+      "different_bytes": 505,
+      "different_pixels": 106,
+      "first_byte": 6328,
+      "first_pixel": [
+        7,
+        7
+      ],
+      "oracle": [
+        91,
+        50,
+        244,
+        45,
+        208,
+        51,
+        0,
+        60
+      ],
+      "candidate": [
+        100,
+        50,
+        252,
+        45,
+        151,
+        51,
+        0,
+        60
+      ]
+    },
+    {
+      "file": "1-false-2-0-true.rgba",
+      "different_bytes": 275,
+      "different_pixels": 99,
+      "first_byte": 3164,
+      "first_pixel": [
+        7,
+        7
+      ],
+      "oracle": [
+        130,
+        88,
+        123,
+        255
+      ],
+      "candidate": [
+        129,
+        88,
+        124,
+        255
+      ]
+    },
+    {
+      "file": "1-false-2-0-false.rgba",
+      "different_bytes": 275,
+      "different_pixels": 99,
+      "first_byte": 3164,
+      "first_pixel": [
+        7,
+        7
+      ],
+      "oracle": [
+        130,
+        88,
+        123,
+        255
+      ],
+      "candidate": [
+        129,
+        88,
+        124,
+        255
+      ]
+    },
+    {
+      "file": "1-true-2-0-true.rgba",
+      "different_bytes": 275,
+      "different_pixels": 99,
+      "first_byte": 3164,
+      "first_pixel": [
+        7,
+        7
+      ],
+      "oracle": [
+        130,
+        88,
+        123,
+        255
+      ],
+      "candidate": [
+        129,
+        88,
+        124,
+        255
+      ]
+    },
+    {
+      "file": "1-true-2-0-false.rgba",
+      "different_bytes": 275,
+      "different_pixels": 99,
+      "first_byte": 3164,
+      "first_pixel": [
+        7,
+        7
+      ],
+      "oracle": [
+        130,
+        88,
+        123,
+        255
+      ],
+      "candidate": [
+        129,
+        88,
+        124,
+        255
+      ]
+    },
+    {
+      "file": "0-false-2-0-false.rgba",
+      "different_bytes": 275,
+      "different_pixels": 99,
+      "first_byte": 3164,
+      "first_pixel": [
+        7,
+        7
+      ],
+      "oracle": [
+        123,
+        88,
+        130,
+        255
+      ],
+      "candidate": [
+        124,
+        88,
+        129,
+        255
+      ]
+    },
+    {
+      "file": "0-true-2-0-false.rgba",
+      "different_bytes": 275,
+      "different_pixels": 99,
+      "first_byte": 3164,
+      "first_pixel": [
+        7,
+        7
+      ],
+      "oracle": [
+        123,
+        88,
+        130,
+        255
+      ],
+      "candidate": [
+        124,
+        88,
+        129,
+        255
+      ]
+    },
+    {
+      "file": "2-false-2-0-false.rgba",
+      "different_bytes": 505,
+      "different_pixels": 106,
+      "first_byte": 6328,
+      "first_pixel": [
+        7,
+        7
+      ],
+      "oracle": [
+        91,
+        50,
+        244,
+        45,
+        208,
+        51,
+        0,
+        60
+      ],
+      "candidate": [
+        100,
+        50,
+        252,
+        45,
+        151,
+        51,
+        0,
+        60
+      ]
+    },
+    {
+      "file": "2-false-2-0-true.rgba",
+      "different_bytes": 505,
+      "different_pixels": 106,
+      "first_byte": 6328,
+      "first_pixel": [
+        7,
+        7
+      ],
+      "oracle": [
+        91,
+        50,
+        244,
+        45,
+        208,
+        51,
+        0,
+        60
+      ],
+      "candidate": [
+        100,
+        50,
+        252,
+        45,
+        151,
+        51,
+        0,
+        60
+      ]
+    },
+    {
+      "file": "0-true-2-0-true.rgba",
+      "different_bytes": 275,
+      "different_pixels": 99,
+      "first_byte": 3164,
+      "first_pixel": [
+        7,
+        7
+      ],
+      "oracle": [
+        123,
+        88,
+        130,
+        255
+      ],
+      "candidate": [
+        124,
+        88,
+        129,
+        255
+      ]
+    }
+  ],
+  "timing_observations": 0
+}

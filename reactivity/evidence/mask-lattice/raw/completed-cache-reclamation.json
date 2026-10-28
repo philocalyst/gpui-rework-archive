@@ -1,0 +1,8 @@
+{
+  "checkpoint": "0b01889e5db5f4dc47ac60418db8c70c205f8978",
+  "cached_executables_removed": 164,
+  "mutant_libraries_removed": 270,
+  "free_before": 10178719744,
+  "free_after": 12243357696,
+  "scope": "Completed target cache copies only, after exact canonical execution-byte verification and committed checkpoint. Inactive mutant libraries regenerable. Every canonical ELF/source/evidence/generated shader/fingerprint retained."
+}

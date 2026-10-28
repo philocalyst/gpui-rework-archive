@@ -1,0 +1,344 @@
+{
+  "variants": {
+    "baseline": {
+      "artifact": {
+        "path": "/home/user/gpui-damage-suffix-target/release/examples/zgx_native_lab",
+        "sha256": "7a76e2fbebe3c7a07dbc6e43d61580a8036ff074b70640030bf145bf241e8a09",
+        "preserved": "/home/user/gpui-preserved-test-binaries/7a76e2fbebe3c7a07dbc6e43d61580a8036ff074b70640030bf145bf241e8a09",
+        "bytes": 26390120,
+        "executed": false,
+        "cargo": {
+          "reason": "compiler-artifact",
+          "package_id": "path+file:///home/user/gpui-damage-suffix-lab/reactivity/crates/gpui#0.1.0",
+          "manifest_path": "/home/user/gpui-damage-suffix-lab/reactivity/crates/gpui/Cargo.toml",
+          "target": {
+            "kind": [
+              "example"
+            ],
+            "crate_types": [
+              "bin"
+            ],
+            "name": "zgx_native_lab",
+            "src_path": "/home/user/gpui-damage-suffix-lab/reactivity/crates/gpui/examples/zgx_native_lab.rs",
+            "edition": "2024",
+            "required-features": [
+              "native-core"
+            ],
+            "doc": false,
+            "doctest": false,
+            "test": false
+          },
+          "profile": {
+            "opt_level": "3",
+            "debuginfo": 0,
+            "debug_assertions": false,
+            "overflow_checks": false,
+            "test": false
+          },
+          "features": [
+            "accessibility",
+            "default",
+            "native",
+            "native-core",
+            "simd",
+            "x11",
+            "x11-minimal"
+          ],
+          "filenames": [
+            "/home/user/gpui-damage-suffix-target/release/examples/zgx_native_lab"
+          ],
+          "executable": "/home/user/gpui-damage-suffix-target/release/examples/zgx_native_lab",
+          "fresh": false
+        }
+      },
+      "functions": [
+        {
+          "symbol": "<gpui_gpu::renderer::GpuContext>::submit_regions",
+          "bytes": 592,
+          "address": "0000000000d722e0",
+          "local_sub_rsp_prologue": [
+            1320
+          ],
+          "assembly": "\n/home/user/gpui-preserved-test-binaries/7a76e2fbebe3c7a07dbc6e43d61580a8036ff074b70640030bf145bf241e8a09:     file format elf64-x86-64\n\n\nDisassembly of section .text:\n\n0000000000d722e0 <_RNvMs3_NtCsfd5itqhq3Vr_8gpui_gpu8rendererNtB5_10GpuContext14submit_regions>:\n  d722e0:\tpush   rbp\n  d722e1:\tpush   r15\n  d722e3:\tpush   r14\n  d722e5:\tpush   r13\n  d722e7:\tpush   r12\n  d722e9:\tpush   rbx\n  d722ea:\tsub    rsp,0x528\n  d722f1:\tmov    r15,rcx\n  d722f4:\tmov    r12,rdx\n  d722f7:\tmov    r14,rsi\n  d722fa:\tmov    rbx,rdi\n  d722fd:\tlea    rdx,[rip+0x665444]        # 13d7748 <anon.255c8ba72969252177b3101bd34b486f.6.llvm.3103484408056536695+0x1e0>\n  d72304:\tlea    r13,[rsp+0x10]\n  d72309:\tmov    rdi,r13\n  d7230c:\tmov    rsi,rbx\n  d7230f:\tcall   QWORD PTR [rip+0x6ac683]        # 141e998 <_DYNAMIC+0x39f8>\n  d72315:\tmov    rax,QWORD PTR [r14]\n  d72318:\tmov    DWORD PTR [rsp+0x98],0x0\n  d72323:\tmov    BYTE PTR [rsp+0xa0],0x1\n  d7232b:\tmov    DWORD PTR [rsp+0xc8],0x0\n  d72336:\tmov    QWORD PTR [rsp+0xd0],rax\n  d7233e:\tmov    QWORD PTR [rsp+0xd8],0x0\n  d7234a:\tlea    rax,[rip+0xffffffffff4fb410]        # 26d761 <_RNvNtCs9Ma7xi4lEBD_12tracing_core10dispatcher13NO_SUBSCRIBER+0x189>\n  d72351:\tmov    QWORD PTR [rsp+0x78],rax\n  d72356:\trex.W\n  d72357:\t.byte 0xc7\n  d72358:\ttest   BYTE PTR [rax+rax*4],ah\n  d7235b:\tadd    BYTE PTR [rax],al\n  d7235d:\tadd    BYTE PTR [rdx],dl\n\t...\n"
+        },
+        {
+          "symbol": "<gpui_gpu::renderer::GpuContext>::submit",
+          "bytes": 636,
+          "address": "0000000000d72530",
+          "local_sub_rsp_prologue": [
+            1344
+          ],
+          "assembly": "\n/home/user/gpui-preserved-test-binaries/7a76e2fbebe3c7a07dbc6e43d61580a8036ff074b70640030bf145bf241e8a09:     file format elf64-x86-64\n\n\nDisassembly of section .text:\n\n0000000000d72530 <_RNvMs3_NtCsfd5itqhq3Vr_8gpui_gpu8rendererNtB5_10GpuContext6submit>:\n  d72530:\tpush   rbp\n  d72531:\tpush   r15\n  d72533:\tpush   r14\n  d72535:\tpush   r12\n  d72537:\tpush   rbx\n  d72538:\tsub    rsp,0x540\n  d7253f:\tmov    r15,rdx\n  d72542:\tmov    r14,rsi\n  d72545:\tmov    rbx,rdi\n  d72548:\tlea    rdx,[rip+0x6651b1]        # 13d7700 <anon.255c8ba72969252177b3101bd34b486f.6.llvm.3103484408056536695+0x198>\n  d7254f:\tlea    rdi,[rsp+0x8]\n  d72554:\tmov    rsi,rbx\n  d72557:\tcall   QWORD PTR [rip+0x6ac43b]        # 141e998 <_DYNAMIC+0x39f8>\n  d7255d:\tmovzx  ebp,WORD PTR [r14+0x18]\n  d72562:\tmov    r12,QWORD PTR [r14+0x1a]\n  d72566:\ttest   bpl,0x1\n  d7256a:\tje     d725a0 <_RNvMs3_NtCsfd5itqhq3Vr_8gpui_gpu8rendererNtB5_10GpuContext6submit+0x70>\n  d7256c:\tmov    rax,r12\n  d7256f:\tshr    rax,0x20\n  d72573:\tcmp    r12w,ax\n  d72577:\tje     d72719 <_RNvMs3_NtCsfd5itqhq3Vr_8gpui_gpu8rendererNtB5_10GpuContext6submit+0x1e9>\n  d7257d:\tmov    rax,r12\n  d72580:\tshr    rax,0x30\n  d72584:\tmov    ecx,r12d\n  d72587:\tshr    ecx,0x10\n  d7258a:\tcmp    cx,ax\n  d7258d:\tje     d72719 <_RNvMs3_NtCsfd5itqhq3Vr_8gpui_gpu8rendererNtB5_10GpuContext6submit+0x1e9>\n  d72593:\tmov    rax,QWORD PTR [r14]\n  d72596:\tmov    cl,0x1\n  d72598:\tcmp    bp,0x1\n  d7259c:\tjne    d725a3 <_RNvMs3_NtCsfd5itqhq3Vr_8gpui_gpu8rendererNtB5_10GpuContext6submit+0x73>\n  d7259e:\tjmp    d725b8 <_RNvMs3_NtCsfd5itqhq3Vr_8gpui_gpu8rendererNtB5_10GpuContext6submit+0x88>\n  d725a0:\tmov    rax,QWORD PTR [r14]\n  d725a3:\txorps  xmm0,xmm0\n  d725a6:\tmovups XMMWORD PTR [rsp+0xa8],xmm0\n  d725ae:\t.byte 0xf\n  d725af:\t.byte 0x11\n"
+        },
+        {
+          "symbol": "<gpui_gpu::renderer::retained::RetainedRenderer>::render_regions",
+          "bytes": 663,
+          "address": "0000000000d79f50",
+          "local_sub_rsp_prologue": [
+            120
+          ],
+          "assembly": "\n/home/user/gpui-preserved-test-binaries/7a76e2fbebe3c7a07dbc6e43d61580a8036ff074b70640030bf145bf241e8a09:     file format elf64-x86-64\n\n\nDisassembly of section .text:\n\n0000000000d79f50 <_RNvMs3_NtNtCsfd5itqhq3Vr_8gpui_gpu8renderer8retainedNtB5_16RetainedRenderer14render_regions>:\n  d79f50:\tpush   rbp\n  d79f51:\tpush   r15\n  d79f53:\tpush   r14\n  d79f55:\tpush   r13\n  d79f57:\tpush   r12\n  d79f59:\tpush   rbx\n  d79f5a:\tsub    rsp,0x78\n  d79f5e:\tmov    rbx,rdi\n  d79f61:\tlea    rbp,[r8+0x8]\n  d79f65:\tmov    rax,QWORD PTR [r8+0x8]\n  d79f69:\tmov    rdi,QWORD PTR [r8+0x10]\n  d79f6d:\tcmp    rdi,0x1\n  d79f71:\tsete   r9b\n  d79f75:\tcmp    QWORD PTR [r8],0x0\n  d79f79:\tsets   r10b\n  d79f7d:\tcmovns rbp,rax\n  d79f81:\tor     r10b,r9b\n  d79f84:\tcmp    r10b,0x1\n  d79f88:\tjne    d79fad <_RNvMs3_NtNtCsfd5itqhq3Vr_8gpui_gpu8renderer8retainedNtB5_16RetainedRenderer14render_regions+0x5d>\n  d79f8a:\tmov    rax,QWORD PTR [rbp+0x0]\n  d79f8e:\tmov    QWORD PTR [rsp+0x22],rax\n  d79f93:\tmov    WORD PTR [rsp+0x20],0x1\n  d79f9a:\tlea    r8,[rsp+0x20]\n  d79f9f:\tmov    rdi,rbx\n  d79fa2:\tcall   QWORD PTR [rip+0x6a2bb0]        # 141cb58 <_DYNAMIC+0x1bb8>\n  d79fa8:\tjmp    d7a0c5 <_RNvMs3_NtNtCsfd5itqhq3Vr_8gpui_gpu8renderer8retainedNtB5_16RetainedRenderer14render_regions+0x175>\n  d79fad:\tmov    r14d,DWORD PTR [rdx+0x28]\n  d79fb1:\tmov    r15d,DWORD PTR [rdx+0x2c]\n  d79fb5:\tmov    r9,QWORD PTR [rsi+0x378]\n  d79fbc:\ttest   r9,r9\n  d79fbf:\tje     d79fe0 <_RNvMs3_NtNtCsfd5itqhq3Vr_8gpui_gpu8renderer8retainedNtB5_16RetainedRenderer14render_regions+0x90>\n  d79fc1:\tmovzx  r12d,BYTE PTR [r9+0x70]\n  d79fc6:\tcmp    QWORD PTR [rsi+0x330],0x0\n  d79fce:\trex.B\n  d79fcf:\t.byte 0xf\n"
+        },
+        {
+          "symbol": "<gpui_gpu::renderer::GpuContext>::submit_scroll",
+          "bytes": 733,
+          "address": "0000000000d71670",
+          "local_sub_rsp_prologue": [
+            1512
+          ],
+          "assembly": "\n/home/user/gpui-preserved-test-binaries/7a76e2fbebe3c7a07dbc6e43d61580a8036ff074b70640030bf145bf241e8a09:     file format elf64-x86-64\n\n\nDisassembly of section .text:\n\n0000000000d71670 <_RNvMNtNtCsfd5itqhq3Vr_8gpui_gpu8renderer13scroll_outputNtB4_10GpuContext13submit_scroll>:\n  d71670:\tpush   rbp\n  d71671:\tpush   r15\n  d71673:\tpush   r14\n  d71675:\tpush   r13\n  d71677:\tpush   r12\n  d71679:\tpush   rbx\n  d7167a:\tsub    rsp,0x5e8\n  d71681:\tmov    r14,QWORD PTR [rsi+0x8]\n  d71685:\ttest   r14,r14\n  d71688:\tje     d71903 <_RNvMNtNtCsfd5itqhq3Vr_8gpui_gpu8renderer13scroll_outputNtB4_10GpuContext13submit_scroll+0x293>\n  d7168e:\tmov    r12,rcx\n  d71691:\tmov    r13,rdx\n  d71694:\tmov    rbp,rsi\n  d71697:\tmov    rbx,rdi\n  d7169a:\tmov    rax,QWORD PTR [rsi+0x10]\n  d7169e:\tmov    QWORD PTR [rsp+0x10],rax\n  d716a3:\tlea    rdx,[rip+0x666056]        # 13d7700 <anon.255c8ba72969252177b3101bd34b486f.6.llvm.3103484408056536695+0x198>\n  d716aa:\tlea    r15,[rsp+0x60]\n  d716af:\tmov    rdi,r15\n  d716b2:\tmov    rsi,rbx\n  d716b5:\tcall   QWORD PTR [rip+0x6ad2dd]        # 141e998 <_DYNAMIC+0x39f8>\n  d716bb:\tmov    rdi,r14\n  d716be:\tmov    rsi,r15\n  d716c1:\tmov    rdx,r12\n  d716c4:\tcall   d7b6c0 <_RNvMs4_NtNtCsfd5itqhq3Vr_8gpui_gpu8renderer8retainedNtB5_7Backing6scroll>\n  d716c9:\tlea    rdi,[rsp+0x1a0]\n  d716d1:\tmov    rsi,r12\n  d716d4:\tcall   QWORD PTR [rip+0x6ad2c6]        # 141e9a0 <_DYNAMIC+0x3a00>\n  d716da:\tlea    rdi,[rsp+0x80]\n  d716e2:\tlea    rsi,[rsp+0x1a0]\n  d716ea:\tcall   d70080 <_RINvMsg_NtNtNtCsaifZ2emd9Uo_4core4iter8adapters7flattenINtB6_13FlattenCompatINtNtB8_3map3MapINtNtNtBc_5slice4iter4IterNtNtCsjaFUUaeVXI8_11gpui_canvas6damage12DamageRegionENCNvMNtNtB1W_6canvas6scrollNtB2O_10ScrollCopy7repairs0EINtNtNtBc_5array4iter8IntoIterB1S_Kj4_EE13iter_try_folduNCINvNvXsi_B6_IBS_ppENtNtNtBa_6traits8iterator8Iterator8try_fold7flattenB3C_uINtNtNtBc_3ops12control_flow11ControlFlowB1S_ENCINvNvB4R_4find5checkB1S_QNCB2L_s_0E0E0B5L_ECsfd5itqhq3Vr_8gpui_gpu>\n  d716ef:\t.byte 0x80\n"
+        },
+        {
+          "symbol": "<gpui_gpu::renderer::retained::RetainedRenderer>::render_with_scroll",
+          "bytes": 1851,
+          "address": "0000000000d7a1f0",
+          "local_sub_rsp_prologue": [
+            264
+          ],
+          "assembly": "\n/home/user/gpui-preserved-test-binaries/7a76e2fbebe3c7a07dbc6e43d61580a8036ff074b70640030bf145bf241e8a09:     file format elf64-x86-64\n\n\nDisassembly of section .text:\n\n0000000000d7a1f0 <_RNvMs3_NtNtCsfd5itqhq3Vr_8gpui_gpu8renderer8retainedNtB5_16RetainedRenderer18render_with_scroll>:\n  d7a1f0:\tpush   rbp\n  d7a1f1:\tpush   r15\n  d7a1f3:\tpush   r14\n  d7a1f5:\tpush   r13\n  d7a1f7:\tpush   r12\n  d7a1f9:\tpush   rbx\n  d7a1fa:\tsub    rsp,0x108\n  d7a201:\ttest   r9,r9\n  d7a204:\tje     d7a237 <_RNvMs3_NtNtCsfd5itqhq3Vr_8gpui_gpu8renderer8retainedNtB5_16RetainedRenderer18render_with_scroll+0x47>\n  d7a206:\tmov    ebp,DWORD PTR [rdx+0x28]\n  d7a209:\tmov    r12d,DWORD PTR [rdx+0x2c]\n  d7a20d:\tmov    rax,QWORD PTR [rsi+0x378]\n  d7a214:\ttest   rax,rax\n  d7a217:\tje     d7a248 <_RNvMs3_NtNtCsfd5itqhq3Vr_8gpui_gpu8renderer8retainedNtB5_16RetainedRenderer18render_with_scroll+0x58>\n  d7a219:\tmovzx  r13d,BYTE PTR [rax+0x70]\n  d7a21e:\tcmp    QWORD PTR [rsi+0x330],0x0\n  d7a226:\tsete   r10b\n  d7a22a:\txor    r13b,0x1\n  d7a22e:\tor     r13b,r10b\n  d7a231:\tmov    BYTE PTR [rax+0x70],0x0\n  d7a235:\tjmp    d7a24b <_RNvMs3_NtNtCsfd5itqhq3Vr_8gpui_gpu8renderer8retainedNtB5_16RetainedRenderer18render_with_scroll+0x5b>\n  d7a237:\tmov    rbx,rdi\n  d7a23a:\tcall   QWORD PTR [rip+0x6a2918]        # 141cb58 <_DYNAMIC+0x1bb8>\n  d7a240:\tmov    rax,rbx\n  d7a243:\tjmp    d7a84a <_RNvMs3_NtNtCsfd5itqhq3Vr_8gpui_gpu8renderer8retainedNtB5_16RetainedRenderer18render_with_scroll+0x65a>\n  d7a248:\tmov    r13b,0x1\n  d7a24b:\tmov    eax,0x4000\n  d7a250:\tmov    r10d,0x4000\n  d7a256:\tsub    r10d,ebp\n  d7a259:\tsub    eax,r12d\n  d7a25c:\tor     eax,r10d\n  d7a25f:\tcmp    eax,0x3fff\n  d7a264:\tja     d7a275 <_RNvMs3_NtNtCsfd5itqhq3Vr_8gpui_gpu8renderer8retainedNtB5_16RetainedRenderer18render_with_scroll+0x85>\n  d7a266:\tmov    rax,r12\n  d7a269:\timul   rax,rbp\n  d7a26d:\trex.W\n  d7a26e:\t.byte 0x3d\n\t...\n"
+        },
+        {
+          "symbol": "<gpui_gpu::renderer::retained::RetainedRenderer>::render",
+          "bytes": 2153,
+          "address": "0000000000d7aa90",
+          "local_sub_rsp_prologue": [
+            664
+          ],
+          "assembly": "\n/home/user/gpui-preserved-test-binaries/7a76e2fbebe3c7a07dbc6e43d61580a8036ff074b70640030bf145bf241e8a09:     file format elf64-x86-64\n\n\nDisassembly of section .text:\n\n0000000000d7aa90 <_RNvMs3_NtNtCsfd5itqhq3Vr_8gpui_gpu8renderer8retainedNtB5_16RetainedRenderer6render>:\n  d7aa90:\tpush   rbp\n  d7aa91:\tpush   r15\n  d7aa93:\tpush   r14\n  d7aa95:\tpush   r13\n  d7aa97:\tpush   r12\n  d7aa99:\tpush   rbx\n  d7aa9a:\tsub    rsp,0x298\n  d7aaa1:\tmov    rbx,rsi\n  d7aaa4:\tmov    r14d,DWORD PTR [rdx+0x28]\n  d7aaa8:\tmov    ebp,DWORD PTR [rdx+0x2c]\n  d7aaab:\tmov    r12,QWORD PTR [rsi+0x378]\n  d7aab2:\tmov    rsi,rcx\n  d7aab5:\ttest   r12,r12\n  d7aab8:\tje     d7aad3 <_RNvMs3_NtNtCsfd5itqhq3Vr_8gpui_gpu8renderer8retainedNtB5_16RetainedRenderer6render+0x43>\n  d7aaba:\tcmp    QWORD PTR [rbx+0x330],0x0\n  d7aac2:\tsetne  r15b\n  d7aac6:\tand    r15b,BYTE PTR [r12+0x70]\n  d7aacb:\tmov    BYTE PTR [r12+0x70],0x0\n  d7aad1:\tjmp    d7aad6 <_RNvMs3_NtNtCsfd5itqhq3Vr_8gpui_gpu8renderer8retainedNtB5_16RetainedRenderer6render+0x46>\n  d7aad3:\txor    r15d,r15d\n  d7aad6:\tmov    eax,0x4000\n  d7aadb:\tmov    ecx,0x4000\n  d7aae0:\tsub    ecx,r14d\n  d7aae3:\tsub    eax,ebp\n  d7aae5:\tor     eax,ecx\n  d7aae7:\tcmp    eax,0x3fff\n  d7aaec:\tja     d7aafd <_RNvMs3_NtNtCsfd5itqhq3Vr_8gpui_gpu8renderer8retainedNtB5_16RetainedRenderer6render+0x6d>\n  d7aaee:\tmov    rax,rbp\n  d7aaf1:\timul   rax,r14\n  d7aaf5:\tcmp    rax,0x1000000\n  d7aafb:\tjbe    d7ab08 <_RNvMs3_NtNtCsfd5itqhq3Vr_8gpui_gpu8renderer8retainedNtB5_16RetainedRenderer6render+0x78>\n  d7aafd:\tmov    DWORD PTR [rdi],0x6\n  d7ab03:\tjmp    d7abe4 <_RNvMs3_NtNtCsfd5itqhq3Vr_8gpui_gpu8renderer8retainedNtB5_16RetainedRenderer6render+0x154>\n  d7ab08:\tmov    r13,rbp\n  d7ab0b:\tshl    r13,0x20\n  d7ab0f:\trex.WRB\n"
+        },
+        {
+          "symbol": "<gpui_canvas::canvas::Canvas>::damage_from",
+          "bytes": 2499,
+          "address": "000000000112dde0",
+          "local_sub_rsp_prologue": [
+            1272
+          ],
+          "assembly": "\n/home/user/gpui-preserved-test-binaries/7a76e2fbebe3c7a07dbc6e43d61580a8036ff074b70640030bf145bf241e8a09:     file format elf64-x86-64\n\n\nDisassembly of section .text:\n\n000000000112dde0 <_RNvMse_NtCsjaFUUaeVXI8_11gpui_canvas6canvasNtB5_6Canvas11damage_from>:\n 112dde0:\tpush   rbp\n 112dde1:\tpush   r15\n 112dde3:\tpush   r14\n 112dde5:\tpush   r13\n 112dde7:\tpush   r12\n 112dde9:\tpush   rbx\n 112ddea:\tsub    rsp,0x4f8\n 112ddf1:\tmov    rax,QWORD PTR [rdi+0x190]\n 112ddf8:\tcmp    rax,0x10000\n 112ddfe:\tjae    112e75f <_RNvMse_NtCsjaFUUaeVXI8_11gpui_canvas6canvasNtB5_6Canvas11damage_from+0x97f>\n 112de04:\tmov    rcx,QWORD PTR [rdi+0x198]\n 112de0b:\tcmp    rcx,0x10000\n 112de12:\tjae    112e75f <_RNvMse_NtCsjaFUUaeVXI8_11gpui_canvas6canvasNtB5_6Canvas11damage_from+0x97f>\n 112de18:\tmov    rdx,rcx\n 112de1b:\tshl    rdx,0x30\n 112de1f:\tmov    rbp,rax\n 112de22:\tshl    rbp,0x20\n 112de26:\tor     rbp,rdx\n 112de29:\tcmp    QWORD PTR [rsi+0x190],rax\n 112de30:\tjne    112e519 <_RNvMse_NtCsjaFUUaeVXI8_11gpui_canvas6canvasNtB5_6Canvas11damage_from+0x739>\n 112de36:\tcmp    QWORD PTR [rsi+0x198],rcx\n 112de3d:\tjne    112e519 <_RNvMse_NtCsjaFUUaeVXI8_11gpui_canvas6canvasNtB5_6Canvas11damage_from+0x739>\n 112de43:\tmovss  xmm0,DWORD PTR [rsi+0x128]\n 112de4b:\tucomiss xmm0,DWORD PTR [rdi+0x128]\n 112de52:\tjne    112e519 <_RNvMse_NtCsjaFUUaeVXI8_11gpui_canvas6canvasNtB5_6Canvas11damage_from+0x739>\n 112de58:\tjp     112e519 <_RNvMse_NtCsjaFUUaeVXI8_11gpui_canvas6canvasNtB5_6Canvas11damage_from+0x739>\n 112de5e:\t.byte 0xf\n 112de5f:\t.byte 0xb6\n"
+        },
+        {
+          "symbol": "<gpui::runtime::Runtime<zgx_native_lab::Lab>>::try_sparse_text",
+          "bytes": 2602,
+          "address": "00000000008e54b0",
+          "local_sub_rsp_prologue": [
+            408
+          ],
+          "assembly": "\n/home/user/gpui-preserved-test-binaries/7a76e2fbebe3c7a07dbc6e43d61580a8036ff074b70640030bf145bf241e8a09:     file format elf64-x86-64\n\n\nDisassembly of section .text:\n\n00000000008e54b0 <_RNvMNtNtCs4Hhyf6K4hkP_4gpui7runtime11sparse_textINtB4_7RuntimeNtCs7yVURBhbKU9_14zgx_native_lab3LabE15try_sparse_textB10_>:\n  8e54b0:\tpush   rbp\n  8e54b1:\tpush   r15\n  8e54b3:\tpush   r14\n  8e54b5:\tpush   r13\n  8e54b7:\tpush   r12\n  8e54b9:\tpush   rbx\n  8e54ba:\tsub    rsp,0x198\n  8e54c1:\tmov    rbx,rdi\n  8e54c4:\tmov    rax,QWORD PTR [rsi+0x718]\n  8e54cb:\ttest   rax,rax\n  8e54ce:\tje     8e5cb9 <_RNvMNtNtCs4Hhyf6K4hkP_4gpui7runtime11sparse_textINtB4_7RuntimeNtCs7yVURBhbKU9_14zgx_native_lab3LabE15try_sparse_textB10_+0x809>\n  8e54d4:\ttest   BYTE PTR [rax],0x1\n  8e54d7:\tje     8e5cb9 <_RNvMNtNtCs4Hhyf6K4hkP_4gpui7runtime11sparse_textINtB4_7RuntimeNtCs7yVURBhbKU9_14zgx_native_lab3LabE15try_sparse_textB10_+0x809>\n  8e54dd:\tmov    rcx,QWORD PTR [rax+0x8]\n  8e54e1:\tcmp    rcx,QWORD PTR [rsi+0x6d0]\n  8e54e8:\tjne    8e5cb9 <_RNvMNtNtCs4Hhyf6K4hkP_4gpui7runtime11sparse_textINtB4_7RuntimeNtCs7yVURBhbKU9_14zgx_native_lab3LabE15try_sparse_textB10_+0x809>\n  8e54ee:\tcmp    QWORD PTR [rsi+0x5f0],0xffffffffffffffff\n  8e54f6:\tjne    8e5cb9 <_RNvMNtNtCs4Hhyf6K4hkP_4gpui7runtime11sparse_textINtB4_7RuntimeNtCs7yVURBhbKU9_14zgx_native_lab3LabE15try_sparse_textB10_+0x809>\n  8e54fc:\tcmp    BYTE PTR [rsi+0x79c],0x0\n  8e5503:\tje     8e5cb9 <_RNvMNtNtCs4Hhyf6K4hkP_4gpui7runtime11sparse_textINtB4_7RuntimeNtCs7yVURBhbKU9_14zgx_native_lab3LabE15try_sparse_textB10_+0x809>\n  8e5509:\tmov    rcx,QWORD PTR [rsi+0x6f0]\n  8e5510:\tcmp    rcx,QWORD PTR [rsi+0x6f8]\n  8e5517:\tjne    8e5cb9 <_RNvMNtNtCs4Hhyf6K4hkP_4gpui7runtime11sparse_textINtB4_7RuntimeNtCs7yVURBhbKU9_14zgx_native_lab3LabE15try_sparse_textB10_+0x809>\n  8e551d:\tmovss  xmm0,DWORD PTR [rsi+0x794]\n  8e5525:\tucomiss xmm0,DWORD PTR [rsi+0x790]\n  8e552c:\t.byte 0xf\n  8e552d:\t.byte 0x85\n  8e552e:\txchg   DWORD PTR [rdi],eax\n"
+        },
+        {
+          "symbol": "<gpui_gpu::renderer::RendererState>::render_observed::<gpui_gpu::renderer::retained::Output, <gpui_gpu::renderer::retained::RetainedRenderer>::render::{closure#5}>",
+          "bytes": 11664,
+          "address": "0000000000d6d2f0",
+          "local_sub_rsp_prologue": [
+            1496
+          ],
+          "assembly": "\n/home/user/gpui-preserved-test-binaries/7a76e2fbebe3c7a07dbc6e43d61580a8036ff074b70640030bf145bf241e8a09:     file format elf64-x86-64\n\n\nDisassembly of section .text:\n\n0000000000d6d2f0 <_RINvMs4_NtCsfd5itqhq3Vr_8gpui_gpu8rendererNtB6_13RendererState15render_observedNtNtB6_8retained6OutputNCNvMs3_B1h_NtB1h_16RetainedRenderer6renders3_0EB8_>:\n  d6d2f0:\tpush   rbp\n  d6d2f1:\tpush   r15\n  d6d2f3:\tpush   r14\n  d6d2f5:\tpush   r13\n  d6d2f7:\tpush   r12\n  d6d2f9:\tpush   rbx\n  d6d2fa:\tsub    rsp,0x5d8\n  d6d301:\tmov    r12,QWORD PTR [r8]\n  d6d304:\tmov    rax,QWORD PTR [rsi+0x228]\n  d6d30b:\tmov    r9,QWORD PTR [rdx+0x18]\n  d6d30f:\tcmp    rax,r9\n  d6d312:\tje     d6d330 <_RINvMs4_NtCsfd5itqhq3Vr_8gpui_gpu8rendererNtB6_13RendererState15render_observedNtNtB6_8retained6OutputNCNvMs3_B1h_NtB1h_16RetainedRenderer6renders3_0EB8_+0x40>\n  d6d314:\tmov    r10,QWORD PTR [rax+0x10]\n  d6d318:\tcmp    r10,QWORD PTR [r9+0x10]\n  d6d31c:\tjne    d6d527 <_RINvMs4_NtCsfd5itqhq3Vr_8gpui_gpu8rendererNtB6_13RendererState15render_observedNtNtB6_8retained6OutputNCNvMs3_B1h_NtB1h_16RetainedRenderer6renders3_0EB8_+0x237>\n  d6d322:\tmov    rax,QWORD PTR [rax+0x18]\n  d6d326:\tcmp    rax,QWORD PTR [r9+0x18]\n  d6d32a:\tjne    d6d527 <_RINvMs4_NtCsfd5itqhq3Vr_8gpui_gpu8rendererNtB6_13RendererState15render_observedNtNtB6_8retained6OutputNCNvMs3_B1h_NtB1h_16RetainedRenderer6renders3_0EB8_+0x237>\n  d6d330:\tlea    rax,[rsi+0x330]\n  d6d337:\tmov    QWORD PTR [rsp+0x1a8],rax\n  d6d33f:\tmov    rax,QWORD PTR [rsi+0x330]\n  d6d346:\ttest   rax,rax\n  d6d349:\tje     d6d37c <_RINvMs4_NtCsfd5itqhq3Vr_8gpui_gpu8rendererNtB6_13RendererState15render_observedNtNtB6_8retained6OutputNCNvMs3_B1h_NtB1h_16RetainedRenderer6renders3_0EB8_+0x8c>\n  d6d34b:\tlock dec QWORD PTR [rax]\n  d6d34f:\tjne    d6d37c <_RINvMs4_NtCsfd5itqhq3Vr_8gpui_gpu8rendererNtB6_13RendererState15render_observedNtNtB6_8retained6OutputNCNvMs3_B1h_NtB1h_16RetainedRenderer6renders3_0EB8_+0x8c>\n  d6d351:\tmov    r14,rdi\n  d6d354:\tlea    rdi,[rsi+0x330]\n  d6d35b:\tmov    r13,rsi\n  d6d35e:\tmov    rbp,r8\n  d6d361:\tmov    r15,rdx\n  d6d364:\tmov    rbx,rcx\n  d6d367:\tcall   QWORD PTR [rip+0x6aea6b]        # 141bdd8 <_DYNAMIC+0xe38>\n  d6d36d:\tmov    rcx,rbx\n"
+        },
+        {
+          "symbol": "<gpui_gpu::renderer::RendererState>::render_observed::<gpui_gpu::renderer::retained::ScrollOutput, <gpui_gpu::renderer::retained::RetainedRenderer>::render_with_scroll::{closure#3}>",
+          "bytes": 11701,
+          "address": "0000000000d67770",
+          "local_sub_rsp_prologue": [
+            1512
+          ],
+          "assembly": "\n/home/user/gpui-preserved-test-binaries/7a76e2fbebe3c7a07dbc6e43d61580a8036ff074b70640030bf145bf241e8a09:     file format elf64-x86-64\n\n\nDisassembly of section .text:\n\n0000000000d67770 <_RINvMs4_NtCsfd5itqhq3Vr_8gpui_gpu8rendererNtB6_13RendererState15render_observedNtNtB6_8retained12ScrollOutputNCNvMs3_B1h_NtB1h_16RetainedRenderer18render_with_scrolls1_0EB8_>:\n  d67770:\tpush   rbp\n  d67771:\tpush   r15\n  d67773:\tpush   r14\n  d67775:\tpush   r13\n  d67777:\tpush   r12\n  d67779:\tpush   rbx\n  d6777a:\tsub    rsp,0x5e8\n  d67781:\tmov    r13,QWORD PTR [r8+0x8]\n  d67785:\tmov    rax,QWORD PTR [rsi+0x228]\n  d6778c:\tmov    r9,QWORD PTR [rdx+0x18]\n  d67790:\tcmp    rax,r9\n  d67793:\tje     d677b1 <_RINvMs4_NtCsfd5itqhq3Vr_8gpui_gpu8rendererNtB6_13RendererState15render_observedNtNtB6_8retained12ScrollOutputNCNvMs3_B1h_NtB1h_16RetainedRenderer18render_with_scrolls1_0EB8_+0x41>\n  d67795:\tmov    r10,QWORD PTR [rax+0x10]\n  d67799:\tcmp    r10,QWORD PTR [r9+0x10]\n  d6779d:\tjne    d679a3 <_RINvMs4_NtCsfd5itqhq3Vr_8gpui_gpu8rendererNtB6_13RendererState15render_observedNtNtB6_8retained12ScrollOutputNCNvMs3_B1h_NtB1h_16RetainedRenderer18render_with_scrolls1_0EB8_+0x233>\n  d677a3:\tmov    rax,QWORD PTR [rax+0x18]\n  d677a7:\tcmp    rax,QWORD PTR [r9+0x18]\n  d677ab:\tjne    d679a3 <_RINvMs4_NtCsfd5itqhq3Vr_8gpui_gpu8rendererNtB6_13RendererState15render_observedNtNtB6_8retained12ScrollOutputNCNvMs3_B1h_NtB1h_16RetainedRenderer18render_with_scrolls1_0EB8_+0x233>\n  d677b1:\tlea    rax,[rsi+0x330]\n  d677b8:\tmov    QWORD PTR [rsp+0x1b8],rax\n  d677c0:\tmov    rax,QWORD PTR [rsi+0x330]\n  d677c7:\ttest   rax,rax\n  d677ca:\tje     d677fd <_RINvMs4_NtCsfd5itqhq3Vr_8gpui_gpu8rendererNtB6_13RendererState15render_observedNtNtB6_8retained12ScrollOutputNCNvMs3_B1h_NtB1h_16RetainedRenderer18render_with_scrolls1_0EB8_+0x8d>\n  d677cc:\tlock dec QWORD PTR [rax]\n  d677d0:\tjne    d677fd <_RINvMs4_NtCsfd5itqhq3Vr_8gpui_gpu8rendererNtB6_13RendererState15render_observedNtNtB6_8retained12ScrollOutputNCNvMs3_B1h_NtB1h_16RetainedRenderer18render_with_scrolls1_0EB8_+0x8d>\n  d677d2:\tmov    r14,rdi\n  d677d5:\tlea    rdi,[rsi+0x330]\n  d677dc:\tmov    r12,rsi\n  d677df:\tmov    rbp,rdx\n  d677e2:\tmov    r15,r8\n  d677e5:\tmov    rbx,rcx\n  d677e8:\tcall   QWORD PTR [rip+0x6b45ea]        # 141bdd8 <_DYNAMIC+0xe38>\n  d677ee:\trex.W\n  d677ef:\t.byte 0x89\n"
+        },
+        {
+          "symbol": "<gpui_gpu::renderer::RendererState>::render_observed::<gpui_gpu::renderer::retained::RegionalOutput, <gpui_gpu::renderer::retained::RetainedRenderer>::render_regions::{closure#3}>",
+          "bytes": 11701,
+          "address": "0000000000d6a530",
+          "local_sub_rsp_prologue": [
+            1512
+          ],
+          "assembly": "\n/home/user/gpui-preserved-test-binaries/7a76e2fbebe3c7a07dbc6e43d61580a8036ff074b70640030bf145bf241e8a09:     file format elf64-x86-64\n\n\nDisassembly of section .text:\n\n0000000000d6a530 <_RINvMs4_NtCsfd5itqhq3Vr_8gpui_gpu8rendererNtB6_13RendererState15render_observedNtNtB6_8retained14RegionalOutputNCNvMs3_B1h_NtB1h_16RetainedRenderer14render_regionss1_0EB8_>:\n  d6a530:\tpush   rbp\n  d6a531:\tpush   r15\n  d6a533:\tpush   r14\n  d6a535:\tpush   r13\n  d6a537:\tpush   r12\n  d6a539:\tpush   rbx\n  d6a53a:\tsub    rsp,0x5e8\n  d6a541:\tmov    r13,QWORD PTR [r8+0x8]\n  d6a545:\tmov    rax,QWORD PTR [rsi+0x228]\n  d6a54c:\tmov    r9,QWORD PTR [rdx+0x18]\n  d6a550:\tcmp    rax,r9\n  d6a553:\tje     d6a571 <_RINvMs4_NtCsfd5itqhq3Vr_8gpui_gpu8rendererNtB6_13RendererState15render_observedNtNtB6_8retained14RegionalOutputNCNvMs3_B1h_NtB1h_16RetainedRenderer14render_regionss1_0EB8_+0x41>\n  d6a555:\tmov    r10,QWORD PTR [rax+0x10]\n  d6a559:\tcmp    r10,QWORD PTR [r9+0x10]\n  d6a55d:\tjne    d6a763 <_RINvMs4_NtCsfd5itqhq3Vr_8gpui_gpu8rendererNtB6_13RendererState15render_observedNtNtB6_8retained14RegionalOutputNCNvMs3_B1h_NtB1h_16RetainedRenderer14render_regionss1_0EB8_+0x233>\n  d6a563:\tmov    rax,QWORD PTR [rax+0x18]\n  d6a567:\tcmp    rax,QWORD PTR [r9+0x18]\n  d6a56b:\tjne    d6a763 <_RINvMs4_NtCsfd5itqhq3Vr_8gpui_gpu8rendererNtB6_13RendererState15render_observedNtNtB6_8retained14RegionalOutputNCNvMs3_B1h_NtB1h_16RetainedRenderer14render_regionss1_0EB8_+0x233>\n  d6a571:\tlea    rax,[rsi+0x330]\n  d6a578:\tmov    QWORD PTR [rsp+0x1b8],rax\n  d6a580:\tmov    rax,QWORD PTR [rsi+0x330]\n  d6a587:\ttest   rax,rax\n  d6a58a:\tje     d6a5bd <_RINvMs4_NtCsfd5itqhq3Vr_8gpui_gpu8rendererNtB6_13RendererState15render_observedNtNtB6_8retained14RegionalOutputNCNvMs3_B1h_NtB1h_16RetainedRenderer14render_regionss1_0EB8_+0x8d>\n  d6a58c:\tlock dec QWORD PTR [rax]\n  d6a590:\tjne    d6a5bd <_RINvMs4_NtCsfd5itqhq3Vr_8gpui_gpu8rendererNtB6_13RendererState15render_observedNtNtB6_8retained14RegionalOutputNCNvMs3_B1h_NtB1h_16RetainedRenderer14render_regionss1_0EB8_+0x8d>\n  d6a592:\tmov    r14,rdi\n  d6a595:\tlea    rdi,[rsi+0x330]\n  d6a59c:\tmov    r12,rsi\n  d6a59f:\tmov    rbp,rdx\n  d6a5a2:\tmov    r15,r8\n  d6a5a5:\tmov    rbx,rcx\n  d6a5a8:\tcall   QWORD PTR [rip+0x6b182a]        # 141bdd8 <_DYNAMIC+0xe38>\n  d6a5ae:\trex.W\n  d6a5af:\t.byte 0x89\n"
+        },
+        {
+          "symbol": "<gpui::runtime::Runtime<zgx_native_lab::Lab>>::present_walk",
+          "bytes": 26880,
+          "address": "0000000000906d30",
+          "local_sub_rsp_prologue": [
+            4096,
+            200
+          ],
+          "assembly": "\n/home/user/gpui-preserved-test-binaries/7a76e2fbebe3c7a07dbc6e43d61580a8036ff074b70640030bf145bf241e8a09:     file format elf64-x86-64\n\n\nDisassembly of section .text:\n\n0000000000906d30 <_RNvMsv_NtCs4Hhyf6K4hkP_4gpui7runtimeINtB5_7RuntimeNtCs7yVURBhbKU9_14zgx_native_lab3LabE12present_walkBO_>:\n  906d30:\tpush   rbp\n  906d31:\tpush   r15\n  906d33:\tpush   r14\n  906d35:\tpush   r13\n  906d37:\tpush   r12\n  906d39:\tpush   rbx\n  906d3a:\tsub    rsp,0x1000\n  906d41:\tmov    QWORD PTR [rsp],0x0\n  906d49:\tsub    rsp,0xc8\n  906d50:\tmov    QWORD PTR [rsp+0x38],rdi\n  906d55:\tmov    BYTE PTR [rsp+0x4b],dl\n  906d59:\tmov    QWORD PTR [rsp+0x30],rsi\n  906d5e:\tmov    r12,QWORD PTR [rsi+0x620]\n  906d65:\tmov    QWORD PTR [rsp+0x1d0],r12\n  906d6d:\tinc    r12\n  906d70:\tje     90bab8 <_RNvMsv_NtCs4Hhyf6K4hkP_4gpui7runtimeINtB5_7RuntimeNtCs7yVURBhbKU9_14zgx_native_lab3LabE12present_walkBO_+0x4d88>\n  906d76:\tmov    ebp,ecx\n  906d78:\tmov    QWORD PTR [rsp+0x70],r8\n  906d7d:\tmov    rcx,QWORD PTR [rsp+0x30]\n  906d82:\tmov    r15,QWORD PTR [rcx+0x618]\n  906d89:\tmov    rsi,QWORD PTR [rcx+0x6f8]\n  906d90:\tmov    rdx,rsi\n  906d93:\tshr    rdx,0x20\n  906d97:\tmovss  xmm0,DWORD PTR [rcx+0x790]\n  906d9f:\tmovaps XMMWORD PTR [rsp+0x560],xmm0\n  906da7:\tmov    eax,DWORD PTR [rcx+0x190]\n  906dad:\trex.W\n  906dae:\t.byte 0x8b\n  906daf:\t.byte 0x89\n"
+        }
+      ]
+    },
+    "candidate": {
+      "artifact": {
+        "path": "/home/user/gpui-mask-lattice-target/release/examples/zgx_native_lab",
+        "sha256": "0047ca77f2b7a694fc148612f4b1c03e03eec801b0382dd0939d5756d08c8d29",
+        "preserved": "/home/user/gpui-preserved-test-binaries/0047ca77f2b7a694fc148612f4b1c03e03eec801b0382dd0939d5756d08c8d29",
+        "bytes": 26391352,
+        "executed": false,
+        "cargo": {
+          "reason": "compiler-artifact",
+          "package_id": "path+file:///home/user/gpui-mask-lattice-lab/reactivity/crates/gpui#0.1.0",
+          "manifest_path": "/home/user/gpui-mask-lattice-lab/reactivity/crates/gpui/Cargo.toml",
+          "target": {
+            "kind": [
+              "example"
+            ],
+            "crate_types": [
+              "bin"
+            ],
+            "name": "zgx_native_lab",
+            "src_path": "/home/user/gpui-mask-lattice-lab/reactivity/crates/gpui/examples/zgx_native_lab.rs",
+            "edition": "2024",
+            "required-features": [
+              "native-core"
+            ],
+            "doc": false,
+            "doctest": false,
+            "test": false
+          },
+          "profile": {
+            "opt_level": "3",
+            "debuginfo": 0,
+            "debug_assertions": false,
+            "overflow_checks": false,
+            "test": false
+          },
+          "features": [
+            "accessibility",
+            "default",
+            "native",
+            "native-core",
+            "simd",
+            "x11",
+            "x11-minimal"
+          ],
+          "filenames": [
+            "/home/user/gpui-mask-lattice-target/release/examples/zgx_native_lab"
+          ],
+          "executable": "/home/user/gpui-mask-lattice-target/release/examples/zgx_native_lab",
+          "fresh": false
+        }
+      },
+      "functions": [
+        {
+          "symbol": "<gpui_gpu::renderer::GpuContext>::submit_regions",
+          "bytes": 592,
+          "address": "0000000000d72750",
+          "local_sub_rsp_prologue": [
+            1320
+          ],
+          "assembly": "\n/home/user/gpui-preserved-test-binaries/0047ca77f2b7a694fc148612f4b1c03e03eec801b0382dd0939d5756d08c8d29:     file format elf64-x86-64\n\n\nDisassembly of section .text:\n\n0000000000d72750 <_RNvMs3_NtCsfd5itqhq3Vr_8gpui_gpu8rendererNtB5_10GpuContext14submit_regions>:\n  d72750:\tpush   rbp\n  d72751:\tpush   r15\n  d72753:\tpush   r14\n  d72755:\tpush   r13\n  d72757:\tpush   r12\n  d72759:\tpush   rbx\n  d7275a:\tsub    rsp,0x528\n  d72761:\tmov    r15,rcx\n  d72764:\tmov    r12,rdx\n  d72767:\tmov    r14,rsi\n  d7276a:\tmov    rbx,rdi\n  d7276d:\tlea    rdx,[rip+0x6657e4]        # 13d7f58 <anon.255c8ba72969252177b3101bd34b486f.6.llvm.3103484408056536695+0x1e0>\n  d72774:\tlea    r13,[rsp+0x10]\n  d72779:\tmov    rdi,r13\n  d7277c:\tmov    rsi,rbx\n  d7277f:\tcall   QWORD PTR [rip+0x6aca23]        # 141f1a8 <_DYNAMIC+0x39f8>\n  d72785:\tmov    rax,QWORD PTR [r14]\n  d72788:\tmov    DWORD PTR [rsp+0x98],0x0\n  d72793:\tmov    BYTE PTR [rsp+0xa0],0x1\n  d7279b:\tmov    DWORD PTR [rsp+0xc8],0x0\n  d727a6:\tmov    QWORD PTR [rsp+0xd0],rax\n  d727ae:\tmov    QWORD PTR [rsp+0xd8],0x0\n  d727ba:\tlea    rax,[rip+0xffffffffff4fb300]        # 26dac1 <_RNvNtCs9Ma7xi4lEBD_12tracing_core10dispatcher13NO_SUBSCRIBER+0x189>\n  d727c1:\tmov    QWORD PTR [rsp+0x78],rax\n  d727c6:\trex.W\n  d727c7:\t.byte 0xc7\n  d727c8:\ttest   BYTE PTR [rax+rax*4],ah\n  d727cb:\tadd    BYTE PTR [rax],al\n  d727cd:\tadd    BYTE PTR [rdx],dl\n\t...\n"
+        },
+        {
+          "symbol": "<gpui_gpu::renderer::GpuContext>::submit",
+          "bytes": 636,
+          "address": "0000000000d729a0",
+          "local_sub_rsp_prologue": [
+            1344
+          ],
+          "assembly": "\n/home/user/gpui-preserved-test-binaries/0047ca77f2b7a694fc148612f4b1c03e03eec801b0382dd0939d5756d08c8d29:     file format elf64-x86-64\n\n\nDisassembly of section .text:\n\n0000000000d729a0 <_RNvMs3_NtCsfd5itqhq3Vr_8gpui_gpu8rendererNtB5_10GpuContext6submit>:\n  d729a0:\tpush   rbp\n  d729a1:\tpush   r15\n  d729a3:\tpush   r14\n  d729a5:\tpush   r12\n  d729a7:\tpush   rbx\n  d729a8:\tsub    rsp,0x540\n  d729af:\tmov    r15,rdx\n  d729b2:\tmov    r14,rsi\n  d729b5:\tmov    rbx,rdi\n  d729b8:\tlea    rdx,[rip+0x665551]        # 13d7f10 <anon.255c8ba72969252177b3101bd34b486f.6.llvm.3103484408056536695+0x198>\n  d729bf:\tlea    rdi,[rsp+0x8]\n  d729c4:\tmov    rsi,rbx\n  d729c7:\tcall   QWORD PTR [rip+0x6ac7db]        # 141f1a8 <_DYNAMIC+0x39f8>\n  d729cd:\tmovzx  ebp,WORD PTR [r14+0x18]\n  d729d2:\tmov    r12,QWORD PTR [r14+0x1a]\n  d729d6:\ttest   bpl,0x1\n  d729da:\tje     d72a10 <_RNvMs3_NtCsfd5itqhq3Vr_8gpui_gpu8rendererNtB5_10GpuContext6submit+0x70>\n  d729dc:\tmov    rax,r12\n  d729df:\tshr    rax,0x20\n  d729e3:\tcmp    r12w,ax\n  d729e7:\tje     d72b89 <_RNvMs3_NtCsfd5itqhq3Vr_8gpui_gpu8rendererNtB5_10GpuContext6submit+0x1e9>\n  d729ed:\tmov    rax,r12\n  d729f0:\tshr    rax,0x30\n  d729f4:\tmov    ecx,r12d\n  d729f7:\tshr    ecx,0x10\n  d729fa:\tcmp    cx,ax\n  d729fd:\tje     d72b89 <_RNvMs3_NtCsfd5itqhq3Vr_8gpui_gpu8rendererNtB5_10GpuContext6submit+0x1e9>\n  d72a03:\tmov    rax,QWORD PTR [r14]\n  d72a06:\tmov    cl,0x1\n  d72a08:\tcmp    bp,0x1\n  d72a0c:\tjne    d72a13 <_RNvMs3_NtCsfd5itqhq3Vr_8gpui_gpu8rendererNtB5_10GpuContext6submit+0x73>\n  d72a0e:\tjmp    d72a28 <_RNvMs3_NtCsfd5itqhq3Vr_8gpui_gpu8rendererNtB5_10GpuContext6submit+0x88>\n  d72a10:\tmov    rax,QWORD PTR [r14]\n  d72a13:\txorps  xmm0,xmm0\n  d72a16:\tmovups XMMWORD PTR [rsp+0xa8],xmm0\n  d72a1e:\t.byte 0xf\n  d72a1f:\t.byte 0x11\n"
+        },
+        {
+          "symbol": "<gpui_gpu::renderer::retained::RetainedRenderer>::render_regions",
+          "bytes": 663,
+          "address": "0000000000d79f50",
+          "local_sub_rsp_prologue": [
+            120
+          ],
+          "assembly": "\n/home/user/gpui-preserved-test-binaries/0047ca77f2b7a694fc148612f4b1c03e03eec801b0382dd0939d5756d08c8d29:     file format elf64-x86-64\n\n\nDisassembly of section .text:\n\n0000000000d79f50 <_RNvMs3_NtNtCsfd5itqhq3Vr_8gpui_gpu8renderer8retainedNtB5_16RetainedRenderer14render_regions>:\n  d79f50:\tpush   rbp\n  d79f51:\tpush   r15\n  d79f53:\tpush   r14\n  d79f55:\tpush   r13\n  d79f57:\tpush   r12\n  d79f59:\tpush   rbx\n  d79f5a:\tsub    rsp,0x78\n  d79f5e:\tmov    rbx,rdi\n  d79f61:\tlea    rbp,[r8+0x8]\n  d79f65:\tmov    rax,QWORD PTR [r8+0x8]\n  d79f69:\tmov    rdi,QWORD PTR [r8+0x10]\n  d79f6d:\tcmp    rdi,0x1\n  d79f71:\tsete   r9b\n  d79f75:\tcmp    QWORD PTR [r8],0x0\n  d79f79:\tsets   r10b\n  d79f7d:\tcmovns rbp,rax\n  d79f81:\tor     r10b,r9b\n  d79f84:\tcmp    r10b,0x1\n  d79f88:\tjne    d79fad <_RNvMs3_NtNtCsfd5itqhq3Vr_8gpui_gpu8renderer8retainedNtB5_16RetainedRenderer14render_regions+0x5d>\n  d79f8a:\tmov    rax,QWORD PTR [rbp+0x0]\n  d79f8e:\tmov    QWORD PTR [rsp+0x22],rax\n  d79f93:\tmov    WORD PTR [rsp+0x20],0x1\n  d79f9a:\tlea    r8,[rsp+0x20]\n  d79f9f:\tmov    rdi,rbx\n  d79fa2:\tcall   QWORD PTR [rip+0x6a33c0]        # 141d368 <_DYNAMIC+0x1bb8>\n  d79fa8:\tjmp    d7a0c5 <_RNvMs3_NtNtCsfd5itqhq3Vr_8gpui_gpu8renderer8retainedNtB5_16RetainedRenderer14render_regions+0x175>\n  d79fad:\tmov    r14d,DWORD PTR [rdx+0x28]\n  d79fb1:\tmov    r15d,DWORD PTR [rdx+0x2c]\n  d79fb5:\tmov    r9,QWORD PTR [rsi+0x378]\n  d79fbc:\ttest   r9,r9\n  d79fbf:\tje     d79fe0 <_RNvMs3_NtNtCsfd5itqhq3Vr_8gpui_gpu8renderer8retainedNtB5_16RetainedRenderer14render_regions+0x90>\n  d79fc1:\tmovzx  r12d,BYTE PTR [r9+0x70]\n  d79fc6:\tcmp    QWORD PTR [rsi+0x330],0x0\n  d79fce:\trex.B\n  d79fcf:\t.byte 0xf\n"
+        },
+        {
+          "symbol": "<gpui_gpu::renderer::GpuContext>::submit_scroll",
+          "bytes": 733,
+          "address": "0000000000d71aa0",
+          "local_sub_rsp_prologue": [
+            1512
+          ],
+          "assembly": "\n/home/user/gpui-preserved-test-binaries/0047ca77f2b7a694fc148612f4b1c03e03eec801b0382dd0939d5756d08c8d29:     file format elf64-x86-64\n\n\nDisassembly of section .text:\n\n0000000000d71aa0 <_RNvMNtNtCsfd5itqhq3Vr_8gpui_gpu8renderer13scroll_outputNtB4_10GpuContext13submit_scroll>:\n  d71aa0:\tpush   rbp\n  d71aa1:\tpush   r15\n  d71aa3:\tpush   r14\n  d71aa5:\tpush   r13\n  d71aa7:\tpush   r12\n  d71aa9:\tpush   rbx\n  d71aaa:\tsub    rsp,0x5e8\n  d71ab1:\tmov    r14,QWORD PTR [rsi+0x8]\n  d71ab5:\ttest   r14,r14\n  d71ab8:\tje     d71d33 <_RNvMNtNtCsfd5itqhq3Vr_8gpui_gpu8renderer13scroll_outputNtB4_10GpuContext13submit_scroll+0x293>\n  d71abe:\tmov    r12,rcx\n  d71ac1:\tmov    r13,rdx\n  d71ac4:\tmov    rbp,rsi\n  d71ac7:\tmov    rbx,rdi\n  d71aca:\tmov    rax,QWORD PTR [rsi+0x10]\n  d71ace:\tmov    QWORD PTR [rsp+0x10],rax\n  d71ad3:\tlea    rdx,[rip+0x666436]        # 13d7f10 <anon.255c8ba72969252177b3101bd34b486f.6.llvm.3103484408056536695+0x198>\n  d71ada:\tlea    r15,[rsp+0x60]\n  d71adf:\tmov    rdi,r15\n  d71ae2:\tmov    rsi,rbx\n  d71ae5:\tcall   QWORD PTR [rip+0x6ad6bd]        # 141f1a8 <_DYNAMIC+0x39f8>\n  d71aeb:\tmov    rdi,r14\n  d71aee:\tmov    rsi,r15\n  d71af1:\tmov    rdx,r12\n  d71af4:\tcall   d7b6c0 <_RNvMs4_NtNtCsfd5itqhq3Vr_8gpui_gpu8renderer8retainedNtB5_7Backing6scroll>\n  d71af9:\tlea    rdi,[rsp+0x1a0]\n  d71b01:\tmov    rsi,r12\n  d71b04:\tcall   QWORD PTR [rip+0x6ad6a6]        # 141f1b0 <_DYNAMIC+0x3a00>\n  d71b0a:\tlea    rdi,[rsp+0x80]\n  d71b12:\tlea    rsi,[rsp+0x1a0]\n  d71b1a:\tcall   d704b0 <_RINvMsg_NtNtNtCsaifZ2emd9Uo_4core4iter8adapters7flattenINtB6_13FlattenCompatINtNtB8_3map3MapINtNtNtBc_5slice4iter4IterNtNtCsjaFUUaeVXI8_11gpui_canvas6damage12DamageRegionENCNvMNtNtB1W_6canvas6scrollNtB2O_10ScrollCopy7repairs0EINtNtNtBc_5array4iter8IntoIterB1S_Kj4_EE13iter_try_folduNCINvNvXsi_B6_IBS_ppENtNtNtBa_6traits8iterator8Iterator8try_fold7flattenB3C_uINtNtNtBc_3ops12control_flow11ControlFlowB1S_ENCINvNvB4R_4find5checkB1S_QNCB2L_s_0E0E0B5L_ECsfd5itqhq3Vr_8gpui_gpu>\n  d71b1f:\t.byte 0x80\n"
+        },
+        {
+          "symbol": "gpui_gpu::renderer::mask_lattice::lowered_mask_rect",
+          "bytes": 1086,
+          "address": "0000000000d75fc0",
+          "local_sub_rsp_prologue": [
+            96
+          ],
+          "assembly": "\n/home/user/gpui-preserved-test-binaries/0047ca77f2b7a694fc148612f4b1c03e03eec801b0382dd0939d5756d08c8d29:     file format elf64-x86-64\n\n\nDisassembly of section .text:\n\n0000000000d75fc0 <_RNvNtNtCsfd5itqhq3Vr_8gpui_gpu8renderer12mask_lattice17lowered_mask_rect>:\n  d75fc0:\tpush   r15\n  d75fc2:\tpush   r14\n  d75fc4:\tpush   rbx\n  d75fc5:\tsub    rsp,0x60\n  d75fc9:\tmov    rax,rdi\n  d75fcc:\txor    ebx,ebx\n  d75fce:\tcmp    BYTE PTR [rsi],0x3\n  d75fd1:\tjne    d7606c <_RNvNtNtCsfd5itqhq3Vr_8gpui_gpu8renderer12mask_lattice17lowered_mask_rect+0xac>\n  d75fd7:\tmovupd xmm0,XMMWORD PTR [rsi+0x48]\n  d75fdc:\tmovupd xmm1,XMMWORD PTR [rsi+0x58]\n  d75fe1:\txorpd  xmm2,xmm2\n  d75fe5:\tmovhpd xmm2,QWORD PTR [rip+0xffffffffff3da0a3]        # 150090 <anon.f26c5c9985c537994d41ebcb3f777c91.157.llvm.3689105597594331238+0x10>\n  d75fed:\tcmpneqpd xmm2,xmm1\n  d75ff2:\tmovsd  xmm1,QWORD PTR [rip+0xffffffffff3da096]        # 150090 <anon.f26c5c9985c537994d41ebcb3f777c91.157.llvm.3689105597594331238+0x10>\n  d75ffa:\tcmpneqpd xmm1,xmm0\n  d75fff:\tshufps xmm1,xmm2,0x88\n  d76003:\tmovmskps ecx,xmm1\n  d76006:\ttest   ecx,ecx\n  d76008:\tjne    d7606c <_RNvNtNtCsfd5itqhq3Vr_8gpui_gpu8renderer12mask_lattice17lowered_mask_rect+0xac>\n  d7600a:\tmovss  xmm2,DWORD PTR [rsi+0x40]\n  d7600f:\tcvtss2sd xmm5,xmm2\n  d76013:\tmovsd  xmm0,QWORD PTR [rsi+0x28]\n  d76018:\tunpcklps xmm0,XMMWORD PTR [rip+0xffffffffff3d4521]        # 14a540 <anon.9e1870d4a4e2ffce1973a5d62f071879.385.llvm.13353404325187366010+0x3a0>\n  d7601f:\tsubpd  xmm0,XMMWORD PTR [rip+0xffffffffff3d3689]        # 1496b0 <GCC_except_table0+0xb4>\n  d76027:\tmovapd xmm1,xmm0\n  d7602b:\tunpckhpd xmm1,xmm0\n  d7602f:\taddsd  xmm1,xmm0\n  d76033:\tucomisd xmm5,xmm1\n  d76037:\tjne    d7606c <_RNvNtNtCsfd5itqhq3Vr_8gpui_gpu8renderer12mask_lattice17lowered_mask_rect+0xac>\n  d76039:\tjp     d7606c <_RNvNtNtCsfd5itqhq3Vr_8gpui_gpu8renderer12mask_lattice17lowered_mask_rect+0xac>\n  d7603b:\tmovss  xmm3,DWORD PTR [rsi+0x44]\n"
+        },
+        {
+          "symbol": "<gpui_gpu::renderer::retained::RetainedRenderer>::render_with_scroll",
+          "bytes": 1851,
+          "address": "0000000000d7a1f0",
+          "local_sub_rsp_prologue": [
+            264
+          ],
+          "assembly": "\n/home/user/gpui-preserved-test-binaries/0047ca77f2b7a694fc148612f4b1c03e03eec801b0382dd0939d5756d08c8d29:     file format elf64-x86-64\n\n\nDisassembly of section .text:\n\n0000000000d7a1f0 <_RNvMs3_NtNtCsfd5itqhq3Vr_8gpui_gpu8renderer8retainedNtB5_16RetainedRenderer18render_with_scroll>:\n  d7a1f0:\tpush   rbp\n  d7a1f1:\tpush   r15\n  d7a1f3:\tpush   r14\n  d7a1f5:\tpush   r13\n  d7a1f7:\tpush   r12\n  d7a1f9:\tpush   rbx\n  d7a1fa:\tsub    rsp,0x108\n  d7a201:\ttest   r9,r9\n  d7a204:\tje     d7a237 <_RNvMs3_NtNtCsfd5itqhq3Vr_8gpui_gpu8renderer8retainedNtB5_16RetainedRenderer18render_with_scroll+0x47>\n  d7a206:\tmov    ebp,DWORD PTR [rdx+0x28]\n  d7a209:\tmov    r12d,DWORD PTR [rdx+0x2c]\n  d7a20d:\tmov    rax,QWORD PTR [rsi+0x378]\n  d7a214:\ttest   rax,rax\n  d7a217:\tje     d7a248 <_RNvMs3_NtNtCsfd5itqhq3Vr_8gpui_gpu8renderer8retainedNtB5_16RetainedRenderer18render_with_scroll+0x58>\n  d7a219:\tmovzx  r13d,BYTE PTR [rax+0x70]\n  d7a21e:\tcmp    QWORD PTR [rsi+0x330],0x0\n  d7a226:\tsete   r10b\n  d7a22a:\txor    r13b,0x1\n  d7a22e:\tor     r13b,r10b\n  d7a231:\tmov    BYTE PTR [rax+0x70],0x0\n  d7a235:\tjmp    d7a24b <_RNvMs3_NtNtCsfd5itqhq3Vr_8gpui_gpu8renderer8retainedNtB5_16RetainedRenderer18render_with_scroll+0x5b>\n  d7a237:\tmov    rbx,rdi\n  d7a23a:\tcall   QWORD PTR [rip+0x6a3128]        # 141d368 <_DYNAMIC+0x1bb8>\n  d7a240:\tmov    rax,rbx\n  d7a243:\tjmp    d7a84a <_RNvMs3_NtNtCsfd5itqhq3Vr_8gpui_gpu8renderer8retainedNtB5_16RetainedRenderer18render_with_scroll+0x65a>\n  d7a248:\tmov    r13b,0x1\n  d7a24b:\tmov    eax,0x4000\n  d7a250:\tmov    r10d,0x4000\n  d7a256:\tsub    r10d,ebp\n  d7a259:\tsub    eax,r12d\n  d7a25c:\tor     eax,r10d\n  d7a25f:\tcmp    eax,0x3fff\n  d7a264:\tja     d7a275 <_RNvMs3_NtNtCsfd5itqhq3Vr_8gpui_gpu8renderer8retainedNtB5_16RetainedRenderer18render_with_scroll+0x85>\n  d7a266:\tmov    rax,r12\n  d7a269:\timul   rax,rbp\n  d7a26d:\trex.W\n  d7a26e:\t.byte 0x3d\n\t...\n"
+        },
+        {
+          "symbol": "<gpui_gpu::renderer::retained::RetainedRenderer>::render",
+          "bytes": 2153,
+          "address": "0000000000d7aa90",
+          "local_sub_rsp_prologue": [
+            664
+          ],
+          "assembly": "\n/home/user/gpui-preserved-test-binaries/0047ca77f2b7a694fc148612f4b1c03e03eec801b0382dd0939d5756d08c8d29:     file format elf64-x86-64\n\n\nDisassembly of section .text:\n\n0000000000d7aa90 <_RNvMs3_NtNtCsfd5itqhq3Vr_8gpui_gpu8renderer8retainedNtB5_16RetainedRenderer6render>:\n  d7aa90:\tpush   rbp\n  d7aa91:\tpush   r15\n  d7aa93:\tpush   r14\n  d7aa95:\tpush   r13\n  d7aa97:\tpush   r12\n  d7aa99:\tpush   rbx\n  d7aa9a:\tsub    rsp,0x298\n  d7aaa1:\tmov    rbx,rsi\n  d7aaa4:\tmov    r14d,DWORD PTR [rdx+0x28]\n  d7aaa8:\tmov    ebp,DWORD PTR [rdx+0x2c]\n  d7aaab:\tmov    r12,QWORD PTR [rsi+0x378]\n  d7aab2:\tmov    rsi,rcx\n  d7aab5:\ttest   r12,r12\n  d7aab8:\tje     d7aad3 <_RNvMs3_NtNtCsfd5itqhq3Vr_8gpui_gpu8renderer8retainedNtB5_16RetainedRenderer6render+0x43>\n  d7aaba:\tcmp    QWORD PTR [rbx+0x330],0x0\n  d7aac2:\tsetne  r15b\n  d7aac6:\tand    r15b,BYTE PTR [r12+0x70]\n  d7aacb:\tmov    BYTE PTR [r12+0x70],0x0\n  d7aad1:\tjmp    d7aad6 <_RNvMs3_NtNtCsfd5itqhq3Vr_8gpui_gpu8renderer8retainedNtB5_16RetainedRenderer6render+0x46>\n  d7aad3:\txor    r15d,r15d\n  d7aad6:\tmov    eax,0x4000\n  d7aadb:\tmov    ecx,0x4000\n  d7aae0:\tsub    ecx,r14d\n  d7aae3:\tsub    eax,ebp\n  d7aae5:\tor     eax,ecx\n  d7aae7:\tcmp    eax,0x3fff\n  d7aaec:\tja     d7aafd <_RNvMs3_NtNtCsfd5itqhq3Vr_8gpui_gpu8renderer8retainedNtB5_16RetainedRenderer6render+0x6d>\n  d7aaee:\tmov    rax,rbp\n  d7aaf1:\timul   rax,r14\n  d7aaf5:\tcmp    rax,0x1000000\n  d7aafb:\tjbe    d7ab08 <_RNvMs3_NtNtCsfd5itqhq3Vr_8gpui_gpu8renderer8retainedNtB5_16RetainedRenderer6render+0x78>\n  d7aafd:\tmov    DWORD PTR [rdi],0x6\n  d7ab03:\tjmp    d7abe4 <_RNvMs3_NtNtCsfd5itqhq3Vr_8gpui_gpu8renderer8retainedNtB5_16RetainedRenderer6render+0x154>\n  d7ab08:\tmov    r13,rbp\n  d7ab0b:\tshl    r13,0x20\n  d7ab0f:\trex.WRB\n"
+        },
+        {
+          "symbol": "<gpui_canvas::canvas::Canvas>::damage_from",
+          "bytes": 2499,
+          "address": "000000000112e5f0",
+          "local_sub_rsp_prologue": [
+            1272
+          ],
+          "assembly": "\n/home/user/gpui-preserved-test-binaries/0047ca77f2b7a694fc148612f4b1c03e03eec801b0382dd0939d5756d08c8d29:     file format elf64-x86-64\n\n\nDisassembly of section .text:\n\n000000000112e5f0 <_RNvMse_NtCsjaFUUaeVXI8_11gpui_canvas6canvasNtB5_6Canvas11damage_from>:\n 112e5f0:\tpush   rbp\n 112e5f1:\tpush   r15\n 112e5f3:\tpush   r14\n 112e5f5:\tpush   r13\n 112e5f7:\tpush   r12\n 112e5f9:\tpush   rbx\n 112e5fa:\tsub    rsp,0x4f8\n 112e601:\tmov    rax,QWORD PTR [rdi+0x190]\n 112e608:\tcmp    rax,0x10000\n 112e60e:\tjae    112ef6f <_RNvMse_NtCsjaFUUaeVXI8_11gpui_canvas6canvasNtB5_6Canvas11damage_from+0x97f>\n 112e614:\tmov    rcx,QWORD PTR [rdi+0x198]\n 112e61b:\tcmp    rcx,0x10000\n 112e622:\tjae    112ef6f <_RNvMse_NtCsjaFUUaeVXI8_11gpui_canvas6canvasNtB5_6Canvas11damage_from+0x97f>\n 112e628:\tmov    rdx,rcx\n 112e62b:\tshl    rdx,0x30\n 112e62f:\tmov    rbp,rax\n 112e632:\tshl    rbp,0x20\n 112e636:\tor     rbp,rdx\n 112e639:\tcmp    QWORD PTR [rsi+0x190],rax\n 112e640:\tjne    112ed29 <_RNvMse_NtCsjaFUUaeVXI8_11gpui_canvas6canvasNtB5_6Canvas11damage_from+0x739>\n 112e646:\tcmp    QWORD PTR [rsi+0x198],rcx\n 112e64d:\tjne    112ed29 <_RNvMse_NtCsjaFUUaeVXI8_11gpui_canvas6canvasNtB5_6Canvas11damage_from+0x739>\n 112e653:\tmovss  xmm0,DWORD PTR [rsi+0x128]\n 112e65b:\tucomiss xmm0,DWORD PTR [rdi+0x128]\n 112e662:\tjne    112ed29 <_RNvMse_NtCsjaFUUaeVXI8_11gpui_canvas6canvasNtB5_6Canvas11damage_from+0x739>\n 112e668:\tjp     112ed29 <_RNvMse_NtCsjaFUUaeVXI8_11gpui_canvas6canvasNtB5_6Canvas11damage_from+0x739>\n 112e66e:\t.byte 0xf\n 112e66f:\t.byte 0xb6\n"
+        },
+        {
+          "symbol": "<gpui::runtime::Runtime<zgx_native_lab::Lab>>::try_sparse_text",
+          "bytes": 2602,
+          "address": "00000000008e5780",
+          "local_sub_rsp_prologue": [
+            408
+          ],
+          "assembly": "\n/home/user/gpui-preserved-test-binaries/0047ca77f2b7a694fc148612f4b1c03e03eec801b0382dd0939d5756d08c8d29:     file format elf64-x86-64\n\n\nDisassembly of section .text:\n\n00000000008e5780 <_RNvMNtNtCs4Hhyf6K4hkP_4gpui7runtime11sparse_textINtB4_7RuntimeNtCs7yVURBhbKU9_14zgx_native_lab3LabE15try_sparse_textB10_>:\n  8e5780:\tpush   rbp\n  8e5781:\tpush   r15\n  8e5783:\tpush   r14\n  8e5785:\tpush   r13\n  8e5787:\tpush   r12\n  8e5789:\tpush   rbx\n  8e578a:\tsub    rsp,0x198\n  8e5791:\tmov    rbx,rdi\n  8e5794:\tmov    rax,QWORD PTR [rsi+0x718]\n  8e579b:\ttest   rax,rax\n  8e579e:\tje     8e5f89 <_RNvMNtNtCs4Hhyf6K4hkP_4gpui7runtime11sparse_textINtB4_7RuntimeNtCs7yVURBhbKU9_14zgx_native_lab3LabE15try_sparse_textB10_+0x809>\n  8e57a4:\ttest   BYTE PTR [rax],0x1\n  8e57a7:\tje     8e5f89 <_RNvMNtNtCs4Hhyf6K4hkP_4gpui7runtime11sparse_textINtB4_7RuntimeNtCs7yVURBhbKU9_14zgx_native_lab3LabE15try_sparse_textB10_+0x809>\n  8e57ad:\tmov    rcx,QWORD PTR [rax+0x8]\n  8e57b1:\tcmp    rcx,QWORD PTR [rsi+0x6d0]\n  8e57b8:\tjne    8e5f89 <_RNvMNtNtCs4Hhyf6K4hkP_4gpui7runtime11sparse_textINtB4_7RuntimeNtCs7yVURBhbKU9_14zgx_native_lab3LabE15try_sparse_textB10_+0x809>\n  8e57be:\tcmp    QWORD PTR [rsi+0x5f0],0xffffffffffffffff\n  8e57c6:\tjne    8e5f89 <_RNvMNtNtCs4Hhyf6K4hkP_4gpui7runtime11sparse_textINtB4_7RuntimeNtCs7yVURBhbKU9_14zgx_native_lab3LabE15try_sparse_textB10_+0x809>\n  8e57cc:\tcmp    BYTE PTR [rsi+0x79c],0x0\n  8e57d3:\tje     8e5f89 <_RNvMNtNtCs4Hhyf6K4hkP_4gpui7runtime11sparse_textINtB4_7RuntimeNtCs7yVURBhbKU9_14zgx_native_lab3LabE15try_sparse_textB10_+0x809>\n  8e57d9:\tmov    rcx,QWORD PTR [rsi+0x6f0]\n  8e57e0:\tcmp    rcx,QWORD PTR [rsi+0x6f8]\n  8e57e7:\tjne    8e5f89 <_RNvMNtNtCs4Hhyf6K4hkP_4gpui7runtime11sparse_textINtB4_7RuntimeNtCs7yVURBhbKU9_14zgx_native_lab3LabE15try_sparse_textB10_+0x809>\n  8e57ed:\tmovss  xmm0,DWORD PTR [rsi+0x794]\n  8e57f5:\tucomiss xmm0,DWORD PTR [rsi+0x790]\n  8e57fc:\t.byte 0xf\n  8e57fd:\t.byte 0x85\n  8e57fe:\txchg   DWORD PTR [rdi],eax\n"
+        },
+        {
+          "symbol": "<gpui_gpu::renderer::RendererState>::render_observed::<gpui_gpu::renderer::retained::Output, <gpui_gpu::renderer::retained::RetainedRenderer>::render::{closure#5}>",
+          "bytes": 11781,
+          "address": "0000000000d6d6a0",
+          "local_sub_rsp_prologue": [
+            1496
+          ],
+          "assembly": "\n/home/user/gpui-preserved-test-binaries/0047ca77f2b7a694fc148612f4b1c03e03eec801b0382dd0939d5756d08c8d29:     file format elf64-x86-64\n\n\nDisassembly of section .text:\n\n0000000000d6d6a0 <_RINvMs4_NtCsfd5itqhq3Vr_8gpui_gpu8rendererNtB6_13RendererState15render_observedNtNtB6_8retained6OutputNCNvMs3_B1h_NtB1h_16RetainedRenderer6renders3_0EB8_>:\n  d6d6a0:\tpush   rbp\n  d6d6a1:\tpush   r15\n  d6d6a3:\tpush   r14\n  d6d6a5:\tpush   r13\n  d6d6a7:\tpush   r12\n  d6d6a9:\tpush   rbx\n  d6d6aa:\tsub    rsp,0x5d8\n  d6d6b1:\tmov    r12,QWORD PTR [r8]\n  d6d6b4:\tmov    rax,QWORD PTR [rsi+0x228]\n  d6d6bb:\tmov    r9,QWORD PTR [rdx+0x18]\n  d6d6bf:\tcmp    rax,r9\n  d6d6c2:\tje     d6d6e0 <_RINvMs4_NtCsfd5itqhq3Vr_8gpui_gpu8rendererNtB6_13RendererState15render_observedNtNtB6_8retained6OutputNCNvMs3_B1h_NtB1h_16RetainedRenderer6renders3_0EB8_+0x40>\n  d6d6c4:\tmov    r10,QWORD PTR [rax+0x10]\n  d6d6c8:\tcmp    r10,QWORD PTR [r9+0x10]\n  d6d6cc:\tjne    d6d8d7 <_RINvMs4_NtCsfd5itqhq3Vr_8gpui_gpu8rendererNtB6_13RendererState15render_observedNtNtB6_8retained6OutputNCNvMs3_B1h_NtB1h_16RetainedRenderer6renders3_0EB8_+0x237>\n  d6d6d2:\tmov    rax,QWORD PTR [rax+0x18]\n  d6d6d6:\tcmp    rax,QWORD PTR [r9+0x18]\n  d6d6da:\tjne    d6d8d7 <_RINvMs4_NtCsfd5itqhq3Vr_8gpui_gpu8rendererNtB6_13RendererState15render_observedNtNtB6_8retained6OutputNCNvMs3_B1h_NtB1h_16RetainedRenderer6renders3_0EB8_+0x237>\n  d6d6e0:\tlea    rax,[rsi+0x330]\n  d6d6e7:\tmov    QWORD PTR [rsp+0x1a0],rax\n  d6d6ef:\tmov    rax,QWORD PTR [rsi+0x330]\n  d6d6f6:\ttest   rax,rax\n  d6d6f9:\tje     d6d72c <_RINvMs4_NtCsfd5itqhq3Vr_8gpui_gpu8rendererNtB6_13RendererState15render_observedNtNtB6_8retained6OutputNCNvMs3_B1h_NtB1h_16RetainedRenderer6renders3_0EB8_+0x8c>\n  d6d6fb:\tlock dec QWORD PTR [rax]\n  d6d6ff:\tjne    d6d72c <_RINvMs4_NtCsfd5itqhq3Vr_8gpui_gpu8rendererNtB6_13RendererState15render_observedNtNtB6_8retained6OutputNCNvMs3_B1h_NtB1h_16RetainedRenderer6renders3_0EB8_+0x8c>\n  d6d701:\tmov    r14,rdi\n  d6d704:\tlea    rdi,[rsi+0x330]\n  d6d70b:\tmov    r13,rsi\n  d6d70e:\tmov    rbp,r8\n  d6d711:\tmov    r15,rdx\n  d6d714:\tmov    rbx,rcx\n  d6d717:\tcall   QWORD PTR [rip+0x6aeecb]        # 141c5e8 <_DYNAMIC+0xe38>\n  d6d71d:\tmov    rcx,rbx\n"
+        },
+        {
+          "symbol": "<gpui_gpu::renderer::RendererState>::render_observed::<gpui_gpu::renderer::retained::ScrollOutput, <gpui_gpu::renderer::retained::RetainedRenderer>::render_with_scroll::{closure#3}>",
+          "bytes": 11818,
+          "address": "0000000000d67a40",
+          "local_sub_rsp_prologue": [
+            1496
+          ],
+          "assembly": "\n/home/user/gpui-preserved-test-binaries/0047ca77f2b7a694fc148612f4b1c03e03eec801b0382dd0939d5756d08c8d29:     file format elf64-x86-64\n\n\nDisassembly of section .text:\n\n0000000000d67a40 <_RINvMs4_NtCsfd5itqhq3Vr_8gpui_gpu8rendererNtB6_13RendererState15render_observedNtNtB6_8retained12ScrollOutputNCNvMs3_B1h_NtB1h_16RetainedRenderer18render_with_scrolls1_0EB8_>:\n  d67a40:\tpush   rbp\n  d67a41:\tpush   r15\n  d67a43:\tpush   r14\n  d67a45:\tpush   r13\n  d67a47:\tpush   r12\n  d67a49:\tpush   rbx\n  d67a4a:\tsub    rsp,0x5d8\n  d67a51:\tmov    r13,QWORD PTR [r8+0x8]\n  d67a55:\tmov    rax,QWORD PTR [rsi+0x228]\n  d67a5c:\tmov    r9,QWORD PTR [rdx+0x18]\n  d67a60:\tcmp    rax,r9\n  d67a63:\tje     d67a81 <_RINvMs4_NtCsfd5itqhq3Vr_8gpui_gpu8rendererNtB6_13RendererState15render_observedNtNtB6_8retained12ScrollOutputNCNvMs3_B1h_NtB1h_16RetainedRenderer18render_with_scrolls1_0EB8_+0x41>\n  d67a65:\tmov    r10,QWORD PTR [rax+0x10]\n  d67a69:\tcmp    r10,QWORD PTR [r9+0x10]\n  d67a6d:\tjne    d67c73 <_RINvMs4_NtCsfd5itqhq3Vr_8gpui_gpu8rendererNtB6_13RendererState15render_observedNtNtB6_8retained12ScrollOutputNCNvMs3_B1h_NtB1h_16RetainedRenderer18render_with_scrolls1_0EB8_+0x233>\n  d67a73:\tmov    rax,QWORD PTR [rax+0x18]\n  d67a77:\tcmp    rax,QWORD PTR [r9+0x18]\n  d67a7b:\tjne    d67c73 <_RINvMs4_NtCsfd5itqhq3Vr_8gpui_gpu8rendererNtB6_13RendererState15render_observedNtNtB6_8retained12ScrollOutputNCNvMs3_B1h_NtB1h_16RetainedRenderer18render_with_scrolls1_0EB8_+0x233>\n  d67a81:\tlea    rax,[rsi+0x330]\n  d67a88:\tmov    QWORD PTR [rsp+0x1a0],rax\n  d67a90:\tmov    rax,QWORD PTR [rsi+0x330]\n  d67a97:\ttest   rax,rax\n  d67a9a:\tje     d67acd <_RINvMs4_NtCsfd5itqhq3Vr_8gpui_gpu8rendererNtB6_13RendererState15render_observedNtNtB6_8retained12ScrollOutputNCNvMs3_B1h_NtB1h_16RetainedRenderer18render_with_scrolls1_0EB8_+0x8d>\n  d67a9c:\tlock dec QWORD PTR [rax]\n  d67aa0:\tjne    d67acd <_RINvMs4_NtCsfd5itqhq3Vr_8gpui_gpu8rendererNtB6_13RendererState15render_observedNtNtB6_8retained12ScrollOutputNCNvMs3_B1h_NtB1h_16RetainedRenderer18render_with_scrolls1_0EB8_+0x8d>\n  d67aa2:\tmov    r14,rdi\n  d67aa5:\tlea    rdi,[rsi+0x330]\n  d67aac:\tmov    r12,rsi\n  d67aaf:\tmov    rbp,rdx\n  d67ab2:\tmov    r15,r8\n  d67ab5:\tmov    rbx,rcx\n  d67ab8:\tcall   QWORD PTR [rip+0x6b4b2a]        # 141c5e8 <_DYNAMIC+0xe38>\n  d67abe:\trex.W\n  d67abf:\t.byte 0x89\n"
+        },
+        {
+          "symbol": "<gpui_gpu::renderer::RendererState>::render_observed::<gpui_gpu::renderer::retained::RegionalOutput, <gpui_gpu::renderer::retained::RetainedRenderer>::render_regions::{closure#3}>",
+          "bytes": 11818,
+          "address": "0000000000d6a870",
+          "local_sub_rsp_prologue": [
+            1496
+          ],
+          "assembly": "\n/home/user/gpui-preserved-test-binaries/0047ca77f2b7a694fc148612f4b1c03e03eec801b0382dd0939d5756d08c8d29:     file format elf64-x86-64\n\n\nDisassembly of section .text:\n\n0000000000d6a870 <_RINvMs4_NtCsfd5itqhq3Vr_8gpui_gpu8rendererNtB6_13RendererState15render_observedNtNtB6_8retained14RegionalOutputNCNvMs3_B1h_NtB1h_16RetainedRenderer14render_regionss1_0EB8_>:\n  d6a870:\tpush   rbp\n  d6a871:\tpush   r15\n  d6a873:\tpush   r14\n  d6a875:\tpush   r13\n  d6a877:\tpush   r12\n  d6a879:\tpush   rbx\n  d6a87a:\tsub    rsp,0x5d8\n  d6a881:\tmov    r13,QWORD PTR [r8+0x8]\n  d6a885:\tmov    rax,QWORD PTR [rsi+0x228]\n  d6a88c:\tmov    r9,QWORD PTR [rdx+0x18]\n  d6a890:\tcmp    rax,r9\n  d6a893:\tje     d6a8b1 <_RINvMs4_NtCsfd5itqhq3Vr_8gpui_gpu8rendererNtB6_13RendererState15render_observedNtNtB6_8retained14RegionalOutputNCNvMs3_B1h_NtB1h_16RetainedRenderer14render_regionss1_0EB8_+0x41>\n  d6a895:\tmov    r10,QWORD PTR [rax+0x10]\n  d6a899:\tcmp    r10,QWORD PTR [r9+0x10]\n  d6a89d:\tjne    d6aaa3 <_RINvMs4_NtCsfd5itqhq3Vr_8gpui_gpu8rendererNtB6_13RendererState15render_observedNtNtB6_8retained14RegionalOutputNCNvMs3_B1h_NtB1h_16RetainedRenderer14render_regionss1_0EB8_+0x233>\n  d6a8a3:\tmov    rax,QWORD PTR [rax+0x18]\n  d6a8a7:\tcmp    rax,QWORD PTR [r9+0x18]\n  d6a8ab:\tjne    d6aaa3 <_RINvMs4_NtCsfd5itqhq3Vr_8gpui_gpu8rendererNtB6_13RendererState15render_observedNtNtB6_8retained14RegionalOutputNCNvMs3_B1h_NtB1h_16RetainedRenderer14render_regionss1_0EB8_+0x233>\n  d6a8b1:\tlea    rax,[rsi+0x330]\n  d6a8b8:\tmov    QWORD PTR [rsp+0x1a0],rax\n  d6a8c0:\tmov    rax,QWORD PTR [rsi+0x330]\n  d6a8c7:\ttest   rax,rax\n  d6a8ca:\tje     d6a8fd <_RINvMs4_NtCsfd5itqhq3Vr_8gpui_gpu8rendererNtB6_13RendererState15render_observedNtNtB6_8retained14RegionalOutputNCNvMs3_B1h_NtB1h_16RetainedRenderer14render_regionss1_0EB8_+0x8d>\n  d6a8cc:\tlock dec QWORD PTR [rax]\n  d6a8d0:\tjne    d6a8fd <_RINvMs4_NtCsfd5itqhq3Vr_8gpui_gpu8rendererNtB6_13RendererState15render_observedNtNtB6_8retained14RegionalOutputNCNvMs3_B1h_NtB1h_16RetainedRenderer14render_regionss1_0EB8_+0x8d>\n  d6a8d2:\tmov    r14,rdi\n  d6a8d5:\tlea    rdi,[rsi+0x330]\n  d6a8dc:\tmov    r12,rsi\n  d6a8df:\tmov    rbp,rdx\n  d6a8e2:\tmov    r15,r8\n  d6a8e5:\tmov    rbx,rcx\n  d6a8e8:\tcall   QWORD PTR [rip+0x6b1cfa]        # 141c5e8 <_DYNAMIC+0xe38>\n  d6a8ee:\trex.W\n  d6a8ef:\t.byte 0x89\n"
+        },
+        {
+          "symbol": "<gpui::runtime::Runtime<zgx_native_lab::Lab>>::present_walk",
+          "bytes": 26880,
+          "address": "0000000000907000",
+          "local_sub_rsp_prologue": [
+            4096,
+            200
+          ],
+          "assembly": "\n/home/user/gpui-preserved-test-binaries/0047ca77f2b7a694fc148612f4b1c03e03eec801b0382dd0939d5756d08c8d29:     file format elf64-x86-64\n\n\nDisassembly of section .text:\n\n0000000000907000 <_RNvMsv_NtCs4Hhyf6K4hkP_4gpui7runtimeINtB5_7RuntimeNtCs7yVURBhbKU9_14zgx_native_lab3LabE12present_walkBO_>:\n  907000:\tpush   rbp\n  907001:\tpush   r15\n  907003:\tpush   r14\n  907005:\tpush   r13\n  907007:\tpush   r12\n  907009:\tpush   rbx\n  90700a:\tsub    rsp,0x1000\n  907011:\tmov    QWORD PTR [rsp],0x0\n  907019:\tsub    rsp,0xc8\n  907020:\tmov    QWORD PTR [rsp+0x38],rdi\n  907025:\tmov    BYTE PTR [rsp+0x4b],dl\n  907029:\tmov    QWORD PTR [rsp+0x30],rsi\n  90702e:\tmov    r12,QWORD PTR [rsi+0x620]\n  907035:\tmov    QWORD PTR [rsp+0x1d0],r12\n  90703d:\tinc    r12\n  907040:\tje     90bd88 <_RNvMsv_NtCs4Hhyf6K4hkP_4gpui7runtimeINtB5_7RuntimeNtCs7yVURBhbKU9_14zgx_native_lab3LabE12present_walkBO_+0x4d88>\n  907046:\tmov    ebp,ecx\n  907048:\tmov    QWORD PTR [rsp+0x70],r8\n  90704d:\tmov    rcx,QWORD PTR [rsp+0x30]\n  907052:\tmov    r15,QWORD PTR [rcx+0x618]\n  907059:\tmov    rsi,QWORD PTR [rcx+0x6f8]\n  907060:\tmov    rdx,rsi\n  907063:\tshr    rdx,0x20\n  907067:\tmovss  xmm0,DWORD PTR [rcx+0x790]\n  90706f:\tmovaps XMMWORD PTR [rsp+0x560],xmm0\n  907077:\tmov    eax,DWORD PTR [rcx+0x190]\n  90707d:\trex.W\n  90707e:\t.byte 0x8b\n  90707f:\t.byte 0x89\n"
+        }
+      ]
+    }
+  },
+  "shipping_lines": {
+    "candidate": 38089,
+    "baseline": 38028
+  },
+  "scope": "Actual repository-default release native ELFs. Local prologue reservations exclude callees, register saves and driver/GPU stacks. No new retained storage; typed shader changes. Timing gates remain outstanding."
+}

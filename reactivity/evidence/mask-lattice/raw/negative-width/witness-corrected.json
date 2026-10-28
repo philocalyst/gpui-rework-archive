@@ -1,0 +1,6 @@
+{
+  "scope": "Dropping only logical/mask width equality admits incorrect texel: address1 instead of2 at sample0.125 with origin-1 and half-width.",
+  "test_exit": 101,
+  "parser_failure": "Initial witness writer retained a prior experiment panic substring and raised StopIteration after confirming expected test failure. This parser-only correction rereads the same preserved observation; no test rerun.",
+  "panic": "assertion `left == right` failed: mask cell axis=0 phase=-256 scale=0.5 translation=0 point=0.125"
+}

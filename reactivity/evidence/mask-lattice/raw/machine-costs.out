@@ -1,0 +1,5 @@
+native ELFs 26390120 26391352 delta 1232
+baseline <gpui_canvas::canvas::Canvas>::damage_from 2499 [1272]
+baseline <gpui::runtime::Runtime<zgx_native_lab::Lab>>::present_walk 26880 [4096, 200]
+candidate <gpui_canvas::canvas::Canvas>::damage_from 2499 [1272]
+candidate <gpui::runtime::Runtime<zgx_native_lab::Lab>>::present_walk 26880 [4096, 200]

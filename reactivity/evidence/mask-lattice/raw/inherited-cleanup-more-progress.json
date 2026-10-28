@@ -1,0 +1,23 @@
+[
+  {
+    "worktree": "/home/user/gpui-native-task-parity-lab",
+    "source": "6a3ae55a05a25fd12b53304d795fc1e0136af73f",
+    "removed_files": 10086,
+    "retained_files": 4379,
+    "bytes": 761653044
+  },
+  {
+    "worktree": "/home/user/gpui-text-witness-lab",
+    "source": "d4fb6f88b6d1354019d2bd01c47aca39220e0412",
+    "removed_files": 9339,
+    "retained_files": 4491,
+    "bytes": 735682877
+  },
+  {
+    "worktree": "/home/user/gpui-text-session-lab",
+    "source": "bc964a0c0a3fbe08f8ad4e35a9dc5d10c27525f1",
+    "removed_files": 9341,
+    "retained_files": 5074,
+    "bytes": 735689006
+  }
+]
