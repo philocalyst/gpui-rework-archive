@@ -1,0 +1,258 @@
+[
+  {
+    "mode": "idle",
+    "group": 4,
+    "order": [
+      "baseline",
+      "candidate"
+    ]
+  },
+  {
+    "mode": "both",
+    "group": 6,
+    "order": [
+      "baseline",
+      "candidate"
+    ]
+  },
+  {
+    "mode": "both",
+    "group": 2,
+    "order": [
+      "baseline",
+      "candidate"
+    ]
+  },
+  {
+    "mode": "stream",
+    "group": 2,
+    "order": [
+      "baseline",
+      "candidate"
+    ]
+  },
+  {
+    "mode": "scroll",
+    "group": 2,
+    "order": [
+      "baseline",
+      "candidate"
+    ]
+  },
+  {
+    "mode": "scroll",
+    "group": 5,
+    "order": [
+      "candidate",
+      "baseline"
+    ]
+  },
+  {
+    "mode": "both",
+    "group": 3,
+    "order": [
+      "candidate",
+      "baseline"
+    ]
+  },
+  {
+    "mode": "scroll",
+    "group": 1,
+    "order": [
+      "candidate",
+      "baseline"
+    ]
+  },
+  {
+    "mode": "both",
+    "group": 5,
+    "order": [
+      "candidate",
+      "baseline"
+    ]
+  },
+  {
+    "mode": "scroll",
+    "group": 4,
+    "order": [
+      "baseline",
+      "candidate"
+    ]
+  },
+  {
+    "mode": "stream",
+    "group": 4,
+    "order": [
+      "baseline",
+      "candidate"
+    ]
+  },
+  {
+    "mode": "stream",
+    "group": 0,
+    "order": [
+      "baseline",
+      "candidate"
+    ]
+  },
+  {
+    "mode": "scroll",
+    "group": 0,
+    "order": [
+      "baseline",
+      "candidate"
+    ]
+  },
+  {
+    "mode": "stream",
+    "group": 1,
+    "order": [
+      "candidate",
+      "baseline"
+    ]
+  },
+  {
+    "mode": "idle",
+    "group": 2,
+    "order": [
+      "baseline",
+      "candidate"
+    ]
+  },
+  {
+    "mode": "both",
+    "group": 1,
+    "order": [
+      "candidate",
+      "baseline"
+    ]
+  },
+  {
+    "mode": "idle",
+    "group": 7,
+    "order": [
+      "candidate",
+      "baseline"
+    ]
+  },
+  {
+    "mode": "idle",
+    "group": 1,
+    "order": [
+      "candidate",
+      "baseline"
+    ]
+  },
+  {
+    "mode": "idle",
+    "group": 3,
+    "order": [
+      "candidate",
+      "baseline"
+    ]
+  },
+  {
+    "mode": "idle",
+    "group": 6,
+    "order": [
+      "baseline",
+      "candidate"
+    ]
+  },
+  {
+    "mode": "scroll",
+    "group": 6,
+    "order": [
+      "baseline",
+      "candidate"
+    ]
+  },
+  {
+    "mode": "stream",
+    "group": 7,
+    "order": [
+      "candidate",
+      "baseline"
+    ]
+  },
+  {
+    "mode": "scroll",
+    "group": 3,
+    "order": [
+      "candidate",
+      "baseline"
+    ]
+  },
+  {
+    "mode": "idle",
+    "group": 5,
+    "order": [
+      "candidate",
+      "baseline"
+    ]
+  },
+  {
+    "mode": "both",
+    "group": 7,
+    "order": [
+      "candidate",
+      "baseline"
+    ]
+  },
+  {
+    "mode": "stream",
+    "group": 5,
+    "order": [
+      "candidate",
+      "baseline"
+    ]
+  },
+  {
+    "mode": "both",
+    "group": 4,
+    "order": [
+      "baseline",
+      "candidate"
+    ]
+  },
+  {
+    "mode": "both",
+    "group": 0,
+    "order": [
+      "baseline",
+      "candidate"
+    ]
+  },
+  {
+    "mode": "stream",
+    "group": 6,
+    "order": [
+      "baseline",
+      "candidate"
+    ]
+  },
+  {
+    "mode": "scroll",
+    "group": 7,
+    "order": [
+      "candidate",
+      "baseline"
+    ]
+  },
+  {
+    "mode": "idle",
+    "group": 0,
+    "order": [
+      "baseline",
+      "candidate"
+    ]
+  },
+  {
+    "mode": "stream",
+    "group": 3,
+    "order": [
+      "candidate",
+      "baseline"
+    ]
+  }
+]
