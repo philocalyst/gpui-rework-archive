@@ -1,0 +1,18 @@
+{
+  "source": "d63782dd4c528860c21c6cc45caa177adce2cd08",
+  "seal": "6d4d44a31de30c418167a97cf977e5634d453a8f",
+  "worktree": "/home/user/gpui-mask-tiles-lab",
+  "dossier": "/home/user/gpui-mask-tiles-lab/reactivity/evidence/mask-tiles",
+  "manifest_sha256": "586c195f8d64c2dff1228d680b8b29da7c763f9494e440a6fc428d915caa0bbc",
+  "verifier_sha256": "d82399a1ce6ab32ca88a2a07bd2fdd718d262248c56c20d7c1006b58816431cd",
+  "verification": {
+    "files": 729,
+    "executable_identities": 64,
+    "gpu_canvas_tests": 353,
+    "ignored_tests": 3,
+    "exact_frames": 336,
+    "mutant_differing_bytes": 1836,
+    "admission_correctness_passes": true,
+    "scope": "Early tile-shader admission only; actual native selection/full configurations/offline/performance remain pending."
+  }
+}

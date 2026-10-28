@@ -1,0 +1,5 @@
+{
+  "exit": 0,
+  "stdout": "{\"files\": 729, \"executable_identities\": 64, \"gpu_canvas_tests\": 353, \"ignored_tests\": 3, \"exact_frames\": 336, \"mutant_differing_bytes\": 1836, \"admission_correctness_passes\": true, \"scope\": \"Early tile-shader admission only; actual native selection/full configurations/offline/performance remain pending.\"}\n",
+  "stderr": ""
+}

@@ -1,0 +1,14 @@
+[
+  {
+    "name": "baseline",
+    "sha256": "ea6e71d3da2bdb23d4971a14f0f55db389dbb45f9b2e9c05c85d4dc6363eb4d1",
+    "bytes": 18995,
+    "elf_offset": 1452007
+  },
+  {
+    "name": "candidate",
+    "sha256": "d798300f08a0c14bdb32705d93d15fa30e707db630880a060d4f6ace88e5d60d",
+    "bytes": 22041,
+    "elf_offset": 1452031
+  }
+]

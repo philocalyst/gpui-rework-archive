@@ -1,0 +1,20 @@
+{
+  "source": "9dcff820167b627d272bb391090a9613e00a4b2a",
+  "seal": "68682a99b03e0f33bf0c7fc438a067a8cea78953",
+  "worktree": "/home/user/gpui-mask-tiles-audit-lab",
+  "dossier": "/home/user/gpui-mask-tiles-audit-lab/reactivity/evidence/mask-tiles-audit",
+  "manifest_sha256": "372b7cd8cad2eeb3833d46caf6cd36421a115d779b6ac7184ce9facfc04c9647",
+  "verifier_sha256": "6af94e6290adb806e555d7b123ba001f24082f3f99e66fdbe5350e1b244542f0",
+  "verification": {
+    "files": 130,
+    "processes": 8,
+    "packets": 1082,
+    "bank_counts": [
+      0
+    ],
+    "banked_packets": 0,
+    "selected_packets": 1082,
+    "verified": true,
+    "scope": "Actual native packet selection audit; planned counts only; no performance claim."
+  }
+}

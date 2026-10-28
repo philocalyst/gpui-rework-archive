@@ -1,0 +1,83 @@
+{
+  "candidate_passes": false,
+  "comparisons": {
+    "idle": {
+      "eligible": true,
+      "baseline_cpu": 0.0,
+      "candidate_cpu": 0.0,
+      "passed": true,
+      "ratio": null,
+      "rule": "zero updates and median observed CPU no greater than baseline; no ratio at zero"
+    },
+    "scroll": {
+      "eligible": false,
+      "passed": false,
+      "reason": "Execution/work/cadence gate failed; comparative CPU ratio suppressed."
+    },
+    "stream": {
+      "eligible": true,
+      "pairs": [
+        {
+          "group": 0,
+          "baseline_cpu": 0.4846417154006528,
+          "candidate_cpu": 0.4365711864381064,
+          "ratio": 0.9008122342031442
+        },
+        {
+          "group": 1,
+          "baseline_cpu": 0.5700068503866442,
+          "candidate_cpu": 0.4940579621780713,
+          "ratio": 0.8667579378088953
+        },
+        {
+          "group": 2,
+          "baseline_cpu": 0.6323007327257903,
+          "candidate_cpu": 0.5981885636647106,
+          "ratio": 0.9460507203367845
+        },
+        {
+          "group": 3,
+          "baseline_cpu": 0.5991139664950209,
+          "candidate_cpu": 0.6202576213819952,
+          "ratio": 1.035291540624016
+        },
+        {
+          "group": 4,
+          "baseline_cpu": 0.7590285680110561,
+          "candidate_cpu": 0.4660390027538541,
+          "ratio": 0.6139940212989002
+        },
+        {
+          "group": 5,
+          "baseline_cpu": 0.6012172739187797,
+          "candidate_cpu": 0.5694360507012229,
+          "ratio": 0.9471385394328338
+        },
+        {
+          "group": 6,
+          "baseline_cpu": 0.6584259924296124,
+          "candidate_cpu": 0.5554242870398918,
+          "ratio": 0.8435637314231154
+        },
+        {
+          "group": 7,
+          "baseline_cpu": 0.6330261989614695,
+          "candidate_cpu": 0.6025853650331702,
+          "ratio": 0.9519122052479977
+        }
+      ],
+      "median_paired_cpu_ratio": 0.9234314772699643,
+      "paired_bootstrap_95": [
+        0.8435637314231154,
+        0.9519122052479977
+      ],
+      "limit": 0.8,
+      "passed": false
+    },
+    "both": {
+      "eligible": false,
+      "passed": false,
+      "reason": "Execution/work/cadence gate failed; comparative CPU ratio suppressed."
+    }
+  }
+}
