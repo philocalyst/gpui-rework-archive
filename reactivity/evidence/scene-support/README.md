@@ -82,3 +82,12 @@ Pre-implementation correction: COST.json inherited the prior trial protocol_sour
 label. Point it to this preregistration c025341544b45f5b27e405ad8372c332aa333498.
 All thresholds, ordering and cases remain unchanged. No implementation or new
 measurement preceded this correction.
+
+## First qualification attempt
+
+Source e5aead49e3a6270e6cde0046bafb77899de6a342 passes the complete Canvas/GPU
+test command. Strict Clippy rejects an unused VIEW constant exported by the
+shared scroll/material fixture in the new whole-scene CPU test. The correction
+marks that known test-module dead code explicitly; no production source changes.
+Original outputs, 63 emitted ELF identities and empty before/after guard remain
+in external gpu-initial. No new performance measurements have run.

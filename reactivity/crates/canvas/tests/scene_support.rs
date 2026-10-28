@@ -1,4 +1,8 @@
 use gpui_canvas::{Affine, Canvas, Color, ColorConfig, Rect, TextSystem};
+#[expect(
+    dead_code,
+    reason = "Shared fixture also exports a viewport for scroll-only tests."
+)]
 #[path = "support/scroll_outside.rs"]
 mod scroll_outside;
 
