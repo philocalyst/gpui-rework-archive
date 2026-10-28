@@ -1,0 +1,26 @@
+[
+  {
+    "worktree": "/home/user/gpui-native-task-parity-lab",
+    "head": "6a3ae55a05a25fd12b53304d795fc1e0136af73f",
+    "evidence": "6a3ae55a05a25fd12b53304d795fc1e0136af73f",
+    "target": "/home/user/gpui-native-task-parity-target"
+  },
+  {
+    "worktree": "/home/user/gpui-patch-workspace-retire-lab",
+    "head": "5d24115d28d39f4095415290fd262cd2bb05e6b2",
+    "evidence": "f7b3f60c70faf6d548fffda530d4de83b2570e34",
+    "target": "/home/user/gpui-patch-workspace-retire-target"
+  },
+  {
+    "worktree": "/home/user/gpui-scroll-sparse-authority-lab",
+    "head": "0a0a496e4640e80797bfc89f3a82731ffd3d7043",
+    "evidence": "53165424be4665a9874b6f3f5f31aa0d301e57ed",
+    "target": "/home/user/gpui-scroll-sparse-authority-target"
+  },
+  {
+    "worktree": "/home/user/gpui-scene-support-pending-lab",
+    "head": "ce224ce7e2b94a331ce98caebf32d90794921ef3",
+    "evidence": "7494c10970d3dc46e7611d4abe93ab8476682a6e",
+    "target": "/home/user/gpui-scene-support-pending-target"
+  }
+]

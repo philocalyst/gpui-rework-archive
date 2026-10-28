@@ -1,0 +1,28 @@
+{
+  "shared_archive": "/home/user/gpui-completed-source-archives/41a67473a0177fbb17df1f7b8e2f2f36dd6940f6-inherited-evidence.tar.gz",
+  "shared_sha256": "37c946d5b222b4c409d42def16924e50c00bc8e5ef3168aa7fe3f8fb31a44c40",
+  "base": "41a67473a0177fbb17df1f7b8e2f2f36dd6940f6",
+  "files": 20255,
+  "records": [
+    {
+      "original_archive": "/home/user/gpui-damage-suffix-evidence/inherited-native-phase/committed-evidence.tar.gz",
+      "original_sha256": "c06675b5f75c9312c449c92902f180cf2a2a59d374cc51f02e74a46cc0b95890",
+      "original_bytes": 623741941,
+      "source": "a34b61c86fbbc6906d834e071bdb7c4fb70aac8d",
+      "all_removed_files_in_shared_archive": true,
+      "removed_files": 20188,
+      "own_dossier_files_verified_in_original_worktree_and_git": 707,
+      "worktree": "/home/user/gpui-native-phase-lab"
+    },
+    {
+      "original_archive": "/home/user/gpui-damage-suffix-evidence/inherited-native-workspace/committed-evidence.tar.gz",
+      "original_sha256": "cfdff5f2b3a33d8194e23d5808d995116bcf106859b75af6b8ac88d4449fa8f4",
+      "original_bytes": 627012837,
+      "source": "344c7f8ddd55326dca2c88322f67530914c97733",
+      "all_removed_files_in_shared_archive": true,
+      "removed_files": 20188,
+      "own_dossier_files_verified_in_original_worktree_and_git": 1542,
+      "worktree": "/home/user/gpui-native-workspace-lab"
+    }
+  ]
+}

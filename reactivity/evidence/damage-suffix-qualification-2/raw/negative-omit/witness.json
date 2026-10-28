@@ -1,0 +1,4 @@
+{
+  "scope": "A changed pixel lies outside reported damage when the first unequal reverse pair is omitted.",
+  "panic": "lost reverse mismatch at 44,2"
+}

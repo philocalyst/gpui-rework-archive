@@ -1,0 +1,8 @@
+{
+  "seal": "344c7f8ddd55326dca2c88322f67530914c97733",
+  "files": 504,
+  "bytes": 691795561,
+  "free_before": 11348492288,
+  "free_after": 12041388032,
+  "scope": "Completed regenerable library caches only; all source/evidence/executable/shader/fingerprint identities remain preserved."
+}
