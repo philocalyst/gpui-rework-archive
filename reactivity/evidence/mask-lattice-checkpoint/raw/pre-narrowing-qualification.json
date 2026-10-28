@@ -1,0 +1,52 @@
+{
+  "gpu-initial": {
+    "source": "7798bfd650dfe571d8edf391886a46e245df913d",
+    "counts": [
+      281,
+      1,
+      3
+    ],
+    "test_exit": 101,
+    "clippy_exit": null
+  },
+  "gpu-fixture-corrected": {
+    "source": "e53ae26100b2efd9075f5ad35afba6bad4e0ed8f",
+    "counts": [
+      353,
+      0,
+      3
+    ],
+    "test_exit": 0,
+    "clippy_exit": 101
+  },
+  "gpu-format-corrected": {
+    "source": "837a23d44e72d3893cbbcf92e17434b1076b8d1a",
+    "counts": [
+      353,
+      0,
+      3
+    ],
+    "test_exit": 0,
+    "clippy_exit": 0
+  },
+  "oracle-gpu-initial": {
+    "source": "6faae98aa7391ede8f07f9325e63f044f1de9adf",
+    "counts": [
+      350,
+      0,
+      3
+    ],
+    "test_exit": 0,
+    "clippy_exit": 0
+  },
+  "negative-width": {
+    "source": "60ec5377966b4749048d855baab97c4a25f8ab11",
+    "counts": [
+      0,
+      1,
+      0
+    ],
+    "test_exit": 101,
+    "clippy_exit": null
+  }
+}

@@ -1,0 +1,5 @@
+Traceback (most recent call last):
+  File "/home/user/gpui-mask-lattice-evidence/negative_gate.py", line 72, in <module>
+    (out / 'witness.json').write_text(json.dumps(dict(scope='A changed pixel lies outside reported damage when the first unequal reverse pair is omitted.',panic=next(line for line in fault.splitlines() if 'lost reverse mismatch at' in line)),indent=2))
+                                                                                                                                                                 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+StopIteration

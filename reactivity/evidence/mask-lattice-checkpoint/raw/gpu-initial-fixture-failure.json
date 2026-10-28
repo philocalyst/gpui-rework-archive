@@ -1,0 +1,8 @@
+{
+  "source": "7798bfd650dfe571d8edf391886a46e245df913d",
+  "exit": 101,
+  "failed_test": "renderer::mask_lattice::tests::placement_tags_survive_inline_compact_and_banked_packets",
+  "cause": "New private fixture left Canvas default transparent clear while requesting an opaque SDR renderer; existing admission correctly returned InvalidScene. Numeric tests passed; public GPU capture was not reached.",
+  "correction": "Set explicit opaque white clear in that test fixture. Production implementation and independently shared public fixture unchanged.",
+  "timing_observations": 0
+}

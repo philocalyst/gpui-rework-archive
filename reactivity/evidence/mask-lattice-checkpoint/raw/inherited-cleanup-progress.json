@@ -1,0 +1,96 @@
+[
+  {
+    "worktree": "/home/user/gpui-patch-workspace-retire-lab",
+    "source": "5d24115d28d39f4095415290fd262cd2bb05e6b2",
+    "removed_files": 20188,
+    "retained_files": 4277,
+    "bytes": 825107687,
+    "new_cone": [
+      "reactivity/benchmarks",
+      "reactivity/comparisons",
+      "reactivity/crates",
+      "reactivity/docs",
+      "reactivity/ports",
+      "reactivity/tools",
+      "reactivity/vendor",
+      ".cargo",
+      "reactivity/evidence/_retain_root_files"
+    ]
+  },
+  {
+    "worktree": "/home/user/gpui-native-profile-sparse-lab",
+    "source": "c965a893364b46f965c83d10e2cf94a46dac1304",
+    "removed_files": 20184,
+    "retained_files": 4269,
+    "bytes": 824046586,
+    "new_cone": [
+      "reactivity/benchmarks",
+      "reactivity/comparisons",
+      "reactivity/crates",
+      "reactivity/docs",
+      "reactivity/ports",
+      "reactivity/tools",
+      "reactivity/vendor",
+      ".cargo",
+      "reactivity/evidence/_retain_root_files"
+    ]
+  },
+  {
+    "worktree": "/home/user/gpui-native-task-sync-lab",
+    "source": "af539f91d8f5d4aafa611912e5aeb95c573d1d61",
+    "removed_files": 10086,
+    "retained_files": 4268,
+    "bytes": 761653044,
+    "new_cone": [
+      "reactivity/benchmarks",
+      "reactivity/comparisons",
+      "reactivity/crates",
+      "reactivity/docs",
+      "reactivity/ports",
+      "reactivity/tools",
+      "reactivity/vendor",
+      "reactivity/evidence/glyph-damage-control",
+      "reactivity/evidence/native-task-parity",
+      ".cargo",
+      "reactivity/evidence/_retain_root_files"
+    ]
+  },
+  {
+    "worktree": "/home/user/gpui-native-task-skip-yield-lab",
+    "source": "eaf32988ca0f8ba9805332b36007f13516382086",
+    "removed_files": 10086,
+    "retained_files": 4268,
+    "bytes": 761653044,
+    "new_cone": [
+      "reactivity/benchmarks",
+      "reactivity/comparisons",
+      "reactivity/crates",
+      "reactivity/docs",
+      "reactivity/ports",
+      "reactivity/tools",
+      "reactivity/vendor",
+      "reactivity/evidence/glyph-damage-control",
+      "reactivity/evidence/native-task-parity",
+      ".cargo",
+      "reactivity/evidence/_retain_root_files"
+    ]
+  },
+  {
+    "worktree": "/home/user/gpui-glyph-submit-negative-lab",
+    "source": "2e5e030e64b3a8dd25ea7fd089145fb5a6d1ec65",
+    "removed_files": 10309,
+    "retained_files": 4269,
+    "bytes": 762878204,
+    "new_cone": [
+      "reactivity/benchmarks",
+      "reactivity/comparisons",
+      "reactivity/crates",
+      "reactivity/docs",
+      "reactivity/ports",
+      "reactivity/tools",
+      "reactivity/vendor",
+      ".cargo",
+      "reactivity/evidence/_retain_root_files"
+    ]
+  }
+]
