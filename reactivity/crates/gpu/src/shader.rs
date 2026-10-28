@@ -648,6 +648,19 @@ pub mod ui {
         draw.color * coverage[index as usize]
     }
 
+    pub fn sample_banked_mask_or_draw(
+        draw: Draw,
+        point: Vec2f,
+        first: Vec2f,
+        coverage: Vec4f,
+        cached: bool,
+    ) -> Vec4f {
+        if cached {
+            return cached_mask_sample(draw, point, first, coverage);
+        }
+        sample_draw(draw, point)
+    }
+
     // Banked scenes decode a draw and its working paint once before the
     // sixteen sample operations. This deliberately trades sixteen local colors
     // for the ordinary sample-major path's repeated record/bank loads; it is
@@ -673,12 +686,7 @@ pub mod ui {
                 for x in 0..4 {
                     let point = position
                         + vec2f((x as f32 + 0.5) * 0.25 - 0.5, (y as f32 + 0.5) * 0.25 - 0.5);
-                    let mut source = vec4f(0.0, 0.0, 0.0, 0.0);
-                    if cached {
-                        source = cached_mask_sample(draw, point, first, coverage);
-                    } else {
-                        source = sample_draw(draw, point);
-                    }
+                    let source = sample_banked_mask_or_draw(draw, point, first, coverage, cached);
                     let index = (y * 4 + x) as usize;
                     colors[index] = source + colors[index] * (1.0 - source.w);
                 }
