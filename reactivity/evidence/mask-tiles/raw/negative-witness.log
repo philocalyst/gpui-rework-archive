@@ -1,0 +1,5 @@
+Traceback (most recent call last):
+  File "/home/user/gpui-mask-tiles-evidence/negative_witness.py", line 4, in <module>
+    assert 'public_mask_lattice_readbacks_replay_clips_and_density_fallbacks' in text
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+AssertionError
